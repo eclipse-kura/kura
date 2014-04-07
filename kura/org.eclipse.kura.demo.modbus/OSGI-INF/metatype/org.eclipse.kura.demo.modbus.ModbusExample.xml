@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (c) 2011, 2014 Eurotech and/or its affiliates
+
+     All rights reserved. This program and the accompanying materials
+     are made available under the terms of the Eclipse Public License v1.0
+     which accompanies this distribution, and is available at
+     http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Eurotech
+
+-->
+<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
+    <OCD id="org.eclipse.kura.demo.modbus.ModbusExample"
+         name="ModbusExample" 
+         description="Modbus protocol example application.">
+              
+        <Icon resource="http://sphotos-a.xx.fbcdn.net/hphotos-ash4/p480x480/408247_10151040905591065_1989684710_n.jpg" size="32"/>
+        
+        <AD id="port"
+            name="port"
+            type="String"
+            cardinality="0"
+            required="true"
+            default="/dev/ttyUSB0"
+            description="Serial Port Name."/>
+        
+        <AD id="baudRate"  
+            name="baudRate"
+            type="String"
+            cardinality="0" 
+            required="false"
+            default="9600" 
+            description="The baud rate of the serial connection."/>
+
+        <AD id="bitsPerWord"  
+            name="bitsPerWord"
+            type="String"
+            cardinality="0" 
+            required="false"
+            default="8" 
+            description="The number of bits per word or the 'data bits' for the serial connection."/>
+
+        <AD id="stopBits"  
+            name="stopBits"
+            type="String"
+            cardinality="0" 
+            required="false"
+            default="1" 
+            description="The stop bits for the serial connection."/>
+
+        <AD id="parity"  
+            name="parity"
+            type="String"
+            cardinality="0" 
+            required="false"
+            default="0" 
+            description="The parity for the serial connection."/>
+
+        <AD id="controlTopic"  
+            name="controlTopic"
+            type="String"
+            cardinality="0" 
+            required="false"
+            default="/modbus/manager" 
+            description="The control topic for the device connected."/>
+    </OCD>
+    <Designate pid="org.eclipse.kura.demo.modbus.ModbusExample">
+        <Object ocdref="org.eclipse.kura.demo.modbus.ModbusExample"/>
+    </Designate>
+</MetaData>

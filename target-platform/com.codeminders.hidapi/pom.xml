@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+    <parent>
+        <groupId>org.eclipse.kura</groupId>
+        <artifactId>target-platform</artifactId>
+        <version>2.1.0-SNAPSHOT</version>
+    </parent>
+
+    <modelVersion>4.0.0</modelVersion>
+    
+    <groupId>org.eclipse.kura</groupId>
+    <artifactId>com.codeminders.hidapi</artifactId>
+    <version>1.1</version>
+    <packaging>bundle</packaging>
+
+    <name>Java API for working with Human Interface USB Devices (HID)</name>
+    <description>JNI wrapper around C/C++ HIDAPI library providing simple java API to work with devices such as USB gamepads, joysticks, keyboards etc.</description>
+    <url>http://code.google.com/p/javahidapi</url>
+
+    <licenses>
+        <license>
+            <name>New BSD License</name>
+            <url>http://opensource.org/licenses/BSD-3-Clause</url>
+            <distribution>repo</distribution>    
+        </license>
+    </licenses>
+    <scm>
+         <connection>scm:hg:http://code.google.com/p/javahidapi</connection>
+         <developerConnection>scm:hg:https://code.google.com/p/javahidapi</developerConnection>
+         <url>http://code.google.com/p/javahidapi</url>
+    </scm>
+    <developers>
+        <developer>
+            <id>lord</id>
+            <name>Vadim Zaliva</name>
+            <email>lord@codeminders.com</email>
+        </developer>
+        <developer>
+            <id>Alexander Sova</id>
+            <name>Vadim Zaliva</name>
+            <email>bird@codeminders.com</email>
+        </developer>
+        <developer>
+            <id>dshmyga</id>
+            <name>Denis Shmyga</name>
+            <email>dshmyga@codeminders.com</email>
+        </developer>
+    </developers>
+    
+    <properties>
+        <maven.compiler.source>1.6</maven.compiler.source>
+        <maven.compiler.target>1.6</maven.compiler.target>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.codeminders</groupId>
+            <artifactId>hidapi</artifactId>
+            <version>1.1</version>
+        </dependency>
+    </dependencies>
+    
+    <build>
+    <resources>
+        <resource>
+            <directory>src/main/resources</directory>
+        </resource>
+        <resource>
+            <directory>.</directory>
+            <includes>
+                <include>plugin.xml</include>
+            </includes>
+        </resource>
+    </resources>
+    <plugins>
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <version>2.7.2</version>
+            <configuration>
+                <systemPropertyVariables>
+                    <java.library.path>${project.basedir}/src/main/lib</java.library.path>
+                </systemPropertyVariables>
+            </configuration>
+        </plugin>
+        <plugin>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>maven-bundle-plugin</artifactId>
+            <version>2.3.5</version>
+            <extensions>true</extensions>
+            <configuration>
+            <manifestLocation>META-INF</manifestLocation>
+                <instructions>
+                    <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
+                    <Bundle-Name>${project.name}</Bundle-Name>
+                    <Bundle-Version>${project.version}</Bundle-Version>
+                    <Embed-Dependency>
+                        hidapi;groupId=com.codeminders;artifactId=hidapi;version=1.1;scope=runtime
+                    </Embed-Dependency>
+                    <Include-Resource>
+                        lib=${project.basedir}/src/lib,
+                        ${project.basedir}/about.html,
+                        about_files=${project.basedir}/about_files
+                    </Include-Resource>
+                    <Bundle-NativeCode>
+                        lib/native/linux/beaglebone/090538fcb81c38c1fa445cfb00755a94bc0131f2/libhidapi-jni.so ; selection-filter="(&amp;(kura.os.version=090538fcb81c38c1fa445cfb00755a94 bc0131f2))",
+                        lib/native/linux/mini-gateway/yocto_1.2.1/libhidapi-jni.so ; selection-filter="(&amp;(kura.os.version=yocto_1.2.1))",
+                        lib/native/linux/raspberry-pi/libhidapi-jni.so ; selection-filter="(&amp;(kura.os.version=raspbian))",
+                        lib/native/linux/linux32/libhidapi-jni-32.so ; osname=Linux ; processor = x86,
+                        lib/native/linux/linux64/libhidapi-jni-64.so ; osname=Linux ; processor = x86_64,
+                        lib/native/mac/libhidapi-jni-32.jnilib ; osname=MacOSX ; processor = x86,
+                        lib/native/mac/libhidapi-jni-64.jnilib ; osname=MacOSX ; processor = x86_64
+                    </Bundle-NativeCode>
+                    <Export-Package>
+                        com.codeminders.hidapi.*
+                    </Export-Package>
+                </instructions>
+            </configuration>
+        </plugin>
+            
+        <plugin>
+            <artifactId>maven-dependency-plugin</artifactId>
+            <executions>
+                <execution>
+                    <id>copy-dependencies</id>
+                    <phase>package</phase>
+                    <goals>
+                      <goal>copy-dependencies</goal>
+                    </goals>
+                </execution>
+            </executions>
+        </plugin>
+       
+    </plugins>
+        <pluginManagement>
+            <plugins>
+                <!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
+                <plugin>
+                    <groupId>org.eclipse.m2e</groupId>
+                    <artifactId>lifecycle-mapping</artifactId>
+                    <version>1.0.0</version>
+                    <configuration>
+                        <lifecycleMappingMetadata>
+                            <pluginExecutions>
+                                <pluginExecution>
+                                    <pluginExecutionFilter>
+                                        <groupId>
+                                            org.apache.maven.plugins
+                                        </groupId>
+                                        <artifactId>
+                                            maven-dependency-plugin
+                                        </artifactId>
+                                        <versionRange>
+                                            [2.1,)
+                                        </versionRange>
+                                        <goals>
+                                            <goal>
+                                                copy-dependencies
+                                            </goal>
+                                        </goals>
+                                    </pluginExecutionFilter>
+                                    <action>
+                                        <ignore></ignore>
+                                    </action>
+                                </pluginExecution>
+                            </pluginExecutions>
+                        </lifecycleMappingMetadata>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
+</project>

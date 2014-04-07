@@ -1,0 +1,33 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: org.eclipse.kura.protocol.modbus
+Bundle-SymbolicName: org.eclipse.kura.protocol.modbus;singleton:=true
+Bundle-Version: 2.1.0.qualifier
+Bundle-Vendor: EUROTECH
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: org.eclipse.kura,
+ org.eclipse.kura.cloud,
+ org.eclipse.kura.comm,
+ org.eclipse.kura.configuration,
+ org.eclipse.kura.position,
+ org.eclipse.kura.system,
+ org.eclipse.kura.usb,
+ javax.comm;version="1.2.0",
+ javax.microedition.io;resolution:=optional,
+ org.osgi.framework;version="1.7.0",
+ org.osgi.service.cm;version="1.4.0",
+ org.osgi.service.component;version="1.2.0",
+ org.osgi.service.event;version="1.3.0",
+ org.osgi.service.io,
+ org.osgi.util.measurement;version="1.0.1",
+ org.osgi.util.position;version="1.0.1",
+ org.osgi.util.tracker;version="1.5.1",
+ org.slf4j;version="1.6.4"
+Export-Package: 
+ org.eclipse.kura.protocol.modbus
+Service-Component: OSGI-INF/*.xml
+Bundle-ActivationPolicy: lazy
+Bundle-Classpath: .,
+ /home/pierre/dev/git/newesf2/esf2/esf/target-definition/equinox_3.8.1/repository/plugins/org.eclipse.equinox.io_1.0.400.v20120522-2049.jar
+
+

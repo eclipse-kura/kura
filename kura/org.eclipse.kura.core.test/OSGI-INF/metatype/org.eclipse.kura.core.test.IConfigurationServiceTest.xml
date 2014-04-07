@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (c) 2011, 2014 Eurotech and/or its affiliates
+
+     All rights reserved. This program and the accompanying materials
+     are made available under the terms of the Eclipse Public License v1.0
+     which accompanies this distribution, and is available at
+     http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Eurotech
+
+-->
+<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0">
+    <OCD id="org.eclipse.kura.core.test.IConfigurationServiceTest" 
+         name="ConfigurationServiceTest" 
+         description="ConfigurationServiceTest Configuration">
+
+        <AD id="prop.string"
+            name="prop.string"
+            type="String"
+            cardinality="0" 
+            required="true"
+            default="prop.string.value" 
+            description="prop.string.value"/>
+
+        <AD id="prop.long"  
+            name="prop.long"
+            type="Long"
+            cardinality="0" 
+            required="false"
+            default="1351589588" 
+            description="prop.long.value"/>
+
+        <AD id="prop.double"  
+            name="prop.double"
+            type="Double"
+            cardinality="0" 
+            required="false"
+            default="13515895.9999988" 
+            description="prop.double.value"/>
+
+        <AD id="prop.float"  
+            name="prop.float"
+            type="Float"
+            cardinality="0" 
+            required="false"
+            default="3.14" 
+            description="prop.float.value"/>
+
+        <AD id="prop.integer"  
+            name="prop.integer"
+            type="Integer"
+            cardinality="0" 
+            required="false"
+            default="314" 
+            description="prop.integer.value"/>
+
+        <AD id="prop.byte"  
+            name="prop.byte"
+            type="Byte"
+            cardinality="0" 
+            required="false"
+            default="7" 
+            description="prop.byte.value"/>
+        
+        <AD id="prop.character"  
+            name="prop.character"
+            type="Char"
+            cardinality="0" 
+            required="false"
+            default="c" 
+            description="prop.character.value"/>
+
+        <AD id="prop.boolean"  
+            name="prop.boolean"
+            type="Boolean"
+            cardinality="0" 
+            required="false"
+            default="true" 
+            description="prop.boolean.value"/>
+
+        <AD id="prop.short"  
+            name="prop.short"
+            type="Short"
+            cardinality="0" 
+            required="false"
+            default="255" 
+            description="prop.short.value"/>
+
+        <AD id="prop.string.array"
+            name="prop.string.array"
+            type="String"
+            cardinality="3" 
+            required="false"
+            default="value1, value2, value3" 
+            description="prop.string.value"/>
+
+        <AD id="prop.long.array"  
+            name="prop.long.array"
+            type="Long"
+            cardinality="3" 
+            required="false"
+            default="1351589588, 1351589589, 1351589590" 
+            description="prop.long.value"/>
+
+        <AD id="prop.double.array"  
+            name="prop.double.array"
+            type="Double"
+            cardinality="3" 
+            required="false"
+            default="13515895.88, 13515895.89, 13515895.90" 
+            description="prop.double.value"/>
+
+        <AD id="prop.float.array"  
+            name="prop.float.array"
+            type="Float"
+            cardinality="3" 
+            required="false"
+            default="3.14, 3.15, 3.16" 
+            description="prop.float.value"/>
+
+        <AD id="prop.integer.array"  
+            name="prop.integer.array"
+            type="Integer"
+            cardinality="3" 
+            required="false"
+            default="314, 315, 316" 
+            description="prop.integer.value"/>
+
+        <AD id="prop.byte.array"  
+            name="prop.byte.array"
+            type="Byte"
+            cardinality="3" 
+            required="false"
+            default="7, 8, 9" 
+            description="prop.byte.value"/>
+        
+        <AD id="prop.character.array"  
+            name="prop.character.array"
+            type="Char"
+            cardinality="3" 
+            required="false"
+            default="c, d, e" 
+            description="prop.character.value"/>
+
+        <AD id="prop.boolean.array"  
+            name="prop.boolean.array"
+            type="Boolean"
+            cardinality="3" 
+            required="false"
+            default="true, false, true" 
+            description="prop.boolean.value"/>
+
+        <AD id="prop.short.array"  
+            name="prop.short.array"
+            type="Short"
+            cardinality="3" 
+            required="false"
+            default="253, 254, 255" 
+            description="prop.short.value"/>
+        
+    </OCD>
+    <Designate pid="org.eclipse.kura.core.test.IConfigurationServiceTest">
+        <Object ocdref="org.eclipse.kura.core.test.IConfigurationServiceTest"/>
+    </Designate>
+</MetaData>

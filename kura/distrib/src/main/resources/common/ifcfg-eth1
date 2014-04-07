@@ -1,0 +1,8 @@
+# Networking Interface
+DEVICE=eth1
+NAME=eth1
+TYPE=ETHERNET
+ONBOOT=yes
+BOOTPROTO=dhcp
+DEFROUTE=yes
+

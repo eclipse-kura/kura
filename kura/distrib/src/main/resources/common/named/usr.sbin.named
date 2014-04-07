@@ -1,0 +1,55 @@
+# vim:syntax=apparmor
+# Last Modified: Fri Jun  1 16:43:22 2007
+#include <tunables/global>
+
+/usr/sbin/named {
+  #include <abstractions/base>
+  #include <abstractions/nameservice>
+
+  capability net_bind_service,
+  capability setgid,
+  capability setuid,
+  capability sys_chroot,
+  capability sys_resource,
+
+  # /etc/bind should be read-only for bind
+  # /var/lib/bind is for dynamically updated zone (and journal) files.
+  # /var/cache/bind is for slave/stub data, since we're not the origin of it.
+  # See /usr/share/doc/bind9/README.Debian.gz
+  /etc/bind/** r,
+  /var/lib/bind/** rw,
+  /var/lib/bind/ rw,
+  /var/cache/bind/** rw,
+  /var/cache/bind/ rw,
+
+  # gssapi
+  /etc/krb5.keytab kr,
+  /etc/bind/krb5.keytab kr,
+
+  # ssl
+  /etc/ssl/openssl.cnf r,
+
+  # dnscvsutil package
+  /var/lib/dnscvsutil/compiled/** rw,
+
+  /proc/net/if_inet6 r,
+  /proc/*/net/if_inet6 r,
+  /usr/sbin/named mr,
+  /{,var/}run/named/named.pid w,
+  /{,var/}run/named/session.key w,
+  # support for resolvconf
+  /{,var/}run/named/named.options r,
+
+  /var/named/** rw,
+  /var/named/ rw,
+
+  # some people like to put logs in /var/log/named/ instead of having
+  # syslog do the heavy lifting.
+  /var/log/named/** rw,
+  /var/log/named/ rw,
+  /var/log/** rw,
+  /varlog/named.log rw,
+
+  # Site-specific additions and overrides. See local/README for details.
+  #include <local/usr.sbin.named>
+}

@@ -1,0 +1,5 @@
+#!/bin/sh
+
+DEVICE=$1
+FILENAME="/tmp/.kura/coninfo-"$DEVICE
+rm -f $FILENAME

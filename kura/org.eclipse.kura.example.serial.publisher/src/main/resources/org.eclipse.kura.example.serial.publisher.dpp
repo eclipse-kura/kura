@@ -1,0 +1,20 @@
+#Deployment Plugin Project File
+#Thu Jun 27 16:13:01 CEST 2013
+build.ant.name=<.>/src/main/resources/org.eclipse.kura.example.serial.publisher_build.xml
+build.dp.file=<.>/target/org.eclipse.kura.example.serial.publisher.dp
+build.location=
+bundles.0.bundle_path=<.>/.project
+bundles.0.customizer=false
+bundles.0.headers.count=0
+bundles.0.missing=false
+bundles.0.name=bundles/org.eclipse.kura.example.serial.publisher.jar
+bundles.0.symbolic_name=org.eclipse.kura.example.serial.publisher;singleton\:\=true
+bundles.0.version=1.0.0.SNAPSHOT
+bundles.count=1
+certificates.count=0
+general.signbundles=false
+headers.other.headers=
+headers.symbolic.name=org.eclipse.kura.example.serial.publisher
+headers.version=1.0.0
+resources.count=0
+

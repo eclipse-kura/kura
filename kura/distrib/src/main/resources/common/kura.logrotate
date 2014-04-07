@@ -1,0 +1,11 @@
+# Logrotate file for Kura
+
+/var/log/kura-console.log {
+        missingok
+        notifempty
+        copytruncate
+        rotate 5
+        size 30k
+        daily
+        create 0600 root root
+}

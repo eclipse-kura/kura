@@ -1,0 +1,10 @@
+libmatthew-java installation guide
+-----------------------------
+
+To compile libmatthew-java you will need a Java 1.4 or better JDK, and a
+standard unix build environment including a C compiler.
+
+The libraries can be compiled and installed with `make' and `make install'
+respectively. By default they will be installed into /usr/local/share/java and
+/usr/local/lib/jni. This location can be configured by giving PREFIX, JARDIR
+and LIBDIR variables to make.

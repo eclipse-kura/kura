@@ -1,0 +1,13 @@
+#!/bin/sh
+
+FILENAME="/tmp/.kura/coninfo-"$PPP_IFACE
+mkdir /tmp/.kura >> /dev/null 2>> /dev/null
+echo "IFACE="$PPP_IFACE > $FILENAME
+echo "IPADDR="$PPP_LOCAL >> $FILENAME
+echo "GATEWAY="$PPP_REMOTE >> $FILENAME
+
+DNS1=`awk '{if(NR==1) print $2}' /var/run/ppp/resolv.conf`
+DNS2=`awk '{if(NR==2) print $2}' /var/run/ppp/resolv.conf`
+
+echo "DNS1="$DNS1 >> $FILENAME
+echo "DNS2="$DNS2 >> $FILENAME

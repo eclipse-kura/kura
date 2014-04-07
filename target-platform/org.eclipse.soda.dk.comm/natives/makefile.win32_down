@@ -1,0 +1,29 @@
+#########################################################################
+# Copyright (c) 2001, 2009 IBM.                                         #
+# All rights reserved. This program and the accompanying materials      #
+# are made available under the terms of the Eclipse Public License v1.0 #
+# which accompanies this distribution, and is available at              #
+# http://www.eclipse.org/legal/epl-v10.html                             #
+#                                                                       #
+# Contributors:                                                         #
+#     IBM - initial API and implementation                              #
+#########################################################################
+!include <win32.mak>
+DLLNAME=../libibmcomm.dll# declaration
+BUILDFILES1 = CommPortIdentifier.obj NSCommDriver.o NSDeviceInputStream.o NSDeviceOutputStream.o NSSerialPort.o
+BUILDFILES2 = SerialDataEventThread.o SerialStatusEventThread.o SysVStyleSemaphore.o
+BUILDFILES3 = NSParallelPort.o ParallelErrorEventThread.o NSCommLOG.o
+BUILDFILES4 = w32SerialPort.o
+CC=gcc
+CFLAGS=-shared -DWIN32 -DDLL -DDEBUG -I../include -I/usr/include -I.
+.SUFFIXES:.cpp
+.cpp.o:
+	$(CC) $(CFLAGS) -I. -fno-exceptions -fno-rtti -c $<
+AS=gcc
+ASFLAGS=-c $(VMASMDEBUG) -shared
+all: \
+	 $(DLLNAME)
+BUILDLIB: $(DLLNAME)
+$(DLLNAME):\
+	$(BUILDFILES1) $(BUILDFILES2) $(BUILDFILES3) $(BUILDFILES4)
+	 gcc -shared -o $(DLLNAME) $(BUILDFILES1) $(BUILDFILES2) $(BUILDFILES3) $(BUILDFILES4)

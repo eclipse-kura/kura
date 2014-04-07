@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (c) 2011, 2014 Eurotech and/or its affiliates
+
+     All rights reserved. This program and the accompanying materials
+     are made available under the terms of the Eclipse Public License v1.0
+     which accompanies this distribution, and is available at
+     http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Eurotech
+
+-->
+<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
+    <OCD id="org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport" 
+         name="MqttDataTransport" 
+         description="The MqttDataTransport provides an MQTT connection. Its configuration parameters are used to determine the MQTT broker and the credentials to connect to the broker.">
+
+        <Icon resource="MqttDataTransport" size="32"/>
+                
+        <AD id="broker-url"
+            name="broker-url"
+            type="String"
+            cardinality="0" 
+            required="true"
+            default="mqtt://broker-url:1883/" 
+            description="URL of the mqtt broker to connect to, for example, mqtt://broker-sandbox.everyware-cloud.com:1883/ or mqtts://broker-sandbox.everyware-cloud.com:8883/."/>
+
+        <AD id="topic.context.account-name"
+            name="topic.context.account-name"
+            type="String"
+            cardinality="0"
+            required="false"
+            default="account-name"
+            description="The value of this attribute will replace the '#account-name' token found in publishing topics. For connections to the EDC platform, this attribute is mandatory and must match the name of the EDC account."/>
+
+        <AD id="username"  
+            name="username"
+            type="String"
+            cardinality="0"
+            required="true"
+            default="username" 
+            description="Username to be used when connecting to the MQTT broker."/>
+
+        <AD id="password"  
+            name="password"
+            type="Password"
+            cardinality="0" 
+            required="true"
+            default="password" 
+            description="Password to be used when connecting to the MQTT broker."/>
+
+        <AD id="client-id"
+            name="client-id"
+            type="String"
+            cardinality="0"
+            required="false"
+            default="" 
+            description="Client identifier to be used when connecting to the MQTT broker. The identifier has to be unique within your account. Characters '/', '+', and '#' are invalid and they will be replaced by '-'. If left empty, this is automatically determined by the client software as the MAC address of the main network interface."/>
+        
+        <AD id="keep-alive"  
+            name="keep-alive"
+            type="Integer"
+            cardinality="0" 
+            required="true"
+            default="30"
+            description="Frequency in seconds for the periodic MQTT PING message."/>
+            
+        <AD id="timeout"
+            name="timeout"
+            type="Integer"
+            cardinality="0" 
+            required="true"
+            default="10"
+            description="Timeout used for all interactions with the MQTT broker."/>
+
+        <AD id="clean-session"
+            name="clean-session"
+            type="Boolean"
+            cardinality="0"
+            required="true"
+            default="true"
+            description="MQTT Clean Session flag."/>
+            
+        <AD id="lwt.topic"
+            name="lwt.topic"
+            type="String"
+            cardinality="0"
+            required="false"
+            default="$EDC/#account-name/#client-id/MQTT/LWT"
+            description="MQTT Last Will and Testament topic. The tokens '#account-name' and '#client-id' will be replaced by the values of the properties topic.context.account-name and client-id"/>
+            
+        <AD id="lwt.payload"
+            name="lwt.payload"
+            type="String"
+            cardinality="0"
+            default=""
+            required="false"
+            description="MQTT Last Will and Testament payload as a string."/>
+            
+        <AD id="lwt.qos"  
+            name="lwt.qos"
+            type="Integer"
+            cardinality="0"
+            required="false"
+            default="0"
+            description="MQTT Last Will and Testament QoS (0..2).">
+            <Option label="0" value="0"/>
+            <Option label="1" value="1"/>
+            <Option label="2" value="2"/>
+        </AD>
+            
+        <AD id="lwt.retain"
+            name="lwt.retain"
+            type="Boolean"
+            cardinality="0"
+            required="false"
+            default="false"
+            description="MQTT Last Will and Testament Retain flag."/>
+            
+        <AD id="in-flight.persistence"
+            name="in-flight.persistence"
+            type="String"
+            cardinality="0" 
+            required="true"
+            default="file"
+            description="Storage type where in-flight messages are persisted across reconnections.">
+           <Option label="file" value="file"/>
+           <Option label="memory" value="memory"/>
+        </AD>
+            
+    </OCD>
+    <Designate pid="org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport">
+        <Object ocdref="org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport"/>
+    </Designate>
+</MetaData>

@@ -1,0 +1,26 @@
+Manifest-Version: 1.0
+Export-Package: javax.comm;uses:="org.eclipse.soda.dk.comm.internal,or
+ g.eclipse.soda.dk.comm";version="1.2.0",org.eclipse.soda.dk.comm;uses
+ :="org.eclipse.soda.dk.comm.internal,javax.comm";version="1.2.0",org.
+ eclipse.soda.dk.comm.bundle;uses:="org.eclipse.soda.dk.comm.internal,
+ org.osgi.framework";version="1.2.0",org.eclipse.soda.dk.comm.internal
+ ;version="1.2.0"
+Built-By: elbert
+Tool: Bnd-1.43.0
+Bundle-Name: %bundle.name
+Created-By: Apache Maven Bundle Plugin
+Bundle-NativeCode: lib/linux/beaglebone/090538fcb81c38c1fa445cfb00755a
+ 94bc0131f2/dkcomm.so ; selection-filter="(&(kura.os.version=090538fcb
+ 81c38c1fa445cfb00755a94bc0131f2))",lib/linux/raspberry-pi/dkcomm.so ;
+  selection-filter="(&(kura.os.version=raspbian))",lib/linux/linux32/d
+ kcomm.so ; osname=Linux ; processor = x86,*
+Build-Jdk: 1.7.0_25
+Bundle-Version: 1.2.0
+Bnd-LastModified: 1396899950635
+Bundle-ManifestVersion: 2
+Bundle-Activator: org.eclipse.soda.dk.comm.bundle.Activator
+Bundle-Description: An implementation of the serialdevice.api, based o
+ n SODA DK comm
+Bundle-SymbolicName: org.eclipse.soda.dk.comm
+Import-Package: org.osgi.framework;version="[1.7,2)"
+

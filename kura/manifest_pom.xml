@@ -1,0 +1,286 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (c) 2011, 2014 Eurotech and/or its affiliates
+
+     All rights reserved. This program and the accompanying materials
+     are made available under the terms of the Eclipse Public License v1.0
+     which accompanies this distribution, and is available at
+     http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Eurotech
+
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	
+    <modelVersion>4.0.0</modelVersion>
+	<groupId>org.eclipse.kura</groupId>
+	<artifactId>kura</artifactId>
+	<version>2.1.0-SNAPSHOT</version>
+
+	<packaging>pom</packaging>
+
+	<modules>
+		<module>target-definition</module>
+		<module>org.eclipse.kura.api</module>
+		<module>org.eclipse.kura.test</module>
+		<module>org.eclipse.kura.core</module>
+		<module>org.eclipse.kura.core.crypto</module>
+		<module>org.eclipse.kura.core.test</module>
+		<module>org.eclipse.kura.deployment.agent</module>
+		<module>org.eclipse.kura.deployment.customizer</module>
+		<module>org.eclipse.kura.deployment.update</module>
+		<module>org.eclipse.kura.linux</module>
+		<module>org.eclipse.kura.linux.test</module>
+		<module>org.eclipse.kura.net.admin</module>
+		<module>org.eclipse.kura.protocol.modbus</module>
+		<module>org.eclipse.kura.protocol.modbus.test</module>
+		<module>org.eclipse.kura.emulator</module>
+		<module>org.eclipse.kura.example.project</module>
+		<module>org.eclipse.kura.example.publisher</module>
+		<module>org.eclipse.kura.example.serial.publisher</module>
+	        <module>org.eclipse.kura.demo.heater</module>
+	</modules>
+
+	<properties>
+		<deployment.package.version>2.1.0</deployment.package.version>
+		<tycho-version>0.18.1</tycho-version>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+		<maven.build.timestamp.format>yyyyMMddHHmm</maven.build.timestamp.format>
+		<kura.build.version>${maven.build.timestamp}</kura.build.version>
+		<kura.bundle.versions>2.1.0.${kura.build.version}</kura.bundle.versions>
+	</properties>
+
+	<repositories>
+		<repository>
+			<id>kura</id>
+			<layout>p2</layout>
+			<url>file://${project.basedir}/../target-definition/equinox_3.8.1/repository</url>
+		</repository>
+	</repositories>
+
+	<build>
+        <extensions>
+            <extension>
+                <groupId>org.apache.maven.wagon</groupId>
+                <artifactId>wagon-ssh</artifactId>
+                <version>1.0-beta-6</version>
+            </extension>
+        </extensions>
+		<plugins>
+			<plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-eclipse-plugin</artifactId>
+				<version>2.9</version>
+				<configuration>
+					<skip>true</skip>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-deploy-plugin</artifactId>
+				<version>2.7</version>
+				<configuration>
+					<skip>true</skip>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.eclipse.tycho</groupId>
+				<artifactId>target-platform-configuration</artifactId>
+				<version>${tycho-version}</version>
+				<configuration>
+					<target>
+						<artifact>
+							<groupId>org.eclipse.kura</groupId>
+							<artifactId>target-definition</artifactId>
+							<version>${project.version}</version>
+							<classifier>kura-equinox_3.8.1</classifier>
+						</artifact>
+					</target>
+					<environments>
+						<environment>
+							<os>win32</os>
+							<ws>win32</ws>
+							<arch>x86</arch>
+						</environment>
+						<environment>
+							<os>linux</os>
+							<ws>gtk</ws>
+							<arch>x86</arch>
+						</environment>
+					</environments>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.eclipse.tycho</groupId>
+				<artifactId>tycho-maven-plugin</artifactId>
+				<version>${tycho-version}</version>
+				<extensions>true</extensions>
+			</plugin>
+			<plugin>
+				<groupId>org.eclipse.tycho</groupId>
+				<artifactId>tycho-packaging-plugin</artifactId>
+				<version>${tycho-version}</version>
+				<configuration>
+					<strictVersions>false</strictVersions>
+					<format>${kura.build.version}</format>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.eclipse.tycho</groupId>
+				<artifactId>tycho-compiler-plugin</artifactId>
+				<version>${tycho-version}</version>
+				<configuration>
+					<compilerArgument>-warn:[+|-]warning_tokens_separated_by_comma</compilerArgument>
+					<!-- <compilerArgument>-err:-forbidden</compilerArgument> -->
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.eclipse.tycho</groupId>
+				<artifactId>tycho-surefire-plugin</artifactId>
+				<version>${tycho-version}</version>
+				<configuration>
+					<providerHint>junit4</providerHint>
+					<parallel>both</parallel>
+					<useUnlimitedThreads>true</useUnlimitedThreads>
+					<argLine>-Deurotech.framework.mode=emulator -Dequinox.ds.print=true</argLine>
+					<dependencies>
+						<dependency>
+							<type>p2-installable-unit</type>
+							<artifactId>org.eclipse.equinox.ds</artifactId>
+						</dependency>
+					</dependencies>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>wagon-maven-plugin</artifactId>
+				<version>1.0-beta-3</version>
+				<executions>
+					<execution>
+						<phase>deploy</phase>
+						<goals>
+							<goal>upload</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<fromDir>target</fromDir>
+					<includes>kura-${project.version}-javadoc.jar,</includes>
+					<url>scp://107.20.195.222</url>
+					<toDir>/home/edcupload/kura_builds/${project.version}/</toDir>
+					<serverId>eurotechcloud-transfer</serverId>
+				</configuration>
+			</plugin>
+			<plugin>
+	        <groupId>org.apache.maven.plugins</groupId>
+	        <artifactId>maven-site-plugin</artifactId>
+	        <version>3.3</version>
+	      </plugin>
+		  <plugin>
+		  	<!-- license:format to add
+				 license:check to check -->
+		  	<groupId>com.mycila</groupId>
+			<artifactId>license-maven-plugin</artifactId>
+			<version>2.2</version>
+			<configuration>
+				<header>distrib/eclipse_license.txt</header>
+				<properties>
+					<owner>Eurotech and/or its affiliates</owner>
+					<contributor>Eurotech</contributor>
+					<dates>2011, 2014</dates>
+				</properties>
+				<includes>
+					<include>**/*.java</include>
+					<include>**/*.properties</include>
+					<include>**/*.sh</include>
+					<include>**/*.xml</include>
+					<include>**/denali.css</include>
+					<include>**/.conf</include>
+				</includes>
+				<mapping>
+					<conf>SCRIPT_STYLE</conf>
+				</mapping>
+			</configuration>
+		  </plugin>
+		</plugins>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-javadoc-plugin</artifactId>
+					<version>2.9</version>
+					<configuration>
+						<doctitle>Kura ${project.version}</doctitle>
+						<!-- Default configuration for all reports -->
+						<skip>false</skip>
+						<links>
+							<link>http://javax-usb.sourceforge.net/jdoc/</link>
+							<link>http://docs.oracle.com/cd/E17802_01/products/products/javacomm/reference/api/index.html</link>
+							<link>http://docs.oracle.com/javame/config/cldc/opt-pkgs/api/bluetooth/jsr082/index.html?javax/bluetooth/package-summary.html</link>
+						</links>
+                        <!-- Remove packages from the list to have them included in the aggregate 
+									javadocs -->
+                        <excludePackageNames>
+                            *.ermes:*.demo*:*.example:*.core:*.cloud.app:*.net.admin:*.deployment:*.emulator:*.linux:*.qa:*.web:*.service.io:*.test
+                        </excludePackageNames>
+						<!-- Add URLs for open source javadocs below -->
+					</configuration>
+					<executions>
+						<execution>
+							<id>javadoc</id>
+							<goals>
+								<goal>javadoc</goal>
+							</goals>
+							<phase>package</phase>
+							<configuration>
+								<skip>false</skip>
+							</configuration>
+						</execution>
+						<execution>
+							<id>aggregate</id>
+							<goals>
+								<goal>aggregate</goal>
+							</goals>
+							<phase>package</phase>
+							<configuration>
+								<!-- Specific configuration for the aggregate report -->
+								<skip>false</skip>
+								<doctitle>Kura ${project.version}</doctitle>
+							</configuration>
+						</execution>
+					</executions>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+	</build>
+	<!-- Use the below format to specify specific reports to run
+	<reporting>
+	    <plugins>
+	      <plugin>
+	        <groupId>org.apache.maven.plugins</groupId>
+	        <artifactId>maven-project-info-reports-plugin</artifactId>
+	        <version>2.7</version>
+	        <reportSets>
+	          <reportSet>
+	            <reports>
+	              <report>index</report>
+	              <report>dependencies</report>
+	              <report>dependency-convergence</report>
+	              <report>dependency-info</report>
+	              <report>dependency-management</report>
+	            </reports>
+	          </reportSet>
+	        </reportSets>
+	      </plugin>
+	    </plugins>
+	</reporting>
+	 -->
+</project>

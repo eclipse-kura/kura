@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (c) 2011, 2014 Eurotech and/or its affiliates
+
+     All rights reserved. This program and the accompanying materials
+     are made available under the terms of the Eclipse Public License v1.0
+     which accompanies this distribution, and is available at
+     http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Eurotech
+
+-->
+<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
+    <OCD id="org.eclipse.kura.example.serial.publisher.ExampleSerialPublisher"
+         name="ExampleSerialPublisher" 
+         description="Example of a Configuring Kura Application publishing data read from the serial port.">
+        
+        <Icon resource="http://sphotos-a.xx.fbcdn.net/hphotos-ash4/p480x480/408247_10151040905591065_1989684710_n.jpg" size="32"/>
+        
+        <AD id="publish.semanticTopic"  
+            name="publish.semanticTopic"
+            type="String"
+            cardinality="0" 
+            required="true"
+            default="data" 
+            description="Default semantic topic to publish the messages to."/>
+        
+        <AD id="publish.qos"  
+            name="publish.qos"
+            type="Integer"
+            cardinality="0" 
+            required="true"
+            default="0" 
+            description="Default QoS to publish the messages with.">
+           <Option label="Fire and forget" value="0"/>
+           <Option label="Al least once" value="1"/>          
+           <Option label="At most once" value="2"/>
+        </AD>
+
+        <AD id="publish.retain"  
+            name="publish.retain"
+            type="Boolean"
+            cardinality="0" 
+            required="true"
+            default="false" 
+            description="Default retaing flag for the published messages."/>
+  
+        <AD id="serial.device"  
+            name="serial.device"
+            type="String"
+            cardinality="0"
+            required="false"
+            description="Name of the serial device (e.g. /dev/ttyS0, /dev/ttyACM0, /dev/ttyUSB0)."/>  
+
+        <AD id="serial.baudrate"  
+            name="serial.baudrate"
+            type="String"
+            cardinality="0"
+            required="true"
+            default="9600"
+            description="Baudrate.">  
+           <Option label="9600" value="9600"/>
+           <Option label="19200" value="19200"/>          
+           <Option label="38400" value="38400"/>
+           <Option label="57600" value="57600"/>
+           <Option label="115200" value="115200"/>         
+        </AD>
+        
+        <AD id="serial.data-bits"  
+            name="serial.data-bits"
+            type="String"
+            cardinality="0"
+            required="true"
+            default="8"
+            description="Data bits.">  
+           <Option label="7" value="7"/>
+           <Option label="8" value="8"/>          
+        </AD>
+        
+        <AD id="serial.parity"  
+            name="serial.parity"
+            type="String"
+            cardinality="0"
+            required="true"
+            default="none"
+            description="Parity.">  
+           <Option label="none" value="none"/>
+           <Option label="even" value="even"/>
+           <Option label="odd" value="odd"/>
+        </AD>
+
+        <AD id="serial.stop-bits"  
+            name="serial.stop-bits"
+            type="String"
+            cardinality="0"
+            required="true"
+            default="1"
+            description="Stop bits.">  
+           <Option label="1" value="1"/>
+           <Option label="2" value="2"/>          
+        </AD>
+        
+        <AD id="serial.echo"
+            name="serial.echo"
+            type="Boolean"
+            cardinality="0" 
+            required="true"
+            default="false" 
+            description="Wheter the device echoes received characters."/>
+        
+        <AD id="serial.cloud-echo"
+            name="serial.cloud-echo"
+            type="Boolean"
+            cardinality="0" 
+            required="true"
+            default="false" 
+            description="Wheter the Cloud echoes received characters."/>
+                            
+    </OCD>
+    <Designate pid="org.eclipse.kura.example.serial.publisher.ExampleSerialPublisher">
+        <Object ocdref="org.eclipse.kura.example.serial.publisher.ExampleSerialPublisher"/>
+    </Designate>
+</MetaData>

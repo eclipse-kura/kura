@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (c) 2011, 2014 Eurotech and/or its affiliates
+
+     All rights reserved. This program and the accompanying materials
+     are made available under the terms of the Eclipse Public License v1.0
+     which accompanies this distribution, and is available at
+     http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Eurotech
+
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+  <parent>
+    <artifactId>kura</artifactId>
+    <groupId>org.eclipse.kura</groupId>
+    <version>2.1.0-SNAPSHOT</version>
+    <relativePath>../pom_pom.xml</relativePath>
+  </parent>
+
+	<artifactId>org.eclipse.kura.qa</artifactId>
+	<name>org.eclipse.kura.qa</name>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.eclipse.kura</groupId>
+			<artifactId>distrib</artifactId>
+			<version>2.1.0-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>3.8.1</version>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-deploy-plugin</artifactId>
+				<version>2.7</version>
+				<configuration>
+					<skip>true</skip>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<version>1.3</version>
+				<dependencies>
+					<dependency>
+						<groupId>org.apache.ant</groupId>
+						<artifactId>ant-jsch</artifactId>
+						<version>1.7.1</version>
+					</dependency>
+					<dependency>
+						<groupId>com.jcraft</groupId>
+						<artifactId>jsch</artifactId>
+						<version>0.1.41</version>
+					</dependency>
+				</dependencies>
+				<executions>
+					<execution>
+						<phase>deploy</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
+						<configuration>
+							<tasks>
+								<scp
+									file="${project.build.directory}/../src/main/resources/start_kura_test.sh"
+									todir="${pdx.everyware.helios.username}@${pdx.everyware.url}:/tmp"
+									port="${pdx.everyware.helios.port}" password="${pdx.everyware.helios.passwd}" />
+
+								<scp
+									file="${project.build.directory}/../../distrib/target/kura-wrl-4.3_2.0.0.zip"
+									todir="${pdx.everyware.helios.username}@${pdx.everyware.url}:/tmp"
+									port="${pdx.everyware.helios.port}" password="${pdx.everyware.helios.passwd}" />
+
+								<sshexec host="${pdx.everyware.url}" port="${pdx.everyware.helios.port}"
+									username="${pdx.everyware.helios.username}" password="${pdx.everyware.helios.passwd}"
+									trust="true" command="sh /tmp/start_kura_test.sh" />
+							</tasks>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+                        <plugin>
+                                <groupId>org.eclipse.tycho</groupId>
+                                <artifactId>tycho-packaging-plugin</artifactId>
+                                <version>${tycho-version}</version>
+                                <configuration>
+                                        <format>'${kura.build.version}'</format>
+                                </configuration>
+                                <executions>
+                                        <execution>
+                                                <phase>package</phase>
+                                                <id>package-plugin</id>
+                                                <goals>
+                                                        <goal>package-plugin</goal>
+                                                </goals>
+                                                <configuration>
+                                                        <finalName>${project.artifactId}_${project.version}.v${kura.build.version}</finalName>
+                                                </configuration>
+                                        </execution>
+                                </executions>
+                        </plugin>
+		</plugins>
+	</build>
+</project>

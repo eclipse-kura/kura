@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (c) 2011, 2014 Eurotech and/or its affiliates
+
+     All rights reserved. This program and the accompanying materials
+     are made available under the terms of the Eclipse Public License v1.0
+     which accompanies this distribution, and is available at
+     http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Eurotech
+
+-->
+<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
+    <OCD id="org.eclipse.kura.cloud.CloudService" 
+         name="CloudService" 
+         description="The CloudService allows for setting a user friendly name for the current device. It also provides the option to compress message payloads to reduce network traffic.">
+
+        <Icon resource="CloudService" size="32"/>
+        
+        <AD id="device.display-name"
+            name="device.display-name"
+            type="String"
+            cardinality="0"
+            required="false"
+            description="Friendly name of the device. If left empty, this is automatically determined by the system." />
+                    
+        <AD id="encode.gzip"
+            name="encode.gzip"
+            type="Boolean"
+            cardinality="0"
+            required="false"
+            default="true"
+            description="Compress message payloads before sending them to the remote server to reduce the network traffic.">
+        </AD>
+        
+        <AD id="republish.mqtt.birth.cert.on.gps.lock"
+            name="republish.mqtt.birth.cert.on.gps.lock"
+            type="Boolean"
+            cardinality="0"
+            required="true"
+            default="false"
+            description="Whether or not to republish the MQTT Birth Certificate on GPS lock event"/>
+
+    </OCD>
+    
+    <Designate pid="org.eclipse.kura.cloud.CloudService">
+        <Object ocdref="org.eclipse.kura.cloud.CloudService"/>
+    </Designate>
+</MetaData>

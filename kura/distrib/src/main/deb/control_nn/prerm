@@ -1,0 +1,37 @@
+#!/bin/bash
+
+##############################################
+# PRE-REMOVE SCRIPT
+##############################################
+PIDS=`pgrep java`
+
+echo ""
+echo "Uninstalling KURA..."
+
+#Kill JVM and monit for installation
+if [ -f "/var/run/kura.pid" ] ; then
+  KURA_PID=`cat /var/run/kura.pid`
+
+  for pid in "${PIDS[@]}"
+  do
+    if [ "$KURA_PID" == "$pid" ] ; then
+      `kill $pid` >> /tmp/kura_install.log 2>&1
+    fi
+  done
+fi
+
+#Remove INIT scripts
+rm /etc/init.d/firewall
+rm /etc/init.d/kura
+update-rc.d firewall remove
+update-rc.d kura remove
+
+#Delete Eclipse directory if present
+if [ -d "/opt/eclipse/data" ] ; then
+  rm -rf /opt/eclipse/data
+fi
+
+if [ -d "/opt/eclipse/kura" ] ; then
+  rm -rf /opt/eclipse/kura
+fi
+

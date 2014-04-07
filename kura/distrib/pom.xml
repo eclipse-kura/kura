@@ -1,0 +1,780 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (c) 2011, 2014 Eurotech and/or its affiliates
+
+     All rights reserved. This program and the accompanying materials
+     are made available under the terms of the Eclipse Public License v1.0
+     which accompanies this distribution, and is available at
+     http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Eurotech
+
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<artifactId>kura</artifactId>
+		<groupId>org.eclipse.kura</groupId>
+		<version>2.1.0-SNAPSHOT</version>
+		<relativePath>../pom_pom.xml</relativePath>
+	</parent>
+
+	<artifactId>distrib</artifactId>
+
+	<name>distrib</name>
+	<url>http://maven.apache.org</url>
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<zip_workspace.prefix>user_workspace_archive_${project.version}</zip_workspace.prefix>
+	</properties>
+
+	<build>
+		<extensions>
+			<extension>
+				<groupId>org.apache.maven.wagon</groupId>
+				<artifactId>wagon-ssh</artifactId>
+				<version>1.0-beta-6</version>
+			</extension>
+		</extensions>
+		<plugins>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>properties-maven-plugin</artifactId>
+				<version>1.0-alpha-1</version>
+				<executions>
+					<execution>
+						<phase>initialize</phase>
+						<goals>
+							<goal>read-project-properties</goal>
+						</goals>
+						<configuration>
+							<files>
+								<file>${basedir}/build.properties</file>
+							</files>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>com.google.code.maven-replacer-plugin</groupId>
+				<artifactId>replacer</artifactId>
+				<version>1.5.2</version>
+				<executions>
+					<execution>
+						<phase>prepare-package</phase>
+						<goals>
+							<goal>replace</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<file>${basedir}/target/classes/common/kura_upgrade_script.sh</file>
+					<replacements>
+						<replacement>
+							<token>KURA_CORRECT_VERSION=UNKNOWN</token>
+							<value>KURA_CORRECT_VERSION=${kura.bundle.versions}</value>
+						</replacement>
+					</replacements>
+				</configuration>
+			</plugin>
+
+		</plugins>
+		<pluginManagement>
+			<plugins>
+				<!--This plugin's configuration is used to store Eclipse m2e settings 
+					only. It has no influence on the Maven build itself. -->
+				<plugin>
+					<groupId>org.eclipse.m2e</groupId>
+					<artifactId>lifecycle-mapping</artifactId>
+					<version>1.0.0</version>
+					<configuration>
+						<lifecycleMappingMetadata>
+							<pluginExecutions>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>
+											org.codehaus.mojo
+										</groupId>
+										<artifactId>
+											properties-maven-plugin
+										</artifactId>
+										<versionRange>
+											[1.0-alpha-1,)
+										</versionRange>
+										<goals>
+											<goal>
+												read-project-properties
+											</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore></ignore>
+									</action>
+								</pluginExecution>
+							</pluginExecutions>
+						</lifecycleMappingMetadata>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+	</build>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.eclipse.kura</groupId>
+			<artifactId>org.eclipse.kura.api</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.kura</groupId>
+			<artifactId>org.eclipse.kura.core</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.kura</groupId>
+			<artifactId>org.eclipse.kura.protocol.modbus</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.kura</groupId>
+			<artifactId>org.eclipse.kura.emulator</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.kura</groupId>
+			<artifactId>org.eclipse.kura.linux</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+<!--
+		<dependency>
+			<groupId>org.eclipse.kura</groupId>
+			<artifactId>org.eclipse.kura.web</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+-->
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>3.8.1</version>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+
+	<profiles>
+		<profile>
+			<id>beaglebone</id>
+			<activation>
+				<activeByDefault>false</activeByDefault>
+			</activation>
+			<build>
+				<resources>
+					<resource>
+						<directory>src/main/resources</directory>
+						<filtering>true</filtering>
+					</resource>
+				</resources>
+				<plugins>
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>properties-maven-plugin</artifactId>
+						<version>1.0-alpha-1</version>
+						<executions>
+							<execution>
+								<phase>initialize</phase>
+								<goals>
+									<goal>read-project-properties</goal>
+								</goals>
+								<configuration>
+									<files>
+										<file>${basedir}/build.properties</file>
+									</files>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>buildnumber-maven-plugin</artifactId>
+						<version>1.0</version>
+						<executions>
+							<execution>
+								<phase>validate</phase>
+								<goals>
+									<goal>create-timestamp</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-antrun-plugin</artifactId>
+						<version>1.7</version>
+						<executions>
+							<execution>
+								<id>beaglebone-dp</id>
+								<phase>install</phase>
+								<goals>
+									<goal>run</goal>
+								</goals>
+								<configuration>
+									<target>
+										<property name="buildNumber" value="buildNumber" />
+										<property name="deployment.package.version" value="${deployment.package.version}" />
+										<property name="project.version" value="${project.version}" />
+										<property name="project.build.profile" value="${project.build.profile}" />
+										<property name="project.build.directory" value="${project.build.directory}" />
+										<property name="build.name" value="beaglebone" />
+										<property name="kura.os.version"
+											value="090538fcb81c38c1fa445cfb00755a94bc0131f2" />
+										<property name="kura.mem.size" value="256m" />
+										<ant antfile="${basedir}/src/main/ant/build_equinox_distrib_dp.xml"
+											target="dist-linux" />
+									</target>
+								</configuration>
+							</execution>
+							<execution>
+								<id>beaglebone-jars</id>
+								<phase>install</phase>
+								<goals>
+									<goal>run</goal>
+								</goals>
+								<configuration>
+									<target>
+										<property name="buildNumber" value="buildNumber" />
+										<property name="project.version" value="${project.version}" />
+										<property name="project.build.profile" value="${project.build.profile}" />
+										<property name="project.build.directory" value="${project.build.directory}" />
+										<property name="build.name" value="beaglebone" />
+										<property name="kura.os.version"
+											value="090538fcb81c38c1fa445cfb00755a94bc0131f2" />
+										<property name="kura.mem.size" value="256m" />
+										<ant antfile="${basedir}/src/main/ant/build_equinox_distrib.xml"
+											target="dist-linux" />
+									</target>
+								</configuration>
+							</execution>
+							<execution>
+								<id>beaglebone-test</id>
+								<phase>install</phase>
+								<goals>
+									<goal>run</goal>
+								</goals>
+								<configuration>
+									<target>
+										<property name="buildNumber" value="buildNumber" />
+										<property name="deployment.package.version" value="${deployment.package.version}" />
+										<property name="project.version" value="${project.version}" />
+										<property name="project.build.profile" value="${project.build.profile}" />
+										<property name="project.build.directory" value="${project.build.directory}" />
+										<property name="build.name" value="beaglebone" />
+										<property name="kura.os.version"
+											value="090538fcb81c38c1fa445cfb00755a94bc0131f2" />
+										<property name="kura.mem.size" value="256m" />
+										<ant antfile="${basedir}/src/main/ant/build_equinox_distrib_test.xml"
+											target="dist-linux" />
+									</target>
+								</configuration>
+							</execution>
+							<execution>
+								<id>beaglebone-nn-dp</id>
+								<phase>install</phase>
+								<goals>
+									<goal>run</goal>
+								</goals>
+								<configuration>
+									<target>
+										<property name="buildNumber" value="buildNumber" />
+										<property name="deployment.package.version" value="${deployment.package.version}" />
+										<property name="project.version" value="${project.version}" />
+										<property name="project.build.profile" value="${project.build.profile}" />
+										<property name="project.build.directory" value="${project.build.directory}" />
+										<property name="build.name" value="beaglebone-nn" />
+										<property name="kura.os.version"
+											value="090538fcb81c38c1fa445cfb00755a94bc0131f2" />
+										<property name="kura.mem.size" value="256m" />
+										<ant antfile="${basedir}/src/main/ant/build_equinox_distrib_dp.xml"
+											target="dist-linux" />
+									</target>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		<profile>
+			<id>raspberry-pi</id>
+			<properties>
+				<project.raspbian.dependencies>hostapd, isc-dhcp-server, iw, dos2unix, bind9</project.raspbian.dependencies>
+			</properties>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<build>
+				<resources>
+					<resource>
+						<directory>src/main/resources</directory>
+						<filtering>true</filtering>
+					</resource>
+				</resources>
+				<plugins>
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>properties-maven-plugin</artifactId>
+						<version>1.0-alpha-1</version>
+						<executions>
+							<execution>
+								<phase>initialize</phase>
+								<goals>
+									<goal>read-project-properties</goal>
+								</goals>
+								<configuration>
+									<files>
+										<file>${basedir}/build.properties</file>
+									</files>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>buildnumber-maven-plugin</artifactId>
+						<version>1.0</version>
+						<executions>
+							<execution>
+								<phase>validate</phase>
+								<goals>
+									<goal>create-timestamp</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-antrun-plugin</artifactId>
+						<version>1.7</version>
+						<executions>
+							<execution>
+								<id>raspberry-pi-dp</id>
+								<phase>install</phase>
+								<goals>
+									<goal>run</goal>
+								</goals>
+								<configuration>
+									<target>
+										<property name="buildNumber" value="buildNumber" />
+										<property name="deployment.package.version" value="${deployment.package.version}" />
+										<property name="project.version" value="${project.version}" />
+										<property name="project.build.profile" value="${project.build.profile}" />
+										<property name="project.build.directory" value="${project.build.directory}" />
+										<property name="build.name" value="raspberry-pi" />
+										<property name="kura.os.version" value="raspbian" />
+										<property name="kura.mem.size" value="256m" />
+										<ant antfile="${basedir}/src/main/ant/build_equinox_distrib_dp.xml"
+											target="dist-linux" />
+									</target>
+								</configuration>
+							</execution>
+							<execution>
+								<id>raspberry-pi-jars</id>
+								<phase>install</phase>
+								<goals>
+									<goal>run</goal>
+								</goals>
+								<configuration>
+									<target>
+										<property name="buildNumber" value="buildNumber" />
+										<property name="project.version" value="${project.version}" />
+										<property name="project.build.profile" value="${project.build.profile}" />
+										<property name="project.build.directory" value="${project.build.directory}" />
+										<property name="build.name" value="raspberry-pi" />
+										<property name="kura.os.version" value="raspbian" />
+										<property name="kura.mem.size" value="256m" />
+										<ant antfile="${basedir}/src/main/ant/build_equinox_distrib.xml"
+											target="dist-linux" />
+									</target>
+								</configuration>
+							</execution>
+							<execution>
+								<id>raspberry-pi-test</id>
+								<phase>install</phase>
+								<goals>
+									<goal>run</goal>
+								</goals>
+								<configuration>
+									<target>
+										<property name="buildNumber" value="buildNumber" />
+										<property name="deployment.package.version" value="${deployment.package.version}" />
+										<property name="project.version" value="${project.version}" />
+										<property name="project.build.profile" value="${project.build.profile}" />
+										<property name="project.build.directory" value="${project.build.directory}" />
+										<property name="build.name" value="raspberry-pi" />
+										<property name="kura.os.version" value="raspbian" />
+										<property name="kura.mem.size" value="256m" />
+										<ant antfile="${basedir}/src/main/ant/build_equinox_distrib_test.xml"
+											target="dist-linux" />
+									</target>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.vafer</groupId>
+						<artifactId>jdeb</artifactId>
+						<version>1.0</version>
+						<executions>
+							<execution>
+								<id>raspberry-pi-deb</id>
+								<phase>install</phase>
+								<goals>
+									<goal>jdeb</goal>
+								</goals>
+								<configuration>
+									<verbose>true</verbose>
+									<deb>${basedir}/target/kura-raspberry-pi_${project.version}.deb</deb>
+									<controlDir>${basedir}/src/main/deb/control</controlDir>
+									<dataSet>
+										<data>
+											<src>${basedir}/target/kura-raspberry-pi_${project.version}.zip</src>
+											<type>file</type>
+											<mapper>
+												<type>perm</type>
+												<prefix>/tmp</prefix>
+											</mapper>
+										</data>
+									</dataSet>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		<profile>
+			<id>raspberry-pi-nn</id>
+			<properties>
+				<project.raspbian.dependencies>dos2unix</project.raspbian.dependencies>
+			</properties>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<build>
+				<resources>
+					<resource>
+						<directory>src/main/resources</directory>
+						<filtering>true</filtering>
+					</resource>
+				</resources>
+				<plugins>
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>properties-maven-plugin</artifactId>
+						<version>1.0-alpha-1</version>
+						<executions>
+							<execution>
+								<phase>initialize</phase>
+								<goals>
+									<goal>read-project-properties</goal>
+								</goals>
+								<configuration>
+									<files>
+										<file>${basedir}/build.properties</file>
+									</files>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>buildnumber-maven-plugin</artifactId>
+						<version>1.0</version>
+						<executions>
+							<execution>
+								<phase>validate</phase>
+								<goals>
+									<goal>create-timestamp</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-antrun-plugin</artifactId>
+						<version>1.7</version>
+						<executions>
+							<execution>
+								<id>raspberry-pi-nn-dp</id>
+								<phase>install</phase>
+								<goals>
+									<goal>run</goal>
+								</goals>
+								<configuration>
+									<target>
+										<property name="buildNumber" value="buildNumber" />
+										<property name="deployment.package.version" value="${deployment.package.version}" />
+										<property name="project.version" value="${project.version}" />
+										<property name="project.build.profile" value="${project.build.profile}" />
+										<property name="project.build.directory" value="${project.build.directory}" />
+										<property name="build.name" value="raspberry-pi-nn" />
+										<property name="kura.os.version" value="raspbian" />
+										<property name="kura.mem.size" value="256m" />
+										<ant antfile="${basedir}/src/main/ant/build_equinox_distrib_dp.xml"
+											target="dist-linux" />
+									</target>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.vafer</groupId>
+						<artifactId>jdeb</artifactId>
+						<version>1.0</version>
+						<executions>
+							<execution>
+								<id>raspberry-pi-nn-deb</id>
+								<phase>install</phase>
+								<goals>
+									<goal>jdeb</goal>
+								</goals>
+								<configuration>
+									<verbose>true</verbose>
+									<deb>${basedir}/target/kura-raspberry-pi-nn_${project.version}.deb</deb>
+									<controlDir>${basedir}/src/main/deb/control_nn</controlDir>
+									<dataSet>
+										<data>
+											<src>${basedir}/target/kura-raspberry-pi-nn_${project.version}.zip</src>
+											<type>file</type>
+											<mapper>
+												<type>perm</type>
+												<prefix>/tmp</prefix>
+											</mapper>
+										</data>
+									</dataSet>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		<profile>
+			<id>dev-env</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<build>
+				<resources>
+					<resource>
+						<directory>src/main/resources</directory>
+						<filtering>true</filtering>
+					</resource>
+				</resources>
+				<plugins>
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>properties-maven-plugin</artifactId>
+						<version>1.0-alpha-1</version>
+						<executions>
+							<execution>
+								<phase>initialize</phase>
+								<goals>
+									<goal>read-project-properties</goal>
+								</goals>
+								<configuration>
+									<files>
+										<file>${basedir}/build.properties</file>
+									</files>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>buildnumber-maven-plugin</artifactId>
+						<version>1.0</version>
+						<executions>
+							<execution>
+								<phase>validate</phase>
+								<goals>
+									<goal>create-timestamp</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-antrun-plugin</artifactId>
+						<version>1.7</version>
+						<executions>
+							<execution>
+								<id>prep-tp</id>
+								<phase>prepare-package</phase>
+								<goals>
+									<goal>run</goal>
+								</goals>
+								<configuration>
+									<target>
+										<!-- Kura User Workspace -->
+										<echo message="Preparing target platform..." />
+
+										<!-- Copy the mtoolkit plugin to the target directory -->
+										<copy
+											file="src/main/resources/common/org.tigris.mtoolkit.sdk-3.1.8-20110411-0918.zip"
+											todir="${project.build.directory}" />
+
+										<!-- Add the deployment agent and core packages to the target platform 
+											which is required for the emulator -->
+										<copy todir="${project.build.directory}/staging/target-definition">
+											<fileset dir="../target-definition" />
+										</copy>
+										<delete
+											file="${project.build.directory}/staging/target-definition/pom.xml" />
+										<delete
+											file="${project.build.directory}/staging/target-definition/kura-equinox_3.8.1.target" />
+										<delete
+											file="${project.build.directory}/staging/target-definition/equinox_3.8.1/repository/artifacts.xml" />
+										<delete
+											file="${project.build.directory}/staging/target-definition/equinox_3.8.1/repository/content.xml" />
+										<copy
+											file="src/main/resources/common/projects/target_definition.project"
+											tofile="${project.build.directory}/staging/target-definition/.project" />
+										<copy file="src/main/resources/common/kura-equinox_3.8.1.target"
+											todir="${project.build.directory}/staging/target-definition" />
+										<copy
+											file="../org.eclipse.kura.core/target/org.eclipse.kura.core_${project.version}.v${kura.build.version}.jar"
+											todir="${project.build.directory}/staging/target-definition/equinox_3.8.1/repository/plugins" />
+										<copy
+											file="../org.eclipse.kura.deployment.agent/target/org.eclipse.kura.deployment.agent_${project.version}.v${kura.build.version}.jar"
+											todir="${project.build.directory}/staging/target-definition/equinox_3.8.1/repository/plugins" />
+<!--
+										<copy
+											file="../org.eclipse.kura.web/target/org.eclipse.kura.web_${project.version}.v${kura.build.version}.jar"
+											todir="${project.build.directory}/staging/target-definition/equinox_3.8.1/repository/plugins" />
+-->
+										<copy
+											file="../org.eclipse.kura.core.crypto/target/org.eclipse.kura.core.crypto_${project.version}.v${kura.build.version}.jar"
+											todir="${project.build.directory}/staging/target-definition/equinox_3.8.1/repository/plugins" />
+									</target>
+								</configuration>
+							</execution>
+							<execution>
+								<id>dev-env</id>
+								<phase>install</phase>
+								<goals>
+									<goal>run</goal>
+								</goals>
+								<configuration>
+									<target>
+										<!-- Stage the emulator -->
+										<copy todir="${project.build.directory}/staging/emulator">
+											<fileset dir="../org.eclipse.kura.emulator" />
+										</copy>
+										<delete file="${project.build.directory}/staging/emulator/pom.xml" />
+										<delete dir="${project.build.directory}/staging/emulator/bin" />
+										<delete dir="${project.build.directory}/staging/emulator/target" />
+										<delete
+											file="${project.build.directory}/staging/emulator/emulator-assembly.xml" />
+										<delete
+											file="${project.build.directory}/staging/emulator/src/main/resources/Kura_Core_Test.launch" />
+										<delete
+											file="${project.build.directory}/staging/emulator/src/main/resources/Kura_Emulator_Linux.launch" />
+										<delete
+											file="${project.build.directory}/staging/emulator/src/main/resources/Kura_Emulator_OSX.launch" />
+										<copy file="src/main/resources/common/NOTICE.txt"
+											todir="${project.build.directory}/staging/emulator/src/main/resources" />
+										<copy file="RELEASE_NOTES.txt"
+											todir="${project.build.directory}/staging/emulator/src/main/resources" />
+										<copy file="src/main/resources/common/Kura_Emulator_Linux.launch"
+											todir="${project.build.directory}/staging/emulator/src/main/resources" />
+										<copy file="src/main/resources/common/Kura_Emulator_OSX.launch"
+											todir="${project.build.directory}/staging/emulator/src/main/resources" />
+										<copy
+											file="src/main/resources/common/classpaths/emulator.classpath"
+											tofile="${project.build.directory}/staging/emulator/emulator.classpath" />
+										<copy file="src/main/resources/common/projects/emulator.project"
+											tofile="${project.build.directory}/staging/emulator/.project" />
+										<move
+											file="${project.build.directory}/staging/emulator/emulator.classpath"
+											tofile="${project.build.directory}/staging/emulator/.classpath" />
+
+										<!-- Stage the API -->
+										<copy todir="${project.build.directory}/staging/api">
+											<fileset dir="../org.eclipse.kura.api" />
+										</copy>
+										<delete file="${project.build.directory}/staging/api/pom.xml" />
+										<delete dir="${project.build.directory}/staging/api/bin" />
+										<delete dir="${project.build.directory}/staging/api/target" />
+										<delete
+											file="${project.build.directory}/staging/api/api-assembly.xml" />
+										<copy file="src/main/resources/common/classpaths/api.classpath"
+											tofile="${project.build.directory}/staging/api/api.classpath" />
+										<copy file="src/main/resources/common/projects/api.project"
+											tofile="${project.build.directory}/staging/api/.project" />
+										<move file="${project.build.directory}/staging/api/api.classpath"
+											tofile="${project.build.directory}/staging/api/.classpath" />
+
+										<!-- Stage the Demo Heater Project -->
+										<copy todir="${project.build.directory}/staging/demo_heater">
+											<fileset dir="../org.eclipse.kura.demo.heater" />
+										</copy>
+										<delete
+											file="${project.build.directory}/staging/demo_heater/pom.xml" />
+										<delete dir="${project.build.directory}/staging/demo_heater/bin" />
+										<delete
+											dir="${project.build.directory}/staging/demo_heater/target" />
+										<copy
+											file="src/main/resources/common/classpaths/demo_heater.classpath"
+											tofile="${project.build.directory}/staging/demo_heater/demo_heater.classpath" />
+										<copy file="src/main/resources/common/projects/demo_heater.project"
+											tofile="${project.build.directory}/staging/demo_heater/.project" />
+										<move
+											file="${project.build.directory}/staging/demo_heater/demo_heater.classpath"
+											tofile="${project.build.directory}/staging/demo_heater/.classpath" />
+
+										<!-- Create the archive file with the components -->
+										<zip destfile="${project.build.directory}/${zip_workspace.prefix}.zip">
+											<zipfileset
+												dir="${project.build.directory}/staging/target-definition/"
+												prefix="target-definition/" />
+											<zipfileset dir="${project.build.directory}/staging/emulator/"
+												prefix="org.eclipse.kura.emulator/" />
+											<zipfileset dir="${project.build.directory}/staging/api/"
+												prefix="org.eclipse.kura.api/" />
+											<zipfileset dir="${project.build.directory}/staging/demo_heater/"
+												prefix="org.eclipse.kura.demo.heater/" />
+										</zip>
+									</target>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.sonatype.tycho</groupId>
+						<artifactId>tycho-p2-extras-plugin</artifactId>
+						<version>0.11.0</version>
+						<executions>
+							<execution>
+								<phase>package</phase>
+								<goals>
+									<goal>publish-features-and-bundles</goal>
+								</goals>
+							</execution>
+						</executions>
+						<configuration>
+							<compress>false</compress>
+							<sourceLocation>${project.build.directory}/staging/target-definition/equinox_3.8.1/repository</sourceLocation>
+							<artifactRepositoryLocation>${project.build.directory}/staging/target-definition/equinox_3.8.1/repository</artifactRepositoryLocation>
+							<metadataRepositoryLocation>${project.build.directory}/staging/target-definition/equinox_3.8.1/repository</metadataRepositoryLocation>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+</project>

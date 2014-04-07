@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (c) 2011, 2014 Eurotech and/or its affiliates
+
+     All rights reserved. This program and the accompanying materials
+     are made available under the terms of the Eclipse Public License v1.0
+     which accompanies this distribution, and is available at
+     http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Eurotech
+
+-->
+<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
+    <OCD id="org.eclipse.kura.demo.heater.Heater"
+         name="Heater" 
+         description="This is a simulator for an heater gateway application. Its configuration options will be passed down the smart heater. ">
+        
+        <Icon resource="http://sphotos-a.xx.fbcdn.net/hphotos-ash4/p480x480/408247_10151040905591065_1989684710_n.jpg" size="32"/>
+
+        <AD id="mode"  
+            name="mode"
+            type="String"
+            cardinality="0" 
+            required="true"
+            default="Program" 
+            description="Operating mode for the heater. If operatng mode is Vacation, set point is automatiaclly set to 6.0C.">
+           <Option label="Program"  value="Program"/>
+           <Option label="Manual"   value="Manual"/>          
+           <Option label="Vacation" value="Vacation"/>
+        </AD>
+        
+        <AD id="program.startTime"  
+            name="program.startTime"
+            type="String"
+            cardinality="0" 
+            required="false"
+            default="06:00" 
+            description="Start time for the heating cycle with the operating mode is Program."/>
+        
+        <AD id="program.stopTime"  
+            name="program.stopTime"
+            type="String"
+            cardinality="0" 
+            required="false"
+            default="22:00" 
+            description="Stop time for the heating cycle with the operating mode is Program."/>
+    
+        <AD id="program.setPoint"  
+            name="program.setPoint"
+            type="Float"
+            cardinality="0" 
+            required="false"
+            default="20.5"
+            min="5.0" 
+            max="40.0" 
+            description="Temperature Set Point in Celsius for the heating cycle with the operating mode is Program."/>
+
+        <AD id="manual.setPoint"  
+            name="manual.setPoint"
+            type="Float"
+            cardinality="0" 
+            required="false"
+            default="15.0" 
+            min="5.0" 
+            max="40.0" 
+            description="Temperature Set Point in Celsius for the heating cycle with the operating mode is Manual."/>
+
+        <AD id="temperature.initial"  
+            name="temperature.initial"
+            type="Float"
+            cardinality="0" 
+            required="true"
+            default="10"
+            description="Initial value for the temperature metric."/>
+        
+        <AD id="temperature.increment"  
+            name="temperature.increment"
+            type="Float"
+            cardinality="0" 
+            required="true"
+            default="0.25"
+            description="Increment value for the temperature metric."/>
+
+        <AD id="publish.rate"  
+            name="publish.rate"
+            type="Integer"
+            cardinality="0" 
+            required="true"
+            default="2"
+            min="1" 
+            description="Default message publishing rate in seconds (min 1)."/>
+
+        <AD id="publish.semanticTopic"  
+            name="publish.semanticTopic"
+            type="String"
+            cardinality="0" 
+            required="true"
+            default="data" 
+            description="Default semantic topic to publish the messages to."/>
+        
+        <AD id="publish.qos"  
+            name="publish.qos"
+            type="Integer"
+            cardinality="0" 
+            required="true"
+            default="0" 
+            description="Default QoS to publish the messages with.">
+           <Option label="Fire and forget" value="0"/>
+           <Option label="Al least once" value="1"/>          
+           <Option label="At most once" value="2"/>
+        </AD>
+
+        <AD id="publish.retain"  
+            name="publish.retain"
+            type="Boolean"
+            cardinality="0" 
+            required="true"
+            default="false" 
+            description="Default retaing flag for the published messages."/>
+    </OCD>
+    
+    <Designate pid="org.eclipse.kura.demo.heater.Heater">
+        <Object ocdref="org.eclipse.kura.demo.heater.Heater"/>
+    </Designate>
+</MetaData>

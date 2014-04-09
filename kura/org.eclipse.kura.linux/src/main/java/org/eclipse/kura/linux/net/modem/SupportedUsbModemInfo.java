@@ -21,7 +21,7 @@ public enum SupportedUsbModemInfo {
 			// device name,     vendor, product, ttyDevs, blockDevs, AT Port, Data Port, technology types, device driver
     Telit_HE910_D   ("HE910-D",  "1bc7", "0021", 7, 0, 3, 0, Arrays.asList(ModemTechnologyType.HSDPA), Arrays.asList(new UsbModemDriver("cdc_acm"))),
     Telit_DE910_DUAL("DE910-DUAL",  "1bc7", "1010", 4, 0, 2, 3, Arrays.asList(ModemTechnologyType.EVDO), Arrays.asList(new De910ModemDriver())),
-    Telit_LE910		("LE910", "1bc7", "1201", 7, 0, 4, 5, Arrays.asList(ModemTechnologyType.HSDPA), Arrays.asList(new Le910ModemDriver())),
+    Telit_LE910		("LE910", "1bc7", "1201", 7, 1, 4, 5, Arrays.asList(ModemTechnologyType.HSDPA), Arrays.asList(new Le910ModemDriver())),
     Sierra_MC8775   ("MC8775", "1199", "6812", 3, 0, 2, 0, Arrays.asList(ModemTechnologyType.HSDPA), Arrays.asList(new UsbModemDriver("sierra"))),
     Sierra_MC8790   ("MC8790", "1199", "683c", 7, 0, 3, 4, Arrays.asList(ModemTechnologyType.HSDPA), Arrays.asList(new UsbModemDriver("sierra"))),
     Sierra_USB598   ("USB598", "1199", "0025", 4, 1, 0, 0, Arrays.asList(ModemTechnologyType.EVDO), Arrays.asList(new UsbModemDriver("sierra")));

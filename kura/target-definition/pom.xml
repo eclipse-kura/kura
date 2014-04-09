@@ -66,9 +66,9 @@
 						<configuration>
 							<artifacts>
 								<artifact>
-									<file>helios.target</file>
+									<file>kura-equinox_3.8.1.target</file>
 									<type>target</type>
-									<classifier>helios</classifier>
+									<classifier>target</classifier>
 								</artifact>
 							</artifacts>
 						</configuration>

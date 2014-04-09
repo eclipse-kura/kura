@@ -58,7 +58,7 @@
 		<repository>
 			<id>kura</id>
 			<layout>p2</layout>
-			<url>file://${project.basedir}/../target-definition/equinox_3.8.1/repository</url>
+			<url>file:///${project.basedir}/../target-definition/equinox_3.8.1/repository</url>
 		</repository>
 	</repositories>
 

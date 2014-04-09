@@ -69,7 +69,7 @@ JNIEXPORT jobject JNICALL Java_org_eclipse_kura_linux_util_LinuxUdevNative_getUs
 		   itself in /dev - save this for TTY devices */
 		//printf("Device Node Path: %s\n", udev_device_get_devnode(dev));
 		if(strcmp(nativeDeviceClass,"block")==0) {
-			interfaceName = (*env)->NewStringUTF(env, udev_device_get_devnode(dev));
+			blockDeviceNode = (*env)->NewStringUTF(env, udev_device_get_devnode(dev));
 		} else if(strcmp(nativeDeviceClass,"net")==0) {
 			interfaceName = (*env)->NewStringUTF(env, udev_device_get_sysname(dev));
 		} else if(strcmp(nativeDeviceClass,"tty")==0) {

@@ -129,16 +129,19 @@ public class PppConfigWriter implements NetworkConfigurationVisitor {
         
         Class<? extends ModemPppConfigGenerator> configClass = null;
         UsbDevice usbDevice = modemInterfaceConfig.getUsbDevice();
+        int baudRate = -1;
 		if (usbDevice != null) {
 			SupportedUsbModemInfo modemInfo = SupportedUsbModemsInfo.getModem(usbDevice);
 			UsbModemFactoryInfo usbFactoryInfo = SupportedUsbModemsFactoryInfo.getModem(modemInfo);
 			if (usbFactoryInfo != null) {
 				configClass = usbFactoryInfo.getConfigGeneratorClass();
 			}
+			baudRate = 921600;
 		} else {
 			SupportedSerialModemInfo serialModemInfo = SupportedSerialModemsInfo.getModem();
 			SerialModemFactoryInfo serialFactoryInfo = SupportedSerialModemsFactoryInfo.getModem(serialModemInfo);
 			configClass = serialFactoryInfo.getConfigGeneratorClass();
+			baudRate = serialModemInfo.getDriver().getComm().getBaudRate();
 		}
 		
 		String pppPeerFilename = formPeerFilename(usbDevice);
@@ -192,6 +195,7 @@ public class PppConfigWriter implements NetworkConfigurationVisitor {
 
 					s_logger.debug("Writing " + pppPeerFilename);
 					PppPeer pppPeer = scriptGenerator.getPppPeer(getDeviceId(usbDevice), modemConfig,pppLogfile, chatFilename, disconnectFilename);
+					pppPeer.setBaudRate(baudRate);
 					pppPeer.write(pppPeerFilename);
 
 					s_logger.debug("Writing " + chatFilename);

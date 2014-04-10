@@ -93,7 +93,7 @@ public class Library {
 	 */
 	private static boolean load_from_java_lib_path() {
 		try {
-			System.loadLibrary("dkcomm"); //$NON-NLS-1$
+			System.loadLibrary("dkcomm.so"); //$NON-NLS-1$
 		} catch (final UnsatisfiedLinkError e) {
 			return false;
 		}

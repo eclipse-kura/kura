@@ -10,6 +10,7 @@
  ************************************************************************/
 #include "dkcomm.h"
 #include <stdio.h>
+#include <string.h>
 #include <fcntl.h>
 #include <errno.h>
 #include <unistd.h>
@@ -464,7 +465,7 @@ void cygSerialPort_setDTRNC(JNIEnv *jenv, jobject jobj, jint fd, jboolean bool)
 {
     int jdtr;
     int rc = -1;
-    jint fd = -1;
+    fd = -1;
     fd = getfd( jenv, jobj );
     rc = ioctl( fd, TIOCMGET, &jdtr );
     if ( rc ==  -1 ) return;

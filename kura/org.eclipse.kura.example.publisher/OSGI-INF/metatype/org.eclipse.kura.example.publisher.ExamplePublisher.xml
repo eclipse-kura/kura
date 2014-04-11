@@ -19,14 +19,15 @@
         
         <Icon resource="http://sphotos-a.xx.fbcdn.net/hphotos-ash4/p480x480/408247_10151040905591065_1989684710_n.jpg" size="32"/>
         
-        <AD id="publish.appTopic"  
-            name="publish.appTopic"
-            type="String"
+        <AD id="publish.rate"  
+            name="publish.rate"
+            type="Integer"
             cardinality="0" 
             required="true"
-            default="data" 
-            description="Default semantic topic to publish the messages to."/>
-        
+            default="1000"
+            min="1"
+            description="Default message publishing rate in milliseconds (min 1)."/>
+            
         <AD id="publish.qos"  
             name="publish.qos"
             type="Integer"
@@ -47,14 +48,13 @@
             default="false" 
             description="Default retaing flag for the published messages."/>
         
-        <AD id="publish.rate"  
-            name="publish.rate"
-            type="Integer"
+        <AD id="publish.appTopic"  
+            name="publish.appTopic"
+            type="String"
             cardinality="0" 
             required="true"
-            default="1000"
-            min="1"
-            description="Default message publishing rate in milliseconds (min 1)."/>
+            default="data/metrics" 
+            description="Default semantic topic to publish the metrics to."/>
         
         <AD id="metric.temperature.initial"  
             name="metric.temperature.initial"

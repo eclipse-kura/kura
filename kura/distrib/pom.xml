@@ -322,7 +322,6 @@
 					</resource>
 				</resources>
 				<plugins>
-				    <pluginManagement>
 					<plugin>
 						<groupId>org.codehaus.mojo</groupId>
 						<artifactId>properties-maven-plugin</artifactId>
@@ -453,7 +452,6 @@
 							</execution>
 						</executions>
 					</plugin>
-					</pluginManagement>
 				</plugins>
 			</build>
 		</profile>
@@ -473,7 +471,6 @@
 					</resource>
 				</resources>
 				<plugins>
-				    <pluginManagement>
 					<plugin>
 						<groupId>org.codehaus.mojo</groupId>
 						<artifactId>properties-maven-plugin</artifactId>
@@ -563,7 +560,6 @@
 							</execution>
 						</executions>
 					</plugin>
-					</pluginManagement>
 				</plugins>
 			</build>
 		</profile>
@@ -580,7 +576,6 @@
 					</resource>
 				</resources>
 				<plugins>
-				    <pluginManagement>
 					<plugin>
 						<groupId>org.codehaus.mojo</groupId>
 						<artifactId>properties-maven-plugin</artifactId>
@@ -778,7 +773,6 @@
 							<metadataRepositoryLocation>${project.build.directory}/staging/target-definition/equinox_3.8.1/repository</metadataRepositoryLocation>
 						</configuration>
 					</plugin>
-					</pluginManagement>
 				</plugins>
 			</build>
 		</profile>

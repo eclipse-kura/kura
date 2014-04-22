@@ -138,7 +138,7 @@ public class DeploymentAgent implements DeploymentAgentService, CommandProvider 
 			throw new ComponentException("The value of '" + PACKAGES_PATH_PROPNAME + "' is not defined");
 		}
 		if(kuraProperties.getProperty(PACKAGES_PATH_PROPNAME) != null && kuraProperties.getProperty(PACKAGES_PATH_PROPNAME).trim().equals("kura/packages")) {
-			kuraProperties.setProperty(PACKAGES_PATH_PROPNAME, "/opt/eurotech/kura/kura/packages");
+			kuraProperties.setProperty(PACKAGES_PATH_PROPNAME, "/opt/eclipse/kura/kura/packages");
 			m_packagesPath = kuraProperties.getProperty(PACKAGES_PATH_PROPNAME);
 			s_logger.warn("Overridding invalid kura.packages location");
 		}

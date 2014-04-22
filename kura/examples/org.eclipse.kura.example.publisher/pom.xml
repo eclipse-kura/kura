@@ -18,16 +18,24 @@
 
 	<parent>
 		<groupId>org.eclipse.kura</groupId>
-		<artifactId>kura</artifactId>
+		<artifactId>examples</artifactId>
 		<version>2.1.0-SNAPSHOT</version>
-		<relativePath>../manifest_pom.xml</relativePath>
+		<relativePath>../pom.xml</relativePath>
 	</parent>
 
-	<artifactId>org.eclipse.kura.demo.heater</artifactId>
+	<artifactId>org.eclipse.kura.example.publisher</artifactId>
 	<packaging>eclipse-plugin</packaging>
 
-        <build>
-                <plugins>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-eclipse-plugin</artifactId>
+				<version>2.9</version>
+				<configuration>
+					<skip>false</skip>
+				</configuration>
+			</plugin>
                         <plugin>
                                 <groupId>org.eclipse.tycho</groupId>
                                 <artifactId>tycho-packaging-plugin</artifactId>

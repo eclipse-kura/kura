@@ -19,7 +19,7 @@
 	<parent>
 		<groupId>org.eclipse.kura</groupId>
 		<artifactId>kura</artifactId>
-		<version>2.1.0-SNAPSHOT</version>
+		<version>0.2.0-SNAPSHOT</version>
 		<relativePath>../manifest_pom.xml</relativePath>
 	</parent>
 
@@ -27,10 +27,11 @@
 	<packaging>pom</packaging>
 
 	<modules>
+		<module>org.eclipse.kura.demo.heater</module>
+		<module>org.eclipse.kura.demo.modbus</module>
 		<module>org.eclipse.kura.example.project</module>
 		<module>org.eclipse.kura.example.publisher</module>
 		<module>org.eclipse.kura.example.serial.publisher</module>
-		<module>org.eclipse.kura.demo.heater</module>
 	</modules>
 	
 	<repositories>

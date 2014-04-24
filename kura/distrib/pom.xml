@@ -17,7 +17,7 @@
 	<parent>
 		<artifactId>kura</artifactId>
 		<groupId>org.eclipse.kura</groupId>
-		<version>2.1.0-SNAPSHOT</version>
+		<version>0.2.0-SNAPSHOT</version>
 		<relativePath>../pom_pom.xml</relativePath>
 	</parent>
 
@@ -755,7 +755,7 @@
 
 										<!-- Stage the Demo Heater Project -->
 										<copy todir="${project.build.directory}/staging/demo_heater">
-											<fileset dir="../org.eclipse.kura.demo.heater" />
+											<fileset dir="../examples/org.eclipse.kura.demo.heater" />
 										</copy>
 										<delete
 											file="${project.build.directory}/staging/demo_heater/pom.xml" />

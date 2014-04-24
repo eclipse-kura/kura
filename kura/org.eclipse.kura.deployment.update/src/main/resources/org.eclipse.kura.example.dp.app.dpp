@@ -9,14 +9,14 @@ bundles.0.headers.count=0
 bundles.0.missing=false
 bundles.0.name=bundles/org.eclipse.kura.example.dp.app.jar
 bundles.0.symbolic_name=org.eclipse.kura.example.dp.app;singleton\:\=true
-bundles.0.version=2.1.0.qualifier
+bundles.0.version=0.2.0.qualifier
 bundles.1.bundle_path=/Users/eurotech/dev/git/esf2_develop/esf2/kura/org.eclipse.kura.example.dp.customizer/.project
 bundles.1.customizer=true
 bundles.1.headers.count=0
 bundles.1.missing=false
 bundles.1.name=bundles/org.eclipse.kura.example.dp.customizer.jar
 bundles.1.symbolic_name=org.eclipse.kura.example.dp.customizer
-bundles.1.version=2.1.0.qualifier
+bundles.1.version=0.2.0.qualifier
 bundles.count=2
 certificates.count=0
 general.signbundles=false

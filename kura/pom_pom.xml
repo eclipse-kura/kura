@@ -28,18 +28,18 @@
 -->
 	</modules>
 
-        <properties>
-                <deployment.package.version>2.1.0</deployment.package.version>
-                <tycho-version>0.18.1</tycho-version>
-                <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-                <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-		<maven.build.timestamp.format>yyyyMMddHHmm</maven.build.timestamp.format>
-		<kura.bundle.versions>2.1.0.${kura.build.version}</kura.bundle.versions>
-        </properties>
+    <properties>
+		<deployment.package.version>2.1.0</deployment.package.version>
+        <tycho-version>0.18.1</tycho-version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <maven.build.timestamp.format>yyyyMMddHHmm</maven.build.timestamp.format>
+        <kura.bundle.versions>2.1.0.${kura.build.version}</kura.bundle.versions>
+    </properties>
 
 	<repositories>
 		<repository>
-			<id>maven.aksw.internal/</id>
+			<id>maven.aksw.internal</id>
 			<name>University Leipzig, AKSW Maven2 Repository</name>
 			<url>http://repo.geosdi.org</url>
 		</repository>
@@ -62,19 +62,19 @@
         </plugins>
 	</build>
 
-        <profiles>
-            <profile>
-                <id>web</id>
-                <activation>
-                    <activeByDefault>true</activeByDefault>
-                </activation>
-                <modules>
+    <profiles>
+        <profile>
+        	<id>web</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <modules>
 <!--
                     <module>org.eclipse.kura.web</module>
 -->
-                </modules>
-            </profile>
-        </profiles>
+            </modules>
+        </profile>
+    </profiles>
 </project>
 
 

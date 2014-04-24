@@ -12,8 +12,7 @@
       Eurotech
 
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<artifactId>kura</artifactId>
@@ -114,6 +113,27 @@
 										<ignore></ignore>
 									</action>
 								</pluginExecution>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>
+											org.codehaus.mojo
+										</groupId>
+										<artifactId>
+											buildnumber-maven-plugin
+										</artifactId>
+										<versionRange>
+											[1.0,)
+										</versionRange>
+										<goals>
+											<goal>
+												create-timestamp
+											</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore></ignore>
+									</action>
+								</pluginExecution>
 							</pluginExecutions>
 						</lifecycleMappingMetadata>
 					</configuration>
@@ -123,36 +143,50 @@
 	</build>
 
 	<dependencies>
-		<dependency>
+<!-- 		
+	    <dependency>
 			<groupId>org.eclipse.kura</groupId>
 			<artifactId>org.eclipse.kura.api</artifactId>
 			<version>${project.version}</version>
+			<scope>system</scope>
+			<systemPath>${basedir}/../org.eclipse.kura.api/target/org.eclipse.kura.api-${project.version}.jar</systemPath>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.kura</groupId>
 			<artifactId>org.eclipse.kura.core</artifactId>
 			<version>${project.version}</version>
+			<scope>system</scope>
+			<systemPath>${basedir}/../org.eclipse.kura.core/target/org.eclipse.kura.core-${project.version}.jar</systemPath>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.kura</groupId>
 			<artifactId>org.eclipse.kura.protocol.modbus</artifactId>
 			<version>${project.version}</version>
+			<scope>system</scope>
+			<systemPath>${basedir}/../org.eclipse.kura.protocol.modbus/target/org.eclipse.kura.protocol.modbus-${project.version}.jar</systemPath>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.kura</groupId>
 			<artifactId>org.eclipse.kura.emulator</artifactId>
 			<version>${project.version}</version>
+			<scope>system</scope>
+			<systemPath>${basedir}/../org.eclipse.kura.emulator/target/org.eclipse.kura.emulator-${project.version}.jar</systemPath>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.kura</groupId>
 			<artifactId>org.eclipse.kura.linux</artifactId>
 			<version>${project.version}</version>
+			<scope>system</scope>
+			<systemPath>${basedir}/../org.eclipse.kura.linux/target/org.eclipse.kura.linux-${project.version}.jar</systemPath>
 		</dependency>
-<!--
+ -->
+ <!--
 		<dependency>
 			<groupId>org.eclipse.kura</groupId>
 			<artifactId>org.eclipse.kura.web</artifactId>
 			<version>${project.version}</version>
+			<scope>system</scope>
+			<systemPath>${basedir}/../org.eclipse.kura.web/target/org.eclipse.kura.web-${project.version}.jar</systemPath>
 		</dependency>
 -->
 		<dependency>

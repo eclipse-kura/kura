@@ -34,6 +34,7 @@
 		<module>org.eclipse.kura.deployment.update</module>
 		<module>org.eclipse.kura.linux</module>
 		<module>org.eclipse.kura.linux.test</module>
+		<module>org.eclipse.kura.linux.watchdog</module>
 		<module>org.eclipse.kura.net.admin</module>
 		<module>org.eclipse.kura.protocol.modbus</module>
 		<module>org.eclipse.kura.protocol.modbus.test</module>

@@ -249,28 +249,6 @@
 						<version>1.7</version>
 						<executions>
 							<execution>
-								<id>beaglebone-dp</id>
-								<phase>install</phase>
-								<goals>
-									<goal>run</goal>
-								</goals>
-								<configuration>
-									<target>
-										<property name="buildNumber" value="buildNumber" />
-										<property name="deployment.package.version" value="${deployment.package.version}" />
-										<property name="project.version" value="${project.version}" />
-										<property name="project.build.profile" value="${project.build.profile}" />
-										<property name="project.build.directory" value="${project.build.directory}" />
-										<property name="build.name" value="beaglebone" />
-										<property name="kura.os.version"
-											value="090538fcb81c38c1fa445cfb00755a94bc0131f2" />
-										<property name="kura.mem.size" value="256m" />
-										<ant antfile="${basedir}/src/main/ant/build_equinox_distrib_dp.xml"
-											target="dist-linux" />
-									</target>
-								</configuration>
-							</execution>
-							<execution>
 								<id>beaglebone-jars</id>
 								<phase>install</phase>
 								<goals>
@@ -291,6 +269,7 @@
 									</target>
 								</configuration>
 							</execution>
+<!--
 							<execution>
 								<id>beaglebone-test</id>
 								<phase>install</phase>
@@ -313,6 +292,8 @@
 									</target>
 								</configuration>
 							</execution>
+-->
+<!--
 							<execution>
 								<id>beaglebone-nn-dp</id>
 								<phase>install</phase>
@@ -335,6 +316,7 @@
 									</target>
 								</configuration>
 							</execution>
+-->
 						</executions>
 					</plugin>
 				</plugins>
@@ -394,27 +376,6 @@
 						<version>1.7</version>
 						<executions>
 							<execution>
-								<id>raspberry-pi-dp</id>
-								<phase>install</phase>
-								<goals>
-									<goal>run</goal>
-								</goals>
-								<configuration>
-									<target>
-										<property name="buildNumber" value="buildNumber" />
-										<property name="deployment.package.version" value="${deployment.package.version}" />
-										<property name="project.version" value="${project.version}" />
-										<property name="project.build.profile" value="${project.build.profile}" />
-										<property name="project.build.directory" value="${project.build.directory}" />
-										<property name="build.name" value="raspberry-pi" />
-										<property name="kura.os.version" value="raspbian" />
-										<property name="kura.mem.size" value="256m" />
-										<ant antfile="${basedir}/src/main/ant/build_equinox_distrib_dp.xml"
-											target="dist-linux" />
-									</target>
-								</configuration>
-							</execution>
-							<execution>
 								<id>raspberry-pi-jars</id>
 								<phase>install</phase>
 								<goals>
@@ -434,6 +395,7 @@
 									</target>
 								</configuration>
 							</execution>
+<!--
 							<execution>
 								<id>raspberry-pi-test</id>
 								<phase>install</phase>
@@ -455,6 +417,7 @@
 									</target>
 								</configuration>
 							</execution>
+-->
 						</executions>
 					</plugin>
 					<plugin>
@@ -470,11 +433,11 @@
 								</goals>
 								<configuration>
 									<verbose>true</verbose>
-									<deb>${basedir}/target/kura-raspberry-pi_${project.version}.deb</deb>
+									<deb>${basedir}/target/kura-raspberry-pi-jars_${project.version}.deb</deb>
 									<controlDir>${basedir}/src/main/deb/control</controlDir>
 									<dataSet>
 										<data>
-											<src>${basedir}/target/kura-raspberry-pi_${project.version}.zip</src>
+											<src>${basedir}/target/kura-raspberry-pi-jars_${project.version}.zip</src>
 											<type>file</type>
 											<mapper>
 												<type>perm</type>
@@ -489,6 +452,7 @@
 				</plugins>
 			</build>
 		</profile>
+<!--
 		<profile>
 			<id>raspberry-pi-nn</id>
 			<properties>
@@ -578,11 +542,11 @@
 								</goals>
 								<configuration>
 									<verbose>true</verbose>
-									<deb>${basedir}/target/kura-raspberry-pi-nn_${project.version}.deb</deb>
+									<deb>${basedir}/target/kura-raspberry-pi-nn-jars_${project.version}.deb</deb>
 									<controlDir>${basedir}/src/main/deb/control_nn</controlDir>
 									<dataSet>
 										<data>
-											<src>${basedir}/target/kura-raspberry-pi-nn_${project.version}.zip</src>
+											<src>${basedir}/target/kura-raspberry-pi-nn-jars_${project.version}.zip</src>
 											<type>file</type>
 											<mapper>
 												<type>perm</type>
@@ -597,6 +561,7 @@
 				</plugins>
 			</build>
 		</profile>
+-->
 		<profile>
 			<id>dev-env</id>
 			<activation>

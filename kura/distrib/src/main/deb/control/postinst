@@ -14,7 +14,7 @@ rm -rf /opt/eclipse/kura/install >> /tmp/kura_install.log 2>&1
 rm /tmp/kura-*.zip >> /tmp/kura_install.log 2>&1
 
 #move the log file
-mv /tmp/kura_install.log /opt/eclipse/kura/configuration/
+mv /tmp/kura_install.log /opt/eclipse/kura/kura/
 
 #flush all cached filesystem to disk
 sync

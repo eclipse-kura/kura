@@ -6,8 +6,8 @@
 PIDS=`pgrep java`
 
 echo ""
-echo "Installing KURA..."
-echo "Installing KURA..." > /tmp/kura_install.log 2>&1
+echo "Installing Kura..."
+echo "Installing Kura..." > /tmp/kura_install.log 2>&1
 
 #Kill JVM and monit for installation
 if [ -f "/var/run/kura.pid" ] ; then

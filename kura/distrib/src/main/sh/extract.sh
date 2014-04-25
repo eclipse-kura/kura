@@ -22,11 +22,14 @@ echo "Installing Kura..." > /tmp/kura_install.log 2>&1
 #Kill JVM and monit for installation
 killall monit java >> /tmp/kura_install.log 2>&1
 
-#remove old Kura if present
-(rpm -ev `rpm -qa | grep -i -e kura -e denali -e eclipse -e dynacor -e reliagate -e helios -e duracor | grep -v atom | grep -v jvm`) >> /tmp/kura_install.log 2>&1
+#remove old ESFv1 if present
+(rpm -ev `rpm -qa | grep -i -e esf -e denali -e eurotech -e dynacor -e reliagate -e helios -e duracor | grep -v atom | grep -v jvm`) >> /tmp/kura_install.log 2>&1
 
 #clean up old installation if present
-rm -fr /opt/eclipse/* >> /tmp/kura_install.log 2>&1
+rm -fr /opt/eclipse/data >> /tmp/kura_install.log 2>&1
+rm -fr /opt/eclipse/esf* >> /tmp/kura_install.log 2>&1
+rm -fr /opt/eclipse/kura* >> /tmp/kura_install.log 2>&1
+rm -fr /tmp/.esf/ >> /tmp/kura_install.log 2>&1
 rm -fr /tmp/.kura/ >> /tmp/kura_install.log 2>&1
 rm /etc/init.d/firewall >> /tmp/kura_install.log 2>&1
 rm /etc/dhcpd-*.conf >> /tmp/kura_install.log 2>&1
@@ -34,12 +37,15 @@ rm /etc/named.conf >> /tmp/kura_install.log 2>&1
 rm /etc/wpa_supplicant.conf >> /tmp/kura_install.log 2>&1
 rm /etc/hostapd.conf >> /tmp/kura_install.log 2>&1
 rm /tmp/coninfo-* >> /tmp/kura_install.log 2>&1
+rm /var/log/esf.log >> /tmp/kura_install.log 2>&1
 rm /var/log/kura.log >> /tmp/kura_install.log 2>&1
 rm -fr /etc/ppp/chat >> /tmp/kura_install.log 2>&1
 rm -fr /etc/ppp/peers >> /tmp/kura_install.log 2>&1
 rm -fr /etc/ppp/scripts >> /tmp/kura_install.log 2>&1
 rm /etc/ppp/*ap-secrets >> /tmp/kura_install.log 2>&1
+rm /etc/rc*.d/S*esf >> /tmp/kura_install.log 2>&1
 rm /etc/rc*.d/S*kura >> /tmp/kura_install.log 2>&1
+rm esf-*.zip >> /tmp/kura_install.log 2>&1
 rm kura-*.zip >> /tmp/kura_install.log 2>&1
 
 #clean up and/or install OS specific stuff
@@ -71,7 +77,7 @@ tail -n +$SKIP $0 | tar -xz
 # POST INSTALL SCRIPT
 ##############################################
 mkdir -p /opt/eclipse >> /tmp/kura_install.log 2>&1
-unzip -o kura-*.zip -d /opt/eclipse >> /tmp/kura_install.log 2>&1
+unzip kura-*.zip -d /opt/eclipse >> /tmp/kura_install.log 2>&1
 
 #install Kura files
 sh /opt/eclipse/kura-*/install/kura_install.sh >> /tmp/kura_install.log 2>&1
@@ -81,7 +87,7 @@ rm -rf /opt/eclipse/kura/install >> /tmp/kura_install.log 2>&1
 rm kura-*.zip >> /tmp/kura_install.log 2>&1
 
 #move the log file
-mv /tmp/kura_install.log /opt/eclipse/kura/configuration/
+mv /tmp/kura_install.log /opt/eclipse/kura/kura/
 
 #flush all cached filesystem to disk
 sync

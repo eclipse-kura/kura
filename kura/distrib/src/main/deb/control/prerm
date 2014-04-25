@@ -27,8 +27,8 @@ update-rc.d firewall remove
 update-rc.d kura remove
 
 #Delete Eclipse directory if present
-if [ -d "/opt/eclipse/data" ] ; then
-  rm -rf /opt/eclipse/data
+if [ -d "/opt/eclipse/kura/data" ] ; then
+  rm -rf /opt/eclipse/kura/data
 fi
 
 if [ -d "/opt/eclipse/kura" ] ; then

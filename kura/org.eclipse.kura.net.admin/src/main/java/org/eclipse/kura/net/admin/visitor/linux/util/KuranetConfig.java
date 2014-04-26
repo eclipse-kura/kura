@@ -27,8 +27,8 @@ public class KuranetConfig {
     
     private static final Logger s_logger = LoggerFactory.getLogger(KuranetConfig.class);
             
-    private static final String KURANET_FILENAME = "/opt/eurotech/data/kuranet.conf";
-    private static final String KURANET_TMP_FILENAME = "/opt/eurotech/data/kuranet.conf.tmp";
+    private static final String KURANET_FILENAME = "/opt/eclipse/kura/data/kuranet.conf";
+    private static final String KURANET_TMP_FILENAME = "/opt/eclipse/kura/data/kuranet.conf.tmp";
     
     public static Properties getProperties() {
         Properties kuraExtendedProps = null;   

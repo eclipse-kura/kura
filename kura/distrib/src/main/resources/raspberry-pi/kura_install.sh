@@ -40,11 +40,12 @@ cp /opt/eclipse/kura/install/dhcpd-eth0.conf /etc/dhcpd-eth0.conf
 cp /opt/eclipse/kura/install/dhcpd-wlan0.conf /etc/dhcpd-wlan0.conf
 
 #set up kuranet.conf
-cp /opt/eclipse/kura/install/kuranet.conf /opt/eclipse/data/kuranet.conf
+mkdir -p /opt/eclipse/kura/data
+cp /opt/eclipse/kura/install/kuranet.conf /opt/eclipse/kura/data/kuranet.conf
 
 #set up bind/named
 cp /opt/eclipse/kura/install/named.conf /etc/bind/named.conf
-mkdir /var/named
+mkdir -p /var/named
 chown -R bind /var/named
 touch /var/log/named.log
 chown -R bind /var/log/named.log

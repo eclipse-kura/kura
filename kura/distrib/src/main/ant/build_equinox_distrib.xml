@@ -141,11 +141,15 @@ echo $KURA_PID > /var/run/kura.pid
                         prefix="kura-${build.name}-jars_${project.version}/install" />
             <zipfileset file="src/main/resources/common/kura.init.yocto"
                         prefix="kura-${build.name}-jars_${project.version}/install" />
+            <zipfileset file="src/main/resources/common/kura.init.raspbian"
+                        prefix="kura-${build.name}-jars_${project.version}/install" />
             <zipfileset file="src/main/resources/${build.name}/firewall.init"
                         prefix="kura-${build.name}-jars_${project.version}/install" />
             <zipfileset file="src/main/resources/common/monit.init.wrl"
                         prefix="kura-${build.name}-jars_${project.version}/install" />
             <zipfileset file="src/main/resources/common/monit.init.yocto"
+                        prefix="kura-${build.name}-jars_${project.version}/install" />
+            <zipfileset file="src/main/resources/common/monit.init.raspbian"
                         prefix="kura-${build.name}-jars_${project.version}/install" />
             <zipfileset file="src/main/resources/common/monitrc.wrl"
                         prefix="kura-${build.name}-jars_${project.version}/install" />

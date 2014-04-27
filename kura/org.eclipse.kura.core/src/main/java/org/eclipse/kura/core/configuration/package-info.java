@@ -17,9 +17,9 @@
 //
 
 @javax.xml.bind.annotation.XmlSchema(
-	    namespace="http://eurotech.com/kura/2.0", 
+	    namespace="http://eurotech.com/esf/2.0", 
 	    xmlns = { 
-	        @XmlNs(namespaceURI="http://eurotech.com/kura/2.0", prefix="kura"),
+	        @XmlNs(namespaceURI="http://eurotech.com/esf/2.0", prefix="esf"),
 	        @XmlNs(namespaceURI="http://www.osgi.org/xmlns/metatype/v1.2.0", prefix="ocd")
 	    },
 		elementFormDefault=javax.xml.bind.annotation.XmlNsForm.QUALIFIED,

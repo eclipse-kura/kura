@@ -680,7 +680,7 @@ public class LinuxNetworkUtil {
 				ethTool = ethTool.replaceAll("\\s", "");
 			}
 			else {
-				s_logger.info("ethtool not found - setting driver to unknow");
+				s_logger.info("ethtool not found - setting driver to unknown");
 				return driver;
 			}
 			

@@ -40,11 +40,12 @@ cp /opt/eclipse/kura/install/dhcpd-eth0.conf /etc/dhcpd-eth0.conf
 cp /opt/eclipse/kura/install/dhcpd-wlan0.conf /etc/dhcpd-wlan0.conf
 
 #set up kuranet.conf
-cp /opt/eclipse/kura/install/kuranet.conf /opt/eclipse/data/kuranet.conf
+mkdir -p /opt/eclipse/kura/data
+cp /opt/eclipse/kura/install/kuranet.conf /opt/eclipse/kura/data/kuranet.conf
 
 #set up bind/named
 cp /opt/eclipse/kura/install/named.conf /etc/bind/named.conf
-mkdir /var/named
+mkdir -p /var/named
 chown -R bind /var/named
 touch /var/log/named.log
 chown -R bind /var/log/named.log
@@ -61,15 +62,15 @@ if [ -d "/etc/monit/conf.d" ] ; then
 fi
 
 # set up /opt/eclipse/recover_dflt_kura_config.sh
-cp /opt/eclipse/kura/install/recover_dflt_kura_config.sh /opt/eclipse/recover_dflt_kura_config.sh
-chmod +x /opt/eclipse/recover_dflt_kura_config.sh
-if [ ! -d /opt/eclipse/.data ]; then
-    mkdir /opt/eclipse/.data
+cp /opt/eclipse/kura/install/recover_dflt_kura_config.sh /opt/eclipse/kura/recover_dflt_kura_config.sh
+chmod +x /opt/eclipse/kura/recover_dflt_kura_config.sh
+if [ ! -d /opt/eclipse/kura/.data ]; then
+    mkdir /opt/eclipse/kura/.data
 fi
-# for md5.info should keep the same order as in the /opt/eclipse/recover_dflt_kura_config.sh
-echo `md5sum /opt/eclipse/data/kuranet.conf` > /opt/eclipse/.data/md5.info
-echo `md5sum /opt/eclipse/data/snapshots/snapshot_0.xml` >> /opt/eclipse/.data/md5.info
-tar czf /opt/eclipse/.data/recover_dflt_kura_config.tgz /opt/eclipse/data/kuranet.conf /opt/eclipse/data/snapshots/snapshot_0.xml
+# for md5.info should keep the same order as in the /opt/eclipse/kura/recover_dflt_kura_config.sh
+echo `md5sum /opt/eclipse/kura/data/kuranet.conf` > /opt/eclipse/kura/.data/md5.info
+echo `md5sum /opt/eclipse/kura/data/snapshots/snapshot_0.xml` >> /opt/eclipse/kura/.data/md5.info
+tar czf /opt/eclipse/kura/.data/recover_dflt_kura_config.tgz /opt/eclipse/kura/data/kuranet.conf /opt/eclipse/kura/data/snapshots/snapshot_0.xml
 
 #set up runlevels to start/stop Kura by default
 update-rc.d firewall defaults

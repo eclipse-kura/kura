@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: org.eclipse.kura.core.test
 Bundle-SymbolicName: org.eclipse.kura.core.test;singleton:=true
-Bundle-Version: 2.1.0.qualifier
+Bundle-Version: 0.2.0.qualifier
 Bundle-Vendor: EUROTECH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: javax.comm,
@@ -17,5 +17,5 @@ Bundle-ActivationPolicy: lazy
 Comment: org.eclipse.kura.emulator is needed as we need to start-up the emulator to run the tests!!
 Require-Bundle: org.eclipse.equinox.io;bundle-version="1.0.400",
  org.junit;bundle-version="4.10.0",
- org.eclipse.kura.emulator;bundle-version="2.1.0",
- org.eclipse.kura.test;bundle-version="2.1.0"
+ org.eclipse.kura.emulator;bundle-version="0.2.0",
+ org.eclipse.kura.test;bundle-version="0.2.0"

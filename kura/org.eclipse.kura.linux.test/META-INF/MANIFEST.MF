@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: org.eclipse.kura.linux.test
 Bundle-SymbolicName: org.eclipse.kura.linux.test;singleton:=true
-Bundle-Version: 2.1.0.qualifier
+Bundle-Version: 0.2.0.qualifier
 Bundle-Vendor: EUROTECH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: org.eclipse.kura.net,
@@ -13,5 +13,5 @@ Service-Component: OSGI-INF/*.xml
 Fragment-Host: org.eclipse.kura.linux
 Unit-Test: true
 Bundle-ClassPath: .
-Require-Bundle: org.eclipse.kura.test;bundle-version="2.1.0",
+Require-Bundle: org.eclipse.kura.test;bundle-version="0.2.0",
  org.junit;bundle-version="4.10.0"

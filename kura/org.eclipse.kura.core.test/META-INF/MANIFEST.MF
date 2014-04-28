@@ -7,11 +7,13 @@ Bundle-Vendor: EUROTECH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: javax.comm,
  junit.framework,
+ org.eclipse.kura.comm,
  org.junit,
  org.osgi.framework,
  org.osgi.service.cm,
  org.osgi.service.component,
- org.osgi.service.event
+ org.osgi.service.event,
+ org.osgi.service.io;version="1.0.0"
 Fragment-Host: org.eclipse.kura.core
 Bundle-ActivationPolicy: lazy
 Comment: org.eclipse.kura.emulator is needed as we need to start-up the emulator to run the tests!!

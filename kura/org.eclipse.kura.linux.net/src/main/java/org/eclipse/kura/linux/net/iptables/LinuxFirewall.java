@@ -210,9 +210,10 @@ public class LinuxFirewall {
 	private void initialize() throws KuraException {
 		
 		s_logger.debug("Parsing current firewall configuraion");
+		BufferedReader br = null;
 		
 		try {
-			BufferedReader br = new BufferedReader(new FileReader(FIREWALL_SCRIPT_NAME));
+			br = new BufferedReader(new FileReader(FIREWALL_SCRIPT_NAME));
 			String line = null;
 			
 			lineloop:
@@ -413,13 +414,19 @@ public class LinuxFirewall {
 				} else {
 					throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "invalid line in /etc/init.d/firewall: " + line);
 				}
-			}
-			
-			//close
-			br.close();
-			br = null;
+			}			
 		} catch(Exception e) {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+		} finally {
+			//close
+			if(br != null) {
+				try {
+					br.close();
+				} catch (IOException e) {
+					throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+				}
+				br = null;
+			}
 		}
 	}
 

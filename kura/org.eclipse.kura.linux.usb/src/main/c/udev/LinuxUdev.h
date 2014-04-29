@@ -1,4 +1,4 @@
-#include "org_eclipse_kura_linux_util_LinuxUdevNative.h"
+#include "org_eclipse_kura_linux_usb_LinuxUdevNative.h"
 
 #include <libudev.h>
 #include <stdio.h>

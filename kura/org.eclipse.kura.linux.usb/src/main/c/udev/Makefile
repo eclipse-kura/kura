@@ -14,7 +14,7 @@
 # Object and header dependencies - these are removed by 'make clean'
 OBJECTS = \
 	LinuxUdev.o
-HEADER = org_eclipse_kura_linux_util_LinuxUdevNative.h
+HEADER = org_eclipse_kura_linux_usb_LinuxUdevNative.h
 
 CC = gcc
 CCLD = $(CC)

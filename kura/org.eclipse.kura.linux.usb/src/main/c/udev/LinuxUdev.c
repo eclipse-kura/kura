@@ -1,6 +1,6 @@
 #include "LinuxUdev.h"
 
-JNIEXPORT jobject JNICALL Java_org_eclipse_kura_linux_util_LinuxUdevNative_getUsbDevices(JNIEnv *env, jclass LinuxUdevNative, jstring deviceClass) {
+JNIEXPORT jobject JNICALL Java_org_eclipse_kura_linux_usb_LinuxUdevNative_getUsbDevices(JNIEnv *env, jclass LinuxUdevNative, jstring deviceClass) {
 	struct udev *udev;
 	struct udev_enumerate *enumerate;
 	struct udev_list_entry *devices, *dev_list_entry;
@@ -134,7 +134,7 @@ JNIEXPORT jobject JNICALL Java_org_eclipse_kura_linux_util_LinuxUdevNative_getUs
 	return objArr;
 }
 
-JNIEXPORT void JNICALL Java_org_eclipse_kura_linux_util_LinuxUdevNative_nativeHotplugThread(JNIEnv *env, jclass LinuxUdevNative, jobject linuxUdevNative) {
+JNIEXPORT void JNICALL Java_org_eclipse_kura_linux_usb_LinuxUdevNative_nativeHotplugThread(JNIEnv *env, jclass LinuxUdevNative, jobject linuxUdevNative) {
 
 	jclass UsbDeviceClass;
 	jmethodID UsbDeviceConstructor;

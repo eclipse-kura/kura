@@ -9,7 +9,7 @@
  * Contributors:
  *   Eurotech
  */
-package org.eclipse.kura.core.linux.util;
+package org.eclipse.kura.linux.usb;
 
 import java.util.ArrayList;
 import java.util.List;

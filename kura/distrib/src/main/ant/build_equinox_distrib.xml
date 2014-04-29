@@ -238,6 +238,8 @@ echo $KURA_PID > /var/run/kura.pid
                         prefix="kura-${build.name}-jars_${project.version}/kura/plugins" />
             <zipfileset file="../org.eclipse.kura.core.comm/target/org.eclipse.kura.core.comm_${project.version}.v${kura.build.version}.jar"
                         prefix="kura-${build.name}-jars_${project.version}/kura/plugins" />
+            <zipfileset file="../org.eclipse.kura.core.configuration/target/org.eclipse.kura.core.configuration_${project.version}.v${kura.build.version}.jar"
+                        prefix="kura-${build.name}-jars_${project.version}/kura/plugins" />
             <zipfileset file="../org.eclipse.kura.core.crypto/target/org.eclipse.kura.core.crypto_${project.version}.v${kura.build.version}.jar"
                         prefix="kura-${build.name}-jars_${project.version}/kura/plugins" />
             <zipfileset file="../org.eclipse.kura.linux.clock/target/org.eclipse.kura.linux.clock_${project.version}.v${kura.build.version}.jar"

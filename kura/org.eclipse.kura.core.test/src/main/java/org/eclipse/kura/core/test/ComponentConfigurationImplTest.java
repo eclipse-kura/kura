@@ -16,9 +16,9 @@ import java.util.Map;
 
 import org.eclipse.kura.core.configuration.ComponentConfigurationImpl;
 import org.eclipse.kura.core.configuration.metatype.Tocd;
-import org.eclipse.kura.core.util.ComponentUtil;
-import org.eclipse.kura.core.util.StringUtil;
-import org.eclipse.kura.core.util.XmlUtil;
+import org.eclipse.kura.core.configuration.util.ComponentUtil;
+import org.eclipse.kura.core.configuration.util.StringUtil;
+import org.eclipse.kura.core.configuration.util.XmlUtil;
 import org.eclipse.kura.test.annotation.TestTarget;
 import org.junit.Test;
 

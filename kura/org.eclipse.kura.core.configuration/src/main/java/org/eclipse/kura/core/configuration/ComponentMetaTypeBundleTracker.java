@@ -15,8 +15,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.kura.configuration.metatype.OCD;
-import org.eclipse.kura.core.util.CollectionsUtil;
-import org.eclipse.kura.core.util.ComponentUtil;
+import org.eclipse.kura.core.configuration.util.CollectionsUtil;
+import org.eclipse.kura.core.configuration.util.ComponentUtil;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;

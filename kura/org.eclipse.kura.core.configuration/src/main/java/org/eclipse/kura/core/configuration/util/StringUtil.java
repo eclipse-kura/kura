@@ -9,7 +9,7 @@
  * Contributors:
  *   Eurotech
  */
-package org.eclipse.kura.core.util;
+package org.eclipse.kura.core.configuration.util;
 
 import java.util.ArrayList;
 import java.util.List;

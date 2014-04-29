@@ -29,8 +29,8 @@ import java.util.Properties;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.core.linux.util.LinuxProcessUtil;
 import org.eclipse.kura.core.util.ProcessUtil;
-import org.eclipse.kura.linux.util.LinuxProcessUtil;
 import org.eclipse.kura.net.wifi.WifiRadioMode;
 import org.eclipse.kura.net.wifi.WifiSecurity;
 import org.slf4j.Logger;

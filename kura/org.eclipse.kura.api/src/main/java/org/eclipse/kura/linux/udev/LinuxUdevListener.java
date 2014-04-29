@@ -9,7 +9,7 @@
  * Contributors:
  *   Eurotech
  */
-package org.eclipse.kura.linux.util;
+package org.eclipse.kura.linux.udev;
 
 import org.eclipse.kura.usb.UsbDevice;
 

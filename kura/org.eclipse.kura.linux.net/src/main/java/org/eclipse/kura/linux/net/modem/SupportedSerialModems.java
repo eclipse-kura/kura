@@ -13,8 +13,7 @@ package org.eclipse.kura.linux.net.modem;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import org.eclipse.kura.linux.util.KuraConstants;
+import org.eclipse.kura.linux.net.util.KuraConstants;
 
 public class SupportedSerialModems {
 

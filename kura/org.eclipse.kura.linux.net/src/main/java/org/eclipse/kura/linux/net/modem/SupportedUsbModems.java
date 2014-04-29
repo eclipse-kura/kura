@@ -15,9 +15,9 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.List;
 
+import org.eclipse.kura.core.linux.util.LinuxProcessUtil;
 import org.eclipse.kura.core.util.ProcessUtil;
-import org.eclipse.kura.linux.util.LinuxProcessUtil;
-import org.eclipse.kura.linux.util.ProcessStats;
+import org.eclipse.kura.core.linux.util.ProcessStats;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

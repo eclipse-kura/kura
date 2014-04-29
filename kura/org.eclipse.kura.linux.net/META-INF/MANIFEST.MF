@@ -8,16 +8,16 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Service-Component: OSGI-INF/*.xml
 Bundle-ClassPath: .
 Bundle-ActivationPolicy: lazy
-Import-Package: org.apache.commons.io;version="1.4.9999",
+Import-Package: org.apache.commons.io;version="2.4.0",
  javax.microedition.io,
  org.eclipse.kura,
  org.eclipse.kura.comm,
  org.eclipse.kura.configuration,
+ org.eclipse.kura.core.linux.util,
  org.eclipse.kura.core.net,
  org.eclipse.kura.core.net.modem,
  org.eclipse.kura.core.net.util,
  org.eclipse.kura.core.util,
- org.eclipse.kura.linux.util,
  org.eclipse.kura.net,
  org.eclipse.kura.net.dhcp,
  org.eclipse.kura.net.dns,
@@ -40,6 +40,5 @@ Export-Package: org.eclipse.kura.linux.net,
  org.eclipse.kura.linux.net.ppp,
  org.eclipse.kura.linux.net.route,
  org.eclipse.kura.linux.net.util,
- org.eclipse.kura.linux.net.wifi,
- org.eclipse.kura.linux.watchdog
+ org.eclipse.kura.linux.net.wifi
 

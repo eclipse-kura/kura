@@ -13,7 +13,7 @@
 * Copyright (c) 2011 Eurotech Inc. All rights reserved.
 */
 
-package org.eclipse.kura.linux.util;
+package org.eclipse.kura.core.linux.util;
 
 import java.io.InputStream;
 import java.io.OutputStream;

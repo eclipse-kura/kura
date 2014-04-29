@@ -35,7 +35,7 @@ import org.apache.commons.io.FileUtils;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.util.ProcessUtil;
-import org.eclipse.kura.linux.util.KuraConstants;
+import org.eclipse.kura.linux.net.util.KuraConstants;
 import org.eclipse.kura.net.IPAddress;
 import org.eclipse.kura.net.NetworkPair;
 import org.slf4j.Logger;

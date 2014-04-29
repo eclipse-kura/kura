@@ -25,14 +25,13 @@ import org.osgi.service.io.ConnectionFactory;
 import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.comm.CommConnection;
 import org.eclipse.kura.comm.CommURI;
-import org.eclipse.kura.linux.util.KuraConstants;
-import org.eclipse.kura.linux.util.LinuxProcessUtil;
-import org.eclipse.kura.linux.util.ProcessStats;
+import org.eclipse.kura.core.linux.util.LinuxProcessUtil;
+import org.eclipse.kura.linux.net.util.KuraConstants;
+import org.eclipse.kura.core.linux.util.ProcessStats;
 
 public class SerialModemDriver {
 	

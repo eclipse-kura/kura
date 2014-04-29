@@ -21,7 +21,6 @@ import java.util.List;
 import org.osgi.service.io.ConnectionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.comm.CommConnection;
@@ -31,7 +30,7 @@ import org.eclipse.kura.linux.net.modem.SupportedSerialModemInfo;
 import org.eclipse.kura.linux.net.modem.SupportedSerialModemsInfo;
 import org.eclipse.kura.linux.net.modem.SupportedUsbModemInfo;
 import org.eclipse.kura.linux.net.modem.SupportedUsbModemsInfo;
-import org.eclipse.kura.linux.util.KuraConstants;
+import org.eclipse.kura.linux.net.util.KuraConstants;
 import org.eclipse.kura.net.NetConfig;
 import org.eclipse.kura.net.admin.modem.HspaCellularModem;
 import org.eclipse.kura.net.modem.ModemDevice;

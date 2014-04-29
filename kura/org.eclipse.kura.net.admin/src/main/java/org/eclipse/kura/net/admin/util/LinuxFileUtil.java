@@ -9,10 +9,11 @@
  * Contributors:
  *   Eurotech
  */
-package org.eclipse.kura.linux.util;
+package org.eclipse.kura.net.admin.util;
 
 import java.io.File;
 
+import org.eclipse.kura.core.linux.util.LinuxProcessUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

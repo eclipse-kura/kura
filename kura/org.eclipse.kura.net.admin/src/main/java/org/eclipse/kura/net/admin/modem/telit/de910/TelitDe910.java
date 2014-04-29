@@ -21,7 +21,7 @@ import org.eclipse.kura.comm.CommURI;
 import org.eclipse.kura.linux.net.modem.SerialModemComm;
 import org.eclipse.kura.linux.net.modem.SupportedUsbModemInfo;
 import org.eclipse.kura.linux.net.modem.SupportedUsbModemsInfo;
-import org.eclipse.kura.linux.util.KuraConstants;
+import org.eclipse.kura.linux.net.util.KuraConstants;
 import org.eclipse.kura.net.NetConfig;
 import org.eclipse.kura.net.admin.modem.EvdoCellularModem;
 import org.eclipse.kura.net.admin.modem.telit.he910.TelitHe910;

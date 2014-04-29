@@ -9,7 +9,7 @@
  * Contributors:
  *   Eurotech
  */
-package org.eclipse.kura.linux.util;
+package org.eclipse.kura.core.linux.util;
 
 /* 
  * Copyright (c) 2013 Eurotech Inc. All rights reserved.
@@ -24,6 +24,7 @@ import java.io.InputStreamReader;
 import java.util.StringTokenizer;
 
 import org.eclipse.kura.core.util.ProcessUtil;
+import org.eclipse.kura.core.linux.util.ProcessStats;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

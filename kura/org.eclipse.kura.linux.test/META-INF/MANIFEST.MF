@@ -7,6 +7,10 @@ Bundle-Vendor: EUROTECH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: org.eclipse.kura,
  org.eclipse.kura.core.net.util,
+<<<<<<< Updated upstream
+=======
+ org.eclipse.kura.core.util,
+>>>>>>> Stashed changes
  org.eclipse.kura.linux.net.dhcp,
  org.eclipse.kura.linux.net.iptables,
  org.eclipse.kura.linux.net.util,

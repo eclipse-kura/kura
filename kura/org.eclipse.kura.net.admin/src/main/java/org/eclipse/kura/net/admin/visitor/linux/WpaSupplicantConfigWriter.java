@@ -27,7 +27,7 @@ import org.eclipse.kura.core.net.NetworkConfiguration;
 import org.eclipse.kura.core.net.NetworkConfigurationVisitor;
 import org.eclipse.kura.core.net.WifiInterfaceAddressConfigImpl;
 import org.eclipse.kura.core.util.ProcessUtil;
-import org.eclipse.kura.linux.util.KuraConstants;
+import org.eclipse.kura.linux.net.util.KuraConstants;
 import org.eclipse.kura.net.NetConfig;
 import org.eclipse.kura.net.NetConfigIP4;
 import org.eclipse.kura.net.NetInterfaceAddressConfig;

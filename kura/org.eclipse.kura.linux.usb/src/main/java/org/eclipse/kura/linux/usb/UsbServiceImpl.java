@@ -23,8 +23,8 @@ import javax.usb.UsbServices;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
-import org.eclipse.kura.linux.util.LinuxUdevListener;
-import org.eclipse.kura.linux.util.LinuxUdevNative;
+import org.eclipse.kura.core.linux.util.LinuxUdevNative;
+import org.eclipse.kura.linux.udev.LinuxUdevListener;
 import org.eclipse.kura.usb.UsbBlockDevice;
 import org.eclipse.kura.usb.UsbDevice;
 import org.eclipse.kura.usb.UsbDeviceAddedEvent;

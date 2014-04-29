@@ -26,13 +26,12 @@ import java.util.StringTokenizer;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.core.linux.util.LinuxProcessUtil;
 import org.eclipse.kura.core.net.WifiAccessPointImpl;
 import org.eclipse.kura.core.net.util.NetworkUtil;
 import org.eclipse.kura.core.util.ProcessUtil;
 import org.eclipse.kura.linux.net.NetworkServiceImpl;
 import org.eclipse.kura.linux.net.wifi.WifiOptions;
-import org.eclipse.kura.linux.util.KuraConstants;
-import org.eclipse.kura.linux.util.LinuxProcessUtil;
 import org.eclipse.kura.net.NetInterfaceType;
 import org.eclipse.kura.net.wifi.WifiAccessPoint;
 import org.eclipse.kura.net.wifi.WifiMode;

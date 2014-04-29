@@ -19,7 +19,7 @@ import java.io.File;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
-import org.eclipse.kura.linux.util.LinuxProcessUtil;
+import org.eclipse.kura.core.linux.util.LinuxProcessUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

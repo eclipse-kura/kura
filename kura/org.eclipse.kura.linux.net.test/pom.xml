@@ -23,7 +23,7 @@
 		<relativePath>../manifest_pom.xml</relativePath>
 	</parent>
 
-	<artifactId>org.eclipse.kura.linux.test</artifactId>
+	<artifactId>org.eclipse.kura.linux.net.test</artifactId>
 	<packaging>eclipse-plugin</packaging>
 
         <build>

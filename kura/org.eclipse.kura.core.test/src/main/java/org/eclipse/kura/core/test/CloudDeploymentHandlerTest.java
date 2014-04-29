@@ -20,13 +20,13 @@ import junit.framework.TestCase;
 
 import org.eclipse.kura.cloud.CloudCallService;
 import org.eclipse.kura.cloud.CloudletTopic;
+import org.eclipse.kura.core.configuration.util.XmlUtil;
 import org.eclipse.kura.core.deployment.CloudDeploymentHandler;
 import org.eclipse.kura.core.deployment.XmlBundle;
 import org.eclipse.kura.core.deployment.XmlBundleInfo;
 import org.eclipse.kura.core.deployment.XmlBundles;
 import org.eclipse.kura.core.deployment.XmlDeploymentPackage;
 import org.eclipse.kura.core.deployment.XmlDeploymentPackages;
-import org.eclipse.kura.core.util.XmlUtil;
 import org.eclipse.kura.message.KuraPayload;
 import org.eclipse.kura.message.KuraResponsePayload;
 import org.eclipse.kura.test.annotation.TestTarget;

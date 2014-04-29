@@ -9,7 +9,7 @@
  * Contributors:
  *   Eurotech
  */
-package org.eclipse.kura.core.util;
+package org.eclipse.kura.core.configuration.util;
 
 import java.util.Dictionary;
 import java.util.Enumeration;

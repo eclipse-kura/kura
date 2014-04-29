@@ -9,7 +9,7 @@
  * Contributors:
  *   Eurotech
  */
-package org.eclipse.kura.core.util;
+package org.eclipse.kura.core.configuration.util;
 
 import java.io.IOException;
 import java.net.URL;
@@ -30,6 +30,7 @@ import org.eclipse.kura.configuration.metatype.Scalar;
 import org.eclipse.kura.core.configuration.Password;
 import org.eclipse.kura.core.configuration.metatype.Tmetadata;
 import org.eclipse.kura.core.configuration.metatype.Tocd;
+import org.eclipse.kura.core.util.IOUtil;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;

@@ -31,6 +31,7 @@
 		<module>org.eclipse.kura.core.comm</module>
 		<module>org.eclipse.kura.core.configuration</module>
 		<module>org.eclipse.kura.core.crypto</module>
+		<module>org.eclipse.kura.core.deployment</module>
 		<module>org.eclipse.kura.core.test</module>
 		<module>org.eclipse.kura.deployment.agent</module>
 		<module>org.eclipse.kura.deployment.customizer</module>

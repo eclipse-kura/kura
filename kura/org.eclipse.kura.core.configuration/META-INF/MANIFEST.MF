@@ -31,5 +31,6 @@ Import-Package: javax.crypto,
  org.slf4j;version="1.6.4",
  org.w3c.dom
 Export-Package: org.eclipse.kura.core.configuration,
- org.eclipse.kura.core.configuration.metatype
+ org.eclipse.kura.core.configuration.metatype,
+ org.eclipse.kura.core.configuration.util
 

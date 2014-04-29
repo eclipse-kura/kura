@@ -15,8 +15,7 @@ Export-Package:
  org.eclipse.kura.core.util
 Service-Component: OSGI-INF/*.xml
 Bundle-ActivationPolicy: lazy
-Import-Package: com.google.protobuf,
- javax.crypto,
+Import-Package: javax.crypto,
  javax.net.ssl,
  javax.xml.bind,
  javax.xml.bind.annotation,
@@ -40,7 +39,6 @@ Import-Package: com.google.protobuf,
  org.eclipse.kura.net.firewall,
  org.eclipse.kura.net.modem,
  org.eclipse.kura.net.wifi,
- org.eclipse.kura.position,
  org.eclipse.kura.ssl,
  org.eclipse.kura.system,
  org.eclipse.kura.usb,

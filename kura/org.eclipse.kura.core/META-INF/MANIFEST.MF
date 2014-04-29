@@ -7,9 +7,6 @@ Bundle-Vendor: EUROTECH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Export-Package: 
  org.eclipse.kura.core.linux.util,
- org.eclipse.kura.core.net,
- org.eclipse.kura.core.net.modem,
- org.eclipse.kura.core.net.util,
  org.eclipse.kura.core.util
 Service-Component: OSGI-INF/*.xml
 Bundle-ActivationPolicy: lazy
@@ -26,10 +23,6 @@ Import-Package: javax.crypto,
  org.eclipse.kura.db,
  org.eclipse.kura.linux.udev,
  org.eclipse.kura.net,
- org.eclipse.kura.net.dhcp,
- org.eclipse.kura.net.firewall,
- org.eclipse.kura.net.modem,
- org.eclipse.kura.net.wifi,
  org.eclipse.kura.ssl,
  org.eclipse.kura.system,
  org.eclipse.kura.usb,

@@ -1,0 +1,23 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: org.eclipse.kura.core.net
+Bundle-SymbolicName: org.eclipse.kura.core.net;singleton:=true
+Bundle-Version: 0.2.0.qualifier
+Bundle-Vendor: EUROTECH
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Service-Component: OSGI-INF/*.xml
+Bundle-ClassPath: .
+Bundle-ActivationPolicy: lazy
+Import-Package: org.eclipse.kura,
+ org.eclipse.kura.core.util,
+ org.eclipse.kura.net,
+ org.eclipse.kura.net.dhcp,
+ org.eclipse.kura.net.firewall,
+ org.eclipse.kura.net.modem,
+ org.eclipse.kura.net.wifi,
+ org.eclipse.kura.usb,
+ org.slf4j;version="1.6.4"
+Export-Package: org.eclipse.kura.core.net,
+ org.eclipse.kura.core.net.modem,
+ org.eclipse.kura.core.net.util
+

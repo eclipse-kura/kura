@@ -18,8 +18,9 @@ qnx:
 	$(MAKE) -f makefile.qnx
 	
 clean:
-	rm *.obj
-	rm $(DLLNAME)
+	rm -f *.o
+	rm -f *.obj
+	rm -f $(DLLNAME)
 		
 	
 	

@@ -9,6 +9,7 @@
  *     IBM - initial API and implementation                              *
  ************************************************************************/
 #include <stdio.h>
+#include <string.h>
 #include <sys/time.h>
 #include <sys/select.h>
 #include <sys/types.h>

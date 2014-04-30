@@ -5,7 +5,6 @@ Bundle-SymbolicName: org.eclipse.kura.core.net;singleton:=true
 Bundle-Version: 0.2.0.qualifier
 Bundle-Vendor: EUROTECH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Service-Component: OSGI-INF/*.xml
 Bundle-ClassPath: .
 Bundle-ActivationPolicy: lazy
 Import-Package: org.eclipse.kura,

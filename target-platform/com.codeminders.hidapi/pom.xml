@@ -105,11 +105,12 @@
                         about_files=${project.basedir}/about_files
                     </Include-Resource>
                     <Bundle-NativeCode>
-                        lib/native/linux/beaglebone/090538fcb81c38c1fa445cfb00755a94bc0131f2/libhidapi-jni.so ; selection-filter="(&amp;(kura.os.version=090538fcb81c38c1fa445cfb00755a94 bc0131f2))",
-                        lib/native/linux/mini-gateway/yocto_1.2.1/libhidapi-jni.so ; selection-filter="(&amp;(kura.os.version=yocto_1.2.1))",
-                        lib/native/linux/raspberry-pi/libhidapi-jni.so ; selection-filter="(&amp;(kura.os.version=raspbian))",
-                        lib/native/linux/linux32/libhidapi-jni-32.so ; osname=Linux ; processor = x86,
-                        lib/native/linux/linux64/libhidapi-jni-64.so ; osname=Linux ; processor = x86_64,
+                        lib/native/linux/x86/libhidapi-jni.so ; osname=Linux ; processor = x86,
+                        lib/native/linux/armv5_sf/libhidapi-jni.so; selection-filter="(&amp;(kura.arch=armv7_hf))",
+                        lib/native/linux/armv5_sf/libhidapi-jni.so; selection-filter="(&amp;(kura.arch=armv7_sf))",
+                        lib/native/linux/armv5_sf/libhidapi-jni.so; selection-filter="(&amp;(kura.arch=armv6_hf))",
+                        lib/native/linux/armv5_sf/libhidapi-jni.so; selection-filter="(&amp;(kura.arch=armv6_sf))",
+                        lib/native/linux/armv5_sf/libhidapi-jni.so; selection-filter="(&amp;(kura.arch=armv5_sf))",
                         lib/native/mac/libhidapi-jni-32.jnilib ; osname=MacOSX ; processor = x86,
                         lib/native/mac/libhidapi-jni-64.jnilib ; osname=MacOSX ; processor = x86_64
                     </Bundle-NativeCode>

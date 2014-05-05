@@ -34,6 +34,7 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.FileUtils;
+import org.osgi.framework.Version;
 import org.eclipse.kura.deployment.agent.DeploymentAgentService;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.ComponentException;
@@ -391,7 +392,8 @@ public class DeploymentAgent implements DeploymentAgentService {
 
 		if (dp != null) {
 			props.put(EVENT_PACKAGE_NAME, dp.getName());
-			props.put(EVENT_PACKAGE_VERSION, dp.getVersion().toString());
+			Version version = dp.getVersion();
+			props.put(EVENT_PACKAGE_VERSION, version.toString());
 		} else {
 			props.put(EVENT_PACKAGE_NAME, "UNKNOWN");
 			props.put(EVENT_PACKAGE_VERSION, "UNKNOWN");	

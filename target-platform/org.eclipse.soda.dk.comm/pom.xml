@@ -93,9 +93,12 @@ Import-Package: org.osgi.framework;version="1.4.0"
                             about_files=${project.basedir}/about_files/
                         </Include-Resource>
                         <Bundle-NativeCode>
-			    lib/linux/beaglebone/090538fcb81c38c1fa445cfb00755a94bc0131f2/dkcomm.so ; selection-filter="(&amp;(kura.os.version=090538fcb81c38c1fa445cfb00755a94bc0131f2))",
-			    lib/linux/raspberry-pi/dkcomm.so ; selection-filter="(&amp;(kura.os.version=raspbian))",
-                            lib/linux/linux32/dkcomm.so ; osname=Linux ; processor = x86,
+                        	lib/linux/x86/dkcomm.so ; osname=Linux ; processor = x86,
+                        	lib/linux/armv5_sf/dkcomm.so; selection-filter="(&amp;(kura.arch=armv7_hf))",
+                        	lib/linux/armv5_sf/dkcomm.so; selection-filter="(&amp;(kura.arch=armv7_sf))",
+                        	lib/linux/armv6_hf/dkcomm.so; selection-filter="(&amp;(kura.arch=armv6_hf))",
+                        	lib/linux/armv5_sf/dkcomm.so; selection-filter="(&amp;(kura.arch=armv6_sf))",
+                        	lib/linux/armv5_sf/dkcomm.so; selection-filter="(&amp;(kura.arch=armv5_sf))",
                             *
                         </Bundle-NativeCode>
                         <Import-Package>

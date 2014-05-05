@@ -263,6 +263,7 @@
 										<property name="build.name" value="beaglebone" />
 										<property name="kura.os.version"
 											value="090538fcb81c38c1fa445cfb00755a94bc0131f2" />
+										<property name="kura.arch" value="armv7_hf" />
 										<property name="kura.mem.size" value="256m" />
 										<ant antfile="${basedir}/src/main/ant/build_equinox_distrib.xml"
 											target="dist-linux" />
@@ -286,6 +287,7 @@
 										<property name="build.name" value="beaglebone" />
 										<property name="kura.os.version"
 											value="090538fcb81c38c1fa445cfb00755a94bc0131f2" />
+										<property name="kura.arch" value="armv7_hf" />
 										<property name="kura.mem.size" value="256m" />
 										<ant antfile="${basedir}/src/main/ant/build_equinox_distrib_test.xml"
 											target="dist-linux" />
@@ -310,6 +312,7 @@
 										<property name="build.name" value="beaglebone-nn" />
 										<property name="kura.os.version"
 											value="090538fcb81c38c1fa445cfb00755a94bc0131f2" />
+										<property name="kura.arch" value="armv7_hf" />
 										<property name="kura.mem.size" value="256m" />
 										<ant antfile="${basedir}/src/main/ant/build_equinox_distrib_dp.xml"
 											target="dist-linux" />
@@ -389,6 +392,7 @@
 										<property name="project.build.directory" value="${project.build.directory}" />
 										<property name="build.name" value="raspberry-pi" />
 										<property name="kura.os.version" value="raspbian" />
+										<property name="kura.arch" value="armv6_hf" />
 										<property name="kura.mem.size" value="256m" />
 										<ant antfile="${basedir}/src/main/ant/build_equinox_distrib.xml"
 											target="dist-linux" />
@@ -411,6 +415,7 @@
 										<property name="project.build.directory" value="${project.build.directory}" />
 										<property name="build.name" value="raspberry-pi" />
 										<property name="kura.os.version" value="raspbian" />
+										<property name="kura.arch" value="armv6_hf" />
 										<property name="kura.mem.size" value="256m" />
 										<ant antfile="${basedir}/src/main/ant/build_equinox_distrib_test.xml"
 											target="dist-linux" />
@@ -521,6 +526,7 @@
 										<property name="project.build.directory" value="${project.build.directory}" />
 										<property name="build.name" value="raspberry-pi-nn" />
 										<property name="kura.os.version" value="raspbian" />
+										<property name="kura.arch" value="armv6_hf" />
 										<property name="kura.mem.size" value="256m" />
 										<ant antfile="${basedir}/src/main/ant/build_equinox_distrib_dp.xml"
 											target="dist-linux" />

@@ -8,14 +8,12 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Service-Component: OSGI-INF/*.xml
 Bundle-ClassPath: .
 Bundle-ActivationPolicy: lazy
-Bundle-NativeCode: lib/linux/raspberry-pi/libJavaxUsb.so;
- lib/linux/raspberry-pi/libEurotechLinuxUdev.so; selection-filter="(&(kura.os.version=raspbian))",
- lib/linux/x86/linux32/libJavaxUsb.so;
- lib/linux/x86/linux32/libEurotechLinuxUdev.so; osname=Linux; processor=x86,
- lib/linux/x86/linux64/libJavaxUsb.so;
- lib/linux/x86/linux64/libEurotechLinuxUdev.so; osname=Linux; processor=x86_64,
- lib/linux/beaglebone/090538fcb81c38c1fa445cfb00755a94bc0131f2/libJavaxUsb.so;
- lib/linux/beaglebone/090538fcb81c38c1fa445cfb00755a94bc0131f2/libEurotechLinuxUdev.so; selection-filter="(&(kura.os.version=090538fcb81c38c1fa445cfb00755a94bc0131f2))",
+Bundle-NativeCode: lib/linux/x86/libEurotechLinuxUdev.so; osname=Linux; processor=x86,
+ lib/linux/armv5_sf/libEurotechLinuxUdev.so; selection-filter="(&(kura.arch=armv7_hf))",
+ lib/linux/armv5_sf/libEurotechLinuxUdev.so; selection-filter="(&(kura.arch=armv7_sf))",
+ lib/linux/armv6_hf/libEurotechLinuxUdev.so; selection-filter="(&(kura.arch=armv6_hf))",
+ lib/linux/armv5_sf/libEurotechLinuxUdev.so; selection-filter="(&(kura.arch=armv6_sf))",
+ lib/linux/armv5_sf/libEurotechLinuxUdev.so; selection-filter="(&(kura.arch=armv5_sf))",
  *
 Import-Package: com.ibm.jusb;version="1.0.2",
  com.ibm.jusb.event;version="1.0.2",

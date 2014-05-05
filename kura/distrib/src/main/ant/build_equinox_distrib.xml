@@ -59,6 +59,7 @@ mkdir -p /tmp/.kura/configuration
 cp /opt/eclipse/kura/kura/config.ini /tmp/.kura/configuration/
 
 java -Xms${kura.mem.size} -Xmx${kura.mem.size} -XX:MaxPermSize=${kura.mem.size} -Dkura.os.version=${kura.os.version} \
+	-Dkura.arch=${kura.arch} \
 	-Dkura.ext.dir=/opt/eclipse/kura-${build.name}_${project.version}/lib/ext \
 	-Declipse.ignoreApp=true \
 	-Dkura.configuration=file:/opt/eclipse/kura/kura/kura.properties \
@@ -81,6 +82,7 @@ cp /opt/eclipse/kura/kura/config.ini /tmp/.kura/configuration/
 
 java -Xms${kura.mem.size} -Xmx${kura.mem.size} -XX:MaxPermSize=${kura.mem.size} -Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=8000,suspend=n \
 	-Dkura.os.version=${kura.os.version} \
+	-Dkura.arch=${kura.arch} \
 	-Dkura.ext.dir=/opt/eclipse/kura-${build.name}_${project.version}/lib/ext \
 	-Declipse.ignoreApp=true \
 	-Dkura.configuration=file:/opt/eclipse/kura/kura/kura.properties \
@@ -103,6 +105,7 @@ mkdir -p /tmp/.kura/configuration
 cp /opt/eclipse/kura/kura/config.ini /tmp/.kura/configuration/
 
 nohup java -Xms${kura.mem.size} -Xmx${kura.mem.size} -XX:MaxPermSize=${kura.mem.size} -Dkura.os.version=${kura.os.version} \
+		-Dkura.arch=${kura.arch} \
         -Dkura.ext.dir=/opt/eclipse/kura-${build.name}_${project.version}/lib/ext  \
         -Declipse.ignoreApp=true \
         -Dkura.configuration=file:/opt/eclipse/kura/kura/kura.properties \

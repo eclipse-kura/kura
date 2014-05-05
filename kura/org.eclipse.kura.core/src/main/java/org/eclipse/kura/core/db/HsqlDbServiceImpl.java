@@ -21,7 +21,7 @@ import java.util.Map;
 import org.eclipse.kura.db.DbService;
 import org.eclipse.kura.system.SystemService;
 import org.hsqldb.jdbc.JDBCPool;
-import org.osgi.service.blueprint.container.ComponentDefinitionException;
+import org.osgi.service.component.ComponentException;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -105,7 +105,7 @@ public class HsqlDbServiceImpl implements DbService
 				catch (SQLException e) {
 					rollback(conn);
 					s_logger.error("Error during HsqdbService startup", e);
-					throw new ComponentDefinitionException(e);
+					throw new ComponentException(e);
 				}
 				finally {
 					close(conn);
@@ -120,7 +120,7 @@ public class HsqlDbServiceImpl implements DbService
 				}
 				catch (SQLException e) {
 					s_logger.error("Error during HsqdbService init", e);
-					throw new ComponentDefinitionException(e);
+					throw new ComponentException(e);
 				}
 			}			
 		}
@@ -136,7 +136,7 @@ public class HsqlDbServiceImpl implements DbService
 		}			
 		catch (SQLException e) {
 			s_logger.error("Error during HsqlDbService shutdown", e);
-			throw new ComponentDefinitionException(e);
+			throw new ComponentException(e);
 		}
 		
 		try {
@@ -147,7 +147,7 @@ public class HsqlDbServiceImpl implements DbService
 		}			
 		catch (SQLException e) {
 			s_logger.error("Error during HsqlDbService connection close", e);
-			throw new ComponentDefinitionException(e);
+			throw new ComponentException(e);
 		}
 	}
 	

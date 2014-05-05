@@ -14,6 +14,7 @@ package org.eclipse.kura.core.data.transport.mqtt;
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Future;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -26,6 +27,7 @@ import org.eclipse.kura.KuraTimeoutException;
 import org.eclipse.kura.KuraTooManyInflightMessagesException;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.core.data.transport.mqtt.MqttClientConfiguration.PersistenceType;
+import org.eclipse.kura.core.util.ExecutorUtil;
 import org.eclipse.kura.core.util.ValidationUtil;
 import org.eclipse.kura.data.DataTransportListener;
 import org.eclipse.kura.data.DataTransportService;
@@ -65,6 +67,7 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 	private MqttAsyncClient m_mqttClient;
 
 	private ServiceTracker<DataTransportListener, DataTransportListener> m_listenersTracker;
+	private Future<?> m_openFuture;
 
 	private MqttClientConfiguration m_clientConf;
 	private boolean m_newSession;
@@ -144,8 +147,18 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 		m_listenersTracker = new ServiceTracker<DataTransportListener, DataTransportListener>(
 				componentContext.getBundleContext(),
 				DataTransportListener.class, null);
-		
-		m_listenersTracker.open();
+		// Open tracker asynchronously avoiding:
+		// java.lang.Exception: Recursive invocation of ServiceFactory.getService
+		// on ProSyst
+		m_openFuture = ExecutorUtil.getInstance().submit(new Runnable() {
+			public void run() {
+				synchronized (m_listenersTracker) {
+					if(!m_openFuture.isCancelled()) {
+						m_listenersTracker.open();
+					}
+				}				
+			}
+		});
 
 		// Do nothing waiting for the connect request from the upper layer.
 	}
@@ -165,7 +178,12 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 			disconnect(0);
 		}
 		
-		m_listenersTracker.close();
+		synchronized (m_listenersTracker) {
+			m_openFuture.cancel(true);
+			if (m_listenersTracker.getTrackingCount() != -1) {
+				m_listenersTracker.close();
+			}
+		}
 	}
 
 	public void updated(Map<String, Object> properties) 

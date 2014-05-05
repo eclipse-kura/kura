@@ -69,6 +69,8 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
 	private DbService m_dbService;
 
 	private ServiceTracker<DataServiceListener, DataServiceListener> m_listenersTracker;
+	
+	private Future<?> m_openFuture;
 
 	private ScheduledFuture<?> m_reconnectFuture;
 	
@@ -131,7 +133,18 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
 				componentContext.getBundleContext(),
 				DataServiceListener.class, null);
 		
-		m_listenersTracker.open();
+		// Open tracker asynchronously avoiding:
+		// java.lang.Exception: Recursive invocation of ServiceFactory.getService
+		// on ProSyst
+		m_openFuture = ExecutorUtil.getInstance().submit(new Runnable() {
+			public void run() {
+				synchronized (m_listenersTracker) {
+					if(!m_openFuture.isCancelled()) {
+						m_listenersTracker.open();
+					}
+				}				
+			}
+		});
 		
 		startReconnectTask();
 	}
@@ -170,7 +183,12 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
 		
 		disconnect();
 				
-		m_listenersTracker.close();
+		synchronized (m_listenersTracker) {
+			m_openFuture.cancel(true);
+			if (m_listenersTracker.getTrackingCount() != -1) {
+				m_listenersTracker.close();
+			}
+		}
 				
 		m_store.stop();
 	}

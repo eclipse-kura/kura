@@ -18,6 +18,5 @@
    <reference bind="setDeploymentAdmin" cardinality="1..1" interface="org.osgi.service.deploymentadmin.DeploymentAdmin" name="DeploymentAdmin" policy="static" unbind="unsetDeploymentAdmin"/>
    <service>
       <provide interface="org.eclipse.kura.deployment.agent.DeploymentAgentService"/>
-      <provide interface="org.eclipse.osgi.framework.console.CommandProvider"/>
    </service>
 </scr:component>

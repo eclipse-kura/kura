@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.HashMap;
@@ -36,11 +35,8 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.FileUtils;
 import org.eclipse.kura.deployment.agent.DeploymentAgentService;
-import org.eclipse.osgi.framework.console.CommandInterpreter;
-import org.eclipse.osgi.framework.console.CommandProvider;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.ComponentException;
-import org.osgi.service.deploymentadmin.BundleInfo;
 import org.osgi.service.deploymentadmin.DeploymentAdmin;
 import org.osgi.service.deploymentadmin.DeploymentException;
 import org.osgi.service.deploymentadmin.DeploymentPackage;
@@ -71,7 +67,7 @@ import org.slf4j.LoggerFactory;
  * We DO NOT support this yet. We assume that for every installed deployment package
  * there is a single deployment package file (.dp) that needs to be reinstalled.
  */
-public class DeploymentAgent implements DeploymentAgentService, CommandProvider {
+public class DeploymentAgent implements DeploymentAgentService {
 	private static Logger s_logger = LoggerFactory.getLogger(DeploymentAgent.class);
 
 	private static final String DPA_CONF_PATH_PROPNAME = "dpa.configuration";
@@ -539,134 +535,5 @@ public class DeploymentAgent implements DeploymentAgentService, CommandProvider 
 		} catch (IOException e) {
 			s_logger.error("Error writing package configuration file", e);
 		}
-	}
-
-	public void _dpa(CommandInterpreter ci) {
-		if (m_deploymentAdmin == null) {
-			ci.println("No DeploymentAdmin service found.");
-			return;
-		}
-
-		String argument = null;
-		try {
-			argument = ci.nextArgument();
-		} catch(NullPointerException e) {
-			//just means no argument - so display all
-		}
-
-		if (argument != null) {
-			if (argument.equals("list")) {
-
-				DeploymentPackage[] dps = m_deploymentAdmin.listDeploymentPackages();
-
-				String arg = ci.nextArgument();
-				Integer packageId = arg == null ? null : Integer.valueOf(arg);
-
-				if (packageId != null) {
-					if (packageId < 0 || packageId >= dps.length) {
-						ci.println("No package with ID " + packageId);
-						return;
-					}
-
-					ci.println("All bundles belonging to package " + dps[packageId].getName() + ":");
-					ci.println("ID\tName.version\n");
-
-					BundleInfo[] bundleInfos = dps[packageId].getBundleInfos();
-					for (int i = 0; i < bundleInfos.length; i++) {
-						StringBuilder sb = new StringBuilder();
-						sb.append(i);
-						sb.append("\t");
-						sb.append(bundleInfos[i].getSymbolicName());
-						sb.append(".");
-						sb.append(bundleInfos[i].getVersion());
-						ci.println(sb.toString());
-					}
-				} else {
-					ci.println("All packages:");
-					ci.println("ID\tStale\tName.version\n");
-
-					for (int i = 0; i < dps.length; i++) {
-						StringBuilder sb = new StringBuilder();
-						sb.append(i);
-						sb.append("\t");
-						sb.append(dps[i].isStale());
-						sb.append("\t");
-						sb.append(dps[i].getName());
-						sb.append(".");
-						sb.append(dps[i].getVersion());
-						ci.println(sb.toString());
-					}
-				}
-			} else if (argument.equals("uninstall") || argument.equals("uninstall_forced")) {
-				String name = ci.nextArgument();
-				if (name != null) {
-					DeploymentPackage dp = m_deploymentAdmin.getDeploymentPackage(name);
-					if (dp != null) {
-						try {
-							if (argument.equals("uninstall")) {
-								dp.uninstall();
-							} else {
-								dp.uninstallForced();
-							}
-							ci.println(dp.getName() + " " + dp.getVersion());
-
-							try {
-								String sUrl = m_deployedPackages.getProperty(name);
-								File dpFile = new File(new URI(sUrl));
-								if (!dpFile.delete()) {
-									ci.println("Cannot delete file at URL: " + sUrl);
-								}
-							} catch (URISyntaxException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
-							}
-
-							removePackageFromConfFile(dp.getName());
-						} catch (DeploymentException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-					} else {
-						ci.println("No such package");
-					}
-				} else {
-					ci.println("Package name missing");
-				}
-			} else if (argument.equals("install")) {
-				String sUrl = ci.nextArgument();
-				if (sUrl != null) {
-					try {
-						DeploymentPackage dp = installDeploymentPackageInternal(sUrl);
-						ci.println(dp.getName() + " " + dp.getVersion());
-					} catch (MalformedURLException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					} catch (DeploymentException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					} catch (IOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					} catch (URISyntaxException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-				} else {
-					ci.println("Package URL missing");
-				}
-			}
-		} else {
-			ci.println("Use {list|install <url>|uninstall <name>}");
-		}
-	}
-
-	@Override
-	public String getHelp() {
-		StringBuffer buffer = new StringBuffer();
-		buffer.append("---Deployment Admin Commands---\n");
-		buffer.append("\tdpa install <package URL> - installs a deployment package\n");
-		buffer.append("\tdpa uninstall <package name> - uninstalls a deployed package\n");
-		buffer.append("\tdpa list <package ID> - lists deployed packages or bundles belonging to <package ID>\n");
-		return buffer.toString();
 	}
 }

@@ -35,9 +35,9 @@
             required="true"
             default="0" 
             description="Default QoS to publish the messages with.">
-           <Option label="Fire and forget" value="0"/>
-           <Option label="Al least once" value="1"/>          
-           <Option label="At most once" value="2"/>
+           <Option label="0 - At most once" value="0"/>
+           <Option label="1 - At least once" value="1"/>          
+           <Option label="2 - Exactly once" value="2"/>
         </AD>
 
         <AD id="publish.retain"  

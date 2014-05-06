@@ -11,6 +11,7 @@ Export-Package:
 Service-Component: OSGI-INF/*.xml
 Bundle-ActivationPolicy: lazy
 Import-Package: javax.crypto,
+ javax.net,
  javax.net.ssl,
  org.eclipse.kura,
  org.eclipse.kura.configuration,

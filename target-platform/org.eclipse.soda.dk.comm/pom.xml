@@ -94,11 +94,11 @@ Import-Package: org.osgi.framework;version="1.4.0"
                         </Include-Resource>
                         <Bundle-NativeCode>
                         	lib/linux/x86/dkcomm.so; osname=Linux; processor=x86,
-                        	lib/linux/armv5_sf/dkcomm.so; osname=Linux; processor=ARM_le; selection-filter="(&amp;(kura.arch=armv7_hf))",
-                        	lib/linux/armv5_sf/dkcomm.so; osname=Linux; processor=ARM_le; selection-filter="(&amp;(kura.arch=armv7_sf))",
-                        	lib/linux/armv6_hf/dkcomm.so; osname=Linux; processor=ARM_le; selection-filter="(&amp;(kura.arch=armv6_hf))",
-                        	lib/linux/armv5_sf/dkcomm.so; osname=Linux; processor=ARM_le; selection-filter="(&amp;(kura.arch=armv6_sf))",
-                        	lib/linux/armv5_sf/dkcomm.so; osname=Linux; processor=ARM_le; selection-filter="(&amp;(kura.arch=armv5_sf))",
+                        	lib/linux/armv5_sf/dkcomm.so; osname=Linux; processor=ARM; selection-filter="(&amp;(kura.arch=armv7_hf))",
+                        	lib/linux/armv5_sf/dkcomm.so; osname=Linux; processor=ARM; selection-filter="(&amp;(kura.arch=armv7_sf))",
+                        	lib/linux/armv6_hf/dkcomm.so; osname=Linux; processor=ARM; selection-filter="(&amp;(kura.arch=armv6_hf))",
+                        	lib/linux/armv5_sf/dkcomm.so; osname=Linux; processor=ARM; selection-filter="(&amp;(kura.arch=armv6_sf))",
+                        	lib/linux/armv5_sf/dkcomm.so; osname=Linux; processor=ARM; selection-filter="(&amp;(kura.arch=armv5_sf))",
                             *
                         </Bundle-NativeCode>
                         <Import-Package>

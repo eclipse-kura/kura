@@ -42,6 +42,24 @@
 					</execution>
 				</executions>
 			</plugin>
+                
+			<plugin>
+				<artifactId>maven-clean-plugin</artifactId>
+				<configuration>
+					<verbose>true</verbose>
+					<filesets>
+						<fileset>
+							<directory>lib</directory>
+							<followSymlinks>false</followSymlinks>
+<!--
+							<includes>
+								<include>abc</include>
+							</includes>
+-->
+						</fileset>
+					</filesets>
+				</configuration>
+			</plugin>  
 			<plugin>
 				<groupId>org.eclipse.tycho</groupId>
 				<artifactId>tycho-packaging-plugin</artifactId>

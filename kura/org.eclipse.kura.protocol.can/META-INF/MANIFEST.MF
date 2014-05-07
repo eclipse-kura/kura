@@ -13,8 +13,7 @@ Import-Package: org.eclipse.kura,
  org.osgi.service.event;version="1.3.0",
  org.osgi.service.io,
  org.slf4j;version="1.6.4"
-Export-Package: 
- org.eclipse.kura.protocol.can
+Export-Package: org.eclipse.kura.protocol.can
 Service-Component: OSGI-INF/*.xml
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .,

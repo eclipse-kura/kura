@@ -1,0 +1,406 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
+    <OCD id="org.eclipse.kura.protocol.can.test.CanSocketTest"
+         name="Can network test" 
+         description="Can network example application.">
+              
+        <AD id="can.name"
+            name="can.name"
+            type="String"
+            cardinality="0"
+            required="true"
+            default="can0"
+            description="CAN socket Name."/>
+        
+        <AD id="can.identifier"
+            name="can.identifier"
+            type="Integer"
+            cardinality="0"
+            required="false"
+            default="0"
+            description="Can device identifier."/>
+            
+        <AD id="compressor.id"  
+            name="compressor.id"
+            type="Integer"
+            cardinality="0" 
+            required="true"
+            default="1"
+            min="1"
+            max="4" 
+            description="DnAirMaxi compressor ID."/>
+        
+        <AD id="poll.interval"  
+            name="poll.interval"
+            type="Integer"
+            cardinality="0" 
+            required="true"
+            default="1" 
+            min = "0"
+            description="Poll interval [s]"/>
+
+        <AD id="average.time"  
+            name="average.time"
+            type="Integer"
+            cardinality="0" 
+            required="true"
+            default="60" 
+            min = "0"
+            description="The averaging time for time series (temperatures and pressures) [s]. 0 disables averaging."/>
+
+        <AD id="publish.on.change"  
+            name="publish.on.change"
+            type="Boolean"
+            cardinality="0" 
+            required="true"
+            default="true" 
+            description="Publish only when a quantity changes."/>
+
+        <AD id="compressor.temperature.enable"  
+            name="compressor.temperature.enable"
+            type="Boolean"
+            cardinality="0" 
+            required="true"
+            default="true" 
+            description="Enables monitoring and publishing the quantity."/>
+
+        <AD id="compressor.pressure.enable"  
+            name="compressor.pressure.enable"
+            type="Boolean"
+            cardinality="0" 
+            required="true"
+            default="true" 
+            description="Enables monitoring and publishing the quantity."/>
+
+        <AD id="compressor.load.enable"  
+            name="compressor.load.enable"
+            type="Boolean"
+            cardinality="0" 
+            required="true"
+            default="true" 
+            description="Enables monitoring and publishing the quantity."/>
+
+        <AD id="compressor.status.enable"  
+            name="compressor.status.enable"
+            type="Boolean"
+            cardinality="0" 
+            required="true"
+            default="true" 
+            description="Enables monitoring and publishing the quantity."/>
+            
+        <AD id="dryer.temperature.enable"  
+            name="dryer.temperature.enable"
+            type="Boolean"
+            cardinality="0" 
+            required="true"
+            default="true" 
+            description="Enables monitoring an publishing the quantity."/>
+
+        <AD id="dryer.status.enable"  
+            name="dryer.status.enable"
+            type="Boolean"
+            cardinality="0" 
+            required="true"
+            default="true" 
+            description="Enables monitoring and publishing the quantity."/>
+        
+        <AD id="error.enable"  
+            name="error.enable"
+            type="Boolean"
+            cardinality="0" 
+            required="true"
+            default="true" 
+            description="Enables monitoring and publishing the quantity."/>
+       
+        <AD id="input.enable"  
+            name="input.enable"
+            type="Boolean"
+            cardinality="0" 
+            required="true"
+            default="true" 
+            description="Enables monitoring and publishing the quantity."/>
+       
+        <AD id="output.enable"  
+            name="output.enable"
+            type="Boolean"
+            cardinality="0" 
+            required="true"
+            default="true" 
+            description="Enables monitoring and publishing the quantity."/>
+        
+        <AD id="oil.filter.remaining.time.enable"  
+            name="oil.filter.remaining.time.enable"
+            type="Boolean"
+            cardinality="0" 
+            required="true"
+            default="true" 
+            description="Enables monitoring and publishing the quantity."/>
+        
+        <AD id="air.filter.remaining.time.enable"  
+            name="air.filter.remaining.time.enable"
+            type="Boolean"
+            cardinality="0" 
+            required="true"
+            default="true" 
+            description="Enables monitoring and publishing the quantity."/>
+        
+        <AD id="dryer.filter.remaining.time.enable"  
+            name="dryer.filter.remaining.time.enable"
+            type="Boolean"
+            cardinality="0" 
+            required="true"
+            default="true" 
+            description="Enables monitoring and publishing the quantity."/>
+
+        <AD id="disoil.filter.remaining.time.enable"  
+            name="disoil.filter.remaining.time.enable"
+            type="Boolean"
+            cardinality="0" 
+            required="true"
+            default="true" 
+            description="Enables monitoring and publishing the quantity."/>
+
+        <AD id="oil.remaining.time.enable"  
+            name="oil.remaining.time.enable"
+            type="Boolean"
+            cardinality="0" 
+            required="true"
+            default="true" 
+            description="Enables monitoring and publishing the quantity."/>
+
+        <AD id="next.service.enable"  
+            name="next.service.enable"
+            type="Boolean"
+            cardinality="0" 
+            required="true"
+            default="true" 
+            description="Enables monitoring and publishing the quantity."/>
+
+        <AD id="temperature.unit.enable"  
+            name="temperature.unit.enable"
+            type="Boolean"
+            cardinality="0" 
+            required="true"
+            default="true" 
+            description="Enables monitoring and publishing the quantity."/>
+
+        <AD id="pressure.min.enable"  
+            name="pressure.min.enable"
+            type="Boolean"
+            cardinality="0" 
+            required="true"
+            default="true" 
+            description="Enables monitoring and publishing the quantity."/>
+
+        <AD id="pressure.max.enable"  
+            name="pressure.max.enable"
+            type="Boolean"
+            cardinality="0" 
+            required="true"
+            default="true" 
+            description="Enables monitoring and publishing the quantity."/>
+
+        <AD id="pressure.unit.enable"  
+            name="pressure.unit.enable"
+            type="Boolean"
+            cardinality="0" 
+            required="true"
+            default="true" 
+            description="Enables monitoring and publishing the quantity."/>
+
+        <AD id="total.hours.enable"  
+            name="total.hours.enable"
+            type="Boolean"
+            cardinality="0" 
+            required="true"
+            default="true" 
+            description="Enables monitoring and publishing the quantity."/>
+       
+        <AD id="load.hours.enable"  
+            name="load.hours.enable"
+            type="Boolean"
+            cardinality="0" 
+            required="true"
+            default="true" 
+            description="Enables monitoring and publishing the quantity."/>
+
+        <AD id="serial.number.enable"  
+            name="serial.number.enable"
+            type="Boolean"
+            cardinality="0" 
+            required="true"
+            default="true" 
+            description="Enables monitoring and publishing the quantity."/>
+
+        <AD id="product.code.enable"  
+            name="product.code.enable"
+            type="Boolean"
+            cardinality="0" 
+            required="true"
+            default="true" 
+            description="Enables monitoring and publishing the quantity."/>
+ 
+        <AD id="production.week.enable"  
+            name="production.week.enable"
+            type="Boolean"
+            cardinality="0" 
+            required="true"
+            default="true" 
+            description="Enables monitoring and publishing the quantity."/>
+
+        <AD id="production.year.enable"  
+            name="production.year.enable"
+            type="Boolean"
+            cardinality="0" 
+            required="true"
+            default="true" 
+            description="Enables monitoring and publishing the quantity."/>
+
+        <AD id="error.history.enable"  
+            name="error.history.enable"
+            type="Boolean"
+            cardinality="0" 
+            required="true"
+            default="false" 
+            description="Enables monitoring and publishing the quantity."/>
+ 
+        <AD id="compressor.temperature.change"  
+            name="compressor.temperature.change"
+            type="Short"
+            cardinality="0" 
+            required="true"
+            default="32767" 
+            description="The minimum change (absolute value) in the quantity causing a message to be published."/>
+
+        <AD id="compressor.pressure.change"  
+            name="compressor.pressure.change"
+            type="Short"
+            cardinality="0" 
+            required="true"
+            default="32767" 
+            description="The minimum change (absolute value) in the quantity causing a message to be published."/>
+
+        <AD id="dryer.temperature.change"  
+            name="dryer.temperature.change"
+            type="Short"
+            cardinality="0" 
+            required="true"
+            default="32767" 
+            description="The minimum change (absolute value) in the quantity causing a message to be published."/>
+
+        <AD id="compressor.status.change"  
+            name="compressor.status.change"
+            type="Boolean"
+            cardinality="0" 
+            required="true"
+            default="true" 
+            description="Enables monitoring and publishing the quantity."/>
+            
+        <AD id="compressor.load.change"  
+            name="compressor.load.change"
+            type="Short"
+            cardinality="0" 
+            required="true"
+            default="32767" 
+            description="The minimum change (absolute value) in the quantity causing a message to be published."/>
+        
+        <AD id="dryer.status.change"  
+            name="dryer.status.change"
+            type="Boolean"
+            cardinality="0" 
+            required="true"
+            default="true" 
+            description="Enables monitoring and publishing the quantity."/>
+
+        <AD id="error.change"  
+            name="error.change"
+            type="Boolean"
+            cardinality="0" 
+            required="true"
+            default="true" 
+            description="Enables monitoring and publishing the quantity."/>
+
+        <AD id="input.change"  
+            name="input.change"
+            type="Boolean"
+            cardinality="0" 
+            required="true"
+            default="true" 
+            description="Enables monitoring and publishing the quantity."/>
+
+        <AD id="output.change"  
+            name="output.change"
+            type="Boolean"
+            cardinality="0" 
+            required="true"
+            default="true" 
+            description="Enables monitoring and publishing the quantity."/>
+
+        <AD id="air.filter.remaining.time.change"  
+            name="air.filter.remaining.time.change"
+            type="Integer"
+            cardinality="0" 
+            required="true"
+            default="2147483647"
+            description="The minimum change (absolute value) in the quantity causing a message to be published."/>
+
+        <AD id="oil.filter.remaining.time.change"  
+            name="oil.filter.remaining.time.change"
+            type="Integer"
+            cardinality="0" 
+            required="true"
+            default="2147483647"
+            description="The minimum change (absolute value) in the quantity causing a message to be published."/>
+
+        <AD id="dryer.filter.remaining.time.change"  
+            name="dryer.filter.remaining.time.change"
+            type="Integer"
+            cardinality="0" 
+            required="true"
+            default="2147483647"
+            description="The minimum change (absolute value) in the quantity causing a message to be published."/>
+            
+        <AD id="oil.remaining.time.change"  
+            name="oil.remaining.time.change"
+            type="Integer"
+            cardinality="0" 
+            required="true"
+            default="2147483647"
+            description="The minimum change (absolute value) in the quantity causing a message to be published."/>
+            
+        <AD id="disoil.filter.remaining.time.change"  
+            name="disoil.filter.remaining.time.change"
+            type="Integer"
+            cardinality="0" 
+            required="true"
+            default="2147483647"
+            description="The minimum change (absolute value) in the quantity causing a message to be published."/>
+            
+        <AD id="total.hours.change"  
+            name="total.hours.change"
+            type="Long"
+            cardinality="0" 
+            required="true"
+            default="9223372036854775807"
+            description="The minimum change (absolute value) in the quantity causing a message to be published."/>
+      
+        <AD id="load.hours.change"  
+            name="load.hours.change"
+            type="Long"
+            cardinality="0" 
+            required="true"
+            default="9223372036854775807"
+            description="The minimum change (absolute value) in the quantity causing a message to be published."/>
+
+        <AD id="error.history.change"  
+            name="error.history.change"
+            type="Boolean"
+            cardinality="0" 
+            required="true"
+            default="false" 
+            description="Enables monitoring and publishing the quantity."/>
+    </OCD>
+    <Designate pid="org.eclipse.kura.protocol.can.test.CanSocketTest">
+        <Object ocdref="org.eclipse.kura.protocol.can.test.CanSocketTest"/>
+    </Designate>
+</MetaData>

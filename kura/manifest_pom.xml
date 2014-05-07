@@ -15,7 +15,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	
-    <modelVersion>4.0.0</modelVersion>
+	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.eclipse.kura</groupId>
 	<artifactId>kura</artifactId>
 	<version>0.2.0-SNAPSHOT</version>
@@ -51,6 +51,19 @@
 		<module>examples</module>
 	</modules>
 
+	<profiles>
+		<profile>
+			<id>can</id>
+			<activation>
+				<activeByDefault>false</activeByDefault>
+			</activation>
+			<modules>
+				<module>org.eclipse.kura.protocol.can</module>
+				<module>org.eclipse.kura.protocol.can.test</module>
+			</modules>
+		</profile>
+	</profiles>
+
 	<properties>
 		<deployment.package.version>0.2.0</deployment.package.version>
 		<tycho-version>0.20.0</tycho-version>
@@ -67,6 +80,11 @@
 			<layout>p2</layout>
 			<url>file:///${project.basedir}/../target-definition/equinox_3.8.1/repository</url>
 		</repository>
+                <repository>
+                        <id>kura_addons</id>
+                        <name>Kura Addons Maven Repository</name>
+                        <url>https://github.com/eurotech/kura_addons/tree/mvn-repo</url>
+                </repository>
 	</repositories>
 
 	<build>

@@ -14,7 +14,7 @@ MAKEFILE = makefile.linux
 ############################################################################################################
 OS  = Linux
 ##OS=Qnx
-CPUTYPE = arm
+CPUTYPE = x86-64
 ##CPUTYPE = powerpc
 ##CPUTYPE = ppc82xx
 ##CPUTYPE = ppc440gp
@@ -60,26 +60,26 @@ ASFLAGS   = -c $(VMASMDEBUG) -shared
 LINKER    = $(TOOL_DIR)/$(CROSSCOMP)gcc
 LNKFLAGS = -shared -o
 endif
-# For Linux ARM (using poky toolchain) 
-ifeq "$(CPUTYPE)_$(COMPILER)""arm_"
+# For Linux i386 (yocto toolchain)
+ifeq "$(CPUTYPE)_$(COMPILER)""i386_"
 #TOOL_DIR  = /usr/bin
 #CROSSCOMP =
 #CC        = $(TOOL_DIR)/$(CROSSCOMP)gcc
-CFLAGS    += -msoft-float -shared -D__linux__ -I$(JAVA_HOME)/include -I../include -I.
+CFLAGS    += -shared -D__linux__ -I$(JAVA_HOME)/include -I../include -I. 
 #AS        = $(TOOL_DIR)/$(CROSSCOMP)gcc
 ASFLAGS   = -c $(VMASMDEBUG) -shared
 LINKER    = $(CXX)
 LNKFLAGS = -shared -o
 endif
-# For Linux i386 
-ifeq "$(CPUTYPE)_$(COMPILER)""i386_"
-TOOL_DIR  = /usr/bin
-CROSSCOMP =
-CC        = $(TOOL_DIR)/$(CROSSCOMP)gcc
-CFLAGS    = -shared -D__linux__ -mcpu=$(CPUTYPE) -I../include -I/usr/include -I. -I/usr/comm/osgimin11/bin/include
-AS        = $(TOOL_DIR)/$(CROSSCOMP)gcc
+# For Linux x86_64 (yocto toolchain)
+ifeq "$(CPUTYPE)_$(COMPILER)""x86-64_"
+#TOOL_DIR  = /usr/bin
+#CROSSCOMP =
+#CC        = $(TOOL_DIR)/$(CROSSCOMP)gcc
+CFLAGS    += -shared -D__linux__ -I$(JAVA_HOME)/include -I../include -I. -fPIC 
+#AS        = $(TOOL_DIR)/$(CROSSCOMP)gcc
 ASFLAGS   = -c $(VMASMDEBUG) -shared
-LINKER    = $(TOOL_DIR)/$(CROSSCOMP)gcc
+LINKER    = $(CXX)
 LNKFLAGS = -shared -o
 endif
 # Yellow Dog Linux for Power PC
@@ -183,7 +183,7 @@ all:      $(DLLNAME) messages
 BUILDLIB: $(DLLNAME)
 $(DLLNAME): \
 	$(C_OBJECTS)
-	mkdir -p `dirname $(DLLNAME)`
+	mkdir -p `dirname $(DLLNAME)` 
 	$(LINKER) $(LNKFLAGS) $(DLLNAME) \
         $(C_OBJECTS)
 messages:         

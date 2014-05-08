@@ -19,8 +19,7 @@ HEADER = org_eclipse_kura_linux_usb_LinuxUdevNative.h
 #CC = gcc
 CCLD = $(CC)
 
-#INCLUDES = -I$(JAVA_HOME)/include -I$(JAVA_HOME)/include/linux $(CINCLUDES)
-INCLUDES = -I../java_home/include/ $(CINCLUDES)
+INCLUDES = -I$(JAVA_HOME)/include -I$(JAVA_HOME)/include/linux $(CINCLUDES)
 
 CFLAGS += -msoft-float -Wall -fPIC $(JUSB_FLAGS)
 SOFLAGS = -shared

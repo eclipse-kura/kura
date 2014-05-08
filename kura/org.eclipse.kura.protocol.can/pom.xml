@@ -42,7 +42,7 @@
 					</execution>
 				</executions>
 			</plugin>
-                
+
 			<plugin>
 				<artifactId>maven-clean-plugin</artifactId>
 				<configuration>
@@ -51,15 +51,11 @@
 						<fileset>
 							<directory>lib</directory>
 							<followSymlinks>false</followSymlinks>
-<!--
-							<includes>
-								<include>abc</include>
-							</includes>
--->
+							<!-- <includes> <include>abc</include> </includes> -->
 						</fileset>
 					</filesets>
 				</configuration>
-			</plugin>  
+			</plugin>
 			<plugin>
 				<groupId>org.eclipse.tycho</groupId>
 				<artifactId>tycho-packaging-plugin</artifactId>
@@ -136,6 +132,25 @@
 									</pluginExecutionFilter>
 									<action>
 										<ignore></ignore>
+									</action>
+								</pluginExecution>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>
+											org.apache.maven.plugins
+										</groupId>
+										<artifactId>
+											maven-dependency-plugin
+										</artifactId>
+										<versionRange>
+											[2.1,)
+										</versionRange>
+										<goals>
+											<goal>copy-dependencies</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore />
 									</action>
 								</pluginExecution>
 							</pluginExecutions>

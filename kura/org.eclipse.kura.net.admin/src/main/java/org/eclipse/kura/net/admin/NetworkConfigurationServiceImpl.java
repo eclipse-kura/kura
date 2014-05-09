@@ -18,6 +18,7 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
+import java.util.concurrent.TimeUnit;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
@@ -40,6 +41,7 @@ import org.eclipse.kura.core.net.WifiInterfaceImpl;
 import org.eclipse.kura.core.net.modem.ModemInterfaceAddressConfigImpl;
 import org.eclipse.kura.core.net.modem.ModemInterfaceConfigImpl;
 import org.eclipse.kura.core.net.modem.ModemInterfaceImpl;
+import org.eclipse.kura.core.util.ExecutorUtil;
 import org.eclipse.kura.deployment.agent.DeploymentAgentService;
 import org.eclipse.kura.linux.net.modem.SupportedSerialModemInfo;
 import org.eclipse.kura.linux.net.modem.SupportedSerialModemsInfo;
@@ -94,7 +96,7 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
     private List<NetworkConfigurationVisitor> m_readVisitors;
     private List<NetworkConfigurationVisitor> m_writeVisitors;
     
-    //private ExecutorUtil m_executorUtil;
+    private ExecutorUtil m_executorUtil;
     private boolean m_firstConfig = true;
     
 	// ----------------------------------------------------------------
@@ -166,7 +168,6 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
         d.put(EventConstants.EVENT_TOPIC, EVENT_TOPICS);
         componentContext.getBundleContext().registerService(EventHandler.class.getName(), this, d);
         
-        /*
         m_executorUtil = ExecutorUtil.getInstance();
         m_executorUtil.schedule(new Runnable() {
     		@Override
@@ -174,8 +175,7 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
     			//make sure we don't miss the setting of firstConfig
     			m_firstConfig = false;
     		}
-    	}, 5, TimeUnit.MINUTES);
-    	*/
+    	}, /*5*/3, TimeUnit.MINUTES);
     }
     
     protected void deactivate(ComponentContext componentContext) {
@@ -186,7 +186,6 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
     
     @Override
 	public void handleEvent(Event event) {
-		
 		s_logger.debug("handleEvent - topic: " + event.getTopic());
         String topic = event.getTopic();
         if (topic.equals(DeploymentAgentService.EVENT_INSTALLED_TOPIC)) {

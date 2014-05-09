@@ -65,7 +65,7 @@ ifeq "$(CPUTYPE)_$(COMPILER)""arm_"
 #TOOL_DIR  = /usr/bin
 #CROSSCOMP =
 #CC        = $(TOOL_DIR)/$(CROSSCOMP)gcc
-CFLAGS    += -msoft-float -shared -D__linux__ -I../include -I.
+CFLAGS    += -msoft-float -shared -D__linux__ -I$(JAVA_HOME)/include -I../include -I.
 #AS        = $(TOOL_DIR)/$(CROSSCOMP)gcc
 ASFLAGS   = -c $(VMASMDEBUG) -shared
 LINKER    = $(CXX)
@@ -183,6 +183,7 @@ all:      $(DLLNAME) messages
 BUILDLIB: $(DLLNAME)
 $(DLLNAME): \
 	$(C_OBJECTS)
+	mkdir -p `dirname $(DLLNAME)`
 	$(LINKER) $(LNKFLAGS) $(DLLNAME) \
         $(C_OBJECTS)
 messages:         

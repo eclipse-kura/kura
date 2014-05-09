@@ -11,11 +11,11 @@
  */
 package org.eclipse.kura.net.admin.monitor;
 
-import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -336,7 +336,7 @@ public class DnsMonitorServiceImpl implements DnsMonitorService, EventHandler {
 
     // Get a list of dns servers for all WAN interfaces
 	private Set<IPAddress> getConfiguredDnsServers() {
-		Set<IPAddress> serverList = new HashSet<IPAddress>();
+		LinkedHashSet<IPAddress> serverList = new LinkedHashSet<IPAddress>();
     	
 		List<NetInterfaceConfig<? extends NetInterfaceAddressConfig>> netInterfaceConfigs = m_networkConfiguration.getNetInterfaceConfigs();
 		// If there are multiple WAN interfaces, their configured DNS servers are all included in no particular order
@@ -346,7 +346,7 @@ public class DnsMonitorServiceImpl implements DnsMonitorService, EventHandler {
 		            netInterfaceConfig.getType() == NetInterfaceType.MODEM) {
 	        	if(isEnabledForWan(netInterfaceConfig)) {
 	        		try {
-	        			List<IPAddress> servers = getConfiguredDnsServers(netInterfaceConfig);
+	        			Set<IPAddress> servers = getConfiguredDnsServers(netInterfaceConfig);
 	        			s_logger.trace(netInterfaceConfig.getName() + " is WAN, adding its dns servers: " + servers);
 						serverList.addAll(servers);
 					} catch (KuraException e) {
@@ -359,11 +359,11 @@ public class DnsMonitorServiceImpl implements DnsMonitorService, EventHandler {
 	}
 
 	// Get a list of dns servers for the specified NetInterfaceConfig
-    private List<IPAddress> getConfiguredDnsServers(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig) throws KuraException {
+    private Set<IPAddress> getConfiguredDnsServers(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig) throws KuraException {
     	String interfaceName = netInterfaceConfig.getName();
     	s_logger.trace("Getting dns servers for " + interfaceName);
     	LinuxDns linuxDns = LinuxDns.getInstance();
-    	ArrayList<IPAddress> serverList = new ArrayList<IPAddress>();
+    	LinkedHashSet<IPAddress> serverList = new LinkedHashSet<IPAddress>();
     	
     	for(NetInterfaceAddressConfig netInterfaceAddressConfig : netInterfaceConfig.getNetInterfaceAddresses()) {
     		for(NetConfig netConfig : netInterfaceAddressConfig.getConfigs()) {

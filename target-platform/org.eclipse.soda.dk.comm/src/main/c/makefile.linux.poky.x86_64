@@ -14,7 +14,7 @@ MAKEFILE = makefile.linux
 ############################################################################################################
 OS  = Linux
 ##OS=Qnx
-CPUTYPE = i386
+CPUTYPE = x86-64
 ##CPUTYPE = powerpc
 ##CPUTYPE = ppc82xx
 ##CPUTYPE = ppc440gp
@@ -39,10 +39,10 @@ DATATYPE = le
 ##BOARDTYPE = Solution
 ############################################################################################################
 #
-#       Release the libdkcomm.so file place
+#       Release the dkcomm.so file place
 #
 ############################################################################################################
-DLLNAME=Release/$(OS)/$(CPUTYPE)_$(COMPILER)/libdkcomm.$(LIBTYPE)
+DLLNAME=Release/$(OS)/$(CPUTYPE)_$(COMPILER)/dkcomm.$(LIBTYPE)
 BUILDFILES1 = CommPortIdentifier.o NSCommDriver.o NSDeviceInputStream.o NSDeviceOutputStream.o NSSerialPort.o
 BUILDFILES2 = cygCommDriver.o cygDeviceInputStream.o cygDeviceOutputStream.o cygSerialPort.o
 BUILDFILES3 = SerialDataEventThread.o SerialStatusEventThread.o SysVStyleSemaphore.o
@@ -66,6 +66,17 @@ ifeq "$(CPUTYPE)_$(COMPILER)""i386_"
 #CROSSCOMP =
 #CC        = $(TOOL_DIR)/$(CROSSCOMP)gcc
 CFLAGS    += -shared -D__linux__ -I$(JAVA_HOME)/include -I../include -I. 
+#AS        = $(TOOL_DIR)/$(CROSSCOMP)gcc
+ASFLAGS   = -c $(VMASMDEBUG) -shared
+LINKER    = $(CXX)
+LNKFLAGS = -shared -o
+endif
+# For Linux x86_64 (yocto toolchain)
+ifeq "$(CPUTYPE)_$(COMPILER)""x86-64_"
+#TOOL_DIR  = /usr/bin
+#CROSSCOMP =
+#CC        = $(TOOL_DIR)/$(CROSSCOMP)gcc
+CFLAGS    += -shared -D__linux__ -I$(JAVA_HOME)/include -I../include -I. -fPIC 
 #AS        = $(TOOL_DIR)/$(CROSSCOMP)gcc
 ASFLAGS   = -c $(VMASMDEBUG) -shared
 LINKER    = $(CXX)
@@ -172,7 +183,7 @@ all:      $(DLLNAME) messages
 BUILDLIB: $(DLLNAME)
 $(DLLNAME): \
 	$(C_OBJECTS)
-	mkdir -p `dirname $(DLLNAME)`
+	mkdir -p `dirname $(DLLNAME)` 
 	$(LINKER) $(LNKFLAGS) $(DLLNAME) \
         $(C_OBJECTS)
 messages:         

@@ -105,6 +105,7 @@
                         </Include-Resource>
                         <Bundle-NativeCode>
                         	lib/linux/x86/libJavaxUsb.so; osname=Linux; processor=x86,
+				lib/linux/x86_64/libJavaxUsb.so; osname=Linux; processor=x86-64,
                         	lib/linux/armv5_sf/libJavaxUsb.so; osname=Linux; processor=ARM; selection-filter="(&amp;(kura.arch=armv7_hf))",
                         	lib/linux/armv5_sf/libJavaxUsb.so; osname=Linux; processor=ARM; selection-filter="(&amp;(kura.arch=armv7_sf))",
                         	lib/linux/armv6_hf/libJavaxUsb.so; osname=Linux; processor=ARM; selection-filter="(&amp;(kura.arch=armv6_hf))",

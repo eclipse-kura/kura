@@ -106,6 +106,7 @@
                     </Include-Resource>
                     <Bundle-NativeCode>
                         lib/native/linux/x86/libhidapi-jni.so; osname=Linux; processor=x86,
+			lib/native/linux/x86_64/libhidapi-jni.so; osname=Linux; processor=x86-64,
                         lib/native/linux/armv5_sf/libhidapi-jni.so; osname=Linux; processor=ARM; selection-filter="(&amp;(kura.arch=armv7_hf))",
                         lib/native/linux/armv5_sf/libhidapi-jni.so; osname=Linux; processor=ARM; selection-filter="(&amp;(kura.arch=armv7_sf))",
                         lib/native/linux/armv5_sf/libhidapi-jni.so; osname=Linux; processor=ARM; selection-filter="(&amp;(kura.arch=armv6_hf))",

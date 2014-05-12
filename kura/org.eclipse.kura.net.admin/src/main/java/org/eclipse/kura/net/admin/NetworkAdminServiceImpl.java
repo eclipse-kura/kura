@@ -1045,16 +1045,21 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 	        }
 	    }
 	    
-	    NL80211 nl80211 = NL80211.getInstance(ifaceName);
-	    if (wifiMode == WifiMode.MASTER) {
-	    	nl80211.setMode(WifiMode.INFRA, 3);
+	    try {
+		    NL80211 nl80211 = NL80211.getInstance(ifaceName);
+		    if (wifiMode == WifiMode.MASTER) {
+		    	nl80211.setMode(WifiMode.INFRA, 3);
+		    }
+		    if (nl80211.triggerScan()) {
+		    	wifiHotspotInfo = nl80211.getScanResults(3, 2);
+		    }
+		    if (wifiMode == WifiMode.MASTER) {
+		    	nl80211.setMode(WifiMode.MASTER);
+		    }
+	    } catch(Throwable t) {
+	    	throw new KuraException(KuraErrorCode.OPERATION_NOT_SUPPORTED, "Could not initialize NL80211");
 	    }
-	    if (nl80211.triggerScan()) {
-	    	wifiHotspotInfo = nl80211.getScanResults(3, 2);
-	    }
-	    if (wifiMode == WifiMode.MASTER) {
-	    	nl80211.setMode(WifiMode.MASTER);
-	    }
+	    
 	    return wifiHotspotInfo;
 	}
 	

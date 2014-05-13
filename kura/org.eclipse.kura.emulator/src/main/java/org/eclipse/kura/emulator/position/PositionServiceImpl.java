@@ -11,9 +11,8 @@
  */
 package org.eclipse.kura.emulator.position;
 
-import java.io.IOException;
 import java.io.InputStream;
-import java.net.UnknownHostException;
+import java.net.URL;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -27,7 +26,7 @@ import javax.xml.parsers.SAXParserFactory;
 import org.eclipse.kura.position.NmeaPosition;
 import org.eclipse.kura.position.PositionLockedEvent;
 import org.eclipse.kura.position.PositionService;
-import org.json.JSONException;
+import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.event.EventAdmin;
 import org.osgi.util.measurement.Measurement;
@@ -42,7 +41,6 @@ public class PositionServiceImpl implements PositionService {
 
 	private static final String LOCATION = "boston";
 
-	@SuppressWarnings("unused")
 	private ComponentContext m_ctx;
 	private EventAdmin m_eventAdmin;
 	
@@ -155,8 +153,10 @@ public class PositionServiceImpl implements PositionService {
 			SAXParser parser = factory.newSAXParser();
 			s_logger.debug("Parsing: " + fileName);
 
-			InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream(fileName);
-
+			BundleContext bundleContext = m_ctx.getBundleContext();
+			URL url = bundleContext.getBundle().getResource(fileName);
+			InputStream is = url.openStream();
+			
 			/*
 			BufferedReader br = new BufferedReader(new InputStreamReader(getClass().getResourceAsStream("/src/main/resources/" + fileName)));
 			StringBuffer buffer = new StringBuffer();

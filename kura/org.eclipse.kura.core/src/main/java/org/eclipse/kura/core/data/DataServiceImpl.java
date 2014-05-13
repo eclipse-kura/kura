@@ -68,8 +68,8 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
 	private DataTransportService m_dataTransportService;
 	private DbService m_dbService;
 
-	private ServiceTracker<DataServiceListener, DataServiceListener> m_listenersTracker;
-
+	private DataServiceListeners m_dataServiceListeners;
+	
 	private ScheduledFuture<?> m_reconnectFuture;
 	
 	// A dedicated executor for the publishing task
@@ -127,11 +127,14 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
 			throw new ComponentException("Failed to start store", e);
 		}
 		
-		m_listenersTracker = new ServiceTracker<DataServiceListener, DataServiceListener>(
+		ServiceTracker<DataServiceListener, DataServiceListener> listenersTracker = new ServiceTracker<DataServiceListener, DataServiceListener>(
 				componentContext.getBundleContext(),
 				DataServiceListener.class, null);
-		
-		m_listenersTracker.open();
+		 		
+		// Deferred open of tracker to prevent
+		// java.lang.Exception: Recursive invocation of ServiceFactory.getService
+		// on ProSyst
+		m_dataServiceListeners = new DataServiceListeners(listenersTracker);
 		
 		startReconnectTask();
 	}
@@ -169,8 +172,8 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
 		stopReconnectTask();
 		
 		disconnect();
-				
-		m_listenersTracker.close();
+
+		m_dataServiceListeners.close();
 				
 		m_store.stop();
 	}
@@ -247,16 +250,7 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
 		}
 		
 		// Notify the listeners
-		Object[] listeners = m_listenersTracker.getServices();
-		if (listeners != null && listeners.length != 0) {
-			for (Object listener : listeners) {
-				try {
-					((DataServiceListener) listener).onConnectionEstablished();
-				} catch (Throwable t) {
-					s_logger.error("Unexpected Throwable", t);
-				}
-			}
-		}
+		m_dataServiceListeners.onConnectionEstablished();
 		
 		// Schedule execution of a publisher task
 		submitPublishingWork();
@@ -268,16 +262,7 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
 		s_logger.info("Notified disconnecting");
 		
 		// Notify the listeners
-		Object[] listeners = m_listenersTracker.getServices();
-		if (listeners != null && listeners.length != 0) {
-			for (Object listener : listeners) {
-				try {
-					((DataServiceListener) listener).onDisconnecting();
-				} catch (Throwable t) {
-					s_logger.error("Unexpected Throwable", t);
-				}
-			}
-		}
+		m_dataServiceListeners.onDisconnecting();
 		
 		// Schedule execution of a publisher task waiting until done or timeout.
 		Future<?> future = submitPublishingWork();
@@ -298,16 +283,7 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
 		s_logger.info("Notified disconnected");
 		
 		// Notify the listeners
-		Object[] listeners = m_listenersTracker.getServices();
-		if (listeners != null && listeners.length != 0) {
-			for (Object listener : listeners) {
-				try {
-					((DataServiceListener) listener).onDisconnected();
-				} catch (Throwable t) {
-					s_logger.error("Unexpected Throwable", t);
-				}
-			}
-		}
+		m_dataServiceListeners.onDisconnected();
 	}
 
 	@Override
@@ -341,16 +317,7 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
 		startReconnectTask();
 		
 		// Notify the listeners
-		Object[] listeners = m_listenersTracker.getServices();
-		if (listeners != null && listeners.length != 0) {
-			for (Object listener : listeners) {
-				try {
-					((DataServiceListener) listener).onConnectionLost(cause);
-				} catch (Throwable t) {
-					s_logger.error("Unexpected Throwable", t);
-				}
-			}
-		}
+		m_dataServiceListeners.onConnectionLost(cause);
 	}
 
 	@Override
@@ -360,18 +327,7 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
 		s_logger.debug("Message arrived on topic: {}", topic);
 		
 		// Notify the listeners
-		Object[] listeners = m_listenersTracker.getServices();
-		if (listeners != null && listeners.length != 0) {
-			for (Object listener : listeners) {
-				try {
-					((DataServiceListener) listener).onMessageArrived(topic, payload, qos, retained);
-				} catch (Throwable t) {
-					s_logger.error("Unexpected Throwable", t);
-				}
-			}
-		} else {
-			s_logger.error("No registered services. Dropping arrived message");
-		}
+		m_dataServiceListeners.onMessageArrived(topic, payload, qos, retained);
 		
 		submitPublishingWork();
 	}
@@ -400,19 +356,7 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
 			// Notify the listeners
 			if (confirmedMessage != null) {
 				String topic = confirmedMessage.getTopic();
-				Object[] listeners = m_listenersTracker.getServices();
-				if (listeners != null && listeners.length != 0) {
-					for (Object listener : listeners) {
-						try {
-							((DataServiceListener) listener).onMessageConfirmed(messageId, topic);
-						} catch (Throwable t) {
-							s_logger.error("Unexpected Throwable", t);
-						}
-					}
-				} 
-				else {
-					s_logger.error("No registered services. Dropping message confirm");
-				}
+				m_dataServiceListeners.onMessageConfirmed(messageId, topic);
 			}
 			else {
 				s_logger.error("Confirmed Message with ID {} could not be loaded from the DataStore.", messageId);
@@ -609,19 +553,7 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
 						// slow down publish rate?
 						
 						// Notify the listeners
-						String topic = message.getTopic();
-						Object[] listeners = m_listenersTracker.getServices();
-						if (listeners != null && listeners.length != 0) {
-							for (Object listener : listeners) {
-								try {
-									((DataServiceListener) listener).onMessagePublished(message.getId(), topic);
-								} catch (Throwable t) {
-									s_logger.error("Unexpected Throwable", t);
-								}
-							}
-						} else {
-							s_logger.error("No registered services. Ignoring message confirm");
-						}
+						m_dataServiceListeners.onMessagePublished(message.getId(), message.getTopic());
 					}
 				} catch (KuraConnectException e) {
 					s_logger.info("DataPublisherService is not connected", e);

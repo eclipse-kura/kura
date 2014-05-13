@@ -39,10 +39,10 @@ DATATYPE = le
 ##BOARDTYPE = Solution
 ############################################################################################################
 #
-#       Release the dkcomm.so file place
+#       Release the libdkcomm.so file place
 #
 ############################################################################################################
-DLLNAME=Release/$(OS)/$(CPUTYPE)_$(COMPILER)/dkcomm.$(LIBTYPE)
+DLLNAME=Release/$(OS)/$(CPUTYPE)_$(COMPILER)/libdkcomm.$(LIBTYPE)
 BUILDFILES1 = CommPortIdentifier.o NSCommDriver.o NSDeviceInputStream.o NSDeviceOutputStream.o NSSerialPort.o
 BUILDFILES2 = cygCommDriver.o cygDeviceInputStream.o cygDeviceOutputStream.o cygSerialPort.o
 BUILDFILES3 = SerialDataEventThread.o SerialStatusEventThread.o SysVStyleSemaphore.o

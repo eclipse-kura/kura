@@ -12,12 +12,11 @@
       Eurotech
 
 -->
-<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" name="org.eclipse.kura.deployment.agent">
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" name="org.eclipse.kura.deployment.agent" enabled="true" immediate="true">
    <implementation class="org.eclipse.kura.deployment.agent.impl.DeploymentAgent"/>
    <reference bind="setEventAdmin" cardinality="1..1" interface="org.osgi.service.event.EventAdmin" name="EventAdmin" policy="static" unbind="unsetEventAdmin"/>
    <reference bind="setDeploymentAdmin" cardinality="1..1" interface="org.osgi.service.deploymentadmin.DeploymentAdmin" name="DeploymentAdmin" policy="static" unbind="unsetDeploymentAdmin"/>
    <service>
       <provide interface="org.eclipse.kura.deployment.agent.DeploymentAgentService"/>
-      <provide interface="org.eclipse.osgi.framework.console.CommandProvider"/>
    </service>
 </scr:component>

@@ -14,6 +14,7 @@ package org.eclipse.kura.core.data.transport.mqtt;
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Future;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -26,6 +27,7 @@ import org.eclipse.kura.KuraTimeoutException;
 import org.eclipse.kura.KuraTooManyInflightMessagesException;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.core.data.transport.mqtt.MqttClientConfiguration.PersistenceType;
+import org.eclipse.kura.core.util.ExecutorUtil;
 import org.eclipse.kura.core.util.ValidationUtil;
 import org.eclipse.kura.data.DataTransportListener;
 import org.eclipse.kura.data.DataTransportService;
@@ -64,8 +66,8 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 	
 	private MqttAsyncClient m_mqttClient;
 
-	private ServiceTracker<DataTransportListener, DataTransportListener> m_listenersTracker;
-
+	private DataTransportListeners m_dataTransportListeners;
+	
 	private MqttClientConfiguration m_clientConf;
 	private boolean m_newSession;
 	private String m_sessionId;
@@ -140,13 +142,16 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 					"Invalid client configuration. Service will not be able to connect until the configuration is updated",
 					e);
 		}
-		
-		m_listenersTracker = new ServiceTracker<DataTransportListener, DataTransportListener>(
+				
+		ServiceTracker<DataTransportListener, DataTransportListener> listenersTracker = new ServiceTracker<DataTransportListener, DataTransportListener>(
 				componentContext.getBundleContext(),
 				DataTransportListener.class, null);
 		
-		m_listenersTracker.open();
-
+		// Deferred open of tracker to prevent
+		// java.lang.Exception: Recursive invocation of ServiceFactory.getService
+		// on ProSyst
+		m_dataTransportListeners = new DataTransportListeners(listenersTracker);
+		
 		// Do nothing waiting for the connect request from the upper layer.
 	}
 
@@ -165,7 +170,7 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 			disconnect(0);
 		}
 		
-		m_listenersTracker.close();
+		m_dataTransportListeners.close();
 	}
 
 	public void updated(Map<String, Object> properties) 
@@ -177,16 +182,7 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 		// First notify the Listeners
 		// We do nothing other than notifying the listeners which may later
 		// request to disconnect and reconnect again.
-		Object[] listeners = m_listenersTracker.getServices();
-		if (listeners != null && listeners.length != 0) {
-			for (Object listener : listeners) {
-				try {
-					((DataTransportListener) listener).onConfigurationUpdating(wasConnected);
-				} catch (Throwable t) {
-					s_logger.error("Unexpected Throwable", t);
-				}
-			}
-		}
+		m_dataTransportListeners.onConfigurationUpdating(wasConnected);
 
 		// Then update the configuration
 		// Throwing a RuntimeException here is fine.
@@ -196,15 +192,7 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 
 		// We do nothing other than notifying the listeners which may later
 		// request to disconnect and reconnect again.
-		if (listeners != null && listeners.length != 0) {
-			for (Object listener : listeners) {
-				try {
-					((DataTransportListener) listener).onConfigurationUpdated(wasConnected);
-				} catch (Throwable t) {
-					s_logger.error("Unexpected Throwable", t);
-				}
-			}
-		}
+		m_dataTransportListeners.onConfigurationUpdated(wasConnected);
 	}
 
 
@@ -285,16 +273,7 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 
 		//
 		// notify the listeners
-		Object[] listeners = m_listenersTracker.getServices();
-		if (listeners != null && listeners.length != 0) {
-			for (Object listener : listeners) {
-				try {
-					((DataTransportListener) listener).onConnectionEstablished(m_newSession);
-				} catch (Throwable t) {
-					s_logger.error("Unexpected Throwable", t);
-				}
-			}
-		}
+		m_dataTransportListeners.onConnectionEstablished(m_newSession);
 	}
 
 	public boolean isConnected() {
@@ -346,16 +325,7 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 			
 			//
 			// notify the listeners
-			Object[] listeners = m_listenersTracker.getServices();
-			if (listeners != null && listeners.length != 0) {
-				for (Object listener : listeners) {
-					try {
-						((DataTransportListener) listener).onDisconnecting();
-					} catch (Throwable t) {
-						s_logger.error("Unexpected Throwable", t);
-					}
-				}
-			}
+			m_dataTransportListeners.onDisconnecting();
 			
 			try {
 				IMqttToken token = m_mqttClient.disconnect(quiesceTimeout);
@@ -367,16 +337,7 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 			
 			//
 			// notify the listeners
-			listeners = m_listenersTracker.getServices();
-			if (listeners != null && listeners.length != 0) {
-				for (Object listener : listeners) {
-					try {
-						((DataTransportListener) listener).onDisconnected();
-					} catch (Throwable t) {
-						s_logger.error("Unexpected Throwable", t);
-					}
-				}
-			}
+			m_dataTransportListeners.onDisconnected();
 		} else {
 			s_logger.warn("MQTT client already disconnected");
 		}
@@ -517,16 +478,7 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 		s_logger.warn("Connection Lost", cause);
 
 		// notify the listeners
-		Object[] listeners = m_listenersTracker.getServices();
-		if (listeners != null && listeners.length != 0) {
-			for (Object listener : listeners) {
-				try {
-					((DataTransportListener) listener).onConnectionLost(cause);
-				} catch (Throwable t) {
-					s_logger.error("Unexpected Throwable", t);
-				}
-			}
-		}
+		m_dataTransportListeners.onConnectionLost(cause);
 	}
 
 	@Override 
@@ -577,20 +529,8 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 		// These confirms will be lost!
 		
 		// notify the listeners
-		DataTransportToken dataPublisherToken = new DataTransportToken(id, m_sessionId);
-		
-		Object[] listeners = m_listenersTracker.getServices();
-		if (listeners != null && listeners.length != 0) {
-			for (Object listener : listeners) {
-				try {
-					((DataTransportListener) listener).onMessageConfirmed(dataPublisherToken);
-				} catch (Throwable t) {
-					s_logger.error("Unexpected Throwable", t);
-				}
-			}
-		} else {
-			s_logger.info("No registered services. Ignoring message delivery confirm");
-		}
+		DataTransportToken dataPublisherToken = new DataTransportToken(id, m_sessionId);		
+		m_dataTransportListeners.onMessageConfirmed(dataPublisherToken);
 	}
 
 	@Override
@@ -606,20 +546,9 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 		// FIXME: the same argument about lost confirms applies to arrived messages.
 		
 		// notify the listeners
-		Object[] listeners = m_listenersTracker.getServices();
-		if (listeners != null && listeners.length != 0) {
-			for (Object listener : listeners) {
-				try {
-					((DataTransportListener) listener).onMessageArrived(topic,
-							message.getPayload(), message.getQos(),
-							message.isRetained());
-				} catch (Throwable t) {
-					s_logger.error("Unexpected Throwable", t);
-				}
-			}
-		} else {
-			s_logger.info("No registered services. Ignoring arrived message");
-		}
+		m_dataTransportListeners.onMessageArrived(topic,
+				message.getPayload(), message.getQos(),
+				message.isRetained());
 	}
 
 	private long getTimeToWaitMillis() {

@@ -752,14 +752,16 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
     private boolean isAccessPointAvailable(String interfaceName, String ssid) throws KuraException {
         boolean available = false;
         if(ssid != null) {
-        	if(OS_VERSION.equals(KuraConstants.Raspberry_Pi.getImageName())) {
+        	//if(OS_VERSION.equals(KuraConstants.Raspberry_Pi.getImageName())) {   do not use libnl80211
         		List<WifiAccessPoint> wifiAccessPoints = LinuxNetworkUtil.getAvailableAccessPoints(interfaceName);
                 for(WifiAccessPoint wap : wifiAccessPoints) {
                     if(ssid.equals(wap.getSSID())) {
+                    	s_logger.trace("isAccessPointAvailable() :: SSID={} is available :: strength={}", ssid, wap.getStrength());
                         available = wap.getStrength() > 0;
                         break;
                     }
                 }
+            /* do not use libnl80211
         	} else {
 	        	NL80211 nl80211 = NL80211.getInstance(interfaceName);
 	        	nl80211.setMode(WifiMode.INFRA, 3);
@@ -780,6 +782,7 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
 	        		}
 	    	    }
         	}
+        	*/
         }
         
         return available;
@@ -788,7 +791,7 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
     private int getSignalLevel(String interfaceName, String ssid) throws KuraException {
 		int rssi = 0;
 		if (ssid != null) {
-			if (OS_VERSION.equals(KuraConstants.Raspberry_Pi.getImageName())) {
+			//if (OS_VERSION.equals(KuraConstants.Raspberry_Pi.getImageName())) {   do not use libnl80211
 				List<WifiAccessPoint> wifiAccessPoints = LinuxNetworkUtil.getAvailableAccessPoints(interfaceName);
 				for (WifiAccessPoint wap : wifiAccessPoints) {
 					if (ssid.equals(wap.getSSID())) {
@@ -798,6 +801,7 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
 						break;
 					}
 				}
+			/*  do not use libnl80211
 			} else {
 				NL80211 nl80211 = NL80211.getInstance(interfaceName);
 				if (nl80211.triggerScan()) {
@@ -817,6 +821,7 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
 					}
 				}
 			}
+			*/
 		}
 
 		return rssi;

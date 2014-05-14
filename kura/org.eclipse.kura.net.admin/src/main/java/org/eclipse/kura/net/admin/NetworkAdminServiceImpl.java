@@ -1063,6 +1063,12 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 		    
 		    List<WifiAccessPoint> wifiAccessPoints = LinuxNetworkUtil.getAvailableAccessPoints(ifaceName);
 		    for(WifiAccessPoint wap : wifiAccessPoints) {
+		    	
+		    	if ((wap.getSSID() == null) || (wap.getSSID().length() == 0)) {
+		    		s_logger.debug("Skipping hidden SSID");
+		    		continue;
+		    	}
+		    	
 		    	s_logger.trace("getWifiHotspots() :: SSID={}", wap.getSSID());
 		    	s_logger.trace("getWifiHotspots() :: Signal={}", wap.getStrength());
 		    	s_logger.trace("getWifiHotspots() :: Frequency={}", wap.getFrequency());

@@ -906,6 +906,7 @@ public class LinuxNetworkUtil {
 			EnumSet<WifiSecurity> rsnSecurity = null;
 			int strength = -1;
 			EnumSet<WifiSecurity> wpaSecurity = null;
+			List<String> capabilities = null;
 
 			while((line = br.readLine()) != null) {
 				if(line.contains("BSS ") && !line.contains("* OBSS")) {
@@ -919,6 +920,9 @@ public class LinuxNetworkUtil {
 						wifiAccessPoint.setRsnSecurity(rsnSecurity);
 						wifiAccessPoint.setStrength(strength);
 						wifiAccessPoint.setWpaSecurity(wpaSecurity);
+						if ((capabilities != null) && (capabilities.size() > 0)) {
+							wifiAccessPoint.setCapabilities(capabilities);
+						}
 						wifiAccessPoints.add(wifiAccessPoint);
 					}
 					
@@ -931,6 +935,7 @@ public class LinuxNetworkUtil {
 					rsnSecurity = null;
 					strength = -1;
 					wpaSecurity = null;
+					capabilities = null;
 					
 					//parse out the MAC
 					StringTokenizer st = new StringTokenizer(line, " ");
@@ -1082,6 +1087,13 @@ public class LinuxNetworkUtil {
 					} else {
 						strength = (int) (2 * (dBm + 100));
 					}
+				} else if (line.contains("capability:")) {
+					capabilities = new ArrayList<String>();
+					line = line.substring("capability:".length()).trim();
+					StringTokenizer st = new StringTokenizer(line, " ");
+					while (st.hasMoreTokens()) {
+						capabilities.add(st.nextToken());
+					}
 				}
 			}
 			
@@ -1095,6 +1107,9 @@ public class LinuxNetworkUtil {
 				wifiAccessPoint.setRsnSecurity(rsnSecurity);
 				wifiAccessPoint.setStrength(strength);
 				wifiAccessPoint.setWpaSecurity(wpaSecurity);
+				if ((capabilities != null) && (capabilities.size() > 0)) {
+					wifiAccessPoint.setCapabilities(capabilities);
+				}
 				wifiAccessPoints.add(wifiAccessPoint);
 			}
 		} catch (IOException e) {

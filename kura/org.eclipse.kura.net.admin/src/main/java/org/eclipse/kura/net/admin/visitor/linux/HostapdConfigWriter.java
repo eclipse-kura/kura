@@ -63,6 +63,7 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
 
 	@Override
 	public void visit(NetworkConfiguration config) throws KuraException {
+		
 		List<NetInterfaceConfig<? extends NetInterfaceAddressConfig>> netInterfaceConfigs = config.getModifiedNetInterfaceConfigs();
 		
 		for(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig: netInterfaceConfigs) {
@@ -78,6 +79,7 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
 	}
 	
 	private void writeConfig(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig) throws KuraException {
+		
 		String interfaceName = netInterfaceConfig.getName();
 		
 		List<? extends NetInterfaceAddressConfig> netInterfaceAddressConfigs = netInterfaceConfig.getNetInterfaceAddresses();
@@ -135,9 +137,11 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
 	 * This method generates hostapd configuration file
 	 */
 	private void generateHostapdConf(WifiConfig wifiConfig, String interfaceName, String interfaceDriver) throws Exception {
+		
 		s_logger.debug("Generating Hostapd Config");
 		
 		if (wifiConfig.getSecurity() == WifiSecurity.SECURITY_NONE) {
+			
 			File outputFile = new File(HOSTAPD_TMP_CONFIG_FILE);
 			InputStream is = getClass().getResourceAsStream("/src/main/resources/wifi/hostapd.conf_no_security");
 			
@@ -202,9 +206,13 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
 			} else {
 				throw KuraException.internalError("the channel " + wifiConfig.getChannels()[0] + " must be between 1 (inclusive) and 11 (inclusive) or 1 (inclusive) and 13 (inclusive) depending on your locale");
 			}
-
+			
 			//everything is set and we haven't failed - write the file
 			this.copyFile(fileAsString, outputFile);
+			
+			//move the file if we made it this far
+			this.moveFile();
+			
 			return;
 		} else if(wifiConfig.getSecurity() == WifiSecurity.SECURITY_WEP) {
 			File outputFile = new File(HOSTAPD_TMP_CONFIG_FILE);
@@ -329,6 +337,10 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
 
 			//everything is set and we haven't failed - write the file
 			this.copyFile(fileAsString, outputFile);
+			
+			//move the file if we made it this far
+			this.moveFile();
+			
 			return;
 		} else if ((wifiConfig.getSecurity() == WifiSecurity.SECURITY_WPA)
 				|| (wifiConfig.getSecurity() == WifiSecurity.SECURITY_WPA2)) {
@@ -417,18 +429,7 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
 			this.copyFile(fileAsString, tmpOutputFile);
 			
 			//move the file if we made it this far
-			File tmpFile = new File(HOSTAPD_TMP_CONFIG_FILE);
-			File file = new File(HOSTAPD_CONFIG_FILE);
-			if(!FileUtils.contentEquals(tmpFile, file)) {
-				if(tmpFile.renameTo(file)){
-					s_logger.trace("Successfully wrote hostapd.conf file");
-				}else{
-					s_logger.error("Failed to write hostapd.conf file");
-					throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR, "error while building up new configuration file for hostapd");
-				}
-			} else {
-				s_logger.info("Not rewriting hostapd.conf file because it is the same");
-			}
+			this.moveFile();
 			
 			return;
 		} else {
@@ -469,6 +470,21 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
 			setPermissions(destination.toString());
 		} catch (IOException e) {
 			throw KuraException.internalError(e);
+		}
+	}
+	
+	private void moveFile() throws Exception {
+		File tmpFile = new File(HOSTAPD_TMP_CONFIG_FILE);
+		File file = new File(HOSTAPD_CONFIG_FILE);
+		if(!FileUtils.contentEquals(tmpFile, file)) {
+			if(tmpFile.renameTo(file)){
+				s_logger.trace("Successfully wrote hostapd.conf file");
+			}else{
+				s_logger.error("Failed to write hostapd.conf file");
+				throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR, "error while building up new configuration file for hostapd");
+			}
+		} else {
+			s_logger.info("Not rewriting hostapd.conf file because it is the same");
 		}
 	}
 	

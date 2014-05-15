@@ -90,6 +90,18 @@ public class WpaSupplicantConfigWriter implements NetworkConfigurationVisitor {
 		}
 	}
 	
+	public void generateTempWpaSupplicantConf() throws KuraException {
+		
+		InputStream is = getClass().getResourceAsStream("/src/main/resources/wifi/wpasupplicant.conf");;
+		try {
+			String fileAsString = readInputStreamAsString(is);
+			File outputFile = new File(TMP_WPA_CONFIG_FILE);
+			copyFile(fileAsString, outputFile);
+		} catch (Exception e) {
+			throw KuraException.internalError("Failed to generate wpa_supplicant.conf");
+		}
+	}
+	
 	private void writeConfig(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig) throws KuraException{
 		String interfaceName = netInterfaceConfig.getName();
         s_logger.debug("Writing wpa_supplicant config for " + interfaceName);

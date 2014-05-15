@@ -94,7 +94,7 @@ public class DnsMonitorServiceImpl implements DnsMonitorService, EventHandler {
 		}
         
         //FIXME - brute force handler for DNS updates
-        // m_executorUtil = ExecutorUtil.getInstance(); <IAB>
+        // m_executorUtil = ExecutorUtil.getInstance();
         m_executor = new ScheduledThreadPoolExecutor(1);
         m_executor.setContinueExistingPeriodicTasksAfterShutdownPolicy(false);
         m_executor.setExecuteExistingDelayedTasksAfterShutdownPolicy(false);

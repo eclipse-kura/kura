@@ -76,7 +76,7 @@ java -Xms${kura.mem.size} -Xmx${kura.mem.size} -XX:MaxPermSize=${kura.mem.size} 
 	-Dkura.configuration=file:/opt/eclipse/kura/kura/kura.properties \
         -Ddpa.configuration=/opt/eclipse/kura/kura/dpa.properties \
 	-Dlog4j.configuration=file:/opt/eclipse/kura/kura/log4j.properties \
-	-jar plugins/org.eclipse.osgi_3.8.1.v20120830-144521.jar \
+	-jar /opt/eclipse/kura/plugins/org.eclipse.osgi_3.8.1.v20120830-144521.jar \
 	-configuration  /tmp/.kura/configuration \
 	-console \
 	-consoleLog
@@ -99,7 +99,7 @@ java -Xms${kura.mem.size} -Xmx${kura.mem.size} -XX:MaxPermSize=${kura.mem.size} 
 	-Dkura.configuration=file:/opt/eclipse/kura/kura/kura.properties \
         -Ddpa.configuration=/opt/eclipse/kura/kura/dpa.properties \
 	-Dlog4j.configuration=file:/opt/eclipse/kura/kura/log4j.properties \
-	-jar plugins/org.eclipse.osgi_3.8.1.v20120830-144521.jar \
+	-jar /opt/eclipse/kura/plugins/org.eclipse.osgi_3.8.1.v20120830-144521.jar \
 	-configuration  /tmp/.kura/configuration \
 	-console \
 	-consoleLog
@@ -122,7 +122,7 @@ nohup java -Xms${kura.mem.size} -Xmx${kura.mem.size} -XX:MaxPermSize=${kura.mem.
         -Dkura.configuration=file:/opt/eclipse/kura/kura/kura.properties \
         -Ddpa.configuration=/opt/eclipse/kura/kura/dpa.properties \
         -Dlog4j.configuration=file:/opt/eclipse/kura/kura/log4j.properties \
-        -jar plugins/org.eclipse.osgi_3.8.1.v20120830-144521.jar \
+        -jar /opt/eclipse/kura/plugins/org.eclipse.osgi_3.8.1.v20120830-144521.jar \
         -configuration  /tmp/.kura/configuration \
         -console 5002 \
         -consoleLog >> /var/log/kura-console.log 2>> /var/log/kura-console.log &amp;
@@ -294,7 +294,7 @@ echo $KURA_PID > /var/run/kura.pid
                 <arg value="${build.name}" />
         </exec>
 
-        <echo message="Building the DP for ${build.name}" />
+        <echo message="Building the update DP for ${build.name}" />
         
         <local name="sortedFiles"/>
         <pathconvert property="sortedFiles" pathsep="${line.separator}">
@@ -306,6 +306,26 @@ echo $KURA_PID > /var/run/kura.pid
                                 manifest="${project.build.directory}/kura-${build.name}-jars_${project.version}/dp_stage/META-INF/MANIFEST.MF">
                 <filelist dir="${project.build.directory}/kura-${build.name}-jars_${project.version}/dp_stage" files="${sortedFiles}"/>
         </jar>
+
+
+
+
+
+<!-- OLD ESF METHOD
+        <echo message="Creating Updater for ${build.name}" />
+        <exec executable="${project.build.directory}/../src/main/sh/create_upgrader.sh">
+                <arg value="${project.build.directory}" />
+                <arg value="esf-${build.name}_${project.version}.zip" />
+                <arg value="esf-${build.name}_${project.version}_dp_upgrader.sh" />
+                <arg value="${build.name}" />
+        </exec>
+
+        !-- Zip the updater --
+        <zip destfile="${project.build.directory}/esf-update-${build.name}_${project.version}.zip">
+                <zipfileset file="${project.build.directory}/esf-${build.name}_${project.version}_dp_upgrader.sh" />
+                <zipfileset file="src/main/sh/upgrade_wrapper.sh" />
+        </zip>
+-->
     </target>
 </project>
 

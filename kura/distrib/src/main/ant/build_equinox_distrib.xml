@@ -320,7 +320,7 @@ echo $KURA_PID > /var/run/kura.pid
                 <arg value="${build.name}" />
         </exec>
 
-        !-- Zip the updater --
+        !- Zip the updater -
         <zip destfile="${project.build.directory}/esf-update-${build.name}_${project.version}.zip">
                 <zipfileset file="${project.build.directory}/esf-${build.name}_${project.version}_dp_upgrader.sh" />
                 <zipfileset file="src/main/sh/upgrade_wrapper.sh" />

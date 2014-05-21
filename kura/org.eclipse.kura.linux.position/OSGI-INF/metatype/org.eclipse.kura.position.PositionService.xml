@@ -65,7 +65,7 @@
             cardinality="0"
             required="false"
             default="/dev/ttyACM0"
-            description="The serial port of the GPS device (e.g. /dev/ttyS3)."/>
+            description="The USB or serial port of the GPS device (e.g. 1-3.2 or /dev/ttyACM0)."/>
         
         <AD id="baudRate"  
             name="baudRate"

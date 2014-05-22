@@ -58,7 +58,7 @@ public class LifeCyclePayloadBuilder
 		// build device name
 		CloudServiceOptions cso = m_cloudServiceImpl.getCloudServiceOptions();
 		String deviceName = cso.getDeviceDisplayName();
-		if (deviceName == null || deviceName.trim().length() == 0) {
+		if (deviceName == null) {
 			deviceName =  m_cloudServiceImpl.getSystemService().getDeviceName();
 		}		
 		
@@ -108,7 +108,7 @@ public class LifeCyclePayloadBuilder
 
 		// build device name
 		String deviceName = cloudOptions.getDeviceDisplayName();
-		if (deviceName == null || deviceName.trim().length() == 0) {
+		if (deviceName == null) {
 			deviceName =  systemService.getDeviceName();
 		}		
 		

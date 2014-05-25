@@ -1,0 +1,94 @@
+<project
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+	xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+	  <groupId>org.eclipse.kura</groupId>
+	  <artifactId>target-platform</artifactId>
+          <version>0.2.0-SNAPSHOT</version>
+	</parent>
+
+	<groupId>org.eclipse.kura</groupId>
+	<artifactId>concierge-repo</artifactId>
+	<version>0.2.0-SNAPSHOT</version>
+	<packaging>pom</packaging>
+
+
+	<build>
+	  <plugins>
+        <!-- 
+            Copying common artifacts across all platforms into a known location
+            ${project.build.directory}/plugins/common 
+            is only one way how to create content to be published. Any other source of 
+            bundles and/or features can be used to be published as long as it end up 
+            in ${project.basedir}/target/source/plugins and or ~/features
+            The publisher will 
+            use every content that is located in this directory 
+        -->
+		<plugin>
+		   <artifactId>maven-antrun-plugin</artifactId>
+		   <executions>
+		     <execution>
+			   <id>setup</id>
+			   <phase>process-resources</phase>
+			   <goals>
+				 <goal>run</goal>
+			   </goals>
+			   <configuration>
+				 <tasks>
+				   <mkdir dir="target/source/plugins/" />
+				   <copy todir="target/source/plugins/">
+				     <fileset dir="src/main/concierge/plugins"/>
+				   </copy>
+				 </tasks>
+			   </configuration>
+			 </execution>
+		  </executions>
+		</plugin>
+				<plugin>
+			<groupId>org.sonatype.tycho</groupId>
+			<artifactId>tycho-p2-extras-plugin</artifactId>
+			<version>0.11.0</version>
+			<executions>
+				<execution>
+					<phase>prepare-package</phase>
+					<goals>
+					  <goal>publish-features-and-bundles</goal>
+					</goals>
+				</execution>
+			</executions>
+			<configuration>
+					<compress>false</compress>
+					<!-- additional arguments example
+						<additionalArgs>-configs win32.win32.x86</additionalArgs>
+					-->
+			</configuration>
+		</plugin>
+        <plugin>
+           <artifactId>maven-antrun-plugin</artifactId>
+           <executions>
+               <execution>
+                   <id>install-concierge</id>
+                   <phase>install</phase>
+                   <goals>
+                       <goal>run</goal>
+                   </goals>
+                   <configuration>
+                       <tasks>
+                           <delete file="../../kura/target-definition/kura.target"/>
+                           <delete dir="../../kura/target-definition/repository/"/>
+                           <delete dir="../../kura/target-definition/concierge/"/>
+			   <mkdir dir="../../kura/target-definition/concierge/repository" />
+                           <copy todir="../../kura/target-definition/concierge/repository">
+                             <fileset dir="${project.build.directory}/repository"/>
+                           </copy>
+                       </tasks>
+                   </configuration>
+               </execution>
+           </executions>
+       </plugin>        
+
+    </plugins>
+  </build>
+</project>

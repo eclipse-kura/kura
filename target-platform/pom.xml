@@ -15,6 +15,7 @@
     <module>org.eclipse.paho</module>
     <module>org.eclipse.soda.dk.comm</module>
     <module>p2-repo</module>
+    <module>concierge-repo</module>
   </modules>
 
 	<properties>

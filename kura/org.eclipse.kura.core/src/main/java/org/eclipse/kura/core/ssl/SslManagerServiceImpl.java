@@ -43,7 +43,9 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 
+import org.eclipse.kura.KuraConnectException;
 import org.eclipse.kura.configuration.ConfigurableComponent;
+import org.eclipse.kura.data.DataTransportService;
 import org.eclipse.kura.ssl.SslManagerService;
 import org.eclipse.kura.system.SystemService;
 import org.osgi.service.component.ComponentContext;
@@ -59,7 +61,6 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
     @SuppressWarnings("unused")
     private ComponentContext         m_ctx;
     private SslManagerServiceOptions m_options;
-    
 
     // ----------------------------------------------------------------
     //
@@ -74,7 +75,6 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
     public void unsetSystemService(SystemService systemService) {
         this.m_systemService = null;
     }
-
     
     // ----------------------------------------------------------------
     //
@@ -278,7 +278,7 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
         SSLSocketFactory sslSocketFactory = sslCtx.getSocketFactory();
         
         // wrap it
-        SSLSocketFactoryWrapper sfw = new SSLSocketFactoryWrapper(sslSocketFactory, ciphers);        
+        SSLSocketFactoryWrapper sfw = new SSLSocketFactoryWrapper(sslSocketFactory, ciphers, m_options.isSslHostnameVerification());        
         return sfw;
     }
     

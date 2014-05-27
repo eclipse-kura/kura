@@ -19,8 +19,10 @@ public class SslManagerServiceOptions
     private static final String  PROP_TRUST_STORE = "ssl.default.trustStore";
     private static final String  PROP_KEY_STORE   = "ssl.default.keyStore";
     private static final String  PROP_CIPHERS     = "ssl.default.cipherSuites";    
+    private static final String  PROP_HN_VERIFY   = "ssl.hostname.verification";
 
     private static final String  PROP_DEFAULT_PROTOCOL    = "TLSv1";
+    private static final Boolean PROP_DEFAULT_HN_VERIFY   = true;
     private static final String  PROP_DEFAULT_TRUST_STORE = "/opt/eurotech/security/cacerts";
     private static final String  PROP_DEFAULT_KEY_STORE   = "/opt/eurotech/security/keystore";
 
@@ -80,5 +82,18 @@ public class SslManagerServiceOptions
             return (String) m_properties.get(PROP_CIPHERS);
         }
         return null;
+    }
+    
+    /**
+     * Returns the ssl.hostname.verification
+     * @return
+     */
+    public Boolean isSslHostnameVerification() {
+    	if (m_properties != null &&
+            m_properties.get(PROP_HN_VERIFY) != null &&
+            m_properties.get(PROP_HN_VERIFY) instanceof Boolean) {
+    		return (Boolean) m_properties.get(PROP_HN_VERIFY);
+    	}
+    	return PROP_DEFAULT_HN_VERIFY;
     }
 }

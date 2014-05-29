@@ -161,7 +161,7 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
 		//
 		// save the bundle context and the properties
 		m_ctx = componentContext;
-		m_options = new CloudServiceOptions(properties);
+		m_options = new CloudServiceOptions(properties, m_systemService);
 
 		//
 		// install event listener for GPS locked event
@@ -176,7 +176,7 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
 		s_logger.info("updated...: " + properties);
 
 		// Update properties and re-publish Birth certificate
-		m_options = new CloudServiceOptions(properties);
+		m_options = new CloudServiceOptions(properties, m_systemService);
 		if (m_dataService != null && m_dataService.isConnected()) {
 			publishBirthCertificate();
 		}

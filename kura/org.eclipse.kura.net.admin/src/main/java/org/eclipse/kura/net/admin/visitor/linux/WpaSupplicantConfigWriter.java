@@ -90,6 +90,18 @@ public class WpaSupplicantConfigWriter implements NetworkConfigurationVisitor {
 		}
 	}
 	
+	public void generateTempWpaSupplicantConf() throws KuraException {
+		
+		InputStream is = getClass().getResourceAsStream("/src/main/resources/wifi/wpasupplicant.conf");;
+		try {
+			String fileAsString = readInputStreamAsString(is);
+			File outputFile = new File(TMP_WPA_CONFIG_FILE);
+			copyFile(fileAsString, outputFile);
+		} catch (Exception e) {
+			throw KuraException.internalError("Failed to generate wpa_supplicant.conf");
+		}
+	}
+	
 	private void writeConfig(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig) throws KuraException{
 		String interfaceName = netInterfaceConfig.getName();
         s_logger.debug("Writing wpa_supplicant config for " + interfaceName);
@@ -163,8 +175,8 @@ public class WpaSupplicantConfigWriter implements NetworkConfigurationVisitor {
     	        		if(wpaSupplicantConfig != null) {
                             s_logger.debug("Writing wifiConfig: " + wpaSupplicantConfig);
                             generateWpaSupplicantConf(wpaSupplicantConfig, interfaceName, WPA_TMP_CONFIG_FILE);
+                            moveWpaSupplicantConf(WPA_TMP_CONFIG_FILE);
     	        		}
-
                     } catch (Exception e) {
                         s_logger.error("Failed to configure WPA Supplicant");
                         throw KuraException.internalError(e);
@@ -288,20 +300,6 @@ public class WpaSupplicantConfigWriter implements NetworkConfigurationVisitor {
 
 			// everything is set and we haven't failed - write the file
 			copyFile(fileAsString, outputFile);
-			
-			//move the file if we made it this far
-			File wpaConfigFile = new File(WPA_CONFIG_FILE);
-			if(!FileUtils.contentEquals(outputFile, wpaConfigFile)) {
-		        if(outputFile.renameTo(wpaConfigFile)){
-		        	s_logger.trace("Successfully wrote wpa_supplicant config file");
-		        }else{
-		        	s_logger.error("Failed to write wpa_supplicant config file");
-		        	throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR, "error while building up new configuration file for wpa_supplicant config");
-		        }
-			} else {
-				s_logger.info("Not rewriting wpa_supplicant.conf file because it is the same");
-			}
-			
 			return;
 		} else if ((wifiConfig.getSecurity() == WifiSecurity.SECURITY_WPA)
 				|| (wifiConfig.getSecurity() == WifiSecurity.SECURITY_WPA2)) {
@@ -386,20 +384,6 @@ public class WpaSupplicantConfigWriter implements NetworkConfigurationVisitor {
 			
 			// everything is set and we haven't failed - write the file
 			this.copyFile(fileAsString, outputFile);
-			
-			//move the file if we made it this far
-			File wpaConfigFile = new File(WPA_CONFIG_FILE);
-			if(!FileUtils.contentEquals(outputFile, wpaConfigFile)) {
-		        if(outputFile.renameTo(wpaConfigFile)){
-		        	s_logger.trace("Successfully wrote wpa_supplicant config file");
-		        }else{
-		        	s_logger.error("Failed to write wpa_supplicant config file");
-		        	throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR, "error while building up new configuration file for wpa_supplicant config");
-		        }
-			} else {
-				s_logger.info("Not rewriting wpa_supplicant.conf file because it is the same");
-			}
-			
 			return;
 		} else if (wifiConfig.getSecurity() == WifiSecurity.SECURITY_NONE || wifiConfig.getSecurity() == WifiSecurity.NONE) {
 			File outputFile = new File(configFile);
@@ -446,25 +430,30 @@ public class WpaSupplicantConfigWriter implements NetworkConfigurationVisitor {
 
 			// everything is set and we haven't failed - write the file
 			this.copyFile(fileAsString, outputFile);
-			
-			//move the file if we made it this far
-			File wpaConfigFile = new File(WPA_CONFIG_FILE);
-			if(!FileUtils.contentEquals(outputFile, wpaConfigFile)) {
-		        if(outputFile.renameTo(wpaConfigFile)){
-		        	s_logger.trace("Successfully wrote wpa_supplicant config file");
-		        }else{
-		        	s_logger.error("Failed to write wpa_supplicant config file");
-		        	throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR, "error while building up new configuration file for wpa_supplicant config");
-		        }
-			} else {
-				s_logger.info("Not rewriting wpa_supplicant.conf file because it is the same");
-			}
-	        
 			return;
 		} else {
 			throw KuraException.internalError("unsupported security type: " + wifiConfig.getSecurity());
 		}
+	}
+	
+	private void moveWpaSupplicantConf(String configFile) throws KuraException {
 		
+		File outputFile = new File(configFile);
+		File wpaConfigFile = new File(WPA_CONFIG_FILE);
+		try {
+			if(!FileUtils.contentEquals(outputFile, wpaConfigFile)) {
+			    if(outputFile.renameTo(wpaConfigFile)){
+			    	s_logger.trace("Successfully wrote wpa_supplicant config file");
+			    }else{
+			    	s_logger.error("Failed to write wpa_supplicant config file");
+			    	throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR, "error while building up new configuration file for wpa_supplicant config");
+			    }
+			} else {
+				s_logger.info("Not rewriting wpa_supplicant.conf file because it is the same");
+			}
+		} catch (IOException e) {
+			throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR, "error while building up new configuration file for wpa_supplicant config");
+		}
 	}
 	
 	/*

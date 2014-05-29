@@ -34,9 +34,7 @@ import org.eclipse.kura.core.net.NetworkConfiguration;
 import org.eclipse.kura.core.net.WifiInterfaceConfigImpl;
 import org.eclipse.kura.linux.net.route.RouteService;
 import org.eclipse.kura.linux.net.route.RouteServiceImpl;
-import org.eclipse.kura.linux.net.util.KuraConstants;
 import org.eclipse.kura.linux.net.util.LinuxNetworkUtil;
-import org.eclipse.kura.linux.net.wifi.NL80211;
 import org.eclipse.kura.net.IPAddress;
 import org.eclipse.kura.net.NetConfig;
 import org.eclipse.kura.net.NetConfigIP4;
@@ -57,7 +55,6 @@ import org.eclipse.kura.net.wifi.WifiAccessPoint;
 import org.eclipse.kura.net.wifi.WifiClientMonitorListener;
 import org.eclipse.kura.net.wifi.WifiClientMonitorService;
 import org.eclipse.kura.net.wifi.WifiConfig;
-import org.eclipse.kura.net.wifi.WifiHotspotInfo;
 import org.eclipse.kura.net.wifi.WifiInterfaceAddressConfig;
 import org.eclipse.kura.net.wifi.WifiMode;
 import org.osgi.service.component.ComponentContext;
@@ -72,7 +69,7 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
 	
     private static final Logger s_logger = LoggerFactory.getLogger(WifiMonitorServiceImpl.class);
     
-    private static final String OS_VERSION = System.getProperty("kura.os.version");
+    //private static final String OS_VERSION = System.getProperty("kura.os.version");
     
     private final static String[] EVENT_TOPICS = new String[] {
         NetworkConfigurationChangeEvent.NETWORK_EVENT_CONFIG_CHANGE_TOPIC,
@@ -752,14 +749,16 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
     private boolean isAccessPointAvailable(String interfaceName, String ssid) throws KuraException {
         boolean available = false;
         if(ssid != null) {
-        	if(OS_VERSION.equals(KuraConstants.Raspberry_Pi.getImageName())) {
-        		List<WifiAccessPoint> wifiAccessPoints = LinuxNetworkUtil.getAvailableAccessPoints(interfaceName);
+        	//if(OS_VERSION.equals(KuraConstants.Raspberry_Pi.getImageName())) {   do not use libnl80211
+        		List<WifiAccessPoint> wifiAccessPoints = LinuxNetworkUtil.getAvailableAccessPoints(interfaceName, 3);
                 for(WifiAccessPoint wap : wifiAccessPoints) {
                     if(ssid.equals(wap.getSSID())) {
+                    	s_logger.trace("isAccessPointAvailable() :: SSID={} is available :: strength={}", ssid, wap.getStrength());
                         available = wap.getStrength() > 0;
                         break;
                     }
                 }
+            /* do not use libnl80211
         	} else {
 	        	NL80211 nl80211 = NL80211.getInstance(interfaceName);
 	        	nl80211.setMode(WifiMode.INFRA, 3);
@@ -780,6 +779,7 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
 	        		}
 	    	    }
         	}
+        	*/
         }
         
         return available;
@@ -788,8 +788,8 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
     private int getSignalLevel(String interfaceName, String ssid) throws KuraException {
 		int rssi = 0;
 		if (ssid != null) {
-			if (OS_VERSION.equals(KuraConstants.Raspberry_Pi.getImageName())) {
-				List<WifiAccessPoint> wifiAccessPoints = LinuxNetworkUtil.getAvailableAccessPoints(interfaceName);
+			//if (OS_VERSION.equals(KuraConstants.Raspberry_Pi.getImageName())) {   do not use libnl80211
+				List<WifiAccessPoint> wifiAccessPoints = LinuxNetworkUtil.getAvailableAccessPoints(interfaceName, 3);
 				for (WifiAccessPoint wap : wifiAccessPoints) {
 					if (ssid.equals(wap.getSSID())) {
 						if (wap.getStrength() > 0) {
@@ -798,6 +798,7 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
 						break;
 					}
 				}
+			/*  do not use libnl80211
 			} else {
 				NL80211 nl80211 = NL80211.getInstance(interfaceName);
 				if (nl80211.triggerScan()) {
@@ -817,6 +818,7 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
 					}
 				}
 			}
+			*/
 		}
 
 		return rssi;

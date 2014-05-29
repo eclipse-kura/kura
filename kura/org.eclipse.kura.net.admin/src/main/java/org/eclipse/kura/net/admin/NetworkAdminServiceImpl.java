@@ -14,6 +14,8 @@ package org.eclipse.kura.net.admin;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Dictionary;
+import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
@@ -40,7 +42,6 @@ import org.eclipse.kura.linux.net.iptables.NATRule;
 import org.eclipse.kura.linux.net.iptables.PortForwardRule;
 import org.eclipse.kura.linux.net.util.LinuxNetworkUtil;
 import org.eclipse.kura.linux.net.wifi.HostapdManager;
-import org.eclipse.kura.linux.net.wifi.NL80211;
 import org.eclipse.kura.linux.net.wifi.WpaSupplicant;
 import org.eclipse.kura.linux.net.wifi.WpaSupplicantManager;
 import org.eclipse.kura.linux.net.wifi.WpaSupplicantStatus;
@@ -59,6 +60,7 @@ import org.eclipse.kura.net.NetworkAdminService;
 import org.eclipse.kura.net.NetworkPair;
 import org.eclipse.kura.net.admin.event.NetworkConfigurationChangeEvent;
 import org.eclipse.kura.net.admin.visitor.linux.WpaSupplicantConfigWriter;
+import org.eclipse.kura.net.admin.visitor.linux.util.KuranetConfig;
 import org.eclipse.kura.net.dhcp.DhcpServerConfigIP4;
 import org.eclipse.kura.net.firewall.FirewallNatConfig;
 import org.eclipse.kura.net.firewall.FirewallOpenPortConfigIP;
@@ -71,6 +73,7 @@ import org.eclipse.kura.net.wifi.WifiConfig;
 import org.eclipse.kura.net.wifi.WifiHotspotInfo;
 import org.eclipse.kura.net.wifi.WifiInterfaceAddressConfig;
 import org.eclipse.kura.net.wifi.WifiMode;
+import org.eclipse.kura.net.wifi.WifiSecurity;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventConstants;
@@ -1027,8 +1030,8 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 	}
 	
 	public Map<String, WifiHotspotInfo> getWifiHotspots(String ifaceName) throws KuraException {
-	
-		Map<String, WifiHotspotInfo> wifiHotspotInfo = null;
+		
+		Map<String, WifiHotspotInfo> mWifiHotspotInfo = new HashMap<String, WifiHotspotInfo>();
 		WifiMode wifiMode = WifiMode.UNKNOWN;
 		List<? extends NetInterfaceConfig<? extends NetInterfaceAddressConfig>> netInterfaceConfigs = getNetworkInterfaceConfigs();
 	    for(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig : netInterfaceConfigs) {
@@ -1046,21 +1049,100 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 	    }
 	    
 	    try {
-		    NL80211 nl80211 = NL80211.getInstance(ifaceName);
+		    //NL80211 nl80211 = NL80211.getInstance(ifaceName);
 		    if (wifiMode == WifiMode.MASTER) {
-		    	nl80211.setMode(WifiMode.INFRA, 3);
+		    	WpaSupplicantConfigWriter wpaSupplicantConfigWriter = WpaSupplicantConfigWriter.getInstance();
+		    	wpaSupplicantConfigWriter.generateTempWpaSupplicantConf();
+		    	
+		    	s_logger.debug("getWifiHotspots() :: Starting temporary instance of wpa_supplicant");
+		    	StringBuilder key = new StringBuilder("net.interface." +  ifaceName + ".config.wifi.infra.driver");
+		    	String driver = KuranetConfig.getProperty(key.toString());
+		    	WpaSupplicantManager.startTemp(ifaceName, WifiMode.INFRA, driver);
+		    	//nl80211.setMode(WifiMode.INFRA, 3);
 		    }
+		    
+		    s_logger.info("getWifiHotspots() :: scanning for available access points ...");
+		    List<WifiAccessPoint> wifiAccessPoints = LinuxNetworkUtil.getAvailableAccessPoints(ifaceName, 3);
+		    for(WifiAccessPoint wap : wifiAccessPoints) {
+		    	
+		    	if ((wap.getSSID() == null) || (wap.getSSID().length() == 0)) {
+		    		s_logger.debug("Skipping hidden SSID");
+		    		continue;
+		    	}
+		    	
+		    	s_logger.trace("getWifiHotspots() :: SSID={}", wap.getSSID());
+		    	s_logger.trace("getWifiHotspots() :: Signal={}", wap.getStrength());
+		    	s_logger.trace("getWifiHotspots() :: Frequency={}", wap.getFrequency());
+		    	
+		    	byte [] baMacAddress = wap.getHardwareAddress();
+		    	StringBuffer sbMacAddress = new StringBuffer();
+		    	for (int i = 0; i < baMacAddress.length; i++) {
+		    		sbMacAddress.append(String.format("%02x", baMacAddress[i]&0x0ff).toUpperCase());
+		    		if (i < baMacAddress.length-1) {
+		    			sbMacAddress.append(':');
+		    		}
+		    	}
+		    	
+		    	WifiSecurity wifiSecurity = WifiSecurity.NONE;
+		    	
+		    	EnumSet<WifiSecurity> esWpaSecurity = wap.getWpaSecurity();
+		    	if ((esWpaSecurity != null) && (esWpaSecurity.size() > 0)) {
+		    		
+		    		wifiSecurity = WifiSecurity.SECURITY_WPA;
+		    		
+		    		Iterator<WifiSecurity> itWpaSecurity = esWpaSecurity.iterator();	
+			    	while (itWpaSecurity.hasNext()) {
+			    		s_logger.trace("getWifiHotspots() :: WPA Security={}", itWpaSecurity.next());
+			    	}
+		    	}
+		    	
+		    	EnumSet<WifiSecurity> esRsnSecurity = wap.getRsnSecurity();
+		    	if ((esRsnSecurity != null) && (esRsnSecurity.size() > 0)) {
+		    		if (wifiSecurity == WifiSecurity.SECURITY_WPA) {
+		    			wifiSecurity = WifiSecurity.SECURITY_WPA_WPA2;
+		    		} else {
+		    			wifiSecurity = WifiSecurity.SECURITY_WPA2;
+		    		}
+		    		Iterator<WifiSecurity> itRsnSecurity = esRsnSecurity.iterator();
+		    		while (itRsnSecurity.hasNext()) {
+			    		s_logger.trace("getWifiHotspots() :: RSN Security={}", itRsnSecurity.next());
+			    	}
+		    	}
+		    	
+		    	if (wifiSecurity == WifiSecurity.NONE) {
+		    		List<String> capabilities = wap.getCapabilities();
+		    		for (String capab : capabilities) {
+		    			if (capab.equals("Privacy")) {
+		    				wifiSecurity = WifiSecurity.SECURITY_WEP;
+		    				break;
+		    			}
+		    		}
+		    	}
+		    	
+		    	int frequency = (int)wap.getFrequency();
+		    	int channel = frequencyMhz2Channel(frequency);
+		    	
+		    	WifiHotspotInfo wifiHotspotInfo = new WifiHotspotInfo(wap.getSSID(), sbMacAddress.toString(), 0-wap.getStrength(), channel, frequency, wifiSecurity);
+		    	mWifiHotspotInfo.put(wap.getSSID(), wifiHotspotInfo);
+		    }
+		    /*
 		    if (nl80211.triggerScan()) {
 		    	wifiHotspotInfo = nl80211.getScanResults(3, 2);
 		    }
+		    */
 		    if (wifiMode == WifiMode.MASTER) {
-		    	nl80211.setMode(WifiMode.MASTER);
+		    	if (WpaSupplicantManager.isTempRunning()) {
+					s_logger.debug("getWifiHotspots() :: stoping temporary instance of wpa_supplicant");
+					WpaSupplicantManager.stop();
+				}
+		    	//nl80211.setMode(WifiMode.MASTER);
 		    }
 	    } catch(Throwable t) {
+	    	t.printStackTrace();
 	    	throw new KuraException(KuraErrorCode.OPERATION_NOT_SUPPORTED, "Could not initialize NL80211");
 	    }
 	    
-	    return wifiHotspotInfo;
+	    return mWifiHotspotInfo;
 	}
 	
 	@Override
@@ -1234,5 +1316,11 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
             s_logger.warn("Did not receive a network configuration change event");
             m_pendingChange = false;
         }
+	}
+	
+	private int frequencyMhz2Channel(int frequency) {
+		
+		int channel = (frequency - 2407)/5;
+		return channel;
 	}
 }

@@ -67,4 +67,10 @@ public interface WifiAccessPoint
 	 * @return
 	 */
 	public EnumSet<WifiSecurity> getRsnSecurity();
+	
+	/**
+	 *  Describes the access point's capabilities
+	 * @return
+	 */
+	public List<String> getCapabilities();
 }

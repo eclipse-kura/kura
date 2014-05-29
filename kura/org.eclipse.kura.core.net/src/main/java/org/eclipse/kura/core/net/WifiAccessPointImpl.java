@@ -29,6 +29,7 @@ public class WifiAccessPointImpl implements WifiAccessPoint
 	private int               strength;
 	private EnumSet<WifiSecurity> wpaSecurity;
 	private EnumSet<WifiSecurity> rsnSecurity;
+	private List<String> capabilities;
 	
 	public WifiAccessPointImpl(String ssid) {
 		this.ssid = ssid;
@@ -92,6 +93,14 @@ public class WifiAccessPointImpl implements WifiAccessPoint
 
 	public void setRsnSecurity(EnumSet<WifiSecurity> rsnSecurity) {
 		this.rsnSecurity = rsnSecurity;
+	}
+	
+	public List<String> getCapabilities() {
+		return this.capabilities;
+	}
+	
+	public void setCapabilities(List<String> capabilities) {
+		this.capabilities = capabilities;
 	}
 	
 	@Override

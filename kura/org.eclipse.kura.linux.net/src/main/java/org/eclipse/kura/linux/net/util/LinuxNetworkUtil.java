@@ -862,7 +862,8 @@ public class LinuxNetworkUtil {
 		return ssid;
 	}
 	
-	public static List<WifiAccessPoint> getAvailableAccessPoints(String interfaceName) throws KuraException {
+	public static List<WifiAccessPoint> getAvailableAccessPoints(String interfaceName, int attempts) throws KuraException {
+		
 		if(LinuxNetworkUtil.getType(interfaceName) != NetInterfaceType.WIFI) {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "Can't scan for wifi Access Points with non-wifi interfaces");
 		}
@@ -886,14 +887,37 @@ public class LinuxNetworkUtil {
 			    .append(interfaceName);
 			    proc = ProcessUtil.exec(sb.toString());			    
 			}
-		    
+			
 			//start the process
 			sb = new StringBuilder();
 			sb.append("iw dev ")
 			.append(interfaceName)
 			.append(" scan");
-			proc = ProcessUtil.exec(sb.toString());
 
+			s_logger.info("getAvailableAccessPoints() :: executing: {}", sb.toString());
+			
+			int stat = -1;
+			while ((stat != 0) || (attempts > 0)) {
+				attempts--;
+				proc = ProcessUtil.exec(sb.toString());
+				try {
+					stat = proc.waitFor();
+					if (stat != 0) {
+						s_logger.error("getAvailableAccessPoints() :: failed to execute {} error code is {}", sb.toString(), stat);
+						s_logger.error("getAvailableAccessPoints() :: STDERR: " + LinuxProcessUtil.getInputStreamAsString(proc.getErrorStream()));
+						Thread.sleep(2000);
+					}	
+				} catch (InterruptedException e) {				
+					e.printStackTrace();
+				}
+			}
+			
+			if (stat != 0) {
+				return wifiAccessPoints; // return empty list
+			}
+			
+			s_logger.error("getAvailableAccessPoints() :: the {} command executed sucessfully, parsing output ...", sb.toString());
+			
 			//get the output
 			BufferedReader br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
 			String line = null;
@@ -906,7 +930,8 @@ public class LinuxNetworkUtil {
 			EnumSet<WifiSecurity> rsnSecurity = null;
 			int strength = -1;
 			EnumSet<WifiSecurity> wpaSecurity = null;
-
+			List<String> capabilities = null;
+			
 			while((line = br.readLine()) != null) {
 				if(line.contains("BSS ") && !line.contains("* OBSS")) {
 					//new AP
@@ -919,6 +944,9 @@ public class LinuxNetworkUtil {
 						wifiAccessPoint.setRsnSecurity(rsnSecurity);
 						wifiAccessPoint.setStrength(strength);
 						wifiAccessPoint.setWpaSecurity(wpaSecurity);
+						if ((capabilities != null) && (capabilities.size() > 0)) {
+							wifiAccessPoint.setCapabilities(capabilities);
+						}
 						wifiAccessPoints.add(wifiAccessPoint);
 					}
 					
@@ -931,6 +959,7 @@ public class LinuxNetworkUtil {
 					rsnSecurity = null;
 					strength = -1;
 					wpaSecurity = null;
+					capabilities = null;
 					
 					//parse out the MAC
 					StringTokenizer st = new StringTokenizer(line, " ");
@@ -1082,6 +1111,13 @@ public class LinuxNetworkUtil {
 					} else {
 						strength = (int) (2 * (dBm + 100));
 					}
+				} else if (line.contains("capability:")) {
+					capabilities = new ArrayList<String>();
+					line = line.substring("capability:".length()).trim();
+					StringTokenizer st = new StringTokenizer(line, " ");
+					while (st.hasMoreTokens()) {
+						capabilities.add(st.nextToken());
+					}
 				}
 			}
 			
@@ -1095,6 +1131,9 @@ public class LinuxNetworkUtil {
 				wifiAccessPoint.setRsnSecurity(rsnSecurity);
 				wifiAccessPoint.setStrength(strength);
 				wifiAccessPoint.setWpaSecurity(wpaSecurity);
+				if ((capabilities != null) && (capabilities.size() > 0)) {
+					wifiAccessPoint.setCapabilities(capabilities);
+				}
 				wifiAccessPoints.add(wifiAccessPoint);
 			}
 		} catch (IOException e) {

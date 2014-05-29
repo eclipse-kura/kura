@@ -24,7 +24,23 @@
             type="String"
             cardinality="0"
             required="false"
-            description="Friendly name of the device. If left empty, this is automatically determined by the system." />
+            default="device-name"
+            description="Friendly name of the device. Device name is the common name of the device (eg: Reliagate 50-21, Raspberry Pi, etc.). Hostname will use the linux hostname utility. 
+            				Custom allows for defining a unique string. Server defined relies on Eurotech Everware Cloud to define a name.">
+        	<Option label="Set display name as device name" value="device-name" />
+        	<Option label="Set display name from hostname" value="hostname" />
+        	<Option label="Custom" value="custom" />
+        	<Option label="Server defined" value="server" />
+        </AD>
+        
+        <AD id="device.custom-name"
+        	name="device.custom-name"
+        	type="String"
+        	cardinality="0"
+        	required="false"
+        	default=""
+        	description='Custom name for the device. This value is applied ONLY if device.display-name is set to "Custom"'>
+        </AD>
                     
         <AD id="encode.gzip"
             name="encode.gzip"

@@ -184,6 +184,7 @@ int cygSerialPort_openDeviceNC
 		io.c_lflag &= ~ICANON;	/* turn off cannonical processing */
 		/* turn off echoing */
 		io.c_lflag &= ~(ECHO | ECHOKE | ECHOE | ECHOCTL);
+		io.c_lflag &= ~ISIG;
 		io.c_cc[VMIN] = 1;
 		io.c_cc[VTIME] = 0;
 		if (tcsetattr(fd, TCSANOW, &io) == -1)

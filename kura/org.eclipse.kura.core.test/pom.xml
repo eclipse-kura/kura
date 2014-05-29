@@ -254,6 +254,36 @@
 			    <autoStart>true</autoStart>
 			</bundle>
 			<bundle>
+			    <id>org.eclipse.kura.core.cloud</id>
+			    <level>4</level>
+			    <autoStart>true</autoStart>
+			</bundle>
+			<bundle>
+			    <id>org.eclipse.kura.core.comm</id>
+			    <level>4</level>
+			    <autoStart>true</autoStart>
+			</bundle>
+			<bundle>
+			    <id>org.eclipse.kura.core.configuration</id>
+			    <level>4</level>
+			    <autoStart>true</autoStart>
+			</bundle>
+			<bundle>
+			    <id>org.eclipse.kura.core.crypto</id>
+			    <level>4</level>
+			    <autoStart>true</autoStart>
+			</bundle>
+			<bundle>
+			    <id>org.eclipse.kura.core.deployment</id>
+			    <level>4</level>
+			    <autoStart>true</autoStart>
+			</bundle>
+			<bundle>
+			    <id>org.eclipse.kura.core.net</id>
+			    <level>4</level>
+			    <autoStart>true</autoStart>
+			</bundle>
+			<bundle>
 			    <id>org.eclipse.kura.deployment.agent</id>
 			    <level>4</level>
 			    <autoStart>true</autoStart>
@@ -410,18 +440,47 @@
                             <artifactId>org.apache.felix.deploymentadmin</artifactId>
                         </dependency>
                         <dependency>
+                        	<type>p2-installable-unit</type>
                             <artifactId>org.eclipse.kura.api</artifactId>
                         </dependency>
                         <dependency>
+                        	<type>p2-installable-unit</type>
                             <artifactId>org.eclipse.kura.core</artifactId>
                         </dependency>
                         <dependency>
+                        	<type>p2-installable-unit</type>
+                            <artifactId>org.eclipse.kura.core.cloud</artifactId>
+                        </dependency>
+                        <dependency>
+                        	<type>p2-installable-unit</type>
+                            <artifactId>org.eclipse.kura.core.comm</artifactId>
+                        </dependency>
+                        <dependency>
+                        	<type>p2-installable-unit</type>
+                            <artifactId>org.eclipse.kura.core.configuration</artifactId>
+                        </dependency>
+                        <dependency>
+                        	<type>p2-installable-unit</type>
+                            <artifactId>org.eclipse.kura.core.crypto</artifactId>
+                        </dependency>
+                        <dependency>
+                        	<type>p2-installable-unit</type>
+                            <artifactId>org.eclipse.kura.core.deployment</artifactId>
+                        </dependency>
+                        <dependency>
+                        	<type>p2-installable-unit</type>
+                            <artifactId>org.eclipse.kura.core.net</artifactId>
+                        </dependency>
+                        <dependency>
+                        	<type>p2-installable-unit</type>
                             <artifactId>org.eclipse.kura.deployment.agent</artifactId>
                         </dependency>
                         <dependency>
+                        	<type>p2-installable-unit</type>
                             <artifactId>org.eclipse.kura.emulator</artifactId>
                         </dependency>
                         <dependency>
+                        	<type>p2-installable-unit</type>
                             <artifactId>org.eclipse.kura.test</artifactId>
                         </dependency>
                     </dependencies>

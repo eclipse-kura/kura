@@ -37,12 +37,15 @@ public class SSLSocketFactoryWrapper extends SSLSocketFactory
     private static final Logger s_logger = LoggerFactory.getLogger(SSLSocketFactoryWrapper.class);
     
     private String           ciphers;
+    private Boolean			 hostnameVerification;
     private SSLSocketFactory sslsf;
     
     public SSLSocketFactoryWrapper(SSLSocketFactory sslsf,
-                                   String ciphers) {
+                                   String ciphers,
+                                   Boolean hnVerify) {
         this.sslsf   = sslsf;
         this.ciphers = ciphers;
+        this.hostnameVerification = hnVerify;
     }
 
     @Override
@@ -115,9 +118,6 @@ public class SSLSocketFactoryWrapper extends SSLSocketFactory
         return socket;
     }
 
-    
-    
-    
     private void updateSSLParameters(Socket socket) 
         throws SocketException
     {
@@ -137,7 +137,7 @@ public class SSLSocketFactoryWrapper extends SSLSocketFactory
             Class<SSLParameters> clSSLParameters = SSLParameters.class;
             try {
                 Method m = clSSLParameters.getMethod("setEndpointIdentificationAlgorithm", String.class);
-                if (m != null) {
+                if (m != null && hostnameVerification) {
                     sslParams.setEndpointIdentificationAlgorithm("HTTPS");
                     s_logger.info("SSL Endpoint Identification enabled.");
                 }

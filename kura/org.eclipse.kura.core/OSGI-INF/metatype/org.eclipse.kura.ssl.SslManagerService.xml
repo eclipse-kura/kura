@@ -27,6 +27,14 @@
             default="TLSv1"
             description="The protocol to use to initialize the SSLContext. If not specified, TLSv1 will be used."/>
                         
+        <AD id="ssl.hostname.verification"
+        	name="ssl.hostname.verification"
+        	type="Boolean"
+        	cardinality="0"
+        	required="false"
+        	default="true"
+        	description="Enable or disable hostname verification." />
+        	
         <AD id="ssl.default.trustStore"
             name="ssl.default.trustStore"
             type="String"

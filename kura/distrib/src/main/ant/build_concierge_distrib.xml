@@ -37,7 +37,8 @@
                  token="{project.version}" value="${project.version}"/>
         <replace file="${project.build.directory}/kura-${build.name}-jars_${project.version}/init.xargs"
                  token="{kura.build.version}" value="${kura.build.version}"/>
-        <echo file="${project.build.directory}/kura-${build.name}-jars_${project.version}/init.xargs" append="true">-istart kura/plugins/org.eclipse.kura.net.admin_${project.version}.v${kura.build.version}.jar</echo>
+        <echo file="${project.build.directory}/kura-${build.name}-jars_${project.version}/init.xargs" append="true">
+            -istart kura/plugins/org.eclipse.kura.net.admin_${project.version}.v${kura.build.version}.jar</echo>
         <propertyfile file="${project.build.directory}/kura-${build.name}-jars_${project.version}/dpa.properties"> 
             <entry key="kura"
                    value="file:/opt/eclipse/kura/kura/packages/kura-${build.name}-jars_${project.version}.dp" />
@@ -58,7 +59,7 @@ java -Xms${kura.mem.size} -Xmx${kura.mem.size} -XX:MaxPermSize=${kura.mem.size} 
         -Ddpa.configuration=/opt/eclipse/kura/kura/dpa.properties \
 	-Dlog4j.configuration=file:kura/log4j.properties \
 	-Dorg.eclipse.concierge.init.xargs=kura/init.xargs \
-	-jar plugins/org.eclipse.concierge_1.0.0.alpha1.v201405140250.jar
+	-jar plugins/org.eclipse.concierge_1.0.0.alpha1.jar
 	</echo>    
 	<echo file="${project.build.directory}/kura-${build.name}-jars_${project.version}/start_kura_concierge_debug.sh" append="false">#!/bin/sh
 
@@ -75,7 +76,7 @@ java -Xms${kura.mem.size} -Xmx${kura.mem.size} -XX:MaxPermSize=${kura.mem.size} 
         -Ddpa.configuration=/opt/eclipse/kura/kura/dpa.properties \
 	-Dlog4j.configuration=file:/opt/eclipse/kura/kura/log4j.properties \
 	-Dorg.eclipse.concierge.init.xargs=kura/init.xargs \
-	-jar plugins/org.eclipse.concierge_1.0.0.alpha1.v201405140250.jar
+	-jar plugins/org.eclipse.concierge_1.0.0.alpha1.jar
 	</echo>    
 	<echo file="${project.build.directory}/kura-${build.name}-jars_${project.version}/start_kura_concierge_background.sh" append="false">#!/bin/sh
 
@@ -92,7 +93,7 @@ nohup java -Xms${kura.mem.size} -Xmx${kura.mem.size} -XX:MaxPermSize=${kura.mem.
         -Ddpa.configuration=/opt/eclipse/kura/kura/dpa.properties \
         -Dlog4j.configuration=file:/opt/eclipse/kura/kura/log4j.properties \
 		-Dorg.eclipse.concierge.init.xargs=kura/init.xargs \
-		-jar plugins/org.eclipse.concierge_1.0.0.alpha1.v201405140250.jar >> /var/log/kura-console.log 2>> /var/log/kura-console.log &amp;
+		-jar plugins/org.eclipse.concierge_1.0.0.alpha1.jar >> /var/log/kura-console.log 2>> /var/log/kura-console.log &amp;
 
 #Save the PID
 KURA_PID=$!

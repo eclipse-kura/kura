@@ -2,7 +2,7 @@
 
 -init
 
--istart plugins/shell-1.0.0.jar
+-istart plugins/ch.ethz.iks.concierge.shell_1.0.0.jar
 
 -install plugins/slf4j.log4j12_1.6.0.jar
 -install plugins/log4j_1.2.17.jar

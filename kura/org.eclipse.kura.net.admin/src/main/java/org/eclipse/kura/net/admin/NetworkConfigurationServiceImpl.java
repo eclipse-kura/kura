@@ -18,6 +18,8 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.kura.KuraErrorCode;
@@ -41,7 +43,6 @@ import org.eclipse.kura.core.net.WifiInterfaceImpl;
 import org.eclipse.kura.core.net.modem.ModemInterfaceAddressConfigImpl;
 import org.eclipse.kura.core.net.modem.ModemInterfaceConfigImpl;
 import org.eclipse.kura.core.net.modem.ModemInterfaceImpl;
-import org.eclipse.kura.core.util.ExecutorUtil;
 import org.eclipse.kura.deployment.agent.DeploymentAgentService;
 import org.eclipse.kura.linux.net.modem.SupportedSerialModemInfo;
 import org.eclipse.kura.linux.net.modem.SupportedSerialModemsInfo;
@@ -96,7 +97,7 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
     private List<NetworkConfigurationVisitor> m_readVisitors;
     private List<NetworkConfigurationVisitor> m_writeVisitors;
     
-    private ExecutorUtil m_executorUtil;
+    private ScheduledExecutorService m_executorUtil;
     private boolean m_firstConfig = true;
     
 	// ----------------------------------------------------------------
@@ -168,7 +169,7 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
         d.put(EventConstants.EVENT_TOPIC, EVENT_TOPICS);
         componentContext.getBundleContext().registerService(EventHandler.class.getName(), this, d);
         
-        m_executorUtil = ExecutorUtil.getInstance();
+        m_executorUtil = Executors.newSingleThreadScheduledExecutor();
         m_executorUtil.schedule(new Runnable() {
     		@Override
     		public void run() {
@@ -182,6 +183,7 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
         s_logger.debug("deactivate()");
         m_writeVisitors = null;
         m_readVisitors = null;
+        m_executorUtil.shutdownNow();
     }
     
     @Override

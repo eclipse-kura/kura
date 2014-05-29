@@ -18,6 +18,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import javax.xml.bind.JAXBException;
@@ -29,7 +31,6 @@ import org.eclipse.kura.cloud.Cloudlet;
 import org.eclipse.kura.cloud.CloudletTopic;
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.core.configuration.util.XmlUtil;
-import org.eclipse.kura.core.util.ExecutorUtil;
 import org.eclipse.kura.message.KuraPayload;
 import org.eclipse.kura.message.KuraRequestPayload;
 import org.eclipse.kura.message.KuraResponsePayload;
@@ -55,6 +56,8 @@ public class CloudConfigurationHandler extends Cloudlet
 	public static final String RESOURCE_ROLLBACK       = "rollback";
 
 	private SystemService m_systemService;
+	
+	private ScheduledExecutorService m_executor;
 	
 	//
 	// ServiceTracker to track the CloudService
@@ -102,11 +105,13 @@ public class CloudConfigurationHandler extends Cloudlet
 	}
 
 	public void open() {
+		m_executor = Executors.newSingleThreadScheduledExecutor();
 		m_serviceTrackerAdapter.open();
 	}
 
 	public void close() {
 		m_serviceTrackerAdapter.close();
+		m_executor.shutdownNow();
 	}
 	
 	@Override
@@ -354,8 +359,8 @@ public class CloudConfigurationHandler extends Cloudlet
 			return;
 		}
 
-		ExecutorUtil.getInstance().schedule(new UpdateConfigurationsCallable(pid, xmlConfigs, m_configService),
-				                            1000, TimeUnit.MILLISECONDS);
+		m_executor.schedule(new UpdateConfigurationsCallable(pid, xmlConfigs, m_configService),
+				            1000, TimeUnit.MILLISECONDS);
 	}
 
 
@@ -382,8 +387,8 @@ public class CloudConfigurationHandler extends Cloudlet
 			return;
 		}
 		
-		ExecutorUtil.getInstance().schedule(new RollbackCallable(sid, m_configService),
-				                            1000, TimeUnit.MILLISECONDS);
+		m_executor.schedule(new RollbackCallable(sid, m_configService),
+				            1000, TimeUnit.MILLISECONDS);
 	}
 
 	private void doExecSnapshot(CloudletTopic reqTopic,

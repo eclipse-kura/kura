@@ -14,7 +14,6 @@ package org.eclipse.kura.core.data.transport.mqtt;
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.Future;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -27,7 +26,6 @@ import org.eclipse.kura.KuraTimeoutException;
 import org.eclipse.kura.KuraTooManyInflightMessagesException;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.core.data.transport.mqtt.MqttClientConfiguration.PersistenceType;
-import org.eclipse.kura.core.util.ExecutorUtil;
 import org.eclipse.kura.core.util.ValidationUtil;
 import org.eclipse.kura.data.DataTransportListener;
 import org.eclipse.kura.data.DataTransportService;

@@ -18,9 +18,10 @@ import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.regex.Pattern;
@@ -33,7 +34,6 @@ import org.eclipse.kura.KuraTimeoutException;
 import org.eclipse.kura.KuraTooManyInflightMessagesException;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.core.data.store.DbDataStore;
-import org.eclipse.kura.core.util.ExecutorUtil;
 import org.eclipse.kura.data.DataService;
 import org.eclipse.kura.data.DataServiceListener;
 import org.eclipse.kura.data.DataTransportListener;
@@ -67,21 +67,20 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
 	
 	private DataTransportService m_dataTransportService;
 	private DbService m_dbService;
-
 	private DataServiceListeners m_dataServiceListeners;
 	
+	protected ScheduledExecutorService m_reconnectExecutor;
 	private ScheduledFuture<?> m_reconnectFuture;
 	
 	// A dedicated executor for the publishing task
-	private ScheduledThreadPoolExecutor m_publisherExecutor;
+	private ScheduledExecutorService m_publisherExecutor;
 	
 	private DataStore m_store;
 	
 	private Map<DataTransportToken, Integer> m_inFlightMsgIds;
-	
+
+	private ScheduledExecutorService m_congestionExecutor;
 	private ScheduledFuture<?> m_congestionFuture;
-	
-	private ScheduledThreadPoolExecutor m_congestionExecutor;
 	
 	// ----------------------------------------------------------------
 	//
@@ -93,8 +92,9 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
 			Map<String, Object> properties) {
 		s_logger.info("Activating...");
 		
-		m_publisherExecutor = new ScheduledThreadPoolExecutor(1);
-		m_congestionExecutor = new ScheduledThreadPoolExecutor(1);
+		m_reconnectExecutor = Executors.newSingleThreadScheduledExecutor();
+		m_publisherExecutor = Executors.newSingleThreadScheduledExecutor();
+		m_congestionExecutor = Executors.newSingleThreadScheduledExecutor();
 						
 		m_properties.putAll(properties);
 		
@@ -170,6 +170,7 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
 		m_publisherExecutor.shutdownNow();
 		
 		stopReconnectTask();
+		m_reconnectExecutor.shutdownNow();
 		
 		disconnect();
 
@@ -460,8 +461,7 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
 			int initialDelay = (new Random()).nextInt(maxDelay);
 			
 			s_logger.info("Starting reconnect task with initial delay {}", initialDelay);
-			ScheduledThreadPoolExecutor stpe = ExecutorUtil.getInstance();
-			m_reconnectFuture = stpe.scheduleAtFixedRate(new Runnable() {
+			m_reconnectFuture = m_reconnectExecutor.scheduleAtFixedRate(new Runnable() {
 				@Override
 				public void run() {
 					Thread.currentThread().setName("DataServiceImpl:ReconnectTask");

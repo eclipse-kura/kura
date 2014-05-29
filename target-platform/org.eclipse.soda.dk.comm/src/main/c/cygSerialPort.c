@@ -21,6 +21,10 @@
 #ifdef NCI
  #include <termios.h>
 #endif	/* NCI */
+#ifdef __osx__
+ #include <sys/ioctl.h>
+ #include <termios.h>
+#endif	/* __osx__ */
 #ifdef __linux__
  //#include <asm/ioctls.h>
  #include <sys/ioctl.h>
@@ -80,7 +84,7 @@ int cygSerialPort_closeDeviceNC
 	 iRet = semop(semId, dev_unlock, NOOF_ELEMS(dev_unlock));
     printf( "Unlock semID %d return value: %d\n", semId, iRet );
      {
-        union semun scarg;
+        union semuni scarg;
         int iVal = 0;
 	     (void)memset(&scarg, 0, sizeof(scarg));
    	  iVal = semctl(semId, 0, GETVAL, scarg);
@@ -133,7 +137,7 @@ int cygSerialPort_openDeviceNC
 #endif
 #if defined(DEBUG) && !(_POSIX_SEMAPHORES)
      {
-        union semun scarg;
+        union semuni scarg;
         int iVal = 0;
 	     (void)memset(&scarg, 0, sizeof(scarg));
    	  iVal = semctl(semId, 0, GETVAL, scarg);
@@ -286,6 +290,9 @@ int cygSerialPort_getFlowControlModeNC
 #ifdef NCI 
   if ((!(ios.c_cflag & CRTS_IFLOW) && !(ios.c_cflag & CCTS_OFLOW)) &&
 #endif	/* NCI */
+#ifdef __osx__
+  if ((!(ios.c_cflag & CRTSCTS)) &&
+#endif	/* __osx__ */
 #ifdef __linux__ 
   if ((!(ios.c_cflag & CRTSCTS)) &&
 #endif	/* __linux__ */
@@ -299,6 +306,9 @@ int cygSerialPort_getFlowControlModeNC
 #ifdef NCI
      if (ios.c_cflag & CRTS_IFLOW)	// RTSCTS_IN
 #endif	/* NCI */
+#ifdef __osx__
+     if (ios.c_cflag & CRTSCTS)		// RTSCTS_IN
+#endif	/* __osx__ */
 #ifdef __linux__ 
      if (ios.c_cflag & CRTSCTS)		// RTSCTS_IN
 #endif	/* __linux__ */
@@ -309,6 +319,9 @@ int cygSerialPort_getFlowControlModeNC
 #ifdef NCI
      if (ios.c_cflag & CCTS_OFLOW)	// RTSCTS_OUT
 #endif	/* NCI */
+#ifdef __osx__ 
+     if (ios.c_cflag & CRTSCTS)		// RTSCTS_IN
+#endif	/* __osx__ */
 #ifdef __linux__ 
      if (ios.c_cflag & CRTSCTS)		// RTSCTS_IN
 #endif	/* __linux__ */

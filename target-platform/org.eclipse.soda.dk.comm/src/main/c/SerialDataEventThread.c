@@ -32,7 +32,7 @@ JNIEXPORT void JNICALL Java_org_eclipse_soda_dk_comm_SerialDataEventThread_monit
 #if _WIN32_WCE>=400
     w32SerialDataEventThread_monitorSerialDataNC( jenv, jobj, jfd );
 #else
-    return cygSerialDataEventThread_monitorSerialDataNC( jenv, jobj, jfd );
+    cygSerialDataEventThread_monitorSerialDataNC( jenv, jobj, jfd );
 #endif
 #endif
 } /* Java_org_eclipse_soda_dk_comm_SerialDataEventThread_monitorSerialDataNC */

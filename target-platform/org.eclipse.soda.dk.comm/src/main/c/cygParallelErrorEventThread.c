@@ -109,6 +109,10 @@ void cygParallelErrorEventThread_monitorParallelErrorNC
 #ifdef NCI
 	if (ioctl(jfd, PIOCSTATUS, &oldStatus) < 0) {
 #endif	/* NCI */
+#ifdef __osx__      /* ToDo: implement */
+        oldStatus = 0;
+	if (0) {
+#endif	/* __osx__ */
 #ifdef __linux__
 	if (ioctl(jfd, LPGETSTATUS, &oldStatus) < 0) {
 #endif	/* __linux__ */
@@ -137,6 +141,10 @@ void cygParallelErrorEventThread_monitorParallelErrorNC
 #ifdef NCI
 		if (ioctl(jfd, PIOCSTATUS, &newStatus) < 0) {
 #endif	/* NCI */
+#ifdef __osx__      /* ToDo: implement */
+                newStatus = 0;
+	        if (0) {
+#endif	/* __osx__ */
 #ifdef __linux__
 		if (ioctl(jfd, LPGETSTATUS, &newStatus) < 0) {
 #endif	/* __linux__ */
@@ -152,6 +160,9 @@ void cygParallelErrorEventThread_monitorParallelErrorNC
 #ifdef NCI
 		if((newStatus & LPS_NERR) != (oldStatus & LPS_NERR))
 #endif	/* NCI */
+#ifdef __osx__      /* ToDo: implement */
+	        if (0)
+#endif	/* __osx__ */
 #ifdef __linux__
 		if((newStatus & LP_PERRORP) != (oldStatus & LP_PERRORP))
 #endif	/* __linux__ */
@@ -164,6 +175,9 @@ void cygParallelErrorEventThread_monitorParallelErrorNC
 				    (oldStatus & LPS_NERR)? JNI_TRUE:JNI_FALSE,
 				    (newStatus & LPS_NERR)? JNI_TRUE:JNI_FALSE);
 #endif	/* NCI */
+#ifdef __osx__      /* ToDo: implement */
+	                            JNI_FALSE, JNI_FALSE);
+#endif	/* __osx__ */
 #ifdef __linux__
 				    (oldStatus & LP_PERRORP)? JNI_TRUE:JNI_FALSE,
 				    (newStatus & LP_PERRORP)? JNI_TRUE:JNI_FALSE);
@@ -177,6 +191,9 @@ void cygParallelErrorEventThread_monitorParallelErrorNC
 #ifdef NCI
 		if((newStatus & LPS_SELECT) != (oldStatus & LPS_SELECT))
 #endif	/* NCI */
+#ifdef __osx__      /* ToDo: implement */
+	        if (0)
+#endif	/* __osx__ */
 #ifdef __linux__
 		if((newStatus & LP_PSELECD) != (oldStatus & LP_PSELECD))
 #endif	/* __linux__ */
@@ -189,6 +206,9 @@ void cygParallelErrorEventThread_monitorParallelErrorNC
 				    (oldStatus & LPS_SELECT)? JNI_TRUE:JNI_FALSE,
 				    (newStatus & LPS_SELECT)? JNI_TRUE:JNI_FALSE);
 #endif	/* NCI */
+#ifdef __osx__      /* ToDo: implement */
+	                            JNI_FALSE, JNI_FALSE);
+#endif	/* __osx__ */
 #ifdef __linux__
 				    (oldStatus & LP_PSELECD)? JNI_TRUE:JNI_FALSE,
 				    (newStatus & LP_PSELECD)? JNI_TRUE:JNI_FALSE);
@@ -202,6 +222,9 @@ void cygParallelErrorEventThread_monitorParallelErrorNC
 #ifdef NCI
 		if((newStatus & LPS_NOPAPER) != (oldStatus & LPS_NOPAPER))
 #endif	/* NCI */
+#ifdef __osx__      /* ToDo: implement */
+	        if (0)
+#endif	/* __osx__ */
 #ifdef __linux__
 		if((newStatus & LP_POUTPA) != (oldStatus & LP_POUTPA))
 #endif	/* __linux__ */
@@ -214,6 +237,9 @@ void cygParallelErrorEventThread_monitorParallelErrorNC
 				    (oldStatus & LPS_NOPAPER)? JNI_TRUE:JNI_FALSE,
 				    (newStatus & LPS_NOPAPER)? JNI_TRUE:JNI_FALSE);
 #endif	/* NCI */
+#ifdef __osx__      /* ToDo: implement */
+	                            JNI_FALSE, JNI_FALSE);
+#endif	/* __osx__ */
 #ifdef __linux__
 				    (oldStatus & LP_POUTPA)? JNI_TRUE:JNI_FALSE,
 				    (newStatus & LP_POUTPA)? JNI_TRUE:JNI_FALSE);
@@ -227,6 +253,9 @@ void cygParallelErrorEventThread_monitorParallelErrorNC
 #ifdef NCI
 		if((newStatus & LPS_NACK) != (oldStatus & LPS_NACK))
 #endif	/* NCI */
+#ifdef __osx__      /* ToDo: implement */
+	        if (0)
+#endif	/* __osx__ */
 #ifdef __linux__
 		if((newStatus & LP_PACK) != (oldStatus & LP_PACK))
 #endif	/* __linux__ */
@@ -239,6 +268,9 @@ void cygParallelErrorEventThread_monitorParallelErrorNC
 				    (oldStatus & LPS_NACK)? JNI_TRUE:JNI_FALSE,
 				    (newStatus & LPS_NACK)? JNI_TRUE:JNI_FALSE);
 #endif	/* NCI */
+#ifdef __osx__      /* ToDo: implement */
+	                            JNI_FALSE, JNI_FALSE);
+#endif	/* __osx__ */
 #ifdef __linux__
 				    (oldStatus & LP_PACK)? JNI_TRUE:JNI_FALSE,
 				    (newStatus & LP_PACK)? JNI_TRUE:JNI_FALSE);
@@ -252,6 +284,9 @@ void cygParallelErrorEventThread_monitorParallelErrorNC
 #ifdef NCI
 		if((newStatus & LPS_NBSY) != (oldStatus & LPS_NBSY))
 #endif	/* NCI */
+#ifdef __osx__      /* ToDo: implement */
+	        if (0)
+#endif	/* __osx__ */
 #ifdef __linux__
 		if((newStatus & LP_PBUSY) != (oldStatus & LP_PBUSY))
 #endif	/* __linux__ */
@@ -264,6 +299,9 @@ void cygParallelErrorEventThread_monitorParallelErrorNC
 				    (oldStatus & LPS_NBSY)? JNI_TRUE:JNI_FALSE,
 				    (newStatus & LPS_NBSY)? JNI_TRUE:JNI_FALSE);
 #endif	/* NCI */
+#ifdef __osx__      /* ToDo: implement */
+	                            JNI_FALSE, JNI_FALSE);
+#endif	/* __osx__ */
 #ifdef __linux__
 				    (oldStatus & LP_PBUSY)? JNI_TRUE:JNI_FALSE,
 				    (newStatus & LP_PBUSY)? JNI_TRUE:JNI_FALSE);

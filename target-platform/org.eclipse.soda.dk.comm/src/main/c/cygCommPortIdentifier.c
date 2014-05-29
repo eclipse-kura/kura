@@ -127,7 +127,7 @@ int cygCommPortIdentifier_monitorInterJVMDeviceAccessNC
 	jmethodID	jintMethod;
 	jclass		jthreadClass;
 	int		semID;
-	union semun	scarg;
+	union semuni	scarg;
 	int		mypid = getpid();
 	int		scpid;
 	pollingTime = getPollingTime(jenv);

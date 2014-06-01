@@ -43,6 +43,9 @@ Kura uses Maven to manage the build process.
 
         cd ../kura
         mvn -Dmaven.test.skip=true -f manifest_pom.xml clean install
+        // Build with web UI
+        mvn -Dmaven.test.skip=true -f pom_pom.xml -Pweb clean install
+        // or build without web UI
         mvn -Dmaven.test.skip=true -f pom_pom.xml clean install
 
 
@@ -94,7 +97,7 @@ If mvn clean install fails in test compilation run it with "-Dmaven.test.skip=tr
 
 
 #### Configure Eclipse (Eclipse Juno or newer required) ####
-* Set perspective to Java (not Java EE) 
+* Set perspective to Java (not Java EE)
 * Install Maven 2 Eclipse (m2e) if it's not already installed
  * Help | Install New Software | Add  
  * Then enter this URL: http://download.eclipse.org/releases/juno  (or the Eclipse release that you have installed - Kepler should have m2e installed by default)
@@ -105,7 +108,7 @@ If mvn clean install fails in test compilation run it with "-Dmaven.test.skip=tr
 
 #### Import into Eclipse and build there ####
 * Link your git repository to your Eclipse workspace: go into your workspace directory (cd {workspace_loc}) and then (assuming your local repository is in ~/dev/git/kura) use the following command: `ln -s ~/dev/git/kura .`
-* In Eclipse select import and under Maven, select 'Existing Maven Projects' 
+* In Eclipse select import and under Maven, select 'Existing Maven Projects'
  * Browse to kura/kura in your git repository, and select all projects
  * If prompted, go ahead and install Tycho Project Configurators (Eclipse will need to restart)
 * Link all projects to the git repository:
@@ -134,6 +137,30 @@ If mvn clean install fails in test compilation run it with "-Dmaven.test.skip=tr
 
 
 ### Running on a target device ###
+#### Raspberry-Pi ####
+* Kura depends on several Linux packages available in the Raspbian repository. These packages are:
+ * hostapd - Services for access point management.
+ * bind9 - Services for DNS management.
+ * isc-dhcp-server - Set of tools for managing a DHCP server.
+ * iw - Set of wireless tools.
+ * monit - System monitoring service.
+ * dos2unix - Tool for converting files written in Windows to Linux format.
+ * telnet - user interface to the TELNET protocol.
+* Each of these pacakges is available in the Raspbian repository and can be installed via:
+
+        sudo apt-get install <package_name>
+
+* To install Kura, copy the Debian package to the Raspberry pi (ex: /tmp). Install ESF by running:
+
+        sudo dpkg -i kura-raspberry-pi_0.2.0-SNAPSHOT.deb
+
+* Once installation is complete, Kura can be started by:
+
+        sudo /etc/init.d/kura start
+
+* The status of Kura can be  monitored by viewing the log file (ex: tail -f /var/log/kura.log).
+
+#### General ####
 * Deploy and Run
  * Make sure a Java VM is installed on the target device
  * After a clean install, archives for supported devices can be found in the kura/kura/distrib/target directory.  The archives are of the format "kura-[target-device]_2.0.0-SNAPSHOT.zip" (e.g. "kura-raspberry-pi_2.0.0-SNAPSHOT.zip").
@@ -189,4 +216,4 @@ To get more useful log messages and errors when running GWT on a remote device, 
         mvn -pl org.eclipse.kura.core clean install
         mvn clean install
 
-* If you get a blank page logging in to the web UI at http://localhost:8080/kura, right click on the web project then select Google and GWT Compile. 
+* If you get a blank page logging in to the web UI at http://localhost:8080/kura, right click on the web project then select Google and GWT Compile.

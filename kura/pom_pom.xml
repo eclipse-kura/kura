@@ -21,14 +21,16 @@
 
 	<packaging>pom</packaging>
 
-	<modules>
-		<module>distrib</module>
-<!--
-		<module>org.eclipse.kura.qa</module>
--->
-	</modules>
-
 	<profiles>
+		<profile>
+			<id>default</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<modules>
+				<module>distrib</module>
+			</modules>
+		</profile>
 		<profile>
 			<id>web</id>
 			<activation>
@@ -36,6 +38,7 @@
 			</activation>
 			<modules>
 				<module>org.eclipse.kura.web</module>
+				<module>distrib</module>
 			</modules>
 		</profile>
 	</profiles>

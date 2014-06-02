@@ -183,7 +183,7 @@
 				<executions>
 					<execution>
 						<id>gxt-extract</id>
-						<phase>validate</phase>
+						<phase>compile</phase>
 						<goals>
 							<goal>run</goal>
 						</goals>
@@ -197,7 +197,7 @@
 					</execution>
 					<execution>
 						<id>gxt-archive-delete</id>
-						<phase>validate</phase>
+						<phase>compile</phase>
 						<goals>
 							<goal>run</goal>
 						</goals>
@@ -215,7 +215,7 @@
 					<version>1.0-alpha-1</version>
 					<executions>
 							<execution>
-									<phase>package</phase>
+									<phase>compile</phase>
 									<goals>
 											<goal>read-project-properties</goal>
 									</goals>

@@ -21,9 +21,7 @@
 		<groupId>org.eclipse.kura</groupId>
 		<artifactId>kura</artifactId>
 		<version>0.2.0-SNAPSHOT</version>
-<!--
 		<relativePath>../pom_pom.xml</relativePath>
--->
 	</parent>
 
 	<groupId>org.eclipse.kura</groupId>

@@ -43,12 +43,12 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 
-import org.eclipse.kura.KuraConnectException;
 import org.eclipse.kura.configuration.ConfigurableComponent;
-import org.eclipse.kura.data.DataTransportService;
 import org.eclipse.kura.ssl.SslManagerService;
+import org.eclipse.kura.ssl.SslServiceListener;
 import org.eclipse.kura.system.SystemService;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,6 +57,7 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
     private static final Logger s_logger = LoggerFactory.getLogger(SslManagerServiceImpl.class);
         
     private SystemService            m_systemService;
+    private SslServiceListeners		 m_sslServiceListeners;
 
     @SuppressWarnings("unused")
     private ComponentContext         m_ctx;
@@ -90,6 +91,15 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
         // save the bundle context and the properties
         m_ctx = componentContext;
         m_options = new SslManagerServiceOptions(properties);
+        
+        ServiceTracker<SslServiceListener, SslServiceListener> listenersTracker = new ServiceTracker<SslServiceListener, SslServiceListener>(
+				componentContext.getBundleContext(),
+				SslServiceListener.class, null);
+		
+		// Deferred open of tracker to prevent
+		// java.lang.Exception: Recursive invocation of ServiceFactory.getService
+		// on ProSyst
+        m_sslServiceListeners = new SslServiceListeners(listenersTracker);
     }
         
     public void updated(Map<String,Object> properties)
@@ -98,11 +108,15 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
 
         // Update properties and re-publish Birth certificate
         m_options = new SslManagerServiceOptions(properties);
+        // Notify listeners that service has been updated
+        m_sslServiceListeners.onConfigurationUpdated();
+        
     }
     
     protected void deactivate(ComponentContext componentContext) 
     {
         s_logger.info("deactivate...");
+        m_sslServiceListeners.close();
     }
     
 

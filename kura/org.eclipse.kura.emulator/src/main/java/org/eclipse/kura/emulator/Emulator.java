@@ -27,7 +27,7 @@ public class Emulator
 		
 		try {
 			Properties props = System.getProperties();
-			String mode = props.getProperty("eurotech.framework.mode");
+			String mode = props.getProperty("org.eclipse.kura.mode");
 			if(mode.equals("emulator")) {
 				System.out.println("Framework is running in emulation mode");
 			} else {

@@ -449,7 +449,7 @@ public class DeviceConfigPanel extends LayoutContainer
 
 				default:
 				case STRING:
-					field = paintTextConfigParameter(param, null);
+					field = paintTextConfigParameter(param, new StringValidator(minValue, maxValue));
 	            	break;
 	    	}
     	}
@@ -461,7 +461,7 @@ public class DeviceConfigPanel extends LayoutContainer
     }
 
 
-    private Field<?> paintTextConfigParameter(GwtConfigParameter param, CharValidator charValidator) {    
+    private Field<?> paintTextConfigParameter(GwtConfigParameter param, Validator validator) {    
     	
     	// FIXME: in some case we might need a TextArea for multi-line String values.
     	// The trick is to put a tag in the parameter descriptor which we use
@@ -504,10 +504,13 @@ public class DeviceConfigPanel extends LayoutContainer
             field.setValue((String) param.getValue());
             field.setOriginalValue((String) param.getValue());
         }        
-        if (charValidator != null) {
+        if (validator != null && validator instanceof CharValidator) {
         	field.setMaxLength(1);
-        	field.setValidator(charValidator);
-        }        
+        	field.setValidator((CharValidator)validator);
+        }   
+        if (validator != null && validator instanceof StringValidator) {
+        	field.setValidator((StringValidator)validator);
+        }   
         return field;
     }
     
@@ -1078,6 +1081,41 @@ public class DeviceConfigPanel extends LayoutContainer
     }
 
 
+    private static class StringValidator implements Validator {
+
+    	private int m_minValue = 0;
+    	private int m_maxValue = 255;
+    	
+    	public StringValidator(String minValue, String maxValue) {
+    		if (minValue != null) {
+    			try {
+    				m_minValue = Integer.parseInt(minValue);
+    			}
+    			catch (NumberFormatException nfe) {
+    				FailureHandler.handle(nfe);
+    			}
+    		}
+    		if (maxValue != null) {
+    			try {
+    				m_maxValue = Integer.parseInt(maxValue);
+    			}
+    			catch (NumberFormatException nfe) {
+    				FailureHandler.handle(nfe);
+    			}
+    		}
+    	}
+    	
+		public String validate(Field<?> field, String value) {
+			if (value.length() > m_maxValue) {
+				return MessageUtils.get("configMaxValue", (m_maxValue + 1));
+			}
+			if (value.length() < m_minValue) {
+				return MessageUtils.get("configMinValue", m_minValue);
+			}
+			return null;
+		}
+    	
+    }
 
     private static class BytePropertyEditor extends NumberPropertyEditor
     {

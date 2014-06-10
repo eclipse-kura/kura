@@ -722,6 +722,20 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 		//
 		// Write it to disk: marshall
 		long sid = (new Date()).getTime();
+
+		//
+		// Do not save the snapshot in the past
+		Set<Long> snapshotIDs = getSnapshots();
+		if (snapshotIDs != null && snapshotIDs.size() > 0) {
+			Long[] snapshots = snapshotIDs.toArray( new Long[]{});
+			Long   lastestID = snapshots[snapshotIDs.size()-1];
+
+			if (lastestID != null && sid <= lastestID) {
+				s_logger.warn("Snapshot ID: {} is in the past. Adjusting ID to: {} + 1", sid, lastestID);
+				sid = lastestID + 1;
+			}
+		}
+		
 		File fSnapshot = getSnapshotFile(sid);
 		s_logger.info("Writing snapshot - Saving {}...", fSnapshot.getAbsolutePath());
 		try {

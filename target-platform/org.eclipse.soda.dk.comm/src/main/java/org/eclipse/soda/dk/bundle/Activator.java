@@ -77,6 +77,7 @@ public class Activator implements BundleActivator {
 	 * @throws Exception Exception.
 	 */
 	public void start(final BundleContext arg0) throws Exception {
+		/*
 		String bundle_loc = arg0.getBundle().getLocation();
 		if (bundle_loc.startsWith(Library.HTTP)) {
 			Library.setBundlepath(Library.HTTP, bundle_loc);
@@ -91,9 +92,10 @@ public class Activator implements BundleActivator {
 			 System.out.println("bundle=" + bundle_file_name);
 			 System.out.println("bundle_install=" + bundle_install);
 			 System.out.println("bundle_path=" + bundle_path);			
-			 */
+			 
 			Library.setBundlepath(Library.FILE, bundle_path);
 		}
+	*/
 	}
 
 	/**

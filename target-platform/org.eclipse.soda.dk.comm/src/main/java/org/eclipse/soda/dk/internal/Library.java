@@ -49,7 +49,8 @@ public class Library {
 	 */
 	public static void load_dkcomm() {
 		if (load_from_java_lib_path() == false) {
-			load_from_bundle();
+			// To remain portable across OSGI, Kura will only load from lib path
+			//load_from_bundle();
 		}
 	}
 
@@ -95,6 +96,7 @@ public class Library {
 		try {
 			System.loadLibrary("dkcomm"); //$NON-NLS-1$
 		} catch (final UnsatisfiedLinkError e) {
+			e.printStackTrace();
 			return false;
 		}
 		return true;

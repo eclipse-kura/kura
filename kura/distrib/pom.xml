@@ -463,7 +463,7 @@
 				<project.raspbian.dependencies>hostapd, isc-dhcp-server, iw, dos2unix, bind9</project.raspbian.dependencies>
 			</properties>
 			<activation>
-				<activeByDefault>true</activeByDefault>
+				<activeByDefault>false</activeByDefault>
 			</activation>
 			<build>
 				<resources>

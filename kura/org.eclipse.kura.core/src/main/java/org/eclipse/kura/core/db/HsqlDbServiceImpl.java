@@ -271,7 +271,7 @@ public class HsqlDbServiceImpl implements DbService
 		// Sets the write delay_millies property, delay in milliseconds.
 		String writeDelayMillies = m_systemService.getProperties().getProperty(DB_WRITE_DELAY_MILLIES_PROPNAME);
 		if (writeDelayMillies == null || writeDelayMillies.isEmpty()) {
-			writeDelayMillies = "0";
+			writeDelayMillies = "500";
 		}
 		execute("SET FILES WRITE DELAY "+writeDelayMillies+" MILLIS");
 

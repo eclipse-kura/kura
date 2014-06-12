@@ -164,4 +164,11 @@ public interface DataStore {
 	 * @throws KuraStoreException
 	 */
 	public void checkpoint() throws KuraStoreException;
+
+	/**
+	 * Checks and attempts to repair the store.
+	 * 
+	 * @throws KuraStoreException
+	 */
+	public void repair() throws KuraStoreException;
 }

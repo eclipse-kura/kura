@@ -44,6 +44,11 @@ public class HouseKeeperTask implements Runnable
 			s_logger.info("HouseKeeperTask started.");
 
 			//
+			// check and attempt to repair the store
+			s_logger.info("HouseKeeperTask: Check store...");
+			m_store.repair();
+
+			//
 			// delete all confirmed messages
 			s_logger.info("HouseKeeperTask: Delete confirmed messages...");	
 			m_store.deleteStaleMessages(m_purgeAge);

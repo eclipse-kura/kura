@@ -409,6 +409,59 @@ public class DbDataStore implements DataStore
     	execute("CHECKPOINT");
     }
     
+    public synchronized void repair() throws KuraStoreException {
+    	// See:
+    	// https://sourceforge.net/p/hsqldb/discussion/73674/thread/a08046eb/#7960
+		ResultSet rs = null;
+		Connection conn = null;
+		PreparedStatement pstmt = null;
+		Statement stmt = null;
+		int count = -1;
+		try {			
+			
+			conn = getConnection();
+			// Get the count of IDs for which duplicates exist
+			pstmt = conn.prepareStatement("SELECT count(*) FROM (SELECT id, COUNT(id) FROM ds_messages GROUP BY id HAVING (COUNT(id) > 1)) dups;");
+			rs = pstmt.executeQuery();
+			if (rs.next()) {
+				count = rs.getInt(1);
+			}
+			
+			if (count <= 0) {
+				return;
+			}
+			
+			s_logger.error("Found messages with duplicate ID. Count of IDs for which duplicates exist: {}. Attempting to repair...", count);
+			
+			stmt = conn.createStatement();
+			
+			stmt.execute("ALTER TABLE ds_messages DROP PRIMARY KEY;");
+			s_logger.info("Primary key dropped");
+			
+			stmt.execute("DELETE FROM ds_messages WHERE id IN (SELECT id FROM ds_messages GROUP BY id HAVING COUNT(*) > 1);");
+			s_logger.info("Duplicate messages deleted");
+			
+			stmt.execute("ALTER TABLE ds_messages ADD PRIMARY KEY (id);");
+			s_logger.info("Primary key created");
+			
+			conn.commit();
+			
+			stmt.execute("CHECKPOINT DEFRAG");
+			s_logger.info("Checkpoint defrag");
+			conn.commit();
+		}
+		catch (SQLException e) {
+			rollback(conn);
+			throw new KuraStoreException(e, "Cannot repair database");
+		}
+		finally {
+			close(rs);
+			close(pstmt);
+			close(stmt);
+			close(conn);
+		}
+    }
+    
 	// ------------------------------------------------------------------
 	//
 	//      Private Methods  

@@ -9,12 +9,8 @@
   <packaging>pom</packaging>
 
   <modules>
-    <module>com.codeminders.hidapi</module>
-    <module>javax.usb.api</module>
-    <module>javax.usb.common</module>
-    <module>org.eclipse.paho</module>
-    <module>org.eclipse.soda.dk.comm</module>
-    <module>p2-repo</module>
+    <module>p2-repo-common</module>
+    <module>p2-repo-equinox_3.8.1</module>
   </modules>
 
 	<properties>
@@ -31,5 +27,3 @@
         </plugins>
     </build>
 </project>
-
-

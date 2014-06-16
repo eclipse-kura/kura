@@ -1,0 +1,54 @@
+#########################################################################
+# Copyright (c) 2001, 2009 IBM.                                         #
+# All rights reserved. This program and the accompanying materials      #
+# are made available under the terms of the Eclipse Public License v1.0 #
+# which accompanies this distribution, and is available at              #
+# http://www.eclipse.org/legal/epl-v10.html                             #
+#                                                                       #
+# Contributors:                                                         #
+#     IBM - initial API and implementation                              #
+#########################################################################
+.SUFFIXES: .s
+CPU=ARM
+CC=clarm
+DLLNAME=Release/Windows/WinCE/libibmcomm.dll# declaration
+LIBNAME=Release/Windows/WinCE/libibmcomm# declaration
+LIBPATH="C:\Program Files\Windows CE Tools\wce420\POCKET PC 2003\Lib\armv4"
+BUILDFILES1 = CommPortIdentifier.obj NSCommDriver.obj          NSDeviceInputStream.obj   NSDeviceOutputStream.obj
+BUILDFILES2 = NSSerialPort.obj       NSCommLOG.obj             SerialDataEventThread.obj SerialStatusEventThread.obj 
+BUILDFILES3 = w32SerialPort.obj      w32DeviceInputStream.obj  w32DeviceOutputStream.obj w32SerialDataEventThread.obj
+BUILDFILES4 = w32CommDriver.obj      w32CommPortIdentifier.obj w32SerialStatusEventThread.obj 
+CFLAGS =-DWINVER=0x0400 -D_WIN32_WINNT=0x0400 /nologo /c -DJ9WINCE -DJ9POCKETPC /W3 -DIPV4_WINCE -D_WIN32_WCE=300 
+CFLAGS+=-D"MS Pocket PC" /DUNDER_CE=300 /D"UNICODE" /D "_MBCS" /Zm400 -DFIXUP_UNALIGNED -D$(CPU) -D_$(CPU)_ -Ogitb1 
+CFLAGS+=-GF -DTR_HOST_32BIT -DTR_TARGET_$(CPU) -DNewFrameShape -DTR_HOST_$(CPU) -DSMALL -DTR_TARGET_32BIT 
+CFLAGS+=-I ../include -I. 
+CFLAGS+=-I "C:\Program Files\IBM\DeviceDeveloper\wsdd5.0\ive-2.2\bin\include"
+CFLAGS+=-I "C:\Program Files\Windows CE Tools\wce420\POCKET PC 2003\Include\armv4"
+##CFLAGS=-shared -DWIN32 -DDLL -DDEBUG -I../include -I/usr/include -I.
+%.obj : %.c
+	$(CC) $(CFLAGS) $< -o $@
+%.obj : %.cpp
+	$(CC) -c $(CFLAGS) $< -o $@
+AS=armasm
+ASFLAGS=$(VMASMDEBUG) -shared
+%.obj : %.s
+	$(AS) -c $(ASFLAGS) $< -o $@
+all: \
+	 $(DLLNAME)
+BUILDLIB: $(DLLNAME)
+$(LIBNAME).lib:\
+	$(BUILDFILES1) $(BUILDFILES2) $(BUILDFILES3) $(BUILDFILES4)
+	lib -subsystem:windowsce,3.0 -out:$(LIBNAME).lib -machine:$(CPU) \
+	$(BUILDFILES1) $(BUILDFILES2) $(BUILDFILES3) $(BUILDFILES4)
+$(DLLNAME):$(LIBNAME).lib\
+	$(BUILDFILES1) $(BUILDFILES2) $(BUILDFILES3) $(BUILDFILES4)
+	link $(VMLINK)  /INCREMENTAL:NO /NOLOGO -machine:$(CPU) \
+	-subsystem:windowsce,3.0 -out:$(DLLNAME) -map:$(LIBNAME).map \
+	$(BUILDFILES1) $(BUILDFILES2) $(BUILDFILES3) $(BUILDFILES4)  \
+        $(LIBPATH)/corelibc.lib $(LIBPATH)/coredll.lib
+	##-subsystem:windowsce,3.0 -out:$(DLLNAME) -map:$(LIBNAME).map /dll \ ##/entry:"_DllMainCRTStartup"  \
+        ##$(LIBPATH)/corelibc.lib 
+	##$(BUILDFILES1) $(BUILDFILES2) $(BUILDFILES3) $(BUILDFILES4)
+	##/dll /entry:"_DllMainCRTStartup" corelibc.lib coredll.lib commctrl.lib aygshell.lib $(LIBPATH)$(LIBNAME).exp
+         
+         

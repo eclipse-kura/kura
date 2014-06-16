@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.eclipse.kura</groupId>
+    <artifactId>target-platform</artifactId>
+    <version>0.2.0-SNAPSHOT</version>
+  </parent>
+
+    <groupId>org.eclipse.kura</groupId>
+    <artifactId>mqtt-client</artifactId>
+    <version>0.4.0</version>
+    <packaging>bundle</packaging>
+
+    <name>Eclipse Paho MQTT Client</name>
+    <description>Eclipse Paho MQTT Client</description>
+
+    <repositories>
+        <repository>
+            <id>eclipse-nexus-paho-repository</id>
+            <name>Eclipse Nexus Paho repository</name>
+            <url>https://repo.eclipse.org/content/groups/paho/</url>
+        </repository>
+    </repositories>
+
+    <properties>
+        <maven.compiler.source>1.6</maven.compiler.source>
+        <maven.compiler.target>1.6</maven.compiler.target>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.eclipse.paho</groupId>
+            <artifactId>mqtt-client</artifactId>
+            <version>0.4.0</version>
+        </dependency>
+
+        <!-- Test -->
+<!--
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.8.1</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jmock</groupId>
+            <artifactId>jmock</artifactId>
+            <version>2.5.1</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jmock</groupId>
+            <artifactId>jmock-legacy</artifactId>
+            <version>2.5.1</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jmock</groupId>
+            <artifactId>jmock-junit4</artifactId>
+            <version>2.5.1</version>
+            <scope>test</scope>
+        </dependency>
+-->
+    </dependencies>
+
+
+    <build>
+    <resources>
+      <resource>
+        <directory>src/main/resources</directory>
+      </resource>
+      <resource>
+        <directory>.</directory>
+        <includes>
+          <include>plugin.xml</include>
+        </includes>
+      </resource>
+    </resources>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.7.2</version>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <version>2.3.5</version>
+                <extensions>true</extensions>
+                <configuration>
+		    <manifestLocation>META-INF</manifestLocation>
+                    <instructions>
+                        <Bundle-SymbolicName>${project.artifactId};singleton:=true</Bundle-SymbolicName>
+                        <Bundle-Name>${project.name}</Bundle-Name>
+                        <Bundle-Version>${project.version}</Bundle-Version>
+                        <Include-Resource>
+                            org/eclipse/paho/client/mqttv3/internal/nls=${project.basedir}/src/main/resources,
+                            ${project.basedir}/about.html,
+                            about_files=${project.basedir}/about_files/
+                        </Include-Resource>
+                        <Import-Package>
+			    javax.net;resolution:=optional,
+			    javax.net.ssl;resolution:=optional
+                        </Import-Package>
+                        <Export-Package>
+			    org.eclipse.paho.client.mqttv3,
+			    org.eclipse.paho.client.mqttv3.logging,
+			    org.eclipse.paho.client.mqttv3.persist,
+			    org.eclipse.paho.client.mqttv3.util,
+			    org.eclipse.paho.client.mqttv3.internal,
+			    org.eclipse.paho.client.mqttv3.internal.security,
+			    org.eclipse.paho.client.mqttv3.internal.wire
+                        </Export-Package>
+                    </instructions>
+                </configuration>
+            </plugin>
+            
+	    <plugin>
+        	<artifactId>maven-dependency-plugin</artifactId>
+        	<executions>
+        	  <execution>
+        	    <id>copy-dependencies</id>
+        	    <phase>package</phase>
+        	    <goals>
+        	      <goal>copy-dependencies</goal>
+        	    </goals>
+        	  </execution>
+        	</executions>
+	   </plugin>
+	   
+        </plugins>
+        <pluginManagement>
+        	<plugins>
+        		<!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
+        		<plugin>
+        			<groupId>org.eclipse.m2e</groupId>
+        			<artifactId>lifecycle-mapping</artifactId>
+        			<version>1.0.0</version>
+        			<configuration>
+        				<lifecycleMappingMetadata>
+        					<pluginExecutions>
+        						<pluginExecution>
+        							<pluginExecutionFilter>
+        								<groupId>
+        									org.apache.maven.plugins
+        								</groupId>
+        								<artifactId>
+        									maven-dependency-plugin
+        								</artifactId>
+        								<versionRange>
+        									[2.1,)
+        								</versionRange>
+        								<goals>
+        									<goal>
+        										copy-dependencies
+        									</goal>
+        								</goals>
+        							</pluginExecutionFilter>
+        							<action>
+        								<ignore></ignore>
+        							</action>
+        						</pluginExecution>
+        					</pluginExecutions>
+        				</lifecycleMappingMetadata>
+        			</configuration>
+        		</plugin>
+        	</plugins>
+        </pluginManagement>
+    </build>
+</project>

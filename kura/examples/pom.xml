@@ -33,7 +33,8 @@
 		<module>org.eclipse.kura.example.publisher</module>
 		<module>org.eclipse.kura.example.serial.publisher</module>
 	</modules>
-	
+
+<!--	
 	<repositories>
 		<repository>
 			<id>kura</id>
@@ -41,5 +42,5 @@
 			<url>file:///${project.basedir}/../../target-definition/equinox_3.8.1/repository</url>
 		</repository>
 	</repositories>
-
+-->
 </project>

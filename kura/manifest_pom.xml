@@ -51,6 +51,7 @@
 		<module>examples</module>
 	</modules>
 
+<!--
 	<profiles>
 		<profile>
 			<id>can</id>
@@ -63,6 +64,7 @@
 			</modules>
 		</profile>
 	</profiles>
+-->
 
 	<properties>
 		<deployment.package.version>0.2.0</deployment.package.version>
@@ -74,21 +76,60 @@
 		<kura.bundle.versions>0.2.0.${kura.build.version}</kura.bundle.versions>
 	</properties>
 
+	<profiles>
+	  <profile>
+	    <id>default</id>
+	    <activation>
+	      <property>
+	      <name>!kura.osgi</name>
+	      </property>
+	    </activation>
+<!--
+	    <activation>
+	      <activeByDefault>true</activeByDefault>
+	    </activation>
+-->
+	    <repositories>
+	      <repository>
+		<id>p2-repo-equinox_3.8.1</id>
+		<layout>p2</layout>
+		<url>file:///${user.dir}/target-definition/equinox_3.8.1/repository/</url>
+	      </repository>
+	    </repositories>
+	  </profile>
+	  <profile>
+	    <id>equinox</id>
+	    <activation>
+	      <property>
+	      <name>kura.osgi</name>
+	      <value>equinox</value>
+	      </property>	      
+	    </activation>
+	    <repositories>
+	      <repository>
+		<id>p2-repo-equinox_3.8.1</id>
+		<layout>p2</layout>
+		<url>file:///${user.dir}/target-definition/equinox_3.8.1/repository/</url>
+	      </repository>
+	    </repositories>
+	  </profile>
+        </profiles>
+
 	<repositories>
-		<repository>
-			<id>kura</id>
-			<layout>p2</layout>
-			<url>file:///${project.basedir}/../target-definition/equinox_3.8.1/repository</url>
-		</repository>
-                <repository>
-                        <id>kura_addons</id>
-                        <name>Kura Addons Maven Repository</name>
-			<url>https://raw.github.com/eurotech/kura_addons/mvn-repo/</url>
-			<snapshots>
-				<enabled>true</enabled>
-				<updatePolicy>always</updatePolicy>
-			</snapshots>
-                </repository>
+	      <repository>
+		<id>p2-repo-common</id>
+		<layout>p2</layout>
+		<url>file:///${user.dir}/target-definition/common/repository/</url>
+	      </repository>
+	      <repository>
+		<id>kura_addons</id>
+		<name>Kura Addons Maven Repository</name>
+		<url>https://raw.github.com/eurotech/kura_addons/mvn-repo/</url>
+		<snapshots>
+		  <enabled>true</enabled>
+		  <updatePolicy>always</updatePolicy>
+		</snapshots>
+	      </repository>
 	</repositories>
 
 	<build>
@@ -121,6 +162,7 @@
 				<artifactId>target-platform-configuration</artifactId>
 				<version>${tycho-version}</version>
 				<configuration>
+<!--
 					<target>
 						<artifact>
 							<groupId>org.eclipse.kura</groupId>
@@ -129,6 +171,7 @@
 							<classifier>kura-equinox_3.8.1</classifier>
 						</artifact>
 					</target>
+-->
 					<environments>
 						<environment>
 							<os>win32</os>

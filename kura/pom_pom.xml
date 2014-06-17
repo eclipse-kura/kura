@@ -47,9 +47,12 @@
 		<deployment.package.version>0.2.0</deployment.package.version>
 		<tycho-version>0.18.1</tycho-version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-		<maven.build.timestamp.format>yyyyMMddHHmm</maven.build.timestamp.format>
-		<kura.bundle.versions>0.2.0.${kura.build.version}</kura.bundle.versions>
+		<project.reporting.outputEncoding>UTF-8
+		</project.reporting.outputEncoding>
+		<maven.build.timestamp.format>yyyyMMddHHmm
+		</maven.build.timestamp.format>
+		<kura.bundle.versions>0.2.0.${kura.build.version}
+		</kura.bundle.versions>
 	</properties>
 
 	<repositories>
@@ -72,15 +75,13 @@
 				<version>2.2</version>
 			</extension>
 		</extensions>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-site-plugin</artifactId>
-                <version>3.3</version>
-              </plugin>
-        </plugins>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-site-plugin</artifactId>
+				<version>3.3</version>
+			</plugin>
+		</plugins>
 	</build>
-        
+
 </project>
-
-

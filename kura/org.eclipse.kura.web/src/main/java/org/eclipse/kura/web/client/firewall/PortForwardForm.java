@@ -179,7 +179,7 @@ public class PortForwardForm extends Window {
     	// out port number
         //
         final TextField<String> outPortField = new TextField<String>();
-        outPortField.setAllowBlank(true);
+        outPortField.setAllowBlank(false);
         outPortField.setName("outPort");
         outPortField.setFieldLabel(MSGS.firewallPortForwardFormOutPort());
         outPortField.setValidator(new TextFieldValidator(outPortField, FieldType.NUMERIC));
@@ -256,6 +256,10 @@ public class PortForwardForm extends Window {
             		m_newEntry.setPermittedNetwork(permittedNetworkField.getValue());
             		m_newEntry.setPermittedMAC(permittedMacField.getValue());
             		m_newEntry.setSourcePortRange(sourcePortRangeField.getValue());
+            		
+            		if (m_newEntry.getPermittedMAC() != null) {
+                		MessageBox.alert(MSGS.firewallPortForwardFormNotification(), MSGS.firewallPortForwardFormNotificationMacFiltering(), null);
+                	}
             	} else {
             		//update the current entry
             		m_existingEntry = new GwtFirewallPortForwardEntry();
@@ -267,6 +271,10 @@ public class PortForwardForm extends Window {
             		m_existingEntry.setPermittedNetwork(permittedNetworkField.getValue());
             		m_existingEntry.setPermittedMAC(permittedMacField.getValue());
             		m_existingEntry.setSourcePortRange(sourcePortRangeField.getValue());
+            		
+            		if (m_existingEntry.getPermittedMAC() != null) {
+                		MessageBox.alert(MSGS.firewallPortForwardFormNotification(), MSGS.firewallPortForwardFormNotificationMacFiltering(), null);
+                	}
             	}
             	
             	m_isCanceled = false;

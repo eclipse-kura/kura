@@ -24,7 +24,7 @@
 #endif
 #define assert(s) if (!s) {printf("\n\n%d asserted!\n\n", __LINE__); return(-1);}
 #define assertexc(s) if (!s) {printf("\n\n%d asserted!\n\n", __LINE__); (*jenv)->ThrowNew(jenv, ec, "");}
-#ifdef __linux__
+#if defined(__linux__) || defined(__osx__)
 static volatile int	timeoutOccurred = FALSE;
 static struct itimerval	apptimer;
 static struct sigaction	appsa;
@@ -107,7 +107,7 @@ int cygDeviceInputStream_readDeviceOneByteNC
 		//dc=-1; //return fake error
 	}
 #endif /* QNX */
-#ifdef __linux__
+#if defined(__linux__) || defined(__osx__)
   // Start the timer.
   timeoutOccurred = FALSE;
   if (tmo > 0)
@@ -169,7 +169,7 @@ int cygDeviceInputStream_readDeviceNC
 		//dc=-1; //return fake error
 	}
 #endif /* QNX */
-#ifdef __linux__ 
+#if defined(__linux__) || defined(__osx__) 
   // Start the timer.
   timeoutOccurred = FALSE;
   if (tmo > 0)

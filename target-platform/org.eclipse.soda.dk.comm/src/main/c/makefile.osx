@@ -80,7 +80,7 @@ ifeq "$(CPUTYPE)_$(COMPILER)""x86_macosx"
 TOOL_DIR  = /usr/bin
 CROSSCOMP =
 CC        = $(TOOL_DIR)/$(CROSSCOMP)gcc
-CFLAGS    = -shared -D__osx__ -I$(JAVA_HOME)/include -I$(JAVA_HOME)/include/darwin -I../include -I/usr/include -I. -I/usr/comm/osgimin11/bin/include
+CFLAGS    = -shared -D__osx__ -I$(JAVA_HOME)/include -I$(JAVA_HOME)/include/darwin -I../include -I/usr/include -I. -I/usr/comm/osgimin11/bin/include -lpthread
 AS        = $(TOOL_DIR)/$(CROSSCOMP)gcc
 ASFLAGS   = -c $(VMASMDEBUG) -shared
 LINKER    = $(TOOL_DIR)/$(CROSSCOMP)gcc

@@ -42,6 +42,7 @@
 #include <org_eclipse_soda_dk_comm_NSSerialPort.h>
 #define assertexc(s) if (!s) {printf("\n\n%d asserted!\n\n", __LINE__); return(-1);}
 #define NOOF_ELEMS(s)	((sizeof(s))/(sizeof(s[0])))
+#define DEBUG
 #ifndef _POSIX_SEMAPHORES
 static struct sembuf	dev_test[] = {
 		{ 0, 0, IPC_NOWAIT }	/* test to see if it is free */
@@ -104,7 +105,7 @@ int cygSerialPort_closeDeviceNC
 #ifdef NCI
   (void)ioctl(fd, TIOCDRAIN, NULL);
 #endif	/* NCI */
-#ifdef __linux__
+#if defined(__linux__) || defined(__osx__)
   (void)tcdrain(fd);
 #endif	/* __linux__ */
 # ifdef QNX
@@ -115,15 +116,16 @@ int cygSerialPort_closeDeviceNC
 int cygSerialPort_openDeviceNC
   (JNIEnv *jenv, jobject jobj, jstring name, jint semId)
 {
+  sem_t * local_sem;
   const char * dname = NULL;
   int fd = -1;
   int sts;
   dname = (*jenv)->GetStringUTFChars(jenv, name, 0);
   if( dname == NULL )
   {
-#ifdef DEBUG
+
     printf( "Can not open port because get NULL name\n" );
-#endif
+
     return fd;
   }
   /* Test the semaphore to see if it is free. If so, lock it.  Else, return
@@ -149,14 +151,13 @@ int cygSerialPort_openDeviceNC
 		return fd;
 	}
   }
-#undef DEBUG
-#ifdef DEBUG
+
   printf("Before opening %s\n", dname);
-#endif /* DEBUG */
+
   fd = open( dname, O_RDWR | O_NONBLOCK );
-#ifdef DEBUG
+
   printf("After opening %s; fd = %d\n", dname, fd);
-#endif /* DEBUG */
+
   /* Turn on blocking mode for the device. */
   if (fd != -1) {
      if ((sts = fcntl(fd, F_GETFL, 0)) != -1) {
@@ -181,6 +182,9 @@ int cygSerialPort_openDeviceNC
 #ifdef __linux__
    		io.c_cflag &= ~(CRTSCTS);
 #endif	/* __linux__ */
+#ifdef __osx__
+		io.c_cflag &= ~(CRTSCTS);
+#endif
 #ifdef QNX
 		io.c_cflag &=~(IHFLOW | OHFLOW);
 #endif /* QNX */		
@@ -206,7 +210,7 @@ int cygSerialPort_openDeviceNC
   /* If the open has failed and the semaphore was locked, unlock it. */
   if (fd == -1 && semId != -1) {
 #ifdef _POSIX_SEMAPHORES
-	(void) sem_post(sem_lookup(semId));
+	(void)sem_post(sem_lookup(semId));
 #else 
 	(void)semop(semId, dev_unlock, NOOF_ELEMS(dev_unlock));
 #endif  
@@ -231,7 +235,7 @@ int cygSerialPort_setFlowControlModeNC
 #ifdef NCI
   ios.c_cflag &= ~(CRTS_IFLOW | CCTS_OFLOW);
 #endif	/* NCI */
-#ifdef __linux__
+#if defined(__linux__) || defined(__osx__)
   ios.c_cflag &= ~(CRTSCTS);
 #endif	/* __linux__ */
 #ifdef QNX
@@ -246,7 +250,7 @@ int cygSerialPort_setFlowControlModeNC
 #ifdef NCI
 	ios.c_cflag |= CRTS_IFLOW;
 #endif	/* NCI */
-#ifdef __linux__
+#if defined(__linux__) || defined(__osx__)
 	ios.c_cflag |= CRTSCTS;
 #endif	/* __linux__ */
 #ifdef QNX
@@ -258,7 +262,7 @@ int cygSerialPort_setFlowControlModeNC
 #ifdef NCI
 	ios.c_cflag |= CCTS_OFLOW;
 #endif	/* NCI */
-#ifdef __linux__
+#if defined(__linux__) || defined(__osx__)
 	ios.c_cflag |= CRTSCTS;
 #endif	/* __linux__ */
 #ifdef QNX
@@ -364,7 +368,7 @@ int cygSerialPort_getBaudRateNC
   /* fflush( stdout ); */
 #endif
  sp = cfgetospeed( &ios );
-#ifdef __linux__
+#if defined(__linux__) || defined(__osx__)
  /* Map the internal value to external speed. */
 #ifdef DEBUG
   printf( "sp %d\n",sp);

@@ -24,6 +24,7 @@ JNIEXPORT void JNICALL Java_org_eclipse_soda_dk_comm_ParallelErrorEventThread_mo
 	return;
 //    return w32ParallelErrorEventThread_monitorParallelErrorNC(jenv, jobj, jfd);
 #else
-    return cygParallelErrorEventThread_monitorParallelErrorNC(jenv, jobj, jfd);
+    return;
+//    return cygParallelErrorEventThread_monitorParallelErrorNC(jenv, jobj, jfd);
 #endif
 } /* Java_org_eclipse_soda_dk_comm_ParallelErrorEventThread_monitorParallelErrorNC */

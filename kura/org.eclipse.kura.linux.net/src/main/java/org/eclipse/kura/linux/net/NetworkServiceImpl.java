@@ -375,7 +375,7 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
 
 	@Override
 	public List<WifiAccessPoint> getWifiAccessPoints(String wifiInterfaceName) throws KuraException {
-		return LinuxNetworkUtil.getAvailableAccessPoints(wifiInterfaceName);
+		return LinuxNetworkUtil.getAvailableAccessPoints(wifiInterfaceName, 3);
 	}
 
 	@Override

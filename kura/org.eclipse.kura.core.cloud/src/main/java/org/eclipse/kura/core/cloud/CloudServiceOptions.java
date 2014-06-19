@@ -11,10 +11,19 @@
  */
 package org.eclipse.kura.core.cloud;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.util.Map;
+
+import org.eclipse.kura.core.util.ProcessUtil;
+import org.eclipse.kura.system.SystemService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class CloudServiceOptions 
 {
+	private static final Logger s_logger = LoggerFactory.getLogger(CloudServiceOptions.class);
+	
 	private static final String  TOPIC_SEPARATOR              = "/";
 	private static final String  TOPIC_ACCOUNT_TOKEN          = "#account-name";
 	private static final String  TOPIC_CLIENT_ID_TOKEN        = "#client-id";
@@ -26,6 +35,7 @@ public class CloudServiceOptions
 	private static final String  TOPIC_WILD_CARD              = "#";
 	
 	private static final String  DEVICE_DISPLAY_NAME          = "device.display-name";
+	private static final String  DEVICE_CUSTOM_NAME			  = "device.custom-name";
 	private static final String  ENCODE_GZIP                  = "encode.gzip";
 	private static final String  REPUB_BIRTH_ON_GPS_LOCK	  = "republish.mqtt.birth.cert.on.gps.lock";
 	
@@ -35,9 +45,11 @@ public class CloudServiceOptions
 	
 	
 	private Map<String,Object> m_properties;
+	private SystemService	   m_systemService;
 	
-	CloudServiceOptions(Map<String,Object> properties) {
+	CloudServiceOptions(Map<String,Object> properties, SystemService systemService) {
 		m_properties = properties;
+		m_systemService = systemService;
 	}
 	
 	/**
@@ -45,12 +57,48 @@ public class CloudServiceOptions
 	 * @return
 	 */
 	public String getDeviceDisplayName() {
-		String displayName = DEVICE_DISPLAY_NAME;
-		if (m_properties != null &&
-			m_properties.get(DEVICE_DISPLAY_NAME) != null &&
-			m_properties.get(DEVICE_DISPLAY_NAME) instanceof String) {
-			displayName = (String) m_properties.get(DEVICE_DISPLAY_NAME);
+		String displayName = "";
+		if (m_properties != null) {
+			String deviceDisplayNameOption = (String) m_properties.get(DEVICE_DISPLAY_NAME);
+			
+			// Use the device name from SystemService. This should be kura.device.name from 
+			// the properties file.
+			if (deviceDisplayNameOption.equals("device-name")) {
+				displayName = m_systemService.getDeviceName();
+				return displayName;
+			}
+			// Try to get the device hostname
+			else if (deviceDisplayNameOption.equals("hostname")) {
+				displayName = "UNKNOWN";
+				if(SystemService.OS_MAC_OSX.equals(m_systemService.getOsName())) {
+					String displayTmp = getHostname("scutil --get ComputerName");
+					if(displayTmp.length() > 0) {
+						displayName = displayTmp;
+					}
+				}
+				else if (SystemService.OS_LINUX.equals(m_systemService.getOsName()) || SystemService.OS_CLOUDBEES.equals(m_systemService.getOsName())) {
+					String displayTmp = getHostname("hostname");
+					if(displayTmp.length() > 0) {
+						displayName = displayTmp;
+					}
+				}	
+				return displayName;
+			}
+			// Return the custom field defined by the user
+			else if (deviceDisplayNameOption.equals("custom")) {
+				if (m_properties.get(DEVICE_CUSTOM_NAME) != null &&
+					m_properties.get(DEVICE_CUSTOM_NAME) instanceof String) {
+						displayName = (String) m_properties.get(DEVICE_CUSTOM_NAME);
+				}
+				return displayName;
+			}
+			// Return empty string to the server
+			else if (deviceDisplayNameOption.equals("server")) {
+				displayName = "";
+				return displayName;
+			}
 		}
+		
 		return displayName;
 	}
 		
@@ -137,6 +185,29 @@ public class CloudServiceOptions
 
 	public boolean getLifeCycleMessageRetain() {
 		return LIFECYCLE_RETAIN;
+	}
+	
+	private String getHostname(String command) {
+		StringBuffer response = new StringBuffer(); 
+		Process proc = null;
+		try {
+			proc = ProcessUtil.exec(command);
+			proc.waitFor();
+			BufferedReader br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+			String line = null;
+			String newLine = "";
+			while ((line = br.readLine()) != null) {
+				response.append(newLine);
+				response.append(line);
+				newLine = "\n";
+			}
+		} catch(Exception e) {
+			s_logger.error("failed to run commands " + command, e);
+		}
+		finally {
+			ProcessUtil.destroy(proc);
+		}
+		return response.toString();
 	}
 }
 

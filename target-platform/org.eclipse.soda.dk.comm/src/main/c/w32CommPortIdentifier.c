@@ -123,7 +123,7 @@ int w32CommPortIdentifier_monitorInterJVMDeviceAccessNC
 	jmethodID	jintMethod;
 	jclass		jthreadClass;
 //t.j	int		semID;
-//t.j	union semun	scarg;
+//t.j	union semuni	scarg;
 //	int		mypid = getpid();
 //	int		scpid;
 	pollingTime = getPollingTime(jenv);

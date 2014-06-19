@@ -1061,8 +1061,15 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 		    	//nl80211.setMode(WifiMode.INFRA, 3);
 		    }
 		    
-		    List<WifiAccessPoint> wifiAccessPoints = LinuxNetworkUtil.getAvailableAccessPoints(ifaceName);
+		    s_logger.info("getWifiHotspots() :: scanning for available access points ...");
+		    List<WifiAccessPoint> wifiAccessPoints = LinuxNetworkUtil.getAvailableAccessPoints(ifaceName, 3);
 		    for(WifiAccessPoint wap : wifiAccessPoints) {
+		    	
+		    	if ((wap.getSSID() == null) || (wap.getSSID().length() == 0)) {
+		    		s_logger.debug("Skipping hidden SSID");
+		    		continue;
+		    	}
+		    	
 		    	s_logger.trace("getWifiHotspots() :: SSID={}", wap.getSSID());
 		    	s_logger.trace("getWifiHotspots() :: Signal={}", wap.getStrength());
 		    	s_logger.trace("getWifiHotspots() :: Frequency={}", wap.getFrequency());
@@ -1125,7 +1132,7 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 		    */
 		    if (wifiMode == WifiMode.MASTER) {
 		    	if (WpaSupplicantManager.isTempRunning()) {
-					s_logger.debug("verifyWifiCredentials() :: stoping temporary instance of wpa_supplicant");
+					s_logger.debug("getWifiHotspots() :: stoping temporary instance of wpa_supplicant");
 					WpaSupplicantManager.stop();
 				}
 		    	//nl80211.setMode(WifiMode.MASTER);

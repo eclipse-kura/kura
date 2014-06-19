@@ -1,0 +1,17 @@
+bin
+target
+src/main/webapp/WEB-INF/lib
+src/main/webapp/denali/denali.nocache.js
+src/main/webapp/denali/gwt-log-triangle-10x10.png
+src/main/webapp/denali/gwt/standard/*
+src/main/webapp/denali/.junit*
+src/main/webapp/denali/*.gwt.rpc
+src/main/webapp/WEB-INF/deploy/denali/rpcPolicyManifest/manifest.txt
+denali/*
+src/main/webapp/com.eurotech.framework.web.denaliJUnit/*
+src/main/webapp/WEB-INF/deploy/*
+src/main/gwt-unitCache
+src/main/webapp/gxt/css
+src/main/webapp/gxt/images
+src/main/webapp/gxt/themes
+

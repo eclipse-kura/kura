@@ -72,7 +72,7 @@
 		    -->
 
                     <useUnlimitedThreads>true</useUnlimitedThreads>
-                    <argLine>-Dequinox.ds.print=true -Dorg.osgi.framework.storage=/tmp/osgi/framework_storage -Dosgi.clean=true -Deurotech.framework.mode=emulator -Dkura.configuration=file:../org.eclipse.kura.emulator/src/main/resources/kura.properties -Ddpa.configuration=/tmp/kura/dpa.properties  -Dlog4j.configuration=file:../org.eclipse.kura.emulator/src/main/resources/log4j.properties</argLine>
+                    <argLine>-Dequinox.ds.print=true -Dorg.osgi.framework.storage=/tmp/osgi/framework_storage -Dosgi.clean=true -Dorg.eclipse.kura.mode=emulator -Dkura.configuration=file:../org.eclipse.kura.emulator/src/main/resources/kura.properties -Ddpa.configuration=/tmp/kura/dpa.properties  -Dlog4j.configuration=file:../org.eclipse.kura.emulator/src/main/resources/log4j.properties</argLine>
 
 		    <!-- This can be uncommented to debug the test in the event of a failure by telneting to port 5002 and seeing the state of the OSGi runtime 		    
                     <appArgLine>-consoleLog -console 5002 -noExit</appArgLine>
@@ -254,6 +254,36 @@
 			    <autoStart>true</autoStart>
 			</bundle>
 			<bundle>
+			    <id>org.eclipse.kura.core.cloud</id>
+			    <level>4</level>
+			    <autoStart>true</autoStart>
+			</bundle>
+			<bundle>
+			    <id>org.eclipse.kura.core.comm</id>
+			    <level>4</level>
+			    <autoStart>true</autoStart>
+			</bundle>
+			<bundle>
+			    <id>org.eclipse.kura.core.configuration</id>
+			    <level>4</level>
+			    <autoStart>true</autoStart>
+			</bundle>
+			<bundle>
+			    <id>org.eclipse.kura.core.crypto</id>
+			    <level>4</level>
+			    <autoStart>true</autoStart>
+			</bundle>
+			<bundle>
+			    <id>org.eclipse.kura.core.deployment</id>
+			    <level>4</level>
+			    <autoStart>true</autoStart>
+			</bundle>
+			<bundle>
+			    <id>org.eclipse.kura.core.net</id>
+			    <level>4</level>
+			    <autoStart>true</autoStart>
+			</bundle>
+			<bundle>
 			    <id>org.eclipse.kura.deployment.agent</id>
 			    <level>4</level>
 			    <autoStart>true</autoStart>
@@ -410,18 +440,47 @@
                             <artifactId>org.apache.felix.deploymentadmin</artifactId>
                         </dependency>
                         <dependency>
+                        	<type>p2-installable-unit</type>
                             <artifactId>org.eclipse.kura.api</artifactId>
                         </dependency>
                         <dependency>
+                        	<type>p2-installable-unit</type>
                             <artifactId>org.eclipse.kura.core</artifactId>
                         </dependency>
                         <dependency>
+                        	<type>p2-installable-unit</type>
+                            <artifactId>org.eclipse.kura.core.cloud</artifactId>
+                        </dependency>
+                        <dependency>
+                        	<type>p2-installable-unit</type>
+                            <artifactId>org.eclipse.kura.core.comm</artifactId>
+                        </dependency>
+                        <dependency>
+                        	<type>p2-installable-unit</type>
+                            <artifactId>org.eclipse.kura.core.configuration</artifactId>
+                        </dependency>
+                        <dependency>
+                        	<type>p2-installable-unit</type>
+                            <artifactId>org.eclipse.kura.core.crypto</artifactId>
+                        </dependency>
+                        <dependency>
+                        	<type>p2-installable-unit</type>
+                            <artifactId>org.eclipse.kura.core.deployment</artifactId>
+                        </dependency>
+                        <dependency>
+                        	<type>p2-installable-unit</type>
+                            <artifactId>org.eclipse.kura.core.net</artifactId>
+                        </dependency>
+                        <dependency>
+                        	<type>p2-installable-unit</type>
                             <artifactId>org.eclipse.kura.deployment.agent</artifactId>
                         </dependency>
                         <dependency>
+                        	<type>p2-installable-unit</type>
                             <artifactId>org.eclipse.kura.emulator</artifactId>
                         </dependency>
                         <dependency>
+                        	<type>p2-installable-unit</type>
                             <artifactId>org.eclipse.kura.test</artifactId>
                         </dependency>
                     </dependencies>

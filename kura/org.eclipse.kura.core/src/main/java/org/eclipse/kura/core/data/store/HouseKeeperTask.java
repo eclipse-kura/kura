@@ -39,10 +39,14 @@ public class HouseKeeperTask implements Runnable
 	@Override
 	public void run()
 	{	
-		//String originalName = Thread.currentThread().getName(); 
 		try {
 			Thread.currentThread().setName(getClass().getSimpleName());
 			s_logger.info("HouseKeeperTask started.");
+
+			//
+			// check and attempt to repair the store
+			s_logger.info("HouseKeeperTask: Check store...");
+			m_store.repair();
 
 			//
 			// delete all confirmed messages
@@ -74,9 +78,6 @@ public class HouseKeeperTask implements Runnable
 			else {
 				s_logger.warn("HouseCleaningTask exception", t);
 			}
-		}
-		finally {
-			Thread.currentThread().setName(getClass().getSimpleName());			
 		}
 	}    	
 }

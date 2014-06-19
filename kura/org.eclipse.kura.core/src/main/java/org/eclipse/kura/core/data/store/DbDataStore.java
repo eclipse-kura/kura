@@ -23,8 +23,9 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.kura.KuraStoreCapacityReachedException;
@@ -32,7 +33,6 @@ import org.eclipse.kura.KuraStoreException;
 import org.eclipse.kura.core.data.DataMessage;
 import org.eclipse.kura.core.data.DataStore;
 import org.eclipse.kura.core.db.HsqlDbServiceImpl;
-import org.eclipse.kura.core.util.ExecutorUtil;
 import org.eclipse.kura.db.DbService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,6 +47,7 @@ public class DbDataStore implements DataStore
 	
     private DbService            m_dbService;
     private Calendar             m_utcCalendar;
+    private ScheduledExecutorService m_houseKeeperExecutor;
     private ScheduledFuture<?>   m_houseKeeperTask;
     int m_capacity;
     
@@ -65,6 +66,8 @@ public class DbDataStore implements DataStore
     public synchronized void start(DbService dbService, int houseKeeperInterval, int purgeAge, int capacity) throws KuraStoreException
     {
     	m_dbService = dbService;
+    	
+    	m_houseKeeperExecutor = Executors.newSingleThreadScheduledExecutor();
     	    	
     	//
     	// Set up the schema tables required by the DataStore
@@ -118,6 +121,7 @@ public class DbDataStore implements DataStore
 		if (m_houseKeeperTask != null) {
 			m_houseKeeperTask.cancel(true);
 		}
+		m_houseKeeperExecutor.shutdownNow();
     }
 	
 	public synchronized void update(int houseKeeperInterval, int purgeAge, int capacity)
@@ -130,10 +134,8 @@ public class DbDataStore implements DataStore
 		
 		boolean doCheckpoint = !((HsqlDbServiceImpl) m_dbService).isLogDataEnabled();
 		
-		ScheduledThreadPoolExecutor executor = ExecutorUtil.getInstance();
-		
 		// Start the Housekeeper task
-		m_houseKeeperTask = executor.scheduleAtFixedRate(new HouseKeeperTask(this, purgeAge, doCheckpoint),
+		m_houseKeeperTask = m_houseKeeperExecutor.scheduleAtFixedRate(new HouseKeeperTask(this, purgeAge, doCheckpoint),
 										      1,  // start in one second
 										      houseKeeperInterval, // repeat every retryInterval until we stopped. 
 										      TimeUnit.SECONDS);
@@ -405,6 +407,59 @@ public class DbDataStore implements DataStore
     
     public synchronized void checkpoint() throws KuraStoreException {
     	execute("CHECKPOINT");
+    }
+    
+    public synchronized void repair() throws KuraStoreException {
+    	// See:
+    	// https://sourceforge.net/p/hsqldb/discussion/73674/thread/a08046eb/#7960
+		ResultSet rs = null;
+		Connection conn = null;
+		PreparedStatement pstmt = null;
+		Statement stmt = null;
+		int count = -1;
+		try {			
+			
+			conn = getConnection();
+			// Get the count of IDs for which duplicates exist
+			pstmt = conn.prepareStatement("SELECT count(*) FROM (SELECT id, COUNT(id) FROM ds_messages GROUP BY id HAVING (COUNT(id) > 1)) dups;");
+			rs = pstmt.executeQuery();
+			if (rs.next()) {
+				count = rs.getInt(1);
+			}
+			
+			if (count <= 0) {
+				return;
+			}
+			
+			s_logger.error("Found messages with duplicate ID. Count of IDs for which duplicates exist: {}. Attempting to repair...", count);
+			
+			stmt = conn.createStatement();
+			
+			stmt.execute("ALTER TABLE ds_messages DROP PRIMARY KEY;");
+			s_logger.info("Primary key dropped");
+			
+			stmt.execute("DELETE FROM ds_messages WHERE id IN (SELECT id FROM ds_messages GROUP BY id HAVING COUNT(*) > 1);");
+			s_logger.info("Duplicate messages deleted");
+			
+			stmt.execute("ALTER TABLE ds_messages ADD PRIMARY KEY (id);");
+			s_logger.info("Primary key created");
+			
+			conn.commit();
+			
+			stmt.execute("CHECKPOINT DEFRAG");
+			s_logger.info("Checkpoint defrag");
+			conn.commit();
+		}
+		catch (SQLException e) {
+			rollback(conn);
+			throw new KuraStoreException(e, "Cannot repair database");
+		}
+		finally {
+			close(rs);
+			close(pstmt);
+			close(stmt);
+			close(conn);
+		}
     }
     
 	// ------------------------------------------------------------------

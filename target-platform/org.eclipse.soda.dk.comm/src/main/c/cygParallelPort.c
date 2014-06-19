@@ -61,7 +61,7 @@ int cygParallelPort_closeDeviceNC
 	 iRet = semop(semId, dev_unlock, NOOF_ELEMS(dev_unlock));
     printf( "Unlock semID %d return value: %d\n", semId, iRet );
      {
-        union semun scarg;
+        union semuni scarg;
         int iVal = 0;
 	     (void)memset(&scarg, 0, sizeof(scarg));
    	  iVal = semctl(semId, 0, GETVAL, scarg);
@@ -81,6 +81,9 @@ int cygParallelPort_closeDeviceNC
 #ifdef NCI
   (void)ioctl(fd, TIOCDRAIN, NULL);
 #endif	/* NCI */
+#ifdef __osx__
+  (void)tcdrain(fd);
+#endif	/* __osx__ */
 #ifdef __linux__
   (void)tcdrain(fd);
 #endif	/* __linux__ */
@@ -121,7 +124,7 @@ int cygParallelPort_openDeviceNC
 #endif
 #if defined(DEBUG) && !(_POSIX_SEMAPHORES)
      {
-        union semun scarg;
+        union semuni scarg;
         int iVal = 0;
 	     (void)memset(&scarg, 0, sizeof(scarg));
    	  iVal = semctl(semId, 0, GETVAL, scarg);
@@ -170,6 +173,9 @@ jboolean cygParallelPort_isPaperOutNC
 #ifdef NCI
   if (ioctl(jfd, PIOCSTATUS, &status) < 0) {
 #endif	/* NCI */
+#ifdef __osx__          /* ToDo: implement */
+  if (0) {
+#endif	/* __osx__ */
 #ifdef __linux__
   if (ioctl(jfd, LPGETSTATUS, &status) < 0) {
 #endif	/* __linux__ */
@@ -182,6 +188,9 @@ jboolean cygParallelPort_isPaperOutNC
 #ifdef NCI
   return status & LPS_NOPAPER ? JNI_TRUE : JNI_FALSE;
 #endif	/* NCI */
+#ifdef __osx__          /* ToDo: implement */
+  return JNI_FALSE;
+#endif	/* __osx__ */
 #ifdef __linux__
   return status & LP_POUTPA ? JNI_TRUE : JNI_FALSE;
 #endif	/* __linux__ */
@@ -201,6 +210,9 @@ jboolean cygParallelPort_isPrinterBusyNC
 #ifdef NCI
   if (ioctl(jfd, PIOCSTATUS, &status) < 0) {
 #endif	/* NCI */
+#ifdef __osx__          /* ToDo: implement */
+  if (0) {
+#endif	/* __osx__ */
 #ifdef __linux__
   if (ioctl(jfd, LPGETSTATUS, &status) < 0) {
 #endif	/* __linux__ */
@@ -213,6 +225,9 @@ jboolean cygParallelPort_isPrinterBusyNC
 #ifdef NCI
   return status & LPS_NBSY ? JNI_FALSE : JNI_TRUE;	/* converse */
 #endif	/* NCI */
+#ifdef __osx__          /* ToDo: implement */
+  return JNI_FALSE;
+#endif	/* __osx__ */
 #ifdef __linux__
   return status & LP_PBUSY ? JNI_FALSE : JNI_TRUE;	/* converse */
 #endif	/* __linux__ */
@@ -232,6 +247,9 @@ jboolean cygParallelPort_isPrinterSelectedNC
 #ifdef NCI
   if (ioctl(jfd, PIOCSTATUS, &status) < 0) {
 #endif	/* NCI */
+#ifdef __osx__          /* ToDo: implement */
+  if (0) {
+#endif	/* __osx__ */
 #ifdef __linux__
   if (ioctl(jfd, LPGETSTATUS, &status) < 0) {
 #endif	/* __linux__ */
@@ -244,6 +262,9 @@ jboolean cygParallelPort_isPrinterSelectedNC
 #ifdef NCI
   return status & LPS_SELECT ? JNI_FALSE : JNI_TRUE;	/* converse */
 #endif	/* NCI */
+#ifdef __osx__          /* ToDo: implement */
+  return JNI_TRUE;
+#endif	/* __osx__ */
 #ifdef __linux__
   return status & LP_PSELECD ? JNI_FALSE : JNI_TRUE;	/* converse */
 #endif	/* __linux__ */
@@ -273,6 +294,9 @@ jboolean cygParallelPort_isPrinterErrorNC
 #ifdef NCI
   if (ioctl(jfd, PIOCSTATUS, &status) < 0) {
 #endif	/* NCI */
+#ifdef __osx__          /* ToDo: implement */
+  if (0) {
+#endif	/* __osx__ */
 #ifdef __linux__
   if (ioctl(jfd, LPGETSTATUS, &status) < 0) {
 #endif	/* __linux__ */
@@ -285,6 +309,9 @@ jboolean cygParallelPort_isPrinterErrorNC
 #ifdef NCI
   return status & LPS_NERR ? JNI_FALSE : JNI_TRUE;	/* converse */
 #endif	/* NCI */
+#ifdef __osx__          /* ToDo: implement */
+  return JNI_FALSE;
+#endif	/* __osx__ */
 #ifdef __linux__
   return status & LP_PERRORP ? JNI_FALSE : JNI_TRUE;	/* converse */
 #endif	/* __linux__ */

@@ -180,15 +180,6 @@
 			<systemPath>${basedir}/../org.eclipse.kura.linux/target/org.eclipse.kura.linux-${project.version}.jar</systemPath>
 		</dependency>
  -->
- <!--
-		<dependency>
-			<groupId>org.eclipse.kura</groupId>
-			<artifactId>org.eclipse.kura.web</artifactId>
-			<version>${project.version}</version>
-			<scope>system</scope>
-			<systemPath>${basedir}/../org.eclipse.kura.web/target/org.eclipse.kura.web-${project.version}.jar</systemPath>
-		</dependency>
--->
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
@@ -790,11 +781,6 @@
 										<copy
 											file="../org.eclipse.kura.deployment.agent/target/org.eclipse.kura.deployment.agent_${project.version}.v${kura.build.version}.jar"
 											todir="${project.build.directory}/staging/target-definition/equinox_3.8.1/repository/plugins" />
-<!--
-										<copy
-											file="../org.eclipse.kura.web/target/org.eclipse.kura.web_${project.version}.v${kura.build.version}.jar"
-											todir="${project.build.directory}/staging/target-definition/equinox_3.8.1/repository/plugins" />
--->
 										<copy
 											file="../org.eclipse.kura.core.crypto/target/org.eclipse.kura.core.crypto_${project.version}.v${kura.build.version}.jar"
 											todir="${project.build.directory}/staging/target-definition/equinox_3.8.1/repository/plugins" />
@@ -910,6 +896,37 @@
 							<artifactRepositoryLocation>${project.build.directory}/staging/target-definition/equinox_3.8.1/repository</artifactRepositoryLocation>
 							<metadataRepositoryLocation>${project.build.directory}/staging/target-definition/equinox_3.8.1/repository</metadataRepositoryLocation>
 						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		<profile>
+			<id>extra-dps</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-antrun-plugin</artifactId>
+						<version>1.7</version>
+						<executions>
+							<execution>
+								<id>modbus-dp</id>
+								<phase>install</phase>
+								<goals>
+									<goal>run</goal>
+								</goals>
+								<configuration>
+									<target>
+										<property name="deployment.package.version" value="${deployment.package.version}" />
+										<ant antfile="${basedir}/src/main/ant/build_modbus_dp.xml"
+											target="build-dp" />
+									</target>
+								</configuration>
+							</execution>
+						</executions>
 					</plugin>
 				</plugins>
 			</build>

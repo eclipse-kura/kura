@@ -28,16 +28,20 @@ public class SupportedSerialModems {
 				if (OS_VERSION.equals(KuraConstants.Mini_Gateway.getImageName() + "_" + KuraConstants.Mini_Gateway.getImageVersion())) {
 					s_logger.info("Installing modem driver for {} ...", modem.getModemName());
 					try {
-						if (modem.getDriver().install() == 0) {
-							for (String modemModel : modem.getModemModels()) {
-								if (modemModel.equals(modem.getDriver().getModemModel())) {
-									s_logger.info("Driver for the {} modem has been installed" , modemModel);
-									modemReachable = true;
-									break breakout;
+						if (!SupportedUsbModems.isAttached(
+								SupportedUsbModemInfo.Telit_HE910_D.getVendorId(),
+								SupportedUsbModemInfo.Telit_HE910_D.getProductId())) {
+							if (modem.getDriver().install() == 0) {
+								for (String modemModel : modem.getModemModels()) {
+									if (modemModel.equals(modem.getDriver().getModemModel())) {
+										s_logger.info("Driver for the {} modem has been installed" , modemModel);
+										modemReachable = true;
+										break breakout;
+									}
 								}
 							}
+							s_logger.warn("Failed to installing modem driver for {}", modem.getModemName());
 						}
-						s_logger.warn("Failed to installing modem driver for {}", modem.getModemName());
 					} catch (Exception e) {
 						e.printStackTrace();
 					}

@@ -8,7 +8,7 @@
  * Contributors:                                                         *
  *     IBM - initial API and implementation                              *
  ************************************************************************/
-union semun {
+union semuni {
   int val;                   /* value for SETVAL             */
   struct semid_ds *buf;      /* buffer for IPC_STAT, IPC_SET */
   unsigned short int *array; /* array for GETALL, SETALL     */

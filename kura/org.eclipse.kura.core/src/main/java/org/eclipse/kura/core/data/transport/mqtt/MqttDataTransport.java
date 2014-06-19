@@ -14,7 +14,6 @@ package org.eclipse.kura.core.data.transport.mqtt;
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.Future;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -27,12 +26,12 @@ import org.eclipse.kura.KuraTimeoutException;
 import org.eclipse.kura.KuraTooManyInflightMessagesException;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.core.data.transport.mqtt.MqttClientConfiguration.PersistenceType;
-import org.eclipse.kura.core.util.ExecutorUtil;
 import org.eclipse.kura.core.util.ValidationUtil;
 import org.eclipse.kura.data.DataTransportListener;
 import org.eclipse.kura.data.DataTransportService;
 import org.eclipse.kura.data.DataTransportToken;
 import org.eclipse.kura.ssl.SslManagerService;
+import org.eclipse.kura.ssl.SslServiceListener;
 import org.eclipse.kura.system.SystemService;
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.IMqttToken;
@@ -50,7 +49,7 @@ import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class MqttDataTransport implements DataTransportService, MqttCallback, ConfigurableComponent 
+public class MqttDataTransport implements DataTransportService, MqttCallback, ConfigurableComponent, SslServiceListener 
 {
 	private static final Logger s_logger = LoggerFactory.getLogger(MqttDataTransport.class);
 
@@ -67,7 +66,7 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 	private MqttAsyncClient m_mqttClient;
 
 	private DataTransportListeners m_dataTransportListeners;
-	
+		
 	private MqttClientConfiguration m_clientConf;
 	private boolean m_newSession;
 	private String m_sessionId;
@@ -76,6 +75,7 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 	MqttClientPersistence m_persistence;
 	
 	private Map<String, String> m_topicContext = new HashMap<String, String>();
+	private Map<String, Object> m_properties = new HashMap<String, Object>();
 
 	private static final String MQTT_BROKER_URL_PROP_NAME = "broker-url";
 	private static final String MQTT_USERNAME_PROP_NAME = "username";
@@ -134,8 +134,9 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 
 		// We need to catch the configuration exception and activate anyway.
 		// Otherwise the ConfigurationService will not be able to track us.
+		m_properties.putAll(properties);
 		try {
-			m_clientConf = buildConfiguration(properties);
+			m_clientConf = buildConfiguration(m_properties);
 			setupMqttSession();
 		} catch (RuntimeException e) {
 			s_logger.error(
@@ -176,7 +177,15 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 	public void updated(Map<String, Object> properties) 
 	{
 		s_logger.info("Updating...");
+		
+		m_properties.clear();
+		m_properties.putAll(properties);
 
+		update();
+		
+	}
+	
+	private void update() {
 		boolean wasConnected = isConnected();
 		
 		// First notify the Listeners
@@ -188,7 +197,7 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 		// Throwing a RuntimeException here is fine.
 		// Listeners will not be notified of an invalid configuration update.
 		s_logger.info("Building new configuration...");
-		m_clientConf = buildConfiguration(properties);
+		m_clientConf = buildConfiguration(m_properties);
 
 		// We do nothing other than notifying the listeners which may later
 		// request to disconnect and reconnect again.
@@ -556,6 +565,17 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 		long timeout = m_clientConf.getConnectOptions().getConnectionTimeout() * 1000L;
 		return timeout;
 	}
+	
+	// ---------------------------------------------------------
+	//
+	// SslServiceListener Overrides
+	//
+	// ---------------------------------------------------------
+	@Override
+	public void onConfigurationUpdated() {
+		// The SSL service was update, build a new socket connection
+		update();
+	}
 
 	/*
 	 * This method builds an internal configuration option needed by the client
@@ -875,4 +895,5 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 		m_newSession = newSession;
 		m_sessionId = generateSessionId();
 	}
+
 }

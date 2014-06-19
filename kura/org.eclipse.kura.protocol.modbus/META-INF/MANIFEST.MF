@@ -27,7 +27,5 @@ Export-Package:
  org.eclipse.kura.protocol.modbus
 Service-Component: OSGI-INF/*.xml
 Bundle-ActivationPolicy: lazy
-Bundle-Classpath: .,
- /home/pierre/dev/git/newesf2/esf2/esf/target-definition/equinox_3.8.1/repository/plugins/org.eclipse.equinox.io_1.0.400.v20120522-2049.jar
-
+Bundle-Classpath: .
 

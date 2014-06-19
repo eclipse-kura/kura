@@ -58,17 +58,17 @@ public class PortForwardRule {
 	*/
 	
 	//required
-	private String iface;
-	private String address;
-	private String protocol;
-	private int inPort;
-	private int outPort;
+	private String m_iface;
+	private String m_address;
+	private String m_protocol;
+	private int m_inPort;
+	private int m_outPort;
 	
 	//optional
-	private String permittedNetwork;
-	private int permittedNetworkMask;
-	private String permittedMAC;
-	private String sourcePortRange;
+	private String m_permittedNetwork;
+	private int m_permittedNetworkMask;
+	private String m_permittedMAC;
+	private String m_sourcePortRange;
 
 	/**
 	 * Constructor of <code>PortForwardRule</code> object.
@@ -84,32 +84,32 @@ public class PortForwardRule {
 	 * @param sourcePortRange	range of source ports allowed on IP connection (sourcePort1:sourcePort2) 
 	 */
 	public PortForwardRule(String iface, String address, String protocol, int inPort, int outPort, String permittedNetwork, int permittedNetworkMask, String permittedMAC, String sourcePortRange) {
-		this.iface = iface;
-		this.inPort = inPort;
-		this.protocol = protocol;
-		this.address = address;
-		this.outPort = outPort;
+		m_iface = iface;
+		m_inPort = inPort;
+		m_protocol = protocol;
+		m_address = address;
+		m_outPort = outPort;
 		
-		this.permittedNetwork = permittedNetwork;
-		this.permittedNetworkMask = permittedNetworkMask;
-		this.permittedMAC = permittedMAC;
-		this.sourcePortRange = sourcePortRange;
+		m_permittedNetwork = permittedNetwork;
+		m_permittedNetworkMask = permittedNetworkMask;
+		m_permittedMAC = permittedMAC;
+		m_sourcePortRange = sourcePortRange;
 	}
 	
 	/**
 	 * Constructor of <code>PortForwardRule</code> object.
 	 */
 	public PortForwardRule() {
-		this.iface = null;
-		this.inPort = 0;
-		this.protocol = null;
-		this.address = null;
-		this.outPort = 0;
+		m_iface = null;
+		m_inPort = 0;
+		m_protocol = null;
+		m_address = null;
+		m_outPort = 0;
 		
-		this.permittedNetworkMask = 0;
-		this.permittedNetwork = null;
-		this.permittedMAC = null;
-		this.sourcePortRange = null;
+		m_permittedNetworkMask = 0;
+		m_permittedNetwork = null;
+		m_permittedMAC = null;
+		m_sourcePortRange = null;
 	}
 	
 	/**
@@ -118,44 +118,216 @@ public class PortForwardRule {
 	 * @return		A boolean representing whether all parameters have been set.
 	 */
 	public boolean isComplete() {
-		if(protocol != null && iface != null && address != null && inPort != 0 && outPort != 0)
+		if(m_protocol != null && m_iface != null && m_address != null && m_inPort != 0 && m_outPort != 0)
 			return true;
 		return false;
 	}
 	
 	/**
 	 * Converts the <code>PortForwardRule</code> to a <code>String</code>.  
-	 * Returns one of the following iptables strings depending on the <code>PortForwardRule</code> format:
+	 * Returns a PREROUTING/FORWARD pair of the following iptables strings depending on the <code>PortForwardRule</code> format:
 	 * <code>
 	 * <p>  iptables -t nat -A PREROUTING -i {iface} -p {protocol} --dport {inPort} -j DNAT --to {address}:{outPort}
+	 * <p>  iptables -A FORWARD -i {iface} -p {protocol} --dport {inPort} -d {address} -j ACCEPT
+
 	 * <p>  iptables -t nat -A PREROUTING -i {iface} -p {protocol} --sport {sourcePortRange} --dport {inPort} -j DNAT --to {address}:{outPort}
+	 * <p>  iptables -A FORWARD -i {iface} -p {protocol} --sport {sourcePortRange} --dport {inPort} -d {address} -j ACCEPT
+	 * 
 	 * <p>  iptables -t nat -A PREROUTING -i {iface} -p {protocol} -m mac --mac-source {permittedMAC} --dport {inPort} -j DNAT --to {address}:{outPort}
+	 * <p>  iptables -A FORWARD -i {iface} -p {protocol} -m mac --mac-source {m_permittedMAC} --dport {inPort} -d {address} -j ACCEPT
+	 *
 	 * <p>  iptables -t nat -A PREROUTING -i {iface} -p {protocol} -m mac --mac-source {permittedMAC} --sport {sourcePortRange} --dport {inPort} -j DNAT --to {address}:{outPort}
+	 * <p>  iptables -A FORWARD -i {iface} -p {protocol} -m mac --mac-source {m_permittedMAC} --sport {sourcePortRange} --dport {inPort} -d {address} -j ACCEPT
+	 *  
 	 * <p>  iptables -t nat -A PREROUTING -i {iface} -p {protocol} -s {permittedNetwork} --dport {inPort} -j DNAT --to {address}:{outPort}
+	 * <p>  iptables -A FORWARD -i {iface} -p {protocol} -s {permittedNetwork} --dport {inPort} -d {address} -j ACCEPT
+	 *
 	 * <p>  iptables -t nat -A PREROUTING -i {iface} -p {protocol} -s {permittedNetwork} --sport {sourcePortRange} --dport {inPort} -j DNAT --to {address}:{outPort}
+	 * <p>  iptables -A FORWARD -i {iface} -p {protocol} -s {permittedNetwork} --sport {sourcePortRange} --dport {inPort} -d {address} -j ACCEPT 
+	 *
 	 * <p>  iptables -t nat -A PREROUTING -i {iface} -p {protocol} -s {permittedNetwork} -m mac --mac-source {permittedMAC} --dport {inPort} -j DNAT --to {address}:{outPort}
+	 * <p>  iptables -A FORWARD -i {iface} -p {protocol} -s {permittedNetwork} -m mac --mac-source {m_permittedMAC} --dport {inPort} -d {address} -j ACCEPT
+	 *
 	 * <p>  iptables -t nat -A PREROUTING -i {iface} -p {protocol} -s {permittedNetwork} -m mac --mac-source {permittedMAC} --sport {sourcePortRange} --dport {inPort} -j DNAT --to {address}:{outPort}
+	 * <p>  iptables -A FORWARD -i {iface} -p {protocol} -s {permittedNetwork} -m mac --mac-source {m_permittedMAC} --sport {sourcePortRange} --dport {inPort} -d {address} -j ACCEPT
 	 * </code>
 	 * 
 	 * @return the String representation of <code>PortForwardRule</code>
 	 */
 	public String toString() {
-		if(this.permittedNetwork == null && this.permittedMAC == null && this.sourcePortRange == null) {
-			return new String("iptables -t nat -A PREROUTING -i " + this.iface + " -p " + this.protocol + " --dport " + this.inPort + " -j DNAT --to " + this.address + ":" + this.outPort);
-		} else if(this.permittedNetwork == null && this.permittedMAC == null && this.sourcePortRange != null) {
-			return new String("iptables -t nat -A PREROUTING -i " + this.iface + " -p " + this.protocol + " --sport " + this.sourcePortRange + " --dport " + this.inPort + " -j DNAT --to " + this.address + ":" + this.outPort);
-		} else if(this.permittedNetwork == null && this.permittedMAC != null && this.sourcePortRange == null) {
-			return new String("iptables -t nat -A PREROUTING -i " + this.iface + " -p " + this.protocol + " -m mac --mac-source " + this.permittedMAC + " --dport " + this.inPort + " -j DNAT --to " + this.address + ":" + this.outPort);
-		} else if(this.permittedNetwork == null && this.permittedMAC != null && this.sourcePortRange != null) {
-			return new String("iptables -t nat -A PREROUTING -i " + this.iface + " -p " + this.protocol + " -m mac --mac-source " + this.permittedMAC + " --sport " + this.sourcePortRange + " --dport " + this.inPort + " -j DNAT --to " + this.address + ":" + this.outPort);
-		} else if(this.permittedNetwork != null && this.permittedMAC == null && this.sourcePortRange == null) {
-			return new String("iptables -t nat -A PREROUTING -i " + this.iface + " -p " + this.protocol + " -s " + this.permittedNetwork + "/" + this.permittedNetworkMask + " --dport " + this.inPort + " -j DNAT --to " + this.address + ":" + this.outPort);
-		} else if(this.permittedNetwork != null && this.permittedMAC == null && this.sourcePortRange != null) {
-			return new String("iptables -t nat -A PREROUTING -i " + this.iface + " -p " + this.protocol + " -s " + this.permittedNetwork + "/" + this.permittedNetworkMask + " --sport " + this.sourcePortRange + " --dport " + this.inPort + " -j DNAT --to " + this.address + ":" + this.outPort);
-		} else if(this.permittedNetwork != null && this.permittedMAC != null && this.sourcePortRange == null) {
-			return new String("iptables -t nat -A PREROUTING -i " + this.iface + " -p " + this.protocol + " -s " + this.permittedNetwork + "/" + this.permittedNetworkMask + " -m mac --mac-source " + this.permittedMAC + " --dport " + this.inPort + " -j DNAT --to " + this.address + ":" + this.outPort);
-		} else if(this.permittedNetwork != null && this.permittedMAC != null && this.sourcePortRange != null) {
-			return new String("iptables -t nat -A PREROUTING -i " + this.iface + " -p " + this.protocol + " -s " + this.permittedNetwork + "/" + this.permittedNetworkMask + " -m mac --mac-source " + this.permittedMAC + " --sport " + this.sourcePortRange + " --dport " + this.inPort + " -j DNAT --to " + this.address + ":" + this.outPort);
+		StringBuffer sb = new StringBuffer();
+		if(m_permittedNetwork == null && m_permittedMAC == null && m_sourcePortRange == null) {
+			/** 
+			 * <code><p> iptables -t nat -A PREROUTING -i {iface} -p {protocol} --dport {inPort} -j DNAT --to {address}:{outPort} <code> 
+			 * <code><p> iptables -A FORWARD -i {iface} -p {protocol} --dport {inPort} -d {address} -j ACCEPT
+			 */
+			sb.append("iptables -t nat -A PREROUTING -i ").append(m_iface)
+					.append(" -p ").append(m_protocol).append(" --dport ")
+					.append(m_inPort).append(" -j DNAT --to ")
+					.append(m_address).append(':').append(m_outPort);
+			sb.append("; ");
+			sb.append("iptables -A FORWARD -i ").append(m_iface).append(" -p ")
+					.append(m_protocol).append(" --dport ")
+					.append(m_inPort).append(" -d ").append(m_address)
+					.append(" -j ACCEPT");
+	
+			return sb.toString();
+			//return new String("iptables -t nat -A PREROUTING -i " + m_iface + " -p " + m_protocol + " --dport " + m_inPort + " -j DNAT --to " + m_address + ":" + m_outPort);
+		} else if(m_permittedNetwork == null && m_permittedMAC == null && m_sourcePortRange != null) {
+			/** 
+			 * <code><p> iptables -t nat -A PREROUTING -i {iface} -p {protocol} --sport {sourcePortRange} --dport {inPort} -j DNAT --to {address}:{outPort} <code> 
+			 * <code><p> iptables -A FORWARD -i {iface} -p {protocol} --sport {sourcePortRange} --dport {inPort} -d {address} -j ACCEPT
+			 */
+			sb.append("iptables -t nat -A PREROUTING -i ").append(m_iface)
+					.append(" -p ").append(m_protocol).append(" --sport ")
+					.append(m_sourcePortRange).append(" --dport ")
+					.append(m_inPort).append(" -j DNAT --to ")
+					.append(m_address).append(':').append(m_outPort);
+			sb.append("; ");
+			sb.append("iptables -A FORWARD -i ").append(m_iface).append(" -p ")
+					.append(m_protocol).append(" --sport ")
+					.append(m_sourcePortRange).append(" --dport ")
+					.append(m_inPort).append(" -d ").append(m_address)
+					.append(" -j ACCEPT");
+	
+			return sb.toString();
+			//return new String("iptables -t nat -A PREROUTING -i " + m_iface + " -p " + m_protocol + " --sport " + m_sourcePortRange + " --dport " + m_inPort + " -j DNAT --to " + m_address + ":" + m_outPort);
+		} else if(m_permittedNetwork == null && m_permittedMAC != null && m_sourcePortRange == null) {
+			/** 
+			 * <code><p> iptables -t nat -A PREROUTING -i {iface} -p {protocol} -m mac --mac-source {m_permittedMAC} --dport {inPort} -j DNAT --to {address}:{outPort} <code> 
+			 * <code><p> iptables -A FORWARD -i {iface} -p {protocol} -m mac --mac-source {m_permittedMAC} --dport {inPort} -d {address} -j ACCEPT
+			 */
+			sb.append("iptables -t nat -A PREROUTING -i ").append(m_iface)
+					.append(" -p ").append(m_protocol)
+					.append(" -m mac --mac-source ").append(m_permittedMAC)
+					.append(" --dport ").append(m_inPort)
+					.append(" -j DNAT --to ").append(m_address).append(':')
+					.append(m_outPort);
+			sb.append("; ");
+			sb.append("iptables -A FORWARD -i ").append(m_iface).append(" -p ")
+					.append(m_protocol).append(" -m mac --mac-source ")
+					.append(m_permittedMAC).append(" --dport ")
+					.append(m_inPort).append(" -d ").append(m_address)
+					.append(" -j ACCEPT");
+	
+			return sb.toString();
+			//return new String("iptables -t nat -A PREROUTING -i " + m_iface + " -p " + m_protocol + " -m mac --mac-source " + m_permittedMAC + " --dport " + m_inPort + " -j DNAT --to " + m_address + ":" + m_outPort);
+		} else if(m_permittedNetwork == null && m_permittedMAC != null && m_sourcePortRange != null) {
+			/** 
+			 * <code><p> iptables -t nat -A PREROUTING -i {iface} -p {protocol} -m mac --mac-source {m_permittedMAC} --sport {sourcePortRange} --dport {inPort} -j DNAT --to {address}:{outPort} <code> 
+			 * <code><p> iptables -A FORWARD -i {iface} -p {protocol} -m mac --mac-source {m_permittedMAC} --sport {sourcePortRange} --dport {inPort} -d {address} -j ACCEPT
+			 */
+			sb.append("iptables -t nat -A PREROUTING -i ").append(m_iface)
+					.append(" -p ").append(m_protocol)
+					.append(" -m mac --mac-source ").append(m_permittedMAC)
+					.append(" --sport ").append(m_sourcePortRange)
+					.append(" --dport ").append(m_inPort)
+					.append(" -j DNAT --to ").append(m_address).append(':')
+					.append(m_outPort);
+			sb.append("; ");
+			sb.append("iptables -A FORWARD -i ").append(m_iface).append(" -p ")
+					.append(m_protocol).append(" -m mac --mac-source ")
+					.append(m_permittedMAC).append(" --sport ")
+					.append(m_sourcePortRange).append(" --dport ")
+					.append(m_inPort).append(" -d ").append(m_address)
+					.append(" -j ACCEPT");
+	
+			return sb.toString();
+			//return new String("iptables -t nat -A PREROUTING -i " + m_iface + " -p " + m_protocol + " -m mac --mac-source " + m_permittedMAC + " --sport " + m_sourcePortRange + " --dport " + m_inPort + " -j DNAT --to " + m_address + ":" + m_outPort);
+		} else if(m_permittedNetwork != null && m_permittedMAC == null && m_sourcePortRange == null) {
+			/** 
+			 * <code><p> iptables -t nat -A PREROUTING -i {iface} -p {protocol} -s {permittedNetwork} --dport {inPort} -j DNAT --to {address}:{outPort} <code> 
+			 * <code><p> iptables -A FORWARD -i {iface} -p {protocol} -s {permittedNetwork} --dport {inPort} -d {address} -j ACCEPT
+			 */
+			sb.append("iptables -t nat -A PREROUTING -i ").append(m_iface)
+					.append(" -p ").append(m_protocol).append(" -s ")
+					.append(m_permittedNetwork).append("/")
+					.append(m_permittedNetworkMask).append(" --dport ")
+					.append(m_inPort).append(" -j DNAT --to ")
+					.append(m_address).append(':').append(m_outPort);
+			sb.append("; ");
+			sb.append("iptables -A FORWARD -i ").append(m_iface).append(" -p ")
+					.append(m_protocol).append(" -s ")
+					.append(m_permittedNetwork).append("/")
+					.append(m_permittedNetworkMask).append(" --dport ")
+					.append(m_inPort).append(" -d ").append(m_address).append(" -j ACCEPT");
+			
+			return sb.toString();
+			//return new String("iptables -t nat -A PREROUTING -i " + m_iface + " -p " + m_protocol + " -s " + m_permittedNetwork + "/" + m_permittedNetworkMask + " --dport " + m_inPort + " -j DNAT --to " + m_address + ":" + m_outPort);
+		} else if(m_permittedNetwork != null && m_permittedMAC == null && m_sourcePortRange != null) {
+			/** 
+			 * <code><p> iptables -t nat -A PREROUTING -i {iface} -p {protocol} -s {permittedNetwork} --sport {sourcePortRange} --dport {inPort} -j DNAT --to {address}:{outPort} <code> 
+			 * <code><p> iptables -A FORWARD -i {iface} -p {protocol} -s {permittedNetwork} --sport {sourcePortRange} --dport {inPort} -d {address} -j ACCEPT
+			 */
+			sb.append("iptables -t nat -A PREROUTING -i ").append(m_iface)
+					.append(" -p ").append(m_protocol).append(" -s ")
+					.append(m_permittedNetwork).append("/")
+					.append(m_permittedNetworkMask).append(" --sport ")
+					.append(m_sourcePortRange).append(" --dport ")
+					.append(m_inPort).append(" -j DNAT --to ")
+					.append(m_address).append(':').append(m_outPort);
+			sb.append("; ");
+			sb.append("iptables -A FORWARD -i ").append(m_iface).append(" -p ")
+					.append(m_protocol).append(" -s ")
+					.append(m_permittedNetwork).append("/")
+					.append(m_permittedNetworkMask).append(" --sport ")
+					.append(m_sourcePortRange).append(" --dport ")
+					.append(m_inPort).append(" -d ").append(m_address)
+					.append(" -j ACCEPT");
+			
+			return sb.toString();
+			//return new String("iptables -t nat -A PREROUTING -i " + m_iface + " -p " + m_protocol + " -s " + m_permittedNetwork + "/" + m_permittedNetworkMask + " --sport " + m_sourcePortRange + " --dport " + m_inPort + " -j DNAT --to " + m_address + ":" + m_outPort);
+		} else if(m_permittedNetwork != null && m_permittedMAC != null && m_sourcePortRange == null) {
+			/** 
+			 * <code><p> iptables -t nat -A PREROUTING -i {iface} -p {protocol} -s {permittedNetwork} -m mac --mac-source {m_permittedMAC} --dport {inPort} -j DNAT --to {address}:{outPort} <code> 
+			 * <code><p> iptables -A FORWARD -i {iface} -p {protocol} -s {permittedNetwork} -m mac --mac-source {m_permittedMAC} --dport {inPort} -d {address} -j ACCEPT
+			 */
+			sb.append("iptables -t nat -A PREROUTING -i ").append(m_iface)
+					.append(" -p ").append(m_protocol).append(" -s ")
+					.append(m_permittedNetwork).append("/")
+					.append(m_permittedNetworkMask)
+					.append(" -m mac --mac-source ").append(m_permittedMAC)
+					.append(" --dport ").append(m_inPort)
+					.append(" -j DNAT --to ").append(m_address).append(':')
+					.append(m_outPort);
+			sb.append("; ");
+			sb.append("iptables -A FORWARD -i ").append(m_iface).append(" -p ")
+					.append(m_protocol).append(" -s ")
+					.append(m_permittedNetwork).append("/")
+					.append(m_permittedNetworkMask)
+					.append(" -m mac --mac-source ").append(m_permittedMAC)
+					.append(" --dport ")
+					.append(m_inPort).append(" -d ").append(m_address)
+					.append(" -j ACCEPT");
+			
+			return sb.toString();
+			//return new String("iptables -t nat -A PREROUTING -i " + m_iface + " -p " + m_protocol + " -s " + m_permittedNetwork + "/" + m_permittedNetworkMask + " -m mac --mac-source " + m_permittedMAC + " --dport " + m_inPort + " -j DNAT --to " + m_address + ":" + m_outPort);
+		} else if(m_permittedNetwork != null && m_permittedMAC != null && m_sourcePortRange != null) {	
+			/** 
+			 * <code><p> iptables -t nat -A PREROUTING -i {iface} -p {protocol} -s {permittedNetwork} -m mac --mac-source {m_permittedMAC} --sport {sourcePortRange} --dport {inPort} -j DNAT --to {address}:{outPort} <code> 
+			 * <code><p> iptables -A FORWARD -i {iface} -p {protocol} -s {permittedNetwork} -m mac --mac-source {m_permittedMAC} --sport {sourcePortRange} --dport {inPort} -d {address} -j ACCEPT
+			 */
+			sb.append("iptables -t nat -A PREROUTING -i ").append(m_iface)
+					.append(" -p ").append(m_protocol).append(" -s ")
+					.append(m_permittedNetwork).append("/")
+					.append(m_permittedNetworkMask)
+					.append(" -m mac --mac-source ").append(m_permittedMAC)
+					.append(" --sport ").append(m_sourcePortRange)
+					.append(" --dport ").append(m_inPort)
+					.append(" -j DNAT --to ").append(m_address).append(':')
+					.append(m_outPort);
+			sb.append("; ");
+			sb.append("iptables -A FORWARD -i ").append(m_iface).append(" -p ")
+					.append(m_protocol).append(" -s ")
+					.append(m_permittedNetwork).append("/")
+					.append(m_permittedNetworkMask)
+					.append(" -m mac --mac-source ").append(m_permittedMAC)
+					.append(" --sport ").append(m_sourcePortRange)
+					.append(" --dport ").append(m_inPort).append(" -d ")
+					.append(m_address).append(" -j ACCEPT");
+			
+			return sb.toString();	
+			//return new String("iptables -t nat -A PREROUTING -i " + m_iface + " -p " + m_protocol + " -s " + m_permittedNetwork + "/" + m_permittedNetworkMask + " -m mac --mac-source " + m_permittedMAC + " --sport " + m_sourcePortRange + " --dport " + m_inPort + " -j DNAT --to " + m_address + ":" + m_outPort);
 		} else {
 			return null;
 		}
@@ -167,7 +339,7 @@ public class PortForwardRule {
 	 * @return the iface
 	 */
 	public String getIface() {
-		return iface;
+		return m_iface;
 	}
 
 	/**
@@ -176,7 +348,7 @@ public class PortForwardRule {
 	 * @param iface the iface to set
 	 */
 	public void setIface(String iface) {
-		this.iface = iface;
+		m_iface = iface;
 	}
 
 	/**
@@ -185,7 +357,7 @@ public class PortForwardRule {
 	 * @return the address
 	 */
 	public String getAddress() {
-		return address;
+		return m_address;
 	}
 
 	/**
@@ -194,7 +366,7 @@ public class PortForwardRule {
 	 * @param address the address to set
 	 */
 	public void setAddress(String address) {
-		this.address = address;
+		m_address = address;
 	}
 
 	/**
@@ -203,7 +375,7 @@ public class PortForwardRule {
 	 * @return the protocol
 	 */
 	public String getProtocol() {
-		return protocol;
+		return m_protocol;
 	}
 
 	/**
@@ -212,7 +384,7 @@ public class PortForwardRule {
 	 * @param protocol the protocol to set
 	 */
 	public void setProtocol(String protocol) {
-		this.protocol = protocol;
+		m_protocol = protocol;
 	}
 
 	/**
@@ -221,7 +393,7 @@ public class PortForwardRule {
 	 * @return the inPort
 	 */
 	public int getInPort() {
-		return inPort;
+		return m_inPort;
 	}
 
 	/**
@@ -230,7 +402,7 @@ public class PortForwardRule {
 	 * @param inPort the inPort to set
 	 */
 	public void setInPort(int inPort) {
-		this.inPort = inPort;
+		m_inPort = inPort;
 	}
 
 	/**
@@ -239,7 +411,7 @@ public class PortForwardRule {
 	 * @return the outPort
 	 */
 	public int getOutPort() {
-		return outPort;
+		return m_outPort;
 	}
 
 	/**
@@ -248,7 +420,7 @@ public class PortForwardRule {
 	 * @param outPort the outPort to set
 	 */
 	public void setOutPort(int outPort) {
-		this.outPort = outPort;
+		m_outPort = outPort;
 	}
 
 	/**
@@ -257,7 +429,7 @@ public class PortForwardRule {
 	 * @return the permittedNetwork
 	 */
 	public String getPermittedNetwork() {
-		return permittedNetwork;
+		return m_permittedNetwork;
 	}
 
 	/**
@@ -266,7 +438,7 @@ public class PortForwardRule {
 	 * @param permittedNetwork the permittedNetwork to set
 	 */
 	public void setPermittedNetwork(String permittedNetwork) {
-		this.permittedNetwork = permittedNetwork;
+		m_permittedNetwork = permittedNetwork;
 	}
 	
 	/**
@@ -275,7 +447,7 @@ public class PortForwardRule {
 	 * @return the permittedNetworkMask
 	 */
 	public int getPermittedNetworkMask() {
-		return permittedNetworkMask;
+		return m_permittedNetworkMask;
 	}
 
 	/**
@@ -284,7 +456,7 @@ public class PortForwardRule {
 	 * @param permittedNetworkMask  of the permittedNetwork to set
 	 */
 	public void setPermittedNetworkMask(int permittedNetworkMask) {
-		this.permittedNetworkMask = permittedNetworkMask;
+		m_permittedNetworkMask = permittedNetworkMask;
 	}
 
 	/**
@@ -293,7 +465,7 @@ public class PortForwardRule {
 	 * @return the permittedMAC
 	 */
 	public String getPermittedMAC() {
-		return permittedMAC;
+		return m_permittedMAC;
 	}
 
 	/**
@@ -302,7 +474,7 @@ public class PortForwardRule {
 	 * @param permittedMAC the permittedMAC to set
 	 */
 	public void setPermittedMAC(String permittedMAC) {
-		this.permittedMAC = permittedMAC;
+		m_permittedMAC = permittedMAC;
 	}
 
 	/**
@@ -311,7 +483,7 @@ public class PortForwardRule {
 	 * @return the sourcePortRange
 	 */
 	public String getSourcePortRange() {
-		return sourcePortRange;
+		return m_sourcePortRange;
 	}
 
 	/**
@@ -320,7 +492,7 @@ public class PortForwardRule {
 	 * @param sourcePortRange the sourcePortRange to set
 	 */
 	public void setSourcePortRange(String sourcePortRange) {
-		this.sourcePortRange = sourcePortRange;
+		m_sourcePortRange = sourcePortRange;
 	}
 	
     @Override
@@ -331,23 +503,23 @@ public class PortForwardRule {
         
         PortForwardRule other = (PortForwardRule) o;
         
-        if (!compareObjects(this.iface, other.iface)) {
+        if (!compareObjects(m_iface, other.m_iface)) {
             return false;
-        } else if (!compareObjects(this.address, other.address)) {
+        } else if (!compareObjects(m_address, other.m_address)) {
             return false;
-        } else if (!compareObjects(this.protocol, other.protocol)) {
+        } else if (!compareObjects(m_protocol, other.m_protocol)) {
             return false;
-        } else if (this.inPort != other.inPort) {
+        } else if (m_inPort != other.m_inPort) {
             return false;
-        } else if (this.outPort != other.outPort) {
+        } else if (m_outPort != other.m_outPort) {
             return false;
-        } else if (!compareObjects(this.permittedNetwork, other.permittedNetwork)) {
+        } else if (!compareObjects(m_permittedNetwork, other.m_permittedNetwork)) {
             return false;
-        } else if (this.permittedNetworkMask != other.permittedNetworkMask) {
+        } else if (m_permittedNetworkMask != other.m_permittedNetworkMask) {
             return false;
-        } else if (!compareObjects(this.permittedMAC, other.permittedMAC)) {
+        } else if (!compareObjects(m_permittedMAC, other.m_permittedMAC)) {
             return false;
-        } else if (!compareObjects(this.sourcePortRange, other.sourcePortRange)) {
+        } else if (!compareObjects(m_sourcePortRange, other.m_sourcePortRange)) {
             return false;
         }
         
@@ -368,21 +540,21 @@ public class PortForwardRule {
     public int hashCode() {
         final int prime = 79;
         int result = 1;
-        result = prime * result + inPort;
-        result = prime * result + outPort;
+        result = prime * result + m_inPort;
+        result = prime * result + m_outPort;
         result = prime * result
-                + ((iface == null) ? 0 : iface.hashCode());
+                + ((m_iface == null) ? 0 : m_iface.hashCode());
         result = prime * result
-                + ((address == null) ? 0 : address.hashCode());
+                + ((m_address == null) ? 0 : m_address.hashCode());
         result = prime * result
-                + ((protocol == null) ? 0 : protocol.hashCode());
+                + ((m_protocol == null) ? 0 : m_protocol.hashCode());
         result = prime * result
-                + ((permittedNetwork == null) ? 0 : permittedNetwork.hashCode());
-        result = prime * result + permittedNetworkMask;
+                + ((m_permittedNetwork == null) ? 0 : m_permittedNetwork.hashCode());
+        result = prime * result + m_permittedNetworkMask;
         result = prime * result
-                + ((permittedMAC == null) ? 0 : permittedMAC.hashCode());
+                + ((m_permittedMAC == null) ? 0 : m_permittedMAC.hashCode());
         result = prime * result
-                + ((sourcePortRange == null) ? 0 : sourcePortRange.hashCode());
+                + ((m_sourcePortRange == null) ? 0 : m_sourcePortRange.hashCode());
         
         return result;
     }

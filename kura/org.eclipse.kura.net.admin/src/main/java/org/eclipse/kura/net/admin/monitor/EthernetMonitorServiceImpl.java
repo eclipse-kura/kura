@@ -131,7 +131,7 @@ public class EthernetMonitorServiceImpl implements EthernetMonitorService, Event
         
         m_routeService = RouteServiceImpl.getInstance();
         
-        m_executor = new ScheduledThreadPoolExecutor(1);
+        m_executor = new ScheduledThreadPoolExecutor(2);
         m_executor.setContinueExistingPeriodicTasksAfterShutdownPolicy(false);
         m_executor.setExecuteExistingDelayedTasksAfterShutdownPolicy(false);
 		

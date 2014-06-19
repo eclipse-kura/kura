@@ -99,10 +99,12 @@ Import-Package: org.osgi.framework;version="1.4.0"
                         	lib/linux/armv5_sf/libdkcomm.so; osname=Linux; processor=ARM; selection-filter="(&amp;(kura.arch=armv7_sf))",
                         	lib/linux/armv6_hf/libdkcomm.so; osname=Linux; processor=ARM; selection-filter="(&amp;(kura.arch=armv6_hf))",
                         	lib/linux/armv5_sf/libdkcomm.so; osname=Linux; processor=ARM; selection-filter="(&amp;(kura.arch=armv6_sf))",
-                        	lib/linux/armv5_sf/libdkcomm.so; osname=Linux; processor=ARM; selection-filter="(&amp;(kura.arch=armv5_sf))"
+                        	lib/linux/armv5_sf/libdkcomm.so; osname=Linux; processor=ARM; selection-filter="(&amp;(kura.arch=armv5_sf))",
+                        	lib/mac/x86/libdkcomm.jnilib; osname=macosx; processor=x86_64,
+                        	*
                         </Bundle-NativeCode>
                         <Import-Package>
-				org.osgi.framework
+				org.osgi.framework;version="[1.5.0,2.0.0)"
                         </Import-Package>
                         <Export-Package>
 				javax.comm;version="1.2.0",

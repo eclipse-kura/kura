@@ -4,7 +4,7 @@ Bundle-Name: org.eclipse.kura.core
 Bundle-SymbolicName: org.eclipse.kura.core;singleton:=true
 Bundle-Version: 0.2.0.qualifier
 Bundle-Vendor: EUROTECH
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Export-Package: 
  org.eclipse.kura.core.linux.util,
  org.eclipse.kura.core.util

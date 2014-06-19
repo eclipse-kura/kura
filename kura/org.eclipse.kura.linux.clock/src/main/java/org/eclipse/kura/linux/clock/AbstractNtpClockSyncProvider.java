@@ -34,6 +34,10 @@ public abstract class AbstractNtpClockSyncProvider implements ClockSyncProvider
 	protected int                         m_refreshInterval;
 	protected Date                        m_lastSync;
 	protected ScheduledThreadPoolExecutor m_scheduler;
+	protected int                         m_maxRetry;
+	protected int                         m_numRetry;
+	protected boolean					  m_isSynced;
+	protected int						  m_syncCount;	
 
 	
 	@Override
@@ -79,12 +83,30 @@ public abstract class AbstractNtpClockSyncProvider implements ClockSyncProvider
 			m_scheduler.scheduleAtFixedRate(new Runnable() {
 				public void run() {
 					Thread.currentThread().setName("AbstractNtpClockSyncProvider:schedule");
-					try { syncClock(); }
-					catch(KuraException e) {
-						s_logger.error("Error Synchronizing Clock", e);
+					if(!m_isSynced){
+						m_syncCount=0;
+						try { 
+							s_logger.info("Try to sync clock ("+m_numRetry+")");
+							syncClock(); 
+							s_logger.info("Clock synced");
+							m_isSynced=true;
+							m_numRetry=0;
+						}
+						catch(KuraException e) {
+							m_numRetry++;
+							if(m_numRetry>=m_maxRetry) m_isSynced=true; // give up retry
+							s_logger.error("Error Synchronizing Clock", e);
+						}
+					}
+					else{
+						m_syncCount++;
+						if((m_syncCount*60)>=m_refreshInterval-1){
+							m_isSynced=false;
+							m_numRetry=0;
+						}
 					}
 				}
-			}, 0, m_refreshInterval, TimeUnit.SECONDS);
+			}, 0, 60, TimeUnit.SECONDS);
 		}		
 	}
 	
@@ -146,6 +168,11 @@ public abstract class AbstractNtpClockSyncProvider implements ClockSyncProvider
 		if (m_properties.containsKey("clock.ntp.refresh-interval")) {
 			m_refreshInterval = (Integer) m_properties.get("clock.ntp.refresh-interval");
 		}		
+		
+		m_maxRetry = 0;
+		if (m_properties.containsKey("clock.ntp.max-retry")) {
+			m_maxRetry = (Integer) m_properties.get("clock.ntp.max-retry");
+		}
 	}
 	
 	

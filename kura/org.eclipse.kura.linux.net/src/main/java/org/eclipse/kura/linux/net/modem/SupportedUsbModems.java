@@ -59,7 +59,7 @@ public class SupportedUsbModems {
         return (SupportedUsbModems.getModem(vendorId, productId) != null);
     }
     
-    private static boolean isAttached (String vendor, String product) throws Exception {
+    public static boolean isAttached (String vendor, String product) throws Exception {
     	// lsusb -d 1bc7:1010
     	boolean attached = false;
     	ProcessStats processStats = LinuxProcessUtil.startWithStats(formLsusbCommand(vendor, product));

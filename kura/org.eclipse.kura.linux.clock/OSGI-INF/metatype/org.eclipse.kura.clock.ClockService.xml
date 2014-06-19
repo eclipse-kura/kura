@@ -70,6 +70,14 @@
             default="10000" 
             description="The NTP timeout in milliseconds"/>
 
+        <AD id="clock.ntp.max-retry"  
+            name="clock.ntp.max-retry"
+            type="Integer"
+            cardinality="0" 
+            required="false"
+            default="10" 
+            description="When sync fails the system retries every minute for max-retry times. After, the next retry will occur on next refresh-interval"/>
+
         <AD id="clock.ntp.refresh-interval"  
             name="clock.ntp.refresh-interval"
             type="Integer"

@@ -333,14 +333,21 @@ public class LinuxFirewall {
 					int permittedNetworkMask = -1;
 					String address = null;
 					
-					StringTokenizer st = new StringTokenizer(line);
+					StringTokenizer st = new StringTokenizer(line, "; \t\n\r\f");
 					while(st.hasMoreTokens()) {
 						String token = st.nextToken();
 						if(token.equals("iptables")) {
-							st.nextToken();	//skip -t
-							st.nextToken(); //skip nat
-							st.nextToken();	//skip -A
-							st.nextElement();	//skip PREROUTING
+							String tok1 = st.nextToken();	//skip -t
+							String tok2 = st.nextToken(); //skip nat
+							if (tok1.equals("-t") && tok2.equals("nat")) {
+								st.nextToken();	//skip -A
+								st.nextElement();	//skip PREROUTING
+							} else if (tok1.equals("-A") && tok2.equals("FORWARD")) {
+								// this is a forwarding rule, skip it
+								break;
+							} else {
+								throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR, "Error parsing LocalRule: " + line);
+							}
 						} else if(token.equals("-i")) {
 							interfaceName = st.nextToken();
 						} else if(token.equals("-p")) {

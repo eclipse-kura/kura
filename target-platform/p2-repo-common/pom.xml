@@ -14,6 +14,14 @@
 	<version>0.2.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
+	<modules>
+		<module>com.codeminders.hidapi</module>
+		<module>javax.usb.api</module>
+		<module>javax.usb.common</module>
+		<module>org.eclipse.paho</module>
+		<module>org.eclipse.soda.dk.comm</module>
+	</modules>
+
 	<build>
 		<plugins>
 			<!-- Copying common artifacts across all platforms into a known location 

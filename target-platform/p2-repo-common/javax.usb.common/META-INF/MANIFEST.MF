@@ -16,7 +16,7 @@ Bundle-Name: javax.usb Common from javax-usb
 Created-By: Apache Maven Bundle Plugin
 Build-Jdk: 1.7.0_45
 Bundle-Version: 1.0.2
-Bnd-LastModified: 1402762737876
+Bnd-LastModified: 1403247068725
 Bundle-ManifestVersion: 2
 Bundle-Description: javax.usb Common from javax-usb
 Import-Package: javax.swing,javax.swing.border,javax.swing.event,javax

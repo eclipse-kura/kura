@@ -23,7 +23,7 @@ Bundle-Name: Eclipse Paho MQTT Client
 Created-By: Apache Maven Bundle Plugin
 Build-Jdk: 1.7.0_45
 Bundle-Version: 0.4.0
-Bnd-LastModified: 1402762738248
+Bnd-LastModified: 1403247070182
 Bundle-ManifestVersion: 2
 Bundle-Description: Eclipse Paho MQTT Client
 Import-Package: javax.net;resolution:=optional,javax.net.ssl;resolutio

@@ -20,7 +20,7 @@ Bundle-NativeCode: lib/native/linux/x86/libhidapi-jni.so; osname=Linux
  api-jni-64.jnilib; osname=MacOSX; processor=x86_64
 Build-Jdk: 1.7.0_45
 Bundle-Version: 1.1
-Bnd-LastModified: 1402762736412
+Bnd-LastModified: 1403247067247
 Bundle-ManifestVersion: 2
 Bundle-License: http://opensource.org/licenses/BSD-3-Clause
 Bundle-Description: JNI wrapper around C/C++ HIDAPI library providing 

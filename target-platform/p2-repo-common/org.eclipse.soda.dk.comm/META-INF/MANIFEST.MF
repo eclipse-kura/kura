@@ -21,7 +21,7 @@ Bundle-NativeCode: lib/linux/x86/libdkcomm.so; osname=Linux; processor
   osname=macosx; processor=x86_64,*
 Build-Jdk: 1.7.0_45
 Bundle-Version: 1.2.0
-Bnd-LastModified: 1402762739408
+Bnd-LastModified: 1403247071477
 Bundle-ManifestVersion: 2
 Bundle-Activator: org.eclipse.soda.dk.comm.bundle.Activator
 Bundle-Description: An implementation of the serialdevice.api, based o

@@ -189,9 +189,9 @@ echo $KURA_PID > /var/run/kura.pid
 
             <zipfileset file="${project.build.directory}/kura-${build.name}-jars_${project.version}/start_kura_concierge.sh"
                         fullpath="kura-${build.name}-jars_${project.version}/bin/start_kura_concierge.sh" filemode="777" />
-            <zipfileset file="${project.build.directory}/kura-${build.name}-jars_${project.version}/start_kura_debug_concierge.sh"
+            <zipfileset file="${project.build.directory}/kura-${build.name}-jars_${project.version}/start_kura_concierge_debug.sh"
                         fullpath="kura-${build.name}-jars_${project.version}/bin/start_kura_concierge_debug.sh" filemode="777" />
-            <zipfileset file="${project.build.directory}/kura-${build.name}-jars_${project.version}/start_kura_background_concierge.sh"
+            <zipfileset file="${project.build.directory}/kura-${build.name}-jars_${project.version}/start_kura_concierge_background.sh"
                         fullpath="kura-${build.name}-jars_${project.version}/bin/start_kura_concierge_background.sh" filemode="777" />
 
             <zipfileset file="src/main/resources/common/NOTICE.txt"

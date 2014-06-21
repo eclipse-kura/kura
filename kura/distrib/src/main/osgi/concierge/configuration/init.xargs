@@ -34,18 +34,18 @@
 -istart plugins/javax.usb.common_1.0.2.jar
 
 #Bundles commented out result in startup failiures due to equinox specific configurations
-#-istart kura/plugins/org.eclipse.kura.deployment.agent_0.2.0-SNAPSHOT.v201406122245.jar
--istart kura/plugins/org.eclipse.kura.api_0.2.0-SNAPSHOT.v201406122245.jar
--istart kura/plugins/org.eclipse.kura.core_0.2.0-SNAPSHOT.v201406122245.jar
--istart kura/plugins/org.eclipse.kura.core.cloud_0.2.0-SNAPSHOT.v201406122245.jar
--istart kura/plugins/org.eclipse.kura.core.comm_0.2.0-SNAPSHOT.v201406122245.jar
-#-istart kura/plugins/org.eclipse.kura.core.configuration_0.2.0-SNAPSHOT.v201406122245.jar
--istart kura/plugins/org.eclipse.kura.core.crypto_0.2.0-SNAPSHOT.v201406122245.jar
-#-istart kura/plugins/org.eclipse.kura.core.deployment_0.2.0-SNAPSHOT.v201406122245.jar
--istart kura/plugins/org.eclipse.kura.core.net_0.2.0-SNAPSHOT.v201406122245.jar
--istart kura/plugins/org.eclipse.kura.linux.clock_0.2.0-SNAPSHOT.v201406122245.jar
--istart kura/plugins/org.eclipse.kura.linux.command_0.2.0-SNAPSHOT.v201406122245.jar
--istart kura/plugins/org.eclipse.kura.linux.net_0.2.0-SNAPSHOT.v201406122245.jar
--istart kura/plugins/org.eclipse.kura.linux.position_0.2.0-SNAPSHOT.v201406122245.jar
--istart kura/plugins/org.eclipse.kura.linux.usb_0.2.0-SNAPSHOT.v201406122245.jar
-#-istart kura/plugins/org.eclipse.kura.linux.watchdog_0.2.0-SNAPSHOT.v201406122245.jar
+#-istart kura/plugins/org.eclipse.kura.deployment.agent_{project.version}.v{kura.build.version}.jar
+-istart kura/plugins/org.eclipse.kura.api_{project.version}.v{kura.build.version}.jar
+-istart kura/plugins/org.eclipse.kura.core_{project.version}.v{kura.build.version}.jar
+-istart kura/plugins/org.eclipse.kura.core.cloud_{project.version}.v{kura.build.version}.jar
+-istart kura/plugins/org.eclipse.kura.core.comm_{project.version}.v{kura.build.version}.jar
+-istart kura/plugins/org.eclipse.kura.core.configuration_{project.version}.v{kura.build.version}.jar
+-istart kura/plugins/org.eclipse.kura.core.crypto_{project.version}.v{kura.build.version}.jar
+-istart kura/plugins/org.eclipse.kura.core.deployment_{project.version}.v{kura.build.version}.jar
+-istart kura/plugins/org.eclipse.kura.core.net_{project.version}.v{kura.build.version}.jar
+-istart kura/plugins/org.eclipse.kura.linux.clock_{project.version}.v{kura.build.version}.jar
+-istart kura/plugins/org.eclipse.kura.linux.command_{project.version}.v{kura.build.version}.jar
+-istart kura/plugins/org.eclipse.kura.linux.net_{project.version}.v{kura.build.version}.jar
+-istart kura/plugins/org.eclipse.kura.linux.position_{project.version}.v{kura.build.version}.jar
+-istart kura/plugins/org.eclipse.kura.linux.usb_{project.version}.v{kura.build.version}.jar
+-istart kura/plugins/org.eclipse.kura.linux.watchdog_{project.version}.v{kura.build.version}.jar

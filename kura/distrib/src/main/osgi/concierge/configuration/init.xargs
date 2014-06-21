@@ -34,7 +34,7 @@
 -istart plugins/javax.usb.common_1.0.2.jar
 
 #Bundles commented out result in startup failiures due to equinox specific configurations
-#-istart kura/plugins/org.eclipse.kura.deployment.agent_{project.version}.v{kura.build.version}.jar
+-istart kura/plugins/org.eclipse.kura.deployment.agent_{project.version}.v{kura.build.version}.jar
 -istart kura/plugins/org.eclipse.kura.api_{project.version}.v{kura.build.version}.jar
 -istart kura/plugins/org.eclipse.kura.core_{project.version}.v{kura.build.version}.jar
 -istart kura/plugins/org.eclipse.kura.core.cloud_{project.version}.v{kura.build.version}.jar

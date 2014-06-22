@@ -1,7 +1,4 @@
 -Dorg.osgi.framework.system.packages.extra=javax.inject,javax.net,javax.net.ssl,javax.security,javax.security.auth,javax.security.cert,javax.naming,javax.sql,javax.microedition.io,javax.imageio,javax.imageio.metadata,org.ietf.jgss,javax.crypto,javax.crypto.spec,javax.xml.bind,javax.xml.bind.annotation,javax.xml.bind.annotation.adapters,javax.xml.bind.util,javax.xml.namespace,javax.xml.stream,javax.swing,javax.swing.border,javax.swing.event,javax.swing.tree,org.w3c.dom,javax.management,javax.xml.parsers,org.xml.sax,org.xml.sax.helpers
-#Temporary equinox related settings until fix committed
--Dosgi.install.area=/tmp/kura/data
--Dosgi.bundles= 
 
 -init
 

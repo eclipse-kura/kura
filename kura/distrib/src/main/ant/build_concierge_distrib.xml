@@ -49,51 +49,63 @@
 
 export PATH=/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/opt/jvm/bin:/usr/java/bin
 
-cd ../
+cd $(dirname $0)/..
+
+# set up the configuration area
+mkdir -p /tmp/.kura/configuration
+cp /opt/eclipse/kura/kura/init.xargs /tmp/.kura/configuration/
 
 java -Xms${kura.mem.size} -Xmx${kura.mem.size} -XX:MaxPermSize=${kura.mem.size} -Dkura.os.version=${kura.os.version} \
 	-Dkura.arch=${kura.arch} \
-	-Dkura.ext.dir=/opt/eclipse/kura-${build.name}_${project.version}/lib/ext \
+	-Dkura.ext.dir=/opt/eclipse/kura/lib/ext \
 	-Declipse.ignoreApp=true \
-	-Dkura.configuration=file:/opt/eclipse/kura/kura/kura.properties \
+	-Dkura.configuration=/opt/eclipse/kura/kura/kura.properties \
         -Ddpa.configuration=/opt/eclipse/kura/kura/dpa.properties \
-	-Dlog4j.configuration=file:kura/log4j.properties \
-	-Dorg.eclipse.concierge.init.xargs=kura/init.xargs \
-	-jar plugins/org.eclipse.concierge_1.0.0.alpha1.jar
+	-Dlog4j.configuration=/opt/eclipse/kura/kura/log4j.properties \
+	-Dorg.eclipse.concierge.init.xargs=/opt/eclipse/kura/kura/init.xargs \
+	-jar /opt/eclipse/kura/plugins/org.eclipse.concierge_1.0.0.alpha1.jar
 	</echo>    
 	<echo file="${project.build.directory}/kura-${build.name}-jars_${project.version}/start_kura_concierge_debug.sh" append="false">#!/bin/sh
 
 export PATH=/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/opt/jvm/bin:/usr/java/bin
 
-cd ../
+cd $(dirname $0)/..
+
+# set up the configuration area
+mkdir -p /tmp/.kura/configuration
+cp /opt/eclipse/kura/kura/init.xargs /tmp/.kura/configuration/
 
 java -Xms${kura.mem.size} -Xmx${kura.mem.size} -XX:MaxPermSize=${kura.mem.size} -Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=8000,suspend=n \
 	-Dkura.os.version=${kura.os.version} \
 	-Dkura.arch=${kura.arch} \
-	-Dkura.ext.dir=/opt/eclipse/kura-${build.name}_${project.version}/lib/ext \
+	-Dkura.ext.dir=/opt/eclipse/kura/lib/ext \
 	-Declipse.ignoreApp=true \
-	-Dkura.configuration=file:/opt/eclipse/kura/kura/kura.properties \
+	-Dkura.configuration=/opt/eclipse/kura/kura/kura.properties \
         -Ddpa.configuration=/opt/eclipse/kura/kura/dpa.properties \
-	-Dlog4j.configuration=file:/opt/eclipse/kura/kura/log4j.properties \
-	-Dorg.eclipse.concierge.init.xargs=kura/init.xargs \
-	-jar plugins/org.eclipse.concierge_1.0.0.alpha1.jar
+	-Dlog4j.configuration=/opt/eclipse/kura/kura/log4j.properties \
+	-Dorg.eclipse.concierge.init.xargs=/opt/eclipse/kura/kura/init.xargs \
+	-jar /opt/eclipse/kura/plugins/org.eclipse.concierge_1.0.0.alpha1.jar
 	</echo>    
 	<echo file="${project.build.directory}/kura-${build.name}-jars_${project.version}/start_kura_concierge_background.sh" append="false">#!/bin/sh
 
 # Kura should be installed to the /opt/eclipse directory.
 export PATH=/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/opt/jvm/bin:/usr/java/bin
 
-cd ../
+cd $(dirname $0)/..
+
+# set up the configuration area
+mkdir -p /tmp/.kura/configuration
+cp /opt/eclipse/kura/kura/init.xargs /tmp/.kura/configuration/
 
 nohup java -Xms${kura.mem.size} -Xmx${kura.mem.size} -XX:MaxPermSize=${kura.mem.size} -Dkura.os.version=${kura.os.version} \
 		-Dkura.arch=${kura.arch} \
-        -Dkura.ext.dir=/opt/eclipse/kura-${build.name}_${project.version}/lib/ext  \
+        -Dkura.ext.dir=/opt/eclipse/kura/lib/ext  \
         -Declipse.ignoreApp=true \
-        -Dkura.configuration=file:/opt/eclipse/kura/kura/kura.properties \
+        -Dkura.configuration=/opt/eclipse/kura/kura/kura.properties \
         -Ddpa.configuration=/opt/eclipse/kura/kura/dpa.properties \
-        -Dlog4j.configuration=file:/opt/eclipse/kura/kura/log4j.properties \
-		-Dorg.eclipse.concierge.init.xargs=kura/init.xargs \
-		-jar plugins/org.eclipse.concierge_1.0.0.alpha1.jar >> /var/log/kura-console.log 2>> /var/log/kura-console.log &amp;
+        -Dlog4j.configuration=/opt/eclipse/kura/kura/log4j.properties \
+		-Dorg.eclipse.concierge.init.xargs=/opt/eclipse/kura/kura/init.xargs \
+		-jar /opt/eclipse/kura/plugins/org.eclipse.concierge_1.0.0.alpha1.jar >> /var/log/kura-console.log 2>> /var/log/kura-console.log &amp;
 
 #Save the PID
 KURA_PID=$!

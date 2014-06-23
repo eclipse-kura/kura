@@ -1,0 +1,184 @@
+#########################################################################
+# Copyright (c) 2001, 2009 IBM.                                         #
+# All rights reserved. This program and the accompanying materials      #
+# are made available under the terms of the Eclipse Public License v1.0 #
+# which accompanies this distribution, and is available at              #
+# http://www.eclipse.org/legal/epl-v10.html                             #
+#                                                                       #
+# Contributors:                                                         #
+#     IBM - initial API and implementation                              #
+#########################################################################
+MAKEFILE = makefile.linux
+############################################################################################################
+#       Configure your OS, CPUTYPE and COMPILER 
+############################################################################################################
+OS  = Linux
+##OS=Qnx
+CPUTYPE = i386
+##CPUTYPE = powerpc
+##CPUTYPE = ppc82xx
+##CPUTYPE = ppc440gp
+##CPUTYPE = xscale
+##CPUTYPE = mips
+##CPUTYPE = sh4
+##CPUTYPE = ibm44gp
+LIBTYPE = so                   
+##LIBTYPE = a
+DATATYPE = le
+##DATATYPE = be
+##COMPILER = kenati
+##COMPILER = ydog
+##COMPILER = mvlpee31
+##COMPILER = mvlcee31
+##COMPILER = mvlarm
+##COMPILER = coyote
+##BOARDTYPE = Mainstone
+##BOARDTYPE = Walnut
+##BOARDTYPE = Malta
+##BOARDTYPE = Sandpoint
+##BOARDTYPE = Solution
+############################################################################################################
+#
+#       Release the libdkcomm.so file place
+#
+############################################################################################################
+DLLNAME=Release/$(OS)/$(CPUTYPE)_$(COMPILER)/libdkcomm.$(LIBTYPE)
+BUILDFILES1 = CommPortIdentifier.o NSCommDriver.o NSDeviceInputStream.o NSDeviceOutputStream.o NSSerialPort.o
+BUILDFILES2 = cygCommDriver.o cygDeviceInputStream.o cygDeviceOutputStream.o cygSerialPort.o
+BUILDFILES3 = SerialDataEventThread.o SerialStatusEventThread.o SysVStyleSemaphore.o
+BUILDFILES4 = NSParallelPort.o ParallelErrorEventThread.o cygSerialDataEventThread.o cygSerialStatusEventThread.o
+BUILDFILES5 = cygParallelPort.o cygParallelErrorEventThread.o cygCommPortIdentifier.o
+C_OBJECTS   = $(BUILDFILES1) $(BUILDFILES2) $(BUILDFILES3) $(BUILDFILES4) $(BUILDFILES5)
+# For Linux ARM BE - Coyote 
+ifeq "$(CPUTYPE)_$(COMPILER)""xscale_coyote"
+TOOL_DIR  = /opt/montavista_xscale_be/montavista/pro/devkit/arm/xscale_be/bin
+CROSSCOMP = xscale_be-
+CC        = $(TOOL_DIR)/$(CROSSCOMP)gcc
+CFLAGS    = -shared -D__linux__ -mcpu=$(CPUTYPE) -I/opt/montavista_xscale_be/montavista/pro/devkit/arm/xscale_be/include -I. -I/phx4f/team/ravi/JavaCommAPI-J9/j9lnxarmbesf-beta22/include
+AS        = $(TOOL_DIR)/$(CROSSCOMP)gcc
+ASFLAGS   = -c $(VMASMDEBUG) -shared
+LINKER    = $(TOOL_DIR)/$(CROSSCOMP)gcc
+LNKFLAGS = -shared -o
+endif
+# For Linux i386 (yocto toolchain)
+ifeq "$(CPUTYPE)_$(COMPILER)""i386_"
+#TOOL_DIR  = /usr/bin
+#CROSSCOMP =
+#CC        = $(TOOL_DIR)/$(CROSSCOMP)gcc
+CFLAGS    += -shared -D__linux__ -I$(JAVA_HOME)/include -I../include -I. 
+#AS        = $(TOOL_DIR)/$(CROSSCOMP)gcc
+ASFLAGS   = -c $(VMASMDEBUG) -shared
+LINKER    = $(CXX)
+LNKFLAGS = -shared -o
+endif
+# Yellow Dog Linux for Power PC
+ifeq "$(CPUTYPE)_$(COMPILER)""powerpc_ydog"
+TOOL_DIR  = /usr/bin
+CROSSCOMP =
+CC        = $(TOOL_DIR)/$(CROSSCOMP)gcc
+CFLAGS    = -shared -D__linux__ -mcpu=$(CPUTYPE) -I../include -I/usr/include -I.
+AS        = $(TOOL_DIR)/$(CROSSCOMP)gcc
+ASFLAGS   = -c $(VMASMDEBUG) -shared
+LINKER    = $(TOOL_DIR)/$(CROSSCOMP)gcc
+endif
+# Kenati Linux gcc for Power PC 
+ifeq "$(CPUTYPE)_$(COMPILER)""powerpc_kenati"
+CROSSCOMP = powerpc-uclibc-
+TOOL_DIR  = /opt/kenati/bin
+CC        = $(TOOL_DIR)/$(CROSSCOMP)gcc
+AS        = $(TOOL_DIR)/$(CROSSCOMP)as
+ASFLAGS   = -c $(VMASMDEBUG)
+ifeq "$(LIBTYPE)""a"
+CFLAGS   = -D__linux__ -DLINUXPPC -DJ9VM_STATIC_LINKAGE -mcpu=$(CPUTYPE) -I../include -I. -I/phx4f/team/ravi/j9lnxppc/include -fno-exceptions
+LINKER   = $(TOOL_DIR)/$(CROSSCOMP)ar
+LNKFLAGS = rcv 
+else
+#CFLAGS   = -shared -D__linux__ -mcpu=$(CPUTYPE) -I../include  -I. -I/phx4f/team/ravi/j9lnxppc/include
+CFLAGS   = -shared -fPIC -D__linux__ -mcpu=$(CPUTYPE) -I../include -I. -I/phx4f/team/ravi/j9lnxppc/include 
+LINKER   = $(TOOL_DIR)/$(CROSSCOMP)gcc
+LNKFLAGS = -shared -o
+endif
+endif
+# Montavista PEE 3.1 for the ppc82xx Sandpoint Board 
+ifeq "$(CPUTYPE)_$(COMPILER)""ppc82xx_mvlpee31"
+TOOL_DIR  = /opt/montavista_x86_ppc82xx/montavista/pro/devkit/ppc/82xx/bin
+CROSSCOMP = ppc_82xx-
+CC        = $(TOOL_DIR)/$(CROSSCOMP)gcc
+CFLAGS    = -shared -D__linux__ -I../include -I/phx4f/team/tjfang/runtimes/2005-2.2.1SR1/j9lnxppc-sandpoint/bin/include -I. -fPIC
+AS        = $(TOOL_DIR)/$(CROSSCOMP)gcc
+ASFLAGS   = -c $(VMASMDEBUG) -shared
+LINKER    = $(TOOL_DIR)/$(CROSSCOMP)gcc
+LNKFLAGS  = -shared -o
+endif
+# Montavista PEE 3.1 for the MIPS LE/BE Malta Board 
+ifeq "$(CPUTYPE)_$(COMPILER)""mips_mvlpee31"
+CROSSCOMP = mips_fp_$(DATATYPE)-
+TOOL_DIR  = /opt/montavista/pro/devkit/mips/fp_$(DATATYPE)/bin
+CC        = $(TOOL_DIR)/$(CROSSCOMP)gcc
+CFLAGS    = -shared -D__linux__ -I../include -I/phx5f/projects/TCK/cert22/runtimes/0706/mvl/31/mipsle/bin/include -I. -fPIC
+AS        = $(TOOL_DIR)/$(CROSSCOMP)gcc
+ASFLAGS   = -c $(VMASMDEBUG) -shared
+LINKER    = $(TOOL_DIR)/$(CROSSCOMP)gcc
+LNKFLAGS  = -shared -o
+endif
+# Montavista PEE 3.1 for the Hitachi SH-4 Solution Board
+ifeq "$(CPUTYPE)_$(COMPILER)""sh4_mvlpee31"
+TOOL_DIR  = /opt/montavista/pro/devkit/sh/sh4_$(DATATYPE)/bin
+CROSSCOMP = sh_sh4_$(DATATYPE)-
+CC        = $(TOOL_DIR)/$(CROSSCOMP)gcc
+CFLAGS    = -shared -D__linux__ -I../include -I/phx5f/projects/TCK/cert22/runtimes/0706/mvl/31/mvl-sh4/bin/include -I. -fPIC
+AS        = $(TOOL_DIR)/$(CROSSCOMP)gcc
+ASFLAGS   = -c $(VMASMDEBUG) -shared
+LINKER    = $(TOOL_DIR)/$(CROSSCOMP)gcc
+LNKFLAGS  = -shared -o
+endif
+# Montavista PEE 3.1 for the IBM 440GP Walnut Board 
+ifeq "$(CPUTYPE)_$(COMPILER)""ppc440gp_mvlpee31"
+CROSSCOMP = ppc_440-
+TOOL_DIR  = /opt/montavista_ppc_440gp/montavista/pro/devkit/ppc/440/bin
+CC        = $(TOOL_DIR)/$(CROSSCOMP)gcc
+CFLAGS    = -shared -D__linux__  -I../include -I/phx4f/team/tjfang/runtimes/2005-2.2.1SR1/j9lnxppc-walnut/bin/include -I. -fPIC
+AS        = $(TOOL_DIR)/$(CROSSCOMP)gcc
+ASFLAGS   = -c $(VMASMDEBUG) -shared
+LINKER    = $(TOOL_DIR)/$(CROSSCOMP)gcc
+LNKFLAGS  = -shared -o
+endif
+# Montavista CEE 3.1 for the xscale Mainstone Board 
+ifeq "$(CPUTYPE)_$(COMPILER)""xscale_mvlcee31"
+CROSSCOMP = iwmmxt_le-
+TOOL_DIR  = /opt/montavista/cee/devkit/arm/iwmmxt_le/bin
+CC        = $(TOOL_DIR)/$(CROSSCOMP)gcc
+CFLAGS    = -shared -D__linux__ -mcpu=$(CPUTYPE) -I../include -I/phx4f/team/ravi/gary/j9lnxarmhhmjit-mpn/include -I. -fPIC
+AS        = $(TOOL_DIR)/$(CROSSCOMP)gcc
+ASFLAGS   = -c $(VMASMDEBUG) -shared
+LINKER    = $(TOOL_DIR)/$(CROSSCOMP)ar
+LNKFLAGS  = rcv
+endif
+# Montavista Linux gcc for the xscale 
+ifeq "$(CPUTYPE)_$(COMPILER)""xscale_mvlarm"
+CROSSCOMP = arm_sa_le-
+TOOL_DIR  = /opt/montavista/pro/devkit/arm/sa_le/bin 
+CC        = $(TOOL_DIR)/$(CROSSCOMP)gcc
+CFLAGS    = -shared -D__linux__ -mcpu=$(CPUTYPE) -I../include -I/phx5f/projects/TCK/cert22/runtimes/0706/mvl/31/xscale/bin/include -I. -fPIC
+AS        = $(TOOL_DIR)/$(CROSSCOMP)gcc
+ASFLAGS   = -c $(VMASMDEBUG) -shared
+LINKER    = $(TOOL_DIR)/$(CROSSCOMP)gcc
+LNKFLAGS  = -shared -o
+endif
+.SUFFIXES:.cpp
+.cpp.o:
+	$(CC) $(CFLAGS) -I. -fno-exceptions -fno-rtti -c $<
+all:      $(DLLNAME) messages
+BUILDLIB: $(DLLNAME)
+$(DLLNAME): \
+	$(C_OBJECTS)
+	mkdir -p `dirname $(DLLNAME)`
+	$(LINKER) $(LNKFLAGS) $(DLLNAME) \
+        $(C_OBJECTS)
+messages:         
+	@echo "================================================";
+	@echo " === It is for $(CPUTYPE)($(DATATYPE)) $(COMPILER) $(BOARDTYPE) ===";
+	@echo "================================================";
+        
+clean:
+	rm $(DLLNAME)

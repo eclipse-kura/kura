@@ -1,0 +1,37 @@
+[Global]
+CurrentProject=Javaxcommnatives.vpj
+[ProjectDates]
+Javaxcommnatives.vpj=20051005132710000
+[ActiveConfig]
+Javaxcommnatives.vpj=Release
+[State]
+SCREEN: 1400 1050 66 87 1050 719 0 0 M 0 0 0 0 1373 824
+CWD: ..\natives
+BUFFER: BN="C:\j9dev\win\j9win\include\j9port.h"
+BI: MA=1 74 1  TABS=1 5  WWS=1 IWT=0 ST=0 IN=2 BW=0 US=32000 RO=0 SE=1 SN=0 BIN=0 MN=C	HM=0 MF=608 TL=0 MLL=0 ASE=0 LNL=6 LCF=0 CAPS=0 E=0 ESBU2=-1
+VIEW: LN=.730 CL=14 LE=0 CX=13 CY=24 WI=5 BI=12 HT=0 HN=0 HF=0 HC=4
+BUFFER: BN="C:\j9dev\win\j9win\include\jni.h"
+BI: MA=1 74 1  TABS=1 5  WWS=1 IWT=0 ST=0 IN=2 BW=0 US=32000 RO=0 SE=1 SN=0 BIN=0 MN=C	HM=0 MF=608 TL=0 MLL=0 ASE=0 LNL=6 LCF=0 CAPS=0 E=0 ESBU2=-1
+VIEW: LN=.3266 CL=26 LE=0 CX=25 CY=15 WI=5 BI=14 HT=0 HN=0 HF=0 HC=4
+BUFFER: BN="..\..\gary\j9win\SerialPortTest.java"
+BI: MA=1 74 1  TABS=1 9  WWS=1 IWT=0 ST=0 IN=2 BW=0 US=32000 RO=0 SE=1 SN=0 BIN=0 MN=Java	HM=0 MF=608 TL=0 MLL=0 ASE=0 LNL=6 LCF=0 CAPS=0 E=0 ESBU2=-1
+VIEW: LN=.0 CL=1 LE=0 CX=0 CY=0 WI=5 BI=15 HT=0 HN=0 HF=0 HC=4
+WINDOW: 44 58 1175 563 -1 -1 N  WF=0 WT=3 "Default Fixed Font,10,0,1"
+BUFFER: BN="C:\j9dev\win\j9win\include\jni.h"
+VIEW: LN=.3266 CL=26 LE=0 CX=25 CY=15 WI=89 BI=14 HT=0 HN=0 HF=0 HC=4
+WINDOW: 22 29 1175 563 -1 -1 N  WF=0 WT=2 "Default Fixed Font,10,0,1"
+BUFFER: BN="C:\j9dev\win\j9win\include\j9port.h"
+VIEW: LN=.730 CL=14 LE=0 CX=13 CY=24 WI=87 BI=12 HT=0 HN=0 HF=0 HC=4
+WINDOW: 66 87 1175 563 -1 -1 M  WF=0 WT=1 "Default Fixed Font,10,0,1"
+BUFFER: BN="..\..\gary\j9win\SerialPortTest.java"
+VIEW: LN=.1984 CL=68 LE=0 CX=67 CY=35 WI=91 BI=15 HT=0 HN=0 HF=0 HC=4
+FILEHIST: 9
+C:\Ravi\stocks\earncal.txt
+C:\Ravi\stocks\zacks.txt
+C:\j9dev\vxworks\j9vxworksppcjit-SR1-d\codegen_common\Options.cpp
+..\..\gary\j9win\SimpleSerial.java
+..\..\gary\j9win\TestComm.java
+C:\Documents and Settings\Administrator\My Documents\IBM\wsdd571\workspace\JavaCommAPIBuild\javaxcomm-rhel-20051004-0527.zip
+C:\j9dev\win\j9win\include\j9port.h
+C:\j9dev\win\j9win\include\jni.h
+..\..\gary\j9win\SerialPortTest.java

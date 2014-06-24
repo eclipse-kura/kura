@@ -11,17 +11,18 @@
  */
 package org.eclipse.kura.web.client.firewall;
 
-import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.util.TextFieldValidator;
 import org.eclipse.kura.web.client.util.TextFieldValidator.FieldType;
 import org.eclipse.kura.web.shared.model.GwtFirewallPortForwardEntry;
 import org.eclipse.kura.web.shared.model.GwtNetProtocol;
 import org.eclipse.kura.web.shared.model.GwtSession;
 
+import org.eclipse.kura.web.client.messages.Messages;
 import com.extjs.gxt.ui.client.Style.HorizontalAlignment;
 import com.extjs.gxt.ui.client.Style.Scroll;
 import com.extjs.gxt.ui.client.event.ButtonEvent;
 import com.extjs.gxt.ui.client.event.SelectionListener;
+import com.extjs.gxt.ui.client.widget.MessageBox;
 import com.extjs.gxt.ui.client.widget.Status;
 import com.extjs.gxt.ui.client.widget.Window;
 import com.extjs.gxt.ui.client.widget.button.Button;
@@ -179,7 +180,7 @@ public class PortForwardForm extends Window {
     	// out port number
         //
         final TextField<String> outPortField = new TextField<String>();
-        outPortField.setAllowBlank(true);
+        outPortField.setAllowBlank(false);
         outPortField.setName("outPort");
         outPortField.setFieldLabel(MSGS.firewallPortForwardFormOutPort());
         outPortField.setValidator(new TextFieldValidator(outPortField, FieldType.NUMERIC));
@@ -256,6 +257,10 @@ public class PortForwardForm extends Window {
             		m_newEntry.setPermittedNetwork(permittedNetworkField.getValue());
             		m_newEntry.setPermittedMAC(permittedMacField.getValue());
             		m_newEntry.setSourcePortRange(sourcePortRangeField.getValue());
+            		
+            		if (m_newEntry.getPermittedMAC() != null) {
+                		MessageBox.alert(MSGS.firewallPortForwardFormNotification(), MSGS.firewallPortForwardFormNotificationMacFiltering(), null);
+                	}
             	} else {
             		//update the current entry
             		m_existingEntry = new GwtFirewallPortForwardEntry();
@@ -267,6 +272,10 @@ public class PortForwardForm extends Window {
             		m_existingEntry.setPermittedNetwork(permittedNetworkField.getValue());
             		m_existingEntry.setPermittedMAC(permittedMacField.getValue());
             		m_existingEntry.setSourcePortRange(sourcePortRangeField.getValue());
+            		
+            		if (m_existingEntry.getPermittedMAC() != null) {
+                		MessageBox.alert(MSGS.firewallPortForwardFormNotification(), MSGS.firewallPortForwardFormNotificationMacFiltering(), null);
+                	}
             	}
             	
             	m_isCanceled = false;

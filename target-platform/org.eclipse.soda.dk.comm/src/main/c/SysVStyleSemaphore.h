@@ -17,7 +17,7 @@
 #define SEM_TBL_SIZE 8
 #endif
 typedef struct {
-	sem_t semaphore;
+	sem_t * semaphore;
 	int id;
 	int pid; /* currently not used */
 } sem_entry;

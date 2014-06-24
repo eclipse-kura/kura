@@ -49,7 +49,7 @@ public class Library {
 	 */
 	public static void load_dkcomm() {
 		if (load_from_java_lib_path() == false) {
-			// To remain portable across OSGI, Kura will only load from lib path
+			// To remain portable across OSGI implementations, Kura will only load from lib path
 			//load_from_bundle();
 		}
 	}

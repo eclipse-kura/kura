@@ -412,15 +412,33 @@ public class PortForwardingConfigTab extends LayoutContainer
     }
     
     private boolean duplicateEntry(GwtFirewallPortForwardEntry portForwardEntry) {
-    	List<GwtFirewallPortForwardEntry> entries = m_grid.getStore().getModels();
-    	if (entries != null && portForwardEntry != null) {
-	    	for(GwtFirewallPortForwardEntry entry : entries) {
-	    		if(entry.getInPort().equals(portForwardEntry.getInPort())) {
-	    			return true;
-	    		}
-	    	}
-    	}
-    	
-    	return false;
-    }
+		
+		boolean isDuplicateEntry = false; 
+		List<GwtFirewallPortForwardEntry> entries = m_grid.getStore().getModels();
+		if (entries != null && portForwardEntry != null) {
+			for (GwtFirewallPortForwardEntry entry : entries) {
+				if (entry.getInterfaceName().equals(portForwardEntry.getInterfaceName())
+						&& entry.getAddress().equals(portForwardEntry.getAddress())
+						&& entry.getProtocol().equals(portForwardEntry.getProtocol())
+						&& entry.getOutPort().equals(portForwardEntry.getOutPort())
+						&& entry.getInPort().equals(portForwardEntry.getInPort())) {
+					
+					String permittedNetwork = (entry.getPermittedNetwork() != null)? entry.getPermittedNetwork() : "0.0.0.0/0";
+					String newPermittedNetwork = (portForwardEntry.getPermittedNetwork() != null)?  portForwardEntry.getPermittedNetwork() : "0.0.0.0/0";
+					String permittedMAC = (entry.getPermittedMAC() != null)? entry.getPermittedMAC().toUpperCase() : "";
+					String newPermittedMAC = (portForwardEntry.getPermittedMAC() != null)? portForwardEntry.getPermittedMAC().toUpperCase() : "";
+					String sourcePortRange = (entry.getSourcePortRange() != null)? entry.getSourcePortRange() : "";
+					String newSourcePortRange = (portForwardEntry.getSourcePortRange() != null)? portForwardEntry.getSourcePortRange() : "";
+					
+					if (permittedNetwork.equals(newPermittedNetwork)
+							&& permittedMAC.equals(newPermittedMAC)
+							&& sourcePortRange.equals(newSourcePortRange)) {
+						isDuplicateEntry = true;
+						break;
+					}
+				}
+			}
+		}
+		return isDuplicateEntry;
+	}
 }

@@ -18,7 +18,7 @@ public class denali extends UI
 {
 
     @WebServlet(value = "/*", asyncSupported = true)
-    @VaadinServletConfiguration(productionMode = false, ui = denali.class, widgetset = "org.eclipse.kura.web.vaadin.AppWidgetSet")
+    @VaadinServletConfiguration(productionMode = false, ui = denali.class, widgetset = "org.eclipse.kura.web.vaadin.client.AppWidgetSet")
     public static class Servlet extends VaadinServlet {
     }
 

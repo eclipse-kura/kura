@@ -250,6 +250,20 @@
 							</excludes>
 							<followSymlinks>false</followSymlinks>
 						</fileset>
+						<fileset>
+							<directory>src/main/webapp/denali</directory>
+							<excludes>
+								<exclude>blank.html</exclude>
+								<exclude>clear.gif</exclude>
+								<exclude>hosted.html</exclude>
+							</excludes>
+						</fileset>
+						<fileset>
+							<directory>src/main/webapp/WEB-INF</directory>
+							<excludes>
+								<exclude>web.xml</exclude>
+							</excludes>
+						</fileset>
 					</filesets>
 				</configuration>
 			</plugin>
@@ -430,7 +444,28 @@
 										<ignore></ignore>
 									</action>
 								</pluginExecution>
-								
+
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>
+											org.codehaus.mojo
+										</groupId>
+										<artifactId>
+											properties-maven-plugin
+										</artifactId>
+										<versionRange>
+											[1.0-alpha-1,)
+										</versionRange>
+										<goals>
+											<goal>
+												read-project-properties
+											</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore></ignore>
+									</action>
+								</pluginExecution>
 							</pluginExecutions>
 						</lifecycleMappingMetadata>
 					</configuration>

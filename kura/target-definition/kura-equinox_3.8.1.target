@@ -3,5 +3,6 @@
 <target name="Kura Target Platform Equinox 3.8.1" sequenceNumber="42">
   <locations>
     <location path="${git_work_tree}/kura/target-definition/equinox_3.8.1/repository/plugins" type="Profile"/>
+    <location path="${git_work_tree}/kura/target-definition/common/repository/plugins" type="Profile"/>
   </locations>
 </target>

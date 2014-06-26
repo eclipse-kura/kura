@@ -1,20 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--
-
-    Copyright (c) 2011, 2014 Eurotech and/or its affiliates
-
-     All rights reserved. This program and the accompanying materials
-     are made available under the terms of the Eclipse Public License v1.0
-     which accompanies this distribution, and is available at
-     http://www.eclipse.org/legal/epl-v10.html
-
-    Contributors:
-      Eurotech
-
--->
+<!-- Copyright (c) 2011, 2014 Eurotech and/or its affiliates All rights reserved. 
+	This program and the accompanying materials are made available under the 
+	terms of the Eclipse Public License v1.0 which accompanies this distribution, 
+	and is available at http://www.eclipse.org/legal/epl-v10.html Contributors: 
+	Eurotech -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	
+
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.eclipse.kura</groupId>
 	<artifactId>kura</artifactId>
@@ -51,7 +43,48 @@
 		<module>examples</module>
 	</modules>
 
+	<properties>
+		<deployment.package.version>0.2.0</deployment.package.version>
+		<tycho-version>0.20.0</tycho-version>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+		<maven.build.timestamp.format>yyyyMMddHHmm</maven.build.timestamp.format>
+		<kura.build.version>${maven.build.timestamp}</kura.build.version>
+		<kura.bundle.versions>0.2.0.${kura.build.version}</kura.bundle.versions>
+	</properties>
+
 	<profiles>
+		<profile>
+			<id>default</id>
+			<activation>
+				<property>
+					<name>!kura.osgi</name>
+				</property>
+			</activation>
+			<repositories>
+				<repository>
+					<id>p2-repo-equinox_3.8.1</id>
+					<layout>p2</layout>
+					<url>file:///${user.dir}/target-definition/equinox_3.8.1/repository/</url>
+				</repository>
+			</repositories>
+		</profile>
+		<profile>
+			<id>equinox</id>
+			<activation>
+				<property>
+					<name>kura.osgi</name>
+					<value>equinox</value>
+				</property>
+			</activation>
+			<repositories>
+				<repository>
+					<id>p2-repo-equinox_3.8.1</id>
+					<layout>p2</layout>
+					<url>file:///${user.dir}/target-definition/equinox_3.8.1/repository/</url>
+				</repository>
+			</repositories>
+		</profile>
 		<profile>
 			<id>can</id>
 			<activation>
@@ -64,44 +97,34 @@
 		</profile>
 	</profiles>
 
-	<properties>
-		<deployment.package.version>0.2.0</deployment.package.version>
-		<tycho-version>0.20.0</tycho-version>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-		<maven.build.timestamp.format>yyyyMMddHHmm</maven.build.timestamp.format>
-		<kura.build.version>${maven.build.timestamp}</kura.build.version>
-		<kura.bundle.versions>0.2.0.${kura.build.version}</kura.bundle.versions>
-	</properties>
-
 	<repositories>
 		<repository>
-			<id>kura</id>
+			<id>p2-repo-common</id>
 			<layout>p2</layout>
-			<url>file:///${project.basedir}/../target-definition/equinox_3.8.1/repository</url>
+			<url>file:///${user.dir}/target-definition/common/repository/</url>
 		</repository>
-                <repository>
-                        <id>kura_addons</id>
-                        <name>Kura Addons Maven Repository</name>
+		<repository>
+			<id>kura_addons</id>
+			<name>Kura Addons Maven Repository</name>
 			<url>https://raw.github.com/eurotech/kura_addons/mvn-repo/</url>
 			<snapshots>
 				<enabled>true</enabled>
 				<updatePolicy>always</updatePolicy>
 			</snapshots>
-                </repository>
+		</repository>
 	</repositories>
 
 	<build>
-        <extensions>
-            <extension>
-                <groupId>org.apache.maven.wagon</groupId>
-                <artifactId>wagon-ssh</artifactId>
-                <version>1.0-beta-6</version>
-            </extension>
-        </extensions>
+		<extensions>
+			<extension>
+				<groupId>org.apache.maven.wagon</groupId>
+				<artifactId>wagon-ssh</artifactId>
+				<version>1.0-beta-6</version>
+			</extension>
+		</extensions>
 		<plugins>
 			<plugin>
-                <groupId>org.apache.maven.plugins</groupId>
+				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-eclipse-plugin</artifactId>
 				<version>2.9</version>
 				<configuration>
@@ -121,14 +144,9 @@
 				<artifactId>target-platform-configuration</artifactId>
 				<version>${tycho-version}</version>
 				<configuration>
-					<target>
-						<artifact>
-							<groupId>org.eclipse.kura</groupId>
-							<artifactId>target-definition</artifactId>
-							<version>${project.version}</version>
-							<classifier>kura-equinox_3.8.1</classifier>
-						</artifact>
-					</target>
+					<!-- <target> <artifact> <groupId>org.eclipse.kura</groupId> <artifactId>target-definition</artifactId> 
+						<version>${project.version}</version> <classifier>kura-equinox_3.8.1</classifier> 
+						</artifact> </target> -->
 					<environments>
 						<environment>
 							<os>win32</os>
@@ -209,36 +227,35 @@
 				</configuration>
 			</plugin>
 			<plugin>
-	        <groupId>org.apache.maven.plugins</groupId>
-	        <artifactId>maven-site-plugin</artifactId>
-	        <version>3.3</version>
-	      </plugin>
-		  <plugin>
-		  	<!-- license:format to add
-				 license:check to check -->
-		  	<groupId>com.mycila</groupId>
-			<artifactId>license-maven-plugin</artifactId>
-			<version>2.2</version>
-			<configuration>
-				<header>distrib/eclipse_license.txt</header>
-				<properties>
-					<owner>Eurotech and/or its affiliates</owner>
-					<contributor>Eurotech</contributor>
-					<dates>2011, 2014</dates>
-				</properties>
-				<includes>
-					<include>**/*.java</include>
-					<include>**/*.properties</include>
-					<include>**/*.sh</include>
-					<include>**/*.xml</include>
-					<include>**/denali.css</include>
-					<include>**/.conf</include>
-				</includes>
-				<mapping>
-					<conf>SCRIPT_STYLE</conf>
-				</mapping>
-			</configuration>
-		  </plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-site-plugin</artifactId>
+				<version>3.3</version>
+			</plugin>
+			<plugin>
+				<!-- license:format to add license:check to check -->
+				<groupId>com.mycila</groupId>
+				<artifactId>license-maven-plugin</artifactId>
+				<version>2.2</version>
+				<configuration>
+					<header>distrib/eclipse_license.txt</header>
+					<properties>
+						<owner>Eurotech and/or its affiliates</owner>
+						<contributor>Eurotech</contributor>
+						<dates>2011, 2014</dates>
+					</properties>
+					<includes>
+						<include>**/*.java</include>
+						<include>**/*.properties</include>
+						<include>**/*.sh</include>
+						<include>**/*.xml</include>
+						<include>**/denali.css</include>
+						<include>**/.conf</include>
+					</includes>
+					<mapping>
+						<conf>SCRIPT_STYLE</conf>
+					</mapping>
+				</configuration>
+			</plugin>
 		</plugins>
 		<pluginManagement>
 			<plugins>
@@ -255,11 +272,11 @@
 							<link>http://docs.oracle.com/cd/E17802_01/products/products/javacomm/reference/api/index.html</link>
 							<link>http://docs.oracle.com/javame/config/cldc/opt-pkgs/api/bluetooth/jsr082/index.html?javax/bluetooth/package-summary.html</link>
 						</links>
-                        <!-- Remove packages from the list to have them included in the aggregate 
-									javadocs -->
-                        <excludePackageNames>
-                            *.ermes:*.demo*:*.example:*.core:*.cloud.app:*.net.admin:*.deployment:*.emulator:*.linux:*.qa:*.web:*.service.io:*.test
-                        </excludePackageNames>
+						<!-- Remove packages from the list to have them included in the aggregate 
+							javadocs -->
+						<excludePackageNames>
+							*.ermes:*.demo*:*.example:*.core:*.cloud.app:*.net.admin:*.deployment:*.emulator:*.linux:*.qa:*.web:*.service.io:*.test
+						</excludePackageNames>
 						<!-- Add URLs for open source javadocs below -->
 					</configuration>
 					<executions>
@@ -290,26 +307,10 @@
 			</plugins>
 		</pluginManagement>
 	</build>
-	<!-- Use the below format to specify specific reports to run
-	<reporting>
-	    <plugins>
-	      <plugin>
-	        <groupId>org.apache.maven.plugins</groupId>
-	        <artifactId>maven-project-info-reports-plugin</artifactId>
-	        <version>2.7</version>
-	        <reportSets>
-	          <reportSet>
-	            <reports>
-	              <report>index</report>
-	              <report>dependencies</report>
-	              <report>dependency-convergence</report>
-	              <report>dependency-info</report>
-	              <report>dependency-management</report>
-	            </reports>
-	          </reportSet>
-	        </reportSets>
-	      </plugin>
-	    </plugins>
-	</reporting>
-	 -->
+	<!-- Use the below format to specify specific reports to run <reporting> 
+		<plugins> <plugin> <groupId>org.apache.maven.plugins</groupId> <artifactId>maven-project-info-reports-plugin</artifactId> 
+		<version>2.7</version> <reportSets> <reportSet> <reports> <report>index</report> 
+		<report>dependencies</report> <report>dependency-convergence</report> <report>dependency-info</report> 
+		<report>dependency-management</report> </reports> </reportSet> </reportSets> 
+		</plugin> </plugins> </reporting> -->
 </project>

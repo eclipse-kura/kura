@@ -26,13 +26,13 @@ import org.slf4j.LoggerFactory;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 
-public class CloudPayloadProtoBufDecoder 
+public class CloudPayloadProtoBufDecoderImpl 
 {
-	private static final Logger s_logger = LoggerFactory.getLogger(CloudPayloadProtoBufDecoder.class); 
+	private static final Logger s_logger = LoggerFactory.getLogger(CloudPayloadProtoBufDecoderImpl.class); 
 		
 	private byte[] m_bytes;
 	
-	public CloudPayloadProtoBufDecoder(byte[] bytes) {
+	public CloudPayloadProtoBufDecoderImpl(byte[] bytes) {
 		m_bytes = bytes;
 	}
 	

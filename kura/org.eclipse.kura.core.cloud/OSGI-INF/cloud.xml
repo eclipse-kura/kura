@@ -23,6 +23,8 @@
       <provide interface="org.eclipse.kura.cloud.CloudService"/>
       <provide interface="org.eclipse.kura.data.DataServiceListener"/>
       <provide interface="org.eclipse.kura.configuration.ConfigurableComponent"/>
+      <provide interface="org.eclipse.kura.cloud.CloudPayloadProtoBufEncoder"/>
+      <provide interface="org.eclipse.kura.cloud.CloudPayloadProtoBufDecoder"/>
    </service>
    <property name="service.pid" value="org.eclipse.kura.cloud.CloudService"/>
    <reference name="DataService" 

@@ -25,13 +25,13 @@ import com.google.protobuf.ByteString;
 /**
  * Encodes an KuraPayload class using the Google ProtoBuf binary format.
  */
-public class CloudPayloadProtoBufEncoder implements CloudPayloadEncoder 
+public class CloudPayloadProtoBufEncoderImpl implements CloudPayloadEncoder 
 {
-	private static final Logger s_logger = LoggerFactory.getLogger(CloudPayloadProtoBufEncoder.class);
+	private static final Logger s_logger = LoggerFactory.getLogger(CloudPayloadProtoBufEncoderImpl.class);
 	
 	private KuraPayload m_kuraPayload;
 	
-	public CloudPayloadProtoBufEncoder(KuraPayload KuraPayload) {
+	public CloudPayloadProtoBufEncoderImpl(KuraPayload KuraPayload) {
 		m_kuraPayload = KuraPayload;
 	}
 	

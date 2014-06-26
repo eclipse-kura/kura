@@ -21,8 +21,8 @@ import org.eclipse.kura.KuraStoreException;
 import org.eclipse.kura.KuraTimeoutException;
 import org.eclipse.kura.cloud.CloudCallService;
 import org.eclipse.kura.cloud.app.RequestIdGenerator;
-import org.eclipse.kura.core.cloud.CloudPayloadProtoBufDecoder;
-import org.eclipse.kura.core.cloud.CloudPayloadProtoBufEncoder;
+import org.eclipse.kura.core.cloud.CloudPayloadProtoBufDecoderImpl;
+import org.eclipse.kura.core.cloud.CloudPayloadProtoBufEncoderImpl;
 import org.eclipse.kura.data.DataService;
 import org.eclipse.kura.data.DataServiceListener;
 import org.eclipse.kura.message.KuraPayload;
@@ -121,7 +121,7 @@ public class CloudCallServiceImpl implements CloudCallService, DataServiceListen
 		req.setRequestId(requestId);
 		req.setRequesterClientId(CLIENT_ID_VAR_NAME);
 
-		CloudPayloadProtoBufEncoder encoder = new CloudPayloadProtoBufEncoder(req);
+		CloudPayloadProtoBufEncoderImpl encoder = new CloudPayloadProtoBufEncoderImpl(req);
 		byte[] rawPayload;
 		try {
 			rawPayload = encoder.getBytes();
@@ -206,7 +206,7 @@ public class CloudCallServiceImpl implements CloudCallService, DataServiceListen
 				
 				s_logger.debug("Got response");
 				
-				CloudPayloadProtoBufDecoder decoder = new CloudPayloadProtoBufDecoder(
+				CloudPayloadProtoBufDecoderImpl decoder = new CloudPayloadProtoBufDecoderImpl(
 						payload);
 
 				KuraResponsePayload resp = null;

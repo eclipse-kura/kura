@@ -60,11 +60,15 @@
 									<version>1.2.0</version>
 								</artifactItem>
 								<!-- copied from Maven central repository -->
+								<!--
+								This jar requires an altered manifest to declare it as a fragment bundle. It
+								cannot be brought in from Maven repository.
 								<artifactItem>
 									<groupId>log4j</groupId>
 									<artifactId>apache-log4j-extras</artifactId>
 									<version>1.1</version>
 								</artifactItem>
+								-->
 								<artifactItem>
 									<groupId>commons-io</groupId>
 									<artifactId>commons-io</artifactId>

@@ -12,10 +12,7 @@
       Eurotech
 
 -->
-<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0"
-			name="org.eclipse.kura.net.NetworkService"
-	        enabled="true" 
-            immediate="true">
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" activate="activate" deactivate="deactivate" enabled="true" immediate="true" name="org.eclipse.kura.net.NetworkService">
    <implementation class="org.eclipse.kura.linux.net.NetworkServiceImpl"/>
    <service>
       <provide interface="org.eclipse.kura.net.NetworkService"/>

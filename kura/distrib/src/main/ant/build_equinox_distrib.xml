@@ -314,9 +314,27 @@ echo $KURA_PID > /var/run/kura.pid
         </jar>
 
 
+		<!-- Get version information for the bundles/files in this build -->
+        <echo message="Gathering version information for the bundles/files in ${build.name}" />
+        <exec executable="src/main/sh/get_build_versions.sh">
+                <arg value="${project.build.directory}" />
+                <arg value="kura-${build.name}-jars_${project.version}.zip" />
+                <arg value="kura-${build.name}_${project.version}.versions" />
+                <arg value="${build.name}" />
+        </exec>
 
 
+		<!-- Diff with the previous version -->
+        <property file="RELEASE_INFO/version.properties" />
+        <echo message="Diff version information with ${build.name} version ${project.version.previous}" />
+        <exec executable="src/main/sh/diff_build_versions.sh">
+                <arg value="RELEASE_INFO/${project.version.previous}/kura-${build.name}_${project.version.previous}.versions" />
+	            <arg value="${project.build.directory}/kura-${build.name}_${project.version}.versions" />
+                <arg value="${project.build.directory}/kura-${build.name}_${project.version.previous}_to_${project.version}.exclude" />
+                <arg value="${build.name}" />
+        </exec>
 
+    	
 <!-- OLD ESF METHOD
         <echo message="Creating Updater for ${build.name}" />
         <exec executable="${project.build.directory}/../src/main/sh/create_upgrader.sh">

@@ -7,16 +7,16 @@ Bundle-Vendor: EUROTECH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ClassPath: .
 Bundle-ActivationPolicy: lazy
-Import-Package: org.eclipse.kura,
- org.eclipse.kura.core.util,
- org.eclipse.kura.net,
- org.eclipse.kura.net.dhcp,
- org.eclipse.kura.net.firewall,
- org.eclipse.kura.net.modem,
- org.eclipse.kura.net.wifi,
- org.eclipse.kura.usb,
+Import-Package: org.eclipse.kura; version="[0.2,1.0)",
+ org.eclipse.kura.core.util; version="[0.2,1.0)",
+ org.eclipse.kura.net; version="[0.2,0.3)",
+ org.eclipse.kura.net.dhcp; version="[0.2,1.0)",
+ org.eclipse.kura.net.firewall; version="[0.2,1.0)",
+ org.eclipse.kura.net.modem; version="[0.2,0.3)",
+ org.eclipse.kura.net.wifi; version="[0.2,0.3)",
+ org.eclipse.kura.usb; version="[0.2,1.0)",
  org.slf4j;version="1.6.4"
-Export-Package: org.eclipse.kura.core.net,
- org.eclipse.kura.core.net.modem,
- org.eclipse.kura.core.net.util
+Export-Package: org.eclipse.kura.core.net; version="0.2.0",
+ org.eclipse.kura.core.net.modem; version="0.2.0",
+ org.eclipse.kura.core.net.util; version="0.2.0"
 

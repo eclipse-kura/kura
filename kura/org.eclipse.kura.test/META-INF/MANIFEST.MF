@@ -7,10 +7,10 @@ Bundle-Vendor: EUROTECH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Service-Component: OSGI-INF/*.xml
 Import-Package: junit.framework,
- org.eclipse.kura,
- org.eclipse.kura.cloud,
- org.eclipse.kura.message,
- org.eclipse.kura.system,
+ org.eclipse.kura; version="[0.2,1.0)",
+ org.eclipse.kura.cloud; version="[0.2,1.0)",
+ org.eclipse.kura.message; version="[0.2,1.0)",
+ org.eclipse.kura.system; version="[0.2,1.0)",
  org.eclipse.osgi.framework.console;version="1.1.0",
  org.junit,
  org.osgi.framework;version="1.5.0",
@@ -18,4 +18,4 @@ Import-Package: junit.framework,
  org.osgi.service.component;version="1.2.0",
  org.osgi.util.tracker;version="1.5.1",
  org.slf4j;version="1.6.4"
-Export-Package: org.eclipse.kura.test.annotation
+Export-Package: org.eclipse.kura.test.annotation; version="0.2.0"

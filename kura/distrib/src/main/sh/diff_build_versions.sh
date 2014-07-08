@@ -14,14 +14,23 @@
 
 OLD_FILES=$1
 NEW_FILES=$2
-OUTPUT_NAME=$3
+REMOVED_NAME="${3}.removed"
+KEEP_NAME="${3}.keep"
+ADDED_NAME="${3}.added"
 BUILD_NAME=$4
+
+# filenames without path or extension
+OLD=${OLD_FILES##*/}
+OLD=${OLD%.versions}
+NEW=${NEW_FILES##*/}
+NEW=${NEW%.versions}
+
 
 
 # Make a list of files that were in the old version but not the new
 # and files whose versions have changed
 
-echo "# Files that were removed or changed from $OLD_FILES to $NEW_FILES" > $OUTPUT_NAME
+echo "# Files that were removed or changed from $OLD to $NEW" > $REMOVED_NAME
 
 while read line
 do
@@ -30,14 +39,37 @@ do
 		continue
 	fi
 
+	# remove version from line
 	filename=${line%%	*}
-	#version=${line#*	}
 
 	if ! grep -q "$line" $NEW_FILES ; then
-		echo $filename >> $OUTPUT_NAME
+		echo $filename >> $REMOVED_NAME
+	fi
+done < $OLD_FILES
+
+
+# Make a list of files in the new version that are unchanged, and a list
+# of files that were not in the old version
+
+echo "# Files that were unchanged from $OLD to $NEW" > $KEEP_NAME
+echo "# Files that were added or changed from $OLD to $NEW" > $ADDED_NAME
+
+while read line
+do
+	# Skip comments
+	if [[ $line == "#"* ]] ; then
+		continue
 	fi
 
-	#printf "${filename}	${version}\n" >> $OUTPUT_NAME
-done < $OLD_FILES
+	# remove version from line
+	filename=${line%%	*}
+
+	if grep -q "$line" $OLD_FILES ; then
+		echo $filename >> $KEEP_NAME
+	else
+		echo $filename >> $ADDED_NAME
+	fi
+done < $NEW_FILES
+
 
 #clean up

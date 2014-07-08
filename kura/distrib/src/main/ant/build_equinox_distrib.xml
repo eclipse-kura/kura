@@ -329,8 +329,19 @@ echo $KURA_PID > /var/run/kura.pid
         <echo message="Diff version information with ${build.name} version ${project.version.previous}" />
         <exec executable="src/main/sh/diff_build_versions.sh">
                 <arg value="RELEASE_INFO/${project.version.previous}/kura-${build.name}_${project.version.previous}.versions" />
-	            <arg value="${project.build.directory}/kura-${build.name}_${project.version}.versions" />
-                <arg value="${project.build.directory}/kura-${build.name}_${project.version.previous}_to_${project.version}.exclude" />
+                <arg value="${project.build.directory}/kura-${build.name}_${project.version}.versions" />
+                <arg value="${project.build.directory}/kura-${build.name}_${project.version.previous}_to_${project.version}" />
+                <arg value="${build.name}" />
+        </exec>
+
+
+		<!-- Create upgrade zip -->
+        <echo message="Create upgrade zip ${build.name} version ${project.version.previous}" />
+        <copy file="${project.build.directory}/kura-${build.name}-jars_${project.version}.zip"
+              tofile="${project.build.directory}/kura-${build.name}-jars-upgrade_${project.version}.zip" />
+        <exec executable="src/main/sh/create_upgrade_zip.sh">
+                <arg value="${project.build.directory}/kura-${build.name}-jars-upgrade_${project.version}.zip" />
+                <arg value="${project.build.directory}/kura-${build.name}_${project.version.previous}_to_${project.version}.keep" />
                 <arg value="${build.name}" />
         </exec>
 

@@ -16,8 +16,9 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.kura.KuraException;
@@ -63,7 +64,7 @@ public class EthernetMonitorServiceImpl implements EthernetMonitorService, Event
 	private final static long THREAD_INTERVAL = 30000;
 	private final static long THREAD_TERMINATION_TOUT = 1; // in seconds
 	
-	private static Map<String, ScheduledFuture<?>> tasks;
+	private static Map<String, Future<?>> tasks;
 	private static Map<String, Boolean> stopThreads;
 	
 	private NetworkService m_networkService;
@@ -75,7 +76,7 @@ public class EthernetMonitorServiceImpl implements EthernetMonitorService, Event
 	private Map<String, InterfaceState> m_interfaceState = new HashMap<String, InterfaceState>();
 	private Map<String, EthernetInterfaceConfigImpl> m_networkConfiguration = new HashMap<String, EthernetInterfaceConfigImpl>();
 	private Map<String, EthernetInterfaceConfigImpl> m_newNetworkConfiguration = new HashMap<String, EthernetInterfaceConfigImpl>();
-	private ScheduledThreadPoolExecutor m_executor;
+	private ExecutorService m_executor;
 	
     // ----------------------------------------------------------------
     //
@@ -131,9 +132,7 @@ public class EthernetMonitorServiceImpl implements EthernetMonitorService, Event
         
         m_routeService = RouteServiceImpl.getInstance();
         
-        m_executor = new ScheduledThreadPoolExecutor(2);
-        m_executor.setContinueExistingPeriodicTasksAfterShutdownPolicy(false);
-        m_executor.setExecuteExistingDelayedTasksAfterShutdownPolicy(false);
+        m_executor = Executors.newFixedThreadPool(2);
 		
         // Get initial configurations
         try {
@@ -498,7 +497,7 @@ public class EthernetMonitorServiceImpl implements EthernetMonitorService, Event
 	// Start a interface specific monitor thread
 	private void startMonitor(final String interfaceName) {
 		if (tasks == null) {
-			tasks = new HashMap<String, ScheduledFuture<?>>();
+			tasks = new HashMap<String, Future<?>>();
 		}
 		if (stopThreads == null) {
 			stopThreads = new HashMap<String, Boolean>();
@@ -509,7 +508,7 @@ public class EthernetMonitorServiceImpl implements EthernetMonitorService, Event
 		// Ensure monitor doesn't already exist for this interface
 		if (tasks.get(interfaceName) == null) {
 			s_logger.debug("Starting monitor for " + interfaceName);
-			ScheduledFuture<?> task = m_executor.schedule(new Runnable() {
+			Future<?> task = m_executor.submit(new Runnable() {
 	    		@Override
 	    		public void run() {
 		    			Thread.currentThread().setName("EthernetMonitor_" + interfaceName);
@@ -522,7 +521,7 @@ public class EthernetMonitorServiceImpl implements EthernetMonitorService, Event
 		    					s_logger.debug(interruptedException.getMessage());
 		    				}
 		    			}
-	    	}}, 0, TimeUnit.SECONDS);
+	    	}});
 			
 			tasks.put(interfaceName, task);
 		}
@@ -532,7 +531,7 @@ public class EthernetMonitorServiceImpl implements EthernetMonitorService, Event
 	private void stopMonitor(String interfaceName) {
 		m_interfaceState.remove(interfaceName);
 		
-		ScheduledFuture<?> task = tasks.get(interfaceName);
+		Future<?> task = tasks.get(interfaceName);
 		if ((task != null) && (!task.isDone())) {
 			stopThreads.put(interfaceName, true);
 			s_logger.debug("Stopping monitor for {} ...", interfaceName);

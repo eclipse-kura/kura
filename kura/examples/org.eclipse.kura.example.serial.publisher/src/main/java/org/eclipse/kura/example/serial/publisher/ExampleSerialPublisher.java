@@ -17,9 +17,9 @@ import java.io.OutputStream;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-
+import java.util.concurrent.ScheduledExecutorService;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloud.CloudClient;
 import org.eclipse.kura.cloud.CloudClientListener;
@@ -67,7 +67,7 @@ public class ExampleSerialPublisher implements ConfigurableComponent, CloudClien
 //	private BufferedWriter m_commBw;
 
 	
-	private ScheduledThreadPoolExecutor m_worker;
+	private ScheduledExecutorService m_worker;
 	private Future<?>           m_handle;
 	
 	private Map<String, Object> m_properties;
@@ -81,7 +81,7 @@ public class ExampleSerialPublisher implements ConfigurableComponent, CloudClien
 	public ExampleSerialPublisher() 
 	{
 		super();
-		m_worker = new ScheduledThreadPoolExecutor(1);
+		m_worker = Executors.newSingleThreadScheduledExecutor();
 	}
 
 	public void setCloudService(CloudService cloudService) {

@@ -18,8 +18,9 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.kura.configuration.ConfigurableComponent;
@@ -49,13 +50,13 @@ public class PositionServiceImpl implements PositionService, ConfigurableCompone
 
 	private final static long THREAD_TERMINATION_TOUT = 1; // in seconds
 
-	private static ScheduledFuture<?> 		monitorTask;
+	private static Future<?>				monitorTask;
 	private static boolean 					stopThread;
 
 	private Map<String,Object>				m_properties;
 	private ConnectionFactory 	            m_connectionFactory;
 	private GpsDevice					 	m_gpsDevice;
-	private ScheduledThreadPoolExecutor		m_executor;
+	private ExecutorService                 m_executor;
 	private EventAdmin            			m_eventAdmin;
 	private UsbService						m_usbService;
 
@@ -126,9 +127,7 @@ public class PositionServiceImpl implements PositionService, ConfigurableCompone
 		m_useGpsd = false;
 		initializeDefaultPosition(0, 0, 0);
 
-		m_executor = new ScheduledThreadPoolExecutor(1);
-		m_executor.setContinueExistingPeriodicTasksAfterShutdownPolicy(false);
-		m_executor.setExecuteExistingDelayedTasksAfterShutdownPolicy(false);
+		m_executor = Executors.newSingleThreadExecutor();
 
 		// install event listener for serial ports
 		Dictionary<String, String[]> props = new Hashtable<String, String[]>();
@@ -271,7 +270,7 @@ public class PositionServiceImpl implements PositionService, ConfigurableCompone
 		s_logger.debug("PositionService configured and starting");
 		stopThread = false;
 		if (monitorTask == null) {
-			monitorTask = m_executor.schedule(new Runnable() {
+			monitorTask = m_executor.submit(new Runnable() {
 				public void run() {
 					Thread.currentThread().setName("PositionServiceImpl");
 					while(!stopThread) {
@@ -284,7 +283,7 @@ public class PositionServiceImpl implements PositionService, ConfigurableCompone
 						};
 					}
 				}
-			}, 0, TimeUnit.MILLISECONDS);
+			});
 		}
 
 		m_isRunning = true;

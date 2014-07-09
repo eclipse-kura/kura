@@ -13,8 +13,9 @@ package org.eclipse.kura.linux.usb;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
@@ -44,8 +45,8 @@ public class LinuxUdevNative {
 	private static List<UsbTtyDevice> ttyDevices;
 
 	private static boolean started;
-	private static ScheduledFuture<?> s_task;
-	private ScheduledThreadPoolExecutor m_executor;
+	private static Future<?> s_task;
+	private ScheduledExecutorService m_executor;
 	
 	private LinuxUdevListener m_linuxUdevListener;
 	private LinuxUdevNative m_linuxUdevNative;
@@ -168,7 +169,7 @@ public class LinuxUdevNative {
 	/** Start this Hotplug Thread. */
 	private void start() {
 		
-		m_executor = new ScheduledThreadPoolExecutor(1, new ThreadFactory() {
+		m_executor = Executors.newSingleThreadScheduledExecutor(new ThreadFactory() {
 			public Thread newThread(Runnable r) {
 				Thread thread = new Thread(r, "UdevHotplugThread");
 				thread.setDaemon(true);
@@ -176,9 +177,7 @@ public class LinuxUdevNative {
 			}
 			});
 		
-		m_executor.setContinueExistingPeriodicTasksAfterShutdownPolicy(false);
-		m_executor.setExecuteExistingDelayedTasksAfterShutdownPolicy(false);
-		s_task = m_executor.schedule(new Runnable() {
+		s_task = m_executor.submit(new Runnable() {
     		@Override
     		public void run() {
     				s_logger.info("Starting LinuxUdevNative Thread ...");
@@ -189,7 +188,7 @@ public class LinuxUdevNative {
     					e.printStackTrace();
     				}
     			}
-    	}, 0, TimeUnit.SECONDS);
+    	});
 	}
 }
 

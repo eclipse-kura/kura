@@ -16,8 +16,9 @@ import java.net.URL;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import javax.xml.parsers.SAXParser;
@@ -44,8 +45,8 @@ public class PositionServiceImpl implements PositionService {
 	private ComponentContext m_ctx;
 	private EventAdmin m_eventAdmin;
 	
-    private ScheduledThreadPoolExecutor m_worker;
-    private ScheduledFuture<?>          m_handle;
+    private ScheduledExecutorService m_worker;
+    private ScheduledFuture<?> m_handle;
     
 	private GpsPoint[] gpsPoints;
 	private Position currentPosition;
@@ -179,7 +180,7 @@ public class PositionServiceImpl implements PositionService {
 		}		
 		
 		// schedule a new worker based on the properties of the service
-		m_worker = new ScheduledThreadPoolExecutor(1);
+		m_worker = Executors.newSingleThreadScheduledExecutor();
         m_handle = m_worker.scheduleAtFixedRate(new Runnable() {
                 @Override
                 public void run() {

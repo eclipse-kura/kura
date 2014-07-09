@@ -26,8 +26,9 @@ import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Properties;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.kura.KuraErrorCode;
@@ -86,7 +87,7 @@ public class WpaSupplicant {
 	private String m_passwd = null;
 	private WifiBgscan m_bgscan = null;
 
-	private ScheduledThreadPoolExecutor m_worker = null;
+	private ScheduledExecutorService m_worker = null;
 	private ScheduledFuture<?> m_handle = null;
 	private WpaSupplicantStatus m_status = null;
 	private int m_ifaceDisabledCnt = 0;
@@ -318,7 +319,7 @@ public class WpaSupplicant {
 			throws KuraException {
 
 		this.m_mode = mode;
-		this.m_worker = new ScheduledThreadPoolExecutor(1);
+		this.m_worker = Executors.newSingleThreadScheduledExecutor();
 		this.m_configFilename = WpaSupplicant.formSupplicantConfigFilename();
 
 		if ((security != WifiSecurity.SECURITY_WEP)

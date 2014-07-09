@@ -19,8 +19,9 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.kura.KuraException;
@@ -62,8 +63,8 @@ public class DnsMonitorServiceImpl implements DnsMonitorService, EventHandler {
     
     private final static long THREAD_INTERVAL = 60000;
     private final static long THREAD_TERMINATION_TOUT = 1; // in seconds
-    private static ScheduledFuture<?> s_monitorTask;
-    private ScheduledThreadPoolExecutor m_executor;
+    private static Future<?> s_monitorTask;
+    private ExecutorService m_executor;
     
     private boolean m_enabled;
     private static boolean stopThread;
@@ -95,11 +96,9 @@ public class DnsMonitorServiceImpl implements DnsMonitorService, EventHandler {
         
         //FIXME - brute force handler for DNS updates
         // m_executorUtil = ExecutorUtil.getInstance();
-        m_executor = new ScheduledThreadPoolExecutor(1);
-        m_executor.setContinueExistingPeriodicTasksAfterShutdownPolicy(false);
-        m_executor.setExecuteExistingDelayedTasksAfterShutdownPolicy(false);
+        m_executor = Executors.newSingleThreadExecutor();
         stopThread = false;
-        s_monitorTask = m_executor.schedule(new Runnable() {
+        s_monitorTask = m_executor.submit(new Runnable() {
     		@Override
     		public void run() {
     			while (!stopThread) {
@@ -160,7 +159,7 @@ public class DnsMonitorServiceImpl implements DnsMonitorService, EventHandler {
 					}
     			}
     		}
-    	}, 0, TimeUnit.MINUTES);
+    	});
     }
     
     protected void deactivate(ComponentContext componentContext) {

@@ -115,11 +115,11 @@ If mvn clean install fails in test compilation run it with "-Dmaven.test.skip=tr
  * Select all projects
  * Right-click and select Team > Share Project > Git
 * Expand the target-definition project and open the 'kura-equinox_3.8.1.target' file.  Click 'Set as Target Platform' in the upper right area of the center pane.  Alternatively, or if this doesn't work, browse to _Windows | Preferences | Plug-in Development | Target Platform_. Then select _Kura Target Platform Equinox 3.8.1_ and click the _Reload_ button.
-** After setting this and letting Eclipse rebuild - there should be no errors in the workspace
-** It may happen that you still have errors stating that some Projects are not up to date. In this case right click on the corresponding Projetcs, then Maven > Update Project
+ * After setting this and letting Eclipse rebuild - there should be no errors in the workspace
+ * It may happen that you still have errors stating that some Projects are not up to date. In this case right click on the corresponding Projetcs, then Maven > Update Project
 * If you have remaining errors,
-** for 'distrib': open its pom.xml and choose the quick fix to permanently mark the goal as ignored. Right-click on project and select Maven > Update Project.
-** for 'org.eclipse.kura.web': right-click on project and select Properties.  Select Java Build Path and click the Source tab, and click Add Folder.  Browse to target/generated-sources and click the box next to gwt.
+ * for 'distrib': open its pom.xml and choose the quick fix to permanently mark the goal as ignored. Right-click on project and select Maven > Update Project.
+ * for 'org.eclipse.kura.web': right-click on project and select Properties.  Select Java Build Path and click the Source tab, and click Add Folder.  Browse to target/generated-sources and click the box next to gwt.
 
 
 #### Emulator ####

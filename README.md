@@ -36,16 +36,16 @@ Kura uses Maven to manage the build process.
 
 2. Build the target platform:
 
-        cd kura/target_platform
+        cd kura/target-platform
         mvn clean install
 
 3. Build Kura core:
 
         cd ../kura
         mvn -Dmaven.test.skip=true -f manifest_pom.xml clean install
-        // Build with web UI
+        # Build with web UI
         mvn -Dmaven.test.skip=true -f pom_pom.xml -Pweb clean install
-        // or build without web UI
+        # or build without web UI
         mvn -Dmaven.test.skip=true -f pom_pom.xml clean install
 
 

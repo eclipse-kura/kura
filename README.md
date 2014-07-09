@@ -91,10 +91,22 @@ http://www.sebastianbauer.info/index.php?page=tutorials&which=justify
     mvn -f manifest_pom.xml eclipse:clean
     mvn -f manifest_pom.xml eclipse:eclipse
 
-If mvn clean install fails in kura (unexpected element (uri:"", local:"snapshot-store")), try to delete
+* If mvn clean install fails in kura (unexpected element (uri:"", local:"snapshot-store")), try to delete
  /tmp/snapshot-store.xml
-If mvn clean install fails in test compilation run it with "-Dmaven.test.skip=true" option
+* If mvn clean install fails in test compilation run it with "-Dmaven.test.skip=true" option.
+* If the build fails with the following message:
 
+    ```
+    [ERROR] Failed to execute goal org.apache.maven.plugins:maven-antrun-plugin:1.7:run (raspberry-pi-jars) on project distrib: An Ant BuildException has occured: The following error occurred while executing this line:
+    [ERROR] ~/kura/kura/distrib/src/main/ant/build_equinox_distrib.xml:296: Execute failed: java.io.IOException: Cannot run program "~/kura/kura/distrib/target/../src/main/sh/create_installer.sh" (in directory "~/kura/kura/distrib"): error=2, No such file or directory
+    ```
+
+then check line endings:
+
+    $ file ~/kura/kura/distrib/src/main/sh/create_installer.sh
+    ~/kura/kura/distrib/src/main/sh/create_installer.sh: POSIX shell script, ASCII text executable, with CRLF line terminators
+
+It should **not** show 'CRLF line terminators'. If it does, see this [StackOverflow question](http://stackoverflow.com/questions/24510493/why-does-git-convert-crlf-to-lf-on-linux) for a fix.
 
 #### Configure Eclipse (Eclipse Juno or newer required) ####
 * Set perspective to Java (not Java EE)

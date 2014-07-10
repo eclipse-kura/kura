@@ -30,6 +30,7 @@ import org.eclipse.kura.net.NetInterfaceStatus;
 import org.eclipse.kura.net.NetInterfaceType;
 import org.eclipse.kura.net.admin.visitor.linux.util.KuranetConfig;
 import org.eclipse.kura.net.firewall.FirewallNatConfig;
+import org.eclipse.kura.net.firewall.FirewallReverseNatConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -142,7 +143,10 @@ public class FirewallNatConfigWriter implements NetworkConfigurationVisitor {
                         if(netConfig instanceof NetConfigIP4) {
                             status = ((NetConfigIP4)netConfig).getStatus();
                         } else if(netConfig instanceof FirewallNatConfig) {
+                        	s_logger.debug("getNatConfigs() :: FirewallNatConfig: {}", ((FirewallNatConfig)netConfig).toString());
                             isNat = true;
+                        } else if (netConfig instanceof FirewallReverseNatConfig) {
+                        	s_logger.debug("getNatConfigs() ::  FirewallReverseNatConfig: {}", ((FirewallReverseNatConfig)netConfig).toString());
                         }
                     }
                 }

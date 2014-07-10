@@ -11,8 +11,6 @@
  */
 package org.eclipse.kura.linux.net.iptables;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 
 /* 
@@ -52,10 +50,13 @@ public class NATRule {
 
 	*/
 	
-    private static final Logger s_logger = LoggerFactory.getLogger(NATRule.class);
-	private String sourceInterface;						//i.e. eth0
-	private String destinationInterface;				//i.e. ppp0
-	private boolean masquerade;
+    // private static final Logger s_logger = LoggerFactory.getLogger(NATRule.class);
+	private String m_sourceInterface;						//i.e. eth0
+	private String m_destinationInterface;				//i.e. ppp0
+	private String m_protocol;	// protocol (i.e. all, tcp, udp) 
+	private String m_source; // source network/host (i.e. 192.168.1.0/24 or 192.168.1.1/32)
+	private String m_destination; // destination network/host (i.e. 192.168.1.0/24 or 192.168.1.1/32)
+	private boolean m_masquerade;
 	
 	/**
 	 * Constructor of <code>NATRule</code> object.
@@ -65,17 +66,24 @@ public class NATRule {
 	 * @param masquerade add masquerade entry
 	 */
 	public NATRule(String sourceInterface, String destinationInterface, boolean masquerade) {
-		this.sourceInterface = sourceInterface;
-		this.destinationInterface = destinationInterface;
-		this.masquerade = masquerade;
+		m_sourceInterface = sourceInterface;
+		m_destinationInterface = destinationInterface;
+		m_masquerade = masquerade;
+	}
+	
+	public NATRule(String sourceInterface, String destinationInterface, String protocol, String source, String destination, boolean masquerade) {
+		this(sourceInterface, destinationInterface, masquerade);
+		m_source = source;
+		m_destination = destination;
+		m_protocol = protocol;
 	}
 	
 	/**
 	 * Constructor of <code>NATRule</code> object.
 	 */
 	public NATRule() {
-		sourceInterface = null;
-		destinationInterface = null;
+		m_sourceInterface = null;
+		m_destinationInterface = null;
 	}
 	
 	/**
@@ -84,7 +92,7 @@ public class NATRule {
 	 * @return		A boolean representing whether all parameters have been set.
 	 */
 	public boolean isComplete() {
-		if(sourceInterface != null && destinationInterface != null)
+		if(m_sourceInterface != null && m_destinationInterface != null)
 			return true;
 		return false;
 	}
@@ -110,24 +118,65 @@ public class NATRule {
 		*/
 		
         StringBuilder forward = new StringBuilder();
-        forward.append("iptables -A FORWARD -i ").append(destinationInterface);
-        forward.append(" -o ").append(sourceInterface);
+        forward.append("iptables -A FORWARD");
+        if (m_protocol != null) {
+        	forward.append(" -p ");
+        	forward.append(m_protocol);
+        }
+        if (m_destination != null) {
+        	forward.append(" -s ");
+        	forward.append(m_destination);
+        }
+        if (m_source != null) {
+        	forward.append(" -d ");
+        	forward.append(m_source);
+        }
+        forward.append(" -i ");
+        forward.append(m_destinationInterface);
+        forward.append(" -o ");
+        forward.append(m_sourceInterface);
         forward.append(" -m state --state RELATED,ESTABLISHED -j ACCEPT; ");
         
-        forward.append("iptables -A FORWARD -i ");
-        forward.append(sourceInterface);
+        forward.append("iptables -A FORWARD");
+        if (m_protocol != null) {
+        	forward.append(" -p ");
+        	forward.append(m_protocol);
+        }
+        if (m_source != null) {
+        	forward.append(" -s ");
+        	forward.append(m_source);
+        }
+        if (m_destination != null) {
+        	forward.append(" -d ");
+        	forward.append(m_destination);
+        }
+        forward.append(" -i ");
+        forward.append(m_sourceInterface);
         forward.append(" -o ");
-        forward.append(destinationInterface);
+        forward.append(m_destinationInterface);
         forward.append(" -j ACCEPT");
 //      
 //      String forward = new String (
 //              "iptables -A FORWARD -i " + destinationInterface + " -o " + sourceInterface + " -m state --state RELATED,ESTABLISHED -j ACCEPT; " +
 //              "iptables -A FORWARD -i " + sourceInterface + " -o " + destinationInterface + " -j ACCEPT");
         
-        if (this.masquerade) {
+        if (m_masquerade) {
             StringBuilder masquerade = new StringBuilder();
-            masquerade.append("iptables -t nat -A POSTROUTING -o ");
-            masquerade.append(destinationInterface);
+            masquerade.append("iptables -t nat -A POSTROUTING");
+            if (m_protocol != null) {
+            	masquerade.append(" -p ");
+            	masquerade.append(m_protocol);
+            }
+            if (m_source != null) {
+            	masquerade.append(" -s ");
+            	masquerade.append(m_source);
+            } 
+            if (m_destination != null) {
+            	masquerade.append(" -d ");
+            	masquerade.append(m_destination);
+            }
+            masquerade.append(" -o ");
+            masquerade.append(m_destinationInterface);
             masquerade.append(" -j MASQUERADE");
             
             masquerade.append("; ");
@@ -148,7 +197,7 @@ public class NATRule {
 	 * @param sourceInterface	A String representing the sourceInterface.
 	 */
 	public void setSourceInterface(String sourceInterface) {
-		this.sourceInterface = sourceInterface;
+		m_sourceInterface = sourceInterface;
 	}
 	
 	/**
@@ -157,7 +206,7 @@ public class NATRule {
 	 * @param destinationInterface	A String representing the destinationInterface.
 	 */
 	public void setDestinationInterface(String destinationInterface) {
-		this.destinationInterface = destinationInterface;
+		m_destinationInterface = destinationInterface;
 	}
 	
 	/**
@@ -166,7 +215,19 @@ public class NATRule {
 	 * @param masquerade	A boolean representing the masquerade.
 	 */
 	public void setMasquerade(boolean masquerade) {
-		this.masquerade = masquerade;
+		m_masquerade = masquerade;
+	}
+	
+	public String getSource() {
+		return m_source;
+	}
+	
+	public String getDestination() {
+		return m_destination;
+	}
+	
+	public String getProtocol() {
+		return m_protocol;
 	}
 	
 	/**
@@ -175,7 +236,7 @@ public class NATRule {
 	 * @return sourceInterface		A String representing the sourceInterface.
 	 */
 	public String getSourceInterface() {
-		return this.sourceInterface;
+		return m_sourceInterface;
 	}
 	
 	/**
@@ -184,7 +245,7 @@ public class NATRule {
 	 * @return destinationInterface		A String representing the destinationInterface.
 	 */
 	public String getDestinationInterface() {
-		return this.destinationInterface;
+		return m_destinationInterface;
 	}
 	
 	/**
@@ -193,7 +254,7 @@ public class NATRule {
 	 * @return masquerade		A boolean representing the masquerade.
 	 */
 	public boolean isMasquerade() {
-		return this.masquerade;
+		return m_masquerade;
 	}
 	
 	@Override
@@ -204,13 +265,37 @@ public class NATRule {
 	    
 	    NATRule other = (NATRule) o;
 
-	    if (!compareObjects(this.sourceInterface, other.sourceInterface)) {
+	    if (!compareObjects(m_sourceInterface, other.m_sourceInterface)) {
 	        return false;
-	    } else if (!compareObjects(this.destinationInterface, other.destinationInterface)) {
+	    } else if (!compareObjects(m_destinationInterface, other.m_destinationInterface)) {
 	        return false;
-	    } else if (masquerade != other.isMasquerade()) {
+	    } else if (m_masquerade != other.isMasquerade()) {
 	        return false;
 	    }
+	    
+	    if (m_protocol == null) {
+			if (other.m_protocol != null) {
+				return false;
+			}
+		} else if (!compareObjects(m_protocol, other.m_protocol)) {
+			return false;
+		}
+	    
+	    if (m_source == null) {
+			if (other.m_source != null) {
+				return false;
+			}
+		} else if (!compareObjects(m_source, other.m_source)) {
+			return false;
+		}
+	    
+	    if (m_destination == null) {
+			if (other.m_destination != null) {
+				return false;
+			}
+		} else if (!compareObjects(m_destination, other.m_destination)) {
+			return false;
+		}
 	    
 	    return true;
 	}
@@ -229,11 +314,23 @@ public class NATRule {
     public int hashCode() {
         final int prime = 71;
         int result = 1;
+        
         result = prime * result
-                + ((sourceInterface == null) ? 0 : sourceInterface.hashCode());
+                + ((m_sourceInterface == null) ? 0 : m_sourceInterface.hashCode());
+ 
         result = prime * result
-                + ((destinationInterface == null) ? 0 : destinationInterface.hashCode());
-        result = prime * result + (masquerade ? 1277 : 1279);
+                + ((m_destinationInterface == null) ? 0 : m_destinationInterface.hashCode());
+ 
+        result = prime * result
+                + ((m_source == null) ? 0 : m_source.hashCode());
+        
+        result = prime * result
+        		+ ((m_destination == null) ? 0 : m_destination.hashCode());
+        
+        result = prime * result
+        		+ ((m_protocol == null) ? 0 : m_protocol.hashCode());
+       
+        result = prime * result + (m_masquerade ? 1277 : 1279);
         
         return result;
     }

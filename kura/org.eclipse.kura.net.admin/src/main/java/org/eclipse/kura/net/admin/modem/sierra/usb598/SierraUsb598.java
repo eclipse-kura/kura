@@ -19,7 +19,8 @@ import java.util.Dictionary;
 import java.util.GregorianCalendar;
 import java.util.Hashtable;
 import java.util.List;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.kura.KuraErrorCode;
@@ -71,7 +72,7 @@ public class SierraUsb598 implements EvdoCellularModem {
 	
 	private CommConnection m_commHipConnection = null;
 	
-	private ScheduledThreadPoolExecutor m_executor = null;
+	private ScheduledExecutorService m_executor = null;
 	
 	private List<CnS> m_notifications = null;
 	
@@ -171,7 +172,7 @@ public class SierraUsb598 implements EvdoCellularModem {
     	m_notifications = new ArrayList();
         
         // define notification thread
-        m_executor = new ScheduledThreadPoolExecutor(1);
+        m_executor = Executors.newSingleThreadScheduledExecutor();
     }
     
     public void bind() {

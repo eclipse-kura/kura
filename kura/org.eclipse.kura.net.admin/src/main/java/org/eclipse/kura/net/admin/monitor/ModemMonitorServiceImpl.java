@@ -20,8 +20,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import org.osgi.service.component.ComponentContext;
@@ -87,7 +88,7 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 	private final static long THREAD_INTERVAL = 30000;
 	private final static long THREAD_TERMINATION_TOUT = 1; // in seconds
 	
-	private static ScheduledFuture<?>  task;
+	private static Future<?>  task;
 	private static boolean stopThread;
 
 	private SystemService m_systemService;
@@ -97,7 +98,7 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 	
 	private List<ModemMonitorListener>m_listeners;
 	
-	private ScheduledThreadPoolExecutor m_executor;
+	private ExecutorService m_executor;
 	
 	private Map<String, CellularModem> m_modems;
 	private Map<String, InterfaceState> m_interfaceStatuses;
@@ -163,10 +164,8 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 		}
 		
 		stopThread = false;
-		m_executor = new ScheduledThreadPoolExecutor(1);
-		m_executor.setContinueExistingPeriodicTasksAfterShutdownPolicy(false);
-		m_executor.setExecuteExistingDelayedTasksAfterShutdownPolicy(false);
-		task = m_executor.schedule(new Runnable() {
+		m_executor = Executors.newSingleThreadExecutor();
+		task = m_executor.submit(new Runnable() {
     		@Override
     		public void run() {
     			while (!stopThread) {
@@ -178,7 +177,7 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 						s_logger.debug(e.getMessage());
 					}
     			}
-    	}}, 0, TimeUnit.SECONDS);
+    	}});
 		
 		m_serviceActivated = true;
 		s_logger.debug("ModemMonitor activated and ready to receive events");
@@ -274,7 +273,7 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 										if (task == null) {
 											s_logger.info("NetworkConfigurationChangeEvent :: Restarting monitor task");
 											stopThread = false;
-											task = m_executor.schedule(new Runnable() {
+											task = m_executor.submit(new Runnable() {
 									    		@Override
 									    		public void run() {
 									    			while (!stopThread) {
@@ -286,7 +285,7 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 															s_logger.debug(e.getMessage());
 														}
 									    			}
-									    	}}, 0, TimeUnit.SECONDS);
+									    	}});
 										}
 									} else {
 										s_logger.info("NetworkConfigurationChangeEvent :: The " + modem.getModel() + " is provisioned");
@@ -535,14 +534,14 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 							if (task == null) {
 								s_logger.info("trackModem() :: Restarting monitor task");
 								stopThread = false;
-								task = m_executor.schedule(new Runnable() {
+								task = m_executor.submit(new Runnable() {
 						    		@Override
 						    		public void run() {
 						    			while (!stopThread) {
 						    				Thread.currentThread().setName("ModemMonitor");
 						    				monitor();
 						    			}
-						    	}}, 0, TimeUnit.SECONDS);
+						    	}});
 							}
 						} else {
 							s_logger.info("trackModem() :: The " + modem.getModel() + " is provisioned");

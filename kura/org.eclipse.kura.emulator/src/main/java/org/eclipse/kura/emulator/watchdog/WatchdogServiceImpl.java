@@ -18,8 +18,9 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.kura.configuration.ConfigurableComponent;
@@ -34,8 +35,8 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
 	private static final Logger s_logger = LoggerFactory.getLogger(WatchdogServiceImpl.class);
 	
 	private Map<String,Object>				m_properties;
-	private ScheduledThreadPoolExecutor     m_executor;
-	private ScheduledFuture<?>					m_future;
+	private ScheduledExecutorService		m_executor;
+	private ScheduledFuture<?>				m_future;
 	private int 							pingInterval = 10000;	//milliseconds
 	private static ArrayList<CriticalServiceImpl>	s_criticalServiceList;
 	private boolean 						m_configEnabled = false;	// initialized in properties, if false -> no watchdog
@@ -64,8 +65,7 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
 			m_executor = null;
 		}
 		
-		m_executor = new ScheduledThreadPoolExecutor(5);
-		m_executor.setKeepAliveTime(1, TimeUnit.SECONDS);
+		m_executor = Executors.newSingleThreadScheduledExecutor();
 
 		m_future=m_executor.scheduleAtFixedRate(new Runnable() {
 			public void run() {

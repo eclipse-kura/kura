@@ -14,8 +14,9 @@ package org.eclipse.kura.linux.position;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.kura.KuraConnectionStatus;
@@ -168,7 +169,7 @@ public class GpsDevice {
 		
 		private final static long THREAD_TERMINATION_TOUT = 1; // in seconds
 		
-		private ScheduledThreadPoolExecutor m_executor;
+		private ScheduledExecutorService m_executor;
 		private ScheduledFuture<?>  m_task;
 		
 		InputStream in;
@@ -227,9 +228,7 @@ public class GpsDevice {
 	    		m_task = null;
 	    	}
 			
-			m_executor = new ScheduledThreadPoolExecutor(1);
-			m_executor.setContinueExistingPeriodicTasksAfterShutdownPolicy(false);
-			m_executor.setExecuteExistingDelayedTasksAfterShutdownPolicy(false);
+			m_executor = Executors.newSingleThreadScheduledExecutor();
 			
 			m_task = m_executor.scheduleAtFixedRate(new Runnable() {
 	    		@Override

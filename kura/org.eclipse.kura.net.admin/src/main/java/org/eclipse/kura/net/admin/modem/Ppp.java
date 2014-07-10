@@ -12,8 +12,9 @@
 package org.eclipse.kura.net.admin.modem;
 
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.kura.KuraErrorCode;
@@ -36,7 +37,7 @@ public class Ppp implements IModemLinkService {
 	private String m_iface;
 	private String m_port;
 	private ScheduledFuture<?> m_pppScheduledFuture = null;
-	private ScheduledThreadPoolExecutor m_executor;
+	private ScheduledExecutorService m_executor;
 	ConnectionInfo m_coninfo = null;
 	
 	private long m_tout = 0;
@@ -45,9 +46,7 @@ public class Ppp implements IModemLinkService {
 	public Ppp(String iface, String port) {
 		m_iface = iface;
 		m_port = port;
-		m_executor = new ScheduledThreadPoolExecutor(1);
-		m_executor.setContinueExistingPeriodicTasksAfterShutdownPolicy(false);
-		m_executor.setExecuteExistingDelayedTasksAfterShutdownPolicy(false);
+		m_executor = Executors.newSingleThreadScheduledExecutor();
 	}
 
 	@Override
@@ -125,7 +124,6 @@ public class Ppp implements IModemLinkService {
 				try {
 					Thread.sleep(200);
 				} catch (InterruptedException e) {}
-				s_logger.debug("Ppp:Connect Thread terminating? - {}", m_executor.isTerminating());
 				s_logger.debug("Ppp:Connect Thread terminated? - {}", m_executor.isTerminated());
 				if ((System.currentTimeMillis()-timer) > THREAD_TERMINATION_TOUT) {
 					s_logger.error("Failed to terminate Ppp:Connect Thread");

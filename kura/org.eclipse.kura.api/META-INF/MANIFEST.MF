@@ -40,4 +40,3 @@ Import-Package: javax.comm;version="1.2.0",
  org.osgi.util.measurement;version="1.0.1",
  org.osgi.util.position;version="1.0.1",
  org.slf4j;version="1.6.4"
-Require-Bundle: org.eclipse.osgi

@@ -15,7 +15,8 @@ import java.util.Date;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Map;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.kura.KuraErrorCode;
@@ -42,7 +43,7 @@ public class GpsClockSyncProvider implements ClockSyncProvider, EventHandler {
 	protected int                 m_refreshInterval;
 	protected Date                m_lastSync;
 	protected boolean			  m_waitForLocked;
-	protected ScheduledThreadPoolExecutor m_scheduler;
+	protected ScheduledExecutorService m_scheduler;
 
 	// ----------------------------------------------------------------
 	//
@@ -120,7 +121,7 @@ public class GpsClockSyncProvider implements ClockSyncProvider, EventHandler {
 				m_scheduler.shutdown();
 				m_scheduler = null;
 			}
-			m_scheduler = new ScheduledThreadPoolExecutor(1);
+			m_scheduler = Executors.newSingleThreadScheduledExecutor();
 			m_scheduler.scheduleAtFixedRate(new Runnable() {
 				public void run() {
 					Thread.currentThread().setName("GpsClockSyncProvider");

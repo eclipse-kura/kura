@@ -24,8 +24,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.kura.KuraErrorCode;
@@ -78,7 +79,7 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
     private final static long THREAD_INTERVAL = /*30000*/10000;
     private final static long THREAD_TERMINATION_TOUT = 1; // in seconds
     
-    private static ScheduledFuture<?> monitorTask;
+    private static Future<?> monitorTask;
     private static boolean stopThread;
             
     private NetworkService m_networkService;
@@ -90,7 +91,7 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
     private Set<String> m_enabledInterfaces;
     private Set<String> m_disabledInterfaces;
     private Map<String, InterfaceState> m_interfaceStatuses;
-    private ScheduledThreadPoolExecutor m_executor;
+    private ExecutorService m_executor;
 	private Object m_lock = new Object();
 	
 	private NetworkConfiguration m_currentNetworkConfiguration;
@@ -149,9 +150,7 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
         m_disabledInterfaces = new HashSet<String>();
         m_interfaceStatuses = new HashMap<String, InterfaceState>();
         
-        m_executor = new ScheduledThreadPoolExecutor(1);
-        m_executor.setContinueExistingPeriodicTasksAfterShutdownPolicy(false);
-		m_executor.setExecuteExistingDelayedTasksAfterShutdownPolicy(false);
+        m_executor = Executors.newSingleThreadExecutor();
 		
         Dictionary<String, String[]> d = new Hashtable<String, String[]>();
         d.put(EventConstants.EVENT_TOPIC, EVENT_TOPICS);
@@ -577,7 +576,7 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
                 if(monitorTask == null) {
 	                s_logger.debug("Starting WifiMonitor thread...");
 	                stopThread = false;
-	                monitorTask = m_executor.schedule(new Runnable() {
+	                monitorTask = m_executor.submit(new Runnable() {
 	                    @Override
 	                    public void run() {
 	                    	while (!stopThread) {
@@ -589,7 +588,7 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
 									s_logger.debug(e.getMessage());
 								}
 	                    	}
-	                }}, 0, TimeUnit.SECONDS);
+	                }});
                 }
             }
         }

@@ -14,7 +14,6 @@ package org.eclipse.kura.test;
 import java.util.Dictionary;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloud.CloudClient;
@@ -42,7 +41,7 @@ public class RemoteTargetTest {
 	private CloudService m_cloudService;
 	private CloudClient  m_cloudClient;
 	
-	private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+	private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
 
 	private ConfigurationAdmin m_configAdmin;
 	private BundleTracker bundleTracker;
@@ -85,11 +84,11 @@ public class RemoteTargetTest {
 		// then we are running in emulator mode and therefore we 
 		// will leverage the JUnit runner available in Eclipse PDE.
 		if (!"emulator".equals(System.getProperty("org.eclipse.kura.mode"))) {
-			scheduler.schedule(new Runnable() {
+			scheduler.submit(new Runnable() {
 				public void run() {
 					runTests(componentContext);
 				}
-			}, 0, TimeUnit.SECONDS);
+			});
 		}
 	}
 	

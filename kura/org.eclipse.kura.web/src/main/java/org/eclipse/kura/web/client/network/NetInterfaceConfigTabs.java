@@ -45,6 +45,7 @@ public class NetInterfaceConfigTabs extends LayoutContainer
 	private TabItem                m_tabIPv4Config;
 	private TabItem                m_tabWirelessConfig;
 	private TabItem                m_tabDhcpNatConfig;
+	private TabItem				   m_tabReverseNatConfig;
 	private TabItem                m_tabModemConfig;
 	private TabItem                m_tabHardwareConfig;
 	
@@ -52,6 +53,7 @@ public class NetInterfaceConfigTabs extends LayoutContainer
 	private TcpIpConfigTab         m_tcpIpConfigTab;
 	private WirelessConfigTab      m_wirelessConfigTab;
 	private DhcpNatConfigTab       m_dhcpNatConfigTab;
+	private ReverseNatConfigTab	   m_reverseNatConfigTab;
 	private ModemConfigTab         m_modemConfigTab;
 	private HardwareConfigTab      m_hwConfigTab;
 	
@@ -130,6 +132,21 @@ public class NetInterfaceConfigTabs extends LayoutContainer
 			m_tabDhcpNatConfig.layout();			
 		}
 		
+		// Reverse NAT
+	    if (m_reverseNatConfigTab != null) {
+	    	m_reverseNatConfigTab.removeFromParent();
+    	}
+	    m_reverseNatConfigTab = new ReverseNatConfigTab(m_currentSession);
+	    m_reverseNatConfigTab.addListener(Events.Change, new Listener<BaseEvent>() {
+			public void handleEvent(BaseEvent be) {
+				theTabs.fireEvent(be.getType());
+			}
+		});
+		if (m_tabReverseNatConfig != null) {
+			m_tabReverseNatConfig.add(m_reverseNatConfigTab);
+			m_tabReverseNatConfig.layout();			
+		}
+		
 		// Hardware
 	    if (m_hwConfigTab != null) {
 	    	m_hwConfigTab.removeFromParent();
@@ -161,6 +178,7 @@ public class NetInterfaceConfigTabs extends LayoutContainer
     	m_hwConfigTab.setNetInterface(netIfConfig);
 		m_wirelessConfigTab.setNetInterface(m_netIfConfig);
 		m_modemConfigTab.setNetInterface(m_netIfConfig);
+		m_reverseNatConfigTab.setNetInterface(m_netIfConfig);
     	
     	// set the tabs for this interface
     	removeInterfaceTabs();    	
@@ -181,6 +199,9 @@ public class NetInterfaceConfigTabs extends LayoutContainer
         }
         if (visibleTabs.contains(m_tabDhcpNatConfig)) {
             m_dhcpNatConfigTab.refresh();
+        }
+        if (visibleTabs.contains(m_tabReverseNatConfig)) {
+        	m_reverseNatConfigTab.refresh();
         }
         if (visibleTabs.contains(m_tabHardwareConfig)) {
             m_hwConfigTab.refresh();
@@ -222,6 +243,9 @@ public class NetInterfaceConfigTabs extends LayoutContainer
         if (tabItems.contains(m_tabDhcpNatConfig)) {
             m_dhcpNatConfigTab.getUpdatedNetInterface(updatedNetIf);
         }
+        if (tabItems.contains(m_tabReverseNatConfig)) {
+        	m_reverseNatConfigTab.getUpdatedNetInterface(updatedNetIf);
+        }
         if (tabItems.contains(m_tabHardwareConfig)) {
             m_hwConfigTab.getUpdatedNetInterface(updatedNetIf);
         }
@@ -230,15 +254,19 @@ public class NetInterfaceConfigTabs extends LayoutContainer
     }
     
     
-    public void removeInterfaceTabs() {
-    	synchronized(m_tabsPanelLock) {
-	        for (TabItem tabItem : new ArrayList<TabItem>(m_tabsPanel.getItems())) {
-	            if (tabItem == m_tabWirelessConfig || tabItem == m_tabModemConfig || tabItem == m_tabDhcpNatConfig) {
-	            	removeTab(tabItem);
-	            }
-	        }
-    	}
-    }
+	public void removeInterfaceTabs() {
+		synchronized (m_tabsPanelLock) {
+			for (TabItem tabItem : new ArrayList<TabItem>(
+					m_tabsPanel.getItems())) {
+				if (tabItem == m_tabWirelessConfig
+						|| tabItem == m_tabModemConfig
+						|| tabItem == m_tabDhcpNatConfig
+						|| tabItem == m_tabReverseNatConfig) {
+					removeTab(tabItem);
+				}
+			}
+		}
+	}
     
     public void removeDhcpNatTab() {
     	synchronized(m_tabsPanelLock) {
@@ -286,7 +314,12 @@ public class NetInterfaceConfigTabs extends LayoutContainer
     		removeInterfaceTabs();
     	} else {
     		boolean includeDhcpNatTab = !m_tcpIpConfigTab.isDhcp() && netIfStatus.equals(GwtNetIfStatus.netIPv4StatusEnabledLAN);
-    		int dhcpNatTabIndex = 1;
+    		boolean includeReverseNatTab = netIfStatus.equals(GwtNetIfStatus.netIPv4StatusEnabledWAN);
+    		
+    		Log.debug("includeDhcpNatTab? " + includeDhcpNatTab);
+    		Log.debug("includeReverseNatTab? " + includeReverseNatTab);
+    		
+    		int natTabIndex = 1;
     		
     		if(m_netIfConfig instanceof GwtWifiNetInterfaceConfig) {
     			Log.debug("insert wifi tab");
@@ -296,8 +329,10 @@ public class NetInterfaceConfigTabs extends LayoutContainer
     			// remove dhcp/nat tab if not an access point
     			if(!GwtWifiWirelessMode.netWifiWirelessModeAccessPoint.equals(m_wirelessConfigTab.getWirelessMode())) {
     				includeDhcpNatTab = false;
-    			} else {
-    				dhcpNatTabIndex = 2;
+    			} 
+    			
+    			if (includeDhcpNatTab || includeReverseNatTab){
+    				natTabIndex = 2;
     			}
     		} else if (m_netIfConfig instanceof GwtModemInterfaceConfig) {
     			includeDhcpNatTab = false;
@@ -305,6 +340,7 @@ public class NetInterfaceConfigTabs extends LayoutContainer
 
 				Log.debug("insert modem tab");
     			insertTab(m_tabModemConfig, 1);
+    			natTabIndex = 2;
     		} else {
     			removeTab(m_tabWirelessConfig);
     			removeTab(m_tabModemConfig);
@@ -316,10 +352,18 @@ public class NetInterfaceConfigTabs extends LayoutContainer
     		    		    		
     		if(includeDhcpNatTab) {
     			Log.debug("insert dhcp/nat tab");
-    			insertTab(m_tabDhcpNatConfig, dhcpNatTabIndex);
+    			insertTab(m_tabDhcpNatConfig, natTabIndex);
     		} else {
     			Log.debug("remove dhcp/nat tab");
     			removeTab(m_tabDhcpNatConfig);
+    		}
+    		
+    		if (includeReverseNatTab) {
+    			Log.debug("insert reverse nat tab");
+    			insertTab(m_tabReverseNatConfig, natTabIndex);
+    		} else {
+    			Log.debug("remove reverse nat tab");
+    			removeTab(m_tabReverseNatConfig);
     		}
     	}
     }
@@ -363,6 +407,10 @@ public class NetInterfaceConfigTabs extends LayoutContainer
     	}
     	if (tabItems.contains(m_tabDhcpNatConfig) && m_dhcpNatConfigTab.isDirty()) {
     		Log.debug("m_dhcpNatConfigTab is dirty");
+    		return true;
+    	}
+    	if (tabItems.contains(m_tabReverseNatConfig) && m_reverseNatConfigTab.isDirty()) {
+    		Log.debug("m_reverseNatConfigTab is dirty");
     		return true;
     	}
     	if (tabItems.contains(m_tabHardwareConfig) && m_hwConfigTab.isDirty()) {
@@ -430,6 +478,17 @@ public class NetInterfaceConfigTabs extends LayoutContainer
 	            }  
 	        });
 	        m_tabsPanel.add(m_tabDhcpNatConfig);
+	        
+	        m_tabReverseNatConfig = new TabItem(MSGS.netReverseNat());
+	        m_tabReverseNatConfig.setBorders(true);
+	        m_tabReverseNatConfig.setLayout(new FitLayout());
+	        m_tabReverseNatConfig.add(m_reverseNatConfigTab);
+	        m_tabReverseNatConfig.addListener(Events.Select, new Listener<ComponentEvent>() {  
+	            public void handleEvent(ComponentEvent be) {  
+	            	m_reverseNatConfigTab.refresh();
+	            }  
+	        });
+	        m_tabsPanel.add(m_tabReverseNatConfig);
 	        
 	        m_tabHardwareConfig = new TabItem(MSGS.netHwHardware());
 	        m_tabHardwareConfig.setBorders(true);

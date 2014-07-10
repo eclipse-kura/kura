@@ -5,13 +5,13 @@ Bundle-SymbolicName: org.eclipse.kura.protocol.modbus;singleton:=true
 Bundle-Version: 0.2.0.qualifier
 Bundle-Vendor: EUROTECH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: org.eclipse.kura,
- org.eclipse.kura.cloud,
- org.eclipse.kura.comm,
- org.eclipse.kura.configuration,
- org.eclipse.kura.position,
- org.eclipse.kura.system,
- org.eclipse.kura.usb,
+Import-Package: org.eclipse.kura; version="[0.2,1.0)",
+ org.eclipse.kura.cloud; version="[0.2,0.3)",
+ org.eclipse.kura.comm; version="[0.2,1.0)",
+ org.eclipse.kura.configuration; version="[0.2,0.3)",
+ org.eclipse.kura.position; version="[0.2,1.0)",
+ org.eclipse.kura.system; version="[0.2,1.0)",
+ org.eclipse.kura.usb; version="[0.2,1.0)",
  javax.comm;version="1.2.0",
  javax.microedition.io;resolution:=optional,
  org.osgi.framework;version="1.5.0",
@@ -24,7 +24,7 @@ Import-Package: org.eclipse.kura,
  org.osgi.util.tracker;version="1.5.1",
  org.slf4j;version="1.6.4"
 Export-Package: 
- org.eclipse.kura.protocol.modbus
+ org.eclipse.kura.protocol.modbus; version="0.2.0"
 Service-Component: OSGI-INF/*.xml
 Bundle-ActivationPolicy: lazy
 Bundle-Classpath: .

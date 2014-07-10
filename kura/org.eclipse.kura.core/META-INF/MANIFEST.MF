@@ -4,24 +4,24 @@ Bundle-Name: org.eclipse.kura.core
 Bundle-SymbolicName: org.eclipse.kura.core;singleton:=true
 Bundle-Version: 0.2.0.qualifier
 Bundle-Vendor: EUROTECH
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Export-Package: 
- org.eclipse.kura.core.linux.util,
- org.eclipse.kura.core.util
+ org.eclipse.kura.core.linux.util; version="0.2.0",
+ org.eclipse.kura.core.util; version="0.2.0"
 Service-Component: OSGI-INF/*.xml
 Bundle-ActivationPolicy: lazy
 Import-Package: javax.crypto,
  javax.net,
  javax.net.ssl,
- org.eclipse.kura,
- org.eclipse.kura.configuration,
- org.eclipse.kura.data,
- org.eclipse.kura.db,
- org.eclipse.kura.net,
- org.eclipse.kura.ssl,
- org.eclipse.kura.system,
- org.eclipse.paho.client.mqttv3,
- org.eclipse.paho.client.mqttv3.persist,
+ org.eclipse.kura; version="[0.2,1.0)",
+ org.eclipse.kura.configuration; version="[0.2,0.3)",
+ org.eclipse.kura.data; version="[0.2,0.3)",
+ org.eclipse.kura.db; version="[0.2,1.0)",
+ org.eclipse.kura.net; version="[0.2,1.0)",
+ org.eclipse.kura.ssl; version="[0.2,0.3)",
+ org.eclipse.kura.system; version="[0.2,0.3)",
+ org.eclipse.paho.client.mqttv3; version="[0.4,0.4]",
+ org.eclipse.paho.client.mqttv3.persist; version="[0.4,0.4]",
  org.hsqldb,
  org.hsqldb.jdbc,
  org.osgi.framework;version="1.5.0",

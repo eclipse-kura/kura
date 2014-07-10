@@ -43,9 +43,9 @@ Kura uses Maven to manage the build process.
 
         cd ../kura
         mvn -Dmaven.test.skip=true -f manifest_pom.xml clean install
-        // Build with web UI
+        # Build with web UI
         mvn -Dmaven.test.skip=true -f pom_pom.xml -Pweb clean install
-        // or build without web UI
+        # or build without web UI
         mvn -Dmaven.test.skip=true -f pom_pom.xml clean install
 
 
@@ -91,10 +91,22 @@ http://www.sebastianbauer.info/index.php?page=tutorials&which=justify
     mvn -f manifest_pom.xml eclipse:clean
     mvn -f manifest_pom.xml eclipse:eclipse
 
-If mvn clean install fails in kura (unexpected element (uri:"", local:"snapshot-store")), try to delete
+* If mvn clean install fails in kura (unexpected element (uri:"", local:"snapshot-store")), try to delete
  /tmp/snapshot-store.xml
-If mvn clean install fails in test compilation run it with "-Dmaven.test.skip=true" option
+* If mvn clean install fails in test compilation run it with "-Dmaven.test.skip=true" option.
+* If the build fails with the following message:
 
+    ```
+    [ERROR] Failed to execute goal org.apache.maven.plugins:maven-antrun-plugin:1.7:run (raspberry-pi-jars) on project distrib: An Ant BuildException has occured: The following error occurred while executing this line:
+    [ERROR] ~/kura/kura/distrib/src/main/ant/build_equinox_distrib.xml:296: Execute failed: java.io.IOException: Cannot run program "~/kura/kura/distrib/target/../src/main/sh/create_installer.sh" (in directory "~/kura/kura/distrib"): error=2, No such file or directory
+    ```
+
+then check line endings:
+
+    $ file ~/kura/kura/distrib/src/main/sh/create_installer.sh
+    ~/kura/kura/distrib/src/main/sh/create_installer.sh: POSIX shell script, ASCII text executable, with CRLF line terminators
+
+It should **not** show 'CRLF line terminators'. If it does, see this [StackOverflow question](http://stackoverflow.com/questions/24510493/why-does-git-convert-crlf-to-lf-on-linux) for a fix.
 
 #### Configure Eclipse (Eclipse Juno or newer required) ####
 * Set perspective to Java (not Java EE)
@@ -115,11 +127,11 @@ If mvn clean install fails in test compilation run it with "-Dmaven.test.skip=tr
  * Select all projects
  * Right-click and select Team > Share Project > Git
 * Expand the target-definition project and open the 'kura-equinox_3.8.1.target' file.  Click 'Set as Target Platform' in the upper right area of the center pane.  Alternatively, or if this doesn't work, browse to _Windows | Preferences | Plug-in Development | Target Platform_. Then select _Kura Target Platform Equinox 3.8.1_ and click the _Reload_ button.
-** After setting this and letting Eclipse rebuild - there should be no errors in the workspace
-** It may happen that you still have errors stating that some Projects are not up to date. In this case right click on the corresponding Projetcs, then Maven > Update Project
+ * After setting this and letting Eclipse rebuild - there should be no errors in the workspace
+ * It may happen that you still have errors stating that some Projects are not up to date. In this case right click on the corresponding Projetcs, then Maven > Update Project
 * If you have remaining errors,
-** for 'distrib': open its pom.xml and choose the quick fix to permanently mark the goal as ignored. Right-click on project and select Maven > Update Project.
-** for 'org.eclipse.kura.web': right-click on project and select Properties.  Select Java Build Path and click the Source tab, and click Add Folder.  Browse to target/generated-sources and click the box next to gwt.
+ * for 'distrib': open its pom.xml and choose the quick fix to permanently mark the goal as ignored. Right-click on project and select Maven > Update Project.
+ * for 'org.eclipse.kura.web': right-click on project and select Properties.  Select Java Build Path and click the Source tab, and click Add Folder.  Browse to target/generated-sources and click the box next to gwt.
 
 
 #### Emulator ####

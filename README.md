@@ -36,7 +36,7 @@ Kura uses Maven to manage the build process.
 
 2. Build the target platform:
 
-        cd kura/target_platform
+        cd kura/target-platform
         mvn clean install
 
 3. Build Kura core:

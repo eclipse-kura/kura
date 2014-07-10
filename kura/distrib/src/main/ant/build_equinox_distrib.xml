@@ -336,7 +336,7 @@ echo $KURA_PID > /var/run/kura.pid
 
 
 		<!-- Create upgrade zip -->
-        <echo message="Create upgrade zip ${build.name} version ${project.version.previous}" />
+        <echo message="Create upgrade zip ${build.name} version ${project.version}" />
         <copy file="${project.build.directory}/kura-${build.name}-jars_${project.version}.zip"
               tofile="${project.build.directory}/kura-${build.name}-jars-upgrade_${project.version}.zip" />
         <exec executable="src/main/sh/create_upgrade_zip.sh">
@@ -346,21 +346,23 @@ echo $KURA_PID > /var/run/kura.pid
         </exec>
 
     	
-<!-- OLD ESF METHOD
+        <!-- Create updater -->
         <echo message="Creating Updater for ${build.name}" />
         <exec executable="${project.build.directory}/../src/main/sh/create_upgrader.sh">
                 <arg value="${project.build.directory}" />
-                <arg value="esf-${build.name}_${project.version}.zip" />
-                <arg value="esf-${build.name}_${project.version}_dp_upgrader.sh" />
+                <arg value="kura-${build.name}-jars-upgrade_${project.version}.zip" />
+                <arg value="${project.version.previous}" />
+                <arg value="kura-${build.name}-jars_${project.version}" />
+                <arg value="kura-${build.name}_${project.version.previous}_to_${project.version}.removed" />
+                <arg value="kura-${build.name}_${project.version}_dp_upgrader.sh" />
                 <arg value="${build.name}" />
         </exec>
 
-        !- Zip the updater -
-        <zip destfile="${project.build.directory}/esf-update-${build.name}_${project.version}.zip">
-                <zipfileset file="${project.build.directory}/esf-${build.name}_${project.version}_dp_upgrader.sh" />
+        <!-- Zip the updater -->
+        <zip destfile="${project.build.directory}/kura-update-${build.name}_${project.version}.zip">
+                <zipfileset file="${project.build.directory}/kura-${build.name}_${project.version}_dp_upgrader.sh" />
                 <zipfileset file="src/main/sh/upgrade_wrapper.sh" />
         </zip>
--->
     </target>
 
 	<target name="web-config" if="web.jar.present">

@@ -14,18 +14,22 @@
 
 TARGET_DIR=$1
 KURA_ZIP_FILE_NAME=$2
-OUTPUT_NAME=$3
-BUILD_NAME=$4
+OLD_VERSION=$3
+INSTALL_DIR=$4
+REMOVE_LIST=$5
+OUTPUT_NAME=$6
+BUILD_NAME=$7
 
-if [ $BUILD_NAME != "raspberry-pi" ]
-then
-	#tar the zip...
-	cd $TARGET_DIR
-	tar czvf $KURA_ZIP_FILE_NAME.tar.gz $KURA_ZIP_FILE_NAME
-	
-	cat $TARGET_DIR/../src/main/sh/extract_upgrade.sh $KURA_ZIP_FILE_NAME.tar.gz > $OUTPUT_NAME
-	chmod +x $OUTPUT_NAME
-	
-	#clean up
-	rm $TARGET_DIR/$KURA_ZIP_FILE_NAME.tar.gz
-fi
+
+#tar the zip...
+cd $TARGET_DIR
+tar czvf $KURA_ZIP_FILE_NAME.tar.gz $KURA_ZIP_FILE_NAME $REMOVE_LIST
+
+# Populate variables in extract script
+sed "s/^OLD_VERSION=$/OLD_VERSION=$OLD_VERSION/;s/^INSTALL_DIR=$/INSTALL_DIR=$INSTALL_DIR/;s/^REMOVE_LIST=$/REMOVE_LIST=$REMOVE_LIST/" ../src/main/sh/extract_upgrade.sh > $TARGET_DIR/extract_upgrade.sh
+
+cat extract_upgrade.sh $KURA_ZIP_FILE_NAME.tar.gz > $OUTPUT_NAME
+chmod +x $OUTPUT_NAME
+
+#clean up
+rm $TARGET_DIR/$KURA_ZIP_FILE_NAME.tar.gz

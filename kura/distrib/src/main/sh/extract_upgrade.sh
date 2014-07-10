@@ -12,75 +12,133 @@
 #
 
 
+OLD_VERSION=
+INSTALL_DIR=
+REMOVE_LIST=
+
+DIR=`pwd`
+LOG=/tmp/kura_upgrade.log
+
 ##############################################
 # PRE-INSTALL SCRIPT
 ##############################################
 echo ""
 echo "Upgrading Kura..."
-echo "Upgrading Kura..." > /tmp/kura_upgrade.log 2>&1
+echo "Upgrading Kura..." > $LOG 2>&1
 
-# Save DPs
-mkdir /tmp/dps
-cp /opt/eclipse/kura/kura/packages/*.dp /tmp/dps/
+# Check currently installed version
+CURRENT_VERSION=`grep -e "^kura.version=" /opt/eclipse/kura/kura/kura.properties |cut -d'=' -f2`
+if [ "$CURRENT_VERSION" != "$OLD_VERSION" ]; then
+    echo "Could not update - Currently installed version is not $OLD_VERSION" | tee $LOG 2>&1
+    exit 1
+fi
+
+# Check that upgraded version does not already exist
+if [ -d "/opt/eclipse/$INSTALL_DIR" ]; then
+    echo "Could not update - Updated version already exists in /opt/eclipse/$INSTALL_DIR" | tee $LOG 2>&1
+    exit 1
+fi
+
+
+## Save DPs
+#mkdir /tmp/dps
+#cp /opt/eclipse/kura/kura/packages/*.dp /tmp/dps/
 
 # Save DPA file wiping out the old Kura version
-sed "s/.*kura=file.*/KURA_VERSION_DP/" /opt/eclipse/kura/kura/dpa.properties > /tmp/dpa.properties
-sed "s/:kura\/packages/:\/opt\/eclipse\/kura\/kura\/packages/" /tmp/dpa.properties > /tmp/dpa1.properties
+sed "s/.*kura=file.*/KURA_VERSION_DP/" /opt/eclipse/kura/kura/dpa.properties > /tmp/dpa.properties 2> $LOG
+sed "s/:kura\/packages/:\/opt\/eclipse\/kura\/kura\/packages/" /tmp/dpa.properties > /tmp/dpa1.properties 2> $LOG
 
 # kill JVM and monit for upgrade
-killall monit java >> /tmp/kura_upgrade.log 2>&1
+killall monit java >> $LOG 2>&1
 
-# clean up old installation if present
-rm /opt/eclipse/kura >> /tmp/kura_upgrade.log 2>&1
-rm -fr /opt/eclipse/kura-* >> /tmp/kura_upgrade.log 2>&1
+## clean up old installation if present
+#rm /opt/eclipse/kura >> $LOG 2>&1
+#rm -fr /opt/eclipse/kura-* >> $LOG 2>&1
+
+
+# Make a copy of the previous installation using hard links
+mkdir "/opt/eclipse/$INSTALL_DIR"
+cd "/opt/eclipse/kura" && find . -type d | cpio -dp /opt/eclipse/$INSTALL_DIR >> $LOG 2>&1
+cd "/opt/eclipse/kura" && find . -type f -exec ln {} /opt/eclipse/$INSTALL_DIR/{} \; >> $LOG 2>&1
 
 echo ""
 ##############################################
 # END PRE-INSTALL SCRIPT
 ##############################################
 
-SKIP=`awk '/^__TARFILE_FOLLOWS__/ { print NR + 1; exit 0; }' $0`
+SKIP=`cd $DIR && awk '/^__TARFILE_FOLLOWS__/ { print NR + 1; exit 0; }' $0`
 
 # take the tarfile and pipe it into tar and redirect the output
-tail -n +$SKIP $0 | tar -xz
+cd $DIR && tail -n +$SKIP $0 | tar -xz
 
 
 ##############################################
 # POST INSTALL SCRIPT
 ##############################################
-unzip -o kura-*.zip -d /opt/eclipse >> /tmp/kura_upgrade.log 2>&1
 
-# install Kura files
-sh /opt/eclipse/kura-*/install/kura_upgrade.sh >> /tmp/kura_upgrade.log 2>&1
+# Remove files not needed in the new version
+echo "Removing old files..." >> $LOG
+while read line
+do
+	# Skip comments
+	if [[ $line == "#"* ]] ; then
+		continue
+	fi
+
+	# TODO - remove files outside of kura directory
+	rmfile="/opt/eclipse/$INSTALL_DIR/$line"
+	echo "Removing $rmfile" >> $LOG
+	rm -f $rmfile
+done < $REMOVE_LIST
+
+# Extract new files
+unzip -o kura-*.zip -d /opt/eclipse >> $LOG 2>&1
+
+## install Kura files
+#if [ -f /opt/eclipse/$INSTALL_DIR/install/kura_upgrade.sh ]; then
+#	sh /opt/eclipse/$INSTALL_DIR/install/kura_upgrade.sh >> $LOG 2>&1
+#fi
+
+# Point symlink to new version
+rm -f /opt/eclipse/kura
+ln -s /opt/eclipse/$INSTALL_DIR /opt/eclipse/kura
 
 # clean up
-rm -rf /opt/eclipse/kura/install >> /tmp/kura_upgrade.log 2>&1
-rm kura-*.zip >> /tmp/kura_upgrade.log 2>&1
+rm -rf /opt/eclipse/kura/install >> $LOG 2>&1
+rm kura-*.zip >> $LOG 2>&1
 
 # move the log file
-mv /tmp/kura_upgrade.log /opt/eclipse/kura/configuration/
+mkdir -p /opt/eclipse/kura/log
+mv $LOG /opt/eclipse/kura/log/
+LOG=/opt/eclipse/kura/log/kura_upgrade.log
 
-# restore dps except old Kura version
-rm /tmp/dps/kura-*.dp
-mv /tmp/dps/* /opt/eclipse/kura/kura/packages/
+## restore dps except old Kura version
+#rm /tmp/dps/kura-*.dp
+#mv /tmp/dps/* /opt/eclipse/kura/kura/packages/
 
 # restore dpa
-cd /opt/eclipse/kura/kura/packages
-KURA=`ls kura-*.dp`
-sed "s/KURA_VERSION_DP/kura=file\\\:\/opt\/eclipse\/kura\/kura\/packages\/${KURA}/" /tmp/dpa1.properties > /opt/eclipse/kura/kura/dpa.properties
+if [ -d /opt/eclipse/kura/kura/packages ]; then
+	cd /opt/eclipse/kura/kura/packages
+	KURA=`ls kura-*.dp 2> $LOG`
+fi
+if [ -s /tmp/dpa1.properties ]; then
+	sed "s/KURA_VERSION_DP/kura=file\\\:\/opt\/eclipse\/kura\/kura\/packages\/${KURA}/" /tmp/dpa1.properties > /opt/eclipse/kura/kura/dpa.properties
+fi
 
 # set permissions
-chmod +x /opt/eclipse/kura/bin/*.sh
+chmod +x /opt/eclipse/kura/bin/*.sh >> $LOG 2>&1
 
 # flush all cached filesystem to disk
 sync
 
 echo ""
-echo "Finished.  Kura has been upgraded in /opt/eclipse/kura and system will now reboot"  >> /opt/eclipse/kura/configuration/kura_upgrade.log 2>&1
+echo "Finished.  Kura has been upgraded in /opt/eclipse/kura and system will now reboot" | tee $LOG 2>&1
 reboot
+
 #############################################
 # END POST INSTALL SCRIPT
 ##############################################
+exit 0
 
 # NOTE: Don't place any newline characters after the last line below.
 __TARFILE_FOLLOWS__

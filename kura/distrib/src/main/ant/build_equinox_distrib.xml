@@ -363,6 +363,30 @@ echo $KURA_PID > /var/run/kura.pid
                 <zipfileset file="${project.build.directory}/kura-${build.name}_${project.version}_dp_upgrader.sh" />
                 <zipfileset file="src/main/sh/upgrade_wrapper.sh" />
         </zip>
+    	
+    	
+    	
+    	<!-- Build the upgrade deployment package -->
+    	<echo message="Building the upgrade DP" />
+
+        <!-- Create the manifest -->
+        <echo file="${project.build.directory}/kura-${build.name}-jars_${project.version}/dp_upgrade_stage/META-INF/MANIFEST.MF" append="false">Manifest-Version: 1.0
+DeploymentPackage-SymbolicName: kura-upgrade
+DeploymentPackage-Version: ${deployment.package.version}
+
+Name: kura-${build.name}_${project.version}_dp_upgrader.sh
+Resource-Processor: org.eclipse.kura.deployment.rp.sh.ShellScriptResourceProcessor
+</echo>
+
+
+	<!-- move everything into place -->
+        <copy    file="${project.build.directory}/kura-${build.name}_${project.version}_dp_upgrader.sh"
+                 todir="${project.build.directory}/kura-${build.name}-jars_${project.version}/dp_upgrade_stage" />
+	
+
+        <jar destfile="${project.build.directory}/kura-${build.name}_${project.version}_dp_upgrader.dp"
+                manifest="${project.build.directory}/kura-${build.name}-jars_${project.version}/dp_upgrade_stage/META-INF/MANIFEST.MF"
+                basedir="${project.build.directory}/kura-${build.name}-jars_${project.version}/dp_upgrade_stage" />	
     </target>
 
 	<target name="web-config" if="web.jar.present">

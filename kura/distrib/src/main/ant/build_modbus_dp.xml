@@ -1,4 +1,4 @@
-<project name="build_modbus_dp" default="dist-linux" basedir="../../../">
+<project name="build_modbus_dp" default="build-dp" basedir="../../../">
 
 	<target name="build-dp">
     	<echo message="Building the DP for modbus" />

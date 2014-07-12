@@ -17,15 +17,6 @@
 
 	<build>
 	  <plugins>
-        <!-- 
-            Copying common artifacts across all platforms into a known location
-            ${project.build.directory}/plugins/common 
-            is only one way how to create content to be published. Any other source of 
-            bundles and/or features can be used to be published as long as it end up 
-            in ${project.basedir}/target/source/plugins and or ~/features
-            The publisher will 
-            use every content that is located in this directory 
-        -->
 		<plugin>
 		   <artifactId>maven-antrun-plugin</artifactId>
 		   <executions>
@@ -39,7 +30,7 @@
 				 <tasks>
 				   <mkdir dir="target/source/plugins/" />
 				   <copy todir="target/source/plugins/">
-				     <fileset dir="src/main/concierge/plugins"/>
+				     <fileset dir="plugins" />
 				   </copy>
 				 </tasks>
 			   </configuration>
@@ -76,8 +67,6 @@
                    </goals>
                    <configuration>
                        <tasks>
-                           <delete file="../../kura/target-definition/kura.target"/>
-                           <delete dir="../../kura/target-definition/repository/"/>
                            <delete dir="../../kura/target-definition/concierge/"/>
 			   <mkdir dir="../../kura/target-definition/concierge/repository" />
                            <copy todir="../../kura/target-definition/concierge/repository">

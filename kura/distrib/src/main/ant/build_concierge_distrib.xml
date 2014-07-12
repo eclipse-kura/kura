@@ -219,7 +219,9 @@ echo $KURA_PID > /var/run/kura.pid
             <zipfileset file="${project.build.directory}/kura-${build.name}-jars_${project.version}/kura.properties"
                         prefix="kura-${build.name}-jars_${project.version}/kura/" />
     
-            <zipfileset dir="../target-definition/equinox_3.8.1/repository/plugins"
+<!--            <zipfileset dir="../target-definition/equinox_3.8.1/repository/plugins"
+                        prefix="kura-${build.name}-jars_${project.version}/plugins"/>-->
+            <zipfileset dir="../target-definition/common/repository/plugins"
                         prefix="kura-${build.name}-jars_${project.version}/plugins"/>
             <zipfileset dir="../target-definition/concierge/repository/plugins"
                         prefix="kura-${build.name}-jars_${project.version}/plugins"/>

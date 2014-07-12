@@ -1,0 +1,32 @@
+Manifest-Version: 1.0
+Export-Package: org.eclipse.paho.client.mqttv3;uses:="org.eclipse.paho
+ .client.mqttv3.internal.wire,javax.net,org.eclipse.paho.client.mqttv3
+ .internal,org.eclipse.paho.client.mqttv3.internal.security,org.eclips
+ e.paho.client.mqttv3.logging,org.eclipse.paho.client.mqttv3.persist,j
+ avax.net.ssl,org.eclipse.paho.client.mqttv3.util";version="0.4.0",org
+ .eclipse.paho.client.mqttv3.logging;version="0.4.0",org.eclipse.paho.
+ client.mqttv3.persist;uses:="org.eclipse.paho.client.mqttv3,org.eclip
+ se.paho.client.mqttv3.internal";version="0.4.0",org.eclipse.paho.clie
+ nt.mqttv3.util;uses:="org.eclipse.paho.client.mqttv3,org.eclipse.paho
+ .client.mqttv3.internal,org.eclipse.paho.client.mqttv3.logging";versi
+ on="0.4.0",org.eclipse.paho.client.mqttv3.internal;uses:="org.eclipse
+ .paho.client.mqttv3.internal.wire,org.eclipse.paho.client.mqttv3,org.
+ eclipse.paho.client.mqttv3.logging,javax.net,javax.net.ssl";version="
+ 0.4.0",org.eclipse.paho.client.mqttv3.internal.security;uses:="org.ec
+ lipse.paho.client.mqttv3,org.eclipse.paho.client.mqttv3.logging,javax
+ .net.ssl";version="0.4.0",org.eclipse.paho.client.mqttv3.internal.wir
+ e;uses:="org.eclipse.paho.client.mqttv3,org.eclipse.paho.client.mqttv
+ 3.internal,org.eclipse.paho.client.mqttv3.logging";version="0.4.0"
+Built-By: root
+Tool: Bnd-1.43.0
+Bundle-Name: Eclipse Paho MQTT Client
+Created-By: Apache Maven Bundle Plugin
+Build-Jdk: 1.7.0_09
+Bundle-Version: 0.4.0
+Bnd-LastModified: 1403407922888
+Bundle-ManifestVersion: 2
+Bundle-Description: Eclipse Paho MQTT Client
+Import-Package: javax.net;resolution:=optional,javax.net.ssl;resolutio
+ n:=optional
+Bundle-SymbolicName: mqtt-client;singleton:=true
+

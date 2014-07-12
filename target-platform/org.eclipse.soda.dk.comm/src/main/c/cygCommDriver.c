@@ -53,7 +53,7 @@ void cygCommDriver_discoverDevicesNC(JNIEnv *jenv, jobject jobj) {
 			{ "COM5", PORT_SERIAL  , "/dev/tty04", 0x11223350 },
 			{ "COM6", PORT_SERIAL  , "/dev/tty05", 0x11223351 },
 #endif	/* NCI */
-#ifdef __linux__
+#if defined(__linux__) || defined(__osx__)
 			{ "LPT1", PORT_PARALLEL, "/dev/lp0"  , 0x11223344 },
 			{ "/dev/ttyS0", PORT_SERIAL  , "/dev/ttyS0", 0x11223345 },
 			{ "/dev/ttyS1", PORT_SERIAL  , "/dev/ttyS1", 0x11223347 },
@@ -103,6 +103,7 @@ void cygCommDriver_discoverDevicesNC(JNIEnv *jenv, jobject jobj) {
 			{ "/dev/ttyO2",   PORT_SERIAL  , "/dev/ttyO0", 0x11223391 },
 			{ "/dev/ttyO3",   PORT_SERIAL  , "/dev/ttyO0", 0x11223392 },
 			{ "/dev/AMA0",    PORT_SERIAL  , "/dev/AMA0", 0x11223393 },
+			{ "/dev/tty.usbserial", PORT_SERIAL , "/dev/tty.usbserial", 0x11223394 },
 #endif	/* __linux__ */
 #ifdef QNX
 			{ "LPT1", PORT_PARALLEL, "/dev/par1"  , 0x11223344 },

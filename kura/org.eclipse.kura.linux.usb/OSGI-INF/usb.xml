@@ -12,7 +12,7 @@
       Eurotech
 
 -->
-<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" immediate="true" name="org.eclipse.kura.usb.UsbService">
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" activate="activate" deactivate="deactivate" immediate="true" name="org.eclipse.kura.usb.UsbService">
    <implementation class="org.eclipse.kura.linux.usb.UsbServiceImpl"/>
    <service>
       <provide interface="org.eclipse.kura.usb.UsbService"/>

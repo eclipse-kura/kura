@@ -26,9 +26,12 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.KuraInvalidMessageException;
 import org.eclipse.kura.cloud.CloudClient;
 import org.eclipse.kura.cloud.CloudConnectionEstablishedEvent;
 import org.eclipse.kura.cloud.CloudConnectionLostEvent;
+import org.eclipse.kura.cloud.CloudPayloadProtoBufDecoder;
+import org.eclipse.kura.cloud.CloudPayloadProtoBufEncoder;
 import org.eclipse.kura.cloud.CloudService;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.data.DataService;
@@ -48,7 +51,7 @@ import org.osgi.service.event.EventHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class CloudServiceImpl implements CloudService, DataServiceListener, ConfigurableComponent, EventHandler
+public class CloudServiceImpl implements CloudService, DataServiceListener, ConfigurableComponent, EventHandler, CloudPayloadProtoBufEncoder, CloudPayloadProtoBufDecoder
 {	
 	private static final Logger s_logger = LoggerFactory.getLogger(CloudServiceImpl.class);
 	
@@ -291,7 +294,7 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
 			return bytes;
 		}
 		
-		CloudPayloadEncoder encoder = new CloudPayloadProtoBufEncoder(payload);
+		CloudPayloadEncoder encoder = new CloudPayloadProtoBufEncoderImpl(payload);
 		if (m_options.getEncodeGzip()) {
 			encoder = new CloudPayloadGZipEncoder(encoder);
 		}
@@ -392,7 +395,7 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
 			KuraPayload kuraPayload = null;
 			try {
 				// try to decode the message into an KuraPayload					
-				kuraPayload = (new CloudPayloadProtoBufDecoder(payload)).buildFromByteArray(); 
+				kuraPayload = (new CloudPayloadProtoBufDecoderImpl(payload)).buildFromByteArray(); 
 			}
 			catch (Exception e) {
 				// Wrap the received bytes payload into an KuraPayload					
@@ -448,7 +451,49 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
 		}
 	}
 
+	// ----------------------------------------------------------------
+	//
+	//   CloudPayloadProtoBufEncoder API
+	//
+	// ----------------------------------------------------------------
 	
+	@Override
+	public byte[] getBytes(KuraPayload kuraPayload, boolean gzipped) throws KuraException {		
+		CloudPayloadEncoder encoder = new CloudPayloadProtoBufEncoderImpl(kuraPayload);
+		if (gzipped) {
+			encoder = new CloudPayloadGZipEncoder(encoder);
+		}
+		
+		byte[] bytes;
+		try {
+			bytes = encoder.getBytes();
+			return bytes;
+		}
+		catch (IOException e) {
+			throw new KuraException(KuraErrorCode.ENCODE_ERROR, e);
+		}
+	}
+
+	// ----------------------------------------------------------------
+	//
+	//   CloudPayloadProtoBufDecoder API
+	//
+	// ----------------------------------------------------------------
+	
+	@Override
+	public KuraPayload buildFromByteArray(byte[] payload) throws KuraException {
+		CloudPayloadProtoBufDecoderImpl encoder = new CloudPayloadProtoBufDecoderImpl(payload);
+		KuraPayload kuraPayload;
+		
+		try {
+			kuraPayload = encoder.buildFromByteArray();
+			return kuraPayload;
+		} catch (KuraInvalidMessageException e) {
+			throw new KuraException(KuraErrorCode.DECODER_ERROR, e);
+		} catch (IOException e) {
+			throw new KuraException(KuraErrorCode.DECODER_ERROR, e);
+		}
+	}
 	
 	// ----------------------------------------------------------------
 	//

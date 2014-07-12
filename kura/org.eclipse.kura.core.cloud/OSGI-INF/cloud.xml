@@ -12,17 +12,14 @@
       Eurotech
 
 -->
-<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" 
-               name="org.eclipse.kura.cloud.CloudService"
-               modified="updated" 
-               enabled="true"
-               immediate="true"
-               configuration-policy="require">
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" activate="activate" configuration-policy="require" deactivate="deactivate" enabled="true" immediate="true" modified="updated" name="org.eclipse.kura.cloud.CloudService">
    <implementation class="org.eclipse.kura.core.cloud.CloudServiceImpl"/>
    <service>
       <provide interface="org.eclipse.kura.cloud.CloudService"/>
       <provide interface="org.eclipse.kura.data.DataServiceListener"/>
       <provide interface="org.eclipse.kura.configuration.ConfigurableComponent"/>
+      <provide interface="org.eclipse.kura.cloud.CloudPayloadProtoBufEncoder"/>
+      <provide interface="org.eclipse.kura.cloud.CloudPayloadProtoBufDecoder"/>
    </service>
    <property name="service.pid" value="org.eclipse.kura.cloud.CloudService"/>
    <reference name="DataService" 

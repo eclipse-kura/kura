@@ -12,11 +12,7 @@
       Eurotech
 
 -->
-<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" 
-               name="org.eclipse.kura.demo.modbus.ModbusExample"
-               enabled="true" 
-               immediate="true" 
-               modified="updated">
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" activate="activate" deactivate="deactivate" enabled="true" immediate="true" modified="updated" name="org.eclipse.kura.demo.modbus.ModbusExample">
    <implementation class="org.eclipse.kura.demo.modbus.ModbusExample"/>
    <service>
       <provide interface="org.eclipse.kura.demo.modbus.ModbusExample"/>

@@ -53,7 +53,6 @@ esf/com.eurotech.framework.protocol.modbus.test/bin/
 esf/com.eurotech.framework.protocol.pcn.test/bin/
 esf/com.eurotech.framework.test/bin/
 esf/target-definition/esf-equinox_3.8.1.target
-kura/target-definition/kura-equinox_3.8.1.target
 esf/com.eurotech.example.dp.app/bin/
 esf/com.eurotech.example.dp.customizer/bin/
 esf/com.eurotech.example.publisher/bin/

@@ -147,7 +147,7 @@ public class SSLSocketFactoryWrapper extends SSLSocketFactory
             }
             
             // Adjust the supported ciphers.
-            if (this.ciphers != null) {
+            if (this.ciphers != null && !this.ciphers.isEmpty()) {
                 String[] arrCiphers = ciphers.split(",");
                 ArrayList<String> lsCiphers = new ArrayList<String>();
                 for (String cipher : arrCiphers) {

@@ -58,29 +58,6 @@
 					</execution>
 				</executions>
 			</plugin>
-			<plugin>
-				<groupId>com.google.code.maven-replacer-plugin</groupId>
-				<artifactId>replacer</artifactId>
-				<version>1.5.2</version>
-				<executions>
-					<execution>
-						<phase>prepare-package</phase>
-						<goals>
-							<goal>replace</goal>
-						</goals>
-					</execution>
-				</executions>
-				<configuration>
-					<file>${basedir}/target/classes/common/kura_upgrade_script.sh</file>
-					<replacements>
-						<replacement>
-							<token>KURA_CORRECT_VERSION=UNKNOWN</token>
-							<value>KURA_CORRECT_VERSION=${kura.bundle.versions}</value>
-						</replacement>
-					</replacements>
-				</configuration>
-			</plugin>
-
 		</plugins>
 		<pluginManagement>
 			<plugins>

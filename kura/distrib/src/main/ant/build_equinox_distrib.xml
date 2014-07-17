@@ -312,30 +312,21 @@ echo $KURA_PID > /var/run/kura.pid
         </exec>
 
 
-		<!-- Create upgrade zip -->
-        <echo message="Create upgrade zip ${build.name} version ${project.version}" />
-        <copy file="${project.build.directory}/kura-${build.name}-jars_${project.version}.zip"
-              tofile="${project.build.directory}/kura-${build.name}-jars-upgrade_${project.version}.zip" />
-        <exec executable="src/main/sh/create_upgrade_zip.sh">
-                <arg value="${project.build.directory}/kura-${build.name}-jars-upgrade_${project.version}.zip" />
-                <arg value="${project.build.directory}/kura-${build.name}_${project.version.previous}_to_${project.version}.keep" />
-                <arg value="${build.name}" />
-        </exec>
-
-    	
-        <!-- Create updater -->
-        <echo message="Creating Updater for ${build.name}" />
+        <!-- Create upgrader -->
+        <echo message="Creating Upgrader for ${build.name}" />
         <exec executable="${project.build.directory}/../src/main/sh/create_upgrader.sh">
                 <arg value="${project.build.directory}" />
+                <arg value="${project.build.directory}/kura-${build.name}-jars_${project.version}.zip" />
                 <arg value="kura-${build.name}-jars-upgrade_${project.version}.zip" />
                 <arg value="${project.version.previous}" />
                 <arg value="kura-${build.name}-jars_${project.version}" />
                 <arg value="kura-${build.name}_${project.version.previous}_to_${project.version}.removed" />
+                <arg value="kura-${build.name}_${project.version.previous}_to_${project.version}.keep" />
                 <arg value="kura-${build.name}_${project.version}_upgrader.sh" />
                 <arg value="${build.name}" />
         </exec>
 
-        <!-- Zip the updater -->
+        <!-- Zip the upgrader -->
         <zip destfile="${project.build.directory}/kura-update-${build.name}_${project.version}.zip">
                 <zipfileset file="${project.build.directory}/kura-${build.name}_${project.version}_upgrader.sh" />
                 <zipfileset file="src/main/sh/upgrade_wrapper.sh" />
@@ -361,7 +352,7 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
 </echo>
 
 
-	<!-- move everything into place -->
+        <!-- move everything into place -->
         <copy    file="${project.build.directory}/kura-${build.name}_${project.version}_upgrader.sh"
                  tofile="${project.build.directory}/kura-${build.name}-jars_${project.version}/dp_upgrade_stage/z_kura_dp_upgrader.sh" />
 		<copy    file="../org.eclipse.kura.deployment.customizer.upgrade/target/org.eclipse.kura.deployment.customizer.upgrade_${project.version}.v${kura.build.version}.jar"

@@ -374,15 +374,21 @@ echo $KURA_PID > /var/run/kura.pid
 DeploymentPackage-SymbolicName: kura-upgrade
 DeploymentPackage-Version: ${deployment.package.version}
 
-Name: kura-${build.name}_${project.version}_dp_upgrader.sh
-Resource-Processor: org.eclipse.kura.deployment.rp.sh.ShellScriptResourceProcessor
+Name: org.eclipse.kura.deployment.customizer.upgrade_${project.version}.v${kura.build.version}.jar
+Bundle-SymbolicName: org.eclipse.kura.deployment.customizer.upgrade
+Bundle-Version: 0.2.0.${kura.build.version}
+DeploymentPackage-Customizer: true
+
+Name: z_kura_dp_upgrader.sh
+Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScriptResourceProcessor
 </echo>
 
 
 	<!-- move everything into place -->
         <copy    file="${project.build.directory}/kura-${build.name}_${project.version}_dp_upgrader.sh"
+                 tofile="${project.build.directory}/kura-${build.name}-jars_${project.version}/dp_upgrade_stage/z_kura_dp_upgrader.sh" />
+		<copy    file="../org.eclipse.kura.deployment.customizer.upgrade/target/org.eclipse.kura.deployment.customizer.upgrade_${project.version}.v${kura.build.version}.jar"
                  todir="${project.build.directory}/kura-${build.name}-jars_${project.version}/dp_upgrade_stage" />
-	
 
         <jar destfile="${project.build.directory}/kura-${build.name}_${project.version}_dp_upgrader.dp"
                 manifest="${project.build.directory}/kura-${build.name}-jars_${project.version}/dp_upgrade_stage/META-INF/MANIFEST.MF"

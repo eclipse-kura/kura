@@ -361,7 +361,7 @@
 								</goals>
 								<configuration>
 									<verbose>true</verbose>
-									<deb>${basedir}/target/kura-raspberry-pi-jars_${project.version}.deb</deb>
+									<deb>${basedir}/target/kura-raspberry-pi_${project.version}.deb</deb>
 									<controlDir>${basedir}/src/main/deb/control</controlDir>
 									<dataSet>
 										<data>

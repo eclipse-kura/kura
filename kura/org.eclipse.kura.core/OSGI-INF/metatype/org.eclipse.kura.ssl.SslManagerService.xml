@@ -40,7 +40,7 @@
             type="String"
             cardinality="0" 
             required="false"
-            default="/opt/eurotech/security/cacerts"
+            default="/opt/eclipse/security/cacerts"
             description="Location of the Java keystore file containing the collection of CA certificates trusted by this application process (trust store). Key store type is expected to be JKS. If not specified or the specified file does not exist, the default Java VM trust store will be used."/>
             
         <AD id="ssl.default.keyStore"
@@ -48,7 +48,7 @@
             type="String"
             cardinality="0" 
             required="false"
-            default="/opt/eurotech/security/keystore"
+            default="/opt/eclipse/security/keystore"
             description="Location of the Java keystore file containing an application process's own certificate and private key.  Key store type is expected to be JKS. If not specified or the specified file does not exist, the default Java VM key store will be used."/>
 
         <AD id="ssl.default.cipherSuites"

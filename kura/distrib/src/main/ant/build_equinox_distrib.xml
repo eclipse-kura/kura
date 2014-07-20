@@ -37,7 +37,7 @@ Resource-Processor: org.eclipse.kura.deployment.rp.sh.ShellScriptResourceProcess
             <entry key="build.number"  value="${build.name}-${buildNumber}" />
         </propertyfile>
     	
-    	<condition property="kura.osgi.repo" value="../target-definition/equinox_3.8.1/repository">
+    	<condition property="kura.osgi.equinox">
     		<or>
     			<not>
     				<isset property="kura.osgi"/>
@@ -45,108 +45,61 @@ Resource-Processor: org.eclipse.kura.deployment.rp.sh.ShellScriptResourceProcess
     			<equals arg1="${kura.osgi}" arg2="equinox"/>
     		</or>
     	</condition>
+    	<condition property="kura.osgi.concierge">
+    			<equals arg1="${kura.osgi}" arg2="concierge"/>
+    	</condition>
+    	
+    	<condition property="kura.osgi.config" value="config.ini">
+    		<istrue value="${kura.osgi.equinox}"/>
+    	</condition>
+    	<condition property="kura.osgi.config" value="init.xargs">
+    		<istrue value="${kura.osgi.concierge}"/>
+    	</condition>
+    	
+    	<condition property="kura.osgi.config.path" value="src/main/osgi/equinox_3.8.1/configuration/config.ini">
+    		<istrue value="${kura.osgi.equinox}"/>
+    	</condition>
+    	<condition property="kura.osgi.config.path" value="src/main/osgi/concierge/configuration/init.xargs">
+    		<istrue value="${kura.osgi.concierge}"/>
+    	</condition>
+    	
+    	<condition property="kura.osgi.repo" value="../target-definition/equinox_3.8.1/repository">
+    		<istrue value="${kura.osgi.equinox}"/>
+    	</condition>
+    	<condition property="kura.osgi.repo" value="../target-definition/concierge/repository">
+    		<istrue value="${kura.osgi.concierge}"/>
+    	</condition>
     	
         <copy file="src/main/resources/${build.name}/snapshot_0.xml"
               tofile="${project.build.directory}/kura-${build.name}-jars_${project.version}/snapshot_0.xml" />
-        <copy    file="src/main/osgi/equinox_3.8.1/configuration/config.ini"
-                 tofile="${project.build.directory}/kura-${build.name}-jars_${project.version}/config.ini" />
+        <copy    file="${kura.osgi.config.path}"
+                 tofile="${project.build.directory}/kura-${build.name}-jars_${project.version}/${kura.osgi.config}" />
         <copy    file="${project.build.directory}/classes/common/kura_upgrade_script.sh"
                  todir="${project.build.directory}/kura-${build.name}-jars_${project.version}/dp_stage" />
 
-        <replace file="${project.build.directory}/kura-${build.name}-jars_${project.version}/config.ini"
+        <replace file="${project.build.directory}/kura-${build.name}-jars_${project.version}/${kura.osgi.config}"
                  token="{project.version}" value="${project.version}"/>
-        <replace file="${project.build.directory}/kura-${build.name}-jars_${project.version}/config.ini"
+        <replace file="${project.build.directory}/kura-${build.name}-jars_${project.version}/${kura.osgi.config}"
                  token="{kura.build.version}" value="${kura.build.version}"/>
-        <propertyfile file="${project.build.directory}/kura-${build.name}-jars_${project.version}/config.ini">
-            <entry key="osgi.bundles" operation="+"
-                   value=", reference:file:/opt/eclipse/kura/kura/plugins/org.eclipse.kura.net.admin_${project.version}.v${kura.build.version}.jar@4:start" />
-        </propertyfile>
+    	<antcall target="net-admin-equinox" />
+    	<antcall target="net-admin-concierge" />
         <propertyfile file="${project.build.directory}/kura-${build.name}-jars_${project.version}/dpa.properties"> 
             <entry key="kura"
                    value="file:/opt/eclipse/kura/kura/packages/kura-${build.name}-jars_${project.version}.dp" />
         </propertyfile>
 		<available file="../org.eclipse.kura.web/target/org.eclipse.kura.web_${project.version}.v${kura.build.version}.jar" property="web.jar.present" />
-		<antcall target="web-config" />
+		<antcall target="web-config-equinox" />
+    	<antcall target="web-config-concierge" />
 	<!-- Create the Kura start scripts -->
-	<echo file="${project.build.directory}/kura-${build.name}-jars_${project.version}/start_kura.sh" append="false">#!/bin/sh
-
-export PATH=/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/opt/jvm/bin:/usr/java/bin
-
-cd $(dirname $0)/..
-
-# set up the configuration area
-mkdir -p /tmp/.kura/configuration
-cp /opt/eclipse/kura/kura/config.ini /tmp/.kura/configuration/
-
-java -Xms${kura.mem.size} -Xmx${kura.mem.size} -XX:MaxPermSize=${kura.mem.size} -Dkura.os.version=${kura.os.version} \
-	-Dkura.arch=${kura.arch} \
-	-Dkura.ext.dir=/opt/eclipse/kura-${build.name}_${project.version}/lib/ext \
-	-Declipse.ignoreApp=true \
-	-Dkura.configuration=file:/opt/eclipse/kura/kura/kura.properties \
-        -Ddpa.configuration=/opt/eclipse/kura/kura/dpa.properties \
-	-Dlog4j.configuration=file:/opt/eclipse/kura/kura/log4j.properties \
-	-jar /opt/eclipse/kura/plugins/org.eclipse.osgi_3.8.1.v20120830-144521.jar \
-	-configuration  /tmp/.kura/configuration \
-	-console \
-	-consoleLog
-	</echo>    
-	<echo file="${project.build.directory}/kura-${build.name}-jars_${project.version}/start_kura_debug.sh" append="false">#!/bin/sh
-
-export PATH=/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/opt/jvm/bin:/usr/java/bin
-
-cd $(dirname $0)/..
-
-# set up the configuration area
-mkdir -p /tmp/.kura/configuration
-cp /opt/eclipse/kura/kura/config.ini /tmp/.kura/configuration/
-
-java -Xms${kura.mem.size} -Xmx${kura.mem.size} -XX:MaxPermSize=${kura.mem.size} -Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=8000,suspend=n \
-	-Dkura.os.version=${kura.os.version} \
-	-Dkura.arch=${kura.arch} \
-	-Dkura.ext.dir=/opt/eclipse/kura-${build.name}_${project.version}/lib/ext \
-	-Declipse.ignoreApp=true \
-	-Dkura.configuration=file:/opt/eclipse/kura/kura/kura.properties \
-        -Ddpa.configuration=/opt/eclipse/kura/kura/dpa.properties \
-	-Dlog4j.configuration=file:/opt/eclipse/kura/kura/log4j.properties \
-	-jar /opt/eclipse/kura/plugins/org.eclipse.osgi_3.8.1.v20120830-144521.jar \
-	-configuration  /tmp/.kura/configuration \
-	-console \
-	-consoleLog
-	</echo>    
-	<echo file="${project.build.directory}/kura-${build.name}-jars_${project.version}/start_kura_background.sh" append="false">#!/bin/sh
-
-# Kura should be installed to the /opt/eclipse directory.
-export PATH=/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/opt/jvm/bin:/usr/java/bin
-
-cd /opt/eclipse/kura
-
-# set up the configuration area
-mkdir -p /tmp/.kura/configuration
-cp /opt/eclipse/kura/kura/config.ini /tmp/.kura/configuration/
-
-nohup java -Xms${kura.mem.size} -Xmx${kura.mem.size} -XX:MaxPermSize=${kura.mem.size} -Dkura.os.version=${kura.os.version} \
-		-Dkura.arch=${kura.arch} \
-        -Dkura.ext.dir=/opt/eclipse/kura-${build.name}_${project.version}/lib/ext  \
-        -Declipse.ignoreApp=true \
-        -Dkura.configuration=file:/opt/eclipse/kura/kura/kura.properties \
-        -Ddpa.configuration=/opt/eclipse/kura/kura/dpa.properties \
-        -Dlog4j.configuration=file:/opt/eclipse/kura/kura/log4j.properties \
-        -jar /opt/eclipse/kura/plugins/org.eclipse.osgi_3.8.1.v20120830-144521.jar \
-        -configuration  /tmp/.kura/configuration \
-        -console 5002 \
-        -consoleLog >> /var/log/kura-console.log 2>> /var/log/kura-console.log &amp;
-
-#Save the PID
-KURA_PID=$!
-echo $KURA_PID > /var/run/kura.pid
-	</echo>
+		<antcall target="equinox-start-scripts" />
+    	<antcall target="concierge-start-scripts" />
         
         <zip destfile="${project.build.directory}/kura-${build.name}-jars_${project.version}.zip">
     
             <zipfileset file="${project.build.directory}/kura-${build.name}-jars_${project.version}/snapshot_0.xml"
                         prefix="kura-${build.name}-jars_${project.version}/data/snapshots/" />
 
-            <zipfileset file="${project.build.directory}/kura-${build.name}-jars_${project.version}/config.ini"
+            <zipfileset file="${project.build.directory}/kura-${build.name}-jars_${project.version}/${kura.osgi.config}"
                         prefix="kura-${build.name}-jars_${project.version}/kura/" />
 	    <zipfileset file="src/main/resources/common/javax.comm.rxtx.properties"
 			prefix="kura-${build.name}-jars_${project.version}/lib/ext/" />
@@ -247,9 +200,8 @@ echo $KURA_PID > /var/run/kura.pid
                         prefix="kura-${build.name}-jars_${project.version}/kura/" />
             <zipfileset file="${project.build.directory}/kura-${build.name}-jars_${project.version}/kura.properties"
                         prefix="kura-${build.name}-jars_${project.version}/kura/" />
-    
-            <zipfileset dir="${kura.osgi.repo}/plugins/"
-                        prefix="kura-${build.name}-jars_${project.version}/plugins"/>
+        	<zipfileset dir="${kura.osgi.repo}/plugins/"
+        	                        prefix="kura-${build.name}-jars_${project.version}/plugins"/>
             <zipfileset dir="../target-definition/common/repository/plugins"
                         prefix="kura-${build.name}-jars_${project.version}/plugins"/>
 
@@ -333,12 +285,192 @@ echo $KURA_PID > /var/run/kura.pid
         </zip>
 -->
     </target>
+	
+	<target name="equinox-start-scripts"  if="kura.osgi.equinox">
+		<echo file="${project.build.directory}/kura-${build.name}-jars_${project.version}/start_kura.sh" append="false">#!/bin/sh
 
-	<target name="web-config" if="web.jar.present">
-		<propertyfile file="${project.build.directory}/kura-${build.name}-jars_${project.version}/config.ini">
+	export PATH=/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/opt/jvm/bin:/usr/java/bin
+
+	cd $(dirname $0)/..
+
+	# set up the configuration area
+	mkdir -p /tmp/.kura/configuration
+	cp /opt/eclipse/kura/kura/config.ini /tmp/.kura/configuration/
+
+	java -Xms${kura.mem.size} -Xmx${kura.mem.size} -XX:MaxPermSize=${kura.mem.size} -Dkura.os.version=${kura.os.version} \
+		-Dkura.arch=${kura.arch} \
+		-Dkura.ext.dir=/opt/eclipse/kura-${build.name}_${project.version}/lib/ext \
+		-Declipse.ignoreApp=true \
+		-Dkura.configuration=file:/opt/eclipse/kura/kura/kura.properties \
+	        -Ddpa.configuration=/opt/eclipse/kura/kura/dpa.properties \
+		-Dlog4j.configuration=file:/opt/eclipse/kura/kura/log4j.properties \
+		-jar /opt/eclipse/kura/plugins/org.eclipse.osgi_3.8.1.v20120830-144521.jar \
+		-configuration  /tmp/.kura/configuration \
+		-console \
+		-consoleLog
+		</echo>    
+		<echo file="${project.build.directory}/kura-${build.name}-jars_${project.version}/start_kura_debug.sh" append="false">#!/bin/sh
+
+	export PATH=/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/opt/jvm/bin:/usr/java/bin
+
+	cd $(dirname $0)/..
+
+	# set up the configuration area
+	mkdir -p /tmp/.kura/configuration
+	cp /opt/eclipse/kura/kura/config.ini /tmp/.kura/configuration/
+
+	java -Xms${kura.mem.size} -Xmx${kura.mem.size} -XX:MaxPermSize=${kura.mem.size} -Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=8000,suspend=n \
+		-Dkura.os.version=${kura.os.version} \
+		-Dkura.arch=${kura.arch} \
+		-Dkura.ext.dir=/opt/eclipse/kura-${build.name}_${project.version}/lib/ext \
+		-Declipse.ignoreApp=true \
+		-Dkura.configuration=file:/opt/eclipse/kura/kura/kura.properties \
+	        -Ddpa.configuration=/opt/eclipse/kura/kura/dpa.properties \
+		-Dlog4j.configuration=file:/opt/eclipse/kura/kura/log4j.properties \
+		-jar /opt/eclipse/kura/plugins/org.eclipse.osgi_3.8.1.v20120830-144521.jar \
+		-configuration  /tmp/.kura/configuration \
+		-console \
+		-consoleLog
+		</echo>    
+		<echo file="${project.build.directory}/kura-${build.name}-jars_${project.version}/start_kura_background.sh" append="false">#!/bin/sh
+
+	# Kura should be installed to the /opt/eclipse directory.
+	export PATH=/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/opt/jvm/bin:/usr/java/bin
+
+	cd /opt/eclipse/kura
+
+	# set up the configuration area
+	mkdir -p /tmp/.kura/configuration
+	cp /opt/eclipse/kura/kura/config.ini /tmp/.kura/configuration/
+
+	nohup java -Xms${kura.mem.size} -Xmx${kura.mem.size} -XX:MaxPermSize=${kura.mem.size} -Dkura.os.version=${kura.os.version} \
+			-Dkura.arch=${kura.arch} \
+	        -Dkura.ext.dir=/opt/eclipse/kura-${build.name}_${project.version}/lib/ext  \
+	        -Declipse.ignoreApp=true \
+	        -Dkura.configuration=file:/opt/eclipse/kura/kura/kura.properties \
+	        -Ddpa.configuration=/opt/eclipse/kura/kura/dpa.properties \
+	        -Dlog4j.configuration=file:/opt/eclipse/kura/kura/log4j.properties \
+	        -jar /opt/eclipse/kura/plugins/org.eclipse.osgi_3.8.1.v20120830-144521.jar \
+	        -configuration  /tmp/.kura/configuration \
+	        -console 5002 \
+	        -consoleLog >> /var/log/kura-console.log 2>> /var/log/kura-console.log &amp;
+
+	#Save the PID
+	KURA_PID=$!
+	echo $KURA_PID > /var/run/kura.pid
+		</echo>
+		
+	</target>
+	
+	<target name="concierge-start-scripts" if="kura.osgi.concierge">
+		<echo file="${project.build.directory}/kura-${build.name}-jars_${project.version}/start_kura.sh" append="false">#!/bin/sh
+
+	export PATH=/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/opt/jvm/bin:/usr/java/bin
+
+	cd $(dirname $0)/..
+
+	# set up the configuration area
+	mkdir -p /tmp/.kura/configuration
+	cp /opt/eclipse/kura/kura/init.xargs /tmp/.kura/configuration/
+
+	java -Xms${kura.mem.size} -Xmx${kura.mem.size} -XX:MaxPermSize=${kura.mem.size} -Dkura.os.version=${kura.os.version} \
+		-Dkura.arch=${kura.arch} \
+		-Dkura.ext.dir=/opt/eclipse/kura/lib/ext \
+		-Declipse.ignoreApp=true \
+		-Dkura.configuration=/opt/eclipse/kura/kura/kura.properties \
+	        -Ddpa.configuration=/opt/eclipse/kura/kura/dpa.properties \
+		-Dlog4j.configuration=/opt/eclipse/kura/kura/log4j.properties \
+		-Dorg.eclipse.concierge.init.xargs=/opt/eclipse/kura/kura/init.xargs \
+		-jar /opt/eclipse/kura/plugins/org.eclipse.concierge_1.0.0.alpha1.jar
+		</echo>    
+		<echo file="${project.build.directory}/kura-${build.name}-jars_${project.version}/start_kura_debug.sh" append="false">#!/bin/sh
+
+	export PATH=/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/opt/jvm/bin:/usr/java/bin
+
+	cd $(dirname $0)/..
+
+	# set up the configuration area
+	mkdir -p /tmp/.kura/configuration
+	cp /opt/eclipse/kura/kura/init.xargs /tmp/.kura/configuration/
+
+	java -Xms${kura.mem.size} -Xmx${kura.mem.size} -XX:MaxPermSize=${kura.mem.size} -Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=8000,suspend=n \
+		-Dkura.os.version=${kura.os.version} \
+		-Dkura.arch=${kura.arch} \
+		-Dkura.ext.dir=/opt/eclipse/kura/lib/ext \
+		-Declipse.ignoreApp=true \
+		-Dkura.configuration=/opt/eclipse/kura/kura/kura.properties \
+	        -Ddpa.configuration=/opt/eclipse/kura/kura/dpa.properties \
+		-Dlog4j.configuration=/opt/eclipse/kura/kura/log4j.properties \
+		-Dorg.eclipse.concierge.init.xargs=/opt/eclipse/kura/kura/init.xargs \
+		-jar /opt/eclipse/kura/plugins/org.eclipse.concierge_1.0.0.alpha1.jar
+		</echo>    
+		<echo file="${project.build.directory}/kura-${build.name}-jars_${project.version}/start_kura_background.sh" append="false">#!/bin/sh
+
+	# Kura should be installed to the /opt/eclipse directory.
+	export PATH=/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/opt/jvm/bin:/usr/java/bin
+
+	cd $(dirname $0)/..
+
+	# set up the configuration area
+	mkdir -p /tmp/.kura/configuration
+	cp /opt/eclipse/kura/kura/init.xargs /tmp/.kura/configuration/
+
+	nohup java -Xms${kura.mem.size} -Xmx${kura.mem.size} -XX:MaxPermSize=${kura.mem.size} -Dkura.os.version=${kura.os.version} \
+			-Dkura.arch=${kura.arch} \
+	        -Dkura.ext.dir=/opt/eclipse/kura/lib/ext  \
+	        -Declipse.ignoreApp=true \
+	        -Dkura.configuration=/opt/eclipse/kura/kura/kura.properties \
+	        -Ddpa.configuration=/opt/eclipse/kura/kura/dpa.properties \
+	        -Dlog4j.configuration=/opt/eclipse/kura/kura/log4j.properties \
+			-Dorg.eclipse.concierge.init.xargs=/opt/eclipse/kura/kura/init.xargs \
+			-jar /opt/eclipse/kura/plugins/org.eclipse.concierge_1.0.0.alpha1.jar >> /var/log/kura-console.log 2>> /var/log/kura-console.log &amp;
+
+	#Save the PID
+	KURA_PID=$!
+	echo $KURA_PID > /var/run/kura.pid
+		</echo>
+	</target>
+	
+	<target name="net-admin-equinox" if="kura.osgi.equinox">
+    <propertyfile file="${project.build.directory}/kura-${build.name}-jars_${project.version}/${kura.osgi.config}">
+        <entry key="osgi.bundles" operation="+"
+               value=", reference:file:/opt/eclipse/kura/kura/plugins/org.eclipse.kura.net.admin_${project.version}.v${kura.build.version}.jar@4:start" />
+    </propertyfile>
+	</target>
+	
+	<target name="net-admin-concierge" if="kura.osgi.concierge">
+        <echo file="${project.build.directory}/kura-${build.name}-jars_${project.version}/${kura.osgi.config}" append="true">
+            -istart kura/plugins/org.eclipse.kura.net.admin_${project.version}.v${kura.build.version}.jar</echo>
+	</target>
+	
+	<target name="web-config-equinox" depends="web-config-equinox.check" if="web-config-equinox.run">
+		<propertyfile file="${project.build.directory}/kura-${build.name}-jars_${project.version}/${kura.osgi.config}">
             	<entry key="osgi.bundles" operation="+"
                    value=", reference:file:/opt/eclipse/kura/kura/plugins/org.eclipse.kura.web_${project.version}.v${kura.build.version}.jar@4:start" />
         </propertyfile>
+	</target>
+
+	<target name="web-config-equinox.check">
+	    <condition property="web-config-equinox.run">
+	        <and>
+	        	<isset property="web.jar.present"/>
+	        	<istrue value="${kura.osgi.equinox}"/>
+	        </and>
+	    </condition>
+	</target>
+	
+	<target name="web-config-concierge" depends="web-config-concierge.check" if="web-config-concierge.run">
+        <echo file="${project.build.directory}/kura-${build.name}-jars_${project.version}/${kura.osgi.config}" append="true">
+            -istart kura/plugins/org.eclipse.kura.web_${project.version}.v${kura.build.version}.jar</echo>
+	</target>
+
+	<target name="web-config-concierge.check">
+	    <condition property="web-config-concierge.run">
+	        <and>
+	        	<isset property="web.jar.present"/>
+	        	<istrue value="${kura.osgi.concierge}"/>
+	        </and>
+	    </condition>
 	</target>
 
 	<target name="web-jar" if="web.jar.present">

@@ -86,6 +86,22 @@
 			</repositories>
 		</profile>
 		<profile>
+			<id>concierge</id>
+			<activation>
+				<property>
+					<name>kura.osgi</name>
+					<value>concierge</value>
+				</property>
+			</activation>
+			<repositories>
+				<repository>
+					<id>concierge-repo</id>
+					<layout>p2</layout>
+					<url>file:///${user.dir}/target-definition/concierge/repository/</url>
+				</repository>
+			</repositories>
+		</profile>
+		<profile>
 			<id>can</id>
 			<activation>
 				<activeByDefault>false</activeByDefault>

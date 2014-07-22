@@ -5,7 +5,7 @@ Bundle-SymbolicName: org.eclipse.kura.deployment.customizer.upgrade;singleton:=t
 Bundle-Version: 0.2.0.qualifier
 Bundle-Vendor: EUROTECH
 Bundle-Activator: org.eclipse.kura.deployment.customizer.upgrade.rp.Activator
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: org.apache.commons.io;version="2.4.0",
  org.osgi.framework;version="1.7.0",
  org.osgi.service.deploymentadmin;version="1.1.0",

@@ -22,6 +22,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.regex.Pattern;
@@ -464,34 +465,31 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
 			m_reconnectFuture = m_reconnectExecutor.scheduleAtFixedRate(new Runnable() {
 				@Override
 				public void run() {
+					String originalName = Thread.currentThread().getName();
 					Thread.currentThread().setName("DataServiceImpl:ReconnectTask");
+					boolean connected = false;
 					try {
 						s_logger.info("Connecting...");
 						if (m_dataTransportService.isConnected()) {
-							s_logger.info("Already connected. Stopping reconnect task.");
+							s_logger.info("Already connected. Reconnect task will be terminated.");
 						}
 						else {
 							m_dataTransportService.connect();
-							s_logger.info("Connected. Stopping reconnect task");
-						}												
-
-						m_reconnectFuture.cancel(false);
-					} 
-					catch (KuraConnectException e) {
-						// It's not apparent from the API but the connect() can be interrupted.
-						// Anyway the InterruptedException is (deeply) nested in the KuraConnectException.
-						// I'd prefer to have the publish method throwing explicitly the InterruptedException.
-						if (!m_reconnectFuture.isCancelled()) {
-							s_logger.info("Connect failed", e);
+							s_logger.info("Connected. Reconnect task will be terminated.");
 						}
-					} catch (RuntimeException e) {
-						// There's nothing we can do here but log an exception.
-						s_logger.error("Unexpected RuntimeException. Thread will be terminated", e);
-						throw e;
+						connected = true;
+					} catch (Exception e) {
+						s_logger.warn("Connect failed", e);
 					} catch (Error e) {
 						// There's nothing we can do here but log an exception.
-						s_logger.error("Unexpected Error. Thread will be terminated", e);
+						s_logger.error("Unexpected Error. Task will be terminated", e);
 						throw e;
+					} finally {
+						Thread.currentThread().setName(originalName);
+						if (connected) {
+							// Throwing an exception will suppress subsequent executions of this periodic task.
+							throw new RuntimeException("Connected. Reconnect task will be terminated.");
+						}
 					}
 				}
 			},

@@ -4,22 +4,22 @@
     	<echo message="Building the DP for modbus" />
 
 		<!-- Create the manifest -->
-		<echo file="${project.build.directory}/org.eclipse.kura.protocol.modbus_${project.version}/dp_stage/META-INF/MANIFEST.MF" append="false">Manifest-Version: 1.0
+		<echo file="${project.build.directory}/org.eclipse.kura.protocol.modbus_${org.eclipse.kura.protocol.modbus.version}/dp_stage/META-INF/MANIFEST.MF" append="false">Manifest-Version: 1.0
 DeploymentPackage-SymbolicName: org.eclipse.kura.protocol.modbus
 DeploymentPackage-Version: ${deployment.package.version}
 
-Name: org.eclipse.kura.protocol.modbus_${project.version}.v${kura.build.version}.jar
+Name: org.eclipse.kura.protocol.modbus_${org.eclipse.kura.protocol.modbus.version}.v${kura.build.version}.jar
 Bundle-SymbolicName: org.eclipse.kura.protocol.modbus
 Bundle-Version: ${kura.bundle.versions}</echo>
 
 	<!-- move everything into place -->
-        <copy    file="${project.basedir}/../../org.eclipse.kura.protocol.modbus/target/org.eclipse.kura.protocol.modbus_${project.version}.v${kura.build.version}.jar"
-                 todir="${project.build.directory}/org.eclipse.kura.protocol.modbus_${project.version}/dp_stage" />
+        <copy    file="${project.basedir}/../../org.eclipse.kura.protocol.modbus/target/org.eclipse.kura.protocol.modbus_${org.eclipse.kura.protocol.modbus.version}.v${kura.build.version}.jar"
+                 todir="${project.build.directory}/org.eclipse.kura.protocol.modbus_${org.eclipse.kura.protocol.modbus.version}/dp_stage" />
 	
 
-        <jar destfile="${project.build.directory}/org.eclipse.kura.protocol.modbus_${project.version}.dp"
-		manifest="${project.build.directory}/org.eclipse.kura.protocol.modbus_${project.version}/dp_stage/META-INF/MANIFEST.MF"
-                basedir="${project.build.directory}/org.eclipse.kura.protocol.modbus_${project.version}/dp_stage" />	
+        <jar destfile="${project.build.directory}/org.eclipse.kura.protocol.modbus_${org.eclipse.kura.protocol.modbus.version}.dp"
+		manifest="${project.build.directory}/org.eclipse.kura.protocol.modbus_${org.eclipse.kura.protocol.modbus.version}/dp_stage/META-INF/MANIFEST.MF"
+                basedir="${project.build.directory}/org.eclipse.kura.protocol.modbus_${org.eclipse.kura.protocol.modbus.version}/dp_stage" />	
     </target>
     
 </project>

@@ -27,6 +27,7 @@
 	<name>distrib</name>
 	<url>http://maven.apache.org</url>
 	<properties>
+		<kura.basedir>${project.basedir}/..</kura.basedir>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<zip_workspace.prefix>user_workspace_archive_${project.version}</zip_workspace.prefix>
 	</properties>

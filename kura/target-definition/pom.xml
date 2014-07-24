@@ -25,10 +25,13 @@
                 <relativePath>../manifest_pom.xml</relativePath>
         </parent>
 
-	<groupId>org.eclipse.kura</groupId>
 	<artifactId>target-definition</artifactId>
 	<packaging>pom</packaging>
 	<name>Kura Target Definition</name>
+
+	<properties>
+		<kura.basedir>${project.basedir}/..</kura.basedir>
+	</properties>
 
 	<build>
 		<plugins>

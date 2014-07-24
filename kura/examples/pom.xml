@@ -26,6 +26,10 @@
 	<artifactId>examples</artifactId>
 	<packaging>pom</packaging>
 
+	<properties>
+		<kura.basedir>${project.basedir}/..</kura.basedir>
+	</properties>
+
 	<modules>
 		<module>org.eclipse.kura.demo.heater</module>
 		<module>org.eclipse.kura.demo.modbus</module>

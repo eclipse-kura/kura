@@ -24,7 +24,12 @@
 	</parent>
 
 	<artifactId>org.eclipse.kura.protocol.modbus.test</artifactId>
+	<version>0.2.0-SNAPSHOT</version>
 	<packaging>eclipse-plugin</packaging>
+
+	<properties>
+		<kura.basedir>${project.basedir}/..</kura.basedir>
+	</properties>
 
         <build>
                 <plugins>

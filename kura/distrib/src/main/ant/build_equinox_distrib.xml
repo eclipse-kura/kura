@@ -375,11 +375,11 @@ Resource-Processor: org.eclipse.kura.deployment.rp.sh.ShellScriptResourceProcess
 
 	java -Xms${kura.mem.size} -Xmx${kura.mem.size} -XX:MaxPermSize=${kura.mem.size} -Dkura.os.version=${kura.os.version} \
 		-Dkura.arch=${kura.arch} \
-		-Dkura.ext.dir=/opt/eclipse/kura/lib/ext \
+		-Dkura.ext.dir=file:/opt/eclipse/kura/lib/ext \
 		-Declipse.ignoreApp=true \
-		-Dkura.configuration=/opt/eclipse/kura/kura/kura.properties \
-	        -Ddpa.configuration=/opt/eclipse/kura/kura/dpa.properties \
-		-Dlog4j.configuration=/opt/eclipse/kura/kura/log4j.properties \
+		-Dkura.configuration=file:/opt/eclipse/kura/kura/kura.properties \
+	        -Ddpa.configuration=file:/opt/eclipse/kura/kura/dpa.properties \
+		-Dlog4j.configuration=file:/opt/eclipse/kura/kura/log4j.properties \
 		-Dorg.eclipse.concierge.init.xargs=/opt/eclipse/kura/kura/init.xargs \
 		-jar /opt/eclipse/kura/plugins/org.eclipse.concierge_1.0.0.alpha1.jar
 		</echo>    
@@ -396,11 +396,11 @@ Resource-Processor: org.eclipse.kura.deployment.rp.sh.ShellScriptResourceProcess
 	java -Xms${kura.mem.size} -Xmx${kura.mem.size} -XX:MaxPermSize=${kura.mem.size} -Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=8000,suspend=n \
 		-Dkura.os.version=${kura.os.version} \
 		-Dkura.arch=${kura.arch} \
-		-Dkura.ext.dir=/opt/eclipse/kura/lib/ext \
+		-Dkura.ext.dir=file:/opt/eclipse/kura/lib/ext \
 		-Declipse.ignoreApp=true \
-		-Dkura.configuration=/opt/eclipse/kura/kura/kura.properties \
-	        -Ddpa.configuration=/opt/eclipse/kura/kura/dpa.properties \
-		-Dlog4j.configuration=/opt/eclipse/kura/kura/log4j.properties \
+		-Dkura.configuration=file:/opt/eclipse/kura/kura/kura.properties \
+	        -Ddpa.configuration=file:/opt/eclipse/kura/kura/dpa.properties \
+		-Dlog4j.configuration=file:/opt/eclipse/kura/kura/log4j.properties \
 		-Dorg.eclipse.concierge.init.xargs=/opt/eclipse/kura/kura/init.xargs \
 		-jar /opt/eclipse/kura/plugins/org.eclipse.concierge_1.0.0.alpha1.jar
 		</echo>    
@@ -417,11 +417,11 @@ Resource-Processor: org.eclipse.kura.deployment.rp.sh.ShellScriptResourceProcess
 
 	nohup java -Xms${kura.mem.size} -Xmx${kura.mem.size} -XX:MaxPermSize=${kura.mem.size} -Dkura.os.version=${kura.os.version} \
 			-Dkura.arch=${kura.arch} \
-	        -Dkura.ext.dir=/opt/eclipse/kura/lib/ext  \
+	        -Dkura.ext.dir=file:/opt/eclipse/kura/lib/ext  \
 	        -Declipse.ignoreApp=true \
-	        -Dkura.configuration=/opt/eclipse/kura/kura/kura.properties \
-	        -Ddpa.configuration=/opt/eclipse/kura/kura/dpa.properties \
-	        -Dlog4j.configuration=/opt/eclipse/kura/kura/log4j.properties \
+	        -Dkura.configuration=file:/opt/eclipse/kura/kura/kura.properties \
+	        -Ddpa.configuration=file:/opt/eclipse/kura/kura/dpa.properties \
+	        -Dlog4j.configuration=file:/opt/eclipse/kura/kura/log4j.properties \
 			-Dorg.eclipse.concierge.init.xargs=/opt/eclipse/kura/kura/init.xargs \
 			-jar /opt/eclipse/kura/plugins/org.eclipse.concierge_1.0.0.alpha1.jar >> /var/log/kura-console.log 2>> /var/log/kura-console.log &amp;
 

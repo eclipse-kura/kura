@@ -23,7 +23,12 @@
 		<relativePath>../manifest_pom.xml</relativePath>
 	</parent>
 
+	<properties>
+		<kura.basedir>${project.basedir}/..</kura.basedir>
+	</properties>
+
 	<artifactId>org.eclipse.kura.core</artifactId>
+	<version>0.2.0-SNAPSHOT</version>
 	<packaging>eclipse-plugin</packaging>
 
         <build>

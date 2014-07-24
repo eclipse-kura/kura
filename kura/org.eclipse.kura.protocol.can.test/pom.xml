@@ -11,7 +11,12 @@
 	</parent>
 
 	<artifactId>org.eclipse.kura.protocol.can.test</artifactId>
+	<version>0.2.0-SNAPSHOT</version>
 	<packaging>eclipse-test-plugin</packaging>
+
+	<properties>
+		<kura.basedir>${project.basedir}/..</kura.basedir>
+	</properties>
 
     <build>
     <plugins>

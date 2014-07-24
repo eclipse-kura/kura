@@ -26,10 +26,12 @@
 
 	<groupId>org.eclipse.kura</groupId>
 	<artifactId>org.eclipse.kura.web</artifactId>
+	<version>0.2.0-SNAPSHOT</version>
 	<packaging>war</packaging>
 	<name>org.eclipse.kura.web</name>
 
 	<properties>
+		<kura.basedir>${project.basedir}/..</kura.basedir>
 		<!-- Convenience property to set the GWT version -->
 		<gwtVersion>2.4.0</gwtVersion>
 		<!-- GWT needs at least java 1.5 -->

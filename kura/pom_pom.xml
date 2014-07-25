@@ -44,7 +44,6 @@
 	</profiles>
 
 	<properties>
-		<deployment.package.version>0.2.0</deployment.package.version>
 		<tycho-version>0.18.1</tycho-version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8
@@ -75,6 +74,26 @@
 			</extension>
 		</extensions>
 		<plugins>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>build-helper-maven-plugin</artifactId>
+				<version>1.9</version>
+				<executions>
+					<execution>
+						<id>set-deployment-package-version</id>
+						<goals>
+							<goal>regex-property</goal>
+						</goals>
+						<configuration>
+							<name>deployment.package.version</name>
+							<value>${project.version}</value>
+							<regex>-SNAPSHOT</regex>
+							<replacement>.qualifier</replacement>
+							<failIfNoMatch>false</failIfNoMatch>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-antrun-plugin</artifactId>

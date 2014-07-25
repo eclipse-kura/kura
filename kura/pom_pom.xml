@@ -52,8 +52,6 @@
 		<maven.build.timestamp.format>yyyyMMddHHmm
 		</maven.build.timestamp.format>
 		<kura.basedir>${project.basedir}</kura.basedir>
-		<kura.bundle.versions>0.2.0.${kura.build.version}
-		</kura.bundle.versions>
 	</properties>
 
 	<repositories>

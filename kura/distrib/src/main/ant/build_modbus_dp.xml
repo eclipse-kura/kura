@@ -10,7 +10,7 @@ DeploymentPackage-Version: ${deployment.package.version}
 
 Name: org.eclipse.kura.protocol.modbus_${org.eclipse.kura.protocol.modbus.version}.v${kura.build.version}.jar
 Bundle-SymbolicName: org.eclipse.kura.protocol.modbus
-Bundle-Version: ${kura.bundle.versions}</echo>
+Bundle-Version: ${org.eclipse.kura.protocol.modbus.version}</echo>
 
 	<!-- move everything into place -->
         <copy    file="${project.basedir}/../../org.eclipse.kura.protocol.modbus/target/org.eclipse.kura.protocol.modbus_${org.eclipse.kura.protocol.modbus.version}.v${kura.build.version}.jar"

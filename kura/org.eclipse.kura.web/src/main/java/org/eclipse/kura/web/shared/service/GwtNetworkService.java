@@ -17,6 +17,7 @@ import org.eclipse.kura.web.shared.GwtKuraException;
 import org.eclipse.kura.web.shared.model.GwtFirewallOpenPortEntry;
 import org.eclipse.kura.web.shared.model.GwtFirewallPortForwardEntry;
 import org.eclipse.kura.web.shared.model.GwtNetInterfaceConfig;
+import org.eclipse.kura.web.shared.model.GwtReverseNatEntry;
 import org.eclipse.kura.web.shared.model.GwtWifiConfig;
 import org.eclipse.kura.web.shared.model.GwtWifiHotspotEntry;
 
@@ -43,6 +44,8 @@ public interface GwtNetworkService extends RemoteService
 	
 	
 	public void updateDeviceFirewallPortForwards(List<GwtFirewallPortForwardEntry> entries) throws GwtKuraException;
+	
+	public ListLoadResult<GwtReverseNatEntry> findReverseNatConfigurations(String sourceIface) throws GwtKuraException;
 	
 	public void renewDhcpLease(String interfaceName) throws GwtKuraException;
 	

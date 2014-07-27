@@ -21,6 +21,7 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
@@ -67,6 +68,7 @@ import org.eclipse.kura.net.firewall.FirewallOpenPortConfigIP;
 import org.eclipse.kura.net.firewall.FirewallOpenPortConfigIP4;
 import org.eclipse.kura.net.firewall.FirewallPortForwardConfigIP;
 import org.eclipse.kura.net.firewall.FirewallPortForwardConfigIP4;
+import org.eclipse.kura.net.firewall.FirewallReverseNatConfig;
 import org.eclipse.kura.net.modem.ModemConfig;
 import org.eclipse.kura.net.wifi.WifiAccessPoint;
 import org.eclipse.kura.net.wifi.WifiConfig;
@@ -1026,6 +1028,46 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 					Short.toString(portForwardEntry.getPermittedNetwork().getPrefix()), 
 					portForwardEntry.getPermittedMac(), 
 					portForwardEntry.getSourcePortRange());
+		}
+	}
+	
+	public List<FirewallReverseNatConfig> getFirewallReverseNatConfiguration(
+			String sourceIface) throws KuraException {
+		
+		List<FirewallReverseNatConfig> reverseNatConfigs = new ArrayList<FirewallReverseNatConfig>();
+
+		LinuxFirewall firewall = LinuxFirewall.getInstance();
+		Set<NATRule> reverseNatRules = firewall.getReverseNatRules();
+		Iterator<NATRule> it = reverseNatRules.iterator();
+		while (it.hasNext()) {
+			NATRule reverseNatRule = it.next();
+			if ((sourceIface != null) && sourceIface.equals(reverseNatRule.getSourceInterface())) {
+				
+				FirewallReverseNatConfig firewallReverseNatConfig = new FirewallReverseNatConfig(
+						reverseNatRule.getSourceInterface(),
+						reverseNatRule.getDestinationInterface(),
+						reverseNatRule.getProtocol(),
+						reverseNatRule.getSource(),
+						reverseNatRule.getDestination());
+				
+				reverseNatConfigs.add(firewallReverseNatConfig);
+			}
+		}
+		
+		return reverseNatConfigs;
+	}
+	
+	@Override
+	public void setFirewallReverseNatConfiguration(String inIface,
+			List<FirewallReverseNatConfig> reverseNatConfigs) throws KuraException {
+		
+		LinuxFirewall firewall = LinuxFirewall.getInstance();
+		firewall.deleteAllReverseNatRules(inIface);
+		for (FirewallReverseNatConfig revNatConfig : reverseNatConfigs) {
+			firewall.addNatRule(inIface,
+					revNatConfig.getDestinationInterface(),
+					revNatConfig.getProtocol(), revNatConfig.getSource(),
+					revNatConfig.getDestination(), true);
 		}
 	}
 	

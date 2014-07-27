@@ -13,8 +13,9 @@ package org.eclipse.kura.example.publisher;
 
 import java.util.Date;
 import java.util.Map;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.kura.KuraException;
@@ -61,7 +62,7 @@ public class ExamplePublisher implements ConfigurableComponent, CloudClientListe
 	private CloudService m_cloudService;
 	private CloudClient m_cloudClient;
 	
-	private ScheduledThreadPoolExecutor m_worker;
+	private ScheduledExecutorService    m_worker;
 	private ScheduledFuture<?>          m_handle;
 	
 	private float               m_temperature;
@@ -76,7 +77,7 @@ public class ExamplePublisher implements ConfigurableComponent, CloudClientListe
 	public ExamplePublisher() 
 	{
 		super();
-		m_worker = new ScheduledThreadPoolExecutor(1);
+		m_worker = Executors.newSingleThreadScheduledExecutor();
 	}
 
 	public void setCloudService(CloudService cloudService) {

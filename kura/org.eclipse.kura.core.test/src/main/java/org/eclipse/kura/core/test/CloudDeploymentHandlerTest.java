@@ -45,10 +45,10 @@ public class CloudDeploymentHandlerTest extends TestCase {
 	
 	private static long s_countdown = 30000;
 
-	private static final String DP_NAME = "org.eclipse.kura.app.helloworld";
+	private static final String DP_NAME = "org.eclipse.kura.test.helloworld";
 	private static final String DP_VERSION = "1.0.0";
-	private static final String BUNDLE_NAME = "org.eclipse.kura.app.helloworld";
-	private static final String BUNDLE_VERSION = "1.0.0.201211061655";
+	private static final String BUNDLE_NAME = "org.eclipse.kura.test.helloworld";
+	private static final String BUNDLE_VERSION = "1.0.0.201407161421";
 	
 	private URL getTestDpUrl() {
 		BundleContext ctx = FrameworkUtil.getBundle(this.getClass()).getBundleContext();
@@ -288,7 +288,7 @@ public class CloudDeploymentHandlerTest extends TestCase {
 		.append(CloudDeploymentHandler.RESOURCE_UNINSTALL);
 		
 		KuraPayload payload = new KuraPayload();
-		payload.setBody("org.eclipse.kura.app.helloworld".getBytes("UTF-8"));
+		payload.setBody("org.eclipse.kura.test.helloworld".getBytes("UTF-8"));
 		
 		KuraResponsePayload resp = s_cloudCallService.call(
 				CloudDeploymentHandler.APP_ID,

@@ -17,8 +17,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.kura.configuration.ConfigurableComponent;
@@ -35,7 +36,7 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
 	private final static long THREAD_TERMINATION_TOUT = 1; // in seconds
 	
 	private static ScheduledFuture<?>  		s_pollThreadTask;
-	private ScheduledThreadPoolExecutor     m_pollThreadExecutor;
+	private ScheduledExecutorService     	m_pollThreadExecutor;
 	
 	private Map<String,Object>				m_properties;	
 	
@@ -66,9 +67,7 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
 		m_enabled=false;
 		m_serviceToStop=false;
 		
-		m_pollThreadExecutor = new ScheduledThreadPoolExecutor(1);
-		m_pollThreadExecutor.setContinueExistingPeriodicTasksAfterShutdownPolicy(false);
-		m_pollThreadExecutor.setExecuteExistingDelayedTasksAfterShutdownPolicy(false);
+		m_pollThreadExecutor = Executors.newSingleThreadScheduledExecutor();
 		
 		updated(properties);
 	}

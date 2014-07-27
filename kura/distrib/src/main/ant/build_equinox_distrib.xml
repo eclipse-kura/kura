@@ -16,15 +16,6 @@
     <target name="dist-linux"> 
         <echo message="Building Kura Distribution profile based on ${kura.osgi} for ${build.name}-jars..." />
 
-        <!-- Create the manifest -->
-        <echo file="${project.build.directory}/kura-${build.name}-jars_${project.version}/dp_stage/META-INF/MANIFEST.MF" append="false">Manifest-Version: 1.0
-DeploymentPackage-SymbolicName: kura
-DeploymentPackage-Version: ${deployment.package.version}
-
-Name: kura_upgrade_script.sh
-Resource-Processor: org.eclipse.kura.deployment.rp.sh.ShellScriptResourceProcessor
-</echo>
-        
         <copy file="src/main/resources/${build.name}/kura.properties"
               tofile="${project.build.directory}/kura-${build.name}-jars_${project.version}/kura.properties" />
         <propertyfile file="${project.build.directory}/kura-${build.name}-jars_${project.version}/kura.properties">
@@ -243,7 +234,8 @@ Resource-Processor: org.eclipse.kura.deployment.rp.sh.ShellScriptResourceProcess
         </zip>
 		<antcall target="web-jar" />
         <echo message="Building Kura Distribution for ${build.name}-jars..." />
-                        
+        
+		<!-- Create installer script -->
         <echo message="Creating Installer for ${build.name}" />
         <exec executable="${project.build.directory}/../src/main/sh/create_installer.sh">
                 <arg value="${project.build.directory}" />
@@ -252,38 +244,77 @@ Resource-Processor: org.eclipse.kura.deployment.rp.sh.ShellScriptResourceProcess
                 <arg value="${build.name}" />
         </exec>
 
-        <echo message="Building the update DP for ${build.name}" />
-        
-        <local name="sortedFiles"/>
-        <pathconvert property="sortedFiles" pathsep="${line.separator}">
-                <sort>
-                      <fileset dir="${project.build.directory}/kura-${build.name}-jars_${project.version}/dp_stage" includes="*.sh"/>
-                </sort>
-        </pathconvert>
-        <jar jarfile="${project.build.directory}/kura-${build.name}-jars_${project.version}.dp" compress="false" duplicate="fail"
-                                manifest="${project.build.directory}/kura-${build.name}-jars_${project.version}/dp_stage/META-INF/MANIFEST.MF">
-                <filelist dir="${project.build.directory}/kura-${build.name}-jars_${project.version}/dp_stage" files="${sortedFiles}"/>
-        </jar>
 
-
-
-
-
-<!-- OLD ESF METHOD
-        <echo message="Creating Updater for ${build.name}" />
-        <exec executable="${project.build.directory}/../src/main/sh/create_upgrader.sh">
+		<!-- Get version information for the bundles/files in this build -->
+        <echo message="Gathering version information for the bundles/files in ${build.name}" />
+        <exec executable="src/main/sh/get_build_versions.sh">
                 <arg value="${project.build.directory}" />
-                <arg value="esf-${build.name}_${project.version}.zip" />
-                <arg value="esf-${build.name}_${project.version}_dp_upgrader.sh" />
+                <arg value="kura-${build.name}-jars_${project.version}.zip" />
+                <arg value="kura-${build.name}_${project.version}.versions" />
                 <arg value="${build.name}" />
         </exec>
 
-        !- Zip the updater -
-        <zip destfile="${project.build.directory}/esf-update-${build.name}_${project.version}.zip">
-                <zipfileset file="${project.build.directory}/esf-${build.name}_${project.version}_dp_upgrader.sh" />
+
+		<!-- Diff with the previous version -->
+        <property file="RELEASE_INFO/version.properties" />
+        <echo message="Diff version information with ${build.name} version ${project.version.previous}" />
+        <exec executable="src/main/sh/diff_build_versions.sh">
+                <arg value="RELEASE_INFO/${project.version.previous}/kura-${build.name}_${project.version.previous}.versions" />
+                <arg value="${project.build.directory}/kura-${build.name}_${project.version}.versions" />
+                <arg value="${project.build.directory}/kura-${build.name}_${project.version.previous}_to_${project.version}" />
+                <arg value="${build.name}" />
+        </exec>
+
+
+        <!-- Create upgrader -->
+        <echo message="Creating Upgrader for ${build.name}" />
+        <exec executable="${project.build.directory}/../src/main/sh/create_upgrader.sh">
+                <arg value="${project.build.directory}" />
+                <arg value="${project.build.directory}/kura-${build.name}-jars_${project.version}.zip" />
+                <arg value="kura-${build.name}-jars-upgrade_${project.version}.zip" />
+                <arg value="${project.version.previous}" />
+                <arg value="kura-${build.name}-jars_${project.version}" />
+                <arg value="kura-${build.name}_${project.version.previous}_to_${project.version}.removed" />
+                <arg value="kura-${build.name}_${project.version.previous}_to_${project.version}.keep" />
+                <arg value="kura-${build.name}_${project.version}_upgrader.sh" />
+                <arg value="${build.name}" />
+        </exec>
+
+        <!-- Zip the upgrader -->
+        <zip destfile="${project.build.directory}/kura-update-${build.name}_${project.version}.zip">
+                <zipfileset file="${project.build.directory}/kura-${build.name}_${project.version}_upgrader.sh" />
                 <zipfileset file="src/main/sh/upgrade_wrapper.sh" />
         </zip>
--->
+    	
+    	
+    	
+    	<!-- Build the upgrade deployment package -->
+    	<echo message="Building the upgrade DP" />
+
+        <!-- Create the manifest -->
+        <echo file="${project.build.directory}/kura-${build.name}-jars_${project.version}/dp_upgrade_stage/META-INF/MANIFEST.MF" append="false">Manifest-Version: 1.0
+DeploymentPackage-SymbolicName: kura-upgrade
+DeploymentPackage-Version: ${deployment.package.version}
+
+Name: org.eclipse.kura.deployment.customizer.upgrade_${project.version}.v${kura.build.version}.jar
+Bundle-SymbolicName: org.eclipse.kura.deployment.customizer.upgrade
+Bundle-Version: 0.2.0.${kura.build.version}
+DeploymentPackage-Customizer: true
+
+Name: z_kura_dp_upgrader.sh
+Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScriptResourceProcessor
+</echo>
+
+
+        <!-- move everything into place -->
+        <copy    file="${project.build.directory}/kura-${build.name}_${project.version}_upgrader.sh"
+                 tofile="${project.build.directory}/kura-${build.name}-jars_${project.version}/dp_upgrade_stage/z_kura_dp_upgrader.sh" />
+		<copy    file="../org.eclipse.kura.deployment.customizer.upgrade/target/org.eclipse.kura.deployment.customizer.upgrade_${project.version}.v${kura.build.version}.jar"
+                 todir="${project.build.directory}/kura-${build.name}-jars_${project.version}/dp_upgrade_stage" />
+
+        <jar destfile="${project.build.directory}/kura-${build.name}_${project.version}_upgrader.dp"
+                manifest="${project.build.directory}/kura-${build.name}-jars_${project.version}/dp_upgrade_stage/META-INF/MANIFEST.MF"
+                basedir="${project.build.directory}/kura-${build.name}-jars_${project.version}/dp_upgrade_stage" />	
     </target>
 	
 	<target name="equinox-start-scripts"  if="kura.osgi.equinox">

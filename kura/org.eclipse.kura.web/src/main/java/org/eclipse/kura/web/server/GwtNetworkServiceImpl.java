@@ -40,6 +40,7 @@ import org.eclipse.kura.net.firewall.FirewallOpenPortConfigIP;
 import org.eclipse.kura.net.firewall.FirewallOpenPortConfigIP4;
 import org.eclipse.kura.net.firewall.FirewallPortForwardConfigIP;
 import org.eclipse.kura.net.firewall.FirewallPortForwardConfigIP4;
+import org.eclipse.kura.net.firewall.FirewallReverseNatConfig;
 import org.eclipse.kura.net.modem.ModemConfig;
 import org.eclipse.kura.net.modem.ModemConfig.AuthType;
 import org.eclipse.kura.net.modem.ModemConfig.PdpType;
@@ -70,6 +71,8 @@ import org.eclipse.kura.web.shared.model.GwtNetIfStatus;
 import org.eclipse.kura.web.shared.model.GwtNetIfType;
 import org.eclipse.kura.web.shared.model.GwtNetInterfaceConfig;
 import org.eclipse.kura.web.shared.model.GwtNetRouterMode;
+import org.eclipse.kura.web.shared.model.GwtReverseNatEntries;
+import org.eclipse.kura.web.shared.model.GwtReverseNatEntry;
 import org.eclipse.kura.web.shared.model.GwtWifiBgscanModule;
 import org.eclipse.kura.web.shared.model.GwtWifiCiphers;
 import org.eclipse.kura.web.shared.model.GwtWifiConfig;
@@ -644,6 +647,13 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 					}
 				}
 				
+				List<FirewallReverseNatConfig> reverseNatConfigs = getReverseNatConfig(config);
+				//if ((reverseNatConfigs != null) && (reverseNatConfigs.size() > 0)) {
+				if (reverseNatConfigs != null) {
+					s_logger.debug("Adding reverse nat configs to interface update config");
+					nas.setFirewallReverseNatConfiguration(config.getName(), reverseNatConfigs);
+				}
+				
 				if(config.getHwTypeEnum() == GwtNetIfType.ETHERNET) {
 					nas.updateEthernetInterfaceConfig(config.getName(), autoConnect, config.getHwMTU(), netConfigs);
 				}
@@ -816,6 +826,28 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 		return status;
 	}
 		
+	public ListLoadResult<GwtReverseNatEntry> findReverseNatConfigurations(String sourceIface) throws GwtKuraException {
+		
+		NetworkAdminService nas = ServiceLocator.getInstance().getService(NetworkAdminService.class);
+		List<GwtReverseNatEntry> gwtReverseNatEntries = new ArrayList<GwtReverseNatEntry>();
+		
+		try {
+			List<FirewallReverseNatConfig> firewallReverseNatConfigs = nas.getFirewallReverseNatConfiguration(sourceIface);
+			
+			for (FirewallReverseNatConfig firewallReverseNatConfig : firewallReverseNatConfigs) {
+				GwtReverseNatEntry gwtReverseNatEntry = new GwtReverseNatEntry();
+				gwtReverseNatEntry.setOutInterface(firewallReverseNatConfig.getDestinationInterface());
+				gwtReverseNatEntry.setProtocol(firewallReverseNatConfig.getProtocol());
+				gwtReverseNatEntry.setSourceNetwork(firewallReverseNatConfig.getSource());
+				gwtReverseNatEntry.setDestinationNetwork(firewallReverseNatConfig.getDestination());
+				gwtReverseNatEntries.add(gwtReverseNatEntry);
+			}
+		} catch (KuraException e) {
+			e.printStackTrace();
+		}
+		
+		return new BaseListLoadResult<GwtReverseNatEntry>(gwtReverseNatEntries);
+	}
 	
 	public ListLoadResult<GwtFirewallPortForwardEntry> findDeviceFirewallPortForwards() throws GwtKuraException 
 	{
@@ -922,7 +954,26 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 		}
 	}
 
-
+	private List<FirewallReverseNatConfig> getReverseNatConfig(GwtNetInterfaceConfig config) throws KuraException {
+		
+		List<FirewallReverseNatConfig> firewallNatConfigs = new ArrayList<FirewallReverseNatConfig>();
+		GwtReverseNatEntries reverseNatEntries = config.getReverseNatEntries();
+		
+		if ((reverseNatEntries != null) && (reverseNatEntries.getNumberOfEntries() > 0)) {
+			List<GwtReverseNatEntry> list = reverseNatEntries.getEntries();
+			if ((list != null) && (list.size() > 0)) {
+				// firewallNatConfigs = new ArrayList<FirewallReverseNatConfig>();
+				for (GwtReverseNatEntry en : list) {
+					FirewallReverseNatConfig natConfig = new FirewallReverseNatConfig(
+							config.getName(), en.getOutInterface(), en.getProtocol(),
+							en.getSourceNetwork(), en.getDestinationNetwork());
+					
+					firewallNatConfigs.add(natConfig);
+				}
+			}
+		}
+		return firewallNatConfigs;
+	}
 
 	public void updateDeviceFirewallOpenPorts( List<GwtFirewallOpenPortEntry> entries) throws GwtKuraException {
 		NetworkAdminService nas = ServiceLocator.getInstance().getService(NetworkAdminService.class);

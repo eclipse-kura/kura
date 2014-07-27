@@ -83,10 +83,18 @@ public class AllCoreTests {
 			// update the settings
 			Configuration mqttConfig = s_configAdmin.getConfiguration("org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport");
 			Dictionary<String, Object> mqttProps = mqttConfig.getProperties();
+			
+			/*
 			mqttProps.put("broker-url", "mqtt://broker-stage.everyware-cloud.com:1883/");
 			mqttProps.put("topic.context.account-name", "edcguest");
 			mqttProps.put("username", "edcguest_broker");
 			mqttProps.put("password", "Welcome1");
+			*/
+			
+			mqttProps.put("broker-url", "mqtt://broker-sandbox.everyware-cloud.com:1883/");
+			mqttProps.put("topic.context.account-name", "edcguest");
+			mqttProps.put("username", "edcguest_broker");
+			mqttProps.put("password", "1nv1t3!");
 			
 			// cloudbees fails in getting the primary MAC address
 			// we need to compensate for it.

@@ -13,7 +13,8 @@ package org.eclipse.kura.linux.clock;
 
 import java.util.Date;
 import java.util.Map;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.kura.KuraErrorCode;
@@ -33,7 +34,7 @@ public abstract class AbstractNtpClockSyncProvider implements ClockSyncProvider
 	protected int                         m_ntpTimeout;
 	protected int                         m_refreshInterval;
 	protected Date                        m_lastSync;
-	protected ScheduledThreadPoolExecutor m_scheduler;
+	protected ScheduledExecutorService    m_scheduler;
 	protected int                         m_maxRetry;
 	protected int                         m_numRetry;
 	protected boolean					  m_isSynced;
@@ -67,7 +68,7 @@ public abstract class AbstractNtpClockSyncProvider implements ClockSyncProvider
 				m_scheduler.shutdown();
 				m_scheduler = null;
 			}
-			m_scheduler = new ScheduledThreadPoolExecutor(1);
+			m_scheduler = Executors.newSingleThreadScheduledExecutor();
 			
 			//call recursive retry method for setting the clock
 			scheduleOnce();	
@@ -79,7 +80,7 @@ public abstract class AbstractNtpClockSyncProvider implements ClockSyncProvider
 				m_scheduler.shutdown();
 				m_scheduler = null;
 			}
-			m_scheduler = new ScheduledThreadPoolExecutor(1);
+			m_scheduler = Executors.newSingleThreadScheduledExecutor();
 			m_scheduler.scheduleAtFixedRate(new Runnable() {
 				public void run() {
 					Thread.currentThread().setName("AbstractNtpClockSyncProvider:schedule");

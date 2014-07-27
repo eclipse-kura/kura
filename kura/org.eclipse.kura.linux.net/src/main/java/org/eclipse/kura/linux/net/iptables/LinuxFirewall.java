@@ -28,6 +28,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.StringTokenizer;
 
@@ -112,6 +113,7 @@ public class LinuxFirewall {
 	private LinkedHashSet<LocalRule> m_localRules;
 	private LinkedHashSet<PortForwardRule> m_portForwardRules;
 	private LinkedHashSet<NATRule> m_natRules;
+	private LinkedHashSet<NATRule> m_reverseNatRules;
 	private LinkedHashSet<String> m_customRules;
 	private boolean m_allowIcmp;
 	private boolean m_allowForwarding;
@@ -139,6 +141,7 @@ public class LinuxFirewall {
 			m_localRules = new LinkedHashSet<LocalRule>();
 			m_portForwardRules = new LinkedHashSet<PortForwardRule>();
 			m_natRules = new LinkedHashSet<NATRule>();
+			m_reverseNatRules = new LinkedHashSet<NATRule>();
 			m_customRules = new LinkedHashSet<String>();
 			m_allowIcmp = true;
 			m_allowForwarding = false;
@@ -386,6 +389,10 @@ public class LinuxFirewall {
 					String sourceInterface = null;
 					boolean masquerade = false;
 					
+					String protocol = null;
+					String source = null;
+					String destination = null;
+					
 					//just do this one by one
 					StringTokenizer st = new StringTokenizer(line);
 					st.nextToken();		//skip iptables
@@ -395,8 +402,18 @@ public class LinuxFirewall {
 						st.nextToken();		//skip nat
 						st.nextToken();		//skip -A
 						st.nextToken();		//skip POSTROUTING
-						st.nextToken();		//skip -o
-						destinationInterface = st.nextToken();
+						String tok = st.nextToken();		//skip -o or -p
+						if (tok.equals("-p")) {
+							protocol = st.nextToken();
+							st.nextToken(); 	// skip -s
+							source = st.nextToken();
+							st.nextToken(); 	// skip -d
+							destination = st.nextToken();
+							st.nextToken(); 	// skip -o
+							destinationInterface = st.nextToken();
+						} else {
+							destinationInterface = st.nextToken();
+						}
 						st.nextToken();		//skip -j
 						st.nextToken();		//skip MASQUERADE
 						st.nextToken();		//skip iptables
@@ -405,19 +422,45 @@ public class LinuxFirewall {
 
 					//get the rest (or continue on if no MASQ)
 					st.nextToken();		//skip FORWARD
-					st.nextToken();		//skip -i
-					destinationInterface = st.nextToken();
-					st.nextToken();		//skip -o
-					sourceInterface = st.nextToken();
+					String tok = st.nextToken();		//skip -i or -p
+					if (tok.equals("-p")) {
+						st.nextToken(); // skip protocol
+						st.nextToken(); // skip -s
+						st.nextToken(); // skip source
+						st.nextToken(); // skip -d
+						st.nextToken(); // skip destination
+						st.nextToken(); // skip -i
+						st.nextToken(); // skip destination interface
+						st.nextToken();		//skip -o
+						sourceInterface = st.nextToken();
+					} else {
+						destinationInterface = st.nextToken();
+						st.nextToken();		//skip -o
+						sourceInterface = st.nextToken();
+					}
 					
-					s_logger.debug("Parsed NAT rule with" +
-							"   sourceInterface: " + sourceInterface +
-							"   destinationInterface: " + destinationInterface +
-							"   masquerade: " + masquerade );
-
-					NATRule natRule = new NATRule(sourceInterface, destinationInterface, masquerade);
-					s_logger.debug("Adding NAT rule " + natRule.toString());
-					m_natRules.add(natRule);
+					if (protocol == null) {
+						// used to be s_logger.debug
+						s_logger.debug("Parsed NAT rule with" +
+								"   sourceInterface: " + sourceInterface +
+								"   destinationInterface: " + destinationInterface +
+								"   masquerade: " + masquerade );
+	
+						NATRule natRule = new NATRule(sourceInterface, destinationInterface, masquerade);
+						s_logger.debug("Adding NAT rule " + natRule.toString());
+						m_natRules.add(natRule);
+					} else {
+						s_logger.debug("Parsed Reverse NAT rule with" +
+								"   sourceInterface: " + sourceInterface +
+								"   destinationInterface: " + destinationInterface +
+								"   masquerade: " + masquerade + 
+								"	protocol: " + protocol + 
+								"	source network/host: " + source + 
+								"	destination network/host + destination");
+						NATRule natRule = new NATRule(sourceInterface, destinationInterface, protocol, source, destination, masquerade);
+						s_logger.warn("Adding Reverse NAT rule " + natRule.toString());
+						m_reverseNatRules.add(natRule);
+					}
 				} else {
 					throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "invalid line in /etc/init.d/firewall: " + line);
 				}
@@ -477,6 +520,12 @@ public class LinuxFirewall {
 			Iterator<NATRule> itNATRules = m_natRules.iterator();
 			while(itNATRules.hasNext()) {
 			    pw.println(itNATRules.next());
+			}
+			pw.println();
+			pw.println("#custom reverse nat service rules");
+			Iterator<NATRule> itReverseNATRules = m_reverseNatRules.iterator();
+			while(itReverseNATRules.hasNext()) {
+			    pw.println(itReverseNATRules.next());
 			}
 			pw.println();
 			pw.println("#custom rules");
@@ -624,6 +673,43 @@ public class LinuxFirewall {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
 		}
 	}
+	
+	/**
+	 * Adds Reverse Nat Rule
+	 * 
+	 * @param sourceInterface
+	 * @param destinationInterface
+	 * @param protocol
+	 * @param source
+	 * @param destination
+	 * @param masquerade
+	 * @throws EsfException
+	 */
+	public void addNatRule(String sourceInterface, String destinationInterface,
+			String protocol, String source, String destination,
+			boolean masquerade) throws KuraException {
+		
+		try {
+			if(sourceInterface == null || sourceInterface.isEmpty()) {
+		        s_logger.warn("Can't add Reverse NAT rule - source interface not specified");
+		        return;
+		    } else if(destinationInterface == null || destinationInterface.isEmpty()) {
+	            s_logger.warn("Can't add Reverse NAT rule - destination interface not specified");
+	            return;
+		    }
+			
+			NATRule newReverseNatRule = new NATRule(sourceInterface,
+					destinationInterface, protocol, source, destination,
+					masquerade);
+			// TODO need to add comparison
+			s_logger.info("adding Reverse NAT rule to firewall configuration: " + newReverseNatRule.toString());
+			m_reverseNatRules.add(newReverseNatRule);
+			m_allowForwarding = true;
+			this.update();
+		} catch (Exception e) {
+			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+		}
+	}
 
 	public Set<LocalRule> getLocalRules() throws KuraException {
 		try {
@@ -646,6 +732,15 @@ public class LinuxFirewall {
 	public Set<NATRule> getNatRules() throws KuraException {
 		try {
 			return m_natRules;
+		}
+		catch (Exception e) {
+			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+		}
+	}
+	
+	public Set<NATRule> getReverseNatRules() throws KuraException {
+		try {
+			return m_reverseNatRules;
 		}
 		catch (Exception e) {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
@@ -675,8 +770,9 @@ public class LinuxFirewall {
 	public void deleteNatRule(NATRule rule) throws KuraException {
 		try {
 			this.m_natRules.remove(rule);
-			if (this.m_natRules.size() < 1) {
-				this.m_allowForwarding = false;
+			if (((m_natRules != null) && (m_natRules.size() < 1))
+					&& ((m_reverseNatRules != null) && (m_reverseNatRules.size() < 1))) {
+				m_allowForwarding = false;
 			}
 			update();
 		}
@@ -708,7 +804,12 @@ public class LinuxFirewall {
 	public void replaceAllNatRules(LinkedHashSet<NATRule> newNatRules) throws KuraException {
 		try {
 			this.m_natRules = newNatRules;
-			this.m_allowForwarding = (this.m_natRules != null && this.m_natRules.size() > 0);
+			if (((m_natRules != null) && (m_natRules.size() > 0))
+					|| ((m_reverseNatRules != null) && (m_reverseNatRules.size() > 0))) {
+				m_allowForwarding = true;
+			} else {
+				m_allowForwarding = false;
+			}
 			this.update();
 		} catch (Exception e) {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
@@ -718,10 +819,41 @@ public class LinuxFirewall {
 	public void deleteAllNatRules() throws KuraException {
 		try {
 			this.m_natRules.clear();
-			this.m_allowForwarding = false;
+			if ((m_reverseNatRules != null) && (m_reverseNatRules.size() < 1)) {
+				m_allowForwarding = false;
+			}
 			this.update();
 		}
 		catch (Exception e) {
+			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+		}
+	}
+	
+	public void deleteAllReverseNatRules(String inIface) throws KuraException {
+		try {
+			List<NATRule> rulesToRemove = null;
+			Iterator<NATRule> it = m_reverseNatRules.iterator();
+			while (it.hasNext()) {
+				NATRule rule = it.next();
+				if (inIface.equals(rule.getSourceInterface())) {
+					if (rulesToRemove == null) {
+						rulesToRemove = new ArrayList<NATRule>();
+					}
+					rulesToRemove.add(rule);
+				}
+			}
+			if ((rulesToRemove != null) && (rulesToRemove.size() > 0)) {
+				for (NATRule ruleToRemove : rulesToRemove) {
+					m_reverseNatRules.remove(ruleToRemove);
+				}
+			}
+			
+			if (((m_natRules != null) && (m_natRules.size() < 1))
+					&& ((m_reverseNatRules != null) && (m_reverseNatRules.size() < 1))) {
+				m_allowForwarding = false;
+			}
+			this.update();
+		} catch (KuraException e) {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
 		}
 	}

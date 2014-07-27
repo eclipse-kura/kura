@@ -29,13 +29,14 @@ import java.util.Properties;
 import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.FileUtils;
-import org.osgi.framework.Version;
 import org.eclipse.kura.deployment.agent.DeploymentAgentService;
+import org.osgi.framework.Version;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.ComponentException;
 import org.osgi.service.deploymentadmin.DeploymentAdmin;
@@ -80,8 +81,8 @@ public class DeploymentAgent implements DeploymentAgentService {
 	
 	private final static long THREAD_TERMINATION_TOUT = 1; // in seconds
 	
-	private static ScheduledFuture<?>  s_installerTask;
-	private static ScheduledFuture<?>  s_uninstallerTask;
+	private static Future<?>  s_installerTask;
+	private static Future<?>  s_uninstallerTask;
 
 	private DeploymentAdmin m_deploymentAdmin;
 	private EventAdmin m_eventAdmin;
@@ -89,8 +90,8 @@ public class DeploymentAgent implements DeploymentAgentService {
 	private Queue<String> m_instPackageUrls;
 	private Queue<String> m_uninstPackageNames;
 	
-	private ScheduledThreadPoolExecutor m_installerExecutor;
-	private ScheduledThreadPoolExecutor m_uninstallerExecutor;
+	private ExecutorService m_installerExecutor;
+	private ExecutorService m_uninstallerExecutor;
 	
 	private String m_dpaConfPath;
 	private String m_packagesPath;
@@ -172,27 +173,23 @@ public class DeploymentAgent implements DeploymentAgentService {
 		m_instPackageUrls = new ConcurrentLinkedQueue<String>();
 		m_uninstPackageNames = new ConcurrentLinkedQueue<String>();
 		
-		m_installerExecutor = new ScheduledThreadPoolExecutor(1);
-		m_installerExecutor.setContinueExistingPeriodicTasksAfterShutdownPolicy(false);
-		m_installerExecutor.setExecuteExistingDelayedTasksAfterShutdownPolicy(false);
+		m_installerExecutor = Executors.newSingleThreadExecutor();
 		
-		m_uninstallerExecutor = new ScheduledThreadPoolExecutor(1);
-		m_uninstallerExecutor.setContinueExistingPeriodicTasksAfterShutdownPolicy(false);
-		m_uninstallerExecutor.setExecuteExistingDelayedTasksAfterShutdownPolicy(false);
+		m_uninstallerExecutor = Executors.newSingleThreadExecutor();
 		
-		s_installerTask = m_installerExecutor.schedule(new Runnable() {
+		s_installerTask = m_installerExecutor.submit(new Runnable() {
     		@Override
     		public void run() {
 	    		Thread.currentThread().setName("DeploymentAgent");
 	    		installer();
-    	}}, 0, TimeUnit.SECONDS);
+    	}});
 
-		s_uninstallerTask = m_uninstallerExecutor.schedule(new Runnable() {
+		s_uninstallerTask = m_uninstallerExecutor.submit(new Runnable() {
     		@Override
     		public void run() {
 	    		Thread.currentThread().setName("DeploymentAgent:Uninstall");
 	    		uninstaller();
-    	}}, 0, TimeUnit.SECONDS);
+    	}});
 		
 		installPackagesFromConfFile();
 	}

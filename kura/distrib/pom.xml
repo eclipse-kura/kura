@@ -58,29 +58,6 @@
 					</execution>
 				</executions>
 			</plugin>
-			<plugin>
-				<groupId>com.google.code.maven-replacer-plugin</groupId>
-				<artifactId>replacer</artifactId>
-				<version>1.5.2</version>
-				<executions>
-					<execution>
-						<phase>prepare-package</phase>
-						<goals>
-							<goal>replace</goal>
-						</goals>
-					</execution>
-				</executions>
-				<configuration>
-					<file>${basedir}/target/classes/common/kura_upgrade_script.sh</file>
-					<replacements>
-						<replacement>
-							<token>KURA_CORRECT_VERSION=UNKNOWN</token>
-							<value>KURA_CORRECT_VERSION=${kura.bundle.versions}</value>
-						</replacement>
-					</replacements>
-				</configuration>
-			</plugin>
-
 		</plugins>
 		<pluginManagement>
 			<plugins>
@@ -361,7 +338,7 @@
 								</goals>
 								<configuration>
 									<verbose>true</verbose>
-									<deb>${basedir}/target/kura-raspberry-pi-jars_${project.version}.deb</deb>
+									<deb>${basedir}/target/kura-raspberry-pi_${project.version}.deb</deb>
 									<controlDir>${basedir}/src/main/deb/control</controlDir>
 									<dataSet>
 										<data>
@@ -495,6 +472,9 @@
 										<copy file="src/main/resources/common/kura-equinox_3.8.1.target"
 											todir="${project.build.directory}/staging/target-definition" />
 										<copy
+											file="../org.eclipse.kura.core.configuration/target/org.eclipse.kura.core.configuration_${project.version}.v${kura.build.version}.jar"
+											todir="${project.build.directory}/staging/target-definition/equinox_3.8.1/repository/plugins" />
+										<copy
 											file="../org.eclipse.kura.core/target/org.eclipse.kura.core_${project.version}.v${kura.build.version}.jar"
 											todir="${project.build.directory}/staging/target-definition/equinox_3.8.1/repository/plugins" />
 										<copy
@@ -503,6 +483,13 @@
 										<copy
 											file="../org.eclipse.kura.core.crypto/target/org.eclipse.kura.core.crypto_${project.version}.v${kura.build.version}.jar"
 											todir="${project.build.directory}/staging/target-definition/equinox_3.8.1/repository/plugins" />
+										<copy
+											file="../org.eclipse.kura.core.net/target/org.eclipse.kura.core.net_${project.version}.v${kura.build.version}.jar"
+											todir="${project.build.directory}/staging/target-definition/equinox_3.8.1/repository/plugins" />
+										<copy
+											file="../org.eclipse.kura.web/target/org.eclipse.kura.web_${project.version}.v${kura.build.version}.jar"
+											todir="${project.build.directory}/staging/target-definition/equinox_3.8.1/repository/plugins"
+											failonerror="false" />
 									</target>
 								</configuration>
 							</execution>

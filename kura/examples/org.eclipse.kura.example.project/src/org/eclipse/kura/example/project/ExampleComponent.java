@@ -18,6 +18,8 @@ import java.io.OutputStream;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -63,7 +65,7 @@ public class ExampleComponent implements CloudClientListener, EventHandler {
 	private ConnectionFactory m_connectionFactory;
 	private ScheduledThreadPoolExecutor m_worker;
 	private ScheduledFuture<?> m_handle;
-	private ScheduledThreadPoolExecutor m_gpsWorker;
+	private ScheduledExecutorService m_gpsWorker;
 	private ScheduledFuture<?> m_gpsHandle;
 	private ScheduledThreadPoolExecutor m_systemPropsWorker;
 	private ScheduledFuture<?> m_systemPropsHandle;
@@ -440,7 +442,7 @@ public class ExampleComponent implements CloudClientListener, EventHandler {
 			m_gpsHandle.cancel(true);
 		}
 		
-		m_gpsWorker = new ScheduledThreadPoolExecutor(1);
+		m_gpsWorker = Executors.newSingleThreadScheduledExecutor();
 		m_gpsHandle = m_gpsWorker.scheduleAtFixedRate(new Runnable() {
 			
 			@Override

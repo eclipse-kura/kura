@@ -21,6 +21,8 @@ public class GwtNetInterfaceConfig extends BaseModelData implements Serializable
 {
 	private static final long serialVersionUID = 7079533925979145804L;
 	
+	private GwtReverseNatEntries m_gwtReverseNatEntries;
+	
 	public GwtNetInterfaceConfig() {	
 		setStatus(GwtNetIfStatus.netIPv4StatusDisabled.name());
 		setConfigMode(GwtNetIfConfigMode.netIPv4ConfigModeDHCP.name());
@@ -274,10 +276,32 @@ public class GwtNetInterfaceConfig extends BaseModelData implements Serializable
         set("routerDnsPass", routerDnsPass);
     }
     
+	public GwtReverseNatEntries getReverseNatEntries() {
+		return m_gwtReverseNatEntries;
+	}
+
+	public void setReverseNatEntries(GwtReverseNatEntries gwtReverseNatEntries) {
+		m_gwtReverseNatEntries = gwtReverseNatEntries;
+	}
+    
     @Override
     public boolean equals(Object o) {
         if(!(o instanceof GwtNetInterfaceConfig)) {
             return false;
+        }
+        
+        GwtNetInterfaceConfig otherGwtNetInterfaceConfig = (GwtNetInterfaceConfig)o;
+        if (m_gwtReverseNatEntries != null) {
+        	if (otherGwtNetInterfaceConfig.m_gwtReverseNatEntries == null) {
+        		return false;
+        	}       
+        	if (!m_gwtReverseNatEntries.equals(otherGwtNetInterfaceConfig.m_gwtReverseNatEntries)) {
+        		return false;
+        	}
+        } else {
+        	if (otherGwtNetInterfaceConfig.m_gwtReverseNatEntries != null) {
+        		return false;
+        	}
         }
         
         Map<String, Object> properties = this.getProperties();

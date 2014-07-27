@@ -14,8 +14,9 @@ package org.eclipse.kura.demo.heater;
 import java.util.Date;
 import java.util.Map;
 import java.util.Random;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.kura.cloud.CloudClient;
@@ -55,7 +56,7 @@ public class Heater implements ConfigurableComponent, CloudClientListener
 	private CloudService                m_cloudService;
 	private CloudClient      			m_cloudClient;
 	
-	private ScheduledThreadPoolExecutor m_worker;
+	private ScheduledExecutorService    m_worker;
 	private ScheduledFuture<?>          m_handle;
 	
 	private float                       m_temperature;
@@ -72,7 +73,7 @@ public class Heater implements ConfigurableComponent, CloudClientListener
 	{
 		super();
 		m_random = new Random();
-		m_worker = new ScheduledThreadPoolExecutor(1);
+		m_worker = Executors.newSingleThreadScheduledExecutor();
 	}
 
 	public void setCloudService(CloudService cloudService) {

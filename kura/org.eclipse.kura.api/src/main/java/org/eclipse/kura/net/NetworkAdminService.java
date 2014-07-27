@@ -17,6 +17,7 @@ import java.util.Map;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.net.firewall.FirewallOpenPortConfigIP;
 import org.eclipse.kura.net.firewall.FirewallPortForwardConfigIP;
+import org.eclipse.kura.net.firewall.FirewallReverseNatConfig;
 import org.eclipse.kura.net.wifi.WifiAccessPoint;
 import org.eclipse.kura.net.wifi.WifiConfig;
 import org.eclipse.kura.net.wifi.WifiHotspotInfo;
@@ -166,6 +167,10 @@ public interface NetworkAdminService {
 	 */
 	public void setFirewallPortForwardingConfiguration(List<FirewallPortForwardConfigIP<? extends IPAddress>> firewallConfiguration) throws KuraException;
 
+	public List<FirewallReverseNatConfig> getFirewallReverseNatConfiguration(String sourceIface) throws KuraException;
+	
+	public void setFirewallReverseNatConfiguration(String inIface,List<FirewallReverseNatConfig> reverseNatConfigs) throws KuraException;
+	
 	/**
 	 * Updates the Firewall configuration based on current environmental conditions. This is
 	 * used to update the firewall in events where NAT rules need to change based on a new WAN

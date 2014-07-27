@@ -65,8 +65,6 @@
               tofile="${project.build.directory}/kura-${build.name}-jars_${project.version}/snapshot_0.xml" />
         <copy    file="${kura.osgi.config.path}"
                  tofile="${project.build.directory}/kura-${build.name}-jars_${project.version}/${kura.osgi.config}" />
-        <copy    file="${project.build.directory}/classes/common/kura_upgrade_script.sh"
-                 todir="${project.build.directory}/kura-${build.name}-jars_${project.version}/dp_stage" />
 
         <replace file="${project.build.directory}/kura-${build.name}-jars_${project.version}/${kura.osgi.config}"
                  token="{project.version}" value="${project.version}"/>

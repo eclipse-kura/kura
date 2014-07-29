@@ -54,9 +54,28 @@ killall monit java >> $LOG 2>&1
 
 
 # Make a copy of the previous installation using hard links
+echo "Creating hard link copy of previous version into $INSTALL_DIR" >> $LOG 2>&1
 mkdir "/opt/eclipse/$INSTALL_DIR"
 cd "/opt/eclipse/kura" && find . -type d | cpio -dp /opt/eclipse/$INSTALL_DIR >> $LOG 2>&1
 cd "/opt/eclipse/kura" && find . -type f -exec ln {} /opt/eclipse/$INSTALL_DIR/{} \; >> $LOG 2>&1
+
+# Replace hard links with real copies for certain files
+FILES=" \
+	data/* \
+	kura/config.ini \
+	kura/dpa.properties \
+	kura/kura_install.log \
+	kura/kura.properties \
+	kura/log4j.properties
+"
+for f in $FILES
+do
+	target="/opt/eclipse/$INSTALL_DIR/$f"
+	echo "Creating a real copy of $target" >> $LOG 2>&1
+	rm -rf $target >> $LOG 2>&1
+	# copy file, removing the filename from the target to support wildcards
+	cp -r /opt/eclipse/kura/$f ${target%/*} >> $LOG 2>&1
+done
 
 echo "" >> $LOG 2>&1
 ##############################################
@@ -66,7 +85,7 @@ echo "" >> $LOG 2>&1
 SKIP=`cd $DIR && awk '/^__TARFILE_FOLLOWS__/ { print NR + 1; exit 0; }' $0`
 
 # take the tarfile and pipe it into tar and redirect the output
-cd $DIR && tail -n +$SKIP $0 | tar -xz
+cd $DIR && tail -n +$SKIP $0 | tar -xz >> $LOG 2>&1
 
 
 ##############################################

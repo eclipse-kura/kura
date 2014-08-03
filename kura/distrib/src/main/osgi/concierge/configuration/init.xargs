@@ -1,5 +1,8 @@
--Dorg.osgi.framework.system.packages.extra=javax.inject,javax.net,javax.net.ssl,javax.security,javax.security.auth,javax.security.cert,javax.naming,javax.sql,javax.microedition.io,javax.imageio,javax.imageio.metadata,org.ietf.jgss,javax.crypto,javax.crypto.spec,javax.xml.bind,javax.xml.bind.annotation,javax.xml.bind.annotation.adapters,javax.xml.bind.util,javax.xml.namespace,javax.xml.stream,javax.swing,javax.swing.border,javax.swing.event,javax.swing.tree,org.w3c.dom,javax.management,javax.xml.parsers,org.xml.sax,org.xml.sax.helpers,javax.jmdns,javax.xml.transform,javax.xml.transform.dom,javax.xml.transform.sax,javax.xml.transform.stream
-
+-Dorg.osgi.framework.system.packages.extra=javax.inject,javax.net,javax.net.ssl,javax.security,javax.security.auth,javax.security.cert,javax.naming,javax.sql,javax.imageio,javax.imageio.metadata,org.ietf.jgss,javax.crypto,javax.crypto.spec,javax.xml.bind,javax.xml.bind.annotation,javax.xml.bind.annotation.adapters,javax.xml.bind.util,javax.xml.namespace,javax.xml.stream,javax.swing,javax.swing.border,javax.swing.event,javax.swing.tree,org.w3c.dom,javax.management,javax.xml.parsers,org.xml.sax,org.xml.sax.helpers,javax.jmdns,javax.xml.transform,javax.xml.transform.dom,javax.xml.transform.sax,javax.xml.transform.stream,org.xml.sax.ext
+-Dequinox.ds.debug=true
+-Dequinox.ds.print=true
+#-Dequinox.scr.waitTimeOnBlock=50000
+-Dorg.osgi.framework.storage.clean=onFirstInit
 -init
 
 -istart plugins/ch.ethz.iks.concierge.shell_1.0.0.jar
@@ -10,20 +13,25 @@
 -install plugins/slf4j.log4j12_1.6.0.jar
 
 #equinox bundles
--istart plugins/org.eclipse.concierge.extension.permission_1.0.0.201407201043.jar
--istart plugins/org.eclipse.osgi.services_3.4.0.v20140312-2051.jar
+-istart plugins/org.eclipse.concierge.service.xmlparser_1.0.0.201407191653.jar
+-istart plugins/org.eclipse.osgi.services_3.3.100.v20120522-1822.jar
 -istart plugins/org.eclipse.equinox.supplement_1.5.100.v20140428-1446.jar
 -istart plugins/org.eclipse.equinox.util_1.0.500.v20130404-1337.jar
+-istart plugins/org.eclipse.equinox.cm_1.0.400.v20120522-1841.jar
+-istart plugins/org.eclipse.concierge.extension.permission_1.0.0.201407201043.jar
+-istart plugins/org.eclipse.equinox.common_3.6.100.v20120522-1841.jar
+-istart plugins/org.eclipse.equinox.registry_3.5.200.v20120522-1841.jar
+-istart plugins/org.eclipse.equinox.event_1.2.200.v20120522-2049.jar
+-istart plugins/org.eclipse.equinox.metatype_1.2.0.v20120522-1841.jar
+-istart plugins/org.eclipse.equinox.preferences_3.5.0.v20120522-1841.jar
 -istart plugins/org.eclipse.equinox.ds_1.4.0.v20120522-1841.jar
 
-#o.e.kura.web deps
+#jetty bundles
 -istart plugins/javax.servlet_3.0.0.v201112011016.jar
--istart plugins/org.apache.commons.fileupload_1.2.2.v20111214-1400.jar
--istart plugins/com.gwt.user_0.2.0.jar
 -istart plugins/org.eclipse.jetty.util_8.1.3.v20120522.jar
 -istart plugins/org.eclipse.jetty.io_8.1.3.v20120522.jar
--istart plugins/org.eclipse.jetty.continuation_8.1.3.v20120522.jar
 -istart plugins/org.eclipse.jetty.http_8.1.3.v20120522.jar
+-istart plugins/org.eclipse.jetty.continuation_8.1.3.v20120522.jar
 -istart plugins/org.eclipse.jetty.server_8.1.3.v20120522.jar
 -istart plugins/org.eclipse.jetty.security_8.1.3.v20120522.jar
 -istart plugins/org.eclipse.jetty.servlet_8.1.3.v20120522.jar
@@ -43,23 +51,27 @@
 #o.e.kura.core.cloud deps
 -istart plugins/org.apache.servicemix.bundles.protobuf-java_2.4.1.1.jar
 
-#o.e.kura.linux.clock deps
--istart plugins/org.apache.commons.net_3.1.0.v201205071737.jar
-
 #o.e.kura.linux.net deps
 -istart plugins/org.apache.commons.io_2.4.0.jar
+
+#o.e.kura.linux.clock deps
+-istart plugins/org.apache.commons.net_3.1.0.v201205071737.jar
 
 #o.e.kura.linux.usb deps
 -istart plugins/javax.usb.common_1.0.2.jar
 
+#o.e.kura.web deps
+-istart plugins/org.apache.commons.fileupload_1.2.2.v20111214-1400.jar
+-istart plugins/com.gwt.user_0.2.0.jar
+
 #Bundles commented out result in startup failiures due to equinox specific configurations
--istart kura/plugins/org.eclipse.kura.deployment.agent_{project.version}.v{kura.build.version}.jar
 -istart kura/plugins/org.eclipse.kura.api_{project.version}.v{kura.build.version}.jar
 -istart kura/plugins/org.eclipse.kura.core_{project.version}.v{kura.build.version}.jar
 -istart kura/plugins/org.eclipse.kura.core.cloud_{project.version}.v{kura.build.version}.jar
 -istart kura/plugins/org.eclipse.kura.core.comm_{project.version}.v{kura.build.version}.jar
 -istart kura/plugins/org.eclipse.kura.core.configuration_{project.version}.v{kura.build.version}.jar
 -istart kura/plugins/org.eclipse.kura.core.crypto_{project.version}.v{kura.build.version}.jar
+-istart kura/plugins/org.eclipse.kura.deployment.agent_{project.version}.v{kura.build.version}.jar
 -istart kura/plugins/org.eclipse.kura.core.deployment_{project.version}.v{kura.build.version}.jar
 -istart kura/plugins/org.eclipse.kura.core.net_{project.version}.v{kura.build.version}.jar
 -istart kura/plugins/org.eclipse.kura.linux.clock_{project.version}.v{kura.build.version}.jar

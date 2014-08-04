@@ -61,11 +61,13 @@ cd "/opt/eclipse/kura" && find . -type f -exec ln {} /opt/eclipse/$INSTALL_DIR/{
 
 # Replace hard links with real copies for certain files
 FILES=" \
+	bin/* \
 	data/* \
 	kura/config.ini \
 	kura/dpa.properties \
 	kura/kura_install.log \
 	kura/kura.properties \
+	kura/kura_custom.properties \
 	kura/log4j.properties
 "
 for f in $FILES

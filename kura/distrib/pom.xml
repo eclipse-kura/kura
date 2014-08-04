@@ -517,8 +517,6 @@
 											file="${project.build.directory}/staging/emulator/src/main/resources/Kura_Emulator_Linux.launch" />
 										<delete
 											file="${project.build.directory}/staging/emulator/src/main/resources/Kura_Emulator_OSX.launch" />
-										<copy file="src/main/resources/common/NOTICE.txt"
-											todir="${project.build.directory}/staging/emulator/src/main/resources" />
 										<copy file="RELEASE_NOTES.txt"
 											todir="${project.build.directory}/staging/emulator/src/main/resources" />
 										<copy file="src/main/resources/common/Kura_Emulator_Linux.launch"

@@ -101,7 +101,7 @@
 		<repository>
 			<id>p2-repo-common</id>
 			<layout>p2</layout>
-			<url>file:///${user.dir}/target-definition/common/repository/</url>
+			<url>file:///${user.dir}/kura/target-definition/common/repository/</url>
 		</repository>
 		<repository>
 			<id>kura_addons</id>

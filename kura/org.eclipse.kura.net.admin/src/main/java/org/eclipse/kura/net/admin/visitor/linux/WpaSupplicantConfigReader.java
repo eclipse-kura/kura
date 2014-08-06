@@ -262,6 +262,9 @@ public class WpaSupplicantConfigReader implements NetworkConfigurationVisitor {
         StringBuilder infraDriverKey = new StringBuilder("net.interface.").append(ifaceName).append(".config.wifi.infra.driver");
         //StringBuilder adhocDriverKey = new StringBuilder("net.interface.").append(ifaceName).append(".config.wifi.adhoc.driver");
         String wifiDriver = KuranetConfig.getProperty(infraDriverKey.toString());
+        if(wifiDriver == null || wifiDriver.isEmpty()) {
+        	wifiDriver = "nl80211";
+        }
         wifiConfig.setDriver(wifiDriver);
 
         return wifiConfig;

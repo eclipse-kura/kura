@@ -102,7 +102,6 @@ cp /opt/eclipse/kura/kura/config.ini /tmp/.kura/configuration/
 
 java -Xms${kura.mem.size} -Xmx${kura.mem.size} -XX:MaxPermSize=${kura.mem.size} -Dkura.os.version=${kura.os.version} \
 	-Dkura.arch=${kura.arch} \
-	-Dkura.ext.dir=/opt/eclipse/kura-${build.name}_${project.version}/lib/ext \
 	-Declipse.ignoreApp=true \
 	-Dkura.configuration=file:/opt/eclipse/kura/kura/kura.properties \
         -Ddpa.configuration=/opt/eclipse/kura/kura/dpa.properties \
@@ -125,7 +124,6 @@ cp /opt/eclipse/kura/kura/config.ini /tmp/.kura/configuration/
 java -Xms${kura.mem.size} -Xmx${kura.mem.size} -XX:MaxPermSize=${kura.mem.size} -Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=8000,suspend=n \
 	-Dkura.os.version=${kura.os.version} \
 	-Dkura.arch=${kura.arch} \
-	-Dkura.ext.dir=/opt/eclipse/kura-${build.name}_${project.version}/lib/ext \
 	-Declipse.ignoreApp=true \
 	-Dkura.configuration=file:/opt/eclipse/kura/kura/kura.properties \
         -Ddpa.configuration=/opt/eclipse/kura/kura/dpa.properties \
@@ -148,7 +146,6 @@ cp /opt/eclipse/kura/kura/config.ini /tmp/.kura/configuration/
 
 nohup java -Xms${kura.mem.size} -Xmx${kura.mem.size} -XX:MaxPermSize=${kura.mem.size} -Dkura.os.version=${kura.os.version} \
 		-Dkura.arch=${kura.arch} \
-        -Dkura.ext.dir=/opt/eclipse/kura-${build.name}_${project.version}/lib/ext  \
         -Declipse.ignoreApp=true \
         -Dkura.configuration=file:/opt/eclipse/kura/kura/kura.properties \
         -Ddpa.configuration=/opt/eclipse/kura/kura/dpa.properties \
@@ -170,8 +167,6 @@ echo $KURA_PID > /var/run/kura.pid
 
             <zipfileset file="${project.build.directory}/kura-${build.name}-jars_${project.version}/config.ini"
                         prefix="kura-${build.name}-jars_${project.version}/kura/" />
-	    <zipfileset file="src/main/resources/common/javax.comm.rxtx.properties"
-			prefix="kura-${build.name}-jars_${project.version}/lib/ext/" />
 
             <zipfileset file="src/main/resources/${build.name}/kura_install.sh"
                         prefix="kura-${build.name}-jars_${project.version}/install/" />

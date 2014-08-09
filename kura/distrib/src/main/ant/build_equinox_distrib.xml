@@ -103,8 +103,10 @@ cp /opt/eclipse/kura/kura/config.ini /tmp/.kura/configuration/
 java -Xms${kura.mem.size} -Xmx${kura.mem.size} -XX:MaxPermSize=${kura.mem.size} -Dkura.os.version=${kura.os.version} \
 	-Dkura.arch=${kura.arch} \
 	-Declipse.ignoreApp=true \
+	-Dkura.home=/opt/eclipse/kura/kura \
 	-Dkura.configuration=file:/opt/eclipse/kura/kura/kura.properties \
-        -Ddpa.configuration=/opt/eclipse/kura/kura/dpa.properties \
+	-Dkura.custom.configuration=file:/opt/eclipse/kura/kura/kura_custom.properties \
+	-Ddpa.configuration=/opt/eclipse/kura/kura/dpa.properties \
 	-Dlog4j.configuration=file:/opt/eclipse/kura/kura/log4j.properties \
 	-jar /opt/eclipse/kura/plugins/org.eclipse.osgi_3.8.1.v20120830-144521.jar \
 	-configuration  /tmp/.kura/configuration \
@@ -125,8 +127,10 @@ java -Xms${kura.mem.size} -Xmx${kura.mem.size} -XX:MaxPermSize=${kura.mem.size} 
 	-Dkura.os.version=${kura.os.version} \
 	-Dkura.arch=${kura.arch} \
 	-Declipse.ignoreApp=true \
+	-Dkura.home=/opt/eclipse/kura/kura \
 	-Dkura.configuration=file:/opt/eclipse/kura/kura/kura.properties \
-        -Ddpa.configuration=/opt/eclipse/kura/kura/dpa.properties \
+	-Dkura.custom.configuration=file:/opt/eclipse/kura/kura/kura_custom.properties \
+	-Ddpa.configuration=/opt/eclipse/kura/kura/dpa.properties \
 	-Dlog4j.configuration=file:/opt/eclipse/kura/kura/log4j.properties \
 	-jar /opt/eclipse/kura/plugins/org.eclipse.osgi_3.8.1.v20120830-144521.jar \
 	-configuration  /tmp/.kura/configuration \
@@ -145,15 +149,17 @@ mkdir -p /tmp/.kura/configuration
 cp /opt/eclipse/kura/kura/config.ini /tmp/.kura/configuration/
 
 nohup java -Xms${kura.mem.size} -Xmx${kura.mem.size} -XX:MaxPermSize=${kura.mem.size} -Dkura.os.version=${kura.os.version} \
-		-Dkura.arch=${kura.arch} \
-        -Declipse.ignoreApp=true \
-        -Dkura.configuration=file:/opt/eclipse/kura/kura/kura.properties \
-        -Ddpa.configuration=/opt/eclipse/kura/kura/dpa.properties \
-        -Dlog4j.configuration=file:/opt/eclipse/kura/kura/log4j.properties \
-        -jar /opt/eclipse/kura/plugins/org.eclipse.osgi_3.8.1.v20120830-144521.jar \
-        -configuration  /tmp/.kura/configuration \
-        -console 5002 \
-        -consoleLog >> /var/log/kura-console.log 2>> /var/log/kura-console.log &amp;
+	-Dkura.arch=${kura.arch} \
+	-Declipse.ignoreApp=true \
+	-Dkura.home=/opt/eclipse/kura/kura \
+	-Dkura.configuration=file:/opt/eclipse/kura/kura/kura.properties \
+	-Dkura.custom.configuration=file:/opt/eclipse/kura/kura/kura_custom.properties \
+	-Ddpa.configuration=/opt/eclipse/kura/kura/dpa.properties \
+	-Dlog4j.configuration=file:/opt/eclipse/kura/kura/log4j.properties \
+	-jar /opt/eclipse/kura/plugins/org.eclipse.osgi_3.8.1.v20120830-144521.jar \
+	-configuration  /tmp/.kura/configuration \
+	-console 5002 \
+	-consoleLog >> /var/log/kura-console.log 2>> /var/log/kura-console.log &amp;
 
 #Save the PID
 KURA_PID=$!
@@ -166,6 +172,9 @@ echo $KURA_PID > /var/run/kura.pid
                         prefix="kura-${build.name}-jars_${project.version}/data/snapshots/" />
 
             <zipfileset file="${project.build.directory}/kura-${build.name}-jars_${project.version}/config.ini"
+                        prefix="kura-${build.name}-jars_${project.version}/kura/" />
+
+            <zipfileset file="src/main/resources/common/kura_custom.properties"
                         prefix="kura-${build.name}-jars_${project.version}/kura/" />
 
             <zipfileset file="src/main/resources/${build.name}/kura_install.sh"

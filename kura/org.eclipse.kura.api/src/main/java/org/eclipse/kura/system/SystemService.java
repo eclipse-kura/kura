@@ -31,6 +31,8 @@ public interface SystemService
 {
 	public static final String KURA_CONFIG      = "kura.configuration";
 	public static final String KURA_PROPS_FILE  = "kura.properties";
+	public static final String KURA_CUSTOM_CONFIG      = "kura.custom.configuration";
+	public static final String KURA_CUSTOM_PROPS_FILE  = "kura_custom.properties";
 	public static final String OS_CLOUDBEES    = "Linux (Cloudbees)";
 	public static final String OS_LINUX        = "Linux";
 	public static final String OS_MAC_OSX      = "Mac OS X";

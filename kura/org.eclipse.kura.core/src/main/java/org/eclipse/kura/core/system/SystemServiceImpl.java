@@ -88,22 +88,22 @@ public class SystemServiceImpl implements SystemService
 		try {
 			//special cases for older versions to fix relative path bug in v2.0.4 and earlier
 			if(System.getProperty(KURA_CONFIG) != null && System.getProperty(KURA_CONFIG).trim().equals("file:kura/kura.properties")) {
-				System.setProperty(KURA_CONFIG, "file:/opt/eurotech/kura/kura/kura.properties");
+				System.setProperty(KURA_CONFIG, "file:/opt/eclipse/kura/kura/kura.properties");
 				updateTriggered = true;
 				s_logger.warn("Overridding invalid kura.properties location");
 			}
 			if(System.getProperty("dpa.configuration") != null && System.getProperty("dpa.configuration").trim().equals("kura/dpa.properties")) {
-				System.setProperty("dpa.configuration", "/opt/eurotech/kura/kura/dpa.properties");
+				System.setProperty("dpa.configuration", "/opt/eclipse/kura/kura/dpa.properties");
 				updateTriggered = true;
 				s_logger.warn("Overridding invalid dpa.properties location");
 			}
 			if(System.getProperty("log4j.configuration") != null && System.getProperty("log4j.configuration").trim().equals("file:kura/log4j.properties")) {
-				System.setProperty("log4j.configuration", "file:/opt/eurotech/kura/kura/log4j.properties");
+				System.setProperty("log4j.configuration", "file:/opt/eclipse/kura/kura/log4j.properties");
 				updateTriggered = true;
 				s_logger.warn("Overridding invalid log4j.properties location");
 			}
 			
-			// load the default kura.proeperties
+			// load the default kura.properties
 			// look for kura.properties as resource in the classpath
 			// if not found, look for such file in the kura.home directory
 			String kuraHome = System.getProperty(KEY_KURA_HOME_DIR);
@@ -125,29 +125,69 @@ public class SystemServiceImpl implements SystemService
 				}
 			}
 			else if (kuraHome != null) {
-				File kuraPropsFile = new File (kuraHome+File.pathSeparator+KURA_PROPS_FILE);
+				File kuraPropsFile = new File (kuraHome+File.separator+KURA_PROPS_FILE);
 				if (kuraPropsFile.exists()) {
 					kuraDefaults.load( new FileReader(kuraPropsFile));
 					s_logger.info("Loaded File kura.properties: "+kuraPropsFile);
+				} else {
+					s_logger.warn("File does not exist: " + kuraPropsFile);
 				}
+
 			}
 			else {
 				s_logger.error("Could not located kura.properties with kura.home "+kuraHome);
 			}
 			
+			// load custom kura properties
+			// look for kura_custom.properties as resource in the classpath
+			// if not found, look for such file in the kura.home directory
+			Properties kuraCustomProps = new Properties();
+			String kuraCustomConfig = System.getProperty(KURA_CUSTOM_CONFIG);
+			String kuraCustomProperties = IOUtil.readResource(KURA_CUSTOM_PROPS_FILE);
+			
+			if (kuraCustomProperties != null) {
+				kuraCustomProps.load( new StringReader(kuraCustomProperties));
+				s_logger.info("Loaded Jar Resource: " + KURA_CUSTOM_PROPS_FILE);
+			}
+			else if (kuraCustomConfig != null) {
+				try {
+					URL kuraConfigUrl = new URL(kuraCustomConfig);
+					kuraCustomProps.load(kuraConfigUrl.openStream());
+					s_logger.info("Loaded URL kura_custom.properties: "+kuraCustomConfig);
+				}
+				catch (Exception e) {
+					s_logger.warn("Could not open kuraCustomConfig URL: " + e);
+				}
+			}
+			else if (kuraHome != null) {
+				File kuraCustomPropsFile = new File (kuraHome+File.separator+KURA_CUSTOM_PROPS_FILE);
+				if (kuraCustomPropsFile.exists()) {
+					kuraCustomProps.load( new FileReader(kuraCustomPropsFile));
+					s_logger.info("Loaded File " + KURA_CUSTOM_PROPS_FILE + ": " + kuraCustomPropsFile);
+				} else {
+					s_logger.warn("File does not exist: " + kuraCustomPropsFile);
+				}
+			}
+			else {
+				s_logger.info("Did not locate a kura_custom.properties file in " + kuraHome);
+			}
+			
+			// Override defaults with values from kura_custom.properties
+			kuraDefaults.putAll(kuraCustomProps);
+			
 			//more path overrides based on earlier Kura problem with relative paths
 			if(kuraDefaults.getProperty(KEY_KURA_HOME_DIR) != null && kuraDefaults.getProperty(KEY_KURA_HOME_DIR).trim().equals("kura")) {
-				kuraDefaults.setProperty(KEY_KURA_HOME_DIR, "/opt/eurotech/kura/kura");
+				kuraDefaults.setProperty(KEY_KURA_HOME_DIR, "/opt/eclipse/kura/kura");
 				updateTriggered = true;
 				s_logger.warn("Overridding invalid kura.home location");
 			}
 			if(kuraDefaults.getProperty(KEY_KURA_PLUGINS_DIR) != null && kuraDefaults.getProperty(KEY_KURA_PLUGINS_DIR).trim().equals("kura/plugins")) {
-				kuraDefaults.setProperty(KEY_KURA_PLUGINS_DIR, "/opt/eurotech/kura/kura/plugins");
+				kuraDefaults.setProperty(KEY_KURA_PLUGINS_DIR, "/opt/eclipse/kura/kura/plugins");
 				updateTriggered = true;
 				s_logger.warn("Overridding invalid kura.plugins location");
 			}	
 			if(kuraDefaults.getProperty("kura.packages") != null && kuraDefaults.getProperty("kura.packages").trim().equals("kura/packages")) {
-				kuraDefaults.setProperty("kura.packages", "/opt/eurotech/kura/kura/packages");
+				kuraDefaults.setProperty("kura.packages", "/opt/eclipse/kura/kura/packages");
 				updateTriggered = true;
 				s_logger.warn("Overridding invalid kura.packages location");
 			}
@@ -156,13 +196,13 @@ public class SystemServiceImpl implements SystemService
 			if(updateTriggered) {
 		        File    directory;       // Desired current working directory
 
-		        directory = new File("/opt/eurotech/kura").getAbsoluteFile();
+		        directory = new File("/opt/eclipse/kura").getAbsoluteFile();
 		        if (directory.exists() || directory.mkdirs())
 		        {
 		        	String oldDir = System.getProperty("user.dir");
 		            boolean result = (System.setProperty("user.dir", directory.getAbsolutePath()) != null);
 		            if(result) {
-		            	s_logger.warn("Changed working directory to /opt/eurotech/kura from " + oldDir);
+		            	s_logger.warn("Changed working directory to /opt/eclipse/kura from " + oldDir);
 		            }
 		        }
 		        
@@ -175,7 +215,7 @@ public class SystemServiceImpl implements SystemService
 				s_logger.info("kura.packages = " + kuraDefaults.getProperty("kura.packages"));
 
 				//write out Kura defaults back to kuraPropsFile
-				FileOutputStream fos = new FileOutputStream(kuraHome+File.pathSeparator+KURA_PROPS_FILE);
+				FileOutputStream fos = new FileOutputStream(kuraHome+File.separator+KURA_PROPS_FILE);
 				kuraDefaults.store(fos, null);
 				fos.flush();
 				fos.getFD().sync();

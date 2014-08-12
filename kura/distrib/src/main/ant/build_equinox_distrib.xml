@@ -19,7 +19,7 @@
         <copy file="src/main/resources/${build.name}/kura.properties"
               tofile="${project.build.directory}/kura-${build.name}-jars_${project.version}/kura.properties" />
         <propertyfile file="${project.build.directory}/kura-${build.name}-jars_${project.version}/kura.properties">
-            <entry key="kura.version"   value="${kura.version}" />
+            <entry key="kura.version"   value="KURA_${kura.version}" />
             <entry key="kura.home"   value="/opt/eclipse/kura/kura" />
             <entry key="kura.plugins"   value="/opt/eclipse/kura/kura/plugins" />
             <entry key="kura.packages"   value="/opt/eclipse/kura/kura/packages" />

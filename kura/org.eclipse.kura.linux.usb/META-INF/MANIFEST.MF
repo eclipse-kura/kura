@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: org.eclipse.kura.linux.usb
 Bundle-SymbolicName: org.eclipse.kura.linux.usb;singleton:=true
-Bundle-Version: 0.2.0.qualifier
+Bundle-Version: 0.7.0
 Bundle-Vendor: EUROTECH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Service-Component: OSGI-INF/*.xml

@@ -379,7 +379,7 @@ DeploymentPackage-Version: ${deployment.package.version}
 
 Name: org.eclipse.kura.deployment.customizer.upgrade_${org.eclipse.kura.deployment.customizer.upgrade.version}.v${kura.build.version}.jar
 Bundle-SymbolicName: org.eclipse.kura.deployment.customizer.upgrade
-Bundle-Version: 0.2.0.${kura.build.version}
+Bundle-Version: 0.7.0.${kura.build.version}
 DeploymentPackage-Customizer: true
 
 Name: z_kura_dp_upgrader.sh

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (c) 2011, 2014 Eurotech and/or its affiliates
+
+     All rights reserved. This program and the accompanying materials
+     are made available under the terms of the Eclipse Public License v1.0
+     which accompanies this distribution, and is available at
+     http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Eurotech
+
+-->
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" activate="activate" configuration-policy="require" deactivate="deactivate" enabled="true" immediate="true" modified="updated" name="org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport">
+   <implementation class="org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport"/>
+   <service>
+      <provide interface="org.eclipse.kura.data.DataTransportService"/>
+      <provide interface="org.eclipse.kura.ssl.SslServiceListener" />
+   </service>
+   <property name="service.pid" value="org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport"/>
+   <reference name="SystemService" 
+              policy="static"
+              cardinality="1..1"
+              bind="setSystemService"
+              unbind="unsetSystemService"
+              interface="org.eclipse.kura.system.SystemService"/>
+   <reference name="SslManagerService" 
+              policy="static"
+              cardinality="1..1"
+              bind="setSslManagerService"
+              unbind="unsetSslManagerService"
+              interface="org.eclipse.kura.ssl.SslManagerService"/>
+</scr:component>

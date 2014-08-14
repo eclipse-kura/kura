@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (c) 2011, 2014 Eurotech and/or its affiliates
+
+     All rights reserved. This program and the accompanying materials
+     are made available under the terms of the Eclipse Public License v1.0
+     which accompanies this distribution, and is available at
+     http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Eurotech
+
+-->
+<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
+    <OCD id="org.eclipse.kura.position.PositionService"
+         name="PositionService" 
+         description="Emulated implementation of the PositionService.">
+        
+        <Icon resource="PositionService" size="32"/>
+        
+        <AD id="enabled"
+            name="enabled"
+            type="Boolean"
+            cardinality="0"
+            required="true"
+            default="true"
+            description="The emulated PositionService is always enabled and using sample GPS positions."/>
+        
+        <AD id="useGpsd"
+            name="useGpsd"
+            type="Boolean"
+            cardinality="0"
+            required="true"
+            default="false"
+            description="If true uses the gpsd service daemon. This implies that this daemon must be installed and active first."/>
+                
+    </OCD>
+    <Designate pid="org.eclipse.kura.position.PositionService">
+        <Object ocdref="org.eclipse.kura.position.PositionService"/>
+    </Designate>
+</MetaData>

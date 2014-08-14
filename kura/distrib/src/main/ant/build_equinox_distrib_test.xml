@@ -1,0 +1,251 @@
+<!--
+
+    Copyright (c) 2011, 2014 Eurotech and/or its affiliates
+
+     All rights reserved. This program and the accompanying materials
+     are made available under the terms of the Eclipse Public License v1.0
+     which accompanies this distribution, and is available at
+     http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Eurotech
+
+-->
+<project name="build_equinox_distrib" default="dist-linux" basedir="../../../">
+
+    <target name="dist-linux"> <!-- depends="replace-core-configs,replace-linux-configs" -->
+		<!-- props in ant are immutable - so if they got set before - it's fine and they will not be overridden -->
+		<property name="core.location" value="../org.eclipse.kura.core/target/org.eclipse.kura.core_${project.version}.v${kura.build.version}.jar"/>
+		<property name="linux.location" value="../org.eclipse.kura.linux/target/org.eclipse.kura.linux_${project.version}.v${kura.build.version}.jar"/>
+	        <property name="core.crypto.location" value="../org.eclipse.kura.core.crypto/target/org.eclipse.kura.core.crypto_${project.version}.v${kura.build.version}.jar"/>
+
+        <echo message="Building Kura Distribution for ${build.name}-test..." />
+        
+        <copy file="src/main/resources/${build.name}/kura.properties"
+              tofile="${project.build.directory}/kura-${build.name}-test_${project.version}/kura.properties" />
+        <propertyfile file="${project.build.directory}/kura-${build.name}-test_${project.version}/kura.properties">
+            <entry key="kura.version"   value="${kura.bundle.versions}" />
+            <entry key="kura.home"   value="kura" />
+            <entry key="kura.plugins"   value="/opt/eclipse/kura/kura/plugins" />
+            <entry key="kura.packages"   value="/opt/eclipse/kura/kura/packages" />
+            <entry key="version"       value="${kura.bundle.versions}" />
+            <entry key="build.version" value="${buildNumber}" />
+            <entry key="build.number"  value="${build.name}-${buildNumber}" />
+        </propertyfile>
+
+        <copy file="src/main/resources/${build.name}/snapshot_0.xml"
+              tofile="${project.build.directory}/kura-${build.name}-test_${project.version}/snapshot_0.xml" />
+    
+        <copy    file="src/main/osgi/equinox_3.8.1/configuration/config-test.ini"
+                 tofile="${project.build.directory}/kura-${build.name}-test_${project.version}/config.ini" />
+        <replace file="${project.build.directory}/kura-${build.name}-test_${project.version}/config.ini"
+                 token="{project.version}" value="${project.version}"/>
+        <replace file="${project.build.directory}/kura-${build.name}-test_${project.version}/config.ini"
+                 token="{kura.build.version}" value="${kura.build.version}"/>
+
+        <propertyfile file="${project.build.directory}/kura-${build.name}-test_${project.version}/config.ini">
+            <entry key="osgi.bundles" operation="+"
+                   value=", reference:file:/opt/eclipse/kura/kura/plugins/org.eclipse.kura.linux_${project.version}.v${kura.build.version}.jar@4:start" />
+            <entry key="osgi.bundles" operation="+"
+                   value=", reference:file:/opt/eclipse/kura/kura/plugins/org.eclipse.kura.linux.test_${project.version}.v${kura.build.version}.jar@4" />
+            <entry key="osgi.bundles" operation="+"
+                   value=", reference:file:/opt/eclipse/kura/kura/plugins/org.eclipse.kura.net.admin_${project.version}.v${kura.build.version}.jar@4:start" />
+        </propertyfile>
+
+        <propertyfile file="${project.build.directory}/kura-${build.name}-test_${project.version}/dpa.properties"> 
+            <!--
+            <entry key="kura"
+                   value="file:/opt/eclipse/kura/kura/packages/kura-${build.name}-test_${project.version}.dp" />
+            -->
+        </propertyfile>
+
+	<!-- Create the Kura start scripts -->
+	<echo file="${project.build.directory}/kura-${build.name}_${project.version}/start_kura.sh" append="false">#!/bin/sh
+
+export PATH=/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/opt/jvm/bin:/usr/java/bin
+
+cd $(dirname $0)/..
+
+java -Xms${kura.mem.size} -Xmx${kura.mem.size} -XX:MaxPermSize=${kura.mem.size} -Dkura.os.version=${kura.os.version} \
+	-Declipse.ignoreApp=true \
+	-Dkura.configuration=file:/opt/eclipse/kura/kura/kura.properties \
+        -Ddpa.configuration=/opt/eclipse/kura/kura/dpa.properties \
+	-Dlog4j.configuration=file:/opt/eclipse/kura/kura/log4j.properties \
+	-jar plugins/org.eclipse.osgi_3.8.1.v20120830-144521.jar \
+	-configuration configuration \
+	-console \
+	-consoleLog
+	</echo>    
+	<echo file="${project.build.directory}/kura-${build.name}_${project.version}/start_kura_debug.sh" append="false">#!/bin/sh
+
+export PATH=/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/opt/jvm/bin:/usr/java/bin
+
+cd $(dirname $0)/..
+
+java -Xms${kura.mem.size} -Xmx${kura.mem.size} -XX:MaxPermSize=${kura.mem.size} -Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=8000,suspend=n \
+	-Dkura.os.version=${kura.os.version} \
+	-Declipse.ignoreApp=true \
+	-Dkura.configuration=file:/opt/eclipse/kura/kura/kura.properties \
+        -Ddpa.configuration=/opt/eclipse/kura/kura/dpa.properties \
+	-Dlog4j.configuration=file:/opt/eclipse/kura/kura/log4j.properties \
+	-jar plugins/org.eclipse.osgi_3.8.1.v20120830-144521.jar \
+	-configuration configuration \
+	-console \
+	-consoleLog
+	</echo>    
+	<echo file="${project.build.directory}/kura-${build.name}_${project.version}/start_kura_background.sh" append="false"># Kura should be installed to the /opt/eclipse directory.
+
+#!/bin/sh
+
+export PATH=/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/opt/jvm/bin:/usr/java/bin
+
+cd /opt/eclipse/kura
+
+nohup java -Xms${kura.mem.size} -Xmx${kura.mem.size} -XX:MaxPermSize=${kura.mem.size} -Dkura.os.version=${kura.os.version} \
+        -Declipse.ignoreApp=true \
+        -Dkura.configuration=file:/opt/eclipse/kura/kura/kura.properties \
+        -Ddpa.configuration=/opt/eclipse/kura/kura/dpa.properties \
+        -Dlog4j.configuration=file:/opt/eclipse/kura/kura/log4j.properties \
+        -jar plugins/org.eclipse.osgi_3.8.1.v20120830-144521.jar \
+        -configuration configuration/ \
+        -console 5002 \
+        -consoleLog >> /var/log/kura-console.log 2>> /var/log/kura-console.log &amp;
+
+#Save the PID
+KURA_PID=$!
+echo $KURA_PID > /var/run/kura.pid
+	</echo>
+        
+        <zip destfile="${project.build.directory}/kura-${build.name}-test_${project.version}.zip">
+    
+            <zipfileset file="${project.build.directory}/kura-${build.name}_${project.version}/snapshot_0.xml"
+                        prefix="data/snapshots/" />
+
+            <zipfileset file="${project.build.directory}/kura-${build.name}-test_${project.version}/config.ini"
+                        prefix="kura-${build.name}-test_${project.version}/configuration/" />
+
+            <zipfileset file="src/main/resources/${build.name}/kura_install.sh"
+                        prefix="kura-${build.name}-test_${project.version}/install/" />
+
+            <zipfileset file="src/main/resources/${build.name}/kuranet.conf"
+                        prefix="kura-${build.name}-test_${project.version}/install/" />
+
+	    <zipfileset file="src/main/resources/${build.name}/recover_dflt_kura_config.sh"
+                        prefix="kura-${build.name}-test_${project.version}/install/" />
+
+            <zipfileset file="src/main/resources/common/kura.init.wrl"
+                        prefix="kura-${build.name}-test_${project.version}/install" />
+            <zipfileset file="src/main/resources/common/kura.init.yocto"
+                        prefix="kura-${build.name}-test_${project.version}/install" />
+            <zipfileset file="src/main/resources/${build.name}/firewall.init"
+                        prefix="kura-${build.name}-test_${project.version}/install" />
+            <zipfileset file="src/main/resources/common/monit.init.wrl"
+                        prefix="kura-${build.name}-test_${project.version}/install" />
+            <zipfileset file="src/main/resources/common/monit.init.yocto"
+                        prefix="kura-${build.name}-test_${project.version}/install" />
+            <zipfileset file="src/main/resources/common/monitrc.wrl"
+                        prefix="kura-${build.name}-test_${project.version}/install" />
+            <zipfileset file="src/main/resources/common/monitrc.yocto"
+                        prefix="kura-${build.name}-test_${project.version}/install" />
+
+            <zipfileset file="src/main/resources/common/hostapd.conf"
+                        prefix="kura-${build.name}-test_${project.version}/install" />
+            <zipfileset file="src/main/resources/common/dhcpd-eth0.conf"
+                        prefix="kura-${build.name}-test_${project.version}/install" />
+            <zipfileset file="src/main/resources/common/dhcpd-wlan0.conf"
+                        prefix="kura-${build.name}-test_${project.version}/install" />
+
+            <zipfileset file="src/main/resources/common/named/named.conf"
+                        prefix="kura-${build.name}-test_${project.version}/install" />
+            <zipfileset file="src/main/resources/common/named/named.ca"
+                        prefix="kura-${build.name}-test_${project.version}/install" />
+            <zipfileset file="src/main/resources/common/named/named.rfc1912.zones"
+                        prefix="kura-${build.name}-test_${project.version}/install" />
+
+            <zipfileset file="src/main/resources/common/ifcfg-eth0"
+                        prefix="kura-${build.name}-test_${project.version}/install" />
+            <zipfileset file="src/main/resources/common/ifcfg-eth1"
+                        prefix="kura-${build.name}-test_${project.version}/install" />
+            <zipfileset file="src/main/resources/common/ifcfg-wlan0"
+                        prefix="kura-${build.name}-test_${project.version}/install" />
+            <zipfileset file="src/main/resources/common/network.interfaces"
+                        prefix="kura-${build.name}-test_${project.version}/install" />
+            <zipfileset file="src/main/resources/common/ifdown-local"
+                        prefix="kura-${build.name}-test_${project.version}/install" />
+            <zipfileset file="src/main/resources/common/ifup-local"
+                        prefix="kura-${build.name}-test_${project.version}/install" />
+            <zipfileset file="src/main/resources/common/ifup-local.debian"
+                        prefix="kura-${build.name}-test_${project.version}/install" />
+            <zipfileset file="src/main/resources/common/ip-down.local"
+                        prefix="kura-${build.name}-test_${project.version}/install" />
+            <zipfileset file="src/main/resources/common/ip-up.local"
+                        prefix="kura-${build.name}-test_${project.version}/install" />
+
+            <zipfileset file="${project.build.directory}/kura-${build.name}_${project.version}/start_kura.sh"
+                        fullpath="kura-${build.name}-test_${project.version}/bin/start_kura.sh" filemode="777" />
+            <zipfileset file="${project.build.directory}/kura-${build.name}_${project.version}/start_kura_debug.sh"
+                        fullpath="kura-${build.name}-test_${project.version}/bin/start_kura_debug.sh" filemode="777" />
+            <zipfileset file="${project.build.directory}/kura-${build.name}_${project.version}/start_kura_background.sh"
+                        fullpath="kura-${build.name}-test_${project.version}/bin/start_kura_background.sh" filemode="777" />
+
+            <zipfileset file="RELEASE_NOTES.txt"
+                        prefix="kura-${build.name}-test_${project.version}/kura/" />
+            <zipfileset file="notice.html"
+                        prefix="kura-${build.name}-test_${project.version}/" />
+            <zipfileset file="epl-v10.html"
+                        prefix="kura-${build.name}-test_${project.version}/" />
+            <zipfileset file="src/main/resources/${build.name}/log4j.properties"
+                        prefix="kura-${build.name}-test_${project.version}/kura/" />
+            <zipfileset file="${project.build.directory}/kura-${build.name}-test_${project.version}/kura.properties"
+                        prefix="kura-${build.name}-test_${project.version}/kura/" />
+    
+            <zipfileset dir="../target-definition/equinox_3.8.1/repository/plugins"
+                        prefix="kura-${build.name}-test_${project.version}/plugins"/>
+    
+            <zipfileset file="../org.eclipse.kura.deployment.agent/target/org.eclipse.kura.deployment.agent_${project.version}.v${kura.build.version}.jar"
+                        prefix="kura-${build.name}-test_${project.version}/kura/plugins" />
+            <zipfileset file="../org.eclipse.kura.api/target/org.eclipse.kura.api_${project.version}.v${kura.build.version}.jar"
+                        prefix="kura-${build.name}-test_${project.version}/kura/plugins" />
+            <zipfileset file="${core.location}"
+                        prefix="kura-${build.name}-test_${project.version}/kura/plugins" />
+            <zipfileset file="${core.crypto.location}"
+                        prefix="kura-${build.name}-test_${project.version}/kura/plugins" />
+            <zipfileset file="${linux.location}"
+                        prefix="kura-${build.name}-test_${project.version}/kura/plugins" />
+            <zipfileset file="../org.eclipse.kura.protocol.modbus/target/org.eclipse.kura.protocol.modbus_${project.version}.v${kura.build.version}.jar"
+                        prefix="kura-${build.name}-test_${project.version}/kura/plugins" />
+            <zipfileset file="../org.eclipse.kura.emulator/target/org.eclipse.kura.linux_${project.version}.v${kura.build.version}.jar"
+                        prefix="kura-${build.name}-test_${project.version}/kura/plugins" />
+            <zipfileset file="../org.eclipse.kura.net.admin/target/org.eclipse.kura.net.admin_${project.version}.v${kura.build.version}.jar"
+                        prefix="kura-${build.name}-test_${project.version}/kura/plugins" />
+<!--
+            <zipfileset file="../org.eclipse.kura.web/target/org.eclipse.kura.web_${project.version}.v${kura.build.version}.jar"
+                        prefix="kura-${build.name}-test_${project.version}/kura/plugins" />
+-->
+
+	    <!-- Test Specific Core Bundles -->
+            <zipfileset file="src/main/resources/common/org.hamcrest.core-1.1.0.v20090501071000.jar"
+                        prefix="kura-${build.name}-test_${project.version}/plugins" />
+            <zipfileset file="src/main/resources/common/org.junit-4.10.0.v4_10_0_v20120426-0900.jar"
+                        prefix="kura-${build.name}-test_${project.version}/plugins" />
+            <zipfileset file="src/main/resources/common/org.junit4-4.8.1.v20120523-1257.jar"
+                        prefix="kura-${build.name}-test_${project.version}/plugins" />
+            <zipfileset file="../org.eclipse.kura.test/target/org.eclipse.kura.test_${project.version}.v${kura.build.version}.jar"
+                        prefix="kura-${build.name}-test_${project.version}/kura/plugins" />
+
+	    <!-- Test Bundles -->
+            <zipfileset file="../org.eclipse.kura.core.test/target/org.eclipse.kura.core.test_${project.version}.v${kura.build.version}.jar"
+                        prefix="kura-${build.name}-test_${project.version}/kura/plugins" />
+            <zipfileset file="../org.eclipse.kura.linux.test/target/org.eclipse.kura.linux.test_${project.version}.v${kura.build.version}.jar"
+                        prefix="kura-${build.name}-test_${project.version}/kura/plugins" />
+
+            <zipfileset file="${project.build.directory}/kura-${build.name}-test_${project.version}/dpa.properties"
+                        prefix="kura-${build.name}-test_${project.version}/kura/" />
+
+        </zip>
+
+        <echo message="Building Kura Distribution for ${build.name}-test... Done." />             
+    </target>
+
+</project>
+

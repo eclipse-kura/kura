@@ -1,0 +1,49 @@
+#! /bin/sh
+### BEGIN INIT INFO
+# Provides:          kura
+# Required-Start:    $all
+# Required-Stop:     $all
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Kura initscript
+# Description:
+### END INIT INFO
+
+kura=/opt/eclipse/kura/bin/start_kura_background.sh
+pidfile=/var/run/kura.pid
+kura_args=""
+
+export PATH=$PATH:/usr/java/bin
+
+test -x "$kura" || exit 0
+
+case "$1" in
+  start)
+    echo -n "Starting Kura"
+    start-stop-daemon --start --quiet --exec $kura -- $kura_args
+    RETVAL=$?
+    echo "."
+    ;;
+  stop)
+    echo -n "Stopping Kura"
+    ((echo "stop 0"; sleep 10) | telnet localhost 5002) > /dev/null 2>&1
+    start-stop-daemon --stop --quiet --pidfile $pidfile
+    RETVAL=$?
+    echo "."
+    ;;
+  restart)
+    $0 stop
+    $0 start
+    RETVAL=$?
+    ;;
+  status)
+    $kura $kura_args status
+    RETVAL=$?
+    echo "."
+    ;;
+  *)
+    echo "Usage: $0 {start|stop|restart|status}"
+    exit 1
+esac
+
+exit $RETVAL

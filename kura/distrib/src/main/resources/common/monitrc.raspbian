@@ -1,0 +1,14 @@
+set daemon 5
+set logfile syslog facility log_daemon
+set statefile /var/.monit.state
+check system localhost
+        if memory usage > 75% then alert
+        if cpu usage (user) > 80% for 1 cycles then alert
+        if cpu usage (system) > 80% for 1 cycles then alert
+        if cpu usage (user) > 90% for 30 cycles then unmonitor
+        if cpu usage (system) > 90% for 30 cycles then unmonitor
+        if loadavg(15min) greater than 4 for 5 cycle then alert
+check process kura with pidfile "/var/run/kura.pid"
+   start program = "/etc/init.d/kura start"
+   stop  program = "/etc/init.d/kura stop"
+   if cpu usage > 80% for 5 cycles then alert

@@ -1,0 +1,26 @@
+Eclipse Kura - Initial Version
+-------------------------------------------------------------------------
+
+Features:
+   * Runs on Java SE 7 Embedded and OpenJDK 7
+   * Core OSGi runtime using Eclipse Equinox v3.8.1
+   * API support including:
+	* Clock (both system clock syncing via NTP and hardware clock sync)
+	* Cloud connections (MQTT) with local store and forward capabilities to handle disconnected states as well as Google Protobuf message packing
+	* Service configuration locally and remotely via OSGi ConfigAdmin with Metatype support
+	* Network status including IP address, netmask, DNS, gateway, and hardware types
+	* Network administration: modifying network configuration including IP address, netmask, DNS, gateway, DHPC servers, Nat/Masq, 
+				  firewall, wifi AP, wifi station, SSID, wifi security types, wifi channel, and cellular modems, and 
+				  routing tables.
+	* GPS configuration
+	* USB devices including dynamic detection
+   * OSGi Deployment Package support
+   * Local configuration web UI
+   * Eclipse based emulator for local host PC development/testing including support for OSX and Linux
+   * Remote configuration and device management capabilities when connected to Eurotech's Everyware Cloud
+   * Support for remote OSGi console and bundle deployment from Eclipse
+
+Known Issues:
+   * Hardware watchdog: not implemented on all platforms
+   * Reliagate 50-21: Using eth1 and Windows 7 to access the webui does not work over some network topologies - OSX or Linux are recommended to access the webui in this rare case
+   * Only one WAN interface is currently supported.  Make sure you never have multiple WAN interfaces defined or it could result in network connectivity issues

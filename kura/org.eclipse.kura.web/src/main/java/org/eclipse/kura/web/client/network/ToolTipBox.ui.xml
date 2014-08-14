@@ -1,0 +1,29 @@
+<!--
+
+    Copyright (c) 2011, 2014 Eurotech and/or its affiliates
+
+     All rights reserved. This program and the accompanying materials
+     are made available under the terms of the Eclipse Public License v1.0
+     which accompanies this distribution, and is available at
+     http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Eurotech
+
+-->
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+	xmlns:g="urn:import:com.google.gwt.user.client.ui">
+	<ui:style>
+		.tool-tip {
+			border: 1px solid;
+			border-color: #b5b8c8;
+			left: 470px;
+			position: absolute
+		}
+	</ui:style>
+	<g:HTMLPanel>
+	    <g:Label ui:field="label" styleName='{style.tool-tip}' addStyleNames="tool-tip-label"/>
+		<g:HTML ui:field="textArea" styleName='{style.tool-tip}' addStyleNames="tool-tip-textarea"/>
+	</g:HTMLPanel>
+</ui:UiBinder> 

@@ -1,0 +1,28 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: org.eclipse.kura.example.project
+Bundle-SymbolicName: org.eclipse.kura.example.project;singleton:=true
+Bundle-Version: 0.7.0
+Bundle-Vendor: EUROTECH
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Service-Component: OSGI-INF/component.xml
+Import-Package: javax.comm;version="1.2.0",
+ javax.microedition.io;resolution:=optional,
+ org.eclipse.kura; version="[0.2,1.0)",
+ org.eclipse.kura.clock; version="[0.2,1.0)",
+ org.eclipse.kura.cloud; version="[0.2,0.3)",
+ org.eclipse.kura.comm; version="[0.2,1.0)",
+ org.eclipse.kura.configuration; version="[0.2,1.0)",
+ org.eclipse.kura.message; version="[0.2,1.0)",
+ org.eclipse.kura.net; version="[0.2,1.0)",
+ org.eclipse.kura.net.wifi; version="[0.2,1.0)",
+ org.eclipse.kura.position; version="[0.2,1.0)",
+ org.eclipse.kura.system; version="[0.2,1.0)",
+ org.eclipse.kura.usb; version="[0.2,1.0)",
+ org.osgi.framework;version="1.5.0",
+ org.osgi.service.component;version="1.2.0",
+ org.osgi.service.event;version="1.3.0",
+ org.osgi.service.io;version="1.0.0",
+ org.osgi.util.position;version="1.0.1",
+ org.slf4j;version="1.6.4"
+Bundle-ClassPath: .

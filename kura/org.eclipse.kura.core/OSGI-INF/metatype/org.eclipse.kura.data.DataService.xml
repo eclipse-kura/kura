@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (c) 2011, 2014 Eurotech and/or its affiliates
+
+     All rights reserved. This program and the accompanying materials
+     are made available under the terms of the Eclipse Public License v1.0
+     which accompanies this distribution, and is available at
+     http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Eurotech
+
+-->
+<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
+    <OCD id="org.eclipse.kura.data.DataService"
+         name="DataService" 
+         description="DataService provides auto-connect, reconnect on connection drops and storing of outgoing messages.">
+
+        <Icon resource="DataService" size="32"/>
+        
+        <AD id="connect.auto-on-startup"
+            name="connect.auto-on-startup"
+            type="Boolean"
+            cardinality="0"
+            required="true"
+            default="false"
+            description="Enable automatic connect of the Data Publishers on startup."/>
+                        
+        <AD id="connect.retry-interval"
+            name="connect.retry-interval"
+            type="Integer"
+            cardinality="0" 
+            required="true"
+            default="60"
+            min="0"
+            description="Frequency in seconds to retry a connection of the Data Publishers after a disconnect (0 to disable)."/>
+            
+        <AD id="disconnect.quiesce-timeout"
+            name="disconnect.quiesce-timeout"
+            type="Integer"
+            cardinality="0"
+            required="true"
+            default="10"
+            min="0"
+            description="Timeout used to try to complete the delivery of stored messages before forcing a disconnect of the Data Publisher."/>
+
+        <AD id="store.housekeeper-interval"
+            name="store.housekeeper-interval"
+            type="Integer"
+            cardinality="0"
+            required="true"
+            default="900"
+            min="5"
+            description="Interval in seconds used to run the Data Store housekeeper task (min 5)."/>
+
+        <AD id="store.purge-age"
+            name="store.purge-age"
+            type="Integer"
+            cardinality="0"
+            required="true"
+            default="60"
+            min="5"
+            description="Age in seconds of completed messages (either published with QoS = 0 or confirmed with QoS > 0) after which they are deleted (min 5)."/>
+            
+        <AD id="store.capacity"
+            name="store.capacity"
+            type="Integer"
+            cardinality="0"
+            required="true"
+            default="10000"
+            min="1"
+            description="Maximum number of messages persisted in the Data Store. The limit does not apply to messages with the priority less than 2. These priority levels are reserved to the framework which uses it for life-cycle messages - birth and death certificates - and replies to request/response flows."/>
+            
+        <AD id="in-flight-messages.republish-on-new-session"
+            name="in-flight-messages.republish-on-new-session"
+            type="Boolean"
+            cardinality="0"
+            required="true"
+            default="true"
+            description="Whether to republish in-flight messages on a new MQTT session."/>
+
+        <AD id="in-flight-messages.max-number"
+            name="in-flight-messages.max-number"
+            type="Integer"
+            cardinality="0"
+            required="true"
+            default="9"
+            min="1"
+            max="10"
+            description="The maximum number of in-flight messages."/>
+            
+        <AD id="in-flight-messages.congestion-timeout"
+            name="in-flight-messages.congestion-timeout"
+            type="Integer"
+            cardinality="0"
+            required="true"
+            default="0"
+            min="0"
+            description="Timeouts the in-flight messages congestion condition. The service will force a disconnect attempting to reconnect (0 to disable)."/>
+            
+    </OCD>
+    <Designate pid="org.eclipse.kura.data.DataService">
+        <Object ocdref="org.eclipse.kura.data.DataService"/>
+    </Designate>
+</MetaData>

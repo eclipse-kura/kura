@@ -1,0 +1,46 @@
+#! /bin/sh
+### BEGIN INIT INFO
+# Provides:          monit
+# Required-Start:    $all
+# Required-Stop:     $all
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: monit initscript
+# Description:
+### END INIT INFO
+
+monit=/usr/bin/monit
+pidfile=/var/run/monit.pid
+monit_args="-c /etc/monitrc"
+
+test -x "$monit" || exit 0
+
+case "$1" in
+  start)
+    echo -n "Starting Monit"
+    start-stop-daemon --start --quiet --exec $monit -- $monit_args
+    RETVAL=$?
+    echo "."
+    ;;
+  stop)
+    echo -n "Stopping Monit"
+    start-stop-daemon --stop --quiet --pidfile $pidfile
+    RETVAL=$?
+    echo "."
+    ;;
+  restart)
+    $0 stop
+    $0 start
+    RETVAL=$?
+    ;;
+  status)
+    $monit $monit_args status
+    RETVAL=$?
+    echo "."
+    ;;
+  *)
+    echo "Usage: $0 {start|stop|restart|status}"
+    exit 1
+esac
+
+exit $RETVAL

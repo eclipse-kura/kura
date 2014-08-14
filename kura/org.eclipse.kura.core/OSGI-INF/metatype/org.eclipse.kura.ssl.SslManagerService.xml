@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (c) 2011, 2014 Eurotech and/or its affiliates
+
+     All rights reserved. This program and the accompanying materials
+     are made available under the terms of the Eclipse Public License v1.0
+     which accompanies this distribution, and is available at
+     http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Eurotech
+
+-->
+<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
+    <OCD id="org.eclipse.kura.ssl.SslManagerService"
+         name="SslManagerService" 
+         description="The SslManagerService is responsible to manage the configuration of the SSL connections.">
+
+        <Icon resource="SslManagerService" size="32"/>
+        
+        <AD id="ssl.default.protocol"
+            name="ssl.default.protocol"
+            type="String"
+            cardinality="0"
+            required="false"
+            default="TLSv1"
+            description="The protocol to use to initialize the SSLContext. If not specified, TLSv1 will be used."/>
+                        
+        <AD id="ssl.hostname.verification"
+        	name="ssl.hostname.verification"
+        	type="Boolean"
+        	cardinality="0"
+        	required="false"
+        	default="true"
+        	description="Enable or disable hostname verification." />
+        	
+        <AD id="ssl.default.trustStore"
+            name="ssl.default.trustStore"
+            type="String"
+            cardinality="0" 
+            required="false"
+            default="/opt/eclipse/security/cacerts"
+            description="Location of the Java keystore file containing the collection of CA certificates trusted by this application process (trust store). Key store type is expected to be JKS. If not specified or the specified file does not exist, the default Java VM trust store will be used."/>
+            
+        <AD id="ssl.default.keyStore"
+            name="ssl.default.keyStore"
+            type="String"
+            cardinality="0" 
+            required="false"
+            default="/opt/eclipse/security/keystore"
+            description="Location of the Java keystore file containing an application process's own certificate and private key.  Key store type is expected to be JKS. If not specified or the specified file does not exist, the default Java VM key store will be used."/>
+
+        <AD id="ssl.default.cipherSuites"
+            name="ssl.default.cipherSuites"
+            type="String"
+            cardinality="0"
+            required="false"
+            default=""
+            description="Comma-separated list of allosed ciphers. If not specifed, all Java VM ciphers will be allowed."/>
+            
+    </OCD>
+    
+    <Designate pid="org.eclipse.kura.ssl.SslManagerService">
+        <Object ocdref="org.eclipse.kura.ssl.SslManagerService"/>
+    </Designate>
+</MetaData>

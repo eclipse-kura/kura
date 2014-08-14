@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" activate="activate" deactivate="deactivate" enabled="true" immediate="true" name="org.eclipse.kura.protocol.can.CanConnectionServiceImpl">
+   <implementation class="org.eclipse.kura.protocol.can.CanConnectionServiceImpl"/>
+   <service>
+      <provide interface="org.eclipse.kura.protocol.can.CanConnectionService"/>
+   </service>
+   <property name="service.pid" value="org.eclipse.kura.protocol.can.CanConnectionService"/>
+</scr:component>

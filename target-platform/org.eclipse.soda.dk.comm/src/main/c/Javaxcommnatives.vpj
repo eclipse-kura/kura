@@ -1,0 +1,122 @@
+<!DOCTYPE Project SYSTEM "http://www.slickedit.com/dtd/vse/10.0/vpj.dtd">
+<Project
+	Version="10.0"
+	VendorName="SlickEdit"
+	WorkingDir=".">
+	<Config
+		Name="Release"
+		OutputFile=""
+		CompilerConfigName="Latest Version">
+		<Menu>
+			<Target
+				Name="Compile"
+				MenuCaption="&amp;Compile"
+				CaptureOutputWith="ProcessBuffer"
+				SaveOption="SaveCurrent"
+				RunFromDir="%rw">
+				<Exec/>
+			</Target>
+			<Target
+				Name="Build"
+				MenuCaption="&amp;Build"
+				CaptureOutputWith="ProcessBuffer"
+				SaveOption="SaveWorkspaceFiles"
+				RunFromDir="%rw">
+				<Exec/>
+			</Target>
+			<Target
+				Name="Rebuild"
+				MenuCaption="&amp;Rebuild"
+				CaptureOutputWith="ProcessBuffer"
+				SaveOption="SaveWorkspaceFiles"
+				RunFromDir="%rw">
+				<Exec/>
+			</Target>
+			<Target
+				Name="Debug"
+				MenuCaption="&amp;Debug"
+				SaveOption="SaveNone"
+				RunFromDir="%rw">
+				<Exec/>
+			</Target>
+			<Target
+				Name="Execute"
+				MenuCaption="E&amp;xecute"
+				SaveOption="SaveNone"
+				RunFromDir="%rw">
+				<Exec CmdLine='"Javaxcommnatives.exe"'/>
+			</Target>
+		</Menu>
+	</Config>
+	<Files>
+		<Folder
+			Name="Source Files"
+			Filters="*.c;*.C;*.cc;*.cpp;*.cp;*.cxx;*.prg;*.pas;*.dpr;*.asm;*.s;*.bas;*.java;*.cs;*.sc;*.e;*.cob;*.html;*.rc;*.tcl;*.py;*.pl">
+			<F N="CommPortIdentifier.c"/>
+			<F N="cygCommDriver.c"/>
+			<F N="cygCommPortIdentifier.c"/>
+			<F N="cygDeviceInputStream.c"/>
+			<F N="cygDeviceOutputStream.c"/>
+			<F N="cygParallelErrorEventThread.c"/>
+			<F N="cygParallelPort.c"/>
+			<F N="cygSerialDataEventThread.c"/>
+			<F N="cygSerialPort.c"/>
+			<F N="cygSerialStatusEventThread.c"/>
+			<F N="NSCommDriver.c"/>
+			<F N="NSCommLOG.c"/>
+			<F N="NSDeviceInputStream.c"/>
+			<F N="NSDeviceOutputStream.c"/>
+			<F N="NSParallelPort.c"/>
+			<F N="NSSerialPort.c"/>
+			<F N="ParallelErrorEventThread.c"/>
+			<F N="SerialDataEventThread.c"/>
+			<F N="SerialStatusEventThread.c"/>
+			<F N="SysVStyleSemaphore.c"/>
+			<F N="w32CommDriver.c"/>
+			<F N="w32CommPortIdentifier.c"/>
+			<F N="w32DeviceInputStream.c"/>
+			<F N="w32DeviceOutputStream.c"/>
+			<F N="w32ParallelErrorEventThread.c"/>
+			<F N="w32ParallelPort.c"/>
+			<F N="w32SerialDataEventThread.c"/>
+			<F N="w32SerialPort.c"/>
+			<F N="w32SerialStatusEventThread.c"/>
+		</Folder>
+		<Folder
+			Name="Header Files"
+			Filters="*.h;*.H;*.hh;*.hpp;*.hxx;*.inc;*.sh;*.cpy;*.if">
+			<F N="org_eclipse_soda_dk_comm_NSCommDriver.h"/>
+			<F N="org_eclipse_soda_dk_comm_NSDeviceInputStream.h"/>
+			<F N="org_eclipse_soda_dk_comm_NSDeviceOutputStream.h"/>
+			<F N="org_eclipse_soda_dk_comm_NSParallelPort.h"/>
+			<F N="org_eclipse_soda_dk_comm_NSSerialPort.h"/>
+			<F N="org_eclipse_soda_dk_comm_ParallelErrorEventThread.h"/>
+			<F N="org_eclipse_soda_dk_comm_SerialDataEventThread.h"/>
+			<F N="org_eclipse_soda_dk_comm_SerialStatusEventThread.h"/>
+			<F N="org_eclipse_soda_dk_comm.h"/>
+			<F N="javax_comm_CommPortIdentifier.h"/>
+			<F N="NSCommLOG.h"/>
+			<F N="SysVStyleSemaphore.h"/>
+			<F N="w32ParallePort.h"/>
+			<F N="w32SerialPort.h"/>
+		</Folder>
+		<Folder
+			Name="Resource Files"
+			Filters="*.ico;*.cur;*.dlg"/>
+		<Folder
+			Name="Bitmaps"
+			Filters="*.bmp"/>
+		<Folder
+			Name="Other Files"
+			Filters="">
+			<F
+				N="makefile"
+				Type="Makefile"/>
+			<F N="makefile.linux"/>
+			<F N="makefile.qnx"/>
+			<F N="makefile.win32"/>
+			<F N="makefile.win32_down"/>
+			<F N="makefile.wince"/>
+		</Folder>
+	</Files>
+</Project>

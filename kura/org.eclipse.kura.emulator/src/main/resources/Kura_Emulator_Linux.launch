@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<launchConfiguration type="org.eclipse.pde.ui.EquinoxLauncher">
+<booleanAttribute key="append.args" value="true"/>
+<booleanAttribute key="automaticAdd" value="true"/>
+<booleanAttribute key="automaticValidate" value="false"/>
+<stringAttribute key="bootstrap" value=""/>
+<stringAttribute key="checked" value="[NONE]"/>
+<booleanAttribute key="clearConfig" value="true"/>
+<stringAttribute key="configLocation" value="${workspace_loc}/.metadata/.plugins/org.eclipse.pde.core/Kura_Emulator_Linux"/>
+<booleanAttribute key="default" value="true"/>
+<booleanAttribute key="default_auto_start" value="true"/>
+<intAttribute key="default_start_level" value="4"/>
+<stringAttribute key="deselected_workspace_plugins" value="org.eclipse.kura.core.test,org.eclipse.kura.demo.heater,org.eclipse.kura.demo.modbus,org.eclipse.kura.deployment.customizer,org.eclipse.kura.deployment.update,org.eclipse.kura.example.project,org.eclipse.kura.example.publisher,org.eclipse.kura.example.serial.publisher,org.eclipse.kura.linux.clock,org.eclipse.kura.linux.net,org.eclipse.kura.linux.net.test,org.eclipse.kura.linux.position,org.eclipse.kura.linux.usb,org.eclipse.kura.linux.watchdog,org.eclipse.kura.net.admin,org.eclipse.kura.protocol.can,org.eclipse.kura.protocol.can.test,org.eclipse.kura.protocol.modbus,org.eclipse.kura.protocol.modbus.test,org.eclipse.kura.test"/>
+<booleanAttribute key="includeOptional" value="true"/>
+<booleanAttribute key="org.eclipse.debug.core.appendEnvironmentVariables" value="false"/>
+<stringAttribute key="org.eclipse.jdt.launching.JRE_CONTAINER" value="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
+<stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="-os ${target.os} -ws ${target.ws} -arch ${target.arch} -nl ${target.nl} -consoleLog -console"/>
+<stringAttribute key="org.eclipse.jdt.launching.SOURCE_PATH_PROVIDER" value="org.eclipse.pde.ui.workbenchClasspathProvider"/>
+<stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Dorg.osgi.service.http.port=8080 -Dorg.osgi.framework.storage=/tmp/osgi/framework_storage -Dosgi.clean=true -Dosgi.noShutdown=true -Declipse.ignoreApp=true  -Dorg.eclipse.kura.mode=emulator -Dkura.configuration=file:${git_work_tree}/kura/org.eclipse.kura.emulator/src/main/resources/kura.properties -Ddpa.configuration=/tmp/kura/dpa.properties -Dlog4j.configuration=file:${git_work_tree}/kura/org.eclipse.kura.emulator/src/main/resources/log4j.properties"/>
+<booleanAttribute key="pde.generated.config" value="true"/>
+<stringAttribute key="pde.version" value="3.3"/>
+<booleanAttribute key="show_selected_only" value="false"/>
+<stringAttribute key="target_bundles" value="com.gwt.user@default:default,javax.servlet@default:default,javax.usb.api@default:default,javax.usb.common@default:default,log4j.apache-log4j-extras@default:false,log4j@default:default,mqtt-client@default:default,org.apache.commons.fileupload@default:default,org.apache.commons.io@default:default,org.apache.commons.net@default:default,org.apache.felix.dependencymanager@default:default,org.apache.felix.deploymentadmin@default:default,org.apache.felix.gogo.command@default:default,org.apache.felix.gogo.runtime@default:default,org.apache.felix.gogo.shell@default:default,org.apache.servicemix.bundles.protobuf-java@default:default,org.eclipse.core.jobs@default:default,org.eclipse.equinox.cm@default:default,org.eclipse.equinox.common@2:true,org.eclipse.equinox.console@default:default,org.eclipse.equinox.ds@1:true,org.eclipse.equinox.event@default:default,org.eclipse.equinox.http.jetty@default:default,org.eclipse.equinox.http.registry@default:default,org.eclipse.equinox.http.servlet@default:default,org.eclipse.equinox.io@default:default,org.eclipse.equinox.metatype@default:default,org.eclipse.equinox.registry@default:default,org.eclipse.equinox.util@default:default,org.eclipse.jetty.continuation@default:default,org.eclipse.jetty.http@default:default,org.eclipse.jetty.io@default:default,org.eclipse.jetty.security@default:default,org.eclipse.jetty.server@default:default,org.eclipse.jetty.servlet@default:default,org.eclipse.jetty.util@default:default,org.eclipse.osgi.services@default:default,org.eclipse.osgi.util@default:default,org.eclipse.osgi@-1:true,org.eclipse.soda.dk.comm@default:default,org.hamcrest.core@default:default,org.hsqldb.hsqldb@default:default,org.json@default:default,org.junit@default:default,osgi.cmpn@default:default,slf4j.api@default:default,slf4j.log4j12@default:false"/>
+<stringAttribute key="timestamp" value="1395389088671"/>
+<booleanAttribute key="tracing" value="false"/>
+<mapAttribute key="tracingOptions">
+<mapEntry key="org.eclipse.equinox.ds/debug" value="true"/>
+<mapEntry key="org.eclipse.equinox.ds/instantiate_all" value="true"/>
+<mapEntry key="org.eclipse.equinox.ds/performance" value="false"/>
+<mapEntry key="org.eclipse.equinox.ds/print_on_console" value="true"/>
+<mapEntry key="org.eclipse.equinox.registry/debug" value="false"/>
+<mapEntry key="org.eclipse.equinox.registry/debug/events" value="false"/>
+<mapEntry key="org.eclipse.osgi/debug" value="false"/>
+<mapEntry key="org.eclipse.osgi/debug/bundleTime" value="false"/>
+<mapEntry key="org.eclipse.osgi/debug/events" value="false"/>
+<mapEntry key="org.eclipse.osgi/debug/filter" value="false"/>
+<mapEntry key="org.eclipse.osgi/debug/loader" value="false"/>
+<mapEntry key="org.eclipse.osgi/debug/manifest" value="false"/>
+<mapEntry key="org.eclipse.osgi/debug/messageBundles" value="false"/>
+<mapEntry key="org.eclipse.osgi/debug/objectPool/adds" value="false"/>
+<mapEntry key="org.eclipse.osgi/debug/objectPool/dups" value="false"/>
+<mapEntry key="org.eclipse.osgi/debug/packageadmin" value="false"/>
+<mapEntry key="org.eclipse.osgi/debug/security" value="false"/>
+<mapEntry key="org.eclipse.osgi/debug/services" value="false"/>
+<mapEntry key="org.eclipse.osgi/debug/startlevel" value="false"/>
+<mapEntry key="org.eclipse.osgi/defaultprofile/buffersize" value="256"/>
+<mapEntry key="org.eclipse.osgi/defaultprofile/logfilename" value=""/>
+<mapEntry key="org.eclipse.osgi/defaultprofile/logsynchronously" value="false"/>
+<mapEntry key="org.eclipse.osgi/eclipseadaptor/converter/debug" value="false"/>
+<mapEntry key="org.eclipse.osgi/eclipseadaptor/debug" value="false"/>
+<mapEntry key="org.eclipse.osgi/eclipseadaptor/debug/cachedmanifest" value="false"/>
+<mapEntry key="org.eclipse.osgi/eclipseadaptor/debug/location" value="false"/>
+<mapEntry key="org.eclipse.osgi/eclipseadaptor/debug/platformadmin" value="false"/>
+<mapEntry key="org.eclipse.osgi/eclipseadaptor/debug/platformadmin/resolver" value="false"/>
+<mapEntry key="org.eclipse.osgi/monitor/activation" value="false"/>
+<mapEntry key="org.eclipse.osgi/monitor/classes" value="false"/>
+<mapEntry key="org.eclipse.osgi/monitor/resources" value="false"/>
+<mapEntry key="org.eclipse.osgi/profile/benchmark" value="false"/>
+<mapEntry key="org.eclipse.osgi/profile/debug" value="false"/>
+<mapEntry key="org.eclipse.osgi/profile/impl" value="org.eclipse.osgi.internal.profile.DefaultProfileLogger"/>
+<mapEntry key="org.eclipse.osgi/profile/startup" value="false"/>
+<mapEntry key="org.eclipse.osgi/resolver/cycles" value="false"/>
+<mapEntry key="org.eclipse.osgi/resolver/debug" value="false"/>
+<mapEntry key="org.eclipse.osgi/resolver/generics" value="false"/>
+<mapEntry key="org.eclipse.osgi/resolver/imports" value="false"/>
+<mapEntry key="org.eclipse.osgi/resolver/requires" value="false"/>
+<mapEntry key="org.eclipse.osgi/resolver/uses" value="false"/>
+<mapEntry key="org.eclipse.osgi/resolver/wiring" value="false"/>
+<mapEntry key="org.eclipse.osgi/trace/activation" value="false"/>
+<mapEntry key="org.eclipse.osgi/trace/classLoading" value="false"/>
+<mapEntry key="org.eclipse.osgi/trace/filename" value="runtime.traces"/>
+<mapEntry key="org.eclipse.osgi/trace/filters" value="trace.properties"/>
+</mapAttribute>
+<booleanAttribute key="useCustomFeatures" value="false"/>
+<booleanAttribute key="useDefaultConfigArea" value="true"/>
+<stringAttribute key="workspace_bundles" value="org.eclipse.kura.api@default:default,org.eclipse.kura.core.cloud@default:default,org.eclipse.kura.core.comm@default:default,org.eclipse.kura.core.configuration@default:default,org.eclipse.kura.core.crypto@default:default,org.eclipse.kura.core.deployment@default:default,org.eclipse.kura.core.net@default:default,org.eclipse.kura.core@default:default,org.eclipse.kura.deployment.agent@default:default,org.eclipse.kura.emulator@default:default,org.eclipse.kura.linux.command@default:default,org.eclipse.kura.web@default:default"/>
+</launchConfiguration>

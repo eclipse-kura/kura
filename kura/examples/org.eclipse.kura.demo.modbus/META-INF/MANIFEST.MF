@@ -1,0 +1,26 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: org.eclipse.kura.demo.modbus
+Bundle-SymbolicName: org.eclipse.kura.demo.modbus;singleton:=true
+Bundle-Version: 0.7.0
+Bundle-Vendor: EUROTECH
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Service-Component: OSGI-INF/*.xml
+Import-Package: org.eclipse.kura; version="[0.2,1.0)",
+ org.eclipse.kura.clock; version="[0.2,1.0)",
+ org.eclipse.kura.cloud; version="[0.2,1.0)",
+ org.eclipse.kura.configuration; version="[0.2,0.3)",
+ org.eclipse.kura.message; version="[0.2,1.0)",
+ org.eclipse.kura.position; version="[0.2,1.0)",
+ org.eclipse.kura.protocol.modbus; version="[0.2,1.0)",
+ org.eclipse.kura.system; version="[0.2,1.0)",
+ org.eclipse.kura.usb; version="[0.2,1.0)",
+ org.eclipse.kura.watchdog; version="[0.2,1.0)",
+ org.osgi.framework;version="1.4.0",
+ org.osgi.service.component;version="1.0.0",
+ org.osgi.service.event;version="1.3.0",
+ org.osgi.service.io;version="1.0.0",
+ org.slf4j;version="1.6.4"
+Unit-Test: true
+Bundle-ActivationPolicy: lazy
+Export-Package: org.eclipse.kura.demo.modbus; version="0.2.0"

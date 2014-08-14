@@ -1,0 +1,14 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: org.eclipse.kura.demo.heater
+Bundle-SymbolicName: org.eclipse.kura.demo.heater;singleton:=true
+Bundle-Version: 0.7.0
+Bundle-Vendor: EUROTECH
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Service-Component: OSGI-INF/*.xml
+Bundle-ActivationPolicy: lazy
+Import-Package: org.eclipse.kura.cloud; version="[0.2,0.3)",
+ org.eclipse.kura.configuration; version="[0.2,0.3)",
+ org.eclipse.kura.message; version="[0.2,1.0)",
+ org.osgi.service.component;version="1.2.0",
+ org.slf4j;version="1.6.4"

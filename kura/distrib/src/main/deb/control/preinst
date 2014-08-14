@@ -1,0 +1,44 @@
+#!/bin/bash
+
+##############################################
+# PRE-INSTALL SCRIPT
+##############################################
+PIDS=`pgrep java`
+
+echo ""
+echo "Installing Kura..."
+echo "Installing Kura..." > /tmp/kura_install.log 2>&1
+
+#Kill JVM and monit for installation
+if [ -f "/var/run/kura.pid" ] ; then
+  KURA_PID=`cat /var/run/kura.pid`
+
+  for pid in "${PIDS[@]}"
+  do
+    if [ "$KURA_PID" == "$pid" ] ; then
+      `kill $pid` >> /tmp/kura_install.log 2>&1
+    fi
+  done
+fi
+
+#clean up old installation if present
+rm -fr /opt/eclipse/* >> /tmp/kura_install.log 2>&1
+rm -fr /tmp/.kura/ >> /tmp/kura_install.log 2>&1
+rm /etc/init.d/firewall >> /tmp/kura_install.log 2>&1
+rm /etc/dhcpd-*.conf >> /tmp/kura_install.log 2>&1
+rm /etc/named.conf >> /tmp/kura_install.log 2>&1
+rm /etc/wpa_supplicant.conf >> /tmp/kura_install.log 2>&1
+rm /etc/hostapd.conf >> /tmp/kura_install.log 2>&1
+rm /tmp/coninfo-* >> /tmp/kura_install.log 2>&1
+rm /var/log/kura.log >> /tmp/kura_install.log 2>&1
+rm -fr /etc/ppp/chat >> /tmp/kura_install.log 2>&1
+rm -fr /etc/ppp/peers >> /tmp/kura_install.log 2>&1
+rm -fr /etc/ppp/scripts >> /tmp/kura_install.log 2>&1
+rm /etc/ppp/*ap-secrets >> /tmp/kura_install.log 2>&1
+rm kura-*.zip >> /tmp/kura_install.log 2>&1
+
+echo ""
+##############################################
+# END PRE-INSTALL SCRIPT
+##############################################
+

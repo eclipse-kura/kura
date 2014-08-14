@@ -1,0 +1,70 @@
+#!/bin/bash
+
+if [ $IFACE == "lo" ] ; then
+	exit
+fi
+
+DEVICE=$IFACE
+FILENAME="/tmp/.kura/coninfo-"$DEVICE
+FLAG=0
+HASDNS=0
+DnsInd=0
+
+if [ ! -d "/tmp/.kura" ] ; then
+        mkdir /tmp/.kura
+fi
+
+while read line
+do
+   ind=`expr index "$line" ' '`
+   if [[ $line == nameserver* ]]; then
+        DnsInd=`expr $DnsInd + 1`
+        echo "DNS"$DnsInd"="${line:$ind} > $FILENAME
+   fi
+done < "/etc/resolv.conf"
+
+# Write DNS entries to resolv.conf
+while read line
+do
+   ind=`expr index "$line" ' '`
+   # No DNS entries for loopback interface
+   if [[ $DEVICE == lo ]]; then
+        break
+   fi                                     
+   # Flag when the desired interface is found
+   if [[ $line == iface\ $DEVICE* ]]; then
+        FLAG=1                                           
+   fi                                                    
+   if [[ $line == dns-nameservers* && $FLAG == 1 ]]; then
+        HASDNS=1                  
+        DnsInd=`expr $DnsInd + 1`               
+        IFS=' ' read -ra  Dns <<< "${line:$ind}"   
+        for i in "${Dns[@]}"; do                   
+           echo "nameserver $i" >> /etc/resolv.conf
+        done 
+        break                   
+   fi                           
+done < "/etc/network/interfaces"       
+                                       
+# Create config file for each interface
+mkdir /tmp/.kura >> /dev/null 2>> /dev/null
+echo "IFACE="$DEVICE >> $FILENAME                   
+                                                   
+ipaddr=`ip address show dev $DEVICE | grep 'inet '`
+
+if [[ -n "$ipaddr" ]] ; then
+	find=`expr index "$ipaddr" "inet"`
+	ipaddr=${ipaddr:$find}         
+	find=`expr index "$ipaddr" ' '`                                
+	lind=`expr index "$ipaddr" '/'`                                
+	echo "IPADDR="${ipaddr:$find:`expr $lind-$find-1`} >> $FILENAME
+	ipgw=`ip route show dev $DEVICE | grep default`
+	echo "GATEWAY="${ipgw:12} >> $FILENAME
+	#ip route del $ipgw        
+	if [[ $HASDNS == 1 ]]; then
+	        for j in "${Dns[@]}"; do
+	           DnsInd=`expr $DnsInd + 1`
+	           echo "DNS$DnsInd=$j" >> $FILENAME
+	        done
+	fi
+fi

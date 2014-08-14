@@ -1,0 +1,43 @@
+#!/bin/sh
+
+if [ $1 == "lo" ] ; then
+        exit
+fi
+
+DEVICE=$1
+FILENAME="/tmp/.kura/coninfo-"$DEVICE
+
+if [ ! -d "/tmp/.kura" ] ; then
+	mkdir /tmp/.kura
+fi
+
+mkdir /tmp/.kura >> /dev/null 2>> /dev/null
+echo "IFACE="$DEVICE > $FILENAME
+
+
+ipaddr=`ip address show dev $DEVICE | grep 'inet '`
+
+if [[ -n "$ipaddr" ]] ; then
+	find=`expr index "$ipaddr" "inet"`
+	ipaddr=${ipaddr:$find}
+	find=`expr index "$ipaddr" ' '`
+	lind=`expr index "$ipaddr" '/'`
+	echo "IPADDR="${ipaddr:$find:`expr $lind-$find-1`} >> $FILENAME
+	ipgw=`ip route show dev $DEVICE | grep default`
+	echo "GATEWAY="${ipgw:12} >> $FILENAME
+	#ip route del $ipgw
+
+	# Only add DNS if this is a gateway - this also implies /etc/resolv.conf was overwritten
+	if [ "x${ipgw:12}" != "x" ] ; then
+		DnsInd=0
+		while read line
+		do
+		   ind=`expr index "$line" ' '`
+		   if [[ $line == nameserver* ]]; then
+		        #echo ${line:$ind}
+		        DnsInd=`expr $DnsInd + 1`
+		        echo "DNS"$DnsInd"="${line:$ind} >> $FILENAME
+		   fi
+		done < "/etc/resolv.conf"
+	fi
+fi

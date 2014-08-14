@@ -1,0 +1,29 @@
+#########################################################################
+# Copyright (c) 2001, 2009 IBM.                                         #
+# All rights reserved. This program and the accompanying materials      #
+# are made available under the terms of the Eclipse Public License v1.0 #
+# which accompanies this distribution, and is available at              #
+# http://www.eclipse.org/legal/epl-v10.html                             #
+#                                                                       #
+# Contributors:                                                         #
+#     IBM - initial API and implementation                              #
+#########################################################################
+DLLNAME=../libibmcomm.so# declaration
+BUILDFILES1 = CommPortIdentifier.o NSCommDriver.o NSDeviceInputStream.o NSDeviceOutputStream.o NSSerialPort.o
+BUILDFILES2 = SerialDataEventThread.o SerialStatusEventThread.o SysVStyleSemaphore.o NSParallelPort.o ParallelErrorEventThread.o
+CC=qcc
+CFLAGS=-O -Vgcc_ntox86 -DQNX -DNEUTRINO -shared -DX86 -I../include -I/usr/include -I.
+.SUFFIXES:.cpp
+.cpp.o:
+	$(CC) $(CFLAGS) -I. -fno-exceptions -fno-rtti -c $<
+AS=qcc
+ASFLAGS=-Vgcc_ntox86 -c $(VMASMDEBUG) 
+all:  BUILDLIB
+BUILDLIB: $(DLLNAME)
+ 
+$(DLLNAME):\
+	$(BUILDFILES1) $(BUILDFILES2) 
+	 qcc -L. -W l,-s -W l,-x -Vgcc_ntox86 -shared  -o $(DLLNAME) \
+	$(BUILDFILES1) $(BUILDFILES2) -W l,--start-group \
+	-W l,--end-group 
+		 

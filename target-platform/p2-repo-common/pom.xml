@@ -1,0 +1,168 @@
+<project
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+	xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>org.eclipse.kura</groupId>
+		<artifactId>target-platform</artifactId>
+		<version>0.7.0</version>
+	</parent>
+
+	<groupId>org.eclipse.kura</groupId>
+	<artifactId>p2-repo-common</artifactId>
+	<version>0.7.0</version>
+	<packaging>pom</packaging>
+
+	<build>
+		<plugins>
+			<!-- Copying common artifacts across all platforms into a known location 
+				${project.build.directory}/plugins/common is only one way how to create content 
+				to be published. Any other source of bundles and/or features can be used 
+				to be published as long as it end up in ${project.basedir}/target/source/plugins 
+				and or ~/features The publisher will use every content that is located in 
+				this directory -->
+			<plugin>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>copy-bundles-for-publishing</id>
+						<phase>process-resources</phase>
+						<goals>
+							<goal>copy</goal>
+						</goals>
+						<configuration>
+							<artifactItems>
+								<!-- copied from local repository -->
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
+									<artifactId>com.codeminders.hidapi</artifactId>
+									<version>1.1</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
+									<artifactId>javax.usb.api</artifactId>
+									<version>1.0.2</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
+									<artifactId>javax.usb.common</artifactId>
+									<version>1.0.2</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
+									<artifactId>mqtt-client</artifactId>
+									<version>0.4.0</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.soda.dk.comm</artifactId>
+									<version>1.2.0</version>
+								</artifactItem>
+								<!-- copied from Maven central repository -->
+								<!--
+								This jar requires an altered manifest to declare it as a fragment bundle. It
+								cannot be brought in from Maven repository.
+								<artifactItem>
+									<groupId>log4j</groupId>
+									<artifactId>apache-log4j-extras</artifactId>
+									<version>1.1</version>
+								</artifactItem>
+								-->
+								<artifactItem>
+									<groupId>commons-io</groupId>
+									<artifactId>commons-io</artifactId>
+									<version>2.4</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.hsqldb</groupId>
+									<artifactId>hsqldb</artifactId>
+									<version>2.3.0</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>log4j</groupId>
+									<artifactId>log4j</artifactId>
+									<version>1.2.17</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.apache.servicemix.bundles</groupId>
+									<artifactId>org.apache.servicemix.bundles.protobuf-java</artifactId>
+									<version>2.4.1_1</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.slf4j</groupId>
+									<artifactId>slf4j-api</artifactId>
+									<version>1.6.4</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.slf4j</groupId>
+									<artifactId>slf4j-log4j12</artifactId>
+									<version>1.6.0</version>
+								</artifactItem>
+							</artifactItems>
+							<outputDirectory>${project.basedir}/target/source/plugins</outputDirectory>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>setup</id>
+						<phase>process-resources</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
+						<configuration>
+							<tasks>
+								<mkdir dir="target/source/plugins/" />
+								<copy todir="target/source/plugins/">
+									<fileset dir="plugins" />
+								</copy>
+							</tasks>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.sonatype.tycho</groupId>
+				<artifactId>tycho-p2-extras-plugin</artifactId>
+				<version>0.11.0</version>
+				<executions>
+					<execution>
+						<phase>prepare-package</phase>
+						<goals>
+							<goal>publish-features-and-bundles</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<compress>false</compress>
+					<!-- additional arguments example <additionalArgs>-configs win32.win32.x86</additionalArgs> -->
+				</configuration>
+			</plugin>
+			<plugin>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>install-equinox</id>
+						<phase>install</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
+						<configuration>
+							<tasks>
+								<delete dir="../../kura/target-definition/common/" />
+								<mkdir dir="../../kura/target-definition/common/repository" />
+								<copy todir="../../kura/target-definition/common/repository">
+									<fileset dir="${project.build.directory}/repository" />
+								</copy>
+							</tasks>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+</project>

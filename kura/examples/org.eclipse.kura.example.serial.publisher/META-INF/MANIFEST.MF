@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: org.eclipse.kura.example.serial.publisher
 Bundle-SymbolicName: org.eclipse.kura.example.serial.publisher;singleton:=true
-Bundle-Version: 0.2.0.SNAPSHOT
+Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: EUROTECH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Service-Component: OSGI-INF/*.xml

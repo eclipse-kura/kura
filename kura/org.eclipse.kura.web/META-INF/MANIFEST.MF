@@ -82,4 +82,4 @@ Export-Package: org.eclipse.kura.web,
  org.eclipse.kura.web.shared.service
 Bundle-ClassPath: ., 
   lib/gxt-2.2.5.jar,
-  target/org.eclipse.kura.web-0.2.0-SNAPSHOT/WEB-INF/lib/gxt-2.2.5.jar
+  target/org.eclipse.kura.web-0.7.0/WEB-INF/lib/gxt-2.2.5.jar

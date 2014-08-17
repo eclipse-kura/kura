@@ -21,7 +21,7 @@ import javax.xml.bind.annotation.XmlElement;
 @XmlAccessorType(XmlAccessType.FIELD)
 public class XmlConfigPropertiesAdapted 
 {
-	@XmlElement(name="property")
+	@XmlElement(name="property",namespace="http://eurotech.com/esf/2.0")
 	private XmlConfigPropertyAdapted[] properties;
 	
 	public XmlConfigPropertiesAdapted()

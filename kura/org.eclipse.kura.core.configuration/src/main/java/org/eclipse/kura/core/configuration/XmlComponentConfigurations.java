@@ -22,11 +22,11 @@ import javax.xml.bind.annotation.XmlRootElement;
  * Utility class to serialize a set of configurations.
  * This is used to serialize a full snapshot.
  */
-@XmlRootElement(name="configurations")
+@XmlRootElement(name="configurations",namespace="http://eurotech.com/esf/2.0")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class XmlComponentConfigurations 
 {
-	@XmlElement(name="configuration")
+	@XmlElement(name="configuration",namespace="http://eurotech.com/esf/2.0")
 	private List<ComponentConfigurationImpl> configurations;
 	
 	public XmlComponentConfigurations()

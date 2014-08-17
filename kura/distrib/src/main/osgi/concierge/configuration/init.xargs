@@ -1,6 +1,7 @@
 -Dorg.osgi.framework.system.packages.extra=javax.inject,javax.net,javax.net.ssl,javax.security,javax.security.auth,javax.security.cert,javax.naming,javax.sql,javax.imageio,javax.imageio.metadata,org.ietf.jgss,javax.crypto,javax.crypto.spec,javax.xml.bind,javax.xml.bind.annotation,javax.xml.bind.annotation.adapters,javax.xml.bind.util,javax.xml.namespace,javax.xml.stream,javax.swing,javax.swing.border,javax.swing.event,javax.swing.tree,org.w3c.dom,javax.management,javax.xml.parsers,org.xml.sax,org.xml.sax.helpers,javax.jmdns,javax.xml.transform,javax.xml.transform.dom,javax.xml.transform.sax,javax.xml.transform.stream,org.xml.sax.ext
--Dequinox.ds.debug=true
--Dequinox.ds.print=true
+#Uncomment below lines to debug starting of services over equinox ds
+#-Dequinox.ds.debug=true
+#-Dequinox.ds.print=true
 #-Dequinox.scr.waitTimeOnBlock=50000
 -Dorg.osgi.framework.storage.clean=onFirstInit
 -init
@@ -64,7 +65,6 @@
 -istart plugins/org.apache.commons.fileupload_1.2.2.v20111214-1400.jar
 -istart plugins/com.gwt.user_0.2.0.jar
 
-#Bundles commented out result in startup failiures due to equinox specific configurations
 -istart kura/plugins/org.eclipse.kura.api_{project.version}.v{kura.build.version}.jar
 -istart kura/plugins/org.eclipse.kura.core_{project.version}.v{kura.build.version}.jar
 -istart kura/plugins/org.eclipse.kura.core.cloud_{project.version}.v{kura.build.version}.jar

@@ -17,7 +17,7 @@ public interface DeploymentAgentService {
 	 * {@linkplain org.osgi.service.event.Event Event} topic on which the result
 	 * of the deployment package installation is posted.
 	 */
-	public static final String EVENT_INSTALLED_TOPIC = "org.eclipse.kura.deployment.agent".replace('.', '/') + "/INSTALLED";
+	public static final String EVENT_INSTALLED_TOPIC = DeploymentAgentService.class.getPackage().getName().replace('.', '/') + "/INSTALLED";
 
 	
 	/**
@@ -47,7 +47,7 @@ public interface DeploymentAgentService {
 	 * {@linkplain org.osgi.service.event.Event Event} topic on which the result
 	 * of the deployment package uninstallation is posted.
 	 */
-	public static final String EVENT_UNINSTALLED_TOPIC = "org.eclipse.kura.deployment.agent".replace('.', '/') + "/UNINSTALLED";
+	public static final String EVENT_UNINSTALLED_TOPIC = DeploymentAgentService.class.getPackage().getName().replace('.', '/') + "/UNINSTALLED";
 	
 	
 	/**

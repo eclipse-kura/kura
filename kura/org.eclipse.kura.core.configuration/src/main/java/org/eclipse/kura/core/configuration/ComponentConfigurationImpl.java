@@ -24,17 +24,17 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.core.configuration.metatype.Tocd;
 
-@XmlRootElement(name="configuration")
+@XmlRootElement(name="configuration",namespace="http://eurotech.com/esf/2.0")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class ComponentConfigurationImpl implements ComponentConfiguration 
 {
 	@XmlAttribute(name="pid")
 	protected String pid;
 	
-	@XmlElementRef
+	@XmlElementRef(namespace="http://www.osgi.org/xmlns/metatype/v1.2.0")
 	protected Tocd definition;
 
-	@XmlElement(name="properties")
+	@XmlElement(name="properties",namespace="http://eurotech.com/esf/2.0")
 	@XmlJavaTypeAdapter(XmlConfigPropertiesAdapter.class)
 	protected Map<String,Object> properties;
 

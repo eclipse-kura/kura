@@ -17,6 +17,7 @@
 		<module>org.eclipse.soda.dk.comm</module>
 		<module>p2-repo-common</module>
 		<module>p2-repo-equinox_3.8.1</module>
+		<module>concierge-repo</module>
 	</modules>
 
 	<properties>
@@ -33,3 +34,4 @@
 		</plugins>
 	</build>
 </project>
+

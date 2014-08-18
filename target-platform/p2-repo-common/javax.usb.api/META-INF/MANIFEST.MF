@@ -1,0 +1,17 @@
+Manifest-Version: 1.0
+Export-Package: javax.usb.util;uses:="javax.usb,javax.usb.event";versi
+ on="1.0.2",javax.usb;uses:="javax.usb.event";version="1.0.2",javax.us
+ b.event;uses:="javax.usb";version="1.0.2"
+Built-By: root
+Tool: Bnd-1.43.0
+Bundle-Name: javax.usb API from javax-usb
+Created-By: Apache Maven Bundle Plugin
+Build-Jdk: 1.7.0_09
+Bundle-Version: 1.0.2
+Bnd-LastModified: 1403407921370
+Bundle-ManifestVersion: 2
+Bundle-Description: javax.usb API from javax-usb
+Embed-Dependency: javax.usb.api;groupId=javax.usb;artifactId=javax.usb
+ .api;version=1.0.2;scope=runtime
+Bundle-SymbolicName: javax.usb.api
+

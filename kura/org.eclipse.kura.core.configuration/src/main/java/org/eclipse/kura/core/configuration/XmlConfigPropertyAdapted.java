@@ -51,7 +51,7 @@ public class XmlConfigPropertyAdapted
 	@XmlAttribute(name="type")
 	private ConfigPropertyType type;
 
-	@XmlElement(name="value")
+	@XmlElement(name="value",namespace="http://eurotech.com/esf/2.0")
 	private String[]           values;
 	
 	

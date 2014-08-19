@@ -19,13 +19,15 @@ public class SupportedSerialModems {
 
 	private static final Logger s_logger = LoggerFactory.getLogger(SupportedSerialModems.class);
 	private static final String OS_VERSION = System.getProperty("kura.os.version");
+	private static final String BUILD_NAME = System.getProperty("build.name");
 	
 	private static boolean modemReachable = false;
 	static {
 		breakout:
 		for (SupportedSerialModemInfo modem : SupportedSerialModemInfo.values()) {
 			if (modem == SupportedSerialModemInfo.MiniGateway_Telit_HE910_NAD) {
-				if (OS_VERSION.equals(KuraConstants.Mini_Gateway.getImageName() + "_" + KuraConstants.Mini_Gateway.getImageVersion())) {
+				if (OS_VERSION.equals(KuraConstants.Mini_Gateway.getImageName() + "_" + KuraConstants.Mini_Gateway.getImageVersion()) &&
+						BUILD_NAME.equals(KuraConstants.Mini_Gateway.getBuildName())) {
 					s_logger.info("Installing modem driver for {} ...", modem.getModemName());
 					try {
 						if (!SupportedUsbModems.isAttached(

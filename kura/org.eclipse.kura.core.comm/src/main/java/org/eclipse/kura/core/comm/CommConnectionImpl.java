@@ -82,6 +82,7 @@ public class CommConnectionImpl implements CommConnection
 		m_flowControl = m_commUri.getFlowControl();
 		m_timeout	  = m_commUri.getTimeout();
 
+		s_logger.info("Dave: port => " + m_port);
 		CommPortIdentifier commPortIdentifier = CommPortIdentifier.getPortIdentifier(m_port);
 		
 		CommPort commPort = commPortIdentifier.open(this.getClass().getName(), m_timeout);

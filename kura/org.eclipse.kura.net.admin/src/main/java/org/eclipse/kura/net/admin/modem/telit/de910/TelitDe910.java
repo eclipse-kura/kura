@@ -41,7 +41,7 @@ public class TelitDe910 implements EvdoCellularModem {
 	private static final Logger s_logger = LoggerFactory.getLogger(TelitDe910.class);
 	
 	private static final String OS_VERSION = System.getProperty("kura.os.version");
-	private static final String TARGET_NAME = System.getProperty("target.name");
+	private static final String TARGET_NAME = System.getProperty("target.device");
 	
 	private IVectorJ21GpioService m_vectorJ21GpioService = null;
 	private ConnectionFactory m_connectionFactory = null;

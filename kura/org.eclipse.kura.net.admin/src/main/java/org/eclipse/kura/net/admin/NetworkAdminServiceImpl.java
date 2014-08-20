@@ -1269,6 +1269,10 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 	    if(ifaceName.startsWith("mon.")) {
 	        return;
 	    }
+	    // ignore redpine vlan interface 
+        if (ifaceName.startsWith("rpine")) {
+        	return;
+        }
 	    
         NetInterfaceStatus status = NetInterfaceStatus.netIPv4StatusUnknown;
 	    WifiMode wifiMode = WifiMode.UNKNOWN;

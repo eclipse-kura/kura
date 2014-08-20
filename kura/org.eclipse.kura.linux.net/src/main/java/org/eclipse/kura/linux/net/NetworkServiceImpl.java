@@ -397,6 +397,12 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
 	}
 	
 	public NetInterface<? extends NetInterfaceAddress> getNetworkInterface(String interfaceName) throws KuraException {
+		// ignore redpine vlan interface 
+        if (interfaceName.startsWith("rpine")) {
+        	s_logger.debug("Ignoring redping vlan interface.");
+        	return null;
+        }
+        
 		NetInterfaceType type = LinuxNetworkUtil.getType(interfaceName);
 		
 		boolean isUp = LinuxNetworkUtil.isUp(interfaceName);

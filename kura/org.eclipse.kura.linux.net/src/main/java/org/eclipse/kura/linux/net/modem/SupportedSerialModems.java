@@ -19,7 +19,7 @@ public class SupportedSerialModems {
 
 	private static final Logger s_logger = LoggerFactory.getLogger(SupportedSerialModems.class);
 	private static final String OS_VERSION = System.getProperty("kura.os.version");
-	private static final String TARGET_NAME = System.getProperty("target.name");
+	private static final String TARGET_NAME = System.getProperty("target.device");
 	
 	private static boolean modemReachable = false;
 	static {

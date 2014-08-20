@@ -19,12 +19,12 @@ public enum KuraConstants {
 	
 	private String m_imageName;
 	private String m_imageVersion;
-	private String m_buildName;
+	private String m_targetName;
 	
-	private KuraConstants (String imageName, String imageVersion, String buildName) {
+	private KuraConstants (String imageName, String imageVersion, String targetName) {
 		m_imageName = imageName;
 		m_imageVersion = imageVersion;
-		m_buildName = buildName;
+		m_targetName = targetName;
 	}
 	
 	public String getImageName () {
@@ -35,8 +35,8 @@ public enum KuraConstants {
 		return m_imageVersion;
 	}
 	
-	public String getBuildName () {
-		return m_buildName;
+	public String getTargetName () {
+		return m_targetName;
 	}
 
 }

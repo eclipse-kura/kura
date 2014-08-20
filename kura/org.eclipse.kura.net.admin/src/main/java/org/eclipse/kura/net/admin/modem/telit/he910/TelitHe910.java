@@ -47,7 +47,7 @@ public class TelitHe910 implements HspaCellularModem {
 	private static final Logger s_logger = LoggerFactory.getLogger(TelitHe910.class);
 	
 	private static final String OS_VERSION = System.getProperty("kura.os.version");
-	private static final String BUILD_NAME = System.getProperty("build.name");
+	private static final String TARGET_NAME = System.getProperty("target.name");
 	
 	private IVectorJ21GpioService m_vectorJ21GpioService = null;
 	private ConnectionFactory m_connectionFactory = null;
@@ -569,7 +569,7 @@ public class TelitHe910 implements HspaCellularModem {
     	
     	String port = null;
     	if (OS_VERSION.equals(KuraConstants.Mini_Gateway.getImageName() + "_" + KuraConstants.Mini_Gateway.getImageVersion()) &&
-    			BUILD_NAME.equals(KuraConstants.Mini_Gateway.getBuildName())) {
+    			TARGET_NAME.equals(KuraConstants.Mini_Gateway.getTargetName())) {
     		port = SerialModemComm.MiniGateway.getAtPort();
     	} else {
     		port = getAtPort();

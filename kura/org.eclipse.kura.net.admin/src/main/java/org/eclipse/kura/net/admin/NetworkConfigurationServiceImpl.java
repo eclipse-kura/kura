@@ -302,6 +302,10 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
 	                    if(interfaceName.startsWith("mon.")) {
 	                        continue;
 	                    }
+	                    // ignore redpine vlan interface 
+	                    if (interfaceName.startsWith("rpine")) {
+	                    	continue;
+	                    }
 	                    
 	                    NetInterfaceType type = LinuxNetworkUtil.getType(interfaceName);
 	                    if(type == NetInterfaceType.UNKNOWN) {

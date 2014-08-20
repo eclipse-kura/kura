@@ -210,8 +210,7 @@
 										<property name="project.build.directory" value="${project.build.directory}" />
 										<property name="build.name" value="beaglebone" />
 										<property name="target.device" value="beaglebone" />
-										<property name="kura.os.version"
-											value="090538fcb81c38c1fa445cfb00755a94bc0131f2" />
+										<property name="kura.os.version" value="debian" />
 										<property name="kura.arch" value="armv7_hf" />
 										<property name="kura.mem.size" value="256m" />
 										<ant antfile="${basedir}/src/main/ant/build_equinox_distrib.xml"

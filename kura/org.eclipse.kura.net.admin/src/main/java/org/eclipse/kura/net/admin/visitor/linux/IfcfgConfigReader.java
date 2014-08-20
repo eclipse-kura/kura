@@ -101,7 +101,7 @@ public class IfcfgConfigReader implements NetworkConfigurationVisitor {
                 
             File ifcfgFile = null;
             if (OS_VERSION.equals(KuraConstants.Mini_Gateway.getImageName() + "_" + KuraConstants.Mini_Gateway.getImageVersion()) || 
-            		OS_VERSION.equals(KuraConstants.Raspberry_Pi.getImageName())) {
+            		OS_VERSION.equals(KuraConstants.Raspberry_Pi.getImageName()) || OS_VERSION.equals(KuraConstants.BeagleBone.getImageName())) {
             	ifcfgFile = new File(DEBIAN_NET_CONFIGURATION_DIRECTORY + "interfaces");
             }
             else {
@@ -112,7 +112,7 @@ public class IfcfgConfigReader implements NetworkConfigurationVisitor {
             	Properties kuraProps;
                 //found our match so load the properties
             	if (OS_VERSION.equals(KuraConstants.Mini_Gateway.getImageName() + "_" + KuraConstants.Mini_Gateway.getImageVersion()) ||
-            			OS_VERSION.equals(KuraConstants.Raspberry_Pi.getImageName())) {
+            			OS_VERSION.equals(KuraConstants.Raspberry_Pi.getImageName()) || OS_VERSION.equals(KuraConstants.BeagleBone.getImageName())) {
             		kuraProps = parseDebianConfigFile(ifcfgFile, interfaceName);
             	}
             	else {

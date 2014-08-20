@@ -39,7 +39,7 @@ sed "s/^ssid=kura_gateway.*/ssid=kura_gateway_${mac_addr}/" < /opt/eclipse/kura/
 cp /opt/eclipse/kura/install/dhcpd-eth0.conf /etc/dhcpd-eth0.conf
 
 #set up kuranet.conf
-cp /opt/eclipse/kura/install/kuranet.conf /opt/eclipse/data/kuranet.conf
+cp /opt/eclipse/kura/install/kuranet.conf /opt/eclipse/kura/data/kuranet.conf
 
 #set up bind/named
 cp /opt/eclipse/kura/install/named.conf /etc/bind/named.conf

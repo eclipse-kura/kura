@@ -399,7 +399,12 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
 	public NetInterface<? extends NetInterfaceAddress> getNetworkInterface(String interfaceName) throws KuraException {
 		// ignore redpine vlan interface 
         if (interfaceName.startsWith("rpine")) {
-        	s_logger.debug("Ignoring redping vlan interface.");
+        	s_logger.debug("Ignoring redpine vlan interface.");
+        	return null;
+        }
+        // ignore usb0 for beaglebone
+        if (interfaceName.startsWith("usb0") && System.getProperty("target.device").equals("beaglebone")) {
+        	s_logger.debug("Ignoring usb0 for beaglebone.");
         	return null;
         }
         

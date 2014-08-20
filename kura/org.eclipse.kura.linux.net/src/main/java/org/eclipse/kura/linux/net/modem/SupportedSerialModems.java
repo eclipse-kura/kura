@@ -26,8 +26,8 @@ public class SupportedSerialModems {
 		breakout:
 		for (SupportedSerialModemInfo modem : SupportedSerialModemInfo.values()) {
 			if (modem == SupportedSerialModemInfo.MiniGateway_Telit_HE910_NAD) {
-				if (OS_VERSION.equals(KuraConstants.Mini_Gateway.getImageName() + "_" + KuraConstants.Mini_Gateway.getImageVersion()) &&
-						TARGET_NAME.equals(KuraConstants.Mini_Gateway.getTargetName())) {
+				if (OS_VERSION != null && OS_VERSION.equals(KuraConstants.Mini_Gateway.getImageName() + "_" + KuraConstants.Mini_Gateway.getImageVersion()) &&
+						TARGET_NAME != null && TARGET_NAME.equals(KuraConstants.Mini_Gateway.getTargetName())) {
 					s_logger.info("Installing modem driver for {} ...", modem.getModemName());
 					try {
 						if (!SupportedUsbModems.isAttached(

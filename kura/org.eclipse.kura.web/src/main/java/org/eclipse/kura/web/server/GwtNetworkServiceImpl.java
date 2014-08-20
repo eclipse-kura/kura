@@ -100,7 +100,14 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 		throws GwtKuraException 
 	{
 		s_logger.debug("Starting");
-		NetworkAdminService nas = ServiceLocator.getInstance().getService(NetworkAdminService.class);
+		
+		NetworkAdminService nas = null;
+		try {
+			nas = ServiceLocator.getInstance().getService(NetworkAdminService.class);
+		} catch (Throwable t) {
+			s_logger.warn("Exception: {}", t.toString());
+			return null;
+		}
 		
 		List<GwtNetInterfaceConfig> gwtNetConfigs = new ArrayList<GwtNetInterfaceConfig>();
 		try {

@@ -306,6 +306,10 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
 	                    if (interfaceName.startsWith("rpine")) {
 	                    	continue;
 	                    }
+	                    // ignore usb0 for beaglebone
+	                    if (interfaceName.startsWith("usb0") && System.getProperty("target.device").equals("beaglebone")) {
+	                    	continue;
+	                    }
 	                    
 	                    NetInterfaceType type = LinuxNetworkUtil.getType(interfaceName);
 	                    if(type == NetInterfaceType.UNKNOWN) {

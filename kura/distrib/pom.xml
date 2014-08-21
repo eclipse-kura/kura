@@ -144,9 +144,13 @@
 	<profiles>
 		<profile>
 			<id>beaglebone</id>
+			<properties>
+				<project.raspbian.dependencies>hostapd, isc-dhcp-server, iw,
+					dos2unix, bind9, unzip, ethtool</project.raspbian.dependencies>
+			</properties>
 			<activation>
-				<activeByDefault>false</activeByDefault>
-			</activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>		
 			<build>
 				<resources>
 					<resource>
@@ -205,9 +209,8 @@
 										<property name="project.build.profile" value="${project.build.profile}" />
 										<property name="project.build.directory" value="${project.build.directory}" />
 										<property name="build.name" value="beaglebone" />
-										<property name="target.name" value="beaglebone" />
-										<property name="kura.os.version"
-											value="090538fcb81c38c1fa445cfb00755a94bc0131f2" />
+										<property name="target.device" value="beaglebone" />
+										<property name="kura.os.version" value="debian" />
 										<property name="kura.arch" value="armv7_hf" />
 										<property name="kura.mem.size" value="256m" />
 										<ant antfile="${basedir}/src/main/ant/build_equinox_distrib.xml"
@@ -237,6 +240,35 @@
 								target="dist-linux" /> </target> </configuration> </execution> -->
 						</executions>
 					</plugin>
+					<plugin> 
+						<groupId>org.vafer</groupId>
+						<artifactId>jdeb</artifactId>
+						<version>1.0</version>
+						<executions>
+							<execution>
+								<id>beaglebone-deb</id>
+								<phase>install</phase>
+								<goals>
+									<goal>jdeb</goal>
+								</goals>
+								<configuration>
+									<verbose>true</verbose>
+									<deb>${basedir}/target/kura-beaglebone_debian_${project.version}_armv7.deb</deb>
+									<controlDir>${basedir}/src/main/deb/control</controlDir>
+									<dataSet>
+										<data>
+											<src>${basedir}/target/kura-beaglebone-jars_${project.version}.zip</src>
+											<type>file</type>
+											<mapper>
+												<type>perm</type>
+												<prefix>/tmp</prefix>
+											</mapper>
+										</data>
+									</dataSet>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>	
 				</plugins>
 			</build>
 		</profile>
@@ -307,7 +339,7 @@
 										<property name="project.build.profile" value="${project.build.profile}" />
 										<property name="project.build.directory" value="${project.build.directory}" />
 										<property name="build.name" value="raspberry-pi" />
-										<property name="target.name" value="raspberry-pi" />
+										<property name="target.device" value="raspberry-pi" />
 										<property name="kura.os.version" value="raspbian" />
 										<property name="kura.arch" value="armv6_hf" />
 										<property name="kura.mem.size" value="256m" />
@@ -341,7 +373,7 @@
 								</goals>
 								<configuration>
 									<verbose>true</verbose>
-									<deb>${basedir}/target/kura-raspberry-pi_${project.version}.deb</deb>
+									<deb>${basedir}/target/kura-raspberry-pi_${project.version}_armv6.deb</deb>
 									<controlDir>${basedir}/src/main/deb/control</controlDir>
 									<dataSet>
 										<data>

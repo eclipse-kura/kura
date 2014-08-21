@@ -16,7 +16,7 @@
    <implementation class="org.eclipse.kura.net.admin.monitor.ModemMonitorServiceImpl"/>
    <service>
       <provide interface="org.eclipse.kura.net.modem.ModemMonitorService"/>
-      <provide interface="org.eclipse.kura.net.admin.modem.ModemManagerService"/>
+      <provide interface="org.eclipse.kura.net.modem.ModemManagerService"/>
    </service>
    <reference bind="setNetworkService" cardinality="1..1" interface="org.eclipse.kura.net.NetworkService" name="NetworkService" policy="static" unbind="unsetNetworkService"/>
    <reference bind="setSystemService" cardinality="1..1" interface="org.eclipse.kura.system.SystemService" name="SystemService" policy="static" unbind="unsetSystemService"/>

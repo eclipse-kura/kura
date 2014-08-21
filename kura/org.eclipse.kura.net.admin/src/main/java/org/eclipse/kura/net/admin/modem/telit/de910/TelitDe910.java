@@ -213,7 +213,7 @@ public class TelitDe910 implements EvdoCellularModem {
 	@Override
 	public int getSignalStrength() throws KuraException {
 		
-		int rssi = -113;
+		int signalStrength = -113;
     	synchronized (m_atLock) {
 	    	s_logger.debug("sendCommand getSignalStrength :: " + TelitDe910AtCommands.getSignalStrength.getCommand());
 	    	byte[] reply = null;
@@ -234,16 +234,20 @@ public class TelitDe910 implements EvdoCellularModem {
 				String sCsq = this.getResponseString(reply);
 				if (sCsq.startsWith("+CSQ:")) {
 					sCsq = sCsq.substring("+CSQ:".length()).trim();
+					s_logger.trace("getSignalStrength() :: +CSQ={}", sCsq);
 					asCsq = sCsq.split(",");
 					if (asCsq.length == 2) {
-						rssi = -113 + 2 * Integer.parseInt(asCsq[0]);
-						
+						int rssi = Integer.parseInt(asCsq[0]);
+						if (rssi < 99) {
+							signalStrength = -113 + 2 * rssi;
+						}
+						s_logger.trace("getSignalStrength() :: signalStrength={}", signalStrength);	
 					}
 				}
 				reply = null;
 			}
     	}
-        return rssi;
+        return signalStrength;
 	}
 
 	@Override

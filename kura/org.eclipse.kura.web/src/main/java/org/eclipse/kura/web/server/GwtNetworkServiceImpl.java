@@ -41,22 +41,28 @@ import org.eclipse.kura.net.firewall.FirewallOpenPortConfigIP4;
 import org.eclipse.kura.net.firewall.FirewallPortForwardConfigIP;
 import org.eclipse.kura.net.firewall.FirewallPortForwardConfigIP4;
 import org.eclipse.kura.net.firewall.FirewallReverseNatConfig;
+import org.eclipse.kura.net.modem.CellularModem;
 import org.eclipse.kura.net.modem.ModemConfig;
 import org.eclipse.kura.net.modem.ModemConfig.AuthType;
 import org.eclipse.kura.net.modem.ModemConfig.PdpType;
 import org.eclipse.kura.net.modem.ModemConnectionStatus;
+import org.eclipse.kura.net.modem.ModemDevice;
 import org.eclipse.kura.net.modem.ModemInterface;
 import org.eclipse.kura.net.modem.ModemInterfaceAddressConfig;
+import org.eclipse.kura.net.modem.ModemManagerService;
 import org.eclipse.kura.net.modem.ModemTechnologyType;
+import org.eclipse.kura.net.modem.SerialModemDevice;
 import org.eclipse.kura.net.wifi.WifiBgscan;
 import org.eclipse.kura.net.wifi.WifiBgscanModule;
 import org.eclipse.kura.net.wifi.WifiCiphers;
+import org.eclipse.kura.net.wifi.WifiClientMonitorService;
 import org.eclipse.kura.net.wifi.WifiConfig;
 import org.eclipse.kura.net.wifi.WifiHotspotInfo;
 import org.eclipse.kura.net.wifi.WifiInterfaceAddressConfig;
 import org.eclipse.kura.net.wifi.WifiMode;
 import org.eclipse.kura.net.wifi.WifiRadioMode;
 import org.eclipse.kura.net.wifi.WifiSecurity;
+import org.eclipse.kura.usb.UsbDevice;
 import org.eclipse.kura.web.server.util.KuraExceptionHandler;
 import org.eclipse.kura.web.server.util.ServiceLocator;
 import org.eclipse.kura.web.shared.GwtKuraErrorCode;
@@ -109,6 +115,20 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 			return null;
 		}
 		
+		ModemManagerService modemManagerService = null;
+		try {
+			modemManagerService = ServiceLocator.getInstance().getService(ModemManagerService.class);
+		} catch (Throwable t) {
+			s_logger.warn("{ModemManagerService} Exception: {}", t.toString());
+		}
+		
+		WifiClientMonitorService wifiClientMonitorService = null;
+		try {
+			wifiClientMonitorService = ServiceLocator.getInstance().getService(WifiClientMonitorService.class);
+		} catch (Throwable t) {
+			s_logger.warn("{WifiClientMonitorService} Exception: {}", t.toString());
+		}
+		
 		List<GwtNetInterfaceConfig> gwtNetConfigs = new ArrayList<GwtNetInterfaceConfig>();
 		try {
 
@@ -138,6 +158,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
                     ((GwtModemInterfaceConfig)gwtNetConfig).setNetworkTechnology(technologyList);
 				} else {
 					gwtNetConfig = new GwtNetInterfaceConfig();
+					gwtNetConfig.setHwRssi("N/A");
 				}
 				
 				gwtNetConfig.setName(netIfConfig.getName());
@@ -415,12 +436,22 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 									WifiMode activeWirelessMode = ((WifiInterfaceAddressConfig)addressConfig).getMode();
 									if (activeWirelessMode == WifiMode.MASTER) {
 										((GwtWifiNetInterfaceConfig)gwtNetConfig).setWirelessMode(GwtWifiWirelessMode.netWifiWirelessModeAccessPoint.name());
+										gwtNetConfig.setHwRssi("N/A");
 									} else if (activeWirelessMode == WifiMode.INFRA) {
 										((GwtWifiNetInterfaceConfig)gwtNetConfig).setWirelessMode(GwtWifiWirelessMode.netWifiWirelessModeStation.name());
+										if (wifiClientMonitorService != null) {
+											if (wifiConfig.getMode().equals(WifiMode.INFRA)) {
+												int rssi = wifiClientMonitorService.getSignalLevel(netIfConfig.getName(), wifiConfig.getSSID());
+												s_logger.debug("Setting Received Signal Strength to {}", rssi);
+												gwtNetConfig.setHwRssi(Integer.toString(rssi));
+											}
+										}
 									} else if (activeWirelessMode == WifiMode.ADHOC) {
 										((GwtWifiNetInterfaceConfig)gwtNetConfig).setWirelessMode(GwtWifiWirelessMode.netWifiWirelessModeAdHoc.name());
+										gwtNetConfig.setHwRssi("N/A");
 									} else {
 										((GwtWifiNetInterfaceConfig)gwtNetConfig).setWirelessMode(GwtWifiWirelessMode.netWifiWirelessModeDisabled.name());
+										gwtNetConfig.setHwRssi("N/A");
 									}
 								}
 								
@@ -431,6 +462,36 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 									GwtModemInterfaceConfig gwtModemConfig = (GwtModemInterfaceConfig) gwtNetConfig;
 									
 									gwtModemConfig.setHwSerial(((ModemInterface)netIfConfig).getSerialNumber());
+									
+									if (modemManagerService != null) {
+										UsbDevice usbDevice = netIfConfig.getUsbDevice();
+										String modemServiceId = null;
+										if (usbDevice != null) {
+											modemServiceId = netIfConfig.getUsbDevice().getUsbPort();
+										} else {
+											Collection<CellularModem> modemServices = modemManagerService.getAllModemServices();
+											for (CellularModem modemService : modemServices) {
+												ModemDevice modemDevice = modemService.getModemDevice();
+												if (modemDevice instanceof SerialModemDevice) {
+													modemServiceId = modemDevice.getProductName();
+													break;
+												}
+											}
+										}
+										
+										if (modemServiceId != null) {
+					                    	CellularModem cellModemService = modemManagerService.getModemService(modemServiceId); 
+					                    	if (cellModemService != null) { 
+					                    		try {
+						                    		int rssi = cellModemService.getSignalStrength();
+						                    		s_logger.debug("Setting Received Signal Strength to {}", rssi);
+						                    		gwtModemConfig.setHwRssi(Integer.toString(rssi));
+					                    		} catch (KuraException e) {
+					                    			e.printStackTrace();
+					                    		}
+					                    	}
+										}
+									}
 
                                     // set as DHCP - populate current address
 									gwtModemConfig.setConfigMode(GwtNetIfConfigMode.netIPv4ConfigModeDHCP.name());

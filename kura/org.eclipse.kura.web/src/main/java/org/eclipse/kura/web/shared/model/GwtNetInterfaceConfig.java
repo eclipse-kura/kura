@@ -207,6 +207,14 @@ public class GwtNetInterfaceConfig extends BaseModelData implements Serializable
     	return get("hwUsbDevice");
     }
     
+    public String getHwRssi() {
+    	return get("hwRssi");
+    }
+    
+    public void setHwRssi(String rssi) {
+    	set("hwRssi", rssi);
+    }
+    
     public GwtNetRouterMode getRouterModeEnum() {
         return GwtNetRouterMode.valueOf(getRouterMode());
 }

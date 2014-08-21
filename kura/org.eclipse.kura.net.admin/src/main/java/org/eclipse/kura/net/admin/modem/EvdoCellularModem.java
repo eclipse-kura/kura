@@ -12,6 +12,7 @@
 package org.eclipse.kura.net.admin.modem;
 
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.net.modem.CellularModem;
 import org.eclipse.kura.net.modem.ModemCdmaServiceProvider;
 
 public interface EvdoCellularModem extends CellularModem {

@@ -581,11 +581,14 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
 	                    public void run() {
 	                    	while (!stopThread) {
 	                    		Thread.currentThread().setName("WifiMonitor Thread");
-	                        	monitor();
 	                        	try {
+	                        		monitor();
 									Thread.sleep(THREAD_INTERVAL);
 								} catch (InterruptedException e) {
 									s_logger.debug(e.getMessage());
+								} catch (Throwable t) {
+									s_logger.error("Exception while monitoring WiFi connection {}", t.toString());
+									t.printStackTrace();
 								}
 	                    	}
 	                }});
@@ -784,7 +787,8 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
         return available;
     }
     
-    private int getSignalLevel(String interfaceName, String ssid) throws KuraException {
+    @Override
+    public int getSignalLevel(String interfaceName, String ssid) throws KuraException {
 		int rssi = 0;
 		if (ssid != null) {
 			//if (OS_VERSION.equals(KuraConstants.Raspberry_Pi.getImageName())) {   do not use libnl80211

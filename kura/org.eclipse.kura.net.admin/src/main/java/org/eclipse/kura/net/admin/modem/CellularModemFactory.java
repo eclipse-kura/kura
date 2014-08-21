@@ -17,6 +17,7 @@ package org.eclipse.kura.net.admin.modem;
 
 import java.util.Hashtable;
 
+import org.eclipse.kura.net.modem.CellularModem;
 import org.eclipse.kura.net.modem.ModemDevice;
 import org.eclipse.kura.net.modem.ModemTechnologyType;
 

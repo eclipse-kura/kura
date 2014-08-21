@@ -11,6 +11,8 @@
  */
 package org.eclipse.kura.net.wifi;
 
+import org.eclipse.kura.KuraException;
+
 /**
  * Marker interface for wifi client monitoring service
  */
@@ -18,4 +20,5 @@ public interface WifiClientMonitorService {
 
 	public void registerListener(WifiClientMonitorListener listener);
 	public void unregisterListener(WifiClientMonitorListener listener);
+	public int getSignalLevel(String interfaceName, String ssid) throws KuraException;
 }

@@ -513,13 +513,16 @@ public class EthernetMonitorServiceImpl implements EthernetMonitorService, Event
 	    		public void run() {
 		    			Thread.currentThread().setName("EthernetMonitor_" + interfaceName);
 		    			while (!stopThreads.get(interfaceName)) {
-		    				monitor(interfaceName);
 		    				try {
+		    					monitor(interfaceName);
 		    					Thread.sleep(THREAD_INTERVAL);
 		    				} catch (InterruptedException interruptedException) {
 		    					Thread.currentThread().interrupt();
 		    					s_logger.debug(interruptedException.getMessage());
-		    				}
+		    				} catch (Throwable t) {
+								s_logger.error("Exception while monitoring ethernet connection {}", t.toString());
+								t.printStackTrace();
+							}
 		    			}
 	    	}});
 			

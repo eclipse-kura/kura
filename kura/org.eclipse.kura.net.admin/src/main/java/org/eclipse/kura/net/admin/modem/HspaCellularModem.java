@@ -12,6 +12,7 @@
 package org.eclipse.kura.net.admin.modem;
 
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.net.modem.CellularModem;
 
 public interface HspaCellularModem extends CellularModem {
 

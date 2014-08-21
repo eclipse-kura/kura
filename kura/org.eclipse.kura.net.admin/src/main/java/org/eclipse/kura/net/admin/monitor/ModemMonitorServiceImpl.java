@@ -13,6 +13,7 @@ package org.eclipse.kura.net.admin.monitor;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -24,14 +25,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-
-import org.osgi.service.component.ComponentContext;
-import org.osgi.service.event.Event;
-import org.osgi.service.event.EventAdmin;
-import org.osgi.service.event.EventConstants;
-import org.osgi.service.event.EventHandler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.linux.net.ConnectionInfoImpl;
@@ -50,22 +43,22 @@ import org.eclipse.kura.net.NetworkAdminService;
 import org.eclipse.kura.net.NetworkService;
 import org.eclipse.kura.net.admin.event.NetworkConfigurationChangeEvent;
 import org.eclipse.kura.net.admin.event.NetworkStatusChangeEvent;
-import org.eclipse.kura.net.admin.modem.CellularModem;
 import org.eclipse.kura.net.admin.modem.CellularModemFactory;
 import org.eclipse.kura.net.admin.modem.EvdoCellularModem;
 import org.eclipse.kura.net.admin.modem.HspaCellularModem;
 import org.eclipse.kura.net.admin.modem.IModemLinkService;
-import org.eclipse.kura.net.admin.modem.ModemManagerService;
 import org.eclipse.kura.net.admin.modem.PppFactory;
 import org.eclipse.kura.net.admin.modem.PppState;
 import org.eclipse.kura.net.admin.modem.SupportedSerialModemsFactoryInfo;
 import org.eclipse.kura.net.admin.modem.SupportedSerialModemsFactoryInfo.SerialModemFactoryInfo;
 import org.eclipse.kura.net.admin.modem.SupportedUsbModemsFactoryInfo;
 import org.eclipse.kura.net.admin.modem.SupportedUsbModemsFactoryInfo.UsbModemFactoryInfo;
+import org.eclipse.kura.net.modem.CellularModem;
 import org.eclipse.kura.net.modem.ModemAddedEvent;
 import org.eclipse.kura.net.modem.ModemConfig;
 import org.eclipse.kura.net.modem.ModemDevice;
 import org.eclipse.kura.net.modem.ModemInterface;
+import org.eclipse.kura.net.modem.ModemManagerService;
 import org.eclipse.kura.net.modem.ModemMonitorListener;
 import org.eclipse.kura.net.modem.ModemMonitorService;
 import org.eclipse.kura.net.modem.ModemRemovedEvent;
@@ -74,6 +67,13 @@ import org.eclipse.kura.net.modem.SerialModemDevice;
 import org.eclipse.kura.system.SystemService;
 import org.eclipse.kura.usb.UsbDeviceEvent;
 import org.eclipse.kura.usb.UsbModemDevice;
+import org.osgi.service.component.ComponentContext;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventAdmin;
+import org.osgi.service.event.EventConstants;
+import org.osgi.service.event.EventHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManagerService, EventHandler {
 	
@@ -170,11 +170,14 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
     		public void run() {
     			while (!stopThread) {
 	    			Thread.currentThread().setName("ModemMonitor");
-	    			monitor();
 	    			try {
-						Thread.sleep(THREAD_INTERVAL);
+	    				monitor();
+	    				Thread.sleep(THREAD_INTERVAL);
 					} catch (InterruptedException e) {
 						s_logger.debug(e.getMessage());
+					} catch (Throwable t) {
+						s_logger.error("activate() :: Exception while monitoring cellular connection {}", t.toString());
+						t.printStackTrace();
 					}
     			}
     	}});
@@ -278,11 +281,14 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 									    		public void run() {
 									    			while (!stopThread) {
 									    				Thread.currentThread().setName("ModemMonitor");
-									    				monitor();
 									    				try {
+									    					monitor();
 															Thread.sleep(THREAD_INTERVAL);
 														} catch (InterruptedException e) {
 															s_logger.debug(e.getMessage());
+														} catch (Throwable t) {
+															s_logger.error("handleEvent() :: Exception while monitoring cellular connection {}", t.toString());
+															t.printStackTrace();
 														}
 									    			}
 									    	}});
@@ -317,6 +323,11 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 	public CellularModem getModemService (String usbPort) {
 		return m_modems.get(usbPort);
 	}
+    
+    @Override
+    public Collection<CellularModem> getAllModemServices() {
+    	return m_modems.values();
+    }
     
 	private NetInterfaceStatus getNetInterfaceStatus (List<NetConfig> netConfigs) {
 		
@@ -417,6 +428,7 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 					if (ifaceName != null) {
 						IModemLinkService pppService = PppFactory.obtainPppService(ifaceName, modem.getDataPort());
 						PppState pppState = pppService.getPppState();
+						s_logger.trace("monitor() :: PppState={}", pppState);
 						if (pppState == PppState.NOT_CONNECTED) {
 							if (modem.getTechnologyType() == ModemTechnologyType.HSDPA) {
 								if(((HspaCellularModem)modem).isSimCardReady()) {
@@ -539,7 +551,15 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 						    		public void run() {
 						    			while (!stopThread) {
 						    				Thread.currentThread().setName("ModemMonitor");
-						    				monitor();
+						    				try {
+						    					monitor();
+						    					Thread.sleep(THREAD_INTERVAL);
+						    				} catch (InterruptedException e) {
+												s_logger.debug(e.getMessage());
+											} catch (Throwable t) {
+												s_logger.error("trackModem() :: Exception while monitoring cellular connection {}", t.toString());
+												t.printStackTrace();
+											}
 						    			}
 						    	}});
 							}

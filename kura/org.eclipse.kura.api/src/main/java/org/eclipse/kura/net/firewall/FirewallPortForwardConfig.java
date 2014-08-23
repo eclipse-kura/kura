@@ -30,7 +30,14 @@ public interface FirewallPortForwardConfig extends NetConfig {
 	 * 
 	 * @return		The interface name used for this port forward configuration
 	 */
-	public String getInterfaceName();
+	public String getInboundInterface();
+	
+	/**
+	 * The internal (LAN) interface packets will be forwarded to
+	 * 
+	 * @return		The interface name used for this port forward configuration
+	 */
+	public String getOutboundInterface();
 	
 	/**
 	 * The LAN IP address to forward connections to
@@ -59,6 +66,13 @@ public interface FirewallPortForwardConfig extends NetConfig {
 	 * @return		The LAN port number
 	 */
 	public int getOutPort();
+	
+	/**
+	 * Use masquerading
+	 * 
+	 * @return boolean 
+	 */
+	public boolean isMasquerade();
 	
 	/**
 	 * Gets the (optional) permitted remote network that can make inbound connections

@@ -156,13 +156,16 @@ public class IPTablesTest extends TestCase {
 	public void testPortForwardRule() {
 		s_logger.info("Test port forward rule");
 		
-		String testIface = "test321";
+		String testInboundIface = "testInboundIface";
+		String testOutboundIface = "testOutboundIface";
 		String testAddress = "12.34.56.78";
 		int testPort1 = 12345;
 		int testPort2 = 65432;
 		
 		try {
-			s_firewall.addPortForwardRule(testIface, testAddress, "tcp", testPort1, testPort2, null, null, null, null);
+			s_firewall.addPortForwardRule(testInboundIface, testOutboundIface,
+					testAddress, "tcp", testPort1, testPort2, false, null, null, null,
+					null);
 			s_firewall.enable();
 			
 			String config = getCurrentIptablesConfig();
@@ -172,7 +175,7 @@ public class IPTablesTest extends TestCase {
 			boolean pass = false;
 			String[] lines = config.split("\n");
 			for(String line : lines) {
-				if(line.contains(testIface) && line.contains(testAddress) && line.contains(Integer.toString(testPort1)) && line.contains(Integer.toString(testPort2))) {
+				if(line.contains(testInboundIface) && line.contains(testAddress) && line.contains(Integer.toString(testPort1)) && line.contains(Integer.toString(testPort2))) {
 					pass = true;
 					break;
 				}

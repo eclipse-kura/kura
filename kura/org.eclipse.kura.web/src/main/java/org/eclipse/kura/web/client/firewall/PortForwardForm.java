@@ -11,13 +11,14 @@
  */
 package org.eclipse.kura.web.client.firewall;
 
+import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.util.TextFieldValidator;
 import org.eclipse.kura.web.client.util.TextFieldValidator.FieldType;
+import org.eclipse.kura.web.shared.model.GwtFirewallNatMasquerade;
 import org.eclipse.kura.web.shared.model.GwtFirewallPortForwardEntry;
 import org.eclipse.kura.web.shared.model.GwtNetProtocol;
 import org.eclipse.kura.web.shared.model.GwtSession;
 
-import org.eclipse.kura.web.client.messages.Messages;
 import com.extjs.gxt.ui.client.Style.HorizontalAlignment;
 import com.extjs.gxt.ui.client.Style.Scroll;
 import com.extjs.gxt.ui.client.event.ButtonEvent;
@@ -47,7 +48,6 @@ public class PortForwardForm extends Window {
 
     private static final int  LABEL_WIDTH_FORM = 190; 
     
-    private GwtSession   				m_currentSession;
     private GwtFirewallPortForwardEntry	m_newEntry;
     private GwtFirewallPortForwardEntry	m_existingEntry;
     private FormPanel    				m_formPanel;
@@ -56,7 +56,6 @@ public class PortForwardForm extends Window {
     
     public PortForwardForm(GwtSession session) {
         
-    	m_currentSession = session;
     	m_existingEntry = null;
     	
         setModal(true);
@@ -108,20 +107,38 @@ public class PortForwardForm extends Window {
         fieldSet.setLayout(layoutAccount);
         
         //
-    	// interface name
+    	// in-bound interface
         //
-        final LabelField interfaceNameLabel = new LabelField();
-        interfaceNameLabel.setName("interfaceNameLabel");
-        interfaceNameLabel.setFieldLabel(MSGS.firewallPortForwardFormInterfaceName());
-        interfaceNameLabel.setLabelSeparator(":");
-        fieldSet.add(interfaceNameLabel, formData);
+        final LabelField inboundInterfaceLabel = new LabelField();
+        inboundInterfaceLabel.setName("inboundInterfaceLabel");
+        inboundInterfaceLabel.setFieldLabel(MSGS.firewallPortForwardFormInboundInterface());
+        inboundInterfaceLabel.setLabelSeparator(":");
+        fieldSet.add(inboundInterfaceLabel, formData);
 
-        final TextField<String> interfaceNameField = new TextField<String>();
-        interfaceNameField.setAllowBlank(false);
-        interfaceNameField.setName("interfaceName");
-        interfaceNameField.setFieldLabel(MSGS.firewallPortForwardFormInterfaceName());
-        interfaceNameField.setValidator(new TextFieldValidator(interfaceNameField, FieldType.ALPHANUMERIC));
-        fieldSet.add(interfaceNameField, formData);
+        final TextField<String> inboundInterfaceField = new TextField<String>();
+        inboundInterfaceField.setAllowBlank(false);
+        inboundInterfaceField.setName("interfaceName");
+        inboundInterfaceField.setFieldLabel(MSGS.firewallPortForwardFormInboundInterface());
+        inboundInterfaceField.setToolTip(MSGS.firewallPortForwardFormInboundInterfaceToolTip());
+        inboundInterfaceField.setValidator(new TextFieldValidator(inboundInterfaceField, FieldType.ALPHANUMERIC));
+        fieldSet.add(inboundInterfaceField, formData);
+        
+        //
+    	// out-bound interface
+        //
+        final LabelField outboundInterfaceLabel = new LabelField();
+        outboundInterfaceLabel.setName("inboundInterfaceLabel");
+        outboundInterfaceLabel.setFieldLabel(MSGS.firewallPortForwardFormOutboundInterface());
+        outboundInterfaceLabel.setLabelSeparator(":");
+        fieldSet.add(outboundInterfaceLabel, formData);
+
+        final TextField<String> outboundInterfaceField = new TextField<String>();
+        outboundInterfaceField.setAllowBlank(false);
+        outboundInterfaceField.setName("interfaceName");
+        outboundInterfaceField.setFieldLabel(MSGS.firewallPortForwardFormOutboundInterface());
+        outboundInterfaceField.setToolTip(MSGS.firewallPortForwardFormOutboundInterfaceToolTip());
+        outboundInterfaceField.setValidator(new TextFieldValidator(outboundInterfaceField, FieldType.ALPHANUMERIC));
+        fieldSet.add(outboundInterfaceField, formData);
         
         //
     	// address
@@ -136,6 +153,7 @@ public class PortForwardForm extends Window {
         addressField.setAllowBlank(false);
         addressField.setName("address");
         addressField.setFieldLabel(MSGS.firewallPortForwardFormAddress());
+        addressField.setToolTip(MSGS.firewallPortForwardFormLanAddressToolTip());
         addressField.setValidator(new TextFieldValidator(addressField, FieldType.IPv4_ADDRESS));
         fieldSet.add(addressField, formData);
 
@@ -154,6 +172,7 @@ public class PortForwardForm extends Window {
         protocolCombo.setEditable(false);
         protocolCombo.setTypeAhead(true);  
         protocolCombo.setTriggerAction(TriggerAction.ALL);
+        protocolCombo.setToolTip(MSGS.firewallPortForwardFormProtocolToolTip());
         for (GwtNetProtocol protocol : GwtNetProtocol.values()) {
         	protocolCombo.add(protocol.name());
         }
@@ -173,46 +192,97 @@ public class PortForwardForm extends Window {
         inPortField.setAllowBlank(false);
         inPortField.setName("inPort");
         inPortField.setFieldLabel(MSGS.firewallPortForwardFormInPort());
+        inPortField.setToolTip(MSGS.firewallPortForwardFormExternalPortToolTip());
         inPortField.setValidator(new TextFieldValidator(inPortField, FieldType.NUMERIC));
         fieldSet.add(inPortField, formData);
         
         //
     	// out port number
         //
+        final LabelField outPortLabel = new LabelField();
+        outPortLabel.setName("outPortLabel");
+        outPortLabel.setFieldLabel(MSGS.firewallPortForwardFormOutPort());
+        outPortLabel.setLabelSeparator(":");
+        fieldSet.add(outPortLabel, formData);
+        
         final TextField<String> outPortField = new TextField<String>();
         outPortField.setAllowBlank(false);
         outPortField.setName("outPort");
         outPortField.setFieldLabel(MSGS.firewallPortForwardFormOutPort());
+        outPortField.setToolTip(MSGS.firewallPortForwardFormInternalPortToolTip());
         outPortField.setValidator(new TextFieldValidator(outPortField, FieldType.NUMERIC));
         fieldSet.add(outPortField, formData);
         
         //
+    	// masquerade
+        //
+        final LabelField masqueradeLabel = new LabelField();
+        masqueradeLabel.setName("masqueradeLabel");
+        masqueradeLabel.setFieldLabel(MSGS.firewallNatFormMasquerade());
+        masqueradeLabel.setLabelSeparator(":");
+        fieldSet.add(masqueradeLabel, formData);
+        
+        final SimpleComboBox<String> masqueradeCombo = new SimpleComboBox<String>();
+        masqueradeCombo.setName("masqueradeCombo");
+        masqueradeCombo.setFieldLabel(MSGS.firewallNatFormMasquerade());
+        masqueradeCombo.setEditable(false);
+        masqueradeCombo.setTypeAhead(true);  
+        masqueradeCombo.setTriggerAction(TriggerAction.ALL);
+        masqueradeCombo.setToolTip(MSGS.firewallNatFormMasqueradingToolTip());
+        for (GwtFirewallNatMasquerade masquerade : GwtFirewallNatMasquerade.values()) {
+        	masqueradeCombo.add(masquerade.name());
+        }
+        masqueradeCombo.setSimpleValue(GwtFirewallNatMasquerade.no.name());
+        fieldSet.add(masqueradeCombo, formData);
+        
+        //
     	// permitted network
-        //        
+        //
+        final LabelField permittedNetworkLabel = new LabelField();
+        permittedNetworkLabel.setName("permittedNetworkLabel");
+        permittedNetworkLabel.setFieldLabel(MSGS.firewallPortForwardFormPermittedNetwork());
+        permittedNetworkLabel.setLabelSeparator(":");
+        fieldSet.add(permittedNetworkLabel, formData);
+        
         final TextField<String> permittedNetworkField = new TextField<String>();
         permittedNetworkField.setAllowBlank(true);
         permittedNetworkField.setName("permittedNetwork");
         permittedNetworkField.setFieldLabel(MSGS.firewallPortForwardFormPermittedNetwork());
+        permittedNetworkField.setToolTip(MSGS.firewallPortForwardFormPermittedNetworkToolTip());
         permittedNetworkField.setValidator(new TextFieldValidator(permittedNetworkField, FieldType.NETWORK));
         fieldSet.add(permittedNetworkField, formData);
         
         //
     	// permitted MAC
         //
+        final LabelField permittedMacLabel = new LabelField();
+        permittedMacLabel.setName("permittedMacLabel");
+        permittedMacLabel.setFieldLabel(MSGS.firewallPortForwardFormPermittedMac());
+        permittedMacLabel.setLabelSeparator(":");
+        fieldSet.add(permittedMacLabel, formData);
+        
         final TextField<String> permittedMacField = new TextField<String>();
         permittedMacField.setAllowBlank(true);
         permittedMacField.setName("permittedMac");
         permittedMacField.setFieldLabel(MSGS.firewallPortForwardFormPermittedMac());
+        permittedMacField.setToolTip(MSGS.firewallPortForwardFormPermittedMacAddressToolTip());
         permittedMacField.setValidator(new TextFieldValidator(permittedMacField, FieldType.MAC_ADDRESS));
         fieldSet.add(permittedMacField, formData);
         
         //
     	// source port range
         //
+        final LabelField sourcePortRangeLabel = new LabelField();
+        sourcePortRangeLabel.setName("sourcePortRangeLabel");
+        sourcePortRangeLabel.setFieldLabel(MSGS.firewallPortForwardFormSourcePortRange());
+        sourcePortRangeLabel.setLabelSeparator(":");
+        fieldSet.add(sourcePortRangeLabel, formData);
+        
         final TextField<String> sourcePortRangeField = new TextField<String>();
         sourcePortRangeField.setAllowBlank(true);
         sourcePortRangeField.setName("sourcePortRange");
         sourcePortRangeField.setFieldLabel(MSGS.firewallPortForwardFormSourcePortRange());
+        sourcePortRangeField.setToolTip(MSGS.firewallPortForwardFormSourcePortRangeToolTip());
         sourcePortRangeField.setValidator(new TextFieldValidator(sourcePortRangeField, FieldType.PORT_RANGE));
         fieldSet.add(sourcePortRangeField, formData);
         
@@ -220,10 +290,16 @@ public class PortForwardForm extends Window {
         m_formPanel.add(fieldSet);
     	
         //disable the labels
-    	interfaceNameLabel.setVisible(false);
+        inboundInterfaceLabel.setVisible(false);
+    	outboundInterfaceLabel.setVisible(false);
     	addressLabel.setVisible(false);
     	protocolLabel.setVisible(false);
     	inPortLabel.setVisible(false);
+    	outPortLabel.setVisible(false);
+    	masqueradeLabel.setVisible(false);
+    	permittedNetworkLabel.setVisible(false);
+    	permittedMacLabel.setVisible(false);
+    	sourcePortRangeLabel.setVisible(false);
     	
 		m_status = new Status();
 		m_status.setBusy(MSGS.waitMsg());
@@ -249,11 +325,13 @@ public class PortForwardForm extends Window {
             	if(m_existingEntry == null) {
             		//create a new entry
             		m_newEntry = new GwtFirewallPortForwardEntry();
-            		m_newEntry.setInterfaceName(interfaceNameField.getValue());
+            		m_newEntry.setInboundInterface(inboundInterfaceField.getValue());
+            		m_newEntry.setOutboundInterface(outboundInterfaceField.getValue());
             		m_newEntry.setAddress(addressField.getValue());
             		m_newEntry.setProtocol(protocolCombo.getValue().getValue());
             		m_newEntry.setInPort(Integer.parseInt(inPortField.getValue()));
             		m_newEntry.setOutPort(Integer.parseInt(outPortField.getValue()));
+            		m_newEntry.setMasquerade(masqueradeCombo.getValue().getValue());
             		m_newEntry.setPermittedNetwork(permittedNetworkField.getValue());
             		m_newEntry.setPermittedMAC(permittedMacField.getValue());
             		m_newEntry.setSourcePortRange(sourcePortRangeField.getValue());
@@ -264,11 +342,13 @@ public class PortForwardForm extends Window {
             	} else {
             		//update the current entry
             		m_existingEntry = new GwtFirewallPortForwardEntry();
-            		m_existingEntry.setInterfaceName(interfaceNameField.getValue());
+            		m_existingEntry.setInboundInterface(inboundInterfaceField.getValue());
+            		m_existingEntry.setOutboundInterface(outboundInterfaceField.getValue());
             		m_existingEntry.setAddress(addressField.getValue());
             		m_existingEntry.setProtocol(protocolCombo.getValue().getValue());
             		m_existingEntry.setInPort(Integer.parseInt(inPortField.getValue()));
             		m_existingEntry.setOutPort(Integer.parseInt(outPortField.getValue()));
+            		m_existingEntry.setMasquerade(masqueradeCombo.getValue().getValue());
             		m_existingEntry.setPermittedNetwork(permittedNetworkField.getValue());
             		m_existingEntry.setPermittedMAC(permittedMacField.getValue());
             		m_existingEntry.setSourcePortRange(sourcePortRangeField.getValue());
@@ -296,9 +376,13 @@ public class PortForwardForm extends Window {
         // populate if necessary
         if (m_existingEntry != null) {
         	
-        	interfaceNameLabel.setValue(m_existingEntry.getInterfaceName());
-        	interfaceNameField.setValue(m_existingEntry.getInterfaceName());
-        	interfaceNameField.setOriginalValue(m_existingEntry.getInterfaceName());
+        	inboundInterfaceLabel.setValue(m_existingEntry.getInboundInterface());
+        	inboundInterfaceField.setValue(m_existingEntry.getInboundInterface());
+        	inboundInterfaceField.setOriginalValue(m_existingEntry.getInboundInterface());
+        	
+        	outboundInterfaceLabel.setValue(m_existingEntry.getOutboundInterface());
+        	outboundInterfaceField.setValue(m_existingEntry.getOutboundInterface());
+        	outboundInterfaceField.setOriginalValue(m_existingEntry.getOutboundInterface());
         	
         	addressLabel.setValue(m_existingEntry.getAddress());
         	addressField.setValue(m_existingEntry.getAddress());
@@ -314,6 +398,8 @@ public class PortForwardForm extends Window {
         	outPortField.setValue(m_existingEntry.getOutPort().toString());
         	outPortField.setOriginalValue(m_existingEntry.getOutPort().toString());
         
+        	masqueradeCombo.setSimpleValue(m_existingEntry.getMasquerade());
+        	
         	permittedNetworkField.setValue(m_existingEntry.getPermittedNetwork());
         	permittedNetworkField.setOriginalValue(m_existingEntry.getPermittedNetwork());
         	

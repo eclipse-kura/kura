@@ -14,10 +14,10 @@ package org.eclipse.kura.web.shared.service;
 import java.util.List;
 
 import org.eclipse.kura.web.shared.GwtKuraException;
+import org.eclipse.kura.web.shared.model.GwtFirewallNatEntry;
 import org.eclipse.kura.web.shared.model.GwtFirewallOpenPortEntry;
 import org.eclipse.kura.web.shared.model.GwtFirewallPortForwardEntry;
 import org.eclipse.kura.web.shared.model.GwtNetInterfaceConfig;
-import org.eclipse.kura.web.shared.model.GwtReverseNatEntry;
 import org.eclipse.kura.web.shared.model.GwtWifiConfig;
 import org.eclipse.kura.web.shared.model.GwtWifiHotspotEntry;
 
@@ -30,22 +30,19 @@ public interface GwtNetworkService extends RemoteService
 {
 	public ListLoadResult<GwtNetInterfaceConfig> findNetInterfaceConfigurations() throws GwtKuraException;
 
-
 	public void updateNetInterfaceConfigurations(GwtNetInterfaceConfig config) throws GwtKuraException;
-	
-	
+		
 	public ListLoadResult<GwtFirewallOpenPortEntry> findDeviceFirewallOpenPorts() throws GwtKuraException;
 
-
 	public void updateDeviceFirewallOpenPorts(List<GwtFirewallOpenPortEntry> entries) throws GwtKuraException;
-	
-	
+		
 	public ListLoadResult<GwtFirewallPortForwardEntry> findDeviceFirewallPortForwards() throws GwtKuraException;
 	
+	public ListLoadResult<GwtFirewallNatEntry> findDeficeFirewallNATs() throws GwtKuraException;
 	
 	public void updateDeviceFirewallPortForwards(List<GwtFirewallPortForwardEntry> entries) throws GwtKuraException;
 	
-	public ListLoadResult<GwtReverseNatEntry> findReverseNatConfigurations(String sourceIface) throws GwtKuraException;
+	public void updateDeviceFirewallNATs(List<GwtFirewallNatEntry> entries) throws GwtKuraException;
 	
 	public void renewDhcpLease(String interfaceName) throws GwtKuraException;
 	

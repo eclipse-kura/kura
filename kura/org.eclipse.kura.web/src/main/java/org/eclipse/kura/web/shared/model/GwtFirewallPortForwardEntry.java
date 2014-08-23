@@ -20,16 +20,24 @@ public class GwtFirewallPortForwardEntry extends BaseModelData implements Serial
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = -2257728265961620948L;
+	private static final long serialVersionUID = 5028849108840020090L;
 
 	public GwtFirewallPortForwardEntry() {}
 	
-	public String getInterfaceName() {
-        return get("interfaceName");
+	public String getInboundInterface() {
+        return get("inboundInterface");
     }
 
-    public void setInterfaceName(String interfaceName) {
-        set("interfaceName", interfaceName);
+    public void setInboundInterface(String interfaceName) {
+        set("inboundInterface", interfaceName);
+    }
+    
+    public String getOutboundInterface() {
+        return get("outboundInterface");
+    }
+
+    public void setOutboundInterface(String interfaceName) {
+        set("outboundInterface", interfaceName);
     }
     
     public String getAddress() {
@@ -72,6 +80,14 @@ public class GwtFirewallPortForwardEntry extends BaseModelData implements Serial
 
     public void setOutPort(int outPort) {
         set("outPort", outPort);
+    }
+    
+    public String getMasquerade() {
+    	return get("masquerade");
+    }
+
+    public void setMasquerade(String masquerade) {
+        set("masquerade", masquerade);
     }
     
     public String getPermittedNetwork() {

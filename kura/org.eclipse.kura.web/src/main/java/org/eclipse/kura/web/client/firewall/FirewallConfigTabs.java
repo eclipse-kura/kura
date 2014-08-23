@@ -14,6 +14,7 @@ package org.eclipse.kura.web.client.firewall;
 import java.util.List;
 
 import org.eclipse.kura.web.client.messages.Messages;
+import org.eclipse.kura.web.shared.model.GwtFirewallNatEntry;
 import org.eclipse.kura.web.shared.model.GwtFirewallOpenPortEntry;
 import org.eclipse.kura.web.shared.model.GwtFirewallPortForwardEntry;
 import org.eclipse.kura.web.shared.model.GwtSession;
@@ -41,9 +42,11 @@ public class FirewallConfigTabs extends LayoutContainer
 	private TabPanel               m_tabsPanel;
 	private TabItem                m_tabOpenPortsConfig;
 	private TabItem                m_tabPortForwardingConfig;
+	private TabItem				   m_tabNatConfig;
 	
 	private OpenPortsConfigTab	    m_openPortsConfigTab;
 	private PortForwardingConfigTab m_portForwardingConfigTab;
+	private NatConfigTab			m_natConfigTab;
 	
 	private Boolean					m_ignoreEvent;
 	
@@ -69,6 +72,12 @@ public class FirewallConfigTabs extends LayoutContainer
 			m_tabPortForwardingConfig.add(m_portForwardingConfigTab);
 			m_tabPortForwardingConfig.layout();
 		}
+		
+		m_natConfigTab = new NatConfigTab(m_currentSession);
+		if (m_tabNatConfig != null) {
+			m_tabNatConfig.add(m_natConfigTab);
+			m_tabNatConfig.layout();
+		}
     }
     
     public boolean isDirty() {
@@ -77,6 +86,9 @@ public class FirewallConfigTabs extends LayoutContainer
     		return true;
     	}
     	if (m_portForwardingConfigTab.isDirty()) {
+    		return true;
+    	}
+    	if (m_natConfigTab.isDirty()) {
     		return true;
     	}
     	
@@ -89,6 +101,10 @@ public class FirewallConfigTabs extends LayoutContainer
     
     public List<GwtFirewallPortForwardEntry> getUpdatedPortForwardConfiguration() {
     	return m_portForwardingConfigTab.getCurrentConfigurations();
+    }
+    
+    public List<GwtFirewallNatEntry> getUpdatedNatConfiguration() {
+    	return m_natConfigTab.getCurrentConfigurations();
     }
     
     private void handleTabChangeEvent(boolean isDirty, final TabPanelEvent be) {
@@ -130,7 +146,7 @@ public class FirewallConfigTabs extends LayoutContainer
         m_tabOpenPortsConfig.add(m_openPortsConfigTab);
         m_tabOpenPortsConfig.addListener(Events.BeforeSelect, new Listener<TabPanelEvent>() {
 			public void handleEvent(final TabPanelEvent be) {
-				handleTabChangeEvent(m_portForwardingConfigTab.isDirty(), be);
+				handleTabChangeEvent(m_openPortsConfigTab.isDirty(), be);
 			}
         });
         m_tabsPanel.add(m_tabOpenPortsConfig);
@@ -141,10 +157,21 @@ public class FirewallConfigTabs extends LayoutContainer
         m_tabPortForwardingConfig.add(m_portForwardingConfigTab);
         m_tabPortForwardingConfig.addListener(Events.BeforeSelect, new Listener<TabPanelEvent>() {
 			public void handleEvent(final TabPanelEvent be) {
-				handleTabChangeEvent(m_openPortsConfigTab.isDirty(), be);
+				handleTabChangeEvent(m_portForwardingConfigTab.isDirty(), be);
 			}
         });
         m_tabsPanel.add(m_tabPortForwardingConfig);
+        
+        m_tabNatConfig = new TabItem(MSGS.firewallNat());
+        m_tabNatConfig.setBorders(true);
+        m_tabNatConfig.setLayout(new FitLayout());
+        m_tabNatConfig.add(m_natConfigTab);
+        m_tabNatConfig.addListener(Events.BeforeSelect, new Listener<TabPanelEvent>() {
+			public void handleEvent(final TabPanelEvent be) {
+				handleTabChangeEvent(m_natConfigTab.isDirty(), be);
+			}
+        });
+        m_tabsPanel.add(m_tabNatConfig);
         
         add(m_tabsPanel);
     }

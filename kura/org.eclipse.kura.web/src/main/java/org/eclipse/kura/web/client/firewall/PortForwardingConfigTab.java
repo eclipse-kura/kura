@@ -154,7 +154,7 @@ public class PortForwardingConfigTab extends LayoutContainer
                 new SelectionListener<ButtonEvent>() {
             		@Override
             		public void componentSelected(ButtonEvent ce) {
-            			Log.debug("about to updateDeviceFirewallOpenPorts() and updateDeviceFirewallPortForwards()");
+            			Log.debug("about to updateDeviceFirewallPortForwards()");
             			List<GwtFirewallPortForwardEntry> updatedPortForwardConf = getCurrentConfigurations();
 
             			if(updatedPortForwardConf != null) {
@@ -164,6 +164,7 @@ public class PortForwardingConfigTab extends LayoutContainer
 	            				public void onSuccess(Void result) {
 									Log.debug("updated!");
 									m_dirty = false;
+									m_applyButton.disable();
 									unmask();
 								}
 	            				
@@ -300,35 +301,43 @@ public class PortForwardingConfigTab extends LayoutContainer
 		ColumnConfig column = null;
 		List<ColumnConfig> configs = new ArrayList<ColumnConfig>();
 		
-		column = new ColumnConfig("interfaceName", MSGS.firewallPortForwardInterfaceName(), 130);
+		column = new ColumnConfig("inboundInterface", MSGS.firewallPortForwardInboundInterface(), 80);
 		column.setAlignment(HorizontalAlignment.CENTER);
 		configs.add(column);
 		
-		column = new ColumnConfig("address", MSGS.firewallPortForwardAddress(), 130);
+		column = new ColumnConfig("outboundInterface", MSGS.firewallPortForwardOutboundInterface(), 80);
 		column.setAlignment(HorizontalAlignment.CENTER);
 		configs.add(column);
 		
-		column = new ColumnConfig("protocol", MSGS.firewallPortForwardProtocol(), 130);
+		column = new ColumnConfig("address", MSGS.firewallPortForwardAddress(), 120);
 		column.setAlignment(HorizontalAlignment.CENTER);
 		configs.add(column);
 		
-		column = new ColumnConfig("inPort", MSGS.firewallPortForwardInPort(), 130);
+		column = new ColumnConfig("protocol", MSGS.firewallPortForwardProtocol(), 60);
 		column.setAlignment(HorizontalAlignment.CENTER);
 		configs.add(column);
 		
-		column = new ColumnConfig("outPort", MSGS.firewallPortForwardOutPort(), 130);
+		column = new ColumnConfig("inPort", MSGS.firewallPortForwardInPort(), 60);
 		column.setAlignment(HorizontalAlignment.CENTER);
 		configs.add(column);
 		
-		column = new ColumnConfig("permittedNetwork", MSGS.firewallPortForwardPermittedNetwork(), 130);
+		column = new ColumnConfig("outPort", MSGS.firewallPortForwardOutPort(), 60);
 		column.setAlignment(HorizontalAlignment.CENTER);
 		configs.add(column);
 		
-		column = new ColumnConfig("permittedMAC", MSGS.firewallPortForwardPermittedMac(), 130);
+		column = new ColumnConfig("masquerade", MSGS.firewallPortForwardMasquerade(), 60);
 		column.setAlignment(HorizontalAlignment.CENTER);
 		configs.add(column);
 		
-		column = new ColumnConfig("sourcePortRange", MSGS.firewallPortForwardSourcePortRange(), 130);
+		column = new ColumnConfig("permittedNetwork", MSGS.firewallPortForwardPermittedNetwork(), 120);
+		column.setAlignment(HorizontalAlignment.CENTER);
+		configs.add(column);
+		
+		column = new ColumnConfig("permittedMAC", MSGS.firewallPortForwardPermittedMac(), 120);
+		column.setAlignment(HorizontalAlignment.CENTER);
+		configs.add(column);
+		
+		column = new ColumnConfig("sourcePortRange", MSGS.firewallPortForwardSourcePortRange(), 120);
 		column.setAlignment(HorizontalAlignment.CENTER);
 		configs.add(column);
 
@@ -417,7 +426,8 @@ public class PortForwardingConfigTab extends LayoutContainer
 		List<GwtFirewallPortForwardEntry> entries = m_grid.getStore().getModels();
 		if (entries != null && portForwardEntry != null) {
 			for (GwtFirewallPortForwardEntry entry : entries) {
-				if (entry.getInterfaceName().equals(portForwardEntry.getInterfaceName())
+				if (entry.getInboundInterface().equals(portForwardEntry.getInboundInterface())
+						&& entry.getOutboundInterface().equals(portForwardEntry.getOutboundInterface())
 						&& entry.getAddress().equals(portForwardEntry.getAddress())
 						&& entry.getProtocol().equals(portForwardEntry.getProtocol())
 						&& entry.getOutPort().equals(portForwardEntry.getOutPort())

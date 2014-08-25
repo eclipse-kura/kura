@@ -327,6 +327,18 @@
 				</plugin>
 			</plugins>
 		</pluginManagement>
+		<distributionManagement>
+			<repository>
+				<id>repo.eclipse.org</id>
+				<name>Kura Repository - Releases</name>
+				<url>https://repo.eclipse.org/content/repositories/kura-releases/</url>
+			</repository>
+			<snapshotRepository>
+				<id>repo.eclipse.org</id>
+				<name>Kura Repository - Snapshots</name>
+				<url>https://repo.eclipse.org/content/repositories/kura-snapshots/</url>
+			</snapshotRepository>
+		</distributionManagement>
 	</build>
 	<!-- Use the below format to specify specific reports to run <reporting> 
 		<plugins> <plugin> <groupId>org.apache.maven.plugins</groupId> <artifactId>maven-project-info-reports-plugin</artifactId> 

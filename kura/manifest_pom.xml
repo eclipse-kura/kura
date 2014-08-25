@@ -241,26 +241,6 @@
 				<artifactId>maven-javadoc-plugin</artifactId>
 			</plugin>
 			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>wagon-maven-plugin</artifactId>
-				<version>1.0-beta-3</version>
-				<executions>
-					<execution>
-						<phase>deploy</phase>
-						<goals>
-							<goal>upload</goal>
-						</goals>
-					</execution>
-				</executions>
-				<configuration>
-					<fromDir>target</fromDir>
-					<includes>kura-${project.version}-javadoc.jar,</includes>
-					<url>scp://107.20.195.222</url>
-					<toDir>/home/edcupload/kura_builds/${project.version}/</toDir>
-					<serverId>eurotechcloud-transfer</serverId>
-				</configuration>
-			</plugin>
-			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-site-plugin</artifactId>
 				<version>3.3</version>

@@ -9,7 +9,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <link href="{{ site.baseurl }}{{ ASSET_PATH }}/resources/bootstrap/css/bootstrap.min.css" rel="stylesheet">
-  
+
     <!--[if lt IE 9]>
       <script src="{{ ASSET_PATH }}/resources/respond/Respond.min.js"></script>
     <![endif]-->
@@ -42,7 +42,18 @@
       </div>
     </nav>
     <div class="container">
-      {{ content }}
+      <div class="row">
+        <div class="col-md-3" style="font-size: 1em; font-weight: bold;">
+          <ul class="lists-unstyled">
+            {% for post in site.posts %}
+            <li><a href="{{ post.url }}">{{ post.title }} </a></li>
+            {% endfor %}
+          </ul>
+        </div>
+        <div class="col-md-9">
+          {{ content }}
+        </div>
+      </div>
       <hr>
       <footer>
         <p>

@@ -1,0 +1,15 @@
+<! -- sidebar.html -->
+<header class="sidebar-header" role="banner">
+	<a href="{% if BASE_PATH %}{{ BASE_PATH }}{% else %}/{% endif %}">
+		<img src="/assets/images/kura_logo_small.png" />
+	</a>
+	<ul class="list-unstyled">
+		{% for post in site.posts %}
+		<li><a href="{{ BASE_PATH }}{{ post.url }}">{{ post.title }}</a></li>
+		{% endfor %}
+	</ul>
+</header>
+
+
+
+<! -- sidebar.html end -->

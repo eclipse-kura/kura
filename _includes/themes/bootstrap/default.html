@@ -46,7 +46,7 @@
         <div class="col-md-3" style="font-size: 1em; font-weight: bold;">
           <ul class="lists-unstyled">
             {% for post in site.posts %}
-            <li><a href="{{ post.url }}">{{ post.title }} </a></li>
+            <li><a href="{{site.baseurl}}{{ post.url }}">{{ post.title }} </a></li>
             {% endfor %}
           </ul>
         </div>
@@ -68,7 +68,7 @@
     </div>
 
     {% include JB/analytics %}
-    <script src="{{ ASSET_PATH }}/resources/jquery/jquery.min.js"></script>
-    <script src="{{ ASSET_PATH }}/resources/bootstrap/js/bootstrap.min.js"></script>
+    <script src="{{site.baseurl}}{{ ASSET_PATH }}/resources/jquery/jquery.min.js"></script>
+    <script src="{{site.baseurl}}{{ ASSET_PATH }}/resources/bootstrap/js/bootstrap.min.js"></script>
   </body>
 </html>

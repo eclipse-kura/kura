@@ -29,6 +29,7 @@ author :
 # Finally if you are pushing to a GitHub project page, include the project name at the end.
 #
 production_url : http://eclipse.github.io/kura
+baseurl : /kura
 
 # All Jekyll-Bootstrap specific configurations are namespaced into this hash
 #

@@ -19,4 +19,4 @@ Eurotech’s Kura is an inclusive and targeted software framework.  Kura allows 
 </ul>
 All of these components come “integrated” from Eurotech and are based on open standards, tools, and implementations.  The amount of 3rd party development is greatly reduced, allowing customers to focus on what they do best – writing their business application logic without having to spend man-years developing the software infrastructure and frameworks upon which those applications can run.
 
-<img style="width: 500px;" src="{{ site.url }}/assets/images/intro.png"/>
+<img style="width: 500px;" src="{{ site.baseurl }}/assets/images/intro.png"/>

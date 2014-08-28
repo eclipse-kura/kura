@@ -29,6 +29,7 @@ import org.eclipse.kura.linux.net.route.RouteService;
 import org.eclipse.kura.linux.net.route.RouteServiceImpl;
 import org.eclipse.kura.linux.net.util.LinuxNetworkUtil;
 import org.eclipse.kura.net.EthernetMonitorService;
+import org.eclipse.kura.net.IP4Address;
 import org.eclipse.kura.net.IPAddress;
 import org.eclipse.kura.net.NetConfig;
 import org.eclipse.kura.net.NetConfigIP4;
@@ -183,6 +184,7 @@ public class EthernetMonitorServiceImpl implements EthernetMonitorService, Event
 				InterfaceState currentInterfaceState = null;
 	        	boolean interfaceEnabled = false;
 	        	boolean isDhcpClient = false;
+	        	IP4Address staticGateway = null;
 	        	boolean dhcpServerEnabled = false;
 	        	IPAddress dhcpServerSubnet = null;
 	        	short dhcpServerPrefix = -1;
@@ -251,6 +253,7 @@ public class EthernetMonitorServiceImpl implements EthernetMonitorService, Event
 	        			            	}
 	    	                        } else if (netConfig instanceof NetConfigIP4) {
 	        							isDhcpClient = ((NetConfigIP4) netConfig).isDhcp();
+	        							staticGateway = ((NetConfigIP4) netConfig).getGateway();
 	        						}
 	        					}
 	        				}
@@ -306,10 +309,12 @@ public class EthernetMonitorServiceImpl implements EthernetMonitorService, Event
 	            		}
 	            		
 	            		if(!found) {
-	            			//disable the interface and reenable - something didn't happen at initialization as it was supposed to
-	            			s_logger.error("WAN interface " + interfaceName + " did not have a route setting it as the default gateway, restarting it");
-	            			m_netAdminService.disableInterface(interfaceName);
-	            			m_netAdminService.enableInterface(interfaceName, isDhcpClient);
+	            			if (isDhcpClient || (staticGateway != null)) {
+	            				//disable the interface and reenable - something didn't happen at initialization as it was supposed to
+	            				s_logger.error("WAN interface " + interfaceName + " did not have a route setting it as the default gateway, restarting it");
+	            				m_netAdminService.disableInterface(interfaceName);
+	            				m_netAdminService.enableInterface(interfaceName, isDhcpClient);
+	            			}
 	            		}
 	            	} else if (netInterfaceStatus == NetInterfaceStatus.netIPv4StatusEnabledLAN) {
 	            		if (isDhcpClient) {

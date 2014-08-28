@@ -228,7 +228,7 @@ public class PortForwardForm extends Window {
         masqueradeCombo.setEditable(false);
         masqueradeCombo.setTypeAhead(true);  
         masqueradeCombo.setTriggerAction(TriggerAction.ALL);
-        masqueradeCombo.setToolTip(MSGS.firewallNatFormMasqueradingToolTip());
+        masqueradeCombo.setToolTip(MSGS.firewallPortForwardFormMasqueradingToolTip());
         for (GwtFirewallNatMasquerade masquerade : GwtFirewallNatMasquerade.values()) {
         	masqueradeCombo.add(masquerade.name());
         }

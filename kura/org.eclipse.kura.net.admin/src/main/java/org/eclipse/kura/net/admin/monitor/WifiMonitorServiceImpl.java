@@ -50,7 +50,7 @@ import org.eclipse.kura.net.admin.NetworkConfigurationService;
 import org.eclipse.kura.net.admin.event.NetworkConfigurationChangeEvent;
 import org.eclipse.kura.net.admin.event.NetworkStatusChangeEvent;
 import org.eclipse.kura.net.dhcp.DhcpServerConfig4;
-import org.eclipse.kura.net.firewall.FirewallNatConfig;
+import org.eclipse.kura.net.firewall.FirewallAutoNatConfig;
 import org.eclipse.kura.net.route.RouteConfig;
 import org.eclipse.kura.net.wifi.WifiAccessPoint;
 import org.eclipse.kura.net.wifi.WifiClientMonitorListener;
@@ -700,7 +700,7 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
         						foundConfigMatch = true;        						
         						
         						//if the config is different and is not the FirewallNatConfig
-        						if(!newNetConfig.equals(currentNetConfig) && newNetConfig.getClass() != FirewallNatConfig.class) {
+        						if(!newNetConfig.equals(currentNetConfig) && newNetConfig.getClass() != FirewallAutoNatConfig.class) {
         							s_logger.debug("\tConfig changed - Old config: " + currentNetConfig.toString());
         							s_logger.debug("\tConfig changed - New config: " + newNetConfig.toString());
         							reconfiguredInterfaces.add(interfaceName);

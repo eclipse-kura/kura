@@ -44,7 +44,7 @@ import org.eclipse.kura.net.admin.NetworkConfigurationService;
 import org.eclipse.kura.net.admin.event.NetworkConfigurationChangeEvent;
 import org.eclipse.kura.net.admin.event.NetworkStatusChangeEvent;
 import org.eclipse.kura.net.dhcp.DhcpServerConfig4;
-import org.eclipse.kura.net.firewall.FirewallNatConfig;
+import org.eclipse.kura.net.firewall.FirewallAutoNatConfig;
 import org.eclipse.kura.net.route.RouteConfig;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.event.Event;
@@ -431,7 +431,7 @@ public class EthernetMonitorServiceImpl implements EthernetMonitorService, Event
 					
 					if(newNetConfig.getClass() == currentNetConfig.getClass()) {
 						foundMatch = true;
-						if(!newNetConfig.equals(currentNetConfig) && newNetConfig.getClass() != FirewallNatConfig.class) {
+						if(!newNetConfig.equals(currentNetConfig) && newNetConfig.getClass() != FirewallAutoNatConfig.class) {
 							s_logger.debug("\tConfig changed - Current config: " + currentNetConfig.toString());
 							s_logger.debug("\tConfig changed - New config: " + newNetConfig.toString());
 							return true;

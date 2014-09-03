@@ -50,9 +50,9 @@
 									<version>1.0.2</version>
 								</artifactItem>
 								<artifactItem>
-									<groupId>org.eclipse.paho</groupId>
-									<artifactId>org.eclipse.paho.client.mqttv3</artifactId>
-									<version>1.0.0</version>
+									<groupId>org.eclipse.kura</groupId>
+									<artifactId>mqtt-client</artifactId>
+									<version>0.4.0</version>
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.eclipse.kura</groupId>

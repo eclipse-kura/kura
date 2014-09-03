@@ -1,3 +1,20 @@
+.navbar-default {
+    background-color: #4b8fd0;
+}
+
+.navbar-default .navbar-header .navbar-brand {
+  color: #eff4f7;
+}
+
+.nav-header {
+  color: #999999;
+}
+
+.nav-header + li a {
+  color: #4b8fd0;
+  padding: 3px 15px;
+}
+
 /* Custom container */
 .container-narrow {
   margin: 0 auto;

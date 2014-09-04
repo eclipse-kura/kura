@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: org.eclipse.kura.linux.net.test
 Bundle-SymbolicName: org.eclipse.kura.linux.net.test;singleton:=true
-Bundle-Version: 1.0.0.qualifier
+Bundle-Version: 0.7.1
 Bundle-Vendor: EUROTECH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: org.eclipse.kura; version="[0.2,1.0)",

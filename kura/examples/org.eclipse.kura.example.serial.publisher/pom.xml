@@ -19,12 +19,12 @@
 	<parent>
 		<groupId>org.eclipse.kura</groupId>
 		<artifactId>examples</artifactId>
-		<version>1.0.0-SNAPSHOT</version>
+		<version>0.7.1</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
 	<artifactId>org.eclipse.kura.example.serial.publisher</artifactId>
-	<version>1.0.0-SNAPSHOT</version>
+	<version>0.7.1</version>
 	<packaging>eclipse-plugin</packaging>
 
 	<properties>

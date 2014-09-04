@@ -10,11 +10,9 @@
  *   Eurotech
  */
 
-package org.eclipse.kura.net.admin.modem;
+package org.eclipse.kura.web.shared.model;
 
-public interface ModemManagerService {
-
-	public CellularModem getModemService (String ifaceName);
-	//public void setModemService (String usbPort, UsbCellularModem modem);
-	//public void removeModemService(String usbPort);
+public enum GwtFirewallNatMasquerade {
+	yes,
+	no
 }

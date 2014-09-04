@@ -6,12 +6,12 @@
 	<parent>
 		<groupId>org.eclipse.kura</groupId>
 		<artifactId>kura</artifactId>
-		<version>0.7.0</version>
+		<version>0.7.1</version>
 		<relativePath>../manifest_pom.xml</relativePath>
 	</parent>
 
 	<artifactId>org.eclipse.kura.protocol.can.test</artifactId>
-	<version>0.7.0</version>
+	<version>0.7.1</version>
 	<packaging>eclipse-test-plugin</packaging>
 
 	<properties>

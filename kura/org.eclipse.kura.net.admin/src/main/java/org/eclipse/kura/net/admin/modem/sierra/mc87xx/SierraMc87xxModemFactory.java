@@ -14,8 +14,8 @@ package org.eclipse.kura.net.admin.modem.sierra.mc87xx;
 import java.util.Hashtable;
 
 import org.eclipse.kura.net.admin.NetworkConfigurationService;
-import org.eclipse.kura.net.admin.modem.CellularModem;
 import org.eclipse.kura.net.admin.modem.CellularModemFactory;
+import org.eclipse.kura.net.modem.CellularModem;
 import org.eclipse.kura.net.modem.ModemDevice;
 import org.eclipse.kura.net.modem.ModemTechnologyType;
 import org.osgi.framework.BundleContext;

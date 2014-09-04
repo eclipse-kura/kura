@@ -41,8 +41,11 @@ import org.eclipse.kura.net.NetInterfaceType;
 import org.eclipse.kura.net.dhcp.DhcpServerConfig;
 import org.eclipse.kura.net.dhcp.DhcpServerConfig4;
 import org.eclipse.kura.net.dhcp.DhcpServerConfigIP4;
+import org.eclipse.kura.net.firewall.FirewallAutoNatConfig;
 import org.eclipse.kura.net.firewall.FirewallNatConfig;
 import org.eclipse.kura.net.modem.ModemConfig;
+import org.eclipse.kura.net.modem.ModemConfig.AuthType;
+import org.eclipse.kura.net.modem.ModemConfig.PdpType;
 import org.eclipse.kura.net.modem.ModemConnectionStatus;
 import org.eclipse.kura.net.modem.ModemConnectionType;
 import org.eclipse.kura.net.modem.ModemInterface;
@@ -50,19 +53,17 @@ import org.eclipse.kura.net.modem.ModemInterfaceAddress;
 import org.eclipse.kura.net.modem.ModemInterfaceAddressConfig;
 import org.eclipse.kura.net.modem.ModemPowerMode;
 import org.eclipse.kura.net.modem.ModemTechnologyType;
-import org.eclipse.kura.net.modem.ModemConfig.AuthType;
-import org.eclipse.kura.net.modem.ModemConfig.PdpType;
 import org.eclipse.kura.net.wifi.WifiAccessPoint;
 import org.eclipse.kura.net.wifi.WifiBgscan;
 import org.eclipse.kura.net.wifi.WifiCiphers;
 import org.eclipse.kura.net.wifi.WifiConfig;
 import org.eclipse.kura.net.wifi.WifiInterface;
+import org.eclipse.kura.net.wifi.WifiInterface.Capability;
 import org.eclipse.kura.net.wifi.WifiInterfaceAddress;
 import org.eclipse.kura.net.wifi.WifiInterfaceAddressConfig;
 import org.eclipse.kura.net.wifi.WifiMode;
 import org.eclipse.kura.net.wifi.WifiRadioMode;
 import org.eclipse.kura.net.wifi.WifiSecurity;
-import org.eclipse.kura.net.wifi.WifiInterface.Capability;
 import org.eclipse.kura.usb.UsbDevice;
 import org.eclipse.kura.usb.UsbNetDevice;
 import org.slf4j.Logger;
@@ -346,8 +347,8 @@ public class NetworkConfiguration {
 							} else if(netConfig instanceof DhcpServerConfig) {
 								sb.append("\n\tDhcpServerConfig ");
 								//TODO - finish displaying
-							} else if(netConfig instanceof FirewallNatConfig) {
-								sb.append("\n\tFirewallNatConfig ");
+							} else if(netConfig instanceof FirewallAutoNatConfig) {
+								sb.append("\n\tFirewallAutoNatConfig ");
 								//TODO - finish displaying
 							} else {
 								if(netConfig != null && netConfig.getClass() != null) {
@@ -698,9 +699,9 @@ public class NetworkConfiguration {
 						} else if (netConfig instanceof DhcpServerConfig4) {
 							s_logger.trace("adding netconfig DhcpServerConfig4 for " + netInterfaceConfig.getName());
 							addDhcpServerConfig4((DhcpServerConfig4) netConfig, netIfConfigPrefix, properties);
-						} else if (netConfig instanceof FirewallNatConfig) {
+						} else if (netConfig instanceof FirewallAutoNatConfig) {
 							s_logger.trace("adding netconfig FirewallNatConfig for " + netInterfaceConfig.getName());
-							addFirewallNatConfig((FirewallNatConfig) netConfig, netIfConfigPrefix, properties);
+							addFirewallNatConfig((FirewallAutoNatConfig) netConfig, netIfConfigPrefix, properties);
 						}
 					}
 				}
@@ -1227,7 +1228,7 @@ public class NetworkConfiguration {
 		
 	}
 	
-	private void addFirewallNatConfig(FirewallNatConfig nc,
+	private void addFirewallNatConfig(FirewallAutoNatConfig nc,
 			String netIfConfigPrefix, 
 			Map<String,Object> properties) {
 		
@@ -1826,7 +1827,7 @@ public class NetworkConfiguration {
                 s_logger.trace("NAT enabled? " + natEnabled);
                 
                 if(natEnabled) {
-                    FirewallNatConfig natConfig = new FirewallNatConfig(interfaceName, "unknown", true);
+                    FirewallAutoNatConfig natConfig = new FirewallAutoNatConfig(interfaceName, "unknown", true);
                     netConfigs.add(natConfig);
                 }
             }

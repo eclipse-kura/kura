@@ -31,7 +31,7 @@ public class LinuxReadVisitor implements NetworkConfigurationVisitor{
         m_visitors.add(WifiConfigReader.getInstance());
         m_visitors.add(PppConfigReader.getInstance());
         m_visitors.add(DhcpConfigReader.getInstance());
-        m_visitors.add(FirewallNatConfigReader.getInstance());
+        m_visitors.add(FirewallAutoNatConfigReader.getInstance());
     }
     
     public static LinuxReadVisitor getInstance() {

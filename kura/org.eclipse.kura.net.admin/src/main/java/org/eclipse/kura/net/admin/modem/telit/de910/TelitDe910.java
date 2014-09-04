@@ -41,6 +41,7 @@ public class TelitDe910 implements EvdoCellularModem {
 	private static final Logger s_logger = LoggerFactory.getLogger(TelitDe910.class);
 	
 	private static final String OS_VERSION = System.getProperty("kura.os.version");
+	private static final String TARGET_NAME = System.getProperty("target.device");
 	
 	private IVectorJ21GpioService m_vectorJ21GpioService = null;
 	private ConnectionFactory m_connectionFactory = null;
@@ -212,7 +213,7 @@ public class TelitDe910 implements EvdoCellularModem {
 	@Override
 	public int getSignalStrength() throws KuraException {
 		
-		int rssi = -113;
+		int signalStrength = -113;
     	synchronized (m_atLock) {
 	    	s_logger.debug("sendCommand getSignalStrength :: " + TelitDe910AtCommands.getSignalStrength.getCommand());
 	    	byte[] reply = null;
@@ -233,16 +234,20 @@ public class TelitDe910 implements EvdoCellularModem {
 				String sCsq = this.getResponseString(reply);
 				if (sCsq.startsWith("+CSQ:")) {
 					sCsq = sCsq.substring("+CSQ:".length()).trim();
+					s_logger.trace("getSignalStrength() :: +CSQ={}", sCsq);
 					asCsq = sCsq.split(",");
 					if (asCsq.length == 2) {
-						rssi = -113 + 2 * Integer.parseInt(asCsq[0]);
-						
+						int rssi = Integer.parseInt(asCsq[0]);
+						if (rssi < 99) {
+							signalStrength = -113 + 2 * rssi;
+						}
+						s_logger.trace("getSignalStrength() :: signalStrength={}", signalStrength);	
 					}
 				}
 				reply = null;
 			}
     	}
-        return rssi;
+        return signalStrength;
 	}
 
 	@Override
@@ -475,7 +480,8 @@ public class TelitDe910 implements EvdoCellularModem {
 	@Override
 	public String getGpsPort() throws KuraException {
 		String port = null;
-    	if (OS_VERSION.equals(KuraConstants.Mini_Gateway.getImageName() + "_" + KuraConstants.Mini_Gateway.getImageVersion())) {
+    	if (OS_VERSION.equals(KuraConstants.Mini_Gateway.getImageName() + "_" + KuraConstants.Mini_Gateway.getImageVersion()) &&
+    			TARGET_NAME.equals(KuraConstants.Mini_Gateway.getTargetName())) {
     		port = SerialModemComm.MiniGateway.getAtPort();
     	} else {
     		port = getAtPort();

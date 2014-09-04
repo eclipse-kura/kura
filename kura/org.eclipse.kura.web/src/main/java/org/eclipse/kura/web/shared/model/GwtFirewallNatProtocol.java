@@ -9,12 +9,11 @@
  * Contributors:
  *   Eurotech
  */
-package org.eclipse.kura.net.admin.modem;
 
-import org.eclipse.kura.KuraException;
-import org.eclipse.kura.net.modem.CellularModem;
+package org.eclipse.kura.web.shared.model;
 
-public interface HspaCellularModem extends CellularModem {
-
-	 public boolean isSimCardReady() throws KuraException;
+public enum GwtFirewallNatProtocol {
+	all,
+	tcp,
+	udp
 }

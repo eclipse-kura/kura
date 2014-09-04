@@ -29,20 +29,20 @@ import org.eclipse.kura.net.NetInterfaceAddressConfig;
 import org.eclipse.kura.net.NetInterfaceConfig;
 import org.eclipse.kura.net.NetInterfaceType;
 import org.eclipse.kura.net.admin.visitor.linux.util.KuranetConfig;
-import org.eclipse.kura.net.firewall.FirewallNatConfig;
+import org.eclipse.kura.net.firewall.FirewallAutoNatConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class FirewallNatConfigReader implements NetworkConfigurationVisitor {
+public class FirewallAutoNatConfigReader implements NetworkConfigurationVisitor {
 	
-	private static final Logger s_logger = LoggerFactory.getLogger(FirewallNatConfigReader.class);
+	private static final Logger s_logger = LoggerFactory.getLogger(FirewallAutoNatConfigReader.class);
 	
-	private static FirewallNatConfigReader s_instance;
+	private static FirewallAutoNatConfigReader s_instance;
 	
-	public static FirewallNatConfigReader getInstance () {
+	public static FirewallAutoNatConfigReader getInstance () {
 		
 		if (s_instance == null) {
-			s_instance = new FirewallNatConfigReader();
+			s_instance = new FirewallAutoNatConfigReader();
 		}
 		return s_instance;
 	}
@@ -92,7 +92,7 @@ public class FirewallNatConfigReader implements NetworkConfigurationVisitor {
 				} 
 				
 				if (natEnabled) {
-					FirewallNatConfig natConfig = new FirewallNatConfig(srcIface, dstIface, useMasquerade);
+					FirewallAutoNatConfig natConfig = new FirewallAutoNatConfig(srcIface, dstIface, useMasquerade);
 					
 					List<? extends NetInterfaceAddressConfig> netInterfaceAddressConfigs = netInterfaceConfig.getNetInterfaceAddresses();
                     
@@ -120,7 +120,7 @@ public class FirewallNatConfigReader implements NetworkConfigurationVisitor {
 			} else {
 				//get it from the firewall file if possible
 				LinuxFirewall firewall = LinuxFirewall.getInstance();
-				Set<NATRule> natRules = firewall.getNatRules();
+				Set<NATRule> natRules = firewall.getAutoNatRules();
 				if(natRules != null && !natRules.isEmpty()) {
 					Iterator<NATRule> it = natRules.iterator();
 					while(it.hasNext()) {
@@ -129,7 +129,7 @@ public class FirewallNatConfigReader implements NetworkConfigurationVisitor {
 							s_logger.debug("found NAT rule: " + rule);
 							
 							//this is the one we care about
-							FirewallNatConfig natConfig = new FirewallNatConfig(rule.getSourceInterface(), rule.getDestinationInterface(), rule.isMasquerade());
+							FirewallAutoNatConfig natConfig = new FirewallAutoNatConfig(rule.getSourceInterface(), rule.getDestinationInterface(), rule.isMasquerade());
 							
 							List<? extends NetInterfaceAddressConfig> netInterfaceAddressConfigs = netInterfaceConfig.getNetInterfaceAddresses();
 		                    

@@ -29,6 +29,7 @@ import org.eclipse.kura.linux.net.route.RouteService;
 import org.eclipse.kura.linux.net.route.RouteServiceImpl;
 import org.eclipse.kura.linux.net.util.LinuxNetworkUtil;
 import org.eclipse.kura.net.EthernetMonitorService;
+import org.eclipse.kura.net.IP4Address;
 import org.eclipse.kura.net.IPAddress;
 import org.eclipse.kura.net.NetConfig;
 import org.eclipse.kura.net.NetConfigIP4;
@@ -43,7 +44,7 @@ import org.eclipse.kura.net.admin.NetworkConfigurationService;
 import org.eclipse.kura.net.admin.event.NetworkConfigurationChangeEvent;
 import org.eclipse.kura.net.admin.event.NetworkStatusChangeEvent;
 import org.eclipse.kura.net.dhcp.DhcpServerConfig4;
-import org.eclipse.kura.net.firewall.FirewallNatConfig;
+import org.eclipse.kura.net.firewall.FirewallAutoNatConfig;
 import org.eclipse.kura.net.route.RouteConfig;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.event.Event;
@@ -183,6 +184,7 @@ public class EthernetMonitorServiceImpl implements EthernetMonitorService, Event
 				InterfaceState currentInterfaceState = null;
 	        	boolean interfaceEnabled = false;
 	        	boolean isDhcpClient = false;
+	        	IP4Address staticGateway = null;
 	        	boolean dhcpServerEnabled = false;
 	        	IPAddress dhcpServerSubnet = null;
 	        	short dhcpServerPrefix = -1;
@@ -251,6 +253,7 @@ public class EthernetMonitorServiceImpl implements EthernetMonitorService, Event
 	        			            	}
 	    	                        } else if (netConfig instanceof NetConfigIP4) {
 	        							isDhcpClient = ((NetConfigIP4) netConfig).isDhcp();
+	        							staticGateway = ((NetConfigIP4) netConfig).getGateway();
 	        						}
 	        					}
 	        				}
@@ -306,10 +309,12 @@ public class EthernetMonitorServiceImpl implements EthernetMonitorService, Event
 	            		}
 	            		
 	            		if(!found) {
-	            			//disable the interface and reenable - something didn't happen at initialization as it was supposed to
-	            			s_logger.error("WAN interface " + interfaceName + " did not have a route setting it as the default gateway, restarting it");
-	            			m_netAdminService.disableInterface(interfaceName);
-	            			m_netAdminService.enableInterface(interfaceName, isDhcpClient);
+	            			if (isDhcpClient || (staticGateway != null)) {
+	            				//disable the interface and reenable - something didn't happen at initialization as it was supposed to
+	            				s_logger.error("WAN interface " + interfaceName + " did not have a route setting it as the default gateway, restarting it");
+	            				m_netAdminService.disableInterface(interfaceName);
+	            				m_netAdminService.enableInterface(interfaceName, isDhcpClient);
+	            			}
 	            		}
 	            	} else if (netInterfaceStatus == NetInterfaceStatus.netIPv4StatusEnabledLAN) {
 	            		if (isDhcpClient) {
@@ -426,7 +431,7 @@ public class EthernetMonitorServiceImpl implements EthernetMonitorService, Event
 					
 					if(newNetConfig.getClass() == currentNetConfig.getClass()) {
 						foundMatch = true;
-						if(!newNetConfig.equals(currentNetConfig) && newNetConfig.getClass() != FirewallNatConfig.class) {
+						if(!newNetConfig.equals(currentNetConfig) && newNetConfig.getClass() != FirewallAutoNatConfig.class) {
 							s_logger.debug("\tConfig changed - Current config: " + currentNetConfig.toString());
 							s_logger.debug("\tConfig changed - New config: " + newNetConfig.toString());
 							return true;
@@ -513,13 +518,16 @@ public class EthernetMonitorServiceImpl implements EthernetMonitorService, Event
 	    		public void run() {
 		    			Thread.currentThread().setName("EthernetMonitor_" + interfaceName);
 		    			while (!stopThreads.get(interfaceName)) {
-		    				monitor(interfaceName);
 		    				try {
+		    					monitor(interfaceName);
 		    					Thread.sleep(THREAD_INTERVAL);
 		    				} catch (InterruptedException interruptedException) {
 		    					Thread.currentThread().interrupt();
 		    					s_logger.debug(interruptedException.getMessage());
-		    				}
+		    				} catch (Throwable t) {
+								s_logger.error("Exception while monitoring ethernet connection {}", t.toString());
+								t.printStackTrace();
+							}
 		    			}
 	    	}});
 			

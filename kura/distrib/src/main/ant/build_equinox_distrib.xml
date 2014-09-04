@@ -102,10 +102,12 @@ cp /opt/eclipse/kura/kura/config.ini /tmp/.kura/configuration/
 
 java -Xms${kura.mem.size} -Xmx${kura.mem.size} -XX:MaxPermSize=${kura.mem.size} -Dkura.os.version=${kura.os.version} \
 	-Dkura.arch=${kura.arch} \
+	-Dtarget.device=${target.device} \
 	-Declipse.ignoreApp=true \
 	-Dkura.home=/opt/eclipse/kura/kura \
 	-Dkura.configuration=file:/opt/eclipse/kura/kura/kura.properties \
 	-Dkura.custom.configuration=file:/opt/eclipse/kura/kura/kura_custom.properties \
+	-Dkura.data.dir=/opt/eclipse/kura/data \
 	-Ddpa.configuration=/opt/eclipse/kura/kura/dpa.properties \
 	-Dlog4j.configuration=file:/opt/eclipse/kura/kura/log4j.properties \
 	-jar /opt/eclipse/kura/plugins/org.eclipse.osgi_3.8.1.v20120830-144521.jar \
@@ -126,10 +128,12 @@ cp /opt/eclipse/kura/kura/config.ini /tmp/.kura/configuration/
 java -Xms${kura.mem.size} -Xmx${kura.mem.size} -XX:MaxPermSize=${kura.mem.size} -Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=8000,suspend=n \
 	-Dkura.os.version=${kura.os.version} \
 	-Dkura.arch=${kura.arch} \
+	-Dtarget.device=${target.device} \
 	-Declipse.ignoreApp=true \
 	-Dkura.home=/opt/eclipse/kura/kura \
 	-Dkura.configuration=file:/opt/eclipse/kura/kura/kura.properties \
 	-Dkura.custom.configuration=file:/opt/eclipse/kura/kura/kura_custom.properties \
+	-Dkura.data.dir=/opt/eclipse/kura/data \
 	-Ddpa.configuration=/opt/eclipse/kura/kura/dpa.properties \
 	-Dlog4j.configuration=file:/opt/eclipse/kura/kura/log4j.properties \
 	-jar /opt/eclipse/kura/plugins/org.eclipse.osgi_3.8.1.v20120830-144521.jar \
@@ -150,10 +154,12 @@ cp /opt/eclipse/kura/kura/config.ini /tmp/.kura/configuration/
 
 nohup java -Xms${kura.mem.size} -Xmx${kura.mem.size} -XX:MaxPermSize=${kura.mem.size} -Dkura.os.version=${kura.os.version} \
 	-Dkura.arch=${kura.arch} \
+	-Dtarget.device=${target.device} \
 	-Declipse.ignoreApp=true \
 	-Dkura.home=/opt/eclipse/kura/kura \
 	-Dkura.configuration=file:/opt/eclipse/kura/kura/kura.properties \
 	-Dkura.custom.configuration=file:/opt/eclipse/kura/kura/kura_custom.properties \
+	-Dkura.data.dir=/opt/eclipse/kura/data \
 	-Ddpa.configuration=/opt/eclipse/kura/kura/dpa.properties \
 	-Dlog4j.configuration=file:/opt/eclipse/kura/kura/log4j.properties \
 	-jar /opt/eclipse/kura/plugins/org.eclipse.osgi_3.8.1.v20120830-144521.jar \
@@ -379,7 +385,7 @@ DeploymentPackage-Version: ${deployment.package.version}
 
 Name: org.eclipse.kura.deployment.customizer.upgrade_${org.eclipse.kura.deployment.customizer.upgrade.version}.v${kura.build.version}.jar
 Bundle-SymbolicName: org.eclipse.kura.deployment.customizer.upgrade
-Bundle-Version: 0.7.0.${kura.build.version}
+Bundle-Version: 1.0.0.${kura.build.version}
 DeploymentPackage-Customizer: true
 
 Name: z_kura_dp_upgrader.sh

@@ -47,6 +47,7 @@ public class TelitHe910 implements HspaCellularModem {
 	private static final Logger s_logger = LoggerFactory.getLogger(TelitHe910.class);
 	
 	private static final String OS_VERSION = System.getProperty("kura.os.version");
+	private static final String TARGET_NAME = System.getProperty("target.device");
 	
 	private IVectorJ21GpioService m_vectorJ21GpioService = null;
 	private ConnectionFactory m_connectionFactory = null;
@@ -57,6 +58,7 @@ public class TelitHe910 implements HspaCellularModem {
 	private String m_serialNumber = null;
 	private String m_revisionId = null;
 	private int m_pdpContext = 1;
+	private int m_rssi = 0;
 	private Boolean m_gpsSupported = null;
 	
 	private Object m_atLock = null; 
@@ -89,6 +91,7 @@ public class TelitHe910 implements HspaCellularModem {
 					m_manufacturer = getManufacturer();		
 					m_revisionId = getRevisionID();
 					m_gpsSupported = isGpsSupported();
+					m_rssi = getSignalStrength();
 				}
 			}
 		} catch (KuraException e) {
@@ -298,11 +301,16 @@ public class TelitHe910 implements HspaCellularModem {
     @Override
     public int getSignalStrength() throws KuraException {
     	
-    	int rssi = -113;
+    	int signalStrength = -113;
     	synchronized (m_atLock) {
+    		String atPort = getAtPort();
+    		String gpsPort = getGpsPort();
+			if ((atPort.equals(getDataPort()) || atPort.equals(gpsPort)) && (m_rssi < 0)) {
+				return m_rssi;
+			}
 	    	s_logger.debug("sendCommand getSignalStrength :: " + TelitHe910AtCommands.getSignalStrength.getCommand());
 	    	byte[] reply = null;
-	    	CommConnection commAtConnection = openSerialPort(getAtPort());
+	    	CommConnection commAtConnection = openSerialPort(atPort);
 	    	if (!isAtReachable(commAtConnection)) {
 	    		closeSerialPort(commAtConnection);
 	    		throw new KuraException(KuraErrorCode.NOT_CONNECTED, "Modem not available for AT commands: " + TelitHe910.class.getName());
@@ -319,16 +327,21 @@ public class TelitHe910 implements HspaCellularModem {
 				String sCsq = this.getResponseString(reply);
 				if (sCsq.startsWith("+CSQ:")) {
 					sCsq = sCsq.substring("+CSQ:".length()).trim();
+					s_logger.trace("getSignalStrength() :: +CSQ={}", sCsq);
 					asCsq = sCsq.split(",");
 					if (asCsq.length == 2) {
-						rssi = -113 + 2 * Integer.parseInt(asCsq[0]);
-						
+						int rssi = Integer.parseInt(asCsq[0]);
+						if (rssi < 99) {
+							signalStrength = -113 + 2 * rssi;
+						}
+						s_logger.trace("getSignalStrength() :: signalStrength={}", signalStrength);
 					}
 				}
 				reply = null;
 			}
     	}
-        return rssi;
+    	m_rssi = signalStrength;
+        return signalStrength;
     }
    
     @Override
@@ -567,7 +580,8 @@ public class TelitHe910 implements HspaCellularModem {
     public String getGpsPort() throws KuraException {
     	
     	String port = null;
-    	if (OS_VERSION.equals(KuraConstants.Mini_Gateway.getImageName() + "_" + KuraConstants.Mini_Gateway.getImageVersion())) {
+    	if (OS_VERSION.equals(KuraConstants.Mini_Gateway.getImageName() + "_" + KuraConstants.Mini_Gateway.getImageVersion()) &&
+    			TARGET_NAME.equals(KuraConstants.Mini_Gateway.getTargetName())) {
     		port = SerialModemComm.MiniGateway.getAtPort();
     	} else {
     		port = getAtPort();

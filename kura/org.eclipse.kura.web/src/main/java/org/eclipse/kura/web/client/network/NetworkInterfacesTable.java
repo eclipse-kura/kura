@@ -307,25 +307,30 @@ public class NetworkInterfacesTable extends LayoutContainer
         	if (le.exception != null) {
                 FailureHandler.handle(le.exception);
             }
-        	if (m_selectedNetIf == null) {
-        		m_grid.getSelectionModel().select(0, false);
-        	}
-        	else {
-        		int i=0;
-        		for (GwtNetInterfaceConfig netIf : m_grid.getStore().getModels()) {
-        			String netIfSerial = netIf.getHwSerial();
-        			String selIfSerial = m_selectedNetIf.getHwSerial();
-        			
-        			// Select the proper interface based on interface name
-        			// In case of modem, the interface name may have changed, so try checking serial numbers
-        			if ((netIf.getName().equals(m_selectedNetIf.getName())) ||
-        					(netIfSerial != null && selIfSerial != null && netIfSerial.equals(selIfSerial))) {
-        				m_grid.getSelectionModel().select(i, false);
-        				break;
-        			}
-        			i++;
-        		}
-        	}
+        	
+        	if (m_grid.getStore().getModels().size() > 0) {
+	        	if (m_selectedNetIf == null) {
+	        		m_grid.getSelectionModel().select(0, false);
+	        	}
+	        	else {
+	        		int i=0;
+	        		for (GwtNetInterfaceConfig netIf : m_grid.getStore().getModels()) {
+	        			String netIfSerial = netIf.getHwSerial();
+	        			String selIfSerial = m_selectedNetIf.getHwSerial();
+	        			
+	        			// Select the proper interface based on interface name
+	        			// In case of modem, the interface name may have changed, so try checking serial numbers
+	        			if ((netIf.getName().equals(m_selectedNetIf.getName())) ||
+	        					(netIfSerial != null && selIfSerial != null && netIfSerial.equals(selIfSerial))) {
+	        				m_grid.getSelectionModel().select(i, false);
+	        				break;
+	        			}
+	        			i++;
+	        		}
+	        	}
+        	} else {
+    			m_netConfigTabs.removeAllInterfaceTabs();
+    		}
 
         	m_grid.unmask();
         	m_netConfigTabs.unmask();

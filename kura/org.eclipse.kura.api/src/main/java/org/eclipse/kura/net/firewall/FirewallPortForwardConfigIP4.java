@@ -21,10 +21,10 @@ public class FirewallPortForwardConfigIP4 extends FirewallPortForwardConfigIP<IP
 		super();
 	}
 	
-	public FirewallPortForwardConfigIP4(String interfaceName, IP4Address address,
-			NetProtocol protocol, int inPort, int outPort,
+	public FirewallPortForwardConfigIP4(String inboundIface, String outboundIface, IP4Address address,
+			NetProtocol protocol, int inPort, int outPort, boolean masquerade,
 			NetworkPair<IP4Address> permittedNetwork,
 			String permittedMac, String sourcePortRange) {
-		super(interfaceName, address, protocol, inPort, outPort, permittedNetwork, permittedMac, sourcePortRange);
+		super(inboundIface, outboundIface, address, protocol, inPort, outPort, masquerade, permittedNetwork, permittedMac, sourcePortRange);
 	}
 }

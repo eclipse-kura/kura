@@ -19,7 +19,7 @@
 	<parent>
 		<groupId>org.eclipse.kura</groupId>
 		<artifactId>kura</artifactId>
-		<version>0.7.0</version>
+		<version>0.7.1</version>
 		<relativePath>../manifest_pom.xml</relativePath>
 	</parent>
 
@@ -407,10 +407,12 @@
                             <type>p2-installable-unit</type>
                             <artifactId>org.apache.servicemix.bundles.protobuf-java</artifactId>
                         </dependency>
+<!--
                         <dependency>
                             <type>p2-installable-unit</type>
                             <artifactId>mqtt-client</artifactId>
                         </dependency>
+-->
                         <dependency>
                             <type>p2-installable-unit</type>
                             <artifactId>org.hsqldb.hsqldb</artifactId>

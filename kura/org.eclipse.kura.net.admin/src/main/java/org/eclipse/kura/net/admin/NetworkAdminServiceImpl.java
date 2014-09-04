@@ -21,7 +21,6 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
@@ -63,12 +62,12 @@ import org.eclipse.kura.net.admin.event.NetworkConfigurationChangeEvent;
 import org.eclipse.kura.net.admin.visitor.linux.WpaSupplicantConfigWriter;
 import org.eclipse.kura.net.admin.visitor.linux.util.KuranetConfig;
 import org.eclipse.kura.net.dhcp.DhcpServerConfigIP4;
+import org.eclipse.kura.net.firewall.FirewallAutoNatConfig;
 import org.eclipse.kura.net.firewall.FirewallNatConfig;
 import org.eclipse.kura.net.firewall.FirewallOpenPortConfigIP;
 import org.eclipse.kura.net.firewall.FirewallOpenPortConfigIP4;
 import org.eclipse.kura.net.firewall.FirewallPortForwardConfigIP;
 import org.eclipse.kura.net.firewall.FirewallPortForwardConfigIP4;
-import org.eclipse.kura.net.firewall.FirewallReverseNatConfig;
 import org.eclipse.kura.net.modem.ModemConfig;
 import org.eclipse.kura.net.wifi.WifiAccessPoint;
 import org.eclipse.kura.net.wifi.WifiConfig;
@@ -206,7 +205,7 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 		NetConfigIP4 netConfig4 = null;
 		NetConfigIP6 netConfig6 = null;
 		DhcpServerConfigIP4 dhcpServerConfigIP4 = null;
-		FirewallNatConfig natConfig = null;
+		FirewallAutoNatConfig natConfig = null;
 		boolean hadNetConfig4 = false, hadNetConfig6 = false, hadDhcpServerConfigIP4 = false, hadNatConfig = false;
 		
 		if(netConfigs != null && netConfigs.size() > 0) {
@@ -220,8 +219,8 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 					netConfig6 = (NetConfigIP6)netConfig;
 				} else if(netConfig instanceof DhcpServerConfigIP4) {
 					dhcpServerConfigIP4 = (DhcpServerConfigIP4) netConfig;
-				} else if(netConfig instanceof FirewallNatConfig) {
-					natConfig = (FirewallNatConfig) netConfig;
+				} else if(netConfig instanceof FirewallAutoNatConfig) {
+					natConfig = (FirewallAutoNatConfig) netConfig;
 				}
 			}
 		}
@@ -315,20 +314,20 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 											s_logger.debug("not updating DhcpServerConfigIP4 for " + interfaceName + " because it is unchanged");
 										}
 									}
-								} else if(netConfig instanceof FirewallNatConfig) {
+								} else if(netConfig instanceof FirewallAutoNatConfig) {
 									if(natConfig == null) {
-										s_logger.debug("removing FirewallNatConfig for " + interfaceName);
+										s_logger.debug("removing FirewallAutoNatConfig for " + interfaceName);
 										configurationChanged = true;
 										if(!modifiedInterfaceNames.contains(interfaceName)) {modifiedInterfaceNames.add(interfaceName);}
 									} else {
 										hadNatConfig = true;
                                         newNetConfigs.add(natConfig);
 										if(!netConfig.equals(natConfig)) {
-											s_logger.debug("updating FirewallNatConfig for " + interfaceName);
+											s_logger.debug("updating FirewallAutoNatConfig for " + interfaceName);
 											configurationChanged = true;
 											if(!modifiedInterfaceNames.contains(interfaceName)) {modifiedInterfaceNames.add(interfaceName);}
 										} else {
-											s_logger.debug("not updating FirewallNatConfig for " + interfaceName + " because it is unchanged");
+											s_logger.debug("not updating FirewallAutoNatConfig for " + interfaceName + " because it is unchanged");
 										}
 									}
 								} else {
@@ -357,8 +356,8 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 										configurationChanged = true;
 										if(!modifiedInterfaceNames.contains(interfaceName)) {modifiedInterfaceNames.add(interfaceName);}
 									}
-									if(netConfig instanceof FirewallNatConfig && !hadNatConfig) {
-										s_logger.debug("adding new FirewallNatConfig to existing config for " + interfaceName);
+									if(netConfig instanceof FirewallAutoNatConfig && !hadNatConfig) {
+										s_logger.debug("adding new FirewallAutoNatConfig to existing config for " + interfaceName);
 										newNetConfigs.add(netConfig);
 										configurationChanged = true;
 										if(!modifiedInterfaceNames.contains(interfaceName)) {modifiedInterfaceNames.add(interfaceName);}
@@ -394,7 +393,7 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 		NetConfigIP6 netConfig6 = null;
 		WifiConfig wifiConfig = null;
 		DhcpServerConfigIP4 dhcpServerConfigIP4 = null;
-		FirewallNatConfig natConfig = null;
+		FirewallAutoNatConfig natConfig = null;
 		boolean hadNetConfig4 = false, hadNetConfig6 = false, hadWifiConfig = false, hadDhcpServerConfigIP4 = false, hadNatConfig = false;
 		
 		if(netConfigs != null && netConfigs.size() > 0) {
@@ -415,9 +414,9 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 				} else if(netConfig instanceof DhcpServerConfigIP4) {
 					s_logger.debug("got new DhcpServerConfigIP4");
 					dhcpServerConfigIP4 = (DhcpServerConfigIP4) netConfig;
-				} else if(netConfig instanceof FirewallNatConfig) {
+				} else if(netConfig instanceof FirewallAutoNatConfig) {
 					s_logger.debug("got new NatConfig");
-					natConfig = (FirewallNatConfig) netConfig;
+					natConfig = (FirewallAutoNatConfig) netConfig;
 				}
 			}
 		}
@@ -521,16 +520,16 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 											s_logger.debug("not updating DhcpServerConfigIP4 for " + interfaceName + " because it is unchanged");
 										}
 									}
-								} else if(netConfig instanceof FirewallNatConfig) {
+								} else if(netConfig instanceof FirewallAutoNatConfig) {
 									if(natConfig == null) {
-										s_logger.debug("removing FirewallNatConfig for " + interfaceName);
+										s_logger.debug("removing FirewallAutoNatConfig for " + interfaceName);
 										configurationChanged = true;
 										if(!modifiedInterfaceNames.contains(interfaceName)) {modifiedInterfaceNames.add(interfaceName);}
 									} else {
 										hadNatConfig = true;
                                         newNetConfigs.add(natConfig);
 										if(!netConfig.equals(natConfig)) {
-											s_logger.debug("updating FirewallNatConfig for " + interfaceName);
+											s_logger.debug("updating FirewallAutoNatConfig for " + interfaceName);
 											configurationChanged = true;
 											if(!modifiedInterfaceNames.contains(interfaceName)) {modifiedInterfaceNames.add(interfaceName);}
 										} else {
@@ -569,8 +568,8 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 										configurationChanged = true;
 										if(!modifiedInterfaceNames.contains(interfaceName)) {modifiedInterfaceNames.add(interfaceName);}
 									}
-									if(netConfig instanceof FirewallNatConfig && !hadNatConfig) {
-										s_logger.debug("adding new FirewallNatConfig to existing config for " + interfaceName);
+									if(netConfig instanceof FirewallAutoNatConfig && !hadNatConfig) {
+										s_logger.debug("adding new FirewallAutoNatConfig to existing config for " + interfaceName);
 										newNetConfigs.add(netConfig);
 										configurationChanged = true;
 										if(!modifiedInterfaceNames.contains(interfaceName)) {modifiedInterfaceNames.add(interfaceName);}
@@ -892,7 +891,7 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 							List<NetConfig> existingNetConfigs = netInterfaceAddressConfig.getConfigs();
 							if(existingNetConfigs != null && existingNetConfigs.size() > 0) {
 								for(NetConfig netConfig : existingNetConfigs) {
-									if (netConfig instanceof FirewallNatConfig) {
+									if (netConfig instanceof FirewallAutoNatConfig) {
 										if (desiredNatRules == null) {
 											desiredNatRules = new LinkedHashSet<NATRule>();
 										}
@@ -912,7 +911,7 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 		if (desiredNatRules != null) {
 			firewall.replaceAllNatRules(desiredNatRules); 
 		} else {
-			firewall.deleteAllNatRules();
+			firewall.deleteAllAutoNatRules();
 		}
 		firewall.enable();
 	}
@@ -942,12 +941,14 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 		while(portForwardRules.hasNext()) {
 		    PortForwardRule portForwardRule = portForwardRules.next();
 			try {
-				s_logger.debug("Adding port forwarding " + portForwardRule.getIface());
-				netConfigs.add(new FirewallPortForwardConfigIP4(portForwardRule.getIface(),
+				s_logger.debug("Adding port forwarding - inbound iface is {}", portForwardRule.getInboundIface());
+				netConfigs.add(new FirewallPortForwardConfigIP4(portForwardRule.getInboundIface(),
+						portForwardRule.getOutboundIface(),
 						(IP4Address) IPAddress.parseHostAddress(portForwardRule.getAddress()),
 						NetProtocol.valueOf(portForwardRule.getProtocol()),
 						portForwardRule.getInPort(),
 						portForwardRule.getOutPort(),
+						portForwardRule.isMasquerade(),
 						new NetworkPair<IP4Address>((IP4Address) IPAddress.parseHostAddress(portForwardRule.getPermittedNetwork()), (short)portForwardRule.getPermittedNetworkMask()),
 								portForwardRule.getPermittedMAC(),
 								portForwardRule.getSourcePortRange()
@@ -957,13 +958,22 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 				throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
 			}
 		}
+		Iterator<NATRule> autoNatRules = firewall.getAutoNatRules().iterator();
+		while(autoNatRules.hasNext()) {
+		    NATRule autoNatRule = autoNatRules.next();
+			s_logger.debug("Adding auto NAT rules " + autoNatRule.getSourceInterface() );
+			netConfigs.add(new FirewallAutoNatConfig(autoNatRule.getSourceInterface(),
+					autoNatRule.getDestinationInterface(),
+					autoNatRule.isMasquerade()));
+		}
+		
 		Iterator<NATRule> natRules = firewall.getNatRules().iterator();
-		while(natRules.hasNext()) {
+		while (natRules.hasNext()) {
 		    NATRule natRule = natRules.next();
-			s_logger.debug("Adding NAT rules " + natRule.getSourceInterface() );
+			s_logger.debug("Adding NAT rules " + natRule.getSourceInterface());
 			netConfigs.add(new FirewallNatConfig(natRule.getSourceInterface(),
-					natRule.getDestinationInterface(),
-					natRule.isMasquerade()));
+					natRule.getDestinationInterface(), natRule.getProtocol(),
+					natRule.getSource(), natRule.getDestination(), natRule.isMasquerade()));
 		}
 
 		return netConfigs;
@@ -1019,11 +1029,13 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 				}
 			}
 			
-			firewall.addPortForwardRule(portForwardEntry.getInterfaceName(), 
+			firewall.addPortForwardRule(portForwardEntry.getInboundInterface(), 
+					portForwardEntry.getOutboundInterface(),
 					portForwardEntry.getAddress().getHostAddress(), 
 					portForwardEntry.getProtocol().name(), 
 					portForwardEntry.getInPort(), 
-					portForwardEntry.getOutPort(), 
+					portForwardEntry.getOutPort(),
+					portForwardEntry.isMasquerade(),
 					portForwardEntry.getPermittedNetwork().getIpAddress().getHostAddress(), 
 					Short.toString(portForwardEntry.getPermittedNetwork().getPrefix()), 
 					portForwardEntry.getPermittedMac(), 
@@ -1031,43 +1043,16 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 		}
 	}
 	
-	public List<FirewallReverseNatConfig> getFirewallReverseNatConfiguration(
-			String sourceIface) throws KuraException {
-		
-		List<FirewallReverseNatConfig> reverseNatConfigs = new ArrayList<FirewallReverseNatConfig>();
-
-		LinuxFirewall firewall = LinuxFirewall.getInstance();
-		Set<NATRule> reverseNatRules = firewall.getReverseNatRules();
-		Iterator<NATRule> it = reverseNatRules.iterator();
-		while (it.hasNext()) {
-			NATRule reverseNatRule = it.next();
-			if ((sourceIface != null) && sourceIface.equals(reverseNatRule.getSourceInterface())) {
-				
-				FirewallReverseNatConfig firewallReverseNatConfig = new FirewallReverseNatConfig(
-						reverseNatRule.getSourceInterface(),
-						reverseNatRule.getDestinationInterface(),
-						reverseNatRule.getProtocol(),
-						reverseNatRule.getSource(),
-						reverseNatRule.getDestination());
-				
-				reverseNatConfigs.add(firewallReverseNatConfig);
-			}
-		}
-		
-		return reverseNatConfigs;
-	}
-	
 	@Override
-	public void setFirewallReverseNatConfiguration(String inIface,
-			List<FirewallReverseNatConfig> reverseNatConfigs) throws KuraException {
+	public void setFirewallNatConfiguration(List<FirewallNatConfig> natConfigs) throws KuraException {
 		
 		LinuxFirewall firewall = LinuxFirewall.getInstance();
-		firewall.deleteAllReverseNatRules(inIface);
-		for (FirewallReverseNatConfig revNatConfig : reverseNatConfigs) {
-			firewall.addNatRule(inIface,
-					revNatConfig.getDestinationInterface(),
-					revNatConfig.getProtocol(), revNatConfig.getSource(),
-					revNatConfig.getDestination(), true);
+		firewall.deleteAllNatRules();
+		for (FirewallNatConfig natConfig : natConfigs) {
+			firewall.addNatRule(natConfig.getSourceInterface(),
+					natConfig.getDestinationInterface(),
+					natConfig.getProtocol(), natConfig.getSource(),
+					natConfig.getDestination(), natConfig.isMasquerade());
 		}
 	}
 	
@@ -1269,6 +1254,10 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 	    if(ifaceName.startsWith("mon.")) {
 	        return;
 	    }
+	    // ignore redpine vlan interface 
+        if (ifaceName.startsWith("rpine")) {
+        	return;
+        }
 	    
         NetInterfaceStatus status = NetInterfaceStatus.netIPv4StatusUnknown;
 	    WifiMode wifiMode = WifiMode.UNKNOWN;

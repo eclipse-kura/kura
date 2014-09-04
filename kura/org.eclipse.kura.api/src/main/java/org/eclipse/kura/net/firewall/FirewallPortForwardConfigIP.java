@@ -26,7 +26,10 @@ import org.eclipse.kura.net.NetworkPair;
 public abstract class FirewallPortForwardConfigIP<T extends IPAddress> implements FirewallPortForwardConfig {
 	
 	/** The interface name on which this configuration will listen for inbound connections **/
-	private String interfaceName;
+	private String inboundIface;
+	
+	/** The interface name on which packet will be forwarded */
+	private String outboundIface;
 	
 	/** The LAN address to forward to **/
 	private IP4Address address;
@@ -39,6 +42,9 @@ public abstract class FirewallPortForwardConfigIP<T extends IPAddress> implement
 	
 	/** The outbound (LAN) port to listen on **/
 	private int outPort;
+	
+	/** use masquerading */
+	private boolean masquerade;
 	
 	/** The (optional) permitted network for inbound connections **/
 	private NetworkPair<T> permittedNetwork;
@@ -59,36 +65,48 @@ public abstract class FirewallPortForwardConfigIP<T extends IPAddress> implement
 	/**
 	 * Creates a complete port forward configuration
 	 * 
-	 * @param interfaceName			The interface name on which this configuration will listen for inbound connections
+	 * @param inboundIface			The interface name on which this configuration will listen for inbound connections
+	 * @param outboundIface			The inetrface name on which packet will be forwarded
 	 * @param address				The LAN address to forward to
 	 * @param protocol				The protocol (TCP or UDP) to listen for and forward
 	 * @param inPort				The inbound (WAN) port to listen on
 	 * @param outPort				The outbound (LAN) port to listen on
+	 * @param masquerade			Use masquerade 
 	 * @param permittedNetwork		The (optional) permitted network for inbound connections
 	 * @param permittedMac			The (optional) permitted MAC address for inbound connections
 	 * @param sourcePortRange		The (options) permitted source port range for inbound connections
 	 */
-	public FirewallPortForwardConfigIP(String interfaceName, IP4Address address,
-			NetProtocol protocol, int inPort, int outPort,
+	public FirewallPortForwardConfigIP(String inboundIface, String outboundIface, IP4Address address,
+			NetProtocol protocol, int inPort, int outPort, boolean masquerade,
 			NetworkPair<T> permittedNetwork,
 			String permittedMac, String sourcePortRange) {
 		super();
-		this.interfaceName = interfaceName;
+		this.inboundIface = inboundIface;
+		this.outboundIface = outboundIface;
 		this.address = address;
 		this.protocol = protocol;
 		this.inPort = inPort;
 		this.outPort = outPort;
+		this.masquerade = masquerade;
 		this.permittedNetwork = permittedNetwork;
 		this.permittedMac = permittedMac;
 		this.sourcePortRange = sourcePortRange;
 	}
 	
-	public String getInterfaceName() {
-		return interfaceName;
+	public String getInboundInterface() {
+		return inboundIface;
 	}
 	
-	public void setInterfaceName(String interfaceName) {
-		this.interfaceName = interfaceName;
+	public void setInboundInterface(String interfaceName) {
+		this.inboundIface = interfaceName;
+	}
+	
+	public String getOutboundInterface() {
+		return outboundIface;
+	}
+	
+	public void setOutboundInterface(String interfaceName) {
+		this.outboundIface = interfaceName;
 	}
 	
 	public IP4Address getAddress() {
@@ -123,6 +141,14 @@ public abstract class FirewallPortForwardConfigIP<T extends IPAddress> implement
 		this.outPort = outPort;
 	}
 	
+	public boolean isMasquerade() {
+		return masquerade;
+	}
+
+	public void setMasquerade(boolean masquerade) {
+		this.masquerade = masquerade;
+	}
+	
 	public NetworkPair<T> getPermittedNetwork() {
 		return permittedNetwork;
 	}
@@ -155,7 +181,10 @@ public abstract class FirewallPortForwardConfigIP<T extends IPAddress> implement
 		result = prime * result + ((address == null) ? 0 : address.hashCode());
 		result = prime * result + inPort;
 		result = prime * result
-				+ ((interfaceName == null) ? 0 : interfaceName.hashCode());
+				+ ((inboundIface == null) ? 0 : inboundIface.hashCode());
+		result = prime * result
+				+ ((outboundIface == null) ? 0 : outboundIface.hashCode());
+		result = prime * result + (masquerade ? 1231 : 1237);
 		result = prime * result + outPort;
 		result = prime * result
 				+ ((permittedMac == null) ? 0 : permittedMac.hashCode());
@@ -186,12 +215,19 @@ public abstract class FirewallPortForwardConfigIP<T extends IPAddress> implement
 			return false;
 		if (inPort != other.inPort)
 			return false;
-		if (interfaceName == null) {
-			if (other.interfaceName != null)
+		if (inboundIface == null) {
+			if (other.inboundIface != null)
 				return false;
-		} else if (!interfaceName.equals(other.interfaceName))
+		} else if (!inboundIface.equals(other.inboundIface))
+			return false;
+		if (outboundIface == null) {
+			if (other.outboundIface != null)
+				return false;
+		} else if (!outboundIface.equals(other.outboundIface))
 			return false;
 		if (outPort != other.outPort)
+			return false;
+		if (masquerade != other.masquerade)
 			return false;
 		if (permittedMac == null) {
 			if (other.permittedMac != null)
@@ -215,7 +251,11 @@ public abstract class FirewallPortForwardConfigIP<T extends IPAddress> implement
 	
 	@Override
 	public boolean isValid() {
-		if(interfaceName == null || interfaceName.trim().isEmpty()) {
+		if(inboundIface == null || inboundIface.trim().isEmpty()) {
+			return false;
+		}
+		
+		if(outboundIface == null || outboundIface.trim().isEmpty()) {
 			return false;
 		}
 		
@@ -239,8 +279,10 @@ public abstract class FirewallPortForwardConfigIP<T extends IPAddress> implement
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
-		builder.append("FirewallPortForwardConfigIP [interfaceName=");
-		builder.append(interfaceName);
+		builder.append("FirewallPortForwardConfigIP [inboundIface=");
+		builder.append(inboundIface);
+		builder.append(", outboundIface=");
+		builder.append(outboundIface);
 		builder.append(", address=");
 		builder.append(address);
 		builder.append(", protocol=");

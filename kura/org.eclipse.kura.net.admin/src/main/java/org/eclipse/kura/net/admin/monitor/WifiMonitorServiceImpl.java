@@ -50,7 +50,7 @@ import org.eclipse.kura.net.admin.NetworkConfigurationService;
 import org.eclipse.kura.net.admin.event.NetworkConfigurationChangeEvent;
 import org.eclipse.kura.net.admin.event.NetworkStatusChangeEvent;
 import org.eclipse.kura.net.dhcp.DhcpServerConfig4;
-import org.eclipse.kura.net.firewall.FirewallNatConfig;
+import org.eclipse.kura.net.firewall.FirewallAutoNatConfig;
 import org.eclipse.kura.net.route.RouteConfig;
 import org.eclipse.kura.net.wifi.WifiAccessPoint;
 import org.eclipse.kura.net.wifi.WifiClientMonitorListener;
@@ -581,11 +581,14 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
 	                    public void run() {
 	                    	while (!stopThread) {
 	                    		Thread.currentThread().setName("WifiMonitor Thread");
-	                        	monitor();
 	                        	try {
+	                        		monitor();
 									Thread.sleep(THREAD_INTERVAL);
 								} catch (InterruptedException e) {
 									s_logger.debug(e.getMessage());
+								} catch (Throwable t) {
+									s_logger.error("Exception while monitoring WiFi connection {}", t.toString());
+									t.printStackTrace();
 								}
 	                    	}
 	                }});
@@ -697,7 +700,7 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
         						foundConfigMatch = true;        						
         						
         						//if the config is different and is not the FirewallNatConfig
-        						if(!newNetConfig.equals(currentNetConfig) && newNetConfig.getClass() != FirewallNatConfig.class) {
+        						if(!newNetConfig.equals(currentNetConfig) && newNetConfig.getClass() != FirewallAutoNatConfig.class) {
         							s_logger.debug("\tConfig changed - Old config: " + currentNetConfig.toString());
         							s_logger.debug("\tConfig changed - New config: " + newNetConfig.toString());
         							reconfiguredInterfaces.add(interfaceName);
@@ -784,7 +787,8 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
         return available;
     }
     
-    private int getSignalLevel(String interfaceName, String ssid) throws KuraException {
+    @Override
+    public int getSignalLevel(String interfaceName, String ssid) throws KuraException {
 		int rssi = 0;
 		if (ssid != null) {
 			//if (OS_VERSION.equals(KuraConstants.Raspberry_Pi.getImageName())) {   do not use libnl80211

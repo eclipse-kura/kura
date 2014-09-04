@@ -13,16 +13,15 @@ package org.eclipse.kura.net.admin.modem.telit.he910;
 
 import java.util.Hashtable;
 
+import org.eclipse.kura.net.admin.NetworkConfigurationService;
+import org.eclipse.kura.net.admin.modem.CellularModemFactory;
+import org.eclipse.kura.net.modem.CellularModem;
+import org.eclipse.kura.net.modem.ModemDevice;
+import org.eclipse.kura.net.modem.ModemTechnologyType;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.service.io.ConnectionFactory;
 import org.osgi.util.tracker.ServiceTracker;
-
-import org.eclipse.kura.net.admin.NetworkConfigurationService;
-import org.eclipse.kura.net.admin.modem.CellularModem;
-import org.eclipse.kura.net.admin.modem.CellularModemFactory;
-import org.eclipse.kura.net.modem.ModemDevice;
-import org.eclipse.kura.net.modem.ModemTechnologyType;
 
 /**
  * Defines Telit HE910 Modem Factory

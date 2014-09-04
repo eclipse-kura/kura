@@ -1,12 +1,26 @@
-package org.eclipse.kura.web.client.network;
+/**
+ * Copyright (c) 2011, 2014 Eurotech and/or its affiliates
+ *
+ *  All rights reserved. This program and the accompanying materials
+ *  are made available under the terms of the Eclipse Public License v1.0
+ *  which accompanies this distribution, and is available at
+ *  http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *   Eurotech
+ */
+
+package org.eclipse.kura.web.client.firewall;
 
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.util.FormUtils;
 import org.eclipse.kura.web.client.util.TextFieldValidator;
 import org.eclipse.kura.web.client.util.TextFieldValidator.FieldType;
-import org.eclipse.kura.web.shared.model.GwtReverseNatEntry;
-import org.eclipse.kura.web.shared.model.GwtReverseNatProtocol;
+import org.eclipse.kura.web.shared.model.GwtFirewallNatEntry;
+import org.eclipse.kura.web.shared.model.GwtFirewallNatMasquerade;
+import org.eclipse.kura.web.shared.model.GwtFirewallNatProtocol;
 import org.eclipse.kura.web.shared.model.GwtSession;
+
 import com.extjs.gxt.ui.client.Style.HorizontalAlignment;
 import com.extjs.gxt.ui.client.Style.Scroll;
 import com.extjs.gxt.ui.client.event.ButtonEvent;
@@ -34,32 +48,31 @@ import com.extjs.gxt.ui.client.widget.toolbar.FillToolItem;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Element;
 
-public class ReverseNatForm extends Window {
-	
+public class NatForm extends Window {
+
 	private static final Messages MSGS = GWT.create(Messages.class);
 
     private static final int  LABEL_WIDTH_FORM = 190; 
     
-	//private GwtSession m_currentSession;
-	private GwtReverseNatEntry m_newEntry;
-	private GwtReverseNatEntry m_existingEntry;
+	private GwtFirewallNatEntry m_newEntry;
+	private GwtFirewallNatEntry m_existingEntry;
 	private FormPanel m_formPanel;
 	private Status m_status;
 	private boolean m_isCanceled;
 	private ComponentPlugin m_dirtyPlugin;
     
-    public ReverseNatForm(GwtSession session) {
-    	//m_currentSession = session;
+    public NatForm(GwtSession session) {
+    	
     	m_existingEntry = null;
     	
     	 setModal(true);
-         setSize(600, /*500*/250);
+         setSize(600, 500);
          setLayout(new FitLayout());
          setResizable(false);
-         String heading = MSGS.netReverseNatFormNew();
+         String heading = MSGS.firewallNatFormNew();
          setHeading(heading);
          
-		final ReverseNatForm theTab = this;
+		final NatForm theTab = this;
 		m_dirtyPlugin = new ComponentPlugin() {
 			public void init(Component component) {
 				component.addListener(Events.Change,
@@ -73,20 +86,20 @@ public class ReverseNatForm extends Window {
 		};   
     }
     
-	public ReverseNatForm(GwtSession session, GwtReverseNatEntry existingEntry) {
+	public NatForm(GwtSession session, GwtFirewallNatEntry existingEntry) {
 		this(session);
 		m_existingEntry = existingEntry;
 		if (m_existingEntry != null) {
-			setHeading(MSGS.netReverseNatFormUpdate(m_existingEntry
+			setHeading(MSGS.firewallNatFormUpdate(m_existingEntry
 					.getOutInterface()));
 		}
 	}
 
-	public GwtReverseNatEntry getNewReverseNatEntry() {
+	public GwtFirewallNatEntry getNewFirewallNatEntry() {
 		return m_newEntry;
 	}
 
-	public GwtReverseNatEntry getExistingReverseNatEntry() {
+	public GwtFirewallNatEntry getExistingFirewallNatEntry() {
 		return m_existingEntry;
 	}
 
@@ -108,7 +121,7 @@ public class ReverseNatForm extends Window {
 	protected void onRender(Element parent, int index) {
 		
 		super.onRender(parent, index);
-    	setId("reverse-nat-form");
+    	setId("nat-form");
     	
     	FormData formData = new FormData("-30");
 
@@ -120,24 +133,43 @@ public class ReverseNatForm extends Window {
         m_formPanel.setLayout(new FlowLayout());
 
         FieldSet fieldSet = new FieldSet();
-        fieldSet.setHeading(MSGS.netReverseNatFormInformation());
+        fieldSet.setHeading(MSGS.firewallNatFormInformation());
         FormLayout layoutAccount = new FormLayout();
         layoutAccount.setLabelWidth(LABEL_WIDTH_FORM);
         fieldSet.setLayout(layoutAccount);
         
         //
-    	// interface name
+    	// input interface name
+        //
+        final LabelField inInterfaceNameLabel = new LabelField();
+        inInterfaceNameLabel.setName("inInterfaceNameLabel");
+        inInterfaceNameLabel.setFieldLabel(MSGS.firewallNatFormInInterfaceName());
+        inInterfaceNameLabel.setLabelSeparator(":");
+        fieldSet.add(inInterfaceNameLabel, formData);
+        
+        final TextField<String> inInterfaceNameField = new TextField<String>();
+        inInterfaceNameField.setAllowBlank(false);
+        inInterfaceNameField.setName("inInterfaceName");
+        inInterfaceNameField.setFieldLabel(MSGS.firewallNatFormInInterfaceName());
+        inInterfaceNameField.setToolTip(MSGS.firewallNatFormInputInterfaceToolTip());
+        inInterfaceNameField.setValidator(new TextFieldValidator(inInterfaceNameField, FieldType.ALPHANUMERIC));
+        inInterfaceNameField.addPlugin(m_dirtyPlugin);
+        fieldSet.add(inInterfaceNameField, formData);
+        
+        //
+    	// output interface name
         //
         final LabelField outInterfaceNameLabel = new LabelField();
         outInterfaceNameLabel.setName("outInterfaceNameLabel");
-        outInterfaceNameLabel.setFieldLabel(MSGS.netReverseNatFormOutInterfaceName());
+        outInterfaceNameLabel.setFieldLabel(MSGS.firewallNatFormOutInterfaceName());
         outInterfaceNameLabel.setLabelSeparator(":");
         fieldSet.add(outInterfaceNameLabel, formData);
-
+        
         final TextField<String> outInterfaceNameField = new TextField<String>();
         outInterfaceNameField.setAllowBlank(false);
-        outInterfaceNameField.setName("interfaceName");
-        outInterfaceNameField.setFieldLabel(MSGS.netReverseNatFormOutInterfaceName());
+        outInterfaceNameField.setName("outInterfaceName");
+        outInterfaceNameField.setFieldLabel(MSGS.firewallNatFormOutInterfaceName());
+        outInterfaceNameField.setToolTip(MSGS.firewallNatFormOutputInterfaceToolTip());
         outInterfaceNameField.setValidator(new TextFieldValidator(outInterfaceNameField, FieldType.ALPHANUMERIC));
         outInterfaceNameField.addPlugin(m_dirtyPlugin);
         fieldSet.add(outInterfaceNameField, formData);
@@ -145,23 +177,23 @@ public class ReverseNatForm extends Window {
         //
     	// protocol
         //
-        /*
         final LabelField protocolLabel = new LabelField();
         protocolLabel.setName("protocolLabel");
-        protocolLabel.setFieldLabel(MSGS.netReverseNatFormProtocol());
+        protocolLabel.setFieldLabel(MSGS.firewallNatFormProtocol());
         protocolLabel.setLabelSeparator(":");
         fieldSet.add(protocolLabel, formData);
-		*/
+        
         final SimpleComboBox<String> protocolCombo = new SimpleComboBox<String>();
         protocolCombo.setName("protocolCombo");
-        protocolCombo.setFieldLabel(MSGS.netReverseNatFormProtocol());
+        protocolCombo.setFieldLabel(MSGS.firewallNatFormProtocol());
         protocolCombo.setEditable(false);
         protocolCombo.setTypeAhead(true);  
         protocolCombo.setTriggerAction(TriggerAction.ALL);
-        for (GwtReverseNatProtocol protocol : GwtReverseNatProtocol.values()) {
+        protocolCombo.setToolTip(MSGS.firewallNatFormProtocolToolTip());
+        for (GwtFirewallNatProtocol protocol : GwtFirewallNatProtocol.values()) {
         	protocolCombo.add(protocol.name());
         }
-        protocolCombo.setSimpleValue(GwtReverseNatProtocol.all.name());
+        protocolCombo.setSimpleValue(GwtFirewallNatProtocol.all.name());
         fieldSet.add(protocolCombo, formData);
         
         //
@@ -169,14 +201,15 @@ public class ReverseNatForm extends Window {
         //
         final LabelField sourceNetworkLabel = new LabelField();
         sourceNetworkLabel.setName("sourceNetworkLabel");
-        sourceNetworkLabel.setFieldLabel(MSGS.netReverseNatFormSourceNetwork());
+        sourceNetworkLabel.setFieldLabel(MSGS.firewallNatFormSourceNetwork());
         sourceNetworkLabel.setLabelSeparator(":");
         fieldSet.add(sourceNetworkLabel, formData);
-
+        
         final TextField<String> sourceNetworkField = new TextField<String>();
         sourceNetworkField.setAllowBlank(true);
         sourceNetworkField.setName("address");
-        sourceNetworkField.setFieldLabel(MSGS.netReverseNatFormSourceNetwork());
+        sourceNetworkField.setFieldLabel(MSGS.firewallNatFormSourceNetwork());
+        sourceNetworkField.setToolTip(MSGS.firewallNatFormSourceNetworkToolTip());
         sourceNetworkField.setValidator(new TextFieldValidator(sourceNetworkField, FieldType.NETWORK));
         sourceNetworkField.addPlugin(m_dirtyPlugin);
         fieldSet.add(sourceNetworkField, formData);
@@ -186,25 +219,51 @@ public class ReverseNatForm extends Window {
         //
         final LabelField destinationNetworkLabel = new LabelField();
         destinationNetworkLabel.setName("destinationNetworkLabel");
-        destinationNetworkLabel.setFieldLabel(MSGS.netReverseNatFormDestinationNetwork());
+        destinationNetworkLabel.setFieldLabel(MSGS.firewallNatFormDestinationNetwork());
         destinationNetworkLabel.setLabelSeparator(":");
         fieldSet.add(destinationNetworkLabel, formData);
         
         final TextField<String> destinationNetworkField = new TextField<String>();
         destinationNetworkField.setAllowBlank(true);
         destinationNetworkField.setName("address");
-        destinationNetworkField.setFieldLabel(MSGS.netReverseNatFormDestinationNetwork());
+        destinationNetworkField.setFieldLabel(MSGS.firewallNatFormDestinationNetwork());
+        destinationNetworkField.setToolTip(MSGS.firewallNatFormDestinationNetworkToolTip());
         destinationNetworkField.setValidator(new TextFieldValidator(destinationNetworkField, FieldType.NETWORK));
         destinationNetworkField.addPlugin(m_dirtyPlugin);
         fieldSet.add(destinationNetworkField, formData);
+        
+        //
+    	// masquerade
+        //
+        final LabelField masqueradeLabel = new LabelField();
+        masqueradeLabel.setName("masqueradeLabel");
+        masqueradeLabel.setFieldLabel(MSGS.firewallNatFormMasquerade());
+        masqueradeLabel.setLabelSeparator(":");
+        fieldSet.add(masqueradeLabel, formData);
+        
+        final SimpleComboBox<String> masqueradeCombo = new SimpleComboBox<String>();
+        masqueradeCombo.setName("masqueradeCombo");
+        masqueradeCombo.setFieldLabel(MSGS.firewallNatFormMasquerade());
+        masqueradeCombo.setEditable(false);
+        masqueradeCombo.setTypeAhead(true);  
+        masqueradeCombo.setTriggerAction(TriggerAction.ALL);
+        masqueradeCombo.setToolTip(MSGS.firewallNatFormMasqueradingToolTip());
+        for (GwtFirewallNatMasquerade masquerade : GwtFirewallNatMasquerade.values()) {
+        	masqueradeCombo.add(masquerade.name());
+        }
+        masqueradeCombo.setSimpleValue(GwtFirewallNatMasquerade.yes.name());
+        fieldSet.add(masqueradeCombo, formData);
         
         //add the fieldSet to the panel
         m_formPanel.add(fieldSet);
     	
         //disable the labels
+        inInterfaceNameLabel.setVisible(false);
         outInterfaceNameLabel.setVisible(false);
+        protocolLabel.setVisible(false);
         sourceNetworkLabel.setVisible(false);
         destinationNetworkLabel.setVisible(false);
+        masqueradeLabel.setVisible(false);
     	
 		m_status = new Status();
 		m_status.setBusy(MSGS.waitMsg());
@@ -228,17 +287,21 @@ public class ReverseNatForm extends Window {
             	//we need to add a new row to the open ports table
             	if(m_existingEntry == null) {
             		//create a new entry
-            		m_newEntry = new GwtReverseNatEntry();
+            		m_newEntry = new GwtFirewallNatEntry();
+            		m_newEntry.setInInterface(inInterfaceNameField.getValue());
             		m_newEntry.setOutInterface(outInterfaceNameField.getValue());
             		m_newEntry.setProtocol(protocolCombo.getValue().getValue());
             		m_newEntry.setSourceNetwork(sourceNetworkField.getValue());
             		m_newEntry.setDestinationNetwork(destinationNetworkField.getValue());
+            		m_newEntry.setMasquerade(masqueradeCombo.getValue().getValue());
             	} else {
-            		m_existingEntry = new GwtReverseNatEntry();
+            		m_existingEntry = new GwtFirewallNatEntry();
+            		m_existingEntry.setInInterface(inInterfaceNameField.getValue());
             		m_existingEntry.setOutInterface(outInterfaceNameField.getValue());
             		m_existingEntry.setProtocol(protocolCombo.getValue().getValue());
             		m_existingEntry.setSourceNetwork(sourceNetworkField.getValue());
             		m_existingEntry.setDestinationNetwork(destinationNetworkField.getValue());
+            		m_existingEntry.setMasquerade(masqueradeCombo.getValue().getValue());
             	}
             	
             	m_isCanceled = false;
@@ -259,11 +322,14 @@ public class ReverseNatForm extends Window {
         // populate if necessary
         if (m_existingEntry != null) {
         	
+        	//inInterfaceNameLabel.setValue(m_existingEntry.getInInterface());
+        	inInterfaceNameField.setValue(m_existingEntry.getInInterface());
+        	inInterfaceNameField.setOriginalValue(m_existingEntry.getInInterface());
+        	
         	outInterfaceNameLabel.setValue(m_existingEntry.getOutInterface());
         	outInterfaceNameField.setValue(m_existingEntry.getOutInterface());
         	outInterfaceNameField.setOriginalValue(m_existingEntry.getOutInterface());
         	
-        	//protocolLabel.setValue(m_existingEntry.getProtocol());
         	protocolCombo.setSimpleValue(m_existingEntry.getProtocol());
         	
         	sourceNetworkLabel.setValue(m_existingEntry.getSourceNetwork());
@@ -273,6 +339,8 @@ public class ReverseNatForm extends Window {
         	destinationNetworkLabel.setValue(m_existingEntry.getDestinationNetwork());
         	destinationNetworkField.setValue(m_existingEntry.getDestinationNetwork());
         	destinationNetworkField.setOriginalValue(m_existingEntry.getDestinationNetwork());
+        	
+        	masqueradeCombo.setSimpleValue(m_existingEntry.getMasquerade());
         }
         
         add(m_formPanel);

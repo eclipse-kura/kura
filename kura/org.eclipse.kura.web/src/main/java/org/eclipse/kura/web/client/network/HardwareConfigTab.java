@@ -51,6 +51,7 @@ public class HardwareConfigTab extends LayoutContainer
 	private LabelField m_firmwareField;
 	private LabelField m_mtuField;
 	private LabelField m_usbField;
+	private LabelField m_rssiField;
 	
     public HardwareConfigTab(GwtSession currentSession) {
         m_currentSession = currentSession;
@@ -99,6 +100,7 @@ public class HardwareConfigTab extends LayoutContainer
 	    		updatedNetIf.setHwMTU(mtu);
 	    	}	    	
 	    	updatedNetIf.setHwUsbDevice((String) m_usbField.getValue());
+	    	updatedNetIf.setHwRssi((String) m_usbField.getValue());
     	}
     }
 
@@ -123,7 +125,7 @@ public class HardwareConfigTab extends LayoutContainer
 
         FieldSet fieldSet = new FieldSet();
         FormLayout layoutAccount = new FormLayout();
-        layoutAccount.setLabelWidth(Constants.LABEL_WIDTH_FORM);
+        layoutAccount.setLabelWidth(Constants.LABEL_WIDTH_FORM+20);
         fieldSet.setLayout(layoutAccount);
         fieldSet.setBorders(false);
 
@@ -176,6 +178,11 @@ public class HardwareConfigTab extends LayoutContainer
         m_usbField = new LabelField();
         m_usbField.setFieldLabel(MSGS.netHwUSBDevice());
         fieldSet.add(m_usbField, formData);
+        
+        // RSSI
+        m_rssiField = new LabelField();
+        m_rssiField.setFieldLabel(MSGS.netHwSignalStrength());
+        fieldSet.add(m_rssiField, formData);
     
         m_formPanel.add(fieldSet);
         add(m_formPanel);
@@ -209,6 +216,7 @@ public class HardwareConfigTab extends LayoutContainer
 			m_firmwareField.setValue(m_selectNetIfConfig.getHwFirmware());
 			m_mtuField.setValue(m_selectNetIfConfig.getHwMTU());
 			m_usbField.setValue(m_selectNetIfConfig.getHwUsbDevice());
+			m_rssiField.setValue(m_selectNetIfConfig.getHwRssi());
 		}
 		else {
 			reset();
@@ -227,5 +235,6 @@ public class HardwareConfigTab extends LayoutContainer
 		m_firmwareField.setValue("");
 		m_mtuField.setValue("");
 		m_usbField.setValue("");
+		m_rssiField.setValue("");
 	}
 }

@@ -28,7 +28,6 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.StringTokenizer;
 
@@ -112,8 +111,8 @@ public class LinuxFirewall {
 
 	private LinkedHashSet<LocalRule> m_localRules;
 	private LinkedHashSet<PortForwardRule> m_portForwardRules;
+	private LinkedHashSet<NATRule> m_autoNatRules;
 	private LinkedHashSet<NATRule> m_natRules;
-	private LinkedHashSet<NATRule> m_reverseNatRules;
 	private LinkedHashSet<String> m_customRules;
 	private boolean m_allowIcmp;
 	private boolean m_allowForwarding;
@@ -140,8 +139,8 @@ public class LinuxFirewall {
 			
 			m_localRules = new LinkedHashSet<LocalRule>();
 			m_portForwardRules = new LinkedHashSet<PortForwardRule>();
+			m_autoNatRules = new LinkedHashSet<NATRule>();
 			m_natRules = new LinkedHashSet<NATRule>();
-			m_reverseNatRules = new LinkedHashSet<NATRule>();
 			m_customRules = new LinkedHashSet<String>();
 			m_allowIcmp = true;
 			m_allowForwarding = false;
@@ -326,10 +325,12 @@ public class LinuxFirewall {
 					s_logger.debug("Found port forward rule");
 					
 					//Port Forward Rule
-					String interfaceName = null;
+					String inboundIfaceName = null;
+					String outboundIfaceName = null;
 					String protocol = null;
 					int inPort = -1;
 					int outPort = -1;
+					boolean masquerade = false;
 					String sport = null;
 					String permittedMac = null;
 					String permittedNetwork = null;
@@ -344,7 +345,14 @@ public class LinuxFirewall {
 							String tok2 = st.nextToken(); //skip nat
 							if (tok1.equals("-t") && tok2.equals("nat")) {
 								st.nextToken();	//skip -A
-								st.nextElement();	//skip PREROUTING
+								String tok3 = st.nextToken();	//skip PREROUTING/POSTROUTING
+								if (tok3.equals("POSTROUTING")) {
+									// this is masquerading rule, set out-bound interface, masquerade flag and skip the rest
+									st.nextToken();	//skip -o 
+									outboundIfaceName = st.nextToken();
+									masquerade = true;
+									break;
+								}
 							} else if (tok1.equals("-A") && tok2.equals("FORWARD")) {
 								// this is a forwarding rule, skip it
 								break;
@@ -352,7 +360,7 @@ public class LinuxFirewall {
 								throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR, "Error parsing LocalRule: " + line);
 							}
 						} else if(token.equals("-i")) {
-							interfaceName = st.nextToken();
+							inboundIfaceName = st.nextToken();
 						} else if(token.equals("-p")) {
 							protocol = st.nextToken();
 						} else if(token.equals("--dport")) {
@@ -378,7 +386,11 @@ public class LinuxFirewall {
 						}
 					}
 					
-					PortForwardRule portForwardRule = new PortForwardRule(interfaceName, address, protocol, inPort, outPort, permittedNetwork, permittedNetworkMask, permittedMac, sport);
+					PortForwardRule portForwardRule = new PortForwardRule(
+							inboundIfaceName, outboundIfaceName, address, protocol, inPort, outPort,
+							masquerade, permittedNetwork, permittedNetworkMask,
+							permittedMac, sport);
+					
 					s_logger.debug("Adding port forward rule: " + portForwardRule.toString());
 					m_portForwardRules.add(portForwardRule);
 				} else if(line.startsWith("iptables -t nat -A POSTROUTING")) {
@@ -441,16 +453,16 @@ public class LinuxFirewall {
 					
 					if (protocol == null) {
 						// used to be s_logger.debug
-						s_logger.debug("Parsed NAT rule with" +
+						s_logger.debug("Parsed auto NAT rule with" +
 								"   sourceInterface: " + sourceInterface +
 								"   destinationInterface: " + destinationInterface +
 								"   masquerade: " + masquerade );
 	
 						NATRule natRule = new NATRule(sourceInterface, destinationInterface, masquerade);
-						s_logger.debug("Adding NAT rule " + natRule.toString());
-						m_natRules.add(natRule);
+						s_logger.debug("Adding auto NAT rule " + natRule.toString());
+						m_autoNatRules.add(natRule);
 					} else {
-						s_logger.debug("Parsed Reverse NAT rule with" +
+						s_logger.debug("Parsed NAT rule with" +
 								"   sourceInterface: " + sourceInterface +
 								"   destinationInterface: " + destinationInterface +
 								"   masquerade: " + masquerade + 
@@ -458,9 +470,31 @@ public class LinuxFirewall {
 								"	source network/host: " + source + 
 								"	destination network/host + destination");
 						NATRule natRule = new NATRule(sourceInterface, destinationInterface, protocol, source, destination, masquerade);
-						s_logger.warn("Adding Reverse NAT rule " + natRule.toString());
-						m_reverseNatRules.add(natRule);
+						s_logger.warn("Adding NAT rule " + natRule.toString());
+						m_natRules.add(natRule);
 					}
+				} else if (line.startsWith("iptables -A FORWARD")) { 
+					s_logger.debug("Found FORWARD rule");
+					
+					//just do this one by one
+					StringTokenizer st = new StringTokenizer(line);
+					st.nextToken();		//skip iptables
+					st.nextToken();		//skip -A
+					st.nextToken();		//skip FORWARD
+					st.nextToken();		//skip -p
+					String protocol = st.nextToken();
+					st.nextToken(); 	// skip -s
+					String source = st.nextToken();
+					st.nextToken(); 	// skip -d
+					String destination = st.nextToken();
+					st.nextToken(); 	// skip -i
+					String destinationInterface = st.nextToken();
+					st.nextToken(); 	// skip -o
+					String sourceInterface = st.nextToken();
+					
+					NATRule natRule = new NATRule(sourceInterface, destinationInterface, protocol, source, destination, false);
+					s_logger.warn("Adding NAT rule (no MASQUERADING)" + natRule.toString());
+					m_natRules.add(natRule);
 				} else {
 					throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "invalid line in /etc/init.d/firewall: " + line);
 				}
@@ -516,16 +550,16 @@ public class LinuxFirewall {
 			    pw.println(itPortForwardRules.next());
 			}
 			pw.println();
-			pw.println("#custom nat service rules");
-			Iterator<NATRule> itNATRules = m_natRules.iterator();
-			while(itNATRules.hasNext()) {
-			    pw.println(itNATRules.next());
+			pw.println("#custom automatic NAT service rules (if NAT option is enabled for LAN interface)");
+			Iterator<NATRule> itAutoNatRules = m_autoNatRules.iterator();
+			while(itAutoNatRules.hasNext()) {
+			    pw.println(itAutoNatRules.next());
 			}
 			pw.println();
-			pw.println("#custom reverse nat service rules");
-			Iterator<NATRule> itReverseNATRules = m_reverseNatRules.iterator();
-			while(itReverseNATRules.hasNext()) {
-			    pw.println(itReverseNATRules.next());
+			pw.println("#custom NAT service rules");
+			Iterator<NATRule> itNatRules = m_natRules.iterator();
+			while(itNatRules.hasNext()) {
+			    pw.println(itNatRules.next());
 			}
 			pw.println();
 			pw.println("#custom rules");
@@ -617,14 +651,24 @@ public class LinuxFirewall {
 		}
 	}
 
-	public void addPortForwardRule(String iface, String address, String protocol, int inPort, int outPort, String permittedNetwork, String permittedNetworkPrefix, String permittedMAC, String sourcePortRange)
-						throws KuraException {
+	public void addPortForwardRule(String inboundIface, String outboundIface,
+			String address, String protocol, int inPort, int outPort,
+			boolean masquerade, String permittedNetwork,
+			String permittedNetworkPrefix, String permittedMAC,
+			String sourcePortRange) throws KuraException {
 		try {
 			PortForwardRule newPortForwardRule = null;
 			if(permittedNetworkPrefix != null) {
-				newPortForwardRule = new PortForwardRule(iface, address, protocol, inPort, outPort, permittedNetwork, Short.parseShort(permittedNetworkPrefix), permittedMAC, sourcePortRange);
+				newPortForwardRule = new PortForwardRule(inboundIface,
+						outboundIface, address, protocol, inPort, outPort,
+						masquerade, permittedNetwork,
+						Short.parseShort(permittedNetworkPrefix), permittedMAC,
+						sourcePortRange);
 			} else {
-				newPortForwardRule = new PortForwardRule(iface, address, protocol, inPort, outPort, permittedNetwork, -1, permittedMAC, sourcePortRange);	
+				newPortForwardRule = new PortForwardRule(inboundIface,
+						outboundIface, address, protocol, inPort, outPort,
+						masquerade, permittedNetwork, -1, permittedMAC,
+						sourcePortRange);
 			}
 			
 			//make sure it is not already present
@@ -636,37 +680,47 @@ public class LinuxFirewall {
 			}
 			
 			s_logger.info("adding port forward rule to firewall configuration: " + newPortForwardRule.toString());
-			m_portForwardRules.add(newPortForwardRule);	
+			m_portForwardRules.add(newPortForwardRule);
+			
+			m_allowForwarding = true;
 			this.update();
 		} catch (Exception e) {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
 		}
 	}
 
+	/**
+	 * Adds automatic NAT rule
+	 * 
+	 * @param sourceInterface
+	 * @param destinationInterface
+	 * @param masquerade
+	 * @throws EsfException
+	 */
 	public void addNatRule(String sourceInterface, String destinationInterface, boolean masquerade) throws KuraException {
 		
 		try {
 		    if(sourceInterface == null || sourceInterface.isEmpty()) {
-		        s_logger.warn("Can't add NAT rule - source interface not specified");
+		        s_logger.warn("Can't add auto NAT rule - source interface not specified");
 		        return;
 		    } else if(destinationInterface == null || destinationInterface.isEmpty()) {
-                s_logger.warn("Can't add NAT rule - destination interface not specified");
+                s_logger.warn("Can't add auto NAT rule - destination interface not specified");
                 return;
 		    }
 		    
 			NATRule newNatRule = new NATRule(sourceInterface, destinationInterface, masquerade);
 			
 			//make sure it is not already present
-			for(NATRule natRule : m_natRules) {
+			for(NATRule natRule : m_autoNatRules) {
 				if(newNatRule.equals(natRule)) {
-					s_logger.warn("Not adding nat rule that is already present: " + natRule);
+					s_logger.warn("Not adding auto nat rule that is already present: " + natRule);
 					return;
 				}
 			}
 			
-			s_logger.info("adding NAT rule to firewall configuration: " + newNatRule.toString());
-			this.m_natRules.add(newNatRule);
-			this.m_allowForwarding = true;
+			s_logger.info("adding auto NAT rule to firewall configuration: " + newNatRule.toString());
+			m_autoNatRules.add(newNatRule);
+			m_allowForwarding = true;
 			this.update();
 		}
 		catch (Exception e) {
@@ -675,7 +729,7 @@ public class LinuxFirewall {
 	}
 	
 	/**
-	 * Adds Reverse Nat Rule
+	 * Adds NAT Rule
 	 * 
 	 * @param sourceInterface
 	 * @param destinationInterface
@@ -691,19 +745,19 @@ public class LinuxFirewall {
 		
 		try {
 			if(sourceInterface == null || sourceInterface.isEmpty()) {
-		        s_logger.warn("Can't add Reverse NAT rule - source interface not specified");
+		        s_logger.warn("Can't add NAT rule - source interface not specified");
 		        return;
 		    } else if(destinationInterface == null || destinationInterface.isEmpty()) {
-	            s_logger.warn("Can't add Reverse NAT rule - destination interface not specified");
+	            s_logger.warn("Can't add NAT rule - destination interface not specified");
 	            return;
 		    }
 			
-			NATRule newReverseNatRule = new NATRule(sourceInterface,
+			NATRule newNatRule = new NATRule(sourceInterface,
 					destinationInterface, protocol, source, destination,
 					masquerade);
 			// TODO need to add comparison
-			s_logger.info("adding Reverse NAT rule to firewall configuration: " + newReverseNatRule.toString());
-			m_reverseNatRules.add(newReverseNatRule);
+			s_logger.info("adding NAT rule to firewall configuration: {}", newNatRule.toString());
+			m_natRules.add(newNatRule);
 			m_allowForwarding = true;
 			this.update();
 		} catch (Exception e) {
@@ -729,18 +783,18 @@ public class LinuxFirewall {
 		}
 	}
 
-	public Set<NATRule> getNatRules() throws KuraException {
+	public Set<NATRule> getAutoNatRules() throws KuraException {
 		try {
-			return m_natRules;
+			return m_autoNatRules;
 		}
 		catch (Exception e) {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
 		}
 	}
 	
-	public Set<NATRule> getReverseNatRules() throws KuraException {
+	public Set<NATRule> getNatRules() throws KuraException {
 		try {
-			return m_reverseNatRules;
+			return m_natRules;
 		}
 		catch (Exception e) {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
@@ -760,6 +814,12 @@ public class LinuxFirewall {
 	public void deletePortForwardRule(PortForwardRule rule) throws KuraException {
 		try {
 			m_portForwardRules.remove(rule);
+			if (((m_autoNatRules != null) && (m_autoNatRules.size() < 1))
+					&& ((m_natRules != null) && (m_natRules.size() < 1))
+					&& ((m_portForwardRules != null) && (m_portForwardRules.size() < 1))) {
+				
+				m_allowForwarding = false;
+			}
 			this.update();
 		}
 		catch (Exception e) {
@@ -767,11 +827,13 @@ public class LinuxFirewall {
 		}
 	}
 
-	public void deleteNatRule(NATRule rule) throws KuraException {
+	public void deleteAutoNatRule(NATRule rule) throws KuraException {
 		try {
-			this.m_natRules.remove(rule);
-			if (((m_natRules != null) && (m_natRules.size() < 1))
-					&& ((m_reverseNatRules != null) && (m_reverseNatRules.size() < 1))) {
+			m_autoNatRules.remove(rule);
+			if (((m_autoNatRules != null) && (m_autoNatRules.size() < 1))
+					&& ((m_natRules != null) && (m_natRules.size() < 1))
+					&& ((m_portForwardRules != null) && (m_portForwardRules.size() < 1))) {
+				
 				m_allowForwarding = false;
 			}
 			update();
@@ -794,6 +856,11 @@ public class LinuxFirewall {
 	public void deleteAllPortForwardRules() throws KuraException {
 		try {
 			m_portForwardRules.clear();
+			if (((m_autoNatRules != null) && (m_autoNatRules.size() < 1))
+					&& ((m_natRules != null) && (m_natRules.size() < 1))) {
+				
+				m_allowForwarding = false;
+			}
 			this.update();
 		}
 		catch (Exception e) {
@@ -803,9 +870,11 @@ public class LinuxFirewall {
 	
 	public void replaceAllNatRules(LinkedHashSet<NATRule> newNatRules) throws KuraException {
 		try {
-			this.m_natRules = newNatRules;
-			if (((m_natRules != null) && (m_natRules.size() > 0))
-					|| ((m_reverseNatRules != null) && (m_reverseNatRules.size() > 0))) {
+			m_autoNatRules = newNatRules;
+			if (((m_autoNatRules != null) && (m_autoNatRules.size() > 0))
+					|| ((m_natRules != null) && (m_natRules.size() > 0))
+					|| ((m_portForwardRules != null) && (m_portForwardRules.size() > 0))) {
+				
 				m_allowForwarding = true;
 			} else {
 				m_allowForwarding = false;
@@ -815,11 +884,13 @@ public class LinuxFirewall {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
 		}
 	}
-
-	public void deleteAllNatRules() throws KuraException {
+	
+	public void deleteAllAutoNatRules() throws KuraException {
 		try {
-			this.m_natRules.clear();
-			if ((m_reverseNatRules != null) && (m_reverseNatRules.size() < 1)) {
+			m_autoNatRules.clear();
+			if ((m_natRules != null) && (m_natRules.size() < 1)
+					&& ((m_portForwardRules != null) && (m_portForwardRules.size() < 1))) {
+				
 				m_allowForwarding = false;
 			}
 			this.update();
@@ -829,27 +900,11 @@ public class LinuxFirewall {
 		}
 	}
 	
-	public void deleteAllReverseNatRules(String inIface) throws KuraException {
+	public void deleteAllNatRules() throws KuraException {
 		try {
-			List<NATRule> rulesToRemove = null;
-			Iterator<NATRule> it = m_reverseNatRules.iterator();
-			while (it.hasNext()) {
-				NATRule rule = it.next();
-				if (inIface.equals(rule.getSourceInterface())) {
-					if (rulesToRemove == null) {
-						rulesToRemove = new ArrayList<NATRule>();
-					}
-					rulesToRemove.add(rule);
-				}
-			}
-			if ((rulesToRemove != null) && (rulesToRemove.size() > 0)) {
-				for (NATRule ruleToRemove : rulesToRemove) {
-					m_reverseNatRules.remove(ruleToRemove);
-				}
-			}
-			
-			if (((m_natRules != null) && (m_natRules.size() < 1))
-					&& ((m_reverseNatRules != null) && (m_reverseNatRules.size() < 1))) {
+			m_natRules.clear();
+			if (((m_autoNatRules != null) && (m_autoNatRules.size() < 1))
+					&& ((m_portForwardRules != null) && (m_portForwardRules.size() < 1))) {
 				m_allowForwarding = false;
 			}
 			this.update();
@@ -861,300 +916,16 @@ public class LinuxFirewall {
 	public void blockAllPorts() throws KuraException {
 		deleteAllLocalRules();
 		deleteAllPortForwardRules();
-		deleteAllNatRules();
+		deleteAllAutoNatRules();
 		this.update();
 	}
 
 	public void unblockAllPorts() throws KuraException {
 		deleteAllLocalRules();
 		deleteAllPortForwardRules();
-		deleteAllNatRules();
+		deleteAllAutoNatRules();
 		this.update();
 	}
-
-	/**
-	 * This method is call when the EventListener receives a new configuration event.  The Configuration
-	 * Object is then requested from the Configuration Manager Service, and the updateConfiguration 
-	 * method is called.
-	 */
-	/*public void handleEvent(Event arg0) {
-		// Get the new configuration object form the Configuration Manager Service
-		Object configurationObject = configManager.getConfiguration(CONFIGURATION_NAME);
-		// Make sure it is a Java Properties object and then update the configuration parameters
-		if(configurationObject instanceof java.util.Properties) {
-			s_logger.info("New configuration received");
-			if(processNewConfig((Properties)configurationObject)) {
-				configManager.storeConfiguration(CONFIGURATION_NAME);
-			
-			}
-		} else {
-			s_logger.error("Invalid Configuration Object of type:  " + configurationObject.getClass().toString());
-		}
-	}*/
-	
-	
-//	public Object receiveConfig(Object config) throws KuraConfigurationException {
-//		try {
-//		// Get the new configuration object form the Configuration Manager Service
-//		Object configurationObject = config;
-//		// Make sure it is a Java Properties object and then update the configuration parameters
-//		if(configurationObject instanceof java.util.Properties) {
-//			s_logger.info("New configuration received");
-//			if(processNewConfig((Properties)configurationObject)) {
-//				s_logger.info("New configuration successfully submitted");
-//				
-//			}
-//		} else {
-//			s_logger.error("Invalid Configuration Object of type:  " + configurationObject.getClass().toString());
-//		}
-//		}catch (Exception e){
-//			throw new KuraConfigurationException(LABEL + "error while trying to submit configuration for firewall");
-//		}
-//		//we don't want the config manager to archive this - since we already did in the filesystem.
-//		return null;
-//	}
-//	
-//	private boolean processNewConfig(Properties props) {
-//		ArrayList natRules = new ArrayList();
-//		ArrayList localRules = new ArrayList();
-//		ArrayList portForwardRules = new ArrayList();
-//		
-//		NewRule newRule = null;
-//		String ruleString, param;
-//		Enumeration keys = props.keys();
-//		Properties configs = new Properties();
-//		
-//		
-//		try {
-//			while(keys.hasMoreElements()) {
-//				String key = (String)keys.nextElement();
-//				ruleString = key.substring(0, key.lastIndexOf('_'));
-//				param = key.substring(key.lastIndexOf('_')+1);
-//				
-//				newRule = getRule(ruleString);
-//				s_logger.trace("New Rule");
-//				s_logger.trace(" type = " + newRule.type); 
-//				s_logger.trace(" index = " + newRule.index);
-//				s_logger.trace(" param = " + param);
-//				s_logger.trace(" value = " + (String)props.getProperty(key));
-//				
-//				// Check if the new rule is a NATRule
-//				if(newRule.type.compareTo("NATRule")==0) {
-//					s_logger.trace("NATRule found");
-//					// Check if it is already contained in the natRules ArrayList
-//					for(int i=0; i<natRules.size(); i++) {
-//						NewRule tmpRule = (NewRule)natRules.get(i);
-//						if(tmpRule.index == newRule.index) {
-//							s_logger.trace("NATRule index recognized");
-//							newRule.natRule = tmpRule.natRule;
-//						}
-//					}
-//					// If not, create the NATRule and add it
-//					if(newRule.natRule == null) {
-//						s_logger.trace("NATRule index not recognized, creating new");
-//						newRule.natRule = new NATRule();
-//						natRules.add(newRule);
-//					}
-//					// Get the parameter and add it
-//					if(param.compareTo("natSourceNetwork")==0) {
-//						newRule.natRule.setNatSourceNetwork((String)props.get(key));
-//					} else if(param.compareTo("sourceInterface")==0) {
-//						newRule.natRule.setSourceInterface((String)props.get(key));
-//					}  else if(param.compareTo("destinationInterface")==0) {
-//						newRule.natRule.setDestinationInterface((String)props.get(key));
-//					} else if(param.compareTo("masquerade")==0) {
-//						newRule.natRule.setMasquerade(Boolean.valueOf((String)props.get(key)).booleanValue());
-//					} else {
-//						s_logger.error("New configuration contains malformatted parameter type:  " + param + ", rejecting configuration");
-//						return false;
-//					}
-//					
-//				// Check if the new rule is a LocalRule
-//				} else if(newRule.type.compareTo("LocalRule")==0) {
-//					s_logger.trace("LocalRule found");
-//					// Check if it is already contained in the localRules ArrayList
-//					for(int i=0; i<localRules.size(); i++) {
-//						NewRule tmpRule = (NewRule)localRules.get(i);
-//						if(tmpRule.index == newRule.index) {
-//							s_logger.trace("LocalRule index recognized");
-//							newRule.localRule = tmpRule.localRule;
-//						}
-//					}
-//					// If not, create the LocalRule and add it
-//					if(newRule.localRule == null) {
-//						s_logger.trace("LocalRule index not recognized, creating new");
-//						newRule.localRule = new LocalRule();
-//						localRules.add(newRule);
-//					}
-//					// Get the parameter and add it
-//					if(param.compareTo("port")==0) {
-//						try {
-//							int port = Integer.parseInt((String)props.get(key));
-//							newRule.localRule.setPort(port);
-//						} catch(NumberFormatException nfe) {
-//							newRule.localRule.setPortRange((String)props.get(key));
-//						}
-//					} else if(param.compareTo("protocol")==0) {
-//						newRule.localRule.setProtocol((String)props.get(key));
-//					} else if(param.compareTo("permittedNetwork")==0) {
-//						newRule.localRule.setPermittedNetwork((String)props.get(key));
-//					}  else if(param.compareTo("permittedMAC")==0) {
-//						newRule.localRule.setPermittedMAC((String)props.get(key));
-//					} else if(param.compareTo("sourcePortRange")==0) {
-//						newRule.localRule.setSourcePortRange((String)props.get(key));
-//					} else {
-//						s_logger.error("New configuration contains malformatted parameter type:  " + param + ", rejecting configuration");
-//						return false;
-//					}
-//				// Check if the new rule is a PortForwardRule
-//				} else if(newRule.type.compareTo("PortForwardRule")==0) {
-//					s_logger.trace("PortForwardRule found");
-//					// Check if it is already contained in the portForwardRules ArrayList
-//					for(int i=0; i<portForwardRules.size(); i++) {
-//						NewRule tmpRule = (NewRule)portForwardRules.get(i);
-//						if(tmpRule.index == newRule.index) {
-//							s_logger.trace("PortForwardRule index recognized");
-//							newRule.portForwardRule = tmpRule.portForwardRule;
-//						}
-//					}
-//					// If not, create the PortForwardRule and add it
-//					if(newRule.portForwardRule == null) {
-//						s_logger.trace("PortForwardRule index not recognized, creating new");
-//						newRule.portForwardRule = new PortForwardRule();
-//						portForwardRules.add(newRule);
-//					}
-//					// Get the parameter and add it
-//					if(param.compareTo("address")==0) {
-//						newRule.portForwardRule.setAddress((String)props.get(key));
-//					} else if(param.compareTo("iface")==0) {
-//						newRule.portForwardRule.setIface((String)props.get(key));
-//					} else if(param.compareTo("outPort")==0) {
-//						newRule.portForwardRule.setOutPort(Integer.parseInt((String)props.get(key)));
-//					} else if(param.compareTo("inPort")==0) {
-//						newRule.portForwardRule.setInPort(Integer.parseInt((String)props.get(key)));
-//					} else if(param.compareTo("protocol")==0) {
-//						newRule.portForwardRule.setProtocol((String)props.get(key));
-//					} else if(param.compareTo("permittedNetwork")==0) {
-//						newRule.portForwardRule.setPermittedNetwork((String)props.get(key));
-//					} else if(param.compareTo("permittedNetworkMask")==0) {
-//						newRule.portForwardRule.setPermittedNetworkMask(networkUtilityService.getNetmaskIntForm((String)props.get(key)));
-//					}  else if(param.compareTo("permittedMAC")==0) {
-//						newRule.portForwardRule.setPermittedMAC((String)props.get(key));
-//					} else if(param.compareTo("sourcePortRange")==0) {
-//						newRule.portForwardRule.setSourcePortRange((String)props.get(key));
-//					} else {
-//						s_logger.error("New configuration contains malformatted parameter type:  " + param + ", rejecting configuration");
-//						return false;
-//					}
-//				} else {
-//					s_logger.error("New configuration contains malformatted rule type:  " + newRule.type + ", rejecting configuration");
-//					return false;
-//				}
-//			}
-//		
-//			// Now that the new rule ArrayLists are all populated, check to make sure all required parameters are present
-//			for(int i=0; i<natRules.size(); i++) {
-//				s_logger.trace("Checking " + natRules.size() + " NATRules for completion");
-//				if(!((NewRule)natRules.get(i)).natRule.isComplete()) {
-//					s_logger.error("New configuration NATRule: " + ((NewRule)natRules.get(i)).toString()+ " does not contain all required parameters, rejecting configuration");
-//					return false;
-//				}
-//			}
-//			for(int i=0; i<localRules.size(); i++) {
-//				s_logger.trace("Checking " + localRules.size() + " LocalRules for completion");
-//				if(!((NewRule)localRules.get(i)).localRule.isComplete()) {
-//					s_logger.error("New configuration LocalRule: " + ((NewRule)localRules.get(i)).toString()+ " does not contain all required parameters, rejecting configuration");
-//					return false;
-//				}
-//			}
-//			for(int i=0; i<portForwardRules.size(); i++) {
-//				s_logger.trace("Checking " + portForwardRules.size() + " PortForwardRules for completion");
-//				if(!((NewRule)portForwardRules.get(i)).portForwardRule.isComplete()) {
-//					s_logger.error("New configuration PortForwardRule: " + ((NewRule)portForwardRules.get(i)).toString()+ " does not contain all required parameters, rejecting configuration");
-//					return false;
-//				}
-//			}
-//			
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//			return false;
-//		}
-//
-//		// Delete all the current rules.
-//		try {
-//			deleteAllNatRules();
-//			deleteAllLocalRules();
-//			deleteAllPortForwardRules();
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//			return false;
-//		}
-//		
-//		// Add all new rules
-//		for(int i=0; i<natRules.size(); i++) {
-//			NATRule tmpNatRule = ((NewRule)natRules.get(i)).natRule;
-//			try {
-//				addNatRule(tmpNatRule.getNatSourceNetwork(), 
-//						tmpNatRule.getDestinationInterface(), 
-//						tmpNatRule.getDestinationInterface(), 
-//						tmpNatRule.getMasquerade());
-//			} catch (Exception e) {
-//				e.printStackTrace();
-//			}
-//		}
-//		for(int i=0; i<localRules.size(); i++) {
-//			s_logger.trace("Adding " + localRules.size() + " LocalRules");
-//			LocalRule tmpLocalRule = ((NewRule)localRules.get(i)).localRule;
-//			s_logger.trace("LocalRule: " + tmpLocalRule.toString());
-//			try {
-//				if(tmpLocalRule.getPort() != 0) {
-//					addLocalRule(tmpLocalRule.getPort(),
-//							tmpLocalRule.getProtocol(), 
-//							tmpLocalRule.getPermittedNetwork(), 
-//							tmpLocalRule.getPermittedNetworkMask(), 
-//							tmpLocalRule.getPermittedMAC(), 
-//							tmpLocalRule.getSourcePortRange());
-//				} else {
-//					addLocalRule(tmpLocalRule.getPortRange(),
-//							tmpLocalRule.getProtocol(), 
-//							tmpLocalRule.getPermittedNetwork(), 
-//							tmpLocalRule.getPermittedNetworkMask(), 
-//							tmpLocalRule.getPermittedMAC(), 
-//							tmpLocalRule.getSourcePortRange());
-//				}
-//			} catch (Exception e) {
-//				e.printStackTrace();
-//			}
-//		}
-//		for(int i=0; i<portForwardRules.size(); i++) {
-//			PortForwardRule tmpPortForwardRule = ((NewRule)portForwardRules.get(i)).portForwardRule;
-//			try {
-//				addPortForwardRule(tmpPortForwardRule.getIface(), 
-//						tmpPortForwardRule.getAddress(), 
-//						tmpPortForwardRule.getProtocol(), 
-//						tmpPortForwardRule.getInPort(), 
-//						tmpPortForwardRule.getOutPort(), 
-//						tmpPortForwardRule.getPermittedNetwork(),
-//						tmpPortForwardRule.getPermittedNetworkMask(),
-//						tmpPortForwardRule.getPermittedMAC(), 
-//						tmpPortForwardRule.getSourcePortRange());
-//			} catch (Exception e) {
-//				e.printStackTrace();
-//			}
-//		}
-//		
-//		try {
-//			writeFile();
-//			writeFile();
-//			
-//		} catch (Exception e) {
-//			s_logger.error("Error writing new  configuration to file");
-//			e.printStackTrace();
-//		}
-//		
-//		return true;
-//		
-//	}
 
 	private void runScript() throws KuraException {
 		Process proc = null;

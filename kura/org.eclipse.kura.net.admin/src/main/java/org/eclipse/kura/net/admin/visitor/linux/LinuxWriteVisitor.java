@@ -31,7 +31,7 @@ public class LinuxWriteVisitor implements NetworkConfigurationVisitor{
         m_visitors.add(WifiConfigWriter.getInstance());
         m_visitors.add(PppConfigWriter.getInstance());
         m_visitors.add(DhcpConfigWriter.getInstance());
-        m_visitors.add(FirewallNatConfigWriter.getInstance());
+        m_visitors.add(FirewallAutoNatConfigWriter.getInstance());
     }
     
     public static LinuxWriteVisitor getInstance() {

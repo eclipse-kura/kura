@@ -29,21 +29,21 @@ import org.eclipse.kura.net.NetInterfaceConfig;
 import org.eclipse.kura.net.NetInterfaceStatus;
 import org.eclipse.kura.net.NetInterfaceType;
 import org.eclipse.kura.net.admin.visitor.linux.util.KuranetConfig;
+import org.eclipse.kura.net.firewall.FirewallAutoNatConfig;
 import org.eclipse.kura.net.firewall.FirewallNatConfig;
-import org.eclipse.kura.net.firewall.FirewallReverseNatConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class FirewallNatConfigWriter implements NetworkConfigurationVisitor {
+public class FirewallAutoNatConfigWriter implements NetworkConfigurationVisitor {
 	
-	private static final Logger s_logger = LoggerFactory.getLogger(FirewallNatConfigWriter.class);
+	private static final Logger s_logger = LoggerFactory.getLogger(FirewallAutoNatConfigWriter.class);
 
-	private static FirewallNatConfigWriter s_instance;
+	private static FirewallAutoNatConfigWriter s_instance;
 	
-	public static FirewallNatConfigWriter getInstance() {
+	public static FirewallAutoNatConfigWriter getInstance() {
 		
 		if (s_instance == null) {
-			s_instance = new FirewallNatConfigWriter();
+			s_instance = new FirewallAutoNatConfigWriter();
 		}
 		return s_instance;
 	}
@@ -82,11 +82,11 @@ public class FirewallNatConfigWriter implements NetworkConfigurationVisitor {
     			if(netConfigs != null && netConfigs.size() > 0) {
     				for(int i=0; i<netConfigs.size(); i++) {
     					NetConfig netConfig = netConfigs.get(i);
-    					if(netConfig instanceof FirewallNatConfig) {
+    					if(netConfig instanceof FirewallAutoNatConfig) {
     						natEnabled = true;
-    						srcIface = ((FirewallNatConfig) netConfig).getSourceInterface();
-    						dstIface = ((FirewallNatConfig) netConfig).getDestinationInterface();
-    						useMasquerade = ((FirewallNatConfig) netConfig).isMasquerade();
+    						srcIface = ((FirewallAutoNatConfig) netConfig).getSourceInterface();
+    						dstIface = ((FirewallAutoNatConfig) netConfig).getDestinationInterface();
+    						useMasquerade = ((FirewallAutoNatConfig) netConfig).isMasquerade();
     					}
     				}
     			}
@@ -142,11 +142,11 @@ public class FirewallNatConfigWriter implements NetworkConfigurationVisitor {
                     for(NetConfig netConfig : addressConfig.getConfigs()) {
                         if(netConfig instanceof NetConfigIP4) {
                             status = ((NetConfigIP4)netConfig).getStatus();
-                        } else if(netConfig instanceof FirewallNatConfig) {
-                        	s_logger.debug("getNatConfigs() :: FirewallNatConfig: {}", ((FirewallNatConfig)netConfig).toString());
+                        } else if(netConfig instanceof FirewallAutoNatConfig) {
+                        	s_logger.debug("getNatConfigs() :: FirewallAutoNatConfig: {}", ((FirewallAutoNatConfig)netConfig).toString());
                             isNat = true;
-                        } else if (netConfig instanceof FirewallReverseNatConfig) {
-                        	s_logger.debug("getNatConfigs() ::  FirewallReverseNatConfig: {}", ((FirewallReverseNatConfig)netConfig).toString());
+                        } else if (netConfig instanceof FirewallNatConfig) {
+                        	s_logger.debug("getNatConfigs() ::  FirewallNatConfig: {}", ((FirewallNatConfig)netConfig).toString());
                         }
                     }
                 }

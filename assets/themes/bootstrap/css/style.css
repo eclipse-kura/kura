@@ -10,7 +10,7 @@
   color: #999999;
 }
 
-.nav-header + li a {
+#navigation li a {
   color: #4b8fd0;
   padding: 3px 15px;
 }

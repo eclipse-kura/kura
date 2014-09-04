@@ -1,0 +1,114 @@
+---
+layout: page
+title:  "Getting Started"
+date:   2014-08-26 11:31:11
+categories: [doc]
+---
+
+PART 2. GETTING STARTED
+Setting up the Kura Development Environment
+
+Kura Development Environment
+* JVM Installation
+* Eclipse IDE
+** Installing Eclipse
+** Installing mToolkit
+* Workspaces
+** Creating an Eclipse Workspace
+** Importing Kura User Workspace
+** Workspace Setup
+
+h1. Kura Development Environment
+
+This document describes how to set up the development environment for Eclipse Kura, which consists of the following components:
+
+* JVM (Java JDK SE 7)
+* Eclipse IDE
+* Kura Workspace setup
+
+The Kura development environment may be installed on a Windows, Linux, or Mac OS.  The setup instructions will be the same across OSs though each system may have unique characteristics.
+
+*NOTE:*  The local emulation of Kura code is only supported in Linux and Mac, not in Windows.
+
+h2. JVM Installation
+
+Download and install JDK SE 7 from the following links as appropriate for your OS.
+
+For Windows and Linux users, the JDK can be downloaded from the following link: ["Java SE 7 Downloads":http://www.oracle.com/technetwork/java/javase/downloads/index.html].  Use the latest version of Java SE Development Kit and download the version appropriate for your system.
+
+For additional information regarding the installation of Java 7 on all supported operating systems, see ["JDK 7 and JRE 7 Installation Guide":http://docs.oracle.com/javase/7/docs/webnotes/install/].
+
+
+h2. Eclipse IDE
+
+The Eclipse IDE is an open source development tool that consists of an integrated development environment (IDE) and a plug-in system for managing extensions.
+
+h3. Installing Eclipse
+
+Before installing Eclipse, you should choose directory locations for the Eclipse install and its workspaces.
+
+*NOTE:*  The following points should be kept in mind regarding Eclipse installs and workspaces:
+
+* The directory location of the Eclipse workspaces should be chosen carefully.  Once Eclipse is installed and workspaces are created, they should never be moved to another location in the file system.
+* There may be multiple installs of Eclipse (of different or similar versions), and single instances of each install can be run simultaneously; but there should never be more that one instance of a specific install running at the same time (to avoid corruption to the Eclipse environment).
+* Each workspace should be used with only one Eclipse install.  You should avoid opening the workspace from more than one installation of Eclipse.
+* For the purposes of this guide, only a single Eclipse installation will be covered.
+
+Download the current distribution of Eclipse for your OS from the ["http://www.eclipse.org/downloads/":http://www.eclipse.org/downloads/)].  Choose the Eclipse IDE for Java EE Developers.
+
+The zipped Eclipse file will be downloaded to the local file system and can be saved to a temporary location that can be deleted after Eclipse has been installed. After the file has been downloaded, it should be extracted to the Eclipse installs directory.  The following screen capture shows the installation in Linux using an eclipse\installs\ directory. The Eclipse executable will then be found in the eclipse\installs\eclipse\ directory.  This installation will be different depending on the operating system.
+
+Because there may potentially be future Eclipse installs extracted into this location, before doing anything else rename the directory, such as to eclipse\installs\+juno1+\. Once you begin using this Eclipse install, +it should not be moved or renamed later+.
+
+h3. Installing mToolkit
+
+An additional plugin, mToolkit, is needed to allow remote connectivity to an OSGi framework on a Kura-enabled target device.  To install mToolkit into Eclipse, use the following steps:
+
+* Download the mToolkit plugin in archive format from ["mtoolkit.tigris.org":http://mtoolkit.tigris.org] (look for the ["latest stable release":http://mtoolkit.tigris.org/servlets/ProjectProcess?pageID=FhaayB] under Download and Install, in zipped format).
+* It is recommended to create an mToolkit directory under dropins in the Eclipse install location (_path_to_eclipse_/dropins/mToolkit).
+* Copy the zip file to the new directory (_path_to_eclipse_/dropins/mToolkit).
+* Extract the contents of the zip file in the mToolkit folder, which should result in a directory structure something like:
+
+bc. eclipse/dropins/mToolkit/eclipse/features
+eclipse/dropins/mToolkit/eclipse/plugins
+
+* Restart Eclipse.  In the menu *Window | Show View | Other*, there should be an *mToolkit | Frameworks* option.  If so, the plugin has been installed correctly.
+
+h2. Workspaces
+
+h3. Creating an Eclipse Workspace
+
+Run Eclipse by clicking its executable in the install directory.
+
+When Eclipse is run for the first time, a workspace needs to be created.  A single workspace will contain all the Java code/projects/bundles, Eclipse configuration parameters, and other relevant files for a specific business-level product.  If the *Use this as the default* option is selected, the designated workspace becomes the default each time you run Eclipse.
+
+If a workspace has not already been defined, or if you are creating a different workspace for another development project, enter a new workspace name.  The workspace should be named appropriate to the project/product being developed.
+
+*NOTE:*  Once you begin using a particular workspace, +it should not be moved or renamed at any time+.
+
+Otherwise, select an existing workspace and click *OK*.  After Eclipse is running, you can select the Eclipse menu *File | Switch Workspace | Other* to create or open a different workspace.
+
+After the new workspace opens, click the Workbench icon to display the development environment.
+
+h3. Importing Kura User Workspace
+
+To set up your Kura project workspace, you will need to download the ["Kura User Workspace archive":http://www.eclipse.org/downloads/download.php?file=/kura/releases/0.7.0/kura-raspberry-pi-jars_0.7.0.zip]
+
+From the Eclipse File menu, select the *Import* option.  In the Import dialog box, expand the *General* heading, select *Existing Projects into Workspace*, and then click *Next*.
+
+Now click the *Select archive file* option button and browse to the archive file, such as user_workspace_archive_0.7.0.zip.
+
+Finally, click *Finish* to import the projects.  At this point, you should have four projects in your workspace.  The four projects are as follows:
+
+* org.eclipse.kura.api This is the core Kura API.
+* org.eclipse.kura.demo.heater This is an example project that you can use as a starting point for creating your own bundle.
+* org.eclipse.kura.emulator This is the emulator project for running Kura within Eclipse (Linux/Mac only).
+* target-definition This is a set of required bundles that are dependencies of the APIs and Kura.
+
+Eclipse will also report some errors at this point.  See the next section to resolve those errors.
+
+h3. Workspace Setup
+
+Click the arrow next to the *target-definition* project in the workspace and double-click *kura-equinox_3.8.1.target* to open it.
+
+In the Target Definition window, click the link *Set as Target Platform*.  Doing so will reset the target platform, rebuild the Kura projects, and clear the errors that were reported.  At this point, you are ready to begin developing Kura-based applications for your target platform.

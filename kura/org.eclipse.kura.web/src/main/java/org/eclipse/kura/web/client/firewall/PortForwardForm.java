@@ -62,7 +62,7 @@ public class PortForwardForm extends Window {
         setSize(600, 500);
         setLayout(new FitLayout());
         setResizable(false);
-        String heading = MSGS.firewallOpenPortFormNew();
+        String heading = MSGS.firewallPortForwardFormNew();
         setHeading(heading);
     }
     

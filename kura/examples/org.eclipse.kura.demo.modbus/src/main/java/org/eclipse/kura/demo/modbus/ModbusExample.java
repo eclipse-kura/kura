@@ -34,6 +34,7 @@ public class ModbusExample implements ConfigurableComponent {
 	private static Properties 			modbusProperties;
 	private boolean 					configured;
 	private boolean						m_threadShouldStop;
+	private int 						m_slaveAddr;
 	
 	public void setModbusProtocolDeviceService(ModbusProtocolDeviceService modbusService) {
 		this.m_protocolDevice = modbusService;
@@ -47,6 +48,7 @@ public class ModbusExample implements ConfigurableComponent {
 		configured = false;		
 		m_properties = properties;
 		modbusProperties = getModbusProperties();
+		m_slaveAddr = Integer.valueOf(modbusProperties.getProperty("slaveAddr")).intValue();
 		m_threadShouldStop=false;
 		m_thread = new Thread(new Runnable() {		
 			@Override
@@ -71,7 +73,12 @@ public class ModbusExample implements ConfigurableComponent {
 		s_logger.info("Modbus polling thread killed");
 		
 		if(m_protocolDevice!=null)
-			m_protocolDevice.disconnect();
+			try {
+				m_protocolDevice.disconnect();
+			} catch (ModbusProtocolException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		configured = false;
 	}
 	
@@ -80,6 +87,7 @@ public class ModbusExample implements ConfigurableComponent {
 		s_logger.info("updated...");		
 		m_properties = properties;
 		modbusProperties = getModbusProperties();
+		m_slaveAddr = Integer.valueOf(modbusProperties.getProperty("slaveAddr")).intValue();
 		configured=false;
 	}	
 	
@@ -117,7 +125,7 @@ public class ModbusExample implements ConfigurableComponent {
 			}
 			else{
 				try {
-					int[] analogInputs = m_protocolDevice.readInputRegisters(512, 8);
+					int[] analogInputs = m_protocolDevice.readInputRegisters(m_slaveAddr, 512, 8);
 					int qc = bcd2Dec(analogInputs[7]);
 					s_logger.info("qc = "+qc);
 				} catch (ModbusProtocolException e) {
@@ -138,7 +146,6 @@ public class ModbusExample implements ConfigurableComponent {
 		if(m_protocolDevice!=null){
 			m_protocolDevice.disconnect();
 
-			m_protocolDevice.configureProtocol(getProtocolProperties());
 			m_protocolDevice.configureConnection(modbusProperties);
 
 			configured = true;
@@ -149,13 +156,13 @@ public class ModbusExample implements ConfigurableComponent {
 		s_logger.debug("Initializing LEDs");	// once on startup, turn on each light
 		for( int led = 1; led <= 6; led++)
 		{
-			m_protocolDevice.writeSingleCoil( 2047 + led, true);
+			m_protocolDevice.writeSingleCoil(m_slaveAddr, 2047 + led, true);
 			try {
 				Thread.sleep(200);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-			m_protocolDevice.writeSingleCoil( 2047 + led, false);
+			m_protocolDevice.writeSingleCoil(m_slaveAddr, 2047 + led, false);
 		}			
 	}
 
@@ -177,6 +184,8 @@ public class ModbusExample implements ConfigurableComponent {
 				String stopBits = null;
 				String parity = null;
 				String ctopic = null;
+				String Slave= null;
+				if(m_properties.get("slaveAddr") != null) Slave 		= (String) m_properties.get("slaveAddr");
 				if(m_properties.get("port") != null) portName 			= (String) m_properties.get("port");
 				if(m_properties.get("serialMode") != null) serialMode 	= (String) m_properties.get("serialMode");
 				if(m_properties.get("baudRate") != null) baudRate 		= (String) m_properties.get("baudRate");
@@ -188,6 +197,7 @@ public class ModbusExample implements ConfigurableComponent {
 				prop.setProperty("connectionType", "SERIAL");
 				if(portName==null) //portName="/dev/ttyUSB0";
 					return null;		
+				if(Slave==null) Slave="1";
 				if(baudRate==null) baudRate="9600";
 				if(stopBits==null) stopBits="1";
 				if(parity==null) parity="0";
@@ -199,6 +209,7 @@ public class ModbusExample implements ConfigurableComponent {
 					prop.setProperty("serialMode", serialMode);
 				prop.setProperty("exclusive", "false");
 				prop.setProperty("mode", "0");
+				prop.setProperty("slaveAddr", Slave);
 				prop.setProperty("baudRate", baudRate);
 				prop.setProperty("stopBits", stopBits);
 				prop.setProperty("parity", parity);
@@ -210,15 +221,4 @@ public class ModbusExample implements ConfigurableComponent {
 		return prop;
 	}
 
-
-	private Properties getProtocolProperties() {
-		Properties prop = new Properties();
-
-		prop.setProperty("unitName", "Demo");
-		prop.setProperty("unitAddress", "1");
-		prop.setProperty("txMode", ModbusTransmissionMode.RTU);
-		prop.setProperty("respTimeout", "1000");
-
-		return prop;
-	}
 }

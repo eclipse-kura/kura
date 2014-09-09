@@ -66,6 +66,14 @@
             required="false"
             default="/modbus/manager" 
             description="The control topic for the device connected."/>
+
+        <AD id="slaveAddr" 
+            name="slaveAddr"
+            type="String"
+            cardinality="0" 
+            required="true"
+            default="1" 
+            description="The modbus address of the device to be queried."/>
     </OCD>
     <Designate pid="org.eclipse.kura.demo.modbus.ModbusExample">
         <Object ocdref="org.eclipse.kura.demo.modbus.ModbusExample"/>

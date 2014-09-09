@@ -17,9 +17,6 @@ package org.eclipse.kura.protocol.modbus;
 
 import java.util.Properties;
 
-import org.eclipse.kura.position.NmeaPosition;
-import org.osgi.util.position.Position;
-
 
 /**
  * OSGI service providing a connection to a device via Serial link (RS232/RS485) or Ethernet using Modbus protocol.
@@ -83,32 +80,6 @@ public interface ModbusProtocolDeviceService {
 	public String getProtocolName();
 
 	/**
-	 * this returns the address given the RTU in the configureProtocol. Until
-	 * configured, this returns an empty string. The address is returned as a
-	 * string rather than an integer or other number as some protocols may have
-	 * multi-part addresses or addresses that contain non-numeric parts.
-	 * 
-	 * @return address of physical device this instance represents
-	 */
-	public String getUnitAddress();
-
-	/**
-	 * Required properties for modbus protocol configuration. 
-	 * 
-	 * @param protocolConfig
-	 * (key/value pairing directly from configuration file)<br>
-	 * <li>unitName : Name to be returned by toString
-	 * <li>unitAddress : Modbus address of the unit (1-255)
-	 * <li>txMode : Must be set to "RTU" or "ASCII"
-	 * <li>respTimeout : maximum time, in milliseconds, to wait for a
-	 * response to a command 
-	 * @throws ModbusProtocolException(INVALID_CONFIGURATION)
-	 *             unspecified problem with the configuration
-	 */
-	public void configureProtocol(Properties protocolConfig)
-			throws ModbusProtocolException;
-
-	/**
 	 * Configure access to the physical device. 
 	 * 
 	 * @param connectionConfig 
@@ -129,6 +100,10 @@ public interface ModbusProtocolDeviceService {
 	 * for ETHERNET mode :
 	 * <li>port : TCP port to be used
 	 * <li>ipAddress : the 4 octet IP address of the field device (xxx.xxx.xxx.xxx)
+	 * <br><br>
+	 * Modbus properties :
+	 * <li>transmissionMode : modbus transmission mode, can be RTU or ASCII, in Ethernet mode only RTU is supported
+	 * <li>respTimeout      : Timeout in milliseconds on a question/response request.
 	 * @throws ModbusProtocolException(INVALID_CONFIGURATION)
 	 *             unspecified problem with the configuration
 	 */
@@ -172,15 +147,18 @@ public interface ModbusProtocolDeviceService {
 	 * Attempting to close an already closed connection is not invalid.
 	 * <p>
 	 * All protocols must implement this method.
+	 * @throws ModbusProtocolException 
 	 * 
 	 * @see #getConnectStatus()
 	 */
-	public void disconnect();
+	public void disconnect() throws ModbusProtocolException;
 
 	/**
 	 * <b>Modbus function 01</b><br>
 	 * Read 1 to 2000 contiguous status of coils from the attached field device.
 	 * <p>
+	 * @param unitAddr
+	 *            modbus slave address (must be unique in the range 1 - 247)
 	 * @param dataAddress
 	 *            starting address
 	 * @param count
@@ -194,13 +172,15 @@ public interface ModbusProtocolDeviceService {
 	 *             should include a protocol specific message to help clarify
 	 *             the cause of the exception
 	 */
-	public boolean[] readCoils(int dataAddress, int count)
+	public boolean[] readCoils(int unitAddr, int dataAddress, int count)
 			throws ModbusProtocolException;
 	
 	/**
 	 * <b>Modbus function 02</b><br>
 	 * Read 1 to 2000 contiguous status of discrete inputs from the attached field device.
 	 * <p>
+	 * @param unitAddr
+	 *            modbus slave address (must be unique in the range 1 - 247)
 	 * @param dataAddress
 	 *            starting address
 	 * @param count
@@ -214,13 +194,15 @@ public interface ModbusProtocolDeviceService {
 	 *             should include a protocol specific message to help clarify
 	 *             the cause of the exception
 	 */
-	public boolean[] readDiscreteInputs(int dataAddress, int count)
+	public boolean[] readDiscreteInputs(int unitAddr, int dataAddress, int count)
 			throws ModbusProtocolException;
 	
 	/**
 	 * <b>Modbus function 05</b><br>
 	 * write a single output to either ON or OFF in the attached field device.
 	 * <p>
+	 * @param unitAddr
+	 *            modbus slave address (must be unique in the range 1 - 247)
 	 * @param dataAddress
 	 *            Output address.
 	 * @param data
@@ -231,13 +213,15 @@ public interface ModbusProtocolDeviceService {
 	 *             should include a protocol specific message to help clarify
 	 *             the cause of the exception
 	 */
-	public void writeSingleCoil(int dataAddress, boolean data)
+	public void writeSingleCoil(int unitAddr, int dataAddress, boolean data)
 			throws ModbusProtocolException;
 	
 	/**
 	 * <b>Modbus function 15 (0x0F)</b><br>
 	 * write multiple coils in a sequence of coils to either ON or OFF in the attached field device.
 	 * <p>
+	 * @param unitAddr
+	 *            modbus slave address (must be unique in the range 1 - 247)
 	 * @param dataAddress
 	 *            Starting Output address.
 	 * @param data
@@ -248,13 +232,15 @@ public interface ModbusProtocolDeviceService {
 	 *             should include a protocol specific message to help clarify
 	 *             the cause of the exception
 	 */
-	public void writeMultipleCoils(int dataAddress, boolean[] data)
+	public void writeMultipleCoils(int unitAddr, int dataAddress, boolean[] data)
 			throws ModbusProtocolException;
 	
 	/**
 	 * <b>Modbus function 03</b><br>
 	 * Read contents of 1 to 125 contiguous block of holding registers from the attached field device.
 	 * <p>
+	 * @param unitAddr
+	 *            modbus slave address (must be unique in the range 1 - 247)
 	 * @param dataAddress
 	 *            starting address
 	 * @param count
@@ -266,13 +252,15 @@ public interface ModbusProtocolDeviceService {
 	 *             should include a protocol specific message to help clarify
 	 *             the cause of the exception
 	 */
-	public int[] readHoldingRegisters(int dataAddress, int count)
+	public int[] readHoldingRegisters(int unitAddr, int dataAddress, int count)
 			throws ModbusProtocolException;
 	
 	/**
 	 * <b>Modbus function 04</b><br>
 	 * Read contents of 1 to 125 contiguous block of input registers from the attached field device.
 	 * <p>
+	 * @param unitAddr
+	 *            modbus slave address (must be unique in the range 1 - 247)
 	 * @param dataAddress
 	 *            starting address
 	 * @param count
@@ -284,13 +272,15 @@ public interface ModbusProtocolDeviceService {
 	 *             should include a protocol specific message to help clarify
 	 *             the cause of the exception
 	 */
-	public int[] readInputRegisters(int dataAddress, int count)
+	public int[] readInputRegisters(int unitAddr, int dataAddress, int count)
 			throws ModbusProtocolException;
 	
 	/**
 	 * <b>Modbus function 06</b><br>
 	 * write a single holding register in the attached field device.
 	 * <p>
+	 * @param unitAddr
+	 *            modbus slave address (must be unique in the range 1 - 247)
 	 * @param dataAddress
 	 *            Output address.
 	 * @param data
@@ -301,20 +291,22 @@ public interface ModbusProtocolDeviceService {
 	 *             should include a protocol specific message to help clarify
 	 *             the cause of the exception
 	 */
-	public void writeSingleRegister(int dataAddress, int data)
+	public void writeSingleRegister(int unitAddr, int dataAddress, int data)
 			throws ModbusProtocolException;
 
 	/**
 	 * <b>Modbus function 07</b><br>
 	 * read the content of 8 Exception Status outputs in the field device.
 	 * <p>
+	 * @param unitAddr
+	 *            modbus slave address (must be unique in the range 1 - 247)
 	 * @throws ModbusProtocolException(NOT_CONNECTED)
 	 *             current connection is in a status other than <b>CONNECTED</b>
 	 * @throws ModbusProtocolException(TRANSACTION_FAILURE)
 	 *             should include a protocol specific message to help clarify
 	 *             the cause of the exception
 	 */
-	public boolean[] readExceptionStatus()
+	public boolean[] readExceptionStatus(int unitAddr)
 			throws ModbusProtocolException;
 	
 	/**
@@ -323,13 +315,15 @@ public interface ModbusProtocolDeviceService {
 	 * Return values in a ModbusCommEvent.
 	 * @see ModbusCommEvent.
 	 * <p>
+	 * @param unitAddr
+	 *            modbus slave address (must be unique in the range 1 - 247)
 	 * @throws ModbusProtocolException(NOT_CONNECTED)
 	 *             current connection is in a status other than <b>CONNECTED</b>
 	 * @throws ModbusProtocolException(TRANSACTION_FAILURE)
 	 *             should include a protocol specific message to help clarify
 	 *             the cause of the exception
 	 */
-	public ModbusCommEvent getCommEventCounter()
+	public ModbusCommEvent getCommEventCounter(int unitAddr)
 			throws ModbusProtocolException;
 	
 	/**
@@ -339,18 +333,22 @@ public interface ModbusProtocolDeviceService {
 	 * Return values in a ModbusCommEvent.
 	 * @see ModbusCommEvent.
 	 * <p>
+	 * @param unitAddr
+	 *            modbus slave address (must be unique in the range 1 - 247)
 	 * @throws ModbusProtocolException(NOT_CONNECTED)
 	 *             current connection is in a status other than <b>CONNECTED</b>
 	 * @throws ModbusProtocolException(TRANSACTION_FAILURE)
 	 *             should include a protocol specific message to help clarify
 	 *             the cause of the exception
 	 */
-	public ModbusCommEvent getCommEventLog()
+	public ModbusCommEvent getCommEventLog(int unitAddr)
 			throws ModbusProtocolException;	
 	/**
 	 * <b>Modbus function 16 (0x10)</b><br>
 	 * write a block of contiguous registers (1 to 123) in the attached field device.
 	 * <p>
+	 * @param unitAddr
+	 *            modbus slave address (must be unique in the range 1 - 247)
 	 * @param dataAddress
 	 *            Output address.
 	 * @param data
@@ -361,21 +359,6 @@ public interface ModbusProtocolDeviceService {
 	 *             should include a protocol specific message to help clarify
 	 *             the cause of the exception
 	 */
-	public void writeMultipleRegister(int dataAddress, int[] data)
+	public void writeMultipleRegister(int unitAddr, int dataAddress, int[] data)
 			throws ModbusProtocolException;
-	
-	/**
-	 * Return OSGI Position of the device
-	 * <p>
-	 * @see Position
-	 */
-	public Position getPosition();
-
-	/**
-	 * Return NMEA Position of the device
-	 * <p>
-	 * @see NmeaPosition
-	 */
-	public NmeaPosition getNmeaPosition();
-
 }

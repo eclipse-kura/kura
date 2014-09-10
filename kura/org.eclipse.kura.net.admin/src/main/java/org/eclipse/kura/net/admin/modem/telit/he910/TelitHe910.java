@@ -56,6 +56,8 @@ public class TelitHe910 implements HspaCellularModem {
 	private String m_model = null;
 	private String m_manufacturer = null;
 	private String m_serialNumber = null;
+	private String m_imsi;
+	private String m_iccid;
 	private String m_revisionId = null;
 	private int m_pdpContext = 1;
 	private int m_rssi = 0;
@@ -87,6 +89,8 @@ public class TelitHe910 implements HspaCellularModem {
 			if (atPort != null) {
 				if (atPort.equals(getDataPort()) || atPort.equals(gpsPort)) {
 					m_serialNumber = getSerialNumber();
+					m_imsi = this.getMobileSubscriberIdentity();
+					m_iccid = this.getIntegratedCirquitCardId();
 					m_model = getModel();
 					m_manufacturer = getManufacturer();		
 					m_revisionId = getRevisionID();
@@ -190,6 +194,70 @@ public class TelitHe910 implements HspaCellularModem {
 	    	}
     	}
         return m_serialNumber;
+    }
+    
+    @Override
+    public String getMobileSubscriberIdentity() throws KuraException {
+    	synchronized (m_atLock) {
+	    	if (m_imsi == null) {
+	    		s_logger.debug("sendCommand getIMSI :: " + TelitHe910AtCommands.getIMSI.getCommand());
+	    		byte[] reply = null;
+	    		CommConnection commAtConnection = openSerialPort(getAtPort());
+	    		if (!isAtReachable(commAtConnection)) {
+	    			closeSerialPort(commAtConnection);
+		    		throw new KuraException(KuraErrorCode.NOT_CONNECTED, "Modem not available for AT commands: " + TelitHe910.class.getName());
+		    	}
+				try {
+					reply = commAtConnection.sendCommand(TelitHe910AtCommands.getIMSI.getCommand().getBytes(), 1000, 100);
+				} catch (IOException e) {
+					closeSerialPort(commAtConnection);
+					throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+				}
+				closeSerialPort(commAtConnection);
+				if (reply != null) {
+				    String imsi = getResponseString(reply);
+				    if(imsi != null && !imsi.isEmpty()) {
+				    	if (imsi.startsWith("#CIMI:")) {
+				    		imsi = imsi.substring("#CIMI:".length()).trim();
+				    	}
+				    	m_imsi = imsi;        
+				    }
+				}
+	    	}
+    	}
+        return m_imsi;
+    }
+    
+    @Override
+    public String getIntegratedCirquitCardId() throws KuraException {
+    	synchronized (m_atLock) {
+	    	if (m_iccid == null) {
+	    		s_logger.debug("sendCommand getICCID :: " + TelitHe910AtCommands.getICCID.getCommand());
+	    		byte[] reply = null;
+	    		CommConnection commAtConnection = openSerialPort(getAtPort());
+	    		if (!isAtReachable(commAtConnection)) {
+	    			closeSerialPort(commAtConnection);
+		    		throw new KuraException(KuraErrorCode.NOT_CONNECTED, "Modem not available for AT commands: " + TelitHe910.class.getName());
+		    	}
+				try {
+					reply = commAtConnection.sendCommand(TelitHe910AtCommands.getICCID.getCommand().getBytes(), 1000, 100);
+				} catch (IOException e) {
+					closeSerialPort(commAtConnection);
+					throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+				}
+				closeSerialPort(commAtConnection);
+				if (reply != null) {
+				    String iccid = getResponseString(reply);
+				    if(iccid != null && !iccid.isEmpty()) {
+				    	if (iccid.startsWith("#CCID:")) {
+				    		iccid = iccid.substring("#CCID:".length()).trim();
+				    	}
+				    	m_iccid = iccid;        
+				    }
+				}
+	    	}
+    	}
+        return m_iccid;
     }
 
     @Override

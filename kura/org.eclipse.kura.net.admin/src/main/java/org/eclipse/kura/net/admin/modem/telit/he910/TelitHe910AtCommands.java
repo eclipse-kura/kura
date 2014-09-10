@@ -34,6 +34,8 @@ public enum TelitHe910AtCommands {
 	getModelNumber("at+gmm\r\n"),
     getManufacturer("at+gmi\r\n"),
     getSerialNumber("at#cgsn\r\n"),
+    getIMSI("at#cimi\r\n"),
+    getICCID("at#ccid\r\n"),
     getRevision("at+gmr\r\n"),
     getSignalStrength("at+csq\r\n"),
     getMobileStationClass("at+cgclass?\r\n"),

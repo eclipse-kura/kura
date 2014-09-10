@@ -22,11 +22,26 @@ public interface CellularModem {
     public String getManufacturer() throws KuraException;
     
     /**
-     * Answers modem's serial number
+     * Answers modem's serial number (IMEI/MEID/ESN)
      * 
-     * @return ESN, null if not known
+     * @return serial number, null if not known
+     * @throws KuraException
      */
     public String getSerialNumber() throws KuraException;
+    
+    /**
+     * Answers International Mobile Subscribe Identity (IMSI)
+     * @return IMSI number, null if not known
+     * @throws KuraException
+     */
+    public String getMobileSubscriberIdentity() throws KuraException;
+    
+    /**
+     * Answers Integrated Circuit Card Identification (ICCID)
+     * @return ICCID, "N/A" if not applicable
+     * @throws KuraException
+     */
+    public String getIntegratedCirquitCardId() throws KuraException;
     
     /**
      * Reports modem's revision identification

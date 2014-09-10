@@ -304,6 +304,18 @@ public class SierraUsb598 implements EvdoCellularModem {
     	}
         return m_esn;
 	}
+	
+	@Override
+	public String getMobileSubscriberIdentity() throws KuraException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String getIntegratedCirquitCardId() throws KuraException {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
 	@Override
 	public String getRevisionID() throws KuraException {

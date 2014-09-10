@@ -136,6 +136,18 @@ public class SierraMc87xx implements HspaCellularModem {
     	}
         return m_serialNumber;
 	}
+	
+	@Override
+	public String getMobileSubscriberIdentity() throws KuraException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String getIntegratedCirquitCardId() throws KuraException {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
 	@Override
 	public String getRevisionID() throws KuraException {
@@ -517,5 +529,4 @@ private CommConnection openSerialPort (String port) throws KuraException {
 			// ignore
 		}
 	}
-
 }

@@ -1,24 +1,11 @@
 ---
 layout: page
 title:  "Getting Started"
-date:   2014-08-26 11:31:11
+date:   2014-08-25 11:31:11
 categories: [doc]
 ---
 
-PART 2. GETTING STARTED
-Setting up the Kura Development Environment
-
-Kura Development Environment
-* JVM Installation
-* Eclipse IDE
-** Installing Eclipse
-** Installing mToolkit
-* Workspaces
-** Creating an Eclipse Workspace
-** Importing Kura User Workspace
-** Workspace Setup
-
-h1. Kura Development Environment
+h1. Setting up the Kura Development Environment
 
 This document describes how to set up the development environment for Eclipse Kura, which consists of the following components:
 
@@ -58,7 +45,8 @@ Download the current distribution of Eclipse for your OS from the ["http://www.e
 
 The zipped Eclipse file will be downloaded to the local file system and can be saved to a temporary location that can be deleted after Eclipse has been installed. After the file has been downloaded, it should be extracted to the Eclipse installs directory.  The following screen capture shows the installation in Linux using an eclipse\installs\ directory. The Eclipse executable will then be found in the eclipse\installs\eclipse\ directory.  This installation will be different depending on the operating system.
 
-Because there may potentially be future Eclipse installs extracted into this location, before doing anything else rename the directory, such as to eclipse\installs\+juno1+\. Once you begin using this Eclipse install, +it should not be moved or renamed later+.
+!{{ site.baseurl }}/assets/images/kura_setup/image001.png!<br>Because there may potentially be future Eclipse installs extracted into this location, before doing anything else rename the directory, such as to “eclipse\installs\+juno1+\”.  Once you begin using this Eclipse install, +it should not be moved or renamed later+.
+!{{ site.baseurl }}/assets/images/kura_setup/image002.png!
 
 h3. Installing mToolkit
 
@@ -86,9 +74,9 @@ If a workspace has not already been defined, or if you are creating a different 
 
 *NOTE:*  Once you begin using a particular workspace, +it should not be moved or renamed at any time+.
 
-Otherwise, select an existing workspace and click *OK*.  After Eclipse is running, you can select the Eclipse menu *File | Switch Workspace | Other* to create or open a different workspace.
+!{{ site.baseurl }}/assets/images/kura_setup/image003.png!<br>
 
-After the new workspace opens, click the Workbench icon to display the development environment.
+Otherwise, select an existing workspace and click *OK*.  After Eclipse is running, you can select the Eclipse menu *File | Switch Workspace | Other* to create or open a different workspace.After the new workspace opens, click the Workbench icon to display the development environment.<br>!{{ site.baseurl }}/assets/images/kura_setup/image004.png!<br>
 
 h3. Importing Kura User Workspace
 
@@ -98,17 +86,16 @@ From the Eclipse File menu, select the *Import* option.  In the Import dialog bo
 
 Now click the *Select archive file* option button and browse to the archive file, such as user_workspace_archive_0.7.0.zip.
 
-Finally, click *Finish* to import the projects.  At this point, you should have four projects in your workspace.  The four projects are as follows:
+!{{ site.baseurl }}/assets/images/kura_setup/image005.png!<br>
 
-* org.eclipse.kura.api This is the core Kura API.
-* org.eclipse.kura.demo.heater This is an example project that you can use as a starting point for creating your own bundle.
-* org.eclipse.kura.emulator This is the emulator project for running Kura within Eclipse (Linux/Mac only).
-* target-definition This is a set of required bundles that are dependencies of the APIs and Kura.
+Finally, click *Finish* to import the projects.  At this point, you should have four projects in your workspace.  The four projects are as follows:* org.eclipse.kura.api – This is the core Kura API.* org.eclipse.kura.demo.heater – This is an example project that you can use as a starting point for creating your own bundle.* org.eclipse.kura.emulator – This is the emulator project for running Kura within Eclipse (Linux/Mac only).* target-definition – This is a set of required bundles that are dependencies of the APIs and Kura.!{{ site.baseurl }}/assets/images/kura_setup/image006.png!<br>
 
 Eclipse will also report some errors at this point.  See the next section to resolve those errors.
 
 h3. Workspace Setup
 
 Click the arrow next to the *target-definition* project in the workspace and double-click *kura-equinox_3.8.1.target* to open it.
+
+!{{ site.baseurl }}/assets/images/kura_setup/image007.png!<br>
 
 In the Target Definition window, click the link *Set as Target Platform*.  Doing so will reset the target platform, rebuild the Kura projects, and clear the errors that were reported.  At this point, you are ready to begin developing Kura-based applications for your target platform.

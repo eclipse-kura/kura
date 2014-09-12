@@ -1,3 +1,8 @@
+p img {
+  padding: 20px;
+  max-width: 100%;
+}
+
 .navbar-default {
     background-color: #4b8fd0;
 }

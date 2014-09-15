@@ -34,11 +34,13 @@ import org.eclipse.kura.cloud.CloudPayloadProtoBufDecoder;
 import org.eclipse.kura.cloud.CloudPayloadProtoBufEncoder;
 import org.eclipse.kura.cloud.CloudService;
 import org.eclipse.kura.configuration.ConfigurableComponent;
+import org.eclipse.kura.core.message.KuraBirthPayload;
 import org.eclipse.kura.data.DataService;
 import org.eclipse.kura.data.DataServiceListener;
 import org.eclipse.kura.message.KuraPayload;
 import org.eclipse.kura.message.KuraTopic;
 import org.eclipse.kura.net.NetworkService;
+import org.eclipse.kura.net.modem.ModemReadyEvent;
 import org.eclipse.kura.position.PositionLockedEvent;
 import org.eclipse.kura.position.PositionService;
 import org.eclipse.kura.system.SystemAdminService;
@@ -169,8 +171,8 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
 		//
 		// install event listener for GPS locked event
 		Dictionary<String,Object> props = new Hashtable<String,Object>();
-		String[] eventTopic = {PositionLockedEvent.POSITION_LOCKED_EVENT_TOPIC};
-		props.put(EventConstants.EVENT_TOPIC, eventTopic);
+		String[] eventTopics = {PositionLockedEvent.POSITION_LOCKED_EVENT_TOPIC, ModemReadyEvent.MODEM_EVENT_READY_TOPIC};
+		props.put(EventConstants.EVENT_TOPIC, eventTopics);
 		m_ctx.getBundleContext().registerService(EventHandler.class.getName(), this, props);
 	}
 		
@@ -213,7 +215,18 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
 			// if we get a position locked event, 
 			// republish the birth certificate only if we are configured to
 			if (m_dataService != null && m_dataService.isConnected() && m_options != null && m_options.getRepubBirthCertOnGpsLock()) {
+				s_logger.debug("handleEvent() :: PositionLockedEvent :: Republishing Birth Certificate ...");
 				publishBirthCertificate();
+			}
+		} else if (ModemReadyEvent.MODEM_EVENT_READY_TOPIC.contains(event.getTopic())) {
+			// republish the birth certificate only if we are configured to
+			if (m_dataService != null && m_options != null && m_options.getRepubBirthCertOnModemDetection()) {
+				s_logger.debug("handleEvent() :: ModemReadyEvent :: Republishing Birth Certificate ...");
+				ModemReadyEvent modemReadyEvent = (ModemReadyEvent)event;
+				String imei = (String)modemReadyEvent.getProperty(ModemReadyEvent.IMEI);
+				String imsi = (String)modemReadyEvent.getProperty(ModemReadyEvent.IMSI);
+				String iccid = (String)modemReadyEvent.getProperty(ModemReadyEvent.ICCID);
+				publishBirthCertificate(imei, imsi, iccid);
 			}
 		}
 	}
@@ -517,6 +530,22 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
 		KuraPayload payload = createBirthPayload();
 		publishLifeCycleMessage(topic, payload);
 	}
+	
+	private void publishBirthCertificate(String imei, String imsi, String iccid) {
+		
+		StringBuilder sbTopic = new StringBuilder();
+		sbTopic.append(m_options.getTopicControlPrefix())
+		  	   .append(m_options.getTopicSeparator())
+		       .append(m_options.getTopicAccountToken())
+		       .append(m_options.getTopicSeparator())
+		       .append(m_options.getTopicClientIdToken())
+		       .append(m_options.getTopicSeparator())
+		       .append(m_options.getTopicBirthSuffix());
+		
+		String topic = sbTopic.toString();
+		KuraPayload payload = createBirthPayload(imei, imsi, iccid);
+		publishLifeCycleMessage(topic, payload);
+	}
 
 	
 	private void publishDisconnectCertificate() 
@@ -557,6 +586,22 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
 	{		
 		LifeCyclePayloadBuilder payloadBuilder = new LifeCyclePayloadBuilder(this);
 		return payloadBuilder.buildBirthPayload();
+	}
+	
+	private KuraPayload createBirthPayload(String imei, String imsi, String iccid) {
+		
+		LifeCyclePayloadBuilder payloadBuilder = new LifeCyclePayloadBuilder(this);
+		KuraBirthPayload kuraBuildPayload = payloadBuilder.buildBirthPayload();
+		if ((imei != null) && (imei.length() > 0)) {
+			kuraBuildPayload.addMetric(KuraBirthPayload.MODEM_IMEI, imei);
+		}
+		if ((imsi != null) && (imsi.length() > 0)) {
+			kuraBuildPayload.addMetric(KuraBirthPayload.MODEM_IMSI, imsi);
+		}
+		if ((iccid != null) && (iccid.length() > 0)) {
+			kuraBuildPayload.addMetric(KuraBirthPayload.MODME_ICCID, iccid);
+		}
+		return kuraBuildPayload;
 	}
 	
 	

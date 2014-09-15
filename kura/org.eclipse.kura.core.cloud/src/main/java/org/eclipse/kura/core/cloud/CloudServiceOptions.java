@@ -38,6 +38,7 @@ public class CloudServiceOptions
 	private static final String  DEVICE_CUSTOM_NAME			  = "device.custom-name";
 	private static final String  ENCODE_GZIP                  = "encode.gzip";
 	private static final String  REPUB_BIRTH_ON_GPS_LOCK	  = "republish.mqtt.birth.cert.on.gps.lock";
+	private static final String  REPUB_BIRTH_ON_MODEM_DETECT  = "republish.mqtt.birth.cert.on.modem.detect";
 	
 	private static final int     LIFECYCLE_QOS                = 0;
 	private static final int     LIFECYCLE_PRIORITY           = 0;
@@ -129,6 +130,22 @@ public class CloudServiceOptions
 			m_properties.get(REPUB_BIRTH_ON_GPS_LOCK) != null &&
 			m_properties.get(REPUB_BIRTH_ON_GPS_LOCK) instanceof Boolean) {
 			repubBirth = (Boolean) m_properties.get(REPUB_BIRTH_ON_GPS_LOCK);
+		}
+		return repubBirth;
+	}
+	
+	/**
+	 * Returns true if the current CloudService configuration 
+	 * specifies the cloud client should republish the MQTT birth
+	 * certificate on modem detection events 
+	 * @return
+	 */
+	public boolean getRepubBirthCertOnModemDetection() {
+		boolean repubBirth = false;
+		if (m_properties != null &&
+			m_properties.get(REPUB_BIRTH_ON_MODEM_DETECT) != null &&
+			m_properties.get(REPUB_BIRTH_ON_MODEM_DETECT) instanceof Boolean) {
+			repubBirth = (Boolean) m_properties.get(REPUB_BIRTH_ON_MODEM_DETECT);
 		}
 		return repubBirth;
 	}	

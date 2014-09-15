@@ -23,7 +23,7 @@
             name="device.display-name"
             type="String"
             cardinality="0"
-            required="false"
+            required="true"
             default="device-name"
             description="Friendly name of the device. Device name is the common name of the device (eg: Reliagate 50-21, Raspberry Pi, etc.). Hostname will use the linux hostname utility. 
             				Custom allows for defining a unique string. Server defined relies on Eurotech Everware Cloud to define a name.">
@@ -58,7 +58,14 @@
             required="true"
             default="false"
             description="Whether or not to republish the MQTT Birth Certificate on GPS lock event"/>
-
+        
+        <AD id="republish.mqtt.birth.cert.on.modem.detect"
+            name="republish.mqtt.birth.cert.on.modem.detect"
+            type="Boolean"
+            cardinality="0"
+            required="true"
+            default="false"
+            description="Whether or not to republish the MQTT Birth Certificate on modem detection event"/>
     </OCD>
     
     <Designate pid="org.eclipse.kura.cloud.CloudService">

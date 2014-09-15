@@ -40,6 +40,9 @@ public class KuraBirthPayload extends KuraPayload
 	private final static String CONNECTION_IP = "connection_ip";
 	private final static String ACCEPT_ENCODING = "accept_encoding";
 	private final static String APPLICATION_IDS = "application_ids";
+	public final static String MODEM_IMEI = "modem_imei";
+	public final static String MODEM_IMSI = "modem_imsi";
+	public final static String MODME_ICCID = "modem_iccid";
 	
 	public KuraBirthPayload(String uptime, String displayName,
 			String modelName, String modelId, String partNumber,

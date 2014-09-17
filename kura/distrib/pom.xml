@@ -56,6 +56,7 @@
 			<plugin>
 				<!-- get kura bundles from (release or local) repository -->
 				<artifactId>maven-dependency-plugin</artifactId>
+				<version>2.8</version>
 				<executions>
 					<execution>
 						<id>get-kura-bundles</id>
@@ -165,6 +166,20 @@
 									<artifactId>org.eclipse.kura.protocol.modbus</artifactId>
 									<version>${org.eclipse.kura.protocol.modbus.version}</version>
 								</artifactItem>
+							</artifactItems>
+							<stripVersion>true</stripVersion>
+							<outputDirectory>${project.basedir}/target/plugins</outputDirectory>
+						</configuration>
+					</execution>
+					<execution>
+						<id>get-web-bundle</id>
+						<phase>generate-resources</phase>
+						<goals>
+							<goal>copy</goal>
+						</goals>
+						<configuration>
+							<skip>${org.eclipse.kura.web.skip}</skip>
+							<artifactItems>
 								<artifactItem>
 									<groupId>org.eclipse.kura</groupId>
 									<artifactId>org.eclipse.kura.web</artifactId>
@@ -209,7 +224,7 @@
 							    <move file="target/plugins/org.eclipse.kura.linux.watchdog.jar" tofile="target/plugins/org.eclipse.kura.linux.watchdog_${org.eclipse.kura.linux.watchdog.version}.jar"/>
 							    <move file="target/plugins/org.eclipse.kura.net.admin.jar" tofile="target/plugins/org.eclipse.kura.net.admin_${org.eclipse.kura.net.admin.version}.jar"/>
 							    <move file="target/plugins/org.eclipse.kura.protocol.modbus.jar" tofile="target/plugins/org.eclipse.kura.protocol.modbus_${org.eclipse.kura.protocol.modbus.version}.jar"/>
-							    <move file="target/plugins/org.eclipse.kura.web.jar" tofile="target/plugins/org.eclipse.kura.web_${org.eclipse.kura.web.version}.jar"/>
+							    <move file="target/plugins/org.eclipse.kura.web.jar" tofile="target/plugins/org.eclipse.kura.web_${org.eclipse.kura.web.version}.jar" failonerror="false" />
 							</tasks>
 						</configuration>
 					</execution>
@@ -520,7 +535,6 @@
 							</execution>
 						</executions>
 					</plugin>
-
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-antrun-plugin</artifactId>

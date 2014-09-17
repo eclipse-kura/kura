@@ -21,6 +21,17 @@
 
 	<packaging>pom</packaging>
 
+	<properties>
+		<tycho-version>0.18.1</tycho-version>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8
+		</project.reporting.outputEncoding>
+		<maven.build.timestamp.format>yyyyMMddHHmm
+		</maven.build.timestamp.format>
+		<kura.basedir>${project.basedir}</kura.basedir>
+		<org.eclipse.kura.web.skip>true</org.eclipse.kura.web.skip>
+	</properties>
+
 	<profiles>
 		<profile>
 			<id>default</id>
@@ -33,6 +44,9 @@
 		</profile>
 		<profile>
 			<id>web</id>
+			<properties>
+				<org.eclipse.kura.web.skip>false</org.eclipse.kura.web.skip>
+			</properties>
 			<activation>
 				<activeByDefault>false</activeByDefault>
 			</activation>
@@ -42,16 +56,6 @@
 			</modules>
 		</profile>
 	</profiles>
-
-	<properties>
-		<tycho-version>0.18.1</tycho-version>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<project.reporting.outputEncoding>UTF-8
-		</project.reporting.outputEncoding>
-		<maven.build.timestamp.format>yyyyMMddHHmm
-		</maven.build.timestamp.format>
-		<kura.basedir>${project.basedir}</kura.basedir>
-	</properties>
 
 	<repositories>
 		<repository>

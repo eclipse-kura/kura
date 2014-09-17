@@ -27,11 +27,23 @@
 	<name>distrib</name>
 	<url>http://maven.apache.org</url>
 	<properties>
-		<kura.basedir>${project.basedir}/..</kura.basedir>
+		<kura.basedir>${project.parent.basedir}</kura.basedir>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<zip_workspace.prefix>user_workspace_archive_${project.version}</zip_workspace.prefix>
 	</properties>
 
+	<repositories>
+		<repository>
+			<id>kura_releases</id>
+			<name>Kura Releases Repository</name>
+			<url>https://repo.eclipse.org/content/repositories/kura/</url>
+			<snapshots>
+				<enabled>false</enabled>
+				<updatePolicy>always</updatePolicy>
+			</snapshots>
+		</repository>
+	</repositories>
+	
 	<build>
 		<extensions>
 			<extension>
@@ -42,19 +54,163 @@
 		</extensions>
 		<plugins>
 			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>properties-maven-plugin</artifactId>
-				<version>1.0-alpha-1</version>
+				<!-- get kura bundles from (release or local) repository -->
+				<artifactId>maven-dependency-plugin</artifactId>
 				<executions>
 					<execution>
-						<phase>initialize</phase>
+						<id>get-kura-bundles</id>
+						<phase>generate-resources</phase>
 						<goals>
-							<goal>read-project-properties</goal>
+							<goal>copy</goal>
 						</goals>
 						<configuration>
-							<files>
-								<file>${basedir}/build.properties</file>
-							</files>
+							<artifactItems>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.kura.api</artifactId>
+									<version>${org.eclipse.kura.api.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.kura.core</artifactId>
+									<version>${org.eclipse.kura.core.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.kura.core.cloud</artifactId>
+									<version>${org.eclipse.kura.core.cloud.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.kura.core.comm</artifactId>
+									<version>${org.eclipse.kura.core.comm.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.kura.core.configuration</artifactId>
+									<version>${org.eclipse.kura.core.configuration.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.kura.core.crypto</artifactId>
+									<version>${org.eclipse.kura.core.crypto.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.kura.core.deployment</artifactId>
+									<version>${org.eclipse.kura.core.deployment.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.kura.core.net</artifactId>
+									<version>${org.eclipse.kura.core.net.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.kura.deployment.agent</artifactId>
+									<version>${org.eclipse.kura.deployment.agent.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.kura.deployment.customizer</artifactId>
+									<version>${org.eclipse.kura.deployment.customizer.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.kura.deployment.customizer.upgrade</artifactId>
+									<version>${org.eclipse.kura.deployment.customizer.upgrade.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.kura.deployment.update</artifactId>
+									<version>${org.eclipse.kura.deployment.update.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.kura.linux.clock</artifactId>
+									<version>${org.eclipse.kura.linux.clock.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.kura.linux.command</artifactId>
+									<version>${org.eclipse.kura.linux.command.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.kura.linux.net</artifactId>
+									<version>${org.eclipse.kura.linux.net.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.kura.linux.position</artifactId>
+									<version>${org.eclipse.kura.linux.position.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.kura.linux.usb</artifactId>
+									<version>${org.eclipse.kura.linux.usb.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.kura.linux.watchdog</artifactId>
+									<version>${org.eclipse.kura.linux.watchdog.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.kura.net.admin</artifactId>
+									<version>${org.eclipse.kura.net.admin.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.kura.protocol.modbus</artifactId>
+									<version>${org.eclipse.kura.protocol.modbus.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.kura.web</artifactId>
+									<version>${org.eclipse.kura.web.version}</version>
+								</artifactItem>
+							</artifactItems>
+							<stripVersion>true</stripVersion>
+							<outputDirectory>${project.basedir}/target/plugins</outputDirectory>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<!--  rename bundles with version appended -->
+				<artifactId>maven-antrun-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>setup</id>
+						<phase>generate-resources</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
+						<configuration>
+							<tasks>
+							    <move file="target/plugins/org.eclipse.kura.api.jar" tofile="target/plugins/org.eclipse.kura.api_${org.eclipse.kura.api.version}.jar"/>
+							    <move file="target/plugins/org.eclipse.kura.core.jar" tofile="target/plugins/org.eclipse.kura.core_${org.eclipse.kura.core.version}.jar"/>
+							    <move file="target/plugins/org.eclipse.kura.core.cloud.jar" tofile="target/plugins/org.eclipse.kura.core.cloud_${org.eclipse.kura.core.cloud.version}.jar"/>
+							    <move file="target/plugins/org.eclipse.kura.core.comm.jar" tofile="target/plugins/org.eclipse.kura.core.comm_${org.eclipse.kura.core.comm.version}.jar"/>
+							    <move file="target/plugins/org.eclipse.kura.core.configuration.jar" tofile="target/plugins/org.eclipse.kura.core.configuration_${org.eclipse.kura.core.configuration.version}.jar"/>
+							    <move file="target/plugins/org.eclipse.kura.core.crypto.jar" tofile="target/plugins/org.eclipse.kura.core.crypto_${org.eclipse.kura.core.crypto.version}.jar"/>
+							    <move file="target/plugins/org.eclipse.kura.core.deployment.jar" tofile="target/plugins/org.eclipse.kura.core.deployment_${org.eclipse.kura.core.deployment.version}.jar"/>
+							    <move file="target/plugins/org.eclipse.kura.core.net.jar" tofile="target/plugins/org.eclipse.kura.core.net_${org.eclipse.kura.core.net.version}.jar"/>
+							    <move file="target/plugins/org.eclipse.kura.deployment.agent.jar" tofile="target/plugins/org.eclipse.kura.deployment.agent_${org.eclipse.kura.deployment.agent.version}.jar"/>
+							    <move file="target/plugins/org.eclipse.kura.deployment.customizer.jar" tofile="target/plugins/org.eclipse.kura.deployment.customizer_${org.eclipse.kura.deployment.customizer.version}.jar"/>
+							    <move file="target/plugins/org.eclipse.kura.deployment.customizer.upgrade.jar" tofile="target/plugins/org.eclipse.kura.deployment.customizer.upgrade_${org.eclipse.kura.deployment.customizer.upgrade.version}.jar"/>
+							    <move file="target/plugins/org.eclipse.kura.deployment.update.jar" tofile="target/plugins/org.eclipse.kura.deployment.update_${org.eclipse.kura.deployment.update.version}.jar"/>
+							    <move file="target/plugins/org.eclipse.kura.linux.clock.jar" tofile="target/plugins/org.eclipse.kura.linux.clock_${org.eclipse.kura.linux.clock.version}.jar"/>
+							    <move file="target/plugins/org.eclipse.kura.linux.command.jar" tofile="target/plugins/org.eclipse.kura.linux.command_${org.eclipse.kura.linux.command.version}.jar"/>
+							    <move file="target/plugins/org.eclipse.kura.linux.net.jar" tofile="target/plugins/org.eclipse.kura.linux.net_${org.eclipse.kura.linux.net.version}.jar"/>
+							    <move file="target/plugins/org.eclipse.kura.linux.position.jar" tofile="target/plugins/org.eclipse.kura.linux.position_${org.eclipse.kura.linux.position.version}.jar"/>
+							    <move file="target/plugins/org.eclipse.kura.linux.usb.jar" tofile="target/plugins/org.eclipse.kura.linux.usb_${org.eclipse.kura.linux.usb.version}.jar"/>
+							    <move file="target/plugins/org.eclipse.kura.linux.watchdog.jar" tofile="target/plugins/org.eclipse.kura.linux.watchdog_${org.eclipse.kura.linux.watchdog.version}.jar"/>
+							    <move file="target/plugins/org.eclipse.kura.net.admin.jar" tofile="target/plugins/org.eclipse.kura.net.admin_${org.eclipse.kura.net.admin.version}.jar"/>
+							    <move file="target/plugins/org.eclipse.kura.protocol.modbus.jar" tofile="target/plugins/org.eclipse.kura.protocol.modbus_${org.eclipse.kura.protocol.modbus.version}.jar"/>
+							    <move file="target/plugins/org.eclipse.kura.web.jar" tofile="target/plugins/org.eclipse.kura.web_${org.eclipse.kura.web.version}.jar"/>
+							</tasks>
 						</configuration>
 					</execution>
 				</executions>
@@ -106,6 +262,48 @@
 										<goals>
 											<goal>
 												create-timestamp
+											</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore></ignore>
+									</action>
+								</pluginExecution>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>
+											org.apache.maven.plugins
+										</groupId>
+										<artifactId>
+											maven-dependency-plugin
+										</artifactId>
+										<versionRange>
+											[1.0,)
+										</versionRange>
+										<goals>
+											<goal>
+												copy
+											</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore></ignore>
+									</action>
+								</pluginExecution>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>
+											org.apache.maven.plugins
+										</groupId>
+										<artifactId>
+											maven-antrun-plugin
+										</artifactId>
+										<versionRange>
+											[1.0,)
+										</versionRange>
+										<goals>
+											<goal>
+												run
 											</goal>
 										</goals>
 									</pluginExecutionFilter>
@@ -172,6 +370,7 @@
 								<configuration>
 									<files>
 										<file>${basedir}/build.properties</file>
+										<file>${basedir}/config/kura.build.properties</file>
 									</files>
 								</configuration>
 							</execution>
@@ -302,6 +501,7 @@
 								<configuration>
 									<files>
 										<file>${basedir}/build.properties</file>
+										<file>${basedir}/config/kura.build.properties</file>
 									</files>
 								</configuration>
 							</execution>
@@ -449,6 +649,7 @@
 								<configuration>
 									<files>
 										<file>${basedir}/build.properties</file>
+										<file>${basedir}/config/kura.build.properties</file>
 									</files>
 								</configuration>
 							</execution>
@@ -507,24 +708,25 @@
 										<copy file="src/main/resources/common/kura-equinox_3.8.1.target"
 											todir="${project.build.directory}/staging/target-definition" />
 										<copy
-											file="../org.eclipse.kura.core.configuration/target/org.eclipse.kura.core.configuration_${org.eclipse.kura.core.configuration.version}.v${kura.build.version}.jar"
+											file="${project.build.directory}/plugins/org.eclipse.kura.core.configuration_${org.eclipse.kura.core.configuration.version}.jar"
 											todir="${project.build.directory}/staging/target-definition/equinox_3.8.1/repository/plugins" />
 										<copy
-											file="../org.eclipse.kura.core/target/org.eclipse.kura.core_${org.eclipse.kura.core.version}.v${kura.build.version}.jar"
+											file="${project.build.directory}/plugins/org.eclipse.kura.core_${org.eclipse.kura.core.version}.jar"
 											todir="${project.build.directory}/staging/target-definition/equinox_3.8.1/repository/plugins" />
 										<copy
-											file="../org.eclipse.kura.deployment.agent/target/org.eclipse.kura.deployment.agent_${org.eclipse.kura.deployment.agent.version}.v${kura.build.version}.jar"
+											file="${project.build.directory}/plugins/org.eclipse.kura.deployment.agent_${org.eclipse.kura.deployment.agent.version}.jar"
 											todir="${project.build.directory}/staging/target-definition/equinox_3.8.1/repository/plugins" />
 										<copy
-											file="../org.eclipse.kura.core.crypto/target/org.eclipse.kura.core.crypto_${org.eclipse.kura.core.crypto.version}.v${kura.build.version}.jar"
+											file="${project.build.directory}/plugins/org.eclipse.kura.core.crypto_${org.eclipse.kura.core.crypto.version}.jar"
 											todir="${project.build.directory}/staging/target-definition/equinox_3.8.1/repository/plugins" />
 										<copy
-											file="../org.eclipse.kura.core.net/target/org.eclipse.kura.core.net_${org.eclipse.kura.core.net.version}.v${kura.build.version}.jar"
+											file="${project.build.directory}/plugins/org.eclipse.kura.core.net_${org.eclipse.kura.core.net.version}.jar"
 											todir="${project.build.directory}/staging/target-definition/equinox_3.8.1/repository/plugins" />
 										<copy
-											file="../org.eclipse.kura.web/target/org.eclipse.kura.web_${org.eclipse.kura.web.version}.v${kura.build.version}.jar"
+											file="${project.build.directory}/plugins/org.eclipse.kura.web_${org.eclipse.kura.web.version}.jar"
 											todir="${project.build.directory}/staging/target-definition/equinox_3.8.1/repository/plugins"
 											failonerror="false" />
+
 									</target>
 								</configuration>
 							</execution>
@@ -660,6 +862,7 @@
 								<configuration>
 									<target>
 										<property name="deployment.package.version" value="${deployment.package.version}" />
+										<property name="kura.build.version" value="${kura.build.version}" />
 										<ant antfile="${basedir}/src/main/ant/build_modbus_dp.xml"
 											target="build-dp" />
 									</target>

@@ -81,13 +81,13 @@
                  token="{org.eclipse.kura.linux.watchdog.version}" value="${org.eclipse.kura.linux.watchdog.version}"/>
         <propertyfile file="${project.build.directory}/kura-${build.name}-jars_${project.version}/config.ini">
             <entry key="osgi.bundles" operation="+"
-                   value=", reference:file:/opt/eclipse/kura/kura/plugins/org.eclipse.kura.net.admin_${org.eclipse.kura.net.admin.version}.v${kura.build.version}.jar@4:start" />
+                   value=", reference:file:/opt/eclipse/kura/kura/plugins/org.eclipse.kura.net.admin_${org.eclipse.kura.net.admin.version}.jar@4:start" />
         </propertyfile>
         <propertyfile file="${project.build.directory}/kura-${build.name}-jars_${project.version}/dpa.properties"> 
             <entry key="kura"
                    value="file:/opt/eclipse/kura/kura/packages/kura-${build.name}-jars_${project.version}.dp" />
         </propertyfile>
-		<available file="../org.eclipse.kura.web/target/org.eclipse.kura.web_${org.eclipse.kura.web.version}.v${kura.build.version}.jar" property="web.jar.present" />
+		<available file="${project.build.directory}/plugins/org.eclipse.kura.web_${org.eclipse.kura.web.version}.jar" property="web.jar.present" />
 		<antcall target="web-config" />
 	<!-- Create the Kura start scripts -->
 	<echo file="${project.build.directory}/kura-${build.name}-jars_${project.version}/start_kura.sh" append="false">#!/bin/sh
@@ -186,7 +186,7 @@ echo $KURA_PID > /var/run/kura.pid
             <zipfileset file="src/main/resources/${build.name}/kura_install.sh"
                         prefix="kura-${build.name}-jars_${project.version}/install/" />
 
-	    <zipfileset file="src/main/resources/${build.name}/recover_dflt_kura_config.sh"
+            <zipfileset file="src/main/resources/${build.name}/recover_dflt_kura_config.sh"
                         prefix="kura-${build.name}-jars_${project.version}/install/" />
 
             <zipfileset file="src/main/resources/${build.name}/kuranet.conf"
@@ -284,39 +284,39 @@ echo $KURA_PID > /var/run/kura.pid
                         prefix="kura-${build.name}-jars_${project.version}/plugins"/>
 
 
-            <zipfileset file="../org.eclipse.kura.deployment.agent/target/org.eclipse.kura.deployment.agent_${org.eclipse.kura.deployment.agent.version}.v${kura.build.version}.jar"
+            <zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.deployment.agent_${org.eclipse.kura.deployment.agent.version}.jar"
                         prefix="kura-${build.name}-jars_${project.version}/kura/plugins" />
-            <zipfileset file="../org.eclipse.kura.api/target/org.eclipse.kura.api_${org.eclipse.kura.api.version}.v${kura.build.version}.jar"
+            <zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.api_${org.eclipse.kura.api.version}.jar"
                         prefix="kura-${build.name}-jars_${project.version}/kura/plugins" />
-            <zipfileset file="../org.eclipse.kura.core/target/org.eclipse.kura.core_${org.eclipse.kura.core.version}.v${kura.build.version}.jar"
+            <zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.core_${org.eclipse.kura.core.version}.jar"
                         prefix="kura-${build.name}-jars_${project.version}/kura/plugins" />
-            <zipfileset file="../org.eclipse.kura.core.cloud/target/org.eclipse.kura.core.cloud_${org.eclipse.kura.core.cloud.version}.v${kura.build.version}.jar"
+            <zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.core.cloud_${org.eclipse.kura.core.cloud.version}.jar"
                         prefix="kura-${build.name}-jars_${project.version}/kura/plugins" />
-            <zipfileset file="../org.eclipse.kura.core.comm/target/org.eclipse.kura.core.comm_${org.eclipse.kura.core.comm.version}.v${kura.build.version}.jar"
+            <zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.core.comm_${org.eclipse.kura.core.comm.version}.jar"
                         prefix="kura-${build.name}-jars_${project.version}/kura/plugins" />
-            <zipfileset file="../org.eclipse.kura.core.configuration/target/org.eclipse.kura.core.configuration_${org.eclipse.kura.core.configuration.version}.v${kura.build.version}.jar"
+            <zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.core.configuration_${org.eclipse.kura.core.configuration.version}.jar"
                         prefix="kura-${build.name}-jars_${project.version}/kura/plugins" />
-            <zipfileset file="../org.eclipse.kura.core.crypto/target/org.eclipse.kura.core.crypto_${org.eclipse.kura.core.crypto.version}.v${kura.build.version}.jar"
+            <zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.core.crypto_${org.eclipse.kura.core.crypto.version}.jar"
                         prefix="kura-${build.name}-jars_${project.version}/kura/plugins" />
-            <zipfileset file="../org.eclipse.kura.core.deployment/target/org.eclipse.kura.core.deployment_${org.eclipse.kura.core.deployment.version}.v${kura.build.version}.jar"
+            <zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.core.deployment_${org.eclipse.kura.core.deployment.version}.jar"
                         prefix="kura-${build.name}-jars_${project.version}/kura/plugins" />
-            <zipfileset file="../org.eclipse.kura.core.net/target/org.eclipse.kura.core.net_${org.eclipse.kura.core.net.version}.v${kura.build.version}.jar"
+            <zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.core.net_${org.eclipse.kura.core.net.version}.jar"
                         prefix="kura-${build.name}-jars_${project.version}/kura/plugins" />
-            <zipfileset file="../org.eclipse.kura.linux.clock/target/org.eclipse.kura.linux.clock_${org.eclipse.kura.linux.clock.version}.v${kura.build.version}.jar"
+            <zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.linux.clock_${org.eclipse.kura.linux.clock.version}.jar"
                         prefix="kura-${build.name}-jars_${project.version}/kura/plugins" />
-            <zipfileset file="../org.eclipse.kura.linux.command/target/org.eclipse.kura.linux.command_${org.eclipse.kura.linux.command.version}.v${kura.build.version}.jar"
+            <zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.linux.command_${org.eclipse.kura.linux.command.version}.jar"
                         prefix="kura-${build.name}-jars_${project.version}/kura/plugins" />
-            <zipfileset file="../org.eclipse.kura.linux.net/target/org.eclipse.kura.linux.net_${org.eclipse.kura.linux.net.version}.v${kura.build.version}.jar"
+            <zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.linux.net_${org.eclipse.kura.linux.net.version}.jar"
                         prefix="kura-${build.name}-jars_${project.version}/kura/plugins" />
-            <zipfileset file="../org.eclipse.kura.linux.position/target/org.eclipse.kura.linux.position_${org.eclipse.kura.linux.position.version}.v${kura.build.version}.jar"
+            <zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.linux.position_${org.eclipse.kura.linux.position.version}.jar"
                         prefix="kura-${build.name}-jars_${project.version}/kura/plugins" />
-            <zipfileset file="../org.eclipse.kura.linux.usb/target/org.eclipse.kura.linux.usb_${org.eclipse.kura.linux.usb.version}.v${kura.build.version}.jar"
+            <zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.linux.usb_${org.eclipse.kura.linux.usb.version}.jar"
                         prefix="kura-${build.name}-jars_${project.version}/kura/plugins" />
-            <zipfileset file="../org.eclipse.kura.linux.watchdog/target/org.eclipse.kura.linux.watchdog_${org.eclipse.kura.linux.watchdog.version}.v${kura.build.version}.jar"
+            <zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.linux.watchdog_${org.eclipse.kura.linux.watchdog.version}.jar"
                         prefix="kura-${build.name}-jars_${project.version}/kura/plugins" />
-            <zipfileset file="../org.eclipse.kura.emulator/target/org.eclipse.kura.linux_${org.eclipse.kura.linux.version}.v${kura.build.version}.jar"
+            <zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.linux_${org.eclipse.kura.linux.version}.jar"
                         prefix="kura-${build.name}-jars_${project.version}/kura/plugins" />
-            <zipfileset file="../org.eclipse.kura.net.admin/target/org.eclipse.kura.net.admin_${org.eclipse.kura.net.admin.version}.v${kura.build.version}.jar"
+            <zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.net.admin_${org.eclipse.kura.net.admin.version}.jar"
                         prefix="kura-${build.name}-jars_${project.version}/kura/plugins" />
         </zip>
 		<antcall target="web-jar" />
@@ -383,7 +383,7 @@ echo $KURA_PID > /var/run/kura.pid
 DeploymentPackage-SymbolicName: kura-upgrade
 DeploymentPackage-Version: ${deployment.package.version}
 
-Name: org.eclipse.kura.deployment.customizer.upgrade_${org.eclipse.kura.deployment.customizer.upgrade.version}.v${kura.build.version}.jar
+Name: org.eclipse.kura.deployment.customizer.upgrade_${org.eclipse.kura.deployment.customizer.upgrade.version}.jar
 Bundle-SymbolicName: org.eclipse.kura.deployment.customizer.upgrade
 Bundle-Version: 1.0.0.${kura.build.version}
 DeploymentPackage-Customizer: true
@@ -396,7 +396,7 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
         <!-- move everything into place -->
         <copy    file="${project.build.directory}/kura-${build.name}_${project.version}_upgrader.sh"
                  tofile="${project.build.directory}/kura-${build.name}-jars_${project.version}/dp_upgrade_stage/z_kura_dp_upgrader.sh" />
-		<copy    file="../org.eclipse.kura.deployment.customizer.upgrade/target/org.eclipse.kura.deployment.customizer.upgrade_${org.eclipse.kura.deployment.customizer.upgrade.version}.v${kura.build.version}.jar"
+		<copy    file="${project.build.directory}/plugins/org.eclipse.kura.deployment.customizer.upgrade_${org.eclipse.kura.deployment.customizer.upgrade.version}.jar"
                  todir="${project.build.directory}/kura-${build.name}-jars_${project.version}/dp_upgrade_stage" />
 
         <jar destfile="${project.build.directory}/kura-${build.name}_${project.version}_upgrader.dp"
@@ -409,13 +409,13 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
 	<target name="web-config" if="web.jar.present">
 		<propertyfile file="${project.build.directory}/kura-${build.name}-jars_${project.version}/config.ini">
             	<entry key="osgi.bundles" operation="+"
-                   value=", reference:file:/opt/eclipse/kura/kura/plugins/org.eclipse.kura.web_${org.eclipse.kura.web.version}.v${kura.build.version}.jar@4:start" />
+                   value=", reference:file:/opt/eclipse/kura/kura/plugins/org.eclipse.kura.web_${org.eclipse.kura.web.version}.jar@4:start" />
         </propertyfile>
 	</target>
 
 	<target name="web-jar" if="web.jar.present">
 		<zip destfile="${project.build.directory}/kura-${build.name}-jars_${project.version}.zip" update="true">
-			<zipfileset file="../org.eclipse.kura.web/target/org.eclipse.kura.web_${org.eclipse.kura.web.version}.v${kura.build.version}.jar"
+			<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.web_${org.eclipse.kura.web.version}.jar"
                         prefix="kura-${build.name}-jars_${project.version}/kura/plugins" />
 		</zip>
 	</target>

@@ -30,6 +30,7 @@
 		<kura.basedir>${project.parent.basedir}</kura.basedir>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<zip_workspace.prefix>user_workspace_archive_${project.version}</zip_workspace.prefix>
+		<kura.install.dir>/opt/eclipse</kura.install.dir>
 	</properties>
 
 	<repositories>
@@ -427,6 +428,7 @@
 										<property name="kura.os.version" value="debian" />
 										<property name="kura.arch" value="armv7_hf" />
 										<property name="kura.mem.size" value="256m" />
+										<property name="kura.install.dir" value="${kura.install.dir}" />
 										<ant antfile="${basedir}/src/main/ant/build_equinox_distrib.xml"
 											target="dist-linux" />
 									</target>
@@ -467,11 +469,11 @@
 								</goals>
 								<configuration>
 									<verbose>true</verbose>
-									<deb>${basedir}/target/kura-beaglebone_debian_${project.version}_armv7.deb</deb>
+									<deb>${basedir}/target/kura_${project.version}_beaglebone_debian_armv7.deb</deb>
 									<controlDir>${basedir}/src/main/deb/control</controlDir>
 									<dataSet>
 										<data>
-											<src>${basedir}/target/kura-beaglebone-jars_${project.version}.zip</src>
+											<src>${basedir}/target/kura_${project.version}_beaglebone.zip</src>
 											<type>file</type>
 											<mapper>
 												<type>perm</type>
@@ -557,6 +559,7 @@
 										<property name="kura.os.version" value="raspbian" />
 										<property name="kura.arch" value="armv6_hf" />
 										<property name="kura.mem.size" value="256m" />
+										<property name="kura.install.dir" value="${kura.install.dir}" />
 										<ant antfile="${basedir}/src/main/ant/build_equinox_distrib.xml"
 											target="dist-linux" />
 									</target>
@@ -587,11 +590,11 @@
 								</goals>
 								<configuration>
 									<verbose>true</verbose>
-									<deb>${basedir}/target/kura-raspberry-pi_${project.version}_armv6.deb</deb>
+									<deb>${basedir}/target/kura_${project.version}_raspberry-pi_armv6.deb</deb>
 									<controlDir>${basedir}/src/main/deb/control</controlDir>
 									<dataSet>
 										<data>
-											<src>${basedir}/target/kura-raspberry-pi-jars_${project.version}.zip</src>
+											<src>${basedir}/target/kura_${project.version}_raspberry-pi.zip</src>
 											<type>file</type>
 											<mapper>
 												<type>perm</type>

@@ -16,11 +16,12 @@ TARGET_DIR=$1
 INSTALL_ZIP=$2
 UPGRADE_ZIP=$3
 OLD_VERSION=$4
-INSTALL_DIR=$5
-REMOVE_LIST=$6
-KEEP_LIST=$7
-OUTPUT_NAME=$8
-BUILD_NAME=$9
+BASE_DIR=$5
+INSTALL_DIR=$6
+REMOVE_LIST=$7
+KEEP_LIST=$8
+OUTPUT_NAME=$9
+BUILD_NAME=${10}
 
 # Files that should NOT be included in an upgrade
 EXCLUDE_FILES=("kura/kura_custom.properties" "kura/dpa.properties" "data/kuranet.conf")  
@@ -57,7 +58,7 @@ sed "$EXCLUDE_SED" $REMOVE_LIST > $UPGRADE_REMOVE
 tar czvf $UPGRADE_ZIP.tar.gz $UPGRADE_ZIP $UPGRADE_REMOVE
 
 # Populate variables in extract script
-sed "s/^OLD_VERSION=$/OLD_VERSION=$OLD_VERSION/;s/^INSTALL_DIR=$/INSTALL_DIR=$INSTALL_DIR/;s/^REMOVE_LIST=$/REMOVE_LIST=$UPGRADE_REMOVE/" ../src/main/sh/extract_upgrade.sh > $TARGET_DIR/extract_upgrade.sh
+sed "s/^OLD_VERSION=.*/OLD_VERSION=$OLD_VERSION/;s|^BASE_DIR=.*|BASE_DIR=$BASE_DIR|;s/^INSTALL_DIR=.*/INSTALL_DIR=$INSTALL_DIR/;s/^REMOVE_LIST=.*/REMOVE_LIST=$UPGRADE_REMOVE/" ../src/main/sh/extract_upgrade.sh > $TARGET_DIR/extract_upgrade.sh
 
 cat extract_upgrade.sh $UPGRADE_ZIP.tar.gz > $OUTPUT_NAME
 chmod +x $OUTPUT_NAME

@@ -1,26 +1,31 @@
 #!/bin/bash
 
+INSTALL_DIR=[[kura.install.dir]]
+TIMESTAMP=`date +%Y%m%d%H%M%S`
+LOG=/tmp/kura_install_${TIMESTAMP}.log
+
 ##############################################
 # POST INSTALL SCRIPT
 ##############################################
-mkdir -p /opt/eclipse >> /tmp/kura_install.log 2>&1
-unzip /tmp/kura-*.zip -d /opt/eclipse >> /tmp/kura_install.log 2>&1
+mkdir -p ${INSTALL_DIR} >> ${LOG} 2>&1
+unzip /tmp/kura_*.zip -d ${INSTALL_DIR} >> ${LOG} 2>&1
 
 #install KURA files
-sh /opt/eclipse/kura-*/install/kura_install.sh >> /tmp/kura_install.log 2>&1
+sh ${INSTALL_DIR}/kura_*/install/kura_install.sh >> ${LOG} 2>&1
 
 #clean up
-rm -rf /opt/eclipse/kura/install >> /tmp/kura_install.log 2>&1
-rm /tmp/kura-*.zip >> /tmp/kura_install.log 2>&1
+rm -rf ${INSTALL_DIR}/kura/install >> ${LOG} 2>&1
+rm /tmp/kura_*.zip >> ${LOG} 2>&1
 
 #move the log file
-mv /tmp/kura_install.log /opt/eclipse/kura/kura/
+mkdir -p ${INSTALL_DIR}/kura/log
+mv ${LOG} ${INSTALL_DIR}/kura/log/
 
 #flush all cached filesystem to disk
 sync
 
 echo ""
-echo "Finished. KURA has been installed to /opt/eclipse/kura and will start automatically after a reboot"
+echo "Finished. KURA has been installed to ${INSTALL_DIR}/kura and will start automatically after a reboot"
 exit 0
 #############################################
 # END POST INSTALL SCRIPT

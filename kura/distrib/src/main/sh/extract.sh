@@ -11,54 +11,59 @@
 #   Eurotech
 #
 
+INSTALL_DIR=/opt/eclipse
+TIMESTAMP=`date +%Y%m%d%H%M%S`
+LOG=/tmp/kura_install_${TIMESTAMP}.log
 
 ##############################################
 # PRE-INSTALL SCRIPT
 ##############################################
 echo ""
 echo "Installing Kura..."
-echo "Installing Kura..." > /tmp/kura_install.log 2>&1
+echo "Installing Kura..." > $LOG 2>&1
 
 #Kill JVM and monit for installation
-killall monit java >> /tmp/kura_install.log 2>&1
+killall monit java >> $LOG 2>&1
 
 #remove old ESFv1 if present
-(rpm -ev `rpm -qa | grep -i -e esf -e denali -e eurotech -e dynacor -e reliagate -e helios -e duracor | grep -v atom | grep -v jvm`) >> /tmp/kura_install.log 2>&1
+(rpm -ev `rpm -qa | grep -i -e esf -e denali -e eurotech -e dynacor -e reliagate -e helios -e duracor | grep -v atom | grep -v jvm`) >> $LOG 2>&1
 
 #clean up old installation if present
-rm -fr /opt/eclipse/data >> /tmp/kura_install.log 2>&1
-rm -fr /opt/eclipse/esf* >> /tmp/kura_install.log 2>&1
-rm -fr /opt/eclipse/kura* >> /tmp/kura_install.log 2>&1
-rm -fr /tmp/.esf/ >> /tmp/kura_install.log 2>&1
-rm -fr /tmp/.kura/ >> /tmp/kura_install.log 2>&1
-rm /etc/init.d/firewall >> /tmp/kura_install.log 2>&1
-rm /etc/dhcpd-*.conf >> /tmp/kura_install.log 2>&1
-rm /etc/named.conf >> /tmp/kura_install.log 2>&1
-rm /etc/wpa_supplicant.conf >> /tmp/kura_install.log 2>&1
-rm /etc/hostapd.conf >> /tmp/kura_install.log 2>&1
-rm /tmp/coninfo-* >> /tmp/kura_install.log 2>&1
-rm /var/log/esf.log >> /tmp/kura_install.log 2>&1
-rm /var/log/kura.log >> /tmp/kura_install.log 2>&1
-rm -fr /etc/ppp/chat >> /tmp/kura_install.log 2>&1
-rm -fr /etc/ppp/peers >> /tmp/kura_install.log 2>&1
-rm -fr /etc/ppp/scripts >> /tmp/kura_install.log 2>&1
-rm /etc/ppp/*ap-secrets >> /tmp/kura_install.log 2>&1
-rm /etc/rc*.d/S*esf >> /tmp/kura_install.log 2>&1
-rm /etc/rc*.d/S*kura >> /tmp/kura_install.log 2>&1
-rm esf-*.zip >> /tmp/kura_install.log 2>&1
-rm kura-*.zip >> /tmp/kura_install.log 2>&1
+rm -fr /opt/eclipse/data >> $LOG 2>&1
+rm -fr /opt/eclipse/esf* >> $LOG 2>&1
+rm -fr /opt/eclipse/kura* >> $LOG 2>&1
+rm -fr ${INSTALL_DIR}/kura* >> $LOG 2>&1
+rm -fr /tmp/.esf/ >> $LOG 2>&1
+rm -fr /tmp/.kura/ >> $LOG 2>&1
+rm /etc/init.d/firewall >> $LOG 2>&1
+rm /etc/dhcpd-*.conf >> $LOG 2>&1
+rm /etc/named.conf >> $LOG 2>&1
+rm /etc/wpa_supplicant.conf >> $LOG 2>&1
+rm /etc/hostapd.conf >> $LOG 2>&1
+rm /tmp/coninfo-* >> $LOG 2>&1
+rm /var/log/esf.log >> $LOG 2>&1
+rm /var/log/kura.log >> $LOG 2>&1
+rm -fr /etc/ppp/chat >> $LOG 2>&1
+rm -fr /etc/ppp/peers >> $LOG 2>&1
+rm -fr /etc/ppp/scripts >> $LOG 2>&1
+rm /etc/ppp/*ap-secrets >> $LOG 2>&1
+rm /etc/rc*.d/S*esf >> $LOG 2>&1
+rm /etc/rc*.d/S*kura >> $LOG 2>&1
+rm esf-*.zip >> $LOG 2>&1
+rm kura-*.zip >> $LOG 2>&1
+rm kura_*.zip >> $LOG 2>&1
 
 #clean up and/or install OS specific stuff
 HOSTNAME=`hostname`
 if [ ${HOSTNAME} == "mini-gateway" ] ; then
 	#MGW specific items
-	mkdir /var/named >> /tmp/kura_install.log 2>&1
+	mkdir /var/named >> $LOG 2>&1
 
 	#remove ntpd
-	rm /etc/rc2.d/S20ntpd >> /tmp/kura_install.log 2>&1
-	rm /etc/rc3.d/S20ntpd >> /tmp/kura_install.log 2>&1
-	rm /etc/rc4.d/S20ntpd >> /tmp/kura_install.log 2>&1
-	rm /etc/rc5.d/S20ntpd >> /tmp/kura_install.log 2>&1
+	rm /etc/rc2.d/S20ntpd >> $LOG 2>&1
+	rm /etc/rc3.d/S20ntpd >> $LOG 2>&1
+	rm /etc/rc4.d/S20ntpd >> $LOG 2>&1
+	rm /etc/rc5.d/S20ntpd >> $LOG 2>&1
 fi
 
 echo ""
@@ -76,24 +81,26 @@ tail -n +$SKIP $0 | tar -xz
 ##############################################
 # POST INSTALL SCRIPT
 ##############################################
-mkdir -p /opt/eclipse >> /tmp/kura_install.log 2>&1
-unzip kura-*.zip -d /opt/eclipse >> /tmp/kura_install.log 2>&1
+mkdir -p ${INSTALL_DIR} >> $LOG 2>&1
+unzip kura_*.zip -d ${INSTALL_DIR} >> $LOG 2>&1
 
 #install Kura files
-sh /opt/eclipse/kura-*/install/kura_install.sh >> /tmp/kura_install.log 2>&1
+sed -i "s|^INSTALL_DIR=.*|INSTALL_DIR=${INSTALL_DIR}|" ${INSTALL_DIR}/kura_*/install/kura_install.sh
+sh ${INSTALL_DIR}/kura_*/install/kura_install.sh >> $LOG 2>&1
 
 #clean up
-rm -rf /opt/eclipse/kura/install >> /tmp/kura_install.log 2>&1
-rm kura-*.zip >> /tmp/kura_install.log 2>&1
+rm -rf ${INSTALL_DIR}/kura/install >> $LOG 2>&1
+rm kura_*.zip >> $LOG 2>&1
 
 #move the log file
-mv /tmp/kura_install.log /opt/eclipse/kura/kura/
+mkdir -p ${INSTALL_DIR}/kura/log
+mv $LOG ${INSTALL_DIR}/kura/log/
 
 #flush all cached filesystem to disk
 sync
 
 echo ""
-echo "Finished.  Kura has been installed to /opt/eclipse/kura and will start automatically after a reboot"
+echo "Finished.  Kura has been installed to ${INSTALL_DIR}/kura and will start automatically after a reboot"
 exit 0
 #############################################
 # END POST INSTALL SCRIPT

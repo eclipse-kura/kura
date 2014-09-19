@@ -9,7 +9,9 @@
 # Description:
 ### END INIT INFO
 
-kura=/opt/eclipse/kura/bin/start_kura_background.sh
+INSTALL_DIR=/opt/eclipse
+
+kura=${INSTALL_DIR}/kura/bin/start_kura_background.sh
 pidfile=/var/run/kura.pid
 kura_args=""
 

@@ -241,7 +241,6 @@ public class ExamplePublisher implements ConfigurableComponent, CloudClientListe
 		
 		// schedule a new worker based on the properties of the service
 		int pubrate = (Integer) m_properties.get(PUBLISH_RATE_PROP_NAME);
-		pubrate = 10 * 1000;
 		m_handle = m_worker.scheduleAtFixedRate(new Runnable() {		
 			@Override
 			public void run() {
@@ -269,8 +268,8 @@ public class ExamplePublisher implements ConfigurableComponent, CloudClientListe
 		KuraPayload payload = new KuraPayload();
 		
 		// Timestamp the message
-		//payload.setTimestamp(new Date());
-		/*
+		payload.setTimestamp(new Date());
+		
 		// Add the temperature as a metric to the payload
 		payload.addMetric("temperature", m_temperature);
 
@@ -295,8 +294,7 @@ public class ExamplePublisher implements ConfigurableComponent, CloudClientListe
 				payload.addMetric(metric, m_properties.get(metric));
 			}
 		}
-		*/
-		payload.addMetric("email", "david.woodard@eurotech.com");
+		
 		// Publish the message
 		try {
 			int messageId = m_cloudClient.publish(topic, payload, qos, retain);

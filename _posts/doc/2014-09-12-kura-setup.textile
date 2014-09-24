@@ -80,7 +80,7 @@ Otherwise, select an existing workspace and click *OK*.  After Eclipse is runnin
 
 h3. Importing Kura User Workspace
 
-To set up your Kura project workspace, you will need to download the ["Kura User Workspace archive":http://www.eclipse.org/downloads/download.php?file=/kura/releases/0.7.0/kura-raspberry-pi-jars_0.7.0.zip]
+To set up your Kura project workspace, you will need to download the ["Kura User Workspace archive":http://eclipse.org/kura/downloads.php]
 
 From the Eclipse File menu, select the *Import* option.  In the Import dialog box, expand the *General* heading, select *Existing Projects into Workspace*, and then click *Next*.
 

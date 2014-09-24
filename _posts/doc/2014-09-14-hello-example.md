@@ -62,7 +62,7 @@ In Eclipse, create a new Plug-in project by selecting **File | New |
 Project**. Select **Plug-in Development | Plug-in Project** and click
 **Next**.
 
-![](../../assets/images/hello_example/media/image1.png)
+![]({{ site.baseurl }}/assets/images/hello_example/media/image1.png)
 
 Your screen should display the New Plug-in Project dialog box as shown
 in the following screen capture. Enter your project a name, such as
@@ -72,12 +72,12 @@ selected and set the variable to **standard** as shown below. You can
 also (optionally) add projects to a working set. To continue, click
 **Next**.
 
-![](../../assets/images/hello_example/media/image2.png)
+![]({{ site.baseurl }}/assets/images/hello_example/media/image2.png)
 
 In the next New Plug-in Project menu (shown below), change the Name
 field to a descriptive name, such as “Hello World Example with Logger”.
 
-![](../../assets/images/hello_example/media/image3.png)
+![]({{ site.baseurl }}/assets/images/hello_example/media/image3.png)
 
 Also, verify that the Execution Environment list is set to match the
 Java JVM version running on the target device (**JavaSE-1.6** or
@@ -98,7 +98,7 @@ If the Open Associated Perspective pop-up window (shown below) appears
 for adding Plug-ins and Error Log views, select Yes or No depending on
 your development requirements.
 
-![](../../assets/images/hello_example/media/image4.png)
+![]({{ site.baseurl }}/assets/images/hello_example/media/image4.png)
 
 You should see the new project in the My Projects working set in the
 Package Explorer (or Project Explorer). Also, you will see the
@@ -114,13 +114,13 @@ dependencies. Click the **Dependencies** tab at the bottom of the editor
 screen and then click the **Automated Management of Dependencies**
 heading to expand it.
 
-![](../../assets/images/hello_example/media/image5.png)
+![]({{ site.baseurl }}/assets/images/hello_example/media/image5.png)
 
 Under Automated Management of Dependencies, click **Add**. In the Select
 a Plug-in field, enter **org.eclipse.osgi.services**. Select the plug-in
 name and click **OK**.
 
-![](../../assets/images/hello_example/media/image6.png)
+![]({{ site.baseurl }}/assets/images/hello_example/media/image6.png)
 
 Note that this operation is very much like adding standalone jars to the
 buildpath by including the ‘-cp’ argument to javac. However, in this
@@ -133,7 +133,7 @@ use the same procedure to add the following dependency:
 You should now see the list of dependencies. Save changes to the
 Manifest.
 
-![](../../assets/images/hello_example/media/image7.png)
+![]({{ site.baseurl }}/assets/images/hello_example/media/image7.png)
 
 Create Java Class
 -----------------
@@ -145,7 +145,7 @@ Source folder to **org.eclipse.kura.example.hello_osgi/src**. Set the
 Package field to **org.eclipse.kura.example.hello_osgi**, set the Name
 field to **HelloOsgi**, and then click **Finish**.
 
-![](../../assets/images/hello_example/media/image8.png)
+![]({{ site.baseurl }}/assets/images/hello_example/media/image8.png)
 
 Write the following code for the new class. You can copy and paste the
 code provided below into your newly created Java class file.
@@ -220,12 +220,12 @@ Because you added the “org.slf4j” to your dependency list, you will be
 prompted to choose one of two potential sources for importing the
 “Logger” class. Select **org.slf4j.Logger** and click **Finish**.
 
-![](../../assets/images/hello_example/media/image9.png)
+![]({{ site.baseurl }}/assets/images/hello_example/media/image9.png)
 
 Now the errors in the class should have been resolved. Save the
 HelloOsgi class.
 
-![](../../assets/images/hello_example/media/image10.png)
+![]({{ site.baseurl }}/assets/images/hello_example/media/image10.png)
 
 The complete set of code (with import statements) is shown below.
 
@@ -269,7 +269,7 @@ Click the **add dependencies** link to automatically add packages to the
 dependencies list based on the “import” statements in your example code.
 Save changes to the Manifest again.
 
-![](../../assets/images/hello_example/media/image11.png)
+![]({{ site.baseurl }}/assets/images/hello_example/media/image11.png)
 
 Create Component Class
 ----------------------
@@ -278,24 +278,24 @@ Right-click the example project and select **New | Other**. From the
 wizard, select **Plug-in Development | Component Definition** and click
 **Next**.
 
-![](../../assets/images/hello_example/media/image12.png)
+![]({{ site.baseurl }}/assets/images/hello_example/media/image12.png)
 
 In the Class field of the New Component Definition window shown below,
 click **Browse.**
 
-![](../../assets/images/hello_example/media/image13.png)
+![]({{ site.baseurl }}/assets/images/hello_example/media/image13.png)
 
 Enter the name of your newly created class in the Select entries field.
 In this case, type the word “hello”, and you will see a list of matching
 items. Select the **HelloOsgi** class and click **OK**.
 
-![](../../assets/images/hello_example/media/image14.png)
+![]({{ site.baseurl }}/assets/images/hello_example/media/image14.png)
 
 In the Enter or select the parent folder field of the New Component
 Definition window, add "/OSGI-INF" to the existing entry (e.g.,
 org.eclipse.kura.example.hello_osgi/OSGI-INF). Then click **Finish**.
 
-![](../../assets/images/hello_example/media/image15.png)
+![]({{ site.baseurl }}/assets/images/hello_example/media/image15.png)
 
 After the Component class has been created, it will open in the
 Workspace. In the Overview tab, the Name and Class point to our Java
@@ -304,7 +304,7 @@ field to **deactivate**. Doing so tells the component where these OSGi
 activation methods are located. Then save the Component class definition
 file.
 
-![](../../assets/images/hello_example/media/image16.png)
+![]({{ site.baseurl }}/assets/images/hello_example/media/image16.png)
 
 Deploying the Plug-in
 =====================
@@ -331,7 +331,7 @@ is equivalent to running javac on your project. From the wizard, select
 **Plug-in Development | Deployable plug-ins and fragments** and click
 **Next**.
 
-![](../../assets/images/hello_example/media/image17.png)
+![]({{ site.baseurl }}/assets/images/hello_example/media/image17.png)
 
 Under Available Plug-ins and Fragments of the Export window, ensure the
 newly created plug-in is selected. Under Destination, select the
@@ -344,7 +344,7 @@ saved.
 
 Click **Finish**.
 
-![](../../assets/images/hello_example/media/image18.png)
+![]({{ site.baseurl }}/assets/images/hello_example/media/image18.png)
 
 This will create a JAR file in the selected directory (e.g.,
 /home/joe/myPlugins/plugins/org.eclipse.kura.example.hello_osgi_1.0.0.jar).
@@ -364,18 +364,18 @@ Right-click the project and select **New | Folder**. Select the
 **org.eclipse.kura.example.hello_osgi** project and enter a folder
 named “resources”.
 
-![](../../assets/images/hello_example/media/image19.png)
+![]({{ site.baseurl }}/assets/images/hello_example/media/image19.png)
 
 Then repeat this step to create a folder named “dp” under the resources
 folder. The resources/dp folder will be used to store the Deployment
 Package.
 
-![](../../assets/images/hello_example/media/image20.png)
+![]({{ site.baseurl }}/assets/images/hello_example/media/image20.png)
 
 Select **File | New | Other**. Select **OSGi | Deployment Package
 Definition** and click **Next**.
 
-![](../../assets/images/hello_example/media/image21.png)
+![]({{ site.baseurl }}/assets/images/hello_example/media/image21.png)
 
 Ensure that the Target folder field of the New dpp file window is set to
 the **/*[project_name]*/resources/dp** folder. In the File name field,
@@ -383,14 +383,14 @@ enter the name for the new Deployment Package file to create, such as
 “hello_osgi”. A version number can also be entered in the Version
 field. Then click **Finish**.
 
-![](../../assets/images/hello_example/media/image22.png)
+![]({{ site.baseurl }}/assets/images/hello_example/media/image22.png)
 
 Under the resources/dp folder in your project, verify that the
 ***[filename]*.dpp** file was created. This is a Deployment Package
 Project that provides information needed to create the Deployment
 Package, such as its output directory, ant build file, etc.
 
-![](../../assets/images/hello_example/media/image23.png)
+![]({{ site.baseurl }}/assets/images/hello_example/media/image23.png)
 
 Select the **Bundles** tab and then click **New**. In the Bundle Path
 column, select the browse icon. Browse to either the bundle’s project
@@ -399,7 +399,7 @@ bundle’s JAR file [created earlier](#export-the-osgi-bundle). Select the
 file and click **Open**. Doing so should populate the remaining columns
 as needed.
 
-![](../../assets/images/hello_example/media/image24.png)
+![]({{ site.baseurl }}/assets/images/hello_example/media/image24.png)
 
 Save changes to the deployment package file.
 
@@ -408,7 +408,7 @@ In the resources/dp folder, right-click the **.dpp** file. Select
 directory. This is the final Deployment Package that can be installed on
 a remote target system.
 
-![](../../assets/images/hello_example/media/image25.png)
+![]({{ site.baseurl }}/assets/images/hello_example/media/image25.png)
 
 In conclusion, you were able to create a new bundle from scratch, write
 the Java code and Activator, modify the Manifest, and build the plug-in

@@ -18,12 +18,12 @@
   <parent>
     <artifactId>kura</artifactId>
     <groupId>org.eclipse.kura</groupId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.0.0</version>
     <relativePath>../pom_pom.xml</relativePath>
   </parent>
 
 	<artifactId>org.eclipse.kura.qa</artifactId>
-	<version>1.0.0-SNAPSHOT</version>
+	<version>1.0.0</version>
 	<name>org.eclipse.kura.qa</name>
 
 	<properties>
@@ -34,7 +34,7 @@
 		<dependency>
 			<groupId>org.eclipse.kura</groupId>
 			<artifactId>distrib</artifactId>
-			<version>1.0.0-SNAPSHOT</version>
+			<version>1.0.0</version>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>

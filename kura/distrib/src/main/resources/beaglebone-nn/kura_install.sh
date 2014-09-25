@@ -11,28 +11,29 @@
 #   Eurotech
 #
 
+INSTALL_DIR=/opt/eclipse
 
 #create known kura install location
-ln -sf /opt/eclipse/kura-* /opt/eclipse/kura
+ln -sf ${INSTALL_DIR}/kura_* ${INSTALL_DIR}/kura
 
 #set up Kura init
-cp /opt/eclipse/kura/install/kura.init.raspbian /etc/init.d/kura
+cp ${INSTALL_DIR}/kura/install/kura.init.raspbian /etc/init.d/kura
 chmod +x /etc/init.d/kura
-chmod +x /opt/eclipse/kura/bin/*.sh
+chmod +x ${INSTALL_DIR}/kura/bin/*.sh
 
-# set up /opt/eclipse/kura/recover_dflt_kura_config.sh
-cp /opt/eclipse/kura/install/recover_dflt_kura_config.sh /opt/eclipse/kura/recover_dflt_kura_config.sh
-chmod +x /opt/eclipse/kura/recover_dflt_kura_config.sh
-if [ ! -d /opt/eclipse/kura/.data ]; then
-    mkdir /opt/eclipse/kura/.data
+# set up ${INSTALL_DIR}/kura/recover_dflt_kura_config.sh
+cp ${INSTALL_DIR}/kura/install/recover_dflt_kura_config.sh ${INSTALL_DIR}/kura/recover_dflt_kura_config.sh
+chmod +x ${INSTALL_DIR}/kura/recover_dflt_kura_config.sh
+if [ ! -d ${INSTALL_DIR}/kura/.data ]; then
+    mkdir ${INSTALL_DIR}/kura/.data
 fi
-# for md5.info should keep the same order as in the /opt/eclipse/kura/recover_dflt_kura_config.sh
-echo `md5sum /opt/eclipse/kura/data/snapshots/snapshot_0.xml` > /opt/eclipse/kura/.data/md5.info
-tar czf /opt/eclipse/kura/.data/recover_dflt_kura_config.tgz /opt/eclipse/kura/data/snapshots/snapshot_0.xml
+# for md5.info should keep the same order as in the ${INSTALL_DIR}/kura/recover_dflt_kura_config.sh
+echo `md5sum ${INSTALL_DIR}/kura/data/snapshots/snapshot_0.xml` > ${INSTALL_DIR}/kura/.data/md5.info
+tar czf ${INSTALL_DIR}/kura/.data/recover_dflt_kura_config.tgz ${INSTALL_DIR}/kura/data/snapshots/snapshot_0.xml
 
 #set up runlevels to start/stop Kura by default
 update-rc.d kura defaults
 
 #set up logrotate - no need to restart as it is a cronjob
-cp /opt/eclipse/kura/install/logrotate.conf /etc/logrotate.conf
-cp /opt/eclipse/kura/install/kura.logrotate /etc/logrotate.d/kura
+cp ${INSTALL_DIR}/kura/install/logrotate.conf /etc/logrotate.conf
+cp ${INSTALL_DIR}/kura/install/kura.logrotate /etc/logrotate.d/kura

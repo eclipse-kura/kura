@@ -19,6 +19,7 @@ public enum TelitDe910AtCommands {
 	getSerialNumber("at#cgsn\r\n"),
 	getRevision("at+gmr\r\n"),
 	getSignalStrength("at+csq\r\n"),
+	getIMSI("at#cimi\r\n"),
 	getNetRegistrationStatus("at+creg?\r\n"), 
 	getMdn("at#modem=0?\r\n"),
 	getMsid("at#modem=1?\r\n"),

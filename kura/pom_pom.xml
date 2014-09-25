@@ -17,9 +17,20 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.eclipse.kura</groupId>
 	<artifactId>kura</artifactId>
-	<version>0.7.1</version>
+	<version>1.0.0</version>
 
 	<packaging>pom</packaging>
+
+	<properties>
+		<tycho-version>0.18.1</tycho-version>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8
+		</project.reporting.outputEncoding>
+		<maven.build.timestamp.format>yyyyMMddHHmm
+		</maven.build.timestamp.format>
+		<kura.basedir>${project.basedir}</kura.basedir>
+		<org.eclipse.kura.web.skip>true</org.eclipse.kura.web.skip>
+	</properties>
 
 	<profiles>
 		<profile>
@@ -33,6 +44,9 @@
 		</profile>
 		<profile>
 			<id>web</id>
+			<properties>
+				<org.eclipse.kura.web.skip>false</org.eclipse.kura.web.skip>
+			</properties>
 			<activation>
 				<activeByDefault>false</activeByDefault>
 			</activation>
@@ -42,16 +56,6 @@
 			</modules>
 		</profile>
 	</profiles>
-
-	<properties>
-		<tycho-version>0.18.1</tycho-version>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<project.reporting.outputEncoding>UTF-8
-		</project.reporting.outputEncoding>
-		<maven.build.timestamp.format>yyyyMMddHHmm
-		</maven.build.timestamp.format>
-		<kura.basedir>${project.basedir}</kura.basedir>
-	</properties>
 
 	<repositories>
 		<repository>
@@ -94,6 +98,7 @@
 					</execution>
 				</executions>
 			</plugin>
+<!-- 
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-antrun-plugin</artifactId>
@@ -115,6 +120,7 @@
 					</execution>
 				</executions>
 			</plugin>
+-->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-site-plugin</artifactId>

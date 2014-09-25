@@ -11,15 +11,16 @@
 #   Eurotech
 #
 
+INSTALL_DIR=/opt/eclipse
 
 #create known kura install location
-ln -sf /opt/eclipse/kura-* /opt/eclipse/kura
+ln -sf ${INSTALL_DIR}/kura_* ${INSTALL_DIR}/kura
 
 #set up Kura init
-cp /opt/eclipse/kura/install/kura.init.raspbian /etc/init.d/kura
+cp ${INSTALL_DIR}/kura/install/kura.init.raspbian /etc/init.d/kura
 chmod +x /etc/init.d/kura
-chmod +x /opt/eclipse/kura/bin/*.sh
+chmod +x ${INSTALL_DIR}/kura/bin/*.sh
 
 #set up logrotate - no need to restart as it is a cronjob
-cp /opt/eclipse/kura/install/logrotate.conf /etc/logrotate.conf
-cp /opt/eclipse/kura/install/kura.logrotate /etc/logrotate.d/kura
+cp ${INSTALL_DIR}/kura/install/logrotate.conf /etc/logrotate.conf
+cp ${INSTALL_DIR}/kura/install/kura.logrotate /etc/logrotate.d/kura

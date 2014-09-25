@@ -21,7 +21,7 @@ import org.osgi.service.event.Event;
 public class ClockEvent extends Event
 {
 	/** Topic of the ClockEvent */
-	public static final String CLOCK_EVENT_TOPIC = "org/ecliplse/kura/clock";
+	public static final String CLOCK_EVENT_TOPIC = "org/eclipse/kura/clock";
 	
 	public ClockEvent(Map<String, ?> properties) {
 		super(CLOCK_EVENT_TOPIC, properties);

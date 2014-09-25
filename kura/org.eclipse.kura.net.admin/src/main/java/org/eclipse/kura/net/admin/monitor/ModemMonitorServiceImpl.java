@@ -61,6 +61,7 @@ import org.eclipse.kura.net.modem.ModemInterface;
 import org.eclipse.kura.net.modem.ModemManagerService;
 import org.eclipse.kura.net.modem.ModemMonitorListener;
 import org.eclipse.kura.net.modem.ModemMonitorService;
+import org.eclipse.kura.net.modem.ModemReadyEvent;
 import org.eclipse.kura.net.modem.ModemRemovedEvent;
 import org.eclipse.kura.net.modem.ModemTechnologyType;
 import org.eclipse.kura.net.modem.SerialModemDevice;
@@ -521,6 +522,17 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 					platform = m_systemService.getPlatform();
 				}
 				CellularModem modem = modemFactoryService.obtainCellularModemService(modemDevice, platform);
+				
+				try {
+					HashMap<String, String> modemInfoMap = new HashMap<String, String>();
+					modemInfoMap.put(ModemReadyEvent.IMEI, modem.getSerialNumber());
+					modemInfoMap.put(ModemReadyEvent.IMSI, modem.getMobileSubscriberIdentity());
+					modemInfoMap.put(ModemReadyEvent.ICCID, modem.getIntegratedCirquitCardId());
+					s_logger.info("posting ModemReadyEvent on topic {}", ModemReadyEvent.MODEM_EVENT_READY_TOPIC);
+					m_eventAdmin.postEvent(new ModemReadyEvent(modemInfoMap));
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 				
 				String ifaceName = m_networkService.getModemPppPort(modemDevice);
 				List<NetConfig> netConfigs = null;

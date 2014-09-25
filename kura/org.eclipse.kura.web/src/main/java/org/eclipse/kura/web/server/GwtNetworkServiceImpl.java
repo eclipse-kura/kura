@@ -142,7 +142,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 				} else if (netIfConfig.getType() == NetInterfaceType.MODEM) {
 					gwtNetConfig = new GwtModemInterfaceConfig();
 					((GwtModemInterfaceConfig)gwtNetConfig).setModemId(((ModemInterface)netIfConfig).getModemIdentifier());
-                    ((GwtModemInterfaceConfig)gwtNetConfig).setHwSerial(((ModemInterface)netIfConfig).getSerialNumber());
+                    //((GwtModemInterfaceConfig)gwtNetConfig).setHwSerial(((ModemInterface)netIfConfig).getSerialNumber());
                     ((GwtModemInterfaceConfig)gwtNetConfig).setManufacturer(((ModemInterface)netIfConfig).getManufacturer());
                     ((GwtModemInterfaceConfig)gwtNetConfig).setModel(((ModemInterface)netIfConfig).getModel());
                     ((GwtModemInterfaceConfig)gwtNetConfig).setGpsSupported(((ModemInterface)netIfConfig).isGpsSupported());
@@ -460,7 +460,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 									ModemConfig modemConfig = (ModemConfig) netConfig;									
 									GwtModemInterfaceConfig gwtModemConfig = (GwtModemInterfaceConfig) gwtNetConfig;
 									
-									gwtModemConfig.setHwSerial(((ModemInterface)netIfConfig).getSerialNumber());
+									//gwtModemConfig.setHwSerial(((ModemInterface)netIfConfig).getSerialNumber());
 									
 									if (modemManagerService != null) {
 										UsbDevice usbDevice = netIfConfig.getUsbDevice();
@@ -481,6 +481,14 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 										if (modemServiceId != null) {
 					                    	CellularModem cellModemService = modemManagerService.getModemService(modemServiceId); 
 					                    	if (cellModemService != null) { 
+					                    		
+					                    		try {
+					                    			String imei = cellModemService.getSerialNumber();
+					                    			s_logger.debug("Setting IMEI/MEID to {}", imei);
+					                    			gwtModemConfig.setHwSerial(imei);
+					                    		} catch (KuraException e) {
+					                    			e.printStackTrace();
+					                    		}
 					                    		try {
 						                    		int rssi = cellModemService.getSignalStrength();
 						                    		s_logger.debug("Setting Received Signal Strength to {}", rssi);

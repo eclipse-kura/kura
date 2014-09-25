@@ -28,12 +28,10 @@ import java.util.Properties;
 import org.eclipse.kura.KuraConnectionStatus;
 import org.eclipse.kura.comm.CommConnection;
 import org.eclipse.kura.comm.CommURI;
-import org.eclipse.kura.position.NmeaPosition;
 import org.eclipse.kura.usb.UsbService;
 import org.eclipse.kura.usb.UsbTtyDevice;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.io.ConnectionFactory;
-import org.osgi.util.position.Position;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,10 +57,9 @@ public class ModbusProtocolDevice implements ModbusProtocolDeviceService {
 	private String unitName = 	PROTOCOL_NAME;
 	private int 				m_respTout;
 	private int 				m_txMode;
-	private int 				m_unitAddr;
 	private boolean				m_serial485 = false;
-	private boolean 			m_protConfigd = false;
 	private boolean 			m_connConfigd = false;
+	private boolean 			m_protConfigd = false;
 	private String 				m_connType = null;
 	private Communicate 		m_comm;
 	private static Properties 	m_modbusProperties=null;
@@ -124,55 +121,14 @@ public class ModbusProtocolDevice implements ModbusProtocolDeviceService {
 	protected void deactivate(ComponentContext componentContext) 
 	{
 		s_logger.info("deactivate...");
-		disconnect();
+		try {
+			disconnect();
+		} catch (ModbusProtocolException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
-	/**
-	 * modbus protocol configuration. Required properties for the modbus
-	 * protocol configuration are:
-	 * <table border="1">
-	 * <tr>
-	 * <th>Key</th><th>Description</th>
-	 * </tr>
-	 * <tr>
-	 * <td>unitName</td><td>Name to be returned by toString</td>
-	 * </tr>
-	 * <tr>
-	 * <td>unitAddress</td><td>Modbus address of the unit (1-255) </td>
-	 * </tr>
-	 * <tr>
-	 * <td>txMode</td><td>Must be set to "RTU" or "ASCII"</td>
-	 * </tr>
-	 * <tr>
-	 * <td>respTimeout</td><td>maximum time, in milliseconds, to wait for a
-	 * response to a command </td>
-	 * </tr>
-	 * </table>
-	 */
-	public void configureProtocol(Properties protocolConfig)
-			throws ModbusProtocolException {
-		String unitAddress;
-		String txMode;
-		String respTimeout;
-
-		if ((m_protConfigd)
-				|| ((unitName = protocolConfig.getProperty("unitName")) == null)
-				|| ((unitAddress = protocolConfig.getProperty("unitAddress")) == null)
-				|| ((txMode = protocolConfig.getProperty("txMode")) == null)
-				|| ((respTimeout = protocolConfig.getProperty("respTimeout")) == null))
-			throw new ModbusProtocolException(ModbusProtocolErrorCode.INVALID_CONFIGURATION);
-		m_unitAddr = Integer.parseInt(unitAddress);
-		if ((m_unitAddr < 1) || (m_unitAddr > 255))
-			throw new ModbusProtocolException(ModbusProtocolErrorCode.INVALID_CONFIGURATION);
-		if(txMode.equals(ModbusTransmissionMode.RTU)) m_txMode = ModbusTransmissionMode.RTU_MODE;
-		else if(txMode.equals(ModbusTransmissionMode.ASCII)) m_txMode = ModbusTransmissionMode.ASCII_MODE;
-		else throw new ModbusProtocolException(ModbusProtocolErrorCode.INVALID_CONFIGURATION); 
-		m_respTout = Integer.parseInt(respTimeout);
-		if (m_respTout < 0)
-			throw new ModbusProtocolException(ModbusProtocolErrorCode.INVALID_CONFIGURATION);
-		m_protConfigd = true;
-	}
-
 	/**
 	 * two connection types are available, PROTOCOL_CONNECTION_TYPE_SERIAL (SERIAL MODE 232 or 485)
 	 * and
@@ -251,6 +207,20 @@ public class ModbusProtocolDevice implements ModbusProtocolDeviceService {
 
 		m_modbusProperties=connectionConfig;
 		
+		String txMode;
+		String respTimeout;
+		if ((m_protConfigd)
+				|| ((txMode = connectionConfig.getProperty("transmissionMode")) == null)
+				|| ((respTimeout = connectionConfig.getProperty("respTimeout")) == null))
+			throw new ModbusProtocolException(ModbusProtocolErrorCode.INVALID_CONFIGURATION);
+		if(txMode.equals(ModbusTransmissionMode.RTU)) m_txMode = ModbusTransmissionMode.RTU_MODE;
+		else if(txMode.equals(ModbusTransmissionMode.ASCII)) m_txMode = ModbusTransmissionMode.ASCII_MODE;
+		else throw new ModbusProtocolException(ModbusProtocolErrorCode.INVALID_CONFIGURATION); 
+		m_respTout = Integer.parseInt(respTimeout);
+		if (m_respTout < 0)
+			throw new ModbusProtocolException(ModbusProtocolErrorCode.INVALID_CONFIGURATION);
+		m_protConfigd = true;
+
 		if (m_connConfigd) {
 			m_comm.disconnect();
 			m_comm = null;
@@ -271,15 +241,6 @@ public class ModbusProtocolDevice implements ModbusProtocolDeviceService {
 	}
 
 	/**
-	 * get the unit name registered for this instance
-	 * 
-	 * @return unitName
-	 */
-	public String toString() {
-		return unitName;
-	}
-
-	/**
 	 * get the name "modbus" for this protocol
 	 * 
 	 * @return "modbus"
@@ -288,22 +249,13 @@ public class ModbusProtocolDevice implements ModbusProtocolDeviceService {
 		return "modbus";
 	}
 
-	/**
-	 * Modbus unit addresses must always be in the range of 1-255
-	 * 
-	 * @return unit address (1-255) as a string
-	 */
-	public String getUnitAddress() {
-		return String.valueOf(m_unitAddr);
-	}
-
 	public void connect() throws ModbusProtocolException {
 		if (!m_connConfigd)
 			throw new ModbusProtocolException(ModbusProtocolErrorCode.INVALID_CONFIGURATION);
 		m_comm.connect();
 	}
 
-	public void disconnect() {
+	public void disconnect() throws ModbusProtocolException {
 		if (m_connConfigd){
 			m_comm.disconnect();
 			m_comm = null;
@@ -326,7 +278,7 @@ public class ModbusProtocolDevice implements ModbusProtocolDeviceService {
 	abstract private class Communicate {
 		abstract public void connect();
 
-		abstract public void disconnect();
+		abstract public void disconnect() throws ModbusProtocolException;
 
 		abstract public int getConnectStatus();
 
@@ -562,14 +514,13 @@ public class ModbusProtocolDevice implements ModbusProtocolDeviceService {
 			 */
 		}
 
-		public void disconnect() {
+		public void disconnect() throws ModbusProtocolException {
 			if (conn!=null) {
 				try {
 					conn.close();
 					s_logger.debug("Serial connection closed");
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					throw new ModbusProtocolException(ModbusProtocolErrorCode.TRANSACTION_FAILURE,e.getMessage());
 				}
 				conn = null;
 			}
@@ -578,8 +529,7 @@ public class ModbusProtocolDevice implements ModbusProtocolDeviceService {
 					try {
 						gpioModeSwitch.close();
 					} catch (IOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
+						throw new ModbusProtocolException(ModbusProtocolErrorCode.TRANSACTION_FAILURE,e.getMessage());
 					}
 				}
 			}
@@ -1009,20 +959,8 @@ public class ModbusProtocolDevice implements ModbusProtocolDeviceService {
 			}
 		}
 	}
-
-	@Override
-	public Position getPosition() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public NmeaPosition getNmeaPosition() {
-		// TODO Auto-generated method stub
-		return null;
-	}
 	
-	public boolean[] readCoils(int dataAddress, int count)
+	public boolean[] readCoils(int unitAddr, int dataAddress, int count)
 			throws ModbusProtocolException {
 		if (!m_connConfigd)
 			throw new ModbusProtocolException(ModbusProtocolErrorCode.NOT_CONNECTED);
@@ -1035,7 +973,7 @@ public class ModbusProtocolDevice implements ModbusProtocolDeviceService {
 		 * construct the command issue and get results
 		 */
 		byte[] cmd = new byte[6];
-		cmd[0] = (byte) m_unitAddr;
+		cmd[0] = (byte) unitAddr;
 		cmd[1] = (byte) ModbusFunctionCodes.READ_COIL_STATUS;
 		cmd[2] = (byte) (dataAddress / 256);
 		cmd[3] = (byte) (dataAddress % 256);
@@ -1073,7 +1011,7 @@ public class ModbusProtocolDevice implements ModbusProtocolDeviceService {
 		return ret;
 	}
 
-	public boolean[] readDiscreteInputs(int dataAddress, int count)
+	public boolean[] readDiscreteInputs(int unitAddr, int dataAddress, int count)
 			throws ModbusProtocolException {
 		if (!m_connConfigd)
 			throw new ModbusProtocolException(ModbusProtocolErrorCode.NOT_CONNECTED);
@@ -1086,7 +1024,7 @@ public class ModbusProtocolDevice implements ModbusProtocolDeviceService {
 		 * construct the command issue and get results
 		 */
 		byte[] cmd = new byte[6];
-		cmd[0] = (byte) m_unitAddr;
+		cmd[0] = (byte) unitAddr;
 		cmd[1] = (byte) ModbusFunctionCodes.READ_INPUT_STATUS;
 		cmd[2] = (byte) (dataAddress / 256);
 		cmd[3] = (byte) (dataAddress % 256);
@@ -1124,7 +1062,7 @@ public class ModbusProtocolDevice implements ModbusProtocolDeviceService {
 		return ret;
 	}
 
-	public void writeSingleCoil(int dataAddress, boolean data)
+	public void writeSingleCoil(int unitAddr, int dataAddress, boolean data)
 			throws ModbusProtocolException{
 		if (!m_connConfigd)
 			throw new ModbusProtocolException(ModbusProtocolErrorCode.NOT_CONNECTED);
@@ -1132,7 +1070,7 @@ public class ModbusProtocolDevice implements ModbusProtocolDeviceService {
 		byte[] resp;
 
 		byte[] cmd = new byte[6];
-		cmd[0] = (byte) m_unitAddr;
+		cmd[0] = (byte) unitAddr;
 		cmd[1] = ModbusFunctionCodes.FORCE_SINGLE_COIL;
 		cmd[2] = (byte) (dataAddress / 256);
 		cmd[3] = (byte) (dataAddress % 256);
@@ -1155,7 +1093,7 @@ public class ModbusProtocolDevice implements ModbusProtocolDeviceService {
 
 	}
 
-	public void writeMultipleCoils(int dataAddress, boolean[] data)
+	public void writeMultipleCoils(int unitAddr, int dataAddress, boolean[] data)
 			throws ModbusProtocolException{
 		if (!m_connConfigd)
 			throw new ModbusProtocolException(ModbusProtocolErrorCode.NOT_CONNECTED);
@@ -1171,7 +1109,7 @@ public class ModbusProtocolDevice implements ModbusProtocolDeviceService {
 		 */
 		int dataLength = (localCnt + 7) / 8;
 		byte[] cmd = new byte[dataLength + 7];
-		cmd[0] = (byte) m_unitAddr;
+		cmd[0] = (byte) unitAddr;
 		cmd[1] = ModbusFunctionCodes.FORCE_MULTIPLE_COILS;
 		cmd[2] = (byte) (dataAddress / 256);
 		cmd[3] = (byte) (dataAddress % 256);
@@ -1210,7 +1148,7 @@ public class ModbusProtocolDevice implements ModbusProtocolDeviceService {
 				throw new ModbusProtocolException(ModbusProtocolErrorCode.INVALID_DATA_TYPE);
 	}
 
-	public int[] readHoldingRegisters(int dataAddress, int count)
+	public int[] readHoldingRegisters(int unitAddr, int dataAddress, int count)
 			throws ModbusProtocolException {
 		if (!m_connConfigd)
 			throw new ModbusProtocolException(ModbusProtocolErrorCode.NOT_CONNECTED);
@@ -1224,7 +1162,7 @@ public class ModbusProtocolDevice implements ModbusProtocolDeviceService {
 		 * away at index and then incrementing index for the next command
 		 */
 		byte[] cmd = new byte[6];
-		cmd[0] = (byte) m_unitAddr;
+		cmd[0] = (byte) unitAddr;
 		cmd[1] = (byte) ModbusFunctionCodes.READ_HOLDING_REGS;
 		cmd[2] = (byte) (dataAddress / 256);
 		cmd[3] = (byte) (dataAddress % 256);
@@ -1259,7 +1197,7 @@ public class ModbusProtocolDevice implements ModbusProtocolDeviceService {
 		return ret;
 	}
 
-	public int[] readInputRegisters(int dataAddress, int count)
+	public int[] readInputRegisters(int unitAddr, int dataAddress, int count)
 			throws ModbusProtocolException {
 		if (!m_connConfigd)
 			throw new ModbusProtocolException(ModbusProtocolErrorCode.NOT_CONNECTED);
@@ -1273,7 +1211,7 @@ public class ModbusProtocolDevice implements ModbusProtocolDeviceService {
 		 * away at index and then incrementing index for the next command
 		 */
 		byte[] cmd = new byte[6];
-		cmd[0] = (byte) m_unitAddr;
+		cmd[0] = (byte) unitAddr;
 		cmd[1] = (byte) ModbusFunctionCodes.READ_INPUT_REGS;
 		cmd[2] = (byte) (dataAddress / 256);
 		cmd[3] = (byte) (dataAddress % 256);
@@ -1308,13 +1246,13 @@ public class ModbusProtocolDevice implements ModbusProtocolDeviceService {
 		return ret;
 	}
 
-	public void writeSingleRegister(int dataAddress, int data)
+	public void writeSingleRegister(int unitAddr, int dataAddress, int data)
 			throws ModbusProtocolException{
 		if (!m_connConfigd)
 			throw new ModbusProtocolException(ModbusProtocolErrorCode.NOT_CONNECTED);
 
 		byte[] cmd = new byte[6];
-		cmd[0] = (byte) m_unitAddr;
+		cmd[0] = (byte) unitAddr;
 		cmd[1] = ModbusFunctionCodes.PRESET_SINGLE_REG;
 		cmd[2] = (byte) (dataAddress / 256);
 		cmd[3] = (byte) (dataAddress % 256);
@@ -1336,7 +1274,7 @@ public class ModbusProtocolDevice implements ModbusProtocolDeviceService {
 				throw new ModbusProtocolException(ModbusProtocolErrorCode.INVALID_DATA_TYPE);
 	}
 
-	public void writeMultipleRegister(int dataAddress, int[] data)
+	public void writeMultipleRegister(int unitAddr, int dataAddress, int[] data)
 			throws ModbusProtocolException{
 		if (!m_connConfigd)
 			throw new ModbusProtocolException(ModbusProtocolErrorCode.NOT_CONNECTED);
@@ -1347,7 +1285,7 @@ public class ModbusProtocolDevice implements ModbusProtocolDeviceService {
 		 */
 		int dataLength = localCnt * 2;
 		byte[] cmd = new byte[dataLength + 7];
-		cmd[0] = (byte) m_unitAddr;
+		cmd[0] = (byte) unitAddr;
 		cmd[1] = ModbusFunctionCodes.PRESET_MULTIPLE_REGS;
 		cmd[2] = (byte) (dataAddress / 256);
 		cmd[3] = (byte) (dataAddress % 256);
@@ -1380,7 +1318,7 @@ public class ModbusProtocolDevice implements ModbusProtocolDeviceService {
 				throw new ModbusProtocolException(ModbusProtocolErrorCode.INVALID_DATA_TYPE);
 	}
 
-	public boolean[] readExceptionStatus()
+	public boolean[] readExceptionStatus(int unitAddr)
 			throws ModbusProtocolException {
 		if (!m_connConfigd)
 			throw new ModbusProtocolException(ModbusProtocolErrorCode.NOT_CONNECTED);
@@ -1393,7 +1331,7 @@ public class ModbusProtocolDevice implements ModbusProtocolDeviceService {
 		 * construct the command issue and get results
 		 */
 		byte[] cmd = new byte[2];
-		cmd[0] = (byte) m_unitAddr;
+		cmd[0] = (byte) unitAddr;
 		cmd[1] = (byte) ModbusFunctionCodes.READ_EXCEPTION_STATUS;
 
 		/*
@@ -1422,7 +1360,7 @@ public class ModbusProtocolDevice implements ModbusProtocolDeviceService {
 		return ret;
 	}
 	
-	public ModbusCommEvent getCommEventCounter()
+	public ModbusCommEvent getCommEventCounter(int unitAddr)
 			throws ModbusProtocolException {
 		ModbusCommEvent mce = new ModbusCommEvent();
 		if (!m_connConfigd)
@@ -1432,7 +1370,7 @@ public class ModbusProtocolDevice implements ModbusProtocolDeviceService {
 		 * construct the command issue and get results
 		 */
 		byte[] cmd = new byte[2];
-		cmd[0] = (byte) m_unitAddr;
+		cmd[0] = (byte) unitAddr;
 		cmd[1] = (byte) ModbusFunctionCodes.GET_COMM_EVENT_COUNTER;
 
 		/*
@@ -1458,7 +1396,7 @@ public class ModbusProtocolDevice implements ModbusProtocolDeviceService {
 		return mce;
 	}
 
-	public ModbusCommEvent getCommEventLog()
+	public ModbusCommEvent getCommEventLog(int unitAddr)
 			throws ModbusProtocolException {
 		ModbusCommEvent mce = new ModbusCommEvent();
 		if (!m_connConfigd)
@@ -1468,7 +1406,7 @@ public class ModbusProtocolDevice implements ModbusProtocolDeviceService {
 		 * construct the command issue and get results
 		 */
 		byte[] cmd = new byte[2];
-		cmd[0] = (byte) m_unitAddr;
+		cmd[0] = (byte) unitAddr;
 		cmd[1] = (byte) ModbusFunctionCodes.GET_COMM_EVENT_LOG;
 
 		/*

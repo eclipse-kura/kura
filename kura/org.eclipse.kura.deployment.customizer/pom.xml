@@ -19,12 +19,12 @@
 	<parent>
 		<groupId>org.eclipse.kura</groupId>
 		<artifactId>kura</artifactId>
-		<version>0.7.1</version>
+		<version>1.0.0</version>
 		<relativePath>../manifest_pom.xml</relativePath>
 	</parent>
 
 	<artifactId>org.eclipse.kura.deployment.customizer</artifactId>
-	<version>0.7.1</version>
+	<version>1.0.0</version>
 	<packaging>eclipse-plugin</packaging>
 
 	<properties>

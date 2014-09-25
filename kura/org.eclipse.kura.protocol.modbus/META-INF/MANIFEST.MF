@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: org.eclipse.kura.protocol.modbus
 Bundle-SymbolicName: org.eclipse.kura.protocol.modbus;singleton:=true
-Bundle-Version: 0.7.1
+Bundle-Version: 1.0.0
 Bundle-Vendor: EUROTECH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: org.eclipse.kura; version="[0.2,1.0)",
@@ -26,5 +26,8 @@ Import-Package: org.eclipse.kura; version="[0.2,1.0)",
 Export-Package: org.eclipse.kura.protocol.modbus; version="0.2.0"
 Service-Component: OSGI-INF/*.xml
 Bundle-ActivationPolicy: lazy
-Bundle-Classpath: .
+Bundle-Classpath: .,
+ ../target-definition/equinox_3.8.1/repository/plugins/org.eclipse.equinox.io_1.0.400.v20120522-2049.jar
+
+
 

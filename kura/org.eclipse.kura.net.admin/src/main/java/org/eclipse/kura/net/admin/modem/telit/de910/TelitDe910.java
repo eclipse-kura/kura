@@ -48,7 +48,8 @@ public class TelitDe910 implements EvdoCellularModem {
 	private ModemTechnologyType m_technologyType = null;
 	private String m_model = null;
 	private String m_manufacturer = null;
-	private String m_esn = null;
+	private String m_serialNumber = null;
+	private String m_imsi;
 	private String m_revisionId = null;
 	
 	private Object m_atLock = null; 
@@ -131,7 +132,7 @@ public class TelitDe910 implements EvdoCellularModem {
 	@Override
 	public String getSerialNumber() throws KuraException {
 		synchronized (m_atLock) {
-	    	if (m_esn == null) {
+	    	if (m_serialNumber == null) {
 	    		s_logger.debug("sendCommand getSerialNumber :: " + TelitDe910AtCommands.getSerialNumber.getCommand());
 	    		byte[] reply = null;
 	    		CommConnection commAtConnection = openSerialPort(getAtPort());
@@ -152,12 +153,49 @@ public class TelitDe910 implements EvdoCellularModem {
 				    	if (serialNum.startsWith("#CGSN:")) {
 				    		serialNum = serialNum.substring("#CGSN:".length()).trim();
 				    	}
-				    	m_esn = serialNum;        
+				    	m_serialNumber = serialNum;        
 				    }
 				}
 	    	}
     	}
-        return m_esn;
+        return m_serialNumber;
+	}
+	
+	@Override
+	public String getMobileSubscriberIdentity() throws KuraException {
+		synchronized (m_atLock) {
+	    	if (m_imsi == null) {
+	    		s_logger.debug("sendCommand getIMSI :: " + TelitHe910AtCommands.getIMSI.getCommand());
+	    		byte[] reply = null;
+	    		CommConnection commAtConnection = openSerialPort(getAtPort());
+	    		if (!isAtReachable(commAtConnection)) {
+	    			closeSerialPort(commAtConnection);
+		    		throw new KuraException(KuraErrorCode.NOT_CONNECTED, "Modem not available for AT commands: " + TelitHe910.class.getName());
+		    	}
+				try {
+					reply = commAtConnection.sendCommand(TelitHe910AtCommands.getIMSI.getCommand().getBytes(), 1000, 100);
+				} catch (IOException e) {
+					closeSerialPort(commAtConnection);
+					throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+				}
+				closeSerialPort(commAtConnection);
+				if (reply != null) {
+				    String imsi = getResponseString(reply);
+				    if(imsi != null && !imsi.isEmpty()) {
+				    	if (imsi.startsWith("#CIMI:")) {
+				    		imsi = imsi.substring("#CIMI:".length()).trim();
+				    	}
+				    	m_imsi = imsi;        
+				    }
+				}
+	    	}
+    	}
+        return m_imsi;
+	}
+
+	@Override
+	public String getIntegratedCirquitCardId() throws KuraException {
+		return "";
 	}
 
 	@Override

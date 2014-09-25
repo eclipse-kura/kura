@@ -48,6 +48,7 @@ public class ModbusManager implements ConfigurableComponent, CriticalComponent, 
 	private CloudClient 				m_cloudAppClient=null;
 	private WatchdogService		   		m_watchdogService;
 
+	private int slaveAddr;
 	private int pollInterval;	//milliseconds
 	private int publishInterval;	//seconds
 	private boolean initLeds;
@@ -105,6 +106,7 @@ public class ModbusManager implements ConfigurableComponent, CriticalComponent, 
 		modbusProperties = getModbusProperties();
 		pollInterval = Integer.valueOf(modbusProperties.getProperty("pollInterval")).intValue();
 		publishInterval = Integer.valueOf(modbusProperties.getProperty("publishInterval")).intValue();
+		slaveAddr = Integer.valueOf(modbusProperties.getProperty("slaveAddr")).intValue();
 		
 		m_threadShouldStop=false;
 		m_thread = new Thread(new Runnable() {		
@@ -133,7 +135,12 @@ public class ModbusManager implements ConfigurableComponent, CriticalComponent, 
 		s_logger.info("Modbus polling thread killed");
 		
 		if(m_protocolDevice!=null)
-			m_protocolDevice.disconnect();
+			try {
+				m_protocolDevice.disconnect();
+			} catch (ModbusProtocolException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		doConnection=true;
 		configured = false;
 	}
@@ -145,6 +152,7 @@ public class ModbusManager implements ConfigurableComponent, CriticalComponent, 
 		modbusProperties = getModbusProperties();
 		pollInterval = Integer.valueOf(modbusProperties.getProperty("pollInterval")).intValue();
 		publishInterval = Integer.valueOf(modbusProperties.getProperty("publishInterval")).intValue();
+		slaveAddr = Integer.valueOf(modbusProperties.getProperty("slaveAddr")).intValue();
 		configured=false;
 	}	
 	
@@ -268,7 +276,6 @@ public class ModbusManager implements ConfigurableComponent, CriticalComponent, 
 		if(m_protocolDevice!=null){
 			m_protocolDevice.disconnect();
 
-			m_protocolDevice.configureProtocol(getProtocolProperties());
 			m_protocolDevice.configureConnection(modbusProperties);
 
 			configured = true;
@@ -291,6 +298,12 @@ public class ModbusManager implements ConfigurableComponent, CriticalComponent, 
 			String ipAddress = null;
 			String pollInt= null;
 			String pubInt= null;
+			String Slave= null;
+			String Mode= null;
+			String timeout= null;
+			if(m_properties.get("slaveAddr") != null) Slave 		= (String) m_properties.get("slaveAddr");
+			if(m_properties.get("transmissionMode") != null) Mode	= (String) m_properties.get("transmissionMode");
+			if(m_properties.get("respTimeout") != null) timeout		= (String) m_properties.get("respTimeout");
 			if(m_properties.get("port") != null) portName 			= (String) m_properties.get("port");
 			if(m_properties.get("serialMode") != null) serialMode 	= (String) m_properties.get("serialMode");
 			if(m_properties.get("baudRate") != null) baudRate 		= (String) m_properties.get("baudRate");
@@ -309,6 +322,9 @@ public class ModbusManager implements ConfigurableComponent, CriticalComponent, 
 			if(stopBits==null) stopBits="1";
 			if(parity==null) parity="0";
 			if(bitsPerWord==null) bitsPerWord="8";
+			if(Slave==null) Slave="1";
+			if(Mode==null) Mode="RTU";
+			if(timeout==null) timeout="1000";
 			if(ptopic==null) ptopic="eurotech/demo";
 			if(ctopic==null) ctopic="eurotech/demo";
 			if(pollInt==null) pollInt="500";
@@ -331,6 +347,9 @@ public class ModbusManager implements ConfigurableComponent, CriticalComponent, 
 					prop.setProperty("port", portName);
 				}
 			}
+			prop.setProperty("slaveAddr", Slave);
+			prop.setProperty("transmissionMode", Mode);
+			prop.setProperty("respTimeout", timeout);
 			prop.setProperty("publishTopic", ptopic);
 			prop.setProperty("controlTopic", ctopic);
 			prop.setProperty("pollInterval", pollInt);
@@ -374,7 +393,7 @@ public class ModbusManager implements ConfigurableComponent, CriticalComponent, 
 		int it6=0;
 		boolean[] digitalInputs;
 
-		digitalInputs = m_protocolDevice.readDiscreteInputs(2048, 8);
+		digitalInputs = m_protocolDevice.readDiscreteInputs(slaveAddr, 2048, 8);
 
 		payload.addMetric("t3", new Boolean(digitalInputs[2]));
 		if((digitalInputs[2] != lastDigitalInputs[2]) || iJustConnected){
@@ -410,7 +429,7 @@ public class ModbusManager implements ConfigurableComponent, CriticalComponent, 
 		}
 		lastDigitalInputs[5] = digitalInputs[5];
 
-		int[] analogInputs = m_protocolDevice.readInputRegisters(512, 8);
+		int[] analogInputs = m_protocolDevice.readInputRegisters(slaveAddr, 512, 8);
 
 		int c3 = bcd2Dec(analogInputs[2]);
 		payload.addMetric("c3", new Integer(c3));
@@ -429,7 +448,7 @@ public class ModbusManager implements ConfigurableComponent, CriticalComponent, 
 		lastAnalogInputs[7] = qc;
 
 		// LEDs 
-		boolean[] digitalOutputs = m_protocolDevice.readCoils(2048, 6); 
+		boolean[] digitalOutputs = m_protocolDevice.readCoils(slaveAddr, 2048, 6); 
 
 		payload.addMetric("LED1", new Boolean(digitalOutputs[0])); 
 		if((digitalOutputs[0] != lastDigitalOutputs[0]) || iJustConnected){
@@ -545,7 +564,7 @@ public class ModbusManager implements ConfigurableComponent, CriticalComponent, 
 			default:	s_logger.warn("Error in TurnOnLED - LED " + LED + " is not valid.");
 						break;
 			}
-			m_protocolDevice.writeSingleCoil( 2047 + LED, On?TurnON:TurnOFF);
+			m_protocolDevice.writeSingleCoil(slaveAddr, 2047 + LED, On?TurnON:TurnOFF);
 		}
 		catch (ModbusProtocolException e) {
 			throw(e);
@@ -700,7 +719,7 @@ public class ModbusManager implements ConfigurableComponent, CriticalComponent, 
 			default:	s_logger.warn("Error in clearCounter - Counter " + counter + " is not valid.");
 						break;
 			}
-			m_protocolDevice.writeSingleCoil( 3072 + counter, On?TurnON:TurnOFF);
+			m_protocolDevice.writeSingleCoil(slaveAddr, 3072 + counter, On?TurnON:TurnOFF);
 		}
 		catch (Exception e) {
 			e.printStackTrace();

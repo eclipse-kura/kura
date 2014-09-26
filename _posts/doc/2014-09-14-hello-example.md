@@ -357,7 +357,7 @@ Deployment Package that contains multiple bundles, configuration
 elements, etc. that can be deployed into an OSGi framework. In this
 example, you will simply create a Deployment Package containing the
 “hello_osgi” bundle. This step requires mToolkit to be installed. (See
-[Kura Setup](2.01-ESF-Setup.asp) for instructions on setting up the
+[Kura Setup](kura-setup.html) for instructions on setting up the
 Eclipse development environment.)
 
 Right-click the project and select **New | Folder**. Select the

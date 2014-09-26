@@ -162,7 +162,7 @@ environment:
 
 where *“[path_to_bundle]*/*[bundle_name]*.jar” should be replaced
 with the name of the bundle exported earlier (the section [Hello World
-Using the Kura Logger](2.01-ESF-Setup.asp)), as shown in the example
+Using the Kura Logger](kura-setup.html)), as shown in the example
 below:
 
 	install file:/Users/Nina/Documents/myPlugins/plugins/plugins/plugins/plugins/plugins/org.eclipse.kura.example.hello_osgi_ 1.0.0.201409101740.jar
@@ -194,7 +194,7 @@ is not persistent after a restart. To make the deployment permanent, see
 
 To deploy a bundle to the remote target device, you will need to connect
 Eclipse to the OSGi framework running on the device. This is done using
-mToolkit. See [Kura Setup](2.01-ESF-Setup.asp) for instructions on
+mToolkit. See [Kura Setup](kura-setup.html) for instructions on
 installing mToolkit into the Eclipse development environment.
 
 -   Select the Eclipse menu **Window | Show View | Other**.
@@ -248,7 +248,7 @@ framework, a single bundle can be installed on the remote device.
 In the mToolkit Frameworks view, right-click the Framework name and
 select **Install Bundle**. (This requires that you have exported the
 bundle as a deployable plug-in JAR file. See the section [Hello World
-Using the Kura Logger](2.01-ESF-Setup.asp).)
+Using the Kura Logger](kura-setup.html).)
 
 Use the **Browse** button to select the JAR file and click **OK** to
 install it to the target device.
@@ -292,7 +292,7 @@ any confusion in having the same bundle installed twice.
 In the mToolkit Frameworks view, right-click the Framework name and
 select **Install Deployment Package**. (This step requires that you have
 exported the bundle as a deployable plug-in JAR file. See the section
-[Hello World Using the Kura Logger](2.02-Hello.asp) for instructions on
+[Hello World Using the Kura Logger](hello-example.html) for instructions on
 exporting the OSGi bundle.)
 
 Open the resources/dp folder in the Workspace filesystem directory,

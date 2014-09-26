@@ -80,7 +80,8 @@ Otherwise, select an existing workspace and click *OK*.  After Eclipse is runnin
 
 h3. Importing Kura User Workspace
 
-To set up your Kura project workspace, you will need to download the ["Kura User Workspace archive":http://eclipse.org/kura/downloads.php]
+To set up your Kura project workspace, you will need to download the ["Kura User Workspace archive *with* Kura web UI":https://s3.amazonaws.com/kura_downloads/user_workspace/1.0.0/user_workspace_archive_1.0.0.zip]
+or the ["Kura User Workspace archive *without* Kura web UI.":http://www.eclipse.org/downloads/download.php].
 
 From the Eclipse File menu, select the *Import* option.  In the Import dialog box, expand the *General* heading, select *Existing Projects into Workspace*, and then click *Next*.
 

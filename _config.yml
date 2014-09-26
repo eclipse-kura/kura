@@ -6,7 +6,9 @@ exclude: [".rvmrc", ".rbenv-version", "README.md", "Rakefile", "changelog.md"]
 highlighter: pygments
 
 # https://help.github.com/articles/migrating-your-pages-site-from-maruku
-markdown: kramdown
+markdown: redcarpet
+redcarpet:
+  extensions: ["no_intra_emphasis", "fenced_code_blocks", "autolink", "tables", "with_toc_data"]
 
 # Themes are encouraged to use these universal variables
 # so be sure to set them if your theme uses them.

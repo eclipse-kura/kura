@@ -81,7 +81,7 @@ Otherwise, select an existing workspace and click *OK*.  After Eclipse is runnin
 h3. Importing Kura User Workspace
 
 To set up your Kura project workspace, you will need to download the ["Kura User Workspace archive *with* Kura web UI":https://s3.amazonaws.com/kura_downloads/user_workspace/1.0.0/user_workspace_archive_1.0.0.zip]
-or the ["Kura User Workspace archive *without* Kura web UI.":http://www.eclipse.org/downloads/download.php].
+or the ["Kura User Workspace archive *without* Kura web UI.":http://www.eclipse.org/downloads/download.php]
 
 From the Eclipse File menu, select the *Import* option.  In the Import dialog box, expand the *General* heading, select *Existing Projects into Workspace*, and then click *Next*.
 
@@ -89,7 +89,7 @@ Now click the *Select archive file* option button and browse to the archive file
 
 !{{ site.baseurl }}/assets/images/kura_setup/image005.png!<br>
 
-Finally, click *Finish* to import the projects.  At this point, you should have four projects in your workspace.  The four projects are as follows:* org.eclipse.kura.api – This is the core Kura API.* org.eclipse.kura.demo.heater – This is an example project that you can use as a starting point for creating your own bundle.* org.eclipse.kura.emulator – This is the emulator project for running Kura within Eclipse (Linux/Mac only).* target-definition – This is a set of required bundles that are dependencies of the APIs and Kura.!{{ site.baseurl }}/assets/images/kura_setup/image006.png!<br>
+Finally, click *Finish* to import the projects.  At this point, you should have four projects in your workspace.  The four projects are as follows:<ul>  <li>org.eclipse.kura.api – This is the core Kura API.</li>  <li>org.eclipse.kura.demo.heater – This is an example project that you can use as a starting point for creating your own bundle.</li>  <li>org.eclipse.kura.emulator – This is the emulator project for running Kura within Eclipse (Linux/Mac only).</li>  <li>target-definition – This is a set of required bundles that are dependencies of the APIs and Kura.</li></ul><br>!{{ site.baseurl }}/assets/images/kura_setup/image006.png!<br>
 
 Eclipse will also report some errors at this point.  See the next section to resolve those errors.
 

@@ -86,7 +86,7 @@ device, log in to its administrative console and enter the command
 
     java –version
 
-Finally, *un*check the **Generate an activator, a Java class that
+Finally, <u>un</u>check the **Generate an activator, a Java class that
 controls the plug-in’s life cycle** option button. For the purposes of
 this example, a single class will be used. An Activator class will not
 be created; instead, OSGi Declarative Services will be used to start and
@@ -321,7 +321,7 @@ file that may be deployed in the OSGi framework through the Deployment
 Admin service and may contain one or more bundles, configuration
 objects, etc.
 
-Export the OSGi Bundle 
+Export the OSGi Bundle
 -----------------------
 
 Your bundle can be built as a stand-alone OSGi plug-in.
@@ -416,6 +416,5 @@ and/or Deployment Package that can be used in a Kura environment.
 
 The next steps will be to test your code in an Emulation mode and/or to
 deploy your code to a target system running Kura. See [Testing and
-Deploying Bundles](2.03-Deploying-Bundles.asp) to continue with those
+Deploying Bundles](deploying-bundles.html) to continue with those
 steps.
-

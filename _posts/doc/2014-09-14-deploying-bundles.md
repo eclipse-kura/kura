@@ -52,7 +52,7 @@ Overview
 This section provides a simple example of how to test and deploy OSGi
 bundles and deployment packages in a Kura environment. These
 instructions use the “Hello World” OSGi project created in the [previous
-section](2.02-Hello.asp). In this example, you will learn how to perform
+section](hello-example.html). In this example, you will learn how to perform
 the following functions:
 
 -   Use local OSGi emulation mode in Eclipse
@@ -69,9 +69,9 @@ the following functions:
 Prerequisites
 -------------
 
--   [Setting up Kura Development Environment](2.01-ESF-Setup.asp)
+-   [Setting up Kura Development Environment](kura-setup.html)
 
--   [Hello World Using the Kura Logger](2.02-Hello.asp)
+-   [Hello World Using the Kura Logger](hello-example.html)
 
 <span id="_Hello_World_Using" class="anchor"><span id="_Testing_the_Plug-in" class="anchor"><span id="_Testing_the_OSGi" class="anchor"></span></span></span>Testing the OSGi Plug-in
 =====================================================================================================================================================================================
@@ -121,8 +121,15 @@ Note the bundle ID number for the
 
 ### Start/Stop Bundle in Local Mode
 
-In the OSGi Console window in Eclipse, run the ‘**start *\#\#***’ or
-‘**stop *\#\#***’ commands to start or stop a bundle, where the “*\#\#*”
+In the OSGi Console window in Eclipse, run the
+
+    start ##
+
+or
+
+    stop ##
+
+commands to start or stop a bundle, where the “*\#\#*”
 is either the bundle ID number or the bundle name (such as “start
 org.eclipse.kura.example.hello_osgi”). Note that the INFO messages for
 both the activate() and deactivate() messages appear in the Console
@@ -429,4 +436,3 @@ the actual name of the deployment package.
 In conclusion, this section described how to test a bundle in an
 Emulation environment within the Eclipse IDE and how to install bundles
 and Deployment Packages to a remote target system running Kura.
-

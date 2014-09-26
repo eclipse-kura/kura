@@ -159,7 +159,7 @@ Development Environment Installation
 To set up the development environment for Eclipse Kura, perform the
 following steps:
 
-1.  Download and install JDK SE 7 as appropriate for your OS (if it is
+1. Download and install JDK SE 7 as appropriate for your OS (if it is
     not already installed). For Windows and Linux users, the JDK can be
     downloaded from Java SE 7 Downloads. Use the latest version of Java
     SE Development Kit.

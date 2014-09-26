@@ -80,7 +80,7 @@ following steps:
 
     Download the Kura user workspace archive *without* Kura web UI from
 
-    <http://www.eclipse.org/downloads/download.php?file=/kura/releases/0.7.1/user_workspace_archive_0.7.1.zip
+    http://www.eclipse.org/kura/downloads.php
 
 1.  Import the Kura workspace zip file into the new Eclipse project
     development environment.

@@ -74,6 +74,7 @@ public class GpsClockSyncProvider implements ClockSyncProvider, EventHandler {
 		m_listener   = listener;
 		
 		m_waitForLocked=false;
+		
 		m_refreshInterval = 0;
 		if (m_properties.containsKey("clock.ntp.refresh-interval")) {
 			m_refreshInterval = (Integer) m_properties.get("clock.ntp.refresh-interval");

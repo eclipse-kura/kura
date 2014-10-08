@@ -55,7 +55,7 @@ following steps:
 
 5.  Install Kura with: 
 
-    <pre>sudo dpkg -i \<kura\_package\_name\>.deb
+    <pre>sudo dpkg -i kura_1.0.0_beaglebone_debian_armv7.deb
 
     sudo apt-get install -f</pre>
 

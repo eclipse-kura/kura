@@ -344,9 +344,17 @@ public class GpsDevice {
 			if(!m_validPosition)
 				return;
 			
-			if(scannedInput.startsWith("$GPTXT")) {
+			if(!scannedInput.startsWith("$G")){
+				//Invalid NMEA String. Return.
+				s_logger.warn("Invalid NMEA sentence: " + scannedInput);
+				return;
+			}
+			//Remove the first 3 characters from the input string in order to normalize the commands
+			scannedInput = scannedInput.substring(3);			
+			
+			if(scannedInput.startsWith("TXT")) {
 				s_logger.debug("U-Blox init message: " + scannedInput);
-			} else if (scannedInput.startsWith("$GPGGA")) {
+			} else if (scannedInput.startsWith("GGA")) {
 				try {
 					lon = gpsParser.get_longNmea();
 					lat = gpsParser.get_latNmea();
@@ -369,7 +377,7 @@ public class GpsDevice {
 					m_longitudeNmea = 0;					
 					m_altitudeNmea = 0; 
 				}
-			} else if (scannedInput.startsWith("$GPGLL")) {
+			} else if (scannedInput.startsWith("GLL")) {
 				try {
 					lon = gpsParser.get_longNmea();
 					lat = gpsParser.get_latNmea();
@@ -383,7 +391,7 @@ public class GpsDevice {
 					m_latitudeNmea = 0;
 					m_longitudeNmea = 0;					
 				}
-			} else if (scannedInput.startsWith("$GPGSA")) {
+			} else if (scannedInput.startsWith("GSA")) {
 				try {
 					m_PDOP = gpsParser.get_PDOPNmea();
 					m_HDOP = gpsParser.get_HDOPNmea();
@@ -396,8 +404,8 @@ public class GpsDevice {
 					m_VDOP = 0;
 					m_3Dfix = 0;
 				}
-			} else if (scannedInput.startsWith("$GPGSV")) {
-			} else if (scannedInput.startsWith("$GPRMC")) {
+			} else if (scannedInput.startsWith("GSV")) {
+			} else if (scannedInput.startsWith("RMC")) {
 				try {
 					lon = gpsParser.get_longNmea();
 					lat = gpsParser.get_latNmea();
@@ -419,7 +427,7 @@ public class GpsDevice {
 					m_longitudeNmea = 0;	
 					m_speedNmea = 0;
 				}
-			} else if (scannedInput.startsWith("$GPVTG")) {
+			} else if (scannedInput.startsWith("VTG")) {
 				try {
 					speed = gpsParser.get_speedNmea();
 					m_speed = new Measurement(speed,Unit.m_s);

@@ -52,7 +52,7 @@
 								<artifactItem>
 									<groupId>org.eclipse.kura</groupId>
 									<artifactId>org.eclipse.soda.dk.comm</artifactId>
-									<version>1.2.0</version>
+									<version>1.2.1</version>
 								</artifactItem>
 								<!-- copied from Maven central repository -->
 								<!--

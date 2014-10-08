@@ -48,7 +48,20 @@ public class NMEAParser {
 		String s_sentence = sentence.substring(0, starpos);
 		
 		String[] tokens = s_sentence.split(",");
-	    if (tokens[0].contains("$GPGGA")) {
+		
+		/*
+		 * Starting from 4.0 NMEA specs the GPS device can send messages representing different talkers
+		 * 
+		 * $GP = GPS
+		 * $GS = Glonass
+		 * $GN = GNSS, that is GPS + Glonass + possibly others
+		 */
+		if(!tokens[0].startsWith("$G")){
+			//Not a valid token. Return.
+			return;
+		}
+		
+	    if (tokens[0].endsWith("GGA")) {
 	    	if(tokens.length>9){
 	    		m_validPosition=true;
 	    		if(!tokens[1].isEmpty()) m_timeNmea=tokens[1];else m_validPosition=false;
@@ -65,7 +78,7 @@ public class NMEAParser {
 	    	}
 	    	else m_validPosition=false;
 	    }
-	    else if (tokens[0].contains("$GPGLL")) {
+	    else if (tokens[0].endsWith("GLL")) {
 	    	if(tokens.length>5){
 	    		m_validPosition=true;
 	    		if(!tokens[1].isEmpty()) m_latNmea=convertPositionlat(tokens[1],tokens[2]);else m_validPosition=false;
@@ -79,7 +92,7 @@ public class NMEAParser {
 	    	}
 	    	else m_validPosition=false;
 	    }
-	    else if (tokens[0].contains("$GPRMC")) {
+	    else if (tokens[0].endsWith("RMC")) {
 	    	if(tokens.length>8){
 	    		m_validPosition=true;
 	    		if(!tokens[1].isEmpty()) m_timeNmea=tokens[1];
@@ -96,7 +109,7 @@ public class NMEAParser {
 	    	}
 	    	else m_validPosition=false;
 	    }
-	    else if (tokens[0].contains("$GPGSA")) {
+	    else if (tokens[0].endsWith("GSA")) {
 	    	if(tokens.length>5){
 	    		m_validPosition=true;
 	    		if(!tokens[2].isEmpty()){
@@ -111,7 +124,7 @@ public class NMEAParser {
 	    	}
 	    	else m_validPosition=false;
 	    }
-	    else if (tokens[0].contains("$GPVTG")) {
+	    else if (tokens[0].endsWith("VTG")) {
 	    	if((tokens.length>7)&&(!tokens[7].isEmpty())){ 
 	    		m_speedNmea=Double.parseDouble(tokens[7])*0.277777778; // conversion km/h in m/s : 1 km/h -> 0,277777778 m/s;
 	    	}

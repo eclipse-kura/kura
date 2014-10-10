@@ -1,7 +1,7 @@
 ---
 layout: page
 title:  "BeagleBone Quick Start"
-date:   2014-08-10 10:31:11
+date:   2014-08-25 11:41:11
 categories: [doc]
 ---
 

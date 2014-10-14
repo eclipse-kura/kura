@@ -24,7 +24,7 @@
             type="Boolean"
             cardinality="0"
             required="true"
-            default="false"
+            default="true"
             description="Enable automatic connect of the Data Publishers on startup."/>
                         
         <AD id="connect.retry-interval"

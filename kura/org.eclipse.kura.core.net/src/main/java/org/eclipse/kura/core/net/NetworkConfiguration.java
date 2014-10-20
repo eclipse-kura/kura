@@ -42,7 +42,6 @@ import org.eclipse.kura.net.dhcp.DhcpServerConfig;
 import org.eclipse.kura.net.dhcp.DhcpServerConfig4;
 import org.eclipse.kura.net.dhcp.DhcpServerConfigIP4;
 import org.eclipse.kura.net.firewall.FirewallAutoNatConfig;
-import org.eclipse.kura.net.firewall.FirewallNatConfig;
 import org.eclipse.kura.net.modem.ModemConfig;
 import org.eclipse.kura.net.modem.ModemConfig.AuthType;
 import org.eclipse.kura.net.modem.ModemConfig.PdpType;
@@ -447,7 +446,7 @@ public class NetworkConfiguration {
 	// ---------------------------------------------------------------
 	
 	private void recomputeNetworkProperties() 
-	{
+	{		
 		Map<String,Object> properties = new HashMap<String,Object>();
 		
 		String netIfPrefix = null;
@@ -773,6 +772,8 @@ public class NetworkConfiguration {
 		
 		properties.put(prefix+".pingAccessPoint", wifiConfig.pingAccessPoint());
 		
+		properties.put(prefix+".ignoreSSID", wifiConfig.ignoreSSID());
+		
 		/*
 		Iterator<Entry<String, Object>> it = properties.entrySet().iterator();
 		while(it.hasNext()) {
@@ -867,6 +868,18 @@ public class NetworkConfiguration {
 	    s_logger.trace("hwMode is " + hwMode);
         wifiConfig.setHardwareMode(hwMode);
         
+        // ignore SSID
+        key = prefix + ".ignoreSSID";
+        boolean ignoreSSID = false;
+        if(properties.get(key) != null) {
+            ignoreSSID = (Boolean)properties.get(key);
+        s_logger.trace("Ignore SSID is {}", ignoreSSID);
+        } else {
+            s_logger.trace("Ignore SSID is null");
+        }
+        
+        wifiConfig.setIgnoreSSID(ignoreSSID);
+        
         // bgscan
         if(mode == WifiMode.INFRA) {
 	        key = prefix + ".bgscan";
@@ -898,6 +911,7 @@ public class NetworkConfiguration {
 	        } else {
 	            s_logger.trace("Ping Access Point is null");
 	        }
+	        
 	        wifiConfig.setPingAccessPoint(pingAccessPoint);
         }
         

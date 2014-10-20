@@ -392,6 +392,9 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 									// ping access point?
 									gwtWifiConfig.setPingAccessPoint(wifiConfig.pingAccessPoint());
 									
+									// ignore SSID?
+									gwtWifiConfig.setIgnoreSSID(wifiConfig.ignoreSSID());
+									
 									// passkey
 									gwtWifiConfig.setPassword(wifiConfig.getPasskey());
 
@@ -1288,6 +1291,9 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 			
 			// ping access point?
 			wifiConfig.setPingAccessPoint(gwtWifiConfig.pingAccessPoint());
+			
+			// ignore SSID?
+			wifiConfig.setIgnoreSSID(gwtWifiConfig.ignoreSSID());
 		}
 		
 		return wifiConfig;

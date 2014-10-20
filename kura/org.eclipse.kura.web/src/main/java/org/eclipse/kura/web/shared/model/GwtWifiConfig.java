@@ -176,4 +176,15 @@ public class GwtWifiConfig extends BaseModelData implements Serializable {
     public void setPingAccessPoint(boolean pingAccessPoint) {
         set("pingAccessPoint", pingAccessPoint);
     }
+    
+    public boolean ignoreSSID() {
+    	if (get("ignoreSSID") != null) {
+    		return (Boolean) get("ignoreSSID");
+    	}
+    	return false;
+    }
+    
+    public void setIgnoreSSID(boolean ignoreSSID) {
+    	set("ignoreSSID", ignoreSSID);
+    }
 }

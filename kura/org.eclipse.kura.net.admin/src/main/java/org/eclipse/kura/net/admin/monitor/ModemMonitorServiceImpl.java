@@ -107,6 +107,9 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 	private Boolean m_gpsSupported = null;
 	
 	private boolean m_serviceActivated; 
+	
+	private PppState m_pppState;
+	private long m_resetTimerStart;
 	    
     public void setNetworkService(NetworkService networkService) {
         m_networkService = networkService;
@@ -143,6 +146,9 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
     protected void activate(ComponentContext componentContext)  {
     	// save the bundle context
     	m_ctx = componentContext;
+    	
+    	m_pppState = PppState.NOT_CONNECTED;
+    	m_resetTimerStart = 0L;
     	
     	Dictionary<String, String[]> d = new Hashtable<String, String[]>();
     	d.put(EventConstants.EVENT_TOPIC, EVENT_TOPICS);
@@ -388,6 +394,27 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 		return ifaceNo;
 	}
 	
+	private long getModemResetTimeoutMsec(String ifaceName) {
+		long resetToutMsec = 0L;
+		
+		if (ifaceName != null) {
+			try {
+				List<NetConfig> netConfigs = m_networkAdminService.getNetworkInterfaceConfigs(ifaceName);
+				if ((netConfigs != null) && (netConfigs.size() > 0)) {
+					for (NetConfig netConfig : netConfigs) {
+						if (netConfig instanceof ModemConfig) {
+							resetToutMsec = ((ModemConfig) netConfig).getResetTimeout() * 60000;
+							break;
+						}
+					}
+				}
+			} catch (KuraException e) {
+				e.printStackTrace();
+			}
+		}
+		return resetToutMsec;
+	}
+	
 	private boolean isGpsEnabledInConfig(List<NetConfig> netConfigs) {
 		boolean isGpsEnabled = false;
 		if ((netConfigs != null) && (netConfigs.size() > 0)) {
@@ -424,23 +451,52 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 			
 			NetInterfaceStatus netInterfaceStatus = getNetInterfaceStatus(modem.getConfiguration());
 			if (netInterfaceStatus == NetInterfaceStatus.netIPv4StatusEnabledWAN) {
+				IModemLinkService pppService = null;
+				PppState pppState = null;
 				try {
 					String ifaceName = m_networkService.getModemPppPort(modem.getModemDevice());
 					if (ifaceName != null) {
-						IModemLinkService pppService = PppFactory.obtainPppService(ifaceName, modem.getDataPort());
-						PppState pppState = pppService.getPppState();
-						s_logger.trace("monitor() :: PppState={}", pppState);
+						pppService = PppFactory.obtainPppService(ifaceName, modem.getDataPort());
+						pppState = pppService.getPppState();
+						
+						s_logger.info("monitor() :: previous PppState={}", m_pppState);
+						s_logger.info("monitor() :: current PppState={}", pppState);
+						
 						if (pppState == PppState.NOT_CONNECTED) {
 							if (modem.getTechnologyType() == ModemTechnologyType.HSDPA) {
 								if(((HspaCellularModem)modem).isSimCardReady()) {
-									s_logger.info("!!! SIM CARD IS READY !!! connecting ...");
+									s_logger.info("monitor() :: !!! SIM CARD IS READY !!! connecting ...");
 									pppService.connect();
+									if (m_pppState == PppState.NOT_CONNECTED) {
+										m_resetTimerStart = System.currentTimeMillis();
+									}
 								}
 							} else {
-								s_logger.info("connecting ...");
+								s_logger.info("monitor() :: connecting ...");
 								pppService.connect();
+								if (m_pppState == PppState.NOT_CONNECTED) {
+									m_resetTimerStart = System.currentTimeMillis();
+								}
 							}
+						} else if (pppState == PppState.IN_PROGRESS) {
+							long modemResetTout = getModemResetTimeoutMsec(ifaceName);
+							if (modemResetTout > 0) {
+								long timeElapsed = System.currentTimeMillis() - m_resetTimerStart;
+								if (timeElapsed > modemResetTout) {
+									// reset modem
+									s_logger.info("monitor() :: Modem Reset TIMEOUT !!!");
+									pppService.disconnect();
+									modem.reset();
+								} else {
+									int timeTillReset = (int)(modemResetTout - timeElapsed) / 1000;
+									s_logger.info("monitor() :: PPP connection in progress. Modem will be reset in {} sec if not connected", timeTillReset);
+								}
+							}
+						} else if (pppState == PppState.CONNECTED) {
+							m_resetTimerStart = System.currentTimeMillis();
 						}
+						
+						m_pppState = pppState;
 						ConnectionInfo connInfo = new ConnectionInfoImpl(ifaceName);
 						InterfaceState interfaceState = new InterfaceState(ifaceName, 
 								LinuxNetworkUtil.isUp(ifaceName), 
@@ -448,7 +504,23 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 								connInfo.getIpAddress());
 						newInterfaceStatuses.put(ifaceName, interfaceState);
 					}
-				} catch (KuraException e) {
+				} catch (Exception e) {
+					s_logger.error("monitor() :: Exception -> " + e);
+					if ((pppService != null) && (pppState != null)) {
+						try {
+							s_logger.error("monitor() :: Exception :: PPPD disconnect");
+							pppService.disconnect();
+						} catch (KuraException e1) {
+							e1.printStackTrace();
+						}
+						m_pppState = pppState;
+					}
+					try {
+						s_logger.error("monitor() :: Exception :: modem reset");
+						modem.reset();
+					} catch (KuraException e1) {
+						e1.printStackTrace();
+					}
 					e.printStackTrace();
 				}
 			}

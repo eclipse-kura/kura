@@ -180,14 +180,23 @@ public class PppConfigReader implements NetworkConfigurationVisitor {
 		String serialNum = "";
 		String modemId = "";
         AuthType authType = AuthType.NONE;
+        boolean persist = false;
+        int maxFail = 0;
+        int idle = 0;
+        String activeFilter = "";
         int lcpEchoInterval = 0;
         int lcpEchoFailure = 0;
         
         String peerFilename = getPeerFilename(ifaceName, usbDevice);
         File peerFile = new File(peerFilename);
         if(!peerFile.exists()) {
-            s_logger.warn("File does not exist - " + peerFilename);
+        	persist = true;
+        	maxFail = 5;
+        	idle = 300;
+        	activeFilter = "inbound";
+            s_logger.warn("getModemConfig() :: PPPD peer file does not exist - {}", peerFilename);
         } else {
+        	s_logger.debug("getModemConfig() :: PPPD peer file exists - {}", peerFilename); 
 	        // Check if peer file is a symlink.  If so, get information from the linked filename.
 	        try {
 	            if(!peerFile.getCanonicalPath().equals(peerFile.getAbsolutePath())) {
@@ -219,6 +228,22 @@ public class PppConfigReader implements NetworkConfigurationVisitor {
 	
 	        if(props.getProperty("user") != null) {
 	            username = removeQuotes(props.getProperty("user"));  
+	        }
+	        
+	        if (props.getProperty("persist") != null) {
+	        	persist = true;
+	        }
+	        
+	        if (props.getProperty("maxfail") != null) {
+	        	maxFail = Integer.parseInt(props.getProperty("maxfail"));
+	        }
+	        
+	        if (props.getProperty("idle") != null) {
+	        	idle = Integer.parseInt(props.getProperty("idle"));
+	        }
+	        
+	        if(props.getProperty("active-filter") != null) {
+	            activeFilter = removeQuotes(props.getProperty("active-filter"));  
 	        }
 	        
 	        if (props.getProperty("lcp-echo-interval") != null) {
@@ -289,12 +314,16 @@ public class PppConfigReader implements NetworkConfigurationVisitor {
 	            }
 	        }
 	        
-	        s_logger.debug("* Enabled: " + enabled);
-	        s_logger.debug("* CHAT file: " + chatFilename);
-	        s_logger.debug("* UnitNum: " + unitNum);    
-	        s_logger.debug("* dial string: " + dialString);
-	        s_logger.debug("* LCP Echo Interval: " + lcpEchoInterval);
-	        s_logger.debug("* LCP Echo Failure: " + lcpEchoFailure);
+	        s_logger.debug("* Enabled: {}", enabled);
+	        s_logger.debug("* CHAT file: {}", chatFilename);
+	        s_logger.debug("* UnitNum: {}", unitNum);    
+	        s_logger.debug("* dial string: {}", dialString);
+	        s_logger.debug("* persist: {}", persist);
+	        s_logger.debug("* maxfail: {}", maxFail);
+	        s_logger.debug("* idle: {}", idle);
+	        s_logger.debug("* active-filter: {}", activeFilter);
+	        s_logger.debug("* LCP Echo Interval: {}", lcpEchoInterval);
+	        s_logger.debug("* LCP Echo Failure: {}", lcpEchoFailure);
 	        
 	        // Get the auth type and credentials
 	        // pppd will use CHAP if available, else PAP
@@ -327,17 +356,29 @@ public class PppConfigReader implements NetworkConfigurationVisitor {
             gpsEnabled = Boolean.parseBoolean(statusString);
         }
         
+        int resetTout = 0;
+        key = new StringBuilder().append("net.interface.").append(ifaceName).append(".config.resetTimeout");
+        statusString = KuranetConfig.getProperty(key.toString());
+        if(statusString != null && !statusString.isEmpty()) {
+        	resetTout = Integer.parseInt(statusString);
+        }
+        
         // Populate the modem config
         ModemConfig modemConfig = new ModemConfig();
         
         modemConfig.setPppNumber(unitNum);
+        modemConfig.setPersist(persist);
+        modemConfig.setMaxFail(maxFail);
+        modemConfig.setIdle(idle);
+        modemConfig.setActiveFilter(activeFilter);
         modemConfig.setLcpEchoInterval(lcpEchoInterval);
         modemConfig.setLcpEchoFailure(lcpEchoFailure);
         modemConfig.setEnabled(enabled);    // TODO - from self configuring properties 
         modemConfig.setDataCompression(0);  // FIXME
         modemConfig.setDialString(dialString);
         modemConfig.setHeaderCompression(0);    // FIXME
-        modemConfig.setGpsEnabled(gpsEnabled);       
+        modemConfig.setGpsEnabled(gpsEnabled);
+        modemConfig.setResetTimeout(resetTout);
         
 		if (isHspa) {
 			modemConfig.setApn(apn);

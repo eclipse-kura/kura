@@ -1,5 +1,6 @@
 package org.eclipse.kura.net.admin.modem.telit.generic;
 
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.List;
 
@@ -613,8 +614,8 @@ public class TelitModem {
 		return isModemOn;
 	}
 	
-private boolean turnOff() throws Exception {
-		
+	private boolean turnOff() throws Exception {
+
 		boolean retVal = true;
 		int remainingAttempts = 5;
 		do {
@@ -625,6 +626,10 @@ private boolean turnOff() throws Exception {
 			s_logger.info("turnOff() :: turning modem OFF ... attempts left: {}", remainingAttempts);
 			if (m_platform.equals("Mini-Gateway")) {
 				SerialModemDriver.toggleGpio65();
+			} else if (m_platform.equals("reliagate-10-20")) {
+				FileWriter fw = new FileWriter("/sys/class/gpio/usb-rear-pwr/value");
+				fw.write("0");
+				fw.close();
 			} else if (m_platform.equals("reliagate-50-21")) {
 				Runtime rt = Runtime.getRuntime();
 				Process pr = rt.exec("/usr/sbin/vector-j21-gpio 11 0");
@@ -634,7 +639,7 @@ private boolean turnOff() throws Exception {
 					continue;
 				}
 				sleep(1000);
-				
+
 				pr = rt.exec("/usr/sbin/vector-j21-gpio 11 1");
 				status = pr.waitFor();
 				s_logger.info("turnOff() :: '/usr/sbin/vector-j21-gpio 11 1' returned {}", status);
@@ -642,59 +647,61 @@ private boolean turnOff() throws Exception {
 					continue;
 				}
 				sleep(3000);
-				
+
 				pr = rt.exec("/usr/sbin/vector-j21-gpio 11 0");
 				status = pr.waitFor();
 				s_logger.info("turnOff() :: '/usr/sbin/vector-j21-gpio 11 0' returned {}", status);
-				retVal = (status == 0)? true : false; 
+				retVal = (status == 0) ? true : false;
 			} else {
 				s_logger.warn("turnOff() :: modem turnOff operation is not supported for the {} platform", m_platform);
 			}
 			remainingAttempts--;
 			sleep(5000);
-		}  while (isOn());
-		
+		} while (isOn());
+
 		s_logger.info("turnOff() :: Modem is OFF? - {}", retVal);
 		return retVal;
 	}
 	
-private boolean turnOn() throws Exception {
-	
-	boolean retVal = true;
-	int remainingAttempts = 5;
-	
-	do {
-		if (remainingAttempts <= 0) {
-			retVal = false;
-			break;
-		}
-		s_logger.info("turnOn() :: turning modem ON ... attempts left: {}", remainingAttempts);
-		if (m_platform.equals("Mini-Gateway")) {
-			SerialModemDriver.toggleGpio65();
-		} else if (m_platform.equals("reliagate-50-21")) {
-			Runtime rt = Runtime.getRuntime();
-			Process pr = rt.exec("/usr/sbin/vector-j21-gpio 11 1");
-			int status = pr.waitFor();
-			s_logger.info("turnOn() :: '/usr/sbin/vector-j21-gpio 11 1' returned {}", status);
-			if (status != 0) {
-				continue;
+	private boolean turnOn() throws Exception {
+
+		boolean retVal = true;
+		int remainingAttempts = 5;
+
+		do {
+			if (remainingAttempts <= 0) {
+				retVal = false;
+				break;
 			}
-			sleep(1000);
-			
-			pr = rt.exec("/usr/sbin/vector-j21-gpio 6");
-			status = pr.waitFor();
-			s_logger.info("turnOn() :: '/usr/sbin/vector-j21-gpio 6' returned {}", status);
-			retVal = (status == 0)? true : false; 
-		} else {
-			s_logger.warn("turnOn() :: modem turnOn operation is not supported for the {} platform", m_platform);
-		}
-		remainingAttempts--;
-		sleep(5000);
-	} while (!isOn());
-	
-	s_logger.info("turnOn() :: Modem is ON? - {}", retVal);
-	return retVal;
-}
-	
-	
+			s_logger.info("turnOn() :: turning modem ON ... attempts left: {}", remainingAttempts);
+			if (m_platform.equals("Mini-Gateway")) {
+				SerialModemDriver.toggleGpio65();
+			} else if (m_platform.equals("reliagate-10-20")) {
+				FileWriter fw = new FileWriter("/sys/class/gpio/usb-rear-pwr/value");
+				fw.write("1");
+				fw.close();
+			} else if (m_platform.equals("reliagate-50-21")) {
+				Runtime rt = Runtime.getRuntime();
+				Process pr = rt.exec("/usr/sbin/vector-j21-gpio 11 1");
+				int status = pr.waitFor();
+				s_logger.info("turnOn() :: '/usr/sbin/vector-j21-gpio 11 1' returned {}", status);
+				if (status != 0) {
+					continue;
+				}
+				sleep(1000);
+
+				pr = rt.exec("/usr/sbin/vector-j21-gpio 6");
+				status = pr.waitFor();
+				s_logger.info("turnOn() :: '/usr/sbin/vector-j21-gpio 6' returned {}", status);
+				retVal = (status == 0) ? true : false;
+			} else {
+				s_logger.warn("turnOn() :: modem turnOn operation is not supported for the {} platform", m_platform);
+			}
+			remainingAttempts--;
+			sleep(5000);
+		} while (!isOn());
+
+		s_logger.info("turnOn() :: Modem is ON? - {}", retVal);
+		return retVal;
+	}
 }

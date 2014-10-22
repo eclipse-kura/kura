@@ -25,25 +25,13 @@ public interface IModemLinkService {
 	public void connect() throws KuraException;
 	
 	/**
-	* Connect request
-	* @param tout - timeout in seconds as {@link int}
-	* 
-	* @throws KuraException
-	*/
-	public void connect(int tout) throws KuraException;
-
-	/**
 	* Disconnect request
 	*
 	* @throws KuraException
 	*/
 	public void disconnect () throws KuraException;
 	
-	public void release();
-	
 	public PppState getPppState () throws KuraException;
-	
-	public PppState getPppState (int tout) throws KuraException;
 	
 	/**
 	* Reports IP address of cellular interface
@@ -52,13 +40,6 @@ public interface IModemLinkService {
 	* @throws KuraException
 	*/
 	public String getIPaddress() throws KuraException;
-	
-	/**
-	* Reports gateway IP address (IP address of the peer)
-	*
-	* @return gateway IP address as <code>String</code>
-	*/
-	public String getGatewayIpAddress();
 	
 	/**
 	* Reports name of network interface

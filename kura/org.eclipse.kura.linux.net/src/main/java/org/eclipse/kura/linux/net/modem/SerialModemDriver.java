@@ -252,7 +252,7 @@ public class SerialModemDriver {
  		}
  	}
  	
- 	private void toggleGpio65() throws Exception { 		
+ 	public static void toggleGpio65() throws Exception { 		
  		File fgpio65Folder = new File ("/sys/class/gpio/gpio65");
 		if (!fgpio65Folder.exists()) {
 			BufferedWriter bwGpioSelect = new BufferedWriter(new FileWriter("/sys/class/gpio/export"));
@@ -277,7 +277,7 @@ public class SerialModemDriver {
 		fGpio65Value.close();
  	}
 	
-    private void sleep(long millis) {
+    private static void sleep(long millis) {
 		try {
 			Thread.sleep(millis);
 		} catch (InterruptedException e) {

@@ -67,9 +67,7 @@ public class PppFactory {
 		while (it.hasNext()) {
 			String iface = it.next();
 			s_logger.debug("releasing modm link for {} interface", iface);
-			IModemLinkService modemLinkService = s_pppServices.get(iface);
-			modemLinkService = s_pppServices.remove(iface);
-			modemLinkService.release();
+			s_pppServices.remove(iface);
 		}
 	}
 }

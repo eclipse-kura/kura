@@ -958,6 +958,11 @@ public class NetworkConfiguration {
 	    properties.put(prefix+"password", modemConfig.getPassword());
 	    properties.put(prefix+"pdpType", (modemConfig.getPdpType() != null) ? modemConfig.getPdpType().toString() : "");
         properties.put(prefix+"pppNum", modemConfig.getPppNumber());
+        properties.put(prefix+"persist", modemConfig.isPersist());
+        properties.put(prefix+"maxFail", modemConfig.getMaxFail());
+        properties.put(prefix+"idle", modemConfig.getIdle());
+        properties.put(prefix+"activeFilter", modemConfig.getActiveFilter());
+        properties.put(prefix+"resetTimeout", modemConfig.getResetTimeout());
         properties.put(prefix+"lcpEchoInterval", modemConfig.getLcpEchoInterval());
         properties.put(prefix+"lcpEchoFailure", modemConfig.getLcpEchoFailure());
 	    properties.put(prefix+"profileId", modemConfig.getProfileID());
@@ -1074,6 +1079,56 @@ public class NetworkConfiguration {
             s_logger.trace("PPP number is null");
         }
         
+        // persist
+        key = prefix + "persist";
+        if(properties.get(key) != null) {
+        	boolean persist = (Boolean)properties.get(key);
+        	s_logger.trace("persist is " + persist);
+        	modemConfig.setPersist(persist);
+        } else {
+        	s_logger.trace("persist is null");
+        }
+        
+        // max fail
+        key = prefix + "maxFail";
+        if(properties.get(key) != null) {
+        	int maxFail = (Integer)properties.get(key);
+        	s_logger.trace("maxfail is " + maxFail);
+        	modemConfig.setMaxFail(maxFail);
+        } else {
+        	s_logger.trace("maxfail is null");
+        }
+        
+        // resetTimeout
+        key = prefix + "resetTimeout";
+        if(properties.get(key) != null) {
+        	int resetTimeout = (Integer)properties.get(key);
+        	s_logger.trace("resetTimeout is " + resetTimeout);
+        	modemConfig.setResetTimeout(resetTimeout);
+        } else {
+        	s_logger.trace("resetTimeout is null");
+        }
+        
+        // idle
+        key = prefix + "idle";
+        if(properties.get(key) != null) {
+        	int idle = (Integer)properties.get(key);
+        	s_logger.trace("idle is " + idle);
+        	modemConfig.setIdle(idle);
+        } else {
+        	s_logger.trace("idle is null");
+        }
+        
+        // active filter
+        key = prefix + "activeFilter";
+        if (properties.get(key) != null) {
+	        String activeFilter = (String)properties.get(key);
+	        s_logger.trace("activeFilter is " + activeFilter);
+	        modemConfig.setActiveFilter(activeFilter);
+        } else {
+ 	        s_logger.trace("activeFilter is null");
+        }
+        
         // LCP echo interval
         key = prefix + "lcpEchoInterval";
         if(properties.get(key) != null) {
@@ -1081,7 +1136,7 @@ public class NetworkConfiguration {
         	s_logger.trace("LCP Echo Interval is " + lcpEchoInterval);
         	modemConfig.setLcpEchoInterval(lcpEchoInterval);
         } else {
-        	s_logger.trace("LCP Echo Interval  is null");
+        	s_logger.trace("LCP Echo Interval is null");
         }
         
         // LCP echo failure

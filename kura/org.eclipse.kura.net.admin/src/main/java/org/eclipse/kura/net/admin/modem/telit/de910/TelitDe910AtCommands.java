@@ -12,27 +12,13 @@
 package org.eclipse.kura.net.admin.modem.telit.de910;
 
 public enum TelitDe910AtCommands {
-
-	at("at\r\n"),
-	getModelNumber("at+gmm\r\n"),
-	getManufacturer("at+gmi\r\n"),
-	getSerialNumber("at#cgsn\r\n"),
-	getRevision("at+gmr\r\n"),
-	getSignalStrength("at+csq\r\n"),
-	getIMSI("at#cimi\r\n"),
+	
 	getNetRegistrationStatus("at+creg?\r\n"), 
 	getMdn("at#modem=0?\r\n"),
 	getMsid("at#modem=1?\r\n"),
 	getServiceType("at+service?\r\n"),
 	getSessionDataVolume("at#gdatavol=1\r\n"),
-	provisionVerizon("atd*22899;\r\n"),
-	isGpsLocked("AT$GPSLOCK?\r\n"),
-	unlockGps("AT$GPSLOCK=0\r\n"),
-	isGpsPowered("AT$GPSP?\r\n"),
-	gpsPowerUp("AT$GPSP=1\r\n"),
-	gpsPowerDown("AT$GPSP=0\r\n"),
-	gpsEnableNMEA("AT$GPSNMUN=3,0,0,1,1,1,1\r\n"),
-	gpsDisableNMEA("+++");
+	provisionVerizon("atd*22899;\r\n");
 	
 	private String m_command;
 	

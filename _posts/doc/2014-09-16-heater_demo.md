@@ -72,7 +72,7 @@ the **Kura_Emulator_[OS]** entry. In the Bundles tab under Workspace,
 enable the **org.eclipse.kura.demo.heater** checkbox to enable it as
 shown below:
 
-![](../../assets/images/heater_demo///media/image1.png)
+![]({{ site.baseurl }}/assets/images/heater_demo///media/image1.png)
 
 Click the **Apply** and **Run** buttons to start the Kura Emulator. Once
 this setting has been made, you only need to right-click on the launch
@@ -92,7 +92,7 @@ web UI at <http://127.0.0.1:8080>. Once connected to the Kura web UI, a
 log in window appears prompting you to enter the Name and Password as
 shown below:
 
-![](../../assets/images/heater_demo///media/image2.png)
+![]({{ site.baseurl }}/assets/images/heater_demo///media/image2.png)
 
 Enter the appropriate name and password (default is admin/admin) and
 click **Log in**. The Kura Admin web UI appears as shown below:
@@ -103,7 +103,7 @@ From the Kura web UI, click on **MqttDataTransport** in the Services
 pane on the lower left of the browser window. You will see a menu
 similar to the one shown in the following screen capture:
 
-![](../../assets/images/heater_demo///media/image4.png)
+![]({{ site.baseurl }}/assets/images/heater_demo///media/image4.png)
 
 Fill in the following fields then click the **Apply** button:
 
@@ -121,7 +121,7 @@ To do so, click **DataService** in the Services area on the left of the
 browser window. For the ‘connect.auto-on-startup’ parameter, select
 **true** as shown below:
 
-![](../../assets/images/heater_demo///media/image5.png)
+![]({{ site.baseurl }}/assets/images/heater_demo///media/image5.png)
 
 <span id="_View_and_Modify" class="anchor"><span
 id="_Modify_Configuration_and" class="anchor"></span></span>
@@ -163,7 +163,7 @@ operational environment:
     application), the heater turns back on, and the temperature starts
     increment at the rate of the ‘temperature.increment’ rate.
 
-![](../../assets/images/heater_demo///media/image6.png)
+![]({{ site.baseurl }}/assets/images/heater_demo///media/image6.png)
 
 Click **Apply** for changes to take affect. The updated() method is
 called after settings are applied for the new configuration.

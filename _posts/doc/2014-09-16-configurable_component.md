@@ -52,7 +52,7 @@ Prerequisites
 -------------
 
 -   Requires Kura development environment set-up ([Setting up Kura
-    Development Environment](2.01-ESF-Setup.asp))
+    Development Environment](kura-setup.html))
 
 -   Implements the use of Kura web user-interface (UI)
 

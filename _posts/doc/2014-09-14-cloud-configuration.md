@@ -30,8 +30,8 @@ constrained devices and low-bandwidth, high-latency or unreliable
 networks, MQTT’s publish/subscribe, lightweight messaging protocol,
 minimizes network bandwidth and device resource requirements while also
 attempting to ensure reliability and delivery assurance in M2M / IoT
-solutions.\
-\
+solutions.
+<br />
 Kura also offers Cloud Services with an easy-to-use API layer for the
 M2M application to communicate with a remote server. In addition to
 simple publish/subscribe, the Cloud Service API simplifies the

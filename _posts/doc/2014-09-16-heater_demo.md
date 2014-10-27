@@ -1,6 +1,6 @@
 ---
 layout: page
-title:  "Heater Demo"
+title:  "Publishing Application"
 date:   2014-08-24 11:29:11
 categories: [doc]
 ---
@@ -10,6 +10,8 @@ categories: [doc]
 -   [Prerequisites](#section)
 
 [Heater Demo Introduction](#_Heater_Demo_Introduction)
+
+[Code Walkthrough](#code-walkthrough)
 
 [Run the Bundle](#run-the-bundle)
 
@@ -54,6 +56,116 @@ CloudClientListener. This tutorial demonstrates how to modify
 configurations of custom bundles and shows how those configuration
 changes can dynamically impact the behavior of the bundle through the
 Kura web UI.
+
+Code Walkthrough
+=================
+The following sections will highlight three important API layers when creating an application that will publish to the cloud. These layers are:
+
+- DataTransportService
+  - Available for standard MQTT messaging. Allows consumers of the service to connect to brokers, publish messages, and receive messages on subscribed topics
+- DataService
+  - Delegates data transport to the DataTransportService
+  - Provides extended features for managing broker connections, buffering of published messages, and priority based delivery of messages
+- CloudService
+  - Further extends the functionality of DataService
+  - Provides means for more complex flows (i.e. request/response)
+  - Manages single broker connection across multiple applications
+  - Provides payload data model with encoding/decoding serializers
+  - Publishes life cycle manages for devices and applications
+
+Acquiring CloudClient
+----------------------
+The CloudService can manage multiple applications over a shared MQTT connection by treating each application as a client. The example code uses the "setCloudService" and "unsetCloudService" methods for referencing and releasing the CloudService. In the bundles activate method, the service reference in conjunction with a unique application ID can then be used to obtain a CloudClient. The relevant code is shown below (ommitted sections are denoted by ==OMMITTED==):
+
+```
+==OMMITTED==
+// Cloud Application identifier
+private static final String APP_ID = "heater";
+
+==OMMITTED==
+
+public void setCloudService(CloudService cloudService) {
+	m_cloudService = cloudService;
+}
+
+public void unsetCloudService(CloudService cloudService) {
+	m_cloudService = null;
+}
+
+==OMMITTED==
+
+// Acquire a Cloud Application Client for this Application
+s_logger.info("Getting CloudClient for {}...", APP_ID);
+m_cloudClient = m_cloudService.newCloudClient(APP_ID);
+```
+
+Publishing/Subscribing
+-----------------------
+The private "doPublish" method is used to publish messages at a fixed rate. The method demonstrates how to use the CloudClient and KuraPayload to publish MQTT messages.
+
+```
+==OMMITTED==
+
+// Allocate a new payload
+KuraPayload payload = new KuraPayload();
+
+// Timestamp the message
+payload.setTimestamp(new Date());
+
+// Add the temperature as a metric to the payload
+payload.addMetric("temperatureInternal", m_temperature);
+payload.addMetric("temperatureExternal", 5.0F);
+payload.addMetric("temperatureExhaust",  30.0F);
+
+int code = m_random.nextInt();
+if ((m_random.nextInt() % 5) == 0) {
+	payload.addMetric("errorCode", code);
+}
+else {
+	payload.addMetric("errorCode", 0);
+}
+
+// Publish the message
+try {
+	m_cloudClient.publish(topic, payload, qos, retain);
+	s_logger.info("Published to {} message: {}", topic, payload);
+}
+catch (Exception e) {
+	s_logger.error("Cannot publish topic: "+topic, e);
+}
+```
+
+Similarly, the CloudClient can be used to subscribe to MQTT topics. Although not shown in the example code, the following snippet could be added to subscribe to all published messages:
+
+```
+m_cloudClient.subscribe(topic, qos);
+```
+
+Callback Methods
+-----------------
+The example class implements CloudClientListener, which provides methods for several common callback methods. The below snippet shows the relevant code for creating the listeners for the demo application.
+
+```
+==OMMITTED==
+
+public class Heater implements ConfigurableComponent, CloudClientListener
+
+==OMMITTED==
+
+m_cloudClient.addCloudClientListener(this);
+
+```
+
+The available methods for implementation are:
+
+- onControlMessageArrived: Method called when a control message is received from the broker.
+- onMessageArrived: Method called when a data message is received from the broker.
+- onConnectionLost: Method called when the client has lost connection with the broker.
+- onConnectionEstablished: Method called when the client establishes a connection with the broker.
+- onMessageConfirmed: Method called when a published message has been fully acknowledged by the broker (not applicable for qos 0 messages).
+- onMessagePublished: Method called when a message has been transfered from the publishing queue to the DataTransportService.
+
+For more information on the various Kura APIs, please review the [Kura APIs]({{site.baseurl }}/ref/api-ref.html)
 
 Run the Bundle
 ==============

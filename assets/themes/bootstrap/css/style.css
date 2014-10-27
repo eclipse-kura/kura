@@ -1,3 +1,9 @@
+
+
+body {
+  padding-top: 70px;
+}
+
 td, thead {
   border: 1px solid;
 }
@@ -23,6 +29,7 @@ p img {
   color: #4b8fd0;
   padding: 3px 15px;
 }
+
 
 /* Custom container */
 .container-narrow {
@@ -89,3 +96,13 @@ p img {
   background: #57A957;
   border: 1px solid #4c964d;
   color: #FFF; }
+
+@media (max-width: 1200px){
+.affix{
+    position:static;
+}
+
+@media (min-width: 1201px){
+.affix{
+    position:fixed;
+}

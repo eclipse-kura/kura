@@ -1,6 +1,6 @@
 ---
 layout: page
-title:  "Configurable Component"
+title:  "Configurable Application"
 date:   2014-08-24 11:30:11
 categories: [doc]
 ---

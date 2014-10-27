@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLDataException;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
@@ -392,13 +393,49 @@ public class DbDataStore implements DataStore
 	}
     
     public synchronized void deleteStaleMessages(int purgeAge) throws KuraStoreException {
+    	final int INTERVAL_FIELD_OVERFLOW = -3435;
     	Timestamp now = new Timestamp((new Date()).getTime());
     	// Delete dropped messages (published with QoS > 0)
-    	execute("DELETE FROM ds_messages WHERE DATEDIFF('ss', droppedOn, ?) > ? AND droppedOn IS NOT NULL;", now, purgeAge);
+    	try {
+    		execute("DELETE FROM ds_messages WHERE DATEDIFF('ss', droppedOn, ?) > ? AND droppedOn IS NOT NULL;", now, purgeAge);
+    	} catch (KuraStoreException e) {
+    		// Interval field overflow
+    		Throwable cause = e.getCause();
+    		if (cause != null && cause instanceof SQLDataException && ((SQLDataException) cause).getErrorCode() == INTERVAL_FIELD_OVERFLOW) {
+    			s_logger.info("Delete all dropped messages older than one year");
+    			execute("DELETE FROM ds_messages WHERE DATEDIFF('yy', droppedOn, ?) > ? AND droppedOn IS NOT NULL;", now, 0);
+    		} else {
+    			throw e;
+    		}
+    	}
+    	
     	// Delete stale confirmed messages (published with QoS > 0)
-    	execute("DELETE FROM ds_messages WHERE DATEDIFF('ss', confirmedOn, ?) > ? AND confirmedOn IS NOT NULL;", now, purgeAge);
+    	try {
+    		execute("DELETE FROM ds_messages WHERE DATEDIFF('ss', confirmedOn, ?) > ? AND confirmedOn IS NOT NULL;", now, purgeAge);
+    	} catch (KuraStoreException e) {
+    		// Interval field overflow
+    		Throwable cause = e.getCause();
+    		if (cause != null && cause instanceof SQLDataException && ((SQLDataException) cause).getErrorCode() == INTERVAL_FIELD_OVERFLOW) {
+    			s_logger.info("Delete all confirmed messages older than one year");
+    			execute("DELETE FROM ds_messages WHERE DATEDIFF('yy', confirmedOn, ?) > ? AND confirmedOn IS NOT NULL;", now, 0);
+    		} else {
+    			throw e;
+    		}    			
+    	}
+    	
     	// Delete stale published messages with QoS == 0
-    	execute("DELETE FROM ds_messages WHERE qos = 0 AND DATEDIFF('ss', publishedOn, ?) > ? AND publishedOn IS NOT NULL;", now, purgeAge);
+    	try {
+    		execute("DELETE FROM ds_messages WHERE qos = 0 AND DATEDIFF('ss', publishedOn, ?) > ? AND publishedOn IS NOT NULL;", now, purgeAge);
+    	} catch (KuraStoreException e) {
+    		// Interval field overflow
+    		Throwable cause = e.getCause();
+    		if (cause != null && cause instanceof SQLDataException && ((SQLDataException) cause).getErrorCode() == INTERVAL_FIELD_OVERFLOW) {
+    			s_logger.info("Delete all published messages older than one year");
+    			execute("DELETE FROM ds_messages WHERE qos = 0 AND DATEDIFF('yy', publishedOn, ?) > ? AND publishedOn IS NOT NULL;", now, 0);
+    		} else {
+    			throw e;
+    		}    		
+    	}
 	}
 	
     public synchronized void defrag() throws KuraStoreException {

@@ -38,6 +38,7 @@ public class Console
 {
 	private static final Logger s_logger = LoggerFactory.getLogger(Console.class);
 
+	private static final String ESF_DATA_DIR = "esf.data";
 	private static final String SERVLET_ALIAS_ROOT = "servlet.alias.root";
 	private static final String APP_ROOT		   = "app.root";
 
@@ -123,8 +124,9 @@ public class Console
 				String servletRoot = s_aliasRoot;
 	
 				// Initialize AuthenticationManager with DbService
+				String dataDir = m_systemService.getProperties().getProperty(ESF_DATA_DIR);
 				AuthenticationManager authMgr = AuthenticationManager.getInstance();
-				authMgr.init(m_dbService);
+				authMgr.init(m_dbService, dataDir);
 			
 				// Initialize HttpService
 				HttpContext httpCtx = new SecureBasicHttpContext(m_httpService.createDefaultHttpContext(), authMgr);	

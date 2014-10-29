@@ -11,6 +11,12 @@
  */
 package org.eclipse.kura.web;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -20,13 +26,13 @@ import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.db.DbService;
 import org.eclipse.kura.web.server.util.ServiceLocator;
 
-
 public class AuthenticationManager 
 {
 	private static final AuthenticationManager s_instance = new AuthenticationManager();
 	
 	private boolean   m_inited;
 	private DbService m_dbService;
+	private String	  m_dataDir;
 	
 	private AuthenticationManager() {
 		m_inited = false;
@@ -41,10 +47,11 @@ public class AuthenticationManager
 	}
 
 
-	public synchronized void init(DbService dbService) 
+	public synchronized void init(DbService dbService, String dataDir) 
 		throws SQLException 
 	{
 		if (!s_instance.m_inited) {
+			s_instance.m_dataDir = dataDir;
 			s_instance.m_dbService = dbService;
 			s_instance.initUserStore();
 			s_instance.m_inited = true;
@@ -101,6 +108,14 @@ public class AuthenticationManager
 			
 			stmt.execute();
 			conn.commit();
+
+			// If we are using in memory only storage,
+			// then save admin password to disk
+			if (conn.getMetaData().getURL().startsWith("jdbc:hsqldb:mem")) {
+				PrintWriter writer = new PrintWriter(m_dataDir + "/ap_store", "UTF-8");
+				writer.println("admin:" + cryptoService.encryptAes(newPassword));
+				writer.close();
+			}
 		}
 		catch (SQLException e) {
 			throw e;
@@ -146,6 +161,30 @@ public class AuthenticationManager
 			if (rs != null && rs.next()) {
 				bAdminExists = true;
 			}
+			
+			// If admin not in DB AND we are using in memory only storage,
+			// then check if admin has been saved to disk
+			if (!bAdminExists && conn.getMetaData().getURL().startsWith("jdbc:hsqldb:mem")) {
+				try {
+					CryptoService cryptoService = ServiceLocator.getInstance().getService(CryptoService.class);
+					File adminFile = new File(m_dataDir + "/ap_store");
+					if (adminFile.exists() && !adminFile.isDirectory()) {
+						BufferedReader br = new BufferedReader(new FileReader(adminFile));
+						String[] adminString = br.readLine().split(":", 2);
+						createAdminUser(cryptoService.decryptAes(adminString[1]));
+						bAdminExists = true;
+					}
+					
+				} catch (FileNotFoundException e) {
+					e.printStackTrace();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				
+			}
 		}
 		catch (SQLException e) {
 			throw e;
@@ -161,8 +200,11 @@ public class AuthenticationManager
 		}
     }
 
-
-    private synchronized void createAdminUser() 
+    private synchronized void createAdminUser() throws SQLException {
+    	createAdminUser("admin");
+    }
+    
+    private synchronized void createAdminUser(String pwd) 
     	throws SQLException 
     {
 		Connection conn = null;
@@ -172,7 +214,7 @@ public class AuthenticationManager
 			conn = m_dbService.getConnection();
 			stmt = conn.prepareStatement("INSERT INTO dn_user (username, password) VALUES (?, ?);");
 			stmt.setString(1, "admin");
-			stmt.setString(2, cryptoService.sha1Hash("admin"));
+			stmt.setString(2, cryptoService.sha1Hash(pwd));
 			
 			stmt.execute();
 		}

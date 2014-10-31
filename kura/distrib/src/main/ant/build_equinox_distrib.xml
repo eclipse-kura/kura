@@ -137,6 +137,8 @@ java -Xms${kura.mem.size} -Xmx${kura.mem.size} -XX:MaxPermSize=${kura.mem.size} 
 	-Dkura.data.dir=${DIR}/data \
 	-Ddpa.configuration=${DIR}/kura/dpa.properties \
 	-Dlog4j.configuration=file:${DIR}/kura/log4j.properties \
+	-Djava.security.policy=${DIR}/kura/jdk.dio.policy \
+	-Djdk.dio.registry=${DIR}/kura/jdk.dio.properties \
 	-jar ${DIR}/plugins/org.eclipse.osgi_3.8.1.v20120830-144521.jar \
 	-configuration  /tmp/.kura/configuration \
 	-console \
@@ -164,6 +166,8 @@ java -Xms${kura.mem.size} -Xmx${kura.mem.size} -XX:MaxPermSize=${kura.mem.size} 
 	-Dkura.data.dir=${DIR}/data \
 	-Ddpa.configuration=${DIR}/kura/dpa.properties \
 	-Dlog4j.configuration=file:${DIR}/kura/log4j.properties \
+	-Djava.security.policy=${DIR}/kura/jdk.dio.policy \
+	-Djdk.dio.registry=${DIR}/kura/jdk.dio.properties \
 	-jar ${DIR}/plugins/org.eclipse.osgi_3.8.1.v20120830-144521.jar \
 	-configuration  /tmp/.kura/configuration \
 	-console \
@@ -191,6 +195,8 @@ nohup java -Xms${kura.mem.size} -Xmx${kura.mem.size} -XX:MaxPermSize=${kura.mem.
 	-Dkura.data.dir=${DIR}/data \
 	-Ddpa.configuration=${DIR}/kura/dpa.properties \
 	-Dlog4j.configuration=file:${DIR}/kura/log4j.properties \
+	-Djava.security.policy=${DIR}/kura/jdk.dio.policy \
+	-Djdk.dio.registry=${DIR}/kura/jdk.dio.properties \
 	-jar ${DIR}/plugins/org.eclipse.osgi_3.8.1.v20120830-144521.jar \
 	-configuration  /tmp/.kura/configuration \
 	-console 5002 \

@@ -207,6 +207,12 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
 				throw KuraException.internalError("the channel " + wifiConfig.getChannels()[0] + " must be between 1 (inclusive) and 11 (inclusive) or 1 (inclusive) and 13 (inclusive) depending on your locale");
 			}
 			
+			if (wifiConfig.ignoreSSID()) {
+				fileAsString = fileAsString.replaceFirst("KURA_IGNORE_BROADCAST_SSID", "2");
+			} else {
+				fileAsString = fileAsString.replaceFirst("KURA_IGNORE_BROADCAST_SSID", "0");
+			}
+			
 			//everything is set and we haven't failed - write the file
 			this.copyFile(fileAsString, outputFile);
 			
@@ -334,6 +340,12 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
 			} else {
 				throw KuraException.internalError("the passwd can not be null");
 			}
+			
+			if (wifiConfig.ignoreSSID()) {
+				fileAsString = fileAsString.replaceFirst("KURA_IGNORE_BROADCAST_SSID", "2");
+			} else {
+				fileAsString = fileAsString.replaceFirst("KURA_IGNORE_BROADCAST_SSID", "0");
+			}
 
 			//everything is set and we haven't failed - write the file
 			this.copyFile(fileAsString, outputFile);
@@ -423,6 +435,12 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
 				}
 			} else {
 				throw KuraException.internalError("the passwd can not be null");
+			}
+			
+			if (wifiConfig.ignoreSSID()) {
+				fileAsString = fileAsString.replaceFirst("KURA_IGNORE_BROADCAST_SSID", "2");
+			} else {
+				fileAsString = fileAsString.replaceFirst("KURA_IGNORE_BROADCAST_SSID", "0");
 			}
 
 			//everything is set and we haven't failed - write the file

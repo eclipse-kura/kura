@@ -56,6 +56,9 @@ public class WifiConfig implements NetConfig {
 	/** Ping Access Point **/
 	private boolean m_pingAccessPoint = false;
 	
+	/** Ignore SSID **/
+	private boolean m_ignoreSSID;
+	
 	/** The driver of the wifi interface **/
 	private String m_driver;
 	
@@ -181,6 +184,14 @@ public class WifiConfig implements NetConfig {
 	public void setPingAccessPoint(boolean pingAP) {
 		this.m_pingAccessPoint = pingAP;
 	}
+	
+	public boolean ignoreSSID() {
+		return m_ignoreSSID;
+	}
+	
+	public void setIgnoreSSID(boolean ignoreSSID) {
+		m_ignoreSSID = ignoreSSID;
+	}
 
 	@Override
 	public int hashCode() {
@@ -241,6 +252,8 @@ public class WifiConfig implements NetConfig {
 		
 		result = prime * result + (m_pingAccessPoint? 1 : 0);
 		
+		result = prime * result + (m_ignoreSSID? 1 : 0);
+		
 		return result;
 	}
 	
@@ -291,6 +304,9 @@ public class WifiConfig implements NetConfig {
 		if (this.m_pingAccessPoint != other.pingAccessPoint()) {
 			return false;
 		}
+		if (this.m_ignoreSSID != other.ignoreSSID()) {
+			return false;
+		}
 		
 		return true;
 	}
@@ -318,6 +334,10 @@ public class WifiConfig implements NetConfig {
             .append(m_ssid)
             .append(" :: ");
         }
+        sb.append ("ignoreSSID: ")
+        	.append(m_ignoreSSID)
+        	.append(" :: ");
+        
 		if(m_driver != null) {
 			sb.append("driver: ")
 			.append(m_driver)

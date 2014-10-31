@@ -245,6 +245,10 @@ public class PppConfigWriter implements NetworkConfigurationVisitor {
 					StringBuilder key = new StringBuilder().append("net.interface.").append(newInterfaceName).append(".config.gpsEnabled");
 					s_logger.debug("Setting gpsEnabled for " + newInterfaceName);
 					KuranetConfig.setProperty(key.toString(), Boolean.toString(modemConfig.isGpsEnabled()));
+					
+					key = new StringBuilder().append("net.interface.").append(newInterfaceName).append(".config.resetTimeout");
+					s_logger.debug("Setting modem resetTimeout for " + newInterfaceName);
+					KuranetConfig.setProperty(key.toString(), Integer.toString(modemConfig.getResetTimeout()));
 				} else {
 					s_logger.error("Error writing connect scripts - modemConfig is null");
 				}

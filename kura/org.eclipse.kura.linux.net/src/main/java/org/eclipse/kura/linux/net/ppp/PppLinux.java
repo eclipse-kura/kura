@@ -55,12 +55,15 @@ public class PppLinux {
 		int pid = getPid(iface, port);
 		if(pid >= 0) {
     		s_logger.info("killing " + iface + " pid=" + pid);
+    		LinuxProcessUtil.kill(pid);
+    		/*
     		if(!LinuxProcessUtil.stop(pid)) {
                 s_logger.debug("Failed to stop process...try to kill");
                 if(!LinuxProcessUtil.kill(pid)) {
                     throw new KuraException(KuraErrorCode.INTERNAL_ERROR, ("error killing process, pid=" + pid));
                 }		    
     		}
+    		*/
 		}
 	}
 	

@@ -142,10 +142,8 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 				} else if (netIfConfig.getType() == NetInterfaceType.MODEM) {
 					gwtNetConfig = new GwtModemInterfaceConfig();
 					((GwtModemInterfaceConfig)gwtNetConfig).setModemId(((ModemInterface)netIfConfig).getModemIdentifier());
-                    //((GwtModemInterfaceConfig)gwtNetConfig).setHwSerial(((ModemInterface)netIfConfig).getSerialNumber());
                     ((GwtModemInterfaceConfig)gwtNetConfig).setManufacturer(((ModemInterface)netIfConfig).getManufacturer());
                     ((GwtModemInterfaceConfig)gwtNetConfig).setModel(((ModemInterface)netIfConfig).getModel());
-                    ((GwtModemInterfaceConfig)gwtNetConfig).setGpsSupported(((ModemInterface)netIfConfig).isGpsSupported());
                     
                     List<String> technologyList = new ArrayList<String>();
                     List<ModemTechnologyType> technologyTypes = ((ModemInterface)netIfConfig).getTechnologyTypes();
@@ -392,6 +390,9 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 									// ping access point?
 									gwtWifiConfig.setPingAccessPoint(wifiConfig.pingAccessPoint());
 									
+									// ignore SSID?
+									gwtWifiConfig.setIgnoreSSID(wifiConfig.ignoreSSID());
+									
 									// passkey
 									gwtWifiConfig.setPassword(wifiConfig.getPasskey());
 
@@ -496,6 +497,10 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 					                    		} catch (KuraException e) {
 					                    			e.printStackTrace();
 					                    		}
+					                    		
+					                    		boolean gpsSupported = cellModemService.isGpsSupported();
+					                    		s_logger.debug("Setting GPS supported to {}", gpsSupported);
+					                            ((GwtModemInterfaceConfig)gwtNetConfig).setGpsSupported(gpsSupported);
 					                    	}
 										}
 									}
@@ -527,6 +532,16 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 									gwtModemConfig.setPassword(modemConfig.getPassword());
                                     
                                     gwtModemConfig.setPppNum(modemConfig.getPppNumber());
+                                     
+                                    gwtModemConfig.setResetTimeout(modemConfig.getResetTimeout());
+                                    
+                                    gwtModemConfig.setPersist(modemConfig.isPersist());
+                                    
+                                    gwtModemConfig.setMaxFail(modemConfig.getMaxFail());
+                                    
+                                    gwtModemConfig.setIdle(modemConfig.getIdle());
+                                    
+                                    gwtModemConfig.setActiveFilter(modemConfig.getActiveFilter());
                                     
                                     gwtModemConfig.setLcpEchoInterval(modemConfig.getLcpEchoInterval());
                                     
@@ -764,6 +779,11 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 					modemConfig.setHeaderCompression(gwtModemConfig.getHeaderCompression());
 					modemConfig.setPassword(gwtModemConfig.getPassword());
 					modemConfig.setUsername(gwtModemConfig.getUsername());
+					modemConfig.setResetTimeout(gwtModemConfig.getResetTimeout());
+					modemConfig.setPersist(gwtModemConfig.isPersist());
+					modemConfig.setMaxFail(gwtModemConfig.getMaxFail());
+					modemConfig.setIdle(gwtModemConfig.getIdle());
+					modemConfig.setActiveFilter(gwtModemConfig.getActiveFilter());
 					modemConfig.setLcpEchoInterval(gwtModemConfig.getLcpEchoInterval());
 					modemConfig.setLcpEchoFailure(gwtModemConfig.getLcpEchoFailure());
 					modemConfig.setGpsEnabled(gwtModemConfig.isGpsEnabled());
@@ -1288,6 +1308,9 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 			
 			// ping access point?
 			wifiConfig.setPingAccessPoint(gwtWifiConfig.pingAccessPoint());
+			
+			// ignore SSID?
+			wifiConfig.setIgnoreSSID(gwtWifiConfig.ignoreSSID());
 		}
 		
 		return wifiConfig;

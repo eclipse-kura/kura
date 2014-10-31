@@ -79,6 +79,17 @@ public class ModemConfigTab extends LayoutContainer
 	private SimpleComboBox<String>   m_authTypeCombo;
 	private TextField<String>        m_usernameField;
 	private TextField<String>        m_passwordField;
+	
+	private NumberField 			 m_resetTimeoutField;
+	
+	private Radio 				   	 m_persistRadioTrue;
+	private Radio 				   	 m_persistRadioFalse;
+	private RadioGroup 			   	 m_persistRadioGroup;
+	private NumberField 			 m_maxFailField;
+	
+	private NumberField 			 m_idleField;
+	private TextField<String>        m_activeFilterField;
+	
 	private NumberField 			 m_lcpEchoIntervalField;
 	private NumberField				 m_lcpEchoFailureField;
 	
@@ -166,6 +177,15 @@ public class ModemConfigTab extends LayoutContainer
         		updatedModemNetIf.setPassword(password);
     		}    
     		
+    		updatedModemNetIf.setResetTimeout(m_resetTimeoutField.getValue().intValue());
+    		
+    		updatedModemNetIf.setPersist(m_persistRadioTrue.getValue().booleanValue());
+    		updatedModemNetIf.setMaxFail(m_maxFailField.getValue().intValue());
+    		updatedModemNetIf.setIdle(m_idleField.getValue().intValue());
+    		
+    		String activeFilter = (m_activeFilterField.getValue() != null) ? m_activeFilterField.getValue() : "";
+    		updatedModemNetIf.setActiveFilter(activeFilter);
+    		
     		updatedModemNetIf.setLcpEchoInterval(m_lcpEchoIntervalField.getValue().intValue());
     		updatedModemNetIf.setLcpEchoFailure(m_lcpEchoFailureField.getValue().intValue());
     		updatedModemNetIf.setGpsEnabled(m_enableGpsRadioTrue.getValue().booleanValue());
@@ -179,7 +199,12 @@ public class ModemConfigTab extends LayoutContainer
         	    updatedModemNetIf.setApn(m_selectNetIfConfig.getApn());
         	    updatedModemNetIf.setAuthType(m_selectNetIfConfig.getAuthType());
         	    updatedModemNetIf.setUsername(m_selectNetIfConfig.getUsername());
-        	    updatedModemNetIf.setPassword(m_selectNetIfConfig.getPassword());    
+        	    updatedModemNetIf.setPassword(m_selectNetIfConfig.getPassword()); 
+        	    updatedModemNetIf.setResetTimeout(m_selectNetIfConfig.getResetTimeout());
+        	    updatedModemNetIf.setPersist(m_selectNetIfConfig.isPersist());
+        	    updatedModemNetIf.setMaxFail(m_selectNetIfConfig.getMaxFail());
+        	    updatedModemNetIf.setIdle(m_selectNetIfConfig.getIdle());
+        	    updatedModemNetIf.setActiveFilter(m_selectNetIfConfig.getActiveFilter());
         	    updatedModemNetIf.setLcpEchoInterval(m_selectNetIfConfig.getLcpEchoInterval());
         	    updatedModemNetIf.setLcpEchoFailure(m_selectNetIfConfig.getLcpEchoFailure());
         	    updatedModemNetIf.setGpsEnabled(m_selectNetIfConfig.isGpsEnabled());
@@ -405,13 +430,70 @@ public class ModemConfigTab extends LayoutContainer
         m_passwordField.addPlugin(m_dirtyPlugin);
         fieldSet.add(m_passwordField, formData);      
         
+        // reset timeout
+        m_resetTimeoutField = new NumberField();
+        m_resetTimeoutField.setAllowBlank(false);
+        m_resetTimeoutField.setName("resetTimeout");
+        m_resetTimeoutField.setFieldLabel(MSGS.netModemResetTimeout());
+        m_resetTimeoutField.addListener(Events.OnMouseOver, new MouseOverListener(MSGS.netModemToolTipResetTimeout()));
+        m_resetTimeoutField.addPlugin(m_dirtyPlugin);
+        m_resetTimeoutField.setStyleAttribute("margin-top", Constants.LABEL_MARGIN_TOP_SEPARATOR);
+        fieldSet.add(m_resetTimeoutField, formData);
+        
+        m_persistRadioTrue = new Radio();  
+        m_persistRadioTrue.setBoxLabel(MSGS.trueLabel());
+        m_persistRadioTrue.setItemId("true");
+        
+        m_persistRadioFalse = new Radio();  
+        m_persistRadioFalse.setBoxLabel(MSGS.falseLabel());  
+        m_persistRadioFalse.setItemId("false");
+        
+        m_persistRadioGroup = new RadioGroup();
+        m_persistRadioGroup.setName("modemPersist");
+        m_persistRadioGroup.setFieldLabel(MSGS.netModemPersist()); 
+        m_persistRadioGroup.add(m_persistRadioTrue);  
+        m_persistRadioGroup.add(m_persistRadioFalse);
+        m_persistRadioGroup.addPlugin(m_dirtyPlugin);  
+        m_persistRadioGroup.addListener(Events.OnMouseOver, new MouseOverListener(MSGS.netModemToolTipPersist()));
+        m_persistRadioGroup.setStyleAttribute("margin-top", Constants.LABEL_MARGIN_TOP_SEPARATOR);
+        fieldSet.add(m_persistRadioGroup, formData);
+        
+        // maxfail
+        m_maxFailField = new NumberField();
+        m_maxFailField.setAllowBlank(false);
+        m_maxFailField.setName("modemMaxFail");
+        m_maxFailField.setFieldLabel(MSGS.netModemMaxFail());
+        m_maxFailField.addListener(Events.OnMouseOver, new MouseOverListener(MSGS.netModemToolTipMaxFail()));
+        m_maxFailField.addPlugin(m_dirtyPlugin);
+        //m_maxFailField.setStyleAttribute("margin-top", Constants.LABEL_MARGIN_TOP_SEPARATOR);
+        fieldSet.add(m_maxFailField, formData);
+        
+        // idle
+        m_idleField = new NumberField();
+        m_idleField.setAllowBlank(false);
+        m_idleField.setName("modemIdle");
+        m_idleField.setFieldLabel(MSGS.netModemIdle());
+        m_idleField.addListener(Events.OnMouseOver, new MouseOverListener(MSGS.netModemToolTipIdle()));
+        m_idleField.addPlugin(m_dirtyPlugin);
+        fieldSet.add(m_idleField, formData);
+        
+        // active-filter
+        m_activeFilterField = new TextField<String>();
+        m_activeFilterField.setAllowBlank(true);
+        m_activeFilterField.setName("active-filter");
+        m_activeFilterField.setFieldLabel(MSGS.netModemActiveFilter());
+        m_activeFilterField.addListener(Events.OnMouseOver, new MouseOverListener(MSGS.netModemToolTipActiveFilter()));
+        m_activeFilterField.addStyleName("esf-textfield");
+        m_activeFilterField.addPlugin(m_dirtyPlugin);
+        fieldSet.add(m_activeFilterField, formData);    
+        
         //
         // LCP Echo Interval
         // 
         m_lcpEchoIntervalField = new NumberField();
         m_lcpEchoIntervalField.setAllowBlank(false);
         m_lcpEchoIntervalField.setName("lcpEchoInterval");
-        m_lcpEchoIntervalField.setFieldLabel(MSGS.netLcpEchoInterval());
+        m_lcpEchoIntervalField.setFieldLabel(MSGS.netModemLcpEchoInterval());
         m_lcpEchoIntervalField.addListener(Events.OnMouseOver, new MouseOverListener(MSGS.netModemToolTipLcpEchoInterval()));
         m_lcpEchoIntervalField.addPlugin(m_dirtyPlugin);
         m_lcpEchoIntervalField.setStyleAttribute("margin-top", Constants.LABEL_MARGIN_TOP_SEPARATOR);
@@ -423,7 +505,7 @@ public class ModemConfigTab extends LayoutContainer
         m_lcpEchoFailureField = new NumberField();
         m_lcpEchoFailureField.setAllowBlank(false);
         m_lcpEchoFailureField.setName("lcpEchoFailure");
-        m_lcpEchoFailureField.setFieldLabel(MSGS.netLcpEchoFailure());
+        m_lcpEchoFailureField.setFieldLabel(MSGS.netModemLcpEchoFailure());
         m_lcpEchoFailureField.addListener(Events.OnMouseOver, new MouseOverListener(MSGS.netModemToolTipLcpEchoFailure()));
         m_lcpEchoFailureField.addPlugin(m_dirtyPlugin);
         fieldSet.add(m_lcpEchoFailureField, formData);
@@ -447,8 +529,9 @@ public class ModemConfigTab extends LayoutContainer
         fieldSet.add(m_enableGpsRadioGroup, formData);
         
 	    m_formPanel.add(fieldSet);
+	    m_formPanel.setScrollMode(Scroll.AUTO);
 	    add(m_formPanel);
-	    setScrollMode(Scroll.AUTO);
+	    setScrollMode(Scroll.AUTOX);
 	    m_initialized = true;
 	}
 	    
@@ -516,7 +599,39 @@ public class ModemConfigTab extends LayoutContainer
 			m_usernameField.setOriginalValue(m_usernameField.getValue());
 			
 			m_passwordField.setValue(m_selectNetIfConfig.getPassword());
-			m_passwordField.setOriginalValue(m_passwordField.getValue());			
+			m_passwordField.setOriginalValue(m_passwordField.getValue());	
+			
+			if (m_selectNetIfConfig.isPersist()) {
+				m_persistRadioTrue.setValue(true);
+				m_persistRadioTrue.setOriginalValue(m_persistRadioTrue.getValue());
+				
+				m_persistRadioFalse.setValue(false);
+				m_persistRadioFalse.setOriginalValue(m_persistRadioFalse.getValue());
+				
+				m_persistRadioGroup.setOriginalValue(m_persistRadioTrue);
+				m_persistRadioGroup.setValue(m_persistRadioGroup.getValue());
+			} else {
+				m_persistRadioTrue.setValue(false);
+				m_persistRadioTrue.setOriginalValue(m_persistRadioTrue.getValue());
+
+				m_persistRadioFalse.setValue(true);
+				m_persistRadioFalse.setOriginalValue(m_persistRadioFalse.getValue());
+
+				m_persistRadioGroup.setOriginalValue(m_persistRadioFalse);
+				m_persistRadioGroup.setValue(m_persistRadioGroup.getValue());
+			}
+			
+			m_resetTimeoutField.setValue(m_selectNetIfConfig.getResetTimeout());
+			m_resetTimeoutField.setOriginalValue(m_resetTimeoutField.getValue());
+			
+			m_maxFailField.setValue(m_selectNetIfConfig.getMaxFail());
+			m_maxFailField.setOriginalValue(m_maxFailField.getValue());
+			
+			m_idleField.setValue(m_selectNetIfConfig.getIdle());
+			m_idleField.setOriginalValue(m_idleField.getValue());
+			
+			m_activeFilterField.setValue(m_selectNetIfConfig.getActiveFilter());
+			m_activeFilterField.setOriginalValue(m_activeFilterField.getValue());
 			
 			m_lcpEchoIntervalField.setValue(m_selectNetIfConfig.getLcpEchoInterval());
 			m_lcpEchoIntervalField.setOriginalValue(m_lcpEchoIntervalField.getValue());
@@ -617,6 +732,18 @@ public class ModemConfigTab extends LayoutContainer
 		
 		m_passwordField.setValue("");
 		m_passwordField.setOriginalValue(m_passwordField.getValue());	
+		
+		m_resetTimeoutField.setValue(null);
+		m_resetTimeoutField.setOriginalValue(m_resetTimeoutField.getValue());
+		
+		m_maxFailField.setValue(null);
+		m_maxFailField.setOriginalValue(m_maxFailField.getValue());
+		
+		m_idleField.setValue(null);
+		m_idleField.setOriginalValue(m_idleField.getValue());
+		
+		m_activeFilterField.setValue("");
+		m_activeFilterField.setOriginalValue(m_activeFilterField.getValue());
 		
 		m_lcpEchoIntervalField.setValue(null);
 		m_lcpEchoIntervalField.setOriginalValue(m_lcpEchoIntervalField.getValue());		

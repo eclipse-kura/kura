@@ -386,11 +386,11 @@ and paste the following XML text into ConfigurableExample.xml for this
 example. Save changes to ConfigurableExample.xml.
 
 ```
-  <?xml version=*"1.0"* encoding=*"UTF-8"*?>
-  <MetaData xmlns=*"http://www.osgi.org/xmlns/metatype/v1.2.0"* localization=*"en_us"*>
-      <OCD id=*"org.eclipse.kura.example.configurable.ConfigurableExample"*
-          name=*"ConfigurableExample"*
-          description=*"This is a sample metatype file for a simple configurable component">
+  <?xml version="1.0" encoding="UTF-8"?>
+  <MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
+      <OCD id="org.eclipse.kura.example.configurable.ConfigurableExample"
+          name="ConfigurableExample"
+          description="This is a sample metatype file for a simple configurable component">
 
           <AD id="param1.string"
               name="param1.string"

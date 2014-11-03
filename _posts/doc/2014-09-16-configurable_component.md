@@ -152,39 +152,39 @@ Class**. Set the Package field to
 Write the following code for the new class. You can copy and paste the
 code provided below into your newly created Java class file.
 
-```
-  package org.eclipse.kura.example.configurable;
+```java
+package org.eclipse.kura.example.configurable;
 
-  public class ConfigurableExample implements ConfigurableComponent {
-      private static final Logger s_logger = LoggerFactory.getLogger(ConfigurableExample.class);
-      private static final String APP_ID = "org.eclipse.kura.example.configurable.ConfigurableExample";
-      private Map<String, Object> properties;
+public class ConfigurableExample implements ConfigurableComponent {
+    private static final Logger s_logger = LoggerFactory.getLogger(ConfigurableExample.class);
+    private static final String APP_ID = "org.eclipse.kura.example.configurable.ConfigurableExample";
+    private Map<String, Object> properties;
 
-      protected void activate(ComponentContext componentContext) {
-          s_logger.info("Bundle " + APP_ID + " has started!");
-      }
+    protected void activate(ComponentContext componentContext) {
+        s_logger.info("Bundle " + APP_ID + " has started!");
+    }
 
-      protected void activate(ComponentContext componentContext, Map<String, Object> properties) {
-          s_logger.info("Bundle " + APP_ID + " has started with config!");
-          updated(properties);
-      }
+    protected void activate(ComponentContext componentContext, Map<String, Object> properties) {
+        s_logger.info("Bundle " + APP_ID + " has started with config!");
+        updated(properties);
+    }
 
-      protected void deactivate(ComponentContext componentContext) {
-          s_logger.info("Bundle " + APP_ID + " has stopped!");
-      }
+    protected void deactivate(ComponentContext componentContext) {
+        s_logger.info("Bundle " + APP_ID + " has stopped!");
+    }
 
-      public void updated(Map<String, Object> properties) {
-          this.properties = properties;
-          if(properties != null && !properties.isEmpty()) {
-              Iterator<Entry<String, Object>> it = properties.entrySet().iterator();
-              while (it.hasNext()) {
-                  Entry<String, Object> entry = it.next();
-                  s_logger.info("New property - " + entry.getKey() + " = " +
-                  entry.getValue() + " of type " + entry.getValue().getClass().toString());
-              }
-          }
-      }
-  }
+    public void updated(Map<String, Object> properties) {
+        this.properties = properties;
+        if(properties != null && !properties.isEmpty()) {
+            Iterator<Entry<String, Object>> it = properties.entrySet().iterator();
+            while (it.hasNext()) {
+                Entry<String, Object> entry = it.next();
+                s_logger.info("New property - " + entry.getKey() + " = " +
+                entry.getValue() + " of type " + entry.getValue().getClass().toString());
+            }
+        }
+    }
+}
 ```
 
 The activate() method is the entry point when the bundle is started.
@@ -227,48 +227,48 @@ ConfigurableExample class.
 
 The complete set of code (with import statements) is shown below.
 
-```
-  package org.eclipse.kura.example.configurable;
+```java
+package org.eclipse.kura.example.configurable;
 
-  import java.util.Iterator;
-  import java.util.Map;
-  import java.util.Map.Entry;
-  import org.osgi.service.component.ComponentContext;
-  import org.slf4j.Logger;
-  import org.slf4j.LoggerFactory;
-  import org.eclipse.kura.configuration.ConfigurableComponent;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Map.Entry;
+import org.osgi.service.component.ComponentContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.eclipse.kura.configuration.ConfigurableComponent;
 
-  public class ConfigurableExample implements ConfigurableComponent {
+public class ConfigurableExample implements ConfigurableComponent {
 
-      private static final Logger s_logger = LoggerFactory.getLogger(ConfigurableExample.class);
-      private static final String APP_ID* = "org.eclipse.kura.configurable.ConfigurableExample";
-      private Map<String, Object> properties;
+    private static final Logger s_logger = LoggerFactory.getLogger(ConfigurableExample.class);
+    private static final String APP_ID* = "org.eclipse.kura.configurable.ConfigurableExample";
+    private Map<String, Object> properties;
 
-      protected void activate(ComponentContext componentContext) {
-        s_logger.info("Bundle " + APP_ID + " has started!");
-      }
+    protected void activate(ComponentContext componentContext) {
+      s_logger.info("Bundle " + APP_ID + " has started!");
+    }
 
-      protected void activate(ComponentContext componentContext, Map<String, Object> properties) {
-          s_logger.info("Bundle " + APP_ID + " has started with config!");
-          updated(properties);
-      }
+    protected void activate(ComponentContext componentContext, Map<String, Object> properties) {
+        s_logger.info("Bundle " + APP_ID + " has started with config!");
+        updated(properties);
+    }
 
-      protected void deactivate(ComponentContext componentContext) {
-          s_logger.info("Bundle " + APP_ID + " has stopped!");
-      }
+    protected void deactivate(ComponentContext componentContext) {
+        s_logger.info("Bundle " + APP_ID + " has stopped!");
+    }
 
-      public void updated(Map<String, Object> properties) {
-          this.properties = properties;
-          if(properties != null && !properties.isEmpty()) {
-              Iterator<Entry<String, Object>> it = properties.entrySet().iterator();
-              while(it.hasNext()) {
-                  Entry<String, Object> entry = it.next();
-                  s_logger.info("New property - " + entry.getKey() + " = " +
-                  entry.getValue() + " of type " + entry.getValue().getClass().toString());
-              }
-          }
-      }
-  }
+    public void updated(Map<String, Object> properties) {
+        this.properties = properties;
+        if(properties != null && !properties.isEmpty()) {
+            Iterator<Entry<String, Object>> it = properties.entrySet().iterator();
+            while(it.hasNext()) {
+                Entry<String, Object> entry = it.next();
+                s_logger.info("New property - " + entry.getKey() + " = " +
+                entry.getValue() + " of type " + entry.getValue().getClass().toString());
+            }
+        }
+    }
+}
 ```
 
 Switch back to the Manifest Editor. Under **Automated Management of
@@ -345,23 +345,23 @@ below and save the Component class definition file:
 Check the Source tab of the component.xml file and carefully verify that
 each of the property values and tags match what is shown below:
 
-```
-  <?xml version="1.0" encoding="UTF-8"?>
-  <scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0"
-      activate="activate"
-      configuration-policy="require"
-      deactivate="deactivate"
-      enabled="true"
-      immediate="true"
-      modified="updated"
-      name="org.eclipse.kura.example.configurable.ConfigurableExample">
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0"
+    activate="activate"
+    configuration-policy="require"
+    deactivate="deactivate"
+    enabled="true"
+    immediate="true"
+    modified="updated"
+    name="org.eclipse.kura.example.configurable.ConfigurableExample">
 
-      <implementation class="org.eclipse.kura.example.configurable.ConfigurableExample"/>
-      <service>
-          <provide interface="org.eclipse.kura.example.configurable.ConfigurableExample"/>
-      </service>
-      <property name="service.pid" type="String" value="org.eclipse.kura.example.configurable.ConfigurableExample"/>
-  </scr:component>
+    <implementation class="org.eclipse.kura.example.configurable.ConfigurableExample"/>
+    <service>
+        <provide interface="org.eclipse.kura.example.configurable.ConfigurableExample"/>
+    </service>
+    <property name="service.pid" type="String" value="org.eclipse.kura.example.configurable.ConfigurableExample"/>
+</scr:component>
 ```
 
 Create the Default Configuration
@@ -385,45 +385,45 @@ parameters, default values, types, etc. Click on the **Source** button
 and paste the following XML text into ConfigurableExample.xml for this
 example. Save changes to ConfigurableExample.xml.
 
-```
-  <?xml version=*"1.0"* encoding=*"UTF-8"*?>
-  <MetaData xmlns=*"http://www.osgi.org/xmlns/metatype/v1.2.0"* localization=*"en_us"*>
-      <OCD id=*"org.eclipse.kura.example.configurable.ConfigurableExample"*
-          name=*"ConfigurableExample"*
-          description=*"This is a sample metatype file for a simple configurable component">
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
+    <OCD id="org.eclipse.kura.example.configurable.ConfigurableExample"
+        name="ConfigurableExample"
+        description="This is a sample metatype file for a simple configurable component">
 
-          <AD id="param1.string"
-              name="param1.string"
-              type="String"
-              cardinality="0"
-              required="true"
-              default="Some Text"
-              description="String configuration parameter"/>
+        <AD id="param1.string"
+            name="param1.string"
+            type="String"
+            cardinality="0"
+            required="true"
+            default="Some Text"
+            description="String configuration parameter"/>
 
-          <AD id="param2.float"
-              name="param2.float"
-              type="Float"
-              cardinality="0"
-              required="false"
-              default="20.5"
-              min="5.0"
-              max="40.0"
-              description="Float configuration parameter"/>
+        <AD id="param2.float"
+            name="param2.float"
+            type="Float"
+            cardinality="0"
+            required="false"
+            default="20.5"
+            min="5.0"
+            max="40.0"
+            description="Float configuration parameter"/>
 
-          <AD id="param3.integer"
-              name="param3.integer"
-              type="Integer"
-              cardinality="0"
-              required="true"
-              default="2"
-              min="1"
-              description="Integer configuration parameter"/>
-      </OCD>
+        <AD id="param3.integer"
+            name="param3.integer"
+            type="Integer"
+            cardinality="0"
+            required="true"
+            default="2"
+            min="1"
+            description="Integer configuration parameter"/>
+    </OCD>
 
-      <Designate pid="org.eclipse.kura.example.configurable.ConfigurableExample">
-          <Object ocdref="org.eclipse.kura.example.configurable.ConfigurableExample"/>
-      </Designate>
-  </MetaData>
+    <Designate pid="org.eclipse.kura.example.configurable.ConfigurableExample">
+        <Object ocdref="org.eclipse.kura.example.configurable.ConfigurableExample"/>
+    </Designate>
+</MetaData>
 ```
 
 In the MANIFEST.MF of this bundle, you must also make sure the XML file

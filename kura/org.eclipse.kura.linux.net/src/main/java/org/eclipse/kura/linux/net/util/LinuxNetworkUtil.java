@@ -1099,17 +1099,28 @@ public class LinuxNetworkUtil {
 						}
 					}
 				} else if(line.contains("signal:")) {
-					//signal: -56.00 dBm
-					StringTokenizer st = new StringTokenizer(line, " ");
-					st.nextToken(); //eat signal:
-					float dBm = Float.parseFloat(st.nextToken());
-					
-					if(dBm <= -100) {
-						strength = 0;
-					} else if(dBm >= -50) {
-						strength = 100;
-					} else {
-						strength = (int) (2 * (dBm + 100));
+					try {
+						//signal: -56.00 dBm
+						StringTokenizer st = new StringTokenizer(line, " ");
+						st.nextToken(); //eat signal:
+						final String strengthRaw = st.nextToken();
+						if (strengthRaw.contains("/")) {
+							// Could also be of format 39/100
+							final String[] parts = strengthRaw.split("/");
+							strength = (int) Float.parseFloat(parts[0]);
+						} else {
+							float dBm = Float.parseFloat(st.nextToken());
+						
+							if(dBm <= -100) {
+								strength = 0;
+							} else if(dBm >= -50) {
+								strength = 100;
+							} else {
+								strength = (int) (2 * (dBm + 100));
+							}
+						}
+					} catch (RuntimeException e) {
+						s_logger.debug("Cannot parse signal strength " + line);
 					}
 				} else if (line.contains("capability:")) {
 					capabilities = new ArrayList<String>();

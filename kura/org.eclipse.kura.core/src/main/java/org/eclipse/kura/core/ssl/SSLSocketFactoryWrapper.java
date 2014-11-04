@@ -12,6 +12,7 @@
 package org.eclipse.kura.core.ssl;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.InetAddress;
 import java.net.Socket;
@@ -138,13 +139,19 @@ public class SSLSocketFactoryWrapper extends SSLSocketFactory
             try {
                 Method m = clSSLParameters.getMethod("setEndpointIdentificationAlgorithm", String.class);
                 if (m != null && hostnameVerification) {
-                    sslParams.setEndpointIdentificationAlgorithm("HTTPS");
+                    m.invoke(sslParams, "HTTPS");
                     s_logger.info("SSL Endpoint Identification enabled.");
                 }
             }
             catch (NoSuchMethodException e) {
                 s_logger.warn("Cannot enable SSL Endpoint Identification as it requires Java7");
-            }
+            } catch (IllegalArgumentException e) {
+            	s_logger.warn("Cannot enable SSL Endpoint Identification as it requires Java7", e);
+			} catch (IllegalAccessException e) {
+				s_logger.warn("Cannot enable SSL Endpoint Identification as it requires Java7", e);
+			} catch (InvocationTargetException e) {
+				s_logger.warn("Cannot enable SSL Endpoint Identification as it requires Java7", e);
+			}
             
             // Adjust the supported ciphers.
             if (this.ciphers != null && !this.ciphers.isEmpty()) {

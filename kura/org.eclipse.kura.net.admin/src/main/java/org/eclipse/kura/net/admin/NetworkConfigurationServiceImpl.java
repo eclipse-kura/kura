@@ -202,7 +202,7 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
         		public void run() {
         			Map<String,Object> props = new HashMap<String,Object>();	
         			EventProperties eventProps = new EventProperties(props);
-        			s_logger.info("postInstalledEvent() :: posting KuraConfigReadyEvent");
+        			s_logger.info("postInstalledEvent() :: posting KuraNetConfigReadyEvent");
         			m_eventAdmin.postEvent(new Event(KuraNetConfigReadyEvent.KURA_NET_CONFIG_EVENT_READY_TOPIC, eventProps));
         		}
         	}, 5, TimeUnit.SECONDS);

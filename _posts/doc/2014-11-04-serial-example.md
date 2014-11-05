@@ -672,7 +672,7 @@ This command opens a view similar to the following screen capture:
 Scroll down to Serial port setup and press <ENTER>. A new dialog
 window opens as shown below:
 
-![](../../assets/images/serial_example//media/image6.png)
+![]({{ site.baseurl }}/assets/images/serial_example//media/image6.png)
 
 <span id="_Cloud_Enabled_Serial" class="anchor"></span>
 

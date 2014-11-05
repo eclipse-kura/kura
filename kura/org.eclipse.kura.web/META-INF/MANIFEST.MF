@@ -83,3 +83,4 @@ Export-Package: org.eclipse.kura.web,
 Bundle-ClassPath: ., 
   lib/gxt-2.2.5.jar,
   target/org.eclipse.kura.web-1.0.1-SNAPSHOT/WEB-INF/lib/gxt-2.2.5.jar
+Require-Bundle: org.eclipse.osgi.services

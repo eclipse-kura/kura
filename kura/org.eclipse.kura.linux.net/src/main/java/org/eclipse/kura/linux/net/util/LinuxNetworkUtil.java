@@ -1099,7 +1099,6 @@ public class LinuxNetworkUtil {
 						}
 					}
 				} else if(line.contains("signal:")) {
-					s_logger.warn("<IAB> line={}", line);
 					try {
 						//signal: -56.00 dBm
 						StringTokenizer st = new StringTokenizer(line, " ");

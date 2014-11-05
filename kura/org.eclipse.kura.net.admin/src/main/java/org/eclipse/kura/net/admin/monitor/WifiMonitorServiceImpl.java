@@ -35,6 +35,7 @@ import org.eclipse.kura.core.net.NetworkConfiguration;
 import org.eclipse.kura.core.net.WifiInterfaceConfigImpl;
 import org.eclipse.kura.linux.net.route.RouteService;
 import org.eclipse.kura.linux.net.route.RouteServiceImpl;
+import org.eclipse.kura.linux.net.util.IwLinkTool;
 import org.eclipse.kura.linux.net.util.LinuxNetworkUtil;
 import org.eclipse.kura.net.IPAddress;
 import org.eclipse.kura.net.NetConfig;
@@ -755,78 +756,50 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
     
     private boolean isAccessPointAvailable(String interfaceName, String ssid) throws KuraException {
         boolean available = false;
-        if(ssid != null) {
-        	//if(OS_VERSION.equals(KuraConstants.Raspberry_Pi.getImageName())) {   do not use libnl80211
-        		List<WifiAccessPoint> wifiAccessPoints = LinuxNetworkUtil.getAvailableAccessPoints(interfaceName, 3);
-                for(WifiAccessPoint wap : wifiAccessPoints) {
-                    if(ssid.equals(wap.getSSID())) {
-                    	s_logger.trace("isAccessPointAvailable() :: SSID={} is available :: strength={}", ssid, wap.getStrength());
-                        available = wap.getStrength() > 0;
-                        break;
-                    }
-                }
-            /* do not use libnl80211
-        	} else {
-	        	NL80211 nl80211 = NL80211.getInstance(interfaceName);
-	        	nl80211.setMode(WifiMode.INFRA, 3);
-	        	if (nl80211.triggerScan()) {
-	        		Map<String, WifiHotspotInfo> wifiHotspotInfoMap = nl80211.getScanResults(3, 2);
-	        		if ((wifiHotspotInfoMap != null) && (!wifiHotspotInfoMap.isEmpty())) {
-	    				Collection<WifiHotspotInfo> wifiHotspotInfoCollection = wifiHotspotInfoMap.values();
-	    				Iterator<WifiHotspotInfo> it = wifiHotspotInfoCollection.iterator();
-	    				while (it.hasNext()) {
-	    					WifiHotspotInfo wifiHotspotInfo = it.next();
-	    					s_logger.info("isAccessPointAvailable() :: looking for {} - found {} in range", ssid, wifiHotspotInfo.getSsid());
-	    					if (ssid.equals(wifiHotspotInfo.getSsid())) {
-	    						s_logger.info("isAccessPointAvailable() :: {} is available", wifiHotspotInfo.getSsid());
-	    						available = true;
-	    						break;
-	    					}
-	    				}
-	        		}
-	    	    }
-        	}
-        	*/
-        }
+		if (ssid != null) {
+			List<WifiAccessPoint> wifiAccessPoints = LinuxNetworkUtil.getAvailableAccessPoints(interfaceName, 3);
+			for (WifiAccessPoint wap : wifiAccessPoints) {
+				if (ssid.equals(wap.getSSID())) {
+					s_logger.trace("isAccessPointAvailable() :: SSID={} is available :: strength={}", ssid, wap.getStrength());
+					available = wap.getStrength() > 0;
+					break;
+				}
+			}
+		}
         
         return available;
     }
     
     @Override
-    public int getSignalLevel(String interfaceName, String ssid) throws KuraException {
+	public int getSignalLevel(String interfaceName, String ssid)
+			throws KuraException {
 		int rssi = 0;
 		if (ssid != null) {
-			//if (OS_VERSION.equals(KuraConstants.Raspberry_Pi.getImageName())) {   do not use libnl80211
+			InterfaceState wifiState = m_interfaceStatuses.get(interfaceName);
+			if(wifiState.isUp()) {
+				s_logger.trace("getSignalLevel() :: using 'iw dev wlan0 link' command ...");
+				IwLinkTool iwLinkTool = new IwLinkTool("iw", interfaceName);
+				if(iwLinkTool.get()) { 
+					if (iwLinkTool.isLinkDetected()) {
+						rssi = iwLinkTool.getSignal();
+						s_logger.debug("getSignalLevel() :: rssi={} (using 'iw dev wlan0 link')", rssi);
+					}
+				}
+			} 
+			
+			if (rssi == 0) {
+				s_logger.trace("getSignalLevel() :: using 'iw dev wlan0 scan' command ...");
 				List<WifiAccessPoint> wifiAccessPoints = LinuxNetworkUtil.getAvailableAccessPoints(interfaceName, 3);
 				for (WifiAccessPoint wap : wifiAccessPoints) {
 					if (ssid.equals(wap.getSSID())) {
 						if (wap.getStrength() > 0) {
 							rssi = 0 - wap.getStrength();
+							s_logger.debug("getSignalLevel() :: rssi={} (using 'iw dev wlan0 scan')", rssi);
 						}
 						break;
 					}
 				}
-			/*  do not use libnl80211
-			} else {
-				NL80211 nl80211 = NL80211.getInstance(interfaceName);
-				if (nl80211.triggerScan()) {
-					Map<String, WifiHotspotInfo> wifiHotspotInfoMap = nl80211.getScanResults(3, 2);
-					if ((wifiHotspotInfoMap != null) && (!wifiHotspotInfoMap.isEmpty())) {
-						Collection<WifiHotspotInfo> wifiHotspotInfoCollection = wifiHotspotInfoMap.values();
-						Iterator<WifiHotspotInfo> it = wifiHotspotInfoCollection.iterator();
-						while (it.hasNext()) {
-							WifiHotspotInfo wifiHotspotInfo = it.next();
-							s_logger.debug("getSignalLevel() :: looking for {} - found {} in range",ssid, wifiHotspotInfo.getSsid());
-							if (ssid.equals(wifiHotspotInfo.getSsid())) {
-								s_logger.debug("getSignalLevel() :: {} is available", wifiHotspotInfo.getSsid());
-								rssi = wifiHotspotInfo.getSignalLevel();
-								break;
-							}
-						}
-					}
-				}
 			}
-			*/
 		}
 
 		return rssi;

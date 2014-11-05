@@ -34,9 +34,9 @@ import org.eclipse.kura.linux.net.NetworkServiceImpl;
 import org.eclipse.kura.linux.net.wifi.WifiOptions;
 import org.eclipse.kura.net.NetInterfaceType;
 import org.eclipse.kura.net.wifi.WifiAccessPoint;
+import org.eclipse.kura.net.wifi.WifiInterface.Capability;
 import org.eclipse.kura.net.wifi.WifiMode;
 import org.eclipse.kura.net.wifi.WifiSecurity;
-import org.eclipse.kura.net.wifi.WifiInterface.Capability;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -1099,6 +1099,7 @@ public class LinuxNetworkUtil {
 						}
 					}
 				} else if(line.contains("signal:")) {
+					s_logger.warn("<IAB> line={}", line);
 					try {
 						//signal: -56.00 dBm
 						StringTokenizer st = new StringTokenizer(line, " ");
@@ -1109,15 +1110,7 @@ public class LinuxNetworkUtil {
 							final String[] parts = strengthRaw.split("/");
 							strength = (int) Float.parseFloat(parts[0]);
 						} else {
-							float dBm = Float.parseFloat(st.nextToken());
-						
-							if(dBm <= -100) {
-								strength = 0;
-							} else if(dBm >= -50) {
-								strength = 100;
-							} else {
-								strength = (int) (2 * (dBm + 100));
-							}
+							strength = Math.abs((int)Float.parseFloat(strengthRaw));
 						}
 					} catch (RuntimeException e) {
 						s_logger.debug("Cannot parse signal strength " + line);

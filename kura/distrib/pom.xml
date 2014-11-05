@@ -379,7 +379,7 @@
 			<id>beaglebone</id>
 			<properties>
 				<project.raspbian.dependencies>hostapd, isc-dhcp-server, iw,
-					dos2unix, bind9, unzip, ethtool</project.raspbian.dependencies>
+					dos2unix, bind9, unzip, ethtool, telnet</project.raspbian.dependencies>
 			</properties>
 			<activation>
 				<activeByDefault>true</activeByDefault>
@@ -511,7 +511,7 @@
 			<id>raspberry-pi</id>
 			<properties>
 				<project.raspbian.dependencies>hostapd, isc-dhcp-server, iw,
-					dos2unix, bind9, unzip, ethtool</project.raspbian.dependencies>
+					dos2unix, bind9, unzip, ethtool, telnet</project.raspbian.dependencies>
 			</properties>
 			<activation>
 				<activeByDefault>true</activeByDefault>

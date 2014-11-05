@@ -36,5 +36,9 @@
    			  bind="setCryptoService"
    			  unbind="unsetCryptoService"
    			  interface="org.eclipse.kura.crypto.CryptoService"/>
+   <reference name="EventAdmin"              
+              bind="setEventAdminService" 
+              unbind="unsetEventAdminService"
+              interface="org.osgi.service.event.EventAdmin"/>
    <property name="app.root" type="String" value="/kura"/>   
 </scr:component>

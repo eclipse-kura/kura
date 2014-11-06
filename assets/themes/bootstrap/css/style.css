@@ -25,6 +25,10 @@ p img {
   color: #999999;
 }
 
+#navigation {
+  min-width: 225px; 
+}
+
 #navigation li a {
   color: #4b8fd0;
   padding: 3px 15px;
@@ -97,7 +101,8 @@ p img {
   border: 1px solid #4c964d;
   color: #FFF; }
 
-@media (max-width: 1200px){
-.affix{
-    position:static;
+@media (max-width: 1000px){
+  .affix{
+      position:static;
+  }
 }

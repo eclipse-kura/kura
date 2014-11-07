@@ -893,15 +893,15 @@ public class LinuxNetworkUtil {
 			sb.append("iw dev ")
 			.append(interfaceName)
 			.append(" scan");
-
-			s_logger.info("getAvailableAccessPoints() :: executing: {}", sb.toString());
-			
+	
 			int stat = -1;
-			while ((stat != 0) || (attempts > 0)) {
+			while ((stat != 0) && (attempts > 0)) {
+				s_logger.info("getAvailableAccessPoints() :: executing: {}, attempt left: {}", sb.toString(), attempts);
 				attempts--;
 				proc = ProcessUtil.exec(sb.toString());
 				try {
 					stat = proc.waitFor();
+					s_logger.info("getAvailableAccessPoints() :: {} command returns status={}", sb.toString(), stat);
 					if (stat != 0) {
 						s_logger.error("getAvailableAccessPoints() :: failed to execute {} error code is {}", sb.toString(), stat);
 						s_logger.error("getAvailableAccessPoints() :: STDERR: " + LinuxProcessUtil.getInputStreamAsString(proc.getErrorStream()));
@@ -916,7 +916,7 @@ public class LinuxNetworkUtil {
 				return wifiAccessPoints; // return empty list
 			}
 			
-			s_logger.error("getAvailableAccessPoints() :: the {} command executed sucessfully, parsing output ...", sb.toString());
+			s_logger.info("getAvailableAccessPoints() :: the {} command executed successfully, parsing output ...", sb.toString());
 			
 			//get the output
 			BufferedReader br = new BufferedReader(new InputStreamReader(proc.getInputStream()));

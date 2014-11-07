@@ -37,7 +37,7 @@
 								<artifactItem>
 									<groupId>org.eclipse.kura</groupId>
 									<artifactId>com.codeminders.hidapi</artifactId>
-									<version>1.1</version>
+									<version>1.1.1</version>
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.eclipse.kura</groupId>
@@ -53,6 +53,11 @@
 									<groupId>org.eclipse.kura</groupId>
 									<artifactId>org.eclipse.soda.dk.comm</artifactId>
 									<version>1.2.1</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>jdk</groupId>
+									<artifactId>jdk.dio</artifactId>
+									<version>1.0.0</version>
 								</artifactItem>
 								<!-- copied from Maven central repository -->
 								<!--

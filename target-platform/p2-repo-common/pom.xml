@@ -104,7 +104,12 @@
 								<artifactItem>
 									<groupId>com.google.protobuf</groupId>
 									<artifactId>protobuf-java</artifactId>
-									<version>2.6.0</version>
+									<version>2.6.0</version>                
+								</artifactItem>                
+								<artifactItem>
+									<groupId>org.github.leshan</groupId>
+									<artifactId>leshan-client</artifactId>
+									<version>0.1.8-SNAPSHOT</version>
 								</artifactItem>
 							</artifactItems>
 							<outputDirectory>${project.basedir}/target/source/plugins</outputDirectory>

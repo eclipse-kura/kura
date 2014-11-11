@@ -110,6 +110,24 @@
 							<outputDirectory>${project.basedir}/target/source/plugins</outputDirectory>
 						</configuration>
 					</execution>
+					<execution>
+						<id>copy-dio-bundle-for-publishing</id>
+						<phase>process-resources</phase>
+						<goals>
+							<goal>copy</goal>
+						</goals>
+						<configuration>
+							<skip>${org.eclipse.kura.dio.skip}</skip>
+							<artifactItems>								
+								<artifactItem>
+									<groupId>jdk</groupId>
+									<artifactId>jdk.dio</artifactId>
+									<version>1.0.0</version>
+								</artifactItem>
+							</artifactItems>
+							<outputDirectory>${project.basedir}/target/source/plugins</outputDirectory>
+						</configuration>
+					</execution>
 				</executions>
 			</plugin>
 			<plugin>

@@ -18,19 +18,17 @@ CC=gcc
 CXX=g++
 COBJS=hid.o
 CPPOBJS=../hidtest/hidtest.o
-#OBJS=$(COBJS) $(CPPOBJS) $(JNIOBJS)
-OBJS=$(COBJS) $(JNIOBJS)
+OBJS=$(COBJS) $(CPPOBJS) $(JNIOBJS)
 CFLAGS+=$(ARCHFLAGS) -I../hidapi -g -c $(JNIINCLUDES)
 LIBS=-framework IOKit -framework CoreFoundation $(JNILIBS)
 
-#all: hidtest $(JNISHAREDLIB)
-all: $(JNISHAREDLIB)
+all: hidtest $(JNISHAREDLIB)
 
 $(JNISHAREDLIB): $(OBJS)
 	$(CXX) $(ARCHFLAGS) -dynamiclib -current_version $(JNISHAREDLIBVER) $(COBJS) $(JNIOBJS) $(LIBS) -o $(JNISHAREDLIB)
 
-#hidtest: $(OBJS)
-#	$(CXX) $(ARCHFLAGS) -g $^ $(LIBS) -o hidtest
+hidtest: $(OBJS)
+	$(CXX) $(ARCHFLAGS) -g $^ $(LIBS) -o hidtest
 
 %.o: ../jni-impl/%.cpp
 	$(CXX) $(CFLAGS) $< -o $@

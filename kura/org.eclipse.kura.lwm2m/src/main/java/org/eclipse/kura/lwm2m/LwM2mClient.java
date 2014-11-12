@@ -29,9 +29,13 @@ import java.util.Random;
 import java.util.TimeZone;
 import java.util.UUID;
 
+import leshan.client.coap.californium.CaliforniumBasedObject;
+import leshan.client.coap.californium.CaliforniumBasedObjectInstance;
 import leshan.client.exchange.LwM2mExchange;
 import leshan.client.register.RegisterUplink;
+import leshan.client.resource.LwM2mClientObject;
 import leshan.client.resource.LwM2mClientObjectDefinition;
+import leshan.client.resource.LwM2mClientObjectInstance;
 import leshan.client.resource.LwM2mClientResourceDefinition;
 import leshan.client.resource.SingleResourceDefinition;
 import leshan.client.resource.integer.IntegerLwM2mExchange;
@@ -45,6 +49,7 @@ import leshan.client.resource.time.TimeLwM2mResource;
 import leshan.client.response.ExecuteResponse;
 import leshan.client.response.OperationResponse;
 
+import org.eclipse.californium.core.CoapServer;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.net.NetworkService;
@@ -64,7 +69,7 @@ public class LwM2mClient implements ConfigurableComponent, EventHandler
 {	
 	private static final Logger s_logger = LoggerFactory.getLogger(LwM2mClient.class);
 	
-	private static final int TIMEOUT_MS = 5000;
+	private static final int TIMEOUT_MS = 10000;
 	
 	private ComponentContext          m_ctx;
 	private LwM2mClientOptions        m_options;
@@ -191,12 +196,17 @@ public class LwM2mClient implements ConfigurableComponent, EventHandler
     private void register()
     	throws KuraException, UnknownHostException
     {
-        LwM2mClientObjectDefinition deviceObject = createDeviceDefinition(); 
         
         CoapServer coapServer = new CoapServer();
+        LwM2mClientObjectDefinition deviceObject = createDeviceDefinition(); 
         m_lwM2mClient = new leshan.client.LwM2mClient(coapServer, deviceObject);
 
-        coapServer.add()
+        s_logger.info("Before creating bundles...");
+        CaliforniumBasedObject calObjectBundles = createBundles();
+        s_logger.info("After creating bundles...");
+        coapServer.add(calObjectBundles);
+        s_logger.info("After coapServer.add...");
+        
         // Connect to the server provided
         s_logger.info("Connecting from: "+m_options.getClientIpAddress()+":"+m_options.getClientIpPort()+" to "+m_options.getServerIpAddress()+":"+m_options.getServerIpPort());
         final InetSocketAddress clientAddress = new InetSocketAddress(m_options.getClientIpAddress(), m_options.getClientIpPort());
@@ -270,26 +280,42 @@ public class LwM2mClient implements ConfigurableComponent, EventHandler
     }
 
     
-    private LwM2mClientObjectDefinition createBundlesDefinition() 
+    private CaliforniumBasedObject createBundles() 
     {
-        final LwM2mClientObjectDefinition objectBundles = new LwM2mClientObjectDefinition(99, false, false);
+        LwM2mClientResourceDefinition[] bundleObjectsResourceDefs = new LwM2mClientResourceDefinition[3];
 
+        IntegerValueResource bundleId = new IntegerValueResource(0, 0);
+        bundleObjectsResourceDefs[0]  = new SingleResourceDefinition(0, bundleId, true);
+
+        StringValueResource  bundleName = new StringValueResource("Bundle-SymbolicName",  1);
+        bundleObjectsResourceDefs[1]    = new SingleResourceDefinition(0, bundleName, true);
+
+        StringValueResource  bundleVersion = new StringValueResource("Bundle-Version", 2);
+        bundleObjectsResourceDefs[2]       = new SingleResourceDefinition(0, bundleVersion, true);
+        
+        final LwM2mClientObjectDefinition objectBundlesDef = new LwM2mClientObjectDefinition(99, false, false, bundleObjectsResourceDefs);
+        CaliforniumBasedObject calObjectBundles = new CaliforniumBasedObject(objectBundlesDef);
+        LwM2mClientObject lwm2mObjectBundles = calObjectBundles.getLwM2mClientObject(); 
+        
         // Create an object model for the list of bundles
-        List<LwM2mClientResourceDefinition> resourceDefinitions = new ArrayList<LwM2mClientResourceDefinition>();
         Bundle[] bundles = m_ctx.getBundleContext().getBundles();
         for (int i = 0; i < bundles.length; i++) {
             
             Bundle bundle = bundles[i];
+            
+            // create object instance
+            LwM2mClientObjectInstance instance = new LwM2mClientObjectInstance(i, lwm2mObjectBundles, objectBundlesDef);
 
-            final LwM2mClientObjectDefinition objectBundles = new LwM2mClientObjectDefinition(99, false, false);
+            // create resources
+            instance.addResource(0, new IntegerValueResource((int) bundle.getBundleId(),     0));
+            instance.addResource(1, new StringValueResource (bundle.getSymbolicName(),       1));
+            instance.addResource(2, new StringValueResource (bundle.getVersion().toString(), 2));
 
-            StringValueResource resource = new StringValueResource(bundle.getSymbolicName(), i);
-            resourceDefinitions.add( new SingleResourceDefinition(i, resource, true));
+            // add the object instance
+            calObjectBundles.onSuccessfulCreate(instance);
         }
 
-        final LwM2mClientObjectDefinition objectBundles = new LwM2mClientObjectDefinition(99, true, true, 
-                resourceDefinitions.toArray( new LwM2mClientResourceDefinition[]{}));
-        return objectBundles;
+        return calObjectBundles;
     }
 
     

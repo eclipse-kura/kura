@@ -65,9 +65,15 @@
     	
         <copy file="src/main/resources/${build.name}/snapshot_0.xml"
               tofile="${project.build.directory}/${build.output.name}/snapshot_0.xml" />
-        <copy    file="src/main/osgi/equinox_3.8.1/configuration/config.ini"
-                 tofile="${project.build.directory}/${build.output.name}/config.ini" />
+        <copy file="src/main/osgi/equinox_3.8.1/configuration/config.ini"
+              tofile="${project.build.directory}/${build.output.name}/config.ini" />
 
+        <!-- Copy jdk.dio files -->
+        <copy file="src/main/resources/${build.name}/jdk.dio.properties"
+              tofile="${project.build.directory}/${build.output.name}/jdk.dio.properties" />
+        <copy file="src/main/resources/common/jdk.dio.policy"
+              tofile="${project.build.directory}/${build.output.name}/jdk.dio.policy" />
+    	
         <!-- Populate config.ini with correct versions -->
         <replace file="${project.build.directory}/${build.output.name}/config.ini"
                  token="{kura.build.version}" value="${kura.build.version}"/>
@@ -137,6 +143,8 @@ java -Xms${kura.mem.size} -Xmx${kura.mem.size} -XX:MaxPermSize=${kura.mem.size} 
 	-Dkura.data.dir=${DIR}/data \
 	-Ddpa.configuration=${DIR}/kura/dpa.properties \
 	-Dlog4j.configuration=file:${DIR}/kura/log4j.properties \
+	-Djava.security.policy=${DIR}/kura/jdk.dio.policy \
+	-Djdk.dio.registry=${DIR}/kura/jdk.dio.properties \
 	-jar ${DIR}/plugins/org.eclipse.osgi_3.8.1.v20120830-144521.jar \
 	-configuration  /tmp/.kura/configuration \
 	-console \
@@ -164,6 +172,8 @@ java -Xms${kura.mem.size} -Xmx${kura.mem.size} -XX:MaxPermSize=${kura.mem.size} 
 	-Dkura.data.dir=${DIR}/data \
 	-Ddpa.configuration=${DIR}/kura/dpa.properties \
 	-Dlog4j.configuration=file:${DIR}/kura/log4j.properties \
+	-Djava.security.policy=${DIR}/kura/jdk.dio.policy \
+	-Djdk.dio.registry=${DIR}/kura/jdk.dio.properties \
 	-jar ${DIR}/plugins/org.eclipse.osgi_3.8.1.v20120830-144521.jar \
 	-configuration  /tmp/.kura/configuration \
 	-console \
@@ -191,6 +201,8 @@ nohup java -Xms${kura.mem.size} -Xmx${kura.mem.size} -XX:MaxPermSize=${kura.mem.
 	-Dkura.data.dir=${DIR}/data \
 	-Ddpa.configuration=${DIR}/kura/dpa.properties \
 	-Dlog4j.configuration=file:${DIR}/kura/log4j.properties \
+	-Djava.security.policy=${DIR}/kura/jdk.dio.policy \
+	-Djdk.dio.registry=${DIR}/kura/jdk.dio.properties \
 	-jar ${DIR}/plugins/org.eclipse.osgi_3.8.1.v20120830-144521.jar \
 	-configuration  /tmp/.kura/configuration \
 	-console 5002 \
@@ -228,6 +240,12 @@ echo $KURA_PID > /var/run/kura.pid
                         prefix="${build.output.name}/data/snapshots/" />
 
             <zipfileset file="${project.build.directory}/${build.output.name}/config.ini"
+                        prefix="${build.output.name}/kura/" />
+
+            <zipfileset file="${project.build.directory}/${build.output.name}/jdk.dio.policy"
+                        prefix="${build.output.name}/kura/" />
+
+        		<zipfileset file="${project.build.directory}/${build.output.name}/jdk.dio.properties"
                         prefix="${build.output.name}/kura/" />
 
             <zipfileset file="src/main/resources/common/kura_custom.properties"

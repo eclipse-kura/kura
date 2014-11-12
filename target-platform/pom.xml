@@ -18,6 +18,18 @@
 		<module>p2-repo-equinox_3.8.1</module>
 	</modules>
 
+	<profiles>
+		<profile>
+			<id>dio</id>
+			<properties>
+				<org.eclipse.kura.dio.skip>false</org.eclipse.kura.dio.skip>
+			</properties>
+			<activation>
+				<activeByDefault>false</activeByDefault>
+			</activation>
+		</profile>
+	</profiles>
+
 	<repositories>
 		<repository>
 			<id>kura_addons</id>

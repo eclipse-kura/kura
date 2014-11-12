@@ -20,6 +20,7 @@ REMOVE_LIST=
 TMP=/tmp/kura_upgrade
 TIMESTAMP=`date +%Y%m%d%H%M%S`
 LOG=$TMP/kura_upgrade_${TIMESTAMP}.log
+ABSOLUTE_PATH=`readlink -m $0`
 
 ##############################################
 # PRE-INSTALL SCRIPT
@@ -45,6 +46,12 @@ fi
 echo "Stopping monit and kura" >> $LOG 2>&1
 killall monit java >> $LOG 2>&1
 
+
+# remove OSGi storage directory
+if [ -d "/tmp/.kura/configuration" ]; then
+	echo "Removing OSGi storage directory..." >> $LOG 2>&1
+	rm -rf /tmp/.kura/configuration >> $LOG 2>&1
+fi
 
 # remove .dp file and dpa.properties entry if it exists
 # wait for the dp to get written to disk first
@@ -92,11 +99,11 @@ echo "" >> $LOG 2>&1
 ##############################################
 
 echo "Extracting tar file..." >> $LOG 2>&1
-SKIP=`awk '/^__TARFILE_FOLLOWS__/ { print NR + 1; exit 0; }' $0`
+SKIP=`awk '/^__TARFILE_FOLLOWS__/ { print NR + 1; exit 0; }' $ABSOLUTE_PATH`
 echo "SKIP: ${SKIP}, file: ${0}" >> $LOG 2>&1
 
 # take the tarfile and pipe it into tar and redirect the output
-cd $TMP && tail -n +$SKIP $0 | tar -xz >> $LOG 2>&1
+cd $TMP && tail -n +$SKIP $ABSOLUTE_PATH | tar -xz >> $LOG 2>&1
 echo "FINISHED TAR" >> $LOG 2>&1
 
 ##############################################

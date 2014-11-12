@@ -45,7 +45,6 @@ import org.eclipse.kura.net.NetInterfaceConfig;
 import org.eclipse.kura.net.NetInterfaceStatus;
 import org.eclipse.kura.net.NetInterfaceType;
 import org.eclipse.kura.net.NetworkAdminService;
-import org.eclipse.kura.net.NetworkPair;
 import org.eclipse.kura.net.NetworkService;
 import org.eclipse.kura.net.admin.NetworkConfigurationService;
 import org.eclipse.kura.net.admin.event.NetworkConfigurationChangeEvent;
@@ -491,7 +490,7 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
     private void disableInterface(String interfaceName) throws KuraException {
         s_logger.debug("Disabling " + interfaceName);
         m_netAdminService.disableInterface(interfaceName);
-        m_netAdminService.manageDhcpServer(interfaceName, false, null);
+        m_netAdminService.manageDhcpServer(interfaceName, false);
     }
     
     private void enableInterface(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig) throws KuraException {
@@ -511,21 +510,17 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
         NetInterfaceStatus status = NetInterfaceStatus.netIPv4StatusUnknown;
         boolean isDhcpClient = false;
         boolean enableDhcpServer = false;
-        IPAddress dhcpServerSubnet = null;
-        short dhcpServerPrefix = -1;
         
         if(wifiInterfaceConfig != null) {
             for(WifiInterfaceAddressConfig wifiInterfaceAddressConfig : wifiInterfaceConfig.getNetInterfaceAddresses()) {
                 wifiMode = wifiInterfaceAddressConfig.getMode();
-                
+
                 for(NetConfig netConfig : wifiInterfaceAddressConfig.getConfigs()) {
                     if(netConfig instanceof NetConfigIP4) {
                         status = ((NetConfigIP4) netConfig).getStatus();
                         isDhcpClient = ((NetConfigIP4) netConfig).isDhcp();
                     } else if(netConfig instanceof DhcpServerConfig4) {
                         enableDhcpServer = ((DhcpServerConfig4) netConfig).isEnabled();
-                        dhcpServerSubnet = ((DhcpServerConfig4) netConfig).getSubnet();
-                        dhcpServerPrefix = ((DhcpServerConfig4) netConfig).getPrefix();
                     }
                 }
             }
@@ -538,7 +533,7 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
                 m_netAdminService.enableInterface(interfaceName, isDhcpClient);
 
                 if(enableDhcpServer) {
-                    m_netAdminService.manageDhcpServer(interfaceName, true, new NetworkPair(dhcpServerSubnet, dhcpServerPrefix));
+                    m_netAdminService.manageDhcpServer(interfaceName, true);
                 }
             }
         }

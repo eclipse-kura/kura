@@ -329,11 +329,11 @@ public class EthernetMonitorServiceImpl implements EthernetMonitorService, Event
 	            	
 	            	if(dhcpServerEnabled && !DhcpServerManager.isRunning(interfaceName)) {
 	            		s_logger.debug("Starting DHCP server for " + interfaceName);
-	            		m_netAdminService.manageDhcpServer(interfaceName, true, new NetworkPair(dhcpServerSubnet, dhcpServerPrefix));
+	            		m_netAdminService.manageDhcpServer(interfaceName, true);
 	            	}
 				} else if(DhcpServerManager.isRunning(interfaceName)) {
 					s_logger.debug("Stopping DHCP server for " + interfaceName);
-					m_netAdminService.manageDhcpServer(interfaceName, false, null);
+					m_netAdminService.manageDhcpServer(interfaceName, false);
 				}
 	            
 	            // post event if there were any changes
@@ -552,6 +552,6 @@ public class EthernetMonitorServiceImpl implements EthernetMonitorService, Event
 	private void disableInterface(String interfaceName) throws Exception {
 		LinuxNetworkUtil.disableInterface(interfaceName);
 		LinuxNetworkUtil.powerOnEthernetController(interfaceName);
-		m_netAdminService.manageDhcpServer(interfaceName, false, null);
+		m_netAdminService.manageDhcpServer(interfaceName, false);
 	}
 }

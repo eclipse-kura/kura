@@ -24,14 +24,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.osgi.service.component.ComponentContext;
-import org.osgi.service.event.Event;
-import org.osgi.service.event.EventAdmin;
-import org.osgi.service.event.EventConstants;
-import org.osgi.service.event.EventHandler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.net.EthernetInterfaceImpl;
@@ -48,6 +40,7 @@ import org.eclipse.kura.linux.net.modem.SupportedSerialModemInfo;
 import org.eclipse.kura.linux.net.modem.SupportedSerialModemsInfo;
 import org.eclipse.kura.linux.net.modem.SupportedUsbModemInfo;
 import org.eclipse.kura.linux.net.modem.SupportedUsbModemsInfo;
+import org.eclipse.kura.linux.net.util.KuraConstants;
 import org.eclipse.kura.linux.net.util.LinuxNetworkUtil;
 import org.eclipse.kura.net.ConnectionInfo;
 import org.eclipse.kura.net.IPAddress;
@@ -78,9 +71,18 @@ import org.eclipse.kura.usb.UsbModemDevice;
 import org.eclipse.kura.usb.UsbNetDevice;
 import org.eclipse.kura.usb.UsbService;
 import org.eclipse.kura.usb.UsbTtyDevice;
+import org.osgi.service.component.ComponentContext;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventAdmin;
+import org.osgi.service.event.EventConstants;
+import org.osgi.service.event.EventHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class NetworkServiceImpl implements NetworkService, EventHandler {
 
+	private static final String OS_VERSION = System.getProperty("kura.os.version");
+	private static final String TARGET_NAME = System.getProperty("target.device");
     public static final String PPP_PEERS_DIR = "/etc/ppp/peers/";
 
     private static final Logger s_logger = LoggerFactory.getLogger(NetworkServiceImpl.class);
@@ -555,6 +557,17 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
 					s_logger.debug("posting ModemAddedEvent -- USB_EVENT_DEVICE_ADDED_TOPIC: " + fUsbModem);
 	                m_eventAdmin.postEvent(new ModemAddedEvent(fUsbModem));
 	                m_addedModems.add(fUsbModem.getUsbPort());
+	                
+	                if (OS_VERSION != null && OS_VERSION.equals(KuraConstants.Mini_Gateway.getImageName() + "_" + KuraConstants.Mini_Gateway.getImageVersion()) &&
+							TARGET_NAME != null && TARGET_NAME.equals(KuraConstants.Mini_Gateway.getTargetName())) {
+		                if (m_serialModem != null) {
+		                	if (SupportedUsbModemInfo.Telit_HE910_D.getVendorId().equals( fUsbModem.getVendorId())
+			                		&& SupportedUsbModemInfo.Telit_HE910_D.getProductId().equals(fUsbModem.getProductId())) {
+		                		s_logger.info("Removing {} from addedModems", m_serialModem.getProductName());
+			                	m_addedModems.remove(m_serialModem.getProductName());
+			                }
+		                }
+	                }
                 }
             }
             

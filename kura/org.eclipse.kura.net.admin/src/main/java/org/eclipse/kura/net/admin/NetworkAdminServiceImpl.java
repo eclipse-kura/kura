@@ -781,13 +781,14 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 
 	@Override
 	public void enableInterface(String interfaceName, boolean dhcp) throws KuraException {
+		
 		try {
 			NetInterfaceType type = LinuxNetworkUtil.getType(interfaceName);
 
 			if(!LinuxNetworkUtil.isUp(interfaceName) ||
 					(type == NetInterfaceType.WIFI && !LinuxNetworkUtil.isLinkUp(interfaceName))) {
 
-				s_logger.info("bringing interface " + interfaceName + " up");
+				s_logger.info("bringing interface {} up", interfaceName);
 				
 				if (type == NetInterfaceType.WIFI) {
 					enableWifiInterface(interfaceName);
@@ -803,7 +804,7 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 					LinuxNetworkUtil.powerOnEthernetController(interfaceName);
 				}
 			} else {
-				s_logger.info("not bringing interface " + interfaceName + " up because it is already up");
+				s_logger.info("not bringing interface {} up because it is already up", interfaceName);
 			}
 		} catch(Exception e) {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
@@ -812,60 +813,65 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 
 	@Override
 	public void disableInterface(String interfaceName) throws KuraException {
-		try {
-			if(LinuxNetworkUtil.isUp(interfaceName)) {
-				if(!interfaceName.equals("lo")) {
-					s_logger.info("bringing interface " + interfaceName + " down");
-				
-					manageDhcpServer(interfaceName, false, null);
-					
+		
+		if(!interfaceName.equals("lo")) {
+			try {
+				if (LinuxNetworkUtil.isUp(interfaceName)) {
+					s_logger.info("bringing interface {} down", interfaceName);
+					manageDhcpClient(interfaceName, false);
+					manageDhcpServer(interfaceName, false);
+
 					NetInterfaceType type = LinuxNetworkUtil.getType(interfaceName);
-				
+
 					if (type == NetInterfaceType.WIFI) {
 						disableWifiInterface(interfaceName);
 					}
-					
+
 					LinuxNetworkUtil.disableInterface(interfaceName);
+
+				} else {
+					s_logger.info("not bringing interface {} down because it is already down", interfaceName);
+					manageDhcpClient(interfaceName, false);
+					manageDhcpServer(interfaceName, false);
 				}
+			} catch(Exception e) {
+				throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+			}
+		}
+	}
+	
+	public void manageDhcpClient(String interfaceName, boolean enable) throws KuraException {
+		
+		try {
+			int pid = LinuxProcessUtil.getPid(formDhclientCommand(interfaceName, false));
+			if (pid > -1) {
+				s_logger.debug("manageDhcpClient() :: killing {}", formDhclientCommand(interfaceName, false));
+				LinuxProcessUtil.kill(pid);
 			} else {
-				s_logger.info("not bringing interface " + interfaceName + " down because it is already down");
+				pid = LinuxProcessUtil.getPid(formDhclientCommand(interfaceName, true));
+				if (pid > -1) {
+					s_logger.debug("manageDhcpClient() :: killing {}", formDhclientCommand(interfaceName, true));
+					LinuxProcessUtil.kill(pid);
+				}
+			}
+			if (enable) {
+				this.renewDhcpLease(interfaceName);
 			}
 		} catch(Exception e) {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
 		}
 	}
 	
-	public void manageDhcpServer(String interfaceName, boolean enable, NetworkPair<IP4Address> allowedNetwork) throws KuraException {
+	public void manageDhcpServer(String interfaceName, boolean enable) throws KuraException {
+		
 		DhcpServerManager.disable(interfaceName);
-		
-		/*
-		LinuxFirewall firewall = LinuxFirewall.getInstance();
-		
-		Set<LocalRule> localRules = firewall.getLocalRules();
-		if (localRules != null) {
-			LocalRule[] rules = localRules.toArray(new LocalRule[localRules.size()]);
-			for(int i=0; i<rules.length; i++) {
-				LocalRule rule = rules[i];
-				if(rule.getPermittedInterfaceName() != null) {
-					if(rule.getPermittedInterfaceName().equals(interfaceName) && rule.getPort() == 53) {
-						firewall.deleteLocalRule(rule);
-					} else if(rule.getPermittedInterfaceName().equals(interfaceName) && rule.getPort() == 67) {
-						firewall.deleteLocalRule(rule);
-					}
-				}
-			}
-		}*/
-		
 		if (enable) {
 			DhcpServerManager.enable(interfaceName);			
-			/*
-			firewall.addLocalRule(53, "udp", allowedNetwork.getIpAddress().getHostAddress(), Short.toString(allowedNetwork.getPrefix()), interfaceName, null, null, null);
-			firewall.addLocalRule(67, "udp", allowedNetwork.getIpAddress().getHostAddress(), Short.toString(allowedNetwork.getPrefix()), interfaceName, null, null, null);
-			*/
 		}
 	}
 	
 	public void renewDhcpLease(String interfaceName) throws KuraException {
+		
 		try {
 			LinuxProcessUtil.start("dhclient -r " + interfaceName + "\n", true);
 			LinuxProcessUtil.start("dhclient " + interfaceName + "\n", true);
@@ -1353,5 +1359,17 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 		
 		int channel = (frequency - 2407)/5;
 		return channel;
+	}
+	
+	private static String formDhclientCommand(String interfaceName, boolean usePidFile) {
+		StringBuffer sb = new StringBuffer();
+		sb.append("dhclient ");
+		if (usePidFile) {
+			sb.append("-pf /var/run/dhclient.");
+			sb.append(interfaceName);
+			sb.append(".pid ");
+		} 
+		sb.append(interfaceName);
+		return sb.toString();
 	}
 }

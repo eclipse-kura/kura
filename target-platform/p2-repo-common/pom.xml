@@ -37,7 +37,7 @@
 								<artifactItem>
 									<groupId>org.eclipse.kura</groupId>
 									<artifactId>com.codeminders.hidapi</artifactId>
-									<version>1.1</version>
+									<version>1.1.1</version>
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.eclipse.kura</groupId>
@@ -105,6 +105,24 @@
 									<groupId>com.google.protobuf</groupId>
 									<artifactId>protobuf-java</artifactId>
 									<version>2.6.0</version>
+								</artifactItem>
+							</artifactItems>
+							<outputDirectory>${project.basedir}/target/source/plugins</outputDirectory>
+						</configuration>
+					</execution>
+					<execution>
+						<id>copy-dio-bundle-for-publishing</id>
+						<phase>process-resources</phase>
+						<goals>
+							<goal>copy</goal>
+						</goals>
+						<configuration>
+							<skip>${org.eclipse.kura.dio.skip}</skip>
+							<artifactItems>								
+								<artifactItem>
+									<groupId>jdk</groupId>
+									<artifactId>jdk.dio</artifactId>
+									<version>1.0.0</version>
 								</artifactItem>
 							</artifactItems>
 							<outputDirectory>${project.basedir}/target/source/plugins</outputDirectory>

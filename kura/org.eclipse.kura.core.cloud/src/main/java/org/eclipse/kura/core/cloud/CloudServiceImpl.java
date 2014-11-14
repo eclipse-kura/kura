@@ -73,9 +73,10 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
 	// use a synchronized implementation for the list
 	private List<CloudClientImpl>   m_cloudClients;
 	
-	private String                  m_imei;
-	private String                  m_iccid;
-	private String                  m_imsi;
+	// package visibility for LyfeCyclePayloadBuilder
+	String                  		m_imei;
+	String                  		m_iccid;
+	String                  		m_imsi;
 
 	
 	public CloudServiceImpl() {
@@ -218,10 +219,12 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
 		if (PositionLockedEvent.POSITION_LOCKED_EVENT_TOPIC.contains(event.getTopic())) {
 			// if we get a position locked event, 
 			// republish the birth certificate only if we are configured to
+			s_logger.info("Handling PositionLockedEvent");
 			if (m_dataService.isConnected() && m_options.getRepubBirthCertOnGpsLock()) {
 				publishBirthCertificate();
 			}
 		} else if (ModemReadyEvent.MODEM_EVENT_READY_TOPIC.contains(event.getTopic())) {
+			s_logger.info("Handling ModemReadyEvent");
 			ModemReadyEvent modemReadyEvent = (ModemReadyEvent) event;
 			// keep these identifiers around until we can publish the certificate
 			m_imei = (String)modemReadyEvent.getProperty(ModemReadyEvent.IMEI);
@@ -571,17 +574,7 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
 	private KuraPayload createBirthPayload()
 	{		
 		LifeCyclePayloadBuilder payloadBuilder = new LifeCyclePayloadBuilder(this);
-		KuraBirthPayload kuraBuildPayload = payloadBuilder.buildBirthPayload();
-		if ((m_imei != null) && (m_imei.length() > 0)) {
-			kuraBuildPayload.addMetric(KuraBirthPayload.MODEM_IMEI, m_imei);
-		}
-		if ((m_imsi != null) && (m_imsi.length() > 0)) {
-			kuraBuildPayload.addMetric(KuraBirthPayload.MODEM_IMSI, m_imsi);
-		}
-		if ((m_iccid != null) && (m_iccid.length() > 0)) {
-			kuraBuildPayload.addMetric(KuraBirthPayload.MODME_ICCID, m_iccid);
-		}
-		return kuraBuildPayload;
+		return payloadBuilder.buildBirthPayload();
 	}
 	
 	

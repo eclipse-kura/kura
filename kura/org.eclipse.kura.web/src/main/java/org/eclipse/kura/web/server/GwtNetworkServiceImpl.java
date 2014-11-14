@@ -488,19 +488,23 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 					                    			s_logger.debug("Setting IMEI/MEID to {}", imei);
 					                    			gwtModemConfig.setHwSerial(imei);
 					                    		} catch (KuraException e) {
-					                    			e.printStackTrace();
+					                    			s_logger.warn("Failed to get IMEI from modem", e);
 					                    		}
 					                    		try {
 						                    		int rssi = cellModemService.getSignalStrength();
 						                    		s_logger.debug("Setting Received Signal Strength to {}", rssi);
 						                    		gwtModemConfig.setHwRssi(Integer.toString(rssi));
 					                    		} catch (KuraException e) {
-					                    			e.printStackTrace();
+					                    			s_logger.warn("Failed to get Received Signal Strength from modem", e);
 					                    		}
 					                    		
-					                    		boolean gpsSupported = cellModemService.isGpsSupported();
-					                    		s_logger.debug("Setting GPS supported to {}", gpsSupported);
-					                            ((GwtModemInterfaceConfig)gwtNetConfig).setGpsSupported(gpsSupported);
+					                    		try {
+					                    			boolean gpsSupported = cellModemService.isGpsSupported();
+					                    			s_logger.debug("Setting GPS supported to {}", gpsSupported);
+					                    			((GwtModemInterfaceConfig)gwtNetConfig).setGpsSupported(gpsSupported);
+					                    		} catch (KuraException e) {
+					                    			s_logger.warn("Failed to get GPS supported from modem", e);
+					                    		}
 					                    	}
 										}
 									}

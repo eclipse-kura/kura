@@ -41,11 +41,12 @@ public class GwtStatusServiceImpl extends OsgiRemoteServiceServlet implements Gw
 	
 	private static Logger s_logger = LoggerFactory.getLogger(GwtNetworkServiceImpl.class);
 	
-	public ListLoadResult<GwtGroupedNVPair> getDeviceConfig() throws GwtKuraException {
+	public ListLoadResult<GwtGroupedNVPair> getDeviceConfig(boolean hasNetAdmin) throws GwtKuraException {
 		List<GwtGroupedNVPair> pairs = new ArrayList<GwtGroupedNVPair>();
 
 		pairs.addAll(getCloudStatus());
-		pairs.addAll(getNetworkStatus());
+		if (hasNetAdmin)
+			pairs.addAll(getNetworkStatus());
 		pairs.addAll(getPositionStatus());
 
 		return new BaseListLoadResult<GwtGroupedNVPair>(pairs);

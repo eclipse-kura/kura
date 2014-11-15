@@ -21,5 +21,5 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 @RemoteServiceRelativePath("status")
 public interface GwtStatusService extends RemoteService {
 	
-	public ListLoadResult<GwtGroupedNVPair> getDeviceConfig() throws GwtKuraException;
+	public ListLoadResult<GwtGroupedNVPair> getDeviceConfig(boolean hasNetAdmin) throws GwtKuraException;
 }

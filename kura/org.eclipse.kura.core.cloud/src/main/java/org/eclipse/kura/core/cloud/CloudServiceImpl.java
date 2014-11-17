@@ -72,6 +72,11 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
 
 	// use a synchronized implementation for the list
 	private List<CloudClientImpl>   m_cloudClients;
+	
+	// package visibility for LyfeCyclePayloadBuilder
+	String                  		m_imei;
+	String                  		m_iccid;
+	String                  		m_imsi;
 
 	
 	public CloudServiceImpl() {
@@ -214,19 +219,19 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
 		if (PositionLockedEvent.POSITION_LOCKED_EVENT_TOPIC.contains(event.getTopic())) {
 			// if we get a position locked event, 
 			// republish the birth certificate only if we are configured to
-			if (m_dataService != null && m_dataService.isConnected() && m_options != null && m_options.getRepubBirthCertOnGpsLock()) {
-				s_logger.debug("handleEvent() :: PositionLockedEvent :: Republishing Birth Certificate ...");
+			s_logger.info("Handling PositionLockedEvent");
+			if (m_dataService.isConnected() && m_options.getRepubBirthCertOnGpsLock()) {
 				publishBirthCertificate();
 			}
 		} else if (ModemReadyEvent.MODEM_EVENT_READY_TOPIC.contains(event.getTopic())) {
-			// republish the birth certificate only if we are configured to
-			if (m_dataService != null && m_options != null && m_options.getRepubBirthCertOnModemDetection()) {
-				s_logger.debug("handleEvent() :: ModemReadyEvent :: Republishing Birth Certificate ...");
-				ModemReadyEvent modemReadyEvent = (ModemReadyEvent)event;
-				String imei = (String)modemReadyEvent.getProperty(ModemReadyEvent.IMEI);
-				String imsi = (String)modemReadyEvent.getProperty(ModemReadyEvent.IMSI);
-				String iccid = (String)modemReadyEvent.getProperty(ModemReadyEvent.ICCID);
-				publishBirthCertificate(imei, imsi, iccid);
+			s_logger.info("Handling ModemReadyEvent");
+			ModemReadyEvent modemReadyEvent = (ModemReadyEvent) event;
+			// keep these identifiers around until we can publish the certificate
+			m_imei = (String)modemReadyEvent.getProperty(ModemReadyEvent.IMEI);
+			m_imsi = (String)modemReadyEvent.getProperty(ModemReadyEvent.IMSI);
+			m_iccid = (String)modemReadyEvent.getProperty(ModemReadyEvent.ICCID);
+			if (m_dataService.isConnected() && m_options.getRepubBirthCertOnModemDetection()) {
+				publishBirthCertificate();
 			}
 		}
 	}
@@ -531,22 +536,6 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
 		publishLifeCycleMessage(topic, payload);
 	}
 	
-	private void publishBirthCertificate(String imei, String imsi, String iccid) {
-		
-		StringBuilder sbTopic = new StringBuilder();
-		sbTopic.append(m_options.getTopicControlPrefix())
-		  	   .append(m_options.getTopicSeparator())
-		       .append(m_options.getTopicAccountToken())
-		       .append(m_options.getTopicSeparator())
-		       .append(m_options.getTopicClientIdToken())
-		       .append(m_options.getTopicSeparator())
-		       .append(m_options.getTopicBirthSuffix());
-		
-		String topic = sbTopic.toString();
-		KuraPayload payload = createBirthPayload(imei, imsi, iccid);
-		publishLifeCycleMessage(topic, payload);
-	}
-
 	
 	private void publishDisconnectCertificate() 
 	{
@@ -586,22 +575,6 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
 	{		
 		LifeCyclePayloadBuilder payloadBuilder = new LifeCyclePayloadBuilder(this);
 		return payloadBuilder.buildBirthPayload();
-	}
-	
-	private KuraPayload createBirthPayload(String imei, String imsi, String iccid) {
-		
-		LifeCyclePayloadBuilder payloadBuilder = new LifeCyclePayloadBuilder(this);
-		KuraBirthPayload kuraBuildPayload = payloadBuilder.buildBirthPayload();
-		if ((imei != null) && (imei.length() > 0)) {
-			kuraBuildPayload.addMetric(KuraBirthPayload.MODEM_IMEI, imei);
-		}
-		if ((imsi != null) && (imsi.length() > 0)) {
-			kuraBuildPayload.addMetric(KuraBirthPayload.MODEM_IMSI, imsi);
-		}
-		if ((iccid != null) && (iccid.length() > 0)) {
-			kuraBuildPayload.addMetric(KuraBirthPayload.MODME_ICCID, iccid);
-		}
-		return kuraBuildPayload;
 	}
 	
 	

@@ -16,6 +16,7 @@ import java.util.List;
 import org.eclipse.kura.core.message.KuraBirthPayload;
 import org.eclipse.kura.core.message.KuraDeviceProfile;
 import org.eclipse.kura.core.message.KuraDisconnectPayload;
+import org.eclipse.kura.core.message.KuraBirthPayload.KuraBirthPayloadBuilder;
 import org.eclipse.kura.core.util.NetUtil;
 import org.eclipse.kura.message.KuraPosition;
 import org.eclipse.kura.net.NetInterface;
@@ -60,43 +61,47 @@ public class LifeCyclePayloadBuilder
 		String deviceName = cso.getDeviceDisplayName();
 		if (deviceName == null) {
 			deviceName =  m_cloudServiceImpl.getSystemService().getDeviceName();
-		}		
+		}
 		
 		// build birth certificate
-		KuraBirthPayload birthPayload = new KuraBirthPayload(
-	        deviceProfile.getUptime(),
-	        deviceName,
-	        deviceProfile.getModelName(),
-	        deviceProfile.getModelId(),
-	        deviceProfile.getPartNumber(),
-	        deviceProfile.getSerialNumber(),
-	        deviceProfile.getFirmwareVersion(),
-	        deviceProfile.getBiosVersion(),
-	        deviceProfile.getOs(),
-	        deviceProfile.getOsVersion(),
-	        deviceProfile.getJvmName(),
-	        deviceProfile.getJvmVersion(),
-	        deviceProfile.getJvmProfile(),
-	        deviceProfile.getKuraVersion(),
-	        deviceProfile.getConnectionInterface(),
-	        deviceProfile.getConnectionIp(),
-	        acceptEncoding,
-	        appIds,
-			deviceProfile.getAvailableProcessors(),
-			deviceProfile.getTotalMemory(),
-			deviceProfile.getOsArch(),
-			deviceProfile.getOsgiFramework(),
-			deviceProfile.getOsgiFrameworkVersion()
-		);        
+		KuraBirthPayloadBuilder birthPayloadBuilder = new KuraBirthPayloadBuilder();
+		birthPayloadBuilder.withUptime(deviceProfile.getUptime())
+		.withDisplayName(deviceName)
+		.withModelName(deviceProfile.getModelName())
+		.withModelId(deviceProfile.getModelId())
+		.withPartNumber(deviceProfile.getPartNumber())
+		.withSerialNumber(deviceProfile.getSerialNumber())
+		.withFirmwareVersion(deviceProfile.getFirmwareVersion())
+		.withBiosVersion(deviceProfile.getBiosVersion())
+		.withOs(deviceProfile.getOs())
+		.withOsVersion(deviceProfile.getOsVersion())
+		.withJvmName(deviceProfile.getJvmName())
+		.withJvmVersion(deviceProfile.getJvmVersion())
+		.withJvmProfile(deviceProfile.getJvmProfile())
+		.withKuraVersion(deviceProfile.getKuraVersion())
+		.withConnectionInterface(deviceProfile.getConnectionInterface())
+		.withConnectionIp(deviceProfile.getConnectionIp())
+		.withAcceptEncoding(acceptEncoding)
+		.withApplicationIdentifiers(appIds)
+		.withAvailableProcessors(deviceProfile.getAvailableProcessors())
+		.withTotalMemory(deviceProfile.getTotalMemory())
+		.withOsArch(deviceProfile.getOsArch())
+		.withOsgiFramework(deviceProfile.getOsgiFramework())
+		.withOsgiFrameworkVersion(deviceProfile.getOsgiFrameworkVersion())
+		.withModemImei(m_cloudServiceImpl.m_imei)
+		.withModemIccid(m_cloudServiceImpl.m_iccid)
+		.withModemImsi(m_cloudServiceImpl.m_imsi);
+
         if (deviceProfile.getLatitude() != null &&
             deviceProfile.getLongitude() != null) {
             KuraPosition KuraPosition = new KuraPosition();
             KuraPosition.setLatitude(deviceProfile.getLatitude());
             KuraPosition.setLongitude(deviceProfile.getLongitude());
             KuraPosition.setAltitude(deviceProfile.getAltitude());
-            birthPayload.setPosition(KuraPosition);
+            birthPayloadBuilder.withPosition(KuraPosition);
         }
-        return birthPayload;
+        
+        return birthPayloadBuilder.build();
 	}
 	
 	

@@ -67,7 +67,7 @@
 								<artifactItem>
 									<groupId>org.eclipse.paho</groupId>
 									<artifactId>org.eclipse.paho.client.mqttv3</artifactId>
-									<version>1.0.0</version>
+									<version>1.0.0.1</version>
 								</artifactItem>
 								<artifactItem>
 									<groupId>commons-io</groupId>

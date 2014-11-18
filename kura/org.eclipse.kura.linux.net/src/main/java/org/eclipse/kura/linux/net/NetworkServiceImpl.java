@@ -310,9 +310,13 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
 		
 		List<String> interfaceNames = getAllNetworkInterfaceNames();
 		for(String interfaceName : interfaceNames) {
-			NetInterface<? extends NetInterfaceAddress> netInterface = getNetworkInterface(interfaceName);
-			if(netInterface != null) {
-				netInterfaces.add(netInterface);
+			try {
+				NetInterface<? extends NetInterfaceAddress> netInterface = getNetworkInterface(interfaceName);
+				if(netInterface != null) {
+					netInterfaces.add(netInterface);
+				}
+			} catch (KuraException e) {
+				s_logger.error("Can't get network interface info for {} :: exception - {}", interfaceName, e.toString());
 			}
 		}
 		

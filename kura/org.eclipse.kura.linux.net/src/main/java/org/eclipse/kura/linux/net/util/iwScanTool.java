@@ -80,6 +80,8 @@ public class iwScanTool {
 			}
 	
 			long timerStart = System.currentTimeMillis();
+			//s_logger.warn("<IAB> scan() :: ... Starting Timer ...");
+			
 			m_executor = Executors.newSingleThreadExecutor();
 			m_task = m_executor.submit(new Runnable() {
 				@Override
@@ -109,11 +111,13 @@ public class iwScanTool {
 			
 			while (!m_task.isDone()) {
 				if (System.currentTimeMillis() > timerStart+m_timeout*1000) {
+					//s_logger.warn("<IAB> scan() :: !!! TIMEOUT !!!");
 					sb = new StringBuilder();
 					sb.append("iw dev ").append(m_ifaceName).append(" scan");
 					try {
 						int pid = LinuxProcessUtil.getPid(sb.toString());
 						if (pid >= 0) {
+							//s_logger.warn("<IAB> scan() :: !!! TIMEOUT !!! :: killing pid {}", pid);
 							LinuxProcessUtil.kill(pid);
 						}
 					} catch (Exception e) {
@@ -122,6 +126,7 @@ public class iwScanTool {
 					m_task.cancel(true);
 					m_task = null;
 					m_errmsg = "timeout executing scan command";
+					break;
 				}
 				try {
 					Thread.sleep(500);
@@ -178,6 +183,7 @@ public class iwScanTool {
 		List<String> capabilities = null;
 		
 		while((line = br.readLine()) != null) {
+			//s_logger.warn("<IAB> !!! line: {}", line);
 			if(line.contains("BSS ") && !line.contains("* OBSS")) {
 				//new AP
 				if(ssid != null) {

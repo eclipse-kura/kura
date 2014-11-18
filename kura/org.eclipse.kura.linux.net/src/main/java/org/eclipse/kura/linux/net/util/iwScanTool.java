@@ -111,13 +111,13 @@ public class iwScanTool {
 			
 			while (!m_task.isDone()) {
 				if (System.currentTimeMillis() > timerStart+m_timeout*1000) {
-					//s_logger.warn("<IAB> scan() :: !!! TIMEOUT !!!");
+					s_logger.warn("scan() :: scan timeout");
 					sb = new StringBuilder();
 					sb.append("iw dev ").append(m_ifaceName).append(" scan");
 					try {
 						int pid = LinuxProcessUtil.getPid(sb.toString());
 						if (pid >= 0) {
-							//s_logger.warn("<IAB> scan() :: !!! TIMEOUT !!! :: killing pid {}", pid);
+							s_logger.warn("scan() :: scan timeout :: killing pid {}", pid);
 							LinuxProcessUtil.kill(pid);
 						}
 					} catch (Exception e) {
@@ -142,7 +142,7 @@ public class iwScanTool {
 			try {
 				wifiAccessPoints = parse();
 			} catch (Exception e) {
-				throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e, "error parsinf scan results");
+				throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e, "error parsing scan results");
 			} finally {
 				s_logger.info("scan() :: destroing scan proccess ...");
 				ProcessUtil.destroy(m_proccess);
@@ -183,6 +183,11 @@ public class iwScanTool {
 		List<String> capabilities = null;
 		
 		while((line = br.readLine()) != null) {
+			
+			if (line.startsWith("scan aborted!")) {
+				s_logger.warn("parse() :: scan operation was aborted");
+				throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "iw scan operation was aborted");
+			}
 			//s_logger.warn("<IAB> !!! line: {}", line);
 			if(line.contains("BSS ") && !line.contains("* OBSS")) {
 				//new AP

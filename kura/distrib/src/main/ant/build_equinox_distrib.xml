@@ -450,7 +450,7 @@ echo $KURA_PID > /var/run/kura.pid
         <!-- Create the manifest -->
 
     	<!-- Read mf entries -->
-        <loadmf jar="${project.build.directory}/plugins/org.eclipse.kura.deployment.customizer_${org.eclipse.kura.deployment.customizer.version}.jar" prefix="customizer-mf."/>
+        <loadmf jar="${project.build.directory}/plugins/org.eclipse.kura.deployment.customizer.upgrade_${org.eclipse.kura.deployment.customizer.upgrade.version}.jar" prefix="customizer-mf."/>
 
         <echo file="${project.build.directory}/${build.output.name}/dp_upgrade_stage/META-INF/MANIFEST.MF" append="false">Manifest-Version: 1.0
 DeploymentPackage-SymbolicName: kura-upgrade

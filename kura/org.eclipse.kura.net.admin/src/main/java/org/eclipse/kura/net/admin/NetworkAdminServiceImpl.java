@@ -41,6 +41,7 @@ import org.eclipse.kura.linux.net.iptables.LocalRule;
 import org.eclipse.kura.linux.net.iptables.NATRule;
 import org.eclipse.kura.linux.net.iptables.PortForwardRule;
 import org.eclipse.kura.linux.net.util.LinuxNetworkUtil;
+import org.eclipse.kura.linux.net.util.iwScanTool;
 import org.eclipse.kura.linux.net.wifi.HostapdManager;
 import org.eclipse.kura.linux.net.wifi.WpaSupplicant;
 import org.eclipse.kura.linux.net.wifi.WpaSupplicantManager;
@@ -1095,7 +1096,7 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 		    }
 		    
 		    s_logger.info("getWifiHotspots() :: scanning for available access points ...");
-		    List<WifiAccessPoint> wifiAccessPoints = LinuxNetworkUtil.getAvailableAccessPoints(ifaceName, 3);
+		    List<WifiAccessPoint> wifiAccessPoints = new iwScanTool(ifaceName).scan();
 		    for(WifiAccessPoint wap : wifiAccessPoints) {
 		    	
 		    	if ((wap.getSSID() == null) || (wap.getSSID().length() == 0)) {
@@ -1172,7 +1173,7 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 		    }
 	    } catch(Throwable t) {
 	    	t.printStackTrace();
-	    	throw new KuraException(KuraErrorCode.OPERATION_NOT_SUPPORTED, "Could not initialize NL80211");
+	    	throw new KuraException(KuraErrorCode.OPERATION_NOT_SUPPORTED, t, "Could not initialize NL80211");
 	    }
 	    
 	    return mWifiHotspotInfo;

@@ -42,6 +42,7 @@ import org.eclipse.kura.linux.net.modem.SupportedUsbModemInfo;
 import org.eclipse.kura.linux.net.modem.SupportedUsbModemsInfo;
 import org.eclipse.kura.linux.net.util.KuraConstants;
 import org.eclipse.kura.linux.net.util.LinuxNetworkUtil;
+import org.eclipse.kura.linux.net.util.iwScanTool;
 import org.eclipse.kura.net.ConnectionInfo;
 import org.eclipse.kura.net.IPAddress;
 import org.eclipse.kura.net.NetInterface;
@@ -309,9 +310,13 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
 		
 		List<String> interfaceNames = getAllNetworkInterfaceNames();
 		for(String interfaceName : interfaceNames) {
-			NetInterface<? extends NetInterfaceAddress> netInterface = getNetworkInterface(interfaceName);
-			if(netInterface != null) {
-				netInterfaces.add(netInterface);
+			try {
+				NetInterface<? extends NetInterfaceAddress> netInterface = getNetworkInterface(interfaceName);
+				if(netInterface != null) {
+					netInterfaces.add(netInterface);
+				}
+			} catch (KuraException e) {
+				s_logger.error("Can't get network interface info for {} :: exception - {}", interfaceName, e.toString());
 			}
 		}
 		
@@ -377,7 +382,7 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
 
 	@Override
 	public List<WifiAccessPoint> getWifiAccessPoints(String wifiInterfaceName) throws KuraException {
-		return LinuxNetworkUtil.getAvailableAccessPoints(wifiInterfaceName, 3);
+		return new iwScanTool(wifiInterfaceName).scan();
 	}
 
 	@Override

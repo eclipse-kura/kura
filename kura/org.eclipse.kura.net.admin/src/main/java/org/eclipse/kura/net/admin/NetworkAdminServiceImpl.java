@@ -1172,7 +1172,7 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 		    	//nl80211.setMode(WifiMode.MASTER);
 		    }
 	    } catch(Throwable t) {
-	    	t.printStackTrace();
+	    	//t.printStackTrace();
 	    	throw new KuraException(KuraErrorCode.OPERATION_NOT_SUPPORTED, t, "Could not initialize NL80211");
 	    }
 	    

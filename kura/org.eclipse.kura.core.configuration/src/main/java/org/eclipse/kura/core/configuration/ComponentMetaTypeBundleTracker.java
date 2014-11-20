@@ -62,13 +62,14 @@ public class ComponentMetaTypeBundleTracker extends BundleTracker<Bundle>
 	{
 		s_logger.info("Opening ComponentMetaTypeBundleTracker...");
 		super.open();
-				
+		/*	<IAB> commented out	
 		Bundle[] bundles = m_context.getBundles();
 		if (bundles != null) {
 			for (Bundle bundle : bundles) {
 				processBundleMetaType(bundle);	
 			}
 		}
+		*/
 	};
 	
 	@Override

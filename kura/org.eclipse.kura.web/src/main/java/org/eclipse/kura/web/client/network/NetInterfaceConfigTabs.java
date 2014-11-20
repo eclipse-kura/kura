@@ -249,6 +249,19 @@ public class NetInterfaceConfigTabs extends LayoutContainer
 			}
 		}
 	}
+	
+	public void disableInterfaceTabs() {
+		synchronized (m_tabsPanelLock) {
+			for (TabItem tabItem : new ArrayList<TabItem>(
+					m_tabsPanel.getItems())) {
+				if (tabItem == m_tabWirelessConfig
+						|| tabItem == m_tabModemConfig
+						|| tabItem == m_tabDhcpNatConfig) {
+					tabItem.disable();
+				}
+			}
+		}
+	}
     
     public void removeDhcpNatTab() {
     	synchronized(m_tabsPanelLock) {
@@ -291,53 +304,60 @@ public class NetInterfaceConfigTabs extends LayoutContainer
     // Add/remove tabs based on the selected settings in the various tabs
     public void adjustInterfaceTabs() {
     	GwtNetIfStatus netIfStatus = m_tcpIpConfigTab.getStatus();
-    	if(netIfStatus.equals(GwtNetIfStatus.netIPv4StatusDisabled)) {
-    		Log.debug("Disabled - remove tabs");
-    		removeInterfaceTabs();
-    	} else {
-    		boolean includeDhcpNatTab = !m_tcpIpConfigTab.isDhcp() && netIfStatus.equals(GwtNetIfStatus.netIPv4StatusEnabledLAN);
-    		
-    		Log.debug("includeDhcpNatTab? " + includeDhcpNatTab);
-    		
-    		int natTabIndex = 1;
-    		
-    		if(m_netIfConfig instanceof GwtWifiNetInterfaceConfig) {
-    			Log.debug("insert wifi tab");
-				removeTab(m_tabModemConfig);
-    			insertTab(m_tabWirelessConfig, 1);
-    			
-    			// remove dhcp/nat tab if not an access point
-    			if(!GwtWifiWirelessMode.netWifiWirelessModeAccessPoint.equals(m_wirelessConfigTab.getWirelessMode())) {
-    				includeDhcpNatTab = false;
-    			} 
-    			
-    			if (includeDhcpNatTab){
-    				natTabIndex = 2;
-    			}
-    		} else if (m_netIfConfig instanceof GwtModemInterfaceConfig) {
-    			includeDhcpNatTab = false;
-				removeTab(m_tabWirelessConfig);
+    	
+		boolean includeDhcpNatTab = !m_tcpIpConfigTab.isDhcp() && netIfStatus.equals(GwtNetIfStatus.netIPv4StatusEnabledLAN);
+		
+		Log.debug("includeDhcpNatTab? " + includeDhcpNatTab);
+		
+		if(m_netIfConfig instanceof GwtWifiNetInterfaceConfig) {
+			Log.debug("insert wifi tab");
+			removeTab(m_tabModemConfig);
+			insertTab(m_tabWirelessConfig, 1);
+			if (!m_tabWirelessConfig.isEnabled()) {
+				m_tabWirelessConfig.enable();
+			}
+			insertTab(m_tabDhcpNatConfig, 2);
+			
+			// remove dhcp/nat tab if not an access point
+			if(!GwtWifiWirelessMode.netWifiWirelessModeAccessPoint.equals(m_wirelessConfigTab.getWirelessMode())) {
+				includeDhcpNatTab = false;
+			} 
+			
+		} else if(m_netIfConfig instanceof GwtModemInterfaceConfig) {
+			includeDhcpNatTab = false;
+			removeTab(m_tabWirelessConfig);
+			removeTab(m_tabDhcpNatConfig);
 
-				Log.debug("insert modem tab");
-    			insertTab(m_tabModemConfig, 1);
-    			natTabIndex = 2;
-    		} else {
-    			removeTab(m_tabWirelessConfig);
-    			removeTab(m_tabModemConfig);
-    			
-    			if(m_netIfConfig.getHwTypeEnum() == GwtNetIfType.LOOPBACK || m_netIfConfig.getName().startsWith("mon.wlan")) {
-    				includeDhcpNatTab = false;
-    			}
-    		}
-    		    		    		
-    		if(includeDhcpNatTab) {
-    			Log.debug("insert dhcp/nat tab");
-    			insertTab(m_tabDhcpNatConfig, natTabIndex);
-    		} else {
-    			Log.debug("remove dhcp/nat tab");
-    			removeTab(m_tabDhcpNatConfig);
-    		}
-    	}
+			Log.debug("insert modem tab");
+			insertTab(m_tabModemConfig, 1);
+			if (!m_tabModemConfig.isEnabled()) {
+				m_tabModemConfig.enable();
+			}
+		} else {
+			removeTab(m_tabWirelessConfig);
+			removeTab(m_tabModemConfig);
+			
+			if(m_netIfConfig.getHwTypeEnum() == GwtNetIfType.LOOPBACK || m_netIfConfig.getName().startsWith("mon.wlan")) {
+				removeTab(m_tabDhcpNatConfig);
+			}
+			else {
+				insertTab(m_tabDhcpNatConfig, 1);
+			}
+		}
+		    		    		
+		if(includeDhcpNatTab) {
+			Log.debug("enable dhcp/nat tab");
+			m_tabDhcpNatConfig.enable();
+		} else {
+			Log.debug("disable dhcp/nat tab");
+			m_tabDhcpNatConfig.disable();
+		}
+		
+		if(netIfStatus.equals(GwtNetIfStatus.netIPv4StatusDisabled)) {
+    		Log.debug("Disabled - remove tabs");
+    		disableInterfaceTabs();
+    	} 
+
     }
     
     public boolean isValid() {
@@ -352,7 +372,7 @@ public class NetInterfaceConfigTabs extends LayoutContainer
     	if (tabItems.contains(m_tabModemConfig) && !m_modemConfigTab.isValid()) {
     		return false;
     	}
-    	if (tabItems.contains(m_tabDhcpNatConfig) && !m_dhcpNatConfigTab.isValid()) {
+    	if (tabItems.contains(m_tabDhcpNatConfig) && m_tabDhcpNatConfig.isEnabled() && !m_dhcpNatConfigTab.isValid()) {
     		return false;
     	}
     	if (tabItems.contains(m_tabHardwareConfig) && !m_hwConfigTab.isValid()) {
@@ -377,7 +397,7 @@ public class NetInterfaceConfigTabs extends LayoutContainer
     		Log.debug("m_modemConfigTab is dirty");
     		return true;
     	}
-    	if (tabItems.contains(m_tabDhcpNatConfig) && m_dhcpNatConfigTab.isDirty()) {
+    	if (tabItems.contains(m_tabDhcpNatConfig) && m_tabDhcpNatConfig.isEnabled() && m_dhcpNatConfigTab.isDirty()) {
     		Log.debug("m_dhcpNatConfigTab is dirty");
     		return true;
     	}

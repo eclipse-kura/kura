@@ -66,6 +66,7 @@ public class GwtStatusServiceImpl extends OsgiRemoteServiceServlet implements Gw
 			pairs.add(new GwtGroupedNVPair("cloudStatus", "Broker URL", dataTransportService.getBrokerUrl()));
 			pairs.add(new GwtGroupedNVPair("cloudStatus", "Account", dataTransportService.getAccountName()));
 			pairs.add(new GwtGroupedNVPair("cloudStatus", "Username", dataTransportService.getUsername()));
+			pairs.add(new GwtGroupedNVPair("cloudStatus", "Client ID", dataTransportService.getClientId()));
 		}
 		} catch (GwtKuraException e) {
 			s_logger.debug(e.getMessage());

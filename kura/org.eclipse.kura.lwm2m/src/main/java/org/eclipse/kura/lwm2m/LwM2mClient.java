@@ -19,18 +19,15 @@ import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.TimeZone;
 import java.util.UUID;
 
 import leshan.client.coap.californium.CaliforniumBasedObject;
-import leshan.client.coap.californium.CaliforniumBasedObjectInstance;
 import leshan.client.exchange.LwM2mExchange;
 import leshan.client.register.RegisterUplink;
 import leshan.client.resource.LwM2mClientObject;

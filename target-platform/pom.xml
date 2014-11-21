@@ -20,13 +20,16 @@
 
 	<profiles>
 		<profile>
-			<id>dio</id>
-			<properties>
-				<org.eclipse.kura.dio.skip>false</org.eclipse.kura.dio.skip>
-			</properties>
+			<id>dio-skip</id>
 			<activation>
-				<activeByDefault>false</activeByDefault>
+				<property>
+					<name>dio.skip</name>
+					<value>true</value>
+				</property>
 			</activation>
+			<properties>
+				<org.eclipse.kura.dio.skip>true</org.eclipse.kura.dio.skip>
+			</properties>
 		</profile>
 	</profiles>
 

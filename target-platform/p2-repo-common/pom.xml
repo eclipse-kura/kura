@@ -24,6 +24,7 @@
 				this directory -->
 			<plugin>
 				<artifactId>maven-dependency-plugin</artifactId>
+				<version>2.9</version>
 				<executions>
 					<execution>
 						<id>copy-bundles-for-publishing</id>

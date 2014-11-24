@@ -441,9 +441,13 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 										((GwtWifiNetInterfaceConfig)gwtNetConfig).setWirelessMode(GwtWifiWirelessMode.netWifiWirelessModeStation.name());
 										if (wifiClientMonitorService != null) {
 											if (wifiConfig.getMode().equals(WifiMode.INFRA)) {
-												int rssi = wifiClientMonitorService.getSignalLevel(netIfConfig.getName(), wifiConfig.getSSID());
-												s_logger.debug("Setting Received Signal Strength to {}", rssi);
-												gwtNetConfig.setHwRssi(Integer.toString(rssi));
+												try {
+													int rssi = wifiClientMonitorService.getSignalLevel(netIfConfig.getName(), wifiConfig.getSSID());
+													s_logger.debug("Setting Received Signal Strength to {}", rssi);
+													gwtNetConfig.setHwRssi(Integer.toString(rssi));
+												} catch (KuraException e) {
+													e.printStackTrace();
+												}
 											}
 										}
 									} else if (activeWirelessMode == WifiMode.ADHOC) {

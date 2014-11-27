@@ -1083,7 +1083,6 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 	    }
 	    
 	    try {
-		    //NL80211 nl80211 = NL80211.getInstance(ifaceName);
 		    if (wifiMode == WifiMode.MASTER) {
 		    	WpaSupplicantConfigWriter wpaSupplicantConfigWriter = WpaSupplicantConfigWriter.getInstance();
 		    	wpaSupplicantConfigWriter.generateTempWpaSupplicantConf();
@@ -1092,7 +1091,6 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 		    	StringBuilder key = new StringBuilder("net.interface." +  ifaceName + ".config.wifi.infra.driver");
 		    	String driver = KuranetConfig.getProperty(key.toString());
 		    	WpaSupplicantManager.startTemp(ifaceName, WifiMode.INFRA, driver);
-		    	//nl80211.setMode(WifiMode.INFRA, 3);
 		    }
 		    
 		    s_logger.info("getWifiHotspots() :: scanning for available access points ...");
@@ -1159,21 +1157,15 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 		    	WifiHotspotInfo wifiHotspotInfo = new WifiHotspotInfo(wap.getSSID(), sbMacAddress.toString(), 0-wap.getStrength(), channel, frequency, wifiSecurity);
 		    	mWifiHotspotInfo.put(wap.getSSID(), wifiHotspotInfo);
 		    }
-		    /*
-		    if (nl80211.triggerScan()) {
-		    	wifiHotspotInfo = nl80211.getScanResults(3, 2);
-		    }
-		    */
+		    
 		    if (wifiMode == WifiMode.MASTER) {
 		    	if (WpaSupplicantManager.isTempRunning()) {
 					s_logger.debug("getWifiHotspots() :: stoping temporary instance of wpa_supplicant");
 					WpaSupplicantManager.stop();
 				}
-		    	//nl80211.setMode(WifiMode.MASTER);
 		    }
 	    } catch(Throwable t) {
-	    	//t.printStackTrace();
-	    	throw new KuraException(KuraErrorCode.OPERATION_NOT_SUPPORTED, t, "Could not initialize NL80211");
+	    	throw new KuraException(KuraErrorCode.INTERNAL_ERROR, t, "The 'iw scan' operation failed");
 	    }
 	    
 	    return mWifiHotspotInfo;

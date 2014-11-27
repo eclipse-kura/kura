@@ -43,6 +43,7 @@ public class TelitModem {
 	protected String m_imsi;
 	protected String m_iccid;
 	
+	private boolean m_gpsEnabled;
 	private ModemDevice m_device;
 	private String m_platform;
 	private ConnectionFactory m_connectionFactory;
@@ -57,6 +58,7 @@ public class TelitModem {
 		m_platform = platform;
 		m_connectionFactory = connectionFactory;
 		m_technologyType = technologyType;
+		m_gpsEnabled = false;
 	}
 	
 	public void reset() throws KuraException {
@@ -209,7 +211,8 @@ public class TelitModem {
     	synchronized (s_atLock) {
     		String atPort = getAtPort();
     		String gpsPort = getGpsPort();
-			if ((atPort.equals(getDataPort()) || atPort.equals(gpsPort)) && (m_rssi < 0)) {
+			if ((atPort.equals(getDataPort()) || (atPort.equals(gpsPort)
+					&& m_gpsEnabled)) && (m_rssi < 0)) {
 				return m_rssi;
 			}
 	    	s_logger.debug("sendCommand getSignalStrength :: " + TelitModemAtCommands.getSignalStrength.getCommand());
@@ -285,6 +288,7 @@ public class TelitModem {
     
     public void enableGps() throws KuraException {
     	if ((m_gpsSupported == null) || (m_gpsSupported == false)) {
+    		m_gpsEnabled = false;
     		return;
     	}
     	synchronized (s_atLock) {
@@ -317,10 +321,13 @@ public class TelitModem {
 			    }
     		}
     	}
+    	
+    	m_gpsEnabled = true;
     }
     
     public void disableGps() throws KuraException {
     	if ((m_gpsSupported == null) || (m_gpsSupported == false)) {
+    		m_gpsEnabled = false;
     		return;
     	}
     	synchronized (s_atLock) {
@@ -344,6 +351,8 @@ public class TelitModem {
 			}
     		closeSerialPort(commAtConnection);
     	}
+    	
+    	m_gpsEnabled = false;
     }
     
     public String getMobileSubscriberIdentity() throws KuraException {

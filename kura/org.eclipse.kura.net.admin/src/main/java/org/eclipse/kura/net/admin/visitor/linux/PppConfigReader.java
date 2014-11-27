@@ -356,7 +356,7 @@ public class PppConfigReader implements NetworkConfigurationVisitor {
             gpsEnabled = Boolean.parseBoolean(statusString);
         }
         
-        int resetTout = 0;
+        int resetTout = 5;
         key = new StringBuilder().append("net.interface.").append(ifaceName).append(".config.resetTimeout");
         statusString = KuranetConfig.getProperty(key.toString());
         if(statusString != null && !statusString.isEmpty()) {

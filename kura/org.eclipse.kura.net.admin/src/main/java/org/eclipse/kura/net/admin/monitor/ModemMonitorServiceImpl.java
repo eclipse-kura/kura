@@ -459,8 +459,10 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 						pppService = PppFactory.obtainPppService(ifaceName, modem.getDataPort());
 						pppState = pppService.getPppState();
 						
-						s_logger.info("monitor() :: previous PppState={}", m_pppState);
-						s_logger.info("monitor() :: current PppState={}", pppState);
+						if (m_pppState != pppState) {
+							s_logger.info("monitor() :: previous PppState={}", m_pppState);
+							s_logger.info("monitor() :: current PppState={}", pppState);
+						}
 						
 						if (pppState == PppState.NOT_CONNECTED) {
 							if (modem.getTechnologyType() == ModemTechnologyType.HSDPA) {

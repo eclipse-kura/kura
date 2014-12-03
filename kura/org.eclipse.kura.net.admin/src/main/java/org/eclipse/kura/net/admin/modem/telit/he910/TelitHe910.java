@@ -59,8 +59,8 @@ public class TelitHe910 extends TelitModem implements HspaCellularModem {
 			if (atPort != null) {
 				if (atPort.equals(getDataPort()) || atPort.equals(gpsPort)) {
 					m_serialNumber = getSerialNumber();
-					m_imsi = this.getMobileSubscriberIdentity();
-					m_iccid = this.getIntegratedCirquitCardId();
+					m_imsi = getMobileSubscriberIdentity();
+					m_iccid = getIntegratedCirquitCardId();
 					m_model = getModel();
 					m_manufacturer = getManufacturer();		
 					m_revisionId = getRevisionID();

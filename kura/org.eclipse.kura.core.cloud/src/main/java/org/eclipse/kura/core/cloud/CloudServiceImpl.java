@@ -230,8 +230,17 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
 			m_imei = (String)modemReadyEvent.getProperty(ModemReadyEvent.IMEI);
 			m_imsi = (String)modemReadyEvent.getProperty(ModemReadyEvent.IMSI);
 			m_iccid = (String)modemReadyEvent.getProperty(ModemReadyEvent.ICCID);
+			s_logger.trace("handleEvent() :: IMEI={}", m_imei);
+			s_logger.trace("handleEvent() :: IMSI={}", m_imsi);
+			s_logger.trace("handleEvent() :: ICCID={}", m_iccid);
+			
 			if (m_dataService.isConnected() && m_options.getRepubBirthCertOnModemDetection()) {
-				publishBirthCertificate();
+				if (!(((m_imei == null) || (m_imei.length() == 0) || m_imei.equals("ERROR"))
+						&& ((m_imsi == null) || (m_imsi.length() == 0) || m_imsi.equals("ERROR"))
+						&& ((m_iccid == null) || (m_iccid.length() == 0) || m_iccid.equals("ERROR")))) {
+					s_logger.debug("handleEvent() :: publishing BIRTH certificate ...");
+					publishBirthCertificate();
+				}
 			}
 		}
 	}

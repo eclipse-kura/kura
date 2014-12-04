@@ -60,16 +60,19 @@ public class ComponentMetaTypeBundleTracker extends BundleTracker<Bundle>
 	@Override
 	public void open() 
 	{
-		s_logger.info("Opening ComponentMetaTypeBundleTracker...");
-		super.open();
-		/*	<IAB> commented out	
+		s_logger.info("Opening ComponentMetaTypeBundleTracker...");	
 		Bundle[] bundles = m_context.getBundles();
 		if (bundles != null) {
 			for (Bundle bundle : bundles) {
 				processBundleMetaType(bundle);	
 			}
 		}
-		*/
+		
+		// Begin tracking bundles.
+		// There is a small change to miss a bundle being added.
+		// If this happens try to synchronize this method and the
+		// method addingBundle() below.
+		super.open();
 	};
 	
 	@Override

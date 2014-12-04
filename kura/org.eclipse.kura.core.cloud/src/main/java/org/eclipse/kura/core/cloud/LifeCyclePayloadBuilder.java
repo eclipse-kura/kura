@@ -87,11 +87,25 @@ public class LifeCyclePayloadBuilder
 		.withTotalMemory(deviceProfile.getTotalMemory())
 		.withOsArch(deviceProfile.getOsArch())
 		.withOsgiFramework(deviceProfile.getOsgiFramework())
-		.withOsgiFrameworkVersion(deviceProfile.getOsgiFrameworkVersion())
-		.withModemImei(m_cloudServiceImpl.m_imei)
-		.withModemIccid(m_cloudServiceImpl.m_iccid)
-		.withModemImsi(m_cloudServiceImpl.m_imsi);
-
+		.withOsgiFrameworkVersion(deviceProfile.getOsgiFrameworkVersion());
+		
+		if ((m_cloudServiceImpl.m_imei != null)
+				&& (m_cloudServiceImpl.m_imei.length() > 0)
+				&& !m_cloudServiceImpl.m_imei.equals("ERROR")) {
+			birthPayloadBuilder.withModemImei(m_cloudServiceImpl.m_imei);
+		}
+		if ((m_cloudServiceImpl.m_iccid != null)
+				&& (m_cloudServiceImpl.m_iccid.length() > 0)
+				&& !m_cloudServiceImpl.m_iccid.equals("ERROR")) {
+			birthPayloadBuilder.withModemIccid(m_cloudServiceImpl.m_iccid);
+		}
+		
+		if ((m_cloudServiceImpl.m_imsi != null)
+				&& (m_cloudServiceImpl.m_imsi.length() > 0)
+				&& !m_cloudServiceImpl.m_imsi.equals("ERROR")) {
+			birthPayloadBuilder.withModemImsi(m_cloudServiceImpl.m_imsi);
+		}
+		
         if (deviceProfile.getLatitude() != null &&
             deviceProfile.getLongitude() != null) {
             KuraPosition KuraPosition = new KuraPosition();

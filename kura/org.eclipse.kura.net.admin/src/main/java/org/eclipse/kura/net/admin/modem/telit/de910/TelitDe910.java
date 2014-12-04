@@ -357,4 +357,9 @@ public class TelitDe910 extends TelitModem implements EvdoCellularModem {
 			sleep (180000);
 		}
 	}
+
+	@Override
+	public boolean isSimCardReady() throws KuraException {
+		return true;
+	}
 }

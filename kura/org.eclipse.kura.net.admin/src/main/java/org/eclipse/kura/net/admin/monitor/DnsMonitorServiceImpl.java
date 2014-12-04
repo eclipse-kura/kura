@@ -226,18 +226,23 @@ public class DnsMonitorServiceImpl implements DnsMonitorService, EventHandler {
 		m_allowedNetworks = new HashSet<NetworkPair<IP4Address>>();
 		m_forwarders = new HashSet<IP4Address>();
 		        
-		List<NetInterfaceConfig<? extends NetInterfaceAddressConfig>> netInterfaceConfigs = m_networkConfiguration.getNetInterfaceConfigs();
-		 
-		for (NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig : netInterfaceConfigs) {
-		    if (netInterfaceConfig.getType() == NetInterfaceType.ETHERNET || 
-		            netInterfaceConfig.getType() == NetInterfaceType.WIFI || 
-		            netInterfaceConfig.getType() == NetInterfaceType.MODEM) {
-		        try{
-		            getAllowedNetworks(netInterfaceConfig);
-		        } catch (KuraException e) {
-		            s_logger.error("Error updating dns proxy", e);
-		        }
-		    }
+		if (m_networkConfiguration != null) {
+			if (m_networkConfiguration.getNetInterfaceConfigs() != null) {
+				List<NetInterfaceConfig<? extends NetInterfaceAddressConfig>> netInterfaceConfigs = m_networkConfiguration
+						.getNetInterfaceConfigs();
+
+				for (NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig : netInterfaceConfigs) {
+					if (netInterfaceConfig.getType() == NetInterfaceType.ETHERNET
+							|| netInterfaceConfig.getType() == NetInterfaceType.WIFI
+							|| netInterfaceConfig.getType() == NetInterfaceType.MODEM) {
+						try {
+							getAllowedNetworks(netInterfaceConfig);
+						} catch (KuraException e) {
+							s_logger.error("Error updating dns proxy", e);
+						}
+					}
+				}
+			}
 		}
 		
 		Set<IPAddress> dnsServers = LinuxDns.getInstance().getDnServers();
@@ -337,22 +342,26 @@ public class DnsMonitorServiceImpl implements DnsMonitorService, EventHandler {
 	private Set<IPAddress> getConfiguredDnsServers() {
 		LinkedHashSet<IPAddress> serverList = new LinkedHashSet<IPAddress>();
     	
-		List<NetInterfaceConfig<? extends NetInterfaceAddressConfig>> netInterfaceConfigs = m_networkConfiguration.getNetInterfaceConfigs();
-		// If there are multiple WAN interfaces, their configured DNS servers are all included in no particular order
-		for (NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig : netInterfaceConfigs) {		
-		    if (netInterfaceConfig.getType() == NetInterfaceType.ETHERNET || 
-		            netInterfaceConfig.getType() == NetInterfaceType.WIFI || 
-		            netInterfaceConfig.getType() == NetInterfaceType.MODEM) {
-	        	if(isEnabledForWan(netInterfaceConfig)) {
-	        		try {
-	        			Set<IPAddress> servers = getConfiguredDnsServers(netInterfaceConfig);
-	        			s_logger.trace(netInterfaceConfig.getName() + " is WAN, adding its dns servers: " + servers);
-						serverList.addAll(servers);
-					} catch (KuraException e) {
-						s_logger.error("Error adding dns servers for " + netInterfaceConfig.getName(), e);
-					}
-		        }
-		    }
+		if(m_networkConfiguration!=null){
+			if(m_networkConfiguration.getNetInterfaceConfigs()!=null){
+				List<NetInterfaceConfig<? extends NetInterfaceAddressConfig>> netInterfaceConfigs = m_networkConfiguration.getNetInterfaceConfigs();
+				// If there are multiple WAN interfaces, their configured DNS servers are all included in no particular order
+				for (NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig : netInterfaceConfigs) {		
+				    if (netInterfaceConfig.getType() == NetInterfaceType.ETHERNET || 
+				            netInterfaceConfig.getType() == NetInterfaceType.WIFI || 
+				            netInterfaceConfig.getType() == NetInterfaceType.MODEM) {
+			        	if(isEnabledForWan(netInterfaceConfig)) {
+			        		try {
+			        			Set<IPAddress> servers = getConfiguredDnsServers(netInterfaceConfig);
+			        			s_logger.trace(netInterfaceConfig.getName() + " is WAN, adding its dns servers: " + servers);
+								serverList.addAll(servers);
+							} catch (KuraException e) {
+								s_logger.error("Error adding dns servers for " + netInterfaceConfig.getName(), e);
+							}
+				        }
+				    }
+				}
+			}
 		}
 		return serverList;
 	}

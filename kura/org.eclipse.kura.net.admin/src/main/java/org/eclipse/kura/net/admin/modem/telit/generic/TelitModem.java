@@ -26,7 +26,7 @@ import org.osgi.service.io.ConnectionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class TelitModem {
+public abstract class TelitModem {
 	
 	private static final Logger s_logger = LoggerFactory.getLogger(TelitModem.class);
 	private static final String OS_VERSION = System.getProperty("kura.os.version");
@@ -358,29 +358,31 @@ public class TelitModem {
     public String getMobileSubscriberIdentity() throws KuraException {
     	synchronized (s_atLock) {
 	    	if (m_imsi == null) {
-	    		s_logger.debug("sendCommand getIMSI :: " + TelitModemAtCommands.getIMSI.getCommand());
-	    		byte[] reply = null;
-	    		CommConnection commAtConnection = openSerialPort(getAtPort());
-	    		if (!isAtReachable(commAtConnection)) {
-	    			closeSerialPort(commAtConnection);
-		    		throw new KuraException(KuraErrorCode.NOT_CONNECTED, "Modem not available for AT commands: " + TelitHe910.class.getName());
-		    	}
-				try {
-					reply = commAtConnection.sendCommand(TelitModemAtCommands.getIMSI.getCommand().getBytes(), 1000, 100);
-				} catch (IOException e) {
+	    		if (isSimCardReady()) {
+		    		s_logger.debug("sendCommand getIMSI :: " + TelitModemAtCommands.getIMSI.getCommand());
+		    		byte[] reply = null;
+		    		CommConnection commAtConnection = openSerialPort(getAtPort());
+		    		if (!isAtReachable(commAtConnection)) {
+		    			closeSerialPort(commAtConnection);
+			    		throw new KuraException(KuraErrorCode.NOT_CONNECTED, "Modem not available for AT commands: " + TelitHe910.class.getName());
+			    	}
+					try {
+						reply = commAtConnection.sendCommand(TelitModemAtCommands.getIMSI.getCommand().getBytes(), 1000, 100);
+					} catch (IOException e) {
+						closeSerialPort(commAtConnection);
+						throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+					}
 					closeSerialPort(commAtConnection);
-					throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
-				}
-				closeSerialPort(commAtConnection);
-				if (reply != null) {
-				    String imsi = getResponseString(reply);
-				    if(imsi != null && !imsi.isEmpty()) {
-				    	if (imsi.startsWith("#CIMI:")) {
-				    		imsi = imsi.substring("#CIMI:".length()).trim();
-				    	}
-				    	m_imsi = imsi;        
-				    }
-				}
+					if (reply != null) {
+					    String imsi = getResponseString(reply);
+					    if(imsi != null && !imsi.isEmpty()) {
+					    	if (imsi.startsWith("#CIMI:")) {
+					    		imsi = imsi.substring("#CIMI:".length()).trim();
+					    	}
+					    	m_imsi = imsi;        
+					    }
+					}
+	    		}
 	    	}
     	}
         return m_imsi;
@@ -389,29 +391,31 @@ public class TelitModem {
     public String getIntegratedCirquitCardId() throws KuraException {
     	synchronized (s_atLock) {
 	    	if (m_iccid == null) {
-	    		s_logger.debug("sendCommand getICCID :: " + TelitModemAtCommands.getICCID.getCommand());
-	    		byte[] reply = null;
-	    		CommConnection commAtConnection = openSerialPort(getAtPort());
-	    		if (!isAtReachable(commAtConnection)) {
-	    			closeSerialPort(commAtConnection);
-		    		throw new KuraException(KuraErrorCode.NOT_CONNECTED, "Modem not available for AT commands: " + TelitHe910.class.getName());
-		    	}
-				try {
-					reply = commAtConnection.sendCommand(TelitModemAtCommands.getICCID.getCommand().getBytes(), 1000, 100);
-				} catch (IOException e) {
+	    		if (isSimCardReady()) {
+		    		s_logger.debug("sendCommand getICCID :: " + TelitModemAtCommands.getICCID.getCommand());
+		    		byte[] reply = null;
+		    		CommConnection commAtConnection = openSerialPort(getAtPort());
+		    		if (!isAtReachable(commAtConnection)) {
+		    			closeSerialPort(commAtConnection);
+			    		throw new KuraException(KuraErrorCode.NOT_CONNECTED, "Modem not available for AT commands: " + TelitHe910.class.getName());
+			    	}
+					try {
+						reply = commAtConnection.sendCommand(TelitModemAtCommands.getICCID.getCommand().getBytes(), 1000, 100);
+					} catch (IOException e) {
+						closeSerialPort(commAtConnection);
+						throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+					}
 					closeSerialPort(commAtConnection);
-					throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
-				}
-				closeSerialPort(commAtConnection);
-				if (reply != null) {
-				    String iccid = getResponseString(reply);
-				    if(iccid != null && !iccid.isEmpty()) {
-				    	if (iccid.startsWith("#CCID:")) {
-				    		iccid = iccid.substring("#CCID:".length()).trim();
-				    	}
-				    	m_iccid = iccid;        
-				    }
-				}
+					if (reply != null) {
+					    String iccid = getResponseString(reply);
+					    if(iccid != null && !iccid.isEmpty()) {
+					    	if (iccid.startsWith("#CCID:")) {
+					    		iccid = iccid.substring("#CCID:".length()).trim();
+					    	}
+					    	m_iccid = iccid;        
+					    }
+					}
+	    		}
 	    	}
     	}
         return m_iccid;
@@ -503,6 +507,8 @@ public class TelitModem {
 	public ModemTechnologyType getTechnologyType() {
 		return m_technologyType;
 	}
+	
+	public abstract boolean isSimCardReady() throws KuraException;
 	
 	protected CommConnection openSerialPort (String port) throws KuraException {
     	

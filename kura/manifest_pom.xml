@@ -51,6 +51,14 @@
 		<maven.build.timestamp.format>yyyyMMddHHmm</maven.build.timestamp.format>
 		<kura.basedir>${project.basedir}</kura.basedir>
 		<kura.build.version>${maven.build.timestamp}</kura.build.version>
+		<maven.javadoc.failOnError>false</maven.javadoc.failOnError>
+		
+		<!-- Jacoco version -->
+		<jacoco.version>0.6.4.201312101107</jacoco.version>
+		<jacoco.reportDir>target/jacoco/</jacoco.reportDir>
+		<sonar.core.codeCoveragePlugin>jacoco</sonar.core.codeCoveragePlugin>
+		<sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>		
+		<sonar.jacoco.reportPath>target/jacoco.exec</sonar.jacoco.reportPath>
 	</properties>
 
 	<distributionManagement>
@@ -159,6 +167,21 @@
 				</executions>
 			</plugin>
 -->
+			<plugin>
+		        <groupId>org.jacoco</groupId>
+		        <artifactId>jacoco-maven-plugin</artifactId>
+		        <version>0.6.4.201312101107</version>
+		        <executions>
+		          <execution>
+		            <goals>
+		              <goal>prepare-agent</goal>
+		            </goals>
+		            <configuration>
+		              <destFile>${sonar.jacoco.reportPath}</destFile>
+		            </configuration>
+		          </execution>
+		        </executions>
+		      </plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-eclipse-plugin</artifactId>

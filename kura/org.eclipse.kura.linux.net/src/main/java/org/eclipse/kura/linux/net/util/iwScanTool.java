@@ -185,11 +185,13 @@ public class iwScanTool {
 		while((line = br.readLine()) != null) {
 			
 			if (line.startsWith("scan aborted!")) {
+				br.close();
 				s_logger.warn("parse() :: scan operation was aborted");
 				throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "iw scan operation was aborted");
 			}
 			//s_logger.warn("<IAB> !!! line: {}", line);
-			if(line.contains("BSS ") && !line.contains("* OBSS")) {
+			//if(line.contains("BSS ") && !line.contains("* OBSS")) {
+			if (line.startsWith("BSS")) {
 				//new AP
 				if(ssid != null) {
 					WifiAccessPointImpl wifiAccessPoint = new WifiAccessPointImpl(ssid);
@@ -395,6 +397,8 @@ public class iwScanTool {
 			}
 			wifiAccessPoints.add(wifiAccessPoint);
 		}
+		
+		br.close();
 		return wifiAccessPoints;
 	}
 }

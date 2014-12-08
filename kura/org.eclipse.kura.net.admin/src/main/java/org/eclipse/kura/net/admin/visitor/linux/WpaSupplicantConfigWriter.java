@@ -148,6 +148,13 @@ public class WpaSupplicantConfigWriter implements NetworkConfigurationVisitor {
     						} catch (IOException e) {
     							e.printStackTrace();
     						}
+        					
+        					key = new StringBuilder().append("net.interface.").append(interfaceName).append(".config.wifi.infra.ignoreSSID");
+        					try {
+    							KuranetConfig.setProperty(key.toString(), Boolean.toString(infraConfig.ignoreSSID()));
+    						} catch (IOException e) {
+    							e.printStackTrace();
+    						}
                             wpaSupplicantConfig = infraConfig;
                         } else {
                             s_logger.debug("Not updating wpa_supplicant config - wifi mode is " + wifiMode + " but the infra config is null");

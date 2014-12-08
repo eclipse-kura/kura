@@ -66,12 +66,7 @@ public class TelitHe910ModemFactory implements CellularModemFactory {
 		TelitHe910 telitHe910 = m_modemServices.get(key);
 
 		if (telitHe910 == null) {
-			telitHe910 = new TelitHe910(modemDevice, m_connectionFactory, s_type);
-			
-			if ((platform != null) && platform.equals("reliagate")) {
-				// FIXME comment out for now
-				//telitHe910.bindVectorJ21GpioService(VectorGpioControl.getInstance());
-			}
+			telitHe910 = new TelitHe910(modemDevice, platform, m_connectionFactory, s_type);
 			this.m_modemServices.put(key, telitHe910);
 		}
 		

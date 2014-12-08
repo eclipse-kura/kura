@@ -269,6 +269,9 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 				// Upon connect timeout, we can:
 				//  - call disconnect(0), but this does not work and an "Already Disconnecting" exception will be raised on the next connect attempt.
 				//  - call close(), but this does not work and an "Already in Use Persistence" exception will be raised when retrying the connect on a new instance.
+				
+				// prevent callbacks from a zombie client
+				m_mqttClient.setCallback(null);
 				m_mqttClient.close();
 			}
 			catch (Exception de) {
@@ -775,6 +778,8 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 			      m_persistenceType == m_clientConf.getPersistenceType())) {
 				try {
 					s_logger.info("Closing client...");
+					// prevent callbacks from a zombie client
+					m_mqttClient.setCallback(null);
 					m_mqttClient.close();
 					s_logger.info("Closed");
 				} catch (MqttException e) {

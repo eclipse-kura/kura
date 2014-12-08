@@ -116,7 +116,7 @@ public class StatusPanel extends LayoutContainer {
 			@Override
 			protected void load(Object loadConfig, final AsyncCallback<ListLoadResult<GwtGroupedNVPair>> callback) {
 				mask(MSGS.loading());
-				gwtStatusService.getDeviceConfig(new AsyncCallback<ListLoadResult<GwtGroupedNVPair>>() {
+				gwtStatusService.getDeviceConfig(m_currentSession.isNetAdminAvailable(), new AsyncCallback<ListLoadResult<GwtGroupedNVPair>>() {
 					public void onFailure(Throwable caught) {
 						unmask();
 						FailureHandler.handle(caught);

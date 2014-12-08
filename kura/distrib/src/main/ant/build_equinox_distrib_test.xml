@@ -69,8 +69,10 @@ cd $(dirname $0)/..
 java -Xms${kura.mem.size} -Xmx${kura.mem.size} -XX:MaxPermSize=${kura.mem.size} -Dkura.os.version=${kura.os.version} \
 	-Declipse.ignoreApp=true \
 	-Dkura.configuration=file:/opt/eclipse/kura/kura/kura.properties \
-        -Ddpa.configuration=/opt/eclipse/kura/kura/dpa.properties \
+   -Ddpa.configuration=/opt/eclipse/kura/kura/dpa.properties \
 	-Dlog4j.configuration=file:/opt/eclipse/kura/kura/log4j.properties \
+	-Djava.security.policy=${DIR}/kura/jdk.dio.policy \
+	-Djdk.dio.registry=${DIR}/kura/jdk.dio.properties \
 	-jar plugins/org.eclipse.osgi_3.8.1.v20120830-144521.jar \
 	-configuration configuration \
 	-console \
@@ -88,6 +90,8 @@ java -Xms${kura.mem.size} -Xmx${kura.mem.size} -XX:MaxPermSize=${kura.mem.size} 
 	-Dkura.configuration=file:/opt/eclipse/kura/kura/kura.properties \
         -Ddpa.configuration=/opt/eclipse/kura/kura/dpa.properties \
 	-Dlog4j.configuration=file:/opt/eclipse/kura/kura/log4j.properties \
+	-Djava.security.policy=${DIR}/kura/jdk.dio.policy \
+	-Djdk.dio.registry=${DIR}/kura/jdk.dio.properties \
 	-jar plugins/org.eclipse.osgi_3.8.1.v20120830-144521.jar \
 	-configuration configuration \
 	-console \
@@ -106,6 +110,8 @@ nohup java -Xms${kura.mem.size} -Xmx${kura.mem.size} -XX:MaxPermSize=${kura.mem.
         -Dkura.configuration=file:/opt/eclipse/kura/kura/kura.properties \
         -Ddpa.configuration=/opt/eclipse/kura/kura/dpa.properties \
         -Dlog4j.configuration=file:/opt/eclipse/kura/kura/log4j.properties \
+        -Djava.security.policy=${DIR}/kura/jdk.dio.policy \
+        -Djdk.dio.registry=${DIR}/kura/jdk.dio.properties \
         -jar plugins/org.eclipse.osgi_3.8.1.v20120830-144521.jar \
         -configuration configuration/ \
         -console 5002 \
@@ -122,6 +128,12 @@ echo $KURA_PID > /var/run/kura.pid
                         prefix="data/snapshots/" />
 
             <zipfileset file="${project.build.directory}/kura-${build.name}-test_${project.version}/config.ini"
+                        prefix="kura-${build.name}-test_${project.version}/configuration/" />
+
+            <zipfileset file="${project.build.directory}/kura-${build.name}-test_${project.version}/jdk.dio.policy"
+                        prefix="kura-${build.name}-test_${project.version}/configuration/" />
+
+        		<zipfileset file="${project.build.directory}/kura-${build.name}-test_${project.version}/jdk.dio.properties"
                         prefix="kura-${build.name}-test_${project.version}/configuration/" />
 
             <zipfileset file="src/main/resources/${build.name}/kura_install.sh"

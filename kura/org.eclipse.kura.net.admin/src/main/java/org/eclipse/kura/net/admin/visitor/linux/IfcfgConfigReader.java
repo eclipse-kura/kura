@@ -307,7 +307,15 @@ public class IfcfgConfigReader implements NetworkConfigurationVisitor {
 		                            	} else if (args[0].equals( "gateway")) {
 		                            		kuraProps.setProperty("GATEWAY", args[1]);
 		                            		kuraProps.setProperty("DEFROUTE", "yes");
-		                            	} else if(args[0].equals("dns-nameservers")) {
+		                            	} else if(args[0].equals("#dns-nameservers")) {
+		                            		/* <IAB>
+		        							 * If DNS servers are listed, those entries will be appended to the /etc/resolv.conf
+		        							 * file on every ifdown/ifup sequence resulting in multiple entries for the same servers.
+		        							 * (Tested on 10-20, 10-10, and Raspberry Pi).
+		        							 * Commenting out dns-nameservers in the /etc/network interfaces file allows DNS servers 
+		        							 * to be picked up by the IfcfgConfigReader and be displayed on the Web UI but the 
+		        							 * /etc/resolv.conf file will only be updated by Kura.    
+		        							 */
 		                            		if (args.length > 1) {
 		                            			for(int i=1; i < args.length; i++) {
 		                            				kuraProps.setProperty("DNS" + Integer.toString(i), args[i]);

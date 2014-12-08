@@ -25,6 +25,8 @@ import java.util.concurrent.TimeUnit;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ComponentConfiguration;
+import org.eclipse.kura.configuration.KuraConfigReadyEvent;
+import org.eclipse.kura.configuration.KuraNetConfigReadyEvent;
 import org.eclipse.kura.configuration.SelfConfiguringComponent;
 import org.eclipse.kura.core.configuration.ComponentConfigurationImpl;
 import org.eclipse.kura.core.configuration.metatype.ObjectFactory;
@@ -74,6 +76,7 @@ import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
+import org.osgi.service.event.EventProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -87,7 +90,8 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
     
 	private final static String[] EVENT_TOPICS = {
 			DeploymentAgentService.EVENT_INSTALLED_TOPIC,
-			DeploymentAgentService.EVENT_UNINSTALLED_TOPIC };
+			DeploymentAgentService.EVENT_UNINSTALLED_TOPIC,
+			KuraConfigReadyEvent.KURA_CONFIG_EVENT_READY_TOPIC};
     
     private NetworkService m_networkService;
     private EventAdmin m_eventAdmin;
@@ -165,18 +169,19 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
         	s_logger.debug("Props..." + properties);
         }
         
+        m_executorUtil = Executors.newSingleThreadScheduledExecutor();
+        
         Dictionary<String, String[]> d = new Hashtable<String, String[]>();
         d.put(EventConstants.EVENT_TOPIC, EVENT_TOPICS);
         componentContext.getBundleContext().registerService(EventHandler.class.getName(), this, d);
         
-        m_executorUtil = Executors.newSingleThreadScheduledExecutor();
         m_executorUtil.schedule(new Runnable() {
     		@Override
     		public void run() {
     			//make sure we don't miss the setting of firstConfig
     			m_firstConfig = false;
     		}
-    	}, /*5*/3, TimeUnit.MINUTES);
+    	}, 3, TimeUnit.MINUTES);
     }
     
     protected void deactivate(ComponentContext componentContext) {
@@ -190,9 +195,18 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
 	public void handleEvent(Event event) {
 		s_logger.debug("handleEvent - topic: " + event.getTopic());
         String topic = event.getTopic();
-        if (topic.equals(DeploymentAgentService.EVENT_INSTALLED_TOPIC)) {
+        if (topic.equals(KuraConfigReadyEvent.KURA_CONFIG_EVENT_READY_TOPIC)) {
         	m_firstConfig = false;
-        }
+        	m_executorUtil.schedule(new Runnable() {
+        		@Override
+        		public void run() {
+        			Map<String,Object> props = new HashMap<String,Object>();	
+        			EventProperties eventProps = new EventProperties(props);
+        			s_logger.info("postInstalledEvent() :: posting KuraNetConfigReadyEvent");
+        			m_eventAdmin.postEvent(new Event(KuraNetConfigReadyEvent.KURA_NET_CONFIG_EVENT_READY_TOPIC, eventProps));
+        		}
+        	}, 5, TimeUnit.SECONDS);
+        } 
 	}
     
     @Override

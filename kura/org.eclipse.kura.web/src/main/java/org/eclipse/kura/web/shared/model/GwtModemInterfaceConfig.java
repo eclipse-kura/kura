@@ -90,6 +90,41 @@ public class GwtModemInterfaceConfig extends GwtNetInterfaceConfig
         set("password", password);
     }
     
+    public boolean isPersist() {
+    	if (get("persist") != null) {
+    		return (Boolean) get("persist");
+    	}
+    	return false;
+    }
+
+    public void setPersist(boolean persist) {
+        set("persist", persist);
+    }
+    
+    public int getMaxFail() {
+    	 return ((Integer)get("maxFail")).intValue();
+    }
+    
+    public void setMaxFail(int maxFail) {
+	    set("maxFail", Integer.valueOf(maxFail));
+	}
+    
+    public int getIdle() {
+    	return ((Integer)get("idle")).intValue();
+    }
+   
+    public void setIdle(int idle) {
+	    set("idle", Integer.valueOf(idle));
+	}
+    
+    public String getActiveFilter() {
+		return get("activeFilter");
+	}
+	
+	public void setActiveFilter(String activeFilter) {
+		set("activeFilter", activeFilter);
+	}
+    
     public int getLcpEchoInterval() {
 	    return ((Integer)get("lcpEchoInterval")).intValue();
 	}
@@ -187,6 +222,14 @@ public class GwtModemInterfaceConfig extends GwtNetInterfaceConfig
 	
 	public String getConnectionType() {
 		return get("connectionType");
+	}
+
+	public int getResetTimeout() {
+		return ((Integer) get("resetTimeout")).intValue();
+	}
+
+	public void setResetTimeout(int resetTimeout) {
+		set("resetTimeout", Integer.valueOf(resetTimeout));
 	}
 	
 	public boolean isGpsEnabled() {

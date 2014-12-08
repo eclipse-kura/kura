@@ -19,6 +19,7 @@ public class SupportedSerialModemsInfo {
 
 	private static final Logger s_logger = LoggerFactory.getLogger(SupportedSerialModemsInfo.class);
 	private static final String OS_VERSION = System.getProperty("kura.os.version");
+	private static final String TARGET_NAME = System.getProperty("target.device");
 
 	private static SupportedSerialModemInfo m_supportedSerialModemInfo = null;
 	
@@ -28,7 +29,8 @@ public class SupportedSerialModemsInfo {
 		if (m_supportedSerialModemInfo != null) {
 			supportedSerialModemInfo = m_supportedSerialModemInfo;
 		} else {
-			if (OS_VERSION.equals(KuraConstants.Mini_Gateway.getImageName() + "_" + KuraConstants.Mini_Gateway.getImageVersion())) {
+			if (OS_VERSION != null && OS_VERSION.equals(KuraConstants.Mini_Gateway.getImageName() + "_" + KuraConstants.Mini_Gateway.getImageVersion()) &&
+					TARGET_NAME != null && TARGET_NAME.equals(KuraConstants.Mini_Gateway.getTargetName())) {
 				s_logger.debug("obtaining serial modem info for {}", KuraConstants.Mini_Gateway.getImageName());
 				supportedSerialModemInfo = SupportedSerialModems.getModem(KuraConstants.Mini_Gateway.getImageName(), KuraConstants.Mini_Gateway.getImageVersion());
 				m_supportedSerialModemInfo = supportedSerialModemInfo;

@@ -30,6 +30,7 @@ public class IwLinkTool implements LinkTool {
     private boolean m_linkDetected = false;
     private int m_speed = 0; // in b/s
     private String m_duplex = null;
+    private int m_signal = 0;
 
     
     /**
@@ -62,6 +63,7 @@ public class IwLinkTool implements LinkTool {
                     try{
                         int signal = Integer.parseInt(parts[1]);
                         if(signal > -100) {     // TODO: adjust this threshold?
+                        	m_signal = signal;
                             m_linkDetected = true;
                         }
                     } catch (NumberFormatException e) {
@@ -121,5 +123,7 @@ public class IwLinkTool implements LinkTool {
         return m_duplex;
     }
 
-    
+    public int getSignal() {
+    	return m_signal;
+    }
 }

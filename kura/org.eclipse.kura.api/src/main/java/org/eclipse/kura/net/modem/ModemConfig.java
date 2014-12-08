@@ -35,12 +35,17 @@ public class ModemConfig implements NetConfig {
 	private String m_apn = "";
 	private String m_username = "";
 	private String m_password = "";
+	private boolean m_persist = false;
+	private int m_maxFail = 0;
+	private int m_idle = 0;
+	private String m_activeFilter = "";
 	private int m_lcpEchoInterval = 0;
 	private int m_lcpEchoFailure = 0;
 	private IPAddress m_ipAddress = null;
 	private int m_dataCompression = 0;			// FIXME: change to enum?
 	private int m_headerCompression = 0;		// FIXME: change to enum?
 	private boolean m_gpsEnabled = false;
+	private int m_resetTimeout = 0;
 	
 	/**
 	 * Empty constructor
@@ -158,6 +163,81 @@ public class ModemConfig implements NetConfig {
 	 */
 	public void setPassword(String password) {
 		this.m_password = password;
+	}
+	
+	/**
+	 * Reports if pppd is instructed to exit after a connection is terminated.
+	 * 
+	 * @return 'persist' flag {@link boolean}
+	 */
+	public boolean isPersist() {
+		return m_persist;
+	}
+	
+	/**
+	 * Sets 'persist' flag to instruct pppd if it needs to exit after a connection is terminated.  
+	 * @param persist as {@link boolean}
+	 */
+	public void setPersist(boolean persist) {
+		m_persist = persist;
+	}
+	
+	/**
+	 * Reports maximum number of failed connection attempts. 
+	 * 
+	 * @return maximum number of failed connection attempts as {@link int}
+	 */
+	public int getMaxFail() {
+		return m_maxFail;
+	}
+	
+	/**
+	 * Sets maximum number of failed connection attempts
+	 * 
+	 * @param maxFail - maximum number of failed connection attempts as {@link int}
+	 */
+	public void setMaxFail(int maxFail) {
+		m_maxFail = maxFail;
+	}
+	
+	/**
+	 * Reports value of the 'idle' option.
+	 * The 'idle' option specifies that pppd should disconnect if the link is idle for n seconds.
+	 * 
+	 * @return value of the 'idle' option as {@link int}
+	 */
+	public int getIdle() {
+		return m_idle;
+	}
+	
+	/**
+	 * Sets value of the 'idle' option. 
+	 * The 'idle' option specifies that pppd should disconnect if the link is idle for n seconds.
+	 * 
+	 * @param idle 
+	 */
+	public void setIdle(int idle) {
+		m_idle = idle;
+	}
+	
+	/**
+	 * Reports the value of the 'active-filter' option that specifies a packet filter to be 
+	 * applied to data packets to determine which packets are to be regarded as link activity.
+	 * 
+	 * @return value of the 'active-filter' option as {@link String}
+	 */
+	public String getActiveFilter() {
+		return m_activeFilter;
+	}
+	
+	/**
+	 * Sets the value of the 'active-filter' option that specifies a packet filter to be 
+	 * applied to data packets to determine which packets are to be regarded as link activity.
+	 * 
+	 * @param activeFilter - active filter as {@link String}
+	 */
+	public void setActiveFilter(String activeFilter) {
+		m_activeFilter = activeFilter;
 	}
 	
 	/**
@@ -344,6 +424,14 @@ public class ModemConfig implements NetConfig {
 		return m_gpsEnabled;
 	}
 	
+	public int getResetTimeout() {
+		return m_resetTimeout;
+	}
+	
+	public void setResetTimeout(int tout) {
+		m_resetTimeout = tout;
+	}
+	
 	public void setGpsEnabled(boolean gpsEnabled) {
 		m_gpsEnabled = gpsEnabled;
 	}
@@ -369,10 +457,23 @@ public class ModemConfig implements NetConfig {
 				+ ((m_ipAddress == null) ? 0 : m_ipAddress.hashCode());
         result = prime * result
                 + m_pppNumber;
+        result = prime * result
+                + m_maxFail;
+        result = prime * result
+                + m_resetTimeout;
+        result = prime * result
+                + m_idle;
+        result = prime * result
+				+ ((m_activeFilter == null) ? 0 : m_activeFilter.hashCode());
+        result = prime * result
+                + m_lcpEchoFailure;
+        result = prime * result
+                + m_lcpEchoInterval;
 		result = prime * result
 				+ m_dataCompression;
 		result = prime * result
 				+ m_headerCompression;
+		result = prime * result + (m_persist? 1 : 0);
 		result = prime * result + (m_gpsEnabled? 1 : 0);
 		
 		return result;
@@ -392,6 +493,22 @@ public class ModemConfig implements NetConfig {
         
         if (this.m_pppNumber != otherConfig.getPppNumber()) {
             return false;
+        }
+        
+        if (this.m_persist != otherConfig.isPersist()) {
+        	return false;
+        }
+        
+        if (this.m_maxFail != otherConfig.getMaxFail()) {
+        	return false;
+        }
+        
+        if (this.m_resetTimeout != otherConfig.getResetTimeout()) {
+        	return false;
+        }
+        
+        if (this.m_idle != otherConfig.getIdle()) {
+        	return false;
         }
         
         if (this.m_lcpEchoInterval != otherConfig.getLcpEchoInterval()) {
@@ -457,6 +574,16 @@ public class ModemConfig implements NetConfig {
 		
 		if ((this.m_password != null) && (this.m_password.length() > 0)) {
 			if (!this.m_password.equals(otherConfig.getPassword())) {
+				return false;
+			}
+		} else {
+			if ((otherConfig.getPassword() != null) && (otherConfig.getPassword().length() > 0)) {
+				return false;
+			}
+		}
+		
+		if ((this.m_activeFilter != null) && (this.m_activeFilter.length() > 0)) {
+			if (!this.m_activeFilter.equals(otherConfig.getActiveFilter())) {
 				return false;
 			}
 		} else {

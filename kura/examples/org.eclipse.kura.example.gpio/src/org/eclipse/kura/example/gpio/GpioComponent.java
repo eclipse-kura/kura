@@ -16,7 +16,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
+import jdk.dio.ClosedDeviceException;
 import jdk.dio.DeviceConfig;
 import jdk.dio.DeviceManager;
 import jdk.dio.DeviceNotFoundException;
@@ -49,7 +54,10 @@ public class GpioComponent implements ConfigurableComponent, PinListener {
 
 	private Map<String, Object> m_properties;
 
-	private ArrayList<GPIOPin> m_pins = new ArrayList<GPIOPin>();
+	private static ArrayList<GPIOPin> m_pins = new ArrayList<GPIOPin>();
+	
+	private ScheduledFuture<?> m_blinker = null;
+	private ScheduledExecutorService m_blinker_executor;
 
 	// ----------------------------------------------------------------
 	//
@@ -57,6 +65,11 @@ public class GpioComponent implements ConfigurableComponent, PinListener {
 	//
 	// ----------------------------------------------------------------
 
+	public GpioComponent() {
+		super();
+		m_blinker_executor = Executors.newSingleThreadScheduledExecutor();
+	}
+	
 	protected void activate(ComponentContext componentContext,
 			Map<String, Object> properties) {
 		s_logger.debug("Activating {}", APP_ID);
@@ -71,10 +84,18 @@ public class GpioComponent implements ConfigurableComponent, PinListener {
 
 	protected void deactivate(ComponentContext componentContext) {
 		s_logger.debug("Deactivating {}", APP_ID);
+		
+		if(m_blinker != null){
+			m_blinker.cancel(true);
+		}
 	}
 
 	public void updated(Map<String, Object> properties) {
 		s_logger.info("updated...");
+		
+		if(m_blinker != null){
+			m_blinker.cancel(true);
+		}
 
 		doUpdate(properties);
 	}
@@ -99,9 +120,8 @@ public class GpioComponent implements ConfigurableComponent, PinListener {
 		Iterator<GPIOPin> pins_it = m_pins.iterator();
 		while (pins_it.hasNext()) {
 			try {
-				GPIOPin p = pins_it.next();
-				s_logger.warn("Closing {}", p.getDescriptor().getID());
-				p.setInputListener(null);
+				GPIOPin p = pins_it.next();				
+				s_logger.warn("Closing GPIO pin {}", p.getDescriptor().toString());
 				p.close();
 			} catch (IOException e) {
 				s_logger.warn("Cannot close pin!");
@@ -122,17 +142,33 @@ public class GpioComponent implements ConfigurableComponent, PinListener {
 				s_logger.info("   Direction....: {}",directions[i]);
 				s_logger.info("   Mode.........: {}",modes[i]);
 				s_logger.info("   Trigger......: {}",triggers[i]);
-				GPIOPinConfig config = new GPIOPinConfig(DeviceConfig.DEFAULT,
+				GPIOPinConfig config = new GPIOPinConfig(DeviceConfig.DEFAULT,						
 						pins[i], directions[i], modes[i], triggers[i], false);
 				GPIOPin p = DeviceManager.open(GPIOPin.class, config);
 				s_logger.info("GPIO pin {} acquired", pins[i]);
 				m_pins.add(p);
 				if(p.getDirection() == GPIOPinConfig.DIR_OUTPUT_ONLY){
-					s_logger.info("Activating GPIO pin {}", pins[i]);
+					final int final_index = i;
+					m_blinker = m_blinker_executor.scheduleAtFixedRate(new Runnable(){
+						@Override
+						public void run() {
+							try {
+								boolean value = !m_pins.get(final_index).getValue();
+								s_logger.info("Setting GPIO pin {} to {}", m_pins.get(final_index).getDescriptor().toString(), value);							
+								m_pins.get(final_index).setValue(value);
+							} catch (UnavailableDeviceException e) {
+								s_logger.warn("GPIO pin {} is not available for export.", final_index);
+							} catch (ClosedDeviceException e) {
+								s_logger.warn("GPIO pin {} has been closed.", final_index);
+							} catch (IOException e) {
+								s_logger.error("I/O Error occurred!");					
+								e.printStackTrace();
+							}
+						}						
+					}, 0, 2, TimeUnit.SECONDS);
 				}else{
 					s_logger.info("Attaching Pin Listener to GPIO pin {}", pins[i]);
-				}
-				
+				}				
 			} catch (InvalidDeviceConfigException e) {
 				s_logger.warn("Invalid PIN configuration for GPIO pin {}", pins[i]);
 			} catch (UnsupportedDeviceTypeException e) {
@@ -146,7 +182,7 @@ public class GpioComponent implements ConfigurableComponent, PinListener {
 				e.printStackTrace();
 			} catch (Exception e) {
 				s_logger.error(e.getLocalizedMessage());
-			}
+			}			
 		}
 	}
 

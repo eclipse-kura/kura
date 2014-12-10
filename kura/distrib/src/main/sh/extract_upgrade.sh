@@ -19,8 +19,36 @@ REMOVE_LIST=
 
 TMP=/tmp/kura_upgrade
 TIMESTAMP=`date +%Y%m%d%H%M%S`
-LOG=$TMP/kura_upgrade_${TIMESTAMP}.log
+LOG=/tmp/kura_upgrade_${TIMESTAMP}.log
 ABSOLUTE_PATH=`readlink -m $0`
+
+# Assume we will fail
+SUCCESS=1
+
+# Signal handler. Also called on exit
+cleanup() {
+    # Remove the upgrade installation directory on fail
+    if [ $SUCCESS -ne 0 ]; then
+        echo "Could not upgrade - Remove the upgrade installation directory" >> $LOG 2>&1
+        rm -rf "${BASE_DIR}/${INSTALL_DIR}" >> $LOG 2>&1
+    fi
+
+    # Remove temporary stuff
+    rm -rf "$TMP" >> $LOG 2>&1
+    rm -rf ${BASE_DIR}/kura/install >> $LOG 2>&1
+    rm -f kura-*.zip >> $LOG 2>&1
+
+    # Save the log file in a persistent directory
+    mkdir -p ${BASE_DIR}/kura/log
+    cp -f $LOG ${BASE_DIR}/kura/log
+    
+    # Always sync and reboot
+    sync
+    reboot
+}
+
+# Trap signals performing cleanup
+trap cleanup INT TERM EXIT
 
 ##############################################
 # PRE-INSTALL SCRIPT
@@ -41,10 +69,12 @@ if [ -d "${BASE_DIR}/${INSTALL_DIR}" ]; then
     exit 1
 fi
 
+# Exit performing cleanup at the first error
+set -e
 
 # kill JVM and monit for upgrade
 echo "Stopping monit and kura" >> $LOG 2>&1
-killall monit java >> $LOG 2>&1
+{ killall monit java || true; } >> $LOG 2>&1
 
 
 # remove OSGi storage directory
@@ -77,9 +107,9 @@ cd "${BASE_DIR}/kura" && find . -type f -exec ln {} ${BASE_DIR}/${INSTALL_DIR}/{
 FILES=" \
 	bin/* \
 	data/* \
+	log/kura_install_*.log \
 	kura/config.ini \
 	kura/dpa.properties \
-	kura/kura_install.log \
 	kura/kura.properties \
 	kura/kura_custom.properties \
 	kura/log4j.properties
@@ -128,34 +158,19 @@ done < ${TMP}/${REMOVE_LIST}
 # Extract new files
 unzip -o ${TMP}/kura_*.zip -d ${BASE_DIR} >> $LOG 2>&1
 
-## install Kura files
-#if [ -f ${BASE_DIR}/${INSTALL_DIR}/install/kura_upgrade.sh ]; then
-#	sh ${BASE_DIR}/${INSTALL_DIR}/install/kura_upgrade.sh >> $LOG 2>&1
-#fi
+# set permissions
+chmod +x ${BASE_DIR}/${INSTALL_DIR}/bin/*.sh >> $LOG 2>&1
 
 # Point symlink to new version
 rm -f ${BASE_DIR}/kura
 ln -s ${BASE_DIR}/${INSTALL_DIR} ${BASE_DIR}/kura
 
-# clean up
-rm -rf ${BASE_DIR}/kura/install >> $LOG 2>&1
-rm kura-*.zip >> $LOG 2>&1
-
-# set permissions
-chmod +x ${BASE_DIR}/kura/bin/*.sh >> $LOG 2>&1
-
+# Upgrade was successful
+SUCCESS=0
 
 echo "" >> $LOG 2>&1
 echo "Finished.  Kura has been upgraded in ${BASE_DIR}/kura and system will now reboot" >> $LOG 2>&1
 
-# move the log file
-mkdir -p ${BASE_DIR}/kura/log
-cp $LOG ${BASE_DIR}/kura/log
-
-# flush all cached filesystem to disk
-sync
-
-reboot
 exit 0
 
 #############################################

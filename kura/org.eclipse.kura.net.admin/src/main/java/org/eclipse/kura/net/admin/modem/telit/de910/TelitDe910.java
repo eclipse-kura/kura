@@ -31,6 +31,11 @@ public class TelitDe910 extends TelitModem implements EvdoCellularModem {
 
 	private static final Logger s_logger = LoggerFactory.getLogger(TelitDe910.class);
 	
+	/*
+	private String m_mdn;
+	private String m_msid;
+	*/
+	
 	 /**
      * TelitDe910 modem constructor
      * 
@@ -44,6 +49,25 @@ public class TelitDe910 extends TelitModem implements EvdoCellularModem {
 			ModemTechnologyType technologyType) {
 		
 		super(device, platform, connectionFactory, technologyType);
+		
+		try {
+			String atPort = getAtPort();
+			String gpsPort = getGpsPort();
+			if (atPort != null) {
+				if (atPort.equals(getDataPort()) || atPort.equals(gpsPort)) {
+					m_serialNumber = getSerialNumber();
+					m_imsi = getMobileSubscriberIdentity();
+					m_iccid = getIntegratedCirquitCardId();
+					m_model = getModel();
+					m_manufacturer = getManufacturer();		
+					m_revisionId = getRevisionID();
+					m_gpsSupported = isGpsSupported();
+					m_rssi = getSignalStrength();
+				}
+			}
+		} catch (KuraException e) {
+			e.printStackTrace();
+		}
     }
 	
 	@Override
@@ -228,7 +252,6 @@ public class TelitDe910 extends TelitModem implements EvdoCellularModem {
 		
 		String sMdn = null;
 		synchronized (s_atLock) {
-	    
 			s_logger.debug("sendCommand getMdn :: " + TelitDe910AtCommands.getMdn.getCommand());
 			byte[] reply = null;
 			CommConnection commAtConnection = openSerialPort(getAtPort());
@@ -250,7 +273,7 @@ public class TelitDe910 extends TelitModem implements EvdoCellularModem {
 				}
 			}
     	}
-        return sMdn;
+		return sMdn;
 	}
 	
 	@Override
@@ -258,7 +281,6 @@ public class TelitDe910 extends TelitModem implements EvdoCellularModem {
 		
 		String sMsid = null;
 		synchronized (s_atLock) {
-	    
 			s_logger.debug("sendCommand getMdn :: " + TelitDe910AtCommands.getMsid.getCommand());
 			byte[] reply = null;
 			CommConnection commAtConnection = openSerialPort(getAtPort());
@@ -280,7 +302,7 @@ public class TelitDe910 extends TelitModem implements EvdoCellularModem {
 				}
 			}
     	}
-        return sMsid;
+		return sMsid;
 	}
 	
 	@Override
@@ -362,4 +384,10 @@ public class TelitDe910 extends TelitModem implements EvdoCellularModem {
 	public boolean isSimCardReady() throws KuraException {
 		return true;
 	}
+	
+	/*
+	public CommURI getSerialConnectionProperties(SerialPortType portType) {
+		return null;
+	}
+	*/
 }

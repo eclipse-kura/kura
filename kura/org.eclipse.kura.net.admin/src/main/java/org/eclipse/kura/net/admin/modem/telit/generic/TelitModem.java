@@ -2,6 +2,7 @@ package org.eclipse.kura.net.admin.modem.telit.generic;
 
 import java.io.FileWriter;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.List;
 
 import org.eclipse.kura.KuraErrorCode;
@@ -18,6 +19,7 @@ import org.eclipse.kura.linux.net.modem.SupportedUsbModemsInfo;
 import org.eclipse.kura.linux.net.util.KuraConstants;
 import org.eclipse.kura.net.NetConfig;
 import org.eclipse.kura.net.admin.modem.telit.he910.TelitHe910;
+import org.eclipse.kura.net.modem.CellularModem.SerialPortType;
 import org.eclipse.kura.net.modem.ModemDevice;
 import org.eclipse.kura.net.modem.ModemTechnologyType;
 import org.eclipse.kura.net.modem.SerialModemDevice;
@@ -508,6 +510,31 @@ public abstract class TelitModem {
 		return m_technologyType;
 	}
 	
+	public CommURI getSerialConnectionProperties(SerialPortType portType) throws KuraException {
+		try {
+			String port;
+			if (portType == SerialPortType.ATPORT) {
+				port = getAtPort();
+			} else if (portType == SerialPortType.DATAPORT) {
+				port = this.getDataPort();
+			} else if (portType == SerialPortType.GPSPORT) {
+				port = getGpsPort();
+			} else {
+				throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "Invalid Port Type");
+			}
+			StringBuffer sb = new StringBuffer();
+			sb.append("comm:").append(port).append(";baudrate=115200;databits=8;stopbits=1;parity=0");
+			return CommURI.parseString(sb.toString());
+			
+		} catch (URISyntaxException e) {
+			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "URI Syntax Exception");
+		}
+	}
+	
+	public boolean isGpsEnabled() {
+		return m_gpsEnabled;
+	}
+	
 	public abstract boolean isSimCardReady() throws KuraException;
 	
 	protected CommConnection openSerialPort (String port) throws KuraException {
@@ -532,7 +559,7 @@ public abstract class TelitModem {
 		}
 		return connection;
     }
-    
+	
     protected void closeSerialPort (CommConnection connection) throws KuraException {
 		try {
 			connection.close();

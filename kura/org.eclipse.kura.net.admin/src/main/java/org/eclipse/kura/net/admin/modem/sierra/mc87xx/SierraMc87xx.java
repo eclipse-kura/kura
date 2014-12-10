@@ -12,6 +12,7 @@
 package org.eclipse.kura.net.admin.modem.sierra.mc87xx;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.List;
 
 import org.eclipse.kura.KuraErrorCode;
@@ -456,7 +457,32 @@ public class SierraMc87xx implements HspaCellularModem {
 		return simReady;
 	}
 	
-private CommConnection openSerialPort (String port) throws KuraException {
+	public CommURI getSerialConnectionProperties(SerialPortType portType) throws KuraException {
+		try {
+			String port;
+			if (portType == SerialPortType.ATPORT) {
+				port = getAtPort();
+			} else if (portType == SerialPortType.DATAPORT) {
+				port = this.getDataPort();
+			} else if (portType == SerialPortType.GPSPORT) {
+				port = getGpsPort();
+			} else {
+				throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "Invalid Port Type");
+			}
+			StringBuffer sb = new StringBuffer();
+			sb.append("comm:").append(port).append(";baudrate=115200;databits=8;stopbits=1;parity=0");
+			return CommURI.parseString(sb.toString());
+			
+		} catch (URISyntaxException e) {
+			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "URI Syntax Exception");
+		}
+	}
+	
+	public boolean isGpsEnabled() {
+		return false;
+	}
+	
+	private CommConnection openSerialPort (String port) throws KuraException {
     	
     	CommConnection connection = null;
 		if(m_connectionFactory != null) {

@@ -24,6 +24,8 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.kura.configuration.ConfigurableComponent;
+import org.eclipse.kura.net.modem.ModemGpsDisabledEvent;
+import org.eclipse.kura.net.modem.ModemGpsEnabledEvent;
 import org.eclipse.kura.position.NmeaPosition;
 import org.eclipse.kura.position.PositionLockedEvent;
 import org.eclipse.kura.position.PositionLostEvent;
@@ -54,6 +56,7 @@ public class PositionServiceImpl implements PositionService, ConfigurableCompone
 	private static boolean 					stopThread;
 
 	private Map<String,Object>				m_properties;
+	private Map<String,Object>				m_positionServiceProperties;
 	private ConnectionFactory 	            m_connectionFactory;
 	private GpsDevice					 	m_gpsDevice;
 	private ExecutorService                 m_executor;
@@ -128,10 +131,16 @@ public class PositionServiceImpl implements PositionService, ConfigurableCompone
 		initializeDefaultPosition(0, 0, 0);
 
 		m_executor = Executors.newSingleThreadExecutor();
+		m_properties = new HashMap<String, Object>();
+		m_positionServiceProperties = new HashMap<String, Object>();
 
 		// install event listener for serial ports
 		Dictionary<String, String[]> props = new Hashtable<String, String[]>();
-		String[] topic = {UsbDeviceAddedEvent.USB_EVENT_DEVICE_ADDED_TOPIC,UsbDeviceRemovedEvent.USB_EVENT_DEVICE_REMOVED_TOPIC};
+		String[] topic = { UsbDeviceAddedEvent.USB_EVENT_DEVICE_ADDED_TOPIC,
+				UsbDeviceRemovedEvent.USB_EVENT_DEVICE_REMOVED_TOPIC,
+				ModemGpsEnabledEvent.MODEM_EVENT_GPS_ENABLED_TOPIC,
+				ModemGpsDisabledEvent.MODEM_EVENT_GPS_DISABLED_TOPIC};
+		
 		props.put(EventConstants.EVENT_TOPIC, topic);
 		componentContext.getBundleContext().registerService(EventHandler.class.getName(), this, props);
 
@@ -154,17 +163,22 @@ public class PositionServiceImpl implements PositionService, ConfigurableCompone
 		}
 
 		m_properties = null;
+		m_positionServiceProperties = null;
 		s_logger.info("Deactivating... Done.");
 	}
 
-	public void updated(Map<String,Object> properties) 
-	{
+	public void updated(Map<String,Object> properties) {
+		
 		s_logger.debug("Updating...");
 		if(m_isRunning) {
 			stop();
 		}
 
-		m_properties = properties;
+		if (!properties.containsKey("modem")) {
+			m_positionServiceProperties.putAll(properties);
+		}	
+		m_properties.putAll(properties);
+		
 		m_configured = false;
 		m_configEnabled = false;
 		m_isRunning = false;
@@ -262,6 +276,18 @@ public class PositionServiceImpl implements PositionService, ConfigurableCompone
 					s_logger.debug("GPS disconnected");
 					stop();
 				}
+			} else if(ModemGpsEnabledEvent.MODEM_EVENT_GPS_ENABLED_TOPIC.contains(event.getTopic())) {
+				s_logger.debug("ModemGpsEnabledEvent");
+				m_properties.put("port", event.getProperty(ModemGpsEnabledEvent.Port));
+				m_properties.put("baudRate", event.getProperty(ModemGpsEnabledEvent.BaudRate));
+				m_properties.put("bitsPerWord", event.getProperty(ModemGpsEnabledEvent.DataBits));
+				m_properties.put("stopBits", event.getProperty(ModemGpsEnabledEvent.StopBits));
+				m_properties.put("parity", event.getProperty(ModemGpsEnabledEvent.Parity));
+				m_properties.put("modem", "true");
+				updated(m_properties);
+			} else if (ModemGpsDisabledEvent.MODEM_EVENT_GPS_DISABLED_TOPIC.contains(event.getTopic())) {
+				s_logger.debug("ModemGpsDisabledEvent");
+				updated(m_positionServiceProperties);
 			}
 		}
 	}
@@ -379,11 +405,8 @@ public class PositionServiceImpl implements PositionService, ConfigurableCompone
 			return;
 		}
 
-		try {
-
-			//Properties serialProperties = getSerialConnectionProperties();			
+		try {			
 			if(serialProperties != null) {
-
 				s_logger.debug("Connecting to serial port: " + serialProperties.getProperty("port"));
 
 				// configure connection & protocol
@@ -469,7 +492,7 @@ public class PositionServiceImpl implements PositionService, ConfigurableCompone
 			prop.setProperty("stopBits", Integer.toString(stopBits));
 			prop.setProperty("parity", Integer.toString(parity));
 			prop.setProperty("bitsPerWord", Integer.toString(bitsPerWord));
-
+			
 			s_logger.debug("port name: " + portName);
 			s_logger.debug("baud rate " + baudRate);
 			s_logger.debug("stop bits " + stopBits);

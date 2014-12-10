@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (c) 2011, 2014 Eurotech and/or its affiliates
+
+     All rights reserved. This program and the accompanying materials
+     are made available under the terms of the Eclipse Public License v1.0
+     which accompanies this distribution, and is available at
+     http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Eurotech
+
+-->
+<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">    
+    <OCD id="org.eclipse.kura.example.gpio.GpioComponent"
+         name="GPIO Configuration" 
+         description="Example of a GPIO Configuring Application.">
+        
+        <!-- 
+        <Icon resource="http://sphotos-a.xx.fbcdn.net/hphotos-ash4/p480x480/408247_10151040905591065_1989684710_n.jpg" size="32"/>
+        -->
+        
+        <AD id="gpio.pins"  
+            name="gpio.pins"
+            type="Integer"
+            cardinality="5" 
+            required="false"
+            default="1"
+            min="0"
+            max="127"
+            description="List of GPIO pins"/>
+        
+        <AD id="gpio.directions"
+            name="gpio.directions"
+            type="Integer"
+            cardinality="5"
+            required="false"
+			default="3,3,3,3,3"
+            description="Pin directions">
+           <Option label="Only input" value="0"/>
+           <Option label="Only output" value="1"/>          
+           <Option label="Both, init input" value="2"/>            
+           <Option label="Both, init output" value="3"/>            
+          </AD>
+          
+          <AD id="gpio.modes"
+              name="gpio.modes"
+              type="Integer"
+              cardinality="5"
+              required="false"
+              default="-1,-1,-1,-1,-1"
+           	  description="Pin working mode">
+           	<Option label="Default" value="-1"/>
+           	<Option label="Input with Pull Down" value="2"/>          
+           	<Option label="Input with Pull Up" value="1"/>            
+           	<Option label="Open Drain Output" value="8"/>                     
+           	<Option label="Push-Pull Output" value="4"/>                     
+           	</AD>
+                    
+          <AD id="gpio.triggers"
+              name="gpio.triggers"
+              type="Integer"
+              cardinality="5"
+              required="false"
+              default="-1,-1,-1,-1,-1"
+           	  description="Input triggering mode">
+           	<Option label="Default" value="-1"/>
+           	<Option label="No trigger" value="0"/>          
+           	<Option label="Rising edge" value="2"/>            
+           	<Option label="Both edges" value="3"/>                     
+           	<Option label="Falling edge" value="1"/>                     
+           	<Option label="High level" value="4"/>                     
+           	<Option label="Low level" value="5"/>                     
+           	<Option label="Both levels" value="6"/>                     
+           </AD>
+                    
+          </OCD>
+   
+    <Designate pid="org.eclipse.kura.example.gpio.GpioComponent">
+        <Object ocdref="org.eclipse.kura.example.gpio.GpioComponent"/>
+    </Designate>
+</MetaData>

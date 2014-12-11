@@ -76,6 +76,7 @@ set -e
 echo "Stopping monit and kura" >> $LOG 2>&1
 { killall monit java || true; } >> $LOG 2>&1
 
+sleep 3
 
 # remove OSGi storage directory
 if [ -d "/tmp/.kura/configuration" ]; then
@@ -116,11 +117,13 @@ FILES=" \
 "
 for f in $FILES
 do
-	target="${BASE_DIR}/${INSTALL_DIR}/$f"
-	echo "Creating a real copy of $target" >> $LOG 2>&1
-	rm -rf $target >> $LOG 2>&1
-	# copy file, removing the filename from the target to support wildcards
-	cp -r ${BASE_DIR}/kura/$f ${target%/*} >> $LOG 2>&1
+	if [ -f "${BASE_DIR}/kura/$f" ]; then
+		target="${BASE_DIR}/${INSTALL_DIR}/$f"
+		echo "Creating a real copy of $target" >> $LOG 2>&1
+		rm -rf $target >> $LOG 2>&1
+		# copy file, removing the filename from the target to support wildcards
+		cp -r ${BASE_DIR}/kura/$f ${target%/*} >> $LOG 2>&1
+	fi
 done
 
 echo "" >> $LOG 2>&1

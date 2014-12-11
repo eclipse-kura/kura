@@ -35,7 +35,7 @@ cleanup() {
 
     # Remove temporary stuff
     rm -rf "$TMP" >> $LOG 2>&1
-    rm -rf ${BASE_DIR}/kura/install >> $LOG 2>&1
+    rm -rf "${BASE_DIR}/${INSTALL_DIR}/install" >> $LOG 2>&1
     rm -f kura-*.zip >> $LOG 2>&1
 
     # Save the log file in a persistent directory

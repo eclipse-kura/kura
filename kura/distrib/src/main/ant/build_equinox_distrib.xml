@@ -11,7 +11,7 @@
       Eurotech
 
 -->
-<project name="build_equinox_distrib" default="dist-linux" basedir="../../../">
+<project name="build_equinox_distrib" default="dist-windows" basedir="../../../">
 
     <target name="dist-linux"> 
     	
@@ -477,7 +477,344 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
                 basedir="${project.build.directory}/${build.output.name}/dp_upgrade_stage" />	
     </target>
 
-	
+    <target name="dist-windows"> 
+    	
+        <property name="build.output.name" value="kura_${project.version}_${build.name}"/> 
+
+        <!--
+        Loads entries from a manifest file.
+        @jar     The jar from where to read
+        @prefix  A prefix to prepend
+        -->
+        <macrodef name="loadmf">
+            <attribute name="jar"/>
+            <attribute name="prefix" default=""/>
+            <sequential>
+                <loadproperties>
+                    <!-- Load the manifest entries -->
+                    <zipentry zipfile="@{jar}" name="META-INF/MANIFEST.MF"/>
+                    <!-- Add the prefix -->
+                    <filterchain>
+                        <prefixlines prefix="@{prefix}"/>
+                    </filterchain>
+                </loadproperties>
+            </sequential>
+        </macrodef>
+    	
+    	<echo message="Building Kura Distribution for ${build.output.name}..." />
+
+        <copy file="src/main/resources/${build.name}/kura.properties"
+              tofile="${project.build.directory}/${build.output.name}/kura.properties" />
+        <propertyfile file="${project.build.directory}/${build.output.name}/kura.properties">
+            <entry key="kura.version"   value="KURA_${kura.version}" />
+            <entry key="kura.home"   value="${kura.install.dir}/kura/kura" />
+            <entry key="kura.plugins"   value="${kura.install.dir}/kura/kura/plugins" />
+            <entry key="kura.packages"   value="${kura.install.dir}/kura/kura/packages" />
+            <entry key="version"       value="${kura.version}" />
+            <entry key="build.version" value="${buildNumber}" />
+            <entry key="build.number"  value="${build.name}-${buildNumber}" />
+        </propertyfile>
+        <replace file="${project.build.directory}/${build.output.name}/kura.properties" token="{kura.install.dir}" value="${kura.install.dir}"/>
+        <replace file="${project.build.directory}/${build.output.name}/kura.properties" token="{kura.symlink}" value="${kura.symlink}"/>
+
+    	
+    	<condition property="kura.osgi.repo" value="../target-definition/equinox_3.8.1/repository">
+    		<or>
+    			<not>
+    				<isset property="kura.osgi"/>
+    			</not>
+    			<equals arg1="${kura.osgi}" arg2="equinox"/>
+    		</or>
+    	</condition>
+    	
+        <copy file="src/main/resources/${build.name}/snapshot_0.xml"
+              tofile="${project.build.directory}/${build.output.name}/snapshot_0.xml" />
+        <copy file="src/main/osgi/equinox_3.8.1/configwindows/config.ini"
+              tofile="${project.build.directory}/${build.output.name}/config.ini" />
+
+        <!-- Populate config.ini with correct versions -->
+        <replace file="${project.build.directory}/${build.output.name}/config.ini"
+                 token="{kura.build.version}" value="${kura.build.version}"/>
+        <replace file="${project.build.directory}/${build.output.name}/config.ini"
+                 token="{org.eclipse.kura.api.version}" value="${org.eclipse.kura.api.version}"/>
+        <replace file="${project.build.directory}/${build.output.name}/config.ini"
+                 token="{org.eclipse.kura.core.version}" value="${org.eclipse.kura.core.version}"/>
+        <replace file="${project.build.directory}/${build.output.name}/config.ini"
+                 token="{org.eclipse.kura.core.cloud.version}" value="${org.eclipse.kura.core.cloud.version}"/>
+        <replace file="${project.build.directory}/${build.output.name}/config.ini"
+                 token="{org.eclipse.kura.core.comm.version}" value="${org.eclipse.kura.core.comm.version}"/>
+        <replace file="${project.build.directory}/${build.output.name}/config.ini"
+                 token="{org.eclipse.kura.core.configuration.version}" value="${org.eclipse.kura.core.configuration.version}"/>
+        <replace file="${project.build.directory}/${build.output.name}/config.ini"
+                 token="{org.eclipse.kura.core.crypto.version}" value="${org.eclipse.kura.core.crypto.version}"/>
+        <replace file="${project.build.directory}/${build.output.name}/config.ini"
+                 token="{org.eclipse.kura.core.deployment.version}" value="${org.eclipse.kura.core.deployment.version}"/>
+        <replace file="${project.build.directory}/${build.output.name}/config.ini"
+                 token="{org.eclipse.kura.core.net.version}" value="${org.eclipse.kura.core.net.version}"/>
+        <replace file="${project.build.directory}/${build.output.name}/config.ini"
+                 token="{org.eclipse.kura.deployment.agent.version}" value="${org.eclipse.kura.deployment.agent.version}"/>
+        <replace file="${project.build.directory}/${build.output.name}/config.ini"
+                 token="{org.eclipse.kura.deployment.customizer.version}" value="${org.eclipse.kura.deployment.customizer.version}"/>
+        <replace file="${project.build.directory}/${build.output.name}/config.ini"
+                 token="{org.eclipse.kura.deployment.update.version}" value="${org.eclipse.kura.deployment.update.version}"/>
+        <replace file="${project.build.directory}/${build.output.name}/config.ini"
+                 token="{org.eclipse.kura.emulator.version}" value="${org.eclipse.kura.emulator.version}"/>
+        <replace file="${project.build.directory}/${build.output.name}/config.ini"
+                 token="{org.eclipse.kura.web.version}" value="${org.eclipse.kura.web.version}"/>
+        <propertyfile file="${project.build.directory}/${build.output.name}/dpa.properties"> 
+            <entry key="kura"
+                   value="file:${kura.install.dir}/kura/kura/packages/${build.output.name}.dp" />
+        </propertyfile>
+	<!-- Create the Kura start scripts -->
+	<echo file="${project.build.directory}/${build.output.name}/start_kura.bat" append="false">set DIR=C:\opt\eclipse\kura\
+cd %DIR%
+
+rem set up the configuration area
+mkdir \tmp\.kura\configuration
+copy %DIR%\kura\config.ini \tmp\.kura\configuration\
+
+java -Xms256m -Xmx256m -XX:MaxPermSize=256m -Dkura.os.version=win32 ^
+	-Dkura.arch=x86_64 ^
+	-Dtarget.device=windows ^
+	-Declipse.ignoreApp=true ^
+	-Dkura.home=%DIR%\kura ^
+	-Dkura.configuration=file:%DIR%\kura\kura.properties ^
+	-Dkura.custom.configuration=file:%DIR%\kura\kura_custom.properties ^
+	-Dkura.data.dir=%DIR%\data ^
+	-Ddpa.configuration=%DIR%\kura\dpa.properties ^
+	-Dlog4j.configuration=file:%DIR%\kura\log4j.properties ^
+	-jar %DIR%\plugins\org.eclipse.osgi_3.8.1.v20120830-144521.jar ^
+	-configuration  \tmp\.kura\configuration ^
+	-console ^
+	-consoleLog	
+	</echo>    
+
+        <zip destfile="${project.build.directory}/${build.output.name}.zip">
+
+            <zipfileset file="${project.build.directory}/${build.output.name}/snapshot_0.xml"
+                        prefix="${build.output.name}/data/snapshots/" />
+
+            <zipfileset file="${project.build.directory}/${build.output.name}/config.ini"
+                        prefix="${build.output.name}/kura/" />
+
+            <zipfileset file="${project.build.directory}/${build.output.name}/jdk.dio.policy"
+                        prefix="${build.output.name}/kura/" />
+
+        		<zipfileset file="${project.build.directory}/${build.output.name}/jdk.dio.properties"
+                        prefix="${build.output.name}/kura/" />
+
+            <zipfileset file="src/main/resources/common/kura_custom.properties"
+                        prefix="${build.output.name}/kura/" />
+
+            <zipfileset file="${project.build.directory}/${build.output.name}/kura_install.bat"
+                        prefix="${build.output.name}/install/" />
+
+            <zipfileset file="${project.build.directory}/${build.output.name}/recover_dflt_kura_config.sh"
+                        prefix="${build.output.name}/install/" />
+
+            <zipfileset file="src/main/resources/${build.name}/kuranet.conf"
+                        prefix="${build.output.name}/install/" />
+
+            <zipfileset file="${project.build.directory}/${build.output.name}/kura.init.wrl"
+                        prefix="${build.output.name}/install" />
+            <zipfileset file="${project.build.directory}/${build.output.name}/kura.init.yocto"
+                        prefix="${build.output.name}/install" />
+            <zipfileset file="${project.build.directory}/${build.output.name}/kura.init.raspbian"
+                        prefix="${build.output.name}/install" />
+            <zipfileset file="src/main/resources/${build.name}/firewall.init"
+                        prefix="${build.output.name}/install" />
+            <zipfileset file="src/main/resources/common/monit.init.wrl"
+                        prefix="${build.output.name}/install" />
+            <zipfileset file="src/main/resources/common/monit.init.yocto"
+                        prefix="${build.output.name}/install" />
+            <zipfileset file="src/main/resources/common/monit.init.raspbian"
+                        prefix="${build.output.name}/install" />
+            <zipfileset file="src/main/resources/common/monitrc.wrl"
+                        prefix="${build.output.name}/install" />
+            <zipfileset file="src/main/resources/common/monitrc.yocto"
+                        prefix="${build.output.name}/install" />
+            <zipfileset file="src/main/resources/common/monitrc.raspbian"
+                        prefix="${build.output.name}/install" />
+
+
+            <zipfileset file="src/main/resources/common/logrotate.conf"
+                        prefix="${build.output.name}/install" />
+            <zipfileset file="src/main/resources/common/kura.logrotate"
+                        prefix="${build.output.name}/install" />
+
+            <zipfileset file="src/main/resources/common/hostapd.conf"
+                        prefix="${build.output.name}/install" />
+            <zipfileset file="src/main/resources/common/dhcpd-eth0.conf"
+                        prefix="${build.output.name}/install" />
+            <zipfileset file="src/main/resources/common/dhcpd-wlan0.conf"
+                        prefix="${build.output.name}/install" />
+
+            <zipfileset file="src/main/resources/common/named/named.conf"
+                        prefix="${build.output.name}/install" />
+            <zipfileset file="src/main/resources/common/named/named.ca"
+                        prefix="${build.output.name}/install" />
+            <zipfileset file="src/main/resources/common/named/named.rfc1912.zones"
+                        prefix="${build.output.name}/install" />
+        	<zipfileset file="src/main/resources/common/named/usr.sbin.named"
+        	        prefix="${build.output.name}/install" />
+
+            <zipfileset file="src/main/resources/common/ifcfg-eth0"
+                        prefix="${build.output.name}/install" />
+            <zipfileset file="src/main/resources/common/ifcfg-eth1"
+                        prefix="${build.output.name}/install" />
+            <zipfileset file="src/main/resources/common/ifcfg-wlan0"
+                        prefix="${build.output.name}/install" />
+            <zipfileset file="src/main/resources/common/network.interfaces"
+                        prefix="${build.output.name}/install" />
+            <zipfileset file="src/main/resources/common/network.interfaces.raspbian"
+                        prefix="${build.output.name}/install" />
+
+            <zipfileset file="src/main/resources/common/ifdown-local"
+                        prefix="${build.output.name}/install" />
+            <zipfileset file="src/main/resources/common/ifup-local"
+                        prefix="${build.output.name}/install" />
+            <zipfileset file="src/main/resources/common/ifup-local.debian"
+                        prefix="${build.output.name}/install" />
+            <zipfileset file="src/main/resources/common/ifup-local.raspbian"
+                        prefix="${build.output.name}/install" />
+
+            <zipfileset file="src/main/resources/common/ip-down.local"
+                        prefix="${build.output.name}/install" />
+            <zipfileset file="src/main/resources/common/ip-up.local"
+                        prefix="${build.output.name}/install" />
+
+            <zipfileset file="${project.build.directory}/${build.output.name}/start_kura.bat"
+                        fullpath="${build.output.name}/bin/start_kura.bat" />
+
+            <zipfileset file="RELEASE_NOTES.txt"
+                        prefix="${build.output.name}/kura/" />
+            <zipfileset file="notice.html"
+                        prefix="${build.output.name}/" />
+            <zipfileset file="epl-v10.html"
+                        prefix="${build.output.name}/" />
+            <zipfileset file="src/main/resources/${build.name}/log4j.properties"
+                        prefix="${build.output.name}/kura/" />
+            <zipfileset file="${project.build.directory}/${build.output.name}/kura.properties"
+                        prefix="${build.output.name}/kura/" />
+    
+            <zipfileset dir="${kura.osgi.repo}/plugins/"
+                        prefix="${build.output.name}/plugins"/>
+            <zipfileset dir="../target-definition/common/repository/plugins"
+                        prefix="${build.output.name}/plugins"/>
+
+
+            <zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.deployment.agent_${org.eclipse.kura.deployment.agent.version}.jar"
+                        prefix="${build.output.name}/kura/plugins" />
+            <zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.api_${org.eclipse.kura.api.version}.jar"
+                        prefix="${build.output.name}/kura/plugins" />
+            <zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.core_${org.eclipse.kura.core.version}.jar"
+                        prefix="${build.output.name}/kura/plugins" />
+            <zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.core.cloud_${org.eclipse.kura.core.cloud.version}.jar"
+                        prefix="${build.output.name}/kura/plugins" />
+            <zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.core.comm_${org.eclipse.kura.core.comm.version}.jar"
+                        prefix="${build.output.name}/kura/plugins" />
+            <zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.core.configuration_${org.eclipse.kura.core.configuration.version}.jar"
+                        prefix="${build.output.name}/kura/plugins" />
+            <zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.core.crypto_${org.eclipse.kura.core.crypto.version}.jar"
+                        prefix="${build.output.name}/kura/plugins" />
+            <zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.core.deployment_${org.eclipse.kura.core.deployment.version}.jar"
+                        prefix="${build.output.name}/kura/plugins" />
+            <zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.core.net_${org.eclipse.kura.core.net.version}.jar"
+                        prefix="${build.output.name}/kura/plugins" />
+            <zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.emulator_${org.eclipse.kura.emulator.version}.jar"
+                        prefix="${build.output.name}/kura/plugins" />
+            <zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.web_${org.eclipse.kura.web.version}.jar"
+                        prefix="${build.output.name}/kura/plugins" />
+        </zip>
+        <echo message="Building Kura Distribution for ${build.name}-jars..." />
+        
+		<!-- Create installer script -->
+        <echo message="Creating Installer for ${build.name}" />
+        <exec executable="${project.build.directory}/../src/main/sh/create_installer.sh">
+                <arg value="${project.build.directory}" />
+                <arg value="${build.output.name}.zip" />
+                <arg value="kura_${project.version}_${build.name}_installer.sh" />
+                <arg value="${build.name}" />
+        </exec>
+
+
+		<!-- Get version information for the bundles/files in this build -->
+        <echo message="Gathering version information for the bundles/files in ${build.name}" />
+        <exec executable="src/main/sh/get_build_versions.sh">
+                <arg value="${project.build.directory}" />
+                <arg value="${build.output.name}.zip" />
+                <arg value="kura_${project.version}_${build.name}.catalog" />
+                <arg value="${build.name}" />
+        </exec>
+
+
+		<!-- Diff with the previous version -->
+        <property file="RELEASE_INFO/version.properties" />
+        <echo message="Diff version information with ${build.name} version ${project.version.previous}" />
+        <exec executable="src/main/sh/diff_build_versions.sh">
+                <arg value="RELEASE_INFO/${project.version.previous}/kura_${project.version.previous}_${build.name}.catalog" />
+                <arg value="${project.build.directory}/${build.output.name}.catalog" />
+                <arg value="${project.build.directory}/kura_${project.version.previous}_to_${project.version}_${build.name}" />
+                <arg value="${build.name}" />
+        </exec>
+
+
+        <!-- Create upgrader -->
+        <echo message="Creating Upgrader for ${build.name}" />
+        <exec executable="${project.build.directory}/../src/main/sh/create_upgrader.sh">
+                <arg value="${project.build.directory}" />
+                <arg value="${project.build.directory}/${build.output.name}.zip" />
+                <arg value="kura_${project.version}_${build.name}_upgrade.zip" />
+                <arg value="KURA_${project.version.previous}" />
+                <arg value="${kura.install.dir}" />
+                <arg value="${build.output.name}" />
+                <arg value="kura_${project.version.previous}_to_${project.version}_${build.name}.removed" />
+                <arg value="kura_${project.version.previous}_to_${project.version}_${build.name}.keep" />
+                <arg value="${build.output.name}_upgrader.sh" />
+                <arg value="${build.name}" />
+        </exec>
+
+        <!-- Zip the upgrader -->
+        <zip destfile="${project.build.directory}/${build.output.name}_upgrade.zip">
+                <zipfileset file="${project.build.directory}/${build.output.name}_upgrader.sh" />
+                <zipfileset file="src/main/sh/upgrade_wrapper.sh" />
+        </zip>
+    	
+    	
+    	
+    	<!-- Build the upgrade deployment package -->
+    	<echo message="Building the upgrade DP" />
+
+        <!-- Create the manifest -->
+
+    	<!-- Read mf entries -->
+        <loadmf jar="${project.build.directory}/plugins/org.eclipse.kura.deployment.customizer.upgrade_${org.eclipse.kura.deployment.customizer.upgrade.version}.jar" prefix="customizer-mf."/>
+
+        <echo file="${project.build.directory}/${build.output.name}/dp_upgrade_stage/META-INF/MANIFEST.MF" append="false">Manifest-Version: 1.0
+DeploymentPackage-SymbolicName: kura-upgrade
+DeploymentPackage-Version: ${deployment.package.version}
+
+Name: org.eclipse.kura.deployment.customizer.upgrade_${org.eclipse.kura.deployment.customizer.upgrade.version}.jar
+Bundle-SymbolicName: org.eclipse.kura.deployment.customizer.upgrade
+Bundle-Version: ${customizer-mf.Bundle-Version}
+DeploymentPackage-Customizer: true
+
+Name: z_kura_dp_upgrader.sh
+Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScriptResourceProcessor
+</echo>
+
+
+        <!-- move everything into place -->
+        <copy    file="${project.build.directory}/${build.output.name}_upgrader.sh"
+                 tofile="${project.build.directory}/${build.output.name}/dp_upgrade_stage/z_kura_dp_upgrader.sh" />
+		<copy    file="${project.build.directory}/plugins/org.eclipse.kura.deployment.customizer.upgrade_${org.eclipse.kura.deployment.customizer.upgrade.version}.jar"
+                 todir="${project.build.directory}/${build.output.name}/dp_upgrade_stage" />
+
+        <jar destfile="${project.build.directory}/${build.output.name}_upgrader.dp"
+                manifest="${project.build.directory}/${build.output.name}/dp_upgrade_stage/META-INF/MANIFEST.MF"
+                basedir="${project.build.directory}/${build.output.name}/dp_upgrade_stage" />	
+    </target>
+
 	
 	<target name="web-config" if="web.jar.present">
 		<propertyfile file="${project.build.directory}/${build.output.name}/config.ini">

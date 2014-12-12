@@ -80,7 +80,7 @@ public class SupportedUsbModemsFactoryInfo {
 		UsbModemFactoryInfo modemFactoryInfo = null;
 		for (UsbModemFactoryInfo modem : UsbModemFactoryInfo.values()) {
 			if (modem.getUsbModemInfo().getVendorId().equals(vendor)
-					&& modem.getUsbModemInfo().getVendorId().equals(vendor)) {
+					&& modem.getUsbModemInfo().getProductId().equals(product)) {
 				modemFactoryInfo = modem;
 				break;
 			}

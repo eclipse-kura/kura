@@ -46,6 +46,7 @@ import com.extjs.gxt.ui.client.widget.form.RadioGroup;
 import com.extjs.gxt.ui.client.widget.form.SimpleComboBox;
 import com.extjs.gxt.ui.client.widget.form.SimpleComboValue;
 import com.extjs.gxt.ui.client.widget.form.TextField;
+import com.extjs.gxt.ui.client.widget.form.Validator;
 import com.extjs.gxt.ui.client.widget.layout.FitLayout;
 import com.extjs.gxt.ui.client.widget.layout.FlowLayout;
 import com.extjs.gxt.ui.client.widget.layout.FormData;
@@ -333,6 +334,15 @@ public class ModemConfigTab extends LayoutContainer
         m_ifaceNumField.setFieldLabel(MSGS.netModemInterfaceNum());
         m_ifaceNumField.addListener(Events.OnMouseOver, new MouseOverListener(MSGS.netModemToolTipModemInterfaceNumber()));
         m_ifaceNumField.addPlugin(m_dirtyPlugin);
+        m_ifaceNumField.setValidator( new Validator() {
+            public String validate(Field<?> field, String value) {
+            	int val = Integer.parseInt(value);
+            	if (val < 0) {
+            		return MSGS.netModemInvalidInterfaceNum();
+            	}
+                return null;
+            }
+        });
         fieldSet.add(m_ifaceNumField, formData);
 
         //
@@ -438,6 +448,15 @@ public class ModemConfigTab extends LayoutContainer
         m_resetTimeoutField.addListener(Events.OnMouseOver, new MouseOverListener(MSGS.netModemToolTipResetTimeout()));
         m_resetTimeoutField.addPlugin(m_dirtyPlugin);
         m_resetTimeoutField.setStyleAttribute("margin-top", Constants.LABEL_MARGIN_TOP_SEPARATOR);
+        m_resetTimeoutField.setValidator( new Validator() {
+            public String validate(Field<?> field, String value) {
+            	int val = Integer.parseInt(value);
+            	if ((val < 0) || (val == 1)) {
+            		return MSGS.netModemInvalidResetTimeout();
+            	}
+                return null;
+            }
+        });
         fieldSet.add(m_resetTimeoutField, formData);
         
         m_persistRadioTrue = new Radio();  
@@ -465,7 +484,15 @@ public class ModemConfigTab extends LayoutContainer
         m_maxFailField.setFieldLabel(MSGS.netModemMaxFail());
         m_maxFailField.addListener(Events.OnMouseOver, new MouseOverListener(MSGS.netModemToolTipMaxFail()));
         m_maxFailField.addPlugin(m_dirtyPlugin);
-        //m_maxFailField.setStyleAttribute("margin-top", Constants.LABEL_MARGIN_TOP_SEPARATOR);
+        m_maxFailField.setValidator( new Validator() {
+            public String validate(Field<?> field, String value) {
+            	int val = Integer.parseInt(value);
+            	if (val <= 0) {
+            		return MSGS.netModemInvalidMaxFail();
+            	}
+                return null;
+            }
+        });
         fieldSet.add(m_maxFailField, formData);
         
         // idle
@@ -475,6 +502,15 @@ public class ModemConfigTab extends LayoutContainer
         m_idleField.setFieldLabel(MSGS.netModemIdle());
         m_idleField.addListener(Events.OnMouseOver, new MouseOverListener(MSGS.netModemToolTipIdle()));
         m_idleField.addPlugin(m_dirtyPlugin);
+        m_idleField.setValidator( new Validator() {
+            public String validate(Field<?> field, String value) {
+            	int val = Integer.parseInt(value);
+            	if (val < 0) {
+            		return MSGS.netModemInvalidIdle();
+            	}
+                return null;
+            }
+        });
         fieldSet.add(m_idleField, formData);
         
         // active-filter
@@ -497,6 +533,15 @@ public class ModemConfigTab extends LayoutContainer
         m_lcpEchoIntervalField.addListener(Events.OnMouseOver, new MouseOverListener(MSGS.netModemToolTipLcpEchoInterval()));
         m_lcpEchoIntervalField.addPlugin(m_dirtyPlugin);
         m_lcpEchoIntervalField.setStyleAttribute("margin-top", Constants.LABEL_MARGIN_TOP_SEPARATOR);
+        m_lcpEchoIntervalField.setValidator( new Validator() {
+            public String validate(Field<?> field, String value) {
+            	int val = Integer.parseInt(value);
+            	if (val < 0) {
+            		return MSGS.netModemInvalidLcpEchoInterval();
+            	}
+                return null;
+            }
+        });
         fieldSet.add(m_lcpEchoIntervalField, formData);
         
         //
@@ -508,6 +553,15 @@ public class ModemConfigTab extends LayoutContainer
         m_lcpEchoFailureField.setFieldLabel(MSGS.netModemLcpEchoFailure());
         m_lcpEchoFailureField.addListener(Events.OnMouseOver, new MouseOverListener(MSGS.netModemToolTipLcpEchoFailure()));
         m_lcpEchoFailureField.addPlugin(m_dirtyPlugin);
+        m_lcpEchoFailureField.setValidator( new Validator() {
+            public String validate(Field<?> field, String value) {
+            	int val = Integer.parseInt(value);
+            	if (val < 0) {
+            		return MSGS.netModemInvalidLcpEchoFailure();
+            	}
+                return null;
+            }
+        });
         fieldSet.add(m_lcpEchoFailureField, formData);
         
         m_enableGpsRadioTrue = new Radio();  

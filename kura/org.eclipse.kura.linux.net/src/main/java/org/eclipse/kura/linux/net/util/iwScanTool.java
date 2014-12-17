@@ -38,7 +38,7 @@ public class iwScanTool {
 	private String m_errmsg;
 	
 	public iwScanTool() {
-		m_timeout = 10;
+		m_timeout = 20;
 	}
 	
 	public iwScanTool(String ifaceName) {

@@ -24,7 +24,6 @@
 		<relativePath>../pom_pom.xml</relativePath>
 	</parent>
 
-	<groupId>org.eclipse.kura</groupId>
 	<artifactId>org.eclipse.kura.web</artifactId>
 	<version>1.0.1-SNAPSHOT</version>
 	<packaging>war</packaging>
@@ -462,6 +461,25 @@
 											<goal>
 												read-project-properties
 											</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore></ignore>
+									</action>
+								</pluginExecution>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>
+											org.codehaus.mojo
+										</groupId>
+										<artifactId>
+											build-helper-maven-plugin
+										</artifactId>
+										<versionRange>
+											[1.9,)
+										</versionRange>
+										<goals>
+											<goal>regex-property</goal>
 										</goals>
 									</pluginExecutionFilter>
 									<action>

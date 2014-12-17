@@ -147,6 +147,7 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 	}
 	
     protected void activate(ComponentContext componentContext)  {
+    	
     	// save the bundle context
     	m_ctx = componentContext;
     	
@@ -388,7 +389,7 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 	    				}
 	    				
 	    				s_logger.debug("handleEvent() :: gpsSupported={}", m_gpsSupported);
-	    				if (m_gpsSupported) {
+	    				if ((m_gpsSupported != null) && m_gpsSupported) {
 	    					if (isGpsEnabledInConfig(newNetConfigs)) {
 	    						s_logger.debug("handleEvent() :: enabling GPS");
 	    						modem.enableGps();
@@ -699,12 +700,16 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 				}
 				
 				if (m_gpsSupported == null) {
-					boolean gpsSupported = modem.isGpsSupported();
-					m_gpsSupported = gpsSupported;
+					try {
+						boolean gpsSupported = modem.isGpsSupported();
+						m_gpsSupported = gpsSupported;
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
 				}
 				
 				s_logger.debug("trackModem() :: gpsSupported={}", m_gpsSupported);
-				if (m_gpsSupported) {
+				if ((m_gpsSupported != null) && m_gpsSupported) {
 					if (isGpsEnabledInConfig(netConfigs)) {
 						s_logger.debug("trackModem() :: enabling GPS");
 						modem.enableGps();

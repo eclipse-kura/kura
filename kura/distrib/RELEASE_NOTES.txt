@@ -4,6 +4,7 @@ Eclipse Kura - 1.1.0
 Added Features:
    * OpenJDK Device I/O integration
    * Added org.eclipse.kura.example.gpio example using OpenJDK Device I/O 
+   * Added RPI B+ distribution
    * Display warning in the WEB UI if the user attempts to enable more than one WAN interface
    * Modem IMEI and SIM IMSI/ICCID published in the birth certificate
    * Improved documentation on the Eclipse Kura Wiki

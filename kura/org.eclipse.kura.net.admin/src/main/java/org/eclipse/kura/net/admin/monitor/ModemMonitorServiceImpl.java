@@ -147,6 +147,7 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 	}
 	
     protected void activate(ComponentContext componentContext)  {
+    	
     	// save the bundle context
     	m_ctx = componentContext;
     	

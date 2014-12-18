@@ -424,7 +424,6 @@ public abstract class TelitModem {
     }
     
     public String getDataPort() throws KuraException {
-    	
     	String port = null;
     	List <String> ports = m_device.getSerialPorts();
     	if ((ports != null) && (ports.size() > 0)) {
@@ -448,13 +447,11 @@ public abstract class TelitModem {
     	} else {
     		throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "No serial ports available");
     	}
-		
     	return port;
 	}
 	
     
     public String getAtPort() throws KuraException {
-		
     	String port = null;
     	List <String> ports = m_device.getSerialPorts();
     	if ((ports != null) && (ports.size() > 0)) {
@@ -478,12 +475,10 @@ public abstract class TelitModem {
     	} else {
     		throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "No serial ports available");
     	}
-    	
     	return port;
 	}
     
     public String getGpsPort() throws KuraException {
-    	
     	String port = null;
     	if (OS_VERSION.equals(KuraConstants.Mini_Gateway.getImageName() + "_" + KuraConstants.Mini_Gateway.getImageVersion()) &&
     			TARGET_NAME.equals(KuraConstants.Mini_Gateway.getTargetName())) {

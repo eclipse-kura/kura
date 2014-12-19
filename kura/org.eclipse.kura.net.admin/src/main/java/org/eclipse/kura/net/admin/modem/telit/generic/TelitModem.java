@@ -554,7 +554,7 @@ public abstract class TelitModem {
 						.createConnection(uri, 1, false);
 			} catch (Exception e) {
 				s_logger.debug("Exception creating connection: " + e);
-				throw new KuraException(KuraErrorCode.CONNECTION_FAILED, e);
+				throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e, "Connection Failed");
 			}
 		}
 		return connection;

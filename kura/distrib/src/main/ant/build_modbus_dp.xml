@@ -8,16 +8,16 @@
 DeploymentPackage-SymbolicName: org.eclipse.kura.protocol.modbus
 DeploymentPackage-Version: ${deployment.package.version}
 
-Name: org.eclipse.kura.protocol.modbus_${org.eclipse.kura.protocol.modbus.version}.v${kura.build.version}.jar
+Name: org.eclipse.kura.protocol.modbus_${org.eclipse.kura.protocol.modbus.version}.jar
 Bundle-SymbolicName: org.eclipse.kura.protocol.modbus
 Bundle-Version: ${org.eclipse.kura.protocol.modbus.version}</echo>
 
 	<!-- move everything into place -->
-        <copy    file="${project.basedir}/../../org.eclipse.kura.protocol.modbus/target/org.eclipse.kura.protocol.modbus_${org.eclipse.kura.protocol.modbus.version}.v${kura.build.version}.jar"
+        <copy    file="${project.build.directory}/plugins/org.eclipse.kura.protocol.modbus_${org.eclipse.kura.protocol.modbus.version}.jar"
                  todir="${project.build.directory}/org.eclipse.kura.protocol.modbus_${org.eclipse.kura.protocol.modbus.version}/dp_stage" />
 	
 
-        <jar destfile="${project.build.directory}/org.eclipse.kura.protocol.modbus_${org.eclipse.kura.protocol.modbus.version}.dp"
+        <jar destfile="${project.build.directory}/org.eclipse.kura.protocol.modbus_${deployment.package.version}.dp"
 		manifest="${project.build.directory}/org.eclipse.kura.protocol.modbus_${org.eclipse.kura.protocol.modbus.version}/dp_stage/META-INF/MANIFEST.MF"
                 basedir="${project.build.directory}/org.eclipse.kura.protocol.modbus_${org.eclipse.kura.protocol.modbus.version}/dp_stage" />	
     </target>

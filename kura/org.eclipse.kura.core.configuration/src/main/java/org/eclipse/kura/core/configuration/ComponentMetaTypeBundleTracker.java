@@ -62,20 +62,30 @@ public class ComponentMetaTypeBundleTracker extends BundleTracker<Bundle>
 	{
 		s_logger.info("Opening ComponentMetaTypeBundleTracker...");
 		super.open();
-				
+		s_logger.debug("open(): getting bundles...");
 		Bundle[] bundles = m_context.getBundles();
 		if (bundles != null) {
 			for (Bundle bundle : bundles) {
-				processBundleMetaType(bundle);	
+				if (bundle.getState() == Bundle.ACTIVE) {
+					s_logger.debug("open(): processing MetaType for bundle: {}...", bundle.getSymbolicName());
+					processBundleMetaType(bundle);
+					s_logger.debug("open(): processed MetaType for bundle: {}", bundle.getSymbolicName());
+				} else {
+					s_logger.debug("open(): bundle: {} is in state: {}. MetaType will be processed by addingBundle()",
+							bundle.getSymbolicName(), bundle.getState());
+				}
 			}
 		}
+		s_logger.debug("open(): done");
 	};
 	
 	@Override
 	public Bundle addingBundle(Bundle bundle, BundleEvent event) 
 	{
 		Bundle bnd = super.addingBundle(bundle, event);
+		s_logger.debug("addingBundle(): processing MetaType for bundle: {}...", bundle.getSymbolicName());
 		processBundleMetaType(bundle);
+		s_logger.debug("addingBundle(): processed MetaType for bundle: {}", bundle.getSymbolicName());
 		return bnd;
 	}
 

@@ -29,6 +29,7 @@ import org.eclipse.kura.web.shared.service.GwtNetworkServiceAsync;
 
 import com.allen_sauer.gwt.log.client.Log;
 import com.extjs.gxt.ui.client.Style.Scroll;
+import com.extjs.gxt.ui.client.data.ListLoadResult;
 import com.extjs.gxt.ui.client.event.BaseEvent;
 import com.extjs.gxt.ui.client.event.ButtonEvent;
 import com.extjs.gxt.ui.client.event.ComponentEvent;
@@ -92,6 +93,7 @@ public class TcpIpConfigTab extends LayoutContainer
 	private TextArea               m_domainsField;
 
     private ComponentPlugin        m_dirtyPlugin;
+    private ComponentPlugin		   m_warningPlugin;
     
     private class MouseOverListener implements Listener<BaseEvent> {
 
@@ -123,8 +125,18 @@ public class TcpIpConfigTab extends LayoutContainer
     				}  
     			});  
   	      	}  
-  	    };    	
+  	    };
+  	    m_warningPlugin = new ComponentPlugin() {
+			public void init(Component component) {
+				component.addListener(Events.Invalid, new Listener<ComponentEvent>() {
+					public void handleEvent(ComponentEvent be) {
+						FormUtils.addWarningFieldIcon(be.getComponent(), MSGS.netStatusWarning());
+					}
+				});
+			}
+		};
     }
+  	    
 
     
     public void setNetInterface(GwtNetInterfaceConfig netIfConfig)
@@ -351,10 +363,33 @@ public class TcpIpConfigTab extends LayoutContainer
 			public void selectionChanged(SelectionChangedEvent<GwtNetIfStatusModel> se) {
 			    adjustTabs();
 				refreshForm();
+				// Check for other WAN interfaces if current interface is changed to WAN
+				if(isWanEnabled()) {
+					m_formPanel.mask(MSGS.waiting());
+					gwtNetworkService.findNetInterfaceConfigurations(new AsyncCallback<ListLoadResult<GwtNetInterfaceConfig>>() {
+						public void onFailure(Throwable caught) {
+							m_formPanel.unmask();;
+						}
+						public void onSuccess(ListLoadResult<GwtNetInterfaceConfig> result) {
+							for(GwtNetInterfaceConfig config : result.getData()) {
+								if(config.getStatusEnum().equals(GwtNetIfStatus.netIPv4StatusEnabledWAN) &&
+										!config.getName().equals(m_selectNetIfConfig.getName())) {
+									m_statusCombo.fireEvent(Events.Invalid);
+								}
+							}
+							m_formPanel.unmask();;
+						}
+						
+					});
+				}
+				else { 
+					FormUtils.removeWarningFieldIcon(m_statusCombo);
+				}
 			}
 		});
         m_statusCombo.addStyleName("kura-combobox");
         m_statusCombo.addPlugin(m_dirtyPlugin);
+        m_statusCombo.addPlugin(m_warningPlugin);
         m_fieldSet.add(m_statusCombo, formData);
 
         //
@@ -532,6 +567,7 @@ public class TcpIpConfigTab extends LayoutContainer
 		for (Field<?> field : m_formPanel.getFields()) {
 			FormUtils.removeDirtyFieldIcon(field);
 		}		
+		FormUtils.removeWarningFieldIcon(m_statusCombo);
 		if (m_selectNetIfConfig != null) {
 
 			Log.debug("in update(): m_selectNetIfConfig.getStatus().name(): " + m_selectNetIfConfig.getStatus());

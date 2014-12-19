@@ -1,5 +1,7 @@
 #!/bin/bash
 
+INSTALL_DIR=[[kura.install.dir]]
+
 ##############################################
 # PRE-INSTALL SCRIPT
 ##############################################
@@ -23,6 +25,7 @@ fi
 
 #clean up old installation if present
 rm -fr /opt/eclipse/* >> /tmp/kura_install.log 2>&1
+rm -fr ${INSTALL_DIR}/kura* >> /tmp/kura_install.log 2>&1
 rm -fr /tmp/.kura/ >> /tmp/kura_install.log 2>&1
 rm /etc/init.d/firewall >> /tmp/kura_install.log 2>&1
 rm /etc/dhcpd-*.conf >> /tmp/kura_install.log 2>&1

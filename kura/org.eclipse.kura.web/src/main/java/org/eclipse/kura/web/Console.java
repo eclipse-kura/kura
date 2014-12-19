@@ -11,9 +11,11 @@
  */
 package org.eclipse.kura.web;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.kura.configuration.ConfigurationService;
+import org.eclipse.kura.configuration.KuraConfigReadyEvent;
 import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.db.DbService;
 import org.eclipse.kura.system.SystemService;
@@ -28,6 +30,9 @@ import org.eclipse.kura.web.server.servlet.DeviceSnapshotsServlet;
 import org.eclipse.kura.web.server.servlet.FileServlet;
 import org.eclipse.kura.web.server.servlet.SkinServlet;
 import org.osgi.framework.BundleContext;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventAdmin;
+import org.osgi.service.event.EventProperties;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.HttpService;
 import org.slf4j.Logger;
@@ -38,6 +43,7 @@ public class Console
 {
 	private static final Logger s_logger = LoggerFactory.getLogger(Console.class);
 
+	private static final String ESF_DATA_DIR = "kura.data";
 	private static final String SERVLET_ALIAS_ROOT = "servlet.alias.root";
 	private static final String APP_ROOT		   = "app.root";
 
@@ -54,6 +60,8 @@ public class Console
 	private ConfigurationService m_configService;
 	@SuppressWarnings("unused")
 	private CryptoService		m_cryptoService;
+	
+	private EventAdmin m_eventAdmin;
 	
 	// ----------------------------------------------------------------
 	//
@@ -100,6 +108,14 @@ public class Console
 	public void unsetCryptoService(CryptoService cryptoService) {
 		this.m_cryptoService = null;
 	}
+	
+	public void setEventAdminService(EventAdmin eventAdmin) {
+		m_eventAdmin = eventAdmin;
+	}
+	
+	public void unsetEventAdminService(EventAdmin eventAdmin) {
+		m_eventAdmin = null;
+	}
 
 	
 	// ----------------------------------------------------------------
@@ -123,8 +139,9 @@ public class Console
 				String servletRoot = s_aliasRoot;
 	
 				// Initialize AuthenticationManager with DbService
+				String dataDir = m_systemService.getProperties().getProperty(ESF_DATA_DIR);
 				AuthenticationManager authMgr = AuthenticationManager.getInstance();
-				authMgr.init(m_dbService);
+				authMgr.init(m_dbService, dataDir);
 			
 				// Initialize HttpService
 				HttpContext httpCtx = new SecureBasicHttpContext(m_httpService.createDefaultHttpContext(), authMgr);	
@@ -142,6 +159,12 @@ public class Console
 				m_httpService.registerServlet(servletRoot+"/file",      		new FileServlet(),             null, httpCtx);
 				m_httpService.registerServlet(servletRoot+"/device_snapshots", 	new DeviceSnapshotsServlet(),  null, httpCtx);
 				m_httpService.registerServlet(servletRoot+"/skin", 				new SkinServlet(),			   null, httpCtx);
+			
+				Map<String,Object> props = new HashMap<String,Object>();
+				props.put("kura.version", m_systemService.getKuraVersion());	
+				EventProperties eventProps = new EventProperties(props);
+				s_logger.info("postInstalledEvent() :: posting KuraConfigReadyEvent");
+				m_eventAdmin.postEvent(new Event(KuraConfigReadyEvent.KURA_CONFIG_EVENT_READY_TOPIC, eventProps));
 			}
 			else {
 				s_logger.info("Web interface disabled in Kura properties file.");

@@ -38,6 +38,7 @@ public class SerialModemDriver {
 	private static final Logger s_logger = LoggerFactory.getLogger(SerialModemDriver.class);
 	
 	private static final String OS_VERSION = System.getProperty("kura.os.version");
+	private static final String TARGET_NAME = System.getProperty("target.device");
 	
 	private ConnectionFactory m_connectionFactory;
 	private SerialModemComm m_serialModemComm;
@@ -78,7 +79,8 @@ public class SerialModemDriver {
 		if (!modemReachable) {
 			s_logger.info("{} modem is not reachable, installing driver ...", m_modemName);
 			int retries = 3;
-			if (OS_VERSION.equals(KuraConstants.Mini_Gateway.getImageName() + "_" + KuraConstants.Mini_Gateway.getImageVersion())) {
+			if (OS_VERSION != null && OS_VERSION.equals(KuraConstants.Mini_Gateway.getImageName() + "_" + KuraConstants.Mini_Gateway.getImageVersion()) &&
+					TARGET_NAME != null && TARGET_NAME.equals(KuraConstants.Mini_Gateway.getTargetName())) {			
 				try {
 					toggleGpio65();
 					retries = 15;
@@ -112,7 +114,8 @@ public class SerialModemDriver {
 		}
 		if (modemReachable) {
 			int retries = 3;
-			if (OS_VERSION.equals(KuraConstants.Mini_Gateway.getImageName() + "_" + KuraConstants.Mini_Gateway.getImageVersion())) {
+			if (OS_VERSION != null && OS_VERSION.equals(KuraConstants.Mini_Gateway.getImageName() + "_" + KuraConstants.Mini_Gateway.getImageVersion()) &&
+					TARGET_NAME != null && TARGET_NAME.equals(KuraConstants.Mini_Gateway.getTargetName())) {
 				toggleGpio65();
 				sleep (2000);
 				retries = 15;
@@ -252,7 +255,7 @@ public class SerialModemDriver {
  		}
  	}
  	
- 	private void toggleGpio65() throws Exception { 		
+ 	public static void toggleGpio65() throws Exception { 		
  		File fgpio65Folder = new File ("/sys/class/gpio/gpio65");
 		if (!fgpio65Folder.exists()) {
 			BufferedWriter bwGpioSelect = new BufferedWriter(new FileWriter("/sys/class/gpio/export"));
@@ -277,7 +280,7 @@ public class SerialModemDriver {
 		fGpio65Value.close();
  	}
 	
-    private void sleep(long millis) {
+    private static void sleep(long millis) {
 		try {
 			Thread.sleep(millis);
 		} catch (InterruptedException e) {

@@ -156,6 +156,10 @@ public class WirelessConfigTab extends LayoutContainer
 	private Radio 				   	m_pingAccessPointRadioFalse;
 	private RadioGroup 			   	m_pingAccessPointRadioGroup;
 	
+	private Radio 				   	m_ignoreSsidRadioTrue;
+	private Radio 				   	m_ignoreSsidRadioFalse;
+	private RadioGroup 			   	m_ignoreSsidRadioGroup;
+	
 	private ContentPanel			m_channelPanel;
 	
     private ComponentPlugin         m_dirtyPlugin;
@@ -736,7 +740,6 @@ public class WirelessConfigTab extends LayoutContainer
         m_bgscanLongIntervalField.addListener(Events.OnMouseOver, new MouseOverListener(MSGS.netWifiToolTipBgScanLongInterval()));
         m_bgscanLongIntervalField.addPlugin(m_dirtyPlugin);
         
-        
         m_pingAccessPointRadioTrue = new Radio();  
         m_pingAccessPointRadioTrue.setBoxLabel(MSGS.trueLabel());
         m_pingAccessPointRadioTrue.setItemId("true");
@@ -753,6 +756,23 @@ public class WirelessConfigTab extends LayoutContainer
         m_pingAccessPointRadioGroup.addPlugin(m_dirtyPlugin);  
         m_pingAccessPointRadioGroup.addListener(Events.OnMouseOver, new MouseOverListener(MSGS.netWifiToolTipPingAccessPoint()));
         m_pingAccessPointRadioGroup.setStyleAttribute("margin-top", Constants.LABEL_MARGIN_TOP_SEPARATOR);
+        
+        m_ignoreSsidRadioTrue = new Radio();  
+        m_ignoreSsidRadioTrue.setBoxLabel(MSGS.trueLabel());
+        m_ignoreSsidRadioTrue.setItemId("true");
+        
+        m_ignoreSsidRadioFalse = new Radio();  
+        m_ignoreSsidRadioFalse.setBoxLabel(MSGS.falseLabel());  
+        m_ignoreSsidRadioFalse.setItemId("false");
+        
+        m_ignoreSsidRadioGroup = new RadioGroup();
+        m_ignoreSsidRadioGroup.setName("ignoreSSID");
+        m_ignoreSsidRadioGroup.setFieldLabel(MSGS.netWifiWirelessIgnoreSSID()); 
+        m_ignoreSsidRadioGroup.add(m_ignoreSsidRadioTrue);  
+        m_ignoreSsidRadioGroup.add(m_ignoreSsidRadioFalse);
+        m_ignoreSsidRadioGroup.addPlugin(m_dirtyPlugin);  
+        m_ignoreSsidRadioGroup.addListener(Events.OnMouseOver, new MouseOverListener(MSGS.netWifiToolTipIgnoreSSID()));
+        m_ignoreSsidRadioGroup.setStyleAttribute("margin-top", Constants.LABEL_MARGIN_TOP_SEPARATOR);
                 
         //
         // Channel
@@ -888,6 +908,7 @@ public class WirelessConfigTab extends LayoutContainer
     	fieldSet.add(m_bgscanShortIntervalField, formData);
     	fieldSet.add(m_bgscanLongIntervalField, formData);
     	fieldSet.add(m_pingAccessPointRadioGroup, formData);
+    	fieldSet.add(m_ignoreSsidRadioGroup, formData);
     	fieldSet.add(m_channelPanel, formData);
     	 
         if ((m_securityCombo.getSimpleValue().equals(MessageUtils.get(GwtWifiSecurity.netWifiSecurityWPA2.name())))
@@ -1013,7 +1034,8 @@ public class WirelessConfigTab extends LayoutContainer
 								&& field != m_bgscanLongIntervalField
 								&& field != m_pingAccessPointRadioTrue
 								&& field != m_pingAccessPointRadioFalse
-								&& field != m_pingAccessPointRadioGroup) {
+								&& field != m_pingAccessPointRadioGroup
+								&& field != m_ignoreSsidRadioGroup) {
 							
 							field.setEnabled(false);
 						}
@@ -1173,6 +1195,9 @@ public class WirelessConfigTab extends LayoutContainer
 		m_pingAccessPointRadioGroup.setValue(m_pingAccessPointRadioFalse);
 		m_pingAccessPointRadioGroup.setOriginalValue(m_pingAccessPointRadioGroup.getValue());
 		
+		m_ignoreSsidRadioGroup.setValue(m_ignoreSsidRadioFalse);
+		m_ignoreSsidRadioGroup.setOriginalValue(m_ignoreSsidRadioGroup.getValue());
+		
 		update();
 	}
 	
@@ -1259,6 +1284,26 @@ public class WirelessConfigTab extends LayoutContainer
 
 				m_pingAccessPointRadioGroup.setOriginalValue(m_pingAccessPointRadioFalse);
 				m_pingAccessPointRadioGroup.setValue(m_pingAccessPointRadioGroup.getValue());
+			}
+			
+			if (m_activeWifiConfig.ignoreSSID()) {
+				m_ignoreSsidRadioTrue.setValue(true);
+				m_ignoreSsidRadioTrue.setOriginalValue(m_ignoreSsidRadioTrue.getValue());
+				
+				m_ignoreSsidRadioFalse.setValue(false);
+				m_ignoreSsidRadioFalse.setOriginalValue(m_ignoreSsidRadioFalse.getValue());
+				
+				m_ignoreSsidRadioGroup.setOriginalValue(m_ignoreSsidRadioTrue);
+				m_ignoreSsidRadioGroup.setValue(m_ignoreSsidRadioGroup.getValue());
+			} else {
+				m_ignoreSsidRadioTrue.setValue(false);
+				m_ignoreSsidRadioTrue.setOriginalValue(m_ignoreSsidRadioTrue.getValue());
+
+				m_ignoreSsidRadioFalse.setValue(true);
+				m_ignoreSsidRadioFalse.setOriginalValue(m_ignoreSsidRadioFalse.getValue());
+
+				m_ignoreSsidRadioGroup.setOriginalValue(m_ignoreSsidRadioFalse);
+				m_ignoreSsidRadioGroup.setValue(m_ignoreSsidRadioGroup.getValue());
 			}
 		}		
 	}
@@ -1529,6 +1574,9 @@ public class WirelessConfigTab extends LayoutContainer
 		
 		// ping access point
 		gwtWifiConfig.setPingAccessPoint(m_pingAccessPointRadioTrue.getValue().booleanValue());
+		
+		// ignore SSID
+		gwtWifiConfig.setIgnoreSSID(m_ignoreSsidRadioTrue.getValue().booleanValue());
 		
 		return gwtWifiConfig;
     }

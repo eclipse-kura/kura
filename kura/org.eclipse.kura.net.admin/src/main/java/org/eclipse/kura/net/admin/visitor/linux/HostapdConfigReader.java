@@ -117,6 +117,7 @@ public class HostapdConfigReader implements NetworkConfigurationVisitor {
                     String driver = hostapdProps.getProperty("driver");
                     String essid = hostapdProps.getProperty("ssid");
                     int channel = Integer.parseInt(hostapdProps.getProperty("channel"));
+                    int ignoreSSID = Integer.parseInt(hostapdProps.getProperty("ignore_broadcast_ssid"));
                     
                     // Determine radio mode
                     WifiRadioMode wifiRadioMode = null;
@@ -176,6 +177,12 @@ public class HostapdConfigReader implements NetworkConfigurationVisitor {
                     wifiConfig.setBroadcast(true);      // TODO: always true?  is this needed?
                     wifiConfig.setSecurity(security);
                     wifiConfig.setRadioMode(wifiRadioMode);
+                    
+                    if (ignoreSSID == 0) {
+                    	 wifiConfig.setIgnoreSSID(false);
+                    } else {
+                    	 wifiConfig.setIgnoreSSID(true);
+                    }
                     
                     // hw mode
                     if(wifiRadioMode == WifiRadioMode.RADIO_MODE_80211b) {

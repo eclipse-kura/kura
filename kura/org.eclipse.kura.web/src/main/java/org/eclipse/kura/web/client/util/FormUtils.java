@@ -36,4 +36,24 @@ public class FormUtils
 			dirtyIcon.removeFromParent();
 		}
 	}
+	
+	public static void addWarningFieldIcon(Component c, String title) {
+		El elem = c.el();
+		El warningIcon = elem.createChild("");
+		warningIcon.setStyleName("x-form-invalid-msg");
+		warningIcon.setStyleAttribute("position", "absolute");
+		warningIcon.setStyleAttribute("top", "0");
+		warningIcon.setStyleAttribute("left", "252px");
+		warningIcon.setTitle(title);
+		warningIcon.setSize(100, 100);
+		warningIcon.show();
+	}
+	
+	public static void removeWarningFieldIcon(Component c) {
+		El elem = c.el();
+		El warningIcon = elem.child(".x-form-invalid-msg");
+		if (warningIcon != null) {
+			warningIcon.removeFromParent();
+		}
+	}
 }

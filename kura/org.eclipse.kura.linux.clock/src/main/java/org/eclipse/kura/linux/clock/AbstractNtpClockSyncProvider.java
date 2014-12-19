@@ -32,6 +32,7 @@ public abstract class AbstractNtpClockSyncProvider implements ClockSyncProvider
 	protected String                      m_ntpHost;
 	protected int                         m_ntpPort;
 	protected int                         m_ntpTimeout;
+	protected int                         m_retryInterval;
 	protected int                         m_refreshInterval;
 	protected Date                        m_lastSync;
 	protected ScheduledExecutorService    m_scheduler;
@@ -74,6 +75,9 @@ public abstract class AbstractNtpClockSyncProvider implements ClockSyncProvider
 			scheduleOnce();	
 		}
 		else {
+			final int retryInt;
+			if(m_retryInterval<=0) retryInt=1;
+			else retryInt=m_retryInterval;
 			// Perform periodic clock updates.
 			s_logger.info("Perform periodic clock updates every {} sec", m_refreshInterval);
 			if (m_scheduler != null) {
@@ -101,13 +105,13 @@ public abstract class AbstractNtpClockSyncProvider implements ClockSyncProvider
 					}
 					else{
 						m_syncCount++;
-						if((m_syncCount*60)>=m_refreshInterval-1){
+						if((m_syncCount*retryInt)>=m_refreshInterval-1){
 							m_isSynced=false;
 							m_numRetry=0;
 						}
 					}
 				}
-			}, 0, 60, TimeUnit.SECONDS);
+			}, 0, retryInt, TimeUnit.SECONDS);
 		}		
 	}
 	
@@ -164,6 +168,11 @@ public abstract class AbstractNtpClockSyncProvider implements ClockSyncProvider
 		if (m_properties.containsKey("clock.ntp.timeout")) {
 			m_ntpTimeout = (Integer) m_properties.get("clock.ntp.timeout");
 		}
+
+		m_retryInterval = 0;
+		if (m_properties.containsKey("clock.ntp.retry.interval")) {
+			m_retryInterval = (Integer) m_properties.get("clock.ntp.retry.interval");
+		}		
 
 		m_refreshInterval = 0;
 		if (m_properties.containsKey("clock.ntp.refresh-interval")) {

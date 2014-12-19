@@ -384,6 +384,8 @@ public class ModbusProtocolDevice implements ModbusProtocolDeviceService {
 			try {
 				in = conn.openInputStream();
 				out = conn.openOutputStream();
+				if(m_serial485)
+					gpioModeSwitch  = new FileWriter(new File("/sys/class/gpio/" + gpioSwitchPin + "/value"));
 			} catch (Exception e) {
 				throw new ModbusProtocolException(ModbusProtocolErrorCode.CONNECTION_FAILURE,e);
 			}

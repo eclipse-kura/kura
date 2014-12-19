@@ -20,19 +20,17 @@ CC=gcc
 CXX=g++
 COBJS=hid-libusb.o
 CPPOBJS=../hidtest/hidtest.o
-#OBJS=$(COBJS) $(CPPOBJS) $(JNIOBJS)
-OBJS=$(COBJS) $(JNIOBJS)
+OBJS=$(COBJS) $(CPPOBJS) $(JNIOBJS)
 CFLAGS+=-fPIC -I../hidapi -g -c `pkg-config libusb-1.0 --cflags` $(JNIINCLUDES)
 LIBS=`pkg-config libusb-1.0 libudev --libs` -ludev -lpthread $(JNILIBS)
 
-all: $(JNISHAREDLIB)
-#all: hidtest $(JNISHAREDLIB)
+all: hidtest $(JNISHAREDLIB)
 
 $(JNISHAREDLIB): $(OBJS)
 	$(CXX) -shared $(COBJS) $(JNIOBJS) $(LIBS) -o $(JNISHAREDLIB)
 
-#hidtest: $(OBJS)
-#	g++ -Wall -g $^ $(LIBS) -o hidtest
+hidtest: $(OBJS)
+	g++ -Wall -g $^ $(LIBS) -o hidtest
 
 %.o: ../jni-impl/%.cpp
 	$(CXX) $(CFLAGS) $< -o $@

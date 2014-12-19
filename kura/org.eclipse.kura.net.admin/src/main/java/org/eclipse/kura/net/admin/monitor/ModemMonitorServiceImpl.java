@@ -27,6 +27,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.comm.CommURI;
 import org.eclipse.kura.linux.net.ConnectionInfoImpl;
 import org.eclipse.kura.linux.net.modem.SupportedSerialModemInfo;
 import org.eclipse.kura.linux.net.modem.SupportedSerialModemsInfo;
@@ -57,6 +58,8 @@ import org.eclipse.kura.net.modem.CellularModem;
 import org.eclipse.kura.net.modem.ModemAddedEvent;
 import org.eclipse.kura.net.modem.ModemConfig;
 import org.eclipse.kura.net.modem.ModemDevice;
+import org.eclipse.kura.net.modem.ModemGpsDisabledEvent;
+import org.eclipse.kura.net.modem.ModemGpsEnabledEvent;
 import org.eclipse.kura.net.modem.ModemInterface;
 import org.eclipse.kura.net.modem.ModemManagerService;
 import org.eclipse.kura.net.modem.ModemMonitorListener;
@@ -107,6 +110,9 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 	private Boolean m_gpsSupported = null;
 	
 	private boolean m_serviceActivated; 
+	
+	private PppState m_pppState;
+	private long m_resetTimerStart;
 	    
     public void setNetworkService(NetworkService networkService) {
         m_networkService = networkService;
@@ -143,6 +149,9 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
     protected void activate(ComponentContext componentContext)  {
     	// save the bundle context
     	m_ctx = componentContext;
+    	
+    	m_pppState = PppState.NOT_CONNECTED;
+    	m_resetTimerStart = 0L;
     	
     	Dictionary<String, String[]> d = new Hashtable<String, String[]>();
     	d.put(EventConstants.EVENT_TOPIC, EVENT_TOPICS);
@@ -217,100 +226,23 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
     	s_logger.debug("handleEvent - topic: " + event.getTopic());
         String topic = event.getTopic();
         if (topic.equals(NetworkConfigurationChangeEvent.NETWORK_EVENT_CONFIG_CHANGE_TOPIC)) {
-        	Set<String> keySet = m_modems.keySet();
-    		Iterator<String> keySetItetrator = keySet.iterator();
-    		while (keySetItetrator.hasNext()) {
-    			String usbPort = keySetItetrator.next();
-    			CellularModem modem = m_modems.get(usbPort);
-    			try {
-    				String ifaceName = null;
-	    			if (m_networkService != null) {
-	    				ifaceName = m_networkService.getModemPppPort(modem.getModemDevice());
-	    			}
-	    			if (ifaceName != null) {
-		    			List<NetConfig> oldNetConfigs = modem.getConfiguration();
-		    			List<NetConfig>newNetConfigs = m_networkAdminService.getNetworkInterfaceConfigs(ifaceName);
-		    			if ((oldNetConfigs == null) || !oldNetConfigs.equals(newNetConfigs)) {
-		    				s_logger.info("new configuration for cellular modem on usb port " + usbPort + " netinterface " + ifaceName); 
-		    				int ifaceNo = getInterfaceNumber(oldNetConfigs);
-		    				if (ifaceNo >= 0) {
-		    					IModemLinkService pppService = PppFactory.obtainPppService(ifaceNo, modem.getDataPort());
-		    					if (pppService != null) {
-		    						PppState pppState = pppService.getPppState();
-									if ((pppState == PppState.CONNECTED) || (pppState == PppState.IN_PROGRESS)) {
-										s_logger.info("disconnecting " + pppService.getIfaceName());
-										pppService.disconnect();
-									}
-									PppFactory.releasePppService(pppService.getIfaceName());
-		    					}
-		    				}
-		    				
-		    				modem.setConfiguration(newNetConfigs);
-		    				if (m_gpsSupported == null) {
-		    					boolean gpsSupported = modem.isGpsSupported();
-		    					m_gpsSupported = gpsSupported;
-		    				}
-		    				s_logger.debug("handleEvent() :: gpsSupported={}", m_gpsSupported);
-		    				if (m_gpsSupported) {
-		    					if (isGpsEnabledInConfig(newNetConfigs)) {
-		    						s_logger.debug("handleEvent() :: enabling GPS");
-		    						modem.enableGps();
-		    					} else {
-		    						s_logger.debug("handleEvent() :: disabling GPS");
-		    						modem.disableGps();
-		    					}
-		    				}
-		    				if (modem instanceof EvdoCellularModem) {
-			    				NetInterfaceStatus netIfaceStatus = getNetInterfaceStatus(newNetConfigs);
-								if (netIfaceStatus == NetInterfaceStatus.netIPv4StatusEnabledWAN) {
-									if (!((EvdoCellularModem) modem).isProvisioned()) {
-										s_logger.info("NetworkConfigurationChangeEvent :: The " + modem.getModel() + " is not provisioned, will try to provision it ...");
-										
-										if ((task != null) && !task.isCancelled()) {
-											s_logger.info("NetworkConfigurationChangeEvent :: Cancelling monitor task");
-											stopThread = true;
-											task.cancel(true);
-											task = null;
-										}
-										
-										((EvdoCellularModem) modem).provision();
-										if (task == null) {
-											s_logger.info("NetworkConfigurationChangeEvent :: Restarting monitor task");
-											stopThread = false;
-											task = m_executor.submit(new Runnable() {
-									    		@Override
-									    		public void run() {
-									    			while (!stopThread) {
-									    				Thread.currentThread().setName("ModemMonitor");
-									    				try {
-									    					monitor();
-															Thread.sleep(THREAD_INTERVAL);
-														} catch (InterruptedException e) {
-															s_logger.debug(e.getMessage());
-														} catch (Throwable t) {
-															s_logger.error("handleEvent() :: Exception while monitoring cellular connection {}", t.toString());
-															t.printStackTrace();
-														}
-									    			}
-									    	}});
-										}
-									} else {
-										s_logger.info("NetworkConfigurationChangeEvent :: The " + modem.getModel() + " is provisioned");
-									}
-								}
-		    				}
-		    			}
-	    			}
-    			} catch (KuraException e) {
-    				e.printStackTrace();
-    			}
-    		}
+        	ExecutorService ex = Executors.newSingleThreadExecutor();
+    		ex.submit(new Runnable() {
+        		@Override
+        		public void run() {
+        			processNetworkConfigurationChangeEvent();
+        	}});
         } else if (topic.equals(ModemAddedEvent.MODEM_EVENT_ADDED_TOPIC)) {
         	
         	ModemAddedEvent modemAddedEvent = (ModemAddedEvent)event;
-        	ModemDevice modemDevice = modemAddedEvent.getModemDevice();
+        	final ModemDevice modemDevice = modemAddedEvent.getModemDevice();
         	if (m_serviceActivated) {
-        		trackModem(modemDevice);
+        		ExecutorService ex = Executors.newSingleThreadExecutor();
+        		ex.submit(new Runnable() {
+            		@Override
+            		public void run() {
+            			trackModem(modemDevice);
+            	}});
         	}
         } else if (topic.equals(ModemRemovedEvent.MODEM_EVENT_REMOVED_TOPIC)) {
         	ModemRemovedEvent modemRemovedEvent = (ModemRemovedEvent)event;
@@ -375,6 +307,116 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 		}
 	}
 	
+	private void processNetworkConfigurationChangeEvent() {
+    	
+    	Set<String> keySet = m_modems.keySet();
+		Iterator<String> keySetItetrator = keySet.iterator();
+		while (keySetItetrator.hasNext()) {
+			String usbPort = keySetItetrator.next();
+			CellularModem modem = m_modems.get(usbPort);
+			try {
+				String ifaceName = null;
+    			if (m_networkService != null) {
+    				ifaceName = m_networkService.getModemPppPort(modem.getModemDevice());
+    			}
+    			if (ifaceName != null) {
+	    			List<NetConfig> oldNetConfigs = modem.getConfiguration();
+	    			List<NetConfig>newNetConfigs = m_networkAdminService.getNetworkInterfaceConfigs(ifaceName);
+	    			if ((oldNetConfigs == null) || !oldNetConfigs.equals(newNetConfigs)) {
+	    				s_logger.info("new configuration for cellular modem on usb port " + usbPort + " netinterface " + ifaceName); 
+	    				int ifaceNo = getInterfaceNumber(oldNetConfigs);
+	    				if (ifaceNo >= 0) {
+	    					IModemLinkService pppService = PppFactory.obtainPppService(ifaceNo, modem.getDataPort());
+	    					if (pppService != null) {
+	    						PppState pppState = pppService.getPppState();
+								if ((pppState == PppState.CONNECTED) || (pppState == PppState.IN_PROGRESS)) {
+									s_logger.info("disconnecting " + pppService.getIfaceName());
+									pppService.disconnect();
+								}
+								PppFactory.releasePppService(pppService.getIfaceName());
+	    					}
+	    				}
+	    				
+	    				if (modem.isGpsEnabled()) {
+	    					disableModemGps(modem);
+	    				}
+	    				
+	    				if (modem instanceof EvdoCellularModem) {
+		    				NetInterfaceStatus netIfaceStatus = getNetInterfaceStatus(newNetConfigs);
+							if (netIfaceStatus == NetInterfaceStatus.netIPv4StatusEnabledWAN) {
+								if (!((EvdoCellularModem) modem).isProvisioned()) {
+									s_logger.info("NetworkConfigurationChangeEvent :: The " + modem.getModel() + " is not provisioned, will try to provision it ...");
+									
+									if ((task != null) && !task.isCancelled()) {
+										s_logger.info("NetworkConfigurationChangeEvent :: Cancelling monitor task");
+										stopThread = true;
+										task.cancel(true);
+										task = null;
+									}
+									
+									((EvdoCellularModem) modem).provision();
+									if (task == null) {
+										s_logger.info("NetworkConfigurationChangeEvent :: Restarting monitor task");
+										stopThread = false;
+										task = m_executor.submit(new Runnable() {
+								    		@Override
+								    		public void run() {
+								    			while (!stopThread) {
+								    				Thread.currentThread().setName("ModemMonitor");
+								    				try {
+								    					monitor();
+														Thread.sleep(THREAD_INTERVAL);
+													} catch (InterruptedException e) {
+														s_logger.debug(e.getMessage());
+													} catch (Throwable t) {
+														s_logger.error("handleEvent() :: Exception while monitoring cellular connection {}", t.toString());
+														t.printStackTrace();
+													}
+								    			}
+								    	}});
+									}
+								} else {
+									s_logger.info("NetworkConfigurationChangeEvent :: The " + modem.getModel() + " is provisioned");
+								}
+							}
+	    				}
+	    				
+	    				modem.setConfiguration(newNetConfigs);
+	    				if (m_gpsSupported == null) {
+	    					boolean gpsSupported = modem.isGpsSupported();
+	    					m_gpsSupported = gpsSupported;
+	    				}
+	    				
+	    				s_logger.debug("handleEvent() :: gpsSupported={}", m_gpsSupported);
+	    				if ((m_gpsSupported != null) && m_gpsSupported) {
+	    					if (isGpsEnabledInConfig(newNetConfigs)) {
+	    						s_logger.debug("handleEvent() :: enabling GPS");
+	    						modem.enableGps();
+	    						try {
+	    							CommURI commUri = modem.getSerialConnectionProperties(CellularModem.SerialPortType.GPSPORT);
+	    							s_logger.trace("handleEvent() :: Modem SeralConnectionProperties: {}", commUri.toString());
+	    							HashMap<String, Object> modemInfoMap = new HashMap<String, Object>();
+	    							modemInfoMap.put(ModemGpsEnabledEvent.Port, commUri.getPort());
+	    							modemInfoMap.put(ModemGpsEnabledEvent.BaudRate, new Integer(commUri.getBaudRate()));
+	    							modemInfoMap.put(ModemGpsEnabledEvent.DataBits, new Integer(commUri.getDataBits()));
+	    							modemInfoMap.put(ModemGpsEnabledEvent.StopBits, new Integer(commUri.getStopBits()));
+	    							modemInfoMap.put(ModemGpsEnabledEvent.Parity, new Integer(commUri.getParity()));
+	    							
+	    							s_logger.debug("handleEvent() :: posting ModemGpsEnabledEvent on topic {}", ModemGpsEnabledEvent.MODEM_EVENT_GPS_ENABLED_TOPIC);
+	    							m_eventAdmin.postEvent(new ModemGpsEnabledEvent(modemInfoMap));
+	    						} catch (Exception e) {
+	    							e.printStackTrace();
+	    						}
+	    					}
+	    				}
+	    			}
+    			}
+			} catch (KuraException e) {
+				e.printStackTrace();
+			}
+		}
+    }
+	
 	private int getInterfaceNumber (List<NetConfig> netConfigs) {
 		int ifaceNo = -1;
 		if ((netConfigs != null) && (netConfigs.size() > 0)) {
@@ -386,6 +428,27 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 			}
 		}
 		return ifaceNo;
+	}
+	
+	private long getModemResetTimeoutMsec(String ifaceName) {
+		long resetToutMsec = 0L;
+		
+		if (ifaceName != null) {
+			try {
+				List<NetConfig> netConfigs = m_networkAdminService.getNetworkInterfaceConfigs(ifaceName);
+				if ((netConfigs != null) && (netConfigs.size() > 0)) {
+					for (NetConfig netConfig : netConfigs) {
+						if (netConfig instanceof ModemConfig) {
+							resetToutMsec = ((ModemConfig) netConfig).getResetTimeout() * 60000;
+							break;
+						}
+					}
+				}
+			} catch (KuraException e) {
+				e.printStackTrace();
+			}
+		}
+		return resetToutMsec;
 	}
 	
 	private boolean isGpsEnabledInConfig(List<NetConfig> netConfigs) {
@@ -424,23 +487,57 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 			
 			NetInterfaceStatus netInterfaceStatus = getNetInterfaceStatus(modem.getConfiguration());
 			if (netInterfaceStatus == NetInterfaceStatus.netIPv4StatusEnabledWAN) {
+				IModemLinkService pppService = null;
+				PppState pppState = null;
 				try {
 					String ifaceName = m_networkService.getModemPppPort(modem.getModemDevice());
 					if (ifaceName != null) {
-						IModemLinkService pppService = PppFactory.obtainPppService(ifaceName, modem.getDataPort());
-						PppState pppState = pppService.getPppState();
-						s_logger.trace("monitor() :: PppState={}", pppState);
+						pppService = PppFactory.obtainPppService(ifaceName, modem.getDataPort());
+						pppState = pppService.getPppState();
+						
+						if (m_pppState != pppState) {
+							s_logger.info("monitor() :: previous PppState={}", m_pppState);
+							s_logger.info("monitor() :: current PppState={}", pppState);
+						}
+						
 						if (pppState == PppState.NOT_CONNECTED) {
 							if (modem.getTechnologyType() == ModemTechnologyType.HSDPA) {
 								if(((HspaCellularModem)modem).isSimCardReady()) {
-									s_logger.info("!!! SIM CARD IS READY !!! connecting ...");
+									s_logger.info("monitor() :: !!! SIM CARD IS READY !!! connecting ...");
 									pppService.connect();
+									if (m_pppState == PppState.NOT_CONNECTED) {
+										m_resetTimerStart = System.currentTimeMillis();
+									}
 								}
 							} else {
-								s_logger.info("connecting ...");
+								s_logger.info("monitor() :: connecting ...");
 								pppService.connect();
+								if (m_pppState == PppState.NOT_CONNECTED) {
+									m_resetTimerStart = System.currentTimeMillis();
+								}
 							}
+						} else if (pppState == PppState.IN_PROGRESS) {
+							long modemResetTout = getModemResetTimeoutMsec(ifaceName);
+							if (modemResetTout > 0) {
+								long timeElapsed = System.currentTimeMillis() - m_resetTimerStart;
+								if (timeElapsed > modemResetTout) {
+									// reset modem
+									s_logger.info("monitor() :: Modem Reset TIMEOUT !!!");
+									pppService.disconnect();
+									if (modem.isGpsEnabled()) {
+										disableModemGps(modem);
+									}
+									modem.reset();
+								} else {
+									int timeTillReset = (int)(modemResetTout - timeElapsed) / 1000;
+									s_logger.info("monitor() :: PPP connection in progress. Modem will be reset in {} sec if not connected", timeTillReset);
+								}
+							}
+						} else if (pppState == PppState.CONNECTED) {
+							m_resetTimerStart = System.currentTimeMillis();
 						}
+						
+						m_pppState = pppState;
 						ConnectionInfo connInfo = new ConnectionInfoImpl(ifaceName);
 						InterfaceState interfaceState = new InterfaceState(ifaceName, 
 								LinuxNetworkUtil.isUp(ifaceName), 
@@ -448,7 +545,23 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 								connInfo.getIpAddress());
 						newInterfaceStatuses.put(ifaceName, interfaceState);
 					}
-				} catch (KuraException e) {
+				} catch (Exception e) {
+					s_logger.error("monitor() :: Exception -> " + e);
+					if ((pppService != null) && (pppState != null)) {
+						try {
+							s_logger.error("monitor() :: Exception :: PPPD disconnect");
+							pppService.disconnect();
+						} catch (KuraException e1) {
+							e1.printStackTrace();
+						}
+						m_pppState = pppState;
+					}
+					try {
+						s_logger.error("monitor() :: Exception :: modem reset");
+						modem.reset();
+					} catch (KuraException e1) {
+						e1.printStackTrace();
+					}
 					e.printStackTrace();
 				}
 			}
@@ -543,6 +656,10 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 					}
 				}
 				
+				if (modem.isGpsEnabled()) {
+					disableModemGps(modem);
+				}
+				
 				if (modem instanceof EvdoCellularModem) {
 					NetInterfaceStatus netIfaceStatus = getNetInterfaceStatus(netConfigs);
 					if (netIfaceStatus == NetInterfaceStatus.netIPv4StatusEnabledWAN) {
@@ -582,18 +699,42 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 				}
 				
 				if (m_gpsSupported == null) {
-					boolean gpsSupported = modem.isGpsSupported();
-					m_gpsSupported = gpsSupported;
+					try {
+						boolean gpsSupported = modem.isGpsSupported();
+						m_gpsSupported = gpsSupported;
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
 				}
+				
 				s_logger.debug("trackModem() :: gpsSupported={}", m_gpsSupported);
-				if (m_gpsSupported) {
+				if ((m_gpsSupported != null) && m_gpsSupported) {
 					if (isGpsEnabledInConfig(netConfigs)) {
 						s_logger.debug("trackModem() :: enabling GPS");
 						modem.enableGps();
-					} else {
+						try {
+							CommURI commUri = modem.getSerialConnectionProperties(CellularModem.SerialPortType.GPSPORT);
+							s_logger.trace("trackModem() :: Modem SeralConnectionProperties: {}", commUri.toString());
+							
+							HashMap<String, Object> modemInfoMap = new HashMap<String, Object>();
+							modemInfoMap.put(ModemGpsEnabledEvent.Port, modem.getGpsPort());
+							modemInfoMap.put(ModemGpsEnabledEvent.BaudRate, new Integer(commUri.getBaudRate()));
+							modemInfoMap.put(ModemGpsEnabledEvent.DataBits, new Integer(commUri.getDataBits()));
+							modemInfoMap.put(ModemGpsEnabledEvent.StopBits, new Integer(commUri.getStopBits()));
+							modemInfoMap.put(ModemGpsEnabledEvent.Parity, new Integer(commUri.getParity()));
+							
+							s_logger.debug("trackModem() :: posting ModemGpsEnabledEvent on topic {}", ModemGpsEnabledEvent.MODEM_EVENT_GPS_ENABLED_TOPIC);
+							m_eventAdmin.postEvent(new ModemGpsEnabledEvent(modemInfoMap));
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+					} 
+					/*
+					else {
 						s_logger.debug("trackModem() :: disabling GPS");
 						modem.disableGps();
 					}
+					*/
 				}
 				
 				if (modemDevice instanceof UsbModemDevice) {
@@ -605,5 +746,32 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 				e.printStackTrace();
 			}
 		}
+	}
+	
+	private void disableModemGps(CellularModem modem) throws KuraException {
+		
+		s_logger.info("disableGps() :: posting ModemGpsDisableEvent on topic {}", ModemGpsDisabledEvent.MODEM_EVENT_GPS_DISABLED_TOPIC);
+		HashMap<String, Object> modemInfoMap = new HashMap<String, Object>();
+		m_eventAdmin.postEvent(new ModemGpsDisabledEvent(modemInfoMap));
+		
+		long startTimer = System.currentTimeMillis();	
+		do {
+			try {
+				Thread.sleep(3000);
+				if (modem.isReachable()) {
+					s_logger.debug("disableGps() modem is now reachable ...");
+					break;
+				} else {
+					s_logger.debug("disableGps() waiting for PositionService to release serial port ...");
+				}
+			} catch (Exception e) {
+				s_logger.debug("disableGps() waiting for PositionService to release serial port: ex={}", e);
+			}
+		} while ((System.currentTimeMillis()-startTimer) < 10000);
+		
+		modem.disableGps();
+		try {
+			Thread.sleep(3000);
+		} catch(InterruptedException e) {}
 	}
 }

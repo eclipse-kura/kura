@@ -249,16 +249,24 @@ public class WpaSupplicantConfigReader implements NetworkConfigurationVisitor {
         wifiConfig.setChannels(channels);
         wifiConfig.setBgscan(bgscan);
         
+        // Get self-stored properties
+        
 		boolean pingAP = false;
         StringBuilder key = new StringBuilder().append("net.interface.").append(ifaceName).append(".config.wifi.infra.pingAccessPoint");
         String statusString = KuranetConfig.getProperty(key.toString());
         if(statusString != null && !statusString.isEmpty()) {
         	pingAP = Boolean.parseBoolean(statusString);
         }
-        
 		wifiConfig.setPingAccessPoint(pingAP);
+		
+		boolean ignoreSSID = false;
+		key = new StringBuilder().append("net.interface.").append(ifaceName).append(".config.wifi.infra.ignoreSSID");
+        statusString = KuranetConfig.getProperty(key.toString());
+        if(statusString != null && !statusString.isEmpty()) {
+        	ignoreSSID = Boolean.parseBoolean(statusString);
+        }
+        wifiConfig.setIgnoreSSID(ignoreSSID);
         
-    	// Get self-stored properties
         StringBuilder infraDriverKey = new StringBuilder("net.interface.").append(ifaceName).append(".config.wifi.infra.driver");
         //StringBuilder adhocDriverKey = new StringBuilder("net.interface.").append(ifaceName).append(".config.wifi.adhoc.driver");
         String wifiDriver = KuranetConfig.getProperty(infraDriverKey.toString());

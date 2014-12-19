@@ -6,12 +6,12 @@
 	<parent>
 		<groupId>org.eclipse.kura</groupId>
 		<artifactId>kura</artifactId>
-		<version>1.0.0</version>
+		<version>1.1.0</version>
 		<relativePath>../manifest_pom.xml</relativePath>
 	</parent>
 
 	<artifactId>org.eclipse.kura.protocol.can.test</artifactId>
-	<version>1.0.0</version>
+	<version>1.0.1</version>
 	<packaging>eclipse-test-plugin</packaging>
 
 	<properties>
@@ -460,6 +460,23 @@
     									<goal>build-qualifier</goal>
     									<goal>validate-version</goal>
     									<goal>validate-id</goal>
+    								</goals>
+    							</pluginExecutionFilter>
+    							<action>
+    								<ignore></ignore>
+    							</action>
+    						</pluginExecution>
+    						<pluginExecution>
+    							<pluginExecutionFilter>
+    								<groupId>org.jacoco</groupId>
+    								<artifactId>
+    									jacoco-maven-plugin
+    								</artifactId>
+    								<versionRange>
+    									[0.6.4.201312101107,)
+    								</versionRange>
+    								<goals>
+    									<goal>prepare-agent</goal>
     								</goals>
     							</pluginExecutionFilter>
     							<action>

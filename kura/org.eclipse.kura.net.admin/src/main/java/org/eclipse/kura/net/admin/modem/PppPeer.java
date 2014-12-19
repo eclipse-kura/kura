@@ -33,60 +33,60 @@ public class PppPeer {
 	
     private static final String CHAT_PROGRAM = "chat";
     
-	private boolean enabled = false;
+	private boolean m_enabled = false;
 	
 	//private int persistence = 0; 
 	
 	/* for a ppp0 or ppp1 etc interface name */
-	private int pppUnitNumber = 0;
+	private int m_pppUnitNumber = 0;
 	
 	/* name of the provider */
-	private String provider = null;
+	private String m_provider = null;
 	
 	/* network technology (e.g. EVDO, 3G) */
-	private ModemTechnologyType networkTechnology = null;
+	private ModemTechnologyType m_networkTechnology = null;
 	
 	/* access point name */
-	private String apn = null;
+	private String m_apn = null;
 	
 	/* dial string */
-	private String dialString = null;
+	private String m_dialString = null;
 	
 	/* Enables connection debugging facilities */
-	private boolean enableDebug = false;
+	private boolean m_enableDebug = false;
 	
 	/* authentication type (e.g. PAP, CHAP) */
-	private AuthType authType = AuthType.NONE;
+	private AuthType m_authType = AuthType.NONE;
 	
 	/* username */
-	private String username = null;
+	private String m_username = null;
 	
 	/* password */
-	private String password = null;
+	private String m_password = null;
 	
 	/* baud rate */
-	private int baudRate = -1;
+	private int m_baudRate = -1;
 	
 	/* PPP log file */
-	private String logfile = null;
+	private String m_logfile = null;
 	
 	/* Use RTS/CTS hardware flow control */
-	private boolean useRtsCtsFlowControl = false;
+	private boolean m_useRtsCtsFlowControl = false;
 	
 	/* use modem control lines? */
-	private boolean useModemControlLines = false;
+	private boolean m_useModemControlLines = false;
 	
 	/* lock serial port? */
-	private boolean lockSerialDevice = false;
+	private boolean m_lockSerialDevice = false;
 	
 	/* require the peer to authenticate itself */
-	private boolean peerMustAuthenticateItself = false;
+	private boolean m_peerMustAuthenticateItself = false;
 	
 	/*
 	 * Add a default route to the system routing tables, 
 	 * using the peer as the gateway.
 	 */
-	private boolean addDefaultRoute = false;
+	private boolean m_addDefaultRoute = false;
 	
 	/*
 	 * Disables the default behavior when no local IP address is specified, 
@@ -95,43 +95,51 @@ public class PppPeer {
 	 * IPCP negotiation (unless it specified explicitly on the command line 
 	 * or in an options file). 
 	 */
-	private boolean peerToSupplyLocalIP = false;
+	private boolean m_peerToSupplyLocalIP = false;
 	
 	/* Ask the peer for DNS server addresses */
-	private boolean usePeerDns = false;
+	private boolean m_usePeerDns = false;
 	
 	/* Allow Proxy-ARPs */
-	private boolean allowProxyArps = false;
+	private boolean m_allowProxyArps = false;
 	
 
 	/*
 	 * Allow Van Jacobson style TCP/IP header compression in both the 
 	 * transmit and the receive direction. 
 	 */
-	private boolean allowVanJacobsonTcpIpHdrCompression = false;
+	private boolean m_allowVanJacobsonTcpIpHdrCompression = false;
 	
 	/*
 	 * Allow the connection-ID compression option in Van Jacobson style TCP/IP header 
 	 * compression. With this option, pppd will not omit the connection-ID byte from 
 	 * Van Jacobson compressed TCP/IP headers, nor ask the peer to do so. 
 	 */
-	private boolean allowVanJacobsonConnectionIDCompression = false;
+	private boolean m_allowVanJacobsonConnectionIDCompression = false;
 	
 	/*
 	 * Allow BSD-Compress compression
 	 */
-	private boolean allowBsdCompression = false;
+	private boolean m_allowBsdCompression = false;
 	
 	/*
 	 * Allow Deflate compression
 	 */
-	private boolean allowDeflateCompression = false;
+	private boolean m_allowDeflateCompression = false;
 	
 	/*
 	 * Allow magic number negotiation
 	 */
-	private boolean allowMagic = false;
+	private boolean m_allowMagic = false;
 	
+	private boolean m_persist = false;
+	
+	private int m_maxFail = 0;
+	
+	private int m_idle = 0;
+	
+	private String m_activeFilter = null;
+		
 	/*
 	 * If this option is given, ppp daemon will presume the peer to be dead 
 	 * if n LCP echo-requests are sent without receiving a valid LCP echo-reply. 
@@ -142,7 +150,7 @@ public class PppPeer {
 	 * physical connection has been broken (e.g., the modem has hung up) 
 	 * in situations where no hardware modem control lines are available. 
 	 */
-	private int lcp_echo_failure = -1;
+	private int m_lcp_echo_failure = -1;
 	
 	/*
 	 * If this option is given, ppp daemon will send an LCP echo-request frame 
@@ -151,17 +159,17 @@ public class PppPeer {
 	 * This option can be used with the lcp-echo-failure option to detect 
 	 * that the peer is no longer connected. 
 	 */
-	private int lcp_echo_interval = -1;
+	private int m_lcp_echo_interval = -1;
 	
 	/*
 	 * Wait for up to n milliseconds after the connect script finishes for a 
 	 * valid PPP packet from the peer.
 	 */
-	private int connect_delay = -1;
+	private int m_connect_delay = -1;
 		   
     /* Modem Exchange script */
-    private String connectScriptFilename = null;
-    private String disconnectScriptFilename = null;
+    private String m_connectScriptFilename = null;
+    private String m_disconnectScriptFilename = null;
 
     
 	/**
@@ -170,7 +178,7 @@ public class PppPeer {
 	 * @return PPP unit number as <code>int</code>
 	 */
 	public int getPppUnitNumber() {
-		return pppUnitNumber;
+		return m_pppUnitNumber;
 	}
 
 	/**
@@ -179,7 +187,7 @@ public class PppPeer {
 	 * @param pppUnitNumber as <code>int</code>
 	 */
 	public void setPppUnitNumber(int pppUnitNumber) {
-		this.pppUnitNumber = pppUnitNumber;
+		m_pppUnitNumber = pppUnitNumber;
 	}
 
 
@@ -192,7 +200,7 @@ public class PppPeer {
 	 * 		false - PPP is disabled
 	 */
 	public boolean isEnabled() {
-		return enabled;
+		return m_enabled;
 	}
 
 	/**
@@ -204,7 +212,7 @@ public class PppPeer {
 
 	 */
 	public void setEnabled(boolean enabled) {
-		this.enabled = enabled;
+		m_enabled = enabled;
 	}
 
 	/**
@@ -213,7 +221,7 @@ public class PppPeer {
 	 * @return - service provider
 	 */
 	public String getProvider() {
-		return provider;
+		return m_provider;
 	}
 
 	/**
@@ -222,7 +230,7 @@ public class PppPeer {
 	 * @param provider as String
 	 */
 	public void setProvider(String provider) {
-		this.provider = provider;
+		m_provider = provider;
 	}
 	
 	/**
@@ -231,7 +239,7 @@ public class PppPeer {
 	 * @return - network technology
 	 */
 	public ModemTechnologyType getNetworkTechnology() {
-		return networkTechnology;
+		return m_networkTechnology;
 	}
 
 	/**
@@ -240,7 +248,7 @@ public class PppPeer {
 	 * @param networkTechnology as ModemServiceType 
 	 */
 	public void setNetworkTechnology(ModemTechnologyType networkTechnology) {
-		this.networkTechnology = networkTechnology;
+		m_networkTechnology = networkTechnology;
 	}
 	
 	/**
@@ -249,7 +257,7 @@ public class PppPeer {
 	 * @return APN
 	 */
 	public String getApn() {
-		return apn;
+		return m_apn;
 	}
 
 	/**
@@ -258,7 +266,7 @@ public class PppPeer {
 	 * @param apn as String
 	 */
 	public void setApn(String apn) {
-		this.apn = apn;
+		m_apn = apn;
 	}
 
 	/**
@@ -267,7 +275,7 @@ public class PppPeer {
 	 * @return dial string
 	 */
 	public String getDialString() {
-		return dialString;
+		return m_dialString;
 	}
 
 	/**
@@ -276,7 +284,7 @@ public class PppPeer {
 	 * @param dialString such as "atdt555-1212"
 	 */
 	public void setDialString(String dialString) {
-		this.dialString = dialString;
+		m_dialString = dialString;
 	}
 
 	/**
@@ -285,7 +293,7 @@ public class PppPeer {
 	 * @return authentication type
 	 */
 	public AuthType getAuthType() {
-		return authType;
+		return m_authType;
 	}
 
 	/**
@@ -294,7 +302,7 @@ public class PppPeer {
 	 * @param authType int (NONE, PAP, CHAP) as defined in {@link org.eclipe.kura.net.ppp.service.PppAuthentication}
 	 */
 	public void setAuthType(AuthType authType) {
-		this.authType = authType;
+		m_authType = authType;
 	}
 
 	/**
@@ -303,7 +311,7 @@ public class PppPeer {
 	 * @return user name
 	 */
 	public String getUsername() {
-		return username;
+		return m_username;
 	}
 
 	/**
@@ -312,7 +320,7 @@ public class PppPeer {
 	 * @param username as String
 	 */
 	public void setUsername(String username) {
-		this.username = username;
+		m_username = username;
 	}
 
 	/**
@@ -321,7 +329,7 @@ public class PppPeer {
 	 * @return password
 	 */ 
 	public String getPassword() {
-		return password;
+		return m_password;
 	}
 
 	/**
@@ -330,7 +338,7 @@ public class PppPeer {
 	 * @param password as String
 	 */
 	public void setPassword(String password) {
-		this.password = password;
+		m_password = password;
 	}
 
 	/**
@@ -339,7 +347,7 @@ public class PppPeer {
 	 * @return baud rate
 	 */
 	public int getBaudRate() {
-		return baudRate;
+		return m_baudRate;
 	}
 
 	/**
@@ -348,7 +356,7 @@ public class PppPeer {
 	 * @param baudRate on serial port, as int
 	 */
 	public void setBaudRate(int baudRate) {
-		this.baudRate = baudRate;
+		m_baudRate = baudRate;
 	}
 
     /**
@@ -357,7 +365,7 @@ public class PppPeer {
      * @return name of the log file
      */
     public String getLogfile() {
-        return logfile;
+        return m_logfile;
     }
 
     /**
@@ -366,7 +374,7 @@ public class PppPeer {
      * @param logfile as String
      */
     public void setLogfile(String logfile) {
-        this.logfile = logfile;
+        m_logfile = logfile;
     }
 
     /**
@@ -375,7 +383,7 @@ public class PppPeer {
      * @return connect script filename as String
      */
     public String getConnectScript() {
-        return connectScriptFilename;
+        return m_connectScriptFilename;
     }
 
     /**
@@ -384,7 +392,7 @@ public class PppPeer {
      * @param connectScript as <code>String</code>
      */
     public void setConnectScript(String connectScript) {
-        this.connectScriptFilename = connectScript;
+        m_connectScriptFilename = connectScript;
     }
 
     /**
@@ -393,7 +401,7 @@ public class PppPeer {
      * @return disconnect script filename as String
      */
     public String getDisconnectScript() {
-        return disconnectScriptFilename;
+        return m_disconnectScriptFilename;
     }
 
     /**
@@ -402,7 +410,7 @@ public class PppPeer {
      * @param disconnectScript as <code>String</code>
      */
     public void setDisconnectScript(String disconnectScript) {
-        this.disconnectScriptFilename = disconnectScript;
+        m_disconnectScriptFilename = disconnectScript;
     }
 
 	/**
@@ -413,7 +421,7 @@ public class PppPeer {
 	 * 		false - do not add default route
 	 */
 	public boolean isAddDefaultRoute() {
-		return addDefaultRoute;
+		return m_addDefaultRoute;
 	}
 
 	/**
@@ -424,7 +432,7 @@ public class PppPeer {
 	 * 		false - do not add default route
 	 */
 	public void setAddDefaultRoute(boolean addDefaultRoute) {
-		this.addDefaultRoute = addDefaultRoute;
+		m_addDefaultRoute = addDefaultRoute;
 	}
 
 	/**
@@ -435,7 +443,7 @@ public class PppPeer {
 	 * 		false - peer is not supplying local IP address
 	 */
 	public boolean isPeerToSupplyLocalIP() {
-		return peerToSupplyLocalIP;
+		return m_peerToSupplyLocalIP;
 	}
 
 	/**
@@ -446,7 +454,7 @@ public class PppPeer {
 	 * 		false - peer is not supplying local IP address
 	 */
 	public void setPeerToSupplyLocalIP(boolean peerToSupplyLocalIP) {
-		this.peerToSupplyLocalIP = peerToSupplyLocalIP;
+		m_peerToSupplyLocalIP = peerToSupplyLocalIP;
 	}
 
 	/**
@@ -457,7 +465,7 @@ public class PppPeer {
 	 * 		false - do not use peer DNS
 	 */
 	public boolean isUsePeerDns() {
-		return usePeerDns;
+		return m_usePeerDns;
 	}
 
 	/**
@@ -468,7 +476,7 @@ public class PppPeer {
 	 * 		false - do not use peer DNS
 	 */
 	public void setUsePeerDns(boolean usePeerDns) {
-		this.usePeerDns = usePeerDns;
+		m_usePeerDns = usePeerDns;
 	}
 
 	/**
@@ -479,7 +487,7 @@ public class PppPeer {
 	 * 		false - 'proxyarp' is disabled
 	 */
 	public boolean isAllowProxyArps() {
-		return allowProxyArps;
+		return m_allowProxyArps;
 	}
 
 	/**
@@ -490,7 +498,7 @@ public class PppPeer {
 	 * 		false - 'proxyarp' is disabled
 	 */
 	public void setAllowProxyArps(boolean allowProxyArps) {
-		this.allowProxyArps = allowProxyArps;
+		m_allowProxyArps = allowProxyArps;
 	}
 
 	/**
@@ -501,7 +509,7 @@ public class PppPeer {
 	 * 		false - Van Jacobson TCP/IP header compression is not allowed
 	 */
 	public boolean isAllowVanJacobsonTcpIpHdrCompression() {
-		return allowVanJacobsonTcpIpHdrCompression;
+		return m_allowVanJacobsonTcpIpHdrCompression;
 	}
 
 	/**
@@ -514,7 +522,7 @@ public class PppPeer {
 	 */
 	public void setAllowVanJacobsonTcpIpHdrCompression(
 			boolean allowVanJacobsonTcpIpHdrCompression) {
-		this.allowVanJacobsonTcpIpHdrCompression = allowVanJacobsonTcpIpHdrCompression;
+		m_allowVanJacobsonTcpIpHdrCompression = allowVanJacobsonTcpIpHdrCompression;
 	}
 
 	
@@ -526,7 +534,7 @@ public class PppPeer {
 	 * 		false - Van Jacobson Connection ID compression is not allowed
 	 */
 	public boolean isAllowVanJacobsonConnectionIDCompression() {
-		return allowVanJacobsonConnectionIDCompression;
+		return m_allowVanJacobsonConnectionIDCompression;
 	}
 
 	/**
@@ -538,7 +546,7 @@ public class PppPeer {
 	 */
 	public void setAllowVanJacobsonConnectionIDCompression(
 			boolean allowVanJacobsonConnectionIDCompression) {
-		this.allowVanJacobsonConnectionIDCompression = allowVanJacobsonConnectionIDCompression;
+		m_allowVanJacobsonConnectionIDCompression = allowVanJacobsonConnectionIDCompression;
 	}
 
 	/**
@@ -549,7 +557,7 @@ public class PppPeer {
 	 * 		false - BSD compression is not allowed
 	 */
 	public boolean isAllowBsdCompression() {
-		return allowBsdCompression;
+		return m_allowBsdCompression;
 	}
 
 	/**
@@ -560,7 +568,7 @@ public class PppPeer {
 	 * 		false - BSD compression is not allowed
 	 */
 	public void setAllowBsdCompression(boolean allowBsdCompression) {
-		this.allowBsdCompression = allowBsdCompression;
+		m_allowBsdCompression = allowBsdCompression;
 	}
 
 	/**
@@ -571,7 +579,7 @@ public class PppPeer {
 	 * 		false - 'Deflate' compression is not allowed
 	 */
 	public boolean isAllowDeflateCompression() {
-		return allowDeflateCompression;
+		return m_allowDeflateCompression;
 	}
 
 	/**
@@ -582,7 +590,7 @@ public class PppPeer {
 	 * 		false - 'Deflate' compression is not allowed
 	 */
 	public void setAllowDeflateCompression(boolean allowDeflateCompression) {
-		this.allowDeflateCompression = allowDeflateCompression;
+		m_allowDeflateCompression = allowDeflateCompression;
 	}
 
 	/**
@@ -593,7 +601,7 @@ public class PppPeer {
 	 * 		false - magic number negotiation is disabled
 	 */
 	public boolean isAllowMagic() {
-		return allowMagic;
+		return m_allowMagic;
 	}
 
 	/**
@@ -604,9 +612,41 @@ public class PppPeer {
 	 * 		false - magic number negotiation is disabled
 	 */
 	public void setAllowMagic(boolean allowMagic) {
-		this.allowMagic = allowMagic;
+		m_allowMagic = allowMagic;
 	}
-
+	
+	public int getIdleTime() {
+		return m_idle;
+	}
+	
+	public void setIdleTime (int idle) {
+		m_idle = idle;
+	}
+	
+	public String getActiveFilter() {
+		return m_activeFilter;
+	}
+	
+	public void setActiveFilter(String activeFilter) {
+		m_activeFilter = activeFilter;
+	}
+	
+	public boolean isPersist() {
+		return m_persist;
+	}
+	
+	public void setPersist(boolean persist) {
+		m_persist = persist;
+	}
+	
+	public int getMaxFail() {
+		return m_maxFail;
+	}
+	
+	public void setMaxFail(int maxfail) {
+		m_maxFail = maxfail;
+	}
+	
 	/**
 	 * Reports number 'lcp-echo-failure' parameter that is number of 
 	 * unanswered LCP echo requests to presume the peer to be
@@ -615,7 +655,7 @@ public class PppPeer {
 	 * @return LCP echo failure
 	 */
 	public int getLcp_echo_failure() {
-		return lcp_echo_failure;
+		return m_lcp_echo_failure;
 	}
 
 	/**
@@ -624,7 +664,7 @@ public class PppPeer {
 	 * @param lcp_echo_failure number of unanswered LCP echo requests before peer is assumed dead
 	 */
 	public void setLcp_echo_failure(int lcp_echo_failure) {
-		this.lcp_echo_failure = lcp_echo_failure;
+		m_lcp_echo_failure = lcp_echo_failure;
 	}
 
 	/**
@@ -633,7 +673,7 @@ public class PppPeer {
 	 * @return LCP echo interval
 	 */
 	public int getLcp_echo_interval() {
-		return lcp_echo_interval;
+		return m_lcp_echo_interval;
 	}
 
 	/**
@@ -642,7 +682,7 @@ public class PppPeer {
 	 * @param lcp_echo_interval in seconds
 	 */
 	public void setLcp_echo_interval(int lcp_echo_interval) {
-		this.lcp_echo_interval = lcp_echo_interval;
+		m_lcp_echo_interval = lcp_echo_interval;
 	}
 
 	/**
@@ -653,7 +693,7 @@ public class PppPeer {
 	 * 		false - do not use RTS/CTS flow control
 	 */
 	public boolean isUseRtsCtsFlowControl() {
-		return useRtsCtsFlowControl;
+		return m_useRtsCtsFlowControl;
 	}
 
 	/**
@@ -664,7 +704,7 @@ public class PppPeer {
 	 * 		false - do not use RTS/CTS flow control
 	 */
 	public void setUseRtsCtsFlowControl(boolean useRtsCtsFlowControl) {
-		this.useRtsCtsFlowControl = useRtsCtsFlowControl;
+		m_useRtsCtsFlowControl = useRtsCtsFlowControl;
 	}
 
 	/**
@@ -675,7 +715,7 @@ public class PppPeer {
 	 * 		false - do not create lock file
 	 */
 	public boolean isLockSerialDevice() {
-		return lockSerialDevice;
+		return m_lockSerialDevice;
 	}
 
 	/**
@@ -686,7 +726,7 @@ public class PppPeer {
 	 * 		false - do not create lock file
 	 */
 	public void setLockSerialDevice(boolean lockSerialDevice) {
-		this.lockSerialDevice = lockSerialDevice;
+		m_lockSerialDevice = lockSerialDevice;
 	}
 
 	/**
@@ -697,7 +737,7 @@ public class PppPeer {
 	 * 		false - do not use modem control lines
 	 */
 	public boolean isUseModemControlLines() {
-		return useModemControlLines;
+		return m_useModemControlLines;
 	}
 
 	/**
@@ -708,7 +748,7 @@ public class PppPeer {
 	 * 		false - do not use modem control lines
 	 */
 	public void setUseModemControlLines(boolean useModemControlLines) {
-		this.useModemControlLines = useModemControlLines;
+		m_useModemControlLines = useModemControlLines;
 	}
 
 	/**
@@ -719,7 +759,7 @@ public class PppPeer {
 	 * 		false - peer is not required to authenticate itself
 	 */
 	public boolean isPeerMustAuthenticateItself() {
-		return peerMustAuthenticateItself;
+		return m_peerMustAuthenticateItself;
 	}
 
 	/**
@@ -731,7 +771,7 @@ public class PppPeer {
 
 	 */
 	public void setPeerMustAuthenticateItself(boolean peerMustAuthenticateItself) {
-		this.peerMustAuthenticateItself = peerMustAuthenticateItself;
+		m_peerMustAuthenticateItself = peerMustAuthenticateItself;
 	}
 
 	/**
@@ -740,7 +780,7 @@ public class PppPeer {
 	 * @return - connect delay
 	 */
 	public int getConnect_delay() {
-		return connect_delay;
+		return m_connect_delay;
 	}
 
 	/**
@@ -749,7 +789,7 @@ public class PppPeer {
 	 * @param connect_delay in milliseconds
 	 */
 	public void setConnect_delay(int connect_delay) {
-		this.connect_delay = connect_delay;
+		m_connect_delay = connect_delay;
 	}
 
 	/**
@@ -760,7 +800,7 @@ public class PppPeer {
 	 * 		false - connection debugging is not enabled 
 	 */
 	public boolean isEnableDebug() {
-		return enableDebug;
+		return m_enableDebug;
 	}
 
 	/**
@@ -769,7 +809,7 @@ public class PppPeer {
 	 * @param enableDebug - enable connection debugging
 	 */
 	public void setEnableDebug(boolean enableDebug) {
-		this.enableDebug = enableDebug;
+		m_enableDebug = enableDebug;
 	}	
 	
 	/**
@@ -782,56 +822,56 @@ public class PppPeer {
 	    PrintWriter writer = new PrintWriter(fos);
 
         // set baud rate
-        if (this.getBaudRate() != -1) {
-            writer.println(this.getBaudRate());
+        if (m_baudRate != -1) {
+            writer.println(m_baudRate);
         }
 
-        if (this.getPppUnitNumber() != -1) {
+        if (m_pppUnitNumber != -1) {
             writer.print("unit ");
-            writer.println(this.getPppUnitNumber());
+            writer.println(m_pppUnitNumber);
         }
 
         // set logfile
-        if (this.getLogfile() != null) {
+        if (m_logfile != null) {
             writer.print("logfile ");
-            writer.println(this.getLogfile());
+            writer.println(m_logfile);
         }
 
-        if (this.isEnableDebug()) {
+        if (m_enableDebug) {
             writer.println("debug");
         }
 
-        if (this.getConnectScript() != null) {
+        if (m_connectScriptFilename != null) {
             StringBuffer connectLine = new StringBuffer("connect '");
             connectLine.append(CHAT_PROGRAM);
             connectLine.append(" -v -f ");
-            connectLine.append(this.getConnectScript());
+            connectLine.append(m_connectScriptFilename);
             connectLine.append("'");
             writer.println(connectLine.toString());
         }
 
-        if (this.getDisconnectScript() != null) {
+        if (m_disconnectScriptFilename != null) {
             StringBuffer disconnectLine = new StringBuffer("disconnect '");
             disconnectLine.append(CHAT_PROGRAM);
             disconnectLine.append(" -v -f ");
-            disconnectLine.append(this.getDisconnectScript());
+            disconnectLine.append(m_disconnectScriptFilename);
             disconnectLine.append("'");
             writer.println(disconnectLine.toString());
         }
 
-        if (this.isUseModemControlLines()) {
+        if (m_useModemControlLines) {
             writer.println("modem");
         }
 
-        if (this.isUseRtsCtsFlowControl()) {
+        if (m_useRtsCtsFlowControl) {
             writer.println("crtscts");
         }
 
-        if (this.isLockSerialDevice()) {
+        if (m_lockSerialDevice) {
             writer.println("lock");
         }
 
-        if (!this.isPeerMustAuthenticateItself()) {
+        if (!m_peerMustAuthenticateItself) {
             writer.println("noauth");
         }
 
@@ -840,42 +880,32 @@ public class PppPeer {
         
         if (this.getAuthType() != AuthType.NONE) {
             writer.print("user \"");
-            writer.print(this.getUsername());
+            writer.print(m_username);
             writer.println("\"");
             
             writer.println("hide-password");
             
             switch (this.getAuthType()) {
             case AUTO:
-				if (!papLinux.checkForEntry(this.getProvider(),
-						this.getUsername(), "*", this.getPassword(), "*")) {
-					papLinux.addEntry(this.getProvider(), this.getUsername(),
-							"*", this.getPassword(), "*");
+				if (!papLinux.checkForEntry(m_provider, m_username, "*", m_password, "*")) {
+					papLinux.addEntry(m_provider, m_username, "*", m_password, "*");
 				}
-				if (!chapLinux.checkForEntry(this.getProvider(),
-						this.getUsername(), "*", this.getPassword(), "*")) {
-					chapLinux.addEntry(this.getProvider(), this.getUsername(),
-							"*", this.getPassword(), "*");
+				if (!chapLinux.checkForEntry(m_provider, m_username, "*", m_password, "*")) {
+					chapLinux.addEntry(m_provider, m_username, "*", m_password, "*");
 				}
             	break;
             case PAP:
 				// remove CHAP entry if exists
-				chapLinux.removeEntry("provider", this.getProvider());
-				            	
-                if (!papLinux.checkForEntry(this.getProvider(), this.getUsername(),
-                        "*", this.getPassword(), "*")) {
-                    papLinux.addEntry(this.getProvider(), this.getUsername(), "*",
-                            this.getPassword(), "*");
+				chapLinux.removeEntry("provider", m_provider);
+                if (!papLinux.checkForEntry(m_provider, m_username, "*", m_password, "*")) {
+                    papLinux.addEntry(m_provider, m_username, "*", m_password, "*");
                 }
                 break;
             case CHAP:
             	// remove PAP entry if exists
-				papLinux.removeEntry("provider", this.getProvider());
-				
-                if (!chapLinux.checkForEntry(this.getProvider(), this.getUsername(),
-                        "*", this.getPassword(), "*")) {
-                    chapLinux.addEntry(this.getProvider(), this.getUsername(), "*",
-                            this.getPassword(), "*");
+				papLinux.removeEntry("provider", m_provider);
+                if (!chapLinux.checkForEntry(m_provider, m_username, "*", m_password, "*")) {
+                    chapLinux.addEntry(m_provider, m_username, "*", m_password, "*");
                 }
                 break;
             case NONE:
@@ -883,58 +913,75 @@ public class PppPeer {
             }
         } else {
         	// remove CHAP/PAP entries if exist
-			chapLinux.removeEntry("provider", this.getProvider());
-			papLinux.removeEntry("provider", this.getProvider());
+			chapLinux.removeEntry("provider", m_provider);
+			papLinux.removeEntry("provider", m_provider);
         }
 
-        if (this.isPeerToSupplyLocalIP()) {
+        if (m_peerToSupplyLocalIP) {
             writer.println("noipdefault");
         }
 
-        if (this.isAddDefaultRoute()) {
+        if (m_addDefaultRoute) {
             writer.println("defaultroute");
         } else {
             writer.println("nodefaultroute");
         }
 
-        if (this.isUsePeerDns()) {
+        if (m_usePeerDns) {
             writer.println("usepeerdns");
         }
 
-        if (!this.isAllowProxyArps()) {
+        if (!m_allowProxyArps) {
             writer.println("noproxyarp");
         }
 
-        if (!this.isAllowVanJacobsonTcpIpHdrCompression()) {
+        if (!m_allowVanJacobsonTcpIpHdrCompression) {
             writer.println("novj");
         }
 
-        if (!this.isAllowVanJacobsonConnectionIDCompression()) {
+        if (!m_allowVanJacobsonConnectionIDCompression) {
             writer.println("novjccomp");
         }
 
-        if (!this.isAllowBsdCompression()) {
+        if (!m_allowBsdCompression) {
             writer.println("nobsdcomp");
         }
 
-        if (!this.isAllowDeflateCompression()) {
+        if (!m_allowDeflateCompression) {
             writer.println("nodeflate");
         }
 
-        if (!this.isAllowMagic()) {
+        if (!m_allowMagic) {
             writer.println("nomagic");
         }
+        
+        if (m_idle > 0) {
+        	writer.println("idle " + m_idle);
+        }
+        
+        if ((m_idle > 0) && (m_activeFilter != null) && (m_activeFilter.length() > 0)) {
+        	writer.println("active-filter '" + m_activeFilter + "'");
+        }
+        
+        if (m_persist) {
+        	 writer.println("persist");
+        	 writer.println("holdoff 1");
+        } else {
+        	 writer.println("nopersist");
+        }
+        
+        writer.println("maxfail " + m_maxFail);
 
-        if (this.getConnect_delay() != -1) {
-            writer.println("connect-delay " + this.getConnect_delay());
+        if (m_connect_delay != -1) {
+            writer.println("connect-delay " + m_connect_delay);
         }
 
-        if (this.getLcp_echo_failure() > 0) {
-            writer.println("lcp-echo-failure " + this.getLcp_echo_failure());
+        if (m_lcp_echo_failure > 0) {
+            writer.println("lcp-echo-failure " + m_lcp_echo_failure);
         }
 
-        if (this.getLcp_echo_interval() > 0) {
-            writer.println("lcp-echo-interval " + this.getLcp_echo_interval());
+        if (m_lcp_echo_interval > 0) {
+            writer.println("lcp-echo-interval " + m_lcp_echo_interval);
         }
 	    
 		writer.flush();

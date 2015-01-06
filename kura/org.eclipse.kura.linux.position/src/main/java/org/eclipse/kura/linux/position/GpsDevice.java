@@ -416,16 +416,18 @@ public class GpsDevice {
 					m_speed = new Measurement(speed,Unit.m_s);
 					m_track = new Measurement(java.lang.Math.toRadians(track),Unit.rad); 
 					m_latitudeNmea = lat;
-					m_longitudeNmea = lon;	
+					m_longitudeNmea = lon;
 					m_speedNmea = speed;
+					m_trackNmea = track;
 					m_dateNmea = gpsParser.get_dateNmea();
 				} catch (Exception e) {
 					m_latitude = null;
-					m_longitude = null;		
+					m_longitude = null;
 					m_speed = null;
 					m_latitudeNmea = 0;
-					m_longitudeNmea = 0;	
+					m_longitudeNmea = 0;
 					m_speedNmea = 0;
+					m_trackNmea = 0;
 				}
 			} else if (scannedInput.startsWith("VTG")) {
 				try {

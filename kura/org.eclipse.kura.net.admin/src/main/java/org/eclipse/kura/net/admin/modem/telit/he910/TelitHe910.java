@@ -66,6 +66,9 @@ public class TelitHe910 extends TelitModem implements HspaCellularModem {
 					m_revisionId = getRevisionID();
 					m_gpsSupported = isGpsSupported();
 					m_rssi = getSignalStrength();
+					
+					s_logger.trace("TelitHe910() :: m_gpsSupported={}", m_gpsSupported);
+					s_logger.trace("TelitHe910() :: m_rssi={}", m_rssi);
 				}
 			}
 		} catch (KuraException e) {
@@ -74,12 +77,21 @@ public class TelitHe910 extends TelitModem implements HspaCellularModem {
     }
     
     @Override
-    public boolean isSimCardReady() throws KuraException {
+	public boolean isSimCardReady() throws KuraException {
+		
     	boolean simReady = false;
+		String port = null;
+		
+		if (isGpsEnabled() && (getAtPort() == getGpsPort()) && (getAtPort() != getDataPort())) {
+			port = getDataPort();
+		} else {
+			port = getAtPort();
+		}
+
     	synchronized (s_atLock) {
-    		s_logger.debug("sendCommand getSimStatus :: " + TelitHe910AtCommands.getSimStatus.getCommand());
+    		s_logger.debug("sendCommand getSimStatus :: {} command to port {}", TelitHe910AtCommands.getSimStatus.getCommand(), port);
 	    	byte[] reply = null;
-	    	CommConnection commAtConnection = openSerialPort(getAtPort());
+	    	CommConnection commAtConnection = openSerialPort(port);
 	    	if (!isAtReachable(commAtConnection)) {
 	    		closeSerialPort(commAtConnection);
 	    		throw new KuraException(KuraErrorCode.NOT_CONNECTED, "Modem not available for AT commands: " + TelitHe910.class.getName());
@@ -127,8 +139,8 @@ public class TelitHe910 extends TelitModem implements HspaCellularModem {
 	        closeSerialPort(commAtConnection);
     	}
     	return simReady;
-    }
-
+	}
+    
     @Override
     public ModemRegistrationStatus getRegistrationStatus() throws KuraException {
     	

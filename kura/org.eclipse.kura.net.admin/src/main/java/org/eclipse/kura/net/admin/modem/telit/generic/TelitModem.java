@@ -331,7 +331,7 @@ public abstract class TelitModem {
 			}
     		closeSerialPort(commAtConnection);
     		
-    		if (reply != null) {
+    		if ((reply != null) && (reply.length > 0)) {
 			    String sReply = getResponseString(reply);
 			    if((sReply != null) && !sReply.isEmpty()) {
 			    	s_logger.trace("enableGps() :: gpsEnableNMEA reply={}", sReply);
@@ -358,8 +358,8 @@ public abstract class TelitModem {
     			while (numAttempts > 0) {
 					s_logger.debug("disableGps() :: sendCommand gpsDisableNMEA {} command ...", TelitModemAtCommands.gpsDisableNMEA.getCommand());
 					byte [] reply = commAtConnection.sendCommand(TelitModemAtCommands.gpsDisableNMEA.getCommand().getBytes(), 1000, 100);
-					s_logger.trace("disableGps() :: reply={}", new String(reply));
-					if (reply.length > 0) {
+					if ((reply != null) && (reply.length > 0)) {
+						s_logger.trace("disableGps() :: reply={}", new String(reply));
 						String sReply = new String(reply);
 						if (sReply.contains("NO CARRIER")) {
 							s_logger.info("disableGps() :: Modem replied with 'NO CARRIER' to the +++ escape sequence");

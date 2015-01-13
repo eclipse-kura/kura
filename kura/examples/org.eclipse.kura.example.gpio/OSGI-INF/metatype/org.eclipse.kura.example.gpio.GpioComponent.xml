@@ -28,7 +28,7 @@
             required="false"
             default="1"
             min="0"
-            max="127"
+            max="255"
             description="List of GPIO pins"/>
         
         <AD id="gpio.directions"

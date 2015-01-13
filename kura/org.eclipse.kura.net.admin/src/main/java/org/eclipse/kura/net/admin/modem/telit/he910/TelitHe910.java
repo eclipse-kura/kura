@@ -67,8 +67,14 @@ public class TelitHe910 extends TelitModem implements HspaCellularModem {
 					m_gpsSupported = isGpsSupported();
 					m_rssi = getSignalStrength();
 					
-					s_logger.trace("TelitHe910() :: m_gpsSupported={}", m_gpsSupported);
-					s_logger.trace("TelitHe910() :: m_rssi={}", m_rssi);
+					s_logger.trace("TelitHe910() :: Serial Number={}", m_serialNumber);
+					s_logger.trace("TelitHe910() :: IMSI={}", m_imsi);
+					s_logger.trace("TelitHe910() :: ICCID={}", m_iccid);
+					s_logger.trace("TelitHe910() :: Model={}", m_model);
+					s_logger.trace("TelitHe910() :: Manufacturer={}", m_manufacturer);
+					s_logger.trace("TelitHe910() :: Revision ID={}", m_revisionId);
+					s_logger.trace("TelitHe910() :: GPS Supported={}", m_gpsSupported);
+					s_logger.trace("TelitHe910() :: RSSI={}", m_rssi);
 				}
 			}
 		} catch (KuraException e) {
@@ -146,7 +152,7 @@ public class TelitHe910 extends TelitModem implements HspaCellularModem {
     	
     	ModemRegistrationStatus modemRegistrationStatus = ModemRegistrationStatus.UNKNOWN;
     	synchronized (s_atLock) {
-    		s_logger.debug("sendCommand getRegistrationStatus :: " + TelitHe910AtCommands.getRegistrationStatus.getCommand());
+    		s_logger.debug("sendCommand getRegistrationStatus :: {}", TelitHe910AtCommands.getRegistrationStatus.getCommand());
 	    	byte[] reply = null;
 	    	CommConnection commAtConnection = openSerialPort(getAtPort());
 	    	if (!isAtReachable(commAtConnection)) {
@@ -190,7 +196,7 @@ public class TelitHe910 extends TelitModem implements HspaCellularModem {
     	
     	long txCnt = 0;
     	synchronized (s_atLock) {
-	    	s_logger.debug("sendCommand getGprsSessionDataVolume :: " + TelitHe910AtCommands.getGprsSessionDataVolume.getCommand());
+	    	s_logger.debug("sendCommand getGprsSessionDataVolume :: {}", TelitHe910AtCommands.getGprsSessionDataVolume.getCommand());
 	    	byte[] reply = null;
 	    	CommConnection commAtConnection = openSerialPort(getAtPort());
 	    	if (!isAtReachable(commAtConnection)) {
@@ -232,7 +238,7 @@ public class TelitHe910 extends TelitModem implements HspaCellularModem {
     public long getCallRxCounter() throws KuraException {
     	long rxCnt = 0;
     	synchronized (s_atLock) {
-	    	s_logger.debug("sendCommand getGprsSessionDataVolume :: " + TelitHe910AtCommands.getGprsSessionDataVolume.getCommand());
+	    	s_logger.debug("sendCommand getGprsSessionDataVolume :: {}", TelitHe910AtCommands.getGprsSessionDataVolume.getCommand());
 	    	byte[] reply = null;
 	    	CommConnection commAtConnection = openSerialPort(getAtPort());
 	    	if (!isAtReachable(commAtConnection)) {
@@ -274,7 +280,7 @@ public class TelitHe910 extends TelitModem implements HspaCellularModem {
     public String getServiceType() throws KuraException {
     	String serviceType = null;
     	synchronized (s_atLock) {
-    		s_logger.debug("sendCommand getMobileStationClass :: " + TelitHe910AtCommands.getMobileStationClass.getCommand());
+    		s_logger.debug("sendCommand getMobileStationClass :: {}", TelitHe910AtCommands.getMobileStationClass.getCommand());
 	    	byte[] reply = null;
 	    	CommConnection commAtConnection = openSerialPort(getAtPort());
 	    	if (!isAtReachable(commAtConnection)) {

@@ -251,10 +251,18 @@ public class TelitDe910 extends TelitModem implements EvdoCellularModem {
 	public String getMobileDirectoryNumber() throws KuraException {
 		
 		String sMdn = null;
+		String port = null;
+		
+		if (isGpsEnabled() && (getAtPort() == getGpsPort()) && (getAtPort() != getDataPort())) {
+			port = getDataPort();
+		} else {
+			port = getAtPort();
+		}
+		
 		synchronized (s_atLock) {
 			s_logger.debug("sendCommand getMdn :: " + TelitDe910AtCommands.getMdn.getCommand());
 			byte[] reply = null;
-			CommConnection commAtConnection = openSerialPort(getAtPort());
+			CommConnection commAtConnection = openSerialPort(port);
 			if (!isAtReachable(commAtConnection)) {
 				closeSerialPort(commAtConnection);
 				throw new KuraException(KuraErrorCode.NOT_CONNECTED, "Modem not available for AT commands: " + TelitDe910.class.getName());

@@ -463,12 +463,12 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 				}
 			}
 			
+			IModemLinkService pppService = null;
+			PppState pppState = null;
 			NetInterfaceStatus netInterfaceStatus = getNetInterfaceStatus(modem.getConfiguration());
-			if (netInterfaceStatus == NetInterfaceStatus.netIPv4StatusEnabledWAN) {
-				IModemLinkService pppService = null;
-				PppState pppState = null;
-				try {
-					String ifaceName = m_networkService.getModemPppPort(modem.getModemDevice());
+			try {
+				String ifaceName = m_networkService.getModemPppPort(modem.getModemDevice());
+				if (netInterfaceStatus == NetInterfaceStatus.netIPv4StatusEnabledWAN) {				
 					if (ifaceName != null) {
 						pppService = PppFactory.obtainPppService(ifaceName, modem.getDataPort());
 						pppState = pppService.getPppState();
@@ -522,43 +522,42 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 								pppState == PppState.CONNECTED, 
 								connInfo.getIpAddress());
 						newInterfaceStatuses.put(ifaceName, interfaceState);
-						
-						s_logger.debug("monitor() :: gpsSupported={}", m_gpsSupported);
-						if ((m_gpsSupported != null) && m_gpsSupported) {	
-							List<NetConfig> netConfigs = m_networkAdminService.getNetworkInterfaceConfigs(ifaceName);
-							if (isGpsEnabledInConfig(netConfigs) && !modem.isGpsEnabled()) {
-								enableModemGps(modem);
-							}
-						}
 					}
-				} catch (Exception e) {
-					s_logger.error("monitor() :: Exception -> " + e);
-					if ((pppService != null) && (pppState != null)) {
-						try {
-							s_logger.error("monitor() :: Exception :: PPPD disconnect");
-							pppService.disconnect();
-						} catch (KuraException e1) {
-							e1.printStackTrace();
-						}
-						m_pppState = pppState;
+				}  
+				s_logger.debug("monitor() :: gpsSupported={}", m_gpsSupported);
+				if ((m_gpsSupported != null) && m_gpsSupported) {	
+					List<NetConfig> netConfigs = m_networkAdminService.getNetworkInterfaceConfigs(ifaceName);
+					if (isGpsEnabledInConfig(netConfigs) && !modem.isGpsEnabled()) {
+						enableModemGps(modem);
 					}
-					
-					if (modem.isGpsEnabled()) {
-						try {
-							disableModemGps(modem);
-						} catch (KuraException e1) {
-							e1.printStackTrace();
-						}
-					}
-					
+				}
+			} catch (Exception e) {
+				s_logger.error("monitor() :: Exception -> " + e);
+				if ((pppService != null) && (pppState != null)) {
 					try {
-						s_logger.error("monitor() :: Exception :: modem reset");
-						modem.reset();
+						s_logger.error("monitor() :: Exception :: PPPD disconnect");
+						pppService.disconnect();
 					} catch (KuraException e1) {
 						e1.printStackTrace();
 					}
-					e.printStackTrace();
+					m_pppState = pppState;
 				}
+				
+				if (modem.isGpsEnabled()) {
+					try {
+						disableModemGps(modem);
+					} catch (KuraException e1) {
+						e1.printStackTrace();
+					}
+				}
+				
+				try {
+					s_logger.error("monitor() :: Exception :: modem reset");
+					modem.reset();
+				} catch (KuraException e1) {
+					e1.printStackTrace();
+				}
+				e.printStackTrace();
 			}
 		}
 		

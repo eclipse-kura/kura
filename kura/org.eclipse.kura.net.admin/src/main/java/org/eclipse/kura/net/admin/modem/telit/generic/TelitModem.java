@@ -68,16 +68,18 @@ public abstract class TelitModem {
 
 		boolean status = false;
 		int resetAttempts = 5;
-
+		int offOnDelay = 1000;
+		
 		sleep(5000);
 		while (resetAttempts > 0) {
 			try {
 				status = turnOff();
 				if (status) {
+					sleep(offOnDelay);
 					status = turnOn();
 					if (!status && isOnGpio()) {
 						s_logger.info("reset() :: {} seconds delay, then turn OFF/ON", 35);
-						sleep(35000);
+						offOnDelay = 35000;
 						continue;
 					}
 				}

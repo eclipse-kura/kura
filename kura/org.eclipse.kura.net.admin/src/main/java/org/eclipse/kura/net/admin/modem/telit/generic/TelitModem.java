@@ -67,11 +67,10 @@ public abstract class TelitModem {
 	public void reset() throws KuraException {
 
 		boolean status = false;
-		int resetAttempts = 5;
 		int offOnDelay = 1000;
 		
 		sleep(5000);
-		while (resetAttempts > 0) {
+		while (true) {
 			try {
 				status = turnOff();
 				if (status) {
@@ -90,8 +89,7 @@ public abstract class TelitModem {
 				s_logger.info("reset() :: modem reset successful");
 				break;
 			} else {
-				resetAttempts--;
-				s_logger.info("reset() :: modem reset failed, attempts left: {}", resetAttempts);
+				s_logger.info("reset() :: modem reset failed");
 				sleep(1000);
 			}
 		}

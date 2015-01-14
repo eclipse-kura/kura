@@ -1,5 +1,6 @@
 package org.eclipse.kura.net.admin.modem.telit.generic;
 
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -74,6 +75,11 @@ public abstract class TelitModem {
 				status = turnOff();
 				if (status) {
 					status = turnOn();
+					if (!status && isOnGpio()) {
+						s_logger.info("reset() :: {} seconds delay, then turn OFF/ON", 35);
+						sleep(35000);
+						continue;
+					}
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -682,7 +688,7 @@ public abstract class TelitModem {
     	return gpsPowered;
     }
 	
-	private boolean isOn() throws Exception {
+	private boolean isOnUsb() throws Exception {
 
 		boolean isModemOn = false;
 		if (m_device instanceof UsbModemDevice) {
@@ -700,10 +706,24 @@ public abstract class TelitModem {
 		return isModemOn;
 	}
 	
+	private boolean isOnGpio() throws Exception {
+		
+		boolean gpioOn = false;
+		if (m_platform.equals("reliagate-10-20")) {
+			FileReader fr = new FileReader("/sys/class/gpio/usb-rear-pwr/value");
+			int data = fr.read();
+			fr.close();
+			s_logger.debug("isGpioOn() :: data={}", data);
+			gpioOn = (data == 48)? false : true;
+			s_logger.info("isGpioOn()? {}", gpioOn);
+		}
+		return gpioOn;
+	}
+	
 	private boolean turnOff() throws Exception {
 
 		boolean retVal = true;
-		int remainingAttempts = 5;
+		int remainingAttempts = 3;
 		do {
 			if (remainingAttempts <= 0) {
 				retVal = false;
@@ -743,7 +763,7 @@ public abstract class TelitModem {
 			}
 			remainingAttempts--;
 			sleep(5000);
-		} while (isOn());
+		} while (isOnUsb());
 
 		s_logger.info("turnOff() :: Modem is OFF? - {}", retVal);
 		return retVal;
@@ -752,7 +772,7 @@ public abstract class TelitModem {
 	private boolean turnOn() throws Exception {
 
 		boolean retVal = true;
-		int remainingAttempts = 5;
+		int remainingAttempts = 3;
 
 		do {
 			if (remainingAttempts <= 0) {
@@ -784,8 +804,8 @@ public abstract class TelitModem {
 				s_logger.warn("turnOn() :: modem turnOn operation is not supported for the {} platform", m_platform);
 			}
 			remainingAttempts--;
-			sleep(5000);
-		} while (!isOn());
+			sleep(7000);
+		} while (!isOnUsb());
 
 		s_logger.info("turnOn() :: Modem is ON? - {}", retVal);
 		return retVal;

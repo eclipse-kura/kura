@@ -306,12 +306,14 @@ public abstract class TelitModem {
     	if (m_gpsSupported != null) {
     		ret = m_gpsSupported;
     	}
+    	
     	return ret;
     }
     
     public void enableGps() throws KuraException {
     	
     	if ((m_gpsSupported == null) || (m_gpsSupported == false)) {
+    		s_logger.warn("enableGps() :: GPS NOT SUPPORTED");
     		m_gpsEnabled = false;
     		return;
     	}
@@ -323,75 +325,92 @@ public abstract class TelitModem {
 	    	}
    
     		byte[] reply = null;
-    		try {
-    			if (!isGpsPowered(commAtConnection)) {
-    				s_logger.debug("enableGps() :: sendCommand gpsPowerUp :: {}", TelitModemAtCommands.gpsPowerUp.getCommand());
-    				commAtConnection.sendCommand(TelitModemAtCommands.gpsPowerUp.getCommand().getBytes(), 1000, 100);
-    			}
-    			
-    			s_logger.debug("enableGps() :: sendCommand gpsEnableNMEA :: {}", TelitModemAtCommands.gpsEnableNMEA.getCommand());
-				reply = commAtConnection.sendCommand(TelitModemAtCommands.gpsEnableNMEA.getCommand().getBytes(), 3000, 100);
-    		} catch (IOException e) {
-				closeSerialPort(commAtConnection);
-				throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+    		int numAttempts = 3;
+			while (numAttempts > 0) {
+	    		try {
+	    			if (!isGpsPowered(commAtConnection)) {
+	    				s_logger.debug("enableGps() :: sendCommand gpsPowerUp :: {}", TelitModemAtCommands.gpsPowerUp.getCommand());
+	    				commAtConnection.sendCommand(TelitModemAtCommands.gpsPowerUp.getCommand().getBytes(), 1000, 100);
+	    			}
+	    			
+	    			s_logger.debug("enableGps() :: sendCommand gpsEnableNMEA :: {}", TelitModemAtCommands.gpsEnableNMEA.getCommand());
+					reply = commAtConnection.sendCommand(TelitModemAtCommands.gpsEnableNMEA.getCommand().getBytes(), 3000, 100);
+	    		} catch (IOException e) {
+					closeSerialPort(commAtConnection);
+					throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+				}
+		
+	    		if ((reply != null) && (reply.length > 0)) {
+				    String sReply = getResponseString(reply);
+				    if((sReply != null) && !sReply.isEmpty()) {
+				    	s_logger.trace("enableGps() :: gpsEnableNMEA reply={}", sReply);
+				    	if (sReply.startsWith("CONNECT")) {
+				    		s_logger.info("Modem replied to the {} command with 'CONNECT'", TelitModemAtCommands.gpsEnableNMEA.getCommand());
+				    		s_logger.info("enableGps() :: !!! Modem GPS enabled !!!");
+				    		m_gpsEnabled = true;
+				    		break;
+				    	}
+				    }
+	    		}
+	    		numAttempts--;
+	    		sleep(2000);
 			}
-    		closeSerialPort(commAtConnection);
     		
-    		if ((reply != null) && (reply.length > 0)) {
-			    String sReply = getResponseString(reply);
-			    if((sReply != null) && !sReply.isEmpty()) {
-			    	s_logger.trace("enableGps() :: gpsEnableNMEA reply={}", sReply);
-			    	if (sReply.startsWith("CONNECT")) {
-			    		s_logger.info("Modem replied to the {} command with 'CONNECT'", TelitModemAtCommands.gpsEnableNMEA.getCommand());
-			    		s_logger.info("enableGps() :: !!! Modem GPS enabled !!!");
-			    		m_gpsEnabled = true;
-			    	}
-			    }
-    		}
+    		closeSerialPort(commAtConnection);
     	}
     }
     
     public void disableGps() throws KuraException {
     	
     	if ((m_gpsSupported == null) || (m_gpsSupported == false)) {
+    		s_logger.warn("disableGps() :: GPS NOT SUPPORTED");
     		m_gpsEnabled = false;
     		return;
     	}
     	synchronized (s_atLock) {
     		CommConnection commAtConnection = openSerialPort(getGpsPort());
     		try {
-    			int numAttempts = 3;
-    			while (numAttempts > 0) {
-					s_logger.debug("disableGps() :: sendCommand gpsDisableNMEA {}", TelitModemAtCommands.gpsDisableNMEA.getCommand());
-					byte [] reply = commAtConnection.sendCommand(TelitModemAtCommands.gpsDisableNMEA.getCommand().getBytes(), 1000, 100);
-					if ((reply != null) && (reply.length > 0)) {
-						s_logger.trace("disableGps() :: reply={}", new String(reply));
-						String sReply = new String(reply);
-						if (sReply.contains("NO CARRIER")) {
-							s_logger.info("disableGps() :: Modem replied with 'NO CARRIER' to the +++ escape sequence");
-							sleep(2000);
-							if(isAtReachable(commAtConnection)) {
-								s_logger.info("disableGps() :: !!! Modem GPS disabled !!!, OK");
-								m_gpsEnabled = false;
-								break;
+    			if(!isAtReachable(commAtConnection)) {
+	    			int numAttempts = 3;
+	    			while (numAttempts > 0) {
+						s_logger.debug("disableGps() :: sendCommand gpsDisableNMEA {}", TelitModemAtCommands.gpsDisableNMEA.getCommand());
+						
+						byte [] reply = commAtConnection.sendCommand(TelitModemAtCommands.gpsDisableNMEA.getCommand().getBytes(), 1000, 100);
+						if ((reply != null) && (reply.length > 0)) {
+							s_logger.trace("disableGps() :: reply={}", new String(reply));
+							String sReply = new String(reply);
+							if (sReply.contains("NO CARRIER")) {
+								s_logger.info("disableGps() :: Modem replied with 'NO CARRIER' to the +++ escape sequence");
+								sleep(2000);
+								if(isAtReachable(commAtConnection)) {
+									s_logger.info("disableGps() :: !!! Modem GPS disabled !!!, OK");
+									m_gpsEnabled = false;
+									break;
+								} else {
+									s_logger.error("disableGps() :: [1] Failed to disable modem GPS");
+									numAttempts--;
+								}
 							} else {
-								s_logger.error("disableGps() :: Failed to disable modem GPS");
-								numAttempts--;
+								if(isAtReachable(commAtConnection)) {
+									s_logger.warn("disableGps() :: Modem didn't reply with 'NO CARRIER' to the +++ escape sequence but port is AT reachable");
+									s_logger.info("disableGps() :: Will assume that GPS is disabled");
+									m_gpsEnabled = false;
+									break;
+								} else {
+									s_logger.error("disableGps() :: [2] Failed to disable modem GPS");
+									numAttempts--;
+								}
 							}
 						} else {
-							if(isAtReachable(commAtConnection)) {
-								s_logger.warn("disableGps() :: Modem didn't reply with 'NO CARRIER' to the +++ escape sequence but port is AT reachable");
-								s_logger.info("disableGps() :: Will assume that GPS is disabled");
-								m_gpsEnabled = false;
-								break;
-							} else {
-								s_logger.error("disableGps() :: Failed to disable modem GPS");
-								numAttempts--;
-							}
+							s_logger.error("disableGps() :: [3] Failed to disable modem GPS");
+							numAttempts--;
 						}
+						sleep(2000);
 					}
-					sleep(2000);
-				}
+    			} else {
+    				s_logger.warn("disableGps() :: Modem GPS has already been disabled");
+    				m_gpsEnabled = false;
+    			}
 				
 				s_logger.debug("sendCommand gpsPowerDown :: {}", TelitModemAtCommands.gpsPowerDown.getCommand());
 				commAtConnection.sendCommand(TelitModemAtCommands.gpsPowerDown.getCommand().getBytes(), 1000, 100);

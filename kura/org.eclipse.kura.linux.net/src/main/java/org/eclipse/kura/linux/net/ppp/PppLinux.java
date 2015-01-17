@@ -16,6 +16,7 @@
 package org.eclipse.kura.linux.net.ppp;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.InputStreamReader;
 
 import org.eclipse.kura.KuraErrorCode;
@@ -56,14 +57,15 @@ public class PppLinux {
 		if(pid >= 0) {
     		s_logger.info("killing " + iface + " pid=" + pid);
     		LinuxProcessUtil.kill(pid);
-    		/*
-    		if(!LinuxProcessUtil.stop(pid)) {
-                s_logger.debug("Failed to stop process...try to kill");
-                if(!LinuxProcessUtil.kill(pid)) {
-                    throw new KuraException(KuraErrorCode.INTERNAL_ERROR, ("error killing process, pid=" + pid));
-                }		    
+    		
+    		if (port.startsWith("/dev/")) {
+    			port = port.substring("/dev/".length());
     		}
-    		*/
+    		File fLock = new File("/var/lock/LCK.."+port);
+    		if (fLock.exists()) {
+    			s_logger.warn("disconnect() :: deleting stale lock file {}", port);
+    			fLock.delete();
+    		}
 		}
 	}
 	

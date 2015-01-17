@@ -16,7 +16,7 @@ Export-Package: org.eclipse.kura; version="1.0.0",org.eclipse.kura.blu
  on="1.0.0",org.eclipse.kura.net; version="1.0.0",org.eclipse.kura.net
  .dhcp; version="1.0.0",org.eclipse.kura.net.dns; version="1.0.0",org.
  eclipse.kura.net.firewall; version="1.0.0",org.eclipse.kura.net.modem
- ; version="1.0.0",org.eclipse.kura.net.route; version="1.0.0",org.ecl
+ ; version="1.1.0",org.eclipse.kura.net.route; version="1.0.0",org.ecl
  ipse.kura.net.wifi; version="1.0.0",org.eclipse.kura.position; versio
  n="1.0.0",org.eclipse.kura.ssl; version="1.0.0",org.eclipse.kura.syst
  em; version="1.0.0",org.eclipse.kura.usb; version="1.0.0",org.eclipse

@@ -511,7 +511,7 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
 			} else if (interfaceName.startsWith("ppp")) {
 			    s_logger.debug("Ignoring unconfigured ppp interface: " + interfaceName);
 			} else {
-				s_logger.warn("Unsupported network type - not adding to network devices: " + interfaceName + " of type: " + type.toString());
+				s_logger.debug("Unsupported network type - not adding to network devices: " + interfaceName + " of type: " + type.toString());
 			}
 			return null;
 		}

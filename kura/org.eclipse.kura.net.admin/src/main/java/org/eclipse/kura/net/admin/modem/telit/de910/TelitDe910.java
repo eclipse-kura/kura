@@ -30,12 +30,7 @@ import org.slf4j.LoggerFactory;
 public class TelitDe910 extends TelitModem implements EvdoCellularModem {
 
 	private static final Logger s_logger = LoggerFactory.getLogger(TelitDe910.class);
-	
-	/*
-	private String m_mdn;
-	private String m_msid;
-	*/
-	
+		
 	 /**
      * TelitDe910 modem constructor
      * 
@@ -260,18 +255,10 @@ public class TelitDe910 extends TelitModem implements EvdoCellularModem {
 	public String getMobileDirectoryNumber() throws KuraException {
 		
 		String sMdn = null;
-		String port = null;
-		
-		if (isGpsEnabled() && (getAtPort() == getGpsPort()) && (getAtPort() != getDataPort())) {
-			port = getDataPort();
-		} else {
-			port = getAtPort();
-		}
-		
 		synchronized (s_atLock) {
 			s_logger.debug("sendCommand getMdn :: {}", TelitDe910AtCommands.getMdn.getCommand());
 			byte[] reply = null;
-			CommConnection commAtConnection = openSerialPort(port);
+			CommConnection commAtConnection = openSerialPort(getAtPort());
 			if (!isAtReachable(commAtConnection)) {
 				closeSerialPort(commAtConnection);
 				throw new KuraException(KuraErrorCode.NOT_CONNECTED, "Modem not available for AT commands: " + TelitDe910.class.getName());

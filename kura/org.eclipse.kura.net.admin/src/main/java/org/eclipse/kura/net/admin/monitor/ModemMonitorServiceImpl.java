@@ -224,7 +224,7 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
     
     @Override
 	public void handleEvent(Event event) {
-    	s_logger.debug("handleEvent - topic: " + event.getTopic());
+    	s_logger.debug("handleEvent - topic: {}", event.getTopic());
         String topic = event.getTopic();
         if (topic.equals(NetworkConfigurationChangeEvent.NETWORK_EVENT_CONFIG_CHANGE_TOPIC)) {
         	ExecutorService ex = Executors.newSingleThreadExecutor();
@@ -339,12 +339,22 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 	    				}
 	    				
 	    				if (modem.isGpsEnabled()) {
-	    					disableModemGps(modem);
+	    					if (!disableModemGps(modem)) {
+	    						s_logger.error("processNetworkConfigurationChangeEvent() :: Failed to disable modem GPS");
+	    						modem.reset();
+	    					}
 	    				}
 	    				
 	    				if (modem instanceof EvdoCellularModem) {
 		    				NetInterfaceStatus netIfaceStatus = getNetInterfaceStatus(newNetConfigs);
 							if (netIfaceStatus == NetInterfaceStatus.netIPv4StatusEnabledWAN) {
+								
+								modem.setConfiguration(newNetConfigs);
+			    				if (m_gpsSupported == null) {
+			    					boolean gpsSupported = modem.isGpsSupported();
+			    					m_gpsSupported = gpsSupported;
+			    				}
+			    				
 								if (!((EvdoCellularModem) modem).isProvisioned()) {
 									s_logger.info("NetworkConfigurationChangeEvent :: The " + modem.getModel() + " is not provisioned, will try to provision it ...");
 									
@@ -378,15 +388,24 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 									}
 								} else {
 									s_logger.info("NetworkConfigurationChangeEvent :: The " + modem.getModel() + " is provisioned");
+								}	
+							}
+							
+							s_logger.debug("monitor() :: gpsSupported={}", m_gpsSupported);
+							if ((m_gpsSupported != null) && m_gpsSupported) {	
+								List<NetConfig> netConfigs = m_networkAdminService.getNetworkInterfaceConfigs(ifaceName);
+								if (isGpsEnabledInConfig(netConfigs) && !modem.isGpsEnabled()) {
+										enableModemGps(modem);
 								}
 							}
 	    				}
-	    				
+	    				/*
 	    				modem.setConfiguration(newNetConfigs);
 	    				if (m_gpsSupported == null) {
 	    					boolean gpsSupported = modem.isGpsSupported();
 	    					m_gpsSupported = gpsSupported;
 	    				}
+	    				*/
 	    			}
     			}
 			} catch (KuraException e) {
@@ -503,7 +522,9 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 									s_logger.info("monitor() :: Modem Reset TIMEOUT !!!");
 									pppService.disconnect();
 									if (modem.isGpsEnabled()) {
-										disableModemGps(modem);
+										if (!disableModemGps(modem)) {
+											s_logger.error("monitor() :: Failed to disable modem GPS");
+										}
 									}
 									modem.reset();
 								} else {
@@ -524,11 +545,14 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 						newInterfaceStatuses.put(ifaceName, interfaceState);
 					}
 				}  
-				s_logger.debug("monitor() :: gpsSupported={}", m_gpsSupported);
-				if ((m_gpsSupported != null) && m_gpsSupported) {	
-					List<NetConfig> netConfigs = m_networkAdminService.getNetworkInterfaceConfigs(ifaceName);
-					if (isGpsEnabledInConfig(netConfigs) && !modem.isGpsEnabled()) {
-						enableModemGps(modem);
+				
+				if (modem instanceof HspaCellularModem) {
+					s_logger.debug("monitor() :: gpsSupported={}", m_gpsSupported);
+					if ((m_gpsSupported != null) && m_gpsSupported) {	
+						List<NetConfig> netConfigs = m_networkAdminService.getNetworkInterfaceConfigs(ifaceName);
+						if (isGpsEnabledInConfig(netConfigs) && !modem.isGpsEnabled()) {
+							enableModemGps(modem);
+						}
 					}
 				}
 			} catch (Exception e) {
@@ -545,7 +569,9 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 				
 				if (modem.isGpsEnabled()) {
 					try {
-						disableModemGps(modem);
+						if (!disableModemGps(modem)) {
+							s_logger.error("monitor() :: Failed to disable modem GPS");
+						}
 					} catch (KuraException e1) {
 						e1.printStackTrace();
 					}
@@ -650,13 +676,31 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 					}
 				}
 				
-				if (modem.isGpsEnabled()) {
-					disableModemGps(modem);
+				if (m_gpsSupported == null) {
+					try {
+						boolean gpsSupported = modem.isGpsSupported();
+						m_gpsSupported = gpsSupported;
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
+				
+				if (modemDevice instanceof UsbModemDevice) {
+					m_modems.put(((UsbModemDevice)modemDevice).getUsbPort(), modem);
+				} else if (modemDevice instanceof SerialModemDevice) {
+					m_modems.put(modemDevice.getProductName(), modem);
 				}
 				
 				if (modem instanceof EvdoCellularModem) {
 					NetInterfaceStatus netIfaceStatus = getNetInterfaceStatus(netConfigs);
 					if (netIfaceStatus == NetInterfaceStatus.netIPv4StatusEnabledWAN) {
+						if (modem.isGpsEnabled()) {
+							if (!disableModemGps(modem)) {
+								s_logger.error("trackModem() :: Failed to disable modem GPS, resetting modem ...");
+								modem.reset();
+							}
+						}
+							
 						if (!((EvdoCellularModem) modem).isProvisioned()) {
 							s_logger.info("trackModem() :: The " + modem.getModel() + " is not provisioned, will try to provision it ...");
 							if ((task != null) && !task.isCancelled()) {
@@ -670,41 +714,33 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 								s_logger.info("trackModem() :: Restarting monitor task");
 								stopThread = false;
 								task = m_executor.submit(new Runnable() {
-						    		@Override
-						    		public void run() {
-						    			while (!stopThread) {
-						    				Thread.currentThread().setName("ModemMonitor");
-						    				try {
-						    					monitor();
-						    					Thread.sleep(THREAD_INTERVAL);
-						    				} catch (InterruptedException e) {
+							    	@Override
+							    	public void run() {
+							    		while (!stopThread) {
+							    			Thread.currentThread().setName("ModemMonitor");
+							    			try {
+							    				monitor();
+							    				Thread.sleep(THREAD_INTERVAL);
+							    			} catch (InterruptedException e) {
 												s_logger.debug(e.getMessage());
 											} catch (Throwable t) {
 												s_logger.error("trackModem() :: Exception while monitoring cellular connection {}", t.toString());
 												t.printStackTrace();
 											}
-						    			}
-						    	}});
+							    		}
+							    }});
 							}
 						} else {
 							s_logger.info("trackModem() :: The " + modem.getModel() + " is provisioned");
 						}
 					}
-				}
-				
-				if (m_gpsSupported == null) {
-					try {
-						boolean gpsSupported = modem.isGpsSupported();
-						m_gpsSupported = gpsSupported;
-					} catch (Exception e) {
-						e.printStackTrace();
+					
+					s_logger.debug("trackModem() :: gpsSupported={}", m_gpsSupported);
+					if ((m_gpsSupported != null) && m_gpsSupported) {	
+						if (isGpsEnabledInConfig(netConfigs) && !modem.isGpsEnabled()) {
+								enableModemGps(modem);
+						}
 					}
-				}
-								
-				if (modemDevice instanceof UsbModemDevice) {
-					m_modems.put(((UsbModemDevice)modemDevice).getUsbPort(), modem);
-				} else if (modemDevice instanceof SerialModemDevice) {
-					m_modems.put(modemDevice.getProductName(), modem);
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -717,16 +753,16 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 		modem.enableGps();
 		
 		CommURI commUri = modem.getSerialConnectionProperties(CellularModem.SerialPortType.GPSPORT);
-		s_logger.trace("enableModemGps() :: Modem SeralConnectionProperties: {}", commUri.toString());
-			
+
+		s_logger.trace("enableModemGps() :: Modem SeralConnectionProperties: {}", commUri.toString());			
 		HashMap<String, Object> modemInfoMap = new HashMap<String, Object>();
 		modemInfoMap.put(ModemGpsEnabledEvent.Port, modem.getGpsPort());
 		modemInfoMap.put(ModemGpsEnabledEvent.BaudRate, new Integer(commUri.getBaudRate()));
 		modemInfoMap.put(ModemGpsEnabledEvent.DataBits, new Integer(commUri.getDataBits()));
 		modemInfoMap.put(ModemGpsEnabledEvent.StopBits, new Integer(commUri.getStopBits()));
 		modemInfoMap.put(ModemGpsEnabledEvent.Parity, new Integer(commUri.getParity()));
-			
-		s_logger.debug("enableModemGps() :: posting ModemGpsEnabledEvent on topic {}", ModemGpsEnabledEvent.MODEM_EVENT_GPS_ENABLED_TOPIC);
+		
+		s_logger.info("enableModemGps() :: posting ModemGpsEnabledEvent on topic {}", ModemGpsEnabledEvent.MODEM_EVENT_GPS_ENABLED_TOPIC);
 		m_eventAdmin.postEvent(new ModemGpsEnabledEvent(modemInfoMap));
 	}
 	
@@ -736,12 +772,14 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 		HashMap<String, Object> modemInfoMap = new HashMap<String, Object>();
 		m_eventAdmin.postEvent(new ModemGpsDisabledEvent(modemInfoMap));
 		
+		boolean portIsReachable = false;
 		long startTimer = System.currentTimeMillis();	
 		do {
 			try {
 				Thread.sleep(3000);
 				if (modem.isPortReachable(modem.getGpsPort())) {
 					s_logger.debug("disableModemGps() modem is now reachable ...");
+					portIsReachable = true;
 					break;
 				} else {
 					s_logger.debug("disableModemGps() waiting for PositionService to release serial port ...");
@@ -749,13 +787,19 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 			} catch (Exception e) {
 				s_logger.debug("disableModemGps() waiting for PositionService to release serial port: ex={}", e);
 			}
-		} while ((System.currentTimeMillis()-startTimer) < 10000);
+		} while ((System.currentTimeMillis()-startTimer) < 20000L);
 		
 		modem.disableGps();
 		try {
-			Thread.sleep(3000);
+			Thread.sleep(1000);
 		} catch(InterruptedException e) {}
 		
-		return modem.isGpsEnabled();
+		boolean ret = false;
+		if (portIsReachable && !modem.isGpsEnabled()) {
+			s_logger.error("disableModemGps() :: Failed to disable modem GPS :: portIsReachable={}, modem.isGpsEnabled()={}",
+					portIsReachable, modem.isGpsEnabled());
+			ret = true;
+		}
+		return ret;
 	}
 }

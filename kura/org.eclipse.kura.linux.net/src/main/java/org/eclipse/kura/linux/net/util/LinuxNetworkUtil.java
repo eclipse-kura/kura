@@ -64,17 +64,20 @@ public class LinuxNetworkUtil {
 			br.close();
 			br = null;
 
-			if (proc.waitFor() != 0) {
-				s_logger.error("error executing command --- ifconfig --- exit value = " + proc.exitValue());
-				return null;
-			} else {
+			try {
+				if (proc.waitFor() != 0) {
+					s_logger.error("error executing command --- ifconfig --- exit value = " + proc.exitValue());
+					return null;
+				} else {
+					return ifaces;
+				}
+			} catch (InterruptedException e) {
+				s_logger.error("getInterfaceNames() :: InterruptedException");
 				return ifaces;
 			}
 		} catch(IOException e) {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
-		} catch (InterruptedException e) {
-			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
-		}
+		} 
 		finally {
 			ProcessUtil.destroy(proc);
 		}

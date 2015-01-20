@@ -235,9 +235,10 @@ public abstract class TelitModem {
     		String gpsPort = getGpsPort();
 			if ((atPort.equals(getDataPort()) || (atPort.equals(gpsPort)
 					&& m_gpsEnabled)) && (m_rssi < 0)) {
+				s_logger.trace("getSignalStrength() :: returning previously obtained RSSI={} :: m_gpsEnabled={}, m_rssi, m_gpsEnabled");
 				return m_rssi;
 			}
-			
+				
 	    	s_logger.debug("sendCommand getSignalStrength :: {}", TelitModemAtCommands.getSignalStrength.getCommand());
 	    	byte[] reply = null;
 	    	CommConnection commAtConnection = openSerialPort(atPort);

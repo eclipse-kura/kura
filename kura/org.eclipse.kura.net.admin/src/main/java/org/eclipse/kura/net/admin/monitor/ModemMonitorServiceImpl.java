@@ -324,7 +324,7 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 	    			List<NetConfig> oldNetConfigs = modem.getConfiguration();
 	    			List<NetConfig>newNetConfigs = m_networkAdminService.getNetworkInterfaceConfigs(ifaceName);
 	    			if ((oldNetConfigs == null) || !oldNetConfigs.equals(newNetConfigs)) {
-	    				s_logger.info("new configuration for cellular modem on usb port " + usbPort + " netinterface " + ifaceName); 
+	    				s_logger.info("new configuration for cellular modem on usb port {} netinterface {}", usbPort, ifaceName); 
 	    				int ifaceNo = getInterfaceNumber(oldNetConfigs);
 	    				if (ifaceNo >= 0) {
 	    					IModemLinkService pppService = PppFactory.obtainPppService(ifaceNo, modem.getDataPort());
@@ -345,18 +345,19 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 	    					}
 	    				}
 	    				
+	    				modem.setConfiguration(newNetConfigs);
+	    				
 	    				if (modem instanceof EvdoCellularModem) {
 		    				NetInterfaceStatus netIfaceStatus = getNetInterfaceStatus(newNetConfigs);
 							if (netIfaceStatus == NetInterfaceStatus.netIPv4StatusEnabledWAN) {
-								
-								modem.setConfiguration(newNetConfigs);
+										
 			    				if (m_gpsSupported == null) {
 			    					boolean gpsSupported = modem.isGpsSupported();
 			    					m_gpsSupported = gpsSupported;
 			    				}
 			    				
 								if (!((EvdoCellularModem) modem).isProvisioned()) {
-									s_logger.info("NetworkConfigurationChangeEvent :: The " + modem.getModel() + " is not provisioned, will try to provision it ...");
+									s_logger.info("NetworkConfigurationChangeEvent :: The {} is not provisioned, will try to provision it ...", modem.getModel());
 									
 									if ((task != null) && !task.isCancelled()) {
 										s_logger.info("NetworkConfigurationChangeEvent :: Cancelling monitor task");
@@ -395,17 +396,10 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 							if ((m_gpsSupported != null) && m_gpsSupported) {	
 								List<NetConfig> netConfigs = m_networkAdminService.getNetworkInterfaceConfigs(ifaceName);
 								if (isGpsEnabledInConfig(netConfigs) && !modem.isGpsEnabled()) {
-										enableModemGps(modem);
+									enableModemGps(modem);
 								}
 							}
 	    				}
-	    				/*
-	    				modem.setConfiguration(newNetConfigs);
-	    				if (m_gpsSupported == null) {
-	    					boolean gpsSupported = modem.isGpsSupported();
-	    					m_gpsSupported = gpsSupported;
-	    				}
-	    				*/
 	    			}
     			}
 			} catch (KuraException e) {
@@ -546,12 +540,18 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 					}
 				}  
 				
-				if (modem instanceof HspaCellularModem) {
-					s_logger.debug("monitor() :: gpsSupported={}", m_gpsSupported);
-					if ((m_gpsSupported != null) && m_gpsSupported) {	
-						List<NetConfig> netConfigs = m_networkAdminService.getNetworkInterfaceConfigs(ifaceName);
-						if (isGpsEnabledInConfig(netConfigs) && !modem.isGpsEnabled()) {
-							enableModemGps(modem);
+				s_logger.debug("monitor() :: gpsSupported={}", m_gpsSupported);
+				if ((m_gpsSupported != null) && m_gpsSupported) {
+					List<NetConfig> netConfigs = m_networkAdminService.getNetworkInterfaceConfigs(ifaceName);
+					if (isGpsEnabledInConfig(netConfigs)) {
+						if (modem instanceof HspaCellularModem) {
+							if (!modem.isGpsEnabled()) {
+								enableModemGps(modem);
+							} else {
+								postModemGpsEvent(modem, true);
+							}
+						} else {
+							postModemGpsEvent(modem, true);
 						}
 					}
 				}
@@ -599,7 +599,7 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 			for(String interfaceName : newStatuses.keySet()) {
 				if ((oldStatuses != null) && oldStatuses.containsKey(interfaceName)) {
 					if (!newStatuses.get(interfaceName).equals(oldStatuses.get(interfaceName))) {
-						s_logger.debug("Posting NetworkStatusChangeEvent on interface: " + interfaceName);
+						s_logger.debug("Posting NetworkStatusChangeEvent on interface: {}", interfaceName);
 						m_eventAdmin.postEvent(new NetworkStatusChangeEvent(interfaceName, newStatuses.get(interfaceName), null));
 					}
 				} else {
@@ -612,7 +612,7 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 	        if (oldStatuses != null) {
 	        	for(String interfaceName : oldStatuses.keySet()) {
                     if(!newStatuses.containsKey(interfaceName)) {
-                        s_logger.debug("Posting NetworkStatusChangeEvent on disabled interface: " + interfaceName);
+                        s_logger.debug("Posting NetworkStatusChangeEvent on disabled interface: {}", interfaceName);
                         m_eventAdmin.postEvent(new NetworkStatusChangeEvent(interfaceName, oldStatuses.get(interfaceName), null));
                     }
                 }
@@ -702,7 +702,7 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 						}
 							
 						if (!((EvdoCellularModem) modem).isProvisioned()) {
-							s_logger.info("trackModem() :: The " + modem.getModel() + " is not provisioned, will try to provision it ...");
+							s_logger.info("trackModem() :: The {} is not provisioned, will try to provision it ...", modem.getModel());
 							if ((task != null) && !task.isCancelled()) {
 								s_logger.info("trackModem() :: Cancelling monitor task");
 								stopThread = true;
@@ -731,7 +731,7 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 							    }});
 							}
 						} else {
-							s_logger.info("trackModem() :: The " + modem.getModel() + " is provisioned");
+							s_logger.info("trackModem() :: The {} is provisioned", modem.getModel());
 						}
 					}
 					
@@ -751,26 +751,12 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 	private void enableModemGps(CellularModem modem) throws KuraException {
 		
 		modem.enableGps();
-		
-		CommURI commUri = modem.getSerialConnectionProperties(CellularModem.SerialPortType.GPSPORT);
-
-		s_logger.trace("enableModemGps() :: Modem SeralConnectionProperties: {}", commUri.toString());			
-		HashMap<String, Object> modemInfoMap = new HashMap<String, Object>();
-		modemInfoMap.put(ModemGpsEnabledEvent.Port, modem.getGpsPort());
-		modemInfoMap.put(ModemGpsEnabledEvent.BaudRate, new Integer(commUri.getBaudRate()));
-		modemInfoMap.put(ModemGpsEnabledEvent.DataBits, new Integer(commUri.getDataBits()));
-		modemInfoMap.put(ModemGpsEnabledEvent.StopBits, new Integer(commUri.getStopBits()));
-		modemInfoMap.put(ModemGpsEnabledEvent.Parity, new Integer(commUri.getParity()));
-		
-		s_logger.info("enableModemGps() :: posting ModemGpsEnabledEvent on topic {}", ModemGpsEnabledEvent.MODEM_EVENT_GPS_ENABLED_TOPIC);
-		m_eventAdmin.postEvent(new ModemGpsEnabledEvent(modemInfoMap));
+		postModemGpsEvent(modem, true);
 	}
 	
 	private boolean disableModemGps(CellularModem modem) throws KuraException {
 		
-		s_logger.info("disableModemGps() :: posting ModemGpsDisableEvent on topic {}", ModemGpsDisabledEvent.MODEM_EVENT_GPS_DISABLED_TOPIC);
-		HashMap<String, Object> modemInfoMap = new HashMap<String, Object>();
-		m_eventAdmin.postEvent(new ModemGpsDisabledEvent(modemInfoMap));
+		postModemGpsEvent(modem, false);
 		
 		boolean portIsReachable = false;
 		long startTimer = System.currentTimeMillis();	
@@ -801,5 +787,27 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 			ret = true;
 		}
 		return ret;
+	}
+	
+	private void postModemGpsEvent(CellularModem modem, boolean enabled) throws KuraException {
+		
+		if (enabled) {
+			CommURI commUri = modem.getSerialConnectionProperties(CellularModem.SerialPortType.GPSPORT);
+			s_logger.trace("postModemGpsEvent() :: Modem SeralConnectionProperties: {}", commUri.toString());			
+			
+			HashMap<String, Object> modemInfoMap = new HashMap<String, Object>();
+			modemInfoMap.put(ModemGpsEnabledEvent.Port, modem.getGpsPort());
+			modemInfoMap.put(ModemGpsEnabledEvent.BaudRate, new Integer(commUri.getBaudRate()));
+			modemInfoMap.put(ModemGpsEnabledEvent.DataBits, new Integer(commUri.getDataBits()));
+			modemInfoMap.put(ModemGpsEnabledEvent.StopBits, new Integer(commUri.getStopBits()));
+			modemInfoMap.put(ModemGpsEnabledEvent.Parity, new Integer(commUri.getParity()));
+			
+			s_logger.info("postModemGpsEvent() :: posting ModemGpsEnabledEvent on topic {}", ModemGpsEnabledEvent.MODEM_EVENT_GPS_ENABLED_TOPIC);
+			m_eventAdmin.postEvent(new ModemGpsEnabledEvent(modemInfoMap));
+		} else {
+			s_logger.info("postModemGpsEvent() :: posting ModemGpsDisableEvent on topic {}", ModemGpsDisabledEvent.MODEM_EVENT_GPS_DISABLED_TOPIC);
+			HashMap<String, Object> modemInfoMap = new HashMap<String, Object>();
+			m_eventAdmin.postEvent(new ModemGpsDisabledEvent(modemInfoMap));
+		}
 	}
 }

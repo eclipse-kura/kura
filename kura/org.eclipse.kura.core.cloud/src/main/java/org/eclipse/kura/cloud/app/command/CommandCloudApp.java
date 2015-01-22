@@ -11,18 +11,36 @@
  */
 package org.eclipse.kura.cloud.app.command;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Map.Entry;
+
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloud.Cloudlet;
 import org.eclipse.kura.cloud.CloudletTopic;
+import org.eclipse.kura.command.CommandService;
+import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.message.KuraRequestPayload;
 import org.eclipse.kura.message.KuraResponsePayload;
+import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class CommandCloudApp extends Cloudlet {
+public class CommandCloudApp extends Cloudlet implements ConfigurableComponent, CommandService{
 	private static final Logger s_logger = LoggerFactory.getLogger(CommandCloudApp.class);
+	private static final String EDC_PASSWORD_METRIC_NAME= "password";
+	private static final String COMMAND_PASSWORD_ENABLED_ID= "command.password.enable";
+	private static final String COMMAND_PASSWORD_ID= "command.password.value";
+	private static final String COMMAND_PATH= "/tmp";
 
 	public static final String APP_ID = "CMD-V1";
+
+	private Map<String, Object> properties;
+
+	private ComponentContext compCtx;
+
 
 	/* EXEC */
 	public static final String RESOURCE_COMMAND = "command";
@@ -40,7 +58,7 @@ public class CommandCloudApp extends Cloudlet {
 
 	// This component inherits the required dependencies from the parent
 	// class CloudApp.
-	
+
 
 	// ----------------------------------------------------------------
 	//
@@ -50,7 +68,35 @@ public class CommandCloudApp extends Cloudlet {
 
 	// This component inherits the activation methods from the parent
 	// class CloudApp.
-	
+	protected void activate(ComponentContext componentContext, Map<String,Object> properties) 
+	{
+		s_logger.info("Bundle " + APP_ID + " has started with config!");
+		this.compCtx= componentContext;
+		updated(properties);
+	}
+
+	public void updated(Map<String,Object> properties)
+	{
+		s_logger.info("updated...: " + properties);
+
+		this.properties = properties;
+		boolean verificationEnabled= (Boolean) properties.get(COMMAND_PASSWORD_ENABLED_ID);
+		if(verificationEnabled){
+			activate(compCtx);
+		}
+
+
+
+		if(properties != null && !properties.isEmpty()) {
+			Iterator<Entry<String, Object>> it = properties.entrySet().iterator();
+			while(it.hasNext()) {
+				Entry<String, Object> entry = it.next();
+				s_logger.info("New property - " + entry.getKey() + " = " +
+						entry.getValue() + " of type " + entry.getValue().getClass().toString());
+			}
+		}
+	}
+
 	@Override
 	protected void doExec(CloudletTopic reqTopic, KuraRequestPayload reqPayload, KuraResponsePayload respPayload)
 			throws KuraException {
@@ -73,10 +119,9 @@ public class CommandCloudApp extends Cloudlet {
 
 		s_logger.info("EXECuting resource: {}", RESOURCE_COMMAND);
 
-		KuraCommandRequestPayload commandReq = new KuraCommandRequestPayload(reqPayload);
-		KuraCommandResponsePayload commandResp = new KuraCommandResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
+		KuraCommandResponsePayload commandResp= execute(reqPayload);
 
-		KuraCommandHandler.handleRequest(commandReq, commandResp);
+
 
 		for (String name : commandResp.metricNames()) {
 			Object value = commandResp.getMetric(name);
@@ -84,4 +129,189 @@ public class CommandCloudApp extends Cloudlet {
 		}
 		respPayload.setBody(commandResp.getBody());
 	}
+
+	@Override
+	public KuraCommandResponsePayload execute(KuraRequestPayload reqPayload){
+		KuraCommandRequestPayload commandReq = new KuraCommandRequestPayload(reqPayload);
+
+		//String receivedPassword= (String) reqPayload.getMetric(EDC_PASSWORD_METRIC_NAME);
+		String receivedPassword= (String) commandReq.getMetric(EDC_PASSWORD_METRIC_NAME);
+		String commandPassword= (String) properties.get(COMMAND_PASSWORD_ID);
+
+		KuraCommandResponsePayload commandResp = new KuraCommandResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
+
+		boolean isExecutionAllowed= verifyPasswords(commandPassword, receivedPassword);
+		if(isExecutionAllowed){
+
+			String command = commandReq.getCommand();
+			if (command == null) {
+				s_logger.error("null command");
+				commandResp.setResponseCode(KuraResponsePayload.RESPONSE_CODE_BAD_REQUEST);
+			}
+
+			String[] cmdarray= prepareCommandArray(commandReq, command);
+
+			String[] envp = commandReq.getEnvironmentPairs();
+			String dir= computeDir(commandReq);
+
+			byte[] zipBytes = commandReq.getZipBytes();
+			if (zipBytes != null) {
+				try {				
+					UnZip.unZipBytes(zipBytes, dir);
+				} 
+				catch (IOException e) {
+					s_logger.error("Error unzipping command zip bytes", e);
+
+					commandResp.setException(e);
+				}
+			}
+
+			Process  proc= null;
+			try {
+				proc= createExecutionProcess(dir, cmdarray, envp);
+			} catch (Throwable t) {
+				s_logger.error("Error executing command {}", t);
+				commandResp.setResponseCode(KuraResponsePayload.RESPONSE_CODE_ERROR);
+				commandResp.setException(t);
+
+			}
+
+			boolean runAsync = commandReq.isRunAsync() != null ? commandReq.isRunAsync() : false;
+			int timeout = commandReq.getTimeout() != null ? commandReq.getTimeout() : 0;
+
+			ProcessMonitorThread pmt = null;
+			pmt = new ProcessMonitorThread(proc, commandReq.getStdin(), timeout);
+			pmt.start();
+
+			if (!runAsync) {
+				try {
+					pmt.join();
+					prepareResponseNoTimeout(commandResp, pmt);
+				} catch (InterruptedException e) {
+					Thread.interrupted();
+					pmt.interrupt();
+					prepareTimeoutResponse(commandResp, pmt);
+				}
+			}
+
+		}else{
+
+			s_logger.error("Password required but not correct and or missing");
+			commandResp.setResponseCode(KuraResponsePayload.RESPONSE_CODE_ERROR);
+			commandResp.setExceptionMessage("Password missing or not correct");
+		}
+
+		return commandResp;
+
+	}
+
+	@Override
+	public String execute(String cmd, String password) throws KuraException, IOException {
+		// TODO Auto-generated method stub
+		//boolean runAsync= false;
+
+		String commandPassword= (String) properties.get(COMMAND_PASSWORD_ID);
+		boolean isExecutionAllowed= verifyPasswords(commandPassword, password);
+		if(isExecutionAllowed){
+
+			String[] cmdArray= cmd.split(" ");
+			Process proc= createExecutionProcess(COMMAND_PATH, cmdArray, null);
+
+			ProcessMonitorThread pmt = null;
+			pmt = new ProcessMonitorThread(proc, null, 60);
+			pmt.start();
+
+			//if (!runAsync) {
+			try {
+				pmt.join();
+				if(pmt.getExitValue() == 0){
+					return pmt.getStdout();
+				}else{
+					return pmt.getStderr();
+				}
+			} catch (InterruptedException e) {
+				Thread.interrupted();
+				pmt.interrupt();
+				throw KuraException.internalError(e);
+			}
+			//}
+		}else{
+			throw KuraException.internalError("The defined password is not correct");
+		}
+
+
+	}
+
+	private boolean verifyPasswords(String commandPassword, String receivedPassword){
+		if (commandPassword == null && receivedPassword == null){
+			return true;
+		}else if (commandPassword.equals(receivedPassword)){
+			return true;
+		}
+		return false;
+	}
+
+	private Process createExecutionProcess(String dir, String[] cmdarray, String[] envp) throws IOException{
+		Runtime rt = Runtime.getRuntime();
+
+		Process  proc = null;
+
+
+		File fileDir = dir == null ? null : new File(dir);
+
+		proc = rt.exec(cmdarray, envp, fileDir);
+		return proc;
+	}
+
+	private String[] prepareCommandArray(KuraCommandRequestPayload req, String command){
+		String[] args = req.getArguments();
+		int argsCount = args != null ? args.length : 0;
+		String[] cmdarray = new String[1 + argsCount];
+
+		cmdarray[0] = command;
+		for (int i = 0; i < argsCount; i++) {
+			cmdarray[1 + i] = args[i];
+		}
+
+		for (int i = 0; i < cmdarray.length; i++) {
+			s_logger.debug("cmdarray: {}", cmdarray[i]);
+		}
+
+		return cmdarray;
+	}
+
+
+	private String computeDir(KuraCommandRequestPayload req){
+		String dir = req.getWorkingDir();
+		if (dir != null && dir.isEmpty()) {
+			dir = COMMAND_PATH;
+		}
+		return dir;
+	}
+
+	private void prepareResponseNoTimeout(KuraCommandResponsePayload resp, ProcessMonitorThread pmt ){
+
+		if (pmt.getException() != null) {
+			resp.setResponseCode(KuraResponsePayload.RESPONSE_CODE_ERROR);
+			resp.setException(pmt.getException());
+			resp.setStderr(pmt.getStderr());
+			resp.setStdout(pmt.getStdout());
+		} else {
+			resp.setStderr(pmt.getStderr());
+			resp.setStdout(pmt.getStdout());
+			resp.setTimedout(pmt.isTimedOut());
+
+			if (!pmt.isTimedOut()) {
+				resp.setExitCode(pmt.getExitValue());
+			}
+		}
+
+	}
+
+	private void prepareTimeoutResponse(KuraCommandResponsePayload resp, ProcessMonitorThread pmt){
+		resp.setStderr(pmt.getStderr());
+		resp.setStdout(pmt.getStdout());
+		resp.setTimedout(true);
+	}
+
 }

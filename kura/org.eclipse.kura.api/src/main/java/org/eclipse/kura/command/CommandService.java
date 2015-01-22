@@ -11,7 +11,11 @@
  */
 package org.eclipse.kura.command;
 
+import java.io.IOException;
+
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.message.KuraRequestPayload;
+import org.eclipse.kura.message.KuraResponsePayload;
 
 /**
  * This interface provides methods for running system commands from the web console.
@@ -19,5 +23,6 @@ import org.eclipse.kura.KuraException;
  */
 public interface CommandService {
 
-	public String execute(String cmd) throws KuraException;
+	public String execute(String cmd, String password) throws KuraException, IOException;
+	public KuraResponsePayload execute(KuraRequestPayload commandReq) throws IOException;
 }

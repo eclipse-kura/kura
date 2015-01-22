@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (c) 2011, 2014 Eurotech and/or its affiliates
+
+     All rights reserved. This program and the accompanying materials
+     are made available under the terms of the Eclipse Public License v1.0
+     which accompanies this distribution, and is available at
+     http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Eurotech
+
+-->
+<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
+    <OCD id="org.eclipse.kura.cloud.app.command.CommandCloudApp" 
+         name="CommandService" 
+         description="Command service configuration">
+         
+        <Icon resource="CommandPasswordService" size="32"/>
+
+        <AD id="command.password.enable"
+            name="command.password.enable"
+            type="Boolean"
+            cardinality="0"
+            required="true"
+            default="true"
+            description="Enables or disables the Command Service">
+        </AD>
+        
+        <AD id="command.password.value"
+        	name="command.password.value"
+        	type="Password"
+        	cardinality="0"
+        	required="false"
+        	default=""
+        	description="If set, this password allows to protect the command messages.">
+        </AD>
+                    
+    </OCD>
+    
+    <Designate pid="org.eclipse.kura.cloud.app.command.CommandCloudApp">
+        <Object ocdref="org.eclipse.kura.cloud.app.command.CommandCloudApp"/>
+    </Designate>
+</MetaData>

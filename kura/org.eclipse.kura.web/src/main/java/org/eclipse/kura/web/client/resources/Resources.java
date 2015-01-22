@@ -152,4 +152,7 @@ public interface Resources extends ClientBundleWithLookup {
     
     @Source("icons/32x32/apps/preferences-desktop-remote-desktop.png")
     ImageResource provisioning32();
+    
+    @Source("icons/32x32/apps/osx_terminal.png")
+    ImageResource command32();
 }

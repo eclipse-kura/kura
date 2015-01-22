@@ -189,6 +189,9 @@ public class ServiceTree extends ContentPanel
             		else if ("ProvisioningService".equals(icon)) {
             			return AbstractImagePrototype.create(Resources.INSTANCE.provisioning32());
             		}
+            		else if ("CommandPasswordService".equals(icon)) {
+            			return AbstractImagePrototype.create(Resources.INSTANCE.command32());
+            		}
             		else if (icon != null && 
             				(icon.toLowerCase().startsWith("http://") ||
             			     icon.toLowerCase().startsWith("https://")) &&

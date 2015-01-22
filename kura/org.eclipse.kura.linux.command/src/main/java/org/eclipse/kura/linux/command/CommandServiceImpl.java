@@ -25,7 +25,7 @@ import org.eclipse.kura.core.util.ProcessUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class CommandServiceImpl implements CommandService {
+public class CommandServiceImpl  {
 	
 	private static final Logger s_logger = LoggerFactory.getLogger(CommandServiceImpl.class);
 	
@@ -51,8 +51,8 @@ public class CommandServiceImpl implements CommandService {
 	//   Service APIs
 	//
 	// ----------------------------------------------------------------
-	@Override
-	public String execute(String cmd) throws KuraException {
+	
+	public String execute(String cmd, String password) throws KuraException {
 		if (cmd == null) {
 			s_logger.debug("null command");
 			return "null command";
@@ -155,5 +155,13 @@ public class CommandServiceImpl implements CommandService {
 			ProcessUtil.destroy(procUserScript);
 		}
 	}
+
+	
+//	public KuraCommandResponsePayload execute(KuraCommandRequestPayload commandReq) throws IOException {
+//		// TODO Auto-generated method stub
+//		return null;
+//	}
+
+	
 	
 }

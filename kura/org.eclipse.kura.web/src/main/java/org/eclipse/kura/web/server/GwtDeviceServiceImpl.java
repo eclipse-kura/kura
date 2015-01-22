@@ -11,6 +11,7 @@
  */
 package org.eclipse.kura.web.server;
 
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.util.ArrayList;
@@ -288,11 +289,14 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
 		return new BaseListLoadResult<GwtGroupedNVPair>(pairs);
 	}
 	
-	public String executeCommand(String cmd) throws GwtKuraException {
+	public String executeCommand(String cmd, String pwd) throws GwtKuraException {
 		CommandService commandService = ServiceLocator.getInstance().getService(CommandService.class);
 		try {
-			return commandService.execute(cmd);
+			return commandService.execute(cmd, pwd);
 		} catch (KuraException e) {
+			s_logger.error(e.getMessage());
+			return null;
+		} catch (IOException e){
 			s_logger.error(e.getMessage());
 			return null;
 		}

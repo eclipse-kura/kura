@@ -63,20 +63,29 @@ public class KuraCommandHandler
 				return;
 			}
 		}
-
-		Runtime rt = Runtime.getRuntime();
-		Process  proc = null;
+		Process proc= null;
 		try {
-
-			File fileDir = dir == null ? null : new File(dir);
-
-			proc = rt.exec(cmdarray, envp, fileDir);
+			//proc= CommandCloudApp.executeCommand(dir, cmdarray, envp);
 		} catch (Throwable t) {
 			s_logger.error("Error executing command {}", t);
 			resp.setResponseCode(KuraResponsePayload.RESPONSE_CODE_ERROR);
 			resp.setException(t);
 			return;
 		}
+
+//		Runtime rt = Runtime.getRuntime();
+//		Process  proc = null;
+//		try {
+//
+//			File fileDir = dir == null ? null : new File(dir);
+//
+//			proc = rt.exec(cmdarray, envp, fileDir);
+//		} catch (Throwable t) {
+//			s_logger.error("Error executing command {}", t);
+//			resp.setResponseCode(KuraResponsePayload.RESPONSE_CODE_ERROR);
+//			resp.setException(t);
+//			return;
+//		}
 		
 		ProcessMonitorThread pmt = null;
 		boolean runAsync = req.isRunAsync() != null ? req.isRunAsync() : false;

@@ -10,12 +10,6 @@
    </service>
    <property name="service.pid" value="org.eclipse.kura.protocol.can.test.CanSocketTest"/>
 
-    <reference name="CloudService"
-              policy="static"
-              bind="setCloudService"       
-              unbind="unsetCloudService"       
-              cardinality="1..1" 
-              interface="org.eclipse.kura.cloud.CloudService"/>
    <reference name="CanConnectionService"
               bind="setCanConnectionService"
               unbind="unsetCanConnectionService"

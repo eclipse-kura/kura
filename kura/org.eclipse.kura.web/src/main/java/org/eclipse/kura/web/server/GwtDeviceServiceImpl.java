@@ -33,6 +33,7 @@ import org.eclipse.kura.net.NetworkService;
 import org.eclipse.kura.position.PositionService;
 import org.eclipse.kura.system.SystemAdminService;
 import org.eclipse.kura.system.SystemService;
+import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.server.util.ServiceLocator;
 import org.eclipse.kura.web.shared.GwtKuraErrorCode;
 import org.eclipse.kura.web.shared.GwtKuraException;
@@ -46,6 +47,7 @@ import org.slf4j.LoggerFactory;
 
 import com.extjs.gxt.ui.client.data.BaseListLoadResult;
 import com.extjs.gxt.ui.client.data.ListLoadResult;
+import com.extjs.gxt.ui.client.widget.Info;
 
 public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements GwtDeviceService 
 {
@@ -295,10 +297,12 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
 			return commandService.execute(cmd, pwd);
 		} catch (KuraException e) {
 			s_logger.error(e.getMessage());
-			return null;
+			throw new GwtKuraException(GwtKuraErrorCode.SERVICE_NOT_ENABLED);
+			//return null;
 		} catch (IOException e){
 			s_logger.error(e.getMessage());
-			return null;
+			throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR);
+			//return null;
 		}
 	}
 	

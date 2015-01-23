@@ -152,11 +152,10 @@ public class CommandTab extends LayoutContainer {
 		m_commandField.setFieldLabel(MSGS.deviceCommandExecute());
 		m_formPanel.add(m_commandField, formData);
 		
+		
 		m_passwordField = new TextField<String>();
-		
 		m_passwordField.setName("password");
-		
-		
+		m_passwordField.setPassword(true);
 		m_passwordField.setAllowBlank(true);
 		m_passwordField.setFieldLabel(MSGS.deviceCommandPassword());
 		m_formPanel.add(m_passwordField, formData);

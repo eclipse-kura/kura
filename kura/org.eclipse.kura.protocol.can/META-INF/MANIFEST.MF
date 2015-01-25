@@ -17,4 +17,4 @@ Export-Package: org.eclipse.kura.protocol.can; version="1.0.0"
 Service-Component: OSGI-INF/*.xml
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .,
- lib/libsocket-can-java-1.0.0.jar
+ lib/libsocket-can-java-1.0.1.jar

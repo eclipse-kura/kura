@@ -24,6 +24,7 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
 
+import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.command.CommandService;
 import org.eclipse.kura.core.util.NetUtil;
@@ -296,11 +297,16 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
 		try {
 			return commandService.execute(cmd, pwd);
 		} catch (KuraException e) {
-			s_logger.error(e.getMessage());
-			throw new GwtKuraException(GwtKuraErrorCode.SERVICE_NOT_ENABLED);
+			s_logger.error(e.getLocalizedMessage());
+			if(e.getCode() == KuraErrorCode.OPERATION_NOT_SUPPORTED){
+				throw new GwtKuraException(GwtKuraErrorCode.SERVICE_NOT_ENABLED);
+			}else if(e.getCode() == KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID){
+				throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT);
+			}
+			throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR);
 			//return null;
 		} catch (IOException e){
-			s_logger.error(e.getMessage());
+			s_logger.error(e.getLocalizedMessage());
 			throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR);
 			//return null;
 		}

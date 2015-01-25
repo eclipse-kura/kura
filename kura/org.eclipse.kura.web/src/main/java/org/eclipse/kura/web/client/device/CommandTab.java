@@ -20,6 +20,7 @@ import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.server.GwtComponentServiceImpl;
 import org.eclipse.kura.web.server.util.ServiceLocator;
+import org.eclipse.kura.web.shared.GwtKuraErrorCode;
 import org.eclipse.kura.web.shared.GwtKuraException;
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
 import org.eclipse.kura.web.shared.model.GwtGroupedNVPair;
@@ -40,6 +41,7 @@ import com.extjs.gxt.ui.client.event.FormEvent;
 import com.extjs.gxt.ui.client.event.Listener;
 import com.extjs.gxt.ui.client.event.SelectionListener;
 import com.extjs.gxt.ui.client.widget.ContentPanel;
+import com.extjs.gxt.ui.client.widget.Info;
 import com.extjs.gxt.ui.client.widget.LayoutContainer;
 import com.extjs.gxt.ui.client.widget.MessageBox;
 import com.extjs.gxt.ui.client.widget.button.Button;
@@ -115,7 +117,14 @@ public class CommandTab extends LayoutContainer {
 				else {
 					gwtDeviceService.executeCommand(m_commandField.getValue(), m_passwordField.getValue(), new AsyncCallback<String>() {
 						public void onFailure(Throwable caught) {
-							FailureHandler.handle(caught);
+							if(caught.getLocalizedMessage().equals(GwtKuraErrorCode.SERVICE_NOT_ENABLED.toString())){
+								Info.display(MSGS.error(), MSGS.commandServiceNotEnabled());
+							}else if(caught.getLocalizedMessage().equals(GwtKuraErrorCode.ILLEGAL_ARGUMENT.toString())){
+								Info.display(MSGS.error(), MSGS.commandPasswordNotCorrect());
+							}else{
+								Info.display(MSGS.error(), caught.getLocalizedMessage());
+							}
+							//FailureHandler.handle(caught);
 							m_commandInput.unmask();
 						}
 

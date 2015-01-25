@@ -17,6 +17,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloud.Cloudlet;
 import org.eclipse.kura.cloud.CloudletTopic;
@@ -212,7 +213,6 @@ public class CommandCloudApp extends Cloudlet implements ConfigurableComponent, 
 	@Override
 	public String execute(String cmd, String password) throws KuraException, IOException {
 		// TODO Auto-generated method stub
-		//boolean runAsync= false;
 		boolean verificationEnabled= (Boolean) properties.get(COMMAND_ENABLED_ID);
 		if(verificationEnabled){
 
@@ -230,7 +230,6 @@ public class CommandCloudApp extends Cloudlet implements ConfigurableComponent, 
 				pmt = new ProcessMonitorThread(proc, null, timeout);
 				pmt.start();
 
-				//if (!runAsync) {
 				try {
 					pmt.join();
 					if(pmt.getExitValue() == 0){
@@ -243,14 +242,11 @@ public class CommandCloudApp extends Cloudlet implements ConfigurableComponent, 
 					pmt.interrupt();
 					throw KuraException.internalError(e);
 				}
-				//}
 			}else{
-				//throw KuraException.internalError("The defined password is not correct");
-				return "The defined password is not correct";
+				throw new KuraException(KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID);
 			}
 		}else{
-			//throw KuraException.internalError("The command console service is not enabled!");
-			return "The command service is not enabled!";
+			throw new KuraException(KuraErrorCode.OPERATION_NOT_SUPPORTED);
 		}
 
 
@@ -306,7 +302,7 @@ public class CommandCloudApp extends Cloudlet implements ConfigurableComponent, 
 	private boolean verifyPasswords(String commandPassword, String receivedPassword){
 		if (commandPassword == null && receivedPassword == null){
 			return true;
-		}else if (commandPassword.equals(receivedPassword)){
+		}else if (commandPassword != null && commandPassword.equals(receivedPassword)){
 			return true;
 		}
 		return false;

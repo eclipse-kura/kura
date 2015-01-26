@@ -23,6 +23,5 @@ import org.eclipse.kura.message.KuraResponsePayload;
  */
 public interface CommandService {
 
-	public String execute(String cmd, String password) throws KuraException, IOException;
-	public KuraResponsePayload execute(KuraRequestPayload commandReq) throws IOException;
+	public String execute(String cmd) throws KuraException;
 }

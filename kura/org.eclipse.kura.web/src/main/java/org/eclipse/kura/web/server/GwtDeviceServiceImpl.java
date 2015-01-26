@@ -26,7 +26,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
-import org.eclipse.kura.command.CommandService;
+import org.eclipse.kura.command.PasswordCommandService;
 import org.eclipse.kura.core.util.NetUtil;
 import org.eclipse.kura.net.NetInterface;
 import org.eclipse.kura.net.NetInterfaceAddress;
@@ -34,7 +34,6 @@ import org.eclipse.kura.net.NetworkService;
 import org.eclipse.kura.position.PositionService;
 import org.eclipse.kura.system.SystemAdminService;
 import org.eclipse.kura.system.SystemService;
-import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.server.util.ServiceLocator;
 import org.eclipse.kura.web.shared.GwtKuraErrorCode;
 import org.eclipse.kura.web.shared.GwtKuraException;
@@ -48,7 +47,6 @@ import org.slf4j.LoggerFactory;
 
 import com.extjs.gxt.ui.client.data.BaseListLoadResult;
 import com.extjs.gxt.ui.client.data.ListLoadResult;
-import com.extjs.gxt.ui.client.widget.Info;
 
 public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements GwtDeviceService 
 {
@@ -293,7 +291,7 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
 	}
 	
 	public String executeCommand(String cmd, String pwd) throws GwtKuraException {
-		CommandService commandService = ServiceLocator.getInstance().getService(CommandService.class);
+		PasswordCommandService commandService = ServiceLocator.getInstance().getService(PasswordCommandService.class);
 		try {
 			return commandService.execute(cmd, pwd);
 		} catch (KuraException e) {
@@ -304,12 +302,7 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
 				throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT);
 			}
 			throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR);
-			//return null;
-		} catch (IOException e){
-			s_logger.error(e.getLocalizedMessage());
-			throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR);
-			//return null;
-		}
+		} 
 	}
 	
 	// ----------------------------------------------------------------

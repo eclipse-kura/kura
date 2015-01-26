@@ -11,10 +11,8 @@
  */
 package org.eclipse.kura.linux.command;
 
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
@@ -25,7 +23,7 @@ import org.eclipse.kura.core.util.ProcessUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class CommandServiceImpl  {
+public class CommandServiceImpl  implements CommandService{
 	
 	private static final Logger s_logger = LoggerFactory.getLogger(CommandServiceImpl.class);
 	
@@ -52,7 +50,7 @@ public class CommandServiceImpl  {
 	//
 	// ----------------------------------------------------------------
 	
-	public String execute(String cmd, String password) throws KuraException {
+	public String execute(String cmd) throws KuraException {
 		if (cmd == null) {
 			s_logger.debug("null command");
 			return "null command";
@@ -155,13 +153,5 @@ public class CommandServiceImpl  {
 			ProcessUtil.destroy(procUserScript);
 		}
 	}
-
-	
-//	public KuraCommandResponsePayload execute(KuraCommandRequestPayload commandReq) throws IOException {
-//		// TODO Auto-generated method stub
-//		return null;
-//	}
-
-	
 	
 }

@@ -8,7 +8,7 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Export-Package: org.eclipse.kura; version="1.0.0",org.eclipse.kura.blu
  etooth; version="1.0.0",org.eclipse.kura.clock; version="1.0.0",org.e
  clipse.kura.cloud; version="1.0.0",org.eclipse.kura.comm; version="1.0
- .0",org.eclipse.kura.command; version="1.0.0",org.eclipse.kura.confi
+ .0",org.eclipse.kura.command; version="1.1.0",org.eclipse.kura.confi
  guration; version="1.0.0",org.eclipse.kura.configuration.metatype; ve
  rsion="1.0.0",org.eclipse.kura.crypto; version="1.0.0",org.eclipse.ku
  ra.data; version="1.0.0",org.eclipse.kura.db; version="1.0.0",org.ecl
@@ -16,13 +16,15 @@ Export-Package: org.eclipse.kura; version="1.0.0",org.eclipse.kura.blu
  on="1.0.0",org.eclipse.kura.net; version="1.0.0",org.eclipse.kura.net
  .dhcp; version="1.0.0",org.eclipse.kura.net.dns; version="1.0.0",org.
  eclipse.kura.net.firewall; version="1.0.0",org.eclipse.kura.net.modem
- ; version="1.0.0",org.eclipse.kura.net.route; version="1.0.0",org.ecl
+ ; version="1.1.0",org.eclipse.kura.net.route; version="1.0.0",org.ecl
  ipse.kura.net.wifi; version="1.0.0",org.eclipse.kura.position; versio
  n="1.0.0",org.eclipse.kura.ssl; version="1.0.0",org.eclipse.kura.syst
  em; version="1.0.0",org.eclipse.kura.usb; version="1.0.0",org.eclipse
  .kura.watchdog; version="1.0.0"
 Import-Package: javax.comm;version="1.2.0",
+ javax.crypto,
  javax.microedition.io,
+ javax.net.ssl,
  javax.usb;version="1.0.2",
  org.osgi.framework;version="[1.5.0,2.0.0)",
  org.osgi.service.component;version="1.2.0",

@@ -12,7 +12,13 @@
       Eurotech
 
 -->
-<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" activate="activate" deactivate="deactivate" name="org.eclipse.kura.cloud.app.command.CommandCloudApp">
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" activate="activate" configuration-policy="require" deactivate="deactivate" name="org.eclipse.kura.cloud.app.command.CommandCloudApp">
    <implementation class="org.eclipse.kura.cloud.app.command.CommandCloudApp"/>
    <reference bind="setCloudService" cardinality="1..1" interface="org.eclipse.kura.cloud.CloudService" name="CloudService" policy="static" unbind="unsetCloudService"/>
+   			  
+   	<service>
+   		<provide interface="org.eclipse.kura.cloud.app.command.CommandCloudApp"/>
+   		<provide interface="org.eclipse.kura.command.PasswordCommandService"/>
+   	</service>
+   	<property name="service.pid" type="String" value="org.eclipse.kura.cloud.app.command.CommandCloudApp"/>
 </scr:component>

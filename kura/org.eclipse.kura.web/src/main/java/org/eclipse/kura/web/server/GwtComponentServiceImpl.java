@@ -129,6 +129,97 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
 		}
 		return gwtConfigs;
 	}
+	
+	public List<GwtConfigComponent> findComponentConfiguration()
+			throws GwtKuraException 
+		{
+			ConfigurationService cs = ServiceLocator.getInstance().getService(ConfigurationService.class);		
+			List<GwtConfigComponent> gwtConfigs = new ArrayList<GwtConfigComponent>();
+			try {
+				
+				List<ComponentConfiguration> configs = cs.getComponentConfigurations();
+		 		// sort the list alphabetically by service name
+		 		Collections.sort(configs, new Comparator<ComponentConfiguration>() {
+					public int compare(ComponentConfiguration arg0,
+									   ComponentConfiguration arg1) {
+						String name0 = arg0.getPid().substring(arg0.getPid().lastIndexOf(".")); 
+						String name1 = arg1.getPid().substring(arg1.getPid().lastIndexOf(".")); 
+						return name0.compareTo(name1);
+					}});
+				for (ComponentConfiguration config : configs) {
+
+					// ignore items we want to hide
+					if (!config.getPid().endsWith("CommandCloudApp")) {
+						continue;
+					}
+					
+					OCD ocd = config.getDefinition();
+					if (ocd != null) {
+
+						GwtConfigComponent gwtConfig = new GwtConfigComponent();
+						gwtConfig.setComponentId(ocd.getId());
+						gwtConfig.setComponentName(ocd.getName());
+						gwtConfig.setComponentDescription(ocd.getDescription());
+						if (ocd.getIcon() != null && ocd.getIcon().size() > 0) {
+							Icon icon = ocd.getIcon().get(0);
+							gwtConfig.setComponentIcon(icon.getResource());
+						}
+
+						List<GwtConfigParameter> gwtParams = new ArrayList<GwtConfigParameter>();
+						gwtConfig.setParameters(gwtParams);
+						for (AD ad : ocd.getAD()) {
+
+							GwtConfigParameter gwtParam = new GwtConfigParameter();
+							gwtParam.setId(ad.getId());
+							gwtParam.setName(ad.getName());
+							gwtParam.setDescription(ad.getDescription());
+							gwtParam.setType(GwtConfigParameterType.valueOf(ad.getType().name()));
+							gwtParam.setRequired(ad.isRequired());
+							gwtParam.setCardinality(ad.getCardinality());
+							if (ad.getOption() != null && ad.getOption().size() > 0) {
+								Map<String, String> options = new HashMap<String, String>();
+								for (Option option : ad.getOption()) {
+									options.put(option.getLabel(), option.getValue());
+								}
+								gwtParam.setOptions(options);
+							}
+							gwtParam.setMin(ad.getMin());
+							gwtParam.setMax(ad.getMax());
+		            		if (config.getConfigurationProperties() != null) {
+
+		            			// handle the value based on the cardinality of the attribute
+		            			int cardinality = ad.getCardinality();
+		            			Object value = config.getConfigurationProperties().get(ad.getId());
+	            				if (value != null) {
+			            			if (cardinality == 0 || cardinality == 1 || cardinality == -1) {
+			            				gwtParam.setValue(value.toString());
+			            			}
+			            			else {
+			            				// this could be an array value
+			            				if (value instanceof Object[]) {
+			            					Object[] objValues = (Object[]) value;
+			            					List<String> strValues = new ArrayList<String>();
+			            					for (Object v : objValues) {
+			            						if (v != null) {
+			            							strValues.add(v.toString());
+			            						}
+			            					}
+			            					gwtParam.setValues(strValues.toArray( new String[]{}));
+			            				}
+			            			}
+	            				}
+								gwtParams.add(gwtParam);
+		            		}
+						}
+						gwtConfigs.add(gwtConfig);
+					}
+				}
+			} 
+			catch (Throwable t) {
+				KuraExceptionHandler.handle(t);
+			}
+			return gwtConfigs;
+		}
 
 	
 	public void updateComponentConfiguration(GwtConfigComponent gwtCompConfig)

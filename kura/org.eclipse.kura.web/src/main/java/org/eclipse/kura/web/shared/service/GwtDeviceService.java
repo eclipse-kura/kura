@@ -29,5 +29,5 @@ public interface GwtDeviceService extends RemoteService
 
 	public ListLoadResult<GwtGroupedNVPair> findSystemProperties() throws GwtKuraException; 
 	
-	public String executeCommand(String cmd) throws GwtKuraException;
+	public String executeCommand(String cmd, String pwd) throws GwtKuraException;
 }

@@ -22,7 +22,7 @@
 		<dependency>
 			<groupId>de.entropia</groupId>
 			<artifactId>libsocket-can-java</artifactId>
-			<version>1.0.0</version>
+			<version>1.0.1</version>
 		</dependency>
 	</dependencies>
 

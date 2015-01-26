@@ -192,7 +192,7 @@ public class PppConfigReader implements NetworkConfigurationVisitor {
         if(!peerFile.exists()) {
         	persist = true;
         	maxFail = 5;
-        	idle = 300;
+        	idle = 95;
         	activeFilter = "inbound";
             s_logger.warn("getModemConfig() :: PPPD peer file does not exist - {}", peerFilename);
         } else {

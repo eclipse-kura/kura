@@ -19,5 +19,5 @@ Import-Package:
 Service-Component: OSGI-INF/*.xml
 Bundle-ClassPath: .
 Bundle-ActivationPolicy: lazy
-Require-Bundle: org.junit;bundle-version="4.10.0",
- org.eclipse.kura.test;bundle-version="1.0.0"
+
+

@@ -503,6 +503,13 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 					                    		}
 					                    		
 					                    		try {
+						                    		String sModel = cellModemService.getModel();
+						                    		((GwtModemInterfaceConfig)gwtNetConfig).setModel(sModel);
+					                    		} catch (KuraException e) {
+					                    			s_logger.warn("Failed to get model information from modem", e);
+					                    		}
+					                    		
+					                    		try {
 					                    			boolean gpsSupported = cellModemService.isGpsSupported();
 					                    			s_logger.debug("Setting GPS supported to {}", gpsSupported);
 					                    			((GwtModemInterfaceConfig)gwtNetConfig).setGpsSupported(gpsSupported);

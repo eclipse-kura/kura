@@ -1,4 +1,4 @@
-Package: KURA
+Package: kura
 Version: [[project.version]]
 Section: misc
 Priority: low

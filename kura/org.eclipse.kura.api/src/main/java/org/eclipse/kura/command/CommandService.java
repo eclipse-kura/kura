@@ -11,7 +11,11 @@
  */
 package org.eclipse.kura.command;
 
+import java.io.IOException;
+
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.message.KuraRequestPayload;
+import org.eclipse.kura.message.KuraResponsePayload;
 
 /**
  * This interface provides methods for running system commands from the web console.

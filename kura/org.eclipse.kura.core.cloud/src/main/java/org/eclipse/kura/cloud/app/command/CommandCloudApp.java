@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
 
 public class CommandCloudApp extends Cloudlet implements ConfigurableComponent, CommandService{
 	private static final Logger s_logger = LoggerFactory.getLogger(CommandCloudApp.class);
-	private static final String EDC_PASSWORD_METRIC_NAME= "password";
+	private static final String EDC_PASSWORD_METRIC_NAME= "command.password";
 	private static final String COMMAND_ENABLED_ID= "command.enable";
 	private static final String COMMAND_PASSWORD_ID= "command.password.value";
 	private static final String COMMAND_WORKDIR_ID= "command.working.directory";
@@ -84,20 +84,9 @@ public class CommandCloudApp extends Cloudlet implements ConfigurableComponent, 
 		s_logger.info("updated...: " + properties);
 
 		this.properties = properties;
-		boolean verificationEnabled= (Boolean) properties.get(COMMAND_ENABLED_ID);
-		if(verificationEnabled){
-			activate(compCtx);
-		}
-
-
-
-		if(properties != null && !properties.isEmpty()) {
-			Iterator<Entry<String, Object>> it = properties.entrySet().iterator();
-			while(it.hasNext()) {
-				Entry<String, Object> entry = it.next();
-				s_logger.info("New property - " + entry.getKey() + " = " +
-						entry.getValue() + " of type " + entry.getValue().getClass().toString());
-			}
+		boolean serviceEnabled= (Boolean) properties.get(COMMAND_ENABLED_ID);
+		if(serviceEnabled){
+			super.activate(compCtx);
 		}
 	}
 

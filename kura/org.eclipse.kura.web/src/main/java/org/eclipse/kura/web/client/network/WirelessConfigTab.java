@@ -743,18 +743,19 @@ public class WirelessConfigTab extends LayoutContainer
         m_pingAccessPointRadioTrue = new Radio();  
         m_pingAccessPointRadioTrue.setBoxLabel(MSGS.trueLabel());
         m_pingAccessPointRadioTrue.setItemId("true");
+        m_pingAccessPointRadioTrue.addListener(Events.OnMouseOver, new MouseOverListener(MSGS.netWifiToolTipPingAccessPoint()));
         
         m_pingAccessPointRadioFalse = new Radio();  
         m_pingAccessPointRadioFalse.setBoxLabel(MSGS.falseLabel());  
         m_pingAccessPointRadioFalse.setItemId("false");
+        m_pingAccessPointRadioFalse.addListener(Events.OnMouseOver, new MouseOverListener(MSGS.netWifiToolTipPingAccessPoint()));
         
         m_pingAccessPointRadioGroup = new RadioGroup();
         m_pingAccessPointRadioGroup.setName("pingAccessPoint");
         m_pingAccessPointRadioGroup.setFieldLabel(MSGS.netWifiWirelessPingAccessPoint()); 
         m_pingAccessPointRadioGroup.add(m_pingAccessPointRadioTrue);  
         m_pingAccessPointRadioGroup.add(m_pingAccessPointRadioFalse);
-        m_pingAccessPointRadioGroup.addPlugin(m_dirtyPlugin);  
-        m_pingAccessPointRadioGroup.addListener(Events.OnMouseOver, new MouseOverListener(MSGS.netWifiToolTipPingAccessPoint()));
+        m_pingAccessPointRadioGroup.addPlugin(m_dirtyPlugin);
         m_pingAccessPointRadioGroup.setStyleAttribute("margin-top", Constants.LABEL_MARGIN_TOP_SEPARATOR);
         
         m_ignoreSsidRadioTrue = new Radio();  

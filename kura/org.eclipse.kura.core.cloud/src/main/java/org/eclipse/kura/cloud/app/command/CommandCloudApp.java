@@ -13,15 +13,13 @@ package org.eclipse.kura.cloud.app.command;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Iterator;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloud.Cloudlet;
 import org.eclipse.kura.cloud.CloudletTopic;
-import org.eclipse.kura.command.CommandService;
+import org.eclipse.kura.command.PasswordCommandService;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.message.KuraRequestPayload;
 import org.eclipse.kura.message.KuraResponsePayload;
@@ -29,7 +27,8 @@ import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class CommandCloudApp extends Cloudlet implements ConfigurableComponent, CommandService{
+
+public class CommandCloudApp extends Cloudlet implements ConfigurableComponent, PasswordCommandService{
 	private static final Logger s_logger = LoggerFactory.getLogger(CommandCloudApp.class);
 	private static final String EDC_PASSWORD_METRIC_NAME= "command.password";
 	private static final String COMMAND_ENABLED_ID= "command.enable";
@@ -38,17 +37,15 @@ public class CommandCloudApp extends Cloudlet implements ConfigurableComponent, 
 	private static final String COMMAND_TIMEOUT_ID= "command.timeout";
 	private static final String COMMAND_ENVIRONMENT_ID= "command.environment";
 
+
 	public static final String APP_ID = "CMD-V1";
 
 	private Map<String, Object> properties;
 
 	private ComponentContext compCtx;
-	
-
 
 	/* EXEC */
 	public static final String RESOURCE_COMMAND = "command";
-
 
 	public CommandCloudApp() {
 		super(APP_ID);
@@ -63,7 +60,6 @@ public class CommandCloudApp extends Cloudlet implements ConfigurableComponent, 
 	// This component inherits the required dependencies from the parent
 	// class CloudApp.
 
-
 	// ----------------------------------------------------------------
 	//
 	// Activation APIs
@@ -72,18 +68,18 @@ public class CommandCloudApp extends Cloudlet implements ConfigurableComponent, 
 
 	// This component inherits the activation methods from the parent
 	// class CloudApp.
-	protected void activate(ComponentContext componentContext, Map<String,Object> properties) 
-	{
+	protected void activate(ComponentContext componentContext,
+			Map<String, Object> properties) {
 		s_logger.info("Bundle " + APP_ID + " has started with config!");
-		this.compCtx= componentContext;
+		this.compCtx = componentContext;
 		updated(properties);
 	}
 
-	public void updated(Map<String,Object> properties)
-	{
+	public void updated(Map<String, Object> properties) {
 		s_logger.info("updated...: " + properties);
 
 		this.properties = properties;
+
 		boolean serviceEnabled= (Boolean) properties.get(COMMAND_ENABLED_ID);
 		if(serviceEnabled){
 			super.activate(compCtx);
@@ -91,30 +87,32 @@ public class CommandCloudApp extends Cloudlet implements ConfigurableComponent, 
 	}
 
 	@Override
-	protected void doExec(CloudletTopic reqTopic, KuraRequestPayload reqPayload, KuraResponsePayload respPayload)
+	protected void doExec(CloudletTopic reqTopic,
+			KuraRequestPayload reqPayload, KuraResponsePayload respPayload)
 			throws KuraException {
 
 		String[] resources = reqTopic.getResources();
 
 		if (resources == null || resources.length != 1) {
 			s_logger.error("Bad request topic: {}", reqTopic.toString());
-			s_logger.error("Expected one resource but found {}", resources !=null ? resources.length: "none");
-			respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_BAD_REQUEST);
+			s_logger.error("Expected one resource but found {}",
+					resources != null ? resources.length : "none");
+			respPayload
+					.setResponseCode(KuraResponsePayload.RESPONSE_CODE_BAD_REQUEST);
 			return;
 		}
 
 		if (!resources[0].equals(RESOURCE_COMMAND)) {
 			s_logger.error("Bad request topic: {}", reqTopic.toString());
 			s_logger.error("Cannot find resource with name: {}", resources[0]);
-			respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_NOTFOUND);
+			respPayload
+					.setResponseCode(KuraResponsePayload.RESPONSE_CODE_NOTFOUND);
 			return;
 		}
 
 		s_logger.info("EXECuting resource: {}", RESOURCE_COMMAND);
 
-		KuraCommandResponsePayload commandResp= execute(reqPayload);
-
-
+		KuraCommandResponsePayload commandResp = execute(reqPayload);
 
 		for (String name : commandResp.metricNames()) {
 			Object value = commandResp.getMetric(name);
@@ -123,55 +121,61 @@ public class CommandCloudApp extends Cloudlet implements ConfigurableComponent, 
 		respPayload.setBody(commandResp.getBody());
 	}
 
-
 	@Override
-	public KuraCommandResponsePayload execute(KuraRequestPayload reqPayload){
-		KuraCommandRequestPayload commandReq = new KuraCommandRequestPayload(reqPayload);
+	public KuraCommandResponsePayload execute(KuraRequestPayload reqPayload) {
+		KuraCommandRequestPayload commandReq = new KuraCommandRequestPayload(
+				reqPayload);
 
-		//String receivedPassword= (String) reqPayload.getMetric(EDC_PASSWORD_METRIC_NAME);
-		String receivedPassword= (String) commandReq.getMetric(EDC_PASSWORD_METRIC_NAME);
-		String commandPassword= (String) properties.get(COMMAND_PASSWORD_ID);
+		// String receivedPassword= (String)
+		// reqPayload.getMetric(EDC_PASSWORD_METRIC_NAME);
+		String receivedPassword = (String) commandReq
+				.getMetric(EDC_PASSWORD_METRIC_NAME);
+		String commandPassword = (String) properties.get(COMMAND_PASSWORD_ID);
 
-		KuraCommandResponsePayload commandResp = new KuraCommandResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
+		KuraCommandResponsePayload commandResp = new KuraCommandResponsePayload(
+				KuraResponsePayload.RESPONSE_CODE_OK);
 
-		boolean isExecutionAllowed= verifyPasswords(commandPassword, receivedPassword);
-		if(isExecutionAllowed){
+		boolean isExecutionAllowed = verifyPasswords(commandPassword,
+				receivedPassword);
+		if (isExecutionAllowed) {
 
 			String command = commandReq.getCommand();
 			if (command == null) {
 				s_logger.error("null command");
-				commandResp.setResponseCode(KuraResponsePayload.RESPONSE_CODE_BAD_REQUEST);
+				commandResp
+						.setResponseCode(KuraResponsePayload.RESPONSE_CODE_BAD_REQUEST);
 			}
 
-			String[] cmdarray= prepareCommandArray(commandReq, command);
+			String[] cmdarray = prepareCommandArray(commandReq, command);
 
-			String[] envp= getEnvironment(commandReq);
-			String dir= getDir(commandReq);
+			String[] envp = getEnvironment(commandReq);
+			String dir = getDir(commandReq);
 
 			byte[] zipBytes = commandReq.getZipBytes();
 			if (zipBytes != null) {
-				try {				
+				try {
 					UnZip.unZipBytes(zipBytes, dir);
-				} 
-				catch (IOException e) {
+				} catch (IOException e) {
 					s_logger.error("Error unzipping command zip bytes", e);
 
 					commandResp.setException(e);
 				}
 			}
 
-			Process  proc= null;
+			Process proc = null;
 			try {
-				proc= createExecutionProcess(dir, cmdarray, envp);
+				proc = createExecutionProcess(dir, cmdarray, envp);
 			} catch (Throwable t) {
 				s_logger.error("Error executing command {}", t);
-				commandResp.setResponseCode(KuraResponsePayload.RESPONSE_CODE_ERROR);
+				commandResp
+						.setResponseCode(KuraResponsePayload.RESPONSE_CODE_ERROR);
 				commandResp.setException(t);
 
 			}
 
-			boolean runAsync = commandReq.isRunAsync() != null ? commandReq.isRunAsync() : false;
-			int timeout= getTimeout(commandReq);
+			boolean runAsync = commandReq.isRunAsync() != null ? commandReq
+					.isRunAsync() : false;
+			int timeout = getTimeout(commandReq);
 
 			ProcessMonitorThread pmt = null;
 			pmt = new ProcessMonitorThread(proc, commandReq.getStdin(), timeout);
@@ -188,10 +192,11 @@ public class CommandCloudApp extends Cloudlet implements ConfigurableComponent, 
 				}
 			}
 
-		}else{
+		} else {
 
 			s_logger.error("Password required but not correct and/or missing");
-			commandResp.setResponseCode(KuraResponsePayload.RESPONSE_CODE_ERROR);
+			commandResp
+					.setResponseCode(KuraResponsePayload.RESPONSE_CODE_ERROR);
 			commandResp.setExceptionMessage("Password missing or not correct");
 		}
 
@@ -200,112 +205,121 @@ public class CommandCloudApp extends Cloudlet implements ConfigurableComponent, 
 	}
 
 	@Override
-	public String execute(String cmd, String password) throws KuraException, IOException {
+	public String execute(String cmd, String password) throws KuraException {
 		// TODO Auto-generated method stub
-		boolean verificationEnabled= (Boolean) properties.get(COMMAND_ENABLED_ID);
-		if(verificationEnabled){
+		boolean verificationEnabled = (Boolean) properties
+				.get(COMMAND_ENABLED_ID);
+		if (verificationEnabled) {
 
-			String commandPassword= (String) properties.get(COMMAND_PASSWORD_ID);
-			boolean isExecutionAllowed= verifyPasswords(commandPassword, password);
-			if(isExecutionAllowed){
+			String commandPassword = (String) properties
+					.get(COMMAND_PASSWORD_ID);
+			boolean isExecutionAllowed = verifyPasswords(commandPassword,
+					password);
+			if (isExecutionAllowed) {
 
-				String[] cmdArray= cmd.split(" ");
-				String defaultDir= getDefaultWorkDir();
-				String[] environment= getDefaultEnvironment();
-				Process proc= createExecutionProcess(defaultDir, cmdArray, environment);
-
-				int timeout= getDefaultTimeout();
-				ProcessMonitorThread pmt = null;
-				pmt = new ProcessMonitorThread(proc, null, timeout);
-				pmt.start();
-
+				String[] cmdArray = cmd.split(" ");
+				String defaultDir = getDefaultWorkDir();
+				String[] environment = getDefaultEnvironment();
 				try {
-					pmt.join();
-					if(pmt.getExitValue() == 0){
-						return pmt.getStdout();
-					}else{
-						return pmt.getStderr();
+					Process proc = createExecutionProcess(defaultDir, cmdArray,
+							environment);
+
+					int timeout = getDefaultTimeout();
+					ProcessMonitorThread pmt = null;
+					pmt = new ProcessMonitorThread(proc, null, timeout);
+					pmt.start();
+
+					try {
+						pmt.join();
+						if (pmt.getExitValue() == 0) {
+							return pmt.getStdout();
+						} else {
+							return pmt.getStderr();
+						}
+					} catch (InterruptedException e) {
+						Thread.interrupted();
+						pmt.interrupt();
+						throw KuraException.internalError(e);
 					}
-				} catch (InterruptedException e) {
-					Thread.interrupted();
-					pmt.interrupt();
-					throw KuraException.internalError(e);
+				} catch (IOException ex) {
+					throw new KuraException(KuraErrorCode.INTERNAL_ERROR, ex);
 				}
-			}else{
-				throw new KuraException(KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID);
+			} else {
+				throw new KuraException(
+						KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID);
 			}
-		}else{
+		} else {
 			throw new KuraException(KuraErrorCode.OPERATION_NOT_SUPPORTED);
 		}
 
-
 	}
 
-
-	//command service defaults getters
-	private String getDefaultWorkDir(){
+	// command service defaults getters
+	private String getDefaultWorkDir() {
 		return (String) properties.get(COMMAND_WORKDIR_ID);
 	}
 
-	private int getDefaultTimeout(){
+	private int getDefaultTimeout() {
 		return (Integer) properties.get(COMMAND_TIMEOUT_ID);
 	}
 
-	private String[] getDefaultEnvironment(){
-		String envString= (String) properties.get(COMMAND_ENVIRONMENT_ID);
-		if(envString != null){
+	private String[] getDefaultEnvironment() {
+		String envString = (String) properties.get(COMMAND_ENVIRONMENT_ID);
+		if (envString != null) {
 			return envString.split(" ");
 		}
 		return null;
 	}
-	
-	
-	private String getDir(KuraCommandRequestPayload req){
+
+	private String getDir(KuraCommandRequestPayload req) {
 		String dir = req.getWorkingDir();
-		String defaultDir= getDefaultWorkDir();
+		String defaultDir = getDefaultWorkDir();
 		if (dir != null && !dir.isEmpty()) {
 			return dir;
 		}
 		return defaultDir;
 	}
-	
-	private int getTimeout(KuraCommandRequestPayload req){
+
+	private int getTimeout(KuraCommandRequestPayload req) {
 		Integer timeout = req.getTimeout();
-		int defaultTimeout= getDefaultTimeout();
+		int defaultTimeout = getDefaultTimeout();
 		if (timeout != null) {
 			return timeout;
 		}
 		return defaultTimeout;
 	}
-	
-	private String[] getEnvironment(KuraCommandRequestPayload req){
+
+	private String[] getEnvironment(KuraCommandRequestPayload req) {
 		String[] envp = req.getEnvironmentPairs();
-		String[] defaultEnv= getDefaultEnvironment();
+		String[] defaultEnv = getDefaultEnvironment();
 		if (envp != null && envp.length != 0) {
 			return envp;
 		}
 		return defaultEnv;
 	}
 
-
-	private boolean verifyPasswords(String commandPassword, String receivedPassword){
-		if (commandPassword == null && receivedPassword == null){
+	private boolean verifyPasswords(String commandPassword,
+			String receivedPassword) {
+		if (commandPassword == null && receivedPassword == null) {
 			return true;
-		}else if (commandPassword != null && commandPassword.equals(receivedPassword)){
+		} else if (commandPassword != null
+				&& commandPassword.equals(receivedPassword)) {
 			return true;
 		}
 		return false;
 	}
 
-	private Process createExecutionProcess(String dir, String[] cmdarray, String[] envp) throws IOException{
+	private Process createExecutionProcess(String dir, String[] cmdarray,
+			String[] envp) throws IOException {
 		Runtime rt = Runtime.getRuntime();
-		Process  proc = null;
+		Process proc = null;
 		File fileDir = dir == null ? null : new File(dir);
 		proc = rt.exec(cmdarray, envp, fileDir);
 		return proc;
 	}
 
-	private String[] prepareCommandArray(KuraCommandRequestPayload req, String command){
+	private String[] prepareCommandArray(KuraCommandRequestPayload req,
+			String command) {
 		String[] args = req.getArguments();
 		int argsCount = args != null ? args.length : 0;
 		String[] cmdarray = new String[1 + argsCount];
@@ -322,8 +336,8 @@ public class CommandCloudApp extends Cloudlet implements ConfigurableComponent, 
 		return cmdarray;
 	}
 
-
-	private void prepareResponseNoTimeout(KuraCommandResponsePayload resp, ProcessMonitorThread pmt ){
+	private void prepareResponseNoTimeout(KuraCommandResponsePayload resp,
+			ProcessMonitorThread pmt) {
 
 		if (pmt.getException() != null) {
 			resp.setResponseCode(KuraResponsePayload.RESPONSE_CODE_ERROR);
@@ -342,7 +356,8 @@ public class CommandCloudApp extends Cloudlet implements ConfigurableComponent, 
 
 	}
 
-	private void prepareTimeoutResponse(KuraCommandResponsePayload resp, ProcessMonitorThread pmt){
+	private void prepareTimeoutResponse(KuraCommandResponsePayload resp,
+			ProcessMonitorThread pmt) {
 		resp.setStderr(pmt.getStderr());
 		resp.setStdout(pmt.getStdout());
 		resp.setTimedout(true);

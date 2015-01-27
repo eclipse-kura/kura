@@ -61,7 +61,7 @@
         	cardinality="0"
         	required="false"
         	default=""
-        	description="Environment specification.">
+        	description="Space separated list of environment variables in the form key=value.">
         </AD>
                     
     </OCD>

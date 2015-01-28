@@ -102,7 +102,9 @@ public abstract class Cloudlet implements CloudClientListener
 		// close the application client. 
 		// this will unsubscribe all open subscriptions
 		s_logger.info("Releasing CloudApplicationClient for {}...", m_applicationId);
-		m_cloudClient.release();
+		if(m_cloudClient != null){
+			m_cloudClient.release();
+		}
 		m_cloudService = null;
 	}
 

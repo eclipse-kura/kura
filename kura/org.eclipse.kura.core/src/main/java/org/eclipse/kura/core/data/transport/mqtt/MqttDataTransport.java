@@ -84,6 +84,7 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 	private static final String MQTT_KEEP_ALIVE_PROP_NAME = "keep-alive";
 	private static final String MQTT_CLEAN_SESSION_PROP_NAME = "clean-session";
 	private static final String MQTT_TIMEOUT_PROP_NAME = "timeout"; // All timeouts
+	private static final String MQTT_DEFAULT_VERSION_PROP_NAME = "protocol-version";
 	
 	private static final String MQTT_LWT_QOS_PROP_NAME = "lwt.qos";
 	private static final String MQTT_LWT_RETAIN_PROP_NAME = "lwt.retain";
@@ -643,6 +644,8 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 					.get(MQTT_TIMEOUT_PROP_NAME));
 
 			conOpt.setCleanSession((Boolean) properties.get(MQTT_CLEAN_SESSION_PROP_NAME));
+			
+			conOpt.setMqttVersion((Integer) properties.get(MQTT_DEFAULT_VERSION_PROP_NAME));
 			
 			synchronized (m_topicContext) {
 				m_topicContext.clear();

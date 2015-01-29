@@ -33,7 +33,7 @@ public class CommandCloudApp extends Cloudlet implements ConfigurableComponent,
 		PasswordCommandService {
 	private static final Logger s_logger = LoggerFactory
 			.getLogger(CommandCloudApp.class);
-	private static final String EDC_PASSWORD_METRIC_NAME = "password";
+	private static final String EDC_PASSWORD_METRIC_NAME = "command.password";
 	private static final String COMMAND_ENABLED_ID = "command.enable";
 	private static final String COMMAND_PASSWORD_ID = "command.password.value";
 	private static final String COMMAND_WORKDIR_ID = "command.working.directory";
@@ -84,18 +84,18 @@ public class CommandCloudApp extends Cloudlet implements ConfigurableComponent,
 		boolean verificationEnabled = (Boolean) properties
 				.get(COMMAND_ENABLED_ID);
 		if (verificationEnabled) {
-			activate(compCtx);
-		}
-
-		if (properties != null && !properties.isEmpty()) {
-			Iterator<Entry<String, Object>> it = properties.entrySet()
-					.iterator();
-			while (it.hasNext()) {
-				Entry<String, Object> entry = it.next();
-				s_logger.info("New property - " + entry.getKey() + " = "
-						+ entry.getValue() + " of type "
-						+ entry.getValue().getClass().toString());
+			super.activate(compCtx);
+		} else {
+			if (getCloudApplicationClient() != null) {
+				super.deactivate(compCtx);
 			}
+		}
+	}
+
+	protected void deactivate(ComponentContext componentContext) {
+		s_logger.info("Bundle " + APP_ID + " is deactivating!");
+		if (getCloudApplicationClient() != null) {
+			super.deactivate(compCtx);
 		}
 	}
 

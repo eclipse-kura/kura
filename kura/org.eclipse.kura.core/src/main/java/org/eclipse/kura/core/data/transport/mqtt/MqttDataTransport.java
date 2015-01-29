@@ -49,31 +49,38 @@ import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class MqttDataTransport implements DataTransportService, MqttCallback, ConfigurableComponent, SslServiceListener 
-{
-	private static final Logger s_logger = LoggerFactory.getLogger(MqttDataTransport.class);
+public class MqttDataTransport implements DataTransportService, MqttCallback,
+		ConfigurableComponent, SslServiceListener {
+	private static final Logger s_logger = LoggerFactory
+			.getLogger(MqttDataTransport.class);
 
 	private static final String MQTT_SCHEME = "mqtt://";
 	private static final String MQTTS_SCHEME = "mqtts://";
 	// TODO: add mqtt+ssl for secure mqtt
-	
-	private static final String TOPIC_PATTERN = "#([^\\s/]+)"; // '#' followed by one or more non-whitespace but not the '/'
-	private static final Pattern s_topicPattern = Pattern.compile(TOPIC_PATTERN);
 
-	private SystemService     m_systemService;
+	private static final String TOPIC_PATTERN = "#([^\\s/]+)"; // '#' followed
+																// by one or
+																// more
+																// non-whitespace
+																// but not the
+																// '/'
+	private static final Pattern s_topicPattern = Pattern
+			.compile(TOPIC_PATTERN);
+
+	private SystemService m_systemService;
 	private SslManagerService m_sslManagerService;
-	
+
 	private MqttAsyncClient m_mqttClient;
 
 	private DataTransportListeners m_dataTransportListeners;
-		
+
 	private MqttClientConfiguration m_clientConf;
 	private boolean m_newSession;
 	private String m_sessionId;
-	
+
 	PersistenceType m_persistenceType;
 	MqttClientPersistence m_persistence;
-	
+
 	private Map<String, String> m_topicContext = new HashMap<String, String>();
 	private Map<String, Object> m_properties = new HashMap<String, Object>();
 
@@ -83,8 +90,10 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 	private static final String MQTT_CLIENT_ID_PROP_NAME = "client-id";
 	private static final String MQTT_KEEP_ALIVE_PROP_NAME = "keep-alive";
 	private static final String MQTT_CLEAN_SESSION_PROP_NAME = "clean-session";
-	private static final String MQTT_TIMEOUT_PROP_NAME = "timeout"; // All timeouts
-	
+	private static final String MQTT_TIMEOUT_PROP_NAME = "timeout"; // All
+																	// timeouts
+	private static final String MQTT_DEFAULT_VERSION_PROP_NAME = "protocol-version";
+
 	private static final String MQTT_LWT_QOS_PROP_NAME = "lwt.qos";
 	private static final String MQTT_LWT_RETAIN_PROP_NAME = "lwt.retain";
 	private static final String MQTT_LWT_TOPIC_PROP_NAME = "lwt.topic";
@@ -93,34 +102,32 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 	private static final String CLOUD_ACCOUNT_NAME_PROP_NAME = "topic.context.account-name";
 
 	private static final String PERSISTENCE_TYPE_PROP_NAME = "in-flight.persistence";
-	
+
 	private static final String TOPIC_ACCOUNT_NAME_CTX_NAME = "account-name";
 	private static final String TOPIC_DEVICE_ID_CTX_NAME = "client-id";
-	
-	
-    // ----------------------------------------------------------------
-    //
-    //   Dependencies
-    //
-    // ----------------------------------------------------------------
 
-    public void setSystemService(SystemService systemService) {
-        this.m_systemService = systemService;
-    }
+	// ----------------------------------------------------------------
+	//
+	// Dependencies
+	//
+	// ----------------------------------------------------------------
 
-    public void unsetSystemService(SystemService systemService) {
-        this.m_systemService = null;
-    }
+	public void setSystemService(SystemService systemService) {
+		this.m_systemService = systemService;
+	}
 
-    public void setSslManagerService(SslManagerService sslManagerService) {
-        this.m_sslManagerService = sslManagerService;
-    }
+	public void unsetSystemService(SystemService systemService) {
+		this.m_systemService = null;
+	}
 
-    public void unsetSslManagerService(SslManagerService sslManagerService) {
-        this.m_sslManagerService= null;
-    }
-    
-    
+	public void setSslManagerService(SslManagerService sslManagerService) {
+		this.m_sslManagerService = sslManagerService;
+	}
+
+	public void unsetSslManagerService(SslManagerService sslManagerService) {
+		this.m_sslManagerService = null;
+	}
+
 	// ----------------------------------------------------------------
 	//
 	// Activation APIs
@@ -128,8 +135,7 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 	// ----------------------------------------------------------------
 
 	protected void activate(ComponentContext componentContext,
-							Map<String, Object> properties) 
-	{
+			Map<String, Object> properties) {
 		s_logger.info("Activating...");
 
 		// We need to catch the configuration exception and activate anyway.
@@ -143,21 +149,21 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 					"Invalid client configuration. Service will not be able to connect until the configuration is updated",
 					e);
 		}
-				
+
 		ServiceTracker<DataTransportListener, DataTransportListener> listenersTracker = new ServiceTracker<DataTransportListener, DataTransportListener>(
 				componentContext.getBundleContext(),
 				DataTransportListener.class, null);
-		
+
 		// Deferred open of tracker to prevent
-		// java.lang.Exception: Recursive invocation of ServiceFactory.getService
+		// java.lang.Exception: Recursive invocation of
+		// ServiceFactory.getService
 		// on ProSyst
 		m_dataTransportListeners = new DataTransportListeners(listenersTracker);
-		
+
 		// Do nothing waiting for the connect request from the upper layer.
 	}
 
-	protected void deactivate(ComponentContext componentContext) 
-	{
+	protected void deactivate(ComponentContext componentContext) {
 		s_logger.debug("Deactivating...");
 
 		// Before deactivating us, the OSGi container should have first
@@ -170,24 +176,23 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 		if (isConnected()) {
 			disconnect(0);
 		}
-		
+
 		m_dataTransportListeners.close();
 	}
 
-	public void updated(Map<String, Object> properties) 
-	{
+	public void updated(Map<String, Object> properties) {
 		s_logger.info("Updating...");
-		
+
 		m_properties.clear();
 		m_properties.putAll(properties);
 
 		update();
-		
+
 	}
-	
+
 	private void update() {
 		boolean wasConnected = isConnected();
-		
+
 		// First notify the Listeners
 		// We do nothing other than notifying the listeners which may later
 		// request to disconnect and reconnect again.
@@ -204,25 +209,23 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 		m_dataTransportListeners.onConfigurationUpdated(wasConnected);
 	}
 
+	// ----------------------------------------------------------------
+	//
+	// Service APIs
+	//
+	// ----------------------------------------------------------------
 
-    // ----------------------------------------------------------------
-    //
-    //   Service APIs
-    //
-    // ----------------------------------------------------------------
-
-	public synchronized void connect() throws KuraConnectException 
-	{
+	public synchronized void connect() throws KuraConnectException {
 		// We treat this as an application bug.
 		if (isConnected()) {
 			s_logger.error("Already connected");
 			throw new IllegalStateException("Already connected");
 			// TODO: define an KuraRuntimeException
 		}
-		
+
 		// Attempt to setup the MQTT session
-	    setupMqttSession();
-		
+		setupMqttSession();
+
 		if (m_mqttClient == null) {
 			s_logger.error("Invalid configuration");
 			throw new IllegalStateException("Invalid configuration");
@@ -242,13 +245,15 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 				+ m_clientConf.getConnectOptions().getConnectionTimeout());
 		s_logger.info("#  cleanSession    = "
 				+ m_clientConf.getConnectOptions().isCleanSession());
+		s_logger.info("#  MQTT version    = "
+				+ getMqttVersionLabel(m_clientConf.getConnectOptions().getMqttVersion()));
 		s_logger.info("#  willDestination = "
 				+ m_clientConf.getConnectOptions().getWillDestination());
 		s_logger.info("#  willMessage     = "
-				+ m_clientConf.getConnectOptions().getWillMessage()); 
+				+ m_clientConf.getConnectOptions().getWillMessage());
 		s_logger.info("#");
 		s_logger.info("#  Connecting...");
-		
+
 		//
 		// connect
 		try {
@@ -257,27 +262,32 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 			connectToken.waitForCompletion(getTimeToWaitMillis() * 3);
 			s_logger.info("#  Connected!");
 			s_logger.info("# ------------------------------------------------------------");
-		} 
-		catch (MqttException e) {
-			s_logger.warn("xxxxxxxxxx  Connect failed. Forcing disconnect. xxxxxxxxxxxxxxxx ", e.getCause().getMessage());
-			try { 				
+		} catch (MqttException e) {
+			s_logger.warn(
+					"xxxxxxxxxx  Connect failed. Forcing disconnect. xxxxxxxxxxxxxxxx ",
+					e.getCause().getMessage());
+			try {
 				// FIXME: Close on CONNACK timeout.
 				// This exposes a Paho bug!
-				// If a connection is established, by mistake, to a non-MQTT server, e.g. to an SSH server,
-				// Paho will wait for a VERY long time (forever?) to get the MQTT CONNACK.
+				// If a connection is established, by mistake, to a non-MQTT
+				// server, e.g. to an SSH server,
+				// Paho will wait for a VERY long time (forever?) to get the
+				// MQTT CONNACK.
 				// We can wait on the connectToken specifying a shorter timeout.
 				// Upon connect timeout, we can:
-				//  - call disconnect(0), but this does not work and an "Already Disconnecting" exception will be raised on the next connect attempt.
-				//  - call close(), but this does not work and an "Already in Use Persistence" exception will be raised when retrying the connect on a new instance.
-				
+				// - call disconnect(0), but this does not work and an
+				// "Already Disconnecting" exception will be raised on the next
+				// connect attempt.
+				// - call close(), but this does not work and an
+				// "Already in Use Persistence" exception will be raised when
+				// retrying the connect on a new instance.
+
 				// prevent callbacks from a zombie client
 				m_mqttClient.setCallback(null);
 				m_mqttClient.close();
-			}
-			catch (Exception de) {
+			} catch (Exception de) {
 				s_logger.warn("Forced disconnect exception.", de);
-			}
-			finally {
+			} finally {
 				m_mqttClient = null;
 			}
 			throw new KuraConnectException(e, "Cannot connect");
@@ -294,28 +304,28 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 		}
 		return false;
 	}
-	
+
 	public String getBrokerUrl() {
 		if (m_clientConf != null) {
 			return m_clientConf.getBrokerUrl();
 		}
 		return "";
 	}
-	
+
 	public String getAccountName() {
 		if (m_clientConf != null) {
 			return m_topicContext.get(TOPIC_ACCOUNT_NAME_CTX_NAME);
 		}
 		return "";
 	}
-	
+
 	public String getUsername() {
 		if (m_clientConf != null) {
 			return m_clientConf.getConnectOptions().getUserName();
 		}
 		return "";
 	}
-	
+
 	@Override
 	public String getClientId() {
 		if (m_clientConf != null) {
@@ -324,21 +334,21 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 		return "";
 	}
 
-	// TODO: java.lang.reflect.Proxy for every listener in order to catch runtime exceptions thrown by listener implementor and log them.
-	
-	public synchronized void disconnect(long quiesceTimeout) 
-	{
+	// TODO: java.lang.reflect.Proxy for every listener in order to catch
+	// runtime exceptions thrown by listener implementor and log them.
+
+	public synchronized void disconnect(long quiesceTimeout) {
 		// Disconnect the client if it's connected. If it fails log the
 		// exception.
 		// Don't throw an exception because the caller would not
 		// be able to handle it.
 		if (isConnected()) {
 			s_logger.info("Disconnecting...");
-			
+
 			//
 			// notify the listeners
 			m_dataTransportListeners.onDisconnecting();
-			
+
 			try {
 				IMqttToken token = m_mqttClient.disconnect(quiesceTimeout);
 				token.waitForCompletion(getTimeToWaitMillis());
@@ -346,7 +356,7 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 			} catch (MqttException e) {
 				s_logger.error("Disconnect failed", e);
 			}
-			
+
 			//
 			// notify the listeners
 			m_dataTransportListeners.onDisconnected();
@@ -362,42 +372,45 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 	// ---------------------------------------------------------
 
 	@Override
-	public void subscribe(String topic, int qos) throws KuraTimeoutException, KuraException, KuraNotConnectedException {
-				
+	public void subscribe(String topic, int qos) throws KuraTimeoutException,
+			KuraException, KuraNotConnectedException {
+
 		if (m_mqttClient == null || !m_mqttClient.isConnected()) {
 			throw new KuraNotConnectedException("Not connected");
 		}
-		
+
 		topic = replaceTopicVariables(topic);
-		
+
 		s_logger.info("Subscribing to topic: {} with QoS: {}", topic, qos);
-		
+
 		try {
 			IMqttToken token = m_mqttClient.subscribe(topic, qos);
 			token.waitForCompletion(getTimeToWaitMillis());
 		} catch (MqttException e) {
 			if (e.getReasonCode() == MqttException.REASON_CODE_CLIENT_TIMEOUT) {
 				s_logger.warn("Timeout subscribing to topic: {}", topic);
-				throw new KuraTimeoutException(
-						"Timeout subscribing to topic: " + topic, e);
+				throw new KuraTimeoutException("Timeout subscribing to topic: "
+						+ topic, e);
 			} else {
 				s_logger.error("Cannot subscribe to topic: " + topic, e);
-				throw KuraException.internalError(e, "Cannot subscribe to topic: " + topic);
+				throw KuraException.internalError(e,
+						"Cannot subscribe to topic: " + topic);
 			}
 		}
 	}
 
 	@Override
-	public void unsubscribe(String topic) throws KuraTimeoutException, KuraException, KuraNotConnectedException {
-		
+	public void unsubscribe(String topic) throws KuraTimeoutException,
+			KuraException, KuraNotConnectedException {
+
 		if (m_mqttClient == null || !m_mqttClient.isConnected()) {
 			throw new KuraNotConnectedException("Not connected");
 		}
-		
+
 		topic = replaceTopicVariables(topic);
-		
+
 		s_logger.info("Unsubscribing to topic: {}", topic);
-		
+
 		try {
 			IMqttToken token = m_mqttClient.unsubscribe(topic);
 			token.waitForCompletion(getTimeToWaitMillis());
@@ -408,7 +421,8 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 						"Timeout unsubscribing to topic: " + topic, e);
 			} else {
 				s_logger.error("Cannot unsubscribe to topic: " + topic, e);
-				throw KuraException.internalError(e, "Cannot unsubscribe to topic: " + topic);
+				throw KuraException.internalError(e,
+						"Cannot unsubscribe to topic: " + topic);
 			}
 		}
 	}
@@ -416,8 +430,7 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * org.eclipse.kura.data.DataPublisherService#publish(java.lang.String
+	 * @see org.eclipse.kura.data.DataPublisherService#publish(java.lang.String
 	 * , byte[], int, boolean)
 	 * 
 	 * DataConnectException this can be easily recovered connecting the service.
@@ -426,17 +439,19 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 	 * unrecoverable faults that are not recoverable by the caller.
 	 */
 	@Override
-	public DataTransportToken publish(String topic, byte[] payload, int qos, boolean retain)
-			throws KuraTooManyInflightMessagesException, KuraException, KuraNotConnectedException {
-				
+	public DataTransportToken publish(String topic, byte[] payload, int qos,
+			boolean retain) throws KuraTooManyInflightMessagesException,
+			KuraException, KuraNotConnectedException {
+
 		if (m_mqttClient == null || !m_mqttClient.isConnected()) {
 			throw new KuraNotConnectedException("Not connected");
 		}
-		
+
 		topic = replaceTopicVariables(topic);
 
-		s_logger.info("Publishing message on topic: {} with QoS: {}", topic, qos);
-		
+		s_logger.info("Publishing message on topic: {} with QoS: {}", topic,
+				qos);
+
 		MqttMessage message = new MqttMessage();
 		message.setPayload(payload);
 		message.setQos(qos);
@@ -445,30 +460,37 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 		Integer messageId = null;
 		try {
 			IMqttDeliveryToken token = m_mqttClient.publish(topic, message);
-			// At present Paho ALWAYS allocates (gets and increments) internally a message ID,
+			// At present Paho ALWAYS allocates (gets and increments) internally
+			// a message ID,
 			// even for messages published with QoS == 0.
-			// Of course, for QoS == 0 this "internal" message ID will not hit the wire.
+			// Of course, for QoS == 0 this "internal" message ID will not hit
+			// the wire.
 			// On top of that, messages published with QoS == 0 are confirmed
 			// in the deliveryComplete callback.
 			// Another implementation might behave differently
-			// and only allocate a message ID for messages published with QoS > 0.
+			// and only allocate a message ID for messages published with QoS >
+			// 0.
 			// We don't want to rely on this and only return and confirm IDs
 			// of messages published with QoS > 0.
-			s_logger.debug("Published message with ID: {}", token.getMessageId());
+			s_logger.debug("Published message with ID: {}",
+					token.getMessageId());
 			if (qos > 0) {
 				messageId = Integer.valueOf(token.getMessageId());
 			}
 		} catch (MqttPersistenceException e) {
 			// This is probably an unrecoverable internal error
 			s_logger.error("Cannot publish on topic: {}", topic, e);
-			throw new IllegalStateException("Cannot publish on topic: " + topic, e);
+			throw new IllegalStateException(
+					"Cannot publish on topic: " + topic, e);
 		} catch (MqttException e) {
 			if (e.getReasonCode() == MqttException.REASON_CODE_MAX_INFLIGHT) {
 				s_logger.info("Too many inflight messages");
-				throw new KuraTooManyInflightMessagesException(e, "Too many in-fligh messages");
+				throw new KuraTooManyInflightMessagesException(e,
+						"Too many in-fligh messages");
 			} else {
 				s_logger.error("Cannot publish on topic: " + topic, e);
-				throw KuraException.internalError(e, "Cannot publish on topic: " + topic);
+				throw KuraException.internalError(e,
+						"Cannot publish on topic: " + topic);
 			}
 		}
 
@@ -476,7 +498,7 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 		if (messageId != null) {
 			token = new DataTransportToken(messageId, m_sessionId);
 		}
-		
+
 		return token;
 	}
 
@@ -493,16 +515,17 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 		m_dataTransportListeners.onConnectionLost(cause);
 	}
 
-	@Override 
+	@Override
 	public void deliveryComplete(IMqttDeliveryToken token) {
-		
+
 		if (token == null) {
 			s_logger.error("null token");
 			return;
 		}
 
-		// Weird, tokens related to messages published with QoS > 0 have a null nested message
-		
+		// Weird, tokens related to messages published with QoS > 0 have a null
+		// nested message
+
 		MqttMessage msg = null;
 		try {
 			msg = token.getMessage();
@@ -510,57 +533,65 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 			s_logger.error("Cannot get message", e);
 			return;
 		}
-		
+
 		if (msg != null) {
-			// Note that Paho call this also for messages published with QoS == 0.
-			// We don't want to rely on that and we drop asynchronous confirms for QoS == 0.
+			// Note that Paho call this also for messages published with QoS ==
+			// 0.
+			// We don't want to rely on that and we drop asynchronous confirms
+			// for QoS == 0.
 			int qos = msg.getQos();
-			
+
 			if (qos == 0) {
 				s_logger.debug("Ignoring deliveryComplete for messages published with QoS == 0");
 				return;
 			}
 		}
-		
+
 		int id = token.getMessageId();
-		
+
 		s_logger.debug("Delivery complete for message with ID: {}", id);
-		
+
 		// FIXME: We should be more selective here and only call the listener
 		// that actually published the message.
-		// Anyway we don't have such a mapping and so the publishers MUST track their own
+		// Anyway we don't have such a mapping and so the publishers MUST track
+		// their own
 		// identifiers and filter confirms.
-		
-		// FIXME: it can happen that the listener that has published the message has not come up yet.
+
+		// FIXME: it can happen that the listener that has published the message
+		// has not come up yet.
 		// This is the scenario:
 		// * Paho has some in-flight messages.
 		// * Kura gets stopped, crashes or the power is removed.
-		// * Kura starts again, Paho connects and restores in-flight messages from its persistence.
-		// * These messages are delivered (this callback gets called) before the publisher (also a DataPublisherListener)
+		// * Kura starts again, Paho connects and restores in-flight messages
+		// from its persistence.
+		// * These messages are delivered (this callback gets called) before the
+		// publisher (also a DataPublisherListener)
 		// * has come up (not yet tracked by the OSGi container).
 		// These confirms will be lost!
-		
+
 		// notify the listeners
-		DataTransportToken dataPublisherToken = new DataTransportToken(id, m_sessionId);		
+		DataTransportToken dataPublisherToken = new DataTransportToken(id,
+				m_sessionId);
 		m_dataTransportListeners.onMessageConfirmed(dataPublisherToken);
 	}
 
 	@Override
 	public void messageArrived(String topic, MqttMessage message)
 			throws Exception {
-		
+
 		s_logger.debug("Message arrived on topic: {}", topic);
-		
+
 		// FIXME: we should be more selective here and only call the listeners
 		// actually subscribed to this topic.
-		// Anyway we don't have such a mapping so the listeners are responsible to filter messages.
+		// Anyway we don't have such a mapping so the listeners are responsible
+		// to filter messages.
 
-		// FIXME: the same argument about lost confirms applies to arrived messages.
-		
+		// FIXME: the same argument about lost confirms applies to arrived
+		// messages.
+
 		// notify the listeners
-		m_dataTransportListeners.onMessageArrived(topic,
-				message.getPayload(), message.getQos(),
-				message.isRetained());
+		m_dataTransportListeners.onMessageArrived(topic, message.getPayload(),
+				message.getQos(), message.isRetained());
 	}
 
 	private long getTimeToWaitMillis() {
@@ -568,7 +599,7 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 		long timeout = m_clientConf.getConnectOptions().getConnectionTimeout() * 1000L;
 		return timeout;
 	}
-	
+
 	// ---------------------------------------------------------
 	//
 	// SslServiceListener Overrides
@@ -603,17 +634,18 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 			}
 			ValidationUtil.notEmptyOrNull(clientId, "clientId");
 
-			// replace invalid token in the client ID as it is used as part of the topicname space
+			// replace invalid token in the client ID as it is used as part of
+			// the topicname space
 			clientId = clientId.replace('/', '-');
 			clientId = clientId.replace('+', '-');
 			clientId = clientId.replace('#', '-');
-			
+
 			// Configure the broker URL
 			brokerUrl = (String) properties.get(MQTT_BROKER_URL_PROP_NAME);
 			ValidationUtil.notEmptyOrNull(brokerUrl, MQTT_BROKER_URL_PROP_NAME);
-			
+
 			brokerUrl = brokerUrl.trim();
-			brokerUrl = brokerUrl.replaceAll("^" + MQTT_SCHEME,  "tcp://");
+			brokerUrl = brokerUrl.replaceAll("^" + MQTT_SCHEME, "tcp://");
 			brokerUrl = brokerUrl.replaceAll("^" + MQTTS_SCHEME, "ssl://");
 			brokerUrl = brokerUrl.replaceAll("/$", "");
 			ValidationUtil.notEmptyOrNull(brokerUrl, "brokerUrl");
@@ -630,8 +662,9 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 			ValidationUtil.notNegative(
 					(Integer) properties.get(MQTT_TIMEOUT_PROP_NAME),
 					MQTT_TIMEOUT_PROP_NAME);
-			
-			ValidationUtil.notNull((Boolean) properties.get(MQTT_CLEAN_SESSION_PROP_NAME), 
+
+			ValidationUtil.notNull(
+					(Boolean) properties.get(MQTT_CLEAN_SESSION_PROP_NAME),
 					MQTT_CLEAN_SESSION_PROP_NAME);
 
 			conOpt.setUserName((String) properties.get(MQTT_USERNAME_PROP_NAME));
@@ -642,31 +675,40 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 			conOpt.setConnectionTimeout((Integer) properties
 					.get(MQTT_TIMEOUT_PROP_NAME));
 
-			conOpt.setCleanSession((Boolean) properties.get(MQTT_CLEAN_SESSION_PROP_NAME));
-			
+			conOpt.setCleanSession((Boolean) properties
+					.get(MQTT_CLEAN_SESSION_PROP_NAME));
+
+			conOpt.setMqttVersion((Integer) properties
+					.get(MQTT_DEFAULT_VERSION_PROP_NAME));
+
 			synchronized (m_topicContext) {
 				m_topicContext.clear();
 				if (properties.get(CLOUD_ACCOUNT_NAME_PROP_NAME) != null) {
-					m_topicContext.put(TOPIC_ACCOUNT_NAME_CTX_NAME, (String) properties.get(CLOUD_ACCOUNT_NAME_PROP_NAME));
+					m_topicContext.put(TOPIC_ACCOUNT_NAME_CTX_NAME,
+							(String) properties
+									.get(CLOUD_ACCOUNT_NAME_PROP_NAME));
 				}
 				m_topicContext.put(TOPIC_DEVICE_ID_CTX_NAME, clientId);
 			}
-			
-			String willTopic = (String) properties.get(MQTT_LWT_TOPIC_PROP_NAME);
+
+			String willTopic = (String) properties
+					.get(MQTT_LWT_TOPIC_PROP_NAME);
 			if (!(willTopic == null || willTopic.isEmpty())) {
 				int willQos = 0;
 				boolean willRetain = false;
-				
-				String willPayload = (String) properties.get(MQTT_LWT_PAYLOAD_PROP_NAME);
+
+				String willPayload = (String) properties
+						.get(MQTT_LWT_PAYLOAD_PROP_NAME);
 				if (properties.get(MQTT_LWT_QOS_PROP_NAME) != null) {
 					willQos = (Integer) properties.get(MQTT_LWT_QOS_PROP_NAME);
 				}
 				if (properties.get(MQTT_LWT_RETAIN_PROP_NAME) != null) {
-					willRetain = (Boolean) properties.get(MQTT_LWT_RETAIN_PROP_NAME);
+					willRetain = (Boolean) properties
+							.get(MQTT_LWT_RETAIN_PROP_NAME);
 				}
-				
+
 				willTopic = replaceTopicVariables(willTopic);
-				
+
 				byte[] payload = {};
 				if (willPayload != null && !willPayload.isEmpty()) {
 					try {
@@ -675,31 +717,29 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 						s_logger.error("Unsupported encoding", e);
 					}
 				}
-				
-				conOpt.setWill(willTopic,
-							payload,
-							willQos,
-							willRetain);
-			}			
+
+				conOpt.setWill(willTopic, payload, willQos, willRetain);
+			}
 		} catch (KuraException e) {
 			s_logger.error("Invalid configuration");
-			throw new IllegalStateException("Invalid MQTT client configuration", e);
+			throw new IllegalStateException(
+					"Invalid MQTT client configuration", e);
 		}
 
 		//
 		// SSL
 		if (brokerUrl.startsWith("ssl")) {
-		    try {
-		        String alias = m_topicContext.get(TOPIC_ACCOUNT_NAME_CTX_NAME);
-			    SSLSocketFactory ssf = m_sslManagerService.getSSLSocketFactory(alias);
+			try {
+				String alias = m_topicContext.get(TOPIC_ACCOUNT_NAME_CTX_NAME);
+				SSLSocketFactory ssf = m_sslManagerService
+						.getSSLSocketFactory(alias);
 				conOpt.setSocketFactory(ssf);
-			} 
-			catch (Exception e) {
-			    s_logger.error("SSL setup failed", e);
-			    throw new IllegalStateException("SSL setup failed", e);
+			} catch (Exception e) {
+				s_logger.error("SSL setup failed", e);
+				throw new IllegalStateException("SSL setup failed", e);
 			}
 		}
-		
+
 		String sType = (String) properties.get(PERSISTENCE_TYPE_PROP_NAME);
 		PersistenceType persistenceType = null;
 		if (sType.equals("file")) {
@@ -707,24 +747,23 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 		} else if (sType.equals("memory")) {
 			persistenceType = PersistenceType.MEMORY;
 		} else {
-			throw new IllegalStateException("Invalid MQTT client configuration: persistenceType: " + persistenceType);
+			throw new IllegalStateException(
+					"Invalid MQTT client configuration: persistenceType: "
+							+ persistenceType);
 		}
 
-		clientConfiguration = new MqttClientConfiguration(brokerUrl,
-				                                          clientId,
-				                                          persistenceType,
-				                                          conOpt);
+		clientConfiguration = new MqttClientConfiguration(brokerUrl, clientId,
+				persistenceType, conOpt);
 
 		return clientConfiguration;
 	}
-	
-	private String replaceTopicVariables(String topic) 
-	{	
+
+	private String replaceTopicVariables(String topic) {
 		boolean found;
 		Matcher topicMatcher = s_topicPattern.matcher(topic);
 		StringBuffer sb = new StringBuffer();
 		do {
-			
+
 			found = topicMatcher.find();
 			if (found) {
 				// By default replace #variable-name (group 0) with itself
@@ -736,7 +775,7 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 					String value = m_topicContext.get(variableName);
 					if (value != null) {
 						replacement = value;
-					}					
+					}
 				}
 
 				// Replace #variable-name with the value of the variable
@@ -748,22 +787,24 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 
 		String replacedTopic = sb.toString();
 
-		s_logger.debug("Replaced tokens in topic {} with: {}", topic, replacedTopic);
+		s_logger.debug("Replaced tokens in topic {} with: {}", topic,
+				replacedTopic);
 
 		return replacedTopic;
 	}
-	
+
 	private String generateSessionId() {
 		return m_clientConf.getClientId() + "-" + m_clientConf.getBrokerUrl();
 	}
-	
+
 	private void setupMqttSession() {
-		
+
 		if (m_clientConf == null) {
 			throw new IllegalStateException("Invalid client configuration");
 		}
-		
-		// We need to construct a new client instance only if either the broker URL
+
+		// We need to construct a new client instance only if either the broker
+		// URL
 		// or the client ID changes.
 		// We also need to construct a new instance if
 		// the persistence type (file or memory) changes.
@@ -772,10 +813,10 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 		if (m_mqttClient != null) {
 			String brokerUrl = m_mqttClient.getServerURI();
 			String clientId = m_mqttClient.getClientId();
-			
-			if (!(brokerUrl.equals(m_clientConf.getBrokerUrl()) &&
-			      clientId.equals(m_clientConf.getClientId()) &&
-			      m_persistenceType == m_clientConf.getPersistenceType())) {
+
+			if (!(brokerUrl.equals(m_clientConf.getBrokerUrl())
+					&& clientId.equals(m_clientConf.getClientId()) && m_persistenceType == m_clientConf
+						.getPersistenceType())) {
 				try {
 					s_logger.info("Closing client...");
 					// prevent callbacks from a zombie client
@@ -793,43 +834,54 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 		// Connecting with Clean Session flag set to true always starts
 		// a new session.
 		boolean newSession = m_clientConf.getConnectOptions().isCleanSession();
-		
+
 		if (m_mqttClient == null) {
-			
+
 			s_logger.info("Creating a new client instance");
 
 			//
-			// Initialize persistence. This is only useful if the client connects with
+			// Initialize persistence. This is only useful if the client
+			// connects with
 			// Clean Session flag set to false.
 			//
 			// Note that when using file peristence,
-			// Paho creates a subdirectory persistence whose name is encoded like this:
+			// Paho creates a subdirectory persistence whose name is encoded
+			// like this:
 			// cristiano-tcpbroker-stageeveryware-cloudcom1883/
 			// So the persistence is per client ID (cristiano) and broker URL.
-			// If we are connecting to a different broker URL or with a different client ID,
+			// If we are connecting to a different broker URL or with a
+			// different client ID,
 			// Paho will create a new subdirectory for this MQTT connection.
-			// Closing the old client instance also deletes the associated persistence subdirectory.
+			// Closing the old client instance also deletes the associated
+			// persistence subdirectory.
 			//
 			// The lesson is:
-			// Reconnecting to the same broker URL with the same client ID will leverage
-			// Paho persistence and the MQTT message ID is always increased (up to the its maximum).
-			// 
-			// Connecting either to a different broker URL or with a different client ID discards persisted
+			// Reconnecting to the same broker URL with the same client ID will
+			// leverage
+			// Paho persistence and the MQTT message ID is always increased (up
+			// to the its maximum).
+			//
+			// Connecting either to a different broker URL or with a different
+			// client ID discards persisted
 			// messages and the MQTT client ID is reset.
 			//
-			// We have a problem here where the DataService needs to track in-flight messages, possibly
+			// We have a problem here where the DataService needs to track
+			// in-flight messages, possibly
 			// across different MQTT connections.
 			// These messages will never be confirmed on a different connection.
-			// While we can assume that the client ID never changes because it's typically auto-generated,
+			// While we can assume that the client ID never changes because it's
+			// typically auto-generated,
 			// we cannot safely assume that the broker URL never changes.
 			//
 			// The above leads to two problems:
-			// The MQTT message ID alone is not sufficient to track an in-flight message
+			// The MQTT message ID alone is not sufficient to track an in-flight
+			// message
 			// because it can be reset on a different connection.
 			//
-			// On a different connection the DataService should republish the in-flight messages because
+			// On a different connection the DataService should republish the
+			// in-flight messages because
 			// Paho won't do that.
-						
+
 			PersistenceType persistenceType = m_clientConf.getPersistenceType();
 			if (persistenceType == PersistenceType.MEMORY) {
 				s_logger.info("Using memory persistence for in-flight messages");
@@ -837,13 +889,15 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 			} else {
 				StringBuffer sb = new StringBuffer();
 				sb.append(m_systemService.getKuraDataDirectory())
-				  .append(m_systemService.getFileSeparator())
-				  .append("paho-persistence");
-				
+						.append(m_systemService.getFileSeparator())
+						.append("paho-persistence");
+
 				String dir = sb.toString();
-				
-				s_logger.info("Using file persistence for in-flight messages: {}", dir);
-				
+
+				s_logger.info(
+						"Using file persistence for in-flight messages: {}",
+						dir);
+
 				// Look for "Close on CONNACK timeout" FIXME in this file.
 				// Make sure persistence is closed.
 				// This is needed if the previous connect attempt was
@@ -852,8 +906,11 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 					try {
 						m_persistence.close();
 					} catch (MqttPersistenceException e) {
-						s_logger.info("Failed to close persistence. Ignoring exception "+e.getMessage());
-						s_logger.debug("Failed to close persistence. Ignoring exception.", e);
+						s_logger.info("Failed to close persistence. Ignoring exception "
+								+ e.getMessage());
+						s_logger.debug(
+								"Failed to close persistence. Ignoring exception.",
+								e);
 					}
 				}
 				m_persistence = new MqttDefaultFilePersistence(dir);
@@ -867,7 +924,8 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 						m_clientConf.getClientId(), m_persistence);
 			} catch (MqttException e) {
 				s_logger.error("Client instantiation failed", e);
-				throw new IllegalStateException("Client instantiation failed", e);
+				throw new IllegalStateException("Client instantiation failed",
+						e);
 			}
 
 			mqttClient.setCallback(this);
@@ -877,28 +935,49 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 
 			if (!m_clientConf.getConnectOptions().isCleanSession()) {
 				// This is tricky.
-				// The purpose of this code is to try to restore pending delivery tokens
-				// from the MQTT client persistence and determine if the next connection
+				// The purpose of this code is to try to restore pending
+				// delivery tokens
+				// from the MQTT client persistence and determine if the next
+				// connection
 				// can be considered continuing an existing session.
-				// This is needed to allow the upper layer deciding what to do with the
+				// This is needed to allow the upper layer deciding what to do
+				// with the
 				// in-flight messages it is tracking (if any).
-				// If pending delivery tokens are found we assume that the upper layer
-				// is tracking them. In this case we set the newSession flag to false
+				// If pending delivery tokens are found we assume that the upper
+				// layer
+				// is tracking them. In this case we set the newSession flag to
+				// false
 				// and notify this in the onConnectionEstablished callback.
 				// The upper layer shouldn't do anything special.
 				//
-				// Otherwise the next upper layer should decide what to do with the
-				// in-flight messages it is tracking (if any), either to republish or 
+				// Otherwise the next upper layer should decide what to do with
+				// the
+				// in-flight messages it is tracking (if any), either to
+				// republish or
 				// drop them.
-				IMqttDeliveryToken[] pendingDeliveryTokens = m_mqttClient.getPendingDeliveryTokens();
-				if (pendingDeliveryTokens != null && pendingDeliveryTokens.length != 0) {
+				IMqttDeliveryToken[] pendingDeliveryTokens = m_mqttClient
+						.getPendingDeliveryTokens();
+				if (pendingDeliveryTokens != null
+						&& pendingDeliveryTokens.length != 0) {
 					newSession = false;
 				}
 			}
 		}
-		
+
 		m_newSession = newSession;
 		m_sessionId = generateSessionId();
+	}
+
+	private String getMqttVersionLabel(int MqttVersion) {
+
+		switch (MqttVersion) {
+		case MqttConnectOptions.MQTT_VERSION_3_1:
+			return "3.1";
+		case MqttConnectOptions.MQTT_VERSION_3_1_1:
+			return "3.1.1";
+		default:
+			return String.valueOf(MqttVersion);
+		}
 	}
 
 }

@@ -11,6 +11,8 @@
  */
 package org.eclipse.kura.net.admin.monitor;
 
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -59,6 +61,7 @@ import org.eclipse.kura.net.wifi.WifiClientMonitorService;
 import org.eclipse.kura.net.wifi.WifiConfig;
 import org.eclipse.kura.net.wifi.WifiInterfaceAddressConfig;
 import org.eclipse.kura.net.wifi.WifiMode;
+import org.eclipse.kura.system.SystemService;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
@@ -84,6 +87,7 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
     private static boolean stopThread;
             
     private NetworkService m_networkService;
+    private SystemService m_systemService;
     private EventAdmin m_eventAdmin;
     private NetworkAdminService m_netAdminService;
     private NetworkConfigurationService m_netConfigService;
@@ -112,6 +116,14 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
     public void unsetNetworkService(NetworkService networkService) {
         m_networkService = null;
     }
+    
+    public void setSystemService(SystemService systemService) {
+		m_systemService = systemService;
+	}
+
+	public void unsetSystemService(SystemService systemService) {
+		m_systemService = null;
+	}
 
     public void setEventAdmin(EventAdmin eventAdmin) {
         m_eventAdmin = eventAdmin;
@@ -276,22 +288,29 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
                         // if MASTER consider the link as 'up' - TODO: check that hostapd is running
                     } else {
                         // State is currently down
-                        if(WifiMode.MASTER.equals(wifiConfig.getMode())) {
-                            s_logger.debug("monitor() :: enable {} in master mode", interfaceName);                            
-                            enableInterface(wifiInterfaceConfig);
-                        } else if (WifiMode.INFRA.equals(wifiConfig.getMode())) {
-                        	if (wifiConfig.ignoreSSID()) {
-                        		s_logger.info("monitor() :: enable {} in infra mode", interfaceName);                                
-                        		enableInterface(wifiInterfaceConfig);
-                        	} else {
-	                            if(isAccessPointAvailable(interfaceName, wifiConfig.getSSID())) {
-	                                s_logger.info("monitor() :: found access point - enable {} in infra mode", interfaceName);                                
-	                                enableInterface(wifiInterfaceConfig);
-	                            } else {
-	                            	s_logger.warn("monitor() :: {} - access point is not available", wifiConfig.getSSID());
-	                            }
-                        	}
-                        }
+                    	try {
+	                        if(WifiMode.MASTER.equals(wifiConfig.getMode())) {
+	                            s_logger.debug("monitor() :: enable {} in master mode", interfaceName);                            
+	                            enableInterface(wifiInterfaceConfig);
+	                        } else if (WifiMode.INFRA.equals(wifiConfig.getMode())) {
+	                        	if (wifiConfig.ignoreSSID()) {
+	                        		s_logger.info("monitor() :: enable {} in infra mode", interfaceName);                                
+	                        		enableInterface(wifiInterfaceConfig);
+	                        	} else {
+		                            if(isAccessPointAvailable(interfaceName, wifiConfig.getSSID())) {
+		                                s_logger.info("monitor() :: found access point - enable {} in infra mode", interfaceName);                                
+		                                enableInterface(wifiInterfaceConfig);
+		                            } else {
+		                            	s_logger.warn("monitor() :: {} - access point is not available", wifiConfig.getSSID());
+		                            }
+	                        	}
+	                        }
+						} catch (KuraException e) {
+							s_logger.error(
+									"monitor() :: Error enabling {} interface, will try to reset wifi :: exception is: {}",
+									interfaceName, e.toString());
+							resetWifiDevice();
+						}
                     }
                 }
                 
@@ -834,5 +853,70 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
         }
         
         return statuses;
+    }
+    
+    private boolean resetWifiDevice() throws Exception {
+    	boolean ret = false;
+    	if (isWifiDeviceOn()) {
+    		turnWifiDeviceOff();
+    	}
+    	if (isWifiDeviceReady(false, 10)) {
+    		turnWifiDeviceOn();
+    		ret = this.isWifiDeviceReady(true, 20);
+    	}
+    	return ret;
+    }
+    
+    private boolean isWifiDeviceReady(boolean expected, int tout) {
+    	boolean deviceReady = false;
+    	long tmrStart = System.currentTimeMillis();
+    	do {
+    		try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+			}
+    		boolean deviceOn = isWifiDeviceOn();
+    		s_logger.trace("isWifiDeviceReady()? :: deviceOn={}, expected={}", deviceOn, expected);
+    		if (deviceOn == expected) {
+    			deviceReady = true;
+    			break;
+    		}
+    	} while ((System.currentTimeMillis()-tmrStart) < tout*1000);
+    	
+    	s_logger.debug("isWifiDeviceReady()? :: deviceReady={}", deviceReady);
+    	return deviceReady;
+    }
+    
+    private boolean isWifiDeviceOn() {
+    	boolean deviceOn = false;
+    	String platform = m_systemService.getPlatform();
+    	if (platform.equals("reliagate-10-20")) {
+    		File fDevice = new File("/sys/bus/pci/devices/0000:01:00.0");
+    		if (fDevice.exists()) {
+    			deviceOn = true;
+    		}
+    	}
+    	s_logger.debug("isWifiDeviceOn()? {}", deviceOn);
+    	return deviceOn;
+    }
+    
+    private void turnWifiDeviceOn() throws Exception {
+    	String platform = m_systemService.getPlatform();
+    	if (platform.equals("reliagate-10-20")) {
+    		s_logger.info("Turning Wifi device ON ...");
+    		FileWriter fw = new FileWriter("/sys/bus/pci/rescan");
+			fw.write("1");
+			fw.close();
+    	}
+    }
+    
+    private void turnWifiDeviceOff() throws Exception {
+    	String platform = m_systemService.getPlatform();
+    	if (platform.equals("reliagate-10-20")) {
+    		s_logger.info("Turning Wifi device OFF ...");
+			FileWriter fw = new FileWriter("/sys/bus/pci/devices/0000:01:00.0/remove");
+			fw.write("1");
+			fw.close();
+    	}
     }
 }

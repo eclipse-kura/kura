@@ -85,7 +85,18 @@ public class CommandCloudApp extends Cloudlet implements ConfigurableComponent,
 				.get(COMMAND_ENABLED_ID);
 		if (verificationEnabled) {
 			super.activate(compCtx);
-		} 
+		} else {
+			if (getCloudApplicationClient() != null) {
+				super.deactivate(compCtx);
+			}
+		}
+	}
+
+	protected void deactivate(ComponentContext componentContext) {
+		s_logger.info("Bundle " + APP_ID + " is deactivating!");
+		if (getCloudApplicationClient() != null) {
+			super.deactivate(compCtx);
+		}
 	}
 
 	@Override

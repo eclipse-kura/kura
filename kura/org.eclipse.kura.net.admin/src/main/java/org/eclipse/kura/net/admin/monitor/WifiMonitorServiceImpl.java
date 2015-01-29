@@ -770,8 +770,8 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
 	public int getSignalLevel(String interfaceName, String ssid)
 			throws KuraException {
 		int rssi = 0;
-		if (ssid != null) {
-			InterfaceState wifiState = m_interfaceStatuses.get(interfaceName);
+		InterfaceState wifiState = m_interfaceStatuses.get(interfaceName);
+		if ((wifiState != null) && (ssid != null)) {
 			if(wifiState.isUp()) {
 				s_logger.trace("getSignalLevel() :: using 'iw dev wlan0 link' command ...");
 				IwLinkTool iwLinkTool = new IwLinkTool("iw", interfaceName);

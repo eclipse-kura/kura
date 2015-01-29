@@ -27,15 +27,15 @@ import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
-public class CommandCloudApp extends Cloudlet implements ConfigurableComponent, PasswordCommandService{
+public class CommandCloudApp extends Cloudlet implements ConfigurableComponent,
+		PasswordCommandService {
 	private static final Logger s_logger = LoggerFactory.getLogger(CommandCloudApp.class);
-	private static final String EDC_PASSWORD_METRIC_NAME= "command.password";
-	private static final String COMMAND_ENABLED_ID= "command.enable";
-	private static final String COMMAND_PASSWORD_ID= "command.password.value";
-	private static final String COMMAND_WORKDIR_ID= "command.working.directory";
-	private static final String COMMAND_TIMEOUT_ID= "command.timeout";
-	private static final String COMMAND_ENVIRONMENT_ID= "command.environment";
+	private static final String EDC_PASSWORD_METRIC_NAME = "command.password";
+	private static final String COMMAND_ENABLED_ID = "command.enable";
+	private static final String COMMAND_PASSWORD_ID = "command.password.value";
+	private static final String COMMAND_WORKDIR_ID = "command.working.directory";
+	private static final String COMMAND_TIMEOUT_ID = "command.timeout";
+	private static final String COMMAND_ENVIRONMENT_ID = "command.environment";
 
 
 	public static final String APP_ID = "CMD-V1";
@@ -80,9 +80,21 @@ public class CommandCloudApp extends Cloudlet implements ConfigurableComponent, 
 
 		this.properties = properties;
 
-		boolean serviceEnabled= (Boolean) properties.get(COMMAND_ENABLED_ID);
-		if(serviceEnabled){
+		boolean serviceEnabled = (Boolean) properties
+				.get(COMMAND_ENABLED_ID);
+		if (serviceEnabled) {
 			super.activate(compCtx);
+		} else {
+			if (getCloudApplicationClient() != null) {
+				super.deactivate(compCtx);
+			}
+		}
+	}
+
+	protected void deactivate(ComponentContext componentContext) {
+		s_logger.info("Bundle " + APP_ID + " is deactivating!");
+		if (getCloudApplicationClient() != null) {
+			super.deactivate(compCtx);
 		}
 	}
 

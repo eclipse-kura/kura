@@ -29,8 +29,9 @@ public class NtpdClockSyncProvider extends AbstractNtpClockSyncProvider
 	//
 	// ----------------------------------------------------------------	
 	
-	protected void syncClock() throws KuraException
+	protected boolean syncClock() throws KuraException
 	{
+		boolean ret = false;
 		Process proc = null;
 		try {			
 			// Execute a native Linux command to perform the NTP time sync.
@@ -44,9 +45,12 @@ public class NtpdClockSyncProvider extends AbstractNtpClockSyncProvider
 				// Call update method with 0 offset to ensure the clock event gets fired and the HW clock
 				// is updated if desired.
 				m_listener.onClockUpdate(0);
+				ret = true;
 			}
 			else {
-				s_logger.error("Unexpected error while Synchronizing System Clock with "+m_ntpHost);
+				s_logger.warn(
+						"Error while synchronizing System Clock with NTP host {}. Please verify network connectivity ...",
+						m_ntpHost);
 			}
 		} 
 		catch (Exception e) {
@@ -55,5 +59,6 @@ public class NtpdClockSyncProvider extends AbstractNtpClockSyncProvider
 		finally {
 			ProcessUtil.destroy(proc);
 		}
+		return ret;
 	}
 }

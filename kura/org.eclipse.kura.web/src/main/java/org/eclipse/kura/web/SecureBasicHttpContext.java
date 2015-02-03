@@ -40,11 +40,13 @@ public class SecureBasicHttpContext implements HttpContext
      */
     private final HttpContext delegate;
     private AuthenticationManager m_authMgr;
+    private String m_appRoot;
     
     public SecureBasicHttpContext(HttpContext delegate,
     						      AuthenticationManager authMgr) {
         this.delegate = delegate;
         m_authMgr = authMgr;
+        m_appRoot = Console.getApplicationRoot();
     }
 
     public String getMimeType(String name) {
@@ -64,13 +66,13 @@ public class SecureBasicHttpContext implements HttpContext
         throws IOException 
     {        
     	// If a trailing "/" is used when accesssing the app, redirect
-    	if (request.getRequestURI().equals("/kura/")) {
-    		response.sendRedirect("/kura");
+    	if (request.getRequestURI().equals(m_appRoot + "/")) {
+    		response.sendRedirect(m_appRoot);
     	}
     	
     	// If using root context, redirect
     	if (request.getRequestURI().equals("/")) {
-    		response.sendRedirect("/kura");
+    		response.sendRedirect(m_appRoot);
     	}
     	
     	HttpSession session = request.getSession(false);

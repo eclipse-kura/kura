@@ -28,6 +28,8 @@ public interface GwtComponentService extends RemoteService
 	 * @return
 	 */
 	public List<GwtConfigComponent> findComponentConfigurations() throws GwtKuraException;
+	
+	public List<GwtConfigComponent> findComponentConfiguration() throws GwtKuraException;
 
 	
 	public void updateComponentConfiguration(GwtConfigComponent configComponent) throws GwtKuraException; 

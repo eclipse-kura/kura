@@ -51,7 +51,10 @@ public abstract class Cloudlet implements CloudClientListener
 	private CloudService m_cloudService;
 	private CloudClient  m_cloudClient;
 	
+	private ComponentContext m_ctx;
+	
 	private String       m_applicationId;
+	
 	
 	
 	// ----------------------------------------------------------------
@@ -67,6 +70,7 @@ public abstract class Cloudlet implements CloudClientListener
 	public void unsetCloudService(CloudService cloudService) {
 		m_cloudService = null;
 	}
+	
 	
 	
 	// ----------------------------------------------------------------
@@ -85,6 +89,7 @@ public abstract class Cloudlet implements CloudClientListener
 			m_cloudClient.addCloudClientListener(this);
 			
 			//Don't subscribe because these are handled by the default subscriptions and we don't want to get messages twice
+			m_ctx= componentContext;
 		}
 		catch (KuraException e) {
 			s_logger.error("Cannot activate", e);
@@ -115,6 +120,10 @@ public abstract class Cloudlet implements CloudClientListener
 	
 	protected CloudClient getCloudApplicationClient() {
 		return m_cloudClient;
+	}
+	
+	protected ComponentContext getComponentContext(){
+		return m_ctx;
 	}
 	
 	// ----------------------------------------------------------------
@@ -324,4 +333,5 @@ class MessageHandlerCallable implements Callable<Void>
 		
 		return null;
 	}
+	
 }

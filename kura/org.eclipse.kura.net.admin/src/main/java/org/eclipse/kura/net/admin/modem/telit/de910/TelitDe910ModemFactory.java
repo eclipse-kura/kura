@@ -55,7 +55,9 @@ public class TelitDe910ModemFactory implements CellularModemFactory {
 
 		if (telitDe910 == null) {
 			telitDe910 = new TelitDe910(modemDevice, platform, m_connectionFactory, s_type);
-			this.m_modemServices.put(key, telitDe910);
+			m_modemServices.put(key, telitDe910);
+		} else {
+			telitDe910.setModemDevice(modemDevice);
 		}
 		
 		return telitDe910;

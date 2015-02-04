@@ -560,6 +560,10 @@ public abstract class TelitModem {
         return m_device;
     }
     
+    public void setModemDevice(ModemDevice device) {
+    	m_device = device;
+    }
+    
     public List<NetConfig> getConfiguration() {
 		return m_netConfigs;
 	}

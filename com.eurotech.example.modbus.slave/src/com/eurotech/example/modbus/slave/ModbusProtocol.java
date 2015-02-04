@@ -94,7 +94,7 @@ public interface ModbusProtocol {
 	 *            starting address
 	 * @param count
 	 *            quantity of registers (maximum 0x7D)
-	 * @return an array of int representing the requested data points (data registers on 2 bytes).
+	 * @return an array of byte representing the requested data points.
 	 * @throws ModbusProtocolException(NOT_CONNECTED)
 	 *             current connection is in a status other than <b>CONNECTED</b>
 	 * @throws ModbusProtocolException(TRANSACTION_FAILURE)
@@ -201,7 +201,8 @@ public interface ModbusProtocol {
 	 * @param dataAddress
 	 *            Output address.
 	 * @param data
-	 *            Registers value (array of int converted in 2 bytes values) to write. 	 
+	 *            Registers value (array of byte) to write. 	
+	 * @param numRegisters Number of registers to write 
 	 * @throws ModbusProtocolException(NOT_CONNECTED)
 	 *             current connection is in a status other than <b>CONNECTED</b>
 	 * @throws ModbusProtocolException(TRANSACTION_FAILURE)

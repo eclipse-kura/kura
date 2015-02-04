@@ -80,7 +80,7 @@ public class ModbusProtocolSlaveComm implements Communicate, Runnable{
 						respIndex += resp;
 					} else {
 						s_logger.error("Socket disconnect in recv");
-						disconnect();
+						//disconnect();
 						throw new ModbusProtocolException(ModbusProtocolErrorCode.TRANSACTION_FAILURE,"Recv failure");
 					}
 				} catch (SocketTimeoutException e) {
@@ -89,7 +89,7 @@ public class ModbusProtocolSlaveComm implements Communicate, Runnable{
 					throw new ModbusProtocolException(ModbusProtocolErrorCode.TRANSACTION_FAILURE,failMsg);
 				} catch (IOException e) {
 					s_logger.error("Socket disconnect in recv: " + e);
-					disconnect();
+					//disconnect();
 					throw new ModbusProtocolException(ModbusProtocolErrorCode.TRANSACTION_FAILURE,
 							"Recv failure");
 				}
@@ -235,6 +235,7 @@ public class ModbusProtocolSlaveComm implements Communicate, Runnable{
 		} catch (IOException | ModbusProtocolException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			run();
 		}
 
 	}

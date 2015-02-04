@@ -387,11 +387,11 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
 	                        break;
 	                        
 	                    case UNKNOWN:
-	                        s_logger.info("Found interface of unknown type in current configuration: {}. Ignoring it.", interfaceName);
+	                        s_logger.debug("Found interface of unknown type in current configuration: {}. Ignoring it.", interfaceName);
 	                        break;
 	                        
 	                    default:
-	                        s_logger.info("Unsupported type : " + type + " - not adding to configuration. Ignoring it.");
+	                        s_logger.debug("Unsupported type : " + type + " - not adding to configuration. Ignoring it.");
 	                    }
 	                }
 	            }

@@ -12,6 +12,7 @@
 package org.eclipse.kura.linux.usb;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -40,10 +41,6 @@ public class LinuxUdevNative {
 		System.loadLibrary( LIBRARY_NAME );
 	}
 	
-	private static List<UsbBlockDevice> blockDevices;
-	private static List<UsbNetDevice> netDevices;
-	private static List<UsbTtyDevice> ttyDevices;
-
 	private static boolean started;
 	private static Future<?> s_task;
 	private ScheduledExecutorService m_executor;
@@ -51,14 +48,37 @@ public class LinuxUdevNative {
 	private LinuxUdevListener m_linuxUdevListener;
 	private LinuxUdevNative m_linuxUdevNative;
 	
+	/*
+	 * Devices by their device node (e.g. ttyACM3 or sdb1) or interface name (e.g. usb1).
+	 */
+	private static HashMap<String, UsbBlockDevice> m_blockDevices;
+	private static HashMap<String, UsbNetDevice> m_netDevices;
+	private static HashMap<String, UsbTtyDevice> m_ttyDevices;
+	
 	public LinuxUdevNative(LinuxUdevListener linuxUdevListener) {
 		if(!started) {
 			m_linuxUdevNative = this;
 			m_linuxUdevListener = linuxUdevListener;
 			
-			blockDevices = (List<UsbBlockDevice>) LinuxUdevNative.getUsbDevices("block");
-			netDevices = (List<UsbNetDevice>) LinuxUdevNative.getUsbDevices("net");
-			ttyDevices = (List<UsbTtyDevice>) LinuxUdevNative.getUsbDevices("tty");
+			m_blockDevices = new HashMap<String, UsbBlockDevice>();
+			m_netDevices = new HashMap<String, UsbNetDevice>();
+			m_ttyDevices = new HashMap<String, UsbTtyDevice>();
+			
+			/* Assume we get some "good" devices here */
+			List<UsbBlockDevice> blockDevices = (List<UsbBlockDevice>) LinuxUdevNative.getUsbDevices("block");
+			for (UsbBlockDevice blockDevice : blockDevices) {
+				m_blockDevices.put(blockDevice.getDeviceNode(), blockDevice);
+			}
+			
+			List<UsbNetDevice> netDevices = (List<UsbNetDevice>) LinuxUdevNative.getUsbDevices("net");
+			for (UsbNetDevice netDevice : netDevices) {
+				m_netDevices.put(netDevice.getInterfaceName(), netDevice);
+			}			
+			
+			List<UsbTtyDevice> ttyDevices = (List<UsbTtyDevice>) LinuxUdevNative.getUsbDevices("tty");
+			for (UsbTtyDevice ttyDevice : ttyDevices) {
+				m_ttyDevices.put(ttyDevice.getDeviceNode(), ttyDevice);
+			}
 			
 			start();
 			started = true;	
@@ -87,21 +107,40 @@ public class LinuxUdevNative {
 	}
 	
 	public static List<UsbBlockDevice> getUsbBlockDevices() {
-		return new ArrayList<UsbBlockDevice>(blockDevices);
+		return new ArrayList<UsbBlockDevice>(m_blockDevices.values());
 	}
 	
 	public static List<UsbNetDevice> getUsbNetDevices() {
-		return new ArrayList<UsbNetDevice>(netDevices);
+		return new ArrayList<UsbNetDevice>(m_netDevices.values());
 	}
 	
 	public static List<UsbTtyDevice> getUsbTtyDevices() {
-		return new ArrayList<UsbTtyDevice>(ttyDevices);
+		return new ArrayList<UsbTtyDevice>(m_ttyDevices.values());
 	}
 
 	private native static void nativeHotplugThread(LinuxUdevNative linuxUdevNative);
 
 	private native static ArrayList<? extends UsbDevice> getUsbDevices(String deviceClass);
 
+	/*
+	 * WARNING
+	 * 
+	 * The callback does not fire for devices open by a process
+	 * when the device is unplugged from the USB.
+	 * Note that `udevadm monitor' correctly reports removal of these devices so there
+	 * must be something wrong with our native code using libudev.
+	 * 
+	 * On top of that information for detached (UdevEventType.DETACHED) devices is completely unreliable:
+	 * missing manufacturer and product names, wrong VID&PID (often the one of the
+	 * USB hub the device was attached to), wrong USB path (often the path of the USB hub
+	 * the device was attached to).
+	 * The only reliable information seems to be the device node name, e.g. ttyACM0.
+	 * 
+	 * Information for devices being attached (UdevEventType.ATTACHED) seems to work more reliably.
+	 * The callback might still fire with wrong/incomplete information but EVENTUALLY
+	 * we get all the devices with the right information.
+	 * 
+	 */
 	private void callback(String type, UsbDevice usbDevice) {
 		
 		s_logger.debug("TYPE: " + usbDevice.getClass().toString());
@@ -111,58 +150,60 @@ public class LinuxUdevNative {
 		s_logger.debug("\tproduct ID: " + usbDevice.getProductId());
 		s_logger.debug("\tUSB Bus Number: " + usbDevice.getUsbBusNumber());
 		
-		if(type.compareTo(UdevEventType.ATTACHED.name()) == 0) {			
-			if(usbDevice instanceof UsbBlockDevice) {
-				s_logger.debug("Adding block device: " + usbDevice.getUsbPort() + " - " + ((UsbBlockDevice) usbDevice).getDeviceNode());
-				blockDevices.add((UsbBlockDevice) usbDevice);
-			} else if(usbDevice instanceof UsbNetDevice) {
-				s_logger.debug("Adding new device: " + usbDevice.getUsbPort() + " - " + ((UsbNetDevice) usbDevice).getInterfaceName());
-				netDevices.add((UsbNetDevice) usbDevice);
-			} else if(usbDevice instanceof UsbTtyDevice) {
-				s_logger.debug("Adding tty device: " + usbDevice.getUsbPort() + " - " + ((UsbTtyDevice) usbDevice).getDeviceNode());
-				ttyDevices.add((UsbTtyDevice) usbDevice);
-			}
-			
-			m_linuxUdevListener.attached(usbDevice);
-		} else if(type.compareTo(UdevEventType.DETACHED.name()) == 0) {
-			if(usbDevice instanceof UsbBlockDevice) {
-				s_logger.debug("Removing block device: " + usbDevice.getUsbPort() + " - " + ((UsbBlockDevice) usbDevice).getDeviceNode());
-				if(blockDevices != null && blockDevices.size() > 0) {
-					for(int i=0; i<blockDevices.size(); i++) {
-						UsbBlockDevice device = blockDevices.get(i);
-						if(device.getDeviceNode().equals(((UsbBlockDevice) usbDevice).getDeviceNode())) {
-							blockDevices.remove(i);
-							break;
-						}
+		if(usbDevice instanceof UsbBlockDevice) {
+			String name = ((UsbBlockDevice) usbDevice).getDeviceNode();
+			if (name != null) {
+				if (type.compareTo(UdevEventType.ATTACHED.name()) == 0) {
+					/*
+					 * FIXME: does an already existing device, with the same name,
+					 * need to be removed first?
+					 */
+					m_blockDevices.put(name, (UsbBlockDevice) usbDevice);
+					m_linuxUdevListener.attached(usbDevice);
+				} else if(type.compareTo(UdevEventType.DETACHED.name()) == 0) {
+					/*
+					 * Due to the above limitations,
+					 * the best we can do is to remove the device from the
+					 * map of already known devices by its name.
+					 */
+					UsbBlockDevice removedDevice = m_blockDevices.remove(name);
+					if (removedDevice != null) {
+						m_linuxUdevListener.detached(removedDevice);
 					}
-				}
-			} else if(usbDevice instanceof UsbNetDevice) {
-				s_logger.debug("Removing net device: " + usbDevice.getUsbPort() + " - " + ((UsbNetDevice) usbDevice).getInterfaceName());
-				if(netDevices != null && netDevices.size() > 0) {
-					for(int i=0; i<netDevices.size(); i++) {
-						UsbNetDevice device = netDevices.get(i);
-						if(device.getInterfaceName().equals(((UsbNetDevice) usbDevice).getInterfaceName())) {
-							netDevices.remove(i);
-							break;
-						}
-					}
-				}
-			} else if(usbDevice instanceof UsbTtyDevice) {
-				s_logger.debug("Removing tty device: " + usbDevice.getUsbPort() + " - " + ((UsbTtyDevice) usbDevice).getDeviceNode());
-				if(ttyDevices != null && ttyDevices.size() > 0) {
-					for(int i=0; i<ttyDevices.size(); i++) {
-						UsbTtyDevice device = ttyDevices.get(i);
-						if(device.getDeviceNode().equals(((UsbTtyDevice) usbDevice).getDeviceNode())) {
-							ttyDevices.remove(i);
-							break;
-						}
-					}
+				} else {
+					s_logger.debug("Unknown udev event: " + type);
 				}
 			}
-			
-			m_linuxUdevListener.detached(usbDevice);
-		} else {
-			s_logger.debug("Unknown udev event: " + type);
+		} else if(usbDevice instanceof UsbNetDevice) {
+			String name = ((UsbNetDevice)usbDevice).getInterfaceName();
+			if (name != null) {
+				if (type.compareTo(UdevEventType.ATTACHED.name()) == 0) {
+					m_netDevices.put(name, (UsbNetDevice) usbDevice);
+					m_linuxUdevListener.attached(usbDevice);
+				} else if(type.compareTo(UdevEventType.DETACHED.name()) == 0) {
+					UsbNetDevice removedDevice = m_netDevices.remove(name);
+					if (removedDevice != null) {
+						m_linuxUdevListener.detached(removedDevice);
+					}
+				} else {
+					s_logger.debug("Unknown udev event: " + type);
+				}
+			}
+		} else if(usbDevice instanceof UsbTtyDevice) {
+			String name = ((UsbTtyDevice)usbDevice).getDeviceNode();
+			if (name != null) {
+				if (type.compareTo(UdevEventType.ATTACHED.name()) == 0) {
+					m_ttyDevices.put(name, (UsbTtyDevice) usbDevice);
+					m_linuxUdevListener.attached(usbDevice);
+				} else if(type.compareTo(UdevEventType.DETACHED.name()) == 0) {
+					UsbTtyDevice removedDevice = m_ttyDevices.remove(name);
+					if (removedDevice != null) {
+						m_linuxUdevListener.detached(removedDevice);
+					}
+				} else {
+					s_logger.debug("Unknown udev event: " + type);
+				}
+			}
 		}
 	}
 
@@ -191,4 +232,3 @@ public class LinuxUdevNative {
     	});
 	}
 }
-

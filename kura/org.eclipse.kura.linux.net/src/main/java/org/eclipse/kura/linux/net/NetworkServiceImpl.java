@@ -519,55 +519,80 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
 	
     @Override
     public void handleEvent(Event event) {
-        s_logger.debug("handleEvent - topic: " + event.getTopic());
+        s_logger.debug("handleEvent - topic: {}", event.getTopic());
         String topic = event.getTopic();
         if (topic.equals(UsbDeviceAddedEvent.USB_EVENT_DEVICE_ADDED_TOPIC)) {
+        	//validate mandatory properties
+        	if (event.getProperty(UsbDeviceEvent.USB_EVENT_VENDOR_ID_PROPERTY) == null) {
+        		return;
+        	}
+        	if (event.getProperty(UsbDeviceEvent.USB_EVENT_PRODUCT_ID_PROPERTY) == null) {
+        		return;
+        	}
+        	if (event.getProperty(UsbDeviceEvent.USB_EVENT_USB_PORT_PROPERTY) == null) {
+        		return;
+        	}
+        	if (event.getProperty(UsbDeviceEvent.USB_EVENT_RESOURCE_PROPERTY) == null) {
+        		return;
+        	}
+        	
             //do we care?
-            SupportedUsbModemInfo modemInfo = SupportedUsbModemsInfo.getModem((String)event.getProperty(UsbDeviceEvent.USB_EVENT_VENDOR_ID_PROPERTY), (String)event.getProperty(UsbDeviceEvent.USB_EVENT_PRODUCT_ID_PROPERTY));
+            SupportedUsbModemInfo modemInfo = SupportedUsbModemsInfo.getModem((String) event.getProperty(UsbDeviceEvent.USB_EVENT_VENDOR_ID_PROPERTY),
+            		                                                          (String) event.getProperty(UsbDeviceEvent.USB_EVENT_PRODUCT_ID_PROPERTY));
             if(modemInfo != null) {
-                UsbModemDevice usbModem = null;
+            	//Found one - see if we have some info for it.
+            	//Also check if we are getting more devices than expected.
+            	//This can happen if all the modem resources cannot be removed from the OS or from ESF.
+            	//In this case we did not receive an UsbDeviceRemovedEvent and we did not post
+            	//an ModemRemovedEvent. Should we do it here?
+            	UsbModemDevice usbModem = m_usbModems.get(event.getProperty(UsbDeviceEvent.USB_EVENT_USB_PORT_PROPERTY));
+            	
+            	if(usbModem == null ||
+            	   (modemInfo.getNumTtyDevs() > 0 && usbModem.getTtyDevs().size() >= modemInfo.getNumTtyDevs()) ||
+            	   (modemInfo.getNumBlockDevs() > 0 && usbModem.getBlockDevs().size() >= modemInfo.getNumBlockDevs())) {
+            		
+            		if (usbModem == null) {
+            			s_logger.debug("Modem not found. Create one");
+            		} else {
+            			s_logger.debug("Found modem with too many resources: {}. Create a new one", usbModem);
+            		}
 
-                //found one - see if we have some info for it                   
-                if(m_usbModems.get(event.getProperty(UsbDeviceEvent.USB_EVENT_USB_PORT_PROPERTY)) == null) {
-                    usbModem = new UsbModemDevice((String) event.getProperty(UsbDeviceEvent.USB_EVENT_VENDOR_ID_PROPERTY),
-                            (String) event.getProperty(UsbDeviceEvent.USB_EVENT_PRODUCT_ID_PROPERTY),
-                            (String) event.getProperty(UsbDeviceEvent.USB_EVENT_MANUFACTURER_NAME_PROPERTY),
-                            (String) event.getProperty(UsbDeviceEvent.USB_EVENT_PRODUCT_NAME_PROPERTY),
-                            (String) event.getProperty(UsbDeviceEvent.USB_EVENT_BUS_NUMBER_PROPERTY),
-                            (String) event.getProperty(UsbDeviceEvent.USB_EVENT_DEVICE_PATH_PROPERTY));
-                } else {
-                    //just add the new resource
-                    usbModem = m_usbModems.get((String) event.getProperty(UsbDeviceAddedEvent.USB_EVENT_USB_PORT_PROPERTY));
-                }
-                
+            		usbModem = new UsbModemDevice(
+            				(String) event.getProperty(UsbDeviceEvent.USB_EVENT_VENDOR_ID_PROPERTY),
+            				(String) event.getProperty(UsbDeviceEvent.USB_EVENT_PRODUCT_ID_PROPERTY),
+            				(String) event.getProperty(UsbDeviceEvent.USB_EVENT_MANUFACTURER_NAME_PROPERTY),
+            				(String) event.getProperty(UsbDeviceEvent.USB_EVENT_PRODUCT_NAME_PROPERTY),
+            				(String) event.getProperty(UsbDeviceEvent.USB_EVENT_BUS_NUMBER_PROPERTY),
+            				(String) event.getProperty(UsbDeviceEvent.USB_EVENT_DEVICE_PATH_PROPERTY));
+            	}
+
                 String resource = (String) event.getProperty(UsbDeviceEvent.USB_EVENT_RESOURCE_PROPERTY);
-                s_logger.debug("Adding resource: " + resource + " for " + usbModem.getUsbPort());
-                if(resource.contains("tty")) {
-                    usbModem.addTtyDev(resource);
-                } else {
-                    usbModem.addBlockDev(resource);
-                }
-                m_usbModems.put((String) event.getProperty(UsbDeviceAddedEvent.USB_EVENT_USB_PORT_PROPERTY), usbModem);
-
                 
+                s_logger.debug("Adding resource: {} for: {}", resource, usbModem.getUsbPort());
+                if(resource.contains("tty")) { 
+                	usbModem.addTtyDev(resource);
+                } else {
+                	usbModem.addBlockDev(resource);
+                }
+                
+                m_usbModems.put((String) usbModem.getUsbPort(), usbModem);
+
                 //At this point, we should have some modems - display them
-                s_logger.debug("Modified modem (Added resource): " + m_usbModems.get(event.getProperty(UsbDeviceAddedEvent.USB_EVENT_USB_PORT_PROPERTY)));
+                s_logger.info("Modified modem (Added resource): {}", usbModem);
                 
                 // Check for correct number of resources
-				if ((usbModem != null)
-						&& (usbModem.getTtyDevs().size() == modemInfo.getNumTtyDevs())
-						&& (usbModem.getBlockDevs().size() == modemInfo.getNumBlockDevs())) {
+				if ((usbModem.getTtyDevs().size() == modemInfo.getNumTtyDevs()) &&
+					(usbModem.getBlockDevs().size() == modemInfo.getNumBlockDevs())) {
 					
-					final UsbModemDevice fUsbModem = usbModem;
-					s_logger.debug("posting ModemAddedEvent -- USB_EVENT_DEVICE_ADDED_TOPIC: " + fUsbModem);
-	                m_eventAdmin.postEvent(new ModemAddedEvent(fUsbModem));
-	                m_addedModems.add(fUsbModem.getUsbPort());
+					s_logger.debug("posting ModemAddedEvent -- USB_EVENT_DEVICE_ADDED_TOPIC: {}", usbModem);
+	                m_eventAdmin.postEvent(new ModemAddedEvent(usbModem));
+	                m_addedModems.add(usbModem.getUsbPort());
 	                
 	                if (OS_VERSION != null && OS_VERSION.equals(KuraConstants.Mini_Gateway.getImageName() + "_" + KuraConstants.Mini_Gateway.getImageVersion()) &&
 							TARGET_NAME != null && TARGET_NAME.equals(KuraConstants.Mini_Gateway.getTargetName())) {
 		                if (m_serialModem != null) {
-		                	if (SupportedUsbModemInfo.Telit_HE910_D.getVendorId().equals( fUsbModem.getVendorId())
-			                		&& SupportedUsbModemInfo.Telit_HE910_D.getProductId().equals(fUsbModem.getProductId())) {
+		                	if (SupportedUsbModemInfo.Telit_HE910_D.getVendorId().equals( usbModem.getVendorId())
+			                		&& SupportedUsbModemInfo.Telit_HE910_D.getProductId().equals(usbModem.getProductId())) {
 		                		s_logger.info("Removing {} from addedModems", m_serialModem.getProductName());
 			                	m_addedModems.remove(m_serialModem.getProductName());
 			                }
@@ -584,47 +609,38 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
             System.out.println("\t" + event.getProperty(UsbDeviceAddedEvent.USB_EVENT_USB_PORT_PROPERTY));
             */
         } else if(topic.equals(UsbDeviceRemovedEvent.USB_EVENT_DEVICE_REMOVED_TOPIC)) {
+        	//validate mandatory properties
+        	if (event.getProperty(UsbDeviceEvent.USB_EVENT_VENDOR_ID_PROPERTY) == null) {
+        		return;
+        	}
+        	if (event.getProperty(UsbDeviceEvent.USB_EVENT_PRODUCT_ID_PROPERTY) == null) {
+        		return;
+        	}
+        	if (event.getProperty(UsbDeviceEvent.USB_EVENT_USB_PORT_PROPERTY) == null) {
+        		return;
+        	}
+
             //do we care?
-            SupportedUsbModemInfo modemInfo = SupportedUsbModemsInfo.getModem((String)event.getProperty(UsbDeviceEvent.USB_EVENT_VENDOR_ID_PROPERTY), (String)event.getProperty(UsbDeviceEvent.USB_EVENT_PRODUCT_ID_PROPERTY));
+            SupportedUsbModemInfo modemInfo = SupportedUsbModemsInfo.getModem((String)event.getProperty(UsbDeviceEvent.USB_EVENT_VENDOR_ID_PROPERTY),
+            		                                                          (String)event.getProperty(UsbDeviceEvent.USB_EVENT_PRODUCT_ID_PROPERTY));
             if(modemInfo != null) {
-                //found one - see if we have some info for it
-                if(m_usbModems.get(event.getProperty(UsbDeviceEvent.USB_EVENT_USB_PORT_PROPERTY)) == null) {
-                    //this shouldn't happen
-                    String newDeviceId = new StringBuffer().append(event.getProperty(UsbDeviceEvent.USB_EVENT_VENDOR_ID_PROPERTY)).append(":").append(event.getProperty(UsbDeviceEvent.USB_EVENT_PRODUCT_ID_PROPERTY)).toString();
-                    s_logger.error("Got a removal event for a modem we've lost track of: " + event.getProperty(UsbDeviceEvent.USB_EVENT_USB_PORT_PROPERTY) + " with ID: " + newDeviceId);
-                } else {
-                    //just remove the old resource
-                    UsbModemDevice usbModem = m_usbModems.get((String) event.getProperty(UsbDeviceEvent.USB_EVENT_USB_PORT_PROPERTY));
-                    String resource = (String) event.getProperty(UsbDeviceEvent.USB_EVENT_RESOURCE_PROPERTY);
-                    s_logger.debug("Removing resource: " + resource + " for " + usbModem.getUsbPort());
-                    if (resource != null) {
-	                    if(resource.contains("tty")) {
-	                        usbModem.removeTtyDev(resource);
-	                    } else {
-	                        usbModem.removeBlockDev(resource);
-	                    }
-	                    s_logger.debug("Modified modem (Removed resource): " + resource + " for: " + usbModem);
-                    }
-                    
-                    // Check expected number of resources for the modem
-                    if(m_addedModems.contains(usbModem.getUsbPort()) && 
-                            (usbModem.getTtyDevs().size() < modemInfo.getNumTtyDevs() || usbModem.getBlockDevs().size() < modemInfo.getNumTtyDevs())) {
-                        s_logger.debug("Removing modem: " + usbModem);
-                        m_addedModems.remove(usbModem.getUsbPort());
-                        
-                        Map<String, String> properties = new HashMap<String, String>();
-                        properties.put(UsbDeviceEvent.USB_EVENT_BUS_NUMBER_PROPERTY, (String) event.getProperty(UsbDeviceEvent.USB_EVENT_BUS_NUMBER_PROPERTY));
-                        properties.put(UsbDeviceEvent.USB_EVENT_DEVICE_PATH_PROPERTY, (String) event.getProperty(UsbDeviceEvent.USB_EVENT_DEVICE_PATH_PROPERTY));
-                        properties.put(UsbDeviceEvent.USB_EVENT_MANUFACTURER_NAME_PROPERTY, (String) event.getProperty(UsbDeviceEvent.USB_EVENT_MANUFACTURER_NAME_PROPERTY));
-                        properties.put(UsbDeviceEvent.USB_EVENT_PRODUCT_ID_PROPERTY, (String) event.getProperty(UsbDeviceEvent.USB_EVENT_PRODUCT_ID_PROPERTY));
-                        properties.put(UsbDeviceEvent.USB_EVENT_PRODUCT_NAME_PROPERTY, (String) event.getProperty(UsbDeviceEvent.USB_EVENT_PRODUCT_NAME_PROPERTY));
-                        properties.put(UsbDeviceEvent.USB_EVENT_USB_PORT_PROPERTY, (String) event.getProperty(UsbDeviceEvent.USB_EVENT_USB_PORT_PROPERTY));
-                        properties.put(UsbDeviceEvent.USB_EVENT_VENDOR_ID_PROPERTY, (String) event.getProperty(UsbDeviceEvent.USB_EVENT_VENDOR_ID_PROPERTY));
-                        m_eventAdmin.postEvent(new ModemRemovedEvent(properties));
-                    }
-                }
+            	//found one - remove if it exists
+            	UsbModemDevice usbModem = m_usbModems.remove(event.getProperty(UsbDeviceEvent.USB_EVENT_USB_PORT_PROPERTY));
+            	if(usbModem != null) {
+            		s_logger.info("Removing modem: {}", usbModem);
+            		m_addedModems.remove(usbModem.getUsbPort());
+
+            		Map<String, String> properties = new HashMap<String, String>();
+            		properties.put(UsbDeviceEvent.USB_EVENT_BUS_NUMBER_PROPERTY, usbModem.getUsbBusNumber());
+            		properties.put(UsbDeviceEvent.USB_EVENT_DEVICE_PATH_PROPERTY, usbModem.getUsbDevicePath());
+            		properties.put(UsbDeviceEvent.USB_EVENT_USB_PORT_PROPERTY, usbModem.getUsbPort());
+            		properties.put(UsbDeviceEvent.USB_EVENT_VENDOR_ID_PROPERTY, usbModem.getVendorId());
+            		properties.put(UsbDeviceEvent.USB_EVENT_PRODUCT_ID_PROPERTY, usbModem.getProductId());
+            		properties.put(UsbDeviceEvent.USB_EVENT_MANUFACTURER_NAME_PROPERTY, usbModem.getManufacturerName());
+            		properties.put(UsbDeviceEvent.USB_EVENT_PRODUCT_NAME_PROPERTY, usbModem.getProductName());
+            		m_eventAdmin.postEvent(new ModemRemovedEvent(properties));
+            	}
             }
-            
             
             /*
             System.out.println("REMOVED Device: " + event.getProperty(UsbDeviceAddedEvent.USB_EVENT_VENDOR_ID_PROPERTY) + ":" + event.getProperty(UsbDeviceAddedEvent.USB_EVENT_PRODUCT_ID_PROPERTY));
@@ -634,7 +650,7 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
             System.out.println("\t" + event.getProperty(UsbDeviceAddedEvent.USB_EVENT_USB_PORT_PROPERTY));
             */
         } else {
-            s_logger.error("Unexpected event topic: " + topic);
+            s_logger.error("Unexpected event topic: {}", topic);
         }
     }
 	

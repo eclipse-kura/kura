@@ -39,18 +39,14 @@ iptables -A OUTPUT -p icmp --icmp-type 0 -m state --state ESTABLISHED,RELATED -j
 #custom local service rules
 iptables -I INPUT -p tcp -s 0.0.0.0/0 --dport 22 -j ACCEPT
 iptables -I INPUT -p tcp -s 0.0.0.0/0 -i eth0 --dport 80 -j ACCEPT
-iptables -I INPUT -p tcp -s 0.0.0.0/0 -i eth1 --dport 80 -j ACCEPT
 iptables -I INPUT -p tcp -s 0.0.0.0/0 -i wlan0 --dport 80 -j ACCEPT
 iptables -I INPUT -p tcp -s 10.234.0.0/16 --dport 80 -j ACCEPT
 iptables -I INPUT -p tcp -s 0.0.0.0/0 -i eth0 --dport 1450 -j ACCEPT
-iptables -I INPUT -p tcp -s 0.0.0.0/0 -i eth1 --dport 1450 -j ACCEPT
 iptables -I INPUT -p tcp -s 0.0.0.0/0 -i wlan0 --dport 1450 -j ACCEPT
 iptables -I INPUT -p tcp -s 127.0.0.1/32 --dport 5002 -j ACCEPT
 iptables -I INPUT -p udp -s 0.0.0.0/0 -i eth0 --dport 53 -j ACCEPT
-iptables -I INPUT -p udp -s 0.0.0.0/0 -i eth1 --dport 53 -j ACCEPT
 iptables -I INPUT -p udp -s 0.0.0.0/0 -i wlan0 --dport 53 -j ACCEPT
 iptables -I INPUT -p udp -s 0.0.0.0/0 -i eth0 --dport 67 -j ACCEPT
-iptables -I INPUT -p udp -s 0.0.0.0/0 -i eth1 --dport 67 -j ACCEPT
 iptables -I INPUT -p udp -s 0.0.0.0/0 -i wlan0 --dport 67 -j ACCEPT
 
 #custom port forward service rules

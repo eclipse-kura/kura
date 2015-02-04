@@ -80,7 +80,6 @@ public class iwScanTool {
 			}
 	
 			long timerStart = System.currentTimeMillis();
-			//s_logger.warn("<IAB> scan() :: ... Starting Timer ...");
 			
 			m_executor = Executors.newSingleThreadExecutor();
 			m_task = m_executor.submit(new Runnable() {
@@ -189,8 +188,7 @@ public class iwScanTool {
 				s_logger.warn("parse() :: scan operation was aborted");
 				throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "iw scan operation was aborted");
 			}
-			//s_logger.warn("<IAB> !!! line: {}", line);
-			//if(line.contains("BSS ") && !line.contains("* OBSS")) {
+			
 			if (line.startsWith("BSS")) {
 				//new AP
 				if(ssid != null) {

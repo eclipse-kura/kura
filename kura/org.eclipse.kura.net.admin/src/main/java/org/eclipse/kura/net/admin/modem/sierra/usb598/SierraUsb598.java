@@ -411,6 +411,10 @@ public class SierraUsb598 implements EvdoCellularModem {
 	public ModemDevice getModemDevice() {
 		 return m_device;
 	}
+	
+	protected void setModemDevice(ModemDevice device) {
+		m_device = device;
+	}
 
 	@Override
 	public String getDataPort() throws KuraException {

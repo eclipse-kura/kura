@@ -27,38 +27,17 @@ killall monit java >> $LOG 2>&1
 
 #clean up old installation if present
 rm -fr /opt/eclipse/data >> $LOG 2>&1
+rm -fr /opt/eclipse/esf* >> $LOG 2>&1
 rm -fr /opt/eclipse/kura* >> $LOG 2>&1
 rm -fr ${INSTALL_DIR}/kura* >> $LOG 2>&1
+rm -fr /tmp/.esf/ >> $LOG 2>&1
 rm -fr /tmp/.kura/ >> $LOG 2>&1
-rm /etc/init.d/firewall >> $LOG 2>&1
-rm /etc/dhcpd-*.conf >> $LOG 2>&1
-rm /etc/named.conf >> $LOG 2>&1
-rm /etc/wpa_supplicant.conf >> $LOG 2>&1
-rm /etc/hostapd.conf >> $LOG 2>&1
 rm /tmp/coninfo-* >> $LOG 2>&1
 rm /var/log/esf.log >> $LOG 2>&1
 rm /var/log/kura.log >> $LOG 2>&1
-rm -fr /etc/ppp/chat >> $LOG 2>&1
-rm -fr /etc/ppp/peers >> $LOG 2>&1
-rm -fr /etc/ppp/scripts >> $LOG 2>&1
-rm /etc/ppp/*ap-secrets >> $LOG 2>&1
-rm /etc/rc*.d/S*esf >> $LOG 2>&1
 rm /etc/rc*.d/S*kura >> $LOG 2>&1
 rm kura-*.zip >> $LOG 2>&1
 rm kura_*.zip >> $LOG 2>&1
-
-#clean up and/or install OS specific stuff
-HOSTNAME=`hostname`
-if [ ${HOSTNAME} == "mini-gateway" ] ; then
-	#MGW specific items
-	mkdir /var/named >> $LOG 2>&1
-
-	#remove ntpd
-	rm /etc/rc2.d/S20ntpd >> $LOG 2>&1
-	rm /etc/rc3.d/S20ntpd >> $LOG 2>&1
-	rm /etc/rc4.d/S20ntpd >> $LOG 2>&1
-	rm /etc/rc5.d/S20ntpd >> $LOG 2>&1
-fi
 
 echo ""
 ##############################################

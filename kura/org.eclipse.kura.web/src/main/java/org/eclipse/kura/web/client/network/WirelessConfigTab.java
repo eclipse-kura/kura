@@ -743,27 +743,30 @@ public class WirelessConfigTab extends LayoutContainer
         m_pingAccessPointRadioTrue = new Radio();  
         m_pingAccessPointRadioTrue.setBoxLabel(MSGS.trueLabel());
         m_pingAccessPointRadioTrue.setItemId("true");
+        m_pingAccessPointRadioTrue.addListener(Events.OnMouseOver, new MouseOverListener(MSGS.netWifiToolTipPingAccessPoint()));
         
         m_pingAccessPointRadioFalse = new Radio();  
         m_pingAccessPointRadioFalse.setBoxLabel(MSGS.falseLabel());  
         m_pingAccessPointRadioFalse.setItemId("false");
+        m_pingAccessPointRadioFalse.addListener(Events.OnMouseOver, new MouseOverListener(MSGS.netWifiToolTipPingAccessPoint()));
         
         m_pingAccessPointRadioGroup = new RadioGroup();
         m_pingAccessPointRadioGroup.setName("pingAccessPoint");
         m_pingAccessPointRadioGroup.setFieldLabel(MSGS.netWifiWirelessPingAccessPoint()); 
         m_pingAccessPointRadioGroup.add(m_pingAccessPointRadioTrue);  
         m_pingAccessPointRadioGroup.add(m_pingAccessPointRadioFalse);
-        m_pingAccessPointRadioGroup.addPlugin(m_dirtyPlugin);  
-        m_pingAccessPointRadioGroup.addListener(Events.OnMouseOver, new MouseOverListener(MSGS.netWifiToolTipPingAccessPoint()));
+        m_pingAccessPointRadioGroup.addPlugin(m_dirtyPlugin);
         m_pingAccessPointRadioGroup.setStyleAttribute("margin-top", Constants.LABEL_MARGIN_TOP_SEPARATOR);
         
         m_ignoreSsidRadioTrue = new Radio();  
         m_ignoreSsidRadioTrue.setBoxLabel(MSGS.trueLabel());
         m_ignoreSsidRadioTrue.setItemId("true");
+        m_ignoreSsidRadioTrue.addListener(Events.OnMouseOver, new MouseOverListener(MSGS.netWifiToolTipIgnoreSSID()));
         
         m_ignoreSsidRadioFalse = new Radio();  
         m_ignoreSsidRadioFalse.setBoxLabel(MSGS.falseLabel());  
         m_ignoreSsidRadioFalse.setItemId("false");
+        m_ignoreSsidRadioFalse.addListener(Events.OnMouseOver, new MouseOverListener(MSGS.netWifiToolTipIgnoreSSID()));
         
         m_ignoreSsidRadioGroup = new RadioGroup();
         m_ignoreSsidRadioGroup.setName("ignoreSSID");
@@ -771,7 +774,6 @@ public class WirelessConfigTab extends LayoutContainer
         m_ignoreSsidRadioGroup.add(m_ignoreSsidRadioTrue);  
         m_ignoreSsidRadioGroup.add(m_ignoreSsidRadioFalse);
         m_ignoreSsidRadioGroup.addPlugin(m_dirtyPlugin);  
-        m_ignoreSsidRadioGroup.addListener(Events.OnMouseOver, new MouseOverListener(MSGS.netWifiToolTipIgnoreSSID()));
         m_ignoreSsidRadioGroup.setStyleAttribute("margin-top", Constants.LABEL_MARGIN_TOP_SEPARATOR);
                 
         //

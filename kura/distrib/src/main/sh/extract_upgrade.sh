@@ -47,9 +47,6 @@ cleanup() {
     reboot
 }
 
-# Trap signals performing cleanup
-trap cleanup INT TERM EXIT
-
 ##############################################
 # PRE-INSTALL SCRIPT
 ##############################################
@@ -70,6 +67,7 @@ if [ -d "${BASE_DIR}/${INSTALL_DIR}" ]; then
 fi
 
 # Exit performing cleanup at the first error
+trap cleanup INT TERM EXIT
 set -e
 
 # kill JVM and monit for upgrade

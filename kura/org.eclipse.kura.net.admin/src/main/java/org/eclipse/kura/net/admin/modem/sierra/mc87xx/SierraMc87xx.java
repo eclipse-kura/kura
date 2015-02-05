@@ -191,6 +191,21 @@ public class SierraMc87xx implements HspaCellularModem {
     	}
 		return ret;
 	}
+	
+	@Override
+	public boolean isPortReachable(String port) {
+		boolean ret = false;
+		synchronized (m_atLock) {
+			try {
+				CommConnection commAtConnection = openSerialPort(port);
+				closeSerialPort(commAtConnection);
+				ret = true;
+			} catch (KuraException e) {
+				s_logger.warn("isPortReachable() :: The {} is not reachable", port);
+			}
+		}
+		return ret;
+	}
 
 	@Override
 	public void reset() throws KuraException {
@@ -339,6 +354,10 @@ public class SierraMc87xx implements HspaCellularModem {
 	@Override
 	public ModemDevice getModemDevice() {
 		return m_device;
+	}
+	
+	protected void setModemDevice(ModemDevice device) {
+		m_device = device;
 	}
 
 	@Override

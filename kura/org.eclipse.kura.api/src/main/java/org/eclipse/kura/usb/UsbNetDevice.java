@@ -53,4 +53,16 @@ public class UsbNetDevice extends AbstractUsbDevice {
 			return false;
 		return true;
 	}
+
+	@Override
+	public String toString() {
+		return "UsbNetDevice [getInterfaceName()=" + getInterfaceName()
+				+ ", getVendorId()=" + getVendorId()
+				+ ", getProductId()=" + getProductId()
+				+ ", getManufacturerName()=" + getManufacturerName()
+				+ ", getProductName()=" + getProductName()
+				+ ", getUsbBusNumber()=" + getUsbBusNumber()
+				+ ", getUsbDevicePath()=" + getUsbDevicePath()
+				+ ", getUsbPort()=" + getUsbPort() + "]";
+	}
 }

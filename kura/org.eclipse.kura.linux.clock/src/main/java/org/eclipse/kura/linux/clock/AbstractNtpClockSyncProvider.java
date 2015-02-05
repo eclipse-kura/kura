@@ -91,16 +91,20 @@ public abstract class AbstractNtpClockSyncProvider implements ClockSyncProvider
 					if(!m_isSynced){
 						m_syncCount=0;
 						try { 
-							s_logger.info("Try to sync clock ("+m_numRetry+")");
-							syncClock(); 
-							s_logger.info("Clock synced");
-							m_isSynced=true;
-							m_numRetry=0;
+							s_logger.info("Try to sync clock ({})", m_numRetry);
+							if(syncClock()) { 
+								s_logger.info("Clock synced");
+								m_isSynced=true;
+								m_numRetry=0;
+							}
 						}
 						catch(KuraException e) {
 							m_numRetry++;
-							if(m_numRetry>=m_maxRetry) m_isSynced=true; // give up retry
 							s_logger.error("Error Synchronizing Clock", e);
+							if(m_numRetry>=m_maxRetry) {
+								s_logger.error("Failed to synchronize System Clock. Exhausted retry attempts, giving up");
+								m_isSynced=true;
+							}
 						}
 					}
 					else{
@@ -186,5 +190,5 @@ public abstract class AbstractNtpClockSyncProvider implements ClockSyncProvider
 	}
 	
 	
-	protected abstract void syncClock() throws KuraException;
+	protected abstract boolean syncClock() throws KuraException;
 }

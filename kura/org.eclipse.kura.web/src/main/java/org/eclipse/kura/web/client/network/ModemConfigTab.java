@@ -462,10 +462,12 @@ public class ModemConfigTab extends LayoutContainer
         m_persistRadioTrue = new Radio();  
         m_persistRadioTrue.setBoxLabel(MSGS.trueLabel());
         m_persistRadioTrue.setItemId("true");
+        m_persistRadioTrue.addListener(Events.OnMouseOver, new MouseOverListener(MSGS.netModemToolTipPersist()));
         
         m_persistRadioFalse = new Radio();  
         m_persistRadioFalse.setBoxLabel(MSGS.falseLabel());  
         m_persistRadioFalse.setItemId("false");
+        m_persistRadioFalse.addListener(Events.OnMouseOver, new MouseOverListener(MSGS.netModemToolTipPersist()));
         
         m_persistRadioGroup = new RadioGroup();
         m_persistRadioGroup.setName("modemPersist");
@@ -473,7 +475,6 @@ public class ModemConfigTab extends LayoutContainer
         m_persistRadioGroup.add(m_persistRadioTrue);  
         m_persistRadioGroup.add(m_persistRadioFalse);
         m_persistRadioGroup.addPlugin(m_dirtyPlugin);  
-        m_persistRadioGroup.addListener(Events.OnMouseOver, new MouseOverListener(MSGS.netModemToolTipPersist()));
         m_persistRadioGroup.setStyleAttribute("margin-top", Constants.LABEL_MARGIN_TOP_SEPARATOR);
         fieldSet.add(m_persistRadioGroup, formData);
         
@@ -567,10 +568,12 @@ public class ModemConfigTab extends LayoutContainer
         m_enableGpsRadioTrue = new Radio();  
         m_enableGpsRadioTrue.setBoxLabel(MSGS.trueLabel());
         m_enableGpsRadioTrue.setItemId("true");
+        m_enableGpsRadioTrue.addListener(Events.OnMouseOver, new MouseOverListener(MSGS.netModemToolTipEnableGps()));
         
         m_enableGpsRadioFalse = new Radio();  
         m_enableGpsRadioFalse.setBoxLabel(MSGS.falseLabel());  
         m_enableGpsRadioFalse.setItemId("false");
+        m_enableGpsRadioFalse.addListener(Events.OnMouseOver, new MouseOverListener(MSGS.netModemToolTipEnableGps()));
         
         m_enableGpsRadioGroup = new RadioGroup();
         m_enableGpsRadioGroup.setName("modemEnableGps");
@@ -578,7 +581,6 @@ public class ModemConfigTab extends LayoutContainer
         m_enableGpsRadioGroup.add(m_enableGpsRadioTrue);  
         m_enableGpsRadioGroup.add(m_enableGpsRadioFalse);
         m_enableGpsRadioGroup.addPlugin(m_dirtyPlugin);  
-        m_enableGpsRadioGroup.addListener(Events.OnMouseOver, new MouseOverListener(MSGS.netModemToolTipEnableGps()));
         m_enableGpsRadioGroup.setStyleAttribute("margin-top", Constants.LABEL_MARGIN_TOP_SEPARATOR);
         fieldSet.add(m_enableGpsRadioGroup, formData);
         

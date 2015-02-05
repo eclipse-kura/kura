@@ -20,12 +20,12 @@
 	<parent>
 		<groupId>org.eclipse.kura</groupId>
 		<artifactId>kura</artifactId>
-		<version>1.1.0</version>
+		<version>1.1.1</version>
 		<relativePath>../pom_pom.xml</relativePath>
 	</parent>
 
 	<artifactId>org.eclipse.kura.web</artifactId>
-	<version>1.0.1</version>
+	<version>1.0.2</version>
 	<packaging>war</packaging>
 	<name>org.eclipse.kura.web</name>
 
@@ -57,31 +57,31 @@
 		<dependency>
 			<groupId>org.eclipse.kura</groupId>
 			<artifactId>org.eclipse.kura.api</artifactId>
-			<version>${project.version}</version>
+			<version>[1.0,2.0)</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.kura</groupId>
 			<artifactId>org.eclipse.kura.core</artifactId>
-			<version>${project.version}</version>
+			<version>[1.0,2.0)</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.kura</groupId>
 			<artifactId>org.eclipse.kura.core.configuration</artifactId>
-			<version>${project.version}</version>
+			<version>[1.0,2.0)</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.kura</groupId>
 			<artifactId>org.eclipse.kura.core.net</artifactId>
-			<version>${project.version}</version>
+			<version>[1.0,2.0)</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.kura</groupId>
 			<artifactId>org.eclipse.kura.deployment.agent</artifactId>
-			<version>${project.version}</version>
+			<version>[1.0,2.0)</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>

@@ -57,8 +57,21 @@ public interface CellularModem {
      */
     public String getRevisionID() throws KuraException;
     
-    
+    /**
+     * Reports if Modem replies to the 'AT' command
+     * 
+     * @return 'true' if AT reachable, 'false' otherwise
+     * @throws KuraException
+     */
     public boolean isReachable() throws KuraException;
+    
+    /**
+     * Reports if specified port can be opened
+     * 
+     * @param port - modem's serial port
+     * @return 'true' if port can be opened, 'false' otherwise
+     */
+    public boolean isPortReachable(String port);
      
     /**
      * resets the modem and tries to restore the state 

@@ -441,12 +441,16 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 										((GwtWifiNetInterfaceConfig)gwtNetConfig).setWirelessMode(GwtWifiWirelessMode.netWifiWirelessModeStation.name());
 										if (wifiClientMonitorService != null) {
 											if (wifiConfig.getMode().equals(WifiMode.INFRA)) {
-												try {
-													int rssi = wifiClientMonitorService.getSignalLevel(netIfConfig.getName(), wifiConfig.getSSID());
-													s_logger.debug("Setting Received Signal Strength to {}", rssi);
-													gwtNetConfig.setHwRssi(Integer.toString(rssi));
-												} catch (KuraException e) {
-													e.printStackTrace();
+												if (gwtNetConfig.getStatus().equals(GwtNetIfStatus.netIPv4StatusDisabled.name())) {
+													gwtNetConfig.setHwRssi("N/A");
+												} else {
+													try {
+														int rssi = wifiClientMonitorService.getSignalLevel(netIfConfig.getName(), wifiConfig.getSSID());
+														s_logger.debug("Setting Received Signal Strength to {}", rssi);
+														gwtNetConfig.setHwRssi(Integer.toString(rssi));
+													} catch (KuraException e) {
+														e.printStackTrace();
+													}
 												}
 											}
 										}
@@ -500,6 +504,13 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 						                    		gwtModemConfig.setHwRssi(Integer.toString(rssi));
 					                    		} catch (KuraException e) {
 					                    			s_logger.warn("Failed to get Received Signal Strength from modem", e);
+					                    		}
+					                    		
+					                    		try {
+						                    		String sModel = cellModemService.getModel();
+						                    		((GwtModemInterfaceConfig)gwtNetConfig).setModel(sModel);
+					                    		} catch (KuraException e) {
+					                    			s_logger.warn("Failed to get model information from modem", e);
 					                    		}
 					                    		
 					                    		try {

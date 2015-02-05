@@ -1,15 +1,15 @@
 #Deployment Plugin Project File
-#Tue Jul 23 11:20:57 CEST 2013
+#Mon Feb 02 13:27:02 CST 2015
 build.ant.name=<.>/src/main/resources/org.eclipse.kura.demo.heater_build.xml
 build.dp.file=<.>/target/org.eclipse.kura.demo.heater.dp
 build.location=
-bundles.0.bundle_path=<.>/.project
+bundles.0.bundle_path=/home/ibinshtok/eurotechdev/kuradev/kura/kura/org.eclipse.kura.demo.heater/target/org.eclipse.kura.demo.heater-2.1.0-SNAPSHOT.jar
 bundles.0.customizer=false
 bundles.0.headers.count=0
 bundles.0.missing=false
-bundles.0.name=bundles/org.eclipse.kura.demo.heater.jar
+bundles.0.name=bundles/org.eclipse.kura.demo.heater-2.1.0-SNAPSHOT.jar
 bundles.0.symbolic_name=org.eclipse.kura.demo.heater;singleton\:\=true
-bundles.0.version=1.0.0.SNAPSHOT
+bundles.0.version=2.1.0.201404221440
 bundles.count=1
 certificates.count=0
 general.signbundles=false
@@ -17,3 +17,4 @@ headers.other.headers=
 headers.symbolic.name=org.eclipse.kura.demo.heater
 headers.version=1.0.0
 resources.count=0
+

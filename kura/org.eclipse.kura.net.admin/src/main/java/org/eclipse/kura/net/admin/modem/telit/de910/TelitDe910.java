@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory;
 public class TelitDe910 extends TelitModem implements EvdoCellularModem {
 
 	private static final Logger s_logger = LoggerFactory.getLogger(TelitDe910.class);
-	
+		
 	 /**
      * TelitDe910 modem constructor
      * 
@@ -44,6 +44,34 @@ public class TelitDe910 extends TelitModem implements EvdoCellularModem {
 			ModemTechnologyType technologyType) {
 		
 		super(device, platform, connectionFactory, technologyType);
+		
+		try {
+			String atPort = getAtPort();
+			String gpsPort = getGpsPort();
+			if (atPort != null) {
+				if (atPort.equals(getDataPort()) || atPort.equals(gpsPort)) {
+					m_serialNumber = getSerialNumber();
+					m_imsi = getMobileSubscriberIdentity();
+					m_iccid = getIntegratedCirquitCardId();
+					m_model = getModel();
+					m_manufacturer = getManufacturer();		
+					m_revisionId = getRevisionID();
+					m_gpsSupported = isGpsSupported();
+					m_rssi = getSignalStrength();
+					
+					s_logger.trace("TelitDe910() :: Serial Number={}", m_serialNumber);
+					s_logger.trace("TelitDe910() :: IMSI={}", m_imsi);
+					s_logger.trace("TelitDe910() :: ICCID={}", m_iccid);
+					s_logger.trace("TelitDe910() :: Model={}", m_model);
+					s_logger.trace("TelitDe910() :: Manufacturer={}", m_manufacturer);
+					s_logger.trace("TelitDe910() :: Revision ID={}", m_revisionId);
+					s_logger.trace("TelitDe910() :: GPS Supported={}", m_gpsSupported);
+					s_logger.trace("TelitDe910() :: RSSI={}", m_rssi);
+				}
+			}
+		} catch (KuraException e) {
+			e.printStackTrace();
+		}
     }
 	
 	@Override
@@ -55,7 +83,7 @@ public class TelitDe910 extends TelitModem implements EvdoCellularModem {
 	public ModemRegistrationStatus getRegistrationStatus() throws KuraException {
 		ModemRegistrationStatus modemRegistrationStatus = ModemRegistrationStatus.UNKNOWN;
     	synchronized (s_atLock) {
-    		s_logger.debug("sendCommand getRegistrationStatus :: " + TelitDe910AtCommands.getNetRegistrationStatus.getCommand());
+    		s_logger.debug("sendCommand getRegistrationStatus :: {}", TelitDe910AtCommands.getNetRegistrationStatus.getCommand());
 	    	byte[] reply = null;
 	    	CommConnection commAtConnection = openSerialPort(getAtPort());
 	    	if (!isAtReachable(commAtConnection)) {
@@ -101,7 +129,7 @@ public class TelitDe910 extends TelitModem implements EvdoCellularModem {
 	public long getCallTxCounter() throws KuraException {
 		long txCnt = 0;
     	synchronized (s_atLock) {
-	    	s_logger.debug("sendCommand getGprsSessionDataVolume :: " + TelitDe910AtCommands.getSessionDataVolume.getCommand());
+	    	s_logger.debug("sendCommand getGprsSessionDataVolume :: {}", TelitDe910AtCommands.getSessionDataVolume.getCommand());
 	    	byte[] reply = null;
 	    	CommConnection commAtConnection = openSerialPort(getAtPort());
 	    	if (!isAtReachable(commAtConnection)) {
@@ -141,7 +169,7 @@ public class TelitDe910 extends TelitModem implements EvdoCellularModem {
 	public long getCallRxCounter() throws KuraException {
 		long rxCnt = 0;
     	synchronized (s_atLock) {
-	    	s_logger.debug("sendCommand getGprsSessionDataVolume :: " + TelitDe910AtCommands.getSessionDataVolume.getCommand());
+	    	s_logger.debug("sendCommand getGprsSessionDataVolume :: {}", TelitDe910AtCommands.getSessionDataVolume.getCommand());
 	    	byte[] reply = null;
 	    	CommConnection commAtConnection = openSerialPort(getAtPort());
 	    	if (!isAtReachable(commAtConnection)) {
@@ -181,7 +209,7 @@ public class TelitDe910 extends TelitModem implements EvdoCellularModem {
 	public String getServiceType() throws KuraException {
 		String serviceType = null;
     	synchronized (s_atLock) {
-    		s_logger.debug("sendCommand getServiceType :: " + TelitDe910AtCommands.getServiceType.getCommand());
+    		s_logger.debug("sendCommand getServiceType :: {}", TelitDe910AtCommands.getServiceType.getCommand());
 	    	byte[] reply = null;
 	    	CommConnection commAtConnection = openSerialPort(getAtPort());
 	    	if (!isAtReachable(commAtConnection)) {
@@ -228,8 +256,7 @@ public class TelitDe910 extends TelitModem implements EvdoCellularModem {
 		
 		String sMdn = null;
 		synchronized (s_atLock) {
-	    
-			s_logger.debug("sendCommand getMdn :: " + TelitDe910AtCommands.getMdn.getCommand());
+			s_logger.debug("sendCommand getMdn :: {}", TelitDe910AtCommands.getMdn.getCommand());
 			byte[] reply = null;
 			CommConnection commAtConnection = openSerialPort(getAtPort());
 			if (!isAtReachable(commAtConnection)) {
@@ -250,7 +277,7 @@ public class TelitDe910 extends TelitModem implements EvdoCellularModem {
 				}
 			}
     	}
-        return sMdn;
+		return sMdn;
 	}
 	
 	@Override
@@ -258,8 +285,7 @@ public class TelitDe910 extends TelitModem implements EvdoCellularModem {
 		
 		String sMsid = null;
 		synchronized (s_atLock) {
-	    
-			s_logger.debug("sendCommand getMdn :: " + TelitDe910AtCommands.getMsid.getCommand());
+			s_logger.debug("sendCommand getMsid :: {}", TelitDe910AtCommands.getMsid.getCommand());
 			byte[] reply = null;
 			CommConnection commAtConnection = openSerialPort(getAtPort());
 			if (!isAtReachable(commAtConnection)) {
@@ -280,7 +306,7 @@ public class TelitDe910 extends TelitModem implements EvdoCellularModem {
 				}
 			}
     	}
-        return sMsid;
+		return sMsid;
 	}
 	
 	@Override

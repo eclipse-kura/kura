@@ -27,17 +27,8 @@ fi
 rm -fr /opt/eclipse/* >> /tmp/kura_install.log 2>&1
 rm -fr ${INSTALL_DIR}/kura* >> /tmp/kura_install.log 2>&1
 rm -fr /tmp/.kura/ >> /tmp/kura_install.log 2>&1
-rm /etc/init.d/firewall >> /tmp/kura_install.log 2>&1
-rm /etc/dhcpd-*.conf >> /tmp/kura_install.log 2>&1
-rm /etc/named.conf >> /tmp/kura_install.log 2>&1
-rm /etc/wpa_supplicant.conf >> /tmp/kura_install.log 2>&1
-rm /etc/hostapd.conf >> /tmp/kura_install.log 2>&1
 rm /tmp/coninfo-* >> /tmp/kura_install.log 2>&1
 rm /var/log/kura.log >> /tmp/kura_install.log 2>&1
-rm -fr /etc/ppp/chat >> /tmp/kura_install.log 2>&1
-rm -fr /etc/ppp/peers >> /tmp/kura_install.log 2>&1
-rm -fr /etc/ppp/scripts >> /tmp/kura_install.log 2>&1
-rm /etc/ppp/*ap-secrets >> /tmp/kura_install.log 2>&1
 rm kura-*.zip >> /tmp/kura_install.log 2>&1
 
 echo ""

@@ -112,6 +112,13 @@ public class GpsDevice {
 			return KuraConnectionStatus.NEVERCONNECTED;
 		return comm.getConnectStatus();
 	}
+	
+	public Properties getConnectConfig() {
+		if (!connConfigd) {
+			return null;
+		}
+		return comm.getConnectConfig();
+	}
 
 	public Position getPosition() {
 		return new Position(m_latitude, m_longitude, m_altitude, m_speed, m_track);
@@ -174,11 +181,13 @@ public class GpsDevice {
 		
 		InputStream in;
 		CommConnection conn=null;
+		Properties connConfig = null; 
 
 		public SerialCommunicate(ConnectionFactory connFactory, Properties connectionConfig)
 				throws PositionException {
 			s_logger.debug("Configure serial connection");
 			
+			connConfig = connectionConfig;
 			
 			String sPort;
 			String sBaud;
@@ -281,6 +290,10 @@ public class GpsDevice {
 
 		public int getConnectStatus() {
 			return KuraConnectionStatus.CONNECTED;
+		}
+		
+		public Properties getConnectConfig() {
+			return connConfig;
 		}
 
 		public void doPollWork() {
@@ -416,16 +429,18 @@ public class GpsDevice {
 					m_speed = new Measurement(speed,Unit.m_s);
 					m_track = new Measurement(java.lang.Math.toRadians(track),Unit.rad); 
 					m_latitudeNmea = lat;
-					m_longitudeNmea = lon;	
+					m_longitudeNmea = lon;
 					m_speedNmea = speed;
+					m_trackNmea = track;
 					m_dateNmea = gpsParser.get_dateNmea();
 				} catch (Exception e) {
 					m_latitude = null;
-					m_longitude = null;		
+					m_longitude = null;
 					m_speed = null;
 					m_latitudeNmea = 0;
-					m_longitudeNmea = 0;	
+					m_longitudeNmea = 0;
 					m_speedNmea = 0;
+					m_trackNmea = 0;
 				}
 			} else if (scannedInput.startsWith("VTG")) {
 				try {

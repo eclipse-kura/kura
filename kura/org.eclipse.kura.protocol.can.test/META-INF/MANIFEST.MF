@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: org.eclipse.kura.protocol.can.test
 Bundle-SymbolicName: org.eclipse.kura.protocol.can.test;singleton:=true
-Bundle-Version: 1.0.1.qualifier
+Bundle-Version: 1.0.2.qualifier
 Bundle-Vendor: EUROTECH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Unit-Test: true
@@ -19,5 +19,5 @@ Import-Package:
 Service-Component: OSGI-INF/*.xml
 Bundle-ClassPath: .
 Bundle-ActivationPolicy: lazy
-Require-Bundle: org.junit;bundle-version="4.10.0",
- org.eclipse.kura.test;bundle-version="1.0.0"
+
+

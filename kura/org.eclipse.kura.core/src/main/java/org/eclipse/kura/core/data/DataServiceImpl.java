@@ -479,7 +479,7 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
 						}
 						connected = true;
 					} catch (Exception e) {
-						s_logger.warn("Connect failed", e);
+						s_logger.warn("Connect failed", e.getCause().getMessage());
 					} catch (Error e) {
 						// There's nothing we can do here but log an exception.
 						s_logger.error("Unexpected Error. Task will be terminated", e);

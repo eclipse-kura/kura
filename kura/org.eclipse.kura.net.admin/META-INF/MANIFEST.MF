@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: org.eclipse.kura.net.admin
 Bundle-SymbolicName: org.eclipse.kura.net.admin;singleton:=true
-Bundle-Version: 1.0.1.qualifier
+Bundle-Version: 1.0.2.qualifier
 Bundle-Vendor: EUROTECH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: javax.microedition.io,
@@ -31,7 +31,7 @@ Import-Package: javax.microedition.io,
  org.eclipse.kura.net.dhcp;version="[1.0,1.1)",
  org.eclipse.kura.net.dns;version="[1.0,1.1)",
  org.eclipse.kura.net.firewall;version="[1.0,1.1)",
- org.eclipse.kura.net.modem;version="[1.0,1.1)",
+ org.eclipse.kura.net.modem;version="[1.1,1.2)",
  org.eclipse.kura.net.route;version="[1.0,1.1)",
  org.eclipse.kura.net.wifi;version="[1.0,1.1)",
  org.eclipse.kura.system;version="[1.0,2.0)",

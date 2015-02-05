@@ -23,9 +23,7 @@ if [ -f "/var/run/kura.pid" ] ; then
 fi
 
 #Remove INIT scripts
-rm /etc/init.d/firewall
 rm /etc/init.d/kura
-update-rc.d firewall remove
 update-rc.d kura remove
 
 #Delete Eclipse directory if present

@@ -13,6 +13,7 @@ package org.eclipse.kura.protocol.modbus.testMaster;
 
 
 import java.lang.Thread.State;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Map;
 import java.util.Properties;
@@ -398,37 +399,67 @@ public class ModbusManager implements ConfigurableComponent, CriticalComponent, 
 
 		if(readWrite){
 			s_logger.info("ReadHoldingRegisters:");
-			digitalInputs = m_protocolDevice.readHoldingRegisters(slaveAddr, 1, 7);
+			digitalInputs = m_protocolDevice.readHoldingRegisters(slaveAddr, 1, 15);
 
-			s_logger.info("Master: Recharge, booking and irradiation:" + digitalInputs[0] + 
-					" Booking time (hour):" + (digitalInputs[1] & 0xFF) + 
-					" Booking time (minutes):" + ((digitalInputs[1]>>8) & 0xFF) + 
-					" Booking date (day):" + (digitalInputs[2] & 0xFF) + 
-					" Booking date (month):" + ((digitalInputs[2]>>8) & 0xFF) + 
-					" Booking date (year):" + digitalInputs[3] + 
-					" Current time (hour):" + (digitalInputs[4] & 0xFF) + 
-					" Current time (minutes):" + ((digitalInputs[4]>>8) & 0xFF) + 
-					" Current time (day):" + (digitalInputs[5] & 0xFF) + 
-					" Current date (month):" + ((digitalInputs[5]>>8) & 0xFF) + 
-					" Current date (year):" + digitalInputs[6]); 
+			int powerOut= digitalInputs[0];
+			int rechargeTime= digitalInputs[1];
+			int energyOut= digitalInputs[2];
+			int powerPV= digitalInputs[3];
+			int faultFlag= digitalInputs[4] & 0x01;
+			int rechargeAvailable= (digitalInputs[4] >> 1) & 0x01;
+			int rechargeInProgress= (digitalInputs[4] >> 2) & 0x01;
+			int pVSystemActive= (digitalInputs[4] >> 3) & 0x01;
+			int auxChargerActive= (digitalInputs[4] >> 4) & 0x01;
+			int storageBatteryContactorStatus= (digitalInputs[4] >> 5) & 0x01;
+			int converterContactorStatus= (digitalInputs[4] >> 6) & 0x01;
+			int faultString1= digitalInputs[5];
+			int faultString2= digitalInputs[6];
+			int iGBTTemp= digitalInputs[7];
+			int storeBattTemp= digitalInputs[8];
+			int storBatterySOC= digitalInputs[9];
+			int vOut= digitalInputs[10];
+			int storageBatteryV= digitalInputs[11];
+			int pVSystemV= digitalInputs[12];
+			int iOut= digitalInputs[13];
+			int storageBatteryI= digitalInputs[14];
+			s_logger.info("Slave-> power out: " + powerOut +
+					" rechargeTime: " + rechargeTime + 
+					" energyOut: " + energyOut +
+					" powerPV: " + powerPV +
+					" faultFlag: " + faultFlag +
+					" rechargeAvailable: " + rechargeAvailable +
+					" rechargeInProgress: " + rechargeInProgress +
+					" pVSystemActive: " + pVSystemActive +
+					" auxChargerActive: " + auxChargerActive +
+					" storageBatteryContactorStatus: " + storageBatteryContactorStatus +
+					" converterContactorStatus: " + converterContactorStatus +
+					" faultString1: " + faultString1 +
+					" faultString2: " + faultString2 +
+					" iGBTTemp: " + iGBTTemp +
+					" storeBattTemp: " + storeBattTemp +
+					" storBatterySOC: " + storBatterySOC +
+					" vOut: " + vOut +
+					" storageBatteryV: " + storageBatteryV +
+					" pVSystemV: " + pVSystemV +
+					" iOut: " + iOut +
+					" storageBatteryI: " + storageBatteryI);
 			readWrite=false;
 		}else{
-			int[] data=new int[15];
-			data[0] = 30000; //Power Out [W]
-			data[1] = 60000; //Time to recharge [s]
-			data[2] = 30000; //Energy Out [Wh]
-			data[3] = 15000; //Power PV Out [W]
-			data[4] = 0 + (1 << 1) + (1 << 2) + (1 << 3) + (1 << 4) + (1 << 5) + (1 << 6); //Status flag
-			data[5] = 0; //Fault String 1
-			data[6] = 0; //Fault String 2
-			data[7] = 50; //IGBT_temp [°C]
-			data[8] = 20; //Storage temp [°C]
-			data[9] = 50; //Storage battery SOC [%]
-			data[10] = 380; //V_Out [V]
-			data[11] = 400; //Storage_Battery_V [V]
-			data[12] = 500; //PV_System_V [V]
-			data[13] = 75; //I_Out [A]
-			data[14] = 90; //Storage_Battery_I [A]
+			int[] data=new int[7];
+			
+			int startRecharge= 1; //start recharge [0,1]
+			int isBooked= (0 << 1); //Recharge is booked? [0-No;1-Yes]
+			int solarIrradiation= (2 << 2); //Next Day Solar Radiation Level [0-Low; 1-Medium; 2-High]
+			
+			data[0] = (startRecharge + isBooked + solarIrradiation) << 8; //Panel PC Start/Stop/Booking/Next day weather forecast
+			data[1] = (25 << 8) + (12); //Booking Time
+			data[2] = (2 << 8) + 22 ; //Booking month and day
+			data[3] = 2014; //Booking year
+			
+			Calendar cal = Calendar.getInstance();
+			data[4] = (cal.get(Calendar.MINUTE) << 8) + cal.get(Calendar.HOUR_OF_DAY); //Current date -> minutes and hours
+			data[5] = (cal.get(Calendar.MONTH) << 8) + cal.get(Calendar.DAY_OF_MONTH);  //Current Date -> month and day
+			data[6] = cal.get(Calendar.YEAR); //Current date -> year
 
 			s_logger.info("WriteMultipleRegister");
 			m_protocolDevice.writeMultipleRegister(slaveAddr, 1, data);
@@ -437,112 +468,12 @@ public class ModbusManager implements ConfigurableComponent, CriticalComponent, 
 		}
 
 
-
-		//.readDiscreteInputs(slaveAddr, 2048, 8);
-
-		/*payload.addMetric("t3", new Boolean(digitalInputs[2]));
-		if((digitalInputs[2] != lastDigitalInputs[2]) || iJustConnected){
-			metricsChanged=true;
-			s_logger.info("t3=" + digitalInputs[2]);
-		}
-		lastDigitalInputs[2] = digitalInputs[2]
-
-		payload.addMetric("t4", new Boolean(digitalInputs[3]));
-		if(digitalInputs[3])it4=1; 
-		payload.addMetric("it4", new Integer(it4));
-		if((digitalInputs[3] != lastDigitalInputs[3]) || iJustConnected){
-			s_logger.info("t4=" + digitalInputs[3]);
-			metricsChanged=true;
-		}
-		lastDigitalInputs[3] = digitalInputs[3];
-
-		payload.addMetric("t5", new Boolean(digitalInputs[4]));
-		if(digitalInputs[4])it5=1; 
-		payload.addMetric("it5", new Integer(it5));
-		if((digitalInputs[4] != lastDigitalInputs[4]) || iJustConnected){
-			s_logger.info("t5=" + digitalInputs[4]);
-			metricsChanged=true;
-		}
-		lastDigitalInputs[4] = digitalInputs[4];
-
-		payload.addMetric("t6", new Boolean(digitalInputs[5]));
-		if(digitalInputs[5])it6=1; 
-		payload.addMetric("it6", new Integer(it6));
-		if((digitalInputs[5] != lastDigitalInputs[5]) || iJustConnected){
-			s_logger.info("t6=" + digitalInputs[5]);
-			metricsChanged=true;
-		}
-		lastDigitalInputs[5] = digitalInputs[5];
-
-		int[] analogInputs = m_protocolDevice.readInputRegisters(slaveAddr, 512, 8);
-
-		int c3 = bcd2Dec(analogInputs[2]);
-		payload.addMetric("c3", new Integer(c3));
-		if((c3 != lastAnalogInputs[2]) || iJustConnected){
-			s_logger.info("c3=" + c3);
-			metricsChanged=true;
-		}
-		lastAnalogInputs[2] = c3;
-
-		int qc = bcd2Dec(analogInputs[7]);
-		payload.addMetric("qc", new Integer(qc));
-		if((qc != lastAnalogInputs[7]) || iJustConnected){
-			s_logger.info("qc=" + qc);
-			metricsChanged=true;
-		}
-		lastAnalogInputs[7] = qc;
-
-		// LEDs 
-		boolean[] digitalOutputs = m_protocolDevice.readCoils(slaveAddr, 2048, 6); 
-
-		payload.addMetric("LED1", new Boolean(digitalOutputs[0])); 
-		if((digitalOutputs[0] != lastDigitalOutputs[0]) || iJustConnected){
-			s_logger.info("LED1=" + digitalOutputs[0]); 
-			metricsChanged=true; 
-		}
-		lastDigitalOutputs[0] = digitalOutputs[0]; 
-
-		payload.addMetric("LED2", new Boolean(digitalOutputs[1])); 
-		if((digitalOutputs[1] != lastDigitalOutputs[1]) || iJustConnected){
-			s_logger.info("LED2=" + digitalOutputs[1]); 
-			metricsChanged=true; 
-		}
-		lastDigitalOutputs[1] = digitalOutputs[1]; 
-
-		payload.addMetric("LED3", new Boolean(digitalOutputs[2])); 
-		if((digitalOutputs[2] != lastDigitalOutputs[2]) || iJustConnected){
-			s_logger.info("LED3=" + digitalOutputs[2]); 
-			metricsChanged=true; 
-		}
-		lastDigitalOutputs[2] = digitalOutputs[2]; 
-
-		payload.addMetric("LED4red", new Boolean(digitalOutputs[3])); 
-		if((digitalOutputs[3] != lastDigitalOutputs[3]) || iJustConnected){
-			s_logger.info("LED4red=" + digitalOutputs[3]); 
-			metricsChanged=true; 
-		}
-		lastDigitalOutputs[3] = digitalOutputs[3]; 
-
-		payload.addMetric("LED4green", new Boolean(digitalOutputs[4])); 
-		if((digitalOutputs[4] != lastDigitalOutputs[4]) || iJustConnected){
-			s_logger.info("LED4green=" + digitalOutputs[4]); 
-			metricsChanged=true; 
-		}
-		lastDigitalOutputs[4] = digitalOutputs[4]; 
-
-		payload.addMetric("LED4blue", new Boolean(digitalOutputs[5])); 
-		if((digitalOutputs[5] != lastDigitalOutputs[5]) || iJustConnected){
-			s_logger.info("LED4blue=" + digitalOutputs[5]); 
-			metricsChanged=true; 
-		}
-		lastDigitalOutputs[5] = digitalOutputs[5];
-
 		// refresh Watchdog 
 		if (wdConfigured){
 			if(m_watchdogService!=null){
 				m_watchdogService.checkin(this);
 			}
-		}*/
+		}
 
 
 		if (clientIsConnected) {
@@ -569,6 +500,10 @@ public class ModbusManager implements ConfigurableComponent, CriticalComponent, 
 				metricsChanged=false;
 			}
 		}
+	}
+	
+	private int buildShort(byte high, byte low){
+		return ((0xFF & (int) high) << 8) + ((0xFF & (int) low));
 	}
 
 	private void initializeLeds() throws ModbusProtocolException {

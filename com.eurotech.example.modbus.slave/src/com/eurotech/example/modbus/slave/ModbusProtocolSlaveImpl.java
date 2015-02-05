@@ -1,6 +1,5 @@
 package com.eurotech.example.modbus.slave;
 
-import java.util.Calendar;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,33 +40,62 @@ public class ModbusProtocolSlaveImpl implements ModbusProtocol{
 	public byte[] readHoldingRegisters(int unitAddr, int dataAddress, int count)
 			throws ModbusProtocolException {
 		// TODO Auto-generated method stub
+		int[] data=new int[15];
+		data[0] = 30000; //Power Out [W]
+		data[1] = 60000; //Time to recharge [s]
+		data[2] = 30000; //Energy Out [Wh]
+		data[3] = 15000; //Power PV Out [W]
+		data[4] = 0 + (1 << 1) + (1 << 2) + (1 << 3) + (1 << 4) + (1 << 5) + (1 << 6); //Status flag
+		data[5] = 0; //Fault String 1
+		data[6] = 0; //Fault String 2
+		data[7] = 50; //IGBT_temp [°C]
+		data[8] = 20; //Storage temp [°C]
+		data[9] = 50; //Storage battery SOC [%]
+		data[10] = 380; //V_Out [V]
+		data[11] = 400; //Storage_Battery_V [V]
+		data[12] = 500; //PV_System_V [V]
+		data[13] = 75; //I_Out [A]
+		data[14] = 90; //Storage_Battery_I [A]
+		
 		byte[] cmd = new byte[2*count + 3];
 		cmd[0] = (byte) unitAddr;
 		cmd[1] = (byte) ModbusFunctionCodes.READ_HOLDING_REGS;
 		cmd[2] = (byte) (2*count);
 		
-		cmd[3] = (byte) 0; //not used
-		cmd[4] = (byte) 3; //start recharge, recharge is booked, next day solar irradiation
+		cmd[3] = (byte) ((data[0] >> 8) & 0xFF); 
+		cmd[4] = (byte) ((data[0]) & 0xFF); 
 		
+		cmd[5] = (byte) ((data[1] >> 8) & 0xFF); 
+		cmd[6] = (byte) ((data[1]) & 0xFF);
 		
-		cmd[5] = (byte) 25; //booking minutes
-		cmd[6] = (byte) 12; //booking hour
+		cmd[7] = (byte) ((data[2] >> 8) & 0xFF);
+		cmd[8] = (byte) ((data[2]) & 0xFF);
+		cmd[9] = (byte) ((data[3] >> 8) & 0xFF);
+		cmd[10] = (byte) ((data[3]) & 0xFF);
 		
+		cmd[11] = (byte) ((data[4] >> 8) & 0xFF);
+		cmd[12] = (byte) ((data[4]) & 0xFF);
 		
-		
-		Calendar cal = Calendar.getInstance();
-		cmd[7] = (byte) cal.get(Calendar.MONTH); //Booking Date -> month
-		cmd[8] = (byte) cal.get(Calendar.DAY_OF_MONTH); //Booking Date -> day
-		cmd[9] = (byte) ((cal.get(Calendar.YEAR) >> 8) & 0xFF);
-		cmd[10] = (byte) (cal.get(Calendar.YEAR) & 0xFF); //booking Date -> year
-		
-		cmd[11] = (byte) cal.get(Calendar.MINUTE); //Current date -> minutes
-		cmd[12] = (byte) cal.get(Calendar.HOUR_OF_DAY); //Current date -> hours
-		
-		cmd[13] = (byte) cal.get(Calendar.MONTH); //Current Date -> month
-		cmd[14] = (byte) cal.get(Calendar.DAY_OF_MONTH); //Current Date -> day
-		cmd[15] = (byte) ((cal.get(Calendar.YEAR) >> 8) & 0xFF);
-		cmd[16] = (byte) (cal.get(Calendar.YEAR) & 0xFF); //Current date -> year
+		cmd[13] = (byte) ((data[5] >> 8) & 0xFF);
+		cmd[14] = (byte) ((data[5]) & 0xFF);
+		cmd[15] = (byte) ((data[6] >> 8) & 0xFF);
+		cmd[16] = (byte) ((data[6]) & 0xFF);
+		cmd[17] = (byte) ((data[7] >> 8) & 0xFF);
+		cmd[18] = (byte) ((data[7]) & 0xFF);
+		cmd[19] = (byte) ((data[8] >> 8) & 0xFF);
+		cmd[20] = (byte) ((data[8]) & 0xFF);
+		cmd[21] = (byte) ((data[9] >> 8) & 0xFF);
+		cmd[22] = (byte) ((data[9]) & 0xFF);
+		cmd[23] = (byte) ((data[10] >> 8) & 0xFF);
+		cmd[24] = (byte) ((data[10]) & 0xFF);
+		cmd[25] = (byte) ((data[11] >> 8) & 0xFF);
+		cmd[26] = (byte) ((data[11]) & 0xFF);
+		cmd[27] = (byte) ((data[12] >> 8) & 0xFF);
+		cmd[28] = (byte) ((data[12]) & 0xFF);
+		cmd[29] = (byte) ((data[13] >> 8) & 0xFF);
+		cmd[30] = (byte) ((data[13]) & 0xFF);
+		cmd[31] = (byte) ((data[14] >> 8) & 0xFF);
+		cmd[32] = (byte) ((data[14]) & 0xFF);
 		
 		return cmd;
 	}
@@ -111,50 +139,35 @@ public class ModbusProtocolSlaveImpl implements ModbusProtocol{
 	public byte[] writeMultipleRegister(int unitAddr, int dataAddress, byte[] data, int numRegisters)
 			throws ModbusProtocolException {
 		// TODO Auto-generated method stub
-
-		int powerOut= buildShort(data[0], data[1]);
-		int rechargeTime= buildShort(data[2], data[3]);
-		int energyOut= buildShort(data[4], data[5]);
-		int powerPV= buildShort(data[6], data[7]);
-		int faultFlag= data[9] & 0x01;
-		int rechargeAvailable= (data[9]>>1) & 0x01;
-		int rechargeInProgress= (data[9]>>2) & 0x01;
-		int pVSystemActive= (data[9]>>3) & 0x01;
-		int auxChargerActive= (data[9]>>4) & 0x01;
-		int storageBatteryContactorStatus= (data[9]>>5) & 0x01;
-		int converterContactorStatus= (data[9]>>6) & 0x01;
-		int faultString1= buildShort(data[10], data[11]);
-		int faultString2= buildShort(data[12], data[13]);
-		int iGBTTemp= buildShort(data[14], data[15]);
-		int storeBattTemp= buildShort(data[16], data[17]);
-		int storBatterySOC= buildShort(data[18], data[19]);
-		int vOut= buildShort(data[20], data[21]);
-		int storageBatteryV= buildShort(data[22], data[23]);
-		int pVSystemV= buildShort(data[24], data[25]);
-		int iOut= buildShort(data[26], data[27]);
-		int storageBatteryI= buildShort(data[28], data[29]);
-		s_logger.info("Slave-> power out: " + powerOut +
-				" rechargeTime: " + rechargeTime + 
-				" energyOut: " + energyOut +
-				" powerPV: " + powerPV +
-				" faultFlag: " + faultFlag +
-				" rechargeAvailable: " + rechargeAvailable +
-				" rechargeInProgress: " + rechargeInProgress +
-				" pVSystemActive: " + pVSystemActive +
-				" auxChargerActive: " + auxChargerActive +
-				" storageBatteryContactorStatus: " + storageBatteryContactorStatus +
-				" converterContactorStatus: " + converterContactorStatus +
-				" faultString1: " + faultString1 +
-				" faultString2: " + faultString2 +
-				" iGBTTemp: " + iGBTTemp +
-				" storeBattTemp: " + storeBattTemp +
-				" storBatterySOC: " + storBatterySOC +
-				" vOut: " + vOut +
-				" storageBatteryV: " + storageBatteryV +
-				" pVSystemV: " + pVSystemV +
-				" iOut: " + iOut +
-				" storageBatteryI: " + storageBatteryI);
 		
+		int startRecharge= data[0] & 0x01;
+		int isBooked = (data[0] >> 1) & 0x01;
+		int irradiation = (data[0] >> 2) & 0x03;
+		int bookingHours = (data[3] & 0xFF);
+		int bookingMinutes= (data[2] & 0xFF);
+		int bookingMonth= (data[4] & 0xFF);
+		int bookingDay= (data[5] & 0xFF);
+		int bookingYear= buildShort(data[6], data[7]);
+		
+		int currentHours = (data[9] & 0xFF);
+		int currentMinutes= (data[8] & 0xFF);
+		int currentMonth= (data[10] & 0xFF);
+		int currentDay= (data[11] & 0xFF);
+		int currentYear= buildShort(data[12], data[13]);
+		
+		s_logger.info("Slave-> startRecharge: " + startRecharge +
+				" isBooked: " + isBooked + 
+				" irradiation: " + irradiation + 
+				" bookingHours: " + bookingHours +
+				" bookingMinutes: " + bookingMinutes +
+				" bookingMonth: " + bookingMonth +
+				" bookingDay: " + bookingDay +
+				" bookingYear: " + bookingYear + 
+				" currentHours: " + currentHours +
+				" currentMinutes: " + currentMinutes +
+				" currentMonth: " + currentMonth +
+				" currentDay: " + currentDay +
+				" currentYear: " + currentYear);
 		
 		byte[] cmd = new byte[6];
 		cmd[0] = (byte) unitAddr;

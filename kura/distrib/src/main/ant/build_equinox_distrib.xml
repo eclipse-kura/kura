@@ -133,7 +133,10 @@ cd $DIR
 mkdir -p /tmp/.kura/configuration
 cp ${DIR}/kura/config.ini /tmp/.kura/configuration/
 
-java -Xms${kura.mem.size} -Xmx${kura.mem.size} -XX:MaxPermSize=${kura.mem.size} -Dkura.os.version=${kura.os.version} \
+KURA_RUNNING=`ps ax | grep java | grep "org.eclipse.osgi"`
+
+if [ "$KURA_RUNNING" == "" ] ; then
+    java -Xms${kura.mem.size} -Xmx${kura.mem.size} -XX:MaxPermSize=${kura.mem.size} -Dkura.os.version=${kura.os.version} \
 	-Dkura.arch=${kura.arch} \
 	-Dtarget.device=${target.device} \
 	-Declipse.ignoreApp=true \
@@ -149,6 +152,7 @@ java -Xms${kura.mem.size} -Xmx${kura.mem.size} -XX:MaxPermSize=${kura.mem.size} 
 	-configuration  /tmp/.kura/configuration \
 	-console \
 	-consoleLog
+fi
 	</echo>    
 	<echo file="${project.build.directory}/${build.output.name}/start_kura_debug.sh" append="false">#!/bin/sh
 
@@ -161,7 +165,10 @@ cd $DIR
 mkdir -p /tmp/.kura/configuration
 cp ${DIR}/kura/config.ini /tmp/.kura/configuration/
 
-java -Xms${kura.mem.size} -Xmx${kura.mem.size} -XX:MaxPermSize=${kura.mem.size} -Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=8000,suspend=n \
+KURA_RUNNING=`ps ax | grep java | grep "org.eclipse.osgi"`
+
+if [ "$KURA_RUNNING" == "" ] ; then
+    java -Xms${kura.mem.size} -Xmx${kura.mem.size} -XX:MaxPermSize=${kura.mem.size} -Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=8000,suspend=n \
 	-Dkura.os.version=${kura.os.version} \
 	-Dkura.arch=${kura.arch} \
 	-Dtarget.device=${target.device} \
@@ -178,6 +185,7 @@ java -Xms${kura.mem.size} -Xmx${kura.mem.size} -XX:MaxPermSize=${kura.mem.size} 
 	-configuration  /tmp/.kura/configuration \
 	-console \
 	-consoleLog
+fi
 	</echo>    
 	<echo file="${project.build.directory}/${build.output.name}/start_kura_background.sh" append="false">#!/bin/sh
 
@@ -191,7 +199,10 @@ cd $DIR
 mkdir -p /tmp/.kura/configuration
 cp ${DIR}/kura/config.ini /tmp/.kura/configuration/
 
-nohup java -Xms${kura.mem.size} -Xmx${kura.mem.size} -XX:MaxPermSize=${kura.mem.size} -Dkura.os.version=${kura.os.version} \
+KURA_RUNNING=`ps ax | grep java | grep "org.eclipse.osgi"`
+
+if [ "$KURA_RUNNING" == "" ] ; then
+    nohup java -Xms${kura.mem.size} -Xmx${kura.mem.size} -XX:MaxPermSize=${kura.mem.size} -Dkura.os.version=${kura.os.version} \
 	-Dkura.arch=${kura.arch} \
 	-Dtarget.device=${target.device} \
 	-Declipse.ignoreApp=true \
@@ -208,9 +219,13 @@ nohup java -Xms${kura.mem.size} -Xmx${kura.mem.size} -XX:MaxPermSize=${kura.mem.
 	-console 5002 \
 	-consoleLog >> /var/log/kura-console.log 2>> /var/log/kura-console.log &amp;
 
-#Save the PID
-KURA_PID=$!
-echo $KURA_PID > /var/run/kura.pid
+    #Save the PID
+    KURA_PID=$!
+    echo "Kura Started (pid="$KURA_PID") ..." >> /var/log/kura-console.log
+    echo $KURA_PID > /var/run/kura.pid
+else
+    echo "Failed to start Kura. It is already running ..." >> /var/log/kura-console.log
+fi
 	</echo>
 
     	<!-- Populate parameters -->

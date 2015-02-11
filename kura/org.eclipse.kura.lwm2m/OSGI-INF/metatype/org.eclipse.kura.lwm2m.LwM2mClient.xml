@@ -37,12 +37,13 @@
             description="">
         </AD>
         
+        <!-- default to: leshan.eclipse.org -->
         <AD id="server.ip-address"
             name="server.ip-address"
             type="String"
             cardinality="0"
             required="false"
-            default="54.228.25.31"
+            default="5.39.83.206"
             description="">
         </AD>
 

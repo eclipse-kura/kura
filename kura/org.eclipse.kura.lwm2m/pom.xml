@@ -23,14 +23,6 @@
 		<kura.basedir>${project.basedir}/..</kura.basedir>
 	</properties>
 
-	<dependencies>
-		<dependency>
-			<groupId>org.github.leshan</groupId>
-			<artifactId>leshan-client</artifactId>
-			<version>0.1.8-SNAPSHOT</version>
-		</dependency>
-	</dependencies>
-
 	<build>
 		<plugins>
 			<plugin>

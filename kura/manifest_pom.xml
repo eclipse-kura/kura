@@ -14,6 +14,7 @@
 
 	<packaging>pom</packaging>
 
+        <!-- comment -->
 	<modules>
 		<module>target-definition</module>
 		<module>org.eclipse.kura.api</module>

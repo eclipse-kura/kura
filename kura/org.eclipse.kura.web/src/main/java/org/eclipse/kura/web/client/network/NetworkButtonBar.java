@@ -11,6 +11,7 @@
  */
 package org.eclipse.kura.web.client.network;
 
+import org.eclipse.kura.web.Console;
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.resources.Resources;
 import org.eclipse.kura.web.client.util.FailureHandler;
@@ -130,7 +131,7 @@ public class NetworkButtonBar extends LayoutContainer
 	                    				Timer t = new Timer () {
 	                        				public void run () {
 	                        					Log.debug("redirecting to new address: " + updatedNetIf.getIpAddress());
-	                							Window.Location.replace("http://" + updatedNetIf.getIpAddress() + "/kura");
+	                							Window.Location.replace("http://" + updatedNetIf.getIpAddress() + Console.getApplicationRoot());
 	                        				}
 	                        			};
 	                        			t.schedule(500);

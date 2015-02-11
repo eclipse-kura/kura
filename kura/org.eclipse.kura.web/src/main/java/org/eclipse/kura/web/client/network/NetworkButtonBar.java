@@ -131,7 +131,7 @@ public class NetworkButtonBar extends LayoutContainer
 	                    				Timer t = new Timer () {
 	                        				public void run () {
 	                        					Log.debug("redirecting to new address: " + updatedNetIf.getIpAddress());
-	                							Window.Location.replace("http://" + updatedNetIf.getIpAddress() + Console.getApplicationRoot());
+	                							Window.Location.replace("http://" + updatedNetIf.getIpAddress());
 	                        				}
 	                        			};
 	                        			t.schedule(500);

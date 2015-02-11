@@ -11,6 +11,7 @@
  */
 package org.eclipse.kura.web.server;
 
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.util.ArrayList;
@@ -23,8 +24,9 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
 
+import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
-import org.eclipse.kura.command.CommandService;
+import org.eclipse.kura.command.PasswordCommandService;
 import org.eclipse.kura.core.util.NetUtil;
 import org.eclipse.kura.net.NetInterface;
 import org.eclipse.kura.net.NetInterfaceAddress;
@@ -288,14 +290,19 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
 		return new BaseListLoadResult<GwtGroupedNVPair>(pairs);
 	}
 	
-	public String executeCommand(String cmd) throws GwtKuraException {
-		CommandService commandService = ServiceLocator.getInstance().getService(CommandService.class);
+	public String executeCommand(String cmd, String pwd) throws GwtKuraException {
+		PasswordCommandService commandService = ServiceLocator.getInstance().getService(PasswordCommandService.class);
 		try {
-			return commandService.execute(cmd);
+			return commandService.execute(cmd, pwd);
 		} catch (KuraException e) {
-			s_logger.error(e.getMessage());
-			return null;
-		}
+			s_logger.error(e.getLocalizedMessage());
+			if(e.getCode() == KuraErrorCode.OPERATION_NOT_SUPPORTED){
+				throw new GwtKuraException(GwtKuraErrorCode.SERVICE_NOT_ENABLED);
+			}else if(e.getCode() == KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID){
+				throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT);
+			}
+			throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR);
+		} 
 	}
 	
 	// ----------------------------------------------------------------

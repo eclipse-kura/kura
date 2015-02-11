@@ -124,16 +124,23 @@ public interface NetworkAdminService {
 	 */
 	public void disableInterface(String interfaceName) throws KuraException;
 	
+	/**
+	 * Used to control DHCP clients on specified interfaces.
+	 * 
+	 * @param interfaceName		The interface of the DHCP server to modify the state
+	 * @param enable			Whether to enable or disable the DHCP client
+	 * @throws KuraException
+	 */
+	public void manageDhcpClient(String interfaceName, boolean enable) throws KuraException; 
 	
 	/**
 	 * Used to control DHCP servers on specified interfaces.
 	 * 
 	 * @param interfaceName		The interface of the DHCP server to modify the state
 	 * @param enable			Whether to enable or disable the DHCP server
-	 * @param allowedNetwork	The allowed network for the DHCP server if enabled
 	 * @throws KuraException
 	 */
-	public void manageDhcpServer(String interfaceName, boolean enable, NetworkPair<IP4Address> allowedNetwork) throws KuraException;
+	public void manageDhcpServer(String interfaceName, boolean enable) throws KuraException;
 	
 	/**
 	 * Releases current IP address and acquires a new lease for the provided interface.

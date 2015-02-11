@@ -127,7 +127,7 @@ public class RouteServiceImpl implements RouteService {
 		
 		// If no default routes exist, return null
 		if(defaultRoutes.size() == 0) {
-			s_logger.info("No default routes exist for inteface: " + iface);
+			s_logger.debug("No default routes exist for inteface: " + iface);
 			return null;
 		}
 		

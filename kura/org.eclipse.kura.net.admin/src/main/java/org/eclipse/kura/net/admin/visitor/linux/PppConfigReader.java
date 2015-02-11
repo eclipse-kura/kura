@@ -192,7 +192,7 @@ public class PppConfigReader implements NetworkConfigurationVisitor {
         if(!peerFile.exists()) {
         	persist = true;
         	maxFail = 5;
-        	idle = 300;
+        	idle = 95;
         	activeFilter = "inbound";
             s_logger.warn("getModemConfig() :: PPPD peer file does not exist - {}", peerFilename);
         } else {
@@ -356,7 +356,7 @@ public class PppConfigReader implements NetworkConfigurationVisitor {
             gpsEnabled = Boolean.parseBoolean(statusString);
         }
         
-        int resetTout = 0;
+        int resetTout = 5;
         key = new StringBuilder().append("net.interface.").append(ifaceName).append(".config.resetTimeout");
         statusString = KuranetConfig.getProperty(key.toString());
         if(statusString != null && !statusString.isEmpty()) {

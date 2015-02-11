@@ -11,9 +11,8 @@
  */
 package org.eclipse.kura.core.message;
 
-import java.util.Iterator;
-
 import org.eclipse.kura.message.KuraPayload;
+import org.eclipse.kura.message.KuraPosition;
 
 public class KuraBirthPayload extends KuraPayload 
 {
@@ -40,143 +39,10 @@ public class KuraBirthPayload extends KuraPayload
 	private final static String CONNECTION_IP = "connection_ip";
 	private final static String ACCEPT_ENCODING = "accept_encoding";
 	private final static String APPLICATION_IDS = "application_ids";
-	public final static String MODEM_IMEI = "modem_imei";
-	public final static String MODEM_IMSI = "modem_imsi";
-	public final static String MODME_ICCID = "modem_iccid";
-	
-	public KuraBirthPayload(String uptime, String displayName,
-			String modelName, String modelId, String partNumber,
-			String serialNumber, String firmwareVersion, String biosVersion,
-			String os, String osVersion, String jvmName, String jvmVersion,
-			String jvmProfile, String kuraVersion, String connectionInterface, String connectionIp) {
-		
-		this(uptime, displayName, modelName, modelId, partNumber,
-			serialNumber, firmwareVersion, biosVersion,
-			os, osVersion, jvmName, jvmVersion,
-			jvmProfile, kuraVersion, connectionInterface, connectionIp,
-			null, null, null, null, null, null, null);
-	}
-	
-	public KuraBirthPayload(String uptime, String displayName,
-			String modelName, String modelId, String partNumber,
-			String serialNumber, String firmwareVersion, String biosVersion,
-			String os, String osVersion, String jvmName, String jvmVersion,
-			String jvmProfile, String kuraVersion, String connectionInterface, String connectionIp,
-			String acceptEncoding) {
-		
-		this(uptime, displayName, modelName, modelId, partNumber,
-			serialNumber, firmwareVersion, biosVersion,
-			os, osVersion, jvmName, jvmVersion,
-			jvmProfile, kuraVersion, connectionInterface, connectionIp,
-			acceptEncoding, null, null, null, null, null, null);
-	}
-	
-	public KuraBirthPayload(String uptime, String displayName,
-			String modelName, String modelId, String partNumber,
-			String serialNumber, String firmwareVersion, String biosVersion,
-			String os, String osVersion, String jvmName, String jvmVersion,
-			String jvmProfile, String kuraVersion, String connectionInterface, String connectionIp,
-			String acceptEncoding, String applicationIdentifiers) {
-		
-		this(uptime, displayName, modelName, modelId, partNumber,
-				serialNumber, firmwareVersion, biosVersion,
-				os, osVersion, jvmName, jvmVersion,
-				jvmProfile, kuraVersion, connectionInterface, connectionIp,
-				acceptEncoding, applicationIdentifiers,
-				null, null, null, null, null);
-	}
-	
-	public KuraBirthPayload(String uptime, String displayName,
-			String modelName, String modelId, String partNumber,
-			String serialNumber, String firmwareVersion, String biosVersion,
-			String os, String osVersion, String jvmName, String jvmVersion,
-			String jvmProfile, String kuraVersion, String connectionInterface, String connectionIp,
-			String acceptEncoding, String applicationIdentifiers,
-			String availableProcessors, String totalMemory, String osArch,
-			String osgiFramework, String osgiFrameworkVersion) {
-		super();
-		
-		if (uptime != null) {
-			addMetric(UPTIME, uptime);
-		}
-		if (displayName != null) {
-			addMetric(DISPLAY_NAME, displayName);
-		}
-		if (modelName != null) {
-			addMetric(MODEL_NAME, modelName);
-		}
-		if (modelId != null) {
-			addMetric(MODEL_ID, modelId);
-		}
-		if (partNumber != null) {
-			addMetric(PART_NUMBER, partNumber);
-		}
-		if (serialNumber != null) {
-			addMetric(SERIAL_NUMBER, serialNumber);
-		}
-		if (firmwareVersion != null) {
-			addMetric(FIRMWARE_VERSION, firmwareVersion);
-		}
-		if (biosVersion != null) {
-			addMetric(BIOS_VERSION, biosVersion);
-		}
-		if (os != null) {
-			addMetric(OS, os);
-		}
-		if (osVersion != null) {
-			addMetric(OS_VERSION, osVersion);
-		}
-		if (jvmName != null) {
-			addMetric(JVM_NAME, jvmName);
-		}
-		if (jvmVersion != null) {
-			addMetric(JVM_VERSION, jvmVersion);
-		}
-		if (jvmProfile != null) {
-			addMetric(JVM_PROFILE, jvmProfile);
-		}
-		if (kuraVersion != null) {
-			addMetric(KURA_VERSION, kuraVersion);
-		}
-		if (connectionInterface != null) {
-			addMetric(CONNECTION_INTERFACE, connectionInterface);
-		}
-		if (connectionIp != null) {
-			addMetric(CONNECTION_IP, connectionIp);
-		}
-		if (acceptEncoding != null) {
-			addMetric(ACCEPT_ENCODING, acceptEncoding);
-		}
-		if (applicationIdentifiers != null) {
-			addMetric(APPLICATION_IDS, applicationIdentifiers);
-		}
-		if (availableProcessors != null) {
-			addMetric(AVAILABLE_PROCESSORS, availableProcessors);
-		}
-		if (totalMemory != null) {
-			addMetric(TOTAL_MEMORY, totalMemory);
-		}
-		if (osArch != null) {
-			addMetric(OS_ARCH, osArch);
-		}
-		if (osgiFramework != null) {
-			addMetric(OSGI_FRAMEWORK, osgiFramework);
-		}
-		if (osgiFrameworkVersion != null) {
-			addMetric(OSGI_FRAMEWORK_VERSION, osgiFrameworkVersion);
-		}
-	}
-	
-	public KuraBirthPayload(KuraPayload edcMessage) {	    
-		Iterator<String> hdrIterator = edcMessage.metricsIterator();		
-		while (hdrIterator.hasNext()) {
-			String hdrName = hdrIterator.next();
-			String hdrVal = (String)edcMessage.getMetric(hdrName);			
-			addMetric(hdrName, hdrVal);
-		}		
-		setBody(edcMessage.getBody());
-		setPosition(edcMessage.getPosition());
-	}
+	private final static String MODEM_IMEI = "modem_imei";
+	private final static String MODEM_IMSI = "modem_imsi";
+	private final static String MODEM_ICCID = "modem_iccid";
+
 
 	public String getUptime() {
 		return (String) getMetric(UPTIME);
@@ -232,26 +98,31 @@ public class KuraBirthPayload extends KuraPayload
 	public String getApplicationIdentifiers() {
 		return (String) getMetric(APPLICATION_IDS);
 	}
-
 	public String getAvailableProcessors() {
 		return (String) getMetric(AVAILABLE_PROCESSORS);
 	}
-
 	public String getTotalMemory() {
 		return (String) getMetric(TOTAL_MEMORY);
 	}
-
 	public String getOsArch() {
 		return (String) getMetric(OS_ARCH);
 	}
-
 	public String getOsgiFramework() {
 		return (String) getMetric(OSGI_FRAMEWORK);
 	}
-
 	public String getOsgiFrameworkVersion() {
 		return (String) getMetric(OSGI_FRAMEWORK_VERSION);
 	}
+	public String getModemImei() {
+		return (String) getMetric(MODEM_IMEI);
+	}
+	public String getModemImsi() {
+		return (String) getMetric(MODEM_IMSI);
+	}
+	public String getModemIccid() {
+		return (String) getMetric(MODEM_ICCID);
+	}
+
 
 	@Override
 	public String toString() {
@@ -274,5 +145,235 @@ public class KuraBirthPayload extends KuraPayload
 				+ ", getConnectionIp()=" + getConnectionIp()
 				+ ", getAcceptEncoding()=" + getAcceptEncoding()
 				+ ", getApplicationIdentifiers()=" + getApplicationIdentifiers() + "]";
+	}
+
+	public static class KuraBirthPayloadBuilder
+	{
+		private String uptime;
+		private String displayName;
+		private String availableProcessors;
+		private String totalMemory;
+		private String osArch;
+		private String modelName;
+		private String modelId;
+		private String partNumber;
+		private String serialNumber;
+		private String firmwareVersion;
+		private String biosVersion;
+		private String os;
+		private String osVersion;
+		private String jvmName;
+		private String jvmVersion;
+		private String jvmProfile;
+		private String kuraVersion;
+		private String connectionInterface;
+		private String connectionIp;
+		private String acceptEncoding;
+		private String applicationIdentifiers;
+		private String osgiFramework;
+		private String osgiFrameworkVersion;
+		private String modemImei;
+		private String modemIccid;
+		private String modemImsi;
+
+		private KuraPosition position;
+
+
+		public KuraBirthPayloadBuilder withUptime(String uptime) {
+			this.uptime = uptime;
+			return this;
+		}
+		public KuraBirthPayloadBuilder withDisplayName(String displayName) {
+			this.displayName = displayName;
+			return this;
+		}
+		public KuraBirthPayloadBuilder withAvailableProcessors(String availableProcessors) {
+			this.availableProcessors = availableProcessors;
+			return this;
+		}
+		public KuraBirthPayloadBuilder withTotalMemory(String totalMemory) {
+			this.totalMemory = totalMemory;
+			return this;
+		}
+		public KuraBirthPayloadBuilder withOsArch(String osArch) {
+			this.osArch = osArch;
+			return this;
+		}
+		public KuraBirthPayloadBuilder withOsgiFramework(String osgiFramework) {
+			this.osgiFramework = osgiFramework;
+			return this;
+		}		
+		public KuraBirthPayloadBuilder withOsgiFrameworkVersion(String osgiFrameworkVersion) {
+			this.osgiFrameworkVersion = osgiFrameworkVersion;
+			return this;
+		}
+		public KuraBirthPayloadBuilder withModelName(String modelName) {
+			this.modelName = modelName;
+			return this;
+		}
+		public KuraBirthPayloadBuilder withModelId(String modelId) {
+			this.modelId = modelId;
+			return this;
+		}
+		public KuraBirthPayloadBuilder withPartNumber(String partNumber) {
+			this.partNumber = partNumber;
+			return this;
+		}
+		public KuraBirthPayloadBuilder withSerialNumber(String serialNumber) {
+			this.serialNumber = serialNumber;
+			return this;
+		}
+		public KuraBirthPayloadBuilder withFirmwareVersion(String firmwareVersion) {
+			this.firmwareVersion = firmwareVersion;
+			return this;
+		}
+		public KuraBirthPayloadBuilder withBiosVersion(String biosVersion) {
+			this.biosVersion = biosVersion;
+			return this;
+		}
+		public KuraBirthPayloadBuilder withOs(String os) {
+			this.os = os;
+			return this;
+		}
+		public KuraBirthPayloadBuilder withOsVersion(String osVersion) {
+			this.osVersion = osVersion;
+			return this;
+		}
+		public KuraBirthPayloadBuilder withJvmName(String jvmName) {
+			this.jvmName = jvmName;
+			return this;
+		}
+		public KuraBirthPayloadBuilder withJvmVersion(String jvmVersion) {
+			this.jvmVersion = jvmVersion;
+			return this;
+		}
+		public KuraBirthPayloadBuilder withJvmProfile(String jvmProfile) {
+			this.jvmProfile = jvmProfile;
+			return this;
+		}
+		public KuraBirthPayloadBuilder withKuraVersion(String kuraVersion) {
+			this.kuraVersion = kuraVersion;
+			return this;
+		}
+		public KuraBirthPayloadBuilder withConnectionInterface(String connectionInterface) {
+			this.connectionInterface = connectionInterface;
+			return this;
+		}
+		public KuraBirthPayloadBuilder withConnectionIp(String connectionIp) {
+			this.connectionIp = connectionIp;
+			return this;
+		}
+		public KuraBirthPayloadBuilder withAcceptEncoding(String acceptEncoding) {
+			this.acceptEncoding = acceptEncoding;
+			return this;
+		}
+		public KuraBirthPayloadBuilder withApplicationIdentifiers(String applicationIdentifiers) {
+			this.applicationIdentifiers = applicationIdentifiers;
+			return this;
+		}
+		public KuraBirthPayloadBuilder withModemImei(String modemImei) {
+			this.modemImei = modemImei;
+			return this;
+		}
+		public KuraBirthPayloadBuilder withModemIccid(String modemIccid) {
+			this.modemIccid = modemIccid;
+			return this;
+		}
+		public KuraBirthPayloadBuilder withModemImsi(String modemImsi) {
+			this.modemImsi = modemImsi;
+			return this;
+		}
+		public KuraBirthPayloadBuilder withPosition(KuraPosition position) {
+			this.position = position;
+			return this;			
+		}
+
+		public KuraBirthPayload build() {
+			KuraBirthPayload birthPayload = new KuraBirthPayload();
+
+			if (uptime != null) {
+				birthPayload.addMetric(UPTIME, uptime);
+			}
+			if (displayName != null) {
+				birthPayload.addMetric(DISPLAY_NAME, displayName);
+			}
+			if (modelName != null) {
+				birthPayload.addMetric(MODEL_NAME, modelName);
+			}
+			if (modelId != null) {
+				birthPayload.addMetric(MODEL_ID, modelId);
+			}
+			if (partNumber != null) {
+				birthPayload.addMetric(PART_NUMBER, partNumber);
+			}
+			if (serialNumber != null) {
+				birthPayload.addMetric(SERIAL_NUMBER, serialNumber);
+			}
+			if (firmwareVersion != null) {
+				birthPayload.addMetric(FIRMWARE_VERSION, firmwareVersion);
+			}
+			if (biosVersion != null) {
+				birthPayload.addMetric(BIOS_VERSION, biosVersion);
+			}
+			if (os != null) {
+				birthPayload.addMetric(OS, os);
+			}
+			if (osVersion != null) {
+				birthPayload.addMetric(OS_VERSION, osVersion);
+			}
+			if (jvmName != null) {
+				birthPayload.addMetric(JVM_NAME, jvmName);
+			}
+			if (jvmVersion != null) {
+				birthPayload.addMetric(JVM_VERSION, jvmVersion);
+			}
+			if (jvmProfile != null) {
+				birthPayload.addMetric(JVM_PROFILE, jvmProfile);
+			}
+			if (kuraVersion != null) {
+				birthPayload.addMetric(KURA_VERSION, kuraVersion);
+			}
+			if (connectionInterface != null) {
+				birthPayload.addMetric(CONNECTION_INTERFACE, connectionInterface);
+			}
+			if (connectionIp != null) {
+				birthPayload.addMetric(CONNECTION_IP, connectionIp);
+			}
+			if (acceptEncoding != null) {
+				birthPayload.addMetric(ACCEPT_ENCODING, acceptEncoding);
+			}
+			if (applicationIdentifiers != null) {
+				birthPayload.addMetric(APPLICATION_IDS, applicationIdentifiers);
+			}
+			if (availableProcessors != null) {
+				birthPayload.addMetric(AVAILABLE_PROCESSORS, availableProcessors);
+			}
+			if (totalMemory != null) {
+				birthPayload.addMetric(TOTAL_MEMORY, totalMemory);
+			}
+			if (osArch != null) {
+				birthPayload.addMetric(OS_ARCH, osArch);
+			}
+			if (osgiFramework != null) {
+				birthPayload.addMetric(OSGI_FRAMEWORK, osgiFramework);
+			}
+			if (osgiFrameworkVersion != null) {
+				birthPayload.addMetric(OSGI_FRAMEWORK_VERSION, osgiFrameworkVersion);
+			}
+			if (modemImei != null) {
+				birthPayload.addMetric(MODEM_IMEI, modemImei);
+			}
+			if (modemIccid != null) {
+				birthPayload.addMetric(MODEM_ICCID, modemIccid);
+			}
+			if (modemImsi != null) {
+				birthPayload.addMetric(MODEM_IMSI, modemImsi);
+			}
+			if (position != null) {
+				birthPayload.setPosition(position);
+			}
+
+			return birthPayload;
+		}
 	}
 }

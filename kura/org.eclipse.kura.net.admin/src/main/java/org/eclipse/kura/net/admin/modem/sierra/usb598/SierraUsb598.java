@@ -12,6 +12,7 @@
 package org.eclipse.kura.net.admin.modem.sierra.usb598;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -347,6 +348,21 @@ public class SierraUsb598 implements EvdoCellularModem {
 		// TODO Auto-generated method stub
 		return false;
 	}
+	
+	@Override
+	public boolean isPortReachable(String port) {
+		boolean ret = false;
+		synchronized (m_atLock) {
+			try {
+				CommConnection commAtConnection = openSerialPort(port);
+				closeSerialPort(commAtConnection);
+				ret = true;
+			} catch (KuraException e) {
+				s_logger.warn("isPortReachable() :: The {} is not reachable", port);
+			}
+		}
+		return ret;
+	}
 
 	@Override
 	public void reset() throws KuraException {
@@ -394,6 +410,10 @@ public class SierraUsb598 implements EvdoCellularModem {
 	@Override
 	public ModemDevice getModemDevice() {
 		 return m_device;
+	}
+	
+	protected void setModemDevice(ModemDevice device) {
+		m_device = device;
 	}
 
 	@Override
@@ -526,6 +546,31 @@ public class SierraUsb598 implements EvdoCellularModem {
 	public ModemCdmaServiceProvider getServiceProvider() {
 		// TODO 
 		return null;
+	}
+	
+	public CommURI getSerialConnectionProperties(SerialPortType portType) throws KuraException {
+		try {
+			String port;
+			if (portType == SerialPortType.ATPORT) {
+				port = getAtPort();
+			} else if (portType == SerialPortType.DATAPORT) {
+				port = this.getDataPort();
+			} else if (portType == SerialPortType.GPSPORT) {
+				port = getGpsPort();
+			} else {
+				throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "Invalid Port Type");
+			}
+			StringBuffer sb = new StringBuffer();
+			sb.append("comm:").append(port).append(";baudrate=115200;databits=8;stopbits=1;parity=0");
+			return CommURI.parseString(sb.toString());
+			
+		} catch (URISyntaxException e) {
+			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "URI Syntax Exception");
+		}
+	}
+	
+	public boolean isGpsEnabled() {
+		return false;
 	}
 	
 	private CommConnection openSerialPort (String port) throws KuraException {

@@ -19,7 +19,7 @@
 	<parent>
 		<groupId>org.eclipse.kura</groupId>
 		<artifactId>kura</artifactId>
-		<version>1.1.0-SNAPSHOT</version>
+		<version>1.2.0-SNAPSHOT</version>
 		<relativePath>../manifest_pom.xml</relativePath>
 	</parent>
 
@@ -76,7 +76,7 @@
 		    -->
 
                     <useUnlimitedThreads>true</useUnlimitedThreads>
-                    <argLine>-Dequinox.ds.print=true -Dorg.osgi.framework.storage=/tmp/osgi/framework_storage -Dosgi.clean=true -Dorg.eclipse.kura.mode=emulator -Dkura.configuration=file:../org.eclipse.kura.emulator/src/main/resources/kura.properties -Ddpa.configuration=/tmp/kura/dpa.properties  -Dlog4j.configuration=file:../org.eclipse.kura.emulator/src/main/resources/log4j.properties</argLine>
+                    <argLine>${tycho.testArgLine} -DbuildingWithTycho=true -Dosgi.locking=none -Dequinox.ds.print=true -Dorg.osgi.framework.storage=/tmp/osgi/framework_storage -Dosgi.clean=true -Dorg.eclipse.kura.mode=emulator -Dkura.configuration=file:../org.eclipse.kura.emulator/src/main/resources/kura.properties -Ddpa.configuration=/tmp/kura/dpa.properties  -Dlog4j.configuration=file:../org.eclipse.kura.emulator/src/main/resources/log4j.properties</argLine>
 
 		    <!-- This can be uncommented to debug the test in the event of a failure by telneting to port 5002 and seeing the state of the OSGi runtime 		    
                     <appArgLine>-consoleLog -console 5002 -noExit</appArgLine>
@@ -208,7 +208,7 @@
 			    <autoStart>true</autoStart>
 			</bundle>
 			<bundle>
-			    <id>org.apache.servicemix.bundles.protobuf-java</id>
+			    <id>com.google.protobuf</id>
 			    <level>4</level>
 			    <autoStart>true</autoStart>
 			</bundle>
@@ -405,7 +405,7 @@
                         </dependency>
                         <dependency>
                             <type>p2-installable-unit</type>
-                            <artifactId>org.apache.servicemix.bundles.protobuf-java</artifactId>
+                            <artifactId>com.google.protobuf</artifactId>
                         </dependency>
 <!--
                         <dependency>
@@ -539,6 +539,23 @@
     								<ignore></ignore>
     							</action>
     						</pluginExecution>
+    						<pluginExecution>
+    							<pluginExecutionFilter>
+    								<groupId>org.jacoco</groupId>
+    								<artifactId>
+    									jacoco-maven-plugin
+    								</artifactId>
+    								<versionRange>
+    									[0.6.4.201312101107,)
+    								</versionRange>
+    								<goals>
+    									<goal>prepare-agent</goal>
+    								</goals>
+    							</pluginExecutionFilter>
+    							<action>
+    								<ignore></ignore>
+    							</action>
+    						</pluginExecution>
     					</pluginExecutions>
     				</lifecycleMappingMetadata>
     			</configuration>
@@ -546,5 +563,5 @@
     	</plugins>
     </pluginManagement>
     </build>
-<version>1.0.1-SNAPSHOT</version>
+<version>1.0.2-SNAPSHOT</version>
 </project>

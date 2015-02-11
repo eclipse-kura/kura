@@ -53,4 +53,16 @@ public class UsbTtyDevice extends AbstractUsbDevice {
 			return false;
 		return true;
 	}
+
+	@Override
+	public String toString() {
+		return "UsbTtyDevice [getDeviceNode()=" + getDeviceNode()
+				+ ", getVendorId()=" + getVendorId()
+				+ ", getProductId()=" + getProductId()
+				+ ", getManufacturerName()=" + getManufacturerName()
+				+ ", getProductName()=" + getProductName()
+				+ ", getUsbBusNumber()=" + getUsbBusNumber()
+				+ ", getUsbDevicePath()=" + getUsbDevicePath()
+				+ ", getUsbPort()=" + getUsbPort() + "]";
+	}
 }

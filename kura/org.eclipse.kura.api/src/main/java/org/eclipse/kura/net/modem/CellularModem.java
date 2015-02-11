@@ -3,10 +3,17 @@ package org.eclipse.kura.net.modem;
 import java.util.List;
 
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.comm.CommURI;
 import org.eclipse.kura.net.NetConfig;
 
 public interface CellularModem {
-
+	
+	public enum SerialPortType {
+		DATAPORT,
+		ATPORT,
+		GPSPORT
+	}
+	
 	/**
      * Reports modem's model
      * 
@@ -50,8 +57,21 @@ public interface CellularModem {
      */
     public String getRevisionID() throws KuraException;
     
-    
+    /**
+     * Reports if Modem replies to the 'AT' command
+     * 
+     * @return 'true' if AT reachable, 'false' otherwise
+     * @throws KuraException
+     */
     public boolean isReachable() throws KuraException;
+    
+    /**
+     * Reports if specified port can be opened
+     * 
+     * @param port - modem's serial port
+     * @return 'true' if port can be opened, 'false' otherwise
+     */
+    public boolean isPortReachable(String port);
      
     /**
      * resets the modem and tries to restore the state 
@@ -115,7 +135,11 @@ public interface CellularModem {
     
     public String getGpsPort() throws KuraException;
     
+    public CommURI getSerialConnectionProperties(SerialPortType portType) throws KuraException;
+    
     public boolean isGpsSupported() throws KuraException;
+    
+    public boolean isGpsEnabled();
     
     public void enableGps() throws KuraException;
     

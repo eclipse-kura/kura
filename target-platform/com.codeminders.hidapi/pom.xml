@@ -1,18 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-
+    <modelVersion>4.0.0</modelVersion>
+    
     <parent>
         <groupId>org.eclipse.kura</groupId>
         <artifactId>target-platform</artifactId>
-        <version>1.1.0-SNAPSHOT</version>
+        <version>1.2.0-SNAPSHOT</version>
     </parent>
 
-    <modelVersion>4.0.0</modelVersion>
-    
     <groupId>org.eclipse.kura</groupId>
     <artifactId>com.codeminders.hidapi</artifactId>
-    <version>1.1</version>
+    <version>1.1.1</version>
     <packaging>bundle</packaging>
 
     <name>Java API for working with Human Interface USB Devices (HID)</name>
@@ -55,11 +54,11 @@
     </properties>
 
     <dependencies>
-        <dependency>
-            <groupId>com.codeminders</groupId>
-            <artifactId>hidapi</artifactId>
-            <version>1.1</version>
-        </dependency>
+		<dependency>
+			<groupId>org.eclipse.tycho</groupId>
+			<artifactId>org.eclipse.osgi</artifactId>
+			<version>3.8.1.v20120830-144521</version>
+		</dependency>
     </dependencies>
     
     <build>
@@ -75,65 +74,66 @@
         </resource>
     </resources>
     <plugins>
-        <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-surefire-plugin</artifactId>
-            <version>2.7.2</version>
-            <configuration>
-                <systemPropertyVariables>
-                    <java.library.path>${project.basedir}/src/main/lib</java.library.path>
-                </systemPropertyVariables>
-            </configuration>
-        </plugin>
-        <plugin>
-            <groupId>org.apache.felix</groupId>
-            <artifactId>maven-bundle-plugin</artifactId>
-            <version>2.3.5</version>
-            <extensions>true</extensions>
-            <configuration>
-            <manifestLocation>META-INF</manifestLocation>
-                <instructions>
-                    <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
-                    <Bundle-Name>${project.name}</Bundle-Name>
-                    <Bundle-Version>${project.version}</Bundle-Version>
-                    <Embed-Dependency>
-                        hidapi;groupId=com.codeminders;artifactId=hidapi;version=1.1;scope=runtime
-                    </Embed-Dependency>
-                    <Include-Resource>
-                        lib=${project.basedir}/src/lib,
-                        ${project.basedir}/about.html,
-                        about_files=${project.basedir}/about_files
-                    </Include-Resource>
-                    <Bundle-NativeCode>
-                        lib/native/linux/x86/libhidapi-jni.so; osname=Linux; processor=x86,
-			lib/native/linux/x86_64/libhidapi-jni.so; osname=Linux; processor=x86-64,
-                        lib/native/linux/armv6_hf/libhidapi-jni.so; osname=Linux; processor=ARM; selection-filter="(&amp;(kura.arch=armv7_hf))",
-                        lib/native/linux/armv5_sf/libhidapi-jni.so; osname=Linux; processor=ARM; selection-filter="(&amp;(kura.arch=armv7_sf))",
-                        lib/native/linux/armv5_sf/libhidapi-jni.so; osname=Linux; processor=ARM; selection-filter="(&amp;(kura.arch=armv6_hf))",
-                        lib/native/linux/armv5_sf/libhidapi-jni.so; osname=Linux; processor=ARM; selection-filter="(&amp;(kura.arch=armv6_sf))",
-                        lib/native/linux/armv5_sf/libhidapi-jni.so; osname=Linux; processor=ARM; selection-filter="(&amp;(kura.arch=armv5_sf))",
-                        lib/native/mac/libhidapi-jni-32.jnilib; osname=MacOSX; processor=x86,
-                        lib/native/mac/libhidapi-jni-64.jnilib; osname=MacOSX; processor=x86_64
-                    </Bundle-NativeCode>
-                    <Export-Package>
-                        com.codeminders.hidapi.*
-                    </Export-Package>
-                </instructions>
-            </configuration>
-        </plugin>
-            
-        <plugin>
-            <artifactId>maven-dependency-plugin</artifactId>
-            <executions>
-                <execution>
-                    <id>copy-dependencies</id>
-                    <phase>package</phase>
-                    <goals>
-                      <goal>copy-dependencies</goal>
-                    </goals>
-                </execution>
-            </executions>
-        </plugin>
+		<plugin>
+			<groupId>org.apache.maven.plugins</groupId>
+			<artifactId>maven-surefire-plugin</artifactId>
+			<version>2.7.2</version>
+         <configuration>
+				<systemPropertyVariables>
+					<java.library.path>${project.basedir}/src/main/lib</java.library.path>
+				</systemPropertyVariables>
+			</configuration>
+		</plugin>
+
+		<plugin>
+			<groupId>org.apache.felix</groupId>
+			<artifactId>maven-bundle-plugin</artifactId>
+			<version>2.3.5</version>
+			<extensions>true</extensions>
+			<configuration>
+				<manifestLocation>META-INF</manifestLocation>
+				<instructions>
+					<Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
+					<Bundle-Name>%bundle.name</Bundle-Name>
+					<Bundle-Version>${project.version}</Bundle-Version>
+					<Include-Resource>
+						lib=${project.basedir}/src/main/lib,
+						${project.basedir}/about.html,
+						about_files=${project.basedir}/about_files/
+					</Include-Resource>
+					<Bundle-NativeCode>
+						lib/linux/x86/libhidapi.so; osname=Linux; processor=x86,
+						lib/linux/x86_64/libhidapi.so; osname=Linux; processor=x86-64,
+						lib/linux/armv6_hf/libhidapi.so; osname=Linux; processor=ARM; selection-filter="(&amp;(kura.arch=armv7_hf))",
+						lib/linux/armv5_sf/libhidapi.so; osname=Linux; processor=ARM; selection-filter="(&amp;(kura.arch=armv7_sf))",
+						lib/linux/armv6_hf/libhidapi.so; osname=Linux; processor=ARM; selection-filter="(&amp;(kura.arch=armv6_hf))",
+						lib/linux/armv5_sf/libhidapi.so; osname=Linux; processor=ARM; selection-filter="(&amp;(kura.arch=armv6_sf))",
+						lib/linux/armv5_sf/libhidapi.so; osname=Linux; processor=ARM; selection-filter="(&amp;(kura.arch=armv5_sf))",
+						lib/mac/x86/libhidapi.jnilib; osname=macosx; processor=x86,					
+						lib/mac/x86_64/libhidapi.jnilib; osname=macosx; processor=x86-64,					
+						lib/win/x86/hidapi.dll; osname=win32; processor=x86,					
+						lib/win/x86_64/hidapi.dll; osname=win64; processor=x86-64,
+						*				
+					</Bundle-NativeCode>
+					<Export-Package>
+						com.codeminders.hidapi
+					</Export-Package>
+				</instructions>
+			</configuration>
+		</plugin>
+
+	    <plugin>
+        	<artifactId>maven-dependency-plugin</artifactId>
+        	<executions>
+        	  <execution>
+        	    <id>copy-dependencies</id>
+        	    <phase>package</phase>
+        	    <goals>
+        	      <goal>copy-dependencies</goal>
+        	    </goals>
+        	  </execution>
+        	</executions>
+	   </plugin>
        
     </plugins>
         <pluginManagement>

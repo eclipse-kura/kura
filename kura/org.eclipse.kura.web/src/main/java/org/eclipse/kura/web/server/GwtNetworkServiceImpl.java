@@ -441,9 +441,17 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 										((GwtWifiNetInterfaceConfig)gwtNetConfig).setWirelessMode(GwtWifiWirelessMode.netWifiWirelessModeStation.name());
 										if (wifiClientMonitorService != null) {
 											if (wifiConfig.getMode().equals(WifiMode.INFRA)) {
-												int rssi = wifiClientMonitorService.getSignalLevel(netIfConfig.getName(), wifiConfig.getSSID());
-												s_logger.debug("Setting Received Signal Strength to {}", rssi);
-												gwtNetConfig.setHwRssi(Integer.toString(rssi));
+												if (gwtNetConfig.getStatus().equals(GwtNetIfStatus.netIPv4StatusDisabled.name())) {
+													gwtNetConfig.setHwRssi("N/A");
+												} else {
+													try {
+														int rssi = wifiClientMonitorService.getSignalLevel(netIfConfig.getName(), wifiConfig.getSSID());
+														s_logger.debug("Setting Received Signal Strength to {}", rssi);
+														gwtNetConfig.setHwRssi(Integer.toString(rssi));
+													} catch (KuraException e) {
+														e.printStackTrace();
+													}
+												}
 											}
 										}
 									} else if (activeWirelessMode == WifiMode.ADHOC) {
@@ -488,19 +496,30 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 					                    			s_logger.debug("Setting IMEI/MEID to {}", imei);
 					                    			gwtModemConfig.setHwSerial(imei);
 					                    		} catch (KuraException e) {
-					                    			e.printStackTrace();
+					                    			s_logger.warn("Failed to get IMEI from modem", e);
 					                    		}
 					                    		try {
 						                    		int rssi = cellModemService.getSignalStrength();
 						                    		s_logger.debug("Setting Received Signal Strength to {}", rssi);
 						                    		gwtModemConfig.setHwRssi(Integer.toString(rssi));
 					                    		} catch (KuraException e) {
-					                    			e.printStackTrace();
+					                    			s_logger.warn("Failed to get Received Signal Strength from modem", e);
 					                    		}
 					                    		
-					                    		boolean gpsSupported = cellModemService.isGpsSupported();
-					                    		s_logger.debug("Setting GPS supported to {}", gpsSupported);
-					                            ((GwtModemInterfaceConfig)gwtNetConfig).setGpsSupported(gpsSupported);
+					                    		try {
+						                    		String sModel = cellModemService.getModel();
+						                    		((GwtModemInterfaceConfig)gwtNetConfig).setModel(sModel);
+					                    		} catch (KuraException e) {
+					                    			s_logger.warn("Failed to get model information from modem", e);
+					                    		}
+					                    		
+					                    		try {
+					                    			boolean gpsSupported = cellModemService.isGpsSupported();
+					                    			s_logger.debug("Setting GPS supported to {}", gpsSupported);
+					                    			((GwtModemInterfaceConfig)gwtNetConfig).setGpsSupported(gpsSupported);
+					                    		} catch (KuraException e) {
+					                    			s_logger.warn("Failed to get GPS supported from modem", e);
+					                    		}
 					                    	}
 										}
 									}

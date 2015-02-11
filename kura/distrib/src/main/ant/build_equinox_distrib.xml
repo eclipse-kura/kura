@@ -65,9 +65,15 @@
     	
         <copy file="src/main/resources/${build.name}/snapshot_0.xml"
               tofile="${project.build.directory}/${build.output.name}/snapshot_0.xml" />
-        <copy    file="src/main/osgi/equinox_3.8.1/configuration/config.ini"
-                 tofile="${project.build.directory}/${build.output.name}/config.ini" />
+        <copy file="src/main/osgi/equinox_3.8.1/configuration/config.ini"
+              tofile="${project.build.directory}/${build.output.name}/config.ini" />
 
+        <!-- Copy jdk.dio files -->
+        <copy file="src/main/resources/${build.name}/jdk.dio.properties"
+              tofile="${project.build.directory}/${build.output.name}/jdk.dio.properties" />
+        <copy file="src/main/resources/common/jdk.dio.policy"
+              tofile="${project.build.directory}/${build.output.name}/jdk.dio.policy" />
+    	
         <!-- Populate config.ini with correct versions -->
         <replace file="${project.build.directory}/${build.output.name}/config.ini"
                  token="{kura.build.version}" value="${kura.build.version}"/>
@@ -127,7 +133,10 @@ cd $DIR
 mkdir -p /tmp/.kura/configuration
 cp ${DIR}/kura/config.ini /tmp/.kura/configuration/
 
-java -Xms${kura.mem.size} -Xmx${kura.mem.size} -XX:MaxPermSize=${kura.mem.size} -Dkura.os.version=${kura.os.version} \
+KURA_RUNNING=`ps ax | grep java | grep "org.eclipse.osgi"`
+
+if [ "$KURA_RUNNING" == "" ] ; then
+    java -Xms${kura.mem.size} -Xmx${kura.mem.size} -XX:MaxPermSize=${kura.mem.size} -Dkura.os.version=${kura.os.version} \
 	-Dkura.arch=${kura.arch} \
 	-Dtarget.device=${target.device} \
 	-Declipse.ignoreApp=true \
@@ -137,10 +146,13 @@ java -Xms${kura.mem.size} -Xmx${kura.mem.size} -XX:MaxPermSize=${kura.mem.size} 
 	-Dkura.data.dir=${DIR}/data \
 	-Ddpa.configuration=${DIR}/kura/dpa.properties \
 	-Dlog4j.configuration=file:${DIR}/kura/log4j.properties \
+	-Djava.security.policy=${DIR}/kura/jdk.dio.policy \
+	-Djdk.dio.registry=${DIR}/kura/jdk.dio.properties \
 	-jar ${DIR}/plugins/org.eclipse.osgi_3.8.1.v20120830-144521.jar \
 	-configuration  /tmp/.kura/configuration \
 	-console \
 	-consoleLog
+fi
 	</echo>    
 	<echo file="${project.build.directory}/${build.output.name}/start_kura_debug.sh" append="false">#!/bin/sh
 
@@ -153,7 +165,10 @@ cd $DIR
 mkdir -p /tmp/.kura/configuration
 cp ${DIR}/kura/config.ini /tmp/.kura/configuration/
 
-java -Xms${kura.mem.size} -Xmx${kura.mem.size} -XX:MaxPermSize=${kura.mem.size} -Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=8000,suspend=n \
+KURA_RUNNING=`ps ax | grep java | grep "org.eclipse.osgi"`
+
+if [ "$KURA_RUNNING" == "" ] ; then
+    java -Xms${kura.mem.size} -Xmx${kura.mem.size} -XX:MaxPermSize=${kura.mem.size} -Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=8000,suspend=n \
 	-Dkura.os.version=${kura.os.version} \
 	-Dkura.arch=${kura.arch} \
 	-Dtarget.device=${target.device} \
@@ -164,10 +179,13 @@ java -Xms${kura.mem.size} -Xmx${kura.mem.size} -XX:MaxPermSize=${kura.mem.size} 
 	-Dkura.data.dir=${DIR}/data \
 	-Ddpa.configuration=${DIR}/kura/dpa.properties \
 	-Dlog4j.configuration=file:${DIR}/kura/log4j.properties \
+	-Djava.security.policy=${DIR}/kura/jdk.dio.policy \
+	-Djdk.dio.registry=${DIR}/kura/jdk.dio.properties \
 	-jar ${DIR}/plugins/org.eclipse.osgi_3.8.1.v20120830-144521.jar \
 	-configuration  /tmp/.kura/configuration \
 	-console \
 	-consoleLog
+fi
 	</echo>    
 	<echo file="${project.build.directory}/${build.output.name}/start_kura_background.sh" append="false">#!/bin/sh
 
@@ -181,7 +199,10 @@ cd $DIR
 mkdir -p /tmp/.kura/configuration
 cp ${DIR}/kura/config.ini /tmp/.kura/configuration/
 
-nohup java -Xms${kura.mem.size} -Xmx${kura.mem.size} -XX:MaxPermSize=${kura.mem.size} -Dkura.os.version=${kura.os.version} \
+KURA_RUNNING=`ps ax | grep java | grep "org.eclipse.osgi"`
+
+if [ "$KURA_RUNNING" == "" ] ; then
+    nohup java -Xms${kura.mem.size} -Xmx${kura.mem.size} -XX:MaxPermSize=${kura.mem.size} -Dkura.os.version=${kura.os.version} \
 	-Dkura.arch=${kura.arch} \
 	-Dtarget.device=${target.device} \
 	-Declipse.ignoreApp=true \
@@ -191,14 +212,20 @@ nohup java -Xms${kura.mem.size} -Xmx${kura.mem.size} -XX:MaxPermSize=${kura.mem.
 	-Dkura.data.dir=${DIR}/data \
 	-Ddpa.configuration=${DIR}/kura/dpa.properties \
 	-Dlog4j.configuration=file:${DIR}/kura/log4j.properties \
+	-Djava.security.policy=${DIR}/kura/jdk.dio.policy \
+	-Djdk.dio.registry=${DIR}/kura/jdk.dio.properties \
 	-jar ${DIR}/plugins/org.eclipse.osgi_3.8.1.v20120830-144521.jar \
 	-configuration  /tmp/.kura/configuration \
 	-console 5002 \
 	-consoleLog >> /var/log/kura-console.log 2>> /var/log/kura-console.log &amp;
 
-#Save the PID
-KURA_PID=$!
-echo $KURA_PID > /var/run/kura.pid
+    #Save the PID
+    KURA_PID=$!
+    echo "Kura Started (pid="$KURA_PID") ..." >> /var/log/kura-console.log
+    echo $KURA_PID > /var/run/kura.pid
+else
+    echo "Failed to start Kura. It is already running ..." >> /var/log/kura-console.log
+fi
 	</echo>
 
     	<!-- Populate parameters -->
@@ -228,6 +255,12 @@ echo $KURA_PID > /var/run/kura.pid
                         prefix="${build.output.name}/data/snapshots/" />
 
             <zipfileset file="${project.build.directory}/${build.output.name}/config.ini"
+                        prefix="${build.output.name}/kura/" />
+
+            <zipfileset file="${project.build.directory}/${build.output.name}/jdk.dio.policy"
+                        prefix="${build.output.name}/kura/" />
+
+        		<zipfileset file="${project.build.directory}/${build.output.name}/jdk.dio.properties"
                         prefix="${build.output.name}/kura/" />
 
             <zipfileset file="src/main/resources/common/kura_custom.properties"
@@ -432,7 +465,7 @@ echo $KURA_PID > /var/run/kura.pid
         <!-- Create the manifest -->
 
     	<!-- Read mf entries -->
-        <loadmf jar="${project.build.directory}/plugins/org.eclipse.kura.deployment.customizer_${org.eclipse.kura.deployment.customizer.version}.jar" prefix="customizer-mf."/>
+        <loadmf jar="${project.build.directory}/plugins/org.eclipse.kura.deployment.customizer.upgrade_${org.eclipse.kura.deployment.customizer.upgrade.version}.jar" prefix="customizer-mf."/>
 
         <echo file="${project.build.directory}/${build.output.name}/dp_upgrade_stage/META-INF/MANIFEST.MF" append="false">Manifest-Version: 1.0
 DeploymentPackage-SymbolicName: kura-upgrade

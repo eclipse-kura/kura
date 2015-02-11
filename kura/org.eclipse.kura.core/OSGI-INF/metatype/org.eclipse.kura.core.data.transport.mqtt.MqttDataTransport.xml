@@ -132,7 +132,18 @@
            <Option label="memory" value="memory"/>
         </AD>
             
-    </OCD>
+        <AD id="protocol-version"  
+            name="protocol-version"
+            type="Integer"
+            cardinality="0"
+            required="false"
+            default="3"
+            description="MQTT Protocol Version.">
+            <Option label="3.1" value="3"/>
+            <Option label="3.1.1" value="4"/>
+        </AD>
+        
+        </OCD>
     <Designate pid="org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport">
         <Object ocdref="org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport"/>
     </Designate>

@@ -11,6 +11,7 @@
  */
 package org.eclipse.kura.linux.clock;
 
+import java.io.IOException;
 import java.net.InetAddress;
 import java.util.Date;
 
@@ -33,23 +34,31 @@ public class JavaNtpClockSyncProvider extends AbstractNtpClockSyncProvider
 	//
 	// ----------------------------------------------------------------	
 	
-	protected void syncClock() throws KuraException
+	protected boolean syncClock() throws KuraException
 	{
+		boolean ret = false;
 		// connect and get the delta
 		NTPUDPClient ntpClient = new NTPUDPClient();
         ntpClient.setDefaultTimeout(m_ntpTimeout);
         try {
             ntpClient.open();
-            InetAddress ntpHostAddr = InetAddress.getByName(m_ntpHost);
-            TimeInfo info = ntpClient.getTime(ntpHostAddr, m_ntpPort);
-            
-            m_lastSync = new Date();
-            info.computeDetails();
-            
-            m_listener.onClockUpdate(info.getOffset());
+            try {
+            	InetAddress ntpHostAddr = InetAddress.getByName(m_ntpHost);
+            	TimeInfo info = ntpClient.getTime(ntpHostAddr, m_ntpPort);
+            	m_lastSync = new Date();
+                info.computeDetails();
+                
+                m_listener.onClockUpdate(info.getOffset());
+                ret = true;
+            } catch (IOException e) {
+				s_logger.warn(
+						"Error while synchronizing System Clock with NTP host {}. Please virify network connectivity ...",
+						m_ntpHost);
+            }
         } 
         catch (Exception e) {
         	throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
         }
+        return ret;
 	}
 }

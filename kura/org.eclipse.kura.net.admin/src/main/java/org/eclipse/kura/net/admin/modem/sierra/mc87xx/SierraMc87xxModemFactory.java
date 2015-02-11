@@ -67,6 +67,8 @@ public class SierraMc87xxModemFactory implements CellularModemFactory {
 		if (sierraMc87xx == null) {
 			sierraMc87xx = new SierraMc87xx(modemDevice, m_connectionFactory, s_type);
 			this.m_modemServices.put(key, sierraMc87xx);
+		} else {
+			sierraMc87xx.setModemDevice(modemDevice);
 		}
 		
 		return sierraMc87xx;

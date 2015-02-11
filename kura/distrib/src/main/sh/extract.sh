@@ -25,15 +25,10 @@ echo "Installing Kura..." > $LOG 2>&1
 #Kill JVM and monit for installation
 killall monit java >> $LOG 2>&1
 
-#remove old ESFv1 if present
-(rpm -ev `rpm -qa | grep -i -e esf -e denali -e eurotech -e dynacor -e reliagate -e helios -e duracor | grep -v atom | grep -v jvm`) >> $LOG 2>&1
-
 #clean up old installation if present
 rm -fr /opt/eclipse/data >> $LOG 2>&1
-rm -fr /opt/eclipse/esf* >> $LOG 2>&1
 rm -fr /opt/eclipse/kura* >> $LOG 2>&1
 rm -fr ${INSTALL_DIR}/kura* >> $LOG 2>&1
-rm -fr /tmp/.esf/ >> $LOG 2>&1
 rm -fr /tmp/.kura/ >> $LOG 2>&1
 rm /etc/init.d/firewall >> $LOG 2>&1
 rm /etc/dhcpd-*.conf >> $LOG 2>&1
@@ -49,7 +44,6 @@ rm -fr /etc/ppp/scripts >> $LOG 2>&1
 rm /etc/ppp/*ap-secrets >> $LOG 2>&1
 rm /etc/rc*.d/S*esf >> $LOG 2>&1
 rm /etc/rc*.d/S*kura >> $LOG 2>&1
-rm esf-*.zip >> $LOG 2>&1
 rm kura-*.zip >> $LOG 2>&1
 rm kura_*.zip >> $LOG 2>&1
 

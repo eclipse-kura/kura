@@ -12,7 +12,6 @@
 package org.eclipse.kura.cloud.app.command;
 
 import java.util.Vector;
-
 import org.eclipse.kura.message.KuraPayload;
 import org.eclipse.kura.message.KuraRequestPayload;
 
@@ -34,6 +33,7 @@ public class KuraCommandRequestPayload extends KuraRequestPayload
 			Object value = kuraPayload.getMetric(name);
 			addMetric(name, value);
 		}
+		
 		setBody(kuraPayload.getBody());
 	}
 

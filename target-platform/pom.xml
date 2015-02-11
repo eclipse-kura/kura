@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.eclipse.kura</groupId>
 	<artifactId>target-platform</artifactId>
-	<version>1.1.0-SNAPSHOT</version>
+	<version>1.2.0-SNAPSHOT</version>
 
 	<packaging>pom</packaging>
 
@@ -18,6 +18,21 @@
 		<module>p2-repo-equinox_3.8.1</module>
 	</modules>
 
+	<profiles>
+		<profile>
+			<id>dio-skip</id>
+			<activation>
+				<property>
+					<name>dio.skip</name>
+					<value>true</value>
+				</property>
+			</activation>
+			<properties>
+				<org.eclipse.kura.dio.skip>true</org.eclipse.kura.dio.skip>
+			</properties>
+		</profile>
+	</profiles>
+
 	<repositories>
 		<repository>
 			<id>kura_addons</id>
@@ -28,6 +43,10 @@
 				<updatePolicy>always</updatePolicy>
 			</snapshots>
 		</repository>
+                <repository>
+                        <id>Eclipse Paho Repo</id>
+                        <url>https://repo.eclipse.org/content/repositories/paho-releases/</url>
+                </repository>
 	</repositories>
 	
 	<properties>

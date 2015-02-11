@@ -24,6 +24,7 @@
               unbind="unsetEventAdmin"
               interface="org.osgi.service.event.EventAdmin"/>
    <reference bind="setNetworkService" cardinality="1..1" interface="org.eclipse.kura.net.NetworkService" name="NetworkService" policy="static" unbind="unsetNetworkService"/>
+   <reference bind="setSystemService" cardinality="1..1" interface="org.eclipse.kura.system.SystemService" name="SystemService" policy="static" unbind="unsetSystemService"/>
    <reference bind="setNetworkAdminService" cardinality="1..1" interface="org.eclipse.kura.net.NetworkAdminService" name="NetworkAdminService" policy="static" unbind="unsetNetworkAdminService"/>
    <reference bind="setNetworkConfigurationService" cardinality="1..1" interface="org.eclipse.kura.net.admin.NetworkConfigurationService" name="NetworkConfigurationService" policy="static" unbind="unsetNetworkConfigurationService"/>
 </scr:component>

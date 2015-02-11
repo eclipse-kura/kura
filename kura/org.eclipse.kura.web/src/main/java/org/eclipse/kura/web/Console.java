@@ -43,7 +43,7 @@ public class Console
 {
 	private static final Logger s_logger = LoggerFactory.getLogger(Console.class);
 
-	private static final String ESF_DATA_DIR = "esf.data";
+	private static final String ESF_DATA_DIR = "kura.data";
 	private static final String SERVLET_ALIAS_ROOT = "servlet.alias.root";
 	private static final String APP_ROOT		   = "app.root";
 

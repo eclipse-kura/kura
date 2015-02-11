@@ -66,15 +66,21 @@ export PATH=/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/opt/jvm/bin:/usr/java/
 
 cd $(dirname $0)/..
 
-java -Xms${kura.mem.size} -Xmx${kura.mem.size} -XX:MaxPermSize=${kura.mem.size} -Dkura.os.version=${kura.os.version} \
+KURA_RUNNING=`ps ax | grep java | grep "org.eclipse.osgi"`
+
+if [ "$KURA_RUNNING" == "" ] ; then
+    java -Xms${kura.mem.size} -Xmx${kura.mem.size} -XX:MaxPermSize=${kura.mem.size} -Dkura.os.version=${kura.os.version} \
 	-Declipse.ignoreApp=true \
 	-Dkura.configuration=file:/opt/eclipse/kura/kura/kura.properties \
-        -Ddpa.configuration=/opt/eclipse/kura/kura/dpa.properties \
+	-Ddpa.configuration=/opt/eclipse/kura/kura/dpa.properties \
 	-Dlog4j.configuration=file:/opt/eclipse/kura/kura/log4j.properties \
+	-Djava.security.policy=${DIR}/kura/jdk.dio.policy \
+	-Djdk.dio.registry=${DIR}/kura/jdk.dio.properties \
 	-jar plugins/org.eclipse.osgi_3.8.1.v20120830-144521.jar \
 	-configuration configuration \
 	-console \
 	-consoleLog
+fi
 	</echo>    
 	<echo file="${project.build.directory}/kura-${build.name}_${project.version}/start_kura_debug.sh" append="false">#!/bin/sh
 
@@ -82,16 +88,22 @@ export PATH=/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/opt/jvm/bin:/usr/java/
 
 cd $(dirname $0)/..
 
-java -Xms${kura.mem.size} -Xmx${kura.mem.size} -XX:MaxPermSize=${kura.mem.size} -Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=8000,suspend=n \
+KURA_RUNNING=`ps ax | grep java | grep "org.eclipse.osgi"`
+
+if [ "$KURA_RUNNING" == "" ] ; then
+    java -Xms${kura.mem.size} -Xmx${kura.mem.size} -XX:MaxPermSize=${kura.mem.size} -Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=8000,suspend=n \
 	-Dkura.os.version=${kura.os.version} \
 	-Declipse.ignoreApp=true \
 	-Dkura.configuration=file:/opt/eclipse/kura/kura/kura.properties \
         -Ddpa.configuration=/opt/eclipse/kura/kura/dpa.properties \
 	-Dlog4j.configuration=file:/opt/eclipse/kura/kura/log4j.properties \
+	-Djava.security.policy=${DIR}/kura/jdk.dio.policy \
+	-Djdk.dio.registry=${DIR}/kura/jdk.dio.properties \
 	-jar plugins/org.eclipse.osgi_3.8.1.v20120830-144521.jar \
 	-configuration configuration \
 	-console \
 	-consoleLog
+fi
 	</echo>    
 	<echo file="${project.build.directory}/kura-${build.name}_${project.version}/start_kura_background.sh" append="false"># Kura should be installed to the /opt/eclipse directory.
 
@@ -101,19 +113,29 @@ export PATH=/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/opt/jvm/bin:/usr/java/
 
 cd /opt/eclipse/kura
 
-nohup java -Xms${kura.mem.size} -Xmx${kura.mem.size} -XX:MaxPermSize=${kura.mem.size} -Dkura.os.version=${kura.os.version} \
+KURA_RUNNING=`ps ax | grep java | grep "org.eclipse.osgi"`
+
+if [ "$KURA_RUNNING" == "" ] ; then
+    nohup java -Xms${kura.mem.size} -Xmx${kura.mem.size} -XX:MaxPermSize=${kura.mem.size} -Dkura.os.version=${kura.os.version} \
         -Declipse.ignoreApp=true \
         -Dkura.configuration=file:/opt/eclipse/kura/kura/kura.properties \
         -Ddpa.configuration=/opt/eclipse/kura/kura/dpa.properties \
         -Dlog4j.configuration=file:/opt/eclipse/kura/kura/log4j.properties \
+        -Djava.security.policy=${DIR}/kura/jdk.dio.policy \
+        -Djdk.dio.registry=${DIR}/kura/jdk.dio.properties \
         -jar plugins/org.eclipse.osgi_3.8.1.v20120830-144521.jar \
         -configuration configuration/ \
         -console 5002 \
         -consoleLog >> /var/log/kura-console.log 2>> /var/log/kura-console.log &amp;
 
-#Save the PID
-KURA_PID=$!
-echo $KURA_PID > /var/run/kura.pid
+    #Save the PID
+    KURA_PID=$!
+    echo "ESF Started (pid="$KURA_PID") ..." >> /var/log/kura-console.log
+    echo $KURA_PID > /var/run/kura.pid
+else
+    echo "Failed to start Kura. It is already running ..." >> /var/log/kura-console.log
+fi
+
 	</echo>
         
         <zip destfile="${project.build.directory}/kura-${build.name}-test_${project.version}.zip">
@@ -122,6 +144,12 @@ echo $KURA_PID > /var/run/kura.pid
                         prefix="data/snapshots/" />
 
             <zipfileset file="${project.build.directory}/kura-${build.name}-test_${project.version}/config.ini"
+                        prefix="kura-${build.name}-test_${project.version}/configuration/" />
+
+            <zipfileset file="${project.build.directory}/kura-${build.name}-test_${project.version}/jdk.dio.policy"
+                        prefix="kura-${build.name}-test_${project.version}/configuration/" />
+
+        		<zipfileset file="${project.build.directory}/kura-${build.name}-test_${project.version}/jdk.dio.properties"
                         prefix="kura-${build.name}-test_${project.version}/configuration/" />
 
             <zipfileset file="src/main/resources/${build.name}/kura_install.sh"

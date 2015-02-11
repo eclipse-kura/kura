@@ -19,7 +19,7 @@ import org.osgi.service.event.Event;
 public class NetworkStatusChangeEvent extends Event {
 	
     /** Topic of the NetworkStatusChangeEvent */
-    public static final String NETWORK_EVENT_STATUS_CHANGE_TOPIC = "com/eurotech/framework/net/admin/event/NETWORK_EVENT_STATUS_CHANGE_TOPIC";
+    public static final String NETWORK_EVENT_STATUS_CHANGE_TOPIC = "org/eclipse/kura/net/admin/event/NETWORK_EVENT_STATUS_CHANGE_TOPIC";
 
     InterfaceState m_interfaceState;
     

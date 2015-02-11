@@ -52,4 +52,16 @@ public class UsbBlockDevice extends AbstractUsbDevice {
 			return false;
 		return true;
 	}
+
+	@Override
+	public String toString() {
+		return "UsbBlockDevice [getDeviceNode()=" + getDeviceNode()
+				+ ", getVendorId()=" + getVendorId()
+				+ ", getProductId()=" + getProductId()
+				+ ", getManufacturerName()=" + getManufacturerName()
+				+ ", getProductName()=" + getProductName()
+				+ ", getUsbBusNumber()=" + getUsbBusNumber()
+				+ ", getUsbDevicePath()=" + getUsbDevicePath()
+				+ ", getUsbPort()=" + getUsbPort() + "]";
+	}
 }

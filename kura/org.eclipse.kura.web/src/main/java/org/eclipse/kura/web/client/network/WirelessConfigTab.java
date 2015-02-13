@@ -515,7 +515,9 @@ public class WirelessConfigTab extends LayoutContainer
         m_radioModeCombo.setTypeAhead(true);
         m_radioModeCombo.setTriggerAction(TriggerAction.ALL);
         for (GwtWifiRadioMode mode : GwtWifiRadioMode.values()) {
-        	m_radioModeCombo.add(MessageUtils.get(mode.name()));
+        	if (mode != GwtWifiRadioMode.netWifiRadioModeA) { // we don't support 802.11a yet
+        		m_radioModeCombo.add(MessageUtils.get(mode.name()));
+        	}
         }
         m_radioModeCombo.setSimpleValue(MessageUtils.get(GwtWifiRadioMode.netWifiRadioModeBGN.name()));
         m_radioModeCombo.addSelectionChangedListener( new SelectionChangedListener<SimpleComboValue<String>>() {			

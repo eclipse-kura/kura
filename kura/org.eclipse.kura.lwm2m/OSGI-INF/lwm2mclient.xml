@@ -19,9 +19,12 @@
     enabled="true" 
     immediate="true" 
     modified="updated" 
-    name="org.eclipse.kura.lwm2m.LwM2mClient">
-   <implementation class="org.eclipse.kura.lwm2m.LwM2mClient"/>
-   <property name="service.pid" value="org.eclipse.kura.lwm2m.LwM2mClient"/>
+    name="org.eclipse.kura.lwm2m.LwM2mClientKura">
+   <implementation class="org.eclipse.kura.lwm2m.LwM2mClientKura"/>
+   <property name="service.pid" value="org.eclipse.kura.lwm2m.LwM2mClientKura"/>
+   <service>
+      <provide interface="org.eclipse.kura.lwm2m.LwM2mClientKura"/>
+   </service>
    <reference name="SystemService" 
               policy="static"
               cardinality="1..1"
@@ -40,6 +43,18 @@
               bind="setNetworkService" 
               unbind="unsetNetworkService"
               interface="org.eclipse.kura.net.NetworkService"/>
+   <reference name="PositionService" 
+              policy="static" 
+              cardinality="1..1" 
+              bind="setPositionService" 
+              unbind="unsetPositionService"
+              interface="org.eclipse.kura.position.PositionService"/>
+   <reference name="ConfigurationService"
+       		  policy="static"
+       		  cardinality="1..1"
+       		  bind="setConfigurationService"
+       		  unbind="unsetConfigurationService"
+       		  interface="org.eclipse.kura.configuration.ConfigurationService"/>
    <reference name="EventAdmin"              
               cardinality="1..1" 
               policy="static" 

@@ -13,7 +13,7 @@
 
 -->
 <MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
-    <OCD id="org.eclipse.kura.lwm2m.LwM2mClient" 
+    <OCD id="org.eclipse.kura.lwm2m.LwM2mClientKura" 
          name="LwM2mClient" 
          description="The LwM2mClient exposes Kura as a LwM2m Device.">
 
@@ -58,7 +58,7 @@
 
     </OCD>
     
-    <Designate pid="org.eclipse.kura.lwm2m.LwM2mClient">
-        <Object ocdref="org.eclipse.kura.lwm2m.LwM2mClient"/>
+    <Designate pid="org.eclipse.kura.lwm2m.LwM2mClientKura">
+        <Object ocdref="org.eclipse.kura.lwm2m.LwM2mClientKura"/>
     </Designate>
 </MetaData>

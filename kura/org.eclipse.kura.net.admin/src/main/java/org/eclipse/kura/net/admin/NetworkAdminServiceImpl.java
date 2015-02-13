@@ -1213,6 +1213,12 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 		return ret;
 	}
 	
+	@Override
+	public boolean rollbackDefaultConfiguration() throws KuraException {
+		s_logger.debug("Recovering default configuration ...");
+		return LinuxNetworkUtil.recoverDefaultConfiguration();
+	}
+	
     @Override
     public void handleEvent(Event event) {
         s_logger.debug("handleEvent - topic: " + event.getTopic());

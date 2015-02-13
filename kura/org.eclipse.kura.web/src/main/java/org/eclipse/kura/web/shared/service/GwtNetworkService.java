@@ -50,4 +50,5 @@ public interface GwtNetworkService extends RemoteService
 	
 	public boolean verifyWifiCredentials(String interfaceName, GwtWifiConfig gwtWifiConfig) throws GwtKuraException;
 
+	public void rollbackDefaultConfiguration();
 }

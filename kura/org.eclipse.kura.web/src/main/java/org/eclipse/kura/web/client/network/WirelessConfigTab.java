@@ -283,6 +283,7 @@ public class WirelessConfigTab extends LayoutContainer
                             m_activeWifiConfig = m_selectNetIfConfig.getStationWifiConfig();
                         }
       	    	        m_tcpIpStatus = tcpIpStatus;
+      	    	        m_netInterfaceConfigTabs.adjustInterfaceTabs();
       	    	    }
   	    	    }
   	    	    refreshForm();
@@ -939,12 +940,20 @@ public class WirelessConfigTab extends LayoutContainer
 	}
     
     public GwtWifiWirelessMode getWirelessMode() {
+    	Log.warn("[+] WirelessConfigTab :: getWirelessMode()");
 		if (m_modeCombo != null) {
 		    return m_modeCombo.getValue().getMode();
-		} else if(m_selectNetIfConfig != null) {
+		} 
+		else if(m_activeWifiConfig != null) {
+			return GwtWifiWirelessMode.valueOf(m_activeWifiConfig.getWirelessMode());
+		} 
+		/*
+		else if(m_selectNetIfConfig != null) {
 			return GwtWifiWirelessMode.valueOf(m_selectNetIfConfig.getWirelessMode());
 		}
-
+		*/
+		
+		Log.warn("[- null] WirelessConfigTab :: getWirelessMode()");
     	return null;
     }
 	    

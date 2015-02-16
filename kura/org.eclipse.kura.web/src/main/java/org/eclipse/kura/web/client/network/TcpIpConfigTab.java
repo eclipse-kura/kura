@@ -668,7 +668,7 @@ public class TcpIpConfigTab extends LayoutContainer
         				m_ipAddressField.setEnabled(true);
         				m_subnetMaskField.setEnabled(true);
         				m_gatewayField.setEnabled(true);
-        				/*
+        				
         				if (GwtNetIfStatus.netIPv4StatusEnabledWAN.equals(statusValue)) {
         				    Log.debug("Enabling gateway field");
         				    m_gatewayField.setEnabled(true);
@@ -677,7 +677,7 @@ public class TcpIpConfigTab extends LayoutContainer
         					m_gatewayField.setValue("");
         					m_gatewayField.setEnabled(false);
         				}
-        				*/
+        				
         				m_renewDHCPButton.setEnabled(false);
         			}
         			m_dnsField.setEnabled(true);

@@ -28,7 +28,8 @@ public class LwM2mClientOptions
 	private static final String CLIENT_IP_ADDRESS = "client.ip-address";
 	private static final String CLIENT_IP_PORT    = "client.port";
 	private static final String SERVER_IP_ADDRESS = "server.ip-address";
-	private static final String SERVER_IP_PORT    = "server.port";	
+	private static final String SERVER_IP_PORT    = "server.port";
+	private static final String UPDATE_DELAY 	  = "update.delay";
 	
 	private Map<String,Object> m_properties;
 	private SystemService	   m_systemService;
@@ -110,6 +111,19 @@ public class LwM2mClientOptions
 				return serverIpPortOption.intValue();
 			}
 		}
-		throw new KuraException(KuraErrorCode.CONFIGURATION_ATTRIBUTE_UNDEFINED, SERVER_IP_PORT);
+		throw new KuraException(KuraErrorCode.CONFIGURATION_ATTRIBUTE_UNDEFINED, SERVER_IP_PORT);			
+	}
+	
+	public int getUpdateDelay()
+		throws KuraException{
+		if(m_properties != null){
+			try{
+				Integer updateDelay = (Integer)m_properties.get(UPDATE_DELAY);
+				return updateDelay;
+			}catch(Exception ex){
+				return 1;
+			}
+		}
+		throw new KuraException(KuraErrorCode.CONFIGURATION_ATTRIBUTE_UNDEFINED, UPDATE_DELAY);
 	}
 }

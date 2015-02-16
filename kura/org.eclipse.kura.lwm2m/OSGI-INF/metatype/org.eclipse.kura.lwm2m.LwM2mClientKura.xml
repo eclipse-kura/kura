@@ -55,6 +55,14 @@
             default="5683"
             description="">
         </AD>
+        
+        <AD id="update.period"
+            name="update.period"
+            type="Integer"
+            cardinality="0"
+            required="true"
+            default="1"
+            description="Registration update delay (minutes)"/>
 
     </OCD>
     

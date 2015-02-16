@@ -27,6 +27,12 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.TimeZone;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 import leshan.client.californium.LeshanClient;
 import leshan.client.coap.californium.CaliforniumBasedObject;
@@ -94,8 +100,12 @@ public class LwM2mClientKura implements ConfigurableComponent, EventHandler {
 	private EventAdmin m_eventAdmin;
 	private PositionService m_positionService;
 	private ConfigurationService m_configurationService;
+	
+	private ScheduledExecutorService updater;
+	private ScheduledFuture<?> updater_future;
 
 	public LwM2mClientKura() {
+		updater = Executors.newSingleThreadScheduledExecutor();
 	}
 
 	// ----------------------------------------------------------------
@@ -192,11 +202,32 @@ public class LwM2mClientKura implements ConfigurableComponent, EventHandler {
 
 		// Update properties and re-publish Birth certificate
 		m_options = new LwM2mClientOptions(properties, m_systemService, m_networkService);
+
+		deregister();
+		
+		try {
+			register();
+		} catch (Exception e) {
+			s_logger.error("Error during registration", e);
+		}
+		
 	}
 
 	protected void deactivate(ComponentContext componentContext) {
 		s_logger.info("deactivate...");
 
+		deregister();
+		
+		m_systemService = null;
+		m_systemAdminService = null;
+		m_networkService = null;
+		m_eventAdmin = null;
+	}
+
+	public void handleEvent(Event event) {
+	}
+
+	private void deregister(){
 		if (clientIdentifier != null) {
 			s_logger.info("\tDevice: Deregistering Client '" + clientIdentifier + "'");
 			final AbstractRegisteredLwM2mClientRequest deregisterRequest = new DeregisterRequest(clientIdentifier);
@@ -209,17 +240,9 @@ public class LwM2mClientKura implements ConfigurableComponent, EventHandler {
 				s_logger.error("\tDevice Deregistration Error: " + deregisterResponse.getErrorMessage());
 			}
 			m_lwM2mClient.stop();
-		}
-
-		m_systemService = null;
-		m_systemAdminService = null;
-		m_networkService = null;
-		m_eventAdmin = null;
+		}		
 	}
-
-	public void handleEvent(Event event) {
-	}
-
+	
 	private void register() throws KuraException, UnknownHostException, ComponentException {
 
 		CoapServer coapServer = new CoapServer();
@@ -257,7 +280,9 @@ public class LwM2mClientKura implements ConfigurableComponent, EventHandler {
 				+"Kura_"+m_systemService.getDeviceName()+"-"
 				+m_systemService.getSerialNumber();
 		
-		final RegisterRequest registerRequest = new RegisterRequest(endpointIdentifier, new HashMap<String, String>());
+		HashMap<String, String> client_props = new HashMap<String, String>();
+		client_props.put("lt", "120000");
+		final RegisterRequest registerRequest = new RegisterRequest(endpointIdentifier, client_props, 2000);
 		final OperationResponse operationResponse = m_lwM2mClient.send(registerRequest);
 
 		// Report registration response.
@@ -269,20 +294,32 @@ public class LwM2mClientKura implements ConfigurableComponent, EventHandler {
 			s_logger.error("\tDevice Registration Error: " + operationResponse.getErrorMessage());
 			s_logger.error("If you're having issues connecting to the LWM2M endpoint, try using the DTLS port instead");
 		}
-
-		final AbstractRegisteredLwM2mClientRequest updateRequest = new UpdateRequest(clientIdentifier, new HashMap<String, String>());
-		final OperationResponse updateResponse = m_lwM2mClient.send(updateRequest);
-
-		// Report update response.
-		s_logger.info("Device Update (Success? " + updateResponse.isSuccess() + ")");
-		if (updateResponse.isSuccess()) {
-			s_logger.info("\tDevice: Client Updated '" + updateResponse.getClientIdentifier() + "'");
-			clientIdentifier = operationResponse.getClientIdentifier();
-		} else {
-			s_logger.error("\tDevice Update Error: " + updateResponse.getErrorMessage());
+		
+		if(updater_future != null){
+			updater_future.cancel(true);
 		}
 		
-		//createComponentObjects();
+		updater_future = updater.scheduleWithFixedDelay(new Runnable(){
+
+			@Override
+			public void run() {
+				
+				final AbstractRegisteredLwM2mClientRequest updateRequest = new UpdateRequest(clientIdentifier, new HashMap<String, String>());
+				final OperationResponse updateResponse = m_lwM2mClient.send(updateRequest);
+
+				// Report update response.
+				s_logger.info("Device Update (Success? " + updateResponse.isSuccess() + ")");
+				if (updateResponse.isSuccess()) {
+					s_logger.info("\tDevice: Client Updated '" + updateResponse.getClientIdentifier() + "'");
+					clientIdentifier = operationResponse.getClientIdentifier();
+				} else {
+					s_logger.error("\tDevice Update Error: " + updateResponse.getErrorMessage());
+				}				
+				
+			}}, 
+			m_options.getUpdateDelay(), 
+			m_options.getUpdateDelay(), 
+			TimeUnit.MINUTES);
 		
 	}
 

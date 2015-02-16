@@ -5,21 +5,33 @@ import java.util.Map;
 import java.util.Set;
 
 import leshan.client.coap.californium.CaliforniumBasedObject;
+import leshan.client.resource.LwM2mClientObject;
 import leshan.client.resource.LwM2mClientObjectDefinition;
+import leshan.client.resource.LwM2mClientObjectInstance;
 import leshan.client.resource.LwM2mClientResourceDefinition;
 import leshan.client.resource.SingleResourceDefinition;
 import leshan.client.resource.bool.BooleanLwM2mExchange;
 import leshan.client.resource.bool.BooleanLwM2mResource;
 import leshan.client.resource.integer.IntegerLwM2mExchange;
 import leshan.client.resource.integer.IntegerLwM2mResource;
+import leshan.client.resource.opaque.OpaqueLwM2mResource;
 import leshan.client.resource.string.StringLwM2mExchange;
 import leshan.client.resource.string.StringLwM2mResource;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurationService;
+import org.eclipse.kura.lwm2m.resources.ActivateComponentExecutableResource;
+import org.eclipse.kura.lwm2m.resources.BooleanValueResource;
+import org.eclipse.kura.lwm2m.resources.DeactivateComponentExecutableResource;
+import org.eclipse.kura.lwm2m.resources.InstallComponentExecutableResource;
+import org.eclipse.kura.lwm2m.resources.IntegerValueResource;
+import org.eclipse.kura.lwm2m.resources.StringValueResource;
+import org.eclipse.kura.lwm2m.resources.UninstallComponentExecutableResource;
 
 public class LWM2mConfigurableComponentsFactory {
+	
+	private static final String SoftwarePackageUri="https://console-sandbox.everyware-cloud.com/updates/";
 	
 	private final static LWM2mConfigurableComponentsFactory _instance = new LWM2mConfigurableComponentsFactory();
 	private static ConfigurationService m_configurationService = null;
@@ -35,6 +47,8 @@ public class LWM2mConfigurableComponentsFactory {
 	public CaliforniumBasedObject[] createComponentObjects(){
 		ArrayList<CaliforniumBasedObject> list = new ArrayList<CaliforniumBasedObject>();
 		
+		list.add(getSoftwareManagementObjectFromComponent());
+		
 		Set<String> pids = m_configurationService.getConfigurableComponentPids();
 		int index = 20;
 		for(String s : pids){
@@ -48,6 +62,59 @@ public class LWM2mConfigurableComponentsFactory {
 		}
 		
 		return list.toArray(new CaliforniumBasedObject[0]);
+	}
+	
+	private CaliforniumBasedObject getSoftwareManagementObjectFromComponent(){
+		LwM2mClientResourceDefinition[] resources = new LwM2mClientResourceDefinition[13];
+				
+		resources[0] = new SingleResourceDefinition(0, new StringValueResource("PkgName", 0), true);
+		resources[1] = new SingleResourceDefinition(1, new StringValueResource("PkgVersion", 1), true);
+		resources[2] = new SingleResourceDefinition(2, new OpaqueLwM2mResource(), true);
+		resources[3] = new SingleResourceDefinition(3, new StringValueResource("Package URI", 3), true);
+		resources[4] = new SingleResourceDefinition(4, new InstallComponentExecutableResource("Install URL"), true);
+		resources[5] = new SingleResourceDefinition(5, new StringValueResource("Install Options", 5), false);
+		resources[6] = new SingleResourceDefinition(6, new UninstallComponentExecutableResource(), true);
+		resources[7] = new SingleResourceDefinition(7, new IntegerValueResource(1, 7), true);
+		resources[8] = new SingleResourceDefinition(8, new BooleanValueResource(false, 8), false);
+		resources[9] = new SingleResourceDefinition(9, new IntegerValueResource(0, 9), true);
+		resources[10] = new SingleResourceDefinition(10, new ActivateComponentExecutableResource(), true);
+		resources[11] = new SingleResourceDefinition(11, new DeactivateComponentExecutableResource(), true);
+		resources[12] = new SingleResourceDefinition(12, new BooleanValueResource(false, 12), true);
+		
+		final LwM2mClientObjectDefinition objectBundlesDef = new LwM2mClientObjectDefinition(9, false, false, resources);
+		CaliforniumBasedObject calObjectBundles = new CaliforniumBasedObject(objectBundlesDef);
+		LwM2mClientObject lwm2mObjectBundles = calObjectBundles.getLwM2mClientObject();
+
+		int comp_index = 0;
+		try {
+			for(ComponentConfiguration comp : m_configurationService.getComponentConfigurations()){
+				// create object instance
+				LwM2mClientObjectInstance instance = new LwM2mClientObjectInstance(comp_index++, lwm2mObjectBundles, objectBundlesDef);
+				
+				// add resources to the instance
+				instance.addResource(0, new StringValueResource(comp.getDefinition().getDescription(), 0));
+				instance.addResource(1, new StringValueResource(comp.getDefinition().getId(), 1));
+				instance.addResource(2, new OpaqueLwM2mResource());
+				instance.addResource(3, new StringValueResource(SoftwarePackageUri+comp.getPid()+".pkg", 3));
+				instance.addResource(4, new InstallComponentExecutableResource(SoftwarePackageUri+comp.getPid()+".pkg"));
+				instance.addResource(5, new StringValueResource(comp.getDefinition().getName(), 5));
+				instance.addResource(6, new UninstallComponentExecutableResource());
+				instance.addResource(7, new IntegerValueResource(1, 7));
+				instance.addResource(8, new BooleanValueResource(false, 8));
+				instance.addResource(9, new IntegerValueResource(0, 9));
+				instance.addResource(10, new ActivateComponentExecutableResource());
+				instance.addResource(11, new DeactivateComponentExecutableResource());
+				instance.addResource(12, new BooleanValueResource(false, 12));
+				
+				// add the object instance
+				calObjectBundles.onSuccessfulCreate(instance);
+			}
+		} catch (KuraException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return calObjectBundles;		
 	}
 
 	private CaliforniumBasedObject getCoapObjectFromComponent(ComponentConfiguration conf, int ObjectIndex){

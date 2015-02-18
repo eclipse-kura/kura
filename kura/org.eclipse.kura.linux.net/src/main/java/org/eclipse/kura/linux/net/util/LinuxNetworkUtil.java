@@ -756,33 +756,58 @@ public class LinuxNetworkUtil {
 	public static WifiMode getWifiMode(String ifaceName) throws KuraException {
 		WifiMode mode = WifiMode.UNKNOWN;
 		Process proc = null;
+		
 		try {
-			//start the process
-			proc = ProcessUtil.exec("iwconfig " + ifaceName);
-
-			//get the output
+			proc = ProcessUtil.exec("iw dev " + ifaceName + " info");
 			BufferedReader br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
 			String line = null;
-
 			while((line = br.readLine()) != null) {
-				int index = line.indexOf("Mode:");
+				int index = line.indexOf("type ");
 				if(index > -1) {
 					s_logger.debug("line: " + line);
-					StringTokenizer st = new StringTokenizer(line.substring(index));
-					String modeStr = st.nextToken().substring(5);
-					if("Managed".equals(modeStr)) {
-						mode = WifiMode.INFRA;
-					} else if ("Master".equals(modeStr)) {
+					String sMode = line.substring(index+"type ".length());
+					if("AP".equals(sMode)) {
 						mode = WifiMode.MASTER;
-					} else if ("Ad-Hoc".equals(modeStr)) {
-						mode = WifiMode.ADHOC;
+					} else if ("managed".equals(sMode)) {
+						mode = WifiMode.INFRA;
+					}
+					break;
+				}
+			}
+			
+			int status = 1;
+			try {
+				status = proc.waitFor();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			
+			if ((status != 0) || mode.equals(WifiMode.UNKNOWN)) {
+				ProcessUtil.destroy(proc);
+				proc = ProcessUtil.exec("iwconfig " + ifaceName);
+
+				//get the output
+				br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+				while((line = br.readLine()) != null) {
+					int index = line.indexOf("Mode:");
+					if(index > -1) {
+						s_logger.debug("line: " + line);
+						StringTokenizer st = new StringTokenizer(line.substring(index));
+						String modeStr = st.nextToken().substring(5);
+						if("Managed".equals(modeStr)) {
+							mode = WifiMode.INFRA;
+						} else if ("Master".equals(modeStr)) {
+							mode = WifiMode.MASTER;
+						} else if ("Ad-Hoc".equals(modeStr)) {
+							mode = WifiMode.ADHOC;
+						}
+						break;
 					}
 				}
 			}
 		} catch (IOException e) {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
-		}
-		finally {
+		} finally {
 			ProcessUtil.destroy(proc);
 		}
 		

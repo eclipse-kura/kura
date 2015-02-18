@@ -21,7 +21,7 @@ public class InterfaceState {
 	
 	private String m_name;
     private boolean m_up;
-    private boolean m_link;
+    protected boolean m_link;
     private IPAddress m_ipAddress;
 
     public InterfaceState(String interfaceName, boolean up, boolean link, IPAddress ipAddress) {

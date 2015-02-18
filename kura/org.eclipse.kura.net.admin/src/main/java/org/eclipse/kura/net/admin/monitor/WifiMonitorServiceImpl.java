@@ -170,8 +170,9 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
         componentContext.getBundleContext().registerService(EventHandler.class.getName(), this, d);
         m_listeners = new ArrayList<WifiClientMonitorListener>();
         try {
-            m_newNetConfiguration = m_netConfigService.getNetworkConfiguration();
-            initializeMonitoredInterfaces(m_newNetConfiguration);
+        	m_currentNetworkConfiguration = m_netConfigService.getNetworkConfiguration();
+            initializeMonitoredInterfaces(m_currentNetworkConfiguration);
+        	
         } catch (KuraException e) {
             s_logger.error("Could not update list of interfaces", e);
         }        
@@ -206,7 +207,7 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
                 // Check to see if the configuration has changed
             	//s_logger.debug("m_newNetConfiguration: " + m_newNetConfiguration);
             	//s_logger.debug("m_currentNetworkConfiguration: " + m_currentNetworkConfiguration);
-            	
+             	
                 if(m_newNetConfiguration != null && !m_newNetConfiguration.equals(m_currentNetworkConfiguration)) {
                     s_logger.debug("monitor() :: Found a new network configuration");
                     List<String> interfacesToReconfigure = new ArrayList<String>();
@@ -284,8 +285,11 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
         	            			}
         	            		}
                         	}
+                        } else if (WifiMode.MASTER.equals(wifiConfig.getMode())) {
+                        	if(!wifiState.isLinkUp()) {
+                        		enableInterface(wifiInterfaceConfig);
+                        	}
                         }
-                        // if MASTER consider the link as 'up' - TODO: check that hostapd is running
                     } else {
                         // State is currently down
                     	try {
@@ -849,7 +853,9 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
         Map<String, InterfaceState> statuses = new HashMap<String, InterfaceState>();
         
         for(String interfaceName : interfaceList) {
-            statuses.put(interfaceName, new InterfaceState(interfaceName));
+        	WifiInterfaceConfigImpl wifiInterfaceConfig = (WifiInterfaceConfigImpl) m_currentNetworkConfiguration.getNetInterfaceConfig(interfaceName);;
+        	WifiConfig wifiConfig = getWifiConfig(wifiInterfaceConfig);
+            statuses.put(interfaceName, new WifiInterfaceState(interfaceName, wifiConfig.getMode()));
         }
         
         return statuses;

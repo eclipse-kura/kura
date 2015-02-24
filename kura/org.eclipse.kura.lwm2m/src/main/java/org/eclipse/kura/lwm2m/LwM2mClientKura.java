@@ -65,6 +65,7 @@ import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.configuration.ConfigurationService;
+import org.eclipse.kura.configuration.metatype.AD;
 import org.eclipse.kura.lwm2m.component.factory.LWM2mConfigurableComponentsFactory;
 import org.eclipse.kura.lwm2m.objects.LwM2mPositionObjectDefinition;
 import org.eclipse.kura.lwm2m.objects.LwM2mServerObjectDefinition;
@@ -100,7 +101,7 @@ public class LwM2mClientKura implements ConfigurableComponent, EventHandler {
 	private EventAdmin m_eventAdmin;
 	private PositionService m_positionService;
 	private ConfigurationService m_configurationService;
-	
+
 	private ScheduledExecutorService updater;
 	private ScheduledFuture<?> updater_future;
 
@@ -114,22 +115,22 @@ public class LwM2mClientKura implements ConfigurableComponent, EventHandler {
 	//
 	// ----------------------------------------------------------------
 
-	public void setConfigurationService(ConfigurationService configurationService){
+	public void setConfigurationService(ConfigurationService configurationService) {
 		this.m_configurationService = configurationService;
 	}
-	
-	public void unsetConfigurationService(ConfigurationService configurationService){
+
+	public void unsetConfigurationService(ConfigurationService configurationService) {
 		this.m_configurationService = null;
 	}
-	
-	public void setPositionService(PositionService positionService){
+
+	public void setPositionService(PositionService positionService) {
 		this.m_positionService = positionService;
 	}
-	
-	public void unsetPositionService(PositionService positionService){
+
+	public void unsetPositionService(PositionService positionService) {
 		this.m_positionService = null;
 	}
-	
+
 	public void setSystemAdminService(SystemAdminService systemAdminService) {
 		this.m_systemAdminService = systemAdminService;
 	}
@@ -195,6 +196,28 @@ public class LwM2mClientKura implements ConfigurableComponent, EventHandler {
 		} catch (Exception e) {
 			s_logger.error("Error during registration", e);
 		}
+
+		// prova();
+	}
+
+	private void prova() {
+		try {
+			for (ComponentConfiguration c : m_configurationService.getComponentConfigurations()) {
+				for (AD ad : c.getDefinition().getAD()) {
+					s_logger.info("********************************");
+					s_logger.info("Component: {}", c.getDefinition().getName());
+					s_logger.info("           id:{}", ad.getId());
+					s_logger.info("         name:{}", ad.getName());
+					s_logger.info("  cardinality:{}", ad.getCardinality());
+					s_logger.info("         type:{}", ad.getType());
+					s_logger.info("      default:{}", ad.getDefault());
+					s_logger.info("  description:{}", ad.getDescription());
+				}
+			}
+		} catch (KuraException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	public void updated(Map<String, Object> properties) {
@@ -204,20 +227,20 @@ public class LwM2mClientKura implements ConfigurableComponent, EventHandler {
 		m_options = new LwM2mClientOptions(properties, m_systemService, m_networkService);
 
 		deregister();
-		
+
 		try {
 			register();
 		} catch (Exception e) {
 			s_logger.error("Error during registration", e);
 		}
-		
+
 	}
 
 	protected void deactivate(ComponentContext componentContext) {
 		s_logger.info("deactivate...");
 
 		deregister();
-		
+
 		m_systemService = null;
 		m_systemAdminService = null;
 		m_networkService = null;
@@ -227,12 +250,12 @@ public class LwM2mClientKura implements ConfigurableComponent, EventHandler {
 	public void handleEvent(Event event) {
 	}
 
-	private void deregister(){
+	private void deregister() {
 		if (clientIdentifier != null) {
 			s_logger.info("\tDevice: Deregistering Client '" + clientIdentifier + "'");
 			final AbstractRegisteredLwM2mClientRequest deregisterRequest = new DeregisterRequest(clientIdentifier);
 			final OperationResponse deregisterResponse = m_lwM2mClient.send(deregisterRequest);
-			
+
 			if (deregisterResponse.isSuccess()) {
 				s_logger.info("\tDevice: Client Location Deregistered'" + deregisterResponse.getClientIdentifier() + "'");
 				clientIdentifier = null;
@@ -240,49 +263,46 @@ public class LwM2mClientKura implements ConfigurableComponent, EventHandler {
 				s_logger.error("\tDevice Deregistration Error: " + deregisterResponse.getErrorMessage());
 			}
 			m_lwM2mClient.stop();
-		}		
+		}
 	}
-	
+
 	private void register() throws KuraException, UnknownHostException, ComponentException {
 
 		CoapServer coapServer = new CoapServer();
 		LwM2mClientObjectDefinition deviceObject = createDeviceDefinition();
 
 		s_logger.info("Before creating bundles...");
-		CaliforniumBasedObject calObjectBundles = createBundles();
+		// CaliforniumBasedObject calObjectBundles = createBundles();
 		s_logger.info("After creating bundles...");
-		coapServer.add(calObjectBundles);
-		LWM2mConfigurableComponentsFactory.getDefault().setConfigurationService(m_configurationService);		
+		// coapServer.add(calObjectBundles);
+		LWM2mConfigurableComponentsFactory.getDefault().setConfigurationService(m_configurationService);
 		CaliforniumBasedObject[] comps = LWM2mConfigurableComponentsFactory.getDefault().createComponentObjects();
 		coapServer.add(comps);
+
 		s_logger.info("After coapServer.add...");
 
 		// Connect to the server provided
-		s_logger.info("Connecting from: " 
-				+ m_options.getClientIpAddress() + ":" + m_options.getClientIpPort() + " to " 
-				+ m_options.getServerIpAddress() + ":" + m_options.getServerIpPort());
+		s_logger.info("Connecting from: " + m_options.getClientIpAddress() + ":" + m_options.getClientIpPort() + " to " + m_options.getServerIpAddress() + ":"
+				+ m_options.getServerIpPort());
 		final InetSocketAddress clientAddress = new InetSocketAddress(m_options.getClientIpAddress(), m_options.getClientIpPort());
 		final InetSocketAddress serverAddress = new InetSocketAddress(m_options.getServerIpAddress(), m_options.getServerIpPort());
 
-		m_lwM2mClient = new LeshanClient(clientAddress, serverAddress, coapServer, 
-				new LwM2mServerObjectDefinition(),
-				deviceObject,
+		m_lwM2mClient = new LeshanClient(clientAddress, serverAddress, coapServer, new LwM2mServerObjectDefinition(), deviceObject,
 				new LwM2mPositionObjectDefinition(m_positionService));
 
 		m_lwM2mClient.start();
 
 		// Register to the server provided
-		//UUID
-		//final String endpointIdentifier = "urn:uuuid:"+UUID.randomUUID().toString();
-		//<OUI>-<Product Class>-<Serial Number>
-		final String endpointIdentifier = "urn:dev:ops:"
-				+ m_systemService.getPrimaryMacAddress()+"-"
-				+"Kura_"+m_systemService.getDeviceName()+"-"
-				+m_systemService.getSerialNumber();
-		
+		// UUID
+		// final String endpointIdentifier =
+		// "urn:uuuid:"+UUID.randomUUID().toString();
+		// <OUI>-<Product Class>-<Serial Number>
+		final String endpointIdentifier = "urn:dev:ops:" + m_systemService.getPrimaryMacAddress() + "-" + "Kura_" + m_systemService.getDeviceName() + "-"
+				+ m_systemService.getSerialNumber();
+
 		HashMap<String, String> client_props = new HashMap<String, String>();
 		client_props.put("lt", "120000");
-		final RegisterRequest registerRequest = new RegisterRequest(endpointIdentifier, client_props, 2000);
+		final RegisterRequest registerRequest = new RegisterRequest(endpointIdentifier, client_props, 5000);
 		final OperationResponse operationResponse = m_lwM2mClient.send(registerRequest);
 
 		// Report registration response.
@@ -294,33 +314,38 @@ public class LwM2mClientKura implements ConfigurableComponent, EventHandler {
 			s_logger.error("\tDevice Registration Error: " + operationResponse.getErrorMessage());
 			s_logger.error("If you're having issues connecting to the LWM2M endpoint, try using the DTLS port instead");
 		}
-		
-		if(updater_future != null){
+
+		if (updater_future != null) {
 			updater_future.cancel(true);
 		}
-		
-		updater_future = updater.scheduleWithFixedDelay(new Runnable(){
+
+		updater_future = updater.scheduleWithFixedDelay(new Runnable() {
 
 			@Override
 			public void run() {
-				
-				final AbstractRegisteredLwM2mClientRequest updateRequest = new UpdateRequest(clientIdentifier, new HashMap<String, String>());
-				final OperationResponse updateResponse = m_lwM2mClient.send(updateRequest);
 
-				// Report update response.
-				s_logger.info("Device Update (Success? " + updateResponse.isSuccess() + ")");
-				if (updateResponse.isSuccess()) {
-					s_logger.info("\tDevice: Client Updated '" + updateResponse.getClientIdentifier() + "'");
-					clientIdentifier = operationResponse.getClientIdentifier();
-				} else {
-					s_logger.error("\tDevice Update Error: " + updateResponse.getErrorMessage());
-				}				
-				
-			}}, 
-			m_options.getUpdateDelay(), 
-			m_options.getUpdateDelay(), 
-			TimeUnit.MINUTES);
-		
+				try {
+					final AbstractRegisteredLwM2mClientRequest updateRequest = new UpdateRequest(clientIdentifier, 5000, new HashMap<String, String>());
+					final OperationResponse updateResponse = m_lwM2mClient.send(updateRequest);
+
+					// Report update response.
+					s_logger.info("Device Update (Success? " + updateResponse.isSuccess() + ")");
+					if (updateResponse.isSuccess()) {
+						s_logger.info("\tDevice: Client Updated '" + updateResponse.getClientIdentifier() + "'");
+						clientIdentifier = operationResponse.getClientIdentifier();
+					} else {
+						s_logger.error("\tDevice Update Error: " + updateResponse.getErrorMessage());
+						deregister();
+
+						register();
+					}
+				} catch (Exception ex) {
+					System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+				}
+
+			}
+		}, m_options.getUpdateDelay(), m_options.getUpdateDelay(), TimeUnit.MINUTES);
+
 	}
 
 	private LwM2mClientObjectDefinition createDeviceDefinition() {
@@ -342,29 +367,19 @@ public class LwM2mClientKura implements ConfigurableComponent, EventHandler {
 		final StringValueResource timezoneResource = new StringValueResource(TimeZone.getDefault().getID(), 15);
 		final StringValueResource bindingsResource = new StringValueResource("U", 16);
 
-		final LwM2mClientObjectDefinition objectDevice = new LwM2mClientObjectDefinition(
-				3, true, true, 
-				new SingleResourceDefinition(0, manufacturerResource, true), 
-				new SingleResourceDefinition(1, modelResource, true), 
-				new SingleResourceDefinition(2, serialNumberResource, true),
-				new SingleResourceDefinition(3, firmwareResource, true), 
-				new SingleResourceDefinition(4, rebootResource, true), 
-				new SingleResourceDefinition(5,	factoryResetResource, true), 
-				new SingleResourceDefinition(6, powerAvailablePowerResource, true), 
-				new SingleResourceDefinition(7,	powerSourceVoltageResource, true), 
-				new SingleResourceDefinition(8, powerSourceCurrentResource, true), 
-				new SingleResourceDefinition(9,	batteryLevelResource, true), 
-				new SingleResourceDefinition(10, memoryFreeResource, true), 
-				new SingleResourceDefinition(11, errorCodeResource, true), 
-				new SingleResourceDefinition(12, new ExecutableResource(12), true), 
-				new SingleResourceDefinition(13, currentTimeResource, true), 
-				new SingleResourceDefinition(14, utcOffsetResource, true), 
-				new SingleResourceDefinition(15, timezoneResource, true), 
-				new SingleResourceDefinition(16, bindingsResource, true));
+		final LwM2mClientObjectDefinition objectDevice = new LwM2mClientObjectDefinition(3, true, true, new SingleResourceDefinition(0, manufacturerResource,
+				true), new SingleResourceDefinition(1, modelResource, true), new SingleResourceDefinition(2, serialNumberResource, true),
+				new SingleResourceDefinition(3, firmwareResource, true), new SingleResourceDefinition(4, rebootResource, true), new SingleResourceDefinition(5,
+						factoryResetResource, true), new SingleResourceDefinition(6, powerAvailablePowerResource, true), new SingleResourceDefinition(7,
+						powerSourceVoltageResource, true), new SingleResourceDefinition(8, powerSourceCurrentResource, true), new SingleResourceDefinition(9,
+						batteryLevelResource, true), new SingleResourceDefinition(10, memoryFreeResource, true), new SingleResourceDefinition(11,
+						errorCodeResource, true), new SingleResourceDefinition(12, new ExecutableResource(12), true), new SingleResourceDefinition(13,
+						currentTimeResource, true), new SingleResourceDefinition(14, utcOffsetResource, true), new SingleResourceDefinition(15,
+						timezoneResource, true), new SingleResourceDefinition(16, bindingsResource, true));
 
 		return objectDevice;
 	}
-		
+
 	private CaliforniumBasedObject createBundles() {
 		LwM2mClientResourceDefinition[] bundleObjectsResourceDefs = new LwM2mClientResourceDefinition[3];
 
@@ -527,7 +542,7 @@ public class LwM2mClientKura implements ConfigurableComponent, EventHandler {
 		}
 
 	}
-	
+
 	public class BooleanValueResource extends BooleanLwM2mResource {
 		private Boolean value;
 		private final int resourceId;
@@ -536,7 +551,7 @@ public class LwM2mClientKura implements ConfigurableComponent, EventHandler {
 			this.value = value;
 			this.resourceId = resourceId;
 		}
-		
+
 		public void setValue(final Boolean newValue) {
 			value = newValue;
 			notifyResourceUpdated();
@@ -559,6 +574,6 @@ public class LwM2mClientKura implements ConfigurableComponent, EventHandler {
 			System.out.println("\tDevice: Reading on BooleanResource " + resourceId);
 			exchange.respondContent(value);
 		}
-		
+
 	}
 }

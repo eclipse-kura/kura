@@ -8,7 +8,7 @@ public class StringValueResource extends StringLwM2mResource {
 	private final int resourceId;
 
 	public StringValueResource(final String initialValue, final int resourceId) {
-		value = initialValue;
+		value = initialValue == null ? "null" : initialValue;
 		this.resourceId = resourceId;
 	}
 

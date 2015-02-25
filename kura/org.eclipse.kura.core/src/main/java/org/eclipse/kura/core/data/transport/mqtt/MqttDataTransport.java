@@ -263,9 +263,16 @@ public class MqttDataTransport implements DataTransportService, MqttCallback,
 			s_logger.info("#  Connected!");
 			s_logger.info("# ------------------------------------------------------------");
 		} catch (MqttException e) {
-			s_logger.warn(
-					"xxxxxxxxxx  Connect failed. Forcing disconnect. xxxxxxxxxxxxxxxx ",
-					e.getCause().getMessage());
+			try {
+				s_logger.warn("xxxxx  Connect failed. Forcing disconnect. xxxxx {}", e.getMessage());
+				if (e.getCause() != null) {
+					s_logger.warn(
+							"xxxxxxxxxx  Connect failed. Forcing disconnect. Exception caused by: {}",
+							e.getCause().getMessage());
+				}
+			} catch (Exception e1) {
+				e1.printStackTrace();
+			}
 			try {
 				// FIXME: Close on CONNACK timeout.
 				// This exposes a Paho bug!

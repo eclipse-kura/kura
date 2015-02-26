@@ -26,6 +26,7 @@ import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.net.NetworkConfiguration;
 import org.eclipse.kura.core.net.NetworkConfigurationVisitor;
 import org.eclipse.kura.core.net.WifiInterfaceAddressConfigImpl;
+import org.eclipse.kura.core.util.IOUtil;
 import org.eclipse.kura.core.util.ProcessUtil;
 import org.eclipse.kura.linux.net.wifi.Hostapd;
 import org.eclipse.kura.net.NetConfig;
@@ -143,10 +144,9 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
 		if (wifiConfig.getSecurity() == WifiSecurity.SECURITY_NONE) {
 			
 			File outputFile = new File(HOSTAPD_TMP_CONFIG_FILE);
-			InputStream is = getClass().getResourceAsStream("/src/main/resources/wifi/hostapd.conf_no_security");
 			
-			//relace the necessary components
-			String fileAsString = readInputStreamAsString(is);
+			//replace the necessary components
+			String fileAsString = IOUtil.readResource("/src/main/resources/wifi/hostapd.conf_no_security");
 			if(interfaceName != null) {
 				fileAsString = fileAsString.replaceFirst("KURA_INTERFACE", interfaceName);
 			} else {
@@ -222,10 +222,9 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
 			return;
 		} else if(wifiConfig.getSecurity() == WifiSecurity.SECURITY_WEP) {
 			File outputFile = new File(HOSTAPD_TMP_CONFIG_FILE);
-			InputStream is = this.getClass().getResourceAsStream("/src/main/resources/wifi/hostapd.conf_wep");
-			
-			//relace the necessary components
-			String fileAsString = readInputStreamAsString(is);
+
+			//replace the necessary components
+			String fileAsString = IOUtil.readResource("/src/main/resources/wifi/hostapd.conf_wep");
 			if(interfaceName != null) {
 				fileAsString = fileAsString.replaceFirst("KURA_INTERFACE", interfaceName);
 			} else {
@@ -359,15 +358,16 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
 
 		    File tmpOutputFile = new File(HOSTAPD_TMP_CONFIG_FILE);
 			
-			InputStream is = null;
+			String resName = null;
 			if (wifiConfig.getSecurity() == WifiSecurity.SECURITY_WPA) {
-				is = this.getClass().getResourceAsStream("/src/main/resources/wifi/hostapd.conf_master_wpa_psk");
+				resName = "/src/main/resources/wifi/hostapd.conf_master_wpa_psk";
 			} else if (wifiConfig.getSecurity() == WifiSecurity.SECURITY_WPA2) {
-				is = this.getClass().getResourceAsStream("/src/main/resources/wifi/hostapd.conf_master_wpa2_psk");
+				resName = "/src/main/resources/wifi/hostapd.conf_master_wpa2_psk";
 			}
 			
 			//replace the necessary components
-			String fileAsString = readInputStreamAsString(is);
+			String fileAsString = IOUtil.readResource(resName);
+			
 			if(interfaceName != null) {
 				fileAsString = fileAsString.replaceFirst("KURA_INTERFACE", interfaceName);
 			} else {
@@ -457,37 +457,33 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
 		}
 	}
 	
-	/*
-	 * This method reads supplied input stream into a string
-	 */
-	private static String readInputStreamAsString(InputStream is) throws IOException {
-		BufferedInputStream bis = new BufferedInputStream(is);
-		ByteArrayOutputStream buf = new ByteArrayOutputStream();
-		int result = bis.read();
-		while(result != -1) {
-			byte b = (byte)result;
-			buf.write(b);
-			result = bis.read();
-		}
-		return buf.toString();
-	}
 	
 	/*
 	 * This method copies supplied String to a file
 	 */
 	private void copyFile(String data, File destination) throws KuraException {
+		FileOutputStream fos = null;
+		PrintWriter pw = null;
 		try {
-			FileOutputStream fos = new FileOutputStream(destination);
-			PrintWriter pw = new PrintWriter(fos);
+			fos = new FileOutputStream(destination);
+			pw = new PrintWriter(fos);
 			pw.write(data);
 			pw.flush();
 			fos.getFD().sync();
-			pw.close();
-			fos.close();
 			
 			setPermissions(destination.toString());
 		} catch (IOException e) {
 			throw KuraException.internalError(e);
+		}
+		finally{
+			if(fos != null){
+				try{
+					fos.close();
+				}catch(IOException ex){
+					s_logger.error("I/O Exception while closing BufferedReader!");
+				}
+			}	
+			if(pw != null) pw.close();
 		}
 	}
 	

@@ -12,6 +12,7 @@
 package org.eclipse.kura.core.cloud;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Map;
 
@@ -207,10 +208,11 @@ public class CloudServiceOptions
 	private String getHostname(String command) {
 		StringBuffer response = new StringBuffer(); 
 		Process proc = null;
+		BufferedReader br = null;
 		try {
 			proc = ProcessUtil.exec(command);
 			proc.waitFor();
-			BufferedReader br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+			br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
 			String line = null;
 			String newLine = "";
 			while ((line = br.readLine()) != null) {
@@ -222,6 +224,13 @@ public class CloudServiceOptions
 			s_logger.error("failed to run commands " + command, e);
 		}
 		finally {
+			if(br != null){
+				try{
+					br.close();
+				}catch(IOException ex){
+					s_logger.error("I/O Exception while closing BufferedReader!");
+				}
+			}
 			ProcessUtil.destroy(proc);
 		}
 		return response.toString();

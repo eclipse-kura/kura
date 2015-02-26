@@ -13,6 +13,7 @@ package org.eclipse.kura.linux.net;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -22,9 +23,12 @@ import org.eclipse.kura.KuraException;
 import org.eclipse.kura.net.ConnectionInfo;
 import org.eclipse.kura.net.IP4Address;
 import org.eclipse.kura.net.IPAddress;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ConnectionInfoImpl implements ConnectionInfo 
 {	
+	private static final Logger s_logger = LoggerFactory.getLogger(ConnectionInfo.class);
 	/**
 	 * The interface name associated with the connection information
 	 */
@@ -46,13 +50,24 @@ public class ConnectionInfoImpl implements ConnectionInfo
 		m_ifaceName = ifaceName;
 		m_props = new Properties();
 
+		FileInputStream fis = null;
 		try {
 			File coninfoFile = new File(formConinfoFileName(ifaceName));
 			if (coninfoFile.exists()) {
-				m_props.load(new FileInputStream(coninfoFile));
+				fis = new FileInputStream(coninfoFile);
+				m_props.load(fis);
 			}
 		} catch (Exception e) {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+		}
+		finally{
+			if(fis != null){
+				try{
+					fis.close();
+				}catch(IOException ex){
+					s_logger.error("I/O Exception while closing FileInputStream!");
+				}
+			}
 		}
 	}
 	

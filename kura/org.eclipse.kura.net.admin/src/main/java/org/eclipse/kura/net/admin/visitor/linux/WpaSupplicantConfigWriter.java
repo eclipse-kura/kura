@@ -21,11 +21,13 @@ import java.io.PrintWriter;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.net.NetworkConfiguration;
 import org.eclipse.kura.core.net.NetworkConfigurationVisitor;
 import org.eclipse.kura.core.net.WifiInterfaceAddressConfigImpl;
+import org.eclipse.kura.core.util.IOUtil;
 import org.eclipse.kura.core.util.ProcessUtil;
 import org.eclipse.kura.linux.net.util.KuraConstants;
 import org.eclipse.kura.net.NetConfig;
@@ -92,9 +94,8 @@ public class WpaSupplicantConfigWriter implements NetworkConfigurationVisitor {
 	
 	public void generateTempWpaSupplicantConf() throws KuraException {
 		
-		InputStream is = getClass().getResourceAsStream("/src/main/resources/wifi/wpasupplicant.conf");;
 		try {
-			String fileAsString = readInputStreamAsString(is);
+			String fileAsString = IOUtil.readResource("/src/main/resources/wifi/wpasupplicant.conf");
 			File outputFile = new File(TMP_WPA_CONFIG_FILE);
 			copyFile(fileAsString, outputFile);
 		} catch (Exception e) {
@@ -146,14 +147,14 @@ public class WpaSupplicantConfigWriter implements NetworkConfigurationVisitor {
         					try {
     							KuranetConfig.setProperty(key.toString(), Boolean.toString(infraConfig.pingAccessPoint()));
     						} catch (IOException e) {
-    							e.printStackTrace();
+    							s_logger.warn("Error setting KuranetConfig property", e);
     						}
         					
         					key = new StringBuilder().append("net.interface.").append(interfaceName).append(".config.wifi.infra.ignoreSSID");
         					try {
     							KuranetConfig.setProperty(key.toString(), Boolean.toString(infraConfig.ignoreSSID()));
     						} catch (IOException e) {
-    							e.printStackTrace();
+    							s_logger.warn("Error setting KuranetConfig property", e);
     						}
                             wpaSupplicantConfig = infraConfig;
                         } else {
@@ -209,15 +210,12 @@ public class WpaSupplicantConfigWriter implements NetworkConfigurationVisitor {
 		if (wifiConfig.getSecurity() == WifiSecurity.SECURITY_WEP) {
 			File outputFile = new File(configFile);
 			
-			InputStream is = null;
 			String fileAsString = null;
 			
 			if (wifiConfig.getMode() == WifiMode.INFRA) {
-				is = getClass().getResourceAsStream("/src/main/resources/wifi/wpasupplicant.conf_wep");
-				fileAsString = readInputStreamAsString(is);
+				fileAsString = IOUtil.readResource("/src/main/resources/wifi/wpasupplicant.conf_wep");
 			} else if (wifiConfig.getMode() == WifiMode.ADHOC) { 
-				is = getClass().getResourceAsStream("/src/main/resources/wifi/wpasupplicant.conf_adhoc_wep");
-				fileAsString = readInputStreamAsString(is);
+				fileAsString = IOUtil.readResource("/src/main/resources/wifi/wpasupplicant.conf_adhoc_wep");
 				fileAsString = fileAsString.replaceFirst("KURA_FREQUENCY", Integer.toString(
 						WpaSupplicantUtil.convChannelToFrequency(wifiConfig.getChannels()[0])));
 			} else {
@@ -229,8 +227,7 @@ public class WpaSupplicantConfigWriter implements NetworkConfigurationVisitor {
 				fileAsString = fileAsString.replaceFirst("ctrl_interface_group=wheel", "#ctrl_interface_group=wheel");
 			}
 			// Replace the necessary components
-			fileAsString = fileAsString.replaceFirst("KURA_MODE",
-					Integer.toString(getSupplicantMode(wifiConfig.getMode())));
+			fileAsString = fileAsString.replaceFirst("KURA_MODE", Integer.toString(getSupplicantMode(wifiConfig.getMode())));
 			if (wifiConfig.getSSID() != null) {
 				fileAsString = fileAsString.replaceFirst("KURA_ESSID", wifiConfig.getSSID());
 			} else {
@@ -243,8 +240,7 @@ public class WpaSupplicantConfigWriter implements NetworkConfigurationVisitor {
 					try {
 						Long.parseLong(passKey, 16);
 					} catch (Exception e) {
-						throw KuraException
-								.internalError("the WEP key (passwd) must be all HEX characters (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, a, b, c, d, e, and f");
+						throw KuraException.internalError("the WEP key (passwd) must be all HEX characters (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, a, b, c, d, e, and f");
 					}
 
 					// since we're here - save the password
@@ -257,8 +253,7 @@ public class WpaSupplicantConfigWriter implements NetworkConfigurationVisitor {
 						Long.parseLong(part1, 16);
 						Long.parseLong(part2, 16);
 					} catch (Exception e) {
-						throw KuraException
-								.internalError("the WEP key (passwd) must be all HEX characters (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, a, b, c, d, e, and f");
+						throw KuraException.internalError("the WEP key (passwd) must be all HEX characters (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, a, b, c, d, e, and f");
 					}
 
 					// since we're here - save the password
@@ -272,8 +267,7 @@ public class WpaSupplicantConfigWriter implements NetworkConfigurationVisitor {
 						Long.parseLong(part2, 16);
 						Long.parseLong(part3, 16);
 					} catch (Exception e) {
-						throw KuraException
-								.internalError("the WEP key (passwd) must be all HEX characters (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, a, b, c, d, e, and f");
+						throw KuraException.internalError("the WEP key (passwd) must be all HEX characters (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, a, b, c, d, e, and f");
 					}
 
 					// since we're here - save the password
@@ -288,8 +282,7 @@ public class WpaSupplicantConfigWriter implements NetworkConfigurationVisitor {
 					// since we're here - save the password
 					fileAsString = fileAsString.replaceFirst("KURA_WEP_KEY", passKey);
 				} else {
-					throw KuraException
-							.internalError("the WEP key (passwd) must be 10, 26, or 32 HEX characters in length");
+					throw KuraException.internalError("the WEP key (passwd) must be 10, 26, or 32 HEX characters in length");
 				}
 			} else {
 				throw KuraException.internalError("the passwd can not be null");
@@ -312,25 +305,17 @@ public class WpaSupplicantConfigWriter implements NetworkConfigurationVisitor {
 				|| (wifiConfig.getSecurity() == WifiSecurity.SECURITY_WPA2)) {
 
 			File outputFile = new File(configFile);
-			InputStream is = null;
 			String fileAsString = null;
 
 			if (wifiConfig.getMode() == WifiMode.INFRA) {
-				is = this.getClass().getResourceAsStream(
-						"/src/main/resources/wifi/wpasupplicant.conf_wpa");
-				fileAsString = readInputStreamAsString(is);
+				fileAsString = IOUtil.readResource("/src/main/resources/wifi/wpasupplicant.conf_wpa");
 			} else if (wifiConfig.getMode() == WifiMode.ADHOC) {
-				is = this.getClass().getResourceAsStream(
-						"/src/main/resources/wifi/wpasupplicant.conf_adhoc_wpa");
-				fileAsString = readInputStreamAsString(is);
-				fileAsString = fileAsString
-						.replaceFirst("KURA_FREQUENCY", Integer.toString(
+				fileAsString = IOUtil.readResource("/src/main/resources/wifi/wpasupplicant.conf_adhoc_wpa");
+				fileAsString = fileAsString.replaceFirst("KURA_FREQUENCY", Integer.toString(
 								WpaSupplicantUtil.convChannelToFrequency(wifiConfig.getChannels()[0])));
-				fileAsString = fileAsString
-						.replaceFirst("KURA_PAIRWISE", "NONE");
+				fileAsString = fileAsString.replaceFirst("KURA_PAIRWISE", "NONE");
 			} else {
-				throw KuraException
-						.internalError("Failed to generate wpa_supplicant.conf -- Invalid mode: " + wifiConfig.getMode());
+				throw KuraException.internalError("Failed to generate wpa_supplicant.conf -- Invalid mode: " + wifiConfig.getMode());
 			}
 			
 			// Remove the 'wheel' group assignment for Yocto image on Raspberry_Pi
@@ -394,17 +379,12 @@ public class WpaSupplicantConfigWriter implements NetworkConfigurationVisitor {
 			return;
 		} else if (wifiConfig.getSecurity() == WifiSecurity.SECURITY_NONE || wifiConfig.getSecurity() == WifiSecurity.NONE) {
 			File outputFile = new File(configFile);
-			InputStream is = null;
 			String fileAsString = null;
 
 			if (wifiConfig.getMode() == WifiMode.INFRA) {
-				is = this.getClass().getResourceAsStream(
-						"/src/main/resources/wifi/wpasupplicant.conf_open");
-				fileAsString = readInputStreamAsString(is);
+				fileAsString = IOUtil.readResource("/src/main/resources/wifi/wpasupplicant.conf_open");
 			} else if (wifiConfig.getMode() == WifiMode.ADHOC) {
-				is = this.getClass().getResourceAsStream(
-						"/src/main/resources/wifi/wpasupplicant.conf_adhoc_open");
-				fileAsString = readInputStreamAsString(is);
+				fileAsString = IOUtil.readResource("/src/main/resources/wifi/wpasupplicant.conf_adhoc_open");
 				fileAsString = fileAsString
 						.replaceFirst("KURA_FREQUENCY", Integer.toString(
 								WpaSupplicantUtil.convChannelToFrequency(wifiConfig.getChannels()[0])));
@@ -467,18 +447,28 @@ public class WpaSupplicantConfigWriter implements NetworkConfigurationVisitor {
 	 * This method copies supplied String to a file
 	 */
 	private void copyFile(String data, File destination) throws KuraException {
+		FileOutputStream fos = null;
+		PrintWriter pw = null;
 		try {
-			FileOutputStream fos = new FileOutputStream(destination);
-			PrintWriter pw = new PrintWriter(fos);
+			fos = new FileOutputStream(destination);
+			pw = new PrintWriter(fos);
 			pw.write(data);
 			pw.flush();
 			fos.getFD().sync();
-			pw.close();
-			fos.close();
 
 			setPermissions(destination.toString());
 		} catch (IOException e) {
 			throw KuraException.internalError(e);
+		}
+		finally{
+			if(fos != null){
+				try{
+					fos.close();
+				}catch(IOException ex){
+					s_logger.error("I/O Exception while closing FileOutputStream!");
+				}
+			}	
+			if(pw != null) pw.close();
 		}
 	}
 	

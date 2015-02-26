@@ -61,9 +61,10 @@ public class EthTool implements LinkTool {
 	 */
 	public boolean get () throws KuraException {
 		Process proc = null;
+		BufferedReader br = null;
 		try {
 			proc = ProcessUtil.exec(tool + " " + this.ifaceName);			
-			BufferedReader br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+			br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
 			String line = null;
 			int ind = -1;
 		    while((line = br.readLine()) != null) {
@@ -92,6 +93,14 @@ public class EthTool implements LinkTool {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
 		}
 		finally {
+			if(br != null){
+				try{
+					br.close();
+				}catch(IOException ex){
+					s_logger.error("I/O Exception while closing BufferedReader!");
+				}
+			}			
+		
 			ProcessUtil.destroy(proc);
 		}
 	}

@@ -30,10 +30,13 @@ import org.eclipse.kura.net.IPAddress;
 import org.eclipse.kura.net.route.RouteConfig;
 import org.eclipse.kura.net.route.RouteConfigIP4;
 import org.eclipse.kura.net.route.RouteConfigIP6;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 public class RouteFile {
-
+	private static final Logger s_logger = LoggerFactory.getLogger(RouteFile.class);
+	
 	private String osRouteConfigDirectory = "/etc/sysconfig/network-scripts/";
 	private String interfaceName;
 	private File file;
@@ -60,9 +63,17 @@ public class RouteFile {
 			in = new FileInputStream(file);
 			routeProps.load(in);
 		} catch (FileNotFoundException e) {
-			e.printStackTrace();
+			s_logger.warn("File not found", e);
 		} catch (IOException e) {
-			e.printStackTrace();
+			s_logger.warn("Exception while reading file", e);
+		} finally{
+			if(in != null){
+				try{
+					in.close();
+				}catch(IOException ex){
+					s_logger.error("I/O Exception while closing BufferedReader!");
+				}
+			}	
 		}
 
 		newRoute = findRoute(routeProps, i);
@@ -134,7 +145,7 @@ public class RouteFile {
 		try {
 			file.createNewFile();
 		} catch (IOException e) {
-			e.printStackTrace();
+			s_logger.warn("Exception while creating file", e);
 		}
 	}
 	
@@ -150,7 +161,7 @@ public class RouteFile {
 	}
 	
 	private void storeFile() {
-		FileOutputStream out;
+		FileOutputStream out = null;
 		Properties props = new Properties();
 		RouteConfig route = null;
 		for(int i=0; i<routes.size(); i++) {
@@ -165,9 +176,17 @@ public class RouteFile {
 			out.flush();
 			out.close();
 		} catch (FileNotFoundException e) {
-			e.printStackTrace();
+			s_logger.warn("File not found", e);
 		} catch (IOException e) {
-			e.printStackTrace();
+			s_logger.warn("Exception while reading file", e);
+		}  finally{
+			if(out != null){
+				try{
+					out.close();
+				}catch(IOException ex){
+					s_logger.error("I/O Exception while closing BufferedReader!");
+				}
+			}
 		}
 		
 	}

@@ -127,6 +127,7 @@ public class DebianNetworkInterface extends GenericNetworkInterface {
 	}
 
 	public static void writeNewConfig(NetInterfaceConfig netInterfaceConfig) throws KuraException {
+		Scanner scanner = null;
 		try {
 			StringBuffer sb = new StringBuffer();
 			String outputFileName = NET_CONFIGURATION_DIRECTORY + "interfaces";
@@ -135,7 +136,7 @@ public class DebianNetworkInterface extends GenericNetworkInterface {
 			
 			if(kuraFile.exists()) {
 				//found our match so load the properties
-				Scanner scanner = new Scanner (new FileInputStream(kuraFile));
+				scanner = new Scanner (new FileInputStream(kuraFile));
 			
 				//need to loop through the existing file and replace only the desired interface
 				while (scanner.hasNextLine()) {
@@ -249,6 +250,11 @@ public class DebianNetworkInterface extends GenericNetworkInterface {
 			fos.close();
 		} catch(Exception e) {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+		}
+		finally{
+			if(scanner != null){
+				scanner.close();
+			}
 		}
 	}
 }

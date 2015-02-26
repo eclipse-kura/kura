@@ -86,35 +86,44 @@ public class ModemXchangeScript {
 	public void writeScript(String filename) throws Exception {
         ModemXchangePair modemXchangePair = null;
 
-        PrintWriter writer = new PrintWriter(new FileOutputStream(filename));
-
-        modemXchangePair = this.getFirstModemXchangePair();
-        while (modemXchangePair != null) {
-            writer.println(modemXchangePair.toString());
-            modemXchangePair = this.getNextModemXchangePair();
+        PrintWriter writer = null;
+        try{
+	        writer = new PrintWriter(new FileOutputStream(filename));
+	
+	        modemXchangePair = this.getFirstModemXchangePair();
+	        while (modemXchangePair != null) {
+	            writer.println(modemXchangePair.toString());
+	            modemXchangePair = this.getNextModemXchangePair();
+	        }
         }
-
-        writer.close();
-	}
+        finally{
+        	writer.close();
+        }
+    }
 	
 	public static ModemXchangeScript parseFile(String filename) throws IOException {
         ModemXchangeScript script = new ModemXchangeScript();
         File scriptFile = new File(filename);
-        
+      
         if (scriptFile.exists()) {
-            BufferedReader reader = new BufferedReader(new FileReader(scriptFile));
-            
-            String line = reader.readLine();
-            String[] pair;
-            while(line != null) {
-                pair = line.split("\\s", 2);
-                if(pair.length == 2) {
-                    script.addmodemXchangePair(new ModemXchangePair(pair[1], pair[0]));
-                }
-                line = reader.readLine();
-            }
-
-            reader.close();
+        	BufferedReader reader = null;
+        	try{
+	            reader = new BufferedReader(new FileReader(scriptFile));
+	            
+	            String line = reader.readLine();
+	            String[] pair;
+	            while(line != null) {
+	                pair = line.split("\\s", 2);
+	                if(pair.length == 2) {
+	                    script.addmodemXchangePair(new ModemXchangePair(pair[1], pair[0]));
+	                }
+	                line = reader.readLine();
+	            }
+	
+        	}
+        	finally {
+        		reader.close();
+        	}
         }
 	    
 	    return script;

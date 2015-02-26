@@ -13,6 +13,7 @@ package org.eclipse.kura.net.admin.visitor.linux;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.List;
 import java.util.Properties;
@@ -78,17 +79,15 @@ private static final Logger s_logger = LoggerFactory.getLogger(DhcpConfigWriter.
 					for (NetConfig netConfig : netConfigs) {
 						if(netConfig instanceof DhcpServerConfig4) {
 							DhcpServerConfig4 dhcpServerConfig = (DhcpServerConfig4) netConfig;
-							
+							FileOutputStream fos = null;
+							PrintWriter pw = null;
 							try {
-								FileOutputStream fos = new FileOutputStream(tmpDhcpConfigFileName);
-								PrintWriter pw = new PrintWriter(fos);
+								fos = new FileOutputStream(tmpDhcpConfigFileName);
+								pw = new PrintWriter(fos);
 								s_logger.trace("writing to " + FILE_DIR + tmpDhcpConfigFileName + " with: " + dhcpServerConfig.toString());
 								pw.print(dhcpServerConfig.toString());				
 								pw.flush();
 								fos.getFD().sync();
-								pw.close();
-								fos.close();
-								
 								//move the file if we made it this far and they are different
 								File tmpDhcpConfigFile = new File(tmpDhcpConfigFileName);
 								File dhcpConfigFile = new File(dhcpConfigFileName);
@@ -102,10 +101,21 @@ private static final Logger s_logger = LoggerFactory.getLogger(DhcpConfigWriter.
 								} else {
 									s_logger.info("Not rewriting DHCP config file for " + interfaceName + " because it is the same");
 								}
-							} catch(Exception e) {
-								e.printStackTrace();
-								throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR, "error while building up new configuration files for dhcp servers: " + e.getMessage());
-							}	
+							} catch(IOException e) {
+								throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR, "error while building up new configuration files for dhcp servers", e);
+							}
+							finally{
+								if(fos != null){
+									try{
+										fos.close();
+									}catch(IOException ex){
+										s_logger.warn("Error while closing FileOutputStream");
+									}
+								}
+								if(pw != null){
+									pw.close();
+								}
+							}
 							
 						}
 					}

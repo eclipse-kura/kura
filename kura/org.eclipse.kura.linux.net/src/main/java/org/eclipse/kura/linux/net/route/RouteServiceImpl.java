@@ -152,9 +152,10 @@ public class RouteServiceImpl implements RouteService {
 		RouteConfig [] routes = null;
 		RouteConfig tmpRoute = null;
 		Process proc = null;		
+		BufferedReader br = null;
 		try {
 			proc = ProcessUtil.exec("route -n");
-			BufferedReader br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+			br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
 			br.readLine();
 			br.readLine();
 			while ((routeEntry = br.readLine()) != null) {
@@ -165,11 +166,17 @@ public class RouteServiceImpl implements RouteService {
 			}
 		} 
 		catch (IOException e) {
-			s_logger.error("Error executing command:  route -n");
-			e.printStackTrace();
+			s_logger.error("Error executing command:  route -n", e);
 			return null;
 		}
 		finally {
+			if(br != null){
+				try{
+					br.close();
+				}catch(IOException ex){
+					s_logger.error("I/O Exception while closing BufferedReader!");
+				}
+			}			
 			ProcessUtil.destroy(proc);
 		}
 				

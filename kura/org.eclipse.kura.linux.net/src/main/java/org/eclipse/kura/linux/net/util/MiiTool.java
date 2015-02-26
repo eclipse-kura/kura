@@ -22,6 +22,8 @@ import java.io.InputStreamReader;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.util.ProcessUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Defines mii-tool utility
@@ -30,7 +32,7 @@ import org.eclipse.kura.core.util.ProcessUtil;
  *
  */
 public class MiiTool implements LinkTool {
-	
+	private static final Logger s_logger = LoggerFactory.getLogger(MiiTool.class);
 	private String ifaceName = null; 
 	private boolean linkDetected = false;
 	private int speed = 0; // in b/s
@@ -51,12 +53,13 @@ public class MiiTool implements LinkTool {
 	 */
 	public boolean get () throws KuraException {
 		Process proc = null;
+		BufferedReader br = null;
 		try {
 			//start the process
 			proc = ProcessUtil.exec("mii-tool " + this.ifaceName);
 	
 			//get the output
-	        BufferedReader br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+	        br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
 	        String line = null;
 	        boolean linkDetected = false;
 	        int speed = 0;
@@ -84,7 +87,7 @@ public class MiiTool implements LinkTool {
 								speed = -2;
 							}
 						} catch (Exception e) {
-							e.printStackTrace();
+							s_logger.warn("Exception while parsing string...");
 						}
 	        		} 
 	        	} 
@@ -100,6 +103,14 @@ public class MiiTool implements LinkTool {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
 		}
 		finally {
+			if(br != null){
+				try{
+					br.close();
+				}catch(IOException ex){
+					s_logger.error("I/O Exception while closing BufferedReader!");
+				}
+			}
+			
 			ProcessUtil.destroy(proc);
 		}
 	}

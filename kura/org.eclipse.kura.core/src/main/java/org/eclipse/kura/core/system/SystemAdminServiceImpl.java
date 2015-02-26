@@ -14,6 +14,7 @@ package org.eclipse.kura.core.system;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 
 import org.eclipse.kura.core.util.ProcessUtil;
@@ -187,10 +188,11 @@ public class SystemAdminServiceImpl implements SystemAdminService
 	private String runSystemCommand(String[] commands) {
 		Process proc = null;
 		StringBuffer response = new StringBuffer(); 
+		BufferedReader br = null;
 		try {
 			proc = ProcessUtil.exec(commands);
 			proc.waitFor();
-			BufferedReader br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+			br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
 			String line = null;
 			String newLine = "";
 			while ((line = br.readLine()) != null) {
@@ -208,6 +210,13 @@ public class SystemAdminServiceImpl implements SystemAdminService
 			s_logger.error("failed to run commands " + command, e);
 		}
 		finally {
+			if(br != null){
+				try{
+					br.close();
+				}catch(IOException ex){
+					s_logger.error("I/O Exception while closing BufferedReader!");
+				}
+			}
 			ProcessUtil.destroy(proc);
 		}
 		

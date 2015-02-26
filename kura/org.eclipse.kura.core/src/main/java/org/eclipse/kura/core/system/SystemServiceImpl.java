@@ -346,9 +346,10 @@ public class SystemServiceImpl implements SystemService
 			try {
 				s_logger.info("executing: ifconfig and looking for " + primaryNetworkInterfaceName);
 				proc = ProcessUtil.exec("ifconfig");
+				BufferedReader br = null;
 				try {
 					proc.waitFor();
-					BufferedReader br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+					br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
 					String line = null;
 					while((line = br.readLine()) != null) {
 						if(line.startsWith(primaryNetworkInterfaceName)) {
@@ -365,6 +366,14 @@ public class SystemServiceImpl implements SystemService
 					}
 				} catch(InterruptedException e) {
 					e.printStackTrace();
+				} finally {
+					if(br != null){
+						try{
+							br.close();
+						}catch(IOException ex){
+							s_logger.error("I/O Exception while closing BufferedReader!");
+						}
+					}
 				}
 			} catch(Exception e) {
 				s_logger.error("Failed to get network interfaces", e);
@@ -789,10 +798,11 @@ public class SystemServiceImpl implements SystemService
 	private String runSystemInfoCommand(String[] commands) {
 		StringBuffer response = new StringBuffer(); 
 		Process proc = null;
+		BufferedReader br = null;
 		try {
 			proc = ProcessUtil.exec(commands);
 			proc.waitFor();
-			BufferedReader br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+			br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
 			String line = null;
 			String newLine = "";
 			while ((line = br.readLine()) != null) {
@@ -810,6 +820,15 @@ public class SystemServiceImpl implements SystemService
 			s_logger.error("failed to run commands " + command, e);
 		}
 		finally {
+			if(br != null){
+				if(br != null){
+					try{
+						br.close();
+					}catch(IOException ex){
+						s_logger.error("I/O Exception while closing BufferedReader!");
+					}
+				}
+			}
 			ProcessUtil.destroy(proc);
 		}
 		return response.toString();

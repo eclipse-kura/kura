@@ -676,6 +676,7 @@ public class Hostapd {
 	 * Return a Hostapd instance from a given config file
 	 */
 	private static Hostapd parseHostapdConf(String filename) throws KuraException {
+		FileInputStream fis = null;
 		try {
 			Hostapd hostapd = null;
 	
@@ -684,7 +685,8 @@ public class Hostapd {
 			
 			s_logger.debug("parsing hostapd config file: " + configFile.getAbsolutePath());
 			if(configFile.exists()) {
-				hostapdProps.load(new FileInputStream(configFile));
+				fis = new FileInputStream(configFile);
+				hostapdProps.load(fis);
 
 				// remove any quotes around the values
 				Enumeration<Object> keys = hostapdProps.keys();
@@ -759,6 +761,15 @@ public class Hostapd {
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw KuraException.internalError(e);
+		}
+		finally{
+			if(fis != null){
+				try{
+					fis.close();
+				}catch(IOException ex){
+					s_logger.error("I/O Exception while closing BufferedReader!");
+				}
+			}			
 		}
 	}
 	

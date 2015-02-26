@@ -1195,6 +1195,14 @@ public class WpaSupplicant {
 			}
 		}
 		finally {
+			if(br != null){
+				try{
+					br.close();
+				}catch(IOException ex){
+					s_logger.error("I/O Exception while closing BufferedReader!");
+				}
+			}
+
 			ProcessUtil.destroy(proc);
 		}
 		return drivers;

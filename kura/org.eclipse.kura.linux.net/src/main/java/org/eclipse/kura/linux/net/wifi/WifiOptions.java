@@ -16,6 +16,7 @@
 package org.eclipse.kura.linux.net.wifi;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Collection;
 import java.util.HashSet;
@@ -23,8 +24,12 @@ import java.util.HashSet;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.util.ProcessUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class WifiOptions {
+	private static final Logger s_logger = LoggerFactory.getLogger(WifiOptions.class);
+	
 	/**
 	 * Reports the class name representing this interface.
 	 */
@@ -42,11 +47,12 @@ public class WifiOptions {
 		Process procIw = null;
 		Process procIwConfig = null;
 		Process procWhich = null;
-		
+		BufferedReader br1 = null;
+		BufferedReader br2 = null;
 		try {
 			procWhich = ProcessUtil.exec("which iw");
-			BufferedReader br = new BufferedReader(new InputStreamReader(procWhich.getInputStream()));
-			String line = br.readLine();
+			br1 = new BufferedReader(new InputStreamReader(procWhich.getInputStream()));
+			String line = br1.readLine();
 			if (line != null) {
 				procIw = ProcessUtil.exec("iw dev " + ifaceName + " info");
 				int status = procIw.waitFor();
@@ -56,9 +62,9 @@ public class WifiOptions {
 			}
 
 			procIwConfig = ProcessUtil.exec("iwconfig " + ifaceName);
-			br = new BufferedReader(new InputStreamReader(procIwConfig.getInputStream()));
+			br2 = new BufferedReader(new InputStreamReader(procIwConfig.getInputStream()));
 			line = null;
-			while ((line = br.readLine()) != null) {
+			while ((line = br2.readLine()) != null) {
 				if (line.contains("IEEE 802.11")) {
 					options.add(WIFI_MANAGED_DRIVER_WEXT);
 					break;
@@ -68,6 +74,22 @@ public class WifiOptions {
 			throw new KuraException (KuraErrorCode.INTERNAL_ERROR, e);
 		}
 		finally {
+			if(br1 != null){
+				try{
+					br1.close();
+				}catch(IOException ex){
+					s_logger.error("I/O Exception while closing BufferedReader!");
+				}
+			}
+			
+			if(br2 != null){
+				try{
+					br2.close();
+				}catch(IOException ex){
+					s_logger.error("I/O Exception while closing BufferedReader!");
+				}
+			}
+			
 			ProcessUtil.destroy(procIw);
 			ProcessUtil.destroy(procIwConfig);
 			ProcessUtil.destroy(procWhich);

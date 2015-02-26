@@ -446,6 +446,7 @@ public class DeploymentAgent implements DeploymentAgentService {
 		DeploymentPackage dp = null;
 		File dpFile = null;
 		InputStream dpInputStream = null;
+		BufferedReader br = null;
 		try {
 			// Download the package to a temporary file unless it already resides
 			// on the local filesystem.
@@ -468,7 +469,7 @@ public class DeploymentAgent implements DeploymentAgentService {
 				s_logger.info("dpPersistentFile.getCanonicalPath(): " +  dpPersistentFile.getCanonicalPath());
                 String line = null;
                 Process proc = Runtime.getRuntime().exec("pwd");
-                BufferedReader br = new BufferedReader( new InputStreamReader(proc.getInputStream()));
+                br = new BufferedReader( new InputStreamReader(proc.getInputStream()));
                 while ((line = br.readLine()) != null) {
                 	s_logger.info("PWD: " + line);
                 }
@@ -481,13 +482,21 @@ public class DeploymentAgent implements DeploymentAgentService {
 		} catch (IOException e) {
 		    throw e;
 		} finally {
+			if(br != null){
+				try{
+					br.close();
+				}catch(IOException ex){
+					s_logger.error("I/O Exception while closing BufferedReader!");
+				}
+			}			
+			
 			if (dpInputStream != null) {
 				try {
 					dpInputStream.close();
 				} catch (IOException e) {
 					s_logger.warn("Cannot close input stream", e);
 				}
-			}
+			}			
 			// The file from which we have installed the deployment package will be deleted
 			// unless it's a persistent deployment package file.
 			if (dpFile != null && !dpFile.getCanonicalPath().equals(dpPersistentFile.getCanonicalPath())) {

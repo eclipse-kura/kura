@@ -13,18 +13,18 @@ package org.eclipse.kura.core.configuration;
 
 public class Password 
 {
-	private String password;
+	private char[] password;
 
 	public Password(String password) {
 		super();
-		this.password = password;
+		this.password = password.toCharArray();
 	}
 
-	public String getPassword() {
+	public char[] getPassword() {
 		return password;
 	}
 	
 	public String toString() {
-		return password;
+		return new String(password);
 	}
 }

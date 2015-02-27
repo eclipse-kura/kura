@@ -80,7 +80,6 @@ public class XmlUtil
 				throw new MarshalException(e.getMessage(), e);	
 			}			
 		}
-		
 		if (valEventHndlr.hasEvents()) {			
 			for (ValidationEvent valEvent : valEventHndlr.getEvents()) {
 				if (valEvent.getSeverity() != ValidationEvent.WARNING) {

@@ -346,7 +346,11 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
     			}
     			if (ifaceName != null) {
 	    			List<NetConfig> oldNetConfigs = modem.getConfiguration();
-	    			List<NetConfig>newNetConfigs = getNetConfigs(ifaceName, newNetworkConfig);
+	    			NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig = newNetworkConfig.getNetInterfaceConfig(ifaceName);
+	    			if (netInterfaceConfig == null) {
+	    				netInterfaceConfig = newNetworkConfig.getNetInterfaceConfig(usbPort);
+	    			}
+	    			List<NetConfig>newNetConfigs = getNetConfigs(ifaceName, netInterfaceConfig);
 	    			if ((oldNetConfigs == null) || !oldNetConfigs.equals(newNetConfigs)) {
 	    				s_logger.info("new configuration for cellular modem on usb port {} netinterface {}", usbPort, ifaceName); 
 	    				m_networkConfig = newNetworkConfig;
@@ -426,16 +430,16 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 		}
     }
 	
-	private List<NetConfig> getNetConfigs(String ifaceName, NetworkConfiguration networkConfig) {
+	private List<NetConfig> getNetConfigs(String ifaceName, 
+			NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig) {
 		
 		List<NetConfig> netConfigs = null;
-		if ((ifaceName != null) && (networkConfig != null)) {
-			NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig = networkConfig.getNetInterfaceConfig(ifaceName);
+		if ((ifaceName != null) && (netInterfaceConfig != null)) {
 			List<? extends NetInterfaceAddressConfig> netInterfaceAddressConfigs = netInterfaceConfig.getNetInterfaceAddresses();
 			if (netInterfaceAddressConfigs != null && netInterfaceAddressConfigs.size() > 0) {
-			    for (NetInterfaceAddressConfig netInterfaceAddressConfig : netInterfaceAddressConfigs) {
-			    	netConfigs = netInterfaceAddressConfig.getConfigs();
-			    }
+				for (NetInterfaceAddressConfig netInterfaceAddressConfig : netInterfaceAddressConfigs) {
+					netConfigs = netInterfaceAddressConfig.getConfigs();
+				}
 			}
 		}
 		return netConfigs;
@@ -694,9 +698,13 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 				String ifaceName = m_networkService.getModemPppPort(modemDevice);
 				List<NetConfig> netConfigs = null;
 				if (ifaceName != null) {
-					netConfigs = getNetConfigs(ifaceName, m_networkConfig);
-					if ((netConfigs != null) && (netConfigs.size() > 0)) {
-						modem.setConfiguration(netConfigs);
+					NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig = m_networkConfig
+							.getNetInterfaceConfig(ifaceName);
+					if (netInterfaceConfig != null) {
+						netConfigs = getNetConfigs(ifaceName, netInterfaceConfig);
+						if ((netConfigs != null) && (netConfigs.size() > 0)) {
+							modem.setConfiguration(netConfigs);
+						}
 					}
 				}
 				

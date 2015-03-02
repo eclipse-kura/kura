@@ -21,7 +21,6 @@ import java.io.PrintWriter;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.net.NetworkConfiguration;
@@ -42,6 +41,7 @@ import org.eclipse.kura.net.wifi.WifiCiphers;
 import org.eclipse.kura.net.wifi.WifiConfig;
 import org.eclipse.kura.net.wifi.WifiMode;
 import org.eclipse.kura.net.wifi.WifiSecurity;
+import org.osgi.framework.FrameworkUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -95,7 +95,7 @@ public class WpaSupplicantConfigWriter implements NetworkConfigurationVisitor {
 	public void generateTempWpaSupplicantConf() throws KuraException {
 		
 		try {
-			String fileAsString = IOUtil.readResource("/src/main/resources/wifi/wpasupplicant.conf");
+			String fileAsString = IOUtil.readResource(FrameworkUtil.getBundle(getClass()), "/src/main/resources/wifi/wpasupplicant.conf");
 			File outputFile = new File(TMP_WPA_CONFIG_FILE);
 			copyFile(fileAsString, outputFile);
 		} catch (Exception e) {
@@ -213,9 +213,9 @@ public class WpaSupplicantConfigWriter implements NetworkConfigurationVisitor {
 			String fileAsString = null;
 			
 			if (wifiConfig.getMode() == WifiMode.INFRA) {
-				fileAsString = IOUtil.readResource("/src/main/resources/wifi/wpasupplicant.conf_wep");
+				fileAsString = IOUtil.readResource(FrameworkUtil.getBundle(getClass()), "/src/main/resources/wifi/wpasupplicant.conf_wep");
 			} else if (wifiConfig.getMode() == WifiMode.ADHOC) { 
-				fileAsString = IOUtil.readResource("/src/main/resources/wifi/wpasupplicant.conf_adhoc_wep");
+				fileAsString = IOUtil.readResource(FrameworkUtil.getBundle(getClass()), "/src/main/resources/wifi/wpasupplicant.conf_adhoc_wep");
 				fileAsString = fileAsString.replaceFirst("KURA_FREQUENCY", Integer.toString(
 						WpaSupplicantUtil.convChannelToFrequency(wifiConfig.getChannels()[0])));
 			} else {
@@ -308,9 +308,9 @@ public class WpaSupplicantConfigWriter implements NetworkConfigurationVisitor {
 			String fileAsString = null;
 
 			if (wifiConfig.getMode() == WifiMode.INFRA) {
-				fileAsString = IOUtil.readResource("/src/main/resources/wifi/wpasupplicant.conf_wpa");
+				fileAsString = IOUtil.readResource(FrameworkUtil.getBundle(getClass()), "/src/main/resources/wifi/wpasupplicant.conf_wpa");
 			} else if (wifiConfig.getMode() == WifiMode.ADHOC) {
-				fileAsString = IOUtil.readResource("/src/main/resources/wifi/wpasupplicant.conf_adhoc_wpa");
+				fileAsString = IOUtil.readResource(FrameworkUtil.getBundle(getClass()), "/src/main/resources/wifi/wpasupplicant.conf_adhoc_wpa");
 				fileAsString = fileAsString.replaceFirst("KURA_FREQUENCY", Integer.toString(
 								WpaSupplicantUtil.convChannelToFrequency(wifiConfig.getChannels()[0])));
 				fileAsString = fileAsString.replaceFirst("KURA_PAIRWISE", "NONE");
@@ -382,9 +382,9 @@ public class WpaSupplicantConfigWriter implements NetworkConfigurationVisitor {
 			String fileAsString = null;
 
 			if (wifiConfig.getMode() == WifiMode.INFRA) {
-				fileAsString = IOUtil.readResource("/src/main/resources/wifi/wpasupplicant.conf_open");
+				fileAsString = IOUtil.readResource(FrameworkUtil.getBundle(getClass()), "/src/main/resources/wifi/wpasupplicant.conf_open");
 			} else if (wifiConfig.getMode() == WifiMode.ADHOC) {
-				fileAsString = IOUtil.readResource("/src/main/resources/wifi/wpasupplicant.conf_adhoc_open");
+				fileAsString = IOUtil.readResource(FrameworkUtil.getBundle(getClass()), "/src/main/resources/wifi/wpasupplicant.conf_adhoc_open");
 				fileAsString = fileAsString
 						.replaceFirst("KURA_FREQUENCY", Integer.toString(
 								WpaSupplicantUtil.convChannelToFrequency(wifiConfig.getChannels()[0])));

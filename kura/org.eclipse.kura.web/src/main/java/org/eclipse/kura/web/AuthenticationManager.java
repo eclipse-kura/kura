@@ -29,11 +29,11 @@ import org.eclipse.kura.web.server.util.ServiceLocator;
 public class AuthenticationManager 
 {
 	private static final AuthenticationManager s_instance = new AuthenticationManager();
-	
+
 	private boolean   m_inited;
 	private DbService m_dbService;
 	private String	  m_dataDir;
-	
+
 	private AuthenticationManager() {
 		m_inited = false;
 	}
@@ -48,7 +48,7 @@ public class AuthenticationManager
 
 
 	public synchronized void init(DbService dbService, String dataDir) 
-		throws SQLException 
+			throws SQLException 
 	{
 		if (!s_instance.m_inited) {
 			s_instance.m_dataDir = dataDir;
@@ -58,21 +58,21 @@ public class AuthenticationManager
 		}
 	}
 
-	
+
 	public boolean authenticate(String username, String password)
-		throws SQLException
+			throws SQLException
 	{
 		Connection conn = null;
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 		try {			
-			
+
 			CryptoService cryptoService = ServiceLocator.getInstance().getService(CryptoService.class);
 			conn = m_dbService.getConnection();
 			stmt = conn.prepareStatement("SELECT username FROM dn_user WHERE username = ? AND password = ?;");
 			stmt.setString(1, username);
-			stmt.setString(2, cryptoService.sha1Hash(password));
-			
+			stmt.setString(2, cryptoService.encryptAes(cryptoService.sha1Hash(password)));
+
 			rs = stmt.executeQuery();
 			if (rs != null && rs.next()) {
 				return true;
@@ -89,13 +89,13 @@ public class AuthenticationManager
 			m_dbService.close(stmt);
 			m_dbService.close(conn);
 		}
-		
+
 		return false;
 	}
-	
-	
+
+
 	public void changeAdminPassword(String newPassword)
-		throws SQLException
+			throws SQLException
 	{
 		Connection conn = null;
 		PreparedStatement stmt = null;
@@ -103,9 +103,9 @@ public class AuthenticationManager
 			CryptoService cryptoService = ServiceLocator.getInstance().getService(CryptoService.class);
 			conn = m_dbService.getConnection();
 			stmt = conn.prepareStatement("UPDATE dn_user SET password = ? WHERE username = ?;");
-			stmt.setString(1, cryptoService.sha1Hash(newPassword));
+			stmt.setString(1, cryptoService.encryptAes(cryptoService.sha1Hash(newPassword)));
 			stmt.setString(2, "admin");
-			
+
 			stmt.execute();
 			conn.commit();
 
@@ -129,39 +129,52 @@ public class AuthenticationManager
 			m_dbService.close(conn);
 		}
 	}
-	
-	
+
+
 	// -------------------------------------------------
 	//
 	//    Private methods
 	//
 	// -------------------------------------------------
-	
+
 	private synchronized void initUserStore() 
-		throws SQLException
+			throws SQLException
 	{
-		execute("CREATE TABLE IF NOT EXISTS dn_user (username VARCHAR(255) PRIMARY KEY, password  VARCHAR(255) NOT NULL);");
+		execute("CREATE TABLE IF NOT EXISTS dn_user (username VARCHAR(255) PRIMARY KEY, password  VARCHAR(255) NOT NULL, version INTEGER NOT NULL);");
 		checkAdminUser();
 	}
 
 
-    private synchronized void checkAdminUser() throws SQLException 
-    {
-    	boolean bAdminExists = false;
+	private synchronized void checkAdminUser() throws SQLException 
+	{
+		boolean bAdminExists = false;
 		Connection conn = null;
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 		try {			
-			
+
 			conn = m_dbService.getConnection();
-			stmt = conn.prepareStatement("SELECT username FROM dn_user WHERE username = ?;");
+			stmt = conn.prepareStatement("SELECT username, password FROM dn_user WHERE username = ?;");
 			stmt.setString(1, "admin");
 			rs = stmt.executeQuery();
 
 			if (rs != null && rs.next()) {
 				bAdminExists = true;
+				try{
+					execute("ALTER TABLE dn_user ADD COLUMN version INTEGER DEFAULT 0 NOT NULL;");
+					CryptoService cryptoService = ServiceLocator.getInstance().getService(CryptoService.class);
+					PreparedStatement stmtUpdate = conn.prepareStatement("UPDATE dn_user SET password = ?, version = ? WHERE username = ?;");
+					String oldPassword= rs.getString("password");
+					stmtUpdate.setString(1, cryptoService.encryptAes(oldPassword));
+					stmtUpdate.setInt(2, 1);
+					stmtUpdate.setString(3, "admin");
+					stmtUpdate.execute();
+					conn.commit();
+				}catch(Exception e){
+					
+				}
 			}
-			
+
 			// If admin not in DB AND we are using in memory only storage,
 			// then check if admin has been saved to disk
 			if (!bAdminExists && conn.getMetaData().getURL().startsWith("jdbc:hsqldb:mem")) {
@@ -174,7 +187,7 @@ public class AuthenticationManager
 						createAdminUser(cryptoService.decryptAes(adminString[1]));
 						bAdminExists = true;
 					}
-					
+
 				} catch (FileNotFoundException e) {
 					e.printStackTrace();
 				} catch (IOException e) {
@@ -183,7 +196,7 @@ public class AuthenticationManager
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
-				
+
 			}
 		}
 		catch (SQLException e) {
@@ -198,24 +211,25 @@ public class AuthenticationManager
 		if (!bAdminExists) {
 			createAdminUser();
 		}
-    }
+	}
 
-    private synchronized void createAdminUser() throws SQLException {
-    	createAdminUser("admin");
-    }
-    
-    private synchronized void createAdminUser(String pwd) 
-    	throws SQLException 
-    {
+	private synchronized void createAdminUser() throws SQLException {
+		createAdminUser("admin");
+	}
+
+	private synchronized void createAdminUser(String pwd) 
+			throws SQLException 
+	{
 		Connection conn = null;
 		PreparedStatement stmt = null;
 		try {			
 			CryptoService cryptoService = ServiceLocator.getInstance().getService(CryptoService.class);
 			conn = m_dbService.getConnection();
-			stmt = conn.prepareStatement("INSERT INTO dn_user (username, password) VALUES (?, ?);");
+			stmt = conn.prepareStatement("INSERT INTO dn_user (username, password, version) VALUES (?, ?, ?);");
 			stmt.setString(1, "admin");
-			stmt.setString(2, cryptoService.sha1Hash(pwd));
-			
+			stmt.setString(2, cryptoService.encryptAes(cryptoService.sha1Hash(pwd)));
+			stmt.setInt(3, 1);
+
 			stmt.execute();
 		}
 		catch (SQLException e) {
@@ -228,15 +242,15 @@ public class AuthenticationManager
 			m_dbService.close(stmt);
 			m_dbService.close(conn);
 		}
-    }
-    
-    
-    private synchronized void execute(String sql) throws SQLException 
-    {
+	}
+
+
+	private synchronized void execute(String sql) throws SQLException 
+	{
 		Connection conn = null;
 		PreparedStatement stmt = null;
 		try {			
-			
+
 			conn = m_dbService.getConnection();
 			stmt = conn.prepareStatement(sql);
 			stmt.execute();
@@ -250,5 +264,5 @@ public class AuthenticationManager
 			m_dbService.close(stmt);
 			m_dbService.close(conn);
 		}
-    }
+	}
 }

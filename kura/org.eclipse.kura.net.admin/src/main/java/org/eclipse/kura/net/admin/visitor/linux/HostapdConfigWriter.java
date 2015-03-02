@@ -11,12 +11,9 @@
  */
 package org.eclipse.kura.net.admin.visitor.linux;
 
-import java.io.BufferedInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.PrintWriter;
 import java.util.List;
 
@@ -39,6 +36,7 @@ import org.eclipse.kura.net.wifi.WifiConfig;
 import org.eclipse.kura.net.wifi.WifiMode;
 import org.eclipse.kura.net.wifi.WifiRadioMode;
 import org.eclipse.kura.net.wifi.WifiSecurity;
+import org.osgi.framework.FrameworkUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -146,7 +144,7 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
 			File outputFile = new File(HOSTAPD_TMP_CONFIG_FILE);
 			
 			//replace the necessary components
-			String fileAsString = IOUtil.readResource("/src/main/resources/wifi/hostapd.conf_no_security");
+			String fileAsString = IOUtil.readResource(FrameworkUtil.getBundle(getClass()), "/src/main/resources/wifi/hostapd.conf_no_security");
 			if(interfaceName != null) {
 				fileAsString = fileAsString.replaceFirst("KURA_INTERFACE", interfaceName);
 			} else {
@@ -224,7 +222,7 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
 			File outputFile = new File(HOSTAPD_TMP_CONFIG_FILE);
 
 			//replace the necessary components
-			String fileAsString = IOUtil.readResource("/src/main/resources/wifi/hostapd.conf_wep");
+			String fileAsString = IOUtil.readResource(FrameworkUtil.getBundle(getClass()), "/src/main/resources/wifi/hostapd.conf_wep");
 			if(interfaceName != null) {
 				fileAsString = fileAsString.replaceFirst("KURA_INTERFACE", interfaceName);
 			} else {
@@ -366,7 +364,7 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
 			}
 			
 			//replace the necessary components
-			String fileAsString = IOUtil.readResource(resName);
+			String fileAsString = IOUtil.readResource(FrameworkUtil.getBundle(getClass()), resName);
 			
 			if(interfaceName != null) {
 				fileAsString = fileAsString.replaceFirst("KURA_INTERFACE", interfaceName);

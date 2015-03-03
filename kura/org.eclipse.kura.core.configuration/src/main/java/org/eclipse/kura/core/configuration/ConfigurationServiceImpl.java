@@ -29,6 +29,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import javax.xml.stream.FactoryConfigurationError;
 
 import org.eclipse.kura.KuraErrorCode;
@@ -467,14 +468,30 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 
 	public List<ComponentConfiguration> getSnapshot(long sid)
 			throws KuraException
-			{
-		List<ComponentConfiguration> configs = new ArrayList<ComponentConfiguration>();		
+			{		
 		XmlComponentConfigurations xmlConfigs = loadSnapshot(sid);
+		List<ComponentConfigurationImpl> decryptedConfigs = new ArrayList<ComponentConfigurationImpl>();
+		List<ComponentConfigurationImpl> configs = xmlConfigs.getConfigurations();
+		for (ComponentConfigurationImpl config : configs) {
+			if (config != null) {
+				try {
+					Map<String,Object> decryptedProperties= decryptPasswords(config);
+					config.setProperties(decryptedProperties);
+					decryptedConfigs.add(config);
+				}
+				catch (Throwable t) {
+					s_logger.warn("Error during snapshot password decryption");
+				}
+			}
+		}
+		xmlConfigs.setConfigurations(decryptedConfigs);
+		
+		List<ComponentConfiguration> returnConfigs = new ArrayList<ComponentConfiguration>();
 		if (xmlConfigs != null) {
-			configs.addAll(xmlConfigs.getConfigurations());
+			returnConfigs.addAll(xmlConfigs.getConfigurations());
 		}
 
-		return configs;
+		return returnConfigs;
 	}
 
 
@@ -698,24 +715,6 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 			} // end while 
 			String decryptedContent= m_cryptoService.decryptAes(entireFile);
 			xmlConfigs = XmlUtil.unmarshal(decryptedContent, XmlComponentConfigurations.class);
-
-			List<ComponentConfigurationImpl> decryptedConfigs = new ArrayList<ComponentConfigurationImpl>();
-			List<ComponentConfigurationImpl> configs = xmlConfigs.getConfigurations();
-			for (ComponentConfigurationImpl config : configs) {
-				if (config != null) {
-					try {
-						Map<String,Object> decryptedProperties= decryptPasswords(config);
-						config.setProperties(decryptedProperties);
-						decryptedConfigs.add(config);
-					}
-					catch (Throwable t) {
-						s_logger.warn("Error during snapshot password decryption");
-					}
-				}
-			}
-			xmlConfigs.setConfigurations(decryptedConfigs);
-
-
 		}
 		catch (Exception e) {
 			s_logger.info("Snapshot not encrypted, trying to load a not encrypted one");
@@ -732,6 +731,31 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 
 
 		return xmlConfigs;
+	}
+	
+	
+	Map<String,Object> decryptPasswords(ComponentConfiguration config){
+		Map<String,Object> configProperties= config.getConfigurationProperties();
+		Map<String,Object> decryptedProperties= new HashMap<String, Object>();
+
+		Iterator<String> keys = configProperties.keySet().iterator();
+		while (keys.hasNext()) {
+			String key = keys.next();
+			Object value = configProperties.get(key);
+			if (value instanceof Password) {
+				try {
+					Password decryptedPassword= new Password(m_cryptoService.decryptAes(value.toString()));
+					decryptedProperties.put(key, decryptedPassword);
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+					decryptedProperties.put(key,value.toString());
+				}
+			}else{
+				decryptedProperties.put(key, value);
+			}
+		}
+		return decryptedProperties;
 	}
 
 
@@ -837,8 +861,28 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 
 			Configuration cfg = m_configurationAdmin.getConfiguration(pid);
 			Map<String,Object> props = CollectionsUtil.dictionaryToMap(cfg.getProperties(), ocd);
+			Map<String,Object> decryptedProperties= new HashMap<String, Object>();
+			
+			Iterator<String> keys = props.keySet().iterator();
+			while (keys.hasNext()) {
+				String key = keys.next();
+				Object value = props.get(key);
+				if (value != null) {
+					if (value instanceof Password) {
+						try{
+							Password decryptedPassword= new Password(m_cryptoService.decryptAes(value.toString()));
+							decryptedProperties.put(key, decryptedPassword);
+						}catch(Exception e){
+							decryptedProperties.put(key, value);
+						}
+					}
+					else {
+						decryptedProperties.put(key, value);
+					}
+				}
+			}
 
-			cc = new ComponentConfigurationImpl(pid, ocd, props);
+			cc = new ComponentConfigurationImpl(pid, ocd, decryptedProperties); //props
 		}
 		catch (Exception e) {
 			s_logger.error("Error getting Configuration for component: "+pid+". Ignoring it.", e);
@@ -1039,22 +1083,6 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 			String decryptedContent= m_cryptoService.decryptAes(entireFile);
 			xmlConfigs = XmlUtil.unmarshal(decryptedContent, XmlComponentConfigurations.class);
 			
-			List<ComponentConfigurationImpl> decryptedConfigs = new ArrayList<ComponentConfigurationImpl>();
-			List<ComponentConfigurationImpl> configs = xmlConfigs.getConfigurations();
-			for (ComponentConfigurationImpl config : configs) {
-				if (config != null) {
-					try {
-						Map<String,Object> decryptedProperties= decryptPasswords(config);
-						config.setProperties(decryptedProperties);
-						decryptedConfigs.add(config);
-					}
-					catch (Throwable t) {
-						s_logger.warn("Error during snapshot password decryption");
-					}
-				}
-			}
-			xmlConfigs.setConfigurations(decryptedConfigs);
-			
 		}
 		catch (Exception e) {
 			s_logger.info("Snapshot not encrypted, trying to load a not encrypted one");
@@ -1090,30 +1118,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 			}
 		}
 	}
-
-	private Map<String,Object> decryptPasswords(ComponentConfiguration config){
-		Map<String,Object> configProperties= config.getConfigurationProperties();
-		Map<String,Object> decryptedProperties= new HashMap<String, Object>();
-
-		Iterator<String> keys = configProperties.keySet().iterator();
-		while (keys.hasNext()) {
-			String key = keys.next();
-			Object value = configProperties.get(key);
-			if (value instanceof Password) {
-				try {
-					Password decryptedPassword= new Password(m_cryptoService.decryptAes(value.toString()));
-					decryptedProperties.put(key, decryptedPassword);
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-					decryptedProperties.put(key,value.toString());
-				}
-			}else{
-				decryptedProperties.put(key, value);
-			}
-		}
-		return decryptedProperties;
-	}
+	
 
 	private void validateProperties(String pid,
 			ObjectClassDefinition ocd,

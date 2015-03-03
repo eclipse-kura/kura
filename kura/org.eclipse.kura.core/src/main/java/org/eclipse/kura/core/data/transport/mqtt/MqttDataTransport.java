@@ -13,6 +13,7 @@ package org.eclipse.kura.core.data.transport.mqtt;
 
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -27,6 +28,7 @@ import org.eclipse.kura.KuraTooManyInflightMessagesException;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.core.data.transport.mqtt.MqttClientConfiguration.PersistenceType;
 import org.eclipse.kura.core.util.ValidationUtil;
+import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.data.DataTransportListener;
 import org.eclipse.kura.data.DataTransportService;
 import org.eclipse.kura.data.DataTransportToken;
@@ -84,6 +86,8 @@ public class MqttDataTransport implements DataTransportService, MqttCallback,
 	private Map<String, String> m_topicContext = new HashMap<String, String>();
 	private Map<String, Object> m_properties = new HashMap<String, Object>();
 
+	private CryptoService m_cryptoService;
+
 	private static final String MQTT_BROKER_URL_PROP_NAME = "broker-url";
 	private static final String MQTT_USERNAME_PROP_NAME = "username";
 	private static final String MQTT_PASSWORD_PROP_NAME = "password";
@@ -127,6 +131,14 @@ public class MqttDataTransport implements DataTransportService, MqttCallback,
 	public void unsetSslManagerService(SslManagerService sslManagerService) {
 		this.m_sslManagerService = null;
 	}
+	
+	public void setCryptoService(CryptoService cryptoService) {
+		this.m_cryptoService = cryptoService;
+	}
+
+	public void unsetCryptoService(CryptoService cryptoService) {
+		this.m_cryptoService = null;
+	}
 
 	// ----------------------------------------------------------------
 	//
@@ -140,7 +152,26 @@ public class MqttDataTransport implements DataTransportService, MqttCallback,
 
 		// We need to catch the configuration exception and activate anyway.
 		// Otherwise the ConfigurationService will not be able to track us.
-		m_properties.putAll(properties);
+		HashMap<String, Object> decryptedPropertiesMap= new HashMap<String, Object>();
+		
+		Iterator<String> keys = properties.keySet().iterator();
+		while (keys.hasNext()) {
+			String key = keys.next();
+			Object value = properties.get(key);
+			if (key.equals(MQTT_PASSWORD_PROP_NAME)) {
+				try {
+					String decryptedPassword= m_cryptoService.decryptAes(value.toString());
+					decryptedPropertiesMap.put(key, decryptedPassword);
+				} catch (Exception e) {
+					//e.printStackTrace();
+					decryptedPropertiesMap.put(key, value.toString());
+				}
+			}else{
+				decryptedPropertiesMap.put(key, value);
+			}
+		}
+		
+		m_properties.putAll(decryptedPropertiesMap);
 		try {
 			m_clientConf = buildConfiguration(m_properties);
 			setupMqttSession();
@@ -184,7 +215,28 @@ public class MqttDataTransport implements DataTransportService, MqttCallback,
 		s_logger.info("Updating...");
 
 		m_properties.clear();
-		m_properties.putAll(properties);
+		
+HashMap<String, Object> decryptedPropertiesMap= new HashMap<String, Object>();
+		
+		Iterator<String> keys = properties.keySet().iterator();
+		while (keys.hasNext()) {
+			String key = keys.next();
+			Object value = properties.get(key);
+			if (key.equals(MQTT_PASSWORD_PROP_NAME)) {
+				try {
+					String decryptedPassword= m_cryptoService.decryptAes(value.toString());
+					decryptedPropertiesMap.put(key, decryptedPassword);
+				} catch (Exception e) {
+					//e.printStackTrace();
+					decryptedPropertiesMap.put(key, value.toString());
+				}
+			}else{
+				decryptedPropertiesMap.put(key, value);
+			}
+		}
+		
+		m_properties.putAll(decryptedPropertiesMap);
+		//m_properties.putAll(properties);
 
 		update();
 
@@ -263,7 +315,7 @@ public class MqttDataTransport implements DataTransportService, MqttCallback,
 			s_logger.info("#  Connected!");
 			s_logger.info("# ------------------------------------------------------------");
 		} catch (MqttException e) {
-			s_logger.warn(
+			s_logger.info(
 					"xxxxxxxxxx  Connect failed. Forcing disconnect. xxxxxxxxxxxxxxxx ",
 					e.getCause().getMessage());
 			try {

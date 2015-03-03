@@ -15,7 +15,10 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
@@ -204,10 +207,30 @@ public class CloudConfigurationHandler extends Cloudlet
 		
 		if (snapshotId != null) {
 			long sid = Long.parseLong(snapshotId);
-			XmlComponentConfigurations configs = m_configService.loadSnapshot(sid);
+			XmlComponentConfigurations xmlConfigs = m_configService.loadSnapshot(sid);
 			//
-			// marshall the response		
-			byte[] body = toResponseBody(configs);
+			// marshall the response	
+			
+			List<ComponentConfigurationImpl> decryptedConfigs = new ArrayList<ComponentConfigurationImpl>();
+			List<ComponentConfigurationImpl> configs = xmlConfigs.getConfigurations();
+			for (ComponentConfigurationImpl config : configs) {
+				if (config != null) {
+					try {
+						Map<String,Object> decryptedProperties= m_configService.decryptPasswords(config);
+						config.setProperties(decryptedProperties);
+						decryptedConfigs.add(config);
+					}
+					catch (Throwable t) {
+						s_logger.warn("Error during snapshot password decryption");
+					}
+				}
+			}
+			xmlConfigs.setConfigurations(decryptedConfigs);
+			
+			
+			
+			
+			byte[] body = toResponseBody(xmlConfigs);
 			
 			//
 			// Build payload
@@ -235,6 +258,7 @@ public class CloudConfigurationHandler extends Cloudlet
 			respPayload.setBody(body);
 		}
 	}
+	
 
 	private void doGetConfigurations(CloudletTopic reqTopic,
 							         KuraPayload reqPayload, 

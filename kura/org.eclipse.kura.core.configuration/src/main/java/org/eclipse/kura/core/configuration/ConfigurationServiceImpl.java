@@ -13,6 +13,7 @@ package org.eclipse.kura.core.configuration;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
@@ -30,7 +31,9 @@ import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.xml.bind.JAXBException;
 import javax.xml.stream.FactoryConfigurationError;
+import javax.xml.stream.XMLStreamException;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
@@ -419,7 +422,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 			}
 		}
 		xmlConfigs.setConfigurations(decryptedConfigs);
-		
+
 		//
 		// restore configuration
 		s_logger.info("Rolling back to snapshot {}...", id);
@@ -501,14 +504,14 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 			}
 		}
 		xmlConfigs.setConfigurations(decryptedConfigs);
-		
+
 		List<ComponentConfiguration> returnConfigs = new ArrayList<ComponentConfiguration>();
 		if (xmlConfigs != null) {
 			returnConfigs.addAll(xmlConfigs.getConfigurations());
 		}
 
 		return returnConfigs;
-	}
+			}
 
 
 	public synchronized void updateConfigurations(List<ComponentConfiguration> configsToUpdate)
@@ -736,7 +739,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 			s_logger.info("Snapshot not encrypted, trying to load a not encrypted one");
 			try {			
 				FileReader fr = new FileReader(fSnapshot);
-				xmlConfigs = XmlUtil.unmarshal(fr, XmlComponentConfigurations.class);			
+				xmlConfigs = XmlUtil.unmarshal(fr, XmlComponentConfigurations.class);
 			}
 			catch (Exception ex) {
 				throw new KuraException(KuraErrorCode.INTERNAL_ERROR, ex);
@@ -748,8 +751,8 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 
 		return xmlConfigs;
 	}
-	
-	
+
+
 	Map<String,Object> decryptPasswords(ComponentConfiguration config){
 		Map<String,Object> configProperties= config.getConfigurationProperties();
 		Map<String,Object> decryptedProperties= new HashMap<String, Object>();
@@ -782,9 +785,8 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 	//
 	// ----------------------------------------------------------------
 
-	private synchronized long saveSnapshot(List<? extends ComponentConfiguration> configs)
-			throws KuraException 
-	{
+
+	private List<ComponentConfigurationImpl> encryptConfigs(List<? extends ComponentConfiguration> configs){
 		List<ComponentConfigurationImpl> configImpls = new ArrayList<ComponentConfigurationImpl>();
 		for (ComponentConfiguration config : configs) {
 			if (config instanceof ComponentConfigurationImpl) {
@@ -801,7 +803,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 								encryptedPropertiesToUpdate.put(key, new Password(m_cryptoService.encryptAes(value.toString())));
 
 							} catch (Exception e) {
-					
+
 							} 
 						}
 						else {
@@ -809,14 +811,133 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 						}
 					}
 				}
-
-
 				((ComponentConfigurationImpl) config).setProperties(encryptedPropertiesToUpdate);
-
-
 				configImpls.add((ComponentConfigurationImpl) config);
 			}
 		}
+		return configImpls;
+	}
+
+
+	private boolean allSnapshotsUnencrypted() {
+		try {
+			Set<Long> snapshotIDs = getSnapshots();
+			if (snapshotIDs == null || snapshotIDs.size() == 0) {
+				return false;
+			}
+			Long[] snapshots = snapshotIDs.toArray( new Long[]{});
+
+			for (Long snapshot : snapshots) {
+
+
+				String configDir = getSnapshotsDirectory();
+				StringBuilder sbSnapshot = new StringBuilder(configDir);
+				sbSnapshot.append(File.separator)
+				.append("snapshot_")
+				.append(snapshot)
+				.append(".xml");
+
+				String snapshotName = sbSnapshot.toString();
+				File fSnapshot = new File(snapshotName);
+				if (!fSnapshot.exists()) {
+					throw new KuraException(KuraErrorCode.CONFIGURATION_SNAPSHOT_NOT_FOUND, snapshot);
+				}
+				//
+				// Unmarshall
+
+				FileReader  fr = null;
+				BufferedReader br = null;
+				try {
+					fr = new FileReader(fSnapshot);
+					br = new BufferedReader(fr);
+					String line="";
+					String entireFile="";
+					while ((line = br.readLine()) != null) {
+						entireFile+= line;
+					} // end while 
+					String decryptedContent= m_cryptoService.decryptAes(entireFile);
+					XmlUtil.unmarshal(decryptedContent, XmlComponentConfigurations.class);
+					return false;
+				}catch(Exception e){
+
+				}finally{
+					if(br != null){
+						br.close();
+					}
+					if(fr != null){
+						fr.close();
+					}
+				}
+			}
+			return true;
+		} catch (Exception e) {
+			return false;
+		}
+	}
+
+	private void encryptPlainSnapshots() throws Exception {
+		Set<Long> snapshotIDs = getSnapshots();
+		if (snapshotIDs == null || snapshotIDs.size() == 0) {
+			return;
+		}
+		Long[] snapshots = snapshotIDs.toArray( new Long[]{});
+
+		for (Long snapshot : snapshots) {
+			String configDir = getSnapshotsDirectory();
+			StringBuilder sbSnapshot = new StringBuilder(configDir);
+			sbSnapshot.append(File.separator)
+			.append("snapshot_")
+			.append(snapshot)
+			.append(".xml");
+
+			String snapshotName = sbSnapshot.toString();
+			File fSnapshot = new File(snapshotName);
+			if (!fSnapshot.exists()) {
+				throw new KuraException(KuraErrorCode.CONFIGURATION_SNAPSHOT_NOT_FOUND, snapshot);
+			}
+			//
+			// Unmarshall
+
+			FileReader fr = null;
+			XmlComponentConfigurations xmlConfigs= null;
+			try {
+
+				fr = new FileReader(fSnapshot);
+				xmlConfigs = XmlUtil.unmarshal(fr, XmlComponentConfigurations.class);
+			}finally{
+				if(fr != null){
+					fr.close();
+				}
+			}
+
+			FileOutputStream fos = null;
+			OutputStreamWriter osw = null;
+			try{	
+				fos = new FileOutputStream(fSnapshot);
+				osw = new OutputStreamWriter(fos, "UTF-8");
+				String xmlResult= XmlUtil.marshal(xmlConfigs);
+				String encryptedXML= m_cryptoService.encryptAes(xmlResult);
+				osw.append(encryptedXML);
+				osw.flush();
+				fos.flush();
+				fos.getFD().sync();
+
+			}finally{
+				if(osw != null){
+					osw.close();
+				}
+				if(fos != null){
+					fos.close();
+				}
+			}
+		}
+	}
+
+
+	private synchronized long saveSnapshot(List<? extends ComponentConfiguration> configs)
+			throws KuraException 
+	{
+		List<ComponentConfigurationImpl> configImpls = encryptConfigs(configs);
 
 		//
 		// Build the XML structure
@@ -877,7 +998,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 			Configuration cfg = m_configurationAdmin.getConfiguration(pid);
 			Map<String,Object> props = CollectionsUtil.dictionaryToMap(cfg.getProperties(), ocd);
 			Map<String,Object> decryptedProperties= new HashMap<String, Object>();
-			
+
 			Iterator<String> keys = props.keySet().iterator();
 			while (keys.hasNext()) {
 				String key = keys.next();
@@ -1097,13 +1218,19 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 			} // end while 
 			String decryptedContent= m_cryptoService.decryptAes(entireFile);
 			xmlConfigs = XmlUtil.unmarshal(decryptedContent, XmlComponentConfigurations.class);
-			
+
+			br.close();
+			fr.close();
 		}
 		catch (Exception e) {
 			s_logger.info("Snapshot not encrypted, trying to load a not encrypted one");
-			try {			
-				FileReader fr = new FileReader(fSnapshot);
-				xmlConfigs = XmlUtil.unmarshal(fr, XmlComponentConfigurations.class);			
+			try {				
+				if(allSnapshotsUnencrypted()){
+					FileReader fr = new FileReader(fSnapshot);
+					xmlConfigs = XmlUtil.unmarshal(fr, XmlComponentConfigurations.class);
+					encryptPlainSnapshots();
+					fr.close();
+				}
 			}
 			catch (Exception ex) {
 				throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
@@ -1133,7 +1260,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 			}
 		}
 	}
-	
+
 
 	private void validateProperties(String pid,
 			ObjectClassDefinition ocd,

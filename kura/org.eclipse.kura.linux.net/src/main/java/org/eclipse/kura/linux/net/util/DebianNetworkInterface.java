@@ -52,7 +52,7 @@ public class DebianNetworkInterface extends GenericNetworkInterface {
 			kuraFile = new File(NET_CONFIGURATION_DIRECTORY + "interfaces");
 			if(kuraFile.exists()) {
 				//found our match so load the properties
-				Scanner scanner = new Scanner (new FileInputStream(kuraFile));
+				Scanner scanner = null;
 
 				s_logger.debug("getting args for " + interfaceName);
 				
@@ -60,6 +60,7 @@ public class DebianNetworkInterface extends GenericNetworkInterface {
 	            kuraProps.setProperty("ONBOOT", "no");
 
 	            try {
+	            	scanner = new Scanner (new FileInputStream(kuraFile));
 	                while (scanner.hasNextLine()) {
 	                    String line = scanner.nextLine().trim();
 	                    //ignore comments and blank lines

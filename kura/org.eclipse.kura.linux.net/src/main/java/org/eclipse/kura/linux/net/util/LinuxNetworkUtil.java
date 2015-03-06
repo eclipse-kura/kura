@@ -61,10 +61,7 @@ public class LinuxNetworkUtil {
 					ifaces.add(st.nextToken());
 				}
 			}
-
-			br.close();
-			br = null;
-
+			
 			try {
 				if (proc.waitFor() != 0) {
 					s_logger.error("error executing command --- ifconfig --- exit value = " + proc.exitValue());
@@ -81,6 +78,14 @@ public class LinuxNetworkUtil {
 		} 
 		finally {
 			ProcessUtil.destroy(proc);
+			if (br != null) {
+				try {
+					br.close();
+					br = null;
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
 		}
 	}
 

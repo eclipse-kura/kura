@@ -805,236 +805,263 @@ public class WpaSupplicant {
 			if (m_mode == WifiMode.INFRA) {
 				is = this.getClass().getResourceAsStream(
 						"/src/main/resources/wifi/wpasupplicant.conf_wep");
-				fileAsString = readInputStreamAsString(is);
+				if (is != null) {
+					fileAsString = readInputStreamAsString(is);
+					is.close();
+					is = null;
+				}
 			} else if (m_mode == WifiMode.ADHOC) {
 				is = this.getClass().getResourceAsStream(
 						"/src/main/resources/wifi/wpasupplicant.conf_adhoc_wep");
-				fileAsString = readInputStreamAsString(is);
-				fileAsString = fileAsString
-						.replaceFirst("KURA_FREQUENCY", Integer.toString(this
-								.getChannelFrequencyMHz(this.m_scanChannels[0])));
+				if (is != null) {
+					fileAsString = readInputStreamAsString(is);
+					fileAsString = fileAsString
+							.replaceFirst("KURA_FREQUENCY", Integer.toString(this
+									.getChannelFrequencyMHz(this.m_scanChannels[0])));
+					is.close();
+					is = null;
+				}
 			} else {
 				throw KuraException
 						.internalError("Failed to generate wpa_supplicant.conf -- Invalid mode: "
 								+ this.m_mode);
 			}
-
-			// replace the necessary components
-			fileAsString = fileAsString.replaceFirst("KURA_MODE",
-					Integer.toString(this.getSupplicantMode()));
-
-			if (this.m_essid != null) {
-				fileAsString = fileAsString.replaceFirst("KURA_ESSID",
-						this.m_essid);
-			} else {
-				throw KuraException.internalError("the essid can not be null");
-			}
-			if (this.m_passwd != null) {
-				if (this.m_passwd.length() == 10) {
-					// check to make sure it is all hex
-					try {
-						Long.parseLong(this.m_passwd, 16);
-					} catch (Exception e) {
-						throw KuraException
-								.internalError("the WEP key (passwd) must be all HEX characters (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, a, b, c, d, e, and f");
-					}
-
-					// since we're here - save the password
-					fileAsString = fileAsString.replaceFirst("KURA_WEP_KEY",
-							this.m_passwd);
-				} else if (this.m_passwd.length() == 26) {
-					String part1 = this.m_passwd.substring(0, 13);
-					String part2 = this.m_passwd.substring(13);
-
-					try {
-						Long.parseLong(part1, 16);
-						Long.parseLong(part2, 16);
-					} catch (Exception e) {
-						throw KuraException
-								.internalError("the WEP key (passwd) must be all HEX characters (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, a, b, c, d, e, and f");
-					}
-
-					// since we're here - save the password
-					fileAsString = fileAsString.replaceFirst("KURA_WEP_KEY",
-							m_passwd);
-				} else if (this.m_passwd.length() == 32) {
-					String part1 = this.m_passwd.substring(0, 10);
-					String part2 = this.m_passwd.substring(10, 20);
-					String part3 = this.m_passwd.substring(20);
-					try {
-						Long.parseLong(part1, 16);
-						Long.parseLong(part2, 16);
-						Long.parseLong(part3, 16);
-					} catch (Exception e) {
-						throw KuraException
-								.internalError("the WEP key (passwd) must be all HEX characters (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, a, b, c, d, e, and f");
-					}
-
-					// since we're here - save the password
-					fileAsString = fileAsString.replaceFirst("KURA_WEP_KEY",
-							m_passwd);
-				} else if ((this.m_passwd.length() == 5)
-						|| (this.m_passwd.length() == 13)
-						|| (this.m_passwd.length() == 16)) {
-
-					// 5, 13, or 16 ASCII characters
-					this.m_passwd = this.toHex(this.m_passwd);
-
-					// since we're here - save the password
-					fileAsString = fileAsString.replaceFirst("KURA_WEP_KEY",
-							m_passwd);
-				} else {
-					throw KuraException
-							.internalError("the WEP key (passwd) must be 10, 26, or 32 HEX characters in length");
-				}
-			} else {
-				throw KuraException.internalError("the passwd can not be null");
-			}
 			
-			if (this.m_bgscan != null) {
-				fileAsString = fileAsString.replaceFirst("KURA_BGSCAN",
-						this.m_bgscan.toString());
-			} else {
-				fileAsString = fileAsString.replaceFirst("KURA_BGSCAN", "");
+			if (fileAsString != null) {
+				// replace the necessary components
+				fileAsString = fileAsString.replaceFirst("KURA_MODE",
+						Integer.toString(this.getSupplicantMode()));
+	
+				if (this.m_essid != null) {
+					fileAsString = fileAsString.replaceFirst("KURA_ESSID",
+							this.m_essid);
+				} else {
+					throw KuraException.internalError("the essid can not be null");
+				}
+				if (this.m_passwd != null) {
+					if (this.m_passwd.length() == 10) {
+						// check to make sure it is all hex
+						try {
+							Long.parseLong(this.m_passwd, 16);
+						} catch (Exception e) {
+							throw KuraException
+									.internalError("the WEP key (passwd) must be all HEX characters (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, a, b, c, d, e, and f");
+						}
+	
+						// since we're here - save the password
+						fileAsString = fileAsString.replaceFirst("KURA_WEP_KEY",
+								this.m_passwd);
+					} else if (this.m_passwd.length() == 26) {
+						String part1 = this.m_passwd.substring(0, 13);
+						String part2 = this.m_passwd.substring(13);
+	
+						try {
+							Long.parseLong(part1, 16);
+							Long.parseLong(part2, 16);
+						} catch (Exception e) {
+							throw KuraException
+									.internalError("the WEP key (passwd) must be all HEX characters (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, a, b, c, d, e, and f");
+						}
+	
+						// since we're here - save the password
+						fileAsString = fileAsString.replaceFirst("KURA_WEP_KEY",
+								m_passwd);
+					} else if (this.m_passwd.length() == 32) {
+						String part1 = this.m_passwd.substring(0, 10);
+						String part2 = this.m_passwd.substring(10, 20);
+						String part3 = this.m_passwd.substring(20);
+						try {
+							Long.parseLong(part1, 16);
+							Long.parseLong(part2, 16);
+							Long.parseLong(part3, 16);
+						} catch (Exception e) {
+							throw KuraException
+									.internalError("the WEP key (passwd) must be all HEX characters (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, a, b, c, d, e, and f");
+						}
+	
+						// since we're here - save the password
+						fileAsString = fileAsString.replaceFirst("KURA_WEP_KEY",
+								m_passwd);
+					} else if ((this.m_passwd.length() == 5)
+							|| (this.m_passwd.length() == 13)
+							|| (this.m_passwd.length() == 16)) {
+	
+						// 5, 13, or 16 ASCII characters
+						this.m_passwd = this.toHex(this.m_passwd);
+	
+						// since we're here - save the password
+						fileAsString = fileAsString.replaceFirst("KURA_WEP_KEY",
+								m_passwd);
+					} else {
+						throw KuraException
+								.internalError("the WEP key (passwd) must be 10, 26, or 32 HEX characters in length");
+					}
+				} else {
+					throw KuraException.internalError("the passwd can not be null");
+				}
+				
+				if (this.m_bgscan != null) {
+					fileAsString = fileAsString.replaceFirst("KURA_BGSCAN",
+							this.m_bgscan.toString());
+				} else {
+					fileAsString = fileAsString.replaceFirst("KURA_BGSCAN", "");
+				}
+	
+				if(m_scanChannels != null && m_scanChannels.length > 0) {
+					fileAsString = fileAsString.replaceFirst("KURA_SCANFREQ",
+							this.getScanFrequenciesMHz(this.m_scanChannels));
+				} else {
+					fileAsString = fileAsString.replaceFirst("scan_freq=KURA_SCANFREQ",
+							"");
+				}
 			}
-
-			if(m_scanChannels != null && m_scanChannels.length > 0) {
-				fileAsString = fileAsString.replaceFirst("KURA_SCANFREQ",
-						this.getScanFrequenciesMHz(this.m_scanChannels));
-			} else {
-				fileAsString = fileAsString.replaceFirst("scan_freq=KURA_SCANFREQ",
-						"");
-			}
-
 		} else if ((this.m_security == WifiSecurity.SECURITY_WPA)
 				|| (this.m_security == WifiSecurity.SECURITY_WPA2)) {
 
 			if (m_mode == WifiMode.INFRA) {
 				is = this.getClass().getResourceAsStream(
 						"/src/main/resources/wifi/wpasupplicant.conf_wpa");
-				fileAsString = readInputStreamAsString(is);
+				if (is != null) {
+					fileAsString = readInputStreamAsString(is);
+					is.close();
+					is = null;
+				}
 			} else if (m_mode == WifiMode.ADHOC) {
 				is = this.getClass().getResourceAsStream(
 						"/src/main/resources/wifi/wpasupplicant.conf_adhoc_wpa");
-				fileAsString = readInputStreamAsString(is);
-				fileAsString = fileAsString
-						.replaceFirst("KURA_FREQUENCY", Integer.toString(this
-								.getChannelFrequencyMHz(this.m_scanChannels[0])));
-				fileAsString = fileAsString
-						.replaceFirst("KURA_PAIRWISE", "NONE");
+				if (is != null) {
+					fileAsString = readInputStreamAsString(is);
+					fileAsString = fileAsString
+							.replaceFirst("KURA_FREQUENCY", Integer.toString(this
+									.getChannelFrequencyMHz(this.m_scanChannels[0])));
+					fileAsString = fileAsString
+							.replaceFirst("KURA_PAIRWISE", "NONE");
+					is.close();
+					is = null;
+				}
 			} else {
 				throw KuraException
 						.internalError("Failed to generate wpa_supplicant.conf -- Invalid mode: "
 								+ this.m_mode);
 			}
 
-			// replace the necessary components
-			fileAsString = fileAsString.replaceFirst("KURA_MODE",
-					Integer.toString(this.getSupplicantMode()));
-
-			if (this.m_essid != null) {
-				fileAsString = fileAsString.replaceFirst("KURA_ESSID",
-						this.m_essid);
-			} else {
-				throw KuraException.internalError("the essid can not be null");
-			}
-			if (this.m_passwd != null && m_passwd.trim().length() > 0) {
-				if ((this.m_passwd.length() < 8)
-						|| (this.m_passwd.length() > 63)) {
-					throw KuraException
-							.internalError("the WPA passphrase (passwd) must be between 8 (inclusive) and 63 (inclusive) characters in length: " + m_passwd);
+			if (fileAsString != null) {
+				// replace the necessary components
+				fileAsString = fileAsString.replaceFirst("KURA_MODE",
+						Integer.toString(this.getSupplicantMode()));
+	
+				if (this.m_essid != null) {
+					fileAsString = fileAsString.replaceFirst("KURA_ESSID",
+							this.m_essid);
 				} else {
-					fileAsString = fileAsString.replaceFirst("KURA_PASSPHRASE",
-							this.m_passwd.trim());
+					throw KuraException.internalError("the essid can not be null");
 				}
-			} else {
-				throw KuraException.internalError("the passwd can not be null");
+				if (this.m_passwd != null && m_passwd.trim().length() > 0) {
+					if ((this.m_passwd.length() < 8)
+							|| (this.m_passwd.length() > 63)) {
+						throw KuraException
+								.internalError("the WPA passphrase (passwd) must be between 8 (inclusive) and 63 (inclusive) characters in length: " + m_passwd);
+					} else {
+						fileAsString = fileAsString.replaceFirst("KURA_PASSPHRASE",
+								this.m_passwd.trim());
+					}
+				} else {
+					throw KuraException.internalError("the passwd can not be null");
+				}
+				
+				if(m_security == WifiSecurity.SECURITY_WPA) {
+					fileAsString = fileAsString.replaceFirst("KURA_PROTO", "WPA");
+				} else if(m_security == WifiSecurity.SECURITY_WPA2) {
+					fileAsString = fileAsString.replaceFirst("KURA_PROTO", "RSN");
+				} else if(m_security == WifiSecurity.SECURITY_WPA_WPA2) {
+					fileAsString = fileAsString.replaceFirst("KURA_PROTO", "WPA RSN");
+				}
+	
+				if (this.m_pairwiseCiphers != null) {
+					fileAsString = fileAsString.replaceFirst("KURA_PAIRWISE",
+							WifiCiphers.toString(this.m_pairwiseCiphers));
+				} else {
+					fileAsString = fileAsString.replaceFirst("KURA_PAIRWISE",
+							"CCMP TKIP");
+				}
+	
+				if (this.m_groupCiphers != null) {
+					fileAsString = fileAsString.replaceFirst("KURA_GROUP",
+							WifiCiphers.toString(this.m_groupCiphers));
+				} else {
+					fileAsString = fileAsString.replaceFirst("KURA_GROUP",
+							"CCMP TKIP");
+				}
+				
+				if (this.m_bgscan != null) {
+					fileAsString = fileAsString.replaceFirst("KURA_BGSCAN",
+							this.m_bgscan.toString());
+				} else {
+					fileAsString = fileAsString.replaceFirst("KURA_BGSCAN", "");
+				}
+	
+				if(m_scanChannels != null && m_scanChannels.length > 0) {
+					fileAsString = fileAsString.replaceFirst("KURA_SCANFREQ",
+							this.getScanFrequenciesMHz(this.m_scanChannels));
+				} else {
+					fileAsString = fileAsString.replaceFirst("scan_freq=KURA_SCANFREQ",
+							"");
+				}
 			}
-			
-			if(m_security == WifiSecurity.SECURITY_WPA) {
-				fileAsString = fileAsString.replaceFirst("KURA_PROTO", "WPA");
-			} else if(m_security == WifiSecurity.SECURITY_WPA2) {
-				fileAsString = fileAsString.replaceFirst("KURA_PROTO", "RSN");
-			} else if(m_security == WifiSecurity.SECURITY_WPA_WPA2) {
-				fileAsString = fileAsString.replaceFirst("KURA_PROTO", "WPA RSN");
-			}
-
-			if (this.m_pairwiseCiphers != null) {
-				fileAsString = fileAsString.replaceFirst("KURA_PAIRWISE",
-						WifiCiphers.toString(this.m_pairwiseCiphers));
-			} else {
-				fileAsString = fileAsString.replaceFirst("KURA_PAIRWISE",
-						"CCMP TKIP");
-			}
-
-			if (this.m_groupCiphers != null) {
-				fileAsString = fileAsString.replaceFirst("KURA_GROUP",
-						WifiCiphers.toString(this.m_groupCiphers));
-			} else {
-				fileAsString = fileAsString.replaceFirst("KURA_GROUP",
-						"CCMP TKIP");
-			}
-			
-			if (this.m_bgscan != null) {
-				fileAsString = fileAsString.replaceFirst("KURA_BGSCAN",
-						this.m_bgscan.toString());
-			} else {
-				fileAsString = fileAsString.replaceFirst("KURA_BGSCAN", "");
-			}
-
-			if(m_scanChannels != null && m_scanChannels.length > 0) {
-				fileAsString = fileAsString.replaceFirst("KURA_SCANFREQ",
-						this.getScanFrequenciesMHz(this.m_scanChannels));
-			} else {
-				fileAsString = fileAsString.replaceFirst("scan_freq=KURA_SCANFREQ",
-						"");
-			}
-			
 		} else if (this.m_security == WifiSecurity.SECURITY_NONE) {
 
 			if (m_mode == WifiMode.INFRA) {
 				is = this.getClass().getResourceAsStream(
 						"/src/main/resources/wifi/wpasupplicant.conf_open");
-				fileAsString = readInputStreamAsString(is);
+				if (is != null) {
+					fileAsString = readInputStreamAsString(is);
+					is.close();
+					is = null;
+				}
 			} else if (m_mode == WifiMode.ADHOC) {
 				is = this.getClass().getResourceAsStream(
 						"/src/main/resources/wifi/wpasupplicant.conf_adhoc_open");
-				fileAsString = readInputStreamAsString(is);
-				fileAsString = fileAsString
-						.replaceFirst("KURA_FREQUENCY", Integer.toString(this
-								.getChannelFrequencyMHz(this.m_scanChannels[0])));
+				if (is != null) {
+					fileAsString = readInputStreamAsString(is);
+					fileAsString = fileAsString
+							.replaceFirst("KURA_FREQUENCY", Integer.toString(this
+									.getChannelFrequencyMHz(this.m_scanChannels[0])));
+					is.close();
+					is = null;
+				}
 			} else {
 				throw KuraException
 						.internalError("Failed to generate wpa_supplicant.conf -- Invalid mode: "
 								+ this.m_mode);
 			}
 
-			// replace the necessary components
-			fileAsString = fileAsString.replaceFirst("KURA_MODE",
-					Integer.toString(this.getSupplicantMode()));
-
-			if (this.m_essid != null) {
-				fileAsString = fileAsString.replaceFirst("KURA_ESSID",
-						this.m_essid);
-			} else {
-				throw KuraException.internalError("the essid can not be null");
+			if (fileAsString != null) {
+				// replace the necessary components
+				fileAsString = fileAsString.replaceFirst("KURA_MODE",
+						Integer.toString(this.getSupplicantMode()));
+	
+				if (this.m_essid != null) {
+					fileAsString = fileAsString.replaceFirst("KURA_ESSID",
+							this.m_essid);
+				} else {
+					throw KuraException.internalError("the essid can not be null");
+				}
+				
+				if (this.m_bgscan != null) {
+					fileAsString = fileAsString.replaceFirst("KURA_BGSCAN",
+							this.m_bgscan.toString());
+				} else {
+					fileAsString = fileAsString.replaceFirst("KURA_BGSCAN", "");
+				}
+	
+				if(m_scanChannels != null && m_scanChannels.length > 0) {
+					fileAsString = fileAsString.replaceFirst("KURA_SCANFREQ",
+							this.getScanFrequenciesMHz(this.m_scanChannels));
+				} else {
+					fileAsString = fileAsString.replaceFirst("scan_freq=KURA_SCANFREQ",
+							"");
+				}
 			}
-			
-			if (this.m_bgscan != null) {
-				fileAsString = fileAsString.replaceFirst("KURA_BGSCAN",
-						this.m_bgscan.toString());
-			} else {
-				fileAsString = fileAsString.replaceFirst("KURA_BGSCAN", "");
-			}
-
-			if(m_scanChannels != null && m_scanChannels.length > 0) {
-				fileAsString = fileAsString.replaceFirst("KURA_SCANFREQ",
-						this.getScanFrequenciesMHz(this.m_scanChannels));
-			} else {
-				fileAsString = fileAsString.replaceFirst("scan_freq=KURA_SCANFREQ",
-						"");
-			}
-
 		} else {
 			s_logger.error("unsupported security type: " + this.m_security);
 			throw KuraException.internalError("unsupported security type: "

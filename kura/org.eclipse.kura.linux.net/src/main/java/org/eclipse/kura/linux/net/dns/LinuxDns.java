@@ -85,11 +85,6 @@ public class LinuxDns {
 					}
 				}
 				
-				if(br != null) {
-					br.close();
-					br = null;
-				}
-				
 				if(servers.size() > 0) {
 					return servers;
 				} else {
@@ -99,6 +94,15 @@ public class LinuxDns {
 			} catch (Exception e) {
 				e.printStackTrace();
 				return null;
+			} finally {
+				if (br != null) {
+					try {
+						br.close();
+						br = null;
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
 			}
 		}
 	}
@@ -138,6 +142,7 @@ public class LinuxDns {
 				if(br != null) {
 					try {
 						br.close();
+						br = null;
 					} catch (IOException e) {
 						throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
 					}
@@ -215,13 +220,17 @@ public class LinuxDns {
 	    					}
 	    				}
 					}
-					
-	    			if(br != null) {
-	    				br.close();
-	    				br = null;
-	    			}
 				} catch (Exception e) {
 					throw new KuraException (KuraErrorCode.INTERNAL_ERROR, e);
+				} finally {
+					if (br != null) {
+						try {
+							br.close();
+							br = null;
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
+					}
 				}
 			} else if(globalDhClientFile.exists()) {
 				try {
@@ -254,13 +263,17 @@ public class LinuxDns {
 	    					}
 	    				}
 					}
-					
-	    			if(br != null) {
-	    				br.close();
-	    				br = null;
-	    			}
 				} catch (Exception e) {
 					throw new KuraException (KuraErrorCode.INTERNAL_ERROR, e);
+				} finally {
+					if (br != null) {
+						try {
+							br.close();
+							br = null;
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
+					}
 				}
 				
 			} else {
@@ -304,14 +317,18 @@ public class LinuxDns {
 	    					}
 	    				}
 	    			}
-	    			
-	    			if(br != null) {
-	    				br.close();
-	    				br = null;
-	    			}
 	    		} catch (Exception e) {
 	    			throw new KuraException (KuraErrorCode.INTERNAL_ERROR, e);
-	    		}    	
+	    		} finally {
+	    			if (br != null) {
+	    				try {
+							br.close();
+							br = null;
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
+	    			}
+	    		}
 			}
 		}
 		

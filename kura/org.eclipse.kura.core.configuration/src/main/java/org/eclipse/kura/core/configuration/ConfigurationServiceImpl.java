@@ -820,7 +820,6 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 
 
 	private boolean allSnapshotsUnencrypted() {
-		s_logger.info("Verify if all snapshots are unencrypted.");
 		try {
 			Set<Long> snapshotIDs = getSnapshots();
 			if (snapshotIDs == null || snapshotIDs.size() == 0) {
@@ -877,7 +876,6 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 	}
 
 	private void encryptPlainSnapshots() throws Exception {
-		s_logger.info("Encrypting unencrypted snapshots.");
 		Set<Long> snapshotIDs = getSnapshots();
 		if (snapshotIDs == null || snapshotIDs.size() == 0) {
 			return;
@@ -911,7 +909,6 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 					fr.close();
 				}
 			}
-			
 			List<ComponentConfigurationImpl> configs = xmlConfigs.getConfigurations();
 			List<ComponentConfigurationImpl> configImpls = encryptConfigs(configs);
 			XmlComponentConfigurations conf = new XmlComponentConfigurations();
@@ -1234,7 +1231,6 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 			FileReader fr = null;
 			try {				
 				if(allSnapshotsUnencrypted()){
-					s_logger.info("All snapshots unencrypted.");
 					fr = new FileReader(fSnapshot);
 					xmlConfigs = XmlUtil.unmarshal(fr, XmlComponentConfigurations.class);
 					encryptPlainSnapshots();

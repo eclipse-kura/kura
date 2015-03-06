@@ -686,12 +686,22 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 
 		// Unmarshall
 		XmlComponentConfigurations xmlConfigs = null;
+		FileReader fr = null;
 		try {			
-			FileReader fr = new FileReader(fSnapshot);
+			fr = new FileReader(fSnapshot);
 			xmlConfigs = XmlUtil.unmarshal(fr, XmlComponentConfigurations.class);			
 		}
 		catch (Exception e) {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+		} finally {
+			if (fr != null) {
+				try {
+					fr.close();
+					fr = null;
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
 		}
 		return xmlConfigs;
 	}
@@ -960,13 +970,23 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 		// Unmarshall
 		s_logger.info("Loading init configurations from: {}...", snapshot);
 		XmlComponentConfigurations xmlConfigs = null;
+		FileReader  fr = null;
 		try {
-			
-			FileReader  fr = new FileReader(fSnapshot);
+			fr = new FileReader(fSnapshot);
 			xmlConfigs = XmlUtil.unmarshal(fr, XmlComponentConfigurations.class);			
 		}
 		catch (Exception e) {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+		} finally {
+			if (fr != null) {
+				try {
+					fr.close();
+					fr = null;
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				
+			}
 		}
 
 		//

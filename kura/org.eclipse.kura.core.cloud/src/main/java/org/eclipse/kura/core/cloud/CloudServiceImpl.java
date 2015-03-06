@@ -10,14 +10,17 @@
  *   Eurotech
  */
 /*
-* Copyright (c) 2011 Eurotech Inc. All rights reserved.
-*/
+ * Copyright (c) 2011 Eurotech Inc. All rights reserved.
+ */
 
 package org.eclipse.kura.core.cloud;
 
 import java.io.IOException;
+import java.security.Signature;
+import java.security.cert.Certificate;
 import java.util.ArrayList;
 import java.util.Dictionary;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
@@ -27,6 +30,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraInvalidMessageException;
+import org.eclipse.kura.certificate.CertificatesService;
 import org.eclipse.kura.cloud.CloudClient;
 import org.eclipse.kura.cloud.CloudConnectionEstablishedEvent;
 import org.eclipse.kura.cloud.CloudConnectionLostEvent;
@@ -34,7 +38,6 @@ import org.eclipse.kura.cloud.CloudPayloadProtoBufDecoder;
 import org.eclipse.kura.cloud.CloudPayloadProtoBufEncoder;
 import org.eclipse.kura.cloud.CloudService;
 import org.eclipse.kura.configuration.ConfigurableComponent;
-import org.eclipse.kura.core.message.KuraBirthPayload;
 import org.eclipse.kura.data.DataService;
 import org.eclipse.kura.data.DataServiceListener;
 import org.eclipse.kura.message.KuraPayload;
@@ -45,6 +48,7 @@ import org.eclipse.kura.position.PositionLockedEvent;
 import org.eclipse.kura.position.PositionService;
 import org.eclipse.kura.system.SystemAdminService;
 import org.eclipse.kura.system.SystemService;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
@@ -56,9 +60,9 @@ import org.slf4j.LoggerFactory;
 public class CloudServiceImpl implements CloudService, DataServiceListener, ConfigurableComponent, EventHandler, CloudPayloadProtoBufEncoder, CloudPayloadProtoBufDecoder
 {	
 	private static final Logger s_logger = LoggerFactory.getLogger(CloudServiceImpl.class);
-	
+
 	private static final String     TOPIC_BA_APP = "BA";
-	
+
 	private ComponentContext        m_ctx;
 
 	private CloudServiceOptions     m_options;
@@ -69,20 +73,21 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
 	private NetworkService          m_networkService;
 	private PositionService		    m_positionService;
 	private EventAdmin              m_eventAdmin;
+	private CertificatesService     m_certificatesService;
 
 	// use a synchronized implementation for the list
 	private List<CloudClientImpl>   m_cloudClients;
-	
+
 	// package visibility for LyfeCyclePayloadBuilder
 	String                  		m_imei;
 	String                  		m_iccid;
 	String                  		m_imsi;
 
-	
+
 	public CloudServiceImpl() {
 		m_cloudClients = new CopyOnWriteArrayList<CloudClientImpl>();
 	}
-	
+
 	// ----------------------------------------------------------------
 	//
 	//   Dependencies
@@ -96,7 +101,7 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
 	public void unsetDataService(DataService dataService) {
 		this.m_dataService = null;
 	}
-	
+
 	public DataService getDataService() {
 		return m_dataService;
 	}
@@ -128,11 +133,11 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
 	public void setNetworkService(NetworkService networkService) {
 		this.m_networkService = networkService;
 	}
-	
+
 	public void unsetNetworkService(NetworkService networkService) {
 		this.m_networkService = null;
 	}
-	
+
 	public NetworkService getNetworkService() {
 		return m_networkService;
 	}
@@ -140,7 +145,7 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
 	public void setPositionService(PositionService positionService) {
 		this.m_positionService = positionService;
 	}
-	
+
 	public void unsetPositionService(PositionService positionService) {
 		this.m_positionService = null;
 	}
@@ -148,16 +153,16 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
 	public PositionService getPositionService() {
 		return m_positionService;
 	}
-	
+
 	public void setEventAdmin(EventAdmin eventAdmin) {
 		this.m_eventAdmin = eventAdmin;
 	}
-	
+
 	public void unsetEventAdmin(EventAdmin eventAdmin) {
 		this.m_eventAdmin = null;
 	}
-	
-	
+
+
 	// ----------------------------------------------------------------
 	//
 	//   Activation APIs
@@ -167,7 +172,7 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
 	protected void activate(ComponentContext componentContext, Map<String,Object> properties) 
 	{
 		s_logger.info("activate...");
-		
+
 		//
 		// save the bundle context and the properties
 		m_ctx = componentContext;
@@ -179,8 +184,12 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
 		String[] eventTopics = {PositionLockedEvent.POSITION_LOCKED_EVENT_TOPIC, ModemReadyEvent.MODEM_EVENT_READY_TOPIC};
 		props.put(EventConstants.EVENT_TOPIC, eventTopics);
 		m_ctx.getBundleContext().registerService(EventHandler.class.getName(), this, props);
+		ServiceReference<CertificatesService> sr= m_ctx.getBundleContext().getServiceReference(CertificatesService.class);
+		if(sr != null){
+			m_certificatesService= m_ctx.getBundleContext().getService(sr);
+		}
 	}
-		
+
 	public void updated(Map<String,Object> properties)
 	{
 		s_logger.info("updated...: " + properties);
@@ -191,7 +200,7 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
 			publishBirthCertificate();
 		}
 	}
-	
+
 	protected void deactivate(ComponentContext componentContext) 
 	{
 		s_logger.info("deactivate...");
@@ -212,8 +221,8 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
 		m_positionService    = null;
 		m_eventAdmin         = null;
 	}
-	
-	
+
+
 	public void handleEvent(Event event) 
 	{
 		if (PositionLockedEvent.POSITION_LOCKED_EVENT_TOPIC.contains(event.getTopic())) {
@@ -233,7 +242,7 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
 			s_logger.trace("handleEvent() :: IMEI={}", m_imei);
 			s_logger.trace("handleEvent() :: IMSI={}", m_imsi);
 			s_logger.trace("handleEvent() :: ICCID={}", m_iccid);
-			
+
 			if (m_dataService.isConnected() && m_options.getRepubBirthCertOnModemDetection()) {
 				if (!(((m_imei == null) || (m_imei.length() == 0) || m_imei.equals("ERROR"))
 						&& ((m_imsi == null) || (m_imsi.length() == 0) || m_imsi.equals("ERROR"))
@@ -244,9 +253,9 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
 			}
 		}
 	}
-	
-	
-	
+
+
+
 	// ----------------------------------------------------------------
 	//
 	//   Service APIs
@@ -255,24 +264,24 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
 
 	@Override
 	public CloudClient newCloudClient(String applicationId)
-		throws KuraException 
+			throws KuraException 
 	{
 		// create new instance
 		CloudClientImpl cloudClient = new CloudClientImpl(applicationId,
-														  m_dataService,
-													      this);
+				m_dataService,
+				this);
 		m_cloudClients.add(cloudClient);
-		
+
 		// publish updated birth certificate with list of active apps
 		if (m_dataService != null && m_dataService.isConnected()) {
 			publishAppCertificate();
 		}
-		
+
 		// return 
 		return cloudClient;
 	}
-	
-	
+
+
 	@Override
 	public String[] getCloudApplicationIdentifiers() 
 	{
@@ -288,8 +297,8 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
 	{
 		return (m_dataService != null && m_dataService.isConnected());
 	}
-	
-	
+
+
 	// ----------------------------------------------------------------
 	//
 	//   Package APIs
@@ -299,33 +308,33 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
 	public CloudServiceOptions getCloudServiceOptions() {
 		return m_options;
 	}
-	
-	
+
+
 	public void removeCloudClient(CloudClientImpl cloudClient) 
 	{
 		// remove the client		
 		m_cloudClients.remove(cloudClient);
-		
+
 		// publish updated birth certificate with updated list of active apps
 		if (m_dataService != null && m_dataService.isConnected()) {
 			publishAppCertificate();
 		}
 	}
-	
-	
+
+
 	byte[] encodePayload(KuraPayload payload)
-		throws KuraException
+			throws KuraException
 	{
 		byte[] bytes = new byte[0];
 		if (payload == null) {
 			return bytes;
 		}
-		
+
 		CloudPayloadEncoder encoder = new CloudPayloadProtoBufEncoderImpl(payload);
 		if (m_options.getEncodeGzip()) {
 			encoder = new CloudPayloadGZipEncoder(encoder);
 		}
-		
+
 		try {
 			bytes = encoder.getBytes();
 			return bytes;
@@ -335,8 +344,8 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
 		}
 	}
 
-	
-	
+
+
 	// ----------------------------------------------------------------
 	//
 	//   DataServiceListener API
@@ -348,30 +357,30 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
 	{
 		// publish birth certificate
 		publishBirthCertificate();
-		
+
 		// raise event
 		m_eventAdmin.postEvent( new CloudConnectionEstablishedEvent( new HashMap<String,Object>()));		
-		
+
 		// restore default subscriptions
 		activateDeviceSubscriptions();
-		
+
 		// notify listeners
 		for (CloudClientImpl cloudClient : m_cloudClients) {
 			cloudClient.onConnectionEstablished();
 		}
 	}
-	
+
 
 	private void activateDeviceSubscriptions()		
 	{
 		StringBuilder sbDeviceSubscription = new StringBuilder();
 		sbDeviceSubscription.append(m_options.getTopicControlPrefix())
-  						    .append(m_options.getTopicSeparator())
-						    .append(m_options.getTopicAccountToken())
-						    .append(m_options.getTopicSeparator())
-						    .append(m_options.getTopicClientIdToken())
-						    .append(m_options.getTopicSeparator())
-						    .append(m_options.getTopicWildCard());
+		.append(m_options.getTopicSeparator())
+		.append(m_options.getTopicAccountToken())
+		.append(m_options.getTopicSeparator())
+		.append(m_options.getTopicClientIdToken())
+		.append(m_options.getTopicSeparator())
+		.append(m_options.getTopicWildCard());
 
 		// restore default subscriptions
 		try {
@@ -382,7 +391,7 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
 		}
 	}
 
-	
+
 	@Override
 	public void onDisconnecting() 
 	{
@@ -401,7 +410,7 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
 	{
 		// raise event
 		m_eventAdmin.postEvent( new CloudConnectionLostEvent( new HashMap<String,Object>()));
-		
+
 		// notify listeners
 		for (CloudClientImpl cloudClient : m_cloudClients) {
 			cloudClient.onConnectionLost();
@@ -412,7 +421,7 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
 	public void onMessageArrived(String topic, byte[] payload, int qos, boolean retained) 
 	{
 		s_logger.debug("Message arrived on topic: {}", topic);		
-			
+
 		// notify listeners			
 		KuraTopic kuraTopic = new KuraTopic(topic);
 		if (TOPIC_BA_APP.equals(kuraTopic.getApplicationId())) {
@@ -430,28 +439,64 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
 				kuraPayload = new KuraPayload();
 				kuraPayload.setBody(payload);
 			}
+
+			boolean validSignature = false;
+			if(m_certificatesService != null){
+				s_logger.info("Start signature verification");
+				Enumeration<String> certList= m_certificatesService.listPublicCertificatesIDs();
+				
+				while(certList.hasMoreElements()){
+					String certAlias= certList.nextElement(); 
+					try{
+						Certificate certificate= m_certificatesService.returnCertificate(certAlias);
+						Signature s = Signature.getInstance("SHA256withRSA");
+						s.initVerify(certificate);
+						s.update(kuraTopic.getApplicationTopic().getBytes());
+						if(kuraPayload != null && kuraPayload.getBody()!=null){
+							s.update(kuraPayload.getBody());
+						}
+						byte[] signedMessage = null;
+						if(kuraPayload.getMetric("signedMessage") instanceof byte[]){
+							signedMessage = (byte[]) kuraPayload.getMetric("signedMessage");
+						}
+
+						s.verify(signedMessage);
+						validSignature= true;
+						break;
+					}catch(Exception e){
+					}
+				}
+			}
+
+
 			for (CloudClientImpl cloudClient : m_cloudClients) {
 				if (cloudClient.getApplicationId().equals(kuraTopic.getApplicationId())) {
 					try {
 						if (m_options.getTopicControlPrefix().equals(kuraTopic.getPrefix())) {
-							cloudClient.onControlMessageArrived(kuraTopic.getDeviceId(), 
-																kuraTopic.getApplicationTopic(), 
-																kuraPayload, 
-														        qos, 
-														        retained);
+							if(m_certificatesService == null || validSignature){
+								
+								cloudClient.onControlMessageArrived(kuraTopic.getDeviceId(), 
+										kuraTopic.getApplicationTopic(), 
+										kuraPayload, 
+										qos, 
+										retained);
+							}else{
+								s_logger.error("Message verification failed! Not valid signature or message not signed.");
+							}
 						}
 						else {
 							cloudClient.onMessageArrived(kuraTopic.getDeviceId(), 
-													     kuraTopic.getApplicationTopic(), 
-													     kuraPayload, 
-													     qos, 
-													     retained);
+									kuraTopic.getApplicationTopic(), 
+									kuraPayload, 
+									qos, 
+									retained);
 						}
 					}
 					catch (Exception e) {
 						s_logger.error("Error during CloudClientListener notification.", e);
 					}
 				}
+
 			}
 		}
 	}
@@ -483,14 +528,14 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
 	//   CloudPayloadProtoBufEncoder API
 	//
 	// ----------------------------------------------------------------
-	
+
 	@Override
 	public byte[] getBytes(KuraPayload kuraPayload, boolean gzipped) throws KuraException {		
 		CloudPayloadEncoder encoder = new CloudPayloadProtoBufEncoderImpl(kuraPayload);
 		if (gzipped) {
 			encoder = new CloudPayloadGZipEncoder(encoder);
 		}
-		
+
 		byte[] bytes;
 		try {
 			bytes = encoder.getBytes();
@@ -506,12 +551,12 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
 	//   CloudPayloadProtoBufDecoder API
 	//
 	// ----------------------------------------------------------------
-	
+
 	@Override
 	public KuraPayload buildFromByteArray(byte[] payload) throws KuraException {
 		CloudPayloadProtoBufDecoderImpl encoder = new CloudPayloadProtoBufDecoderImpl(payload);
 		KuraPayload kuraPayload;
-		
+
 		try {
 			kuraPayload = encoder.buildFromByteArray();
 			return kuraPayload;
@@ -521,88 +566,88 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
 			throw new KuraException(KuraErrorCode.DECODER_ERROR, e);
 		}
 	}
-	
+
 	// ----------------------------------------------------------------
 	//
 	//   Birth and Disconnect Certificates
 	//
 	// ----------------------------------------------------------------
-		
-	
+
+
 	private void publishBirthCertificate() 
 	{
 		StringBuilder sbTopic = new StringBuilder();
 		sbTopic.append(m_options.getTopicControlPrefix())
-		  	   .append(m_options.getTopicSeparator())
-		       .append(m_options.getTopicAccountToken())
-		       .append(m_options.getTopicSeparator())
-		       .append(m_options.getTopicClientIdToken())
-		       .append(m_options.getTopicSeparator())
-		       .append(m_options.getTopicBirthSuffix());
-		
-		String topic = sbTopic.toString();
-		KuraPayload payload = createBirthPayload();
-		publishLifeCycleMessage(topic, payload);
-	}
-	
-	
-	private void publishDisconnectCertificate() 
-	{
-		StringBuilder sbTopic = new StringBuilder();
-		sbTopic.append(m_options.getTopicControlPrefix())
-		  	   .append(m_options.getTopicSeparator())
-		       .append(m_options.getTopicAccountToken())
-		       .append(m_options.getTopicSeparator())
-		       .append(m_options.getTopicClientIdToken())
-		       .append(m_options.getTopicSeparator())
-		       .append(m_options.getTopicDisconnectSuffix());
-		
-		String topic = sbTopic.toString();
-		KuraPayload payload = createDisconnectPayload();
-		publishLifeCycleMessage(topic, payload);
-	}
-	
-	
-	private void publishAppCertificate() 
-	{
-		StringBuilder sbTopic = new StringBuilder();
-		sbTopic.append(m_options.getTopicControlPrefix())
-		  	   .append(m_options.getTopicSeparator())
-		       .append(m_options.getTopicAccountToken())
-		       .append(m_options.getTopicSeparator())
-		       .append(m_options.getTopicClientIdToken())
-		       .append(m_options.getTopicSeparator())
-		       .append(m_options.getTopicAppsSuffix());
-		
+		.append(m_options.getTopicSeparator())
+		.append(m_options.getTopicAccountToken())
+		.append(m_options.getTopicSeparator())
+		.append(m_options.getTopicClientIdToken())
+		.append(m_options.getTopicSeparator())
+		.append(m_options.getTopicBirthSuffix());
+
 		String topic = sbTopic.toString();
 		KuraPayload payload = createBirthPayload();
 		publishLifeCycleMessage(topic, payload);
 	}
 
-	
+
+	private void publishDisconnectCertificate() 
+	{
+		StringBuilder sbTopic = new StringBuilder();
+		sbTopic.append(m_options.getTopicControlPrefix())
+		.append(m_options.getTopicSeparator())
+		.append(m_options.getTopicAccountToken())
+		.append(m_options.getTopicSeparator())
+		.append(m_options.getTopicClientIdToken())
+		.append(m_options.getTopicSeparator())
+		.append(m_options.getTopicDisconnectSuffix());
+
+		String topic = sbTopic.toString();
+		KuraPayload payload = createDisconnectPayload();
+		publishLifeCycleMessage(topic, payload);
+	}
+
+
+	private void publishAppCertificate() 
+	{
+		StringBuilder sbTopic = new StringBuilder();
+		sbTopic.append(m_options.getTopicControlPrefix())
+		.append(m_options.getTopicSeparator())
+		.append(m_options.getTopicAccountToken())
+		.append(m_options.getTopicSeparator())
+		.append(m_options.getTopicClientIdToken())
+		.append(m_options.getTopicSeparator())
+		.append(m_options.getTopicAppsSuffix());
+
+		String topic = sbTopic.toString();
+		KuraPayload payload = createBirthPayload();
+		publishLifeCycleMessage(topic, payload);
+	}
+
+
 	private KuraPayload createBirthPayload()
 	{		
 		LifeCyclePayloadBuilder payloadBuilder = new LifeCyclePayloadBuilder(this);
 		return payloadBuilder.buildBirthPayload();
 	}
-	
-	
+
+
 	private KuraPayload createDisconnectPayload() 
 	{
 		LifeCyclePayloadBuilder payloadBuilder = new LifeCyclePayloadBuilder(this);
 		return payloadBuilder.buildDisconnectPayload();
 	}
-		
-	
+
+
 	private void publishLifeCycleMessage(String topic, KuraPayload payload) 
 	{
 		try {			
 			byte[] encodedPayload = encodePayload(payload);
 			m_dataService.publish(topic, 
-								  encodedPayload, 
-							      m_options.getLifeCycleMessageQos(), 
-							      m_options.getLifeCycleMessageRetain(), 
-							      m_options.getLifeCycleMessagePriority());
+					encodedPayload, 
+					m_options.getLifeCycleMessageQos(), 
+					m_options.getLifeCycleMessageRetain(), 
+					m_options.getLifeCycleMessagePriority());
 		}
 		catch (Exception e) {
 			s_logger.error("Error publishing life-cycle message on topic: "+topic, e);

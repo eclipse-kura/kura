@@ -31,6 +31,7 @@ import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.linux.util.LinuxProcessUtil;
 import org.eclipse.kura.core.util.ProcessUtil;
+import org.eclipse.kura.core.util.SafeProcess;
 import org.eclipse.kura.net.wifi.WifiRadioMode;
 import org.eclipse.kura.net.wifi.WifiSecurity;
 import org.slf4j.Logger;
@@ -316,7 +317,7 @@ public class Hostapd {
 		this.saveConfig();
 		
 		if(this.m_isConfigured) {
-			Process proc = null;
+			SafeProcess proc = null;
 			try {
 				if(this.isEnabled()) {
 					this.disable();
@@ -335,7 +336,7 @@ public class Hostapd {
 				throw KuraException.internalError(e);
 			}
 			finally {
-				ProcessUtil.destroy(proc);
+				if (proc != null) ProcessUtil.destroy(proc);
 			}
 		} else {
 			s_logger.error("Hostapd failed to configure - so can not start");
@@ -358,7 +359,7 @@ public class Hostapd {
 	 * @throws Exception
 	 */
 	public static void killAll() throws KuraException {
-		Process proc = null;
+		SafeProcess proc = null;
 		try {
 			//kill hostapd
 			s_logger.debug("stopping hostapd");
@@ -369,7 +370,7 @@ public class Hostapd {
 			throw KuraException.internalError(e);
 		}
 		finally {
-			ProcessUtil.destroy(proc);
+			if (proc != null) ProcessUtil.destroy(proc);
 		}
 	}
 	
@@ -820,8 +821,8 @@ public class Hostapd {
 	 * This method sets permissions to hostapd configuration file 
 	 */
 	private void setPermissions(String fileName) throws KuraException {
-		Process procDos = null;
-		Process procChmod = null;
+		SafeProcess procDos = null;
+		SafeProcess procChmod = null;
 		try {
 			procChmod = ProcessUtil.exec("chmod 600 " + fileName);
 			procChmod.waitFor();
@@ -832,8 +833,8 @@ public class Hostapd {
 			throw KuraException.internalError(e);
 		}
 		finally {
-			ProcessUtil.destroy(procChmod);
-			ProcessUtil.destroy(procDos);			
+			if (procChmod != null) ProcessUtil.destroy(procChmod);
+			if (procDos != null) ProcessUtil.destroy(procDos);			
 		}
 	}
 

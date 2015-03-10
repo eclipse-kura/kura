@@ -24,6 +24,7 @@ import java.util.HashSet;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.util.ProcessUtil;
+import org.eclipse.kura.core.util.SafeProcess;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,13 +45,18 @@ public class WifiOptions {
 	public static Collection<String> getSupportedOptions (String ifaceName) throws KuraException {
 		
 		Collection<String> options = new HashSet<String>();
-		Process procIw = null;
-		Process procIwConfig = null;
-		Process procWhich = null;
+		SafeProcess procIw = null;
+		SafeProcess procIwConfig = null;
+		SafeProcess procWhich = null;
 		BufferedReader br1 = null;
 		BufferedReader br2 = null;
 		try {
 			procWhich = ProcessUtil.exec("which iw");
+			if (procWhich.waitFor() != 0) {
+				s_logger.error("error executing command --- which iw --- exit value = " + procWhich.exitValue());
+				throw new KuraException(KuraErrorCode.INTERNAL_ERROR);
+			}
+
 			br1 = new BufferedReader(new InputStreamReader(procWhich.getInputStream()));
 			String line = br1.readLine();
 			if (line != null) {
@@ -62,6 +68,11 @@ public class WifiOptions {
 			}
 
 			procIwConfig = ProcessUtil.exec("iwconfig " + ifaceName);
+			if (procIwConfig.waitFor() != 0) {
+				s_logger.error("error executing command --- iwconfig --- exit value = " + procIwConfig.exitValue());
+				throw new KuraException(KuraErrorCode.INTERNAL_ERROR);
+			}
+			
 			br2 = new BufferedReader(new InputStreamReader(procIwConfig.getInputStream()));
 			line = null;
 			while ((line = br2.readLine()) != null) {
@@ -90,9 +101,9 @@ public class WifiOptions {
 				}
 			}
 			
-			ProcessUtil.destroy(procIw);
-			ProcessUtil.destroy(procIwConfig);
-			ProcessUtil.destroy(procWhich);
+			if (procIw != null) ProcessUtil.destroy(procIw);
+			if (procIwConfig != null) ProcessUtil.destroy(procIwConfig);
+			if (procWhich != null) ProcessUtil.destroy(procWhich);
 		}
 		
 		return options;

@@ -20,79 +20,64 @@ public class ProcessUtil
 {
 	private static final Logger s_logger = LoggerFactory.getLogger(ProcessUtil.class);
 	
-	
-	public static Process exec(String command)
+	public static SafeProcess exec(String command)
 		throws IOException
 	{
+		s_logger.debug("Executing: {}", command);
 		Runtime runtime = Runtime.getRuntime();
-		return runtime.exec(command);
+		//return new SafeProcess(runtime.exec(command));
+		String[] cmdarray = new String[] {"/bin/bash", "-c", command};
+		return new SafeProcess(runtime.exec(cmdarray));
 	}
 
 	
-	public static Process exec(String command, String[] envp)
+//	public static SafeProcess exec(String command, String[] envp)
+//		throws IOException
+//	{
+//		s_logger.debug("Executing: {}", command);
+//		Runtime runtime = Runtime.getRuntime();
+//		return new SafeProcess(runtime.exec(command, envp));
+//	}
+//
+//	
+	public static SafeProcess exec(String[] cmdarray)
 		throws IOException
 	{
+		s_logger.debug("Executing: {}", cmdarray[0]);
 		Runtime runtime = Runtime.getRuntime();
-		return runtime.exec(command, envp);
+		//return new SafeProcess(runtime.exec(cmdarray));
+		StringBuilder sb = new StringBuilder();
+		for (String s : cmdarray) {
+			sb.append(s);
+			sb.append(" ");
+		}
+		String[] newCmdArray = new String[] {"/bin/bash", "-c", sb.toString()};
+		return new SafeProcess(runtime.exec(newCmdArray));
 	}
+//
+//	
+//	public static SafeProcess exec(String[] cmdarray, String[] envp)
+//		throws IOException
+//	{
+//		s_logger.debug("Executing: {}", cmdarray[0]);
+//		Runtime runtime = Runtime.getRuntime();
+//		return new SafeProcess(runtime.exec(cmdarray, envp));
+//	}
 
-	
-	public static Process exec(String[] cmdarray)
-		throws IOException
+	/**
+	 * @deprecated  The method does nothing
+	 */
+	@Deprecated
+	public static void close(SafeProcess proc)
 	{
-		Runtime runtime = Runtime.getRuntime();
-		return runtime.exec(cmdarray);
 	}
-
 	
-	public static Process exec(String[] cmdarray, String[] envp)
-		throws IOException
+	/**
+	 * @deprecated  Call {@link SafeProcess#destroy() instead}
+	 */
+	@Deprecated
+	public static void destroy(SafeProcess proc)
 	{
-		Runtime runtime = Runtime.getRuntime();
-		return runtime.exec(cmdarray, envp);
-	}
-	
-	
-	public static void close(Process proc) {
-		if (proc == null) {
-			return;
-		}
-		
-		try {
-			proc.getInputStream().close();
-		}
-		catch (Exception e) {
-			s_logger.warn("Exception in proc.getInputStream().close()", e);
-		}
-		
-		try {
-			proc.getOutputStream().close();
-		}
-		catch (Exception e) {
-			s_logger.warn("Exception in proc.getOutputStream().close()", e);
-		}
-
-		try {
-			proc.getErrorStream().close();;
-		}
-		catch (Exception e) {
-			s_logger.warn("Exception in proc.getErrorStream().close()", e);
-		}
-	}
-	
-	public static void destroy(Process proc) 
-	{
-		if (proc == null) {
-			return;
-		}
-		
-		ProcessUtil.close(proc);
-
-		try {
-			proc.destroy();
-		}
-		catch (Exception e) {
-			s_logger.warn("Exception in proc.destroy()", e);
-		}		
+		proc.destroy();	
 	}
 }

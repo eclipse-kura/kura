@@ -33,6 +33,7 @@ import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.util.IOUtil;
 import org.eclipse.kura.core.util.NetUtil;
 import org.eclipse.kura.core.util.ProcessUtil;
+import org.eclipse.kura.core.util.SafeProcess;
 import org.eclipse.kura.net.NetInterface;
 import org.eclipse.kura.net.NetInterfaceAddress;
 import org.eclipse.kura.net.NetworkService;
@@ -342,7 +343,7 @@ public class SystemServiceImpl implements SystemService
 		String macAddress = null;
 
 		if (OS_MAC_OSX.equals(getOsName())) {
-			Process proc = null;
+			SafeProcess proc = null;
 			try {
 				s_logger.info("executing: ifconfig and looking for " + primaryNetworkInterfaceName);
 				proc = ProcessUtil.exec("ifconfig");
@@ -379,7 +380,7 @@ public class SystemServiceImpl implements SystemService
 				s_logger.error("Failed to get network interfaces", e);
 			}
 			finally {
-				ProcessUtil.destroy(proc);
+				if (proc != null) ProcessUtil.destroy(proc);
 			}
 		} else {
 			try {
@@ -797,7 +798,7 @@ public class SystemServiceImpl implements SystemService
 
 	private String runSystemInfoCommand(String[] commands) {
 		StringBuffer response = new StringBuffer(); 
-		Process proc = null;
+		SafeProcess proc = null;
 		BufferedReader br = null;
 		try {
 			proc = ProcessUtil.exec(commands);
@@ -829,7 +830,7 @@ public class SystemServiceImpl implements SystemService
 					}
 				}
 			}
-			ProcessUtil.destroy(proc);
+			if (proc != null) ProcessUtil.destroy(proc);
 		}
 		return response.toString();
 	}

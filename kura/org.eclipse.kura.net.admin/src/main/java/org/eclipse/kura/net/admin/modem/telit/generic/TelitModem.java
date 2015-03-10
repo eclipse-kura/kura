@@ -10,6 +10,8 @@ import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.comm.CommConnection;
 import org.eclipse.kura.comm.CommURI;
+import org.eclipse.kura.core.util.ProcessUtil;
+import org.eclipse.kura.core.util.SafeProcess;
 import org.eclipse.kura.linux.net.modem.SerialModemComm;
 import org.eclipse.kura.linux.net.modem.SerialModemDriver;
 import org.eclipse.kura.linux.net.modem.SupportedSerialModemInfo;
@@ -761,8 +763,7 @@ public abstract class TelitModem {
 				fw.write("0");
 				fw.close();
 			} else if (m_platform.equals("reliagate-50-21")) {
-				Runtime rt = Runtime.getRuntime();
-				Process pr = rt.exec("/usr/sbin/vector-j21-gpio 11 0");
+				SafeProcess pr = ProcessUtil.exec("/usr/sbin/vector-j21-gpio 11 0");
 				int status = pr.waitFor();
 				s_logger.info("turnOff() :: '/usr/sbin/vector-j21-gpio 11 0' returned {}", status);
 				if (status != 0) {
@@ -770,7 +771,7 @@ public abstract class TelitModem {
 				}
 				sleep(1000);
 
-				pr = rt.exec("/usr/sbin/vector-j21-gpio 11 1");
+				pr = ProcessUtil.exec("/usr/sbin/vector-j21-gpio 11 1");
 				status = pr.waitFor();
 				s_logger.info("turnOff() :: '/usr/sbin/vector-j21-gpio 11 1' returned {}", status);
 				if (status != 0) {
@@ -778,7 +779,7 @@ public abstract class TelitModem {
 				}
 				sleep(3000);
 
-				pr = rt.exec("/usr/sbin/vector-j21-gpio 11 0");
+				pr = ProcessUtil.exec("/usr/sbin/vector-j21-gpio 11 0");
 				status = pr.waitFor();
 				s_logger.info("turnOff() :: '/usr/sbin/vector-j21-gpio 11 0' returned {}", status);
 				retVal = (status == 0) ? true : false;
@@ -811,8 +812,7 @@ public abstract class TelitModem {
 				fw.write("1");
 				fw.close();
 			} else if (m_platform.equals("reliagate-50-21")) {
-				Runtime rt = Runtime.getRuntime();
-				Process pr = rt.exec("/usr/sbin/vector-j21-gpio 11 1");
+				SafeProcess pr = ProcessUtil.exec("/usr/sbin/vector-j21-gpio 11 1");
 				int status = pr.waitFor();
 				s_logger.info("turnOn() :: '/usr/sbin/vector-j21-gpio 11 1' returned {}", status);
 				if (status != 0) {
@@ -820,7 +820,7 @@ public abstract class TelitModem {
 				}
 				sleep(1000);
 
-				pr = rt.exec("/usr/sbin/vector-j21-gpio 6");
+				pr = ProcessUtil.exec("/usr/sbin/vector-j21-gpio 6");
 				status = pr.waitFor();
 				s_logger.info("turnOn() :: '/usr/sbin/vector-j21-gpio 6' returned {}", status);
 				retVal = (status == 0) ? true : false;

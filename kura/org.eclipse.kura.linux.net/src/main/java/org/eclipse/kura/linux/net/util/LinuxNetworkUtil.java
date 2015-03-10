@@ -28,6 +28,7 @@ import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.linux.util.LinuxProcessUtil;
 import org.eclipse.kura.core.util.ProcessUtil;
+import org.eclipse.kura.core.util.SafeProcess;
 import org.eclipse.kura.linux.net.NetworkServiceImpl;
 import org.eclipse.kura.linux.net.wifi.WifiOptions;
 import org.eclipse.kura.net.NetInterfaceType;
@@ -43,14 +44,18 @@ public class LinuxNetworkUtil {
 	private static final String OS_VERSION = System.getProperty("kura.os.version");
 
 	public static List<String> getInterfaceNames() throws KuraException {
-		Process proc = null;
+		SafeProcess proc = null;
 		BufferedReader br = null;
+		List<String> ifaces = new ArrayList<String>();
 		try {
-			List<String> ifaces = new ArrayList<String>();
 
 			//start the process
 			proc = ProcessUtil.exec("ifconfig");
-
+			if (proc.waitFor() != 0) {
+				s_logger.error("error executing command --- ifconfig --- exit value = " + proc.exitValue());
+				throw new KuraException(KuraErrorCode.INTERNAL_ERROR);
+			}
+			
 			//get the output
 			br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
 			String line = null;
@@ -61,23 +66,12 @@ public class LinuxNetworkUtil {
 					ifaces.add(st.nextToken());
 				}
 			}
-			
-			try {
-				if (proc.waitFor() != 0) {
-					s_logger.error("error executing command --- ifconfig --- exit value = " + proc.exitValue());
-					return null;
-				} else {
-					return ifaces;
-				}
-			} catch (InterruptedException e) {
-				s_logger.error("getInterfaceNames() :: InterruptedException");
-				return ifaces;
-			}
 		} catch(IOException e) {
+			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+		}  catch(InterruptedException e) {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
 		} 
 		finally {
-			ProcessUtil.destroy(proc);
 			if (br != null) {
 				try {
 					br.close();
@@ -86,18 +80,25 @@ public class LinuxNetworkUtil {
 					e.printStackTrace();
 				}
 			}
+			if (proc != null) ProcessUtil.destroy(proc);
 		}
+		
+		return ifaces;
 	}
 
 	public static List<String> getAllInterfaceNames() throws KuraException {
-		Process proc = null;
+		SafeProcess proc = null;
 		BufferedReader br = null;
 		try {
 			List<String> ifaces = new ArrayList<String>();
 
 			//start the process
 			proc = ProcessUtil.exec("ifconfig -a");
-
+			if (proc.waitFor() != 0) {
+				s_logger.error("error executing command --- ifconfig -a --- exit value = " + proc.exitValue());
+				throw new KuraException(KuraErrorCode.INTERNAL_ERROR);
+			}
+			
 			//get the output
 			br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
 			String line = null;
@@ -108,22 +109,13 @@ public class LinuxNetworkUtil {
 					ifaces.add(st.nextToken());
 				}
 			}
-
-			try {
-				if (proc.waitFor() != 0) {
-					s_logger.error("error executing command --- ifconfig -a --- exit value = " + proc.exitValue());
-					return null;
-				} else {
-					return ifaces;
-				}
-			} catch (InterruptedException e) {
-				s_logger.error("getAllInterfaceNames() :: InterruptedException");
-				return ifaces;
-			}
+			
+			return ifaces;
 		} catch(IOException e) {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
-		}
-		finally {
+		} catch(InterruptedException e) {
+			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+		} finally {
 			if(br != null){
 				try{
 					br.close();
@@ -132,17 +124,21 @@ public class LinuxNetworkUtil {
 				}
 			}
 			
-			ProcessUtil.destroy(proc);
+			if (proc != null) ProcessUtil.destroy(proc);
 		}
 	}
 
 	public static boolean isUp(String interfaceName) throws KuraException {
-		Process proc = null;
+		SafeProcess proc = null;
 		BufferedReader br = null;
 		try {
 			//start the process
 			proc = ProcessUtil.exec("ifconfig");
-
+			if (proc.waitFor() != 0) {
+				s_logger.error("error executing command --- ifconfig --- exit value = " + proc.exitValue());
+				throw new KuraException(KuraErrorCode.INTERNAL_ERROR);
+			}
+			
 			//get the output
 			br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
 			String line = null;
@@ -161,11 +157,6 @@ public class LinuxNetworkUtil {
 					return true;
 				}
 			}
-
-			if (proc.waitFor() != 0) {
-				s_logger.error("error executing command --- ifconfig --- exit value = " + proc.exitValue());
-				return false;
-			}
 		} catch(IOException e) {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
 		} catch (InterruptedException e) {
@@ -180,18 +171,22 @@ public class LinuxNetworkUtil {
 				}
 			}
 			
-			ProcessUtil.destroy(proc);
+			if (proc != null) ProcessUtil.destroy(proc);
 		}
 
 		return false;
 	}
 	
 	public static boolean isDhclientRunning(String interfaceName) throws KuraException {
-		Process proc = null;
+		SafeProcess proc = null;
 		BufferedReader br = null;
 		try {
 			//start the process
 			proc = ProcessUtil.exec("ps ax");
+			if (proc.waitFor() != 0) {
+				s_logger.error("error executing command --- ps ax --- exit value = " + proc.exitValue());
+				throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "Unable to check in dhclient is running for " + interfaceName);
+			}
 
 			//get the output
 			br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
@@ -202,11 +197,6 @@ public class LinuxNetworkUtil {
 					return true;
 				}
 			}
-
-			if (proc.waitFor() != 0) {
-				s_logger.error("error executing command --- ps ax --- exit value = " + proc.exitValue());
-				throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "Unable to check in dhclient is running for " + interfaceName);
-			}
 		} catch(IOException e) {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
 		} catch (InterruptedException e) {
@@ -221,7 +211,7 @@ public class LinuxNetworkUtil {
 				}
 			}
 			
-			ProcessUtil.destroy(proc);
+			if (proc != null) ProcessUtil.destroy(proc);
 		}
 
 		return false;
@@ -229,12 +219,16 @@ public class LinuxNetworkUtil {
 
 	public static String getCurrentIpAddress(String ifaceName) throws KuraException {
 		String ipAddress = null;
-		Process proc = null;
+		SafeProcess proc = null;
 		BufferedReader br = null;
 		try {
 			//start the process
 			proc = ProcessUtil.exec("ifconfig " + ifaceName);
-
+			if (proc.waitFor() != 0) {
+				s_logger.error("getCurrentIpAddress() :: error executing command --- ifconfig " + ifaceName + " --- exit value = " + proc.exitValue());
+				throw new KuraException(KuraErrorCode.INTERNAL_ERROR);
+			}
+			
 			//get the output
 			br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
 			String line = null;
@@ -249,11 +243,7 @@ public class LinuxNetworkUtil {
 					}
 					break;
 				}
-			}
-			
-			if (proc.waitFor() != 0) {
-				s_logger.error("getCurrentIpAddress() :: error executing command --- ifconfig " + ifaceName + " --- exit value = " + proc.exitValue());
-			}
+			}			
 		} catch(IOException e) {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
 		} catch (InterruptedException e) {
@@ -268,19 +258,23 @@ public class LinuxNetworkUtil {
 				}
 			}
 			
-			ProcessUtil.destroy(proc);
+			if (proc != null) ProcessUtil.destroy(proc);
 		}
 		return ipAddress;
 	}
 
 	public static String getCurrentNetmask(String ifaceName) throws KuraException {
 		String netmask = null;
-		Process proc = null;
+		SafeProcess proc = null;
 		BufferedReader br = null;
 		try {
 			//start the process
 			proc = ProcessUtil.exec("ifconfig " + ifaceName);
-
+			if (proc.waitFor() != 0) {
+				s_logger.error("getCurrentNetmask() :: error executing command --- ifconfig " + ifaceName + " --- exit value = " + proc.exitValue());
+				throw new KuraException(KuraErrorCode.INTERNAL_ERROR);
+			}
+			
 			//get the output
 			br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
 			String line = null;
@@ -295,11 +289,7 @@ public class LinuxNetworkUtil {
 					}
 					break;
 				}
-			}
-			
-			if (proc.waitFor() != 0) {
-				s_logger.error("getCurrentNetmask() :: error executing command --- ifconfig " + ifaceName + " --- exit value = " + proc.exitValue());
-			}
+			}			
 		} catch(IOException e) {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
 		} catch (InterruptedException e) {
@@ -314,7 +304,7 @@ public class LinuxNetworkUtil {
 				}
 			}
 			
-			ProcessUtil.destroy(proc);
+			if (proc != null) ProcessUtil.destroy(proc);
 		}
 
 		return netmask;
@@ -322,12 +312,16 @@ public class LinuxNetworkUtil {
 	
 	public static int getCurrentMtu(String ifaceName) throws KuraException {
 		String stringMtu = null;
-		Process proc = null;
+		SafeProcess proc = null;
 		BufferedReader br = null;
 		try {
 			//start the process
 			proc = ProcessUtil.exec("ifconfig " + ifaceName);
-
+			if (proc.waitFor() != 0) {
+				s_logger.error("getCurrentMtu() :: error executing command --- ifconfig " + ifaceName + " --- exit value = " + proc.exitValue());
+				throw new KuraException(KuraErrorCode.INTERNAL_ERROR);
+			}
+			
 			//get the output
 			br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
 			String line = null;
@@ -338,10 +332,6 @@ public class LinuxNetworkUtil {
 					break;
 				}
 			}
-
-			if (proc.waitFor() != 0) {
-				s_logger.error("getCurrentMtu() :: error executing command --- ifconfig " + ifaceName + " --- exit value = " + proc.exitValue());
-			}
 		} catch(IOException e) {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
 		} catch (InterruptedException e) {
@@ -356,7 +346,7 @@ public class LinuxNetworkUtil {
 				}
 			}
 			
-			ProcessUtil.destroy(proc);
+			if (proc != null) ProcessUtil.destroy(proc);
 		}
 
 		if(stringMtu != null) {
@@ -368,12 +358,16 @@ public class LinuxNetworkUtil {
 
 	public static String getCurrentBroadcastAddress(String ifaceName) throws KuraException {
 		String broadcast = null;
-		Process proc = null;
+		SafeProcess proc = null;
 		BufferedReader br = null;
 		try {
 			//start the process
 			proc = ProcessUtil.exec("ifconfig " + ifaceName);
-
+			if (proc.waitFor() != 0) {
+				s_logger.error("getCurrentBroadcastAddress() :: error executing command --- ifconfig " + ifaceName + " --- exit value = " + proc.exitValue());
+				throw new KuraException(KuraErrorCode.INTERNAL_ERROR);
+			}
+			
 			//get the output
 			br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
 			String line = null;
@@ -389,10 +383,6 @@ public class LinuxNetworkUtil {
 					break;
 				}
 			}
-
-			if (proc.waitFor() != 0) {
-				s_logger.error("getCurrentBroadcastAddress() :: error executing command --- ifconfig " + ifaceName + " --- exit value = " + proc.exitValue());
-			}
 		} catch(IOException e) {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
 		} catch (InterruptedException e) {
@@ -407,7 +397,7 @@ public class LinuxNetworkUtil {
 				}
 			}
 			
-			ProcessUtil.destroy(proc);
+			if (proc != null) ProcessUtil.destroy(proc);
 		}
 
 		return broadcast;
@@ -415,12 +405,16 @@ public class LinuxNetworkUtil {
 	
 	public static String getCurrentPtpAddress(String ifaceName) throws KuraException {
 		String ptp = null;
-		Process proc = null;
+		SafeProcess proc = null;
 		BufferedReader br = null;
 		try {
 			//start the process
 			proc = ProcessUtil.exec("ifconfig " + ifaceName);
-
+			if (proc.waitFor() != 0) {
+				s_logger.error("getCurrentPtpAddress() :: error executing command --- ifconfig " + ifaceName + " --- exit value = " + proc.exitValue());
+				throw new KuraException(KuraErrorCode.INTERNAL_ERROR);
+			}
+			
 			//get the output
 			br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
 			String line = null;
@@ -435,11 +429,7 @@ public class LinuxNetworkUtil {
 					}
 					break;
 				}
-			}
-			
-			if (proc.waitFor() != 0) {
-				s_logger.error("getCurrentPtpAddress() :: error executing command --- ifconfig " + ifaceName + " --- exit value = " + proc.exitValue());
-			}
+			}			
 		} catch(IOException e) {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
 		} catch (InterruptedException e) {
@@ -454,7 +444,7 @@ public class LinuxNetworkUtil {
 				}
 			}
 			
-			ProcessUtil.destroy(proc);
+			if (proc != null) ProcessUtil.destroy(proc);
 		}
 
 		return ptp;
@@ -548,11 +538,15 @@ public class LinuxNetworkUtil {
 
 	public static String getMacAddress(String ifaceName) throws KuraException {
 		String mac = null;
-		Process proc = null;
+		SafeProcess proc = null;
 		BufferedReader br = null;
 		try {
 			//start the process
 			proc = ProcessUtil.exec("ifconfig " + ifaceName);
+			if (proc.waitFor() != 0) {
+				s_logger.error("error executing command --- ifconfig --- exit value = " + proc.exitValue());
+				throw new KuraException(KuraErrorCode.INTERNAL_ERROR);
+			}
 
 			//get the output
 			br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
@@ -568,6 +562,8 @@ public class LinuxNetworkUtil {
 			
 		} catch (IOException e) {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+		} catch (InterruptedException e) {
+			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
 		}
 		finally {
 			if(br != null){
@@ -578,7 +574,7 @@ public class LinuxNetworkUtil {
 				}
 			}
 			
-			ProcessUtil.destroy(proc);
+			if (proc != null) ProcessUtil.destroy(proc);
 		}
 		
 		return mac;
@@ -604,11 +600,15 @@ public class LinuxNetworkUtil {
 	}
 	
 	public static boolean isSupportsMulticast(String interfaceName) throws KuraException {		
-		Process proc = null;
+		SafeProcess proc = null;
 		BufferedReader br = null;
 		try {
 			//start the process
 			proc = ProcessUtil.exec("ifconfig");
+			if (proc.waitFor() != 0) {
+				s_logger.error("error executing command --- ifconfig --- exit value = " + proc.exitValue());
+				throw new KuraException(KuraErrorCode.INTERNAL_ERROR);
+			}
 
 			//get the output
 			br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
@@ -625,11 +625,6 @@ public class LinuxNetworkUtil {
 					}
 				}
 			}
-
-			if (proc.waitFor() != 0) {
-				s_logger.error("error executing command --- ifconfig --- exit value = " + proc.exitValue());
-				return false;
-			}
 		} catch(IOException e) {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
 		} catch (InterruptedException e) {
@@ -644,14 +639,14 @@ public class LinuxNetworkUtil {
 				}
 			}
 			
-			ProcessUtil.destroy(proc);
+			if (proc != null) ProcessUtil.destroy(proc);
 		}
 
 		return false;
 	}
 
 	public static boolean canPing(String ipAddress, int count) throws KuraException {
-		Process proc = null;
+		SafeProcess proc = null;
 		try {
 			proc = ProcessUtil.exec(new StringBuilder().append("ping -c ").append(count).append(" ").append(ipAddress).toString());
 			if(proc.waitFor() == 0) {
@@ -665,18 +660,22 @@ public class LinuxNetworkUtil {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
 		}
 		finally {
-			ProcessUtil.destroy(proc);
+			if (proc != null) ProcessUtil.destroy(proc);
 		}
 	}
 	
 	public static NetInterfaceType getType(String ifaceName) throws KuraException {
 		NetInterfaceType ifaceType = NetInterfaceType.UNKNOWN;
 		String stringType = null;
-		Process proc = null;
+		SafeProcess proc = null;
 		BufferedReader br = null;
 		try {
 			//start the process
 			proc = ProcessUtil.exec("ifconfig " + ifaceName);
+			if (proc.waitFor() != 0) {
+				s_logger.error("error executing command --- ifconfig --- exit value = " + proc.exitValue());
+				throw new KuraException(KuraErrorCode.INTERNAL_ERROR);
+			}
 
 			//get the output
 			br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
@@ -738,7 +737,7 @@ public class LinuxNetworkUtil {
 			*/
 		} catch (Exception e) {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
-		}
+		} 
 		finally {
 			if(br != null){
 				try{
@@ -748,7 +747,7 @@ public class LinuxNetworkUtil {
 				}
 			}
 			
-			ProcessUtil.destroy(proc);
+			if (proc != null) ProcessUtil.destroy(proc);
 		}
 		try {
 			ifaceType = NetInterfaceType.valueOf(stringType);
@@ -760,7 +759,8 @@ public class LinuxNetworkUtil {
 	}
 	
 	public static Map<String,String> getEthernetDriver(String interfaceName) throws KuraException{
-		Process proc = null;
+		SafeProcess procWhich = null;
+		SafeProcess procEthtool = null;
 		BufferedReader br1 = null;
 		BufferedReader br2 = null;
 		
@@ -771,10 +771,14 @@ public class LinuxNetworkUtil {
 		
 		try {
 			//find the location of ethtool
-			proc = ProcessUtil.exec("which ethtool");
+			procWhich = ProcessUtil.exec("which ethtool");
+			if (procWhich.waitFor() != 0) {
+				s_logger.error("getEthernetDriver() :: error executing command --- which ethtool --- exit value = " + procWhich.exitValue());
+				throw new KuraException(KuraErrorCode.INTERNAL_ERROR);				
+			}
 			
 			//get the output
-			br1 = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+			br1 = new BufferedReader(new InputStreamReader(procWhich.getInputStream()));
 			String ethTool = br1.readLine();
 			if (ethTool != null && ethTool.length() > 0) {
 				ethTool = ethTool.replaceAll("\\s", "");
@@ -785,10 +789,14 @@ public class LinuxNetworkUtil {
 			}
 			
 			//run ethtool
-			proc = ProcessUtil.exec(ethTool + " -i " + interfaceName);
+			procEthtool = ProcessUtil.exec(ethTool + " -i " + interfaceName);
+			if (procEthtool.waitFor() != 0) {
+				s_logger.error("getEthernetDriver() :: error executing command --- " + ethTool + " -i " + interfaceName + " --- exit value = " + procWhich.exitValue());
+				throw new KuraException(KuraErrorCode.INTERNAL_ERROR);				
+			}
 			
 			//get the output
-			br2 = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+			br2 = new BufferedReader(new InputStreamReader(procEthtool.getInputStream()));
 			String line = null;
 			while ((line = br2.readLine()) != null) {
 				if (line.startsWith("driver: ")) {
@@ -803,6 +811,8 @@ public class LinuxNetworkUtil {
 			}
 			
 		} catch (IOException e) {
+			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+		} catch (InterruptedException e) {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
 		}
 		finally {
@@ -823,18 +833,23 @@ public class LinuxNetworkUtil {
 				}
 			}	
 			
-			ProcessUtil.destroy(proc);
+			if (procWhich != null) ProcessUtil.destroy(procWhich);
+			if (procEthtool != null) ProcessUtil.destroy(procEthtool);
 		}
 		return driver;
 	}
 	
 	public static EnumSet<Capability> getWifiCapabilities(String ifaceName) throws KuraException {
 		EnumSet<Capability> capabilities = EnumSet.noneOf(Capability.class);
-		Process proc = null;
+		SafeProcess proc = null;
 		BufferedReader br = null;
 		try {
 			//start the process
 			proc = ProcessUtil.exec("iwlist " + ifaceName + " auth");
+			if (proc.waitFor() != 0) {
+				s_logger.error("error executing command --- iwlist --- exit value = " + proc.exitValue());
+				throw new KuraException(KuraErrorCode.INTERNAL_ERROR);
+			}
 	
 			//get the output
 			br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
@@ -863,6 +878,8 @@ public class LinuxNetworkUtil {
 			
 		} catch (IOException e) {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+		} catch (InterruptedException e) {
+			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
 		}
 		finally {
 			if(br != null){
@@ -873,20 +890,26 @@ public class LinuxNetworkUtil {
 				}
 			}
 			
-			ProcessUtil.destroy(proc);
+			if (proc != null) ProcessUtil.destroy(proc);
 		}
 		return capabilities;
 	}
 	
 	public static WifiMode getWifiMode(String ifaceName) throws KuraException {
 		WifiMode mode = WifiMode.UNKNOWN;
-		Process proc = null;
+		SafeProcess procIw = null;
+		SafeProcess procIwConfig = null;
 		BufferedReader br1 = null;
 		BufferedReader br2 = null;
 		
 		try {
-			proc = ProcessUtil.exec("iw dev " + ifaceName + " info");
-			br1 = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+			procIw = ProcessUtil.exec("iw dev " + ifaceName + " info");
+			if (procIw.waitFor() != 0) {
+				s_logger.error("error executing command --- iw --- exit value = " + procIw.exitValue());
+				throw new KuraException(KuraErrorCode.INTERNAL_ERROR);
+			}
+			
+			br1 = new BufferedReader(new InputStreamReader(procIw.getInputStream()));
 			String line = null;
 			while((line = br1.readLine()) != null) {
 				int index = line.indexOf("type ");
@@ -901,20 +924,16 @@ public class LinuxNetworkUtil {
 					break;
 				}
 			}
-			
-			int status = 1;
-			try {
-				status = proc.waitFor();
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-			
-			if ((status != 0) || mode.equals(WifiMode.UNKNOWN)) {
-				ProcessUtil.destroy(proc);
-				proc = ProcessUtil.exec("iwconfig " + ifaceName);
-
+						
+			if (mode.equals(WifiMode.UNKNOWN)) {
+				procIwConfig = ProcessUtil.exec("iwconfig " + ifaceName);
+				if (procIwConfig.waitFor() != 0) {
+					s_logger.error("error executing command --- iwconfig --- exit value = " + procIwConfig.exitValue());
+					throw new KuraException(KuraErrorCode.INTERNAL_ERROR);
+				}
+				
 				//get the output
-				br2 = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+				br2 = new BufferedReader(new InputStreamReader(procIwConfig.getInputStream()));
 				while((line = br2.readLine()) != null) {
 					int index = line.indexOf("Mode:");
 					if(index > -1) {
@@ -935,8 +954,9 @@ public class LinuxNetworkUtil {
 			
 		} catch (IOException e) {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+		} catch (InterruptedException e) {
+			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
 		} finally {
-			
 			if(br1 != null){
 				try{
 					br1.close();
@@ -953,7 +973,8 @@ public class LinuxNetworkUtil {
 				}
 			}	
 			
-			ProcessUtil.destroy(proc);
+			if (procIw != null) ProcessUtil.destroy(procIw);
+			if (procIwConfig != null) ProcessUtil.destroy(procIwConfig);
 		}
 		
 		return mode;
@@ -961,11 +982,15 @@ public class LinuxNetworkUtil {
 	
 	public static long getWifiBitrate(String ifaceName) throws KuraException {
 		long bitRate = 0;
-		Process proc = null;
+		SafeProcess proc = null;
 		BufferedReader br = null;
 		try {
 			//start the process
 			proc = ProcessUtil.exec("iwconfig " + ifaceName);
+			if (proc.waitFor() != 0) {
+				s_logger.error("error executing command --- iwconfig --- exit value = " + proc.exitValue());
+				throw new KuraException(KuraErrorCode.INTERNAL_ERROR);
+			}
 
 			//get the output
 			br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
@@ -996,6 +1021,8 @@ public class LinuxNetworkUtil {
 			
 		} catch (IOException e) {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+		} catch (InterruptedException e) {
+			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
 		}
 		finally {
 			if(br != null){
@@ -1006,7 +1033,7 @@ public class LinuxNetworkUtil {
 				}
 			}
 			
-			ProcessUtil.destroy(proc);
+			if (proc != null) ProcessUtil.destroy(proc);
 		}
 		
 		return bitRate;
@@ -1014,11 +1041,15 @@ public class LinuxNetworkUtil {
 	
 	public static String getSSID(String ifaceName) throws KuraException {
 		String ssid = null;
-		Process proc = null;
+		SafeProcess proc = null;
 		BufferedReader br = null;
 		try {
 			//start the process
 			proc = ProcessUtil.exec("iwconfig " + ifaceName);
+			if (proc.waitFor() != 0) {
+				s_logger.error("error executing command --- ifconfig --- exit value = " + proc.exitValue());
+				throw new KuraException(KuraErrorCode.INTERNAL_ERROR);
+			}
 
 			//get the output
 			br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
@@ -1040,6 +1071,8 @@ public class LinuxNetworkUtil {
 			
 		} catch (IOException e) {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+		} catch (InterruptedException e) {
+			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
 		}
 		finally {
 			if(br != null){
@@ -1050,7 +1083,7 @@ public class LinuxNetworkUtil {
 				}
 			}
 			
-			ProcessUtil.destroy(proc);
+			if (proc != null) ProcessUtil.destroy(proc);
 		}
 		
 		return ssid;
@@ -1084,11 +1117,15 @@ public class LinuxNetworkUtil {
 	}
 	
 	public static void powerOnEthernetController(String interfaceName) throws KuraException {
-		Process proc = null;
+		SafeProcess proc = null;
 		BufferedReader br = null;
 		try {
 			//start the process
 			proc = ProcessUtil.exec("ifconfig");
+			if (proc.waitFor() != 0) {
+				s_logger.error("error executing command --- ifconfig --- exit value = " + proc.exitValue());
+				throw new KuraException(KuraErrorCode.INTERNAL_ERROR);
+			}
 
 			//get the output
 			br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
@@ -1103,11 +1140,6 @@ public class LinuxNetworkUtil {
 					}
 				}
 			}
-
-			if (proc.waitFor() != 0) {
-				s_logger.error("error executing command --- ifconfig --- exit value = " + proc.exitValue());
-				return;
-			}
 		} catch(IOException e) {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
 		} catch (InterruptedException e) {
@@ -1122,12 +1154,12 @@ public class LinuxNetworkUtil {
 				}
 			}
 			
-			ProcessUtil.destroy(proc);
+			if (proc != null) ProcessUtil.destroy(proc);
 		}
 		
 		//power the controller since it is not on
 		try {
-			//start the process
+			//start the SafeProcess
 			StringBuilder sb = new StringBuilder().append("ifconfig ").append(interfaceName).append(" 0.0.0.0");
 			proc = ProcessUtil.exec(sb.toString());
 
@@ -1141,17 +1173,21 @@ public class LinuxNetworkUtil {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
 		}
 		finally {
-			ProcessUtil.destroy(proc);
+			if (proc != null) ProcessUtil.destroy(proc);
 		}
 	}
 	
 	public static boolean isEthernetControllerPowered(String interfaceName) throws KuraException {
-		Process proc = null;
+		SafeProcess proc = null;
 		BufferedReader br = null;
 		try {
 			//start the process
 			proc = ProcessUtil.exec("ifconfig");
-
+			if (proc.waitFor() != 0) {
+				s_logger.error("error executing command --- ifconfig --- exit value = " + proc.exitValue());
+				throw new KuraException(KuraErrorCode.INTERNAL_ERROR);
+			}
+			
 			//get the output
 			br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
 			String line = null;
@@ -1162,10 +1198,6 @@ public class LinuxNetworkUtil {
 					//so the interface is listed - power is already on
 					return true;
 				}
-			}
-
-			if (proc.waitFor() != 0) {
-				s_logger.error("error executing command --- ifconfig --- exit value = " + proc.exitValue());
 			}
 		} catch(IOException e) {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
@@ -1181,7 +1213,7 @@ public class LinuxNetworkUtil {
 				}
 			}
 			
-			ProcessUtil.destroy(proc);
+			if (proc != null) ProcessUtil.destroy(proc);
 		}
 
 		return false;
@@ -1189,20 +1221,19 @@ public class LinuxNetworkUtil {
 	
 	public static boolean recoverDefaultConfiguration() throws KuraException {
 		boolean ret = false;
-		Process proc = null;
+		SafeProcess proc = null;
 		try {
 			proc = ProcessUtil.exec("/opt/eurotech/esf/recover_dflt_kura_config.sh");
-			try {
-				int status = proc.waitFor();
-				if (status == 0) {
-					ret = true;
-				} else {
-					s_logger.error("error executing command --- ifconfig --- exit value = " + proc.exitValue());
-				}
-			} catch (InterruptedException e) {
+			if (proc.waitFor() != 0) {
+				s_logger.error("error executing command --- /opt/eurotech/esf/recover_dflt_kura_config.sh --- exit value = " + proc.exitValue());
+				throw new KuraException(KuraErrorCode.INTERNAL_ERROR);
 			}
 		} catch (IOException e) {
-			e.printStackTrace();
+			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+		} catch (InterruptedException e) {
+			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+		} finally {
+			if (proc != null) ProcessUtil.destroy(proc);
 		}
 		return ret;
 	}

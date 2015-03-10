@@ -16,6 +16,7 @@ import java.io.File;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.linux.util.LinuxProcessUtil;
 import org.eclipse.kura.core.util.ProcessUtil;
+import org.eclipse.kura.core.util.SafeProcess;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,7 +28,7 @@ public class HostapdManager {
     private static final String HOSTAPD_EXEC = "hostapd";
 
     public static void start() throws KuraException {
-        Process proc = null;
+        SafeProcess proc = null;
         
         if(!CONFIG_FILE.exists()) {
             throw KuraException.internalError("Config file does not exist: " + CONFIG_FILE.getAbsolutePath());
@@ -51,12 +52,12 @@ public class HostapdManager {
             throw KuraException.internalError(e);
         }
         finally {
-            ProcessUtil.destroy(proc);
+        	if (proc != null) ProcessUtil.destroy(proc);
         }
     }
     
     public static void stop() throws KuraException {
-        Process proc = null;
+        SafeProcess proc = null;
         try {
             //kill hostapd
             s_logger.debug("stopping hostapd");
@@ -67,7 +68,7 @@ public class HostapdManager {
             throw KuraException.internalError(e);
         }
         finally {
-            ProcessUtil.destroy(proc);
+        	if (proc != null) ProcessUtil.destroy(proc);
         }
     }
 

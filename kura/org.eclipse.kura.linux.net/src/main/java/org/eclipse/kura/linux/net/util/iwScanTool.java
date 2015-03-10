@@ -17,6 +17,7 @@ import org.eclipse.kura.core.linux.util.LinuxProcessUtil;
 import org.eclipse.kura.core.net.WifiAccessPointImpl;
 import org.eclipse.kura.core.net.util.NetworkUtil;
 import org.eclipse.kura.core.util.ProcessUtil;
+import org.eclipse.kura.core.util.SafeProcess;
 import org.eclipse.kura.net.wifi.WifiAccessPoint;
 import org.eclipse.kura.net.wifi.WifiMode;
 import org.eclipse.kura.net.wifi.WifiSecurity;
@@ -33,7 +34,7 @@ public class iwScanTool {
 	private static Future<?>  m_task;
 
 	private int m_timeout;
-	private Process m_proccess;
+	private SafeProcess m_process;
 	private boolean m_status;
 	private String m_errmsg;
 	
@@ -59,24 +60,26 @@ public class iwScanTool {
 		synchronized (s_lock) {
 			StringBuilder sb = new StringBuilder();
 		    
-			Process pr = null;
+			SafeProcess prIpLink = null;
+			SafeProcess prIpAddr = null;
 			try {
 				if(!LinuxNetworkUtil.isUp(m_ifaceName)) {
 				    // activate the interface
 					sb.append("ip link set ").append(m_ifaceName).append(" up");
-				    pr = ProcessUtil.exec(sb.toString());
+				    prIpLink = ProcessUtil.exec(sb.toString());
+				    prIpLink.waitFor();
 				 
 				    // remove the previous ip address (needed on mgw)
 				    sb = new StringBuilder();
 					sb.append("ip addr flush dev ").append(m_ifaceName);
-				    pr = ProcessUtil.exec(sb.toString());			    
+				    prIpAddr = ProcessUtil.exec(sb.toString());
+				    prIpAddr.waitFor();
 				}
 			} catch (Exception e) {
 				throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
 			} finally {
-				if (pr != null) {
-					ProcessUtil.destroy(pr);
-				}
+				if (prIpLink != null) ProcessUtil.destroy(prIpLink);
+				if (prIpAddr != null) ProcessUtil.destroy(prIpAddr);
 			}
 	
 			long timerStart = System.currentTimeMillis();
@@ -86,20 +89,20 @@ public class iwScanTool {
 				@Override
 				public void run() {
 					int stat = -1;
-					m_proccess = null;
+					m_process = null;
 					StringBuilder sb = new StringBuilder();
 					sb.append("iw dev ").append(m_ifaceName).append(" scan");
 					s_logger.info("scan() :: executing: {}", sb.toString());
 					m_status = false;
 					try {
-						m_proccess = ProcessUtil.exec(sb.toString());
-						stat = m_proccess.waitFor();
+						m_process = ProcessUtil.exec(sb.toString());
+						stat = m_process.waitFor();
 						s_logger.info("scan() :: {} command returns status={}", sb.toString(), stat);
 						if (stat == 0) {
 							m_status = true;
 						} else {
 							s_logger.error("scan() :: failed to execute {} error code is {}", sb.toString(), stat);
-							s_logger.error("scan() :: STDERR: " + LinuxProcessUtil.getInputStreamAsString(m_proccess.getErrorStream()));
+							s_logger.error("scan() :: STDERR: " + LinuxProcessUtil.getInputStreamAsString(m_process.getErrorStream()));
 						}	
 					} catch (Exception e) {
 						m_errmsg = "exception executing scan command";
@@ -133,7 +136,7 @@ public class iwScanTool {
 				}
 			}
 			 
-			if ((m_status == false) || (m_proccess == null)) {
+			if ((m_status == false) || (m_process == null)) {
 				throw new KuraException(KuraErrorCode.INTERNAL_ERROR, m_errmsg);
 			}
 			
@@ -144,8 +147,8 @@ public class iwScanTool {
 				throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e, "error parsing scan results");
 			} finally {
 				s_logger.info("scan() :: destroing scan proccess ...");
-				ProcessUtil.destroy(m_proccess);
-				m_proccess = null;
+				if (m_process != null) ProcessUtil.destroy(m_process);
+				m_process = null;
 				
 				s_logger.info("scan() :: Terminating WifiMonitor Thread ...");
 				m_executor.shutdownNow();
@@ -168,7 +171,7 @@ public class iwScanTool {
 		List<WifiAccessPoint> wifiAccessPoints = new ArrayList<WifiAccessPoint>();
 		
 		//get the output
-		BufferedReader br = new BufferedReader(new InputStreamReader(m_proccess.getInputStream()));
+		BufferedReader br = new BufferedReader(new InputStreamReader(m_process.getInputStream()));
 		String line = null;
 		
 		String ssid = null;

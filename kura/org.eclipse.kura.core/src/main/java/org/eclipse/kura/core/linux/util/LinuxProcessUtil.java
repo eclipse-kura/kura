@@ -24,6 +24,7 @@ import java.io.InputStreamReader;
 import java.util.StringTokenizer;
 
 import org.eclipse.kura.core.util.ProcessUtil;
+import org.eclipse.kura.core.util.SafeProcess;
 import org.eclipse.kura.core.linux.util.ProcessStats;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,7 +36,7 @@ public class LinuxProcessUtil {
 
 	public static int start(String command, boolean wait, boolean background)
 			throws Exception {
-		Process proc = null;
+		SafeProcess proc = null;
 		try {
 			s_logger.info("executing: " + command);
 			proc = ProcessUtil.exec(command);
@@ -64,7 +65,7 @@ public class LinuxProcessUtil {
 			throw e;
 		} finally {
 			if (!background) {
-				ProcessUtil.destroy(proc);
+				if (proc != null) ProcessUtil.destroy(proc);
 			}
 		}
 	}
@@ -91,7 +92,7 @@ public class LinuxProcessUtil {
 	}
 
 	public static ProcessStats startWithStats(String command) throws Exception {
-		Process proc = null;
+		SafeProcess proc = null;
 		try {
 			s_logger.info("executing: " + command);
 			proc = ProcessUtil.exec(command);
@@ -115,7 +116,7 @@ public class LinuxProcessUtil {
 
 	public static ProcessStats startWithStats(String[] command)
 			throws Exception {
-		Process proc = null;
+		SafeProcess proc = null;
 		try {
 			StringBuilder cmdBuilder = new StringBuilder();
 			for (String cmd : command) {
@@ -146,13 +147,15 @@ public class LinuxProcessUtil {
 		StringTokenizer st = null;
 		String line = null;
 		String pid = null;
-		Process proc = null;
+		SafeProcess proc = null;
 		BufferedReader br = null;
 		try {
 
 			if (command != null && !command.isEmpty()) {
 				s_logger.trace("searching process list for " + command);
 				proc = ProcessUtil.exec("ps -ax");
+				
+				proc.waitFor();
 
 				// get the output
 				br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
@@ -182,7 +185,7 @@ public class LinuxProcessUtil {
 			throw e;
 		} finally {
 			if(br != null) br.close();
-			ProcessUtil.destroy(proc);
+			if (proc != null) ProcessUtil.destroy(proc);
 		}
 	}
 

@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 
 import org.eclipse.kura.core.util.ProcessUtil;
+import org.eclipse.kura.core.util.SafeProcess;
 import org.eclipse.kura.system.SystemAdminService;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
@@ -142,14 +143,15 @@ public class SystemAdminServiceImpl implements SystemAdminService
 			s_logger.error("Unsupported OS for reboot()");
 			return;
 		}
-		Process proc = null;
+		SafeProcess proc = null;
 		try {
 			proc = ProcessUtil.exec(cmd);
+			proc.waitFor();
 		} catch(Exception e) {
 			s_logger.error("failed to issue reboot", e);
 		}
 		finally {
-			ProcessUtil.destroy(proc);
+			if (proc != null) ProcessUtil.destroy(proc);
 		}
 	}
 	
@@ -161,7 +163,7 @@ public class SystemAdminServiceImpl implements SystemAdminService
 			s_logger.error("Unsupported OS for sync()");
 			return;
 		}
-		Process proc = null;		
+		SafeProcess proc = null;		
 		try {
 			proc = ProcessUtil.exec(cmd);
 			int status = proc.waitFor();
@@ -172,7 +174,7 @@ public class SystemAdminServiceImpl implements SystemAdminService
 			s_logger.error("failed to issue sync command", e);
 		}
 		finally {
-			ProcessUtil.destroy(proc);
+			if (proc != null) ProcessUtil.destroy(proc);
 		}
 	}
 
@@ -186,7 +188,7 @@ public class SystemAdminServiceImpl implements SystemAdminService
 	}
 	
 	private String runSystemCommand(String[] commands) {
-		Process proc = null;
+		SafeProcess proc = null;
 		StringBuffer response = new StringBuffer(); 
 		BufferedReader br = null;
 		try {
@@ -217,7 +219,7 @@ public class SystemAdminServiceImpl implements SystemAdminService
 					s_logger.error("I/O Exception while closing BufferedReader!");
 				}
 			}
-			ProcessUtil.destroy(proc);
+			if (proc != null) ProcessUtil.destroy(proc);
 		}
 		
 		return response.toString();

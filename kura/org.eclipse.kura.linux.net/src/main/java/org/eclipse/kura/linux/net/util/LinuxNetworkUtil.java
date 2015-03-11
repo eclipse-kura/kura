@@ -627,7 +627,7 @@ public class LinuxNetworkUtil {
 	public static byte[] getMacAddressBytes(String interfaceName) throws KuraException {
 		//ignore logical interfaces like "1-1.2"
 		if (Character.isDigit(interfaceName.charAt(0))) {
-			return null;
+			return new byte[]{0, 0, 0, 0, 0, 0};
 		}
 
 		String macAddress = LinuxNetworkUtil.getMacAddress(interfaceName);		

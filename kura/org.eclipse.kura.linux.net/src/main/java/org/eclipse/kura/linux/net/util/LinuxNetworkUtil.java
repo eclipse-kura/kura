@@ -129,6 +129,10 @@ public class LinuxNetworkUtil {
 	}
 
 	public static boolean isUp(String interfaceName) throws KuraException {
+		//ignore logical interfaces like "1-1.2"
+		if (Character.isDigit(interfaceName.charAt(0))) {
+			return false;
+		}
 		SafeProcess proc = null;
 		BufferedReader br = null;
 		try {
@@ -178,6 +182,10 @@ public class LinuxNetworkUtil {
 	}
 	
 	public static boolean isDhclientRunning(String interfaceName) throws KuraException {
+		//ignore logical interfaces like "1-1.2"
+		if (Character.isDigit(interfaceName.charAt(0))) {
+			return false;
+		}
 		SafeProcess proc = null;
 		BufferedReader br = null;
 		try {
@@ -218,6 +226,10 @@ public class LinuxNetworkUtil {
 	}
 
 	public static String getCurrentIpAddress(String ifaceName) throws KuraException {
+		//ignore logical interfaces like "1-1.2"
+		if (Character.isDigit(ifaceName.charAt(0))) {
+			return null;
+		}
 		String ipAddress = null;
 		SafeProcess proc = null;
 		BufferedReader br = null;
@@ -264,6 +276,10 @@ public class LinuxNetworkUtil {
 	}
 
 	public static String getCurrentNetmask(String ifaceName) throws KuraException {
+		//ignore logical interfaces like "1-1.2"
+		if (Character.isDigit(ifaceName.charAt(0))) {
+			return null;
+		}
 		String netmask = null;
 		SafeProcess proc = null;
 		BufferedReader br = null;
@@ -311,6 +327,10 @@ public class LinuxNetworkUtil {
 	}
 	
 	public static int getCurrentMtu(String ifaceName) throws KuraException {
+		//ignore logical interfaces like "1-1.2"
+		if (Character.isDigit(ifaceName.charAt(0))) {
+			return -1;
+		}
 		String stringMtu = null;
 		SafeProcess proc = null;
 		BufferedReader br = null;
@@ -357,6 +377,10 @@ public class LinuxNetworkUtil {
 	}
 
 	public static String getCurrentBroadcastAddress(String ifaceName) throws KuraException {
+		//ignore logical interfaces like "1-1.2"
+		if (Character.isDigit(ifaceName.charAt(0))) {
+			return null;
+		}
 		String broadcast = null;
 		SafeProcess proc = null;
 		BufferedReader br = null;
@@ -404,6 +428,10 @@ public class LinuxNetworkUtil {
 	}
 	
 	public static String getCurrentPtpAddress(String ifaceName) throws KuraException {
+		//ignore logical interfaces like "1-1.2"
+		if (Character.isDigit(ifaceName.charAt(0))) {
+			return null;
+		}
 		String ptp = null;
 		SafeProcess proc = null;
 		BufferedReader br = null;
@@ -451,10 +479,18 @@ public class LinuxNetworkUtil {
 	}
 
 	public static boolean isLinkUp(String ifaceName) throws KuraException {
+		//ignore logical interfaces like "1-1.2"
+		if (Character.isDigit(ifaceName.charAt(0))) {
+			return false;
+		}
 		return isLinkUp(getType(ifaceName), ifaceName);
 	}
 	
 	public static boolean isLinkUp(NetInterfaceType ifaceType, String ifaceName) throws KuraException {
+		//ignore logical interfaces like "1-1.2"
+		if (Character.isDigit(ifaceName.charAt(0))) {
+			return false;
+		}
 		try {
 			if(ifaceType == NetInterfaceType.WIFI) {                
 				LinkTool linkTool = new IwLinkTool("iw", ifaceName);
@@ -502,6 +538,10 @@ public class LinuxNetworkUtil {
 	}
 	
 	public static boolean isAutoConnect(String interfaceName) throws KuraException {
+		//ignore logical interfaces like "1-1.2"
+		if (Character.isDigit(interfaceName.charAt(0))) {
+			return false;
+		}
 		BufferedReader br = null;
 		
 		try {
@@ -537,6 +577,10 @@ public class LinuxNetworkUtil {
 	}
 
 	public static String getMacAddress(String ifaceName) throws KuraException {
+		//ignore logical interfaces like "1-1.2"
+		if (Character.isDigit(ifaceName.charAt(0))) {
+			return null;
+		}
 		String mac = null;
 		SafeProcess proc = null;
 		BufferedReader br = null;
@@ -581,6 +625,10 @@ public class LinuxNetworkUtil {
 	}
 	
 	public static byte[] getMacAddressBytes(String interfaceName) throws KuraException {
+		//ignore logical interfaces like "1-1.2"
+		if (Character.isDigit(interfaceName.charAt(0))) {
+			return null;
+		}
 
 		String macAddress = LinuxNetworkUtil.getMacAddress(interfaceName);		
 
@@ -600,6 +648,10 @@ public class LinuxNetworkUtil {
 	}
 	
 	public static boolean isSupportsMulticast(String interfaceName) throws KuraException {		
+		//ignore logical interfaces like "1-1.2"
+		if (Character.isDigit(interfaceName.charAt(0))) {
+			return false;
+		}
 		SafeProcess proc = null;
 		BufferedReader br = null;
 		try {
@@ -665,6 +717,10 @@ public class LinuxNetworkUtil {
 	}
 	
 	public static NetInterfaceType getType(String ifaceName) throws KuraException {
+		//ignore logical interfaces like "1-1.2"
+		if (Character.isDigit(ifaceName.charAt(0))) {
+			return NetInterfaceType.UNKNOWN;
+		}
 		NetInterfaceType ifaceType = NetInterfaceType.UNKNOWN;
 		String stringType = null;
 		SafeProcess proc = null;
@@ -759,6 +815,10 @@ public class LinuxNetworkUtil {
 	}
 	
 	public static Map<String,String> getEthernetDriver(String interfaceName) throws KuraException{
+		//ignore logical interfaces like "1-1.2"
+		if (Character.isDigit(interfaceName.charAt(0))) {
+			return null;
+		}
 		SafeProcess procWhich = null;
 		SafeProcess procEthtool = null;
 		BufferedReader br1 = null;
@@ -840,6 +900,10 @@ public class LinuxNetworkUtil {
 	}
 	
 	public static EnumSet<Capability> getWifiCapabilities(String ifaceName) throws KuraException {
+		//ignore logical interfaces like "1-1.2"
+		if (Character.isDigit(ifaceName.charAt(0))) {
+			return null;
+		}
 		EnumSet<Capability> capabilities = EnumSet.noneOf(Capability.class);
 		SafeProcess proc = null;
 		BufferedReader br = null;
@@ -896,6 +960,10 @@ public class LinuxNetworkUtil {
 	}
 	
 	public static WifiMode getWifiMode(String ifaceName) throws KuraException {
+		//ignore logical interfaces like "1-1.2"
+		if (Character.isDigit(ifaceName.charAt(0))) {
+			return WifiMode.UNKNOWN;
+		}
 		WifiMode mode = WifiMode.UNKNOWN;
 		SafeProcess procIw = null;
 		SafeProcess procIwConfig = null;
@@ -981,6 +1049,10 @@ public class LinuxNetworkUtil {
 	}
 	
 	public static long getWifiBitrate(String ifaceName) throws KuraException {
+		//ignore logical interfaces like "1-1.2"
+		if (Character.isDigit(ifaceName.charAt(0))) {
+			return -1;
+		}
 		long bitRate = 0;
 		SafeProcess proc = null;
 		BufferedReader br = null;
@@ -1040,6 +1112,10 @@ public class LinuxNetworkUtil {
 	}
 	
 	public static String getSSID(String ifaceName) throws KuraException {
+		//ignore logical interfaces like "1-1.2"
+		if (Character.isDigit(ifaceName.charAt(0))) {
+			return null;
+		}
 		String ssid = null;
 		SafeProcess proc = null;
 		BufferedReader br = null;
@@ -1091,6 +1167,10 @@ public class LinuxNetworkUtil {
 		
 	public static void disableInterface(String interfaceName) throws Exception {
 		if(interfaceName != null) {
+			//ignore logical interfaces like "1-1.2"
+			if (Character.isDigit(interfaceName.charAt(0))) {
+				return;
+			}
 			if (OS_VERSION.equals(KuraConstants.Mini_Gateway.getImageName() + "_" + KuraConstants.Mini_Gateway.getImageVersion())) {
 				LinuxProcessUtil.start("ifdown " + interfaceName + "\n");
 				LinuxProcessUtil.start("ifconfig " + interfaceName + " down\n");
@@ -1107,6 +1187,10 @@ public class LinuxNetworkUtil {
 	
 	public static void enableInterface(String interfaceName) throws Exception {
 		if(interfaceName != null) {
+			//ignore logical interfaces like "1-1.2"
+			if (Character.isDigit(interfaceName.charAt(0))) {
+				return;
+			}
 			if (OS_VERSION.equals(KuraConstants.Mini_Gateway.getImageName() + "_" + KuraConstants.Mini_Gateway.getImageVersion())) {
 				LinuxProcessUtil.start("ifconfig " + interfaceName + " up\n");
 				LinuxProcessUtil.start("ifup " + interfaceName + "\n");
@@ -1117,6 +1201,10 @@ public class LinuxNetworkUtil {
 	}
 	
 	public static void powerOnEthernetController(String interfaceName) throws KuraException {
+		//ignore logical interfaces like "1-1.2"
+		if (Character.isDigit(interfaceName.charAt(0))) {
+			return;
+		}
 		SafeProcess proc = null;
 		BufferedReader br = null;
 		try {
@@ -1178,6 +1266,10 @@ public class LinuxNetworkUtil {
 	}
 	
 	public static boolean isEthernetControllerPowered(String interfaceName) throws KuraException {
+		//ignore logical interfaces like "1-1.2"
+		if (Character.isDigit(interfaceName.charAt(0))) {
+			return false;
+		}
 		SafeProcess proc = null;
 		BufferedReader br = null;
 		try {

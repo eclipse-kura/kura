@@ -5,8 +5,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,18 +13,16 @@ public class SafeProcess {
 	private static final Logger s_logger = LoggerFactory.getLogger(SafeProcess.class);
 	
 	private Process m_process;
-	private ByteArrayOutputStream m_inBaos;
-	private ByteArrayOutputStream m_errBaos;
+	private byte[]  m_inBytes;
+	private byte[]  m_errBytes;
 	private boolean m_waited;
 	
-	private static List<SafeProcess> s_trackList = new ArrayList<SafeProcess>();
+//	private static List<SafeProcess> s_trackList = new ArrayList<SafeProcess>();
 
     SafeProcess(Process process) {
 		super();
 		m_process = process;
-		m_inBaos = new ByteArrayOutputStream(2048);
-		m_errBaos = new ByteArrayOutputStream(2048);
-		s_trackList.add(this);
+//		s_trackList.add(this);
 	}
 
 	public OutputStream getOutputStream() {
@@ -39,7 +35,7 @@ public class SafeProcess {
 			s_logger.warn("getInputStream() must be called after waitFor()");
 			//Thread.dumpStack();
 		}
- 		return new ByteArrayInputStream(m_inBaos.toByteArray());
+ 		return new ByteArrayInputStream(m_inBytes);
 	}
 
 	public InputStream getErrorStream() {
@@ -47,10 +43,12 @@ public class SafeProcess {
 			s_logger.warn("getErrorStream() must be called after waitFor()");
 			//Thread.dumpStack();
 		}
-		return new ByteArrayInputStream(m_errBaos.toByteArray());
+		return new ByteArrayInputStream(m_errBytes);
 	}
 
 	public int waitFor() throws InterruptedException {
+	    ByteArrayOutputStream inBaos = new ByteArrayOutputStream(1024);
+	    ByteArrayOutputStream errBaos = new ByteArrayOutputStream(1024);
 		InputStream is = null;
 		InputStream es = null;
 		int exitValue = -1;
@@ -61,21 +59,25 @@ public class SafeProcess {
 			int len;
 			is = m_process.getInputStream();
 			while ((len = is.read(buf)) != -1) {
-				m_inBaos.write(buf, 0, len);
+				inBaos.write(buf, 0, len);
 			}
 			
 			es = m_process.getErrorStream();
 			while ((len = es.read(buf)) != -1) {
-				m_errBaos.write(buf, 0, len);
+				errBaos.write(buf, 0, len);
 			}
-		} catch (IOException e) {
-			s_logger.warn("Failed to consume process input/error stream", e);
-		} finally {
-			// no need to close ByteArrayOutputStream(s)
 			
+	        m_inBytes = inBaos.toByteArray();
+	        m_errBytes = errBaos.toByteArray();			
+		} 
+		catch (IOException e) {
+			s_logger.warn("Failed to consume process input/error stream", e);
+		} 
+		finally {
 			if (is != null) {
 				try {
 					is.close();
+					is = null;
 				} catch (IOException e) {
 					s_logger.warn("Failed to close process input stream", e);
 				}
@@ -83,14 +85,31 @@ public class SafeProcess {
 			if (es != null) {
 				try {
 					es.close();
+                    es = null;
 				} catch (IOException e) {
 					s_logger.warn("Failed to close process error stream", e);
 				}
 			}
+            if (inBaos != null) {
+                try {
+                    inBaos.close();
+                    inBaos = null;
+                } catch (IOException e) {
+                    s_logger.warn("Failed to close inBaos stream", e);
+                }
+            }
+            if (errBaos != null) {
+                try {
+                    errBaos.close();
+                    errBaos = null;
+                } catch (IOException e) {
+                    s_logger.warn("Failed to close errBaos stream", e);
+                }
+            }
 			m_process.destroy();
 			m_waited = true;
-			s_trackList.remove(this);
-			s_logger.debug("Number of running processes: {}", s_trackList.size());
+//			s_trackList.remove(this);
+//			s_logger.debug("Number of running processes: {}", s_trackList.size());
 		}
 		
 		return exitValue;
@@ -105,11 +124,11 @@ public class SafeProcess {
 			s_logger.warn("Calling destroy() before waitFor() might lead to resource leaks");
 			Thread.dumpStack();
 			m_process.destroy();
-			s_trackList.remove(this);
-			s_logger.debug("Number of running processes: {}", s_trackList.size());
+//			s_trackList.remove(this);
+//			s_logger.debug("Number of running processes: {}", s_trackList.size());
 		}
-		m_errBaos = null; // just in case...
-		m_inBaos = null;
-		m_process = null;
+		m_inBytes  = null; // just in case...
+		m_errBytes = null;
+		m_process  = null;
 	}
 }

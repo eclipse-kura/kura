@@ -78,10 +78,6 @@ public class ProcessUtil
 	{
 	}
 	
-	/**
-	 * @deprecated  Call {@link SafeProcess#destroy() instead}
-	 */
-	@Deprecated
 	public static void destroy(SafeProcess proc)
 	{
 		proc.destroy();	

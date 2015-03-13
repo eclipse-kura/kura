@@ -815,20 +815,20 @@ public class LinuxNetworkUtil {
 	}
 	
 	public static Map<String,String> getEthernetDriver(String interfaceName) throws KuraException{
-		//ignore logical interfaces like "1-1.2"
-		if (Character.isDigit(interfaceName.charAt(0))) {
-			return null;
-		}
-		SafeProcess procWhich = null;
-		SafeProcess procEthtool = null;
-		BufferedReader br1 = null;
-		BufferedReader br2 = null;
-		
 		Map<String, String> driver = new HashMap<String, String>();
 		driver.put("name", "unknown");
 		driver.put("version", "unkown");
 		driver.put("firmware", "unknown");
 		
+		//ignore logical interfaces like "1-1.2"
+		if (Character.isDigit(interfaceName.charAt(0))) {
+			return driver;
+		}
+		SafeProcess procWhich = null;
+		SafeProcess procEthtool = null;
+		BufferedReader br1 = null;
+		BufferedReader br2 = null;
+				
 		try {
 			//find the location of ethtool
 			procWhich = ProcessUtil.exec("which ethtool");
@@ -900,11 +900,13 @@ public class LinuxNetworkUtil {
 	}
 	
 	public static EnumSet<Capability> getWifiCapabilities(String ifaceName) throws KuraException {
+		EnumSet<Capability> capabilities = EnumSet.noneOf(Capability.class);
+		
 		//ignore logical interfaces like "1-1.2"
 		if (Character.isDigit(ifaceName.charAt(0))) {
-			return null;
+			return capabilities;
 		}
-		EnumSet<Capability> capabilities = EnumSet.noneOf(Capability.class);
+		
 		SafeProcess proc = null;
 		BufferedReader br = null;
 		try {
@@ -1049,11 +1051,13 @@ public class LinuxNetworkUtil {
 	}
 	
 	public static long getWifiBitrate(String ifaceName) throws KuraException {
+		long bitRate = 0;
+		
 		//ignore logical interfaces like "1-1.2"
 		if (Character.isDigit(ifaceName.charAt(0))) {
-			return -1;
+			return bitRate;
 		}
-		long bitRate = 0;
+		
 		SafeProcess proc = null;
 		BufferedReader br = null;
 		try {

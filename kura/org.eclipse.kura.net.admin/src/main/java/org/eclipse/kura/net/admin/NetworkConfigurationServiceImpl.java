@@ -287,6 +287,7 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
     }
     
     //@Override
+    // FIXME:MC All monitors call this method at start up. Making it synchronized and introducing a short lived cache will make startup much faster. 
     public NetworkConfiguration getNetworkConfiguration() throws KuraException 
     {	
         try {
@@ -300,12 +301,14 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
 	                allNetworkInterfacesMap.put(netInterface.getName(), netInterface);
 	            }
 	            
+	            // FIXME:MC the following method repeat the process above. The activeNetworkInterfaces collection can be build by filtering on netInterface.isUp() if the above loop 
 	            List<NetInterface<? extends NetInterfaceAddress>> activeNetworkInterfaces = m_networkService.getActiveNetworkInterfaces();
 	            Map<String, NetInterface<? extends NetInterfaceAddress>> activeNetworkInterfacesMap = new HashMap<String, NetInterface<? extends NetInterfaceAddress>>();
 	            for(NetInterface<? extends NetInterfaceAddress> netInterface : activeNetworkInterfaces) {
 	                activeNetworkInterfacesMap.put(netInterface.getName(), netInterface);
 	            }
 	            
+                // FIXME:MC can just iterate over the allNetworkInterfacesMap.keySet() 
 	            // Create the NetInterfaceConfig objects
 	            List<String> interfaceNames = m_networkService.getAllNetworkInterfaceNames();        // TODO - include non-active modem interfaces
 	            s_logger.debug("Getting configs for " + interfaceNames.size() + " interfaces");
@@ -325,6 +328,7 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
 	                    	continue;
 	                    }
 	                    
+	                    // FIXME:MC can I use activeNetInterface.getType() instead of doing another system call?
 	                    NetInterfaceType type = LinuxNetworkUtil.getType(interfaceName);
 	                    if(type == NetInterfaceType.UNKNOWN) {
 	                    	if (interfaceName.matches(UNCONFIGURED_MODEM_REGEX)) {
@@ -583,6 +587,7 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
 																	 NetInterface<? extends NetInterfaceAddress> activeNetInterface)
 		throws KuraException 
 	{
+	    // FIXME:MC This whole method is not needed. It can just return the activeNetInterface casted to EthernetInterfaceConfigImpl	    
 		EthernetInterfaceConfigImpl ethernetInterfaceConfig;
 		if(activeNetInterface != null && activeNetInterface instanceof EthernetInterfaceImpl) {
 		    // Copy current values

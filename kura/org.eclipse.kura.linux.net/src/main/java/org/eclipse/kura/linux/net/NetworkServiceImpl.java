@@ -47,6 +47,7 @@ import org.eclipse.kura.net.ConnectionInfo;
 import org.eclipse.kura.net.IPAddress;
 import org.eclipse.kura.net.NetInterface;
 import org.eclipse.kura.net.NetInterfaceAddress;
+import org.eclipse.kura.net.NetInterfaceAddressConfig;
 import org.eclipse.kura.net.NetInterfaceState;
 import org.eclipse.kura.net.NetInterfaceType;
 import org.eclipse.kura.net.NetworkService;
@@ -430,6 +431,8 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
 		if(type == NetInterfaceType.ETHERNET) {
 			EthernetInterfaceImpl<NetInterfaceAddress> netInterface = new EthernetInterfaceImpl<NetInterfaceAddress>(interfaceName);
 			
+			// FIXME:MC Use LinuxNetworkUtil.getEthernetDriver(interfaceName); and populate the driver as well
+			// FIXME:MC Add setAutoConnect
 			netInterface.setDriver(getDriver());
 			netInterface.setDriverVersion(getDriverVersion());
 			netInterface.setFirmwareVersion(getFirmwareVersion());
@@ -747,6 +750,7 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
 			netInterfaceAddresses.add(netInterfaceAddress);
 			
 			try {
+			    // FIXME:MC The whole block of information can be fetched with a single ifconfig?
 				String currentNetmask = LinuxNetworkUtil.getCurrentNetmask(interfaceName);
                 if (currentNetmask != null) {
 					netInterfaceAddress.setAddress(IPAddress.parseHostAddress(LinuxNetworkUtil.getCurrentIpAddress(interfaceName)));
@@ -770,6 +774,7 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
 	            
 			return netInterfaceAddresses;
 		} else {
+		    // FIXME:MC This should return an empty new ArrayList<NetInterfaceAddressConfig>(); to match the NetowrkConfigurationServiceImpl buildXYZ method behavior 
 			return null;
 		}
 	}

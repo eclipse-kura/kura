@@ -143,6 +143,7 @@ public class EthernetMonitorServiceImpl implements EthernetMonitorService, Event
 					if (netInterfaceConfig instanceof EthernetInterfaceConfigImpl) {
 						s_logger.debug("Adding initial ethernet config for " + netInterfaceConfig.getName());
 						EthernetInterfaceConfigImpl newEthernetConfig = (EthernetInterfaceConfigImpl) netInterfaceConfig;
+						// FIXME:MC why do we need to mark this a new configuration at start?
 						m_newNetworkConfiguration.put(netInterfaceConfig.getName(), newEthernetConfig);
 						m_networkConfiguration.put(netInterfaceConfig.getName(), newEthernetConfig);
 					}
@@ -194,6 +195,7 @@ public class EthernetMonitorServiceImpl implements EthernetMonitorService, Event
 	        	EthernetInterfaceConfigImpl newInterfaceConfig = m_newNetworkConfiguration.get(interfaceName);
 	        	
 	        	// Make sure the Ethernet Controllers are powered
+                // FIXME:MC it should be possible to refactor this under the InterfaceState to avoid dual checks
 	        	if(!LinuxNetworkUtil.isEthernetControllerPowered(interfaceName)) {
 					LinuxNetworkUtil.powerOnEthernetController(interfaceName);
 				}
@@ -215,7 +217,8 @@ public class EthernetMonitorServiceImpl implements EthernetMonitorService, Event
 		        		// Set the current config to the new config
 		      			m_networkConfiguration.put(interfaceName, newInterfaceConfig);
 						currentInterfaceConfig = newInterfaceConfig;
-	
+						
+						// FIXME:MC why do we need to post a change here. We are just consuming a change.
 						postStatusChangeEvent = true;
 	        		}
 	        		
@@ -226,7 +229,14 @@ public class EthernetMonitorServiceImpl implements EthernetMonitorService, Event
 	
 	    		interfaceEnabled = isEthernetEnabled(currentInterfaceConfig);
 	    		InterfaceState prevInterfaceState = m_interfaceState.get(interfaceName);
-				currentInterfaceState = new InterfaceState(interfaceName);
+
+	            // FIXME:MC Deprecate this constructor and prefer the one with the explicit parameters
+	    		// (String interfaceName, boolean up, boolean link, IPAddress ipAddress)
+	    		// It will save a call to determine the iface type and it will keep InterfaceState
+	    		// as a state object as it should be. Maybe introduce an InterfaceStateBuilder.
+	    		// FIXME:MC Is it effectively reading the IP address? It seems to read it from a cache file.
+	    		currentInterfaceState = new InterfaceState(interfaceName);
+                // FIXME:MC prevInterfaceState is null at first, so an event is always posted.
 				if(!currentInterfaceState.equals(prevInterfaceState)) {
 					postStatusChangeEvent = true;
 				}
@@ -287,6 +297,7 @@ public class EthernetMonitorServiceImpl implements EthernetMonitorService, Event
 	            }
 	            
 	            // Get the status after all ifdowns and ifups
+	            // FIXME: reload the configuration IFF one of above enable/disable happened
 	            currentInterfaceState = new InterfaceState(interfaceName);
 	
 	            // Manage the DHCP server and validate routes
@@ -500,6 +511,7 @@ public class EthernetMonitorServiceImpl implements EthernetMonitorService, Event
 	}
 	
 	// Start a interface specific monitor thread
+	// FIXME:MC This should be synchronized
 	private void startMonitor(final String interfaceName) {
 		if (tasks == null) {
 			tasks = new HashMap<String, Future<?>>();
@@ -536,6 +548,7 @@ public class EthernetMonitorServiceImpl implements EthernetMonitorService, Event
 	}
 	
 	// Stop a interface specific monitor thread
+    // FIXME:MC This should be synchronized
 	private void stopMonitor(String interfaceName) {
 		m_interfaceState.remove(interfaceName);
 		

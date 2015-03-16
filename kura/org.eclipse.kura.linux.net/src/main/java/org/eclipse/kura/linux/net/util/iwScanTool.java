@@ -34,6 +34,8 @@ public class iwScanTool {
 	private static Future<?>  m_task;
 
 	private int m_timeout;
+	
+	// FIXME:MC Is this process always closed?
 	private SafeProcess m_process;
 	private boolean m_status;
 	private String m_errmsg;

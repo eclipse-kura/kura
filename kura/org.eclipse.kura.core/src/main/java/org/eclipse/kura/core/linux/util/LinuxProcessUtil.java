@@ -40,6 +40,7 @@ public class LinuxProcessUtil {
 		try {
 			s_logger.info("executing: " + command);
 			proc = ProcessUtil.exec(command);
+			// FIXME:MC this leads to a process leak when called with false
 			if (wait) {
 				try {
 					proc.waitFor();

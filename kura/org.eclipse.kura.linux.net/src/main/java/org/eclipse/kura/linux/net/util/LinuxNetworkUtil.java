@@ -331,30 +331,28 @@ public class LinuxNetworkUtil {
 		if (Character.isDigit(ifaceName.charAt(0))) {
 			return -1;
 		}
+		int mtu = -1;
 		String stringMtu = null;
 		SafeProcess proc = null;
 		BufferedReader br = null;
 		try {
 			//start the process
 			proc = ProcessUtil.exec("ifconfig " + ifaceName);
-			if (proc.waitFor() != 0) {
-				s_logger.error("getCurrentMtu() :: error executing command --- ifconfig " + ifaceName + " --- exit value = " + proc.exitValue());
-				throw new KuraException(KuraErrorCode.INTERNAL_ERROR);
-			}
-			
-			//get the output
-			br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
-			String line = null;
+			if (proc.waitFor() == 0) {
 
-			while ((line = br.readLine()) != null) {
-				if (line.indexOf("MTU:") > -1) {
-					stringMtu = line.substring(line.indexOf("MTU:") + 4, line.indexOf("Metric:") - 2);
-					break;
-				}
+			    //get the output
+			    br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+			    String line = null;
+			    while ((line = br.readLine()) != null) {
+			        if (line.indexOf("MTU:") > -1) {
+			            stringMtu = line.substring(line.indexOf("MTU:") + 4, line.indexOf("Metric:") - 2);
+			            break;
+			        }
+			    }
+			    
+			    mtu = Integer.parseInt(stringMtu);
 			}
-		} catch(IOException e) {
-			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
-		} catch (InterruptedException e) {
+		} catch (Exception e) {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
 		}
 		finally {
@@ -368,12 +366,7 @@ public class LinuxNetworkUtil {
 			
 			if (proc != null) ProcessUtil.destroy(proc);
 		}
-
-		if(stringMtu != null) {
-			return Integer.parseInt(stringMtu);
-		} else {
-			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "Interface is not up");
-		}
+		return mtu;
 	}
 
 	public static String getCurrentBroadcastAddress(String ifaceName) throws KuraException {
@@ -503,10 +496,10 @@ public class LinuxNetworkUtil {
 					return false;
 				}
 			} else if(ifaceType == NetInterfaceType.ETHERNET) {
-				LinkTool linkTool = null;
-
+			
+			    // FIXME:MC get this information from the same ifconfig run - on second pass use ip tools. 
+			    LinkTool linkTool = null;
 				String[] tools = new String[]{"/sbin/ethtool", "/usr/sbin/ethtool", "/sbin/mii-tool"};
-
 				for(int i=0; i<tools.length; i++) {
 					File tool = new File(tools[i]);
 					if(tool.exists()) {
@@ -537,18 +530,16 @@ public class LinuxNetworkUtil {
 		}
 	}
 	
+	/**
+	 * This method is meaningful only for interfaces of type: NetInterfaceType.ETHERNET, NetInterfaceType.WIFI, NetInterfaceType.LOOPBACK.
+	 */
 	public static boolean isAutoConnect(String interfaceName) throws KuraException {
 		//ignore logical interfaces like "1-1.2"
 		if (Character.isDigit(interfaceName.charAt(0))) {
 			return false;
 		}
-		BufferedReader br = null;
-		
+		BufferedReader br = null;		
 		try {
-			NetInterfaceType type = LinuxNetworkUtil.getType(interfaceName);
-			if(type != NetInterfaceType.ETHERNET && type != NetInterfaceType.WIFI && type != NetInterfaceType.LOOPBACK) {
-				throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "method only supports interfaces of NetInterfaceType ETHERNET, WIFI, or LOOPBACK");
-			}
 			File interfaceFile = new File("/etc/sysconfig/network-scripts/ifcfg-" + interfaceName);
 			if(interfaceFile.exists()) {
 				br = new BufferedReader(new FileReader(interfaceFile));
@@ -560,8 +551,7 @@ public class LinuxNetworkUtil {
 						}
 					}
 				}
-			}
-			
+			}			
 			return false;
 		} catch (Exception e) {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
@@ -670,17 +660,14 @@ public class LinuxNetworkUtil {
 				if(line.indexOf(interfaceName) > -1 && line.indexOf("mon." + interfaceName) < 0) {
 					//eat the next line
 					line = br.readLine();
-					line = br.readLine();
-					
+					line = br.readLine();					
 					if(line.contains("MULTICAST")) {
 						return true;
 					}
 				}
 			}
-		} catch(IOException e) {
-			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
-		} catch (InterruptedException e) {
-			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+		} catch(Exception e) {
+		    s_logger.warn("Error reading multicast info", e);
 		}
 		finally {
 			if(br != null){
@@ -693,7 +680,6 @@ public class LinuxNetworkUtil {
 			
 			if (proc != null) ProcessUtil.destroy(proc);
 		}
-
 		return false;
 	}
 
@@ -814,7 +800,8 @@ public class LinuxNetworkUtil {
 		return ifaceType;
 	}
 	
-	public static Map<String,String> getEthernetDriver(String interfaceName) throws KuraException{
+	public static Map<String,String> getEthernetDriver(String interfaceName) throws KuraException
+	{
 		Map<String, String> driver = new HashMap<String, String>();
 		driver.put("name", "unknown");
 		driver.put("version", "unkown");
@@ -824,41 +811,21 @@ public class LinuxNetworkUtil {
 		if (Character.isDigit(interfaceName.charAt(0))) {
 			return driver;
 		}
-		SafeProcess procWhich = null;
 		SafeProcess procEthtool = null;
-		BufferedReader br1 = null;
-		BufferedReader br2 = null;
-				
+		BufferedReader br = null;			
 		try {
-			//find the location of ethtool
-			procWhich = ProcessUtil.exec("which ethtool");
-			if (procWhich.waitFor() != 0) {
-				s_logger.error("getEthernetDriver() :: error executing command --- which ethtool --- exit value = " + procWhich.exitValue());
-				throw new KuraException(KuraErrorCode.INTERNAL_ERROR);				
-			}
-			
-			//get the output
-			br1 = new BufferedReader(new InputStreamReader(procWhich.getInputStream()));
-			String ethTool = br1.readLine();
-			if (ethTool != null && ethTool.length() > 0) {
-				ethTool = ethTool.replaceAll("\\s", "");
-			}
-			else {
-				s_logger.info("ethtool not found - setting driver to unknown");
-				return driver;
-			}
-			
+
 			//run ethtool
-			procEthtool = ProcessUtil.exec(ethTool + " -i " + interfaceName);
+			procEthtool = ProcessUtil.exec("ethtool -i " + interfaceName);
 			if (procEthtool.waitFor() != 0) {
-				s_logger.error("getEthernetDriver() :: error executing command --- " + ethTool + " -i " + interfaceName + " --- exit value = " + procWhich.exitValue());
+				s_logger.error("getEthernetDriver() :: error executing command --- ethtool -i {}", interfaceName);
 				throw new KuraException(KuraErrorCode.INTERNAL_ERROR);				
 			}
 			
 			//get the output
-			br2 = new BufferedReader(new InputStreamReader(procEthtool.getInputStream()));
+			br = new BufferedReader(new InputStreamReader(procEthtool.getInputStream()));
 			String line = null;
-			while ((line = br2.readLine()) != null) {
+			while ((line = br.readLine()) != null) {
 				if (line.startsWith("driver: ")) {
 					driver.put("name", line.substring(line.indexOf(": ") + 1));
 				}
@@ -876,24 +843,13 @@ public class LinuxNetworkUtil {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
 		}
 		finally {
-			
-			if(br1 != null){
+			if(br != null){
 				try{
-					br1.close();
+					br.close();
 				}catch(IOException ex){
 					s_logger.error("I/O Exception while closing BufferedReader!");
 				}
-			}	
-			
-			if(br2 != null){
-				try{
-					br2.close();
-				}catch(IOException ex){
-					s_logger.error("I/O Exception while closing BufferedReader!");
-				}
-			}	
-			
-			if (procWhich != null) ProcessUtil.destroy(procWhich);
+			}			
 			if (procEthtool != null) ProcessUtil.destroy(procEthtool);
 		}
 		return driver;
@@ -938,8 +894,7 @@ public class LinuxNetworkUtil {
 					capabilities.add(Capability.CIPHER_WEP104);
 				} else if ("WEP-40".equals(cleanLine)) {
 					capabilities.add(Capability.CIPHER_WEP40);
-				}
-				
+				}				
 			}
 			
 		} catch (IOException e) {

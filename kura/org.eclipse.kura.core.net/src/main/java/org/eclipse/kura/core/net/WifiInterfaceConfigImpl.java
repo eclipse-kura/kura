@@ -38,6 +38,11 @@ public class WifiInterfaceConfigImpl extends WifiInterfaceImpl<WifiInterfaceAddr
                 interfaceAddresses.add(copiedInterfaceAddressImpl);
             }
         }
+        if (interfaceAddresses.size() == 0) {
+            // add at least one empty interface implementation. 
+            // It is needed as a container for the NetConfig objects 
+            interfaceAddresses.add( new WifiInterfaceAddressConfigImpl());
+        }
         this.setNetInterfaceAddresses(interfaceAddresses);
     }
 }

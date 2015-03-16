@@ -156,6 +156,8 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 	}
 
 	@Override
+	// FIME: This api should be deprecated in favor of the following signature:
+	// List<? extends NetInterfaceConfig<? extends NetInterfaceAddressConfig>> getNetworkInterfaceConfigs()
 	public List<? extends NetInterfaceConfig<? extends NetInterfaceAddressConfig>> getNetworkInterfaceConfigs() throws KuraException {
 	    
 		try {

@@ -65,6 +65,7 @@ public class LinuxProcessUtil {
 		} catch (Exception e) {
 			throw e;
 		} finally {
+            // FIXME:MC this may lead to a process leak when called with false
 			if (!background) {
 				if (proc != null) ProcessUtil.destroy(proc);
 			}

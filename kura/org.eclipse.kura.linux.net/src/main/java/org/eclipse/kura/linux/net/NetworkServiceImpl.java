@@ -47,7 +47,6 @@ import org.eclipse.kura.net.ConnectionInfo;
 import org.eclipse.kura.net.IPAddress;
 import org.eclipse.kura.net.NetInterface;
 import org.eclipse.kura.net.NetInterfaceAddress;
-import org.eclipse.kura.net.NetInterfaceAddressConfig;
 import org.eclipse.kura.net.NetInterfaceState;
 import org.eclipse.kura.net.NetInterfaceType;
 import org.eclipse.kura.net.NetworkService;
@@ -431,65 +430,65 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
 		if(type == NetInterfaceType.ETHERNET) {
 			EthernetInterfaceImpl<NetInterfaceAddress> netInterface = new EthernetInterfaceImpl<NetInterfaceAddress>(interfaceName);
 			
-			// FIXME:MC Use LinuxNetworkUtil.getEthernetDriver(interfaceName); and populate the driver as well
-			// FIXME:MC Add setAutoConnect
-			netInterface.setDriver(getDriver());
-			netInterface.setDriverVersion(getDriverVersion());
-			netInterface.setFirmwareVersion(getFirmwareVersion());
+	        Map<String, String> driver = LinuxNetworkUtil.getEthernetDriver(interfaceName);
+            netInterface.setDriver(driver.get("name"));
+            netInterface.setDriverVersion(driver.get("version"));
+            netInterface.setFirmwareVersion(driver.get("firmware"));
+
+            netInterface.setAutoConnect(LinuxNetworkUtil.isAutoConnect(interfaceName));			
 			netInterface.setHardwareAddress(LinuxNetworkUtil.getMacAddressBytes(interfaceName));
 			netInterface.setLinkUp(LinuxNetworkUtil.isLinkUp(type, interfaceName));
 			netInterface.setLoopback(false);
 			netInterface.setMTU(LinuxNetworkUtil.getCurrentMtu(interfaceName));
-			netInterface.setNetInterfaceAddresses(getNetInterfaceAddresses(interfaceName, type, isUp));
 			netInterface.setPointToPoint(false);
-			netInterface.setState(getState(interfaceName, isUp));
 			netInterface.setSupportsMulticast(LinuxNetworkUtil.isSupportsMulticast(interfaceName));
 			netInterface.setUp(isUp);
-			netInterface.setUsbDevice(getUsbDevice(interfaceName));
-			netInterface.setVirtual(isVirtual());
+            netInterface.setVirtual(isVirtual());
+            netInterface.setUsbDevice(getUsbDevice(interfaceName));
+            netInterface.setState(getState(interfaceName, isUp));
+            netInterface.setNetInterfaceAddresses(getNetInterfaceAddresses(interfaceName, type, isUp));
 			
-			return netInterface;
+            return netInterface;
 		} else if(type == NetInterfaceType.LOOPBACK) {	
 			LoopbackInterfaceImpl<NetInterfaceAddress> netInterface = new LoopbackInterfaceImpl<NetInterfaceAddress>(interfaceName);
 			
 			netInterface.setDriver(getDriver());
 			netInterface.setDriverVersion(getDriverVersion());
 			netInterface.setFirmwareVersion(getFirmwareVersion());
-			netInterface.setHardwareAddress(LinuxNetworkUtil.getMacAddressBytes(interfaceName));
+            netInterface.setAutoConnect(LinuxNetworkUtil.isAutoConnect(interfaceName));         
+			netInterface.setHardwareAddress(new byte[]{0, 0, 0, 0, 0, 0});
 			netInterface.setLoopback(true);
 			netInterface.setMTU(LinuxNetworkUtil.getCurrentMtu(interfaceName));
-			netInterface.setNetInterfaceAddresses(getNetInterfaceAddresses(interfaceName, type, isUp));
 			netInterface.setPointToPoint(false);
+            netInterface.setSupportsMulticast(LinuxNetworkUtil.isSupportsMulticast(interfaceName));
+            netInterface.setUp(isUp);
+            netInterface.setVirtual(false);
+            netInterface.setUsbDevice(null);
 			netInterface.setState(getState(interfaceName, isUp));
-			netInterface.setSupportsMulticast(LinuxNetworkUtil.isSupportsMulticast(interfaceName));
-			netInterface.setUp(isUp);
-			netInterface.setUsbDevice(getUsbDevice(interfaceName));
-			netInterface.setVirtual(isVirtual());
+            netInterface.setNetInterfaceAddresses(getNetInterfaceAddresses(interfaceName, type, isUp));
 
 			return netInterface;
 		} else if(type == NetInterfaceType.WIFI) {
 			WifiInterfaceImpl<WifiInterfaceAddress> wifiInterface = new WifiInterfaceImpl<WifiInterfaceAddress>(interfaceName);
 			
-			int mtu = -1;
-			try {
-			    mtu = LinuxNetworkUtil.getCurrentMtu(interfaceName);
-			} catch (Exception e) {
-			    s_logger.error("Could not get mtu for " + interfaceName, e);
-			}
-			
-			wifiInterface.setDriver(getDriver());
-			wifiInterface.setDriverVersion(getDriverVersion());
-			wifiInterface.setFirmwareVersion(getFirmwareVersion());
+            Map<String, String> driver = LinuxNetworkUtil.getEthernetDriver(interfaceName);
+            wifiInterface.setDriver(driver.get("name"));
+            wifiInterface.setDriverVersion(driver.get("version"));
+            wifiInterface.setFirmwareVersion(driver.get("firmware"));
+
+			wifiInterface.setAutoConnect(LinuxNetworkUtil.isAutoConnect(interfaceName));         
 			wifiInterface.setHardwareAddress(LinuxNetworkUtil.getMacAddressBytes(interfaceName));
+			// FIXME:MS Add linkUp in the AbstractNetInterface and populate accordingly
+//			wifiInterface.setLinkUp(LinuxNetworkUtil.isLinkUp(type, interfaceName));
 			wifiInterface.setLoopback(false);
-			wifiInterface.setMTU(mtu);
+			wifiInterface.setMTU(LinuxNetworkUtil.getCurrentMtu(interfaceName));
+            wifiInterface.setPointToPoint(false);
+            wifiInterface.setSupportsMulticast(LinuxNetworkUtil.isSupportsMulticast(interfaceName));
+            wifiInterface.setUp(isUp);
+            wifiInterface.setVirtual(isVirtual());
+            wifiInterface.setUsbDevice(getUsbDevice(interfaceName));
+            wifiInterface.setState(getState(interfaceName, isUp));
 			wifiInterface.setNetInterfaceAddresses(getWifiInterfaceAddresses(interfaceName, isUp));
-			wifiInterface.setPointToPoint(false);
-			wifiInterface.setState(getState(interfaceName, isUp));
-			wifiInterface.setSupportsMulticast(LinuxNetworkUtil.isSupportsMulticast(interfaceName));
-			wifiInterface.setUp(isUp);
-			wifiInterface.setUsbDevice(getUsbDevice(interfaceName));
-			wifiInterface.setVirtual(isVirtual());
 			wifiInterface.setCapabilities(LinuxNetworkUtil.getWifiCapabilities(interfaceName));
 
 			return wifiInterface;
@@ -676,79 +675,57 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
 
 		ModemInterfaceImpl<ModemInterfaceAddress> modemInterface = new ModemInterfaceImpl<ModemInterfaceAddress>(interfaceName);
         
-        SupportedUsbModemInfo supportedUsbModem = null;
-        SupportedSerialModemInfo supportedSerialModem = null;		
-        
+        modemInterface.setModemDevice(modemDevice);
         if (modemDevice instanceof UsbModemDevice) {
-        	UsbModemDevice usbDevice = (UsbModemDevice)modemDevice;
-        	supportedUsbModem = SupportedUsbModemsInfo.getModem(usbDevice.getVendorId(), usbDevice.getProductId()); 
-        } else if (modemDevice instanceof SerialModemDevice) {
-        	supportedSerialModem = SupportedSerialModemsInfo.getModem();
+
+            UsbModemDevice usbModemDevice = (UsbModemDevice) modemDevice;
+            SupportedUsbModemInfo supportedUsbModemInfo = null;
+        	supportedUsbModemInfo = SupportedUsbModemsInfo.getModem(usbModemDevice.getVendorId(), usbModemDevice.getProductId());
+            modemInterface.setTechnologyTypes(supportedUsbModemInfo.getTechnologyTypes());
+            modemInterface.setUsbDevice((UsbModemDevice)modemDevice);        	
+        } 
+        else if (modemDevice instanceof SerialModemDevice) {
+
+            SupportedSerialModemInfo supportedSerialModemInfo = null;
+            supportedSerialModemInfo = SupportedSerialModemsInfo.getModem();
+            modemInterface.setTechnologyTypes(supportedSerialModemInfo.getTechnologyTypes());
         }
-         
-        
+                 
         int pppNum = 0;
         if(interfaceName.startsWith("ppp")) {
             pppNum = Integer.parseInt(interfaceName.substring(3));
         }
-        
-        modemInterface.setDriver(getDriver());
-        modemInterface.setDriverVersion(getDriverVersion());
-        modemInterface.setFirmwareVersion(getFirmwareVersion());
-        modemInterface.setLoopback(false);
-        modemInterface.setNetInterfaceAddresses(getModemInterfaceAddresses(interfaceName, isUp));
-        modemInterface.setPointToPoint(true);
-        modemInterface.setState(getState(interfaceName, isUp));
-        modemInterface.setUp(isUp);
-        if (isUp) {
-	        try {
-	            int mtu = LinuxNetworkUtil.getCurrentMtu(interfaceName);
-	            modemInterface.setMTU(mtu);
-	        } catch (KuraException e) {
-	            s_logger.warn("Could not get MTU for " + interfaceName);
-	        }
-	        try {
-	            boolean multicast = LinuxNetworkUtil.isSupportsMulticast(interfaceName);
-	            modemInterface.setSupportsMulticast(multicast);
-	        } catch (KuraException e) {
-	            s_logger.warn("Could not get multicast for " + interfaceName);
-	        }
-	        
-	        try {
-	        	byte [] macAddressBytes = LinuxNetworkUtil.getMacAddressBytes(interfaceName);
-	        	modemInterface.setHardwareAddress(macAddressBytes);
-	        } catch (KuraException e) {
-	        	s_logger.warn("Could not get MAC Address for " + interfaceName);
-	        }
-        }
-        
-        modemInterface.setModemDevice(modemDevice);
-        if (modemDevice instanceof UsbModemDevice) {
-        	modemInterface.setTechnologyTypes(supportedUsbModem.getTechnologyTypes());
-        	modemInterface.setUsbDevice((UsbModemDevice)modemDevice);
-        } else if (modemDevice instanceof SerialModemDevice) {
-        	modemInterface.setTechnologyTypes(supportedSerialModem.getTechnologyTypes());
-        }
-        modemInterface.setVirtual(isVirtual());
-                
+        modemInterface.setPppNum(pppNum);        
         modemInterface.setManufacturer(modemDevice.getManufacturerName());
         modemInterface.setModel(modemDevice.getProductName());
         modemInterface.setModemIdentifier(modemDevice.getProductName());
-        modemInterface.setPppNum(pppNum);
-        modemInterface.setSerialNumber("");
+        
+        // these properties required net.admin packages
+        modemInterface.setDriver(getDriver());
+        modemInterface.setDriverVersion(getDriverVersion());
+        modemInterface.setFirmwareVersion(getFirmwareVersion());
+        modemInterface.setSerialNumber("unknown");
 
+        modemInterface.setLoopback(false);
+        modemInterface.setPointToPoint(true);
+        modemInterface.setState(getState(interfaceName, isUp));
+        modemInterface.setHardwareAddress(new byte[]{0, 0, 0, 0, 0, 0});
+        modemInterface.setMTU(LinuxNetworkUtil.getCurrentMtu(interfaceName));
+        modemInterface.setUp(isUp);
+        modemInterface.setSupportsMulticast(LinuxNetworkUtil.isSupportsMulticast(interfaceName));
+        modemInterface.setVirtual(isVirtual());
+        modemInterface.setNetInterfaceAddresses(getModemInterfaceAddresses(interfaceName, isUp));
+        
         return modemInterface;
 
     }
 	
-	private List<NetInterfaceAddress> getNetInterfaceAddresses(String interfaceName, NetInterfaceType type, boolean isUp) throws KuraException {
+	private List<NetInterfaceAddress> getNetInterfaceAddresses(String interfaceName, NetInterfaceType type, boolean isUp) throws KuraException 
+	{
+        List<NetInterfaceAddress> netInterfaceAddresses = new ArrayList<NetInterfaceAddress>();
 		if(isUp) {
-			ConnectionInfo conInfo = new ConnectionInfoImpl(interfaceName);
-			
-			List<NetInterfaceAddress> netInterfaceAddresses = new ArrayList<NetInterfaceAddress>();
-			NetInterfaceAddressImpl netInterfaceAddress = new NetInterfaceAddressImpl();
-			netInterfaceAddresses.add(netInterfaceAddress);
-			
+			ConnectionInfo conInfo = new ConnectionInfoImpl(interfaceName);			
+			NetInterfaceAddressImpl netInterfaceAddress = new NetInterfaceAddressImpl();			
 			try {
 			    // FIXME:MC The whole block of information can be fetched with a single ifconfig?
 				String currentNetmask = LinuxNetworkUtil.getCurrentNetmask(interfaceName);
@@ -765,18 +742,13 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
 					} else {
 						netInterfaceAddress.setDnsServers(conInfo.getDnsServers());
 					}
-                } else {
-                	return null;
+					netInterfaceAddresses.add(netInterfaceAddress);
                 }
 			} catch(UnknownHostException e) {
 				throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
-			}
-	            
-			return netInterfaceAddresses;
-		} else {
-		    // FIXME:MC This should return an empty new ArrayList<NetInterfaceAddressConfig>(); to match the NetowrkConfigurationServiceImpl buildXYZ method behavior 
-			return null;
-		}
+			}            	            
+		} 
+        return netInterfaceAddresses;
 	}
 	
 	private List<WifiInterfaceAddress> getWifiInterfaceAddresses(String interfaceName, boolean isUp) throws KuraException {

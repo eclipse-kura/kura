@@ -20,7 +20,6 @@ import java.security.Signature;
 import java.security.cert.Certificate;
 import java.util.ArrayList;
 import java.util.Dictionary;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
@@ -62,6 +61,8 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
 	private static final Logger s_logger = LoggerFactory.getLogger(CloudServiceImpl.class);
 
 	private static final String     TOPIC_BA_APP = "BA";
+	private static final String 	CERT_SERIAL = "pkiSerial";
+	private static final String 	RESOURCE_CERTIFICATE_DM = "dm";
 
 	private ComponentContext        m_ctx;
 
@@ -446,10 +447,10 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
 				if (cloudClient.getApplicationId().equals(kuraTopic.getApplicationId())) {
 					try {
 						if (m_options.getTopicControlPrefix().equals(kuraTopic.getPrefix())) {
-							
+
 							boolean validSignature= verifyMessageSignature(kuraTopic, kuraPayload);
 							if(m_certificatesService == null || validSignature){
-								
+
 								cloudClient.onControlMessageArrived(kuraTopic.getDeviceId(), 
 										kuraTopic.getApplicationTopic(), 
 										kuraPayload, 
@@ -628,34 +629,33 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
 			s_logger.error("Error publishing life-cycle message on topic: "+topic, e);
 		}
 	}
-	
-	
-	private boolean verifyMessageSignature(KuraTopic kuraTopic, KuraPayload kuraPayload){
-		if(m_certificatesService != null){
-			s_logger.info("Start signature verification");
-			Enumeration<String> certList= m_certificatesService.listDMCertificatesAliases();
-			
-			while(certList.hasMoreElements()){
-				String certAlias= certList.nextElement(); 
-				try{
-					Certificate certificate= m_certificatesService.returnCertificate(certAlias);
-					Signature s = Signature.getInstance("SHA256withRSA");
-					s.initVerify(certificate);
-					s.update(kuraTopic.getApplicationTopic().getBytes());
-					if(kuraPayload != null && kuraPayload.getBody()!=null){
-						s.update(kuraPayload.getBody());
-					}
-					byte[] signedMessage = null;
-					if(kuraPayload.getMetric("signedMessage") instanceof byte[]){
-						signedMessage = (byte[]) kuraPayload.getMetric("signedMessage");
-					}
 
-					s.verify(signedMessage);
-					return true;
-				}catch(Exception e){
+
+	private boolean verifyMessageSignature(KuraTopic kuraTopic, KuraPayload kuraPayload){
+		if(kuraTopic.getApplicationId().equals("PROV-V1") && kuraTopic.getApplicationTopic().contains("certificate")){ //maybe is better a different check based on the number of certificates available in db: for provisioning this number is 0. What happens is provision fails in the middle?
+			return true;
+		}else{
+			s_logger.info("Start signature verification");
+			String certSerial= (String) kuraPayload.getMetric(CERT_SERIAL);
+			String signingCertAlias= RESOURCE_CERTIFICATE_DM + "-" + certSerial;
+			try{
+				Certificate certificate= m_certificatesService.returnCertificate(signingCertAlias);
+				Signature s = Signature.getInstance("SHA256withRSA");
+				s.initVerify(certificate);
+				s.update(kuraTopic.getApplicationTopic().getBytes());
+				if(kuraPayload != null && kuraPayload.getBody()!=null){
+					s.update(kuraPayload.getBody());
 				}
+				byte[] signedMessage = null;
+				if(kuraPayload.getMetric("signedMessage") instanceof byte[]){
+					signedMessage = (byte[]) kuraPayload.getMetric("signedMessage");
+				}
+
+				s.verify(signedMessage);
+				return true;
+			}catch(Exception e){
+				return false;
 			}
 		}
-		return false;
 	}
 }

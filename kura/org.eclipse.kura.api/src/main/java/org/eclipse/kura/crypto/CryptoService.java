@@ -85,5 +85,11 @@ public interface CryptoService
 	 */
 	public String decodeBase64(String encodedValue) 
 			throws NoSuchAlgorithmException, UnsupportedEncodingException;
+	
+	
+	/**
+	 * 
+	 */
+	public String getKeyStorePassword(String keyStorePath);
 
 }

@@ -28,14 +28,20 @@ import org.eclipse.kura.web.server.util.ServiceLocator;
 
 public class AuthenticationManager 
 {
-	private static final AuthenticationManager s_instance = new AuthenticationManager();
+	private static AuthenticationManager s_instance;
 
 	private boolean   m_inited;
 	private DbService m_dbService;
 	private String	  m_dataDir;
+	private String password;
 
-	private AuthenticationManager() {
+	/*private AuthenticationManager() {
 		m_inited = false;
+	}*/
+
+	protected AuthenticationManager(String psw) {
+		password= psw;
+		s_instance= this;
 	}
 
 	/**
@@ -47,7 +53,7 @@ public class AuthenticationManager
 	}
 
 
-	public synchronized void init(DbService dbService, String dataDir) 
+	/*public synchronized void init(DbService dbService, String dataDir) 
 			throws SQLException 
 	{
 		if (!s_instance.m_inited) {
@@ -56,44 +62,28 @@ public class AuthenticationManager
 			s_instance.initUserStore();
 			s_instance.m_inited = true;
 		}
+	}*/
+	
+	protected void updatePassword(String psw){
+		password= psw;
 	}
 
-
 	public boolean authenticate(String username, String password)
-			throws SQLException
 	{
-		Connection conn = null;
-		PreparedStatement stmt = null;
-		ResultSet rs = null;
 		try {			
 
 			CryptoService cryptoService = ServiceLocator.getInstance().getService(CryptoService.class);
-			conn = m_dbService.getConnection();
-			stmt = conn.prepareStatement("SELECT username FROM dn_user WHERE username = ? AND password = ?;");
-			stmt.setString(1, username);
-			stmt.setString(2, cryptoService.encryptAes(cryptoService.sha1Hash(password)));
-
-			rs = stmt.executeQuery();
-			if (rs != null && rs.next()) {
+			String sha1Password= cryptoService.sha1Hash(password);
+			
+			if(sha1Password.equals(this.password)){
 				return true;
-			}			
+			}
+		}catch (Exception e) {
 		}
-		catch (SQLException e) {
-			throw e;
-		}
-		catch (Exception e) {
-			throw new SQLException(e);
-		}
-		finally {
-			m_dbService.close(rs);
-			m_dbService.close(stmt);
-			m_dbService.close(conn);
-		}
-
 		return false;
 	}
 
-
+/*
 	public void changeAdminPassword(String newPassword)
 			throws SQLException
 	{
@@ -129,14 +119,14 @@ public class AuthenticationManager
 			m_dbService.close(conn);
 		}
 	}
-
+*/
 
 	// -------------------------------------------------
 	//
 	//    Private methods
 	//
 	// -------------------------------------------------
-
+/*
 	private synchronized void initUserStore() 
 			throws SQLException
 	{
@@ -171,7 +161,7 @@ public class AuthenticationManager
 					stmtUpdate.execute();
 					conn.commit();
 				}catch(Exception e){
-					
+
 				}
 			}
 
@@ -265,4 +255,53 @@ public class AuthenticationManager
 			m_dbService.close(conn);
 		}
 	}
+*/
+	public static String isDBInitialized(DbService dbService, String dataDir){
+
+		Connection conn = null;
+		BufferedReader br = null;
+		String result= null;
+		try{
+
+			conn = dbService.getConnection();
+			File adminFile = new File(dataDir + "/ap_store");
+			if(conn.getMetaData().getURL().startsWith("jdbc:hsqldb:mem")){
+				if(adminFile.exists() && !adminFile.isDirectory()){
+
+					br = new BufferedReader(new FileReader(adminFile));
+					String[] adminString = br.readLine().split(":", 2);
+
+
+					result = adminString[1];
+				}else{
+
+				}
+			}else{
+				PreparedStatement stmt = null;
+				ResultSet rs = null;
+				stmt = conn.prepareStatement("SELECT username, password FROM dn_user WHERE username = ?;");
+				stmt.setString(1, "admin");
+				rs = stmt.executeQuery();
+
+				if (rs != null && rs.next()) {
+					stmt = conn.prepareStatement("SELECT password FROM dn_user WHERE username = ?;");
+					stmt.setString(1, "admin");
+					rs = stmt.executeQuery();
+					if (rs != null && rs.next()) {
+						result= rs.getString("password");
+					}		
+				}
+			}
+		}catch(Exception e){
+		} finally {
+			try{
+				if(br != null){
+					br.close();
+				}
+			}catch (Exception ex){
+			}
+		}
+		return result;
+	}
+	
 }

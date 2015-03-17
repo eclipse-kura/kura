@@ -13,7 +13,6 @@ package org.eclipse.kura.core.configuration;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
@@ -31,9 +30,7 @@ import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.xml.bind.JAXBException;
 import javax.xml.stream.FactoryConfigurationError;
-import javax.xml.stream.XMLStreamException;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
@@ -724,9 +721,11 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 		// Unmarshall
 		XmlComponentConfigurations xmlConfigs = null;
 
+		FileReader fr = null;
+		BufferedReader br = null;
 		try {
-			FileReader  fr = new FileReader(fSnapshot);
-			BufferedReader br = new BufferedReader(fr);
+			fr = new FileReader(fSnapshot);
+			br = new BufferedReader(fr);
 			String line="";
 			String entireFile="";
 			while ((line = br.readLine()) != null) {
@@ -736,19 +735,19 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 			xmlConfigs = XmlUtil.unmarshal(decryptedContent, XmlComponentConfigurations.class);
 		}
 		catch (Exception e) {
-			s_logger.info("Snapshot not encrypted, trying to load a not encrypted one");
-			try {			
-				FileReader fr = new FileReader(fSnapshot);
-				xmlConfigs = XmlUtil.unmarshal(fr, XmlComponentConfigurations.class);
-			}
-			catch (Exception ex) {
-				throw new KuraException(KuraErrorCode.INTERNAL_ERROR, ex);
+			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+		}finally{
+			try{
+				if(br != null){
+					br.close();
+				}
+				if(fr != null){
+					fr.close();
+				}
+			}catch (Exception e){
+
 			}
 		}
-
-
-
-
 		return xmlConfigs;
 	}
 
@@ -1234,16 +1233,18 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 					fr = new FileReader(fSnapshot);
 					xmlConfigs = XmlUtil.unmarshal(fr, XmlComponentConfigurations.class);
 					encryptPlainSnapshots();
+					List<ComponentConfigurationImpl> encryptedConfigs= encryptConfigs(xmlConfigs.getConfigurations());
+					xmlConfigs.setConfigurations(encryptedConfigs);
 				}
 			}
 			catch (Exception ex) {
 				throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
 			}finally{
-				if(fr != null){
-					try {
+				try {
+					if(fr != null){
 						fr.close();
-					} catch (IOException e1) {
 					}
+				} catch (IOException e1) {
 				}
 			}
 		}

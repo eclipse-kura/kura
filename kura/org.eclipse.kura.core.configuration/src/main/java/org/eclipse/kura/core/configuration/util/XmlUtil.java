@@ -32,6 +32,7 @@ import javax.xml.stream.FactoryConfigurationError;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
+import com.sun.xml.*;
 
 import org.eclipse.kura.core.configuration.XmlConfigPropertiesAdapter;
 import org.slf4j.Logger;

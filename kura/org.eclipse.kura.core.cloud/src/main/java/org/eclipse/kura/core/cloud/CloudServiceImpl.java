@@ -440,39 +440,14 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
 				kuraPayload.setBody(payload);
 			}
 
-			boolean validSignature = false;
-			if(m_certificatesService != null){
-				s_logger.info("Start signature verification");
-				Enumeration<String> certList= m_certificatesService.listPublicCertificatesIDs();
-				
-				while(certList.hasMoreElements()){
-					String certAlias= certList.nextElement(); 
-					try{
-						Certificate certificate= m_certificatesService.returnCertificate(certAlias);
-						Signature s = Signature.getInstance("SHA256withRSA");
-						s.initVerify(certificate);
-						s.update(kuraTopic.getApplicationTopic().getBytes());
-						if(kuraPayload != null && kuraPayload.getBody()!=null){
-							s.update(kuraPayload.getBody());
-						}
-						byte[] signedMessage = null;
-						if(kuraPayload.getMetric("signedMessage") instanceof byte[]){
-							signedMessage = (byte[]) kuraPayload.getMetric("signedMessage");
-						}
-
-						s.verify(signedMessage);
-						validSignature= true;
-						break;
-					}catch(Exception e){
-					}
-				}
-			}
 
 
 			for (CloudClientImpl cloudClient : m_cloudClients) {
 				if (cloudClient.getApplicationId().equals(kuraTopic.getApplicationId())) {
 					try {
 						if (m_options.getTopicControlPrefix().equals(kuraTopic.getPrefix())) {
+							
+							boolean validSignature= verifyMessageSignature(kuraTopic, kuraPayload);
 							if(m_certificatesService == null || validSignature){
 								
 								cloudClient.onControlMessageArrived(kuraTopic.getDeviceId(), 
@@ -652,5 +627,35 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
 		catch (Exception e) {
 			s_logger.error("Error publishing life-cycle message on topic: "+topic, e);
 		}
+	}
+	
+	
+	private boolean verifyMessageSignature(KuraTopic kuraTopic, KuraPayload kuraPayload){
+		if(m_certificatesService != null){
+			s_logger.info("Start signature verification");
+			Enumeration<String> certList= m_certificatesService.listDMCertificatesAliases();
+			
+			while(certList.hasMoreElements()){
+				String certAlias= certList.nextElement(); 
+				try{
+					Certificate certificate= m_certificatesService.returnCertificate(certAlias);
+					Signature s = Signature.getInstance("SHA256withRSA");
+					s.initVerify(certificate);
+					s.update(kuraTopic.getApplicationTopic().getBytes());
+					if(kuraPayload != null && kuraPayload.getBody()!=null){
+						s.update(kuraPayload.getBody());
+					}
+					byte[] signedMessage = null;
+					if(kuraPayload.getMetric("signedMessage") instanceof byte[]){
+						signedMessage = (byte[]) kuraPayload.getMetric("signedMessage");
+					}
+
+					s.verify(signedMessage);
+					return true;
+				}catch(Exception e){
+				}
+			}
+		}
+		return false;
 	}
 }

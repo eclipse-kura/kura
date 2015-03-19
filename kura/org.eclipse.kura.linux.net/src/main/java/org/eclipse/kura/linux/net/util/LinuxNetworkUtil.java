@@ -237,8 +237,8 @@ public class LinuxNetworkUtil {
 			//start the process
 			proc = ProcessUtil.exec("ifconfig " + ifaceName);
 			if (proc.waitFor() != 0) {
-				s_logger.error("getCurrentIpAddress() :: error executing command --- ifconfig " + ifaceName + " --- exit value = " + proc.exitValue());
-				throw new KuraException(KuraErrorCode.INTERNAL_ERROR);
+				s_logger.warn("getCurrentIpAddress() :: error executing command --- ifconfig {} --- exit value = {}", ifaceName , proc.exitValue());
+				return ipAddress;
 			}
 			
 			//get the output
@@ -287,8 +287,8 @@ public class LinuxNetworkUtil {
 			//start the process
 			proc = ProcessUtil.exec("ifconfig " + ifaceName);
 			if (proc.waitFor() != 0) {
-				s_logger.error("getCurrentNetmask() :: error executing command --- ifconfig " + ifaceName + " --- exit value = " + proc.exitValue());
-				throw new KuraException(KuraErrorCode.INTERNAL_ERROR);
+                s_logger.warn("getCurrentNetmask() :: error executing command --- ifconfig {} --- exit value = {}", ifaceName , proc.exitValue());
+                return netmask;
 			}
 			
 			//get the output
@@ -338,20 +338,23 @@ public class LinuxNetworkUtil {
 		try {
 			//start the process
 			proc = ProcessUtil.exec("ifconfig " + ifaceName);
-			if (proc.waitFor() == 0) {
+			if (proc.waitFor() != 0) {
+                s_logger.warn("getCurrentMtu() :: error executing command --- ifconfig {} --- exit value = {}", ifaceName , proc.exitValue());
+                return mtu;
+            }
 
-			    //get the output
-			    br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
-			    String line = null;
-			    while ((line = br.readLine()) != null) {
-			        if (line.indexOf("MTU:") > -1) {
-			            stringMtu = line.substring(line.indexOf("MTU:") + 4, line.indexOf("Metric:") - 2);
-			            break;
-			        }
-			    }
-			    
-			    mtu = Integer.parseInt(stringMtu);
-			}
+		    //get the output
+		    br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+		    String line = null;
+		    while ((line = br.readLine()) != null) {
+		        if (line.indexOf("MTU:") > -1) {
+		            stringMtu = line.substring(line.indexOf("MTU:") + 4, line.indexOf("Metric:") - 2);
+		            break;
+		        }
+		    }
+		    
+		    mtu = Integer.parseInt(stringMtu);
+
 		} catch (Exception e) {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
 		}
@@ -381,8 +384,8 @@ public class LinuxNetworkUtil {
 			//start the process
 			proc = ProcessUtil.exec("ifconfig " + ifaceName);
 			if (proc.waitFor() != 0) {
-				s_logger.error("getCurrentBroadcastAddress() :: error executing command --- ifconfig " + ifaceName + " --- exit value = " + proc.exitValue());
-				throw new KuraException(KuraErrorCode.INTERNAL_ERROR);
+                s_logger.warn("getCurrentBroadcastAddress() :: error executing command --- ifconfig {} --- exit value = {}", ifaceName , proc.exitValue());
+                return broadcast;
 			}
 			
 			//get the output
@@ -432,8 +435,8 @@ public class LinuxNetworkUtil {
 			//start the process
 			proc = ProcessUtil.exec("ifconfig " + ifaceName);
 			if (proc.waitFor() != 0) {
-				s_logger.error("getCurrentPtpAddress() :: error executing command --- ifconfig " + ifaceName + " --- exit value = " + proc.exitValue());
-				throw new KuraException(KuraErrorCode.INTERNAL_ERROR);
+                s_logger.warn("getCurrentPtpAddress() :: error executing command --- ifconfig {} --- exit value = {}", ifaceName , proc.exitValue());
+                return ptp;
 			}
 			
 			//get the output
@@ -497,7 +500,6 @@ public class LinuxNetworkUtil {
 				}
 			} else if(ifaceType == NetInterfaceType.ETHERNET) {
 			
-			    // FIXME:MC get this information from the same ifconfig run - on second pass use ip tools. 
 			    LinkTool linkTool = null;
 				String[] tools = new String[]{"/sbin/ethtool", "/usr/sbin/ethtool", "/sbin/mii-tool"};
 				for(int i=0; i<tools.length; i++) {
@@ -578,8 +580,8 @@ public class LinuxNetworkUtil {
 			//start the process
 			proc = ProcessUtil.exec("ifconfig " + ifaceName);
 			if (proc.waitFor() != 0) {
-				s_logger.error("error executing command --- ifconfig --- exit value = " + proc.exitValue());
-				throw new KuraException(KuraErrorCode.INTERNAL_ERROR);
+                s_logger.warn("getMacAddress() :: error executing command --- ifconfig {} --- exit value = {}", ifaceName , proc.exitValue());
+                return mac;
 			}
 
 			//get the output
@@ -648,8 +650,8 @@ public class LinuxNetworkUtil {
 			//start the process
 			proc = ProcessUtil.exec("ifconfig");
 			if (proc.waitFor() != 0) {
-				s_logger.error("error executing command --- ifconfig --- exit value = " + proc.exitValue());
-				throw new KuraException(KuraErrorCode.INTERNAL_ERROR);
+                s_logger.warn("isSupportsMulticast() :: error executing command --- ifconfig {} --- exit value = {}", interfaceName , proc.exitValue());
+                return false;
 			}
 
 			//get the output
@@ -715,8 +717,8 @@ public class LinuxNetworkUtil {
 			//start the process
 			proc = ProcessUtil.exec("ifconfig " + ifaceName);
 			if (proc.waitFor() != 0) {
-				s_logger.error("error executing command --- ifconfig --- exit value = " + proc.exitValue());
-				throw new KuraException(KuraErrorCode.INTERNAL_ERROR);
+                s_logger.warn("getType() :: error executing command --- ifconfig {} --- exit value = {}", ifaceName , proc.exitValue());
+			    return NetInterfaceType.UNKNOWN;
 			}
 
 			//get the output
@@ -818,8 +820,8 @@ public class LinuxNetworkUtil {
 			//run ethtool
 			procEthtool = ProcessUtil.exec("ethtool -i " + interfaceName);
 			if (procEthtool.waitFor() != 0) {
-				s_logger.error("getEthernetDriver() :: error executing command --- ethtool -i {}", interfaceName);
-				throw new KuraException(KuraErrorCode.INTERNAL_ERROR);				
+                s_logger.warn("getEthernetDriver() :: error executing command --- ethtool -i {}", interfaceName);
+                return driver;
 			}
 			
 			//get the output
@@ -869,8 +871,8 @@ public class LinuxNetworkUtil {
 			//start the process
 			proc = ProcessUtil.exec("iwlist " + ifaceName + " auth");
 			if (proc.waitFor() != 0) {
-				s_logger.error("error executing command --- iwlist --- exit value = " + proc.exitValue());
-				throw new KuraException(KuraErrorCode.INTERNAL_ERROR);
+                s_logger.warn("error executing command --- iwlist --- exit value = {}", proc.exitValue());
+                return capabilities;
 			}
 	
 			//get the output
@@ -930,8 +932,8 @@ public class LinuxNetworkUtil {
 		try {
 			procIw = ProcessUtil.exec("iw dev " + ifaceName + " info");
 			if (procIw.waitFor() != 0) {
-				s_logger.error("error executing command --- iw --- exit value = " + procIw.exitValue());
-				throw new KuraException(KuraErrorCode.INTERNAL_ERROR);
+				s_logger.warn("error executing command --- iw --- exit value = {}", procIw.exitValue());
+				return mode;
 			}
 			
 			br1 = new BufferedReader(new InputStreamReader(procIw.getInputStream()));
@@ -953,8 +955,8 @@ public class LinuxNetworkUtil {
 			if (mode.equals(WifiMode.UNKNOWN)) {
 				procIwConfig = ProcessUtil.exec("iwconfig " + ifaceName);
 				if (procIwConfig.waitFor() != 0) {
-					s_logger.error("error executing command --- iwconfig --- exit value = " + procIwConfig.exitValue());
-					throw new KuraException(KuraErrorCode.INTERNAL_ERROR);
+					s_logger.error("error executing command --- iwconfig --- exit value = {}", procIwConfig.exitValue());
+	                return mode;
 				}
 				
 				//get the output
@@ -1019,8 +1021,8 @@ public class LinuxNetworkUtil {
 			//start the process
 			proc = ProcessUtil.exec("iwconfig " + ifaceName);
 			if (proc.waitFor() != 0) {
-				s_logger.error("error executing command --- iwconfig --- exit value = " + proc.exitValue());
-				throw new KuraException(KuraErrorCode.INTERNAL_ERROR);
+				s_logger.warn("error executing command --- iwconfig --- exit value = {}", proc.exitValue());
+				return bitRate;
 			}
 
 			//get the output
@@ -1047,8 +1049,7 @@ public class LinuxNetworkUtil {
 					
 					bitRate = (long) (rate * mult);
 				}
-			}
-			
+			}			
 			
 		} catch (IOException e) {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
@@ -1082,8 +1083,8 @@ public class LinuxNetworkUtil {
 			//start the process
 			proc = ProcessUtil.exec("iwconfig " + ifaceName);
 			if (proc.waitFor() != 0) {
-				s_logger.error("error executing command --- ifconfig --- exit value = " + proc.exitValue());
-				throw new KuraException(KuraErrorCode.INTERNAL_ERROR);
+				s_logger.warn("error executing command --- ifconfig --- exit value = {}", proc.exitValue());
+				return ssid;
 			}
 
 			//get the output
@@ -1182,6 +1183,7 @@ public class LinuxNetworkUtil {
 				if(line.indexOf(interfaceName) > -1 && line.indexOf("mon." + interfaceName) < 0) {
 					
 					//so the interface is listed - power is already on
+				    // WTF: should this be !=, or even better, can we remove the statement below?
 					if(LinuxNetworkUtil.getCurrentIpAddress(interfaceName) == null) {
 						return;
 					}

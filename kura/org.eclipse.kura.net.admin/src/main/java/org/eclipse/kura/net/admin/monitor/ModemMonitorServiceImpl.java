@@ -418,7 +418,8 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 							
 							if (modem.isGpsSupported()) {
 								if (isGpsEnabledInConfig(newNetConfigs) && !modem.isGpsEnabled()) {
-									enableModemGps(modem);
+	                                modem.enableGps();
+	                                postModemGpsEvent(modem, true);
 								}
 							}
 	    				}
@@ -574,23 +575,20 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 					if (isGpsEnabledInConfig(modem.getConfiguration())) {
 						if (modem instanceof HspaCellularModem) {
 							if (!modem.isGpsEnabled()) {
-								enableModemGps(modem);
-							} else {
-								postModemGpsEvent(modem, true);
+						        modem.enableGps();
 							}
-						} else {
-							postModemGpsEvent(modem, true);
 						}
+				        postModemGpsEvent(modem, true);
 					}
 				}
 			} catch (Exception e) {
-				s_logger.error("monitor() :: Exception -> " + e);
+				s_logger.error("monitor() :: Exception", e);
 				if ((pppService != null) && (pppState != null)) {
 					try {
-						s_logger.error("monitor() :: Exception :: PPPD disconnect");
+						s_logger.info("monitor() :: Exception :: PPPD disconnect");
 						pppService.disconnect();
 					} catch (KuraException e1) {
-						e1.printStackTrace();
+                        s_logger.error("monitor() :: Exception while disconnect", e1);
 					}
 					m_pppState = pppState;
 				}
@@ -601,17 +599,16 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 							s_logger.error("monitor() :: Failed to disable modem GPS");
 						}
 					} catch (KuraException e1) {
-						e1.printStackTrace();
+                        s_logger.error("monitor() :: Exception disableModemGps", e1);
 					}
 				}
 				
 				try {
-					s_logger.error("monitor() :: Exception :: modem reset");
+					s_logger.info("monitor() :: Exception :: modem reset");
 					modem.reset();
 				} catch (KuraException e1) {
-					e1.printStackTrace();
+                    s_logger.error("monitor() :: Exception modem.reset", e1);
 				}
-				e.printStackTrace();
 			}
 		}
 		
@@ -760,7 +757,8 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 					
 					if (modem.isGpsSupported()) {
 						if (isGpsEnabledInConfig(netConfigs) && !modem.isGpsEnabled()) {
-								enableModemGps(modem);
+                            modem.enableGps();
+                            postModemGpsEvent(modem, true);
 						}
 					}
 				}
@@ -770,11 +768,6 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 		}
 	}
 	
-	private void enableModemGps(CellularModem modem) throws KuraException {
-		
-		modem.enableGps();
-		postModemGpsEvent(modem, true);
-	}
 	
 	private boolean disableModemGps(CellularModem modem) throws KuraException {
 		

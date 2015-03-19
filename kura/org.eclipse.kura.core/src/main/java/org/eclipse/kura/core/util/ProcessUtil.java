@@ -12,6 +12,10 @@
 package org.eclipse.kura.core.util;
 
 import java.io.IOException;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,55 +24,44 @@ public class ProcessUtil
 {
 	private static final Logger s_logger = LoggerFactory.getLogger(ProcessUtil.class);
 
+	private static final ExecutorService s_processExecutor = Executors.newSingleThreadExecutor();
+
 	private static final String BASH      = "/bin/bash";
     private static final String BASH_FLAG = "-c";
     
 	public static SafeProcess exec(String command)
 		throws IOException
 	{
-		s_logger.debug("Executing: {}", command);
-		Runtime runtime = Runtime.getRuntime();
-		//return new SafeProcess(runtime.exec(command));
-		String[] cmdarray = new String[] {BASH, BASH_FLAG, command};
-		return new SafeProcess(runtime.exec(cmdarray));
+		return exec( new String[] {command});
 	}
 
-	
-//	public static SafeProcess exec(String command, String[] envp)
-//		throws IOException
-//	{
-//		s_logger.debug("Executing: {}", command);
-//		Runtime runtime = Runtime.getRuntime();
-//		return new SafeProcess(runtime.exec(command, envp));
-//	}
-//
-//	
 	public static SafeProcess exec(String[] cmdarray)
 		throws IOException
 	{
-		s_logger.debug("Executing: {}", cmdarray[0]);
-		Runtime runtime = Runtime.getRuntime();
-		//return new SafeProcess(runtime.exec(cmdarray));
-//		StringBuilder sb = new StringBuilder();
-//		for (String s : cmdarray) {
-//			sb.append(s);
-//			sb.append(" ");
-//		}
-		String[] newCmdArray = new String[cmdarray.length + 2];
+		final String[] newCmdArray = new String[cmdarray.length + 2];
 		newCmdArray[0] = BASH;
 		newCmdArray[1] = BASH_FLAG;
 		System.arraycopy(cmdarray, 0, newCmdArray, 2, cmdarray.length);
-		return new SafeProcess(runtime.exec(newCmdArray));
+		
+		// Serialize process executions. One at a time so we can consume all streams.
+        Future<SafeProcess> futureSafeProcess = s_processExecutor.submit( new Callable<SafeProcess>() {
+            @Override
+            public SafeProcess call() throws Exception {
+                Thread.currentThread().setName("SafeProcessExecutor");
+                SafeProcess safeProcess = new SafeProcess();
+                safeProcess.exec(newCmdArray);
+                return safeProcess;
+            }           
+        });
+        
+        try {
+            return futureSafeProcess.get();
+        } 
+        catch (Exception e) {
+            s_logger.error("Error waiting from SafeProcess ooutput", e);
+            throw new IOException(e);
+        }
 	}
-//
-//	
-//	public static SafeProcess exec(String[] cmdarray, String[] envp)
-//		throws IOException
-//	{
-//		s_logger.debug("Executing: {}", cmdarray[0]);
-//		Runtime runtime = Runtime.getRuntime();
-//		return new SafeProcess(runtime.exec(cmdarray, envp));
-//	}
 
 	/**
 	 * @deprecated  The method does nothing
@@ -83,3 +76,7 @@ public class ProcessUtil
 		proc.destroy();	
 	}
 }
+
+
+
+    

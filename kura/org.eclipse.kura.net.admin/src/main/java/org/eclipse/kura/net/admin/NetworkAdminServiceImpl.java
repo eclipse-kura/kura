@@ -824,8 +824,8 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 					manageDhcpClient(interfaceName, false);
 					manageDhcpServer(interfaceName, false);
 
+					// FIXME: can we avoid getting the interface type again and ask for the caller to pass it in?
 					NetInterfaceType type = LinuxNetworkUtil.getType(interfaceName);
-
 					if (type == NetInterfaceType.WIFI) {
 						disableWifiInterface(interfaceName);
 					}

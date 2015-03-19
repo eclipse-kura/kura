@@ -277,7 +277,12 @@ public abstract class TelitModem {
         return signalStrength;
     }
 	
-    public boolean isGpsSupported() throws KuraException {
+    public boolean isGpsSupported() throws KuraException 
+    {
+        if (m_gpsSupported != null) {
+            return m_gpsSupported;
+        }
+    
     	synchronized (s_atLock) {
     		if (m_gpsSupported == null) {
 	    		s_logger.debug("sendCommand isGpsSupported :: {}", TelitModemAtCommands.isGpsPowered.getCommand());
@@ -301,16 +306,14 @@ public abstract class TelitModem {
 				    	if (sReply.startsWith("$GPSP:")) {
 				    		m_gpsSupported = true;
 				    	}
+				    	else {
+				    	    m_gpsSupported = false;
+				    	}
 				    }
 				}
     		}
-    	}
-    	boolean ret = false;
-    	if (m_gpsSupported != null) {
-    		ret = m_gpsSupported;
-    	}
-    	
-    	return ret;
+    	}    	
+    	return m_gpsSupported;
     }
     
     public void enableGps() throws KuraException {
@@ -630,7 +633,9 @@ public abstract class TelitModem {
 	
     protected void closeSerialPort (CommConnection connection) throws KuraException {
 		try {
-			connection.close();
+		    if (connection != null) {
+		        connection.close();
+		    }
 		} catch (IOException e) {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
 		}

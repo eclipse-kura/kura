@@ -725,7 +725,7 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
         List<NetInterfaceAddress> netInterfaceAddresses = new ArrayList<NetInterfaceAddress>();
 		if(isUp) {
 			ConnectionInfo conInfo = new ConnectionInfoImpl(interfaceName);			
-			NetInterfaceAddressImpl netInterfaceAddress = new NetInterfaceAddressImpl();			
+			NetInterfaceAddressImpl netInterfaceAddress = new NetInterfaceAddressImpl();
 			try {
 			    // FIXME:MC The whole block of information can be fetched with a single ifconfig?
 				String currentNetmask = LinuxNetworkUtil.getCurrentNetmask(interfaceName);
@@ -751,14 +751,13 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
         return netInterfaceAddresses;
 	}
 	
-	private List<WifiInterfaceAddress> getWifiInterfaceAddresses(String interfaceName, boolean isUp) throws KuraException {
+	private List<WifiInterfaceAddress> getWifiInterfaceAddresses(String interfaceName, boolean isUp) throws KuraException 
+	{
+        List<WifiInterfaceAddress> wifiInterfaceAddresses = new ArrayList<WifiInterfaceAddress>();
 		if(isUp) {
-			ConnectionInfo conInfo = new ConnectionInfoImpl(interfaceName);
-			
-			List<WifiInterfaceAddress> wifiInterfaceAddresses = new ArrayList<WifiInterfaceAddress>();
+			ConnectionInfo conInfo = new ConnectionInfoImpl(interfaceName);			
 			WifiInterfaceAddressImpl wifiInterfaceAddress = new WifiInterfaceAddressImpl();
-			wifiInterfaceAddresses.add(wifiInterfaceAddress);
-			
+			wifiInterfaceAddresses.add(wifiInterfaceAddress);			
 			try {
 				String currentNetmask = LinuxNetworkUtil.getCurrentNetmask(interfaceName);
                 if (currentNetmask != null) {
@@ -802,21 +801,17 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
 			} catch(UnknownHostException e) {
 				throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
 			}
-
-			return wifiInterfaceAddresses;
-		} else {
-			return null;
 		}
+
+		return wifiInterfaceAddresses;
 	}
 	
     private List<ModemInterfaceAddress> getModemInterfaceAddresses(String interfaceName, boolean isUp) throws KuraException {
+        List<ModemInterfaceAddress> modemInterfaceAddresses = new ArrayList<ModemInterfaceAddress>();
         if(isUp) {
-            ConnectionInfo conInfo = new ConnectionInfoImpl(interfaceName);
-            
-            List<ModemInterfaceAddress> modemInterfaceAddresses = new ArrayList<ModemInterfaceAddress>();
+            ConnectionInfo conInfo = new ConnectionInfoImpl(interfaceName);            
             ModemInterfaceAddressImpl modemInterfaceAddress = new ModemInterfaceAddressImpl();
-            modemInterfaceAddresses.add(modemInterfaceAddress);
-            
+            modemInterfaceAddresses.add(modemInterfaceAddress);            
             try {
                 String currentNetmask = LinuxNetworkUtil.getCurrentNetmask(interfaceName);
                 if (currentNetmask != null) {
@@ -826,7 +821,6 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
                     modemInterfaceAddress.setNetworkPrefixLength(NetworkUtil.getNetmaskShortForm(currentNetmask));
                     modemInterfaceAddress.setGateway(conInfo.getGateway());
                     modemInterfaceAddress.setDnsServers(conInfo.getDnsServers());
-                    modemInterfaceAddress.setConnectionType(ModemConnectionType.PPP);   // FIXME - hardcoded
                     ModemConnectionStatus connectionStatus = isUp? ModemConnectionStatus.CONNECTED : ModemConnectionStatus.DISCONNECTED;
                     modemInterfaceAddress.setConnectionStatus(connectionStatus);
                     // TODO - other attributes
@@ -836,13 +830,9 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
             } catch(UnknownHostException e) {
                 throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
             }
-                
-            return modemInterfaceAddresses;
-        } else {
-            return null;
         }
+        return modemInterfaceAddresses;
     }
-
 	
 	private NetInterfaceState getState(String interfaceName, boolean isUp) {
 		/** The device is in an unknown state. */

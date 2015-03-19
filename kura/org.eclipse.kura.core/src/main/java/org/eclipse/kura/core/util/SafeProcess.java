@@ -5,24 +5,32 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Arrays;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SafeProcess {
+public class SafeProcess 
+{
 	private static final Logger s_logger = LoggerFactory.getLogger(SafeProcess.class);
+
+	private static final ExecutorService s_streamGobblers = Executors.newFixedThreadPool(2);
 	
 	private Process m_process;
+	private Future<byte[]> m_futureInputGobbler;
+	private Future<byte[]> m_futureErrorGobbler;
 	private byte[]  m_inBytes;
 	private byte[]  m_errBytes;
 	private boolean m_waited;
+	private int     m_exitValue;
 	
-//	private static List<SafeProcess> s_trackList = new ArrayList<SafeProcess>();
-
-    SafeProcess(Process process) {
+    SafeProcess() {
 		super();
-		m_process = process;
-//		s_trackList.add(this);
 	}
 
 	public OutputStream getOutputStream() {
@@ -46,89 +54,94 @@ public class SafeProcess {
 		return new ByteArrayInputStream(m_errBytes);
 	}
 
-	public int waitFor() throws InterruptedException {
-	    ByteArrayOutputStream inBaos = new ByteArrayOutputStream(1024);
-	    ByteArrayOutputStream errBaos = new ByteArrayOutputStream(1024);
-		InputStream is = null;
-		InputStream es = null;
-		int exitValue = -1;
-		try {
-			exitValue = m_process.waitFor();
-			
-			byte[] buf = new byte[1024];
-			int len;
-			is = m_process.getInputStream();
-			while ((len = is.read(buf)) != -1) {
-				inBaos.write(buf, 0, len);
-			}
-			
-			es = m_process.getErrorStream();
-			while ((len = es.read(buf)) != -1) {
-				errBaos.write(buf, 0, len);
-			}
-			
-	        m_inBytes = inBaos.toByteArray();
-	        m_errBytes = errBaos.toByteArray();			
-		} 
-		catch (IOException e) {
-			s_logger.warn("Failed to consume process input/error stream", e);
-		} 
-		finally {
-			if (is != null) {
-				try {
-					is.close();
-					is = null;
-				} catch (IOException e) {
-					s_logger.warn("Failed to close process input stream", e);
-				}
-			}
-			if (es != null) {
-				try {
-					es.close();
-                    es = null;
-				} catch (IOException e) {
-					s_logger.warn("Failed to close process error stream", e);
-				}
-			}
-            if (inBaos != null) {
-                try {
-                    inBaos.close();
-                    inBaos = null;
-                } catch (IOException e) {
-                    s_logger.warn("Failed to close inBaos stream", e);
-                }
+	void exec(String[] cmdarray)
+	    throws IOException
+	{
+        s_logger.debug("Executing: {}", Arrays.toString(cmdarray));
+        Runtime runtime = Runtime.getRuntime();
+        m_process = runtime.exec(cmdarray);
+
+        // process the input stream
+        m_futureInputGobbler = s_streamGobblers.submit( new Callable<byte[]>() {
+            @Override
+            public byte[] call() throws Exception {
+                Thread.currentThread().setName("SafeProcess InputStream Gobbler");
+                return readStreamFully(m_process.getInputStream());                    
             }
-            if (errBaos != null) {
-                try {
-                    errBaos.close();
-                    errBaos = null;
-                } catch (IOException e) {
-                    s_logger.warn("Failed to close errBaos stream", e);
-                }
+        });
+
+        // process the error stream
+        m_futureErrorGobbler = s_streamGobblers.submit( new Callable<byte[]>() {
+            @Override
+            public byte[] call() throws Exception {
+                Thread.currentThread().setName("SafeProcess ErrorStream Gobbler");
+                return readStreamFully(m_process.getErrorStream());                    
             }
-			m_process.destroy();
-			m_waited = true;
-//			s_trackList.remove(this);
-//			s_logger.debug("Number of running processes: {}", s_trackList.size());
-		}
-		
-		return exitValue;
+        });      
+        
+        // wait for the process execution
+        try {
+            m_exitValue = m_process.waitFor();
+            m_inBytes  = m_futureInputGobbler.get();
+            m_errBytes = m_futureErrorGobbler.get();
+        }
+        catch (InterruptedException e) {
+            throw new IOException(e);
+        }
+        catch (ExecutionException e) {
+            throw new IOException(e);
+        }
+        finally {
+            m_process.destroy();
+            m_process = null;
+            m_waited  = true;
+        }
+	}
+	
+	public int waitFor() throws InterruptedException 
+	{
+		return m_exitValue;
 	}
 
 	public int exitValue() {
-		return m_process.exitValue();
+		return m_exitValue;
 	}
 
 	public void destroy() {
 		if (!m_waited) {
 			s_logger.warn("Calling destroy() before waitFor() might lead to resource leaks");
 			Thread.dumpStack();
-			m_process.destroy();
-//			s_trackList.remove(this);
-//			s_logger.debug("Number of running processes: {}", s_trackList.size());
+			if (m_process != null) {
+			    m_process.destroy();
+			}
 		}
 		m_inBytes  = null; // just in case...
 		m_errBytes = null;
 		m_process  = null;
 	}
+	
+	
+    private byte[] readStreamFully(InputStream is) 
+        throws IOException 
+    {
+        int len;
+        byte[] buf = new byte[1024];
+        ByteArrayOutputStream inBaos = new ByteArrayOutputStream(1024);
+        try {
+            while ((len = is.read(buf)) != -1) {
+                inBaos.write(buf, 0, len);
+            }
+            return inBaos.toByteArray();
+        }
+        finally {
+            if (is != null) {
+                try {
+                    is.close();
+                    is = null;
+                } catch (IOException e) {
+                    s_logger.warn("Failed to close process input stream", e);
+                }
+            }
+        }
+    }
 }

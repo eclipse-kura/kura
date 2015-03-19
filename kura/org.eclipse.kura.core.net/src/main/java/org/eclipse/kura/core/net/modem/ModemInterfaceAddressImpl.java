@@ -27,6 +27,7 @@ public class ModemInterfaceAddressImpl extends NetInterfaceAddressImpl implement
 	
 	public ModemInterfaceAddressImpl() {
 		super();
+		m_connectionType = ModemConnectionType.PPP; // FIXME - hardcoded
 	}
 
     public ModemInterfaceAddressImpl(ModemInterfaceAddress other) {

@@ -14,7 +14,6 @@ package org.eclipse.kura.core.net.modem;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.kura.core.net.WifiInterfaceAddressConfigImpl;
 import org.eclipse.kura.net.NetInterfaceConfig;
 import org.eclipse.kura.net.modem.ModemConnectionStatus;
 import org.eclipse.kura.net.modem.ModemConnectionType;

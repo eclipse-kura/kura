@@ -173,11 +173,10 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 			throws KuraException {
 	    
 	    ArrayList<NetConfig> netConfigs = new ArrayList<NetConfig>();
-	    ComponentConfiguration componentConfiguration = ((SelfConfiguringComponent)m_networkConfigurationService).getConfiguration();
-	    if ((interfaceName != null) && (componentConfiguration != null)) {
+	    NetworkConfiguration networkConfig = m_networkConfigurationService.getNetworkConfiguration();
+	    if ((interfaceName != null) && (networkConfig != null)) {
 	    	try {
 	    		s_logger.debug("Getting networkInterfaceConfigs for " + interfaceName);
-				NetworkConfiguration networkConfig = new NetworkConfiguration(componentConfiguration.getConfigurationProperties());
 				if(networkConfig != null && networkConfig.getNetInterfaceConfigs() != null && networkConfig.getNetInterfaceConfigs().size() > 0) {
 		    	    for(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig : networkConfig.getNetInterfaceConfigs()) {
 		    	        if(interfaceName.equals(netInterfaceConfig.getName())) {

@@ -155,4 +155,10 @@ public interface Resources extends ClientBundleWithLookup {
     
     @Source("icons/32x32/apps/osx_terminal.png")
     ImageResource command32();
+    
+    @Source("icons/16x16/actions/system-lock-screen.png")
+    ImageResource systemLock16();
+    
+    @Source("icons/32x32/actions/system-lock-screen.png")
+    ImageResource systemLock32();
 }

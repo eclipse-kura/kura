@@ -171,6 +171,7 @@ public class Console implements ConfigurableComponent
 				String passwordFromDB= AuthenticationManager.isDBInitialized(m_dbService, dataDir);
 				try{
 					passwordFromDB= m_cryptoService.decryptAes(passwordFromDB);
+
 				}catch (Exception e){
 				}
 				String propertyPassword= (String) properties.get(CONSOLE_PASSWORD);
@@ -181,8 +182,8 @@ public class Console implements ConfigurableComponent
 
 				if(passwordFromDB != null){ 
 					if(!propertyPassword.equals(passwordFromDB)){
+						
 						if(propertyPassword.equals("admin")){
-
 							Map<String, Object> updatedProperties= new HashMap<String, Object>();
 							Iterator<String> keys = properties.keySet().iterator();
 							while (keys.hasNext()) {
@@ -231,7 +232,6 @@ public class Console implements ConfigurableComponent
 					}
 				}
 
-
 				authMgr = new AuthenticationManager(propertyPassword);
 				initHTTPService(authMgr, servletRoot);
 
@@ -255,6 +255,15 @@ public class Console implements ConfigurableComponent
 	protected void updated(Map<String, Object> properties) {
 		Iterator<String> keys = properties.keySet().iterator();
 		String propertyPassword=null;
+		String dataDir = m_systemService.getProperties().getProperty(ESF_DATA_DIR);
+
+		String passwordFromDB= AuthenticationManager.isDBInitialized(m_dbService, dataDir);
+		try{
+			passwordFromDB= m_cryptoService.decryptAes(passwordFromDB);
+
+		}catch (Exception e){
+		}
+		
 		try{
 			while (keys.hasNext()) {
 				String key = keys.next();
@@ -266,7 +275,11 @@ public class Console implements ConfigurableComponent
 					}catch (Exception e){
 						decryptedPassword= (String) value;
 					}
-					propertyPassword= m_cryptoService.sha1Hash(decryptedPassword);
+					if(passwordFromDB != null && decryptedPassword.equals(passwordFromDB)){
+						propertyPassword= decryptedPassword;
+					}else{
+						propertyPassword= m_cryptoService.sha1Hash(decryptedPassword);
+					}
 				}
 			}
 			authMgr.updatePassword(propertyPassword);
@@ -327,14 +340,17 @@ public class Console implements ConfigurableComponent
 		m_worker= Executors.newSingleThreadExecutor();
 		m_handle = m_worker.submit(new Runnable() {		
 			public void run() {
+				s_logger.info("--> Runner started");
 				String searchedPID= (String) m_properties.get(APP_PID);
 				while(true){
+					s_logger.info("--> Runner while");
 					Set<String> pids= m_configService.getConfigurableComponentPids();
 					Iterator<String> pidIterator= pids.iterator();
 					while(pidIterator.hasNext()){
 						String pid= pidIterator.next();
 						if(pid.equals(searchedPID)){
 							try {
+								s_logger.info("Try to update config.");
 								m_configService.updateConfiguration(searchedPID, m_properties);
 								return;
 							} catch (KuraException e) {
@@ -342,6 +358,12 @@ public class Console implements ConfigurableComponent
 								e.printStackTrace();
 							}
 						}
+					}
+					try {
+						Thread.sleep(1000);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
 					}
 				}
 			}

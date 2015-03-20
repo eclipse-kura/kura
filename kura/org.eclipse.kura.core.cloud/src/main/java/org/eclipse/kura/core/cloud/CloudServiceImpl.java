@@ -19,7 +19,9 @@ import java.io.IOException;
 import java.security.Signature;
 import java.security.cert.Certificate;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Dictionary;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
@@ -632,7 +634,13 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
 
 
 	private boolean verifyMessageSignature(KuraTopic kuraTopic, KuraPayload kuraPayload){
-		if(kuraTopic.getApplicationId().equals("PROV-V1") && kuraTopic.getApplicationTopic().contains("certificate")){ //maybe is better a different check based on the number of certificates available in db: for provisioning this number is 0. What happens is provision fails in the middle?
+		if(kuraTopic.getApplicationId().equals("PROV-V1") 
+				&& kuraTopic.getApplicationTopic().contains("certificate")){
+			/*Enumeration<String> aliasDMEnum= m_certificatesService.listDMCertificatesAliases();
+			if(aliasDMEnum == null || !aliasDMEnum.hasMoreElements()){
+				return true;
+			}
+			return false;*/
 			return true;
 		}else{
 			s_logger.info("Start signature verification");

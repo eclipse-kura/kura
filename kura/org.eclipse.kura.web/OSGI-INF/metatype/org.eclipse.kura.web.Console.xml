@@ -14,10 +14,10 @@
 -->
 <MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
     <OCD id="org.eclipse.kura.web.Console" 
-         name="Denali Console" 
+         name="DenaliConsole" 
          description="Denali Console configuration">
          
-        <Icon resource="CommandPasswordService" size="32"/>
+        <Icon resource="DenaliService" size="32"/>
 
         
         <AD id="console.password.value"
@@ -26,7 +26,7 @@
         	cardinality="0"
         	required="true"
         	default="admin"
-        	description="This password.">
+        	description="Device's web console password. A non empty value should be set.">
         </AD>
 
                     

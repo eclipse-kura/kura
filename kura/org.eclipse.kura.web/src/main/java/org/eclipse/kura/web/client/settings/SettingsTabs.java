@@ -33,10 +33,10 @@ public class SettingsTabs extends LayoutContainer
     private ServiceTree         m_servicesTree;
 	
 	private TabPanel            m_tabsPanel;
-	private TabItem             m_adminPasswordConfig;
+	//private TabItem             m_adminPasswordConfig;
 	private TabItem             m_snapshotsConfig;
 	
-	private AdminPasswordTab	m_adminPasswordTab;
+	//private AdminPasswordTab	m_adminPasswordTab;
 	private SnapshotsTab	    m_snapshotsTab;
 	
 	public SettingsTabs(GwtSession currentSession,
@@ -52,11 +52,11 @@ public class SettingsTabs extends LayoutContainer
 	
     private void initTabs()
     {
-    	m_adminPasswordTab = new AdminPasswordTab(m_currentSession);
+    	/*m_adminPasswordTab = new AdminPasswordTab(m_currentSession);
 		if (m_adminPasswordConfig != null) {
 			m_adminPasswordConfig.add(m_adminPasswordTab);
 			m_adminPasswordConfig.layout();
-		}
+		}*/
 
     	m_snapshotsTab = new SnapshotsTab(m_currentSession, m_servicesTree);
 		if (m_snapshotsConfig != null) {
@@ -67,9 +67,9 @@ public class SettingsTabs extends LayoutContainer
     
     public boolean isDirty() {
     	
-    	if (m_adminPasswordTab.isDirty()) {
+    	/*if (m_adminPasswordTab.isDirty()) {
     		return true;
-    	}
+    	}*/
     	
     	return false;
     }
@@ -94,11 +94,11 @@ public class SettingsTabs extends LayoutContainer
         m_snapshotsConfig.add(m_snapshotsTab);
         m_tabsPanel.add(m_snapshotsConfig);
 
-        m_adminPasswordConfig = new TabItem(MSGS.settingsAdminPassword());
+       /* m_adminPasswordConfig = new TabItem(MSGS.settingsAdminPassword());
         m_adminPasswordConfig.setBorders(true);
         m_adminPasswordConfig.setLayout(new FitLayout());
         m_adminPasswordConfig.add(m_adminPasswordTab);
-        m_tabsPanel.add(m_adminPasswordConfig);
+        m_tabsPanel.add(m_adminPasswordConfig);*/
 
         add(m_tabsPanel);
     }

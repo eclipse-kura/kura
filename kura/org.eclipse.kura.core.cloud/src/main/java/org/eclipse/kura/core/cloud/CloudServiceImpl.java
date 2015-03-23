@@ -65,6 +65,7 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
 	private static final String     TOPIC_BA_APP = "BA";
 	private static final String 	CERT_SERIAL = "pkiSerial";
 	private static final String 	RESOURCE_CERTIFICATE_DM = "dm";
+	private static final String 	SIGNATURE_METRIC = "signedMessage";
 
 	private ComponentContext        m_ctx;
 
@@ -187,6 +188,9 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
 		String[] eventTopics = {PositionLockedEvent.POSITION_LOCKED_EVENT_TOPIC, ModemReadyEvent.MODEM_EVENT_READY_TOPIC};
 		props.put(EventConstants.EVENT_TOPIC, eventTopics);
 		m_ctx.getBundleContext().registerService(EventHandler.class.getName(), this, props);
+		
+		//
+		//
 		ServiceReference<CertificatesService> sr= m_ctx.getBundleContext().getServiceReference(CertificatesService.class);
 		if(sr != null){
 			m_certificatesService= m_ctx.getBundleContext().getService(sr);
@@ -646,24 +650,13 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
 			s_logger.info("Start signature verification");
 			String certSerial= (String) kuraPayload.getMetric(CERT_SERIAL);
 			String signingCertAlias= RESOURCE_CERTIFICATE_DM + "-" + certSerial;
-			try{
-				Certificate certificate= m_certificatesService.returnCertificate(signingCertAlias);
-				Signature s = Signature.getInstance("SHA256withRSA");
-				s.initVerify(certificate);
-				s.update(kuraTopic.getApplicationTopic().getBytes());
-				if(kuraPayload != null && kuraPayload.getBody()!=null){
-					s.update(kuraPayload.getBody());
-				}
-				byte[] signedMessage = null;
-				if(kuraPayload.getMetric("signedMessage") instanceof byte[]){
-					signedMessage = (byte[]) kuraPayload.getMetric("signedMessage");
-				}
-
-				s.verify(signedMessage);
-				return true;
-			}catch(Exception e){
-				return false;
+			byte[] topicBytes= kuraTopic.getApplicationTopic().getBytes();
+			byte[] messagePayload= kuraPayload.getBody();
+			byte[] signedMessage = null;
+			if(kuraPayload.getMetric(SIGNATURE_METRIC) instanceof byte[]){
+				signedMessage = (byte[]) kuraPayload.getMetric(SIGNATURE_METRIC);
 			}
+			return m_certificatesService.verifySignature(signingCertAlias, topicBytes, messagePayload, signedMessage);
 		}
 	}
 }

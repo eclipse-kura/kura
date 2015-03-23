@@ -77,5 +77,17 @@ public interface CertificatesService {
 	 */
 	public void removeCertificate(String alias) throws KuraException;
 	
+	/**
+	 * verifySignature is a method that takes the alias of the certificate used to sign the message, the byte array containing the topic used
+	 * to send the message, the body of the kura message and the signed message to verify the correctness of the signature, 
+	 * if compared to the received message
+	 * 
+	 * @param alias The string used to identify the certificate in a key store
+	 * @param topic The topic used to send the received message
+	 * @param 
+	 * @throws KuraException raised if the certificate removal operation failed
+	 * 
+	 */
+	public boolean verifySignature(String alias, byte[] topic, byte[] body, byte[] signedMessage);
 
 }

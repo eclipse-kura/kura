@@ -70,7 +70,7 @@ cd $(dirname $0)/..
 KURA_RUNNING=`ps ax | grep java | grep "org.eclipse.osgi"`
 
 if [ "$KURA_RUNNING" == "" ] ; then
-    java -Xms${kura.mem.size} -Xmx${kura.mem.size} -XX:MaxPermSize=${kura.mem.size} -Xss128k \ 
+    java -Xms${kura.mem.size} -Xmx${kura.mem.size} -XX:MaxPermSize=64m -Xss128k \ 
     -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/var/log/kura-heapdump.hprof \
     -XX:ErrorFile=/var/log/kura-error.log \
     -Dkura.os.version=${kura.os.version} \
@@ -96,7 +96,7 @@ cd $(dirname $0)/..
 KURA_RUNNING=`ps ax | grep java | grep "org.eclipse.osgi"`
 
 if [ "$KURA_RUNNING" == "" ] ; then
-    java -Xms${kura.mem.size} -Xmx${kura.mem.size} -XX:MaxPermSize=${kura.mem.size} -Xss128k \
+    java -Xms${kura.mem.size} -Xmx${kura.mem.size} -XX:MaxPermSize=64m -Xss128k \
     -XX:+PrintGCDetails -XX:+PrintGCTimeStamps -Xloggc:/var/log/kura-gc.log \
 	-XX:+UseGCLogFileRotation -XX:NumberOfGCLogFiles=10 -XX:GCLogFileSize=100M \
 	-XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/var/log/kura-heapdump.hprof \
@@ -127,7 +127,7 @@ cd /opt/eclipse/kura
 KURA_RUNNING=`ps ax | grep java | grep "org.eclipse.osgi"`
 
 if [ "$KURA_RUNNING" == "" ] ; then
-    nohup java -Xms${kura.mem.size} -Xmx${kura.mem.size} -XX:MaxPermSize=${kura.mem.size} -Xss128k \
+    nohup java -Xms${kura.mem.size} -Xmx${kura.mem.size} -XX:MaxPermSize=64m -Xss128k \
 	    -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/var/log/kura-heapdump.hprof \
 	    -XX:ErrorFile=/var/log/kura-error.log \
 		-Dkura.os.version=${kura.os.version} \

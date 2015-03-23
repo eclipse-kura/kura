@@ -24,6 +24,7 @@ import java.util.HashSet;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.util.ProcessUtil;
+import org.eclipse.kura.core.util.SafeProcess;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,30 +42,29 @@ public class WifiOptions {
 	public static final String WIFI_MANAGED_DRIVER_WIRED = "wired";
 	public static final String WIFI_MANAGED_DRIVER_NL80211 = "nl80211";
 	
-	public static Collection<String> getSupportedOptions (String ifaceName) throws KuraException {
-		
+	public static Collection<String> getSupportedOptions (String ifaceName) throws KuraException 
+	{		
 		Collection<String> options = new HashSet<String>();
-		Process procIw = null;
-		Process procIwConfig = null;
-		Process procWhich = null;
-		BufferedReader br1 = null;
-		BufferedReader br2 = null;
+		SafeProcess procIw = null;
+		SafeProcess procIwConfig = null;
+		BufferedReader br = null;
 		try {
-			procWhich = ProcessUtil.exec("which iw");
-			br1 = new BufferedReader(new InputStreamReader(procWhich.getInputStream()));
-			String line = br1.readLine();
-			if (line != null) {
-				procIw = ProcessUtil.exec("iw dev " + ifaceName + " info");
-				int status = procIw.waitFor();
-				if (status == 0) {
-					options.add(WIFI_MANAGED_DRIVER_NL80211);
-				}
+		    
+			procIw = ProcessUtil.exec("iw dev " + ifaceName + " info");
+			int status = procIw.waitFor();
+			if (status == 0) {
+				options.add(WIFI_MANAGED_DRIVER_NL80211);
 			}
 
 			procIwConfig = ProcessUtil.exec("iwconfig " + ifaceName);
-			br2 = new BufferedReader(new InputStreamReader(procIwConfig.getInputStream()));
-			line = null;
-			while ((line = br2.readLine()) != null) {
+			if (procIwConfig.waitFor() != 0) {
+				s_logger.error("error executing command --- iwconfig --- exit value = {}", procIwConfig.exitValue());
+				throw new KuraException(KuraErrorCode.INTERNAL_ERROR);
+			}
+			
+			br = new BufferedReader(new InputStreamReader(procIwConfig.getInputStream()));
+			String line = null;
+			while ((line = br.readLine()) != null) {
 				if (line.contains("IEEE 802.11")) {
 					options.add(WIFI_MANAGED_DRIVER_WEXT);
 					break;
@@ -74,27 +74,17 @@ public class WifiOptions {
 			throw new KuraException (KuraErrorCode.INTERNAL_ERROR, e);
 		}
 		finally {
-			if(br1 != null){
+			if(br != null){
 				try{
-					br1.close();
+					br.close();
 				}catch(IOException ex){
 					s_logger.error("I/O Exception while closing BufferedReader!");
 				}
 			}
 			
-			if(br2 != null){
-				try{
-					br2.close();
-				}catch(IOException ex){
-					s_logger.error("I/O Exception while closing BufferedReader!");
-				}
-			}
-			
-			ProcessUtil.destroy(procIw);
-			ProcessUtil.destroy(procIwConfig);
-			ProcessUtil.destroy(procWhich);
-		}
-		
+			if (procIw != null) ProcessUtil.destroy(procIw);
+			if (procIwConfig != null) ProcessUtil.destroy(procIwConfig);
+		}		
 		return options;
 	}
 }

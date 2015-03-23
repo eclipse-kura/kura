@@ -35,6 +35,7 @@ import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.linux.util.LinuxProcessUtil;
 import org.eclipse.kura.core.util.ProcessUtil;
+import org.eclipse.kura.core.util.SafeProcess;
 import org.eclipse.kura.linux.net.route.RouteService;
 import org.eclipse.kura.linux.net.route.RouteServiceImpl;
 import org.eclipse.kura.linux.net.util.LinuxNetworkUtil;
@@ -405,7 +406,7 @@ public class WpaSupplicant {
 		
 		//this.saveConfig();
 		
-		Process proc = null;
+		SafeProcess proc = null;
 		try {
 			if (this.isEnabled()) {
 				this.disable();
@@ -441,7 +442,7 @@ public class WpaSupplicant {
 			throw KuraException.internalError(e);
 		}
 		finally {
-			ProcessUtil.destroy(proc);
+			if (proc != null) ProcessUtil.destroy(proc);
 		}
 
 	}
@@ -462,7 +463,7 @@ public class WpaSupplicant {
 	 * @throws Exception
 	 */
 	public static void killAll() throws KuraException {
-		Process proc = null;
+		SafeProcess proc = null;
 		try {
 			// kill wpa_supplicant
 			s_logger.debug("stopping wpa_supplicant");
@@ -486,7 +487,7 @@ public class WpaSupplicant {
 			throw KuraException.internalError(e);
 		}
 		finally {
-			ProcessUtil.destroy(proc);
+			if (proc != null) ProcessUtil.destroy(proc);
 		}
 	}
 	
@@ -1102,8 +1103,8 @@ public class WpaSupplicant {
 	 * This method sets permissions to wpa_supplicant configuration file
 	 */
 	private void setPermissions(String fileName) throws KuraException {
-		Process procChmod = null;
-		Process procDos = null;
+		SafeProcess procChmod = null;
+		SafeProcess procDos = null;
 		try {
 			procChmod = ProcessUtil.exec("chmod 600 " + fileName);
 			procChmod.waitFor();
@@ -1114,8 +1115,8 @@ public class WpaSupplicant {
 			throw KuraException.internalError(e);
 		}
 		finally {
-			ProcessUtil.destroy(procChmod);			
-			ProcessUtil.destroy(procDos);
+			if (procChmod != null) ProcessUtil.destroy(procChmod);			
+			if (procDos != null) ProcessUtil.destroy(procDos);
 		}
 	}
 
@@ -1198,10 +1199,15 @@ public class WpaSupplicant {
 		s_logger.debug("getting drivers supported by wpa_supplicant ...");
 		Collection<String> drivers = new HashSet<String>();
 		BufferedReader br = null;
-		Process proc = null;
+		SafeProcess proc = null;
 		try {
 			proc = ProcessUtil.exec("wpa_supplicant");
-			br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+			if (proc.waitFor() != 0) {
+				s_logger.error("error executing command --- wpa_supplicant --- exit value = " + proc.exitValue());
+				throw new KuraException(KuraErrorCode.INTERNAL_ERROR);
+			}
+
+			br = new BufferedReader(new InputStreamReader(proc.getInputStream()));			
 			String line = null;
 			boolean fDrivers = false;
 
@@ -1230,7 +1236,7 @@ public class WpaSupplicant {
 				}
 			}
 
-			ProcessUtil.destroy(proc);
+			if (proc != null) ProcessUtil.destroy(proc);
 		}
 		return drivers;
 	}

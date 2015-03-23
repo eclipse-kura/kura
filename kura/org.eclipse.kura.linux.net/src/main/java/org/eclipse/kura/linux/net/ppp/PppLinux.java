@@ -17,6 +17,7 @@ package org.eclipse.kura.linux.net.ppp;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStreamReader;
 
 import org.eclipse.kura.KuraErrorCode;
@@ -109,32 +110,47 @@ public class PppLinux {
 	
 	private static int getPid(String iface, String port) throws KuraException {
 
-		int pid = -1;
-		
+		int pid = -1;		
 		synchronized (s_lock) {
-			String [] pgrepCmd = {"pgrep", "-f", ""};
-			pgrepCmd[2] = formConnectCommand(iface, port);
-			
+		    
+		    StringBuilder sb = new StringBuilder();
+		    sb.append("pgrep")
+		      .append(' ')
+		      .append("-f")
+		      .append(' ')
+              .append("\'")
+		      .append(formConnectCommand(iface, port))
+		      .append("\'");
+			BufferedReader br = null;
 			try {
-				ProcessStats processStats = LinuxProcessUtil.startWithStats(pgrepCmd);
-		    	BufferedReader br = new BufferedReader(new InputStreamReader(processStats.getInputStream()));
+				ProcessStats processStats = LinuxProcessUtil.startWithStats(sb.toString());
+		    	br = new BufferedReader(new InputStreamReader(processStats.getInputStream()));
 		    	String line = br.readLine();
 		    	if ((line != null) && (line.length() > 0)) {
 		    		pid = Integer.parseInt(line);
-		    	}
-		    	br.close();
+		    	}		    	
 			} catch (Exception e) {
 				throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+			}
+			finally {
+			    try { br.close(); }
+			    catch(IOException e) {
+			        s_logger.warn("Error closing input stream", e);
+			    }
 			}
 		}
 		return pid;
 	}
 	
-	private static String formConnectCommand(String peer, String port) {
-		
-		StringBuffer sb = new StringBuffer();
-		sb.append(PPP_DAEMON).append(' ').append(port).append(' ')
-				.append("call").append(' ').append(peer);
+	private static String formConnectCommand(String peer, String port) 
+	{		
+		StringBuilder sb = new StringBuilder();
+		sb.append(PPP_DAEMON)
+		  .append(' ')
+		  .append(port).append(' ')
+		  .append("call")
+		  .append(' ')
+		  .append(peer);
 		return sb.toString();
 	}
 }

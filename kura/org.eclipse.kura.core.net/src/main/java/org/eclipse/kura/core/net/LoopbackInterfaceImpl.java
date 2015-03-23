@@ -17,18 +17,15 @@ import java.util.List;
 import org.eclipse.kura.net.LoopbackInterface;
 import org.eclipse.kura.net.NetInterfaceAddress;
 import org.eclipse.kura.net.NetInterfaceType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class LoopbackInterfaceImpl<T extends NetInterfaceAddress> extends AbstractNetInterface<T> implements LoopbackInterface<T> {
 	
-    private static final Logger s_logger = LoggerFactory.getLogger(LoopbackInterfaceImpl.class);
-            
 	public LoopbackInterfaceImpl(String name) {
 		super(name);
 	}
 	
-	public LoopbackInterfaceImpl(LoopbackInterface<? extends NetInterfaceAddress> other) {
+	@SuppressWarnings("unchecked")
+    public LoopbackInterfaceImpl(LoopbackInterface<? extends NetInterfaceAddress> other) {
 	    super(other);
 	    
 	    // Copy the NetInterfaceAddresses
@@ -37,12 +34,8 @@ public class LoopbackInterfaceImpl<T extends NetInterfaceAddress> extends Abstra
 
         if(otherNetInterfaceAddresses != null) {
     	    for(NetInterfaceAddress netInterfaceAddress : otherNetInterfaceAddresses) {
-    	        try {
-    	            NetInterfaceAddressImpl copiedInterfaceAddressImpl = new NetInterfaceAddressImpl(netInterfaceAddress);
-    	            interfaceAddresses.add((T)copiedInterfaceAddressImpl);
-    	        } catch (Exception e) {
-    	            s_logger.debug("Could not copy interface address: " + netInterfaceAddress);
-    	        }
+	            NetInterfaceAddressImpl copiedInterfaceAddressImpl = new NetInterfaceAddressImpl(netInterfaceAddress);
+	            interfaceAddresses.add((T)copiedInterfaceAddressImpl);
     	    }
         }
 	    this.setNetInterfaceAddresses(interfaceAddresses);

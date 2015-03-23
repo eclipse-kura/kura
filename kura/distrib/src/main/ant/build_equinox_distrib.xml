@@ -125,6 +125,7 @@
 	<echo file="${project.build.directory}/${build.output.name}/start_kura.sh" append="false">#!/bin/sh
 
 export PATH=/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/opt/jvm/bin:/usr/java/bin
+export MALLOC_ARENA_MAX=1
 
 DIR=$(cd $(dirname $0)/..; pwd)
 cd $DIR
@@ -136,7 +137,10 @@ cp ${DIR}/kura/config.ini /tmp/.kura/configuration/
 KURA_RUNNING=`ps ax | grep java | grep "org.eclipse.osgi"`
 
 if [ "$KURA_RUNNING" == "" ] ; then
-    java -Xms${kura.mem.size} -Xmx${kura.mem.size} -XX:MaxPermSize=${kura.mem.size} -Dkura.os.version=${kura.os.version} \
+	java -Xms${kura.mem.size} -Xmx${kura.mem.size} -XX:MaxPermSize=64m -Xss128k \ 
+	-XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/var/log/kura-heapdump.hprof \
+	-XX:ErrorFile=/var/log/kura-error.log \
+	-Dkura.os.version=${kura.os.version} \
 	-Dkura.arch=${kura.arch} \
 	-Dtarget.device=${target.device} \
 	-Declipse.ignoreApp=true \
@@ -157,6 +161,7 @@ fi
 	<echo file="${project.build.directory}/${build.output.name}/start_kura_debug.sh" append="false">#!/bin/sh
 
 export PATH=/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/opt/jvm/bin:/usr/java/bin
+export MALLOC_ARENA_MAX=1
 
 DIR=$(cd $(dirname $0)/..; pwd)
 cd $DIR
@@ -168,7 +173,12 @@ cp ${DIR}/kura/config.ini /tmp/.kura/configuration/
 KURA_RUNNING=`ps ax | grep java | grep "org.eclipse.osgi"`
 
 if [ "$KURA_RUNNING" == "" ] ; then
-    java -Xms${kura.mem.size} -Xmx${kura.mem.size} -XX:MaxPermSize=${kura.mem.size} -Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=8000,suspend=n \
+	java -Xms${kura.mem.size} -Xmx${kura.mem.size} -XX:MaxPermSize=64m -Xss128k \
+	-XX:+PrintGCDetails -XX:+PrintGCTimeStamps -Xloggc:/var/log/kura-gc.log \
+	-XX:+UseGCLogFileRotation -XX:NumberOfGCLogFiles=10 -XX:GCLogFileSize=100M \
+	-XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/var/log/kura-heapdump.hprof \
+	-XX:ErrorFile=/var/log/kura-error.log \
+	-Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=8000,suspend=n \
 	-Dkura.os.version=${kura.os.version} \
 	-Dkura.arch=${kura.arch} \
 	-Dtarget.device=${target.device} \
@@ -191,7 +201,8 @@ fi
 
 # Kura should be installed to the ${kura.install.dir} directory.
 export PATH=/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/opt/jvm/bin:/usr/java/bin
-
+export MALLOC_ARENA_MAX=1
+		
 DIR=$(cd $(dirname $0)/..; pwd)
 cd $DIR
 
@@ -202,7 +213,10 @@ cp ${DIR}/kura/config.ini /tmp/.kura/configuration/
 KURA_RUNNING=`ps ax | grep java | grep "org.eclipse.osgi"`
 
 if [ "$KURA_RUNNING" == "" ] ; then
-    nohup java -Xms${kura.mem.size} -Xmx${kura.mem.size} -XX:MaxPermSize=${kura.mem.size} -Dkura.os.version=${kura.os.version} \
+  nohup java -Xms${kura.mem.size} -Xmx${kura.mem.size} -XX:MaxPermSize=64m -Xss128k \
+	-XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/var/log/kura-heapdump.hprof \
+	-XX:ErrorFile=/var/log/kura-error.log \
+    -Dkura.os.version=${kura.os.version} \
 	-Dkura.arch=${kura.arch} \
 	-Dtarget.device=${target.device} \
 	-Declipse.ignoreApp=true \

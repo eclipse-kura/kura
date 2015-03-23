@@ -35,6 +35,7 @@ import org.apache.commons.io.FileUtils;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.util.ProcessUtil;
+import org.eclipse.kura.core.util.SafeProcess;
 import org.eclipse.kura.linux.net.util.KuraConstants;
 import org.eclipse.kura.net.IPAddress;
 import org.eclipse.kura.net.NetworkPair;
@@ -603,13 +604,13 @@ public class LinuxFirewall {
 			}
 			pw.close();
 			
-			Process proc = null; 
+			SafeProcess proc = null; 
 			try {
 				proc = ProcessUtil.exec("chmod 755 " + FIREWALL_TMP_SCRIPT_NAME);
 				proc.waitFor();
 			}
 			finally {
-				ProcessUtil.destroy(proc);
+				if (proc != null) ProcessUtil.destroy(proc);
 			}
 			
 			//move the file if we made it this far
@@ -952,7 +953,7 @@ public class LinuxFirewall {
 	}
 
 	private void runScript() throws KuraException {
-		Process proc = null;
+		SafeProcess proc = null;
 		try {
 			File file = new File(FIREWALL_SCRIPT_NAME);
 			if(!file.exists()) {
@@ -965,7 +966,7 @@ public class LinuxFirewall {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
 		}
 		finally {
-			ProcessUtil.destroy(proc);
+			if (proc != null) ProcessUtil.destroy(proc);
 		}
 	}
 	
@@ -973,7 +974,7 @@ public class LinuxFirewall {
 	 * Saves the current iptables config into /etc/sysconfig/iptables
 	 */
 	private void iptablesSave() throws KuraException {
-		Process proc = null;
+		SafeProcess proc = null;
 		try {
 			if (OS_VERSION.equals(KuraConstants.Mini_Gateway.getImageName() + "_" + KuraConstants.Mini_Gateway.getImageVersion())) {
 				proc = ProcessUtil.exec("iptables-save > /opt/eurotech/firewall_rules.fw");
@@ -986,7 +987,7 @@ public class LinuxFirewall {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
 		}
 		finally {
-			ProcessUtil.destroy(proc);
+			if (proc != null) ProcessUtil.destroy(proc);
 		}
 	}
 	

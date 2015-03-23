@@ -222,6 +222,7 @@ public class DhcpServerImpl implements DhcpServer {
 				disable();
 			}
 			// Start dhcpd
+            // FIXME:MC This leads to a process leak
 			if (LinuxProcessUtil.startBackground(formDhcpdCommand(), false) == 0) {
 				s_logger.debug("DHCP server started.");
 				s_logger.trace(m_dhcpServerConfig4.toString());

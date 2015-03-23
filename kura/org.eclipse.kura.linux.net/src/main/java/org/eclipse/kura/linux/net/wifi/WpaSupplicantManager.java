@@ -16,6 +16,7 @@ import java.io.File;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.linux.util.LinuxProcessUtil;
 import org.eclipse.kura.core.util.ProcessUtil;
+import org.eclipse.kura.core.util.SafeProcess;
 import org.eclipse.kura.linux.net.util.LinuxNetworkUtil;
 import org.eclipse.kura.net.wifi.WifiMode;
 import org.slf4j.Logger;
@@ -43,7 +44,7 @@ public class WpaSupplicantManager {
 		
 		s_logger.debug("enable WPA Supplicant");
 		
-		Process proc = null;
+		SafeProcess proc = null;
 		try {
 			if(WpaSupplicantManager.isRunning()) {
                 stop();
@@ -61,7 +62,7 @@ public class WpaSupplicantManager {
 			throw KuraException.internalError(e);
 		}
 		finally {
-			ProcessUtil.destroy(proc);
+			if (proc != null) ProcessUtil.destroy(proc);
 		}
 
 	}

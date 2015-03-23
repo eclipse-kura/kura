@@ -22,6 +22,7 @@ import java.io.InputStreamReader;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.util.ProcessUtil;
+import org.eclipse.kura.core.util.SafeProcess;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,11 +53,13 @@ public class MiiTool implements LinkTool {
 	 * @see org.eclipse.kura.util.net.service.ILinkTool#get()
 	 */
 	public boolean get () throws KuraException {
-		Process proc = null;
+		SafeProcess proc = null;
 		BufferedReader br = null;
+		boolean result = false;
 		try {
 			//start the process
 			proc = ProcessUtil.exec("mii-tool " + this.ifaceName);
+			result = (proc.waitFor() == 0)? true : false;
 	
 			//get the output
 	        br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
@@ -96,7 +99,7 @@ public class MiiTool implements LinkTool {
 	        this.speed = speed;
 	        this.linkDetected = linkDetected;
 	        
-	        return (proc.waitFor() == 0)? true : false;
+	        return result;
 		} catch(IOException e) {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
 		} catch (InterruptedException e) {
@@ -111,7 +114,7 @@ public class MiiTool implements LinkTool {
 				}
 			}
 			
-			ProcessUtil.destroy(proc);
+			if (proc != null) ProcessUtil.destroy(proc);
 		}
 	}
 	

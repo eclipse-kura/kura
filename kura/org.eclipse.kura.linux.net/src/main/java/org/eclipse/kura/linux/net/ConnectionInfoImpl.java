@@ -52,6 +52,7 @@ public class ConnectionInfoImpl implements ConnectionInfo
 
 		FileInputStream fis = null;
 		try {
+		    // FIXME:MC Where is this file stored?
 			File coninfoFile = new File(formConinfoFileName(ifaceName));
 			if (coninfoFile.exists()) {
 				fis = new FileInputStream(coninfoFile);

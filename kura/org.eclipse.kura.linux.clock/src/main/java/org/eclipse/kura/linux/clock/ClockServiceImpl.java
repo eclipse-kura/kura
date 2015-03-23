@@ -21,6 +21,7 @@ import org.eclipse.kura.clock.ClockEvent;
 import org.eclipse.kura.clock.ClockService;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.core.util.ProcessUtil;
+import org.eclipse.kura.core.util.SafeProcess;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.event.EventAdmin;
 import org.slf4j.Logger;
@@ -181,7 +182,7 @@ public class ClockServiceImpl implements ConfigurableComponent, ClockService, Cl
 		boolean bClockUpToDate = false;
 		if (offset != 0) {
 			long time = System.currentTimeMillis() + offset;
-			Process proc = null;
+			SafeProcess proc = null;
 			try {
 				proc = ProcessUtil.exec("date -s @"+time/1000);		//divide by 1000 to switch to seconds
 				proc.waitFor();
@@ -197,7 +198,7 @@ public class ClockServiceImpl implements ConfigurableComponent, ClockService, Cl
 				s_logger.error("Error updating System Clock", e);
 			}
 			finally {
-				ProcessUtil.destroy(proc);
+				if (proc != null) ProcessUtil.destroy(proc);
 			}
 		}
 		else {
@@ -210,7 +211,7 @@ public class ClockServiceImpl implements ConfigurableComponent, ClockService, Cl
 			updateHwClock = (Boolean) m_properties.get("clock.set.hwclock");
 		}
 		if (updateHwClock) {
-			Process proc = null;
+			SafeProcess proc = null;
 			try {
 				proc = ProcessUtil.exec("hwclock --utc --systohc");
 				proc.waitFor();
@@ -225,7 +226,7 @@ public class ClockServiceImpl implements ConfigurableComponent, ClockService, Cl
 				s_logger.error("Error updating Hardware Clock", e);
 			}
 			finally {
-				ProcessUtil.destroy(proc);
+				if (proc != null) ProcessUtil.destroy(proc);
 			}
 		}
 		

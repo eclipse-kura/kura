@@ -58,8 +58,8 @@ public class SafeProcess
 	    throws IOException
 	{
         s_logger.debug("Executing: {}", Arrays.toString(cmdarray));
-        Runtime runtime = Runtime.getRuntime();
-        m_process = runtime.exec(cmdarray);
+        ProcessBuilder pb = new ProcessBuilder(cmdarray);
+        m_process = pb.start();
 
         // process the input stream
         m_futureInputGobbler = s_streamGobblers.submit( new Callable<byte[]>() {
@@ -81,9 +81,9 @@ public class SafeProcess
         
         // wait for the process execution
         try {
+            m_inBytes   = m_futureInputGobbler.get();
+            m_errBytes  = m_futureErrorGobbler.get();
             m_exitValue = m_process.waitFor();
-            m_inBytes  = m_futureInputGobbler.get();
-            m_errBytes = m_futureErrorGobbler.get();
         }
         catch (InterruptedException e) {
             throw new IOException(e);
@@ -92,6 +92,9 @@ public class SafeProcess
             throw new IOException(e);
         }
         finally {
+            closeQuietly(m_process.getInputStream());
+            closeQuietly(m_process.getErrorStream());
+            closeQuietly(m_process.getOutputStream());
             m_process.destroy();
             m_process = null;
             m_waited  = true;
@@ -127,20 +130,30 @@ public class SafeProcess
         int len;
         byte[] buf = new byte[1024];
         ByteArrayOutputStream inBaos = new ByteArrayOutputStream(1024);
-        try {
-            while ((len = is.read(buf)) != -1) {
-                inBaos.write(buf, 0, len);
-            }
-            return inBaos.toByteArray();
+        while ((len = is.read(buf)) != -1) {
+            inBaos.write(buf, 0, len);
         }
-        finally {
-            if (is != null) {
-                try {
-                    is.close();
-                    is = null;
-                } catch (IOException e) {
-                    s_logger.warn("Failed to close process input stream", e);
-                }
+        return inBaos.toByteArray();
+    }
+    
+    private void closeQuietly(InputStream is) {
+        if (is != null) {
+            try {
+                is.close();
+                is = null;
+            } catch (IOException e) {
+                s_logger.warn("Failed to close process input stream", e);
+            }
+        }
+    }
+
+    private void closeQuietly(OutputStream os) {
+        if (os != null) {
+            try {
+                os.close();
+                os = null;
+            } catch (IOException e) {
+                s_logger.warn("Failed to close process output stream", e);
             }
         }
     }

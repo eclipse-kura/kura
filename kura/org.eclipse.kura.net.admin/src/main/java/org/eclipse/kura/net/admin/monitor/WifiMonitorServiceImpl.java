@@ -610,9 +610,9 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
 									Thread.sleep(THREAD_INTERVAL);
 								} catch (InterruptedException interruptedException) {
 									Thread.interrupted();
-	                                s_logger.debug("WiFi monitor interrupted", interruptedException);
+	                                s_logger.debug("WiFi monitor interrupted - {}", interruptedException);
 								} catch (Throwable t) {
-	                                s_logger.error("Exception while monitoring WiFi connection", t);
+	                                s_logger.error("Exception while monitoring WiFi connection - {}", t);
 								}
 	                    	}
 	                }});

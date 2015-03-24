@@ -39,6 +39,8 @@ Import-Package:
  com.google.gwt.user.rebind.rpc,
  com.google.gwt.user.server.rpc,
  com.google.gwt.user.server.rpc.impl,
+ javax.crypto,
+ javax.crypto.spec,
  javax.security.auth,
  javax.servlet;version="2.6.0",
  javax.servlet.http;version="2.6.0",

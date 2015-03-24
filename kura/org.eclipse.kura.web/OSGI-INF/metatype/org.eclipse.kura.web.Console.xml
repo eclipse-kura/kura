@@ -14,8 +14,8 @@
 -->
 <MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
     <OCD id="org.eclipse.kura.web.Console" 
-         name="DenaliConsole" 
-         description="Denali Console configuration">
+         name="WebConsole" 
+         description="Web Console configuration">
          
         <Icon resource="DenaliService" size="32"/>
 

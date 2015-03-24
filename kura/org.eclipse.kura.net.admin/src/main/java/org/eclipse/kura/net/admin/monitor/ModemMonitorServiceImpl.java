@@ -192,8 +192,7 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 						Thread.interrupted();
 						s_logger.debug("modem monitor interrupted - {}", interruptedException);
 					} catch (Throwable t) {
-						s_logger.error("activate() :: Exception while monitoring cellular connection {}", t.toString());
-						t.printStackTrace();
+						s_logger.error("activate() :: Exception while monitoring cellular connection {}", t);
 					}
     			}
     	}});
@@ -255,7 +254,7 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 						}
 					});
 				} catch (Exception e) {
-					e.printStackTrace();
+					s_logger.error("Failed to handle the NetworkConfigurationChangeEvent - {}", e);
 				}
 			}
         } else if (topic.equals(ModemAddedEvent.MODEM_EVENT_ADDED_TOPIC)) {
@@ -407,8 +406,7 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 														Thread.interrupted();
 														s_logger.debug("modem monitor interrupted - {}", interruptedException);
 													} catch (Throwable t) {
-														s_logger.error("handleEvent() :: Exception while monitoring cellular connection {}", t.toString());
-														t.printStackTrace();
+														s_logger.error("handleEvent() :: Exception while monitoring cellular connection {}", t);
 													}
 								    			}
 								    	}});
@@ -428,7 +426,7 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 	    			}
     			}
 			} catch (KuraException e) {
-				e.printStackTrace();
+				s_logger.error("NetworkConfigurationChangeEvent :: Failed to process - {}", e);
 			}
 		}
     }
@@ -504,7 +502,7 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 						listener.setCellularSignalLevel(rssi);
 					} catch (KuraException e) {
 						listener.setCellularSignalLevel(0);
-						e.printStackTrace();
+						s_logger.error("monitor() :: Failed to obtain signal strength - {}", e);
 					}
 				}
 			}
@@ -691,7 +689,7 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 					s_logger.info("posting ModemReadyEvent on topic {}", ModemReadyEvent.MODEM_EVENT_READY_TOPIC);
 					m_eventAdmin.postEvent(new ModemReadyEvent(modemInfoMap));
 				} catch (Exception e) {
-					e.printStackTrace();
+					s_logger.error("Failed to post the ModemReadyEvent - {}", e);
 				}
 				
 				String ifaceName = m_networkService.getModemPppPort(modemDevice);
@@ -747,8 +745,7 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 							    				Thread.interrupted();
 												s_logger.debug("modem monitor interrupted - {}", interruptedException);
 											} catch (Throwable t) {
-												s_logger.error("trackModem() :: Exception while monitoring cellular connection {}", t.toString());
-												t.printStackTrace();
+												s_logger.error("trackModem() :: Exception while monitoring cellular connection {}", t);
 											}
 							    		}
 							    }});
@@ -766,7 +763,7 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 					}
 				}
 			} catch (Exception e) {
-				e.printStackTrace();
+				s_logger.error("trackModem() :: {}", e);
 			}
 		}
 	}

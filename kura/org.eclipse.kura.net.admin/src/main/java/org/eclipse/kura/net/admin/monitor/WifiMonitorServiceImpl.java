@@ -244,7 +244,7 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
                         			s_logger.debug("monitor() :: Wifi RSSI is {}", rssi);
                         		} catch (KuraException e) {
                         			s_logger.error("monitor() :: Failed to get Signal Level for {} -> {}", interfaceName, wifiConfig.getSSID());
-                        			e.printStackTrace();
+                        			s_logger.error("monitor() :: Failed to get Signal Level - {}", e);
                         			rssi = 0;
                         		} 
                         		for (WifiClientMonitorListener listener : m_listeners) {

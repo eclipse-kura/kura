@@ -188,8 +188,9 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 	    			try {
 	    				monitor();
 	    				Thread.sleep(THREAD_INTERVAL);
-					} catch (InterruptedException e) {
-						s_logger.debug(e.getMessage());
+					} catch (InterruptedException interruptedException) {
+						Thread.interrupted();
+						s_logger.debug("modem monitor interrupted - {}", interruptedException);
 					} catch (Throwable t) {
 						s_logger.error("activate() :: Exception while monitoring cellular connection {}", t.toString());
 						t.printStackTrace();
@@ -402,8 +403,9 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 								    				try {
 								    					monitor();
 														Thread.sleep(THREAD_INTERVAL);
-													} catch (InterruptedException e) {
-														s_logger.debug(e.getMessage());
+													} catch (InterruptedException interruptedException) {
+														Thread.interrupted();
+														s_logger.debug("modem monitor interrupted - {}", interruptedException);
 													} catch (Throwable t) {
 														s_logger.error("handleEvent() :: Exception while monitoring cellular connection {}", t.toString());
 														t.printStackTrace();
@@ -741,8 +743,9 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 							    			try {
 							    				monitor();
 							    				Thread.sleep(THREAD_INTERVAL);
-							    			} catch (InterruptedException e) {
-												s_logger.debug(e.getMessage());
+							    			} catch (InterruptedException interruptedException) {
+							    				Thread.interrupted();
+												s_logger.debug("modem monitor interrupted - {}", interruptedException);
 											} catch (Throwable t) {
 												s_logger.error("trackModem() :: Exception while monitoring cellular connection {}", t.toString());
 												t.printStackTrace();

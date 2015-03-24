@@ -17,6 +17,9 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloud.Cloudlet;
@@ -101,9 +104,8 @@ public class CommandCloudApp extends Cloudlet implements ConfigurableComponent,
 					String decryptedPassword= m_cryptoService.decryptAes(value.toString());
 					this.properties.put(key, decryptedPassword);
 				} catch (Exception e) {
-					//e.printStackTrace();
-					this.properties.put(key, value.toString());
-				}
+					this.properties.put(key, value);
+				} 
 			}else{
 				this.properties.put(key, value);
 			}

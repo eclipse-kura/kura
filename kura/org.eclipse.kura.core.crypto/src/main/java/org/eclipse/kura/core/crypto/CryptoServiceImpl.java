@@ -94,4 +94,11 @@ public class CryptoServiceImpl implements CryptoService {
         String decodedValue = new String(decodedBytes, "UTF-8");
         return decodedValue;		
 	}
+
+
+	@Override
+	public String getKeyStorePassword(String keyStorePath) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

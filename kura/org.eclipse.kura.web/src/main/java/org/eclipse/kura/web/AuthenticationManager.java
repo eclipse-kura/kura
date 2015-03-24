@@ -38,10 +38,6 @@ public class AuthenticationManager
 		s_instance= this;
 	}
 
-	/**
-	 * Returns the singleton instance of AuthenticationManager. 
-	 * @return AuthenticationManager
-	 */
 	public static AuthenticationManager getInstance() {
 		return s_instance;
 	}
@@ -76,8 +72,8 @@ public class AuthenticationManager
 		Connection conn = null;
 		BufferedReader br = null;
 		String result= null;
+		PreparedStatement stmt = null;
 		try{
-
 			conn = dbService.getConnection();
 			File adminFile = new File(dataDir + "/ap_store");
 			if(conn.getMetaData().getURL().startsWith("jdbc:hsqldb:mem")){
@@ -86,26 +82,16 @@ public class AuthenticationManager
 					br = new BufferedReader(new FileReader(adminFile));
 					String[] adminString = br.readLine().split(":", 2);
 
-
 					CryptoService cryptoService = ServiceLocator.getInstance().getService(CryptoService.class);
 					result = cryptoService.sha1Hash(decryptAes(adminString[1]));
-				}else{
-
 				}
 			}else{
-				PreparedStatement stmt = null;
 				ResultSet rs = null;
 				stmt = conn.prepareStatement("SELECT username, password FROM dn_user WHERE username = ?;");
 				stmt.setString(1, "admin");
 				rs = stmt.executeQuery();
-
 				if (rs != null && rs.next()) {
-					stmt = conn.prepareStatement("SELECT password FROM dn_user WHERE username = ?;");
-					stmt.setString(1, "admin");
-					rs = stmt.executeQuery();
-					if (rs != null && rs.next()) {
-						result= rs.getString("password");
-					}		
+					result= rs.getString("password");
 				}
 			}
 		}catch(Exception e){
@@ -115,6 +101,12 @@ public class AuthenticationManager
 					br.close();
 				}
 			}catch (Exception ex){
+			}
+			try{
+				if(stmt != null){
+					stmt.close();
+				}
+			}catch(Exception ex){
 			}
 		}
 		return result;

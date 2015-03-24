@@ -19,7 +19,6 @@ import java.io.IOException;
 import java.security.Signature;
 import java.security.cert.Certificate;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -66,6 +65,7 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
 	private static final String 	CERT_SERIAL = "pkiSerial";
 	private static final String 	RESOURCE_CERTIFICATE_DM = "dm";
 	private static final String 	SIGNATURE_METRIC = "signedMessage";
+	private static final String 	SIGNATURE_METRIC_ERROR ="signatureError";
 
 	private ComponentContext        m_ctx;
 
@@ -188,7 +188,6 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
 		String[] eventTopics = {PositionLockedEvent.POSITION_LOCKED_EVENT_TOPIC, ModemReadyEvent.MODEM_EVENT_READY_TOPIC};
 		props.put(EventConstants.EVENT_TOPIC, eventTopics);
 		m_ctx.getBundleContext().registerService(EventHandler.class.getName(), this, props);
-		
 		//
 		//
 		ServiceReference<CertificatesService> sr= m_ctx.getBundleContext().getServiceReference(CertificatesService.class);
@@ -221,12 +220,13 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
 		// we only need to empty our CloudClient list
 		m_cloudClients.clear();
 
-		m_dataService        = null;
-		m_systemService      = null;
-		m_systemAdminService = null;
-		m_networkService     = null;
-		m_positionService    = null;
-		m_eventAdmin         = null;
+		m_dataService         = null;
+		m_systemService       = null;
+		m_systemAdminService  = null;
+		m_networkService      = null;
+		m_positionService     = null;
+		m_eventAdmin          = null;
+		m_certificatesService = null;
 	}
 
 
@@ -453,7 +453,7 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
 				if (cloudClient.getApplicationId().equals(kuraTopic.getApplicationId())) {
 					try {
 						if (m_options.getTopicControlPrefix().equals(kuraTopic.getPrefix())) {
-
+							
 							boolean validSignature= verifyMessageSignature(kuraTopic, kuraPayload);
 							if(m_certificatesService == null || validSignature){
 
@@ -464,6 +464,13 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
 										retained);
 							}else{
 								s_logger.error("Message verification failed! Not valid signature or message not signed.");
+
+								kuraPayload.addMetric(SIGNATURE_METRIC_ERROR, true);
+								cloudClient.onControlMessageArrived(kuraTopic.getDeviceId(), 
+										kuraTopic.getApplicationTopic(), 
+										kuraPayload, 
+										qos, 
+										retained);
 							}
 						}
 						else {
@@ -638,14 +645,18 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
 
 
 	private boolean verifyMessageSignature(KuraTopic kuraTopic, KuraPayload kuraPayload){
-		if(kuraTopic.getApplicationId().equals("PROV-V1") 
-				&& kuraTopic.getApplicationTopic().contains("certificate")){
-			/*Enumeration<String> aliasDMEnum= m_certificatesService.listDMCertificatesAliases();
-			if(aliasDMEnum == null || !aliasDMEnum.hasMoreElements()){
+		
+		if(kuraTopic.getApplicationId().equals("PROV-V1") && 
+		   kuraTopic.getApplicationTopic().contains("certificate")){
+			if(m_certificatesService == null){
 				return true;
+			} else{
+				Enumeration<String> aliasDMEnum= m_certificatesService.listDMCertificatesAliases();
+				if(aliasDMEnum == null || !aliasDMEnum.hasMoreElements()){
+					return true;
+				}
 			}
-			return false;*/
-			return true;
+			return false;
 		}else{
 			s_logger.info("Start signature verification");
 			String certSerial= (String) kuraPayload.getMetric(CERT_SERIAL);

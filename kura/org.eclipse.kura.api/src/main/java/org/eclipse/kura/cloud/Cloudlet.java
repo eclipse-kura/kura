@@ -44,7 +44,7 @@ public abstract class Cloudlet implements CloudClientListener
 	protected static final int     DFLT_PUB_QOS  = 0;
 	protected static final boolean DFLT_RETAIN   = false;
 	protected static final int     DFLT_PRIORITY = 1;
-
+	
 	private static int NUM_CONCURRENT_CALLBACKS = 2;
 	private static ExecutorService m_callbackExecutor = Executors.newFixedThreadPool(NUM_CONCURRENT_CALLBACKS);
 	
@@ -172,6 +172,7 @@ public abstract class Cloudlet implements CloudClientListener
 			                            boolean retain) 
 	{		
 		try {
+			
 			s_logger.debug("Control Arrived on topic: {}", appTopic);
 			
 			StringBuilder sb = new StringBuilder(m_applicationId)
@@ -229,7 +230,9 @@ public abstract class Cloudlet implements CloudClientListener
 class MessageHandlerCallable implements Callable<Void> 
 {	
 	private static final Logger s_logger = LoggerFactory.getLogger(MessageHandlerCallable.class);
-	
+
+	private static final String 	METRIC_SIGNATURE_ERROR ="signatureError";
+
 	private Cloudlet   m_cloudApp;
 	@SuppressWarnings("unused")
 	private String     m_deviceId;
@@ -241,11 +244,11 @@ class MessageHandlerCallable implements Callable<Void>
 	private boolean    m_retain;
 	
 	public MessageHandlerCallable(Cloudlet cloudApp,
-			                      String deviceId,
-			                      String appTopic,
-			                      KuraPayload msg,
-			                      int qos,
-			                      boolean retain) {
+            String deviceId,
+            String appTopic,
+            KuraPayload msg,
+            int qos,
+            boolean retain) {
 		super();
 		this.m_cloudApp = cloudApp;
 		this.m_deviceId = deviceId;
@@ -263,50 +266,55 @@ class MessageHandlerCallable implements Callable<Void>
 		// Prepare the default response
 		KuraRequestPayload reqPayload = KuraRequestPayload.buildFromKuraPayload(m_msg);
 		KuraResponsePayload respPayload = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
-		try {
-			
-			CloudletTopic reqTopic = CloudletTopic.parseAppTopic(m_appTopic);
-			CloudletTopic.Method method = reqTopic.getMethod();
-			switch (method) {
-			case GET:
-				s_logger.debug("Handling GET request topic: {}", m_appTopic);
-				m_cloudApp.doGet(reqTopic, reqPayload, respPayload);
-				break;
+		
+		if(m_msg.getMetric(METRIC_SIGNATURE_ERROR) != null){
+			respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_ERROR);			
+		}else{
+			try {
 				
-			case PUT:
-				s_logger.debug("Handling PUT request topic: {}", m_appTopic);
-				m_cloudApp.doPut(reqTopic, reqPayload, respPayload);
-				break;
+				CloudletTopic reqTopic = CloudletTopic.parseAppTopic(m_appTopic);
+				CloudletTopic.Method method = reqTopic.getMethod();
+				switch (method) {
+				case GET:
+					s_logger.debug("Handling GET request topic: {}", m_appTopic);
+					m_cloudApp.doGet(reqTopic, reqPayload, respPayload);
+					break;
+					
+				case PUT:
+					s_logger.debug("Handling PUT request topic: {}", m_appTopic);
+					m_cloudApp.doPut(reqTopic, reqPayload, respPayload);
+					break;
+					
+				case POST:
+					s_logger.debug("Handling POST request topic: {}", m_appTopic);
+					m_cloudApp.doPost(reqTopic, reqPayload, respPayload);
+					break;
+					
+				case DEL:
+					s_logger.debug("Handling DEL request topic: {}", m_appTopic);
+					m_cloudApp.doDel(reqTopic, reqPayload, respPayload);
+					break;
+					
+				case EXEC:
+					s_logger.debug("Handling EXEC request topic: {}", m_appTopic);
+					m_cloudApp.doExec(reqTopic, reqPayload, respPayload);
+					break;
 				
-			case POST:
-				s_logger.debug("Handling POST request topic: {}", m_appTopic);
-				m_cloudApp.doPost(reqTopic, reqPayload, respPayload);
-				break;
-				
-			case DEL:
-				s_logger.debug("Handling DEL request topic: {}", m_appTopic);
-				m_cloudApp.doDel(reqTopic, reqPayload, respPayload);
-				break;
-				
-			case EXEC:
-				s_logger.debug("Handling EXEC request topic: {}", m_appTopic);
-				m_cloudApp.doExec(reqTopic, reqPayload, respPayload);
-				break;
-			
-			default:
+				default:
+					s_logger.error("Bad request topic: {}", m_appTopic);
+					respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_BAD_REQUEST);
+					break;
+				}
+			}
+			catch (IllegalArgumentException e) {
 				s_logger.error("Bad request topic: {}", m_appTopic);
 				respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_BAD_REQUEST);
-				break;
 			}
-		}
-		catch (IllegalArgumentException e) {
-			s_logger.error("Bad request topic: {}", m_appTopic);
-			respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_BAD_REQUEST);
-		}
-		catch (KuraException e) {
-			s_logger.error("Error handling request topic: {}\n{}", m_appTopic, e);
-			respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_ERROR);
-			respPayload.setException(e);
+			catch (KuraException e) {
+				s_logger.error("Error handling request topic: {}\n{}", m_appTopic, e);
+				respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_ERROR);
+				respPayload.setException(e);
+			}
 		}
 		
 		try {

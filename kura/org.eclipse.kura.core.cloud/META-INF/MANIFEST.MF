@@ -4,7 +4,7 @@ Bundle-Name: org.eclipse.kura.core.cloud
 Bundle-SymbolicName: org.eclipse.kura.core.cloud;singleton:=true
 Bundle-Version: 1.0.2.qualifier
 Bundle-Vendor: EUROTECH
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Service-Component: OSGI-INF/*.xml
 Bundle-ClassPath: .
 Bundle-ActivationPolicy: lazy

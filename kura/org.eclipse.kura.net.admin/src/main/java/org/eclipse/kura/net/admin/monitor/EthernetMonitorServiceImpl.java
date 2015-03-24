@@ -513,9 +513,9 @@ public class EthernetMonitorServiceImpl implements EthernetMonitorService, Event
 			    					Thread.sleep(THREAD_INTERVAL);
 			    				} catch (InterruptedException interruptedException) {
 			    					Thread.interrupted();
-			    					s_logger.debug("Ethernet monitor interrupted", interruptedException);
+			    					s_logger.debug("Ethernet monitor interrupted - {}", interruptedException);
 			    				} catch (Throwable t) {
-									s_logger.error("Exception while monitoring ethernet connection", t);
+									s_logger.error("Exception while monitoring ethernet connection - {}", t);
 								}
 			    			}
 		    	}});			

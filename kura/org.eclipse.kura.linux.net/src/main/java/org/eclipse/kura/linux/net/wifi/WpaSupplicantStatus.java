@@ -44,7 +44,7 @@ public class WpaSupplicantStatus {
 		try {
 			proc = ProcessUtil.exec(formSupplicantStatusCommand(iface));
 			if (proc.waitFor() != 0) {
-				s_logger.error("error executing command --- formSupplicantStatusCommand(iface) --- exit value = " + proc.exitValue());
+				s_logger.error("error executing command --- {} --- exit value = {}", formSupplicantStatusCommand(iface), proc.exitValue());
 				throw new KuraException(KuraErrorCode.INTERNAL_ERROR);
 			}
 
@@ -53,7 +53,7 @@ public class WpaSupplicantStatus {
 			Enumeration<Object> keys = m_props.keys();
 			while (keys.hasMoreElements()) {
 				String key = (String)keys.nextElement();
-				s_logger.trace("[WpaSupplicant Status] " + key + "=" + m_props.getProperty(key));
+				s_logger.trace("[WpaSupplicant Status] {} = {}", key, m_props.getProperty(key));
 			}
 		} catch (Exception e) {
 			throw new KuraException (KuraErrorCode.INTERNAL_ERROR, e);
@@ -100,8 +100,7 @@ public class WpaSupplicantStatus {
 	}
 	
 	private static String formSupplicantStatusCommand (String iface) {
-		
-		StringBuffer sb = new StringBuffer ();
+		StringBuilder sb = new StringBuilder();
 		sb.append("wpa_cli -i ");
 		sb.append(iface);
 		sb.append(" status");

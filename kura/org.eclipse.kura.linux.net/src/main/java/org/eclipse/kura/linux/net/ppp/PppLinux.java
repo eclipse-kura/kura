@@ -56,7 +56,7 @@ public class PppLinux {
 		
 		int pid = getPid(iface, port);
 		if(pid >= 0) {
-    		s_logger.info("killing " + iface + " pid=" + pid);
+    		s_logger.info("killing {}  pid={}", iface, pid);
     		LinuxProcessUtil.kill(pid);
     		
     		if (port.startsWith("/dev/")) {
@@ -94,7 +94,7 @@ public class PppLinux {
 			if (isPppRunning) {
 				break;
 			}
-			s_logger.info("Waiting " + (timeout - dif) + " ms for pppd to launch");
+			s_logger.info("Waiting {} ms for pppd to launch", (timeout - dif));
 			try {
 				Thread.sleep(timeout - dif);
 			} catch (InterruptedException e) {

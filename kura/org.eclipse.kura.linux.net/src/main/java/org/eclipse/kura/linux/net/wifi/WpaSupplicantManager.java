@@ -55,7 +55,7 @@ public class WpaSupplicantManager {
 
 			// start wpa_supplicant
 			String wpaSupplicantCommand = formSupplicantCommand(configFile);
-			s_logger.debug("starting wpa_supplicant -> " + wpaSupplicantCommand);
+			s_logger.debug("starting wpa_supplicant -> {}", wpaSupplicantCommand);
 			LinuxProcessUtil.start(wpaSupplicantCommand);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -64,7 +64,6 @@ public class WpaSupplicantManager {
 		finally {
 			if (proc != null) ProcessUtil.destroy(proc);
 		}
-
 	}
 
 	
@@ -73,7 +72,7 @@ public class WpaSupplicantManager {
 	 */
 	private static String formSupplicantCommand(File configFile) {
 
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		sb.append("wpa_supplicant -B -D ");
 		sb.append(m_driver);
 		sb.append(" -i ");

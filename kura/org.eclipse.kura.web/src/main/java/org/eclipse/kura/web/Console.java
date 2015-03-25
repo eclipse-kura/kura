@@ -12,6 +12,7 @@
 package org.eclipse.kura.web;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -37,6 +38,8 @@ import org.eclipse.kura.web.server.servlet.DeviceSnapshotsServlet;
 import org.eclipse.kura.web.server.servlet.FileServlet;
 import org.eclipse.kura.web.server.servlet.SkinServlet;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleEvent;
+import org.osgi.service.component.ComponentContext;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import org.osgi.service.event.EventProperties;
@@ -58,7 +61,7 @@ public class Console implements ConfigurableComponent {
 
 	private static String s_aliasRoot;
 	private static String s_appRoot;
-	private static BundleContext s_context;
+	private static ComponentContext s_context;
 
 	private DbService m_dbService;
 	private HttpService m_httpService;
@@ -140,7 +143,7 @@ public class Console implements ConfigurableComponent {
 	//
 	// ----------------------------------------------------------------
 
-	protected void activate(BundleContext context, Map<String, Object> properties) {
+	protected void activate(ComponentContext context, Map<String, Object> properties) {
 		try {
 			// Check if web interface is enabled.
 			Boolean webEnabled = Boolean.valueOf(m_systemService.getKuraWebEnabled());
@@ -152,8 +155,15 @@ public class Console implements ConfigurableComponent {
 				s_aliasRoot = (String) properties.get(SERVLET_ALIAS_ROOT);
 				s_appRoot = (String) properties.get(APP_ROOT);
 				String servletRoot = s_aliasRoot;
-				m_properties = properties;
-
+				
+				m_properties= new HashMap<String, Object>();
+				Iterator<String> keys = properties.keySet().iterator();
+				while (keys.hasNext()) {
+					String key = keys.next();
+					Object value = properties.get(key);
+					m_properties.put(key, value);
+				}
+				
 				String dataDir = m_systemService.getProperties().getProperty(KURA_DATA_DIR);
 
 				String passwordFromDB = AuthenticationManager.isDBInitialized(m_dbService, dataDir);
@@ -277,7 +287,7 @@ public class Console implements ConfigurableComponent {
 	}
 
 	public static BundleContext getBundleContext() {
-		return s_context;
+		return s_context.getBundleContext();
 	}
 
 	public static String getApplicationRoot() {
@@ -297,23 +307,24 @@ public class Console implements ConfigurableComponent {
 		m_worker = Executors.newSingleThreadExecutor();
 		m_handle = m_worker.submit(new Runnable() {
 			public void run() {
-				s_logger.info("--> Runner started");
+				s_logger.debug("--> Runner started");
 				String searchedPID = (String) m_properties.get(APP_PID);
 				while (true) {
-					s_logger.info("--> Runner while");
-					try {
-						if (m_configService.getComponentConfiguration(searchedPID) != null) {
-							s_logger.info("Try to update config.");
-							m_configService.updateConfiguration(searchedPID, m_properties);
-							return;
-						}
-					} catch (KuraException e1) {
-					}
+					s_logger.debug("--> Runner while");
 					try {
 						Thread.sleep(1000);
 					} catch (InterruptedException e) {
 						e.printStackTrace();
 					}
+					try {
+						if(s_context.getServiceReference() != null && m_configService.getComponentConfiguration(searchedPID) != null){
+							s_logger.info("Trying to update config.");
+							m_configService.updateConfiguration(searchedPID, m_properties);
+							return;
+						}
+					} catch (KuraException e1) {
+					}
+					
 				}
 			}
 		});

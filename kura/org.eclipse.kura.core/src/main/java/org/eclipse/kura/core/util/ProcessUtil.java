@@ -12,6 +12,7 @@
 package org.eclipse.kura.core.util;
 
 import java.io.IOException;
+import java.util.StringTokenizer;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -25,40 +26,41 @@ public class ProcessUtil
 	private static final Logger s_logger = LoggerFactory.getLogger(ProcessUtil.class);
 
 	private static final ExecutorService s_processExecutor = Executors.newSingleThreadExecutor();
-
-	private static final String BASH      = "/bin/bash";
-    private static final String BASH_FLAG = "-c";
     
 	public static SafeProcess exec(String command)
 		throws IOException
 	{
-		return exec( new String[] {command});
+		// Use StringTokenizer since this is the method documented by Runtime
+		StringTokenizer st = new StringTokenizer(command);
+		int count = st.countTokens();
+		String[] cmdArray = new String[count];
+				
+		for (int i = 0; i < count; i++) {
+			cmdArray[i] = st.nextToken();
+		}
+		
+		return exec(cmdArray);
 	}
 
-	public static SafeProcess exec(String[] cmdarray)
+	public static SafeProcess exec(final String[] cmdarray)
 		throws IOException
-	{
-		final String[] newCmdArray = new String[cmdarray.length + 2];
-		newCmdArray[0] = BASH;
-		newCmdArray[1] = BASH_FLAG;
-		System.arraycopy(cmdarray, 0, newCmdArray, 2, cmdarray.length);
-		
+	{		
 		// Serialize process executions. One at a time so we can consume all streams.
-        Future<SafeProcess> futureSafeProcess = s_processExecutor.submit( new Callable<SafeProcess>() {
+        Future<SafeProcess> futureSafeProcess = s_processExecutor.submit(new Callable<SafeProcess>() {
             @Override
             public SafeProcess call() throws Exception {
                 Thread.currentThread().setName("SafeProcessExecutor");
                 SafeProcess safeProcess = new SafeProcess();
-                safeProcess.exec(newCmdArray);
+                safeProcess.exec(cmdarray);
                 return safeProcess;
-            }           
+            }
         });
         
         try {
             return futureSafeProcess.get();
         } 
         catch (Exception e) {
-            s_logger.error("Error waiting from SafeProcess ooutput", e);
+            s_logger.error("Error waiting from SafeProcess output", e);
             throw new IOException(e);
         }
 	}
@@ -76,7 +78,4 @@ public class ProcessUtil
 		proc.destroy();	
 	}
 }
-
-
-
     

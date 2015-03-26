@@ -80,6 +80,8 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
         NetworkConfigurationChangeEvent.NETWORK_EVENT_CONFIG_CHANGE_TOPIC,
     };
     
+    private static Object s_lock = new Object();
+    
     private final static long THREAD_INTERVAL = /*30000*/10000;
     private final static long THREAD_TERMINATION_TOUT = 1; // in seconds
     
@@ -97,8 +99,7 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
     private Set<String> m_disabledInterfaces;
     private Map<String, InterfaceState> m_interfaceStatuses;
     private ExecutorService m_executor;
-	private Object m_lock = new Object();
-	
+		
 	private NetworkConfiguration m_currentNetworkConfiguration;
 	private NetworkConfiguration m_newNetConfiguration;
 	
@@ -202,7 +203,7 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
     }
     
     private void monitor() {
-        synchronized(m_lock) {
+        synchronized(s_lock) {
             try {
                 // Check to see if the configuration has changed
             	//s_logger.debug("m_newNetConfiguration: " + m_newNetConfiguration);
@@ -243,7 +244,7 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
                         			s_logger.debug("monitor() :: Wifi RSSI is {}", rssi);
                         		} catch (KuraException e) {
                         			s_logger.error("monitor() :: Failed to get Signal Level for {} -> {}", interfaceName, wifiConfig.getSSID());
-                        			e.printStackTrace();
+                        			s_logger.error("monitor() :: Failed to get Signal Level - {}", e);
                         			rssi = 0;
                         		} 
                         		for (WifiClientMonitorListener listener : m_listeners) {
@@ -562,7 +563,7 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
     }
     
     private void initializeMonitoredInterfaces(NetworkConfiguration networkConfiguration) throws KuraException {
-        synchronized (m_lock) {
+        synchronized (s_lock) {
             m_enabledInterfaces.clear();
             m_disabledInterfaces.clear();
     
@@ -608,9 +609,10 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
 	                        		monitor();
 									Thread.sleep(THREAD_INTERVAL);
 								} catch (InterruptedException interruptedException) {
-	                                s_logger.debug("WiFi monitor interrupted", interruptedException);
+									Thread.interrupted();
+	                                s_logger.debug("WiFi monitor interrupted - {}", interruptedException);
 								} catch (Throwable t) {
-	                                s_logger.error("Exception while monitoring WiFi connection", t);
+	                                s_logger.error("Exception while monitoring WiFi connection - {}", t);
 								}
 	                    	}
 	                }});

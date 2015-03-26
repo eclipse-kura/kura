@@ -95,6 +95,8 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 	private final static long THREAD_INTERVAL = 30000;
 	private final static long THREAD_TERMINATION_TOUT = 1; // in seconds
 	
+	private static Object s_lock = new Object();
+	
 	private static Future<?>  task;
 	private static boolean stopThread;
 
@@ -188,11 +190,11 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 	    			try {
 	    				monitor();
 	    				Thread.sleep(THREAD_INTERVAL);
-					} catch (InterruptedException e) {
-						s_logger.debug(e.getMessage());
+					} catch (InterruptedException interruptedException) {
+						Thread.interrupted();
+						s_logger.debug("modem monitor interrupted - {}", interruptedException);
 					} catch (Throwable t) {
-						s_logger.error("activate() :: Exception while monitoring cellular connection {}", t.toString());
-						t.printStackTrace();
+						s_logger.error("activate() :: Exception while monitoring cellular connection {}", t);
 					}
     			}
     	}});
@@ -254,7 +256,7 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 						}
 					});
 				} catch (Exception e) {
-					e.printStackTrace();
+					s_logger.error("Failed to handle the NetworkConfigurationChangeEvent - {}", e);
 				}
 			}
         } else if (topic.equals(ModemAddedEvent.MODEM_EVENT_ADDED_TOPIC)) {
@@ -426,7 +428,7 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 	    			}
     			}
 			} catch (KuraException e) {
-				s_logger.error("processNetworkConfigurationChangeEvent() - {}", e);
+				e.printStackTrace();
 			}
 		}
     }
@@ -502,7 +504,7 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 						listener.setCellularSignalLevel(rssi);
 					} catch (KuraException e) {
 						listener.setCellularSignalLevel(0);
-						s_logger.error("monitor() :: failed to obtain signal strength info - {}", e);
+						e.printStackTrace();
 					}
 				}
 			}
@@ -588,7 +590,7 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 						s_logger.info("monitor() :: Exception :: PPPD disconnect");
 						pppService.disconnect();
 					} catch (KuraException e1) {
-						e1.printStackTrace();
+                        s_logger.error("monitor() :: Exception while disconnect", e1);
 					}
 					m_pppState = pppState;
 				}
@@ -599,7 +601,7 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 							s_logger.error("monitor() :: Failed to disable modem GPS");
 						}
 					} catch (KuraException e1) {
-						e1.printStackTrace();
+                        s_logger.error("monitor() :: Exception disableModemGps", e1);
 					}
 				}
 				
@@ -607,9 +609,8 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 					s_logger.info("monitor() :: Exception :: modem reset");
 					modem.reset();
 				} catch (KuraException e1) {
-					e1.printStackTrace();
+                    s_logger.error("monitor() :: Exception modem.reset", e1);
 				}
-				e.printStackTrace();
 			}
 		}
 		
@@ -690,7 +691,7 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 					s_logger.info("posting ModemReadyEvent on topic {}", ModemReadyEvent.MODEM_EVENT_READY_TOPIC);
 					m_eventAdmin.postEvent(new ModemReadyEvent(modemInfoMap));
 				} catch (Exception e) {
-					s_logger.error("Can't post the ModemReadyEvent. Failed to obtain modem info - {}", e);
+					s_logger.error("Failed to post the ModemReadyEvent - {}", e);
 				}
 				
 				String ifaceName = m_networkService.getModemPppPort(modemDevice);
@@ -742,8 +743,9 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 							    			try {
 							    				monitor();
 							    				Thread.sleep(THREAD_INTERVAL);
-							    			} catch (InterruptedException e) {
-												s_logger.debug(e.getMessage());
+							    			} catch (InterruptedException interruptedException) {
+							    				Thread.interrupted();
+												s_logger.debug("modem monitor interrupted - {}", interruptedException);
 											} catch (Throwable t) {
 												s_logger.error("trackModem() :: Exception while monitoring cellular connection {}", t);
 											}
@@ -763,7 +765,7 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 					}
 				}
 			} catch (Exception e) {
-				s_logger.error("trackModem() :: Exception - {}", e);
+				e.printStackTrace();
 			}
 		}
 	}

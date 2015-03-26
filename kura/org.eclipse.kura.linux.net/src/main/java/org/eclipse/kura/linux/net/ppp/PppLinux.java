@@ -56,7 +56,7 @@ public class PppLinux {
 		
 		int pid = getPid(iface, port);
 		if(pid >= 0) {
-    		s_logger.info("killing " + iface + " pid=" + pid);
+    		s_logger.info("killing {}  pid={}", iface, pid);
     		LinuxProcessUtil.kill(pid);
     		
     		if (port.startsWith("/dev/")) {
@@ -94,7 +94,7 @@ public class PppLinux {
 			if (isPppRunning) {
 				break;
 			}
-			s_logger.info("Waiting " + (timeout - dif) + " ms for pppd to launch");
+			s_logger.info("Waiting {} ms for pppd to launch", (timeout - dif));
 			try {
 				Thread.sleep(timeout - dif);
 			} catch (InterruptedException e) {
@@ -109,25 +109,19 @@ public class PppLinux {
 	}
 	
 	private static int getPid(String iface, String port) throws KuraException {
-
 		int pid = -1;		
 		synchronized (s_lock) {
-		    
-		    StringBuilder sb = new StringBuilder();
-		    sb.append("pgrep")
-		      .append(' ')
-		      .append("-f")
-		      .append(' ')
-              .append("\'")
-		      .append(formConnectCommand(iface, port))
-		      .append("\'");
+			String [] pgrepCmd = {"pgrep", "-f", ""};
+			pgrepCmd[2] = formConnectCommand(iface, port);
+			
 			BufferedReader br = null;
 			try {
-				ProcessStats processStats = LinuxProcessUtil.startWithStats(sb.toString());
+				ProcessStats processStats = LinuxProcessUtil.startWithStats(pgrepCmd);
 		    	br = new BufferedReader(new InputStreamReader(processStats.getInputStream()));
 		    	String line = br.readLine();
 		    	if ((line != null) && (line.length() > 0)) {
 		    		pid = Integer.parseInt(line);
+		    		s_logger.trace("getPid() :: pppd pid={} for {}", pid, iface);
 		    	}		    	
 			} catch (Exception e) {
 				throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);

@@ -57,7 +57,7 @@ public class WpaSupplicant {
 	
 	public static final int[] ALL_CHANNELS = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13};
 	
-	private static final String OS_VERSION = System.getProperty("kura.os.version");
+	//private static final String OS_VERSION = System.getProperty("kura.os.version");
 	
 	private static final int MODE_INFRA = 0;
 	private static final int MODE_IBSS = 1;
@@ -789,6 +789,10 @@ public class WpaSupplicant {
 			throw KuraException.internalError(e);
 		}
 	}
+	
+	public boolean isConfigured() {
+		return m_isConfigured;
+	}
 
 	/*
 	 * This method generates wpa_supplicant configuration file
@@ -1145,7 +1149,7 @@ public class WpaSupplicant {
 		}
 		byte[] raw = s.getBytes();
 
-		StringBuffer hex = new StringBuffer(2 * raw.length);
+		StringBuilder hex = new StringBuilder(2 * raw.length);
 		for (int i = 0; i < raw.length; i++) {
 			hex.append(HEXES.charAt((raw[i] & 0xF0) >> 4)).append(
 					HEXES.charAt((raw[i] & 0x0F)));
@@ -1158,7 +1162,7 @@ public class WpaSupplicant {
 	 */
 	private String formSupplicantCommand() {
 
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		sb.append("wpa_supplicant -B -D ");
 		sb.append(this.m_driver);
 		sb.append(" -i ");
@@ -1174,7 +1178,7 @@ public class WpaSupplicant {
 	 */
 	private static String formSupplicantConfigDirectory() {
 
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		// sb.append("/tmp/.kura/");
 		// sb.append(WpaSupplicant.class.getPackage().getName());
 		sb.append("/etc/");
@@ -1187,7 +1191,7 @@ public class WpaSupplicant {
 	 */
 	private static String formSupplicantConfigFilename() {
 
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		sb.append(WpaSupplicant.formSupplicantConfigDirectory());
 		sb.append("/wpa_supplicant.conf");
 
@@ -1243,7 +1247,7 @@ public class WpaSupplicant {
 
 	private String getScanFrequenciesMHz(int[] channels) {
 
-		StringBuffer sbFrequencies = new StringBuffer();
+		StringBuilder sbFrequencies = new StringBuilder();
 		if (channels != null && channels.length > 0) {
 			for (int i = 0; i < channels.length; i++) {
 				int freq = getChannelFrequencyMHz(channels[i]);

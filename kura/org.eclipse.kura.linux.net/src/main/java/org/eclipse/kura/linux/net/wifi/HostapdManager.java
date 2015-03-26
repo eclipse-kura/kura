@@ -41,7 +41,7 @@ public class HostapdManager {
             
             //start hostapd
             String launchHostapdCommand = generateCommand();
-            s_logger.debug("starting hostapd --> " + launchHostapdCommand);
+            s_logger.debug("starting hostapd --> {}", launchHostapdCommand);
             proc = ProcessUtil.exec(launchHostapdCommand);
             if(proc.waitFor() != 0) {
                 s_logger.error("failed to start hostapd for unknown reason");

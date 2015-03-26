@@ -709,6 +709,7 @@ public class LinuxNetworkUtil {
 		if (Character.isDigit(ifaceName.charAt(0))) {
 			return NetInterfaceType.UNKNOWN;
 		}
+			
 		NetInterfaceType ifaceType = NetInterfaceType.UNKNOWN;
 		String stringType = null;
 		SafeProcess proc = null;
@@ -716,69 +717,46 @@ public class LinuxNetworkUtil {
 		try {
 			//start the process
 			proc = ProcessUtil.exec("ifconfig " + ifaceName);
-			if (proc.waitFor() != 0) {
-                s_logger.warn("getType() :: error executing command --- ifconfig {} --- exit value = {}", ifaceName , proc.exitValue());
-			    return NetInterfaceType.UNKNOWN;
-			}
+			if (proc.waitFor() == 0) {
+				//get the output
+				br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+				String line = null;
 
-			//get the output
-			br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
-			String line = null;
-
-			while((line = br.readLine()) != null) {
-				int index = line.indexOf("Link encap:");
-				if(index > -1) {
-					StringTokenizer st = new StringTokenizer(line);
-					st.nextToken(); //skip iface name
-					st.nextToken(); //skip Link
-					stringType = st.nextToken();
-					stringType = stringType.substring(6).toUpperCase();
-					if(stringType.equals("LOCAL")) {
-						stringType = "LOOPBACK";
-					} else if (stringType.equals("POINT-TO-POINT")) {
-						stringType = "MODEM";
-					}
-					break;
-				}
-			}
-			
-			Collection<String> wifiOptions = WifiOptions.getSupportedOptions(ifaceName);
-			if (wifiOptions.size() > 0) {
-				for (String op : wifiOptions) {
-					s_logger.trace("WiFi option supported on " + ifaceName + ": " + op);
-				}
-				stringType = "WIFI";
-			}
-			
-			File pppFile = new File(NetworkServiceImpl.PPP_PEERS_DIR + ifaceName);
-			if(pppFile.exists()) {
-			    stringType = "MODEM";
-			}
-			
-			if(ifaceName.matches("^ppp\\d+$")) {
-				stringType = "MODEM";
-			}
-			
-			//determine if wifi
-			/*
-			if("ETHERNET".equals(stringType)) {
-				proc = rt.exec("iw dev " + ifaceName + " info");
-				int status = proc.waitFor();
-				if (status != 0) {
-					proc = rt.exec("iwconfig " + ifaceName);				
-					br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
-	
-					while((line = br.readLine()) != null) {
-						if(line.contains("IEEE 802.11")) {
-							stringType = "WIFI";
-							break;
+				while((line = br.readLine()) != null) {
+					int index = line.indexOf("Link encap:");
+					if(index > -1) {
+						StringTokenizer st = new StringTokenizer(line);
+						st.nextToken(); //skip iface name
+						st.nextToken(); //skip Link
+						stringType = st.nextToken();
+						stringType = stringType.substring(6).toUpperCase();
+						if(stringType.equals("LOCAL")) {
+							stringType = "LOOPBACK";
+						} else if (stringType.equals("ETHERNET")) { 
+							stringType = "ETHERNET";
+						} else if (stringType.equals("POINT-TO-POINT")) {
+							stringType = "MODEM";
 						}
-					}				
-				} else {
+						break;
+					}
+				}
+			} else {
+				File pppFile = new File(NetworkServiceImpl.PPP_PEERS_DIR + ifaceName);
+				if(pppFile.exists() || ifaceName.matches("^ppp\\d+$")) {
+				    stringType = "MODEM";
+				}
+			}
+
+			//determine if wifi
+			if (stringType.equals("ETHERNET")) {
+				Collection<String> wifiOptions = WifiOptions.getSupportedOptions(ifaceName);
+				if (wifiOptions.size() > 0) {
+					for (String op : wifiOptions) {
+						s_logger.trace("WiFi option supported on {} : {}", ifaceName, op);
+					}
 					stringType = "WIFI";
 				}
-			}
-			*/
+			} 
 		} catch (Exception e) {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
 		} 
@@ -799,6 +777,7 @@ public class LinuxNetworkUtil {
 			// leave as unknown
 		}
 		
+		s_logger.trace("getType() :: interface={}, type={}", ifaceName, ifaceType);
 		return ifaceType;
 	}
 	

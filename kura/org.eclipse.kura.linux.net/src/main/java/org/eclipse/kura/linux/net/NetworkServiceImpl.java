@@ -53,7 +53,6 @@ import org.eclipse.kura.net.NetworkService;
 import org.eclipse.kura.net.NetworkState;
 import org.eclipse.kura.net.modem.ModemAddedEvent;
 import org.eclipse.kura.net.modem.ModemConnectionStatus;
-import org.eclipse.kura.net.modem.ModemConnectionType;
 import org.eclipse.kura.net.modem.ModemDevice;
 import org.eclipse.kura.net.modem.ModemInterface;
 import org.eclipse.kura.net.modem.ModemInterfaceAddress;

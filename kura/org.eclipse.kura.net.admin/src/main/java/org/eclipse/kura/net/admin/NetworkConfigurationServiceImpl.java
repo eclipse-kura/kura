@@ -41,7 +41,6 @@ import org.eclipse.kura.core.net.WifiInterfaceConfigImpl;
 import org.eclipse.kura.core.net.WifiInterfaceImpl;
 import org.eclipse.kura.core.net.modem.ModemInterfaceConfigImpl;
 import org.eclipse.kura.core.net.modem.ModemInterfaceImpl;
-import org.eclipse.kura.deployment.agent.DeploymentAgentService;
 import org.eclipse.kura.linux.net.modem.SupportedSerialModemInfo;
 import org.eclipse.kura.linux.net.modem.SupportedSerialModemsInfo;
 import org.eclipse.kura.linux.net.modem.UsbModemDriver;
@@ -76,10 +75,7 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
 
     private static final Logger s_logger = LoggerFactory.getLogger(NetworkConfigurationServiceImpl.class);
         
-	private final static String[] EVENT_TOPICS = {
-			DeploymentAgentService.EVENT_INSTALLED_TOPIC,
-			DeploymentAgentService.EVENT_UNINSTALLED_TOPIC,
-			KuraConfigReadyEvent.KURA_CONFIG_EVENT_READY_TOPIC};
+	private final static String[] EVENT_TOPICS = {KuraConfigReadyEvent.KURA_CONFIG_EVENT_READY_TOPIC};
     
     private NetworkService m_networkService;
     private EventAdmin m_eventAdmin;

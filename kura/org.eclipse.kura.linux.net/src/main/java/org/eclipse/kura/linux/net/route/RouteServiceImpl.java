@@ -30,7 +30,6 @@ import org.eclipse.kura.net.IPAddress;
 import org.eclipse.kura.net.route.RouteConfig;
 import org.eclipse.kura.net.route.RouteConfigIP4;
 import org.eclipse.kura.net.route.RouteConfigIP6;
-import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

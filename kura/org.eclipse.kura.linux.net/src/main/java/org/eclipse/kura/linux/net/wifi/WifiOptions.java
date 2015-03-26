@@ -57,17 +57,14 @@ public class WifiOptions {
 			}
 
 			procIwConfig = ProcessUtil.exec("iwconfig " + ifaceName);
-			if (procIwConfig.waitFor() != 0) {
-				s_logger.error("error executing command --- iwconfig --- exit value = {}", procIwConfig.exitValue());
-				throw new KuraException(KuraErrorCode.INTERNAL_ERROR);
-			}
-			
-			br = new BufferedReader(new InputStreamReader(procIwConfig.getInputStream()));
-			String line = null;
-			while ((line = br.readLine()) != null) {
-				if (line.contains("IEEE 802.11")) {
-					options.add(WIFI_MANAGED_DRIVER_WEXT);
-					break;
+			if (procIwConfig.waitFor() == 0) {
+				br = new BufferedReader(new InputStreamReader(procIwConfig.getInputStream()));
+				String line = null;
+				while ((line = br.readLine()) != null) {
+					if (line.contains("IEEE 802.11")) {
+						options.add(WIFI_MANAGED_DRIVER_WEXT);
+						break;
+					}
 				}
 			}
 		} catch (Exception e) {

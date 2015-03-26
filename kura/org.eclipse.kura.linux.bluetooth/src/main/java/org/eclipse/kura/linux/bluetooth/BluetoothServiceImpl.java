@@ -15,8 +15,10 @@ public class BluetoothServiceImpl implements BluetoothService, ConfigurableCompo
 	private static final Logger s_logger = LoggerFactory.getLogger(BluetoothServiceImpl.class);
 	
 	private final String PROPERTY_INAME = "iname";
+	private final String PROPERTY_SCAN_TIME = "scan_time";
 	
 	private String m_name;
+	private int m_scanTime;
 	
 	// --------------------------------------------------------------------
 	//
@@ -26,6 +28,7 @@ public class BluetoothServiceImpl implements BluetoothService, ConfigurableCompo
 	protected void activate(ComponentContext context, Map<String,Object> properties) {
 		s_logger.info("Activating Bluetooth Service...");
 		m_name = (String) properties.get(PROPERTY_INAME);
+		m_scanTime = (Integer) properties.get(PROPERTY_SCAN_TIME);
 	}
 	
 	protected void deactivate(ComponentContext context) {
@@ -36,6 +39,11 @@ public class BluetoothServiceImpl implements BluetoothService, ConfigurableCompo
 		s_logger.debug("Updating Bluetooth Service...");
 	}
 	
+	// --------------------------------------------------------------------
+	//
+	//  Service APIs
+	//
+	// --------------------------------------------------------------------
 	@Override
 	public BluetoothAdapter getBluetoothAdapter() {
 		return getBluetoothAdapter(m_name);
@@ -44,12 +52,19 @@ public class BluetoothServiceImpl implements BluetoothService, ConfigurableCompo
 	@Override
 	public BluetoothAdapter getBluetoothAdapter(String name) {
 		try {
-			BluetoothAdapterImpl ba = new BluetoothAdapterImpl(name);
+			BluetoothAdapterImpl ba = new BluetoothAdapterImpl(name, m_scanTime);
 			return ba;
 		} catch (KuraException e) {
 			s_logger.error("Could not get bluetooth adapter", e);
 			return null;
 		}
 	}
+	
+	// --------------------------------------------------------------------
+	//
+	//  Local methods
+	//
+	// --------------------------------------------------------------------
+	
 
 }

@@ -5,17 +5,23 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.util.ProcessUtil;
+import org.eclipse.kura.core.util.SafeProcess;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class BluetoothUtil {
 	
 	private static final Logger s_logger = LoggerFactory.getLogger(BluetoothUtil.class);
-	
+	private static final ExecutorService s_processExecutor = Executors.newSingleThreadExecutor();
+
 	private static final String BD_ADDRESS    = "BD Address:";
 	private static final String HCI_VERSION_4 = "HCI Version: 4.0";
 	private static final String HCICONFIG     = "hciconfig";
@@ -23,14 +29,12 @@ public class BluetoothUtil {
 	
 	public static Map<String,String> getConfig(String name) throws KuraException {
 		Map<String,String> props = new HashMap<String,String>();
-		
-		Process proc = null;
+		SafeProcess proc = null;
 		BufferedReader br = null;
 		StringBuilder sb = null;
-		String command = HCICONFIG + " " + name + " version";
+		String[] command = {HCICONFIG, name, "version"};
 		try {
 			proc = ProcessUtil.exec(command);
-			proc.waitFor();
 			br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
 			sb = new StringBuilder();
 			String line = null;
@@ -67,10 +71,11 @@ public class BluetoothUtil {
 		} finally {
 			try {
 				br.close();
+				proc.destroy();
 			} catch (IOException e) {
 				s_logger.error("Error closing read buffer", e);
 			}
-			ProcessUtil.destroy(proc);
+			
 		}
 		
 		return props;
@@ -78,14 +83,12 @@ public class BluetoothUtil {
 	
 	public static boolean isEnabled(String name) {
 		
-		String command = HCICONFIG + " " + name;
-		Process proc = null;
+		String[] command = {HCICONFIG, name};
+		SafeProcess proc = null;
 		BufferedReader br = null;
 		
 		try {
 			proc = ProcessUtil.exec(command);
-			proc.waitFor();
-			
 			br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
 			String line = null;
 			while ((line = br.readLine()) != null) {
@@ -101,26 +104,78 @@ public class BluetoothUtil {
 		} finally {
 			try {
 				br.close();
+				proc.destroy();
 			} catch (IOException e) {
 				s_logger.error("Error closing read buffer", e);
 			}
-			ProcessUtil.destroy(proc);
 		}
 		
 		return false;
 	}
 	
-	public static void hciconfigCmd(String name, String cmd) {
-		String command = HCICONFIG + " " + name + " " + cmd;
-		Process proc = null;
+	public static BufferedReader hciconfigCmd(String name, String cmd) {
+		String[] command = {HCICONFIG, name, cmd};
+		SafeProcess proc = null;
+		BufferedReader br = null;
 		try {
 			proc = ProcessUtil.exec(command);
-			proc.waitFor();
+			br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
 		} catch (Exception e) {
 			s_logger.error("Error executing command: " + command, e);
 		} finally {
-			ProcessUtil.destroy(proc);
+			try {
+				br.close();
+				proc.destroy();
+			} catch (IOException e) {
+				s_logger.error("Error closing read buffer", e);
+			}
+		}
+		return br;
+	}
+	
+	public static void killCmd(String cmd, String signal) {
+		String[] command = {"pkill", "-" + signal, cmd};
+		SafeProcess proc = null;
+		try {
+			proc = ProcessUtil.exec(command);
+		} catch (IOException e) {
+			s_logger.error("Error executing command: " + command, e);
+		} finally {
+			proc.destroy();
+		}
+	}
+	
+	public static BluetoothProcess hcitoolCmd (String name, String cmd, BluetoothProcessListener listener) {
+		String[] command = {HCITOOL, "-i", name, cmd};
+		BluetoothProcess proc = null;
+		try {
+			proc = exec(command, listener);
+		} catch (Exception e) {
+			s_logger.error("Error executing command: " + command, e);
 		}
 		
+		return proc;
+	}
+	
+	private static BluetoothProcess exec(final String[] cmdArray, final BluetoothProcessListener listener) throws IOException {
+
+		// Serialize process executions. One at a time so we can consume all streams.
+        Future<BluetoothProcess> futureSafeProcess = s_processExecutor.submit( new Callable<BluetoothProcess>() {
+            @Override
+            public BluetoothProcess call() throws Exception {
+                Thread.currentThread().setName("BluetoothProcessExecutor");
+                BluetoothProcess bluetoothProcess = new BluetoothProcess();
+                bluetoothProcess.exec(cmdArray, listener);
+                return bluetoothProcess;
+            }           
+        });
+        
+        try {
+            return futureSafeProcess.get();
+        } 
+        catch (Exception e) {
+            s_logger.error("Error waiting from SafeProcess ooutput", e);
+            throw new IOException(e);
+        }
 	}
 }

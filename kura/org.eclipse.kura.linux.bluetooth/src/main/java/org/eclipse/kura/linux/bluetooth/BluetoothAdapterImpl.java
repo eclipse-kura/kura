@@ -6,6 +6,7 @@ import java.util.Map;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.bluetooth.BluetoothAdapter;
 import org.eclipse.kura.bluetooth.BluetoothScanListener;
+import org.eclipse.kura.linux.bluetooth.le.BluetoothLeScanner;
 import org.eclipse.kura.linux.bluetooth.util.BluetoothUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,9 +18,11 @@ public class BluetoothAdapterImpl implements BluetoothAdapter {
 	private String  m_name;
 	private String 	m_address;
 	private boolean m_leReady;
+	private int     m_scanTime;
 	
-	public BluetoothAdapterImpl(String name) throws KuraException {
+	public BluetoothAdapterImpl(String name, int scanTime) throws KuraException {
 		m_name = name;
+		m_scanTime = scanTime;
 		buildAdapter(name);
 	}
 	
@@ -44,6 +47,16 @@ public class BluetoothAdapterImpl implements BluetoothAdapter {
 	public String getAddress() {
 		return m_address;
 	}
+	
+	@Override
+	public int getScanTime() {
+		return m_scanTime;
+	}
+	
+	@Override
+	public void setScanTime(int scanTime) {
+		m_scanTime = scanTime;
+	}
 
 	@Override
 	public boolean isEnabled() {
@@ -52,7 +65,8 @@ public class BluetoothAdapterImpl implements BluetoothAdapter {
 
 	@Override
 	public void startLeScan(BluetoothScanListener listener) {
-		// TODO Auto-generated method stub
+		BluetoothLeScanner bls = new BluetoothLeScanner(listener);
+		bls.startScan(m_name, m_scanTime);
 
 	}
 

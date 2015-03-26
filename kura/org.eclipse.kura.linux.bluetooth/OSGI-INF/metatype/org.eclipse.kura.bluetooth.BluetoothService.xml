@@ -25,6 +25,13 @@
             required="true"
             default="hci0"
             description="Name of bluetooth adapter."/>
+        <AD id="scan_time"
+            name="scan_time"
+            type="Integer"
+            cardinality="0"
+            required="true"
+            default="12"
+            description="Lenght of time to scan for devices." />
 
     </OCD>
     <Designate pid="org.eclipse.kura.bluetooth.BluetoothService">

@@ -65,8 +65,8 @@ public class BluetoothAdapterImpl implements BluetoothAdapter {
 
 	@Override
 	public void startLeScan(BluetoothScanListener listener) {
-		BluetoothLeScanner bls = new BluetoothLeScanner(listener);
-		bls.startScan(m_name, m_scanTime);
+		BluetoothLeScanner bls = new BluetoothLeScanner();
+		bls.startScan(m_name, m_scanTime, listener);
 
 	}
 

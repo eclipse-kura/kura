@@ -1,7 +1,6 @@
 package org.eclipse.kura.linux.bluetooth.util;
 
 import java.io.BufferedWriter;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -68,12 +67,19 @@ public class BluetoothProcess {
 	}
 	
 	private Void readStreamFully(InputStream is, BluetoothProcessListener listener) throws IOException {
-		int len;
-		byte[] buf = new byte[1024];
+		int ch;
+		StringBuilder sb = new StringBuilder();
 		
-		while ((len = is.read(buf)) != -1) {
-			listener.processInputStream(new String(buf));
+		while ((ch = is.read()) != -1) {
+			if ((char) ch == '\n') {
+				listener.processInputStream(sb.toString());
+				sb.setLength(0);
+			}
+			else {
+				sb.append((char) ch);
+			}
 		}
+		
 		return null;
 	}
 	

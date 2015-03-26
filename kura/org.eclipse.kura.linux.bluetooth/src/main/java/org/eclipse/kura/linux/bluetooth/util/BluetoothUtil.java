@@ -54,7 +54,11 @@ public class BluetoothUtil {
 			props.put("leReady", "false");
 			for (String result : results) {
 				if((index = result.indexOf(BD_ADDRESS)) >= 0) {
-					String address = result.substring(index + BD_ADDRESS.length()).trim();
+					// Address reported as:
+					// BD Address: xx:xx:xx:xx:xx:xx  ACL MTU: xx:xx SCO MTU: xx:x
+					String address = result.substring(index + BD_ADDRESS.length());
+					String[] tmpAddress = address.split("\\s", 2);
+					address = tmpAddress[0].trim();
 					props.put("address", address);
 					s_logger.trace("Bluetooth adapter address set to: " + address);
 				}
@@ -63,7 +67,6 @@ public class BluetoothUtil {
 					s_logger.trace("Bluetooth adapter is LE ready");
 				}
 			}
-			
 			
 		} catch (Exception e) {
 			s_logger.error("Failed to execute command: " + command, e);

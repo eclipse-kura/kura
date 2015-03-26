@@ -10,7 +10,6 @@ import java.util.Map.Entry;
 import org.eclipse.kura.bluetooth.BluetoothDevice;
 import org.eclipse.kura.bluetooth.BluetoothScanListener;
 import org.eclipse.kura.linux.bluetooth.BluetoothDeviceImpl;
-import org.eclipse.kura.linux.bluetooth.BluetoothScanListenerAdapter;
 import org.eclipse.kura.linux.bluetooth.util.BluetoothProcess;
 import org.eclipse.kura.linux.bluetooth.util.BluetoothProcessListener;
 import org.eclipse.kura.linux.bluetooth.util.BluetoothUtil;
@@ -26,27 +25,21 @@ public class BluetoothLeScanner implements BluetoothProcessListener {
 	
 	private Map<String, String> devices;
 	private List<BluetoothDevice> scanResult;
-	private BluetoothScanListenerAdapter m_listener;
 	
-	public BluetoothLeScanner(BluetoothScanListener listener) {
+	public BluetoothLeScanner() {
 		devices = new HashMap<String, String>();
-		m_listener = new BluetoothScanListenerAdapter(listener);
 	}
 	
-	public void startScan(String name, int scanTime) {
+	public void startScan(String name, int scanTime, BluetoothScanListener listener) {
 		BluetoothProcess proc = null;
 		
 		try {
-			s_logger.debug("Starting scan...");
+			s_logger.debug("Starting bluetooth le scan...");
 			proc = BluetoothUtil.hcitoolCmd(name, "lescan", this);
-			//Thread.sleep(scanTime * 1000);
-			long start = System.currentTimeMillis();
-			long end = start + scanTime * 1000;
-			s_logger.debug("Starting timer...");
-			while (System.currentTimeMillis() < end) {
-				
-			}
-			s_logger.debug("Killing scan");
+			
+			// Sleep for specified time while scan is running
+			Thread.sleep(scanTime * 1000);
+			// SIGINT must be sent to the hcitool process. Otherwise the adapter must be toggled (down/up).
 			BluetoothUtil.killCmd("hcitool", "SIGINT");
 			proc.destroy();
 			
@@ -56,12 +49,13 @@ public class BluetoothLeScanner implements BluetoothProcessListener {
 				Map.Entry<String, String> pair = (Map.Entry<String, String>)it.next();
 				scanResult.add(new BluetoothDeviceImpl(pair.getKey(), pair.getValue()));
 			}
-			s_logger.debug("Alerting listener");
-			m_listener.onScanResults(scanResult);
-			s_logger.debug("Done");
+			
+			// Alert listener that scan is complete
+			listener.onScanResults(scanResult);
+
 		} catch (Exception e) {
 			s_logger.error("Error running bluetooth LE scan.", e);
-			m_listener.onScanFailed(SCAN_FAILED_INTERNAL_ERROR);
+			listener.onScanFailed(SCAN_FAILED_INTERNAL_ERROR);
 		}
 	}
 
@@ -71,27 +65,27 @@ public class BluetoothLeScanner implements BluetoothProcessListener {
 		String name;
 		String address;
 		
-		String[] lines = line.split("\\r?\\n");
-		for (String l : lines) {
-			String[] results = l.split("\\s", 2);
-			if (results.length == 2) {
-				address = results[0].trim();
-				name = results[1].trim();
-				
-				if(address.matches(s_mac_regex)) {
-					if (devices.containsKey(address)) {
-						if (!name.equals("unknown") && !devices.get(address).equals(name)) {
-							System.out.println("Updating device: " + address + " - " + name);
-							devices.put(address, name);
-						}
-					}
-					else {
-						s_logger.debug("Device found: " + address + " - " + name);
+		// Results from hcitool lescan should be in form:
+		// <mac_address> <device_name>
+		String[] results = line.split("\\s", 2);
+		if (results.length == 2) {
+			address = results[0].trim();
+			name = results[1].trim();
+			
+			if(address.matches(s_mac_regex)) {
+				if (devices.containsKey(address)) {
+					if (!name.equals("(unknown)") && !devices.get(address).equals(name)) {
+						s_logger.debug("Updating device: " + address + " - " + name);
 						devices.put(address, name);
 					}
 				}
+				else {
+					s_logger.debug("Device found: " + address + " - " + name);
+					devices.put(address, name);
+				}
 			}
 		}
+		
 		
 	}
 	

@@ -14,9 +14,9 @@ public class BluetoothDeviceImpl implements BluetoothDevice {
 	private String m_name;
 	private String m_address;
 	
-	public BluetoothDeviceImpl(String name, String address) {
-		m_name = name;
+	public BluetoothDeviceImpl(String address, String name) {
 		m_address = address;
+		m_name = name;
 	}
 
 	@Override

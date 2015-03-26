@@ -16,9 +16,8 @@
 package org.eclipse.kura.core.cloud;
 
 import java.io.IOException;
-import java.security.Signature;
-import java.security.cert.Certificate;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -41,6 +40,8 @@ import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.data.DataService;
 import org.eclipse.kura.data.DataServiceListener;
 import org.eclipse.kura.message.KuraPayload;
+import org.eclipse.kura.message.KuraRequestPayload;
+import org.eclipse.kura.message.KuraResponsePayload;
 import org.eclipse.kura.message.KuraTopic;
 import org.eclipse.kura.net.NetworkService;
 import org.eclipse.kura.net.modem.ModemReadyEvent;
@@ -65,7 +66,6 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
 	private static final String 	CERT_SERIAL = "pkiSerial";
 	private static final String 	RESOURCE_CERTIFICATE_DM = "dm";
 	private static final String 	SIGNATURE_METRIC = "signedMessage";
-	private static final String 	SIGNATURE_METRIC_ERROR ="signatureError";
 
 	private ComponentContext        m_ctx;
 
@@ -188,12 +188,6 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
 		String[] eventTopics = {PositionLockedEvent.POSITION_LOCKED_EVENT_TOPIC, ModemReadyEvent.MODEM_EVENT_READY_TOPIC};
 		props.put(EventConstants.EVENT_TOPIC, eventTopics);
 		m_ctx.getBundleContext().registerService(EventHandler.class.getName(), this, props);
-		//
-		//
-		ServiceReference<CertificatesService> sr= m_ctx.getBundleContext().getServiceReference(CertificatesService.class);
-		if(sr != null){
-			m_certificatesService= m_ctx.getBundleContext().getService(sr);
-		}
 	}
 
 	public void updated(Map<String,Object> properties)
@@ -453,9 +447,21 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
 				if (cloudClient.getApplicationId().equals(kuraTopic.getApplicationId())) {
 					try {
 						if (m_options.getTopicControlPrefix().equals(kuraTopic.getPrefix())) {
+							if(m_certificatesService == null){
+								ServiceReference<CertificatesService> sr= m_ctx.getBundleContext().getServiceReference(CertificatesService.class);
+								if(sr != null){
+									m_certificatesService= m_ctx.getBundleContext().getService(sr);
+								}
+							}
 							
-							boolean validSignature= verifyMessageSignature(kuraTopic, kuraPayload);
-							if(m_certificatesService == null || validSignature){
+							boolean validMessage= false;
+							if(m_certificatesService == null){
+								validMessage= true;
+							}else if(verifyMessageSignature(kuraTopic, kuraPayload)){
+								validMessage= true;
+							}
+
+							if(validMessage){
 
 								cloudClient.onControlMessageArrived(kuraTopic.getDeviceId(), 
 										kuraTopic.getApplicationTopic(), 
@@ -463,14 +469,23 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
 										qos, 
 										retained);
 							}else{
-								s_logger.error("Message verification failed! Not valid signature or message not signed.");
+								s_logger.debug("Message verification failed! Not valid signature or message not signed.");
 
-								kuraPayload.addMetric(SIGNATURE_METRIC_ERROR, true);
-								cloudClient.onControlMessageArrived(kuraTopic.getDeviceId(), 
-										kuraTopic.getApplicationTopic(), 
-										kuraPayload, 
-										qos, 
-										retained);
+								KuraRequestPayload reqPayload = KuraRequestPayload.buildFromKuraPayload(kuraPayload);
+								KuraResponsePayload respPayload = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_ERROR);
+								respPayload.setTimestamp(new Date());
+								
+								StringBuilder sb = new StringBuilder("REPLY")
+								.append("/")
+								.append(reqPayload.getRequestId());
+								
+								String requesterClientId = reqPayload.getRequesterClientId();			
+								cloudClient.controlPublish(
+										requesterClientId,
+										sb.toString(),
+										respPayload,
+										0, false, 1);
+								
 							}
 						}
 						else {
@@ -645,9 +660,9 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
 
 
 	private boolean verifyMessageSignature(KuraTopic kuraTopic, KuraPayload kuraPayload){
-		
+
 		if(kuraTopic.getApplicationId().equals("PROV-V1") && 
-		   kuraTopic.getApplicationTopic().contains("certificate")){
+				kuraTopic.getApplicationTopic().contains("certificate")){
 			if(m_certificatesService == null){
 				return true;
 			} else{
@@ -657,8 +672,8 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
 				}
 			}
 			return false;
-		}else{
-			s_logger.info("Start signature verification");
+		}else if(kuraPayload.getMetric(CERT_SERIAL) != null && !((String) kuraPayload.getMetric(CERT_SERIAL)).equals("")){
+			s_logger.debug("Start signature verification");
 			String certSerial= (String) kuraPayload.getMetric(CERT_SERIAL);
 			String signingCertAlias= RESOURCE_CERTIFICATE_DM + "-" + certSerial;
 			byte[] topicBytes= kuraTopic.getApplicationTopic().getBytes();
@@ -668,6 +683,9 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
 				signedMessage = (byte[]) kuraPayload.getMetric(SIGNATURE_METRIC);
 			}
 			return m_certificatesService.verifySignature(signingCertAlias, topicBytes, messagePayload, signedMessage);
+		}else{
+			s_logger.debug("Error: not correct message formatting");
+			return false;
 		}
 	}
 }

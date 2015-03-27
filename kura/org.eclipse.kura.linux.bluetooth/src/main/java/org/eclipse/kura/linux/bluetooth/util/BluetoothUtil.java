@@ -1,6 +1,7 @@
 package org.eclipse.kura.linux.bluetooth.util;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.HashMap;
@@ -26,13 +27,17 @@ public class BluetoothUtil {
 	private static final String HCI_VERSION_4 = "HCI Version: 4.0";
 	private static final String HCICONFIG     = "hciconfig";
 	private static final String HCITOOL       = "hcitool";
+	private static final String GATTTOOL      = "gatttool";
 	
+	/*
+	 * Use hciconfig utility to return information about the bluetooth adatper
+	 */
 	public static Map<String,String> getConfig(String name) throws KuraException {
 		Map<String,String> props = new HashMap<String,String>();
 		SafeProcess proc = null;
 		BufferedReader br = null;
 		StringBuilder sb = null;
-		String[] command = {HCICONFIG, name, "version"};
+		String[] command = { HCICONFIG, name, "version" };
 		try {
 			proc = ProcessUtil.exec(command);
 			br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
@@ -84,9 +89,12 @@ public class BluetoothUtil {
 		return props;
 	}
 	
+	/*
+	 * Use hciconfig utility to determine status of bluetooth adapter
+	 */
 	public static boolean isEnabled(String name) {
 		
-		String[] command = {HCICONFIG, name};
+		String[] command = { HCICONFIG, name };
 		SafeProcess proc = null;
 		BufferedReader br = null;
 		
@@ -116,8 +124,12 @@ public class BluetoothUtil {
 		return false;
 	}
 	
+	/*
+	 * Utility method that allows sending any hciconfig command. The buffered
+	 * response is returned in case results are needed.
+	 */
 	public static BufferedReader hciconfigCmd(String name, String cmd) {
-		String[] command = {HCICONFIG, name, cmd};
+		String[] command = { HCICONFIG, name, cmd };
 		SafeProcess proc = null;
 		BufferedReader br = null;
 		try {
@@ -136,8 +148,11 @@ public class BluetoothUtil {
 		return br;
 	}
 	
+	/*
+	 * Utility method to send specific kill commands to processes.
+	 */
 	public static void killCmd(String cmd, String signal) {
-		String[] command = {"pkill", "-" + signal, cmd};
+		String[] command = { "pkill", "-" + signal, cmd };
 		SafeProcess proc = null;
 		try {
 			proc = ProcessUtil.exec(command);
@@ -148,8 +163,12 @@ public class BluetoothUtil {
 		}
 	}
 	
+	/*
+	 * Method to utilize BluetoothProcess and the hcitool utility. These processes run indefinitely, so the
+	 * BluetoothProcessListeneris used to receive output from the process. 
+	 */
 	public static BluetoothProcess hcitoolCmd (String name, String cmd, BluetoothProcessListener listener) {
-		String[] command = {HCITOOL, "-i", name, cmd};
+		String[] command = { HCITOOL, "-i", name, cmd };
 		BluetoothProcess proc = null;
 		try {
 			proc = exec(command, listener);
@@ -160,6 +179,24 @@ public class BluetoothUtil {
 		return proc;
 	}
 	
+	/*
+	 * Method to start an interactive session with a remote Bluetooth LE device using the gatttool utility. The
+	 * listener is used to receive output from the process. 
+	 */
+	public static BluetoothProcess startSession(String address, BluetoothProcessListener listener) {
+		String[] command = { GATTTOOL, "-b", address, "-I" };
+		BluetoothProcess proc = null;
+		try {
+			proc = exec(command, listener);
+		} catch (Exception e) {
+			s_logger.error("Error executing command: "+ command, e);
+		}
+		return proc;
+	}
+	
+	/*
+	 * Method to create a separate thread for the BluetoothProcesses.
+	 */
 	private static BluetoothProcess exec(final String[] cmdArray, final BluetoothProcessListener listener) throws IOException {
 
 		// Serialize process executions. One at a time so we can consume all streams.

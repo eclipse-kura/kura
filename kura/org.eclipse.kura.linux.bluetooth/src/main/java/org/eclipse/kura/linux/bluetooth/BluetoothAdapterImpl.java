@@ -1,10 +1,13 @@
 package org.eclipse.kura.linux.bluetooth;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.bluetooth.BluetoothAdapter;
+import org.eclipse.kura.bluetooth.BluetoothDevice;
 import org.eclipse.kura.bluetooth.BluetoothScanListener;
 import org.eclipse.kura.linux.bluetooth.le.BluetoothLeScanner;
 import org.eclipse.kura.linux.bluetooth.util.BluetoothUtil;
@@ -14,6 +17,8 @@ import org.slf4j.LoggerFactory;
 public class BluetoothAdapterImpl implements BluetoothAdapter {
 
 	private static final Logger s_logger = LoggerFactory.getLogger(BluetoothAdapterImpl.class);
+	
+	private static List<BluetoothDevice> s_connectedDevices;
 	
 	private String  m_name;
 	private String 	m_address;
@@ -37,6 +42,27 @@ public class BluetoothAdapterImpl implements BluetoothAdapter {
 		m_address = props.get("address");
 		m_leReady= Boolean.parseBoolean(props.get("leReady"));
 	}
+	
+
+	// --------------------------------------------------------------------
+	//
+	//  Static methods
+	//
+	// --------------------------------------------------------------------
+	public static void addConnectedDevice(BluetoothDevice bd) {
+		if (s_connectedDevices == null) {
+			s_connectedDevices = new ArrayList<BluetoothDevice>();
+		}
+		s_connectedDevices.add(bd);
+	}
+	
+	public static void removeConnectedDevice(BluetoothDevice bd) {
+		if (s_connectedDevices == null) {
+			return;
+		}
+		s_connectedDevices.remove(bd);
+	}
+	
 	// --------------------------------------------------------------------
 	//
 	//  BluetoothAdapter API

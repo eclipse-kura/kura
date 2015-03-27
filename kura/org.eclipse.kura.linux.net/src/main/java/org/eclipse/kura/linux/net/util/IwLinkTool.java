@@ -18,6 +18,7 @@ import java.io.InputStreamReader;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.util.ProcessUtil;
+import org.eclipse.kura.core.util.SafeProcess;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,18 +40,21 @@ public class IwLinkTool implements LinkTool {
      * @param ifaceName - interface name as {@link String}
      */
     public IwLinkTool (String tool, String ifaceName) {
-        this.m_tool = tool;
-        this.m_interfaceName = ifaceName;
-        
-        this.m_duplex = "half";
+        m_tool = tool;
+        m_interfaceName = ifaceName;
+        m_duplex = "half";
     }
 
     @Override
     public boolean get() throws KuraException {
-        Process proc = null;
+        SafeProcess proc = null;
         BufferedReader br = null;
         try {
-            proc = ProcessUtil.exec(m_tool + " " + this.m_interfaceName + " link");
+            proc = ProcessUtil.exec(m_tool + " " + m_interfaceName + " link");
+            if (proc.waitFor() != 0) {
+            	s_logger.warn("The {} returned with exit value {}", m_tool, proc.exitValue());
+            	return false;
+            }
             br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
             String line = null;
             while((line = br.readLine()) != null) {
@@ -68,7 +72,7 @@ public class IwLinkTool implements LinkTool {
                             m_linkDetected = true;
                         }
                     } catch (NumberFormatException e) {
-                    	s_logger.debug("Could not parse '" + parts[1] + "' as int in line: " + line);
+                    	s_logger.debug("Could not parse '{}' as int in line: {}", parts[1], line);
                     	return false;
                     }
                 } else if (line.contains("tx bitrate:")) {
@@ -81,16 +85,10 @@ public class IwLinkTool implements LinkTool {
                         }
                         this.m_speed = (int) Math.round(bitrate);
                     } catch (NumberFormatException e) {
-                    	s_logger.debug("Could not parse '" + parts[2] + "' as double in line: " + line);
+                    	s_logger.debug("Could not parse '{}' as double in line: {}", parts[2], line);
                     	return false;
                     }                    
                 }
-            }
-            
-            int exitVal = proc.waitFor();
-            if(exitVal != 0) {
-            	s_logger.warn(m_tool + " returned with exit value " + exitVal);
-            	return false;
             }
             
             return true;
@@ -108,7 +106,7 @@ public class IwLinkTool implements LinkTool {
 				}
 			}			
 
-        	ProcessUtil.destroy(proc);
+			if (proc != null) ProcessUtil.destroy(proc);
         }
     }
 

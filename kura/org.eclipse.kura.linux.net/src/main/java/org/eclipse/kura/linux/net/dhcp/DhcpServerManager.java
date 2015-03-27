@@ -52,6 +52,7 @@ public class DhcpServerManager {
 			// Start dhcpd
 			File configFile = new File(DhcpServerManager.getConfigFilename(interfaceName));
 			if(configFile.exists()) {
+			    // FIXME:MC This leads to a process leak
     			if (LinuxProcessUtil.startBackground(DhcpServerManager.formDhcpdCommand(interfaceName), false) == 0) {
     				s_logger.debug("DHCP server started.");
     				return true;

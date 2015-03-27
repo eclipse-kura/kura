@@ -23,13 +23,13 @@ import java.util.ArrayList;
 import java.util.StringTokenizer;
 
 import org.eclipse.kura.core.util.ProcessUtil;
+import org.eclipse.kura.core.util.SafeProcess;
 import org.eclipse.kura.net.IP4Address;
 import org.eclipse.kura.net.IP6Address;
 import org.eclipse.kura.net.IPAddress;
 import org.eclipse.kura.net.route.RouteConfig;
 import org.eclipse.kura.net.route.RouteConfigIP4;
 import org.eclipse.kura.net.route.RouteConfigIP6;
-import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -87,7 +87,7 @@ public class RouteServiceImpl implements RouteService {
 			command.append("metric " + metric);
 		}
 		
-		Process proc = null;
+		SafeProcess proc = null;
 		try {
 			s_logger.debug("Executing command:  " + command.toString());
 			proc = ProcessUtil.exec(command.toString());
@@ -101,7 +101,7 @@ public class RouteServiceImpl implements RouteService {
 			throw e;
 		}
 		finally {
-			ProcessUtil.destroy(proc);
+			if (proc != null) ProcessUtil.destroy(proc);
 		}
 		
 		if(destination instanceof IP4Address) {
@@ -151,10 +151,11 @@ public class RouteServiceImpl implements RouteService {
 		ArrayList<RouteConfig> routeList = new ArrayList<RouteConfig>();
 		RouteConfig [] routes = null;
 		RouteConfig tmpRoute = null;
-		Process proc = null;		
+		SafeProcess proc = null;		
 		BufferedReader br = null;
 		try {
 			proc = ProcessUtil.exec("route -n");
+			proc.waitFor();
 			br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
 			br.readLine();
 			br.readLine();
@@ -165,7 +166,7 @@ public class RouteServiceImpl implements RouteService {
 				}
 			}
 		} 
-		catch (IOException e) {
+		catch (Exception e) {
 			s_logger.error("Error executing command:  route -n", e);
 			return null;
 		}
@@ -177,7 +178,7 @@ public class RouteServiceImpl implements RouteService {
 					s_logger.error("I/O Exception while closing BufferedReader!");
 				}
 			}			
-			ProcessUtil.destroy(proc);
+			if (proc != null) ProcessUtil.destroy(proc);
 		}
 				
 		routes = new RouteConfig[routeList.size()];
@@ -214,7 +215,7 @@ public class RouteServiceImpl implements RouteService {
 			command.append("dev " + iface + " ");
 		}
 		
-		Process proc = null;
+		SafeProcess proc = null;
 		try {
 			s_logger.debug("Executing command:  " + command.toString());
 			proc = ProcessUtil.exec(command.toString());
@@ -228,7 +229,7 @@ public class RouteServiceImpl implements RouteService {
 			throw e;
 		}
 		finally {
-			ProcessUtil.destroy(proc);
+			if (proc != null) ProcessUtil.destroy(proc);
 		}
 		
 		if(destination instanceof IP4Address) {

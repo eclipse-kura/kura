@@ -3,6 +3,7 @@ package org.eclipse.kura.net.admin.monitor;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.linux.net.util.LinuxNetworkUtil;
 import org.eclipse.kura.linux.net.wifi.HostapdManager;
+import org.eclipse.kura.net.NetInterfaceType;
 import org.eclipse.kura.net.wifi.WifiMode;
 
 public class WifiInterfaceState extends InterfaceState {
@@ -15,7 +16,7 @@ public class WifiInterfaceState extends InterfaceState {
 	 * @throws KuraException
 	 */
 	public WifiInterfaceState(String interfaceName, WifiMode wifiMode) throws KuraException {
-		super(interfaceName);
+		super(NetInterfaceType.WIFI, interfaceName);
 		if (WifiMode.MASTER.equals(wifiMode)) {
 			if (HostapdManager.isRunning() && WifiMode.MASTER.equals(LinuxNetworkUtil.getWifiMode(interfaceName))) {
 				m_link = true;

@@ -156,6 +156,8 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 	}
 
 	@Override
+	// FIME: This api should be deprecated in favor of the following signature:
+	// List<? extends NetInterfaceConfig<? extends NetInterfaceAddressConfig>> getNetworkInterfaceConfigs()
 	public List<? extends NetInterfaceConfig<? extends NetInterfaceAddressConfig>> getNetworkInterfaceConfigs() throws KuraException {
 	    
 		try {
@@ -171,11 +173,10 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 			throws KuraException {
 	    
 	    ArrayList<NetConfig> netConfigs = new ArrayList<NetConfig>();
-	    ComponentConfiguration componentConfiguration = ((SelfConfiguringComponent)m_networkConfigurationService).getConfiguration();
-	    if ((interfaceName != null) && (componentConfiguration != null)) {
+	    NetworkConfiguration networkConfig = m_networkConfigurationService.getNetworkConfiguration();
+	    if ((interfaceName != null) && (networkConfig != null)) {
 	    	try {
 	    		s_logger.debug("Getting networkInterfaceConfigs for " + interfaceName);
-				NetworkConfiguration networkConfig = new NetworkConfiguration(componentConfiguration.getConfigurationProperties());
 				if(networkConfig != null && networkConfig.getNetInterfaceConfigs() != null && networkConfig.getNetInterfaceConfigs().size() > 0) {
 		    	    for(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig : networkConfig.getNetInterfaceConfigs()) {
 		    	        if(interfaceName.equals(netInterfaceConfig.getName())) {
@@ -822,8 +823,8 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 					manageDhcpClient(interfaceName, false);
 					manageDhcpServer(interfaceName, false);
 
+					// FIXME: can we avoid getting the interface type again and ask for the caller to pass it in?
 					NetInterfaceType type = LinuxNetworkUtil.getType(interfaceName);
-
 					if (type == NetInterfaceType.WIFI) {
 						disableWifiInterface(interfaceName);
 					}

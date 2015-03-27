@@ -25,6 +25,7 @@ import org.eclipse.kura.core.net.NetworkConfigurationVisitor;
 import org.eclipse.kura.core.net.WifiInterfaceAddressConfigImpl;
 import org.eclipse.kura.core.util.IOUtil;
 import org.eclipse.kura.core.util.ProcessUtil;
+import org.eclipse.kura.core.util.SafeProcess;
 import org.eclipse.kura.linux.net.wifi.Hostapd;
 import org.eclipse.kura.net.NetConfig;
 import org.eclipse.kura.net.NetConfigIP4;
@@ -504,8 +505,8 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
 	 * This method sets permissions to hostapd configuration file 
 	 */
 	private void setPermissions(String fileName) throws KuraException {
-		Process procDos = null;
-		Process procChmod = null;
+		SafeProcess procDos = null;
+		SafeProcess procChmod = null;
 		try {
 			procChmod = ProcessUtil.exec("chmod 600 " + fileName);
 			procChmod.waitFor();
@@ -516,8 +517,8 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
 			throw KuraException.internalError(e);
 		}
 		finally {
-			ProcessUtil.destroy(procChmod);
-			ProcessUtil.destroy(procDos);			
+			if (procChmod != null) ProcessUtil.destroy(procChmod);
+			if (procDos != null) ProcessUtil.destroy(procDos);			
 		}
 	}
 	

@@ -97,28 +97,24 @@ public class TelitHe910 extends TelitModem implements HspaCellularModem {
     	synchronized (s_atLock) {
     		s_logger.debug("sendCommand getSimStatus :: {} command to port {}", TelitHe910AtCommands.getSimStatus.getCommand(), port);
 	    	byte[] reply = null;
-	    	CommConnection commAtConnection = openSerialPort(port);
-	    	if (!isAtReachable(commAtConnection)) {
-	    		closeSerialPort(commAtConnection);
-	    		throw new KuraException(KuraErrorCode.NOT_CONNECTED, "Modem not available for AT commands: " + TelitHe910.class.getName());
-	    	}
-			try {
+	    	CommConnection commAtConnection = null;
+	    	try {
+
+	    	    commAtConnection = openSerialPort(port);
+	    	    if (!isAtReachable(commAtConnection)) {	    		
+	    	        throw new KuraException(KuraErrorCode.NOT_CONNECTED, "Modem not available for AT commands: " + TelitHe910.class.getName());
+	    	    }
+	    	    
 				reply = commAtConnection.sendCommand(TelitHe910AtCommands.getSimStatus.getCommand().getBytes(), 1000, 100);
-			} catch (IOException e) {
-				closeSerialPort(commAtConnection);
-				throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
-			}
-			
-	        if (reply != null) {
-	            String simStatus = getResponseString(reply);
-	            String[] simStatusSplit = simStatus.split(",");
-	            if((simStatusSplit.length > 1) && (Integer.valueOf(simStatusSplit[1]) > 0)) {
-	                simReady = true;
-	            } 
-	        }
-	        
-	        if (!simReady) {
-	        	try {
+    	        if (reply != null) {
+    	            String simStatus = getResponseString(reply);
+    	            String[] simStatusSplit = simStatus.split(",");
+    	            if((simStatusSplit.length > 1) && (Integer.valueOf(simStatusSplit[1]) > 0)) {
+    	                simReady = true;
+    	            } 
+    	        }
+    	        
+    	        if (!simReady) {
 					reply = commAtConnection.sendCommand(TelitHe910AtCommands.simulateSimNotInserted.getCommand().getBytes(), 1000, 100);
 					if (reply != null) {
 						sleep(5000);
@@ -136,13 +132,17 @@ public class TelitHe910 extends TelitModem implements HspaCellularModem {
 							}
 						}
 					}
-	        	} catch (IOException e) {
-	        		 closeSerialPort(commAtConnection);
-					throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
-				}
-	        }
-	        
-	        closeSerialPort(commAtConnection);
+	        	}
+	    	}
+        	catch (IOException e) {
+                throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+            }
+        	catch (KuraException e) {
+        	    throw e;
+        	}
+        	finally {	        
+    	        closeSerialPort(commAtConnection);
+        	}
     	}
     	return simReady;
 	}

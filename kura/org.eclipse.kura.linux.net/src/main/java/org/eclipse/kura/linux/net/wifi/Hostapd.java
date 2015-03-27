@@ -31,6 +31,7 @@ import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.linux.util.LinuxProcessUtil;
 import org.eclipse.kura.core.util.ProcessUtil;
+import org.eclipse.kura.core.util.SafeProcess;
 import org.eclipse.kura.net.wifi.WifiRadioMode;
 import org.eclipse.kura.net.wifi.WifiSecurity;
 import org.slf4j.Logger;
@@ -131,13 +132,13 @@ public class Hostapd {
 		File fHostapdConfigDirectory = new File(hostapdConfDirectory);
 		if (!fHostapdConfigDirectory.exists()) {
 			if (!fHostapdConfigDirectory.mkdirs()) {
-				s_logger.error("failed to create the temporary storage directory in " + hostapdConfDirectory);
+				s_logger.error("failed to create the temporary storage directory in {}", hostapdConfDirectory);
 			} else {
-				s_logger.debug("created temporary storage directory in " + hostapdConfDirectory);
+				s_logger.debug("created temporary storage directory in {}", hostapdConfDirectory);
 			}
 
 			if (!fHostapdConfigDirectory.isDirectory()) {
-				s_logger.error(hostapdConfDirectory + " is not a directory as it should be");
+				s_logger.error("{} is not a directory as it should be", hostapdConfDirectory);
 			}
 		}
 	}
@@ -316,7 +317,7 @@ public class Hostapd {
 		this.saveConfig();
 		
 		if(this.m_isConfigured) {
-			Process proc = null;
+			SafeProcess proc = null;
 			try {
 				if(this.isEnabled()) {
 					this.disable();
@@ -324,7 +325,7 @@ public class Hostapd {
 				
 				//start hostapd
 				String launchHostapdCommand = this.formHostapdCommand();
-				s_logger.debug("starting hostapd --> " + launchHostapdCommand);
+				s_logger.debug("starting hostapd --> {}", launchHostapdCommand);
 				proc = ProcessUtil.exec(launchHostapdCommand);
 				if(proc.waitFor() != 0) {
 					s_logger.error("failed to start hostapd for unknown reason");
@@ -335,7 +336,7 @@ public class Hostapd {
 				throw KuraException.internalError(e);
 			}
 			finally {
-				ProcessUtil.destroy(proc);
+				if (proc != null) ProcessUtil.destroy(proc);
 			}
 		} else {
 			s_logger.error("Hostapd failed to configure - so can not start");
@@ -358,7 +359,7 @@ public class Hostapd {
 	 * @throws Exception
 	 */
 	public static void killAll() throws KuraException {
-		Process proc = null;
+		SafeProcess proc = null;
 		try {
 			//kill hostapd
 			s_logger.debug("stopping hostapd");
@@ -369,7 +370,7 @@ public class Hostapd {
 			throw KuraException.internalError(e);
 		}
 		finally {
-			ProcessUtil.destroy(proc);
+			if (proc != null) ProcessUtil.destroy(proc);
 		}
 	}
 	
@@ -689,8 +690,7 @@ public class Hostapd {
 			}
 			return;
 		} else {
-			s_logger.error("unsupported security type: " + m_security +
-					" It must be WifiSecurity.SECURITY_NONE, WifiSecurity.SECURITY_WEP, WifiSecurity.SECURITY_WPA, or WifiSecurity.SECURITY_WPA2");
+			s_logger.error("unsupported security type: {} It must be WifiSecurity.SECURITY_NONE, WifiSecurity.SECURITY_WEP, WifiSecurity.SECURITY_WPA, or WifiSecurity.SECURITY_WPA2", m_security);
 			throw KuraException.internalError("unsupported security type: " + m_security);
 		}
 	}
@@ -707,7 +707,7 @@ public class Hostapd {
 			File configFile = new File(filename);
 			Properties hostapdProps = new Properties();
 			
-			s_logger.debug("parsing hostapd config file: " + configFile.getAbsolutePath());
+			s_logger.debug("parsing hostapd config file: {}", configFile.getAbsolutePath());
 			if(configFile.exists()) {
 				fis = new FileInputStream(configFile);
 				hostapdProps.load(fis);
@@ -820,8 +820,8 @@ public class Hostapd {
 	 * This method sets permissions to hostapd configuration file 
 	 */
 	private void setPermissions(String fileName) throws KuraException {
-		Process procDos = null;
-		Process procChmod = null;
+		SafeProcess procDos = null;
+		SafeProcess procChmod = null;
 		try {
 			procChmod = ProcessUtil.exec("chmod 600 " + fileName);
 			procChmod.waitFor();
@@ -832,8 +832,8 @@ public class Hostapd {
 			throw KuraException.internalError(e);
 		}
 		finally {
-			ProcessUtil.destroy(procChmod);
-			ProcessUtil.destroy(procDos);			
+			if (procChmod != null) ProcessUtil.destroy(procChmod);
+			if (procDos != null) ProcessUtil.destroy(procDos);			
 		}
 	}
 
@@ -861,7 +861,7 @@ public class Hostapd {
 		}
 		byte[] raw = s.getBytes();
 
-		StringBuffer hex = new StringBuffer(2 * raw.length);
+		StringBuilder hex = new StringBuilder(2 * raw.length);
 		for (int i = 0; i < raw.length; i++) {
 			hex.append(HEXES.charAt((raw[i] & 0xF0) >> 4)).append(HEXES.charAt((raw[i] & 0x0F)));
 		}
@@ -873,7 +873,7 @@ public class Hostapd {
 	 */
 	private String formHostapdCommand () {
 		
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		sb.append("hostapd -B ");
 		sb.append(this.m_configFilename);
 		
@@ -885,7 +885,7 @@ public class Hostapd {
 	 */
 	private static String formHostapdConfigDirectory () {
 		
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 //		sb.append("/tmp/.kura/");
 //		sb.append(Hostapd.class.getPackage().getName());
 		sb.append("/etc/");
@@ -898,7 +898,7 @@ public class Hostapd {
 	 */
 	private static String formHostapdConfigFilename () {
 		
-		StringBuffer sb = new StringBuffer ();
+		StringBuilder sb = new StringBuilder ();
 		sb.append(Hostapd.formHostapdConfigDirectory());
 		sb.append("/hostapd.conf");
 		

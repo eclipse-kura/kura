@@ -57,7 +57,7 @@ public class Ppp implements IModemLinkService {
 	public String getIPaddress() throws KuraException {
 		String ipAddress = null;
 		if (LinuxNetworkUtil.isUp(m_iface)) {
-			ipAddress = LinuxNetworkUtil.getCurrentIpAddress(m_iface);
+		    ipAddress = LinuxNetworkUtil.getCurrentIpAddress(m_iface);
 		}
 		return ipAddress;
 	}

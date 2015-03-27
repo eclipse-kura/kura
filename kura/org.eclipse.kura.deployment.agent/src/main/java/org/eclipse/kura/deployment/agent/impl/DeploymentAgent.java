@@ -465,15 +465,8 @@ public class DeploymentAgent implements DeploymentAgentService {
 			// Now we need to copy the deployment package file to the Kura
 			// packages directory unless it's already there.
 			if (!dpFile.getCanonicalPath().equals(dpPersistentFile.getCanonicalPath())) {
-				s_logger.info("dpFile.getCanonicalPath(): " +  dpFile.getCanonicalPath());
-				s_logger.info("dpPersistentFile.getCanonicalPath(): " +  dpPersistentFile.getCanonicalPath());
-                String line = null;
-                Process proc = Runtime.getRuntime().exec("pwd");
-                br = new BufferedReader( new InputStreamReader(proc.getInputStream()));
-                while ((line = br.readLine()) != null) {
-                	s_logger.info("PWD: " + line);
-                }
-				
+				s_logger.debug("dpFile.getCanonicalPath(): " +  dpFile.getCanonicalPath());
+				s_logger.debug("dpPersistentFile.getCanonicalPath(): " +  dpPersistentFile.getCanonicalPath());				
 				FileUtils.copyFile(dpFile, dpPersistentFile);
 				addPackageToConfFile(dp.getName(), "file:" + dpPersistentFilePath);
 			}			

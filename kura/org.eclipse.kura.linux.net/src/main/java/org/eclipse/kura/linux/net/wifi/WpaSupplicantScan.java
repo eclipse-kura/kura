@@ -137,7 +137,7 @@ public class WpaSupplicantScan {
 	
 	private static String formSupplicantScanCommand (String iface) {
 		
-		StringBuffer sb = new StringBuffer ();
+		StringBuilder sb = new StringBuilder ();
 		sb.append("wpa_cli -i ");
 		sb.append(iface);
 		sb.append(" scan");
@@ -146,7 +146,7 @@ public class WpaSupplicantScan {
 	
 	private static String formSupplicantScanResultsCommand (String iface) {
 		
-		StringBuffer sb = new StringBuffer ();
+		StringBuilder sb = new StringBuilder ();
 		sb.append("wpa_cli -i ");
 		sb.append(iface);
 		sb.append(" scan_results");

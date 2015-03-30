@@ -83,11 +83,13 @@ public interface CertificatesService {
 	 * if compared to the received message
 	 * 
 	 * @param alias The string used to identify the certificate in a key store
-	 * @param topic The topic used to send the received message
-	 * @param 
-	 * @throws KuraException raised if the certificate removal operation failed
+	 * @param topic The topic used to send the message
+	 * @param body A byte array representing the body of the message received. It is used to verify the signature received with the message
+	 * @param signature A byte array representing the message signature that has to be verified.
+	 * @return A boolean value that is true if the signature received corresponds with the signature 
+	 * calculated from the message content. False otherwise.
 	 * 
 	 */
-	public boolean verifySignature(String alias, byte[] topic, byte[] body, byte[] signedMessage);
+	public boolean verifySignature(String alias, byte[] topic, byte[] body, byte[] signature);
 
 }

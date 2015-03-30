@@ -678,11 +678,11 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
 			String signingCertAlias= RESOURCE_CERTIFICATE_DM + "-" + certSerial;
 			byte[] topicBytes= kuraTopic.getApplicationTopic().getBytes();
 			byte[] messagePayload= kuraPayload.getBody();
-			byte[] signedMessage = null;
+			byte[] signature = null;
 			if(kuraPayload.getMetric(SIGNATURE_METRIC) instanceof byte[]){
-				signedMessage = (byte[]) kuraPayload.getMetric(SIGNATURE_METRIC);
+				signature = (byte[]) kuraPayload.getMetric(SIGNATURE_METRIC);
 			}
-			return m_certificatesService.verifySignature(signingCertAlias, topicBytes, messagePayload, signedMessage);
+			return m_certificatesService.verifySignature(signingCertAlias, topicBytes, messagePayload, signature);
 		}else{
 			s_logger.debug("Error: not correct message formatting");
 			return false;

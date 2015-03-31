@@ -1,3 +1,28 @@
+Eclipse Kura - 1.1.1
+-------------------------------------------------------------------------
+
+Added Features:
+   * Added configurable CommandService to password-protect command execution
+   * Added support to reset WiFi if it cannot be enabled
+   * Added selection of the MQTT protocol version to the MqttDataTransport configuration
+
+Bug Fixes:
+   * Fixed ppp0 interface disappeared from Web UI
+   * Improved tips in the cellular modem advanced options and changed default values
+   * Fixed bug 452499: Kura Debian package name should be lower case
+   * Fixed org.eclipse.kura.linux.position not setting the track heading parameter
+   * Fixed org.eclipse.kura.linux.position to correctly select the GPS receiver
+   * Fixed org.eclipse.kura.linux.usb to better handle removal of USB devices
+   * Fixed org.eclipse.kura.linux.net to properly track USB add/remove events and stale devices
+   * Fixed org.eclipse.kura.net.admin to properly track modems
+   * Fixed org.eclipse.kura.net.admin to keep resetting the modem if PPP link cannot be established
+   * Fixed minor issues
+
+Known Issues:
+   * Hardware watchdog: not implemented on all platforms
+   * Only one WAN interface is currently supported. A warning in displayed in the WEB UI if the user attempts to enable more than one WAN interface
+
+
 Eclipse Kura - 1.1.0
 -------------------------------------------------------------------------
 

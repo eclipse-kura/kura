@@ -2,14 +2,14 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: org.eclipse.kura.core.net
 Bundle-SymbolicName: org.eclipse.kura.core.net;singleton:=true
-Bundle-Version: 1.0.2.qualifier
+Bundle-Version: 1.0.3.qualifier
 Bundle-Vendor: EUROTECH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ClassPath: .
 Bundle-ActivationPolicy: lazy
 Import-Package: org.eclipse.kura; version="[1.0,2.0)",
  org.eclipse.kura.core.util; version="[1.0,2.0)",
- org.eclipse.kura.net; version="[1.0,1.1)",
+ org.eclipse.kura.net; version="[1.1,1.2)",
  org.eclipse.kura.net.dhcp; version="[1.0,2.0)",
  org.eclipse.kura.net.firewall; version="[1.0,2.0)",
  org.eclipse.kura.net.modem; version="[1.1,1.2)",
@@ -19,4 +19,3 @@ Import-Package: org.eclipse.kura; version="[1.0,2.0)",
 Export-Package: org.eclipse.kura.core.net; version="1.0.0",org.eclipse
  .kura.core.net.modem; version="1.0.0",org.eclipse.kura.core.net.util;
   version="1.0.0"
-

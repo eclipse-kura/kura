@@ -31,6 +31,7 @@ import java.util.StringTokenizer;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.util.ProcessUtil;
+import org.eclipse.kura.core.util.SafeProcess;
 import org.eclipse.kura.net.IP4Address;
 import org.eclipse.kura.net.IPAddress;
 import org.slf4j.Logger;
@@ -85,11 +86,6 @@ public class LinuxDns {
 					}
 				}
 				
-				if(br != null) {
-					br.close();
-					br = null;
-				}
-				
 				if(servers.size() > 0) {
 					return servers;
 				} else {
@@ -99,6 +95,15 @@ public class LinuxDns {
 			} catch (Exception e) {
 				e.printStackTrace();
 				return null;
+			} finally {
+				if (br != null) {
+					try {
+						br.close();
+						br = null;
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
 			}
 		}
 	}
@@ -138,6 +143,7 @@ public class LinuxDns {
 				if(br != null) {
 					try {
 						br.close();
+						br = null;
 					} catch (IOException e) {
 						throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
 					}
@@ -215,13 +221,17 @@ public class LinuxDns {
 	    					}
 	    				}
 					}
-					
-	    			if(br != null) {
-	    				br.close();
-	    				br = null;
-	    			}
 				} catch (Exception e) {
 					throw new KuraException (KuraErrorCode.INTERNAL_ERROR, e);
+				} finally {
+					if (br != null) {
+						try {
+							br.close();
+							br = null;
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
+					}
 				}
 			} else if(globalDhClientFile.exists()) {
 				try {
@@ -254,13 +264,17 @@ public class LinuxDns {
 	    					}
 	    				}
 					}
-					
-	    			if(br != null) {
-	    				br.close();
-	    				br = null;
-	    			}
 				} catch (Exception e) {
 					throw new KuraException (KuraErrorCode.INTERNAL_ERROR, e);
+				} finally {
+					if (br != null) {
+						try {
+							br.close();
+							br = null;
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
+					}
 				}
 				
 			} else {
@@ -304,14 +318,18 @@ public class LinuxDns {
 	    					}
 	    				}
 	    			}
-	    			
-	    			if(br != null) {
-	    				br.close();
-	    				br = null;
-	    			}
 	    		} catch (Exception e) {
 	    			throw new KuraException (KuraErrorCode.INTERNAL_ERROR, e);
-	    		}    	
+	    		} finally {
+	    			if (br != null) {
+	    				try {
+							br.close();
+							br = null;
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
+	    			}
+	    		}
 			}
 		}
 		
@@ -372,7 +390,7 @@ public class LinuxDns {
 				if(!isPppDnsSet()) {
 					File file = new File(DNS_FILE_NAME);
 					if(file.exists()) {
-						Process proc = null;
+						SafeProcess proc = null;
 						try {
 							proc = ProcessUtil.exec("mv " + DNS_FILE_NAME + " " + BACKUP_DNS_FILE_NAME);
 							if(proc.waitFor() != 0) {
@@ -383,11 +401,11 @@ public class LinuxDns {
 							}
 						}
 						finally {
-							ProcessUtil.destroy(proc);
+							if (proc != null) ProcessUtil.destroy(proc);
 						}
 					}
 					
-					Process proc = null;
+					SafeProcess proc = null;
 					try {
 						proc = ProcessUtil.exec("ln -sf " + sPppDnsFileName + " " + DNS_FILE_NAME);
 						if(proc.waitFor() != 0) {
@@ -398,7 +416,7 @@ public class LinuxDns {
 						}
 					}
 					finally {
-						ProcessUtil.destroy(proc);
+						if (proc != null) ProcessUtil.destroy(proc);
 					}
 				}
 			}
@@ -411,7 +429,7 @@ public class LinuxDns {
 				String pppDnsFilename = getPppDnsFileName();
 				File file = new File(DNS_FILE_NAME);
 				if(file.exists()) {
-					Process proc = null;
+					SafeProcess proc = null;
 					try {
 						proc = ProcessUtil.exec("rm " + DNS_FILE_NAME);
 						if(proc.waitFor() != 0) {
@@ -422,13 +440,13 @@ public class LinuxDns {
 						}
 					}
 					finally {
-						ProcessUtil.destroy(proc);
+						if (proc != null) ProcessUtil.destroy(proc);
 					}
 				}
 				
 				file = new File(BACKUP_DNS_FILE_NAME);
 				if(file.exists()) {
-					Process proc = null;
+					SafeProcess proc = null;
 					try {
 						proc = ProcessUtil.exec("mv " + BACKUP_DNS_FILE_NAME + " " + DNS_FILE_NAME);
 						if(proc.waitFor() != 0) {
@@ -439,10 +457,10 @@ public class LinuxDns {
 						}
 					}
 					finally {
-						ProcessUtil.destroy(proc);
+						if (proc != null) ProcessUtil.destroy(proc);
 					}						
 				} else {
-					Process proc = null;
+					SafeProcess proc = null;
 					try {
 						proc = ProcessUtil.exec("touch " + DNS_FILE_NAME);
 						if(proc.waitFor() != 0) {
@@ -453,7 +471,7 @@ public class LinuxDns {
 						}
 					}
 					finally {
-						ProcessUtil.destroy(proc);
+						if (proc != null) ProcessUtil.destroy(proc);
 					}
 				}
 				

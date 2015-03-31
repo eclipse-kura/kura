@@ -41,10 +41,20 @@ public class KuranetConfig {
         if(kuranetFile.exists()) {
             //found our match so load the properties
             kuraExtendedProps = new Properties();
+            FileInputStream fis = null;
             try {
-                kuraExtendedProps.load(new FileInputStream(kuranetFile));
+            	fis = new FileInputStream(kuranetFile);
+                kuraExtendedProps.load(fis);
             } catch (Exception e) {
                 s_logger.error("Could not load " + KURANET_FILENAME);
+            }finally{
+            	if(null != fis){
+            		try {
+						fis.close();
+					} catch (IOException e) {
+		                s_logger.error("Could not load " + KURANET_FILENAME);
+					}
+            	}
             }
         } else {
             s_logger.debug("File does not exist: " + KURANET_FILENAME);
@@ -69,25 +79,30 @@ public class KuranetConfig {
         Properties oldProperties = KuranetConfig.getProperties();
         
         if(oldProperties == null || !oldProperties.equals(props)) {
-        	FileOutputStream fos = new FileOutputStream(KURANET_TMP_FILENAME);
-            props.store(fos, null);
-            fos.flush();
-            fos.getFD().sync();
-            fos.close();
-            
-          //move the file if we made it this far
-            File tmpFile = new File(KURANET_TMP_FILENAME);
-            File file = new File(KURANET_FILENAME);
-            if(!FileUtils.contentEquals(tmpFile, file)) {
-	            if(tmpFile.renameTo(file)){
-	            	s_logger.trace("Successfully wrote kuranet props file");
-	            }else{
-	            	s_logger.error("Failed to write kuranet props file");
-	            	throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR, "error while building up new configuration file for kuranet props");
-	            }
-            } else {
-				s_logger.info("Not rewriting kuranet props file because it is the same");
-			}
+        	FileOutputStream fos = null;
+        	try{
+	        	fos = new FileOutputStream(KURANET_TMP_FILENAME);
+	            props.store(fos, null);
+	            fos.flush();
+	            fos.getFD().sync();
+	            
+	            //move the file if we made it this far
+	            File tmpFile = new File(KURANET_TMP_FILENAME);
+	            File file = new File(KURANET_FILENAME);
+	            if(!FileUtils.contentEquals(tmpFile, file)) {
+		            if(tmpFile.renameTo(file)){
+		            	s_logger.trace("Successfully wrote kuranet props file");
+		            }else{
+		            	s_logger.error("Failed to write kuranet props file");
+		            	throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR, "error while building up new configuration file for kuranet props");
+		            }
+	            } else {
+					s_logger.info("Not rewriting kuranet props file because it is the same");
+				}
+        	}
+        	finally{
+        		fos.close();
+        	}
         }
     }
     

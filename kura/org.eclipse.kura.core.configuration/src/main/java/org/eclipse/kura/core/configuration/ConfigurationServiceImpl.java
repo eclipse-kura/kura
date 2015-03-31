@@ -663,15 +663,22 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 		} catch (Exception e) {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
 		} finally {
-			try {
-				if (br != null) {
-					br.close();
-				}
-				if (fr != null) {
-					fr.close();
-				}
-			} catch (Exception e) {
 
+			if (br != null) {
+				try {
+					br.close();
+					br= null;
+				}catch(IOException e){
+
+				}
+			}
+			if (fr != null) {
+				try {
+					fr.close();
+					fr= null;
+				}catch(IOException e){
+
+				}
 			}
 		}
 		return xmlConfigs;
@@ -695,7 +702,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 		}
 		return configProperties;
 	}
-	
+
 	private Map<String, Object> encryptPasswords(ComponentConfiguration config){
 		Map<String, Object> propertiesToUpdate = config.getConfigurationProperties();
 
@@ -1134,6 +1141,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 					br.close();
 				}
 			} catch (IOException e) {
+
 			}
 		}
 

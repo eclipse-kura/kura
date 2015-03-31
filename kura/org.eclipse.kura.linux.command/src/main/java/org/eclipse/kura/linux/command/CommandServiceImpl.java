@@ -11,15 +11,17 @@
  */
 package org.eclipse.kura.linux.command;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.command.CommandService;
 import org.eclipse.kura.core.util.ProcessUtil;
+import org.eclipse.kura.core.util.SafeProcess;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -101,8 +103,8 @@ public class CommandServiceImpl  implements CommandService{
 	}
 	
 	private void setPermissions() throws KuraException {
-		Process procChmod = null;
-		Process procDos = null;
+		SafeProcess procChmod = null;
+		SafeProcess procDos = null;
 		
 		try {
 			procChmod = ProcessUtil.exec("chmod 700 " + m_scriptFile.toString());
@@ -113,45 +115,59 @@ public class CommandServiceImpl  implements CommandService{
 		} catch (Exception e) {
 			throw KuraException.internalError(e);
 		} finally {
-			ProcessUtil.destroy(procChmod);
-			ProcessUtil.destroy(procDos);
+			if (procChmod != null) ProcessUtil.destroy(procChmod);
+			if (procDos != null) ProcessUtil.destroy(procDos);
 		}
 		
 	}
 	
 	private String runScript() throws KuraException{
-		Process procUserScript = null;
-		InputStream is = null;
-		InputStream es = null;
-		StreamGobbler isg = null;
-		StreamGobbler esg = null;
-		
+		SafeProcess procUserScript = null;
+		BufferedReader ibr = null;
+		BufferedReader ebr = null;
+		StringBuilder sb = new StringBuilder();
 		try {
 			procUserScript = ProcessUtil.exec("sh " + m_scriptFile.toString());
-			
-			is = procUserScript.getInputStream();
-			es = procUserScript.getErrorStream();
-			
-			isg = new StreamGobbler(is, "stdout");
-			esg = new StreamGobbler(es, "stderr");
-			isg.start();
-			esg.start();
-			
 			procUserScript.waitFor();
-			isg.join(1000);
-			esg.join(1000);
 			
+			ibr = new BufferedReader(new InputStreamReader(procUserScript.getInputStream()));
+			ebr = new BufferedReader(new InputStreamReader(procUserScript.getErrorStream()));
+
+			BufferedReader br = null;
 			if (procUserScript.exitValue() == 0) {
-				return isg.getStreamAsString();
+				br = ibr;
 			}
 			else {
-				return esg.getStreamAsString();
+				br = ebr;
+			}
+			
+			String line = null;
+			String newLine = "";
+			while ((line = br.readLine()) != null) {
+				sb.append(newLine);
+				sb.append(line);
+				newLine = "\n";
 			}
 		} catch (Exception e) {
 			throw KuraException.internalError(e);
 		} finally {
-			ProcessUtil.destroy(procUserScript);
+			if (ibr != null) {
+				try {
+					ibr.close();
+				} catch (IOException e) {
+					s_logger.warn("Cannot close process input stream", e);
+				}
+			}
+			if (ebr != null) {
+				try {
+					ebr.close();
+				} catch (IOException e) {
+					s_logger.warn("Cannot close process error stream", e);
+				}
+			}
+			if (procUserScript != null) ProcessUtil.destroy(procUserScript);
 		}
+		
+		return sb.toString();
 	}
-	
 }

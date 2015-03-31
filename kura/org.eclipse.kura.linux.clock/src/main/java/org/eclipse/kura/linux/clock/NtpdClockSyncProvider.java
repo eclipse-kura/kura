@@ -16,6 +16,7 @@ import java.util.Date;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.util.ProcessUtil;
+import org.eclipse.kura.core.util.SafeProcess;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,7 +33,7 @@ public class NtpdClockSyncProvider extends AbstractNtpClockSyncProvider
 	protected boolean syncClock() throws KuraException
 	{
 		boolean ret = false;
-		Process proc = null;
+		SafeProcess proc = null;
 		try {			
 			// Execute a native Linux command to perform the NTP time sync.
 			int ntpTimeout = m_ntpTimeout / 1000;
@@ -57,7 +58,7 @@ public class NtpdClockSyncProvider extends AbstractNtpClockSyncProvider
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
 		}
 		finally {
-			ProcessUtil.destroy(proc);
+			if (proc != null) ProcessUtil.destroy(proc);
 		}
 		return ret;
 	}

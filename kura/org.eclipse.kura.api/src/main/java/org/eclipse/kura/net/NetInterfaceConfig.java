@@ -12,11 +12,9 @@
 package org.eclipse.kura.net;
 
 /**
- * Marker class for NetInterfaceConfig objects
- * 
- * @author eurotech
- *
- * @param <T>
+ * Marker class for NetInterfaceConfig objects.
+ * Network interfaces implementing this maker will return addresses of type NetInterfaceAddressConfig in their getNetInterfaceAddresses() method.
+ * NetInterfaceAddressConfig complements NetInterfaceAddress, which provides the current addresses associated to the interface, with the NetConfig objects. 
  */
 public interface NetInterfaceConfig<T extends NetInterfaceAddressConfig> extends NetInterface<T> {
 

@@ -31,6 +31,7 @@ import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.linux.util.LinuxProcessUtil;
 import org.eclipse.kura.core.util.ProcessUtil;
+import org.eclipse.kura.core.util.SafeProcess;
 import org.eclipse.kura.net.wifi.WifiRadioMode;
 import org.eclipse.kura.net.wifi.WifiSecurity;
 import org.slf4j.Logger;
@@ -131,13 +132,13 @@ public class Hostapd {
 		File fHostapdConfigDirectory = new File(hostapdConfDirectory);
 		if (!fHostapdConfigDirectory.exists()) {
 			if (!fHostapdConfigDirectory.mkdirs()) {
-				s_logger.error("failed to create the temporary storage directory in " + hostapdConfDirectory);
+				s_logger.error("failed to create the temporary storage directory in {}", hostapdConfDirectory);
 			} else {
-				s_logger.debug("created temporary storage directory in " + hostapdConfDirectory);
+				s_logger.debug("created temporary storage directory in {}", hostapdConfDirectory);
 			}
 
 			if (!fHostapdConfigDirectory.isDirectory()) {
-				s_logger.error(hostapdConfDirectory + " is not a directory as it should be");
+				s_logger.error("{} is not a directory as it should be", hostapdConfDirectory);
 			}
 		}
 	}
@@ -316,7 +317,7 @@ public class Hostapd {
 		this.saveConfig();
 		
 		if(this.m_isConfigured) {
-			Process proc = null;
+			SafeProcess proc = null;
 			try {
 				if(this.isEnabled()) {
 					this.disable();
@@ -324,7 +325,7 @@ public class Hostapd {
 				
 				//start hostapd
 				String launchHostapdCommand = this.formHostapdCommand();
-				s_logger.debug("starting hostapd --> " + launchHostapdCommand);
+				s_logger.debug("starting hostapd --> {}", launchHostapdCommand);
 				proc = ProcessUtil.exec(launchHostapdCommand);
 				if(proc.waitFor() != 0) {
 					s_logger.error("failed to start hostapd for unknown reason");
@@ -335,7 +336,7 @@ public class Hostapd {
 				throw KuraException.internalError(e);
 			}
 			finally {
-				ProcessUtil.destroy(proc);
+				if (proc != null) ProcessUtil.destroy(proc);
 			}
 		} else {
 			s_logger.error("Hostapd failed to configure - so can not start");
@@ -358,7 +359,7 @@ public class Hostapd {
 	 * @throws Exception
 	 */
 	public static void killAll() throws KuraException {
-		Process proc = null;
+		SafeProcess proc = null;
 		try {
 			//kill hostapd
 			s_logger.debug("stopping hostapd");
@@ -369,7 +370,7 @@ public class Hostapd {
 			throw KuraException.internalError(e);
 		}
 		finally {
-			ProcessUtil.destroy(proc);
+			if (proc != null) ProcessUtil.destroy(proc);
 		}
 	}
 	
@@ -410,180 +411,192 @@ public class Hostapd {
 		if(this.m_security == WifiSecurity.SECURITY_NONE) {
 			File outputFile = new File(this.m_configFilename);
 			InputStream is = this.getClass().getResourceAsStream("/src/main/resources/wifi/hostapd.conf_no_security");
-			
-			//relace the necessary components
-			String fileAsString = readInputStreamAsString(is);
-			if(this.m_iface != null) {
-				fileAsString = fileAsString.replaceFirst("KURA_INTERFACE", this.m_iface);
-			} else {
-				throw KuraException.internalError("the interface name can not be null");
+			String fileAsString = null;
+			if (is != null) {
+				fileAsString = readInputStreamAsString(is);
+				is.close();
+				is = null;
 			}
-			if(this.m_driver != null) {
-				fileAsString = fileAsString.replaceFirst("KURA_DRIVER", this.m_driver);
-			} else {
-				throw KuraException.internalError("the driver name can not be null");
+			if (fileAsString != null) {
+				//relace the necessary components
+				if(this.m_iface != null) {
+					fileAsString = fileAsString.replaceFirst("KURA_INTERFACE", this.m_iface);
+				} else {
+					throw KuraException.internalError("the interface name can not be null");
+				}
+				if(this.m_driver != null) {
+					fileAsString = fileAsString.replaceFirst("KURA_DRIVER", this.m_driver);
+				} else {
+					throw KuraException.internalError("the driver name can not be null");
+				}
+				if(this.m_essid != null) {
+					fileAsString = fileAsString.replaceFirst("KURA_ESSID", this.m_essid);
+				} else {
+					throw KuraException.internalError("the essid can not be null");
+				}
+				
+				if (m_radioMode == WifiRadioMode.RADIO_MODE_80211a) {
+					fileAsString = fileAsString.replaceFirst("KURA_HW_MODE", "a");
+					fileAsString = fileAsString.replaceFirst("KURA_WME_ENABLED", "0");
+					fileAsString = fileAsString.replaceFirst("KURA_IEEE80211N", "0");
+				} else if (m_radioMode == WifiRadioMode.RADIO_MODE_80211b) {
+					fileAsString = fileAsString.replaceFirst("KURA_HW_MODE", "b");
+					fileAsString = fileAsString.replaceFirst("KURA_WME_ENABLED", "0");
+					fileAsString = fileAsString.replaceFirst("KURA_IEEE80211N", "0");
+				} else if (m_radioMode == WifiRadioMode.RADIO_MODE_80211g) {
+					fileAsString = fileAsString.replaceFirst("KURA_HW_MODE", "g");
+					fileAsString = fileAsString.replaceFirst("KURA_WME_ENABLED", "0");
+					fileAsString = fileAsString.replaceFirst("KURA_IEEE80211N", "0");
+				} else if (m_radioMode == WifiRadioMode.RADIO_MODE_80211nHT20) {
+					fileAsString = fileAsString.replaceFirst("KURA_HW_MODE", "g");
+					fileAsString = fileAsString.replaceFirst("KURA_WME_ENABLED", "1");
+					fileAsString = fileAsString.replaceFirst("KURA_IEEE80211N", "1");
+					fileAsString = fileAsString.replaceFirst("KURA_HTCAPAB", "[SHORT-GI-20]");
+				} else if (m_radioMode == WifiRadioMode.RADIO_MODE_80211nHT40above) {
+					fileAsString = fileAsString.replaceFirst("KURA_HW_MODE", "g");
+					fileAsString = fileAsString.replaceFirst("KURA_WME_ENABLED", "1");
+					fileAsString = fileAsString.replaceFirst("KURA_IEEE80211N", "1");
+					fileAsString = fileAsString.replaceFirst("KURA_HTCAPAB", "[HT40+][SHORT-GI-20][SHORT-GI-40]");
+				} else if (m_radioMode == WifiRadioMode.RADIO_MODE_80211nHT40below) {
+					fileAsString = fileAsString.replaceFirst("KURA_HW_MODE", "g");
+					fileAsString = fileAsString.replaceFirst("KURA_WME_ENABLED", "1");
+					fileAsString = fileAsString.replaceFirst("KURA_IEEE80211N", "1");
+					fileAsString = fileAsString.replaceFirst("KURA_HTCAPAB", "[HT40-][SHORT-GI-20][SHORT-GI-40]");
+				} else {
+					throw KuraException.internalError("invalid hardware mode");
+				}
+				
+				if(this.m_channel > 0 && this.m_channel < 14) {
+					fileAsString = fileAsString.replaceFirst("KURA_CHANNEL", Integer.toString(this.m_channel));
+				} else {
+					throw KuraException.internalError("the channel " + this.m_channel + " must be between 1 (inclusive) and 11 (inclusive) or 1 (inclusive) and 13 (inclusive) depending on your locale");
+				}
+	
+				//everything is set and we haven't failed - write the file
+				this.copyFile(fileAsString, outputFile);
 			}
-			if(this.m_essid != null) {
-				fileAsString = fileAsString.replaceFirst("KURA_ESSID", this.m_essid);
-			} else {
-				throw KuraException.internalError("the essid can not be null");
-			}
-			
-			if (m_radioMode == WifiRadioMode.RADIO_MODE_80211a) {
-				fileAsString = fileAsString.replaceFirst("KURA_HW_MODE", "a");
-				fileAsString = fileAsString.replaceFirst("KURA_WME_ENABLED", "0");
-				fileAsString = fileAsString.replaceFirst("KURA_IEEE80211N", "0");
-			} else if (m_radioMode == WifiRadioMode.RADIO_MODE_80211b) {
-				fileAsString = fileAsString.replaceFirst("KURA_HW_MODE", "b");
-				fileAsString = fileAsString.replaceFirst("KURA_WME_ENABLED", "0");
-				fileAsString = fileAsString.replaceFirst("KURA_IEEE80211N", "0");
-			} else if (m_radioMode == WifiRadioMode.RADIO_MODE_80211g) {
-				fileAsString = fileAsString.replaceFirst("KURA_HW_MODE", "g");
-				fileAsString = fileAsString.replaceFirst("KURA_WME_ENABLED", "0");
-				fileAsString = fileAsString.replaceFirst("KURA_IEEE80211N", "0");
-			} else if (m_radioMode == WifiRadioMode.RADIO_MODE_80211nHT20) {
-				fileAsString = fileAsString.replaceFirst("KURA_HW_MODE", "g");
-				fileAsString = fileAsString.replaceFirst("KURA_WME_ENABLED", "1");
-				fileAsString = fileAsString.replaceFirst("KURA_IEEE80211N", "1");
-				fileAsString = fileAsString.replaceFirst("KURA_HTCAPAB", "[SHORT-GI-20]");
-			} else if (m_radioMode == WifiRadioMode.RADIO_MODE_80211nHT40above) {
-				fileAsString = fileAsString.replaceFirst("KURA_HW_MODE", "g");
-				fileAsString = fileAsString.replaceFirst("KURA_WME_ENABLED", "1");
-				fileAsString = fileAsString.replaceFirst("KURA_IEEE80211N", "1");
-				fileAsString = fileAsString.replaceFirst("KURA_HTCAPAB", "[HT40+][SHORT-GI-20][SHORT-GI-40]");
-			} else if (m_radioMode == WifiRadioMode.RADIO_MODE_80211nHT40below) {
-				fileAsString = fileAsString.replaceFirst("KURA_HW_MODE", "g");
-				fileAsString = fileAsString.replaceFirst("KURA_WME_ENABLED", "1");
-				fileAsString = fileAsString.replaceFirst("KURA_IEEE80211N", "1");
-				fileAsString = fileAsString.replaceFirst("KURA_HTCAPAB", "[HT40-][SHORT-GI-20][SHORT-GI-40]");
-			} else {
-				throw KuraException.internalError("invalid hardware mode");
-			}
-			
-			if(this.m_channel > 0 && this.m_channel < 14) {
-				fileAsString = fileAsString.replaceFirst("KURA_CHANNEL", Integer.toString(this.m_channel));
-			} else {
-				throw KuraException.internalError("the channel " + this.m_channel + " must be between 1 (inclusive) and 11 (inclusive) or 1 (inclusive) and 13 (inclusive) depending on your locale");
-			}
-
-			//everything is set and we haven't failed - write the file
-			this.copyFile(fileAsString, outputFile);
 			return;
 		} else if(this.m_security == WifiSecurity.SECURITY_WEP) {
 			File outputFile = new File(this.m_configFilename);
 			InputStream is = this.getClass().getResourceAsStream("/src/main/resources/wifi/hostapd.conf_wep");
-			
-			//relace the necessary components
-			String fileAsString = readInputStreamAsString(is);
-			if(this.m_iface != null) {
-				fileAsString = fileAsString.replaceFirst("KURA_INTERFACE", this.m_iface);
-			} else {
-				throw KuraException.internalError("the interface name can not be null");
+			String fileAsString = null;
+			if (is != null) {
+				fileAsString = readInputStreamAsString(is);
+				is.close();
+				is = null;
 			}
-			if(this.m_driver != null) {
-				fileAsString = fileAsString.replaceFirst("KURA_DRIVER", this.m_driver);
-			} else {
-				throw KuraException.internalError("the driver name can not be null");
-			}
-			if(this.m_essid != null) {
-				fileAsString = fileAsString.replaceFirst("KURA_ESSID", this.m_essid);
-			} else {
-				throw KuraException.internalError("the essid can not be null");
-			}
-			
-			if (m_radioMode == WifiRadioMode.RADIO_MODE_80211a) {
-				fileAsString = fileAsString.replaceFirst("KURA_HW_MODE", "a");
-				fileAsString = fileAsString.replaceFirst("KURA_WME_ENABLED", "0");
-				fileAsString = fileAsString.replaceFirst("KURA_IEEE80211N", "0");
-			} else if (m_radioMode == WifiRadioMode.RADIO_MODE_80211b) {
-				fileAsString = fileAsString.replaceFirst("KURA_HW_MODE", "b");
-				fileAsString = fileAsString.replaceFirst("KURA_WME_ENABLED", "0");
-				fileAsString = fileAsString.replaceFirst("KURA_IEEE80211N", "0");
-			} else if (m_radioMode == WifiRadioMode.RADIO_MODE_80211g) {
-				fileAsString = fileAsString.replaceFirst("KURA_HW_MODE", "g");
-				fileAsString = fileAsString.replaceFirst("KURA_WME_ENABLED", "0");
-				fileAsString = fileAsString.replaceFirst("KURA_IEEE80211N", "0");
-			} else if (m_radioMode == WifiRadioMode.RADIO_MODE_80211nHT20) {
-				fileAsString = fileAsString.replaceFirst("KURA_HW_MODE", "g");
-				fileAsString = fileAsString.replaceFirst("KURA_WME_ENABLED", "1");
-				fileAsString = fileAsString.replaceFirst("KURA_IEEE80211N", "1");
-				fileAsString = fileAsString.replaceFirst("KURA_HTCAPAB", "[SHORT-GI-20]");
-			} else if (m_radioMode == WifiRadioMode.RADIO_MODE_80211nHT40above) {
-				fileAsString = fileAsString.replaceFirst("KURA_HW_MODE", "g");
-				fileAsString = fileAsString.replaceFirst("KURA_WME_ENABLED", "1");
-				fileAsString = fileAsString.replaceFirst("KURA_IEEE80211N", "1");
-				fileAsString = fileAsString.replaceFirst("KURA_HTCAPAB", "[HT40+][SHORT-GI-20][SHORT-GI-40]");
-			} else if (m_radioMode == WifiRadioMode.RADIO_MODE_80211nHT40below) {
-				fileAsString = fileAsString.replaceFirst("KURA_HW_MODE", "g");
-				fileAsString = fileAsString.replaceFirst("KURA_WME_ENABLED", "1");
-				fileAsString = fileAsString.replaceFirst("KURA_IEEE80211N", "1");
-				fileAsString = fileAsString.replaceFirst("KURA_HTCAPAB", "[HT40-][SHORT-GI-20][SHORT-GI-40]");
-			} else {
-				throw KuraException.internalError("invalid hardware mode");
-			}
-			
-			if(this.m_channel > 0 && this.m_channel < 14) {
-				fileAsString = fileAsString.replaceFirst("KURA_CHANNEL", Integer.toString(this.m_channel));
-			} else {
-				throw KuraException.internalError("the channel must be between 1 (inclusive) and 11 (inclusive) or 1 (inclusive) and 13 (inclusive) depending on your locale");
-			}
-			if(this.m_passwd != null) {
-				if(this.m_passwd.length() == 10) {
-					//check to make sure it is all hex
-					try {
-						Long.parseLong(this.m_passwd, 16);
-					} catch(Exception e) {
-						throw KuraException.internalError("the WEP key (passwd) must be all HEX characters (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, a, b, c, d, e, and f");
-					}
-					
-					//since we're here - save the password
-					fileAsString = fileAsString.replaceFirst("KURA_WEP_KEY", m_passwd);
-				} else if(this.m_passwd.length() == 26) {
-					String part1 = this.m_passwd.substring(0, 13);
-					String part2 = this.m_passwd.substring(13);
-					
-					try {
-						Long.parseLong(part1, 16);
-						Long.parseLong(part2, 16);
-					} catch(Exception e) {
-						throw KuraException.internalError("the WEP key (passwd) must be all HEX characters (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, a, b, c, d, e, and f");
-					}
-					
-					//since we're here - save the password
-					fileAsString = fileAsString.replaceFirst("KURA_WEP_KEY", this.m_passwd);
-				} else if(this.m_passwd.length() == 32) {
-					String part1 = this.m_passwd.substring(0, 10);
-					String part2 = this.m_passwd.substring(10, 20);
-					String part3 = this.m_passwd.substring(20);
-					try {
-						Long.parseLong(part1, 16);
-						Long.parseLong(part2, 16);
-						Long.parseLong(part3, 16);
-					} catch(Exception e) {
-						throw KuraException.internalError("the WEP key (passwd) must be all HEX characters (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, a, b, c, d, e, and f");
-					}
-					
-					//since we're here - save the password
-					fileAsString = fileAsString.replaceFirst("KURA_WEP_KEY", this.m_passwd);
-				} else if ((this.m_passwd.length() == 5)
-						|| (this.m_passwd.length() == 13)
-						|| (this.m_passwd.length() == 16)) {
-					
-					// 5, 13, or 16 ASCII characters
-					this.m_passwd = this.toHex(this.m_passwd);
-					
-					//since we're here - save the password
-					fileAsString = fileAsString.replaceFirst("KURA_WEP_KEY", this.m_passwd);
+			if (fileAsString != null) {
+				//relace the necessary components
+				if(this.m_iface != null) {
+					fileAsString = fileAsString.replaceFirst("KURA_INTERFACE", this.m_iface);
 				} else {
-					throw KuraException.internalError("the WEP key (passwd) must be 10, 26, or 32 HEX characters in length");
+					throw KuraException.internalError("the interface name can not be null");
+				}
+				if(this.m_driver != null) {
+					fileAsString = fileAsString.replaceFirst("KURA_DRIVER", this.m_driver);
+				} else {
+					throw KuraException.internalError("the driver name can not be null");
+				}
+				if(this.m_essid != null) {
+					fileAsString = fileAsString.replaceFirst("KURA_ESSID", this.m_essid);
+				} else {
+					throw KuraException.internalError("the essid can not be null");
 				}
 				
-			} else {
-				throw KuraException.internalError("the passwd can not be null");
+				if (m_radioMode == WifiRadioMode.RADIO_MODE_80211a) {
+					fileAsString = fileAsString.replaceFirst("KURA_HW_MODE", "a");
+					fileAsString = fileAsString.replaceFirst("KURA_WME_ENABLED", "0");
+					fileAsString = fileAsString.replaceFirst("KURA_IEEE80211N", "0");
+				} else if (m_radioMode == WifiRadioMode.RADIO_MODE_80211b) {
+					fileAsString = fileAsString.replaceFirst("KURA_HW_MODE", "b");
+					fileAsString = fileAsString.replaceFirst("KURA_WME_ENABLED", "0");
+					fileAsString = fileAsString.replaceFirst("KURA_IEEE80211N", "0");
+				} else if (m_radioMode == WifiRadioMode.RADIO_MODE_80211g) {
+					fileAsString = fileAsString.replaceFirst("KURA_HW_MODE", "g");
+					fileAsString = fileAsString.replaceFirst("KURA_WME_ENABLED", "0");
+					fileAsString = fileAsString.replaceFirst("KURA_IEEE80211N", "0");
+				} else if (m_radioMode == WifiRadioMode.RADIO_MODE_80211nHT20) {
+					fileAsString = fileAsString.replaceFirst("KURA_HW_MODE", "g");
+					fileAsString = fileAsString.replaceFirst("KURA_WME_ENABLED", "1");
+					fileAsString = fileAsString.replaceFirst("KURA_IEEE80211N", "1");
+					fileAsString = fileAsString.replaceFirst("KURA_HTCAPAB", "[SHORT-GI-20]");
+				} else if (m_radioMode == WifiRadioMode.RADIO_MODE_80211nHT40above) {
+					fileAsString = fileAsString.replaceFirst("KURA_HW_MODE", "g");
+					fileAsString = fileAsString.replaceFirst("KURA_WME_ENABLED", "1");
+					fileAsString = fileAsString.replaceFirst("KURA_IEEE80211N", "1");
+					fileAsString = fileAsString.replaceFirst("KURA_HTCAPAB", "[HT40+][SHORT-GI-20][SHORT-GI-40]");
+				} else if (m_radioMode == WifiRadioMode.RADIO_MODE_80211nHT40below) {
+					fileAsString = fileAsString.replaceFirst("KURA_HW_MODE", "g");
+					fileAsString = fileAsString.replaceFirst("KURA_WME_ENABLED", "1");
+					fileAsString = fileAsString.replaceFirst("KURA_IEEE80211N", "1");
+					fileAsString = fileAsString.replaceFirst("KURA_HTCAPAB", "[HT40-][SHORT-GI-20][SHORT-GI-40]");
+				} else {
+					throw KuraException.internalError("invalid hardware mode");
+				}
+				
+				if(this.m_channel > 0 && this.m_channel < 14) {
+					fileAsString = fileAsString.replaceFirst("KURA_CHANNEL", Integer.toString(this.m_channel));
+				} else {
+					throw KuraException.internalError("the channel must be between 1 (inclusive) and 11 (inclusive) or 1 (inclusive) and 13 (inclusive) depending on your locale");
+				}
+				if(this.m_passwd != null) {
+					if(this.m_passwd.length() == 10) {
+						//check to make sure it is all hex
+						try {
+							Long.parseLong(this.m_passwd, 16);
+						} catch(Exception e) {
+							throw KuraException.internalError("the WEP key (passwd) must be all HEX characters (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, a, b, c, d, e, and f");
+						}
+						
+						//since we're here - save the password
+						fileAsString = fileAsString.replaceFirst("KURA_WEP_KEY", m_passwd);
+					} else if(this.m_passwd.length() == 26) {
+						String part1 = this.m_passwd.substring(0, 13);
+						String part2 = this.m_passwd.substring(13);
+						
+						try {
+							Long.parseLong(part1, 16);
+							Long.parseLong(part2, 16);
+						} catch(Exception e) {
+							throw KuraException.internalError("the WEP key (passwd) must be all HEX characters (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, a, b, c, d, e, and f");
+						}
+						
+						//since we're here - save the password
+						fileAsString = fileAsString.replaceFirst("KURA_WEP_KEY", this.m_passwd);
+					} else if(this.m_passwd.length() == 32) {
+						String part1 = this.m_passwd.substring(0, 10);
+						String part2 = this.m_passwd.substring(10, 20);
+						String part3 = this.m_passwd.substring(20);
+						try {
+							Long.parseLong(part1, 16);
+							Long.parseLong(part2, 16);
+							Long.parseLong(part3, 16);
+						} catch(Exception e) {
+							throw KuraException.internalError("the WEP key (passwd) must be all HEX characters (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, a, b, c, d, e, and f");
+						}
+						
+						//since we're here - save the password
+						fileAsString = fileAsString.replaceFirst("KURA_WEP_KEY", this.m_passwd);
+					} else if ((this.m_passwd.length() == 5)
+							|| (this.m_passwd.length() == 13)
+							|| (this.m_passwd.length() == 16)) {
+						
+						// 5, 13, or 16 ASCII characters
+						this.m_passwd = this.toHex(this.m_passwd);
+						
+						//since we're here - save the password
+						fileAsString = fileAsString.replaceFirst("KURA_WEP_KEY", this.m_passwd);
+					} else {
+						throw KuraException.internalError("the WEP key (passwd) must be 10, 26, or 32 HEX characters in length");
+					}
+					
+				} else {
+					throw KuraException.internalError("the passwd can not be null");
+				}
+	
+				//everything is set and we haven't failed - write the file
+				this.copyFile(fileAsString, outputFile);
 			}
-
-			//everything is set and we haven't failed - write the file
-			this.copyFile(fileAsString, outputFile);
 			return;
 		} else if ((this.m_security == WifiSecurity.SECURITY_WPA)
 				|| (this.m_security == WifiSecurity.SECURITY_WPA2)) {
@@ -591,82 +604,93 @@ public class Hostapd {
 		    File outputFile = new File(this.m_configFilename);
 			
 			InputStream is = null;
+			String fileAsString = null;
 			if (this.m_security == WifiSecurity.SECURITY_WPA) {
 				is = this.getClass().getResourceAsStream("/src/main/resources/wifi/hostapd.conf_master_wpa_psk");
+				if (is != null) {
+					fileAsString = readInputStreamAsString(is);
+					is.close();
+					is = null;
+				}
 			} else if (this.m_security == WifiSecurity.SECURITY_WPA2) {
 				is = this.getClass().getResourceAsStream("/src/main/resources/wifi/hostapd.conf_master_wpa2_psk");
-			}
-			
-			//replace the necessary components
-			String fileAsString = readInputStreamAsString(is);
-			if(this.m_iface != null) {
-				fileAsString = fileAsString.replaceFirst("KURA_INTERFACE", this.m_iface);
-			} else {
-				throw KuraException.internalError("the interface name can not be null");
-			}
-			if(this.m_driver != null) {
-				fileAsString = fileAsString.replaceFirst("KURA_DRIVER", this.m_driver);
-			} else {
-				throw KuraException.internalError("the driver name can not be null");
-			}
-			if(this.m_essid != null) {
-				fileAsString = fileAsString.replaceFirst("KURA_ESSID", this.m_essid);
-			} else {
-				throw KuraException.internalError("the essid can not be null");
-			}
-			
-			if (m_radioMode == WifiRadioMode.RADIO_MODE_80211a) {
-				fileAsString = fileAsString.replaceFirst("KURA_HW_MODE", "a");
-				fileAsString = fileAsString.replaceFirst("KURA_WME_ENABLED", "0");
-				fileAsString = fileAsString.replaceFirst("KURA_IEEE80211N", "0");
-			} else if (m_radioMode == WifiRadioMode.RADIO_MODE_80211b) {
-				fileAsString = fileAsString.replaceFirst("KURA_HW_MODE", "b");
-				fileAsString = fileAsString.replaceFirst("KURA_WME_ENABLED", "0");
-				fileAsString = fileAsString.replaceFirst("KURA_IEEE80211N", "0");
-			} else if (m_radioMode == WifiRadioMode.RADIO_MODE_80211g) {
-				fileAsString = fileAsString.replaceFirst("KURA_HW_MODE", "g");
-				fileAsString = fileAsString.replaceFirst("KURA_WME_ENABLED", "0");
-				fileAsString = fileAsString.replaceFirst("KURA_IEEE80211N", "0");
-			} else if (m_radioMode == WifiRadioMode.RADIO_MODE_80211nHT20) {
-				fileAsString = fileAsString.replaceFirst("KURA_HW_MODE", "g");
-				fileAsString = fileAsString.replaceFirst("KURA_WME_ENABLED", "1");
-				fileAsString = fileAsString.replaceFirst("KURA_IEEE80211N", "1");
-				fileAsString = fileAsString.replaceFirst("KURA_HTCAPAB", "[SHORT-GI-20]");
-			} else if (m_radioMode == WifiRadioMode.RADIO_MODE_80211nHT40above) {
-				fileAsString = fileAsString.replaceFirst("KURA_HW_MODE", "g");
-				fileAsString = fileAsString.replaceFirst("KURA_WME_ENABLED", "1");
-				fileAsString = fileAsString.replaceFirst("KURA_IEEE80211N", "1");
-				fileAsString = fileAsString.replaceFirst("KURA_HTCAPAB", "[HT40+][SHORT-GI-20][SHORT-GI-40]");
-			} else if (m_radioMode == WifiRadioMode.RADIO_MODE_80211nHT40below) {
-				fileAsString = fileAsString.replaceFirst("KURA_HW_MODE", "g");
-				fileAsString = fileAsString.replaceFirst("KURA_WME_ENABLED", "1");
-				fileAsString = fileAsString.replaceFirst("KURA_IEEE80211N", "1");
-				fileAsString = fileAsString.replaceFirst("KURA_HTCAPAB", "[HT40-][SHORT-GI-20][SHORT-GI-40]");
-			} else {
-				throw KuraException.internalError("invalid hardware mode");
-			}
-			
-			if((this.m_channel > 0) && (this.m_channel < 14)) {
-				fileAsString = fileAsString.replaceFirst("KURA_CHANNEL", Integer.toString(this.m_channel));
-			} else {
-				throw KuraException.internalError("the channel must be between 1 (inclusive) and 11 (inclusive) or 1 (inclusive) and 13 (inclusive) depending on your locale");
-			}
-			if(this.m_passwd != null && m_passwd.trim().length() > 0) {
-				if((this.m_passwd.length() < 8) || (this.m_passwd.length() > 63)) {
-					throw KuraException.internalError("the WPA passphrase (passwd) must be between 8 (inclusive) and 63 (inclusive) characters in length: " + m_passwd);
-				} else {
-					fileAsString = fileAsString.replaceFirst("KURA_PASSPHRASE", this.m_passwd.trim());
+				if (is != null) {
+					fileAsString = readInputStreamAsString(is);
+					is.close();
+					is = null;
 				}
-			} else {
-				throw KuraException.internalError("the passwd can not be null");
 			}
-
-			//everything is set and we haven't failed - write the file
-			this.copyFile(fileAsString, outputFile);
+			
+			if (fileAsString != null) {
+				//replace the necessary components
+				if(this.m_iface != null) {
+					fileAsString = fileAsString.replaceFirst("KURA_INTERFACE", this.m_iface);
+				} else {
+					throw KuraException.internalError("the interface name can not be null");
+				}
+				if(this.m_driver != null) {
+					fileAsString = fileAsString.replaceFirst("KURA_DRIVER", this.m_driver);
+				} else {
+					throw KuraException.internalError("the driver name can not be null");
+				}
+				if(this.m_essid != null) {
+					fileAsString = fileAsString.replaceFirst("KURA_ESSID", this.m_essid);
+				} else {
+					throw KuraException.internalError("the essid can not be null");
+				}
+				
+				if (m_radioMode == WifiRadioMode.RADIO_MODE_80211a) {
+					fileAsString = fileAsString.replaceFirst("KURA_HW_MODE", "a");
+					fileAsString = fileAsString.replaceFirst("KURA_WME_ENABLED", "0");
+					fileAsString = fileAsString.replaceFirst("KURA_IEEE80211N", "0");
+				} else if (m_radioMode == WifiRadioMode.RADIO_MODE_80211b) {
+					fileAsString = fileAsString.replaceFirst("KURA_HW_MODE", "b");
+					fileAsString = fileAsString.replaceFirst("KURA_WME_ENABLED", "0");
+					fileAsString = fileAsString.replaceFirst("KURA_IEEE80211N", "0");
+				} else if (m_radioMode == WifiRadioMode.RADIO_MODE_80211g) {
+					fileAsString = fileAsString.replaceFirst("KURA_HW_MODE", "g");
+					fileAsString = fileAsString.replaceFirst("KURA_WME_ENABLED", "0");
+					fileAsString = fileAsString.replaceFirst("KURA_IEEE80211N", "0");
+				} else if (m_radioMode == WifiRadioMode.RADIO_MODE_80211nHT20) {
+					fileAsString = fileAsString.replaceFirst("KURA_HW_MODE", "g");
+					fileAsString = fileAsString.replaceFirst("KURA_WME_ENABLED", "1");
+					fileAsString = fileAsString.replaceFirst("KURA_IEEE80211N", "1");
+					fileAsString = fileAsString.replaceFirst("KURA_HTCAPAB", "[SHORT-GI-20]");
+				} else if (m_radioMode == WifiRadioMode.RADIO_MODE_80211nHT40above) {
+					fileAsString = fileAsString.replaceFirst("KURA_HW_MODE", "g");
+					fileAsString = fileAsString.replaceFirst("KURA_WME_ENABLED", "1");
+					fileAsString = fileAsString.replaceFirst("KURA_IEEE80211N", "1");
+					fileAsString = fileAsString.replaceFirst("KURA_HTCAPAB", "[HT40+][SHORT-GI-20][SHORT-GI-40]");
+				} else if (m_radioMode == WifiRadioMode.RADIO_MODE_80211nHT40below) {
+					fileAsString = fileAsString.replaceFirst("KURA_HW_MODE", "g");
+					fileAsString = fileAsString.replaceFirst("KURA_WME_ENABLED", "1");
+					fileAsString = fileAsString.replaceFirst("KURA_IEEE80211N", "1");
+					fileAsString = fileAsString.replaceFirst("KURA_HTCAPAB", "[HT40-][SHORT-GI-20][SHORT-GI-40]");
+				} else {
+					throw KuraException.internalError("invalid hardware mode");
+				}
+				
+				if((this.m_channel > 0) && (this.m_channel < 14)) {
+					fileAsString = fileAsString.replaceFirst("KURA_CHANNEL", Integer.toString(this.m_channel));
+				} else {
+					throw KuraException.internalError("the channel must be between 1 (inclusive) and 11 (inclusive) or 1 (inclusive) and 13 (inclusive) depending on your locale");
+				}
+				if(this.m_passwd != null && m_passwd.trim().length() > 0) {
+					if((this.m_passwd.length() < 8) || (this.m_passwd.length() > 63)) {
+						throw KuraException.internalError("the WPA passphrase (passwd) must be between 8 (inclusive) and 63 (inclusive) characters in length: " + m_passwd);
+					} else {
+						fileAsString = fileAsString.replaceFirst("KURA_PASSPHRASE", this.m_passwd.trim());
+					}
+				} else {
+					throw KuraException.internalError("the passwd can not be null");
+				}
+	
+				//everything is set and we haven't failed - write the file
+				this.copyFile(fileAsString, outputFile);
+			}
 			return;
 		} else {
-			s_logger.error("unsupported security type: " + m_security +
-					" It must be WifiSecurity.SECURITY_NONE, WifiSecurity.SECURITY_WEP, WifiSecurity.SECURITY_WPA, or WifiSecurity.SECURITY_WPA2");
+			s_logger.error("unsupported security type: {} It must be WifiSecurity.SECURITY_NONE, WifiSecurity.SECURITY_WEP, WifiSecurity.SECURITY_WPA, or WifiSecurity.SECURITY_WPA2", m_security);
 			throw KuraException.internalError("unsupported security type: " + m_security);
 		}
 	}
@@ -676,15 +700,17 @@ public class Hostapd {
 	 * Return a Hostapd instance from a given config file
 	 */
 	private static Hostapd parseHostapdConf(String filename) throws KuraException {
+		FileInputStream fis = null;
 		try {
 			Hostapd hostapd = null;
 	
 			File configFile = new File(filename);
 			Properties hostapdProps = new Properties();
 			
-			s_logger.debug("parsing hostapd config file: " + configFile.getAbsolutePath());
+			s_logger.debug("parsing hostapd config file: {}", configFile.getAbsolutePath());
 			if(configFile.exists()) {
-				hostapdProps.load(new FileInputStream(configFile));
+				fis = new FileInputStream(configFile);
+				hostapdProps.load(fis);
 
 				// remove any quotes around the values
 				Enumeration<Object> keys = hostapdProps.keys();
@@ -760,6 +786,15 @@ public class Hostapd {
 			e.printStackTrace();
 			throw KuraException.internalError(e);
 		}
+		finally{
+			if(fis != null){
+				try{
+					fis.close();
+				}catch(IOException ex){
+					s_logger.error("I/O Exception while closing BufferedReader!");
+				}
+			}			
+		}
 	}
 	
 	/*
@@ -785,8 +820,8 @@ public class Hostapd {
 	 * This method sets permissions to hostapd configuration file 
 	 */
 	private void setPermissions(String fileName) throws KuraException {
-		Process procDos = null;
-		Process procChmod = null;
+		SafeProcess procDos = null;
+		SafeProcess procChmod = null;
 		try {
 			procChmod = ProcessUtil.exec("chmod 600 " + fileName);
 			procChmod.waitFor();
@@ -797,8 +832,8 @@ public class Hostapd {
 			throw KuraException.internalError(e);
 		}
 		finally {
-			ProcessUtil.destroy(procChmod);
-			ProcessUtil.destroy(procDos);			
+			if (procChmod != null) ProcessUtil.destroy(procChmod);
+			if (procDos != null) ProcessUtil.destroy(procDos);			
 		}
 	}
 
@@ -826,7 +861,7 @@ public class Hostapd {
 		}
 		byte[] raw = s.getBytes();
 
-		StringBuffer hex = new StringBuffer(2 * raw.length);
+		StringBuilder hex = new StringBuilder(2 * raw.length);
 		for (int i = 0; i < raw.length; i++) {
 			hex.append(HEXES.charAt((raw[i] & 0xF0) >> 4)).append(HEXES.charAt((raw[i] & 0x0F)));
 		}
@@ -838,7 +873,7 @@ public class Hostapd {
 	 */
 	private String formHostapdCommand () {
 		
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		sb.append("hostapd -B ");
 		sb.append(this.m_configFilename);
 		
@@ -850,7 +885,7 @@ public class Hostapd {
 	 */
 	private static String formHostapdConfigDirectory () {
 		
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 //		sb.append("/tmp/.kura/");
 //		sb.append(Hostapd.class.getPackage().getName());
 		sb.append("/etc/");
@@ -863,7 +898,7 @@ public class Hostapd {
 	 */
 	private static String formHostapdConfigFilename () {
 		
-		StringBuffer sb = new StringBuffer ();
+		StringBuilder sb = new StringBuilder ();
 		sb.append(Hostapd.formHostapdConfigDirectory());
 		sb.append("/hostapd.conf");
 		

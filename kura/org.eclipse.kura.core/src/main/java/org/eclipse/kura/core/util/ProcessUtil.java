@@ -12,6 +12,11 @@
 package org.eclipse.kura.core.util;
 
 import java.io.IOException;
+import java.util.StringTokenizer;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,80 +24,58 @@ import org.slf4j.LoggerFactory;
 public class ProcessUtil 
 {
 	private static final Logger s_logger = LoggerFactory.getLogger(ProcessUtil.class);
-	
-	
-	public static Process exec(String command)
-		throws IOException
-	{
-		Runtime runtime = Runtime.getRuntime();
-		return runtime.exec(command);
-	}
 
-	
-	public static Process exec(String command, String[] envp)
+	private static final ExecutorService s_processExecutor = Executors.newSingleThreadExecutor();
+    
+	public static SafeProcess exec(String command)
 		throws IOException
 	{
-		Runtime runtime = Runtime.getRuntime();
-		return runtime.exec(command, envp);
-	}
-
-	
-	public static Process exec(String[] cmdarray)
-		throws IOException
-	{
-		Runtime runtime = Runtime.getRuntime();
-		return runtime.exec(cmdarray);
-	}
-
-	
-	public static Process exec(String[] cmdarray, String[] envp)
-		throws IOException
-	{
-		Runtime runtime = Runtime.getRuntime();
-		return runtime.exec(cmdarray, envp);
-	}
-	
-	
-	public static void close(Process proc) {
-		if (proc == null) {
-			return;
+		// Use StringTokenizer since this is the method documented by Runtime
+		StringTokenizer st = new StringTokenizer(command);
+		int count = st.countTokens();
+		String[] cmdArray = new String[count];
+				
+		for (int i = 0; i < count; i++) {
+			cmdArray[i] = st.nextToken();
 		}
 		
-		try {
-			proc.getInputStream().close();
-		}
-		catch (Exception e) {
-			s_logger.warn("Exception in proc.getInputStream().close()", e);
-		}
-		
-		try {
-			proc.getOutputStream().close();
-		}
-		catch (Exception e) {
-			s_logger.warn("Exception in proc.getOutputStream().close()", e);
-		}
+		return exec(cmdArray);
+	}
 
-		try {
-			proc.getErrorStream().close();;
-		}
-		catch (Exception e) {
-			s_logger.warn("Exception in proc.getErrorStream().close()", e);
-		}
+	public static SafeProcess exec(final String[] cmdarray)
+		throws IOException
+	{		
+		// Serialize process executions. One at a time so we can consume all streams.
+        Future<SafeProcess> futureSafeProcess = s_processExecutor.submit(new Callable<SafeProcess>() {
+            @Override
+            public SafeProcess call() throws Exception {
+                Thread.currentThread().setName("SafeProcessExecutor");
+                SafeProcess safeProcess = new SafeProcess();
+                safeProcess.exec(cmdarray);
+                return safeProcess;
+            }
+        });
+        
+        try {
+            return futureSafeProcess.get();
+        } 
+        catch (Exception e) {
+            s_logger.error("Error waiting from SafeProcess output", e);
+            throw new IOException(e);
+        }
+	}
+
+	/**
+	 * @deprecated  The method does nothing
+	 */
+	@Deprecated
+	public static void close(SafeProcess proc)
+	{
 	}
 	
-	public static void destroy(Process proc) 
+	public static void destroy(SafeProcess proc)
 	{
-		if (proc == null) {
-			return;
-		}
-		
-		ProcessUtil.close(proc);
-
-		try {
-			proc.destroy();
-		}
-		catch (Exception e) {
-			s_logger.warn("Exception in proc.destroy()", e);
-		}		
+		proc.destroy();	
 	}
 }
+    

@@ -14,6 +14,7 @@ package org.eclipse.kura.net.admin.visitor.linux;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -282,19 +283,18 @@ public class WpaSupplicantConfigReader implements NetworkConfigurationVisitor {
         
         Properties props = null;
         
+        BufferedReader br = null;
         try {
             File wpaConfigFile = new File(WPA_CONFIG_FILE);
             if (wpaConfigFile.exists()) {
     
                 // Read into a string
-                BufferedReader br = new BufferedReader(
-                        new FileReader(wpaConfigFile));
+                br = new BufferedReader(new FileReader(wpaConfigFile));
                 StringBuilder sb = new StringBuilder();
                 String line = null;
                 while ((line = br.readLine()) != null) {
                     sb.append(line).append("\n");
                 }
-                br.close();
     
                 String newConfig = null;
                 int beginIndex = sb.toString().indexOf("network");
@@ -322,6 +322,15 @@ public class WpaSupplicantConfigReader implements NetworkConfigurationVisitor {
         } catch (Exception e) {
             throw KuraException
                     .internalError("wpa_supplicant failed to parse its configuration file");
+        }
+        finally{
+        	if(br != null){
+				try{
+					br.close();
+				}catch(IOException ex){
+					s_logger.error("I/O Exception while closing BufferedReader!");
+				}
+			}
         }
 
         return props;

@@ -261,8 +261,9 @@ public class ShellScriptResourceProcessorImpl implements ResourceProcessor {
 		File targetResourceFile = getDPResourceFile(resource);
 		if (targetResourceFile != null) {
 			s_logger.info("Resource: '{}' already exists in Deployment Package: '{}'", resource, m_sourceDP);
+			InputStream tis = null;
 			try {
-				InputStream tis = new FileInputStream(targetResourceFile);
+				tis = new FileInputStream(targetResourceFile);
 				byte[] d1 = computeDigest(tis);
 				byte[] d2 = computeDigest(is);
 
@@ -276,6 +277,15 @@ public class ShellScriptResourceProcessorImpl implements ResourceProcessor {
 				s_logger.warn("Unexpected exception. Proceed anyway", e);
 			} catch (IOException e) {
 				s_logger.warn("Unexpected exception. Proceed anyway", e);
+			}
+			finally{
+				if(tis != null){
+					try{
+						tis.close();
+					}catch(IOException ex){
+						s_logger.error("I/O Exception while closing BufferedReader!");
+					}
+				}			
 			}
 		}
 		

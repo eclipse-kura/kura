@@ -918,7 +918,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 				if (value != null) {
 					if (value instanceof Password) {
 						try {
-							Password decryptedPassword = new Password(new String(m_cryptoService.decryptAes(value.toString().toCharArray())));
+							Password decryptedPassword = new Password(m_cryptoService.decryptAes(value.toString().toCharArray()));
 							decryptedProperties.put(key, decryptedPassword);
 						} catch (Exception e) {
 							decryptedProperties.put(key, value);

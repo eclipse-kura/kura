@@ -658,7 +658,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 			while ((line = br.readLine()) != null) {
 				entireFile += line;
 			} // end while
-			String decryptedContent = m_cryptoService.decryptAes(entireFile);
+			String decryptedContent = new String(m_cryptoService.decryptAes(entireFile.toCharArray()));
 			xmlConfigs = XmlUtil.unmarshal(decryptedContent, XmlComponentConfigurations.class);
 		} catch (Exception e) {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
@@ -694,7 +694,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 			Object value = configProperties.get(key);
 			if (value instanceof Password) {
 				try {
-					Password decryptedPassword = new Password(m_cryptoService.decryptAes(value.toString()));
+					Password decryptedPassword = new Password(m_cryptoService.decryptAes(value.toString().toCharArray()));
 					configProperties.put(key, decryptedPassword);
 				} catch (Exception e) {
 				}
@@ -772,7 +772,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 					while ((line = br.readLine()) != null) {
 						entireFile += line;
 					} // end while
-					String decryptedContent = m_cryptoService.decryptAes(entireFile);
+					String decryptedContent = new String(m_cryptoService.decryptAes(entireFile.toCharArray()));
 					XmlUtil.unmarshal(decryptedContent, XmlComponentConfigurations.class);
 					return false;
 				} catch (Exception e) {
@@ -918,7 +918,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 				if (value != null) {
 					if (value instanceof Password) {
 						try {
-							Password decryptedPassword = new Password(m_cryptoService.decryptAes(value.toString()));
+							Password decryptedPassword = new Password(new String(m_cryptoService.decryptAes(value.toString().toCharArray())));
 							decryptedProperties.put(key, decryptedPassword);
 						} catch (Exception e) {
 							decryptedProperties.put(key, value);
@@ -1113,7 +1113,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 			while ((line = br.readLine()) != null) {
 				entireFile += line;
 			} // end while
-			String decryptedContent = m_cryptoService.decryptAes(entireFile);
+			String decryptedContent = new String(m_cryptoService.decryptAes(entireFile.toCharArray()));
 			xmlConfigs = XmlUtil.unmarshal(decryptedContent, XmlComponentConfigurations.class);
 
 		} catch (Exception e) {

@@ -97,10 +97,10 @@ public class CommandCloudApp extends Cloudlet implements ConfigurableComponent,
 			Object value = properties.get(key);
 			if (key.equals(COMMAND_PASSWORD_ID)) {
 				try {
-					String decryptedPassword= m_cryptoService.decryptAes(value.toString());
+					char[] decryptedPassword= m_cryptoService.decryptAes(value.toString().toCharArray());
 					this.properties.put(key, decryptedPassword);
 				} catch (Exception e) {
-					this.properties.put(key, value);
+					this.properties.put(key, value.toString().toCharArray());
 				} 
 			}else{
 				this.properties.put(key, value);
@@ -165,7 +165,7 @@ public class CommandCloudApp extends Cloudlet implements ConfigurableComponent,
 		// String receivedPassword= (String)
 		// reqPayload.getMetric(EDC_PASSWORD_METRIC_NAME);
 		String receivedPassword = (String) commandReq.getMetric(EDC_PASSWORD_METRIC_NAME);
-		String commandPassword = (String) properties.get(COMMAND_PASSWORD_ID);
+		char[] commandPassword = (char[])properties.get(COMMAND_PASSWORD_ID);
 
 		KuraCommandResponsePayload commandResp = new KuraCommandResponsePayload(
 				KuraResponsePayload.RESPONSE_CODE_OK);
@@ -242,12 +242,10 @@ public class CommandCloudApp extends Cloudlet implements ConfigurableComponent,
 	@Override
 	public String execute(String cmd, String password) throws KuraException {
 		// TODO Auto-generated method stub
-		boolean verificationEnabled = (Boolean) properties
-				.get(COMMAND_ENABLED_ID);
+		boolean verificationEnabled = (Boolean) properties.get(COMMAND_ENABLED_ID);
 		if (verificationEnabled) {
 
-			String commandPassword = (String) properties
-					.get(COMMAND_PASSWORD_ID);
+			char[] commandPassword = (char[]) properties.get(COMMAND_PASSWORD_ID);
 			boolean isExecutionAllowed = verifyPasswords(commandPassword,
 					password);
 			if (isExecutionAllowed) {
@@ -333,15 +331,16 @@ public class CommandCloudApp extends Cloudlet implements ConfigurableComponent,
 		return defaultEnv;
 	}
 
-	private boolean verifyPasswords(String commandPassword,
+	private boolean verifyPasswords(char[] commandPassword,
 			String receivedPassword) {
 		if (commandPassword == null && receivedPassword == null) {
 			return true;
-		} else if (commandPassword != null
-				&& commandPassword.equals(receivedPassword)) {
-			return true;
 		}
-		return false;
+		if(commandPassword == null){
+			return false;
+		}
+		String pwd = new String(commandPassword);
+		return pwd.equals(receivedPassword);
 	}
 
 	private Process createExecutionProcess(String dir, String[] cmdarray,

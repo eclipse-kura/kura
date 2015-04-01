@@ -19,6 +19,11 @@ public class Password
 		super();
 		this.password = password.toCharArray();
 	}
+	
+	public Password(char[] password) {
+		super();
+		this.password = password;
+	}
 
 	public char[] getPassword() {
 		return password;

@@ -18,6 +18,7 @@ import java.security.Key;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.Arrays;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
@@ -25,15 +26,16 @@ import javax.crypto.spec.SecretKeySpec;
 import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.db.DbService;
 import org.eclipse.kura.web.server.util.ServiceLocator;
+
 import javax.xml.bind.*;
 
 public class AuthenticationManager 
 {
 	private static AuthenticationManager s_instance;
 
-	private String password;
+	private char[] password;
 
-	protected AuthenticationManager(String psw) {
+	protected AuthenticationManager(char[] psw) {
 		password= psw;
 		s_instance= this;
 	}
@@ -42,7 +44,7 @@ public class AuthenticationManager
 		return s_instance;
 	}
 	
-	protected void updatePassword(String psw){
+	protected void updatePassword(char[] psw){
 		password= psw;
 	}
 
@@ -53,9 +55,7 @@ public class AuthenticationManager
 			CryptoService cryptoService = ServiceLocator.getInstance().getService(CryptoService.class);
 			String sha1Password= cryptoService.sha1Hash(password);
 			
-			if(sha1Password.equals(this.password)){
-				return true;
-			}
+			return Arrays.equals(sha1Password.toCharArray(), this.password);
 		}catch (Exception e) {
 		}
 		return false;
@@ -67,7 +67,7 @@ public class AuthenticationManager
 	//
 	// -------------------------------------------------
 
-	public static String isDBInitialized(DbService dbService, String dataDir){
+	public static char[] isDBInitialized(DbService dbService, String dataDir){
 
 		Connection conn = null;
 		BufferedReader br = null;
@@ -109,9 +109,10 @@ public class AuthenticationManager
 			}catch(Exception ex){
 			}
 		}
-		return result;
+		return result.toCharArray();
 	}
 	
+	@SuppressWarnings("restriction")
 	private static String decryptAes(String encryptedValue) 
 			throws Exception 
 		{

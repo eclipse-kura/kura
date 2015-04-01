@@ -11,6 +11,7 @@
  */
 package org.eclipse.kura.web;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -38,7 +39,6 @@ import org.eclipse.kura.web.server.servlet.DeviceSnapshotsServlet;
 import org.eclipse.kura.web.server.servlet.FileServlet;
 import org.eclipse.kura.web.server.servlet.SkinServlet;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.BundleEvent;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
@@ -166,43 +166,50 @@ public class Console implements ConfigurableComponent {
 				
 				String dataDir = m_systemService.getProperties().getProperty(KURA_DATA_DIR);
 
-				String passwordFromDB = AuthenticationManager.isDBInitialized(m_dbService, dataDir);
+				char[] passwordFromDB = AuthenticationManager.isDBInitialized(m_dbService, dataDir);
 				try {
 					passwordFromDB = m_cryptoService.decryptAes(passwordFromDB);
 
 				} catch (Exception e) {
 				}
-				String propertyPassword = (String) properties.get(CONSOLE_PASSWORD);
+				Object pwdProp = properties.get(CONSOLE_PASSWORD);
+				char[] propertyPassword = null;
+				if(pwdProp instanceof char[]){
+					propertyPassword = (char[]) properties.get(CONSOLE_PASSWORD);
+				} else {
+					propertyPassword = properties.get(CONSOLE_PASSWORD).toString().toCharArray();
+				}
+
 				try {
 					propertyPassword = m_cryptoService.decryptAes(propertyPassword);
 				} catch (Exception e) {
 				}
 
 				if (passwordFromDB != null) {
-					if (!propertyPassword.equals(passwordFromDB)) {
-						if (propertyPassword.equals("admin")) {
+					if (!Arrays.equals(propertyPassword, passwordFromDB)) {
+						if (Arrays.equals(propertyPassword, "admin".toCharArray())) {
 							m_properties.put(CONSOLE_PASSWORD, passwordFromDB);
 							doUpdate(false);
 						} else {
 							Object value = properties.get(CONSOLE_PASSWORD);
-							String decryptedPassword = null;
+							char[] decryptedPassword = null;
 							try {
-								decryptedPassword = m_cryptoService.decryptAes((String) value);
+								decryptedPassword = m_cryptoService.decryptAes(((String) value).toCharArray());
 							} catch (Exception e) {
-								decryptedPassword = (String) value;
+								decryptedPassword = value.toString().toCharArray();
 							}
-							propertyPassword = m_cryptoService.sha1Hash(decryptedPassword);
+							propertyPassword = m_cryptoService.sha1Hash(new String(decryptedPassword)).toCharArray();
 						}
 					}
 				} else {
 					Object value = properties.get(CONSOLE_PASSWORD);
-					String decryptedPassword = null;
+					char[] decryptedPassword = null;
 					try {
-						decryptedPassword = m_cryptoService.decryptAes((String) value);
+						decryptedPassword = m_cryptoService.decryptAes(((String) value).toCharArray());
 					} catch (Exception e) {
-						decryptedPassword = (String) value;
+						decryptedPassword = value.toString().toCharArray();
 					}
-					propertyPassword = m_cryptoService.sha1Hash(decryptedPassword);
+					propertyPassword = m_cryptoService.sha1Hash(new String(decryptedPassword)).toCharArray();
 				}
 
 				authMgr = new AuthenticationManager(propertyPassword);
@@ -224,10 +231,10 @@ public class Console implements ConfigurableComponent {
 
 	protected void updated(Map<String, Object> properties) {
 
-		String propertyPassword = null;
+		char[] propertyPassword = null;
 		String dataDir = m_systemService.getProperties().getProperty(KURA_DATA_DIR);
 
-		String passwordFromDB = AuthenticationManager.isDBInitialized(m_dbService, dataDir);
+		char[] passwordFromDB = AuthenticationManager.isDBInitialized(m_dbService, dataDir);
 		try {
 			passwordFromDB = m_cryptoService.decryptAes(passwordFromDB);
 		} catch (Exception e) {
@@ -235,16 +242,16 @@ public class Console implements ConfigurableComponent {
 
 		try {
 			Object value = properties.get(CONSOLE_PASSWORD);
-			String decryptedPassword = null;
+			char[] decryptedPassword = null;
 			try {
-				decryptedPassword = m_cryptoService.decryptAes((String) value);
+				decryptedPassword = m_cryptoService.decryptAes(((String) value).toCharArray());
 			} catch (Exception e) {
-				decryptedPassword = (String) value;
+				decryptedPassword = value.toString().toCharArray();
 			}
-			if (passwordFromDB != null && decryptedPassword.equals(passwordFromDB)) {
+			if (passwordFromDB != null && Arrays.equals(decryptedPassword, passwordFromDB)) {
 				propertyPassword = decryptedPassword;
 			} else {
-				propertyPassword = m_cryptoService.sha1Hash(decryptedPassword);
+				propertyPassword = m_cryptoService.sha1Hash(new String(decryptedPassword)).toCharArray();
 			}
 			authMgr.updatePassword(propertyPassword);
 		} catch (Exception e) {

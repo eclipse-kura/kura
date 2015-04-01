@@ -20,6 +20,8 @@ import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 
+import org.eclipse.kura.KuraException;
+
 /**
  * The CryptoService is used to provide AES encrypt and decrypt functionality, Base64 encoding and
  * decoding, and SHA1 hash generation. 
@@ -53,9 +55,20 @@ public interface CryptoService
 	 * @throws IllegalBlockSizeException
 	 * @throws BadPaddingException
 	 */
+	@Deprecated
 	public String decryptAes(String encryptedValue) 
 			throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IOException, IllegalBlockSizeException, BadPaddingException;
 	
+	/**
+	 * Returns a char array based on the provided encrypted value.
+	 * 
+	 * @param encryptedValue A char array representing the value to be decrypted.
+	 * @return char[] that has been decrypted.
+	 * @throws KuraException
+	 */
+	public char[] decryptAes(char[] encryptedValue) 
+			throws KuraException;
+
 	/**
 	 * Returns a SHA1 hashed value of the provided string s.
 	 * @param s A string on which to run the SHA1 hasing algorithm.

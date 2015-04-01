@@ -661,6 +661,7 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
 
 	private boolean verifyMessageSignature(KuraTopic kuraTopic, KuraPayload kuraPayload){
 
+		System.out.println(kuraPayload.getMetric(CERT_SERIAL));
 		if(kuraTopic.getApplicationId().equals("PROV-V1") && 
 				kuraTopic.getApplicationTopic().contains("certificate")){
 			if(m_certificatesService == null){
@@ -676,7 +677,12 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
 			s_logger.debug("Start signature verification");
 			String certSerial= (String) kuraPayload.getMetric(CERT_SERIAL);
 			String signingCertAlias= RESOURCE_CERTIFICATE_DM + "-" + certSerial;
-			byte[] topicBytes= kuraTopic.getApplicationTopic().getBytes();
+			
+			String applicationId= kuraTopic.getApplicationId();
+			String fullTopic= kuraTopic.getFullTopic();
+			String semanticTopic= fullTopic.substring(fullTopic.indexOf(applicationId));
+			byte[] topicBytes= semanticTopic.getBytes();
+			
 			byte[] messagePayload= kuraPayload.getBody();
 			byte[] signature = null;
 			if(kuraPayload.getMetric(SIGNATURE_METRIC) instanceof byte[]){
@@ -684,7 +690,7 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
 			}
 			return m_certificatesService.verifySignature(signingCertAlias, topicBytes, messagePayload, signature);
 		}else{
-			s_logger.debug("Error: not correct message formatting");
+			s_logger.debug("Error: not correct message format");
 			return false;
 		}
 	}

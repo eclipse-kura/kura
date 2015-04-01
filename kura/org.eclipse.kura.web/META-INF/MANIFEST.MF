@@ -71,6 +71,7 @@ Import-Package:
  org.eclipse.kura.system;version="[1.0,2.0)",
  org.eclipse.kura.usb;version="[1.0,2.0)",
  org.osgi.framework,
+ org.osgi.service.component;version="1.2.0",
  org.osgi.service.deploymentadmin,
  org.osgi.service.event,
  org.osgi.service.http,

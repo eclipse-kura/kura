@@ -1,3 +1,35 @@
+Eclipse Kura - 1.1.2
+-------------------------------------------------------------------------
+Bug Fixes:
+   * Fixed JVM memory leak by making sure all stream are closed and
+     the streams associated to the stdout and stderr of external processes
+     are consumed asynchronously
+   * Overall optimization of the network related bundles by removing
+     unnecessary executions of external processes
+   * Fixed MANIFESTs removing unused imports and fixing Import-Package version
+     ranges to comply with OSGi Semantic Versioning
+   * Ppp0 connection not starting after a fresh install
+   * Modem did not recover the connection when the antenna is unplugged
+   * Avoid starting two Kura instances
+   * Rolling back to snapshot 0 does not change the modem configuration on the Minigateway
+   * Don't allow to set the gateway on LAN interfaces
+   * When reconfiguring Wifi from Station to Access Point, DHCP&NAT tab gets enabled only
+     after clicking on the 'Wireless' tab
+   * Since we don't support 802.11a, do not allow this in configuration
+   * Poweroff command fails at 'Stopping Kura'
+   * Disable snmpd to avoid excessive flash writes on raw-flash devices
+
+Known Issues:
+   * The reference JVM is Oracle Java SE Embedded version 7 Update 40.
+     Later versions (including Oracle Java SE Embedded version 8 Update 33)
+     may be affected by a ProcessBuilder memory leak [1]  
+   * Hardware watchdog: not implemented on all platforms
+   * Only one WAN interface is currently supported. A warning in displayed
+     in the WEB UI if the user attempts to enable more than one WAN interface
+
+[1] https://bugs.openjdk.java.net/browse/JDK-8054841
+
+
 Eclipse Kura - 1.1.1
 -------------------------------------------------------------------------
 

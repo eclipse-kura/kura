@@ -353,30 +353,39 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 		    				netInterfaceConfig = newNetworkConfig.getNetInterfaceConfig(usbPort);
 		    			}
 		    			List<NetConfig>newNetConfigs = null;
+		    			IModemLinkService pppService = null;
 		    			int ifaceNo = getInterfaceNumber(oldNetConfigs);
+		    			if (ifaceNo >= 0) {
+		    				pppService = PppFactory.obtainPppService(ifaceNo, modem.getDataPort());
+		    			}
+		    			
 		    			if (netInterfaceConfig != null) {
 		    				newNetConfigs = getNetConfigs(netInterfaceConfig);
 		    			} else {
-		    				if (oldNetConfigs != null) {
-		    					newNetConfigs = oldNetConfigs;
-		    					oldNetConfigs = null;
-		    					setInterfaceNumber(ifaceName, newNetConfigs);
+		    				if ((oldNetConfigs != null) && (pppService != null)) {
+			    				if (!ifaceName.equals(pppService.getIfaceName())) {
+			    					newNetConfigs = oldNetConfigs;
+			    					oldNetConfigs = null;
+			    					try {
+			    						setInterfaceNumber(ifaceName, newNetConfigs);
+			    					} catch (NumberFormatException e) {
+			    						s_logger.error("failed to set new interface number - {}", e);
+			    					}
+			    				}
 		    				}
 		    			}
 		    			
 		    			if ((oldNetConfigs == null) || !oldNetConfigs.equals(newNetConfigs)) {
 		    				s_logger.info("new configuration for cellular modem on usb port {} netinterface {}", usbPort, ifaceName); 
 		    				m_networkConfig = newNetworkConfig;
-		    				if (ifaceNo >= 0) {
-		    					IModemLinkService pppService = PppFactory.obtainPppService(ifaceNo, modem.getDataPort());
-		    					if (pppService != null) {
-		    						PppState pppState = pppService.getPppState();
-									if ((pppState == PppState.CONNECTED) || (pppState == PppState.IN_PROGRESS)) {
-										s_logger.info("disconnecting " + pppService.getIfaceName());
-										pppService.disconnect();
-									}
-									PppFactory.releasePppService(pppService.getIfaceName());
-		    					}
+		    				
+		    				if (pppService != null) {
+		    					PppState pppState = pppService.getPppState();
+								if ((pppState == PppState.CONNECTED) || (pppState == PppState.IN_PROGRESS)) {
+									s_logger.info("disconnecting " + pppService.getIfaceName());
+									pppService.disconnect();
+								}
+								PppFactory.releasePppService(pppService.getIfaceName());
 		    				}
 		    				
 		    				if (modem.isGpsEnabled()) {
@@ -471,11 +480,15 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 		return ifaceNo;
 	}
 	
+	private int getInterfaceNumber(String ifaceName) {
+		return Integer.parseInt(ifaceName.replaceAll("[^0-9]", ""));
+	}
+	
 	private void setInterfaceNumber (String ifaceName, List<NetConfig> netConfigs) {
 		if ((netConfigs != null) && (netConfigs.size() > 0)) {
 			for (NetConfig netConfig : netConfigs) {
 				if (netConfig instanceof ModemConfig) {
-					((ModemConfig) netConfig).setPppNumber(Integer.parseInt(ifaceName.replaceAll("[^0-9]", "")));
+					((ModemConfig) netConfig).setPppNumber(getInterfaceNumber(ifaceName));
 					break;
 				}
 			}

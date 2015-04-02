@@ -98,7 +98,7 @@ public class CryptoServiceImpl implements CryptoService {
 
 
 	@Override
-	public String getKeyStorePassword(String keyStorePath) {
+	public char[] getKeyStorePassword(String keyStorePath) {
 		// TODO Auto-generated method stub
 		return null;
 	}

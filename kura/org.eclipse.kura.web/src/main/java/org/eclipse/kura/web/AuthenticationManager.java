@@ -71,7 +71,7 @@ public class AuthenticationManager
 
 		Connection conn = null;
 		BufferedReader br = null;
-		String result= null;
+		char[] result= null;
 		PreparedStatement stmt = null;
 		try{
 			conn = dbService.getConnection();
@@ -83,7 +83,7 @@ public class AuthenticationManager
 					String[] adminString = br.readLine().split(":", 2);
 
 					CryptoService cryptoService = ServiceLocator.getInstance().getService(CryptoService.class);
-					result = cryptoService.sha1Hash(decryptAes(adminString[1]));
+					result = cryptoService.sha1Hash(decryptAes(adminString[1])).toCharArray();
 				}
 			}else{
 				ResultSet rs = null;
@@ -91,7 +91,7 @@ public class AuthenticationManager
 				stmt.setString(1, "admin");
 				rs = stmt.executeQuery();
 				if (rs != null && rs.next()) {
-					result= rs.getString("password");
+					result= rs.getString("password").toCharArray();
 				}
 			}
 		}catch(Exception e){
@@ -109,7 +109,7 @@ public class AuthenticationManager
 			}catch(Exception ex){
 			}
 		}
-		return result.toCharArray();
+		return result;
 	}
 	
 	@SuppressWarnings("restriction")

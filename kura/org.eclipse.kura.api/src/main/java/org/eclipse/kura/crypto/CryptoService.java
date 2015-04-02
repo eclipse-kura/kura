@@ -103,8 +103,8 @@ public interface CryptoService
 	/**
 	 * Takes a keystore path and returns the corresponding password that can be used to access to the data saved in the specified keystore.
 	 * @param keyStorePath A String that represents a unique identifier of the specified keystore.
-	 * @return A String that is the password of the specified keystore.
+	 * @return A char array that represents the password of the specified keystore.
 	 */
-	public String getKeyStorePassword(String keyStorePath);
+	public char[] getKeyStorePassword(String keyStorePath);
 
 }

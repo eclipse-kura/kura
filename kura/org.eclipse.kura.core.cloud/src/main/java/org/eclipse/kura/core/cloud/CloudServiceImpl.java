@@ -662,7 +662,8 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
 	private boolean verifyMessageSignature(KuraTopic kuraTopic, KuraPayload kuraPayload){
 
 		System.out.println(kuraPayload.getMetric(CERT_SERIAL));
-		if(kuraTopic.getApplicationId().equals("PROV-V1") && 
+		System.out.println("metric: " + kuraPayload.getMetric(SIGNATURE_METRIC));
+		if(kuraTopic.getApplicationId().equals("PROV-V2") && 
 				kuraTopic.getApplicationTopic().contains("certificate")){
 			if(m_certificatesService == null){
 				return true;

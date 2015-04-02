@@ -45,7 +45,11 @@ public class CollectionsUtil
 			Object value =  dictionary.get(key);
 			AD        ad = ads.get(key);
 			if (ad != null && ad.getType() != null && Scalar.PASSWORD.equals(ad.getType())) {
-				map.put(key, new Password(value.toString()));
+				if(value instanceof char[]){
+					map.put(key, new Password((char[]) value));
+				}else{
+					map.put(key, new Password(value.toString()));
+				}
 			}
 			else {
 				map.put(key, value);

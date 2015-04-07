@@ -1202,9 +1202,11 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 			try {
 				s_logger.debug("verifyWifiCredentials() :: Restarting wpa_supplicant");
 				WpaSupplicant wpaSupplicant = WpaSupplicant.getWpaSupplicant(ifaceName);
-				WpaSupplicantManager.start(ifaceName, wpaSupplicant.getMode(), wpaSupplicant.getDriver());
-				if (isWifiConnectionCompleted(ifaceName, tout)) {
-					this.renewDhcpLease(ifaceName);
+				if (wpaSupplicant != null) {
+					WpaSupplicantManager.start(ifaceName, wpaSupplicant.getMode(), wpaSupplicant.getDriver());
+					if (isWifiConnectionCompleted(ifaceName, tout)) {
+						this.renewDhcpLease(ifaceName);
+					}
 				}
 			} catch (KuraException e) {
 				e.printStackTrace();

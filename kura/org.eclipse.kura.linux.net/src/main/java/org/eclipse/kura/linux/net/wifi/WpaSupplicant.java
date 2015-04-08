@@ -1205,12 +1205,12 @@ public class WpaSupplicant {
 		BufferedReader br = null;
 		SafeProcess proc = null;
 		try {
-			proc = ProcessUtil.exec("wpa_supplicant");
-			// Don't throw exception on error here, it is expected. 
-			// All we want is a list of drivers supported by wpa_supplicant.
-			proc.waitFor();
-			
-			br = new BufferedReader(new InputStreamReader(proc.getInputStream()));			
+			proc = ProcessUtil.exec("wpa_supplicant -h");
+			if (proc.waitFor() != 0) {
+				s_logger.error("error executing command --- wpa_supplicant --- exit value = " + proc.exitValue());
+				throw new KuraException(KuraErrorCode.INTERNAL_ERROR);
+			}			
+			br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
 			String line = null;
 			boolean fDrivers = false;
 

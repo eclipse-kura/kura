@@ -75,8 +75,9 @@ public class AuthenticationManager
 		PreparedStatement stmt = null;
 		try{
 			conn = dbService.getConnection();
-			File adminFile = new File(dataDir + "/ap_store");
+			
 			if(conn.getMetaData().getURL().startsWith("jdbc:hsqldb:mem")){
+				File adminFile = new File(dataDir + "/ap_store");
 				if(adminFile.exists() && !adminFile.isDirectory()){
 
 					br = new BufferedReader(new FileReader(adminFile));

@@ -25,6 +25,7 @@ import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.configuration.KuraConfigReadyEvent;
+import org.eclipse.kura.core.configuration.Password;
 import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.db.DbService;
 import org.eclipse.kura.system.SystemService;
@@ -189,6 +190,7 @@ public class Console implements ConfigurableComponent {
 					if (!Arrays.equals(propertyPassword, passwordFromDB)) {
 						if (Arrays.equals(propertyPassword, "admin".toCharArray())) {
 							m_properties.put(CONSOLE_PASSWORD, passwordFromDB);
+							s_logger.debug("Needed password update from db");
 							doUpdate(false);
 						} else {
 							Object value = properties.get(CONSOLE_PASSWORD);
@@ -316,6 +318,20 @@ public class Console implements ConfigurableComponent {
 			public void run() {
 				s_logger.debug("--> Runner started");
 				String searchedPID = (String) m_properties.get(APP_PID);
+				
+				HashMap<String, Object> propertiesCopy= new HashMap<String, Object>();
+				Iterator<String> keys = m_properties.keySet().iterator();
+				while (keys.hasNext()) {
+					String key = keys.next();
+					Object value = m_properties.get(key);
+					propertiesCopy.put(key, value);
+				}
+				Object pwdProp = m_properties.get(CONSOLE_PASSWORD);
+				if(pwdProp instanceof char[]){
+					char[] password= (char[]) m_properties.get(CONSOLE_PASSWORD);
+					propertiesCopy.put(CONSOLE_PASSWORD, new Password(password));
+				}
+						
 				while (true) {
 					s_logger.debug("--> Runner while");
 					try {
@@ -326,7 +342,7 @@ public class Console implements ConfigurableComponent {
 					try {
 						if(s_context.getServiceReference() != null && m_configService.getComponentConfiguration(searchedPID) != null){
 							s_logger.info("Trying to update config.");
-							m_configService.updateConfiguration(searchedPID, m_properties);
+							m_configService.updateConfiguration(searchedPID, propertiesCopy);
 							return;
 						}
 					} catch (KuraException e1) {

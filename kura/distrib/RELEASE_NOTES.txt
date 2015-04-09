@@ -26,6 +26,9 @@ Known Issues:
    * Hardware watchdog: not implemented on all platforms
    * Only one WAN interface is currently supported. A warning in displayed
      in the WEB UI if the user attempts to enable more than one WAN interface
+   * When first modem configuration is submitted, unconfigured cellular interface for serial modem (e.g. HE910) is not being replaced by 
+     ppp0 interface. Both ppp0 and HE910 interfaces are shown in the Web Admin.
+   * Gateway needs to be rebooted for static GPS coordinates to be published to the cloud.
 
 [1] https://bugs.openjdk.java.net/browse/JDK-8054841
 

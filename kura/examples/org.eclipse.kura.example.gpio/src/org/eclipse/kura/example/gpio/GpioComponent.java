@@ -38,7 +38,7 @@ import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class GpioComponent implements ConfigurableComponent, PinListener {
+public class GpioComponent implements ConfigurableComponent {
 
 	private static final Logger s_logger = LoggerFactory
 			.getLogger(GpioComponent.class);
@@ -73,7 +73,6 @@ public class GpioComponent implements ConfigurableComponent, PinListener {
 	protected void activate(ComponentContext componentContext,
 			Map<String, Object> properties) {
 		s_logger.debug("Activating {}", APP_ID);
-
 		m_properties = new HashMap<String, Object>();
 
 		doUpdate(properties);
@@ -87,6 +86,17 @@ public class GpioComponent implements ConfigurableComponent, PinListener {
 		
 		if(m_blinker != null){
 			m_blinker.cancel(true);
+		}
+		
+		Iterator<GPIOPin> pins_it = m_pins.iterator();
+		while (pins_it.hasNext()) {
+			try {
+				GPIOPin p = pins_it.next();				
+				s_logger.warn("Closing GPIO pin {}", p.getDescriptor().getConfiguration().toString());
+				p.close();
+			} catch (IOException e) {
+				s_logger.warn("Cannot close pin!");
+			}
 		}
 	}
 
@@ -110,9 +120,9 @@ public class GpioComponent implements ConfigurableComponent, PinListener {
 	 * Called after a new set of properties has been configured on the service
 	 */
 	private void doUpdate(Map<String, Object> properties) {
-		for (String s : properties.keySet()) {
-			s_logger.info("Update - " + s + ": " + properties.get(s));
-		}
+//		for (String s : properties.keySet()) {
+//			s_logger.info("Update - " + s + ": " + properties.get(s));
+//		}
 
 		m_properties.clear();
 		m_properties.putAll(properties);
@@ -121,7 +131,7 @@ public class GpioComponent implements ConfigurableComponent, PinListener {
 		while (pins_it.hasNext()) {
 			try {
 				GPIOPin p = pins_it.next();				
-				s_logger.warn("Closing GPIO pin {}", p.getDescriptor().toString());
+				s_logger.warn("Closing GPIO pin {}", p.getDescriptor().getConfiguration().toString());
 				p.close();
 			} catch (IOException e) {
 				s_logger.warn("Cannot close pin!");
@@ -131,13 +141,12 @@ public class GpioComponent implements ConfigurableComponent, PinListener {
 		m_pins.clear();
 
 		Integer[] pins = (Integer[]) properties.get(PROP_NAME_GPIO_PINS);
-		Integer[] directions = (Integer[]) properties
-				.get(PROP_NAME_GPIO_DIRECTIONS);
+		Integer[] directions = (Integer[]) properties.get(PROP_NAME_GPIO_DIRECTIONS);
 		Integer[] modes = (Integer[]) properties.get(PROP_NAME_GPIO_MODES);
-		Integer[] triggers = (Integer[]) properties
-				.get(PROP_NAME_GPIO_TRIGGERS);
+		Integer[] triggers = (Integer[]) properties.get(PROP_NAME_GPIO_TRIGGERS);
 		for (int i = 0; i < pins.length; i++) {
 			try {
+				final int pinNum = pins[i];
 				s_logger.info("Acquiring GPIO pin {} with params:",pins[i]);
 				s_logger.info("   Direction....: {}",directions[i]);
 				s_logger.info("   Mode.........: {}",modes[i]);
@@ -156,6 +165,7 @@ public class GpioComponent implements ConfigurableComponent, PinListener {
 								boolean value = !m_pins.get(final_index).getValue();
 								s_logger.info("Setting GPIO pin {} to {}", m_pins.get(final_index).getDescriptor().toString(), value);							
 								m_pins.get(final_index).setValue(value);
+								//s_logger.info("Trigger = "+m_pins.get(final_index).getTrigger());
 							} catch (UnavailableDeviceException e) {
 								s_logger.warn("GPIO pin {} is not available for export.", final_index);
 							} catch (ClosedDeviceException e) {
@@ -168,6 +178,14 @@ public class GpioComponent implements ConfigurableComponent, PinListener {
 					}, 0, 2, TimeUnit.SECONDS);
 				}else{
 					s_logger.info("Attaching Pin Listener to GPIO pin {}", pins[i]);
+					PinListener listener = new PinListener() {
+						private int pinNumber = pinNum;
+						@Override
+						public void valueChanged(PinEvent event) {
+							s_logger.info("Pin status for GPIO pin {} changed to {}", pinNumber, event.getValue());
+						}					
+					};
+					p.setInputListener(listener);
 				}				
 			} catch (InvalidDeviceConfigException e) {
 				s_logger.warn("Invalid PIN configuration for GPIO pin {}", pins[i]);
@@ -186,8 +204,4 @@ public class GpioComponent implements ConfigurableComponent, PinListener {
 		}
 	}
 
-	@Override
-	public void valueChanged(PinEvent pinEvent) {
-		s_logger.info("Pin status for GPIO pin {} changed to {}", pinEvent.getDevice().getDescriptor().getID(), pinEvent.getValue());
-	}
 }

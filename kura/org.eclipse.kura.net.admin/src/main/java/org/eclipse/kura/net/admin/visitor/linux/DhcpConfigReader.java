@@ -28,7 +28,6 @@ import org.eclipse.kura.core.net.NetworkConfiguration;
 import org.eclipse.kura.core.net.NetworkConfigurationVisitor;
 import org.eclipse.kura.core.net.WifiInterfaceAddressConfigImpl;
 import org.eclipse.kura.core.net.util.NetworkUtil;
-import org.eclipse.kura.core.util.NetUtil;
 import org.eclipse.kura.net.IP4Address;
 import org.eclipse.kura.net.IPAddress;
 import org.eclipse.kura.net.NetConfig;
@@ -139,8 +138,6 @@ public class DhcpConfigReader implements NetworkConfigurationVisitor {
 					} else if(token.equals("subnet")) {
 						subnet = (IP4Address) IPAddress.parseHostAddress(st.nextToken());
 						if(!st.nextToken().equals("netmask")) {
-							br.close();
-							br = null;
 							throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR, "invalid dhcp config file: " + dhcpConfigFile.getAbsolutePath());
 						}
 						netmask = (IP4Address) IPAddress.parseHostAddress(st.nextToken());
@@ -180,8 +177,6 @@ public class DhcpConfigReader implements NetworkConfigurationVisitor {
 					}
 				}
 			}
-            br.close();
-            br = null;
 
 			StringBuilder sb = new StringBuilder().append("net.interface.").append(interfaceName).append(".config.dhcpServer4.enabled");
 			if(kuraExtendedProps != null && kuraExtendedProps.getProperty(sb.toString()) != null) {
@@ -218,6 +213,14 @@ public class DhcpConfigReader implements NetworkConfigurationVisitor {
 			throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR, e);
 		} catch (IOException e) {
 			throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR, e);
+		} finally{
+			if(br != null){
+				try{
+					br.close();
+				}catch(IOException ex){
+					s_logger.error("I/O Exception while closing BufferedReader!");
+				}
+			}	
 		}
         
         return dhcpServerConfigIP4;

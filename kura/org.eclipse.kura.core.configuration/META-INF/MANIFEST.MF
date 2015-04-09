@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: org.eclipse.kura.core.configuration
 Bundle-SymbolicName: org.eclipse.kura.core.configuration;singleton:=true
-Bundle-Version: 1.0.2.qualifier
+Bundle-Version: 1.0.2
 Bundle-Vendor: EUROTECH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Service-Component: OSGI-INF/*.xml
@@ -30,7 +30,7 @@ Import-Package: javax.crypto,
  org.osgi.util.tracker;version="[1.5.0,2.0.0)",
  org.slf4j;version="1.6.4",
  org.w3c.dom
-Export-Package: org.eclipse.kura.core.configuration; version="1.0.0",o
+Export-Package: org.eclipse.kura.core.configuration; version="1.0.2",o
  rg.eclipse.kura.core.configuration.metatype; version="1.0.0",org.ecli
  pse.kura.core.configuration.util; version="1.0.0"
 

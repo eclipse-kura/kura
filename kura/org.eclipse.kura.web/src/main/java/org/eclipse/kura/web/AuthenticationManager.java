@@ -165,11 +165,12 @@ public class AuthenticationManager
 			// If admin not in DB AND we are using in memory only storage,
 			// then check if admin has been saved to disk
 			if (!bAdminExists && conn.getMetaData().getURL().startsWith("jdbc:hsqldb:mem")) {
+				BufferedReader br = null;
 				try {
 					CryptoService cryptoService = ServiceLocator.getInstance().getService(CryptoService.class);
 					File adminFile = new File(m_dataDir + "/ap_store");
 					if (adminFile.exists() && !adminFile.isDirectory()) {
-						BufferedReader br = new BufferedReader(new FileReader(adminFile));
+						br = new BufferedReader(new FileReader(adminFile));
 						String[] adminString = br.readLine().split(":", 2);
 						createAdminUser(cryptoService.decryptAes(adminString[1]));
 						bAdminExists = true;
@@ -182,6 +183,14 @@ public class AuthenticationManager
 					e.printStackTrace();
 				} catch (Exception e) {
 					e.printStackTrace();
+				} finally{
+					if(br != null){
+						try{
+							br.close();
+						}catch(IOException ex){
+							ex.printStackTrace();
+						}
+					}
 				}
 				
 			}

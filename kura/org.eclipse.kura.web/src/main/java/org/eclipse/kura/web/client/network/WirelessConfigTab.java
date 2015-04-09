@@ -115,7 +115,8 @@ public class WirelessConfigTab extends LayoutContainer
 
 	private static final String PASSWORD_REGEX_ANY  = ".*";
 	private static final String PASSWORD_REGEX_WPA  = "^[ -~]{8,63}$"; // Match all ASCII printable characters
-	private static final String PASSWORD_REGEX_WEP  = "^(?:\\w{5}|\\w{13}|\\w{16}|[a-fA-F0-9]{10}|[a-fA-F0-9]{26}|[a-fA-F0-9]{32})$";
+	//private static final String PASSWORD_REGEX_WEP  = "^(?:\\w{5}|\\w{13}|\\w{16}|[a-fA-F0-9]{10}|[a-fA-F0-9]{26}|[a-fA-F0-9]{32})$";
+	private static final String PASSWORD_REGEX_WEP  = "^(?:\\w{5}|\\w{13}|[a-fA-F0-9]{10}|[a-fA-F0-9]{26})$";
 	private static final int	MAX_WIFI_CHANNEL	= 13;
 	
 	//private final TextArea toolTipField = new TextArea();
@@ -283,6 +284,7 @@ public class WirelessConfigTab extends LayoutContainer
                             m_activeWifiConfig = m_selectNetIfConfig.getStationWifiConfig();
                         }
       	    	        m_tcpIpStatus = tcpIpStatus;
+      	    	        m_netInterfaceConfigTabs.adjustInterfaceTabs();
       	    	    }
   	    	    }
   	    	    refreshForm();
@@ -515,7 +517,9 @@ public class WirelessConfigTab extends LayoutContainer
         m_radioModeCombo.setTypeAhead(true);
         m_radioModeCombo.setTriggerAction(TriggerAction.ALL);
         for (GwtWifiRadioMode mode : GwtWifiRadioMode.values()) {
-        	m_radioModeCombo.add(MessageUtils.get(mode.name()));
+        	if (mode != GwtWifiRadioMode.netWifiRadioModeA) { // we don't support 802.11a yet
+        		m_radioModeCombo.add(MessageUtils.get(mode.name()));
+        	}
         }
         m_radioModeCombo.setSimpleValue(MessageUtils.get(GwtWifiRadioMode.netWifiRadioModeBGN.name()));
         m_radioModeCombo.addSelectionChangedListener( new SelectionChangedListener<SimpleComboValue<String>>() {			
@@ -937,12 +941,20 @@ public class WirelessConfigTab extends LayoutContainer
 	}
     
     public GwtWifiWirelessMode getWirelessMode() {
+    	Log.warn("[+] WirelessConfigTab :: getWirelessMode()");
 		if (m_modeCombo != null) {
 		    return m_modeCombo.getValue().getMode();
-		} else if(m_selectNetIfConfig != null) {
+		} 
+		else if(m_activeWifiConfig != null) {
+			return GwtWifiWirelessMode.valueOf(m_activeWifiConfig.getWirelessMode());
+		} 
+		/*
+		else if(m_selectNetIfConfig != null) {
 			return GwtWifiWirelessMode.valueOf(m_selectNetIfConfig.getWirelessMode());
 		}
-
+		*/
+		
+		Log.warn("[- null] WirelessConfigTab :: getWirelessMode()");
     	return null;
     }
 	    

@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: org.eclipse.kura.api
 Bundle-SymbolicName: org.eclipse.kura.api;singleton:=true
-Bundle-Version: 1.0.2
+Bundle-Version: 1.0.3
 Bundle-Vendor: EUROTECH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Export-Package: org.eclipse.kura; version="1.0.0",org.eclipse.kura.blu
@@ -13,7 +13,7 @@ Export-Package: org.eclipse.kura; version="1.0.0",org.eclipse.kura.blu
  rsion="1.0.0",org.eclipse.kura.crypto; version="1.0.0",org.eclipse.ku
  ra.data; version="1.0.0",org.eclipse.kura.db; version="1.0.0",org.ecl
  ipse.kura.linux.udev; version="1.0.0",org.eclipse.kura.message; versi
- on="1.0.0",org.eclipse.kura.net; version="1.0.0",org.eclipse.kura.net
+ on="1.0.0",org.eclipse.kura.net; version="1.1.0",org.eclipse.kura.net
  .dhcp; version="1.0.0",org.eclipse.kura.net.dns; version="1.0.0",org.
  eclipse.kura.net.firewall; version="1.0.0",org.eclipse.kura.net.modem
  ; version="1.1.0",org.eclipse.kura.net.route; version="1.0.0",org.ecl

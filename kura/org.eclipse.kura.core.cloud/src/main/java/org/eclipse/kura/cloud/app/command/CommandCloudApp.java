@@ -13,9 +13,7 @@ package org.eclipse.kura.cloud.app.command;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Iterator;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;

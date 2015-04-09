@@ -361,7 +361,7 @@ public class TcpIpConfigTab extends LayoutContainer
         m_statusCombo.addSelectionChangedListener( new SelectionChangedListener<GwtNetIfStatusModel>() {			
 			@Override
 			public void selectionChanged(SelectionChangedEvent<GwtNetIfStatusModel> se) {
-			    adjustTabs();
+				m_netInterfaceConfigTabs.adjustInterfaceTabs();
 				refreshForm();
 				// Check for other WAN interfaces if current interface is changed to WAN
 				if(isWanEnabled()) {
@@ -413,7 +413,7 @@ public class TcpIpConfigTab extends LayoutContainer
         m_configureCombo.addSelectionChangedListener( new SelectionChangedListener<SimpleComboValue<String>>() {			
 			@Override
 			public void selectionChanged(SelectionChangedEvent<SimpleComboValue<String>> se) {
-				adjustTabs();
+				m_netInterfaceConfigTabs.adjustInterfaceTabs();
 				refreshForm();
 			}
 		});
@@ -579,7 +579,7 @@ public class TcpIpConfigTab extends LayoutContainer
 			m_configureCombo.setOriginalValue(m_configureCombo.getValue());
 			
 			// adjust tabs based on status and configure combo boxes
-			adjustTabs();
+			m_netInterfaceConfigTabs.adjustInterfaceTabs();
 			
 			m_ipAddressField.setValue(m_selectNetIfConfig.getIpAddress());
 			m_ipAddressField.setOriginalValue(m_selectNetIfConfig.getIpAddress());
@@ -668,7 +668,7 @@ public class TcpIpConfigTab extends LayoutContainer
         				m_ipAddressField.setEnabled(true);
         				m_subnetMaskField.setEnabled(true);
         				m_gatewayField.setEnabled(true);
-        				/*
+        				
         				if (GwtNetIfStatus.netIPv4StatusEnabledWAN.equals(statusValue)) {
         				    Log.debug("Enabling gateway field");
         				    m_gatewayField.setEnabled(true);
@@ -677,7 +677,7 @@ public class TcpIpConfigTab extends LayoutContainer
         					m_gatewayField.setValue("");
         					m_gatewayField.setEnabled(false);
         				}
-        				*/
+        				
         				m_renewDHCPButton.setEnabled(false);
         			}
         			m_dnsField.setEnabled(true);
@@ -735,27 +735,6 @@ public class TcpIpConfigTab extends LayoutContainer
         m_statusListStore.add(new GwtNetIfStatusModel(GwtNetIfStatus.netIPv4StatusEnabledWAN,
                 MessageUtils.get("netIPv4StatusEnabledWAN"),
                 MSGS.netIPv4ToolTipStatusEnabledWAN()));
-	}
-	
-	// Enable/disable other tabs according to the selected settings
-	private void adjustTabs() {
-		m_netInterfaceConfigTabs.adjustInterfaceTabs();
-		/*
-	    if (GwtNetIfStatus.netIPv4StatusEnabledLAN.equals(m_statusCombo.getValue().getStatus())) {
-            m_netInterfaceConfigTabs.addInterfaceTabs();
-            if(MessageUtils.get(GwtNetIfConfigMode.netIPv4ConfigModeDHCP.name()).equals(m_configureCombo.getSimpleValue())) {
-            	m_netInterfaceConfigTabs.removeDhcpNatTab();
-            }
-            m_statusCombo.addListener(Events.OnMouseOver, new MouseOverListener(MSGS.netIPv4ToolTipStatusEnabledLAN()));
-        } else if (GwtNetIfStatus.netIPv4StatusEnabledWAN.equals(m_statusCombo.getValue().getStatus())) {
-            m_netInterfaceConfigTabs.addInterfaceTabs();
-            m_netInterfaceConfigTabs.removeDhcpNatTab();
-            m_statusCombo.addListener(Events.OnMouseOver, new MouseOverListener(MSGS.netIPv4ToolTipStatusEnabledWAN()));
-        } else {
-            m_netInterfaceConfigTabs.removeInterfaceTabs();
-            m_statusCombo.addListener(Events.OnMouseOver, new MouseOverListener(MSGS.netIPv4ToolTipStatus()));
-        }
-        */
 	}
 	
     // Combo box item template

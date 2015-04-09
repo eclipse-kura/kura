@@ -57,7 +57,6 @@ public class NetInterfaceConfigTabs extends LayoutContainer
 	
 	private Object				   m_tabsPanelLock = new Object();
 	
-    
 	public NetInterfaceConfigTabs(GwtSession currentSession) {
 	    
 		m_currentSession   = currentSession;
@@ -159,8 +158,9 @@ public class NetInterfaceConfigTabs extends LayoutContainer
      	m_tcpIpConfigTab.setNetInterface(netIfConfig);     	
     	m_dhcpNatConfigTab.setNetInterface(netIfConfig);
     	m_hwConfigTab.setNetInterface(netIfConfig);
-		m_wirelessConfigTab.setNetInterface(m_netIfConfig);
-		m_modemConfigTab.setNetInterface(m_netIfConfig);
+    	
+		m_wirelessConfigTab.setNetInterface(netIfConfig);
+		m_modemConfigTab.setNetInterface(netIfConfig);
     	
     	// set the tabs for this interface
     	removeInterfaceTabs();    	
@@ -321,8 +321,7 @@ public class NetInterfaceConfigTabs extends LayoutContainer
 			// remove dhcp/nat tab if not an access point
 			if(!GwtWifiWirelessMode.netWifiWirelessModeAccessPoint.equals(m_wirelessConfigTab.getWirelessMode())) {
 				includeDhcpNatTab = false;
-			} 
-			
+			}			
 		} else if(m_netIfConfig instanceof GwtModemInterfaceConfig) {
 			includeDhcpNatTab = false;
 			removeTab(m_tabWirelessConfig);

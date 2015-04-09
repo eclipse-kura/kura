@@ -17,19 +17,16 @@ import java.util.List;
 import org.eclipse.kura.net.EthernetInterface;
 import org.eclipse.kura.net.NetInterfaceAddress;
 import org.eclipse.kura.net.NetInterfaceType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class EthernetInterfaceImpl<T extends NetInterfaceAddress> extends AbstractNetInterface<T> implements EthernetInterface<T>
 {
-    private static final Logger s_logger = LoggerFactory.getLogger(EthernetInterfaceImpl.class);
-    
 	private boolean linkUp;
 	
 	public EthernetInterfaceImpl(String name) {
 		super(name);
 	}
 		   
+    @SuppressWarnings("unchecked")
     public EthernetInterfaceImpl(EthernetInterface<? extends NetInterfaceAddress> other) {
         super(other);
         this.linkUp = other.isLinkUp();
@@ -40,12 +37,8 @@ public class EthernetInterfaceImpl<T extends NetInterfaceAddress> extends Abstra
 
         if(otherNetInterfaceAddresses != null) {
             for(NetInterfaceAddress netInterfaceAddress : otherNetInterfaceAddresses) {
-                try {
-                    NetInterfaceAddressImpl copiedInterfaceAddressImpl = new NetInterfaceAddressImpl(netInterfaceAddress);
-                    interfaceAddresses.add((T)copiedInterfaceAddressImpl);
-                } catch (Exception e) {
-                    s_logger.debug("Could not copy interface address: " + netInterfaceAddress);
-                }
+                NetInterfaceAddressImpl copiedInterfaceAddressImpl = new NetInterfaceAddressImpl(netInterfaceAddress);
+                interfaceAddresses.add((T)copiedInterfaceAddressImpl);
             }
         }
         this.setNetInterfaceAddresses(interfaceAddresses);

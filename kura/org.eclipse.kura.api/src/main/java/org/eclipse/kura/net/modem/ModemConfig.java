@@ -587,7 +587,7 @@ public class ModemConfig implements NetConfig {
 				return false;
 			}
 		} else {
-			if ((otherConfig.getPassword() != null) && (otherConfig.getPassword().length() > 0)) {
+			if ((otherConfig.getActiveFilter() != null) && (otherConfig.getActiveFilter().length() > 0)) {
 				return false;
 			}
 		}

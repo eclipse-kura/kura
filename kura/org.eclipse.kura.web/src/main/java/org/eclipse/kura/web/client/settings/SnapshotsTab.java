@@ -21,9 +21,12 @@ import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.client.widget.FileUploadDialog;
 import org.eclipse.kura.web.shared.model.GwtSession;
 import org.eclipse.kura.web.shared.model.GwtSnapshot;
+import org.eclipse.kura.web.shared.service.GwtNetworkService;
+import org.eclipse.kura.web.shared.service.GwtNetworkServiceAsync;
 import org.eclipse.kura.web.shared.service.GwtSnapshotService;
 import org.eclipse.kura.web.shared.service.GwtSnapshotServiceAsync;
 
+import com.allen_sauer.gwt.log.client.Log;
 import com.extjs.gxt.ui.client.Style.HorizontalAlignment;
 import com.extjs.gxt.ui.client.Style.Scroll;
 import com.extjs.gxt.ui.client.Style.SelectionMode;
@@ -67,6 +70,7 @@ public class SnapshotsTab extends LayoutContainer {
 	private static final Messages MSGS = GWT.create(Messages.class);
 
 	private final GwtSnapshotServiceAsync gwtSnapshotService = GWT.create(GwtSnapshotService.class);
+	private final GwtNetworkServiceAsync gwtNetworkService = GWT.create(GwtNetworkService.class);
 	
 	private final static String SERVLET_URL = "/" + GWT.getModuleName() + "/file/configuration/snapshot";
 	
@@ -308,11 +312,9 @@ public class SnapshotsTab extends LayoutContainer {
                         // if confirmed, delete
                         Dialog  dialog = ce.getDialog(); 
                         if (dialog.yesText.equals(ce.getButtonClicked().getText())) {
-
                         	m_dirty = true;
                         	m_grid.mask(MSGS.rollingBack());
                         	m_toolBar.disable();
-
                         	// do the rollback
                         	gwtSnapshotService.rollbackDeviceSnapshot(
                         			snapshot,  
@@ -322,9 +324,23 @@ public class SnapshotsTab extends LayoutContainer {
 						                    m_dirty = true;
 						                }                        								    
 						                public void onSuccess(Void arg0) {
-						                    refresh();
+						                	refresh();
 						                }
                         			});
+                        	
+                        	if (snapshot.getSnapshotId() == 0L) {
+		                		if (gwtNetworkService != null) {
+			                		gwtNetworkService.rollbackDefaultConfiguration(new AsyncCallback<Void>() {                        										 	    
+						                public void onFailure(Throwable caught) {
+						                    FailureHandler.handle(caught);
+						                    m_dirty = true;
+						                }                        								    
+						                public void onSuccess(Void arg0) {
+						                    refresh();
+						                }
+		                			});
+		                		}
+		                	}
                         }
                     }
         	});

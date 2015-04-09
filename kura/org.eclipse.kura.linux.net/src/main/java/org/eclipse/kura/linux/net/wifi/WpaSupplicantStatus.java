@@ -17,6 +17,7 @@ import java.util.Properties;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.util.ProcessUtil;
+import org.eclipse.kura.core.util.SafeProcess;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,21 +40,26 @@ public class WpaSupplicantStatus {
 	public WpaSupplicantStatus (String iface) throws KuraException {
 		
 		m_props = new Properties();
-		Process proc = null;
+		SafeProcess proc = null;
 		try {
 			proc = ProcessUtil.exec(formSupplicantStatusCommand(iface));
+			if (proc.waitFor() != 0) {
+				s_logger.error("error executing command --- {} --- exit value = {}", formSupplicantStatusCommand(iface), proc.exitValue());
+				throw new KuraException(KuraErrorCode.INTERNAL_ERROR);
+			}
+
 			m_props.load(proc.getInputStream());
 			
 			Enumeration<Object> keys = m_props.keys();
 			while (keys.hasMoreElements()) {
 				String key = (String)keys.nextElement();
-				s_logger.trace("[WpaSupplicant Status] " + key + "=" + m_props.getProperty(key));
+				s_logger.trace("[WpaSupplicant Status] {} = {}", key, m_props.getProperty(key));
 			}
 		} catch (Exception e) {
 			throw new KuraException (KuraErrorCode.INTERNAL_ERROR, e);
 		}
 		finally {
-			ProcessUtil.destroy(proc);
+			if (proc != null) ProcessUtil.destroy(proc);
 		}		
 	}
 	
@@ -94,8 +100,7 @@ public class WpaSupplicantStatus {
 	}
 	
 	private static String formSupplicantStatusCommand (String iface) {
-		
-		StringBuffer sb = new StringBuffer ();
+		StringBuilder sb = new StringBuilder();
 		sb.append("wpa_cli -i ");
 		sb.append(iface);
 		sb.append(" status");

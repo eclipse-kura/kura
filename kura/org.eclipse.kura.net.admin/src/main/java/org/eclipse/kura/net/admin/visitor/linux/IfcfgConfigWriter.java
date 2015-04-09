@@ -225,16 +225,26 @@ public class IfcfgConfigWriter implements NetworkConfigurationVisitor {
 			}
 			
 			if (allowWrite) {
+				FileOutputStream fos = null;
+				PrintWriter pw = null;
 				try {
-					FileOutputStream fos = new FileOutputStream(tmpOutputFileName);
-					PrintWriter pw = new PrintWriter(fos);
+					fos = new FileOutputStream(tmpOutputFileName);
+					pw = new PrintWriter(fos);
 					pw.write(sb.toString());
 					pw.flush();
 					fos.getFD().sync();
-					pw.close();
-					fos.close();
 				} catch (Exception e) {
 					throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+				}
+				finally {
+					if(fos != null){
+						try{
+							fos.close();
+						}catch(IOException ex){
+							s_logger.error("I/O Exception while closing BufferedReader!");
+						}
+					}
+					if (pw != null) pw.close();
 				}
 				
 				//move the file if we made it this far
@@ -271,56 +281,68 @@ public class IfcfgConfigWriter implements NetworkConfigurationVisitor {
 			Scanner scanner = null;
 			try {
 				scanner = new Scanner (new FileInputStream(kuraFile));
-			} catch (FileNotFoundException e1) {
+		
+				//need to loop through the existing file and replace only the desired interface
+				while (scanner.hasNextLine()) {
+					String noTrimLine = scanner.nextLine();
+					String line = noTrimLine.trim();
+	                //ignore comments and blank lines
+	                if (!line.isEmpty() && !line.startsWith("#")) {
+	                    String[] args = line.split("\\s+");
+	                        //must be a line stating that interface starts on boot
+	                    if(args.length > 1) {
+	                    	if (args[1].equals(iName)) {
+	                    		s_logger.debug("Found entry in interface file...");
+	                    		appendConfig = false;
+	                            sb.append(debianWriteUtility(netInterfaceConfig.getNetInterfaceAddresses(), iName));
+								
+								//remove old config lines from the scanner
+								while (scanner.hasNextLine() && !(line = scanner.nextLine()).isEmpty()) {
+								}
+								sb.append("\n");
+	                    	} else {
+	                    		sb.append(noTrimLine + "\n");
+	                    	}
+	                    }
+	                } else {
+	                	sb.append(noTrimLine + "\n");
+	                }
+				}
+			}
+			catch (FileNotFoundException e1) {
 				throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e1);
 			}
-		
-			//need to loop through the existing file and replace only the desired interface
-			while (scanner.hasNextLine()) {
-				String noTrimLine = scanner.nextLine();
-				String line = noTrimLine.trim();
-                //ignore comments and blank lines
-                if (!line.isEmpty() && !line.startsWith("#")) {
-                    String[] args = line.split("\\s+");
-                        //must be a line stating that interface starts on boot
-                    if(args.length > 1) {
-                    	if (args[1].equals(iName)) {
-                    		s_logger.debug("Found entry in interface file...");
-                    		appendConfig = false;
-                            sb.append(debianWriteUtility(netInterfaceConfig.getNetInterfaceAddresses(), iName));
-							
-							//remove old config lines from the scanner
-							while (scanner.hasNextLine() && !(line = scanner.nextLine()).isEmpty()) {
-							}
-							sb.append("\n");
-                    	} else {
-                    		sb.append(noTrimLine + "\n");
-                    	}
-                    }
-                } else {
-                	sb.append(noTrimLine + "\n");
-                }
+			finally {
+				scanner.close();
+				scanner = null;				
 			}
+			
 			// If config not present in file, append to end
 			if (appendConfig) {
 				s_logger.debug("Appending entry to interface file...");
 				sb.append(debianWriteUtility(netInterfaceConfig.getNetInterfaceAddresses(), iName));
 				sb.append("\n");
 			}
-			
-			scanner.close();
-			scanner = null;
-			
+						
+			FileOutputStream fos = null;
+			PrintWriter pw = null;
 			try {
-				FileOutputStream fos = new FileOutputStream(DEBIAN_TMP_NET_CONFIGURATION_FILE);
-				PrintWriter pw = new PrintWriter(fos);
+				fos = new FileOutputStream(DEBIAN_TMP_NET_CONFIGURATION_FILE);
+				pw = new PrintWriter(fos);
 				pw.write(sb.toString());
 				pw.flush();
 				fos.getFD().sync();
-				pw.close();
-				fos.close();
 			} catch(Exception e) {
 				throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+			} finally {
+				if(fos != null){
+					try{
+						fos.close();
+					}catch(IOException ex){
+						s_logger.error("I/O Exception while closing BufferedReader!");
+					}
+				}
+				if (pw != null) pw.close();				
 			}
 			
 			//move the file if we made it this far

@@ -748,7 +748,7 @@ public class LinuxNetworkUtil {
 			}
 
 			//determine if wifi
-			if (stringType.equals("ETHERNET")) {
+			if ("ETHERNET".equals(stringType)) {
 				Collection<String> wifiOptions = WifiOptions.getSupportedOptions(ifaceName);
 				if (wifiOptions.size() > 0) {
 					for (String op : wifiOptions) {

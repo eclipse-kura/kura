@@ -57,7 +57,7 @@ public class UpgradeScriptResourceProcessorImpl implements ResourceProcessor {
 			throw new ResourceProcessorException(ResourceProcessorException.CODE_PREPARE,
 					"Failed to create temporary file for resource: " + name, ioe);
 		}
-		tmpFile.deleteOnExit();
+
 		try {
 			FileUtils.copyInputStreamToFile(stream, tmpFile);
 		} catch (IOException ioe) {

@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: org.eclipse.kura.web
 Bundle-SymbolicName: org.eclipse.kura.web;singleton:=true
-Bundle-Version: 1.0.3.qualifier
+Bundle-Version: 1.0.3
 Bundle-Vendor: EUROTECH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Service-Component: OSGI-INF/*.xml
@@ -76,4 +76,5 @@ Import-Package:
  org.osgi.util.position;version="1.0.1",
  org.slf4j;version="1.6.4"
 Bundle-ClassPath: .,
-  lib/gxt-2.2.5.jar
+  lib/gxt-2.2.5.jar,
+  target/org.eclipse.kura.web-1.0.3/WEB-INF/lib/gxt-2.2.5.jar

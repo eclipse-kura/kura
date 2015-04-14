@@ -21,7 +21,7 @@ import java.util.Map;
 import org.eclipse.kura.configuration.metatype.AD;
 import org.eclipse.kura.configuration.metatype.OCD;
 import org.eclipse.kura.configuration.metatype.Scalar;
-import org.eclipse.kura.core.configuration.Password;
+import org.eclipse.kura.configuration.Password;
 
 public class CollectionsUtil 
 {

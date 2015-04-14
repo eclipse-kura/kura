@@ -25,7 +25,7 @@ import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.configuration.KuraConfigReadyEvent;
-import org.eclipse.kura.core.configuration.Password;
+import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.db.DbService;
 import org.eclipse.kura.system.SystemService;

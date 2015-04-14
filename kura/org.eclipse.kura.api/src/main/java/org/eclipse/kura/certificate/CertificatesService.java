@@ -24,13 +24,13 @@ public interface CertificatesService {
 	public void storeCertificate(Certificate cert, String alias) throws KuraException;
 	
 	/**
-	 * listStoredCertificatesAliases provides an enumeration of strings representing the different public certificates 
+	 * listCACertificatesAliases provides an enumeration of strings representing the different CA certificates 
 	 * stored in a key store
 	 * 
-	 * @return An enumeration containing the strings that represent the aliases stored in a key store.
+	 * @return An enumeration containing the strings that represent the CA aliases stored in a key store.
 	 * 
 	 */
-	public Enumeration<String> listStoredCertificatesAliases();
+	public Enumeration<String> listCACertificatesAliases();
 	
 	/**
 	 * listSSLCertificatesAliases provides an enumeration of strings representing the different ssl certificates 

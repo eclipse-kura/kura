@@ -20,6 +20,7 @@ import java.util.Map;
 import javax.xml.bind.annotation.adapters.XmlAdapter;
 
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.core.configuration.XmlConfigPropertyAdapted.ConfigPropertyType;
 import org.eclipse.kura.crypto.CryptoService;
 import org.osgi.framework.BundleContext;

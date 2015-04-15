@@ -69,6 +69,7 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
 {
 	private static final Logger s_logger = LoggerFactory.getLogger(SslManagerServiceImpl.class);
 	private static final String APP_PID = "service.pid";
+	private static ComponentContext s_context;
 
 	private SslServiceListeners		 m_sslServiceListeners;
 
@@ -86,7 +87,8 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
 
 	private ExecutorService m_worker;
 	private Future<?> m_handle;
-	private static ComponentContext s_context;
+
+	private boolean serviceEnabled = true;
 
 
 
@@ -142,84 +144,55 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
 		// on ProSyst
 		m_sslServiceListeners = new SslServiceListeners(listenersTracker);
 
-		m_properties= properties;
-		if(m_options.getSslKeystorePassword() == null){
-			String randomValue= new BigInteger(160, random).toString(32);
+		decryptProperties(properties);
+
+		char[] keystorePassword= m_cryptoService.getKeyStorePassword(m_options.getSslTrustStore());
+
+		if(m_options.getSslKeystorePassword() == null && keystorePassword != null && verifyEnvironmentProperties(keystorePassword)){
+
+				String randomValue= new BigInteger(160, random).toString(32);
 
 
-			HashMap<String, Object> propertiesCopy= new HashMap<String, Object>();
-			Iterator<String> keys = properties.keySet().iterator();
-			while (keys.hasNext()) {
-				String key = keys.next();
-				Object value = properties.get(key);
-				propertiesCopy.put(key, value);
-			}
-
-			propertiesCopy.put(SslManagerServiceOptions.PROP_TRUST_PASSWORD, new Password(randomValue.toCharArray()));
-			try {
-				char[] oldPassword= m_cryptoService.getKeyStorePassword(m_options.getSslTrustStore());
-				changeSSLKeystorePassword(oldPassword, randomValue.toCharArray());
-				doUpdate(false, propertiesCopy);
-			} catch (IOException | KeyStoreException | NoSuchAlgorithmException | CertificateException e) {
-				e.printStackTrace();
-			} 
-
-		}else{
-			m_properties= new HashMap<String, Object>();
-			Iterator<String> keys = properties.keySet().iterator();
-			while (keys.hasNext()) {
-				String key = keys.next();
-				Object value = properties.get(key);
-				if (key.equals(SslManagerServiceOptions.PROP_TRUST_PASSWORD)) {
-					try {
-						char[] decryptedPassword= m_cryptoService.decryptAes(value.toString().toCharArray());
-						m_properties.put(key, decryptedPassword);
-					} catch (Exception e) {
-						m_properties.put(key, value.toString().toCharArray());
-					} 
-				}else{
-					m_properties.put(key, value);
+				HashMap<String, Object> propertiesCopy= new HashMap<String, Object>();
+				Iterator<String> keys1 = properties.keySet().iterator();
+				while (keys1.hasNext()) {
+					String key = keys1.next();
+					Object value = properties.get(key);
+					propertiesCopy.put(key, value);
 				}
-			}
+
+				propertiesCopy.put(SslManagerServiceOptions.PROP_TRUST_PASSWORD, new Password(randomValue.toCharArray()));
+				try {
+
+					changeSSLKeystorePassword(keystorePassword, randomValue.toCharArray());
+					doUpdate(false, propertiesCopy);
+				} catch (IOException | KeyStoreException | NoSuchAlgorithmException | CertificateException e) {
+					e.printStackTrace();
+				} 
+				
+		}else if(m_options.getSslKeystorePassword() != null && !verifyEnvironmentProperties(m_options.getSslKeystorePassword().toCharArray())){
+			serviceEnabled= false;
 		}
-
-
 	}
 
 	public void updated(Map<String,Object> properties)
 	{
 		s_logger.info("updated...: " + properties);
 
-		m_properties= new HashMap<String, Object>();
-
-		Iterator<String> keys = properties.keySet().iterator();
-		while (keys.hasNext()) {
-			String key = keys.next();
-			Object value = properties.get(key);
-			if (key.equals(SslManagerServiceOptions.PROP_TRUST_PASSWORD)) {
-				try {
-					char[] decryptedPassword= m_cryptoService.decryptAes(value.toString().toCharArray());
-					m_properties.put(key, decryptedPassword);
-				} catch (Exception e) {
-					m_properties.put(key, value.toString().toCharArray());
-				} 
-			}else{
-				m_properties.put(key, value);
-			}
-		}
+		decryptProperties(properties);
 
 		char[] oldPassword= m_cryptoService.getKeyStorePassword(m_options.getSslTrustStore());
 		try {
-			
+
 			char[] newPassword= (char[]) m_properties.get(SslManagerServiceOptions.PROP_TRUST_PASSWORD);
-			
+
 			if(oldPassword != null && !Arrays.equals(oldPassword, newPassword)){
 				changeSSLKeystorePassword(oldPassword, newPassword);
 			}else if(oldPassword == null){
 				changeSSLKeystorePassword(newPassword, newPassword);
 			}
 		} catch (Exception e) {
-			s_logger.info("Eccezione salvataggio");
+			s_logger.info("Problem managing SSL keystore");
 		}
 
 		// Update properties and re-publish Birth certificate
@@ -456,7 +429,7 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
 				}
 			}
 
-			if(!verifyEnvironmentProperties(m_options.getSslKeystorePassword().toCharArray())){
+			if(!serviceEnabled || (m_certificatesService != null && !verifyEnvironmentProperties(m_options.getSslKeystorePassword().toCharArray()))){
 				return null;
 			}
 
@@ -567,19 +540,11 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
 	}
 
 	private boolean verifyEnvironmentProperties(char[] newPassword){
-
-		KeyStore keystore= null;
 		try {
-			keystore = loadKeyStore(m_options.getSslTrustStore(), "eurotech".toCharArray());
-			saveKeyStore(keystore, m_options.getSslTrustStore(), newPassword);
+			loadKeyStore(m_options.getSslTrustStore(), newPassword);
 			return true;
 		} catch (Exception e) {
-			try {
-				keystore= loadKeyStore(m_options.getSslTrustStore(), newPassword);
-				return true; 
-			} catch (Exception e1) {
-				return false;
-			}
+			return false;
 		}
 	}
 
@@ -644,11 +609,30 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
 			}
 		});
 	}
-	
+
 	private void changeSSLKeystorePassword(char[] oldPassword, char[] newPassword) throws IOException, NoSuchAlgorithmException, CertificateException, KeyStoreException{
 		m_cryptoService.setKeyStorePassword(m_options.getSslTrustStore(), new String(newPassword));
 		KeyStore keystore = loadKeyStore(m_options.getSslTrustStore(), oldPassword);
 		saveKeyStore(keystore, m_options.getSslTrustStore(), newPassword);
+	}
+
+	private void decryptProperties(Map<String, Object> properties) {
+		m_properties= new HashMap<String, Object>();
+		Iterator<String> keys = properties.keySet().iterator();
+		while (keys.hasNext()) {
+			String key = keys.next();
+			Object value = properties.get(key);
+			if (key.equals(SslManagerServiceOptions.PROP_TRUST_PASSWORD)) {
+				try {
+					char[] decryptedPassword= m_cryptoService.decryptAes(value.toString().toCharArray());
+					m_properties.put(key, decryptedPassword);
+				} catch (Exception e) {
+					m_properties.put(key, value.toString().toCharArray());
+				} 
+			}else{
+				m_properties.put(key, value);
+			}
+		}
 	}
 
 }

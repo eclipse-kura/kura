@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: org.eclipse.kura.net.admin
 Bundle-SymbolicName: org.eclipse.kura.net.admin;singleton:=true
-Bundle-Version: 1.0.3.qualifier
+Bundle-Version: 1.0.4.qualifier
 Bundle-Vendor: EUROTECH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: javax.microedition.io,
@@ -45,5 +45,5 @@ Service-Component: OSGI-INF/*.xml
 Bundle-ClassPath: .
 Bundle-ActivationPolicy: lazy
 Export-Package: org.eclipse.kura.net.admin;version="1.1.0",
- org.eclipse.kura.net.admin.modem;version="1.0.3",
- org.eclipse.kura.net.admin.monitor;version="1.0.3"
+ org.eclipse.kura.net.admin.modem;version="1.0.4",
+ org.eclipse.kura.net.admin.monitor;version="1.0.4"

@@ -42,6 +42,8 @@ public class LinuxNetworkUtil {
 	private static final Logger s_logger = LoggerFactory.getLogger(LinuxNetworkUtil.class);
 	
 	private static final String OS_VERSION = System.getProperty("kura.os.version");
+	
+	private static Map<String, NetInterfaceType> m_ifaceTypes = new HashMap<String, NetInterfaceType>();
 
 	public static List<String> getInterfaceNames() throws KuraException {
 		SafeProcess proc = null;
@@ -709,8 +711,15 @@ public class LinuxNetworkUtil {
 		if (Character.isDigit(ifaceName.charAt(0))) {
 			return NetInterfaceType.UNKNOWN;
 		}
-			
+		
 		NetInterfaceType ifaceType = NetInterfaceType.UNKNOWN;
+
+		if (m_ifaceTypes.containsKey(ifaceName)) {
+			ifaceType = m_ifaceTypes.get(ifaceName);
+			s_logger.trace("getType() :: interface={}, type={}", ifaceName, ifaceType);
+			return ifaceType;
+		}
+		
 		String stringType = null;
 		SafeProcess proc = null;
 		BufferedReader br = null;
@@ -748,7 +757,7 @@ public class LinuxNetworkUtil {
 			}
 
 			//determine if wifi
-			if (stringType.equals("ETHERNET")) {
+			if ("ETHERNET".equals(stringType)) {
 				Collection<String> wifiOptions = WifiOptions.getSupportedOptions(ifaceName);
 				if (wifiOptions.size() > 0) {
 					for (String op : wifiOptions) {
@@ -778,6 +787,8 @@ public class LinuxNetworkUtil {
 		}
 		
 		s_logger.trace("getType() :: interface={}, type={}", ifaceName, ifaceType);
+		m_ifaceTypes.put(ifaceName, ifaceType);
+		
 		return ifaceType;
 	}
 	

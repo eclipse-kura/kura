@@ -428,8 +428,14 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
 					m_certificatesService= m_ctx.getBundleContext().getService(sr);
 				}
 			}
+			
+			Object decryptedPasswordObject= m_properties.get(SslManagerServiceOptions.PROP_TRUST_PASSWORD);
+			char[] decryptedPasswordArray= null;
+			if(decryptedPasswordObject != null && decryptedPasswordObject instanceof String){
+				decryptedPasswordArray= ((String) decryptedPasswordObject).toCharArray();
+			}
 
-			if(!serviceEnabled || (m_certificatesService != null && !verifyEnvironmentProperties(m_options.getSslKeystorePassword().toCharArray()))){
+			if(!serviceEnabled || (m_certificatesService != null && !verifyEnvironmentProperties(decryptedPasswordArray))){
 				return null;
 			}
 

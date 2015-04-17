@@ -185,12 +185,13 @@ public class Console implements ConfigurableComponent {
 					propertyPassword = m_cryptoService.decryptAes(propertyPassword);
 				} catch (Exception e) {
 				}
+				
 
 				if (passwordFromDB != null) {
 					if (!Arrays.equals(propertyPassword, passwordFromDB)) {
 						if (Arrays.equals(propertyPassword, "admin".toCharArray())) {
 							m_properties.put(CONSOLE_PASSWORD, passwordFromDB);
-							s_logger.debug("Needed password update from db");
+							s_logger.info("Needed password update from db");
 							doUpdate(false);
 						} else {
 							Object value = properties.get(CONSOLE_PASSWORD);

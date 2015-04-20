@@ -17,14 +17,6 @@
     <name>javax.usb Linux implementation from javax-usb</name>
     <description>javax.usb Linux implementation from javax-usb</description>
 
-	<repositories>
-        <repository>
-            <id>cloudbees-private-release-plugin-repository</id>
-            <name>Eurotech Cloudbees private release plugin repository</name>
-            <url>https://repository-eurotech.forge.cloudbees.com/private/</url>
-        </repository>
-    </repositories>
-
     <properties>
         <maven.compiler.source>1.6</maven.compiler.source>
         <maven.compiler.target>1.6</maven.compiler.target>
@@ -35,6 +27,8 @@
             <groupId>javax.usb</groupId>
             <artifactId>javax.usb.linux</artifactId>
             <version>1.0.3</version>
+			<scope>system</scope>
+            <systemPath>${basedir}/src/lib/javax.usb.linux-1.0.3.jar</systemPath>
         </dependency>
 
         <!-- Test -->

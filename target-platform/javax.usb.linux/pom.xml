@@ -23,13 +23,13 @@
     </properties>
 
     <dependencies>
-<!--
         <dependency>
             <groupId>javax.usb</groupId>
             <artifactId>javax.usb.linux</artifactId>
             <version>1.0.3</version>
+			<scope>system</scope>
+            <systemPath>${basedir}/src/lib/javax.usb.linux-1.0.3.jar</systemPath>
         </dependency>
--->
 
         <!-- Test -->
 <!--

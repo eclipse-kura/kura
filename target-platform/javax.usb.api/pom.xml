@@ -104,11 +104,15 @@
                         <Include-Resource>
                             ${project.basedir}/src/main,
                             ${project.basedir}/about.html,
-                            about_files=${project.basedir}/about_files/
+                            about_files=${project.basedir}/about_files/,
+							${project.basedir}/lib/
                         </Include-Resource>
                         <Export-Package>
                             javax.usb.*;version="1.0.2"
                         </Export-Package>
+						<Import-Package>
+							com.ibm.jusb.os.linux;version="1.0.3"
+						</Import-Package>
                     </instructions>
                 </configuration>
             </plugin>

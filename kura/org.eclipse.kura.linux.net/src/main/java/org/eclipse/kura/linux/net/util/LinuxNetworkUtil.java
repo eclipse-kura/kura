@@ -43,7 +43,9 @@ public class LinuxNetworkUtil {
 	
 	private static final String OS_VERSION = System.getProperty("kura.os.version");
 	
-	private static Map<String, NetInterfaceType> m_ifaceTypes = new HashMap<String, NetInterfaceType>();
+	private static Map<String, LinuxIfconfig> s_ifconfigs = new HashMap<String, LinuxIfconfig>();
+	
+	private static final String [] s_ignoreIfaces = {"can", "sit", "mon.wlan"};
 
 	public static List<String> getInterfaceNames() throws KuraException {
 		SafeProcess proc = null;
@@ -129,58 +131,22 @@ public class LinuxNetworkUtil {
 			if (proc != null) ProcessUtil.destroy(proc);
 		}
 	}
-
-	public static boolean isUp(String interfaceName) throws KuraException {
+	
+	public static boolean isUp(String ifaceName) throws KuraException {
 		//ignore logical interfaces like "1-1.2"
-		if (Character.isDigit(interfaceName.charAt(0))) {
+		if (Character.isDigit(ifaceName.charAt(0))) {
 			return false;
 		}
-		SafeProcess proc = null;
-		BufferedReader br = null;
-		try {
-			//start the process
-			proc = ProcessUtil.exec("ifconfig");
-			if (proc.waitFor() != 0) {
-				s_logger.error("error executing command --- ifconfig --- exit value = " + proc.exitValue());
-				throw new KuraException(KuraErrorCode.INTERNAL_ERROR);
+		
+		boolean ret = false;
+		LinuxIfconfig ifconfig = getInterfaceConfiguration(ifaceName);
+		if (ifconfig != null) {
+			if ((ifconfig.getInetAddress() != null) && (ifconfig.getInetMask() != null)) {
+				ret = true;
 			}
-			
-			//get the output
-			br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
-			String line = null;
-
-			while((line = br.readLine()) != null) {
-				if(line.indexOf(interfaceName) > -1 && line.indexOf("mon." + interfaceName) < 0) {
-					
-					//so the interface is listed - but must also have an IP and netmask to be 'up'
-					if(LinuxNetworkUtil.getCurrentIpAddress(interfaceName) == null) {
-						return false;
-					}
-					if(LinuxNetworkUtil.getCurrentNetmask(interfaceName) == null) {
-						return false;
-					}
-					
-					return true;
-				}
-			}
-		} catch(IOException e) {
-			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
-		} catch (InterruptedException e) {
-			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
 		}
-		finally {
-			if(br != null){
-				try{
-					br.close();
-				}catch(IOException ex){
-					s_logger.error("I/O Exception while closing BufferedReader!");
-				}
-			}
-			
-			if (proc != null) ProcessUtil.destroy(proc);
-		}
-
-		return false;
+		
+		return ret;	
 	}
 	
 	public static boolean isDhclientRunning(String interfaceName) throws KuraException {
@@ -569,13 +535,118 @@ public class LinuxNetworkUtil {
 			}			
 		}
 	}
+	
+	public static LinuxIfconfig getInterfaceConfiguration(String ifaceName) throws KuraException {
+		
+		//ignore logical interfaces like "1-1.2"
+		if (Character.isDigit(ifaceName.charAt(0))) {
+			return null;
+		}
+		for (String ignoreIface : s_ignoreIfaces) {
+			if (ifaceName.startsWith(ignoreIface)) {
+				return null;
+			}
+		}
+		
+		LinuxIfconfig linuxIfconfig = null;
+		SafeProcess proc = null;
+		BufferedReader br = null;
+		linuxIfconfig = new LinuxIfconfig(ifaceName);
+		try {
+			//start the process
+			proc = ProcessUtil.exec("ifconfig " + ifaceName);
+			if (proc.waitFor() == 0) {
+				//get the output
+				br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+				String line = null;
+				
+				while ((line = br.readLine()) != null) {
+					
+					int i = line.indexOf("Link encap:");
+					if(i > -1) {
+						linuxIfconfig.setType(getInterfaceType(ifaceName, line));
+						
+						i = line.indexOf("HWaddr ");
+						if(i > -1) {
+							String mac = line.substring(i + 7, line.length()-2);
+							linuxIfconfig.setMacAddress(mac);
+						}
+					}
+					
+					i = line.indexOf("inet addr:");
+					if (i > -1) {
+						String ipAddress = line.substring(i + 10, line.indexOf(' ', i + 10));
+						linuxIfconfig.setInetAddress(ipAddress);
+						
+						i = line.indexOf("Mask:");
+						if (i > -1) {
+							String netmask = line.substring(i + 5);
+							linuxIfconfig.setInetMask(netmask);
+						}
+							
+						i = line.indexOf("Bcast:");
+						if (i > -1) {
+							String broadcast = line.substring(i + 6, line.indexOf(' ', i + 6));
+							linuxIfconfig.setInetBcast(broadcast);
+						}
+					}
+						
+					i = line.indexOf("MTU:");
+					if (i > -1) {
+						String mtu = line.substring(i + 4, line.indexOf(' ', i + 4));
+						linuxIfconfig.setMtu(Integer.parseInt(mtu));
+					}	
+					
+					if (line.contains("MULTICAST")) {
+						linuxIfconfig.setMulticast(true);
+					}
+				}
+			} else {
+				File pppFile = new File(NetworkServiceImpl.PPP_PEERS_DIR + ifaceName);
+				if(pppFile.exists() || ifaceName.matches("^ppp\\d+$")) {
+					linuxIfconfig.setType(NetInterfaceType.valueOf("MODEM"));
+				}
+			}			
+		} catch(IOException e) {
+			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+		} catch (InterruptedException e) {
+			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+		}
+		finally {
+			if(br != null){
+				try	{
+					br.close();
+				} catch(IOException ex){
+					s_logger.error("I/O Exception while closing BufferedReader!");
+				}
+			}
+					
+			if (proc != null) ProcessUtil.destroy(proc);
+		}
+		
+		s_ifconfigs.put(ifaceName, linuxIfconfig);
+		return linuxIfconfig;
+	}
 
 	public static String getMacAddress(String ifaceName) throws KuraException {
 		//ignore logical interfaces like "1-1.2"
 		if (Character.isDigit(ifaceName.charAt(0))) {
 			return null;
 		}
+		
 		String mac = null;
+		if (s_ifconfigs.containsKey(ifaceName)) {
+			LinuxIfconfig ifconfig = s_ifconfigs.get(ifaceName);
+			mac = ifconfig.getMacAddress();
+			s_logger.trace("getMacAddress() :: interface={}, MAC={}", ifaceName, mac);
+		} else {
+			s_ifconfigs.put(ifaceName, new LinuxIfconfig(ifaceName));
+		}
+		
+		if (mac != null) {
+			return mac;
+		}
+		
 		SafeProcess proc = null;
 		BufferedReader br = null;
 		try {
@@ -593,7 +664,6 @@ public class LinuxNetworkUtil {
 			while((line = br.readLine()) != null) {
 				int index = line.indexOf("HWaddr ");
 				if(index > -1) {
-					//found the iface in the list so return
 					mac = line.substring(index + 7, line.length()-2);
 				}
 			}
@@ -614,6 +684,10 @@ public class LinuxNetworkUtil {
 			
 			if (proc != null) ProcessUtil.destroy(proc);
 		}
+		
+		s_logger.trace("getMacAddress() :: interface={}, MAC Address={}", ifaceName, mac);
+		LinuxIfconfig ifconfig = s_ifconfigs.get(ifaceName);
+		ifconfig.setMacAddress(mac);
 		
 		return mac;
 	}
@@ -641,18 +715,32 @@ public class LinuxNetworkUtil {
         return mac;
 	}
 	
-	public static boolean isSupportsMulticast(String interfaceName) throws KuraException {		
+	public static boolean isSupportsMulticast(String ifaceName) throws KuraException {		
 		//ignore logical interfaces like "1-1.2"
-		if (Character.isDigit(interfaceName.charAt(0))) {
+		if (Character.isDigit(ifaceName.charAt(0))) {
 			return false;
 		}
+		
+		Boolean suportsMulticast = null;
+		if (s_ifconfigs.containsKey(ifaceName)) {
+			LinuxIfconfig ifconfig = s_ifconfigs.get(ifaceName);
+			suportsMulticast = ifconfig.isMulticast();
+			s_logger.trace("isSupportsMulticast() :: interface={}, multicast?={}", ifaceName, suportsMulticast);
+		} else {
+			s_ifconfigs.put(ifaceName, new LinuxIfconfig(ifaceName));
+		}
+		
+		if (suportsMulticast != null) {
+			return suportsMulticast;
+		}
+		
 		SafeProcess proc = null;
 		BufferedReader br = null;
 		try {
 			//start the process
-			proc = ProcessUtil.exec("ifconfig");
+			proc = ProcessUtil.exec("ifconfig " + ifaceName);
 			if (proc.waitFor() != 0) {
-                s_logger.warn("isSupportsMulticast() :: error executing command --- ifconfig {} --- exit value = {}", interfaceName , proc.exitValue());
+                s_logger.warn("isSupportsMulticast() :: error executing command --- ifconfig {} --- exit value = {}", ifaceName , proc.exitValue());
                 return false;
 			}
 
@@ -660,14 +748,10 @@ public class LinuxNetworkUtil {
 			br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
 			String line = null;
 
-			while((line = br.readLine()) != null) {
-				if(line.indexOf(interfaceName) > -1 && line.indexOf("mon." + interfaceName) < 0) {
-					//eat the next line
-					line = br.readLine();
-					line = br.readLine();					
-					if(line.contains("MULTICAST")) {
-						return true;
-					}
+			while ((line = br.readLine()) != null) {
+				if (line.contains("MULTICAST")) {
+					suportsMulticast = true;
+					break;
 				}
 			}
 		} catch(Exception e) {
@@ -684,7 +768,12 @@ public class LinuxNetworkUtil {
 			
 			if (proc != null) ProcessUtil.destroy(proc);
 		}
-		return false;
+		
+		s_logger.trace("isSupportsMulticast() :: interface={}, multicast?={}", ifaceName, suportsMulticast);
+		LinuxIfconfig ifconfig = s_ifconfigs.get(ifaceName);
+		ifconfig.setMulticast(suportsMulticast);
+		
+		return suportsMulticast;
 	}
 
 	public static boolean canPing(String ipAddress, int count) throws KuraException {
@@ -711,16 +800,27 @@ public class LinuxNetworkUtil {
 		if (Character.isDigit(ifaceName.charAt(0))) {
 			return NetInterfaceType.UNKNOWN;
 		}
+		for (String ignoreIface : s_ignoreIfaces) {
+			if (ifaceName.startsWith(ignoreIface)) {
+				return NetInterfaceType.UNKNOWN;
+			}
+		}
 		
 		NetInterfaceType ifaceType = NetInterfaceType.UNKNOWN;
 
-		if (m_ifaceTypes.containsKey(ifaceName)) {
-			ifaceType = m_ifaceTypes.get(ifaceName);
+		if (s_ifconfigs.containsKey(ifaceName)) {
+			LinuxIfconfig ifconfig = s_ifconfigs.get(ifaceName);
+			ifaceType = ifconfig.getType();
 			s_logger.trace("getType() :: interface={}, type={}", ifaceName, ifaceType);
+		} else {
+			s_ifconfigs.put(ifaceName, new LinuxIfconfig(ifaceName));
+		}
+		
+		if (ifaceType != NetInterfaceType.UNKNOWN) {
 			return ifaceType;
 		}
 		
-		String stringType = null;
+		//String stringType = null;
 		SafeProcess proc = null;
 		BufferedReader br = null;
 		try {
@@ -734,38 +834,16 @@ public class LinuxNetworkUtil {
 				while((line = br.readLine()) != null) {
 					int index = line.indexOf("Link encap:");
 					if(index > -1) {
-						StringTokenizer st = new StringTokenizer(line);
-						st.nextToken(); //skip iface name
-						st.nextToken(); //skip Link
-						stringType = st.nextToken();
-						stringType = stringType.substring(6).toUpperCase();
-						if(stringType.equals("LOCAL")) {
-							stringType = "LOOPBACK";
-						} else if (stringType.equals("ETHERNET")) { 
-							stringType = "ETHERNET";
-						} else if (stringType.equals("POINT-TO-POINT")) {
-							stringType = "MODEM";
-						}
+						ifaceType = getInterfaceType(ifaceName, line);
 						break;
 					}
 				}
 			} else {
 				File pppFile = new File(NetworkServiceImpl.PPP_PEERS_DIR + ifaceName);
 				if(pppFile.exists() || ifaceName.matches("^ppp\\d+$")) {
-				    stringType = "MODEM";
+				    ifaceType = NetInterfaceType.valueOf("MODEM");
 				}
 			}
-
-			//determine if wifi
-			if ("ETHERNET".equals(stringType)) {
-				Collection<String> wifiOptions = WifiOptions.getSupportedOptions(ifaceName);
-				if (wifiOptions.size() > 0) {
-					for (String op : wifiOptions) {
-						s_logger.trace("WiFi option supported on {} : {}", ifaceName, op);
-					}
-					stringType = "WIFI";
-				}
-			} 
 		} catch (Exception e) {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
 		} 
@@ -780,15 +858,50 @@ public class LinuxNetworkUtil {
 			
 			if (proc != null) ProcessUtil.destroy(proc);
 		}
-		try {
-			ifaceType = NetInterfaceType.valueOf(stringType);
-		} catch (Exception e) {
-			// leave as unknown
-		}
 		
 		s_logger.trace("getType() :: interface={}, type={}", ifaceName, ifaceType);
-		m_ifaceTypes.put(ifaceName, ifaceType);
+		LinuxIfconfig ifconfig = s_ifconfigs.get(ifaceName);
+		ifconfig.setType(ifaceType);
 		
+		return ifaceType;
+	}
+	
+	private static NetInterfaceType getInterfaceType (String ifaceName, String line) throws KuraException {
+		
+		NetInterfaceType ifaceType = NetInterfaceType.UNKNOWN;
+		
+		String stringType = null;
+		StringTokenizer st = new StringTokenizer(line);
+		st.nextToken(); //skip iface name
+		st.nextToken(); //skip Link
+		stringType = st.nextToken();
+		stringType = stringType.substring(6).toUpperCase();
+		if(stringType.equals("LOCAL")) {
+			stringType = "LOOPBACK";
+		} else if (stringType.equals("ETHERNET")) { 
+			stringType = "ETHERNET";
+		} else if (stringType.equals("POINT-TO-POINT")) {
+			stringType = "MODEM";
+		}
+		
+		//determine if wifi
+		if ("ETHERNET".equals(stringType)) {
+			Collection<String> wifiOptions = WifiOptions.getSupportedOptions(ifaceName);
+			if (wifiOptions.size() > 0) {
+				for (String op : wifiOptions) {
+					s_logger.trace("WiFi option supported on {} : {}", ifaceName, op);
+				}
+				stringType = "WIFI";
+			}
+		} 
+		
+		if (stringType != null) {
+			try {
+				ifaceType = NetInterfaceType.valueOf(stringType);
+			} catch (Exception e) {
+				// leave it UNKNOWN
+			}
+		}
 		return ifaceType;
 	}
 	

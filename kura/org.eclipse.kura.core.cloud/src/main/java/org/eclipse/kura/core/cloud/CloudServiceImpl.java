@@ -664,7 +664,7 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
 		System.out.println(kuraPayload.getMetric(CERT_SERIAL));
 		System.out.println("metric: " + kuraPayload.getMetric(SIGNATURE_METRIC));
 		if(kuraTopic.getApplicationId().equals("PROV-V2") && 
-				kuraTopic.getApplicationTopic().contains("certificate")){
+				kuraTopic.getApplicationTopic().contains("certificate")){ //provisioning message
 			if(m_certificatesService == null){
 				return true;
 			} else{
@@ -674,7 +674,7 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
 				}
 			}
 			return false;
-		}else if(kuraPayload.getMetric(CERT_SERIAL) != null && !((String) kuraPayload.getMetric(CERT_SERIAL)).equals("")){
+		}else if(kuraPayload.getMetric(CERT_SERIAL) != null && !((String) kuraPayload.getMetric(CERT_SERIAL)).equals("")){ //signed message
 			s_logger.debug("Start signature verification");
 			String certSerial= (String) kuraPayload.getMetric(CERT_SERIAL);
 			String signingCertAlias= RESOURCE_CERTIFICATE_DM + "-" + certSerial;
@@ -690,6 +690,11 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
 				signature = (byte[]) kuraPayload.getMetric(SIGNATURE_METRIC);
 			}
 			return m_certificatesService.verifySignature(signingCertAlias, topicBytes, messagePayload, signature);
+		}else if( (kuraPayload.getMetric(CERT_SERIAL) == null || ((String) kuraPayload.getMetric(CERT_SERIAL)).equals("")) 
+				   && 
+				   (m_certificatesService != null && !m_certificatesService.listDMCertificatesAliases().hasMoreElements()) 
+				   ){ //no signature in message and no platform certificate in local keystore
+			return true;
 		}else{
 			s_logger.debug("Error: not correct message format");
 			return false;

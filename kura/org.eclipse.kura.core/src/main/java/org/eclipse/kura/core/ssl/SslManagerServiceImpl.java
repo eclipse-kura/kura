@@ -542,7 +542,7 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
 
 	private char[] getKeyStorePassword() throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, IOException 
 	{
-		return m_cryptoService.getKeyStorePassword(m_options.getSslTrustStore());//"eurotech".toCharArray();//return m_systemService.getJavaKeyStorePassword();
+		return m_cryptoService.getKeyStorePassword(m_options.getSslTrustStore());
 	}
 
 	private boolean verifyEnvironmentProperties(char[] newPassword){

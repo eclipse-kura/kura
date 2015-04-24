@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.eclipse.kura.bluetooth.BluetoothDevice;
-import org.eclipse.kura.bluetooth.BluetoothScanListener;
+import org.eclipse.kura.bluetooth.BluetoothLeScanListener;
 import org.eclipse.kura.linux.bluetooth.BluetoothDeviceImpl;
 import org.eclipse.kura.linux.bluetooth.util.BluetoothProcess;
 import org.eclipse.kura.linux.bluetooth.util.BluetoothProcessListener;
@@ -23,14 +23,15 @@ public class BluetoothLeScanner implements BluetoothProcessListener {
 	
 	public static final int SCAN_FAILED_INTERNAL_ERROR = 0x0003;
 	
-	private Map<String, String> devices;
-	private List<BluetoothDevice> scanResult;
+	private Map<String, String> m_devices;
+	private List<BluetoothDevice> m_scanResult;
+	private StringBuilder m_stringBuilder = null;
 	
 	public BluetoothLeScanner() {
-		devices = new HashMap<String, String>();
+		m_devices = new HashMap<String, String>();
 	}
 	
-	public void startScan(String name, int scanTime, BluetoothScanListener listener) {
+	public void startScan(String name, int scanTime, BluetoothLeScanListener listener) {
 		BluetoothProcess proc = null;
 		
 		try {
@@ -43,15 +44,15 @@ public class BluetoothLeScanner implements BluetoothProcessListener {
 			BluetoothUtil.killCmd("hcitool", "SIGINT");
 			proc.destroy();
 			
-			scanResult = new ArrayList<BluetoothDevice>();
-			Iterator<Entry<String, String>> it = devices.entrySet().iterator();
+			m_scanResult = new ArrayList<BluetoothDevice>();
+			Iterator<Entry<String, String>> it = m_devices.entrySet().iterator();
 			while (it.hasNext()) {
 				Map.Entry<String, String> pair = (Map.Entry<String, String>)it.next();
-				scanResult.add(new BluetoothDeviceImpl(pair.getKey(), pair.getValue()));
+				m_scanResult.add(new BluetoothDeviceImpl(pair.getKey(), pair.getValue()));
 			}
 			
 			// Alert listener that scan is complete
-			listener.onScanResults(scanResult);
+			listener.onScanResults(m_scanResult);
 
 		} catch (Exception e) {
 			s_logger.error("Error running bluetooth LE scan.", e);
@@ -59,9 +60,34 @@ public class BluetoothLeScanner implements BluetoothProcessListener {
 		}
 	}
 
+	// --------------------------------------------------------------------
+	//
+	//  BluetoothProcessListener API
+	//
+	// --------------------------------------------------------------------
 	@Override
-	public void processInputStream(String line) {
+	public void processInputStream(int ch) {
 		
+		if (m_stringBuilder == null) {
+			m_stringBuilder = new StringBuilder();
+		}
+		
+		if ((char) ch == '\n') {
+			m_stringBuilder.append((char) ch);
+			processLine(m_stringBuilder.toString());
+			m_stringBuilder.setLength(0);
+		}
+		else {
+			m_stringBuilder.append((char) ch);
+		}
+	}
+	
+	// --------------------------------------------------------------------
+	//
+	//  Private methods
+	//
+	// --------------------------------------------------------------------
+	private void processLine(String line) {
 		String name;
 		String address;
 		
@@ -73,20 +99,18 @@ public class BluetoothLeScanner implements BluetoothProcessListener {
 			name = results[1].trim();
 			
 			if(address.matches(s_mac_regex)) {
-				if (devices.containsKey(address)) {
-					if (!name.equals("(unknown)") && !devices.get(address).equals(name)) {
+				if (m_devices.containsKey(address)) {
+					if (!name.equals("(unknown)") && !m_devices.get(address).equals(name)) {
 						s_logger.debug("Updating device: " + address + " - " + name);
-						devices.put(address, name);
+						m_devices.put(address, name);
 					}
 				}
 				else {
 					s_logger.debug("Device found: " + address + " - " + name);
-					devices.put(address, name);
+					m_devices.put(address, name);
 				}
 			}
 		}
-		
-		
 	}
 	
 }

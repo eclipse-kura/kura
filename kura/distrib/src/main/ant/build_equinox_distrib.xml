@@ -109,6 +109,8 @@
                  token="{org.eclipse.kura.linux.position.version}" value="${org.eclipse.kura.linux.position.version}"/>
         <replace file="${project.build.directory}/${build.output.name}/config.ini"
                  token="{org.eclipse.kura.linux.usb.version}" value="${org.eclipse.kura.linux.usb.version}"/>
+		<replace file="${project.build.directory}/${build.output.name}/config.ini"
+                 token="{org.eclipse.kura.linux.bluetooth.version}" value="${org.eclipse.kura.linux.bluetooth.version}"/>
         <replace file="${project.build.directory}/${build.output.name}/config.ini"
                  token="{org.eclipse.kura.linux.watchdog.version}" value="${org.eclipse.kura.linux.watchdog.version}"/>
         <propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
@@ -409,7 +411,9 @@ fi
                         prefix="${build.output.name}/kura/plugins" />
             <zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.linux.usb_${org.eclipse.kura.linux.usb.version}.jar"
                         prefix="${build.output.name}/kura/plugins" />
-            <zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.linux.watchdog_${org.eclipse.kura.linux.watchdog.version}.jar"
+            <zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.linux.bluetooth_${org.eclipse.kura.linux.bluetooth.version}.jar"
+                        prefix="${build.output.name}/kura/plugins" />
+			<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.linux.watchdog_${org.eclipse.kura.linux.watchdog.version}.jar"
                         prefix="${build.output.name}/kura/plugins" />
             <zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.linux_${org.eclipse.kura.linux.version}.jar"
                         prefix="${build.output.name}/kura/plugins" />

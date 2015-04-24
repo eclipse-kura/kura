@@ -8,7 +8,7 @@ import java.util.Map;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.bluetooth.BluetoothAdapter;
 import org.eclipse.kura.bluetooth.BluetoothDevice;
-import org.eclipse.kura.bluetooth.BluetoothScanListener;
+import org.eclipse.kura.bluetooth.BluetoothLeScanListener;
 import org.eclipse.kura.linux.bluetooth.le.BluetoothLeScanner;
 import org.eclipse.kura.linux.bluetooth.util.BluetoothUtil;
 import org.slf4j.Logger;
@@ -37,6 +37,7 @@ public class BluetoothAdapterImpl implements BluetoothAdapter {
 	//
 	// --------------------------------------------------------------------
 	private void buildAdapter(String name) throws KuraException {
+		s_logger.debug("Creating new Bluetooth adapter: " + name);
 		Map<String,String> props = new HashMap<String,String>();
 		props = BluetoothUtil.getConfig(name);
 		m_address = props.get("address");
@@ -90,7 +91,7 @@ public class BluetoothAdapterImpl implements BluetoothAdapter {
 	}
 
 	@Override
-	public void startLeScan(BluetoothScanListener listener) {
+	public void startLeScan(BluetoothLeScanListener listener) {
 		BluetoothLeScanner bls = new BluetoothLeScanner();
 		bls.startScan(m_name, m_scanTime, listener);
 

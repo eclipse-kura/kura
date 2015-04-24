@@ -56,7 +56,7 @@ public class BluetoothProcess {
 	
 	public void destroy() {
 		if (m_process != null) {
-			s_logger.debug("Closing streams and killing..." );
+			s_logger.info("Closing streams and killing..." );
             closeQuietly(m_process.getInputStream());
             closeQuietly(m_process.getErrorStream());
             closeQuietly(m_process.getOutputStream());
@@ -68,18 +68,11 @@ public class BluetoothProcess {
 	
 	private Void readStreamFully(InputStream is, BluetoothProcessListener listener) throws IOException {
 		int ch;
-		StringBuilder sb = new StringBuilder();
 		
 		while ((ch = is.read()) != -1) {
-			if ((char) ch == '\n') {
-				listener.processInputStream(sb.toString());
-				sb.setLength(0);
-			}
-			else {
-				sb.append((char) ch);
-			}
+			listener.processInputStream(ch);
 		}
-		
+		s_logger.info("End of stream!");
 		return null;
 	}
 	

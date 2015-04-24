@@ -19,6 +19,11 @@ public class BluetoothDeviceImpl implements BluetoothDevice {
 		m_name = name;
 	}
 
+	// --------------------------------------------------------------------
+	//
+	//  BluetoothDevice API
+	//
+	// --------------------------------------------------------------------
 	@Override
 	public String getName() {
 		return m_name;
@@ -43,7 +48,7 @@ public class BluetoothDeviceImpl implements BluetoothDevice {
 
 	@Override
 	public BluetoothGatt getBluetoothGatt() {
-		return new BluetoothGattImpl();
+		return new BluetoothGattImpl(m_address);
 	}
 
 }

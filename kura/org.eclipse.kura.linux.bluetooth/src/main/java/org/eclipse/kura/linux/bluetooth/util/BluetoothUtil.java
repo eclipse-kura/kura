@@ -214,7 +214,7 @@ public class BluetoothUtil {
             return futureSafeProcess.get();
         } 
         catch (Exception e) {
-            s_logger.error("Error waiting from SafeProcess ooutput", e);
+            s_logger.error("Error waiting from SafeProcess output", e);
             throw new IOException(e);
         }
 	}

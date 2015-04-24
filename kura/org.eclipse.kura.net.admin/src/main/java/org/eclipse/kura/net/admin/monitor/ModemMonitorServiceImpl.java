@@ -375,7 +375,7 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 		    				}
 		    			}
 		    			
-		    			if ((oldNetConfigs == null) || !oldNetConfigs.equals(newNetConfigs)) {
+		    			if((oldNetConfigs == null) || !isConfigsEqual(oldNetConfigs, newNetConfigs)) {	
 		    				s_logger.info("new configuration for cellular modem on usb port {} netinterface {}", usbPort, ifaceName); 
 		    				m_networkConfig = newNetworkConfig;
 		    				
@@ -453,6 +453,20 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 		}
     }
 	
+	private boolean isConfigsEqual(List<NetConfig>oldConfig, List<NetConfig> newConfig) {
+	
+		boolean ret = false;
+		ModemConfig oldModemConfig = getModemConfig(oldConfig);
+		ModemConfig newModemConfig = getModemConfig(newConfig);
+		NetConfigIP4 oldNetConfigIP4 = getNetConfigIp4(oldConfig);
+		NetConfigIP4 newNetConfigIP4 = getNetConfigIp4(newConfig);
+		
+		if (oldNetConfigIP4.equals(newNetConfigIP4) && oldModemConfig.equals(newModemConfig)) {
+			ret = true;
+		}
+		return ret;
+	}
+	
 	private List<NetConfig> getNetConfigs(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig) {
 		
 		List<NetConfig> netConfigs = null;
@@ -465,6 +479,26 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 			}
 		}
 		return netConfigs;
+	}
+	
+	private ModemConfig getModemConfig(List<NetConfig> netConfigs) {
+		ModemConfig modemConfig = null;
+		for (NetConfig netConfig : netConfigs) {
+			if (netConfig instanceof ModemConfig) {
+				modemConfig = (ModemConfig)netConfig;
+			}
+		}
+		return modemConfig;
+	}
+	
+	private NetConfigIP4 getNetConfigIp4(List<NetConfig> netConfigs) {
+		NetConfigIP4 netConfigIP4 = null;
+		for (NetConfig netConfig : netConfigs) {
+			if (netConfig instanceof NetConfigIP4) {
+				netConfigIP4 = (NetConfigIP4)netConfig;
+			}
+		}
+		return netConfigIP4;
 	}
 	
 	private int getInterfaceNumber (List<NetConfig> netConfigs) {

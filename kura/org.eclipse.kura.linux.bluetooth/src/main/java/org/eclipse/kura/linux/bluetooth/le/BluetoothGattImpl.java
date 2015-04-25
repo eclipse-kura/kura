@@ -28,7 +28,7 @@ public class BluetoothGattImpl implements BluetoothGatt, BluetoothProcessListene
 	private final String REGEX_CHARACTERISTICS = "handle.*properties.*value\\shandle.*uuid\\:\\s[0-9|a-f|A-F]{8}(-[0-9|a-f|A-F]{4}){3}-[0-9|a-f|A-F]{12}$";
 	private final String REGEX_READ_CHAR       = "Characteristic\\svalue/descriptor\\:[\\s|0-9|a-f|A-F]*";
 	private final String REGEX_READ_CHAR_UUID  = "handle\\:.*value\\:[\\s|0-9|a-f|A-F]*";
-	private final String REGEX_NOTIFICATION    = "Notification\\shandle.*value";
+	private final String REGEX_NOTIFICATION    = ".*Notification\\shandle.*value\\:.*[\\n\\r]*";
 	private final String REGEX_ERROR_HANDLE    = "Invalid\\shandle";
 	private final String REGEX_ERROR_UUID      = "Invalid\\sUUID";
 	
@@ -142,13 +142,10 @@ public class BluetoothGattImpl implements BluetoothGatt, BluetoothProcessListene
 	@Override
 	public String readCharacteristicValueByUuid(UUID uuid) {
 		if(m_proc != null) {
-			s_logger.info("Here");
 			m_charValueUuid = "";
 			String l_uuid = uuid.toString();
 			String command = "char-read-uuid " + l_uuid + "\n";
-			s_logger.info("Here2");
 			sendCmd(command);
-			s_logger.info("Here3");
 		}
 		
 		// Wait until read is complete or error is received
@@ -199,7 +196,6 @@ public class BluetoothGattImpl implements BluetoothGatt, BluetoothProcessListene
 	}
 	
 	private void processLine(String line) {
-		s_logger.info(line);
 		// gatttool prompt indicates not connected
 		if (line.matches(REGEX_NOT_CONNECTED)) {
 			m_connected = false;
@@ -261,7 +257,7 @@ public class BluetoothGattImpl implements BluetoothGatt, BluetoothProcessListene
 			// Parse the characteristic line, line is expected to be:
 			// Notification handle = 0xmmmm value: <value>
 			String x = "Notification hanlde = ";
-			String sub = line.substring(x.length());
+			String sub = line.substring(x.length()).trim();
 			String[] attr = sub.split(":");
 			String handle = attr[0].split("\\s")[0];
 			String value = attr[1].trim();

@@ -60,4 +60,12 @@ public interface BluetoothAdapter {
 	 */
 	public void startLeScan(BluetoothLeScanListener listener);
 	
+	/**
+	 * Get a remote Bluetooth device based on hardware adress
+	 * 
+	 * @param address	Hardware address of remote device
+	 * @return BluetoothDevice
+	 */
+	public BluetoothDevice getRemoteDevice(String address);
+	
 }

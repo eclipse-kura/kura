@@ -1,7 +1,6 @@
 package org.eclipse.kura.linux.bluetooth.util;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.HashMap;
@@ -152,14 +151,32 @@ public class BluetoothUtil {
 	 * Utility method to send specific kill commands to processes.
 	 */
 	public static void killCmd(String cmd, String signal) {
-		String[] command = { "pkill", "-" + signal, cmd };
+		//String[] command = { "pkill", "-" + signal, cmd };
+		String[] command = { "pidof", cmd };
 		SafeProcess proc = null;
+		BufferedReader br = null;
 		try {
 			proc = ProcessUtil.exec(command);
+			proc.waitFor();
+			br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+			String pid = br.readLine();
+			
+			String[] command2 = { "kill", "-" + signal, pid };
+			proc = ProcessUtil.exec(command2);
+			
 		} catch (IOException e) {
 			s_logger.error("Error executing command: " + command, e);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		} finally {
 			proc.destroy();
+			try {
+				br.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 	}
 	

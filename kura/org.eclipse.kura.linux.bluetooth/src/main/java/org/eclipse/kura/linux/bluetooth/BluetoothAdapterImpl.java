@@ -111,5 +111,10 @@ public class BluetoothAdapterImpl implements BluetoothAdapter {
 	public void disable() {
 		BluetoothUtil.hciconfigCmd(m_name, "down");
 	}
+	
+	@Override
+	public BluetoothDevice getRemoteDevice(String address) {
+		return new BluetoothDeviceImpl(address, "");
+	}
 
 }

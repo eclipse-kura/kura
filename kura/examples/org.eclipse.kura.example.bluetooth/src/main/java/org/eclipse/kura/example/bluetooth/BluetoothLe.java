@@ -25,6 +25,7 @@ public class BluetoothLe implements ConfigurableComponent, CloudClientListener, 
 	
 	private final String APP_ID = "BLE_APP_V1";
 	private final int WAIT_TIME = 20000;
+	private final boolean DO_SCAN = false;
 	
 	private CloudService m_cloudService;
 	private static CloudClient  m_cloudClient;
@@ -131,11 +132,18 @@ public class BluetoothLe implements ConfigurableComponent, CloudClientListener, 
 		 *Scan for Bluetooth LE devices. This will block until the the desired device is found or
 		 *the time limit is exceeded.
 		*/
-		startScan();
-		s_logger.info("Looking for device...");
-		long startTime = System.currentTimeMillis();
-		while (!m_found && (System.currentTimeMillis() - startTime) < WAIT_TIME) {
-			// do nothing
+		
+		if (DO_SCAN) {
+			startScan();
+			s_logger.info("Looking for device...");
+			long startTime = System.currentTimeMillis();
+			while (!m_found && (System.currentTimeMillis() - startTime) < WAIT_TIME) {
+				// do nothing
+			}
+		}
+		else {
+			m_found = true;
+			m_tiSensorTag = new TiSensorTag(m_bluetoothAdapter.getRemoteDevice(TiSensorTag.ADDRESS));
 		}
 		
 		/*

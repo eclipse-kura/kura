@@ -90,7 +90,7 @@ public class BluetoothLeScanner implements BluetoothProcessListener {
 	private void processLine(String line) {
 		String name;
 		String address;
-		
+		s_logger.info(line);
 		// Results from hcitool lescan should be in form:
 		// <mac_address> <device_name>
 		String[] results = line.split("\\s", 2);

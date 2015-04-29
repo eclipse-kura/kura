@@ -120,14 +120,12 @@ public class CryptoServiceImpl implements CryptoService {
 	
 	@Override
 	public char[] getKeyStorePassword(String keyStorePath) {
-		// TODO Auto-generated method stub
-		return null;
+		return "changeit".toCharArray();
 	}
 
 	@Override
 	public void setKeyStorePassword(String keyStorePath, String password)
 			throws IOException {
-		// TODO Auto-generated method stub
-		
+		return;
 	}
 }

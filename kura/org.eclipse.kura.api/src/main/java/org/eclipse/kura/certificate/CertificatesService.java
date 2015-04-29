@@ -4,6 +4,8 @@ import java.security.cert.Certificate;
 import java.util.Enumeration;
 
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.message.KuraPayload;
+import org.eclipse.kura.message.KuraTopic;
 
 
 /**
@@ -78,18 +80,15 @@ public interface CertificatesService {
 	public void removeCertificate(String alias) throws KuraException;
 	
 	/**
-	 * verifySignature is a method that takes the alias of the certificate used to sign the message, the byte array containing the topic used
-	 * to send the message, the body of the kura message and the signed message to verify the correctness of the signature, 
-	 * if compared to the received message
+	 * verifySignature is a method that takes the topic used
+	 * to send the message and the signed message to verify the correctness of the signature.
 	 * 
-	 * @param alias The string used to identify the certificate in a key store
-	 * @param topic The topic used to send the message
-	 * @param body A byte array representing the body of the message received. It is used to verify the signature received with the message
-	 * @param signature A byte array representing the message signature that has to be verified.
+	 * @param kuraTopic The topic used to send the message
+	 * @param kuraPayload The kuraPayload message received and that needs to be verified
 	 * @return A boolean value that is true if the signature received corresponds with the signature 
 	 * calculated from the message content. False otherwise.
 	 * 
 	 */
-	public boolean verifySignature(String alias, byte[] topic, byte[] body, byte[] signature);
+	public boolean verifySignature(KuraTopic kuraTopic, KuraPayload kuraPayload);
 
 }

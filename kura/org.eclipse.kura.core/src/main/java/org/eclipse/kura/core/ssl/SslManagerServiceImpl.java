@@ -73,7 +73,6 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
 
 	private SslServiceListeners		 m_sslServiceListeners;
 
-	@SuppressWarnings("unused")
 	private ComponentContext         m_ctx;
 	private SslManagerServiceOptions m_options;
 
@@ -87,8 +86,6 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
 
 	private ExecutorService m_worker;
 	private Future<?> m_handle;
-
-	private boolean serviceEnabled = true;
 
 
 
@@ -169,9 +166,6 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
 				} catch (IOException | KeyStoreException | NoSuchAlgorithmException | CertificateException e) {
 					e.printStackTrace();
 				} 
-				
-		}else if(m_options.getSslKeystorePassword() != null && !verifyEnvironmentProperties(m_options.getSslKeystorePassword().toCharArray())){
-			serviceEnabled= false;
 		}
 	}
 
@@ -435,7 +429,7 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
 				decryptedPasswordArray= ((String) decryptedPasswordObject).toCharArray();
 			}
 
-			if(!serviceEnabled || (m_certificatesService != null && !verifyEnvironmentProperties(decryptedPasswordArray))){
+			if(m_options.getSslKeystorePassword() != null && !verifyEnvironmentProperties(decryptedPasswordArray)){
 				return null;
 			}
 
@@ -456,8 +450,6 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
 					ts.load(tsReadStream, null);
 					tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
 					tmf.init(ts);
-				} else if(m_certificatesService != null){
-					throw new IOException("Keystore location not correctly specified!");
 				} else {
 					s_logger.info("Could not find trust store at {}. Using Java default.", trustStore);
 				}
@@ -500,6 +492,12 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
 			KeyStore ks = null;
 
 			if (keyStore != null) {
+				
+				Object decryptedPasswordObject= m_properties.get(SslManagerServiceOptions.PROP_TRUST_PASSWORD);
+				char[] decryptedPasswordArray= null;
+				if(decryptedPasswordObject != null && decryptedPasswordObject instanceof String){
+					decryptedPasswordArray= ((String) decryptedPasswordObject).toCharArray();
+				}
 
 				// Load the configured the Key Store
 				File fKeyStore = new File(keyStore);
@@ -525,7 +523,7 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
 							ks = null;
 						}
 					}
-				} else if(m_certificatesService != null){
+				} else if(m_options.getSslKeystorePassword() != null && !verifyEnvironmentProperties(decryptedPasswordArray)){
 					throw new IOException("Keystore location not correctly specified!");
 				}
 				else {

@@ -79,6 +79,11 @@
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.kura.core.certificates</artifactId>
+									<version>${org.eclipse.kura.core.certificates.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
 									<artifactId>org.eclipse.kura.core.cloud</artifactId>
 									<version>${org.eclipse.kura.core.cloud.version}</version>
 								</artifactItem>
@@ -207,6 +212,7 @@
 							<tasks>
 							    <move file="target/plugins/org.eclipse.kura.api.jar" tofile="target/plugins/org.eclipse.kura.api_${org.eclipse.kura.api.version}.jar"/>
 							    <move file="target/plugins/org.eclipse.kura.core.jar" tofile="target/plugins/org.eclipse.kura.core_${org.eclipse.kura.core.version}.jar"/>
+							    <move file="target/plugins/org.eclipse.kura.core.certificates.jar" tofile="target/plugins/org.eclipse.kura.core.certificates_${org.eclipse.kura.core.certificates.version}.jar"/>
 							    <move file="target/plugins/org.eclipse.kura.core.cloud.jar" tofile="target/plugins/org.eclipse.kura.core.cloud_${org.eclipse.kura.core.cloud.version}.jar"/>
 							    <move file="target/plugins/org.eclipse.kura.core.comm.jar" tofile="target/plugins/org.eclipse.kura.core.comm_${org.eclipse.kura.core.comm.version}.jar"/>
 							    <move file="target/plugins/org.eclipse.kura.core.configuration.jar" tofile="target/plugins/org.eclipse.kura.core.configuration_${org.eclipse.kura.core.configuration.version}.jar"/>
@@ -478,7 +484,7 @@
 					<plugin> 
 						<groupId>org.vafer</groupId>
 						<artifactId>jdeb</artifactId>
-						<version>1.0</version>
+						<version>1.3</version>
 						<executions>
 							<execution>
 								<id>beaglebone-deb</id>
@@ -510,7 +516,7 @@
 		<profile>
 			<id>beaglebone-nn</id>
 			<properties>
-				<project.raspbian.dependencies>dos2unix, unzip, telnet</project.raspbian.dependencies>
+				<project.raspbian.dependencies.nn>dos2unix, unzip, telnet</project.raspbian.dependencies.nn>
 			</properties>
 			<activation>
 				<activeByDefault>true</activeByDefault>
@@ -589,7 +595,7 @@
 					<plugin> 
 						<groupId>org.vafer</groupId>
 						<artifactId>jdeb</artifactId>
-						<version>1.0</version>
+						<version>1.3</version>
 						<executions>
 							<execution>
 								<id>beaglebone-nn-deb</id>
@@ -600,7 +606,7 @@
 								<configuration>
 									<verbose>true</verbose>
 									<deb>${basedir}/target/kura_${project.version}_beaglebone-nn_debian_armv7.deb</deb>
-									<controlDir>${basedir}/src/main/deb/control</controlDir>
+									<controlDir>${basedir}/src/main/deb/control_nn</controlDir>
 									<dataSet>
 										<data>
 											<src>${basedir}/target/kura_${project.version}_beaglebone-nn.zip</src>
@@ -710,7 +716,7 @@
 					<plugin>
 						<groupId>org.vafer</groupId>
 						<artifactId>jdeb</artifactId>
-						<version>1.0</version>
+						<version>1.3</version>
 						<executions>
 							<execution>
 								<id>raspberry-pi-deb</id>
@@ -742,7 +748,7 @@
 		<profile>
 			<id>raspberry-pi-nn</id>
 			<properties>
-				<project.raspbian.dependencies>dos2unix, unzip, telnet</project.raspbian.dependencies> 
+				<project.raspbian.dependencies.nn>dos2unix, unzip, telnet</project.raspbian.dependencies.nn> 
 			</properties> 
 			<activation>
 				<activeByDefault>true</activeByDefault>
@@ -818,7 +824,7 @@
 					<plugin>
 						<groupId>org.vafer</groupId>
 						<artifactId>jdeb</artifactId> 
-						<version>1.0</version>
+						<version>1.3</version>
 						<executions>
 							<execution>
 								<id>raspberry-pi-nn-deb</id> 
@@ -939,7 +945,7 @@
 					<plugin>
 						<groupId>org.vafer</groupId>
 						<artifactId>jdeb</artifactId>
-						<version>1.0</version>
+						<version>1.3</version>
 						<executions>
 							<execution>
 								<id>raspberry-pi-bplus-deb</id>
@@ -971,7 +977,7 @@
 		<profile>
 			<id>raspberry-pi-bplus-nn</id>
 			<properties>
-				<project.raspbian.dependencies>dos2unix, unzip, telnet</project.raspbian.dependencies> 
+				<project.raspbian.dependencies.nn>dos2unix, unzip, telnet</project.raspbian.dependencies.nn> 
 			</properties> 
 			<activation>
 				<activeByDefault>true</activeByDefault>
@@ -1047,7 +1053,7 @@
 					<plugin>
 						<groupId>org.vafer</groupId>
 						<artifactId>jdeb</artifactId> 
-						<version>1.0</version>
+						<version>1.3</version>
 						<executions>
 							<execution>
 								<id>raspberry-pi-bplus-nn-deb</id> 
@@ -1066,7 +1072,7 @@
 											<mapper>
 												<type>perm</type>
 												<prefix>/tmp</prefix>
-											</mapper> 
+											</mapper>
 										</data>
 									</dataSet>
 								</configuration>
@@ -1168,6 +1174,9 @@
 											todir="${project.build.directory}/staging/target-definition/equinox_3.8.1/repository/plugins" />
 										<copy
 											file="${project.build.directory}/plugins/org.eclipse.kura.core_${org.eclipse.kura.core.version}.jar"
+											todir="${project.build.directory}/staging/target-definition/equinox_3.8.1/repository/plugins" />
+										<copy
+											file="${project.build.directory}/plugins/org.eclipse.kura.core.certificates_${org.eclipse.kura.core.certificates.version}.jar"
 											todir="${project.build.directory}/staging/target-definition/equinox_3.8.1/repository/plugins" />
 										<copy
 											file="${project.build.directory}/plugins/org.eclipse.kura.deployment.agent_${org.eclipse.kura.deployment.agent.version}.jar"

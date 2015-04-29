@@ -381,7 +381,8 @@ public class IfcfgConfigReader implements NetworkConfigurationVisitor {
 										} else if (args[0]
 												.equals("#dns-nameservers")) {
 											/*
-											 * <IAB> If DNS servers are listed,
+											 * IAB: 
+											 * If DNS servers are listed,
 											 * those entries will be appended to
 											 * the /etc/resolv.conf file on
 											 * every ifdown/ifup sequence

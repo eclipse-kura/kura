@@ -428,7 +428,7 @@ public class IfcfgConfigWriter implements NetworkConfigurationVisitor {
 						for (int i = 0; i < dnsAddresses.size(); i++) {
 							if(!dnsAddresses.get(i).getHostAddress().equals("127.0.0.1")) {
 								if(!setDns) {
-									/* <IAB>
+									/* IAB:
 									 * If DNS servers are listed, those entries will be appended to the /etc/resolv.conf
 									 * file on every ifdown/ifup sequence resulting in multiple entries for the same servers.
 									 * (Tested on 10-20, 10-10, and Raspberry Pi).

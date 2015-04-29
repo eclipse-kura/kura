@@ -41,6 +41,7 @@ public class BluetoothLe implements ConfigurableComponent, CloudClientListener, 
 	private boolean endTest = false;
 	private String m_deviceId;
 	
+	
 	public void setCloudService(CloudService cloudService) {
 		m_cloudService = cloudService;
 	}

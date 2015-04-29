@@ -30,7 +30,7 @@
             type="Integer"
             cardinality="0"
             required="true"
-            default="12"
+            default="4"
             description="Lenght of time to scan for devices." />
 
     </OCD>

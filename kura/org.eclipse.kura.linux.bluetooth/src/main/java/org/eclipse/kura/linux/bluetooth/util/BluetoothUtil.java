@@ -61,9 +61,17 @@ public class BluetoothUtil {
 				if((index = result.indexOf(BD_ADDRESS)) >= 0) {
 					// Address reported as:
 					// BD Address: xx:xx:xx:xx:xx:xx  ACL MTU: xx:xx SCO MTU: xx:x
-					String address = result.substring(index + BD_ADDRESS.length());
-					String[] tmpAddress = address.split("\\s", 2);
-					address = tmpAddress[0].trim();
+					String[] ss = result.split(" ");
+					String address="";
+					for(String sss:ss){
+						if(sss.matches("^([0-9a-fA-F][0-9a-fA-F]:){5}([0-9a-fA-F][0-9a-fA-F])$")){
+							address = sss;
+							break;
+						}
+					}
+//					String address = result.substring(index + BD_ADDRESS.length());
+//					String[] tmpAddress = address.split("\\s", 2);
+//					address = tmpAddress[0].trim();
 					props.put("address", address);
 					s_logger.trace("Bluetooth adapter address set to: " + address);
 				}

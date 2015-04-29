@@ -49,6 +49,7 @@ public class BluetoothLeScanner implements BluetoothProcessListener {
 			while (it.hasNext()) {
 				Map.Entry<String, String> pair = (Map.Entry<String, String>)it.next();
 				m_scanResult.add(new BluetoothDeviceImpl(pair.getKey(), pair.getValue()));
+				s_logger.info("m_scanResult.add "+pair.getKey()+" - "+ pair.getValue());
 			}
 			
 			// Alert listener that scan is complete

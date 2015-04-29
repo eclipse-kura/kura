@@ -43,6 +43,7 @@
 				<module>org.eclipse.kura.example.publisher</module>
 				<module>org.eclipse.kura.example.serial.publisher</module>
 				<module>org.eclipse.kura.example.gpio</module>
+				<module>org.eclipse.kura.example.bluetooth</module>
 			</modules>
 		</profile>
 		<profile>

@@ -1,9 +1,11 @@
 package org.eclipse.kura.example.bluetooth;
 
 import java.util.List;
+import java.util.UUID;
 
 import org.eclipse.kura.bluetooth.BluetoothDevice;
 import org.eclipse.kura.bluetooth.BluetoothGatt;
+import org.eclipse.kura.bluetooth.BluetoothGattCharacteristic;
 import org.eclipse.kura.bluetooth.BluetoothGattService;
 import org.eclipse.kura.bluetooth.BluetoothLeNotificationListener;
 import org.slf4j.Logger;
@@ -13,7 +15,8 @@ public class TiSensorTag implements BluetoothLeNotificationListener {
 
 	private static final Logger s_logger = LoggerFactory.getLogger(TiSensorTag.class);
 	
-	public static final String ADDRESS = "BC:6A:29:AC:94:7E";
+	public static final String ADDRESS = "68:C9:0B:06:54:82"; // TI SensorTag
+//	public static final String ADDRESS = "00:22:D0:4F:4E:1C"; // Polar Loop
 	
 	private BluetoothGatt m_bluetoothGatt;
 	private BluetoothDevice m_device;
@@ -46,6 +49,11 @@ public class TiSensorTag implements BluetoothLeNotificationListener {
 		return m_bluetoothGatt.getServices();
 	}
 	
+	public List<BluetoothGattCharacteristic> getCharacteristics(String startHandle, String endHandle) {
+		s_logger.info("List<BluetoothGattCharacteristic> getCharacteristics");
+		return m_bluetoothGatt.getCharacteristics(startHandle, endHandle);
+	}
+
 	// --------------------------------------------------------------------
 	//
 	//  Temperature Sensor
@@ -70,16 +78,17 @@ public class TiSensorTag implements BluetoothLeNotificationListener {
 	/*
 	 * Read temperature sensor
 	 */
-	public String readTemp() {
+	public String readTemp(String handleValue) {
 		// Read value from handle 0x25
-		return m_bluetoothGatt.readCharacteristicValue(TiSensorTagGatt.HANDLE_TEMP_SENSOR_VALUE);
+		//return m_bluetoothGatt.readCharacteristicValue(TiSensorTagGatt.HANDLE_TEMP_SENSOR_VALUE);
+		return m_bluetoothGatt.readCharacteristicValue(handleValue);
 	}
 	
 	/*
 	 * Read temperature sensor by UUID
 	 */
-	public String readTempByUuid() {
-		return m_bluetoothGatt.readCharacteristicValueByUuid(TiSensorTagGatt.UUID_TEMP_SENSOR_VALUE);
+	public String readTempByUuid(UUID uuid) {
+		return m_bluetoothGatt.readCharacteristicValueByUuid(uuid);
 	}
 	
 	/*

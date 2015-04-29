@@ -41,4 +41,13 @@ public class BluetoothGattServiceImpl implements BluetoothGattService {
 		return m_uuid;
 	}
 
+	@Override
+	public String getStartHandle() {
+		return m_startHandle;
+	}
+
+	@Override
+	public String getEndHandle() {
+		return m_endHandle;
+	}
 }

@@ -1,8 +1,10 @@
 package org.eclipse.kura.linux.bluetooth.util;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.util.Arrays;
@@ -69,7 +71,9 @@ public class BluetoothProcess {
 	private Void readStreamFully(InputStream is, BluetoothProcessListener listener) throws IOException {
 		int ch;
 		
-		while ((ch = is.read()) != -1) {
+		BufferedReader br = null;
+		br = new BufferedReader(new InputStreamReader(is));
+		while ((ch = br.read()) != -1) {
 			listener.processInputStream(ch);
 		}
 		s_logger.info("End of stream!");

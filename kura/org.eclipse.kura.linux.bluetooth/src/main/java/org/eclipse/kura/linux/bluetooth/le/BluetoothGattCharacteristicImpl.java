@@ -13,9 +13,9 @@ public class BluetoothGattCharacteristicImpl implements BluetoothGattCharacteris
 	
 	public BluetoothGattCharacteristicImpl(String uuid, String handle, String properties, String valueHandle) {
 		m_uuid = UUID.fromString(uuid);
-		m_handle = handle;
-		m_properties = Integer.parseInt(properties.substring(2, properties.length()), 16);
-		m_valueHandle = valueHandle;
+		setHandle(handle);
+		setProperties(Integer.parseInt(properties.substring(2, properties.length()), 16));
+		setValueHandle(valueHandle);
 	}
 	
 	// --------------------------------------------------------------------
@@ -44,6 +44,33 @@ public class BluetoothGattCharacteristicImpl implements BluetoothGattCharacteris
 	public int getPermissions() {
 		// TODO Auto-generated method stub
 		return 0;
+	}
+
+	public void setHandle(String m_handle) {
+		this.m_handle = m_handle;
+	}
+
+	public void setProperties(int m_properties) {
+		this.m_properties = m_properties;
+	}
+
+	public void setValueHandle(String m_valueHandle) {
+		this.m_valueHandle = m_valueHandle;
+	}
+
+	@Override
+	public String getHandle() {
+		return m_handle;
+	}
+
+	@Override
+	public int getProperties() {
+		return m_properties;
+	}
+
+	@Override
+	public String getValueHandle() {
+		return m_valueHandle;
 	}
 
 }

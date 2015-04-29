@@ -23,4 +23,8 @@ public interface BluetoothGattCharacteristic {
 	 * Get permissions of this characteristic
 	 */
 	public int getPermissions();
+	
+	public String getHandle();
+	public int getProperties();
+	public String getValueHandle();
 }

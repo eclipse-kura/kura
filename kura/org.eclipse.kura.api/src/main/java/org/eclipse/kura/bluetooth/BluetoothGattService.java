@@ -19,4 +19,9 @@ public interface BluetoothGattService {
 	 * Return the UUID of this service
 	 */
 	public UUID getUuid();
+
+	public String getStartHandle();
+	
+	public String getEndHandle();
+	
 }

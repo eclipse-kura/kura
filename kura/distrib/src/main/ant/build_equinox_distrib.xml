@@ -38,6 +38,7 @@
         </macrodef>
     	
     	<echo message="Building Kura Distribution for ${build.output.name}..." />
+		<echo message="Dave: ${kura.install.dir}" />
 
         <copy file="src/main/resources/${build.name}/kura.properties"
               tofile="${project.build.directory}/${build.output.name}/kura.properties" />
@@ -122,9 +123,14 @@
                    value="file:${kura.install.dir}/kura/kura/packages/${build.output.name}.dp" />
         </propertyfile>
 		<available file="${project.build.directory}/plugins/org.eclipse.kura.web_${org.eclipse.kura.web.version}.jar" property="web.jar.present" />
+		
+		<!-- Set web UI port -->
+		<antcall target="set-http-port" />
+		
 		<antcall target="web-config" />
-	<!-- Create the Kura start scripts -->
-	<echo file="${project.build.directory}/${build.output.name}/start_kura.sh" append="false">#!/bin/sh
+	
+		<!-- Create the Kura start scripts -->
+		<echo file="${project.build.directory}/${build.output.name}/start_kura.sh" append="false">#!/bin/sh
 
 export PATH=/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/opt/jvm/bin:/usr/java/bin
 export MALLOC_ARENA_MAX=1
@@ -424,12 +430,13 @@ fi
         <echo message="Building Kura Distribution for ${build.name}-jars..." />
         
 		<!-- Create installer script -->
-        <echo message="Creating Installer for ${build.name}" />
+        <echo message="Creating Installer for ${build.name}  ${kura.install.dir}" />
         <exec executable="${project.build.directory}/../src/main/sh/create_installer.sh">
                 <arg value="${project.build.directory}" />
                 <arg value="${build.output.name}.zip" />
                 <arg value="kura_${project.version}_${build.name}_installer.sh" />
                 <arg value="${build.name}" />
+				<arg value="${kura.install.dir}" />
         </exec>
 
 
@@ -510,7 +517,12 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
                 basedir="${project.build.directory}/${build.output.name}/dp_upgrade_stage" />	
     </target>
 
-	
+	<target name="set-http-port" if="http.port"> 
+    	<propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
+            	<entry key="org.osgi.service.http.port" operation="="
+                   value="${http.port}" />
+        </propertyfile>
+    </target>
 	
 	<target name="web-config" if="web.jar.present">
 		<propertyfile file="${project.build.directory}/${build.output.name}/config.ini">

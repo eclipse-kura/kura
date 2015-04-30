@@ -29,6 +29,7 @@ import junit.framework.TestCase;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.util.ProcessUtil;
+import org.eclipse.kura.core.util.SafeProcess;
 import org.eclipse.kura.linux.net.iptables.LinuxFirewall;
 import org.eclipse.kura.test.annotation.TestTarget;
 import org.junit.AfterClass;
@@ -192,7 +193,7 @@ public class IPTablesTest extends TestCase {
 	@AfterClass()
 	public void tearDown() {
 		// Restore old iptables config
-		Process proc = null;
+		SafeProcess proc = null;
 		try {
 			s_logger.info("Restoring iptables config from " + oldConfig);
 			
@@ -219,15 +220,19 @@ public class IPTablesTest extends TestCase {
 			fail("Error restoring iptables config");
 		}
 		finally {
-			ProcessUtil.destroy(proc);
+			if (proc != null) ProcessUtil.destroy(proc);
 		}
 	}
 	
 	
 	private String getCurrentIptablesConfig() throws KuraException {
-		Process proc = null;
+		SafeProcess proc = null;
 		try {
 			proc = ProcessUtil.exec("iptables-save");
+			if (proc.waitFor() != 0) {
+				s_logger.error("error executing command --- iptables-save --- exit value = " + proc.exitValue());
+				throw new KuraException(KuraErrorCode.INTERNAL_ERROR);
+			}
 			
 			InputStreamReader isr = new InputStreamReader(proc.getInputStream());
 			BufferedReader br = new BufferedReader(isr);
@@ -246,7 +251,7 @@ public class IPTablesTest extends TestCase {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
 		}
 		finally {
-			ProcessUtil.destroy(proc);
+			if (proc != null) ProcessUtil.destroy(proc);
 		}
 	}
 

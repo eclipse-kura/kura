@@ -209,12 +209,16 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
     public void installTrustCertificate(String alias, X509Certificate x509crt) 
         throws GeneralSecurityException, IOException
     {
+    	InputStream tsReadStream = null;
+    	FileOutputStream tsOutStream = null;
+
+    	try{
         // load the trust store
         String trustStore = m_options.getSslTrustStore();
         KeyStore ts = KeyStore.getInstance(KeyStore.getDefaultType());
         File fTrustStore = new File(trustStore);
         if (fTrustStore.exists()) {
-            InputStream tsReadStream = new FileInputStream(trustStore);
+            tsReadStream = new FileInputStream(trustStore);
             ts.load(tsReadStream, null);
         }
         else {
@@ -226,12 +230,14 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
         
         // save it
         char[] trustStorePwd = getTrustStorePassword(); 
-        FileOutputStream tsOutStream = new FileOutputStream(trustStore);
+        tsOutStream = new FileOutputStream(trustStore);
         ts.store(tsOutStream, trustStorePwd);
-        try {
             tsOutStream.close();
-        }
-        catch (IOException e) {}
+    	}
+    	finally{
+    		if(tsReadStream != null) tsReadStream.close();
+    		if(tsOutStream != null) tsOutStream.close();
+    	}
     }
     
 
@@ -239,30 +245,37 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
     public void deleteTrustCertificate(String alias)
         throws GeneralSecurityException, IOException
     {
-        // load the trust store
-        String trustStore = m_options.getSslTrustStore();
-        KeyStore ts = KeyStore.getInstance(KeyStore.getDefaultType());
-        InputStream tsReadStream = new FileInputStream(trustStore);
-        ts.load(tsReadStream, null);
-        
-        // delete the entry
-        ts.deleteEntry(alias);
-
-        // save it
-        ts.store( new LoadStoreParameter() {            
-            @Override
-            public ProtectionParameter getProtectionParameter() {
-                char[] trustStorePwd;
-                try {
-                    trustStorePwd = getTrustStorePassword();
-                    return new PasswordProtection(trustStorePwd);
-                }
-                catch (Exception e) {
-                    s_logger.error("Error loading TrustStore password", e);
-                } 
-                return null;
-            }
-        });        
+    	InputStream tsReadStream = null;
+    	
+    	try{
+	        // load the trust store
+	        String trustStore = m_options.getSslTrustStore();
+	        KeyStore ts = KeyStore.getInstance(KeyStore.getDefaultType());
+	        tsReadStream = new FileInputStream(trustStore);
+	        ts.load(tsReadStream, null);
+	        
+	        // delete the entry
+	        ts.deleteEntry(alias);
+	
+	        // save it
+	        ts.store( new LoadStoreParameter() {            
+	            @Override
+	            public ProtectionParameter getProtectionParameter() {
+	                char[] trustStorePwd;
+	                try {
+	                    trustStorePwd = getTrustStorePassword();
+	                    return new PasswordProtection(trustStorePwd);
+	                }
+	                catch (Exception e) {
+	                    s_logger.error("Error loading TrustStore password", e);
+	                } 
+	                return null;
+	            }
+	        }); 
+    	}
+    	finally{
+    		if(tsReadStream != null) tsReadStream.close();
+    	}
     }
 
     
@@ -300,30 +313,36 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
     private TrustManager[] getTrustManagers(String trustStore) 
         throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException
     {
-        TrustManagerFactory tmf = null;        
-        if (trustStore != null) {
-         
-            // Load the configured the Trust Store
-            File fTrustStore = new File(trustStore);
-            if (fTrustStore.exists()) {
-                
-                KeyStore ts = KeyStore.getInstance(KeyStore.getDefaultType());
-                InputStream tsReadStream = new FileInputStream(trustStore);
-                ts.load(tsReadStream, null);
-                tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-                tmf.init(ts);
-            }
-            else {
-                s_logger.info("Could not find trust store at {}. Using Java default.", trustStore);
-            }
-        }
-
-        if (tmf == null) {
-            // Load the default Java VM Trust Store
-            tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-            tmf.init((KeyStore) null);
-        }        
-        return tmf.getTrustManagers(); 
+    	InputStream tsReadStream = null;
+    	try{
+	        TrustManagerFactory tmf = null;        
+	        if (trustStore != null) {
+	         
+	            // Load the configured the Trust Store
+	            File fTrustStore = new File(trustStore);
+	            if (fTrustStore.exists()) {
+	                
+	                KeyStore ts = KeyStore.getInstance(KeyStore.getDefaultType());
+	                tsReadStream = new FileInputStream(trustStore);
+	                ts.load(tsReadStream, null);
+	                tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+	                tmf.init(ts);
+	            }
+	            else {
+	                s_logger.info("Could not find trust store at {}. Using Java default.", trustStore);
+	            }
+	        }
+	
+	        if (tmf == null) {
+	            // Load the default Java VM Trust Store
+	            tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+	            tmf.init((KeyStore) null);
+	        }           
+	        return tmf.getTrustManagers();
+    	}
+    	finally{
+    		if(tsReadStream != null) tsReadStream.close();
+    	}
     }
     
     
@@ -350,39 +369,45 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
                IOException, NoSuchAlgorithmException,
                CertificateException, UnrecoverableEntryException
     {
-        KeyStore ks = null;
-        if (keyStore != null) {
-         
-            // Load the configured the Key Store
-            File fKeyStore = new File(keyStore);
-            if (fKeyStore.exists()) {
-                
-                ks = KeyStore.getInstance(KeyStore.getDefaultType());
-                InputStream ksReadStream = new FileInputStream(keyStore);
-                ks.load(ksReadStream, null);    
-    
-                // if we have an alias, then build KeyStore with such key
-                if (keyAlias != null) {                
-                    if (ks.containsAlias(keyAlias) && ks.isKeyEntry(keyAlias)) {
-                        if (ks.size() > 1) {                    
-                            PasswordProtection pp = new PasswordProtection(keyStorePassword);
-                            Entry entry = ks.getEntry(keyAlias, pp);
-                            ks = KeyStore.getInstance(KeyStore.getDefaultType());
-                            ks.load(null, null);
-                            ks.setEntry(keyAlias, entry, pp);
-                        }
-                    }
-                    else {
-                        s_logger.info("Could not find alias {} in key store at {}. Using Java default.", keyAlias, keyStore);
-                        ks = null;
-                    }
-                }
-            }
-            else {
-                s_logger.info("Could not find key store at {}. Using Java default.", keyStore);
-            }
-        }
-        return ks;
+        InputStream ksReadStream = null;
+    	try{
+	        KeyStore ks = null;
+	        if (keyStore != null) {
+	         
+	            // Load the configured the Key Store
+	            File fKeyStore = new File(keyStore);
+	            if (fKeyStore.exists()) {
+	                
+	                ks = KeyStore.getInstance(KeyStore.getDefaultType());
+	                ksReadStream = new FileInputStream(keyStore);
+	                ks.load(ksReadStream, null);    
+	    
+	                // if we have an alias, then build KeyStore with such key
+	                if (keyAlias != null) {                
+	                    if (ks.containsAlias(keyAlias) && ks.isKeyEntry(keyAlias)) {
+	                        if (ks.size() > 1) {                    
+	                            PasswordProtection pp = new PasswordProtection(keyStorePassword);
+	                            Entry entry = ks.getEntry(keyAlias, pp);
+	                            ks = KeyStore.getInstance(KeyStore.getDefaultType());
+	                            ks.load(null, null);
+	                            ks.setEntry(keyAlias, entry, pp);
+	                        }
+	                    }
+	                    else {
+	                        s_logger.info("Could not find alias {} in key store at {}. Using Java default.", keyAlias, keyStore);
+	                        ks = null;
+	                    }
+	                }
+	            }
+	            else {
+	                s_logger.info("Could not find key store at {}. Using Java default.", keyStore);
+	            }
+	        }
+	        return ks;
+    	}
+    	finally{
+    		if(ksReadStream != null) ksReadStream.close();
+    	}
     }
     
     

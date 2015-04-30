@@ -38,8 +38,6 @@ import org.eclipse.kura.net.NetInterfaceConfig;
 import org.eclipse.kura.net.NetInterfaceStatus;
 import org.eclipse.kura.net.NetInterfaceType;
 import org.eclipse.kura.net.NetworkAdminService;
-import org.eclipse.kura.net.NetworkPair;
-import org.eclipse.kura.net.NetworkService;
 import org.eclipse.kura.net.admin.NetworkConfigurationService;
 import org.eclipse.kura.net.admin.event.NetworkConfigurationChangeEvent;
 import org.eclipse.kura.net.admin.event.NetworkStatusChangeEvent;
@@ -65,10 +63,11 @@ public class EthernetMonitorServiceImpl implements EthernetMonitorService, Event
 	private final static long THREAD_INTERVAL = 30000;
 	private final static long THREAD_TERMINATION_TOUT = 1; // in seconds
 	
+	private static Object s_lock = new Object();
+	
 	private static Map<String, Future<?>> tasks;
 	private static Map<String, Boolean> stopThreads;
 	
-	private NetworkService m_networkService;
 	private EventAdmin m_eventAdmin;
 	private NetworkAdminService m_netAdminService;
 	private NetworkConfigurationService m_netConfigService;
@@ -85,14 +84,6 @@ public class EthernetMonitorServiceImpl implements EthernetMonitorService, Event
     //
     // ----------------------------------------------------------------
 	
-    public void setNetworkService(NetworkService networkService) {
-    	m_networkService = networkService;
-    }
-    
-    public void unsetNetworkService(NetworkService networkService) {
-    	m_networkService = null;
-    }
-
     public void setEventAdmin(EventAdmin eventAdmin) {
         m_eventAdmin = eventAdmin;
     }
@@ -141,10 +132,10 @@ public class EthernetMonitorServiceImpl implements EthernetMonitorService, Event
         	if (netConfiguration != null) {
 				for (NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig: netConfiguration.getNetInterfaceConfigs()) {
 					if (netInterfaceConfig instanceof EthernetInterfaceConfigImpl) {
-						s_logger.debug("Adding initial ethernet config for " + netInterfaceConfig.getName());
+						s_logger.debug("Adding initial ethernet config for {}", netInterfaceConfig.getName());
 						EthernetInterfaceConfigImpl newEthernetConfig = (EthernetInterfaceConfigImpl) netInterfaceConfig;
-						m_newNetworkConfiguration.put(netInterfaceConfig.getName(), newEthernetConfig);
 						m_networkConfiguration.put(netInterfaceConfig.getName(), newEthernetConfig);
+                        m_newNetworkConfiguration.put(netInterfaceConfig.getName(), newEthernetConfig);
 					}
 				}
 			}
@@ -160,7 +151,9 @@ public class EthernetMonitorServiceImpl implements EthernetMonitorService, Event
 
     protected void deactivate(ComponentContext componentContext) {
     	for (String key : tasks.keySet()) {
-    		stopMonitor(key);
+    		synchronized(s_lock) {
+    			stopMonitor(key);
+    		}
     	}
     	
     	if (m_executor != null) {
@@ -177,183 +170,193 @@ public class EthernetMonitorServiceImpl implements EthernetMonitorService, Event
     }
     
 	private void monitor(String interfaceName) {
-		while (!stopThreads.get(interfaceName)) {
+		synchronized(s_lock) {
 			try {
 				List <? extends NetInterfaceAddressConfig> new_niacs = null;
 				List <? extends NetInterfaceAddressConfig> cur_niacs = null;
 				InterfaceState currentInterfaceState = null;
-	        	boolean interfaceEnabled = false;
-	        	boolean isDhcpClient = false;
-	        	IP4Address staticGateway = null;
-	        	boolean dhcpServerEnabled = false;
-	        	IPAddress dhcpServerSubnet = null;
-	        	short dhcpServerPrefix = -1;
-	        	boolean postStatusChangeEvent = false;
-	        	
-	        	EthernetInterfaceConfigImpl currentInterfaceConfig = m_networkConfiguration.get(interfaceName);
-	        	EthernetInterfaceConfigImpl newInterfaceConfig = m_newNetworkConfiguration.get(interfaceName);
-	        	
-	        	// Make sure the Ethernet Controllers are powered
-	        	if(!LinuxNetworkUtil.isEthernetControllerPowered(interfaceName)) {
+		        boolean interfaceEnabled = false;
+		        boolean isDhcpClient = false;
+		        IP4Address staticGateway = null;
+		        boolean dhcpServerEnabled = false;
+		        //IPAddress dhcpServerSubnet = null;
+		        //short dhcpServerPrefix = -1;
+		        boolean postStatusChangeEvent = false;
+		        	
+		        EthernetInterfaceConfigImpl currentInterfaceConfig = m_networkConfiguration.get(interfaceName);
+		        EthernetInterfaceConfigImpl newInterfaceConfig = m_newNetworkConfiguration.get(interfaceName);
+		        	
+		        // Make sure the Ethernet Controllers are powered
+		        // FIXME:MC it should be possible to refactor this under the InterfaceState to avoid dual checks
+		        if(!LinuxNetworkUtil.isEthernetControllerPowered(interfaceName)) {
 					LinuxNetworkUtil.powerOnEthernetController(interfaceName);
 				}
-	        	
-	        	// If a new configuration exists, compare it to the existing configuration
-	        	if (newInterfaceConfig != null) {
-	        		// Get all configurations for the interface
-	        		new_niacs = newInterfaceConfig.getNetInterfaceAddresses();
-	        		if (currentInterfaceConfig != null) {
-	        			cur_niacs = currentInterfaceConfig.getNetInterfaceAddresses();
-	        		}
-	        		
-	        		if (isConfigChanged(new_niacs, cur_niacs)) {
-	        			s_logger.debug("Found a new network configuration for " + interfaceName);
+		        	
+		        // If a new configuration exists, compare it to the existing configuration
+		        if (newInterfaceConfig != null) {
+		        	// Get all configurations for the interface
+		        	new_niacs = newInterfaceConfig.getNetInterfaceAddresses();
+		        	if (currentInterfaceConfig != null) {
+		        		cur_niacs = currentInterfaceConfig.getNetInterfaceAddresses();
+		        	}
 		        		
-		        		// Disable the interface to be reconfigured below
+		        	if (isConfigChanged(new_niacs, cur_niacs)) {
+		        		s_logger.info("Found a new Ethernet network configuration for {}", interfaceName);
+			        	
+			        	// Disable the interface to be reconfigured below
 						disableInterface(interfaceName);
-	
-		        		// Set the current config to the new config
-		      			m_networkConfiguration.put(interfaceName, newInterfaceConfig);
+		
+			        	// Set the current config to the new config
+			      		m_networkConfiguration.put(interfaceName, newInterfaceConfig);
 						currentInterfaceConfig = newInterfaceConfig;
-	
+							
+						// Post a status change event - not to be confusd with the Config Change that I am consuming
 						postStatusChangeEvent = true;
-	        		}
-	        		
-	        		m_newNetworkConfiguration.remove(interfaceName);
-	        	}
-	        		
-	        	// Monitor for status changes and ensure dhcp server is running when enabled
+		        	}
+		        		
+		        	m_newNetworkConfiguration.remove(interfaceName);
+		        }
+		        		
+		        // Monitor for status changes and ensure dhcp server is running when enabled
+		
+		    	interfaceEnabled = isEthernetEnabled(currentInterfaceConfig);
+		    	InterfaceState prevInterfaceState = m_interfaceState.get(interfaceName);
 	
-	    		interfaceEnabled = isEthernetEnabled(currentInterfaceConfig);
-	    		InterfaceState prevInterfaceState = m_interfaceState.get(interfaceName);
-				currentInterfaceState = new InterfaceState(interfaceName);
+		    	// FIXME:MC Deprecate this constructor and prefer the one with the explicit parameters
+		    	// (String interfaceName, boolean up, boolean link, IPAddress ipAddress)
+		    	// It will save a call to determine the iface type and it will keep InterfaceState
+		    	// as a state object as it should be. Maybe introduce an InterfaceStateBuilder.
+		    	currentInterfaceState = new InterfaceState(NetInterfaceType.ETHERNET, interfaceName);
 				if(!currentInterfaceState.equals(prevInterfaceState)) {
 					postStatusChangeEvent = true;
 				}
-				
+					
 				// Find if DHCP server or DHCP client mode is enabled
-	            if (currentInterfaceConfig != null) {
-	            	NetInterfaceStatus netInterfaceStatus = getStatus(currentInterfaceConfig);
-	            	
-	            	cur_niacs = currentInterfaceConfig.getNetInterfaceAddresses();
-	            	
-	            	if ((cur_niacs != null) && cur_niacs.size() > 0) {
-	        			for (NetInterfaceAddressConfig niac : cur_niacs) {
-	        				List<NetConfig> netConfigs = niac.getConfigs();
-	        				if ((netConfigs != null) && netConfigs.size() > 0) {
-	        					for (NetConfig netConfig : netConfigs) {
-	        						if (netConfig instanceof DhcpServerConfig4) {
-	        			            	// only enable if Enabled for LAN
-	        			            	if(netInterfaceStatus.equals(NetInterfaceStatus.netIPv4StatusEnabledLAN)) {
-	        			            		dhcpServerEnabled = ((DhcpServerConfig4) netConfig).isEnabled();
-	        			            		dhcpServerSubnet = ((DhcpServerConfig4) netConfig).getSubnet();
-	        			            		dhcpServerPrefix = ((DhcpServerConfig4) netConfig).getPrefix();
-	        			            	} else {
-	        			            		s_logger.trace("Not enabling DHCP server for " + interfaceName + " since it is set to " + netInterfaceStatus);
-	        			            	}
-	    	                        } else if (netConfig instanceof NetConfigIP4) {
-	        							isDhcpClient = ((NetConfigIP4) netConfig).isDhcp();
-	        							staticGateway = ((NetConfigIP4) netConfig).getGateway();
-	        						}
-	        					}
-	        				}
-	        			}
-	        		} else {
-	        			s_logger.debug("No current net interface addresses for " + interfaceName);
-	        		}
-	            } else {
-	            	s_logger.debug("Current interface config is null for " + interfaceName);
-	            }
-	            
-	            // Enable/disable based on configuration and current status
-	            if(interfaceEnabled) {
-		            if(currentInterfaceState.isUp()) {
-		            	if(!currentInterfaceState.isLinkUp()) {
-		            		s_logger.debug("link is down - disabling " + interfaceName);
-		            		disableInterface(interfaceName);
-		            	}
-		            } else {
-		            	// State is currently down
-		            	if(currentInterfaceState.isLinkUp()) {
-		            		s_logger.debug("link is up - enabling " + interfaceName);
-		            		m_netAdminService.enableInterface(interfaceName, isDhcpClient);
-		            	}
-		            }
-	            } else {
-	            	if(currentInterfaceState.isUp()) {
-	                    s_logger.debug(interfaceName + " is currently up - disable interface");
-	                    disableInterface(interfaceName);            		
-	            	}
-	            }
-	            
-	            // Get the status after all ifdowns and ifups
-	            currentInterfaceState = new InterfaceState(interfaceName);
-	
-	            // Manage the DHCP server and validate routes
-	            if (currentInterfaceState != null && currentInterfaceState.isUp() && currentInterfaceState.isLinkUp()) {
-	            	NetInterfaceStatus netInterfaceStatus = getStatus(currentInterfaceConfig);
-	            	if(netInterfaceStatus == NetInterfaceStatus.netIPv4StatusEnabledWAN) {
-	            		// This should be the default gateway - make sure it is
-	            		boolean found = false;
-	            		
-	            		RouteConfig[] routes = m_routeService.getRoutes();
-	            		if(routes != null && routes.length > 0) {
-	            			for(RouteConfig route : routes) {
-	            				if(route.getInterfaceName().equals(interfaceName) && 
-	            						route.getDestination().equals(IPAddress.parseHostAddress("0.0.0.0")) &&
-	            						!route.getGateway().equals(IPAddress.parseHostAddress("0.0.0.0"))) {
-	            					found = true;
-	            					break;
-	            				}
-	            			}
-	            		}
-	            		
-	            		if(!found) {
-	            			if (isDhcpClient || (staticGateway != null)) {
-	            				//disable the interface and reenable - something didn't happen at initialization as it was supposed to
-	            				s_logger.error("WAN interface " + interfaceName + " did not have a route setting it as the default gateway, restarting it");
-	            				m_netAdminService.disableInterface(interfaceName);
-	            				m_netAdminService.enableInterface(interfaceName, isDhcpClient);
-	            			}
-	            		}
-	            	} else if (netInterfaceStatus == NetInterfaceStatus.netIPv4StatusEnabledLAN) {
-	            		if (isDhcpClient) {
-	            			RouteService rs = RouteServiceImpl.getInstance();
-	            			RouteConfig rconf = rs.getDefaultRoute(interfaceName);
-	            			if (rconf != null) {
-	            				s_logger.debug("{} is configured for LAN/DHCP - removing GATEWAY route ...", rconf.getInterfaceName());
-	            				rs.removeStaticRoute(rconf.getDestination(), rconf.getGateway(), rconf.getNetmask(), rconf.getInterfaceName());
-	            			}
-	            		}
-	            	}
-	            	
-	            	if(dhcpServerEnabled && !DhcpServerManager.isRunning(interfaceName)) {
-	            		s_logger.debug("Starting DHCP server for " + interfaceName);
-	            		m_netAdminService.manageDhcpServer(interfaceName, true);
-	            	}
+				if (currentInterfaceConfig != null) {
+					NetInterfaceStatus netInterfaceStatus = getStatus(currentInterfaceConfig);
+		            	
+		            cur_niacs = currentInterfaceConfig.getNetInterfaceAddresses();
+		            	
+		            if ((cur_niacs != null) && cur_niacs.size() > 0) {
+		        		for (NetInterfaceAddressConfig niac : cur_niacs) {
+		        			List<NetConfig> netConfigs = niac.getConfigs();
+		        			if ((netConfigs != null) && netConfigs.size() > 0) {
+		        				for (NetConfig netConfig : netConfigs) {
+		        					if (netConfig instanceof DhcpServerConfig4) {
+		        		            	// only enable if Enabled for LAN
+		        		            	if(netInterfaceStatus.equals(NetInterfaceStatus.netIPv4StatusEnabledLAN)) {
+		        		            		dhcpServerEnabled = ((DhcpServerConfig4) netConfig).isEnabled();
+		        		            		//dhcpServerSubnet = ((DhcpServerConfig4) netConfig).getSubnet();
+		        		            		//dhcpServerPrefix = ((DhcpServerConfig4) netConfig).getPrefix();
+		        		            	} else {
+		        		            		s_logger.trace("Not enabling DHCP server for " + interfaceName + " since it is set to " + netInterfaceStatus);
+		        		            	}
+									} else if (netConfig instanceof NetConfigIP4) {
+										isDhcpClient = ((NetConfigIP4) netConfig).isDhcp();
+		        						staticGateway = ((NetConfigIP4) netConfig).getGateway();
+		        					}
+		        				}
+		        			}
+		        		}
+		        	} else {
+		        		s_logger.debug("No current net interface addresses for {}", interfaceName);
+		        	}
+				} else {
+		            s_logger.debug("Current interface config is null for {}", interfaceName);
+				}
+		            
+				// Enable/disable based on configuration and current status
+				boolean interfaceStateChanged = false;
+				if (interfaceEnabled) {
+					if(currentInterfaceState.isUp()) {
+			           	if(!currentInterfaceState.isLinkUp()) {
+			           		s_logger.debug("link is down - disabling {}", interfaceName);
+			           		disableInterface(interfaceName);
+			           		interfaceStateChanged = true;
+			           	}
+					} else {
+			            // State is currently down
+			            if(currentInterfaceState.isLinkUp()) {
+			            	s_logger.debug("link is up - enabling {}", interfaceName);
+			            	m_netAdminService.enableInterface(interfaceName, isDhcpClient);
+			            	interfaceStateChanged = true;
+			            }
+					}
+				} else {
+					if (currentInterfaceState.isUp()) {
+						s_logger.debug("{} is currently up - disable interface", interfaceName);
+						disableInterface(interfaceName);
+						interfaceStateChanged = true;
+					}
+				}
+		            
+				// Get the status after all ifdowns and ifups
+				// FIXME: reload the configuration IFF one of above enable/disable happened
+				if (interfaceStateChanged) {
+					currentInterfaceState = new InterfaceState(NetInterfaceType.ETHERNET, interfaceName);
+				}
+		
+				// Manage the DHCP server and validate routes
+				if (currentInterfaceState != null && currentInterfaceState.isUp() && currentInterfaceState.isLinkUp()) {
+		           	NetInterfaceStatus netInterfaceStatus = getStatus(currentInterfaceConfig);
+		           	if(netInterfaceStatus == NetInterfaceStatus.netIPv4StatusEnabledWAN) {
+		           		// This should be the default gateway - make sure it is
+		           		boolean found = false;
+		            		
+		           		RouteConfig[] routes = m_routeService.getRoutes();
+		           		if(routes != null && routes.length > 0) {
+		           			for(RouteConfig route : routes) {
+		           				if(route.getInterfaceName().equals(interfaceName) && 
+		           						route.getDestination().equals(IPAddress.parseHostAddress("0.0.0.0")) &&
+		           						!route.getGateway().equals(IPAddress.parseHostAddress("0.0.0.0"))) {
+		           					found = true;
+		           					break;
+		           				}
+		           			}
+		           		}
+		            		
+		           		if(!found) {
+		           			if (isDhcpClient || (staticGateway != null)) {
+		           				//disable the interface and reenable - something didn't happen at initialization as it was supposed to
+		           				s_logger.error("WAN interface " + interfaceName + " did not have a route setting it as the default gateway, restarting it");
+		           				m_netAdminService.disableInterface(interfaceName);
+		           				m_netAdminService.enableInterface(interfaceName, isDhcpClient);
+		           			}
+		           		}
+		           	} else if (netInterfaceStatus == NetInterfaceStatus.netIPv4StatusEnabledLAN) {
+		           		if (isDhcpClient) {
+		           			RouteService rs = RouteServiceImpl.getInstance();
+		           			RouteConfig rconf = rs.getDefaultRoute(interfaceName);
+		           			if (rconf != null) {
+		           				s_logger.debug("{} is configured for LAN/DHCP - removing GATEWAY route ...", rconf.getInterfaceName());
+		           				rs.removeStaticRoute(rconf.getDestination(), rconf.getGateway(), rconf.getNetmask(), rconf.getInterfaceName());
+		           			}
+		           		}
+		           	}
+		            	
+		           	if(dhcpServerEnabled && !DhcpServerManager.isRunning(interfaceName)) {
+		           		s_logger.debug("Starting DHCP server for {}", interfaceName);
+		           		m_netAdminService.manageDhcpServer(interfaceName, true);
+		           	}
 				} else if(DhcpServerManager.isRunning(interfaceName)) {
-					s_logger.debug("Stopping DHCP server for " + interfaceName);
+					s_logger.debug("Stopping DHCP server for {}", interfaceName);
 					m_netAdminService.manageDhcpServer(interfaceName, false);
 				}
-	            
-	            // post event if there were any changes
-	            if(postStatusChangeEvent) {            	
-	            	s_logger.debug("Posting NetworkStatusChangeEvent for " + interfaceName + ": " + currentInterfaceState);
+		            
+				// post event if there were any changes
+				if(postStatusChangeEvent) {            	
+		           	s_logger.debug("Posting NetworkStatusChangeEvent for {}: {}", interfaceName, currentInterfaceState);
 					m_eventAdmin.postEvent(new NetworkStatusChangeEvent(interfaceName, currentInterfaceState, null));
-		            m_interfaceState.put(interfaceName, currentInterfaceState);
-	            }
-	
-	            // If the interface is disabled in Denali, stop the monitor
-	            if(!interfaceEnabled) {
-	            	s_logger.debug(interfaceName + " is disabled - stopping monitor");
-	                stopMonitor(interfaceName);
-	            }
-	            Thread.sleep(30000);
-			} catch (KuraException kuraException) {
-				s_logger.debug(kuraException.getMessage());
-				
+					m_interfaceState.put(interfaceName, currentInterfaceState);
+				}
+		
+				// If the interface is disabled in Denali, stop the monitor
+				if (!interfaceEnabled) {
+					s_logger.debug("{} is disabled - stopping monitor", interfaceName);
+					stopMonitor(interfaceName);
+				}
 			} catch (Exception e) {
-				s_logger.debug(e.getMessage());
+				s_logger.warn("Error during Ethernet Monitor", e);
 			}
 		}
 	}
@@ -362,7 +365,7 @@ public class EthernetMonitorServiceImpl implements EthernetMonitorService, Event
 	@Override
 	public void handleEvent(Event event) {
 		String topic = event.getTopic();
-		s_logger.debug("handleEvent - topic: " + topic);
+		s_logger.debug("handleEvent - topic: {}", topic);
         
 		if (topic.equals(NetworkConfigurationChangeEvent.NETWORK_EVENT_CONFIG_CHANGE_TOPIC)) {
 			NetworkConfigurationChangeEvent netConfigChangedEvent = (NetworkConfigurationChangeEvent)event;
@@ -382,7 +385,7 @@ public class EthernetMonitorServiceImpl implements EthernetMonitorService, Event
                     if (newNetworkConfig != null) {
 						for (NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig: newNetworkConfig.getNetInterfaceConfigs()) {
 							if (netInterfaceConfig instanceof EthernetInterfaceConfigImpl) {
-								s_logger.debug("Adding new ethernet config for " + netInterfaceConfig.getName());
+								s_logger.debug("Adding new ethernet config for {}", netInterfaceConfig.getName());
 								EthernetInterfaceConfigImpl newEthernetConfig = (EthernetInterfaceConfigImpl) netInterfaceConfig;
 								m_newNetworkConfiguration.put(netInterfaceConfig.getName(), newEthernetConfig);
 								if (isEthernetEnabled(newEthernetConfig)) {
@@ -392,7 +395,7 @@ public class EthernetMonitorServiceImpl implements EthernetMonitorService, Event
 						}
 					}
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    s_logger.warn("Error during Ethernet Monitor handle event", e);
                 }
             }
 		}
@@ -418,8 +421,8 @@ public class EthernetMonitorServiceImpl implements EthernetMonitorService, Event
 			}
 			
 			if((newNetConfigs == null || currentNetConfigs == null) || (newNetConfigs.size() != currentNetConfigs.size())) {
-				s_logger.debug("Config changed current - " + currentNetConfigs);
-				s_logger.debug("Config changed new     - " + newNetConfigs);
+				s_logger.debug("Config changed current - {}", currentNetConfigs);
+				s_logger.debug("Config changed new     - {}", newNetConfigs);
 				return true;
 			}
 			
@@ -432,8 +435,8 @@ public class EthernetMonitorServiceImpl implements EthernetMonitorService, Event
 					if(newNetConfig.getClass() == currentNetConfig.getClass()) {
 						foundMatch = true;
 						if(!newNetConfig.equals(currentNetConfig) && newNetConfig.getClass() != FirewallAutoNatConfig.class) {
-							s_logger.debug("\tConfig changed - Current config: " + currentNetConfig.toString());
-							s_logger.debug("\tConfig changed - New config: " + newNetConfig.toString());
+							s_logger.debug("\tConfig changed - Current config: {}", currentNetConfig.toString());
+							s_logger.debug("\tConfig changed - New config: {}", newNetConfig.toString());
 							return true;
 						}
 						break;
@@ -457,8 +460,7 @@ public class EthernetMonitorServiceImpl implements EthernetMonitorService, Event
 	
 	// Very the interface is enabled in Denali
 	private boolean isEthernetEnabled(EthernetInterfaceConfigImpl ethernetInterfaceConfig) {
-		NetInterfaceStatus status = getStatus(ethernetInterfaceConfig);
-		
+		NetInterfaceStatus status = getStatus(ethernetInterfaceConfig);		
 		return status.equals(NetInterfaceStatus.netIPv4StatusEnabledLAN) || status.equals(NetInterfaceStatus.netIPv4StatusEnabledWAN);
 	}
 	
@@ -478,60 +480,47 @@ public class EthernetMonitorServiceImpl implements EthernetMonitorService, Event
 		return status;
 	}
 	
-		// Initialize a monitor thread for each ethernet interface
-	private void initializeMonitors() {
-		 List<String> currentInterfaceNames;
-		try {
-			currentInterfaceNames = m_networkService.getAllNetworkInterfaceNames();
-			if(currentInterfaceNames != null && currentInterfaceNames.size() > 0) {
-				for (String interfaceName : currentInterfaceNames) {
-			        // skip non-ethernet interfaces
-			        if(LinuxNetworkUtil.getType(interfaceName) != NetInterfaceType.ETHERNET) {
-			            continue;
-			        }
-			        startMonitor(interfaceName);
-				}
-			         
-			}
-		} catch (KuraException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+	// Initialize a monitor thread for each ethernet interface
+	private void initializeMonitors() 
+	{
+	    for (String interfaceName : m_networkConfiguration.keySet()) {
+	        startMonitor(interfaceName);
 		}
 	}
 	
 	// Start a interface specific monitor thread
 	private void startMonitor(final String interfaceName) {
-		if (tasks == null) {
-			tasks = new HashMap<String, Future<?>>();
-		}
-		if (stopThreads == null) {
-			stopThreads = new HashMap<String, Boolean>();
-		}
-		
-		stopThreads.put(interfaceName, false);
-		
-		// Ensure monitor doesn't already exist for this interface
-		if (tasks.get(interfaceName) == null) {
-			s_logger.debug("Starting monitor for " + interfaceName);
-			Future<?> task = m_executor.submit(new Runnable() {
-	    		@Override
-	    		public void run() {
-		    			Thread.currentThread().setName("EthernetMonitor_" + interfaceName);
-		    			while (!stopThreads.get(interfaceName)) {
-		    				try {
-		    					monitor(interfaceName);
-		    					Thread.sleep(THREAD_INTERVAL);
-		    				} catch (InterruptedException interruptedException) {
-		    					Thread.currentThread().interrupt();
-		    					s_logger.debug(interruptedException.getMessage());
-		    				} catch (Throwable t) {
-								s_logger.error("Exception while monitoring ethernet connection {}", t.toString());
-								t.printStackTrace();
-							}
-		    			}
-	    	}});
+		synchronized(s_lock) {
+			if (tasks == null) {
+				tasks = new HashMap<String, Future<?>>();
+			}
+			if (stopThreads == null) {
+				stopThreads = new HashMap<String, Boolean>();
+			}
 			
-			tasks.put(interfaceName, task);
+			stopThreads.put(interfaceName, false);
+			
+			// Ensure monitor doesn't already exist for this interface
+			if (tasks.get(interfaceName) == null) {
+				s_logger.info("Starting monitor for {}", interfaceName);
+				Future<?> task = m_executor.submit(new Runnable() {
+		    		@Override
+		    		public void run() {
+			    			Thread.currentThread().setName("EthernetMonitor_" + interfaceName);
+			    			while (!stopThreads.get(interfaceName)) {
+			    				try {
+			    					monitor(interfaceName);
+			    					Thread.sleep(THREAD_INTERVAL);
+			    				} catch (InterruptedException interruptedException) {
+			    					Thread.interrupted();
+			    					s_logger.debug("Ethernet monitor interrupted - {}", interruptedException);
+			    				} catch (Throwable t) {
+									s_logger.error("Exception while monitoring ethernet connection - {}", t);
+								}
+			    			}
+		    	}});			
+				tasks.put(interfaceName, task);
+			}
 		}
 	}
 	
@@ -550,8 +539,9 @@ public class EthernetMonitorServiceImpl implements EthernetMonitorService, Event
 	}
 	
 	private void disableInterface(String interfaceName) throws Exception {
+	    // WTF: should this be m_netAdminService.disableInterface(interfaceName); instead?
 		LinuxNetworkUtil.disableInterface(interfaceName);
-		LinuxNetworkUtil.powerOnEthernetController(interfaceName);
+		// LinuxNetworkUtil.powerOnEthernetController(interfaceName); // already called by NetworkUtil.disableInterface 
 		m_netAdminService.manageDhcpServer(interfaceName, false);
 	}
 }

@@ -38,6 +38,11 @@ public class LoopbackInterfaceConfigImpl extends LoopbackInterfaceImpl<NetInterf
                 interfaceAddresses.add(copiedInterfaceAddressImpl);
             }
         }
+        if (interfaceAddresses.size() == 0) {
+            // add at least one empty interface implementation. 
+            // It is needed as a container for the NetConfig objects 
+            interfaceAddresses.add( new NetInterfaceAddressConfigImpl());
+        }
         this.setNetInterfaceAddresses(interfaceAddresses);
 	}
 }

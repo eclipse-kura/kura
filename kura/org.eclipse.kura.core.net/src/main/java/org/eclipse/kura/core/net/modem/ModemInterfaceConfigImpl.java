@@ -15,6 +15,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.kura.net.NetInterfaceConfig;
+import org.eclipse.kura.net.modem.ModemConnectionStatus;
+import org.eclipse.kura.net.modem.ModemConnectionType;
 import org.eclipse.kura.net.modem.ModemInterface;
 import org.eclipse.kura.net.modem.ModemInterfaceAddress;
 import org.eclipse.kura.net.modem.ModemInterfaceAddressConfig;
@@ -31,12 +33,22 @@ public class ModemInterfaceConfigImpl extends ModemInterfaceImpl<ModemInterfaceA
         // Copy the NetInterfaceAddresses
         List<? extends ModemInterfaceAddress> otherNetInterfaceAddresses = other.getNetInterfaceAddresses();
         ArrayList<ModemInterfaceAddressConfig> interfaceAddresses = new ArrayList<ModemInterfaceAddressConfig>();
-
         if(otherNetInterfaceAddresses != null) {
             for(ModemInterfaceAddress modemInterfaceAddress : otherNetInterfaceAddresses) {
                 ModemInterfaceAddressConfigImpl copiedInterfaceAddressImpl = new ModemInterfaceAddressConfigImpl(modemInterfaceAddress);
+                copiedInterfaceAddressImpl.setConnectionType(ModemConnectionType.PPP);
+                if (other.isUp()) {
+                    copiedInterfaceAddressImpl.setConnectionStatus(ModemConnectionStatus.CONNECTED);
+                } else {
+                    copiedInterfaceAddressImpl.setConnectionStatus(ModemConnectionStatus.DISCONNECTED);
+                }                
                 interfaceAddresses.add(copiedInterfaceAddressImpl);
             }
+        }
+        if (interfaceAddresses.size() == 0) {
+            // add at least one empty interface implementation. 
+            // It is needed as a container for the NetConfig objects 
+            interfaceAddresses.add( new ModemInterfaceAddressConfigImpl());
         }
         this.setNetInterfaceAddresses(interfaceAddresses);
     }

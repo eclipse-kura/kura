@@ -263,25 +263,8 @@ public class MqttDataTransport implements DataTransportService, MqttCallback,
 			s_logger.info("#  Connected!");
 			s_logger.info("# ------------------------------------------------------------");
 		} catch (MqttException e) {
-			s_logger.warn(
-					"xxxxxxxxxx  Connect failed. Forcing disconnect. xxxxxxxxxxxxxxxx ",
-					e.getCause().getMessage());
+			s_logger.warn("xxxxx  Connect failed. Forcing disconnect. xxxxx {}", e);
 			try {
-				// FIXME: Close on CONNACK timeout.
-				// This exposes a Paho bug!
-				// If a connection is established, by mistake, to a non-MQTT
-				// server, e.g. to an SSH server,
-				// Paho will wait for a VERY long time (forever?) to get the
-				// MQTT CONNACK.
-				// We can wait on the connectToken specifying a shorter timeout.
-				// Upon connect timeout, we can:
-				// - call disconnect(0), but this does not work and an
-				// "Already Disconnecting" exception will be raised on the next
-				// connect attempt.
-				// - call close(), but this does not work and an
-				// "Already in Use Persistence" exception will be raised when
-				// retrying the connect on a new instance.
-
 				// prevent callbacks from a zombie client
 				m_mqttClient.setCallback(null);
 				m_mqttClient.close();

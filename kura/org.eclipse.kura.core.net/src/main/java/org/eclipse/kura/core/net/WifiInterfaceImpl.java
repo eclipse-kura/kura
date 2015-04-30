@@ -18,19 +18,16 @@ import java.util.List;
 import org.eclipse.kura.net.NetInterfaceType;
 import org.eclipse.kura.net.wifi.WifiInterface;
 import org.eclipse.kura.net.wifi.WifiInterfaceAddress;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class WifiInterfaceImpl<T extends WifiInterfaceAddress> extends AbstractNetInterface<T> implements WifiInterface<T> 
 {
-    private static final Logger s_logger = LoggerFactory.getLogger(WifiInterfaceImpl.class);
-            
 	private EnumSet<Capability> capabilities = null;
 
 	public WifiInterfaceImpl(String name) {
 		super(name);
 	}
 	
+    @SuppressWarnings("unchecked")
     public WifiInterfaceImpl(WifiInterface<? extends WifiInterfaceAddress> other) {
         super(other);
         this.capabilities = other.getCapabilities();
@@ -41,12 +38,8 @@ public class WifiInterfaceImpl<T extends WifiInterfaceAddress> extends AbstractN
 
         if(otherNetInterfaceAddresses != null) {
             for(WifiInterfaceAddress wifiInterfaceAddress : otherNetInterfaceAddresses) {
-                try {
-                    WifiInterfaceAddressImpl copiedInterfaceAddressImpl = new WifiInterfaceAddressImpl(wifiInterfaceAddress);
-                    interfaceAddresses.add((T)copiedInterfaceAddressImpl);
-                } catch (Exception e) {
-                    s_logger.debug("Could not copy interface address: " + wifiInterfaceAddress);
-                }
+                WifiInterfaceAddressImpl copiedInterfaceAddressImpl = new WifiInterfaceAddressImpl(wifiInterfaceAddress);
+                interfaceAddresses.add((T)copiedInterfaceAddressImpl);
             }
         }
         this.setNetInterfaceAddresses(interfaceAddresses);

@@ -70,9 +70,9 @@
            	<Option label="Rising edge" value="2"/>            
            	<Option label="Both edges" value="3"/>                     
            	<Option label="Falling edge" value="1"/>                     
-           	<Option label="High level" value="4"/>                     
-           	<Option label="Low level" value="5"/>                     
-           	<Option label="Both levels" value="6"/>                     
+<!--            	<Option label="High level" value="4"/>                      -->
+<!--            	<Option label="Low level" value="5"/>                      -->
+<!--            	<Option label="Both levels" value="6"/>                      -->
            </AD>
                     
           </OCD>

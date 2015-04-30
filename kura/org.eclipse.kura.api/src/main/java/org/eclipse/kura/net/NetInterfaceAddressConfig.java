@@ -21,9 +21,6 @@ import java.util.List;
  * In this case, the configuration would not include an IP address.  However, the 'status' in
  * the NetInterfaceAddress would because the interface does have an IP - just not one that is
  * configured because it is dynamically assigned by the DHCP server.
- * 
- * @author eurotech
- *
  */
 public interface NetInterfaceAddressConfig extends NetInterfaceAddress {
 

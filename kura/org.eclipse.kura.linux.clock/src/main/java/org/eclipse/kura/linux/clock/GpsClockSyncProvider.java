@@ -22,6 +22,7 @@ import java.util.concurrent.TimeUnit;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.util.ProcessUtil;
+import org.eclipse.kura.core.util.SafeProcess;
 import org.eclipse.kura.position.PositionLockedEvent;
 import org.eclipse.kura.position.PositionService;
 import org.osgi.framework.BundleContext;
@@ -158,8 +159,8 @@ public class GpsClockSyncProvider implements ClockSyncProvider, EventHandler {
 	
 	protected void synchClock() throws KuraException
 	{
-		Process procDate = null;
-		Process procTime = null;
+		SafeProcess procDate = null;
+		SafeProcess procTime = null;
 		try {			
 			if(m_positionService!=null){
 				if(m_positionService.isLocked()){
@@ -212,8 +213,8 @@ public class GpsClockSyncProvider implements ClockSyncProvider, EventHandler {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
 		}
 		finally {
-			ProcessUtil.destroy(procDate);
-			ProcessUtil.destroy(procTime);
+			if (procDate != null) ProcessUtil.destroy(procDate);
+			if (procTime != null) ProcessUtil.destroy(procTime);
 		}
 	}
 }

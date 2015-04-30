@@ -126,7 +126,7 @@
             type="String"
             cardinality="0" 
             required="true"
-            default="file"
+            default="memory"
             description="Storage type where in-flight messages are persisted across reconnections.">
            <Option label="file" value="file"/>
            <Option label="memory" value="memory"/>

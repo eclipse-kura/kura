@@ -3,8 +3,10 @@ package org.eclipse.kura.deployment.customizer.upgrade.rp;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
@@ -23,8 +25,7 @@ public class UpgradeScriptResourceProcessorImpl implements ResourceProcessor {
 	private BundleContext		m_bundleContext;
 	private DeploymentPackage 	m_sourceDP;
 	private DeploymentPackage 	m_targetDP;
-	private Map<String, File>	m_sourceResourceFiles = new HashMap<String, File>();
-	private File				m_upgradeScript;
+	private Map<String, File>	m_sourceResourceFiles = new LinkedHashMap<String, File>(); // preserve insertion order
 	
 	protected void activate(BundleContext bundleContext) {
 		m_bundleContext = bundleContext;
@@ -56,7 +57,7 @@ public class UpgradeScriptResourceProcessorImpl implements ResourceProcessor {
 			throw new ResourceProcessorException(ResourceProcessorException.CODE_PREPARE,
 					"Failed to create temporary file for resource: " + name, ioe);
 		}
-		
+
 		try {
 			FileUtils.copyInputStreamToFile(stream, tmpFile);
 		} catch (IOException ioe) {
@@ -83,45 +84,73 @@ public class UpgradeScriptResourceProcessorImpl implements ResourceProcessor {
 	public void prepare() throws ResourceProcessorException {
 		s_logger.debug("Upgrade script resource processor: prepare");
 		// Iterate over list of resources
-		// TODO: Check for and execute pre-upgrade scripts here
-		Set<String> sourceResources = m_sourceResourceFiles.keySet();
-		for (String resource : sourceResources) {
-			m_upgradeScript = m_sourceResourceFiles.get(resource);
-		}
+		Set<Entry<String, File>> entrySet = m_sourceResourceFiles.entrySet();
+		Iterator<Entry<String, File>> it = entrySet.iterator();
 		try {
-			executeScript(m_upgradeScript);
+			while (it.hasNext()) {
+				Entry<String, File> entry = it.next();
+				File upgradeScript = entry.getValue();
+				executeScript(upgradeScript);
+			}
 		} catch (Exception e) {
-			s_logger.error("Failed to copy input stream for resource: '{}'");
+			s_logger.error("Error during prepare");
 			throw new ResourceProcessorException(ResourceProcessorException.CODE_PREPARE,
-					"Failed to copy input stream for resource: "+ e);
+					"Error during prepare", e);
 		}
 	}
 
 	@Override
 	public void commit() {
 		s_logger.debug("Upgrade script resource processor: commit");
-		
-		
-		
+		cleanup();
 	}
 
 	@Override
 	public void rollback() {
 		s_logger.debug("Upgrade script resource processor: rollback");
-		
+		cleanup();
 	}
 
 	@Override
 	public void cancel() {
 		s_logger.debug("Upgrade script resource processor: cancel");
-		
+		cleanup();
 	}
 	
-	private void executeScript(File file) throws IOException {
+	private void executeScript(File file) throws Exception {
 		String path = file.getCanonicalPath();
 		String[] cmdarray = {"/bin/bash", path};
 		Runtime rt = Runtime.getRuntime();
-		rt.exec(cmdarray);
+		Process proc = null;
+		try {
+			proc = rt.exec(cmdarray);
+			if (proc.waitFor() != 0) {
+				s_logger.error("Script {} failed with exit value {}", path, proc.exitValue());
+			}
+			// FIXME: streams must be consumed concurrently
+		} catch (Exception e) {
+			s_logger.error("Error executing process for script {}", path, e);
+			throw e;
+		} finally {
+			if (proc != null) {
+				proc.destroy();
+			}
+		}
 	}
-
+	
+	private void cleanup() {
+		Set<Entry<String, File>> entrySet = m_sourceResourceFiles.entrySet();
+		Iterator<Entry<String, File>> it = entrySet.iterator();
+		
+		while (it.hasNext()) {
+			Entry<String, File> entry = it.next();
+			File file = entry.getValue();
+			try {
+				file.delete();
+			} catch (Exception e) {
+				s_logger.warn("Failed to delete file", e);
+			}
+		}
+		m_sourceResourceFiles.clear();
+	}
 }

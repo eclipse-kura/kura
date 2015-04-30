@@ -25,7 +25,7 @@
 	</parent>
 
 	<artifactId>org.eclipse.kura.web</artifactId>
-	<version>1.0.2-SNAPSHOT</version>
+	<version>1.0.4-SNAPSHOT</version>
 	<packaging>war</packaging>
 	<name>org.eclipse.kura.web</name>
 
@@ -57,31 +57,31 @@
 		<dependency>
 			<groupId>org.eclipse.kura</groupId>
 			<artifactId>org.eclipse.kura.api</artifactId>
-			<version>${project.version}</version>
+			<version>[1.0,2.0)</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.kura</groupId>
 			<artifactId>org.eclipse.kura.core</artifactId>
-			<version>${project.version}</version>
+			<version>[1.0,2.0)</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.kura</groupId>
 			<artifactId>org.eclipse.kura.core.configuration</artifactId>
-			<version>${project.version}</version>
+			<version>[1.0,2.0)</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.kura</groupId>
 			<artifactId>org.eclipse.kura.core.net</artifactId>
-			<version>${project.version}</version>
+			<version>[1.0,2.0)</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.kura</groupId>
 			<artifactId>org.eclipse.kura.deployment.agent</artifactId>
-			<version>${project.version}</version>
+			<version>[1.0,2.0)</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
@@ -105,7 +105,7 @@
 			<version>4.7</version>
 			<scope>provided</scope>
 		</dependency>
-        <dependency>
+	        <dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
 			<version>1.6.4</version>

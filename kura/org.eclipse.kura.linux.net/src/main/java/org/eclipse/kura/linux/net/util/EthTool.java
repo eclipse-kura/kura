@@ -22,6 +22,7 @@ import java.io.InputStreamReader;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.util.ProcessUtil;
+import org.eclipse.kura.core.util.SafeProcess;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,10 +61,13 @@ public class EthTool implements LinkTool {
 	 * @see org.eclipse.kura.util.net.service.ILinkTool#get()
 	 */
 	public boolean get () throws KuraException {
-		Process proc = null;
+		SafeProcess proc = null;
+		BufferedReader br = null;
+		boolean result = false;
 		try {
-			proc = ProcessUtil.exec(tool + " " + this.ifaceName);			
-			BufferedReader br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+			proc = ProcessUtil.exec(tool + " " + this.ifaceName);	
+			result = (proc.waitFor() == 0)? true : false;
+			br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
 			String line = null;
 			int ind = -1;
 		    while((line = br.readLine()) != null) {
@@ -84,16 +88,24 @@ public class EthTool implements LinkTool {
 		    		}
 		    	}
 		    }
-		    
-		    return (proc.waitFor() == 0)? true : false;
 		} catch(IOException e) {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
 		} catch (InterruptedException e) {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
 		}
 		finally {
-			ProcessUtil.destroy(proc);
+			if(br != null){
+				try{
+					br.close();
+				}catch(IOException ex){
+					s_logger.error("I/O Exception while closing BufferedReader!");
+				}
+			}			
+		
+			if (proc != null) ProcessUtil.destroy(proc);
 		}
+		
+		return result;
 	}
 
 	/*

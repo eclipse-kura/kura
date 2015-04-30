@@ -16,12 +16,13 @@ import org.eclipse.kura.linux.net.ConnectionInfoImpl;
 import org.eclipse.kura.linux.net.util.LinuxNetworkUtil;
 import org.eclipse.kura.net.ConnectionInfo;
 import org.eclipse.kura.net.IPAddress;
+import org.eclipse.kura.net.NetInterfaceType;
 
 public class InterfaceState {
 	
 	private String m_name;
     private boolean m_up;
-    private boolean m_link;
+    protected boolean m_link;
     private IPAddress m_ipAddress;
 
     public InterfaceState(String interfaceName, boolean up, boolean link, IPAddress ipAddress) {
@@ -31,15 +32,15 @@ public class InterfaceState {
         m_ipAddress = ipAddress;
     }
     
-    public InterfaceState(String interfaceName) throws KuraException {
-    	m_name = interfaceName;
-    	m_up = LinuxNetworkUtil.isUp(interfaceName);
-    	m_link = LinuxNetworkUtil.isLinkUp(interfaceName);
-    	
-    	ConnectionInfo connInfo = new ConnectionInfoImpl(interfaceName);
-    	m_ipAddress = connInfo.getIpAddress();
+    public InterfaceState(NetInterfaceType type, String interfaceName) throws KuraException {
+        m_name = interfaceName;
+        m_up = LinuxNetworkUtil.isUp(interfaceName);
+        m_link = LinuxNetworkUtil.isLinkUp(type, interfaceName);
+        
+        ConnectionInfo connInfo = new ConnectionInfoImpl(interfaceName);
+        m_ipAddress = connInfo.getIpAddress();
     }
-
+    
     @Override
     public int hashCode() {
         final int prime = 31;

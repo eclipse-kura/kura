@@ -16,6 +16,7 @@ import java.io.File;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.linux.util.LinuxProcessUtil;
 import org.eclipse.kura.core.util.ProcessUtil;
+import org.eclipse.kura.core.util.SafeProcess;
 import org.eclipse.kura.linux.net.util.LinuxNetworkUtil;
 import org.eclipse.kura.net.wifi.WifiMode;
 import org.slf4j.Logger;
@@ -43,7 +44,7 @@ public class WpaSupplicantManager {
 		
 		s_logger.debug("enable WPA Supplicant");
 		
-		Process proc = null;
+		SafeProcess proc = null;
 		try {
 			if(WpaSupplicantManager.isRunning()) {
                 stop();
@@ -54,16 +55,15 @@ public class WpaSupplicantManager {
 
 			// start wpa_supplicant
 			String wpaSupplicantCommand = formSupplicantCommand(configFile);
-			s_logger.debug("starting wpa_supplicant -> " + wpaSupplicantCommand);
+			s_logger.debug("starting wpa_supplicant -> {}", wpaSupplicantCommand);
 			LinuxProcessUtil.start(wpaSupplicantCommand);
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw KuraException.internalError(e);
 		}
 		finally {
-			ProcessUtil.destroy(proc);
+			if (proc != null) ProcessUtil.destroy(proc);
 		}
-
 	}
 
 	
@@ -72,7 +72,7 @@ public class WpaSupplicantManager {
 	 */
 	private static String formSupplicantCommand(File configFile) {
 
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		sb.append("wpa_supplicant -B -D ");
 		sb.append(m_driver);
 		sb.append(" -i ");

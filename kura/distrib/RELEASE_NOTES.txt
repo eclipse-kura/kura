@@ -1,3 +1,63 @@
+Eclipse Kura - 1.1.2
+-------------------------------------------------------------------------
+Bug Fixes:
+   * Fixed JVM memory leak by making sure all stream are closed and
+     the streams associated to the stdout and stderr of external processes
+     are consumed asynchronously
+   * Overall optimization of the network related bundles by removing
+     unnecessary executions of external processes
+   * Fixed MANIFESTs removing unused imports and fixing Import-Package version
+     ranges to comply with OSGi Semantic Versioning
+   * Ppp0 connection not starting after a fresh install
+   * Modem did not recover the connection when the antenna is unplugged
+   * Avoid starting two Kura instances
+   * Rolling back to snapshot 0 does not change the modem configuration on the Minigateway
+   * Don't allow to set the gateway on LAN interfaces
+   * When reconfiguring Wifi from Station to Access Point, DHCP&NAT tab gets enabled only
+     after clicking on the 'Wireless' tab
+   * Since we don't support 802.11a, do not allow this in configuration
+   * Poweroff command fails at 'Stopping Kura'
+   * Disable snmpd to avoid excessive flash writes on raw-flash devices
+
+Known Issues:
+   * The reference JVM is Oracle Java SE Embedded version 7 Update 40.
+     Later versions (including Oracle Java SE Embedded version 8 Update 33)
+     may be affected by a ProcessBuilder memory leak [1]  
+   * Hardware watchdog: not implemented on all platforms
+   * Only one WAN interface is currently supported. A warning in displayed
+     in the WEB UI if the user attempts to enable more than one WAN interface
+   * When first modem configuration is submitted, unconfigured cellular interface for serial modem (e.g. HE910) is not being replaced by 
+     ppp0 interface. Both ppp0 and HE910 interfaces are shown in the Web Admin.
+   * Gateway needs to be rebooted for static GPS coordinates to be published to the cloud.
+
+[1] https://bugs.openjdk.java.net/browse/JDK-8054841
+
+
+Eclipse Kura - 1.1.1
+-------------------------------------------------------------------------
+
+Added Features:
+   * Added configurable CommandService to password-protect command execution
+   * Added support to reset WiFi if it cannot be enabled
+   * Added selection of the MQTT protocol version to the MqttDataTransport configuration
+
+Bug Fixes:
+   * Fixed ppp0 interface disappeared from Web UI
+   * Improved tips in the cellular modem advanced options and changed default values
+   * Fixed bug 452499: Kura Debian package name should be lower case
+   * Fixed org.eclipse.kura.linux.position not setting the track heading parameter
+   * Fixed org.eclipse.kura.linux.position to correctly select the GPS receiver
+   * Fixed org.eclipse.kura.linux.usb to better handle removal of USB devices
+   * Fixed org.eclipse.kura.linux.net to properly track USB add/remove events and stale devices
+   * Fixed org.eclipse.kura.net.admin to properly track modems
+   * Fixed org.eclipse.kura.net.admin to keep resetting the modem if PPP link cannot be established
+   * Fixed minor issues
+
+Known Issues:
+   * Hardware watchdog: not implemented on all platforms
+   * Only one WAN interface is currently supported. A warning in displayed in the WEB UI if the user attempts to enable more than one WAN interface
+
+
 Eclipse Kura - 1.1.0
 -------------------------------------------------------------------------
 

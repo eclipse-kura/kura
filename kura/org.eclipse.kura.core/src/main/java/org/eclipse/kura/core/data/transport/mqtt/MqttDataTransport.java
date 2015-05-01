@@ -26,6 +26,7 @@ import org.eclipse.kura.KuraNotConnectedException;
 import org.eclipse.kura.KuraTimeoutException;
 import org.eclipse.kura.KuraTooManyInflightMessagesException;
 import org.eclipse.kura.configuration.ConfigurableComponent;
+import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.core.data.transport.mqtt.MqttClientConfiguration.PersistenceType;
 import org.eclipse.kura.core.util.ValidationUtil;
 import org.eclipse.kura.crypto.CryptoService;
@@ -53,7 +54,8 @@ import org.slf4j.LoggerFactory;
 
 public class MqttDataTransport implements DataTransportService, MqttCallback, ConfigurableComponent, SslServiceListener {
 	private static final Logger s_logger = LoggerFactory.getLogger(MqttDataTransport.class);
-	
+	private static final String APP_PID = "service.pid";
+
 	private static final String ENV_JAVA_SECURITY= System.getProperty("java.security.manager");
 	private static final String ENV_OSGI_FRAMEWORK_SECURITY= System.getProperty("org.osgi.framework.security");
 	private static final String ENV_OSGI_SIGNED_CONTENT_SUPPORT= System.getProperty("osgi.signedcontent.support");
@@ -64,11 +66,11 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 	// TODO: add mqtt+ssl for secure mqtt
 
 	private static final String TOPIC_PATTERN = "#([^\\s/]+)"; // '#' followed
-																// by one or
-																// more
-																// non-whitespace
-																// but not the
-																// '/'
+	// by one or
+	// more
+	// non-whitespace
+	// but not the
+	// '/'
 	private static final Pattern s_topicPattern = Pattern.compile(TOPIC_PATTERN);
 
 	private SystemService m_systemService;
@@ -89,6 +91,7 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 	private Map<String, Object> m_properties = new HashMap<String, Object>();
 
 	private CryptoService m_cryptoService;
+	private ConfigurationService m_configurationService;
 
 	private static final String MQTT_BROKER_URL_PROP_NAME = "broker-url";
 	private static final String MQTT_USERNAME_PROP_NAME = "username";
@@ -97,7 +100,7 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 	private static final String MQTT_KEEP_ALIVE_PROP_NAME = "keep-alive";
 	private static final String MQTT_CLEAN_SESSION_PROP_NAME = "clean-session";
 	private static final String MQTT_TIMEOUT_PROP_NAME = "timeout"; // All
-																	// timeouts
+	// timeouts
 	private static final String MQTT_DEFAULT_VERSION_PROP_NAME = "protocol-version";
 
 	private static final String MQTT_LWT_QOS_PROP_NAME = "lwt.qos";
@@ -140,6 +143,14 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 
 	public void unsetCryptoService(CryptoService cryptoService) {
 		this.m_cryptoService = null;
+	}
+	
+	public void setConfigurationService(ConfigurationService configurationService) {
+		this.m_configurationService = configurationService;
+	}
+
+	public void unsetConfigurationService(ConfigurationService cryptoService) {
+		this.m_configurationService = null;
 	}
 
 	// ----------------------------------------------------------------
@@ -459,7 +470,7 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 	 */
 	@Override
 	public DataTransportToken publish(String topic, byte[] payload, int qos, boolean retain) throws KuraTooManyInflightMessagesException, KuraException,
-			KuraNotConnectedException {
+	KuraNotConnectedException {
 
 		if (m_mqttClient == null || !m_mqttClient.isConnected()) {
 			throw new KuraNotConnectedException("Not connected");
@@ -648,19 +659,17 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 			clientId = clientId.replace('/', '-');
 			clientId = clientId.replace('+', '-');
 			clientId = clientId.replace('#', '-');
+			
+			secureBrokerUrl();
 
 			// Configure the broker URL
 			brokerUrl = (String) properties.get(MQTT_BROKER_URL_PROP_NAME);
 			ValidationUtil.notEmptyOrNull(brokerUrl, MQTT_BROKER_URL_PROP_NAME);
 
 			brokerUrl = brokerUrl.trim();
-			if(isSecuredEnvironment() && brokerUrl.contains(MQTT_SCHEME)){
-				brokerUrl = brokerUrl.replaceAll("^" + MQTT_SCHEME, "ssl://");
-				brokerUrl = brokerUrl.replaceAll(":1883", ":8883");
-			}else{
-				brokerUrl = brokerUrl.replaceAll("^" + MQTT_SCHEME, "tcp://");
-				brokerUrl = brokerUrl.replaceAll("^" + MQTTS_SCHEME, "ssl://");
-			} 
+			
+			brokerUrl = brokerUrl.replaceAll("^" + MQTT_SCHEME, "tcp://");
+			brokerUrl = brokerUrl.replaceAll("^" + MQTTS_SCHEME, "ssl://"); 
 			//brokerUrl = brokerUrl.replaceAll("^" + MQTT_SCHEME, "tcp://");
 			//brokerUrl = brokerUrl.replaceAll("^" + MQTTS_SCHEME, "ssl://");
 			brokerUrl = brokerUrl.replaceAll("/$", "");
@@ -751,10 +760,30 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 
 	private boolean isSecuredEnvironment() {
 		boolean result =    ENV_JAVA_SECURITY != null 
-						 && ENV_OSGI_FRAMEWORK_SECURITY != null 
-						 && ENV_OSGI_SIGNED_CONTENT_SUPPORT != null 
-						 && ENV_OSGI_FRAMEWORK_TRUST_REPOSITORIES != null;
+				&& ENV_OSGI_FRAMEWORK_SECURITY != null 
+				&& ENV_OSGI_SIGNED_CONTENT_SUPPORT != null 
+				&& ENV_OSGI_FRAMEWORK_TRUST_REPOSITORIES != null;
 		return result;
+	}
+
+	private void secureBrokerUrl() {
+		try{
+			String brokerUrl = (String) m_properties.get(MQTT_BROKER_URL_PROP_NAME);
+			ValidationUtil.notEmptyOrNull(brokerUrl, MQTT_BROKER_URL_PROP_NAME);
+
+			brokerUrl = brokerUrl.trim();
+			if( isSecuredEnvironment() && brokerUrl.contains(MQTT_SCHEME)){
+				brokerUrl = brokerUrl.replaceAll("^" + MQTT_SCHEME, MQTTS_SCHEME);
+				brokerUrl = brokerUrl.replaceAll(":1883", ":8883");
+				m_properties.put(MQTT_BROKER_URL_PROP_NAME, brokerUrl);
+				String searchedPID = (String) m_properties.get(APP_PID);
+				m_configurationService.updateConfiguration(searchedPID, m_properties);
+			}
+			
+		} catch (KuraException e) {
+			s_logger.error("Invalid configuration");
+			throw new IllegalStateException("Invalid MQTT client configuration", e);
+		}
 	}
 
 	private String replaceTopicVariables(String topic) {

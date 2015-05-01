@@ -144,7 +144,7 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 	public void unsetCryptoService(CryptoService cryptoService) {
 		this.m_cryptoService = null;
 	}
-	
+
 	public void setConfigurationService(ConfigurationService configurationService) {
 		this.m_configurationService = configurationService;
 	}
@@ -659,19 +659,23 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 			clientId = clientId.replace('/', '-');
 			clientId = clientId.replace('+', '-');
 			clientId = clientId.replace('#', '-');
-			
-			secureBrokerUrl();
 
+			
 			// Configure the broker URL
+			brokerUrl= secureBrokerUrl();
+			brokerUrl = brokerUrl.replaceAll("^" + MQTT_SCHEME, "tcp://");
+			brokerUrl = brokerUrl.replaceAll("^" + MQTTS_SCHEME, "ssl://"); 
+
+			/*
+			// Configure the broker URL //only for demo use: for example with CIAB and auto-signed certificates
 			brokerUrl = (String) properties.get(MQTT_BROKER_URL_PROP_NAME);
 			ValidationUtil.notEmptyOrNull(brokerUrl, MQTT_BROKER_URL_PROP_NAME);
 
 			brokerUrl = brokerUrl.trim();
-			
+
 			brokerUrl = brokerUrl.replaceAll("^" + MQTT_SCHEME, "tcp://");
-			brokerUrl = brokerUrl.replaceAll("^" + MQTTS_SCHEME, "ssl://"); 
-			//brokerUrl = brokerUrl.replaceAll("^" + MQTT_SCHEME, "tcp://");
-			//brokerUrl = brokerUrl.replaceAll("^" + MQTTS_SCHEME, "ssl://");
+			brokerUrl = brokerUrl.replaceAll("^" + MQTTS_SCHEME, "ssl://"); */
+			
 			brokerUrl = brokerUrl.replaceAll("/$", "");
 			ValidationUtil.notEmptyOrNull(brokerUrl, "brokerUrl");
 
@@ -766,7 +770,7 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 		return result;
 	}
 
-	private void secureBrokerUrl() {
+	private String secureBrokerUrl() throws KuraException {
 		try{
 			String brokerUrl = (String) m_properties.get(MQTT_BROKER_URL_PROP_NAME);
 			ValidationUtil.notEmptyOrNull(brokerUrl, MQTT_BROKER_URL_PROP_NAME);
@@ -775,15 +779,26 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 			if( isSecuredEnvironment() && brokerUrl.contains(MQTT_SCHEME)){
 				brokerUrl = brokerUrl.replaceAll("^" + MQTT_SCHEME, MQTTS_SCHEME);
 				brokerUrl = brokerUrl.replaceAll(":1883", ":8883");
-				m_properties.put(MQTT_BROKER_URL_PROP_NAME, brokerUrl);
-				String searchedPID = (String) m_properties.get(APP_PID);
-				m_configurationService.updateConfiguration(searchedPID, m_properties);
+
+				updateConfiguration(brokerUrl);
 			}
-			
+			return brokerUrl;
 		} catch (KuraException e) {
-			s_logger.error("Invalid configuration");
-			throw new IllegalStateException("Invalid MQTT client configuration", e);
+			s_logger.error("Url securization operation failed!");
+			throw KuraException.internalError(e, "Failure during Url securization or configuration update");
 		}
+	}
+
+	private void updateConfiguration(String brokerUrl) throws KuraException {
+		char[] password = (char[]) m_properties.get(MQTT_PASSWORD_PROP_NAME); 
+		Map<String, Object> properties= new HashMap<String, Object>();
+		properties.putAll(m_properties);
+		properties.put(MQTT_BROKER_URL_PROP_NAME, brokerUrl);
+		properties.put(MQTT_PASSWORD_PROP_NAME, new String(password));
+		String searchedPID = (String) m_properties.get(APP_PID);
+
+		m_configurationService.updateConfiguration(searchedPID, properties);
+
 	}
 
 	private String replaceTopicVariables(String topic) {

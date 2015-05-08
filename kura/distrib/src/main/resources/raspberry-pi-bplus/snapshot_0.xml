@@ -416,6 +416,9 @@
             <esf:property name="lwt.qos" array="false" encrypted="false" type="Integer">
                 <esf:value>0</esf:value>
             </esf:property>
+           	<esf:property name="protocol-version" array="false" encrypted="false" type="Integer">
+                <esf:value>4</esf:value>
+            </esf:property>
         </esf:properties>
     </esf:configuration>
     <esf:configuration pid="org.eclipse.kura.data.DataService">

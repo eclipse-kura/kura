@@ -22,6 +22,7 @@ import java.security.GeneralSecurityException;
 import java.security.InvalidKeyException;
 import java.security.KeyManagementException;
 import java.security.KeyStore;
+import java.security.PrivateKey;
 import java.security.KeyStore.Entry;
 import java.security.KeyStore.LoadStoreParameter;
 import java.security.KeyStore.PasswordProtection;
@@ -30,15 +31,15 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.UnrecoverableEntryException;
+import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
+import java.util.Dictionary;
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
@@ -55,19 +56,24 @@ import org.eclipse.kura.KuraException;
 import org.eclipse.kura.certificate.CertificatesService;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.configuration.ConfigurationService;
+import org.eclipse.kura.configuration.KuraConfigReadyEvent;
 import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.ssl.SslManagerService;
 import org.eclipse.kura.ssl.SslServiceListener;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventConstants;
+import org.osgi.service.event.EventHandler;
 import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SslManagerServiceImpl implements SslManagerService, ConfigurableComponent
+public class SslManagerServiceImpl implements SslManagerService, ConfigurableComponent, EventHandler
 {
 	private static final Logger s_logger = LoggerFactory.getLogger(SslManagerServiceImpl.class);
+	private final static String[] EVENT_TOPICS = {KuraConfigReadyEvent.KURA_CONFIG_EVENT_READY_TOPIC};
 	private static final String APP_PID = "service.pid";
 	private static ComponentContext s_context;
 
@@ -81,18 +87,10 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
 	private ConfigurationService m_configurationService;
 	private SecureRandom random = new SecureRandom();
 
+	private boolean toSave= false;
 
 	private Map<String, Object> m_properties;
 
-	private ExecutorService m_worker;
-	private Future<?> m_handle;
-
-
-
-	public SslManagerServiceImpl() {
-		super();
-		m_worker = Executors.newSingleThreadExecutor();
-	}
 
 	// ----------------------------------------------------------------
 	//
@@ -131,6 +129,10 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
 		// save the bundle context and the properties
 		m_ctx = componentContext;
 		m_options = new SslManagerServiceOptions(properties);
+		
+		Dictionary<String, String[]> d = new Hashtable<String, String[]>();
+		d.put(EventConstants.EVENT_TOPIC, EVENT_TOPICS);
+		componentContext.getBundleContext().registerService(EventHandler.class.getName(), this, d);
 
 		ServiceTracker<SslServiceListener, SslServiceListener> listenersTracker = new ServiceTracker<SslServiceListener, SslServiceListener>(
 				componentContext.getBundleContext(),
@@ -146,23 +148,12 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
 		char[] keystorePassword= m_cryptoService.getKeyStorePassword(m_options.getSslTrustStore());
 
 		if(m_options.getSslKeystorePassword() == null && keystorePassword != null && verifyEnvironmentProperties(keystorePassword)){
-
 				String randomValue= new BigInteger(160, random).toString(32);
 
-
-				HashMap<String, Object> propertiesCopy= new HashMap<String, Object>();
-				Iterator<String> keys1 = properties.keySet().iterator();
-				while (keys1.hasNext()) {
-					String key = keys1.next();
-					Object value = properties.get(key);
-					propertiesCopy.put(key, value);
-				}
-
-				propertiesCopy.put(SslManagerServiceOptions.PROP_TRUST_PASSWORD, new Password(randomValue.toCharArray()));
 				try {
-
 					changeSSLKeystorePassword(keystorePassword, randomValue.toCharArray());
-					doUpdate(false, propertiesCopy);
+					m_properties.put(SslManagerServiceOptions.PROP_TRUST_PASSWORD, new Password(randomValue.toCharArray()));
+					toSave= true;
 				} catch (IOException | KeyStoreException | NoSuchAlgorithmException | CertificateException e) {
 					e.printStackTrace();
 				} 
@@ -376,6 +367,61 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
 			if(tsReadStream != null) tsReadStream.close();
 		}
 	}
+	
+	@Override
+	public void installPrivateKey(String alias, PrivateKey privateKey, char[] password, Certificate[] publicCerts)
+			throws GeneralSecurityException, IOException {
+		InputStream tsReadStream = null;
+		FileOutputStream tsOutStream = null;
+
+		try{
+			// load the trust store
+			String trustStore = m_options.getSslTrustStore();
+			KeyStore ts = KeyStore.getInstance(KeyStore.getDefaultType());
+			File fTrustStore = new File(trustStore);
+			if (fTrustStore.exists()) {
+				tsReadStream = new FileInputStream(trustStore);
+				ts.load(tsReadStream, null);
+			}
+			else {
+				ts.load(null, null);
+			}
+
+			// add the certificate
+			ts.setKeyEntry(alias, privateKey, password, publicCerts);
+
+			// save it
+			char[] trustStorePwd = getKeyStorePassword(); 
+			tsOutStream = new FileOutputStream(trustStore);
+			ts.store(tsOutStream, trustStorePwd);
+			tsOutStream.close();
+		}
+		finally{
+			if(tsReadStream != null) tsReadStream.close();
+			if(tsOutStream != null) tsOutStream.close();
+		}
+		
+	}
+	
+	@Override
+	public void handleEvent(Event event) {
+		s_logger.debug("handleEvent - topic: " + event.getTopic());
+		String topic = event.getTopic();
+		if (topic.equals(KuraConfigReadyEvent.KURA_CONFIG_EVENT_READY_TOPIC)) {
+			s_logger.info("--> System up and running");
+			String searchedPID = (String) m_properties.get(APP_PID);
+			try {
+				if(toSave && s_context.getServiceReference() != null && m_configurationService.getComponentConfiguration(searchedPID) != null){
+					
+					m_configurationService.updateConfiguration(searchedPID, m_properties);
+					return;
+				}
+			} catch (KuraException e) {
+				s_logger.info("Configuration update failure!");
+				e.printStackTrace();
+			}
+		}
+	}
 
 
 	// ----------------------------------------------------------------
@@ -581,39 +627,6 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
 		}
 	}
 
-	private void doUpdate(boolean onUpdate, final HashMap<String, Object> propertiesCopy) {
-		// cancel a current worker handle if one if active
-		if (m_handle != null) {
-			m_handle.cancel(true);
-		}
-
-		m_worker = Executors.newSingleThreadExecutor();
-		m_handle = m_worker.submit(new Runnable() {
-			public void run() {
-				s_logger.debug("--> Runner started");
-				String searchedPID = (String) propertiesCopy.get(APP_PID);
-
-				while (true) {
-					s_logger.debug("--> Runner while");
-					try {
-						Thread.sleep(1000);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-					try {
-						if(s_context.getServiceReference() != null && m_configurationService.getComponentConfiguration(searchedPID) != null){
-							s_logger.info("Trying to update config.");
-							m_configurationService.updateConfiguration(searchedPID, propertiesCopy);
-							return;
-						}
-					} catch (KuraException e1) {
-					}
-
-				}
-			}
-		});
-	}
-
 	private void changeSSLKeystorePassword(char[] oldPassword, char[] newPassword) throws IOException, NoSuchAlgorithmException, CertificateException, KeyStoreException{
 		m_cryptoService.setKeyStorePassword(m_options.getSslTrustStore(), new String(newPassword));
 		KeyStore keystore = loadKeyStore(m_options.getSslTrustStore(), oldPassword);
@@ -638,5 +651,4 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
 			}
 		}
 	}
-
 }

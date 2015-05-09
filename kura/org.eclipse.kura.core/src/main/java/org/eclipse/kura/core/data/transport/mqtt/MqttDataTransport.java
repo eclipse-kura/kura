@@ -26,7 +26,6 @@ import org.eclipse.kura.KuraNotConnectedException;
 import org.eclipse.kura.KuraTimeoutException;
 import org.eclipse.kura.KuraTooManyInflightMessagesException;
 import org.eclipse.kura.configuration.ConfigurableComponent;
-import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.core.data.transport.mqtt.MqttClientConfiguration.PersistenceType;
 import org.eclipse.kura.core.util.ValidationUtil;
 import org.eclipse.kura.crypto.CryptoService;
@@ -54,7 +53,6 @@ import org.slf4j.LoggerFactory;
 
 public class MqttDataTransport implements DataTransportService, MqttCallback, ConfigurableComponent, SslServiceListener {
 	private static final Logger s_logger = LoggerFactory.getLogger(MqttDataTransport.class);
-	private static final String APP_PID = "service.pid";
 
 	private static final String ENV_JAVA_SECURITY= System.getProperty("java.security.manager");
 	private static final String ENV_OSGI_FRAMEWORK_SECURITY= System.getProperty("org.osgi.framework.security");
@@ -91,7 +89,6 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 	private Map<String, Object> m_properties = new HashMap<String, Object>();
 
 	private CryptoService m_cryptoService;
-	private ConfigurationService m_configurationService;
 
 	private static final String MQTT_BROKER_URL_PROP_NAME = "broker-url";
 	private static final String MQTT_USERNAME_PROP_NAME = "username";
@@ -143,14 +140,6 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 
 	public void unsetCryptoService(CryptoService cryptoService) {
 		this.m_cryptoService = null;
-	}
-
-	public void setConfigurationService(ConfigurationService configurationService) {
-		this.m_configurationService = configurationService;
-	}
-
-	public void unsetConfigurationService(ConfigurationService cryptoService) {
-		this.m_configurationService = null;
 	}
 
 	// ----------------------------------------------------------------
@@ -662,10 +651,19 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 
 			
 			// Configure the broker URL
-			brokerUrl= secureBrokerUrl();
+			brokerUrl = (String) properties.get(MQTT_BROKER_URL_PROP_NAME);
+			ValidationUtil.notEmptyOrNull(brokerUrl, MQTT_BROKER_URL_PROP_NAME);
+			brokerUrl = brokerUrl.trim();
+			
+			if( isSecuredEnvironment() && brokerUrl.contains(MQTT_SCHEME)){
+				s_logger.error("ESF requires a secure (mqtts) connection!");
+				throw KuraException.internalError("ESF requires a secure (mqtts) connection!");
+				
+			}
 			brokerUrl = brokerUrl.replaceAll("^" + MQTT_SCHEME, "tcp://");
 			brokerUrl = brokerUrl.replaceAll("^" + MQTTS_SCHEME, "ssl://"); 
 
+			
 			/*
 			// Configure the broker URL //only for demo use: for example with CIAB and auto-signed certificates
 			brokerUrl = (String) properties.get(MQTT_BROKER_URL_PROP_NAME);
@@ -674,7 +672,11 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 			brokerUrl = brokerUrl.trim();
 
 			brokerUrl = brokerUrl.replaceAll("^" + MQTT_SCHEME, "tcp://");
-			brokerUrl = brokerUrl.replaceAll("^" + MQTTS_SCHEME, "ssl://"); */
+			brokerUrl = brokerUrl.replaceAll("^" + MQTTS_SCHEME, "ssl://"); 
+			*/
+			
+			
+			
 			
 			brokerUrl = brokerUrl.replaceAll("/$", "");
 			ValidationUtil.notEmptyOrNull(brokerUrl, "brokerUrl");
@@ -768,37 +770,6 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 				&& ENV_OSGI_SIGNED_CONTENT_SUPPORT != null 
 				&& ENV_OSGI_FRAMEWORK_TRUST_REPOSITORIES != null;
 		return result;
-	}
-
-	private String secureBrokerUrl() throws KuraException {
-		try{
-			String brokerUrl = (String) m_properties.get(MQTT_BROKER_URL_PROP_NAME);
-			ValidationUtil.notEmptyOrNull(brokerUrl, MQTT_BROKER_URL_PROP_NAME);
-
-			brokerUrl = brokerUrl.trim();
-			if( isSecuredEnvironment() && brokerUrl.contains(MQTT_SCHEME)){
-				brokerUrl = brokerUrl.replaceAll("^" + MQTT_SCHEME, MQTTS_SCHEME);
-				brokerUrl = brokerUrl.replaceAll(":1883", ":8883");
-
-				updateConfiguration(brokerUrl);
-			}
-			return brokerUrl;
-		} catch (KuraException e) {
-			s_logger.error("Url securization operation failed!");
-			throw KuraException.internalError(e, "Failure during Url securization or configuration update");
-		}
-	}
-
-	private void updateConfiguration(String brokerUrl) throws KuraException {
-		char[] password = (char[]) m_properties.get(MQTT_PASSWORD_PROP_NAME); 
-		Map<String, Object> properties= new HashMap<String, Object>();
-		properties.putAll(m_properties);
-		properties.put(MQTT_BROKER_URL_PROP_NAME, brokerUrl);
-		properties.put(MQTT_PASSWORD_PROP_NAME, new String(password));
-		String searchedPID = (String) m_properties.get(APP_PID);
-
-		m_configurationService.updateConfiguration(searchedPID, properties);
-
 	}
 
 	private String replaceTopicVariables(String topic) {

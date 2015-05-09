@@ -13,6 +13,8 @@ package org.eclipse.kura.ssl;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
+import java.security.PrivateKey;
+import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 
 import javax.net.ssl.SSLSocketFactory;
@@ -99,4 +101,12 @@ public interface SslManagerService
      * @param cn 
      */
     public void deleteTrustCertificate(String alias) throws GeneralSecurityException, IOException;
+    
+    /**
+     * Installs the specified X509 certificate in the currently configured trust store.
+     * If the SslManagerService configuration contains a path to a custom trust store, then the certificate will be installed in such store.
+     * Otherwise the certificate will be installed in the default Java VM trust store.
+     * @param x509crt certificate to be installed
+     */
+    public void installPrivateKey(String alias, PrivateKey privateKey, char[] password, Certificate[] publicCerts) throws GeneralSecurityException, IOException;
 }

@@ -417,7 +417,7 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
         
         LinuxIfconfig ifconfig = LinuxNetworkUtil.getInterfaceConfiguration(interfaceName);
         if (ifconfig == null) {
-        	s_logger.error("Failed to get intervace configuration for {}", interfaceName);
+        	s_logger.debug("Ignoring {} interface.", interfaceName);
         	return null;
         }
         

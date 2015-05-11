@@ -162,7 +162,7 @@
                 <esf:value>true</esf:value>
             </esf:property>
             <esf:property name="device.display-name" array="false" encrypted="false" type="String">
-                <esf:value>Raspberry Pi</esf:value>
+                <esf:value>Raspberry Pi 2</esf:value>
             </esf:property>
         </esf:properties>
     </esf:configuration>

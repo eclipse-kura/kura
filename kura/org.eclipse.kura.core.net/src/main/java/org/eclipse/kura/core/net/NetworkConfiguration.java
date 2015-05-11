@@ -762,6 +762,12 @@ public class NetworkConfiguration {
 		    properties.put(prefix+".radioMode", wifiConfig.getRadioMode().toString());
 		}
 		
+		if (wifiConfig.getBgscan() != null) {
+			properties.put(prefix+".bgscan", wifiConfig.getBgscan().toString());
+		} else {
+			properties.put(prefix+".bgscan", "");
+		}
+		
 		if (wifiConfig.getPairwiseCiphers() != null) {
 			properties.put(prefix+".pairwiseCiphers", wifiConfig.getPairwiseCiphers().name());
 		}
@@ -880,7 +886,6 @@ public class NetworkConfiguration {
         
         wifiConfig.setIgnoreSSID(ignoreSSID);
         
-        // bgscan
         if(mode == WifiMode.INFRA) {
 	        key = prefix + ".bgscan";
 	        String bgscan = (String)properties.get(key);

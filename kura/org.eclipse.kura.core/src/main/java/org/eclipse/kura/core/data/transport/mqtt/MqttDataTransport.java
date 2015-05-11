@@ -649,7 +649,7 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 			clientId = clientId.replace('+', '-');
 			clientId = clientId.replace('#', '-');
 
-			
+			/*
 			// Configure the broker URL
 			brokerUrl = (String) properties.get(MQTT_BROKER_URL_PROP_NAME);
 			ValidationUtil.notEmptyOrNull(brokerUrl, MQTT_BROKER_URL_PROP_NAME);
@@ -662,9 +662,9 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 			}
 			brokerUrl = brokerUrl.replaceAll("^" + MQTT_SCHEME, "tcp://");
 			brokerUrl = brokerUrl.replaceAll("^" + MQTTS_SCHEME, "ssl://"); 
-
+			*/
 			
-			/*
+			
 			// Configure the broker URL //only for demo use: for example with CIAB and auto-signed certificates
 			brokerUrl = (String) properties.get(MQTT_BROKER_URL_PROP_NAME);
 			ValidationUtil.notEmptyOrNull(brokerUrl, MQTT_BROKER_URL_PROP_NAME);
@@ -673,7 +673,7 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 
 			brokerUrl = brokerUrl.replaceAll("^" + MQTT_SCHEME, "tcp://");
 			brokerUrl = brokerUrl.replaceAll("^" + MQTTS_SCHEME, "ssl://"); 
-			*/
+			
 			
 			
 			

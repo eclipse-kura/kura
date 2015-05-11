@@ -103,10 +103,12 @@ public interface SslManagerService
     public void deleteTrustCertificate(String alias) throws GeneralSecurityException, IOException;
     
     /**
-     * Installs the specified X509 certificate in the currently configured trust store.
-     * If the SslManagerService configuration contains a path to a custom trust store, then the certificate will be installed in such store.
-     * Otherwise the certificate will be installed in the default Java VM trust store.
-     * @param x509crt certificate to be installed
+     * Installs a private key and the correspondent public certificate chains in the configured key store with the defined alias.
+     * @param alias that is a string that will be used to identify the certificates in the key store
+     * @param privateKey that represents PrivateKey object
+     * @param password that represents the password used to encode the keys in the key store
+     * @param publicCerts that represents an array of Certificate objects that contain the public certificate chain
+     * 
      */
     public void installPrivateKey(String alias, PrivateKey privateKey, char[] password, Certificate[] publicCerts) throws GeneralSecurityException, IOException;
 }

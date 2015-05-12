@@ -18,6 +18,7 @@ import java.security.Key;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Arrays;
 
 import javax.crypto.Cipher;
@@ -26,12 +27,15 @@ import javax.crypto.spec.SecretKeySpec;
 import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.db.DbService;
 import org.eclipse.kura.web.server.util.ServiceLocator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.xml.bind.*;
 
 public class AuthenticationManager 
 {
 	private static AuthenticationManager s_instance;
+	private static final Logger s_logger = LoggerFactory.getLogger(AuthenticationManager.class);
 
 	private char[] password;
 
@@ -75,8 +79,8 @@ public class AuthenticationManager
 		PreparedStatement stmt = null;
 		try{
 			conn = dbService.getConnection();
-			
 			if(conn.getMetaData().getURL().startsWith("jdbc:hsqldb:mem")){
+				s_logger.info("db is file");
 				File adminFile = new File(dataDir + "/ap_store");
 				if(adminFile.exists() && !adminFile.isDirectory()){
 
@@ -88,15 +92,18 @@ public class AuthenticationManager
 				}
 			}else{
 				ResultSet rs = null;
-				stmt = conn.prepareStatement("SELECT username, password FROM dn_user WHERE username = ?;");
-				stmt.setString(1, "admin");
+				stmt = conn.prepareStatement("SELECT password FROM dn_user WHERE username = 'admin';");
 				rs = stmt.executeQuery();
 				if (rs != null && rs.next()) {
-					result= rs.getString("password").toCharArray();
+					String pass= rs.getString("password");
+					result= pass.toCharArray();
 				}
 			}
-		}catch(Exception e){
-		} finally {
+		}catch(SQLException e){
+			s_logger.info("SQLException");
+		} catch(Exception e1){
+			s_logger.info("DB Exception");
+		}finally {
 			try{
 				if(br != null){
 					br.close();

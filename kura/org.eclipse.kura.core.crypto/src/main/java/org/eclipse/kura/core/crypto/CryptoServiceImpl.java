@@ -96,14 +96,6 @@ public class CryptoServiceImpl implements CryptoService {
         return decodedValue;		
 	}
 
-
-	@Override
-	public char[] getKeyStorePassword(String keyStorePath) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-
 	@Override
 	public char[] decryptAes(char[] encryptedValue) throws KuraException {
 		Key  key = generateKey();
@@ -124,5 +116,16 @@ public class CryptoServiceImpl implements CryptoService {
 				 IllegalBlockSizeException e){
 			throw new KuraException(KuraErrorCode.DECODER_ERROR);
 		}
+	}
+	
+	@Override
+	public char[] getKeyStorePassword(String keyStorePath) {
+		return "changeit".toCharArray();
+	}
+
+	@Override
+	public void setKeyStorePassword(String keyStorePath, String password)
+			throws IOException {
+		return;
 	}
 }

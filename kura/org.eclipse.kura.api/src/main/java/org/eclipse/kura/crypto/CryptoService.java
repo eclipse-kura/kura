@@ -106,5 +106,13 @@ public interface CryptoService
 	 * @return A char array that represents the password of the specified keystore.
 	 */
 	public char[] getKeyStorePassword(String keyStorePath);
+	
+	/**
+	 * Takes a keystore path as a String and a char array representing a password that has to be stored for the specified keystore.
+	 * @param keyStorePath A String that represents a unique identifier of the specified keystore.
+	 * @param password A char array that represents the password of the specified keystore.
+	 * @throws IOException
+	 */
+	public void setKeyStorePassword(String keyStorePath, String password) throws IOException;
 
 }

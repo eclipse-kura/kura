@@ -34,7 +34,7 @@
         	required="false"
         	default="true"
         	description="Enable or disable hostname verification." />
-        	
+        	        	
         <AD id="ssl.default.trustStore"
             name="ssl.default.trustStore"
             type="String"
@@ -43,14 +43,14 @@
             default="/opt/eclipse/security/cacerts"
             description="Location of the Java keystore file containing the collection of CA certificates trusted by this application process (trust store). Key store type is expected to be JKS. If not specified or the specified file does not exist, the default Java VM trust store will be used."/>
             
-        <AD id="ssl.default.keyStore"
-            name="ssl.default.keyStore"
-            type="String"
+        <AD id="ssl.keystore.password"  
+            name="ssl.keystore.password"
+            type="Password"
             cardinality="0" 
-            required="false"
-            default="/opt/eclipse/security/keystore"
-            description="Location of the Java keystore file containing an application process's own certificate and private key.  Key store type is expected to be JKS. If not specified or the specified file does not exist, the default Java VM key store will be used."/>
-
+            required="true"
+            default="" 
+            description="Keystore access password."/>
+        
         <AD id="ssl.default.cipherSuites"
             name="ssl.default.cipherSuites"
             type="String"

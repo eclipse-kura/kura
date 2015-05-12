@@ -19,7 +19,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Dictionary;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
@@ -63,9 +62,6 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
 	private static final Logger s_logger = LoggerFactory.getLogger(CloudServiceImpl.class);
 
 	private static final String     TOPIC_BA_APP = "BA";
-	private static final String 	CERT_SERIAL = "pkiSerial";
-	private static final String 	RESOURCE_CERTIFICATE_DM = "dm";
-	private static final String 	SIGNATURE_METRIC = "signedMessage";
 
 	private ComponentContext        m_ctx;
 
@@ -453,16 +449,14 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
 									m_certificatesService= m_ctx.getBundleContext().getService(sr);
 								}
 							}
-							
 							boolean validMessage= false;
 							if(m_certificatesService == null){
 								validMessage= true;
-							}else if(verifyMessageSignature(kuraTopic, kuraPayload)){
+							}else if(m_certificatesService.verifySignature(kuraTopic, kuraPayload)){
 								validMessage= true;
 							}
 
 							if(validMessage){
-
 								cloudClient.onControlMessageArrived(kuraTopic.getDeviceId(), 
 										kuraTopic.getApplicationTopic(), 
 										kuraPayload, 
@@ -655,44 +649,6 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
 		}
 		catch (Exception e) {
 			s_logger.error("Error publishing life-cycle message on topic: "+topic, e);
-		}
-	}
-
-
-	private boolean verifyMessageSignature(KuraTopic kuraTopic, KuraPayload kuraPayload){
-
-		System.out.println(kuraPayload.getMetric(CERT_SERIAL));
-		System.out.println("metric: " + kuraPayload.getMetric(SIGNATURE_METRIC));
-		if(kuraTopic.getApplicationId().equals("PROV-V2") && 
-				kuraTopic.getApplicationTopic().contains("certificate")){
-			if(m_certificatesService == null){
-				return true;
-			} else{
-				Enumeration<String> aliasDMEnum= m_certificatesService.listDMCertificatesAliases();
-				if(aliasDMEnum == null || !aliasDMEnum.hasMoreElements()){
-					return true;
-				}
-			}
-			return false;
-		}else if(kuraPayload.getMetric(CERT_SERIAL) != null && !((String) kuraPayload.getMetric(CERT_SERIAL)).equals("")){
-			s_logger.debug("Start signature verification");
-			String certSerial= (String) kuraPayload.getMetric(CERT_SERIAL);
-			String signingCertAlias= RESOURCE_CERTIFICATE_DM + "-" + certSerial;
-			
-			String applicationId= kuraTopic.getApplicationId();
-			String fullTopic= kuraTopic.getFullTopic();
-			String semanticTopic= fullTopic.substring(fullTopic.indexOf(applicationId));
-			byte[] topicBytes= semanticTopic.getBytes();
-			
-			byte[] messagePayload= kuraPayload.getBody();
-			byte[] signature = null;
-			if(kuraPayload.getMetric(SIGNATURE_METRIC) instanceof byte[]){
-				signature = (byte[]) kuraPayload.getMetric(SIGNATURE_METRIC);
-			}
-			return m_certificatesService.verifySignature(signingCertAlias, topicBytes, messagePayload, signature);
-		}else{
-			s_logger.debug("Error: not correct message format");
-			return false;
 		}
 	}
 }

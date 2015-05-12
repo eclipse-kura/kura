@@ -37,6 +37,7 @@ import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraPartialSuccessException;
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurationService;
+import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.configuration.SelfConfiguringComponent;
 import org.eclipse.kura.configuration.metatype.AD;
 import org.eclipse.kura.configuration.metatype.OCD;
@@ -626,10 +627,12 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 				s_logger.info("Snapshot on EventAdmin configuration will be taken for {}.", pid);
 			}
 
+			Map<String, Object> encryptedProperties= encryptPasswords(mergedProperties);
 			// Update the new properties
 			// use ConfigurationAdmin to do the update
 			Configuration config = m_configurationAdmin.getConfiguration(pid);
-			config.update(CollectionsUtil.mapToDictionary(mergedProperties));
+			config.update(CollectionsUtil.mapToDictionary(encryptedProperties));
+			//mergedProperties));
 
 			s_logger.info("Updating Configuration of ConfigurableComponent {} ... Done.", pid);
 		} catch (IOException e) {
@@ -706,6 +709,24 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 	private Map<String, Object> encryptPasswords(ComponentConfiguration config){
 		Map<String, Object> propertiesToUpdate = config.getConfigurationProperties();
 
+		Iterator<String> keys = propertiesToUpdate.keySet().iterator();
+		while (keys.hasNext()) {
+			String key = keys.next();
+			Object value = propertiesToUpdate.get(key);
+			if (value != null) {
+				if (value instanceof Password) {
+					try {
+						propertiesToUpdate.put(key, new Password(m_cryptoService.encryptAes(value.toString())));
+					} catch (Exception e) {
+						propertiesToUpdate.remove(key);
+					}
+				}
+			}
+		}		
+		return propertiesToUpdate;
+	}
+	
+	private Map<String, Object> encryptPasswords(Map<String, Object> propertiesToUpdate){
 		Iterator<String> keys = propertiesToUpdate.keySet().iterator();
 		while (keys.hasNext()) {
 			String key = keys.next();
@@ -852,8 +873,16 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 	}
 
 	private synchronized long saveSnapshot(List<? extends ComponentConfiguration> configs) throws KuraException {
-		List<ComponentConfigurationImpl> configImpls = encryptConfigs(configs);
+		//List<ComponentConfigurationImpl> configImpls = configs;//encryptConfigs(configs);
 
+		List<ComponentConfigurationImpl> configImpls = new ArrayList<ComponentConfigurationImpl>();
+		for (ComponentConfiguration config : configs) {
+			if (config instanceof ComponentConfigurationImpl) {
+				configImpls.add((ComponentConfigurationImpl) config);
+			}
+		}
+		
+		
 		//
 		// Build the XML structure
 		XmlComponentConfigurations conf = new XmlComponentConfigurations();

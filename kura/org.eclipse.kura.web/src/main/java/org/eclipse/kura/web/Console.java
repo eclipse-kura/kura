@@ -25,10 +25,11 @@ import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.configuration.KuraConfigReadyEvent;
-import org.eclipse.kura.core.configuration.Password;
+import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.db.DbService;
 import org.eclipse.kura.system.SystemService;
+import org.eclipse.kura.web.server.GwtCertificatesServiceImpl;
 import org.eclipse.kura.web.server.GwtComponentServiceImpl;
 import org.eclipse.kura.web.server.GwtDeviceServiceImpl;
 import org.eclipse.kura.web.server.GwtNetworkServiceImpl;
@@ -185,12 +186,13 @@ public class Console implements ConfigurableComponent {
 					propertyPassword = m_cryptoService.decryptAes(propertyPassword);
 				} catch (Exception e) {
 				}
+				
 
 				if (passwordFromDB != null) {
 					if (!Arrays.equals(propertyPassword, passwordFromDB)) {
 						if (Arrays.equals(propertyPassword, "admin".toCharArray())) {
 							m_properties.put(CONSOLE_PASSWORD, passwordFromDB);
-							s_logger.debug("Needed password update from db");
+							s_logger.info("Needed password update from db");
 							doUpdate(false);
 						} else {
 							Object value = properties.get(CONSOLE_PASSWORD);
@@ -367,6 +369,7 @@ public class Console implements ConfigurableComponent {
 		m_httpService.registerServlet(servletRoot + "/package", new GwtPackageServiceImpl(), null, httpCtx);
 		m_httpService.registerServlet(servletRoot + "/snapshot", new GwtSnapshotServiceImpl(), null, httpCtx);
 		m_httpService.registerServlet(servletRoot + "/setting", new GwtSettingServiceImpl(), null, httpCtx);
+		m_httpService.registerServlet(servletRoot + "/certificate", new GwtCertificatesServiceImpl(), null, httpCtx);
 		m_httpService.registerServlet(servletRoot + "/file", new FileServlet(), null, httpCtx);
 		m_httpService.registerServlet(servletRoot + "/device_snapshots", new DeviceSnapshotsServlet(), null, httpCtx);
 		m_httpService.registerServlet(servletRoot + "/skin", new SkinServlet(), null, httpCtx);

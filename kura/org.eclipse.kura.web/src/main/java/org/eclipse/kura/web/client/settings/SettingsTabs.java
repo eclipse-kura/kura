@@ -33,9 +33,12 @@ public class SettingsTabs extends LayoutContainer
     private ServiceTree         m_servicesTree;
 	
 	private TabPanel            m_tabsPanel;
+	private TabItem             m_certificatesConfig;
 	private TabItem             m_snapshotsConfig;
 	
 	private SnapshotsTab	    m_snapshotsTab;
+
+	private CertificatesTab m_certificatesTab;
 	
 	public SettingsTabs(GwtSession currentSession,
 					    ServiceTree serviceTree) 
@@ -50,6 +53,12 @@ public class SettingsTabs extends LayoutContainer
 	
     private void initTabs()
     {
+    	m_certificatesTab = new CertificatesTab(m_currentSession);
+		if (m_certificatesConfig != null) {
+			m_certificatesConfig.add(m_certificatesTab);
+			m_certificatesConfig.layout();
+		}
+    	
     	m_snapshotsTab = new SnapshotsTab(m_currentSession, m_servicesTree);
 		if (m_snapshotsConfig != null) {
 			m_snapshotsConfig.add(m_snapshotsTab);
@@ -80,7 +89,13 @@ public class SettingsTabs extends LayoutContainer
         m_snapshotsConfig.setLayout(new FitLayout());
         m_snapshotsConfig.add(m_snapshotsTab);
         m_tabsPanel.add(m_snapshotsConfig);
+        
+        m_certificatesConfig = new TabItem(MSGS.settingsAddSSLCertificates());
+        m_certificatesConfig.setBorders(true);
+        m_certificatesConfig.setLayout(new FitLayout());
+        m_certificatesConfig.add(m_certificatesTab);
+        m_tabsPanel.add(m_certificatesConfig);
 
-         add(m_tabsPanel);
+        add(m_tabsPanel);
     }
 }

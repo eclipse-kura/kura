@@ -54,16 +54,21 @@ import org.slf4j.LoggerFactory;
 public class MqttDataTransport implements DataTransportService, MqttCallback, ConfigurableComponent, SslServiceListener {
 	private static final Logger s_logger = LoggerFactory.getLogger(MqttDataTransport.class);
 
+	private static final String ENV_JAVA_SECURITY= System.getProperty("java.security.manager");
+	private static final String ENV_OSGI_FRAMEWORK_SECURITY= System.getProperty("org.osgi.framework.security");
+	private static final String ENV_OSGI_SIGNED_CONTENT_SUPPORT= System.getProperty("osgi.signedcontent.support");
+	private static final String ENV_OSGI_FRAMEWORK_TRUST_REPOSITORIES= System.getProperty("org.osgi.framework.trust.repositories");
+
 	private static final String MQTT_SCHEME = "mqtt://";
 	private static final String MQTTS_SCHEME = "mqtts://";
 	// TODO: add mqtt+ssl for secure mqtt
 
 	private static final String TOPIC_PATTERN = "#([^\\s/]+)"; // '#' followed
-																// by one or
-																// more
-																// non-whitespace
-																// but not the
-																// '/'
+	// by one or
+	// more
+	// non-whitespace
+	// but not the
+	// '/'
 	private static final Pattern s_topicPattern = Pattern.compile(TOPIC_PATTERN);
 
 	private SystemService m_systemService;
@@ -92,7 +97,7 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 	private static final String MQTT_KEEP_ALIVE_PROP_NAME = "keep-alive";
 	private static final String MQTT_CLEAN_SESSION_PROP_NAME = "clean-session";
 	private static final String MQTT_TIMEOUT_PROP_NAME = "timeout"; // All
-																	// timeouts
+	// timeouts
 	private static final String MQTT_DEFAULT_VERSION_PROP_NAME = "protocol-version";
 
 	private static final String MQTT_LWT_QOS_PROP_NAME = "lwt.qos";
@@ -454,7 +459,7 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 	 */
 	@Override
 	public DataTransportToken publish(String topic, byte[] payload, int qos, boolean retain) throws KuraTooManyInflightMessagesException, KuraException,
-			KuraNotConnectedException {
+	KuraNotConnectedException {
 
 		if (m_mqttClient == null || !m_mqttClient.isConnected()) {
 			throw new KuraNotConnectedException("Not connected");
@@ -644,13 +649,35 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 			clientId = clientId.replace('+', '-');
 			clientId = clientId.replace('#', '-');
 
+			
 			// Configure the broker URL
+			brokerUrl = (String) properties.get(MQTT_BROKER_URL_PROP_NAME);
+			ValidationUtil.notEmptyOrNull(brokerUrl, MQTT_BROKER_URL_PROP_NAME);
+			brokerUrl = brokerUrl.trim();
+			
+			if( isSecuredEnvironment() && brokerUrl.contains(MQTT_SCHEME)){
+				s_logger.error("ESF requires a secure (mqtts) connection!");
+				throw KuraException.internalError("ESF requires a secure (mqtts) connection!");
+				
+			}
+			brokerUrl = brokerUrl.replaceAll("^" + MQTT_SCHEME, "tcp://");
+			brokerUrl = brokerUrl.replaceAll("^" + MQTTS_SCHEME, "ssl://"); 
+
+			
+			/*
+			// Configure the broker URL //only for demo use: for example with CIAB and auto-signed certificates
 			brokerUrl = (String) properties.get(MQTT_BROKER_URL_PROP_NAME);
 			ValidationUtil.notEmptyOrNull(brokerUrl, MQTT_BROKER_URL_PROP_NAME);
 
 			brokerUrl = brokerUrl.trim();
+
 			brokerUrl = brokerUrl.replaceAll("^" + MQTT_SCHEME, "tcp://");
-			brokerUrl = brokerUrl.replaceAll("^" + MQTTS_SCHEME, "ssl://");
+			brokerUrl = brokerUrl.replaceAll("^" + MQTTS_SCHEME, "ssl://"); 
+			*/
+			
+			
+			
+			
 			brokerUrl = brokerUrl.replaceAll("/$", "");
 			ValidationUtil.notEmptyOrNull(brokerUrl, "brokerUrl");
 
@@ -735,6 +762,14 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 		clientConfiguration = new MqttClientConfiguration(brokerUrl, clientId, persistenceType, conOpt);
 
 		return clientConfiguration;
+	}
+
+	private boolean isSecuredEnvironment() {
+		boolean result =    ENV_JAVA_SECURITY != null 
+				&& ENV_OSGI_FRAMEWORK_SECURITY != null 
+				&& ENV_OSGI_SIGNED_CONTENT_SUPPORT != null 
+				&& ENV_OSGI_FRAMEWORK_TRUST_REPOSITORIES != null;
+		return result;
 	}
 
 	private String replaceTopicVariables(String topic) {

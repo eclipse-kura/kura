@@ -9,15 +9,8 @@
  * Contributors:
  *   Eurotech
  */
-package org.eclipse.kura.core.configuration;
+package org.eclipse.kura.configuration;
 
-/**
- * 
- * @author matteo.maiero
- *
- */
-
-@Deprecated
 public class Password 
 {
 	private char[] password;

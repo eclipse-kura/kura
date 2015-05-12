@@ -434,14 +434,26 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 		
 		for (String pid : pids) {
 			s_logger.info("Rolling back to default configuration for component pid: '{}'", pid);
-			Bundle bundle = m_ctx.getBundleContext().getServiceReference(pid).getBundle();
 			try {
-				OCD ocd = ComponentUtil.readObjectClassDefinition(bundle, pid);
-				Map<String, Object> defaults = ComponentUtil.getDefaultProperties(ocd);
-				updateConfigurationInternal(pid, defaults, snapshotOnConfirmation);
-			} catch (Throwable t) {
-				s_logger.warn("Error during rollback for component "+pid, t);
-				causes.add(t);
+				ServiceReference<?>[] refs = m_ctx.getBundleContext().getServiceReferences((String) null, null);
+				if (refs != null) {
+					for (ServiceReference<?> ref : refs) {
+						String ppid = (String) ref.getProperty("component.name");
+						if (pid.equals(ppid)) {
+							Bundle bundle = ref.getBundle();
+							try {
+								OCD ocd = ComponentUtil.readObjectClassDefinition(bundle, pid);
+								Map<String, Object> defaults = ComponentUtil.getDefaultProperties(ocd);
+								updateConfigurationInternal(pid, defaults, snapshotOnConfirmation);
+							} catch (Throwable t) {
+								s_logger.warn("Error during rollback for component "+pid, t);
+								causes.add(t);
+							}
+						}
+					}
+				}
+			} catch (InvalidSyntaxException e) {
+				s_logger.warn("Error during rollback for component "+pid, e);
 			}
 		}
 		if (causes.size() > 0) {
@@ -793,83 +805,93 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 	private ComponentConfiguration getSelfConfiguringComponentConfiguration(String pid)
 	{
 		ComponentConfiguration cc = null;
-		ServiceReference<?> ref = m_ctx.getBundleContext().getServiceReference(pid);
-		if (ref != null) {
-			Object obj = m_ctx.getBundleContext().getService(ref);
-			try {
-				if (obj instanceof SelfConfiguringComponent) {
-					SelfConfiguringComponent selfConfigComp = null;
-					selfConfigComp = (SelfConfiguringComponent) obj;
-					try {
-						
-						cc = selfConfigComp.getConfiguration();
-						if (cc.getPid() == null || !cc.getPid().equals(pid)) {
-							s_logger.error("Invalid pid for returned Configuration of SelfConfiguringComponent with pid: "+pid+". Ignoring it.");
-							cc = null; // do not return the invalid configuration
-							return cc;
-						}
-						
-						OCD ocd = cc.getDefinition();
-						if (ocd != null) {
-							List<AD> ads = ocd.getAD();
-							
-							if (ads != null) {
-								for (AD ad : ads) {
-									String adId = ad.getId();
-									String adType = ad.getType().value();
-									
-									if (adId == null) {
-										s_logger.error("null required id for AD for returned Configuration of SelfConfiguringComponent with pid: {}", pid);
-										cc = null;
-										return cc;  // do not return the invalid configuration										
-									}
-									if (adType == null) {
-										s_logger.error("null required type for AD id: {} for returned Configuration of SelfConfiguringComponent with pid: {}", adId, pid);
-										cc = null;
-										return cc;  // do not return the invalid configuration
+		try {
+			ServiceReference<?>[] refs = m_ctx.getBundleContext().getServiceReferences((String) null, null);
+			if (refs != null) {
+				for (ServiceReference<?> ref : refs) {
+					String ppid = (String) ref.getProperty("component.name");
+					if (pid.equals(ppid)) {		
+						Object obj = m_ctx.getBundleContext().getService(ref);
+						try {
+							if (obj instanceof SelfConfiguringComponent) {
+								SelfConfiguringComponent selfConfigComp = null;
+								selfConfigComp = (SelfConfiguringComponent) obj;
+								try {
+
+									cc = selfConfigComp.getConfiguration();
+									if (cc.getPid() == null || !cc.getPid().equals(pid)) {
+										s_logger.error("Invalid pid for returned Configuration of SelfConfiguringComponent with pid: "+pid+". Ignoring it.");
+										cc = null; // do not return the invalid configuration
+										return cc;
 									}
 
-									Map<String, Object> props = cc.getConfigurationProperties();
-									if (props != null) {
-										for (String propName : props.keySet()) {
-											if (propName.equals(adId)) {
-												Object value = props.get(propName);
-												if (value != null) {
-													String propType = value.getClass().getSimpleName();
-													try {
-														s_logger.debug("pid: {}, property name: {}, type: {}, value: {}", new Object[] {pid, propName, propType, value});
-														Scalar.fromValue(propType);
-														if (!propType.equals(adType)) {
-															s_logger.error("Type: {} for property named: {} does not match the AD type: {} for returned Configuration of SelfConfiguringComponent with pid: {}",
-																	new Object[] {propType, propName, adType, pid});
-															cc = null;
-															return cc;  // do not return the invalid configuration															
+									OCD ocd = cc.getDefinition();
+									if (ocd != null) {
+										List<AD> ads = ocd.getAD();
+
+										if (ads != null) {
+											for (AD ad : ads) {
+												String adId = ad.getId();
+												String adType = ad.getType().value();
+
+												if (adId == null) {
+													s_logger.error("null required id for AD for returned Configuration of SelfConfiguringComponent with pid: {}", pid);
+													cc = null;
+													return cc;  // do not return the invalid configuration										
+												}
+												if (adType == null) {
+													s_logger.error("null required type for AD id: {} for returned Configuration of SelfConfiguringComponent with pid: {}", adId, pid);
+													cc = null;
+													return cc;  // do not return the invalid configuration
+												}
+
+												Map<String, Object> props = cc.getConfigurationProperties();
+												if (props != null) {
+													for (String propName : props.keySet()) {
+														if (propName.equals(adId)) {
+															Object value = props.get(propName);
+															if (value != null) {
+																String propType = value.getClass().getSimpleName();
+																try {
+																	s_logger.debug("pid: {}, property name: {}, type: {}, value: {}", new Object[] {pid, propName, propType, value});
+																	Scalar.fromValue(propType);
+																	if (!propType.equals(adType)) {
+																		s_logger.error("Type: {} for property named: {} does not match the AD type: {} for returned Configuration of SelfConfiguringComponent with pid: {}",
+																				new Object[] {propType, propName, adType, pid});
+																		cc = null;
+																		return cc;  // do not return the invalid configuration															
+																	}
+																} catch (IllegalArgumentException e) {
+																	s_logger.error("Invalid class: {} for property named: {} for returned Configuration of SelfConfiguringComponent with pid: " + pid, propType, propName);
+																	cc = null;
+																	return cc;  // do not return the invalid configuration
+																}
+															}
 														}
-													} catch (IllegalArgumentException e) {
-														s_logger.error("Invalid class: {} for property named: {} for returned Configuration of SelfConfiguringComponent with pid: " + pid, propType, propName);
-														cc = null;
-														return cc;  // do not return the invalid configuration
 													}
 												}
 											}
 										}
-									}
+									}						
+								} 
+								catch (KuraException e) {
+									s_logger.error("Error getting Configuration for component: "+pid+". Ignoring it.", e);
 								}
 							}
-						}						
-					} 
-					catch (KuraException e) {
-						s_logger.error("Error getting Configuration for component: "+pid+". Ignoring it.", e);
+							else {
+								s_logger.error("Component "+obj+" is not a SelfConfiguringComponent. Ignoring it.");			
+							}
+						}
+						finally {
+							m_ctx.getBundleContext().ungetService(ref);
+						}
 					}
 				}
-				else {
-					s_logger.error("Component "+obj+" is not a SelfConfiguringComponent. Ignoring it.");			
-				}
 			}
-			finally {
-				m_ctx.getBundleContext().ungetService(ref);
-			}
+		} catch (InvalidSyntaxException e) {
+			s_logger.error("Error getting Configuration for component: "+pid+". Ignoring it.", e);
 		}
+
 		return cc;
 	}
 	

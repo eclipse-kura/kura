@@ -25,8 +25,7 @@ import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.Collection;
 import java.util.Iterator;
 
-import javax.xml.bind.DatatypeConverter;
-
+import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.ssl.SslManagerService;
 import org.eclipse.kura.web.server.util.ServiceLocator;
 import org.eclipse.kura.web.shared.GwtKuraErrorCode;
@@ -50,7 +49,9 @@ public class GwtCertificatesServiceImpl extends OsgiRemoteServiceServlet impleme
 	        String key = privateCert.replace("-----BEGIN PRIVATE KEY-----", "");
 	        key = key.replace("-----END PRIVATE KEY-----", "");
 	    	
-	        byte[] conversion= DatatypeConverter.parseBase64Binary(key);
+	        CryptoService cryptoService = ServiceLocator.getInstance().getService(CryptoService.class);
+	        byte[] conversion= cryptoService.decodeBase64(key).getBytes("UTF-8");
+	        
 	        // Parse Base64 - after PKCS8
 	        PKCS8EncodedKeySpec specPriv = new PKCS8EncodedKeySpec(conversion);
 		    

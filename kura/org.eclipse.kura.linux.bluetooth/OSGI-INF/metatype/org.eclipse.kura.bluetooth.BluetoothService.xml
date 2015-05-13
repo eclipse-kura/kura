@@ -31,7 +31,7 @@
             cardinality="0"
             required="true"
             default="4"
-            description="Lenght of time to scan for devices." />
+            description="Length of time to scan for devices. (seconds)" />
 
     </OCD>
     <Designate pid="org.eclipse.kura.bluetooth.BluetoothService">

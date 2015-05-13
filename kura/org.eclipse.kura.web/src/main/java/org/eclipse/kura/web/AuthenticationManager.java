@@ -30,7 +30,6 @@ import org.eclipse.kura.web.server.util.ServiceLocator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.xml.bind.*;
 
 public class AuthenticationManager 
 {
@@ -120,15 +119,15 @@ public class AuthenticationManager
 		return result;
 	}
 	
-	@SuppressWarnings("restriction")
 	private static String decryptAes(String encryptedValue) 
 			throws Exception 
 		{
 			Key  key = new SecretKeySpec("rv;ipse329183!@#".getBytes(), "AES");
 	        Cipher c = Cipher.getInstance("AES");
 	        c.init(Cipher.DECRYPT_MODE, key);
-	        byte[] decordedValue  = DatatypeConverter.parseBase64Binary(encryptedValue);
-	        byte[] decryptedBytes = c.doFinal(decordedValue);
+	        CryptoService cryptoService = ServiceLocator.getInstance().getService(CryptoService.class);
+	        byte[] decodedValue  = cryptoService.decodeBase64(encryptedValue).getBytes("UTF-8");
+	        byte[] decryptedBytes = c.doFinal(decodedValue);
 	        String decryptedValue = new String(decryptedBytes);
 	        return decryptedValue;
 	    }

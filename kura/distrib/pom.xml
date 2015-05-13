@@ -396,7 +396,7 @@
 		<profile>
             <id>intel-edison-nn</id>
 			<properties>
-				<kura.install.dir>/home/root/eclipse</kura.install.dir>
+				<kura.edison.install.dir>/home/root/eclipse</kura.edison.install.dir>
 			</properties>
             <activation>
                 <activeByDefault>true</activeByDefault>
@@ -462,7 +462,7 @@
                                         <property name="build.name" value="intel-edison-nn" />
                                         <property name="kura.arch" value="x86_64" />
                                         <property name="kura.mem.size" value="256m" />
-                                        <property name="kura.install.dir" value="${kura.install.dir}" />
+                                        <property name="kura.install.dir" value="${kura.edison.install.dir}" />
 										<property name="http.port" value="8080" />
                                         <ant antfile="${basedir}/src/main/ant/build_equinox_distrib.xml"
                                             target="dist-linux" />

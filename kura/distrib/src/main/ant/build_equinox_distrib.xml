@@ -81,6 +81,8 @@
                  token="{org.eclipse.kura.api.version}" value="${org.eclipse.kura.api.version}"/>
         <replace file="${project.build.directory}/${build.output.name}/config.ini"
                  token="{org.eclipse.kura.core.version}" value="${org.eclipse.kura.core.version}"/>
+    	<replace file="${project.build.directory}/${build.output.name}/config.ini"
+                 token="{org.eclipse.kura.core.certificates.version}" value="${org.eclipse.kura.core.certificates.version}"/>
         <replace file="${project.build.directory}/${build.output.name}/config.ini"
                  token="{org.eclipse.kura.core.cloud.version}" value="${org.eclipse.kura.core.cloud.version}"/>
         <replace file="${project.build.directory}/${build.output.name}/config.ini"
@@ -388,6 +390,8 @@ fi
             <zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.api_${org.eclipse.kura.api.version}.jar"
                         prefix="${build.output.name}/kura/plugins" />
             <zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.core_${org.eclipse.kura.core.version}.jar"
+                        prefix="${build.output.name}/kura/plugins" />
+            <zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.core.certificates_${org.eclipse.kura.core.certificates.version}.jar"
                         prefix="${build.output.name}/kura/plugins" />
             <zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.core.cloud_${org.eclipse.kura.core.cloud.version}.jar"
                         prefix="${build.output.name}/kura/plugins" />

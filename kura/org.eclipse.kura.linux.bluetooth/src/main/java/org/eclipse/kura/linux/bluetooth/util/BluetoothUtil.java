@@ -29,7 +29,7 @@ public class BluetoothUtil {
 	private static final String GATTTOOL      = "gatttool";
 	
 	/*
-	 * Use hciconfig utility to return information about the bluetooth adatper
+	 * Use hciconfig utility to return information about the bluetooth adapter
 	 */
 	public static Map<String,String> getConfig(String name) throws KuraException {
 		Map<String,String> props = new HashMap<String,String>();
@@ -160,20 +160,23 @@ public class BluetoothUtil {
 	 */
 	public static void killCmd(String cmd, String signal) {
 		//String[] command = { "pkill", "-" + signal, cmd };
-		String[] command = { "pidof", cmd };
+		String[] commandPidOf = { "pidof", cmd };
 		SafeProcess proc = null;
 		BufferedReader br = null;
 		try {
-			proc = ProcessUtil.exec(command);
+			proc = ProcessUtil.exec(commandPidOf);
 			proc.waitFor();
 			br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
 			String pid = br.readLine();
 			
-			String[] command2 = { "kill", "-" + signal, pid };
-			proc = ProcessUtil.exec(command2);
+			// Check if the pid is not empty
+			if (pid != null) {
+				String[] commandKill = { "kill", "-" + signal, pid };
+				proc = ProcessUtil.exec(commandKill);
+			}
 			
 		} catch (IOException e) {
-			s_logger.error("Error executing command: " + command, e);
+			s_logger.error("Error executing command: " + commandPidOf, e);
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

@@ -13,11 +13,12 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import org.eclipse.kura.bluetooth.BluetoothGatt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class BluetoothProcess {
-	
+
 	private static final Logger s_logger = LoggerFactory.getLogger(BluetoothProcess.class);
 	private static final ExecutorService s_streamGobblers = Executors.newFixedThreadPool(2);
 
@@ -40,7 +41,7 @@ public class BluetoothProcess {
 			@Override
 			public Void call() throws Exception {
 				Thread.currentThread().setName("BluetoothProcess Input Stream Gobbler");
-				return readStreamFully(m_process.getInputStream(), listener);
+				return readInputStreamFully(m_process.getInputStream(), listener);
 			}
 			
 		});
@@ -50,7 +51,7 @@ public class BluetoothProcess {
             @Override
             public Void call() throws Exception {
                 Thread.currentThread().setName("BluetoothProcess ErrorStream Gobbler");
-                return readStreamFully(m_process.getErrorStream(), listener);                    
+                return readErrorStreamFully(m_process.getErrorStream(), listener);                    
             }
         });
         
@@ -68,14 +69,43 @@ public class BluetoothProcess {
 		m_process  = null;
 	}
 	
-	private Void readStreamFully(InputStream is, BluetoothProcessListener listener) throws IOException {
+	private Void readInputStreamFully(InputStream is, BluetoothProcessListener listener) throws IOException {
 		int ch;
 		
+		if (listener instanceof BluetoothGatt) {
+			BufferedReader br = null;
+			br = new BufferedReader(new InputStreamReader(is));
+			while ((ch = br.read()) != -1) {
+				listener.processInputStream((char) ch);
+			}
+			s_logger.info("End of stream!");
+			return null;
+		} else {
+			StringBuilder stringBuilder = new StringBuilder();
+
+			BufferedReader br = null;
+			br = new BufferedReader(new InputStreamReader(is));
+			while ((ch = br.read()) != -1) {
+				stringBuilder.append((char) ch);
+			}
+			s_logger.info("EEE " + stringBuilder.toString());
+			listener.processInputStream(stringBuilder.toString());
+			s_logger.info("End of stream!");
+			return null;
+		}
+	}
+	
+	private Void readErrorStreamFully(InputStream is, BluetoothProcessListener listener) throws IOException {
+		int ch;
+
+		StringBuilder stringBuilder = new StringBuilder();
+
 		BufferedReader br = null;
 		br = new BufferedReader(new InputStreamReader(is));
 		while ((ch = br.read()) != -1) {
-			listener.processInputStream(ch);
+			stringBuilder.append((char) ch);
 		}
+		listener.processErrorStream(stringBuilder.toString());
 		s_logger.info("End of stream!");
 		return null;
 	}

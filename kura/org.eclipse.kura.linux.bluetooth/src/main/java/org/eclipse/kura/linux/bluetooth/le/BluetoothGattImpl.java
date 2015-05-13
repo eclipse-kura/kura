@@ -19,9 +19,9 @@ import org.slf4j.LoggerFactory;
 public class BluetoothGattImpl implements BluetoothGatt, BluetoothProcessListener {
 
 	private static final Logger s_logger = LoggerFactory.getLogger(BluetoothGattImpl.class);
-	
+
 	private final long GATT_TIMEOUT = 10000;
-	
+
 	private final String REGEX_NOT_CONNECTED   = "\\[\\s{3}\\].*>$";
 	private final String REGEX_CONNECTED       = ".*\\[CON\\].*>$";
 	private final String REGEX_SERVICES        = "attr.handle\\:.*[0-9|a-f|A-F]{8}(-[0-9|a-f|A-F]{4}){3}-[0-9|a-f|A-F]{12}$";
@@ -31,13 +31,13 @@ public class BluetoothGattImpl implements BluetoothGatt, BluetoothProcessListene
 	private final String REGEX_NOTIFICATION    = ".*Notification\\shandle.*value\\:.*[\\n\\r]*";
 	private final String REGEX_ERROR_HANDLE    = "Invalid\\shandle";
 	private final String REGEX_ERROR_UUID      = "Invalid\\sUUID";
-	
+
 	private List<BluetoothGattService> m_bluetoothServices;
 	private List<BluetoothGattCharacteristic> m_bluetoothGattCharacteristics;
 	private BluetoothLeNotificationListener m_listener;
 	private String m_charValue;
 	private static String m_charValueUuid;
-	
+
 	private BluetoothProcess m_proc;
 	private BufferedWriter   m_bufferedWriter;
 	private boolean          m_connected = false;
@@ -45,11 +45,11 @@ public class BluetoothGattImpl implements BluetoothGatt, BluetoothProcessListene
 	private StringBuilder    m_stringBuilder = null;
 	private String           m_address;
 	private boolean printLine = false;
-	
+
 	public BluetoothGattImpl(String address) {
 		m_address = address;
 	}
-	
+
 	// --------------------------------------------------------------------
 	//
 	//  BluetoothGatt API
@@ -60,12 +60,11 @@ public class BluetoothGattImpl implements BluetoothGatt, BluetoothProcessListene
 		m_proc = BluetoothUtil.startSession(m_address, this);
 		if (m_proc != null) {
 			m_bufferedWriter = m_proc.getWriter();
-			
 			s_logger.info("Sending connect message...");
 			m_ready = false;
 			String command = "connect\n";
 			sendCmd(command);
-			
+
 			// Wait for connection or timeout
 			long startTime = System.currentTimeMillis();
 			while (!m_ready && (System.currentTimeMillis() - startTime) < 2000) {
@@ -76,7 +75,7 @@ public class BluetoothGattImpl implements BluetoothGatt, BluetoothProcessListene
 				}
 			}
 		}
-		
+
 		return m_connected;
 	}
 
@@ -90,15 +89,14 @@ public class BluetoothGattImpl implements BluetoothGatt, BluetoothProcessListene
 			s_logger.info("Disconnected");
 		}
 	}
-	
+
 	@Override
 	public void setBluetoothLeNotificationListener(BluetoothLeNotificationListener listener) {
 		m_listener = listener;
 	}
-	
+
 	@Override
 	public BluetoothGattService getService(UUID uuid) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
@@ -116,7 +114,7 @@ public class BluetoothGattImpl implements BluetoothGatt, BluetoothProcessListene
 		}
 		return m_bluetoothServices;
 	}
-	
+
 	@Override
 	public List<BluetoothGattCharacteristic> getCharacteristics(String startHandle, String endHandle) {
 		s_logger.info("getCharacteristics "+startHandle+":"+endHandle);
@@ -141,7 +139,7 @@ public class BluetoothGattImpl implements BluetoothGatt, BluetoothProcessListene
 			String command = "char-read-hnd " + handle + "\n";
 			sendCmd(command);
 		}
-		
+
 		// Wait until read is complete or error is received
 		while (m_charValue == "" && !m_charValue.startsWith("ERROR")) {
 			try {
@@ -163,7 +161,7 @@ public class BluetoothGattImpl implements BluetoothGatt, BluetoothProcessListene
 			s_logger.info("send command : "+command);
 			sendCmd(command);
 		}
-		
+
 		// Wait until read is complete or error is received
 		while (m_charValueUuid == "" && !m_charValueUuid.startsWith("ERROR")) {
 			try {
@@ -189,7 +187,7 @@ public class BluetoothGattImpl implements BluetoothGatt, BluetoothProcessListene
 		if (m_stringBuilder == null) {
 			m_stringBuilder = new StringBuilder();
 		}
-		
+
 		// Process stream once newline, carriage return, or > char is received.
 		// '>' indicates the gatttool prompt has returned.
 		if (ch == 0xA || ch == 0xD || ch == 0x1B || (char) ch == '>') {
@@ -201,13 +199,21 @@ public class BluetoothGattImpl implements BluetoothGatt, BluetoothProcessListene
 			m_stringBuilder.append((char) ch);
 		}
 	}
-	
+
+	@Override
+	public void processInputStream(String string) {		
+	}
+
+	@Override
+	public void processErrorStream(String string) {		
+	}
+
 	// --------------------------------------------------------------------
 	//
 	//  Private methods
 	//
 	// --------------------------------------------------------------------
-	
+
 	private void sendCmd(String command) {
 		try {
 			s_logger.debug("send command = "+command);
@@ -217,14 +223,16 @@ public class BluetoothGattImpl implements BluetoothGatt, BluetoothProcessListene
 			s_logger.error("Error writing command: " + command, e);
 		}
 	}
-	
+
 	private void processLine(String line) {
 		if(printLine){
 			s_logger.info("Processing line : "+line);
 		}
-		// gatttool prompt indicates not connected
+		// gatttool prompt indicates not connected, but session started
 		if (line.matches(REGEX_NOT_CONNECTED)) {
 			m_connected = false;
+			//			m_sessionStarted = true;
+			m_ready = false;
 		}
 		// gatttool prompt indicates connected
 		else if (line.matches(REGEX_CONNECTED)) {
@@ -249,10 +257,10 @@ public class BluetoothGattImpl implements BluetoothGatt, BluetoothProcessListene
 			String startHandle = attr[2].substring(0,  attr[2].length() - 1);
 			String endHandle = attr[6];
 			String uuid = attr[8];
-			
+
 			if (m_bluetoothServices != null)
 				s_logger.debug("Adding new GATT service: " + uuid + ":" + startHandle + ":" + endHandle);
-				m_bluetoothServices.add(new BluetoothGattServiceImpl(uuid, startHandle, endHandle));
+			m_bluetoothServices.add(new BluetoothGattServiceImpl(uuid, startHandle, endHandle));
 		}
 		// characteristics are being returned
 		else if (line.startsWith("handle:")){  //(line.matches(REGEX_CHARACTERISTICS)) { 
@@ -277,7 +285,7 @@ public class BluetoothGattImpl implements BluetoothGatt, BluetoothProcessListene
 			// Characteristic value/descriptor: <value>
 			String[] attr = line.split(":");
 			m_charValue = attr[1].trim();
-			
+
 		}
 		// receiving notifications, need to notify listener
 		else if (line.matches(REGEX_NOTIFICATION)) {

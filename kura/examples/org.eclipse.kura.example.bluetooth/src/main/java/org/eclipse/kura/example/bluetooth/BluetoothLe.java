@@ -1,8 +1,14 @@
 package org.eclipse.kura.example.bluetooth;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
+
 import org.eclipse.kura.bluetooth.BluetoothAdapter;
 import org.eclipse.kura.bluetooth.BluetoothDevice;
 import org.eclipse.kura.bluetooth.BluetoothGattCharacteristic;
@@ -22,30 +28,30 @@ import org.slf4j.LoggerFactory;
 public class BluetoothLe implements ConfigurableComponent, CloudClientListener, BluetoothLeScanListener{
 
 	private static final Logger s_logger = LoggerFactory.getLogger(BluetoothLe.class);
-	
+
 	private final String APP_ID = "BLE_APP_V1";
-	private final int WAIT_TIME = 20000;
-	private final boolean DO_SCAN = false;
-	private final String PROPERTY_DEVICEID = "deviceId";
-	
-	private CloudService m_cloudService;
-	private static CloudClient  m_cloudClient;
-	
-	private TiSensorTag m_tiSensorTag;
-	private BluetoothService m_bluetoothService;
-	private BluetoothAdapter m_bluetoothAdapter;
-	
-	private List<BluetoothGattService> m_bluetoothGattServices;
-	private boolean m_found = false;
-	private LocalThread m_thread;
-	private boolean endTest = false;
-	private String m_deviceId;
-	
-	
+
+	private CloudService                m_cloudService;
+	private static CloudClient          m_cloudClient;
+	private List<TiSensorTag>           m_tiSensorTagList;
+	private BluetoothService            m_bluetoothService;
+	private BluetoothAdapter            m_bluetoothAdapter;
+	private List<BluetoothGattService>  m_bluetoothGattServices;
+	private ScheduledExecutorService    m_worker;
+	private ScheduledFuture<?>          m_handle;
+
+	private String PROPERTY_PERIOD = "period";
+
+	public BluetoothLe() {
+		super();
+		m_tiSensorTagList = new ArrayList<TiSensorTag>();
+		m_worker = Executors.newSingleThreadScheduledExecutor();
+	}
+
 	public void setCloudService(CloudService cloudService) {
 		m_cloudService = cloudService;
 	}
-	
+
 	public void unsetCloudService(CloudService cloudService) {
 		m_cloudService = null;
 	}
@@ -53,11 +59,11 @@ public class BluetoothLe implements ConfigurableComponent, CloudClientListener, 
 	public void setBluetoothService(BluetoothService bluetoothService) {
 		m_bluetoothService = bluetoothService;
 	}
-	
+
 	public void unsetBluetoothService(BluetoothService bluetoothService) {
 		m_bluetoothService = null;
 	}
-	
+
 	// --------------------------------------------------------------------
 	//
 	//  Activation APIs
@@ -65,154 +71,211 @@ public class BluetoothLe implements ConfigurableComponent, CloudClientListener, 
 	// --------------------------------------------------------------------
 	protected void activate(ComponentContext context, Map<String,Object> properties) {
 		s_logger.info("Activating BluetoothLe example...");
-		
+
 		try {
 			m_cloudClient = m_cloudService.newCloudClient(APP_ID);
 			m_cloudClient.addCloudClientListener(this);
-			
+
 			doUpdate(properties);
 		} catch (Exception e) {
 			s_logger.error("Error starting component", e);
 			throw new ComponentException(e);
 		}
-		
+
 	}
-	
+
 	protected void deactivate(ComponentContext context) {
-		if (m_tiSensorTag != null) {
-			m_tiSensorTag.disconnect();
+
+		s_logger.debug("Deactivating BluetoothLe...");
+
+		// disconnect SensorTags
+		for (TiSensorTag tiSensorTag : m_tiSensorTagList) {
+			if (tiSensorTag != null) {
+				tiSensorTag.disconnect();
+			}
 		}
-		endTest = true;
-		m_thread.stopThread();
+		m_tiSensorTagList.clear();
+
+		// cancel a current worker handle if one if active
+		if (m_handle != null) {
+			m_handle.cancel(true);
+		}
+
+		// shutting down the worker and cleaning up the properties
+		m_worker.shutdown();
+
+		// Releasing the CloudApplicationClient
+		s_logger.info("Releasing CloudApplicationClient for {}...", APP_ID);
+		m_cloudClient.release();
+
+		s_logger.debug("Deactivating BluetoothLe... Done.");
 	}
-	
+
 	protected void updated(Map<String,Object> properties) {
+
 		s_logger.debug("Updating Bluetooth Service...");
 		doUpdate(properties);
+		s_logger.debug("Updating Bluetooth Service... Done.");
 	}
 
-	private void doUpdate(Map<String,Object> properties) {
-		
-		if(properties.get(PROPERTY_DEVICEID) != null){
-			m_deviceId = (String) properties.get(PROPERTY_DEVICEID);
-			s_logger.info("Device ID from properties = "+m_deviceId);
-		}
-		else{ 
-			m_deviceId = TiSensorTag.ADDRESS;
-			s_logger.info("Device ID from properties = NULL -> hardcoded = "+m_deviceId);
-		}
-
-		if (m_tiSensorTag != null) {
-			m_tiSensorTag.disconnect();
-		}
-		if(m_thread!=null)
-			m_thread.stopThread();
-		
-		// Get Bluetooth adapter and ensure it is enabled
-		m_bluetoothAdapter = m_bluetoothService.getBluetoothAdapter();
-		if (m_bluetoothAdapter != null) {
-			s_logger.info("Bluetooth adapter address => " + m_bluetoothAdapter.getAddress());
-			s_logger.info("Bluetooth adapter le enabled => " + m_bluetoothAdapter.isLeReady());
-			
-			if (!m_bluetoothAdapter.isEnabled()) {
-				s_logger.info("Enabling bluetooth adapter...");
-				m_bluetoothAdapter.enable();
-				s_logger.info("Bluetooth adapter address => " + m_bluetoothAdapter.getAddress());
-			}
-			
-			// Start scanning in separate thread to allow bundle to finish activation
-			m_thread = new LocalThread();
-			m_thread.start();
-			
-		}
-		
-	}
-	
 	// --------------------------------------------------------------------
 	//
 	//  Static Methods
 	//
 	// --------------------------------------------------------------------
-	
-	protected static void doPublishTemp(Object ambValue, Object targetValue) {
+
+	protected static void doPublishTemp(String address, Object ambValue, Object targetValue) {
 		KuraPayload payload = new KuraPayload();
 		payload.setTimestamp(new Date());
 		payload.addMetric("Ambient", ambValue);
 		payload.addMetric("Target", targetValue);
 		try {
-			int messageId = m_cloudClient.publish("temperature", payload, 0, false);
+			m_cloudClient.publish(address + "/temperature", payload, 0, false);
 		} catch (Exception e) {
 			s_logger.error("Can't publish message, " + "temperature", e);
 		}
-		
+
 	}
-	
+
+	protected static void doPublishAcc(String address, Object x, Object y, Object z) {
+		KuraPayload payload = new KuraPayload();
+		payload.setTimestamp(new Date());
+		payload.addMetric("accX", x);
+		payload.addMetric("accY", y);
+		payload.addMetric("accZ", z);
+		try {
+			m_cloudClient.publish(address + "/accelerometer", payload, 0, false);
+		} catch (Exception e) {
+			s_logger.error("Can't publish message, " + "accelerometer", e);
+		}
+
+	}
+
+	protected static void doPublishHum(String address, Object hum) {
+		KuraPayload payload = new KuraPayload();
+		payload.setTimestamp(new Date());
+		payload.addMetric("Humidity", hum);
+		try {
+			m_cloudClient.publish(address + "/humidity", payload, 0, false);
+		} catch (Exception e) {
+			s_logger.error("Can't publish message, " + "humidity", e);
+		}
+
+	}
+
+	protected static void doPublishMag(String address, Object x, Object y, Object z) {
+		KuraPayload payload = new KuraPayload();
+		payload.setTimestamp(new Date());
+		payload.addMetric("magX", x);
+		payload.addMetric("magY", y);
+		payload.addMetric("magZ", z);
+		try {
+			m_cloudClient.publish(address + "/magnetometer", payload, 0, false);
+		} catch (Exception e) {
+			s_logger.error("Can't publish message, " + "magnetometer", e);
+		}
+
+	}
+
+	protected static void doPublishPre(String address, Object pre) {
+		KuraPayload payload = new KuraPayload();
+		payload.setTimestamp(new Date());
+		payload.addMetric("pressure", pre);
+		try {
+			m_cloudClient.publish(address + "/pressure", payload, 0, false);
+		} catch (Exception e) {
+			s_logger.error("Can't publish message, " + "pressure", e);
+		}
+
+	}
+
+	protected static void doPublishGyr(String address, Object x, Object y, Object z) {
+		KuraPayload payload = new KuraPayload();
+		payload.setTimestamp(new Date());
+		payload.addMetric("gyrX", x);
+		payload.addMetric("gyrY", y);
+		payload.addMetric("gyrZ", z);
+		try {
+			m_cloudClient.publish(address + "/gyroscope", payload, 0, false);
+		} catch (Exception e) {
+			s_logger.error("Can't publish message, " + "gyroscope", e);
+		}
+
+	}
+
+	protected static void doPublishKeys(String address, Object key) {
+		KuraPayload payload = new KuraPayload();
+		payload.setTimestamp(new Date());
+		payload.addMetric("key", key);
+		try {
+			m_cloudClient.publish(address + "/keys", payload, 0, false);
+		} catch (Exception e) {
+			s_logger.error("Can't publish message, " + "keys", e);
+		}
+
+	}
+
 	// --------------------------------------------------------------------
 	//
 	//  Private Methods
 	//
 	// --------------------------------------------------------------------
-	
-	private void begin() {
-		/*
-		 *Scan for Bluetooth LE devices. This will block until the the desired device is found or
-		 *the time limit is exceeded.
-		*/
-		if (DO_SCAN) {
-			startScan();
-			s_logger.info("Looking for device...");
-			long startTime = System.currentTimeMillis();
-			while (!m_found && (System.currentTimeMillis() - startTime) < WAIT_TIME) {
-				// do nothing
+
+
+	private void doUpdate(Map<String,Object> properties) {
+
+		// disconnect SensorTags
+		for (TiSensorTag tiSensorTag : m_tiSensorTagList) {
+			if (tiSensorTag != null) {
+				tiSensorTag.disconnect();
 			}
 		}
-		else {
-			m_found = true;
-			m_tiSensorTag = new TiSensorTag(m_bluetoothAdapter.getRemoteDevice(TiSensorTag.ADDRESS));
+		// cancel a current worker handle if one if active
+		if (m_handle != null) {
+			m_handle.cancel(true);
 		}
-		
-		/*
-		 * Device was found, connect to device. To connect, you must
-	  	 * first get the GATT server of the device, then connect.
-	  	*/
-		if (m_found) {
-			s_logger.info("Found, connecting...");
-			boolean connected = m_tiSensorTag.connect();
-			if (connected) {
-				// Once connected, run through all diagnostics or comment
-				// out and run demo
-				s_logger.info("Connected!");
-				doServicesDiscovery();
-				doCharacteristicsDiscovery();
-				//testReadWrite();
-				//testNotifications();
-				//runDemo();
-				
-				m_tiSensorTag.disconnect();
+
+		// Get Bluetooth adapter and ensure it is enabled
+		m_bluetoothAdapter = m_bluetoothService.getBluetoothAdapter();
+		if (m_bluetoothAdapter != null) {
+			s_logger.info("Bluetooth adapter address => " + m_bluetoothAdapter.getAddress());
+			s_logger.info("Bluetooth adapter le enabled => " + m_bluetoothAdapter.isLeReady());
+
+			if (!m_bluetoothAdapter.isEnabled()) {
+				s_logger.info("Enabling bluetooth adapter...");
+				m_bluetoothAdapter.enable();
+				s_logger.info("Bluetooth adapter address => " + m_bluetoothAdapter.getAddress());
 			}
-			else 
-				s_logger.info("Device could not connect");
+
+			// schedule a new worker based on the properties of the service
+			int pubrate = (Integer) properties.get(PROPERTY_PERIOD);
+			m_handle = m_worker.scheduleAtFixedRate(new Runnable() {		
+				@Override
+				public void run() {
+
+					startScan();
+				}
+			}, 0, pubrate, TimeUnit.SECONDS);
+
 		}
-		else {
-			s_logger.info("Device not found");
-		}
+
 	}
-	
-	private void doServicesDiscovery() {
+
+	private void doServicesDiscovery(TiSensorTag tiSensorTag) {
 		s_logger.info("Starting services discovery...");
-		m_bluetoothGattServices = m_tiSensorTag.discoverServices();
+		m_bluetoothGattServices = tiSensorTag.discoverServices();
 		for (BluetoothGattService bgs : m_bluetoothGattServices) {	
 			s_logger.info("Service UUID: " + bgs.getUuid()+"  :  "+bgs.getStartHandle()+"  :  "+bgs.getEndHandle());
 		}
 	}
 
-	private void doCharacteristicsDiscovery() {
-		List<BluetoothGattCharacteristic> lbgc = m_tiSensorTag.getCharacteristics("0x0001", "0x0100"); 
+	private void doCharacteristicsDiscovery(TiSensorTag tiSensorTag) {
+		List<BluetoothGattCharacteristic> lbgc = tiSensorTag.getCharacteristics("0x0001", "0x0100"); 
 		for(BluetoothGattCharacteristic bgc:lbgc){
 			s_logger.info("Characteristics uuid : "+bgc.getUuid()+" : "+bgc.getHandle()+" : "+bgc.getValueHandle());
 			String ls = bgc.getUuid().toString();
 			if(ls.startsWith("00002a00")){
-				String value = m_tiSensorTag.readTemp(bgc.getValueHandle());
+				String value = tiSensorTag.readTemperature(bgc.getValueHandle());
 				s_logger.info("rec  = "+value);
 				String[] ts = value.split(" ");
 				String fin = "";
@@ -223,84 +286,63 @@ public class BluetoothLe implements ConfigurableComponent, CloudClientListener, 
 				s_logger.info("Device name: " + fin);
 			}
 		}
-		
- 		// Try to read All Values ?		
-		
-//		String [] uu = new String[100];
-//		String [] vv = new String[100];
-//		int index=0;
-//		for(BluetoothGattCharacteristic bgc:lbgc){
-//			String ls = bgc.getUuid().toString();
-//			if(ls.startsWith("f000aa")){
-//				String value = m_tiSensorTag.readTempByUuid(bgc.getUuid());
-//				//s_logger.info("Read from UUID is: " + value);
-//				uu[index]=ls;
-//				vv[index]=value;
-//				index++;
-//			}
-//		}
-//		for(int i=0; i<index; i++){
-//			s_logger.info(uu[i]+"  ->  "+vv[i]);
-//		}
-		
+
 	}
 
+	private void scheduleNotifications(TiSensorTag tiSensorTag) {
+		s_logger.info("Starting sensor notifications...");
+		try {
 
-	
-	private void runDemo() {
-		try {
-			m_tiSensorTag.enableTempNotifications();
-			Thread.sleep(1000);
-			m_tiSensorTag.enableTempSensor();
-		} catch (InterruptedException ie) {
-			s_logger.error(ie.getLocalizedMessage());
-		}
-	}
-	
-	private void testReadWrite() {
-		String value;
-		
-		s_logger.info("Starting read/write test...");
-		// Enable temperature sensor
-		m_tiSensorTag.enableTempSensor();
-		try {
-			Thread.sleep(5000);
-			// Read value from temp sensor
-			value = m_tiSensorTag.readTemp(TiSensorTagGatt.HANDLE_TEMP_SENSOR_VALUE);
-			s_logger.info("Temperatue read from handle is: " + value);
-			Thread.sleep(5000);
-			//Read value from UUID
-			value = m_tiSensorTag.readTempByUuid(TiSensorTagGatt.UUID_TEMP_SENSOR_VALUE);
-			s_logger.info("Temperature read from UUID is: " + value);
-		} catch (InterruptedException e) {
-			s_logger.error("Error in testReadWrite: " + e.getLocalizedMessage());
-		}
-	}
-	
-	private void testNotifications() {
-		s_logger.info("Starting notifications test...");
-		try {
-			
+			// Calibrate pressure sensor
+			tiSensorTag.calibratePressureSensor();
+			String cal = tiSensorTag.readCalibrationPressureSensor(TiSensorTagGatt.HANDLE_PRE_CALIBRATION);
+
 			// Enable notifications
-			m_tiSensorTag.enableTempNotifications();
-			// Enable temperature sensor
-			m_tiSensorTag.enableTempSensor();
-			// Data should show in listener
-			// Delay, then disable notifications
+			tiSensorTag.enableTemperatureNotifications();
+			tiSensorTag.enableAccelerometerNotifications();
+			tiSensorTag.enableHumidityNotifications();
+			tiSensorTag.enableMagnetometerNotifications();
+			tiSensorTag.enablePressureNotifications();
+			tiSensorTag.enableGyroscopeNotifications();
+			tiSensorTag.enableKeysNotification();
+			// Enable sensors
+			tiSensorTag.enableTemperatureSensor();
+			tiSensorTag.enableAccelerometerSensor("01");
+			tiSensorTag.enableHumiditySensor();
+			tiSensorTag.enableMagnetometerSensor();
+			tiSensorTag.enablePressureSensor();
+			tiSensorTag.enableGyroscopeSensor("07");
+			// Wait for 5 second
 			Thread.sleep(5000);
-			m_tiSensorTag.disableTempNotifications();
+			// Disable notifications
+			tiSensorTag.disableTemperatureNotifications();
+			tiSensorTag.disableAccelerometerNotifications();
+			tiSensorTag.disableHumidityNotifications();
+			tiSensorTag.disableMagnetometerNotifications();
+			tiSensorTag.disablePressureNotifications();
+			tiSensorTag.disableGyroscopeNotifications();
+			tiSensorTag.disableKeysNotifications();
 		} catch (InterruptedException e) {
-			s_logger.error("Error in testNotifications: " + e.getLocalizedMessage());
+			s_logger.error("Error during sensor notifications: " + e.getLocalizedMessage());
 		}
-		
-		
+
+
 	}
-	
+
 	private void startScan() {
 		s_logger.info("Starting LE scan...");
 		m_bluetoothAdapter.startLeScan(this);
 	}
-	
+
+	private boolean searchSensorTagList(String address) {
+
+		for (TiSensorTag tiSensorTag : m_tiSensorTagList) {
+			if (tiSensorTag.getBluetoothDevice().getAdress().equals(address))
+				return true;
+		}
+		return false;
+	}
+
 	// --------------------------------------------------------------------
 	//
 	//  BluetoothLeScanListener APIs
@@ -309,19 +351,39 @@ public class BluetoothLe implements ConfigurableComponent, CloudClientListener, 
 	@Override
 	public void onScanFailed(int errorCode) {
 		s_logger.error("Error during scan");
-		
+
 	}
 
 	@Override
 	public void onScanResults(List<BluetoothDevice> scanResults) {
 		// Scan for TI SensorTag
 		for (BluetoothDevice bluetoothDevice : scanResults) {
-			if (bluetoothDevice.getAdress().equals(m_deviceId)) {
-				s_logger.info("Smart Sensor found ");
-				m_tiSensorTag = new TiSensorTag(bluetoothDevice);
-				m_found = true;
+			s_logger.info("Address " + bluetoothDevice.getAdress() + " Name " + bluetoothDevice.getName());
+			if (bluetoothDevice.getName().equals("SensorTag")) {
+				s_logger.info("TI SensorTag " + bluetoothDevice.getAdress() + " found.");
+				if (!searchSensorTagList(bluetoothDevice.getAdress()))
+					m_tiSensorTagList.add(new TiSensorTag(bluetoothDevice));
 			}
-			else s_logger.info("Found device = "+bluetoothDevice.getAdress());
+			else { 
+				s_logger.info("Found device = " + bluetoothDevice.getAdress());
+			}
+		}
+		if (m_tiSensorTagList.size() > 0) {
+			for (TiSensorTag tiSensorTag : m_tiSensorTagList) {
+				boolean connected = tiSensorTag.connect();
+				if (connected) {
+					s_logger.info("Connected to TI SensorTag " + tiSensorTag.getBluetoothDevice().getAdress() + ".");
+					// Once connected, run through all diagnostics or comment
+					doServicesDiscovery(tiSensorTag);
+//					doCharacteristicsDiscovery(tiSensorTag);
+					scheduleNotifications(tiSensorTag);
+
+					tiSensorTag.disconnect();
+				}
+				else {
+					s_logger.info("Cannot connect to TI SensorTag " + tiSensorTag.getBluetoothDevice().getAdress() + ".");
+				}
+			}
 		}
 	}
 
@@ -333,60 +395,33 @@ public class BluetoothLe implements ConfigurableComponent, CloudClientListener, 
 	@Override
 	public void onControlMessageArrived(String deviceId, String appTopic,
 			KuraPayload msg, int qos, boolean retain) {
-		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void onMessageArrived(String deviceId, String appTopic,
 			KuraPayload msg, int qos, boolean retain) {
-		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void onConnectionLost() {
-		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void onConnectionEstablished() {
-		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void onMessageConfirmed(int messageId, String appTopic) {
-		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void onMessagePublished(int messageId, String appTopic) {
-		// TODO Auto-generated method stub
-		
-	}
-	
-	/*
-	 * Local Thread
-	 */
-	private class LocalThread extends Thread {
-		private volatile boolean stopThread = false;
-		private volatile boolean done = false;
-				
-		public void run() {
-			int x = 0;
-			while (!stopThread && !done) {
-				begin();
-				done = true;
-			}
-			
-		}
-		
-		public void stopThread() {
-			stopThread = true;
-		}
+
 	}
 
 }

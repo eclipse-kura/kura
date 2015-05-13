@@ -32,6 +32,7 @@
 		<module>org.eclipse.kura.deployment.customizer</module>
 		<module>org.eclipse.kura.deployment.customizer.upgrade</module>
 		<module>org.eclipse.kura.deployment.update</module>
+		<module>org.eclipse.kura.linux.bluetooth</module>
 		<module>org.eclipse.kura.linux.clock</module>
 		<module>org.eclipse.kura.linux.command</module>
 		<module>org.eclipse.kura.linux.net</module>

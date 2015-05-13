@@ -22,7 +22,7 @@ import javax.microedition.io.Connection;
 import org.osgi.service.io.ConnectorService;
 
 
-public interface BluetoothConnectorService extends ConnectorService
+public interface BluetoothConnector extends ConnectorService
 {
 	/**
 	 * Access mode READ

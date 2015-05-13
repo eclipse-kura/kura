@@ -164,6 +164,11 @@
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.kura.linux.bluetooth</artifactId>
+									<version>${org.eclipse.kura.linux.bluetooth.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
 									<artifactId>org.eclipse.kura.linux.watchdog</artifactId>
 									<version>${org.eclipse.kura.linux.watchdog.version}</version>
 								</artifactItem>
@@ -234,7 +239,8 @@
 							    <move file="target/plugins/org.eclipse.kura.linux.net.jar" tofile="target/plugins/org.eclipse.kura.linux.net_${org.eclipse.kura.linux.net.version}.jar"/>
 							    <move file="target/plugins/org.eclipse.kura.linux.position.jar" tofile="target/plugins/org.eclipse.kura.linux.position_${org.eclipse.kura.linux.position.version}.jar"/>
 							    <move file="target/plugins/org.eclipse.kura.linux.usb.jar" tofile="target/plugins/org.eclipse.kura.linux.usb_${org.eclipse.kura.linux.usb.version}.jar"/>
-							    <move file="target/plugins/org.eclipse.kura.linux.watchdog.jar" tofile="target/plugins/org.eclipse.kura.linux.watchdog_${org.eclipse.kura.linux.watchdog.version}.jar"/>
+							    <move file="target/plugins/org.eclipse.kura.linux.bluetooth.jar" tofile="target/plugins/org.eclipse.kura.linux.bluetooth_${org.eclipse.kura.linux.bluetooth.version}.jar"/>
+								<move file="target/plugins/org.eclipse.kura.linux.watchdog.jar" tofile="target/plugins/org.eclipse.kura.linux.watchdog_${org.eclipse.kura.linux.watchdog.version}.jar"/>
 							    <move file="target/plugins/org.eclipse.kura.net.admin.jar" tofile="target/plugins/org.eclipse.kura.net.admin_${org.eclipse.kura.net.admin.version}.jar"/>
 							    <move file="target/plugins/org.eclipse.kura.protocol.modbus.jar" tofile="target/plugins/org.eclipse.kura.protocol.modbus_${org.eclipse.kura.protocol.modbus.version}.jar"/>
 							    <move file="target/plugins/org.eclipse.kura.web.jar" tofile="target/plugins/org.eclipse.kura.web_${org.eclipse.kura.web.version}.jar" failonerror="false" />
@@ -387,6 +393,87 @@
 	</dependencies>
 
 	<profiles>
+		<profile>
+            <id>intel-edison-nn</id>
+			<properties>
+				<kura.install.dir>/home/root/eclipse</kura.install.dir>
+			</properties>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <build>
+                <resources>
+                    <resource>
+                        <directory>src/main/resources</directory>
+                        <filtering>true</filtering>
+                    </resource>
+                </resources>
+                <plugins>
+                    <plugin>
+						<groupId>org.codehaus.mojo</groupId> 
+						<artifactId>properties-maven-plugin</artifactId> <version>1.0-alpha-1</version> 
+						<executions>
+							<execution>
+								<phase>initialize</phase>
+								<goals>
+									<goal>read-project-properties</goal> 
+								</goals>
+								<configuration>
+									<files>
+										<file>${basedir}/build.properties</file> 
+										<file>${basedir}/config/kura.build.properties</file> 
+									</files>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>buildnumber-maven-plugin</artifactId>
+                        <version>1.0</version>
+                        <executions>
+                            <execution>
+                                <phase>validate</phase>
+                                <goals>
+                                    <goal>create-timestamp</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <version>1.7</version>
+                        <executions>
+                            <execution>
+                                <id>intel-edison-nn-jars</id>
+                                <phase>install</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <target>
+                                        <property name="buildNumber" value="buildNumber" />
+                                        <property name="project.version" value="${project.version}" />
+                                        <property name="project.build.profile" value="${project.build.profile}" />
+                                        <property name="project.build.directory" value="${project.build.directory}" />
+                                        <property name="target.device" value="intel-edison" />
+                                        <property name="kura.os.version" value="yocto_1.6.1_edison" />                                        
+                                        <property name="build.name" value="intel-edison-nn" />
+                                        <property name="kura.arch" value="x86_64" />
+                                        <property name="kura.mem.size" value="256m" />
+                                        <property name="kura.install.dir" value="${kura.install.dir}" />
+										<property name="http.port" value="8080" />
+                                        <ant antfile="${basedir}/src/main/ant/build_equinox_distrib.xml"
+                                            target="dist-linux" />
+                                    </target>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
 		<profile>
 			<id>beaglebone</id>
 			<properties>

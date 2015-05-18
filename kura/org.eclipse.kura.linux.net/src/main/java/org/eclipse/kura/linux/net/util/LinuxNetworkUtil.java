@@ -500,6 +500,20 @@ public class LinuxNetworkUtil {
 		}
 	}
 	
+	public static boolean isToolExists(String tool) {
+		boolean ret = false;
+		String[] searchFolders = new String[]{"/sbin/", "/usr/sbin/", "/bin/"};
+		
+		for (String folder : searchFolders) {
+			File fTool = new File(folder + tool);
+			if (fTool.exists()) {
+				ret = true;
+				break;
+			}
+		}
+		return ret;
+	}
+	
 	/**
 	 * This method is meaningful only for interfaces of type: NetInterfaceType.ETHERNET, NetInterfaceType.WIFI, NetInterfaceType.LOOPBACK.
 	 */
@@ -886,6 +900,7 @@ public class LinuxNetworkUtil {
 		
 		//determine if wifi
 		if ("ETHERNET".equals(stringType)) {
+			s_logger.info("<IAB> getInterfaceType() :: calling WifiOptions.getSupportedOptions({})", ifaceName);
 			Collection<String> wifiOptions = WifiOptions.getSupportedOptions(ifaceName);
 			if (wifiOptions.size() > 0) {
 				for (String op : wifiOptions) {
@@ -1031,57 +1046,59 @@ public class LinuxNetworkUtil {
 		SafeProcess procIwConfig = null;
 		BufferedReader br1 = null;
 		BufferedReader br2 = null;
-		
+		String line = null;
 		try {
-			procIw = ProcessUtil.exec("iw dev " + ifaceName + " info");
-			if (procIw.waitFor() != 0) {
-				s_logger.warn("error executing command --- iw --- exit value = {}", procIw.exitValue());
-				return mode;
-			}
-			
-			br1 = new BufferedReader(new InputStreamReader(procIw.getInputStream()));
-			String line = null;
-			while((line = br1.readLine()) != null) {
-				int index = line.indexOf("type ");
-				if(index > -1) {
-					s_logger.debug("line: " + line);
-					String sMode = line.substring(index+"type ".length());
-					if("AP".equals(sMode)) {
-						mode = WifiMode.MASTER;
-					} else if ("managed".equals(sMode)) {
-						mode = WifiMode.INFRA;
-					}
-					break;
-				}
-			}
-						
-			if (mode.equals(WifiMode.UNKNOWN)) {
-				procIwConfig = ProcessUtil.exec("iwconfig " + ifaceName);
-				if (procIwConfig.waitFor() != 0) {
-					s_logger.error("error executing command --- iwconfig --- exit value = {}", procIwConfig.exitValue());
-	                return mode;
+			if (isToolExists("iw")) {
+				procIw = ProcessUtil.exec("iw dev " + ifaceName + " info");
+				if (procIw.waitFor() != 0) {
+					s_logger.warn("error executing command --- iw --- exit value = {}", procIw.exitValue());
+					return mode;
 				}
 				
-				//get the output
-				br2 = new BufferedReader(new InputStreamReader(procIwConfig.getInputStream()));
-				while((line = br2.readLine()) != null) {
-					int index = line.indexOf("Mode:");
+				br1 = new BufferedReader(new InputStreamReader(procIw.getInputStream()));
+				while((line = br1.readLine()) != null) {
+					int index = line.indexOf("type ");
 					if(index > -1) {
 						s_logger.debug("line: " + line);
-						StringTokenizer st = new StringTokenizer(line.substring(index));
-						String modeStr = st.nextToken().substring(5);
-						if("Managed".equals(modeStr)) {
-							mode = WifiMode.INFRA;
-						} else if ("Master".equals(modeStr)) {
+						String sMode = line.substring(index+"type ".length());
+						if("AP".equals(sMode)) {
 							mode = WifiMode.MASTER;
-						} else if ("Ad-Hoc".equals(modeStr)) {
-							mode = WifiMode.ADHOC;
+						} else if ("managed".equals(sMode)) {
+							mode = WifiMode.INFRA;
 						}
 						break;
 					}
 				}
 			}
-			
+						
+			if (mode.equals(WifiMode.UNKNOWN)) {
+				if(isToolExists("iwconfig")) {
+					procIwConfig = ProcessUtil.exec("iwconfig " + ifaceName);
+					if (procIwConfig.waitFor() != 0) {
+						s_logger.error("error executing command --- iwconfig --- exit value = {}", procIwConfig.exitValue());
+		                return mode;
+					}
+					
+					//get the output
+					br2 = new BufferedReader(new InputStreamReader(procIwConfig.getInputStream()));
+					while((line = br2.readLine()) != null) {
+						int index = line.indexOf("Mode:");
+						if(index > -1) {
+							s_logger.debug("line: " + line);
+							StringTokenizer st = new StringTokenizer(line.substring(index));
+							String modeStr = st.nextToken().substring(5);
+							if("Managed".equals(modeStr)) {
+								mode = WifiMode.INFRA;
+							} else if ("Master".equals(modeStr)) {
+								mode = WifiMode.MASTER;
+							} else if ("Ad-Hoc".equals(modeStr)) {
+								mode = WifiMode.ADHOC;
+							}
+							break;
+						}
+					}
+				}
+			}
 		} catch (IOException e) {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
 		} catch (InterruptedException e) {

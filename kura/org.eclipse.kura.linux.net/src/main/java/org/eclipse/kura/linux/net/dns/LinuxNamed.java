@@ -203,6 +203,9 @@ public class LinuxNamed {
 			else if (OS_VERSION.equals(KuraConstants.Raspberry_Pi.getImageName()) || OS_VERSION.equals(KuraConstants.BeagleBone.getImageName())) {
 				result = LinuxProcessUtil.start("/etc/init.d/bind9 stop");
 			}
+			else if (OS_VERSION.equals(KuraConstants.Intel_Edison.getImageName() + "_" + KuraConstants.Intel_Edison.getImageVersion())) {
+				result = LinuxProcessUtil.start("/etc/init.d/bind9 stop");
+			}
 			else {
 				result = LinuxProcessUtil.start("/etc/init.d/named stop");
 			}

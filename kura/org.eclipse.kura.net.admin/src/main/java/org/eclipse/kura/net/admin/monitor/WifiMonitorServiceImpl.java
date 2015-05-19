@@ -37,9 +37,10 @@ import org.eclipse.kura.core.net.NetworkConfiguration;
 import org.eclipse.kura.core.net.WifiInterfaceConfigImpl;
 import org.eclipse.kura.linux.net.route.RouteService;
 import org.eclipse.kura.linux.net.route.RouteServiceImpl;
+import org.eclipse.kura.linux.net.util.IScanTool;
 import org.eclipse.kura.linux.net.util.IwLinkTool;
 import org.eclipse.kura.linux.net.util.LinuxNetworkUtil;
-import org.eclipse.kura.linux.net.util.iwScanTool;
+import org.eclipse.kura.linux.net.util.ScanTool;
 import org.eclipse.kura.net.IPAddress;
 import org.eclipse.kura.net.NetConfig;
 import org.eclipse.kura.net.NetConfigIP4;
@@ -775,12 +776,15 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
     private boolean isAccessPointAvailable(String interfaceName, String ssid) throws KuraException {
         boolean available = false;
 		if (ssid != null) {
-			List<WifiAccessPoint> wifiAccessPoints = new iwScanTool(interfaceName).scan();
-			for (WifiAccessPoint wap : wifiAccessPoints) {
-				if (ssid.equals(wap.getSSID())) {
-					s_logger.trace("isAccessPointAvailable() :: SSID={} is available :: strength={}", ssid, wap.getStrength());
-					available = wap.getStrength() > 0;
-					break;
+			IScanTool scanTool = ScanTool.get(interfaceName);
+			if (scanTool != null) {
+				List<WifiAccessPoint> wifiAccessPoints = scanTool.scan();
+				for (WifiAccessPoint wap : wifiAccessPoints) {
+					if (ssid.equals(wap.getSSID())) {
+						s_logger.trace("isAccessPointAvailable() :: SSID={} is available :: strength={}", ssid, wap.getStrength());
+						available = wap.getStrength() > 0;
+						break;
+					}
 				}
 			}
 		}
@@ -807,14 +811,17 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
 			
 			if (rssi == 0) {
 				s_logger.trace("getSignalLevel() :: using 'iw dev wlan0 scan' command ...");
-				List<WifiAccessPoint> wifiAccessPoints = new iwScanTool(interfaceName).scan();
-				for (WifiAccessPoint wap : wifiAccessPoints) {
-					if (ssid.equals(wap.getSSID())) {
-						if (wap.getStrength() > 0) {
-							rssi = 0 - wap.getStrength();
-							s_logger.debug("getSignalLevel() :: rssi={} (using 'iw dev wlan0 scan')", rssi);
+				IScanTool scanTool = ScanTool.get(interfaceName);
+				if (scanTool != null) {
+					List<WifiAccessPoint> wifiAccessPoints = scanTool.scan();
+					for (WifiAccessPoint wap : wifiAccessPoints) {
+						if (ssid.equals(wap.getSSID())) {
+							if (wap.getStrength() > 0) {
+								rssi = 0 - wap.getStrength();
+								s_logger.debug("getSignalLevel() :: rssi={} (using 'iw dev wlan0 scan')", rssi);
+							}
+							break;
 						}
-						break;
 					}
 				}
 			}

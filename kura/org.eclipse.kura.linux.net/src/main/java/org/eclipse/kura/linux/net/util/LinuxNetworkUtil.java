@@ -467,22 +467,13 @@ public class LinuxNetworkUtil {
 					return false;
 				}
 			} else if(ifaceType == NetInterfaceType.ETHERNET) {
-			
 			    LinkTool linkTool = null;
-				String[] tools = new String[]{"/sbin/ethtool", "/usr/sbin/ethtool", "/sbin/mii-tool"};
-				for(int i=0; i<tools.length; i++) {
-					File tool = new File(tools[i]);
-					if(tool.exists()) {
-						if(tools[i].indexOf("ethtool") >= 0) {
-							linkTool = new EthTool (tools[i], ifaceName);
-							break;
-						} else {
-							linkTool = new MiiTool (ifaceName);
-							break;
-						}
-					}
-				}
-
+			    if (isToolExists("ethtool")) {
+			    	linkTool = new EthTool (ifaceName);
+			    } else if (isToolExists("mii-tool")) {
+			    	linkTool = new MiiTool (ifaceName);
+			    }
+			    
 				if (linkTool != null) {
 					if(linkTool.get()) {
 						return linkTool.isLinkDetected();
@@ -900,7 +891,6 @@ public class LinuxNetworkUtil {
 		
 		//determine if wifi
 		if ("ETHERNET".equals(stringType)) {
-			s_logger.info("<IAB> getInterfaceType() :: calling WifiOptions.getSupportedOptions({})", ifaceName);
 			Collection<String> wifiOptions = WifiOptions.getSupportedOptions(ifaceName);
 			if (wifiOptions.size() > 0) {
 				for (String op : wifiOptions) {

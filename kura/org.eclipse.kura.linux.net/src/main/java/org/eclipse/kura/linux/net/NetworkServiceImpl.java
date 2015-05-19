@@ -15,6 +15,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Dictionary;
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -40,10 +41,13 @@ import org.eclipse.kura.linux.net.modem.SupportedSerialModemInfo;
 import org.eclipse.kura.linux.net.modem.SupportedSerialModemsInfo;
 import org.eclipse.kura.linux.net.modem.SupportedUsbModemInfo;
 import org.eclipse.kura.linux.net.modem.SupportedUsbModemsInfo;
+import org.eclipse.kura.linux.net.util.IScanTool;
 import org.eclipse.kura.linux.net.util.KuraConstants;
 import org.eclipse.kura.linux.net.util.LinuxIfconfig;
 import org.eclipse.kura.linux.net.util.LinuxNetworkUtil;
-import org.eclipse.kura.linux.net.util.iwScanTool;
+import org.eclipse.kura.linux.net.util.ScanTool;
+import org.eclipse.kura.linux.net.util.iwlistScanTool;
+import org.eclipse.kura.linux.net.wifi.WifiOptions;
 import org.eclipse.kura.net.ConnectionInfo;
 import org.eclipse.kura.net.IPAddress;
 import org.eclipse.kura.net.NetInterface;
@@ -382,7 +386,12 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
 
 	@Override
 	public List<WifiAccessPoint> getWifiAccessPoints(String wifiInterfaceName) throws KuraException {
-		return new iwScanTool(wifiInterfaceName).scan();
+		List<WifiAccessPoint> wifAccessPoints = null;
+		IScanTool scanTool = ScanTool.get(wifiInterfaceName);
+		if (scanTool != null) {
+			wifAccessPoints = scanTool.scan();
+		}
+		return wifAccessPoints;
 	}
 
 	@Override

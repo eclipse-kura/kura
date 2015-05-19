@@ -4,6 +4,8 @@ import org.eclipse.kura.bluetooth.BluetoothConnector;
 import org.eclipse.kura.bluetooth.BluetoothDevice;
 import org.eclipse.kura.bluetooth.BluetoothGatt;
 import org.eclipse.kura.linux.bluetooth.le.BluetoothGattImpl;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 
 public class BluetoothDeviceImpl implements BluetoothDevice {
 	
@@ -42,8 +44,15 @@ public class BluetoothDeviceImpl implements BluetoothDevice {
 
 	@Override
 	public BluetoothConnector getBluetoothConnector() {
-		// TODO Auto-generated method stub
-		return null;
+		BluetoothConnector bluetoothConnector = null;     
+		BundleContext bundleContext = BluetoothServiceImpl.getBundleContext();
+		if (bundleContext != null) {
+			ServiceReference sr = bundleContext.getServiceReference(BluetoothConnector.class);
+			if (sr != null) {
+				bluetoothConnector = (BluetoothConnector) bundleContext.getService(sr);
+			}
+		}               
+		return bluetoothConnector;
 	}
 
 	@Override

@@ -482,7 +482,11 @@ public class WpaSupplicantConfigWriter implements NetworkConfigurationVisitor {
 		try {
 			procChmod = ProcessUtil.exec("chmod 600 " + fileName);
 			procChmod.waitFor();
-			procDos = ProcessUtil.exec("dos2unix " + fileName);
+			try {
+				procDos = ProcessUtil.exec("dos2unix " + fileName);
+			} catch (Exception e) {
+				s_logger.warn("Failed to execute 'dos2unix {}' - {}", fileName, e);
+			}
 			procDos.waitFor();
 		} catch (Exception e) {
 			throw KuraException.internalError(e);

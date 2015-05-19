@@ -150,6 +150,12 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 
 	protected void activate(ComponentContext componentContext, Map<String, Object> properties) {
 		s_logger.info("Activating...");
+		
+		Iterator<String> kkeys = properties.keySet().iterator();
+		while (kkeys.hasNext()) {
+			String key = kkeys.next();
+			s_logger.info("{}: {}", key, properties.get(key));
+		}
 
 		// We need to catch the configuration exception and activate anyway.
 		// Otherwise the ConfigurationService will not be able to track us.
@@ -161,11 +167,11 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 			Object value = properties.get(key);
 			if (key.equals(MQTT_PASSWORD_PROP_NAME)) {
 				try {
-					char[] decryptedPassword = m_cryptoService.decryptAes(value.toString().toCharArray());
+					char[] decryptedPassword = m_cryptoService.decryptAes(((String) value).toCharArray());
 					decryptedPropertiesMap.put(key, decryptedPassword);
 				} catch (Exception e) {
-					// e.printStackTrace();
-					decryptedPropertiesMap.put(key, value.toString().toCharArray());
+					s_logger.info("Password is not encrypted");
+					decryptedPropertiesMap.put(key, ((String) value).toCharArray());
 				}
 			} else {
 				decryptedPropertiesMap.put(key, value);
@@ -211,6 +217,12 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 
 	public void updated(Map<String, Object> properties) {
 		s_logger.info("Updating...");
+		
+		Iterator<String> kkeys = properties.keySet().iterator();
+		while (kkeys.hasNext()) {
+			String key = kkeys.next();
+			s_logger.info("{}: {}", key, properties.get(key));
+		}
 
 		m_properties.clear();
 
@@ -222,11 +234,11 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 			Object value = properties.get(key);
 			if (key.equals(MQTT_PASSWORD_PROP_NAME)) {
 				try {
-					char[] decryptedPassword = m_cryptoService.decryptAes(value.toString().toCharArray());
+					char[] decryptedPassword = m_cryptoService.decryptAes(((String) value).toCharArray());
 					decryptedPropertiesMap.put(key, decryptedPassword);
 				} catch (Exception e) {
-					// e.printStackTrace();
-					decryptedPropertiesMap.put(key, value.toString().toCharArray());
+					s_logger.info("Password is not encrypted");
+					decryptedPropertiesMap.put(key, ((String) value).toCharArray());
 				}
 			} else {
 				decryptedPropertiesMap.put(key, value);
@@ -234,10 +246,8 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 		}
 
 		m_properties.putAll(decryptedPropertiesMap);
-		// m_properties.putAll(properties);
 
 		update();
-
 	}
 
 	private void update() {
@@ -667,7 +677,8 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 			ValidationUtil.notEmptyOrNull(brokerUrl, "brokerUrl");
 
 			ValidationUtil.notEmptyOrNull((String) properties.get(MQTT_USERNAME_PROP_NAME), MQTT_USERNAME_PROP_NAME);
-			ValidationUtil.notEmptyOrNull(new String((char[]) properties.get(MQTT_PASSWORD_PROP_NAME)), MQTT_PASSWORD_PROP_NAME);
+			ValidationUtil.notNull(properties.get(MQTT_PASSWORD_PROP_NAME), MQTT_PASSWORD_PROP_NAME);
+			ValidationUtil.notEmptyOrNull(new String((char[]) properties.get(MQTT_PASSWORD_PROP_NAME)), MQTT_PASSWORD_PROP_NAME);			
 			ValidationUtil.notNegative((Integer) properties.get(MQTT_KEEP_ALIVE_PROP_NAME), MQTT_KEEP_ALIVE_PROP_NAME);
 			ValidationUtil.notNegative((Integer) properties.get(MQTT_TIMEOUT_PROP_NAME), MQTT_TIMEOUT_PROP_NAME);
 
@@ -750,7 +761,7 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 	}
 
 	private boolean isSecuredEnvironment() {
-		boolean result =    ENV_JAVA_SECURITY != null 
+		boolean result = ENV_JAVA_SECURITY != null 
 				&& ENV_OSGI_FRAMEWORK_SECURITY != null 
 				&& ENV_OSGI_SIGNED_CONTENT_SUPPORT != null 
 				&& ENV_OSGI_FRAMEWORK_TRUST_REPOSITORIES != null;
@@ -956,5 +967,4 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 			return String.valueOf(MqttVersion);
 		}
 	}
-
 }

@@ -13,14 +13,16 @@ package org.eclipse.kura.cloud.app.command;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
-
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloud.Cloudlet;
 import org.eclipse.kura.cloud.CloudletTopic;
 import org.eclipse.kura.command.PasswordCommandService;
 import org.eclipse.kura.configuration.ConfigurableComponent;
+import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.message.KuraRequestPayload;
 import org.eclipse.kura.message.KuraResponsePayload;
 import org.osgi.service.component.ComponentContext;
@@ -43,6 +45,7 @@ public class CommandCloudApp extends Cloudlet implements ConfigurableComponent,
 	private Map<String, Object> properties;
 
 	private ComponentContext compCtx;
+	private CryptoService m_cryptoService;
 
 	/* EXEC */
 	public static final String RESOURCE_COMMAND = "command";
@@ -59,6 +62,14 @@ public class CommandCloudApp extends Cloudlet implements ConfigurableComponent,
 
 	// This component inherits the required dependencies from the parent
 	// class CloudApp.
+	
+	public void setCryptoService(CryptoService cryptoService) {
+		this.m_cryptoService = cryptoService;
+	}
+
+	public void unsetCryptoService(CryptoService cryptoService) {
+		this.m_cryptoService = null;
+	}
 
 	// ----------------------------------------------------------------
 	//
@@ -77,11 +88,26 @@ public class CommandCloudApp extends Cloudlet implements ConfigurableComponent,
 
 	public void updated(Map<String, Object> properties) {
 		s_logger.info("updated...: " + properties);
+		
+		this.properties= new HashMap<String, Object>();
+		
+		Iterator<String> keys = properties.keySet().iterator();
+		while (keys.hasNext()) {
+			String key = keys.next();
+			Object value = properties.get(key);
+			if (key.equals(COMMAND_PASSWORD_ID)) {
+				try {
+					char[] decryptedPassword= m_cryptoService.decryptAes(value.toString().toCharArray());
+					this.properties.put(key, decryptedPassword);
+				} catch (Exception e) {
+					this.properties.put(key, value.toString().toCharArray());
+				} 
+			}else{
+				this.properties.put(key, value);
+			}
+		}
 
-		this.properties = properties;
-
-		boolean serviceEnabled = (Boolean) properties
-				.get(COMMAND_ENABLED_ID);
+		boolean serviceEnabled = (Boolean) properties.get(COMMAND_ENABLED_ID);
 		if (serviceEnabled) {
 			super.activate(compCtx);
 		} else {
@@ -109,16 +135,14 @@ public class CommandCloudApp extends Cloudlet implements ConfigurableComponent,
 			s_logger.error("Bad request topic: {}", reqTopic.toString());
 			s_logger.error("Expected one resource but found {}",
 					resources != null ? resources.length : "none");
-			respPayload
-					.setResponseCode(KuraResponsePayload.RESPONSE_CODE_BAD_REQUEST);
+			respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_BAD_REQUEST);
 			return;
 		}
 
 		if (!resources[0].equals(RESOURCE_COMMAND)) {
 			s_logger.error("Bad request topic: {}", reqTopic.toString());
 			s_logger.error("Cannot find resource with name: {}", resources[0]);
-			respPayload
-					.setResponseCode(KuraResponsePayload.RESPONSE_CODE_NOTFOUND);
+			respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_NOTFOUND);
 			return;
 		}
 
@@ -140,9 +164,8 @@ public class CommandCloudApp extends Cloudlet implements ConfigurableComponent,
 
 		// String receivedPassword= (String)
 		// reqPayload.getMetric(EDC_PASSWORD_METRIC_NAME);
-		String receivedPassword = (String) commandReq
-				.getMetric(EDC_PASSWORD_METRIC_NAME);
-		String commandPassword = (String) properties.get(COMMAND_PASSWORD_ID);
+		String receivedPassword = (String) commandReq.getMetric(EDC_PASSWORD_METRIC_NAME);
+		char[] commandPassword = (char[])properties.get(COMMAND_PASSWORD_ID);
 
 		KuraCommandResponsePayload commandResp = new KuraCommandResponsePayload(
 				KuraResponsePayload.RESPONSE_CODE_OK);
@@ -219,12 +242,10 @@ public class CommandCloudApp extends Cloudlet implements ConfigurableComponent,
 	@Override
 	public String execute(String cmd, String password) throws KuraException {
 		// TODO Auto-generated method stub
-		boolean verificationEnabled = (Boolean) properties
-				.get(COMMAND_ENABLED_ID);
+		boolean verificationEnabled = (Boolean) properties.get(COMMAND_ENABLED_ID);
 		if (verificationEnabled) {
 
-			String commandPassword = (String) properties
-					.get(COMMAND_PASSWORD_ID);
+			char[] commandPassword = (char[]) properties.get(COMMAND_PASSWORD_ID);
 			boolean isExecutionAllowed = verifyPasswords(commandPassword,
 					password);
 			if (isExecutionAllowed) {
@@ -310,15 +331,16 @@ public class CommandCloudApp extends Cloudlet implements ConfigurableComponent,
 		return defaultEnv;
 	}
 
-	private boolean verifyPasswords(String commandPassword,
+	private boolean verifyPasswords(char[] commandPassword,
 			String receivedPassword) {
 		if (commandPassword == null && receivedPassword == null) {
 			return true;
-		} else if (commandPassword != null
-				&& commandPassword.equals(receivedPassword)) {
-			return true;
 		}
-		return false;
+		if(commandPassword == null){
+			return false;
+		}
+		String pwd = new String(commandPassword);
+		return pwd.equals(receivedPassword);
 	}
 
 	private Process createExecutionProcess(String dir, String[] cmdarray,

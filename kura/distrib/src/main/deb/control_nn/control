@@ -2,7 +2,7 @@ Package: kura
 Version: [[project.version]]
 Section: misc
 Priority: low
-Depends: [[project.raspbian.dependencies]]
+Depends: [[project.raspbian.dependencies.nn]]
 Architecture: all
 Maintainer: support@eurotech.com
 Description: Kura is an inclusive software framework that puts a layer

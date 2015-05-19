@@ -56,7 +56,8 @@
             <directory>OSGI-INF</directory>
             <outputDirectory>OSGI-INF</outputDirectory>
             <includes>
-                <include>*</include>
+            	<include>*</include>
+                <include>metatype/*</include>
             </includes>
         </fileSet>
     </fileSets>

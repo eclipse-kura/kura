@@ -125,11 +125,12 @@ public class Tad implements AD
      * 
      * 
      */
-    public List<Option> getOption() {
+    @SuppressWarnings("unchecked")
+	public List<Option> getOption() {
         if (option == null) {
             option = new ArrayList<Toption>();
         }
-        return new ArrayList<Option>(this.option);
+        return (List<Option>)(List<?>) this.option;
     }
 
     /**

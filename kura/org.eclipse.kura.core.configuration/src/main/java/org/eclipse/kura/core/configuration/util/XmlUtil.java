@@ -32,6 +32,7 @@ import javax.xml.stream.FactoryConfigurationError;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
+import com.sun.xml.*;
 
 import org.eclipse.kura.core.configuration.XmlConfigPropertiesAdapter;
 import org.slf4j.Logger;
@@ -80,7 +81,6 @@ public class XmlUtil
 				throw new MarshalException(e.getMessage(), e);	
 			}			
 		}
-		
 		if (valEventHndlr.hasEvents()) {			
 			for (ValidationEvent valEvent : valEventHndlr.getEvents()) {
 				if (valEvent.getSeverity() != ValidationEvent.WARNING) {

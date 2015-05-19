@@ -14,7 +14,7 @@ package org.eclipse.kura.core.configuration.util;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.kura.core.configuration.Password;
+import org.eclipse.kura.configuration.Password;
 
 public class StringUtil 
 {		

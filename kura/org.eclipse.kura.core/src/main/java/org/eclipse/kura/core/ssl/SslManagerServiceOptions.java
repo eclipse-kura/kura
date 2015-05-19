@@ -15,16 +15,15 @@ import java.util.Map;
 
 public class SslManagerServiceOptions
 {
-    private static final String  PROP_PROTOCOL    = "ssl.default.protocol";
-    private static final String  PROP_TRUST_STORE = "ssl.default.trustStore";
-    private static final String  PROP_KEY_STORE   = "ssl.default.keyStore";
-    private static final String  PROP_CIPHERS     = "ssl.default.cipherSuites";    
-    private static final String  PROP_HN_VERIFY   = "ssl.hostname.verification";
+    private static final String  PROP_PROTOCOL       = "ssl.default.protocol";
+    private static final String  PROP_TRUST_STORE    = "ssl.default.trustStore";
+    private static final String  PROP_CIPHERS        = "ssl.default.cipherSuites";    
+    private static final String  PROP_HN_VERIFY      = "ssl.hostname.verification";
+    static final String  PROP_TRUST_PASSWORD = "ssl.keystore.password";
 
     private static final String  PROP_DEFAULT_PROTOCOL    = "TLSv1";
     private static final Boolean PROP_DEFAULT_HN_VERIFY   = true;
-    private static final String  PROP_DEFAULT_TRUST_STORE = "/opt/eurotech/security/cacerts";
-    private static final String  PROP_DEFAULT_KEY_STORE   = "/opt/eurotech/security/keystore";
+    private static final String  PROP_DEFAULT_TRUST_STORE = "/opt/eurotech/esf/security/cacerts.ks";
 
     private Map<String,Object> m_properties;
     
@@ -57,19 +56,6 @@ public class SslManagerServiceOptions
         }
         return PROP_DEFAULT_TRUST_STORE;
     }
-
-    /**
-     * Returns the ssl.default.trustStore.
-     * @return
-     */
-    public String getSslKeyStore() {
-        if (m_properties != null &&
-            m_properties.get(PROP_KEY_STORE) != null &&
-            m_properties.get(PROP_KEY_STORE) instanceof String) {
-            return (String) m_properties.get(PROP_KEY_STORE);
-        }
-        return PROP_DEFAULT_KEY_STORE;
-    }
     
     /**
      * Returns the ssl.default.trustStore.
@@ -80,6 +66,19 @@ public class SslManagerServiceOptions
             m_properties.get(PROP_CIPHERS) != null &&
             m_properties.get(PROP_CIPHERS) instanceof String) {
             return (String) m_properties.get(PROP_CIPHERS);
+        }
+        return null;
+    }
+    
+    /**
+     * Returns the ssl.keystore.password.
+     * @return
+     */
+    public String getSslKeystorePassword() {
+        if (m_properties != null &&
+            m_properties.get(PROP_TRUST_PASSWORD) != null &&
+            m_properties.get(PROP_TRUST_PASSWORD) instanceof String) {
+            return (String) m_properties.get(PROP_TRUST_PASSWORD);
         }
         return null;
     }

@@ -19,17 +19,20 @@
 		<module>org.eclipse.kura.api</module>
 		<module>org.eclipse.kura.test</module>
 		<module>org.eclipse.kura.core</module>
+		<module>org.eclipse.kura.core.certificates</module>
 		<module>org.eclipse.kura.core.cloud</module>
 		<module>org.eclipse.kura.core.comm</module>
 		<module>org.eclipse.kura.core.configuration</module>
 		<module>org.eclipse.kura.core.crypto</module>
 		<module>org.eclipse.kura.core.deployment</module>
+		<module>org.eclipse.kura.core.log</module>
 		<module>org.eclipse.kura.core.net</module>
 		<module>org.eclipse.kura.core.test</module>
 		<module>org.eclipse.kura.deployment.agent</module>
 		<module>org.eclipse.kura.deployment.customizer</module>
 		<module>org.eclipse.kura.deployment.customizer.upgrade</module>
 		<module>org.eclipse.kura.deployment.update</module>
+		<module>org.eclipse.kura.linux.bluetooth</module>
 		<module>org.eclipse.kura.linux.clock</module>
 		<module>org.eclipse.kura.linux.command</module>
 		<module>org.eclipse.kura.linux.net</module>

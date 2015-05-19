@@ -11,20 +11,16 @@
  */
 package org.eclipse.kura.core.configuration;
 
-import java.io.IOException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
 import javax.xml.bind.annotation.adapters.XmlAdapter;
 
+import org.eclipse.kura.KuraException;
+import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.core.configuration.XmlConfigPropertyAdapted.ConfigPropertyType;
 import org.eclipse.kura.crypto.CryptoService;
 import org.osgi.framework.BundleContext;
@@ -286,20 +282,9 @@ public class XmlConfigPropertiesAdapter extends XmlAdapter<XmlConfigPropertiesAd
 						propvalue = (String) adaptedProp.getValues()[0];
 						if (adaptedProp.isEncrypted()) {
 							try {
-								propvalue = new Password(cryptoService.decryptAes((String) propvalue));
-							} catch (Exception e) {
-								if (e instanceof IllegalBlockSizeException
-									|| e instanceof NoSuchAlgorithmException
-									|| e instanceof NoSuchPaddingException
-									|| e instanceof InvalidKeyException
-									|| e instanceof IOException
-									|| e instanceof IllegalBlockSizeException
-									|| e instanceof BadPaddingException)
-								{
-									propvalue = new Password(cryptoService.decodeBase64((String) propvalue));
-								} else {
-									throw e;
-								}
+								propvalue = new Password(cryptoService.decryptAes(((String) propvalue).toCharArray()));
+							} catch (KuraException e) {
+								propvalue = new Password(cryptoService.decodeBase64((String) propvalue));
 							}
 						}
 						else {
@@ -396,20 +381,9 @@ public class XmlConfigPropertiesAdapter extends XmlAdapter<XmlConfigPropertiesAd
 							if (adaptedProp.getValues()[i] != null) {
 								if (adaptedProp.isEncrypted()) {
 									try {
-										pwdValues[i] = new Password(cryptoService.decryptAes(adaptedProp.getValues()[i]));
-									} catch (Exception e) {
-										if (e instanceof IllegalBlockSizeException
-											|| e instanceof NoSuchAlgorithmException
-											|| e instanceof NoSuchPaddingException
-											|| e instanceof InvalidKeyException
-											|| e instanceof IOException
-											|| e instanceof IllegalBlockSizeException
-											|| e instanceof BadPaddingException)
-										{
-											pwdValues[i] = new Password(cryptoService.decodeBase64(adaptedProp.getValues()[i]));
-										} else {
-											throw e;
-										}
+										pwdValues[i] = new Password(cryptoService.decryptAes(adaptedProp.getValues()[i].toCharArray()));
+									} catch (KuraException e) {
+										pwdValues[i] = new Password(cryptoService.decodeBase64(adaptedProp.getValues()[i]));
 									}
 								}
 								else {

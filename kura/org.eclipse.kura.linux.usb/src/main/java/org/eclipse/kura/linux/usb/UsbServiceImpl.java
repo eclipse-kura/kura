@@ -45,7 +45,7 @@ public class UsbServiceImpl implements UsbService, LinuxUdevListener {
 	private EventAdmin m_eventAdmin;
 	
 	protected void activate(ComponentContext componentContext) {
-		//only support Linux
+		// only support Linux
 		Properties props = System.getProperties();
 		if(((String)props.getProperty("os.name")).equals("Linux")) {
 			m_linuxUdevNative = new LinuxUdevNative(this);

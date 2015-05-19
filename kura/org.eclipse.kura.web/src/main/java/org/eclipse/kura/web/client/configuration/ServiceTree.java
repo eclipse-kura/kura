@@ -192,6 +192,9 @@ public class ServiceTree extends ContentPanel
             		else if ("CommandPasswordService".equals(icon)) {
             			return AbstractImagePrototype.create(Resources.INSTANCE.command32());
             		}
+            		else if ("DenaliService".equals(icon)) {
+            			return AbstractImagePrototype.create(Resources.INSTANCE.systemLock32());
+            		}
             		else if (icon != null && 
             				(icon.toLowerCase().startsWith("http://") ||
             			     icon.toLowerCase().startsWith("https://")) &&

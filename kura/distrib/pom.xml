@@ -79,6 +79,11 @@
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.kura.core.certificates</artifactId>
+									<version>${org.eclipse.kura.core.certificates.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
 									<artifactId>org.eclipse.kura.core.cloud</artifactId>
 									<version>${org.eclipse.kura.core.cloud.version}</version>
 								</artifactItem>
@@ -101,6 +106,11 @@
 									<groupId>org.eclipse.kura</groupId>
 									<artifactId>org.eclipse.kura.core.deployment</artifactId>
 									<version>${org.eclipse.kura.core.deployment.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.kura.core.log</artifactId>
+									<version>${org.eclipse.kura.core.log.version}</version>
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.eclipse.kura</groupId>
@@ -151,6 +161,11 @@
 									<groupId>org.eclipse.kura</groupId>
 									<artifactId>org.eclipse.kura.linux.usb</artifactId>
 									<version>${org.eclipse.kura.linux.usb.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.kura.linux.bluetooth</artifactId>
+									<version>${org.eclipse.kura.linux.bluetooth.version}</version>
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.eclipse.kura</groupId>
@@ -207,11 +222,13 @@
 							<tasks>
 							    <move file="target/plugins/org.eclipse.kura.api.jar" tofile="target/plugins/org.eclipse.kura.api_${org.eclipse.kura.api.version}.jar"/>
 							    <move file="target/plugins/org.eclipse.kura.core.jar" tofile="target/plugins/org.eclipse.kura.core_${org.eclipse.kura.core.version}.jar"/>
+							    <move file="target/plugins/org.eclipse.kura.core.certificates.jar" tofile="target/plugins/org.eclipse.kura.core.certificates_${org.eclipse.kura.core.certificates.version}.jar"/>
 							    <move file="target/plugins/org.eclipse.kura.core.cloud.jar" tofile="target/plugins/org.eclipse.kura.core.cloud_${org.eclipse.kura.core.cloud.version}.jar"/>
 							    <move file="target/plugins/org.eclipse.kura.core.comm.jar" tofile="target/plugins/org.eclipse.kura.core.comm_${org.eclipse.kura.core.comm.version}.jar"/>
 							    <move file="target/plugins/org.eclipse.kura.core.configuration.jar" tofile="target/plugins/org.eclipse.kura.core.configuration_${org.eclipse.kura.core.configuration.version}.jar"/>
 							    <move file="target/plugins/org.eclipse.kura.core.crypto.jar" tofile="target/plugins/org.eclipse.kura.core.crypto_${org.eclipse.kura.core.crypto.version}.jar"/>
 							    <move file="target/plugins/org.eclipse.kura.core.deployment.jar" tofile="target/plugins/org.eclipse.kura.core.deployment_${org.eclipse.kura.core.deployment.version}.jar"/>
+								<move file="target/plugins/org.eclipse.kura.core.log.jar" tofile="target/plugins/org.eclipse.kura.core.log_${org.eclipse.kura.core.log.version}.jar"/>
 							    <move file="target/plugins/org.eclipse.kura.core.net.jar" tofile="target/plugins/org.eclipse.kura.core.net_${org.eclipse.kura.core.net.version}.jar"/>
 							    <move file="target/plugins/org.eclipse.kura.deployment.agent.jar" tofile="target/plugins/org.eclipse.kura.deployment.agent_${org.eclipse.kura.deployment.agent.version}.jar"/>
 							    <move file="target/plugins/org.eclipse.kura.deployment.customizer.jar" tofile="target/plugins/org.eclipse.kura.deployment.customizer_${org.eclipse.kura.deployment.customizer.version}.jar"/>
@@ -222,7 +239,8 @@
 							    <move file="target/plugins/org.eclipse.kura.linux.net.jar" tofile="target/plugins/org.eclipse.kura.linux.net_${org.eclipse.kura.linux.net.version}.jar"/>
 							    <move file="target/plugins/org.eclipse.kura.linux.position.jar" tofile="target/plugins/org.eclipse.kura.linux.position_${org.eclipse.kura.linux.position.version}.jar"/>
 							    <move file="target/plugins/org.eclipse.kura.linux.usb.jar" tofile="target/plugins/org.eclipse.kura.linux.usb_${org.eclipse.kura.linux.usb.version}.jar"/>
-							    <move file="target/plugins/org.eclipse.kura.linux.watchdog.jar" tofile="target/plugins/org.eclipse.kura.linux.watchdog_${org.eclipse.kura.linux.watchdog.version}.jar"/>
+							    <move file="target/plugins/org.eclipse.kura.linux.bluetooth.jar" tofile="target/plugins/org.eclipse.kura.linux.bluetooth_${org.eclipse.kura.linux.bluetooth.version}.jar"/>
+								<move file="target/plugins/org.eclipse.kura.linux.watchdog.jar" tofile="target/plugins/org.eclipse.kura.linux.watchdog_${org.eclipse.kura.linux.watchdog.version}.jar"/>
 							    <move file="target/plugins/org.eclipse.kura.net.admin.jar" tofile="target/plugins/org.eclipse.kura.net.admin_${org.eclipse.kura.net.admin.version}.jar"/>
 							    <move file="target/plugins/org.eclipse.kura.protocol.modbus.jar" tofile="target/plugins/org.eclipse.kura.protocol.modbus_${org.eclipse.kura.protocol.modbus.version}.jar"/>
 							    <move file="target/plugins/org.eclipse.kura.web.jar" tofile="target/plugins/org.eclipse.kura.web_${org.eclipse.kura.web.version}.jar" failonerror="false" />
@@ -376,6 +394,87 @@
 
 	<profiles>
 		<profile>
+            <id>intel-edison-nn</id>
+			<properties>
+				<kura.edison.install.dir>/home/root/eclipse</kura.edison.install.dir>
+			</properties>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <build>
+                <resources>
+                    <resource>
+                        <directory>src/main/resources</directory>
+                        <filtering>true</filtering>
+                    </resource>
+                </resources>
+                <plugins>
+                    <plugin>
+						<groupId>org.codehaus.mojo</groupId> 
+						<artifactId>properties-maven-plugin</artifactId> <version>1.0-alpha-1</version> 
+						<executions>
+							<execution>
+								<phase>initialize</phase>
+								<goals>
+									<goal>read-project-properties</goal> 
+								</goals>
+								<configuration>
+									<files>
+										<file>${basedir}/build.properties</file> 
+										<file>${basedir}/config/kura.build.properties</file> 
+									</files>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>buildnumber-maven-plugin</artifactId>
+                        <version>1.0</version>
+                        <executions>
+                            <execution>
+                                <phase>validate</phase>
+                                <goals>
+                                    <goal>create-timestamp</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <version>1.7</version>
+                        <executions>
+                            <execution>
+                                <id>intel-edison-nn-jars</id>
+                                <phase>install</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <target>
+                                        <property name="buildNumber" value="buildNumber" />
+                                        <property name="project.version" value="${project.version}" />
+                                        <property name="project.build.profile" value="${project.build.profile}" />
+                                        <property name="project.build.directory" value="${project.build.directory}" />
+                                        <property name="target.device" value="intel-edison" />
+                                        <property name="kura.os.version" value="yocto_1.6.1_edison" />                                        
+                                        <property name="build.name" value="intel-edison-nn" />
+                                        <property name="kura.arch" value="x86_64" />
+                                        <property name="kura.mem.size" value="256m" />
+                                        <property name="kura.install.dir" value="${kura.edison.install.dir}" />
+										<property name="http.port" value="8080" />
+                                        <ant antfile="${basedir}/src/main/ant/build_equinox_distrib.xml"
+                                            target="dist-linux" />
+                                    </target>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+		<profile>
 			<id>beaglebone</id>
 			<properties>
 				<project.raspbian.dependencies>hostapd, isc-dhcp-server, iw,
@@ -478,7 +577,7 @@
 					<plugin> 
 						<groupId>org.vafer</groupId>
 						<artifactId>jdeb</artifactId>
-						<version>1.0</version>
+						<version>1.3</version>
 						<executions>
 							<execution>
 								<id>beaglebone-deb</id>
@@ -510,7 +609,7 @@
 		<profile>
 			<id>beaglebone-nn</id>
 			<properties>
-				<project.raspbian.dependencies>dos2unix, unzip, telnet</project.raspbian.dependencies>
+				<project.raspbian.dependencies.nn>dos2unix, unzip, telnet</project.raspbian.dependencies.nn>
 			</properties>
 			<activation>
 				<activeByDefault>true</activeByDefault>
@@ -589,7 +688,7 @@
 					<plugin> 
 						<groupId>org.vafer</groupId>
 						<artifactId>jdeb</artifactId>
-						<version>1.0</version>
+						<version>1.3</version>
 						<executions>
 							<execution>
 								<id>beaglebone-nn-deb</id>
@@ -600,7 +699,7 @@
 								<configuration>
 									<verbose>true</verbose>
 									<deb>${basedir}/target/kura_${project.version}_beaglebone-nn_debian_armv7.deb</deb>
-									<controlDir>${basedir}/src/main/deb/control</controlDir>
+									<controlDir>${basedir}/src/main/deb/control_nn</controlDir>
 									<dataSet>
 										<data>
 											<src>${basedir}/target/kura_${project.version}_beaglebone-nn.zip</src>
@@ -710,7 +809,7 @@
 					<plugin>
 						<groupId>org.vafer</groupId>
 						<artifactId>jdeb</artifactId>
-						<version>1.0</version>
+						<version>1.3</version>
 						<executions>
 							<execution>
 								<id>raspberry-pi-deb</id>
@@ -742,7 +841,7 @@
 		<profile>
 			<id>raspberry-pi-nn</id>
 			<properties>
-				<project.raspbian.dependencies>dos2unix, unzip, telnet</project.raspbian.dependencies> 
+				<project.raspbian.dependencies.nn>dos2unix, unzip, telnet</project.raspbian.dependencies.nn> 
 			</properties> 
 			<activation>
 				<activeByDefault>true</activeByDefault>
@@ -818,7 +917,7 @@
 					<plugin>
 						<groupId>org.vafer</groupId>
 						<artifactId>jdeb</artifactId> 
-						<version>1.0</version>
+						<version>1.3</version>
 						<executions>
 							<execution>
 								<id>raspberry-pi-nn-deb</id> 
@@ -939,7 +1038,7 @@
 					<plugin>
 						<groupId>org.vafer</groupId>
 						<artifactId>jdeb</artifactId>
-						<version>1.0</version>
+						<version>1.3</version>
 						<executions>
 							<execution>
 								<id>raspberry-pi-bplus-deb</id>
@@ -971,7 +1070,7 @@
 		<profile>
 			<id>raspberry-pi-bplus-nn</id>
 			<properties>
-				<project.raspbian.dependencies>dos2unix, unzip, telnet</project.raspbian.dependencies> 
+				<project.raspbian.dependencies.nn>dos2unix, unzip, telnet</project.raspbian.dependencies.nn> 
 			</properties> 
 			<activation>
 				<activeByDefault>true</activeByDefault>
@@ -1047,7 +1146,7 @@
 					<plugin>
 						<groupId>org.vafer</groupId>
 						<artifactId>jdeb</artifactId> 
-						<version>1.0</version>
+						<version>1.3</version>
 						<executions>
 							<execution>
 								<id>raspberry-pi-bplus-nn-deb</id> 
@@ -1066,7 +1165,7 @@
 											<mapper>
 												<type>perm</type>
 												<prefix>/tmp</prefix>
-											</mapper> 
+											</mapper>
 										</data>
 									</dataSet>
 								</configuration>
@@ -1075,7 +1174,231 @@
 					</plugin> 
 				</plugins>
 			</build>
-		</profile>		
+		</profile>
+
+		<profile>
+			<id>raspberry-pi-2</id>
+			<properties>
+				<project.raspbian.dependencies>hostapd, isc-dhcp-server, iw,
+					dos2unix, bind9, unzip, ethtool, telnet</project.raspbian.dependencies>
+			</properties>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<build>
+				<resources>
+					<resource>
+						<directory>src/main/resources</directory>
+						<filtering>true</filtering>
+					</resource>
+				</resources>
+				<plugins>
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>properties-maven-plugin</artifactId>
+						<version>1.0-alpha-1</version>
+						<executions>
+							<execution>
+								<phase>initialize</phase>
+								<goals>
+									<goal>read-project-properties</goal>
+								</goals>
+								<configuration>
+									<files>
+										<file>${basedir}/build.properties</file>
+										<file>${basedir}/config/kura.build.properties</file>
+									</files>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>buildnumber-maven-plugin</artifactId>
+						<version>1.0</version>
+						<executions>
+							<execution>
+								<phase>validate</phase>
+								<goals>
+									<goal>create-timestamp</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-antrun-plugin</artifactId>
+						<version>1.7</version>
+						<executions>
+							<execution>
+								<id>raspberry-pi-2-jars</id>
+								<phase>install</phase>
+								<goals>
+									<goal>run</goal>
+								</goals>
+								<configuration>
+									<target>
+										<property name="buildNumber" value="buildNumber" />
+										<property name="project.version" value="${project.version}" />
+										<property name="project.build.profile" value="${project.build.profile}" />
+										<property name="project.build.directory" value="${project.build.directory}" />
+										<property name="build.name" value="raspberry-pi-2" />
+										<property name="target.device" value="raspberry-pi-2" />
+										<property name="kura.os.version" value="raspbian" />
+										<property name="kura.arch" value="armv7_hf" />
+										<property name="kura.mem.size" value="512m" />
+										<property name="kura.install.dir" value="${kura.install.dir}" />
+										<ant antfile="${basedir}/src/main/ant/build_equinox_distrib.xml"
+											target="dist-linux" />
+									</target>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.vafer</groupId>
+						<artifactId>jdeb</artifactId>
+						<version>1.0</version>
+						<executions>
+							<execution>
+								<id>raspberry-pi-2-deb</id>
+								<phase>install</phase>
+								<goals>
+									<goal>jdeb</goal>
+								</goals>
+								<configuration>
+									<verbose>true</verbose>
+									<deb>${basedir}/target/kura_${project.version}_raspberry-pi-2_armv7.deb</deb>
+									<controlDir>${basedir}/src/main/deb/control</controlDir>
+									<dataSet>
+										<data>
+											<src>${basedir}/target/kura_${project.version}_raspberry-pi-2.zip</src>
+											<type>file</type>
+											<mapper>
+												<type>perm</type>
+												<prefix>/tmp</prefix>
+											</mapper>
+										</data>
+									</dataSet>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		
+		<profile>
+			<id>raspberry-pi-2-nn</id>
+			<properties>
+				<project.raspbian.dependencies>dos2unix, unzip, telnet</project.raspbian.dependencies>
+			</properties>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<build>
+				<resources>
+					<resource>
+						<directory>src/main/resources</directory>
+						<filtering>true</filtering>
+					</resource>
+				</resources>
+				<plugins>
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>properties-maven-plugin</artifactId>
+						<version>1.0-alpha-1</version>
+						<executions>
+							<execution>
+								<phase>initialize</phase>
+								<goals>
+									<goal>read-project-properties</goal>
+								</goals>
+								<configuration>
+									<files>
+										<file>${basedir}/build.properties</file>
+										<file>${basedir}/config/kura.build.properties</file>
+									</files>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>buildnumber-maven-plugin</artifactId>
+						<version>1.0</version>
+						<executions>
+							<execution>
+								<phase>validate</phase>
+								<goals>
+									<goal>create-timestamp</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-antrun-plugin</artifactId>
+						<version>1.7</version>
+						<executions>
+							<execution>
+								<id>raspberry-pi-2-nn-jars</id>
+								<phase>install</phase>
+								<goals>
+									<goal>run</goal>
+								</goals>
+								<configuration>
+									<target>
+										<property name="buildNumber" value="buildNumber" />
+										<property name="project.version" value="${project.version}" />
+										<property name="project.build.profile" value="${project.build.profile}" />
+										<property name="project.build.directory" value="${project.build.directory}" />
+										<property name="build.name" value="raspberry-pi-2-nn" />
+										<property name="target.device" value="raspberry-pi-2-nn" />
+										<property name="kura.os.version" value="raspbian" />
+										<property name="kura.arch" value="armv7_hf" />
+										<property name="kura.mem.size" value="512m" />
+										<property name="kura.install.dir" value="${kura.install.dir}" />
+										<ant antfile="${basedir}/src/main/ant/build_equinox_distrib.xml"
+											target="dist-linux" />
+									</target>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.vafer</groupId>
+						<artifactId>jdeb</artifactId>
+						<version>1.0</version>
+						<executions>
+							<execution>
+								<id>raspberry-pi-2-nn-deb</id>
+								<phase>install</phase>
+								<goals>
+									<goal>jdeb</goal>
+								</goals>
+								<configuration>
+									<verbose>true</verbose>
+									<deb>${basedir}/target/kura_${project.version}_raspberry-pi-2-nn_armv7.deb</deb>
+									<controlDir>${basedir}/src/main/deb/control</controlDir>
+									<dataSet>
+										<data>
+											<src>${basedir}/target/kura_${project.version}_raspberry-pi-2-nn.zip</src>
+											<type>file</type>
+											<mapper>
+												<type>perm</type>
+												<prefix>/tmp</prefix>
+											</mapper>
+										</data>
+									</dataSet>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		
 		<profile>
 			<id>dev-env</id>
 			<activation>
@@ -1168,6 +1491,9 @@
 											todir="${project.build.directory}/staging/target-definition/equinox_3.8.1/repository/plugins" />
 										<copy
 											file="${project.build.directory}/plugins/org.eclipse.kura.core_${org.eclipse.kura.core.version}.jar"
+											todir="${project.build.directory}/staging/target-definition/equinox_3.8.1/repository/plugins" />
+										<copy
+											file="${project.build.directory}/plugins/org.eclipse.kura.core.certificates_${org.eclipse.kura.core.certificates.version}.jar"
 											todir="${project.build.directory}/staging/target-definition/equinox_3.8.1/repository/plugins" />
 										<copy
 											file="${project.build.directory}/plugins/org.eclipse.kura.deployment.agent_${org.eclipse.kura.deployment.agent.version}.jar"

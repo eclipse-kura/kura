@@ -456,10 +456,18 @@ public class LinuxNetworkUtil {
 			return false;
 		}
 		try {
-			if(ifaceType == NetInterfaceType.WIFI) {                
-				LinkTool linkTool = new IwLinkTool("iw", ifaceName);
-
-				if(linkTool.get()) {
+			if(ifaceType == NetInterfaceType.WIFI) {  
+				Collection<String> supportedWifiOptions = WifiOptions.getSupportedOptions(ifaceName);
+				LinkTool linkTool = null;
+				if ((supportedWifiOptions != null) && (supportedWifiOptions.size() > 0)) {
+		            if (supportedWifiOptions.contains(WifiOptions.WIFI_MANAGED_DRIVER_NL80211)) {
+		            	linkTool = new IwLinkTool(ifaceName);
+		            } else if (supportedWifiOptions.contains(WifiOptions.WIFI_MANAGED_DRIVER_WEXT)) {
+		            	linkTool = new iwconfigLinkTool(ifaceName);
+		            }
+				}
+				
+				if((linkTool != null) && linkTool.get()) {
 					return linkTool.isLinkDetected();
 				} else {
 					//throw new KuraException(Kura`ErrorCode.INTERNAL_ERROR, "link tool failed to detect the status of " + ifaceName);

@@ -39,8 +39,11 @@ import org.eclipse.kura.linux.net.route.RouteService;
 import org.eclipse.kura.linux.net.route.RouteServiceImpl;
 import org.eclipse.kura.linux.net.util.IScanTool;
 import org.eclipse.kura.linux.net.util.IwLinkTool;
+import org.eclipse.kura.linux.net.util.LinkTool;
 import org.eclipse.kura.linux.net.util.LinuxNetworkUtil;
 import org.eclipse.kura.linux.net.util.ScanTool;
+import org.eclipse.kura.linux.net.util.iwconfigLinkTool;
+import org.eclipse.kura.linux.net.wifi.WifiOptions;
 import org.eclipse.kura.net.IPAddress;
 import org.eclipse.kura.net.NetConfig;
 import org.eclipse.kura.net.NetConfigIP4;
@@ -800,10 +803,20 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
 		if ((wifiState != null) && (ssid != null)) {
 			if(wifiState.isUp()) {
 				s_logger.trace("getSignalLevel() :: using 'iw dev wlan0 link' command ...");
-				IwLinkTool iwLinkTool = new IwLinkTool("iw", interfaceName);
-				if(iwLinkTool.get()) { 
-					if (iwLinkTool.isLinkDetected()) {
-						rssi = iwLinkTool.getSignal();
+				//IwLinkTool iwLinkTool = new IwLinkTool(interfaceName);
+				Collection<String> supportedWifiOptions = WifiOptions.getSupportedOptions(interfaceName);
+				LinkTool linkTool = null;
+				if ((supportedWifiOptions != null) && (supportedWifiOptions.size() > 0)) {
+		            if (supportedWifiOptions.contains(WifiOptions.WIFI_MANAGED_DRIVER_NL80211)) {
+		            	linkTool = new IwLinkTool(interfaceName);
+		            } else if (supportedWifiOptions.contains(WifiOptions.WIFI_MANAGED_DRIVER_WEXT)) {
+		            	linkTool = new iwconfigLinkTool(interfaceName);
+		            }
+				}
+				
+				if((linkTool != null) &&linkTool.get()) { 
+					if (linkTool.isLinkDetected()) {
+						rssi = linkTool.getSignal();
 						s_logger.debug("getSignalLevel() :: rssi={} (using 'iw dev wlan0 link')", rssi);
 					}
 				}

@@ -60,4 +60,11 @@ public interface LinkTool {
 	 * @return duplex as {@link String}
 	 */
 	public String getDuplex();
+	
+	/**
+	 * Reports signal strength for WiFi interface
+	 * 
+	 * @return signal strength as {@link int}
+	 */
+	public int getSignal();
 }

@@ -176,7 +176,6 @@ public class LinuxNamed {
 				result = LinuxProcessUtil.start("/etc/init.d/bind9 start");
 			}
 			else if (OS_VERSION.equals(KuraConstants.Intel_Edison.getImageName() + "_" + KuraConstants.Intel_Edison.getImageVersion() + "_" + KuraConstants.Intel_Edison.getTargetName())) {
-				s_logger.warn("<IAB> enable() :: !!! YES !!!");
 				result = LinuxProcessUtil.start("/etc/init.d/bind start");
 			}
 			else {
@@ -198,11 +197,6 @@ public class LinuxNamed {
 		try {
 			int result = -1;
 			// If so, stop it.
-			
-			s_logger.warn("<IAB> OS_VERSION={}", OS_VERSION);
-			s_logger.warn("<IAB> KuraConstants.Intel_Edison.getImageName()={}", KuraConstants.Intel_Edison.getImageName());
-			s_logger.warn("<IAB> KuraConstants.Intel_Edison.getImageVersion()={}", KuraConstants.Intel_Edison.getImageVersion());
-			
 			if (OS_VERSION.equals(KuraConstants.Mini_Gateway.getImageName() + "_" + KuraConstants.Mini_Gateway.getImageVersion())) {
 				result = LinuxProcessUtil.start("/etc/init.d/bind stop");
 			} 
@@ -210,7 +204,6 @@ public class LinuxNamed {
 				result = LinuxProcessUtil.start("/etc/init.d/bind9 stop");
 			}
 			else if (OS_VERSION.equals(KuraConstants.Intel_Edison.getImageName() + "_" + KuraConstants.Intel_Edison.getImageVersion() + "_" + KuraConstants.Intel_Edison.getTargetName())) {
-				s_logger.warn("<IAB> disable() :: !!! YES !!!");
 				result = LinuxProcessUtil.start("/etc/init.d/bind stop");
 			}
 			else {

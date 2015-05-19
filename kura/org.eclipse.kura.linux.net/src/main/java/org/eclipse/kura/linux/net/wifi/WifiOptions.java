@@ -27,7 +27,6 @@ import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.util.ProcessUtil;
 import org.eclipse.kura.core.util.SafeProcess;
-import org.eclipse.kura.linux.net.util.LinuxIfconfig;
 import org.eclipse.kura.linux.net.util.LinuxNetworkUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,10 +49,8 @@ public class WifiOptions {
 	
 	public static Collection<String> getSupportedOptions (String ifaceName) throws KuraException 
 	{		
-		s_logger.info("<IAB> [+] !! getSupportedOptions() - {}", ifaceName);
 		Collection<String> options = s_wifiOptions.get(ifaceName);
 		if (options != null) {
-			s_logger.info("<IAB> [-] !! {CACHED} getSupportedOptions() - {}", ifaceName);
 			return options;
 		}
 		
@@ -64,7 +61,6 @@ public class WifiOptions {
 		try {
 			if (LinuxNetworkUtil.isToolExists("iw")) {
 			    try {
-			    	s_logger.info("<IAB> ## executing: iw dev {} info...", ifaceName);
 			    	procIw = ProcessUtil.exec("iw dev " + ifaceName + " info");
 			    } catch (Exception e) {
 			    	s_logger.warn("Failed to execute 'iw dev {} info - {}", ifaceName, e);
@@ -79,14 +75,12 @@ public class WifiOptions {
 			}
 
 			if (LinuxNetworkUtil.isToolExists("iwconfig")) {
-			    s_logger.info("<IAB> #### executing: iwconfig {} ...", ifaceName);
 				procIwConfig = ProcessUtil.exec("iwconfig " + ifaceName);
 				if (procIwConfig.waitFor() == 0) {
 					br = new BufferedReader(new InputStreamReader(procIwConfig.getInputStream()));
 					String line = null;
 					while ((line = br.readLine()) != null) {
 						if (line.contains("IEEE 802.11")) {
-							s_logger.info("<IAB> ## WIFI_MANAGED_DRIVER_WEXT option added for {}", ifaceName);
 							options.add(WIFI_MANAGED_DRIVER_WEXT);
 							break;
 						}
@@ -110,8 +104,6 @@ public class WifiOptions {
 		}		
 		
 		s_wifiOptions.put(ifaceName, options);
-		
-		s_logger.info("<IAB> [-] !! {OBTAINED} getSupportedOptions() - {}", ifaceName);
 		return options;
 	}
 }

@@ -639,12 +639,11 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 				s_logger.info("Snapshot on EventAdmin configuration will be taken for {}.", pid);
 			}
 
-			Map<String, Object> encryptedProperties= encryptPasswords(mergedProperties);
+			encryptPasswords(mergedProperties);
 			// Update the new properties
 			// use ConfigurationAdmin to do the update
 			Configuration config = m_configurationAdmin.getConfiguration(pid);
-			config.update(CollectionsUtil.mapToDictionary(encryptedProperties));
-			//mergedProperties));
+			config.update(CollectionsUtil.mapToDictionary(mergedProperties));
 
 			s_logger.info("Updating Configuration of ConfigurableComponent {} ... Done.", pid);
 		} catch (IOException e) {
@@ -718,7 +717,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 		return configProperties;
 	}
 
-	private Map<String, Object> encryptPasswords(ComponentConfiguration config){
+	private void encryptPasswords(ComponentConfiguration config){
 		Map<String, Object> propertiesToUpdate = config.getConfigurationProperties();
 
 		Iterator<String> keys = propertiesToUpdate.keySet().iterator();
@@ -730,15 +729,15 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 					try {
 						propertiesToUpdate.put(key, new Password(m_cryptoService.encryptAes(value.toString())));
 					} catch (Exception e) {
+						s_logger.warn("Failed to encrypt Password property: {}", key);
 						propertiesToUpdate.remove(key);
 					}
 				}
 			}
-		}		
-		return propertiesToUpdate;
+		}
 	}
 	
-	private Map<String, Object> encryptPasswords(Map<String, Object> propertiesToUpdate){
+	private void encryptPasswords(Map<String, Object> propertiesToUpdate){
 		Iterator<String> keys = propertiesToUpdate.keySet().iterator();
 		while (keys.hasNext()) {
 			String key = keys.next();
@@ -748,12 +747,12 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 					try {
 						propertiesToUpdate.put(key, new Password(m_cryptoService.encryptAes(value.toString())));
 					} catch (Exception e) {
+						s_logger.warn("Failed to encrypt Password property: {}", key);
 						propertiesToUpdate.remove(key);
 					}
 				}
 			}
-		}		
-		return propertiesToUpdate;
+		}
 	}
 
 	// ----------------------------------------------------------------
@@ -762,15 +761,12 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 	//
 	// ----------------------------------------------------------------
 
-	private List<ComponentConfigurationImpl> encryptConfigs(List<? extends ComponentConfiguration> configs) {
-		List<ComponentConfigurationImpl> configImpls = new ArrayList<ComponentConfigurationImpl>();
+	private void encryptConfigs(List<? extends ComponentConfiguration> configs) {
 		for (ComponentConfiguration config : configs) {
 			if (config instanceof ComponentConfigurationImpl) {
-				((ComponentConfigurationImpl) config).setProperties(encryptPasswords(config));
-				configImpls.add((ComponentConfigurationImpl) config);
+				encryptPasswords(config);
 			}
 		}
-		return configImpls;
 	}
 
 	private boolean allSnapshotsUnencrypted() {
@@ -857,16 +853,14 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 				}
 			}
 			List<ComponentConfigurationImpl> configs = xmlConfigs.getConfigurations();
-			List<ComponentConfigurationImpl> configImpls = encryptConfigs(configs);
-			XmlComponentConfigurations conf = new XmlComponentConfigurations();
-			conf.setConfigurations(configImpls);
+			encryptConfigs(configs);
 
 			FileOutputStream fos = null;
 			OutputStreamWriter osw = null;
 			try {
 				fos = new FileOutputStream(fSnapshot);
 				osw = new OutputStreamWriter(fos, "UTF-8");
-				String xmlResult = XmlUtil.marshal(conf);
+				String xmlResult = XmlUtil.marshal(xmlConfigs);
 				String encryptedXML = m_cryptoService.encryptAes(xmlResult);
 				osw.append(encryptedXML);
 				osw.flush();
@@ -1172,8 +1166,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 					fr = new FileReader(fSnapshot);
 					xmlConfigs = XmlUtil.unmarshal(fr, XmlComponentConfigurations.class);
 					encryptPlainSnapshots();
-					List<ComponentConfigurationImpl> encryptedConfigs = encryptConfigs(xmlConfigs.getConfigurations());
-					xmlConfigs.setConfigurations(encryptedConfigs);
+					encryptConfigs(xmlConfigs.getConfigurations());
 				}
 			} catch (Exception ex) {
 				throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);

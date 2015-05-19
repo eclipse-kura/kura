@@ -17,7 +17,7 @@ public enum KuraConstants {
 	Mini_Gateway ("yocto", "1.2.1", "mini-gateway"),
 	Raspberry_Pi ("raspbian", "1.0.0", "raspberry-pi"),
 	BeagleBone ("debian", "1.0.0", "beaglebone"),
-	Intel_Edison("yocto", "3.10.17", "intel-edison");
+	Intel_Edison("yocto", "1.6.1", "edison");
 	
 	private String m_imageName;
 	private String m_imageVersion;

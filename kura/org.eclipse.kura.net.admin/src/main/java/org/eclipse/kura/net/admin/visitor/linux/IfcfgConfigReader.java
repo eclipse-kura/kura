@@ -111,12 +111,9 @@ public class IfcfgConfigReader implements NetworkConfigurationVisitor {
 			String gateway = null;
 
 			File ifcfgFile = null;
-			if (OS_VERSION.equals(KuraConstants.Mini_Gateway.getImageName()
-					+ "_" + KuraConstants.Mini_Gateway.getImageVersion())
-					|| OS_VERSION.equals(KuraConstants.Raspberry_Pi
-							.getImageName())
-					|| OS_VERSION.equals(KuraConstants.BeagleBone
-							.getImageName())) {
+			if (OS_VERSION.equals(KuraConstants.Mini_Gateway.getImageName() + "_" + KuraConstants.Mini_Gateway.getImageVersion()) || 
+			    OS_VERSION.equals(KuraConstants.Raspberry_Pi.getImageName()) || OS_VERSION.equals(KuraConstants.BeagleBone.getImageName()) ||
+			    OS_VERSION.equals(KuraConstants.Intel_Edison.getImageName() + "_" + KuraConstants.Intel_Edison.getImageVersion() + "_" + KuraConstants.Intel_Edison.getTargetName())) {
 				ifcfgFile = new File(DEBIAN_NET_CONFIGURATION_DIRECTORY
 						+ "interfaces");
 			} else {
@@ -127,12 +124,10 @@ public class IfcfgConfigReader implements NetworkConfigurationVisitor {
 			if (ifcfgFile.exists()) {
 				Properties kuraProps;
 				// found our match so load the properties
-				if (OS_VERSION.equals(KuraConstants.Mini_Gateway.getImageName()
-						+ "_" + KuraConstants.Mini_Gateway.getImageVersion())
-						|| OS_VERSION.equals(KuraConstants.Raspberry_Pi
-								.getImageName())
-						|| OS_VERSION.equals(KuraConstants.BeagleBone
-								.getImageName())) {
+				if (OS_VERSION.equals(KuraConstants.Mini_Gateway.getImageName() + "_" + KuraConstants.Mini_Gateway.getImageVersion()) || 
+					OS_VERSION.equals(KuraConstants.Raspberry_Pi.getImageName()) || 
+					OS_VERSION.equals(KuraConstants.BeagleBone.getImageName()) ||
+					OS_VERSION.equals(KuraConstants.Intel_Edison.getImageName() + "_" + KuraConstants.Intel_Edison.getImageVersion() + "_" + KuraConstants.Intel_Edison.getTargetName())) {
 					kuraProps = parseDebianConfigFile(ifcfgFile, interfaceName);
 				} else {
 					kuraProps = parseRedhatConfigFile(ifcfgFile, interfaceName);

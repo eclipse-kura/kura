@@ -175,8 +175,9 @@ public class LinuxNamed {
 			else if (OS_VERSION.equals(KuraConstants.Raspberry_Pi.getImageName()) || OS_VERSION.equals(KuraConstants.BeagleBone.getImageName())) {
 				result = LinuxProcessUtil.start("/etc/init.d/bind9 start");
 			}
-			else if (OS_VERSION.equals(KuraConstants.Intel_Edison.getImageName() + "_" + KuraConstants.Intel_Edison.getImageVersion())) {
-				result = LinuxProcessUtil.start("/etc/init.d/bind9 start");
+			else if (OS_VERSION.equals(KuraConstants.Intel_Edison.getImageName() + "_" + KuraConstants.Intel_Edison.getImageVersion() + "_" + KuraConstants.Intel_Edison.getTargetName())) {
+				s_logger.warn("<IAB> enable() :: !!! YES !!!");
+				result = LinuxProcessUtil.start("/etc/init.d/bind start");
 			}
 			else {
 				result = LinuxProcessUtil.start("/etc/init.d/named start");
@@ -197,14 +198,20 @@ public class LinuxNamed {
 		try {
 			int result = -1;
 			// If so, stop it.
+			
+			s_logger.warn("<IAB> OS_VERSION={}", OS_VERSION);
+			s_logger.warn("<IAB> KuraConstants.Intel_Edison.getImageName()={}", KuraConstants.Intel_Edison.getImageName());
+			s_logger.warn("<IAB> KuraConstants.Intel_Edison.getImageVersion()={}", KuraConstants.Intel_Edison.getImageVersion());
+			
 			if (OS_VERSION.equals(KuraConstants.Mini_Gateway.getImageName() + "_" + KuraConstants.Mini_Gateway.getImageVersion())) {
 				result = LinuxProcessUtil.start("/etc/init.d/bind stop");
 			} 
 			else if (OS_VERSION.equals(KuraConstants.Raspberry_Pi.getImageName()) || OS_VERSION.equals(KuraConstants.BeagleBone.getImageName())) {
 				result = LinuxProcessUtil.start("/etc/init.d/bind9 stop");
 			}
-			else if (OS_VERSION.equals(KuraConstants.Intel_Edison.getImageName() + "_" + KuraConstants.Intel_Edison.getImageVersion())) {
-				result = LinuxProcessUtil.start("/etc/init.d/bind9 stop");
+			else if (OS_VERSION.equals(KuraConstants.Intel_Edison.getImageName() + "_" + KuraConstants.Intel_Edison.getImageVersion() + "_" + KuraConstants.Intel_Edison.getTargetName())) {
+				s_logger.warn("<IAB> disable() :: !!! YES !!!");
+				result = LinuxProcessUtil.start("/etc/init.d/bind stop");
 			}
 			else {
 				result = LinuxProcessUtil.start("/etc/init.d/named stop");

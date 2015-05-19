@@ -75,7 +75,9 @@ public class IfcfgConfigWriter implements NetworkConfigurationVisitor {
 	
 	private void writeConfig(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig) throws KuraException {
 		if (OS_VERSION.equals(KuraConstants.Mini_Gateway.getImageName() + "_" + KuraConstants.Mini_Gateway.getImageVersion()) ||
-				OS_VERSION.equals(KuraConstants.Raspberry_Pi.getImageName()) || OS_VERSION.equals(KuraConstants.BeagleBone.getImageName())) {
+				OS_VERSION.equals(KuraConstants.Raspberry_Pi.getImageName()) || OS_VERSION.equals(KuraConstants.BeagleBone.getImageName()) ||
+				OS_VERSION.equals(KuraConstants.Intel_Edison.getImageName() + "_" + KuraConstants.Intel_Edison.getImageVersion() + "_" + KuraConstants.Intel_Edison.getTargetName())
+				) {
 			NetInterfaceType type = netInterfaceConfig.getType();
 			if(type == NetInterfaceType.LOOPBACK || type == NetInterfaceType.ETHERNET || type == NetInterfaceType.WIFI) {					
 				if(configHasChanged(netInterfaceConfig)) {

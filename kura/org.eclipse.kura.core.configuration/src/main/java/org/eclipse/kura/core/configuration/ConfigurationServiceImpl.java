@@ -279,69 +279,21 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 		return cc;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public synchronized void updateConfiguration(String pidToUpdate, Map<String, Object> propertiesToUpdate) throws KuraException {
-		// Update the component configuration
-		boolean snapshotOnConfirmation = false;
-
-		updateConfigurationInternal(pidToUpdate, propertiesToUpdate, snapshotOnConfirmation);
-
-		// Build the current configuration
-		ComponentConfiguration cc = null;
-		ComponentConfigurationImpl cci = null;
-		Map<String, Object> props = null;
 		List<ComponentConfigurationImpl> configs = new ArrayList<ComponentConfigurationImpl>();
-
-		// clone the list to avoid concurrent modifications
-		List<String> allPids = new ArrayList<String>(m_allPids);
-		for (String pid : allPids) {
-			if (pid.equals(pidToUpdate)) {
-				cci = new ComponentConfigurationImpl(pid, null, propertiesToUpdate);
-				configs.add((ComponentConfigurationImpl) cci);
-			} else {
-				if (!m_selfConfigComponents.contains(pid)) {
-					cc = getConfigurableComponentConfiguration(pid);
-				} else {
-					cc = getSelfConfiguringComponentConfiguration(pid);
-				}
-				if (cc != null && cc.getPid() != null && cc.getPid().equals(pid)) {
-					props = cc.getConfigurationProperties();
-					cci = new ComponentConfigurationImpl(pid, null, props);
-					configs.add((ComponentConfigurationImpl) cci);
-				}
-			}
-		}
-
-		saveSnapshot(configs);
+		ComponentConfigurationImpl cci = new ComponentConfigurationImpl(pidToUpdate, null, propertiesToUpdate);
+		configs.add(cci);
+		updateConfigurations((List<ComponentConfiguration>) (List<?>) configs);	
 	}
 
 	@Override
 	public long snapshot() throws KuraException {
 		s_logger.info("Writing snapshot - Getting component configurations...");
 
-		//
-		// Build the current configuration
-		ComponentConfiguration cc = null;
-		ComponentConfigurationImpl cci = null;
-		Map<String, Object> props = null;
-		List<ComponentConfigurationImpl> configs = new ArrayList<ComponentConfigurationImpl>();
-
-		// clone the list to avoid concurrent modifications
-		List<String> allPids = new ArrayList<String>(m_allPids);
-		for (String pid : allPids) {
-
-			if (!m_selfConfigComponents.contains(pid)) {
-				cc = getConfigurableComponentConfiguration(pid);
-			} else {
-				cc = getSelfConfiguringComponentConfiguration(pid);
-			}
-			if (cc != null && cc.getPid() != null && cc.getPid().equals(pid)) {
-				props = cc.getConfigurationProperties();
-				cci = new ComponentConfigurationImpl(pid, null, props);
-				configs.add((ComponentConfigurationImpl) cci);
-			}
-		}
-
+		List<ComponentConfiguration> configs = buildCurrentConfiguration(null);
+		
 		return saveSnapshot(configs);
 	}
 
@@ -477,21 +429,8 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 
 		return returnConfigs;
 	}
-
-	public synchronized void updateConfigurations(List<ComponentConfiguration> configsToUpdate) throws KuraException {
-		boolean snapshotOnConfirmation = false;
-		List<Throwable> causes = new ArrayList<Throwable>();
-		for (ComponentConfiguration config : configsToUpdate) {
-			if (config != null) {
-				try {
-					updateConfigurationInternal(config.getPid(), config.getConfigurationProperties(), snapshotOnConfirmation);
-				} catch (KuraException e) {
-					s_logger.warn("Error during updateConfigurations for component " + config.getPid(), e);
-					causes.add(e);
-				}
-			}
-		}
-
+	
+	private synchronized List<ComponentConfiguration> buildCurrentConfiguration(List<ComponentConfiguration> configsToUpdate) throws KuraException {
 		// Build the current configuration
 		ComponentConfiguration cc = null;
 		ComponentConfigurationImpl cci = null;
@@ -502,12 +441,14 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 		List<String> allPids = new ArrayList<String>(m_allPids);
 		for (String pid : allPids) {
 			boolean isConfigToUpdate = false;
-			for (ComponentConfiguration configToUpdate : configsToUpdate) {
-				if (configToUpdate.getPid().equals(pid)) {
-					// found a match
-					isConfigToUpdate = true;
-					configs.add(configToUpdate);
-					break;
+			if (configsToUpdate != null) {
+				for (ComponentConfiguration configToUpdate : configsToUpdate) {
+					if (configToUpdate.getPid().equals(pid)) {
+						// found a match
+						isConfigToUpdate = true;
+						configs.add(configToUpdate);
+						break;
+					}
 				}
 			}
 
@@ -524,6 +465,41 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 				}
 			}
 		}
+		
+		// merge the current configs with those in the latest snapshot
+		List<ComponentConfigurationImpl> snapshotConfigs = loadLatestSnapshotConfigurations();
+		for (ComponentConfigurationImpl snapshotConfig : snapshotConfigs) {
+			boolean found = false;
+			for (ComponentConfiguration config : configs) {
+				if (config.getPid().equals(snapshotConfig.getPid())) {
+					found = true;
+					break;
+				}
+			}
+			if (!found) {
+				configs.add(snapshotConfig);
+			}
+		}
+		
+		return configs;
+	}
+	
+
+	public synchronized void updateConfigurations(List<ComponentConfiguration> configsToUpdate) throws KuraException {
+		boolean snapshotOnConfirmation = false;
+		List<Throwable> causes = new ArrayList<Throwable>();
+		for (ComponentConfiguration config : configsToUpdate) {
+			if (config != null) {
+				try {
+					updateConfigurationInternal(config.getPid(), config.getConfigurationProperties(), snapshotOnConfirmation);
+				} catch (KuraException e) {
+					s_logger.warn("Error during updateConfigurations for component " + config.getPid(), e);
+					causes.add(e);
+				}
+			}
+		}
+
+		List<ComponentConfiguration> configs = buildCurrentConfiguration(configsToUpdate);
 
 		saveSnapshot(configs);
 
@@ -1123,10 +1099,34 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 
 	private void loadLatestSnapshotInConfigAdmin() throws KuraException {
 		//
+		// save away initial configuration
+		List<ComponentConfigurationImpl> configs = loadLatestSnapshotConfigurations();
+		for (ComponentConfigurationImpl config : configs) {
+			if (config != null) {
+				Configuration cfg;
+				try {
+					s_logger.debug("Pushing config to config admin: {}", config.getPid());
+
+					// push it to the ConfigAdmin
+					cfg = m_configurationAdmin.getConfiguration(config.getPid());
+					cfg.update(CollectionsUtil.mapToDictionary(config.getConfigurationProperties()));
+
+					// track it as a pending Configuration
+					// for which we are expecting a confirmation
+					m_pendingConfigurationPids.add(config.getPid());
+				} catch (IOException e) {
+					s_logger.warn("Error seeding initial properties to ConfigAdmin for service: " + config.getPid(), e);
+				}
+			}
+		}
+	}
+	
+	private List<ComponentConfigurationImpl> loadLatestSnapshotConfigurations() throws KuraException {
+		//
 		// Get the latest snapshot file to use as initialization
 		Set<Long> snapshotIDs = getSnapshots();
 		if (snapshotIDs == null || snapshotIDs.size() == 0) {
-			return;
+			return null;
 		}
 
 		Long[] snapshots = snapshotIDs.toArray(new Long[] {});
@@ -1187,27 +1187,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 			}
 		}
 
-		//
-		// save away initial configuration
-		List<ComponentConfigurationImpl> configs = xmlConfigs.getConfigurations();
-		for (ComponentConfigurationImpl config : configs) {
-			if (config != null) {
-				Configuration cfg;
-				try {
-					s_logger.debug("Pushing config to config admin: {}", config.getPid());
-
-					// push it to the ConfigAdmin
-					cfg = m_configurationAdmin.getConfiguration(config.getPid());
-					cfg.update(CollectionsUtil.mapToDictionary(config.getConfigurationProperties()));
-
-					// track it as a pending Configuration
-					// for which we are expecting a confirmation
-					m_pendingConfigurationPids.add(config.getPid());
-				} catch (IOException e) {
-					s_logger.warn("Error seeding initial properties to ConfigAdmin for service: " + config.getPid(), e);
-				}
-			}
-		}
+		return xmlConfigs.getConfigurations();
 	}
 
 	private void validateProperties(String pid, ObjectClassDefinition ocd, Map<String, Object> updatedProps) throws KuraException {

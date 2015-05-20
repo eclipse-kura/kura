@@ -161,7 +161,7 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
 					}
 				},
 				1000, 1000);
-			} catch (IOException | KeyStoreException | NoSuchAlgorithmException | CertificateException e) {
+			} catch (Exception e) {
 				s_logger.warn("Keystore password change failed");
 			}
 		}

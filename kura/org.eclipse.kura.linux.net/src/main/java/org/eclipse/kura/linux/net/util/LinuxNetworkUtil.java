@@ -476,9 +476,9 @@ public class LinuxNetworkUtil {
 				}
 			} else if(ifaceType == NetInterfaceType.ETHERNET) {
 			    LinkTool linkTool = null;
-			    if (isToolExists("ethtool")) {
+			    if (toolExists("ethtool")) {
 			    	linkTool = new EthTool (ifaceName);
-			    } else if (isToolExists("mii-tool")) {
+			    } else if (toolExists("mii-tool")) {
 			    	linkTool = new MiiTool (ifaceName);
 			    }
 			    
@@ -499,7 +499,7 @@ public class LinuxNetworkUtil {
 		}
 	}
 	
-	public static boolean isToolExists(String tool) {
+	public static boolean toolExists(String tool) {
 		boolean ret = false;
 		String[] searchFolders = new String[]{"/sbin/", "/usr/sbin/", "/bin/"};
 		
@@ -1046,7 +1046,7 @@ public class LinuxNetworkUtil {
 		BufferedReader br2 = null;
 		String line = null;
 		try {
-			if (isToolExists("iw")) {
+			if (toolExists("iw")) {
 				procIw = ProcessUtil.exec("iw dev " + ifaceName + " info");
 				if (procIw.waitFor() != 0) {
 					s_logger.warn("error executing command --- iw --- exit value = {}", procIw.exitValue());
@@ -1070,7 +1070,7 @@ public class LinuxNetworkUtil {
 			}
 						
 			if (mode.equals(WifiMode.UNKNOWN)) {
-				if(isToolExists("iwconfig")) {
+				if(toolExists("iwconfig")) {
 					procIwConfig = ProcessUtil.exec("iwconfig " + ifaceName);
 					if (procIwConfig.waitFor() != 0) {
 						s_logger.error("error executing command --- iwconfig --- exit value = {}", procIwConfig.exitValue());

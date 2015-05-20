@@ -59,7 +59,7 @@ public class WifiOptions {
 		SafeProcess procIwConfig = null;
 		BufferedReader br = null;
 		try {
-			if (LinuxNetworkUtil.isToolExists("iw")) {
+			if (LinuxNetworkUtil.toolExists("iw")) {
 			    try {
 			    	procIw = ProcessUtil.exec("iw dev " + ifaceName + " info");
 			    } catch (Exception e) {
@@ -74,7 +74,7 @@ public class WifiOptions {
 			    }
 			}
 
-			if (LinuxNetworkUtil.isToolExists("iwconfig")) {
+			if (LinuxNetworkUtil.toolExists("iwconfig")) {
 				procIwConfig = ProcessUtil.exec("iwconfig " + ifaceName);
 				if (procIwConfig.waitFor() == 0) {
 					br = new BufferedReader(new InputStreamReader(procIwConfig.getInputStream()));

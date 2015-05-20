@@ -20,6 +20,7 @@ import java.io.File;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.linux.util.LinuxProcessUtil;
+import org.eclipse.kura.linux.net.util.LinuxNetworkUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,7 +30,22 @@ public class DhcpServerManager {
 	
 	private static final String FILE_DIR = "/etc/";
 	private static final String PID_FILE_DIR = "/var/run/";
+	private static DhcpServerTool dhcpServerTool = DhcpServerTool.NONE;
 	
+	static {
+		dhcpServerTool = getTool();
+	}
+	
+	public static DhcpServerTool getTool() {
+		if (dhcpServerTool == DhcpServerTool.NONE) {
+			if (LinuxNetworkUtil.toolExists("dhcpd")) {
+				dhcpServerTool = DhcpServerTool.DHCPD;
+			} else if (LinuxNetworkUtil.toolExists("udhcpd")) {
+				dhcpServerTool = DhcpServerTool.UDHCPD;
+			}
+		}
+		return dhcpServerTool;
+	}
 	
 	public static boolean isRunning(String interfaceName) throws KuraException {
 		try {
@@ -96,9 +112,12 @@ public class DhcpServerManager {
 	}
 
 	public static String getConfigFilename(String interfaceName) {
-	    StringBuffer sb = new StringBuffer(FILE_DIR);
-	    sb.append("dhcpd-").append(interfaceName).append(".conf");
-
+	    StringBuilder sb = new StringBuilder(FILE_DIR);
+	    if (dhcpServerTool == DhcpServerTool.DHCPD) {
+	    	sb.append("dhcpd-").append(interfaceName).append(".conf");
+	    } else if (dhcpServerTool == DhcpServerTool.UDHCPD) {
+	    	sb.append("udhcpd-").append(interfaceName).append(".conf");
+	    }
 		return sb.toString();
 	}
 	
@@ -109,18 +128,27 @@ public class DhcpServerManager {
 		}
 	}
 
-    private static String getPidFilename(String interfaceName) {
-        StringBuffer sb = new StringBuffer(PID_FILE_DIR);
-        sb.append("dhcpd-").append(interfaceName).append(".pid");
+    public static String getPidFilename(String interfaceName) {
+        StringBuilder sb = new StringBuilder(PID_FILE_DIR);
+        if (dhcpServerTool == DhcpServerTool.DHCPD) {
+        	sb.append("dhcpd-").append(interfaceName).append(".pid");
+        } else if (dhcpServerTool == DhcpServerTool.UDHCPD) {
+        	sb.append("udhcpd-").append(interfaceName).append(".pid");
+        }
 
         return sb.toString();
     }
 	
 	private static String formDhcpdCommand(String interfaceName) {
-		StringBuffer sb = new StringBuffer("dhcpd");
-		sb.append(" -cf ").append(DhcpServerManager.getConfigFilename(interfaceName));
-		sb.append(" -pf ").append(DhcpServerManager.getPidFilename(interfaceName));
-		
+		StringBuilder sb = new StringBuilder();
+		if (dhcpServerTool == DhcpServerTool.DHCPD) {
+			sb.append("dhcpd");
+			sb.append(" -cf ").append(DhcpServerManager.getConfigFilename(interfaceName));
+			sb.append(" -pf ").append(DhcpServerManager.getPidFilename(interfaceName));
+		} else if (dhcpServerTool == DhcpServerTool.UDHCPD) {
+			sb.append("udhcpd ");
+			sb.append(DhcpServerManager.getConfigFilename(interfaceName));
+		}
 		return sb.toString();
 	}
 }

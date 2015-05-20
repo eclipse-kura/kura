@@ -25,6 +25,9 @@ import org.eclipse.kura.core.net.EthernetInterfaceConfigImpl;
 import org.eclipse.kura.core.net.NetworkConfiguration;
 import org.eclipse.kura.core.net.NetworkConfigurationVisitor;
 import org.eclipse.kura.core.net.WifiInterfaceConfigImpl;
+import org.eclipse.kura.linux.net.dhcp.DhcpServerManager;
+import org.eclipse.kura.linux.net.dhcp.DhcpServerTool;
+import org.eclipse.kura.net.IPAddress;
 import org.eclipse.kura.net.NetConfig;
 import org.eclipse.kura.net.NetInterfaceAddressConfig;
 import org.eclipse.kura.net.NetInterfaceConfig;
@@ -38,7 +41,7 @@ public class DhcpConfigWriter implements NetworkConfigurationVisitor {
 	
 private static final Logger s_logger = LoggerFactory.getLogger(DhcpConfigWriter.class);
 	
-	private static final String FILE_DIR = "/etc/";
+	//private static final String FILE_DIR = "/etc/";
 	//private static final String PID_FILE_DIR = "/var/run/";
 	
 	private static DhcpConfigWriter s_instance;
@@ -63,10 +66,27 @@ private static final Logger s_logger = LoggerFactory.getLogger(DhcpConfigWriter.
 		}
 	}
 	
+	/*
+	private void writeConfig(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig) throws KuraException {
+		DhcpServerTool dhcpServerTool = DhcpServerManager.getTool();
+		if (dhcpServerTool == DhcpServerTool.DHCPD) {
+			 writeDhcpdConfig(netInterfaceConfig);
+		} else if (dhcpServerTool == DhcpServerTool.DHCPD) {
+			writeUdhcpdConfig(netInterfaceConfig);
+		}
+	}
+	*/
+	
 	private void writeConfig(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig) throws KuraException {
 		String interfaceName = netInterfaceConfig.getName();
+		
+		/*
 		String dhcpConfigFileName = new StringBuffer().append(FILE_DIR).append("dhcpd-").append(interfaceName).append(".conf").toString();
 		String tmpDhcpConfigFileName = new StringBuffer().append(FILE_DIR).append("dhcpd-").append(interfaceName).append(".conf").append(".tmp").toString();		
+		*/
+		String dhcpConfigFileName = DhcpServerManager.getConfigFilename(interfaceName);
+		String tmpDhcpConfigFileName = new StringBuilder(dhcpConfigFileName).append(".tmp").toString();
+		
 		s_logger.debug("Writing DHCP config for " + interfaceName);
 		
 		List<? extends NetInterfaceAddressConfig> netInterfaceAddressConfigs = netInterfaceConfig.getNetInterfaceAddresses();
@@ -79,18 +99,11 @@ private static final Logger s_logger = LoggerFactory.getLogger(DhcpConfigWriter.
 					for (NetConfig netConfig : netConfigs) {
 						if(netConfig instanceof DhcpServerConfig4) {
 							DhcpServerConfig4 dhcpServerConfig = (DhcpServerConfig4) netConfig;
-							FileOutputStream fos = null;
-							PrintWriter pw = null;
+							writeConfigFile(tmpDhcpConfigFileName, interfaceName, dhcpServerConfig);
+							//move the file if we made it this far and they are different
+							File tmpDhcpConfigFile = new File(tmpDhcpConfigFileName);
+							File dhcpConfigFile = new File(dhcpConfigFileName);
 							try {
-								fos = new FileOutputStream(tmpDhcpConfigFileName);
-								pw = new PrintWriter(fos);
-								s_logger.trace("writing to " + FILE_DIR + tmpDhcpConfigFileName + " with: " + dhcpServerConfig.toString());
-								pw.print(dhcpServerConfig.toString());				
-								pw.flush();
-								fos.getFD().sync();
-								//move the file if we made it this far and they are different
-								File tmpDhcpConfigFile = new File(tmpDhcpConfigFileName);
-								File dhcpConfigFile = new File(dhcpConfigFileName);
 								if(!FileUtils.contentEquals(tmpDhcpConfigFile, dhcpConfigFile)) {
 									if(tmpDhcpConfigFile.renameTo(dhcpConfigFile)) {
 										s_logger.trace("Successfully wrote DHCP config file");
@@ -101,28 +114,58 @@ private static final Logger s_logger = LoggerFactory.getLogger(DhcpConfigWriter.
 								} else {
 									s_logger.info("Not rewriting DHCP config file for " + interfaceName + " because it is the same");
 								}
-							} catch(IOException e) {
+							} catch (IOException e) {
 								throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR, "error while building up new configuration files for dhcp servers", e);
 							}
-							finally{
-								if(fos != null){
-									try{
-										fos.close();
-									}catch(IOException ex){
-										s_logger.warn("Error while closing FileOutputStream");
-									}
-								}
-								if(pw != null){
-									pw.close();
-								}
-							}
-							
 						}
 					}
 				}
 			}
 		}
-		
+	}
+	
+	private void writeConfigFile(String configFileName, String ifaceName, DhcpServerConfig4 dhcpServerConfig) throws KuraException {
+		FileOutputStream fos = null;
+		PrintWriter pw = null;
+		try {
+			fos = new FileOutputStream(configFileName);
+			pw = new PrintWriter(fos);
+			s_logger.trace("writing to {} with: {}", configFileName, dhcpServerConfig.toString());	
+			DhcpServerTool dhcpServerTool = DhcpServerManager.getTool();
+			if (dhcpServerTool == DhcpServerTool.DHCPD) {
+				pw.print(dhcpServerConfig.toString());
+			} else if (dhcpServerTool == DhcpServerTool.DHCPD) {
+				pw.println("start " + dhcpServerConfig.getRangeStart().getHostAddress());
+				pw.println("end " + dhcpServerConfig.getRangeEnd().getHostAddress());
+				pw.println("interface " + ifaceName);
+				pw.println("pidfile " + DhcpServerManager.getPidFilename(ifaceName));
+				pw.println("max_leases " + (ip2int(dhcpServerConfig.getRangeEnd()) - ip2int(dhcpServerConfig.getRangeStart())));
+				pw.println("auto_time 0");
+				pw.println("decline_time "	+ dhcpServerConfig.getDefaultLeaseTime());
+				pw.println("conflict_time " + dhcpServerConfig.getDefaultLeaseTime());
+				pw.println("offer_time " + dhcpServerConfig.getDefaultLeaseTime());
+				pw.println("min_lease " + dhcpServerConfig.getDefaultLeaseTime());
+				pw.println("opt subnet " + dhcpServerConfig.getSubnetMask().getHostAddress());
+				pw.println("opt router " + dhcpServerConfig.getRouterAddress().getHostAddress());
+				pw.println("opt lease " + dhcpServerConfig.getDefaultLeaseTime());
+			}
+			pw.flush();
+			fos.getFD().sync();
+		} catch(Exception e) {
+			throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR, "error while building up new configuration files for dhcp servers", e);
+		}
+		finally{
+			if(fos != null){
+				try{
+					fos.close();
+				}catch(IOException ex){
+					s_logger.warn("Error while closing FileOutputStream");
+				}
+			}
+			if(pw != null){
+				pw.close();
+			}
+		}
 	}
 	
 	private void writeKuraExtendedConfig(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig, Properties kuraExtendedProps) throws KuraException {
@@ -171,6 +214,15 @@ private static final Logger s_logger = LoggerFactory.getLogger(DhcpConfigWriter.
 				throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
 			}
 		}
+	}
+	
+	private int ip2int(IPAddress ip) {
+		int result = 0;
+		for (byte b: ip.getAddress())
+		{
+		    result = result << 8 | (b & 0xFF);
+		}
+		return result;
 	}
 
 }

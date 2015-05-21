@@ -4,7 +4,7 @@ Bundle-Name: org.eclipse.kura.core.crypto
 Bundle-SymbolicName: org.eclipse.kura.core.crypto;singleton:=true
 Bundle-Version: 1.0.2
 Bundle-Vendor: EUROTECH
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: org.eclipse.kura; version="[1.0,2.0)",
  org.eclipse.kura.crypto; version="[1.1,1.2)",
  javax.crypto,

@@ -1112,9 +1112,14 @@ public class WpaSupplicant {
 		try {
 			procChmod = ProcessUtil.exec("chmod 600 " + fileName);
 			procChmod.waitFor();
-
-			procDos = ProcessUtil.exec("dos2unix " + fileName);
-			procDos.waitFor();
+			if (LinuxNetworkUtil.toolExists("dos2unix")) {
+				try {
+					procDos = ProcessUtil.exec("dos2unix " + fileName);
+					procDos.waitFor();
+				} catch (Exception e) {
+					s_logger.warn("Failed to execute 'dos2unix {}' - {}", fileName, e);
+				}
+			} 
 		} catch (Exception e) {
 			throw KuraException.internalError(e);
 		}

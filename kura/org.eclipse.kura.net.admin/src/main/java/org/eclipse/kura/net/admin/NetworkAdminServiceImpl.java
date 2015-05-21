@@ -1170,7 +1170,7 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 				}
 		    }
 	    } catch(Throwable t) {
-	    	throw new KuraException(KuraErrorCode.INTERNAL_ERROR, t, "The 'iw scan' operation failed");
+	    	throw new KuraException(KuraErrorCode.INTERNAL_ERROR, t, "scan operation has failed");
 	    }
 	    
 	    return mWifiHotspotInfo;

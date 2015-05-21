@@ -32,6 +32,7 @@ import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.linux.util.LinuxProcessUtil;
 import org.eclipse.kura.core.util.ProcessUtil;
 import org.eclipse.kura.core.util.SafeProcess;
+import org.eclipse.kura.linux.net.util.LinuxNetworkUtil;
 import org.eclipse.kura.net.wifi.WifiRadioMode;
 import org.eclipse.kura.net.wifi.WifiSecurity;
 import org.slf4j.Logger;
@@ -825,9 +826,14 @@ public class Hostapd {
 		try {
 			procChmod = ProcessUtil.exec("chmod 600 " + fileName);
 			procChmod.waitFor();
-			
-			procDos = ProcessUtil.exec("dos2unix " + fileName);
-			procDos.waitFor();
+			if (LinuxNetworkUtil.toolExists("dos2unix")) {
+				try {
+					procDos = ProcessUtil.exec("dos2unix " + fileName);
+					procDos.waitFor();
+				} catch (Exception e) {
+					s_logger.warn("Failed to execute 'dos2unix {}' - {}", fileName, e);
+				}
+			}
 		} catch (Exception e) {
 			throw KuraException.internalError(e);
 		}

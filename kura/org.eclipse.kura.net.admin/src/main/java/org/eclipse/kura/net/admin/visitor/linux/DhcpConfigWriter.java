@@ -134,7 +134,7 @@ private static final Logger s_logger = LoggerFactory.getLogger(DhcpConfigWriter.
 			DhcpServerTool dhcpServerTool = DhcpServerManager.getTool();
 			if (dhcpServerTool == DhcpServerTool.DHCPD) {
 				pw.print(dhcpServerConfig.toString());
-			} else if (dhcpServerTool == DhcpServerTool.DHCPD) {
+			} else if (dhcpServerTool == DhcpServerTool.UDHCPD) {
 				pw.println("start " + dhcpServerConfig.getRangeStart().getHostAddress());
 				pw.println("end " + dhcpServerConfig.getRangeEnd().getHostAddress());
 				pw.println("interface " + ifaceName);

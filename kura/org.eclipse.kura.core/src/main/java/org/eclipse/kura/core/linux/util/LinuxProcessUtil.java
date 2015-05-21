@@ -25,7 +25,6 @@ import java.util.StringTokenizer;
 
 import org.eclipse.kura.core.util.ProcessUtil;
 import org.eclipse.kura.core.util.SafeProcess;
-import org.eclipse.kura.core.linux.util.ProcessStats;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,6 +32,8 @@ public class LinuxProcessUtil {
 
 	private static final Logger s_logger = LoggerFactory
 			.getLogger(LinuxProcessUtil.class);
+	
+	private static final String OS_VERSION = System.getProperty("kura.os.version");
 
 	public static int start(String command, boolean wait, boolean background)
 			throws Exception {
@@ -155,8 +156,12 @@ public class LinuxProcessUtil {
 
 			if (command != null && !command.isEmpty()) {
 				s_logger.trace("searching process list for " + command);
-				proc = ProcessUtil.exec("ps -ax");
 				
+				if (OS_VERSION.equals(KuraConstants.Intel_Edison.getImageName() + "_" + KuraConstants.Intel_Edison.getImageVersion() + "_" + KuraConstants.Intel_Edison.getTargetName())) {
+					proc = ProcessUtil.exec("ps");
+				} else {
+					proc = ProcessUtil.exec("ps -ax");
+				}
 				proc.waitFor();
 
 				// get the output
@@ -171,7 +176,6 @@ public class LinuxProcessUtil {
 					// get the remainder of the line showing the command that
 					// was issued
 					line = line.substring(line.indexOf(st.nextToken()));
-
 					// see if the line has our command
 					if (line.indexOf(command) >= 0) {
 						s_logger.trace("found pid " + pid + " for command: "

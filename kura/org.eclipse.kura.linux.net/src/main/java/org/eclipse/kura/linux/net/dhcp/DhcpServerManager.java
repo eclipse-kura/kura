@@ -84,7 +84,8 @@ public class DhcpServerManager {
 	}
 
 	public static boolean disable(String interfaceName) throws KuraException {
-        s_logger.debug("Disable DHCP server for " + interfaceName);
+		
+        s_logger.debug("Disable DHCP server for {}", interfaceName);
 
 		try {
 			// Check if dhcpd is running

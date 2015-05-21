@@ -14,7 +14,7 @@ package org.eclipse.kura.linux.net.modem;
 import java.util.Arrays;
 import java.util.List;
 
-import org.eclipse.kura.linux.net.util.KuraConstants;
+import org.eclipse.kura.core.linux.util.KuraConstants;
 import org.eclipse.kura.net.modem.ModemTechnologyType;
 
 public enum SupportedSerialModemInfo {

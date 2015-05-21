@@ -34,9 +34,9 @@ import java.util.StringTokenizer;
 import org.apache.commons.io.FileUtils;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.core.linux.util.KuraConstants;
 import org.eclipse.kura.core.util.ProcessUtil;
 import org.eclipse.kura.core.util.SafeProcess;
-import org.eclipse.kura.linux.net.util.KuraConstants;
 import org.eclipse.kura.net.IPAddress;
 import org.eclipse.kura.net.NetworkPair;
 import org.slf4j.Logger;
@@ -976,7 +976,8 @@ public class LinuxFirewall {
 	private void iptablesSave() throws KuraException {
 		SafeProcess proc = null;
 		try {
-			if (OS_VERSION.equals(KuraConstants.Mini_Gateway.getImageName() + "_" + KuraConstants.Mini_Gateway.getImageVersion())) {
+			if (OS_VERSION.equals(KuraConstants.Mini_Gateway.getImageName() + "_" + KuraConstants.Mini_Gateway.getImageVersion()) ||
+				(OS_VERSION.equals(KuraConstants.Intel_Edison.getImageName() + "_" + KuraConstants.Intel_Edison.getImageVersion() + "_" + KuraConstants.Intel_Edison.getTargetName()))) {
 				proc = ProcessUtil.exec("iptables-save > /opt/eurotech/firewall_rules.fw");
 				proc.waitFor();
 			} else {

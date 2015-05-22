@@ -252,11 +252,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 		for (String pid : allPids) {
 			try {
 				cc = null;
-				if (!m_selfConfigComponents.contains(pid)) {
-					cc = getConfigurableComponentConfiguration(pid);
-				} else {
-					cc = getSelfConfiguringComponentConfiguration(pid);
-				}
+				cc= getComponentConfiguration(pid);
 				if (cc != null) {
 					configs.add(cc);
 				}
@@ -276,6 +272,8 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 		} else {
 			cc = getSelfConfiguringComponentConfiguration(pid);
 		}
+		
+		decryptPasswords(cc);
 		return cc;
 	}
 
@@ -468,16 +466,18 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 		
 		// merge the current configs with those in the latest snapshot
 		List<ComponentConfigurationImpl> snapshotConfigs = loadLatestSnapshotConfigurations();
-		for (ComponentConfigurationImpl snapshotConfig : snapshotConfigs) {
-			boolean found = false;
-			for (ComponentConfiguration config : configs) {
-				if (config.getPid().equals(snapshotConfig.getPid())) {
-					found = true;
-					break;
+		if(snapshotConfigs != null){
+			for (ComponentConfigurationImpl snapshotConfig : snapshotConfigs) {
+				boolean found = false;
+				for (ComponentConfiguration config : configs) {
+					if (config.getPid().equals(snapshotConfig.getPid())) {
+						found = true;
+						break;
+					}
 				}
-			}
-			if (!found) {
-				configs.add(snapshotConfig);
+				if (!found) {
+					configs.add(snapshotConfig);
+				}
 			}
 		}
 		
@@ -491,6 +491,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 		for (ComponentConfiguration config : configsToUpdate) {
 			if (config != null) {
 				try {
+					encryptPasswords(config);
 					updateConfigurationInternal(config.getPid(), config.getConfigurationProperties(), snapshotOnConfirmation);
 				} catch (KuraException e) {
 					s_logger.warn("Error during updateConfigurations for component " + config.getPid(), e);
@@ -615,7 +616,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 				s_logger.info("Snapshot on EventAdmin configuration will be taken for {}.", pid);
 			}
 
-			encryptPasswords(mergedProperties);
+			
 			// Update the new properties
 			// use ConfigurationAdmin to do the update
 			Configuration config = m_configurationAdmin.getConfiguration(pid);
@@ -695,22 +696,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 
 	private void encryptPasswords(ComponentConfiguration config){
 		Map<String, Object> propertiesToUpdate = config.getConfigurationProperties();
-
-		Iterator<String> keys = propertiesToUpdate.keySet().iterator();
-		while (keys.hasNext()) {
-			String key = keys.next();
-			Object value = propertiesToUpdate.get(key);
-			if (value != null) {
-				if (value instanceof Password) {
-					try {
-						propertiesToUpdate.put(key, new Password(m_cryptoService.encryptAes(value.toString())));
-					} catch (Exception e) {
-						s_logger.warn("Failed to encrypt Password property: {}", key);
-						propertiesToUpdate.remove(key);
-					}
-				}
-			}
-		}
+		encryptPasswords(propertiesToUpdate);
 	}
 	
 	private void encryptPasswords(Map<String, Object> propertiesToUpdate){
@@ -920,27 +906,8 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 
 			Configuration cfg = m_configurationAdmin.getConfiguration(pid);
 			Map<String, Object> props = CollectionsUtil.dictionaryToMap(cfg.getProperties(), ocd);
-			Map<String, Object> decryptedProperties = new HashMap<String, Object>();
 
-			Iterator<String> keys = props.keySet().iterator();
-			while (keys.hasNext()) {
-				String key = keys.next();
-				Object value = props.get(key);
-				if (value != null) {
-					if (value instanceof Password) {
-						try {
-							Password decryptedPassword = new Password(m_cryptoService.decryptAes(value.toString().toCharArray()));
-							decryptedProperties.put(key, decryptedPassword);
-						} catch (Exception e) {
-							decryptedProperties.put(key, value);
-						}
-					} else {
-						decryptedProperties.put(key, value);
-					}
-				}
-			}
-
-			cc = new ComponentConfigurationImpl(pid, ocd, decryptedProperties); // props
+			cc = new ComponentConfigurationImpl(pid, ocd, props); 
 		} catch (Exception e) {
 			s_logger.error("Error getting Configuration for component: " + pid + ". Ignoring it.", e);
 		}
@@ -1101,6 +1068,9 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 		//
 		// save away initial configuration
 		List<ComponentConfigurationImpl> configs = loadLatestSnapshotConfigurations();
+		if(configs == null){
+			return;
+		}
 		for (ComponentConfigurationImpl config : configs) {
 			if (config != null) {
 				Configuration cfg;

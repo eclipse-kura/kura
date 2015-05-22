@@ -42,7 +42,7 @@ public class GwtCertificatesServiceImpl extends OsgiRemoteServiceServlet impleme
 	private static final long serialVersionUID = 7402961266449489433L;
 
 
-	public Integer storePrivateSSLCertificate(String privateCert, String publicCert, String password)
+	public Integer storePrivateSSLCertificate(String privateCert, String publicCert, String password, String alias)
 			throws GwtKuraException {
 		try {
 	    	// Remove header if exists
@@ -50,8 +50,8 @@ public class GwtCertificatesServiceImpl extends OsgiRemoteServiceServlet impleme
 	        key = key.replace("-----END PRIVATE KEY-----", "");
 	    	
 	        CryptoService cryptoService = ServiceLocator.getInstance().getService(CryptoService.class);
-	        byte[] conversion= cryptoService.decodeBase64(key).getBytes("UTF-8");
 	        
+	        byte[] conversion= cryptoService.decodeBase64(key).getBytes("UTF-8");
 	        // Parse Base64 - after PKCS8
 	        PKCS8EncodedKeySpec specPriv = new PKCS8EncodedKeySpec(conversion);
 		    
@@ -63,15 +63,12 @@ public class GwtCertificatesServiceImpl extends OsgiRemoteServiceServlet impleme
 			Collection<? extends Certificate> publicCertificates= certFactory.generateCertificates(new ByteArrayInputStream(publicCert.getBytes("UTF-8")));
 			
 			Certificate[] certs= parsePublicCertificates(publicCertificates);
-			
-			X509Certificate sslCert= (X509Certificate) certs[0];
-			String sslCertificateAlias= "ssl-"+sslCert.getSerialNumber().toString();
 
 			if(privKey == null){
 				throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT);
 			}else{
 				SslManagerService sslService = ServiceLocator.getInstance().getService(SslManagerService.class);
-				sslService.installPrivateKey(sslCertificateAlias, privKey, password.toCharArray(), certs);
+				sslService.installPrivateKey(alias, privKey, password.toCharArray(), certs);
 			}
 			return 1;
 		} catch (UnsupportedEncodingException e) {
@@ -84,7 +81,7 @@ public class GwtCertificatesServiceImpl extends OsgiRemoteServiceServlet impleme
 	}
 
 
-	public Integer storePublicSSLCertificate(String publicCert)
+	public Integer storePublicSSLCertificate(String publicCert, String alias)
 			throws GwtKuraException {
 		try {
 			CertificateFactory certFactory= CertificateFactory.getInstance("X.509");
@@ -98,8 +95,8 @@ public class GwtCertificatesServiceImpl extends OsgiRemoteServiceServlet impleme
 				int i= 0;
 				SslManagerService sslService = ServiceLocator.getInstance().getService(SslManagerService.class);
 				X509Certificate sslCert= (X509Certificate) certs[i];
-				String sslCertificateAlias= "ssl-"+sslCert.getSerialNumber().toString();
-				sslService.installTrustCertificate(sslCertificateAlias, sslCert);
+				
+				sslService.installTrustCertificate(alias, sslCert);
 				i++;
 				
 				while(i < certs.length){

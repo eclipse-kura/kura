@@ -174,9 +174,10 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
 		decryptProperties(properties);
 
 		char[] oldPassword = m_cryptoService.getKeyStorePassword(m_options.getSslTrustStore());
+		char[] newPassword = null;
 		try {
 
-			char[] newPassword= (char[]) m_properties.get(SslManagerServiceOptions.PROP_TRUST_PASSWORD);
+			newPassword= (char[]) m_properties.get(SslManagerServiceOptions.PROP_TRUST_PASSWORD);
 			
 			if (newPassword == null) {
 				// FIXME: rolling back to snapshot_0 would require a configuration update to save
@@ -194,7 +195,11 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
 				changeSSLKeystorePassword(newPassword, newPassword);
 			}
 		} catch (Exception e) {
-			s_logger.info("Problem managing SSL keystore");
+			if(newPassword != null && verifyEnvironmentProperties(newPassword)){
+				s_logger.warn("Keystore accessible, but the system is not able to manage its password");
+			} else {
+				s_logger.warn("The SSL keystore is completely unaccessible. Please verify your data.");
+			}
 		}
 
 		// Update properties and re-publish Birth certificate
@@ -583,7 +588,13 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
 
 	private char[] getKeyStorePassword() throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, IOException 
 	{
-		return m_cryptoService.getKeyStorePassword(m_options.getSslTrustStore());
+		char[] password= null;
+		try{ 
+			password = (char[]) m_properties.get(SslManagerServiceOptions.PROP_TRUST_PASSWORD);
+		} catch (Exception e){
+			password = new char[0];
+		}
+		return password;
 	}
 
 	private boolean verifyEnvironmentProperties(char[] newPassword){

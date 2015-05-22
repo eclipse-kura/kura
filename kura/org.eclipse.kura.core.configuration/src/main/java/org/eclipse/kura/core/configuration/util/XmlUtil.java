@@ -136,7 +136,7 @@ public class XmlUtil
 							valEvent.getLocator().getLineNumber(),
 							valEvent.getLocator().getColumnNumber(),
 							valEvent.getLinkedException().getMessage());
-					throw new UnmarshalException(msg, valEvent.getLinkedException());							
+					throw new UnmarshalException(msg, valEvent.getLinkedException());
 				}
 			}
 		}

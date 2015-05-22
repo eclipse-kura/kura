@@ -56,6 +56,7 @@ public class CertificatesTab extends LayoutContainer {
 	private TextArea			m_publicCertificate;
 	private TextArea			m_privateCertificate;
 	private TextField<String>	m_storagePassword;
+	private TextField<String>   m_storageAlias;
 
 	private Button				m_executeButton;
 	private Button				m_resetButton;
@@ -99,7 +100,7 @@ public class CertificatesTab extends LayoutContainer {
 		m_formPanel.addListener(Events.Submit, new Listener<FormEvent>() {
 			public void handleEvent(FormEvent be) {
 				if(m_privateCertificate.getValue() != null && m_privateCertificate.getValue() != ""){
-					gwtCertificatesService.storePrivateSSLCertificate(m_privateCertificate.getValue(), m_publicCertificate.getValue(), m_storagePassword.getValue(), new AsyncCallback<Integer>() {
+					gwtCertificatesService.storePrivateSSLCertificate(m_privateCertificate.getValue(), m_publicCertificate.getValue(), m_storagePassword.getValue(), m_storageAlias.getValue(), new AsyncCallback<Integer>() {
 						public void onFailure(Throwable caught) {
 							if(caught.getLocalizedMessage().equals(GwtKuraErrorCode.ILLEGAL_ARGUMENT.toString())){
 								Info.display(MSGS.error(), "Error while storing the private certificate in the key store");
@@ -113,12 +114,13 @@ public class CertificatesTab extends LayoutContainer {
 							m_publicCertificate.clear();
 							m_privateCertificate.clear();
 							m_storagePassword.clear();
+							m_storageAlias.clear();
 							Info.display(MSGS.info(), "Storage success. Stored private and public certificates.");
 							m_commandInput.unmask();
 						}
 					});
 				}else{
-					gwtCertificatesService.storePublicSSLCertificate(m_publicCertificate.getValue(), new AsyncCallback<Integer>() {
+					gwtCertificatesService.storePublicSSLCertificate(m_publicCertificate.getValue(), m_storageAlias.getValue(), new AsyncCallback<Integer>() {
 						public void onFailure(Throwable caught) {
 							if(caught.getLocalizedMessage().equals(GwtKuraErrorCode.ILLEGAL_ARGUMENT.toString())){
 								Info.display(MSGS.error(), "Error while storing the public certificate(s) in the key store");
@@ -130,7 +132,8 @@ public class CertificatesTab extends LayoutContainer {
 
 						public void onSuccess(Integer certsStored) {
 							m_publicCertificate.clear();
-
+							m_storagePassword.clear();
+							m_storageAlias.clear();
 							Info.display(MSGS.info(), "Storage success. Stored " + certsStored + " public certificate(s).");
 							m_commandInput.unmask();
 						}
@@ -188,6 +191,17 @@ public class CertificatesTab extends LayoutContainer {
 		m_publicCertificate.setAllowBlank(false);
 		m_publicCertificate.setFieldLabel(MSGS.settingsPublicCertLabel());
 		m_formPanel.add(m_publicCertificate, formData);
+		
+		//
+		//
+		//
+		m_storageAlias = new TextField<String>();
+		m_storageAlias.setName(MSGS.settingsStorageAliasLabel());
+		m_storageAlias.setPassword(true);
+		m_storageAlias.setAllowBlank(false);
+		m_storageAlias.setEmptyText("* " + MSGS.settingsStorageAliasLabel());
+		m_storageAlias.setFieldLabel(MSGS.settingsStorageAliasLabel());
+		m_formPanel.add(m_storageAlias, new FormData("95%"));
 
 
 

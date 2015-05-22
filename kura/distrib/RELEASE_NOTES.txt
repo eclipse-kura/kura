@@ -30,7 +30,8 @@ Bug Fixes:
 
 Known Issues:
    * BLE only tested on the Raspberry Pi B with a Broadcom BCM20702 USB dongle and the TI SensorTag.
-     TODO: BlueZ requirements  
+     The only working version of BlueZ is 4.101. The deb package is not available from Raspbian so it
+     must be compiled from sources).
    * The reference JVM is Oracle Java SE Embedded version 7 Update 40.
      Later versions (including Oracle Java SE Embedded version 8 Update 33)
      may be affected by a ProcessBuilder memory leak [1]  

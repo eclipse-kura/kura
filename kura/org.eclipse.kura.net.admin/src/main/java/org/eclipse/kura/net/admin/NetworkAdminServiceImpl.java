@@ -27,13 +27,13 @@ import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.configuration.SelfConfiguringComponent;
-import org.eclipse.kura.core.linux.util.LinuxProcessUtil;
 import org.eclipse.kura.core.net.AbstractNetInterface;
 import org.eclipse.kura.core.net.NetInterfaceAddressConfigImpl;
 import org.eclipse.kura.core.net.NetworkConfiguration;
 import org.eclipse.kura.core.net.WifiInterfaceAddressConfigImpl;
 import org.eclipse.kura.core.net.modem.ModemInterfaceAddressConfigImpl;
 import org.eclipse.kura.core.net.modem.ModemInterfaceConfigImpl;
+import org.eclipse.kura.linux.net.dhcp.DhcpClientManager;
 import org.eclipse.kura.linux.net.dhcp.DhcpServerManager;
 import org.eclipse.kura.linux.net.dns.LinuxNamed;
 import org.eclipse.kura.linux.net.iptables.LinuxFirewall;
@@ -808,6 +808,10 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 				}
 			} else {
 				s_logger.info("not bringing interface {} up because it is already up", interfaceName);
+				if (dhcp) {
+					s_logger.warn("<IAB> [+] enableInterface() - {} :: but renewing DHCP lease ... :-)", interfaceName);
+					renewDhcpLease(interfaceName);
+				}
 			}
 		} catch(Exception e) {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
@@ -846,6 +850,7 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 	public void manageDhcpClient(String interfaceName, boolean enable) throws KuraException {
 		
 		try {
+			/*
 			int pid = LinuxProcessUtil.getPid(formDhclientCommand(interfaceName, false));
 			if (pid > -1) {
 				s_logger.debug("manageDhcpClient() :: killing {}", formDhclientCommand(interfaceName, false));
@@ -857,6 +862,8 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 					LinuxProcessUtil.kill(pid);
 				}
 			}
+			*/
+			DhcpClientManager.disable(interfaceName);
 			if (enable) {
 				this.renewDhcpLease(interfaceName);
 			}
@@ -875,12 +882,17 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 	
 	public void renewDhcpLease(String interfaceName) throws KuraException {
 		
+		DhcpClientManager.releaseCurrentLease(interfaceName);
+		DhcpClientManager.enable(interfaceName);
+
+		/*
 		try {
 			LinuxProcessUtil.start("dhclient -r " + interfaceName + "\n", true);
 			LinuxProcessUtil.start("dhclient " + interfaceName + "\n", true);
 		} catch (Exception e) {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
 		}
+		*/
 	}
 	
 	public void manageFirewall (String gatewayIface) throws KuraException {
@@ -1367,6 +1379,7 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 		return channel;
 	}
 	
+	/*
 	private static String formDhclientCommand(String interfaceName, boolean usePidFile) {
 		StringBuffer sb = new StringBuffer();
 		sb.append("dhclient ");
@@ -1378,4 +1391,5 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 		sb.append(interfaceName);
 		return sb.toString();
 	}
+	*/
 }

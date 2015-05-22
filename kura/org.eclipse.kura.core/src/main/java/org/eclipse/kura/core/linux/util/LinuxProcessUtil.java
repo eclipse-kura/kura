@@ -194,6 +194,61 @@ public class LinuxProcessUtil {
 			if (proc != null) ProcessUtil.destroy(proc);
 		}
 	}
+	
+	public static int getPid(String command, String [] tokens) throws Exception {
+		StringTokenizer st = null;
+		String line = null;
+		String pid = null;
+		SafeProcess proc = null;
+		try {
+			if(command != null && !command.isEmpty()) {
+    			s_logger.trace("searching process list for " + command);
+    			if (OS_VERSION.equals(KuraConstants.Intel_Edison.getImageName() + "_" + KuraConstants.Intel_Edison.getImageVersion() + "_" + KuraConstants.Intel_Edison.getTargetName())) {
+					proc = ProcessUtil.exec("ps");
+				} else {
+					proc = ProcessUtil.exec("ps -ax");
+				}
+				proc.waitFor();
+    
+    			//get the output
+    			BufferedReader br = new BufferedReader( new InputStreamReader(proc.getInputStream()));
+    			while ((line = br.readLine()) != null) {
+    				st = new StringTokenizer(line);
+    				pid = st.nextToken();
+    				st.nextElement();
+    				st.nextElement();
+    				st.nextElement();
+    				
+    				//get the remainder of the line showing the command that was issued
+    				line = line.substring(line.indexOf(st.nextToken()));
+    				s_logger.warn("<IAB> getPid() :: line={}", line);
+    				
+    				//see if the line has our command
+    				if(line.indexOf(command) >= 0) {
+    					boolean allTokensPresent = true;
+    					for (String token : tokens) {
+    						if (!line.contains(token)) {
+    							allTokensPresent = false;
+    							break;
+    						}
+    					}
+    					if (allTokensPresent) {
+    						s_logger.trace("found pid " + pid + " for command: " + command);
+    						return Integer.parseInt(pid);
+    					}
+    				}
+    			}
+			}
+
+			return -1;
+		} catch(Exception e) {
+			throw e;
+		}
+		finally {
+			ProcessUtil.destroy(proc);
+		}
+	}
+
 
 	public static int getKuraPid() throws Exception {
 

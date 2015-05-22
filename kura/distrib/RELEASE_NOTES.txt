@@ -2,7 +2,16 @@ Eclipse Kura - 1.2.0
 -------------------------------------------------------------------------
 
 Added Features:
-   * TODO: Security support
+   * Added support for securing Kura
+     * Revised org.eclipse.kura.crypto API.
+     * New org.eclipse.kura.certificate API to enable validation of
+       signed requests from the cloud.
+     * Minimal implementation of the org.eclipse.kura.crypto API.
+     * Implementation of the org.eclipse.kura.certificate API.
+     * Encryption of passwords in snapshot files.
+     * Snapshot encryption.
+     * Improved management and security of the keystore used for the MQTT
+       SSL connection.
    * Added support for the Raspberry Pi B+ and the Raspberry Pi 2. 
    * Added support for Bluetooth Low Energy (see Known Issues section below).
      * API: org.eclipse.kura.bluetooth

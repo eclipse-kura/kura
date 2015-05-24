@@ -221,7 +221,6 @@ public class LinuxProcessUtil {
     				
     				//get the remainder of the line showing the command that was issued
     				line = line.substring(line.indexOf(st.nextToken()));
-    				s_logger.warn("<IAB> getPid() :: line={}", line);
     				
     				//see if the line has our command
     				if(line.indexOf(command) >= 0) {

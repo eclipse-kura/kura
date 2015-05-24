@@ -809,7 +809,6 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 			} else {
 				s_logger.info("not bringing interface {} up because it is already up", interfaceName);
 				if (dhcp) {
-					s_logger.warn("<IAB> [+] enableInterface() - {} :: but renewing DHCP lease ... :-)", interfaceName);
 					renewDhcpLease(interfaceName);
 				}
 			}

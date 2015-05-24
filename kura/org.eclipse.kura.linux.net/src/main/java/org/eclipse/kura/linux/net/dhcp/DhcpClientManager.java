@@ -122,31 +122,39 @@ public class DhcpClientManager {
 			sb.append("dhclient ");
 			if (useLeasesFile) {
 				sb.append(formLeasesOption(interfaceName));
+				sb.append(' ');
 			}
 			if (usePidFile) {
 				sb.append(getPidFilename(interfaceName));
+				sb.append(' ');
 			} 
-			sb.append(' ');
 			sb.append(interfaceName);
-			sb.append("\n");
 		} else if (dhcpClientTool == DhcpClientTool.UDHCPC) {
 			sb.append("udhcpc ");
 			sb.append("-i ");
 			sb.append(interfaceName);
+			sb.append(' ');
 			if (usePidFile) {
 				sb.append(getPidFilename(interfaceName));
+				sb.append(' ');
 			}
-			sb.append(' ');
 			sb.append(" -S");
 		}
+		sb.append("\n");
 		return sb.toString();
 	}
 	
 	private static String formReleaseCurrentLeaseCommand(String interfaceName) {
 		
-		StringBuffer sb = new StringBuffer();
-		sb.append("dhclient -r ");
-		sb.append(interfaceName);
+		StringBuilder sb = new StringBuilder();
+		if (dhcpClientTool == DhcpClientTool.DHCLIENT) {
+			sb.append("dhclient -r ");
+			sb.append(interfaceName);
+		} else if (dhcpClientTool == DhcpClientTool.UDHCPC) {
+			sb.append("udhcpc -R ");
+			sb.append("-i ");
+			sb.append(interfaceName);
+		}
 		sb.append("\n");
 		return sb.toString();
 	}

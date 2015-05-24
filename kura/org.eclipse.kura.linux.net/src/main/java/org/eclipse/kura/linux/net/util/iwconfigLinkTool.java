@@ -82,6 +82,8 @@ public class iwconfigLinkTool implements LinkTool {
                      }
 	        	 }
 	         }
+	         
+	         return true;
     	} catch (Exception e) {
     		throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
     	} finally {
@@ -95,7 +97,6 @@ public class iwconfigLinkTool implements LinkTool {
 
 			if (proc != null) ProcessUtil.destroy(proc);
     	}
-    	return false;
     }
 
     @Override

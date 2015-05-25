@@ -151,12 +151,6 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 	protected void activate(ComponentContext componentContext, Map<String, Object> properties) {
 		s_logger.info("Activating...");
 		
-		Iterator<String> kkeys = properties.keySet().iterator();
-		while (kkeys.hasNext()) {
-			String key = kkeys.next();
-			s_logger.info("{}: {}", key, properties.get(key));
-		}
-
 		// We need to catch the configuration exception and activate anyway.
 		// Otherwise the ConfigurationService will not be able to track us.
 		HashMap<String, Object> decryptedPropertiesMap = new HashMap<String, Object>();
@@ -218,12 +212,6 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 	public void updated(Map<String, Object> properties) {
 		s_logger.info("Updating...");
 		
-		Iterator<String> kkeys = properties.keySet().iterator();
-		while (kkeys.hasNext()) {
-			String key = kkeys.next();
-			s_logger.info("{}: {}", key, properties.get(key));
-		}
-
 		m_properties.clear();
 
 		HashMap<String, Object> decryptedPropertiesMap = new HashMap<String, Object>();

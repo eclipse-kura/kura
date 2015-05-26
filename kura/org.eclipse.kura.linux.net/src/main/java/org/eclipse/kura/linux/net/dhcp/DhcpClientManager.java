@@ -50,12 +50,14 @@ public class DhcpClientManager {
 	
 	public static boolean enable(String interfaceName) throws KuraException {
 		try {
-			int sysPid = LinuxProcessUtil.getPid("dhclient", new String[]{interfaceName});
-			int esfPid = LinuxProcessUtil.getPid("dhclient", new String[]{interfaceName, formLeasesOption(interfaceName)});
-			if ((sysPid > -1) && (esfPid != sysPid)) {
-				LinuxProcessUtil.kill(sysPid);
+			int pid = -1;
+			if (dhcpClientTool == DhcpClientTool.DHCLIENT) {
+				pid = LinuxProcessUtil.getPid("dhclient", new String[]{interfaceName});
+			} else if (dhcpClientTool == DhcpClientTool.UDHCPC) {
+				pid = LinuxProcessUtil.getPid("udhcpc", new String[]{interfaceName});
 			}
-			if (esfPid < 0) {
+			
+			if (pid < 0) {
 				LinuxProcessUtil.start(formCommand(interfaceName, true, true), true);
 			}
 			
@@ -69,11 +71,15 @@ public class DhcpClientManager {
 	public static boolean disable(String interfaceName) throws KuraException {
 		
 		String [] tokens = {interfaceName};
-		int pid;
+		int pid = -1;
 		try {
-			pid = LinuxProcessUtil.getPid("dhclient", tokens);
+			if (dhcpClientTool == DhcpClientTool.DHCLIENT) {
+				pid = LinuxProcessUtil.getPid("dhclient", tokens);
+			} else if (dhcpClientTool == DhcpClientTool.UDHCPC) {
+				pid = LinuxProcessUtil.getPid("udhcpc", tokens);
+			}
 			if (pid > -1) {
-				s_logger.debug("manageDhcpClient() :: killing dhclient for {}", interfaceName);
+				s_logger.debug("manageDhcpClient() :: killing DHCP client for {}", interfaceName);
 				if(LinuxProcessUtil.kill(pid)) {
 					removePidFile(interfaceName);
 				} else {

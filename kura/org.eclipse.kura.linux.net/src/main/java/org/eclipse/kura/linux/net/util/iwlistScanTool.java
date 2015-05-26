@@ -134,7 +134,7 @@ public class iwlistScanTool implements IScanTool {
 				} catch (InterruptedException e) {
 					s_logger.warn("Interrupted " + e);
 				}
-				s_logger.info("scan() :: 'iw scan' thread terminated? - {}" +  m_executor.isTerminated());
+				s_logger.info("scan() :: 'iw scan' thread terminated? - {}", m_executor.isTerminated());
 				m_executor = null;
 			}
 		}

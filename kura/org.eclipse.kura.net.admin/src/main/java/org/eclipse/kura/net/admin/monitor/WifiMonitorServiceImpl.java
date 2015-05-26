@@ -785,7 +785,7 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
 				for (WifiAccessPoint wap : wifiAccessPoints) {
 					if (ssid.equals(wap.getSSID())) {
 						s_logger.trace("isAccessPointAvailable() :: SSID={} is available :: strength={}", ssid, wap.getStrength());
-						available = wap.getStrength() > 0;
+						available = Math.abs(wap.getStrength()) > 0;
 						break;
 					}
 				}

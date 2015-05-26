@@ -1158,11 +1158,13 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 			    	
 			    	if (wifiSecurity == WifiSecurity.NONE) {
 			    		List<String> capabilities = wap.getCapabilities();
-			    		for (String capab : capabilities) {
-			    			if (capab.equals("Privacy")) {
-			    				wifiSecurity = WifiSecurity.SECURITY_WEP;
-			    				break;
-			    			}
+			    		if ((capabilities != null) && (capabilities.size() > 0)) {
+				    		for (String capab : capabilities) {
+				    			if (capab.equals("Privacy")) {
+				    				wifiSecurity = WifiSecurity.SECURITY_WEP;
+				    				break;
+				    			}
+				    		}
 			    		}
 			    	}
 			    	

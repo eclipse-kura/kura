@@ -159,6 +159,9 @@ public class ServiceTree extends ContentPanel
 			public AbstractImagePrototype getIcon(ModelData model) {
 				if (model.get("componentIcon") != null) {										
 					String icon = (String) model.get("componentIcon");
+					if ("BluetoothService".equals(icon)){
+						return AbstractImagePrototype.create(Resources.INSTANCE.bluetooth32());
+					}
             		if ("CloudService".equals(icon)) {
             			return AbstractImagePrototype.create(Resources.INSTANCE.cloud32());
             		}

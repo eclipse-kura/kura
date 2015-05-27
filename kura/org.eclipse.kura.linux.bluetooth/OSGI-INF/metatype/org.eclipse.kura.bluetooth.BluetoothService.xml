@@ -16,7 +16,7 @@
          name="BluetoothService" 
          description="Bluetooth Service for Eclipse Kura.">
         
-        
+        <Icon resource="BluetoothService" size="32"/>
         
         <AD id="iname"
             name="iname"

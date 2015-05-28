@@ -133,6 +133,13 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
 		m_sslServiceListeners = new SslServiceListeners(listenersTracker);
 
 		decryptProperties(properties);
+		
+		File f = new File(m_options.getSslTrustStore());
+		String defaultTrustStoreLocation= m_options.getPropDefaultTrustStore();
+		if(!f.exists() && !f.isDirectory() && !m_options.getSslTrustStore().equals(defaultTrustStoreLocation)) {
+			s_logger.info("Upgrade process: keystore reference needs to be updated...");
+			m_properties.put(m_options.getPropTrustStore(), defaultTrustStoreLocation);
+		}
 
 		char[] keystorePassword= m_cryptoService.getKeyStorePassword(m_options.getSslTrustStore());
 
@@ -142,7 +149,7 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
 
 			try {
 				changeSSLKeystorePassword(keystorePassword, randomValue.toCharArray());
-				m_properties.put(SslManagerServiceOptions.PROP_TRUST_PASSWORD, new Password(randomValue.toCharArray()));
+				m_properties.put(m_options.getPropTrustPassword(), new Password(randomValue.toCharArray()));
 
 				final String pid = (String) properties.get(APP_PID);
 				m_timer.scheduleAtFixedRate(new TimerTask() {
@@ -177,14 +184,14 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
 		char[] newPassword = null;
 		try {
 
-			newPassword= (char[]) m_properties.get(SslManagerServiceOptions.PROP_TRUST_PASSWORD);
+			newPassword= (char[]) m_properties.get(m_options.getPropTrustPassword());
 			
 			if (newPassword == null) {
 				// FIXME: rolling back to snapshot_0 would require a configuration update to save
 				// the old password. We prefer to not call the updateConfiguration method from this
 				// method.
 				newPassword = oldPassword;
-				m_properties.put(SslManagerServiceOptions.PROP_TRUST_PASSWORD, newPassword);
+				m_properties.put(m_options.getPropTrustPassword(), newPassword);
 				s_logger.warn("Null keystore password. Using the password stored in the previous configuration snapshot");
 				s_logger.warn("Null keystore password. A new password will be randomly generated at the next ESF start");
 			}
@@ -471,7 +478,7 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
 				}
 			}
 			
-			Object decryptedPasswordObject= m_properties.get(SslManagerServiceOptions.PROP_TRUST_PASSWORD);
+			Object decryptedPasswordObject= m_properties.get(m_options.getPropTrustPassword());
 			char[] decryptedPasswordArray= null;
 			if(decryptedPasswordObject != null && decryptedPasswordObject instanceof String){
 				decryptedPasswordArray= ((String) decryptedPasswordObject).toCharArray();
@@ -541,7 +548,7 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
 
 			if (keyStore != null) {
 				
-				Object decryptedPasswordObject= m_properties.get(SslManagerServiceOptions.PROP_TRUST_PASSWORD);
+				Object decryptedPasswordObject= m_properties.get(m_options.getPropTrustPassword());
 				char[] decryptedPasswordArray= null;
 				if(decryptedPasswordObject != null && decryptedPasswordObject instanceof String){
 					decryptedPasswordArray= ((String) decryptedPasswordObject).toCharArray();
@@ -590,7 +597,7 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
 	{
 		char[] password= null;
 		try{ 
-			password = (char[]) m_properties.get(SslManagerServiceOptions.PROP_TRUST_PASSWORD);
+			password = (char[]) m_properties.get(m_options.getPropTrustPassword());
 		} catch (Exception e){
 			password = new char[0];
 		}
@@ -647,7 +654,7 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
 		while (keys.hasNext()) {
 			String key = keys.next();
 			Object value = properties.get(key);
-			if (key.equals(SslManagerServiceOptions.PROP_TRUST_PASSWORD)) {
+			if (key.equals(m_options.getPropTrustPassword())) {
 				try {
 					char[] decryptedPassword= m_cryptoService.decryptAes(value.toString().toCharArray());
 					m_properties.put(key, decryptedPassword);

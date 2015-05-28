@@ -19,7 +19,7 @@ public class SslManagerServiceOptions
     private static final String  PROP_TRUST_STORE    = "ssl.default.trustStore";
     private static final String  PROP_CIPHERS        = "ssl.default.cipherSuites";    
     private static final String  PROP_HN_VERIFY      = "ssl.hostname.verification";
-    static final String  PROP_TRUST_PASSWORD = "ssl.keystore.password";
+    private static final String  PROP_TRUST_PASSWORD = "ssl.keystore.password";
 
     private static final String  PROP_DEFAULT_PROTOCOL    = "TLSv1";
     private static final Boolean PROP_DEFAULT_HN_VERIFY   = true;
@@ -95,4 +95,17 @@ public class SslManagerServiceOptions
     	}
     	return PROP_DEFAULT_HN_VERIFY;
     }
+    
+    public String getPropDefaultTrustStore(){
+    	return PROP_DEFAULT_TRUST_STORE;
+    }
+
+	public String getPropTrustStore() {
+		return PROP_TRUST_STORE;
+	}
+
+	public String getPropTrustPassword() {
+		return PROP_TRUST_PASSWORD;
+	}
+    
 }

@@ -147,7 +147,7 @@ public class DhcpServerManager {
 			sb.append(" -cf ").append(DhcpServerManager.getConfigFilename(interfaceName));
 			sb.append(" -pf ").append(DhcpServerManager.getPidFilename(interfaceName));
 		} else if (dhcpServerTool == DhcpServerTool.UDHCPD) {
-			sb.append("udhcpd ");
+			sb.append("udhcpd -f -S ");
 			sb.append(DhcpServerManager.getConfigFilename(interfaceName));
 		}
 		return sb.toString();

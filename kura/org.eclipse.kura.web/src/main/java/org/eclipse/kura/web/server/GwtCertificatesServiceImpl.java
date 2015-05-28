@@ -47,7 +47,7 @@ public class GwtCertificatesServiceImpl extends OsgiRemoteServiceServlet impleme
 			throws GwtKuraException {
 		try {
 	    	// Remove header if exists
-	        String key = privateCert.replace("-----BEGIN PRIVATE KEY-----", "");
+	        String key = privateCert.replace("-----BEGIN PRIVATE KEY-----", "").replace("\n", "");
 	        key = key.replace("-----END PRIVATE KEY-----", "");
 	    	
 	        byte[] conversion= DatatypeConverter.parseBase64Binary(key);

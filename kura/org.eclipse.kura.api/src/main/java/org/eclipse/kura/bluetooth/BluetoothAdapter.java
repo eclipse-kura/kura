@@ -14,19 +14,18 @@ public interface BluetoothAdapter {
 	public String getAddress();
 	
 	/**
-	 * Return the amount of time used when scanning for Bluetooth devices.
+	 * Kill the process started by startLeScan.<br>
+	 * SIGINT must be sent to the hcitool process. Otherwise the adapter must be toggled (down/up).
 	 * 
-	 * @return The scan time in seconds
 	 */
-	public int getScanTime();
+	public void killLeScan();
 	
 	/**
-	 * Set the amount of time used when scanning for Bluetooth devices.
+	 * Return true if a lescan is running
 	 * 
-	 * @param scanTime	The amount of time in seconds to scan
 	 */
-	public void setScanTime(int scanTime);
-	
+	public boolean isScanning();
+
 	/**
 	 * Return the status of the adapter
 	 * 

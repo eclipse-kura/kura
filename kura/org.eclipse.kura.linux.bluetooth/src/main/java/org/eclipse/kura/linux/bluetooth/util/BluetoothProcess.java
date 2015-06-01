@@ -78,7 +78,7 @@ public class BluetoothProcess {
 			while ((ch = br.read()) != -1) {
 				listener.processInputStream((char) ch);
 			}
-			s_logger.info("End of stream!");
+			s_logger.debug("End of stream!");
 			return null;
 		} else {
 			StringBuilder stringBuilder = new StringBuilder();
@@ -90,7 +90,7 @@ public class BluetoothProcess {
 			}
 			s_logger.info("EEE " + stringBuilder.toString());
 			listener.processInputStream(stringBuilder.toString());
-			s_logger.info("End of stream!");
+			s_logger.debug("End of stream!");
 			return null;
 		}
 	}
@@ -106,7 +106,7 @@ public class BluetoothProcess {
 			stringBuilder.append((char) ch);
 		}
 		listener.processErrorStream(stringBuilder.toString());
-		s_logger.info("End of stream!");
+		s_logger.debug("End of stream!");
 		return null;
 	}
 	

@@ -193,7 +193,7 @@ public class BluetoothUtil {
 	
 	/*
 	 * Method to utilize BluetoothProcess and the hcitool utility. These processes run indefinitely, so the
-	 * BluetoothProcessListeneris used to receive output from the process. 
+	 * BluetoothProcessListener is used to receive output from the process. 
 	 */
 	public static BluetoothProcess hcitoolCmd (String name, String cmd, BluetoothProcessListener listener) {
 		String[] command = { HCITOOL, "-i", name, cmd };

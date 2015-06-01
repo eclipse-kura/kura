@@ -26,37 +26,31 @@ public class BluetoothLeScanner implements BluetoothProcessListener {
 	private List<BluetoothDevice> m_scanResult;
 	private BluetoothProcess m_proc = null;
 	private BluetoothLeScanListener m_listener = null;
+	private boolean m_scanRunning = false;
 
 	public BluetoothLeScanner() {
 		m_devices = new HashMap<String, String>();
 	}
 
-	public void startScan(String name, int scanTime, BluetoothLeScanListener listener) {
+	public void startScan(String name, BluetoothLeScanListener listener) {
 		m_listener = listener;
 
-		try {
-			s_logger.info("Starting bluetooth le scan...");
-			m_proc = BluetoothUtil.hcitoolCmd(name, "lescan", this);
+		s_logger.info("Starting bluetooth le scan...");
+		m_proc = BluetoothUtil.hcitoolCmd(name, "lescan", this);
+					
+		set_scanRunning(true);
+	}
 
-			// Sleep for specified time while scan is running
-			Thread.sleep(scanTime * 1000);
-			// SIGINT must be sent to the hcitool process. Otherwise the adapter must be toggled (down/up).
-			if (m_proc != null) {
-				s_logger.debug("Killing hcitool...");
-				BluetoothUtil.killCmd("hcitool", SIGINT);
-				m_proc.destroy();
-			}
-
-		} catch (Exception e) {
-			s_logger.error("Error running bluetooth LE scan.", e);
-			listener.onScanFailed(SCAN_FAILED_INTERNAL_ERROR);
-		} finally {
-			if (m_proc != null) {
-				s_logger.debug("Killing hcitool...");
-				BluetoothUtil.killCmd("hcitool", SIGINT);
-				m_proc.destroy();
-			}
+	public void killScan() {
+		// SIGINT must be sent to the hcitool process. Otherwise the adapter must be toggled (down/up).
+		if (m_proc != null) {
+			s_logger.info("Killing hcitool...");
+			BluetoothUtil.killCmd("hcitool", SIGINT);
+			m_proc.destroy();
+			set_scanRunning(false);
 		}
+		else
+			s_logger.info("Cannot Kill hcitool, m_proc = null ...");
 	}
 
 	// --------------------------------------------------------------------
@@ -124,6 +118,14 @@ public class BluetoothLeScanner implements BluetoothProcessListener {
 				}
 			}
 		}
+	}
+
+	public boolean is_scanRunning() {
+		return m_scanRunning;
+	}
+
+	public void set_scanRunning(boolean m_scanRunning) {
+		this.m_scanRunning = m_scanRunning;
 	}
 
 }

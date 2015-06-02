@@ -15,7 +15,7 @@ Added Features:
    * Added support for the Raspberry Pi B+ and the Raspberry Pi 2. 
    * Added support for Bluetooth Low Energy (see Known Issues section below).
      * API: org.eclipse.kura.bluetooth
-     * Example: org.eclipse.kura.example.bluetooth
+     * Example: org.eclipse.kura.example.ble.tisensortag
    * Added OSGi console commands (get/setkuraloglevel) to control the Kura logger.
 
 Bug Fixes:

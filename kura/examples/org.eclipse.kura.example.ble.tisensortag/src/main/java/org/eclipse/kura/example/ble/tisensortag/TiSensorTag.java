@@ -223,17 +223,23 @@ public class TiSensorTag implements BluetoothLeNotificationListener {
 	/*
 	 * Enable humidity sensor
 	 */
-	public void enableHumiditySensor() {
+	public void enableHumiditySensor(boolean cc2650) {
 		// Write "01" to 0x3c enable humidity sensor
-		m_bluetoothGatt.writeCharacteristicValue(TiSensorTagGatt.HANDLE_HUM_SENSOR_ENABLE, "01");
+		if(cc2650)
+			m_bluetoothGatt.writeCharacteristicValue(TiSensorTagGatt.HANDLE_HUM_SENSOR_ENABLE_2650, "01");
+		else
+			m_bluetoothGatt.writeCharacteristicValue(TiSensorTagGatt.HANDLE_HUM_SENSOR_ENABLE_2541, "01");
 	}
 	
 	/*
 	 * Disable humidity sensor
 	 */
-	public void disableHumiditySensor() {
+	public void disableHumiditySensor(boolean cc2650) {
 		// Write "00" to 0x3c to disable humidity sensor
-		m_bluetoothGatt.writeCharacteristicValue(TiSensorTagGatt.HANDLE_HUM_SENSOR_ENABLE, "00");
+		if(cc2650)
+			m_bluetoothGatt.writeCharacteristicValue(TiSensorTagGatt.HANDLE_HUM_SENSOR_ENABLE_2650, "00");
+		else
+			m_bluetoothGatt.writeCharacteristicValue(TiSensorTagGatt.HANDLE_HUM_SENSOR_ENABLE_2541, "00");
 	}
 	
 	/*
@@ -254,16 +260,22 @@ public class TiSensorTag implements BluetoothLeNotificationListener {
 	/*
 	 * Enable humidity notifications
 	 */
-	public void enableHumidityNotifications() {
+	public void enableHumidityNotifications(boolean cc2650) {
 		//Write "01:00 to 0x39 to enable notifications
-		m_bluetoothGatt.writeCharacteristicValue(TiSensorTagGatt.HANDLE_HUM_SENSOR_NOTIFICATION, "01:00");
+		if(cc2650)
+			m_bluetoothGatt.writeCharacteristicValue(TiSensorTagGatt.HANDLE_HUM_SENSOR_NOTIFICATION_2650, "01:00");
+		else 
+			m_bluetoothGatt.writeCharacteristicValue(TiSensorTagGatt.HANDLE_HUM_SENSOR_NOTIFICATION_2541, "01:00");
 	}
 	/*
 	 * Disable humidity notifications
 	 */
-	public void disableHumidityNotifications() {
+	public void disableHumidityNotifications(boolean cc2650) {
 		//Write "00:00 to 0x39 to enable notifications
-		m_bluetoothGatt.writeCharacteristicValue(TiSensorTagGatt.HANDLE_HUM_SENSOR_NOTIFICATION, "00:00");
+		if(cc2650)
+			m_bluetoothGatt.writeCharacteristicValue(TiSensorTagGatt.HANDLE_HUM_SENSOR_NOTIFICATION_2650, "00:00");
+		else 
+			m_bluetoothGatt.writeCharacteristicValue(TiSensorTagGatt.HANDLE_HUM_SENSOR_NOTIFICATION_2541, "00:00");
 	}
 	
 	// ------------------------------------------------------------------------------------------
@@ -515,7 +527,6 @@ public class TiSensorTag implements BluetoothLeNotificationListener {
 			temperatureReceived = true;
 			tempAmbient = ambient;
 			tempTarget = target;
-			//BluetoothLe.doPublishTemp(m_device.getAdress(), ambient, target);
 		} 
 		else if (handle.equals(TiSensorTagGatt.HANDLE_ACC_SENSOR_VALUE)) {
 			s_logger.info("Received acc value: " + value);
@@ -529,9 +540,9 @@ public class TiSensorTag implements BluetoothLeNotificationListener {
 			double zd = z / 64.0;
 			
 			s_logger.info("X acc: " + xd + " Y acc: " + yd + " Z acc: " + zd);
-			BluetoothLe.doPublishAcc(m_device.getAdress(), xd, yd, zd);
+			//BluetoothLe.doPublishAcc(m_device.getAdress(), xd, yd, zd);
 		}
-		else if (handle.equals(TiSensorTagGatt.HANDLE_HUM_SENSOR_VALUE)) {
+		else if (handle.equals(TiSensorTagGatt.HANDLE_HUM_SENSOR_VALUE_2650)||handle.equals(TiSensorTagGatt.HANDLE_HUM_SENSOR_VALUE_2541)) {
 			s_logger.info("Received hum value: " + value);
 			tmp = value.split("\\s");
 			// Ignore temperature value from humidity sensor
@@ -543,7 +554,6 @@ public class TiSensorTag implements BluetoothLeNotificationListener {
 			float humf = (-6f) + 125f * (hum / 65535f);
 			
 			s_logger.info("Hum: " + humf);
-			BluetoothLe.doPublishHum(m_device.getAdress(), humf);
 		}
 		else if (handle.equals(TiSensorTagGatt.HANDLE_MAG_SENSOR_VALUE)) {
 			s_logger.info("Received mag value: " + value);
@@ -564,7 +574,7 @@ public class TiSensorTag implements BluetoothLeNotificationListener {
 			float zf = z * (2000f / 65536f);
 			
 			s_logger.info("X mag: " + xf + " Y mag: " + yf + " Z mag: " + zf);
-			BluetoothLe.doPublishMag(m_device.getAdress(), xf, yf, zf);
+			//BluetoothLe.doPublishMag(m_device.getAdress(), xf, yf, zf);
 		}
 		else if (handle.equals(TiSensorTagGatt.HANDLE_PRE_SENSOR_VALUE)) {
 			s_logger.info("Received pre value: " + value);
@@ -607,7 +617,7 @@ public class TiSensorTag implements BluetoothLeNotificationListener {
 			
 			double p_a = calculatePre(t_r, p_r, c);
 			s_logger.info("Pre: " + p_a);
-			BluetoothLe.doPublishPre(m_device.getAdress(), p_a);
+			//BluetoothLe.doPublishPre(m_device.getAdress(), p_a);
 		}
 		else if (handle.equals(TiSensorTagGatt.HANDLE_GYR_SENSOR_VALUE)) {
 			s_logger.info("Received gyr value: " + value);
@@ -628,12 +638,12 @@ public class TiSensorTag implements BluetoothLeNotificationListener {
 			float zf = z * (500f / 65536f);
 			
 			s_logger.info("X gyr: " + xf + " Y gyr: " + yf + " Z gyr: " + zf);
-			BluetoothLe.doPublishGyr(m_device.getAdress(), xf, yf, zf);
+			//BluetoothLe.doPublishGyr(m_device.getAdress(), xf, yf, zf);
 		}
 		else if (handle.equals(TiSensorTagGatt.HANDLE_KEYS_STATUS)) {
 			s_logger.info("Received keys value: " + value);
-			if (!value.equals("00"))
-				BluetoothLe.doPublishKeys(m_device.getAdress(), Integer.parseInt(value) );
+//			if (!value.equals("00"))
+//				BluetoothLe.doPublishKeys(m_device.getAdress(), Integer.parseInt(value) );
 		}
 	}
 	

@@ -186,7 +186,7 @@ public class BluetoothLe implements ConfigurableComponent, CloudClientListener, 
 		// Scan
 		if(!m_found){
 			if(m_bluetoothAdapter.isScanning()){
-				s_logger.debug("m_bluetoothAdapter.isScanning");
+				s_logger.info("m_bluetoothAdapter.isScanning");
 				if((System.currentTimeMillis() - m_startTime) >= (m_scantime*1000)){
 					m_bluetoothAdapter.killLeScan();
 				}
@@ -207,8 +207,12 @@ public class BluetoothLe implements ConfigurableComponent, CloudClientListener, 
 				s_logger.info("Found, connecting...");
 				m_connected = myTiSensorTag.connect();
 				if(m_connected){
+					doServicesDiscovery(myTiSensorTag);
+					doCharacteristicsDiscovery(myTiSensorTag);
 					myTiSensorTag.enableTemperatureSensor(m_cc2650);
+					myTiSensorTag.enableHumiditySensor(m_cc2650);
 					myTiSensorTag.enableTemperatureNotifications(m_cc2650);
+					myTiSensorTag.enableHumidityNotifications(m_cc2650);
 				}
 				else {
 					s_logger.info("Cannot connect to TI SensorTag " + myTiSensorTag.getBluetoothDevice().getAdress() + ".");

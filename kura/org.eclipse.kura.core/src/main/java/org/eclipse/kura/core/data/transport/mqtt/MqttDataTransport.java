@@ -654,8 +654,8 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 			brokerUrl = brokerUrl.trim();
 			
 			if( isSecuredEnvironment() && brokerUrl.contains(MQTT_SCHEME)){
-				s_logger.error("ESF requires a secure (mqtts) connection!");
-				throw KuraException.internalError("ESF requires a secure (mqtts) connection!");
+				s_logger.error("Secure (mqtts) connection required!");
+				throw KuraException.internalError("Secure (mqtts) connection required!");
 				
 			}
 			brokerUrl = brokerUrl.replaceAll("^" + MQTT_SCHEME, "tcp://");

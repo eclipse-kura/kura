@@ -88,7 +88,6 @@ public class BluetoothProcess {
 			while ((ch = br.read()) != -1) {
 				stringBuilder.append((char) ch);
 			}
-			s_logger.info("EEE " + stringBuilder.toString());
 			listener.processInputStream(stringBuilder.toString());
 			s_logger.debug("End of stream!");
 			return null;

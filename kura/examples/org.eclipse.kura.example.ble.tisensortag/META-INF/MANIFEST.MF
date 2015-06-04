@@ -1,0 +1,14 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: org.eclipse.kura.example.ble.tisensortag
+Bundle-SymbolicName: org.eclipse.kura.example.ble.tisensortag;singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Service-Component: OSGI-INF/*.xml
+Import-Package: org.eclipse.kura.bluetooth;version="1.0.0",
+ org.eclipse.kura.cloud;version="1.0.0",
+ org.eclipse.kura.configuration;version="1.0.0",
+ org.eclipse.kura.message;version="1.0.0",
+ org.osgi.service.component;version="1.2.0",
+ org.slf4j;version="1.6.4"
+Bundle-ActivationPolicy: lazy

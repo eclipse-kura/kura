@@ -10,7 +10,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.eclipse.kura</groupId>
 	<artifactId>kura</artifactId>
-	<version>1.1.2</version>
+	<version>1.2.0</version>
 
 	<packaging>pom</packaging>
 
@@ -19,17 +19,20 @@
 		<module>org.eclipse.kura.api</module>
 		<module>org.eclipse.kura.test</module>
 		<module>org.eclipse.kura.core</module>
+		<module>org.eclipse.kura.core.certificates</module>
 		<module>org.eclipse.kura.core.cloud</module>
 		<module>org.eclipse.kura.core.comm</module>
 		<module>org.eclipse.kura.core.configuration</module>
 		<module>org.eclipse.kura.core.crypto</module>
 		<module>org.eclipse.kura.core.deployment</module>
+		<module>org.eclipse.kura.core.log</module>
 		<module>org.eclipse.kura.core.net</module>
 		<module>org.eclipse.kura.core.test</module>
 		<module>org.eclipse.kura.deployment.agent</module>
 		<module>org.eclipse.kura.deployment.customizer</module>
 		<module>org.eclipse.kura.deployment.customizer.upgrade</module>
 		<module>org.eclipse.kura.deployment.update</module>
+		<module>org.eclipse.kura.linux.bluetooth</module>
 		<module>org.eclipse.kura.linux.clock</module>
 		<module>org.eclipse.kura.linux.command</module>
 		<module>org.eclipse.kura.linux.net</module>
@@ -168,6 +171,15 @@
 			</plugin>
 -->
 			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.3</version>
+				<configuration>
+					<source>1.6</source>
+					<target>1.7</target>
+				</configuration>
+			</plugin>
+			<plugin>
 		        <groupId>org.jacoco</groupId>
 		        <artifactId>jacoco-maven-plugin</artifactId>
 		        <version>0.6.4.201312101107</version>
@@ -241,6 +253,8 @@
 				<artifactId>tycho-compiler-plugin</artifactId>
 				<version>${tycho-version}</version>
 				<configuration>
+					<source>1.6</source>
+					<target>1.6</target>
 					<compilerArgument>-warn:[+|-]warning_tokens_separated_by_comma</compilerArgument>
 					<!-- <compilerArgument>-err:-forbidden</compilerArgument> -->
 				</configuration>

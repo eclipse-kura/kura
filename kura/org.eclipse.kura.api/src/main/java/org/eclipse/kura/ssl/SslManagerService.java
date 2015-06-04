@@ -13,6 +13,8 @@ package org.eclipse.kura.ssl;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
+import java.security.PrivateKey;
+import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 
 import javax.net.ssl.SSLSocketFactory;
@@ -99,4 +101,14 @@ public interface SslManagerService
      * @param cn 
      */
     public void deleteTrustCertificate(String alias) throws GeneralSecurityException, IOException;
+    
+    /**
+     * Installs a private key and the correspondent public certificate chains in the configured key store with the defined alias.
+     * @param alias that is a string that will be used to identify the certificates in the key store
+     * @param privateKey that represents PrivateKey object
+     * @param password that represents the password used to encode the keys in the key store
+     * @param publicCerts that represents an array of Certificate objects that contain the public certificate chain
+     * 
+     */
+    public void installPrivateKey(String alias, PrivateKey privateKey, char[] password, Certificate[] publicCerts) throws GeneralSecurityException, IOException;
 }

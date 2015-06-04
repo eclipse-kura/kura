@@ -33,24 +33,22 @@ public class GwtSettingServiceImpl extends OsgiRemoteServiceServlet implements G
 		//
 		// verify the current password
 		boolean validCurrPwd = false;
-		try {
-			validCurrPwd = authMgr.authenticate("admin", settings.getPasswordCurrent());
-		}
-		catch (SQLException e) {
-			throw new GwtKuraException(GwtKuraErrorCode.CURRENT_ADMIN_PASSWORD_DOES_NOT_MATCH, e);
-		}
+		
+		validCurrPwd = authMgr.authenticate("admin", settings.getPasswordCurrent());
+		
+		
 		if (!validCurrPwd) {
 			throw new GwtKuraException(GwtKuraErrorCode.CURRENT_ADMIN_PASSWORD_DOES_NOT_MATCH);
 		}
 		
 		//
 		// set the new password
-		try {
+		/*try {
 			authMgr.changeAdminPassword(settings.getPasswordNew());
 		}
 		catch (SQLException e) {
 			throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
-		}
+		}*/
 	}
 	
 	

@@ -15,6 +15,7 @@ import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.linux.net.dns.LinuxDns;
 import org.eclipse.kura.linux.net.ppp.PppLinux;
+import org.eclipse.kura.linux.net.util.LinuxIfconfig;
 import org.eclipse.kura.linux.net.util.LinuxNetworkUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,8 +57,9 @@ public class Ppp implements IModemLinkService {
 	@Override
 	public String getIPaddress() throws KuraException {
 		String ipAddress = null;
-		if (LinuxNetworkUtil.isUp(m_iface)) {
-		    ipAddress = LinuxNetworkUtil.getCurrentIpAddress(m_iface);
+		LinuxIfconfig ifconfig = LinuxNetworkUtil.getInterfaceConfiguration(m_iface);
+		if (ifconfig != null) {
+			ipAddress = ifconfig.getInetAddress();
 		}
 		return ipAddress;
 	}

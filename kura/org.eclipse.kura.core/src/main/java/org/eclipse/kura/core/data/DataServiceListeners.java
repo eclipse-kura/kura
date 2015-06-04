@@ -35,6 +35,8 @@ class DataServiceListeners implements DataServiceListener {
 					s_logger.error("Unexpected Throwable", t);
 				}
 			}
+		} else {
+			s_logger.warn("No registered services. Missing onConnectionEstablished()");
 		}
 	}
 
@@ -51,6 +53,8 @@ class DataServiceListeners implements DataServiceListener {
 					s_logger.error("Unexpected Throwable", t);
 				}
 			}
+		} else {
+			s_logger.warn("No registered services. Missing onDisconnecting()");
 		}
 	}
 
@@ -67,6 +71,8 @@ class DataServiceListeners implements DataServiceListener {
 					s_logger.error("Unexpected Throwable", t);
 				}
 			}
+		} else {
+			s_logger.warn("No registered services. Missing onDisconnected()");
 		}
 	}
 
@@ -83,6 +89,8 @@ class DataServiceListeners implements DataServiceListener {
 					s_logger.error("Unexpected Throwable", t);
 				}
 			}
+		} else {
+			s_logger.warn("No registered services. Missing onConnectionLost()");
 		}
 	}
 
@@ -101,7 +109,7 @@ class DataServiceListeners implements DataServiceListener {
 				}
 			}
 		} else {
-			s_logger.error("No registered services. Dropping arrived message");
+			s_logger.warn("No registered services. Missing onMessageArrived()");
 		}
 	}
 
@@ -119,7 +127,7 @@ class DataServiceListeners implements DataServiceListener {
 				}
 			}
 		} else {
-			s_logger.error("No registered services. Ignoring message confirm");
+			s_logger.warn("No registered services. Missing onMessagePublished()");
 		}
 	}
 
@@ -136,9 +144,8 @@ class DataServiceListeners implements DataServiceListener {
 					s_logger.error("Unexpected Throwable", t);
 				}
 			}
-		} 
-		else {
-			s_logger.error("No registered services. Dropping message confirm");
+		} else {
+			s_logger.warn("No registered services. Missing onMessageConfirmed()");
 		}
 	}
 	

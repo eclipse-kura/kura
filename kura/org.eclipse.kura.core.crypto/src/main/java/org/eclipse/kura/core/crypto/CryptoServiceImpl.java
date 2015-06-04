@@ -25,13 +25,15 @@ import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.SecretKeySpec;
 import javax.xml.bind.DatatypeConverter;
 
+import org.eclipse.kura.KuraErrorCode;
+import org.eclipse.kura.KuraException;
 import org.eclipse.kura.crypto.CryptoService;
 
 public class CryptoServiceImpl implements CryptoService {
 	private static final String ALGORITHM   = "AES";
     private static final byte[] SECRET_KEY  = "rv;ipse329183!@#".getBytes();
                                                
-	
+	@Override
 	public String encryptAes(String value) 
 		throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException 
 	{
@@ -44,17 +46,16 @@ public class CryptoServiceImpl implements CryptoService {
         return encryptedValue;	
 	}
 
-
+	@Override
+	@Deprecated
 	public String decryptAes(String encryptedValue) 
 		throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IOException, IllegalBlockSizeException, BadPaddingException 
 	{
-		Key  key = generateKey();
-        Cipher c = Cipher.getInstance(ALGORITHM);
-        c.init(Cipher.DECRYPT_MODE, key);
-        byte[] decordedValue  = DatatypeConverter.parseBase64Binary(encryptedValue);
-        byte[] decryptedBytes = c.doFinal(decordedValue);
-        String decryptedValue = new String(decryptedBytes);
-        return decryptedValue;
+		try {
+			return new String(decryptAes(encryptedValue.toCharArray()));
+		} catch (KuraException e) {
+			throw new IOException();
+		}
     }
 
 
@@ -64,7 +65,7 @@ public class CryptoServiceImpl implements CryptoService {
         return key;
 	}
 
-	
+	@Override
 	public String sha1Hash(String s) 
 		throws NoSuchAlgorithmException, UnsupportedEncodingException 
 	{
@@ -76,7 +77,7 @@ public class CryptoServiceImpl implements CryptoService {
         return DatatypeConverter.printBase64Binary(encodedBytes);
 	}
 
-
+	@Override
 	public String encodeBase64(String stringValue) 
 		throws NoSuchAlgorithmException, UnsupportedEncodingException 
 	{
@@ -86,12 +87,48 @@ public class CryptoServiceImpl implements CryptoService {
 		
 	}
 
-
+	@Override
 	public String decodeBase64(String encodedValue) 
 		throws NoSuchAlgorithmException, UnsupportedEncodingException 
 	{
         byte[] decodedBytes = DatatypeConverter.parseBase64Binary(encodedValue);
         String decodedValue = new String(decodedBytes, "UTF-8");
         return decodedValue;		
+	}
+
+	@Override
+	public char[] decryptAes(char[] encryptedValue) throws KuraException {
+		Key  key = generateKey();
+        Cipher c;
+		try {
+			c = Cipher.getInstance(ALGORITHM);
+	        c.init(Cipher.DECRYPT_MODE, key);
+	        String internalStringValue = new String(encryptedValue);
+	        byte[] decordedValue  =  DatatypeConverter.parseBase64Binary(internalStringValue);
+	        byte[] decryptedBytes = c.doFinal(decordedValue);
+	        String decryptedValue = new String(decryptedBytes);
+	        return decryptedValue.toCharArray();
+		} catch (NoSuchAlgorithmException e) {
+			throw new KuraException(KuraErrorCode.OPERATION_NOT_SUPPORTED);
+		} catch (NoSuchPaddingException e) {
+			throw new KuraException(KuraErrorCode.OPERATION_NOT_SUPPORTED);
+		} catch (InvalidKeyException e) {
+			throw new KuraException(KuraErrorCode.DECODER_ERROR);
+		} catch (BadPaddingException e) {
+			throw new KuraException(KuraErrorCode.DECODER_ERROR);
+		} catch (IllegalBlockSizeException e) {
+			throw new KuraException(KuraErrorCode.DECODER_ERROR);
+		}
+	}
+	
+	@Override
+	public char[] getKeyStorePassword(String keyStorePath) {
+		return "changeit".toCharArray();
+	}
+
+	@Override
+	public void setKeyStorePassword(String keyStorePath, String password)
+			throws IOException {
+		return;
 	}
 }

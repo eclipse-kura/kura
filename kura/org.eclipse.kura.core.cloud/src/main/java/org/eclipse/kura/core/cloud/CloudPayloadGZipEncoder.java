@@ -25,6 +25,9 @@ public class CloudPayloadGZipEncoder implements CloudPayloadEncoder {
 	
 	public byte[] getBytes() throws IOException {
 		byte[] source = m_decorated.getBytes();
-		return GZipUtil.compress(source);
+		byte[] compressed = GZipUtil.compress(source);
+		
+		//Return gzip compressed data only if shorter than uncompressed one
+		return compressed.length < source.length ? compressed : source;
 	}
 }

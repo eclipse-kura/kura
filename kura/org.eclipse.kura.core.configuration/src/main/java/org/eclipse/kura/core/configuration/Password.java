@@ -11,20 +11,32 @@
  */
 package org.eclipse.kura.core.configuration;
 
+/**
+ * 
+ * @author matteo.maiero
+ *
+ */
+
+@Deprecated
 public class Password 
 {
-	private String password;
+	private char[] password;
 
 	public Password(String password) {
+		super();
+		this.password = password.toCharArray();
+	}
+	
+	public Password(char[] password) {
 		super();
 		this.password = password;
 	}
 
-	public String getPassword() {
+	public char[] getPassword() {
 		return password;
 	}
 	
 	public String toString() {
-		return password;
+		return new String(password);
 	}
 }

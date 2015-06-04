@@ -23,6 +23,7 @@ public class SslManagerServiceOptions
 
     private static final String  PROP_DEFAULT_PROTOCOL    = "TLSv1";
     private static final Boolean PROP_DEFAULT_HN_VERIFY   = true;
+    //:TODO Move hardcoded string in kura.properties and retrieve using SystemService
     private static final String  PROP_DEFAULT_TRUST_STORE = "/opt/eurotech/esf/security/cacerts.ks";
 
     private Map<String,Object> m_properties;

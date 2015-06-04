@@ -547,7 +547,7 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
             if(modemInfo != null) {
             	//Found one - see if we have some info for it.
             	//Also check if we are getting more devices than expected.
-            	//This can happen if all the modem resources cannot be removed from the OS or from ESF.
+            	//This can happen if all the modem resources cannot be removed from the OS or from Kura.
             	//In this case we did not receive an UsbDeviceRemovedEvent and we did not post
             	//an ModemRemovedEvent. Should we do it here?
             	UsbModemDevice usbModem = m_usbModems.get(event.getProperty(UsbDeviceEvent.USB_EVENT_USB_PORT_PROPERTY));

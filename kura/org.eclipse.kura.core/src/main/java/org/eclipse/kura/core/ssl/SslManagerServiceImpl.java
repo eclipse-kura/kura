@@ -134,13 +134,6 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
 
 		decryptProperties(properties);
 		
-		File f = new File(m_options.getSslTrustStore());
-		String defaultTrustStoreLocation= m_options.getPropDefaultTrustStore();
-		if(!f.exists() && !f.isDirectory() && !m_options.getSslTrustStore().equals(defaultTrustStoreLocation)) {
-			s_logger.info("Upgrade process: keystore reference needs to be updated...");
-			m_properties.put(m_options.getPropTrustStore(), defaultTrustStoreLocation);
-		}
-
 		char[] keystorePassword= m_cryptoService.getKeyStorePassword(m_options.getSslTrustStore());
 
 		m_timer = new Timer(true);
@@ -193,7 +186,7 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
 				newPassword = oldPassword;
 				m_properties.put(m_options.getPropTrustPassword(), newPassword);
 				s_logger.warn("Null keystore password. Using the password stored in the previous configuration snapshot");
-				s_logger.warn("Null keystore password. A new password will be randomly generated at the next ESF start");
+				s_logger.warn("Null keystore password. A new password will be randomly generated at next restart");
 			}
 
 			if(oldPassword != null && !Arrays.equals(oldPassword, newPassword)){

@@ -317,21 +317,6 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 		// load the snapshot we need to rollback to
 		XmlComponentConfigurations xmlConfigs = loadSnapshot(id);
 
-		List<ComponentConfigurationImpl> decryptedConfigs = new ArrayList<ComponentConfigurationImpl>();
-		List<ComponentConfigurationImpl> configsToDecrypt = xmlConfigs.getConfigurations();
-		for (ComponentConfigurationImpl config : configsToDecrypt) {
-			if (config != null) {
-				try {
-					Map<String, Object> decryptedProperties = decryptPasswords(config);
-					config.setProperties(decryptedProperties);
-					decryptedConfigs.add(config);
-				} catch (Throwable t) {
-					s_logger.warn("Error during snapshot password decryption");
-				}
-			}
-		}
-		xmlConfigs.setConfigurations(decryptedConfigs);
-
 		//
 		// restore configuration
 		s_logger.info("Rolling back to snapshot {}...", id);

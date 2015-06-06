@@ -150,7 +150,7 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 
 	protected void activate(ComponentContext componentContext, Map<String, Object> properties) {
 		s_logger.info("Activating...");
-
+		
 		// We need to catch the configuration exception and activate anyway.
 		// Otherwise the ConfigurationService will not be able to track us.
 		HashMap<String, Object> decryptedPropertiesMap = new HashMap<String, Object>();
@@ -161,11 +161,11 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 			Object value = properties.get(key);
 			if (key.equals(MQTT_PASSWORD_PROP_NAME)) {
 				try {
-					char[] decryptedPassword = m_cryptoService.decryptAes(value.toString().toCharArray());
+					char[] decryptedPassword = m_cryptoService.decryptAes(((String) value).toCharArray());
 					decryptedPropertiesMap.put(key, decryptedPassword);
 				} catch (Exception e) {
-					// e.printStackTrace();
-					decryptedPropertiesMap.put(key, value.toString().toCharArray());
+					s_logger.info("Password is not encrypted");
+					decryptedPropertiesMap.put(key, ((String) value).toCharArray());
 				}
 			} else {
 				decryptedPropertiesMap.put(key, value);
@@ -211,7 +211,7 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 
 	public void updated(Map<String, Object> properties) {
 		s_logger.info("Updating...");
-
+		
 		m_properties.clear();
 
 		HashMap<String, Object> decryptedPropertiesMap = new HashMap<String, Object>();
@@ -222,11 +222,11 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 			Object value = properties.get(key);
 			if (key.equals(MQTT_PASSWORD_PROP_NAME)) {
 				try {
-					char[] decryptedPassword = m_cryptoService.decryptAes(value.toString().toCharArray());
+					char[] decryptedPassword = m_cryptoService.decryptAes(((String) value).toCharArray());
 					decryptedPropertiesMap.put(key, decryptedPassword);
 				} catch (Exception e) {
-					// e.printStackTrace();
-					decryptedPropertiesMap.put(key, value.toString().toCharArray());
+					s_logger.info("Password is not encrypted");
+					decryptedPropertiesMap.put(key, ((String) value).toCharArray());
 				}
 			} else {
 				decryptedPropertiesMap.put(key, value);
@@ -234,10 +234,8 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 		}
 
 		m_properties.putAll(decryptedPropertiesMap);
-		// m_properties.putAll(properties);
 
 		update();
-
 	}
 
 	private void update() {
@@ -656,33 +654,19 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 			brokerUrl = brokerUrl.trim();
 			
 			if( isSecuredEnvironment() && brokerUrl.contains(MQTT_SCHEME)){
-				s_logger.error("ESF requires a secure (mqtts) connection!");
-				throw KuraException.internalError("ESF requires a secure (mqtts) connection!");
+				s_logger.error("Secure (mqtts) connection required!");
+				throw KuraException.internalError("Secure (mqtts) connection required!");
 				
 			}
 			brokerUrl = brokerUrl.replaceAll("^" + MQTT_SCHEME, "tcp://");
 			brokerUrl = brokerUrl.replaceAll("^" + MQTTS_SCHEME, "ssl://"); 
-
-			
-			/*
-			// Configure the broker URL //only for demo use: for example with CIAB and auto-signed certificates
-			brokerUrl = (String) properties.get(MQTT_BROKER_URL_PROP_NAME);
-			ValidationUtil.notEmptyOrNull(brokerUrl, MQTT_BROKER_URL_PROP_NAME);
-
-			brokerUrl = brokerUrl.trim();
-
-			brokerUrl = brokerUrl.replaceAll("^" + MQTT_SCHEME, "tcp://");
-			brokerUrl = brokerUrl.replaceAll("^" + MQTTS_SCHEME, "ssl://"); 
-			*/
-			
-			
-			
 			
 			brokerUrl = brokerUrl.replaceAll("/$", "");
 			ValidationUtil.notEmptyOrNull(brokerUrl, "brokerUrl");
 
 			ValidationUtil.notEmptyOrNull((String) properties.get(MQTT_USERNAME_PROP_NAME), MQTT_USERNAME_PROP_NAME);
-			ValidationUtil.notEmptyOrNull(new String((char[]) properties.get(MQTT_PASSWORD_PROP_NAME)), MQTT_PASSWORD_PROP_NAME);
+			ValidationUtil.notNull(properties.get(MQTT_PASSWORD_PROP_NAME), MQTT_PASSWORD_PROP_NAME);
+			ValidationUtil.notEmptyOrNull(new String((char[]) properties.get(MQTT_PASSWORD_PROP_NAME)), MQTT_PASSWORD_PROP_NAME);			
 			ValidationUtil.notNegative((Integer) properties.get(MQTT_KEEP_ALIVE_PROP_NAME), MQTT_KEEP_ALIVE_PROP_NAME);
 			ValidationUtil.notNegative((Integer) properties.get(MQTT_TIMEOUT_PROP_NAME), MQTT_TIMEOUT_PROP_NAME);
 
@@ -765,7 +749,7 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 	}
 
 	private boolean isSecuredEnvironment() {
-		boolean result =    ENV_JAVA_SECURITY != null 
+		boolean result = ENV_JAVA_SECURITY != null 
 				&& ENV_OSGI_FRAMEWORK_SECURITY != null 
 				&& ENV_OSGI_SIGNED_CONTENT_SUPPORT != null 
 				&& ENV_OSGI_FRAMEWORK_TRUST_REPOSITORIES != null;
@@ -971,5 +955,4 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 			return String.valueOf(MqttVersion);
 		}
 	}
-
 }

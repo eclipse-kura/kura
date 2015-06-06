@@ -23,11 +23,10 @@ public class BluetoothAdapterImpl implements BluetoothAdapter {
 	private String  m_name;
 	private String 	m_address;
 	private boolean m_leReady;
-	private int     m_scanTime;
+	private BluetoothLeScanner m_bls = null;
 	
-	public BluetoothAdapterImpl(String name, int scanTime) throws KuraException {
+	public BluetoothAdapterImpl(String name) throws KuraException {
 		m_name = name;
-		m_scanTime = scanTime;
 		buildAdapter(name);
 	}
 	
@@ -76,25 +75,27 @@ public class BluetoothAdapterImpl implements BluetoothAdapter {
 	}
 	
 	@Override
-	public int getScanTime() {
-		return m_scanTime;
-	}
-	
-	@Override
-	public void setScanTime(int scanTime) {
-		m_scanTime = scanTime;
-	}
-
-	@Override
 	public boolean isEnabled() {
 		return BluetoothUtil.isEnabled(m_name);
 	}
 
 	@Override
 	public void startLeScan(BluetoothLeScanListener listener) {
-		BluetoothLeScanner bls = new BluetoothLeScanner();
-		bls.startScan(m_name, m_scanTime, listener);
+		m_bls = new BluetoothLeScanner();
+		m_bls.startScan(m_name, listener);
+	}
 
+	public void killLeScan() {
+		if(m_bls!=null){
+			m_bls.killScan();
+			m_bls = null;
+		}
+	}
+
+	public boolean isScanning() {
+		if(m_bls!=null)
+			return m_bls.is_scanRunning();
+		else return false;
 	}
 
 	@Override

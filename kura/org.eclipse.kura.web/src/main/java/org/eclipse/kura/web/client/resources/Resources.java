@@ -161,4 +161,11 @@ public interface Resources extends ClientBundleWithLookup {
     
     @Source("icons/32x32/actions/system-lock-screen.png")
     ImageResource systemLock32();
+    
+    @Source("icons/32x32/apps/bluetooth.png")
+    ImageResource bluetooth32();
+    
+    @Source("icons/16x16/apps/bluetooth.png")
+    ImageResource bluetooth();
+
 }

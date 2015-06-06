@@ -108,12 +108,15 @@ public class CryptoServiceImpl implements CryptoService {
 	        byte[] decryptedBytes = c.doFinal(decordedValue);
 	        String decryptedValue = new String(decryptedBytes);
 	        return decryptedValue.toCharArray();
-		} catch (NoSuchAlgorithmException | 
-				 NoSuchPaddingException e) {
+		} catch (NoSuchAlgorithmException e) {
 			throw new KuraException(KuraErrorCode.OPERATION_NOT_SUPPORTED);
-		} catch (InvalidKeyException |
-				 BadPaddingException |
-				 IllegalBlockSizeException e){
+		} catch (NoSuchPaddingException e) {
+			throw new KuraException(KuraErrorCode.OPERATION_NOT_SUPPORTED);
+		} catch (InvalidKeyException e) {
+			throw new KuraException(KuraErrorCode.DECODER_ERROR);
+		} catch (BadPaddingException e) {
+			throw new KuraException(KuraErrorCode.DECODER_ERROR);
+		} catch (IllegalBlockSizeException e) {
 			throw new KuraException(KuraErrorCode.DECODER_ERROR);
 		}
 	}

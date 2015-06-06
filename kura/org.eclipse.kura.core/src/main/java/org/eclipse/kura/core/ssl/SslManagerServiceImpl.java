@@ -22,24 +22,24 @@ import java.security.GeneralSecurityException;
 import java.security.InvalidKeyException;
 import java.security.KeyManagementException;
 import java.security.KeyStore;
-import java.security.PrivateKey;
 import java.security.KeyStore.Entry;
 import java.security.KeyStore.LoadStoreParameter;
 import java.security.KeyStore.PasswordProtection;
 import java.security.KeyStore.ProtectionParameter;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
 import java.security.SecureRandom;
 import java.security.UnrecoverableEntryException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
-import java.util.Dictionary;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
@@ -56,24 +56,19 @@ import org.eclipse.kura.KuraException;
 import org.eclipse.kura.certificate.CertificatesService;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.configuration.ConfigurationService;
-import org.eclipse.kura.configuration.KuraConfigReadyEvent;
 import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.ssl.SslManagerService;
 import org.eclipse.kura.ssl.SslServiceListener;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
-import org.osgi.service.event.Event;
-import org.osgi.service.event.EventConstants;
-import org.osgi.service.event.EventHandler;
 import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SslManagerServiceImpl implements SslManagerService, ConfigurableComponent, EventHandler
+public class SslManagerServiceImpl implements SslManagerService, ConfigurableComponent
 {
 	private static final Logger s_logger = LoggerFactory.getLogger(SslManagerServiceImpl.class);
-	private final static String[] EVENT_TOPICS = {KuraConfigReadyEvent.KURA_CONFIG_EVENT_READY_TOPIC};
 	private static final String APP_PID = "service.pid";
 	private static ComponentContext s_context;
 
@@ -87,10 +82,8 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
 	private ConfigurationService m_configurationService;
 	private SecureRandom random = new SecureRandom();
 
-	private boolean toSave= false;
-
 	private Map<String, Object> m_properties;
-
+	private Timer m_timer;
 
 	// ----------------------------------------------------------------
 	//
@@ -130,10 +123,6 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
 		m_ctx = componentContext;
 		m_options = new SslManagerServiceOptions(properties);
 		
-		Dictionary<String, String[]> d = new Hashtable<String, String[]>();
-		d.put(EventConstants.EVENT_TOPIC, EVENT_TOPICS);
-		componentContext.getBundleContext().registerService(EventHandler.class.getName(), this, d);
-
 		ServiceTracker<SslServiceListener, SslServiceListener> listenersTracker = new ServiceTracker<SslServiceListener, SslServiceListener>(
 				componentContext.getBundleContext(),
 				SslServiceListener.class, null);
@@ -144,19 +133,37 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
 		m_sslServiceListeners = new SslServiceListeners(listenersTracker);
 
 		decryptProperties(properties);
-
+		
 		char[] keystorePassword= m_cryptoService.getKeyStorePassword(m_options.getSslTrustStore());
 
+		m_timer = new Timer(true);
 		if(m_options.getSslKeystorePassword() == null && keystorePassword != null && verifyEnvironmentProperties(keystorePassword)){
-				String randomValue= new BigInteger(160, random).toString(32);
+			String randomValue= new BigInteger(160, random).toString(32);
 
-				try {
-					changeSSLKeystorePassword(keystorePassword, randomValue.toCharArray());
-					m_properties.put(SslManagerServiceOptions.PROP_TRUST_PASSWORD, new Password(randomValue.toCharArray()));
-					toSave= true;
-				} catch (IOException | KeyStoreException | NoSuchAlgorithmException | CertificateException e) {
-					e.printStackTrace();
-				} 
+			try {
+				changeSSLKeystorePassword(keystorePassword, randomValue.toCharArray());
+				m_properties.put(m_options.getPropTrustPassword(), new Password(randomValue.toCharArray()));
+
+				final String pid = (String) properties.get(APP_PID);
+				m_timer.scheduleAtFixedRate(new TimerTask() {
+					public void run() {
+						try {
+							if(s_context.getServiceReference() != null &&
+							   m_configurationService.getComponentConfiguration(pid) != null) {
+								m_configurationService.updateConfiguration(pid, m_properties);
+								m_timer.cancel();
+							} else {
+								s_logger.info("No service or configuration available yet. Sleeping...");
+							}
+						} catch (KuraException e) {
+							s_logger.warn("Cannot get/update configuration for pid: {}", pid, e);
+						}
+					}
+				},
+				1000, 1000);
+			} catch (Exception e) {
+				s_logger.warn("Keystore password change failed");
+			}
 		}
 	}
 
@@ -166,10 +173,21 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
 
 		decryptProperties(properties);
 
-		char[] oldPassword= m_cryptoService.getKeyStorePassword(m_options.getSslTrustStore());
+		char[] oldPassword = m_cryptoService.getKeyStorePassword(m_options.getSslTrustStore());
+		char[] newPassword = null;
 		try {
 
-			char[] newPassword= (char[]) m_properties.get(SslManagerServiceOptions.PROP_TRUST_PASSWORD);
+			newPassword= (char[]) m_properties.get(m_options.getPropTrustPassword());
+			
+			if (newPassword == null) {
+				// FIXME: rolling back to snapshot_0 would require a configuration update to save
+				// the old password. We prefer to not call the updateConfiguration method from this
+				// method.
+				newPassword = oldPassword;
+				m_properties.put(m_options.getPropTrustPassword(), newPassword);
+				s_logger.warn("Null keystore password. Using the password stored in the previous configuration snapshot");
+				s_logger.warn("Null keystore password. A new password will be randomly generated at next restart");
+			}
 
 			if(oldPassword != null && !Arrays.equals(oldPassword, newPassword)){
 				changeSSLKeystorePassword(oldPassword, newPassword);
@@ -177,7 +195,11 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
 				changeSSLKeystorePassword(newPassword, newPassword);
 			}
 		} catch (Exception e) {
-			s_logger.info("Problem managing SSL keystore");
+			if(newPassword != null && verifyEnvironmentProperties(newPassword)){
+				s_logger.warn("Keystore accessible, but the system is not able to manage its password");
+			} else {
+				s_logger.warn("The SSL keystore is completely unaccessible. Please verify your data.");
+			}
 		}
 
 		// Update properties and re-publish Birth certificate
@@ -190,6 +212,7 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
 	protected void deactivate(ComponentContext componentContext) 
 	{
 		s_logger.info("deactivate...");
+		m_timer.cancel();
 		m_sslServiceListeners.close();
 	}
 
@@ -402,27 +425,6 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
 		}
 		
 	}
-	
-	@Override
-	public void handleEvent(Event event) {
-		s_logger.debug("handleEvent - topic: " + event.getTopic());
-		String topic = event.getTopic();
-		if (topic.equals(KuraConfigReadyEvent.KURA_CONFIG_EVENT_READY_TOPIC)) {
-			s_logger.info("--> System up and running");
-			String searchedPID = (String) m_properties.get(APP_PID);
-			try {
-				if(toSave && s_context.getServiceReference() != null && m_configurationService.getComponentConfiguration(searchedPID) != null){
-					
-					m_configurationService.updateConfiguration(searchedPID, m_properties);
-					return;
-				}
-			} catch (KuraException e) {
-				s_logger.info("Configuration update failure!");
-				e.printStackTrace();
-			}
-		}
-	}
-
 
 	// ----------------------------------------------------------------
 	//
@@ -469,7 +471,7 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
 				}
 			}
 			
-			Object decryptedPasswordObject= m_properties.get(SslManagerServiceOptions.PROP_TRUST_PASSWORD);
+			Object decryptedPasswordObject= m_properties.get(m_options.getPropTrustPassword());
 			char[] decryptedPasswordArray= null;
 			if(decryptedPasswordObject != null && decryptedPasswordObject instanceof String){
 				decryptedPasswordArray= ((String) decryptedPasswordObject).toCharArray();
@@ -539,7 +541,7 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
 
 			if (keyStore != null) {
 				
-				Object decryptedPasswordObject= m_properties.get(SslManagerServiceOptions.PROP_TRUST_PASSWORD);
+				Object decryptedPasswordObject= m_properties.get(m_options.getPropTrustPassword());
 				char[] decryptedPasswordArray= null;
 				if(decryptedPasswordObject != null && decryptedPasswordObject instanceof String){
 					decryptedPasswordArray= ((String) decryptedPasswordObject).toCharArray();
@@ -586,7 +588,13 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
 
 	private char[] getKeyStorePassword() throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, IOException 
 	{
-		return m_cryptoService.getKeyStorePassword(m_options.getSslTrustStore());
+		char[] password= null;
+		try{ 
+			password = (char[]) m_properties.get(m_options.getPropTrustPassword());
+		} catch (Exception e){
+			password = new char[0];
+		}
+		return password;
 	}
 
 	private boolean verifyEnvironmentProperties(char[] newPassword){
@@ -639,7 +647,7 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
 		while (keys.hasNext()) {
 			String key = keys.next();
 			Object value = properties.get(key);
-			if (key.equals(SslManagerServiceOptions.PROP_TRUST_PASSWORD)) {
+			if (key.equals(m_options.getPropTrustPassword())) {
 				try {
 					char[] decryptedPassword= m_cryptoService.decryptAes(value.toString().toCharArray());
 					m_properties.put(key, decryptedPassword);

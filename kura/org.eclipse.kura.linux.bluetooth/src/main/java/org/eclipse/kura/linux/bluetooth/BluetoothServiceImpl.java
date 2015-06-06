@@ -18,10 +18,8 @@ public class BluetoothServiceImpl implements BluetoothService, ConfigurableCompo
 	private static ComponentContext s_context;
 	 
 	private final String PROPERTY_INAME = "iname";
-	private final String PROPERTY_SCAN_TIME = "scan_time";
 	
 	private String m_name;
-	private int m_scanTime;
 	
 	// --------------------------------------------------------------------
 	//
@@ -32,7 +30,6 @@ public class BluetoothServiceImpl implements BluetoothService, ConfigurableCompo
 		s_logger.info("Activating Bluetooth Service...");
 		s_context = context;
 		m_name = (String) properties.get(PROPERTY_INAME);
-		m_scanTime = (Integer) properties.get(PROPERTY_SCAN_TIME);
 	}
 	
 	protected void deactivate(ComponentContext context) {
@@ -56,7 +53,7 @@ public class BluetoothServiceImpl implements BluetoothService, ConfigurableCompo
 	@Override
 	public BluetoothAdapter getBluetoothAdapter(String name) {
 		try {
-			BluetoothAdapterImpl ba = new BluetoothAdapterImpl(name, m_scanTime);
+			BluetoothAdapterImpl ba = new BluetoothAdapterImpl(name);
 			return ba;
 		} catch (KuraException e) {
 			s_logger.error("Could not get bluetooth adapter", e);

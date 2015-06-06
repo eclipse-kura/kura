@@ -1,16 +1,21 @@
-package org.eclipse.kura.example.bluetooth;
+package org.eclipse.kura.example.ble.tisensortag;
 
 import java.util.UUID;
 
 public class TiSensorTagGatt {
 	
-	// These values are for TI CC2541
+	// These values are for TI CC2541 and TI CC2650
 	// Refer to http://processors.wiki.ti.com/images/archive/a/a8/20130111154127!BLE_SensorTag_GATT_Server.pdf
 	
 	// Temperature sensor
-	public static final String HANDLE_TEMP_SENSOR_VALUE			= "0x0025";
-	public static final String HANDLE_TEMP_SENSOR_NOTIFICATION	= "0x0026";
-	public static final String HANDLE_TEMP_SENSOR_ENABLE		= "0x0029";
+	//CC 2650
+	public static final String HANDLE_TEMP_SENSOR_VALUE_2650		= "0x0021";
+	public static final String HANDLE_TEMP_SENSOR_NOTIFICATION_2650	= "0x0022";
+	public static final String HANDLE_TEMP_SENSOR_ENABLE_2650		= "0x0024";
+	//	CC2541
+	public static final String HANDLE_TEMP_SENSOR_VALUE_2541		= "0x0025";
+	public static final String HANDLE_TEMP_SENSOR_NOTIFICATION_2541	= "0x0026";
+	public static final String HANDLE_TEMP_SENSOR_ENABLE_2541		= "0x0029";
 	
 	public static final UUID UUID_TEMP_SENSOR_VALUE			    = UUID.fromString("f000aa01-0451-4000-b000-000000000000");
 	public static final UUID UUID_TEMP_SENSOR_ENABLE		    = UUID.fromString("f000aa02-0451-4000-b000-000000000000");
@@ -24,9 +29,14 @@ public class TiSensorTagGatt {
 	public static final UUID UUID_ACC_SENSOR_ENABLE		        = UUID.fromString("f000aa12-0451-4000-b000-000000000000");
 	
 	// Humidity sensor
-	public static final String HANDLE_HUM_SENSOR_VALUE			= "0x0038";
-	public static final String HANDLE_HUM_SENSOR_NOTIFICATION	= "0x0039";
-	public static final String HANDLE_HUM_SENSOR_ENABLE		    = "0x003c";
+	//	CC2650
+	public static final String HANDLE_HUM_SENSOR_VALUE_2650			= "0x0029";
+	public static final String HANDLE_HUM_SENSOR_NOTIFICATION_2650	= "0x002a";
+	public static final String HANDLE_HUM_SENSOR_ENABLE_2650	    = "0x002c";
+	//	CC2541
+	public static final String HANDLE_HUM_SENSOR_VALUE_2541			= "0x0038";
+	public static final String HANDLE_HUM_SENSOR_NOTIFICATION_2541	= "0x0039";
+	public static final String HANDLE_HUM_SENSOR_ENABLE_2541	    = "0x003c";
 
 	public static final UUID UUID_HUM_SENSOR_VALUE			    = UUID.fromString("f000aa21-0451-4000-b000-000000000000");
 	public static final UUID UUID_HUM_SENSOR_ENABLE		        = UUID.fromString("f000aa22-0451-4000-b000-000000000000");

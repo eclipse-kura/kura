@@ -42,7 +42,6 @@ public class XmlConfigPropertiesAdapter extends XmlAdapter<XmlConfigPropertiesAd
 			while (keys.hasNext()) {
 	
 				XmlConfigPropertyAdapted adaptedValue = new XmlConfigPropertyAdapted();
-				adaptedValues.add(adaptedValue);
 				
 				String key = keys.next();			
 				adaptedValue.setName(key);
@@ -221,6 +220,10 @@ public class XmlConfigPropertiesAdapter extends XmlAdapter<XmlConfigPropertiesAd
 		    		}
 		    		adaptedValue.setValues(stringValues);
 		    	}
+				
+				if(adaptedValue.getValues() == null || adaptedValue.getValues().length > 0){
+					adaptedValues.add(adaptedValue);
+				}
 			}
 		}
 		
@@ -294,6 +297,11 @@ public class XmlConfigPropertiesAdapter extends XmlAdapter<XmlConfigPropertiesAd
 					}
 				}
 				else {
+					//If we are dealing with an empty array, skip this element.
+					//Starting from 1.2.0 an empty array will never be present in a snapshot.
+					if(adaptedProp.getValues() == null){
+						continue;
+					}
 					switch (adaptedProp.getType()) {
 					case stringType:
 						propvalue = adaptedProp.getValues();

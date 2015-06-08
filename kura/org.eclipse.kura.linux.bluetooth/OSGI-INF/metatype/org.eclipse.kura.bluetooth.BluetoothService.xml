@@ -16,7 +16,7 @@
          name="BluetoothService" 
          description="Bluetooth Service for Eclipse Kura.">
         
-        
+        <Icon resource="BluetoothService" size="32"/>
         
         <AD id="iname"
             name="iname"
@@ -25,13 +25,6 @@
             required="true"
             default="hci0"
             description="Name of bluetooth adapter."/>
-        <AD id="scan_time"
-            name="scan_time"
-            type="Integer"
-            cardinality="0"
-            required="true"
-            default="4"
-            description="Length of time to scan for devices. (seconds)" />
 
     </OCD>
     <Designate pid="org.eclipse.kura.bluetooth.BluetoothService">

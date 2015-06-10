@@ -131,6 +131,7 @@ public class DhcpClientManager {
 				sb.append(' ');
 			}
 			if (usePidFile) {
+				sb.append(" -pf ");
 				sb.append(getPidFilename(interfaceName));
 				sb.append(' ');
 			} 

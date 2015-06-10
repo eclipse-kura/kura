@@ -410,11 +410,11 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
 				ts.load(null, null);
 			}
 
+			char[] trustStorePwd = getKeyStorePassword(); 
 			// add the certificate
-			ts.setKeyEntry(alias, privateKey, password, publicCerts);
+			ts.setKeyEntry(alias, privateKey, trustStorePwd, publicCerts);
 
 			// save it
-			char[] trustStorePwd = getKeyStorePassword(); 
 			tsOutStream = new FileOutputStream(trustStore);
 			ts.store(tsOutStream, trustStorePwd);
 			tsOutStream.close();
@@ -553,7 +553,7 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
 
 					ks = KeyStore.getInstance(KeyStore.getDefaultType());
 					ksReadStream = new FileInputStream(keyStore);
-					ks.load(ksReadStream, null);    
+					ks.load(ksReadStream, keyStorePassword);    
 
 					// if we have an alias, then build KeyStore with such key
 					if (keyAlias != null) {                

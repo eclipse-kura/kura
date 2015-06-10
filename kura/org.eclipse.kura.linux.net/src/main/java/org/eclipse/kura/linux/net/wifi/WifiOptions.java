@@ -80,7 +80,7 @@ public class WifiOptions {
 					br = new BufferedReader(new InputStreamReader(procIwConfig.getInputStream()));
 					String line = null;
 					while ((line = br.readLine()) != null) {
-						if (line.contains("IEEE 802.11")) {
+						if (line.contains("IEEE 802.11") || line.contains("Mode:") || line.contains("Access Point:")) {
 							options.add(WIFI_MANAGED_DRIVER_WEXT);
 							break;
 						}

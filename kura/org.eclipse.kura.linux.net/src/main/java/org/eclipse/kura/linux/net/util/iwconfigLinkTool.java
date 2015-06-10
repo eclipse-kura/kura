@@ -75,11 +75,24 @@ public class iwconfigLinkTool implements LinkTool {
 	        		 int sigLevelInd = line.indexOf("Signal level=");
 	        		 line = line.substring(sigLevelInd+"Signal level=".length());
 	        		 line = line.substring(0, line.indexOf(' '));
-	        		 int signal = Integer.parseInt(line);
-                     if(associated && (signal > -100)) {     // TODO: adjust this threshold?
-                     	m_signal = signal;
-                        m_linkDetected = true;
-                     }
+	        		 int signal = 0;
+	        		 if (line.contains("/")) {
+	        			// Could also be of format 39/100
+							final String[] parts = line.split("/");
+							signal = (int) Float.parseFloat(parts[0]);
+							if(signal <= 0)
+								signal = -100;
+						    else if(signal >= 100)
+						    	signal = -50;
+						    else
+						    	signal = (signal / 2) - 100;
+	        		 } else {
+		        		 signal = Integer.parseInt(line);
+	                     if(associated && (signal > -100)) {     // TODO: adjust this threshold?
+	                     	m_signal = signal;
+	                        m_linkDetected = true;
+	                     }
+	        		 }
 	        	 }
 	         }
 	         

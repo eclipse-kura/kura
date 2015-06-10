@@ -203,7 +203,20 @@ public class iwlistScanTool implements IScanTool {
 				String signalLevel = st.nextToken();
 				if (signalLevel != null) {
 					signalLevel = signalLevel.substring(signalLevel.indexOf('=')+1);
-					strength = Integer.parseInt(signalLevel);
+					if (signalLevel.contains("/")) {
+						// Could also be of format 39/100
+						final String[] parts = signalLevel.split("/");
+						strength = (int) Float.parseFloat(parts[0]);
+						if(strength <= 0)
+							strength = -100;
+					    else if(strength >= 100)
+					    	strength = -50;
+					    else
+					    	strength = (strength / 2) - 100;
+					} else {
+						strength = (int)Float.parseFloat(signalLevel);
+					}
+					strength = Math.abs(strength);
 				}
 				
 			} else if (line.startsWith("Mode:")) {

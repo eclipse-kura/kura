@@ -789,11 +789,17 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 			// Unmarshall
 
 			FileReader fr = null;
+			BufferedReader br = null;
 			XmlComponentConfigurations xmlConfigs = null;
 			try {
-
 				fr = new FileReader(fSnapshot);
-				xmlConfigs = XmlUtil.unmarshal(fr, XmlComponentConfigurations.class);
+				br = new BufferedReader(fr);
+				String line = "";
+				String entireFile = "";
+				while ((line = br.readLine()) != null) {
+					entireFile += line;
+				} // end while
+				xmlConfigs = XmlUtil.unmarshal(entireFile, XmlComponentConfigurations.class);
 			} finally {
 				if (fr != null) {
 					fr.close();
@@ -1119,7 +1125,13 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 			try {
 				if (allSnapshotsUnencrypted()) {
 					fr = new FileReader(fSnapshot);
-					xmlConfigs = XmlUtil.unmarshal(fr, XmlComponentConfigurations.class);
+					br = new BufferedReader(fr);
+					String line = "";
+					String entireFile = "";
+					while ((line = br.readLine()) != null) {
+						entireFile += line;
+					} // end while
+					xmlConfigs = XmlUtil.unmarshal(entireFile, XmlComponentConfigurations.class);
 					encryptPlainSnapshots();
 					encryptConfigs(xmlConfigs.getConfigurations());
 				}

@@ -24,14 +24,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAnyAttribute;
-import javax.xml.bind.annotation.XmlAnyElement;
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlType;
 import javax.xml.namespace.QName;
 
 import org.eclipse.kura.configuration.metatype.AD;
@@ -65,28 +57,15 @@ import org.w3c.dom.Element;
  * 
  * 
  */
-@XmlRootElement(name="OCD", namespace="http://www.osgi.org/xmlns/metatype/v1.2.0")
-@XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "Tocd", propOrder = {
-    "ad",
-    "icon",
-    "any"
-})
+
 public class Tocd implements OCD 
 {
-    @XmlElement(name = "AD", namespace="http://www.osgi.org/xmlns/metatype/v1.2.0", required=true)
     protected List<Tad> ad;
-    @XmlElement(name = "Icon", namespace="http://www.osgi.org/xmlns/metatype/v1.2.0")
     protected List<Ticon> icon;
-    @XmlAnyElement(lax = true)
     protected List<Object> any;
-    @XmlAttribute(name = "name", required = true)
     protected String name;
-    @XmlAttribute(name = "description")
     protected String description;
-    @XmlAttribute(name = "id", required = true)
     protected String id;
-    @XmlAnyAttribute
     private Map<QName, String> otherAttributes = new HashMap<QName, String>();
 
     /**

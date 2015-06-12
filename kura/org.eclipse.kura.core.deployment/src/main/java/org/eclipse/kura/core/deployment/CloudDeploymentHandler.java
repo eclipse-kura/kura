@@ -21,15 +21,12 @@ import java.util.Date;
 import java.util.Dictionary;
 import java.util.Hashtable;
 
-import javax.xml.bind.JAXBException;
-
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloud.CloudClient;
 import org.eclipse.kura.cloud.CloudClientListener;
 import org.eclipse.kura.cloud.CloudService;
 import org.eclipse.kura.cloud.CloudletTopic;
 import org.eclipse.kura.cloud.CloudletTopic.Method;
-import org.eclipse.kura.core.configuration.util.XmlUtil;
 import org.eclipse.kura.core.util.ThrowableUtil;
 import org.eclipse.kura.deployment.agent.DeploymentAgentService;
 import org.eclipse.kura.message.KuraPayload;

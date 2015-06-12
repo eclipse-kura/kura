@@ -14,6 +14,8 @@ package org.eclipse.kura.web.server;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.security.GeneralSecurityException;
 import java.security.KeyFactory;
 import java.security.PrivateKey;
@@ -24,8 +26,7 @@ import java.security.cert.X509Certificate;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.Collection;
 import java.util.Iterator;
-
-import javax.xml.bind.DatatypeConverter;
+import java.util.Base64;
 
 import org.eclipse.kura.ssl.SslManagerService;
 import org.eclipse.kura.web.server.util.ServiceLocator;
@@ -49,8 +50,33 @@ public class GwtCertificatesServiceImpl extends OsgiRemoteServiceServlet impleme
 	    	// Remove header if exists
 	        String key = privateCert.replace("-----BEGIN PRIVATE KEY-----", "").replace("\n", "");
 	        key = key.replace("-----END PRIVATE KEY-----", "");
+	        
+	        Object convertedData= null;
+	        try {
+	        	Class<?> clazz = Class.forName( "javax.xml.bind.DatatypeConverter" );
+	        	Method method = clazz.getMethod("parseBase64Binary", String.class);
+	        	convertedData= method.invoke(null, key);
+	        } catch( ClassNotFoundException e ) {
+	        	Base64.Decoder b64= Base64.getDecoder();
+	        	convertedData= b64.decode(key);
+	        } catch (NoSuchMethodException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (SecurityException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IllegalAccessException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IllegalArgumentException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (InvocationTargetException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 	    	
-	        byte[] conversion= DatatypeConverter.parseBase64Binary(key);
+	        byte[] conversion= (byte[]) convertedData;
 	        // Parse Base64 - after PKCS8
 	        PKCS8EncodedKeySpec specPriv = new PKCS8EncodedKeySpec(conversion);
 		    

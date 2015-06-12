@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import javax.xml.bind.JAXBException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -39,6 +38,7 @@ import org.eclipse.kura.core.configuration.XmlConfigPropertiesAdapted;
 import org.eclipse.kura.core.configuration.XmlConfigPropertiesAdapter;
 import org.eclipse.kura.core.configuration.XmlConfigPropertyAdapted;
 import org.eclipse.kura.core.configuration.XmlConfigPropertyAdapted.ConfigPropertyType;
+import org.eclipse.kura.core.configuration.XmlSnapshotIdResult;
 import org.eclipse.kura.core.configuration.metatype.Tad;
 import org.eclipse.kura.core.configuration.metatype.Tdesignate;
 import org.eclipse.kura.core.configuration.metatype.Ticon;
@@ -119,9 +119,10 @@ public class XmlUtil
 
 	public static void marshal(Object object, Writer w) throws Exception 
 	{
-		if(!(object instanceof XmlComponentConfigurations)){
-			throw new Exception("Unsupported Object");
-		}else{
+		if(object instanceof XmlSnapshotIdResult){
+			
+		}else if(object instanceof XmlComponentConfigurations){
+			
 
 			try {				
 				DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
@@ -232,7 +233,7 @@ public class XmlUtil
 	}
 
 	public static <T> T unmarshal(String s, Class<T> clazz) 
-			throws JAXBException, XMLStreamException, FactoryConfigurationError
+			throws Exception, XMLStreamException, FactoryConfigurationError
 	{
 		StringReader sr = new StringReader(s);
 		T result=unmarshal(sr, clazz);
@@ -241,7 +242,7 @@ public class XmlUtil
 
 
 	public static <T> T unmarshal(Reader r, Class<T> clazz) 
-			throws JAXBException, XMLStreamException, FactoryConfigurationError
+			throws Exception, XMLStreamException, FactoryConfigurationError
 	{
 		DocumentBuilderFactory factory = null;
 		DocumentBuilder parser = null;

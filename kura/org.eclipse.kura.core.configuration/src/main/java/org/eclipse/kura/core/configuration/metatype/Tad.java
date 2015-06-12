@@ -132,6 +132,13 @@ public class Tad implements AD
         }
         return (List<Option>)(List<?>) this.option;
     }
+    
+    public void setOption(Toption o) {
+        if (option == null) {
+            option = new ArrayList<Toption>();
+        }
+        option.add(o);
+    }
 
     /**
      * Gets the value of the any property.

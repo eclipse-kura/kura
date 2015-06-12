@@ -107,6 +107,13 @@ public class Ticon implements Icon
         }
         return this.any;
     }
+    
+    public void setAny(Object o) {
+        if (any == null) {
+            any = new ArrayList<Object>();
+        }
+        any.add(o);
+    }
 
     /**
      * Gets the value of the resource property.

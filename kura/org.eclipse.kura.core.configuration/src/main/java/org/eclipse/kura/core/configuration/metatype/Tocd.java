@@ -154,6 +154,13 @@ public class Tocd implements OCD
         }
         return new ArrayList<Icon>(this.icon);
     }
+    
+    public void setIcon(Ticon ti) {
+        if (icon == null) {
+            icon = new ArrayList<Ticon>();
+        }
+        icon.add(ti);
+    }
 
     /**
      * Gets the value of the any property.
@@ -183,6 +190,13 @@ public class Tocd implements OCD
             any = new ArrayList<Object>();
         }
         return this.any;
+    }
+    
+    public void setAny(Object o) {
+        if (any == null) {
+            any = new ArrayList<Object>();
+        }
+        any.add(o);
     }
 
     /**

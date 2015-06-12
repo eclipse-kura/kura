@@ -112,6 +112,12 @@ public class Tmetadata implements MetaData
         return new ArrayList<OCD>(this.ocd);
     }
 
+    public void setOCD(Tocd element) {
+        if (ocd == null) {
+            ocd = new ArrayList<Tocd>();
+        }
+        ocd.add(element);
+    }
     /**
      * Gets the value of the designate property.
      * 
@@ -139,6 +145,13 @@ public class Tmetadata implements MetaData
             designate = new ArrayList<Tdesignate>();
         }
         return new ArrayList<Designate>(this.designate);
+    }
+    
+    public void setDesignate(Tdesignate td) {
+        if (designate == null) {
+            designate = new ArrayList<Tdesignate>();
+        }
+        designate.add(td);
     }
 
     /**
@@ -169,6 +182,13 @@ public class Tmetadata implements MetaData
             any = new ArrayList<Object>();
         }
         return this.any;
+    }
+    
+    public void getAny(Object o) {
+        if (any == null) {
+            any = new ArrayList<Object>();
+        }
+        any.add(o);
     }
 
     /**

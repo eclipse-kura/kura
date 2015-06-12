@@ -449,7 +449,7 @@ public class CloudConfigurationHandler extends Cloudlet
 		StringWriter sw = new StringWriter();
 		try {
 			XmlUtil.marshal(o, sw);
-		} catch (JAXBException e) {
+		} catch (Exception e) {
 			s_logger.error("Error marshalling snapshots: {}", e);
 			throw new KuraException(KuraErrorCode.CONFIGURATION_SNAPSHOT_LOADING, e);
 		}

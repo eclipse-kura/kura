@@ -104,6 +104,13 @@ public class Toption implements Option
         }
         return this.any;
     }
+    
+    public void setAny(Object o) {
+        if (any == null) {
+            any = new ArrayList<Object>();
+        }
+        any.add(o);
+    }
 
     /**
      * Gets the value of the label property.

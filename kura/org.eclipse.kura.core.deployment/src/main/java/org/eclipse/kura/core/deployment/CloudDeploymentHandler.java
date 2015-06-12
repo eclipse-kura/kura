@@ -616,7 +616,7 @@ public class CloudDeploymentHandler implements EventHandler, CloudClientListener
 			} catch (UnsupportedEncodingException e) {
 				// Ignore
 			}
-		} catch (JAXBException e) {
+		} catch (Exception e) {
 			s_logger.error("Error getting resource {}: {}", RESOURCE_PACKAGES, e);
 		}
 		
@@ -688,7 +688,7 @@ public class CloudDeploymentHandler implements EventHandler, CloudClientListener
 			} catch (UnsupportedEncodingException e) {
 				// Ignore
 			}
-		} catch (JAXBException e) {
+		} catch (Exception e) {
 			s_logger.error("Error getting resource {}: {}", RESOURCE_BUNDLES, e);
 		}
 

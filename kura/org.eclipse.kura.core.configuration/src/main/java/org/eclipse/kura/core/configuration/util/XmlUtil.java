@@ -12,6 +12,7 @@
 package org.eclipse.kura.core.configuration.util;
 
 import java.io.IOException;
+import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
@@ -239,7 +240,7 @@ public class XmlUtil
 	}
 
 
-	public static <T> T unmarshal(StringReader r, Class<T> clazz) 
+	public static <T> T unmarshal(Reader r, Class<T> clazz) 
 			throws JAXBException, XMLStreamException, FactoryConfigurationError
 	{
 		DocumentBuilderFactory factory = null;

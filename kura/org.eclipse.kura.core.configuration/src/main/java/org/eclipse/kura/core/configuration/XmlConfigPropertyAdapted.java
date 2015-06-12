@@ -64,6 +64,7 @@ public class XmlConfigPropertyAdapted
 	{
 		super();
 
+		this.name      = name;
 		this.type      = type;
 		this.values    = values;
 		this.encrypted = false;   

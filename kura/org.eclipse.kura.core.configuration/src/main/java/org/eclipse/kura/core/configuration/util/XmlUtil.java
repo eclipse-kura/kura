@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import javax.xml.namespace.QName;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -32,6 +33,10 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+import org.eclipse.kura.configuration.metatype.AD;
+import org.eclipse.kura.configuration.metatype.Icon;
+import org.eclipse.kura.configuration.metatype.Option;
+import org.eclipse.kura.configuration.metatype.Scalar;
 import org.eclipse.kura.core.configuration.ComponentConfigurationImpl;
 import org.eclipse.kura.core.configuration.XmlComponentConfigurations;
 import org.eclipse.kura.core.configuration.XmlConfigPropertiesAdapted;
@@ -60,11 +65,12 @@ import org.xml.sax.SAXException;
 public class XmlUtil 
 {
 	private static final Logger s_logger = LoggerFactory.getLogger(XmlUtil.class);
-	private static final String nameSpace = "esf";
-	
+	private static final String ESF_NAMESPACE = "esf";
+	private static final String OCD_NAMESPACE = "ocd";
+
 	private static final String SNAPSHOT_IDS = "snapshot-ids";
 	private static final String SNAPSHOTIDS = "snapshotIds";
-	
+
 	private static final String CONFIGURATIONS = "configurations";
 	private static final String PROPERTIES = "properties";
 
@@ -81,13 +87,16 @@ public class XmlUtil
 
 	private final static String METADATA_LOCALIZATION = "localization";
 
+	private static final String METADATA_OCD = "OCD";
 	private final static String METADATA_OCD_NAME = "name";
 	private final static String METADATA_OCD_ID = "id";
 	private final static String METADATA_OCD_DESCRIPTION = "description";
 
-	private final static String METADATA_IMAGE_RESOURCE = "resource";
-	private final static String METADATA_IMAGE_SIZE = "size";
+	private final static String METADATA_ICON = "Icon";
+	private final static String METADATA_ICON_RESOURCE = "resource";
+	private final static String METADATA_ICON_SIZE = "size";
 
+	private final static String METADATA_AD = "AD";
 	private final static String METADATA_AD_ID = "id";
 	private final static String METADATA_AD_NAME = "name";
 	private final static String METADATA_AD_TYPE = "type";
@@ -132,23 +141,23 @@ public class XmlUtil
 			doc.setXmlStandalone(true);
 
 			if(object instanceof XmlSnapshotIdResult){
-				Element snapshotIDs = doc.createElement(nameSpace + ":" + SNAPSHOT_IDS);
+				Element snapshotIDs = doc.createElement(ESF_NAMESPACE + ":" + SNAPSHOT_IDS);
 				snapshotIDs.setAttributeNS("http://www.w3.org/2000/xmlns/", "xmlns:esf","http://eurotech.com/esf/2.0");
 				snapshotIDs.setAttributeNS("http://www.w3.org/2000/xmlns/", "xmlns:ocd","http://www.osgi.org/xmlns/metatype/v1.2.0");
 				doc.appendChild(snapshotIDs);
-				
+
 				XmlSnapshotIdResult xmlSnapshotIdResult = (XmlSnapshotIdResult) object;
 				List<Long> snapshotIdVals= xmlSnapshotIdResult.getSnapshotIds();
-				
+
 				for(Long snapId: snapshotIdVals){
-					Element snapshotIds= doc.createElement(nameSpace + ":" + SNAPSHOTIDS);
+					Element snapshotIds= doc.createElement(ESF_NAMESPACE + ":" + SNAPSHOTIDS);
 					snapshotIds.setTextContent(snapId.toString());
 					snapshotIDs.appendChild(snapshotIds);
 				}
-				
+
 			}else if(object instanceof XmlComponentConfigurations){		
 
-				Element configurations = doc.createElement(nameSpace + ":" + CONFIGURATIONS);
+				Element configurations = doc.createElement(ESF_NAMESPACE + ":" + CONFIGURATIONS);
 				configurations.setAttributeNS("http://www.w3.org/2000/xmlns/", "xmlns:esf","http://eurotech.com/esf/2.0");
 				configurations.setAttributeNS("http://www.w3.org/2000/xmlns/", "xmlns:ocd","http://www.osgi.org/xmlns/metatype/v1.2.0");
 				doc.appendChild(configurations);
@@ -162,7 +171,7 @@ public class XmlUtil
 				}
 
 			}
-			
+
 			// write the content into xml file
 			TransformerFactory transformerFactory = TransformerFactory.newInstance();
 			Transformer transformer = transformerFactory.newTransformer();
@@ -180,19 +189,57 @@ public class XmlUtil
 
 
 	private static Element marshallConfiguration(ComponentConfigurationImpl config, Document doc) throws Exception {
-		String pid= config.getPid();
+		//get ComponentConfigurationImpl Object data
+		String configPid= config.getPid();
+		Map<String, Object> configProperty= config.getConfigurationProperties();
+		Tocd configOCD= config.getDefinition();
 
 		//create configuration element
-		Element configurationElement= doc.createElement(nameSpace + ":" +CONFIGURATION);
+		Element configurationElement= doc.createElement(ESF_NAMESPACE + ":" +CONFIGURATION);
 		Attr propertiesAttribute= doc.createAttribute(CONFIGURATION_PID);
-		propertiesAttribute.setNodeValue(pid);
+		propertiesAttribute.setNodeValue(configPid);
 		configurationElement.setAttributeNode(propertiesAttribute);
 
-		Map<String, Object> property= config.getConfigurationProperties();
-		//Add properties Node
-		Element properties= doc.createElement(nameSpace + ":" +PROPERTIES);
+		//Add OCD node and marshall definitions
+		String ocdName= configOCD.getName();
+		String ocdDescription= configOCD.getDescription();
+		String ocdID= configOCD.getId();
+		List<Icon> ocdIcons= configOCD.getIcon();
+		List<AD> ocdADs= configOCD.getAD();
+		List<Object> ocdAnys= configOCD.getAny();
+		Map<QName,String> ocdOtherAttrs= configOCD.getOtherAttributes();
+
+		Element ocd= doc.createElement(OCD_NAMESPACE + ":" + METADATA_OCD);
+		configurationElement.appendChild(ocd);
+		Attr ocdAttrName= doc.createAttribute(METADATA_OCD_NAME);
+		ocdAttrName.setNodeValue(ocdName);
+		ocd.setAttributeNode(ocdAttrName);
+
+		Attr ocdAttrDescription= doc.createAttribute(METADATA_OCD_DESCRIPTION);
+		ocdAttrDescription.setNodeValue(ocdDescription);
+		ocd.setAttributeNode(ocdAttrDescription);
+
+		Attr ocdAttrId= doc.createAttribute(METADATA_OCD_ID);
+		ocdAttrId.setNodeValue(ocdID);
+		ocd.setAttributeNode(ocdAttrId);
+
+		for(AD ocdAD: ocdADs){
+			Element ad= doc.createElement(OCD_NAMESPACE + ":" + METADATA_AD);
+			marshallAD(ocdAD, doc, ad);
+			ocd.appendChild(ad);
+		}
+
+		for(Icon ocdIcon: ocdIcons){
+			Element icon= doc.createElement(OCD_NAMESPACE + ":" + METADATA_ICON);
+			marshallIcon(ocdIcon, doc, icon);
+			ocd.appendChild(icon);
+		}
+
+
+		//Add properties Node and marshall properties
+		Element properties= doc.createElement(ESF_NAMESPACE + ":" + PROPERTIES);
+		marshallProperties(configProperty, doc, properties);
 		configurationElement.appendChild(properties);
-		marshallProperties(property, doc, properties);
 
 		return configurationElement;
 	}
@@ -218,7 +265,7 @@ public class XmlUtil
 		String[] values= propertyObj.getValues();
 
 		if(values != null){
-			Element property= doc.createElement(nameSpace + ":" +CONFIGURATION_PROPERTY);
+			Element property= doc.createElement(ESF_NAMESPACE + ":" +CONFIGURATION_PROPERTY);
 			Attr attName= doc.createAttribute(CONFIGURATION_PROPERTY_NAME);
 			attName.setNodeValue(name);
 			property.setAttributeNode(attName);
@@ -238,7 +285,7 @@ public class XmlUtil
 
 
 			for(String value:values){
-				Element valueElem= doc.createElement(nameSpace + ":" +CONFIGURATION_PROPERTY_VALUE);
+				Element valueElem= doc.createElement(ESF_NAMESPACE + ":" +CONFIGURATION_PROPERTY_VALUE);
 				valueElem.setTextContent(value);
 				property.appendChild(valueElem);
 			}
@@ -246,6 +293,106 @@ public class XmlUtil
 		}
 		return null;
 	}
+
+	private static void marshallAD(AD ocdAD, Document doc, Element ad) {
+		String adId= ocdAD.getId();
+		String adName= ocdAD.getName();
+		Scalar adType= ocdAD.getType();
+		Integer adCardinality= ocdAD.getCardinality();
+		Boolean adRequired= ocdAD.isRequired();
+		String adDefault= ocdAD.getDefault();
+		String adDescription= ocdAD.getDescription();
+		String adMin= ocdAD.getMin();
+		String adMax= ocdAD.getMax();
+		List<Option> adOptions= ocdAD.getOption();
+
+		if(adName != null){
+			Attr attrName= doc.createAttribute(METADATA_AD_NAME);
+			attrName.setNodeValue(adName);
+			ad.setAttributeNode(attrName);
+		}
+		if(adId != null){
+			Attr attrId= doc.createAttribute(METADATA_AD_ID);
+			attrId.setNodeValue(adId);
+			ad.setAttributeNode(attrId);
+		}
+		if(adType != null){
+			Attr attrType= doc.createAttribute(METADATA_AD_TYPE);
+			attrType.setNodeValue(adType.value());
+			ad.setAttributeNode(attrType);
+		}
+		if(adCardinality != null){
+			Attr attrCardinality= doc.createAttribute(METADATA_AD_CARDINALITY);
+			attrCardinality.setNodeValue(adCardinality.toString());
+			ad.setAttributeNode(attrCardinality);
+		}
+		if(adRequired != null){
+			Attr attrRequired= doc.createAttribute(METADATA_AD_REQUIRED);
+			attrRequired.setNodeValue(adRequired.toString());
+			ad.setAttributeNode(attrRequired);
+		}
+		if(adDefault != null){
+			Attr attrDefault= doc.createAttribute(METADATA_AD_DEFAULT);
+			attrDefault.setNodeValue(adDefault);
+			ad.setAttributeNode(attrDefault);
+		}
+		if(adDescription != null){
+			Attr attrDescription= doc.createAttribute(METADATA_AD_DESCRIPTION);
+			attrDescription.setNodeValue(adDescription);
+			ad.setAttributeNode(attrDescription);
+		}
+		if(adMin != null){
+			Attr attrMin= doc.createAttribute(METADATA_AD_MIN);
+			attrMin.setNodeValue(adMin);
+			ad.setAttributeNode(attrMin);
+		}
+		if(adMax != null){
+			Attr attrMax= doc.createAttribute(METADATA_AD_MAX);
+			attrMax.setNodeValue(adMax);
+			ad.setAttributeNode(attrMax);
+		}
+
+		for(Option adOption:adOptions){
+			Element option= doc.createElement(OCD_NAMESPACE + ":" + METADATA_AD_OPTION);
+			marshallOption(adOption, doc, option);
+			ad.appendChild(option);
+		}
+
+	}
+
+	private static void marshallOption(Option adOption, Document doc, Element option) {
+		String label= adOption.getLabel();
+		String value= adOption.getValue();
+
+		if(!label.trim().isEmpty()){
+			Attr attrLabel= doc.createAttribute(METADATA_AD_OPTION_LABEL);
+			attrLabel.setNodeValue(label);
+			option.setAttributeNode(attrLabel);
+		}
+		if(!value.trim().isEmpty()){
+			Attr attrValue= doc.createAttribute(METADATA_AD_OPTION_VALUE);
+			attrValue.setNodeValue(value);
+			option.setAttributeNode(attrValue);
+		}
+	}
+	
+	private static void marshallIcon(Icon ocdIcon, Document doc, Element icon) {
+		String iconResource= ocdIcon.getResource();
+		BigInteger iconSize= ocdIcon.getSize();
+		
+		if(!iconResource.trim().isEmpty()){
+			Attr attrResource= doc.createAttribute(METADATA_ICON_RESOURCE);
+			attrResource.setNodeValue(iconResource);
+			icon.setAttributeNode(attrResource);
+		}
+		if(iconSize != null){
+			Attr attrSize= doc.createAttribute(METADATA_ICON_SIZE);
+			attrSize.setNodeValue(iconSize.toString());
+			icon.setAttributeNode(attrSize);
+		}
+		
+	}
+	
 
 	public static <T> T unmarshal(String s, Class<T> clazz) 
 			throws Exception, XMLStreamException, FactoryConfigurationError
@@ -313,7 +460,7 @@ public class XmlUtil
 		XmlComponentConfigurations xcc= new XmlComponentConfigurations();
 
 		//Get all configurations
-		NodeList configurationList = document.getElementsByTagName(nameSpace + ":" + CONFIGURATION);
+		NodeList configurationList = document.getElementsByTagName(ESF_NAMESPACE + ":" + CONFIGURATION);
 
 		List<ComponentConfigurationImpl> compConfList= new ArrayList<ComponentConfigurationImpl>();
 		//Iterate through all the configuration elements inside configurations tag
@@ -496,11 +643,11 @@ public class XmlUtil
 		for(int ocdChildsIndex=0; ocdChildsIndex < ocdChildElements.length; ocdChildsIndex++){
 			Element node= ocdChildElements[ocdChildsIndex];
 			String localName= node.getNodeName();
-			if(localName.equals("Icon")){
+			if(localName.equals(METADATA_ICON)){
 				//parse Icon
 				Ticon tIcon= parseIcon(node);
 				tocd.setIcon(tIcon);
-			}else if(localName.equals("AD")){
+			}else if(localName.equals(METADATA_AD)){
 				//parse AD
 				Tad tad= parseAD(node);
 				tocd.addAD(tad);
@@ -574,8 +721,8 @@ public class XmlUtil
 	private static Ticon parseIcon(Element icon) {
 		Ticon result= new Ticon();
 
-		String resource= icon.getAttribute(METADATA_IMAGE_RESOURCE);
-		BigInteger size= new BigInteger(icon.getAttribute(METADATA_IMAGE_SIZE));
+		String resource= icon.getAttribute(METADATA_ICON_RESOURCE);
+		BigInteger size= new BigInteger(icon.getAttribute(METADATA_ICON_SIZE));
 		if(size.signum() >= 0){
 			result.setSize(size);
 		}else{

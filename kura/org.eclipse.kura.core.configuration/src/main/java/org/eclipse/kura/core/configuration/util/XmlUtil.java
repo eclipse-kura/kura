@@ -61,6 +61,10 @@ public class XmlUtil
 {
 	private static final Logger s_logger = LoggerFactory.getLogger(XmlUtil.class);
 	private static final String nameSpace = "esf";
+	
+	private static final String SNAPSHOT_IDS = "snapshot-ids";
+	private static final String SNAPSHOTIDS = "snapshotIds";
+	
 	private static final String CONFIGURATIONS = "configurations";
 	private static final String PROPERTIES = "properties";
 
@@ -107,7 +111,7 @@ public class XmlUtil
 
 	private final static String METADATA_DESIGNATE_OBJECT_ATTRIBUTE = "Attribute";
 	private final static String METADATA_DESIGNATE_OBJECT_OCDREF = "ocdref";
-	
+
 
 
 	public static String marshal(Object object) throws Exception 
@@ -119,19 +123,30 @@ public class XmlUtil
 
 	public static void marshal(Object object, Writer w) throws Exception 
 	{
-		if(object instanceof XmlSnapshotIdResult){
-			
-		}else if(object instanceof XmlComponentConfigurations){
-			
+		try{
+			DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+			DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
 
-			try {				
-				DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
-				DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
+			// root elements
+			Document doc = docBuilder.newDocument();
+			doc.setXmlStandalone(true);
 
-				// root elements
-				Document doc = docBuilder.newDocument();
-				doc.setXmlStandalone(true);
-
+			if(object instanceof XmlSnapshotIdResult){
+				Element snapshotIDs = doc.createElement(nameSpace + ":" + SNAPSHOT_IDS);
+				snapshotIDs.setAttributeNS("http://www.w3.org/2000/xmlns/", "xmlns:esf","http://eurotech.com/esf/2.0");
+				snapshotIDs.setAttributeNS("http://www.w3.org/2000/xmlns/", "xmlns:ocd","http://www.osgi.org/xmlns/metatype/v1.2.0");
+				doc.appendChild(snapshotIDs);
+				
+				XmlSnapshotIdResult xmlSnapshotIdResult = (XmlSnapshotIdResult) object;
+				List<Long> snapshotIdVals= xmlSnapshotIdResult.getSnapshotIds();
+				
+				for(Long snapId: snapshotIdVals){
+					Element snapshotIds= doc.createElement(nameSpace + ":" + SNAPSHOTIDS);
+					snapshotIds.setTextContent(snapId.toString());
+					snapshotIDs.appendChild(snapshotIds);
+				}
+				
+			}else if(object instanceof XmlComponentConfigurations){		
 
 				Element configurations = doc.createElement(nameSpace + ":" + CONFIGURATIONS);
 				configurations.setAttributeNS("http://www.w3.org/2000/xmlns/", "xmlns:esf","http://eurotech.com/esf/2.0");
@@ -146,19 +161,19 @@ public class XmlUtil
 					configurations.appendChild(configuration);
 				}
 
-				// write the content into xml file
-				TransformerFactory transformerFactory = TransformerFactory.newInstance();
-				Transformer transformer = transformerFactory.newTransformer();
-				DOMSource source = new DOMSource(doc);
-
-				StreamResult result = new StreamResult(w); //System.out
-				transformer.transform(source, result);
-			} catch (ParserConfigurationException pce) {
-				pce.printStackTrace();
-			} catch (TransformerException tfe) {
-				tfe.printStackTrace();
 			}
+			
+			// write the content into xml file
+			TransformerFactory transformerFactory = TransformerFactory.newInstance();
+			Transformer transformer = transformerFactory.newTransformer();
+			DOMSource source = new DOMSource(doc);
 
+			StreamResult result = new StreamResult(w); //System.out
+			transformer.transform(source, result);
+		} catch (ParserConfigurationException pce) {
+			pce.printStackTrace();
+		} catch (TransformerException tfe) {
+			tfe.printStackTrace();
 		}
 
 	}

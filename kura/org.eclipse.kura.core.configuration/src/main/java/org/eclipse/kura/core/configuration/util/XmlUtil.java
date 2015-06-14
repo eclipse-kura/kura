@@ -119,6 +119,8 @@ public class XmlUtil
 
 	private final static String METADATA_DESIGNATE_OBJECT_ATTRIBUTE = "Attribute";
 	private final static String METADATA_DESIGNATE_OBJECT_OCDREF = "ocdref";
+	
+	private static Document doc= null;
 
 
 	//
@@ -139,7 +141,7 @@ public class XmlUtil
 			DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
 
 			// root elements
-			Document doc = docBuilder.newDocument();
+			doc = docBuilder.newDocument();
 			doc.setXmlStandalone(true);
 
 			if(object instanceof XmlSnapshotIdResult){
@@ -171,7 +173,7 @@ public class XmlUtil
 
 				if(configsList != null){
 					for(ComponentConfigurationImpl config: configsList){
-						Element configuration= marshallConfiguration(config, doc);
+						Element configuration= marshallConfiguration(config);
 						configurations.appendChild(configuration);
 					}
 				}
@@ -217,40 +219,35 @@ public class XmlUtil
 			s_logger.error("Parser Factory configuration Error");
 			throw fce;
 		} catch (ParserConfigurationException pce) {
-			// a parser cannot be created with the requested configuration
+			// the parser cannot be created with the specified configuration
 			s_logger.error("Parser configuration exception");
 			throw new FactoryConfigurationError(pce);
 		}
 
 		// parse the document
-		Document document = null;
 		try {
 			InputSource is = new InputSource(r);
-			document = parser.parse(is);
-			document.getDocumentElement().normalize();
+			doc = parser.parse(is);
+			doc.getDocumentElement().normalize();
 		} catch (SAXException se) {
-			// Some general parse error occurred. Might be thrown because DocumentBuilder
-			// class reuses several classes from the SAX API.
 			throw new XMLStreamException(se.getMessage());
 		} catch (IOException ioe) {
-			// Some IO error occurred
 			throw new XMLStreamException(ioe.getMessage());
 		} catch (IllegalArgumentException iae) {
-			// filename is null
 			throw new XMLStreamException(iae.getMessage());
 		}
 
 		//identify the correct parser that has to execute
 		if(clazz.equals(XmlComponentConfigurations.class)){
 			try {
-				//Snapshot parser
-				return unmarshalXmlComponentConfig(document);
+				// Snapshot parser
+				return unmarshalXmlComponentConfig();
 			} catch (Exception e) {
 				throw new XMLStreamException(e.getMessage());
 			}
 		}else {
-			//MetaData parser
-			return unmarshalMetaData(document);
+			// MetaData parser
+			return unmarshalMetaData();
 		}
 	}
 
@@ -259,7 +256,7 @@ public class XmlUtil
 	//
 	// Marshaller's private methods
 	//
-	private static Element marshallConfiguration(ComponentConfigurationImpl config, Document doc) throws Exception {
+	private static Element marshallConfiguration(ComponentConfigurationImpl config) throws Exception {
 		//get ComponentConfigurationImpl Object data
 		String configPid= config.getPid();
 		Map<String, Object> configProperty= config.getConfigurationProperties();
@@ -305,7 +302,7 @@ public class XmlUtil
 			if(ocdADs != null){
 				for(AD ocdAD: ocdADs){
 					Element ad= doc.createElement(OCD_NAMESPACE + ":" + METADATA_AD);
-					marshallAD(ocdAD, doc, ad);
+					marshallAD(ocdAD, ad);
 					ocd.appendChild(ad);
 				}
 			}
@@ -313,7 +310,7 @@ public class XmlUtil
 			if(ocdIcons != null){
 				for(Icon ocdIcon: ocdIcons){
 					Element icon= doc.createElement(OCD_NAMESPACE + ":" + METADATA_ICON);
-					marshallIcon(ocdIcon, doc, icon);
+					marshallIcon(ocdIcon, icon);
 					ocd.appendChild(icon);
 				}
 			}
@@ -323,27 +320,27 @@ public class XmlUtil
 		//Add properties Node and marshall properties
 		if(configProperty != null){
 			Element properties= doc.createElement(ESF_NAMESPACE + ":" + PROPERTIES);
-			marshallProperties(configProperty, doc, properties);
+			marshallProperties(configProperty, properties);
 			configurationElement.appendChild(properties);
 		}
 
 		return configurationElement;
 	}
 
-	private static void marshallProperties(Map<String, Object> propertyMap, Document doc, Element properties) throws Exception {
+	private static void marshallProperties(Map<String, Object> propertyMap, Element properties) throws Exception {
 		XmlConfigPropertiesAdapter xmlPropAdapter = new XmlConfigPropertiesAdapter();
 		XmlConfigPropertiesAdapted configPropAdapted= xmlPropAdapter.marshal(propertyMap);
 
 		XmlConfigPropertyAdapted[] propArray = configPropAdapted.getProperties();
 		for(XmlConfigPropertyAdapted propertyObj: propArray){
-			Element property= marshallProperty(propertyObj, doc);
+			Element property= marshallProperty(propertyObj);
 			if(property != null){
 				properties.appendChild(property);
 			}
 		}
 	}
 
-	private static Element marshallProperty(XmlConfigPropertyAdapted propertyObj, Document doc) {
+	private static Element marshallProperty(XmlConfigPropertyAdapted propertyObj) {
 		String name= propertyObj.getName();
 		Boolean array= propertyObj.getArray();
 		Boolean encrypted= propertyObj.isEncrypted();
@@ -380,7 +377,7 @@ public class XmlUtil
 		return null;
 	}
 
-	private static void marshallAD(AD ocdAD, Document doc, Element ad) {
+	private static void marshallAD(AD ocdAD, Element ad) {
 		String adId= ocdAD.getId();
 		String adName= ocdAD.getName();
 		Scalar adType= ocdAD.getType();
@@ -441,14 +438,14 @@ public class XmlUtil
 		if(adOptions != null){
 			for(Option adOption: adOptions){
 				Element option= doc.createElement(OCD_NAMESPACE + ":" + METADATA_AD_OPTION);
-				marshallOption(adOption, doc, option);
+				marshallOption(adOption, option);
 				ad.appendChild(option);
 			}
 		}
 
 	}
 
-	private static void marshallOption(Option adOption, Document doc, Element option) {
+	private static void marshallOption(Option adOption, Element option) {
 		String label= adOption.getLabel();
 		String value= adOption.getValue();
 
@@ -464,7 +461,7 @@ public class XmlUtil
 		}
 	}
 
-	private static void marshallIcon(Icon ocdIcon, Document doc, Element icon) {
+	private static void marshallIcon(Icon ocdIcon, Element icon) {
 		String iconResource= ocdIcon.getResource();
 		BigInteger iconSize= ocdIcon.getSize();
 
@@ -487,11 +484,11 @@ public class XmlUtil
 	// Unmarshaller's private methods
 	//
 	@SuppressWarnings("unchecked")
-	private static <T> T unmarshalXmlComponentConfig(Document document) throws Exception {
+	private static <T> T unmarshalXmlComponentConfig() throws Exception {
 		XmlComponentConfigurations xcc= new XmlComponentConfigurations();
 
 		//Get all configurations
-		NodeList configurationList = document.getElementsByTagName(ESF_NAMESPACE + ":" + CONFIGURATION);
+		NodeList configurationList = doc.getElementsByTagName(ESF_NAMESPACE + ":" + CONFIGURATION);
 
 		List<ComponentConfigurationImpl> compConfList= new ArrayList<ComponentConfigurationImpl>();
 		//Iterate through all the configuration elements inside configurations tag
@@ -627,8 +624,8 @@ public class XmlUtil
 
 	//metadata parsing
 	@SuppressWarnings("unchecked")
-	private static <T> T unmarshalMetaData(Document document) {
-		Element metadata = document.getDocumentElement();
+	private static <T> T unmarshalMetaData() {
+		Element metadata = doc.getDocumentElement();
 		Tmetadata tMetadata= parseMetadataAttributes(metadata);
 
 		NodeList metadataChilds= metadata.getChildNodes();
@@ -744,7 +741,6 @@ public class XmlUtil
 		}
 
 		return tObject;
-
 	}
 
 	private static Ticon parseIcon(Element icon) {

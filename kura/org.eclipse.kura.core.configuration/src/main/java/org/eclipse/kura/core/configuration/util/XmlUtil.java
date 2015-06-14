@@ -84,7 +84,6 @@ public class XmlUtil
 	private final static String CONFIGURATION_PROPERTY_TYPE = "type";
 	private final static String CONFIGURATION_PROPERTY_VALUE= "value";
 
-
 	private final static String METADATA_LOCALIZATION = "localization";
 
 	private static final String METADATA_OCD = "OCD";
@@ -122,6 +121,9 @@ public class XmlUtil
 	private final static String METADATA_DESIGNATE_OBJECT_OCDREF = "ocdref";
 
 
+	//
+	// Public methods
+	//
 
 	public static String marshal(Object object) throws Exception 
 	{
@@ -149,10 +151,12 @@ public class XmlUtil
 				XmlSnapshotIdResult xmlSnapshotIdResult = (XmlSnapshotIdResult) object;
 				List<Long> snapshotIdVals= xmlSnapshotIdResult.getSnapshotIds();
 
-				for(Long snapId: snapshotIdVals){
-					Element snapshotIds= doc.createElement(ESF_NAMESPACE + ":" + SNAPSHOTIDS);
-					snapshotIds.setTextContent(snapId.toString());
-					snapshotIDs.appendChild(snapshotIds);
+				if(snapshotIdVals != null){
+					for(Long snapId: snapshotIdVals){
+						Element snapshotIds= doc.createElement(ESF_NAMESPACE + ":" + SNAPSHOTIDS);
+						snapshotIds.setTextContent(snapId.toString());
+						snapshotIDs.appendChild(snapshotIds);
+					}
 				}
 
 			}else if(object instanceof XmlComponentConfigurations){		
@@ -165,9 +169,11 @@ public class XmlUtil
 				XmlComponentConfigurations xmlCompConfig= (XmlComponentConfigurations) object;
 				List<ComponentConfigurationImpl> configsList = xmlCompConfig.getConfigurations();
 
-				for(ComponentConfigurationImpl config: configsList){
-					Element configuration= marshallConfiguration(config, doc);
-					configurations.appendChild(configuration);
+				if(configsList != null){
+					for(ComponentConfigurationImpl config: configsList){
+						Element configuration= marshallConfiguration(config, doc);
+						configurations.appendChild(configuration);
+					}
 				}
 
 			}
@@ -186,8 +192,73 @@ public class XmlUtil
 		}
 
 	}
+	
+	public static <T> T unmarshal(String s, Class<T> clazz) 
+			throws Exception, XMLStreamException, FactoryConfigurationError
+	{
+		StringReader sr = new StringReader(s);
+		T result=unmarshal(sr, clazz);
+		return result;
+	}
 
 
+	public static <T> T unmarshal(Reader r, Class<T> clazz) 
+			throws Exception, XMLStreamException, FactoryConfigurationError
+	{
+		DocumentBuilderFactory factory = null;
+		DocumentBuilder parser = null;
+
+		try {
+			factory = DocumentBuilderFactory.newInstance();
+			//factory.setValidating(true);
+			parser = factory.newDocumentBuilder();
+		} catch (FactoryConfigurationError fce) {
+			// The implementation is not available or cannot be instantiated
+			s_logger.error("Parser Factory configuration Error");
+			throw fce;
+		} catch (ParserConfigurationException pce) {
+			// a parser cannot be created with the requested configuration
+			s_logger.error("Parser configuration exception");
+			throw new FactoryConfigurationError(pce);
+		}
+
+		// parse the document
+		Document document = null;
+		try {
+			InputSource is = new InputSource(r);
+			document = parser.parse(is);
+			document.getDocumentElement().normalize();
+		} catch (SAXException se) {
+			// Some general parse error occurred. Might be thrown because DocumentBuilder
+			// class reuses several classes from the SAX API.
+			throw new XMLStreamException(se.getMessage());
+		} catch (IOException ioe) {
+			// Some IO error occurred
+			throw new XMLStreamException(ioe.getMessage());
+		} catch (IllegalArgumentException iae) {
+			// filename is null
+			throw new XMLStreamException(iae.getMessage());
+		}
+
+		//identify the correct parser that has to execute
+		if(clazz.equals(XmlComponentConfigurations.class)){
+			try {
+				//Snapshot parser
+				return unmarshalXmlComponentConfig(document);
+			} catch (Exception e) {
+				throw new XMLStreamException(e.getMessage());
+			}
+		}else {
+			//MetaData parser
+			return unmarshalMetaData(document);
+		}
+	}
+
+	
+	
+	//
+	// Marshaller's private methods
+	//
 	private static Element marshallConfiguration(ComponentConfigurationImpl config, Document doc) throws Exception {
 		//get ComponentConfigurationImpl Object data
 		String configPid= config.getPid();
@@ -201,45 +272,60 @@ public class XmlUtil
 		configurationElement.setAttributeNode(propertiesAttribute);
 
 		//Add OCD node and marshall definitions
-		String ocdName= configOCD.getName();
-		String ocdDescription= configOCD.getDescription();
-		String ocdID= configOCD.getId();
-		List<Icon> ocdIcons= configOCD.getIcon();
-		List<AD> ocdADs= configOCD.getAD();
-		List<Object> ocdAnys= configOCD.getAny();
-		Map<QName,String> ocdOtherAttrs= configOCD.getOtherAttributes();
+		if(configOCD != null){
+			String ocdName= configOCD.getName();
+			String ocdDescription= configOCD.getDescription();
+			String ocdID= configOCD.getId();
+			List<Icon> ocdIcons= configOCD.getIcon();
+			List<AD> ocdADs= configOCD.getAD();
+			List<Object> ocdAnys= configOCD.getAny(); // TODO
+			Map<QName,String> ocdOtherAttrs= configOCD.getOtherAttributes(); // TODO
 
-		Element ocd= doc.createElement(OCD_NAMESPACE + ":" + METADATA_OCD);
-		configurationElement.appendChild(ocd);
-		Attr ocdAttrName= doc.createAttribute(METADATA_OCD_NAME);
-		ocdAttrName.setNodeValue(ocdName);
-		ocd.setAttributeNode(ocdAttrName);
+			Element ocd= doc.createElement(OCD_NAMESPACE + ":" + METADATA_OCD);
+			configurationElement.appendChild(ocd);
 
-		Attr ocdAttrDescription= doc.createAttribute(METADATA_OCD_DESCRIPTION);
-		ocdAttrDescription.setNodeValue(ocdDescription);
-		ocd.setAttributeNode(ocdAttrDescription);
+			if(ocdName != null && !ocdName.trim().isEmpty()){
+				Attr ocdAttrName= doc.createAttribute(METADATA_OCD_NAME);
+				ocdAttrName.setNodeValue(ocdName);
+				ocd.setAttributeNode(ocdAttrName);
+			}
 
-		Attr ocdAttrId= doc.createAttribute(METADATA_OCD_ID);
-		ocdAttrId.setNodeValue(ocdID);
-		ocd.setAttributeNode(ocdAttrId);
+			if(ocdDescription != null && !ocdDescription.trim().isEmpty()){
+				Attr ocdAttrDescription= doc.createAttribute(METADATA_OCD_DESCRIPTION);
+				ocdAttrDescription.setNodeValue(ocdDescription);
+				ocd.setAttributeNode(ocdAttrDescription);
+			}
 
-		for(AD ocdAD: ocdADs){
-			Element ad= doc.createElement(OCD_NAMESPACE + ":" + METADATA_AD);
-			marshallAD(ocdAD, doc, ad);
-			ocd.appendChild(ad);
-		}
+			if(ocdID != null && !ocdID.trim().isEmpty()){
+				Attr ocdAttrId= doc.createAttribute(METADATA_OCD_ID);
+				ocdAttrId.setNodeValue(ocdID);
+				ocd.setAttributeNode(ocdAttrId);
+			}
 
-		for(Icon ocdIcon: ocdIcons){
-			Element icon= doc.createElement(OCD_NAMESPACE + ":" + METADATA_ICON);
-			marshallIcon(ocdIcon, doc, icon);
-			ocd.appendChild(icon);
+			if(ocdADs != null){
+				for(AD ocdAD: ocdADs){
+					Element ad= doc.createElement(OCD_NAMESPACE + ":" + METADATA_AD);
+					marshallAD(ocdAD, doc, ad);
+					ocd.appendChild(ad);
+				}
+			}
+
+			if(ocdIcons != null){
+				for(Icon ocdIcon: ocdIcons){
+					Element icon= doc.createElement(OCD_NAMESPACE + ":" + METADATA_ICON);
+					marshallIcon(ocdIcon, doc, icon);
+					ocd.appendChild(icon);
+				}
+			}
 		}
 
 
 		//Add properties Node and marshall properties
-		Element properties= doc.createElement(ESF_NAMESPACE + ":" + PROPERTIES);
-		marshallProperties(configProperty, doc, properties);
-		configurationElement.appendChild(properties);
+		if(configProperty != null){
+			Element properties= doc.createElement(ESF_NAMESPACE + ":" + PROPERTIES);
+			marshallProperties(configProperty, doc, properties);
+			configurationElement.appendChild(properties);
+		}
 
 		return configurationElement;
 	}
@@ -249,7 +335,7 @@ public class XmlUtil
 		XmlConfigPropertiesAdapted configPropAdapted= xmlPropAdapter.marshal(propertyMap);
 
 		XmlConfigPropertyAdapted[] propArray = configPropAdapted.getProperties();
-		for(XmlConfigPropertyAdapted propertyObj:propArray){
+		for(XmlConfigPropertyAdapted propertyObj: propArray){
 			Element property= marshallProperty(propertyObj, doc);
 			if(property != null){
 				properties.appendChild(property);
@@ -284,7 +370,7 @@ public class XmlUtil
 			property.setAttributeNode(attType);
 
 
-			for(String value:values){
+			for(String value: values){
 				Element valueElem= doc.createElement(ESF_NAMESPACE + ":" +CONFIGURATION_PROPERTY_VALUE);
 				valueElem.setTextContent(value);
 				property.appendChild(valueElem);
@@ -352,10 +438,12 @@ public class XmlUtil
 			ad.setAttributeNode(attrMax);
 		}
 
-		for(Option adOption:adOptions){
-			Element option= doc.createElement(OCD_NAMESPACE + ":" + METADATA_AD_OPTION);
-			marshallOption(adOption, doc, option);
-			ad.appendChild(option);
+		if(adOptions != null){
+			for(Option adOption: adOptions){
+				Element option= doc.createElement(OCD_NAMESPACE + ":" + METADATA_AD_OPTION);
+				marshallOption(adOption, doc, option);
+				ad.appendChild(option);
+			}
 		}
 
 	}
@@ -375,11 +463,11 @@ public class XmlUtil
 			option.setAttributeNode(attrValue);
 		}
 	}
-	
+
 	private static void marshallIcon(Icon ocdIcon, Document doc, Element icon) {
 		String iconResource= ocdIcon.getResource();
 		BigInteger iconSize= ocdIcon.getSize();
-		
+
 		if(!iconResource.trim().isEmpty()){
 			Attr attrResource= doc.createAttribute(METADATA_ICON_RESOURCE);
 			attrResource.setNodeValue(iconResource);
@@ -390,71 +478,14 @@ public class XmlUtil
 			attrSize.setNodeValue(iconSize.toString());
 			icon.setAttributeNode(attrSize);
 		}
-		
+
 	}
+
 	
-
-	public static <T> T unmarshal(String s, Class<T> clazz) 
-			throws Exception, XMLStreamException, FactoryConfigurationError
-	{
-		StringReader sr = new StringReader(s);
-		T result=unmarshal(sr, clazz);
-		return result;
-	}
-
-
-	public static <T> T unmarshal(Reader r, Class<T> clazz) 
-			throws Exception, XMLStreamException, FactoryConfigurationError
-	{
-		DocumentBuilderFactory factory = null;
-		DocumentBuilder parser = null;
-
-		try {
-			factory = DocumentBuilderFactory.newInstance();
-			//factory.setValidating(true);
-			parser = factory.newDocumentBuilder();
-		} catch (FactoryConfigurationError fce) {
-			// The implementation is not available or cannot be instantiated
-			s_logger.error("Parser Factory configuration Error");
-			throw fce;
-		} catch (ParserConfigurationException pce) {
-			// a parser cannot be created with the requested configuration
-			s_logger.error("Parser configuration exception");
-			throw new FactoryConfigurationError(pce);
-		}
-
-		// parse the document
-		Document document = null;
-		try {
-			InputSource is = new InputSource(r);
-			document = parser.parse(is);
-			document.getDocumentElement().normalize();
-		} catch (SAXException se) {
-			// Some general parse error occurred. Might be thrown because DocumentBuilder
-			// class reuses several classes from the SAX API.
-			throw new XMLStreamException(se.getMessage());
-		} catch (IOException ioe) {
-			// Some IO error occurred
-			throw new XMLStreamException(ioe.getMessage());
-		} catch (IllegalArgumentException iae) {
-			// filename is null
-			throw new XMLStreamException(iae.getMessage());
-		}
-
-		//identify the correct parser that has to execute
-		if(clazz.equals(XmlComponentConfigurations.class)){
-			try {
-				//Snapshot parser
-				return unmarshalXmlComponentConfig(document);
-			} catch (Exception e) {
-				throw new XMLStreamException(e.getMessage());
-			}
-		}else {
-			//MetaData parser
-			return unmarshalMetaData(document);
-		}
-	}
-
+	
+	//
+	// Unmarshaller's private methods
+	//
 	@SuppressWarnings("unchecked")
 	private static <T> T unmarshalXmlComponentConfig(Document document) throws Exception {
 		XmlComponentConfigurations xcc= new XmlComponentConfigurations();
@@ -465,7 +496,6 @@ public class XmlUtil
 		List<ComponentConfigurationImpl> compConfList= new ArrayList<ComponentConfigurationImpl>();
 		//Iterate through all the configuration elements inside configurations tag
 		for(int configIndex= 0; configIndex < configurationList.getLength(); configIndex++){
-
 			Element configuration = (Element) configurationList.item(configIndex);
 			ComponentConfigurationImpl cci= parseConfiguration(configuration);
 			compConfList.add(cci);
@@ -621,7 +651,6 @@ public class XmlUtil
 	}
 
 	private static Tocd parseOCD(Element ocd) {
-
 		String ocdName= ocd.getAttribute(METADATA_OCD_NAME);
 		String ocdID= ocd.getAttribute(METADATA_OCD_ID);
 		String ocdDescription= ocd.getAttribute(METADATA_OCD_DESCRIPTION);

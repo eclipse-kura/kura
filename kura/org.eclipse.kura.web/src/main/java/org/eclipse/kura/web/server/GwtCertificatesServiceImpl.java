@@ -14,7 +14,6 @@ package org.eclipse.kura.web.server;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.security.GeneralSecurityException;
 import java.security.KeyFactory;
@@ -26,7 +25,6 @@ import java.security.cert.X509Certificate;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.Base64;
 
 import org.eclipse.kura.ssl.SslManagerService;
 import org.eclipse.kura.web.server.util.ServiceLocator;
@@ -57,24 +55,21 @@ public class GwtCertificatesServiceImpl extends OsgiRemoteServiceServlet impleme
 	        	Method method = clazz.getMethod("parseBase64Binary", String.class);
 	        	convertedData= method.invoke(null, key);
 	        } catch( ClassNotFoundException e ) {
-	        	Base64.Decoder b64= Base64.getDecoder();
-	        	convertedData= b64.decode(key);
-	        } catch (NoSuchMethodException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (SecurityException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (IllegalAccessException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (IllegalArgumentException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (InvocationTargetException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+				try {
+					Class<?> clazz = Class.forName("java.util.Base64");
+		        	Method decoderMethod= clazz.getMethod("getDecoder", (Class<?>[]) null);
+					Object decoder= decoderMethod.invoke(null, new Object[0]);
+					
+		        	Class<?> Base64Decoder = Class.forName("java.util.Base64$Decoder");
+		        	Method decodeMethod = Base64Decoder.getMethod("decode", String.class);
+		        	convertedData= decodeMethod.invoke(decoder, key);
+				} catch (Exception e1) {
+					throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e1);
+				} 
+	        	
+	        } catch (Exception e) {
+	        	throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
+			} 
 	    	
 	        byte[] conversion= (byte[]) convertedData;
 	        // Parse Base64 - after PKCS8

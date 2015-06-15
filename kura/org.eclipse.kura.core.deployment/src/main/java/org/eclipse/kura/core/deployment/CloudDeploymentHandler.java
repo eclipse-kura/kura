@@ -603,7 +603,7 @@ public class CloudDeploymentHandler implements EventHandler, CloudClientListener
 		try {
 			String s = XmlUtil.marshal(xdps);
 			
-			s_logger.info("Getting resource {}: {}", RESOURCE_PACKAGES, s);
+			//s_logger.info("Getting resource {}: {}", RESOURCE_PACKAGES, s);
 			
 			response = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK); 
 			response.setTimestamp(new Date());
@@ -675,7 +675,7 @@ public class CloudDeploymentHandler implements EventHandler, CloudClientListener
 		try {
 			String s = XmlUtil.marshal(xmlBundles);
 			
-			s_logger.info("Getting resource {}: {}", RESOURCE_BUNDLES, s);
+			//s_logger.info("Getting resource {}: {}", RESOURCE_BUNDLES, s);
 			
 			response = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK); 
 			response.setTimestamp(new Date());

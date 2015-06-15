@@ -13,6 +13,7 @@ package org.eclipse.kura.core.crypto;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Method;
 import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.MessageDigest;
@@ -42,7 +43,12 @@ public class CryptoServiceImpl implements CryptoService {
         c.init(Cipher.ENCRYPT_MODE, key);
         byte[] encryptedBytes = c.doFinal(value.getBytes());
         
-        String encryptedValue = DatatypeConverter.printBase64Binary(encryptedBytes);
+        String encryptedValue;
+		try {
+			encryptedValue = encodeBase64(new String(encryptedBytes));
+		} catch (UnsupportedEncodingException e) {
+			throw new NoSuchAlgorithmException(e);
+		}
         return encryptedValue;	
 	}
 
@@ -74,7 +80,7 @@ public class CryptoServiceImpl implements CryptoService {
         cript.update(s.getBytes("UTF8"));
         
         byte[] encodedBytes = cript.digest();
-        return DatatypeConverter.printBase64Binary(encodedBytes);
+        return encodeBase64(new String(encodedBytes));
 	}
 
 	@Override
@@ -82,7 +88,27 @@ public class CryptoServiceImpl implements CryptoService {
 		throws NoSuchAlgorithmException, UnsupportedEncodingException 
 	{
 		byte[] bytesValue = stringValue.getBytes("UTF-8");
-		String encodedValue = DatatypeConverter.printBase64Binary(bytesValue);
+		Object convertedData= null;
+        try {
+        	Class<?> clazz = Class.forName( "javax.xml.bind.DatatypeConverter" );
+        	Method method = clazz.getMethod("printBase64Binary", byte.class);
+        	convertedData= method.invoke(null, bytesValue);
+        } catch( ClassNotFoundException e ) {
+			try {
+				Class<?> clazz = Class.forName("java.util.Base64");
+	        	Method decoderMethod= clazz.getMethod("getEncoder", (Class<?>[]) null);
+				Object encoder= decoderMethod.invoke(null, new Object[0]);
+				
+	        	Class<?> Base64Encoder = Class.forName("java.util.Base64$Encoder");
+	        	Method decodeMethod = Base64Encoder.getMethod("encode", String.class);
+	        	convertedData= decodeMethod.invoke(encoder, bytesValue);
+			} catch (Exception e1) {
+				throw new NoSuchAlgorithmException(e1);
+			} 
+        } catch (Exception e) {
+        	throw new NoSuchAlgorithmException(e);
+		} 
+		String encodedValue = (String) convertedData; //DatatypeConverter.printBase64Binary(bytesValue);
         return encodedValue;	
 		
 	}
@@ -91,7 +117,27 @@ public class CryptoServiceImpl implements CryptoService {
 	public String decodeBase64(String encodedValue) 
 		throws NoSuchAlgorithmException, UnsupportedEncodingException 
 	{
-        byte[] decodedBytes = DatatypeConverter.parseBase64Binary(encodedValue);
+		Object convertedData= null;
+        try {
+        	Class<?> clazz = Class.forName( "javax.xml.bind.DatatypeConverter" );
+        	Method method = clazz.getMethod("parseBase64Binary", String.class);
+        	convertedData= method.invoke(null, encodedValue);
+        } catch( ClassNotFoundException e ) {
+			try {
+				Class<?> clazz = Class.forName("java.util.Base64");
+	        	Method decoderMethod= clazz.getMethod("getDecoder", (Class<?>[]) null);
+				Object decoder= decoderMethod.invoke(null, new Object[0]);
+				
+	        	Class<?> Base64Decoder = Class.forName("java.util.Base64$Decoder");
+	        	Method decodeMethod = Base64Decoder.getMethod("decode", String.class);
+	        	convertedData= decodeMethod.invoke(decoder, encodedValue);
+			} catch (Exception e1) {
+				throw new NoSuchAlgorithmException(e1);
+			} 
+        } catch (Exception e) {
+        	throw new NoSuchAlgorithmException(e);
+		} 
+        byte[] decodedBytes = (byte[]) convertedData;
         String decodedValue = new String(decodedBytes, "UTF-8");
         return decodedValue;		
 	}
@@ -104,7 +150,7 @@ public class CryptoServiceImpl implements CryptoService {
 			c = Cipher.getInstance(ALGORITHM);
 	        c.init(Cipher.DECRYPT_MODE, key);
 	        String internalStringValue = new String(encryptedValue);
-	        byte[] decordedValue  =  DatatypeConverter.parseBase64Binary(internalStringValue);
+	        byte[] decordedValue  =  decodeBase64(internalStringValue).getBytes("UTF-8");
 	        byte[] decryptedBytes = c.doFinal(decordedValue);
 	        String decryptedValue = new String(decryptedBytes);
 	        return decryptedValue.toCharArray();
@@ -118,6 +164,8 @@ public class CryptoServiceImpl implements CryptoService {
 			throw new KuraException(KuraErrorCode.DECODER_ERROR);
 		} catch (IllegalBlockSizeException e) {
 			throw new KuraException(KuraErrorCode.DECODER_ERROR);
+		} catch (UnsupportedEncodingException e) {
+			throw new KuraException(KuraErrorCode.OPERATION_NOT_SUPPORTED);
 		}
 	}
 	

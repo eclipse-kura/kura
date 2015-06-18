@@ -1,0 +1,10 @@
+[Unit]
+Description=Kura
+
+[Service]
+Type=forking
+ExecStart=/bin/sh INSTALL_DIR/kura/bin/start_kura_background.sh
+
+[Install]
+WantedBy=multi-user.target
+

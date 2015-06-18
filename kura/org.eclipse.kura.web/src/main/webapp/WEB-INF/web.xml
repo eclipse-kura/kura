@@ -27,7 +27,7 @@
   <!-- Servlets -->
   <servlet>
     <servlet-name>deviceServlet</servlet-name>
-    <servlet-class>org.eclipse.kura.web.server.GwtDeviceServiceImpl</servlet-class>
+    <servlet-class>org.eclipse.kura.web.server.GwtBSDeviceServiceImpl</servlet-class>
   </servlet>
   
   <servlet-mapping>

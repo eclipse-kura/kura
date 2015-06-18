@@ -15,7 +15,7 @@
 <module rename-to='denali'>
     
   <!-- Inherit the core Web Toolkit stuff.                        -->
-  <inherits name='com.google.gwt.user.User' />
+  <inherits name='com.google.gwt.user.User' />  
   
   <inherits name="com.allen_sauer.gwt.log.gwt-log-OFF"/>
 
@@ -26,12 +26,14 @@
   <!-- Inherit the default GWT style sheet.  You can change       -->
   <!-- the theme of your GWT application by uncommenting          -->
   <!-- any one of the following lines.                            -->
-  <inherits name='com.google.gwt.user.theme.standard.Standard' />
+  <!-- <inherits name='com.google.gwt.user.theme.standard.Standard' />  -->
   <!-- <inherits name='com.google.gwt.user.theme.chrome.Chrome'/> -->
-  <!-- <inherits name='com.google.gwt.user.theme.dark.Dark'/>     -->
+  <inherits name='com.google.gwt.user.theme.dark.Dark'/>
 
   <!-- Other module inherits                                      -->
-  <inherits name='com.extjs.gxt.ui.GXT' />
+  <inherits name='org.gwtbootstrap3.GwtBootstrap3'/>
+  <inherits name="org.gwtbootstrap3.extras.growl.Growl"/>
+  <inherits name="org.gwtbootstrap3.extras.slider.Slider"/>  
   <inherits name="com.google.gwt.i18n.I18N"/>
 
   <!-- Locales: English language, independent of country -->
@@ -45,6 +47,6 @@
 -->
   <!-- Specify the paths for translatable code                    -->
   <source path='client' />
-  <source path='shared' />
+  <source path='shared' />  
   
 </module>

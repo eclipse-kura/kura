@@ -244,12 +244,13 @@ public class CommandCloudApp extends Cloudlet implements ConfigurableComponent,
 		// TODO Auto-generated method stub
 		boolean verificationEnabled = (Boolean) properties.get(COMMAND_ENABLED_ID);
 		if (verificationEnabled) {
-
 			char[] commandPassword = (char[]) properties.get(COMMAND_PASSWORD_ID);
 			boolean isExecutionAllowed = verifyPasswords(commandPassword,
 					password);
+			
 			if (isExecutionAllowed) {
-
+				
+				s_logger.info("Command cloud app execution allowed");
 				String[] cmdArray = cmd.split(" ");
 				String defaultDir = getDefaultWorkDir();
 				String[] environment = getDefaultEnvironment();

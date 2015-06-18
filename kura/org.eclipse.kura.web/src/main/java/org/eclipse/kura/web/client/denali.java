@@ -11,208 +11,116 @@
  */
 package org.eclipse.kura.web.client;
 
+import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.kura.web.client.messages.Messages;
-import org.eclipse.kura.web.client.util.FailureHandler;
-import org.eclipse.kura.web.shared.model.GwtGroupedNVPair;
-import org.eclipse.kura.web.shared.model.GwtSession;
-import org.eclipse.kura.web.shared.service.GwtDeviceService;
-import org.eclipse.kura.web.shared.service.GwtDeviceServiceAsync;
+import org.eclipse.kura.web.client.bootstrap.ui.EntryClassUi;
+import org.eclipse.kura.web.shared.model.GwtBSGroupedNVPair;
+import org.eclipse.kura.web.shared.model.GwtBSSession;
+import org.eclipse.kura.web.shared.service.GwtBSDeviceService;
+import org.eclipse.kura.web.shared.service.GwtBSDeviceServiceAsync;
+import org.gwtbootstrap3.extras.growl.client.ui.Growl;
 
 import com.allen_sauer.gwt.log.client.Log;
-import com.extjs.gxt.ui.client.GXT;
-import com.extjs.gxt.ui.client.Style.HorizontalAlignment;
-import com.extjs.gxt.ui.client.Style.LayoutRegion;
-import com.extjs.gxt.ui.client.data.ListLoadResult;
-import com.extjs.gxt.ui.client.util.Margins;
-import com.extjs.gxt.ui.client.util.Theme;
-import com.extjs.gxt.ui.client.widget.ContentPanel;
-import com.extjs.gxt.ui.client.widget.HorizontalPanel;
-import com.extjs.gxt.ui.client.widget.Viewport;
-import com.extjs.gxt.ui.client.widget.layout.BorderLayout;
-import com.extjs.gxt.ui.client.widget.layout.BorderLayoutData;
-import com.extjs.gxt.ui.client.widget.layout.FitLayout;
-import com.extjs.gxt.ui.client.widget.layout.TableData;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
-import com.google.gwt.core.client.ScriptInjector;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
 
 /**
  * Entry point classes define <code>onModuleLoad()</code>.
  */
-public class denali implements EntryPoint 
-{
-	private static final Messages MSGS = GWT.create(Messages.class);
-	//private final boolean VIEW_LOG = true;
-	private final GwtDeviceServiceAsync gwtDeviceService = GWT.create(GwtDeviceService.class);
+public class denali implements EntryPoint {
+
+	private final GwtBSDeviceServiceAsync gwtBSDeviceService = GWT.create(GwtBSDeviceService.class);			
+
+	private final EntryClassUi binder = GWT.create(EntryClassUi.class);
 
 	/**
 	 * Note, we defer all application initialization code to
 	 * {@link #onModuleLoad2()} so that the UncaughtExceptionHandler can catch
 	 * any unexpected exceptions.
 	 */
-	public void onModuleLoad() 
-	{
-		/*
-	     * Install an UncaughtExceptionHandler which will produce <code>FATAL</code> log messages
-	     */
-	    Log.setUncaughtExceptionHandler();
+	@Override
+	public void onModuleLoad() {
 
-	    /*
-	    // Disable the web UI log view unless VIEW_LOG is set to true
-	    if (!VIEW_LOG) {
-	    	Widget divLogger = Log.getLogger(DivLogger.class).getWidget();
-	    	divLogger.setVisible(false);
-	    }
-	    */
+		/*
+		 * Install an UncaughtExceptionHandler which will produce
+		 * <code>FATAL</code> log messages
+		 */
+		Log.setUncaughtExceptionHandler();
+
+		/*
+		 * // Disable the web UI log view unless VIEW_LOG is set to true if
+		 * (!VIEW_LOG) { Widget divLogger =
+		 * Log.getLogger(DivLogger.class).getWidget();
+		 * divLogger.setVisible(false); }
+		 */
 		// use deferred command to catch initialization exceptions in
 		// onModuleLoad2
 		Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+			@Override
 			public void execute() {
 				onModuleLoad2();
 			}
 		});
 	}
 
-	
-	/**
-	 * This is the 'real' entry point method.
-	 */
 	public void onModuleLoad2() {
 
-		// set the default theme
-		GXT.setDefaultTheme(Theme.GRAY, true);
-		
-		// load custom CSS/JS
-    	loadCss("denali/skin/skin.css");
-    	ScriptInjector.fromUrl("skin/skin.js?v=1").inject(); // Make sure this request is not cached
-		
-		gwtDeviceService.findSystemProperties( new AsyncCallback<ListLoadResult<GwtGroupedNVPair>>() {    				
-			public void onSuccess(ListLoadResult<GwtGroupedNVPair> results) {
-				
-				GwtSession gwtSession = new GwtSession();
-				
-				if (results != null) {
-					List<GwtGroupedNVPair> pairs = results.getData();
-					if (pairs != null) {
-						for (GwtGroupedNVPair pair : pairs) {
-							String name = pair.getName();
-							if (name != null && name.equals("kura.have.net.admin")) {
-								Boolean value = Boolean.valueOf(pair.getValue());
-								gwtSession.setNetAdminAvailable(value);
-							}
-							if (name != null && name.equals("kura.version")) {
-								gwtSession.setKuraVersion(pair.getValue());
-							}
-							if (name != null && name.equals("kura.os.version")) {
-								gwtSession.setOsVersion(pair.getValue());
+		Log.debug("Beginning GWTBootstrap3 render");
+		System.out.println("Beginning GWTBootstrap3 render");
+		RootPanel.get().add(binder);
+		gwtBSDeviceService
+				.findSystemProperties(new AsyncCallback<ArrayList<GwtBSGroupedNVPair>>() {
+					@Override
+					public void onSuccess(ArrayList<GwtBSGroupedNVPair> results) {
+
+						GwtBSSession gwtBSSession = new GwtBSSession();
+
+						if (results != null) {
+							List<GwtBSGroupedNVPair> pairs = results;
+							if (pairs != null) {
+								for (GwtBSGroupedNVPair pair : pairs) {
+									String name = pair.getName();
+									if (name != null
+											&& name.equals("kura.have.net.admin")) {
+										Boolean value = Boolean.valueOf(pair
+												.getValue());//FIXME (remove !)
+										gwtBSSession
+												.setNetAdminAvailable(value);
+									}
+									if (name != null
+											&& name.equals("kura.version")) {
+										gwtBSSession.setKuraVersion(pair
+												.getValue());
+									}
+									if (name != null
+											&& name.equals("kura.os.version")) {
+										gwtBSSession.setOsVersion(pair
+												.getValue());
+									}
+								}
 							}
 						}
+						binder.setFooter(gwtBSSession);
+						binder.initSystemPanel(gwtBSSession);
+						binder.setSession(gwtBSSession);
+						binder.initServicesTree();
+						binder.setDirty(false);
+
 					}
-				}
-				
-				render(gwtSession);
-			}
-			
-			public void onFailure(Throwable caught) {
-				FailureHandler.handle(caught);
-				render( new GwtSession());
-			}
-		});
+
+					@Override
+					public void onFailure(Throwable caught) {
+						//FailureHandler.handle(caught);
+						binder.setFooter(new GwtBSSession());
+						binder.initSystemPanel(new GwtBSSession());
+						binder.setSession(new GwtBSSession());
+					}
+				});
 	}
-	
-	private static native void loadCss(String url) /*-{
-		var l = $doc.createElement("link");
-		l.setAttribute("id", url);
-		l.setAttribute("rel", "stylesheet");
-		l.setAttribute("type", "text/css");
-		l.setAttribute("href", url + "?v=1"); // Make sure this request is not cached
-		$doc.getElementsByTagName("head")[0].appendChild(l);
-	}-*/;
-	
-    private void render(GwtSession gwtSession) 
-    {    	
-    	Log.debug("Beginning page render");
-    	
-        final Viewport viewport = new Viewport();
-        
-        final BorderLayout borderLayout = new BorderLayout();
-        viewport.setLayout(borderLayout);
-        viewport.setStyleAttribute("padding", "5px");
-        
-        //
-        // north
-        BorderLayoutData northData = new BorderLayoutData(LayoutRegion.NORTH, 52);  
-        northData.setCollapsible(false);  
-        northData.setFloatable(false);  
-        northData.setHideCollapseTool(false);  
-        northData.setSplit(false);
-        northData.setMargins(new Margins(0, 0, 5, 0));  
-        viewport.add(new NorthView(gwtSession), northData);
 
-        //
-        // center
-        BorderLayoutData centerData = new BorderLayoutData(LayoutRegion.CENTER);  
-        centerData.setMargins(new Margins(0));  
-
-        ContentPanel center = new ContentPanel();
-        center.setLayout(new FitLayout());
-        center.setBorders(false);
-        center.setBodyBorder(false);
-        center.setId("center-panel-wrapper");
-        viewport.add(center, centerData);
-        
-        //
-        // west
-        BorderLayoutData westData = new BorderLayoutData(LayoutRegion.WEST, 180);  
-        westData.setSplit(true);  
-        westData.setCollapsible(true);  
-        westData.setMargins(new Margins(0,5,0,0));
-        WestNavigationView westView = new WestNavigationView(gwtSession, center);
-        viewport.add(westView, westData);
-
-        //
-        // south
-        BorderLayoutData southData = new BorderLayoutData(LayoutRegion.SOUTH, 18);  
-        southData.setCollapsible(false);  
-        southData.setFloatable(false);  
-        southData.setHideCollapseTool(false);  
-        southData.setSplit(false);
-        southData.setMargins(new Margins(3, 5, 0, 0));
-        
-        HorizontalPanel south = new HorizontalPanel();
-        south.setTableWidth("100%");
-        south.setId("south-panel-wrapper");
-        Label copyright = new Label(MSGS.copyright());
-        copyright.setStyleName("x-form-label");
-        TableData td = new TableData();
-        td.setHorizontalAlign(HorizontalAlignment.LEFT);
-        south.add(copyright, td);
-        
-        Label version = new Label(gwtSession.getKuraVersion());
-        version.setStyleName("x-form-label");
-        TableData tdVersion = new TableData();
-        tdVersion.setHorizontalAlign(HorizontalAlignment.RIGHT);
-        south.add(version, tdVersion);
-
-        viewport.add(south, southData);
-
-        //
-        // Initial Selection
-//        center.setIconAbstractImagePrototype.create(Resources.INSTANCE.alerts()));
-//        center.setHeading(MSGS.announcements());
-//        center.removeAll();                  
-//        center.add(new Overview(currentSession));
-//        center.layout();
-
-        //
-        // RootPanel
-        RootPanel.get().add(viewport);
-    }
 }

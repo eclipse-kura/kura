@@ -109,6 +109,17 @@ img.x-tree3-node-icon {
 	font: bold 12px tahoma, arial, helvetica, sans-serif;
 }
 
+.status-table-row{
+	color: black;	
+}
+
+.rowHeader{	
+	text-align: center;
+	font-weight: bold; 
+	text-decoration: underline;
+	font-size: 1.5em;
+	
+}
 
 div.headerLogo { 
 	height: 			38px;
@@ -131,3 +142,9 @@ div.headerLogo-ie8 {
 	filter:            progid:DXImageTransform.Microsoft.AlphaImageLoader(src='kura/org/eclipse/kura/images/kura_logo_small.png',sizingMethod='scale');
 	-ms-filter:        "progid:DXImageTransform.Microsoft.AlphaImageLoader(src='kura/org/eclipse/kura/images/kura_logo_small.png',sizingMethod='scale')";
 }
+
+div.button {
+		border-style: solid;
+		border-radius: 5px;
+		border-width: 1px;
+	}

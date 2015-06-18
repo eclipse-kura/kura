@@ -1,0 +1,169 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+	xmlns:b="urn:import:org.gwtbootstrap3.client.ui" xmlns:b.html="urn:import:org.gwtbootstrap3.client.ui.html"
+	xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:gwt="urn:import:org.gwtbootstrap3.client.ui.gwt">
+
+	<ui:style>
+	.important {
+		font-weight: bold;
+	}
+	
+	.center-panel {
+		height: 450px;
+		font-size: 0.6 em;
+		font-weight: normal;
+	}
+	
+	.padding {
+		margin-bottom: 10px;
+	}
+	
+	.help {
+		height: 310px;
+	}
+	</ui:style>
+
+	<b:Container fluid="true">
+
+		<b:Column size="MD_7" addStyleNames="{style.center-panel}">
+			<b:Row>
+				<g:ScrollPanel addStyleNames="{style.center-panel}">
+					<b:Form ui:field="form">
+						<b:FieldSet ui:field="field">
+
+							<b:FormGroup >
+								<b:FormLabel for="model" ui:field="labelModel" />
+								<b:FormControlStatic b:id="model" ui:field="model" />
+							</b:FormGroup>
+
+							<b:FormGroup>
+								<b:FormLabel for="network" ui:field="labelNetwork" />
+								<g:FlowPanel>
+									<b:ListBox b:id="network" ui:field="network" />
+								</g:FlowPanel>
+							</b:FormGroup>
+
+							<b:FormGroup>
+								<b:FormLabel for="service" ui:field="labelService" />
+								<b:FormControlStatic b:id="service"
+									ui:field="service" />
+							</b:FormGroup>
+
+							<b:FormGroup>
+								<b:FormLabel for="modem" ui:field="labelModem" />
+								<b:TextBox b:id="modem" ui:field="modem" />
+							</b:FormGroup>
+
+							<b:FormGroup ui:field="groupNumber">
+								<b:FormLabel for="number" ui:field="labelNumber" />
+								<b:HelpBlock color="red" ui:field="helpNumber"/>
+								<b:TextBox b:id="number" ui:field="number" />
+							</b:FormGroup>
+
+							<b:FormGroup ui:field="groupDial">
+								<b:FormLabel for="dial" ui:field="labelDial" />
+								<b:TextBox b:id="dial" ui:field="dial" />
+							</b:FormGroup>
+
+							<b:FormGroup ui:field="groupApn">
+								<b:FormLabel for="apn" ui:field="labelApn" />
+								<b:TextBox b:id="apn" ui:field="apn" />
+							</b:FormGroup>
+
+							<b:FormGroup >
+								<b:FormLabel for="auth" ui:field="labelAuth" />
+								<g:FlowPanel>
+									<b:ListBox b:id="auth" ui:field="auth" />
+								</g:FlowPanel>
+							</b:FormGroup>
+
+							<b:FormGroup >
+								<b:FormLabel for="username" ui:field="labelUsername" />
+								<b:TextBox b:id="username" ui:field="username" />
+							</b:FormGroup>
+
+							<b:FormGroup>
+								<b:FormLabel for="password" ui:field="labelPassword" />
+								<b:Input type="PASSWORD" b:id="password" ui:field="password" />
+							</b:FormGroup>
+
+							<b:FormGroup ui:field="groupReset">
+								<b:FormLabel for="reset" ui:field="labelReset" />
+								<b:HelpBlock color="red" ui:field="helpReset"/>
+								<b:TextBox b:id="reset" ui:field="reset" />
+							</b:FormGroup>
+
+							<b:FormGroup>
+								<b:FormLabel for="persist" ui:field="labelPersist" />
+								<g:FlowPanel>
+									<b:RadioButton name="radio1" formValue="true"
+										ui:field="radio1" />
+									<b:RadioButton name="radio1" formValue="false"
+										ui:field="radio2" />
+								</g:FlowPanel>
+							</b:FormGroup>
+							
+							<b:FormGroup ui:field="groupMaxfail">
+								<b:FormLabel for="maxfail" ui:field="labelMaxfail" />
+								<b:HelpBlock color="red" ui:field="helpMaxfail"/>
+								<b:TextBox b:id="maxfail" ui:field="maxfail" />
+							</b:FormGroup>
+							
+							<b:FormGroup ui:field="groupIdle">
+								<b:FormLabel for="idle" ui:field="labelIdle" />
+								<b:HelpBlock color="red" ui:field="helpIdle"/>
+								<b:TextBox b:id="idle" ui:field="idle" />
+							</b:FormGroup>
+							
+							<b:FormGroup>
+								<b:FormLabel for="active" ui:field="labelActive" />
+								<b:TextBox b:id="active" ui:field="active" />
+							</b:FormGroup>
+							
+							<b:FormGroup ui:field="groupInterval">
+								<b:FormLabel for="interval" ui:field="labelInterval" />
+								<b:HelpBlock color="red" ui:field="helpInterval"/>
+								<b:TextBox b:id="interval" ui:field="interval" />								
+							</b:FormGroup>														
+							
+							<b:FormGroup ui:field="groupFailure">
+								<b:FormLabel for="failure" ui:field="labelFailure" />
+								<b:HelpBlock color="red" ui:field="helpFailure"/>
+								<b:TextBox b:id="failure" ui:field="failure" />								
+							</b:FormGroup>	
+							
+							<b:FormGroup>
+								<b:FormLabel for="gps" ui:field="labelGps" />
+								<g:FlowPanel>
+									<b:RadioButton name="radio2" formValue="true"
+										ui:field="radio3" />
+									<b:RadioButton name="radio2" formValue="false"
+										ui:field="radio4" />
+								</g:FlowPanel>
+							</b:FormGroup>
+							
+						</b:FieldSet>
+					</b:Form>
+
+				</g:ScrollPanel>
+			</b:Row>
+		</b:Column>
+
+		<b:Column size="MD_5" addStyleNames="{style.center-panel}">
+			<b:Column addStyleNames="{style.padding}" size="MD_12">
+			</b:Column>
+			<b:Column size="MD_12">
+				<b:Row>
+					<b:Panel>
+						<b:PanelHeader ui:field="helpTitle" />
+						<b:PanelBody  >
+							<g:ScrollPanel addStyleNames="{style.help}" ui:field="helpText" />
+						</b:PanelBody>
+					</b:Panel>
+				</b:Row>
+			</b:Column>
+		</b:Column>
+
+
+	</b:Container>
+</ui:UiBinder> 

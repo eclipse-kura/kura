@@ -11,7 +11,10 @@
  */
 package org.eclipse.kura.web.shared;
 
-public enum GwtKuraErrorCode {
+import java.io.Serializable;
+
+
+public enum GwtKuraErrorCode{
 
     DUPLICATE_NAME, 
     CANNOT_REMOVE_LAST_ADMIN,

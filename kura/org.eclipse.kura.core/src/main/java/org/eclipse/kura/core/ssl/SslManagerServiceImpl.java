@@ -113,6 +113,7 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
 		//
 		// save the bundle context and the properties
 		m_ctx = componentContext;
+		m_properties = properties;
 		m_options = new SslManagerServiceOptions(properties);
 
 		ServiceTracker<SslServiceListener, SslServiceListener> listenersTracker = new ServiceTracker<SslServiceListener, SslServiceListener>(

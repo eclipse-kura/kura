@@ -469,9 +469,14 @@ public class EthernetMonitorServiceImpl implements EthernetMonitorService, Event
 		
 		if (ethernetInterfaceConfig != null) {
 			for (NetInterfaceAddressConfig addresses : ethernetInterfaceConfig.getNetInterfaceAddresses()) {
-				for (NetConfig netConfig : addresses.getConfigs()) {
-					if (netConfig instanceof NetConfigIP4) {
-						status = ((NetConfigIP4)netConfig).getStatus();
+				if (addresses != null) {
+					List<NetConfig> netConfigs = addresses.getConfigs();
+					if (netConfigs != null) {
+						for (NetConfig netConfig : netConfigs) {
+							if (netConfig instanceof NetConfigIP4) {
+								status = ((NetConfigIP4)netConfig).getStatus();
+							}
+						}
 					}
 				}
 			}

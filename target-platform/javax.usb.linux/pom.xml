@@ -110,7 +110,8 @@
                         	lib/linux/armv5_sf/libJavaxUsb.so; osname=Linux; processor=ARM; selection-filter="(&amp;(kura.arch=armv7_sf))",
                         	lib/linux/armv6_hf/libJavaxUsb.so; osname=Linux; processor=ARM; selection-filter="(&amp;(kura.arch=armv6_hf))",
                         	lib/linux/armv5_sf/libJavaxUsb.so; osname=Linux; processor=ARM; selection-filter="(&amp;(kura.arch=armv6_sf))",
-                        	lib/linux/armv5_sf/libJavaxUsb.so; osname=Linux; processor=ARM; selection-filter="(&amp;(kura.arch=armv5_sf))"
+                        	lib/linux/armv5_sf/libJavaxUsb.so; osname=Linux; processor=ARM; selection-filter="(&amp;(kura.arch=armv5_sf))",
+							*
                         </Bundle-NativeCode>
                         <Export-Package>
                             com.ibm.jusb.os.linux.*;version="1.0.3"

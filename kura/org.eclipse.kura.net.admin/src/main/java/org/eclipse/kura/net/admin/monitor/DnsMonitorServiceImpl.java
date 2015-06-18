@@ -306,9 +306,14 @@ public class DnsMonitorServiceImpl implements DnsMonitorService, EventHandler {
     
     private boolean isEnabledForWan(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig) {
     	for(NetInterfaceAddressConfig netInterfaceAddressConfig : netInterfaceConfig.getNetInterfaceAddresses()) {
-    		for(NetConfig netConfig : netInterfaceAddressConfig.getConfigs()) {
-    			if(netConfig instanceof NetConfigIP4) {
-    				return NetInterfaceStatus.netIPv4StatusEnabledWAN.equals(((NetConfigIP4) netConfig).getStatus());
+    		if (netInterfaceAddressConfig != null) {
+    			List<NetConfig> netConfigs = netInterfaceAddressConfig.getConfigs();
+    			if (netConfigs != null) {
+		    		for(NetConfig netConfig : netConfigs) {
+		    			if(netConfig instanceof NetConfigIP4) {
+		    				return NetInterfaceStatus.netIPv4StatusEnabledWAN.equals(((NetConfigIP4) netConfig).getStatus());
+		    			}
+		    		}
     			}
     		}
     	}

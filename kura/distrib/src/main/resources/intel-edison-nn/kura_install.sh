@@ -42,3 +42,4 @@ cp ${INSTALL_DIR}/kura/install/kura.logrotate /etc/logrotate.d/kura
 sed -i 's/ps ax/ps/g' ${INSTALL_DIR}/kura/bin/start_kura.sh
 sed -i 's/ps ax/ps/g' ${INSTALL_DIR}/kura/bin/start_kura_background.sh
 sed -i 's/ps ax/ps/g' ${INSTALL_DIR}/kura/bin/start_kura_debug.sh
+

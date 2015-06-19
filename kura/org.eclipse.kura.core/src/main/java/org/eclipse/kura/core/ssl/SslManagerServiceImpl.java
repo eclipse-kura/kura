@@ -51,6 +51,7 @@ import javax.net.ssl.X509TrustManager;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.configuration.ConfigurationService;
+import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.ssl.SslManagerService;
 import org.eclipse.kura.ssl.SslServiceListener;
@@ -609,7 +610,7 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
 				final String pid = (String) m_properties.get("service.pid");
 
 				Map<String, Object> props = new HashMap<String, Object>(m_properties);
-				props.put(SslManagerServiceOptions.PROP_TRUST_PASSWORD, new String(newPassword));
+				props.put(SslManagerServiceOptions.PROP_TRUST_PASSWORD, new Password(newPassword));
 				final Map<String, Object> theProperties = props;
 
 				m_timer.scheduleAtFixedRate(new TimerTask() {

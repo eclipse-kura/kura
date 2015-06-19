@@ -66,6 +66,14 @@
             required="true"
             default="false"
             description="Whether or not to republish the MQTT Birth Certificate on modem detection event"/>
+            
+        <AD id="disable.default.subscriptions"
+            name="disable.default.subscriptions"
+            type="Boolean"
+            cardinality="0"
+            required="true"
+            default="false"
+            description="By disabling default subscriptions the gateway will not be remotely manageable"/>
     </OCD>
     
     <Designate pid="org.eclipse.kura.cloud.CloudService">

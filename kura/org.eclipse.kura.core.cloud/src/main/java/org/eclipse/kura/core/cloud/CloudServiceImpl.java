@@ -82,6 +82,8 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
 	String                  		m_imei;
 	String                  		m_iccid;
 	String                  		m_imsi;
+	
+	private boolean                 m_subscribed;
 
 
 	public CloudServiceImpl() {
@@ -193,7 +195,7 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
 		// Update properties and re-publish Birth certificate
 		m_options = new CloudServiceOptions(properties, m_systemService);
 		if (m_dataService != null && m_dataService.isConnected()) {
-			publishBirthCertificate();
+			setupCloudConnection();
 		}
 	}
 
@@ -352,14 +354,10 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
 	@Override
 	public void onConnectionEstablished() 
 	{
-		// publish birth certificate
-		publishBirthCertificate();
-
+		setupCloudConnection();
+		
 		// raise event
 		m_eventAdmin.postEvent( new CloudConnectionEstablishedEvent( new HashMap<String,Object>()));		
-
-		// restore default subscriptions
-		activateDeviceSubscriptions();
 
 		// notify listeners
 		for (CloudClientImpl cloudClient : m_cloudClients) {
@@ -368,7 +366,7 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
 	}
 
 
-	private void activateDeviceSubscriptions()		
+	private void setupDeviceSubscriptions(boolean subscribe)		
 	{
 		StringBuilder sbDeviceSubscription = new StringBuilder();
 		sbDeviceSubscription.append(m_options.getTopicControlPrefix())
@@ -379,15 +377,18 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
 		.append(m_options.getTopicSeparator())
 		.append(m_options.getTopicWildCard());
 
-		// restore default subscriptions
+		// restore or remove default subscriptions
 		try {
-			m_dataService.subscribe(sbDeviceSubscription.toString(), 1);
+			if (subscribe) {
+				m_dataService.subscribe(sbDeviceSubscription.toString(), 1);
+			} else {
+				m_dataService.unsubscribe(sbDeviceSubscription.toString());
+			}
 		}
 		catch (KuraException e) {
 			s_logger.error("Error - Cannot activate default subscriptions", e);
 		}
 	}
-
 
 	@Override
 	public void onDisconnecting() 
@@ -571,6 +572,24 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
 	//
 	// ----------------------------------------------------------------
 
+	private void setupCloudConnection()
+	{
+		// restore or remove default subscriptions
+		if (m_options.getDisableDefaultSubscriptions()) {
+			if (m_subscribed) {
+				setupDeviceSubscriptions(false);
+				m_subscribed = false;
+			}
+		} else {
+			if (!m_subscribed) {
+			    setupDeviceSubscriptions(true);
+				m_subscribed = true;
+			}
+		}
+		
+		// publish birth certificate
+		publishBirthCertificate();
+	}
 
 	private void publishBirthCertificate() 
 	{

@@ -272,7 +272,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 		} else {
 			cc = getSelfConfiguringComponentConfiguration(pid);
 		}
-		
+
 		decryptPasswords(cc);
 		return cc;
 	}
@@ -291,7 +291,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 		s_logger.info("Writing snapshot - Getting component configurations...");
 
 		List<ComponentConfiguration> configs = buildCurrentConfiguration(null);
-		
+
 		return saveSnapshot(configs);
 	}
 
@@ -356,7 +356,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 							Bundle bundle = ref.getBundle();
 							try {
 								OCD ocd = ComponentUtil.readObjectClassDefinition(bundle, pid);
-								Map<String, Object> defaults = ComponentUtil.getDefaultProperties(ocd);
+								Map<String, Object> defaults = ComponentUtil.getDefaultProperties(ocd, m_ctx);
 								updateConfigurationInternal(pid, defaults, snapshotOnConfirmation);
 							} catch (Throwable t) {
 								s_logger.warn("Error during rollback for component "+pid, t);
@@ -412,7 +412,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 
 		return returnConfigs;
 	}
-	
+
 	private synchronized List<ComponentConfiguration> buildCurrentConfiguration(List<ComponentConfiguration> configsToUpdate) throws KuraException {
 		// Build the current configuration
 		ComponentConfiguration cc = null;
@@ -448,7 +448,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 				}
 			}
 		}
-		
+
 		// merge the current configs with those in the latest snapshot
 		List<ComponentConfigurationImpl> snapshotConfigs = loadLatestSnapshotConfigurations();
 		if(snapshotConfigs != null){
@@ -465,10 +465,10 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 				}
 			}
 		}
-		
+
 		return configs;
 	}
-	
+
 
 	public synchronized void updateConfigurations(List<ComponentConfiguration> configsToUpdate) throws KuraException {
 		boolean snapshotOnConfirmation = false;
@@ -601,11 +601,12 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 				s_logger.info("Snapshot on EventAdmin configuration will be taken for {}.", pid);
 			}
 
-			
+			Map<String, Object> cleanedProperties= cleanProperties(mergedProperties, pid);
+
 			// Update the new properties
 			// use ConfigurationAdmin to do the update
 			Configuration config = m_configurationAdmin.getConfiguration(pid);
-			config.update(CollectionsUtil.mapToDictionary(mergedProperties));
+			config.update(CollectionsUtil.mapToDictionary(cleanedProperties));
 
 			s_logger.info("Updating Configuration of ConfigurableComponent {} ... Done.", pid);
 		} catch (IOException e) {
@@ -683,7 +684,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 		Map<String, Object> propertiesToUpdate = config.getConfigurationProperties();
 		encryptPasswords(propertiesToUpdate);
 	}
-	
+
 	private void encryptPasswords(Map<String, Object> propertiesToUpdate){
 		Iterator<String> keys = propertiesToUpdate.keySet().iterator();
 		while (keys.hasNext()) {
@@ -692,7 +693,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 			if (value != null) {
 				if (value instanceof Password) {
 					try {
-						propertiesToUpdate.put(key, new Password(m_cryptoService.encryptAes(value.toString())));
+						propertiesToUpdate.put(key, new Password(m_cryptoService.encryptAes(value.toString().toCharArray())));
 					} catch (Exception e) {
 						s_logger.warn("Failed to encrypt Password property: {}", key);
 						propertiesToUpdate.remove(key);
@@ -814,8 +815,8 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 				fos = new FileOutputStream(fSnapshot);
 				osw = new OutputStreamWriter(fos, "UTF-8");
 				String xmlResult = XmlUtil.marshal(xmlConfigs);
-				String encryptedXML = m_cryptoService.encryptAes(xmlResult);
-				osw.append(encryptedXML);
+				char[] encryptedXML = m_cryptoService.encryptAes(xmlResult.toCharArray());
+				osw.append(new String(encryptedXML));
 				osw.flush();
 				fos.flush();
 				fos.getFD().sync();
@@ -840,8 +841,8 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 				configImpls.add((ComponentConfigurationImpl) config);
 			}
 		}
-		
-		
+
+
 		//
 		// Build the XML structure
 		XmlComponentConfigurations conf = new XmlComponentConfigurations();
@@ -871,8 +872,8 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 			FileOutputStream fos = new FileOutputStream(fSnapshot);
 			OutputStreamWriter osw = new OutputStreamWriter(fos, "UTF-8");
 			String xmlResult = XmlUtil.marshal(conf);
-			String encryptedXML = m_cryptoService.encryptAes(xmlResult);
-			osw.append(encryptedXML);
+			char[] encryptedXML = m_cryptoService.encryptAes(xmlResult.toCharArray());
+			osw.append(new String(encryptedXML));
 			osw.flush();
 			fos.flush();
 			fos.getFD().sync();
@@ -898,7 +899,9 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 			Configuration cfg = m_configurationAdmin.getConfiguration(pid);
 			Map<String, Object> props = CollectionsUtil.dictionaryToMap(cfg.getProperties(), ocd);
 
-			cc = new ComponentConfigurationImpl(pid, ocd, props); 
+			Map<String, Object> cleanedProps= cleanProperties(props, pid);
+
+			cc = new ComponentConfigurationImpl(pid, ocd, cleanedProps); 
 		} catch (Exception e) {
 			s_logger.error("Error getting Configuration for component: " + pid + ". Ignoring it.", e);
 		}
@@ -1081,7 +1084,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 			}
 		}
 	}
-	
+
 	private List<ComponentConfigurationImpl> loadLatestSnapshotConfigurations() throws KuraException {
 		//
 		// Get the latest snapshot file to use as initialization
@@ -1124,16 +1127,8 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 			s_logger.info("Snapshot not encrypted, trying to load a not encrypted one");
 			try {
 				if (allSnapshotsUnencrypted()) {
-					fr = new FileReader(fSnapshot);
-					br = new BufferedReader(fr);
-					String line = "";
-					String entireFile = "";
-					while ((line = br.readLine()) != null) {
-						entireFile += line;
-					} // end while
-					xmlConfigs = XmlUtil.unmarshal(entireFile, XmlComponentConfigurations.class);
 					encryptPlainSnapshots();
-					encryptConfigs(xmlConfigs.getConfigurations());
+					return loadLatestSnapshotConfigurations();
 				}
 			} catch (Exception ex) {
 				throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
@@ -1153,7 +1148,6 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 
 			}
 		}
-
 		return xmlConfigs.getConfigurations();
 	}
 
@@ -1213,12 +1207,40 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 			}
 		}
 	}
+	
+	private Map<String, Object> cleanProperties(Map<String, Object> mergedProperties, String pid) {
+		Tocd componentOcd= m_ocds.get(pid);
+		Set<String> metatypeNames= new HashSet<String>();
+		if (componentOcd != null) {
+			List<AD> attrDefs = componentOcd.getAD();
+			if (attrDefs != null) {
+				for (AD attrDef : attrDefs) {
+					String name = attrDef.getName();
+					if (!metatypeNames.contains(name)) {
+						metatypeNames.add(name);
+					}
+				}
+			}
+		}
+
+		Map<String, Object> cleanedProperties= new HashMap<String, Object> ();
+		Set<String> mergedKeys= mergedProperties.keySet();
+
+		for(String key: mergedKeys){
+			if(metatypeNames.contains(key)){
+				Object value= mergedProperties.get(key);
+				cleanedProperties.put(key, value);
+			}
+		}
+		return cleanedProperties;
+
+	}
 
 	boolean mergeWithDefaults(OCD ocd, Map<String, Object> properties) throws KuraException {
 		boolean changed = false;
 		Set<String> keys = properties.keySet();
 
-		Map<String, Object> defaults = ComponentUtil.getDefaultProperties(ocd);
+		Map<String, Object> defaults = ComponentUtil.getDefaultProperties(ocd, m_ctx);
 		Set<String> defaultsKeys = defaults.keySet();
 		defaultsKeys.removeAll(keys);
 		if (!defaultsKeys.isEmpty()) {

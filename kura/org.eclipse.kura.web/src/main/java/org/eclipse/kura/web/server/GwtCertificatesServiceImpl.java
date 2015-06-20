@@ -80,7 +80,7 @@ public class GwtCertificatesServiceImpl extends OsgiRemoteServiceServlet impleme
 	}
 
 
-	public Integer storePublicSSLCertificate(String publicCert, String alias)
+	public Integer storePublicSSLCertificate(String publicCert, String alias, int index)
 			throws GwtKuraException {
 		try {
 			CertificateFactory certFactory= CertificateFactory.getInstance("X.509");

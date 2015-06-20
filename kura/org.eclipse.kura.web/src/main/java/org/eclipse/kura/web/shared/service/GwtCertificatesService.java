@@ -20,5 +20,5 @@ public interface GwtCertificatesService extends RemoteService
 {	
 	public Integer storePrivateSSLCertificate(String privateCert, String publicCert, String password, String alias) throws GwtKuraException;
 	
-	public Integer storePublicSSLCertificate(String publicCert, String alias) throws GwtKuraException;
+	public Integer storePublicSSLCertificate(String publicCert, String alias, int typeIndex) throws GwtKuraException;
 }

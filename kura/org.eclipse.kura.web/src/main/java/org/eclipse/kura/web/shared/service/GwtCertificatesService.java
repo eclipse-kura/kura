@@ -18,7 +18,11 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 @RemoteServiceRelativePath("certificate")
 public interface GwtCertificatesService extends RemoteService 
 {	
-	public Integer storePrivateSSLCertificate(String privateCert, String publicCert, String password, String alias) throws GwtKuraException;
+	public Integer storePublicPrivateKeys(String privateCert, String publicCert, String password, String alias) throws GwtKuraException;
 	
-	public Integer storePublicSSLCertificate(String publicCert, String alias, int typeIndex) throws GwtKuraException;
+	public Integer storeLeafKey(String publicCert, String alias) throws GwtKuraException;
+	
+	public Integer storePublicChain(String publicCert, String alias) throws GwtKuraException;
+	
+	public Integer storeCertificationAuthority(String publicCert, String alias) throws GwtKuraException;
 }

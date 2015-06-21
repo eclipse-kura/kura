@@ -100,7 +100,7 @@ public class MutualAuthenticationTab extends LayoutContainer {
 		m_formPanel.addListener(Events.Submit, new Listener<FormEvent>() {
 			public void handleEvent(FormEvent be) {
 				
-					gwtCertificatesService.storePrivateSSLCertificate(m_privateCertificate.getValue(), m_publicCertificate.getValue(), m_storagePassword.getValue(), m_storageAlias.getValue(), new AsyncCallback<Integer>() {
+					gwtCertificatesService.storePublicPrivateKeys(m_privateCertificate.getValue(), m_publicCertificate.getValue(), m_storagePassword.getValue(), m_storageAlias.getValue(), new AsyncCallback<Integer>() {
 						public void onFailure(Throwable caught) {
 							if(caught.getLocalizedMessage().equals(GwtKuraErrorCode.ILLEGAL_ARGUMENT.toString())){
 								Info.display(MSGS.error(), "Error while storing the private certificate in the key store");
@@ -143,7 +143,7 @@ public class MutualAuthenticationTab extends LayoutContainer {
 		m_privateCertificate = new TextArea();
 		m_privateCertificate.setBorders(false);
 		m_privateCertificate.setReadOnly(false);
-		m_privateCertificate.setEmptyText(MSGS.settingsPrivateCertLabel());
+		m_privateCertificate.setEmptyText("* " +MSGS.settingsPrivateCertLabel());
 		m_privateCertificate.setName(MSGS.settingsPrivateCertLabel());
 		m_privateCertificate.setAllowBlank(false);
 		m_privateCertificate.setFieldLabel(MSGS.settingsPrivateCertLabel());
@@ -177,7 +177,7 @@ public class MutualAuthenticationTab extends LayoutContainer {
 		//
 		m_storageAlias = new TextField<String>();
 		m_storageAlias.setName(MSGS.settingsStorageAliasLabel());
-		m_storageAlias.setPassword(true);
+		m_storageAlias.setPassword(false);
 		m_storageAlias.setAllowBlank(false);
 		m_storageAlias.setEmptyText("* " + MSGS.settingsStorageAliasLabel());
 		m_storageAlias.setFieldLabel(MSGS.settingsStorageAliasLabel());

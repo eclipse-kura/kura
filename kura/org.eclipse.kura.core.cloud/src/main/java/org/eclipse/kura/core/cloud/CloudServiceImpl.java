@@ -186,6 +186,16 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
 		String[] eventTopics = {PositionLockedEvent.POSITION_LOCKED_EVENT_TOPIC, ModemReadyEvent.MODEM_EVENT_READY_TOPIC};
 		props.put(EventConstants.EVENT_TOPIC, eventTopics);
 		m_ctx.getBundleContext().registerService(EventHandler.class.getName(), this, props);
+		
+		//
+		// Usually the cloud connection is setup in the
+		// onConnectionEstablished callback.
+		// Since the callback may be lost if we are activated
+		// too late (the DataService is already connected) we
+		// setup the cloud connection here.
+		if (m_dataService != null && m_dataService.isConnected()) {
+			setupCloudConnection();
+		}
 	}
 
 	public void updated(Map<String,Object> properties)

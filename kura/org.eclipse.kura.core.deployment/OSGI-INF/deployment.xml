@@ -12,10 +12,12 @@
       Eurotech
 
 -->
-<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" activate="activate" deactivate="deactivate" name="org.eclipse.kura.core.deployment">
-   <implementation class="org.eclipse.kura.core.deployment.CloudDeploymentHandler"/>
-   <reference bind="setCloudService" cardinality="1..1" interface="org.eclipse.kura.cloud.CloudService" name="CloudService" policy="static" unbind="unsetCloudService"/>
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" activate="activate" deactivate="deactivate" name="org.eclipse.kura.core.deployment.CloudDeploymentHandlerV2">
+   <implementation class="org.eclipse.kura.core.deployment.CloudDeploymentHandlerV2"/>
+	<!-- 
    <reference bind="setDeploymentAgentService" cardinality="1..1" interface="org.eclipse.kura.deployment.agent.DeploymentAgentService" name="DeploymentAgentService" policy="static" unbind="unsetDeploymentAgentService"/>
+   -->
    <reference bind="setDeploymentAdmin" cardinality="1..1" interface="org.osgi.service.deploymentadmin.DeploymentAdmin" name="DeploymentAdmin" policy="static" unbind="unsetDeploymentAdmin"/>
-   <reference bind="setSystemService" cardinality="1..1" interface="org.eclipse.kura.system.SystemService" name="SystemService" policy="static" unbind="unsetSystemService"/>
+   <reference bind="setCloudService" cardinality="1..1" interface="org.eclipse.kura.cloud.CloudService" name="CloudService" policy="static" unbind="unsetCloudService"/>
+   <reference bind="setSslManagerService" cardinality="1..1" interface="org.eclipse.kura.ssl.SslManagerService" name="SslManagerService" policy="static" unbind="unsetSslManagerService"/>
 </scr:component>

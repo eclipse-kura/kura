@@ -663,7 +663,6 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 
 	Map<String, Object> decryptPasswords(ComponentConfiguration config) {
 		Map<String, Object> configProperties = config.getConfigurationProperties();
-		//Map<String, Object> decryptedProperties = new HashMap<String, Object>();
 
 		Iterator<String> keys = configProperties.keySet().iterator();
 		while (keys.hasNext()) {
@@ -726,41 +725,16 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 			Long[] snapshots = snapshotIDs.toArray(new Long[] {});
 
 			for (Long snapshot : snapshots) {
-
-				String configDir = getSnapshotsDirectory();
-				StringBuilder sbSnapshot = new StringBuilder(configDir);
-				sbSnapshot.append(File.separator).append("snapshot_").append(snapshot).append(".xml");
-
-				String snapshotName = sbSnapshot.toString();
-				File fSnapshot = new File(snapshotName);
+				File fSnapshot = loadSnapshotFile(snapshot);
 				if (!fSnapshot.exists()) {
 					throw new KuraException(KuraErrorCode.CONFIGURATION_SNAPSHOT_NOT_FOUND, snapshot);
 				}
-				//
-				// Unmarshall
-
-				FileReader fr = null;
-				BufferedReader br = null;
+				
 				try {
-					fr = new FileReader(fSnapshot);
-					br = new BufferedReader(fr);
-					String line = "";
-					String entireFile = "";
-					while ((line = br.readLine()) != null) {
-						entireFile += line;
-					} // end while
-					String decryptedContent = new String(m_cryptoService.decryptAes(entireFile.toCharArray()));
-					XmlUtil.unmarshal(decryptedContent, XmlComponentConfigurations.class);
+					//Verify if the current snapshot is encrypted
+					loadEncryptedSnapshotFileContent(fSnapshot);
 					return false;
 				} catch (Exception e) {
-
-				} finally {
-					if (br != null) {
-						br.close();
-					}
-					if (fr != null) {
-						fr.close();
-					}
 				}
 			}
 			return true;
@@ -777,21 +751,16 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 		Long[] snapshots = snapshotIDs.toArray(new Long[] {});
 
 		for (Long snapshot : snapshots) {
-			String configDir = getSnapshotsDirectory();
-			StringBuilder sbSnapshot = new StringBuilder(configDir);
-			sbSnapshot.append(File.separator).append("snapshot_").append(snapshot).append(".xml");
-
-			String snapshotName = sbSnapshot.toString();
-			File fSnapshot = new File(snapshotName);
+			File fSnapshot = loadSnapshotFile(snapshot);
 			if (!fSnapshot.exists()) {
 				throw new KuraException(KuraErrorCode.CONFIGURATION_SNAPSHOT_NOT_FOUND, snapshot);
 			}
+			
 			//
 			// Unmarshall
-
+			XmlComponentConfigurations xmlConfigs = null;
 			FileReader fr = null;
 			BufferedReader br = null;
-			XmlComponentConfigurations xmlConfigs = null;
 			try {
 				fr = new FileReader(fSnapshot);
 				br = new BufferedReader(fr);
@@ -808,27 +777,9 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 			}
 			List<ComponentConfigurationImpl> configs = xmlConfigs.getConfigurations();
 			encryptConfigs(configs);
-
-			FileOutputStream fos = null;
-			OutputStreamWriter osw = null;
-			try {
-				fos = new FileOutputStream(fSnapshot);
-				osw = new OutputStreamWriter(fos, "UTF-8");
-				String xmlResult = XmlUtil.marshal(xmlConfigs);
-				char[] encryptedXML = m_cryptoService.encryptAes(xmlResult.toCharArray());
-				osw.append(new String(encryptedXML));
-				osw.flush();
-				fos.flush();
-				fos.getFD().sync();
-
-			} finally {
-				if (osw != null) {
-					osw.close();
-				}
-				if (fos != null) {
-					fos.close();
-				}
-			}
+			
+			//Writes an encrypted snapshot with encrypted passwords.
+			writeSnapshot(snapshot, xmlConfigs);
 		}
 	}
 
@@ -865,29 +816,49 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 			}
 		}
 
-		File fSnapshot = getSnapshotFile(sid);
-		s_logger.info("Writing snapshot - Saving {}...", fSnapshot.getAbsolutePath());
-		try {
+		//Write snapshot
+		writeSnapshot(sid, conf);
 
-			FileOutputStream fos = new FileOutputStream(fSnapshot);
-			OutputStreamWriter osw = new OutputStreamWriter(fos, "UTF-8");
+		//
+		// Garbage Collector for number of Snapshots Saved
+		garbageCollectionOldSnapshots();
+		return sid;
+	}
+
+	private void writeSnapshot(long sid, XmlComponentConfigurations conf) throws KuraException {
+		File fSnapshot = getSnapshotFile(sid);
+		
+		FileOutputStream fos = null;
+		OutputStreamWriter osw = null;
+		try {
+			s_logger.info("Writing snapshot - Saving {}...", fSnapshot.getAbsolutePath());
+			fos = new FileOutputStream(fSnapshot);
+			osw = new OutputStreamWriter(fos, "UTF-8");
 			String xmlResult = XmlUtil.marshal(conf);
 			char[] encryptedXML = m_cryptoService.encryptAes(xmlResult.toCharArray());
 			osw.append(new String(encryptedXML));
 			osw.flush();
 			fos.flush();
 			fos.getFD().sync();
-			osw.close();
-			fos.close();
+			s_logger.info("Writing snapshot - Saving {}... Done.", fSnapshot.getAbsolutePath());
 		} catch (Throwable t) {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, t);
+		} finally {
+			if (osw != null){
+				try {
+					osw.close();
+				} catch (IOException e) {
+				
+				}
+			}
+			if(fos != null){
+				try {
+					fos.close();
+				} catch (IOException e) {
+				
+				}
+			}
 		}
-		s_logger.info("Writing snapshot - Saving {}... Done.", fSnapshot.getAbsolutePath());
-
-		//
-		// Garbage Collector for number of Snapshots Saved
-		garbageCollectionOldSnapshots();
-		return sid;
 	}
 
 	private ComponentConfiguration getConfigurableComponentConfiguration(String pid) {
@@ -1095,21 +1066,35 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 
 		Long[] snapshots = snapshotIDs.toArray(new Long[] {});
 		Long lastestID = snapshots[snapshotIDs.size() - 1];
-		String configDir = getSnapshotsDirectory();
-		StringBuilder sbSnapshot = new StringBuilder(configDir);
-		sbSnapshot.append(File.separator).append("snapshot_").append(lastestID).append(".xml");
-
-		String snapshot = sbSnapshot.toString();
-		File fSnapshot = new File(snapshot);
+		
+		File fSnapshot = loadSnapshotFile(lastestID);
 		if (!fSnapshot.exists()) {
-			throw new KuraException(KuraErrorCode.CONFIGURATION_SNAPSHOT_NOT_FOUND, snapshot);
+			throw new KuraException(KuraErrorCode.CONFIGURATION_SNAPSHOT_NOT_FOUND, lastestID);
 		}
 
 		//
 		// Unmarshall
-		s_logger.info("Loading init configurations from: {}...", snapshot);
+		s_logger.info("Loading init configurations from: {}...", lastestID);
 		XmlComponentConfigurations xmlConfigs = null;
 
+		try {
+			xmlConfigs = loadEncryptedSnapshotFileContent(fSnapshot);
+		} catch (Exception e) {
+			s_logger.info("Snapshot not encrypted, trying to load a not encrypted one");
+			try {
+				if (allSnapshotsUnencrypted()) {
+					encryptPlainSnapshots();
+					return loadLatestSnapshotConfigurations();
+				}
+			} catch (Exception ex) {
+				throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+			}
+		}
+		return xmlConfigs.getConfigurations();
+	}
+	
+	private XmlComponentConfigurations loadEncryptedSnapshotFileContent(File fSnapshot) throws KuraException{
+		XmlComponentConfigurations xmlConfigs= null;
 		FileReader fr = null;
 		BufferedReader br = null;
 		try {
@@ -1122,17 +1107,8 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 			} // end while
 			String decryptedContent = new String(m_cryptoService.decryptAes(entireFile.toCharArray()));
 			xmlConfigs = XmlUtil.unmarshal(decryptedContent, XmlComponentConfigurations.class);
-
 		} catch (Exception e) {
-			s_logger.info("Snapshot not encrypted, trying to load a not encrypted one");
-			try {
-				if (allSnapshotsUnencrypted()) {
-					encryptPlainSnapshots();
-					return loadLatestSnapshotConfigurations();
-				}
-			} catch (Exception ex) {
-				throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
-			}
+			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
 		}finally {			
 			try {
 				if (fr != null) {
@@ -1148,7 +1124,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 
 			}
 		}
-		return xmlConfigs.getConfigurations();
+		return xmlConfigs;
 	}
 
 	private void validateProperties(String pid, ObjectClassDefinition ocd, Map<String, Object> updatedProps) throws KuraException {
@@ -1234,6 +1210,15 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 		}
 		return cleanedProperties;
 
+	}
+	
+	private File loadSnapshotFile(Long snapshotID){
+		String configDir = getSnapshotsDirectory();
+		StringBuilder sbSnapshot = new StringBuilder(configDir);
+		sbSnapshot.append(File.separator).append("snapshot_").append(snapshotID).append(".xml");
+
+		String snapshot = sbSnapshot.toString();
+		return new File(snapshot);	
 	}
 
 	boolean mergeWithDefaults(OCD ocd, Map<String, Object> properties) throws KuraException {

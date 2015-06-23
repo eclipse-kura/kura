@@ -24,6 +24,7 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
@@ -61,7 +62,8 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
 {	
 	private static final Logger s_logger = LoggerFactory.getLogger(CloudServiceImpl.class);
 
-	private static final String     TOPIC_BA_APP = "BA";
+	private static final String     TOPIC_BA_APP   = "BA";
+	private static final String     TOPIC_MQTT_APP = "MQTT";
 
 	private ComponentContext        m_ctx;
 
@@ -84,10 +86,13 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
 	String                  		m_imsi;
 	
 	private boolean                 m_subscribed;
+	private boolean                 m_birthPublished;
 
+	private AtomicInteger           m_messageId;
 
 	public CloudServiceImpl() {
 		m_cloudClients = new CopyOnWriteArrayList<CloudClientImpl>();
+		m_messageId = new AtomicInteger();
 	}
 
 	// ----------------------------------------------------------------
@@ -193,8 +198,12 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
 		// Since the callback may be lost if we are activated
 		// too late (the DataService is already connected) we
 		// setup the cloud connection here.
-		if (m_dataService != null && m_dataService.isConnected()) {
-			setupCloudConnection();
+		if (isConnected()) {
+			try {
+				setupCloudConnection(true);
+			} catch (KuraException e) {
+				s_logger.warn("Cannot setup cloud service connection");
+			}
 		}
 	}
 
@@ -204,8 +213,12 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
 
 		// Update properties and re-publish Birth certificate
 		m_options = new CloudServiceOptions(properties, m_systemService);
-		if (m_dataService != null && m_dataService.isConnected()) {
-			setupCloudConnection();
+		if (isConnected()) {
+			try {
+				setupCloudConnection(false);
+			} catch (KuraException e) {
+				s_logger.warn("Cannot setup cloud service connection");
+			}
 		}
 	}
 
@@ -213,8 +226,12 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
 	{
 		s_logger.info("deactivate...");
 
-		if (m_dataService != null && m_dataService.isConnected()) {
-			publishDisconnectCertificate();
+		if (isConnected()) {
+			try {
+				publishDisconnectCertificate();
+			} catch (KuraException e) {
+				s_logger.warn("Cannot publish disconnect certificate");
+			}
 		}
 
 		// no need to release the cloud clients as the updated app 
@@ -239,7 +256,11 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
 			// republish the birth certificate only if we are configured to
 			s_logger.info("Handling PositionLockedEvent");
 			if (m_dataService.isConnected() && m_options.getRepubBirthCertOnGpsLock()) {
-				publishBirthCertificate();
+				try {
+					publishBirthCertificate();
+				} catch (KuraException e) {
+					s_logger.warn("Cannot publish birth certificate", e);
+				}
 			}
 		} else if (ModemReadyEvent.MODEM_EVENT_READY_TOPIC.contains(event.getTopic())) {
 			s_logger.info("Handling ModemReadyEvent");
@@ -257,7 +278,11 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
 						&& ((m_imsi == null) || (m_imsi.length() == 0) || m_imsi.equals("ERROR"))
 						&& ((m_iccid == null) || (m_iccid.length() == 0) || m_iccid.equals("ERROR")))) {
 					s_logger.debug("handleEvent() :: publishing BIRTH certificate ...");
-					publishBirthCertificate();
+					try {
+						publishBirthCertificate();
+					} catch (KuraException e) {
+						s_logger.warn("Cannot publish birth certificate", e);
+					}
 				}
 			}
 		}
@@ -282,7 +307,7 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
 		m_cloudClients.add(cloudClient);
 
 		// publish updated birth certificate with list of active apps
-		if (m_dataService != null && m_dataService.isConnected()) {
+		if (isConnected()) {
 			publishAppCertificate();
 		}
 
@@ -325,8 +350,12 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
 		m_cloudClients.remove(cloudClient);
 
 		// publish updated birth certificate with updated list of active apps
-		if (m_dataService != null && m_dataService.isConnected()) {
-			publishAppCertificate();
+		if (isConnected()) {
+			try {
+				publishAppCertificate();
+			} catch (KuraException e) {
+				s_logger.warn("Cannot publish app certificate");
+			}
 		}
 	}
 
@@ -363,8 +392,12 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
 
 	@Override
 	public void onConnectionEstablished() 
-	{
-		setupCloudConnection();
+	{	
+		try {
+			setupCloudConnection(true);
+		} catch (KuraException e) {
+			s_logger.warn("Cannot setup cloud service connection");
+		}
 		
 		// raise event
 		m_eventAdmin.postEvent( new CloudConnectionEstablishedEvent( new HashMap<String,Object>()));		
@@ -376,7 +409,7 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
 	}
 
 
-	private void setupDeviceSubscriptions(boolean subscribe)		
+	private void setupDeviceSubscriptions(boolean subscribe) throws KuraException		
 	{
 		StringBuilder sbDeviceSubscription = new StringBuilder();
 		sbDeviceSubscription.append(m_options.getTopicControlPrefix())
@@ -388,15 +421,10 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
 		.append(m_options.getTopicWildCard());
 
 		// restore or remove default subscriptions
-		try {
-			if (subscribe) {
-				m_dataService.subscribe(sbDeviceSubscription.toString(), 1);
-			} else {
-				m_dataService.unsubscribe(sbDeviceSubscription.toString());
-			}
-		}
-		catch (KuraException e) {
-			s_logger.error("Error - Cannot activate default subscriptions", e);
+		if (subscribe) {
+			m_dataService.subscribe(sbDeviceSubscription.toString(), 1);
+		} else {
+			m_dataService.unsubscribe(sbDeviceSubscription.toString());
 		}
 	}
 
@@ -404,7 +432,11 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
 	public void onDisconnecting() 
 	{
 		// publish disconnect certificate
-		publishDisconnectCertificate();
+		try {
+			publishDisconnectCertificate();
+		} catch (KuraException e) {
+			s_logger.warn("Cannot publish disconnect certificate");
+		}
 	}
 
 	@Override
@@ -428,11 +460,12 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
 	@Override
 	public void onMessageArrived(String topic, byte[] payload, int qos, boolean retained) 
 	{
-		s_logger.debug("Message arrived on topic: {}", topic);		
+		s_logger.info("Message arrived on topic: {}", topic);		
 
 		// notify listeners			
 		KuraTopic kuraTopic = new KuraTopic(topic);
-		if (TOPIC_BA_APP.equals(kuraTopic.getApplicationId())) {
+		if (TOPIC_MQTT_APP.equals(kuraTopic.getApplicationId())||
+			TOPIC_BA_APP.equals(kuraTopic.getApplicationId())) {
 			s_logger.info("Ignoring feedback message from "+topic);
 		}
 		else {
@@ -512,7 +545,17 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
 
 	@Override
 	public void onMessagePublished(int messageId, String topic) {
-		// notify listeners			
+		synchronized (m_messageId) {
+			if (m_messageId.get() != -1 && m_messageId.get() == messageId) {
+				if (m_options.getLifeCycleMessageQos() == 0) {
+					m_messageId.set(-1);
+				}
+				m_messageId.notifyAll();
+				return;
+			}
+		}
+		
+		// notify listeners
 		KuraTopic kuraTopic = new KuraTopic(topic);
 		for (CloudClientImpl cloudClient : m_cloudClients) {
 			if (cloudClient.getApplicationId().equals(kuraTopic.getApplicationId())) {
@@ -523,6 +566,14 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
 
 	@Override
 	public void onMessageConfirmed(int messageId, String topic) {
+		synchronized (m_messageId) {
+			if (m_messageId.get() != -1 && m_messageId.get() == messageId) {
+				m_messageId.set(-1);
+				m_messageId.notifyAll();
+				return;
+			}
+		}
+		
 		// notify listeners			
 		KuraTopic kuraTopic = new KuraTopic(topic);
 		for (CloudClientImpl cloudClient : m_cloudClients) {
@@ -582,10 +633,30 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
 	//
 	// ----------------------------------------------------------------
 
-	private void setupCloudConnection()
+	private void setupCloudConnection(boolean onConnect) throws KuraException
 	{
+		// assume we are not yet subscribed
+		if (onConnect) {
+			m_subscribed = false;
+		}
+		
+		// publish birth certificate unless it has already been published
+		// and republish is disabled 
+		boolean publishBirth = true;
+		if (m_birthPublished && m_options.getDisableRepubBirthCertOnReconnect()) {
+			publishBirth = false;
+			s_logger.info("Birth certificate republish is disabled in configuration");
+		}
+		
+		// publish birth certificate
+		if (publishBirth) {
+			publishBirthCertificate();
+			m_birthPublished = true;
+		}
+		
 		// restore or remove default subscriptions
 		if (m_options.getDisableDefaultSubscriptions()) {
+			s_logger.info("Default subscriptions are disabled in configuration");
 			if (m_subscribed) {
 				setupDeviceSubscriptions(false);
 				m_subscribed = false;
@@ -596,12 +667,9 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
 				m_subscribed = true;
 			}
 		}
-		
-		// publish birth certificate
-		publishBirthCertificate();
 	}
 
-	private void publishBirthCertificate() 
+	private void publishBirthCertificate() throws KuraException 
 	{
 		StringBuilder sbTopic = new StringBuilder();
 		sbTopic.append(m_options.getTopicControlPrefix())
@@ -618,7 +686,7 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
 	}
 
 
-	private void publishDisconnectCertificate() 
+	private void publishDisconnectCertificate() throws KuraException 
 	{
 		StringBuilder sbTopic = new StringBuilder();
 		sbTopic.append(m_options.getTopicControlPrefix())
@@ -635,7 +703,7 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
 	}
 
 
-	private void publishAppCertificate() 
+	private void publishAppCertificate() throws KuraException 
 	{
 		StringBuilder sbTopic = new StringBuilder();
 		sbTopic.append(m_options.getTopicControlPrefix())
@@ -666,18 +734,24 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
 	}
 
 
-	private void publishLifeCycleMessage(String topic, KuraPayload payload) 
+	private void publishLifeCycleMessage(String topic, KuraPayload payload) throws KuraException 
 	{
-		try {			
+		// track the message ID and block until the message
+		// has been published (i.e. written to the socket).
+		synchronized (m_messageId) {
+			m_messageId.set(-1);
 			byte[] encodedPayload = encodePayload(payload);
-			m_dataService.publish(topic, 
+			int messageId = m_dataService.publish(topic, 
 					encodedPayload, 
 					m_options.getLifeCycleMessageQos(), 
 					m_options.getLifeCycleMessageRetain(), 
 					m_options.getLifeCycleMessagePriority());
-		}
-		catch (Exception e) {
-			s_logger.error("Error publishing life-cycle message on topic: "+topic, e);
+			m_messageId.set(messageId);
+			try {
+				m_messageId.wait(1000);
+			} catch (InterruptedException e) {
+				s_logger.info("Interrupted while waiting for the message to be published", e);
+			}
 		}
 	}
 }

@@ -368,8 +368,7 @@ public class CloudConfigurationHandler extends Cloudlet
 			}
 
 			String s = new String(reqPayload.getBody(), "UTF-8");
-			s_logger.info("Received new Configuration...");
-			s_logger.info(s);
+			s_logger.info("Received new Configuration");
 			
 			StringReader sr = new StringReader(s);
 			xmlConfigs = XmlUtil.unmarshal(sr, XmlComponentConfigurations.class);

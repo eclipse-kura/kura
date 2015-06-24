@@ -42,6 +42,7 @@ public class LinuxNetworkUtil {
 	private static final Logger s_logger = LoggerFactory.getLogger(LinuxNetworkUtil.class);
 	
 	private static final String OS_VERSION = System.getProperty("kura.os.version");
+	private static final String TARGET_NAME = System.getProperty("target.device");
 	
 	private static Map<String, LinuxIfconfig> s_ifconfigs = new HashMap<String, LinuxIfconfig>();
 	
@@ -486,6 +487,12 @@ public class LinuxNetworkUtil {
 					if(linkTool.get()) {
 						return linkTool.isLinkDetected();
 					} else {
+						if (TARGET_NAME.equals(KuraConstants.ReliaGATE_15_10.getTargetName())) {
+							SafeProcess proc = ProcessUtil.exec("ifconfig " + ifaceName + " up");
+							if ((proc.waitFor() == 0) && linkTool.get()) {
+								return linkTool.isLinkDetected();
+							}
+						}
 						throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "link tool failed to detect the ethernet status of " + ifaceName);
 					}
 				} else {
@@ -550,7 +557,6 @@ public class LinuxNetworkUtil {
 	}
 	
 	public static LinuxIfconfig getInterfaceConfiguration(String ifaceName) throws KuraException {
-		
 		//ignore logical interfaces like "1-1.2"
 		if (Character.isDigit(ifaceName.charAt(0))) {
 			return null;
@@ -630,11 +636,22 @@ public class LinuxNetworkUtil {
 				try	{
 					br.close();
 				} catch(IOException ex){
-					s_logger.error("I/O Exception while closing BufferedReader!");
+					s_logger.error("getInterfaceConfiguration() :: I/O Exception while closing BufferedReader!");
 				}
 			}
 					
 			if (proc != null) ProcessUtil.destroy(proc);
+		}
+		
+		if ((linuxIfconfig.getType() == NetInterfaceType.ETHERNET) || (linuxIfconfig.getType() == NetInterfaceType.WIFI)) {
+			try {
+				Map<String,String> driver = getEthernetDriver(ifaceName);
+				if (driver != null) {
+					linuxIfconfig.setDriver(driver);
+				}
+			} catch (KuraException e) {
+				s_logger.error("getInterfaceConfiguration() :: failed to obtain driver information - {}", e);
+			}
 		}
 		
 		s_ifconfigs.put(ifaceName, linuxIfconfig);
@@ -920,24 +937,46 @@ public class LinuxNetworkUtil {
 	
 	public static Map<String,String> getEthernetDriver(String interfaceName) throws KuraException
 	{
-		Map<String, String> driver = new HashMap<String, String>();
+		Map<String, String> driver = null;
+		//ignore logical interfaces like "1-1.2"
+		if (Character.isDigit(interfaceName.charAt(0))) {
+			driver = new HashMap<String, String>();
+			driver.put("name", "unknown");
+			driver.put("version", "unkown");
+			driver.put("firmware", "unknown");
+			return driver;
+		}
+		
+		if (s_ifconfigs.containsKey(interfaceName)) {
+			LinuxIfconfig ifconfig = s_ifconfigs.get(interfaceName);
+			driver = ifconfig.getDriver();
+		} else {
+			s_ifconfigs.put(interfaceName, new LinuxIfconfig(interfaceName));
+		}
+		
+		if (driver != null) {
+			return driver;
+		}
+		
+		driver = new HashMap<String, String>();
 		driver.put("name", "unknown");
 		driver.put("version", "unkown");
 		driver.put("firmware", "unknown");
 		
-		//ignore logical interfaces like "1-1.2"
-		if (Character.isDigit(interfaceName.charAt(0))) {
-			return driver;
-		}
 		SafeProcess procEthtool = null;
 		BufferedReader br = null;			
 		try {
-
 			//run ethtool
-			procEthtool = ProcessUtil.exec("ethtool -i " + interfaceName);
-			if (procEthtool.waitFor() != 0) {
-                s_logger.warn("getEthernetDriver() :: error executing command --- ethtool -i {}", interfaceName);
-                return driver;
+			if (toolExists("ethtool")) {
+				if (TARGET_NAME.equals(KuraConstants.ReliaGATE_15_10.getTargetName())) {
+					SafeProcess proc = ProcessUtil.exec("ifconfig " + interfaceName + " up");
+					proc.waitFor();
+				}
+				procEthtool = ProcessUtil.exec("ethtool -i " + interfaceName);
+				if (procEthtool.waitFor() != 0) {
+	                s_logger.warn("getEthernetDriver() :: error executing command --- ethtool -i {}", interfaceName);
+	                return driver;
+				}
 			}
 			
 			//get the output

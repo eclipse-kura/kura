@@ -51,8 +51,13 @@ public class WpaSupplicantManager {
             }
 			
 			m_interfaceName = interfaceName;
-			m_driver = driver;
-
+			String drv = WpaSupplicant.getDriver(interfaceName);
+			if (drv != null) {
+				m_driver =  drv;
+			} else {
+				m_driver = driver;
+			}
+			
 			// start wpa_supplicant
 			String wpaSupplicantCommand = formSupplicantCommand(configFile);
 			s_logger.debug("starting wpa_supplicant -> {}", wpaSupplicantCommand);

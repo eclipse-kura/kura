@@ -24,14 +24,14 @@ import org.eclipse.kura.net.wifi.WifiSecurity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class iwScanTool extends ScanTool implements IScanTool {
+public class iwlistScanTool implements IScanTool {
 	
-	private static final Logger s_logger = LoggerFactory.getLogger(iwScanTool.class);
-
+	private static final Logger s_logger = LoggerFactory.getLogger(iwlistScanTool.class);
+	
 	private static final Object s_lock = new Object();
 	private String m_ifaceName;
 	private ExecutorService m_executor;
-	private static Future<?>  m_task;
+	private static Future<?>  s_task;
 
 	private int m_timeout;
 	
@@ -40,71 +40,46 @@ public class iwScanTool extends ScanTool implements IScanTool {
 	private boolean m_status;
 	private String m_errmsg;
 	
-	protected iwScanTool() {
+	protected iwlistScanTool() {
 		m_timeout = 20;
 	}
 	
-	protected iwScanTool(String ifaceName) {
+	protected iwlistScanTool(String ifaceName) {
 		this();
 		m_ifaceName = ifaceName;
 		m_errmsg = "";
 		m_status = false;
 	}
 	
-	protected iwScanTool(String ifaceName, int tout) {
+	protected iwlistScanTool(String ifaceName, int tout) {
 		this(ifaceName);
 		m_timeout = tout;
 	}
-	
+
+	@Override
 	public List<WifiAccessPoint> scan() throws KuraException {
 		
 		List<WifiAccessPoint> wifiAccessPoints = new ArrayList<WifiAccessPoint>();
 		synchronized (s_lock) {
-			StringBuilder sb = new StringBuilder();
-		    
-			SafeProcess prIpLink = null;
-			SafeProcess prIpAddr = null;
-			try {
-				if(!LinuxNetworkUtil.isUp(m_ifaceName)) {
-				    // activate the interface
-					sb.append("ip link set ").append(m_ifaceName).append(" up");
-				    prIpLink = ProcessUtil.exec(sb.toString());
-				    prIpLink.waitFor();
-				 
-				    // remove the previous ip address (needed on mgw)
-				    sb = new StringBuilder();
-					sb.append("ip addr flush dev ").append(m_ifaceName);
-				    prIpAddr = ProcessUtil.exec(sb.toString());
-				    prIpAddr.waitFor();
-				}
-			} catch (Exception e) {
-				throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
-			} finally {
-				if (prIpLink != null) ProcessUtil.destroy(prIpLink);
-				if (prIpAddr != null) ProcessUtil.destroy(prIpAddr);
-			}
-	
 			long timerStart = System.currentTimeMillis();
 			
 			m_executor = Executors.newSingleThreadExecutor();
-			m_task = m_executor.submit(new Runnable() {
-				@Override
+			s_task = m_executor.submit(new Runnable() {
 				public void run() {
 					int stat = -1;
 					m_process = null;
 					StringBuilder sb = new StringBuilder();
-					sb.append("iw dev ").append(m_ifaceName).append(" scan");
-					s_logger.info("scan() :: executing: {}", sb.toString());
+					sb.append("iwlist ").append(m_ifaceName).append(" scanning");
+					s_logger.info("scan() :: executing: " + sb.toString());
 					m_status = false;
 					try {
 						m_process = ProcessUtil.exec(sb.toString());
 						stat = m_process.waitFor();
-						s_logger.info("scan() :: {} command returns status={}", sb.toString(), stat);
+						s_logger.info("scan() :: " + sb.toString() + " command returns status=" + stat + " - process=" + m_process);
 						if (stat == 0) {
 							m_status = true;
 						} else {
-							s_logger.error("scan() :: failed to execute {} error code is {}", sb.toString(), stat);
-							s_logger.error("scan() :: STDERR: " + LinuxProcessUtil.getInputStreamAsString(m_process.getErrorStream()));
+							s_logger.error("scan() :: failed to execute " + sb.toString() + " error code is " + stat);
 						}	
 					} catch (Exception e) {
 						m_errmsg = "exception executing scan command";
@@ -113,11 +88,11 @@ public class iwScanTool extends ScanTool implements IScanTool {
 				}
 			});
 			
-			while (!m_task.isDone()) {
+			while (!s_task.isDone()) {
 				if (System.currentTimeMillis() > timerStart+m_timeout*1000) {
 					s_logger.warn("scan() :: scan timeout");
-					sb = new StringBuilder();
-					sb.append("iw dev ").append(m_ifaceName).append(" scan");
+					StringBuilder sb = new StringBuilder();
+					sb.append("iwlist ").append(m_ifaceName).append(" scanning");
 					try {
 						int pid = LinuxProcessUtil.getPid(sb.toString());
 						if (pid >= 0) {
@@ -126,9 +101,9 @@ public class iwScanTool extends ScanTool implements IScanTool {
 						}
 					} catch (Exception e) {
 						e.printStackTrace();
-					}
-					m_task.cancel(true);
-					m_task = null;
+					}	
+					s_task.cancel(true);
+					s_task = null;
 					m_errmsg = "timeout executing scan command";
 					break;
 				}
@@ -137,7 +112,7 @@ public class iwScanTool extends ScanTool implements IScanTool {
 				} catch (InterruptedException e) {
 				}
 			}
-			 
+			
 			if ((m_status == false) || (m_process == null)) {
 				throw new KuraException(KuraErrorCode.INTERNAL_ERROR, m_errmsg);
 			}
@@ -157,16 +132,14 @@ public class iwScanTool extends ScanTool implements IScanTool {
 				try {
 					m_executor.awaitTermination(2, TimeUnit.SECONDS);
 				} catch (InterruptedException e) {
-					s_logger.warn("Interrupted", e);
+					s_logger.warn("Interrupted " + e);
 				}
 				s_logger.info("scan() :: 'iw scan' thread terminated? - {}", m_executor.isTerminated());
 				m_executor = null;
 			}
 		}
-	
 		return wifiAccessPoints;
 	}
-	
 	
 	private List<WifiAccessPoint> parse() throws Exception {
 		
@@ -184,30 +157,20 @@ public class iwScanTool extends ScanTool implements IScanTool {
 		EnumSet<WifiSecurity> rsnSecurity = null;
 		int strength = -1;
 		EnumSet<WifiSecurity> wpaSecurity = null;
-		List<String> capabilities = null;
 		
 		while((line = br.readLine()) != null) {
-			
-			if (line.startsWith("scan aborted!")) {
-				br.close();
-				s_logger.warn("parse() :: scan operation was aborted");
-				throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "iw scan operation was aborted");
-			}
-			
-			if (line.startsWith("BSS")) {
+			line = line.trim();
+			if (line.startsWith("Cell")) {
 				//new AP
 				if(ssid != null) {
 					WifiAccessPointImpl wifiAccessPoint = new WifiAccessPointImpl(ssid);
 					wifiAccessPoint.setBitrate(bitrate);
 					wifiAccessPoint.setFrequency(frequency);
 					wifiAccessPoint.setHardwareAddress(hardwareAddress);
-					wifiAccessPoint.setMode(WifiMode.MASTER);				//FIME - is this right? - always MASTER - or maybe AD-HOC too?
+					wifiAccessPoint.setMode(mode);
 					wifiAccessPoint.setRsnSecurity(rsnSecurity);
 					wifiAccessPoint.setStrength(strength);
 					wifiAccessPoint.setWpaSecurity(wpaSecurity);
-					if ((capabilities != null) && (capabilities.size() > 0)) {
-						wifiAccessPoint.setCapabilities(capabilities);
-					}
 					wifiAccessPoints.add(wifiAccessPoint);
 				}
 				
@@ -220,28 +183,73 @@ public class iwScanTool extends ScanTool implements IScanTool {
 				rsnSecurity = null;
 				strength = -1;
 				wpaSecurity = null;
-				capabilities = null;
 				
 				//parse out the MAC
 				StringTokenizer st = new StringTokenizer(line, " ");
-				st.nextToken(); //eat BSS
+				st.nextToken(); //eat Cell
+				st.nextToken(); //eat Cell #
+				st.nextToken(); // eat '-'
+				st.nextToken(); // eat 'Address:'
 				String macAddressString = st.nextToken();
 				if(macAddressString != null) {
 					hardwareAddress = NetworkUtil.macToBytes(macAddressString);				
 				}
-			} else if(line.contains("freq: ")) {
+			} else if (line.startsWith("ESSID:")) {
+				ssid = line.substring("ESSID:".length()+1, line.length()-1);
+			} else if (line.startsWith("Quality=")) {
 				StringTokenizer st = new StringTokenizer(line, " ");
-				st.nextToken();	//eat freq:
-				frequency = Long.parseLong(st.nextToken());
-			} else if(line.contains("SSID: ")) {
-				ssid = line.trim().substring(5).trim();
-			} else if(line.contains("RSN:")) {
+				st.nextToken(); // eat 'Quality='
+				st.nextToken(); // eat 'Signal'
+				String signalLevel = st.nextToken();
+				if (signalLevel != null) {
+					signalLevel = signalLevel.substring(signalLevel.indexOf('=')+1);
+					if (signalLevel.contains("/")) {
+						// Could also be of format 39/100
+						final String[] parts = signalLevel.split("/");
+						strength = (int) Float.parseFloat(parts[0]);
+						if(strength <= 0)
+							strength = -100;
+					    else if(strength >= 100)
+					    	strength = -50;
+					    else
+					    	strength = (strength / 2) - 100;
+					} else {
+						strength = (int)Float.parseFloat(signalLevel);
+					}
+					strength = Math.abs(strength);
+				}
+				
+			} else if (line.startsWith("Mode:")) {
+				line = line.substring("Mode:".length());
+				if (line.equals("Master")) {
+					mode = WifiMode.MASTER;
+				}
+			} else if (line.startsWith("Frequency:")) {
+				line = line.substring("Frequency:".length(), line.indexOf(' '));
+				frequency = (long) (Float.parseFloat(line) * 1000);
+			} else if (line.startsWith("Bit Rates:")) {
+				if(bitrate == null) {
+					bitrate = new ArrayList<Long>();
+				}
+				line = line.substring("Bit Rates:".length());
+				String [] bitRates = line.split(";");
+				for (String rate : bitRates) {
+					if (rate != null) {
+						rate = rate.trim();
+						if (rate.length() > 0) {
+							rate = rate.substring(0, rate.indexOf(' '));	
+							bitrate.add((long) (Float.parseFloat(rate) * 1000000));
+						}
+					}
+				}
+			} else if (line.contains("IE: IEEE 802.11i/WPA2")) {
 				rsnSecurity = EnumSet.noneOf(WifiSecurity.class);
 				boolean foundGroup = false;
 				boolean foundPairwise = false;
 				boolean foundAuthSuites = false;
 				while((line = br.readLine()) != null) {
-					if(line.contains("Group cipher:")) {
+					line = line.trim();
+					if(line.contains("Group Cipher")) {
 						foundGroup = true;
 						if(line.contains("CCMP")) {
 							rsnSecurity.add(WifiSecurity.GROUP_CCMP);
@@ -255,7 +263,7 @@ public class iwScanTool extends ScanTool implements IScanTool {
 						if(line.contains("WEP40")) {
 							rsnSecurity.add(WifiSecurity.GROUP_WEP40);
 						}
-					} else if(line.contains("Pairwise ciphers:")) {
+					} else if(line.contains("Pairwise Ciphers")) {
 						foundPairwise = true;
 						if(line.contains("CCMP")) {
 							rsnSecurity.add(WifiSecurity.PAIR_CCMP);
@@ -269,7 +277,7 @@ public class iwScanTool extends ScanTool implements IScanTool {
 						if(line.contains("WEP40")) {
 							rsnSecurity.add(WifiSecurity.PAIR_WEP40);
 						}
-					} else if(line.contains("Authentication suites:")) {
+					} else if(line.contains("Authentication Suites")) {
 						foundAuthSuites = true;
 						if(line.contains("802_1X")) {
 							rsnSecurity.add(WifiSecurity.KEY_MGMT_802_1X);
@@ -284,14 +292,15 @@ public class iwScanTool extends ScanTool implements IScanTool {
 					if(foundGroup && foundPairwise && foundAuthSuites) {
 						break;
 					}
-				}
-			} else if(line.contains("WPA:")) {
+				}				
+			} else if (line.contains("IE: WPA Version")) {
 				wpaSecurity = EnumSet.noneOf(WifiSecurity.class);
 				boolean foundGroup = false;
 				boolean foundPairwise = false;
 				boolean foundAuthSuites = false;
 				while((line = br.readLine()) != null) {
-					if(line.contains("Group cipher:")) {
+					line = line.trim();
+					if(line.contains("Group Cipher")) {
 						foundGroup = true;
 						if(line.contains("CCMP")) {
 							wpaSecurity.add(WifiSecurity.GROUP_CCMP);
@@ -305,7 +314,7 @@ public class iwScanTool extends ScanTool implements IScanTool {
 						if(line.contains("WEP40")) {
 							wpaSecurity.add(WifiSecurity.GROUP_WEP40);
 						}
-					} else if(line.contains("Pairwise ciphers:")) {
+					} else if(line.contains("Pairwise Ciphers")) {
 						foundPairwise = true;
 						if(line.contains("CCMP")) {
 							wpaSecurity.add(WifiSecurity.PAIR_CCMP);
@@ -319,7 +328,7 @@ public class iwScanTool extends ScanTool implements IScanTool {
 						if(line.contains("WEP40")) {
 							wpaSecurity.add(WifiSecurity.PAIR_WEP40);
 						}
-					} else if(line.contains("Authentication suites:")) {
+					} else if(line.contains("Authentication Suites")) {
 						foundAuthSuites = true;
 						if(line.contains("802_1X")) {
 							wpaSecurity.add(WifiSecurity.KEY_MGMT_802_1X);
@@ -335,58 +344,11 @@ public class iwScanTool extends ScanTool implements IScanTool {
 						break;
 					}
 				}
-			} else if(line.contains("Supported rates: ")) {
-				//Supported rates: 1.0* 2.0* 5.5* 11.0* 18.0 24.0 36.0 54.0
-				if(bitrate == null) {
-					bitrate = new ArrayList<Long>();
-				}
-				StringTokenizer st = new StringTokenizer(line, " *");
-				while(st.hasMoreTokens()) {
-					String token = st.nextToken();
-					if(!(token.contains("Supported") || token.contains("rates:"))) {
-						bitrate.add((long) (Float.parseFloat(token) * 1000000));
-					}
-				}
-			} else if(line.contains("Extended supported rates: ")) {
-				//Extended supported rates: 6.0 9.0 12.0 48.0 
-				if(bitrate == null) {
-					bitrate = new ArrayList<Long>();
-				}
-				StringTokenizer st = new StringTokenizer(line, " *");
-				while(st.hasMoreTokens()) {
-					String token = st.nextToken();
-					if(!(token.contains("Extended") || token.contains("supported") || token.contains("rates:"))) {
-						bitrate.add((long) (Float.parseFloat(token) * 1000000));
-					}
-				}
-			} else if(line.contains("signal:")) {
-				try {
-					//signal: -56.00 dBm
-					StringTokenizer st = new StringTokenizer(line, " ");
-					st.nextToken(); //eat signal:
-					final String strengthRaw = st.nextToken();
-					if (strengthRaw.contains("/")) {
-						// Could also be of format 39/100
-						final String[] parts = strengthRaw.split("/");
-						strength = (int) Float.parseFloat(parts[0]);
-					} else {
-						strength = Math.abs((int)Float.parseFloat(strengthRaw));
-					}
-				} catch (RuntimeException e) {
-					s_logger.debug("Cannot parse signal strength " + line);
-				}
-			} else if (line.contains("capability:")) {
-				capabilities = new ArrayList<String>();
-				line = line.substring("capability:".length()).trim();
-				StringTokenizer st = new StringTokenizer(line, " ");
-				while (st.hasMoreTokens()) {
-					capabilities.add(st.nextToken());
-				}
 			}
-		}
+		}	
 		
 		//store the last one
-		if(ssid != null) {
+		if (ssid != null) {
 			WifiAccessPointImpl wifiAccessPoint = new WifiAccessPointImpl(ssid);
 			wifiAccessPoint.setBitrate(bitrate);
 			wifiAccessPoint.setFrequency(frequency);
@@ -395,13 +357,10 @@ public class iwScanTool extends ScanTool implements IScanTool {
 			wifiAccessPoint.setRsnSecurity(rsnSecurity);
 			wifiAccessPoint.setStrength(strength);
 			wifiAccessPoint.setWpaSecurity(wpaSecurity);
-			if ((capabilities != null) && (capabilities.size() > 0)) {
-				wifiAccessPoint.setCapabilities(capabilities);
-			}
 			wifiAccessPoints.add(wifiAccessPoint);
 		}
-		
 		br.close();
 		return wifiAccessPoints;
 	}
+
 }

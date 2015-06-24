@@ -27,21 +27,22 @@ import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.configuration.SelfConfiguringComponent;
-import org.eclipse.kura.core.linux.util.LinuxProcessUtil;
 import org.eclipse.kura.core.net.AbstractNetInterface;
 import org.eclipse.kura.core.net.NetInterfaceAddressConfigImpl;
 import org.eclipse.kura.core.net.NetworkConfiguration;
 import org.eclipse.kura.core.net.WifiInterfaceAddressConfigImpl;
 import org.eclipse.kura.core.net.modem.ModemInterfaceAddressConfigImpl;
 import org.eclipse.kura.core.net.modem.ModemInterfaceConfigImpl;
+import org.eclipse.kura.linux.net.dhcp.DhcpClientManager;
 import org.eclipse.kura.linux.net.dhcp.DhcpServerManager;
 import org.eclipse.kura.linux.net.dns.LinuxNamed;
 import org.eclipse.kura.linux.net.iptables.LinuxFirewall;
 import org.eclipse.kura.linux.net.iptables.LocalRule;
 import org.eclipse.kura.linux.net.iptables.NATRule;
 import org.eclipse.kura.linux.net.iptables.PortForwardRule;
+import org.eclipse.kura.linux.net.util.IScanTool;
 import org.eclipse.kura.linux.net.util.LinuxNetworkUtil;
-import org.eclipse.kura.linux.net.util.iwScanTool;
+import org.eclipse.kura.linux.net.util.ScanTool;
 import org.eclipse.kura.linux.net.wifi.HostapdManager;
 import org.eclipse.kura.linux.net.wifi.WpaSupplicant;
 import org.eclipse.kura.linux.net.wifi.WpaSupplicantManager;
@@ -807,6 +808,9 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 				}
 			} else {
 				s_logger.info("not bringing interface {} up because it is already up", interfaceName);
+				if (dhcp) {
+					renewDhcpLease(interfaceName);
+				}
 			}
 		} catch(Exception e) {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
@@ -845,6 +849,7 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 	public void manageDhcpClient(String interfaceName, boolean enable) throws KuraException {
 		
 		try {
+			/*
 			int pid = LinuxProcessUtil.getPid(formDhclientCommand(interfaceName, false));
 			if (pid > -1) {
 				s_logger.debug("manageDhcpClient() :: killing {}", formDhclientCommand(interfaceName, false));
@@ -856,6 +861,8 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 					LinuxProcessUtil.kill(pid);
 				}
 			}
+			*/
+			DhcpClientManager.disable(interfaceName);
 			if (enable) {
 				this.renewDhcpLease(interfaceName);
 			}
@@ -874,12 +881,17 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 	
 	public void renewDhcpLease(String interfaceName) throws KuraException {
 		
+		DhcpClientManager.releaseCurrentLease(interfaceName);
+		DhcpClientManager.enable(interfaceName);
+
+		/*
 		try {
 			LinuxProcessUtil.start("dhclient -r " + interfaceName + "\n", true);
 			LinuxProcessUtil.start("dhclient " + interfaceName + "\n", true);
 		} catch (Exception e) {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
 		}
+		*/
 	}
 	
 	public void manageFirewall (String gatewayIface) throws KuraException {
@@ -1095,69 +1107,74 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 		    }
 		    
 		    s_logger.info("getWifiHotspots() :: scanning for available access points ...");
-		    List<WifiAccessPoint> wifiAccessPoints = new iwScanTool(ifaceName).scan();
-		    for(WifiAccessPoint wap : wifiAccessPoints) {
-		    	
-		    	if ((wap.getSSID() == null) || (wap.getSSID().length() == 0)) {
-		    		s_logger.debug("Skipping hidden SSID");
-		    		continue;
-		    	}
-		    	
-		    	s_logger.trace("getWifiHotspots() :: SSID={}", wap.getSSID());
-		    	s_logger.trace("getWifiHotspots() :: Signal={}", wap.getStrength());
-		    	s_logger.trace("getWifiHotspots() :: Frequency={}", wap.getFrequency());
-		    	
-		    	byte [] baMacAddress = wap.getHardwareAddress();
-		    	StringBuffer sbMacAddress = new StringBuffer();
-		    	for (int i = 0; i < baMacAddress.length; i++) {
-		    		sbMacAddress.append(String.format("%02x", baMacAddress[i]&0x0ff).toUpperCase());
-		    		if (i < baMacAddress.length-1) {
-		    			sbMacAddress.append(':');
-		    		}
-		    	}
-		    	
-		    	WifiSecurity wifiSecurity = WifiSecurity.NONE;
-		    	
-		    	EnumSet<WifiSecurity> esWpaSecurity = wap.getWpaSecurity();
-		    	if ((esWpaSecurity != null) && (esWpaSecurity.size() > 0)) {
-		    		
-		    		wifiSecurity = WifiSecurity.SECURITY_WPA;
-		    		
-		    		Iterator<WifiSecurity> itWpaSecurity = esWpaSecurity.iterator();	
-			    	while (itWpaSecurity.hasNext()) {
-			    		s_logger.trace("getWifiHotspots() :: WPA Security={}", itWpaSecurity.next());
+		    IScanTool scanTool = ScanTool.get(ifaceName);
+		    if (scanTool != null) {
+			    List<WifiAccessPoint> wifiAccessPoints = scanTool.scan();
+			    for(WifiAccessPoint wap : wifiAccessPoints) {
+			    	
+			    	if ((wap.getSSID() == null) || (wap.getSSID().length() == 0)) {
+			    		s_logger.debug("Skipping hidden SSID");
+			    		continue;
 			    	}
-		    	}
-		    	
-		    	EnumSet<WifiSecurity> esRsnSecurity = wap.getRsnSecurity();
-		    	if ((esRsnSecurity != null) && (esRsnSecurity.size() > 0)) {
-		    		if (wifiSecurity == WifiSecurity.SECURITY_WPA) {
-		    			wifiSecurity = WifiSecurity.SECURITY_WPA_WPA2;
-		    		} else {
-		    			wifiSecurity = WifiSecurity.SECURITY_WPA2;
-		    		}
-		    		Iterator<WifiSecurity> itRsnSecurity = esRsnSecurity.iterator();
-		    		while (itRsnSecurity.hasNext()) {
-			    		s_logger.trace("getWifiHotspots() :: RSN Security={}", itRsnSecurity.next());
+			    	
+			    	s_logger.trace("getWifiHotspots() :: SSID={}", wap.getSSID());
+			    	s_logger.trace("getWifiHotspots() :: Signal={}", wap.getStrength());
+			    	s_logger.trace("getWifiHotspots() :: Frequency={}", wap.getFrequency());
+			    	
+			    	byte [] baMacAddress = wap.getHardwareAddress();
+			    	StringBuffer sbMacAddress = new StringBuffer();
+			    	for (int i = 0; i < baMacAddress.length; i++) {
+			    		sbMacAddress.append(String.format("%02x", baMacAddress[i]&0x0ff).toUpperCase());
+			    		if (i < baMacAddress.length-1) {
+			    			sbMacAddress.append(':');
+			    		}
 			    	}
-		    	}
-		    	
-		    	if (wifiSecurity == WifiSecurity.NONE) {
-		    		List<String> capabilities = wap.getCapabilities();
-		    		for (String capab : capabilities) {
-		    			if (capab.equals("Privacy")) {
-		    				wifiSecurity = WifiSecurity.SECURITY_WEP;
-		    				break;
-		    			}
-		    		}
-		    	}
-		    	
-		    	int frequency = (int)wap.getFrequency();
-		    	int channel = frequencyMhz2Channel(frequency);
-		    	
-		    	WifiHotspotInfo wifiHotspotInfo = new WifiHotspotInfo(wap.getSSID(), sbMacAddress.toString(), 0-wap.getStrength(), channel, frequency, wifiSecurity);
-		    	mWifiHotspotInfo.put(wap.getSSID(), wifiHotspotInfo);
-		    }
+			    	
+			    	WifiSecurity wifiSecurity = WifiSecurity.NONE;
+			    	
+			    	EnumSet<WifiSecurity> esWpaSecurity = wap.getWpaSecurity();
+			    	if ((esWpaSecurity != null) && (esWpaSecurity.size() > 0)) {
+			    		
+			    		wifiSecurity = WifiSecurity.SECURITY_WPA;
+			    		
+			    		Iterator<WifiSecurity> itWpaSecurity = esWpaSecurity.iterator();	
+				    	while (itWpaSecurity.hasNext()) {
+				    		s_logger.trace("getWifiHotspots() :: WPA Security={}", itWpaSecurity.next());
+				    	}
+			    	}
+			    	
+			    	EnumSet<WifiSecurity> esRsnSecurity = wap.getRsnSecurity();
+			    	if ((esRsnSecurity != null) && (esRsnSecurity.size() > 0)) {
+			    		if (wifiSecurity == WifiSecurity.SECURITY_WPA) {
+			    			wifiSecurity = WifiSecurity.SECURITY_WPA_WPA2;
+			    		} else {
+			    			wifiSecurity = WifiSecurity.SECURITY_WPA2;
+			    		}
+			    		Iterator<WifiSecurity> itRsnSecurity = esRsnSecurity.iterator();
+			    		while (itRsnSecurity.hasNext()) {
+				    		s_logger.trace("getWifiHotspots() :: RSN Security={}", itRsnSecurity.next());
+				    	}
+			    	}
+			    	
+			    	if (wifiSecurity == WifiSecurity.NONE) {
+			    		List<String> capabilities = wap.getCapabilities();
+			    		if ((capabilities != null) && (capabilities.size() > 0)) {
+				    		for (String capab : capabilities) {
+				    			if (capab.equals("Privacy")) {
+				    				wifiSecurity = WifiSecurity.SECURITY_WEP;
+				    				break;
+				    			}
+				    		}
+			    		}
+			    	}
+			    	
+			    	int frequency = (int)wap.getFrequency();
+			    	int channel = frequencyMhz2Channel(frequency);
+			    	
+			    	WifiHotspotInfo wifiHotspotInfo = new WifiHotspotInfo(wap.getSSID(), sbMacAddress.toString(), 0-wap.getStrength(), channel, frequency, wifiSecurity);
+			    	mWifiHotspotInfo.put(wap.getSSID(), wifiHotspotInfo);
+			    }
+	    	}
 		    
 		    if (wifiMode == WifiMode.MASTER) {
 		    	if (WpaSupplicantManager.isTempRunning()) {
@@ -1166,7 +1183,7 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 				}
 		    }
 	    } catch(Throwable t) {
-	    	throw new KuraException(KuraErrorCode.INTERNAL_ERROR, t, "The 'iw scan' operation failed");
+	    	throw new KuraException(KuraErrorCode.INTERNAL_ERROR, t, "scan operation has failed");
 	    }
 	    
 	    return mWifiHotspotInfo;
@@ -1363,6 +1380,7 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 		return channel;
 	}
 	
+	/*
 	private static String formDhclientCommand(String interfaceName, boolean usePidFile) {
 		StringBuffer sb = new StringBuffer();
 		sb.append("dhclient ");
@@ -1374,4 +1392,5 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 		sb.append(interfaceName);
 		return sb.toString();
 	}
+	*/
 }

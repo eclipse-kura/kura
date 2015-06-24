@@ -37,9 +37,13 @@ import org.eclipse.kura.core.net.NetworkConfiguration;
 import org.eclipse.kura.core.net.WifiInterfaceConfigImpl;
 import org.eclipse.kura.linux.net.route.RouteService;
 import org.eclipse.kura.linux.net.route.RouteServiceImpl;
+import org.eclipse.kura.linux.net.util.IScanTool;
 import org.eclipse.kura.linux.net.util.IwLinkTool;
+import org.eclipse.kura.linux.net.util.LinkTool;
 import org.eclipse.kura.linux.net.util.LinuxNetworkUtil;
-import org.eclipse.kura.linux.net.util.iwScanTool;
+import org.eclipse.kura.linux.net.util.ScanTool;
+import org.eclipse.kura.linux.net.util.iwconfigLinkTool;
+import org.eclipse.kura.linux.net.wifi.WifiOptions;
 import org.eclipse.kura.net.IPAddress;
 import org.eclipse.kura.net.NetConfig;
 import org.eclipse.kura.net.NetConfigIP4;
@@ -775,12 +779,15 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
     private boolean isAccessPointAvailable(String interfaceName, String ssid) throws KuraException {
         boolean available = false;
 		if (ssid != null) {
-			List<WifiAccessPoint> wifiAccessPoints = new iwScanTool(interfaceName).scan();
-			for (WifiAccessPoint wap : wifiAccessPoints) {
-				if (ssid.equals(wap.getSSID())) {
-					s_logger.trace("isAccessPointAvailable() :: SSID={} is available :: strength={}", ssid, wap.getStrength());
-					available = wap.getStrength() > 0;
-					break;
+			IScanTool scanTool = ScanTool.get(interfaceName);
+			if (scanTool != null) {
+				List<WifiAccessPoint> wifiAccessPoints = scanTool.scan();
+				for (WifiAccessPoint wap : wifiAccessPoints) {
+					if (ssid.equals(wap.getSSID())) {
+						s_logger.trace("isAccessPointAvailable() :: SSID={} is available :: strength={}", ssid, wap.getStrength());
+						available = Math.abs(wap.getStrength()) > 0;
+						break;
+					}
 				}
 			}
 		}
@@ -796,10 +803,20 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
 		if ((wifiState != null) && (ssid != null)) {
 			if(wifiState.isUp()) {
 				s_logger.trace("getSignalLevel() :: using 'iw dev wlan0 link' command ...");
-				IwLinkTool iwLinkTool = new IwLinkTool("iw", interfaceName);
-				if(iwLinkTool.get()) { 
-					if (iwLinkTool.isLinkDetected()) {
-						rssi = iwLinkTool.getSignal();
+				//IwLinkTool iwLinkTool = new IwLinkTool(interfaceName);
+				Collection<String> supportedWifiOptions = WifiOptions.getSupportedOptions(interfaceName);
+				LinkTool linkTool = null;
+				if ((supportedWifiOptions != null) && (supportedWifiOptions.size() > 0)) {
+		            if (supportedWifiOptions.contains(WifiOptions.WIFI_MANAGED_DRIVER_NL80211)) {
+		            	linkTool = new IwLinkTool(interfaceName);
+		            } else if (supportedWifiOptions.contains(WifiOptions.WIFI_MANAGED_DRIVER_WEXT)) {
+		            	linkTool = new iwconfigLinkTool(interfaceName);
+		            }
+				}
+				
+				if((linkTool != null) && linkTool.get()) { 
+					if (linkTool.isLinkDetected()) {
+						rssi = linkTool.getSignal();
 						s_logger.debug("getSignalLevel() :: rssi={} (using 'iw dev wlan0 link')", rssi);
 					}
 				}
@@ -807,14 +824,17 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
 			
 			if (rssi == 0) {
 				s_logger.trace("getSignalLevel() :: using 'iw dev wlan0 scan' command ...");
-				List<WifiAccessPoint> wifiAccessPoints = new iwScanTool(interfaceName).scan();
-				for (WifiAccessPoint wap : wifiAccessPoints) {
-					if (ssid.equals(wap.getSSID())) {
-						if (wap.getStrength() > 0) {
-							rssi = 0 - wap.getStrength();
-							s_logger.debug("getSignalLevel() :: rssi={} (using 'iw dev wlan0 scan')", rssi);
+				IScanTool scanTool = ScanTool.get(interfaceName);
+				if (scanTool != null) {
+					List<WifiAccessPoint> wifiAccessPoints = scanTool.scan();
+					for (WifiAccessPoint wap : wifiAccessPoints) {
+						if (ssid.equals(wap.getSSID())) {
+							if (wap.getStrength() > 0) {
+								rssi = 0 - wap.getStrength();
+								s_logger.debug("getSignalLevel() :: rssi={} (using 'iw dev wlan0 scan')", rssi);
+							}
+							break;
 						}
-						break;
 					}
 				}
 			}
@@ -852,7 +872,7 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
         Map<String, InterfaceState> statuses = new HashMap<String, InterfaceState>();
         
         for(String interfaceName : interfaceList) {
-        	WifiInterfaceConfigImpl wifiInterfaceConfig = (WifiInterfaceConfigImpl) m_currentNetworkConfiguration.getNetInterfaceConfig(interfaceName);;
+        	WifiInterfaceConfigImpl wifiInterfaceConfig = (WifiInterfaceConfigImpl) m_currentNetworkConfiguration.getNetInterfaceConfig(interfaceName);
         	WifiConfig wifiConfig = getWifiConfig(wifiInterfaceConfig);
             statuses.put(interfaceName, new WifiInterfaceState(interfaceName, wifiConfig.getMode()));
         }

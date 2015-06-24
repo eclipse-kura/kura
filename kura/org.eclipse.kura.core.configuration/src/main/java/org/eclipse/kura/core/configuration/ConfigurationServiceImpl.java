@@ -598,24 +598,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 			throw new KuraException(KuraErrorCode.CONFIGURATION_UPDATE, e, pid);
 		}
 	}
-
-	/*Map<String, Object> decryptPasswords(ComponentConfiguration config) {
-		Map<String, Object> configProperties = config.getConfigurationProperties();
-
-		Iterator<String> keys = configProperties.keySet().iterator();
-		while (keys.hasNext()) {
-			String key = keys.next();
-			Object value = configProperties.get(key);
-			if (value instanceof Password) {
-				try {
-					Password decryptedPassword = new Password(m_cryptoService.decryptAes(value.toString().toCharArray()));
-					configProperties.put(key, decryptedPassword);
-				} catch (Exception e) {
-				}
-			}
-		}
-		return configProperties;
-	}*/
+	
 
 	// ----------------------------------------------------------------
 	//

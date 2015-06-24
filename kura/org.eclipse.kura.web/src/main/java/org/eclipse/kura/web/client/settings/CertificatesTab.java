@@ -58,7 +58,6 @@ public class CertificatesTab extends LayoutContainer {
 	private FormPanel			m_formPanel;
 	private TextArea			m_publicCertificate;
 	private ListBox			    m_certificateType;
-	private TextField<String>	m_storagePassword;
 	private TextField<String>   m_storageAlias;
 
 	private Button				m_executeButton;
@@ -120,7 +119,6 @@ public class CertificatesTab extends LayoutContainer {
 
 						public void onSuccess(Integer certsStored) {
 							m_publicCertificate.clear();
-							m_storagePassword.clear();
 							m_storageAlias.clear();
 							Info.display(MSGS.info(), "Storage success. Stored " + certsStored + " public key.");
 							m_commandInput.unmask();
@@ -141,7 +139,6 @@ public class CertificatesTab extends LayoutContainer {
 
 						public void onSuccess(Integer certsStored) {
 							m_publicCertificate.clear();
-							m_storagePassword.clear();
 							m_storageAlias.clear();
 							Info.display(MSGS.info(), "Storage success. Stored " + certsStored + " public keys.");
 							m_commandInput.unmask();
@@ -162,7 +159,6 @@ public class CertificatesTab extends LayoutContainer {
 
 						public void onSuccess(Integer certsStored) {
 							m_publicCertificate.clear();
-							m_storagePassword.clear();
 							m_storageAlias.clear();
 							Info.display(MSGS.info(), "Storage success. Stored " + certsStored + " CA public keys.");
 							m_commandInput.unmask();

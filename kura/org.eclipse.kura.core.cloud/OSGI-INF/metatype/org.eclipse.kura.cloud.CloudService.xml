@@ -74,6 +74,14 @@
             required="true"
             default="false"
             description="By disabling default subscriptions the gateway will not be remotely manageable"/>
+            
+        <AD id="disable.republish.birth.cert.on.reconnect"
+            name="disable.republish.birth.cert.on.reconnect"
+            type="Boolean"
+            cardinality="0"
+            required="true"
+            default="false"
+            description="Disable republishing the MQTT Birth Certificate on reconnects"/>    
     </OCD>
     
     <Designate pid="org.eclipse.kura.cloud.CloudService">

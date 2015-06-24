@@ -25,6 +25,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.comm.CommURI;
@@ -98,7 +99,7 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 	private static Object s_lock = new Object();
 	
 	private static Future<?>  task;
-	private static boolean stopThread;
+    private static AtomicBoolean stopThread;
 
 	private SystemService m_systemService;
 	private NetworkService m_networkService;
@@ -167,6 +168,8 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 		m_interfaceStatuses = new HashMap<String, InterfaceState>();
 		m_listeners = new ArrayList<ModemMonitorListener>();
 		
+        stopThread = new AtomicBoolean();
+		
 		// track currently installed modems
 		try {
 			m_networkConfig = m_netConfigService.getNetworkConfiguration();
@@ -180,16 +183,16 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 			s_logger.error("Error getting installed modems", e);
 		}
 		
-		stopThread = false;
+		stopThread.set(false);
 		m_executor = Executors.newSingleThreadExecutor();
 		task = m_executor.submit(new Runnable() {
     		@Override
     		public void run() {
-    			while (!stopThread) {
+    			while (!stopThread.get()) {
 	    			Thread.currentThread().setName("ModemMonitor");
 	    			try {
 	    				monitor();
-	    				Thread.sleep(THREAD_INTERVAL);
+	    				monitorWait();
 					} catch (InterruptedException interruptedException) {
 						Thread.interrupted();
 						s_logger.debug("modem monitor interrupted - {}", interruptedException);
@@ -205,9 +208,10 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
     
     protected void deactivate(ComponentContext componentContext) {
     	m_listeners = null;
-    	stopThread = true;
     	PppFactory.releaseAllPppServices();
     	if ((task != null) && (!task.isDone())) {
+        	stopThread.set(true);
+        	monitorNotity();
     		s_logger.debug("Cancelling ModemMonitor task ...");
     		task.cancel(true);
     		s_logger.info("ModemMonitor task cancelled? = {}", task.isDone());
@@ -406,7 +410,8 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 										
 										if ((task != null) && !task.isCancelled()) {
 											s_logger.info("NetworkConfigurationChangeEvent :: Cancelling monitor task");
-											stopThread = true;
+											stopThread.set(true);
+											monitorNotity();
 											task.cancel(true);
 											task = null;
 										}
@@ -414,15 +419,15 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 										((EvdoCellularModem) modem).provision();
 										if (task == null) {
 											s_logger.info("NetworkConfigurationChangeEvent :: Restarting monitor task");
-											stopThread = false;
+											stopThread.set(false);
 											task = m_executor.submit(new Runnable() {
 									    		@Override
 									    		public void run() {
-									    			while (!stopThread) {
+									    			while (!stopThread.get()) {
 									    				Thread.currentThread().setName("ModemMonitor");
 									    				try {
 									    					monitor();
-															Thread.sleep(THREAD_INTERVAL);
+									    					monitorWait();
 														} catch (InterruptedException interruptedException) {
 															Thread.interrupted();
 															s_logger.debug("modem monitor interrupted - {}", interruptedException);
@@ -431,6 +436,8 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 														}
 									    			}
 									    	}});
+										} else {
+											monitorNotity();
 										}
 									} else {
 										s_logger.info("NetworkConfigurationChangeEvent :: The " + modem.getModel() + " is provisioned");
@@ -797,22 +804,23 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 							s_logger.info("trackModem() :: The {} is not provisioned, will try to provision it ...", modem.getModel());
 							if ((task != null) && !task.isCancelled()) {
 								s_logger.info("trackModem() :: Cancelling monitor task");
-								stopThread = true;
+								stopThread.set(true);
+								monitorNotity();
 								task.cancel(true);
 								task = null;
 							}
 							((EvdoCellularModem) modem).provision();
 							if (task == null) {
 								s_logger.info("trackModem() :: Restarting monitor task");
-								stopThread = false;
+								stopThread.set(false);
 								task = m_executor.submit(new Runnable() {
 							    	@Override
 							    	public void run() {
-							    		while (!stopThread) {
+							    		while (!stopThread.get()) {
 							    			Thread.currentThread().setName("ModemMonitor");
 							    			try {
 							    				monitor();
-							    				Thread.sleep(THREAD_INTERVAL);
+							    				monitorWait();
 							    			} catch (InterruptedException interruptedException) {
 							    				Thread.interrupted();
 												s_logger.debug("modem monitor interrupted - {}", interruptedException);
@@ -821,6 +829,8 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 											}
 							    		}
 							    }});
+							} else {
+								monitorNotity();
 							}
 						} else {
 							s_logger.info("trackModem() :: The {} is provisioned", modem.getModel());
@@ -895,6 +905,22 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 			s_logger.info("postModemGpsEvent() :: posting ModemGpsDisableEvent on topic {}", ModemGpsDisabledEvent.MODEM_EVENT_GPS_DISABLED_TOPIC);
 			HashMap<String, Object> modemInfoMap = new HashMap<String, Object>();
 			m_eventAdmin.postEvent(new ModemGpsDisabledEvent(modemInfoMap));
+		}
+	}
+	
+	private void monitorNotity() {
+		if (stopThread != null) {
+			synchronized (stopThread) {
+				stopThread.notifyAll();
+			}
+		}
+	}
+	
+	private void monitorWait() throws InterruptedException {
+		if (stopThread != null) {
+			synchronized (stopThread) {
+				stopThread.wait(THREAD_INTERVAL);
+			}
 		}
 	}
 }

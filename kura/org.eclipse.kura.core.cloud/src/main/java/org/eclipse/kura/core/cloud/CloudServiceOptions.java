@@ -42,6 +42,7 @@ public class CloudServiceOptions
 	private static final String  REPUB_BIRTH_ON_GPS_LOCK	  = "republish.mqtt.birth.cert.on.gps.lock";
 	private static final String  REPUB_BIRTH_ON_MODEM_DETECT  = "republish.mqtt.birth.cert.on.modem.detect";
 	private static final String  DISABLE_DFLT_SUBSCRIPTIONS   = "disable.default.subscriptions";
+	private static final String  DISABLE_REPUB_BIRTH_ON_RECONNECT = "disable.republish.birth.cert.on.reconnect";
 	
 	private static final int     LIFECYCLE_QOS                = 0;
 	private static final int     LIFECYCLE_PRIORITY           = 0;
@@ -173,6 +174,16 @@ public class CloudServiceOptions
 			m_properties.get(DISABLE_DFLT_SUBSCRIPTIONS) != null &&
 			m_properties.get(DISABLE_DFLT_SUBSCRIPTIONS) instanceof Boolean) {
 			disable = (Boolean) m_properties.get(DISABLE_DFLT_SUBSCRIPTIONS);
+		}
+		return disable;
+	}
+	
+	public boolean getDisableRepubBirthCertOnReconnect() {
+		boolean disable = false;
+		if (m_properties != null &&
+			m_properties.get(DISABLE_REPUB_BIRTH_ON_RECONNECT) != null &&
+			m_properties.get(DISABLE_REPUB_BIRTH_ON_RECONNECT) instanceof Boolean) {
+			disable = (Boolean) m_properties.get(DISABLE_REPUB_BIRTH_ON_RECONNECT);
 		}
 		return disable;
 	}

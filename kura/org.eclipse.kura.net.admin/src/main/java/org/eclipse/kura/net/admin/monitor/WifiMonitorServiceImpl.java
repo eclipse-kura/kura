@@ -30,6 +30,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
@@ -86,7 +87,7 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
     private final static long THREAD_TERMINATION_TOUT = 1; // in seconds
     
     private static Future<?> monitorTask;
-    private static boolean stopThread;
+    private static AtomicBoolean stopThread;
             
     private NetworkService m_networkService;
     private SystemService m_systemService;
@@ -165,6 +166,8 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
         m_interfaceStatuses = new HashMap<String, InterfaceState>();
         
         m_executor = Executors.newSingleThreadExecutor();
+        
+        stopThread = new AtomicBoolean();
 		
         Dictionary<String, String[]> d = new Hashtable<String, String[]>();
         d.put(EventConstants.EVENT_TOPIC, EVENT_TOPICS);
@@ -181,8 +184,9 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
 
     protected void deactivate(ComponentContext componentContext) {
     	m_listeners = null;
-    	stopThread = true;
         if ((monitorTask != null) && (!monitorTask.isDone())) {
+        	stopThread.set(true);
+        	monitorNotity();
         	s_logger.debug("Cancelling WifiMonitor task ...");
         	monitorTask.cancel(true);
     		s_logger.info("WifiMonitor task cancelled? = {}", monitorTask.isDone());
@@ -335,7 +339,7 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
                 if(m_enabledInterfaces.size() == 0) {
                     if(monitorTask != null) {
                         s_logger.debug("monitor() :: No enabled wifi interfaces - shutting down monitor thread");
-                        stopThread = true;
+                        stopThread.set(true);
                         monitorTask.cancel(true);
                         monitorTask = null;
                     }
@@ -599,15 +603,15 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
                 
                 if(monitorTask == null) {
 	                s_logger.info("Starting WifiMonitor thread...");
-	                stopThread = false;
+	                stopThread.set(false);
 	                monitorTask = m_executor.submit(new Runnable() {
 	                    @Override
 	                    public void run() {
-	                    	while (!stopThread) {
+	                    	while (!stopThread.get()) {
 	                    		Thread.currentThread().setName("WifiMonitor Thread");
 	                        	try {
 	                        		monitor();
-									Thread.sleep(THREAD_INTERVAL);
+	                        		monitorWait();
 								} catch (InterruptedException interruptedException) {
 									Thread.interrupted();
 	                                s_logger.debug("WiFi monitor interrupted - {}", interruptedException);
@@ -616,6 +620,8 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
 								}
 	                    	}
 	                }});
+                } else {
+                	monitorNotity();
                 }
             }
         }
@@ -924,4 +930,20 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
 			fw.close();
     	}
     }
+    
+	private void monitorNotity() {
+		if (stopThread != null) {
+			synchronized (stopThread) {
+				stopThread.notifyAll();
+			}
+		}
+	}
+	
+	private void monitorWait() throws InterruptedException {
+		if (stopThread != null) {
+			synchronized (stopThread) {
+				stopThread.wait(THREAD_INTERVAL);
+			}
+		}
+	}
 }

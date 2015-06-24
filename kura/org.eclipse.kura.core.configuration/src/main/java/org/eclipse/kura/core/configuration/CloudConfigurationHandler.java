@@ -15,6 +15,7 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -31,7 +32,9 @@ import org.eclipse.kura.cloud.CloudService;
 import org.eclipse.kura.cloud.Cloudlet;
 import org.eclipse.kura.cloud.CloudletTopic;
 import org.eclipse.kura.configuration.ComponentConfiguration;
+import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.core.configuration.util.XmlUtil;
+import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.message.KuraPayload;
 import org.eclipse.kura.message.KuraRequestPayload;
 import org.eclipse.kura.message.KuraResponsePayload;
@@ -94,15 +97,18 @@ public class CloudConfigurationHandler extends Cloudlet
 	
 	private ServiceTrackerAdapter m_serviceTrackerAdapter;
 	private ConfigurationServiceImpl m_configService;
+	private CryptoService m_cryptoService;
 	
 	public CloudConfigurationHandler(BundleContext context,
 			ConfigurationServiceImpl configService,
-			SystemService systemService) 
+			SystemService systemService,
+			CryptoService cryptoService) 
 	{
 		super(APP_ID);
 		m_serviceTrackerAdapter = new ServiceTrackerAdapter(context);
 		m_configService = configService;
 		m_systemService = systemService;
+		m_cryptoService = cryptoService;
 	}
 
 	public void open() {
@@ -205,7 +211,7 @@ public class CloudConfigurationHandler extends Cloudlet
 		
 		if (snapshotId != null) {
 			long sid = Long.parseLong(snapshotId);
-			XmlComponentConfigurations xmlConfigs = m_configService.loadSnapshot(sid);
+			XmlComponentConfigurations xmlConfigs = m_configService.loadEncryptedSnapshotFileContent(sid);
 			//
 			// marshall the response	
 			
@@ -214,7 +220,7 @@ public class CloudConfigurationHandler extends Cloudlet
 			for (ComponentConfigurationImpl config : configs) {
 				if (config != null) {
 					try {
-						Map<String,Object> decryptedProperties= m_configService.decryptPasswords(config);
+						Map<String,Object> decryptedProperties= decryptPasswords(config);
 						config.setProperties(decryptedProperties);
 						decryptedConfigs.add(config);
 					}
@@ -462,6 +468,24 @@ public class CloudConfigurationHandler extends Cloudlet
 		}
 		
 		return body;
+	}
+	
+	private Map<String, Object> decryptPasswords(ComponentConfiguration config) {
+		Map<String, Object> configProperties = config.getConfigurationProperties();
+
+		Iterator<String> keys = configProperties.keySet().iterator();
+		while (keys.hasNext()) {
+			String key = keys.next();
+			Object value = configProperties.get(key);
+			if (value instanceof Password) {
+				try {
+					Password decryptedPassword = new Password(m_cryptoService.decryptAes(value.toString().toCharArray()));
+					configProperties.put(key, decryptedPassword);
+				} catch (Exception e) {
+				}
+			}
+		}
+		return configProperties;
 	}
 }
 

@@ -14,7 +14,9 @@ package org.eclipse.kura.web.server.servlet;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -23,10 +25,13 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurationService;
+import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.core.configuration.ComponentConfigurationImpl;
 import org.eclipse.kura.core.configuration.XmlComponentConfigurations;
 import org.eclipse.kura.core.configuration.util.XmlUtil;
+import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.web.server.util.ServiceLocator;
+import org.eclipse.kura.web.shared.GwtKuraException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,19 +58,35 @@ public class DeviceSnapshotsServlet extends HttpServlet
 			if (snapshotId != null) {
 
 				long sid = Long.parseLong(snapshotId);
-				List<ComponentConfiguration> configs = cs.getSnapshot(sid);
+				List<ComponentConfiguration> xmlConfigs = cs.getSnapshot(sid);
+				
+				//List<ComponentConfigurationImpl> decryptedConfigs = new ArrayList<ComponentConfigurationImpl>();
+				for (ComponentConfiguration config : xmlConfigs) {
+					if (config != null) {
+						ComponentConfigurationImpl configImpl= (ComponentConfigurationImpl) config;
+						try {
+							Map<String, Object> decryptedProperties = decryptPasswords(configImpl);
+							configImpl.setProperties(decryptedProperties);
+							//decryptedConfigs.add(configImpl);
+						} catch (Throwable t) {
+							s_logger.warn("Error during snapshot password decryption");
+						}
+					}
+				}
+				//xmlConfigs.setConfigurations(decryptedConfigs);
+
 								
 				// build a list of configuration which can be marshalled in XML
 				List<ComponentConfigurationImpl> configImpls = new ArrayList<ComponentConfigurationImpl>();
-				for (ComponentConfiguration config : configs) {
+				for (ComponentConfiguration config : xmlConfigs) {
 					configImpls.add((ComponentConfigurationImpl) config);
 				}
-				XmlComponentConfigurations xmlConfigs = new XmlComponentConfigurations();
-				xmlConfigs.setConfigurations(configImpls);
+				XmlComponentConfigurations xmlCompConfigs = new XmlComponentConfigurations();
+				xmlCompConfigs.setConfigurations(configImpls);
 				
 				//
 				// marshall the response and write it
-				XmlUtil.marshal(xmlConfigs, writer);
+				XmlUtil.marshal(xmlCompConfigs, writer);
 			}
         } 
         catch (Exception e) {
@@ -77,5 +98,24 @@ public class DeviceSnapshotsServlet extends HttpServlet
             	writer.close();
         }
     }
+    
+    private Map<String, Object> decryptPasswords(ComponentConfiguration config) throws GwtKuraException {
+		Map<String, Object> configProperties = config.getConfigurationProperties();
+		CryptoService cryptoService = ServiceLocator.getInstance().getService(CryptoService.class);	
+
+		Iterator<String> keys = configProperties.keySet().iterator();
+		while (keys.hasNext()) {
+			String key = keys.next();
+			Object value = configProperties.get(key);
+			if (value instanceof Password) {
+				try {
+					Password decryptedPassword = new Password(cryptoService.decryptAes(value.toString().toCharArray()));
+					configProperties.put(key, decryptedPassword);
+				} catch (Exception e) {
+				}
+			}
+		}
+		return configProperties;
+	}
 }
 

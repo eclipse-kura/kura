@@ -397,63 +397,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 		return returnConfigs;
 	}
 
-	private synchronized List<ComponentConfiguration> buildCurrentConfiguration(List<ComponentConfiguration> configsToUpdate) throws KuraException {
-		// Build the current configuration
-		ComponentConfiguration cc = null;
-		ComponentConfigurationImpl cci = null;
-		Map<String, Object> props = null;
-		List<ComponentConfiguration> configs = new ArrayList<ComponentConfiguration>();
-
-		// clone the list to avoid concurrent modifications
-		List<String> allPids = new ArrayList<String>(m_allPids);
-		for (String pid : allPids) {
-			boolean isConfigToUpdate = false;
-			if (configsToUpdate != null) {
-				for (ComponentConfiguration configToUpdate : configsToUpdate) {
-					if (configToUpdate.getPid().equals(pid)) {
-						// found a match
-						isConfigToUpdate = true;
-						configs.add(configToUpdate);
-						break;
-					}
-				}
-			}
-
-			if (!isConfigToUpdate) {
-				if (!m_selfConfigComponents.contains(pid)) {
-					cc = getConfigurableComponentConfiguration(pid);
-				} else {
-					cc = getSelfConfiguringComponentConfiguration(pid);
-				}
-				if (cc != null && cc.getPid() != null && cc.getPid().equals(pid)) {
-					props = cc.getConfigurationProperties();
-					cci = new ComponentConfigurationImpl(pid, null, props);
-					configs.add((ComponentConfigurationImpl) cci);
-				}
-			}
-		}
-
-		// merge the current configs with those in the latest snapshot
-		List<ComponentConfigurationImpl> snapshotConfigs = loadLatestSnapshotConfigurations();
-		if(snapshotConfigs != null){
-			for (ComponentConfigurationImpl snapshotConfig : snapshotConfigs) {
-				boolean found = false;
-				for (ComponentConfiguration config : configs) {
-					if (config.getPid().equals(snapshotConfig.getPid())) {
-						found = true;
-						break;
-					}
-				}
-				if (!found) {
-					configs.add(snapshotConfig);
-				}
-			}
-		}
-
-		return configs;
-	}
-
-
+	@Override
 	public synchronized void updateConfigurations(List<ComponentConfiguration> configsToUpdate) throws KuraException {
 		boolean snapshotOnConfirmation = false;
 		List<Throwable> causes = new ArrayList<Throwable>();
@@ -599,6 +543,26 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 		}
 	}
 	
+	boolean mergeWithDefaults(OCD ocd, Map<String, Object> properties) throws KuraException {
+		boolean changed = false;
+		Set<String> keys = properties.keySet();
+
+		Map<String, Object> defaults = ComponentUtil.getDefaultProperties(ocd, m_ctx);
+		Set<String> defaultsKeys = defaults.keySet();
+		defaultsKeys.removeAll(keys);
+		if (!defaultsKeys.isEmpty()) {
+
+			changed = true;
+			s_logger.info("Merging configuration for pid: {}", ocd.getId());
+			for (String key : defaultsKeys) {
+
+				Object value = defaults.get(key);
+				properties.put(key, value);
+				s_logger.debug("Merged configuration properties with property with name: {} and default value {}", key, value);
+			}
+		}
+		return changed;
+	}
 
 	// ----------------------------------------------------------------
 	//
@@ -1138,25 +1102,60 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 		return cleanedProperties;
 
 	}
+	
+	private synchronized List<ComponentConfiguration> buildCurrentConfiguration(List<ComponentConfiguration> configsToUpdate) throws KuraException {
+		// Build the current configuration
+		ComponentConfiguration cc = null;
+		ComponentConfigurationImpl cci = null;
+		Map<String, Object> props = null;
+		List<ComponentConfiguration> configs = new ArrayList<ComponentConfiguration>();
 
-	boolean mergeWithDefaults(OCD ocd, Map<String, Object> properties) throws KuraException {
-		boolean changed = false;
-		Set<String> keys = properties.keySet();
+		// clone the list to avoid concurrent modifications
+		List<String> allPids = new ArrayList<String>(m_allPids);
+		for (String pid : allPids) {
+			boolean isConfigToUpdate = false;
+			if (configsToUpdate != null) {
+				for (ComponentConfiguration configToUpdate : configsToUpdate) {
+					if (configToUpdate.getPid().equals(pid)) {
+						// found a match
+						isConfigToUpdate = true;
+						configs.add(configToUpdate);
+						break;
+					}
+				}
+			}
 
-		Map<String, Object> defaults = ComponentUtil.getDefaultProperties(ocd, m_ctx);
-		Set<String> defaultsKeys = defaults.keySet();
-		defaultsKeys.removeAll(keys);
-		if (!defaultsKeys.isEmpty()) {
-
-			changed = true;
-			s_logger.info("Merging configuration for pid: {}", ocd.getId());
-			for (String key : defaultsKeys) {
-
-				Object value = defaults.get(key);
-				properties.put(key, value);
-				s_logger.debug("Merged configuration properties with property with name: {} and default value {}", key, value);
+			if (!isConfigToUpdate) {
+				if (!m_selfConfigComponents.contains(pid)) {
+					cc = getConfigurableComponentConfiguration(pid);
+				} else {
+					cc = getSelfConfiguringComponentConfiguration(pid);
+				}
+				if (cc != null && cc.getPid() != null && cc.getPid().equals(pid)) {
+					props = cc.getConfigurationProperties();
+					cci = new ComponentConfigurationImpl(pid, null, props);
+					configs.add((ComponentConfigurationImpl) cci);
+				}
 			}
 		}
-		return changed;
+
+		// merge the current configs with those in the latest snapshot
+		List<ComponentConfigurationImpl> snapshotConfigs = loadLatestSnapshotConfigurations();
+		if(snapshotConfigs != null){
+			for (ComponentConfigurationImpl snapshotConfig : snapshotConfigs) {
+				boolean found = false;
+				for (ComponentConfiguration config : configs) {
+					if (config.getPid().equals(snapshotConfig.getPid())) {
+						found = true;
+						break;
+					}
+				}
+				if (!found) {
+					configs.add(snapshotConfig);
+				}
+			}
+		}
+
+		return configs;
 	}
 }

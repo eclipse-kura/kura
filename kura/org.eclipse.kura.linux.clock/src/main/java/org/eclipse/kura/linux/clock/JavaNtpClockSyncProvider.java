@@ -52,7 +52,7 @@ public class JavaNtpClockSyncProvider extends AbstractNtpClockSyncProvider
                 ret = true;
             } catch (IOException e) {
 				s_logger.warn(
-						"Error while synchronizing System Clock with NTP host {}. Please virify network connectivity ...",
+						"Error while synchronizing System Clock with NTP host {}. Please verify network connectivity ...",
 						m_ntpHost);
             }
         } 

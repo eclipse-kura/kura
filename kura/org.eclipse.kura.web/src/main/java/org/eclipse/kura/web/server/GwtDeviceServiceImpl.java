@@ -295,7 +295,7 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
 		try {
 			return commandService.execute(cmd, pwd);
 		} catch (KuraException e) {
-			s_logger.error(e.getLocalizedMessage());
+			//s_logger.error(e.getLocalizedMessage());
 			if(e.getCode() == KuraErrorCode.OPERATION_NOT_SUPPORTED){
 				throw new GwtKuraException(GwtKuraErrorCode.SERVICE_NOT_ENABLED);
 			}else if(e.getCode() == KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID){

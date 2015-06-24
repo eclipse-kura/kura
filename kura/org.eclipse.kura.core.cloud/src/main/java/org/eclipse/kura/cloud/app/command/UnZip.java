@@ -63,57 +63,53 @@ public class UnZip
 	}
 	
 	static private void unZipZipInputStream(ZipInputStream zis, String outFolder) throws IOException {
-		String outputFolder = outFolder;
-		if (outputFolder == null) {
-			outputFolder = System.getProperty("user.dir");
-		}
-		
-		//create output directory is not exists
-		File folder = new File(outputFolder);
-		if(!folder.exists()){
-			folder.mkdirs();
-		}
-
-		ZipEntry ze = zis.getNextEntry();
-
-		while(ze!=null){
-			byte[] buffer = new byte[1024];
-
-			String fileName = ze.getName();
-			File newFile = new File(outputFolder + File.separator + fileName);
-
-			//System.out.println("file unzip : "+ newFile.getAbsoluteFile());
-
-			//create all non exists folders
-			//else you will hit FileNotFoundException for compressed folder
-			//new File(newFile.getParent()).mkdirs();
+		try{
+			String outputFolder = outFolder;
+			if (outputFolder == null) {
+				outputFolder = System.getProperty("user.dir");
+			}
 			
-			if (newFile.isDirectory()) {
-				newFile.mkdirs();
+			//create output directory is not exists
+			File folder = new File(outputFolder);
+			if(!folder.exists()){
+				folder.mkdirs();
+			}
+	
+			ZipEntry ze = zis.getNextEntry();
+	
+			while(ze!=null){
+				byte[] buffer = new byte[1024];
+	
+				String fileName = ze.getName();
+				File newFile = new File(outputFolder + File.separator + fileName);
+	
+				if (newFile.isDirectory()) {
+					newFile.mkdirs();
+					ze = zis.getNextEntry();
+					continue;
+				}
+				
+				if (newFile.getParent() != null) {
+					File parent = new File(newFile.getParent());
+					parent.mkdirs();
+				}
+	
+				FileOutputStream fos = new FileOutputStream(newFile);
+	
+				int len;
+				while ((len = zis.read(buffer)) > 0) {
+					fos.write(buffer, 0, len);
+				}
+	
+				fos.close();   
 				ze = zis.getNextEntry();
-				continue;
 			}
-			
-			if (newFile.getParent() != null) {
-				File parent = new File(newFile.getParent());
-				parent.mkdirs();
-			}
-
-			FileOutputStream fos = new FileOutputStream(newFile);
-
-			int len;
-			while ((len = zis.read(buffer)) > 0) {
-				fos.write(buffer, 0, len);
-			}
-
-			fos.close();   
-			ze = zis.getNextEntry();
+	
+			zis.closeEntry();
 		}
-
-		zis.closeEntry();
-		zis.close();
-
-		//System.out.println("Done");
+		finally{
+			zis.close();
+		}
 	}
 
 	private static byte[] getFileBytes(File file) throws IOException {

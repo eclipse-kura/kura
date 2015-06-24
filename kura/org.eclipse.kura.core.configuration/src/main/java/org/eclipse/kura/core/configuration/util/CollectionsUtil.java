@@ -21,7 +21,7 @@ import java.util.Map;
 import org.eclipse.kura.configuration.metatype.AD;
 import org.eclipse.kura.configuration.metatype.OCD;
 import org.eclipse.kura.configuration.metatype.Scalar;
-import org.eclipse.kura.core.configuration.Password;
+import org.eclipse.kura.configuration.Password;
 
 public class CollectionsUtil 
 {
@@ -45,7 +45,11 @@ public class CollectionsUtil
 			Object value =  dictionary.get(key);
 			AD        ad = ads.get(key);
 			if (ad != null && ad.getType() != null && Scalar.PASSWORD.equals(ad.getType())) {
-				map.put(key, new Password(value.toString()));
+				if(value instanceof char[]){
+					map.put(key, new Password((char[]) value));
+				}else{
+					map.put(key, new Password(value.toString()));
+				}
 			}
 			else {
 				map.put(key, value);

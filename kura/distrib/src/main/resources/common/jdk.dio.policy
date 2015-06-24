@@ -16,7 +16,8 @@ grant {
 	permission jdk.dio.gpio.GPIOPinPermission "*:*", "open,setdirection";
 	permission jdk.dio.gpio.GPIOPortPermission "*:*";
 	permission jdk.dio.i2cbus.I2CPermission "*:*";
-	permission jdk.dio.spi.SPIPermission "*:*";
+	permission jdk.dio.spibus.SPIPermission "*:*";
 	permission jdk.dio.uart.UARTPermission "*:*";
 	permission jdk.dio.watchdog.WatchdogTimerPermission "*:*";
+	permission java.security.AllPermission;
 };

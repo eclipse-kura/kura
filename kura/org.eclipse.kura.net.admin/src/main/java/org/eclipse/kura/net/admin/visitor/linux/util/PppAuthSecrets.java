@@ -69,11 +69,11 @@ public class PppAuthSecrets {
 		secrets = new ArrayList<String>();
 		ipAddresses = new ArrayList<String>();
 
+        BufferedReader br = null;
 		try {
 	        File secretsFile = new File(m_secretsFilename);
 	        
 	        if(secretsFile.exists()) {
-    	        BufferedReader br = null;
     	        String currentLine = null;
     	        StringTokenizer st = null;
     		    
@@ -91,9 +91,7 @@ public class PppAuthSecrets {
     					providers.add(st.nextToken().substring(1));
     				}
     			}
-    			
-    			br.close();
-    			
+    					
     			for(int i=0; i<providers.size(); ++i) {
     				s_logger.debug((String)clients.get(i)+"\t");
     				s_logger.debug((String)servers.get(i)+"\t");
@@ -108,6 +106,15 @@ public class PppAuthSecrets {
 	        }
 		} catch(Exception e) {
 			s_logger.error("Could not initialize", e);
+		}
+		finally{
+			if(br != null){
+				try{
+					br.close();
+				}catch(IOException ex){
+					s_logger.error("I/O Exception while closing BufferedReader!");
+				}
+			}	
 		}
 		
 	}
@@ -172,8 +179,9 @@ public class PppAuthSecrets {
 		}
 		
 		PrintWriter pw = null;
+		FileOutputStream fos = null;
 		try {
-			FileOutputStream fos = new FileOutputStream(m_secretsFilename);
+			fos = new FileOutputStream(m_secretsFilename);
 			pw = new PrintWriter(fos);
 
 			pw.write("#Secrets for authentication using " + authType + "\n");
@@ -189,14 +197,19 @@ public class PppAuthSecrets {
             
 			pw.flush();
 			fos.getFD().sync();
-			pw.close();
-			fos.close();
 		} catch (IOException ioe) {
 			throw ioe;
 		} finally {
+			if(fos != null){
+				try{
+					fos.close();
+				}catch(IOException ex){
+					s_logger.error("I/O Exception while closing BufferedReader!");
+				}
+			}
+			
 			if (pw != null) {
 				pw.close();
-				pw = null;
 			}
 		}
 	}

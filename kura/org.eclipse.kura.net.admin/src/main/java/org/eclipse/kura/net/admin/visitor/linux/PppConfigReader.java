@@ -212,12 +212,20 @@ public class PppConfigReader implements NetworkConfigurationVisitor {
 	
 	        
 	        Properties props = new Properties();
+	        FileInputStream fis = null;
 	        try {
-	            FileInputStream fis = new FileInputStream(peerFilename);    
+	            fis = new FileInputStream(peerFilename);    
 	            props.load(fis);
-	            fis.close();
 	        } catch (Exception e) {
 	            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "Error getting modem config", e);
+	        } finally{
+	        	if(null != fis){
+	        	  try {
+					fis.close();
+					} catch (IOException e) {
+						throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "Error getting modem config", e);
+					}
+	        	}
 	        }
 	        
 	        s_logger.debug("peer properties: " + props);
@@ -264,15 +272,15 @@ public class PppConfigReader implements NetworkConfigurationVisitor {
 	            }
 	        }
 	
-	        String disconnectFilename = "";
-	        String disconnectProperty = removeQuotes(props.getProperty("disconnect"));
-	        args = disconnectProperty.split("\\s+");
-	        for(int i=0; i<args.length; i++) {
-	            if(args[i].equals("-f") && args.length > i+1) {
-	                disconnectFilename = args[i+1];
-	                break;
-	            }
-	        }
+//	        String disconnectFilename = "";
+//	        String disconnectProperty = removeQuotes(props.getProperty("disconnect"));
+//	        args = disconnectProperty.split("\\s+");
+//	        for(int i=0; i<args.length; i++) {
+//	            if(args[i].equals("-f") && args.length > i+1) {
+//	                disconnectFilename = args[i+1];
+//	                break;
+//	            }
+//	        }
 	   
 	        // Parse the connect script
 	        ModemXchangeScript connectScript = null;

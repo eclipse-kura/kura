@@ -17,7 +17,7 @@
          name="ModbusManager" 
          description="Modbus protocol example application, connecting a Modbus PLC to the Eurotech Cloud.">
               
-        <Icon resource="http://sphotos-a.xx.fbcdn.net/hphotos-ash4/p480x480/408247_10151040905591065_1989684710_n.jpg" size="32"/>
+        <Icon resource="http://s3.amazonaws.com/kura-resources/application/icon/modbus.png" size="32"/>
         
         <AD id="serialMode"
             name="serialMode"

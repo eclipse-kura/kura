@@ -126,7 +126,7 @@
             type="String"
             cardinality="0" 
             required="true"
-            default="file"
+            default="memory"
             description="Storage type where in-flight messages are persisted across reconnections.">
            <Option label="file" value="file"/>
            <Option label="memory" value="memory"/>
@@ -137,7 +137,7 @@
             type="Integer"
             cardinality="0"
             required="false"
-            default="3"
+            default="4"
             description="MQTT Protocol Version.">
             <Option label="3.1" value="3"/>
             <Option label="3.1.1" value="4"/>

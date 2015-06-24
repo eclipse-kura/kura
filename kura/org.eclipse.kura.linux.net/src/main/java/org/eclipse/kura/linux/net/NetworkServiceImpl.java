@@ -41,6 +41,7 @@ import org.eclipse.kura.linux.net.modem.SupportedSerialModemsInfo;
 import org.eclipse.kura.linux.net.modem.SupportedUsbModemInfo;
 import org.eclipse.kura.linux.net.modem.SupportedUsbModemsInfo;
 import org.eclipse.kura.linux.net.util.KuraConstants;
+import org.eclipse.kura.linux.net.util.LinuxIfconfig;
 import org.eclipse.kura.linux.net.util.LinuxNetworkUtil;
 import org.eclipse.kura.linux.net.util.iwScanTool;
 import org.eclipse.kura.net.ConnectionInfo;
@@ -53,7 +54,6 @@ import org.eclipse.kura.net.NetworkService;
 import org.eclipse.kura.net.NetworkState;
 import org.eclipse.kura.net.modem.ModemAddedEvent;
 import org.eclipse.kura.net.modem.ModemConnectionStatus;
-import org.eclipse.kura.net.modem.ModemConnectionType;
 import org.eclipse.kura.net.modem.ModemDevice;
 import org.eclipse.kura.net.modem.ModemInterface;
 import org.eclipse.kura.net.modem.ModemInterfaceAddress;
@@ -415,9 +415,14 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
         	return null;
         }
         
-		NetInterfaceType type = LinuxNetworkUtil.getType(interfaceName);
-		
-		boolean isUp = LinuxNetworkUtil.isUp(interfaceName);
+        LinuxIfconfig ifconfig = LinuxNetworkUtil.getInterfaceConfiguration(interfaceName);
+        if (ifconfig == null) {
+        	s_logger.debug("Ignoring {} interface.", interfaceName);
+        	return null;
+        }
+        
+		NetInterfaceType type = ifconfig.getType();	
+		boolean isUp = ifconfig.isUp();
 		if(type == NetInterfaceType.UNKNOWN) {
 			 if (interfaceName.matches(UNCONFIGURED_MODEM_REGEX)) {
          		// If the interface name is in a form such as "1-3.4", assume it is a modem
@@ -430,63 +435,63 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
 		if(type == NetInterfaceType.ETHERNET) {
 			EthernetInterfaceImpl<NetInterfaceAddress> netInterface = new EthernetInterfaceImpl<NetInterfaceAddress>(interfaceName);
 			
-			netInterface.setDriver(getDriver());
-			netInterface.setDriverVersion(getDriverVersion());
-			netInterface.setFirmwareVersion(getFirmwareVersion());
-			netInterface.setHardwareAddress(LinuxNetworkUtil.getMacAddressBytes(interfaceName));
+	        Map<String, String> driver = LinuxNetworkUtil.getEthernetDriver(interfaceName);
+            netInterface.setDriver(driver.get("name"));
+            netInterface.setDriverVersion(driver.get("version"));
+            netInterface.setFirmwareVersion(driver.get("firmware"));
+            netInterface.setAutoConnect(LinuxNetworkUtil.isAutoConnect(interfaceName));	  
+            netInterface.setHardwareAddress(ifconfig.getMacAddressBytes()); 
+            netInterface.setMTU(ifconfig.getMtu());
+            netInterface.setSupportsMulticast(ifconfig.isMulticast());
 			netInterface.setLinkUp(LinuxNetworkUtil.isLinkUp(type, interfaceName));
 			netInterface.setLoopback(false);
-			netInterface.setMTU(LinuxNetworkUtil.getCurrentMtu(interfaceName));
-			netInterface.setNetInterfaceAddresses(getNetInterfaceAddresses(interfaceName, type, isUp));
 			netInterface.setPointToPoint(false);
-			netInterface.setState(getState(interfaceName, isUp));
-			netInterface.setSupportsMulticast(LinuxNetworkUtil.isSupportsMulticast(interfaceName));
 			netInterface.setUp(isUp);
-			netInterface.setUsbDevice(getUsbDevice(interfaceName));
-			netInterface.setVirtual(isVirtual());
+            netInterface.setVirtual(isVirtual());
+            netInterface.setUsbDevice(getUsbDevice(interfaceName));
+            netInterface.setState(getState(interfaceName, isUp));
+            netInterface.setNetInterfaceAddresses(getNetInterfaceAddresses(interfaceName, type, isUp));
 			
-			return netInterface;
+            return netInterface;
 		} else if(type == NetInterfaceType.LOOPBACK) {	
 			LoopbackInterfaceImpl<NetInterfaceAddress> netInterface = new LoopbackInterfaceImpl<NetInterfaceAddress>(interfaceName);
 			
 			netInterface.setDriver(getDriver());
 			netInterface.setDriverVersion(getDriverVersion());
 			netInterface.setFirmwareVersion(getFirmwareVersion());
-			netInterface.setHardwareAddress(LinuxNetworkUtil.getMacAddressBytes(interfaceName));
+            netInterface.setAutoConnect(LinuxNetworkUtil.isAutoConnect(interfaceName));         
+			netInterface.setHardwareAddress(new byte[]{0, 0, 0, 0, 0, 0});
 			netInterface.setLoopback(true);
-			netInterface.setMTU(LinuxNetworkUtil.getCurrentMtu(interfaceName));
-			netInterface.setNetInterfaceAddresses(getNetInterfaceAddresses(interfaceName, type, isUp));
+	        netInterface.setMTU(ifconfig.getMtu());
+	        netInterface.setSupportsMulticast(ifconfig.isMulticast());
 			netInterface.setPointToPoint(false);
+            netInterface.setUp(isUp);
+            netInterface.setVirtual(false);
+            netInterface.setUsbDevice(null);
 			netInterface.setState(getState(interfaceName, isUp));
-			netInterface.setSupportsMulticast(LinuxNetworkUtil.isSupportsMulticast(interfaceName));
-			netInterface.setUp(isUp);
-			netInterface.setUsbDevice(getUsbDevice(interfaceName));
-			netInterface.setVirtual(isVirtual());
+            netInterface.setNetInterfaceAddresses(getNetInterfaceAddresses(interfaceName, type, isUp));
 
 			return netInterface;
 		} else if(type == NetInterfaceType.WIFI) {
 			WifiInterfaceImpl<WifiInterfaceAddress> wifiInterface = new WifiInterfaceImpl<WifiInterfaceAddress>(interfaceName);
 			
-			int mtu = -1;
-			try {
-			    mtu = LinuxNetworkUtil.getCurrentMtu(interfaceName);
-			} catch (Exception e) {
-			    s_logger.error("Could not get mtu for " + interfaceName, e);
-			}
-			
-			wifiInterface.setDriver(getDriver());
-			wifiInterface.setDriverVersion(getDriverVersion());
-			wifiInterface.setFirmwareVersion(getFirmwareVersion());
-			wifiInterface.setHardwareAddress(LinuxNetworkUtil.getMacAddressBytes(interfaceName));
+            Map<String, String> driver = LinuxNetworkUtil.getEthernetDriver(interfaceName);
+            wifiInterface.setDriver(driver.get("name"));
+            wifiInterface.setDriverVersion(driver.get("version"));
+            wifiInterface.setFirmwareVersion(driver.get("firmware"));
+			wifiInterface.setAutoConnect(LinuxNetworkUtil.isAutoConnect(interfaceName));	        
+	        wifiInterface.setHardwareAddress(ifconfig.getMacAddressBytes());
+	        wifiInterface.setMTU(ifconfig.getMtu());
+	        wifiInterface.setSupportsMulticast(ifconfig.isMulticast());
+			// FIXME:MS Add linkUp in the AbstractNetInterface and populate accordingly
+//			wifiInterface.setLinkUp(LinuxNetworkUtil.isLinkUp(type, interfaceName));
 			wifiInterface.setLoopback(false);
-			wifiInterface.setMTU(mtu);
+            wifiInterface.setPointToPoint(false);
+            wifiInterface.setUp(isUp);
+            wifiInterface.setVirtual(isVirtual());
+            wifiInterface.setUsbDevice(getUsbDevice(interfaceName));
+            wifiInterface.setState(getState(interfaceName, isUp));
 			wifiInterface.setNetInterfaceAddresses(getWifiInterfaceAddresses(interfaceName, isUp));
-			wifiInterface.setPointToPoint(false);
-			wifiInterface.setState(getState(interfaceName, isUp));
-			wifiInterface.setSupportsMulticast(LinuxNetworkUtil.isSupportsMulticast(interfaceName));
-			wifiInterface.setUp(isUp);
-			wifiInterface.setUsbDevice(getUsbDevice(interfaceName));
-			wifiInterface.setVirtual(isVirtual());
 			wifiInterface.setCapabilities(LinuxNetworkUtil.getWifiCapabilities(interfaceName));
 
 			return wifiInterface;
@@ -542,7 +547,7 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
             if(modemInfo != null) {
             	//Found one - see if we have some info for it.
             	//Also check if we are getting more devices than expected.
-            	//This can happen if all the modem resources cannot be removed from the OS or from ESF.
+            	//This can happen if all the modem resources cannot be removed from the OS or from Kura.
             	//In this case we did not receive an UsbDeviceRemovedEvent and we did not post
             	//an ModemRemovedEvent. Should we do it here?
             	UsbModemDevice usbModem = m_usbModems.get(event.getProperty(UsbDeviceEvent.USB_EVENT_USB_PORT_PROPERTY));
@@ -673,199 +678,182 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
 
 		ModemInterfaceImpl<ModemInterfaceAddress> modemInterface = new ModemInterfaceImpl<ModemInterfaceAddress>(interfaceName);
         
-        SupportedUsbModemInfo supportedUsbModem = null;
-        SupportedSerialModemInfo supportedSerialModem = null;		
-        
+        modemInterface.setModemDevice(modemDevice);
         if (modemDevice instanceof UsbModemDevice) {
-        	UsbModemDevice usbDevice = (UsbModemDevice)modemDevice;
-        	supportedUsbModem = SupportedUsbModemsInfo.getModem(usbDevice.getVendorId(), usbDevice.getProductId()); 
-        } else if (modemDevice instanceof SerialModemDevice) {
-        	supportedSerialModem = SupportedSerialModemsInfo.getModem();
+
+            UsbModemDevice usbModemDevice = (UsbModemDevice) modemDevice;
+            SupportedUsbModemInfo supportedUsbModemInfo = null;
+        	supportedUsbModemInfo = SupportedUsbModemsInfo.getModem(usbModemDevice.getVendorId(), usbModemDevice.getProductId());
+            modemInterface.setTechnologyTypes(supportedUsbModemInfo.getTechnologyTypes());
+            modemInterface.setUsbDevice((UsbModemDevice)modemDevice);        	
+        } 
+        else if (modemDevice instanceof SerialModemDevice) {
+
+            SupportedSerialModemInfo supportedSerialModemInfo = null;
+            supportedSerialModemInfo = SupportedSerialModemsInfo.getModem();
+            modemInterface.setTechnologyTypes(supportedSerialModemInfo.getTechnologyTypes());
         }
-         
-        
+                 
         int pppNum = 0;
         if(interfaceName.startsWith("ppp")) {
             pppNum = Integer.parseInt(interfaceName.substring(3));
         }
-        
-        modemInterface.setDriver(getDriver());
-        modemInterface.setDriverVersion(getDriverVersion());
-        modemInterface.setFirmwareVersion(getFirmwareVersion());
-        modemInterface.setLoopback(false);
-        modemInterface.setNetInterfaceAddresses(getModemInterfaceAddresses(interfaceName, isUp));
-        modemInterface.setPointToPoint(true);
-        modemInterface.setState(getState(interfaceName, isUp));
-        modemInterface.setUp(isUp);
-        if (isUp) {
-	        try {
-	            int mtu = LinuxNetworkUtil.getCurrentMtu(interfaceName);
-	            modemInterface.setMTU(mtu);
-	        } catch (KuraException e) {
-	            s_logger.warn("Could not get MTU for " + interfaceName);
-	        }
-	        try {
-	            boolean multicast = LinuxNetworkUtil.isSupportsMulticast(interfaceName);
-	            modemInterface.setSupportsMulticast(multicast);
-	        } catch (KuraException e) {
-	            s_logger.warn("Could not get multicast for " + interfaceName);
-	        }
-	        
-	        try {
-	        	byte [] macAddressBytes = LinuxNetworkUtil.getMacAddressBytes(interfaceName);
-	        	modemInterface.setHardwareAddress(macAddressBytes);
-	        } catch (KuraException e) {
-	        	s_logger.warn("Could not get MAC Address for " + interfaceName);
-	        }
-        }
-        
-        modemInterface.setModemDevice(modemDevice);
-        if (modemDevice instanceof UsbModemDevice) {
-        	modemInterface.setTechnologyTypes(supportedUsbModem.getTechnologyTypes());
-        	modemInterface.setUsbDevice((UsbModemDevice)modemDevice);
-        } else if (modemDevice instanceof SerialModemDevice) {
-        	modemInterface.setTechnologyTypes(supportedSerialModem.getTechnologyTypes());
-        }
-        modemInterface.setVirtual(isVirtual());
-                
+        modemInterface.setPppNum(pppNum);        
         modemInterface.setManufacturer(modemDevice.getManufacturerName());
         modemInterface.setModel(modemDevice.getProductName());
         modemInterface.setModemIdentifier(modemDevice.getProductName());
-        modemInterface.setPppNum(pppNum);
-        modemInterface.setSerialNumber("");
+        
+        // these properties required net.admin packages
+        modemInterface.setDriver(getDriver());
+        modemInterface.setDriverVersion(getDriverVersion());
+        modemInterface.setFirmwareVersion(getFirmwareVersion());
+        modemInterface.setSerialNumber("unknown");
 
+        modemInterface.setLoopback(false);
+        modemInterface.setPointToPoint(true);
+        modemInterface.setState(getState(interfaceName, isUp));
+        modemInterface.setHardwareAddress(new byte[]{0, 0, 0, 0, 0, 0});
+        LinuxIfconfig ifconfig = LinuxNetworkUtil.getInterfaceConfiguration(interfaceName);
+        if (ifconfig != null) {
+        	modemInterface.setMTU(ifconfig.getMtu());
+        	modemInterface.setSupportsMulticast(ifconfig.isMulticast());
+        }
+        
+        modemInterface.setUp(isUp);
+        modemInterface.setVirtual(isVirtual());
+        modemInterface.setNetInterfaceAddresses(getModemInterfaceAddresses(interfaceName, isUp));
+        
         return modemInterface;
 
     }
 	
-	private List<NetInterfaceAddress> getNetInterfaceAddresses(String interfaceName, NetInterfaceType type, boolean isUp) throws KuraException {
+	private List<NetInterfaceAddress> getNetInterfaceAddresses(String interfaceName, NetInterfaceType type, boolean isUp) throws KuraException 
+	{
+        List<NetInterfaceAddress> netInterfaceAddresses = new ArrayList<NetInterfaceAddress>();
 		if(isUp) {
-			ConnectionInfo conInfo = new ConnectionInfoImpl(interfaceName);
-			
-			List<NetInterfaceAddress> netInterfaceAddresses = new ArrayList<NetInterfaceAddress>();
+			ConnectionInfo conInfo = new ConnectionInfoImpl(interfaceName);			
 			NetInterfaceAddressImpl netInterfaceAddress = new NetInterfaceAddressImpl();
-			netInterfaceAddresses.add(netInterfaceAddress);
-			
 			try {
-				String currentNetmask = LinuxNetworkUtil.getCurrentNetmask(interfaceName);
-                if (currentNetmask != null) {
-					netInterfaceAddress.setAddress(IPAddress.parseHostAddress(LinuxNetworkUtil.getCurrentIpAddress(interfaceName)));
-					netInterfaceAddress.setBroadcast(IPAddress.parseHostAddress(LinuxNetworkUtil.getCurrentBroadcastAddress(interfaceName)));
-					netInterfaceAddress.setNetmask(IPAddress.parseHostAddress(currentNetmask));
-					netInterfaceAddress.setNetworkPrefixLength(NetworkUtil.getNetmaskShortForm(currentNetmask));
-					netInterfaceAddress.setGateway(conInfo.getGateway());
-					if(type == NetInterfaceType.MODEM) {
-						if(isUp) {
-							netInterfaceAddress.setDnsServers(LinuxDns.getInstance().getPppDnServers());
+			    // FIXME:MC The whole block of information can be fetched with a single ifconfig?
+				LinuxIfconfig ifconfig = LinuxNetworkUtil.getInterfaceConfiguration(interfaceName);
+				if (ifconfig != null) {
+					String currentNetmask = ifconfig.getInetMask();
+	                if (currentNetmask != null) {
+						netInterfaceAddress.setAddress(IPAddress.parseHostAddress(ifconfig.getInetAddress()));
+						netInterfaceAddress.setBroadcast(IPAddress.parseHostAddress(ifconfig.getInetBcast()));
+						
+						netInterfaceAddress.setNetmask(IPAddress.parseHostAddress(currentNetmask));
+						netInterfaceAddress.setNetworkPrefixLength(NetworkUtil.getNetmaskShortForm(currentNetmask));
+						netInterfaceAddress.setGateway(conInfo.getGateway());
+						if(type == NetInterfaceType.MODEM) {
+							if(isUp) {
+								netInterfaceAddress.setDnsServers(LinuxDns.getInstance().getPppDnServers());
+							}
+						} else {
+							netInterfaceAddress.setDnsServers(conInfo.getDnsServers());
 						}
-					} else {
-						netInterfaceAddress.setDnsServers(conInfo.getDnsServers());
-					}
-                } else {
-                	return null;
-                }
+						netInterfaceAddresses.add(netInterfaceAddress);
+	                }
+				}
 			} catch(UnknownHostException e) {
 				throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
-			}
-	            
-			return netInterfaceAddresses;
-		} else {
-			return null;
-		}
+			}            	            
+		} 
+        return netInterfaceAddresses;
 	}
 	
-	private List<WifiInterfaceAddress> getWifiInterfaceAddresses(String interfaceName, boolean isUp) throws KuraException {
+	private List<WifiInterfaceAddress> getWifiInterfaceAddresses(String interfaceName, boolean isUp) throws KuraException 
+	{
+        List<WifiInterfaceAddress> wifiInterfaceAddresses = new ArrayList<WifiInterfaceAddress>();
 		if(isUp) {
-			ConnectionInfo conInfo = new ConnectionInfoImpl(interfaceName);
-			
-			List<WifiInterfaceAddress> wifiInterfaceAddresses = new ArrayList<WifiInterfaceAddress>();
+			ConnectionInfo conInfo = new ConnectionInfoImpl(interfaceName);			
 			WifiInterfaceAddressImpl wifiInterfaceAddress = new WifiInterfaceAddressImpl();
-			wifiInterfaceAddresses.add(wifiInterfaceAddress);
-			
+			wifiInterfaceAddresses.add(wifiInterfaceAddress);			
 			try {
-				String currentNetmask = LinuxNetworkUtil.getCurrentNetmask(interfaceName);
-                if (currentNetmask != null) {
-					wifiInterfaceAddress.setAddress(IPAddress.parseHostAddress(LinuxNetworkUtil.getCurrentIpAddress(interfaceName)));
-					wifiInterfaceAddress.setBroadcast(IPAddress.parseHostAddress(LinuxNetworkUtil.getCurrentBroadcastAddress(interfaceName)));
-					wifiInterfaceAddress.setNetmask(IPAddress.parseHostAddress(currentNetmask));
-					wifiInterfaceAddress.setNetworkPrefixLength(NetworkUtil.getNetmaskShortForm(currentNetmask));
-					wifiInterfaceAddress.setGateway(conInfo.getGateway());
-					wifiInterfaceAddress.setDnsServers(conInfo.getDnsServers());
-					
-					WifiMode wifiMode = LinuxNetworkUtil.getWifiMode(interfaceName);
-					wifiInterfaceAddress.setBitrate(LinuxNetworkUtil.getWifiBitrate(interfaceName));
-					wifiInterfaceAddress.setMode(wifiMode);
-					
-					//TODO - should this only be the AP we are connected to in client mode?
-					if(wifiMode == WifiMode.INFRA) {
-						String currentSSID = LinuxNetworkUtil.getSSID(interfaceName);
-
-						if(currentSSID != null) {
-							s_logger.debug("Adding access point SSID: " + currentSSID);
-
-							WifiAccessPointImpl wifiAccessPoint = new WifiAccessPointImpl(currentSSID);
-
-							// FIXME: fill in other info
-							wifiAccessPoint.setMode(WifiMode.INFRA);
-							List<Long> bitrate = new ArrayList<Long>();
-							bitrate.add(54000000L);
-							wifiAccessPoint.setBitrate(bitrate);
-							wifiAccessPoint.setFrequency(12345);
-							wifiAccessPoint.setHardwareAddress("20AA4B8A6442".getBytes());
-							wifiAccessPoint.setRsnSecurity(EnumSet.allOf(WifiSecurity.class));
-							wifiAccessPoint.setStrength(1234);
-							wifiAccessPoint.setWpaSecurity(EnumSet.allOf(WifiSecurity.class));
-
-							wifiInterfaceAddress.setWifiAccessPoint(wifiAccessPoint);
+				LinuxIfconfig ifconfig = LinuxNetworkUtil.getInterfaceConfiguration(interfaceName);
+				if (ifconfig != null) {
+					String currentNetmask = ifconfig.getInetMask();
+	                if (currentNetmask != null) {
+						wifiInterfaceAddress.setAddress(IPAddress.parseHostAddress(ifconfig.getInetAddress()));
+						wifiInterfaceAddress.setBroadcast(IPAddress.parseHostAddress(ifconfig.getInetBcast()));
+						wifiInterfaceAddress.setNetmask(IPAddress.parseHostAddress(currentNetmask));
+						wifiInterfaceAddress.setNetworkPrefixLength(NetworkUtil.getNetmaskShortForm(currentNetmask));
+						wifiInterfaceAddress.setGateway(conInfo.getGateway());
+						wifiInterfaceAddress.setDnsServers(conInfo.getDnsServers());
+						
+						WifiMode wifiMode = LinuxNetworkUtil.getWifiMode(interfaceName);
+						wifiInterfaceAddress.setBitrate(LinuxNetworkUtil.getWifiBitrate(interfaceName));
+						wifiInterfaceAddress.setMode(wifiMode);
+						
+						//TODO - should this only be the AP we are connected to in client mode?
+						if(wifiMode == WifiMode.INFRA) {
+							String currentSSID = LinuxNetworkUtil.getSSID(interfaceName);
+	
+							if(currentSSID != null) {
+								s_logger.debug("Adding access point SSID: " + currentSSID);
+	
+								WifiAccessPointImpl wifiAccessPoint = new WifiAccessPointImpl(currentSSID);
+	
+								// FIXME: fill in other info
+								wifiAccessPoint.setMode(WifiMode.INFRA);
+								List<Long> bitrate = new ArrayList<Long>();
+								bitrate.add(54000000L);
+								wifiAccessPoint.setBitrate(bitrate);
+								wifiAccessPoint.setFrequency(12345);
+								wifiAccessPoint.setHardwareAddress("20AA4B8A6442".getBytes());
+								wifiAccessPoint.setRsnSecurity(EnumSet.allOf(WifiSecurity.class));
+								wifiAccessPoint.setStrength(1234);
+								wifiAccessPoint.setWpaSecurity(EnumSet.allOf(WifiSecurity.class));
+	
+								wifiInterfaceAddress.setWifiAccessPoint(wifiAccessPoint);
+							}
 						}
-					}
-                } else {
-                	return null;
-                }
+	                } else {
+	                	return null;
+	                }
+				} else {
+					return null;
+				}
 			} catch(UnknownHostException e) {
 				throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
 			}
-
-			return wifiInterfaceAddresses;
-		} else {
-			return null;
 		}
+
+		return wifiInterfaceAddresses;
 	}
 	
     private List<ModemInterfaceAddress> getModemInterfaceAddresses(String interfaceName, boolean isUp) throws KuraException {
+        List<ModemInterfaceAddress> modemInterfaceAddresses = new ArrayList<ModemInterfaceAddress>();
         if(isUp) {
-            ConnectionInfo conInfo = new ConnectionInfoImpl(interfaceName);
-            
-            List<ModemInterfaceAddress> modemInterfaceAddresses = new ArrayList<ModemInterfaceAddress>();
+            ConnectionInfo conInfo = new ConnectionInfoImpl(interfaceName);            
             ModemInterfaceAddressImpl modemInterfaceAddress = new ModemInterfaceAddressImpl();
-            modemInterfaceAddresses.add(modemInterfaceAddress);
-            
+            modemInterfaceAddresses.add(modemInterfaceAddress);            
             try {
-                String currentNetmask = LinuxNetworkUtil.getCurrentNetmask(interfaceName);
-                if (currentNetmask != null) {
-                    modemInterfaceAddress.setAddress(IPAddress.parseHostAddress(LinuxNetworkUtil.getCurrentIpAddress(interfaceName)));
-                    modemInterfaceAddress.setBroadcast(IPAddress.parseHostAddress(LinuxNetworkUtil.getCurrentBroadcastAddress(interfaceName)));
-                    modemInterfaceAddress.setNetmask(IPAddress.parseHostAddress(currentNetmask));
-                    modemInterfaceAddress.setNetworkPrefixLength(NetworkUtil.getNetmaskShortForm(currentNetmask));
-                    modemInterfaceAddress.setGateway(conInfo.getGateway());
-                    modemInterfaceAddress.setDnsServers(conInfo.getDnsServers());
-                    modemInterfaceAddress.setConnectionType(ModemConnectionType.PPP);   // FIXME - hardcoded
-                    ModemConnectionStatus connectionStatus = isUp? ModemConnectionStatus.CONNECTED : ModemConnectionStatus.DISCONNECTED;
-                    modemInterfaceAddress.setConnectionStatus(connectionStatus);
-                    // TODO - other attributes
-                } else {
+            	LinuxIfconfig ifconfig = LinuxNetworkUtil.getInterfaceConfiguration(interfaceName);
+            	if (ifconfig != null) {
+					String currentNetmask = ifconfig.getInetMask();
+	                if (currentNetmask != null) {
+	                    modemInterfaceAddress.setAddress(IPAddress.parseHostAddress(ifconfig.getInetAddress()));
+	                    modemInterfaceAddress.setBroadcast(IPAddress.parseHostAddress(ifconfig.getInetBcast()));
+	                    modemInterfaceAddress.setNetmask(IPAddress.parseHostAddress(currentNetmask));
+	                    modemInterfaceAddress.setNetworkPrefixLength(NetworkUtil.getNetmaskShortForm(currentNetmask));
+	                    modemInterfaceAddress.setGateway(conInfo.getGateway());
+	                    modemInterfaceAddress.setDnsServers(conInfo.getDnsServers());
+	                    ModemConnectionStatus connectionStatus = isUp? ModemConnectionStatus.CONNECTED : ModemConnectionStatus.DISCONNECTED;
+	                    modemInterfaceAddress.setConnectionStatus(connectionStatus);
+	                    // TODO - other attributes
+	                } else {
+	                    return null;
+	                }
+            	} else {
                     return null;
                 }
             } catch(UnknownHostException e) {
                 throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
             }
-                
-            return modemInterfaceAddresses;
-        } else {
-            return null;
         }
+        return modemInterfaceAddresses;
     }
-
 	
 	private NetInterfaceState getState(String interfaceName, boolean isUp) {
 		/** The device is in an unknown state. */

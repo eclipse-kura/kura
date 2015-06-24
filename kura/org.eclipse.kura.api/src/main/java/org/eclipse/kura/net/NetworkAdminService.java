@@ -192,4 +192,6 @@ public interface NetworkAdminService {
 	public Map<String, WifiHotspotInfo> getWifiHotspots(String ifaceName) throws KuraException;
 	
 	public boolean verifyWifiCredentials(String ifaceName, WifiConfig wifiConfig, int tout);
+	
+	public boolean rollbackDefaultConfiguration() throws KuraException;
 }

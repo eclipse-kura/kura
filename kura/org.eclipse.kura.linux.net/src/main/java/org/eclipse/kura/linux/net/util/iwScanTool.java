@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
 public class iwScanTool extends ScanTool implements IScanTool {
 	
 	private static final Logger s_logger = LoggerFactory.getLogger(iwScanTool.class);
-
+	private static final String SCAN_THREAD_NAME = "iwScanThread";
 	private static final Object s_lock = new Object();
 	private String m_ifaceName;
 	private ExecutorService m_executor;
@@ -90,6 +90,7 @@ public class iwScanTool extends ScanTool implements IScanTool {
 			m_task = m_executor.submit(new Runnable() {
 				@Override
 				public void run() {
+					Thread.currentThread().setName(SCAN_THREAD_NAME);
 					int stat = -1;
 					m_process = null;
 					StringBuilder sb = new StringBuilder();
@@ -152,7 +153,7 @@ public class iwScanTool extends ScanTool implements IScanTool {
 				if (m_process != null) ProcessUtil.destroy(m_process);
 				m_process = null;
 				
-				s_logger.info("scan() :: Terminating WifiMonitor Thread ...");
+				s_logger.info("scan() :: Terminating {} ...", SCAN_THREAD_NAME);
 				m_executor.shutdownNow();
 				try {
 					m_executor.awaitTermination(2, TimeUnit.SECONDS);

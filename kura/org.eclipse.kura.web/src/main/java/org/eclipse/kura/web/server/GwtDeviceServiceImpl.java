@@ -96,8 +96,8 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
 			if (systemService.getNumberOfProcessors() != -1) {
 				pairs.add( new GwtGroupedNVPair("devJava", "devNumProc", String.valueOf(systemService.getNumberOfProcessors())));
 			}
-			pairs.add( new GwtGroupedNVPair("devJava", "devRamTot",  String.valueOf(systemService.getTotalMemory())+" MB"));
-			pairs.add( new GwtGroupedNVPair("devJava", "devRamFree", String.valueOf(systemService.getFreeMemory())+" MB"));
+			pairs.add( new GwtGroupedNVPair("devJava", "devRamTot",  String.valueOf(systemService.getTotalMemory())+" kB"));
+			pairs.add( new GwtGroupedNVPair("devJava", "devRamFree", String.valueOf(systemService.getFreeMemory())+" kB"));
 
 			// get the network information
 			String connectionIp = UNKNOWN;

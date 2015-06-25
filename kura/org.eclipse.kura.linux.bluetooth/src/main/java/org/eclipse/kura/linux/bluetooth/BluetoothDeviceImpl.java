@@ -38,7 +38,6 @@ public class BluetoothDeviceImpl implements BluetoothDevice {
 
 	@Override
 	public int getType() {
-		// TODO Auto-generated method stub
 		return DEVICE_TYPE_UNKNOWN;
 	}
 
@@ -47,9 +46,9 @@ public class BluetoothDeviceImpl implements BluetoothDevice {
 		BluetoothConnector bluetoothConnector = null;     
 		BundleContext bundleContext = BluetoothServiceImpl.getBundleContext();
 		if (bundleContext != null) {
-			ServiceReference sr = bundleContext.getServiceReference(BluetoothConnector.class);
+			ServiceReference<BluetoothConnector> sr = bundleContext.getServiceReference(BluetoothConnector.class);
 			if (sr != null) {
-				bluetoothConnector = (BluetoothConnector) bundleContext.getService(sr);
+				bluetoothConnector = bundleContext.getService(sr);
 			}
 		}               
 		return bluetoothConnector;

@@ -32,7 +32,6 @@ import org.eclipse.kura.cloud.Cloudlet;
 import org.eclipse.kura.cloud.CloudletTopic;
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.core.configuration.util.XmlUtil;
-import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.message.KuraPayload;
 import org.eclipse.kura.message.KuraRequestPayload;
 import org.eclipse.kura.message.KuraResponsePayload;

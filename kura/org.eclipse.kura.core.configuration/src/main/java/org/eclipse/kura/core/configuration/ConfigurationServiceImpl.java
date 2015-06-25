@@ -518,6 +518,28 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 				registerdOCD = config.getDefinition();
 			}
 		}
+		
+		try {
+			if (!m_selfConfigComponents.contains(pid) && registerdOCD != null) {
+				//get the actual running configuration for the selected component
+				Configuration config = m_configurationAdmin.getConfiguration(pid);
+				Map<String, Object> runningProps = CollectionsUtil.dictionaryToMap(config.getProperties(), registerdOCD);
+
+				//iterate through all the running properties and include in mergedProperties 
+				//the ones that are missing in order to create a complete component configuration
+				//eventual properties that are runtime only will be removed in next steps
+				Iterator<String> keys= runningProps.keySet().iterator();
+				while(keys.hasNext()){
+					String key= keys.next();
+					if(!mergedProperties.containsKey(key)){
+						mergedProperties.put(key, runningProps.get(key));
+					}
+				}	
+			}
+		} catch (IOException e) {
+			s_logger.info("merge with running failed!");
+			throw new KuraException(KuraErrorCode.CONFIGURATION_UPDATE, e, pid);
+		}
 
 		if (registerdOCD != null) {
 			boolean changed = mergeWithDefaults(registerdOCD, mergedProperties);
@@ -527,7 +549,6 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 		}
 
 		try {
-
 			if (!m_selfConfigComponents.contains(pid)) {
 
 				// load the ocd to do the validation
@@ -536,7 +557,8 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 				ocd = ComponentUtil.getObjectClassDefinition(ctx, pid);
 
 				// Validate the properties to be applied and set them
-				validateProperties(pid, ocd, mergedProperties);
+				// TODO: it seems that code does not enter here: the ocd object is always null!
+				validateProperties(pid, ocd, mergedProperties); 
 			} else {
 				// FIXME: validation of properties for self-configuring
 				// components
@@ -1130,7 +1152,8 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 			}
 			return cleanedProperties;
 		}else{
-			return mergedProperties;
+			Map<String, Object> cleanedProperties= new HashMap<String, Object> (mergedProperties);
+			return cleanedProperties;
 		}
 	}
 

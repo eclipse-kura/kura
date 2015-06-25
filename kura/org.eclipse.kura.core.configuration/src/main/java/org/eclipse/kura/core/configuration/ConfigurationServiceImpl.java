@@ -388,7 +388,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 
 	public List<ComponentConfiguration> getSnapshot(long sid) throws KuraException {
 		XmlComponentConfigurations xmlConfigs = loadEncryptedSnapshotFileContent(sid);
-		
+
 		//List<ComponentConfigurationImpl> decryptedConfigs = new ArrayList<ComponentConfigurationImpl>();
 		List<ComponentConfigurationImpl> configs = xmlConfigs.getConfigurations();
 		for (ComponentConfigurationImpl config : configs) {
@@ -402,7 +402,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 				}
 			}
 		}
-	
+
 		List<ComponentConfiguration> returnConfigs = new ArrayList<ComponentConfiguration>();
 		if (xmlConfigs != null) {
 			returnConfigs.addAll(xmlConfigs.getConfigurations());
@@ -417,8 +417,15 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 		List<Throwable> causes = new ArrayList<Throwable>();
 		for (ComponentConfiguration config : configsToUpdate) {
 			if (config != null) {
+				encryptPasswords(config);
+			}
+		}
+
+		List<ComponentConfiguration> configs = buildCurrentConfiguration(configsToUpdate);
+
+		for (ComponentConfiguration config : configsToUpdate) {
+			if (config != null) {
 				try {
-					encryptPasswords(config);
 					updateConfigurationInternal(config.getPid(), config.getConfigurationProperties(), snapshotOnConfirmation);
 				} catch (KuraException e) {
 					s_logger.warn("Error during updateConfigurations for component " + config.getPid(), e);
@@ -426,8 +433,6 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 				}
 			}
 		}
-
-		List<ComponentConfiguration> configs = buildCurrentConfiguration(configsToUpdate);
 
 		saveSnapshot(configs);
 
@@ -556,7 +561,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 			throw new KuraException(KuraErrorCode.CONFIGURATION_UPDATE, e, pid);
 		}
 	}
-	
+
 	boolean mergeWithDefaults(OCD ocd, Map<String, Object> properties) throws KuraException {
 		boolean changed = false;
 		Set<String> keys = properties.keySet();
@@ -577,7 +582,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 		}
 		return changed;
 	}
-	
+
 	Map<String, Object> decryptPasswords(ComponentConfiguration config) {
 		Map<String, Object> configProperties = config.getConfigurationProperties();
 		Iterator<String> keys = configProperties.keySet().iterator();
@@ -623,7 +628,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 			}
 		}
 	}
-	
+
 	private void encryptConfigs(List<? extends ComponentConfiguration> configs) {
 		for (ComponentConfiguration config : configs) {
 			if (config instanceof ComponentConfigurationImpl) {
@@ -641,7 +646,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 			Long[] snapshots = snapshotIDs.toArray(new Long[] {});
 
 			for (Long snapshot : snapshots) {
-				
+
 				try {
 					//Verify if the current snapshot is encrypted
 					loadEncryptedSnapshotFileContent(snapshot);
@@ -667,7 +672,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 			if (!fSnapshot.exists()) {
 				throw new KuraException(KuraErrorCode.CONFIGURATION_SNAPSHOT_NOT_FOUND, snapshot);
 			}
-			
+
 			//
 			// Unmarshall
 			XmlComponentConfigurations xmlConfigs = null;
@@ -689,7 +694,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 			}
 			List<ComponentConfigurationImpl> configs = xmlConfigs.getConfigurations();
 			encryptConfigs(configs);
-			
+
 			//Writes an encrypted snapshot with encrypted passwords.
 			writeSnapshot(snapshot, xmlConfigs);
 		}
@@ -739,7 +744,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 
 	private void writeSnapshot(long sid, XmlComponentConfigurations conf) throws KuraException {
 		File fSnapshot = getSnapshotFile(sid);
-		
+
 		FileOutputStream fos = null;
 		OutputStreamWriter osw = null;
 		try {
@@ -760,14 +765,14 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 				try {
 					osw.close();
 				} catch (IOException e) {
-				
+
 				}
 			}
 			if(fos != null){
 				try {
 					fos.close();
 				} catch (IOException e) {
-				
+
 				}
 			}
 		}
@@ -999,13 +1004,13 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 		}
 		return xmlConfigs.getConfigurations();
 	}
-	
+
 	XmlComponentConfigurations loadEncryptedSnapshotFileContent(long snapshotID) throws KuraException{
 		File fSnapshot = getSnapshotFile(snapshotID);
 		if (!fSnapshot.exists()) {
 			throw new KuraException(KuraErrorCode.CONFIGURATION_SNAPSHOT_NOT_FOUND, fSnapshot.getAbsolutePath());
 		}
-		
+
 		XmlComponentConfigurations xmlConfigs= null;
 		FileReader fr = null;
 		BufferedReader br = null;
@@ -1017,7 +1022,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 			while ((line = br.readLine()) != null) {
 				entireFile += line;
 			}
-			
+
 			//File loaded, try to decrypt and unmarshall
 			String decryptedContent = new String(m_cryptoService.decryptAes(entireFile.toCharArray()));
 			xmlConfigs = XmlUtil.unmarshal(decryptedContent, XmlComponentConfigurations.class);
@@ -1097,35 +1102,38 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 			}
 		}
 	}
-	
+
 	private Map<String, Object> cleanProperties(Map<String, Object> mergedProperties, String pid) {
-		Tocd componentOcd= m_ocds.get(pid);
-		Set<String> metatypeNames= new HashSet<String>();
-		if (componentOcd != null) {
-			List<AD> attrDefs = componentOcd.getAD();
-			if (attrDefs != null) {
-				for (AD attrDef : attrDefs) {
-					String name = attrDef.getName();
-					if (!metatypeNames.contains(name)) {
-						metatypeNames.add(name);
+		if (!m_selfConfigComponents.contains(pid)) {
+			Tocd componentOcd= m_ocds.get(pid);
+			Set<String> metatypeNames= new HashSet<String>();
+			if (componentOcd != null) {
+				List<AD> attrDefs = componentOcd.getAD();
+				if (attrDefs != null) {
+					for (AD attrDef : attrDefs) {
+						String name = attrDef.getName();
+						if (!metatypeNames.contains(name)) {
+							metatypeNames.add(name);
+						}
 					}
 				}
 			}
-		}
 
-		Map<String, Object> cleanedProperties= new HashMap<String, Object> ();
-		Set<String> mergedKeys= mergedProperties.keySet();
+			Map<String, Object> cleanedProperties= new HashMap<String, Object> ();
+			Set<String> mergedKeys= mergedProperties.keySet();
 
-		for(String key: mergedKeys){
-			if(metatypeNames.contains(key)){
-				Object value= mergedProperties.get(key);
-				cleanedProperties.put(key, value);
+			for(String key: mergedKeys){
+				if(metatypeNames.contains(key)){
+					Object value= mergedProperties.get(key);
+					cleanedProperties.put(key, value);
+				}
 			}
+			return cleanedProperties;
+		}else{
+			return mergedProperties;
 		}
-		return cleanedProperties;
-
 	}
-	
+
 	private synchronized List<ComponentConfiguration> buildCurrentConfiguration(List<ComponentConfiguration> configsToUpdate) throws KuraException {
 		// Build the current configuration
 		ComponentConfiguration cc = null;

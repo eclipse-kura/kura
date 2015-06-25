@@ -166,7 +166,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 		//
 		// start the trackers
 		s_logger.info("Trackers being opened...");
-		m_cloudHandler = new CloudConfigurationHandler(m_ctx.getBundleContext(), this, m_systemService, m_cryptoService);
+		m_cloudHandler = new CloudConfigurationHandler(m_ctx.getBundleContext(), this, m_systemService);
 		m_cloudHandler.open();
 
 		m_serviceTracker = new ConfigurableComponentTracker(m_ctx.getBundleContext(), this);
@@ -271,7 +271,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 			cc = getSelfConfiguringComponentConfiguration(pid);
 		}
 
-		//decryptPasswords(cc);
+		decryptPasswords(cc);
 		return cc;
 	}
 
@@ -388,6 +388,20 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 
 	public List<ComponentConfiguration> getSnapshot(long sid) throws KuraException {
 		XmlComponentConfigurations xmlConfigs = loadEncryptedSnapshotFileContent(sid);
+		
+		//List<ComponentConfigurationImpl> decryptedConfigs = new ArrayList<ComponentConfigurationImpl>();
+		List<ComponentConfigurationImpl> configs = xmlConfigs.getConfigurations();
+		for (ComponentConfigurationImpl config : configs) {
+			if (config != null) {
+				try {
+					Map<String, Object> decryptedProperties = decryptPasswords(config);
+					config.setProperties(decryptedProperties);
+					//decryptedConfigs.add(config);
+				} catch (Throwable t) {
+					s_logger.warn("Error during snapshot password decryption");
+				}
+			}
+		}
 	
 		List<ComponentConfiguration> returnConfigs = new ArrayList<ComponentConfiguration>();
 		if (xmlConfigs != null) {
@@ -563,6 +577,23 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 		}
 		return changed;
 	}
+	
+	Map<String, Object> decryptPasswords(ComponentConfiguration config) {
+		Map<String, Object> configProperties = config.getConfigurationProperties();
+		Iterator<String> keys = configProperties.keySet().iterator();
+		while (keys.hasNext()) {
+			String key = keys.next();
+			Object value = configProperties.get(key);
+			if (value instanceof Password) {
+				try {
+					Password decryptedPassword = new Password(m_cryptoService.decryptAes(value.toString().toCharArray()));
+					configProperties.put(key, decryptedPassword);
+				} catch (Exception e) {
+				}
+			}
+		}
+		return configProperties;
+	}
 
 	// ----------------------------------------------------------------
 	//
@@ -582,16 +613,8 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 			Object value = propertiesToUpdate.get(key);
 			if (value != null) {
 				if (value instanceof Password) {
-					boolean isFreshData= false;
-					try{
-						m_cryptoService.decryptAes(value.toString().toCharArray());
-					} catch (KuraException e){
-						isFreshData= true;
-					}
 					try {
-						if(isFreshData){
-							propertiesToUpdate.put(key, new Password(m_cryptoService.encryptAes(value.toString().toCharArray())));
-						}
+						propertiesToUpdate.put(key, new Password(m_cryptoService.encryptAes(value.toString().toCharArray())));
 					} catch (Exception e) {
 						s_logger.warn("Failed to encrypt Password property: {}", key);
 						propertiesToUpdate.remove(key);

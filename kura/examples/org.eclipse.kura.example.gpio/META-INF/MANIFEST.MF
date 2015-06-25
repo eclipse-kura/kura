@@ -12,5 +12,4 @@ Import-Package: jdk.dio;version="1.0.1",
  org.eclipse.kura.configuration;version="[1.0,2.0)",
  org.osgi.service.component;version="1.2.0",
  org.slf4j;version="1.6.4"
-Bundle-ClassPath: .,
- ../../target-definition/common/repository/plugins/jdk.dio_1.0.1.jar
+Bundle-ClassPath: .

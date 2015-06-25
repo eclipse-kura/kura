@@ -2,7 +2,6 @@ package org.eclipse.kura.example.ble.tisensortag;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executors;
@@ -35,6 +34,7 @@ public class BluetoothLe implements ConfigurableComponent, CloudClientListener, 
 	private String PROPERTY_CC2650 = "cc2650";
 	private String PROPERTY_PERIOD = "period";
 	private String PROPERTY_TOPIC = "publishTopic";
+	private String PROPERTY_INAME = "iname";
 
 	private CloudService                m_cloudService;
 	private static CloudClient          m_cloudClient;
@@ -44,16 +44,17 @@ public class BluetoothLe implements ConfigurableComponent, CloudClientListener, 
 	private List<BluetoothGattService>  m_bluetoothGattServices;
 	private ScheduledExecutorService    m_worker;
 	private ScheduledFuture<?>          m_handle;
-	private boolean m_found = false;
-	private TiSensorTag myTiSensorTag = null;
+	private boolean m_found;
+	private TiSensorTag myTiSensorTag;
 	
 	private int m_pubrate = 10;
 	private int m_scantime = 5;
-	private String m_topic = null;
-	private int m_workerCount = 0;
-	private long m_startTime = 0;
-	private boolean m_connected = false;
+	private String m_topic;
+	private int m_workerCount;
+	private long m_startTime;
+	private boolean m_connected;
 	private boolean m_cc2650 = true;
+	private String iname = "hci0";
 
 
 	public void setCloudService(CloudService cloudService) {
@@ -89,6 +90,8 @@ public class BluetoothLe implements ConfigurableComponent, CloudClientListener, 
 				m_pubrate = (Integer) properties.get(PROPERTY_PERIOD);
 			if(properties.get(PROPERTY_TOPIC)!=null)
 				m_topic = (String) properties.get(PROPERTY_TOPIC);
+			if(properties.get(PROPERTY_INAME)!=null)
+				iname = (String) properties.get(PROPERTY_INAME);
 		}
 		
 		m_tiSensorTagList = new ArrayList<TiSensorTag>();
@@ -99,8 +102,9 @@ public class BluetoothLe implements ConfigurableComponent, CloudClientListener, 
 			m_cloudClient.addCloudClientListener(this);
 
 			// Get Bluetooth adapter and ensure it is enabled
-			m_bluetoothAdapter = m_bluetoothService.getBluetoothAdapter();
+			m_bluetoothAdapter = m_bluetoothService.getBluetoothAdapter(iname);
 			if (m_bluetoothAdapter != null) {
+				s_logger.info("Bluetooth adapter interface => " + iname);
 				s_logger.info("Bluetooth adapter address => " + m_bluetoothAdapter.getAddress());
 				s_logger.info("Bluetooth adapter le enabled => " + m_bluetoothAdapter.isLeReady());
 
@@ -152,6 +156,9 @@ public class BluetoothLe implements ConfigurableComponent, CloudClientListener, 
 		// shutting down the worker and cleaning up the properties
 		m_worker.shutdown();
 
+		// cancel bluetoothAdapter
+		m_bluetoothAdapter = null;
+		
 		// Releasing the CloudApplicationClient
 		s_logger.info("Releasing CloudApplicationClient for {}...", APP_ID);
 		m_cloudClient.release();
@@ -170,6 +177,66 @@ public class BluetoothLe implements ConfigurableComponent, CloudClientListener, 
 				m_pubrate = (Integer) properties.get(PROPERTY_PERIOD);
 			if(properties.get(PROPERTY_TOPIC)!=null)
 				m_topic = (String) properties.get(PROPERTY_TOPIC);
+			if(properties.get(PROPERTY_INAME)!=null)
+				iname = (String) properties.get(PROPERTY_INAME);
+		}
+		
+		try {
+			s_logger.debug("Deactivating BluetoothLe...");
+			if(m_bluetoothAdapter.isScanning()){
+				s_logger.debug("m_bluetoothAdapter.isScanning");
+				m_bluetoothAdapter.killLeScan();
+			}
+
+			// disconnect SensorTags
+			for (TiSensorTag tiSensorTag : m_tiSensorTagList) {
+				if (tiSensorTag != null) {
+					tiSensorTag.disconnect();
+				}
+			}
+			m_tiSensorTagList.clear();
+			
+			// cancel a current worker handle if one is active
+			if (m_handle != null) {
+				m_handle.cancel(true);
+			}
+
+			// shutting down the worker and cleaning up the properties
+			m_worker.shutdown();
+			
+			// cancel bluetoothAdapter
+			m_bluetoothAdapter = null;
+			
+			// re-create the worker
+			m_worker = Executors.newSingleThreadScheduledExecutor();
+			
+			// Get Bluetooth adapter and ensure it is enabled
+			m_bluetoothAdapter = m_bluetoothService.getBluetoothAdapter(iname);
+			if (m_bluetoothAdapter != null) {
+				s_logger.info("Bluetooth adapter interface => " + iname);
+				s_logger.info("Bluetooth adapter address => " + m_bluetoothAdapter.getAddress());
+				s_logger.info("Bluetooth adapter le enabled => " + m_bluetoothAdapter.isLeReady());
+
+				if (!m_bluetoothAdapter.isEnabled()) {
+					s_logger.info("Enabling bluetooth adapter...");
+					m_bluetoothAdapter.enable();
+					s_logger.info("Bluetooth adapter address => " + m_bluetoothAdapter.getAddress());
+				}
+				m_workerCount = 0;
+				m_found = false;
+				m_connected = false;
+				m_startTime = 0;
+				m_handle = m_worker.scheduleAtFixedRate(new Runnable() {		
+					@Override
+					public void run() {
+						updateSensors();
+					}
+				}, 0, 1, TimeUnit.SECONDS);
+			}
+			else s_logger.warn("No Bluetooth adapter found ...");
+		} catch (Exception e) {
+			s_logger.error("Error starting component", e);
+			throw new ComponentException(e);
 		}
 
 		s_logger.debug("Updating Bluetooth Service... Done.");

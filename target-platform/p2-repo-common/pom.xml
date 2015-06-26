@@ -112,25 +112,38 @@
 									<artifactId>protobuf-java</artifactId>
 									<version>2.6.0</version>                
 								</artifactItem>                
-                                                                <artifactItem>
-                                                                        <groupId>org.github.leshan</groupId>
-                                                                        <artifactId>leshan-client</artifactId>
-                                                                        <version>0.1.9</version>
-                                                                </artifactItem>
+								<!-- Get local version of Leshan client bundles. Need to follow up with Leshan team. -->
+								<!--
 								<artifactItem>
-                                                                        <groupId>org.github.leshan</groupId>
-                                                                        <artifactId>leshan-core</artifactId>
-                                                                        <version>0.1.9</version>
-                                                                </artifactItem>
-                                                                <artifactItem>
-                                                                        <groupId>com.google.code.gson</groupId>
-                                                                        <artifactId>gson</artifactId>
-                                                                        <version>2.3</version>
-                                                                </artifactItem>
-                                                                <artifactItem>
-                                                                        <groupId>org.eclipse.californium</groupId>
-                                                                        <artifactId>californium-osgi</artifactId>
-                                                                        <version>1.0.0-M3</version>
+									<groupId>org.eclipse.leshan</groupId>
+									<artifactId>leshan-client-core</artifactId>
+									<version>0.1.11-M5-SNAPSHOT</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.leshan</groupId>
+									<artifactId>leshan-client-cf</artifactId>
+									<version>0.1.11-M5-SNAPSHOT</version>
+								</artifactItem>
+								-->
+								<artifactItem>
+									<groupId>org.eclipse.leshan</groupId>
+									<artifactId>leshan-core</artifactId>
+									<version>0.1.11-M4</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>com.google.code.gson</groupId>
+									<artifactId>gson</artifactId>
+									<version>2.3</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.californium</groupId>
+									<artifactId>californium-osgi</artifactId>
+									<version>1.0.0-M3</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.californium</groupId>
+									<artifactId>scandium</artifactId>
+									<version>1.0.0-M3</version>
 								</artifactItem>
 							</artifactItems>
 							<outputDirectory>${project.basedir}/target/source/plugins</outputDirectory>

@@ -4,33 +4,23 @@ Bundle-Name: org.eclipse.kura.lwm2m
 Bundle-SymbolicName: org.eclipse.kura.lwm2m;singleton:=true
 Bundle-Version: 1.0.1.qualifier
 Bundle-Vendor: EUROTECH
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Service-Component: OSGI-INF/*.xml
 Bundle-ClassPath: .
 Bundle-ActivationPolicy: lazy
-Import-Package: leshan.client;version="0.1.9",
- leshan.client.californium;version="0.1.9",
- leshan.client.coap.californium;version="0.1.9",
- leshan.client.exchange;version="0.1.9",
- leshan.client.request;version="0.1.9",
- leshan.client.request.identifier;version="0.1.9",
- leshan.client.resource;version="0.1.9",
- leshan.client.resource.bool;version="0.1.9",
- leshan.client.resource.integer;version="0.1.9",
- leshan.client.resource.multiple;version="0.1.9",
- leshan.client.resource.opaque;version="0.1.9",
- leshan.client.resource.string;version="0.1.9",
- leshan.client.resource.time;version="0.1.9",
- leshan.client.response;version="0.1.9",
- org.eclipse.californium.core;version="1.0.0.M3",
- org.eclipse.californium.core.server.resources;version="1.0.0.M3",
+Import-Package: org.eclipse.californium.core;version="1.0.0.M3",
  org.eclipse.kura;version="1.0.0",
  org.eclipse.kura.configuration;version="1.0.0",
  org.eclipse.kura.configuration.metatype;version="1.0.0",
  org.eclipse.kura.net;version="1.0.0",
  org.eclipse.kura.position;version="1.0.0",
  org.eclipse.kura.system;version="1.0.0",
- org.osgi.framework;version="1.7.0",
+ org.eclipse.leshan;version="0.1.11.M4",
+ org.eclipse.leshan.client.californium;version="0.1.11.M5-SNAPSHOT",
+ org.eclipse.leshan.client.resource;version="0.1.11",
+ org.eclipse.leshan.core.node;version="0.1.11.M4",
+ org.eclipse.leshan.core.request;version="0.1.11.M4",
+ org.eclipse.leshan.core.response;version="0.1.11.M4",
  org.osgi.service.component;version="1.2.0",
  org.osgi.service.event;version="1.3.0",
  org.slf4j;version="1.6.4"
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7

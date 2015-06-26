@@ -7,6 +7,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+//import org.eclipse.leshan.client.resource.ObjectsInitializer;
+/*
 import leshan.client.coap.californium.CaliforniumBasedObject;
 import leshan.client.resource.LwM2mClientObject;
 import leshan.client.resource.LwM2mClientObjectDefinition;
@@ -37,13 +39,14 @@ import org.eclipse.kura.lwm2m.resources.InstallComponentExecutableResource;
 import org.eclipse.kura.lwm2m.resources.IntegerValueResource;
 import org.eclipse.kura.lwm2m.resources.StringValueResource;
 import org.eclipse.kura.lwm2m.resources.UninstallComponentExecutableResource;
-
+*/
 public class LWM2mConfigurableComponentsFactory {
 
 	private static final String SoftwarePackageUri = "https://console-sandbox.everyware-cloud.com/updates/";
 
-	private final static LWM2mConfigurableComponentsFactory _instance = new LWM2mConfigurableComponentsFactory();
-	private static ConfigurationService m_configurationService = null;
+	private final static LWM2mConfigurableComponentsFactory _instance = null;
+	
+	//private static ConfigurationService m_configurationService = null;
 
 	private static final int LWM2M_OBJECT_INDEX_METATYPE_GENERIC = 100;
 	private static final int LWM2M_OBJECT_INDEX_COMPONENTS_METATYPES = 91;
@@ -53,7 +56,12 @@ public class LWM2mConfigurableComponentsFactory {
 																	// and going
 																	// forth
 
+	private LWM2mConfigurableComponentsFactory() {}
+	/*
 	public static LWM2mConfigurableComponentsFactory getDefault() {
+		if (_instance == null) {
+			_instance = new LWM2mConfigurableComponentsFactory();
+		}
 		return _instance;
 	}
 
@@ -62,6 +70,8 @@ public class LWM2mConfigurableComponentsFactory {
 	}
 
 	public CaliforniumBasedObject[] createComponentObjects() {
+		ObjectsInitializer initializer = new ObjectsInitializer();
+		initializer.set
 		ArrayList<CaliforniumBasedObject> list = new ArrayList<CaliforniumBasedObject>();
 
 		list.add(getSoftwareManagementObjectFromComponent());
@@ -496,6 +506,6 @@ public class LWM2mConfigurableComponentsFactory {
 			exchange.respondContent(value);
 		}
 
-	}
+	}*/
 
 }

@@ -66,7 +66,7 @@
 		<sonar.jacoco.reportPath>target/jacoco.exec</sonar.jacoco.reportPath>
 	</properties>
 
-	<distributionManagement>
+	<distributionManagement>	
 			<repository>
 				<id>repo.eclipse.org</id>
 				<name>Kura Repository - Releases</name>
@@ -258,7 +258,6 @@
 					<source>1.6</source>
 					<target>1.6</target>
 					<compilerArgument>-warn:[+|-]warning_tokens_separated_by_comma</compilerArgument>
-					<!-- <compilerArgument>-err:-forbidden</compilerArgument> -->
 				</configuration>
 			</plugin>
 			<plugin>

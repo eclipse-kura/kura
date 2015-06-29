@@ -550,10 +550,16 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
 		}
 	}
 
-	private static void changeKeyStorePassword(String location, char[] oldPassword, char[] newPassword)
+	private void changeKeyStorePassword(String location, char[] oldPassword, char[] newPassword)
 			throws IOException, NoSuchAlgorithmException, CertificateException, KeyStoreException
 	{
-		KeyStore keystore = loadKeyStore(location, oldPassword);
+		KeyStore keystore = null;
+		if(isDefaultPassword(oldPassword) && !m_cryptoService.isFrameworkSecure()){
+			keystore= loadKeyStore(location, newPassword);
+		} else {
+			keystore= loadKeyStore(location, oldPassword);
+		}
+		
 		saveKeyStore(keystore, location, newPassword);
 	}
 
@@ -569,7 +575,7 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
 		}
 	}
 	
-	private boolean isDefaultPassword(char[] password)
+	private static boolean isDefaultPassword(char[] password)
 	{
 		return Arrays.equals(password,
 				SslManagerServiceOptions.PROP_DEFAULT_TRUST_PASSWORD.toCharArray());

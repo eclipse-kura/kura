@@ -30,8 +30,6 @@ import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.xml.stream.FactoryConfigurationError;
-
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraPartialSuccessException;
@@ -272,7 +270,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 		} else {
 			cc = getSelfConfiguringComponentConfiguration(pid);
 		}
-		
+
 		decryptPasswords(cc);
 		return cc;
 	}
@@ -291,7 +289,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 		s_logger.info("Writing snapshot - Getting component configurations...");
 
 		List<ComponentConfiguration> configs = buildCurrentConfiguration(null);
-		
+
 		return saveSnapshot(configs);
 	}
 
@@ -315,7 +313,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 	@Override
 	public synchronized void rollback(long id) throws KuraException {
 		// load the snapshot we need to rollback to
-		XmlComponentConfigurations xmlConfigs = loadSnapshot(id);
+		XmlComponentConfigurations xmlConfigs = loadEncryptedSnapshotFileContent(id);
 
 		//
 		// restore configuration
@@ -356,7 +354,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 							Bundle bundle = ref.getBundle();
 							try {
 								OCD ocd = ComponentUtil.readObjectClassDefinition(bundle, pid);
-								Map<String, Object> defaults = ComponentUtil.getDefaultProperties(ocd);
+								Map<String, Object> defaults = ComponentUtil.getDefaultProperties(ocd, m_ctx);
 								updateConfigurationInternal(pid, defaults, snapshotOnConfirmation);
 							} catch (Throwable t) {
 								s_logger.warn("Error during rollback for component "+pid, t);
@@ -389,21 +387,21 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 	}
 
 	public List<ComponentConfiguration> getSnapshot(long sid) throws KuraException {
-		XmlComponentConfigurations xmlConfigs = loadSnapshot(sid);
-		List<ComponentConfigurationImpl> decryptedConfigs = new ArrayList<ComponentConfigurationImpl>();
+		XmlComponentConfigurations xmlConfigs = loadEncryptedSnapshotFileContent(sid);
+
+		//List<ComponentConfigurationImpl> decryptedConfigs = new ArrayList<ComponentConfigurationImpl>();
 		List<ComponentConfigurationImpl> configs = xmlConfigs.getConfigurations();
 		for (ComponentConfigurationImpl config : configs) {
 			if (config != null) {
 				try {
 					Map<String, Object> decryptedProperties = decryptPasswords(config);
 					config.setProperties(decryptedProperties);
-					decryptedConfigs.add(config);
+					//decryptedConfigs.add(config);
 				} catch (Throwable t) {
 					s_logger.warn("Error during snapshot password decryption");
 				}
 			}
 		}
-		xmlConfigs.setConfigurations(decryptedConfigs);
 
 		List<ComponentConfiguration> returnConfigs = new ArrayList<ComponentConfiguration>();
 		if (xmlConfigs != null) {
@@ -412,71 +410,22 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 
 		return returnConfigs;
 	}
-	
-	private synchronized List<ComponentConfiguration> buildCurrentConfiguration(List<ComponentConfiguration> configsToUpdate) throws KuraException {
-		// Build the current configuration
-		ComponentConfiguration cc = null;
-		ComponentConfigurationImpl cci = null;
-		Map<String, Object> props = null;
-		List<ComponentConfiguration> configs = new ArrayList<ComponentConfiguration>();
 
-		// clone the list to avoid concurrent modifications
-		List<String> allPids = new ArrayList<String>(m_allPids);
-		for (String pid : allPids) {
-			boolean isConfigToUpdate = false;
-			if (configsToUpdate != null) {
-				for (ComponentConfiguration configToUpdate : configsToUpdate) {
-					if (configToUpdate.getPid().equals(pid)) {
-						// found a match
-						isConfigToUpdate = true;
-						configs.add(configToUpdate);
-						break;
-					}
-				}
-			}
-
-			if (!isConfigToUpdate) {
-				if (!m_selfConfigComponents.contains(pid)) {
-					cc = getConfigurableComponentConfiguration(pid);
-				} else {
-					cc = getSelfConfiguringComponentConfiguration(pid);
-				}
-				if (cc != null && cc.getPid() != null && cc.getPid().equals(pid)) {
-					props = cc.getConfigurationProperties();
-					cci = new ComponentConfigurationImpl(pid, null, props);
-					configs.add((ComponentConfigurationImpl) cci);
-				}
-			}
-		}
-		
-		// merge the current configs with those in the latest snapshot
-		List<ComponentConfigurationImpl> snapshotConfigs = loadLatestSnapshotConfigurations();
-		if(snapshotConfigs != null){
-			for (ComponentConfigurationImpl snapshotConfig : snapshotConfigs) {
-				boolean found = false;
-				for (ComponentConfiguration config : configs) {
-					if (config.getPid().equals(snapshotConfig.getPid())) {
-						found = true;
-						break;
-					}
-				}
-				if (!found) {
-					configs.add(snapshotConfig);
-				}
-			}
-		}
-		
-		return configs;
-	}
-	
-
+	@Override
 	public synchronized void updateConfigurations(List<ComponentConfiguration> configsToUpdate) throws KuraException {
 		boolean snapshotOnConfirmation = false;
 		List<Throwable> causes = new ArrayList<Throwable>();
 		for (ComponentConfiguration config : configsToUpdate) {
 			if (config != null) {
+				encryptPasswords(config);
+			}
+		}
+
+		List<ComponentConfiguration> configs = buildCurrentConfiguration(configsToUpdate);
+
+		for (ComponentConfiguration config : configsToUpdate) {
+			if (config != null) {
 				try {
-					encryptPasswords(config);
 					updateConfigurationInternal(config.getPid(), config.getConfigurationProperties(), snapshotOnConfirmation);
 				} catch (KuraException e) {
 					s_logger.warn("Error during updateConfigurations for component " + config.getPid(), e);
@@ -484,8 +433,6 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 				}
 			}
 		}
-
-		List<ComponentConfiguration> configs = buildCurrentConfiguration(configsToUpdate);
 
 		saveSnapshot(configs);
 
@@ -571,6 +518,28 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 				registerdOCD = config.getDefinition();
 			}
 		}
+		
+		try {
+			if (!m_selfConfigComponents.contains(pid) && registerdOCD != null) {
+				//get the actual running configuration for the selected component
+				Configuration config = m_configurationAdmin.getConfiguration(pid);
+				Map<String, Object> runningProps = CollectionsUtil.dictionaryToMap(config.getProperties(), registerdOCD);
+
+				//iterate through all the running properties and include in mergedProperties 
+				//the ones that are missing in order to create a complete component configuration
+				//eventual properties that are runtime only will be removed in next steps
+				Iterator<String> keys= runningProps.keySet().iterator();
+				while(keys.hasNext()){
+					String key= keys.next();
+					if(!mergedProperties.containsKey(key)){
+						mergedProperties.put(key, runningProps.get(key));
+					}
+				}	
+			}
+		} catch (IOException e) {
+			s_logger.info("merge with running failed!");
+			throw new KuraException(KuraErrorCode.CONFIGURATION_UPDATE, e, pid);
+		}
 
 		if (registerdOCD != null) {
 			boolean changed = mergeWithDefaults(registerdOCD, mergedProperties);
@@ -580,7 +549,6 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 		}
 
 		try {
-
 			if (!m_selfConfigComponents.contains(pid)) {
 
 				// load the ocd to do the validation
@@ -589,7 +557,8 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 				ocd = ComponentUtil.getObjectClassDefinition(ctx, pid);
 
 				// Validate the properties to be applied and set them
-				validateProperties(pid, ocd, mergedProperties);
+				// TODO: it seems that code does not enter here: the ocd object is always null!
+				validateProperties(pid, ocd, mergedProperties); 
 			} else {
 				// FIXME: validation of properties for self-configuring
 				// components
@@ -601,11 +570,12 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 				s_logger.info("Snapshot on EventAdmin configuration will be taken for {}.", pid);
 			}
 
-			
+			Map<String, Object> cleanedProperties= cleanProperties(mergedProperties, pid);
+
 			// Update the new properties
 			// use ConfigurationAdmin to do the update
 			Configuration config = m_configurationAdmin.getConfiguration(pid);
-			config.update(CollectionsUtil.mapToDictionary(mergedProperties));
+			config.update(CollectionsUtil.mapToDictionary(cleanedProperties));
 
 			s_logger.info("Updating Configuration of ConfigurableComponent {} ... Done.", pid);
 		} catch (IOException e) {
@@ -614,56 +584,29 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 		}
 	}
 
-	XmlComponentConfigurations loadSnapshot(long id) throws KuraException, FactoryConfigurationError {
-		// Get the snapshot file to rollback to
-		File fSnapshot = getSnapshotFile(id);
-		if (!fSnapshot.exists()) {
-			throw new KuraException(KuraErrorCode.CONFIGURATION_SNAPSHOT_NOT_FOUND, fSnapshot.getAbsolutePath());
-		}
+	boolean mergeWithDefaults(OCD ocd, Map<String, Object> properties) throws KuraException {
+		boolean changed = false;
+		Set<String> keys = properties.keySet();
 
-		// Unmarshall
-		XmlComponentConfigurations xmlConfigs = null;
+		Map<String, Object> defaults = ComponentUtil.getDefaultProperties(ocd, m_ctx);
+		Set<String> defaultsKeys = defaults.keySet();
+		defaultsKeys.removeAll(keys);
+		if (!defaultsKeys.isEmpty()) {
 
-		FileReader fr = null;
-		BufferedReader br = null;
-		try {
-			fr = new FileReader(fSnapshot);
-			br = new BufferedReader(fr);
-			String line = "";
-			String entireFile = "";
-			while ((line = br.readLine()) != null) {
-				entireFile += line;
-			} // end while
-			String decryptedContent = new String(m_cryptoService.decryptAes(entireFile.toCharArray()));
-			xmlConfigs = XmlUtil.unmarshal(decryptedContent, XmlComponentConfigurations.class);
-		} catch (Exception e) {
-			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
-		} finally {
+			changed = true;
+			s_logger.info("Merging configuration for pid: {}", ocd.getId());
+			for (String key : defaultsKeys) {
 
-			if (br != null) {
-				try {
-					br.close();
-					br= null;
-				}catch(IOException e){
-
-				}
-			}
-			if (fr != null) {
-				try {
-					fr.close();
-					fr= null;
-				}catch(IOException e){
-
-				}
+				Object value = defaults.get(key);
+				properties.put(key, value);
+				s_logger.debug("Merged configuration properties with property with name: {} and default value {}", key, value);
 			}
 		}
-		return xmlConfigs;
+		return changed;
 	}
 
 	Map<String, Object> decryptPasswords(ComponentConfiguration config) {
 		Map<String, Object> configProperties = config.getConfigurationProperties();
-		//Map<String, Object> decryptedProperties = new HashMap<String, Object>();
-
 		Iterator<String> keys = configProperties.keySet().iterator();
 		while (keys.hasNext()) {
 			String key = keys.next();
@@ -679,11 +622,17 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 		return configProperties;
 	}
 
+	// ----------------------------------------------------------------
+	//
+	// Private APIs
+	//
+	// ----------------------------------------------------------------
+
 	private void encryptPasswords(ComponentConfiguration config){
 		Map<String, Object> propertiesToUpdate = config.getConfigurationProperties();
 		encryptPasswords(propertiesToUpdate);
 	}
-	
+
 	private void encryptPasswords(Map<String, Object> propertiesToUpdate){
 		Iterator<String> keys = propertiesToUpdate.keySet().iterator();
 		while (keys.hasNext()) {
@@ -692,7 +641,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 			if (value != null) {
 				if (value instanceof Password) {
 					try {
-						propertiesToUpdate.put(key, new Password(m_cryptoService.encryptAes(value.toString())));
+						propertiesToUpdate.put(key, new Password(m_cryptoService.encryptAes(value.toString().toCharArray())));
 					} catch (Exception e) {
 						s_logger.warn("Failed to encrypt Password property: {}", key);
 						propertiesToUpdate.remove(key);
@@ -701,12 +650,6 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 			}
 		}
 	}
-
-	// ----------------------------------------------------------------
-	//
-	// Private APIs
-	//
-	// ----------------------------------------------------------------
 
 	private void encryptConfigs(List<? extends ComponentConfiguration> configs) {
 		for (ComponentConfiguration config : configs) {
@@ -726,40 +669,11 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 
 			for (Long snapshot : snapshots) {
 
-				String configDir = getSnapshotsDirectory();
-				StringBuilder sbSnapshot = new StringBuilder(configDir);
-				sbSnapshot.append(File.separator).append("snapshot_").append(snapshot).append(".xml");
-
-				String snapshotName = sbSnapshot.toString();
-				File fSnapshot = new File(snapshotName);
-				if (!fSnapshot.exists()) {
-					throw new KuraException(KuraErrorCode.CONFIGURATION_SNAPSHOT_NOT_FOUND, snapshot);
-				}
-				//
-				// Unmarshall
-
-				FileReader fr = null;
-				BufferedReader br = null;
 				try {
-					fr = new FileReader(fSnapshot);
-					br = new BufferedReader(fr);
-					String line = "";
-					String entireFile = "";
-					while ((line = br.readLine()) != null) {
-						entireFile += line;
-					} // end while
-					String decryptedContent = new String(m_cryptoService.decryptAes(entireFile.toCharArray()));
-					XmlUtil.unmarshal(decryptedContent, XmlComponentConfigurations.class);
+					//Verify if the current snapshot is encrypted
+					loadEncryptedSnapshotFileContent(snapshot);
 					return false;
 				} catch (Exception e) {
-
-				} finally {
-					if (br != null) {
-						br.close();
-					}
-					if (fr != null) {
-						fr.close();
-					}
 				}
 			}
 			return true;
@@ -776,24 +690,25 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 		Long[] snapshots = snapshotIDs.toArray(new Long[] {});
 
 		for (Long snapshot : snapshots) {
-			String configDir = getSnapshotsDirectory();
-			StringBuilder sbSnapshot = new StringBuilder(configDir);
-			sbSnapshot.append(File.separator).append("snapshot_").append(snapshot).append(".xml");
-
-			String snapshotName = sbSnapshot.toString();
-			File fSnapshot = new File(snapshotName);
+			File fSnapshot = getSnapshotFile(snapshot);
 			if (!fSnapshot.exists()) {
 				throw new KuraException(KuraErrorCode.CONFIGURATION_SNAPSHOT_NOT_FOUND, snapshot);
 			}
+
 			//
 			// Unmarshall
-
-			FileReader fr = null;
 			XmlComponentConfigurations xmlConfigs = null;
+			FileReader fr = null;
+			BufferedReader br = null;
 			try {
-
 				fr = new FileReader(fSnapshot);
-				xmlConfigs = XmlUtil.unmarshal(fr, XmlComponentConfigurations.class);
+				br = new BufferedReader(fr);
+				String line = "";
+				String entireFile = "";
+				while ((line = br.readLine()) != null) {
+					entireFile += line;
+				} // end while
+				xmlConfigs = XmlUtil.unmarshal(entireFile, XmlComponentConfigurations.class);
 			} finally {
 				if (fr != null) {
 					fr.close();
@@ -802,26 +717,8 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 			List<ComponentConfigurationImpl> configs = xmlConfigs.getConfigurations();
 			encryptConfigs(configs);
 
-			FileOutputStream fos = null;
-			OutputStreamWriter osw = null;
-			try {
-				fos = new FileOutputStream(fSnapshot);
-				osw = new OutputStreamWriter(fos, "UTF-8");
-				String xmlResult = XmlUtil.marshal(xmlConfigs);
-				String encryptedXML = m_cryptoService.encryptAes(xmlResult);
-				osw.append(encryptedXML);
-				osw.flush();
-				fos.flush();
-				fos.getFD().sync();
-
-			} finally {
-				if (osw != null) {
-					osw.close();
-				}
-				if (fos != null) {
-					fos.close();
-				}
-			}
+			//Writes an encrypted snapshot with encrypted passwords.
+			writeSnapshot(snapshot, xmlConfigs);
 		}
 	}
 
@@ -834,8 +731,8 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 				configImpls.add((ComponentConfigurationImpl) config);
 			}
 		}
-		
-		
+
+
 		//
 		// Build the XML structure
 		XmlComponentConfigurations conf = new XmlComponentConfigurations();
@@ -858,29 +755,49 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 			}
 		}
 
-		File fSnapshot = getSnapshotFile(sid);
-		s_logger.info("Writing snapshot - Saving {}...", fSnapshot.getAbsolutePath());
-		try {
-
-			FileOutputStream fos = new FileOutputStream(fSnapshot);
-			OutputStreamWriter osw = new OutputStreamWriter(fos, "UTF-8");
-			String xmlResult = XmlUtil.marshal(conf);
-			String encryptedXML = m_cryptoService.encryptAes(xmlResult);
-			osw.append(encryptedXML);
-			osw.flush();
-			fos.flush();
-			fos.getFD().sync();
-			osw.close();
-			fos.close();
-		} catch (Throwable t) {
-			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, t);
-		}
-		s_logger.info("Writing snapshot - Saving {}... Done.", fSnapshot.getAbsolutePath());
+		//Write snapshot
+		writeSnapshot(sid, conf);
 
 		//
 		// Garbage Collector for number of Snapshots Saved
 		garbageCollectionOldSnapshots();
 		return sid;
+	}
+
+	private void writeSnapshot(long sid, XmlComponentConfigurations conf) throws KuraException {
+		File fSnapshot = getSnapshotFile(sid);
+
+		FileOutputStream fos = null;
+		OutputStreamWriter osw = null;
+		try {
+			s_logger.info("Writing snapshot - Saving {}...", fSnapshot.getAbsolutePath());
+			fos = new FileOutputStream(fSnapshot);
+			osw = new OutputStreamWriter(fos, "UTF-8");
+			String xmlResult = XmlUtil.marshal(conf);
+			char[] encryptedXML = m_cryptoService.encryptAes(xmlResult.toCharArray());
+			osw.append(new String(encryptedXML));
+			osw.flush();
+			fos.flush();
+			fos.getFD().sync();
+			s_logger.info("Writing snapshot - Saving {}... Done.", fSnapshot.getAbsolutePath());
+		} catch (Throwable t) {
+			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, t);
+		} finally {
+			if (osw != null){
+				try {
+					osw.close();
+				} catch (IOException e) {
+
+				}
+			}
+			if(fos != null){
+				try {
+					fos.close();
+				} catch (IOException e) {
+
+				}
+			}
+		}
 	}
 
 	private ComponentConfiguration getConfigurableComponentConfiguration(String pid) {
@@ -892,7 +809,9 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 			Configuration cfg = m_configurationAdmin.getConfiguration(pid);
 			Map<String, Object> props = CollectionsUtil.dictionaryToMap(cfg.getProperties(), ocd);
 
-			cc = new ComponentConfigurationImpl(pid, ocd, props); 
+			Map<String, Object> cleanedProps= cleanProperties(props, pid);
+
+			cc = new ComponentConfigurationImpl(pid, ocd, cleanedProps); 
 		} catch (Exception e) {
 			s_logger.error("Error getting Configuration for component: " + pid + ". Ignoring it.", e);
 		}
@@ -1075,7 +994,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 			}
 		}
 	}
-	
+
 	private List<ComponentConfigurationImpl> loadLatestSnapshotConfigurations() throws KuraException {
 		//
 		// Get the latest snapshot file to use as initialization
@@ -1086,21 +1005,35 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 
 		Long[] snapshots = snapshotIDs.toArray(new Long[] {});
 		Long lastestID = snapshots[snapshotIDs.size() - 1];
-		String configDir = getSnapshotsDirectory();
-		StringBuilder sbSnapshot = new StringBuilder(configDir);
-		sbSnapshot.append(File.separator).append("snapshot_").append(lastestID).append(".xml");
-
-		String snapshot = sbSnapshot.toString();
-		File fSnapshot = new File(snapshot);
-		if (!fSnapshot.exists()) {
-			throw new KuraException(KuraErrorCode.CONFIGURATION_SNAPSHOT_NOT_FOUND, snapshot);
-		}
 
 		//
 		// Unmarshall
-		s_logger.info("Loading init configurations from: {}...", snapshot);
+		s_logger.info("Loading init configurations from: {}...", lastestID);
 		XmlComponentConfigurations xmlConfigs = null;
 
+		try {
+			xmlConfigs = loadEncryptedSnapshotFileContent(lastestID);
+		} catch (Exception e) {
+			s_logger.info("Snapshot not encrypted, trying to load a not encrypted one");
+			try {
+				if (allSnapshotsUnencrypted()) {
+					encryptPlainSnapshots();
+					return loadLatestSnapshotConfigurations();
+				}
+			} catch (Exception ex) {
+				throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+			}
+		}
+		return xmlConfigs.getConfigurations();
+	}
+
+	XmlComponentConfigurations loadEncryptedSnapshotFileContent(long snapshotID) throws KuraException{
+		File fSnapshot = getSnapshotFile(snapshotID);
+		if (!fSnapshot.exists()) {
+			throw new KuraException(KuraErrorCode.CONFIGURATION_SNAPSHOT_NOT_FOUND, fSnapshot.getAbsolutePath());
+		}
+
+		XmlComponentConfigurations xmlConfigs= null;
 		FileReader fr = null;
 		BufferedReader br = null;
 		try {
@@ -1110,22 +1043,13 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 			String entireFile = "";
 			while ((line = br.readLine()) != null) {
 				entireFile += line;
-			} // end while
+			}
+
+			//File loaded, try to decrypt and unmarshall
 			String decryptedContent = new String(m_cryptoService.decryptAes(entireFile.toCharArray()));
 			xmlConfigs = XmlUtil.unmarshal(decryptedContent, XmlComponentConfigurations.class);
-
 		} catch (Exception e) {
-			s_logger.info("Snapshot not encrypted, trying to load a not encrypted one");
-			try {
-				if (allSnapshotsUnencrypted()) {
-					fr = new FileReader(fSnapshot);
-					xmlConfigs = XmlUtil.unmarshal(fr, XmlComponentConfigurations.class);
-					encryptPlainSnapshots();
-					encryptConfigs(xmlConfigs.getConfigurations());
-				}
-			} catch (Exception ex) {
-				throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
-			}
+			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
 		}finally {			
 			try {
 				if (fr != null) {
@@ -1141,8 +1065,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 
 			}
 		}
-
-		return xmlConfigs.getConfigurations();
+		return xmlConfigs;
 	}
 
 	private void validateProperties(String pid, ObjectClassDefinition ocd, Map<String, Object> updatedProps) throws KuraException {
@@ -1202,24 +1125,91 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 		}
 	}
 
-	boolean mergeWithDefaults(OCD ocd, Map<String, Object> properties) throws KuraException {
-		boolean changed = false;
-		Set<String> keys = properties.keySet();
+	private Map<String, Object> cleanProperties(Map<String, Object> mergedProperties, String pid) {
+		if (!m_selfConfigComponents.contains(pid)) {
+			Tocd componentOcd= m_ocds.get(pid);
+			Set<String> metatypeNames= new HashSet<String>();
+			if (componentOcd != null) {
+				List<AD> attrDefs = componentOcd.getAD();
+				if (attrDefs != null) {
+					for (AD attrDef : attrDefs) {
+						String name = attrDef.getName();
+						if (!metatypeNames.contains(name)) {
+							metatypeNames.add(name);
+						}
+					}
+				}
+			}
 
-		Map<String, Object> defaults = ComponentUtil.getDefaultProperties(ocd);
-		Set<String> defaultsKeys = defaults.keySet();
-		defaultsKeys.removeAll(keys);
-		if (!defaultsKeys.isEmpty()) {
+			Map<String, Object> cleanedProperties= new HashMap<String, Object> ();
+			Set<String> mergedKeys= mergedProperties.keySet();
 
-			changed = true;
-			s_logger.info("Merging configuration for pid: {}", ocd.getId());
-			for (String key : defaultsKeys) {
+			for(String key: mergedKeys){
+				if(metatypeNames.contains(key)){
+					Object value= mergedProperties.get(key);
+					cleanedProperties.put(key, value);
+				}
+			}
+			return cleanedProperties;
+		}else{
+			Map<String, Object> cleanedProperties= new HashMap<String, Object> (mergedProperties);
+			return cleanedProperties;
+		}
+	}
 
-				Object value = defaults.get(key);
-				properties.put(key, value);
-				s_logger.debug("Merged configuration properties with property with name: {} and default value {}", key, value);
+	private synchronized List<ComponentConfiguration> buildCurrentConfiguration(List<ComponentConfiguration> configsToUpdate) throws KuraException {
+		// Build the current configuration
+		ComponentConfiguration cc = null;
+		ComponentConfigurationImpl cci = null;
+		Map<String, Object> props = null;
+		List<ComponentConfiguration> configs = new ArrayList<ComponentConfiguration>();
+
+		// clone the list to avoid concurrent modifications
+		List<String> allPids = new ArrayList<String>(m_allPids);
+		for (String pid : allPids) {
+			boolean isConfigToUpdate = false;
+			if (configsToUpdate != null) {
+				for (ComponentConfiguration configToUpdate : configsToUpdate) {
+					if (configToUpdate.getPid().equals(pid)) {
+						// found a match
+						isConfigToUpdate = true;
+						configs.add(configToUpdate);
+						break;
+					}
+				}
+			}
+
+			if (!isConfigToUpdate) {
+				if (!m_selfConfigComponents.contains(pid)) {
+					cc = getConfigurableComponentConfiguration(pid);
+				} else {
+					cc = getSelfConfiguringComponentConfiguration(pid);
+				}
+				if (cc != null && cc.getPid() != null && cc.getPid().equals(pid)) {
+					props = cc.getConfigurationProperties();
+					cci = new ComponentConfigurationImpl(pid, null, props);
+					configs.add((ComponentConfigurationImpl) cci);
+				}
 			}
 		}
-		return changed;
+
+		// merge the current configs with those in the latest snapshot
+		List<ComponentConfigurationImpl> snapshotConfigs = loadLatestSnapshotConfigurations();
+		if(snapshotConfigs != null){
+			for (ComponentConfigurationImpl snapshotConfig : snapshotConfigs) {
+				boolean found = false;
+				for (ComponentConfiguration config : configs) {
+					if (config.getPid().equals(snapshotConfig.getPid())) {
+						found = true;
+						break;
+					}
+				}
+				if (!found) {
+					configs.add(snapshotConfig);
+				}
+			}
+		}
+
+		return configs;
 	}
 }

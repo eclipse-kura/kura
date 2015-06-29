@@ -205,25 +205,25 @@ public class CloudConfigurationHandler extends Cloudlet
 		
 		if (snapshotId != null) {
 			long sid = Long.parseLong(snapshotId);
-			XmlComponentConfigurations xmlConfigs = m_configService.loadSnapshot(sid);
+			XmlComponentConfigurations xmlConfigs = m_configService.loadEncryptedSnapshotFileContent(sid);
 			//
 			// marshall the response	
 			
-			List<ComponentConfigurationImpl> decryptedConfigs = new ArrayList<ComponentConfigurationImpl>();
+			//List<ComponentConfigurationImpl> decryptedConfigs = new ArrayList<ComponentConfigurationImpl>();
 			List<ComponentConfigurationImpl> configs = xmlConfigs.getConfigurations();
 			for (ComponentConfigurationImpl config : configs) {
 				if (config != null) {
 					try {
 						Map<String,Object> decryptedProperties= m_configService.decryptPasswords(config);
 						config.setProperties(decryptedProperties);
-						decryptedConfigs.add(config);
+						//decryptedConfigs.add(config);
 					}
 					catch (Throwable t) {
 						s_logger.warn("Error during snapshot password decryption");
 					}
 				}
 			}
-			xmlConfigs.setConfigurations(decryptedConfigs);
+			//xmlConfigs.setConfigurations(decryptedConfigs);
 			
 			
 			

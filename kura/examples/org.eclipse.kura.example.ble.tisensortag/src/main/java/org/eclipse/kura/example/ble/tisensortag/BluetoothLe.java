@@ -2,7 +2,6 @@ package org.eclipse.kura.example.ble.tisensortag;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executors;
@@ -239,10 +238,10 @@ public class BluetoothLe implements ConfigurableComponent, CloudClientListener, 
 		if(m_topic!=null){
 			KuraPayload payload = new KuraPayload();
 			payload.setTimestamp(new Date());
-			payload.addMetric("Ambient", ambValue);
-			payload.addMetric("Target", targetValue);
+			payload.addMetric("temp", ambValue);
+			payload.addMetric("hum", new Double(myTiSensorTag.getHumTarget()));
 			try {
-				m_cloudClient.publish(m_topic+"/"+address + "/temperature", payload, 0, false);
+				m_cloudClient.publish(m_topic+"/"+address , payload, 0, false);
 			} catch (Exception e) {
 				s_logger.error("Can't publish message, " + "temperature", e);
 			}

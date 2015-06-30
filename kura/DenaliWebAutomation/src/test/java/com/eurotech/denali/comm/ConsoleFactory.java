@@ -20,6 +20,7 @@ public class ConsoleFactory extends ConsoleSession {
 	private static final String OSGI_LIST_BUNDLES_COMMAND = "ss";
 	private static final String OSGI_CONSOLE_DISCONNECT_COMMAND = "disconnect";
 	private static final String IF_CONFIG_ETH0_COMMAND = "ifconfig eth0";
+	private static final String IF_CONFIG_DOWN_COMMAND = "sudo ifdown eth0";
 	private static final String IF_CONFIG_ETH1_COMMAND = "ifconfig eth1";
 	private static final String IF_CONFIG_WLAN0_COMMAND = "ifconfig wlan0";
 	private static final String ROUTE_COMMAND = "route";
@@ -84,7 +85,7 @@ public class ConsoleFactory extends ConsoleSession {
 	}
 
 	public void sendEth0DownCommand() {
-		send("sudo ifdown eth0");
+		send(IF_CONFIG_DOWN_COMMAND);
 	}
 
 	public void rebootDevice() {

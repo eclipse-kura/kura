@@ -692,29 +692,5 @@ public class EthernetTest extends DriverProcessor {
 	@AfterMethod
 	public void afterMethod() {
 		quitDriver();
-	}
-	
-	@AfterClass
-	public void afterClass()
-	{
-		this.beforeClass();
-		this.beforeMethod();
-		
-		Reporter.log("===========================", Constants.ENV_OUTPUT);
-		Reporter.log("Test case ID : NET-ETH0-007", Constants.ENV_OUTPUT);
-		Reporter.log("===========================", Constants.ENV_OUTPUT);
-		Reporter.log("Reconfigure eth0 to use DHCP Client",
-				Constants.ENV_OUTPUT);
-		networkView.selectNetworkView();
-		networkView.selectEth0Interface();
-		networkView.clearNetworkDNSServer();
-		networkView.selectTCPDHCP();
-		networkView.clickApplyButton();
-		Application.updateDenaliIPInProperty(Application
-				.getNetworkEth0DHCPIPAddress());
-		Reporter.log("Updating static IP to DHCP ip in application.properties",
-				Constants.ENV_OUTPUT);
-
-		this.afterMethod();
-	}
+	}	
 }

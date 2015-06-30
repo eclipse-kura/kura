@@ -37,14 +37,20 @@ public class AuthenticationManager
 	private static final Logger s_logger = LoggerFactory.getLogger(AuthenticationManager.class);
 
 	private char[] password;
+	private String username;
 
-	protected AuthenticationManager(char[] psw) {
-		password= psw;
+	protected AuthenticationManager(String username, char[] psw) {
+		this.username= username;
+		this.password= psw;
 		s_instance= this;
 	}
 
 	public static AuthenticationManager getInstance() {
 		return s_instance;
+	}
+	
+	protected void updateUsername(String username){
+		this.username= username;
 	}
 	
 	protected void updatePassword(char[] psw){
@@ -57,8 +63,9 @@ public class AuthenticationManager
 
 			CryptoService cryptoService = ServiceLocator.getInstance().getService(CryptoService.class);
 			String sha1Password= cryptoService.sha1Hash(password);
-			
-			return Arrays.equals(sha1Password.toCharArray(), this.password);
+			boolean isUsernameMatching= username.equals(this.username);
+			boolean isPasswordMatching= Arrays.equals(sha1Password.toCharArray(), this.password);
+			return isUsernameMatching && isPasswordMatching;
 		}catch (Exception e) {
 		}
 		return false;

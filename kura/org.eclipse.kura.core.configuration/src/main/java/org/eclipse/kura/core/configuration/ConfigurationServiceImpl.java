@@ -326,7 +326,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 		for (ComponentConfigurationImpl config : configs) {
 			if (config != null) {
 				try {
-					updateConfigurationInternal(config.getPid(), config.getConfigurationProperties(), snapshotOnConfirmation);
+					rollbackConfigurationInternal(config.getPid(), config.getConfigurationProperties(), snapshotOnConfirmation);
 				} catch (Throwable t) {
 					s_logger.warn("Error during rollback for component " + config.getPid(), t);
 					causes.add(t);
@@ -355,7 +355,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 							try {
 								OCD ocd = ComponentUtil.readObjectClassDefinition(bundle, pid);
 								Map<String, Object> defaults = ComponentUtil.getDefaultProperties(ocd, m_ctx);
-								updateConfigurationInternal(pid, defaults, snapshotOnConfirmation);
+								rollbackConfigurationInternal(pid, defaults, snapshotOnConfirmation);
 							} catch (Throwable t) {
 								s_logger.warn("Error during rollback for component "+pid, t);
 								causes.add(t);
@@ -492,96 +492,6 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 		m_allPids.remove(pid);
 		m_ocds.remove(pid);
 		m_selfConfigComponents.remove(pid);
-	}
-
-	void updateConfigurationInternal(String pid, Map<String, Object> properties, boolean snapshotOnConfirmation) throws KuraException {
-		s_logger.debug("Attempting update configuration for {}", pid);
-
-		if (!m_allPids.contains(pid)) {
-			s_logger.info("UpdatingConfiguration ignored as ConfigurableComponent {} is NOT tracked.", pid);
-			return;
-		}
-		if (properties == null) {
-			s_logger.info("UpdatingConfiguration ignored as properties for ConfigurableComponent {} are NULL.", pid);
-			return;
-		}
-
-		Map<String, Object> mergedProperties = new HashMap<String, Object>(properties);
-
-		// Try to get the OCD from the registered ConfigurableComponents
-		OCD registerdOCD = m_ocds.get(pid);
-		// Otherwise try to get it from the registered SelfConfiguringComponents
-		// (whose OCD is not tracked in the m_ocds map - why?).
-		if (registerdOCD == null) {
-			ComponentConfiguration config = getSelfConfiguringComponentConfiguration(pid);
-			if (config != null) {
-				registerdOCD = config.getDefinition();
-			}
-		}
-		
-		try {
-			if (!m_selfConfigComponents.contains(pid) && registerdOCD != null) {
-				//get the actual running configuration for the selected component
-				Configuration config = m_configurationAdmin.getConfiguration(pid);
-				Map<String, Object> runningProps = CollectionsUtil.dictionaryToMap(config.getProperties(), registerdOCD);
-
-				//iterate through all the running properties and include in mergedProperties 
-				//the ones that are missing in order to create a complete component configuration
-				//eventual properties that are runtime only will be removed in next steps
-				Iterator<String> keys= runningProps.keySet().iterator();
-				while(keys.hasNext()){
-					String key= keys.next();
-					if(!mergedProperties.containsKey(key)){
-						mergedProperties.put(key, runningProps.get(key));
-					}
-				}	
-			}
-		} catch (IOException e) {
-			s_logger.info("merge with running failed!");
-			throw new KuraException(KuraErrorCode.CONFIGURATION_UPDATE, e, pid);
-		}
-
-		if (registerdOCD != null) {
-			boolean changed = mergeWithDefaults(registerdOCD, mergedProperties);
-			if (changed) {
-				s_logger.info("mergeWithDefaults returned " + changed);
-			}
-		}
-
-		try {
-			if (!m_selfConfigComponents.contains(pid)) {
-
-				// load the ocd to do the validation
-				BundleContext ctx = m_ctx.getBundleContext();
-				ObjectClassDefinition ocd = null;
-				ocd = ComponentUtil.getObjectClassDefinition(ctx, pid);
-
-				// Validate the properties to be applied and set them
-				// TODO: it seems that code does not enter here: the ocd object is always null!
-				validateProperties(pid, ocd, mergedProperties); 
-			} else {
-				// FIXME: validation of properties for self-configuring
-				// components
-			}
-
-			if (!snapshotOnConfirmation) {
-				m_pendingConfigurationPids.add(pid);
-			} else {
-				s_logger.info("Snapshot on EventAdmin configuration will be taken for {}.", pid);
-			}
-
-			Map<String, Object> cleanedProperties= cleanProperties(mergedProperties, pid);
-
-			// Update the new properties
-			// use ConfigurationAdmin to do the update
-			Configuration config = m_configurationAdmin.getConfiguration(pid);
-			config.update(CollectionsUtil.mapToDictionary(cleanedProperties));
-
-			s_logger.info("Updating Configuration of ConfigurableComponent {} ... Done.", pid);
-		} catch (IOException e) {
-			s_logger.error("Error updating Configuration of ConfigurableComponent " + pid, e);
-			throw new KuraException(KuraErrorCode.CONFIGURATION_UPDATE, e, pid);
-		}
 	}
 
 	boolean mergeWithDefaults(OCD ocd, Map<String, Object> properties) throws KuraException {
@@ -1049,7 +959,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 			String decryptedContent = new String(m_cryptoService.decryptAes(entireFile.toCharArray()));
 			xmlConfigs = XmlUtil.unmarshal(decryptedContent, XmlComponentConfigurations.class);
 		} catch (Exception e) {
-			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+			throw new KuraException(KuraErrorCode.INTERNAL_ERROR);
 		}finally {			
 			try {
 				if (fr != null) {
@@ -1066,6 +976,140 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 			}
 		}
 		return xmlConfigs;
+	}
+
+	private void updateConfigurationInternal(String pid, Map<String, Object> properties, boolean snapshotOnConfirmation) throws KuraException {
+		s_logger.debug("Attempting update configuration for {}", pid);
+
+		if (!m_allPids.contains(pid)) {
+			s_logger.info("UpdatingConfiguration ignored as ConfigurableComponent {} is NOT tracked.", pid);
+			return;
+		}
+		if (properties == null) {
+			s_logger.info("UpdatingConfiguration ignored as properties for ConfigurableComponent {} are NULL.", pid);
+			return;
+		}
+
+		Map<String, Object> mergedProperties = new HashMap<String, Object>(properties);
+
+		// Try to get the OCD from the registered ConfigurableComponents
+		OCD registerdOCD = getRegisteredOCD(pid);
+		
+		try {
+			if (!m_selfConfigComponents.contains(pid) && registerdOCD != null) {
+				//get the actual running configuration for the selected component
+				Configuration config = m_configurationAdmin.getConfiguration(pid);
+				Map<String, Object> runningProps = CollectionsUtil.dictionaryToMap(config.getProperties(), registerdOCD);
+
+				//iterate through all the running properties and include in mergedProperties 
+				//the ones that are missing in order to create a complete component configuration
+				//eventual properties that are runtime only will be removed in next steps
+				Iterator<String> keys= runningProps.keySet().iterator();
+				while(keys.hasNext()){
+					String key= keys.next();
+					if(!mergedProperties.containsKey(key)){
+						mergedProperties.put(key, runningProps.get(key));
+					}
+				}	
+			}
+		} catch (IOException e) {
+			s_logger.info("merge with running failed!");
+			throw new KuraException(KuraErrorCode.CONFIGURATION_UPDATE, e, pid);
+		}
+
+		if (registerdOCD != null) {
+			boolean changed = mergeWithDefaults(registerdOCD, mergedProperties);
+			if (changed) {
+				s_logger.info("mergeWithDefaults returned " + changed);
+			}
+		}
+
+		try {
+			updateComponentConfiguration(pid, mergedProperties, snapshotOnConfirmation);
+
+			s_logger.info("Updating Configuration of ConfigurableComponent {} ... Done.", pid);
+		} catch (IOException e) {
+			s_logger.error("Error updating Configuration of ConfigurableComponent " + pid, e);
+			throw new KuraException(KuraErrorCode.CONFIGURATION_UPDATE, e, pid);
+		}
+	}
+
+	private void rollbackConfigurationInternal(String pid, Map<String, Object> properties, boolean snapshotOnConfirmation) throws KuraException {
+		s_logger.debug("Attempting to rollback configuration for {}", pid);
+
+		if (!m_allPids.contains(pid)) {
+			s_logger.info("RollbackConfiguration ignored as ConfigurableComponent {} is NOT tracked.", pid);
+			return;
+		}
+		if (properties == null) {
+			s_logger.info("RollbackConfiguration ignored as properties for ConfigurableComponent {} are NULL.", pid);
+			return;
+		}
+
+		Map<String, Object> mergedProperties = new HashMap<String, Object>(properties);
+
+		// Try to get the OCD from the registered ConfigurableComponents
+		OCD registerdOCD = getRegisteredOCD(pid);
+
+		if (registerdOCD != null) {
+			boolean changed = mergeWithDefaults(registerdOCD, mergedProperties);
+			if (changed) {
+				s_logger.info("mergeWithDefaults returned " + changed);
+			}
+		}
+
+		try {
+			updateComponentConfiguration(pid, mergedProperties, snapshotOnConfirmation);
+
+			s_logger.info("Updating Configuration of ConfigurableComponent {} to its default... Done.", pid);
+		} catch (IOException e) {
+			s_logger.error("Error updating Configuration of ConfigurableComponent " + pid, e);
+			throw new KuraException(KuraErrorCode.CONFIGURATION_UPDATE, e, pid);
+		}
+	}
+	
+	private void updateComponentConfiguration(String pid, Map<String, Object> mergedProperties, boolean snapshotOnConfirmation) throws KuraException, IOException{
+		if (!m_selfConfigComponents.contains(pid)) {
+
+			// load the ocd to do the validation
+			BundleContext ctx = m_ctx.getBundleContext();
+			ObjectClassDefinition ocd = null;
+			ocd = ComponentUtil.getObjectClassDefinition(ctx, pid);
+
+			// Validate the properties to be applied and set them
+			// TODO: it seems that code does not enter here: the ocd object is always null!
+			validateProperties(pid, ocd, mergedProperties); 
+		} else {
+			// FIXME: validation of properties for self-configuring
+			// components
+		}
+
+		if (!snapshotOnConfirmation) {
+			m_pendingConfigurationPids.add(pid);
+		} else {
+			s_logger.info("Snapshot on EventAdmin configuration will be taken for {}.", pid);
+		}
+
+		Map<String, Object> cleanedProperties= cleanProperties(mergedProperties, pid);
+
+		// Update the new properties
+		// use ConfigurationAdmin to do the update
+		Configuration config = m_configurationAdmin.getConfiguration(pid);
+		config.update(CollectionsUtil.mapToDictionary(cleanedProperties));
+	}
+
+	private OCD getRegisteredOCD(String pid){
+		// Try to get the OCD from the registered ConfigurableComponents
+		OCD registerdOCD = m_ocds.get(pid);
+		// Otherwise try to get it from the registered SelfConfiguringComponents
+		// (whose OCD is not tracked in the m_ocds map - why?).
+		if (registerdOCD == null) {
+			ComponentConfiguration config = getSelfConfiguringComponentConfiguration(pid);
+			if (config != null) {
+				registerdOCD = config.getDefinition();
+			}
+		}
+		return registerdOCD;
 	}
 
 	private void validateProperties(String pid, ObjectClassDefinition ocd, Map<String, Object> updatedProps) throws KuraException {

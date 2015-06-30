@@ -1,0 +1,39 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
+<suite name="ESF/Kura RegressionSuite" verbose="1">
+	<listeners>
+		<listener class-name="com.eurotech.denali.driver.processor.FailureListener" />
+	</listeners>
+	<test name="Denali Test - Firefox" group-by-instances="true">
+		<parameter name="browser" value="FIREFOX" />
+		<classes>
+			<class name="com.eurotech.denali.test.DenaliTest"></class>
+		</classes>
+	</test>
+	<test name="Denali Test - Chrome" group-by-instances="true">
+		<parameter name="browser" value="CHROME" />
+		<classes>
+			<class name="com.eurotech.denali.test.DenaliTest"></class>
+		</classes>
+	</test>
+	<test name="Denali Test - IE" group-by-instances="true">
+		<parameter name="browser" value="IE" />
+		<classes>
+			<class name="com.eurotech.denali.test.DenaliTest"></class>
+		</classes>
+	</test>
+	<test name="Ethernet Test - Eth0" group-by-instances="true">
+		<classes>
+			<class name="com.eurotech.denali.test.EthernetTest"></class>
+		</classes>
+	</test>
+	<test name="Ethernet Test - Eth1" group-by-instances="true">
+		<classes>
+			<class name="com.eurotech.denali.test.Ethernet1Test"></class>
+		</classes>
+	</test>
+	<test name="Wifi Test - Wlan0" group-by-instances="true">
+		<classes>
+			<class name="com.eurotech.denali.test.WifiTest"></class>
+		</classes>
+	</test>
+</suite>

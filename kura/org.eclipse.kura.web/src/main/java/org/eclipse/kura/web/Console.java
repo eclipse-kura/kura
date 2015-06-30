@@ -59,6 +59,7 @@ public class Console implements ConfigurableComponent {
 	private static final String APP_PID = "service.pid";
 
 	private static final String CONSOLE_PASSWORD = "console.password.value";
+	private static final String CONSOLE_USERNAME = "console.username.value";
 	private static final String KURA_DATA_DIR = "kura.data";
 
 	private static String s_aliasRoot;
@@ -216,7 +217,8 @@ public class Console implements ConfigurableComponent {
 					propertyPassword = m_cryptoService.sha1Hash(new String(decryptedPassword)).toCharArray();
 				}
 
-				authMgr = new AuthenticationManager(propertyPassword);
+				String registeredUsername= (String) properties.get(CONSOLE_USERNAME);
+				authMgr = new AuthenticationManager(registeredUsername, propertyPassword);
 				initHTTPService(authMgr, servletRoot);
 
 				Map<String, Object> props = new HashMap<String, Object>();
@@ -237,6 +239,9 @@ public class Console implements ConfigurableComponent {
 
 		char[] propertyPassword = null;
 		String dataDir = m_systemService.getProperties().getProperty(KURA_DATA_DIR);
+		
+		String registeredUsername= (String) properties.get(CONSOLE_USERNAME);
+		authMgr.updateUsername(registeredUsername);
 
 		char[] passwordFromDB = AuthenticationManager.isDBInitialized(m_dbService, dataDir);
 		try {

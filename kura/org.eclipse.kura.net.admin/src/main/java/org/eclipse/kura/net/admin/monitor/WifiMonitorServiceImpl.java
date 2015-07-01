@@ -241,7 +241,7 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
                     //s_logger.debug("Evaluating: " + interfaceName + " and is currently up? " + wifiState.isUp());
                     //s_logger.debug("Evaluating: " + interfaceName + " and is currently link up? " + wifiState.isLinkUp());
                      
-                    if(wifiState.isUp()) {
+                    if(wifiConfig != null && wifiState.isUp()) {
                         if(WifiMode.INFRA.equals(wifiConfig.getMode())) {
                         	// get signal strength only if somebody needs it
                         	if ((m_listeners != null) && (m_listeners.size() > 0)) {
@@ -879,8 +879,13 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
         
         for(String interfaceName : interfaceList) {
         	WifiInterfaceConfigImpl wifiInterfaceConfig = (WifiInterfaceConfigImpl) m_currentNetworkConfiguration.getNetInterfaceConfig(interfaceName);
+        	if(wifiInterfaceConfig == null){
+        		continue;
+        	}
         	WifiConfig wifiConfig = getWifiConfig(wifiInterfaceConfig);
-            statuses.put(interfaceName, new WifiInterfaceState(interfaceName, wifiConfig.getMode()));
+        	if(wifiConfig != null){
+        		statuses.put(interfaceName, new WifiInterfaceState(interfaceName, wifiConfig.getMode()));
+        	}
         }
         
         return statuses;

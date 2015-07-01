@@ -10,9 +10,6 @@ import javax.sql.PooledConnection;
 import javax.sql.StatementEvent;
 import javax.sql.StatementEventListener;
 
-import org.hsqldb.jdbc.JDBCUtil;
-import org.hsqldb.jdbc.pool.JDBCPooledConnection;
-
 public class KuraJDBCConnectionPool implements ConnectionEventListener, StatementEventListener {
 
 	interface RefState {
@@ -22,7 +19,7 @@ public class KuraJDBCConnectionPool implements ConnectionEventListener, Statemen
 	}
 
 	AtomicIntegerArray states;
-	JDBCPooledConnection[] connections;
+	PooledConnection[] connections;
 	KuraJDBCPooledDatasource source;
 	volatile boolean closed;
 
@@ -32,7 +29,7 @@ public class KuraJDBCConnectionPool implements ConnectionEventListener, Statemen
 
 	public KuraJDBCConnectionPool(int size) {
 		source = new KuraJDBCPooledDatasource();
-		connections = new JDBCPooledConnection[size];
+		connections = new PooledConnection[size];
 		states = new AtomicIntegerArray(size);
 	}
 
@@ -56,7 +53,7 @@ public class KuraJDBCConnectionPool implements ConnectionEventListener, Statemen
 
 				if (states.compareAndSet(i, RefState.empty, RefState.allocated)) {
 					try {
-						JDBCPooledConnection connection = (JDBCPooledConnection) source.getPooledConnection();
+						PooledConnection connection = source.getPooledConnection();
 
 						connection.addConnectionEventListener(this);
 						connection.addStatementEventListener(this);
@@ -75,7 +72,7 @@ public class KuraJDBCConnectionPool implements ConnectionEventListener, Statemen
 			}
 		}
 
-		throw JDBCUtil.invalidArgument();
+		throw new SQLException("Invalid argument!");
 	}
 
 	public Connection getConnection(String username, String password) throws SQLException {
@@ -140,7 +137,7 @@ public class KuraJDBCConnectionPool implements ConnectionEventListener, Statemen
 	public void close(int wait) throws SQLException {
 
 		if (wait < 0 || wait > 60) {
-			throw JDBCUtil.outOfRangeArgument();
+			throw new SQLException("Out of range!");
 		}
 		if (closed) {
 			return;
@@ -155,7 +152,7 @@ public class KuraJDBCConnectionPool implements ConnectionEventListener, Statemen
 
 		for (int i = 0; i < connections.length; i++) {
 			if (connections[i] != null) {
-				connections[i].release();
+				KuraPooledConnectionManager.releaseConnection(connections[i]);
 			}
 		}
 

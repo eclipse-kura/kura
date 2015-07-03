@@ -26,7 +26,6 @@ public class IwLinkTool implements LinkTool {
 
 	private static final Logger s_logger = LoggerFactory.getLogger(IwLinkTool.class);
 			
-    private String m_tool = null;
     private String m_interfaceName = null; 
     private boolean m_linkDetected = false;
     private int m_speed = 0; // in b/s
@@ -39,8 +38,7 @@ public class IwLinkTool implements LinkTool {
      * 
      * @param ifaceName - interface name as {@link String}
      */
-    public IwLinkTool (String tool, String ifaceName) {
-        m_tool = tool;
+    public IwLinkTool (String ifaceName) {
         m_interfaceName = ifaceName;
         m_duplex = "half";
     }
@@ -50,9 +48,9 @@ public class IwLinkTool implements LinkTool {
         SafeProcess proc = null;
         BufferedReader br = null;
         try {
-            proc = ProcessUtil.exec(m_tool + " " + m_interfaceName + " link");
+            proc = ProcessUtil.exec("iw " + m_interfaceName + " link");
             if (proc.waitFor() != 0) {
-            	s_logger.warn("The {} returned with exit value {}", m_tool, proc.exitValue());
+            	s_logger.warn("The iw returned with exit value {}", proc.exitValue());
             	return false;
             }
             br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
@@ -130,6 +128,7 @@ public class IwLinkTool implements LinkTool {
         return m_duplex;
     }
 
+    @Override
     public int getSignal() {
     	return m_signal;
     }

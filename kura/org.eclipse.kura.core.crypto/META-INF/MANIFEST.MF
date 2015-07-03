@@ -5,10 +5,10 @@ Bundle-SymbolicName: org.eclipse.kura.core.crypto;singleton:=true
 Bundle-Version: 1.0.3.qualifier
 Bundle-Vendor: EUROTECH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: javax.crypto,
+Import-Package: org.eclipse.kura; version="[1.0,2.0)",
+ org.eclipse.kura.crypto; version="[1.2,1.3)",
+ javax.crypto,
  javax.crypto.spec,
- javax.xml.bind,
- org.eclipse.kura;version="[1.0,2.0)",
- org.eclipse.kura.crypto;version="[1.1,1.2)"
+ javax.xml.bind
 Service-Component: OSGI-INF/*.xml
 Bundle-ActivationPolicy: lazy

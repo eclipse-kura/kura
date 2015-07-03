@@ -38,14 +38,11 @@ import com.extjs.gxt.ui.client.widget.layout.ColumnLayout;
 import com.extjs.gxt.ui.client.widget.layout.FitLayout;
 import com.extjs.gxt.ui.client.widget.layout.FormData;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.ListBox;
 
-public class CertificatesTab extends LayoutContainer {
+public class MutualAuthenticationTab extends LayoutContainer {
 
 	private static final Messages MSGS = GWT.create(Messages.class);
 
@@ -57,19 +54,16 @@ public class CertificatesTab extends LayoutContainer {
 	private LayoutContainer 	m_commandInput;
 	private FormPanel			m_formPanel;
 	private TextArea			m_publicCertificate;
-	private ListBox			    m_certificateType;
+	private TextArea			m_privateCertificate;
+	private TextField<String>	m_storagePassword;
 	private TextField<String>   m_storageAlias;
 
 	private Button				m_executeButton;
 	private Button				m_resetButton;
 	private ButtonBar			m_buttonBar;
 
-	private String 				certPublicSSLLeaf = "SSL leaf certificate";
-	private String 				certPublicSSLChain = "SSL complete certificate chain";
-	private String 				certCertificationAuthority = "Certification authority";
 
-
-	public CertificatesTab(GwtSession currentSession) 
+	public MutualAuthenticationTab(GwtSession currentSession) 
 	{
 		m_currentSession = currentSession;
 	}
@@ -105,12 +99,11 @@ public class CertificatesTab extends LayoutContainer {
 
 		m_formPanel.addListener(Events.Submit, new Listener<FormEvent>() {
 			public void handleEvent(FormEvent be) {
-				switch(m_certificateType.getSelectedIndex()){
-				case 0:
-					gwtCertificatesService.storeLeafKey(m_publicCertificate.getValue(), m_storageAlias.getValue(), new AsyncCallback<Integer>() {
+				
+					gwtCertificatesService.storePublicPrivateKeys(m_privateCertificate.getValue(), m_publicCertificate.getValue(), m_storagePassword.getValue(), m_storageAlias.getValue(), new AsyncCallback<Integer>() {
 						public void onFailure(Throwable caught) {
 							if(caught.getLocalizedMessage().equals(GwtKuraErrorCode.ILLEGAL_ARGUMENT.toString())){
-								Info.display(MSGS.error(), "Error while storing the public key in the key store");
+								Info.display(MSGS.error(), "Error while storing the private certificate in the key store");
 							}else{
 								Info.display(MSGS.error(), caught.getLocalizedMessage());
 							}
@@ -119,56 +112,16 @@ public class CertificatesTab extends LayoutContainer {
 
 						public void onSuccess(Integer certsStored) {
 							m_publicCertificate.clear();
+							m_privateCertificate.clear();
+							m_storagePassword.clear();
 							m_storageAlias.clear();
-							Info.display(MSGS.info(), "Storage success. Stored " + certsStored + " public key.");
+							Info.display(MSGS.info(), "Storage success. Stored private and public certificates.");
 							m_commandInput.unmask();
 						}
 					});
-					break;
-
-				case 1:
-					gwtCertificatesService.storePublicChain(m_publicCertificate.getValue(), m_storageAlias.getValue(), new AsyncCallback<Integer>() {
-						public void onFailure(Throwable caught) {
-							if(caught.getLocalizedMessage().equals(GwtKuraErrorCode.ILLEGAL_ARGUMENT.toString())){
-								Info.display(MSGS.error(), "Error while storing the public keys in the key store");
-							}else{
-								Info.display(MSGS.error(), caught.getLocalizedMessage());
-							}
-							m_commandInput.unmask();
-						}
-
-						public void onSuccess(Integer certsStored) {
-							m_publicCertificate.clear();
-							m_storageAlias.clear();
-							Info.display(MSGS.info(), "Storage success. Stored " + certsStored + " public keys.");
-							m_commandInput.unmask();
-						}
-					});
-					break;
-
-				case 2:
-					gwtCertificatesService.storeCertificationAuthority(m_publicCertificate.getValue(), m_storageAlias.getValue(), new AsyncCallback<Integer>() {
-						public void onFailure(Throwable caught) {
-							if(caught.getLocalizedMessage().equals(GwtKuraErrorCode.ILLEGAL_ARGUMENT.toString())){
-								Info.display(MSGS.error(), "Error while storing the CA public keys in the key store");
-							}else{
-								Info.display(MSGS.error(), caught.getLocalizedMessage());
-							}
-							m_commandInput.unmask();
-						}
-
-						public void onSuccess(Integer certsStored) {
-							m_publicCertificate.clear();
-							m_storageAlias.clear();
-							Info.display(MSGS.info(), "Storage success. Stored " + certsStored + " CA public keys.");
-							m_commandInput.unmask();
-						}
-					});
-					break;
-				}
 			}
 		});
-
+		
 		//
 		// Initial description
 		// 
@@ -176,13 +129,36 @@ public class CertificatesTab extends LayoutContainer {
 		description.setBorders(false);
 		description.setLayout(new ColumnLayout());
 
-		Label descriptionLabel = new Label(MSGS.settingsAddCertDescription1());
-		Label descriptionLabel2 = new Label(MSGS.settingsAddCertDescription2());
-
+		Label descriptionLabel = new Label(MSGS.settingsMAuthDescription1());
+		Label descriptionLabel2 = new Label(MSGS.settingsMAuthDescription2());
+		
 		description.add(descriptionLabel);
 		description.add(descriptionLabel2);
 		description.setStyleAttribute("padding-bottom", "10px");
 		m_formPanel.add(description);
+
+		//
+		// Private Certificate
+		//       
+		m_privateCertificate = new TextArea();
+		m_privateCertificate.setBorders(false);
+		m_privateCertificate.setReadOnly(false);
+		m_privateCertificate.setEmptyText("* " +MSGS.settingsPrivateCertLabel());
+		m_privateCertificate.setName(MSGS.settingsPrivateCertLabel());
+		m_privateCertificate.setAllowBlank(false);
+		m_privateCertificate.setFieldLabel(MSGS.settingsPrivateCertLabel());
+		m_formPanel.add(m_privateCertificate, formData);
+		
+		//
+		//
+		//
+		m_storagePassword = new TextField<String>();
+		m_storagePassword.setName(MSGS.settingsStoragePasswordLabel());
+		m_storagePassword.setPassword(true);
+		m_storagePassword.setAllowBlank(false);
+		m_storagePassword.setEmptyText("* " + MSGS.settingsStoragePasswordLabel());
+		m_storagePassword.setFieldLabel(MSGS.settingsStoragePasswordLabel());
+		m_formPanel.add(m_storagePassword, new FormData("95%"));
 
 		//
 		// Public Certificate
@@ -195,25 +171,9 @@ public class CertificatesTab extends LayoutContainer {
 		m_publicCertificate.setAllowBlank(false);
 		m_publicCertificate.setFieldLabel(MSGS.settingsPublicCertLabel());
 		m_formPanel.add(m_publicCertificate, formData);
-
+		
 		//
-		// Certificate Type
 		//
-		HorizontalPanel hp= new HorizontalPanel();
-
-		m_certificateType = new ListBox();
-		m_certificateType.addItem(certPublicSSLLeaf);
-		m_certificateType.addItem(certPublicSSLChain);
-		m_certificateType.addItem(certCertificationAuthority);
-		m_certificateType.setName(MSGS.settingsPublicCertLabel());
-
-		hp.getElement().getStyle().setMarginLeft(80, Unit.PX);
-		hp.getElement().getStyle().setMarginBottom(7, Unit.PX);
-		hp.add(m_certificateType);
-		m_formPanel.add(hp, new FormData("50%"));
-
-		//
-		// Storage alias
 		//
 		m_storageAlias = new TextField<String>();
 		m_storageAlias.setName(MSGS.settingsStorageAliasLabel());

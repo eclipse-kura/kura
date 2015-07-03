@@ -50,7 +50,11 @@ public class XmlUtil
 	private static final String BUNDLES_BUNDLE_STATE = "state";
 
 
+	//
+	// Public methods
+	//
 
+	//Marshalling
 	public static String marshal(Object object) throws Exception 
 	{
 		StringWriter sw = new StringWriter();
@@ -69,6 +73,21 @@ public class XmlUtil
 			doc.setXmlStandalone(true);
 
 			if(object instanceof XmlDeploymentPackages){
+				// Expected resulting xml:
+				// <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+				// <packages>
+				// 		<package>
+				//			<name>org.eclipse.kura.demo.heater</name>
+				//			<version>1.2.0.qualifier</version>
+				//			<bundles>
+				//				<bundle>
+				//					<name>org.eclipse.kura.demo.heater</name>
+				//				    <version>1.0.1</version>
+				//				</bundle>
+				//			</bundles>
+				//		</package>
+				// </packages>
+
 				Element packages = doc.createElement(PACKAGES);
 				doc.appendChild(packages);
 
@@ -82,6 +101,17 @@ public class XmlUtil
 				}
 
 			}else if (object instanceof XmlBundles){
+				// Expected resulting xml:
+				// <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+				// <bundles>
+				// 		<bundle>
+				// 			<name>org.eclipse.osgi</name>
+				//			<version>3.8.1.v20120830-144521</version>
+				//			<id>0</id>
+				//			<state>ACTIVE</state>
+				//		</bundle>
+				// </bundles>
+
 				Element bundles = doc.createElement(BUNDLES);
 				doc.appendChild(bundles);
 
@@ -109,9 +139,11 @@ public class XmlUtil
 		} catch (TransformerException tfe) {
 			tfe.printStackTrace();
 		}
-
 	}
 
+	//
+	// Marshaller's private methods
+	//
 	private static void marshalDeploymentPackage(Document doc, XmlDeploymentPackage xdp, Element packageInstalled) {
 		//Extract data from XmlDeploymentPackage
 		String packageName= xdp.getName();
@@ -119,21 +151,27 @@ public class XmlUtil
 		XmlBundleInfo[] xbiArray= xdp.getBundleInfos();
 
 		//Create xml elements
-		Element name= doc.createElement(PACKAGES_PACKAGE_NAME);
-		name.setTextContent(packageName);
-		packageInstalled.appendChild(name);
+		if(packageName != null && !packageName.trim().isEmpty()){
+			Element name= doc.createElement(PACKAGES_PACKAGE_NAME);
+			name.setTextContent(packageName);
+			packageInstalled.appendChild(name);
+		}
 
-		Element version= doc.createElement(PACKAGES_PACKAGE_VERSION);
-		version.setTextContent(packageVersion);
-		packageInstalled.appendChild(version);
+		if(packageVersion != null && !packageVersion.trim().isEmpty()){
+			Element version= doc.createElement(PACKAGES_PACKAGE_VERSION);
+			version.setTextContent(packageVersion);
+			packageInstalled.appendChild(version);
+		}
 
 		Element bundles= doc.createElement(PACKAGES_PACKAGE_BUNDLES);
 		packageInstalled.appendChild(bundles);
 
-		for(XmlBundleInfo xbi:xbiArray){
-			Element bundle= doc.createElement(PACKAGES_PACKAGE_BUNDLES_BUNDLE);
-			marshalBundleInfo(doc, xbi, bundle);
-			bundles.appendChild(bundle);
+		if(xbiArray != null){
+			for(XmlBundleInfo xbi:xbiArray){
+				Element bundle= doc.createElement(PACKAGES_PACKAGE_BUNDLES_BUNDLE);
+				marshalBundleInfo(doc, xbi, bundle);
+				bundles.appendChild(bundle);
+			}
 		}
 	}
 
@@ -143,14 +181,17 @@ public class XmlUtil
 		String bundleVersion= xbi.getVersion();
 
 		//Create xml elements
-		Element name= doc.createElement(PACKAGES_PACKAGE_BUNDLES_BUNDLE_NAME);
-		name.setTextContent(bundleName);
-		bundle.appendChild(name);
+		if(bundleName != null && !bundleName.trim().isEmpty()){
+			Element name= doc.createElement(PACKAGES_PACKAGE_BUNDLES_BUNDLE_NAME);
+			name.setTextContent(bundleName);
+			bundle.appendChild(name);
+		}
 
-		Element version= doc.createElement(PACKAGES_PACKAGE_BUNDLES_BUNDLE_VERSION);
-		version.setTextContent(bundleVersion);
-		bundle.appendChild(version);
-
+		if(bundleVersion != null && !bundleVersion.trim().isEmpty()){
+			Element version= doc.createElement(PACKAGES_PACKAGE_BUNDLES_BUNDLE_VERSION);
+			version.setTextContent(bundleVersion);
+			bundle.appendChild(version);
+		}
 	}
 
 	private static void marshalBundle(Document doc, XmlBundle xmlBundle, Element bundle) {
@@ -161,22 +202,28 @@ public class XmlUtil
 		String bundleState= xmlBundle.getState();
 
 		//Create xml elements
-		Element name= doc.createElement(BUNDLES_BUNDLE_NAME);
-		name.setTextContent(bundleName);
-		bundle.appendChild(name);
+		if(bundleName != null && !bundleName.trim().isEmpty()){
+			Element name= doc.createElement(BUNDLES_BUNDLE_NAME);
+			name.setTextContent(bundleName);
+			bundle.appendChild(name);
+		}
 
-		Element version= doc.createElement(BUNDLES_BUNDLE_VERSION);
-		version.setTextContent(bundleVersion);
-		bundle.appendChild(version);
-		
-		Element id= doc.createElement(BUNDLES_BUNDLE_ID);
-		id.setTextContent(bundleId);
-		bundle.appendChild(id);
-		
-		Element state= doc.createElement(BUNDLES_BUNDLE_STATE);
-		state.setTextContent(bundleState);
-		bundle.appendChild(state);
+		if(bundleVersion != null && !bundleVersion.trim().isEmpty()){
+			Element version= doc.createElement(BUNDLES_BUNDLE_VERSION);
+			version.setTextContent(bundleVersion);
+			bundle.appendChild(version);
+		}
+
+		if(bundleId != null && !bundleId.trim().isEmpty()){
+			Element id= doc.createElement(BUNDLES_BUNDLE_ID);
+			id.setTextContent(bundleId);
+			bundle.appendChild(id);
+		}
+
+		if(bundleState != null && !bundleState.trim().isEmpty()){
+			Element state= doc.createElement(BUNDLES_BUNDLE_STATE);
+			state.setTextContent(bundleState);
+			bundle.appendChild(state);
+		}
 	}
-
-
 }

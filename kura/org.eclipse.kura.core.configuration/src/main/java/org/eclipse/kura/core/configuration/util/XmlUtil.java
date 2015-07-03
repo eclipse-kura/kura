@@ -120,7 +120,7 @@ public class XmlUtil
 
 	private final static String METADATA_DESIGNATE_OBJECT_ATTRIBUTE = "Attribute";
 	private final static String METADATA_DESIGNATE_OBJECT_OCDREF = "ocdref";
-	
+
 	private static Document doc= null;
 
 
@@ -128,6 +128,7 @@ public class XmlUtil
 	// Public methods
 	//
 
+	//Marshalling
 	public static String marshal(Object object) throws Exception 
 	{
 		StringWriter sw = new StringWriter();
@@ -146,8 +147,15 @@ public class XmlUtil
 			doc.setXmlStandalone(true);
 
 			if(object instanceof XmlSnapshotIdResult){
+				// Resulting xml:
+				// <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+				// <esf:snapshot-ids xmlns:ocd="http://www.osgi.org/xmlns/metatype/v1.2.0" xmlns:esf="http://eurotech.com/esf/2.0">
+				//	 <esf:snapshotIds>1434122113492</esf:snapshotIds>
+				//	 <esf:snapshotIds>1434122124387</esf:snapshotIds>
+				// </esf:snapshot-ids>
+
 				Element snapshotIDs = doc.createElement(ESF_NAMESPACE + ":" + SNAPSHOT_IDS);
-				snapshotIDs.setAttributeNS("http://www.w3.org/2000/xmlns/", "xmlns:esf","http://eurotech.com/esf/2.0");
+				snapshotIDs.setAttributeNS("http://www.w3.org/2000/xmlns/", "xmlns:esf","http://eurotech.com/esf/2.0"); //TODO: add xml schema to EUROTECH site
 				snapshotIDs.setAttributeNS("http://www.w3.org/2000/xmlns/", "xmlns:ocd","http://www.osgi.org/xmlns/metatype/v1.2.0");
 				doc.appendChild(snapshotIDs);
 
@@ -195,9 +203,10 @@ public class XmlUtil
 		} catch (TransformerException tfe) {
 			tfe.printStackTrace();
 		}
-
 	}
-	
+
+
+	//un-marshalling
 	public static <T> T unmarshal(String s, Class<T> clazz) 
 			throws Exception, XMLStreamException, FactoryConfigurationError
 	{
@@ -205,7 +214,6 @@ public class XmlUtil
 		T result=unmarshal(sr, clazz);
 		return result;
 	}
-
 
 	public static <T> T unmarshal(Reader r, Class<T> clazz) 
 			throws Exception, XMLStreamException, FactoryConfigurationError
@@ -254,8 +262,8 @@ public class XmlUtil
 		}
 	}
 
-	
-	
+
+
 	//
 	// Marshaller's private methods
 	//
@@ -343,7 +351,7 @@ public class XmlUtil
 		}
 	}
 
-	private static Element marshallProperty(XmlConfigPropertyAdapted propertyObj) {
+	private static Element marshallProperty(XmlConfigPropertyAdapted propertyObj) { 
 		String name= propertyObj.getName();
 		Boolean array= propertyObj.getArray();
 		Boolean encrypted= propertyObj.isEncrypted();
@@ -445,7 +453,6 @@ public class XmlUtil
 				ad.appendChild(option);
 			}
 		}
-
 	}
 
 	private static void marshallOption(Option adOption, Element option) {
@@ -468,7 +475,7 @@ public class XmlUtil
 		String iconResource= ocdIcon.getResource();
 		BigInteger iconSize= ocdIcon.getSize();
 
-		if(!iconResource.trim().isEmpty()){
+		if(iconResource != null && !iconResource.trim().isEmpty()){
 			Attr attrResource= doc.createAttribute(METADATA_ICON_RESOURCE);
 			attrResource.setNodeValue(iconResource);
 			icon.setAttributeNode(attrResource);
@@ -478,11 +485,10 @@ public class XmlUtil
 			attrSize.setNodeValue(iconSize.toString());
 			icon.setAttributeNode(attrSize);
 		}
-
 	}
 
-	
-	
+
+
 	//
 	// Unmarshaller's private methods
 	//
@@ -501,7 +507,6 @@ public class XmlUtil
 			compConfList.add(cci);
 		}
 		xcc.setConfigurations(compConfList);
-
 		return (T) xcc;
 	}
 
@@ -646,7 +651,6 @@ public class XmlUtil
 			}
 		}
 
-
 		return (T) tMetadata; 
 	}
 
@@ -656,13 +660,13 @@ public class XmlUtil
 		String ocdDescription= ocd.getAttribute(METADATA_OCD_DESCRIPTION);
 		Tocd tocd= new Tocd();
 
-		if(!ocdID.trim().isEmpty()){
+		if(ocdID != null && !ocdID.trim().isEmpty()){
 			tocd.setId(ocdID);
 		}
-		if(!ocdName.trim().isEmpty()){
+		if(ocdName != null && !ocdName.trim().isEmpty()){
 			tocd.setName(ocdName);
 		}
-		if(!ocdDescription.trim().isEmpty()){
+		if(ocdDescription != null && !ocdDescription.trim().isEmpty()){
 			tocd.setDescription(ocdDescription);
 		}
 
@@ -720,7 +724,6 @@ public class XmlUtil
 		}
 
 		return tDesignate;
-
 	}
 
 	private static Tobject parseObject(Element object) {
@@ -750,14 +753,18 @@ public class XmlUtil
 		Ticon result= new Ticon();
 
 		String resource= icon.getAttribute(METADATA_ICON_RESOURCE);
-		BigInteger size= new BigInteger(icon.getAttribute(METADATA_ICON_SIZE));
-		if(size.signum() >= 0){
-			result.setSize(size);
-		}else{
-			result.setSize(new BigInteger("0"));
-		}
-		if(!resource.trim().isEmpty()){
+		if(resource != null && !resource.trim().isEmpty()){
 			result.setResource(resource);
+		}
+		
+		String iconSize= icon.getAttribute(METADATA_ICON_SIZE);
+		if(iconSize != null){
+			BigInteger size= new BigInteger(iconSize);
+			if(size.signum() >= 0){
+				result.setSize(size);
+			}else{
+				result.setSize(new BigInteger("0"));
+			}
 		}
 
 		return result;
@@ -776,10 +783,10 @@ public class XmlUtil
 		String min= adElement.getAttribute(METADATA_AD_MIN);
 		String max= adElement.getAttribute(METADATA_AD_MAX);
 
-		if(!id.trim().isEmpty()){
+		if(id != null && !id.trim().isEmpty()){
 			tad.setId(id);
 		}
-		if(!name.trim().isEmpty()){
+		if(name != null && !name.trim().isEmpty()){
 			tad.setName(name);
 		}
 
@@ -787,16 +794,16 @@ public class XmlUtil
 		tad.setCardinality(cardinality);
 		tad.setRequired(required);
 
-		if(!defaultVal.trim().isEmpty()){
+		if(defaultVal != null && !defaultVal.trim().isEmpty()){
 			tad.setDefault(defaultVal);
 		}
-		if(!description.trim().isEmpty()){
+		if(description != null && !description.trim().isEmpty()){
 			tad.setDescription(description);
 		}
-		if(!min.trim().isEmpty()){
+		if(min != null && !min.trim().isEmpty()){
 			tad.setMin(min);
 		}
-		if(!max.trim().isEmpty()){
+		if(max != null && !max.trim().isEmpty()){
 			tad.setMax(max);
 		}
 
@@ -822,10 +829,10 @@ public class XmlUtil
 		String label= option.getAttribute(METADATA_AD_OPTION_LABEL);
 		String value= option.getAttribute(METADATA_AD_OPTION_VALUE);
 
-		if(!label.trim().isEmpty()){
+		if(label != null && !label.trim().isEmpty()){
 			tOption.setLabel(label);
 		}
-		if(!value.trim().isEmpty()){
+		if(value != null && !value.trim().isEmpty()){
 			tOption.setValue(value);
 		}
 		return tOption;
@@ -835,7 +842,7 @@ public class XmlUtil
 		Tmetadata tMetadata= new Tmetadata();
 		String localization= metadata.getAttribute(METADATA_LOCALIZATION);
 
-		if (!localization.trim().isEmpty()){ 
+		if (localization != null && !localization.trim().isEmpty()){ 
 			tMetadata.setLocalization(localization);
 		}
 

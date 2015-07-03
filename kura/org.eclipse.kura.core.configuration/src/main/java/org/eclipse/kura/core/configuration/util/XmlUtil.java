@@ -756,7 +756,7 @@ public class XmlUtil
 		if(resource != null && !resource.trim().isEmpty()){
 			result.setResource(resource);
 		}
-		
+
 		String iconSize= icon.getAttribute(METADATA_ICON_SIZE);
 		if(iconSize != null){
 			BigInteger size= new BigInteger(iconSize);
@@ -790,9 +790,15 @@ public class XmlUtil
 			tad.setName(name);
 		}
 
-		tad.setType(type);
-		tad.setCardinality(cardinality);
-		tad.setRequired(required);
+		if(type != null){
+			tad.setType(type);
+		}
+		if(cardinality != null){
+			tad.setCardinality(cardinality);
+		}
+		if(required != null){
+			tad.setRequired(required);
+		}
 
 		if(defaultVal != null && !defaultVal.trim().isEmpty()){
 			tad.setDefault(defaultVal);

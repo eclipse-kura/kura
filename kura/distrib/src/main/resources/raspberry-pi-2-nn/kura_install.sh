@@ -22,16 +22,6 @@ cp ${INSTALL_DIR}/${KURA_SYMLINK}/install/kura.init.raspbian /etc/init.d/kura
 chmod +x /etc/init.d/kura
 chmod +x ${INSTALL_DIR}/${KURA_SYMLINK}/bin/*.sh
 
-# set up ${INSTALL_DIR}/kura/recover_dflt_kura_config.sh
-cp ${INSTALL_DIR}/${KURA_SYMLINK}/install/recover_dflt_kura_config.sh ${INSTALL_DIR}/${KURA_SYMLINK}/recover_dflt_kura_config.sh
-chmod +x ${INSTALL_DIR}/${KURA_SYMLINK}/recover_dflt_kura_config.sh
-if [ ! -d ${INSTALL_DIR}/${KURA_SYMLINK}/.data ]; then
-    mkdir ${INSTALL_DIR}/${KURA_SYMLINK}/.data
-fi
-# for md5.info should keep the same order as in the ${INSTALL_DIR}/kura/recover_dflt_kura_config.sh
-echo `md5sum ${INSTALL_DIR}/${KURA_SYMLINK}/data/snapshots/snapshot_0.xml` > ${INSTALL_DIR}/${KURA_SYMLINK}/.data/md5.info
-tar czf ${INSTALL_DIR}/${KURA_SYMLINK}/.data/recover_dflt_kura_config.tgz ${INSTALL_DIR}/${KURA_SYMLINK}/data/snapshots/snapshot_0.xml
-
 #set up runlevels to start/stop Kura by default
 update-rc.d -f kura remove
 update-rc.d kura defaults

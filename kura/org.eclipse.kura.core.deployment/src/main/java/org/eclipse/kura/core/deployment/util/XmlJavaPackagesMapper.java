@@ -11,7 +11,6 @@
  */
 package org.eclipse.kura.core.deployment.util;
 
-import org.eclipse.kura.core.configuration.util.parse.XmlJavaDataMapper;
 import org.eclipse.kura.core.deployment.XmlBundleInfo;
 import org.eclipse.kura.core.deployment.XmlDeploymentPackage;
 import org.eclipse.kura.core.deployment.XmlDeploymentPackages;

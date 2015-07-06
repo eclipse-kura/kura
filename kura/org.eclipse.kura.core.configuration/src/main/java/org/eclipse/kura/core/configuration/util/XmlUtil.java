@@ -31,9 +31,9 @@ import javax.xml.transform.stream.StreamResult;
 
 import org.eclipse.kura.core.configuration.XmlComponentConfigurations;
 import org.eclipse.kura.core.configuration.XmlSnapshotIdResult;
-import org.eclipse.kura.core.configuration.util.parse.XmlJavaComponentConfigurationsMapper;
-import org.eclipse.kura.core.configuration.util.parse.XmlJavaMetadataMapper;
-import org.eclipse.kura.core.configuration.util.parse.XmlJavaSnapshotIdResultMapper;
+import org.eclipse.kura.core.configuration.util.serializers.XmlJavaComponentConfigurationsMapper;
+import org.eclipse.kura.core.configuration.util.serializers.XmlJavaMetadataMapper;
+import org.eclipse.kura.core.configuration.util.serializers.XmlJavaSnapshotIdResultMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;

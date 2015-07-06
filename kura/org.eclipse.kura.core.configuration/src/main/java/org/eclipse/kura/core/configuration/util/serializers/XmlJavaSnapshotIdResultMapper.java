@@ -9,7 +9,7 @@
  * Contributors:
  *   Eurotech
  */
-package org.eclipse.kura.core.configuration.util.parse;
+package org.eclipse.kura.core.configuration.util.serializers;
 
 import java.util.List;
 

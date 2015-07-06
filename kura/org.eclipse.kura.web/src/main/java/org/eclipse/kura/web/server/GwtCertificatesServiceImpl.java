@@ -43,11 +43,11 @@ public class GwtCertificatesServiceImpl extends OsgiRemoteServiceServlet impleme
 	private static final long serialVersionUID = 7402961266449489433L;
 
 
-	public Integer storePrivateSSLCertificate(String privateCert, String publicCert, String password, String alias)
+	public Integer storePublicPrivateKeys(String privateKey, String publicKey, String password, String alias)
 			throws GwtKuraException {
 		try {
 	    	// Remove header if exists
-	        String key = privateCert.replace("-----BEGIN PRIVATE KEY-----", "").replace("\n", "");
+	        String key = privateKey.replace("-----BEGIN PRIVATE KEY-----", "").replace("\n", "");
 	        key = key.replace("-----END PRIVATE KEY-----", "");
 	    	
 	        byte[] conversion= DatatypeConverter.parseBase64Binary(key);
@@ -58,10 +58,7 @@ public class GwtCertificatesServiceImpl extends OsgiRemoteServiceServlet impleme
 	        KeyFactory kf=KeyFactory.getInstance("RSA");        
 	        PrivateKey privKey = kf.generatePrivate(specPriv);
 			
-			CertificateFactory certFactory= CertificateFactory.getInstance("X.509");
-			Collection<? extends Certificate> publicCertificates= certFactory.generateCertificates(new ByteArrayInputStream(publicCert.getBytes("UTF-8")));
-			
-			Certificate[] certs= parsePublicCertificates(publicCertificates);
+			Certificate[] certs= parsePublicCertificates(publicKey);
 
 			if(privKey == null){
 				throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT);
@@ -80,33 +77,21 @@ public class GwtCertificatesServiceImpl extends OsgiRemoteServiceServlet impleme
 	}
 
 
-	public Integer storePublicSSLCertificate(String publicCert, String alias)
+	public Integer storeLeafKey(String publicKey, String alias)
 			throws GwtKuraException {
 		try {
-			CertificateFactory certFactory= CertificateFactory.getInstance("X.509");
-			Collection<? extends Certificate> publicCertificates= certFactory.generateCertificates(new ByteArrayInputStream(publicCert.getBytes("UTF-8")));
-			
-			Certificate[] certs= parsePublicCertificates(publicCertificates);
+			Certificate[] certs= parsePublicCertificates(publicKey);
 			
 			if(certs.length == 0){
 				throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT);
 			}else{
-				int i= 0;
+				//Store only the first leaf passed. Don't consider other eventual certificates
 				SslManagerService sslService = ServiceLocator.getInstance().getService(SslManagerService.class);
-				X509Certificate sslCert= (X509Certificate) certs[i];
+				X509Certificate sslCert= (X509Certificate) certs[0];
 				
-				sslService.installTrustCertificate(alias, sslCert);
-				i++;
-				
-				while(i < certs.length){
-					X509Certificate caCert= (X509Certificate) certs[i];
-					String certificateAlias= "ca-"+caCert.getSerialNumber().toString();
-						
-					sslService.installTrustCertificate(certificateAlias, caCert);
-					i++;
-				}
+				sslService.installTrustCertificate("ssl-" + alias, sslCert);
 			}
-			return publicCertificates.size();
+			return 1;
 		} catch (CertificateException e) {
 			throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT, e);
 		} catch (UnsupportedEncodingException e) {
@@ -118,7 +103,78 @@ public class GwtCertificatesServiceImpl extends OsgiRemoteServiceServlet impleme
 		}
 	}
 	
-	private Certificate[] parsePublicCertificates(Collection<? extends Certificate> publicCertificates){
+	public Integer storePublicChain(String publicKeys, String alias) throws GwtKuraException {
+		try {
+			Certificate[] certs= parsePublicCertificates(publicKeys);
+			
+			if(certs.length == 0){
+				throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT);
+			}else{
+				int i= 0;
+				SslManagerService sslService = ServiceLocator.getInstance().getService(SslManagerService.class);
+				X509Certificate sslCert= (X509Certificate) certs[i];
+				
+				sslService.installTrustCertificate("ssl-" + alias, sslCert);
+				i++;
+				
+				while(i < certs.length){
+					X509Certificate caCert= (X509Certificate) certs[i];
+					String certificateAlias= "ca-"+caCert.getSerialNumber().toString();
+						
+					sslService.installTrustCertificate(certificateAlias, caCert);
+					i++;
+				}
+			}
+			return certs.length;
+		} catch (CertificateException e) {
+			throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT, e);
+		} catch (UnsupportedEncodingException e) {
+			throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT, e);
+		} catch (GeneralSecurityException e) {
+			throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT, e);
+		} catch (IOException e) {
+			throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT, e);
+		}
+	}
+	
+	public Integer storeCertificationAuthority(String publicCAKeys, String alias)
+			throws GwtKuraException {
+		try {
+			Certificate[] certs= parsePublicCertificates(publicCAKeys);
+			
+			if(certs.length == 0){
+				throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT);
+			}else{
+				int i= 0;
+				SslManagerService sslService = ServiceLocator.getInstance().getService(SslManagerService.class);
+				X509Certificate sslCert= (X509Certificate) certs[i];
+				
+				sslService.installTrustCertificate("ca-"+alias, sslCert);
+				i++;
+				
+				while(i < certs.length){
+					X509Certificate caCert= (X509Certificate) certs[i];
+					String certificateAlias= "ca-"+caCert.getSerialNumber().toString();
+						
+					sslService.installTrustCertificate(certificateAlias, caCert);
+					i++;
+				}
+			}
+			return certs.length;
+		} catch (CertificateException e) {
+			throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT, e);
+		} catch (UnsupportedEncodingException e) {
+			throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT, e);
+		} catch (GeneralSecurityException e) {
+			throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT, e);
+		} catch (IOException e) {
+			throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT, e);
+		}
+	}
+	
+	private Certificate[] parsePublicCertificates(String publicKey) throws CertificateException, UnsupportedEncodingException{
+		CertificateFactory certFactory= CertificateFactory.getInstance("X.509");
+		Collection<? extends Certificate> publicCertificates= certFactory.generateCertificates(new ByteArrayInputStream(publicKey.getBytes("UTF-8")));
 		Iterator<? extends Certificate> certIterator= publicCertificates.iterator();
 		
 		Certificate[] certs= new Certificate[publicCertificates.size()];
@@ -128,7 +184,6 @@ public class GwtCertificatesServiceImpl extends OsgiRemoteServiceServlet impleme
 			X509Certificate cert= (X509Certificate) certIterator.next();
 			certs[i]= cert;
 			i++;
-			
 		}
 		return certs;
 	}

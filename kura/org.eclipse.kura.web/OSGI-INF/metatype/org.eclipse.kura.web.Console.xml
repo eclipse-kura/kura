@@ -19,6 +19,14 @@
          
         <Icon resource="DenaliService" size="32"/>
 
+		<AD id="console.username.value"
+        	name="console.username.value"
+        	type="String"
+        	cardinality="0"
+        	required="true"
+        	default="admin"
+        	description="Device's web username.">
+        </AD>
         
         <AD id="console.password.value"
         	name="console.password.value"

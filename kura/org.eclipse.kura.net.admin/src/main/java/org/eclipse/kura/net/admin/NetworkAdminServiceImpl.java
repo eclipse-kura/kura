@@ -11,7 +11,12 @@
  */
 package org.eclipse.kura.net.admin;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.net.UnknownHostException;
+import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.EnumSet;
@@ -41,6 +46,7 @@ import org.eclipse.kura.linux.net.iptables.LocalRule;
 import org.eclipse.kura.linux.net.iptables.NATRule;
 import org.eclipse.kura.linux.net.iptables.PortForwardRule;
 import org.eclipse.kura.linux.net.util.IScanTool;
+import org.eclipse.kura.linux.net.util.KuraConstants;
 import org.eclipse.kura.linux.net.util.LinuxNetworkUtil;
 import org.eclipse.kura.linux.net.util.ScanTool;
 import org.eclipse.kura.linux.net.wifi.HostapdManager;
@@ -77,6 +83,7 @@ import org.eclipse.kura.net.wifi.WifiHotspotInfo;
 import org.eclipse.kura.net.wifi.WifiInterfaceAddressConfig;
 import org.eclipse.kura.net.wifi.WifiMode;
 import org.eclipse.kura.net.wifi.WifiSecurity;
+import org.eclipse.kura.system.SystemService;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventConstants;
@@ -88,9 +95,12 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 
 	private static final Logger s_logger = LoggerFactory.getLogger(NetworkAdminServiceImpl.class);
 	
+	private static final String OS_VERSION = System.getProperty("kura.os.version");
+	
     private ComponentContext                   m_ctx;
 	private ConfigurationService               m_configurationService;
 	private NetworkConfigurationService		   m_networkConfigurationService;
+	private SystemService 					   m_systemService;
 	
 	private boolean m_pendingChange = false;
 	
@@ -120,6 +130,13 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
         m_networkConfigurationService = null;
     }
     
+	public void setSystemService(SystemService systemService) {
+		m_systemService = systemService;
+	}
+
+	public void unsetSystemService(SystemService systemService) {
+		m_systemService = null;
+	}
     
 	// ----------------------------------------------------------------
 	//
@@ -1236,7 +1253,91 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 	@Override
 	public boolean rollbackDefaultConfiguration() throws KuraException {
 		s_logger.debug("Recovering default configuration ...");
-		return LinuxNetworkUtil.recoverDefaultConfiguration();
+		
+		final class RollbackItem {
+			String m_src; String m_dst;
+			RollbackItem(String src, String dst) {
+				m_src = src; m_dst = dst;
+			}
+		}
+		
+		ArrayList<RollbackItem> rollbackItems = new ArrayList<RollbackItem>();
+				
+		if (m_systemService == null) {
+			return false;
+		}
+		
+		String dstDataDirectory = m_systemService.getKuraDataDirectory();
+		if (dstDataDirectory == null) {
+			return false;
+		}
+		
+		int ind = dstDataDirectory.lastIndexOf('/');
+		String srcDataDirectory = null;
+		if (ind >= 0) {
+			srcDataDirectory = "".concat(dstDataDirectory.substring(0, ind+1).concat(".data"));
+		}
+		
+		if (srcDataDirectory == null) {
+			return false;
+		}
+		
+		rollbackItems.add(new RollbackItem(srcDataDirectory + "/kuranet.conf", dstDataDirectory + "/kuranet.conf"));
+		rollbackItems.add(new RollbackItem(srcDataDirectory + "/firewall", "/etc/init.d/firewall"));
+		rollbackItems.add(new RollbackItem(srcDataDirectory + "/hostapd.conf", "/etc/hostapd.conf"));
+			
+		// TODO add other platforms ... 
+		if (OS_VERSION.equals(KuraConstants.Mini_Gateway.getImageName() + "_" + KuraConstants.Mini_Gateway.getImageVersion()) ||
+				OS_VERSION.equals(KuraConstants.Raspberry_Pi.getImageName()) || OS_VERSION.equals(KuraConstants.BeagleBone.getImageName())) {
+			// restore debian interface configuration
+			rollbackItems.add(new RollbackItem(srcDataDirectory + "/interfaces", "/etc/network/interfaces"));
+		} else {
+			// restore RedHat interface configuration
+			rollbackItems.add(new RollbackItem(srcDataDirectory + "/ifcfg-eth0", "/etc/sysconfig/network-scripts/ifcfg-eth0"));
+			rollbackItems.add(new RollbackItem(srcDataDirectory + "/ifcfg-eth1", "/etc/sysconfig/network-scripts/ifcfg-eth1"));
+			rollbackItems.add(new RollbackItem(srcDataDirectory + "/ifcfg-wlan0", "/etc/sysconfig/network-scripts/ifcfg-wlan0"));
+		}
+		rollbackItems.add(new RollbackItem(srcDataDirectory + "/dhcpd-eth0.conf", "/etc/dhcpd-eth0.conf"));
+		rollbackItems.add(new RollbackItem(srcDataDirectory + "/dhcpd-wlan0.conf", "/etc/dhcpd-wlan0.conf"));
+		
+		for (RollbackItem rollbackItem : rollbackItems) {
+			File srcFile = new File (rollbackItem.m_src);
+			File dstFile = new File (rollbackItem.m_dst);
+			if (srcFile.exists()) {
+				try {
+					copyFile(srcFile, dstFile);
+				} catch (IOException e) {
+					s_logger.error("Failed to recover {} file - {}", dstFile, e);
+				}
+			}
+		}
+		
+		m_networkConfigurationService.setNetworkConfiguration(m_networkConfigurationService.getNetworkConfiguration());
+			
+		return true;
+	}
+	
+	private void copyFile(File sourceFile, File destFile) throws IOException {
+	    if(!destFile.exists()) {
+	        destFile.createNewFile();
+	    }
+
+	    FileChannel source = null;
+	    FileChannel destination = null;
+
+	    try {
+	        source = new FileInputStream(sourceFile).getChannel();
+	        destination = new FileOutputStream(destFile).getChannel();
+	        destination.transferFrom(source, 0, source.size());
+	    }
+	    finally {
+	        if(source != null) {
+	            source.close();
+	        }
+	        if(destination != null) {
+	            destination.close();
+	        }
+	    }
 	}
 	
     @Override

@@ -46,7 +46,6 @@ public class BluetoothLeScanner implements BluetoothProcessListener {
 		if (m_proc != null) {
 			s_logger.info("Killing hcitool...");
 			BluetoothUtil.killCmd("hcitool", SIGINT);
-			m_proc.destroy();
 			set_scanRunning(false);
 		}
 		else

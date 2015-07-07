@@ -86,13 +86,11 @@ public class CryptoServiceImpl implements CryptoService {
 				Class<?> Base64Decoder = Class.forName("java.util.Base64$Decoder");
 				Method decodeMethod = Base64Decoder.getMethod("decode", String.class);
 				convertedData= decodeMethod.invoke(decoder, internalStringValue);
-			} catch (Exception e1) {
-				System.out.println("Error while decoding base 64 with Java 8 methods.");
+			} catch (Exception e1) {	
 			} 
-
 		} catch (Exception e) {
-
 		}
+		
 		if(convertedData != null){
 			return (byte[]) convertedData;
 		}
@@ -115,12 +113,11 @@ public class CryptoServiceImpl implements CryptoService {
 				Method decodeMethod = Base64Decoder.getMethod("encodeToString", byte[].class);
 				convertedData= decodeMethod.invoke(encoder, encryptedBytes);
 			} catch (Exception e1) {
-				System.out.println("Error while encoding base 64 with Java 8 methods.");
 			} 
 
 		} catch (Exception e) {
-
 		}
+		
 		if(convertedData != null){
 			return (String) convertedData;
 		}

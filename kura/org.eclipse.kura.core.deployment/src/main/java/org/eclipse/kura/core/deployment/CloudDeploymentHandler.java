@@ -21,6 +21,10 @@ import java.util.Date;
 import java.util.Dictionary;
 import java.util.Hashtable;
 
+
+import javax.xml.bind.JAXBException;
+
+import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloud.CloudClient;
 import org.eclipse.kura.cloud.CloudClientListener;
@@ -28,7 +32,7 @@ import org.eclipse.kura.cloud.CloudService;
 import org.eclipse.kura.cloud.CloudletTopic;
 import org.eclipse.kura.cloud.CloudletTopic.Method;
 import org.eclipse.kura.core.util.ThrowableUtil;
-import org.eclipse.kura.deployment.agent.DeploymentAgentService;
+import org.eclipse.kura.message.KuraNotifyPayload;
 import org.eclipse.kura.message.KuraPayload;
 import org.eclipse.kura.message.KuraRequestPayload;
 import org.eclipse.kura.message.KuraResponsePayload;
@@ -47,11 +51,35 @@ import org.osgi.service.event.EventHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+public class CloudDeploymentHandler{
+	
+	public static final String  APP_ID         = "DEPLOY-V2";
+	
+	public static final String  RESOURCE_PACKAGES = "packages";
+	public static final String  RESOURCE_BUNDLES  = "bundles";
+	
+	public static final String  RESOURCE_INSTALL   = "install";
+	public static final String  RESOURCE_UNINSTALL = "uninstall";
+	public static final String  RESOURCE_START     = "start";
+	public static final String  RESOURCE_STOP      = "stop";
+	public static final String  RESOURCE_DOWNLOAD   = "download";
+	
+	// Metrics of RESOURCE_INSTALL
+		public static final String  METRIC_INSTALL_COMMAND_URL      = "deploy.url";
+		public static final String  METRIC_INSTALL_COMMAND_FILENAME = "deploy.filename";
+		
+		// Metrics in the REPLY to RESOURCE_INSTALL	
+		public static final String  METRIC_INSTALL_REPLY_PKG_NAME    = "deploy.pkg.name";
+		public static final String  METRIC_INSTALL_REPLY_PKG_VERSION = "deploy.pkg.version";
+		
+		// Metrics in the REPLY to RESOURCE_DOWNLOAD
+		public static final String METRIC_DOWNLOAD_STATUS = "download.status";
+/*
 public class CloudDeploymentHandler implements EventHandler, CloudClientListener 
 {
 	private static Logger s_logger = LoggerFactory.getLogger(CloudDeploymentHandler.class);
 	
-	public static final String  APP_ID         = "DEPLOY-V1";
+	public static final String  APP_ID         = "DEPLOY-V2";
 	
 	// GET
 	public static final String  RESOURCE_PACKAGES = "packages";
@@ -62,6 +90,7 @@ public class CloudDeploymentHandler implements EventHandler, CloudClientListener
 	public static final String  RESOURCE_UNINSTALL = "uninstall";
 	public static final String  RESOURCE_START     = "start";
 	public static final String  RESOURCE_STOP      = "stop";
+	public static final String  RESOURCE_DOWNLOAD   = "download";
 	
 	// Metrics of RESOURCE_INSTALL
 	public static final String  METRIC_INSTALL_COMMAND_URL      = "deploy.url";
@@ -71,11 +100,20 @@ public class CloudDeploymentHandler implements EventHandler, CloudClientListener
 	public static final String  METRIC_INSTALL_REPLY_PKG_NAME    = "deploy.pkg.name";
 	public static final String  METRIC_INSTALL_REPLY_PKG_VERSION = "deploy.pkg.version";
 	
+	// Metrics in the REPLY to RESOURCE_DOWNLOAD
+	public static final String METRIC_DOWNLOAD_STATUS = "download.status";
+	
+	// Status description variables
+	public static final int DS_STATUS_SUCCESS = 0;
+	public static final int DS_ALREADY_IN_PROGRESS = DS_STATUS_SUCCESS +1;
+	public static final int DS_ALREADY_DONE = DS_ALREADY_IN_PROGRESS +1;
+	
 	//private final static String [] EVENT_TOPICS = new String[] {"*"};
 	//private final static String [] EVENT_TOPICS = new String[] {"org/osgi/service/deployment/*"};
 	private final static String [] EVENT_TOPICS = {
 		DeploymentAgentService.EVENT_INSTALLED_TOPIC,
-		DeploymentAgentService.EVENT_UNINSTALLED_TOPIC
+		DeploymentAgentService.EVENT_UNINSTALLED_TOPIC,
+		DeploymentAgentService.EVENT_PROGRESS_TOPIC
 		};
 	
 	private final static String SYS_PROP_REQ_ID = CloudDeploymentHandler.class.getPackage().getName() + "request.id";
@@ -86,6 +124,8 @@ public class CloudDeploymentHandler implements EventHandler, CloudClientListener
 	private static final int     DFLT_PUB_QOS  = 0;
 	private static final boolean DFLT_RETAIN   = false;
 	private static final int     DFLT_PRIORITY = 1;
+	
+	private static final int PUB_QOS_NOTIFY = 2;
 
 	private CloudService             m_cloudService;
 	private CloudClient   m_cloudClient;
@@ -170,8 +210,7 @@ public class CloudDeploymentHandler implements EventHandler, CloudClientListener
 		
 		Dictionary<String, String[]> d = new Hashtable<String, String[]>();
 		d.put(EventConstants.EVENT_TOPIC, EVENT_TOPICS);
-//		d.put(EventConstants.EVENT_FILTER,
-//		"(bundle.symbolicName=com.acme.*)" );
+
 		BundleContext bundleContext = componentContext.getBundleContext();
 		m_eventServiceRegistration = bundleContext.registerService(EventHandler.class.getName(), this, d);
 				
@@ -192,7 +231,6 @@ public class CloudDeploymentHandler implements EventHandler, CloudClientListener
 				
 		m_cloudClient.release();
 		m_eventServiceRegistration.unregister();
-		
 		System.clearProperty(SYS_PROP_PACKAGE_URL);
 		System.clearProperty(SYS_PROP_REQUESTER_CLIENT_ID);
 		System.clearProperty(SYS_PROP_REQ_ID);
@@ -216,6 +254,169 @@ public class CloudDeploymentHandler implements EventHandler, CloudClientListener
 		
 		m_bundleContext = null;
 	}
+
+	private void handleUninstalledEvent(Event event){
+
+		if (m_pendingUninstPackageName == null) {
+			s_logger.info("Ignore event because no request is pending");
+			return;
+		}
+
+		String packageName = (String) event.getProperty(DeploymentAgentService.EVENT_PACKAGE_NAME);
+		Boolean successful = (Boolean) event.getProperty(DeploymentAgentService.EVENT_SUCCESSFUL);
+		Exception ex = (Exception) event.getProperty(DeploymentAgentService.EVENT_EXCEPTION);
+
+		String successfully = successful ? "Successfully" : "Unsuccessfully";
+
+		s_logger.info("{} completed installation of package {}", successfully, packageName);
+
+		s_logger.info("Responding to command {}...", RESOURCE_UNINSTALL);
+
+		if (m_pendingUninstRequestId == null) {
+			s_logger.error("Unexpected null request ID associated to package {}", m_pendingUninstPackageName);
+			return;
+		}
+		
+		if (m_pendingUninstRequesterClientId == null) {
+			s_logger.error("Unexpected null requester client ID associated to package {}", m_pendingUninstPackageName);
+			return;
+		}
+
+		KuraResponsePayload response = null;
+		try {
+			int responseCode = successful ? KuraResponsePayload.RESPONSE_CODE_OK : KuraResponsePayload.RESPONSE_CODE_ERROR;
+
+			response = new KuraResponsePayload(responseCode);
+			response.setException(ex);
+			response.setTimestamp( new Date());
+			response.setBody(packageName.getBytes("UTF-8"));
+		} catch(Exception e) {
+			response = new KuraResponsePayload(e); 
+			response.setTimestamp(new Date());
+			s_logger.error("Error responding to command {} {}", RESOURCE_UNINSTALL, e);
+		}
+
+		try {
+			m_cloudClient.controlPublish(m_pendingUninstRequesterClientId,
+										 "REPLY" + "/" + m_pendingUninstRequestId, 
+										 response,
+										 DFLT_PUB_QOS, 
+										 DFLT_RETAIN,
+										 DFLT_PRIORITY);
+		}
+		catch (KuraException e) {
+			s_logger.error("Error publishing response for command {} {}", RESOURCE_UNINSTALL, e);
+		}
+
+		m_pendingUninstPackageName = null;
+		m_pendingUninstRequestId = null;
+		m_pendingUninstRequesterClientId = null;
+	
+	}
+	
+	private void handleInstalledEvent(Event event){
+
+		if (m_pendingInstPackageUrl == null) {
+			s_logger.info("Ignore event because no request is pending");
+			return;
+		}
+		
+		String packageName = (String) event.getProperty(DeploymentAgentService.EVENT_PACKAGE_NAME);
+		String packageVersion = (String) event.getProperty(DeploymentAgentService.EVENT_PACKAGE_VERSION);
+		String packageUrl = (String) event.getProperty(DeploymentAgentService.EVENT_PACKAGE_URL);
+		Boolean successful = (Boolean) event.getProperty(DeploymentAgentService.EVENT_SUCCESSFUL);
+		Exception ex = (Exception) event.getProperty(DeploymentAgentService.EVENT_EXCEPTION);
+		
+		String successfully = successful ? "Successfully" : "Unsuccessfully";
+		
+		s_logger.info("{} completed installation of package {}", successfully, packageUrl);
+		
+		s_logger.info("Responding to command {}...", RESOURCE_INSTALL);
+		
+		if (m_pendingInstRequestId == null) {
+			s_logger.error("Unexpected null request ID associated to package URL {}", m_pendingInstPackageUrl);
+			return;
+		}
+
+		if (m_pendingInstRequesterClientId == null) {
+			s_logger.error("Unexpected null requester client ID associated to package URL {}", m_pendingInstPackageUrl);
+			return;
+		}
+		
+		KuraResponsePayload response = null;
+		try {
+			int responseCode = successful ? KuraResponsePayload.RESPONSE_CODE_OK : KuraResponsePayload.RESPONSE_CODE_ERROR;
+			
+			response = new KuraResponsePayload(responseCode);
+			response.addMetric(METRIC_INSTALL_REPLY_PKG_NAME, packageName);
+			response.addMetric(METRIC_INSTALL_REPLY_PKG_VERSION, packageVersion);
+			response.setException(ex);
+			response.setTimestamp( new Date());
+			response.setBody(packageUrl.getBytes("UTF-8"));
+		} catch(Exception e) {
+			response = new KuraResponsePayload(e); 
+			response.setTimestamp(new Date());
+			s_logger.error("Error responding to command {} {}", RESOURCE_INSTALL, e);
+		}
+
+		try {
+			m_cloudClient.controlPublish(m_pendingInstRequesterClientId,
+										 "REPLY" + "/" + m_pendingInstRequestId, 
+									     response,
+									     DFLT_PUB_QOS, 
+									     DFLT_RETAIN,
+									     DFLT_PRIORITY);
+		}
+		catch (KuraException e) {
+			s_logger.error("Error publishing response for topic {} {}", RESOURCE_INSTALL, e);
+		}
+		
+		m_pendingInstPackageUrl = null;
+		m_pendingInstRequestId = null;
+		m_pendingInstRequesterClientId = null;
+	
+	}
+	
+	public void handleProgressEvent(Event event){
+
+		int progress = (Integer)event.getProperty(DeploymentAgentService.EVENT_CURRENT_PROGRESS);
+		int total = (Integer)event.getProperty(DeploymentAgentService.EVENT_TOTAL_SIZE);
+		String status = (String)event.getProperty(DeploymentAgentService.EVENT_PROGRESS_STATUS);
+		String clientId = (String)event.getProperty(DeploymentAgentService.EVENT_CLIENT_ID);
+		
+		s_logger.info("{}% downloaded", progress);
+
+		if (m_pendingInstRequestId == null) {
+			s_logger.error("Unexpected null request ID associated to package URL {}", m_pendingInstPackageUrl);
+			return;
+		}
+
+		if (m_pendingInstRequesterClientId == null) {
+			s_logger.error("Unexpected null requester client ID associated to package URL {}", m_pendingInstPackageUrl);
+			return;
+		}
+
+		KuraNotifyPayload notify = null;
+
+		notify = new KuraNotifyPayload(clientId);
+		notify.setTimestamp( new Date());
+		notify.setTransferSize(total);
+		notify.setTransferProgress(progress);
+		notify.setTransferStatus(status);
+		
+		try {
+			m_cloudClient.controlPublish(m_pendingInstRequesterClientId,
+					 					 APP_ID + "/NOTIFY/progress", 
+					 					 notify,
+										 PUB_QOS_NOTIFY, 
+										 DFLT_RETAIN,
+										 DFLT_PRIORITY);
+		}
+		catch (KuraException e) {
+			s_logger.error("Error publishing response for command {} {}", RESOURCE_DOWNLOAD, e);
+		}
+	
+	}
 	
 	@Override
 	public void handleEvent(Event event) {
@@ -233,119 +434,16 @@ public class CloudDeploymentHandler implements EventHandler, CloudClientListener
 		
 		if (topic.equals(DeploymentAgentService.EVENT_INSTALLED_TOPIC)) {
 			
-			if (m_pendingInstPackageUrl == null) {
-				s_logger.info("Ignore event because no request is pending");
-				return;
-			}
+			handleInstalledEvent(event);
 			
-			String packageName = (String) event.getProperty(DeploymentAgentService.EVENT_PACKAGE_NAME);
-			String packageVersion = (String) event.getProperty(DeploymentAgentService.EVENT_PACKAGE_VERSION);
-			String packageUrl = (String) event.getProperty(DeploymentAgentService.EVENT_PACKAGE_URL);
-			Boolean successful = (Boolean) event.getProperty(DeploymentAgentService.EVENT_SUCCESSFUL);
-			Exception ex = (Exception) event.getProperty(DeploymentAgentService.EVENT_EXCEPTION);
-			
-			String successfully = successful ? "Successfully" : "Unsuccessfully";
-			
-			s_logger.info("{} completed installation of package {}", successfully, packageUrl);
-			
-			s_logger.info("Responding to command {}...", RESOURCE_INSTALL);
-			
-			if (m_pendingInstRequestId == null) {
-				s_logger.error("Unexpected null request ID associated to package URL {}", m_pendingInstPackageUrl);
-				return;
-			}
-
-			if (m_pendingInstRequesterClientId == null) {
-				s_logger.error("Unexpected null requester client ID associated to package URL {}", m_pendingInstPackageUrl);
-				return;
-			}
-			
-			KuraResponsePayload response = null;
-			try {
-				int responseCode = successful ? KuraResponsePayload.RESPONSE_CODE_OK : KuraResponsePayload.RESPONSE_CODE_ERROR;
-				
-				response = new KuraResponsePayload(responseCode);
-				response.addMetric(METRIC_INSTALL_REPLY_PKG_NAME, packageName);
-				response.addMetric(METRIC_INSTALL_REPLY_PKG_VERSION, packageVersion);
-				response.setException(ex);
-				response.setTimestamp( new Date());
-				response.setBody(packageUrl.getBytes("UTF-8"));
-			} catch(Exception e) {
-				response = new KuraResponsePayload(e); 
-				response.setTimestamp(new Date());
-				s_logger.error("Error responding to command {} {}", RESOURCE_INSTALL, e);
-			}
-
-			try {
-				m_cloudClient.controlPublish(m_pendingInstRequesterClientId,
-											 "REPLY" + "/" + m_pendingInstRequestId, 
-										     response,
-										     DFLT_PUB_QOS, 
-										     DFLT_RETAIN,
-										     DFLT_PRIORITY);
-			}
-			catch (KuraException e) {
-				s_logger.error("Error publishing response for topic {} {}", RESOURCE_INSTALL, e);
-			}
-			
-			m_pendingInstPackageUrl = null;
-			m_pendingInstRequestId = null;
-			m_pendingInstRequesterClientId = null;
 		} else if (topic.equals(DeploymentAgentService.EVENT_UNINSTALLED_TOPIC)) {
-			if (m_pendingUninstPackageName == null) {
-				s_logger.info("Ignore event because no request is pending");
-				return;
-			}
-
-			String packageName = (String) event.getProperty(DeploymentAgentService.EVENT_PACKAGE_NAME);
-			Boolean successful = (Boolean) event.getProperty(DeploymentAgentService.EVENT_SUCCESSFUL);
-			Exception ex = (Exception) event.getProperty(DeploymentAgentService.EVENT_EXCEPTION);
-
-			String successfully = successful ? "Successfully" : "Unsuccessfully";
-
-			s_logger.info("{} completed installation of package {}", successfully, packageName);
-
-			s_logger.info("Responding to command {}...", RESOURCE_UNINSTALL);
-
-			if (m_pendingUninstRequestId == null) {
-				s_logger.error("Unexpected null request ID associated to package {}", m_pendingUninstPackageName);
-				return;
-			}
 			
-			if (m_pendingUninstRequesterClientId == null) {
-				s_logger.error("Unexpected null requester client ID associated to package {}", m_pendingUninstPackageName);
-				return;
-			}
-
-			KuraResponsePayload response = null;
-			try {
-				int responseCode = successful ? KuraResponsePayload.RESPONSE_CODE_OK : KuraResponsePayload.RESPONSE_CODE_ERROR;
-
-				response = new KuraResponsePayload(responseCode);
-				response.setException(ex);
-				response.setTimestamp( new Date());
-				response.setBody(packageName.getBytes("UTF-8"));
-			} catch(Exception e) {
-				response = new KuraResponsePayload(e); 
-				response.setTimestamp(new Date());
-				s_logger.error("Error responding to command {} {}", RESOURCE_UNINSTALL, e);
-			}
-
-			try {
-				m_cloudClient.controlPublish(m_pendingUninstRequesterClientId,
-											 "REPLY" + "/" + m_pendingUninstRequestId, 
-											 response,
-											 DFLT_PUB_QOS, 
-											 DFLT_RETAIN,
-											 DFLT_PRIORITY);
-			}
-			catch (KuraException e) {
-				s_logger.error("Error publishing response for command {} {}", RESOURCE_UNINSTALL, e);
-			}
-
-			m_pendingUninstPackageName = null;
-			m_pendingUninstRequestId = null;
-			m_pendingUninstRequesterClientId = null;
+			handleUninstalledEvent(event);
+			
+		} else if (topic.equals(DeploymentAgentService.EVENT_PROGRESS_TOPIC)) {
+			
+			handleProgressEvent(event);
+			
 		}
 	}
 
@@ -465,6 +563,113 @@ public class CloudDeploymentHandler implements EventHandler, CloudClientListener
 		
 		return response;
 	}	
+	
+	private boolean deploymentPackageAlreadyDownloaded(DeploymentPackageDownloadOptions options) throws KuraException{
+		
+		try {
+			String packageFilename = new StringBuilder()
+				.append(options.getDpName())
+				.append(File.separator)
+				.append(options.getDpVersion())
+				.append(".dp").toString();
+			File dp = File.createTempFile("dpa", null);
+			dp = new File(dp, packageFilename);
+			
+			return dp.exists();
+		} catch (Exception e) {
+			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+		}		
+
+	}
+	
+	private KuraResponsePayload doExecDownload(KuraRequestPayload request){
+		KuraResponsePayload response = null;
+		
+		DeploymentPackageDownloadOptions options;
+		try{
+			options = new DeploymentPackageDownloadOptions(request);
+		}catch(Exception ex){
+			s_logger.info("Malformed download request!");
+			response = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_ERROR);
+			response.setTimestamp(new Date());
+			try {
+				response.setBody("Malformed donwload request".getBytes("UTF-8"));
+			} catch (UnsupportedEncodingException e) {
+				// Ignore
+			}
+			response.setException(ex);
+			
+			return response;
+		}
+		
+		if (m_pendingInstPackageUrl != null) {
+			s_logger.info("Antother request seems still pending: {}. Checking if stale...", m_pendingInstPackageUrl);
+			
+			boolean isPending = m_deploymentAgentService.isInstallingDeploymentPackage(m_pendingInstPackageUrl);
+			if (isPending) {
+				s_logger.info("...it isn't");
+				response = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_ERROR);
+				response.setTimestamp(new Date());
+				try {
+					response.setBody("Only one request at a time is allowed".getBytes("UTF-8"));
+				} catch (UnsupportedEncodingException e) {
+					// Ignore
+				}
+				
+				return response;
+			}
+		}
+		
+		boolean alreadyDownloaded = false;
+		try{
+			alreadyDownloaded = deploymentPackageAlreadyDownloaded(options);
+		}catch(KuraException ex){
+			response = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_ERROR);
+			response.setException(ex);
+			response.setTimestamp(new Date());
+			try {
+				response.setBody("Error checking download status".getBytes("UTF-8"));
+			} catch (UnsupportedEncodingException e) {
+				// Ignore
+			}
+			return response;
+		}
+		
+		if(alreadyDownloaded){
+			response = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
+			response.addMetric(METRIC_DOWNLOAD_STATUS, DS_ALREADY_DONE);
+			return response;
+		}
+				
+		s_logger.info("About to download and install package at URL {}", options.getDeployUrl());
+		
+		try {
+			m_pendingInstPackageUrl = options.getDeployUrl();
+			m_pendingInstRequestId = request.getRequestId();
+			m_pendingInstRequesterClientId = request.getRequesterClientId();
+			options.setClientId(m_pendingInstRequesterClientId);
+						
+			s_logger.info("Installing package at URL: " + options.getDeployUrl());
+			m_deploymentAgentService.installDeploymentPackageAsync(options);
+		} catch (Exception e) {
+			
+			s_logger.error("Failed to download and install package at URL {}: {}", options.getDeployUrl(), e);
+			
+			m_pendingInstPackageUrl = null;
+			m_pendingInstRequestId = null;
+			m_pendingInstRequesterClientId = null;
+			
+			response = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_ERROR);
+			response.setTimestamp(new Date());
+			try {
+				response.setBody(e.getMessage().getBytes("UTF-8"));
+			} catch (UnsupportedEncodingException uee) {
+				// Ignore
+			}
+		}
+		
+		return response;
+	}
 	
 	private KuraResponsePayload doExecInstall(CloudletTopic requestTopic, KuraRequestPayload request) {
 		KuraResponsePayload response = null;
@@ -803,6 +1008,8 @@ public class CloudDeploymentHandler implements EventHandler, CloudClientListener
 			response = doExecStartStopBundle(requestTopic, request, true);
 		} else if (commandName.equals(RESOURCE_STOP)) {
 			response = doExecStartStopBundle(requestTopic, request, false);
+		} else if (commandName.equals(RESOURCE_DOWNLOAD)) {
+			response = doExecDownload(request);
 		} else {
 			s_logger.info("Command {} not found", commandName);
 			
@@ -909,4 +1116,7 @@ public class CloudDeploymentHandler implements EventHandler, CloudClientListener
 		// Ignore
 	}
 
+}
+
+*/
 }

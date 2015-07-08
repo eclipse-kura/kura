@@ -2,6 +2,7 @@ package org.eclipse.kura.linux.bluetooth;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.bluetooth.BluetoothAdapter;
+import org.eclipse.kura.bluetooth.BluetoothBeaconCommandListener;
 import org.eclipse.kura.bluetooth.BluetoothService;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
@@ -45,6 +46,17 @@ public class BluetoothServiceImpl implements BluetoothService {
 			return ba;
 		} catch (KuraException e) {
 			s_logger.error("Could not get bluetooth adapter", e);
+			return null;
+		}
+	}
+	
+	@Override
+	public BluetoothAdapter getBluetoothAdapter(String name, BluetoothBeaconCommandListener bbcl) {
+		try {
+			BluetoothAdapterImpl bbs = new BluetoothAdapterImpl(name, bbcl);
+			return bbs;
+		} catch (KuraException e) {
+			s_logger.error("Could not get bluetooth beacon service", e);
 			return null;
 		}
 	}

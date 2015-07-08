@@ -42,19 +42,14 @@
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.eclipse.kura</groupId>
-									<artifactId>javax.usb.api</artifactId>
-									<version>1.0.2</version>
+									<artifactId>org.usb4java</artifactId>
+									<version>1.2.0</version>
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.eclipse.kura</groupId>
-									<artifactId>javax.usb.common</artifactId>
+									<artifactId>javax.usb</artifactId>
 									<version>1.0.2</version>
-								</artifactItem>
-								<artifactItem>
-									<groupId>org.eclipse.kura</groupId>
-									<artifactId>javax.usb.linux</artifactId>
-									<version>1.0.3</version>
-								</artifactItem>
+								</artifactItem>	
 								<artifactItem>
 									<groupId>org.eclipse.kura</groupId>
 									<artifactId>org.eclipse.soda.dk.comm</artifactId>

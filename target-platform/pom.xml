@@ -10,9 +10,8 @@
 
 	<modules>
 		<module>com.codeminders.hidapi</module>
-		<module>javax.usb.api</module>
-		<module>javax.usb.common</module>
-		<module>javax.usb.linux</module>
+		<module>org.usb4java</module>
+		<module>javax.usb</module>		
 		<module>org.eclipse.soda.dk.comm</module>
 		<module>p2-repo-common</module>
 		<module>p2-repo-equinox_3.8.1</module>

@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.eclipse.kura</groupId>
+    <artifactId>target-platform</artifactId>
+    <version>1.3.0-SNAPSHOT</version>
+  </parent>
+
+    <groupId>org.eclipse.kura</groupId>
+    <artifactId>org.usb4java</artifactId>
+    <version>1.2.0</version>
+    <packaging>bundle</packaging>
+
+    <name>usb4java</name>
+
+
+    <properties>
+        <maven.compiler.source>1.6</maven.compiler.source>
+        <maven.compiler.target>1.6</maven.compiler.target>
+    </properties>
+
+    <dependencies>
+    
+    	<!--  
+        <dependency>
+            <groupId>javax.usb</groupId>
+            <artifactId>javax.usb.common</artifactId>
+            <version>1.0.2</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/src/lib/javax.usb.common-1.0.2.jar</systemPath>
+        </dependency>
+		-->
+       <dependency>
+            <groupId>org.usb4java</groupId>
+            <artifactId>org.usb4java</artifactId>
+            <version>1.2.0</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/src/lib/usb4java-1.2.0.jar</systemPath>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.usb4java</groupId>
+            <artifactId>org.usb4java.linux-arm</artifactId>
+            <version>1.2.0</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/src/lib/libusb4java-1.2.0-linux-arm.jar</systemPath>
+        </dependency>
+        
+         <dependency>
+            <groupId>org.usb4java</groupId>
+            <artifactId>org.usb4java.linux-x86_64</artifactId>
+            <version>1.2.0</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/src/lib/libusb4java-1.2.0-linux-x86_64.jar</systemPath>
+        </dependency>
+        
+         <dependency>
+            <groupId>org.usb4java</groupId>
+            <artifactId>org.usb4java.linux-x86</artifactId>
+            <version>1.2.0</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/src/lib/libusb4java-1.2.0-linux-x86.jar</systemPath>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.usb4java</groupId>
+            <artifactId>org.usb4java.osx-x86</artifactId>
+            <version>1.2.0</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/src/lib/libusb4java-1.2.0-osx-x86.jar</systemPath>
+        </dependency>
+        
+       <dependency>
+            <groupId>org.usb4java</groupId>
+            <artifactId>org.usb4java.osx-x86_64</artifactId>
+            <version>1.2.0</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/src/lib/libusb4java-1.2.0-osx-x86_64.jar</systemPath>
+        </dependency>
+        
+        
+        <dependency>
+            <groupId>org.usb4java</groupId>
+            <artifactId>org.usb4java.windows-x86_64</artifactId>
+            <version>1.2.0</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/src/lib/libusb4java-1.2.0-windows-x86_64.jar</systemPath>
+        </dependency>
+        
+         <dependency>
+            <groupId>org.usb4java</groupId>
+            <artifactId>org.usb4java.windows-x86</artifactId>
+            <version>1.2.0</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/src/lib/libusb4java-1.2.0-windows-x86.jar</systemPath>
+        </dependency>
+
+    </dependencies>
+
+
+    <build>
+    <resources>
+      <resource>
+        <directory>src/main/resources</directory>
+      </resource>
+      <resource>
+        <directory>.</directory>
+        <includes>
+          <include>plugin.xml</include>
+        </includes>
+      </resource>
+    </resources>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.7.2</version>
+                <configuration>
+                    <systemPropertyVariables>
+                        <java.library.path>${project.basedir}/src/main/lib</java.library.path>
+                    </systemPropertyVariables>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <version>2.3.5</version>
+                <extensions>true</extensions>
+                <configuration>
+		    <manifestLocation>META-INF</manifestLocation>
+                    <instructions>
+                        <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
+                        <Bundle-Name>${project.name}</Bundle-Name>
+                        <Bundle-Version>${project.version}</Bundle-Version>
+                        <Embed-Dependency>
+                            org.usb4java;groupId=org.usb4java;artifactId=org.usb4java;version=1.2.0;scope=runtime,
+                            org.usb4java.linux-arm;groupId=org.usb4java;artifactId=org.usb4java.linux-arm;version=1.2.0;scope=system,
+	                        org.usb4java.linux-x86_64;groupId=org.usb4java;artifactId=org.usb4java.linux-x86_64;version=1.2.0;scope=system,
+	                        org.usb4java.linux-x86;groupId=org.usb4java;artifactId=org.usb4java.linux-x86;version=1.2.0;scope=system,
+	                        org.usb4java.osx-x86_64;groupId=org.usb4java;artifactId=org.usb4java.osx-x86_64;version=1.2.0;scope=system,
+	                        org.usb4java.osx-x86;groupId=org.usb4java;artifactId=org.usb4java.osx-x86;version=1.2.0;scope=system,
+	                        org.usb4java.windows-x86_64;groupId=org.usb4java;artifactId=org.usb4java.windows-x86_64;version=1.2.0;scope=system,
+	                        org.usb4java.windows-x86;groupId=org.usb4java;artifactId=org.usb4java.windows-x86;version=1.2.0;scope=system
+                        </Embed-Dependency>
+                        <Include-Resource>
+                            ${project.basedir}/src/main,
+                            ${project.basedir}/about.html,
+                            about_files=${project.basedir}/about_files/
+                        </Include-Resource>
+                        <Export-Package>
+                            org.usb4java.*;version="1.2.0"
+                        </Export-Package>
+                    </instructions>
+                </configuration>
+            </plugin>
+            
+	    <plugin>
+        	<artifactId>maven-dependency-plugin</artifactId>
+        	<executions>
+        	  <execution>
+        	    <id>copy-dependencies</id>
+        	    <phase>package</phase>
+        	    <goals>
+        	      <goal>copy-dependencies</goal>
+        	    </goals>
+        	  </execution>
+        	</executions>
+	   </plugin>
+	   
+        </plugins>
+        <pluginManagement>
+        	<plugins>
+        		<!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
+        		<plugin>
+        			<groupId>org.eclipse.m2e</groupId>
+        			<artifactId>lifecycle-mapping</artifactId>
+        			<version>1.0.0</version>
+        			<configuration>
+        				<lifecycleMappingMetadata>
+        					<pluginExecutions>
+        						<pluginExecution>
+        							<pluginExecutionFilter>
+        								<groupId>
+        									org.apache.maven.plugins
+        								</groupId>
+        								<artifactId>
+        									maven-dependency-plugin
+        								</artifactId>
+        								<versionRange>
+        									[2.1,)
+        								</versionRange>
+        								<goals>
+        									<goal>
+        										copy-dependencies
+        									</goal>
+        								</goals>
+        							</pluginExecutionFilter>
+        							<action>
+        								<ignore></ignore>
+        							</action>
+        						</pluginExecution>
+        					</pluginExecutions>
+        				</lifecycleMappingMetadata>
+        			</configuration>
+        		</plugin>
+        	</plugins>
+        </pluginManagement>
+    </build>
+    <description>usb4java interface using libusb</description>
+</project>

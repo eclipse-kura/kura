@@ -67,4 +67,53 @@ public interface BluetoothAdapter {
 	 */
 	public BluetoothDevice getRemoteDevice(String address);
 	
+	/**
+	 * Start Beacon advertising for the given interface.
+	 * 
+	 */
+	public void startBeaconAdvertising();
+	
+	/**
+	 * Stop Beacon advertising for the given interface.
+	 * 
+	 */
+	public void stopBeaconAdvertising();
+
+	/**
+	 * Set the Beacon advertising interval for the given interface.
+	 * 
+	 * @param min 	Minimum time interval between advertises
+	 * @param max 	Maximum time interval between advertises
+
+	 */
+	public void setBeaconAdvertisingInterval(Integer min, Integer max);
+	
+	/**
+	 * Set the data in to the Beacon advertising packet for the given interface.
+	 * 
+	 * @param uuid            Proximity UUID
+	 * @param major           Groups beacons with the same proximity UUID
+	 * @param minor           Differentiates beacons with the same proximity UUID and major value
+	 * @param txPower         Transmitting power \@1m
+	 * @param companyCode     Indicates the manufacturer
+	 * @param LELimited       Indicates LE Limited Discoverable Mode (the device advertises for 30.72s and then stops)
+	 * @param LEGeneral       Indicates LE General Discoverable Mode (the device advertises indefinitely)
+	 * @param BR_EDRSupported Indicates whether BR/EDR is supported
+	 * @param LE_BRController Indicates whether LE and BR/EDR Controller operates simultaneously
+	 * @param LE_BRHost       Indicates whether LE and BR/EDR Host operates simultaneously
+	 * 
+	 */
+	public void setBeaconAdvertisingData(String uuid, Integer major, Integer minor, String companyCode, Integer txPower, boolean LELimited, boolean LEGeneral,
+			boolean BR_EDRSupported, boolean LE_BRController, boolean LE_BRHost);
+	
+	/**
+	 * Execute a command to the given interface.
+	 * 
+	 * @param ogf       OpCode Group Field
+	 * @param ocf       OpCode Command Field
+	 * @param parameter Parameters passed to the command
+	 * 
+	 */
+	public void ExecuteCmd(String ogf, String ocf, String parameter);
+	
 }

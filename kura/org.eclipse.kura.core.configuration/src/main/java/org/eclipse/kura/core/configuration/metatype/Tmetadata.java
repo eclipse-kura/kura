@@ -24,14 +24,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAnyAttribute;
-import javax.xml.bind.annotation.XmlAnyElement;
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlType;
 import javax.xml.namespace.QName;
 
 import org.eclipse.kura.configuration.metatype.Designate;
@@ -63,24 +55,13 @@ import org.w3c.dom.Element;
  * 
  * 
  */
-@XmlRootElement(name="MetaData", namespace="http://www.osgi.org/xmlns/metatype/v1.2.0")
-@XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "Tmetadata", propOrder = {
-    "ocd",
-    "designate",
-    "any"
-})
+
 public class Tmetadata implements MetaData 
 {
-    @XmlElement(name = "OCD", namespace="http://www.osgi.org/xmlns/metatype/v1.2.0")
     protected List<Tocd> ocd;
-    @XmlElement(name = "Designate", namespace="http://www.osgi.org/xmlns/metatype/v1.2.0")
     protected List<Tdesignate> designate;
-    @XmlAnyElement(lax = true)
     protected List<Object> any;
-    @XmlAttribute(name = "localization")
     protected String localization;
-    @XmlAnyAttribute
     private Map<QName, String> otherAttributes = new HashMap<QName, String>();
 
     /**
@@ -112,6 +93,12 @@ public class Tmetadata implements MetaData
         return new ArrayList<OCD>(this.ocd);
     }
 
+    public void setOCD(Tocd element) {
+        if (ocd == null) {
+            ocd = new ArrayList<Tocd>();
+        }
+        ocd.add(element);
+    }
     /**
      * Gets the value of the designate property.
      * 
@@ -139,6 +126,13 @@ public class Tmetadata implements MetaData
             designate = new ArrayList<Tdesignate>();
         }
         return new ArrayList<Designate>(this.designate);
+    }
+    
+    public void setDesignate(Tdesignate td) {
+        if (designate == null) {
+            designate = new ArrayList<Tdesignate>();
+        }
+        designate.add(td);
     }
 
     /**
@@ -169,6 +163,13 @@ public class Tmetadata implements MetaData
             any = new ArrayList<Object>();
         }
         return this.any;
+    }
+    
+    public void getAny(Object o) {
+        if (any == null) {
+            any = new ArrayList<Object>();
+        }
+        any.add(o);
     }
 
     /**

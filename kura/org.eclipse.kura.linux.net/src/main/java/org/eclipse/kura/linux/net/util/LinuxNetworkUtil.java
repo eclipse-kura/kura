@@ -1428,23 +1428,4 @@ public class LinuxNetworkUtil {
 
 		return false;
 	}
-	
-	public static boolean recoverDefaultConfiguration() throws KuraException {
-		boolean ret = false;
-		SafeProcess proc = null;
-		try {
-			proc = ProcessUtil.exec("/opt/eurotech/esf/recover_dflt_kura_config.sh");
-			if (proc.waitFor() != 0) {
-				s_logger.error("error executing command --- /opt/eurotech/esf/recover_dflt_kura_config.sh --- exit value = " + proc.exitValue());
-				throw new KuraException(KuraErrorCode.INTERNAL_ERROR);
-			}
-		} catch (IOException e) {
-			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
-		} catch (InterruptedException e) {
-			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
-		} finally {
-			if (proc != null) ProcessUtil.destroy(proc);
-		}
-		return ret;
-	}
 }

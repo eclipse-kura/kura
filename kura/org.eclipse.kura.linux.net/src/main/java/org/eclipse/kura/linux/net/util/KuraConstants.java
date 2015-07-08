@@ -16,6 +16,7 @@ public enum KuraConstants {
 	// image name, version
 	Mini_Gateway ("yocto", "1.2.1", "mini-gateway"),
 	ReliaGATE_15_10("yocto", "1.2.1", "reliagate-15-10"),
+	ReliaGATE_10_05("yocto", "1.2.1", "reliagate-10-05"),
 	Raspberry_Pi ("raspbian", "1.0.0", "raspberry-pi"),
 	BeagleBone ("debian", "1.0.0", "beaglebone");
 	

@@ -120,7 +120,7 @@
                  token="{org.eclipse.kura.linux.watchdog.version}" value="${org.eclipse.kura.linux.watchdog.version}"/>
         <propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
             <entry key="osgi.bundles" operation="+"
-                   value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.net.admin_${org.eclipse.kura.net.admin.version}.jar@4:start" />
+                   value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.net.admin_${org.eclipse.kura.net.admin.version}.jar@5:start" />
         </propertyfile>
         <propertyfile file="${project.build.directory}/${build.output.name}/dpa.properties"> 
             <entry key="kura"
@@ -268,11 +268,15 @@ fi
         <copy file="src/main/resources/common/kura.init.raspbian"
               tofile="${project.build.directory}/${build.output.name}/kura.init.raspbian" 
         	  failonerror="false" />
+        <copy file="src/main/resources/common/kura.service.edison"
+              tofile="${project.build.directory}/${build.output.name}/kura.service.edison" 
+        	  failonerror="false" />
         <replaceregexp file="${project.build.directory}/${build.output.name}/kura_install.sh" match="INSTALL_DIR=.*" replace="INSTALL_DIR=${kura.install.dir}" />
         <replaceregexp file="${project.build.directory}/${build.output.name}/recover_dflt_kura_config.sh" match="INSTALL_DIR=.*" replace="INSTALL_DIR=${kura.install.dir}" />
         <replaceregexp file="${project.build.directory}/${build.output.name}/kura.init.wrl" match="INSTALL_DIR=.*" replace="INSTALL_DIR=${kura.install.dir}" />
         <replaceregexp file="${project.build.directory}/${build.output.name}/kura.init.yocto" match="INSTALL_DIR=.*" replace="INSTALL_DIR=${kura.install.dir}" />
         <replaceregexp file="${project.build.directory}/${build.output.name}/kura.init.raspbian" match="INSTALL_DIR=.*" replace="INSTALL_DIR=${kura.install.dir}" />
+        <replaceregexp file="${project.build.directory}/${build.output.name}/kura.service.edison" match="INSTALL_DIR" replace="${kura.install.dir}" />
 
 
         <zip destfile="${project.build.directory}/${build.output.name}.zip">
@@ -286,7 +290,7 @@ fi
             <zipfileset file="${project.build.directory}/${build.output.name}/jdk.dio.policy"
                         prefix="${build.output.name}/kura/" />
 
-        		<zipfileset file="${project.build.directory}/${build.output.name}/jdk.dio.properties"
+        	<zipfileset file="${project.build.directory}/${build.output.name}/jdk.dio.properties"
                         prefix="${build.output.name}/kura/" />
 
             <zipfileset file="src/main/resources/common/kura_custom.properties"
@@ -306,6 +310,8 @@ fi
             <zipfileset file="${project.build.directory}/${build.output.name}/kura.init.yocto"
                         prefix="${build.output.name}/install" />
             <zipfileset file="${project.build.directory}/${build.output.name}/kura.init.raspbian"
+                        prefix="${build.output.name}/install" />
+            <zipfileset file="${project.build.directory}/${build.output.name}/kura.service.edison"
                         prefix="${build.output.name}/install" />
             <zipfileset file="src/main/resources/${build.name}/firewall.init"
                         prefix="${build.output.name}/install" />
@@ -535,7 +541,7 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
 	<target name="web-config" if="web.jar.present">
 		<propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
             	<entry key="osgi.bundles" operation="+"
-                   value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.web_${org.eclipse.kura.web.version}.jar@4:start" />
+                   value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.web_${org.eclipse.kura.web.version}.jar@5:start" />
         </propertyfile>
 	</target>
 

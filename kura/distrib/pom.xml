@@ -30,7 +30,6 @@
 		<kura.basedir>${project.parent.basedir}</kura.basedir>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<zip_workspace.prefix>user_workspace_archive_${project.version}</zip_workspace.prefix>
-		<kura.install.dir>/opt/eclipse</kura.install.dir>
 	</properties>
 
 	<repositories>
@@ -396,7 +395,7 @@
 		<profile>
             <id>intel-edison-nn</id>
 			<properties>
-				<kura.edison.install.dir>/home/root/eclipse</kura.edison.install.dir>
+				<kura.install.dir>/home/root/eclipse</kura.install.dir>
 			</properties>
             <activation>
                 <activeByDefault>true</activeByDefault>
@@ -462,7 +461,7 @@
                                         <property name="build.name" value="intel-edison-nn" />
                                         <property name="kura.arch" value="x86_64" />
                                         <property name="kura.mem.size" value="256m" />
-                                        <property name="kura.install.dir" value="${kura.edison.install.dir}" />
+                                        <property name="kura.install.dir" value="${kura.install.dir}" />
 										<property name="http.port" value="8080" />
                                         <ant antfile="${basedir}/src/main/ant/build_equinox_distrib.xml"
                                             target="dist-linux" />
@@ -479,6 +478,7 @@
 			<properties>
 				<project.raspbian.dependencies>hostapd, isc-dhcp-server, iw,
 					dos2unix, bind9, unzip, ethtool, telnet</project.raspbian.dependencies>
+				<kura.install.dir>/opt/eclipse</kura.install.dir>
 			</properties>
 			<activation>
 				<activeByDefault>true</activeByDefault>
@@ -610,6 +610,7 @@
 			<id>beaglebone-nn</id>
 			<properties>
 				<project.raspbian.dependencies.nn>dos2unix, unzip, telnet</project.raspbian.dependencies.nn>
+				<kura.install.dir>/opt/eclipse</kura.install.dir>
 			</properties>
 			<activation>
 				<activeByDefault>true</activeByDefault>
@@ -722,6 +723,7 @@
 			<properties>
 				<project.raspbian.dependencies>hostapd, isc-dhcp-server, iw,
 					dos2unix, bind9, unzip, ethtool, telnet</project.raspbian.dependencies>
+				<kura.install.dir>/opt/eclipse</kura.install.dir>
 			</properties>
 			<activation>
 				<activeByDefault>true</activeByDefault>
@@ -841,7 +843,8 @@
 		<profile>
 			<id>raspberry-pi-nn</id>
 			<properties>
-				<project.raspbian.dependencies.nn>dos2unix, unzip, telnet</project.raspbian.dependencies.nn> 
+				<project.raspbian.dependencies.nn>dos2unix, unzip, telnet</project.raspbian.dependencies.nn>
+				<kura.install.dir>/opt/eclipse</kura.install.dir> 
 			</properties> 
 			<activation>
 				<activeByDefault>true</activeByDefault>
@@ -951,6 +954,7 @@
 			<properties>
 				<project.raspbian.dependencies>hostapd, isc-dhcp-server, iw,
 					dos2unix, bind9, unzip, ethtool, telnet</project.raspbian.dependencies>
+				<kura.install.dir>/opt/eclipse</kura.install.dir>
 			</properties>
 			<activation>
 				<activeByDefault>true</activeByDefault>
@@ -1071,6 +1075,7 @@
 			<id>raspberry-pi-bplus-nn</id>
 			<properties>
 				<project.raspbian.dependencies.nn>dos2unix, unzip, telnet</project.raspbian.dependencies.nn> 
+				<kura.install.dir>/opt/eclipse</kura.install.dir>
 			</properties> 
 			<activation>
 				<activeByDefault>true</activeByDefault>
@@ -1181,6 +1186,7 @@
 			<properties>
 				<project.raspbian.dependencies>hostapd, isc-dhcp-server, iw,
 					dos2unix, bind9, unzip, ethtool, telnet</project.raspbian.dependencies>
+				<kura.install.dir>/opt/eclipse</kura.install.dir>
 			</properties>
 			<activation>
 				<activeByDefault>true</activeByDefault>
@@ -1292,6 +1298,7 @@
 			<id>raspberry-pi-2-nn</id>
 			<properties>
 				<project.raspbian.dependencies>dos2unix, unzip, telnet</project.raspbian.dependencies>
+				<kura.install.dir>/opt/eclipse</kura.install.dir>
 			</properties>
 			<activation>
 				<activeByDefault>true</activeByDefault>

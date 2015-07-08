@@ -13,23 +13,26 @@ package org.eclipse.kura.core.ssl;
 
 import java.util.Map;
 
-public class SslManagerServiceOptions
+class SslManagerServiceOptions
 {
-    private static final String  PROP_PROTOCOL       = "ssl.default.protocol";
-    private static final String  PROP_TRUST_STORE    = "ssl.default.trustStore";
-    private static final String  PROP_CIPHERS        = "ssl.default.cipherSuites";    
-    private static final String  PROP_HN_VERIFY      = "ssl.hostname.verification";
-    private static final String  PROP_TRUST_PASSWORD = "ssl.keystore.password";
+    static final String  PROP_PROTOCOL       = "ssl.default.protocol";
+    static final String  PROP_TRUST_STORE    = "ssl.default.trustStore";
+    static final String  PROP_CIPHERS        = "ssl.default.cipherSuites";    
+    static final String  PROP_HN_VERIFY      = "ssl.hostname.verification";
+    static final String  PROP_TRUST_PASSWORD = "ssl.keystore.password";
 
-    private static final String  PROP_DEFAULT_PROTOCOL    = "TLSv1";
-    private static final Boolean PROP_DEFAULT_HN_VERIFY   = true;
-    //:TODO Move hardcoded string in kura.properties and retrieve using SystemService
-    private static final String  PROP_DEFAULT_TRUST_STORE = "/opt/eurotech/esf/security/cacerts.ks";
+    static final String  PROP_DEFAULT_PROTOCOL      = "TLSv1";
+    static final Boolean PROP_DEFAULT_HN_VERIFY     = true;
+    static final String PROP_DEFAULT_TRUST_PASSWORD = "changeit";
 
     private Map<String,Object> m_properties;
     
     SslManagerServiceOptions(Map<String,Object> properties) {
         m_properties = properties;
+    }
+    
+    public Map<String,Object> getConfigurationProperties() {
+    	return m_properties;
     }
     
     /**
@@ -49,13 +52,13 @@ public class SslManagerServiceOptions
      * Returns the ssl.default.trustStore.
      * @return
      */
-    public String getSslTrustStore() {
+    public String getSslKeyStore() {
         if (m_properties != null &&
             m_properties.get(PROP_TRUST_STORE) != null &&
             m_properties.get(PROP_TRUST_STORE) instanceof String) {
             return (String) m_properties.get(PROP_TRUST_STORE);
         }
-        return PROP_DEFAULT_TRUST_STORE;
+        return null;
     }
     
     /**
@@ -80,8 +83,9 @@ public class SslManagerServiceOptions
             m_properties.get(PROP_TRUST_PASSWORD) != null &&
             m_properties.get(PROP_TRUST_PASSWORD) instanceof String) {
             return (String) m_properties.get(PROP_TRUST_PASSWORD);
+        } else {
+        	return PROP_DEFAULT_TRUST_PASSWORD;
         }
-        return null;
     }
     
     /**
@@ -95,18 +99,5 @@ public class SslManagerServiceOptions
     		return (Boolean) m_properties.get(PROP_HN_VERIFY);
     	}
     	return PROP_DEFAULT_HN_VERIFY;
-    }
-    
-    public String getPropDefaultTrustStore(){
-    	return PROP_DEFAULT_TRUST_STORE;
-    }
-
-	public String getPropTrustStore() {
-		return PROP_TRUST_STORE;
-	}
-
-	public String getPropTrustPassword() {
-		return PROP_TRUST_PASSWORD;
-	}
-    
+    }    
 }

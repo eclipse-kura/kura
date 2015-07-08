@@ -23,8 +23,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import javax.xml.bind.JAXBException;
-
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloud.CloudService;
@@ -205,25 +203,25 @@ public class CloudConfigurationHandler extends Cloudlet
 		
 		if (snapshotId != null) {
 			long sid = Long.parseLong(snapshotId);
-			XmlComponentConfigurations xmlConfigs = m_configService.loadSnapshot(sid);
+			XmlComponentConfigurations xmlConfigs = m_configService.loadEncryptedSnapshotFileContent(sid);
 			//
 			// marshall the response	
 			
-			List<ComponentConfigurationImpl> decryptedConfigs = new ArrayList<ComponentConfigurationImpl>();
+			//List<ComponentConfigurationImpl> decryptedConfigs = new ArrayList<ComponentConfigurationImpl>();
 			List<ComponentConfigurationImpl> configs = xmlConfigs.getConfigurations();
 			for (ComponentConfigurationImpl config : configs) {
 				if (config != null) {
 					try {
 						Map<String,Object> decryptedProperties= m_configService.decryptPasswords(config);
 						config.setProperties(decryptedProperties);
-						decryptedConfigs.add(config);
+						//decryptedConfigs.add(config);
 					}
 					catch (Throwable t) {
 						s_logger.warn("Error during snapshot password decryption");
 					}
 				}
 			}
-			xmlConfigs.setConfigurations(decryptedConfigs);
+			//xmlConfigs.setConfigurations(decryptedConfigs);
 			
 			
 			
@@ -368,8 +366,7 @@ public class CloudConfigurationHandler extends Cloudlet
 			}
 
 			String s = new String(reqPayload.getBody(), "UTF-8");
-			s_logger.info("Received new Configuration...");
-			s_logger.info(s);
+			s_logger.info("Received new Configuration");
 			
 			StringReader sr = new StringReader(s);
 			xmlConfigs = XmlUtil.unmarshal(sr, XmlComponentConfigurations.class);
@@ -449,7 +446,7 @@ public class CloudConfigurationHandler extends Cloudlet
 		StringWriter sw = new StringWriter();
 		try {
 			XmlUtil.marshal(o, sw);
-		} catch (JAXBException e) {
+		} catch (Exception e) {
 			s_logger.error("Error marshalling snapshots: {}", e);
 			throw new KuraException(KuraErrorCode.CONFIGURATION_SNAPSHOT_LOADING, e);
 		}

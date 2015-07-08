@@ -13,12 +13,10 @@ package org.eclipse.kura.core.configuration;
 
 import java.util.List;
 
-import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  * Utility class to serialize a set of snapshot ids.
  */
-@XmlRootElement(name="snapshot-ids")
 public class XmlSnapshotIdResult 
 {
 	private List<Long> snapshotIds;

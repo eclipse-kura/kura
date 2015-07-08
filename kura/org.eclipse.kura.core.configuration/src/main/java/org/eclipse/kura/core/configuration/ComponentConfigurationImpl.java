@@ -13,29 +13,15 @@ package org.eclipse.kura.core.configuration;
 
 import java.util.Map;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlElementRef;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
-
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.core.configuration.metatype.Tocd;
 
-@XmlRootElement(name="configuration")
-@XmlAccessorType(XmlAccessType.FIELD)
 public class ComponentConfigurationImpl implements ComponentConfiguration 
 {
-	@XmlAttribute(name="pid")
 	protected String pid;
 	
-	@XmlElementRef
 	protected Tocd definition;
 
-	@XmlElement(name="properties")
-	@XmlJavaTypeAdapter(XmlConfigPropertiesAdapter.class)
 	protected Map<String,Object> properties;
 
 	// Required by JAXB

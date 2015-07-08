@@ -54,7 +54,7 @@ public class DeviceSnapshotsServlet extends HttpServlet
 
 				long sid = Long.parseLong(snapshotId);
 				List<ComponentConfiguration> configs = cs.getSnapshot(sid);
-								
+					
 				// build a list of configuration which can be marshalled in XML
 				List<ComponentConfigurationImpl> configImpls = new ArrayList<ComponentConfigurationImpl>();
 				for (ComponentConfiguration config : configs) {

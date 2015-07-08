@@ -310,6 +310,7 @@
 				<configuration>
 					<webappDirectory>${webappDirectory}</webappDirectory>
 					<archive>
+						<compress>false</compress>
 						<manifestFile>META-INF/MANIFEST.MF</manifestFile>
 					</archive>
 				</configuration>
@@ -344,6 +345,9 @@
 							<descriptors>
 								<descriptor>src/main/assembly/bundle.xml</descriptor>
 							</descriptors>
+							<archiverConfig>
+            					<compress>false</compress>
+        					</archiverConfig>
 						</configuration>
 					</execution>
 					<execution>
@@ -361,6 +365,9 @@
 							<descriptors>
 								<descriptor>src/main/assembly/bundle.xml</descriptor>
 							</descriptors>
+							<archiverConfig>
+            					<compress>false</compress>
+        					</archiverConfig>
 						</configuration>
 					</execution>
 				</executions>

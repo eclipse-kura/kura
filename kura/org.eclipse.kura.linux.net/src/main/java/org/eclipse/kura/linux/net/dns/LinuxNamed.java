@@ -184,10 +184,14 @@ public class LinuxNamed {
 			if (OS_VERSION.equals(KuraConstants.Mini_Gateway.getImageName() + "_" + KuraConstants.Mini_Gateway.getImageVersion())) {
 				result = LinuxProcessUtil.start("/etc/init.d/bind start");
 			} 
+			else if (OS_VERSION.equals(KuraConstants.ReliaGATE_10_05.getImageName() + "_" + KuraConstants.ReliaGATE_10_05.getImageVersion())) {
+				result = LinuxProcessUtil.start("/etc/init.d/bind start");
+			} 
 			else if (OS_VERSION.equals(KuraConstants.Raspberry_Pi.getImageName()) || OS_VERSION.equals(KuraConstants.BeagleBone.getImageName())) {
 				result = LinuxProcessUtil.start("/etc/init.d/bind9 start");
 			}
 			else {
+				s_logger.info("Linux named enable fallback");
 				result = LinuxProcessUtil.start("/etc/init.d/named start");
 			}
 			if(result == 0) {

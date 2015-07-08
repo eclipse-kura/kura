@@ -25,6 +25,12 @@ echo "Installing Kura..." > $LOG 2>&1
 #Kill JVM and monit for installation
 killall monit java >> $LOG 2>&1
 
+#Stop and disable Kura for Intel Edison
+systemctl stop kura.service >> $LOG 2>&1
+systemctl disable kura.service >> $LOG 2>&1
+systemctl daemon-reload >> $LOG 2>&1
+rm -fr /etc/systemd/system/kura.service >> $LOG 2>&1
+
 #clean up old installation if present
 rm -fr /opt/eclipse/data >> $LOG 2>&1
 rm -fr /opt/eclipse/esf* >> $LOG 2>&1

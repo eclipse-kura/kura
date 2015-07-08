@@ -58,7 +58,12 @@ sed "$EXCLUDE_SED" $REMOVE_LIST > $UPGRADE_REMOVE
 tar czvf $UPGRADE_ZIP.tar.gz $UPGRADE_ZIP $UPGRADE_REMOVE
 
 # Populate variables in extract script
-sed "s/^OLD_VERSION=.*/OLD_VERSION=$OLD_VERSION/;s|^BASE_DIR=.*|BASE_DIR=$BASE_DIR|;s/^INSTALL_DIR=.*/INSTALL_DIR=$INSTALL_DIR/;s/^REMOVE_LIST=.*/REMOVE_LIST=$UPGRADE_REMOVE/" ../src/main/sh/extract_upgrade.sh > $TARGET_DIR/extract_upgrade.sh
+if [[ $BUILD_NAME == *"edison"* ]]
+then
+	sed "s/^OLD_VERSION=.*/OLD_VERSION=$OLD_VERSION/;s|^BASE_DIR=.*|BASE_DIR=$BASE_DIR|;s/^INSTALL_DIR=.*/INSTALL_DIR=$INSTALL_DIR/;s/^REMOVE_LIST=.*/REMOVE_LIST=$UPGRADE_REMOVE/;s/^ABSOLUTE_PATH=\`readlink -m \$0\`/ABSOLUTE_PATH=\`readlink -f \$0\`/" ../src/main/sh/extract_upgrade.sh > $TARGET_DIR/extract_upgrade.sh
+else
+	sed "s/^OLD_VERSION=.*/OLD_VERSION=$OLD_VERSION/;s|^BASE_DIR=.*|BASE_DIR=$BASE_DIR|;s/^INSTALL_DIR=.*/INSTALL_DIR=$INSTALL_DIR/;s/^REMOVE_LIST=.*/REMOVE_LIST=$UPGRADE_REMOVE/" ../src/main/sh/extract_upgrade.sh > $TARGET_DIR/extract_upgrade.sh
+fi
 
 cat extract_upgrade.sh $UPGRADE_ZIP.tar.gz > $OUTPUT_NAME
 chmod +x $OUTPUT_NAME

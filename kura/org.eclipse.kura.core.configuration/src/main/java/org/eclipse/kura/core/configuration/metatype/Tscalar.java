@@ -19,9 +19,6 @@
 
 package org.eclipse.kura.core.configuration.metatype;
 
-import javax.xml.bind.annotation.XmlEnum;
-import javax.xml.bind.annotation.XmlEnumValue;
-import javax.xml.bind.annotation.XmlType;
 
 
 /**
@@ -47,29 +44,17 @@ import javax.xml.bind.annotation.XmlType;
  * </pre>
  * 
  */
-@XmlEnum
-@XmlType(name = "Tscalar")
 public enum Tscalar 
 {
-    @XmlEnumValue("String")
     STRING("String"),
-    @XmlEnumValue("Long")
     LONG("Long"),
-    @XmlEnumValue("Double")
     DOUBLE("Double"),
-    @XmlEnumValue("Float")
     FLOAT("Float"),
-    @XmlEnumValue("Integer")
     INTEGER("Integer"),
-    @XmlEnumValue("Byte")
     BYTE("Byte"),
-    @XmlEnumValue("Char")
     CHAR("Char"),
-    @XmlEnumValue("Boolean")
     BOOLEAN("Boolean"),
-    @XmlEnumValue("Short")
     SHORT("Short"),
-    @XmlEnumValue("Password")
     PASSWORD("Password");
     private final String value;
 

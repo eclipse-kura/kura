@@ -11,47 +11,34 @@
  */
 package org.eclipse.kura.core.configuration;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlEnum;
-import javax.xml.bind.annotation.XmlEnumValue;
 
 
 /**
  * Helper class to serialize a property in XML.
  */
-@XmlAccessorType(XmlAccessType.FIELD)
 public class XmlConfigPropertyAdapted 
 {
-	@XmlEnum
 	public enum ConfigPropertyType {
-		@XmlEnumValue("String")    stringType,
-		@XmlEnumValue("Long")      longType,
-		@XmlEnumValue("Double")    doubleType,
-		@XmlEnumValue("Float")     floatType,
-		@XmlEnumValue("Integer")   integerType,
-		@XmlEnumValue("Byte")      byteType,
-		@XmlEnumValue("Char")      charType,
-		@XmlEnumValue("Boolean")   booleanType,
-		@XmlEnumValue("Short")     shortType,
-		@XmlEnumValue("Password")  passwordType
+		stringType,
+		longType,
+		doubleType,
+		floatType,
+		integerType,
+		byteType,
+		charType,
+		booleanType,
+		shortType,
+		passwordType
 	}
 
-	@XmlAttribute(name="name")
 	private String             name;
 
-	@XmlAttribute(name="array")
 	private boolean            array;
 	
-	@XmlAttribute(name="encrypted")
 	private boolean            encrypted;
 
-	@XmlAttribute(name="type")
 	private ConfigPropertyType type;
 
-	@XmlElement(name="value")
 	private String[]           values;
 	
 	
@@ -64,7 +51,7 @@ public class XmlConfigPropertyAdapted
 	{
 		super();
 
-		this.name	   = name;
+		this.name      = name;
 		this.type      = type;
 		this.values    = values;
 		this.encrypted = false;   

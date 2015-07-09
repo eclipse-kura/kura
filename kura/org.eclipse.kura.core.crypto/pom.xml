@@ -38,7 +38,10 @@
                                 <artifactId>tycho-packaging-plugin</artifactId>
                                 <version>${tycho-version}</version>
                                 <configuration>
-                                        <format>'${kura.build.version}'</format>
+                                	<archive>
+                						<compress>false</compress>
+                					</archive>
+                                	<format>'${kura.build.version}'</format>
                                 </configuration>
                                 <executions>
                                         <execution>

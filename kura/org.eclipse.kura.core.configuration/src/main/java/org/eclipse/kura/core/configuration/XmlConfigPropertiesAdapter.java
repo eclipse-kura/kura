@@ -17,7 +17,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import javax.xml.bind.annotation.adapters.XmlAdapter;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.Password;
@@ -30,9 +29,8 @@ import org.osgi.framework.ServiceReference;
 /**
  * Helper class to serialize a set of properties in XML.
  */
-public class XmlConfigPropertiesAdapter extends XmlAdapter<XmlConfigPropertiesAdapted,Map<String,Object>> 
+public class XmlConfigPropertiesAdapter
 {
-	@Override
 	public XmlConfigPropertiesAdapted marshal(Map<String,Object> props) 
 		throws Exception 
 	{
@@ -232,8 +230,7 @@ public class XmlConfigPropertiesAdapter extends XmlAdapter<XmlConfigPropertiesAd
 		return result;
 	}
 
-	
-	@Override
+
 	public Map<String,Object> unmarshal(XmlConfigPropertiesAdapted adaptedPropsAdapted) 
 		throws Exception 
 	{

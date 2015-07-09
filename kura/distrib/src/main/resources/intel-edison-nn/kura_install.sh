@@ -17,8 +17,7 @@ INSTALL_DIR=/home/root/eclipse
 ln -sf ${INSTALL_DIR}/kura_* ${INSTALL_DIR}/kura
 
 #set up Kura init
-cp ${INSTALL_DIR}/kura/install/kura.init.raspbian /etc/init.d/kura
-chmod +x /etc/init.d/kura
+cp ${INSTALL_DIR}/kura/install/kura.service.edison /etc/systemd/system/kura.service
 chmod +x ${INSTALL_DIR}/kura/bin/*.sh
 
 #set up runlevels to start/stop Kura by default
@@ -27,3 +26,8 @@ update-rc.d kura defaults
 #set up logrotate - no need to restart as it is a cronjob
 cp ${INSTALL_DIR}/kura/install/logrotate.conf /etc/logrotate.conf
 cp ${INSTALL_DIR}/kura/install/kura.logrotate /etc/logrotate.d/kura
+
+#change ps command in start scripts
+sed -i 's/ps ax/ps/g' ${INSTALL_DIR}/kura/bin/start_kura.sh
+sed -i 's/ps ax/ps/g' ${INSTALL_DIR}/kura/bin/start_kura_background.sh
+sed -i 's/ps ax/ps/g' ${INSTALL_DIR}/kura/bin/start_kura_debug.sh

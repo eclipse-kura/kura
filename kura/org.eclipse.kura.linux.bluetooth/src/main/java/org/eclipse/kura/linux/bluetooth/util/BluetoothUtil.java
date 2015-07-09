@@ -3,6 +3,7 @@ package org.eclipse.kura.linux.bluetooth.util;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -199,6 +200,29 @@ public class BluetoothUtil {
 		String[] command = { HCITOOL, "-i", name, cmd };
 		BluetoothProcess proc = null;
 		try {
+			s_logger.debug("Command executed : " + Arrays.toString(command));
+			proc = exec(command, listener);
+		} catch (Exception e) {
+			s_logger.error("Error executing command: " + command, e);
+		}
+		
+		return proc;
+	}
+	
+	/*
+	 * Method to utilize BluetoothProcess and the hcitool utility. These processes run indefinitely, so the
+	 * BluetoothProcessListener is used to receive output from the process. 
+	 */
+	public static BluetoothProcess hcitoolCmd (String name, String[] cmd, BluetoothProcessListener listener) {
+		String[] command = new String[3 + cmd.length];
+		command[0] = HCITOOL;
+		command[1] = "-i";
+		command[2] = name;
+		for (int i=0; i < cmd.length; i++)
+			command[i+3] = cmd[i];
+		BluetoothProcess proc = null;
+		try {
+			s_logger.debug("Command executed : " + Arrays.toString(command));
 			proc = exec(command, listener);
 		} catch (Exception e) {
 			s_logger.error("Error executing command: " + command, e);

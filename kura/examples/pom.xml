@@ -44,6 +44,7 @@
 				<module>org.eclipse.kura.example.serial.publisher</module>
 				<module>org.eclipse.kura.example.gpio</module>
 				<module>org.eclipse.kura.example.ble.tisensortag</module>
+				<module>org.eclipse.kura.example.beacon</module>
 			</modules>
 		</profile>
 		<profile>
@@ -61,6 +62,7 @@
 				<module>org.eclipse.kura.example.publisher</module>
 				<module>org.eclipse.kura.example.serial.publisher</module>
 				<module>org.eclipse.kura.example.ble.tisensortag</module>
+				<module>org.eclipse.kura.example.beacon</module>
 			</modules>
 		</profile>
 	</profiles>

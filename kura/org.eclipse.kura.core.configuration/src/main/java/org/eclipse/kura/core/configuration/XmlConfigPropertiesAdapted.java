@@ -11,17 +11,12 @@
  */
 package org.eclipse.kura.core.configuration;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
 
 /**
  * Helper class to serialize a property in XML.
  */
-@XmlAccessorType(XmlAccessType.FIELD)
 public class XmlConfigPropertiesAdapted 
 {
-	@XmlElement(name="property")
 	private XmlConfigPropertyAdapted[] properties;
 	
 	public XmlConfigPropertiesAdapted()

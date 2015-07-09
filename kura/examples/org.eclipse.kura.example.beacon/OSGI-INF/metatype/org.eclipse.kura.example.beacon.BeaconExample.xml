@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
+    <OCD id="org.eclipse.kura.example.beacon.BeaconExample"
+         name="BeaconExample" 
+         description="Simple Beacon example.">
+         
+        <AD id="enableAdvertising"
+            name="enableAdvertising"
+            type="Boolean"
+            cardinality="0"
+            required="true"
+            default="false"
+            description="Enable Beacon advertising."/>
+
+         <AD id="minBeaconInterval"
+            name="minBeaconInterval"
+            type="Integer"
+            cardinality="0"
+            required="true"
+            default="1000"
+            description="Minimum time interval between beacons (milliseconds)."/>
+            
+        <AD id="maxBeaconInterval"
+            name="maxBeaconInterval"
+            type="Integer"
+            cardinality="0"
+            required="true"
+            default="1000"
+            description="Maximum time interval between beacons (milliseconds)."/>
+
+        <AD id="uuid"
+            name="uuid"
+            type="String"
+            cardinality="0"
+            required="true"
+            default=""
+            description="128-bit uuid for beacon advertising expressed as hex string."/>
+
+        <AD id="major"  
+            name="major"
+            type="Integer"
+            cardinality="0" 
+            required="true"
+            default="0" 
+            description="Major value."/>
+
+        <AD id="minor"  
+            name="minor"
+            type="Integer"
+            cardinality="0" 
+            required="true"
+            default="0" 
+            description="Minor value."/>
+
+        <AD id="companyCode"
+            name="companyCode"
+            type="String"
+            cardinality="0"
+            required="true"
+            default="0000"
+            description="16-bit company code as hex string."/>
+                        
+         <AD id="txPower"
+            name="txPower"
+            type="Integer"
+            cardinality="0"
+            required="true"
+            default="00"
+            description="Transmission power measured at 1m away from the beacon expressed in dBm."/>
+            
+        <AD id="LELimited"
+            name="LELimited"
+            type="Boolean"
+            cardinality="0"
+            required="true"
+            default="false"
+            description="LE Discoverable Mode. Set false to advertise for 30.72s and then stops. Set true to advertise indefinitely."/>
+
+        <AD id="BR_EDRSupported"
+            name="BR_EDRSupported"
+            type="Boolean"
+            cardinality="0"
+            required="true"
+            default="false"
+            description="Indicates whether BR/EDR is supported"/>
+                        
+        <AD id="LE_BRController"
+            name="LE_BRController"
+            type="Boolean"
+            cardinality="0"
+            required="true"
+            default="true"
+            description="Indicates whether LE and BR/EDR Controller operates simultaneously"/>
+            
+        <AD id="LE_BRHost"
+            name="LE_BRHost"
+            type="Boolean"
+            cardinality="0"
+            required="true"
+            default="true"
+            description="Indicates whether LE and BR/EDR Host operates simultaneously"/>
+            
+        <AD id="iname"
+            name="iname"
+            type="String"
+            cardinality="0"
+            required="true"
+            default="hci0"
+            description="Name of bluetooth adapter."/>
+                    
+    </OCD>
+
+    <Designate pid="org.eclipse.kura.example.beacon.BeaconExample">
+        <Object ocdref="org.eclipse.kura.example.beacon.BeaconExample"/>
+    </Designate>
+</MetaData>

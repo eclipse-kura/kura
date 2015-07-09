@@ -16,5 +16,4 @@
 // Generated on: 2012.11.25 at 06:05:15 PM CET 
 //
 
-@javax.xml.bind.annotation.XmlSchema(namespace = "http://www.osgi.org/xmlns/metatype/v1.2.0")
 package org.eclipse.kura.core.configuration.metatype;

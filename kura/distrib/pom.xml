@@ -395,7 +395,7 @@
 		<profile>
             <id>intel-edison</id>
 			<properties>
-				<kura.edison.install.dir>/home/root/eclipse</kura.edison.install.dir>
+				<kura.install.dir>/home/root/eclipse</kura.install.dir>
 			</properties>
             <activation>
                 <activeByDefault>true</activeByDefault>

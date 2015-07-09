@@ -10,11 +10,11 @@
   </parent>
 
     <groupId>org.eclipse.kura</groupId>
-    <artifactId>javax.usb</artifactId>
-    <version>1.0.2</version>
+    <artifactId>usb4java-javax</artifactId>
+    <version>1.0.0</version>
     <packaging>bundle</packaging>
 
-    <name>javax.usb</name>
+    <name>usb4java-javax</name>
 
 
     <properties>
@@ -24,15 +24,6 @@
 
     <dependencies>
     
-    	<!--  
-        <dependency>
-            <groupId>javax.usb</groupId>
-            <artifactId>javax.usb.common</artifactId>
-            <version>1.0.2</version>
-            <scope>system</scope>
-            <systemPath>${basedir}/src/lib/javax.usb.common-1.0.2.jar</systemPath>
-        </dependency>
-		-->
        <dependency>
             <groupId>javax.usb</groupId>
             <artifactId>usb-api</artifactId>
@@ -157,5 +148,5 @@
         	</plugins>
         </pluginManagement>
     </build>
-    <description>javax.usb API using usb4java</description>
+    <description>javax.usb 1.0.2 API using usb4java</description>
 </project>

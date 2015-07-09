@@ -47,8 +47,8 @@
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.eclipse.kura</groupId>
-									<artifactId>javax.usb</artifactId>
-									<version>1.0.2</version>
+									<artifactId>usb4java-javax</artifactId>
+									<version>1.0.0</version>
 								</artifactItem>	
 								<artifactItem>
 									<groupId>org.eclipse.kura</groupId>

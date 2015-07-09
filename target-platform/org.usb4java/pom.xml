@@ -11,7 +11,7 @@
 
     <groupId>org.eclipse.kura</groupId>
     <artifactId>org.usb4java</artifactId>
-    <version>1.2.0</version>
+    <version>1.0.0</version>
     <packaging>bundle</packaging>
 
     <name>usb4java</name>
@@ -209,5 +209,6 @@
         	</plugins>
         </pluginManagement>
     </build>
-    <description>usb4java interface using libusb</description>
+    <description>usb4java 1.2.0  libraries using libusb</description>
+    <url>usb4java.org/</url>
 </project>

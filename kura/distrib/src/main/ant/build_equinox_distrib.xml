@@ -47,6 +47,11 @@
             <entry key="kura.home"   value="${kura.install.dir}/kura/kura" />
             <entry key="kura.plugins"   value="${kura.install.dir}/kura/kura/plugins" />
             <entry key="kura.packages"   value="${kura.install.dir}/kura/kura/packages" />
+
+	    <entry key="kura.data"   value="${kura.install.dir}/kura/data" />
+	    <entry key="kura.snapshots"   value="${kura.install.dir}/kura/data/snapshots" />
+	    <entry key="kura.style.dir"   value="${kura.install.dir}/kura/console/skin" />
+
             <entry key="version"       value="${kura.version}" />
             <entry key="build.version" value="${buildNumber}" />
             <entry key="build.number"  value="${build.name}-${buildNumber}" />
@@ -257,8 +262,6 @@ fi
     	<!-- Populate parameters -->
         <copy file="src/main/resources/${build.name}/kura_install.sh"
               tofile="${project.build.directory}/${build.output.name}/kura_install.sh" />
-        <copy file="src/main/resources/${build.name}/recover_dflt_kura_config.sh"
-              tofile="${project.build.directory}/${build.output.name}/recover_dflt_kura_config.sh" />
         <copy file="src/main/resources/common/kura.init.wrl"
               tofile="${project.build.directory}/${build.output.name}/kura.init.wrl"
               failonerror="false" />
@@ -269,7 +272,6 @@ fi
               tofile="${project.build.directory}/${build.output.name}/kura.init.raspbian" 
         	  failonerror="false" />
         <replaceregexp file="${project.build.directory}/${build.output.name}/kura_install.sh" match="INSTALL_DIR=.*" replace="INSTALL_DIR=${kura.install.dir}" />
-        <replaceregexp file="${project.build.directory}/${build.output.name}/recover_dflt_kura_config.sh" match="INSTALL_DIR=.*" replace="INSTALL_DIR=${kura.install.dir}" />
         <replaceregexp file="${project.build.directory}/${build.output.name}/kura.init.wrl" match="INSTALL_DIR=.*" replace="INSTALL_DIR=${kura.install.dir}" />
         <replaceregexp file="${project.build.directory}/${build.output.name}/kura.init.yocto" match="INSTALL_DIR=.*" replace="INSTALL_DIR=${kura.install.dir}" />
         <replaceregexp file="${project.build.directory}/${build.output.name}/kura.init.raspbian" match="INSTALL_DIR=.*" replace="INSTALL_DIR=${kura.install.dir}" />
@@ -293,9 +295,6 @@ fi
                         prefix="${build.output.name}/kura/" />
 
             <zipfileset file="${project.build.directory}/${build.output.name}/kura_install.sh"
-                        prefix="${build.output.name}/install/" />
-
-            <zipfileset file="${project.build.directory}/${build.output.name}/recover_dflt_kura_config.sh"
                         prefix="${build.output.name}/install/" />
 
             <zipfileset file="src/main/resources/${build.name}/kuranet.conf"
@@ -334,7 +333,24 @@ fi
                         prefix="${build.output.name}/install" />
             <zipfileset file="src/main/resources/common/dhcpd-wlan0.conf"
                         prefix="${build.output.name}/install" />
+<!-- <intel-edison> -->
+	    <zipfileset file="src/main/resources/${build.name}/udhcpd-for-hostapd.service"
+                        prefix="${build.output.name}/install" />
+	    <zipfileset file="src/main/resources/${build.name}/udhcpd-usb0.conf"
+                        prefix="${build.output.name}/install" />
+	    <zipfileset file="src/main/resources/${build.name}/udhcpd-wlan0.conf"
+                        prefix="${build.output.name}/install" />
 
+	    <zipfileset file="src/main/resources/${build.name}/dos2unix.bin"
+                        prefix="${build.output.name}/install" />
+
+	    <zipfileset file="src/main/resources/${build.name}/named.bin"
+                        prefix="${build.output.name}/install" />
+	    <zipfileset file="src/main/resources/${build.name}/rndc.bin"
+                        prefix="${build.output.name}/install" />
+	    <zipfileset file="src/main/resources/${build.name}/rndc-confgen.bin"
+                        prefix="${build.output.name}/install" />
+<!-- </intel-edison> -->
             <zipfileset file="src/main/resources/common/named/named.conf"
                         prefix="${build.output.name}/install" />
             <zipfileset file="src/main/resources/common/named/named.ca"
@@ -354,7 +370,8 @@ fi
                         prefix="${build.output.name}/install" />
             <zipfileset file="src/main/resources/common/network.interfaces.raspbian"
                         prefix="${build.output.name}/install" />
-
+	    <zipfileset file="src/main/resources/common/network.interfaces.intel.edison"
+                        prefix="${build.output.name}/install" />
             <zipfileset file="src/main/resources/common/ifdown-local"
                         prefix="${build.output.name}/install" />
             <zipfileset file="src/main/resources/common/ifup-local"

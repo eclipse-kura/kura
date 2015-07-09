@@ -25,7 +25,6 @@ import java.util.StringTokenizer;
 
 import org.eclipse.kura.core.util.ProcessUtil;
 import org.eclipse.kura.core.util.SafeProcess;
-import org.eclipse.kura.core.linux.util.ProcessStats;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,7 +32,9 @@ public class LinuxProcessUtil {
 
 	private static final Logger s_logger = LoggerFactory
 			.getLogger(LinuxProcessUtil.class);
-
+	
+	private static final String OS_VERSION = System.getProperty("kura.os.version");
+	
 	public static int start(String command, boolean wait, boolean background)
 			throws Exception {
 		SafeProcess proc = null;
@@ -155,8 +156,12 @@ public class LinuxProcessUtil {
 
 			if (command != null && !command.isEmpty()) {
 				s_logger.trace("searching process list for " + command);
-				proc = ProcessUtil.exec("ps -ax");
 				
+				if (OS_VERSION.equals("yocto_1.6.1_edison")) {
+					proc = ProcessUtil.exec("ps");
+				} else {
+					proc = ProcessUtil.exec("ps -ax");
+				}
 				proc.waitFor();
 
 				// get the output
@@ -199,7 +204,11 @@ public class LinuxProcessUtil {
 		try {
 			if(command != null && !command.isEmpty()) {
     			s_logger.trace("searching process list for " + command);
-    			proc = ProcessUtil.exec("ps -ax");
+    			if (OS_VERSION.equals("yocto_1.6.1_edison")) {
+    				proc = ProcessUtil.exec("ps");
+    			} else {
+    				proc = ProcessUtil.exec("ps -ax");
+    			}
 				proc.waitFor();
     
     			//get the output

@@ -187,6 +187,9 @@ public class LinuxNamed {
 			else if (OS_VERSION.equals(KuraConstants.Raspberry_Pi.getImageName()) || OS_VERSION.equals(KuraConstants.BeagleBone.getImageName())) {
 				result = LinuxProcessUtil.start("/etc/init.d/bind9 start");
 			}
+			else if (OS_VERSION.equals(KuraConstants.Intel_Edison.getImageName() + "_" + KuraConstants.Intel_Edison.getImageVersion() + "_" + KuraConstants.Intel_Edison.getTargetName())) {
+				result = LinuxProcessUtil.start("/etc/init.d/bind start");
+			}
 			else {
 				result = LinuxProcessUtil.start("/etc/init.d/named start");
 			}
@@ -211,6 +214,9 @@ public class LinuxNamed {
 			} 
 			else if (OS_VERSION.equals(KuraConstants.Raspberry_Pi.getImageName()) || OS_VERSION.equals(KuraConstants.BeagleBone.getImageName())) {
 				result = LinuxProcessUtil.start("/etc/init.d/bind9 stop");
+			}
+			else if (OS_VERSION.equals(KuraConstants.Intel_Edison.getImageName() + "_" + KuraConstants.Intel_Edison.getImageVersion() + "_" + KuraConstants.Intel_Edison.getTargetName())) {
+				result = LinuxProcessUtil.start("/etc/init.d/bind stop");
 			}
 			else {
 				result = LinuxProcessUtil.start("/etc/init.d/named stop");

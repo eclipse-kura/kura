@@ -85,6 +85,12 @@
 									<artifactId>log4j</artifactId>
 									<version>1.2.17</version>
 								</artifactItem>
+								<!-- Needed by usb4java -->
+								<artifactItem>
+									<groupId>org.apache.commons</groupId>
+									<artifactId>commons-lang3</artifactId>
+									<version>3.4</version>
+								</artifactItem>
 <!--
 								<artifactItem>
 									<groupId>org.apache.servicemix.bundles</groupId>

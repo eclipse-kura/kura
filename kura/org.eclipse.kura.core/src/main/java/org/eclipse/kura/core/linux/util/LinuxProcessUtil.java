@@ -17,10 +17,13 @@ package org.eclipse.kura.core.linux.util;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URI;
+import java.util.Properties;
 import java.util.StringTokenizer;
 
 import org.eclipse.kura.core.util.ProcessUtil;
@@ -33,7 +36,21 @@ public class LinuxProcessUtil {
 	private static final Logger s_logger = LoggerFactory
 			.getLogger(LinuxProcessUtil.class);
 	
-	private static final String OS_VERSION = System.getProperty("kura.os.version");
+	private static String s_platform = null;
+	
+	static {
+		String uriSpec = System.getProperty("kura.configuration");
+		Properties props = new Properties();
+		FileInputStream fis = null;
+		try {
+			URI uri = new URI(uriSpec);
+			fis = new FileInputStream(new File(uri));
+			props.load(fis);
+			s_platform = props.getProperty("kura.platform");
+		} catch (Exception e) {
+			s_logger.error("Failed to obtain platform information - {}", e);
+		}
+	}
 	
 	public static int start(String command, boolean wait, boolean background)
 			throws Exception {
@@ -157,7 +174,7 @@ public class LinuxProcessUtil {
 			if (command != null && !command.isEmpty()) {
 				s_logger.trace("searching process list for " + command);
 				
-				if (OS_VERSION.equals("yocto_1.6.1_edison")) {
+				if ("intel-edison".equals(s_platform)) {
 					proc = ProcessUtil.exec("ps");
 				} else {
 					proc = ProcessUtil.exec("ps -ax");
@@ -204,7 +221,7 @@ public class LinuxProcessUtil {
 		try {
 			if(command != null && !command.isEmpty()) {
     			s_logger.trace("searching process list for " + command);
-    			if (OS_VERSION.equals("yocto_1.6.1_edison")) {
+    			if ("intel-edison".equals(s_platform)) {
     				proc = ProcessUtil.exec("ps");
     			} else {
     				proc = ProcessUtil.exec("ps -ax");

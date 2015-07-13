@@ -1284,12 +1284,17 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 		
 		rollbackItems.add(new RollbackItem(srcDataDirectory + "/kuranet.conf", dstDataDirectory + "/kuranet.conf"));
 		rollbackItems.add(new RollbackItem(srcDataDirectory + "/firewall", "/etc/init.d/firewall"));
-		rollbackItems.add(new RollbackItem(srcDataDirectory + "/hostapd.conf", "/etc/hostapd.conf"));
+		if (OS_VERSION.equals(KuraConstants.Intel_Edison.getImageName() + "_" + KuraConstants.Intel_Edison.getImageVersion() + "_" + KuraConstants.Intel_Edison.getTargetName())) {
+			rollbackItems.add(new RollbackItem(srcDataDirectory + "/hostapd.conf", "/etc/hostapd/hostapd.conf"));
+		} else {
+			rollbackItems.add(new RollbackItem(srcDataDirectory + "/hostapd.conf", "/etc/hostapd.conf"));
+		}
 			
-		// TODO add other platforms ... 
 		if (OS_VERSION.equals(KuraConstants.Mini_Gateway.getImageName() + "_" + KuraConstants.Mini_Gateway.getImageVersion()) ||
-				OS_VERSION.equals(KuraConstants.Raspberry_Pi.getImageName()) || OS_VERSION.equals(KuraConstants.BeagleBone.getImageName())) {
-			// restore debian interface configuration
+				OS_VERSION.equals(KuraConstants.Raspberry_Pi.getImageName()) || 
+				OS_VERSION.equals(KuraConstants.BeagleBone.getImageName()) ||
+				OS_VERSION.equals(KuraConstants.Intel_Edison.getImageName() + "_" + KuraConstants.Intel_Edison.getImageVersion() + "_" + KuraConstants.Intel_Edison.getTargetName())) {
+			// restore Debian interface configuration
 			rollbackItems.add(new RollbackItem(srcDataDirectory + "/interfaces", "/etc/network/interfaces"));
 		} else {
 			// restore RedHat interface configuration

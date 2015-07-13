@@ -393,9 +393,94 @@
 
 	<profiles>
 		<profile>
+            <id>intel-edison</id>
+			<properties>
+<!--
+				<kura.install.dir>/home/root/eclipse</kura.install.dir>
+-->
+			</properties>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <build>
+                <resources>
+                    <resource>
+                        <directory>src/main/resources</directory>
+                        <filtering>true</filtering>
+                    </resource>
+                </resources>
+                <plugins>
+                    <plugin>
+						<groupId>org.codehaus.mojo</groupId> 
+						<artifactId>properties-maven-plugin</artifactId> <version>1.0-alpha-1</version> 
+						<executions>
+							<execution>
+								<phase>initialize</phase>
+								<goals>
+									<goal>read-project-properties</goal> 
+								</goals>
+								<configuration>
+									<files>
+										<file>${basedir}/build.properties</file> 
+										<file>${basedir}/config/kura.build.properties</file> 
+									</files>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>buildnumber-maven-plugin</artifactId>
+                        <version>1.0</version>
+                        <executions>
+                            <execution>
+                                <phase>validate</phase>
+                                <goals>
+                                    <goal>create-timestamp</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <version>1.7</version>
+                        <executions>
+                            <execution>
+                                <id>intel-edison-jars</id>
+                                <phase>install</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <target>
+                                        <property name="buildNumber" value="buildNumber" />
+                                        <property name="project.version" value="${project.version}" />
+                                        <property name="project.build.profile" value="${project.build.profile}" />
+                                        <property name="project.build.directory" value="${project.build.directory}" />
+                                        <property name="target.device" value="intel-edison" />
+                                        <property name="kura.os.version" value="yocto_1.6.1_edison" />                                        
+                                        <property name="build.name" value="intel-edison" />
+                                        <property name="kura.arch" value="x86_64" />
+                                        <property name="kura.mem.size" value="256m" />
+                                        <property name="kura.install.dir" value="/home/root/eclipse" />
+					<property name="http.port" value="8080" />
+                                        <ant antfile="${basedir}/src/main/ant/build_equinox_distrib.xml"
+                                            target="dist-linux" />
+                                    </target>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+		<profile>
             <id>intel-edison-nn</id>
 			<properties>
+<!--
 				<kura.install.dir>/home/root/eclipse</kura.install.dir>
+-->
 			</properties>
             <activation>
                 <activeByDefault>true</activeByDefault>
@@ -461,8 +546,8 @@
                                         <property name="build.name" value="intel-edison-nn" />
                                         <property name="kura.arch" value="x86_64" />
                                         <property name="kura.mem.size" value="256m" />
-                                        <property name="kura.install.dir" value="${kura.install.dir}" />
-										<property name="http.port" value="8080" />
+                                        <property name="kura.install.dir" value="/home/root/eclipse" />
+					<property name="http.port" value="8080" />
                                         <ant antfile="${basedir}/src/main/ant/build_equinox_distrib.xml"
                                             target="dist-linux" />
                                     </target>
@@ -478,7 +563,9 @@
 			<properties>
 				<project.raspbian.dependencies>hostapd, isc-dhcp-server, iw,
 					dos2unix, bind9, unzip, ethtool, telnet</project.raspbian.dependencies>
+<!--
 				<kura.install.dir>/opt/eclipse</kura.install.dir>
+-->
 			</properties>
 			<activation>
 				<activeByDefault>true</activeByDefault>
@@ -546,7 +633,7 @@
 										<property name="kura.os.version" value="debian" />
 										<property name="kura.arch" value="armv7_hf" />
 										<property name="kura.mem.size" value="256m" />
-										<property name="kura.install.dir" value="${kura.install.dir}" />
+										<property name="kura.install.dir" value="/opt/eclipse" />
 										<ant antfile="${basedir}/src/main/ant/build_equinox_distrib.xml"
 											target="dist-linux" />
 									</target>
@@ -610,7 +697,9 @@
 			<id>beaglebone-nn</id>
 			<properties>
 				<project.raspbian.dependencies.nn>dos2unix, unzip, telnet</project.raspbian.dependencies.nn>
+<!--
 				<kura.install.dir>/opt/eclipse</kura.install.dir>
+-->
 			</properties>
 			<activation>
 				<activeByDefault>true</activeByDefault>
@@ -678,7 +767,7 @@
 										<property name="kura.os.version" value="debian" />
 										<property name="kura.arch" value="armv7_hf" />
 										<property name="kura.mem.size" value="256m" />
-										<property name="kura.install.dir" value="${kura.install.dir}" />
+										<property name="kura.install.dir" value="/opt/eclipse" />
 										<ant antfile="${basedir}/src/main/ant/build_equinox_distrib.xml"
 											target="dist-linux" />
 									</target>
@@ -723,7 +812,9 @@
 			<properties>
 				<project.raspbian.dependencies>hostapd, isc-dhcp-server, iw,
 					dos2unix, bind9, unzip, ethtool, telnet</project.raspbian.dependencies>
+<!--
 				<kura.install.dir>/opt/eclipse</kura.install.dir>
+-->
 			</properties>
 			<activation>
 				<activeByDefault>true</activeByDefault>
@@ -790,7 +881,7 @@
 										<property name="kura.os.version" value="raspbian" />
 										<property name="kura.arch" value="armv6_hf" />
 										<property name="kura.mem.size" value="256m" />
-										<property name="kura.install.dir" value="${kura.install.dir}" />
+										<property name="kura.install.dir" value="/opt/eclipse" />
 										<ant antfile="${basedir}/src/main/ant/build_equinox_distrib.xml"
 											target="dist-linux" />
 									</target>
@@ -844,7 +935,9 @@
 			<id>raspberry-pi-nn</id>
 			<properties>
 				<project.raspbian.dependencies.nn>dos2unix, unzip, telnet</project.raspbian.dependencies.nn>
-				<kura.install.dir>/opt/eclipse</kura.install.dir> 
+<!--
+				<kura.install.dir>/opt/eclipse</kura.install.dir>
+-->
 			</properties> 
 			<activation>
 				<activeByDefault>true</activeByDefault>
@@ -910,7 +1003,7 @@
 										<property name="kura.os.version" value="raspbian" /> 
 										<property name="kura.arch" value="armv6_hf" />
 										<property name="kura.mem.size" value="256m" />
-										<property name="kura.install.dir" value="${kura.install.dir}" />
+										<property name="kura.install.dir" value="/opt/eclipse" />
 										<ant antfile="${basedir}/src/main/ant/build_equinox_distrib.xml" target="dist-linux" />
 									</target>
 								</configuration>
@@ -954,7 +1047,9 @@
 			<properties>
 				<project.raspbian.dependencies>hostapd, isc-dhcp-server, iw,
 					dos2unix, bind9, unzip, ethtool, telnet</project.raspbian.dependencies>
+<!--
 				<kura.install.dir>/opt/eclipse</kura.install.dir>
+-->
 			</properties>
 			<activation>
 				<activeByDefault>true</activeByDefault>
@@ -1021,7 +1116,7 @@
 										<property name="kura.os.version" value="raspbian" />
 										<property name="kura.arch" value="armv6_hf" />
 										<property name="kura.mem.size" value="256m" />
-										<property name="kura.install.dir" value="${kura.install.dir}" />
+										<property name="kura.install.dir" value="/opt/eclipse" />
 										<ant antfile="${basedir}/src/main/ant/build_equinox_distrib.xml"
 											target="dist-linux" />
 									</target>
@@ -1074,8 +1169,10 @@
 		<profile>
 			<id>raspberry-pi-bplus-nn</id>
 			<properties>
-				<project.raspbian.dependencies.nn>dos2unix, unzip, telnet</project.raspbian.dependencies.nn> 
+				<project.raspbian.dependencies.nn>dos2unix, unzip, telnet</project.raspbian.dependencies.nn>
+<!--
 				<kura.install.dir>/opt/eclipse</kura.install.dir>
+-->
 			</properties> 
 			<activation>
 				<activeByDefault>true</activeByDefault>
@@ -1141,7 +1238,7 @@
 										<property name="kura.os.version" value="raspbian" /> 
 										<property name="kura.arch" value="armv6_hf" />
 										<property name="kura.mem.size" value="256m" />
-										<property name="kura.install.dir" value="${kura.install.dir}" />
+										<property name="kura.install.dir" value="/opt/eclipse" />
 										<ant antfile="${basedir}/src/main/ant/build_equinox_distrib.xml" target="dist-linux" />
 									</target>
 								</configuration>
@@ -1186,7 +1283,9 @@
 			<properties>
 				<project.raspbian.dependencies>hostapd, isc-dhcp-server, iw,
 					dos2unix, bind9, unzip, ethtool, telnet</project.raspbian.dependencies>
+<!--
 				<kura.install.dir>/opt/eclipse</kura.install.dir>
+-->
 			</properties>
 			<activation>
 				<activeByDefault>true</activeByDefault>
@@ -1253,7 +1352,7 @@
 										<property name="kura.os.version" value="raspbian" />
 										<property name="kura.arch" value="armv7_hf" />
 										<property name="kura.mem.size" value="512m" />
-										<property name="kura.install.dir" value="${kura.install.dir}" />
+										<property name="kura.install.dir" value="/opt/eclipse" />
 										<ant antfile="${basedir}/src/main/ant/build_equinox_distrib.xml"
 											target="dist-linux" />
 									</target>
@@ -1298,7 +1397,9 @@
 			<id>raspberry-pi-2-nn</id>
 			<properties>
 				<project.raspbian.dependencies>dos2unix, unzip, telnet</project.raspbian.dependencies>
+<!--
 				<kura.install.dir>/opt/eclipse</kura.install.dir>
+-->
 			</properties>
 			<activation>
 				<activeByDefault>true</activeByDefault>
@@ -1365,7 +1466,7 @@
 										<property name="kura.os.version" value="raspbian" />
 										<property name="kura.arch" value="armv7_hf" />
 										<property name="kura.mem.size" value="512m" />
-										<property name="kura.install.dir" value="${kura.install.dir}" />
+										<property name="kura.install.dir" value="/opt/eclipse" />
 										<ant antfile="${basedir}/src/main/ant/build_equinox_distrib.xml"
 											target="dist-linux" />
 									</target>

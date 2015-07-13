@@ -1,0 +1,20 @@
+
+#loopback interface
+auto lo
+iface lo inet static
+        address 127.0.0.1
+        netmask 255.0.0.0
+
+# Wireless interfaces
+auto wlan0
+iface wlan0 inet static
+        address 172.16.1.1
+        netmask 255.255.255.0
+
+
+# Ethernet/RNDIS gadget (g_ether)
+# ... or on host side, usbnet and random hwaddr
+iface usb0 inet static
+        address 172.16.0.1
+        netmask 255.255.255.0
+        network 172.16.0.0

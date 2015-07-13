@@ -20,6 +20,7 @@ public class KuraNotifyPayload extends KuraPayload
 	private static final String METRIC_TRASNFER_SIZE = "dp.http.transfer.size";
 	private static final String METRIC_TRANSFER_PROGRESS = "dp.http.transfer.progress";
 	private static final String METRIC_TRANSFER_STATUS = "dp.http.transfer.status";
+	private static final String METRIC_JOB_ID = "job.id";
 	
 	public KuraNotifyPayload(String clientId) 
 	{
@@ -80,6 +81,12 @@ public class KuraNotifyPayload extends KuraPayload
 		return notifyPayload;
 	}
 	
+	public void setJobId(long jobId) {
+		addMetric(METRIC_JOB_ID, jobId);
+	}
 	
+	public Long getJobId() {
+		return (Long) getMetric(METRIC_JOB_ID);
+	}
 	
 }

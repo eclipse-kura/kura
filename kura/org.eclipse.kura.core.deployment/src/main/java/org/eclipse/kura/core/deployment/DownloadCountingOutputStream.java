@@ -33,6 +33,7 @@ public class DownloadCountingOutputStream extends CountingOutputStream {
 	private static int PROP_BUFFER_SIZE = 1024 * 4;
 	private static int PROP_CONNECT_TIMEOUT = 5000;
 	private static int PROP_READ_TIMEOUT = 6000;
+	private static int PROP_BLOCK_DELAY = 1000;
 
 	private final DeploymentPackageDownloadOptions options;
 	// https://s3.amazonaws.com/kura-resources/dps/heater.dp
@@ -45,10 +46,12 @@ public class DownloadCountingOutputStream extends CountingOutputStream {
 
 	InputStream is = null;
 
-	private long m_currentStep = 0;
+	private long m_currentStep = 1;
 	
 	private ExecutorService executor;
 	private Future<Void> future;
+	private long previous;
+	
 
 	public DownloadCountingOutputStream(OutputStream out, DeploymentPackageDownloadOptions options, ProgressListener callback,
 			SslManagerService m_sslManagerService) {
@@ -58,6 +61,8 @@ public class DownloadCountingOutputStream extends CountingOutputStream {
 		this.pl = callback;
 		PROP_BUFFER_SIZE = options.getBlockSize();
 		PROP_RESOLUTION = options.getNotifyBlockSize();
+		PROP_BLOCK_DELAY = options.getBlockDelay();
+		PROP_CONNECT_TIMEOUT = options.getTimeout();
 	}
 
 	public void setResolution(int resolution) {
@@ -99,7 +104,7 @@ public class DownloadCountingOutputStream extends CountingOutputStream {
 				boolean shouldAuthenticate = false;
 				try {
 
-					postProgressEvent(options.getClientId(), 0, totalBytes, DOWNLOAD_STATUS.PROGRESS);
+					
 
 					shouldAuthenticate = (options.getUsername() != null) && (options.getPassword() != null)
 							&& !(options.getUsername().trim().isEmpty() && !(options.getPassword().trim().isEmpty()));
@@ -134,10 +139,11 @@ public class DownloadCountingOutputStream extends CountingOutputStream {
 					String s = urlConnection.getHeaderField("Content-Length");
 
 					totalBytes = s != null ? Integer.parseInt(s) : -1;
+					postProgressEvent(options.getClientId(), 0, totalBytes, DOWNLOAD_STATUS.IN_PROGRESS);
 
 					long numBytes = IOUtils.copyLarge(is, DownloadCountingOutputStream.this, new byte[PROP_BUFFER_SIZE]);
 
-					postProgressEvent(options.getClientId(), numBytes, totalBytes, DOWNLOAD_STATUS.COMPLETE);
+					postProgressEvent(options.getClientId(), numBytes, totalBytes, DOWNLOAD_STATUS.COMPLETED);
 
 				} catch (IOException e) {
 					postProgressEvent(options.getClientId(), getByteCount(), totalBytes, DOWNLOAD_STATUS.FAILED);
@@ -177,16 +183,24 @@ public class DownloadCountingOutputStream extends CountingOutputStream {
 	@Override
 	protected void afterWrite(int n) throws IOException {
 		super.afterWrite(n);
-		if (getByteCount() > m_currentStep * PROP_RESOLUTION) {
+		if (getByteCount() >= m_currentStep * PROP_RESOLUTION) {
+			System.out.println("Bytes read: "+ (getByteCount() - previous));
+			previous = getByteCount();
 			m_currentStep++;
-			postProgressEvent(options.getClientId(), getByteCount(), totalBytes, DOWNLOAD_STATUS.PROGRESS);
+			postProgressEvent(options.getClientId(), getByteCount(), totalBytes, DOWNLOAD_STATUS.IN_PROGRESS);
+		}
+		try {
+			Thread.sleep(PROP_BLOCK_DELAY);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 
 	private void postProgressEvent(String clientId, long progress, long total, DOWNLOAD_STATUS status) {
 		Long perc = Math.round((((Long) progress).doubleValue() / ((Long) total).doubleValue()) * 100);
 		pl.progressChanged(new ProgressEvent(this, options.getRequestClientId(), clientId, ((Long) total).intValue(), ((Long) perc).intValue(), status
-				.getStatusString()));
+				.getStatusString(), options.getJobId()));
 	}
 
 }

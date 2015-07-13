@@ -20,4 +20,10 @@
    <reference bind="setDeploymentAdmin" cardinality="1..1" interface="org.osgi.service.deploymentadmin.DeploymentAdmin" name="DeploymentAdmin" policy="static" unbind="unsetDeploymentAdmin"/>
    <reference bind="setCloudService" cardinality="1..1" interface="org.eclipse.kura.cloud.CloudService" name="CloudService" policy="static" unbind="unsetCloudService"/>
    <reference bind="setSslManagerService" cardinality="1..1" interface="org.eclipse.kura.ssl.SslManagerService" name="SslManagerService" policy="static" unbind="unsetSslManagerService"/>
+   <reference name="DataTransportService"
+              bind="setDataTransportService" 
+              unbind="unsetDataTransportService"
+              cardinality="1..1" 
+              policy="static"
+              interface="org.eclipse.kura.data.DataTransportService"/>
 </scr:component>

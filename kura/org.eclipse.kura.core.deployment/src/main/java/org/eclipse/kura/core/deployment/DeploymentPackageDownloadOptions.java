@@ -9,7 +9,7 @@ import org.eclipse.kura.message.KuraRequestPayload;
 public class DeploymentPackageDownloadOptions {
 
 	// Metrics in RESOURCE_DOWNLOAD
-	public static final String METRIC_DEPLOY_URL = "deploy.url";
+	public static final String METRIC_DEPLOY_URL = "dp.url";
 	public static final String METRIC_DP_NAME = "dp.name";
 	public static final String METRIC_DP_VERSION = "dp.version";
 	public static final String METRIC_BLOCK_SIZE = "dp.http.block.size";
@@ -25,6 +25,8 @@ public class DeploymentPackageDownloadOptions {
 	public static final String METRIC_DP_REBOOT_DELAY = "dp.reboot.delay";
 	public static final String METRIC_DP_CLIENT_ID = "client.id";
 	public static final String METRIC_DP_NOTIFY_BLOCK_SIZE = "dp.http.notify.block.size";
+	public static final String METRIC_JOB_ID = "job.id";
+	public static final String METRIC_DP_HTTP_FORCE_DOWNLOAD = "dp.http.force.download";
 
 	private final String deployUrl;
 	private final String dpName;
@@ -41,9 +43,11 @@ public class DeploymentPackageDownloadOptions {
 	private int rebootDelay = 0;
 	private String username = null;
 	private String password = null;
+	private boolean forceDownload = false;
 
 	private String clientId = "";
 	private String requestClientId = "";
+	private Long jobId = null;
 
 	public DeploymentPackageDownloadOptions(String deployUrl, String dpName, String dpVersion) {
 		super();
@@ -67,6 +71,11 @@ public class DeploymentPackageDownloadOptions {
 		dpVersion = (String) request.getMetric(METRIC_DP_VERSION);
 		if (dpVersion == null) {
 			throw new KuraInvalidMessageException("Missing deployment package version!");
+		}
+		
+		jobId = (Long) request.getMetric(METRIC_JOB_ID);
+		if (jobId == null) {
+			throw new KuraInvalidMessageException("Missing jobId!");
 		}
 
 		try {
@@ -113,6 +122,10 @@ public class DeploymentPackageDownloadOptions {
 			metric = request.getMetric(METRIC_DP_REBOOT_DELAY);
 			if (metric != null) {
 				rebootDelay = (Integer) metric;
+			}
+			metric = request.getMetric(METRIC_DP_HTTP_FORCE_DOWNLOAD);
+			if (metric != null) {
+				forceDownload = (Boolean) metric;
 			}
 
 			metric = request.getMetric(METRIC_DP_NOTIFY_BLOCK_SIZE);
@@ -169,6 +182,10 @@ public class DeploymentPackageDownloadOptions {
 	public int getTimeout() {
 		return timeout;
 	}
+	
+	public long getJobId() {
+		return jobId;
+	}
 
 	public void setTimeout(int timeout) {
 		this.timeout = timeout;
@@ -216,6 +233,14 @@ public class DeploymentPackageDownloadOptions {
 
 	public int getRebootDelay() {
 		return rebootDelay;
+	}
+	
+	public boolean isDownloadForced() {
+		return forceDownload;
+	}
+	
+	public void setDownloadForced(boolean forceDownload) {
+		this.forceDownload = forceDownload;
 	}
 
 	public void setRebootDelay(int rebootDelay) {

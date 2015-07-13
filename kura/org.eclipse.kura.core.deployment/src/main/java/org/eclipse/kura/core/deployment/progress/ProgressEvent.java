@@ -14,14 +14,16 @@ public class ProgressEvent extends EventObject {
 	int transferProgress;
 	String transferStatus;
 	String requesterClientId;
+	long jobId;
 	
-	public ProgressEvent(Object source, String requesterClientId, String clientId, int transferSize, int transferProgress, String trasnferStatus) {
+	public ProgressEvent(Object source, String requesterClientId, String clientId, int transferSize, int transferProgress, String trasnferStatus, long jobId) {
 		super(source);
 		this.clientId = clientId;
 		this.transferSize = transferSize;
 		this.transferProgress = transferProgress;
 		this.transferStatus = trasnferStatus;
 		this.requesterClientId = requesterClientId;
+		this.jobId= jobId;
 	}
 
 	public String getClientId() {
@@ -42,6 +44,10 @@ public class ProgressEvent extends EventObject {
 
 	public String getRequesterClientId() {
 		return requesterClientId;
+	}
+	
+	public long getJobId() {
+		return jobId;
 	}
 
 }

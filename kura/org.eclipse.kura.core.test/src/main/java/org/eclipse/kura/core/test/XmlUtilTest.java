@@ -20,6 +20,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.xml.bind.JAXB;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.Unmarshaller;
+
 import junit.framework.Assert;
 import junit.framework.TestCase;
 
@@ -30,7 +34,6 @@ import org.eclipse.kura.core.configuration.XmlSnapshotIdResult;
 import org.eclipse.kura.core.configuration.metatype.Tad;
 import org.eclipse.kura.core.configuration.metatype.Tocd;
 import org.eclipse.kura.core.configuration.metatype.Tscalar;
-import org.eclipse.kura.core.configuration.util.XmlUtil;
 import org.eclipse.kura.core.deployment.XmlBundle;
 import org.eclipse.kura.core.deployment.XmlBundleInfo;
 import org.eclipse.kura.core.deployment.XmlBundles;
@@ -47,7 +50,6 @@ public class XmlUtilTest extends TestCase {
 
 	private static final Logger s_logger = LoggerFactory.getLogger(XmlUtilTest.class);
 
-	// Constants, Names and Messages
 	private static final String stringWriter = "String Writer";
 	private static final String string = "String";
 	private static final String id = "Id";
@@ -70,186 +72,20 @@ public class XmlUtilTest extends TestCase {
 
 	@TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
 	@Test
-	public void testXmlBundlesUnmarshalling() {
-
-		try {
-
-			XmlBundles xmlBundles = getSampleXmlBundlesObject();
-
-			// test String unmarshalling
-			String marshalledString = XmlUtil.marshal(xmlBundles);
-			Object unmarshalledObjectFromString = XmlUtil.unmarshal(marshalledString, XmlBundles.class);
-			Assert.assertTrue(String.format(differentInstanceMessage, XmlBundles.class, unmarshalledObjectFromString.getClass()), unmarshalledObjectFromString instanceof XmlBundles);
-
-			XmlBundles outputXmlBundles = (XmlBundles) unmarshalledObjectFromString;
-
-			assertValuesForEquality(id, Long.toString(xmlBundles.bundles[0].getId()), Long.toString(outputXmlBundles.bundles[0].getId()), false);
-			assertValuesForEquality(name, xmlBundles.bundles[0].getName(), outputXmlBundles.bundles[0].getName(), false);
-			assertValuesForEquality(state, xmlBundles.bundles[0].getState(), outputXmlBundles.bundles[0].getState(), false);
-			assertValuesForEquality(version, xmlBundles.bundles[0].getVersion(), outputXmlBundles.bundles[0].getVersion(), false);
-
-			// test Reader unmarshalling
-			Reader marshalledStringReader = new StringReader(marshalledString);
-			Object unmarshalledObjectFromStringReader = XmlUtil.unmarshal(marshalledStringReader, XmlBundles.class);
-			Assert.assertTrue(String.format(differentInstanceMessage, XmlBundles.class, unmarshalledObjectFromStringReader.getClass()), unmarshalledObjectFromStringReader instanceof XmlBundles);
-
-			outputXmlBundles = (XmlBundles) unmarshalledObjectFromStringReader;
-
-			assertValuesForEquality(id, Long.toString(xmlBundles.bundles[0].getId()), Long.toString(outputXmlBundles.bundles[0].getId()), true);
-			assertValuesForEquality(name, xmlBundles.bundles[0].getName(), outputXmlBundles.bundles[0].getName(), true);
-			assertValuesForEquality(state, xmlBundles.bundles[0].getState(), outputXmlBundles.bundles[0].getState(), true);
-			assertValuesForEquality(version, xmlBundles.bundles[0].getVersion(), outputXmlBundles.bundles[0].getVersion(), true);
-
-		} catch (Exception e) {
-
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
-
-	}
-
-	@TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
-	@Test
-	public void testXmlDeploymentPackagesUnmarshalling() {
-
-		try {
-			XmlDeploymentPackages xmlDeploymentPackages = getSampleXmlDeploymentPackagesObject();
-
-			// test String unmarshalling
-			String marshalledString = XmlUtil.marshal(xmlDeploymentPackages);
-			Object unmarshalledObjectFromString = XmlUtil.unmarshal(marshalledString, XmlDeploymentPackages.class);
-			Assert.assertTrue(String.format(differentInstanceMessage, XmlDeploymentPackages.class, unmarshalledObjectFromString.getClass()), unmarshalledObjectFromString instanceof XmlDeploymentPackages);
-
-			XmlDeploymentPackages outputXmlDeploymentPackages = (XmlDeploymentPackages) unmarshalledObjectFromString;
-
-			assertValuesForEquality(name, xmlDeploymentPackages.deploymentPackages[0].getName(), outputXmlDeploymentPackages.deploymentPackages[0].getName(), false);
-			assertValuesForEquality(version, xmlDeploymentPackages.deploymentPackages[0].getVersion(), outputXmlDeploymentPackages.deploymentPackages[0].getVersion(), false);
-			assertValuesForEquality(bundleInfo + name, xmlDeploymentPackages.deploymentPackages[0].getBundleInfos()[0].getName(), outputXmlDeploymentPackages.deploymentPackages[0].getBundleInfos()[0].getName(), false);
-			assertValuesForEquality(bundleInfo + version, xmlDeploymentPackages.deploymentPackages[0].getBundleInfos()[0].getVersion(), outputXmlDeploymentPackages.deploymentPackages[0].getBundleInfos()[0].getVersion(), false);
-
-			// test Reader unmarshalling
-			Reader marshalledStringReader = new StringReader(marshalledString);
-			Object unmarshalledObjectFromStringReader = XmlUtil.unmarshal(marshalledStringReader, XmlDeploymentPackages.class);
-			Assert.assertTrue(String.format(differentInstanceMessage, XmlDeploymentPackages.class, unmarshalledObjectFromStringReader.getClass()), unmarshalledObjectFromStringReader instanceof XmlDeploymentPackages);
-
-			outputXmlDeploymentPackages = (XmlDeploymentPackages) unmarshalledObjectFromStringReader;
-
-			assertValuesForEquality(name, outputXmlDeploymentPackages.deploymentPackages[0].getName(), xmlDeploymentPackages.deploymentPackages[0].getName(), true);
-			assertValuesForEquality(version, xmlDeploymentPackages.deploymentPackages[0].getVersion(), outputXmlDeploymentPackages.deploymentPackages[0].getVersion(), true);
-			assertValuesForEquality(bundleInfo + name, xmlDeploymentPackages.deploymentPackages[0].getBundleInfos()[0].getName(), outputXmlDeploymentPackages.deploymentPackages[0].getBundleInfos()[0].getName(), true);
-			assertValuesForEquality(bundleInfo + version, xmlDeploymentPackages.deploymentPackages[0].getBundleInfos()[0].getVersion(), outputXmlDeploymentPackages.deploymentPackages[0].getBundleInfos()[0].getVersion(), true);
-
-		} catch (Exception e) {
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
-
-	}
-
-	@TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
-	@Test
-	public void testTocdUnmarshalling() {
-
-		try {
-			Tocd tocd = getSampleTocdObject();
-
-			// test String unmarshalling
-			String marshalledString = XmlUtil.marshal(tocd);
-			Object unmarshalledObjectFromString = XmlUtil.unmarshal(marshalledString, Tocd.class);
-			Assert.assertTrue(String.format(differentInstanceMessage, Tocd.class, unmarshalledObjectFromString.getClass()), unmarshalledObjectFromString instanceof Tocd);
-
-			Tocd outputXmlDeploymentPackages = (Tocd) unmarshalledObjectFromString;
-
-			assertValuesForEquality(id, tocd.getId(), outputXmlDeploymentPackages.getId(), false);
-			assertValuesForEquality(name, tocd.getName(), outputXmlDeploymentPackages.getName(), false);
-			assertValuesForEquality(description, tocd.getDescription(), outputXmlDeploymentPackages.getDescription(), false);
-
-			// test Reader unmarshalling
-			Reader marshalledStringReader = new StringReader(marshalledString);
-			Object unmarshalledObjectFromStringReader = XmlUtil.unmarshal(marshalledStringReader, Tocd.class);
-			Assert.assertTrue(String.format(differentInstanceMessage, Tocd.class, unmarshalledObjectFromStringReader.getClass()), unmarshalledObjectFromStringReader instanceof Tocd);
-
-			outputXmlDeploymentPackages = (Tocd) unmarshalledObjectFromStringReader;
-
-			assertValuesForEquality(id, tocd.getId(), outputXmlDeploymentPackages.getId(), true);
-			assertValuesForEquality(name, tocd.getName(), outputXmlDeploymentPackages.getName(), true);
-			assertValuesForEquality(description, tocd.getDescription(), outputXmlDeploymentPackages.getDescription(), true);
-
-		} catch (Exception e) {
-
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
-
-	}
-
-	@TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
-	@Test
-	public void testXmlSnapshotIdResultUnmarshalling() {
-
-		try {
-			XmlSnapshotIdResult xmlSnapshotIdResult = getSampleXmlSnapshotIdResultObject();
-
-			// test String unmarshalling
-			String marshalledString = XmlUtil.marshal(xmlSnapshotIdResult);
-			Object unmarshalledObjectFromString = XmlUtil.unmarshal(marshalledString, XmlSnapshotIdResult.class);
-			Assert.assertTrue(String.format(differentInstanceMessage, XmlSnapshotIdResult.class, unmarshalledObjectFromString.getClass()), unmarshalledObjectFromString instanceof XmlSnapshotIdResult);
-			XmlSnapshotIdResult outputXmlSnapshotIdResult = (XmlSnapshotIdResult) unmarshalledObjectFromString;
-			// Checking for missing items
-			for (Long snapshotId : xmlSnapshotIdResult.getSnapshotIds()) {
-				Assert.assertTrue(String.format(missingItemsMessage, snapshotId), outputXmlSnapshotIdResult.getSnapshotIds().contains(snapshotId));
-			}
-			// Checking for additional items
-			if (xmlSnapshotIdResult.getSnapshotIds().size() < outputXmlSnapshotIdResult.getSnapshotIds().size()) {
-				info(marshalled + printList(xmlSnapshotIdResult.getSnapshotIds()));
-				info(whiteSpace);
-				info(unmarshalled + printList(outputXmlSnapshotIdResult.getSnapshotIds()));
-				Assert.fail(String.format(additionalItmesMessage));
-			}
-
-			// test Reader unmarshalling
-			Reader marshalledStringReader = new StringReader(marshalledString);
-			Object unmarshalledObjectFromStringReader = XmlUtil.unmarshal(marshalledStringReader, XmlSnapshotIdResult.class);
-			Assert.assertTrue(String.format(differentInstanceMessage, XmlSnapshotIdResult.class, unmarshalledObjectFromStringReader.getClass()), unmarshalledObjectFromStringReader instanceof XmlSnapshotIdResult);
-			outputXmlSnapshotIdResult = (XmlSnapshotIdResult) unmarshalledObjectFromStringReader;
-			// Checking for missing items
-			for (Long snapshotId : xmlSnapshotIdResult.getSnapshotIds()) {
-				Assert.assertTrue(String.format(missingItemsMessage, snapshotId), outputXmlSnapshotIdResult.getSnapshotIds().contains(snapshotId));
-			}
-			// Checking for additional items
-			if (xmlSnapshotIdResult.getSnapshotIds().size() < outputXmlSnapshotIdResult.getSnapshotIds().size()) {
-				info(marshalled + printList(xmlSnapshotIdResult.getSnapshotIds()));
-				info(whiteSpace);
-				info(unmarshalled + printList(outputXmlSnapshotIdResult.getSnapshotIds()));
-				Assert.fail(String.format(additionalItmesMessage));
-			}
-
-		} catch (Exception e) {
-
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
-
-	}
-
-	@TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
-	@Test
 	public void testXmlComponentConfigurationsUnmarshalling() {
 
 		try {
 
-			XmlComponentConfigurations xmlComponentConfigurations = getSampletestXmlComponentConfigurationsObject();
+			XmlComponentConfigurations xmlComponentConfigurations = getSampleXmlComponentConfigurationsObject();
 
 			// test String unmarshalling
-			String marshalledString = XmlUtil.marshal(xmlComponentConfigurations);
-			Object unmarshalledObjectFromString = XmlUtil.unmarshal(marshalledString, XmlComponentConfigurations.class);
+			String marshalledString = org.eclipse.kura.core.configuration.util.XmlUtil.marshal(xmlComponentConfigurations);
+			Object unmarshalledObjectFromString = org.eclipse.kura.core.configuration.util.XmlUtil.unmarshal(marshalledString, XmlComponentConfigurations.class);
 			Assert.assertTrue(String.format(differentInstanceMessage, XmlComponentConfigurations.class, unmarshalledObjectFromString.getClass()), unmarshalledObjectFromString instanceof XmlComponentConfigurations);
 
 			XmlComponentConfigurations outputXmlComponentConfigurations = (XmlComponentConfigurations) unmarshalledObjectFromString;
 
 			assertValuesForEquality(pid, xmlComponentConfigurations.getConfigurations().get(0).getPid(), outputXmlComponentConfigurations.getConfigurations().get(0).getPid(), false);
-			assertValuesForEquality(tocdDescription + id, xmlComponentConfigurations.getConfigurations().get(0).getDefinition().getId(), outputXmlComponentConfigurations.getConfigurations().get(0).getDefinition().getId(), false);
-			assertValuesForEquality(tocdDescription + name, xmlComponentConfigurations.getConfigurations().get(0).getDefinition().getName(), outputXmlComponentConfigurations.getConfigurations().get(0).getDefinition().getName(), false);
 			assertValuesForEquality(hashmapValues, xmlComponentConfigurations.getConfigurations().get(0).getConfigurationProperties().get("int"), outputXmlComponentConfigurations.getConfigurations().get(0).getConfigurationProperties().get("int"),
 					false);
 			assertValuesForEquality(hashmapValues, xmlComponentConfigurations.getConfigurations().get(0).getConfigurationProperties().get("long"), outputXmlComponentConfigurations.getConfigurations().get(0).getConfigurationProperties().get("long"),
@@ -268,27 +104,15 @@ public class XmlUtilTest extends TestCase {
 					outputXmlComponentConfigurations.getConfigurations().get(0).getConfigurationProperties().get("short"), false);
 			assertValuesForEquality(hashmapValues, xmlComponentConfigurations.getConfigurations().get(0).getConfigurationProperties().get("byte"), outputXmlComponentConfigurations.getConfigurations().get(0).getConfigurationProperties().get("byte"),
 					false);
-			// junit.framework.AssertionFailedError: Property value Hashmap
-			// values of unmarshalled object from String differs from original.
-			// Orignal : [C@1915e83 ; Received : [C@d3ee56 ;
-
-			// assertValuesForEquality(hashmapValues, ((Password)
-			// xmlComponentConfigurations.getConfigurations().get(0).getConfigurationProperties().get("password")).getPassword(),
-			// ((Password)
-			// outputXmlComponentConfigurations.getConfigurations().get(0)
-			// .getConfigurationProperties().get("password")).getPassword(),
-			// false);
 
 			// test Reader unmarshalling
 			Reader marshalledStringReader = new StringReader(marshalledString);
-			Object unmarshalledObjectFromStringReader = XmlUtil.unmarshal(marshalledStringReader, XmlComponentConfigurations.class);
+			Object unmarshalledObjectFromStringReader = org.eclipse.kura.core.configuration.util.XmlUtil.unmarshal(marshalledStringReader, XmlComponentConfigurations.class);
 			Assert.assertTrue(String.format(differentInstanceMessage, XmlComponentConfigurations.class, unmarshalledObjectFromStringReader.getClass()), unmarshalledObjectFromStringReader instanceof XmlComponentConfigurations);
 
 			outputXmlComponentConfigurations = (XmlComponentConfigurations) unmarshalledObjectFromStringReader;
 
 			assertValuesForEquality(pid, xmlComponentConfigurations.getConfigurations().get(0).getPid(), outputXmlComponentConfigurations.getConfigurations().get(0).getPid(), true);
-			assertValuesForEquality(tocdDescription + id, xmlComponentConfigurations.getConfigurations().get(0).getDefinition().getId(), outputXmlComponentConfigurations.getConfigurations().get(0).getDefinition().getId(), true);
-			assertValuesForEquality(tocdDescription + name, xmlComponentConfigurations.getConfigurations().get(0).getDefinition().getName(), outputXmlComponentConfigurations.getConfigurations().get(0).getDefinition().getName(), true);
 			assertValuesForEquality(hashmapValues, xmlComponentConfigurations.getConfigurations().get(0).getConfigurationProperties().get("int"), outputXmlComponentConfigurations.getConfigurations().get(0).getConfigurationProperties().get("int"),
 					true);
 			assertValuesForEquality(hashmapValues, xmlComponentConfigurations.getConfigurations().get(0).getConfigurationProperties().get("long"), outputXmlComponentConfigurations.getConfigurations().get(0).getConfigurationProperties().get("long"),
@@ -307,12 +131,6 @@ public class XmlUtilTest extends TestCase {
 					outputXmlComponentConfigurations.getConfigurations().get(0).getConfigurationProperties().get("short"), true);
 			assertValuesForEquality(hashmapValues, xmlComponentConfigurations.getConfigurations().get(0).getConfigurationProperties().get("byte"), outputXmlComponentConfigurations.getConfigurations().get(0).getConfigurationProperties().get("byte"),
 					true);
-			// assertValuesForEquality(hashmapValues, ((Password)
-			// xmlComponentConfigurations.getConfigurations().get(0).getConfigurationProperties().get("password")).getPassword(),
-			// ((Password)
-			// outputXmlComponentConfigurations.getConfigurations().get(0)
-			// .getConfigurationProperties().get("password")).getPassword(),
-			// true);
 
 		} catch (Exception e) {
 
@@ -324,16 +142,57 @@ public class XmlUtilTest extends TestCase {
 
 	@TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
 	@Test
-	public void testRaspberrySnapshotXmlUnmarshalling() throws IOException {
+	public void testXmlSnapshotIdResultMarshalling() {
 
 		try {
+			XmlSnapshotIdResult xmlSnapshotIdResult = getSampleXmlSnapshotIdResultObject();
+			String marshalledString = org.eclipse.kura.core.configuration.util.XmlUtil.marshal(xmlSnapshotIdResult);
 
-			String content = IOUtil.readResource(FrameworkUtil.getBundle(getClass()), snapshotFilePath);
-			Object unmarshalledObjectFromFileReader = XmlUtil.unmarshal(content, Tocd.class);
-			Assert.assertTrue(String.format(differentInstanceMessage, Tocd.class, unmarshalledObjectFromFileReader.getClass()), unmarshalledObjectFromFileReader instanceof Tocd);
+			for (Long value : xmlSnapshotIdResult.getSnapshotIds()) {
+				Assert.assertTrue(String.format(missingItemsMessage, value), marshalledString.contains(Long.toString(value)));
+			}
 
 		} catch (Exception e) {
 
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+
+	}
+
+	@TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+	@Test
+	public void testXmlDeploymentPackagesMarshalling() {
+		try {
+
+			XmlDeploymentPackages xmlDeploymentPackages = getSampleXmlDeploymentPackagesObject();
+			String marshalledString = org.eclipse.kura.core.deployment.XmlUtil.marshal(xmlDeploymentPackages);
+			Assert.assertTrue(String.format(missingItemsMessage, xmlDeploymentPackages.getDeploymentPackages()[0].getName()), marshalledString.contains(xmlDeploymentPackages.getDeploymentPackages()[0].getName()));
+			Assert.assertTrue(String.format(missingItemsMessage, xmlDeploymentPackages.getDeploymentPackages()[0].getVersion()), marshalledString.contains(xmlDeploymentPackages.getDeploymentPackages()[0].getVersion()));
+			Assert.assertTrue(String.format(missingItemsMessage, xmlDeploymentPackages.getDeploymentPackages()[0].getBundleInfos()[0].getName()),
+					marshalledString.contains(xmlDeploymentPackages.getDeploymentPackages()[0].getBundleInfos()[0].getName()));
+			Assert.assertTrue(String.format(missingItemsMessage, xmlDeploymentPackages.getDeploymentPackages()[0].getBundleInfos()[0].getVersion()),
+					marshalledString.contains(xmlDeploymentPackages.getDeploymentPackages()[0].getBundleInfos()[0].getVersion()));
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+	}
+
+	@TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+	@Test
+	public void testXmlBundlesMarshalling() {
+		try {
+
+			XmlBundles xmlBundles = getSampleXmlBundlesObject();
+			String marshalledString = org.eclipse.kura.core.deployment.XmlUtil.marshal(xmlBundles);
+			Assert.assertTrue(String.format(missingItemsMessage, xmlBundles.getBundles()[0].getId()), marshalledString.contains(Long.toString(xmlBundles.getBundles()[0].getId())));
+			Assert.assertTrue(String.format(missingItemsMessage, xmlBundles.getBundles()[0].getName()), marshalledString.contains(xmlBundles.getBundles()[0].getName()));
+			Assert.assertTrue(String.format(missingItemsMessage, xmlBundles.getBundles()[0].getState()), marshalledString.contains(xmlBundles.getBundles()[0].getState()));
+			Assert.assertTrue(String.format(missingItemsMessage, xmlBundles.getBundles()[0].getVersion()), marshalledString.contains(xmlBundles.getBundles()[0].getVersion()));
+
+		} catch (Exception e) {
 			e.printStackTrace();
 			fail(e.getMessage());
 		}
@@ -396,9 +255,9 @@ public class XmlUtilTest extends TestCase {
 	private static XmlSnapshotIdResult getSampleXmlSnapshotIdResultObject() {
 
 		List<Long> snapshotIds = new ArrayList<Long>();
-		snapshotIds.add(1L);
-		snapshotIds.add(2L);
-		snapshotIds.add(3L);
+		snapshotIds.add(102540L);
+		snapshotIds.add(27848415L);
+		snapshotIds.add(378485484848L);
 
 		XmlSnapshotIdResult xmlSnapshotIdResult = new XmlSnapshotIdResult();
 		xmlSnapshotIdResult.setSnapshotIds(snapshotIds);
@@ -406,7 +265,7 @@ public class XmlUtilTest extends TestCase {
 		return xmlSnapshotIdResult;
 	}
 
-	private static XmlComponentConfigurations getSampletestXmlComponentConfigurationsObject() {
+	private static XmlComponentConfigurations getSampleXmlComponentConfigurationsObject() {
 
 		Map<String, Object> sampleMap = new HashMap<String, Object>();
 
@@ -420,7 +279,7 @@ public class XmlUtilTest extends TestCase {
 		sampleMap.put("short", (short) 1);
 		sampleMap.put("byte", (byte) 90);
 		Password password = new Password("password".toCharArray());
-		sampleMap.put("password", password);
+		// sampleMap.put("password", password);
 
 		ComponentConfigurationImpl componentConfigurationImpl = new ComponentConfigurationImpl();
 		componentConfigurationImpl.setPid("8236");

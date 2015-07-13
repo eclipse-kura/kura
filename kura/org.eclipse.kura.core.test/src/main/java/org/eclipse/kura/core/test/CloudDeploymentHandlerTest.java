@@ -118,7 +118,7 @@ public class CloudDeploymentHandlerTest extends TestCase {
 				CloudDeploymentHandler.APP_ID,
 				sb.toString(),
 				payload,
-				5000);
+				10000);
 
 		assertEquals(KuraResponsePayload.RESPONSE_CODE_OK, resp.getResponseCode());
 	}
@@ -294,7 +294,7 @@ public class CloudDeploymentHandlerTest extends TestCase {
 				CloudDeploymentHandler.APP_ID,
 				sb.toString(),
 				payload,
-				5000);
+				10000);
 		
 		assertEquals(KuraResponsePayload.RESPONSE_CODE_OK, resp.getResponseCode());
 		assertNull(s_deploymentAdmin.getDeploymentPackage(DP_NAME));

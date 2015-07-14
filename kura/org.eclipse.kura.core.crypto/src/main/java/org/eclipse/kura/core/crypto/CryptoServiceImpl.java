@@ -77,7 +77,7 @@ public class CryptoServiceImpl implements CryptoService {
 			Class<?> clazz = Class.forName( "javax.xml.bind.DatatypeConverter" );
 			Method method = clazz.getMethod("parseBase64Binary", String.class);
 			convertedData= method.invoke(null, internalStringValue);
-		} catch( ClassNotFoundException e ) {
+		} catch (Exception e ) {
 			try {
 				Class<?> clazz = Class.forName("java.util.Base64");
 				Method decoderMethod= clazz.getMethod("getDecoder", (Class<?>[]) null);
@@ -88,7 +88,6 @@ public class CryptoServiceImpl implements CryptoService {
 				convertedData= decodeMethod.invoke(decoder, internalStringValue);
 			} catch (Exception e1) {	
 			} 
-		} catch (Exception e) {
 		}
 		
 		if(convertedData != null){
@@ -103,7 +102,7 @@ public class CryptoServiceImpl implements CryptoService {
 			Class<?> clazz = Class.forName( "javax.xml.bind.DatatypeConverter" );
 			Method method = clazz.getMethod("printBase64Binary", byte[].class);
 			convertedData= method.invoke(null, encryptedBytes);
-		} catch( ClassNotFoundException e ) {
+		} catch (Exception e ) {
 			try {
 				Class<?> clazz = Class.forName("java.util.Base64");
 				Method encoderMethod= clazz.getMethod("getEncoder", (Class<?>[]) null);
@@ -114,8 +113,6 @@ public class CryptoServiceImpl implements CryptoService {
 				convertedData= decodeMethod.invoke(encoder, encryptedBytes);
 			} catch (Exception e1) {
 			} 
-
-		} catch (Exception e) {
 		}
 		
 		if(convertedData != null){

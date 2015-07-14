@@ -54,7 +54,7 @@ public class GwtCertificatesServiceImpl extends OsgiRemoteServiceServlet impleme
 	        	Class<?> clazz = Class.forName( "javax.xml.bind.DatatypeConverter" );
 	        	Method method = clazz.getMethod("parseBase64Binary", String.class);
 	        	convertedData= method.invoke(null, key);
-	        } catch( ClassNotFoundException e ) {
+	        } catch (Exception e) {
 				try {
 					Class<?> clazz = Class.forName("java.util.Base64");
 		        	Method decoderMethod= clazz.getMethod("getDecoder", (Class<?>[]) null);
@@ -65,11 +65,8 @@ public class GwtCertificatesServiceImpl extends OsgiRemoteServiceServlet impleme
 		        	convertedData= decodeMethod.invoke(decoder, key);
 				} catch (Exception e1) {
 					throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e1);
-				} 
-	        	
-	        } catch (Exception e) {
-	        	throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
-			} 
+				}	
+	        }
 	    	
 	        byte[] conversion= (byte[]) convertedData;
 	        // Parse Base64 - after PKCS8

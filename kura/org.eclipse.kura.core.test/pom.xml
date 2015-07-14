@@ -199,11 +199,6 @@
 			    <autoStart>true</autoStart>
 			</bundle>
 			<bundle>
-			    <id>javax.usb.api</id>
-			    <level>4</level>
-			    <autoStart>true</autoStart>
-			</bundle>
-			<bundle>
 			    <id>slf4j.api</id>
 			    <level>4</level>
 			    <autoStart>true</autoStart>
@@ -395,10 +390,6 @@
                         <dependency>
                             <type>p2-installable-unit</type>
                             <artifactId>org.eclipse.soda.dk.comm</artifactId>
-                        </dependency>
-                        <dependency>
-                            <type>p2-installable-unit</type>
-                            <artifactId>javax.usb.api</artifactId>
                         </dependency>
                         <dependency>
                             <type>p2-installable-unit</type>

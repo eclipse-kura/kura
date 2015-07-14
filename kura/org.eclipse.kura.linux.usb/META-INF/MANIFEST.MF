@@ -17,11 +17,7 @@ Bundle-NativeCode: lib/linux/x86_64_32jvm/libEurotechLinuxUdev.so; osname=Linux;
  lib/linux/armv5_sf/libEurotechLinuxUdev.so; osname=Linux; processor=ARM; selection-filter="(&(kura.arch=armv6_sf))",
  lib/linux/armv5_sf/libEurotechLinuxUdev.so; osname=Linux; processor=ARM; selection-filter="(&(kura.arch=armv5_sf))",
  *
-Import-Package: com.ibm.jusb;version="1.0.2",
- com.ibm.jusb.event;version="1.0.2",
- com.ibm.jusb.os;version="1.0.2",
- com.ibm.jusb.util;version="1.0.2",
- javax.usb;version="1.0.2",
+Import-Package:  javax.usb;version="1.0.2",
  javax.usb.event;version="1.0.2",
  javax.usb.util;version="1.0.2",
  org.eclipse.kura;version="[1.0,2.0)",

@@ -23,6 +23,7 @@ import org.eclipse.kura.core.net.NetworkConfiguration;
 import org.eclipse.kura.core.net.NetworkConfigurationVisitor;
 import org.eclipse.kura.core.net.WifiInterfaceAddressConfigImpl;
 import org.eclipse.kura.core.net.WifiInterfaceConfigImpl;
+import org.eclipse.kura.linux.net.util.KuraConstants;
 import org.eclipse.kura.net.NetConfig;
 import org.eclipse.kura.net.NetInterfaceAddressConfig;
 import org.eclipse.kura.net.NetInterfaceConfig;
@@ -38,7 +39,17 @@ public class HostapdConfigReader implements NetworkConfigurationVisitor {
 
 	private static final Logger s_logger = LoggerFactory.getLogger(HostapdConfigReader.class);
 
-	private static final String HOSTAPD_CONFIG_FILE = "/etc/hostapd.conf";
+	private static String HOSTAPD_CONFIG_FILE = null;
+	
+	private static final String OS_VERSION = System.getProperty("kura.os.version");
+	
+	static {
+		if (OS_VERSION.equals(KuraConstants.Intel_Edison.getImageName() + "_" + KuraConstants.Intel_Edison.getImageVersion() + "_" + KuraConstants.Intel_Edison.getTargetName())) {
+			HOSTAPD_CONFIG_FILE = "/etc/hostapd/hostapd.conf";
+		} else {
+			HOSTAPD_CONFIG_FILE = "/etc/hostapd.conf";
+		}
+	}
 
 	private static HostapdConfigReader s_instance;
 

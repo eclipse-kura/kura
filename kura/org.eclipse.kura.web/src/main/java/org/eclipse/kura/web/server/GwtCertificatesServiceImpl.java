@@ -14,6 +14,7 @@ package org.eclipse.kura.web.server;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Method;
 import java.security.GeneralSecurityException;
 import java.security.KeyFactory;
 import java.security.PrivateKey;
@@ -24,8 +25,6 @@ import java.security.cert.X509Certificate;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.Collection;
 import java.util.Iterator;
-
-import javax.xml.bind.DatatypeConverter;
 
 import org.eclipse.kura.ssl.SslManagerService;
 import org.eclipse.kura.web.server.util.ServiceLocator;
@@ -49,8 +48,27 @@ public class GwtCertificatesServiceImpl extends OsgiRemoteServiceServlet impleme
 	    	// Remove header if exists
 	        String key = privateKey.replace("-----BEGIN PRIVATE KEY-----", "").replace("\n", "");
 	        key = key.replace("-----END PRIVATE KEY-----", "");
+	        
+	        Object convertedData= null;
+	        try {
+	        	Class<?> clazz = Class.forName( "javax.xml.bind.DatatypeConverter" );
+	        	Method method = clazz.getMethod("parseBase64Binary", String.class);
+	        	convertedData= method.invoke(null, key);
+	        } catch (Exception e) {
+				try {
+					Class<?> clazz = Class.forName("java.util.Base64");
+		        	Method decoderMethod= clazz.getMethod("getDecoder", (Class<?>[]) null);
+					Object decoder= decoderMethod.invoke(null, new Object[0]);
+					
+		        	Class<?> Base64Decoder = Class.forName("java.util.Base64$Decoder");
+		        	Method decodeMethod = Base64Decoder.getMethod("decode", String.class);
+		        	convertedData= decodeMethod.invoke(decoder, key);
+				} catch (Exception e1) {
+					throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e1);
+				}	
+	        }
 	    	
-	        byte[] conversion= DatatypeConverter.parseBase64Binary(key);
+	        byte[] conversion= (byte[]) convertedData;
 	        // Parse Base64 - after PKCS8
 	        PKCS8EncodedKeySpec specPriv = new PKCS8EncodedKeySpec(conversion);
 		    

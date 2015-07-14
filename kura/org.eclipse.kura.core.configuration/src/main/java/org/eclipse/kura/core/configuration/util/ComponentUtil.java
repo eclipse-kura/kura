@@ -18,7 +18,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.xml.bind.JAXBException;
 import javax.xml.stream.FactoryConfigurationError;
 import javax.xml.stream.XMLStreamException;
 
@@ -135,7 +134,7 @@ public class ComponentUtil
 	 * @throws FactoryConfigurationError
 	 */
 	public static OCD readObjectClassDefinition(URL resourceUrl)
-			throws IOException, JAXBException, XMLStreamException, FactoryConfigurationError
+		throws IOException, XMLStreamException, FactoryConfigurationError, Exception
 	{
 		OCD ocd = null;
 		String metatypeXml = IOUtil.readResource(resourceUrl);
@@ -166,7 +165,7 @@ public class ComponentUtil
 	 * @throws FactoryConfigurationError
 	 */
 	public static Tocd readObjectClassDefinition(String pid)
-			throws IOException, JAXBException, XMLStreamException, FactoryConfigurationError
+		throws IOException, Exception, XMLStreamException, FactoryConfigurationError
 	{
 		Tocd ocd = null;
 		StringBuilder sbMetatypeXmlName = new StringBuilder();
@@ -202,7 +201,7 @@ public class ComponentUtil
 	 * @throws FactoryConfigurationError
 	 */
 	public static Tocd readObjectClassDefinition(Bundle bundle, String pid)
-			throws IOException, JAXBException, XMLStreamException, FactoryConfigurationError
+		throws IOException, Exception, XMLStreamException, FactoryConfigurationError
 	{
 		Tocd ocd = null;
 		StringBuilder sbMetatypeXmlName = new StringBuilder();

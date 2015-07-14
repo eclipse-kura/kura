@@ -61,6 +61,15 @@ public class iwlistScanTool implements IScanTool {
 	@Override
 	public List<WifiAccessPoint> scan() throws KuraException {
 		
+		StringBuilder sb = new StringBuilder();
+		sb.append("ifconfig ").append(m_ifaceName).append(" up");
+		try {
+			SafeProcess process = ProcessUtil.exec(sb.toString());
+			process.waitFor();
+		} catch (Exception e) {
+			s_logger.error("failed to execute the {} command - {}", sb.toString(), e);
+		}
+		
 		List<WifiAccessPoint> wifiAccessPoints = new ArrayList<WifiAccessPoint>();
 		synchronized (s_lock) {
 			long timerStart = System.currentTimeMillis();
@@ -86,7 +95,7 @@ public class iwlistScanTool implements IScanTool {
 						}	
 					} catch (Exception e) {
 						m_errmsg = "exception executing scan command";
-						e.printStackTrace();
+						s_logger.error("failed to execute the {} command - {}", sb.toString(), e);
 					}
 				}
 			});
@@ -94,7 +103,7 @@ public class iwlistScanTool implements IScanTool {
 			while (!s_task.isDone()) {
 				if (System.currentTimeMillis() > timerStart+m_timeout*1000) {
 					s_logger.warn("scan() :: scan timeout");
-					StringBuilder sb = new StringBuilder();
+					sb = new StringBuilder();
 					sb.append("iwlist ").append(m_ifaceName).append(" scanning");
 					try {
 						int pid = LinuxProcessUtil.getPid(sb.toString());
@@ -103,7 +112,7 @@ public class iwlistScanTool implements IScanTool {
 							LinuxProcessUtil.kill(pid);
 						}
 					} catch (Exception e) {
-						e.printStackTrace();
+						s_logger.error("failed to get pid of the {} process - {}", sb.toString(), e);
 					}	
 					s_task.cancel(true);
 					s_task = null;

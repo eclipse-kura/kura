@@ -976,7 +976,8 @@ public class LinuxFirewall {
 	private void iptablesSave() throws KuraException {
 		SafeProcess proc = null;
 		try {
-			if (OS_VERSION.equals(KuraConstants.Mini_Gateway.getImageName() + "_" + KuraConstants.Mini_Gateway.getImageVersion())) {
+			if (OS_VERSION.equals(KuraConstants.Mini_Gateway.getImageName() + "_" + KuraConstants.Mini_Gateway.getImageVersion()) ||
+				(OS_VERSION.equals(KuraConstants.Intel_Edison.getImageName() + "_" + KuraConstants.Intel_Edison.getImageVersion() + "_" + KuraConstants.Intel_Edison.getTargetName()))) {
 				proc = ProcessUtil.exec("iptables-save > /opt/eurotech/firewall_rules.fw");
 				proc.waitFor();
 			} else {

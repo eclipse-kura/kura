@@ -17,15 +17,17 @@ package org.eclipse.kura.core.linux.util;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URI;
+import java.util.Properties;
 import java.util.StringTokenizer;
 
 import org.eclipse.kura.core.util.ProcessUtil;
 import org.eclipse.kura.core.util.SafeProcess;
-import org.eclipse.kura.core.linux.util.ProcessStats;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,7 +35,23 @@ public class LinuxProcessUtil {
 
 	private static final Logger s_logger = LoggerFactory
 			.getLogger(LinuxProcessUtil.class);
-
+	
+	private static String s_platform = null;
+	
+	static {
+		String uriSpec = System.getProperty("kura.configuration");
+		Properties props = new Properties();
+		FileInputStream fis = null;
+		try {
+			URI uri = new URI(uriSpec);
+			fis = new FileInputStream(new File(uri));
+			props.load(fis);
+			s_platform = props.getProperty("kura.platform");
+		} catch (Exception e) {
+			s_logger.error("Failed to obtain platform information - {}", e);
+		}
+	}
+	
 	public static int start(String command, boolean wait, boolean background)
 			throws Exception {
 		SafeProcess proc = null;
@@ -155,8 +173,12 @@ public class LinuxProcessUtil {
 
 			if (command != null && !command.isEmpty()) {
 				s_logger.trace("searching process list for " + command);
-				proc = ProcessUtil.exec("ps -ax");
 				
+				if ("intel-edison".equals(s_platform)) {
+					proc = ProcessUtil.exec("ps");
+				} else {
+					proc = ProcessUtil.exec("ps -ax");
+				}
 				proc.waitFor();
 
 				// get the output
@@ -199,7 +221,11 @@ public class LinuxProcessUtil {
 		try {
 			if(command != null && !command.isEmpty()) {
     			s_logger.trace("searching process list for " + command);
-    			proc = ProcessUtil.exec("ps -ax");
+    			if ("intel-edison".equals(s_platform)) {
+    				proc = ProcessUtil.exec("ps");
+    			} else {
+    				proc = ProcessUtil.exec("ps -ax");
+    			}
 				proc.waitFor();
     
     			//get the output

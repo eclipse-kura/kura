@@ -184,10 +184,17 @@ public class LinuxNamed {
 			if (OS_VERSION.equals(KuraConstants.Mini_Gateway.getImageName() + "_" + KuraConstants.Mini_Gateway.getImageVersion())) {
 				result = LinuxProcessUtil.start("/etc/init.d/bind start");
 			} 
+			else if (OS_VERSION.equals(KuraConstants.ReliaGATE_10_05.getImageName() + "_" + KuraConstants.ReliaGATE_10_05.getImageVersion())) {
+				result = LinuxProcessUtil.start("/etc/init.d/bind start");
+			} 
 			else if (OS_VERSION.equals(KuraConstants.Raspberry_Pi.getImageName()) || OS_VERSION.equals(KuraConstants.BeagleBone.getImageName())) {
 				result = LinuxProcessUtil.start("/etc/init.d/bind9 start");
 			}
+			else if (OS_VERSION.equals(KuraConstants.Intel_Edison.getImageName() + "_" + KuraConstants.Intel_Edison.getImageVersion() + "_" + KuraConstants.Intel_Edison.getTargetName())) {
+				result = LinuxProcessUtil.start("/etc/init.d/bind start");
+			}
 			else {
+				s_logger.info("Linux named enable fallback");
 				result = LinuxProcessUtil.start("/etc/init.d/named start");
 			}
 			if(result == 0) {
@@ -211,6 +218,9 @@ public class LinuxNamed {
 			} 
 			else if (OS_VERSION.equals(KuraConstants.Raspberry_Pi.getImageName()) || OS_VERSION.equals(KuraConstants.BeagleBone.getImageName())) {
 				result = LinuxProcessUtil.start("/etc/init.d/bind9 stop");
+			}
+			else if (OS_VERSION.equals(KuraConstants.Intel_Edison.getImageName() + "_" + KuraConstants.Intel_Edison.getImageVersion() + "_" + KuraConstants.Intel_Edison.getTargetName())) {
+				result = LinuxProcessUtil.start("/etc/init.d/bind stop");
 			}
 			else {
 				result = LinuxProcessUtil.start("/etc/init.d/named stop");

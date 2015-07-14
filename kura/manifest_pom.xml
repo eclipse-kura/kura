@@ -176,9 +176,31 @@
 				<version>3.3</version>
 				<configuration>
 					<source>1.6</source>
-					<target>1.7</target>
+					<target>1.6</target>
 				</configuration>
 			</plugin>
+<!--
+                        <plugin>
+                                <groupId>org.apache.maven.plugins</groupId>
+                                <artifactId>maven-toolchains-plugin</artifactId>
+                                <version>1.1</version>
+                                <executions>
+                                    <execution>
+                                        <goals>
+                                            <goal>toolchain</goal>
+                                        </goals>
+                                    </execution>
+                                </executions>
+                                <configuration>
+                                    <toolchains>
+                                        <jdk>
+                                            <version>1.8.compact2</version>
+                                            <vendor>sun</vendor>
+                                        </jdk>
+                                    </toolchains>
+                                </configuration>
+                        </plugin>
+-->
 			<plugin>
 		        <groupId>org.jacoco</groupId>
 		        <artifactId>jacoco-maven-plugin</artifactId>
@@ -267,6 +289,7 @@
 					<target>1.6</target>
 					<compilerArgument>-warn:[+|-]warning_tokens_separated_by_comma</compilerArgument>
 					<!-- <compilerArgument>-err:-forbidden</compilerArgument> -->
+                                        <!-- <useJDK>BREE</useJDK> -->
 				</configuration>
 			</plugin>
 			<plugin>

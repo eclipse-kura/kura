@@ -23,8 +23,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import javax.xml.bind.JAXBException;
-
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloud.CloudService;
@@ -448,7 +446,7 @@ public class CloudConfigurationHandler extends Cloudlet
 		StringWriter sw = new StringWriter();
 		try {
 			XmlUtil.marshal(o, sw);
-		} catch (JAXBException e) {
+		} catch (Exception e) {
 			s_logger.error("Error marshalling snapshots: {}", e);
 			throw new KuraException(KuraErrorCode.CONFIGURATION_SNAPSHOT_LOADING, e);
 		}

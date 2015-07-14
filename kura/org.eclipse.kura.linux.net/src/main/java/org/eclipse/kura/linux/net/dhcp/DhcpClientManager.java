@@ -48,7 +48,7 @@ public class DhcpClientManager {
 		}
 	}
 	
-	public static boolean enable(String interfaceName) throws KuraException {
+	public static void enable(String interfaceName) throws KuraException {
 		try {
 			int pid = -1;
 			if (dhcpClientTool == DhcpClientTool.DHCLIENT) {
@@ -57,29 +57,27 @@ public class DhcpClientManager {
 				pid = LinuxProcessUtil.getPid("udhcpc", new String[]{interfaceName});
 			}
 			
-			if (pid < 0) {
-				LinuxProcessUtil.start(formCommand(interfaceName, true, true), true);
+			if (pid >= 0) {
+				s_logger.info("enable() :: disabling DHCP client for {}", interfaceName);
+				disable(interfaceName);
 			}
-			
+			s_logger.info("enable() :: Starting DHCP client for {}", interfaceName);
+			LinuxProcessUtil.start(formCommand(interfaceName, true, true), true);
 		} catch (Exception e) {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
 		}
-		
-		return false;
 	}
 	
-	public static boolean disable(String interfaceName) throws KuraException {
-		
-		String [] tokens = {interfaceName};
+	public static void disable(String interfaceName) throws KuraException {
 		int pid = -1;
 		try {
 			if (dhcpClientTool == DhcpClientTool.DHCLIENT) {
-				pid = LinuxProcessUtil.getPid("dhclient", tokens);
+				pid = LinuxProcessUtil.getPid("dhclient", new String[]{interfaceName});
 			} else if (dhcpClientTool == DhcpClientTool.UDHCPC) {
-				pid = LinuxProcessUtil.getPid("udhcpc", tokens);
+				pid = LinuxProcessUtil.getPid("udhcpc", new String[]{interfaceName});
 			}
 			if (pid > -1) {
-				s_logger.debug("manageDhcpClient() :: killing DHCP client for {}", interfaceName);
+				s_logger.info("disable() :: killing DHCP client for {}", interfaceName);
 				if(LinuxProcessUtil.kill(pid)) {
 					removePidFile(interfaceName);
 				} else {
@@ -89,8 +87,6 @@ public class DhcpClientManager {
 		} catch (Exception e) {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
 		}
-		
-		return false;
 	}
 	
 	public static void releaseCurrentLease(String interfaceName) throws KuraException {

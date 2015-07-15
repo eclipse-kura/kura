@@ -2,12 +2,11 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: org.eclipse.kura.web
 Bundle-SymbolicName: org.eclipse.kura.web;singleton:=true
-Bundle-Version: 1.0.5.qualifier
+Bundle-Version: 1.0.5
 Bundle-Vendor: EUROTECH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Service-Component: OSGI-INF/*.xml
-Import-Package: 
- com.allen_sauer.gwt.log.client,
+Import-Package: com.allen_sauer.gwt.log.client,
  com.allen_sauer.gwt.log.client.impl,
  com.allen_sauer.gwt.log.client.util,
  com.allen_sauer.gwt.log.client.util.impl,

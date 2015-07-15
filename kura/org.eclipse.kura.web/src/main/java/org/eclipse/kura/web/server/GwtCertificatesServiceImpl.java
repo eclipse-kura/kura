@@ -45,37 +45,31 @@ public class GwtCertificatesServiceImpl extends OsgiRemoteServiceServlet impleme
 	public Integer storePublicPrivateKeys(String privateKey, String publicKey, String password, String alias)
 			throws GwtKuraException {
 		try {
-	    	// Remove header if exists
-	        String key = privateKey.replace("-----BEGIN PRIVATE KEY-----", "").replace("\n", "");
-	        key = key.replace("-----END PRIVATE KEY-----", "");
-	        
-	        Object convertedData= null;
-	        try {
-	        	Class<?> clazz = Class.forName( "javax.xml.bind.DatatypeConverter" );
-	        	Method method = clazz.getMethod("parseBase64Binary", String.class);
-	        	convertedData= method.invoke(null, key);
-	        } catch (Exception e) {
-				try {
-					Class<?> clazz = Class.forName("java.util.Base64");
-		        	Method decoderMethod= clazz.getMethod("getDecoder", (Class<?>[]) null);
-					Object decoder= decoderMethod.invoke(null, new Object[0]);
-					
-		        	Class<?> Base64Decoder = Class.forName("java.util.Base64$Decoder");
-		        	Method decodeMethod = Base64Decoder.getMethod("decode", String.class);
-		        	convertedData= decodeMethod.invoke(decoder, key);
-				} catch (Exception e1) {
-					throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e1);
-				}	
-	        }
-	    	
-	        byte[] conversion= (byte[]) convertedData;
-	        // Parse Base64 - after PKCS8
-	        PKCS8EncodedKeySpec specPriv = new PKCS8EncodedKeySpec(conversion);
-		    
-	        // Create RSA key
-	        KeyFactory kf=KeyFactory.getInstance("RSA");        
-	        PrivateKey privKey = kf.generatePrivate(specPriv);
-			
+			// Remove header if exists
+			String key = privateKey.replace("-----BEGIN PRIVATE KEY-----", "").replace("\n", "");
+			key = key.replace("-----END PRIVATE KEY-----", "");
+
+			Object convertedData= null;
+			try {
+				Class<?> clazz = Class.forName("javax.xml.bind.DatatypeConverter");
+				Method method = clazz.getMethod("parseBase64Binary", String.class);
+				convertedData= method.invoke(null, key);
+			} catch(ClassNotFoundException e) {
+				convertedData = base64DecodeJava8(key);
+			} catch (LinkageError e){
+				convertedData = base64DecodeJava8(key);
+			} catch (Exception e) {
+				throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
+			} 
+
+			byte[] conversion= (byte[]) convertedData;
+			// Parse Base64 - after PKCS8
+			PKCS8EncodedKeySpec specPriv = new PKCS8EncodedKeySpec(conversion);
+
+			// Create RSA key
+			KeyFactory kf=KeyFactory.getInstance("RSA");        
+			PrivateKey privKey = kf.generatePrivate(specPriv);
+
 			Certificate[] certs= parsePublicCertificates(publicKey);
 
 			if(privKey == null){
@@ -99,14 +93,14 @@ public class GwtCertificatesServiceImpl extends OsgiRemoteServiceServlet impleme
 			throws GwtKuraException {
 		try {
 			Certificate[] certs= parsePublicCertificates(publicKey);
-			
+
 			if(certs.length == 0){
 				throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT);
 			}else{
 				//Store only the first leaf passed. Don't consider other eventual certificates
 				SslManagerService sslService = ServiceLocator.getInstance().getService(SslManagerService.class);
 				X509Certificate sslCert= (X509Certificate) certs[0];
-				
+
 				sslService.installTrustCertificate("ssl-" + alias, sslCert);
 			}
 			return 1;
@@ -120,25 +114,25 @@ public class GwtCertificatesServiceImpl extends OsgiRemoteServiceServlet impleme
 			throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT, e);
 		}
 	}
-	
+
 	public Integer storePublicChain(String publicKeys, String alias) throws GwtKuraException {
 		try {
 			Certificate[] certs= parsePublicCertificates(publicKeys);
-			
+
 			if(certs.length == 0){
 				throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT);
 			}else{
 				int i= 0;
 				SslManagerService sslService = ServiceLocator.getInstance().getService(SslManagerService.class);
 				X509Certificate sslCert= (X509Certificate) certs[i];
-				
+
 				sslService.installTrustCertificate("ssl-" + alias, sslCert);
 				i++;
-				
+
 				while(i < certs.length){
 					X509Certificate caCert= (X509Certificate) certs[i];
 					String certificateAlias= "ca-"+caCert.getSerialNumber().toString();
-						
+
 					sslService.installTrustCertificate(certificateAlias, caCert);
 					i++;
 				}
@@ -154,26 +148,26 @@ public class GwtCertificatesServiceImpl extends OsgiRemoteServiceServlet impleme
 			throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT, e);
 		}
 	}
-	
+
 	public Integer storeCertificationAuthority(String publicCAKeys, String alias)
 			throws GwtKuraException {
 		try {
 			Certificate[] certs= parsePublicCertificates(publicCAKeys);
-			
+
 			if(certs.length == 0){
 				throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT);
 			}else{
 				int i= 0;
 				SslManagerService sslService = ServiceLocator.getInstance().getService(SslManagerService.class);
 				X509Certificate sslCert= (X509Certificate) certs[i];
-				
+
 				sslService.installTrustCertificate("ca-"+alias, sslCert);
 				i++;
-				
+
 				while(i < certs.length){
 					X509Certificate caCert= (X509Certificate) certs[i];
 					String certificateAlias= "ca-"+caCert.getSerialNumber().toString();
-						
+
 					sslService.installTrustCertificate(certificateAlias, caCert);
 					i++;
 				}
@@ -189,20 +183,36 @@ public class GwtCertificatesServiceImpl extends OsgiRemoteServiceServlet impleme
 			throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT, e);
 		}
 	}
-	
+
 	private Certificate[] parsePublicCertificates(String publicKey) throws CertificateException, UnsupportedEncodingException{
 		CertificateFactory certFactory= CertificateFactory.getInstance("X.509");
 		Collection<? extends Certificate> publicCertificates= certFactory.generateCertificates(new ByteArrayInputStream(publicKey.getBytes("UTF-8")));
 		Iterator<? extends Certificate> certIterator= publicCertificates.iterator();
-		
+
 		Certificate[] certs= new Certificate[publicCertificates.size()];
 		int i=0;
-		
+
 		while(certIterator.hasNext()){
 			X509Certificate cert= (X509Certificate) certIterator.next();
 			certs[i]= cert;
 			i++;
 		}
 		return certs;
+	}
+	
+	private Object base64DecodeJava8(String key) throws GwtKuraException{
+		Object convertedData= null;
+		try {
+			Class<?> clazz = Class.forName("java.util.Base64");
+			Method decoderMethod= clazz.getMethod("getDecoder", (Class<?>[]) null);
+			Object decoder= decoderMethod.invoke(null, new Object[0]);
+
+			Class<?> Base64Decoder = Class.forName("java.util.Base64$Decoder");
+			Method decodeMethod = Base64Decoder.getMethod("decode", String.class);
+			convertedData= decodeMethod.invoke(decoder, key);
+		} catch (Exception e1) {
+			throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e1);
+		}
+		return convertedData;
 	}
 }

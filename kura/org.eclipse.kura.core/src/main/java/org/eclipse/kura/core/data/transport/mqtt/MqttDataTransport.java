@@ -34,6 +34,9 @@ import org.eclipse.kura.data.DataTransportService;
 import org.eclipse.kura.data.DataTransportToken;
 import org.eclipse.kura.ssl.SslManagerService;
 import org.eclipse.kura.ssl.SslServiceListener;
+import org.eclipse.kura.status.CloudConnectionStatusComponent;
+import org.eclipse.kura.status.CloudConnectionStatusEnum;
+import org.eclipse.kura.status.CloudConnectionStatusService;
 import org.eclipse.kura.system.SystemService;
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.IMqttToken;
@@ -51,7 +54,7 @@ import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class MqttDataTransport implements DataTransportService, MqttCallback, ConfigurableComponent, SslServiceListener {
+public class MqttDataTransport implements DataTransportService, MqttCallback, ConfigurableComponent, SslServiceListener, CloudConnectionStatusComponent {
 	private static final Logger s_logger = LoggerFactory.getLogger(MqttDataTransport.class);
 
 	private static final String MQTT_SCHEME = "mqtt://";
@@ -68,6 +71,9 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 
 	private SystemService m_systemService;
 	private SslManagerService m_sslManagerService;
+	private CloudConnectionStatusService m_cloudConnectionStatusService;
+	
+	private CloudConnectionStatusEnum m_notificationStatus = CloudConnectionStatusEnum.OFF;
 
 	private MqttAsyncClient m_mqttClient;
 
@@ -136,7 +142,15 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 	public void unsetCryptoService(CryptoService cryptoService) {
 		this.m_cryptoService = null;
 	}
+	
+	public void setCloudConnectionStatusService(CloudConnectionStatusService cloudConnectionStatusService) {
+		this.m_cloudConnectionStatusService = cloudConnectionStatusService;
+	}
 
+	public void unsetCloudConnectionStatusService(CloudConnectionStatusService cloudConnectionStatusService) {
+		this.m_cloudConnectionStatusService = null;
+	}
+	
 	// ----------------------------------------------------------------
 	//
 	// Activation APIs
@@ -172,12 +186,16 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 			m_clientConf = buildConfiguration(m_properties);
 			setupMqttSession();
 		} catch (RuntimeException e) {
-			s_logger.error("Invalid client configuration. Service will not be able to connect until the configuration is updated", e);
+			m_cloudConnectionStatusService.updateStatus(this, CloudConnectionStatusEnum.SLOW_BLINKING);
+			s_logger.error("Invalid client configuration. Service will not be able to connect until the configuration is updated", e);			
 		}
 
 		ServiceTracker<DataTransportListener, DataTransportListener> listenersTracker = new ServiceTracker<DataTransportListener, DataTransportListener>(
 				componentContext.getBundleContext(), DataTransportListener.class, null);
 
+		//Register the component into the StatusDisplayService
+		m_cloudConnectionStatusService.register(this);
+		
 		// Deferred open of tracker to prevent
 		// java.lang.Exception: Recursive invocation of
 		// ServiceFactory.getService
@@ -201,6 +219,8 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 			disconnect(0);
 		}
 
+		m_cloudConnectionStatusService.unregister(this);
+		
 		m_dataTransportListeners.close();
 	}
 
@@ -290,6 +310,9 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 		s_logger.info("#");
 		s_logger.info("#  Connecting...");
 
+		//Update status notification service
+		m_cloudConnectionStatusService.updateStatus(this, CloudConnectionStatusEnum.FAST_BLINKING);
+
 		//
 		// connect
 		try {
@@ -297,6 +320,10 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 			connectToken.waitForCompletion(getTimeToWaitMillis() * 3);
 			s_logger.info("#  Connected!");
 			s_logger.info("# ------------------------------------------------------------");
+			
+			//Update status notification service
+			m_cloudConnectionStatusService.updateStatus(this, CloudConnectionStatusEnum.ON);
+			
 		} catch (MqttException e) {
 			s_logger.warn("xxxxx  Connect failed. Forcing disconnect. xxxxx {}", e);
 			try {
@@ -308,6 +335,10 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 			} finally {
 				m_mqttClient = null;
 			}
+			
+			//Update status notification service
+			m_cloudConnectionStatusService.updateStatus(this, CloudConnectionStatusEnum.OFF);
+			
 			throw new KuraConnectException(e, "Cannot connect");
 		}
 
@@ -941,5 +972,20 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 		default:
 			return String.valueOf(MqttVersion);
 		}
+	}
+
+	@Override
+	public int getNotificationPriority() {
+		return CloudConnectionStatusService.PRIORITY_MEDIUM;
+	}
+
+	@Override
+	public CloudConnectionStatusEnum getNotificationStatus() {
+		return m_notificationStatus;
+	}
+
+	@Override
+	public void setNotificationStatus(CloudConnectionStatusEnum status) {
+		m_notificationStatus = status;
 	}
 }

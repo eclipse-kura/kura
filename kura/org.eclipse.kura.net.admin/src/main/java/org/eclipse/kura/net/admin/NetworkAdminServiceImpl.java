@@ -900,15 +900,6 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 		
 		DhcpClientManager.releaseCurrentLease(interfaceName);
 		DhcpClientManager.enable(interfaceName);
-
-		/*
-		try {
-			LinuxProcessUtil.start("dhclient -r " + interfaceName + "\n", true);
-			LinuxProcessUtil.start("dhclient " + interfaceName + "\n", true);
-		} catch (Exception e) {
-			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
-		}
-		*/
 	}
 	
 	public void manageFirewall (String gatewayIface) throws KuraException {
@@ -1286,8 +1277,12 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 		rollbackItems.add(new RollbackItem(srcDataDirectory + "/firewall", "/etc/init.d/firewall"));
 		if (OS_VERSION.equals(KuraConstants.Intel_Edison.getImageName() + "_" + KuraConstants.Intel_Edison.getImageVersion() + "_" + KuraConstants.Intel_Edison.getTargetName())) {
 			rollbackItems.add(new RollbackItem(srcDataDirectory + "/hostapd.conf", "/etc/hostapd/hostapd.conf"));
+			rollbackItems.add(new RollbackItem(srcDataDirectory + "/dhcpd-eth0.conf", "/etc/udhcpd-usb0.conf"));
+			rollbackItems.add(new RollbackItem(srcDataDirectory + "/dhcpd-wlan0.conf", "/etc/udhcpd-wlan0.conf"));
 		} else {
 			rollbackItems.add(new RollbackItem(srcDataDirectory + "/hostapd.conf", "/etc/hostapd.conf"));
+			rollbackItems.add(new RollbackItem(srcDataDirectory + "/dhcpd-eth0.conf", "/etc/dhcpd-eth0.conf"));
+			rollbackItems.add(new RollbackItem(srcDataDirectory + "/dhcpd-wlan0.conf", "/etc/dhcpd-wlan0.conf"));
 		}
 			
 		if (OS_VERSION.equals(KuraConstants.Mini_Gateway.getImageName() + "_" + KuraConstants.Mini_Gateway.getImageVersion()) ||
@@ -1302,8 +1297,6 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 			rollbackItems.add(new RollbackItem(srcDataDirectory + "/ifcfg-eth1", "/etc/sysconfig/network-scripts/ifcfg-eth1"));
 			rollbackItems.add(new RollbackItem(srcDataDirectory + "/ifcfg-wlan0", "/etc/sysconfig/network-scripts/ifcfg-wlan0"));
 		}
-		rollbackItems.add(new RollbackItem(srcDataDirectory + "/dhcpd-eth0.conf", "/etc/dhcpd-eth0.conf"));
-		rollbackItems.add(new RollbackItem(srcDataDirectory + "/dhcpd-wlan0.conf", "/etc/dhcpd-wlan0.conf"));
 		
 		for (RollbackItem rollbackItem : rollbackItems) {
 			File srcFile = new File (rollbackItem.m_src);
@@ -1485,18 +1478,4 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 		int channel = (frequency - 2407)/5;
 		return channel;
 	}
-	
-	/*
-	private static String formDhclientCommand(String interfaceName, boolean usePidFile) {
-		StringBuffer sb = new StringBuffer();
-		sb.append("dhclient ");
-		if (usePidFile) {
-			sb.append("-pf /var/run/dhclient.");
-			sb.append(interfaceName);
-			sb.append(".pid ");
-		} 
-		sb.append(interfaceName);
-		return sb.toString();
-	}
-	*/
 }

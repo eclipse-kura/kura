@@ -30,6 +30,7 @@ import org.eclipse.kura.core.linux.util.LinuxProcessUtil;
 import org.eclipse.kura.core.util.ProcessUtil;
 import org.eclipse.kura.core.util.SafeProcess;
 import org.eclipse.kura.linux.net.NetworkServiceImpl;
+import org.eclipse.kura.linux.net.dhcp.DhcpClientTool;
 import org.eclipse.kura.linux.net.wifi.WifiOptions;
 import org.eclipse.kura.net.NetInterfaceType;
 import org.eclipse.kura.net.wifi.WifiInterface.Capability;
@@ -170,7 +171,7 @@ public class LinuxNetworkUtil {
 			String line = null;
 
 			while((line = br.readLine()) != null) {
-				if(line.indexOf(interfaceName) > -1 && line.indexOf("dhclient") > -1) {					
+				if(line.indexOf(interfaceName) > -1 && line.indexOf(DhcpClientTool.DHCLIENT.getValue()) > -1) {					
 					return true;
 				}
 			}

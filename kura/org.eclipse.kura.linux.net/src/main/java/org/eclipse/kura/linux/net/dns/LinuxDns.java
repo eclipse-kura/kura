@@ -32,6 +32,7 @@ import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.util.ProcessUtil;
 import org.eclipse.kura.core.util.SafeProcess;
+import org.eclipse.kura.linux.net.dhcp.DhcpClientTool;
 import org.eclipse.kura.net.IP4Address;
 import org.eclipse.kura.net.IPAddress;
 import org.slf4j.Logger;
@@ -46,6 +47,9 @@ public class LinuxDns {
 	//private static final String PPP_DNS_FILE_NAME = "/etc/ppp/resolv.conf";
 	private static final String [] PPP_DNS_FILES = {"/var/run/ppp/resolv.conf", "/etc/ppp/resolv.conf"};
 	private static final String BACKUP_DNS_FILE_NAME = "/etc/resolv.conf.save";
+	
+	private static final String GLOBAL_DHCP_LEASES_DIR = "/var/lib/dhcp";
+	private static final String IFACE_DHCP_LEASES_DIR = "/var/lib/dhclient";
 	
 	private static Object s_lock;
 	private static LinuxDns s_linuxDns = null;
@@ -182,8 +186,8 @@ public class LinuxDns {
 			.append(";");
 			String fixedAddressMatch = sb.toString();
 			
-			File globalDhClientFile = new File("/var/lib/dhcp/dhclient.leases");
-			File interfaceDhClientFile = new File("/var/lib/dhcp/dhclient." + interfaceName + ".leases");
+			File globalDhClientFile = new File(formGlobalDhclientLeasesFilename());
+			File interfaceDhClientFile = new File(formInterfaceDhclientLeasesFilename(interfaceName));
 			
 			if (interfaceDhClientFile.exists()) {
 				try {
@@ -278,13 +282,8 @@ public class LinuxDns {
 				}
 				
 			} else {
-	    		sb = new StringBuilder();
-	    		sb.append("/var/lib/dhclient/dhclient-")
-	    		.append(interfaceName)
-	    		.append(".leases");
-	    
 	    		try {
-	    		    File dhclientFile = new File(sb.toString());
+	    		    File dhclientFile = new File(formInterfaceDhclientLeasesFilename(interfaceName));
 	    		    if(!dhclientFile.exists()) {
 	    		        dhclientFile.createNewFile();
 	    		    }
@@ -619,5 +618,23 @@ public class LinuxDns {
     	}
     	
     	return pppDnsFileName;
+    }
+    
+    private String formGlobalDhclientLeasesFilename() {
+    	StringBuilder sb = new StringBuilder(GLOBAL_DHCP_LEASES_DIR);
+    	sb.append('/');
+    	sb.append(DhcpClientTool.DHCLIENT.getValue());
+    	sb.append(".leases");
+    	return sb.toString();
+    }
+    
+    private String formInterfaceDhclientLeasesFilename(String ifaceName) {
+    	StringBuilder sb = new StringBuilder(IFACE_DHCP_LEASES_DIR);
+    	sb.append('/');
+    	sb.append(DhcpClientTool.DHCLIENT.getValue());
+    	sb.append('.');
+    	sb.append(ifaceName);
+    	sb.append(".leases");
+    	return sb.toString();
     }
 }

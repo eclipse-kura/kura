@@ -1217,7 +1217,9 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 					if (configToUpdate.getPid().equals(pid)) {
 						// found a match
 						isConfigToUpdate = true;
-						configs.add(configToUpdate);
+						Map<String, Object> cleanedProps= cleanProperties(configToUpdate.getConfigurationProperties(), pid);
+						ComponentConfiguration cleanedConfig= new ComponentConfigurationImpl(pid, (Tocd) configToUpdate.getDefinition(), cleanedProps);
+						configs.add(cleanedConfig);
 						break;
 					}
 				}

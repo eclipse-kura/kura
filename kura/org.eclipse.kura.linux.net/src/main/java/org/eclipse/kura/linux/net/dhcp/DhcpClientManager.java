@@ -27,9 +27,9 @@ public class DhcpClientManager {
 	
 	public static DhcpClientTool getTool() {
 		if (dhcpClientTool == DhcpClientTool.NONE) {
-			if (LinuxNetworkUtil.toolExists("dhclient")) {
+			if (LinuxNetworkUtil.toolExists(DhcpClientTool.DHCLIENT.getValue())) {
 				dhcpClientTool = DhcpClientTool.DHCLIENT;
-			} else if (LinuxNetworkUtil.toolExists("udhcpc")) {
+			} else if (LinuxNetworkUtil.toolExists(DhcpClientTool.UDHCPC.getValue())) {
 				dhcpClientTool = DhcpClientTool.UDHCPC;
 			}
 		}
@@ -39,47 +39,49 @@ public class DhcpClientManager {
 	
 	public static boolean isRunning(String interfaceName) throws KuraException {
 		
+		int pid = -1;
 		try {
-			String [] tokens = {interfaceName};
-			int pid = LinuxProcessUtil.getPid("dhclient", tokens);
+			if (dhcpClientTool == DhcpClientTool.DHCLIENT) {
+				pid = LinuxProcessUtil.getPid(DhcpClientTool.DHCLIENT.getValue(), new String[]{interfaceName});
+			}  else if (dhcpClientTool == DhcpClientTool.UDHCPC) {
+				pid = LinuxProcessUtil.getPid(DhcpClientTool.UDHCPC.getValue(), new String[]{interfaceName});
+			}
 			return (pid > -1);
 		} catch (Exception e) {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
 		}
 	}
 	
-	public static boolean enable(String interfaceName) throws KuraException {
+	public static void enable(String interfaceName) throws KuraException {
 		try {
 			int pid = -1;
 			if (dhcpClientTool == DhcpClientTool.DHCLIENT) {
-				pid = LinuxProcessUtil.getPid("dhclient", new String[]{interfaceName});
+				pid = LinuxProcessUtil.getPid(DhcpClientTool.DHCLIENT.getValue(), new String[]{interfaceName});
 			} else if (dhcpClientTool == DhcpClientTool.UDHCPC) {
-				pid = LinuxProcessUtil.getPid("udhcpc", new String[]{interfaceName});
+				pid = LinuxProcessUtil.getPid(DhcpClientTool.UDHCPC.getValue(), new String[]{interfaceName});
 			}
 			
-			if (pid < 0) {
-				LinuxProcessUtil.start(formCommand(interfaceName, true, true), true);
+			if (pid >= 0) {
+				s_logger.info("enable() :: disabling DHCP client for {}", interfaceName);
+				disable(interfaceName);
 			}
-			
+			s_logger.info("enable() :: Starting DHCP client for {}", interfaceName);
+			LinuxProcessUtil.start(formCommand(interfaceName, true, true), true);
 		} catch (Exception e) {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
 		}
-		
-		return false;
 	}
 	
-	public static boolean disable(String interfaceName) throws KuraException {
-		
-		String [] tokens = {interfaceName};
+	public static void disable(String interfaceName) throws KuraException {
 		int pid = -1;
 		try {
 			if (dhcpClientTool == DhcpClientTool.DHCLIENT) {
-				pid = LinuxProcessUtil.getPid("dhclient", tokens);
+				pid = LinuxProcessUtil.getPid(DhcpClientTool.DHCLIENT.getValue(), new String[]{interfaceName});
 			} else if (dhcpClientTool == DhcpClientTool.UDHCPC) {
-				pid = LinuxProcessUtil.getPid("udhcpc", tokens);
+				pid = LinuxProcessUtil.getPid(DhcpClientTool.UDHCPC.getValue(), new String[]{interfaceName});
 			}
 			if (pid > -1) {
-				s_logger.debug("manageDhcpClient() :: killing DHCP client for {}", interfaceName);
+				s_logger.info("disable() :: killing DHCP client for {}", interfaceName);
 				if(LinuxProcessUtil.kill(pid)) {
 					removePidFile(interfaceName);
 				} else {
@@ -89,8 +91,6 @@ public class DhcpClientManager {
 		} catch (Exception e) {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
 		}
-		
-		return false;
 	}
 	
 	public static void releaseCurrentLease(String interfaceName) throws KuraException {
@@ -111,9 +111,13 @@ public class DhcpClientManager {
 	private static String getPidFilename(String interfaceName) {
         StringBuilder sb = new StringBuilder(PID_FILE_DIR);
         if (dhcpClientTool == DhcpClientTool.DHCLIENT) {
-        	sb.append("/dhclient.");
+        	sb.append('/');
+        	sb.append(DhcpClientTool.DHCLIENT.getValue());
+        	sb.append('.');
         } else if (dhcpClientTool == DhcpClientTool.UDHCPC) {
-        	sb.append("/udhcpc-");
+        	sb.append('/');
+        	sb.append(DhcpClientTool.UDHCPC.getValue());
+        	sb.append('-');
         }
         sb.append(interfaceName);
         sb.append(".pid");
@@ -125,7 +129,8 @@ public class DhcpClientManager {
 		StringBuilder sb = new StringBuilder();
 		
 		if (dhcpClientTool == DhcpClientTool.DHCLIENT) {
-			sb.append("dhclient ");
+			sb.append(DhcpClientTool.DHCLIENT.getValue());
+			sb.append(' ');
 			if (useLeasesFile) {
 				sb.append(formLeasesOption(interfaceName));
 				sb.append(' ');
@@ -137,8 +142,8 @@ public class DhcpClientManager {
 			} 
 			sb.append(interfaceName);
 		} else if (dhcpClientTool == DhcpClientTool.UDHCPC) {
-			sb.append("udhcpc ");
-			sb.append("-i ");
+			sb.append(DhcpClientTool.UDHCPC.getValue());
+			sb.append(" -i ");
 			sb.append(interfaceName);
 			sb.append(' ');
 			if (usePidFile) {
@@ -155,10 +160,12 @@ public class DhcpClientManager {
 		
 		StringBuilder sb = new StringBuilder();
 		if (dhcpClientTool == DhcpClientTool.DHCLIENT) {
-			sb.append("dhclient -r ");
+			sb.append(DhcpClientTool.DHCLIENT.getValue());
+			sb.append(" -r ");
 			sb.append(interfaceName);
 		} else if (dhcpClientTool == DhcpClientTool.UDHCPC) {
-			sb.append("udhcpc -R ");
+			sb.append(DhcpClientTool.UDHCPC.getValue());
+			sb.append(" -R ");
 			sb.append("-i ");
 			sb.append(interfaceName);
 		}
@@ -171,10 +178,11 @@ public class DhcpClientManager {
 		StringBuffer sb = new StringBuffer();
 		sb.append("-lf ");
 		sb.append(LEASES_DIR);
-		sb.append("/dhclient.");
+		sb.append('/');
+		sb.append(DhcpClientTool.DHCLIENT.getValue());
+		sb.append('.');
 		sb.append(interfaceName);
 		sb.append(".leases");
 		return sb.toString();
 	}
-
 }

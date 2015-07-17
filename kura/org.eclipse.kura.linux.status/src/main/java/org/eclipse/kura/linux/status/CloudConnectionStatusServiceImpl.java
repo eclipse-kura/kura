@@ -172,6 +172,10 @@ public class CloudConnectionStatusServiceImpl implements CloudConnectionStatusSe
 				notificationWorker = null;
 			}
 			
+			//Avoid NPE if CloudConnectionStatusComponent doesn't initialize its internal status.
+			//Defaults to OFF
+			currentStatus = currentStatus == null ? CloudConnectionStatusEnum.OFF : currentStatus;
+			
 			notificationWorker = notificationExecutor.submit(this.getWorker(currentStatus));
 		}
 	}

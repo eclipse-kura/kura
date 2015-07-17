@@ -186,16 +186,12 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 			m_clientConf = buildConfiguration(m_properties);
 			setupMqttSession();
 		} catch (RuntimeException e) {
-			m_cloudConnectionStatusService.updateStatus(this, CloudConnectionStatusEnum.SLOW_BLINKING);
 			s_logger.error("Invalid client configuration. Service will not be able to connect until the configuration is updated", e);			
 		}
 
 		ServiceTracker<DataTransportListener, DataTransportListener> listenersTracker = new ServiceTracker<DataTransportListener, DataTransportListener>(
 				componentContext.getBundleContext(), DataTransportListener.class, null);
 
-		//Register the component into the StatusDisplayService
-		m_cloudConnectionStatusService.register(this);
-		
 		// Deferred open of tracker to prevent
 		// java.lang.Exception: Recursive invocation of
 		// ServiceFactory.getService
@@ -219,8 +215,6 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 			disconnect(0);
 		}
 
-		m_cloudConnectionStatusService.unregister(this);
-		
 		m_dataTransportListeners.close();
 	}
 
@@ -310,6 +304,8 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 		s_logger.info("#");
 		s_logger.info("#  Connecting...");
 
+		//Register the component in the CloudConnectionStatus service
+		m_cloudConnectionStatusService.register(this);
 		//Update status notification service
 		m_cloudConnectionStatusService.updateStatus(this, CloudConnectionStatusEnum.FAST_BLINKING);
 
@@ -340,9 +336,11 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 			m_cloudConnectionStatusService.updateStatus(this, CloudConnectionStatusEnum.OFF);
 			
 			throw new KuraConnectException(e, "Cannot connect");
+		} finally{
+			//Always unregister from CloudConnectionStatus service so to switch to the previous state
+			m_cloudConnectionStatusService.unregister(this);
 		}
-
-		//
+		
 		// notify the listeners
 		m_dataTransportListeners.onConnectionEstablished(m_newSession);
 	}

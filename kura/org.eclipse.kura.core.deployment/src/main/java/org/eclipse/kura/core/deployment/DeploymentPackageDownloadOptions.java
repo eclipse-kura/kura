@@ -27,6 +27,7 @@ public class DeploymentPackageDownloadOptions {
 	public static final String METRIC_DP_NOTIFY_BLOCK_SIZE = "dp.http.notify.block.size";
 	public static final String METRIC_JOB_ID = "job.id";
 	public static final String METRIC_DP_HTTP_FORCE_DOWNLOAD = "dp.http.force.download";
+	public static final String METRIC_DP_SYSTEM_UPDATE = "dp.system.update";
 
 	private final String deployUrl;
 	private final String dpName;
@@ -48,6 +49,7 @@ public class DeploymentPackageDownloadOptions {
 	private String clientId = "";
 	private String requestClientId = "";
 	private Long jobId = null;
+	private boolean systemUpdate = false;
 
 	public DeploymentPackageDownloadOptions(String deployUrl, String dpName, String dpVersion) {
 		super();
@@ -77,6 +79,8 @@ public class DeploymentPackageDownloadOptions {
 		if (jobId == null) {
 			throw new KuraInvalidMessageException("Missing jobId!");
 		}
+		
+		systemUpdate = (Boolean) request.getMetric(METRIC_DP_SYSTEM_UPDATE);
 
 		try {
 			Object metric = request.getMetric(METRIC_BLOCK_SIZE);
@@ -186,6 +190,10 @@ public class DeploymentPackageDownloadOptions {
 	public long getJobId() {
 		return jobId;
 	}
+	
+	public void setJobId(long jobId) {
+		this.jobId = jobId;
+	}
 
 	public void setTimeout(int timeout) {
 		this.timeout = timeout;
@@ -277,6 +285,14 @@ public class DeploymentPackageDownloadOptions {
 
 	public void setRequestClientId(String requestClientId) {
 		this.requestClientId = requestClientId;
+	}
+	
+	public void setSystemUpdate(boolean systemUpdate) {
+		this.systemUpdate = systemUpdate;
+	}
+
+	public boolean isSystemUpdate() {
+		return systemUpdate;
 	}
 
 }

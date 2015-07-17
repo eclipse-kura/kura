@@ -6,12 +6,10 @@ import org.eclipse.kura.KuraInvalidMessageException;
 import org.eclipse.kura.message.KuraPayload;
 import org.eclipse.kura.message.KuraRequestPayload;
 
-public class DeploymentPackageDownloadOptions {
+public class DeploymentPackageDownloadOptions extends DeploymentPackageOptions{
 
 	// Metrics in RESOURCE_DOWNLOAD
 	public static final String METRIC_DEPLOY_URL = "dp.url";
-	public static final String METRIC_DP_NAME = "dp.name";
-	public static final String METRIC_DP_VERSION = "dp.version";
 	public static final String METRIC_BLOCK_SIZE = "dp.http.block.size";
 	public static final String METRIC_BLOCK_DELAY = "dp.http.block.delay";
 	public static final String METRIC_HTTP_TIMEOUT = "dp.http.timeout";
@@ -19,68 +17,52 @@ public class DeploymentPackageDownloadOptions {
 	public static final String METRIC_HTTP_USER = "dp.http.username";
 	public static final String METRIC_HTTP_PASSWORD = "dp.http.password";
 	public static final String METRIC_DP_INSTALL = "dp.install";
-	public static final String METRIC_DP_POSTINSTALL = "dp.postinst";
-	public static final String METRIC_DP_DELETE = "dp.delete";
-	public static final String METRIC_DP_REBOOT = "dp.reboot";
-	public static final String METRIC_DP_REBOOT_DELAY = "dp.reboot.delay";
-	public static final String METRIC_DP_CLIENT_ID = "client.id";
 	public static final String METRIC_DP_NOTIFY_BLOCK_SIZE = "dp.http.notify.block.size";
-	public static final String METRIC_JOB_ID = "job.id";
 	public static final String METRIC_DP_HTTP_FORCE_DOWNLOAD = "dp.http.force.download";
-	public static final String METRIC_DP_SYSTEM_UPDATE = "dp.system.update";
 
-	private final String deployUrl;
-	private final String dpName;
-	private final String dpVersion;
+	
+	private String deployUrl;
 	private int blockSize = 1024 * 4;
 	private int notifyBlockSize = 1024 * 256;
 	private int blockDelay = 0;
 	private int timeout = 4000;
-	private boolean resume = false;
-	private boolean install = true;
-	private boolean postInst = false;
-	private boolean delete = false;
-	private boolean reboot = false;
-	private int rebootDelay = 0;
+	
 	private String username = null;
 	private String password = null;
 	private boolean forceDownload = false;
 
-	private String clientId = "";
-	private String requestClientId = "";
-	private Long jobId = null;
-	private boolean systemUpdate = false;
-
 	public DeploymentPackageDownloadOptions(String deployUrl, String dpName, String dpVersion) {
-		super();
+		super(dpName, dpVersion);
 		this.deployUrl = deployUrl;
-		this.dpName = dpName;
-		this.dpVersion = dpVersion;
 	}
 
 	public DeploymentPackageDownloadOptions(KuraPayload request) throws KuraException {
-
+		super(null, null);
 		deployUrl = (String) request.getMetric(METRIC_DEPLOY_URL);
 		if (deployUrl == null) {
 			throw new KuraInvalidMessageException("Missing deployment package URL!");
 		}
 
-		dpName = (String) request.getMetric(METRIC_DP_NAME);
-		if (dpName == null) {
+		super.setDpName((String) request.getMetric(METRIC_DP_NAME));
+		if (super.getDpName() == null) {
 			throw new KuraInvalidMessageException("Missing deployment package name!");
 		}
 
-		dpVersion = (String) request.getMetric(METRIC_DP_VERSION);
-		if (dpVersion == null) {
+		super.setDpVersion((String) request.getMetric(METRIC_DP_VERSION));
+		if (super.getDpVersion() == null) {
 			throw new KuraInvalidMessageException("Missing deployment package version!");
 		}
 		
-		jobId = (Long) request.getMetric(METRIC_JOB_ID);
-		if (jobId == null) {
+		super.setJobId((Long) request.getMetric(METRIC_JOB_ID));
+		if (super.getJobId() == null) {
 			throw new KuraInvalidMessageException("Missing jobId!");
 		}
 		
-		systemUpdate = (Boolean) request.getMetric(METRIC_DP_SYSTEM_UPDATE);
+		super.setSystemUpdate((Boolean) request.getMetric(METRIC_DP_INSTALL_SYSTEM_UPDATE));
+		if (super.getSystemUpdate() == null){
+			throw new KuraInvalidMessageException("Missing SystemUpdate!");
+		}
+		
 
 		try {
 			Object metric = request.getMetric(METRIC_BLOCK_SIZE);
@@ -97,7 +79,7 @@ public class DeploymentPackageDownloadOptions {
 			}
 			metric = request.getMetric(METRIC_HTTP_RESUME);
 			if (metric != null) {
-				resume = (Boolean) metric;
+				super.setResume((Boolean) metric);
 			}
 			metric = request.getMetric(METRIC_HTTP_USER);
 			if (metric != null) {
@@ -109,23 +91,23 @@ public class DeploymentPackageDownloadOptions {
 			}
 			metric = request.getMetric(METRIC_DP_INSTALL);
 			if (metric != null) {
-				install = (Boolean) metric;
+				super.setInstall((Boolean) metric);
 			}
 			metric = request.getMetric(METRIC_DP_POSTINSTALL);
 			if (metric != null) {
-				postInst = (Boolean) metric;
+				super.setPostInst((Boolean) metric);
 			}
 			metric = request.getMetric(METRIC_DP_DELETE);
 			if (metric != null) {
-				delete = (Boolean) metric;
+				super.setDelete((Boolean) metric);
 			}
 			metric = request.getMetric(METRIC_DP_REBOOT);
 			if (metric != null) {
-				reboot = (Boolean) metric;
+				super.setReboot((Boolean) metric);
 			}
 			metric = request.getMetric(METRIC_DP_REBOOT_DELAY);
 			if (metric != null) {
-				rebootDelay = (Integer) metric;
+				super.setRebootDelay((Integer) metric);
 			}
 			metric = request.getMetric(METRIC_DP_HTTP_FORCE_DOWNLOAD);
 			if (metric != null) {
@@ -139,7 +121,7 @@ public class DeploymentPackageDownloadOptions {
 
 			metric = request.getMetric(KuraRequestPayload.REQUESTER_CLIENT_ID);
 			if (metric != null) {
-				clientId = (String) metric;
+				super.setClientId((String) metric);
 			}
 
 		} catch (Exception ex) {
@@ -157,14 +139,6 @@ public class DeploymentPackageDownloadOptions {
 
 	public String getDeployUrl() {
 		return deployUrl;
-	}
-
-	public String getDpName() {
-		return dpName;
-	}
-
-	public String getDpVersion() {
-		return dpVersion;
 	}
 
 	public int getBlockSize() {
@@ -187,80 +161,16 @@ public class DeploymentPackageDownloadOptions {
 		return timeout;
 	}
 	
-	public long getJobId() {
-		return jobId;
-	}
-	
-	public void setJobId(long jobId) {
-		this.jobId = jobId;
-	}
-
 	public void setTimeout(int timeout) {
 		this.timeout = timeout;
 	}
 
-	public boolean isResume() {
-		return resume;
-	}
-
-	public void setResume(boolean resume) {
-		this.resume = resume;
-	}
-
-	public boolean isInstall() {
-		return install;
-	}
-
-	public void setInstall(boolean install) {
-		this.install = install;
-	}
-
-	public boolean isPostInst() {
-		return postInst;
-	}
-
-	public void setPostInst(boolean postInst) {
-		this.postInst = postInst;
-	}
-
-	public boolean isDelete() {
-		return delete;
-	}
-
-	public void setDelete(boolean delete) {
-		this.delete = delete;
-	}
-
-	public boolean isReboot() {
-		return reboot;
-	}
-
-	public void setReboot(boolean reboot) {
-		this.reboot = reboot;
-	}
-
-	public int getRebootDelay() {
-		return rebootDelay;
-	}
-	
 	public boolean isDownloadForced() {
 		return forceDownload;
 	}
 	
 	public void setDownloadForced(boolean forceDownload) {
 		this.forceDownload = forceDownload;
-	}
-
-	public void setRebootDelay(int rebootDelay) {
-		this.rebootDelay = rebootDelay;
-	}
-
-	public String getClientId() {
-		return clientId;
-	}
-
-	public void setClientId(String clientId) {
-		this.clientId = clientId;
 	}
 
 	public String getUsername() {
@@ -278,21 +188,4 @@ public class DeploymentPackageDownloadOptions {
 	public void setPassword(String password) {
 		this.password = password;
 	}
-
-	public String getRequestClientId() {
-		return requestClientId;
-	}
-
-	public void setRequestClientId(String requestClientId) {
-		this.requestClientId = requestClientId;
-	}
-	
-	public void setSystemUpdate(boolean systemUpdate) {
-		this.systemUpdate = systemUpdate;
-	}
-
-	public boolean isSystemUpdate() {
-		return systemUpdate;
-	}
-
 }

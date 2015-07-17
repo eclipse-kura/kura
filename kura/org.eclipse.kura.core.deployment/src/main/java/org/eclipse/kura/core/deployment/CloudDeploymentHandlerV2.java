@@ -72,6 +72,12 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 
 	/* Metrics in the REPLY to RESOURCE_DOWNLOAD */
 	public static final String METRIC_DOWNLOAD_STATUS = "download.status";
+	
+	private static final String METRIC_CLIENT_ID = "client.id";
+	private static final String METRIC_TRASNFER_SIZE = "dp.http.transfer.size";
+	private static final String METRIC_TRANSFER_PROGRESS = "dp.http.transfer.progress";
+	private static final String METRIC_TRANSFER_STATUS = "dp.http.transfer.status";
+	private static final String METRIC_JOB_ID = "job.id";
 
 	/**
 	 * Enum representing the different status of the download process
@@ -96,7 +102,7 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 	}
 
 	public static enum INSTALL_STATUS {
-		COMPLETED("COMPLETED"), FAILED("FAILED"), ALREADY_DONE("ALREADY DONE");
+		IDLE("IDLE"), IN_PROGRESS("IN_PROGRESS"), COMPLETED("COMPLETED"), FAILED("FAILED"), ALREADY_DONE("ALREADY DONE");
 
 		private final String status;
 
@@ -130,6 +136,7 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 	private String persistanceFileName= "persistance";
 
 	private String m_installPersistanceDir;
+	private DeploymentPackageDownloadOptions m_options;
 
 	public void setSslManagerService(SslManagerService sslManagerService) {
 		this.m_sslManagerService = sslManagerService;
@@ -241,7 +248,7 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 					request.addMetric(DeploymentPackageDownloadOptions.METRIC_BLOCK_SIZE, 1024 * 8);
 					request.addMetric(DeploymentPackageDownloadOptions.METRIC_DP_NOTIFY_BLOCK_SIZE, 1024 * 1024);
 					request.addMetric(DeploymentPackageDownloadOptions.METRIC_JOB_ID, Long.parseLong("1111")); 
-					request.addMetric(DeploymentPackageDownloadOptions.METRIC_DP_SYSTEM_UPDATE, false);
+					request.addMetric(DeploymentPackageDownloadOptions.METRIC_DP_INSTALL_SYSTEM_UPDATE, false);
 					request.addMetric(DeploymentPackageDownloadOptions.METRIC_DP_REBOOT, true);
 
 					KuraResponsePayload response = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
@@ -357,165 +364,202 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 	}
 
 
-	private void doGetPackages(KuraPayload request, KuraResponsePayload response) {
+//	private void doGetPackages(KuraPayload request, KuraResponsePayload response) {
+//
+//		DeploymentPackage[] dps = m_deploymentAdmin.listDeploymentPackages();
+//		XmlDeploymentPackages xdps = new XmlDeploymentPackages();
+//		XmlDeploymentPackage[] axdp = new XmlDeploymentPackage[dps.length];
+//
+//		for (int i = 0; i < dps.length; i++) {
+//			DeploymentPackage dp = dps[i];
+//
+//			XmlDeploymentPackage xdp = new XmlDeploymentPackage();
+//			xdp.setName(dp.getName());
+//			xdp.setVersion(dp.getVersion().toString());
+//
+//			BundleInfo[] bis = dp.getBundleInfos();
+//			XmlBundleInfo[] axbi = new XmlBundleInfo[bis.length];
+//
+//			for (int j = 0; j < bis.length; j++) {
+//
+//				BundleInfo bi = bis[j];
+//				XmlBundleInfo xbi = new XmlBundleInfo();
+//				xbi.setName(bi.getSymbolicName());
+//				xbi.setVersion(bi.getVersion().toString());
+//
+//				axbi[j] = xbi;
+//			}
+//
+//			xdp.setBundleInfos(axbi);
+//
+//			axdp[i] = xdp;
+//		}
+//
+//		xdps.setDeploymentPackages(axdp);
+//
+//		try {
+//			String s = XmlUtil.marshal(xdps);
+//
+//			s_logger.info("Getting resource {}: {}", RESOURCE_PACKAGES, s);
+//
+//			response.setResponseCode(KuraResponsePayload.RESPONSE_CODE_OK); 
+//			response.setTimestamp(new Date());
+//
+//			try {
+//				response.setBody(s.getBytes("UTF-8"));
+//			} catch (UnsupportedEncodingException e) {
+//				// Ignore
+//			}
+//		} catch (Exception e1) {
+//			// TODO Auto-generated catch block
+//			e1.printStackTrace();
+//		}
+//
+//	}
 
-		DeploymentPackage[] dps = m_deploymentAdmin.listDeploymentPackages();
-		XmlDeploymentPackages xdps = new XmlDeploymentPackages();
-		XmlDeploymentPackage[] axdp = new XmlDeploymentPackage[dps.length];
+//	private void doGetBundles(KuraPayload request, KuraResponsePayload response) {
+//
+//		Bundle[] bundles = m_bundleContext.getBundles();
+//		XmlBundles xmlBundles = new XmlBundles();
+//		XmlBundle[] axb = new XmlBundle[bundles.length];
+//
+//		for (int i = 0; i < bundles.length; i++) {
+//
+//			Bundle bundle = bundles[i];
+//			XmlBundle xmlBundle = new XmlBundle();
+//
+//			xmlBundle.setName(bundle.getSymbolicName());
+//			xmlBundle.setVersion(bundle.getVersion().toString());
+//			xmlBundle.setId(bundle.getBundleId());
+//
+//			int state = bundle.getState();
+//
+//			switch(state) {
+//			case Bundle.UNINSTALLED:
+//				xmlBundle.setState("UNINSTALLED");
+//				break;
+//
+//			case Bundle.INSTALLED:
+//				xmlBundle.setState("INSTALLED");
+//				break;
+//
+//			case Bundle.RESOLVED:
+//				xmlBundle.setState("RESOLVED");
+//				break;
+//
+//			case Bundle.STARTING:
+//				xmlBundle.setState("STARTING");
+//				break;
+//
+//			case Bundle.STOPPING:
+//				xmlBundle.setState("STOPPING");
+//				break;
+//
+//			case Bundle.ACTIVE:
+//				xmlBundle.setState("ACTIVE");
+//				break;
+//
+//			default:
+//				xmlBundle.setState(String.valueOf(state));
+//			}
+//
+//			axb[i] = xmlBundle;
+//		}
+//
+//		xmlBundles.setBundles(axb);
+//
+//		try {
+//			String s = XmlUtil.marshal(xmlBundles);
+//
+//			s_logger.info("Getting resource {}: {}", RESOURCE_BUNDLES, s);
+//
+//			response.setResponseCode(KuraResponsePayload.RESPONSE_CODE_OK); 
+//			response.setTimestamp(new Date());
+//
+//			try {
+//				response.setBody(s.getBytes("UTF-8"));
+//			} catch (UnsupportedEncodingException e) {
+//				// Ignore
+//			}
+//		} catch (Exception e1) {
+//			// TODO Auto-generated catch block
+//			e1.printStackTrace();
+//		}
+//
+//
+//	}
 
-		for (int i = 0; i < dps.length; i++) {
-			DeploymentPackage dp = dps[i];
-
-			XmlDeploymentPackage xdp = new XmlDeploymentPackage();
-			xdp.setName(dp.getName());
-			xdp.setVersion(dp.getVersion().toString());
-
-			BundleInfo[] bis = dp.getBundleInfos();
-			XmlBundleInfo[] axbi = new XmlBundleInfo[bis.length];
-
-			for (int j = 0; j < bis.length; j++) {
-
-				BundleInfo bi = bis[j];
-				XmlBundleInfo xbi = new XmlBundleInfo();
-				xbi.setName(bi.getSymbolicName());
-				xbi.setVersion(bi.getVersion().toString());
-
-				axbi[j] = xbi;
-			}
-
-			xdp.setBundleInfos(axbi);
-
-			axdp[i] = xdp;
-		}
-
-		xdps.setDeploymentPackages(axdp);
-
-		try {
-			String s = XmlUtil.marshal(xdps);
-
-			s_logger.info("Getting resource {}: {}", RESOURCE_PACKAGES, s);
-
-			response.setResponseCode(KuraResponsePayload.RESPONSE_CODE_OK); 
-			response.setTimestamp(new Date());
-
-			try {
-				response.setBody(s.getBytes("UTF-8"));
-			} catch (UnsupportedEncodingException e) {
-				// Ignore
-			}
-		} catch (Exception e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-
-	}
-
-	private void doGetBundles(KuraPayload request, KuraResponsePayload response) {
-
-		Bundle[] bundles = m_bundleContext.getBundles();
-		XmlBundles xmlBundles = new XmlBundles();
-		XmlBundle[] axb = new XmlBundle[bundles.length];
-
-		for (int i = 0; i < bundles.length; i++) {
-
-			Bundle bundle = bundles[i];
-			XmlBundle xmlBundle = new XmlBundle();
-
-			xmlBundle.setName(bundle.getSymbolicName());
-			xmlBundle.setVersion(bundle.getVersion().toString());
-			xmlBundle.setId(bundle.getBundleId());
-
-			int state = bundle.getState();
-
-			switch(state) {
-			case Bundle.UNINSTALLED:
-				xmlBundle.setState("UNINSTALLED");
-				break;
-
-			case Bundle.INSTALLED:
-				xmlBundle.setState("INSTALLED");
-				break;
-
-			case Bundle.RESOLVED:
-				xmlBundle.setState("RESOLVED");
-				break;
-
-			case Bundle.STARTING:
-				xmlBundle.setState("STARTING");
-				break;
-
-			case Bundle.STOPPING:
-				xmlBundle.setState("STOPPING");
-				break;
-
-			case Bundle.ACTIVE:
-				xmlBundle.setState("ACTIVE");
-				break;
-
-			default:
-				xmlBundle.setState(String.valueOf(state));
-			}
-
-			axb[i] = xmlBundle;
-		}
-
-		xmlBundles.setBundles(axb);
-
-		try {
-			String s = XmlUtil.marshal(xmlBundles);
-
-			s_logger.info("Getting resource {}: {}", RESOURCE_BUNDLES, s);
-
-			response.setResponseCode(KuraResponsePayload.RESPONSE_CODE_OK); 
-			response.setTimestamp(new Date());
-
-			try {
-				response.setBody(s.getBytes("UTF-8"));
-			} catch (UnsupportedEncodingException e) {
-				// Ignore
-			}
-		} catch (Exception e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
+	//	private void doGetResource(CloudletTopic requestTopic, KuraPayload request) {
+	//
+	//		KuraResponsePayload response = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
+	//		response.setTimestamp(new Date());
+	//
+	//
+	//		String resourceName = requestTopic.getResources()[0];
+	//
+	//		if (resourceName == null) {
+	//
+	//			s_logger.info("GET: null resource name");
+	//
+	//			response = new KuraResponsePayload(
+	//					KuraResponsePayload.RESPONSE_CODE_BAD_REQUEST);
+	//
+	//			response.setTimestamp(new Date());
+	//
+	//		} else if (resourceName.equals(RESOURCE_PACKAGES)) {
+	//			doGetPackages(request, response);
+	//		} else if (resourceName.equals(RESOURCE_BUNDLES)) {
+	//			doGetBundles(request, response);
+	//		} else {
+	//			s_logger.info("Resource {} not found", resourceName);
+	//
+	//			response.setResponseCode(KuraResponsePayload.RESPONSE_CODE_NOTFOUND); 			
+	//			response.setTimestamp(new Date());
+	//		}
+	//	}
 
 
-	}
-
-	private void doGetResource(CloudletTopic requestTopic, KuraPayload request) {
-
-		KuraResponsePayload response = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
-		response.setTimestamp(new Date());
-
-
-		String resourceName = requestTopic.getResources()[0];
-
-		if (resourceName == null) {
-
-			s_logger.info("GET: null resource name");
-
-			response = new KuraResponsePayload(
-					KuraResponsePayload.RESPONSE_CODE_BAD_REQUEST);
-
-			response.setTimestamp(new Date());
-
-		} else if (resourceName.equals(RESOURCE_PACKAGES)) {
-			doGetPackages(request, response);
-		} else if (resourceName.equals(RESOURCE_BUNDLES)) {
-			doGetBundles(request, response);
-		} else {
-			s_logger.info("Resource {} not found", resourceName);
-
-			response.setResponseCode(KuraResponsePayload.RESPONSE_CODE_NOTFOUND); 			
-			response.setTimestamp(new Date());
-		}
-	}
 
 	@Override
 	protected void doGet(CloudletTopic reqTopic, KuraRequestPayload reqPayload, KuraResponsePayload respPayload) throws KuraException {
 
-		doGetResource(reqTopic, reqPayload);
+		//doGetResource(reqTopic, reqPayload);
 
+		String[] resources = reqTopic.getResources();
+
+		if (resources == null || resources.length == 0) {
+			s_logger.error("Bad request topic: {}", reqTopic.toString());
+			s_logger.error("Expected one resource but found {}", resources != null ? resources.length : "none");
+			respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_BAD_REQUEST);
+			return;
+		}
+
+		if (resources[0].equals(RESOURCE_DOWNLOAD)) {
+			doGetDownload(reqPayload, respPayload);
+		} else if (resources[0].equals(RESOURCE_INSTALL)) {
+			doGetInstall(reqPayload, respPayload);
+		} else {
+			s_logger.error("Bad request topic: {}", reqTopic.toString());
+			s_logger.error("Cannot find resource with name: {}", resources[0]);
+			respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_NOTFOUND);
+			return;
+		}
+
+	}
+
+	private void doGetInstall(KuraRequestPayload reqPayload, KuraResponsePayload respPayload) {
+		// TODO Auto-generated method stub
+
+	}
+
+	private void doGetDownload(KuraRequestPayload reqPayload, KuraResponsePayload respPayload) {
+		// TODO Auto-generated method stub
+
+		if (s_pendingPackageUrl != null){ //A download is pending
+			downloadInProgressMessage(respPayload);
+		} else { //No pending downloads
+			downloadEndedMessage(respPayload); //is it right? Do we remove the last object
+		}
 	}
 
 	@Override
@@ -600,12 +644,14 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 
 			return;
 		}
+		m_options = options;
 
 		if (s_pendingPackageUrl != null) {
 			s_logger.info("Another request seems still pending: {}. Checking if stale...", s_pendingPackageUrl);
 
-			response.setResponseCode(KuraResponsePayload.RESPONSE_CODE_ERROR);
+			response.setResponseCode(KuraResponsePayload.RESPONSE_CODE_OK);
 			response.setTimestamp(new Date());
+			response.addMetric(METRIC_DOWNLOAD_STATUS, DOWNLOAD_STATUS.IN_PROGRESS);
 			try {
 				response.setBody("Only one request at a time is allowed".getBytes("UTF-8"));
 			} catch (UnsupportedEncodingException e) {
@@ -679,11 +725,76 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 	}
 
 	private void doExecInstall(KuraRequestPayload request, KuraResponsePayload response){
-		
+		final DeploymentPackageInstallOptions options;
+		try {
+			options = new DeploymentPackageInstallOptions(request);
+		} catch (Exception ex) {
+			s_logger.info("Malformed install request!");
+			response.setResponseCode(KuraResponsePayload.RESPONSE_CODE_ERROR);
+			response.setTimestamp(new Date());
+			try {
+				response.setBody("Malformed install request".getBytes("UTF-8"));
+			} catch (UnsupportedEncodingException e) {
+				// Ignore
+			}
+			response.setException(ex);
+
+			return;
+		}
+
+		boolean alreadyDownloaded = false;
+
+		try {
+			alreadyDownloaded = deploymentPackageAlreadyDownloaded(options);
+		} catch (KuraException ex) {
+			response.setResponseCode(KuraResponsePayload.RESPONSE_CODE_ERROR);
+			response.setException(ex);
+			response.setTimestamp(new Date());
+			try {
+				response.setBody("Error checking download status".getBytes("UTF-8"));
+			} catch (UnsupportedEncodingException e) {
+			}
+			return;
+		}
+
+		if(alreadyDownloaded){
+			//Check if file exists
+			File dpFile;
+			try {
+				dpFile = getDpDownloadFile(options);
+				//if yes, install
+				installDownloadedFile(dpFile, options);
+			} catch (IOException e) {
+				response.setResponseCode(KuraResponsePayload.RESPONSE_CODE_ERROR);
+				response.setException(e);
+				response.setTimestamp(new Date());
+				try {
+					response.setBody("Exception during install".getBytes("UTF-8"));
+				} catch (UnsupportedEncodingException e1) {
+				}
+			} catch (KuraException e) {
+				response.setResponseCode(KuraResponsePayload.RESPONSE_CODE_ERROR);
+				response.setException(e);
+				response.setTimestamp(new Date());
+				try {
+					response.setBody("Exception during install".getBytes("UTF-8"));
+				} catch (UnsupportedEncodingException e1) {
+				}
+			}
+		} else {
+			response.setResponseCode(KuraResponsePayload.RESPONSE_CODE_ERROR);
+			response.setException(new KuraException(KuraErrorCode.INTERNAL_ERROR));
+			response.setTimestamp(new Date());
+			try {
+				response.setBody("The requested file does not exist in this device".getBytes("UTF-8"));
+			} catch (UnsupportedEncodingException e) {
+			}
+			return;
+		}
 	}
 
 
-	private DeploymentPackage installDeploymentPackageInternal(File fileReference, DeploymentPackageDownloadOptions options) 
+	private DeploymentPackage installDeploymentPackageInternal(File fileReference, DeploymentPackageOptions options) 
 			throws DeploymentException, IOException {
 
 		InputStream dpInputStream = null;
@@ -764,13 +875,12 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 
 	}
 
-	private void updateInstallPersistance(String fileName, DeploymentPackageDownloadOptions options){
+	private void updateInstallPersistance(String fileName, DeploymentPackageOptions options){
 		m_installPersistance = new Properties();
-		m_installPersistance.setProperty(DeploymentPackageDownloadOptions.METRIC_DP_CLIENT_ID, options.getClientId());
-		m_installPersistance.setProperty(DeploymentPackageDownloadOptions.METRIC_JOB_ID, Long.toString(options.getJobId()));
-		m_installPersistance.setProperty(DeploymentPackageDownloadOptions.METRIC_DEPLOY_URL, options.getDeployUrl());
-		m_installPersistance.setProperty(DeploymentPackageDownloadOptions.METRIC_DP_NAME, fileName);
-		m_installPersistance.setProperty(DeploymentPackageDownloadOptions.METRIC_DP_VERSION, options.getDpVersion());
+		m_installPersistance.setProperty(DeploymentPackageOptions.METRIC_DP_CLIENT_ID, options.getClientId());
+		m_installPersistance.setProperty(DeploymentPackageOptions.METRIC_JOB_ID, Long.toString(options.getJobId()));
+		m_installPersistance.setProperty(DeploymentPackageOptions.METRIC_DP_NAME, fileName);
+		m_installPersistance.setProperty(DeploymentPackageOptions.METRIC_DP_VERSION, options.getDpVersion());
 		m_installPersistance.setProperty(PERSISTANCE_FILE_NAME, fileName);
 
 		if (m_installPersistanceDir == null) {
@@ -816,10 +926,10 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 		}
 	}
 
-	private File getDpDownloadFile(DeploymentPackageDownloadOptions options) throws IOException {
+	private File getDpDownloadFile(DeploymentPackageOptions options) throws IOException {
 		// File dpFile = File.createTempFile("dpa", null);
 		String packageFilename = null;
-		if(!options.isSystemUpdate()){
+		if(!options.getSystemUpdate()){
 			packageFilename = new StringBuilder().append(File.separator).append("tmp").append(File.separator).append(options.getDpName()).append("-")
 					.append(options.getDpVersion()).append(".dp").toString();
 		} else {
@@ -843,17 +953,22 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 				incrementalDownloadFromURL(dpFile, options);
 			}
 
-			if(options.isSystemUpdate()){
-				installSh(options, dpFile);
-			} else {
-				installDp(options, dpFile);
-			}	
+			installDownloadedFile(dpFile, options);
 		} catch (Exception e) {
 			throw e;
 		} 
 	}
 
-	private void installDp(DeploymentPackageDownloadOptions options, File dpFile) throws KuraException{
+	private void installDownloadedFile(File dpFile,
+			DeploymentPackageOptions options) throws KuraException {
+		if(options.getSystemUpdate()){
+			installSh(options, dpFile);
+		} else {
+			installDp(options, dpFile);
+		}
+	}
+
+	private void installDp(DeploymentPackageOptions options, File dpFile) throws KuraException{
 		try {
 			if (options.isInstall()) {
 				installDeploymentPackageInternal(dpFile, options);
@@ -874,7 +989,7 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 		}
 	}
 
-	private void installSh(DeploymentPackageDownloadOptions options, File shFile) throws KuraException{	
+	private void installSh(DeploymentPackageOptions options, File shFile) throws KuraException{	
 		if (options.isInstall()) {
 
 			updateInstallPersistance(shFile.getName(), options);
@@ -897,8 +1012,7 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 	 *             {@link org.eclipse.kura.KuraException} if failing in checking
 	 *             the existance of the file
 	 */
-	private boolean deploymentPackageAlreadyDownloaded(DeploymentPackageDownloadOptions options) throws KuraException {
-
+	private boolean deploymentPackageAlreadyDownloaded(DeploymentPackageOptions options) throws KuraException {
 		try {
 			File dp = getDpDownloadFile(options);
 
@@ -906,7 +1020,6 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 		} catch (Exception e) {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
 		}
-
 	}
 
 	@Override
@@ -929,8 +1042,24 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 			s_logger.error("Error publishing response for command {} {}", RESOURCE_DOWNLOAD, e);
 		}
 	}
+	
+	private void downloadInProgressMessage(KuraResponsePayload respPayload) {
+		respPayload.setTimestamp(new Date());
+		respPayload.addMetric(METRIC_TRASNFER_SIZE, downloadHelper.getTotalBytes().intValue());
+		respPayload.addMetric(METRIC_TRANSFER_PROGRESS, downloadHelper.getDownloadTransferProgressPercentage().intValue());
+		respPayload.addMetric(METRIC_TRANSFER_STATUS, downloadHelper.getDownloadTransferStatus().getStatusString());
+		respPayload.addMetric(METRIC_JOB_ID, m_options.getJobId());
+	}
+	
+	private void downloadEndedMessage(KuraResponsePayload respPayload) {
+		respPayload.setTimestamp(new Date());
+		respPayload.addMetric(METRIC_TRASNFER_SIZE, 0);
+		respPayload.addMetric(METRIC_TRANSFER_PROGRESS, 100);
+		respPayload.addMetric(METRIC_TRANSFER_STATUS, DOWNLOAD_STATUS.ALREADY_DONE);
+		//respPayload.addMetric(METRIC_JOB_ID, m_options.getJobId());
+	}
 
-	private void installComplete(DeploymentPackageDownloadOptions options, String dpName) throws KuraException{
+	private void installComplete(DeploymentPackageOptions options, String dpName) throws KuraException{
 		KuraInstallPayload notify = null;
 
 		notify = new KuraInstallPayload(options.getClientId());
@@ -943,7 +1072,7 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 		getCloudApplicationClient().controlPublish(options.getRequestClientId(), "NOTIFY/"+options.getClientId()+"/install", notify, 2, DFLT_RETAIN, DFLT_PRIORITY);
 	}
 
-	private void installFailed(DeploymentPackageDownloadOptions options, String dpName) throws KuraException{
+	private void installFailed(DeploymentPackageOptions options, String dpName) throws KuraException{
 		KuraInstallPayload notify = null;
 
 		notify = new KuraInstallPayload(options.getClientId());

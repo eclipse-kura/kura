@@ -103,9 +103,6 @@ public class DownloadCountingOutputStream extends CountingOutputStream {
 				URL localUrl = null;
 				boolean shouldAuthenticate = false;
 				try {
-
-					
-
 					shouldAuthenticate = (options.getUsername() != null) && (options.getPassword() != null)
 							&& !(options.getUsername().trim().isEmpty() && !(options.getPassword().trim().isEmpty()));
 
@@ -198,9 +195,25 @@ public class DownloadCountingOutputStream extends CountingOutputStream {
 	}
 
 	private void postProgressEvent(String clientId, long progress, long total, DOWNLOAD_STATUS status) {
-		Long perc = Math.round((((Long) progress).doubleValue() / ((Long) total).doubleValue()) * 100);
-		pl.progressChanged(new ProgressEvent(this, options.getRequestClientId(), clientId, ((Long) total).intValue(), ((Long) perc).intValue(), status
-				.getStatusString(), options.getJobId()));
+		Long perc = getDownloadTransferProgressPercentage();
+		pl.progressChanged(new ProgressEvent(this, options.getRequestClientId(), clientId, ((Long) total).intValue(), ((Long) perc).intValue(), 
+				getDownloadTransferStatus().getStatusString(), options.getJobId()));
+	}
+	
+	public DOWNLOAD_STATUS getDownloadTransferStatus(){
+		Long downloadPercentage= getDownloadTransferProgressPercentage();
+		if (downloadPercentage < 100){
+			return DOWNLOAD_STATUS.IN_PROGRESS;
+		}
+		return DOWNLOAD_STATUS.COMPLETED;
+	}
+	
+	public Long getDownloadTransferProgressPercentage(){
+		return Math.round((((Long) getByteCount()).doubleValue() / ((Long) totalBytes).doubleValue()) * 100);
+	}
+	
+	public Long getTotalBytes(){
+		return totalBytes;
 	}
 
 }

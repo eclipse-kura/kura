@@ -629,15 +629,8 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 			return;
 		}
 
-		if (alreadyDownloaded && !forceDownload) {
-			response.setResponseCode(KuraResponsePayload.RESPONSE_CODE_OK);
-			response.addMetric(METRIC_DOWNLOAD_STATUS, DOWNLOAD_STATUS.ALREADY_DONE.getStatusString());
-			try {
-				response.setBody("Already downloaded!".getBytes("UTF-8"));
-			} catch (UnsupportedEncodingException e) {
-			}
-			return;
-		}
+		final boolean alreadyDownloadedFinal = alreadyDownloaded;
+		final boolean forceDownloadFinal = forceDownload;
 
 		s_logger.info("About to download and install package at URL {}", options.getDeployUrl());
 
@@ -659,7 +652,7 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 				@Override
 				public void run() {
 					try {
-						downloadDeploymentPackageInternal(options);
+						downloadDeploymentPackageInternal(options, alreadyDownloadedFinal, forceDownloadFinal);
 					} catch (Exception e) {
 
 					} finally{
@@ -686,7 +679,7 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 	}
 
 	private void doExecInstall(KuraRequestPayload request, KuraResponsePayload response){
-		//doInstall();
+		
 	}
 
 
@@ -838,7 +831,7 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 		return dpFile;
 	}
 
-	private void downloadDeploymentPackageInternal(DeploymentPackageDownloadOptions options) throws Exception {
+	private void downloadDeploymentPackageInternal(DeploymentPackageDownloadOptions options, boolean alreadyDownloaded, boolean forceDownload) throws Exception {
 
 		File dpFile = null;
 		try {
@@ -846,7 +839,9 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 			// Check for file existence has already been done
 			dpFile = getDpDownloadFile(options);
 
-			incrementalDownloadFromURL(dpFile, options);
+			if (!alreadyDownloaded || forceDownload) {
+				incrementalDownloadFromURL(dpFile, options);
+			}
 
 			if(options.isSystemUpdate()){
 				installSh(options, dpFile);
@@ -887,7 +882,6 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 			//Esecuzione script
 
 		}
-
 	}
 
 	/**
@@ -973,11 +967,11 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 				String clientId= downloadProperties.getProperty(DeploymentPackageDownloadOptions.METRIC_DP_CLIENT_ID);
 				Long jobId= Long.valueOf(downloadProperties.getProperty(DeploymentPackageDownloadOptions.METRIC_JOB_ID));
 				String fileSystemFileName= downloadProperties.getProperty(PERSISTANCE_FILE_NAME);
-				
+
 				DeploymentPackageDownloadOptions options = new DeploymentPackageDownloadOptions(deployUrl, dpName, dpVersion);
 				options.setClientId(clientId);
 				options.setJobId(jobId);
-				
+
 				try {
 					installComplete(options, fileSystemFileName);
 				} catch (KuraException e) {

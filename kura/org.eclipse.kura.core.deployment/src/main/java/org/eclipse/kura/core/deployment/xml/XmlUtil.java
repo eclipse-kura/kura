@@ -9,7 +9,7 @@
  * Contributors:
  *   Eurotech
  */
-package org.eclipse.kura.core.deployment;
+package org.eclipse.kura.core.deployment.xml;
 
 import java.io.StringWriter;
 import java.io.Writer;

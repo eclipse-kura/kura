@@ -1,3 +1,15 @@
+/**
+ * Copyright (c) 2011, 2015 Eurotech and/or its affiliates
+ *
+ *  All rights reserved. This program and the accompanying materials
+ *  are made available under the terms of the Eclipse Public License v1.0
+ *  which accompanies this distribution, and is available at
+ *  http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *   Eurotech
+ */
+
 package org.eclipse.kura.core.deployment;
 
 import java.io.File;
@@ -22,13 +34,21 @@ import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloud.Cloudlet;
 import org.eclipse.kura.cloud.CloudletTopic;
-import org.eclipse.kura.core.configuration.util.XmlUtil;
+import org.eclipse.kura.core.deployment.download.DeploymentPackageDownloadOptions;
+import org.eclipse.kura.core.deployment.download.DownloadCountingOutputStream;
+import org.eclipse.kura.core.deployment.install.DeploymentPackageInstallOptions;
+import org.eclipse.kura.core.deployment.install.KuraInstallPayload;
 import org.eclipse.kura.core.deployment.progress.ProgressEvent;
 import org.eclipse.kura.core.deployment.progress.ProgressListener;
+import org.eclipse.kura.core.deployment.xml.XmlBundle;
+import org.eclipse.kura.core.deployment.xml.XmlBundleInfo;
+import org.eclipse.kura.core.deployment.xml.XmlBundles;
+import org.eclipse.kura.core.deployment.xml.XmlDeploymentPackage;
+import org.eclipse.kura.core.deployment.xml.XmlDeploymentPackages;
+import org.eclipse.kura.core.deployment.xml.XmlUtil;
 import org.eclipse.kura.core.util.ProcessUtil;
 import org.eclipse.kura.data.DataTransportService;
 import org.eclipse.kura.message.KuraNotifyPayload;
-import org.eclipse.kura.message.KuraPayload;
 import org.eclipse.kura.message.KuraRequestPayload;
 import org.eclipse.kura.message.KuraResponsePayload;
 import org.eclipse.kura.ssl.SslManagerService;
@@ -45,12 +65,7 @@ import org.slf4j.LoggerFactory;
 
 public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListener {
 
-	/*
-	 * Risorsa di prova:
-	 * 
-	 * http://esfdownload.eurotech-inc.com/update_site/esf3/3.0.2/
-	 * user_workspace_archive_3.0.2.zip
-	 */
+	private static final Logger s_logger = LoggerFactory.getLogger(CloudDeploymentHandlerV2.class);
 	private static final String APP_ID = "DEPLOY-V2";
 
 	private static final String DPA_CONF_PATH_PROPNAME = "dpa.configuration";
@@ -63,7 +78,6 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 	public static final String  RESOURCE_PACKAGES = "packages";
 	public static final String  RESOURCE_BUNDLES  = "bundles";
 
-	private static final Logger s_logger = LoggerFactory.getLogger(CloudDeploymentHandlerV2.class);
 
 	/* EXEC */
 	public static final String RESOURCE_DOWNLOAD = "download";
@@ -72,7 +86,7 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 
 	/* Metrics in the REPLY to RESOURCE_DOWNLOAD */
 	public static final String METRIC_DOWNLOAD_STATUS = "download.status";
-	
+
 	private static final String METRIC_CLIENT_ID = "client.id";
 	private static final String METRIC_TRASNFER_SIZE = "dp.http.transfer.size";
 	private static final String METRIC_TRANSFER_PROGRESS = "dp.http.transfer.progress";
@@ -123,6 +137,8 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 	private DownloadCountingOutputStream downloadHelper;
 
 	private static ExecutorService executor = Executors.newSingleThreadExecutor();
+
+
 	private Future<?> downloaderFuture;
 
 	private BundleContext m_bundleContext;
@@ -137,6 +153,14 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 
 	private String m_installPersistanceDir;
 	private DeploymentPackageDownloadOptions m_options;
+
+
+
+	// ----------------------------------------------------------------
+	//
+	// Dependencies
+	//
+	// ----------------------------------------------------------------
 
 	public void setSslManagerService(SslManagerService sslManagerService) {
 		this.m_sslManagerService = sslManagerService;
@@ -165,6 +189,13 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 	public CloudDeploymentHandlerV2() {
 		super(APP_ID);
 	}
+
+
+	// ----------------------------------------------------------------
+	//
+	// Activation APIs
+	//
+	// ----------------------------------------------------------------
 
 	@Override
 	protected void activate(ComponentContext componentContext) {
@@ -221,304 +252,54 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 
 
 		sendInstallConfirmations();
-
-
-
-		Thread t = new Thread(new Runnable() {
-
-			@Override
-			public void run() {
-				try {
-					Thread.sleep(5000);
-					s_logger.info("STARTING DOWNLOAD...");
-					CloudletTopic ct = CloudletTopic.parseAppTopic("EXEC/download");
-					KuraRequestPayload request = new KuraRequestPayload();
-					request.setRequestId("RequestID");
-					request.setRequesterClientId("RequesterClientId");
-					String url = "https://s3.amazonaws.com/kura-resources/dps/heater.dp";//"http://esfdownload.eurotech-inc.com/update_site/esf3/3.0.2/user_workspace_archive_3.0.2.zip";
-					DeploymentPackageDownloadOptions options = new DeploymentPackageDownloadOptions(url, "dpName", "dpVersion");
-					options.setUsername("luca.dazi@eurotech.com");
-					options.setPassword("lc2251981");
-					// options.setPassword("errata");
-					request.addMetric(DeploymentPackageDownloadOptions.METRIC_DEPLOY_URL, options.getDeployUrl());
-					request.addMetric(DeploymentPackageDownloadOptions.METRIC_DP_NAME, options.getDpName());
-					request.addMetric(DeploymentPackageDownloadOptions.METRIC_DP_VERSION, options.getDpVersion());
-					request.addMetric(DeploymentPackageDownloadOptions.METRIC_HTTP_USER, options.getUsername());
-					request.addMetric(DeploymentPackageDownloadOptions.METRIC_HTTP_PASSWORD, options.getPassword());
-					request.addMetric(DeploymentPackageDownloadOptions.METRIC_BLOCK_SIZE, 1024 * 8);
-					request.addMetric(DeploymentPackageDownloadOptions.METRIC_DP_NOTIFY_BLOCK_SIZE, 1024 * 1024);
-					request.addMetric(DeploymentPackageDownloadOptions.METRIC_JOB_ID, Long.parseLong("1111")); 
-					request.addMetric(DeploymentPackageDownloadOptions.METRIC_DP_INSTALL_SYSTEM_UPDATE, false);
-					request.addMetric(DeploymentPackageDownloadOptions.METRIC_DP_REBOOT, true);
-
-					KuraResponsePayload response = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
-
-					doExec(ct, request, response);
-
-					s_logger.info("*******************************************");
-					s_logger.info(response.getMetric(KuraResponsePayload.METRIC_RESPONSE_CODE).toString());
-					if(response.getBody() != null){
-						s_logger.info(new String(response.getBody()));
-					}
-					if(response.getMetric(METRIC_DOWNLOAD_STATUS) != null){
-						s_logger.info(response.getMetric(METRIC_DOWNLOAD_STATUS).toString());
-					}
-					s_logger.info("*******************************************");
-
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (KuraException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
-
-		});
-
-
-		Thread t3 = new Thread(new Runnable() {
-
-			@Override
-			public void run() {
-				try {
-					Thread.sleep(10000);
-					s_logger.info("STARTING DOWNLOAD 2...");
-					CloudletTopic ct = CloudletTopic.parseAppTopic("EXEC/download");
-					KuraRequestPayload request = new KuraRequestPayload();
-					request.setRequestId("RequestID");
-					request.setRequesterClientId("RequesterClientId");
-					String url = "http://esfdownload.eurotech-inc.com/update_site/esf3/3.0.2/user_workspace_archive_3.0.2.zip";
-					DeploymentPackageDownloadOptions options = new DeploymentPackageDownloadOptions(url, "dpName", "dpVersion");
-					options.setUsername("luca.dazi@eurotech.com");
-					options.setPassword("lc2251981");
-					// options.setPassword("errata");
-					request.addMetric(DeploymentPackageDownloadOptions.METRIC_DEPLOY_URL, options.getDeployUrl());
-					request.addMetric(DeploymentPackageDownloadOptions.METRIC_DP_NAME, options.getDpName());
-					request.addMetric(DeploymentPackageDownloadOptions.METRIC_DP_VERSION, options.getDpVersion());
-					request.addMetric(DeploymentPackageDownloadOptions.METRIC_HTTP_USER, options.getUsername());
-					request.addMetric(DeploymentPackageDownloadOptions.METRIC_HTTP_PASSWORD, options.getPassword());
-					request.addMetric(DeploymentPackageDownloadOptions.METRIC_BLOCK_SIZE, 1024 * 8);
-					request.addMetric(DeploymentPackageDownloadOptions.METRIC_DP_NOTIFY_BLOCK_SIZE, 1024 * 1024);
-
-					KuraResponsePayload response = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
-
-					doExec(ct, request, response);
-
-					s_logger.info("*******************************************");
-					s_logger.info(response.getMetric(KuraResponsePayload.METRIC_RESPONSE_CODE).toString());
-					if(response.getBody() != null){
-						s_logger.info(new String(response.getBody()));
-					}
-					if(response.getMetric(METRIC_DOWNLOAD_STATUS) != null){
-						s_logger.info(response.getMetric(METRIC_DOWNLOAD_STATUS).toString());
-					}
-					s_logger.info("*******************************************");
-
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (KuraException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
-
-		});
-
-		//t.start();
-
-		//t3.start();
-
-		Thread t2 = new Thread(new Runnable() {
-
-			@Override
-			public void run() {
-				try {
-					Thread.sleep(30000);
-					s_logger.info("CANCELLING DOWNLOAD...");
-					CloudletTopic ct = CloudletTopic.parseAppTopic("EXEC/cancel");
-					KuraRequestPayload request = new KuraRequestPayload();
-					request.setRequestId("RequestID");
-					request.setRequesterClientId("RequesterClientId");
-
-					KuraResponsePayload response = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
-
-					request.addMetric(DeploymentPackageDownloadOptions.METRIC_DP_NAME, "dpName");
-					request.addMetric(DeploymentPackageDownloadOptions.METRIC_DP_VERSION, "dpVersion");
-
-					doExec(ct, request, response);
-
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (KuraException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
-
-		});
-
-		//t2.start();
 	}
 
+	@Override
+	protected void deactivate(ComponentContext componentContext) {
+		s_logger.info("Bundle " + APP_ID + " is deactivating!");
+		if(downloaderFuture != null){
+			downloaderFuture.cancel(true);
+		}
 
-//	private void doGetPackages(KuraPayload request, KuraResponsePayload response) {
-//
-//		DeploymentPackage[] dps = m_deploymentAdmin.listDeploymentPackages();
-//		XmlDeploymentPackages xdps = new XmlDeploymentPackages();
-//		XmlDeploymentPackage[] axdp = new XmlDeploymentPackage[dps.length];
-//
-//		for (int i = 0; i < dps.length; i++) {
-//			DeploymentPackage dp = dps[i];
-//
-//			XmlDeploymentPackage xdp = new XmlDeploymentPackage();
-//			xdp.setName(dp.getName());
-//			xdp.setVersion(dp.getVersion().toString());
-//
-//			BundleInfo[] bis = dp.getBundleInfos();
-//			XmlBundleInfo[] axbi = new XmlBundleInfo[bis.length];
-//
-//			for (int j = 0; j < bis.length; j++) {
-//
-//				BundleInfo bi = bis[j];
-//				XmlBundleInfo xbi = new XmlBundleInfo();
-//				xbi.setName(bi.getSymbolicName());
-//				xbi.setVersion(bi.getVersion().toString());
-//
-//				axbi[j] = xbi;
-//			}
-//
-//			xdp.setBundleInfos(axbi);
-//
-//			axdp[i] = xdp;
-//		}
-//
-//		xdps.setDeploymentPackages(axdp);
-//
-//		try {
-//			String s = XmlUtil.marshal(xdps);
-//
-//			s_logger.info("Getting resource {}: {}", RESOURCE_PACKAGES, s);
-//
-//			response.setResponseCode(KuraResponsePayload.RESPONSE_CODE_OK); 
-//			response.setTimestamp(new Date());
-//
-//			try {
-//				response.setBody(s.getBytes("UTF-8"));
-//			} catch (UnsupportedEncodingException e) {
-//				// Ignore
-//			}
-//		} catch (Exception e1) {
-//			// TODO Auto-generated catch block
-//			e1.printStackTrace();
-//		}
-//
-//	}
+		m_bundleContext = null;
+	}
 
-//	private void doGetBundles(KuraPayload request, KuraResponsePayload response) {
-//
-//		Bundle[] bundles = m_bundleContext.getBundles();
-//		XmlBundles xmlBundles = new XmlBundles();
-//		XmlBundle[] axb = new XmlBundle[bundles.length];
-//
-//		for (int i = 0; i < bundles.length; i++) {
-//
-//			Bundle bundle = bundles[i];
-//			XmlBundle xmlBundle = new XmlBundle();
-//
-//			xmlBundle.setName(bundle.getSymbolicName());
-//			xmlBundle.setVersion(bundle.getVersion().toString());
-//			xmlBundle.setId(bundle.getBundleId());
-//
-//			int state = bundle.getState();
-//
-//			switch(state) {
-//			case Bundle.UNINSTALLED:
-//				xmlBundle.setState("UNINSTALLED");
-//				break;
-//
-//			case Bundle.INSTALLED:
-//				xmlBundle.setState("INSTALLED");
-//				break;
-//
-//			case Bundle.RESOLVED:
-//				xmlBundle.setState("RESOLVED");
-//				break;
-//
-//			case Bundle.STARTING:
-//				xmlBundle.setState("STARTING");
-//				break;
-//
-//			case Bundle.STOPPING:
-//				xmlBundle.setState("STOPPING");
-//				break;
-//
-//			case Bundle.ACTIVE:
-//				xmlBundle.setState("ACTIVE");
-//				break;
-//
-//			default:
-//				xmlBundle.setState(String.valueOf(state));
-//			}
-//
-//			axb[i] = xmlBundle;
-//		}
-//
-//		xmlBundles.setBundles(axb);
-//
-//		try {
-//			String s = XmlUtil.marshal(xmlBundles);
-//
-//			s_logger.info("Getting resource {}: {}", RESOURCE_BUNDLES, s);
-//
-//			response.setResponseCode(KuraResponsePayload.RESPONSE_CODE_OK); 
-//			response.setTimestamp(new Date());
-//
-//			try {
-//				response.setBody(s.getBytes("UTF-8"));
-//			} catch (UnsupportedEncodingException e) {
-//				// Ignore
-//			}
-//		} catch (Exception e1) {
-//			// TODO Auto-generated catch block
-//			e1.printStackTrace();
-//		}
-//
-//
-//	}
+	
+	
+	// ----------------------------------------------------------------
+	//
+	// Public methods
+	//
+	// ----------------------------------------------------------------
 
-	//	private void doGetResource(CloudletTopic requestTopic, KuraPayload request) {
-	//
-	//		KuraResponsePayload response = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
-	//		response.setTimestamp(new Date());
-	//
-	//
-	//		String resourceName = requestTopic.getResources()[0];
-	//
-	//		if (resourceName == null) {
-	//
-	//			s_logger.info("GET: null resource name");
-	//
-	//			response = new KuraResponsePayload(
-	//					KuraResponsePayload.RESPONSE_CODE_BAD_REQUEST);
-	//
-	//			response.setTimestamp(new Date());
-	//
-	//		} else if (resourceName.equals(RESOURCE_PACKAGES)) {
-	//			doGetPackages(request, response);
-	//		} else if (resourceName.equals(RESOURCE_BUNDLES)) {
-	//			doGetBundles(request, response);
-	//		} else {
-	//			s_logger.info("Resource {} not found", resourceName);
-	//
-	//			response.setResponseCode(KuraResponsePayload.RESPONSE_CODE_NOTFOUND); 			
-	//			response.setTimestamp(new Date());
-	//		}
-	//	}
+	@Override
+	public void progressChanged(ProgressEvent progress) {
 
+		s_logger.info("{}% downloaded", progress.getTransferProgress());
 
+		KuraNotifyPayload notify = null;
+
+		notify = new KuraNotifyPayload(progress.getClientId());
+		notify.setTimestamp(new Date());
+		notify.setTransferSize(progress.getTransferSize());
+		notify.setTransferProgress(progress.getTransferProgress());
+		notify.setTransferStatus(progress.getTransferStatus());
+		notify.setJobId(progress.getJobId());
+
+		try {
+			getCloudApplicationClient().controlPublish(progress.getRequesterClientId(), "NOTIFY/"+progress.getClientId()+"/progress", notify, 2, DFLT_RETAIN, DFLT_PRIORITY);
+		} catch (KuraException e) {
+			s_logger.error("Error publishing response for command {} {}", RESOURCE_DOWNLOAD, e);
+		}
+	}
+	
+	
+
+	// ----------------------------------------------------------------
+	//
+	// Protected methods
+	//
+	// ----------------------------------------------------------------
 
 	@Override
 	protected void doGet(CloudletTopic reqTopic, KuraRequestPayload reqPayload, KuraResponsePayload respPayload) throws KuraException {
@@ -538,28 +319,17 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 			doGetDownload(reqPayload, respPayload);
 		} else if (resources[0].equals(RESOURCE_INSTALL)) {
 			doGetInstall(reqPayload, respPayload);
-		} else {
+		} else if (resources[0].equals(RESOURCE_PACKAGES)) {
+			doGetPackages(reqPayload, respPayload);
+		} else if (resources[0].equals(RESOURCE_BUNDLES)) {
+			doGetBundles(reqPayload, respPayload);
+		}else {
 			s_logger.error("Bad request topic: {}", reqTopic.toString());
 			s_logger.error("Cannot find resource with name: {}", resources[0]);
 			respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_NOTFOUND);
 			return;
 		}
 
-	}
-
-	private void doGetInstall(KuraRequestPayload reqPayload, KuraResponsePayload respPayload) {
-		// TODO Auto-generated method stub
-
-	}
-
-	private void doGetDownload(KuraRequestPayload reqPayload, KuraResponsePayload respPayload) {
-		// TODO Auto-generated method stub
-
-		if (s_pendingPackageUrl != null){ //A download is pending
-			downloadInProgressMessage(respPayload);
-		} else { //No pending downloads
-			downloadEndedMessage(respPayload); //is it right? Do we remove the last object
-		}
 	}
 
 	@Override
@@ -593,6 +363,16 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 			return;
 		}
 	}
+
+	
+
+
+
+	// ----------------------------------------------------------------
+	//
+	// Private methods
+	//
+	// ----------------------------------------------------------------
 
 	private void doExecCancel(KuraRequestPayload request, KuraResponsePayload response) {
 
@@ -705,7 +485,6 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 						s_pendingPackageUrl = null;
 					}
 				}
-
 			});
 
 		} catch (Exception e) {
@@ -793,6 +572,139 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 		}
 	}
 
+	private void doGetInstall(KuraRequestPayload reqPayload, KuraResponsePayload respPayload) {
+		// TODO Auto-generated method stub
+
+	}
+
+	private void doGetDownload(KuraRequestPayload reqPayload, KuraResponsePayload respPayload) {
+		// TODO Auto-generated method stub
+
+		if (s_pendingPackageUrl != null){ //A download is pending
+			downloadInProgressMessage(respPayload);
+		} else { //No pending downloads
+			downloadEndedMessage(respPayload); //is it right? Do we remove the last object
+		}
+	}
+
+	private void doGetPackages(KuraRequestPayload request, KuraResponsePayload response) {
+
+		DeploymentPackage[] dps = m_deploymentAdmin.listDeploymentPackages();
+		XmlDeploymentPackages xdps = new XmlDeploymentPackages();
+		XmlDeploymentPackage[] axdp = new XmlDeploymentPackage[dps.length];
+
+		for (int i = 0; i < dps.length; i++) {
+			DeploymentPackage dp = dps[i];
+
+			XmlDeploymentPackage xdp = new XmlDeploymentPackage();
+			xdp.setName(dp.getName());
+			xdp.setVersion(dp.getVersion().toString());
+
+			BundleInfo[] bis = dp.getBundleInfos();
+			XmlBundleInfo[] axbi = new XmlBundleInfo[bis.length];
+
+			for (int j = 0; j < bis.length; j++) {
+
+				BundleInfo bi = bis[j];
+				XmlBundleInfo xbi = new XmlBundleInfo();
+				xbi.setName(bi.getSymbolicName());
+				xbi.setVersion(bi.getVersion().toString());
+
+				axbi[j] = xbi;
+			}
+
+			xdp.setBundleInfos(axbi);
+
+			axdp[i] = xdp;
+		}
+
+		xdps.setDeploymentPackages(axdp);
+
+		try {
+			String s = XmlUtil.marshal(xdps);
+
+			//s_logger.info("Getting resource {}: {}", RESOURCE_PACKAGES, s);
+
+			response = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK); 
+			response.setTimestamp(new Date());
+
+			try {
+				response.setBody(s.getBytes("UTF-8"));
+			} catch (UnsupportedEncodingException e) {
+				// Ignore
+			}
+		} catch (Exception e) {
+			s_logger.error("Error getting resource {}: {}", RESOURCE_PACKAGES, e);
+		}
+	}
+
+	private void doGetBundles(KuraRequestPayload request, KuraResponsePayload response) {
+		Bundle[] bundles = m_bundleContext.getBundles();
+		XmlBundles xmlBundles = new XmlBundles();
+		XmlBundle[] axb = new XmlBundle[bundles.length];
+
+		for (int i = 0; i < bundles.length; i++) {
+
+			Bundle bundle = bundles[i];
+			XmlBundle xmlBundle = new XmlBundle();
+
+			xmlBundle.setName(bundle.getSymbolicName());
+			xmlBundle.setVersion(bundle.getVersion().toString());
+			xmlBundle.setId(bundle.getBundleId());
+
+			int state = bundle.getState();
+
+			switch(state) {
+			case Bundle.UNINSTALLED:
+				xmlBundle.setState("UNINSTALLED");
+				break;
+
+			case Bundle.INSTALLED:
+				xmlBundle.setState("INSTALLED");
+				break;
+
+			case Bundle.RESOLVED:
+				xmlBundle.setState("RESOLVED");
+				break;
+
+			case Bundle.STARTING:
+				xmlBundle.setState("STARTING");
+				break;
+
+			case Bundle.STOPPING:
+				xmlBundle.setState("STOPPING");
+				break;
+
+			case Bundle.ACTIVE:
+				xmlBundle.setState("ACTIVE");
+				break;
+
+			default:
+				xmlBundle.setState(String.valueOf(state));
+			}
+
+			axb[i] = xmlBundle;
+		}
+
+		xmlBundles.setBundles(axb);
+
+		try {
+			String s = XmlUtil.marshal(xmlBundles);
+
+			//s_logger.info("Getting resource {}: {}", RESOURCE_BUNDLES, s);
+
+			response = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK); 
+			response.setTimestamp(new Date());
+
+			try {
+				response.setBody(s.getBytes("UTF-8"));
+			} catch (UnsupportedEncodingException e) {
+				// Ignore
+			}
+		} catch (Exception e) {
+			s_logger.error("Error getting resource {}: {}", RESOURCE_BUNDLES, e);
+		}
+	}
 
 	private DeploymentPackage installDeploymentPackageInternal(File fileReference, DeploymentPackageOptions options) 
 			throws DeploymentException, IOException {
@@ -953,14 +865,15 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 				incrementalDownloadFromURL(dpFile, options);
 			}
 
-			installDownloadedFile(dpFile, options);
+			if (options.isInstall()) {
+				installDownloadedFile(dpFile, options);
+			}
 		} catch (Exception e) {
 			throw e;
 		} 
 	}
 
-	private void installDownloadedFile(File dpFile,
-			DeploymentPackageOptions options) throws KuraException {
+	private void installDownloadedFile(File dpFile, DeploymentPackageOptions options) throws KuraException {
 		if(options.getSystemUpdate()){
 			installSh(options, dpFile);
 		} else {
@@ -970,16 +883,13 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 
 	private void installDp(DeploymentPackageOptions options, File dpFile) throws KuraException{
 		try {
-			if (options.isInstall()) {
-				installDeploymentPackageInternal(dpFile, options);
-				installComplete(options, dpFile.getName());
-				s_logger.info("Install completed!");
+			installDeploymentPackageInternal(dpFile, options);
+			installComplete(options, dpFile.getName());
+			s_logger.info("Install completed!");
 
-				//verificare se richiesto reboot
-				if(options.isReboot()){
-					Thread.sleep(options.getRebootDelay());
-					ProcessUtil.exec("reboot");
-				}
+			if(options.isReboot()){
+				Thread.sleep(options.getRebootDelay());
+				ProcessUtil.exec("reboot");
 			}
 		} catch (Exception e) {
 			s_logger.info("Install failed!");
@@ -990,28 +900,18 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 	}
 
 	private void installSh(DeploymentPackageOptions options, File shFile) throws KuraException{	
-		if (options.isInstall()) {
 
-			updateInstallPersistance(shFile.getName(), options);
+		updateInstallPersistance(shFile.getName(), options);
 
-			//Esecuzione script
-
+		//Esecuzione script
+		try {
+			ProcessUtil.exec(shFile.getAbsolutePath());
+		} catch (IOException e) {
+			throw new KuraException(KuraErrorCode.INTERNAL_ERROR);
 		}
 	}
 
-	/**
-	 * Checks if the deployment package contained in the download request has
-	 * already been downloaded and is thus present in the temporary storage
-	 * 
-	 * @param request
-	 *            Request payload as sent by the cloud platform
-	 * @return true is the package has already been deployed
-	 * @throws KuraException
-	 *             {@link org.eclipse.kura.KuraInvalidMessageException} if the
-	 *             request doesn't contain dp name and version
-	 *             {@link org.eclipse.kura.KuraException} if failing in checking
-	 *             the existance of the file
-	 */
+
 	private boolean deploymentPackageAlreadyDownloaded(DeploymentPackageOptions options) throws KuraException {
 		try {
 			File dp = getDpDownloadFile(options);
@@ -1022,27 +922,6 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 		}
 	}
 
-	@Override
-	public void progressChanged(ProgressEvent progress) {
-
-		s_logger.info("{}% downloaded", progress.getTransferProgress());
-
-		KuraNotifyPayload notify = null;
-
-		notify = new KuraNotifyPayload(progress.getClientId());
-		notify.setTimestamp(new Date());
-		notify.setTransferSize(progress.getTransferSize());
-		notify.setTransferProgress(progress.getTransferProgress());
-		notify.setTransferStatus(progress.getTransferStatus());
-		notify.setJobId(progress.getJobId());
-
-		try {
-			getCloudApplicationClient().controlPublish(progress.getRequesterClientId(), "NOTIFY/"+progress.getClientId()+"/progress", notify, 2, DFLT_RETAIN, DFLT_PRIORITY);
-		} catch (KuraException e) {
-			s_logger.error("Error publishing response for command {} {}", RESOURCE_DOWNLOAD, e);
-		}
-	}
-	
 	private void downloadInProgressMessage(KuraResponsePayload respPayload) {
 		respPayload.setTimestamp(new Date());
 		respPayload.addMetric(METRIC_TRASNFER_SIZE, downloadHelper.getTotalBytes().intValue());
@@ -1050,7 +929,7 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 		respPayload.addMetric(METRIC_TRANSFER_STATUS, downloadHelper.getDownloadTransferStatus().getStatusString());
 		respPayload.addMetric(METRIC_JOB_ID, m_options.getJobId());
 	}
-	
+
 	private void downloadEndedMessage(KuraResponsePayload respPayload) {
 		respPayload.setTimestamp(new Date());
 		respPayload.addMetric(METRIC_TRASNFER_SIZE, 0);

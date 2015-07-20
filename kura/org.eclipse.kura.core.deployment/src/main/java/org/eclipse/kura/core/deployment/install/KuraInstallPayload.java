@@ -20,11 +20,12 @@ import org.eclipse.kura.message.KuraPayload;
 public class KuraInstallPayload extends KuraPayload
 {
 	
-	private static final String METRIC_CLIENT_ID = "client.id";
-	private static final String METRIC_INSTALL_PROGRESS = "dp.install.progress";
-	private static final String METRIC_INSTALL_STATUS = "dp.install.status";
-	private static final String METRIC_DP_NAME = "dp.name";
-	private static final String METRIC_JOB_ID = "job.id";
+	public static final String METRIC_CLIENT_ID = "client.id";
+	public static final String METRIC_INSTALL_PROGRESS = "dp.install.progress";
+	public static final String METRIC_INSTALL_STATUS = "dp.install.status";
+	public static final String METRIC_DP_NAME = "dp.name";
+	public static final String METRIC_DP_VERSION = "dp.version";
+	public static final String METRIC_JOB_ID = "job.id";
 	
 	public KuraInstallPayload(String clientId) 
 	{
@@ -72,8 +73,8 @@ public class KuraInstallPayload extends KuraPayload
 		addMetric(METRIC_DP_NAME, dpName);
 	}
 	
-	public static String getMetricDpName() {
-		return METRIC_DP_NAME;
+	public void setDpVersion(String dpVersion){
+		addMetric(METRIC_DP_VERSION, dpVersion);
 	}
 	
 	public static KuraNotifyPayload buildFromKuraPayload(KuraPayload payload) throws ParseException 

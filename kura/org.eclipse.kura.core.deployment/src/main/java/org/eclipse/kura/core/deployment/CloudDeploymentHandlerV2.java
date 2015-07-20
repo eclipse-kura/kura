@@ -152,7 +152,10 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 	private String persistanceFileName= "persistance";
 
 	private String m_installPersistanceDir;
-	private DeploymentPackageDownloadOptions m_options;
+	private DeploymentPackageDownloadOptions m_downloadOptions;
+	
+	private boolean isInstalling = false;
+	private DeploymentPackageInstallOptions m_installOptions;
 
 
 
@@ -424,7 +427,7 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 
 			return;
 		}
-		m_options = options;
+		m_downloadOptions = options;
 
 		if (s_pendingPackageUrl != null) {
 			s_logger.info("Another request seems still pending: {}. Checking if stale...", s_pendingPackageUrl);
@@ -521,6 +524,7 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 			return;
 		}
 
+		m_installOptions = options;
 		boolean alreadyDownloaded = false;
 
 		try {
@@ -540,6 +544,7 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 			//Check if file exists
 			File dpFile;
 			try {
+				isInstalling = true;
 				dpFile = getDpDownloadFile(options);
 				//if yes, install
 				installDownloadedFile(dpFile, options);
@@ -559,6 +564,9 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 					response.setBody("Exception during install".getBytes("UTF-8"));
 				} catch (UnsupportedEncodingException e1) {
 				}
+			} finally {
+				m_installOptions = null;
+				isInstalling = false;
 			}
 		} else {
 			response.setResponseCode(KuraResponsePayload.RESPONSE_CODE_ERROR);
@@ -573,8 +581,11 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 	}
 
 	private void doGetInstall(KuraRequestPayload reqPayload, KuraResponsePayload respPayload) {
-		// TODO Auto-generated method stub
-
+		if(isInstalling){
+			installInProgressMessage(respPayload);
+		} else {
+			installIdleMessage(respPayload);
+		}
 	}
 
 	private void doGetDownload(KuraRequestPayload reqPayload, KuraResponsePayload respPayload) {
@@ -927,7 +938,7 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 		respPayload.addMetric(METRIC_TRASNFER_SIZE, downloadHelper.getTotalBytes().intValue());
 		respPayload.addMetric(METRIC_TRANSFER_PROGRESS, downloadHelper.getDownloadTransferProgressPercentage().intValue());
 		respPayload.addMetric(METRIC_TRANSFER_STATUS, downloadHelper.getDownloadTransferStatus().getStatusString());
-		respPayload.addMetric(METRIC_JOB_ID, m_options.getJobId());
+		respPayload.addMetric(METRIC_JOB_ID, m_downloadOptions.getJobId());
 	}
 
 	private void downloadEndedMessage(KuraResponsePayload respPayload) {
@@ -937,6 +948,18 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 		respPayload.addMetric(METRIC_TRANSFER_STATUS, DOWNLOAD_STATUS.ALREADY_DONE);
 		//respPayload.addMetric(METRIC_JOB_ID, m_options.getJobId());
 	}
+	
+	private void installInProgressMessage(KuraResponsePayload respPayload) {
+		respPayload.setTimestamp(new Date());
+		respPayload.addMetric(KuraInstallPayload.METRIC_INSTALL_STATUS, INSTALL_STATUS.IN_PROGRESS);
+		respPayload.addMetric(KuraInstallPayload.METRIC_DP_NAME, m_installOptions.getDpName());
+		respPayload.addMetric(KuraInstallPayload.METRIC_DP_VERSION, m_installOptions.getDpVersion());
+	}
+	
+	private void installIdleMessage(KuraResponsePayload respPayload) {
+		respPayload.setTimestamp(new Date());
+		respPayload.addMetric(KuraInstallPayload.METRIC_INSTALL_STATUS, INSTALL_STATUS.IDLE);
+	}
 
 	private void installComplete(DeploymentPackageOptions options, String dpName) throws KuraException{
 		KuraInstallPayload notify = null;
@@ -945,7 +968,7 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 		notify.setTimestamp(new Date());
 		notify.setInstallStatus(INSTALL_STATUS.COMPLETED.getStatusString());
 		notify.setJobId(options.getJobId());
-		notify.setDpName(dpName);
+		notify.setDpName(dpName); //Probably split dpName and dpVersion?
 		notify.setInstallProgress(100);
 
 		getCloudApplicationClient().controlPublish(options.getRequestClientId(), "NOTIFY/"+options.getClientId()+"/install", notify, 2, DFLT_RETAIN, DFLT_PRIORITY);
@@ -958,7 +981,7 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 		notify.setTimestamp(new Date());
 		notify.setInstallStatus(INSTALL_STATUS.FAILED.getStatusString());
 		notify.setJobId(options.getJobId());
-		notify.setDpName(dpName);
+		notify.setDpName(dpName); //Probably split dpName and dpVersion?
 		notify.setInstallProgress(0);
 
 		getCloudApplicationClient().controlPublish(options.getRequestClientId(), "NOTIFY/"+options.getClientId()+"/install", notify, 2, DFLT_RETAIN, DFLT_PRIORITY);
@@ -982,6 +1005,7 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 
 				try {
 					installComplete(options, fileSystemFileName);
+					fileEntry.delete();
 				} catch (KuraException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();

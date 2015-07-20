@@ -58,11 +58,15 @@ public class FileServlet extends HttpServlet {
 	private static final long serialVersionUID = -5016170117606322129L;
 
 	private static Logger s_logger = LoggerFactory.getLogger(FileServlet.class);
-	
+
+	private static final int BUFFER = 1024;
+	private static final int TOOBIG = 0x6400000; // Max size of unzipped data, 100MB
+	private static final int TOOMANY = 1024;     // Max number of files
+
 	private DiskFileItemFactory m_diskFileItemFactory;
 	private FileCleaningTracker m_fileCleaningTracker;
 
-	
+
 	@Override
 	public void destroy() {
 		super.destroy();
@@ -83,13 +87,13 @@ public class FileServlet extends HttpServlet {
 
 		ServletContext ctx = getServletContext();
 		m_fileCleaningTracker = FileCleanerCleanup.getFileCleaningTracker(ctx);
-				
+
 		int sizeThreshold = getFileUploadInMemorySizeThreshold();
 		File repository = new File(System.getProperty("java.io.tmpdir"));
-		
+
 		s_logger.info("DiskFileItemFactory.DEFAULT_SIZE_THRESHOLD: {}", DiskFileItemFactory.DEFAULT_SIZE_THRESHOLD);
 		s_logger.info("DiskFileItemFactory: using size threshold of: {}", sizeThreshold);
-		
+
 		m_diskFileItemFactory = new DiskFileItemFactory(sizeThreshold, repository);
 		m_diskFileItemFactory.setFileCleaningTracker(m_fileCleaningTracker);
 	}
@@ -98,7 +102,7 @@ public class FileServlet extends HttpServlet {
 	@Override
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
-		
+
 		resp.setContentType("text/html");
 
 		String reqPathInfo = req.getPathInfo();
@@ -128,7 +132,7 @@ public class FileServlet extends HttpServlet {
 			throw new ServletException("Unknown request path info: " + reqPathInfo);			
 		}
 	}
-	
+
 	private void doPostCommand(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
 		UploadRequest upload = new UploadRequest(m_diskFileItemFactory);
@@ -144,23 +148,26 @@ public class FileServlet extends HttpServlet {
 		InputStream is = null;
 		File localFolder = new File(System.getProperty("java.io.tmpdir"));
 		OutputStream os = null;
-		
+
 		try {
 			fileItems = upload.getFileItems();
 
 			if (fileItems.size() > 0) {
 				FileItem item = fileItems.get(0);
 				is = item.getInputStream();
-				
+
 				byte[] bytes = IOUtils.toByteArray(is);
 				ZipInputStream zis = new ZipInputStream(new ByteArrayInputStream(bytes));
-				
+
+				int entries = 0;
+				long total = 0;
 				ZipEntry ze = zis.getNextEntry();
 				while (ze != null) {
-					byte[] buffer = new byte[1024];
-					
-					String fileName = ze.getName();
-					File newFile = new File(localFolder + File.separator + fileName);
+					byte[] buffer = new byte[BUFFER];
+
+					String expectedFilePath = new StringBuilder(localFolder.getPath()).append(File.separator).append(ze.getName()).toString();
+					String fileName = validateFileName(expectedFilePath, localFolder.getPath());
+					File newFile = new File(fileName);
 					if (newFile.isDirectory()) {
 						newFile.mkdirs();
 						ze = zis.getNextEntry();
@@ -170,16 +177,27 @@ public class FileServlet extends HttpServlet {
 						File parent = new File(newFile.getParent());
 						parent.mkdirs();
 					}
-					
+
 					FileOutputStream fos = new FileOutputStream(newFile);
 					int len;
-					while ((len = zis.read(buffer)) > 0) {
+					while ((total + BUFFER <= TOOBIG) && (len = zis.read(buffer)) > 0) {
 						fos.write(buffer, 0, len);
+						total += len;
 					}
+					fos.flush();
 					fos.close();
+
+					entries++;
+					if (entries > TOOMANY) {
+						throw new IllegalStateException("Too many files to unzip.");
+					}
+					if (total > TOOBIG) {
+						throw new IllegalStateException("File being unzipped is too big.");
+					}
+
 					ze = zis.getNextEntry();
 				}
-	
+
 				zis.closeEntry();
 				zis.close();
 			}
@@ -208,9 +226,23 @@ public class FileServlet extends HttpServlet {
 		}
 	}
 
+	private String validateFileName(String zipFileName, String intendedDir) throws IOException{
+		File zipFile = new File(zipFileName);
+		String filePath = zipFile.getCanonicalPath();
+
+		File iD = new File(intendedDir);
+		String canonicalID = iD.getCanonicalPath();
+
+		if (filePath.contains(canonicalID)) {
+			return filePath;
+		} else {
+			throw new IllegalStateException("File is outside extraction target directory.");
+		}
+	}
+
 	private void doPostConfigurationSnapshot(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
-		
+
 		UploadRequest upload = new UploadRequest(m_diskFileItemFactory);
 
 		try {
@@ -225,7 +257,7 @@ public class FileServlet extends HttpServlet {
 			s_logger.error("expected 1 file item but found {}", fileItems.size());
 			throw new ServletException("Wrong number of file items");
 		}
-		
+
 		FileItem fileItem = fileItems.get(0);
 		byte[] data = fileItem.get();
 		String xmlString = new String(data, "UTF-8");
@@ -236,34 +268,34 @@ public class FileServlet extends HttpServlet {
 			s_logger.error("Error unmarshaling device configuration", e);
 			throw new ServletException("Error unmarshaling device configuration", e);
 		}		
-		
+
 		ServiceLocator  locator = ServiceLocator.getInstance();
 		try {
-			
+
 			ConfigurationService cs = locator.getService(ConfigurationService.class); 
 			List<ComponentConfigurationImpl> configImpls = xmlConfigs.getConfigurations();
-			
+
 			List<ComponentConfiguration> configs = new ArrayList<ComponentConfiguration>();
 			configs.addAll(configImpls);
-			
+
 			cs.updateConfigurations(configs);
 
-        	//
-        	// Add an additional delay after the configuration update
-        	// to give the time to the device to apply the received 
-        	// configuration            
+			//
+			// Add an additional delay after the configuration update
+			// to give the time to the device to apply the received 
+			// configuration            
 			SystemService ss = locator.getService(SystemService.class);
 			long delay = Long.parseLong(ss.getProperties().getProperty("console.updateConfigDelay", "5000"));
-            if (delay > 0) {
-            	Thread.sleep(delay);
-            }		
+			if (delay > 0) {
+				Thread.sleep(delay);
+			}		
 		} 
 		catch (Exception e) {
 			s_logger.error("Error updating device configuration: {}", e);
 			throw new ServletException("Error updating device configuration", e);
 		}
 	}
-	
+
 	private void doPostDeployUpload (HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
 		ServiceLocator locator = ServiceLocator.getInstance();
@@ -274,7 +306,7 @@ public class FileServlet extends HttpServlet {
 			s_logger.error("Error locating DeploymentAgentService", e);
 			throw new ServletException("Error locating DeploymentAgentService", e);
 		}
-		
+
 		// Check that we have a file upload request
 		boolean isMultipart = ServletFileUpload.isMultipartContent(req);
 		if (!isMultipart) {
@@ -296,7 +328,7 @@ public class FileServlet extends HttpServlet {
 		File localFile = null;
 		OutputStream os = null;
 		boolean successful = false;
-		
+
 		try {
 			fileItems = upload.getFileItems();
 
@@ -318,7 +350,7 @@ public class FileServlet extends HttpServlet {
 					throw new ServletException("Cannot delete file: " + filePath);
 				}
 			}
-			
+
 			try {
 				localFile.createNewFile();
 				localFile.deleteOnExit();
@@ -333,9 +365,9 @@ public class FileServlet extends HttpServlet {
 				s_logger.error("Cannot find file: {}", filePath, e);
 				throw new ServletException("Cannot find file: " + filePath, e);				
 			}
-						
+
 			s_logger.info("Copying uploaded package file to file: {}", filePath);
-			
+
 			try {
 				IOUtils.copy(is, os);
 			} catch (IOException e) {
@@ -348,7 +380,7 @@ public class FileServlet extends HttpServlet {
 			} catch (IOException e) {
 				s_logger.warn("Cannot close output stream", e);
 			}
-				
+
 			URL url = localFile.toURI().toURL();
 			String sUrl = url.toString();
 
@@ -396,7 +428,7 @@ public class FileServlet extends HttpServlet {
 
 	private void doPostDeploy(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
-				
+
 		ServiceLocator locator = ServiceLocator.getInstance();
 		DeploymentAgentService deploymentAgentService;
 		try {
@@ -405,10 +437,10 @@ public class FileServlet extends HttpServlet {
 			s_logger.error("Error locating DeploymentAgentService", e);
 			throw new ServletException("Error locating DeploymentAgentService", e);
 		}
-						
+
 		String reqPathInfo = req.getPathInfo();
 		if (reqPathInfo.endsWith("url")) {
-			
+
 			String packageDownloadUrl = req.getParameter("packageUrl");
 			if (packageDownloadUrl == null) {
 				s_logger.error("Deployment package URL parameter missing");
@@ -429,10 +461,10 @@ public class FileServlet extends HttpServlet {
 			throw new ServletException("Unsupported package deployment request");			
 		}
 	}
-	
+
 	static long getFileUploadSizeMax() {
 		ServiceLocator locator = ServiceLocator.getInstance();
-		
+
 		long sizeMax = -1;
 		try {
 			SystemService systemService = locator.getService(SystemService.class);
@@ -441,13 +473,13 @@ public class FileServlet extends HttpServlet {
 		} catch (GwtKuraException e) {
 			s_logger.error("Error locating SystemService", e);
 		}
-		
+
 		return sizeMax;
 	}
-	
+
 	static private int getFileUploadInMemorySizeThreshold() {
 		ServiceLocator locator = ServiceLocator.getInstance();
-		
+
 		int sizeThreshold = DiskFileItemFactory.DEFAULT_SIZE_THRESHOLD;
 		try {
 			SystemService systemService = locator.getService(SystemService.class);
@@ -457,7 +489,7 @@ public class FileServlet extends HttpServlet {
 		} catch (GwtKuraException e) {
 			s_logger.error("Error locating SystemService", e);
 		}
-		
+
 		return sizeThreshold;
 	}
 }

@@ -483,7 +483,7 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 					try {
 						downloadDeploymentPackageInternal(options, alreadyDownloadedFinal, forceDownloadFinal);
 					} catch (Exception e) {
-
+						
 					} finally{
 						s_pendingPackageUrl = null;
 					}
@@ -823,7 +823,7 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 		}
 	}
 
-	private void incrementalDownloadFromURL(File dpFile, DeploymentPackageDownloadOptions options) {
+	private void incrementalDownloadFromURL(File dpFile, DeploymentPackageDownloadOptions options) throws Exception {
 		OutputStream os = null;
 
 		try {
@@ -836,7 +836,7 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 			downloadHelper.close();
 
 		} catch (Exception e) {
-			System.out.println(e);
+			throw new Exception(e);
 		} finally {
 			if (os != null) {
 				try {

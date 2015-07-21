@@ -27,6 +27,7 @@ public class ProgressEvent extends EventObject {
 	String transferStatus;
 	String requesterClientId;
 	long jobId;
+	String exceptionMessage = null;
 	
 	public ProgressEvent(Object source, String requesterClientId, String clientId, int transferSize, int transferProgress, String trasnferStatus, long jobId) {
 		super(source);
@@ -61,5 +62,12 @@ public class ProgressEvent extends EventObject {
 	public long getJobId() {
 		return jobId;
 	}
+	
+	public void setExceptionMessage(String exceptionMessage){
+		this.exceptionMessage= exceptionMessage;
+	}
 
+	public String getExceptionMessage(){
+		return exceptionMessage;
+	}
 }

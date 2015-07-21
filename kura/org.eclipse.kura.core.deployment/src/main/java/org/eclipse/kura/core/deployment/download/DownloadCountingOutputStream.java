@@ -29,7 +29,6 @@ import java.util.concurrent.Future;
 
 import javax.net.ssl.HttpsURLConnection;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.CountingOutputStream;
 import org.eclipse.kura.KuraConnectException;
 import org.eclipse.kura.KuraErrorCode;
@@ -63,6 +62,7 @@ public class DownloadCountingOutputStream extends CountingOutputStream {
 	private ExecutorService executor;
 	private Future<Void> future;
 	private long previous;
+	private DOWNLOAD_STATUS m_downloadStatus = DOWNLOAD_STATUS.FAILED;
 	
 
 	public DownloadCountingOutputStream(OutputStream out, DeploymentPackageDownloadOptions options, ProgressListener callback,
@@ -99,7 +99,7 @@ public class DownloadCountingOutputStream extends CountingOutputStream {
 				future.cancel(true);
 				executor.shutdownNow();
 				
-				postProgressEvent(options.getClientId(), getByteCount(), totalBytes, DOWNLOAD_STATUS.FAILED);
+				postProgressEvent(options.getClientId(), getByteCount(), totalBytes, DOWNLOAD_STATUS.FAILED, "Download cancelled");
 			}
 		}
 	}
@@ -135,11 +135,11 @@ public class DownloadCountingOutputStream extends CountingOutputStream {
 						if (urlConnection instanceof HttpsURLConnection) {
 							((HttpsURLConnection) urlConnection).setSSLSocketFactory(m_sslManagerService.getSSLSocketFactory());
 						} else if (!(urlConnection instanceof HttpURLConnection)) {
-							postProgressEvent(options.getClientId(), getByteCount(), totalBytes, DOWNLOAD_STATUS.FAILED);
+							postProgressEvent(options.getClientId(), getByteCount(), totalBytes, DOWNLOAD_STATUS.FAILED, "The request URL is not supported");
 							throw new KuraConnectException("Unsupported protocol!");
 						}
 					} catch (GeneralSecurityException e) {
-						postProgressEvent(options.getClientId(), getByteCount(), totalBytes, DOWNLOAD_STATUS.FAILED);
+						postProgressEvent(options.getClientId(), getByteCount(), totalBytes, DOWNLOAD_STATUS.FAILED, e.getMessage());
 						throw new KuraConnectException(e, "Unsupported protocol!");
 					}
 
@@ -148,14 +148,10 @@ public class DownloadCountingOutputStream extends CountingOutputStream {
 					String s = urlConnection.getHeaderField("Content-Length");
 
 					totalBytes = s != null ? Integer.parseInt(s) : -1;
-					postProgressEvent(options.getClientId(), 0, totalBytes, DOWNLOAD_STATUS.IN_PROGRESS);
-
-					long numBytes = IOUtils.copyLarge(is, DownloadCountingOutputStream.this, new byte[PROP_BUFFER_SIZE]);
-
-					postProgressEvent(options.getClientId(), numBytes, totalBytes, DOWNLOAD_STATUS.COMPLETED);
+					postProgressEvent(options.getClientId(), 0, totalBytes, DOWNLOAD_STATUS.IN_PROGRESS, null);
 
 				} catch (IOException e) {
-					postProgressEvent(options.getClientId(), getByteCount(), totalBytes, DOWNLOAD_STATUS.FAILED);
+					postProgressEvent(options.getClientId(), getByteCount(), totalBytes, DOWNLOAD_STATUS.FAILED, e.getMessage());
 					throw new KuraConnectException(e);
 				} finally {
 					if (is != null) {
@@ -196,7 +192,7 @@ public class DownloadCountingOutputStream extends CountingOutputStream {
 			System.out.println("Bytes read: "+ (getByteCount() - previous));
 			previous = getByteCount();
 			m_currentStep++;
-			postProgressEvent(options.getClientId(), getByteCount(), totalBytes, DOWNLOAD_STATUS.IN_PROGRESS);
+			postProgressEvent(options.getClientId(), getByteCount(), totalBytes, DOWNLOAD_STATUS.IN_PROGRESS, null);
 		}
 		try {
 			Thread.sleep(PROP_BLOCK_DELAY);
@@ -206,18 +202,20 @@ public class DownloadCountingOutputStream extends CountingOutputStream {
 		}
 	}
 
-	private void postProgressEvent(String clientId, long progress, long total, DOWNLOAD_STATUS status) {
+	private void postProgressEvent(String clientId, long progress, long total, DOWNLOAD_STATUS status, String errorMessage) {
 		Long perc = getDownloadTransferProgressPercentage();
-		pl.progressChanged(new ProgressEvent(this, options.getRequestClientId(), clientId, ((Long) total).intValue(), ((Long) perc).intValue(), 
-				getDownloadTransferStatus().getStatusString(), options.getJobId()));
+		m_downloadStatus = status;
+		ProgressEvent pe= new ProgressEvent(this, options.getRequestClientId(), clientId, ((Long) total).intValue(), ((Long) perc).intValue(), 
+											getDownloadTransferStatus().getStatusString(), options.getJobId());
+		if(errorMessage != null){
+			pe.setExceptionMessage(errorMessage);
+		}
+		pl.progressChanged(pe);
+		
 	}
 	
 	public DOWNLOAD_STATUS getDownloadTransferStatus(){
-		Long downloadPercentage= getDownloadTransferProgressPercentage();
-		if (downloadPercentage < 100){
-			return DOWNLOAD_STATUS.IN_PROGRESS;
-		}
-		return DOWNLOAD_STATUS.COMPLETED;
+		return m_downloadStatus;
 	}
 	
 	public Long getDownloadTransferProgressPercentage(){

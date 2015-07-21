@@ -288,6 +288,9 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 		notify.setTransferProgress(progress.getTransferProgress());
 		notify.setTransferStatus(progress.getTransferStatus());
 		notify.setJobId(progress.getJobId());
+		if (progress.getExceptionMessage() != null){
+			notify.setErrorMessage(progress.getExceptionMessage());
+		}
 
 		try {
 			getCloudApplicationClient().controlPublish(progress.getRequesterClientId(), "NOTIFY/"+progress.getClientId()+"/progress", notify, 2, DFLT_RETAIN, DFLT_PRIORITY);

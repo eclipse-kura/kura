@@ -203,6 +203,8 @@ public class FileServlet extends HttpServlet {
 			}
 		} catch (IOException e) {
 			throw e;
+		} catch (GwtKuraException e) {
+			throw new ServletException(e.getMessage());
 		} finally {
 			if (os != null) {
 				try {
@@ -226,7 +228,7 @@ public class FileServlet extends HttpServlet {
 		}
 	}
 
-	private String validateFileName(String zipFileName, String intendedDir) throws IOException{
+	private String validateFileName(String zipFileName, String intendedDir) throws IOException, GwtKuraException{
 		File zipFile = new File(zipFileName);
 		String filePath = zipFile.getCanonicalPath();
 
@@ -236,7 +238,7 @@ public class FileServlet extends HttpServlet {
 		if (filePath.contains(canonicalID)) {
 			return filePath;
 		} else {
-			throw new IllegalStateException("File is outside extraction target directory.");
+			throw new GwtKuraException("File is outside extraction target directory.");
 		}
 	}
 

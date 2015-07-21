@@ -25,6 +25,7 @@ Import-Package:
  com.google.gwt.rpc.linker,
  com.google.gwt.rpc.rebind,
  com.google.gwt.rpc.server,
+ com.google.gwt.safehtml.shared,
  com.google.gwt.uibinder.client,
  com.google.gwt.user.client,
  com.google.gwt.user.client.rpc,

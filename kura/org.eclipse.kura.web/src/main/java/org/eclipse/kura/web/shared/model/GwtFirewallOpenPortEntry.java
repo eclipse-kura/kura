@@ -13,6 +13,8 @@ package org.eclipse.kura.web.shared.model;
 
 import java.io.Serializable;
 
+import org.eclipse.kura.web.client.util.GwtSafeHtmlUtils;
+
 import com.extjs.gxt.ui.client.data.BaseModelData;
 
 public class GwtFirewallOpenPortEntry extends BaseModelData implements Serializable {
@@ -23,6 +25,14 @@ public class GwtFirewallOpenPortEntry extends BaseModelData implements Serializa
 	private static final long serialVersionUID = 1153451329284913943L;
 
 	public GwtFirewallOpenPortEntry() {}
+	
+	@SuppressWarnings("unchecked")
+	public <X> X set(String name, X value){
+		if (value instanceof String) {
+			value = (X) GwtSafeHtmlUtils.htmlEscape((String) value);
+		}
+		return super.set(name, value);
+	}
 	
 	public Integer getPort() {
     	if (get("port") != null) {

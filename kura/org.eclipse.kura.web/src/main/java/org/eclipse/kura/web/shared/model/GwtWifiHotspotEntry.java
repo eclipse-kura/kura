@@ -13,11 +13,12 @@ package org.eclipse.kura.web.shared.model;
 
 import java.io.Serializable;
 
-import com.extjs.gxt.ui.client.data.BaseModelData;
+import org.eclipse.kura.web.client.util.KuraBaseModel;
 
-public class GwtWifiHotspotEntry extends BaseModelData implements Serializable {
+public class GwtWifiHotspotEntry extends KuraBaseModel implements Serializable {
 	
 	private static final long serialVersionUID = -7818472380334612955L;
+	
 
 	public String getSSID() {
         return get("ssid");

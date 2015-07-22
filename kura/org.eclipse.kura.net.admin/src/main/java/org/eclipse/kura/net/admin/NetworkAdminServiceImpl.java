@@ -97,6 +97,8 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 	
 	private static final String OS_VERSION = System.getProperty("kura.os.version");
 	
+	private static final String SSID_REGEXP = "[0-9A-Za-z/.@#:\\ \\_\\-]+";
+	
     private ComponentContext                   m_ctx;
 	private ConfigurationService               m_configurationService;
 	private NetworkConfigurationService		   m_networkConfigurationService;
@@ -1122,6 +1124,11 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 			    	
 			    	if ((wap.getSSID() == null) || (wap.getSSID().length() == 0)) {
 			    		s_logger.debug("Skipping hidden SSID");
+			    		continue;
+			    	}
+			    	
+			    	if (!wap.getSSID().matches(SSID_REGEXP)){
+			    		s_logger.debug("Skipping undesired SSID");
 			    		continue;
 			    	}
 			    	

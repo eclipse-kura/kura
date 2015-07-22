@@ -14,10 +14,13 @@ package org.eclipse.kura.web.shared.model;
 import java.io.Serializable;
 import java.util.ArrayList;
 
-import com.extjs.gxt.ui.client.data.BaseModelData;
+import org.eclipse.kura.web.client.util.GwtSafeHtmlUtils;
+
+import com.extjs.gxt.ui.client.data.BaseModel;
 
 
-public class GwtWifiConfig extends BaseModelData implements Serializable {
+
+public class GwtWifiConfig extends BaseModel implements Serializable {
 
 	private static final long serialVersionUID = -7610506986073264800L;
 	
@@ -26,6 +29,15 @@ public class GwtWifiConfig extends BaseModelData implements Serializable {
 		setRadioMode(GwtWifiRadioMode.netWifiRadioModeBGN.name());
 		//setChannel(GwtWifiChannel.netWifiChannelAuto.name());
 		setSecurity(GwtWifiSecurity.netWifiSecurityWPA2.name());
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Override
+	public <X> X set(String name, X value){
+		if (value instanceof String) {
+			value = (X) GwtSafeHtmlUtils.htmlEscape((String) value);
+		}
+		return super.set(name, value);
 	}
 
     public String getWirelessMode() {

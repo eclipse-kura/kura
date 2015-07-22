@@ -13,11 +13,9 @@ package org.eclipse.kura.web.shared.model;
 
 import java.io.Serializable;
 
-import org.eclipse.kura.web.client.util.GwtSafeHtmlUtils;
+import org.eclipse.kura.web.client.util.KuraBaseModel;
 
-import com.extjs.gxt.ui.client.data.BaseModelData;
-
-public class GwtFirewallPortForwardEntry extends BaseModelData implements Serializable {
+public class GwtFirewallPortForwardEntry extends KuraBaseModel implements Serializable {
 
 	/**
 	 * 
@@ -25,14 +23,6 @@ public class GwtFirewallPortForwardEntry extends BaseModelData implements Serial
 	private static final long serialVersionUID = 5028849108840020090L;
 
 	public GwtFirewallPortForwardEntry() {}
-
-	@SuppressWarnings("unchecked")
-	public <X> X set(String name, X value){
-		if (value instanceof String) {
-			value = (X) GwtSafeHtmlUtils.htmlEscape((String) value);
-		}
-		return super.set(name, value);
-	}
 
 	public String getInboundInterface() {
 		return get("inboundInterface");

@@ -15,25 +15,16 @@ package org.eclipse.kura.web.shared.model;
 import java.io.Serializable;
 import java.util.Map;
 
-import org.eclipse.kura.web.client.util.GwtSafeHtmlUtils;
+import org.eclipse.kura.web.client.util.KuraBaseModel;
 
 import com.allen_sauer.gwt.log.client.Log;
-import com.extjs.gxt.ui.client.data.BaseModelData;
 
-public class GwtFirewallNatEntry extends BaseModelData implements Serializable {
+public class GwtFirewallNatEntry extends KuraBaseModel implements Serializable {
 	
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 6603318099742645871L;
-
-	@SuppressWarnings("unchecked")
-	public <X> X set(String name, X value){
-		if (value instanceof String) {
-			value = (X) GwtSafeHtmlUtils.htmlEscape((String) value);
-		}
-		return super.set(name, value);
-	}
 	
 	public String getInInterface() {
         return get("inInterface");

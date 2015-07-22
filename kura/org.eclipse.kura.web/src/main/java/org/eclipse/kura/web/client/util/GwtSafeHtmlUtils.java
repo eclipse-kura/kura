@@ -6,8 +6,18 @@ public class GwtSafeHtmlUtils {
 
 	public static String htmlEscape(String unsafeHtml)
 	{
-		if (unsafeHtml == null || !unsafeHtml.matches("[0-9A-Za-z/.]+")){
+		if (unsafeHtml == null){
 			return null;
+		}
+		return SafeHtmlUtils.htmlEscape(unsafeHtml);
+	}
+	
+	public static String inputSanitize(String unsafeHtml)
+	{
+		if (unsafeHtml == null){
+			return null;
+		} else if (!unsafeHtml.matches("[0-9A-Za-z/.@#:\\ \\_\\-]+")){
+			return "";
 		}
 		return SafeHtmlUtils.htmlEscape(unsafeHtml);
 	}

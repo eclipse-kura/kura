@@ -13,7 +13,7 @@
 
 -->
 
-<!-- 
+
 <scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" activate="activate" deactivate="deactivate" immediate="true" name="org.eclipse.kura.status.CloudConnectionStatusService">
    <implementation class="org.eclipse.kura.emulator.status.CloudConnectionStatusServiceImpl"/>
    <service>
@@ -21,4 +21,3 @@
    </service>
    <property name="service.pid" value="org.eclipse.kura.status.CloudConnectionStatusService"/>
 </scr:component>
--->

@@ -36,8 +36,9 @@ public class GPIOServiceImpl implements GPIOService {
 	protected void activate(ComponentContext componentContext) {
 		s_logger.debug("activating jdk.dio GPIOService");
 
-		String prova = m_SystemService.getKuraHome();
-		if (prova != null) {
+		String prova = m_SystemService.getProperties().getProperty("jdk.dio.registry");
+		prova = m_SystemService.getProperties().getProperty("kura.configuration");
+		if (prova == null) {
 			try {
 				File dioPropsFile = new File(System.getProperty("jdk.dio.registry"));
 				if (dioPropsFile.exists()) {

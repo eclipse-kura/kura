@@ -29,6 +29,7 @@ import java.util.concurrent.Future;
 
 import javax.net.ssl.HttpsURLConnection;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.CountingOutputStream;
 import org.eclipse.kura.KuraConnectException;
 import org.eclipse.kura.KuraErrorCode;
@@ -149,6 +150,8 @@ public class DownloadCountingOutputStream extends CountingOutputStream {
 
 					totalBytes = s != null ? Integer.parseInt(s) : -1;
 					postProgressEvent(options.getClientId(), 0, totalBytes, DOWNLOAD_STATUS.IN_PROGRESS, null);
+					
+					IOUtils.copyLarge(is, DownloadCountingOutputStream.this, new byte[PROP_BUFFER_SIZE]);
 
 				} catch (IOException e) {
 					postProgressEvent(options.getClientId(), getByteCount(), totalBytes, DOWNLOAD_STATUS.FAILED, e.getMessage());

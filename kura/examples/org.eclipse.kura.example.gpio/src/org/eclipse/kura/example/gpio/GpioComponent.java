@@ -21,19 +21,16 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-import jdk.dio.ClosedDeviceException;
-import jdk.dio.DeviceConfig;
-import jdk.dio.DeviceManager;
-import jdk.dio.DeviceNotFoundException;
-import jdk.dio.InvalidDeviceConfigException;
-import jdk.dio.UnavailableDeviceException;
-import jdk.dio.UnsupportedDeviceTypeException;
-import jdk.dio.gpio.GPIOPin;
-import jdk.dio.gpio.GPIOPinConfig;
-import jdk.dio.gpio.PinEvent;
-import jdk.dio.gpio.PinListener;
-
 import org.eclipse.kura.configuration.ConfigurableComponent;
+import org.eclipse.kura.gpio.GPIOService;
+import org.eclipse.kura.gpio.KuraClosedDeviceException;
+import org.eclipse.kura.gpio.KuraGPIODeviceException;
+import org.eclipse.kura.gpio.KuraGPIODirection;
+import org.eclipse.kura.gpio.KuraGPIOMode;
+import org.eclipse.kura.gpio.KuraGPIOPin;
+import org.eclipse.kura.gpio.KuraGPIOTrigger;
+import org.eclipse.kura.gpio.KuraUnavailableDeviceException;
+import org.eclipse.kura.gpio.PinStatusListener;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,9 +49,11 @@ public class GpioComponent implements ConfigurableComponent {
 	private static final String PROP_NAME_GPIO_MODES = "gpio.modes";
 	private static final String PROP_NAME_GPIO_TRIGGERS = "gpio.triggers";
 
+	private GPIOService m_GPIOService;
+	
 	private Map<String, Object> m_properties;
 
-	private static ArrayList<GPIOPin> m_pins = new ArrayList<GPIOPin>();
+	private static ArrayList<KuraGPIOPin> m_pins = new ArrayList<KuraGPIOPin>();
 	
 	private ScheduledFuture<?> m_blinker = null;
 	private ScheduledExecutorService m_blinker_executor;
@@ -70,6 +69,14 @@ public class GpioComponent implements ConfigurableComponent {
 		m_blinker_executor = Executors.newSingleThreadScheduledExecutor();
 	}
 	
+	public void setGPIOService(GPIOService gpioService){
+		m_GPIOService = gpioService;
+	}
+	
+	public void unsetGPIOService(GPIOService gpioService){
+		m_GPIOService = null;
+	}
+		
 	protected void activate(ComponentContext componentContext,
 			Map<String, Object> properties) {
 		s_logger.debug("Activating {}", APP_ID);
@@ -88,11 +95,11 @@ public class GpioComponent implements ConfigurableComponent {
 			m_blinker.cancel(true);
 		}
 		
-		Iterator<GPIOPin> pins_it = m_pins.iterator();
+		Iterator<KuraGPIOPin> pins_it = m_pins.iterator();
 		while (pins_it.hasNext()) {
 			try {
-				GPIOPin p = pins_it.next();				
-				s_logger.warn("Closing GPIO pin {}", p.getDescriptor().getConfiguration().toString());
+				KuraGPIOPin p = pins_it.next();				
+				s_logger.warn("Closing GPIO pin {}", p);
 				p.close();
 			} catch (IOException e) {
 				s_logger.warn("Cannot close pin!");
@@ -127,11 +134,11 @@ public class GpioComponent implements ConfigurableComponent {
 		m_properties.clear();
 		m_properties.putAll(properties);
 
-		Iterator<GPIOPin> pins_it = m_pins.iterator();
+		Iterator<KuraGPIOPin> pins_it = m_pins.iterator();
 		while (pins_it.hasNext()) {
 			try {
-				GPIOPin p = pins_it.next();				
-				s_logger.warn("Closing GPIO pin {}", p.getDescriptor().getConfiguration().toString());
+				KuraGPIOPin p = pins_it.next();				
+				s_logger.warn("Closing GPIO pin {}", p);
 				p.close();
 			} catch (IOException e) {
 				s_logger.warn("Cannot close pin!");
@@ -151,24 +158,26 @@ public class GpioComponent implements ConfigurableComponent {
 				s_logger.info("   Direction....: {}",directions[i]);
 				s_logger.info("   Mode.........: {}",modes[i]);
 				s_logger.info("   Trigger......: {}",triggers[i]);
-				GPIOPinConfig config = new GPIOPinConfig(DeviceConfig.DEFAULT,						
-						pins[i], directions[i], modes[i], triggers[i], false);
-				GPIOPin p = DeviceManager.open(GPIOPin.class, config);
+				KuraGPIOPin p = m_GPIOService.getPinByTerminal(
+						pins[i], 
+						getPinDirection(directions[i]), 
+						getPinMode(modes[i]), 
+						getPinTrigger(triggers[i]));
 				s_logger.info("GPIO pin {} acquired", pins[i]);
 				m_pins.add(p);
-				if(p.getDirection() == GPIOPinConfig.DIR_OUTPUT_ONLY){
+				if(p.getDirection() == KuraGPIODirection.OUTPUT){
 					final int final_index = i;
 					m_blinker = m_blinker_executor.scheduleAtFixedRate(new Runnable(){
 						@Override
 						public void run() {
 							try {
 								boolean value = !m_pins.get(final_index).getValue();
-								s_logger.info("Setting GPIO pin {} to {}", m_pins.get(final_index).getDescriptor().toString(), value);							
-								m_pins.get(final_index).setValue(value);
+								s_logger.info("Setting GPIO pin {} to {}", m_pins.get(final_index), value);							
+								m_pins.get(final_index).changeValue(value);
 								//s_logger.info("Trigger = "+m_pins.get(final_index).getTrigger());
-							} catch (UnavailableDeviceException e) {
+							} catch (KuraUnavailableDeviceException e) {
 								s_logger.warn("GPIO pin {} is not available for export.", final_index);
-							} catch (ClosedDeviceException e) {
+							} catch (KuraClosedDeviceException e) {
 								s_logger.warn("GPIO pin {} has been closed.", final_index);
 							} catch (IOException e) {
 								s_logger.error("I/O Error occurred!");					
@@ -178,23 +187,15 @@ public class GpioComponent implements ConfigurableComponent {
 					}, 0, 2, TimeUnit.SECONDS);
 				}else{
 					s_logger.info("Attaching Pin Listener to GPIO pin {}", pins[i]);
-					PinListener listener = new PinListener() {
+					PinStatusListener listener = new PinStatusListener() {
 						private int pinNumber = pinNum;
 						@Override
-						public void valueChanged(PinEvent event) {
-							s_logger.info("Pin status for GPIO pin {} changed to {}", pinNumber, event.getValue());
+						public void pinStatusChange(boolean value) {
+							s_logger.info("Pin status for GPIO pin {} changed to {}", pinNumber, value);
 						}					
 					};
-					p.setInputListener(listener);
+					p.addPinStatusListener(listener);
 				}				
-			} catch (InvalidDeviceConfigException e) {
-				s_logger.warn("Invalid PIN configuration for GPIO pin {}", pins[i]);
-			} catch (UnsupportedDeviceTypeException e) {
-				s_logger.error("Unsupported device! Gpio pin {}", pins[i]);
-			} catch (DeviceNotFoundException e) {
-				s_logger.warn("Cannot find device GPIO {} on the device", pins[i]);
-			} catch (UnavailableDeviceException e) {
-				s_logger.warn("GPIO pin {} is not available for export.", pins[i]);
 			} catch (IOException e) {
 				s_logger.error("I/O Error occurred!");
 				e.printStackTrace();
@@ -203,5 +204,44 @@ public class GpioComponent implements ConfigurableComponent {
 			}			
 		}
 	}
+	
+	private KuraGPIODirection getPinDirection(int direction){
+		switch(direction){
+		case 0:
+		case 2:
+			return KuraGPIODirection.INPUT;
+		case 1:
+		case 3:
+			return KuraGPIODirection.OUTPUT;
+		}
+		return KuraGPIODirection.OUTPUT;
+	}
 
+	private KuraGPIOMode getPinMode(int mode){
+		switch(mode){
+		case 2:
+			return KuraGPIOMode.INPUT_PULL_DOWN;
+		case 1:
+			return KuraGPIOMode.INPUT_PULL_UP;
+		case 8:
+			return KuraGPIOMode.OUTPUT_OPEN_DRAIN;
+		case 4:
+			return KuraGPIOMode.OUTPUT_PUSH_PULL;
+		}
+		return KuraGPIOMode.OUTPUT_OPEN_DRAIN;
+	}
+	
+	private KuraGPIOTrigger getPinTrigger(int trigger){
+		switch(trigger){
+		case 0:
+			return KuraGPIOTrigger.NONE;
+		case 2:
+			return KuraGPIOTrigger.RAISING_EDGE;
+		case 3:
+			return KuraGPIOTrigger.FALLING_EDGE;
+		case 1:
+			default:
+				return KuraGPIOTrigger.NONE;
+		}
+	}
 }

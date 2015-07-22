@@ -19,12 +19,15 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.util.ProcessUtil;
 import org.eclipse.kura.core.util.SafeProcess;
+import org.eclipse.kura.linux.net.util.LinuxNetworkUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,28 +45,45 @@ public class WifiOptions {
 	public static final String WIFI_MANAGED_DRIVER_WIRED = "wired";
 	public static final String WIFI_MANAGED_DRIVER_NL80211 = "nl80211";
 	
+	private static Map<String, Collection<String>> s_wifiOptions = new HashMap<String, Collection<String>>();
+	
 	public static Collection<String> getSupportedOptions (String ifaceName) throws KuraException 
-	{		
-		Collection<String> options = new HashSet<String>();
+	{
+		Collection<String> options = s_wifiOptions.get(ifaceName);
+		if (options != null) {
+			return options;
+		}
+		
+		options = new HashSet<String>();
 		SafeProcess procIw = null;
 		SafeProcess procIwConfig = null;
 		BufferedReader br = null;
 		try {
-		    
-			procIw = ProcessUtil.exec("iw dev " + ifaceName + " info");
-			int status = procIw.waitFor();
-			if (status == 0) {
-				options.add(WIFI_MANAGED_DRIVER_NL80211);
+			if (LinuxNetworkUtil.toolExists("iw")) {
+				try {
+					procIw = ProcessUtil.exec("iw dev " + ifaceName + " info");
+				} catch (Exception e) {
+			    	s_logger.warn("Failed to execute 'iw dev {} info - {}", ifaceName, e);
+			    }
+				
+				if (procIw != null) {
+					int status = procIw.waitFor();
+					if (status == 0) {
+						options.add(WIFI_MANAGED_DRIVER_NL80211);
+					}
+				}
 			}
 
-			procIwConfig = ProcessUtil.exec("iwconfig " + ifaceName);
-			if (procIwConfig.waitFor() == 0) {
-				br = new BufferedReader(new InputStreamReader(procIwConfig.getInputStream()));
-				String line = null;
-				while ((line = br.readLine()) != null) {
-					if (line.contains("IEEE 802.11")) {
-						options.add(WIFI_MANAGED_DRIVER_WEXT);
-						break;
+			if (LinuxNetworkUtil.toolExists("iwconfig")) {
+				procIwConfig = ProcessUtil.exec("iwconfig " + ifaceName);
+				if (procIwConfig.waitFor() == 0) {
+					br = new BufferedReader(new InputStreamReader(procIwConfig.getInputStream()));
+					String line = null;
+					while ((line = br.readLine()) != null) {
+						if (line.contains("IEEE 802.11") || line.contains("Mode:") || line.contains("Access Point:")) {
+							options.add(WIFI_MANAGED_DRIVER_WEXT);
+							break;
+						}
 					}
 				}
 			}
@@ -81,7 +101,9 @@ public class WifiOptions {
 			
 			if (procIw != null) ProcessUtil.destroy(procIw);
 			if (procIwConfig != null) ProcessUtil.destroy(procIwConfig);
-		}		
+		}
+		
+		s_wifiOptions.put(ifaceName, options);
 		return options;
 	}
 }

@@ -18,11 +18,11 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Map;
 
+import org.eclipse.kura.core.db.pool.KuraJDBCConnectionPool;
 import org.eclipse.kura.db.DbService;
 import org.eclipse.kura.system.SystemService;
-import org.hsqldb.jdbc.JDBCPool;
-import org.osgi.service.component.ComponentException;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.ComponentException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,7 +60,7 @@ public class HsqlDbServiceImpl implements DbService
 	@SuppressWarnings("unused")
 	private ComponentContext m_ctx;
 	private SystemService    m_systemService;
-    private JDBCPool         m_connPool;
+    private KuraJDBCConnectionPool         m_connPool;
     
     
 	// ----------------------------------------------------------------
@@ -166,7 +166,8 @@ public class HsqlDbServiceImpl implements DbService
 			String url = m_systemService.getProperties().getProperty(DB_URL_PROPNAME);			
 			s_logger.info("Opening database with url: "+url);			
 			    
-		    m_connPool = new JDBCPool();
+		    //m_connPool = new JDBCPool();
+			m_connPool = new KuraJDBCConnectionPool();
 		    m_connPool.setUrl(url);
 		    m_connPool.setUser(s_username);
 		    m_connPool.setPassword(s_password);

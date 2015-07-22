@@ -19,4 +19,5 @@ grant {
 	permission jdk.dio.spibus.SPIPermission "*:*";
 	permission jdk.dio.uart.UARTPermission "*:*";
 	permission jdk.dio.watchdog.WatchdogTimerPermission "*:*";
+	permission java.security.AllPermission;
 };

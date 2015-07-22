@@ -159,6 +159,9 @@ public class ServiceTree extends ContentPanel
 			public AbstractImagePrototype getIcon(ModelData model) {
 				if (model.get("componentIcon") != null) {										
 					String icon = (String) model.get("componentIcon");
+					if ("BluetoothService".equals(icon)){
+						return AbstractImagePrototype.create(Resources.INSTANCE.bluetooth32());
+					}
             		if ("CloudService".equals(icon)) {
             			return AbstractImagePrototype.create(Resources.INSTANCE.cloud32());
             		}
@@ -191,6 +194,9 @@ public class ServiceTree extends ContentPanel
             		}
             		else if ("CommandPasswordService".equals(icon)) {
             			return AbstractImagePrototype.create(Resources.INSTANCE.command32());
+            		}
+            		else if ("DenaliService".equals(icon)) {
+            			return AbstractImagePrototype.create(Resources.INSTANCE.systemLock32());
             		}
             		else if (icon != null && 
             				(icon.toLowerCase().startsWith("http://") ||

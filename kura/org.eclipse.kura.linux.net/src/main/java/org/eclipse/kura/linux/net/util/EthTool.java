@@ -40,7 +40,6 @@ public class EthTool implements LinkTool {
 	private static final String DUPLEX = "Duplex:";
 	private static final String SPEED = "Speed:";
 	
-	private String tool = null;
 	private String ifaceName = null; 
 	private boolean linkDetected = false;
 	private int speed = 0; // in b/s
@@ -51,8 +50,7 @@ public class EthTool implements LinkTool {
 	 * 
 	 * @param ifaceName - interface name as {@link String}
 	 */
-	public EthTool (String tool, String ifaceName) {
-		this.tool = tool;
+	public EthTool (String ifaceName) {
 		this.ifaceName = ifaceName;
 	}
 	
@@ -65,7 +63,7 @@ public class EthTool implements LinkTool {
 		BufferedReader br = null;
 		boolean result = false;
 		try {
-			proc = ProcessUtil.exec(tool + " " + this.ifaceName);	
+			proc = ProcessUtil.exec("ethtool " + this.ifaceName);	
 			result = (proc.waitFor() == 0)? true : false;
 			br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
 			String line = null;
@@ -138,5 +136,10 @@ public class EthTool implements LinkTool {
 	 */
 	public String getDuplex() {
 		return this.duplex;
+	}
+
+	@Override
+	public int getSignal() {
+		return 0;
 	}
 }

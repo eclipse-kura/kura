@@ -413,6 +413,9 @@
             <esf:property name="lwt.qos" array="false" encrypted="false" type="Integer">
                 <esf:value>0</esf:value>
             </esf:property>
+           	<esf:property name="protocol-version" array="false" encrypted="false" type="Integer">
+                <esf:value>4</esf:value>
+            </esf:property>
         </esf:properties>
     </esf:configuration>
     <esf:configuration pid="org.eclipse.kura.data.DataService">
@@ -481,6 +484,19 @@
             </esf:property>
             <esf:property name="device.display-name" array="false" encrypted="false" type="String">
                 <esf:value>Beaglebone</esf:value>
+            </esf:property>
+        </esf:properties>
+    </esf:configuration>
+    <esf:configuration pid="org.eclipse.kura.ssl.SslManagerService">
+        <esf:properties>
+            <esf:property name="ssl.default.protocol" array="false" encrypted="false" type="String">
+                <esf:value>TLSv1</esf:value>
+            </esf:property>
+            <esf:property name="ssl.hostname.verification" array="false" encrypted="false" type="Boolean">
+                <esf:value>true</esf:value>
+            </esf:property>
+            <esf:property name="ssl.default.trustStore" array="false" encrypted="false" type="String">
+                <esf:value>/opt/eclipse/kura/security/cacerts.ks</esf:value>
             </esf:property>
         </esf:properties>
     </esf:configuration>

@@ -20,6 +20,8 @@ import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 
+import org.eclipse.kura.KuraException;
+
 /**
  * The CryptoService is used to provide AES encrypt and decrypt functionality, Base64 encoding and
  * decoding, and SHA1 hash generation. 
@@ -27,6 +29,24 @@ import javax.crypto.NoSuchPaddingException;
  */
 public interface CryptoService 
 {
+	/**
+	 * Returns an AES encrypted char array based on the provided value.
+	 * 
+	 * @param value A char array that will be encrypted.
+	 * @return The char array representing the encrypted value.
+	 * @throws KuraException
+	 */
+	public char[] encryptAes(char[] value) throws KuraException;
+	
+	/**
+	 * Returns a char array based on the provided encrypted value.
+	 * 
+	 * @param encryptedValue A char array representing the value to be decrypted.
+	 * @return char[] that has been decrypted.
+	 * @throws KuraException
+	 */
+	public char[] decryptAes(char[] encryptedValue) throws KuraException;
+	
 	/**
 	 * Returns an AES encrypted string based on the provided value.
 	 * 
@@ -38,6 +58,7 @@ public interface CryptoService
 	 * @throws IllegalBlockSizeException
 	 * @throws BadPaddingException
 	 */
+	@Deprecated
 	public String encryptAes(String value) 
 			throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException;
 
@@ -53,11 +74,13 @@ public interface CryptoService
 	 * @throws IllegalBlockSizeException
 	 * @throws BadPaddingException
 	 */
+	@Deprecated
 	public String decryptAes(String encryptedValue) 
 			throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IOException, IllegalBlockSizeException, BadPaddingException;
 	
 	/**
 	 * Returns a SHA1 hashed value of the provided string s.
+	 * 
 	 * @param s A string on which to run the SHA1 hasing algorithm.
 	 * @return String that has been hashed.
 	 * @throws NoSuchAlgorithmException
@@ -68,6 +91,7 @@ public interface CryptoService
 			
 	/**
 	 * Returns an encoded string based on the provided stringValue.
+	 * 
 	 * @param stringValue A string to be encoded.
 	 * @return String that has been encoded.
 	 * @throws NoSuchAlgorithmException
@@ -78,6 +102,7 @@ public interface CryptoService
 	
 	/**
 	 * Returns a decoded string based on the provided encodedValue.
+	 * 
 	 * @param encodedValue A string to be decoded.
 	 * @return String that has been decoded.
 	 * @throws NoSuchAlgorithmException
@@ -85,5 +110,41 @@ public interface CryptoService
 	 */
 	public String decodeBase64(String encodedValue) 
 			throws NoSuchAlgorithmException, UnsupportedEncodingException;
+	
+	
+	/**
+	 * Takes a keystore path and returns the corresponding password that can be
+	 * used to access to the data saved in the specified keystore.
+	 * 
+	 * @param keyStorePath A String that represents a unique identifier of the specified keystore.
+	 * @return A char array that represents the password of the specified keystore.
+	 */
+	public char[] getKeyStorePassword(String keyStorePath);
 
+	/**
+	 * Takes a keystore path as a String and a char array representing a password
+	 * that has to be stored for the specified keystore.
+	 * 
+	 * @param keyStorePath A String that represents a unique identifier of the specified keystore.
+	 * @param password A char array that represents the password of the specified keystore.
+	 * @throws IOException
+	 */
+	public void setKeyStorePassword(String keyStorePath, char[] password) throws KuraException;
+	
+	/**
+	 * Takes a keystore path as a String and a char array representing a password
+	 * that has to be stored for the specified keystore.
+	 * 
+	 * @param keyStorePath A String that represents a unique identifier of the specified keystore.
+	 * @param password A String that represents the password of the specified keystore.
+	 * @throws IOException
+	 */
+	@Deprecated
+	public void setKeyStorePassword(String keyStorePath, String password) throws IOException;
+
+	/**
+	 * Answers if the Kura framework is running in security mode.
+	 * @return true if the framework is running in security mode.
+	 */
+	public boolean isFrameworkSecure();
 }

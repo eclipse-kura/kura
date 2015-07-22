@@ -2,9 +2,9 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: org.eclipse.kura.web
 Bundle-SymbolicName: org.eclipse.kura.web;singleton:=true
-Bundle-Version: 1.0.4.qualifier
+Bundle-Version: 1.0.5.qualifier
 Bundle-Vendor: EUROTECH
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Service-Component: OSGI-INF/*.xml
 Import-Package: 
  com.allen_sauer.gwt.log.client,
@@ -39,14 +39,16 @@ Import-Package:
  com.google.gwt.user.rebind.rpc,
  com.google.gwt.user.server.rpc,
  com.google.gwt.user.server.rpc.impl,
+ javax.crypto,
+ javax.crypto.spec,
  javax.security.auth,
  javax.servlet;version="2.6.0",
  javax.servlet.http;version="2.6.0",
- javax.xml.bind,
  org.apache.commons.fileupload;version="1.2.2",
  org.apache.commons.fileupload.disk;version="1.2.2",
  org.apache.commons.fileupload.servlet;version="1.2.2",
  org.apache.commons.io;version="1.4.0",
+ org.apache.commons.net.util;version="3.1.0",
  org.eclipse.kura;version="[1.0,2.0)",
  org.eclipse.kura.command;version="[1.1,2.0)",
  org.eclipse.kura.configuration;version="[1.0,2.0)",
@@ -66,9 +68,11 @@ Import-Package:
  org.eclipse.kura.net.modem;version="[1.0,2.0)",
  org.eclipse.kura.net.wifi;version="[1.0,2.0)",
  org.eclipse.kura.position;version="[1.0,2.0)",
+ org.eclipse.kura.ssl;version="[1.0,2.0)",
  org.eclipse.kura.system;version="[1.0,2.0)",
  org.eclipse.kura.usb;version="[1.0,2.0)",
  org.osgi.framework,
+ org.osgi.service.component;version="1.2.0",
  org.osgi.service.deploymentadmin,
  org.osgi.service.event,
  org.osgi.service.http,
@@ -77,4 +81,4 @@ Import-Package:
  org.slf4j;version="1.6.4"
 Bundle-ClassPath: .,
   lib/gxt-2.2.5.jar,
-  target/org.eclipse.kura.web-1.0.4-SNAPSHOT/WEB-INF/lib/gxt-2.2.5.jar
+  target/org.eclipse.kura.web-1.0.5-SNAPSHOT/WEB-INF/lib/gxt-2.2.5.jar

@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
+    <OCD id="org.eclipse.kura.example.ble.tisensortag.BluetoothLe"
+         name="BluetoothLe" 
+         description="Bluetooth Low Energy demo on a TI SensorTag.">
+         
+        <Icon resource="http://s3.amazonaws.com/kura-resources/application/icon/sensortag.png" size="32"/>
+
+        <AD id="cc2650"
+            name="cc2650"
+            type="Boolean"
+            cardinality="0"
+            required="true"
+            default="true"
+            description="Type of TI Sensor Tag, if CC2650 select true." />
+
+         <AD id="scan_time"
+            name="scan_time"
+            type="Integer"
+            cardinality="0"
+            required="true"
+            default="5"
+            description="Length of time to scan for devices (seconds)" />
+
+        <AD id="period"
+            name="period"
+            type="Integer"
+            cardinality="0"
+            required="true"
+            default="120"
+            description="Period in seconds between 2 publishes."/>
+
+        <AD id="publishTopic"  
+            name="publishTopic"
+            type="String"
+            cardinality="0" 
+            required="true"
+            default="" 
+            description="The topic to publish data to the Cloud."/>
+
+        <AD id="iname"
+            name="iname"
+            type="String"
+            cardinality="0"
+            required="true"
+            default="hci0"
+            description="Name of bluetooth adapter."/>
+                    
+    </OCD>
+
+    <Designate pid="org.eclipse.kura.example.ble.tisensortag.BluetoothLe">
+        <Object ocdref="org.eclipse.kura.example.ble.tisensortag.BluetoothLe"/>
+    </Designate>
+</MetaData>

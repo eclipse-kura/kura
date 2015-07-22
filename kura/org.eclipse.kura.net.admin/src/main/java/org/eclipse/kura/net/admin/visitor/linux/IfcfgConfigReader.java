@@ -30,7 +30,6 @@ import org.eclipse.kura.core.net.WifiInterfaceAddressConfigImpl;
 import org.eclipse.kura.core.net.util.NetworkUtil;
 import org.eclipse.kura.linux.net.dns.LinuxDns;
 import org.eclipse.kura.linux.net.util.KuraConstants;
-import org.eclipse.kura.linux.net.util.LinuxNetworkUtil;
 import org.eclipse.kura.net.IP4Address;
 import org.eclipse.kura.net.IPAddress;
 import org.eclipse.kura.net.NetConfig;
@@ -102,7 +101,7 @@ public class IfcfgConfigReader implements NetworkConfigurationVisitor {
 					+ netInterfaceConfig.getName());
 
 			boolean autoConnect = false;
-			int mtu = -1;
+			// int mtu = -1; // IAB - MTU is not currently used
 			boolean dhcp = false;
 			IP4Address address = null;
 			String ipAddress = null;
@@ -150,6 +149,7 @@ public class IfcfgConfigReader implements NetworkConfigurationVisitor {
 					}
 
 					// override MTU with what is in config if it is present
+					/* IAB: MTU is not currently used
 					String stringMtu = kuraProps.getProperty("MTU");
 					if (stringMtu == null) {
 						try {
@@ -165,7 +165,7 @@ public class IfcfgConfigReader implements NetworkConfigurationVisitor {
 					} else {
 						mtu = Short.parseShort(stringMtu);
 					}
-
+					*/
 					// get the bootproto
 					String bootproto = kuraProps.getProperty("BOOTPROTO");
 					if (bootproto == null) {
@@ -381,7 +381,8 @@ public class IfcfgConfigReader implements NetworkConfigurationVisitor {
 										} else if (args[0]
 												.equals("#dns-nameservers")) {
 											/*
-											 * <IAB> If DNS servers are listed,
+											 * IAB: 
+											 * If DNS servers are listed,
 											 * those entries will be appended to
 											 * the /etc/resolv.conf file on
 											 * every ifdown/ifup sequence

@@ -24,10 +24,10 @@ import org.eclipse.kura.net.wifi.WifiSecurity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class iwScanTool {
+public class iwScanTool extends ScanTool implements IScanTool {
 	
 	private static final Logger s_logger = LoggerFactory.getLogger(iwScanTool.class);
-
+	private static final String SCAN_THREAD_NAME = "iwScanThread";
 	private static final Object s_lock = new Object();
 	private String m_ifaceName;
 	private ExecutorService m_executor;
@@ -40,18 +40,18 @@ public class iwScanTool {
 	private boolean m_status;
 	private String m_errmsg;
 	
-	public iwScanTool() {
+	protected iwScanTool() {
 		m_timeout = 20;
 	}
 	
-	public iwScanTool(String ifaceName) {
+	protected iwScanTool(String ifaceName) {
 		this();
 		m_ifaceName = ifaceName;
 		m_errmsg = "";
 		m_status = false;
 	}
 	
-	public iwScanTool(String ifaceName, int tout) {
+	protected iwScanTool(String ifaceName, int tout) {
 		this(ifaceName);
 		m_timeout = tout;
 	}
@@ -90,6 +90,7 @@ public class iwScanTool {
 			m_task = m_executor.submit(new Runnable() {
 				@Override
 				public void run() {
+					Thread.currentThread().setName(SCAN_THREAD_NAME);
 					int stat = -1;
 					m_process = null;
 					StringBuilder sb = new StringBuilder();
@@ -152,7 +153,7 @@ public class iwScanTool {
 				if (m_process != null) ProcessUtil.destroy(m_process);
 				m_process = null;
 				
-				s_logger.info("scan() :: Terminating WifiMonitor Thread ...");
+				s_logger.info("scan() :: Terminating {} ...", SCAN_THREAD_NAME);
 				m_executor.shutdownNow();
 				try {
 					m_executor.awaitTermination(2, TimeUnit.SECONDS);

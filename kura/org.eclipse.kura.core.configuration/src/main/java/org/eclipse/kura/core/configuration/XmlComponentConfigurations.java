@@ -13,20 +13,13 @@ package org.eclipse.kura.core.configuration;
 
 import java.util.List;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  * Utility class to serialize a set of configurations.
  * This is used to serialize a full snapshot.
  */
-@XmlRootElement(name="configurations")
-@XmlAccessorType(XmlAccessType.FIELD)
 public class XmlComponentConfigurations 
 {
-	@XmlElement(name="configuration")
 	private List<ComponentConfigurationImpl> configurations;
 	
 	public XmlComponentConfigurations()

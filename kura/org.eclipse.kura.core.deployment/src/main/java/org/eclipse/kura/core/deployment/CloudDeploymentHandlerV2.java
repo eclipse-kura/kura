@@ -876,13 +876,18 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 			dpFile = getDpDownloadFile(options);
 
 			if (!alreadyDownloaded || forceDownload) {
+				s_logger.info("To download");
 				incrementalDownloadFromURL(dpFile, options);
+			} else {
+				alreadyDownloadedMessage(options);
 			}
 
 			if (options.isInstall()) {
+				s_logger.info("Ready to install");
 				installDownloadedFile(dpFile, options);
 			}
 		} catch (Exception e) {
+			s_logger.info("Download/install exception");
 			throw e;
 		} 
 	}
@@ -933,6 +938,24 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 			return dp.exists();
 		} catch (Exception e) {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+		}
+	}
+	
+	private void alreadyDownloadedMessage(DeploymentPackageOptions options){
+		KuraNotifyPayload notify = null;
+
+		notify = new KuraNotifyPayload(options.getClientId());
+		notify.setTimestamp(new Date());
+		notify.setTransferSize(0);
+		notify.setTransferProgress(100);
+		notify.setTransferStatus(DOWNLOAD_STATUS.COMPLETED.getStatusString());
+		notify.setJobId(options.getJobId());
+		
+
+		try {
+			getCloudApplicationClient().controlPublish(options.getRequestClientId(), "NOTIFY/"+options.getClientId()+"/progress", notify, 2, DFLT_RETAIN, DFLT_PRIORITY);
+		} catch (KuraException e) {
+			s_logger.error("Error publishing response for command {} {}", RESOURCE_DOWNLOAD, e);
 		}
 	}
 

@@ -151,7 +151,8 @@ public class DownloadCountingOutputStream extends CountingOutputStream {
 					totalBytes = s != null ? Integer.parseInt(s) : -1;
 					postProgressEvent(options.getClientId(), 0, totalBytes, DOWNLOAD_STATUS.IN_PROGRESS, null);
 					
-					IOUtils.copyLarge(is, DownloadCountingOutputStream.this, new byte[PROP_BUFFER_SIZE]);
+					long numBytes = IOUtils.copyLarge(is, DownloadCountingOutputStream.this, new byte[PROP_BUFFER_SIZE]);
+					postProgressEvent(options.getClientId(), numBytes, totalBytes, DOWNLOAD_STATUS.COMPLETED, null);
 
 				} catch (IOException e) {
 					postProgressEvent(options.getClientId(), getByteCount(), totalBytes, DOWNLOAD_STATUS.FAILED, e.getMessage());
@@ -222,7 +223,7 @@ public class DownloadCountingOutputStream extends CountingOutputStream {
 	}
 	
 	public Long getDownloadTransferProgressPercentage(){
-		return Math.round((((Long) getByteCount()).doubleValue() / ((Long) totalBytes).doubleValue()) * 100);
+		return (long) Math.floor((((Long) getByteCount()).doubleValue() / ((Long) totalBytes).doubleValue()) * 100);
 	}
 	
 	public Long getTotalBytes(){

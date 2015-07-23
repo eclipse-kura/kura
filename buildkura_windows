@@ -1,0 +1,207 @@
+#!/bin/bash
+#
+
+umask 022
+
+# fancy stuff for text colors
+# txtund=$(tput sgr 0 1)    # Underline
+# txtbld=$(tput bold)       # Bold
+# txtred=$(tput setaf 1)    # Red
+# txtgrn=$(tput setaf 2)    # Green
+# txtylw=$(tput setaf 3)    # Yellow
+# txtblu=$(tput setaf 4)    # Blue
+# txtpur=$(tput setaf 5)    # Purple
+# txtcyn=$(tput setaf 6)    # Cyan
+# txtwht=$(tput setaf 7)    # White
+# txtrst=$(tput sgr0)       # Text reset
+
+# get number of args
+argc=$#
+
+# cd C:/Build/dev/git/kura_eth
+# Get new tags from the remote
+# git fetch --tags
+# Get the latest tag name
+# kura_eth_release=$(git describe --tags `git rev-list --tags --max-count=1`)
+
+cd C:/Kura
+# Get new tags from the remote
+git fetch --tags
+# Get the latest tag name
+kura_release=$(git describe --tags `git rev-list --tags --max-count=1`)
+ 
+# Parse the filename. 
+# If it's a symlink (e.g. buildkura_release) that contains the string 'release' then build the release version specified else build develop branch
+if [[ "$0" == *release* ]]
+then
+  kura_eth_branch=$kura_eth_release
+  kura_branch=$kura_release
+elif [[ "$0" == *windows* ]]
+then
+  kura_eth_branch=""
+  kura_branch="windows_beta"
+else
+
+  #echo "its NOT the release version, so look for some ENV variables that tell us what to build"
+
+    [ -z "$KURA_BRANCH" ] && KURA_BRANCH="abc"
+
+    if env | grep -q ^KURA_BRANCH=
+    then
+      printf " KURA_BRANCH is exported as: $txtgrn$KURA_BRANCH$txtrst\n"
+      kura_branch=$KURA_BRANCH
+    else
+      printf "\n$txtred KURA_BRANCH was not exported.$txtrst\n" 
+      echo " Suggestion: You should set this as develop OR $kura_release "
+      echo " e.g. export KURA_BRANCH=develop OR export KURA_BRANCH=$kura_release"
+      exit
+    fi
+
+    [ -z "$KURA_ETH_BRANCH" ] && KURA_ETH_BRANCH="abc"
+
+    if env | grep -q ^KURA_ETH_BRANCH=
+    then
+
+      printf " KURA_ETH_BRANCH is exported as: $txtgrn$KURA_ETH_BRANCH$txtrst\n"
+      kura_eth_branch=$KURA_ETH_BRANCH
+    else
+      printf "\n$txtred KURA_ETH_BRANCH was not exported.$txtrst\n" 
+      echo " Suggestion: You should set this as develop OR $kura_eth_release "
+      echo " e.g. export KURA_ETH_BRANCH=develop OR  export KURA_ETH_BRANCH=$kura_eth_release"
+      exit
+    fi
+fi
+
+usage()
+{
+cat << EOF
+Kura build script"
+
+usage: `basename $0` <options>
+
+OPTIONS:
+                 If no parameters are supplied, all targets are built
+    help         Show this message
+    skip |-s|-x  Skip tests
+    -Pmgw        Build for Mini-Gateway
+    -Preliagate  Build for Reliagate
+    -P-web       Build for everything excluding 'web' project
+
+EXAMPLES"
+    Build all targets
+    `basename $0` 
+
+    Build for mini-gateway,reliagate and all modules except web
+    `basename $0` -P-web,mgw,reliagate
+
+EOF
+}
+
+
+
+if [ $argc -gt 0 ]; then 
+
+    if [ $1 == "help" ] || [ $1 == "-help" ] || [ $1 == "-h" ]; then
+        usage
+        exit 1
+
+    fi
+
+    if [ $1 == "skip" ] || [ $1 == "-s" ] || [ $1 == "-x" ]; then
+        skip="-Dmaven.test.skip=true"
+        if [ $argc -gt 1 ]; then 
+            # we may need to apply some options e.g. '-P-web,mgw,reliagate'
+            last_arg=${@: -1}
+        fi
+    fi
+
+else   
+    skip=""
+    # we may need to apply some options e.g. '-P-web,mgw,reliagate'
+    last_arg=$@
+fi
+
+
+
+echo "Building [$kura_eth_branch] based on $kura_branch: $last_arg"
+echo $skip
+
+
+# I started clean. After pulling the latest changes from kura (develop) and kura_eth (develop) I did:
+# 
+# * rm -r ~/.m2/repository/org/eclipse/kura
+# * rm -r ~/.m2/repository/com/eurotech/kura_eth
+# * cd kura
+# * git clean -d -x -f
+# * cd target-platform
+# * mvn clean install
+# * cd ../kura
+# * mvn -e -Dmaven.test.skip=true -f manifest_pom.xml clean install && mvn -f manifest_pom.xml eclipse:eclipse && mvn -Pweb -f pom_pom.xml clean install
+# * cd ../../kura_eth/
+# * git clean -d -x -f
+# * mvn clean install
+
+
+
+echo ""
+
+if [[ "$0" == *windows* ]]
+then
+  # We need to skip junit tests *always* for the Windows build
+  skip="-Dmaven.test.skip=true"
+fi
+
+#==============
+# kura
+#==============
+printf "\n$txtylw Building kura ...$txtrst\n" 
+cd c:/kura
+git checkout $kura_branch
+
+cd C:/Kura/target-platform; 
+mvn $skip clean install; 
+
+cd ../kura ; 
+mvn $skip -f manifest_pom.xml  clean install -Pcan && mvn $skip -f manifest_pom.xml eclipse:eclipse && mvn -Pweb $skip -f pom_pom.xml $last_arg clean install
+
+if [[ "$0" == *windows* ]]
+then
+  # This is all that we need to build for KURA on Windows
+  echo "Build finished for $txtgrn KURA_BRANCH:$kura_branch$txtrst "
+  exit 0
+fi
+
+#==============
+# kura_addons
+#==============
+printf "\n$txtylw Building kura_addons ...$txtrst\n" 
+cd c:/Build/dev/git/kura_addons
+mvn -Pprod clean install
+
+#==============
+# kura_eth
+#==============
+printf "\n$txtylw Building kura_eth ...$txtrst\n" 
+# this will clone the Eurotech value-add components and platforms
+# hardware platform builds will be in [git_root]/kura_eth/distrib/target after the build is complete
+cd ~/dev/git/kura_eth
+git checkout $kura_eth_branch
+
+cd C:/Build/dev/git/kura_eth/target-platform; 
+mvn $skip clean install 
+
+cd ..
+mvn $skip clean install
+
+
+#==============
+# kura_projects
+#==============
+printf "\n$txtylw Building kura_projects ...$txtrst\n" 
+# this will build the Eurotech specific demos and POC bundles 
+cd C:/Build/dev/git/kura_projects
+git checkout develop
+
+mvn $skip clean install
+
+echo "Build finished for [$txtgrn KURA_ETH_BRANCH:$kura_eth_branch$txtrst] based on $txtgrn KURA_BRANCH:$kura_branch$txtrst   :$last_arg"

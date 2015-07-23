@@ -52,7 +52,7 @@ public class EmulatedPin implements KuraGPIOPin {
 	}
 
 	@Override
-	public void changeValue(boolean active) throws KuraUnavailableDeviceException, KuraClosedDeviceException, IOException {
+	public void setValue(boolean active) throws KuraUnavailableDeviceException, KuraClosedDeviceException, IOException {
 		internalValue = active;
 		
 		s_logger.debug("Emulated GPIO Pin {} changed to {}", pinName != null ? pinName : pinIndex, active == true ? "on" : "off");

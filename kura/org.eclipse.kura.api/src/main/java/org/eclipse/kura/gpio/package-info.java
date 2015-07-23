@@ -13,7 +13,7 @@
  * 
  */
 /**
- * Provides service to notify the status of the connection to the cloud.
+ * Provides APIs to acquire and use GPIO resources available on the system. 
  *
  */
-package org.eclipse.kura.status;
+package org.eclipse.kura.gpio;

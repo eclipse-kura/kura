@@ -87,7 +87,7 @@ public class JdkDioPin implements KuraGPIOPin {
 	}
 
 	@Override
-	public void changeValue(boolean active) throws KuraClosedDeviceException, KuraUnavailableDeviceException, IOException {
+	public void setValue(boolean active) throws KuraClosedDeviceException, KuraUnavailableDeviceException, IOException {
 		try {
 			thePin.setValue(active);
 		} catch (UnavailableDeviceException ex) {

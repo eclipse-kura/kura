@@ -22,9 +22,9 @@ public class BlinkStatusRunnable implements Runnable {
 	public void run() {
 		while(true){
 			try{				
-				local_pin.changeValue(true);
+				local_pin.setValue(true);
 				Thread.sleep(onTime);
-				local_pin.changeValue(false);
+				local_pin.setValue(false);
 				Thread.sleep(offTime);
 			}catch(InterruptedException ex){
 				break;

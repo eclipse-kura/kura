@@ -19,13 +19,13 @@ public class HeartbeatStatusRunnable implements Runnable {
 	public void run() {
 		while(true){
 			try{				
-				local_pin.changeValue(true);
+				local_pin.setValue(true);
 				Thread.sleep(CloudConnectionStatusEnum.HEARTBEAT_SYSTOLE_DURATION);
-				local_pin.changeValue(false);
+				local_pin.setValue(false);
 				Thread.sleep(CloudConnectionStatusEnum.HEARTBEAT_SYSTOLE_DURATION);
-				local_pin.changeValue(true);
+				local_pin.setValue(true);
 				Thread.sleep(CloudConnectionStatusEnum.HEARTBEAT_DIASTOLE_DURATION);
-				local_pin.changeValue(false);
+				local_pin.setValue(false);
 				Thread.sleep(CloudConnectionStatusEnum.HEARTBEAT_PAUSE_DURATION);
 			}catch(InterruptedException ex){
 				break;

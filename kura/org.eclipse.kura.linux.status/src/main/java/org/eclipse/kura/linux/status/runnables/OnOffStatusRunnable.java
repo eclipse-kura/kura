@@ -21,7 +21,7 @@ public class OnOffStatusRunnable implements Runnable {
 	public void run() {
 		while(true){
 			try {
-				local_pin.changeValue(on);				
+				local_pin.setValue(on);				
 			}catch(KuraUnavailableDeviceException ex){
 				ex.printStackTrace();
 				break;				

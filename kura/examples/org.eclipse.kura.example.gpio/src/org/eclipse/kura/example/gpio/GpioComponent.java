@@ -182,7 +182,7 @@ public class GpioComponent implements ConfigurableComponent {
 							try {
 								boolean value = !m_pins.get(final_index).getValue();
 								s_logger.info("Setting GPIO pin {} to {}", m_pins.get(final_index), value);							
-								m_pins.get(final_index).changeValue(value);
+								m_pins.get(final_index).setValue(value);
 								//s_logger.info("Trigger = "+m_pins.get(final_index).getTrigger());
 							} catch (KuraUnavailableDeviceException e) {
 								s_logger.warn("GPIO pin {} is not available for export.", final_index);

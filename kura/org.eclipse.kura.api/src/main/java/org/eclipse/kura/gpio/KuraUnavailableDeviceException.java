@@ -5,9 +5,6 @@ import org.eclipse.kura.KuraException;
 
 public class KuraUnavailableDeviceException extends KuraException {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = -5115093706356681148L;
 
 	public KuraUnavailableDeviceException(Object argument) {

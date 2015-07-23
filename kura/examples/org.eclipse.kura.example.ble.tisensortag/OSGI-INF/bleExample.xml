@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" activate="activate" configuration-policy="require" deactivate="deactivate" enabled="true" immediate="true" modified="updated" name="org.eclipse.kura.example.ble.tisensortag.BluetoothLe">
+   <implementation class="org.eclipse.kura.example.ble.tisensortag.BluetoothLe"/>
+   <service>
+      <provide interface="org.eclipse.kura.example.ble.tisensortag.BluetoothLe"/>
+   </service>
+   <property name="service.pid" value="org.eclipse.kura.example.ble.tisensortag.BluetoothLe"/>
+   <reference bind="setCloudService" 
+    		  cardinality="1..1" 
+    		  interface="org.eclipse.kura.cloud.CloudService"
+    		  unbind="unsetCloudService"/>
+    <reference bind="setBluetoothService" 
+              cardinality="1..1" 
+              interface="org.eclipse.kura.bluetooth.BluetoothService" 
+              name="BluetoothService" 
+              policy="static" 
+              unbind="unsetBluetoothService"/>
+</scr:component>

@@ -793,6 +793,25 @@ public class WpaSupplicant {
 	public boolean isConfigured() {
 		return m_isConfigured;
 	}
+	
+	public static String getDriver(String iface) throws KuraException {
+        String driver = null;
+        Collection<String> supportedWifiOptions = null;
+        try {
+            supportedWifiOptions = WifiOptions.getSupportedOptions(iface);
+        } catch (Exception e) {
+            throw new KuraException (KuraErrorCode.INTERNAL_ERROR, e);
+        }
+        
+        if ((supportedWifiOptions != null) && (supportedWifiOptions.size() > 0)) {
+            if (supportedWifiOptions.contains(WifiOptions.WIFI_MANAGED_DRIVER_NL80211)) {
+                driver = WifiOptions.WIFI_MANAGED_DRIVER_NL80211;
+            } else if (supportedWifiOptions.contains(WifiOptions.WIFI_MANAGED_DRIVER_WEXT)) {
+                driver = WifiOptions.WIFI_MANAGED_DRIVER_WEXT;
+            }
+        } 
+        return driver;
+    }
 
 	/*
 	 * This method generates wpa_supplicant configuration file

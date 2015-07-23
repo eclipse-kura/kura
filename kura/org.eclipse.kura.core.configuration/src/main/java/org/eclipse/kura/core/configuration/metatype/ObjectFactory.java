@@ -19,9 +19,6 @@
 
 package org.eclipse.kura.core.configuration.metatype;
 
-import javax.xml.bind.JAXBElement;
-import javax.xml.bind.annotation.XmlElementDecl;
-import javax.xml.bind.annotation.XmlRegistry;
 import javax.xml.namespace.QName;
 
 
@@ -39,7 +36,7 @@ import javax.xml.namespace.QName;
  * provided in this class.
  * 
  */
-@XmlRegistry
+
 public class ObjectFactory {
 
     private final static QName _MetaData_QNAME = new QName("http://www.osgi.org/xmlns/metatype/v1.2.0", "MetaData");
@@ -114,14 +111,4 @@ public class ObjectFactory {
     public Toption createToption() {
         return new Toption();
     }
-
-    /**
-     * Create an instance of {@link JAXBElement }{@code <}{@link Tmetadata }{@code >}}
-     * 
-     */
-    @XmlElementDecl(namespace = "http://www.osgi.org/xmlns/metatype/v1.2.0", name = "MetaData")
-    public JAXBElement<Tmetadata> createMetaData(Tmetadata value) {
-        return new JAXBElement<Tmetadata>(_MetaData_QNAME, Tmetadata.class, null, value);
-    }
-
 }

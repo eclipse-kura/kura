@@ -14,7 +14,13 @@
 -->
 <scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" activate="activate" configuration-policy="require" deactivate="deactivate" modified="updated" name="org.eclipse.kura.cloud.app.command.CommandCloudApp">
    <implementation class="org.eclipse.kura.cloud.app.command.CommandCloudApp"/>
-   <reference bind="setCloudService" cardinality="1..1" interface="org.eclipse.kura.cloud.CloudService" name="CloudService" policy="static" unbind="unsetCloudService"/>
+   <reference bind="setCloudService" cardinality="1..1" interface="org.eclipse.kura.cloud.CloudService" name="CloudService" policy="static" unbind="unsetCloudService"/>		 
+   <reference name="CryptoService" 
+              interface="org.eclipse.kura.crypto.CryptoService" 
+              bind="setCryptoService" 
+              unbind="unsetCryptoService"
+              cardinality="1..1" 
+              policy="static"/>   			
    			  
    	<service>
    		<provide interface="org.eclipse.kura.cloud.app.command.CommandCloudApp"/>

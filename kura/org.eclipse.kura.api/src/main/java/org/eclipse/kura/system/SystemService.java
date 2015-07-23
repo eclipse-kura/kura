@@ -348,14 +348,14 @@ public interface SystemService
 
 	
 	/**
-	 * Returns the total memory visible to this Java instance.
+	 * Returns the total memory visible to this Java instance in kilobytes.
 	 * @return
 	 */
 	public long getTotalMemory();
 	
 	
 	/**
-	 * Returns the free memory for Java instance.
+	 * Returns the free memory for Java instance in kilobytes.
 	 * @return
 	 */
 	public long getFreeMemory();	

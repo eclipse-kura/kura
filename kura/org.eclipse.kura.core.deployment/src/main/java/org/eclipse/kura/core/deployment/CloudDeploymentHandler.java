@@ -21,6 +21,7 @@ import java.util.Date;
 import java.util.Dictionary;
 import java.util.Hashtable;
 
+
 import javax.xml.bind.JAXBException;
 
 import org.eclipse.kura.KuraErrorCode;
@@ -30,7 +31,6 @@ import org.eclipse.kura.cloud.CloudClientListener;
 import org.eclipse.kura.cloud.CloudService;
 import org.eclipse.kura.cloud.CloudletTopic;
 import org.eclipse.kura.cloud.CloudletTopic.Method;
-import org.eclipse.kura.core.configuration.util.XmlUtil;
 import org.eclipse.kura.core.util.ThrowableUtil;
 import org.eclipse.kura.message.KuraNotifyPayload;
 import org.eclipse.kura.message.KuraPayload;
@@ -808,7 +808,7 @@ public class CloudDeploymentHandler implements EventHandler, CloudClientListener
 		try {
 			String s = XmlUtil.marshal(xdps);
 			
-			s_logger.info("Getting resource {}: {}", RESOURCE_PACKAGES, s);
+			//s_logger.info("Getting resource {}: {}", RESOURCE_PACKAGES, s);
 			
 			response = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK); 
 			response.setTimestamp(new Date());
@@ -818,7 +818,7 @@ public class CloudDeploymentHandler implements EventHandler, CloudClientListener
 			} catch (UnsupportedEncodingException e) {
 				// Ignore
 			}
-		} catch (JAXBException e) {
+		} catch (Exception e) {
 			s_logger.error("Error getting resource {}: {}", RESOURCE_PACKAGES, e);
 		}
 		
@@ -880,7 +880,7 @@ public class CloudDeploymentHandler implements EventHandler, CloudClientListener
 		try {
 			String s = XmlUtil.marshal(xmlBundles);
 			
-			s_logger.info("Getting resource {}: {}", RESOURCE_BUNDLES, s);
+			//s_logger.info("Getting resource {}: {}", RESOURCE_BUNDLES, s);
 			
 			response = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK); 
 			response.setTimestamp(new Date());
@@ -890,7 +890,7 @@ public class CloudDeploymentHandler implements EventHandler, CloudClientListener
 			} catch (UnsupportedEncodingException e) {
 				// Ignore
 			}
-		} catch (JAXBException e) {
+		} catch (Exception e) {
 			s_logger.error("Error getting resource {}: {}", RESOURCE_BUNDLES, e);
 		}
 

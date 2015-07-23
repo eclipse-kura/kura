@@ -189,11 +189,12 @@ public class GenericNetworkInterface {
 				NetInterfaceAddressConfigImpl netInterfaceAddressConfig = new NetInterfaceAddressConfigImpl();
 				netInterfaceAddressConfigs.add(netInterfaceAddressConfig);
 				netInterfaceAddresses.add(netInterfaceAddressConfig);
-				if(LinuxNetworkUtil.isUp(interfaceName)) {
-					netInterfaceAddressConfig.setAddress(IPAddress.parseHostAddress(LinuxNetworkUtil.getCurrentIpAddress(interfaceName)));
-					netInterfaceAddressConfig.setBroadcast(IPAddress.parseHostAddress(LinuxNetworkUtil.getCurrentBroadcastAddress(interfaceName)));
-					netInterfaceAddressConfig.setNetmask(IPAddress.parseHostAddress(LinuxNetworkUtil.getCurrentNetmask(interfaceName)));
-					netInterfaceAddressConfig.setNetworkPrefixLength(NetworkUtil.getNetmaskShortForm(LinuxNetworkUtil.getCurrentNetmask(interfaceName)));
+				LinuxIfconfig ifconfig = LinuxNetworkUtil.getInterfaceConfiguration(interfaceName);
+				if((ifconfig != null) && ifconfig.isUp()) {
+					netInterfaceAddressConfig.setAddress(IPAddress.parseHostAddress(ifconfig.getInetAddress()));
+					netInterfaceAddressConfig.setBroadcast(IPAddress.parseHostAddress(ifconfig.getInetBcast()));
+					netInterfaceAddressConfig.setNetmask(IPAddress.parseHostAddress(ifconfig.getInetMask()));
+					netInterfaceAddressConfig.setNetworkPrefixLength(NetworkUtil.getNetmaskShortForm(ifconfig.getInetMask()));
                     netInterfaceAddressConfig.setGateway(conInfo.getGateway());
 					if(dhcp) {
 					    netInterfaceAddressConfig.setDnsServers(dnsService.getDhcpDnsServers(interfaceName, netInterfaceAddressConfig.getAddress())); 
@@ -225,7 +226,6 @@ public class GenericNetworkInterface {
 				
 				((EthernetInterfaceImpl)netInterfaceConfig).setMTU(mtu);
 				((EthernetInterfaceImpl)netInterfaceConfig).setAutoConnect(autoConnect);
-				((EthernetInterfaceImpl)netInterfaceConfig).setHardwareAddress(LinuxNetworkUtil.getMacAddressBytes(interfaceName));
 				((EthernetInterfaceImpl)netInterfaceConfig).setLoopback(false);
 
 				List<NetInterfaceAddressConfig> netInterfaceAddressConfigs = new ArrayList<NetInterfaceAddressConfig>();
@@ -234,26 +234,30 @@ public class GenericNetworkInterface {
 				NetInterfaceAddressConfigImpl netInterfaceAddressConfig = new NetInterfaceAddressConfigImpl();
 				netInterfaceAddressConfigs.add(netInterfaceAddressConfig);
 				netInterfaceAddresses.add(netInterfaceAddressConfig);
-				if(LinuxNetworkUtil.isUp(interfaceName)) {
-					try {
-						netInterfaceAddressConfig.setAddress(IPAddress.parseHostAddress(LinuxNetworkUtil.getCurrentIpAddress(interfaceName)));
-						netInterfaceAddressConfig.setBroadcast(IPAddress.parseHostAddress(LinuxNetworkUtil.getCurrentBroadcastAddress(interfaceName)));
-						netInterfaceAddressConfig.setNetmask(IPAddress.parseHostAddress(LinuxNetworkUtil.getCurrentNetmask(interfaceName)));
-						netInterfaceAddressConfig.setNetworkPrefixLength(NetworkUtil.getNetmaskShortForm(LinuxNetworkUtil.getCurrentNetmask(interfaceName)));
-						netInterfaceAddressConfig.setGateway(conInfo.getGateway());
-	                    if(dhcp) {
-	                        netInterfaceAddressConfig.setDnsServers(dnsService.getDhcpDnsServers(interfaceName, netInterfaceAddressConfig.getAddress()));
-	                    } else {
-	                        netInterfaceAddressConfig.setDnsServers(conInfo.getDnsServers());
-	                    }
-					} catch(KuraException e) {
-						s_logger.warn("The interface went down " + interfaceName + " not including current state in status because it is not up");
-						netInterfaceAddressConfig.setAddress(null);
-						netInterfaceAddressConfig.setBroadcast(null);
-						netInterfaceAddressConfig.setNetmask(null);
-						netInterfaceAddressConfig.setNetworkPrefixLength((short)-1);
-						netInterfaceAddressConfig.setGateway(null);
-						netInterfaceAddressConfig.setDnsServers(null);
+				LinuxIfconfig ifconfig = LinuxNetworkUtil.getInterfaceConfiguration(interfaceName);
+				if (ifconfig != null) {
+					((EthernetInterfaceImpl)netInterfaceConfig).setHardwareAddress(ifconfig.getMacAddressBytes());
+					if(ifconfig.isUp()) {
+						try {
+							netInterfaceAddressConfig.setAddress(IPAddress.parseHostAddress(ifconfig.getInetAddress()));
+							netInterfaceAddressConfig.setBroadcast(IPAddress.parseHostAddress(ifconfig.getInetBcast()));
+							netInterfaceAddressConfig.setNetmask(IPAddress.parseHostAddress(ifconfig.getInetMask()));
+							netInterfaceAddressConfig.setNetworkPrefixLength(NetworkUtil.getNetmaskShortForm(ifconfig.getInetMask()));
+							netInterfaceAddressConfig.setGateway(conInfo.getGateway());
+		                    if(dhcp) {
+		                        netInterfaceAddressConfig.setDnsServers(dnsService.getDhcpDnsServers(interfaceName, netInterfaceAddressConfig.getAddress()));
+		                    } else {
+		                        netInterfaceAddressConfig.setDnsServers(conInfo.getDnsServers());
+		                    }
+						} catch(KuraException e) {
+							s_logger.warn("The interface went down " + interfaceName + " not including current state in status because it is not up");
+							netInterfaceAddressConfig.setAddress(null);
+							netInterfaceAddressConfig.setBroadcast(null);
+							netInterfaceAddressConfig.setNetmask(null);
+							netInterfaceAddressConfig.setNetworkPrefixLength((short)-1);
+							netInterfaceAddressConfig.setGateway(null);
+							netInterfaceAddressConfig.setDnsServers(null);
+						}
 					}
 				}
 				((EthernetInterfaceConfigImpl)netInterfaceConfig).setNetInterfaceAddresses(netInterfaceAddressConfigs);
@@ -281,7 +285,6 @@ public class GenericNetworkInterface {
 
 				wifiInterfaceConfig.setMTU(mtu);
 				wifiInterfaceConfig.setAutoConnect(autoConnect);
-				wifiInterfaceConfig.setHardwareAddress(LinuxNetworkUtil.getMacAddressBytes(interfaceName));
 				wifiInterfaceConfig.setLoopback(false);
 
 				List<WifiInterfaceAddressConfig> wifiInterfaceAddressConfigs = new ArrayList<WifiInterfaceAddressConfig>();
@@ -292,46 +295,47 @@ public class GenericNetworkInterface {
 				wifiInterfaceAddresses.add(wifiInterfaceAddressConfig);
 				
 				String currentSSID = LinuxNetworkUtil.getSSID(interfaceName);
-				
-				if(LinuxNetworkUtil.isUp(interfaceName)) {
-					wifiInterfaceAddressConfig.setAddress(IPAddress.parseHostAddress(LinuxNetworkUtil.getCurrentIpAddress(interfaceName)));
-					wifiInterfaceAddressConfig.setBroadcast(IPAddress.parseHostAddress(LinuxNetworkUtil.getCurrentBroadcastAddress(interfaceName)));
-
-					String currentNetmask = LinuxNetworkUtil.getCurrentNetmask(interfaceName);
-					if (currentNetmask != null) {
-						wifiInterfaceAddressConfig.setNetmask(IPAddress.parseHostAddress(currentNetmask));
-						wifiInterfaceAddressConfig.setNetworkPrefixLength(NetworkUtil.getNetmaskShortForm(currentNetmask));
+				LinuxIfconfig ifconfig = LinuxNetworkUtil.getInterfaceConfiguration(interfaceName);
+				if (ifconfig != null) {
+					wifiInterfaceConfig.setHardwareAddress(ifconfig.getMacAddressBytes());
+					if(ifconfig.isUp()) {
+						wifiInterfaceAddressConfig.setAddress(IPAddress.parseHostAddress(ifconfig.getInetAddress()));
+						wifiInterfaceAddressConfig.setBroadcast(IPAddress.parseHostAddress(ifconfig.getInetBcast()));
+						String currentNetmask = ifconfig.getInetMask();
+						if (currentNetmask != null) {
+							wifiInterfaceAddressConfig.setNetmask(IPAddress.parseHostAddress(currentNetmask));
+							wifiInterfaceAddressConfig.setNetworkPrefixLength(NetworkUtil.getNetmaskShortForm(currentNetmask));
+						}
+	
+						wifiInterfaceAddressConfig.setBitrate(LinuxNetworkUtil.getWifiBitrate(interfaceName));
+						wifiInterfaceAddressConfig.setGateway(conInfo.getGateway());
+	                    if(dhcp) {
+	                        wifiInterfaceAddressConfig.setDnsServers(dnsService.getDhcpDnsServers(interfaceName, wifiInterfaceAddressConfig.getAddress()));
+	                    } else {
+	                        wifiInterfaceAddressConfig.setDnsServers(conInfo.getDnsServers());
+	                    }
+	
+	
+						WifiAccessPointImpl ap = null;
+						 
+						if(currentSSID != null) {
+							s_logger.debug("Adding access point SSID: " + currentSSID);
+	
+							ap = new WifiAccessPointImpl(currentSSID);
+	
+							// TODO: fill in other info
+							ap.setMode(WifiMode.INFRA);
+							List<Long> bitrate = new ArrayList<Long>();
+							bitrate.add(54000000L);
+							ap.setBitrate(bitrate);
+							ap.setFrequency(12345);
+							ap.setHardwareAddress("20AA4B8A6442".getBytes());
+							ap.setRsnSecurity(EnumSet.allOf(WifiSecurity.class));
+							ap.setStrength(1234);
+							ap.setWpaSecurity(EnumSet.allOf(WifiSecurity.class));
+						}
+						wifiInterfaceAddressConfig.setWifiAccessPoint(ap);						
 					}
-
-					wifiInterfaceAddressConfig.setBitrate(LinuxNetworkUtil.getWifiBitrate(interfaceName));
-					wifiInterfaceAddressConfig.setGateway(conInfo.getGateway());
-                    if(dhcp) {
-                        wifiInterfaceAddressConfig.setDnsServers(dnsService.getDhcpDnsServers(interfaceName, wifiInterfaceAddressConfig.getAddress()));
-                    } else {
-                        wifiInterfaceAddressConfig.setDnsServers(conInfo.getDnsServers());
-                    }
-
-
-					WifiAccessPointImpl ap = null;
-					 
-					if(currentSSID != null) {
-						s_logger.debug("Adding access point SSID: " + currentSSID);
-
-						ap = new WifiAccessPointImpl(currentSSID);
-
-						// TODO: fill in other info
-						ap.setMode(WifiMode.INFRA);
-						List<Long> bitrate = new ArrayList<Long>();
-						bitrate.add(54000000L);
-						ap.setBitrate(bitrate);
-						ap.setFrequency(12345);
-						ap.setHardwareAddress("20AA4B8A6442".getBytes());
-						ap.setRsnSecurity(EnumSet.allOf(WifiSecurity.class));
-						ap.setStrength(1234);
-						ap.setWpaSecurity(EnumSet.allOf(WifiSecurity.class));
-					}
-					wifiInterfaceAddressConfig.setWifiAccessPoint(ap);						
-
 				}
 				
 				// mode
@@ -404,7 +408,6 @@ public class GenericNetworkInterface {
 				
 				((ModemInterfaceConfigImpl)netInterfaceConfig).setMTU(mtu);
 				((ModemInterfaceConfigImpl)netInterfaceConfig).setAutoConnect(autoConnect);
-				((ModemInterfaceConfigImpl)netInterfaceConfig).setHardwareAddress(LinuxNetworkUtil.getMacAddressBytes(interfaceName));
 				((ModemInterfaceConfigImpl)netInterfaceConfig).setLoopback(false);
 				((ModemInterfaceConfigImpl)netInterfaceConfig).setPointToPoint(true);
 
@@ -414,13 +417,17 @@ public class GenericNetworkInterface {
 				ModemInterfaceAddressConfigImpl netInterfaceAddressConfig = new ModemInterfaceAddressConfigImpl();
 				modemInterfaceAddressConfigs.add(netInterfaceAddressConfig);
 				netInterfaceAddresses.add(netInterfaceAddressConfig);
-				if(LinuxNetworkUtil.isUp(interfaceName)) {
-					netInterfaceAddressConfig.setAddress(IPAddress.parseHostAddress(LinuxNetworkUtil.getCurrentIpAddress(interfaceName)));
-					netInterfaceAddressConfig.setBroadcast(IPAddress.parseHostAddress(LinuxNetworkUtil.getCurrentBroadcastAddress(interfaceName)));
-					netInterfaceAddressConfig.setNetmask(IPAddress.parseHostAddress(LinuxNetworkUtil.getCurrentNetmask(interfaceName)));
-					netInterfaceAddressConfig.setNetworkPrefixLength(NetworkUtil.getNetmaskShortForm(LinuxNetworkUtil.getCurrentNetmask(interfaceName)));
-                    netInterfaceAddressConfig.setGateway(conInfo.getGateway());
-                    netInterfaceAddressConfig.setDnsServers(conInfo.getDnsServers());
+				LinuxIfconfig ifconfig = LinuxNetworkUtil.getInterfaceConfiguration(interfaceName);
+				if (ifconfig != null) {
+					((ModemInterfaceConfigImpl)netInterfaceConfig).setHardwareAddress(ifconfig.getMacAddressBytes());
+					if(ifconfig.isUp()) {
+						netInterfaceAddressConfig.setAddress(IPAddress.parseHostAddress(ifconfig.getInetAddress()));
+						netInterfaceAddressConfig.setBroadcast(IPAddress.parseHostAddress(ifconfig.getInetBcast()));
+						netInterfaceAddressConfig.setNetmask(IPAddress.parseHostAddress(ifconfig.getInetMask()));
+						netInterfaceAddressConfig.setNetworkPrefixLength(NetworkUtil.getNetmaskShortForm(ifconfig.getInetMask()));
+	                    netInterfaceAddressConfig.setGateway(conInfo.getGateway());
+	                    netInterfaceAddressConfig.setDnsServers(conInfo.getDnsServers());
+					}
 				}
 				((ModemInterfaceConfigImpl)netInterfaceConfig).setNetInterfaceAddresses(modemInterfaceAddressConfigs);
 

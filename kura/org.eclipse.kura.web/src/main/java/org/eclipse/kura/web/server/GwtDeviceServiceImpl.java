@@ -96,8 +96,8 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
 			if (systemService.getNumberOfProcessors() != -1) {
 				pairs.add( new GwtGroupedNVPair("devJava", "devNumProc", String.valueOf(systemService.getNumberOfProcessors())));
 			}
-			pairs.add( new GwtGroupedNVPair("devJava", "devRamTot",  String.valueOf(systemService.getTotalMemory())+" MB"));
-			pairs.add( new GwtGroupedNVPair("devJava", "devRamFree", String.valueOf(systemService.getFreeMemory())+" MB"));
+			pairs.add( new GwtGroupedNVPair("devJava", "devRamTot",  String.valueOf(systemService.getTotalMemory())+" kB"));
+			pairs.add( new GwtGroupedNVPair("devJava", "devRamFree", String.valueOf(systemService.getFreeMemory())+" kB"));
 
 			// get the network information
 			String connectionIp = UNKNOWN;
@@ -295,7 +295,7 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
 		try {
 			return commandService.execute(cmd, pwd);
 		} catch (KuraException e) {
-			s_logger.error(e.getLocalizedMessage());
+			//s_logger.error(e.getLocalizedMessage());
 			if(e.getCode() == KuraErrorCode.OPERATION_NOT_SUPPORTED){
 				throw new GwtKuraException(GwtKuraErrorCode.SERVICE_NOT_ENABLED);
 			}else if(e.getCode() == KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID){

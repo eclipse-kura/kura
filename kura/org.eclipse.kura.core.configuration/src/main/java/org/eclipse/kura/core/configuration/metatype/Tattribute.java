@@ -24,14 +24,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAnyAttribute;
-import javax.xml.bind.annotation.XmlAnyElement;
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlType;
 import javax.xml.namespace.QName;
 
 import org.eclipse.kura.configuration.metatype.Attribute;
@@ -61,23 +53,12 @@ import org.w3c.dom.Element;
  * 
  * 
  */
-@XmlRootElement(name="Attribute", namespace="http://www.osgi.org/xmlns/metatype/v1.2.0")
-@XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "Tattribute", propOrder = {
-    "value",
-    "any"
-})
 public class Tattribute implements Attribute 
 {
-    @XmlElement(name = "Value", namespace="http://www.osgi.org/xmlns/metatype/v1.2.0")
     protected List<String> value;
-    @XmlAnyElement(lax = true)
     protected List<Object> any;
-    @XmlAttribute(name = "adref", required = true)
     protected String adref;
-    @XmlAttribute(name = "content")
     protected String content;
-    @XmlAnyAttribute
     private Map<QName, String> otherAttributes = new HashMap<QName, String>();
 
     /**

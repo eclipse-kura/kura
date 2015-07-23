@@ -3,6 +3,9 @@
 
 umask 022
 
+# Get the working directory
+root=$(pwd)
+
 # fancy stuff for text colors
 # txtund=$(tput sgr 0 1)    # Underline
 # txtbld=$(tput bold)       # Bold
@@ -24,11 +27,11 @@ argc=$#
 # Get the latest tag name
 # kura_eth_release=$(git describe --tags `git rev-list --tags --max-count=1`)
 
-cd C:/Kura
+# cd C:/Kura
 # Get new tags from the remote
-git fetch --tags
+# git fetch --tags
 # Get the latest tag name
-kura_release=$(git describe --tags `git rev-list --tags --max-count=1`)
+# kura_release=$(git describe --tags `git rev-list --tags --max-count=1`)
  
 # Parse the filename. 
 # If it's a symlink (e.g. buildkura_release) that contains the string 'release' then build the release version specified else build develop branch
@@ -155,10 +158,11 @@ fi
 # kura
 #==============
 printf "\n$txtylw Building kura ...$txtrst\n" 
-cd c:/kura
+# cd c:/kura
+cd $root
 git checkout $kura_branch
 
-cd C:/Kura/target-platform; 
+cd $root/target-platform; 
 mvn $skip clean install; 
 
 cd ../kura ; 
@@ -171,37 +175,37 @@ then
   exit 0
 fi
 
-#==============
-# kura_addons
-#==============
-printf "\n$txtylw Building kura_addons ...$txtrst\n" 
-cd c:/Build/dev/git/kura_addons
-mvn -Pprod clean install
+#============================================================
+# kura_addons (don't bother with these for Windows for now)
+#============================================================
+# printf "\n$txtylw Building kura_addons ...$txtrst\n" 
+# cd c:/Build/dev/git/kura_addons
+# mvn -Pprod clean install
 
-#==============
-# kura_eth
-#==============
-printf "\n$txtylw Building kura_eth ...$txtrst\n" 
+#============================================================
+# kura_eth (don't bother with these for Windows for now)
+#============================================================
+# printf "\n$txtylw Building kura_eth ...$txtrst\n" 
 # this will clone the Eurotech value-add components and platforms
 # hardware platform builds will be in [git_root]/kura_eth/distrib/target after the build is complete
-cd ~/dev/git/kura_eth
-git checkout $kura_eth_branch
+# cd ~/dev/git/kura_eth
+# git checkout $kura_eth_branch
 
-cd C:/Build/dev/git/kura_eth/target-platform; 
-mvn $skip clean install 
+# cd C:/Build/dev/git/kura_eth/target-platform; 
+# mvn $skip clean install 
 
-cd ..
-mvn $skip clean install
+# cd ..
+# mvn $skip clean install
 
 
-#==============
-# kura_projects
-#==============
-printf "\n$txtylw Building kura_projects ...$txtrst\n" 
+#==============================================================
+# kura_projects  (don't bother with these for Windows for now)
+#==============================================================
+# printf "\n$txtylw Building kura_projects ...$txtrst\n" 
 # this will build the Eurotech specific demos and POC bundles 
-cd C:/Build/dev/git/kura_projects
-git checkout develop
+# cd C:/Build/dev/git/kura_projects
+# git checkout develop
 
-mvn $skip clean install
+# mvn $skip clean install
 
-echo "Build finished for [$txtgrn KURA_ETH_BRANCH:$kura_eth_branch$txtrst] based on $txtgrn KURA_BRANCH:$kura_branch$txtrst   :$last_arg"
+# echo "Build finished for [$txtgrn KURA_ETH_BRANCH:$kura_eth_branch$txtrst] based on $txtgrn KURA_BRANCH:$kura_branch$txtrst   :$last_arg"

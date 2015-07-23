@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -151,6 +152,13 @@ public class GpioComponent implements ConfigurableComponent {
 		Integer[] directions = (Integer[]) properties.get(PROP_NAME_GPIO_DIRECTIONS);
 		Integer[] modes = (Integer[]) properties.get(PROP_NAME_GPIO_MODES);
 		Integer[] triggers = (Integer[]) properties.get(PROP_NAME_GPIO_TRIGGERS);
+		s_logger.info("______________________________");
+		s_logger.info("Available GPIOs on the system:");
+		Map<Integer, String> gpios = m_GPIOService.getAvailablePins();
+		for(Entry<Integer, String> e: gpios.entrySet()){
+			s_logger.info("#{} - [{}]", e.getKey(), e.getValue());
+		}
+		s_logger.info("______________________________");
 		for (int i = 0; i < pins.length; i++) {
 			try {
 				final int pinNum = pins[i];
@@ -163,6 +171,7 @@ public class GpioComponent implements ConfigurableComponent {
 						getPinDirection(directions[i]), 
 						getPinMode(modes[i]), 
 						getPinTrigger(triggers[i]));
+				p.open();
 				s_logger.info("GPIO pin {} acquired", pins[i]);
 				m_pins.add(p);
 				if(p.getDirection() == KuraGPIODirection.OUTPUT){

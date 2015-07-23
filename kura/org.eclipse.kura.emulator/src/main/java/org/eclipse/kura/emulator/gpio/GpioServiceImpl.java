@@ -49,7 +49,7 @@ public class GpioServiceImpl implements GPIOService {
 	public Map<Integer, String> getAvailablePins() {
 		pins.clear();
 		
-		for(int i=1; i<257; i++){
+		for(int i=1; i<11; i++){
 			pins.put(i, "Pin#"+String.valueOf(i));
 		}
 		

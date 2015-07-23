@@ -35,26 +35,51 @@ public class JdkDioPin implements KuraGPIOPin {
 
 	PinStatusListener localListener;
 
+	public static JdkDioPin parseFromProperty(Object key, String property) {
+		try {
+			int index = Integer.parseInt((String) key);
+
+			String[] tokens = property.split(",");
+
+			String name = getValueByToken("name", tokens);
+			String deviceType = getValueByToken("deviceType", tokens);
+			if (deviceType.trim().equals("gpio.GPIOPin")) {
+				KuraGPIODirection d = parseDirection(getValueByToken("direction", tokens));
+				KuraGPIOMode m = parseMode(getValueByToken("mode", tokens));
+				KuraGPIOTrigger t = parseTrigger(getValueByToken("trigger", tokens));
+				return new JdkDioPin(index, name, d, m, t);
+			}
+			
+		} catch (Exception e) {
+			// Invalid property. Not a GPIO Pin
+			return null;
+		}
+		
+		return null;
+	}
+
+	private static String getValueByToken(String token, String[] tokens) {
+		try {
+			for (String e : tokens) {
+				String[] elements = e.split(":");
+				if (elements[0].trim().equals(token)) {
+					return elements[1];
+				}
+			}
+		} catch (Exception e) {
+			return null;
+		}
+		return null;
+	}
+
 	public JdkDioPin(int pinIndex) {
 		super();
 		this.pinIndex = pinIndex;
 	}
 
-	public JdkDioPin(String pinName) {
-		super();
-		this.pinName = pinName;
-	}
-
-	public JdkDioPin(int pinIndex, KuraGPIODirection direction, KuraGPIOMode mode, KuraGPIOTrigger trigger) {
+	public JdkDioPin(int pinIndex, String pinName, KuraGPIODirection direction, KuraGPIOMode mode, KuraGPIOTrigger trigger) {
 		super();
 		this.pinIndex = pinIndex;
-		this.direction = direction;
-		this.mode = mode;
-		this.trigger = trigger;
-	}
-
-	public JdkDioPin(String pinName, KuraGPIODirection direction, KuraGPIOMode mode, KuraGPIOTrigger trigger) {
-		super();
 		this.pinName = pinName;
 		this.direction = direction;
 		this.mode = mode;
@@ -106,13 +131,8 @@ public class JdkDioPin implements KuraGPIOPin {
 
 	@Override
 	public void open() throws KuraGPIODeviceException, KuraUnavailableDeviceException, IOException {
-		if(direction != null){
-			GPIOPinConfig config = new GPIOPinConfig(
-					DeviceConfig.DEFAULT,						
-					getPinIndex(), 
-					getDirectionInternal(), 
-					getModeInternal(), 
-					getTriggerInternal(), 
+		if (direction != null) {
+			GPIOPinConfig config = new GPIOPinConfig(DeviceConfig.DEFAULT, getPinIndex(), getDirectionInternal(), getModeInternal(), getTriggerInternal(),
 					false);
 			try {
 				thePin = DeviceManager.open(GPIOPin.class, config);
@@ -124,9 +144,9 @@ public class JdkDioPin implements KuraGPIOPin {
 				throw new KuraGPIODeviceException(e, getPinIndex());
 			} catch (UnavailableDeviceException e) {
 				throw new KuraUnavailableDeviceException(e, getPinIndex());
-			} 
-		}else{
-			try{
+			}
+		} else {
+			try {
 				thePin = DeviceManager.open(getPinIndex());
 			} catch (InvalidDeviceConfigException e) {
 				throw new KuraGPIODeviceException(e, getPinIndex());
@@ -136,7 +156,7 @@ public class JdkDioPin implements KuraGPIOPin {
 				throw new KuraGPIODeviceException(e, getPinIndex());
 			} catch (UnavailableDeviceException e) {
 				throw new KuraUnavailableDeviceException(e, getPinIndex());
-			} 
+			}
 		}
 	}
 
@@ -149,7 +169,9 @@ public class JdkDioPin implements KuraGPIOPin {
 				// Do nothing
 			}
 		}
-		thePin.close();
+		if(thePin != null && thePin.isOpen()){
+			thePin.close();
+		}
 	}
 
 	private PinListener privateListener = new PinListener() {
@@ -164,11 +186,7 @@ public class JdkDioPin implements KuraGPIOPin {
 	};
 
 	private int getPinIndex() {
-		if(pinName != null){
-			return -1;
-		}else{
-			return pinIndex;
-		}
+		return pinIndex;
 	}
 
 	private int getDirectionInternal() {
@@ -179,6 +197,61 @@ public class JdkDioPin implements KuraGPIOPin {
 			return GPIOPinConfig.DIR_OUTPUT_ONLY;
 		}
 		return -1;
+	}
+
+	private static KuraGPIODirection parseDirection(String d) {
+		try {
+			switch (Integer.decode(d)) {
+			case GPIOPinConfig.DIR_BOTH_INIT_INPUT:
+			case GPIOPinConfig.DIR_INPUT_ONLY:
+				return KuraGPIODirection.INPUT;
+			case GPIOPinConfig.DIR_BOTH_INIT_OUTPUT:
+			case GPIOPinConfig.DIR_OUTPUT_ONLY:
+				return KuraGPIODirection.OUTPUT;
+			}
+		} catch (Exception e) {
+		}
+		return KuraGPIODirection.OUTPUT;
+	}
+
+	private static  KuraGPIOMode parseMode(String m) {
+		try {
+			switch (Integer.decode(m)) {
+			case GPIOPinConfig.MODE_INPUT_PULL_DOWN:
+				return KuraGPIOMode.INPUT_PULL_DOWN;
+			case GPIOPinConfig.MODE_INPUT_PULL_UP:
+				return KuraGPIOMode.INPUT_PULL_UP;
+			case GPIOPinConfig.MODE_OUTPUT_OPEN_DRAIN:
+				return KuraGPIOMode.OUTPUT_OPEN_DRAIN;
+			case GPIOPinConfig.MODE_OUTPUT_PUSH_PULL:
+				return KuraGPIOMode.OUTPUT_PUSH_PULL;
+			}
+		} catch (Exception e) {
+		}
+		return KuraGPIOMode.OUTPUT_OPEN_DRAIN;
+	}
+
+	private static  KuraGPIOTrigger parseTrigger(String t) {
+		try {
+			switch (Integer.decode(t)) {
+			case GPIOPinConfig.TRIGGER_BOTH_EDGES:
+				return KuraGPIOTrigger.BOTH_EDGES;
+			case GPIOPinConfig.TRIGGER_BOTH_LEVELS:
+				return KuraGPIOTrigger.BOTH_LEVELS;
+			case GPIOPinConfig.TRIGGER_FALLING_EDGE:
+				return KuraGPIOTrigger.FALLING_EDGE;
+			case GPIOPinConfig.TRIGGER_HIGH_LEVEL:
+				return KuraGPIOTrigger.HIGH_LEVEL;
+			case GPIOPinConfig.TRIGGER_LOW_LEVEL:
+				return KuraGPIOTrigger.LOW_LEVEL;
+			case GPIOPinConfig.TRIGGER_NONE:
+				return KuraGPIOTrigger.NONE;
+			case GPIOPinConfig.TRIGGER_RISING_EDGE:
+				return KuraGPIOTrigger.RAISING_EDGE;
+			}
+		} catch (Exception e) {
+		}
+		return KuraGPIOTrigger.NONE;
 	}
 
 	private int getModeInternal() {
@@ -244,4 +317,10 @@ public class JdkDioPin implements KuraGPIOPin {
 	public boolean isOpen() {
 		return thePin != null ? thePin.isOpen() : false;
 	}
+
+	@Override
+	public String toString() {
+		return "JdkDioPin [pinIndex=" + pinIndex + ", pinName=" + pinName + "]";
+	}
+	
 }

@@ -12,7 +12,7 @@
       Eurotech
 
 -->
-<!-- 
+ 
 <scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" activate="activate" deactivate="deactivate" name="org.eclipse.kura.gpio.GPIOService">
    <implementation class="org.eclipse.kura.emulator.gpio.GpioServiceImpl"/>
    <service>
@@ -20,4 +20,4 @@
    </service>
    <property name="service.pid" value="org.eclipse.kura.gpio.GPIOService"/>
 </scr:component>
--->
+

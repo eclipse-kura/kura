@@ -561,6 +561,8 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
                  token="{org.eclipse.kura.emulator.version}" value="${org.eclipse.kura.emulator.version}"/>
         <replace file="${project.build.directory}/${build.output.name}/config.ini"
                  token="{org.eclipse.kura.web.version}" value="${org.eclipse.kura.web.version}"/>
+        <replace file="${project.build.directory}/${build.output.name}/config.ini"
+                 token="{org.eclipse.kura.windows.position.version}" value="${org.eclipse.kura.windows.position.version}"/>
         <propertyfile file="${project.build.directory}/${build.output.name}/dpa.properties"> 
             <entry key="kura"
                    value="file:${kura.install.dir}/kura/kura/packages/${build.output.name}.dp" />
@@ -721,9 +723,11 @@ java -Xms256m -Xmx256m -XX:MaxPermSize=256m -Dkura.os.version=win32 ^
                         prefix="${build.output.name}/kura/plugins" />
             <zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.core.net_${org.eclipse.kura.core.net.version}.jar"
                         prefix="${build.output.name}/kura/plugins" />
-            <zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.emulator_${org.eclipse.kura.emulator.version}.jar"
-                        prefix="${build.output.name}/kura/plugins" />
             <zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.web_${org.eclipse.kura.web.version}.jar"
+                        prefix="${build.output.name}/kura/plugins" />
+            <zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.windows.position_${org.eclipse.kura.windows.position.version}.jar"
+                        prefix="${build.output.name}/kura/plugins" />
+            <zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.emulator_${org.eclipse.kura.emulator.version}.jar"
                         prefix="${build.output.name}/kura/plugins" />
         </zip>
         <echo message="Building Kura Distribution for ${build.name}-jars..." />

@@ -29,7 +29,7 @@ public class SystemAdminServiceImpl implements SystemAdminService
 
 	private static final String OS_LINUX    = "Linux";
 	private static final String OS_MAC_OSX  = "Mac OS X";
-	private static final String OS_WINDOWS  = "Windows";
+	private static final String OS_WINDOWS  = "windows";
 	private static final String UNKNOWN     = "UNKNOWN";
 	
 	@SuppressWarnings("unused")
@@ -74,7 +74,18 @@ public class SystemAdminServiceImpl implements SystemAdminService
 		String uptimeStr = UNKNOWN;
 		long uptime = 0;
 
-		if(OS_LINUX.equals(this.getOsName())) {
+		if(this.getOsName().toLowerCase().contains(OS_WINDOWS))
+		{
+			try {
+				uptimeStr = runSystemCommand("C:\\opt\\eclipse\\kura\\bin\\KURAUtils.exe -up");
+			}
+
+			catch(Exception e) {
+				uptimeStr = "0";
+				s_logger.error("Could not read uptime", e);
+			}
+		}
+		else if(OS_LINUX.equals(this.getOsName())) {
 			try {
 				File file = new File("/proc/uptime");
 				FileReader fr = new FileReader(file);

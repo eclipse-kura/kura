@@ -87,7 +87,6 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 	/* Metrics in the REPLY to RESOURCE_DOWNLOAD */
 	public static final String METRIC_DOWNLOAD_STATUS = "download.status";
 
-	private static final String METRIC_CLIENT_ID = "client.id";
 	private static final String METRIC_TRASNFER_SIZE = "dp.http.transfer.size";
 	private static final String METRIC_TRANSFER_PROGRESS = "dp.http.transfer.progress";
 	private static final String METRIC_TRANSFER_STATUS = "dp.http.transfer.status";
@@ -153,7 +152,7 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 
 	private String m_installPersistanceDir;
 	private DeploymentPackageDownloadOptions m_downloadOptions;
-	
+
 	private boolean isInstalling = false;
 	private DeploymentPackageInstallOptions m_installOptions;
 
@@ -202,7 +201,6 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 
 	@Override
 	protected void activate(ComponentContext componentContext) {
-		// TODO Auto-generated method stub
 		s_logger.info("Cloud Deployment v2 is starting");
 		super.activate(componentContext);
 
@@ -267,8 +265,8 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 		m_bundleContext = null;
 	}
 
-	
-	
+
+
 	// ----------------------------------------------------------------
 	//
 	// Public methods
@@ -298,8 +296,8 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 			s_logger.error("Error publishing response for command {} {}", RESOURCE_DOWNLOAD, e);
 		}
 	}
-	
-	
+
+
 
 	// ----------------------------------------------------------------
 	//
@@ -370,7 +368,7 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 		}
 	}
 
-	
+
 
 
 
@@ -486,7 +484,7 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 					try {
 						downloadDeploymentPackageInternal(options, alreadyDownloadedFinal, forceDownloadFinal);
 					} catch (Exception e) {
-						
+
 					} finally{
 						s_pendingPackageUrl = null;
 					}
@@ -592,8 +590,6 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 	}
 
 	private void doGetDownload(KuraRequestPayload reqPayload, KuraResponsePayload respPayload) {
-		// TODO Auto-generated method stub
-
 		if (s_pendingPackageUrl != null){ //A download is pending
 			downloadInProgressMessage(respPayload);
 		} else { //No pending downloads
@@ -845,7 +841,6 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 				try {
 					os.close();
 				} catch (IOException e1) {
-					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
 			}
@@ -924,7 +919,8 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 
 		//Esecuzione script
 		try {
-			ProcessUtil.exec(shFile.getAbsolutePath());
+			ProcessUtil.exec("chmod +x shFile.getCanonicalPath()");
+			ProcessUtil.exec(shFile.getCanonicalPath());
 		} catch (IOException e) {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR);
 		}
@@ -940,7 +936,7 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
 		}
 	}
-	
+
 	private void alreadyDownloadedMessage(DeploymentPackageOptions options){
 		KuraNotifyPayload notify = null;
 
@@ -950,7 +946,7 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 		notify.setTransferProgress(100);
 		notify.setTransferStatus(DOWNLOAD_STATUS.COMPLETED.getStatusString());
 		notify.setJobId(options.getJobId());
-		
+
 
 		try {
 			getCloudApplicationClient().controlPublish(options.getRequestClientId(), "NOTIFY/"+options.getClientId()+"/progress", notify, 2, DFLT_RETAIN, DFLT_PRIORITY);
@@ -974,14 +970,14 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 		respPayload.addMetric(METRIC_TRANSFER_STATUS, DOWNLOAD_STATUS.ALREADY_DONE);
 		//respPayload.addMetric(METRIC_JOB_ID, m_options.getJobId());
 	}
-	
+
 	private void installInProgressMessage(KuraResponsePayload respPayload) {
 		respPayload.setTimestamp(new Date());
 		respPayload.addMetric(KuraInstallPayload.METRIC_INSTALL_STATUS, INSTALL_STATUS.IN_PROGRESS);
 		respPayload.addMetric(KuraInstallPayload.METRIC_DP_NAME, m_installOptions.getDpName());
 		respPayload.addMetric(KuraInstallPayload.METRIC_DP_VERSION, m_installOptions.getDpVersion());
 	}
-	
+
 	private void installIdleMessage(KuraResponsePayload respPayload) {
 		respPayload.setTimestamp(new Date());
 		respPayload.addMetric(KuraInstallPayload.METRIC_INSTALL_STATUS, INSTALL_STATUS.IDLE);
@@ -1033,7 +1029,6 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 					installComplete(options, fileSystemFileName);
 					fileEntry.delete();
 				} catch (KuraException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}

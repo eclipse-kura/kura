@@ -156,6 +156,7 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 
 
 	private Future<?> downloaderFuture;
+	private Future<?> installerFuture;
 
 	private BundleContext m_bundleContext;
 
@@ -170,7 +171,7 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 	private String m_installPersistanceDir;
 	private DeploymentPackageDownloadOptions m_downloadOptions;
 
-	private boolean isInstalling = false;
+	private boolean m_isInstalling = false;
 	private DeploymentPackageInstallOptions m_installOptions;
 
 	private String m_pendingUninstPackageName;
@@ -281,6 +282,10 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 			downloaderFuture.cancel(true);
 		}
 
+		if(installerFuture != null){
+			installerFuture.cancel(true);
+		}
+
 		m_bundleContext = null;
 	}
 
@@ -352,7 +357,6 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 			respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_NOTFOUND);
 			return;
 		}
-
 	}
 
 	@Override
@@ -564,14 +568,32 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 			return;
 		}
 
-		if(alreadyDownloaded){
+		if(alreadyDownloaded && !m_isInstalling){
 			//Check if file exists
-			File dpFile;
+
 			try {
-				isInstalling = true;
-				dpFile = getDpDownloadFile(options);
+				m_isInstalling = true;
+				final File dpFile = getDpDownloadFile(options);
 				//if yes, install
-				installDownloadedFile(dpFile, options);
+
+				installerFuture = executor.submit(new Runnable(){
+
+					@Override
+					public void run() {
+						try {
+							installDownloadedFile(dpFile, options);
+						} catch (Exception e) {
+							try {
+								installFailed(options, dpFile.getName(), e);
+							} catch (KuraException e1) {
+
+							}
+						} finally {
+							m_installOptions = null;
+							m_isInstalling = false;
+						}
+					}
+				});
 			} catch (IOException e) {
 				response.setResponseCode(KuraResponsePayload.RESPONSE_CODE_ERROR);
 				response.setException(e);
@@ -580,24 +602,13 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 					response.setBody("Exception during install".getBytes("UTF-8"));
 				} catch (UnsupportedEncodingException e1) {
 				}
-			} catch (KuraException e) {
-				response.setResponseCode(KuraResponsePayload.RESPONSE_CODE_ERROR);
-				response.setException(e);
-				response.setTimestamp(new Date());
-				try {
-					response.setBody("Exception during install".getBytes("UTF-8"));
-				} catch (UnsupportedEncodingException e1) {
-				}
-			} finally {
-				m_installOptions = null;
-				isInstalling = false;
-			}
+			} 
 		} else {
 			response.setResponseCode(KuraResponsePayload.RESPONSE_CODE_ERROR);
 			response.setException(new KuraException(KuraErrorCode.INTERNAL_ERROR));
 			response.setTimestamp(new Date());
 			try {
-				response.setBody("The requested file does not exist in this device".getBytes("UTF-8"));
+				response.setBody("Already installing/uninstalling".getBytes("UTF-8"));
 			} catch (UnsupportedEncodingException e) {
 			}
 			return;
@@ -622,13 +633,13 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 			return;
 		}
 
-		String packageName;
+
 		try {
-			packageName = getDpUninstallFile(options).getName();
+			final String packageName = getDpUninstallFile(options).getName();
 
 			//
 			// We only allow one request at a time
-			if (m_pendingUninstPackageName != null) {
+			if (!m_isInstalling && m_pendingUninstPackageName != null) {
 				s_logger.info("Antother request seems still pending: {}. Checking if stale...", m_pendingUninstPackageName);
 
 				response = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_ERROR);
@@ -638,26 +649,46 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 				} catch (UnsupportedEncodingException e) {
 					// Ignore
 				}
-			}
+			} else {
 
-			s_logger.info("About to uninstall package {}", packageName);
+				s_logger.info("About to uninstall package {}", packageName);
 
-			try {
-				m_pendingUninstPackageName = packageName;
-
-				s_logger.info("Uninstalling package...");
-				uninstaller(options, packageName);
-			} catch (Exception e) {
-				s_logger.error("Failed to uninstall package {}: {}", packageName, e);
-
-				m_pendingUninstPackageName = null;
-
-				response = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_ERROR);
-				response.setTimestamp(new Date());
 				try {
-					response.setBody(e.getMessage().getBytes("UTF-8"));
-				} catch (UnsupportedEncodingException uee) {
-					// Ignore
+					m_isInstalling = true;
+					m_pendingUninstPackageName = packageName;
+
+					s_logger.info("Uninstalling package...");
+					installerFuture = executor.submit(new Runnable(){
+
+						@Override
+						public void run() {
+							try {
+								uninstaller(options);
+							} catch (Exception e) {
+								try {
+									uninstallFailed(options, packageName, e);
+								} catch (KuraException e1) {
+
+								}
+							} finally {
+								m_installOptions = null;
+								m_isInstalling = false;
+							}
+						}
+					});
+				} catch (Exception e) {
+					s_logger.error("Failed to uninstall package {}: {}", packageName, e);
+
+					response = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_ERROR);
+					response.setTimestamp(new Date());
+					try {
+						response.setBody(e.getMessage().getBytes("UTF-8"));
+					} catch (UnsupportedEncodingException uee) {
+						// Ignore
+					}
+				} finally {
+					m_isInstalling = false;
+					m_pendingUninstPackageName = null;
 				}
 			}
 		} catch (IOException e1) {
@@ -672,27 +703,26 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 		}
 	}
 
-	private void uninstaller(DeploymentPackageUninstallOptions options, String packageName) throws KuraException {
-
+	private void uninstaller(DeploymentPackageUninstallOptions options) throws KuraException {
 		try{
-		String name = packageName;
-		if (name != null) {
-			s_logger.info("About to uninstall package ", name);
-			DeploymentPackage dp = null;
+			String name = m_pendingUninstPackageName;
+			if (name != null) {
+				s_logger.info("About to uninstall package ", name);
+				DeploymentPackage dp = null;
 
-			dp = m_deploymentAdmin.getDeploymentPackage(name);
-			if (dp != null) {
-				dp.uninstall();
+				dp = m_deploymentAdmin.getDeploymentPackage(name);
+				if (dp != null) {
+					dp.uninstall();
 
-				String sUrl = m_deployedPackages.getProperty(name);
-				File dpFile = new File(new URL(sUrl).getPath());
-				if (!dpFile.delete()) {
-					s_logger.warn("Cannot delete file at URL: {}", sUrl);
+					String sUrl = m_deployedPackages.getProperty(name);
+					File dpFile = new File(new URL(sUrl).getPath());
+					if (!dpFile.delete()) {
+						s_logger.warn("Cannot delete file at URL: {}", sUrl);
+					}
+					removePackageFromConfFile(name);
+					uninstallComplete(options, name);
 				}
-				removePackageFromConfFile(name);
-				uninstallComplete(options, name);
 			}
-		}
 		} catch (Exception e) {
 			throw KuraException.internalError(e.getMessage());
 		}
@@ -718,7 +748,7 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 	}
 
 	private void doGetInstall(KuraRequestPayload reqPayload, KuraResponsePayload respPayload) {
-		if(isInstalling){
+		if(m_isInstalling){
 			installInProgressMessage(respPayload);
 		} else {
 			installIdleMessage(respPayload);
@@ -1068,7 +1098,7 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 			}
 		} catch (Exception e) {
 			s_logger.info("Install failed!");
-			installFailed(options, dpFile.getName());
+			installFailed(options, dpFile.getName(), e);
 		} finally {
 			dpFile = null;
 		}
@@ -1157,7 +1187,7 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 		getCloudApplicationClient().controlPublish(options.getRequestClientId(), "NOTIFY/"+options.getClientId()+"/install", notify, 2, DFLT_RETAIN, DFLT_PRIORITY);
 	}
 
-	private void installFailed(DeploymentPackageOptions options, String dpName) throws KuraException{
+	private void installFailed(DeploymentPackageInstallOptions options, String dpName, Exception e) throws KuraException{
 		KuraInstallPayload notify = null;
 
 		notify = new KuraInstallPayload(options.getClientId());
@@ -1166,6 +1196,9 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 		notify.setJobId(options.getJobId());
 		notify.setDpName(dpName); //Probably split dpName and dpVersion?
 		notify.setInstallProgress(0);
+		if (e != null){
+			notify.setErrorMessage(e.getMessage());
+		}
 
 		getCloudApplicationClient().controlPublish(options.getRequestClientId(), "NOTIFY/"+options.getClientId()+"/install", notify, 2, DFLT_RETAIN, DFLT_PRIORITY);
 	}
@@ -1206,6 +1239,22 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 		notify.setDpName(dpName); //Probably split dpName and dpVersion?
 		notify.setUninstallProgress(100);
 
-		getCloudApplicationClient().controlPublish(options.getRequestClientId(), "NOTIFY/"+options.getClientId()+"/install", notify, 2, DFLT_RETAIN, DFLT_PRIORITY);
+		getCloudApplicationClient().controlPublish(options.getRequestClientId(), "NOTIFY/"+options.getClientId()+"/uninstall", notify, 2, DFLT_RETAIN, DFLT_PRIORITY);
+	}
+
+	private void uninstallFailed(DeploymentPackageUninstallOptions options, String dpName, Exception e) throws KuraException{
+		KuraUninstallPayload notify = null;
+
+		notify = new KuraUninstallPayload(options.getClientId());
+		notify.setTimestamp(new Date());
+		notify.setUninstallStatus(UNINSTALL_STATUS.FAILED.getStatusString());
+		notify.setJobId(options.getJobId());
+		notify.setDpName(dpName); //Probably split dpName and dpVersion?
+		notify.setUninstallProgress(0);
+		if (e != null){
+			notify.setErrorMessage(e.getMessage());
+		}
+
+		getCloudApplicationClient().controlPublish(options.getRequestClientId(), "NOTIFY/"+options.getClientId()+"/uninstall", notify, 2, DFLT_RETAIN, DFLT_PRIORITY);
 	}
 }

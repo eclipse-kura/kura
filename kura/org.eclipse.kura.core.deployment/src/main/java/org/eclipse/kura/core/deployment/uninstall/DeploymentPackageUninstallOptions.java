@@ -10,7 +10,7 @@
  *   Eurotech
  */
 
-package org.eclipse.kura.core.deployment.install;
+package org.eclipse.kura.core.deployment.uninstall;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
@@ -19,17 +19,14 @@ import org.eclipse.kura.core.deployment.DeploymentPackageOptions;
 import org.eclipse.kura.message.KuraPayload;
 import org.eclipse.kura.message.KuraRequestPayload;
 
-public class DeploymentPackageInstallOptions extends DeploymentPackageOptions{
-	public static final String METRIC_DP_INSTALL_SYSTEM_UPDATE = "dp.install.system.update";
-	
-	private Boolean systemUpdate = false;
+public class DeploymentPackageUninstallOptions extends DeploymentPackageOptions{
 
 	// Metrics in RESOURCE_INSTALL
-	public DeploymentPackageInstallOptions(String deployUrl, String dpName, String dpVersion) {
+	public DeploymentPackageUninstallOptions(String deployUrl, String dpName, String dpVersion) {
 		super(dpName, dpVersion);
 	}
 
-	public DeploymentPackageInstallOptions(KuraPayload request) throws KuraException {
+	public DeploymentPackageUninstallOptions(KuraPayload request) throws KuraException {
 
 		super(null,null);
 
@@ -46,11 +43,6 @@ public class DeploymentPackageInstallOptions extends DeploymentPackageOptions{
 		super.setJobId((Long) request.getMetric(METRIC_JOB_ID));
 		if (super.getJobId() == null) {
 			throw new KuraInvalidMessageException("Missing jobId!");
-		}
-		
-		setSystemUpdate((Boolean) request.getMetric(METRIC_DP_INSTALL_SYSTEM_UPDATE));
-		if (getSystemUpdate() == null){
-			throw new KuraInvalidMessageException("Missing SystemUpdate!");
 		}
 		
 		try {
@@ -79,13 +71,5 @@ public class DeploymentPackageInstallOptions extends DeploymentPackageOptions{
 		} catch (Exception ex) {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, ex);
 		}
-	}
-	
-	public void setSystemUpdate(Boolean systemUpdate) {
-		this.systemUpdate = systemUpdate;
-	}
-
-	public Boolean getSystemUpdate() {
-		return systemUpdate;
 	}
 }

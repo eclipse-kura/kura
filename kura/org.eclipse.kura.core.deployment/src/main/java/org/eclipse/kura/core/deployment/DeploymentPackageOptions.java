@@ -24,7 +24,6 @@ public abstract class DeploymentPackageOptions {
 	public static final String METRIC_DP_REBOOT_DELAY = "dp.reboot.delay";
 	public static final String METRIC_DP_CLIENT_ID = "client.id";
 	public static final String METRIC_JOB_ID = "job.id";
-	public static final String METRIC_DP_INSTALL_SYSTEM_UPDATE = "dp.install.system.update";
 
 	
 	private String dpName;
@@ -40,7 +39,6 @@ public abstract class DeploymentPackageOptions {
 	private String clientId = "";
 	private String requestClientId = "";
 	private Long jobId = null;
-	private Boolean systemUpdate = false;
 
 	public DeploymentPackageOptions(String dpName, String dpVersion) {
 		this.dpName = dpName;
@@ -134,13 +132,4 @@ public abstract class DeploymentPackageOptions {
 	public void setRequestClientId(String requestClientId) {
 		this.requestClientId = requestClientId;
 	}
-	
-	public void setSystemUpdate(Boolean systemUpdate) {
-		this.systemUpdate = systemUpdate;
-	}
-
-	public Boolean getSystemUpdate() {
-		return systemUpdate;
-	}
-
 }

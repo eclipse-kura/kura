@@ -15,11 +15,11 @@ package org.eclipse.kura.core.deployment.download;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraInvalidMessageException;
-import org.eclipse.kura.core.deployment.DeploymentPackageOptions;
+import org.eclipse.kura.core.deployment.install.DeploymentPackageInstallOptions;
 import org.eclipse.kura.message.KuraPayload;
 import org.eclipse.kura.message.KuraRequestPayload;
 
-public class DeploymentPackageDownloadOptions extends DeploymentPackageOptions{
+public class DeploymentPackageDownloadOptions extends DeploymentPackageInstallOptions{
 
 	// Metrics in RESOURCE_DOWNLOAD
 	public static final String METRIC_DEPLOY_URL = "dp.url";
@@ -45,12 +45,11 @@ public class DeploymentPackageDownloadOptions extends DeploymentPackageOptions{
 	private boolean forceDownload = false;
 
 	public DeploymentPackageDownloadOptions(String deployUrl, String dpName, String dpVersion) {
-		super(dpName, dpVersion);
-		this.deployUrl = deployUrl;
+		super(deployUrl, dpName, dpVersion);
 	}
 
 	public DeploymentPackageDownloadOptions(KuraPayload request) throws KuraException {
-		super(null, null);
+		super(null, null, null);
 		deployUrl = (String) request.getMetric(METRIC_DEPLOY_URL);
 		if (deployUrl == null) {
 			throw new KuraInvalidMessageException("Missing deployment package URL!");

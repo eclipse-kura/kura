@@ -64,14 +64,18 @@ public class DownloadCountingOutputStream extends CountingOutputStream {
 	private Future<Void> future;
 	private long previous;
 	private DOWNLOAD_STATUS m_downloadStatus = DOWNLOAD_STATUS.FAILED;
+	private String m_downloadURL;
+	private int m_alreadyDownloaded;
 	
 
 	public DownloadCountingOutputStream(OutputStream out, DeploymentPackageDownloadOptions options, ProgressListener callback,
-			SslManagerService m_sslManagerService) {
+			SslManagerService m_sslManagerService, String downloadURL, int alreadyDownloaded) {
 		super(out);
 		this.options = options;
 		this.m_sslManagerService = m_sslManagerService;
 		this.pl = callback;
+		this.m_downloadURL = downloadURL;
+		this.m_alreadyDownloaded = alreadyDownloaded;
 		PROP_BUFFER_SIZE = options.getBlockSize();
 		PROP_RESOLUTION = options.getNotifyBlockSize();
 		PROP_BLOCK_DELAY = options.getBlockDelay();
@@ -127,7 +131,7 @@ public class DownloadCountingOutputStream extends CountingOutputStream {
 						});
 					}
 
-					localUrl = new URL(options.getDeployUrl());
+					localUrl = new URL(m_downloadURL);
 					URLConnection urlConnection = localUrl.openConnection();
 					urlConnection.setConnectTimeout(PROP_CONNECT_TIMEOUT);
 					urlConnection.setReadTimeout(PROP_READ_TIMEOUT);
@@ -209,8 +213,8 @@ public class DownloadCountingOutputStream extends CountingOutputStream {
 	private void postProgressEvent(String clientId, long progress, long total, DOWNLOAD_STATUS status, String errorMessage) {
 		Long perc = getDownloadTransferProgressPercentage();
 		m_downloadStatus = status;
-		ProgressEvent pe= new ProgressEvent(this, options.getRequestClientId(), clientId, ((Long) total).intValue(), ((Long) perc).intValue(), 
-											getDownloadTransferStatus().getStatusString(), options.getJobId());
+		ProgressEvent pe= new ProgressEvent(this, options, ((Long) total).intValue(), ((Long) perc).intValue(), 
+											getDownloadTransferStatus().getStatusString(), m_alreadyDownloaded);
 		if(errorMessage != null){
 			pe.setExceptionMessage(errorMessage);
 		}

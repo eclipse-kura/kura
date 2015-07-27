@@ -21,7 +21,6 @@ import java.util.Date;
 import java.util.Dictionary;
 import java.util.Hashtable;
 
-
 import javax.xml.bind.JAXBException;
 
 import org.eclipse.kura.KuraErrorCode;
@@ -31,8 +30,8 @@ import org.eclipse.kura.cloud.CloudClientListener;
 import org.eclipse.kura.cloud.CloudService;
 import org.eclipse.kura.cloud.CloudletTopic;
 import org.eclipse.kura.cloud.CloudletTopic.Method;
+import org.eclipse.kura.core.deployment.download.KuraNotifyPayload;
 import org.eclipse.kura.core.util.ThrowableUtil;
-import org.eclipse.kura.message.KuraNotifyPayload;
 import org.eclipse.kura.message.KuraPayload;
 import org.eclipse.kura.message.KuraRequestPayload;
 import org.eclipse.kura.message.KuraResponsePayload;

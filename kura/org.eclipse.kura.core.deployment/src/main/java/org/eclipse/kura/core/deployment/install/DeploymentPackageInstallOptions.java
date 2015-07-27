@@ -21,8 +21,10 @@ import org.eclipse.kura.message.KuraRequestPayload;
 
 public class DeploymentPackageInstallOptions extends DeploymentPackageOptions{
 	public static final String METRIC_DP_INSTALL_SYSTEM_UPDATE = "dp.install.system.update";
+	public static final String METRIC_INSTALL_VERIFIER_URL = "dp.install.verifier.url";
 	
 	private Boolean systemUpdate = false;
+	private String verifierURL = null; 
 
 	// Metrics in RESOURCE_INSTALL
 	public DeploymentPackageInstallOptions(String deployUrl, String dpName, String dpVersion) {
@@ -75,6 +77,11 @@ public class DeploymentPackageInstallOptions extends DeploymentPackageOptions{
 			if (metric != null) {
 				super.setClientId((String) metric);
 			}
+			
+			metric = request.getMetric(METRIC_INSTALL_VERIFIER_URL);
+			if (metric != null) {
+				setVerifierURL((String) metric);
+			}
 
 		} catch (Exception ex) {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, ex);
@@ -87,5 +94,13 @@ public class DeploymentPackageInstallOptions extends DeploymentPackageOptions{
 
 	public Boolean getSystemUpdate() {
 		return systemUpdate;
+	}
+	
+	public void setVerifierURL(String verifierURL) {
+		this.verifierURL = verifierURL;
+	}
+
+	public String getVerifierURL() {
+		return verifierURL;
 	}
 }

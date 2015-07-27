@@ -14,7 +14,7 @@ package org.eclipse.kura.core.deployment.install;
 
 import java.text.ParseException;
 
-import org.eclipse.kura.message.KuraNotifyPayload;
+import org.eclipse.kura.core.deployment.download.KuraNotifyPayload;
 import org.eclipse.kura.message.KuraPayload;
 
 public class KuraInstallPayload extends KuraPayload

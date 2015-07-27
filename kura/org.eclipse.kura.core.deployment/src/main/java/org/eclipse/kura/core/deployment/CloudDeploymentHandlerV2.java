@@ -36,6 +36,7 @@ import org.eclipse.kura.cloud.Cloudlet;
 import org.eclipse.kura.cloud.CloudletTopic;
 import org.eclipse.kura.core.deployment.download.DeploymentPackageDownloadOptions;
 import org.eclipse.kura.core.deployment.download.DownloadCountingOutputStream;
+import org.eclipse.kura.core.deployment.download.KuraNotifyPayload;
 import org.eclipse.kura.core.deployment.install.DeploymentPackageInstallOptions;
 import org.eclipse.kura.core.deployment.install.KuraInstallPayload;
 import org.eclipse.kura.core.deployment.progress.ProgressEvent;
@@ -50,7 +51,6 @@ import org.eclipse.kura.core.deployment.xml.XmlDeploymentPackages;
 import org.eclipse.kura.core.deployment.xml.XmlUtil;
 import org.eclipse.kura.core.util.ProcessUtil;
 import org.eclipse.kura.data.DataTransportService;
-import org.eclipse.kura.message.KuraNotifyPayload;
 import org.eclipse.kura.message.KuraRequestPayload;
 import org.eclipse.kura.message.KuraResponsePayload;
 import org.eclipse.kura.ssl.SslManagerService;
@@ -90,10 +90,6 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 	/* Metrics in the REPLY to RESOURCE_DOWNLOAD */
 	public static final String METRIC_DOWNLOAD_STATUS = "download.status";
 
-	private static final String METRIC_TRASNFER_SIZE = "dp.http.transfer.size";
-	private static final String METRIC_TRANSFER_PROGRESS = "dp.http.transfer.progress";
-	private static final String METRIC_TRANSFER_STATUS = "dp.http.transfer.status";
-	private static final String METRIC_JOB_ID = "job.id";
 
 	/**
 	 * Enum representing the different status of the download process
@@ -314,6 +310,9 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 			notify.setErrorMessage(progress.getExceptionMessage());
 		}
 
+		notify.setTransferIndex(progress.getDownloadIndex());
+
+
 		try {
 			getCloudApplicationClient().controlPublish(progress.getRequesterClientId(), "NOTIFY/"+progress.getClientId()+"/progress", notify, 2, DFLT_RETAIN, DFLT_PRIORITY);
 		} catch (KuraException e) {
@@ -394,8 +393,6 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 			return;
 		}
 	}
-
-
 
 
 
@@ -988,18 +985,17 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 		}
 	}
 
-	private void incrementalDownloadFromURL(File dpFile, DeploymentPackageDownloadOptions options) throws Exception {
+	private void incrementalDownloadFromURL(File dpFile, DeploymentPackageDownloadOptions options, String url, int downloadIndex) throws Exception {
 		OutputStream os = null;
 
 		try {
 			os = new FileOutputStream(dpFile);
 
-			downloadHelper = new DownloadCountingOutputStream(os, options, this, m_sslManagerService);
+			downloadHelper = new DownloadCountingOutputStream(os, options, this, m_sslManagerService, url, downloadIndex);
 
 			downloadHelper.startWork();
 
 			downloadHelper.close();
-
 		} catch (Exception e) {
 			throw new Exception(e);
 		} finally {
@@ -1036,6 +1032,20 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 		return dpFile;
 	}
 
+	private File getDpVerifierFile(DeploymentPackageInstallOptions options) throws IOException {
+		// File dpFile = File.createTempFile("dpa", null);
+		String packageFilename = null;
+
+		String shName= getFileName(options.getDpName(), options.getDpVersion(), "_verifier.sh");
+		packageFilename = new StringBuilder().append(m_installPersistanceDir)
+				.append(File.separator)
+				.append(shName)
+				.toString();
+
+		File dpFile = new File(packageFilename);
+		return dpFile;
+	}
+
 	private File getDpUninstallFile(DeploymentPackageUninstallOptions options) throws IOException {
 		// File dpFile = File.createTempFile("dpa", null);
 		String packageFilename = null;
@@ -1054,16 +1064,20 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 	}
 
 	private void downloadDeploymentPackageInternal(DeploymentPackageDownloadOptions options, boolean alreadyDownloaded, boolean forceDownload) throws Exception {
-
-		File dpFile = null;
 		try {
 			// Download the package to a temporary file.
 			// Check for file existence has already been done
-			dpFile = getDpDownloadFile(options);
+			File dpFile = getDpDownloadFile(options);
 
 			if (!alreadyDownloaded || forceDownload) {
 				s_logger.info("To download");
-				incrementalDownloadFromURL(dpFile, options);
+				int downloadIndex = 0;
+				incrementalDownloadFromURL(dpFile, options, options.getDeployUrl(), downloadIndex++);
+
+				if(options.getVerifierURL() != null){
+					File dpVerifier= getDpVerifierFile(options);
+					incrementalDownloadFromURL(dpVerifier, options, options.getVerifierURL(), downloadIndex);
+				}
 			} else {
 				alreadyDownloadedMessage(options);
 			}
@@ -1148,17 +1162,17 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 
 	private void downloadInProgressMessage(KuraResponsePayload respPayload) {
 		respPayload.setTimestamp(new Date());
-		respPayload.addMetric(METRIC_TRASNFER_SIZE, downloadHelper.getTotalBytes().intValue());
-		respPayload.addMetric(METRIC_TRANSFER_PROGRESS, downloadHelper.getDownloadTransferProgressPercentage().intValue());
-		respPayload.addMetric(METRIC_TRANSFER_STATUS, downloadHelper.getDownloadTransferStatus().getStatusString());
-		respPayload.addMetric(METRIC_JOB_ID, m_downloadOptions.getJobId());
+		respPayload.addMetric(KuraNotifyPayload.METRIC_TRANSFER_SIZE, downloadHelper.getTotalBytes().intValue());
+		respPayload.addMetric(KuraNotifyPayload.METRIC_TRANSFER_PROGRESS, downloadHelper.getDownloadTransferProgressPercentage().intValue());
+		respPayload.addMetric(KuraNotifyPayload.METRIC_TRANSFER_STATUS, downloadHelper.getDownloadTransferStatus().getStatusString());
+		respPayload.addMetric(KuraNotifyPayload.METRIC_JOB_ID, m_downloadOptions.getJobId());
 	}
 
 	private void downloadEndedMessage(KuraResponsePayload respPayload) {
 		respPayload.setTimestamp(new Date());
-		respPayload.addMetric(METRIC_TRASNFER_SIZE, 0);
-		respPayload.addMetric(METRIC_TRANSFER_PROGRESS, 100);
-		respPayload.addMetric(METRIC_TRANSFER_STATUS, DOWNLOAD_STATUS.ALREADY_DONE);
+		respPayload.addMetric(KuraNotifyPayload.METRIC_TRANSFER_SIZE, 0);
+		respPayload.addMetric(KuraNotifyPayload.METRIC_TRANSFER_PROGRESS, 100);
+		respPayload.addMetric(KuraNotifyPayload.METRIC_TRANSFER_STATUS, DOWNLOAD_STATUS.ALREADY_DONE);
 		//respPayload.addMetric(METRIC_JOB_ID, m_options.getJobId());
 	}
 

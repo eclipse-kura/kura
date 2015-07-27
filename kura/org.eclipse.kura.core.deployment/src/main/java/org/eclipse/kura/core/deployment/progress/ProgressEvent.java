@@ -14,6 +14,8 @@ package org.eclipse.kura.core.deployment.progress;
 
 import java.util.EventObject;
 
+import org.eclipse.kura.core.deployment.download.DeploymentPackageDownloadOptions;
+
 public class ProgressEvent extends EventObject {
 
 	/**
@@ -28,15 +30,17 @@ public class ProgressEvent extends EventObject {
 	String requesterClientId;
 	long jobId;
 	String exceptionMessage = null;
+	int downloadIndex;
 	
-	public ProgressEvent(Object source, String requesterClientId, String clientId, int transferSize, int transferProgress, String trasnferStatus, long jobId) {
+	public ProgressEvent(Object source, DeploymentPackageDownloadOptions options, int transferSize, int transferProgress, String trasnferStatus, int downloadIndex) {
 		super(source);
-		this.clientId = clientId;
+		this.clientId = options.getClientId();
 		this.transferSize = transferSize;
 		this.transferProgress = transferProgress;
 		this.transferStatus = trasnferStatus;
-		this.requesterClientId = requesterClientId;
-		this.jobId= jobId;
+		this.requesterClientId = options.getRequestClientId();
+		this.jobId= options.getJobId();
+		this.downloadIndex = downloadIndex;
 	}
 
 	public String getClientId() {
@@ -69,5 +73,13 @@ public class ProgressEvent extends EventObject {
 
 	public String getExceptionMessage(){
 		return exceptionMessage;
+	}
+	
+	public void setDownloadIndex(int downloadIndex){
+		this.downloadIndex = downloadIndex;
+	}
+	
+	public int getDownloadIndex() {
+		return downloadIndex;
 	}
 }

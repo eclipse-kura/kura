@@ -9,19 +9,22 @@
  * Contributors:
  *   Eurotech
  */
-package org.eclipse.kura.message;
+package org.eclipse.kura.core.deployment.download;
 
 import java.text.ParseException;
+
+import org.eclipse.kura.message.KuraPayload;
 
 public class KuraNotifyPayload extends KuraPayload
 {
 	
-	private static final String METRIC_CLIENT_ID = "client.id";
-	private static final String METRIC_TRASNFER_SIZE = "dp.http.transfer.size";
-	private static final String METRIC_TRANSFER_PROGRESS = "dp.http.transfer.progress";
-	private static final String METRIC_TRANSFER_STATUS = "dp.http.transfer.status";
-	private static final String METRIC_JOB_ID = "job.id";
-	private static final String METRIC_ERROR_MESSAGE = "dp.http.transfer.error.message";
+	public static final String METRIC_CLIENT_ID = "client.id";
+	public static final String METRIC_TRANSFER_SIZE = "dp.http.transfer.size";
+	public static final String METRIC_TRANSFER_PROGRESS = "dp.http.transfer.progress";
+	public static final String METRIC_TRANSFER_STATUS = "dp.http.transfer.status";
+	public static final String METRIC_JOB_ID = "job.id";
+	public static final String METRIC_ERROR_MESSAGE = "dp.http.transfer.error.message";
+	public static final String METRIC_TRANSFER_INDEX = "dp.http.transfer.index";
 	
 	public KuraNotifyPayload(String clientId) 
 	{
@@ -50,11 +53,11 @@ public class KuraNotifyPayload extends KuraPayload
 	}
 	
 	public void setTransferSize(int trasnferSize){
-		addMetric(METRIC_TRASNFER_SIZE, trasnferSize);
+		addMetric(METRIC_TRANSFER_SIZE, trasnferSize);
 	}
 	
 	public int getTransferSize(){
-		return (Integer) getMetric(METRIC_TRASNFER_SIZE);
+		return (Integer) getMetric(METRIC_TRANSFER_SIZE);
 	}
 	
 	public void setTransferProgress(int transferProgress){
@@ -96,6 +99,14 @@ public class KuraNotifyPayload extends KuraPayload
 	
 	public String getErrorMessage() {
 		return (String) getMetric(METRIC_ERROR_MESSAGE);
+	}
+	
+	public void setTransferIndex(int transferIndex) {
+		addMetric(METRIC_TRANSFER_INDEX, transferIndex);
+	}
+	
+	public Integer getMissingDownloads() {
+		return (Integer) getMetric(METRIC_TRANSFER_INDEX);
 	}
 	
 }

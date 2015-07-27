@@ -135,6 +135,11 @@ public class DeploymentPackageDownloadOptions extends DeploymentPackageInstallOp
 			if (metric != null) {
 				super.setClientId((String) metric);
 			}
+			
+			metric = request.getMetric(METRIC_INSTALL_VERIFIER_URL);
+			if (metric != null) {
+				super.setVerifierURL((String) metric);
+			}
 
 		} catch (Exception ex) {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, ex);

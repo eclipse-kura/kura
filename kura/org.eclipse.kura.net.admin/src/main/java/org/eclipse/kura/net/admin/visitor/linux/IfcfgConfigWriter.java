@@ -298,7 +298,7 @@ public class IfcfgConfigWriter implements NetworkConfigurationVisitor {
 							if (args[1].equals(iName)) {
 								s_logger.debug("Found entry in interface file...");
 								appendConfig = false;
-								sb.append(debianWriteUtility(netInterfaceConfig.getNetInterfaceAddresses(), iName));
+								sb.append(debianWriteUtility(netInterfaceConfig, iName));
 
 								//remove old config lines from the scanner
 								while (scanner.hasNextLine() && !(line = scanner.nextLine()).isEmpty()) {
@@ -324,7 +324,7 @@ public class IfcfgConfigWriter implements NetworkConfigurationVisitor {
 			// If config not present in file, append to end
 			if (appendConfig) {
 				s_logger.debug("Appending entry to interface file...");
-				sb.append(debianWriteUtility(netInterfaceConfig.getNetInterfaceAddresses(), iName));
+				sb.append(debianWriteUtility(netInterfaceConfig, iName));
 				sb.append("\n");
 			}
 
@@ -369,7 +369,9 @@ public class IfcfgConfigWriter implements NetworkConfigurationVisitor {
 		}
 	}
 
-	private String debianWriteUtility(List<? extends NetInterfaceAddressConfig> netInterfaceAddressConfigs, String interfaceName) {
+	private String debianWriteUtility(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig, String interfaceName) {
+		
+		List<? extends NetInterfaceAddressConfig> netInterfaceAddressConfigs = netInterfaceConfig.getNetInterfaceAddresses();
 		StringBuffer sb = new StringBuffer();
 
 		s_logger.debug("There are " + netInterfaceAddressConfigs.size() + " NetInterfaceAddressConfigs in this configuration");
@@ -383,11 +385,25 @@ public class IfcfgConfigWriter implements NetworkConfigurationVisitor {
 						s_logger.debug("Writing netconfig " + netConfig.getClass().toString() + " for " + interfaceName);
 
 						//ONBOOT
-						if(((NetConfigIP4) netConfig).isAutoConnect())
-							sb.append("auto " + interfaceName + "\n" );
+						if(((NetConfigIP4) netConfig).isAutoConnect()) {
+							if (OS_VERSION.equals(KuraConstants.Raspberry_Pi.getImageName()) && 
+									(netInterfaceConfig.getType() == NetInterfaceType.WIFI) &&
+									((NetConfigIP4) netConfig).isDhcp()) {
+								sb.append("#!kura!auto " + interfaceName + "\n" );
+							} else {
+								sb.append("auto " + interfaceName + "\n" );
+							}
+						}
 
 						//BOOTPROTO
-						sb.append("iface " + interfaceName + " inet ");
+						if (OS_VERSION.equals(KuraConstants.Raspberry_Pi.getImageName()) && 
+								(netInterfaceConfig.getType() == NetInterfaceType.WIFI) &&
+								((NetConfigIP4) netConfig).isDhcp()) {
+							sb.append("# Commented out to prevent wpa_supplicant from starting dhclient\n");
+							sb.append("#!kura!iface " + interfaceName + " inet ");
+						} else {
+							sb.append("iface " + interfaceName + " inet ");
+						}
 						if(((NetConfigIP4) netConfig).isDhcp()) {
 							s_logger.debug("new config is DHCP");
 							sb.append("dhcp\n");

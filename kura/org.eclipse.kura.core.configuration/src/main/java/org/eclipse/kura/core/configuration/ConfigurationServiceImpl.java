@@ -13,6 +13,7 @@ package org.eclipse.kura.core.configuration;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
@@ -29,6 +30,9 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import javax.xml.stream.FactoryConfigurationError;
+import javax.xml.stream.XMLStreamException;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
@@ -958,8 +962,16 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 			//File loaded, try to decrypt and unmarshall
 			String decryptedContent = new String(m_cryptoService.decryptAes(entireFile.toCharArray()));
 			xmlConfigs = XmlUtil.unmarshal(decryptedContent, XmlComponentConfigurations.class);
-		} catch (Exception e) {
+		} catch (KuraException e) {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR);
+		} catch (FileNotFoundException e) {
+			s_logger.error("Error loading file from disk: not found. Message: {}", e.getMessage());
+		} catch (IOException e) {
+			s_logger.error("Error loading file from disk. Message: {}", e.getMessage());
+		} catch (XMLStreamException e) {
+			s_logger.error("Error parsing xml: {}", e.getMessage());
+		} catch (FactoryConfigurationError e) {
+			s_logger.error("Error parsing xml: {}", e.getMessage());
 		}finally {			
 			try {
 				if (fr != null) {

@@ -291,22 +291,30 @@ public class IfcfgConfigWriter implements NetworkConfigurationVisitor {
 					String noTrimLine = scanner.nextLine();
 					String line = noTrimLine.trim();
 					//ignore comments and blank lines
-					if (!line.isEmpty() && !line.startsWith("#")) {
-						String[] args = line.split("\\s+");
-						//must be a line stating that interface starts on boot
-						if(args.length > 1) {
-							if (args[1].equals(iName)) {
-								s_logger.debug("Found entry in interface file...");
-								appendConfig = false;
-								sb.append(debianWriteUtility(netInterfaceConfig, iName));
-
-								//remove old config lines from the scanner
-								while (scanner.hasNextLine() && !(line = scanner.nextLine()).isEmpty()) {
+					if (!line.isEmpty()) {
+						if (line.startsWith("#!kura!")) {
+							line = line.substring("#!kura!".length());
+						}
+						
+						if (!line.startsWith("#")) {
+							String[] args = line.split("\\s+");
+							//must be a line stating that interface starts on boot
+							if(args.length > 1) {
+								if (args[1].equals(iName)) {
+									s_logger.debug("Found entry in interface file...");
+									appendConfig = false;
+									sb.append(debianWriteUtility(netInterfaceConfig, iName));
+	
+									//remove old config lines from the scanner
+									while (scanner.hasNextLine() && !(line = scanner.nextLine()).isEmpty()) {
+									}
+									sb.append("\n");
+								} else {
+									sb.append(noTrimLine + "\n");
 								}
-								sb.append("\n");
-							} else {
-								sb.append(noTrimLine + "\n");
 							}
+						} else {
+							sb.append(noTrimLine + "\n");
 						}
 					} else {
 						sb.append(noTrimLine + "\n");

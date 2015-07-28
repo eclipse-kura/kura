@@ -90,6 +90,7 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 
 	/* Metrics in the REPLY to RESOURCE_DOWNLOAD */
 	public static final String METRIC_DOWNLOAD_STATUS = "download.status";
+	public static final String METRIC_REQUESTER_CLIENT_ID = "requester.client.id";
 	
 	private static final String PERSISTANCE_SUFFIX = "_persistance";
 	private static final String PERSISTANCE_FOLDER_NAME= "persistance";
@@ -273,7 +274,7 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 		}
 		
 		m_installVerificationDir= m_installPersistanceDir + File.separator + PERSISTANCE_VERIFICATION_FOLDER_NAME;
-		File installVerificationDir = new File(m_installPersistanceDir);
+		File installVerificationDir = new File(m_installVerificationDir);
 		if (!installVerificationDir.exists()) {
 			installVerificationDir.mkdir();
 		}
@@ -977,6 +978,7 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 		m_installPersistance.setProperty(DeploymentPackageOptions.METRIC_JOB_ID, Long.toString(options.getJobId()));
 		m_installPersistance.setProperty(DeploymentPackageOptions.METRIC_DP_NAME, fileName);
 		m_installPersistance.setProperty(DeploymentPackageOptions.METRIC_DP_VERSION, options.getDpVersion());
+		m_installPersistance.setProperty(METRIC_REQUESTER_CLIENT_ID, options.getRequestClientId());
 		m_installPersistance.setProperty(PERSISTANCE_FILE_NAME, fileName);
 
 		if (m_installPersistanceDir == null) {
@@ -1048,7 +1050,7 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 		String packageFilename = null;
 
 		String shName= getFileName(options.getDpName(), options.getDpVersion(), "_verifier.sh");
-		packageFilename = new StringBuilder().append(m_installPersistanceDir)
+		packageFilename = new StringBuilder().append(m_installVerificationDir)
 				.append(File.separator)
 				.append(shName)
 				.toString();
@@ -1242,8 +1244,9 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 	}
 
 	private void sendInstallConfirmations(){
+		s_logger.info("Ready to send Confirmations");
 		File verificationDir= new File(m_installVerificationDir);
-		for (final File fileEntry : verificationDir.listFiles()) {
+		for (File fileEntry : verificationDir.listFiles()) {
 			if (fileEntry.isFile() && fileEntry.getName().endsWith(".sh")) {
 				SafeProcess proc = null;
 				try {
@@ -1276,9 +1279,11 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 	}
 	
 	private void sendSysUpdateSuccess(File verificationFile) throws KuraException {
+		s_logger.info("Ready to send success after install");
 		File installDir= new File(m_installPersistanceDir);
-		for (final File fileEntry : installDir.listFiles()) {
-			if (fileEntry.isFile() && fileEntry.getName().endsWith(PERSISTANCE_SUFFIX) && fileEntry.getName().contains(verificationFile.getName())) {
+		for (File fileEntry : installDir.listFiles()) {
+			
+			if (fileEntry.isFile() && fileEntry.getName().endsWith(PERSISTANCE_SUFFIX)) { //&& fileEntry.getName().contains(verificationFile.getName()
 				Properties downloadProperties= loadInstallPersistance(fileEntry);
 				String deployUrl= downloadProperties.getProperty(DeploymentPackageDownloadOptions.METRIC_DEPLOY_URL);
 				String dpName= downloadProperties.getProperty(DeploymentPackageDownloadOptions.METRIC_DP_NAME);
@@ -1286,13 +1291,16 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 				String clientId= downloadProperties.getProperty(DeploymentPackageDownloadOptions.METRIC_DP_CLIENT_ID);
 				Long jobId= Long.valueOf(downloadProperties.getProperty(DeploymentPackageDownloadOptions.METRIC_JOB_ID));
 				String fileSystemFileName= downloadProperties.getProperty(PERSISTANCE_FILE_NAME);
+				String requestClientId = downloadProperties.getProperty(METRIC_REQUESTER_CLIENT_ID);
 
 				DeploymentPackageDownloadOptions options = new DeploymentPackageDownloadOptions(deployUrl, dpName, dpVersion);
 				options.setClientId(clientId);
 				options.setJobId(jobId);
+				options.setRequestClientId(requestClientId);
 
 				try {
 					installComplete(options, fileSystemFileName);
+					s_logger.info("Sent install complete");
 					fileEntry.delete();
 					break;
 				} catch (KuraException e) {
@@ -1305,7 +1313,7 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 	private void sendSysUpdateFailure(File verificationFile) throws KuraException {
 		File installDir= new File(m_installPersistanceDir);
 		for (final File fileEntry : installDir.listFiles()) {
-			if (fileEntry.isFile() && fileEntry.getName().endsWith(PERSISTANCE_SUFFIX) && fileEntry.getName().contains(verificationFile.getName())) {
+			if (fileEntry.isFile() && fileEntry.getName().endsWith(PERSISTANCE_SUFFIX)) { //&& fileEntry.getName().contains(verificationFile.getName())
 				Properties downloadProperties= loadInstallPersistance(fileEntry);
 				String deployUrl= downloadProperties.getProperty(DeploymentPackageDownloadOptions.METRIC_DEPLOY_URL);
 				String dpName= downloadProperties.getProperty(DeploymentPackageDownloadOptions.METRIC_DP_NAME);
@@ -1313,13 +1321,16 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 				String clientId= downloadProperties.getProperty(DeploymentPackageDownloadOptions.METRIC_DP_CLIENT_ID);
 				Long jobId= Long.valueOf(downloadProperties.getProperty(DeploymentPackageDownloadOptions.METRIC_JOB_ID));
 				String fileSystemFileName= downloadProperties.getProperty(PERSISTANCE_FILE_NAME);
+				String requestClientId = downloadProperties.getProperty(METRIC_REQUESTER_CLIENT_ID);
 
 				DeploymentPackageDownloadOptions options = new DeploymentPackageDownloadOptions(deployUrl, dpName, dpVersion);
 				options.setClientId(clientId);
 				options.setJobId(jobId);
+				options.setRequestClientId(requestClientId);
 
 				try {
 					installFailed(options, fileSystemFileName, new KuraException(KuraErrorCode.INTERNAL_ERROR));
+					s_logger.info("Sent install failed");
 					fileEntry.delete();
 					break;
 				} catch (KuraException e) {

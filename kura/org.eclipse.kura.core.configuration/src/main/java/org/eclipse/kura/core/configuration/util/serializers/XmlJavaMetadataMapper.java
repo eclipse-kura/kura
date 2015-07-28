@@ -134,7 +134,7 @@ public class XmlJavaMetadataMapper implements XmlJavaDataMapper{
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public <T> T unmarshal(Document doc) throws Exception {
+	public <T> T unmarshal(Document doc) {
 		Element metadata = doc.getDocumentElement();
 		Tmetadata tMetadata= parseMetadataAttributes(metadata);
 

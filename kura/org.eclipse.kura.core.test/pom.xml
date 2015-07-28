@@ -82,7 +82,7 @@
 		    <!-- This can be uncommented to debug the test in the event of a failure by telneting to port 5002 and seeing the state of the OSGi runtime 		    
                     <appArgLine>-consoleLog -console 5002 -noExit</appArgLine>
             -->
-		    <bundleStartLevel>
+            <bundleStartLevel>
 			<bundle>
 			    <id>org.eclipse.equinox.ds</id>
 			    <level>4</level>

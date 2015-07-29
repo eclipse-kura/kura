@@ -928,7 +928,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 		try {
 			xmlConfigs = loadEncryptedSnapshotFileContent(lastestID);
 		} catch (Exception e) {
-			s_logger.info("Snapshot not encrypted, trying to load a not encrypted one");
+			s_logger.info("Unable to decrypt snapshot! Fallback to unencrypted snapshots mode.");
 			try {
 				if (allSnapshotsUnencrypted()) {
 					encryptPlainSnapshots();
@@ -963,7 +963,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 			String decryptedContent = new String(m_cryptoService.decryptAes(entireFile.toCharArray()));
 			xmlConfigs = XmlUtil.unmarshal(decryptedContent, XmlComponentConfigurations.class);
 		} catch (KuraException e) {
-			throw new KuraException(KuraErrorCode.INTERNAL_ERROR);
+			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e.getMessage());
 		} catch (FileNotFoundException e) {
 			s_logger.error("Error loading file from disk: not found. Message: {}", e.getMessage());
 		} catch (IOException e) {

@@ -25,7 +25,7 @@ mv ${LOG} ${INSTALL_DIR}/kura/log/
 sync
 
 echo ""
-echo "Finished. KURA has been installed to /opt/eclipse/kura and will start automatically after a reboot"
+echo "Finished. KURA has been installed to ${INSTALL_DIR}/kura and will start automatically after a reboot"
 exit 0
 #############################################
 # END POST INSTALL SCRIPT

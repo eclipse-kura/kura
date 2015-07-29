@@ -127,11 +127,21 @@
             <entry key="osgi.bundles" operation="+"
                    value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.net.admin_${org.eclipse.kura.net.admin.version}.jar@5:start" />
         </propertyfile>
+        
+        <!-- Add mToolkit to config.ini -->
+        <propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
+            <entry key="osgi.bundles" operation="+"
+                   value=", reference:file:../plugins/org.tigris.mtoolkit.iagent.rpc_3.0.0.20110411-0918.jar@5:start" />
+        </propertyfile>
+        
+        
+        
         <propertyfile file="${project.build.directory}/${build.output.name}/dpa.properties"> 
             <entry key="kura"
                    value="file:${kura.install.dir}/kura/kura/packages/${build.output.name}.dp" />
         </propertyfile>
 		<available file="${project.build.directory}/plugins/org.eclipse.kura.web_${org.eclipse.kura.web.version}.jar" property="web.jar.present" />
+		
 		
 		<!-- Set web UI port -->
 		<antcall target="set-http-port" />

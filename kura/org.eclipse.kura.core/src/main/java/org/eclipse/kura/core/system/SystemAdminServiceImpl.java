@@ -34,7 +34,10 @@ public class SystemAdminServiceImpl implements SystemAdminService
 	
 	@SuppressWarnings("unused")
 	private ComponentContext      m_ctx;
-	
+
+	// Holds the full path of the KURAUtils.exe command 
+	private String winUtilCommand;
+
 	// ----------------------------------------------------------------
 	//
 	//   Dependencies
@@ -53,6 +56,8 @@ public class SystemAdminServiceImpl implements SystemAdminService
 		//
 		// save the bundle context
 		m_ctx = componentContext;
+
+		winUtilCommand = System.getProperty("user.dir") + "\\bin\\KURAUtils.exe";
 	}
 	
 	
@@ -77,7 +82,7 @@ public class SystemAdminServiceImpl implements SystemAdminService
 		if(this.getOsName().toLowerCase().contains(OS_WINDOWS))
 		{
 			try {
-				uptimeStr = runSystemCommand("C:\\opt\\eclipse\\kura\\bin\\KURAUtils.exe -up");
+				uptimeStr = runSystemCommand(winUtilCommand + " -up");
 			}
 
 			catch(Exception e) {

@@ -1,0 +1,12 @@
+# allow frontend (e.g., wpa_cli) to be used by all users in 'wheel' group
+ctrl_interface=/var/run/wpa_supplicant
+ctrl_interface_group=wheel
+
+# home network; allow all valid ciphers
+ap_scan=2
+network={
+    mode=KURA_MODE
+    ssid="KURA_ESSID"
+    key_mgmt=NONE
+    frequency=KURA_FREQUENCY
+}

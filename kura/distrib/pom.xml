@@ -174,6 +174,11 @@
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.kura.windows.net</artifactId>
+									<version>${org.eclipse.kura.windows.net.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
 									<artifactId>org.eclipse.kura.windows.position</artifactId>
 									<version>${org.eclipse.kura.windows.position.version}</version>
 								</artifactItem>
@@ -236,6 +241,7 @@
 							    <move file="target/plugins/org.eclipse.kura.net.admin.jar" tofile="target/plugins/org.eclipse.kura.net.admin_${org.eclipse.kura.net.admin.version}.jar"/>
 							    <move file="target/plugins/org.eclipse.kura.emulator.jar" tofile="target/plugins/org.eclipse.kura.emulator_${org.eclipse.kura.net.admin.version}.jar"/>
 							    <move file="target/plugins/org.eclipse.kura.protocol.modbus.jar" tofile="target/plugins/org.eclipse.kura.protocol.modbus_${org.eclipse.kura.protocol.modbus.version}.jar"/>
+							    <move file="target/plugins/org.eclipse.kura.windows.net.jar" tofile="target/plugins/org.eclipse.kura.windows.net_${org.eclipse.kura.windows.position.version}.jar"/>
 							    <move file="target/plugins/org.eclipse.kura.windows.position.jar" tofile="target/plugins/org.eclipse.kura.windows.position_${org.eclipse.kura.windows.position.version}.jar"/>
 							    <move file="target/plugins/org.eclipse.kura.web.jar" tofile="target/plugins/org.eclipse.kura.web_${org.eclipse.kura.web.version}.jar" failonerror="false" />
 							</tasks>
@@ -400,6 +406,29 @@
 					</resource>
 				</resources>
 				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-resources-plugin</artifactId>
+						<version>2.3</version>
+						<executions>
+							<execution>
+								<id>copy-resources</id>
+								<phase>validate</phase>
+								<goals>
+									<goal>copy-resources</goal>
+								</goals>
+								<configuration>
+									<outputDirectory>${basedir}/target/KURAUtils</outputDirectory>
+									<resources>
+										<resource>
+											<directory>${basedir}/../org.eclipse.kura.core/KURAUtils</directory>
+										</resource>
+									</resources>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+
 					<plugin>
 						<groupId>org.codehaus.mojo</groupId>
 						<artifactId>properties-maven-plugin</artifactId>

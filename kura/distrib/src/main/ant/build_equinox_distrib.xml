@@ -562,6 +562,8 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
         <replace file="${project.build.directory}/${build.output.name}/config.ini"
                  token="{org.eclipse.kura.web.version}" value="${org.eclipse.kura.web.version}"/>
         <replace file="${project.build.directory}/${build.output.name}/config.ini"
+                 token="{org.eclipse.kura.windows.net.version}" value="${org.eclipse.kura.windows.net.version}"/>
+        <replace file="${project.build.directory}/${build.output.name}/config.ini"
                  token="{org.eclipse.kura.windows.position.version}" value="${org.eclipse.kura.windows.position.version}"/>
         <propertyfile file="${project.build.directory}/${build.output.name}/dpa.properties"> 
             <entry key="kura"
@@ -602,7 +604,7 @@ java -Xms256m -Xmx256m -XX:MaxPermSize=256m -Dkura.os.version=win32 ^
             <zipfileset file="${project.build.directory}/${build.output.name}/jdk.dio.policy"
                         prefix="${build.output.name}/kura/" />
 
-        		<zipfileset file="${project.build.directory}/${build.output.name}/jdk.dio.properties"
+			<zipfileset file="${project.build.directory}/${build.output.name}/jdk.dio.properties"
                         prefix="${build.output.name}/kura/" />
 
             <zipfileset file="src/main/resources/common/kura_custom.properties"
@@ -688,7 +690,10 @@ java -Xms256m -Xmx256m -XX:MaxPermSize=256m -Dkura.os.version=win32 ^
             <zipfileset file="${project.build.directory}/${build.output.name}/start_kura.bat"
                         fullpath="${build.output.name}/bin/start_kura.bat" />
 
-            <zipfileset file="RELEASE_NOTES.txt"
+			<zipfileset file="${project.build.directory}/KURAUtils/KURAUtils.exe"
+						fullpath="${build.output.name}/bin/KURAUtils.exe" />
+
+		   <zipfileset file="RELEASE_NOTES.txt"
                         prefix="${build.output.name}/kura/" />
             <zipfileset file="notice.html"
                         prefix="${build.output.name}/" />
@@ -725,6 +730,8 @@ java -Xms256m -Xmx256m -XX:MaxPermSize=256m -Dkura.os.version=win32 ^
                         prefix="${build.output.name}/kura/plugins" />
             <zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.web_${org.eclipse.kura.web.version}.jar"
                         prefix="${build.output.name}/kura/plugins" />
+            <zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.windows.net_${org.eclipse.kura.windows.net.version}.jar"
+                        prefix="${build.output.name}/kura/plugins" />
             <zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.windows.position_${org.eclipse.kura.windows.position.version}.jar"
                         prefix="${build.output.name}/kura/plugins" />
             <zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.emulator_${org.eclipse.kura.emulator.version}.jar"
@@ -732,50 +739,6 @@ java -Xms256m -Xmx256m -XX:MaxPermSize=256m -Dkura.os.version=win32 ^
         </zip>
         <echo message="Building Kura Distribution for ${build.name}-jars..." />
         
-		<!-- Create installer script -->
-        <echo message="Creating Installer for ${build.name}" />
-<!--        <exec executable="${project.build.directory}/../src/main/sh/create_installer.sh">
-                <arg value="${project.build.directory}" />
-                <arg value="${build.output.name}.zip" />
-                <arg value="kura_${project.version}_${build.name}_installer.sh" />
-                <arg value="${build.name}" />
-        </exec> -->
-
-
-		<!-- Get version information for the bundles/files in this build -->
-<!--        <echo message="Gathering version information for the bundles/files in ${build.name}" />
-        <exec executable="src/main/sh/get_build_versions.sh">
-                <arg value="${project.build.directory}" />
-                <arg value="${build.output.name}.zip" />
-                <arg value="kura_${project.version}_${build.name}.catalog" />
-                <arg value="${build.name}" />
-        </exec> -->
-
-		<!-- Diff with the previous version -->
-        <property file="RELEASE_INFO/version.properties" />
-        <echo message="Diff version information with ${build.name} version ${project.version.previous}" />
-<!--    <exec executable="src/main/sh/diff_build_versions.sh">
-                <arg value="RELEASE_INFO/${project.version.previous}/kura_${project.version.previous}_${build.name}.catalog" />
-                <arg value="${project.build.directory}/${build.output.name}.catalog" />
-                <arg value="${project.build.directory}/kura_${project.version.previous}_to_${project.version}_${build.name}" />
-                <arg value="${build.name}" />
-        </exec> -->
-
-
-        <!-- Create upgrader -->
-        <echo message="Creating Upgrader for ${build.name}" />
-<!--    <exec executable="${project.build.directory}/../src/main/sh/create_upgrader.sh">
-                <arg value="${project.build.directory}" />
-                <arg value="${project.build.directory}/${build.output.name}.zip" />
-                <arg value="kura_${project.version}_${build.name}_upgrade.zip" />
-                <arg value="KURA_${project.version.previous}" />
-                <arg value="${kura.install.dir}" />
-                <arg value="${build.output.name}" />
-                <arg value="kura_${project.version.previous}_to_${project.version}_${build.name}.removed" />
-                <arg value="kura_${project.version.previous}_to_${project.version}_${build.name}.keep" />
-                <arg value="${build.output.name}_upgrader.sh" />
-                <arg value="${build.name}" />
-        </exec> -->
 
         <!-- Zip the upgrader -->
         <zip destfile="${project.build.directory}/${build.output.name}_upgrade.zip">

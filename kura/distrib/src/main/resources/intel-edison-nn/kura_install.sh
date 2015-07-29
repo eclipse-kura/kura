@@ -17,7 +17,8 @@ INSTALL_DIR=/home/root/eclipse
 ln -sf ${INSTALL_DIR}/kura_* ${INSTALL_DIR}/kura
 
 #set up Kura init
-cp ${INSTALL_DIR}/kura/install/kura.service.edison /etc/systemd/system/kura.service
+sed "s|^KURA_DIR=.*|KURA_DIR=${BASE_DIR}/${KURA_SYMLINK}|" ${BASE_DIR}/${KURA_SYMLINK}/install/kura.init.yocto > /etc/init.d/kura
+chmod +x /etc/init.d/kura
 chmod +x ${INSTALL_DIR}/kura/bin/*.sh
 
 #set up runlevels to start/stop Kura by default
@@ -28,6 +29,6 @@ cp ${INSTALL_DIR}/kura/install/logrotate.conf /etc/logrotate.conf
 cp ${INSTALL_DIR}/kura/install/kura.logrotate /etc/logrotate.d/kura
 
 #change ps command in start scripts
-sed -i 's/ps ax/ps/g' ${INSTALL_DIR}/kura/bin/start_kura.sh
-sed -i 's/ps ax/ps/g' ${INSTALL_DIR}/kura/bin/start_kura_background.sh
-sed -i 's/ps ax/ps/g' ${INSTALL_DIR}/kura/bin/start_kura_debug.sh
+sed -i 's/ps ax/ps/g' ${BASE_DIR}/${KURA_SYMLINK}/bin/start_kura.sh
+sed -i 's/ps ax/ps/g' ${BASE_DIR}/${KURA_SYMLINK}/bin/start_kura_background.sh
+sed -i 's/ps ax/ps/g' ${BASE_DIR}/${KURA_SYMLINK}/bin/start_kura_debug.sh

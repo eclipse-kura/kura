@@ -205,13 +205,14 @@ public class BeaconExample implements ConfigurableComponent, BluetoothBeaconComm
 			if (m_minInterval != null && m_maxInterval != null) {
 				m_bluetoothAdapter.setBeaconAdvertisingInterval(m_minInterval, m_maxInterval);
 			}
+
+			m_bluetoothAdapter.startBeaconAdvertising();
 			
 			if (m_uuid != null && m_major != null && m_minor != null && m_companyCode != null && m_txPower != null) {
 				m_bluetoothAdapter.setBeaconAdvertisingData(m_uuid, m_major, m_minor, m_companyCode, m_txPower, m_LELimited, (m_LELimited) ? false : true, 
 						m_BRSupported, m_BRController, m_BRHost);
 			}
 			
-			m_bluetoothAdapter.startBeaconAdvertising();
 		}
 		else
 			m_bluetoothAdapter.stopBeaconAdvertising();

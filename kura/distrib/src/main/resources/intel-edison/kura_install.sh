@@ -17,7 +17,7 @@ INSTALL_DIR=/home/root/eclipse
 ln -sf ${INSTALL_DIR}/kura_* ${INSTALL_DIR}/kura
 
 #set up Kura init
-cp ${INSTALL_DIR}/kura/install/kura.init.raspbian /etc/init.d/kura
+sed "s|^KURA_DIR=.*|KURA_DIR=${BASE_DIR}/${KURA_SYMLINK}|" ${BASE_DIR}/${KURA_SYMLINK}/install/kura.init.yocto > /etc/init.d/kura
 chmod +x /etc/init.d/kura
 chmod +x ${INSTALL_DIR}/kura/bin/*.sh
 
@@ -113,7 +113,7 @@ fi
 cp ${INSTALL_DIR}/kura/install/bind.init /etc/init.d/bind
 chmod +x /etc/init.d/bind
 
-#if [ ! -d /etc/bind ]; then 
+#if [ ! -d /etc/bind ]; then
 #    mkdir /etc/bind
 #fi
 cp ${INSTALL_DIR}/kura/install/named.conf /etc/named.conf
@@ -167,3 +167,8 @@ ln -sf ../init.d/kura S99kura			# this is not needed since monit handles this
 #set up logrotate - no need to restart as it is a cronjob
 cp ${INSTALL_DIR}/kura/install/logrotate.conf /etc/logrotate.conf
 cp ${INSTALL_DIR}/kura/install/kura.logrotate /etc/logrotate.d/kura
+
+#change ps command in start scripts
+sed -i 's/ps ax/ps/g' ${BASE_DIR}/${KURA_SYMLINK}/bin/start_kura.sh
+sed -i 's/ps ax/ps/g' ${BASE_DIR}/${KURA_SYMLINK}/bin/start_kura_background.sh
+sed -i 's/ps ax/ps/g' ${BASE_DIR}/${KURA_SYMLINK}/bin/start_kura_debug.sh

@@ -66,7 +66,7 @@ public class ConfigurationServiceTest extends TestCase implements IConfiguration
 	{
 		// Wait for OSGi dependencies
 		try {
-			dependencyLatch.await(5, TimeUnit.SECONDS);			
+			dependencyLatch.await(10, TimeUnit.SECONDS);			
 			while (s_countdown > 0) {
 				Thread.sleep(1000);
 				s_countdown -= 1000;

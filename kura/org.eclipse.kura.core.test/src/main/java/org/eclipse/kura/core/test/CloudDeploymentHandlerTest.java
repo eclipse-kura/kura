@@ -30,6 +30,7 @@ import org.eclipse.kura.core.deployment.XmlDeploymentPackages;
 import org.eclipse.kura.message.KuraPayload;
 import org.eclipse.kura.message.KuraResponsePayload;
 import org.eclipse.kura.test.annotation.TestTarget;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -118,14 +119,15 @@ public class CloudDeploymentHandlerTest extends TestCase {
 				CloudDeploymentHandler.APP_ID,
 				sb.toString(),
 				payload,
-				5000);
+				10000);
 
 		assertEquals(KuraResponsePayload.RESPONSE_CODE_OK, resp.getResponseCode());
 	}
 
+	@Ignore
 	@TestTarget(targetPlatforms={TestTarget.PLATFORM_ALL})
 	@Test
-	public void testGetPackages() throws Exception {
+	public void TestGetPackages() throws Exception {
 		
 		assertTrue(s_cloudCallService.isConnected());
 		
@@ -171,9 +173,10 @@ public class CloudDeploymentHandlerTest extends TestCase {
 		assertEquals(BUNDLE_VERSION, bundleInfos[0].getVersion());
 	}
 
+	@Ignore
 	@TestTarget(targetPlatforms={TestTarget.PLATFORM_ALL})
 	@Test
-	public void testGetBundles() throws Exception {
+	public void TestGetBundles() throws Exception {
 
 		assertTrue(s_cloudCallService.isConnected());
 		
@@ -294,7 +297,7 @@ public class CloudDeploymentHandlerTest extends TestCase {
 				CloudDeploymentHandler.APP_ID,
 				sb.toString(),
 				payload,
-				5000);
+				10000);
 		
 		assertEquals(KuraResponsePayload.RESPONSE_CODE_OK, resp.getResponseCode());
 		assertNull(s_deploymentAdmin.getDeploymentPackage(DP_NAME));

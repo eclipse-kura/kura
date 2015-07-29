@@ -18,7 +18,6 @@ public abstract class DeploymentPackageOptions {
 	
 	public static final String METRIC_DP_NAME = "dp.name";
 	public static final String METRIC_DP_VERSION = "dp.version";
-	public static final String METRIC_DP_POSTINSTALL = "dp.postinst";
 	public static final String METRIC_DP_DELETE = "dp.delete";
 	public static final String METRIC_DP_REBOOT = "dp.reboot";
 	public static final String METRIC_DP_REBOOT_DELAY = "dp.reboot.delay";

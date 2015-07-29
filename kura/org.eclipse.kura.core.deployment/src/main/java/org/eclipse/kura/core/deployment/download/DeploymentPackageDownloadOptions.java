@@ -105,10 +105,6 @@ public class DeploymentPackageDownloadOptions extends DeploymentPackageInstallOp
 			if (metric != null) {
 				super.setInstall((Boolean) metric);
 			}
-			metric = request.getMetric(METRIC_DP_POSTINSTALL);
-			if (metric != null) {
-				super.setPostInst((Boolean) metric);
-			}
 			metric = request.getMetric(METRIC_DP_DELETE);
 			if (metric != null) {
 				super.setDelete((Boolean) metric);

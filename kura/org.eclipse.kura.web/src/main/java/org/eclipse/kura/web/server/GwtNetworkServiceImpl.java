@@ -14,6 +14,7 @@ package org.eclipse.kura.web.server;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -916,6 +917,58 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 						} else if (wifiHotspotInfo.getSecurity() == WifiSecurity.SECURITY_WPA_WPA2) {
 							gwtWifiHotspotEntry.setSecurity("WPA/WPA2");
 						}
+						
+						GwtWifiCiphers gwtPairCiphers = null;
+						GwtWifiCiphers gwtGroupCiphers = null;
+						EnumSet<WifiSecurity>pairCiphers = wifiHotspotInfo.getPairCiphers();
+						Iterator<WifiSecurity> itPairCiphers = pairCiphers.iterator();
+						while (itPairCiphers.hasNext()) {
+							WifiSecurity cipher = itPairCiphers.next();
+							if (gwtPairCiphers == null) {
+								if (cipher == WifiSecurity.PAIR_TKIP) {
+									gwtPairCiphers = GwtWifiCiphers.netWifiCiphers_TKIP;
+								} else if (cipher == WifiSecurity.PAIR_CCMP) {
+									gwtPairCiphers = GwtWifiCiphers.netWifiCiphers_CCMP;
+								}
+							} else if (gwtPairCiphers == GwtWifiCiphers.netWifiCiphers_TKIP) {
+								if (cipher == WifiSecurity.PAIR_CCMP) {
+									gwtPairCiphers = GwtWifiCiphers.netWifiCiphers_CCMP_TKIP;
+								}
+							} else if (gwtPairCiphers == GwtWifiCiphers.netWifiCiphers_CCMP) {
+								if (cipher == WifiSecurity.PAIR_TKIP) {
+									gwtPairCiphers = GwtWifiCiphers.netWifiCiphers_CCMP_TKIP;
+								}
+							}
+						}
+						
+						EnumSet<WifiSecurity>groupCiphers = wifiHotspotInfo.getGroupCiphers();
+						Iterator<WifiSecurity> itGroupCiphers = groupCiphers.iterator();
+						while (itGroupCiphers.hasNext()) {
+							WifiSecurity cipher = itGroupCiphers.next();
+							if (gwtGroupCiphers == null) {
+								if (cipher == WifiSecurity.GROUP_TKIP) {
+									gwtGroupCiphers = GwtWifiCiphers.netWifiCiphers_TKIP;
+								} else if (cipher == WifiSecurity.GROUP_CCMP) {
+									gwtGroupCiphers = GwtWifiCiphers.netWifiCiphers_CCMP;
+								}
+							} else if (gwtGroupCiphers == GwtWifiCiphers.netWifiCiphers_TKIP) {
+								if (cipher == WifiSecurity.GROUP_CCMP) {
+									gwtGroupCiphers = GwtWifiCiphers.netWifiCiphers_CCMP_TKIP;
+								}
+							} else if (gwtGroupCiphers == GwtWifiCiphers.netWifiCiphers_CCMP) {
+								if (cipher == WifiSecurity.GROUP_TKIP) {
+									gwtGroupCiphers = GwtWifiCiphers.netWifiCiphers_CCMP_TKIP;
+								}
+							}
+						}
+						
+						if (gwtPairCiphers != null) { 
+							gwtWifiHotspotEntry.setPairwiseCiphers(gwtPairCiphers.name());
+						}
+						if (gwtGroupCiphers != null) {
+							gwtWifiHotspotEntry.setGroupCiphers(gwtGroupCiphers.name());
+						}
+						
 						gwtWifiHotspotsEntries.add(gwtWifiHotspotEntry);
 					}
 				}

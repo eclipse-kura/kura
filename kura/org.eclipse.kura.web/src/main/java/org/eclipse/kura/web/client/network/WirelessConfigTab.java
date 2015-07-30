@@ -1479,6 +1479,32 @@ public class WirelessConfigTab extends LayoutContainer
 	            				m_securityCombo.setSimpleValue(MessageUtils.get(GwtWifiSecurity.netWifiSecurityNONE.name()));
 	            			}
 	            			
+	            			if (security.equals("WPA") || security.equals("WPA2") || security.equals("WPA/WPA2")) {
+	            				GwtWifiCiphers pairwiseCiphers = wifiHotspotEntry.getPairwiseCiphersEnum();
+		            			if (pairwiseCiphers == GwtWifiCiphers.netWifiCiphers_TKIP) {
+		            				m_pairwiseCiphersCombo.setSimpleValue(MessageUtils.get(GwtWifiCiphers.netWifiCiphers_TKIP.name()));
+		            			} else if (pairwiseCiphers == GwtWifiCiphers.netWifiCiphers_CCMP) {
+		            				m_pairwiseCiphersCombo.setSimpleValue(MessageUtils.get(GwtWifiCiphers.netWifiCiphers_CCMP.name()));
+		            			} else if (pairwiseCiphers == GwtWifiCiphers.netWifiCiphers_CCMP_TKIP) {
+		            				m_pairwiseCiphersCombo.setSimpleValue(MessageUtils.get(GwtWifiCiphers.netWifiCiphers_CCMP_TKIP.name()));
+		            			} else {
+		            				// let's set it for CCMP TKIP
+		            				m_pairwiseCiphersCombo.setSimpleValue(MessageUtils.get(GwtWifiCiphers.netWifiCiphers_CCMP_TKIP.name()));
+		            			}
+		            			
+		            			GwtWifiCiphers groupCiphers = wifiHotspotEntry.getGroupCiphersEnum();
+		            			if (groupCiphers == GwtWifiCiphers.netWifiCiphers_TKIP) {
+		            				m_groupCiphersCombo.setSimpleValue(MessageUtils.get(GwtWifiCiphers.netWifiCiphers_TKIP.name()));
+		            			} else if (groupCiphers == GwtWifiCiphers.netWifiCiphers_CCMP) {
+		            				m_groupCiphersCombo.setSimpleValue(MessageUtils.get(GwtWifiCiphers.netWifiCiphers_CCMP.name()));
+		            			} else if (groupCiphers == GwtWifiCiphers.netWifiCiphers_CCMP_TKIP) {
+		            				m_groupCiphersCombo.setSimpleValue(MessageUtils.get(GwtWifiCiphers.netWifiCiphers_CCMP_TKIP.name()));
+		            			} else {
+		            				// let's set it for CCMP TKIP
+		            				m_groupCiphersCombo.setSimpleValue(MessageUtils.get(GwtWifiCiphers.netWifiCiphers_CCMP_TKIP.name()));
+		            			}
+	            			}
+	            			
 	            			// deselect all channels
 	        				for (int channel = 1; channel <= MAX_WIFI_CHANNEL; channel++) {
 	        					m_checkboxChannelSelectionModel.deselect(channel-1);

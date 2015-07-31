@@ -362,7 +362,7 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 			doGetPackages(reqPayload, respPayload);
 		} else if (resources[0].equals(RESOURCE_BUNDLES)) {
 			doGetBundles(reqPayload, respPayload);
-		}else {
+		} else {
 			s_logger.error("Bad request topic: {}", reqTopic.toString());
 			s_logger.error("Cannot find resource with name: {}", resources[0]);
 			respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_NOTFOUND);
@@ -466,10 +466,21 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 		}
 		m_downloadOptions = options;
 
-		if (s_pendingPackageUrl != null) {
-			s_logger.info("Another request seems still pending: {}. Checking if stale...", s_pendingPackageUrl);
+		if (s_pendingPackageUrl != null && s_pendingPackageUrl.equals(options.getDeployUrl())) {
+			s_logger.info("Another request seems for the same URL is pending: {}.", s_pendingPackageUrl);
 
 			response.setResponseCode(KuraResponsePayload.RESPONSE_CODE_OK);
+			response.setTimestamp(new Date());
+			response.addMetric(METRIC_DOWNLOAD_STATUS, DOWNLOAD_STATUS.IN_PROGRESS);
+			try {
+				response.setBody("The requested resource is already in download".getBytes("UTF-8"));
+			} catch (UnsupportedEncodingException e) {
+			}
+			return;
+		} else if (s_pendingPackageUrl != null && !s_pendingPackageUrl.equals(options.getDeployUrl())) {
+			s_logger.info("Another request is pending for a different URL: {}.", s_pendingPackageUrl);
+
+			response.setResponseCode(KuraResponsePayload.RESPONSE_CODE_ERROR);
 			response.setTimestamp(new Date());
 			response.addMetric(METRIC_DOWNLOAD_STATUS, DOWNLOAD_STATUS.IN_PROGRESS);
 			try {
@@ -809,8 +820,6 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 			String s = XmlUtil.marshal(xdps);
 
 			//s_logger.info("Getting resource {}: {}", RESOURCE_PACKAGES, s);
-
-			response = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK); 
 			response.setTimestamp(new Date());
 
 			try {
@@ -877,8 +886,6 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 			String s = XmlUtil.marshal(xmlBundles);
 
 			//s_logger.info("Getting resource {}: {}", RESOURCE_BUNDLES, s);
-
-			response = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK); 
 			response.setTimestamp(new Date());
 
 			try {
@@ -938,7 +945,6 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 		}
 
 		return dp;
-
 	}
 
 	private void addPackageToConfFile(String packageName, String packageUrl) {
@@ -961,7 +967,6 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 	}
 
 	private Properties loadInstallPersistance(File installedDpPersistance){
-
 		Properties downloadProperies= new Properties();
 		try {
 			downloadProperies.load(new FileReader(installedDpPersistance));
@@ -969,7 +974,6 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 			s_logger.error("Exception loading install configuration file", e);
 		}
 		return downloadProperies;
-
 	}
 
 	private void updateInstallPersistance(String fileName, DeploymentPackageOptions options){
@@ -1003,11 +1007,8 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 
 		try {
 			os = new FileOutputStream(dpFile);
-
 			downloadHelper = new DownloadCountingOutputStream(os, options, this, m_sslManagerService, url, downloadIndex);
-
 			downloadHelper.startWork();
-
 			downloadHelper.close();
 		} catch (Exception e) {
 			throw new Exception(e);
@@ -1020,60 +1021,6 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 				}
 			}
 		}
-	}
-
-	private File getDpDownloadFile(DeploymentPackageInstallOptions options) throws IOException {
-		// File dpFile = File.createTempFile("dpa", null);
-		String packageFilename = null;
-		if(!options.getSystemUpdate()){
-			String dpName= getFileName(options.getDpName(), options.getDpVersion(), ".dp");
-			packageFilename = new StringBuilder().append(File.separator)
-					.append("tmp")
-					.append(File.separator)
-					.append(dpName)
-					.toString();
-		} else {
-			String shName= getFileName(options.getDpName(), options.getDpVersion(), ".sh");
-			packageFilename = new StringBuilder().append(File.separator)
-					.append("tmp")
-					.append(File.separator)
-					.append(shName)
-					.toString();
-		}
-
-		File dpFile = new File(packageFilename);
-		return dpFile;
-	}
-
-	private File getDpVerifierFile(DeploymentPackageInstallOptions options) throws IOException {
-		// File dpFile = File.createTempFile("dpa", null);
-		String packageFilename = null;
-
-		String shName= getFileName(options.getDpName(), options.getDpVersion(), "_verifier.sh");
-		packageFilename = new StringBuilder().append(m_installVerificationDir)
-				.append(File.separator)
-				.append(shName)
-				.toString();
-
-		File dpFile = new File(packageFilename);
-		return dpFile;
-	}
-
-	private File getDpUninstallFile(DeploymentPackageUninstallOptions options) throws IOException {
-		// File dpFile = File.createTempFile("dpa", null);
-		String packageFilename = null;
-		packageFilename = getFileName(options.getDpName(), options.getDpVersion(), ".dp");
-
-		File dpFile = new File(packageFilename);
-		return dpFile;
-	}
-
-	private String getFileName(String dpName, String dpVersion, String extension) {
-		String packageFilename = null;
-		packageFilename = new StringBuilder().append(dpName).append("-")
-				.append(dpVersion)
-				.append(extension).toString();
-		return packageFilename;
 	}
 
 	private void downloadDeploymentPackageInternal(DeploymentPackageDownloadOptions options, boolean alreadyDownloaded, boolean forceDownload) throws Exception {
@@ -1367,5 +1314,61 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 		}
 
 		getCloudApplicationClient().controlPublish(options.getRequestClientId(), "NOTIFY/"+options.getClientId()+"/uninstall", notify, 2, DFLT_RETAIN, DFLT_PRIORITY);
+	}
+	
+	
+	//File Management
+	private File getDpDownloadFile(DeploymentPackageInstallOptions options) throws IOException {
+		// File dpFile = File.createTempFile("dpa", null);
+		String packageFilename = null;
+		if(!options.getSystemUpdate()){
+			String dpName= getFileName(options.getDpName(), options.getDpVersion(), ".dp");
+			packageFilename = new StringBuilder().append(File.separator)
+					.append("tmp")
+					.append(File.separator)
+					.append(dpName)
+					.toString();
+		} else {
+			String shName= getFileName(options.getDpName(), options.getDpVersion(), ".sh");
+			packageFilename = new StringBuilder().append(File.separator)
+					.append("tmp")
+					.append(File.separator)
+					.append(shName)
+					.toString();
+		}
+
+		File dpFile = new File(packageFilename);
+		return dpFile;
+	}
+
+	private File getDpVerifierFile(DeploymentPackageInstallOptions options) throws IOException {
+		// File dpFile = File.createTempFile("dpa", null);
+		String packageFilename = null;
+
+		String shName= getFileName(options.getDpName(), options.getDpVersion(), "_verifier.sh");
+		packageFilename = new StringBuilder().append(m_installVerificationDir)
+				.append(File.separator)
+				.append(shName)
+				.toString();
+
+		File dpFile = new File(packageFilename);
+		return dpFile;
+	}
+
+	private File getDpUninstallFile(DeploymentPackageUninstallOptions options) throws IOException {
+		// File dpFile = File.createTempFile("dpa", null);
+		String packageFilename = null;
+		packageFilename = getFileName(options.getDpName(), options.getDpVersion(), ".dp");
+
+		File dpFile = new File(packageFilename);
+		return dpFile;
+	}
+
+	private String getFileName(String dpName, String dpVersion, String extension) {
+		String packageFilename = null;
+		packageFilename = new StringBuilder().append(dpName).append("-")
+				.append(dpVersion)
+				.append(extension).toString();
+		return packageFilename;
 	}
 }

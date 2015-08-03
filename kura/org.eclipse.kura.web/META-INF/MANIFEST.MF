@@ -81,4 +81,4 @@ Import-Package: com.allen_sauer.gwt.log.client,
  org.slf4j;version="1.6.4"
 Bundle-ClassPath: .,
   lib/gxt-2.2.5.jar,
-  target/org.eclipse.kura.web-1.0.5-SNAPSHOT/WEB-INF/lib/gxt-2.2.5.jar
+  target/org.eclipse.kura.web-1.0.5/WEB-INF/lib/gxt-2.2.5.jar

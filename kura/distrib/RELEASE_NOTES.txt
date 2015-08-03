@@ -5,7 +5,6 @@ Added Features :
   * Added Bluetooth LE Beacon Service
     * Example: org.eclipse.kura.example.beacon
   * Reduced number of dependencies for Bluetooth LE bundle
-  * Added support for Intel Edison with network manager
   * Added support for non cfg80211 wifi modules
   * Added support for wifi on Raspberry Pi
   * Added support for Oracle Java 8 SE Compact 2 Profile runtime
@@ -24,6 +23,8 @@ Known Issues :
   * BLE only tested on the Raspberry Pi B with a Broadcom BCM20702 USB dongle and the TI SensorTag.
     The only working version of BlueZ is 4.101. The deb package is not available from Raspbian so it
     must be compiled from sources.
+  * WiFi on Raspberry Pi only tested with WiPi WiFi Dongle (Realink RT5370 chipset) and official Pi USB WiFi Dongle (Broadcom BCM43143 chipset).
+    AccessPoint WiFi mode not working for Broadcom chipest.
   * The reference JVM is Oracle Java SE Embedded version 7 Update 40.
     Later versions (including Oracle Java SE Embedded version 8 Update 33)
     may be affected by a ProcessBuilder memory leak [1]

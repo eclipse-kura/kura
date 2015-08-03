@@ -1,0 +1,47 @@
+#! /bin/sh
+#
+# This is an init script for openembedded
+# Copy it to /etc/init.d/kura and type
+# > update-rc.d kura defaults 99
+#
+
+KURA_DIR=/opt/eclipse/kura
+
+kura=${KURA_DIR}/bin/start_kura_background.sh
+pidfile=/var/run/kura.pid
+kura_args=""
+
+export PATH=$PATH:/usr/java/bin
+
+test -x "$kura" || exit 0
+
+case "$1" in
+  start)
+    echo -n "Starting Kura"
+    start-stop-daemon --start --quiet --exec $kura -- $kura_args
+    RETVAL=$?
+    echo "."
+    ;;
+  stop)
+    echo -n "Stopping Kura"
+    ((echo "stop 0"; sleep 10) | telnet localhost 5002) > /dev/null 2>&1
+    start-stop-daemon --stop --quiet --pidfile $pidfile
+    RETVAL=$?
+    echo "."
+    ;;
+  restart)
+    $0 stop
+    $0 start
+    RETVAL=$?
+    ;;
+  status)
+    $kura $kura_args status
+    RETVAL=$?
+    echo "."
+    ;;
+  *)
+    echo "Usage: $0 {start|stop|restart|status}"
+    exit 1
+esac
+
+exit $RETVAL

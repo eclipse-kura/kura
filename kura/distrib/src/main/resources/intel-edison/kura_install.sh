@@ -16,8 +16,13 @@ INSTALL_DIR=/home/root/eclipse
 #create known kura install location
 ln -sf ${INSTALL_DIR}/kura_* ${INSTALL_DIR}/kura
 
+#create /etc/init.d/ folder
+if [ ! -d /etc/init.d ]; then
+    mkdir -p /etc/init.d
+fi
+
 #set up Kura init
-sed "s|^KURA_DIR=.*|KURA_DIR=${BASE_DIR}/${KURA_SYMLINK}|" ${BASE_DIR}/${KURA_SYMLINK}/install/kura.init.yocto > /etc/init.d/kura
+sed "s|^KURA_DIR=.*|KURA_DIR=${INSTALL_DIR}/kura|" ${INSTALL_DIR}/kura/install/kura.init.yocto > /etc/init.d/kura
 chmod +x /etc/init.d/kura
 chmod +x ${INSTALL_DIR}/kura/bin/*.sh
 
@@ -67,14 +72,10 @@ cp ${INSTALL_DIR}/kura/install/firewall.init /etc/init.d/firewall
 chmod +x /etc/init.d/firewall
 cp /etc/init.d/firewall ${INSTALL_DIR}/kura/.data/firewall
 
-#set up kuraprep
-cp ${INSTALL_DIR}/kura/install/kuraprep.init /etc/init.d/kuraprep
-chmod +x /etc/init.d/kuraprep
-
 #set up networking configuration
 mac_addr=$(head /sys/class/net/usb0/address | tr '[:lower:]' '[:upper:]')
 sed "s/^ssid=kura_gateway.*/ssid=kura_gateway_${mac_addr}/" < ${INSTALL_DIR}/kura/install/hostapd.conf > /etc/hostapd/hostapd.conf
-cp /etc/hostapd.conf ${INSTALL_DIR}/kura/.data/hostapd.conf
+cp /etc/hostapd/hostapd.conf ${INSTALL_DIR}/kura/.data/hostapd.conf
 
 cp ${INSTALL_DIR}/kura/install/udhcpd-for-hostapd.service /lib/systemd/system/udhcpd-for-hostapd.service
 
@@ -141,23 +142,37 @@ if ! grep -q 'bind' $GroupFile; then
 fi
 
 #set up runlevels to start/stop Kura by default
-#set up runlevels to stop Kura by default
+if [ ! -d /etc/rc0.d ]; then
+    mkdir -p /etc/rc0.d
+fi
 cd /etc/rc0.d
 #ln -sf ../init.d/monit K08monit
 ln -sf ../init.d/kura K09kura
+if [ ! -d /etc/rc6.d ]; then
+    mkdir -p /etc/rc6.d
+fi
 cd /etc/rc6.d
 #ln -sf ../init.d/monit K08monit
 ln -sf ../init.d/kura K09kura
 
 #set up runlevels to start Kura by default
+if [ ! -d /etc/rc2.d ]; then
+    mkdir -p /etc/rc2.d
+fi
 cd /etc/rc2.d
 ln -sf ../init.d/firewall S25firewall
 ln -sf ../init.d/kura S99kura			# this is not needed since monit handles this
 #ln -sf ../init.d/monit S99monit
+if [ ! -d /etc/rc3.d ]; then
+    mkdir -p /etc/rc3.d
+fi
 cd ../rc3.d
 ln -sf ../init.d/firewall S25firewall
 ln -sf ../init.d/kura S99kura			# this is not needed since monit handles this
 #ln -sf ../init.d/monit S99monit
+if [ ! -d /etc/rc5.d ]; then
+    mkdir -p /etc/rc5.d
+fi
 cd ../rc5.d
 ln -sf ../init.d/firewall S25firewall
 ln -sf ../init.d/kura S99kura			# this is not needed since monit handles this
@@ -166,9 +181,12 @@ ln -sf ../init.d/kura S99kura			# this is not needed since monit handles this
 
 #set up logrotate - no need to restart as it is a cronjob
 cp ${INSTALL_DIR}/kura/install/logrotate.conf /etc/logrotate.conf
+if [ ! -d /etc/logrotate.d/ ]; then
+    mkdir -p /etc/logrotate.d/
+fi
 cp ${INSTALL_DIR}/kura/install/kura.logrotate /etc/logrotate.d/kura
 
 #change ps command in start scripts
-sed -i 's/ps ax/ps/g' ${BASE_DIR}/${KURA_SYMLINK}/bin/start_kura.sh
-sed -i 's/ps ax/ps/g' ${BASE_DIR}/${KURA_SYMLINK}/bin/start_kura_background.sh
-sed -i 's/ps ax/ps/g' ${BASE_DIR}/${KURA_SYMLINK}/bin/start_kura_debug.sh
+sed -i 's/ps ax/ps/g' ${INSTALL_DIR}/kura/bin/start_kura.sh
+sed -i 's/ps ax/ps/g' ${INSTALL_DIR}/kura/bin/start_kura_background.sh
+sed -i 's/ps ax/ps/g' ${INSTALL_DIR}/kura/bin/start_kura_debug.sh

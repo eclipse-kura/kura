@@ -56,11 +56,7 @@ public class DeploymentPackageInstallOptions extends DeploymentPackageOptions{
 		}
 		
 		try {
-			Object metric = request.getMetric(METRIC_DP_DELETE);
-			if (metric != null) {
-				super.setDelete((Boolean) metric);
-			}
-			metric = request.getMetric(METRIC_DP_REBOOT);
+			Object metric = request.getMetric(METRIC_DP_REBOOT);
 			if (metric != null) {
 				super.setReboot((Boolean) metric);
 			}

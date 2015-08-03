@@ -22,16 +22,18 @@ import org.eclipse.kura.message.KuraRequestPayload;
 public class DeploymentPackageDownloadOptions extends DeploymentPackageInstallOptions{
 
 	// Metrics in RESOURCE_DOWNLOAD
-	public static final String METRIC_DEPLOY_URL = "dp.url";
-	public static final String METRIC_BLOCK_SIZE = "dp.http.block.size";
-	public static final String METRIC_BLOCK_DELAY = "dp.http.block.delay";
-	public static final String METRIC_HTTP_TIMEOUT = "dp.http.timeout";
-	public static final String METRIC_HTTP_RESUME = "dp.http.resume";
-	public static final String METRIC_HTTP_USER = "dp.http.username";
-	public static final String METRIC_HTTP_PASSWORD = "dp.http.password";
+	public static final String METRIC_DP_DOWNLOAD_URL = "dp.download.url";
+	public static final String METRIC_DP_DOWNLOAD_BLOCK_SIZE = "dp.download.block.size";
+	public static final String METRIC_DP_DOWNLOAD_BLOCK_DELAY = "dp.download.block.delay";
+	public static final String METRIC_DP_DOWNLOAD_TIMEOUT = "dp.download.timeout";
+	public static final String METRIC_DP_DOWNLOAD_RESUME = "dp.download.resume";
+	public static final String METRIC_DP_DOWNLOAD_USER = "dp.download.username";
+	public static final String METRIC_DP_DOWNLOAD_PASSWORD = "dp.download.password";
+	public static final String METRIC_DP_DOWNLOAD_NOTIFY_BLOCK_SIZE = "dp.download.notify.block.size";
+	public static final String METRIC_DP_DOWNLOAD_FORCE_DOWNLOAD = "dp.download.force.download";
+	public static final String METRIC_DP_DOWNLOAD_HASH_ALGORITHM = "dp.download.hash.algorithm";
+	public static final String METRIC_DP_DOWNLOAD_HASH_VALUE = "dp.download.hash.value";
 	public static final String METRIC_DP_INSTALL = "dp.install";
-	public static final String METRIC_DP_NOTIFY_BLOCK_SIZE = "dp.http.notify.block.size";
-	public static final String METRIC_DP_HTTP_FORCE_DOWNLOAD = "dp.http.force.download";
 
 	
 	private String deployUrl;
@@ -43,6 +45,9 @@ public class DeploymentPackageDownloadOptions extends DeploymentPackageInstallOp
 	private String username = null;
 	private String password = null;
 	private boolean forceDownload = false;
+	
+	private String hashAlgorithm;
+	private String hashValue;
 
 	public DeploymentPackageDownloadOptions(String deployUrl, String dpName, String dpVersion) {
 		super(deployUrl, dpName, dpVersion);
@@ -50,7 +55,7 @@ public class DeploymentPackageDownloadOptions extends DeploymentPackageInstallOp
 
 	public DeploymentPackageDownloadOptions(KuraPayload request) throws KuraException {
 		super(null, null, null);
-		deployUrl = (String) request.getMetric(METRIC_DEPLOY_URL);
+		deployUrl = (String) request.getMetric(METRIC_DP_DOWNLOAD_URL);
 		if (deployUrl == null) {
 			throw new KuraInvalidMessageException("Missing deployment package URL!");
 		}
@@ -75,39 +80,42 @@ public class DeploymentPackageDownloadOptions extends DeploymentPackageInstallOp
 			throw new KuraInvalidMessageException("Missing SystemUpdate!");
 		}
 		
-
 		try {
-			Object metric = request.getMetric(METRIC_BLOCK_SIZE);
+			Object metric = request.getMetric(METRIC_DP_DOWNLOAD_BLOCK_SIZE);
 			if (metric != null) {
 				blockSize = (Integer) metric;
 			}
-			metric = request.getMetric(METRIC_BLOCK_DELAY);
+			metric = request.getMetric(METRIC_DP_DOWNLOAD_BLOCK_DELAY);
 			if (metric != null) {
 				blockDelay = (Integer) metric;
 			}
-			metric = request.getMetric(METRIC_HTTP_TIMEOUT);
+			metric = request.getMetric(METRIC_DP_DOWNLOAD_TIMEOUT);
 			if (metric != null) {
 				timeout = (Integer) metric;
 			}
-			metric = request.getMetric(METRIC_HTTP_RESUME);
+			metric = request.getMetric(METRIC_DP_DOWNLOAD_RESUME);
 			if (metric != null) {
 				super.setResume((Boolean) metric);
 			}
-			metric = request.getMetric(METRIC_HTTP_USER);
+			metric = request.getMetric(METRIC_DP_DOWNLOAD_USER);
 			if (metric != null) {
 				username = (String) metric;
 			}
-			metric = request.getMetric(METRIC_HTTP_PASSWORD);
+			metric = request.getMetric(METRIC_DP_DOWNLOAD_PASSWORD);
 			if (metric != null) {
 				password = (String) metric;
+			}
+			metric = request.getMetric(METRIC_DP_DOWNLOAD_HASH_ALGORITHM);
+			if (metric != null) {
+				hashAlgorithm = (String) metric;
+			}
+			metric = request.getMetric(METRIC_DP_DOWNLOAD_HASH_VALUE);
+			if (metric != null) {
+				hashValue = (String) metric;
 			}
 			metric = request.getMetric(METRIC_DP_INSTALL);
 			if (metric != null) {
 				super.setInstall((Boolean) metric);
-			}
-			metric = request.getMetric(METRIC_DP_DELETE);
-			if (metric != null) {
-				super.setDelete((Boolean) metric);
 			}
 			metric = request.getMetric(METRIC_DP_REBOOT);
 			if (metric != null) {
@@ -117,12 +125,12 @@ public class DeploymentPackageDownloadOptions extends DeploymentPackageInstallOp
 			if (metric != null) {
 				super.setRebootDelay((Integer) metric);
 			}
-			metric = request.getMetric(METRIC_DP_HTTP_FORCE_DOWNLOAD);
+			metric = request.getMetric(METRIC_DP_DOWNLOAD_FORCE_DOWNLOAD);
 			if (metric != null) {
 				forceDownload = (Boolean) metric;
 			}
 
-			metric = request.getMetric(METRIC_DP_NOTIFY_BLOCK_SIZE);
+			metric = request.getMetric(METRIC_DP_DOWNLOAD_NOTIFY_BLOCK_SIZE);
 			if (metric != null) {
 				notifyBlockSize = (Integer) metric;
 			}
@@ -200,5 +208,21 @@ public class DeploymentPackageDownloadOptions extends DeploymentPackageInstallOp
 
 	public void setPassword(String password) {
 		this.password = password;
+	}
+	
+	public String getHashAlgorithm() {
+		return hashAlgorithm;
+	}
+
+	public void setHashAlgorithm(String hashProtocol) {
+		this.hashAlgorithm = hashProtocol;
+	}
+	
+	public String getHashValue() {
+		return hashValue;
+	}
+
+	public void setHashValue(String hashValue) {
+		this.hashValue = hashValue;
 	}
 }

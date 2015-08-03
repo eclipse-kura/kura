@@ -21,7 +21,8 @@ import junit.framework.TestCase;
 import org.eclipse.kura.cloud.CloudCallService;
 import org.eclipse.kura.cloud.CloudletTopic;
 import org.eclipse.kura.core.configuration.util.XmlUtil;
-import org.eclipse.kura.core.deployment.CloudDeploymentHandler;
+import org.eclipse.kura.core.deployment.CloudDeploymentHandlerV2;
+import org.eclipse.kura.core.deployment.download.DeploymentPackageDownloadOptions;
 import org.eclipse.kura.core.deployment.xml.XmlBundle;
 import org.eclipse.kura.core.deployment.xml.XmlBundleInfo;
 import org.eclipse.kura.core.deployment.xml.XmlBundles;
@@ -106,16 +107,16 @@ public class CloudDeploymentHandlerTest extends TestCase {
 		
 		StringBuilder sb = new StringBuilder(CloudletTopic.Method.EXEC.toString())
 		.append("/")
-		.append(CloudDeploymentHandler.RESOURCE_INSTALL);
+		.append(CloudDeploymentHandlerV2.RESOURCE_INSTALL);
 		
 		URL packageUrl = getTestDpUrl();
 		
 		KuraPayload payload = new KuraPayload();
 
-		payload.addMetric(CloudDeploymentHandler.METRIC_INSTALL_COMMAND_URL, packageUrl.toString());
+		payload.addMetric(DeploymentPackageDownloadOptions.METRIC_DP_DOWNLOAD_URL, packageUrl.toString());
 
 		KuraResponsePayload resp = s_cloudCallService.call(
-				CloudDeploymentHandler.APP_ID,
+				CloudDeploymentHandlerV2.APP_ID,
 				sb.toString(),
 				payload,
 				5000);
@@ -137,10 +138,10 @@ public class CloudDeploymentHandlerTest extends TestCase {
 		
 		StringBuilder sb = new StringBuilder(CloudletTopic.Method.GET.toString())
 		.append("/")
-		.append(CloudDeploymentHandler.RESOURCE_PACKAGES);
+		.append(CloudDeploymentHandlerV2.RESOURCE_PACKAGES);
 		
 		KuraResponsePayload resp = s_cloudCallService.call(
-				CloudDeploymentHandler.APP_ID,
+				CloudDeploymentHandlerV2.APP_ID,
 				sb.toString(),
 				null,
 				5000);
@@ -185,10 +186,10 @@ public class CloudDeploymentHandlerTest extends TestCase {
 		
 		StringBuilder sb = new StringBuilder(CloudletTopic.Method.GET.toString())
 		.append("/")
-		.append(CloudDeploymentHandler.RESOURCE_BUNDLES);
+		.append(CloudDeploymentHandlerV2.RESOURCE_BUNDLES);
 		
 		KuraResponsePayload resp = s_cloudCallService.call(
-				CloudDeploymentHandler.APP_ID,
+				CloudDeploymentHandlerV2.APP_ID,
 				sb.toString(),
 				null,
 				5000);
@@ -239,12 +240,12 @@ public class CloudDeploymentHandlerTest extends TestCase {
 		
 		StringBuilder sb = new StringBuilder(CloudletTopic.Method.EXEC.toString())
 		.append("/")
-		.append(CloudDeploymentHandler.RESOURCE_STOP)
+		.append(CloudDeploymentHandlerV2.RESOURCE_STOP)
 		.append("/")
 		.append(bundle.getBundleId());
 		
 		KuraResponsePayload resp = s_cloudCallService.call(
-				CloudDeploymentHandler.APP_ID,
+				CloudDeploymentHandlerV2.APP_ID,
 				sb.toString(),
 				null,
 				5000);
@@ -256,12 +257,12 @@ public class CloudDeploymentHandlerTest extends TestCase {
 		// Start
 		sb = new StringBuilder(CloudletTopic.Method.EXEC.toString())
 		.append("/")
-		.append(CloudDeploymentHandler.RESOURCE_START)
+		.append(CloudDeploymentHandlerV2.RESOURCE_START)
 		.append("/")
 		.append(bundle.getBundleId());
 		
 		resp = s_cloudCallService.call(
-				CloudDeploymentHandler.APP_ID,
+				CloudDeploymentHandlerV2.APP_ID,
 				sb.toString(),
 				null,
 				5000);
@@ -285,13 +286,13 @@ public class CloudDeploymentHandlerTest extends TestCase {
 		
 		StringBuilder sb = new StringBuilder(CloudletTopic.Method.EXEC.toString())
 		.append("/")
-		.append(CloudDeploymentHandler.RESOURCE_UNINSTALL);
+		.append(CloudDeploymentHandlerV2.RESOURCE_UNINSTALL);
 		
 		KuraPayload payload = new KuraPayload();
 		payload.setBody("org.eclipse.kura.test.helloworld".getBytes("UTF-8"));
 		
 		KuraResponsePayload resp = s_cloudCallService.call(
-				CloudDeploymentHandler.APP_ID,
+				CloudDeploymentHandlerV2.APP_ID,
 				sb.toString(),
 				payload,
 				5000);

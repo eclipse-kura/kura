@@ -53,12 +53,14 @@ import org.eclipse.kura.core.deployment.xml.XmlDeploymentPackages;
 import org.eclipse.kura.core.deployment.xml.XmlUtil;
 import org.eclipse.kura.core.util.ProcessUtil;
 import org.eclipse.kura.core.util.SafeProcess;
+import org.eclipse.kura.core.util.ThrowableUtil;
 import org.eclipse.kura.data.DataTransportService;
 import org.eclipse.kura.message.KuraRequestPayload;
 import org.eclipse.kura.message.KuraResponsePayload;
 import org.eclipse.kura.ssl.SslManagerService;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleException;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.ComponentException;
 import org.osgi.service.deploymentadmin.BundleInfo;
@@ -71,7 +73,7 @@ import org.slf4j.LoggerFactory;
 public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListener {
 
 	private static final Logger s_logger = LoggerFactory.getLogger(CloudDeploymentHandlerV2.class);
-	private static final String APP_ID = "DEPLOY-V2";
+	public static final String APP_ID = "DEPLOY-V2";
 
 	private static final String DPA_CONF_PATH_PROPNAME = "dpa.configuration";
 	private static final String KURA_CONF_URL_PROPNAME = "kura.configuration";
@@ -89,6 +91,8 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 	public static final String RESOURCE_INSTALL = "install";
 	public static final String RESOURCE_UNINSTALL = "uninstall";
 	public static final String RESOURCE_CANCEL = "cancel";
+	public static final String RESOURCE_START     = "start";
+	public static final String RESOURCE_STOP      = "stop";
 
 	/* Metrics in the REPLY to RESOURCE_DOWNLOAD */
 	public static final String METRIC_DOWNLOAD_STATUS = "download.status";
@@ -383,6 +387,7 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 			return;
 		}
 
+		String bundleId = resources[1];
 		if (resources[0].equals(RESOURCE_DOWNLOAD)) {
 
 			doExecDownload(reqPayload, respPayload);
@@ -399,7 +404,11 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 
 			doExecUninstall(reqPayload, respPayload);
 
-		} else {
+		} else if (resources[0].equals(RESOURCE_START)) {
+			doExecStartStopBundle(reqPayload, respPayload, true, bundleId);
+		} else if (resources[0].equals(RESOURCE_STOP)) {
+			doExecStartStopBundle(reqPayload, respPayload, false, bundleId);
+		}else {
 			s_logger.error("Bad request topic: {}", reqTopic.toString());
 			s_logger.error("Cannot find resource with name: {}", resources[0]);
 			respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_NOTFOUND);
@@ -720,6 +729,55 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 				response.setBody("Package name parameter missing".getBytes("UTF-8"));
 			} catch (UnsupportedEncodingException e) {
 				// Ignore
+			}
+		}
+	}
+
+	private void doExecStartStopBundle(KuraRequestPayload request, KuraResponsePayload response, boolean start, String bundleId) {
+		if (bundleId == null) {
+			s_logger.info("EXEC start/stop bundle: null bundle ID");
+
+			response.setResponseCode(KuraResponsePayload.RESPONSE_CODE_BAD_REQUEST);
+
+			response.setTimestamp(new Date());
+		} else {
+			Long id = null;
+			try {
+				id = Long.valueOf(bundleId);
+			} catch (NumberFormatException e){
+
+				s_logger.error("EXEC start/stop bundle: bad bundle ID format: {}", e);
+				response.setResponseCode(KuraResponsePayload.RESPONSE_CODE_BAD_REQUEST);
+				response.setTimestamp(new Date());
+				response.setExceptionMessage(e.getMessage());
+				response.setExceptionStack(ThrowableUtil.stackTraceAsString(e));
+			}
+
+			if (id != null) {
+
+				s_logger.info("Executing command {}", start ? RESOURCE_START : RESOURCE_STOP);
+
+				Bundle bundle = m_bundleContext.getBundle(id);
+				if (bundle == null) {
+					s_logger.error("Bundle ID {} not found", id);
+					response.setResponseCode(KuraResponsePayload.RESPONSE_CODE_NOTFOUND);
+					response.setTimestamp(new Date());
+				} else {
+					try {
+						if (start) {
+							bundle.start();
+						} else {
+							bundle.stop();
+						}
+						s_logger.info("{} bundle ID {} ({})", new Object[] {start ? "Started" : "Stopped", id, bundle.getSymbolicName()});
+						response.setResponseCode(KuraResponsePayload.RESPONSE_CODE_OK);
+						response.setTimestamp(new Date());
+					} catch (BundleException e) {
+						s_logger.error("Failed to {} bundle {}: {}", new Object[] {start ? "start" : "stop", id, e});
+						response.setResponseCode(KuraResponsePayload.RESPONSE_CODE_ERROR);
+						response.setTimestamp(new Date());
+					}
+				}				
 			}
 		}
 	}

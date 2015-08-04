@@ -30,9 +30,8 @@ public class DeploymentPackageDownloadOptions extends DeploymentPackageInstallOp
 	public static final String METRIC_DP_DOWNLOAD_USER = "dp.download.username";
 	public static final String METRIC_DP_DOWNLOAD_PASSWORD = "dp.download.password";
 	public static final String METRIC_DP_DOWNLOAD_NOTIFY_BLOCK_SIZE = "dp.download.notify.block.size";
-	public static final String METRIC_DP_DOWNLOAD_FORCE_DOWNLOAD = "dp.download.force.download";
-	public static final String METRIC_DP_DOWNLOAD_HASH_ALGORITHM = "dp.download.hash.algorithm";
-	public static final String METRIC_DP_DOWNLOAD_HASH_VALUE = "dp.download.hash.value";
+	public static final String METRIC_DP_DOWNLOAD_FORCE_DOWNLOAD = "dp.download.force";
+	public static final String METRIC_DP_DOWNLOAD_HASH = "dp.download.hash";
 	public static final String METRIC_DP_INSTALL = "dp.install";
 
 	
@@ -45,9 +44,8 @@ public class DeploymentPackageDownloadOptions extends DeploymentPackageInstallOp
 	private String username = null;
 	private String password = null;
 	private boolean forceDownload = false;
-	
-	private String hashAlgorithm;
-	private String hashValue;
+
+	private String hash;
 
 	public DeploymentPackageDownloadOptions(String deployUrl, String dpName, String dpVersion) {
 		super(deployUrl, dpName, dpVersion);
@@ -105,13 +103,9 @@ public class DeploymentPackageDownloadOptions extends DeploymentPackageInstallOp
 			if (metric != null) {
 				password = (String) metric;
 			}
-			metric = request.getMetric(METRIC_DP_DOWNLOAD_HASH_ALGORITHM);
+			metric = request.getMetric(METRIC_DP_DOWNLOAD_HASH);
 			if (metric != null) {
-				hashAlgorithm = (String) metric;
-			}
-			metric = request.getMetric(METRIC_DP_DOWNLOAD_HASH_VALUE);
-			if (metric != null) {
-				hashValue = (String) metric;
+				hash = (String) metric;
 			}
 			metric = request.getMetric(METRIC_DP_INSTALL);
 			if (metric != null) {
@@ -210,19 +204,11 @@ public class DeploymentPackageDownloadOptions extends DeploymentPackageInstallOp
 		this.password = password;
 	}
 	
-	public String getHashAlgorithm() {
-		return hashAlgorithm;
+	public String getHash() {
+		return hash;
 	}
 
-	public void setHashAlgorithm(String hashProtocol) {
-		this.hashAlgorithm = hashProtocol;
-	}
-	
-	public String getHashValue() {
-		return hashValue;
-	}
-
-	public void setHashValue(String hashValue) {
-		this.hashValue = hashValue;
+	public void setHash(String hash) {
+		this.hash = hash;
 	}
 }

@@ -506,7 +506,6 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 		}
 
 		boolean alreadyDownloaded = false;
-		boolean forceDownload = options.isDownloadForced();
 
 		try {
 			alreadyDownloaded = deploymentPackageAlreadyDownloaded(options);
@@ -522,7 +521,6 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 		}
 
 		final boolean alreadyDownloadedFinal = alreadyDownloaded;
-		final boolean forceDownloadFinal = forceDownload;
 
 		s_logger.info("About to download and install package at URL {}", options.getDeployUrl());
 
@@ -539,7 +537,7 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 				@Override
 				public void run() {
 					try {
-						downloadDeploymentPackageInternal(options, alreadyDownloadedFinal, forceDownloadFinal);
+						downloadDeploymentPackageInternal(options, alreadyDownloadedFinal);
 					} catch (KuraException e) {
 
 					} finally{
@@ -1079,16 +1077,29 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 			}
 		}
 
-		if(options.getHashAlgorithm() != null){
-			String checksum= HashUtil.hash(options.getHashAlgorithm(), dpFile);
-			String cloudHashValue= options.getHashValue();
-			if(!checksum.equals(cloudHashValue)){
-				throw new KuraException(KuraErrorCode.INTERNAL_ERROR, null, "Failed to verify checksum with algorithm: " + options.getHashAlgorithm());
+		if(options.getHash() != null){
+			String[] hashAlgorithmValue= options.getHash().split(":");
+
+			String hashAlgorithm= null;
+			String hashValue= null;
+			if(hashAlgorithmValue.length == 2){
+				hashAlgorithm= hashAlgorithmValue[0].trim();
+				hashValue= hashAlgorithmValue[1].trim();
+			}
+			s_logger.info("--> Going to verify hash signature!");
+			try{
+				String checksum= HashUtil.hash(hashAlgorithm, dpFile);
+				if(hashAlgorithm == null || hashValue== null || !checksum.equals(hashValue)){
+					throw new KuraException(KuraErrorCode.INTERNAL_ERROR, null, "Failed to verify checksum with algorithm: " + hashAlgorithm);
+				}
+			}catch(Exception e){
+				dpFile.delete();
+				throw e;
 			}
 		}
 	}
 
-	private void downloadDeploymentPackageInternal(DeploymentPackageDownloadOptions options, boolean alreadyDownloaded, boolean forceDownload) throws KuraException{
+	private void downloadDeploymentPackageInternal(DeploymentPackageDownloadOptions options, boolean alreadyDownloaded) throws KuraException{
 		File dpFile = null;
 		int downloadIndex = 0;
 		boolean downloadSuccess= true;
@@ -1096,6 +1107,7 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 			// Download the package to a temporary file.
 			// Check for file existence has already been done
 			dpFile = getDpDownloadFile(options);
+			boolean forceDownload = options.isDownloadForced();
 
 			if (!alreadyDownloaded || forceDownload) {
 				s_logger.info("To download");

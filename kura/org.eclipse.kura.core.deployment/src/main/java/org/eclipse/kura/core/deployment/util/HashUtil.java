@@ -12,7 +12,7 @@ import org.eclipse.kura.KuraException;
 
 public class HashUtil {
 
-	public static String hash(String digestAlgorithm, File file) throws IOException, KuraException
+	public static String hash(String digestAlgorithm, File file) throws IOException, Exception
 	{
 		MessageDigest cript = null;
 		FileInputStream fis = null;
@@ -37,7 +37,7 @@ public class HashUtil {
 		} catch (IOException e) {
 			throw new KuraException(KuraErrorCode.STORE_ERROR, null, e.getMessage());
 		} catch (NoSuchAlgorithmException e) {
-			throw new KuraException(KuraErrorCode.OPERATION_NOT_SUPPORTED, null, e.getMessage());
+			throw e;
 		} finally {
 			if (fis != null) {
 				fis.close();

@@ -71,6 +71,10 @@ public abstract class DownloadCountingOutputStream extends CountingOutputStream 
 	public Long getTotalBytes(){
 		return totalBytes;
 	}
+	
+	public void setTotalBytes(long totalBytes){
+		this.totalBytes= totalBytes;
+	}
 
 	@Override
 	protected void afterWrite(int n) throws IOException {

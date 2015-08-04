@@ -34,11 +34,6 @@ public class DeploymentPackageUninstallOptions extends DeploymentPackageOptions{
 		if (super.getDpName() == null) {
 			throw new KuraInvalidMessageException("Missing deployment package name!");
 		}
-
-		super.setDpVersion((String) request.getMetric(METRIC_DP_VERSION));
-		if (super.getDpVersion() == null) {
-			throw new KuraInvalidMessageException("Missing deployment package version!");
-		}
 		
 		super.setJobId((Long) request.getMetric(METRIC_JOB_ID));
 		if (super.getJobId() == null) {
@@ -46,7 +41,12 @@ public class DeploymentPackageUninstallOptions extends DeploymentPackageOptions{
 		}
 		
 		try {
-			Object metric = request.getMetric(METRIC_DP_REBOOT);
+			Object metric = request.getMetric(METRIC_DP_VERSION);
+			if (metric != null) {
+				super.setDpVersion((String) metric);
+			}
+					
+			metric = request.getMetric(METRIC_DP_REBOOT);
 			if (metric != null) {
 				super.setReboot((Boolean) metric);
 			}
@@ -57,7 +57,7 @@ public class DeploymentPackageUninstallOptions extends DeploymentPackageOptions{
 		
 			metric = request.getMetric(KuraRequestPayload.REQUESTER_CLIENT_ID);
 			if (metric != null) {
-				super.setClientId((String) metric);
+				super.setRequestClientId((String) metric);
 			}
 
 		} catch (Exception ex) {

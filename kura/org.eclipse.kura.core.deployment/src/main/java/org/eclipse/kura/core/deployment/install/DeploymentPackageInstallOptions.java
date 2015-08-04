@@ -67,7 +67,7 @@ public class DeploymentPackageInstallOptions extends DeploymentPackageOptions{
 		
 			metric = request.getMetric(KuraRequestPayload.REQUESTER_CLIENT_ID);
 			if (metric != null) {
-				super.setClientId((String) metric);
+				super.setRequestClientId((String) metric);
 			}
 			
 			metric = request.getMetric(METRIC_INSTALL_VERIFIER_URL);

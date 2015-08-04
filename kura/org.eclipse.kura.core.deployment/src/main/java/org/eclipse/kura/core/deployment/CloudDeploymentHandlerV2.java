@@ -183,6 +183,7 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 
 	private String m_pendingUninstPackageName;
 	private String m_installVerificationDir;
+	private String m_clientId;
 
 
 
@@ -233,6 +234,7 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 		super.activate(componentContext);
 
 		m_bundleContext = componentContext.getBundleContext();
+		m_clientId= m_dataTransportService.getClientId();
 
 		m_deployedPackages = new Properties();
 
@@ -387,7 +389,7 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 			return;
 		}
 
-		String bundleId = resources[1];
+
 		if (resources[0].equals(RESOURCE_DOWNLOAD)) {
 
 			doExecDownload(reqPayload, respPayload);
@@ -405,8 +407,10 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 			doExecUninstall(reqPayload, respPayload);
 
 		} else if (resources[0].equals(RESOURCE_START)) {
+			String bundleId = resources[1];
 			doExecStartStopBundle(reqPayload, respPayload, true, bundleId);
 		} else if (resources[0].equals(RESOURCE_STOP)) {
+			String bundleId = resources[1];
 			doExecStartStopBundle(reqPayload, respPayload, false, bundleId);
 		}else {
 			s_logger.error("Bad request topic: {}", reqTopic.toString());
@@ -461,6 +465,7 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 		final DeploymentPackageDownloadOptions options;
 		try {
 			options = new DeploymentPackageDownloadOptions(request);
+			options.setClientId(m_clientId);
 		} catch (Exception ex) {
 			s_logger.info("Malformed download request!");
 			response.setResponseCode(KuraResponsePayload.RESPONSE_CODE_ERROR);
@@ -526,11 +531,6 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 			// m_pendingInstRequestId = request.getRequestId();
 			// m_pendingInstRequesterClientId = request.getRequesterClientId();
 
-			String clientId= m_dataTransportService.getClientId();
-
-			options.setClientId(clientId);
-			options.setRequestClientId(request.getRequesterClientId());
-
 			s_logger.info("Downloading package from URL: " + options.getDeployUrl());
 
 
@@ -568,6 +568,7 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 		final DeploymentPackageInstallOptions options;
 		try {
 			options = new DeploymentPackageInstallOptions(request);
+			options.setClientId(m_clientId);
 		} catch (Exception ex) {
 			s_logger.info("Malformed install request!");
 			response.setResponseCode(KuraResponsePayload.RESPONSE_CODE_ERROR);
@@ -649,6 +650,7 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 		final DeploymentPackageUninstallOptions options;
 		try {
 			options = new DeploymentPackageUninstallOptions(request);
+			options.setClientId(m_clientId);
 		} catch (Exception ex) {
 			s_logger.info("Malformed uninstall request!");
 			response.setResponseCode(KuraResponsePayload.RESPONSE_CODE_ERROR);
@@ -664,71 +666,61 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 		}
 
 
-		try {
-			final String packageName = getDpUninstallFile(options).getName();
 
-			//
-			// We only allow one request at a time
-			if (!m_isInstalling && m_pendingUninstPackageName != null) {
-				s_logger.info("Antother request seems still pending: {}. Checking if stale...", m_pendingUninstPackageName);
+		final String packageName = options.getDpName();
+
+		//
+		// We only allow one request at a time
+		if (!m_isInstalling && m_pendingUninstPackageName != null) {
+			s_logger.info("Antother request seems still pending: {}. Checking if stale...", m_pendingUninstPackageName);
+
+			response = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_ERROR);
+			response.setTimestamp(new Date());
+			try {
+				response.setBody("Only one request at a time is allowed".getBytes("UTF-8"));
+			} catch (UnsupportedEncodingException e) {
+				// Ignore
+			}
+		} else {
+
+			s_logger.info("About to uninstall package {}", packageName);
+
+			try {
+				m_isInstalling = true;
+				m_pendingUninstPackageName = packageName;
+
+				s_logger.info("Uninstalling package...");
+				installerFuture = executor.submit(new Runnable(){
+
+					@Override
+					public void run() {
+						try {
+							uninstaller(options, packageName);
+						} catch (Exception e) {
+							try {
+								uninstallFailedAsync(options, packageName, e);
+							} catch (KuraException e1) {
+
+							}
+						} finally {
+							m_installOptions = null;
+							m_isInstalling = false;
+						}
+					}
+				});
+			} catch (Exception e) {
+				s_logger.error("Failed to uninstall package {}: {}", packageName, e);
 
 				response = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_ERROR);
 				response.setTimestamp(new Date());
 				try {
-					response.setBody("Only one request at a time is allowed".getBytes("UTF-8"));
-				} catch (UnsupportedEncodingException e) {
+					response.setBody(e.getMessage().getBytes("UTF-8"));
+				} catch (UnsupportedEncodingException uee) {
 					// Ignore
 				}
-			} else {
-
-				s_logger.info("About to uninstall package {}", packageName);
-
-				try {
-					m_isInstalling = true;
-					m_pendingUninstPackageName = packageName;
-
-					s_logger.info("Uninstalling package...");
-					installerFuture = executor.submit(new Runnable(){
-
-						@Override
-						public void run() {
-							try {
-								uninstaller(options);
-							} catch (Exception e) {
-								try {
-									uninstallFailedAsync(options, packageName, e);
-								} catch (KuraException e1) {
-
-								}
-							} finally {
-								m_installOptions = null;
-								m_isInstalling = false;
-							}
-						}
-					});
-				} catch (Exception e) {
-					s_logger.error("Failed to uninstall package {}: {}", packageName, e);
-
-					response = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_ERROR);
-					response.setTimestamp(new Date());
-					try {
-						response.setBody(e.getMessage().getBytes("UTF-8"));
-					} catch (UnsupportedEncodingException uee) {
-						// Ignore
-					}
-				} finally {
-					m_isInstalling = false;
-					m_pendingUninstPackageName = null;
-				}
-			}
-		} catch (IOException e1) {
-			s_logger.error("Package name parameter missing");
-			response = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_BAD_REQUEST);
-			response.setTimestamp(new Date());
-			try {
-				response.setBody("Package name parameter missing".getBytes("UTF-8"));
-			} catch (UnsupportedEncodingException e) {
-				// Ignore
+			} finally {
+				m_isInstalling = false;
+				m_pendingUninstPackageName = null;
 			}
 		}
 	}
@@ -782,9 +774,9 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 		}
 	}
 
-	private void uninstaller(DeploymentPackageUninstallOptions options) throws KuraException {
+	private void uninstaller(DeploymentPackageUninstallOptions options, String packageName) throws KuraException {
 		try{
-			String name = m_pendingUninstPackageName;
+			String name = packageName;
 			if (name != null) {
 				s_logger.info("About to uninstall package ", name);
 				DeploymentPackage dp = null;
@@ -1087,15 +1079,19 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 			}
 		}
 
-		String checksum= HashUtil.hash(options.getHashAlgorithm(), dpFile);
-		if(!checksum.equals(options.getHashValue())){
-			throw new KuraException(KuraErrorCode.INTERNAL_ERROR);
+		if(options.getHashAlgorithm() != null){
+			String checksum= HashUtil.hash(options.getHashAlgorithm(), dpFile);
+			String cloudHashValue= options.getHashValue();
+			if(!checksum.equals(cloudHashValue)){
+				throw new KuraException(KuraErrorCode.INTERNAL_ERROR, null, "Failed to verify checksum with algorithm: " + options.getHashAlgorithm());
+			}
 		}
 	}
 
 	private void downloadDeploymentPackageInternal(DeploymentPackageDownloadOptions options, boolean alreadyDownloaded, boolean forceDownload) throws KuraException{
 		File dpFile = null;
 		int downloadIndex = 0;
+		boolean downloadSuccess= true;
 		try {
 			// Download the package to a temporary file.
 			// Check for file existence has already been done
@@ -1103,7 +1099,8 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 
 			if (!alreadyDownloaded || forceDownload) {
 				s_logger.info("To download");
-				incrementalDownloadFromURL(dpFile, options, options.getDeployUrl(), downloadIndex++);
+				incrementalDownloadFromURL(dpFile, options, options.getDeployUrl(), downloadIndex);
+				downloadIndex++;
 
 				if(options.getVerifierURL() != null){
 					File dpVerifier= getDpVerifierFile(options);
@@ -1114,11 +1111,12 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 			}
 		} catch (Exception e) {
 			s_logger.info("Download exception");
+			downloadSuccess= false;
 			downloadFailedAsync(options, e, downloadIndex);
 		} 
 
 		try{
-			if (dpFile != null && options.isInstall()) {
+			if (downloadSuccess && dpFile != null && options.isInstall()) {
 				s_logger.info("Ready to install");
 				installDownloadedFile(dpFile, options);
 			}
@@ -1326,7 +1324,7 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 
 			if (fileEntry.isFile() && fileEntry.getName().endsWith(PERSISTANCE_SUFFIX)) { //&& fileEntry.getName().contains(verificationFile.getName()
 				Properties downloadProperties= loadInstallPersistance(fileEntry);
-				String deployUrl= downloadProperties.getProperty(DeploymentPackageDownloadOptions.METRIC_DP_DOWNLOAD_URL);
+				String deployUrl= downloadProperties.getProperty(DeploymentPackageDownloadOptions.METRIC_DP_DOWNLOAD_URI);
 				String dpName= downloadProperties.getProperty(DeploymentPackageDownloadOptions.METRIC_DP_NAME);
 				String dpVersion= downloadProperties.getProperty(DeploymentPackageDownloadOptions.METRIC_DP_VERSION);
 				String clientId= downloadProperties.getProperty(DeploymentPackageDownloadOptions.METRIC_DP_CLIENT_ID);
@@ -1356,7 +1354,7 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 		for (final File fileEntry : installDir.listFiles()) {
 			if (fileEntry.isFile() && fileEntry.getName().endsWith(PERSISTANCE_SUFFIX)) { //&& fileEntry.getName().contains(verificationFile.getName())
 				Properties downloadProperties= loadInstallPersistance(fileEntry);
-				String deployUrl= downloadProperties.getProperty(DeploymentPackageDownloadOptions.METRIC_DP_DOWNLOAD_URL);
+				String deployUrl= downloadProperties.getProperty(DeploymentPackageDownloadOptions.METRIC_DP_DOWNLOAD_URI);
 				String dpName= downloadProperties.getProperty(DeploymentPackageDownloadOptions.METRIC_DP_NAME);
 				String dpVersion= downloadProperties.getProperty(DeploymentPackageDownloadOptions.METRIC_DP_VERSION);
 				String clientId= downloadProperties.getProperty(DeploymentPackageDownloadOptions.METRIC_DP_CLIENT_ID);
@@ -1444,15 +1442,6 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 				.append(File.separator)
 				.append(shName)
 				.toString();
-
-		File dpFile = new File(packageFilename);
-		return dpFile;
-	}
-
-	private File getDpUninstallFile(DeploymentPackageUninstallOptions options) throws IOException {
-		// File dpFile = File.createTempFile("dpa", null);
-		String packageFilename = null;
-		packageFilename = getFileName(options.getDpName(), options.getDpVersion(), ".dp");
 
 		File dpFile = new File(packageFilename);
 		return dpFile;

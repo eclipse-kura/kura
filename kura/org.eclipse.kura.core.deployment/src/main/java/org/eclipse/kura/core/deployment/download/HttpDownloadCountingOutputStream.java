@@ -38,7 +38,6 @@ import org.eclipse.kura.core.deployment.progress.ProgressListener;
 import org.eclipse.kura.ssl.SslManagerService;
 
 public class HttpDownloadCountingOutputStream extends DownloadCountingOutputStream {
-	private long totalBytes;
 
 	InputStream is = null;
 	
@@ -111,7 +110,7 @@ public class HttpDownloadCountingOutputStream extends DownloadCountingOutputStre
 
 					String s = urlConnection.getHeaderField("Content-Length");
 
-					totalBytes = s != null ? Integer.parseInt(s) : -1;
+					setTotalBytes(s != null ? Integer.parseInt(s) : -1);
 					postProgressEvent(options.getClientId(), 0, totalBytes, DOWNLOAD_STATUS.IN_PROGRESS, null);
 					
 					int bufferSize = getBufferSize();

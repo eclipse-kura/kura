@@ -113,7 +113,7 @@ public class CloudDeploymentHandlerTest extends TestCase {
 		
 		KuraPayload payload = new KuraPayload();
 
-		payload.addMetric(DeploymentPackageDownloadOptions.METRIC_DP_DOWNLOAD_URL, packageUrl.toString());
+		payload.addMetric(DeploymentPackageDownloadOptions.METRIC_DP_DOWNLOAD_URI, packageUrl.toString());
 
 		KuraResponsePayload resp = s_cloudCallService.call(
 				CloudDeploymentHandlerV2.APP_ID,

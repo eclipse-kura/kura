@@ -36,8 +36,11 @@ import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.deployment.CloudDeploymentHandlerV2.DOWNLOAD_STATUS;
 import org.eclipse.kura.core.deployment.progress.ProgressListener;
 import org.eclipse.kura.ssl.SslManagerService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class HttpDownloadCountingOutputStream extends DownloadCountingOutputStream {
+	private static final Logger s_logger = LoggerFactory.getLogger(HttpDownloadCountingOutputStream.class);
 
 	InputStream is = null;
 	
@@ -109,6 +112,7 @@ public class HttpDownloadCountingOutputStream extends DownloadCountingOutputStre
 					is = localUrl.openStream();
 
 					String s = urlConnection.getHeaderField("Content-Length");
+					s_logger.info("Content-lenght: " + s);
 
 					setTotalBytes(s != null ? Integer.parseInt(s) : -1);
 					postProgressEvent(options.getClientId(), 0, totalBytes, DOWNLOAD_STATUS.IN_PROGRESS, null);

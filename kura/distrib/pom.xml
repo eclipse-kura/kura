@@ -182,6 +182,26 @@
 									<artifactId>org.eclipse.kura.windows.position</artifactId>
 									<version>${org.eclipse.kura.windows.position.version}</version>
 								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.kura.windows.command</artifactId>
+									<version>${org.eclipse.kura.windows.command.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.kura.windows.usb</artifactId>
+									<version>${org.eclipse.kura.windows.usb.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.kura.windows.watchdog</artifactId>
+									<version>${org.eclipse.kura.windows.watchdog.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.kura.windows.clock</artifactId>
+									<version>${org.eclipse.kura.windows.clock.version}</version>
+								</artifactItem>
 							</artifactItems>
 							<stripVersion>true</stripVersion>
 							<outputDirectory>${project.basedir}/target/plugins</outputDirectory>
@@ -244,6 +264,10 @@
 							    <move file="target/plugins/org.eclipse.kura.windows.net.jar" tofile="target/plugins/org.eclipse.kura.windows.net_${org.eclipse.kura.windows.position.version}.jar"/>
 							    <move file="target/plugins/org.eclipse.kura.windows.position.jar" tofile="target/plugins/org.eclipse.kura.windows.position_${org.eclipse.kura.windows.position.version}.jar"/>
 							    <move file="target/plugins/org.eclipse.kura.web.jar" tofile="target/plugins/org.eclipse.kura.web_${org.eclipse.kura.web.version}.jar" failonerror="false" />
+							    <move file="target/plugins/org.eclipse.kura.windows.command.jar" tofile="target/plugins/org.eclipse.kura.windows.command_${org.eclipse.kura.windows.command.version}.jar"/>
+							    <move file="target/plugins/org.eclipse.kura.windows.usb.jar" tofile="target/plugins/org.eclipse.kura.windows.usb_${org.eclipse.kura.windows.usb.version}.jar"/>
+							    <move file="target/plugins/org.eclipse.kura.windows.watchdog.jar" tofile="target/plugins/org.eclipse.kura.windows.watchdog_${org.eclipse.kura.windows.watchdog.version}.jar"/>
+							    <move file="target/plugins/org.eclipse.kura.windows.clock.jar" tofile="target/plugins/org.eclipse.kura.windows.clock_${org.eclipse.kura.windows.clock.version}.jar"/>
 							</tasks>
 						</configuration>
 					</execution>

@@ -565,6 +565,14 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
                  token="{org.eclipse.kura.windows.net.version}" value="${org.eclipse.kura.windows.net.version}"/>
         <replace file="${project.build.directory}/${build.output.name}/config.ini"
                  token="{org.eclipse.kura.windows.position.version}" value="${org.eclipse.kura.windows.position.version}"/>
+        <replace file="${project.build.directory}/${build.output.name}/config.ini"
+                 token="{org.eclipse.kura.windows.command.version}" value="${org.eclipse.kura.windows.command.version}"/>
+        <replace file="${project.build.directory}/${build.output.name}/config.ini"
+                 token="{org.eclipse.kura.windows.usb.version}" value="${org.eclipse.kura.windows.usb.version}"/>
+        <replace file="${project.build.directory}/${build.output.name}/config.ini"
+                 token="{org.eclipse.kura.windows.watchdog.version}" value="${org.eclipse.kura.windows.watchdog.version}"/>
+        <replace file="${project.build.directory}/${build.output.name}/config.ini"
+                 token="{org.eclipse.kura.windows.clock.version}" value="${org.eclipse.kura.windows.clock.version}"/>
         <propertyfile file="${project.build.directory}/${build.output.name}/dpa.properties"> 
             <entry key="kura"
                    value="file:${kura.install.dir}/kura/kura/packages/${build.output.name}.dp" />
@@ -733,6 +741,14 @@ java -Xms256m -Xmx256m -XX:MaxPermSize=256m -Dkura.os.version=win32 ^
             <zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.windows.net_${org.eclipse.kura.windows.net.version}.jar"
                         prefix="${build.output.name}/kura/plugins" />
             <zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.windows.position_${org.eclipse.kura.windows.position.version}.jar"
+                        prefix="${build.output.name}/kura/plugins" />
+            <zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.windows.command_${org.eclipse.kura.windows.command.version}.jar"
+                        prefix="${build.output.name}/kura/plugins" />
+            <zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.windows.usb_${org.eclipse.kura.windows.usb.version}.jar"
+                        prefix="${build.output.name}/kura/plugins" />
+            <zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.windows.watchdog_${org.eclipse.kura.windows.watchdog.version}.jar"
+                        prefix="${build.output.name}/kura/plugins" />
+            <zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.windows.clock_${org.eclipse.kura.windows.clock.version}.jar"
                         prefix="${build.output.name}/kura/plugins" />
             <zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.emulator_${org.eclipse.kura.emulator.version}.jar"
                         prefix="${build.output.name}/kura/plugins" />

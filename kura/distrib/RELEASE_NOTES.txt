@@ -13,6 +13,7 @@ Added Features :
     * Improved security during keystore loading in SSL Manager
   * Refactor of ConfigurationService
   * Replace JAXB XML Parser with a custom one
+  * Startup time improvements due to various code optimizations and uncompressed jars
   * Web UI: added the possibility to specify a custom web interface user
   * Web UI: split certificate management in two separate tabs
 

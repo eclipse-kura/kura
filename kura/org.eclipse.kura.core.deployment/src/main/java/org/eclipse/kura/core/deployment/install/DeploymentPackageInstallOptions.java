@@ -27,7 +27,7 @@ public class DeploymentPackageInstallOptions extends DeploymentPackageOptions{
 	private String verifierURL = null; 
 
 	// Metrics in RESOURCE_INSTALL
-	public DeploymentPackageInstallOptions(String deployUrl, String dpName, String dpVersion) {
+	public DeploymentPackageInstallOptions(String dpName, String dpVersion) {
 		super(dpName, dpVersion);
 	}
 

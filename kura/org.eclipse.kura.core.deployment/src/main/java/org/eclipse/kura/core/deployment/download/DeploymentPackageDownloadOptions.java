@@ -35,7 +35,7 @@ public class DeploymentPackageDownloadOptions extends DeploymentPackageInstallOp
 	public static final String METRIC_DP_INSTALL = "dp.install";
 
 	
-	private String deployUrl;
+	private String deployUri;
 	private int blockSize = 1024 * 4;
 	private int notifyBlockSize = 1024 * 256;
 	private int blockDelay = 0;
@@ -47,14 +47,15 @@ public class DeploymentPackageDownloadOptions extends DeploymentPackageInstallOp
 
 	private String hash;
 
-	public DeploymentPackageDownloadOptions(String deployUrl, String dpName, String dpVersion) {
-		super(deployUrl, dpName, dpVersion);
+	public DeploymentPackageDownloadOptions(String deployUri, String dpName, String dpVersion) {
+		super(dpName, dpVersion);
+		this.deployUri= deployUri;
 	}
 
 	public DeploymentPackageDownloadOptions(KuraPayload request) throws KuraException {
-		super(null, null, null);
-		deployUrl = (String) request.getMetric(METRIC_DP_DOWNLOAD_URI);
-		if (deployUrl == null) {
+		super(null, null);
+		deployUri = (String) request.getMetric(METRIC_DP_DOWNLOAD_URI);
+		if (deployUri == null) {
 			throw new KuraInvalidMessageException("Missing deployment package URL!");
 		}
 
@@ -153,7 +154,7 @@ public class DeploymentPackageDownloadOptions extends DeploymentPackageInstallOp
 	}
 
 	public String getDeployUrl() {
-		return deployUrl;
+		return deployUri;
 	}
 
 	public int getBlockSize() {

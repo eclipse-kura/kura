@@ -13,12 +13,8 @@
 package org.eclipse.kura.core.deployment;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -28,7 +24,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-import org.apache.commons.io.FileUtils;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloud.Cloudlet;
@@ -38,17 +33,15 @@ import org.eclipse.kura.core.deployment.download.DownloadCountingOutputStream;
 import org.eclipse.kura.core.deployment.download.DownloadFileUtilities;
 import org.eclipse.kura.core.deployment.download.DownloadImpl;
 import org.eclipse.kura.core.deployment.install.DeploymentPackageInstallOptions;
-import org.eclipse.kura.core.deployment.install.KuraInstallPayload;
+import org.eclipse.kura.core.deployment.install.InstallImpl;
 import org.eclipse.kura.core.deployment.uninstall.DeploymentPackageUninstallOptions;
-import org.eclipse.kura.core.deployment.uninstall.KuraUninstallPayload;
+import org.eclipse.kura.core.deployment.uninstall.UninstallImpl;
 import org.eclipse.kura.core.deployment.xml.XmlBundle;
 import org.eclipse.kura.core.deployment.xml.XmlBundleInfo;
 import org.eclipse.kura.core.deployment.xml.XmlBundles;
 import org.eclipse.kura.core.deployment.xml.XmlDeploymentPackage;
 import org.eclipse.kura.core.deployment.xml.XmlDeploymentPackages;
 import org.eclipse.kura.core.deployment.xml.XmlUtil;
-import org.eclipse.kura.core.util.ProcessUtil;
-import org.eclipse.kura.core.util.SafeProcess;
 import org.eclipse.kura.core.util.ThrowableUtil;
 import org.eclipse.kura.data.DataTransportService;
 import org.eclipse.kura.message.KuraPayload;
@@ -62,7 +55,6 @@ import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.ComponentException;
 import org.osgi.service.deploymentadmin.BundleInfo;
 import org.osgi.service.deploymentadmin.DeploymentAdmin;
-import org.osgi.service.deploymentadmin.DeploymentException;
 import org.osgi.service.deploymentadmin.DeploymentPackage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -76,7 +68,6 @@ public class CloudDeploymentHandlerV2 extends Cloudlet {
 	private static final String KURA_CONF_URL_PROPNAME = "kura.configuration";
 	private static final String PACKAGES_PATH_PROPNAME = "kura.packages";
 	private static final String KURA_DATA_DIR = "kura.data";
-	private static final String PERSISTANCE_FILE_NAME = "persistance.file.name";
 
 
 	public static final String  RESOURCE_PACKAGES = "packages";
@@ -94,10 +85,6 @@ public class CloudDeploymentHandlerV2 extends Cloudlet {
 	/* Metrics in the REPLY to RESOURCE_DOWNLOAD */
 	public static final String METRIC_DOWNLOAD_STATUS = "download.status";
 	public static final String METRIC_REQUESTER_CLIENT_ID = "requester.client.id";
-
-	private static final String PERSISTANCE_SUFFIX = "_persistance";
-	private static final String PERSISTANCE_FOLDER_NAME= "persistance";
-	private static final String PERSISTANCE_VERIFICATION_FOLDER_NAME= "verification";
 
 
 	/**
@@ -156,6 +143,8 @@ public class CloudDeploymentHandlerV2 extends Cloudlet {
 	private DeploymentAdmin   m_deploymentAdmin;
 
 	private DownloadImpl m_downloadImplementation;
+	private UninstallImpl m_uninstallImplementation;
+	public InstallImpl m_installImplementation;
 
 	private static ExecutorService executor = Executors.newSingleThreadExecutor();
 
@@ -167,12 +156,9 @@ public class CloudDeploymentHandlerV2 extends Cloudlet {
 
 	private DataTransportService m_dataTransportService;
 
-	private Properties m_deployedPackages;
-	private Properties m_installPersistance;
 	private String m_dpaConfPath;
 	private String m_packagesPath;
 
-	private String m_installPersistanceDir;
 	private DeploymentPackageDownloadOptions m_downloadOptions;
 
 	private boolean m_isInstalling = false;
@@ -233,8 +219,6 @@ public class CloudDeploymentHandlerV2 extends Cloudlet {
 		m_bundleContext = componentContext.getBundleContext();
 		m_clientId= m_dataTransportService.getClientId();
 
-		m_deployedPackages = new Properties();
-
 		m_dpaConfPath = System.getProperty(DPA_CONF_PATH_PROPNAME);
 		if (m_dpaConfPath == null || m_dpaConfPath.isEmpty()) {
 			throw new ComponentException("The value of '" + DPA_CONF_PATH_PROPNAME + "' is not defined");
@@ -272,20 +256,12 @@ public class CloudDeploymentHandlerV2 extends Cloudlet {
 		}
 
 		String kuraDataDir= kuraProperties.getProperty(KURA_DATA_DIR);
-		m_installPersistanceDir= kuraDataDir + File.separator + PERSISTANCE_FOLDER_NAME;
-		File installPersistanceDir = new File(m_installPersistanceDir);
-		if (!installPersistanceDir.exists()) {
-			installPersistanceDir.mkdir();
-		}
-
-		m_installVerificationDir= m_installPersistanceDir + File.separator + PERSISTANCE_VERIFICATION_FOLDER_NAME;
-		File installVerificationDir = new File(m_installVerificationDir);
-		if (!installVerificationDir.exists()) {
-			installVerificationDir.mkdir();
-		}
-
-
-		sendInstallConfirmations();
+		
+		m_installImplementation = new InstallImpl(this, kuraDataDir);
+		m_installImplementation.setPackagesPath(m_packagesPath);
+		m_installImplementation.setDpaConfPath(m_dpaConfPath);
+		m_installImplementation.setDeploymentAdmin(m_deploymentAdmin);
+		m_installImplementation.sendInstallConfirmations();
 	}
 
 	@Override
@@ -309,14 +285,14 @@ public class CloudDeploymentHandlerV2 extends Cloudlet {
 	// Public methods
 	//
 	// ----------------------------------------------------------------
-	
+
 	public void publishMessage(DeploymentPackageOptions options, KuraPayload messagePayload, String messageType){
 		try {
 			String messageTopic = new StringBuilder("NOTIFY/").append(options.getClientId())
-															  .append("/")
-															  .append(messageType)
-															  .toString();
-			
+					.append("/")
+					.append(messageType)
+					.toString();
+
 			getCloudApplicationClient().controlPublish(options.getRequestClientId(), messageTopic, messagePayload, 2, DFLT_RETAIN, DFLT_PRIORITY);
 		} catch (KuraException e) {
 			s_logger.error("Error publishing response for command {} {}", messageType, e);
@@ -450,6 +426,7 @@ public class CloudDeploymentHandlerV2 extends Cloudlet {
 		try {
 			options = new DeploymentPackageDownloadOptions(request);
 			options.setClientId(m_clientId);
+			m_downloadImplementation= new DownloadImpl(options, this);
 		} catch (Exception ex) {
 			s_logger.info("Malformed download request!");
 			response.setResponseCode(KuraResponsePayload.RESPONSE_CODE_ERROR);
@@ -508,7 +485,7 @@ public class CloudDeploymentHandlerV2 extends Cloudlet {
 
 		try {
 			s_pendingPackageUrl = options.getDeployUrl();
-			m_downloadImplementation= new DownloadImpl(options, this);
+			
 			m_downloadImplementation.setSslManager(m_sslManagerService);
 			m_downloadImplementation.setAlreadyDownloadedFlag(alreadyDownloaded);
 			m_downloadImplementation.setVerificationDirectory(m_installVerificationDir);
@@ -521,7 +498,7 @@ public class CloudDeploymentHandlerV2 extends Cloudlet {
 				@Override
 				public void run() {
 					try {
-						
+
 						m_downloadImplementation.downloadDeploymentPackageInternal();
 					} catch (KuraException e) {
 
@@ -588,6 +565,9 @@ public class CloudDeploymentHandlerV2 extends Cloudlet {
 			try {
 				m_isInstalling = true;
 				final File dpFile = DownloadFileUtilities.getDpDownloadFile(options);
+
+				m_installImplementation.setOptions(options);
+
 				//if yes, install
 
 				installerFuture = executor.submit(new Runnable(){
@@ -595,13 +575,9 @@ public class CloudDeploymentHandlerV2 extends Cloudlet {
 					@Override
 					public void run() {
 						try {
-							installDownloadedFile(dpFile, options);
-						} catch (Exception e) {
-							try {
-								installFailedAsync(options, dpFile.getName(), e);
-							} catch (KuraException e1) {
-
-							}
+							installDownloadedFile(dpFile, m_installOptions);
+						} catch (KuraException e) {
+							s_logger.error("Impossible to send an exception message to the cloud platform");
 						} finally {
 							m_installOptions = null;
 							m_isInstalling = false;
@@ -668,6 +644,7 @@ public class CloudDeploymentHandlerV2 extends Cloudlet {
 			try {
 				m_isInstalling = true;
 				m_pendingUninstPackageName = packageName;
+				m_uninstallImplementation= new UninstallImpl(this, m_deploymentAdmin);
 
 				s_logger.info("Uninstalling package...");
 				installerFuture = executor.submit(new Runnable(){
@@ -675,10 +652,10 @@ public class CloudDeploymentHandlerV2 extends Cloudlet {
 					@Override
 					public void run() {
 						try {
-							uninstaller(options, packageName);
+							m_uninstallImplementation.uninstaller(options, packageName);
 						} catch (Exception e) {
 							try {
-								uninstallFailedAsync(options, packageName, e);
+								m_uninstallImplementation.uninstallFailedAsync(options, packageName, e);
 							} catch (KuraException e1) {
 
 							}
@@ -754,55 +731,11 @@ public class CloudDeploymentHandlerV2 extends Cloudlet {
 		}
 	}
 
-	private void uninstaller(DeploymentPackageUninstallOptions options, String packageName) throws KuraException {
-		try{
-			String name = packageName;
-			if (name != null) {
-				s_logger.info("About to uninstall package ", name);
-				DeploymentPackage dp = null;
-
-				dp = m_deploymentAdmin.getDeploymentPackage(name);
-				if (dp != null) {
-					dp.uninstall();
-
-					String sUrl = m_deployedPackages.getProperty(name);
-					File dpFile = new File(new URL(sUrl).getPath());
-					if (!dpFile.delete()) {
-						s_logger.warn("Cannot delete file at URL: {}", sUrl);
-					}
-					removePackageFromConfFile(name);
-					uninstallCompleteAsync(options, name);
-				}
-			}
-		} catch (Exception e) {
-			throw KuraException.internalError(e.getMessage());
-		}
-	}
-
-	private void removePackageFromConfFile(String packageName) {
-		m_deployedPackages.remove(packageName);
-
-		if (m_dpaConfPath == null) {
-			s_logger.warn("Configuration file not specified");
-			return;
-		}
-
-		try {
-			FileOutputStream fos = new FileOutputStream(m_dpaConfPath);
-			m_deployedPackages.store(fos, null);
-			fos.flush();
-			fos.getFD().sync();
-			fos.close();
-		} catch (IOException e) {
-			s_logger.error("Error writing package configuration file", e);
-		}
-	}
-
 	private void doGetInstall(KuraRequestPayload reqPayload, KuraResponsePayload respPayload) {
 		if(m_isInstalling){
-			installInProgressSyncMessage(respPayload);
+			m_installImplementation.installInProgressSyncMessage(respPayload);
 		} else {
-			installIdleSyncMessage(respPayload);
+			m_installImplementation.installIdleSyncMessage(respPayload);
 		}
 	}
 
@@ -929,333 +862,17 @@ public class CloudDeploymentHandlerV2 extends Cloudlet {
 		}
 	}
 
-	private DeploymentPackage installDeploymentPackageInternal(File fileReference, DeploymentPackageOptions options) 
-			throws DeploymentException, IOException {
-
-		InputStream dpInputStream = null;
-		DeploymentPackage dp = null;
-		File dpPersistentFile = null;
-		File downloadedFile = fileReference;
-
-		try {
-			String dpBasename = fileReference.getName();
-			String dpPersistentFilePath = m_packagesPath + File.separator + dpBasename;
-			dpPersistentFile = new File(dpPersistentFilePath);
-			//downloadedFile = getDpDownloadFile(options);
-
-
-			dpInputStream = new FileInputStream(downloadedFile);
-			dp = m_deploymentAdmin.installDeploymentPackage(dpInputStream);
-
-			// Now we need to copy the deployment package file to the Kura
-			// packages directory unless it's already there.
-
-			if (!downloadedFile.getCanonicalPath().equals(dpPersistentFile.getCanonicalPath())) {
-				s_logger.debug("dpFile.getCanonicalPath(): " + downloadedFile.getCanonicalPath());
-				s_logger.debug("dpPersistentFile.getCanonicalPath(): " + dpPersistentFile.getCanonicalPath());
-				FileUtils.copyFile(downloadedFile, dpPersistentFile);
-				addPackageToConfFile(dp.getName(), "file:" + dpPersistentFilePath);
-			}
-		} catch (FileNotFoundException ex) {
-
-		} catch (IOException ex){
-
-		} finally{
-			if (dpInputStream != null) {
-				try {
-					dpInputStream.close();
-				} catch (IOException e) {
-					s_logger.warn("Cannot close input stream", e);
-				}
-			}
-			// The file from which we have installed the deployment package will be deleted
-			// unless it's a persistent deployment package file.
-			if (downloadedFile != null && !downloadedFile.getCanonicalPath().equals(dpPersistentFile.getCanonicalPath())) {
-				downloadedFile.delete();
-			}			
-		}
-
-		return dp;
-	}
-
-	private void addPackageToConfFile(String packageName, String packageUrl) {
-		m_deployedPackages.setProperty(packageName, packageUrl);
-
-		if (m_dpaConfPath == null) {
-			s_logger.warn("Configuration file not specified");
-			return;
-		}
-
-		try {
-			FileOutputStream fos = new FileOutputStream(m_dpaConfPath);
-			m_deployedPackages.store(fos, null);
-			fos.flush();
-			fos.getFD().sync();
-			fos.close();
-		} catch (IOException e) {
-			s_logger.error("Error writing package configuration file", e);
-		}
-	}
-
-	private Properties loadInstallPersistance(File installedDpPersistance){
-		Properties downloadProperies= new Properties();
-		try {
-			downloadProperies.load(new FileReader(installedDpPersistance));
-		} catch (IOException e) {
-			s_logger.error("Exception loading install configuration file", e);
-		}
-		return downloadProperies;
-	}
-
-	private void updateInstallPersistance(String fileName, DeploymentPackageOptions options){
-		m_installPersistance = new Properties();
-		m_installPersistance.setProperty(DeploymentPackageOptions.METRIC_DP_CLIENT_ID, options.getClientId());
-		m_installPersistance.setProperty(DeploymentPackageOptions.METRIC_JOB_ID, Long.toString(options.getJobId()));
-		m_installPersistance.setProperty(DeploymentPackageOptions.METRIC_DP_NAME, fileName);
-		m_installPersistance.setProperty(DeploymentPackageOptions.METRIC_DP_VERSION, options.getDpVersion());
-		m_installPersistance.setProperty(METRIC_REQUESTER_CLIENT_ID, options.getRequestClientId());
-		m_installPersistance.setProperty(PERSISTANCE_FILE_NAME, fileName);
-
-		if (m_installPersistanceDir == null) {
-			s_logger.warn("Configuration file not specified");
-			return;
-		}
-
-		FileOutputStream fos= null;
-		try {
-			String persistanceFile= m_installPersistanceDir + File.separator + fileName + PERSISTANCE_SUFFIX;
-			fos = new FileOutputStream(persistanceFile);
-			m_installPersistance.store(fos, null);
-			fos.flush();
-			fos.getFD().sync();
-		} catch (IOException e) {
-			s_logger.error("Error writing remote install configuration file", e);
-		} finally {
-			if(fos != null){
-				try {
-					fos.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
-		}
-	}
-
 	public void installDownloadedFile(File dpFile, DeploymentPackageInstallOptions options) throws KuraException {
-		if(options.getSystemUpdate()){
-			installSh(options, dpFile);
-		} else {
-			installDp(options, dpFile);
-		}
-	}
-
-	private void installDp(DeploymentPackageInstallOptions options, File dpFile) throws KuraException{
-		SafeProcess proc = null;
-		try {
-			installDeploymentPackageInternal(dpFile, options);
-			installCompleteAsync(options, dpFile.getName());
-			s_logger.info("Install completed!");
-
-			if(options.isReboot()){
-				Thread.sleep(options.getRebootDelay());
-				proc = ProcessUtil.exec("reboot");
+		try{
+			if(options.getSystemUpdate()){
+				m_installImplementation.installSh(options, dpFile);
+			} else {
+				m_installImplementation.installDp(options, dpFile);
 			}
 		} catch (Exception e) {
-			s_logger.info("Install failed!");
-			installFailedAsync(options, dpFile.getName(), e);
-		} finally {
-			if (proc != null) ProcessUtil.destroy(proc);
-			dpFile = null;
+			s_logger.info("Install exception");
+			m_installImplementation.installFailedAsync(options, dpFile.getName(), e);
 		}
 	}
 
-	private void installSh(DeploymentPackageOptions options, File shFile) throws KuraException{	
-
-		updateInstallPersistance(shFile.getName(), options);
-
-		//Esecuzione script
-		SafeProcess proc = null;
-		try {
-			proc = ProcessUtil.exec("chmod +x " + shFile.getCanonicalPath());
-		} catch (IOException e) {
-			throw new KuraException(KuraErrorCode.INTERNAL_ERROR);
-		} finally {
-			if (proc != null) ProcessUtil.destroy(proc);
-		}
-
-		SafeProcess proc2 = null;
-		try {
-			proc2 = ProcessUtil.exec(shFile.getCanonicalPath());
-		} catch (IOException e) {
-			throw new KuraException(KuraErrorCode.INTERNAL_ERROR);
-		} finally {
-			if (proc2 != null) ProcessUtil.destroy(proc2);
-		}
-	}
-
-	private void installInProgressSyncMessage(KuraResponsePayload respPayload) {
-		respPayload.setTimestamp(new Date());
-		respPayload.addMetric(KuraInstallPayload.METRIC_INSTALL_STATUS, INSTALL_STATUS.IN_PROGRESS);
-		respPayload.addMetric(KuraInstallPayload.METRIC_DP_NAME, m_installOptions.getDpName());
-		respPayload.addMetric(KuraInstallPayload.METRIC_DP_VERSION, m_installOptions.getDpVersion());
-	}
-
-	private void installIdleSyncMessage(KuraResponsePayload respPayload) {
-		respPayload.setTimestamp(new Date());
-		respPayload.addMetric(KuraInstallPayload.METRIC_INSTALL_STATUS, INSTALL_STATUS.IDLE);
-	}
-
-	private void installCompleteAsync(DeploymentPackageOptions options, String dpName) throws KuraException{
-		KuraInstallPayload notify = null;
-
-		notify = new KuraInstallPayload(options.getClientId());
-		notify.setTimestamp(new Date());
-		notify.setInstallStatus(INSTALL_STATUS.COMPLETED.getStatusString());
-		notify.setJobId(options.getJobId());
-		notify.setDpName(dpName); //Probably split dpName and dpVersion?
-		notify.setInstallProgress(100);
-
-		getCloudApplicationClient().controlPublish(options.getRequestClientId(), "NOTIFY/"+options.getClientId()+"/install", notify, 2, DFLT_RETAIN, DFLT_PRIORITY);
-	}
-
-	public void installFailedAsync(DeploymentPackageInstallOptions options, String dpName, Exception e) throws KuraException{
-		KuraInstallPayload notify = null;
-
-		notify = new KuraInstallPayload(options.getClientId());
-		notify.setTimestamp(new Date());
-		notify.setInstallStatus(INSTALL_STATUS.FAILED.getStatusString());
-		notify.setJobId(options.getJobId());
-		notify.setDpName(dpName); //Probably split dpName and dpVersion?
-		notify.setInstallProgress(0);
-		if (e != null){
-			notify.setErrorMessage(e.getMessage());
-		}
-
-		getCloudApplicationClient().controlPublish(options.getRequestClientId(), "NOTIFY/"+options.getClientId()+"/install", notify, 2, DFLT_RETAIN, DFLT_PRIORITY);
-	}
-
-	private void sendInstallConfirmations(){
-		s_logger.info("Ready to send Confirmations");
-		File verificationDir= new File(m_installVerificationDir);
-		for (File fileEntry : verificationDir.listFiles()) {
-			if (fileEntry.isFile() && fileEntry.getName().endsWith(".sh")) {
-				SafeProcess proc = null;
-				try {
-					proc = ProcessUtil.exec("chmod +x " + fileEntry.getCanonicalPath());
-				} catch (IOException e) {
-
-				} finally {
-					if (proc != null) ProcessUtil.destroy(proc);
-				}
-
-				SafeProcess proc2 = null;
-				try {
-					proc2 = ProcessUtil.exec(fileEntry.getCanonicalPath());
-					int exitValue = proc2.exitValue();
-					if(exitValue == 0){
-						sendSysUpdateSuccess(fileEntry);
-					} else {
-						sendSysUpdateFailure(fileEntry);
-					}
-				} catch (Exception e) {
-
-				} finally {
-					fileEntry.delete();
-					if (proc2 != null) ProcessUtil.destroy(proc2);
-				}
-
-			}
-		}
-	}
-
-	private void sendSysUpdateSuccess(File verificationFile) throws KuraException {
-		s_logger.info("Ready to send success after install");
-		File installDir= new File(m_installPersistanceDir);
-		for (File fileEntry : installDir.listFiles()) {
-
-			if (fileEntry.isFile() && fileEntry.getName().endsWith(PERSISTANCE_SUFFIX)) { //&& fileEntry.getName().contains(verificationFile.getName()
-				Properties downloadProperties= loadInstallPersistance(fileEntry);
-				String deployUrl= downloadProperties.getProperty(DeploymentPackageDownloadOptions.METRIC_DP_DOWNLOAD_URI);
-				String dpName= downloadProperties.getProperty(DeploymentPackageDownloadOptions.METRIC_DP_NAME);
-				String dpVersion= downloadProperties.getProperty(DeploymentPackageDownloadOptions.METRIC_DP_VERSION);
-				String clientId= downloadProperties.getProperty(DeploymentPackageDownloadOptions.METRIC_DP_CLIENT_ID);
-				Long jobId= Long.valueOf(downloadProperties.getProperty(DeploymentPackageDownloadOptions.METRIC_JOB_ID));
-				String fileSystemFileName= downloadProperties.getProperty(PERSISTANCE_FILE_NAME);
-				String requestClientId = downloadProperties.getProperty(METRIC_REQUESTER_CLIENT_ID);
-
-				DeploymentPackageDownloadOptions options = new DeploymentPackageDownloadOptions(deployUrl, dpName, dpVersion);
-				options.setClientId(clientId);
-				options.setJobId(jobId);
-				options.setRequestClientId(requestClientId);
-
-				try {
-					installCompleteAsync(options, fileSystemFileName);
-					s_logger.info("Sent install complete");
-					fileEntry.delete();
-					break;
-				} catch (KuraException e) {
-					throw new KuraException(KuraErrorCode.INTERNAL_ERROR);
-				}
-			}
-		}
-	}
-
-	private void sendSysUpdateFailure(File verificationFile) throws KuraException {
-		File installDir= new File(m_installPersistanceDir);
-		for (final File fileEntry : installDir.listFiles()) {
-			if (fileEntry.isFile() && fileEntry.getName().endsWith(PERSISTANCE_SUFFIX)) { //&& fileEntry.getName().contains(verificationFile.getName())
-				Properties downloadProperties= loadInstallPersistance(fileEntry);
-				String deployUrl= downloadProperties.getProperty(DeploymentPackageDownloadOptions.METRIC_DP_DOWNLOAD_URI);
-				String dpName= downloadProperties.getProperty(DeploymentPackageDownloadOptions.METRIC_DP_NAME);
-				String dpVersion= downloadProperties.getProperty(DeploymentPackageDownloadOptions.METRIC_DP_VERSION);
-				String clientId= downloadProperties.getProperty(DeploymentPackageDownloadOptions.METRIC_DP_CLIENT_ID);
-				Long jobId= Long.valueOf(downloadProperties.getProperty(DeploymentPackageDownloadOptions.METRIC_JOB_ID));
-				String fileSystemFileName= downloadProperties.getProperty(PERSISTANCE_FILE_NAME);
-				String requestClientId = downloadProperties.getProperty(METRIC_REQUESTER_CLIENT_ID);
-
-				DeploymentPackageDownloadOptions options = new DeploymentPackageDownloadOptions(deployUrl, dpName, dpVersion);
-				options.setClientId(clientId);
-				options.setJobId(jobId);
-				options.setRequestClientId(requestClientId);
-
-				try {
-					installFailedAsync(options, fileSystemFileName, new KuraException(KuraErrorCode.INTERNAL_ERROR));
-					s_logger.info("Sent install failed");
-					fileEntry.delete();
-					break;
-				} catch (KuraException e) {
-					throw new KuraException(KuraErrorCode.INTERNAL_ERROR);
-				}
-			}
-		}
-	}
-
-	private void uninstallCompleteAsync(DeploymentPackageUninstallOptions options, String dpName) throws KuraException{
-		KuraUninstallPayload notify = null;
-
-		notify = new KuraUninstallPayload(options.getClientId());
-		notify.setTimestamp(new Date());
-		notify.setUninstallStatus(UNINSTALL_STATUS.COMPLETED.getStatusString());
-		notify.setJobId(options.getJobId());
-		notify.setDpName(dpName); //Probably split dpName and dpVersion?
-		notify.setUninstallProgress(100);
-
-		getCloudApplicationClient().controlPublish(options.getRequestClientId(), "NOTIFY/"+options.getClientId()+"/uninstall", notify, 2, DFLT_RETAIN, DFLT_PRIORITY);
-	}
-
-	private void uninstallFailedAsync(DeploymentPackageUninstallOptions options, String dpName, Exception e) throws KuraException{
-		KuraUninstallPayload notify = null;
-
-		notify = new KuraUninstallPayload(options.getClientId());
-		notify.setTimestamp(new Date());
-		notify.setUninstallStatus(UNINSTALL_STATUS.FAILED.getStatusString());
-		notify.setJobId(options.getJobId());
-		notify.setDpName(dpName); //Probably split dpName and dpVersion?
-		notify.setUninstallProgress(0);
-		if (e != null){
-			notify.setErrorMessage(e.getMessage());
-		}
-
-		getCloudApplicationClient().controlPublish(options.getRequestClientId(), "NOTIFY/"+options.getClientId()+"/uninstall", notify, 2, DFLT_RETAIN, DFLT_PRIORITY);
-	}
 }

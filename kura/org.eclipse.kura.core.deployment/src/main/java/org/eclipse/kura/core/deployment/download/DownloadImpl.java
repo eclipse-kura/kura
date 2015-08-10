@@ -93,12 +93,12 @@ public class DownloadImpl implements ProgressListener{
 
 			if (!alreadyDownloadedFlag || forceDownload) {
 				s_logger.info("To download");
-				incrementalDownloadFromURL(dpFile, downloadIndex);
+				incrementalDownloadFromURL(dpFile, options.getDeployUrl(), downloadIndex);
 				downloadIndex++;
 
 				if(options.getVerifierURL() != null){
 					File dpVerifier= getDpVerifierFile(options);
-					incrementalDownloadFromURL(dpVerifier, downloadIndex);
+					incrementalDownloadFromURL(dpVerifier, options.getVerifierURL(), downloadIndex);
 				}
 			} else {
 				alreadyDownloadedAsync();
@@ -109,15 +109,11 @@ public class DownloadImpl implements ProgressListener{
 			downloadFailedAsync(e, downloadIndex);
 		} 
 
-		try{
-			if (downloadSuccess && dpFile != null && options.isInstall()) {
-				s_logger.info("Ready to install");
-				callback.installDownloadedFile(dpFile, options);
-			}
-		} catch (Exception e) {
-			s_logger.info("Install exception");
-			callback.installFailedAsync(options, dpFile.getName(), e);
-		} 
+
+		if (downloadSuccess && dpFile != null && options.isInstall()) {
+			s_logger.info("Ready to install");
+			callback.installDownloadedFile(dpFile, options);
+		}
 	}
 
 	public boolean isAlreadyDownloaded() throws KuraException {
@@ -137,8 +133,7 @@ public class DownloadImpl implements ProgressListener{
 	//
 	// ----------------------------------------------------------------
 
-	private void incrementalDownloadFromURL(File dpFile, int downloadIndex) throws Exception {
-		String url= options.getVerifierURL();
+	private void incrementalDownloadFromURL(File dpFile, String url, int downloadIndex) throws Exception {
 		OutputStream os = null;
 
 		try {

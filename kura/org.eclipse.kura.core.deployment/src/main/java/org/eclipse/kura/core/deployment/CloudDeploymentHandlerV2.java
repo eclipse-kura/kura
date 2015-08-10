@@ -19,7 +19,6 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -36,15 +35,12 @@ import org.eclipse.kura.cloud.Cloudlet;
 import org.eclipse.kura.cloud.CloudletTopic;
 import org.eclipse.kura.core.deployment.download.DeploymentPackageDownloadOptions;
 import org.eclipse.kura.core.deployment.download.DownloadCountingOutputStream;
-import org.eclipse.kura.core.deployment.download.HttpDownloadCountingOutputStream;
-import org.eclipse.kura.core.deployment.download.KuraNotifyPayload;
+import org.eclipse.kura.core.deployment.download.DownloadFileUtilities;
+import org.eclipse.kura.core.deployment.download.DownloadImpl;
 import org.eclipse.kura.core.deployment.install.DeploymentPackageInstallOptions;
 import org.eclipse.kura.core.deployment.install.KuraInstallPayload;
-import org.eclipse.kura.core.deployment.progress.ProgressEvent;
-import org.eclipse.kura.core.deployment.progress.ProgressListener;
 import org.eclipse.kura.core.deployment.uninstall.DeploymentPackageUninstallOptions;
 import org.eclipse.kura.core.deployment.uninstall.KuraUninstallPayload;
-import org.eclipse.kura.core.deployment.util.HashUtil;
 import org.eclipse.kura.core.deployment.xml.XmlBundle;
 import org.eclipse.kura.core.deployment.xml.XmlBundleInfo;
 import org.eclipse.kura.core.deployment.xml.XmlBundles;
@@ -55,6 +51,7 @@ import org.eclipse.kura.core.util.ProcessUtil;
 import org.eclipse.kura.core.util.SafeProcess;
 import org.eclipse.kura.core.util.ThrowableUtil;
 import org.eclipse.kura.data.DataTransportService;
+import org.eclipse.kura.message.KuraPayload;
 import org.eclipse.kura.message.KuraRequestPayload;
 import org.eclipse.kura.message.KuraResponsePayload;
 import org.eclipse.kura.ssl.SslManagerService;
@@ -70,7 +67,7 @@ import org.osgi.service.deploymentadmin.DeploymentPackage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListener {
+public class CloudDeploymentHandlerV2 extends Cloudlet {
 
 	private static final Logger s_logger = LoggerFactory.getLogger(CloudDeploymentHandlerV2.class);
 	public static final String APP_ID = "DEPLOY-V2";
@@ -158,7 +155,7 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 	private SslManagerService m_sslManagerService;
 	private DeploymentAdmin   m_deploymentAdmin;
 
-	private DownloadCountingOutputStream downloadHelper;
+	private DownloadImpl m_downloadImplementation;
 
 	private static ExecutorService executor = Executors.newSingleThreadExecutor();
 
@@ -312,30 +309,17 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 	// Public methods
 	//
 	// ----------------------------------------------------------------
-
-	@Override
-	public void progressChanged(ProgressEvent progress) {
-
-		s_logger.info("{}% downloaded", progress.getTransferProgress());
-
-		KuraNotifyPayload notify = null;
-
-		notify = new KuraNotifyPayload(progress.getClientId());
-		notify.setTimestamp(new Date());
-		notify.setTransferSize(progress.getTransferSize());
-		notify.setTransferProgress(progress.getTransferProgress());
-		notify.setTransferStatus(progress.getTransferStatus());
-		notify.setJobId(progress.getJobId());
-		if (progress.getExceptionMessage() != null){
-			notify.setErrorMessage(progress.getExceptionMessage());
-		}
-
-		notify.setTransferIndex(progress.getDownloadIndex());
-
+	
+	public void publishMessage(DeploymentPackageOptions options, KuraPayload messagePayload, String messageType){
 		try {
-			getCloudApplicationClient().controlPublish(progress.getRequesterClientId(), "NOTIFY/"+progress.getClientId()+"/progress", notify, 2, DFLT_RETAIN, DFLT_PRIORITY);
+			String messageTopic = new StringBuilder("NOTIFY/").append(options.getClientId())
+															  .append("/")
+															  .append(messageType)
+															  .toString();
+			
+			getCloudApplicationClient().controlPublish(options.getRequestClientId(), messageTopic, messagePayload, 2, DFLT_RETAIN, DFLT_PRIORITY);
 		} catch (KuraException e) {
-			s_logger.error("Error publishing response for command {} {}", RESOURCE_DOWNLOAD, e);
+			s_logger.error("Error publishing response for command {} {}", messageType, e);
 		}
 	}
 
@@ -434,7 +418,7 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 		String dpVersion = (String) request.getMetric(DeploymentPackageDownloadOptions.METRIC_DP_VERSION);
 
 		try{
-			downloadHelper.cancelDownload();
+			m_downloadImplementation.getDownloadHelper().cancelDownload();
 		}catch(Exception ex){
 			s_logger.info("Error cancelling download!", ex);
 		}
@@ -508,7 +492,7 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 		boolean alreadyDownloaded = false;
 
 		try {
-			alreadyDownloaded = deploymentPackageAlreadyDownloaded(options);
+			alreadyDownloaded = m_downloadImplementation.isAlreadyDownloaded();
 		} catch (KuraException ex) {
 			response.setResponseCode(KuraResponsePayload.RESPONSE_CODE_ERROR);
 			response.setException(ex);
@@ -520,14 +504,14 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 			return;
 		}
 
-		final boolean alreadyDownloadedFinal = alreadyDownloaded;
-
 		s_logger.info("About to download and install package at URL {}", options.getDeployUrl());
 
 		try {
 			s_pendingPackageUrl = options.getDeployUrl();
-			// m_pendingInstRequestId = request.getRequestId();
-			// m_pendingInstRequesterClientId = request.getRequesterClientId();
+			m_downloadImplementation= new DownloadImpl(options, this);
+			m_downloadImplementation.setSslManager(m_sslManagerService);
+			m_downloadImplementation.setAlreadyDownloadedFlag(alreadyDownloaded);
+			m_downloadImplementation.setVerificationDirectory(m_installVerificationDir);
 
 			s_logger.info("Downloading package from URL: " + options.getDeployUrl());
 
@@ -537,7 +521,8 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 				@Override
 				public void run() {
 					try {
-						downloadDeploymentPackageInternal(options, alreadyDownloadedFinal);
+						
+						m_downloadImplementation.downloadDeploymentPackageInternal();
 					} catch (KuraException e) {
 
 					} finally{
@@ -585,7 +570,7 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 		boolean alreadyDownloaded = false;
 
 		try {
-			alreadyDownloaded = deploymentPackageAlreadyDownloaded(options);
+			alreadyDownloaded = m_downloadImplementation.isAlreadyDownloaded();
 		} catch (KuraException ex) {
 			response.setResponseCode(KuraResponsePayload.RESPONSE_CODE_ERROR);
 			response.setException(ex);
@@ -602,7 +587,7 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 
 			try {
 				m_isInstalling = true;
-				final File dpFile = getDpDownloadFile(options);
+				final File dpFile = DownloadFileUtilities.getDpDownloadFile(options);
 				//if yes, install
 
 				installerFuture = executor.submit(new Runnable(){
@@ -663,8 +648,6 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 			return;
 		}
 
-
-
 		final String packageName = options.getDpName();
 
 		//
@@ -680,7 +663,6 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 				// Ignore
 			}
 		} else {
-
 			s_logger.info("About to uninstall package {}", packageName);
 
 			try {
@@ -826,14 +808,14 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 
 	private void doGetDownload(KuraRequestPayload reqPayload, KuraResponsePayload respPayload) {
 		if (s_pendingPackageUrl != null){ //A download is pending
-			downloadInProgressSyncMessage(respPayload);
+			DownloadCountingOutputStream downloadHelper= m_downloadImplementation.getDownloadHelper();
+			DownloadImpl.downloadInProgressSyncMessage(respPayload, downloadHelper, m_downloadOptions);
 		} else { //No pending downloads
-			downloadAlreadyDoneSyncMessage(respPayload); //is it right? Do we remove the last object
+			DownloadImpl.downloadAlreadyDoneSyncMessage(respPayload); //is it right? Do we remove the last object
 		}
 	}
 
 	private void doGetPackages(KuraRequestPayload request, KuraResponsePayload response) {
-
 		DeploymentPackage[] dps = m_deploymentAdmin.listDeploymentPackages();
 		XmlDeploymentPackages xdps = new XmlDeploymentPackages();
 		XmlDeploymentPackage[] axdp = new XmlDeploymentPackage[dps.length];
@@ -1059,86 +1041,7 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 		}
 	}
 
-	private void incrementalDownloadFromURL(File dpFile, DeploymentPackageDownloadOptions options, String url, int downloadIndex) throws Exception {
-		OutputStream os = null;
-
-		try {
-			os = new FileOutputStream(dpFile);
-			downloadHelper = new HttpDownloadCountingOutputStream(os, options, this, m_sslManagerService, url, downloadIndex);
-			downloadHelper.startWork();
-			downloadHelper.close();
-		} finally {
-			if (os != null) {
-				try {
-					os.close();
-				} catch (IOException e1) {
-					e1.printStackTrace();
-				}
-			}
-		}
-
-		if(options.getHash() != null){
-			String[] hashAlgorithmValue= options.getHash().split(":");
-
-			String hashAlgorithm= null;
-			String hashValue= null;
-			if(hashAlgorithmValue.length == 2){
-				hashAlgorithm= hashAlgorithmValue[0].trim();
-				hashValue= hashAlgorithmValue[1].trim();
-			}
-			s_logger.info("--> Going to verify hash signature!");
-			try{
-				String checksum= HashUtil.hash(hashAlgorithm, dpFile);
-				if(hashAlgorithm == null || hashValue== null || !checksum.equals(hashValue)){
-					throw new KuraException(KuraErrorCode.INTERNAL_ERROR, null, "Failed to verify checksum with algorithm: " + hashAlgorithm);
-				}
-			}catch(Exception e){
-				dpFile.delete();
-				throw e;
-			}
-		}
-	}
-
-	private void downloadDeploymentPackageInternal(DeploymentPackageDownloadOptions options, boolean alreadyDownloaded) throws KuraException{
-		File dpFile = null;
-		int downloadIndex = 0;
-		boolean downloadSuccess= true;
-		try {
-			// Download the package to a temporary file.
-			// Check for file existence has already been done
-			dpFile = getDpDownloadFile(options);
-			boolean forceDownload = options.isDownloadForced();
-
-			if (!alreadyDownloaded || forceDownload) {
-				s_logger.info("To download");
-				incrementalDownloadFromURL(dpFile, options, options.getDeployUrl(), downloadIndex);
-				downloadIndex++;
-
-				if(options.getVerifierURL() != null){
-					File dpVerifier= getDpVerifierFile(options);
-					incrementalDownloadFromURL(dpVerifier, options, options.getVerifierURL(), downloadIndex);
-				}
-			} else {
-				alreadyDownloadedAsync(options);
-			}
-		} catch (Exception e) {
-			s_logger.info("Download exception");
-			downloadSuccess= false;
-			downloadFailedAsync(options, e, downloadIndex);
-		} 
-
-		try{
-			if (downloadSuccess && dpFile != null && options.isInstall()) {
-				s_logger.info("Ready to install");
-				installDownloadedFile(dpFile, options);
-			}
-		} catch (Exception e) {
-			s_logger.info("Install exception");
-			installFailedAsync(options, dpFile.getName(), e);
-		} 
-	}
-
-	private void installDownloadedFile(File dpFile, DeploymentPackageInstallOptions options) throws KuraException {
+	public void installDownloadedFile(File dpFile, DeploymentPackageInstallOptions options) throws KuraException {
 		if(options.getSystemUpdate()){
 			installSh(options, dpFile);
 		} else {
@@ -1190,70 +1093,6 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 		}
 	}
 
-
-	private boolean deploymentPackageAlreadyDownloaded(DeploymentPackageInstallOptions options) throws KuraException {
-		try {
-			File dp = getDpDownloadFile(options);
-
-			return dp.exists();
-		} catch (Exception e) {
-			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
-		}
-	}
-
-	private void alreadyDownloadedAsync(DeploymentPackageOptions options){
-		KuraNotifyPayload notify = null;
-
-		notify = new KuraNotifyPayload(options.getClientId());
-		notify.setTimestamp(new Date());
-		notify.setTransferSize(0);
-		notify.setTransferProgress(100);
-		notify.setTransferStatus(DOWNLOAD_STATUS.COMPLETED.getStatusString());
-		notify.setJobId(options.getJobId());
-
-
-		try {
-			getCloudApplicationClient().controlPublish(options.getRequestClientId(), "NOTIFY/"+options.getClientId()+"/progress", notify, 2, DFLT_RETAIN, DFLT_PRIORITY);
-		} catch (KuraException e) {
-			s_logger.error("Error publishing response for command {} {}", RESOURCE_DOWNLOAD, e);
-		}
-	}
-
-	private void downloadFailedAsync(DeploymentPackageOptions options, Exception e, int downloadIndex) {
-		KuraNotifyPayload notify = null;
-
-		notify = new KuraNotifyPayload(options.getClientId());
-		notify.setTimestamp(new Date());
-		notify.setTransferSize(0);
-		notify.setTransferProgress(100);
-		notify.setTransferStatus(DOWNLOAD_STATUS.FAILED.getStatusString());
-		notify.setJobId(options.getJobId());
-		notify.setErrorMessage(e.getMessage());
-		notify.setTransferIndex(downloadIndex);
-
-		try {
-			getCloudApplicationClient().controlPublish(options.getRequestClientId(), "NOTIFY/"+options.getClientId()+"/progress", notify, 2, DFLT_RETAIN, DFLT_PRIORITY);
-		} catch (KuraException e1) {
-			s_logger.error("Error publishing response for command {} {}", RESOURCE_DOWNLOAD, e1);
-		}
-	}
-
-	private void downloadInProgressSyncMessage(KuraResponsePayload respPayload) {
-		respPayload.setTimestamp(new Date());
-		respPayload.addMetric(KuraNotifyPayload.METRIC_TRANSFER_SIZE, downloadHelper.getTotalBytes().intValue());
-		respPayload.addMetric(KuraNotifyPayload.METRIC_TRANSFER_PROGRESS, downloadHelper.getDownloadTransferProgressPercentage().intValue());
-		respPayload.addMetric(KuraNotifyPayload.METRIC_TRANSFER_STATUS, downloadHelper.getDownloadTransferStatus().getStatusString());
-		respPayload.addMetric(KuraNotifyPayload.METRIC_JOB_ID, m_downloadOptions.getJobId());
-	}
-
-	private void downloadAlreadyDoneSyncMessage(KuraResponsePayload respPayload) {
-		respPayload.setTimestamp(new Date());
-		respPayload.addMetric(KuraNotifyPayload.METRIC_TRANSFER_SIZE, 0);
-		respPayload.addMetric(KuraNotifyPayload.METRIC_TRANSFER_PROGRESS, 100);
-		respPayload.addMetric(KuraNotifyPayload.METRIC_TRANSFER_STATUS, DOWNLOAD_STATUS.ALREADY_DONE);
-		//respPayload.addMetric(METRIC_JOB_ID, m_options.getJobId());
-	}
-
 	private void installInProgressSyncMessage(KuraResponsePayload respPayload) {
 		respPayload.setTimestamp(new Date());
 		respPayload.addMetric(KuraInstallPayload.METRIC_INSTALL_STATUS, INSTALL_STATUS.IN_PROGRESS);
@@ -1279,7 +1118,7 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 		getCloudApplicationClient().controlPublish(options.getRequestClientId(), "NOTIFY/"+options.getClientId()+"/install", notify, 2, DFLT_RETAIN, DFLT_PRIORITY);
 	}
 
-	private void installFailedAsync(DeploymentPackageInstallOptions options, String dpName, Exception e) throws KuraException{
+	public void installFailedAsync(DeploymentPackageInstallOptions options, String dpName, Exception e) throws KuraException{
 		KuraInstallPayload notify = null;
 
 		notify = new KuraInstallPayload(options.getClientId());
@@ -1418,52 +1257,5 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ProgressListen
 		}
 
 		getCloudApplicationClient().controlPublish(options.getRequestClientId(), "NOTIFY/"+options.getClientId()+"/uninstall", notify, 2, DFLT_RETAIN, DFLT_PRIORITY);
-	}
-
-
-	//File Management
-	private File getDpDownloadFile(DeploymentPackageInstallOptions options) throws IOException {
-		// File dpFile = File.createTempFile("dpa", null);
-		String packageFilename = null;
-		if(!options.getSystemUpdate()){
-			String dpName= getFileName(options.getDpName(), options.getDpVersion(), ".dp");
-			packageFilename = new StringBuilder().append(File.separator)
-					.append("tmp")
-					.append(File.separator)
-					.append(dpName)
-					.toString();
-		} else {
-			String shName= getFileName(options.getDpName(), options.getDpVersion(), ".sh");
-			packageFilename = new StringBuilder().append(File.separator)
-					.append("tmp")
-					.append(File.separator)
-					.append(shName)
-					.toString();
-		}
-
-		File dpFile = new File(packageFilename);
-		return dpFile;
-	}
-
-	private File getDpVerifierFile(DeploymentPackageInstallOptions options) throws IOException {
-		// File dpFile = File.createTempFile("dpa", null);
-		String packageFilename = null;
-
-		String shName= getFileName(options.getDpName(), options.getDpVersion(), "_verifier.sh");
-		packageFilename = new StringBuilder().append(m_installVerificationDir)
-				.append(File.separator)
-				.append(shName)
-				.toString();
-
-		File dpFile = new File(packageFilename);
-		return dpFile;
-	}
-
-	private String getFileName(String dpName, String dpVersion, String extension) {
-		String packageFilename = null;
-		packageFilename = new StringBuilder().append(dpName).append("-")
-				.append(dpVersion)
-				.append(extension).toString();
-		return packageFilename;
 	}
 }

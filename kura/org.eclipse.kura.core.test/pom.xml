@@ -59,6 +59,7 @@
                 <version>${tycho-version}</version>
                 <configuration>
                     <providerHint>junit4</providerHint>
+					<redirectTestOutputToFile>true</redirectTestOutputToFile>
                     <testSuite>org.eclipse.kura.core.test</testSuite>
                     <testClass>org.eclipse.kura.core.test.AllCoreTests</testClass>
 <!--                                         

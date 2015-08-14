@@ -201,7 +201,8 @@ public class CloudDeploymentHandlerTest extends TestCase {
 
 		String s = new String(resp.getBody());
 
-		XmlBundles xmlBundles = XmlUtil.unmarshal(s, XmlBundles.class);
+		//XmlBundles xmlBundles = XmlUtil.unmarshal(s, XmlBundles.class);
+		XmlBundles xmlBundles = CoreTestXmlUtil.unmarshal(s, XmlBundles.class);
 
 		XmlBundle[] bundles = xmlBundles.getBundles();
 

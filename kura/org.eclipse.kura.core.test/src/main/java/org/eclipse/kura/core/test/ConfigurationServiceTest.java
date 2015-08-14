@@ -374,7 +374,7 @@ public class ConfigurationServiceTest extends TestCase implements IConfiguration
 				CloudConfigurationHandler.APP_ID,
 				sb.toString(),
 				null,
-				5000);
+				10000);
 
 		assertEquals(KuraResponsePayload.RESPONSE_CODE_OK, resp.getResponseCode());
 		assertNotNull(resp.getBody());

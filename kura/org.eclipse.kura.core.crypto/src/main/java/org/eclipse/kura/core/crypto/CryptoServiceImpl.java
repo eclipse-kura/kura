@@ -77,23 +77,33 @@ public class CryptoServiceImpl implements CryptoService {
 			Class<?> clazz = Class.forName( "javax.xml.bind.DatatypeConverter" );
 			Method method = clazz.getMethod("parseBase64Binary", String.class);
 			convertedData= method.invoke(null, internalStringValue);
-		} catch (Exception e ) {
-			try {
-				Class<?> clazz = Class.forName("java.util.Base64");
-				Method decoderMethod= clazz.getMethod("getDecoder", (Class<?>[]) null);
-				Object decoder= decoderMethod.invoke(null, new Object[0]);
-
-				Class<?> Base64Decoder = Class.forName("java.util.Base64$Decoder");
-				Method decodeMethod = Base64Decoder.getMethod("decode", String.class);
-				convertedData= decodeMethod.invoke(decoder, internalStringValue);
-			} catch (Exception e1) {	
-			} 
+		} catch (ClassNotFoundException e ) {
+			convertedData = base64DecodeJava8(internalStringValue);
+		} catch (LinkageError e){
+			convertedData = base64DecodeJava8(internalStringValue);
+		} catch (Exception e){
+			
 		}
 		
 		if(convertedData != null){
 			return (byte[]) convertedData;
 		}
 		return null;
+	}
+	
+	private Object base64DecodeJava8(String internalStringValue){
+		Object convertedData= null;
+		try {
+			Class<?> clazz = Class.forName("java.util.Base64");
+			Method decoderMethod= clazz.getMethod("getDecoder", (Class<?>[]) null);
+			Object decoder= decoderMethod.invoke(null, new Object[0]);
+
+			Class<?> Base64Decoder = Class.forName("java.util.Base64$Decoder");
+			Method decodeMethod = Base64Decoder.getMethod("decode", String.class);
+			convertedData= decodeMethod.invoke(decoder, internalStringValue);
+		} catch (Exception e1) {	
+		} 
+		return convertedData;
 	}
 
 	private String base64Encode(byte[] encryptedBytes){
@@ -102,23 +112,33 @@ public class CryptoServiceImpl implements CryptoService {
 			Class<?> clazz = Class.forName( "javax.xml.bind.DatatypeConverter" );
 			Method method = clazz.getMethod("printBase64Binary", byte[].class);
 			convertedData= method.invoke(null, encryptedBytes);
+		} catch (ClassNotFoundException e ) {
+			convertedData= base64EncodeJava8(encryptedBytes);
+		} catch (LinkageError e ) {
+			convertedData= base64EncodeJava8(encryptedBytes);
 		} catch (Exception e ) {
-			try {
-				Class<?> clazz = Class.forName("java.util.Base64");
-				Method encoderMethod= clazz.getMethod("getEncoder", (Class<?>[]) null);
-				Object encoder= encoderMethod.invoke(null, new Object[0]);
-
-				Class<?> Base64Decoder = Class.forName("java.util.Base64$Encoder");
-				Method decodeMethod = Base64Decoder.getMethod("encodeToString", byte[].class);
-				convertedData= decodeMethod.invoke(encoder, encryptedBytes);
-			} catch (Exception e1) {
-			} 
+			 
 		}
 		
 		if(convertedData != null){
 			return (String) convertedData;
 		}
 		return null;
+	}
+	
+	private Object base64EncodeJava8(byte[] encryptedBytes){
+		Object convertedData= null;
+		try {
+			Class<?> clazz = Class.forName("java.util.Base64");
+			Method encoderMethod= clazz.getMethod("getEncoder", (Class<?>[]) null);
+			Object encoder= encoderMethod.invoke(null, new Object[0]);
+
+			Class<?> Base64Decoder = Class.forName("java.util.Base64$Encoder");
+			Method decodeMethod = Base64Decoder.getMethod("encodeToString", byte[].class);
+			convertedData= decodeMethod.invoke(encoder, encryptedBytes);
+		} catch (Exception e1) {
+		}
+		return convertedData;
 	}
 
 	@Override

@@ -13,6 +13,7 @@ package org.eclipse.kura.core.configuration;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
@@ -30,6 +31,9 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import javax.xml.stream.FactoryConfigurationError;
+import javax.xml.stream.XMLStreamException;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
@@ -972,7 +976,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 		try {
 			xmlConfigs = loadEncryptedSnapshotFileContent(lastestID);
 		} catch (Exception e) {
-			s_logger.info("Snapshot not encrypted, trying to load a not encrypted one");
+			s_logger.info("Unable to decrypt snapshot! Fallback to unencrypted snapshots mode.");
 			try {
 				if (allSnapshotsUnencrypted()) {
 					encryptPlainSnapshots();
@@ -1006,8 +1010,17 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 			//File loaded, try to decrypt and unmarshall
 			String decryptedContent = new String(m_cryptoService.decryptAes(entireFile.toCharArray()));
 			xmlConfigs = XmlUtil.unmarshal(decryptedContent, XmlComponentConfigurations.class);
-		} catch (Exception e) {
-			throw new KuraException(KuraErrorCode.INTERNAL_ERROR);
+		} catch (KuraException e) {
+			s_logger.debug("KuraException: {}", e.getCode().toString());
+			throw e;
+		} catch (FileNotFoundException e) {
+			s_logger.error("Error loading file from disk: not found. Message: {}", e.getMessage());
+		} catch (IOException e) {
+			s_logger.error("Error loading file from disk. Message: {}", e.getMessage());
+		} catch (XMLStreamException e) {
+			s_logger.error("Error parsing xml: {}", e.getMessage());
+		} catch (FactoryConfigurationError e) {
+			s_logger.error("Error parsing xml: {}", e.getMessage());
 		}finally {			
 			try {
 				if (fr != null) {
@@ -1265,7 +1278,9 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 					if (configToUpdate.getPid().equals(pid)) {
 						// found a match
 						isConfigToUpdate = true;
-						configs.add(configToUpdate);
+						Map<String, Object> cleanedProps= cleanProperties(configToUpdate.getConfigurationProperties(), pid);
+						ComponentConfiguration cleanedConfig= new ComponentConfigurationImpl(pid, (Tocd) configToUpdate.getDefinition(), cleanedProps);
+						configs.add(cleanedConfig);
 						break;
 					}
 				}

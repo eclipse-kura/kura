@@ -18,7 +18,7 @@
 	<parent>
 		<artifactId>kura</artifactId>
 		<groupId>org.eclipse.kura</groupId>
-		<version>1.3.0-SNAPSHOT</version>
+		<version>1.2.1</version>
 		<relativePath>../pom_pom.xml</relativePath>
 	</parent>
 
@@ -1287,8 +1287,7 @@
 		<profile>
 			<id>raspberry-pi-2</id>
 			<properties>
-				<project.raspbian.dependencies>hostapd, isc-dhcp-server, iw,
-					dos2unix, bind9, unzip, ethtool, telnet</project.raspbian.dependencies>
+				<project.raspbian.dependencies>hostapd, isc-dhcp-server, iw, dos2unix, bind9, unzip, ethtool, telnet</project.raspbian.dependencies>
 <!--
 				<kura.install.dir>/opt/eclipse</kura.install.dir>
 -->
@@ -1402,7 +1401,7 @@
 		<profile>
 			<id>raspberry-pi-2-nn</id>
 			<properties>
-				<project.raspbian.dependencies>dos2unix, unzip, telnet</project.raspbian.dependencies>
+				<project.raspbian.dependencies.nn>dos2unix, unzip, telnet</project.raspbian.dependencies.nn>
 <!--
 				<kura.install.dir>/opt/eclipse</kura.install.dir>
 -->

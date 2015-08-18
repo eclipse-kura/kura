@@ -1,3 +1,43 @@
+Eclipse Kura - 1.2.1
+-------------------------------------------------------------------------
+
+Added Features :
+  * Added Bluetooth LE Beacon Service
+    * Example: org.eclipse.kura.example.beacon
+  * Reduced number of dependencies for Bluetooth LE bundle
+  * Added support for non cfg80211 wifi modules
+  * Added support for wifi on Raspberry Pi
+  * Added support for Oracle Java 8 SE Compact 2 Profile runtime
+  * Replaced IBM javax.usb implementation with usb4java
+  * Refactor and optimization of SSL Manager
+    * Improved security during keystore loading in SSL Manager
+  * Refactor of ConfigurationService
+  * Replace JAXB XML Parser with a custom one
+  * Startup time improvements due to various code optimizations and uncompressed jars
+  * Web UI: added the possibility to specify a custom web interface user
+  * Web UI: split certificate management in two separate tabs
+
+Bug Fixes :
+  * Web UI: fixed wrong units for memory
+
+Known Issues :
+  * BLE only tested on the Raspberry Pi B with a Broadcom BCM20702 USB dongle and the TI SensorTag.
+    The only working version of BlueZ is 4.101. The deb package is not available from Raspbian so it
+    must be compiled from sources.
+  * WiFi on Raspberry Pi only tested with WiPi WiFi Dongle (Realink RT5370 chipset) and official Pi USB WiFi Dongle (Broadcom BCM43143 chipset).
+    AccessPoint WiFi mode not working for Broadcom chipest.
+  * The reference JVM is Oracle Java SE Embedded version 7 Update 40.
+    Later versions (including Oracle Java SE Embedded version 8 Update 33)
+    may be affected by a ProcessBuilder memory leak [1]
+  * Hardware watchdog: not implemented on all platforms
+  * Only one WAN interface is currently supported. A warning in displayed
+    in the WEB UI if the user attempts to enable more than one WAN interface
+  * When first modem configuration is submitted, unconfigured cellular interface for serial modem (e.g. HE910) is not being replaced by
+    ppp0 interface. Both ppp0 and HE910 interfaces are shown in the Web Admin.
+  * Gateway needs to be rebooted for static GPS coordinates to be published to the cloud.
+
+[1] https://bugs.openjdk.java.net/browse/JDK-8054841
+
 Eclipse Kura - 1.2.0
 -------------------------------------------------------------------------
 
@@ -12,7 +52,7 @@ Added Features:
      * Snapshot encryption.
      * Improved management and security of the keystore used for the MQTT
        SSL connection.
-   * Added support for the Raspberry Pi B+ and the Raspberry Pi 2. 
+   * Added support for the Raspberry Pi B+ and the Raspberry Pi 2.
    * Added support for Bluetooth Low Energy (see Known Issues section below).
      * API: org.eclipse.kura.bluetooth
      * Example: org.eclipse.kura.example.ble.tisensortag
@@ -23,7 +63,7 @@ Bug Fixes:
    * Web UI: filter 5GHz channels when displaying WiFi scan results.
    * Upgrade Deployment Package: remove the old Kura installation directory.
    * MqttDataTransport configuration: changed default MQTT protocol version to 3.1.1.
-   * CloudService: even if gzip compression is enabled, publish the uncompressed 
+   * CloudService: even if gzip compression is enabled, publish the uncompressed
      MQtt payload if its size is less than the compressed payload size.
    * Network: Reduced executions of external ifconfig processes.
    * Network: Fixed WiFi background scan configuration.
@@ -35,11 +75,11 @@ Known Issues:
    * The Intel Edison platform is still a work in progress.
    * The reference JVM is Oracle Java SE Embedded version 7 Update 40.
      Later versions (including Oracle Java SE Embedded version 8 Update 33)
-     may be affected by a ProcessBuilder memory leak [1]  
+     may be affected by a ProcessBuilder memory leak [1]
    * Hardware watchdog: not implemented on all platforms
    * Only one WAN interface is currently supported. A warning in displayed
      in the WEB UI if the user attempts to enable more than one WAN interface
-   * When first modem configuration is submitted, unconfigured cellular interface for serial modem (e.g. HE910) is not being replaced by 
+   * When first modem configuration is submitted, unconfigured cellular interface for serial modem (e.g. HE910) is not being replaced by
      ppp0 interface. Both ppp0 and HE910 interfaces are shown in the Web Admin.
    * Gateway needs to be rebooted for static GPS coordinates to be published to the cloud.
 
@@ -70,11 +110,11 @@ Bug Fixes:
 Known Issues:
    * The reference JVM is Oracle Java SE Embedded version 7 Update 40.
      Later versions (including Oracle Java SE Embedded version 8 Update 33)
-     may be affected by a ProcessBuilder memory leak [1]  
+     may be affected by a ProcessBuilder memory leak [1]
    * Hardware watchdog: not implemented on all platforms
    * Only one WAN interface is currently supported. A warning in displayed
      in the WEB UI if the user attempts to enable more than one WAN interface
-   * When first modem configuration is submitted, unconfigured cellular interface for serial modem (e.g. HE910) is not being replaced by 
+   * When first modem configuration is submitted, unconfigured cellular interface for serial modem (e.g. HE910) is not being replaced by
      ppp0 interface. Both ppp0 and HE910 interfaces are shown in the Web Admin.
    * Gateway needs to be rebooted for static GPS coordinates to be published to the cloud.
 
@@ -111,14 +151,14 @@ Eclipse Kura - 1.1.0
 
 Added Features:
    * OpenJDK Device I/O integration
-   * Added org.eclipse.kura.example.gpio example using OpenJDK Device I/O 
+   * Added org.eclipse.kura.example.gpio example using OpenJDK Device I/O
    * Added RPI B+ distribution
    * Display warning in the WEB UI if the user attempts to enable more than one WAN interface
    * Modem IMEI and SIM IMSI/ICCID published in the birth certificate
    * Improved documentation on the Eclipse Kura Wiki
    * Upgraded to Google Protocol Buffers 2.6.0 (adding union types)
    * Display client ID in the WEB UI Status page
-   
+
 Bug Fixes:
    * Upticked API package versions to 1.0.0
    * Fixed DNS issue when DNS servers are provided in the configuration
@@ -131,11 +171,11 @@ Bug Fixes:
    * Set Paho client callback to null before terminating the client
    * Removed 'old' native library directories
    * Fixed WEB UI username/password lost for the in-memory configuration of HSQLDB
-   * Fixed HIDAPI bundle 
+   * Fixed HIDAPI bundle
    * Fixed HSQLDB exception due to large system time adjustments
    * Merged pull requests and contributions sent in the form o diff files to the mailing list
    * Added 'telnet' to the list of 'apt' dependencies
-   
+
 Known Issues:
    * Hardware watchdog: not implemented on all platforms
    * Reliagate 50-21: Using eth1 and Windows 7 to access the webui does not work over some network topologies - OSX or Linux are recommended to access the webui in this rare case
@@ -153,8 +193,8 @@ Features:
 	* Cloud connections (MQTT) with local store and forward capabilities to handle disconnected states as well as Google Protobuf message packing
 	* Service configuration locally and remotely via OSGi ConfigAdmin with Metatype support
 	* Network status including IP address, netmask, DNS, gateway, and hardware types
-	* Network administration: modifying network configuration including IP address, netmask, DNS, gateway, DHPC servers, Nat/Masq, 
-				  firewall, wifi AP, wifi station, SSID, wifi security types, wifi channel, and cellular modems, and 
+	* Network administration: modifying network configuration including IP address, netmask, DNS, gateway, DHPC servers, Nat/Masq,
+				  firewall, wifi AP, wifi station, SSID, wifi security types, wifi channel, and cellular modems, and
 				  routing tables.
 	* GPS configuration
 	* USB devices including dynamic detection

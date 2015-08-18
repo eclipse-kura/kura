@@ -13,9 +13,9 @@
 -->
 <project name="build_equinox_distrib" default="dist-linux" basedir="../../../">
 
-    <target name="dist-linux"> 
-    	
-        <property name="build.output.name" value="kura_${project.version}_${build.name}"/> 
+    <target name="dist-linux">
+
+        <property name="build.output.name" value="kura_${project.version}_${build.name}"/>
 
         <!--
         Loads entries from a manifest file.
@@ -36,7 +36,7 @@
                 </loadproperties>
             </sequential>
         </macrodef>
-    	
+
     	<echo message="Building Kura Distribution for ${build.output.name}..." />
 		<echo message="Dave: ${kura.install.dir}" />
 
@@ -59,7 +59,7 @@
         <replace file="${project.build.directory}/${build.output.name}/kura.properties" token="{kura.install.dir}" value="${kura.install.dir}"/>
         <replace file="${project.build.directory}/${build.output.name}/kura.properties" token="{kura.symlink}" value="${kura.symlink}"/>
 
-    	
+
     	<condition property="kura.osgi.repo" value="../target-definition/equinox_3.8.1/repository">
     		<or>
     			<not>
@@ -68,7 +68,7 @@
     			<equals arg1="${kura.osgi}" arg2="equinox"/>
     		</or>
     	</condition>
-    	
+
         <copy file="src/main/resources/${build.name}/snapshot_0.xml"
               tofile="${project.build.directory}/${build.output.name}/snapshot_0.xml" />
         <copy file="src/main/osgi/equinox_3.8.1/configuration/config.ini"
@@ -79,7 +79,7 @@
               tofile="${project.build.directory}/${build.output.name}/jdk.dio.properties" />
         <copy file="src/main/resources/common/jdk.dio.policy"
               tofile="${project.build.directory}/${build.output.name}/jdk.dio.policy" />
-    	
+
         <!-- Populate config.ini with correct versions -->
         <replace file="${project.build.directory}/${build.output.name}/config.ini"
                  token="{kura.build.version}" value="${kura.build.version}"/>
@@ -129,21 +129,31 @@
             <entry key="osgi.bundles" operation="+"
                    value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.net.admin_${org.eclipse.kura.net.admin.version}.jar@5:start" />
         </propertyfile>
-        <propertyfile file="${project.build.directory}/${build.output.name}/dpa.properties"> 
+
+        <!-- Add mToolkit to config.ini -->
+        <propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
+            <entry key="osgi.bundles" operation="+"
+                   value=", reference:file:../plugins/org.tigris.mtoolkit.iagent.rpc_3.0.0.20110411-0918.jar@5:start" />
+        </propertyfile>
+
+
+
+        <propertyfile file="${project.build.directory}/${build.output.name}/dpa.properties">
             <entry key="kura"
                    value="file:${kura.install.dir}/kura/kura/packages/${build.output.name}.dp" />
         </propertyfile>
 		<available file="${project.build.directory}/plugins/org.eclipse.kura.web_${org.eclipse.kura.web.version}.jar" property="web.jar.present" />
-		
+
+
 		<!-- Set web UI port -->
 		<antcall target="set-http-port" />
-		
+
 		<antcall target="web-config" />
-	
+
 		<!-- Create the Kura start scripts -->
 		<echo file="${project.build.directory}/${build.output.name}/start_kura.sh" append="false">#!/bin/sh
 
-export PATH=/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/opt/jvm/bin:/usr/java/bin
+export PATH=$PATH:/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/opt/jvm/bin:/usr/java/bin
 export MALLOC_ARENA_MAX=1
 
 DIR=$(cd $(dirname $0)/..; pwd)
@@ -176,10 +186,10 @@ if [ -z "$KURA_RUNNING" ] ; then
 	-console \
 	-consoleLog
 fi
-	</echo>    
+	</echo>
 	<echo file="${project.build.directory}/${build.output.name}/start_kura_debug.sh" append="false">#!/bin/sh
 
-export PATH=/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/opt/jvm/bin:/usr/java/bin
+export PATH=$PATH:/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/opt/jvm/bin:/usr/java/bin
 export MALLOC_ARENA_MAX=1
 
 DIR=$(cd $(dirname $0)/..; pwd)
@@ -215,13 +225,13 @@ if [ -z "$KURA_RUNNING" ] ; then
 	-console \
 	-consoleLog
 fi
-	</echo>    
+	</echo>
 	<echo file="${project.build.directory}/${build.output.name}/start_kura_background.sh" append="false">#!/bin/sh
 
 # Kura should be installed to the ${kura.install.dir} directory.
-export PATH=/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/opt/jvm/bin:/usr/java/bin
+export PATH=$PATH:/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/opt/jvm/bin:/usr/java/bin
 export MALLOC_ARENA_MAX=1
-		
+
 DIR=$(cd $(dirname $0)/..; pwd)
 cd $DIR
 
@@ -271,10 +281,10 @@ fi
               tofile="${project.build.directory}/${build.output.name}/kura.init.yocto"
               failonerror="false" />
         <copy file="src/main/resources/common/kura.init.raspbian"
-              tofile="${project.build.directory}/${build.output.name}/kura.init.raspbian" 
+              tofile="${project.build.directory}/${build.output.name}/kura.init.raspbian"
         	  failonerror="false" />
         <copy file="src/main/resources/common/kura.service.edison"
-              tofile="${project.build.directory}/${build.output.name}/kura.service.edison" 
+              tofile="${project.build.directory}/${build.output.name}/kura.service.edison"
         	  failonerror="false" />
         <replaceregexp file="${project.build.directory}/${build.output.name}/kura_install.sh" match="INSTALL_DIR=.*" replace="INSTALL_DIR=${kura.install.dir}" />
         <replaceregexp file="${project.build.directory}/${build.output.name}/kura.init.wrl" match="INSTALL_DIR=.*" replace="INSTALL_DIR=${kura.install.dir}" />
@@ -284,7 +294,7 @@ fi
 
 
         <zip destfile="${project.build.directory}/${build.output.name}.zip">
-    
+
             <zipfileset file="${project.build.directory}/${build.output.name}/snapshot_0.xml"
                         prefix="${build.output.name}/data/snapshots/" />
 
@@ -365,8 +375,10 @@ fi
                         prefix="${build.output.name}/install" />
             <zipfileset file="src/main/resources/common/named/named.rfc1912.zones"
                         prefix="${build.output.name}/install" />
-        	<zipfileset file="src/main/resources/common/named/usr.sbin.named"
-        	        prefix="${build.output.name}/install" />
+        	  <zipfileset file="src/main/resources/common/named/usr.sbin.named"
+        	              prefix="${build.output.name}/install" />
+            <zipfileset file="src/main/resources/${build.name}/bind.init"
+                        prefix="${build.output.name}/install" />
 
             <zipfileset file="src/main/resources/common/ifcfg-eth0"
                         prefix="${build.output.name}/install" />
@@ -411,7 +423,7 @@ fi
                         prefix="${build.output.name}/kura/" />
             <zipfileset file="${project.build.directory}/${build.output.name}/kura.properties"
                         prefix="${build.output.name}/kura/" />
-    
+
             <zipfileset dir="${kura.osgi.repo}/plugins/"
                         prefix="${build.output.name}/plugins"/>
             <zipfileset dir="../target-definition/common/repository/plugins"
@@ -463,7 +475,7 @@ fi
         </zip>
 		<antcall target="web-jar" />
         <echo message="Building Kura Distribution for ${build.name}-jars..." />
-        
+
 		<!-- Create installer script -->
         <echo message="Creating Installer for ${build.name}  ${kura.install.dir}" />
         <exec executable="${project.build.directory}/../src/main/sh/create_installer.sh">
@@ -516,9 +528,9 @@ fi
                 <zipfileset file="${project.build.directory}/${build.output.name}_upgrader.sh" />
                 <zipfileset file="src/main/sh/upgrade_wrapper.sh" />
         </zip>
-    	
-    	
-    	
+
+
+
     	<!-- Build the upgrade deployment package -->
     	<echo message="Building the upgrade DP" />
 
@@ -549,16 +561,16 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
 
         <jar destfile="${project.build.directory}/${build.output.name}_upgrader.dp"
                 manifest="${project.build.directory}/${build.output.name}/dp_upgrade_stage/META-INF/MANIFEST.MF"
-                basedir="${project.build.directory}/${build.output.name}/dp_upgrade_stage" />	
+                basedir="${project.build.directory}/${build.output.name}/dp_upgrade_stage" />
     </target>
 
-	<target name="set-http-port" if="http.port"> 
+	<target name="set-http-port" if="http.port">
     	<propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
             	<entry key="org.osgi.service.http.port" operation="="
                    value="${http.port}" />
         </propertyfile>
     </target>
-	
+
 	<target name="web-config" if="web.jar.present">
 		<propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
             	<entry key="osgi.bundles" operation="+"
@@ -573,4 +585,3 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
 		</zip>
 	</target>
 </project>
-

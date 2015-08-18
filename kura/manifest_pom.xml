@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Copyright (c) 2011, 2014 Eurotech and/or its affiliates All rights reserved. 
-	This program and the accompanying materials are made available under the 
-	terms of the Eclipse Public License v1.0 which accompanies this distribution, 
-	and is available at http://www.eclipse.org/legal/epl-v10.html Contributors: 
+<!-- Copyright (c) 2011, 2014 Eurotech and/or its affiliates All rights reserved.
+	This program and the accompanying materials are made available under the
+	terms of the Eclipse Public License v1.0 which accompanies this distribution,
+	and is available at http://www.eclipse.org/legal/epl-v10.html Contributors:
 	Eurotech -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
@@ -10,7 +10,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.eclipse.kura</groupId>
 	<artifactId>kura</artifactId>
-	<version>1.3.0-SNAPSHOT</version>
+	<version>1.2.1</version>
 
 	<packaging>pom</packaging>
 
@@ -56,12 +56,12 @@
 		<kura.basedir>${project.basedir}</kura.basedir>
 		<kura.build.version>${maven.build.timestamp}</kura.build.version>
 		<maven.javadoc.failOnError>false</maven.javadoc.failOnError>
-		
+
 		<!-- Jacoco version -->
 		<jacoco.version>0.6.4.201312101107</jacoco.version>
 		<jacoco.reportDir>target/jacoco/</jacoco.reportDir>
 		<sonar.core.codeCoveragePlugin>jacoco</sonar.core.codeCoveragePlugin>
-		<sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>		
+		<sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
 		<sonar.jacoco.reportPath>target/jacoco.exec</sonar.jacoco.reportPath>
 	</properties>
 
@@ -148,7 +148,7 @@
 			</extension>
 		</extensions>
 		<plugins>
-<!-- 
+<!--
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-antrun-plugin</artifactId>
@@ -249,8 +249,8 @@
 				<artifactId>target-platform-configuration</artifactId>
 				<version>${tycho-version}</version>
 				<configuration>
-					<!-- <target> <artifact> <groupId>org.eclipse.kura</groupId> <artifactId>target-definition</artifactId> 
-						<version>${project.version}</version> <classifier>kura-equinox_3.8.1</classifier> 
+					<!-- <target> <artifact> <groupId>org.eclipse.kura</groupId> <artifactId>target-definition</artifactId>
+						<version>${project.version}</version> <classifier>kura-equinox_3.8.1</classifier>
 						</artifact> </target> -->
 					<environments>
 						<environment>
@@ -360,7 +360,7 @@
 							<link>http://docs.oracle.com/cd/E17802_01/products/products/javacomm/reference/api/index.html</link>
 							<link>http://docs.oracle.com/javame/config/cldc/opt-pkgs/api/bluetooth/jsr082/index.html?javax/bluetooth/package-summary.html</link>
 						</links>
-						<!-- Remove packages from the list to have them included in the aggregate 
+						<!-- Remove packages from the list to have them included in the aggregate
 							javadocs -->
 						<excludePackageNames>
 							*.ermes:*.demo*:*.example:*.core:*.cloud.app:*.net.admin:*.deployment:*.emulator:*.linux:*.qa:*.web:*.service.io:*.test
@@ -395,10 +395,10 @@
 			</plugins>
 		</pluginManagement>
 	</build>
-	<!-- Use the below format to specify specific reports to run <reporting> 
-		<plugins> <plugin> <groupId>org.apache.maven.plugins</groupId> <artifactId>maven-project-info-reports-plugin</artifactId> 
-		<version>2.7</version> <reportSets> <reportSet> <reports> <report>index</report> 
-		<report>dependencies</report> <report>dependency-convergence</report> <report>dependency-info</report> 
-		<report>dependency-management</report> </reports> </reportSet> </reportSets> 
+	<!-- Use the below format to specify specific reports to run <reporting>
+		<plugins> <plugin> <groupId>org.apache.maven.plugins</groupId> <artifactId>maven-project-info-reports-plugin</artifactId>
+		<version>2.7</version> <reportSets> <reportSet> <reports> <report>index</report>
+		<report>dependencies</report> <report>dependency-convergence</report> <report>dependency-info</report>
+		<report>dependency-management</report> </reports> </reportSet> </reportSets>
 		</plugin> </plugins> </reporting> -->
 </project>

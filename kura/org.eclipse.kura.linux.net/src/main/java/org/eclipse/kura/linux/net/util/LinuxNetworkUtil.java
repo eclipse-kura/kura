@@ -1312,6 +1312,9 @@ public class LinuxNetworkUtil {
 			if (OS_VERSION.equals(KuraConstants.Mini_Gateway.getImageName() + "_" + KuraConstants.Mini_Gateway.getImageVersion())) {
 				LinuxProcessUtil.start("ifconfig " + interfaceName + " up\n");
 				LinuxProcessUtil.start("ifup -f " + interfaceName + "\n");
+			} else if (OS_VERSION.equals(KuraConstants.Raspberry_Pi.getImageName())) { 
+				LinuxProcessUtil.start("ifconfig " + interfaceName + " up\n");
+				LinuxProcessUtil.start("ifup --force " + interfaceName + "\n");
 			} else {
 				LinuxProcessUtil.start("ifup " + interfaceName + "\n");						
 			}

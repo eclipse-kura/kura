@@ -1,6 +1,6 @@
 #!/bin/bash
 
-INSTALL_DIR=[[kura.install.dir]]
+INSTALL_DIR=/opt/eclipse
 TIMESTAMP=`date +%Y%m%d%H%M%S`
 LOG=/tmp/kura_install_${TIMESTAMP}.log
 

@@ -2,12 +2,11 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: org.eclipse.kura.web
 Bundle-SymbolicName: org.eclipse.kura.web;singleton:=true
-Bundle-Version: 1.0.5.qualifier
+Bundle-Version: 1.0.5
 Bundle-Vendor: EUROTECH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Service-Component: OSGI-INF/*.xml
-Import-Package: 
- com.allen_sauer.gwt.log.client,
+Import-Package: com.allen_sauer.gwt.log.client,
  com.allen_sauer.gwt.log.client.impl,
  com.allen_sauer.gwt.log.client.util,
  com.allen_sauer.gwt.log.client.util.impl,
@@ -45,6 +44,7 @@ Import-Package:
  javax.security.auth,
  javax.servlet;version="2.6.0",
  javax.servlet.http;version="2.6.0",
+ javax.xml.bind;resolution:=optional,
  org.apache.commons.fileupload;version="1.2.2",
  org.apache.commons.fileupload.disk;version="1.2.2",
  org.apache.commons.fileupload.servlet;version="1.2.2",
@@ -82,4 +82,4 @@ Import-Package:
  org.slf4j;version="1.6.4"
 Bundle-ClassPath: .,
   lib/gxt-2.2.5.jar,
-  target/org.eclipse.kura.web-1.0.5-SNAPSHOT/WEB-INF/lib/gxt-2.2.5.jar
+  target/org.eclipse.kura.web-1.0.5/WEB-INF/lib/gxt-2.2.5.jar

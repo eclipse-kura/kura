@@ -171,11 +171,11 @@
 									<artifactId>org.eclipse.kura.linux.watchdog</artifactId>
 									<version>${org.eclipse.kura.linux.watchdog.version}</version>
 								</artifactItem>
-								<artifactItem>
+								<!--<artifactItem>
 									<groupId>org.eclipse.kura</groupId>
 									<artifactId>org.eclipse.kura.linux.status</artifactId>
 									<version>${org.eclipse.kura.linux.status.version}</version>
-								</artifactItem>
+								</artifactItem>-->
 								<artifactItem>
 									<groupId>org.eclipse.kura</groupId>
 									<artifactId>org.eclipse.kura.net.admin</artifactId>
@@ -245,7 +245,7 @@
 							    <move file="target/plugins/org.eclipse.kura.linux.usb.jar" tofile="target/plugins/org.eclipse.kura.linux.usb_${org.eclipse.kura.linux.usb.version}.jar"/>
 							    <move file="target/plugins/org.eclipse.kura.linux.bluetooth.jar" tofile="target/plugins/org.eclipse.kura.linux.bluetooth_${org.eclipse.kura.linux.bluetooth.version}.jar"/>
   								 <move file="target/plugins/org.eclipse.kura.linux.watchdog.jar" tofile="target/plugins/org.eclipse.kura.linux.watchdog_${org.eclipse.kura.linux.watchdog.version}.jar"/>
-  								 <move file="target/plugins/org.eclipse.kura.linux.status.jar" tofile="target/plugins/org.eclipse.kura.linux.status_${org.eclipse.kura.linux.status.version}.jar"/>
+  								 <!--<move file="target/plugins/org.eclipse.kura.linux.status.jar" tofile="target/plugins/org.eclipse.kura.linux.status_${org.eclipse.kura.linux.status.version}.jar"/>-->
 							    <move file="target/plugins/org.eclipse.kura.net.admin.jar" tofile="target/plugins/org.eclipse.kura.net.admin_${org.eclipse.kura.net.admin.version}.jar"/>
 							    <move file="target/plugins/org.eclipse.kura.protocol.modbus.jar" tofile="target/plugins/org.eclipse.kura.protocol.modbus_${org.eclipse.kura.protocol.modbus.version}.jar"/>
 							    <move file="target/plugins/org.eclipse.kura.web.jar" tofile="target/plugins/org.eclipse.kura.web_${org.eclipse.kura.web.version}.jar" failonerror="false" />

@@ -15,16 +15,17 @@ package org.eclipse.kura.web.shared.model;
 import java.io.Serializable;
 import java.util.Map;
 
-import com.allen_sauer.gwt.log.client.Log;
-import com.extjs.gxt.ui.client.data.BaseModelData;
+import org.eclipse.kura.web.client.util.KuraBaseModel;
 
-public class GwtFirewallNatEntry extends BaseModelData implements Serializable {
+import com.allen_sauer.gwt.log.client.Log;
+
+public class GwtFirewallNatEntry extends KuraBaseModel implements Serializable {
 	
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 6603318099742645871L;
-
+	
 	public String getInInterface() {
         return get("inInterface");
     }

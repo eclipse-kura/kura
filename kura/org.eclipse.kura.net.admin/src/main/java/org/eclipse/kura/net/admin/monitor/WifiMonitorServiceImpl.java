@@ -241,7 +241,7 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
                     //s_logger.debug("Evaluating: " + interfaceName + " and is currently up? " + wifiState.isUp());
                     //s_logger.debug("Evaluating: " + interfaceName + " and is currently link up? " + wifiState.isLinkUp());
                      
-                    if(wifiConfig != null && wifiState.isUp()) {
+                    if(wifiConfig != null && wifiState != null && wifiState.isUp()) {
                         if(WifiMode.INFRA.equals(wifiConfig.getMode())) {
                         	// get signal strength only if somebody needs it
                         	if ((m_listeners != null) && (m_listeners.size() > 0)) {

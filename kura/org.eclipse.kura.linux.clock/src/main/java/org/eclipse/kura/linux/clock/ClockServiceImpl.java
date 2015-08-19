@@ -114,6 +114,14 @@ public class ClockServiceImpl implements ConfigurableComponent, ClockService, Cl
 			if(m_configEnabled) {
 				// start the provider
 				startClockSyncProvider();
+			} else{
+				//stop the provider if it was running
+				try {
+					stopClockSyncProvider();
+				}
+				catch (Throwable t) {
+					s_logger.error("Error deactivate ClockService", t);
+				}
 			}
 		}
 		catch (Throwable t) {

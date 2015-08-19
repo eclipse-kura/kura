@@ -28,7 +28,7 @@
 	</properties>
 
 	<artifactId>org.eclipse.kura.core.log</artifactId>
-	<version>1.0.1-SNAPSHOT</version>
+	<version>1.0.2-SNAPSHOT</version>
 	<packaging>eclipse-plugin</packaging>
 
         <build>

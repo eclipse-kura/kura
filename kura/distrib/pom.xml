@@ -171,11 +171,11 @@
 									<artifactId>org.eclipse.kura.linux.watchdog</artifactId>
 									<version>${org.eclipse.kura.linux.watchdog.version}</version>
 								</artifactItem>
-								<artifactItem>
+								<!--<artifactItem>
 									<groupId>org.eclipse.kura</groupId>
 									<artifactId>org.eclipse.kura.linux.status</artifactId>
 									<version>${org.eclipse.kura.linux.status.version}</version>
-								</artifactItem>
+								</artifactItem>-->
 								<artifactItem>
 									<groupId>org.eclipse.kura</groupId>
 									<artifactId>org.eclipse.kura.linux.gpio</artifactId>
@@ -1293,8 +1293,7 @@
 		<profile>
 			<id>raspberry-pi-2</id>
 			<properties>
-				<project.raspbian.dependencies>hostapd, isc-dhcp-server, iw,
-					dos2unix, bind9, unzip, ethtool, telnet</project.raspbian.dependencies>
+				<project.raspbian.dependencies>hostapd, isc-dhcp-server, iw, dos2unix, bind9, unzip, ethtool, telnet</project.raspbian.dependencies>
 <!--
 				<kura.install.dir>/opt/eclipse</kura.install.dir>
 -->
@@ -1408,7 +1407,7 @@
 		<profile>
 			<id>raspberry-pi-2-nn</id>
 			<properties>
-				<project.raspbian.dependencies>dos2unix, unzip, telnet</project.raspbian.dependencies>
+				<project.raspbian.dependencies.nn>dos2unix, unzip, telnet</project.raspbian.dependencies.nn>
 <!--
 				<kura.install.dir>/opt/eclipse</kura.install.dir>
 -->

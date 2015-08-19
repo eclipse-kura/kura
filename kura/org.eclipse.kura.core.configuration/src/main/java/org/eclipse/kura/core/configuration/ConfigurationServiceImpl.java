@@ -13,11 +13,13 @@ package org.eclipse.kura.core.configuration;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -29,6 +31,9 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import javax.xml.stream.FactoryConfigurationError;
+import javax.xml.stream.XMLStreamException;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
@@ -94,6 +99,8 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 	// contains all pids which have been configured and for which we have not
 	// received the corresponding ConfigurationEvent yet
 	private Set<String> m_pendingConfigurationPids;
+
+	private final char[] GENERIC_PLACEHOLDER = "PlaceHolder".toCharArray();
 
 	// ----------------------------------------------------------------
 	//
@@ -271,8 +278,26 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 			cc = getSelfConfiguringComponentConfiguration(pid);
 		}
 
-		decryptPasswords(cc);
+		//decryptPasswords(cc);
+		replacePasswordsWithPlaceholder(cc);
 		return cc;
+	}
+
+	private Map<String, Object> replacePasswordsWithPlaceholder(ComponentConfiguration config) {
+		Map<String, Object> configProperties = config.getConfigurationProperties();
+		Iterator<String> keys = configProperties.keySet().iterator();
+		while (keys.hasNext()) {
+			String key = keys.next();
+			Object value = configProperties.get(key);
+			if (value instanceof Password) {
+				try {
+					Password decryptedPassword = new Password(GENERIC_PLACEHOLDER );
+					configProperties.put(key, decryptedPassword);
+				} catch (Exception e) {
+				}
+			}
+		}
+		return configProperties;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -418,6 +443,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 		for (ComponentConfiguration config : configsToUpdate) {
 			if (config != null) {
 				encryptPasswords(config);
+				replacePlaceholdersWithPasswords(config);
 			}
 		}
 
@@ -446,7 +472,6 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 	// Package APIs
 	//
 	// ----------------------------------------------------------------
-
 	synchronized void registerComponentConfiguration(Bundle bundle, String pid) throws KuraException {
 		if (!m_allPids.contains(pid)) {
 
@@ -549,12 +574,39 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 			String key = keys.next();
 			Object value = propertiesToUpdate.get(key);
 			if (value != null) {
-				if (value instanceof Password) {
+				if (value instanceof Password && !Arrays.equals(value.toString().toCharArray(), GENERIC_PLACEHOLDER)) {
 					try {
 						propertiesToUpdate.put(key, new Password(m_cryptoService.encryptAes(value.toString().toCharArray())));
 					} catch (Exception e) {
 						s_logger.warn("Failed to encrypt Password property: {}", key);
 						propertiesToUpdate.remove(key);
+					}
+				}
+			}
+		}
+	}
+	
+	private void replacePlaceholdersWithPasswords(ComponentConfiguration config) {
+		Map<String, Object> propertiesToUpdate = config.getConfigurationProperties();
+		Iterator<String> keys = propertiesToUpdate.keySet().iterator();
+		while (keys.hasNext()) {
+			String key = keys.next();
+			Object value = propertiesToUpdate.get(key);
+			if (value != null) {
+				if (value instanceof Password && Arrays.equals(value.toString().toCharArray(), GENERIC_PLACEHOLDER)) {
+					try {
+
+						String pid= config.getPid();
+						Tocd ocd = m_ocds.get(pid);
+
+						Configuration cfg = m_configurationAdmin.getConfiguration(pid);
+						Map<String, Object> props = CollectionsUtil.dictionaryToMap(cfg.getProperties(), ocd);
+						
+						Password encPassword= (Password) props.get(key);
+						
+						propertiesToUpdate.put(key, encPassword);
+					} catch (Exception e) {
+						s_logger.error("Error while trying to remove placeholders for: {}", key);
 					}
 				}
 			}
@@ -924,7 +976,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 		try {
 			xmlConfigs = loadEncryptedSnapshotFileContent(lastestID);
 		} catch (Exception e) {
-			s_logger.info("Snapshot not encrypted, trying to load a not encrypted one");
+			s_logger.info("Unable to decrypt snapshot! Fallback to unencrypted snapshots mode.");
 			try {
 				if (allSnapshotsUnencrypted()) {
 					encryptPlainSnapshots();
@@ -958,8 +1010,17 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 			//File loaded, try to decrypt and unmarshall
 			String decryptedContent = new String(m_cryptoService.decryptAes(entireFile.toCharArray()));
 			xmlConfigs = XmlUtil.unmarshal(decryptedContent, XmlComponentConfigurations.class);
-		} catch (Exception e) {
-			throw new KuraException(KuraErrorCode.INTERNAL_ERROR);
+		} catch (KuraException e) {
+			s_logger.debug("KuraException: {}", e.getCode().toString());
+			throw e;
+		} catch (FileNotFoundException e) {
+			s_logger.error("Error loading file from disk: not found. Message: {}", e.getMessage());
+		} catch (IOException e) {
+			s_logger.error("Error loading file from disk. Message: {}", e.getMessage());
+		} catch (XMLStreamException e) {
+			s_logger.error("Error parsing xml: {}", e.getMessage());
+		} catch (FactoryConfigurationError e) {
+			s_logger.error("Error parsing xml: {}", e.getMessage());
 		}finally {			
 			try {
 				if (fr != null) {
@@ -1217,7 +1278,9 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 					if (configToUpdate.getPid().equals(pid)) {
 						// found a match
 						isConfigToUpdate = true;
-						configs.add(configToUpdate);
+						Map<String, Object> cleanedProps= cleanProperties(configToUpdate.getConfigurationProperties(), pid);
+						ComponentConfiguration cleanedConfig= new ComponentConfigurationImpl(pid, (Tocd) configToUpdate.getDefinition(), cleanedProps);
+						configs.add(cleanedConfig);
 						break;
 					}
 				}

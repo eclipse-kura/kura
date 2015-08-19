@@ -62,7 +62,7 @@
 	<!-- Create the Kura start scripts -->
 	<echo file="${project.build.directory}/kura-${build.name}_${project.version}/start_kura.sh" append="false">#!/bin/sh
 
-export PATH=/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/opt/jvm/bin:/usr/java/bin
+export PATH=$PATH:/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/opt/jvm/bin:/usr/java/bin
 export MALLOC_ARENA_MAX=1
 
 cd $(dirname $0)/..
@@ -88,7 +88,7 @@ fi
 	</echo>    
 	<echo file="${project.build.directory}/kura-${build.name}_${project.version}/start_kura_debug.sh" append="false">#!/bin/sh
 
-export PATH=/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/opt/jvm/bin:/usr/java/bin
+export PATH=$PATH:/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/opt/jvm/bin:/usr/java/bin
 export MALLOC_ARENA_MAX=1
 
 cd $(dirname $0)/..
@@ -119,7 +119,7 @@ fi
 
 #!/bin/sh
 
-export PATH=/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/opt/jvm/bin:/usr/java/bin
+export PATH=$PATH:/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/opt/jvm/bin:/usr/java/bin
 export MALLOC_ARENA_MAX=1
 
 cd /opt/eclipse/kura

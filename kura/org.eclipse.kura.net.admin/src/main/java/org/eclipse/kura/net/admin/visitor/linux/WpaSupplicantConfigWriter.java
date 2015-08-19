@@ -311,7 +311,8 @@ public class WpaSupplicantConfigWriter implements NetworkConfigurationVisitor {
 			copyFile(fileAsString, outputFile);
 			return;
 		} else if ((wifiConfig.getSecurity() == WifiSecurity.SECURITY_WPA)
-				|| (wifiConfig.getSecurity() == WifiSecurity.SECURITY_WPA2)) {
+				|| (wifiConfig.getSecurity() == WifiSecurity.SECURITY_WPA2)
+				|| (wifiConfig.getSecurity() == WifiSecurity.SECURITY_WPA_WPA2)) {
 
 			File outputFile = new File(configFile);
 			String fileAsString = null;

@@ -11,15 +11,17 @@
  */
 package org.eclipse.kura.web.shared.model;
 
-import com.extjs.gxt.ui.client.data.BaseModelData;
+import org.eclipse.kura.web.client.util.KuraBaseModel;
 
-public class GwtNetIfStatusModel extends BaseModelData {
+
+public class GwtNetIfStatusModel extends KuraBaseModel {
 
     private static final long serialVersionUID = 2779596516813518500L;
 
     public static final String NAME = "name";
     public static final String STATUS = "status";
     public static final String TOOLTIP = "tooltip";
+    
     
     protected GwtNetIfStatusModel() {
         

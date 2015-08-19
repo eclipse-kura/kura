@@ -11,6 +11,8 @@
  */
 package org.eclipse.kura.net.wifi;
 
+import java.util.EnumSet;
+
 public class WifiHotspotInfo {
 
 	private String m_ssid;
@@ -19,6 +21,8 @@ public class WifiHotspotInfo {
 	private int m_channel;
 	private int m_frequency;
 	private WifiSecurity m_security;
+	private EnumSet<WifiSecurity> m_pairCiphers;
+	private EnumSet<WifiSecurity> m_groupCiphers;
 	
 	public WifiHotspotInfo(String ssid, String macAddress,
 			int signalLevel, int channel, int frequency, WifiSecurity security) {
@@ -29,6 +33,14 @@ public class WifiHotspotInfo {
 		m_channel = channel;
 		m_frequency = frequency;
 		m_security = security;
+	}
+	
+	public WifiHotspotInfo(String ssid, String macAddress,
+			int signalLevel, int channel, int frequency, WifiSecurity security,
+			EnumSet<WifiSecurity> pairCiphers, EnumSet<WifiSecurity> groupCiphers) {
+		this(ssid, macAddress, signalLevel, channel, frequency, security);
+		m_pairCiphers = pairCiphers;
+		m_groupCiphers = groupCiphers;
 	}
 
 	public String getSsid() {
@@ -53,6 +65,14 @@ public class WifiHotspotInfo {
 
 	public WifiSecurity getSecurity() {
 		return m_security;
+	}
+	
+	public EnumSet<WifiSecurity> getPairCiphers() {
+		return m_pairCiphers;
+	}
+	
+	public EnumSet<WifiSecurity> getGroupCiphers() {
+		return m_groupCiphers;
 	}
 	
 	public String toString() {

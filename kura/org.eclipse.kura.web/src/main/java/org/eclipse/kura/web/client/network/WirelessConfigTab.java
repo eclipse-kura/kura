@@ -1035,7 +1035,14 @@ public class WirelessConfigTab extends LayoutContainer
 				
 				// Station mode
 				if(GwtWifiWirelessMode.netWifiWirelessModeStation.equals(m_modeCombo.getValue().getMode())) {
-					for (Field<?> field : m_formPanel.getFields()) {			
+					
+					// ** make sure all GwtWifiSecurity security options are listed in the m_securityCombo if in 'Station' mode
+					m_securityCombo.removeAll();
+					for (GwtWifiSecurity mode : GwtWifiSecurity.values()) {
+						m_securityCombo.add(MessageUtils.get(mode.name()));
+			        }
+					
+					for (Field<?> field : m_formPanel.getFields()) {
 						if (field != m_modeCombo
 								&& field != m_ssidField
 								&& field != m_securityCombo
@@ -1072,9 +1079,17 @@ public class WirelessConfigTab extends LayoutContainer
 
                 // Access Point mode
 				} else if(GwtWifiWirelessMode.netWifiWirelessModeAccessPoint.equals(m_modeCombo.getValue().getMode())) {
+					// ** At this point, the WPA_WPA2 option is not supported in the 'Access Point' mode. 
+					m_securityCombo.removeAll();
+					for (GwtWifiSecurity mode : GwtWifiSecurity.values()) {
+						if (mode != GwtWifiSecurity.netWifiSecurityWPA_WPA2) {
+							m_securityCombo.add(MessageUtils.get(mode.name()));
+						}
+			        }
+								
 					// Disable Access Point mode when TCP/IP is set to WAN
 					if (tcpIpStatus.equals(GwtNetIfStatus.netIPv4StatusEnabledWAN)) {
-						for (Field<?> field : m_formPanel.getFields()) {			
+						for (Field<?> field : m_formPanel.getFields()) {
 							if (field != m_modeCombo) {
 								field.setEnabled(false);
 							}
@@ -1477,6 +1492,32 @@ public class WirelessConfigTab extends LayoutContainer
 	            				m_securityCombo.setSimpleValue(MessageUtils.get(GwtWifiSecurity.netWifiSecurityWPA2.name()));
 	            			} else {
 	            				m_securityCombo.setSimpleValue(MessageUtils.get(GwtWifiSecurity.netWifiSecurityNONE.name()));
+	            			}
+	            			
+	            			if (security.equals("WPA") || security.equals("WPA2") || security.equals("WPA/WPA2")) {
+	            				GwtWifiCiphers pairwiseCiphers = wifiHotspotEntry.getPairwiseCiphersEnum();
+		            			if (pairwiseCiphers == GwtWifiCiphers.netWifiCiphers_TKIP) {
+		            				m_pairwiseCiphersCombo.setSimpleValue(MessageUtils.get(GwtWifiCiphers.netWifiCiphers_TKIP.name()));
+		            			} else if (pairwiseCiphers == GwtWifiCiphers.netWifiCiphers_CCMP) {
+		            				m_pairwiseCiphersCombo.setSimpleValue(MessageUtils.get(GwtWifiCiphers.netWifiCiphers_CCMP.name()));
+		            			} else if (pairwiseCiphers == GwtWifiCiphers.netWifiCiphers_CCMP_TKIP) {
+		            				m_pairwiseCiphersCombo.setSimpleValue(MessageUtils.get(GwtWifiCiphers.netWifiCiphers_CCMP_TKIP.name()));
+		            			} else {
+		            				// let's set it for CCMP TKIP
+		            				m_pairwiseCiphersCombo.setSimpleValue(MessageUtils.get(GwtWifiCiphers.netWifiCiphers_CCMP_TKIP.name()));
+		            			}
+		            			
+		            			GwtWifiCiphers groupCiphers = wifiHotspotEntry.getGroupCiphersEnum();
+		            			if (groupCiphers == GwtWifiCiphers.netWifiCiphers_TKIP) {
+		            				m_groupCiphersCombo.setSimpleValue(MessageUtils.get(GwtWifiCiphers.netWifiCiphers_TKIP.name()));
+		            			} else if (groupCiphers == GwtWifiCiphers.netWifiCiphers_CCMP) {
+		            				m_groupCiphersCombo.setSimpleValue(MessageUtils.get(GwtWifiCiphers.netWifiCiphers_CCMP.name()));
+		            			} else if (groupCiphers == GwtWifiCiphers.netWifiCiphers_CCMP_TKIP) {
+		            				m_groupCiphersCombo.setSimpleValue(MessageUtils.get(GwtWifiCiphers.netWifiCiphers_CCMP_TKIP.name()));
+		            			} else {
+		            				// let's set it for CCMP TKIP
+		            				m_groupCiphersCombo.setSimpleValue(MessageUtils.get(GwtWifiCiphers.netWifiCiphers_CCMP_TKIP.name()));
+		            			}
 	            			}
 	            			
 	            			// deselect all channels

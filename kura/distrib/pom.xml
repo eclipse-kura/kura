@@ -171,11 +171,11 @@
 									<artifactId>org.eclipse.kura.linux.watchdog</artifactId>
 									<version>${org.eclipse.kura.linux.watchdog.version}</version>
 								</artifactItem>
-								<!--<artifactItem>
+								<artifactItem>
 									<groupId>org.eclipse.kura</groupId>
 									<artifactId>org.eclipse.kura.linux.status</artifactId>
 									<version>${org.eclipse.kura.linux.status.version}</version>
-								</artifactItem>-->
+								</artifactItem>
 								<artifactItem>
 									<groupId>org.eclipse.kura</groupId>
 									<artifactId>org.eclipse.kura.linux.gpio</artifactId>

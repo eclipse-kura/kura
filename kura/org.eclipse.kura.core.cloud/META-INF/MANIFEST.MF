@@ -6,10 +6,10 @@ Bundle-Version: 1.0.6.qualifier
 Bundle-Vendor: EUROTECH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Service-Component: OSGI-INF/*.xml
-Bundle-ClassPath: .
+Bundle-ClassPath: .,
+ lib/com.google.protobuf_2.6.0.jar
 Bundle-ActivationPolicy: lazy
-Import-Package: com.google.protobuf;version="2.5.0",
- org.eclipse.kura;version="[1.0,2.0)",
+Import-Package: org.eclipse.kura;version="[1.0,2.0)",
  org.eclipse.kura.certificate;version="[1.0,1.1)",
  org.eclipse.kura.cloud;version="[1.0,1.1)",
  org.eclipse.kura.command;version="[1.1,1.2)",

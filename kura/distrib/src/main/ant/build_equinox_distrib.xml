@@ -125,12 +125,20 @@
                  token="{org.eclipse.kura.linux.watchdog.version}" value="${org.eclipse.kura.linux.watchdog.version}"/>
         <replace file="${project.build.directory}/${build.output.name}/config.ini"
                  token="{org.eclipse.kura.linux.status.version}" value="${org.eclipse.kura.linux.status.version}"/>
-        <replace file="${project.build.directory}/${build.output.name}/config.ini"
-                 token="{org.eclipse.kura.linux.gpio.version}" value="${org.eclipse.kura.linux.gpio.version}"/>
         <propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
             <entry key="osgi.bundles" operation="+"
                    value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.net.admin_${org.eclipse.kura.net.admin.version}.jar@5:start" />
         </propertyfile>
+
+			<!-- Conditional entries. Check for jar presence, and invoke relevant ant target-->
+			<available file="${project.build.directory}/plugins/org.eclipse.kura.web_${org.eclipse.kura.web.version}.jar" property="web.jar.present" />
+			<antcall target="web-config" />
+
+			<available file="${project.build.directory}/plugins/org.eclipse.kura.linux.gpio_${org.eclipse.kura.linux.gpio.version}.jar" property="linux.gpio.jar.present" />
+			<antcall target="gpio-config" />
+
+			<available file="${project.build.directory}/plugins/org.eclipse.kura.emulator.gpio_${org.eclipse.kura.emulator.gpio.version}.jar" property="emulated.gpio.jar.present" />
+			<antcall target="emulated-gpio-config" />
 
         <!-- Add mToolkit to config.ini -->
         <propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
@@ -144,13 +152,9 @@
             <entry key="kura"
                    value="file:${kura.install.dir}/kura/kura/packages/${build.output.name}.dp" />
         </propertyfile>
-		<available file="${project.build.directory}/plugins/org.eclipse.kura.web_${org.eclipse.kura.web.version}.jar" property="web.jar.present" />
-
 
 		<!-- Set web UI port -->
 		<antcall target="set-http-port" />
-
-		<antcall target="web-config" />
 
 		<!-- Create the Kura start scripts -->
 		<echo file="${project.build.directory}/${build.output.name}/start_kura.sh" append="false">#!/bin/sh
@@ -306,7 +310,7 @@ fi
             <zipfileset file="${project.build.directory}/${build.output.name}/jdk.dio.policy"
                         prefix="${build.output.name}/kura/" />
 
-        	<zipfileset file="${project.build.directory}/${build.output.name}/jdk.dio.properties"
+        		<zipfileset file="${project.build.directory}/${build.output.name}/jdk.dio.properties"
                         prefix="${build.output.name}/kura/" />
 
             <zipfileset file="src/main/resources/common/kura_custom.properties"
@@ -428,6 +432,7 @@ fi
 
             <zipfileset dir="${kura.osgi.repo}/plugins/"
                         prefix="${build.output.name}/plugins"/>
+
             <zipfileset dir="../target-definition/common/repository/plugins"
                         prefix="${build.output.name}/plugins"/>
 
@@ -477,8 +482,13 @@ fi
 				<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.net.admin_${org.eclipse.kura.net.admin.version}.jar"
                         prefix="${build.output.name}/kura/plugins" />
         </zip>
+		
+		<!-- Conditional inclusion of jar files in the distribution jar -->
 		<antcall target="web-jar" />
-        <echo message="Building Kura Distribution for ${build.name}-jars..." />
+		<antcall target="gpio-jar" />
+		<antcall target="emulated-gpio-jar" />
+
+      <echo message="Building Kura Distribution for ${build.name}-jars..." />
 
 		<!-- Create installer script -->
         <echo message="Creating Installer for ${build.name}  ${kura.install.dir}" />
@@ -582,10 +592,46 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
         </propertyfile>
 	</target>
 
+	<target name="gpio-config" if="linux.gpio.jar.present">
+		<propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
+			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.linux.gpio_${org.eclipse.kura.linux.gpio.version}.jar@5:start" />
+		</propertyfile>
+	</target>
+
+	<target name="emulated-gpio-config" if="emulated.gpio.jar.present">
+		<propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
+			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.emulator.gpio_${org.eclipse.kura.emulator.gpio.version}.jar@5:start" />
+		</propertyfile>
+	</target>
+
 	<target name="web-jar" if="web.jar.present">
 		<zip destfile="${project.build.directory}/${build.output.name}.zip" update="true">
 			<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.web_${org.eclipse.kura.web.version}.jar"
                         prefix="${build.output.name}/kura/plugins" />
 		</zip>
 	</target>
+
+	<target name="gpio-jar" if="linux.gpio.jar.present">
+		<zip destfile="${project.build.directory}/${build.output.name}.zip" update="true">
+			<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.linux.gpio_${org.eclipse.kura.linux.gpio.version}.jar"
+                        prefix="${build.output.name}/kura/plugins" />
+		</zip>
+	</target>
+
+	<target name="emulated-gpio-jar" if="emulated.gpio.jar.present">
+		<zip destfile="${project.build.directory}/${build.output.name}.zip" update="true">
+			<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.emulator.gpio_${org.eclipse.kura.emulator.gpio.version}.jar"
+                        prefix="${build.output.name}/kura/plugins" />
+		</zip>
+
+		<zip destfile="${project.build.directory}/tmp.zip"> 
+			<zipfileset src="${project.build.directory}/${build.output.name}.zip"> 
+				<exclude name="${build.output.name}/plugins/jdk.dio_1.0.1.jar" /> 
+			</zipfileset> 
+		</zip> 
+		<move file="${project.build.directory}/tmp.zip" tofile="${project.build.directory}/${build.output.name}.zip" /> 
+	</target>
+
 </project>

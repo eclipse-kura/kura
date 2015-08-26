@@ -39,7 +39,7 @@ following steps:
 2.  Eclipse Kura requires Oracle Java VM or Open JDK to be installed on
     the target device.
 
-    Verify that Java 7 is installed with:
+    Verify that Java 7 or above is installed with:
 
     <pre>java –version</pre>
 
@@ -51,11 +51,13 @@ following steps:
 
 4.  Download the Kura package with:
 
-    <pre>wget http://www.eclipse.org/downloads/download.php?file=/kura/releases/1.0.0/kura_1.0.0_beaglebone_debian_armv7.deb</pre>
+    <pre>wget https://s3.amazonaws.com/kura_downloads/debian/release/1.2.1/kura_1.2.1_beaglebone_debian_armv7.deb</pre>
 
 5.  Install Kura with: 
 
-    <pre>sudo dpkg -i kura_1.0.0_beaglebone_debian_armv7.deb
+    <pre>sudo apt-get update
+
+    sudo dpkg -i kura_1.2.1_beaglebone_debian_armv7.deb
 
     sudo apt-get install -f</pre>
 
@@ -167,7 +169,7 @@ following steps:
 2.  Download and install the Eclipse IDE for Java EE Developers from
     http://www.eclipse.org/downloads/.
 
-3.  Download the Kura user workspace archive *with* Kura web UI from https://s3.amazonaws.com/kura_downloads/user_workspace/1.0.0/user_workspace_archive_1.0.0.zip
+3.  Download the Kura user workspace archive *with* Kura web UI from https://s3.amazonaws.com/kura_downloads/user_workspace/1.2.1/user_workspace_archive_1.2.1.zip
 
 or
 

@@ -49,7 +49,9 @@ following steps:
 
 5.  Install Kura with: 
 
-    <pre>sudo dpkg -i kura_1.2.1_raspberry-pi_armv6.deb
+    <pre>sudo apt-get update
+
+    sudo dpkg -i kura_1.2.1_raspberry-pi_armv6.deb
 
     sudo apt-get install -f</pre>
 

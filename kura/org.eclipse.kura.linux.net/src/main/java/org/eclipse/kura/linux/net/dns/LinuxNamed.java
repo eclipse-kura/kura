@@ -62,10 +62,10 @@ public class LinuxNamed {
 			}
 		} 
 		else if (OS_VERSION.equals(KuraConstants.ReliaGATE_50_21_Ubuntu.getImageName() + "_" + KuraConstants.ReliaGATE_50_21_Ubuntu.getImageVersion())) {
-			s_persistentConfigFileName = "/etc/named.conf";
+			s_persistentConfigFileName = "/etc/bind/named.conf";
 			s_procString = "/usr/sbin/named";
 			s_logFileName = "/var/log/named.log";
-			s_rfc1912ZonesFilename = "/etc/named.rfc1912.zones";
+			s_rfc1912ZonesFilename = "/etc/bind/named.rfc1912.zones";
 		}
 		else {
 			s_persistentConfigFileName = "/etc/named.conf";

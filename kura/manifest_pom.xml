@@ -38,7 +38,7 @@
 		<module>org.eclipse.kura.linux.net</module>
 		<module>org.eclipse.kura.linux.net.test</module>
 		<module>org.eclipse.kura.linux.position</module>
-		<!--<module>org.eclipse.kura.linux.status</module>-->
+		<module>org.eclipse.kura.linux.status</module>
 		<module>org.eclipse.kura.linux.usb</module>
 		<module>org.eclipse.kura.linux.watchdog</module>
 		<module>org.eclipse.kura.net.admin</module>

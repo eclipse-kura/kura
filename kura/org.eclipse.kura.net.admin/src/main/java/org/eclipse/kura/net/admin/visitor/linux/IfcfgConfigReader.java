@@ -114,7 +114,8 @@ public class IfcfgConfigReader implements NetworkConfigurationVisitor {
 			if (OS_VERSION.equals(KuraConstants.Mini_Gateway.getImageName() + "_" + KuraConstants.Mini_Gateway.getImageVersion()) ||
 				OS_VERSION.equals(KuraConstants.Raspberry_Pi .getImageName()) || 
 				OS_VERSION.equals(KuraConstants.BeagleBone.getImageName()) ||
-				OS_VERSION.equals(KuraConstants.Intel_Edison.getImageName() + "_" + KuraConstants.Intel_Edison.getImageVersion() + "_" + KuraConstants.Intel_Edison.getTargetName())) {
+				OS_VERSION.equals(KuraConstants.Intel_Edison.getImageName() + "_" + KuraConstants.Intel_Edison.getImageVersion() + "_" + KuraConstants.Intel_Edison.getTargetName()) ||
+				OS_VERSION.equals(KuraConstants.ReliaGATE_50_21_Ubuntu.getImageName() + "_" + KuraConstants.ReliaGATE_50_21_Ubuntu.getImageVersion())) {
 				ifcfgFile = new File(DEBIAN_NET_CONFIGURATION_DIRECTORY
 						+ "interfaces");
 			} else {
@@ -128,7 +129,8 @@ public class IfcfgConfigReader implements NetworkConfigurationVisitor {
 				if (OS_VERSION.equals(KuraConstants.Mini_Gateway.getImageName() + "_" + KuraConstants.Mini_Gateway.getImageVersion()) ||
 					OS_VERSION.equals(KuraConstants.Raspberry_Pi.getImageName()) ||
 					OS_VERSION.equals(KuraConstants.BeagleBone.getImageName()) ||
-					OS_VERSION.equals(KuraConstants.Intel_Edison.getImageName() + "_" + KuraConstants.Intel_Edison.getImageVersion() + "_" + KuraConstants.Intel_Edison.getTargetName())) {
+					OS_VERSION.equals(KuraConstants.Intel_Edison.getImageName() + "_" + KuraConstants.Intel_Edison.getImageVersion() + "_" + KuraConstants.Intel_Edison.getTargetName()) ||
+					OS_VERSION.equals(KuraConstants.ReliaGATE_50_21_Ubuntu.getImageName() + "_" + KuraConstants.ReliaGATE_50_21_Ubuntu.getImageVersion())) {
 					kuraProps = parseDebianConfigFile(ifcfgFile, interfaceName);
 				} else {
 					kuraProps = parseRedhatConfigFile(ifcfgFile, interfaceName);

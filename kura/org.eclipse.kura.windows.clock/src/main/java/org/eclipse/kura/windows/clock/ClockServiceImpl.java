@@ -184,7 +184,7 @@ public class ClockServiceImpl implements ConfigurableComponent, ClockService, Cl
 			long time = System.currentTimeMillis() + offset;
 			Calendar cal = Calendar.getInstance();
 			cal.setTimeInMillis( time );
-			SetLocalTime(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DAY_OF_MONTH), cal.get(Calendar.HOUR_OF_DAY), cal.get(Calendar.MINUTE), cal.get(Calendar.SECOND));
+			//SetLocalTime(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DAY_OF_MONTH), cal.get(Calendar.HOUR_OF_DAY), cal.get(Calendar.MINUTE), cal.get(Calendar.SECOND));
 /*			Process proc = null;
 			try {
 				proc = ProcessUtil.exec("date -s @"+time/1000);		//divide by 1000 to switch to seconds

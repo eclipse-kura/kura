@@ -35,9 +35,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class GpsClockSyncProvider implements ClockSyncProvider, EventHandler {
-	
+
 	private static final Logger s_logger = LoggerFactory.getLogger(GpsClockSyncProvider.class);
-	
+
 	private PositionService		  m_positionService;
 	protected Map<String, Object> m_properties;
 	protected ClockSyncListener   m_listener;
@@ -51,7 +51,7 @@ public class GpsClockSyncProvider implements ClockSyncProvider, EventHandler {
 	//   Wait for GPS locked event if single clock update
 	//
 	// ----------------------------------------------------------------	
-	
+
 	public void handleEvent(Event event) {
 		if(PositionLockedEvent.POSITION_LOCKED_EVENT_TOPIC.contains(event.getTopic())){
 			if((m_waitForLocked)&&(m_refreshInterval == 0)){
@@ -73,20 +73,20 @@ public class GpsClockSyncProvider implements ClockSyncProvider, EventHandler {
 		s_logger.debug("initiing the GPS clock sync provider");
 		m_properties = properties;
 		m_listener   = listener;
-		
+
 		m_waitForLocked=false;
-		
+
 		m_refreshInterval = 0;
 		if (m_properties.containsKey("clock.ntp.refresh-interval")) {
 			m_refreshInterval = (Integer) m_properties.get("clock.ntp.refresh-interval");
 		}	
-		
+
 		try {
 			// looking for a valid PositionService from SCR
 			BundleContext bundleContext = FrameworkUtil.getBundle(this.getClass()).getBundleContext();
 			ServiceReference<PositionService> scrServiceRef = bundleContext.getServiceReference(PositionService.class);
 			m_positionService = bundleContext.getService(scrServiceRef);
-	
+
 			// install event listener for GPS locked event
 			Dictionary props = new Hashtable<String, String>();
 			String[] topic = {PositionLockedEvent.POSITION_LOCKED_EVENT_TOPIC};
@@ -95,13 +95,13 @@ public class GpsClockSyncProvider implements ClockSyncProvider, EventHandler {
 		} catch(Exception e) {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "Failed to initialize the GpsClockSyncProvider", e);
 		}
-		
+
 		s_logger.debug("done initiing the GPS clock sync provider");
 	}
 
 	@Override
 	public void start() throws KuraException {
-		
+
 		if (m_refreshInterval < 0) {			
 			// Never do any update. So Nothing to do.
 			s_logger.info("No clock update required");
@@ -156,7 +156,7 @@ public class GpsClockSyncProvider implements ClockSyncProvider, EventHandler {
 	//   The GPS can give time but not date 
 	//
 	// ----------------------------------------------------------------	
-	
+
 	protected void synchClock() throws KuraException
 	{
 		Process procDate = null;
@@ -176,8 +176,8 @@ public class GpsClockSyncProvider implements ClockSyncProvider, EventHandler {
 						String mm = gpsTime.substring(2, 4);
 						String ss = gpsTime.substring(4, 6);
 
-						SetLocalTime(YY, MM, DD, hh, mm, ss);
-/*
+						//SetLocalTime(YY, MM, DD, hh, mm, ss);
+						/*
 						String commandDate ="date +%Y%m%d -s \"20"+YY+MM+DD+"\"";
 						procDate = ProcessUtil.exec(commandDate);
 						procDate.waitFor();
@@ -198,22 +198,21 @@ public class GpsClockSyncProvider implements ClockSyncProvider, EventHandler {
 									m_waitForLocked=true;
 								}
 							}
-*/
-				            m_lastSync = new Date();
-				            m_waitForLocked=false;
-				            // Call update method with 0 offset to ensure the clock event gets fired and the HW clock
-							// is updated if desired.
-							m_listener.onClockUpdate(0);
-						}
-						else {
-							s_logger.error("Unexpected error while Synchronizing System Clock with GPS");
-							m_waitForLocked=true;
-						}
+						 */
+						m_lastSync = new Date();
+						m_waitForLocked=false;
+						// Call update method with 0 offset to ensure the clock event gets fired and the HW clock
+						// is updated if desired.
+						m_listener.onClockUpdate(0);
+					}
+					else {
+						s_logger.error("Unexpected error while Synchronizing System Clock with GPS");
+						m_waitForLocked=true;
 					}
 				}
-				else
-					m_waitForLocked=true;
 			}
+			else
+				m_waitForLocked=true;
 		} 
 		catch (Exception e) {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);

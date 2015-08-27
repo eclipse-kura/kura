@@ -19,12 +19,12 @@
 	<parent>
 		<groupId>org.eclipse.kura</groupId>
 		<artifactId>kura</artifactId>
-		<version>1.2.0</version>
+		<version>1.2.1</version>
 		<relativePath>../manifest_pom.xml</relativePath>
 	</parent>
 
 	<artifactId>org.eclipse.kura.core.certificates</artifactId>
-	<version>1.0.0</version>
+	<version>1.0.1</version>
 	<packaging>eclipse-plugin</packaging>
 
 	<properties>
@@ -38,6 +38,9 @@
                                 <artifactId>tycho-packaging-plugin</artifactId>
                                 <version>${tycho-version}</version>
                                 <configuration>
+                                	<archive>
+                						<compress>false</compress>
+                					</archive>
                                         <format>'${kura.build.version}'</format>
                                 </configuration>
                                 <executions>

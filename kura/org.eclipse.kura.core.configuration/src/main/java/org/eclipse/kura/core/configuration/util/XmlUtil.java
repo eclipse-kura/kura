@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011, 2014 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2015 Eurotech and/or its affiliates
  *
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
@@ -11,135 +11,147 @@
  */
 package org.eclipse.kura.core.configuration.util;
 
+import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
-import java.text.MessageFormat;
-import java.util.HashMap;
-import java.util.Map;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBElement;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.MarshalException;
-import javax.xml.bind.Marshaller;
-import javax.xml.bind.UnmarshalException;
-import javax.xml.bind.Unmarshaller;
-import javax.xml.bind.ValidationEvent;
-import javax.xml.bind.util.ValidationEventCollector;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.FactoryConfigurationError;
-import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamReader;
-import com.sun.xml.*;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 
-import org.eclipse.kura.core.configuration.XmlConfigPropertiesAdapter;
+import org.eclipse.kura.core.configuration.XmlComponentConfigurations;
+import org.eclipse.kura.core.configuration.XmlSnapshotIdResult;
+import org.eclipse.kura.core.configuration.util.serializers.XmlJavaComponentConfigurationsMapper;
+import org.eclipse.kura.core.configuration.util.serializers.XmlJavaMetadataMapper;
+import org.eclipse.kura.core.configuration.util.serializers.XmlJavaSnapshotIdResultMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.w3c.dom.Document;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
 public class XmlUtil 
 {
-	@SuppressWarnings("unused")
 	private static final Logger s_logger = LoggerFactory.getLogger(XmlUtil.class);
-	
-	@SuppressWarnings("rawtypes")
-	private static Map<Class,JAXBContext> s_contexts = new HashMap<Class,JAXBContext>();	
-	
-	
-	public static String marshal(Object object) throws JAXBException 
+
+
+	//
+	// Public methods
+	//
+
+	//Marshalling
+	public static String marshal(Object object) throws Exception 
 	{
 		StringWriter sw = new StringWriter();
 		marshal(object, sw);
 		return sw.toString();
 	}
 
-	@SuppressWarnings("rawtypes")
-	public static void marshal(Object object, Writer w) throws JAXBException 
+	public static void marshal(Object object, Writer w) throws Exception 
 	{
-		Class clazz = object.getClass();
-		JAXBContext context = s_contexts.get(clazz);
-		if (context == null) {			
-			context = JAXBContext.newInstance(clazz);
-			s_contexts.put(clazz, context);
-		}
+		try{
+			DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+			DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
 
-		ValidationEventCollector valEventHndlr = new ValidationEventCollector();
-		Marshaller marshaller = context.createMarshaller();
-		marshaller.setSchema(null);
-		marshaller.setProperty( Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
-		marshaller.setEventHandler(valEventHndlr);
+			// root elements
+			Document doc = docBuilder.newDocument();
+			doc.setXmlStandalone(true);
 
-		try {
-			marshaller.marshal(object, w);
-		}
-		catch (Exception e) {		
-			if (e instanceof JAXBException) {
-				throw (JAXBException) e;
+			if(object instanceof XmlSnapshotIdResult){
+				// Resulting xml:
+				// <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+				// <esf:snapshot-ids xmlns:ocd="http://www.osgi.org/xmlns/metatype/v1.2.0" xmlns:esf="http://eurotech.com/esf/2.0">
+				//	 <esf:snapshotIds>1434122113492</esf:snapshotIds>
+				//	 <esf:snapshotIds>1434122124387</esf:snapshotIds>
+				// </esf:snapshot-ids>
+
+				new XmlJavaSnapshotIdResultMapper().marshal(doc, object);
+
+			}else if(object instanceof XmlComponentConfigurations){		
+				new XmlJavaComponentConfigurationsMapper().marshal(doc, object);
 			}
-			else {
-				throw new MarshalException(e.getMessage(), e);	
-			}			
-		}
-		if (valEventHndlr.hasEvents()) {			
-			for (ValidationEvent valEvent : valEventHndlr.getEvents()) {
-				if (valEvent.getSeverity() != ValidationEvent.WARNING) {
-					// throw a new Marshall Exception if there is a parsing error
-					throw new MarshalException(valEvent.getMessage(), valEvent.getLinkedException());							
-				}
-			}
+
+			// write the content into xml file
+			TransformerFactory transformerFactory = TransformerFactory.newInstance();
+			Transformer transformer = transformerFactory.newTransformer();
+			transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+			transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
+			DOMSource source = new DOMSource(doc);
+
+			StreamResult result = new StreamResult(w); //System.out
+			transformer.transform(source, result);
+		} catch (ParserConfigurationException pce) {
+			pce.printStackTrace();
+		} catch (TransformerException tfe) {
+			tfe.printStackTrace();
 		}
 	}
-	
 
+
+	//un-marshalling
 	public static <T> T unmarshal(String s, Class<T> clazz) 
-		throws JAXBException, XMLStreamException, FactoryConfigurationError 
+			throws XMLStreamException, FactoryConfigurationError
 	{
 		StringReader sr = new StringReader(s);
-		return unmarshal(sr, clazz);
+		T result=unmarshal(sr, clazz);
+		return result;
 	}
 
-
 	public static <T> T unmarshal(Reader r, Class<T> clazz) 
-		throws JAXBException, XMLStreamException, FactoryConfigurationError 
+			throws XMLStreamException, FactoryConfigurationError
 	{
-		JAXBContext context = s_contexts.get(clazz);
-		if (context == null) {			
-			context = JAXBContext.newInstance(clazz);
-			s_contexts.put(clazz, context);
+		DocumentBuilderFactory factory = null;
+		DocumentBuilder parser = null;
+
+		try {
+			factory = DocumentBuilderFactory.newInstance();
+			//factory.setValidating(true);
+			parser = factory.newDocumentBuilder();
+		} catch (FactoryConfigurationError fce) {
+			// The implementation is not available or cannot be instantiated
+			s_logger.error("Parser Factory configuration Error");
+			throw fce;
+		} catch (ParserConfigurationException pce) {
+			// the parser cannot be created with the specified configuration
+			s_logger.error("Parser configuration exception");
+			throw new FactoryConfigurationError(pce);
 		}
 
-		ValidationEventCollector valEventHndlr = new ValidationEventCollector();
-		XMLStreamReader xmlsr = XMLInputFactory.newFactory().createXMLStreamReader(r);
-		Unmarshaller unmarshaller = context.createUnmarshaller();
-		unmarshaller.setSchema(null);
-		unmarshaller.setEventHandler(valEventHndlr);
-		
-		JAXBElement<T> elem = null;
+		// parse the document
+		Document doc= null;
 		try {
-			elem = unmarshaller.unmarshal(xmlsr, clazz);
+			InputSource is = new InputSource(r);
+			doc = parser.parse(is);
+			doc.getDocumentElement().normalize();
+		} catch (SAXException se) {
+			throw new XMLStreamException(se.getMessage());
+		} catch (IOException ioe) {
+			throw new XMLStreamException(ioe.getMessage());
+		} catch (IllegalArgumentException iae) {
+			throw new XMLStreamException(iae.getMessage());
 		}
-		catch (Exception e) {		
-			if (e instanceof JAXBException) {
-				throw (JAXBException) e;
+
+		//identify the correct parser that has to execute
+		if(clazz.equals(XmlComponentConfigurations.class)){
+			try {
+				// Snapshot parser
+				return new XmlJavaComponentConfigurationsMapper().unmarshal(doc);
+			} catch (Exception e) {
+				throw new XMLStreamException(e.getMessage());
 			}
-			else {
-				throw new UnmarshalException(e.getMessage(), e);	
-			}			
+		}else {
+			// MetaData parser
+			return new XmlJavaMetadataMapper().unmarshal(doc);
 		}
-		
-		if (valEventHndlr.hasEvents()) {			
-			for (ValidationEvent valEvent : valEventHndlr.getEvents()) {
-				if (valEvent.getSeverity() != ValidationEvent.WARNING) {
-					// throw a new Unmarshall Exception if there is a parsing error
-					String msg = MessageFormat.format("Line {0}, Col: {1}: {2}",
-							valEvent.getLocator().getLineNumber(),
-							valEvent.getLocator().getColumnNumber(),
-							valEvent.getLinkedException().getMessage());
-					throw new UnmarshalException(msg, valEvent.getLinkedException());
-				}
-			}
-		}
-		return elem.getValue();
 	}
 }

@@ -1,0 +1,63 @@
+#!/bin/sh
+### BEGIN INIT INFO
+# Provides:          firewall
+# Required-Start:    
+# Required-Stop:     
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Firewall init 
+# Description:       Start linux firewall
+### END INIT INFO
+# IPTables Firewall script
+
+
+#Clear all Built-in Chains
+iptables -F INPUT
+iptables -F OUTPUT
+iptables -F FORWARD
+iptables -t nat -F
+
+
+#Block all ports for input traffic
+iptables -P INPUT DROP
+#block Output Traffic
+iptables -P OUTPUT ACCEPT
+#block forward Traffic
+iptables -P FORWARD DROP
+
+#Allow all traffic to loop back interface, SSH, and HTTP
+iptables -A INPUT -i lo -j ACCEPT
+
+#Allow Only incoming connection related to Outgoing connection
+iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
+
+#allow inbound ICMP requests
+iptables -A INPUT -p icmp --icmp-type 8 -m state --state NEW,ESTABLISHED,RELATED -j ACCEPT
+iptables -A OUTPUT -p icmp --icmp-type 0 -m state --state ESTABLISHED,RELATED -j ACCEPT
+
+#custom local service rules
+iptables -I INPUT -p tcp -s 0.0.0.0/0 --dport 22 -j ACCEPT
+iptables -I INPUT -p tcp -s 0.0.0.0/0 -i usb0 --dport 8080 -j ACCEPT
+iptables -I INPUT -p tcp -s 0.0.0.0/0 -i wlan0 --dport 8080 -j ACCEPT
+iptables -I INPUT -p tcp -s 10.234.0.0/16 --dport 8080 -j ACCEPT
+iptables -I INPUT -p tcp -s 0.0.0.0/0 -i usb0 --dport 1450 -j ACCEPT
+iptables -I INPUT -p tcp -s 0.0.0.0/0 -i wlan0 --dport 1450 -j ACCEPT
+iptables -I INPUT -p tcp -s 127.0.0.1/32 --dport 5002 -j ACCEPT
+iptables -I INPUT -p udp -s 0.0.0.0/0 -i usb0 --dport 53 -j ACCEPT
+iptables -I INPUT -p udp -s 0.0.0.0/0 -i wlan0 --dport 53 -j ACCEPT
+iptables -I INPUT -p udp -s 0.0.0.0/0 -i usb0 --dport 67 -j ACCEPT
+iptables -I INPUT -p udp -s 0.0.0.0/0 -i wlan0 --dport 67 -j ACCEPT
+
+#custom port forward service rules
+
+#custom nat service rules
+#iptables -t nat -A POSTROUTING -o eth1 -j MASQUERADE; iptables -A FORWARD -i eth1 -o wlan0 -m state --state RELATED,ESTABLISHED -j ACCEPT; iptables -A FORWARD -i wlan0 -o eth1 -j ACCEPT
+#iptables -t nat -A POSTROUTING -o eth1 -j MASQUERADE; iptables -A FORWARD -i eth1 -o eth0 -m state --state RELATED,ESTABLISHED -j ACCEPT; iptables -A FORWARD -i eth0 -o eth1 -j ACCEPT
+
+#custom rules
+
+#allow fowarding if any masquerade is defined
+echo 1 > /proc/sys/net/ipv4/ip_forward
+
+#source a custom firewall script
+source /etc/init.d/firewall_cust 2> /dev/null

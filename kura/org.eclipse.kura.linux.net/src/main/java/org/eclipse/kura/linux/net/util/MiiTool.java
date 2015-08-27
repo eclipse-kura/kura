@@ -149,4 +149,9 @@ public class MiiTool implements LinkTool {
 	public String getDuplex() {
 		return this.duplex;
 	}
+
+	@Override
+	public int getSignal() {
+		return 0;
+	}
 }

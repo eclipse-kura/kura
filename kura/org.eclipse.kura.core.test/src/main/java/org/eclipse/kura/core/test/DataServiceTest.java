@@ -249,7 +249,7 @@ public class DataServiceTest implements DataServiceListener {
 			s_qos12MsgIds.clear();
 		}
 		
-		for (int i = 0; i < MAX_MSGS/2; i++) {
+		for (int i = 0; i < MAX_MSGS; i++) {
 			try {
 				synchronized (s_qos12MsgIds) {
 					Integer id = s_dataService.publish(MSG_TOPIC1, MSG_PAYLOAD.getBytes(), 1, false, DFLT_MSG_PRIORITY);
@@ -265,7 +265,7 @@ public class DataServiceTest implements DataServiceListener {
 			s_qos12HighPriorityMsgIds.clear();
 		}		
 
-		for (int i = 0; i < MAX_MSGS/2; i++) {
+		for (int i = 0; i < MAX_MSGS; i++) {
 			try {
 				synchronized (s_qos12HighPriorityMsgIds) {
 					Integer id = s_dataService.publish(MSG_TOPIC1, MSG_PAYLOAD.getBytes(), 1, false, HIGH_MSG_PRIORITY);
@@ -282,13 +282,11 @@ public class DataServiceTest implements DataServiceListener {
 		for (int i = 0; i < ALL_CONFIRMED_QOS1_TIMEOUT; i++) {
 			synchronized (s_qos12MsgIds) {
 				synchronized (s_qos12HighPriorityMsgIds) {
-					if (s_qos12HighPriorityMsgIds.isEmpty()) {
-						if(s_qos12MsgIds.isEmpty()) {
-							fail("High priority messages should be confirmed before default priority messages");
-						} else {
-							allConfirmed = true;
-							break;
-						}
+					if (!s_qos12HighPriorityMsgIds.isEmpty() && s_qos12MsgIds.isEmpty()) {
+						fail("High priority messages should be confirmed before default priority messages");
+					} else if (s_qos12HighPriorityMsgIds.isEmpty() && s_qos12MsgIds.isEmpty()) {
+						allConfirmed = true;
+						break;
 					}
 				}
 			}

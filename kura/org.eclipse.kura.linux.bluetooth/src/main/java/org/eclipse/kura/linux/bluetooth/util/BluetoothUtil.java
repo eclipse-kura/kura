@@ -3,6 +3,7 @@ package org.eclipse.kura.linux.bluetooth.util;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -12,8 +13,8 @@ import java.util.concurrent.Future;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
-import org.eclipse.kura.core.util.ProcessUtil;
-import org.eclipse.kura.core.util.SafeProcess;
+import org.eclipse.kura.linux.bluetooth.util.BluetoothSafeProcess;
+import org.eclipse.kura.linux.bluetooth.util.BluetoothProcessUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,7 +24,7 @@ public class BluetoothUtil {
 	private static final ExecutorService s_processExecutor = Executors.newSingleThreadExecutor();
 
 	private static final String BD_ADDRESS    = "BD Address:";
-	private static final String HCI_VERSION_4 = "HCI Version: 4.0";
+	private static final String HCI_VERSION   = "HCI Version:";
 	private static final String HCICONFIG     = "hciconfig";
 	private static final String HCITOOL       = "hcitool";
 	private static final String GATTTOOL      = "gatttool";
@@ -33,12 +34,12 @@ public class BluetoothUtil {
 	 */
 	public static Map<String,String> getConfig(String name) throws KuraException {
 		Map<String,String> props = new HashMap<String,String>();
-		SafeProcess proc = null;
+		BluetoothSafeProcess proc = null;
 		BufferedReader br = null;
 		StringBuilder sb = null;
 		String[] command = { HCICONFIG, name, "version" };
 		try {
-			proc = ProcessUtil.exec(command);
+			proc = BluetoothProcessUtil.exec(command);
 			br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
 			sb = new StringBuilder();
 			String line = null;
@@ -54,10 +55,9 @@ public class BluetoothUtil {
 			
 			//TODO: Pull more parameters from hciconfig? 
 			String[] results = sb.toString().split("\n");
-			int index = -1;
 			props.put("leReady", "false");
 			for (String result : results) {
-				if((index = result.indexOf(BD_ADDRESS)) >= 0) {
+				if((result.indexOf(BD_ADDRESS)) >= 0) {
 					// Address reported as:
 					// BD Address: xx:xx:xx:xx:xx:xx  ACL MTU: xx:xx SCO MTU: xx:x
 					String[] ss = result.split(" ");
@@ -74,9 +74,12 @@ public class BluetoothUtil {
 					props.put("address", address);
 					s_logger.trace("Bluetooth adapter address set to: " + address);
 				}
-				if((index = result.indexOf(HCI_VERSION_4)) >= 0) {
-					props.put("leReady", "true");
-					s_logger.trace("Bluetooth adapter is LE ready");
+				if((result.indexOf(HCI_VERSION)) >= 0) {
+					// HCI version : 4.0 (0x6) or HCI version : 4.1 (0x7)
+					if((result.indexOf("0x6") >= 0) || (result.indexOf("0x7") >= 0)) {
+						props.put("leReady", "true");
+						s_logger.trace("Bluetooth adapter is LE ready");
+					}
 				}
 			}
 			
@@ -102,11 +105,11 @@ public class BluetoothUtil {
 	public static boolean isEnabled(String name) {
 		
 		String[] command = { HCICONFIG, name };
-		SafeProcess proc = null;
+		BluetoothSafeProcess proc = null;
 		BufferedReader br = null;
 		
 		try {
-			proc = ProcessUtil.exec(command);
+			proc = BluetoothProcessUtil.exec(command);
 			br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
 			String line = null;
 			while ((line = br.readLine()) != null) {
@@ -137,10 +140,10 @@ public class BluetoothUtil {
 	 */
 	public static BufferedReader hciconfigCmd(String name, String cmd) {
 		String[] command = { HCICONFIG, name, cmd };
-		SafeProcess proc = null;
+		BluetoothSafeProcess proc = null;
 		BufferedReader br = null;
 		try {
-			proc = ProcessUtil.exec(command);
+			proc = BluetoothProcessUtil.exec(command);
 			br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
 		} catch (Exception e) {
 			s_logger.error("Error executing command: " + command, e);
@@ -161,10 +164,10 @@ public class BluetoothUtil {
 	public static void killCmd(String cmd, String signal) {
 		//String[] command = { "pkill", "-" + signal, cmd };
 		String[] commandPidOf = { "pidof", cmd };
-		SafeProcess proc = null;
+		BluetoothSafeProcess proc = null;
 		BufferedReader br = null;
 		try {
-			proc = ProcessUtil.exec(commandPidOf);
+			proc = BluetoothProcessUtil.exec(commandPidOf);
 			proc.waitFor();
 			br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
 			String pid = br.readLine();
@@ -172,21 +175,19 @@ public class BluetoothUtil {
 			// Check if the pid is not empty
 			if (pid != null) {
 				String[] commandKill = { "kill", "-" + signal, pid };
-				proc = ProcessUtil.exec(commandKill);
+				proc = BluetoothProcessUtil.exec(commandKill);
 			}
 			
 		} catch (IOException e) {
 			s_logger.error("Error executing command: " + commandPidOf, e);
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			s_logger.warn("Error executing command: " + commandPidOf, e);
 		} finally {
 			proc.destroy();
 			try {
 				br.close();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				s_logger.warn("Error closing process for command: " + commandPidOf, e);
 			}
 		}
 	}
@@ -199,6 +200,29 @@ public class BluetoothUtil {
 		String[] command = { HCITOOL, "-i", name, cmd };
 		BluetoothProcess proc = null;
 		try {
+			s_logger.debug("Command executed : " + Arrays.toString(command));
+			proc = exec(command, listener);
+		} catch (Exception e) {
+			s_logger.error("Error executing command: " + command, e);
+		}
+		
+		return proc;
+	}
+	
+	/*
+	 * Method to utilize BluetoothProcess and the hcitool utility. These processes run indefinitely, so the
+	 * BluetoothProcessListener is used to receive output from the process. 
+	 */
+	public static BluetoothProcess hcitoolCmd (String name, String[] cmd, BluetoothProcessListener listener) {
+		String[] command = new String[3 + cmd.length];
+		command[0] = HCITOOL;
+		command[1] = "-i";
+		command[2] = name;
+		for (int i=0; i < cmd.length; i++)
+			command[i+3] = cmd[i];
+		BluetoothProcess proc = null;
+		try {
+			s_logger.debug("Command executed : " + Arrays.toString(command));
 			proc = exec(command, listener);
 		} catch (Exception e) {
 			s_logger.error("Error executing command: " + command, e);

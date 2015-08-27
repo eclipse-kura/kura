@@ -101,7 +101,7 @@ public class IfcfgConfigReader implements NetworkConfigurationVisitor {
 					+ netInterfaceConfig.getName());
 
 			boolean autoConnect = false;
-			// int mtu = -1; // IAB - MTU is not currently used
+			// int mtu = -1; // MTU is not currently used
 			boolean dhcp = false;
 			IP4Address address = null;
 			String ipAddress = null;
@@ -111,12 +111,10 @@ public class IfcfgConfigReader implements NetworkConfigurationVisitor {
 			String gateway = null;
 
 			File ifcfgFile = null;
-			if (OS_VERSION.equals(KuraConstants.Mini_Gateway.getImageName()
-					+ "_" + KuraConstants.Mini_Gateway.getImageVersion())
-					|| OS_VERSION.equals(KuraConstants.Raspberry_Pi
-							.getImageName())
-					|| OS_VERSION.equals(KuraConstants.BeagleBone
-							.getImageName())) {
+			if (OS_VERSION.equals(KuraConstants.Mini_Gateway.getImageName() + "_" + KuraConstants.Mini_Gateway.getImageVersion()) ||
+				OS_VERSION.equals(KuraConstants.Raspberry_Pi .getImageName()) || 
+				OS_VERSION.equals(KuraConstants.BeagleBone.getImageName()) ||
+				OS_VERSION.equals(KuraConstants.Intel_Edison.getImageName() + "_" + KuraConstants.Intel_Edison.getImageVersion() + "_" + KuraConstants.Intel_Edison.getTargetName())) {
 				ifcfgFile = new File(DEBIAN_NET_CONFIGURATION_DIRECTORY
 						+ "interfaces");
 			} else {
@@ -127,12 +125,10 @@ public class IfcfgConfigReader implements NetworkConfigurationVisitor {
 			if (ifcfgFile.exists()) {
 				Properties kuraProps;
 				// found our match so load the properties
-				if (OS_VERSION.equals(KuraConstants.Mini_Gateway.getImageName()
-						+ "_" + KuraConstants.Mini_Gateway.getImageVersion())
-						|| OS_VERSION.equals(KuraConstants.Raspberry_Pi
-								.getImageName())
-						|| OS_VERSION.equals(KuraConstants.BeagleBone
-								.getImageName())) {
+				if (OS_VERSION.equals(KuraConstants.Mini_Gateway.getImageName() + "_" + KuraConstants.Mini_Gateway.getImageVersion()) ||
+					OS_VERSION.equals(KuraConstants.Raspberry_Pi.getImageName()) ||
+					OS_VERSION.equals(KuraConstants.BeagleBone.getImageName()) ||
+					OS_VERSION.equals(KuraConstants.Intel_Edison.getImageName() + "_" + KuraConstants.Intel_Edison.getImageVersion() + "_" + KuraConstants.Intel_Edison.getTargetName())) {
 					kuraProps = parseDebianConfigFile(ifcfgFile, interfaceName);
 				} else {
 					kuraProps = parseRedhatConfigFile(ifcfgFile, interfaceName);
@@ -336,109 +332,114 @@ public class IfcfgConfigReader implements NetworkConfigurationVisitor {
 				while (scanner.hasNextLine()) {
 					String line = scanner.nextLine().trim();
 					// ignore comments and blank lines
-					if (!line.isEmpty() && !line.startsWith("#")) {
-						String[] args = line.split("\\s+");
-						try {
-							// must be a line stating that interface starts on
-							// boot
-							if (args[0].equals("auto")
-									&& args[1].equals(interfaceName)) {
-								s_logger.debug("Setting ONBOOT to yes for "
-										+ interfaceName);
-								kuraProps.setProperty("ONBOOT", "yes");
-							}
-							// once the correct interface is found, read all
-							// configuration information
-							else if (args[0].equals("iface")
-									&& args[1].equals(interfaceName)) {
-								kuraProps.setProperty("BOOTPROTO", args[3]);
-								if (args[3].equals("dhcp")) {
-									kuraProps.setProperty("DEFROUTE", "yes");
+					if (!line.isEmpty()) {
+						if (line.startsWith("#!kura!")) {
+							line = line.substring("#!kura!".length());
+						}
+						if (!line.startsWith("#")) {
+							String[] args = line.split("\\s+");
+							try {
+								// must be a line stating that interface starts on
+								// boot
+								if (args[0].equals("auto")
+										&& args[1].equals(interfaceName)) {
+									s_logger.debug("Setting ONBOOT to yes for "
+											+ interfaceName);
+									kuraProps.setProperty("ONBOOT", "yes");
 								}
-								while (scanner.hasNextLine()) {
-									line = scanner.nextLine().trim();
-									if (line != null && !line.isEmpty()) {
-										if (line.startsWith("auto")
-												|| line.startsWith("iface")) {
-											break;
-										}
-
-										args = line.trim().split("\\s+");
-										if (args[0].equals("mtu")) {
-											kuraProps.setProperty("mtu",
-													args[1]);
-										} else if (args[0].equals("address")) {
-											kuraProps.setProperty("IPADDR",
-													args[1]);
-										} else if (args[0].equals("netmask")) {
-											kuraProps.setProperty("NETMASK",
-													args[1]);
-										} else if (args[0].equals("gateway")) {
-											kuraProps.setProperty("GATEWAY",
-													args[1]);
-											kuraProps.setProperty("DEFROUTE",
-													"yes");
-										} else if (args[0]
-												.equals("#dns-nameservers")) {
-											/*
-											 * IAB: 
-											 * If DNS servers are listed,
-											 * those entries will be appended to
-											 * the /etc/resolv.conf file on
-											 * every ifdown/ifup sequence
-											 * resulting in multiple entries for
-											 * the same servers. (Tested on
-											 * 10-20, 10-10, and Raspberry Pi).
-											 * Commenting out dns-nameservers in
-											 * the /etc/network interfaces file
-											 * allows DNS servers to be picked
-											 * up by the IfcfgConfigReader and
-											 * be displayed on the Web UI but
-											 * the /etc/resolv.conf file will
-											 * only be updated by Kura.
-											 */
-											if (args.length > 1) {
-												for (int i = 1; i < args.length; i++) {
-													kuraProps
-															.setProperty(
-																	"DNS"
-																			+ Integer
-																					.toString(i),
-																	args[i]);
+								// once the correct interface is found, read all
+								// configuration information
+								else if (args[0].equals("iface")
+										&& args[1].equals(interfaceName)) {
+									kuraProps.setProperty("BOOTPROTO", args[3]);
+									if (args[3].equals("dhcp")) {
+										kuraProps.setProperty("DEFROUTE", "yes");
+									}
+									while (scanner.hasNextLine()) {
+										line = scanner.nextLine().trim();
+										if (line != null && !line.isEmpty()) {
+											if (line.startsWith("auto")
+													|| line.startsWith("iface")) {
+												break;
+											}
+	
+											args = line.trim().split("\\s+");
+											if (args[0].equals("mtu")) {
+												kuraProps.setProperty("mtu",
+														args[1]);
+											} else if (args[0].equals("address")) {
+												kuraProps.setProperty("IPADDR",
+														args[1]);
+											} else if (args[0].equals("netmask")) {
+												kuraProps.setProperty("NETMASK",
+														args[1]);
+											} else if (args[0].equals("gateway")) {
+												kuraProps.setProperty("GATEWAY",
+														args[1]);
+												kuraProps.setProperty("DEFROUTE",
+														"yes");
+											} else if (args[0]
+													.equals("#dns-nameservers")) {
+												/*
+												 * IAB: 
+												 * If DNS servers are listed,
+												 * those entries will be appended to
+												 * the /etc/resolv.conf file on
+												 * every ifdown/ifup sequence
+												 * resulting in multiple entries for
+												 * the same servers. (Tested on
+												 * 10-20, 10-10, and Raspberry Pi).
+												 * Commenting out dns-nameservers in
+												 * the /etc/network interfaces file
+												 * allows DNS servers to be picked
+												 * up by the IfcfgConfigReader and
+												 * be displayed on the Web UI but
+												 * the /etc/resolv.conf file will
+												 * only be updated by Kura.
+												 */
+												if (args.length > 1) {
+													for (int i = 1; i < args.length; i++) {
+														kuraProps
+																.setProperty(
+																		"DNS"
+																				+ Integer
+																						.toString(i),
+																		args[i]);
+													}
 												}
-											}
-										} else if (args[0].equals("post-up")) {
-											StringBuffer sb = new StringBuffer();
-											for (int i = 1; i < args.length; i++) {
-												sb.append(args[i]);
-												sb.append(' ');
-											}
-											if (sb.toString()
-													.trim()
-													.equals("route del default dev "
-															+ interfaceName)) {
-												kuraProps.setProperty(
-														"DEFROUTE", "no");
+											} else if (args[0].equals("post-up")) {
+												StringBuffer sb = new StringBuffer();
+												for (int i = 1; i < args.length; i++) {
+													sb.append(args[i]);
+													sb.append(' ');
+												}
+												if (sb.toString()
+														.trim()
+														.equals("route del default dev "
+																+ interfaceName)) {
+													kuraProps.setProperty(
+															"DEFROUTE", "no");
+												}
 											}
 										}
 									}
+									// Debian makes assumptions about lo, handle
+									// those here
+									if (interfaceName.equals("lo")
+											&& kuraProps.getProperty("IPADDR") == null
+											&& kuraProps.getProperty("NETMASK") == null) {
+										kuraProps
+												.setProperty("IPADDR", "127.0.0.1");
+										kuraProps.setProperty("NETMASK",
+												"255.0.0.0");
+									}
+									break;
 								}
-								// Debian makes assumptions about lo, handle
-								// those here
-								if (interfaceName.equals("lo")
-										&& kuraProps.getProperty("IPADDR") == null
-										&& kuraProps.getProperty("NETMASK") == null) {
-									kuraProps
-											.setProperty("IPADDR", "127.0.0.1");
-									kuraProps.setProperty("NETMASK",
-											"255.0.0.0");
-								}
-								break;
+							} catch (Exception e) {
+								s_logger.warn(
+										"Possible malformed configuration file for "
+												+ interfaceName, e);
 							}
-						} catch (Exception e) {
-							s_logger.warn(
-									"Possible malformed configuration file for "
-											+ interfaceName, e);
 						}
 					}
 				}

@@ -19,12 +19,13 @@
 	<parent>
 		<groupId>org.eclipse.kura</groupId>
 		<artifactId>kura</artifactId>
-		<version>1.2.0</version>
+		<version>1.2.1</version>
 		<relativePath>../manifest_pom.xml</relativePath>
 	</parent>
 
 	<artifactId>org.eclipse.kura.core.test</artifactId>
 	<packaging>eclipse-test-plugin</packaging>
+	<version>1.0.2</version>
 
 	<properties>
 		<kura.basedir>${project.basedir}/..</kura.basedir>
@@ -60,7 +61,7 @@
                     <providerHint>junit4</providerHint>
                     <testSuite>org.eclipse.kura.core.test</testSuite>
                     <testClass>org.eclipse.kura.core.test.AllCoreTests</testClass>
-<!--                                         
+<!--
                     <testClass>org.eclipse.kura.core.test.CloudDeploymentHandlerTest</testClass>
                     <testClass>org.eclipse.kura.core.test.CloudServiceTest</testClass>
                     <testClass>org.eclipse.kura.core.test.CommURITest</testClass>
@@ -70,15 +71,15 @@
                     <testClass>org.eclipse.kura.core.test.NetworkServiceTest</testClass>
                     <testClass>org.eclipse.kura.core.test.SystemAdminServiceTest</testClass>
                     <testClass>org.eclipse.kura.core.test.SystemServiceTest</testClass>
- -->                    
+ -->
 		    <!-- Don't run tests in parallel because it breaks them
                     <parallel>both</parallel>
 		    -->
 
                     <useUnlimitedThreads>true</useUnlimitedThreads>
-                    <argLine>${tycho.testArgLine} -DbuildingWithTycho=true -Dosgi.locking=none -Dequinox.ds.print=true -Dorg.osgi.framework.storage=/tmp/osgi/framework_storage -Dosgi.clean=true -Dorg.eclipse.kura.mode=emulator -Dkura.configuration=file:../org.eclipse.kura.emulator/src/main/resources/kura.properties -Ddpa.configuration=/tmp/kura/dpa.properties  -Dlog4j.configuration=file:../org.eclipse.kura.emulator/src/main/resources/log4j.properties</argLine>
+                    <argLine>${tycho.testArgLine} -DbuildingWithTycho=true -Dosgi.locking=none -Dequinox.ds.print=true -Dorg.osgi.framework.storage=/tmp/osgi/framework_storage -Dosgi.clean=true -Dorg.eclipse.kura.mode=emulator -Dkura.configuration=file:${project.basedir}/../org.eclipse.kura.emulator/src/main/resources/kura.properties -Ddpa.configuration=/tmp/kura/dpa.properties  -Dlog4j.configuration=file:../org.eclipse.kura.emulator/src/main/resources/log4j.properties</argLine>
 
-		    <!-- This can be uncommented to debug the test in the event of a failure by telneting to port 5002 and seeing the state of the OSGi runtime 		    
+		    <!-- This can be uncommented to debug the test in the event of a failure by telneting to port 5002 and seeing the state of the OSGi runtime
                     <appArgLine>-consoleLog -console 5002 -noExit</appArgLine>
             -->
 		    <bundleStartLevel>
@@ -198,11 +199,6 @@
 			    <autoStart>true</autoStart>
 			</bundle>
 			<bundle>
-			    <id>javax.usb.api</id>
-			    <level>4</level>
-			    <autoStart>true</autoStart>
-			</bundle>
-			<bundle>
 			    <id>slf4j.api</id>
 			    <level>4</level>
 			    <autoStart>true</autoStart>
@@ -306,7 +302,7 @@
                         <dependency>
                             <type>p2-installable-unit</type>
                             <artifactId>org.eclipse.equinox.console</artifactId>
-                        </dependency>       
+                        </dependency>
                         <dependency>
                             <type>p2-installable-unit</type>
                             <artifactId>org.apache.felix.gogo.shell</artifactId>
@@ -318,7 +314,7 @@
                         <dependency>
                             <type>p2-installable-unit</type>
                             <artifactId>org.apache.felix.gogo.runtime</artifactId>
-                        </dependency>                        
+                        </dependency>
                         <dependency>
                             <type>p2-installable-unit</type>
                             <artifactId>org.eclipse.core.contenttype</artifactId>
@@ -394,10 +390,6 @@
                         <dependency>
                             <type>p2-installable-unit</type>
                             <artifactId>org.eclipse.soda.dk.comm</artifactId>
-                        </dependency>
-                        <dependency>
-                            <type>p2-installable-unit</type>
-                            <artifactId>javax.usb.api</artifactId>
                         </dependency>
                         <dependency>
                             <type>p2-installable-unit</type>
@@ -563,5 +555,4 @@
     	</plugins>
     </pluginManagement>
     </build>
-<version>1.0.2-SNAPSHOT</version>
 </project>

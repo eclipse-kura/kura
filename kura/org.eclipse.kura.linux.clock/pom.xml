@@ -19,12 +19,12 @@
 	<parent>
 		<groupId>org.eclipse.kura</groupId>
 		<artifactId>kura</artifactId>
-		<version>1.2.0</version>
+		<version>1.2.1</version>
 		<relativePath>../manifest_pom.xml</relativePath>
 	</parent>
 
 	<artifactId>org.eclipse.kura.linux.clock</artifactId>
-	<version>1.0.4-SNAPSHOT</version>
+	<version>1.0.4</version>
 	<packaging>eclipse-plugin</packaging>
 
 	<properties>
@@ -38,7 +38,7 @@
 			<version>20090211</version>
 		</dependency>
 	</dependencies>
-	
+
         <build>
                 <plugins>
                         <plugin>
@@ -46,7 +46,10 @@
                                 <artifactId>tycho-packaging-plugin</artifactId>
                                 <version>${tycho-version}</version>
                                 <configuration>
-                                        <format>'${kura.build.version}'</format>
+                                	<archive>
+                						<compress>false</compress>
+                					</archive>
+                                	<format>'${kura.build.version}'</format>
                                 </configuration>
                                 <executions>
                                         <execution>

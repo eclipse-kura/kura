@@ -176,39 +176,14 @@ public class GpsClockSyncProvider implements ClockSyncProvider, EventHandler {
 						String mm = gpsTime.substring(2, 4);
 						String ss = gpsTime.substring(4, 6);
 
-						SetLocalTime(YY, MM, DD, hh, mm, ss);
-/*
-						String commandDate ="date +%Y%m%d -s \"20"+YY+MM+DD+"\"";
-						procDate = ProcessUtil.exec(commandDate);
-						procDate.waitFor();
-						if (procDate.exitValue() == 0) {
-							s_logger.info("System Clock Synchronized with GPS, date = {} ",gpsDate);
-							m_lastSync = new Date();
-							if(!gpsTime.isEmpty()){
-								String commandTime ="date +%T -u -s \""+hh+":"+mm+":"+ss+"\""; // time is in UTC => -u
-								procTime = ProcessUtil.exec(commandTime);
-								procTime.waitFor();
-								if (procTime.exitValue() == 0) {
-									s_logger.info("System Clock Synchronized with GPS, time = {}",gpsTime);
-									m_lastSync = new Date();
-						            m_waitForLocked=false;
-								}
-								else {
-									s_logger.error("Unexpected error while Synchronizing System Clock with GPS");
-									m_waitForLocked=true;
-								}
-							}
-*/
+						WindowsSetSystemTime winTime = new WindowsSetSystemTime();
+						winTime.SetLocalTime(Integer.parseInt(YY), Integer.parseInt(MM), Integer.parseInt(DD), Integer.parseInt(hh), Integer.parseInt(mm), Integer.parseInt(ss));
+
 				            m_lastSync = new Date();
 				            m_waitForLocked=false;
 				            // Call update method with 0 offset to ensure the clock event gets fired and the HW clock
 							// is updated if desired.
 							m_listener.onClockUpdate(0);
-						}
-						else {
-							s_logger.error("Unexpected error while Synchronizing System Clock with GPS");
-							m_waitForLocked=true;
-						}
 					}
 				}
 				else
@@ -219,8 +194,6 @@ public class GpsClockSyncProvider implements ClockSyncProvider, EventHandler {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
 		}
 		finally {
-			ProcessUtil.destroy(procDate);
-			ProcessUtil.destroy(procTime);
 		}
 	}
 }

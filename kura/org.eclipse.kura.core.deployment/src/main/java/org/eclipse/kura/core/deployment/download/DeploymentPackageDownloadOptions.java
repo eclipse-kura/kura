@@ -22,7 +22,7 @@ import org.eclipse.kura.message.KuraRequestPayload;
 public class DeploymentPackageDownloadOptions extends DeploymentPackageInstallOptions{
 
 	// Metrics in RESOURCE_DOWNLOAD
-	public static final String METRIC_DP_DOWNLOAD_URI = "dp.download.uri";
+	public static final String METRIC_DP_DOWNLOAD_URI = "dp.uri";
 	public static final String METRIC_DP_DOWNLOAD_BLOCK_SIZE = "dp.download.block.size";
 	public static final String METRIC_DP_DOWNLOAD_BLOCK_DELAY = "dp.download.block.delay";
 	public static final String METRIC_DP_DOWNLOAD_TIMEOUT = "dp.download.timeout";
@@ -135,7 +135,7 @@ public class DeploymentPackageDownloadOptions extends DeploymentPackageInstallOp
 				super.setRequestClientId((String) metric);
 			}
 			
-			metric = request.getMetric(METRIC_INSTALL_VERIFIER_URL);
+			metric = request.getMetric(METRIC_INSTALL_VERIFIER_URI);
 			if (metric != null) {
 				super.setVerifierURL((String) metric);
 			}

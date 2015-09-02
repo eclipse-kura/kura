@@ -24,4 +24,23 @@ public interface SecurityService {
 	 * @return A char array that represents the password of the specified keystore.
 	 */
 	public void reloadSecurityPolicyFingerprint() throws KuraException;
+	
+	
+	/**
+	 * Takes a keystore path and returns the corresponding password that can be
+	 * used to access to the data saved in the specified keystore.
+	 * 
+	 * @param keyStorePath A String that represents a unique identifier of the specified keystore.
+	 * @return A char array that represents the password of the specified keystore.
+	 */
+	public void reloadEnvironmentConfigurationFingerprint() throws KuraException;
+	
+	/**
+	 * Takes a keystore path and returns the corresponding password that can be
+	 * used to access to the data saved in the specified keystore.
+	 * 
+	 * @param keyStorePath A String that represents a unique identifier of the specified keystore.
+	 * @return A char array that represents the password of the specified keystore.
+	 */
+	public void reloadFingerprint(String path) throws KuraException;
 }

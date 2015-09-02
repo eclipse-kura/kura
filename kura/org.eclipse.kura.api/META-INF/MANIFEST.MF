@@ -32,7 +32,8 @@ Export-Package: org.eclipse.kura;version="1.0.0",
  org.eclipse.kura.system;version="1.0.0",
  org.eclipse.kura.usb;version="1.1.0",
  org.eclipse.kura.watchdog;version="1.0.0",
- org.eclipse.kura.status;version="1.0.0"
+ org.eclipse.kura.status;version="1.0.0",
+ org.eclipse.kura.security;version="1.0.0"
 Import-Package: javax.comm;version="1.2.0",
  javax.crypto,
  javax.microedition.io,

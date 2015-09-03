@@ -203,8 +203,7 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
 			if ((modemInfo != null)
 					&& (usbModem.getTtyDevs().size() == modemInfo.getNumTtyDevs())
 					&& (usbModem.getBlockDevs().size() == modemInfo.getNumBlockDevs())) {
-				
-            	s_logger.debug("Found modem during init: " + usbModem);            	
+            	s_logger.debug("Found modem during init: " + usbModem);
             	s_logger.debug("posting ModemAddedEvent during init: " + usbModem);
                 m_eventAdmin.postEvent(new ModemAddedEvent(usbModem));
                 m_addedModems.add(usbModem.getUsbPort());
@@ -558,10 +557,19 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
             	//an ModemRemovedEvent. Should we do it here?
             	UsbModemDevice usbModem = m_usbModems.get(event.getProperty(UsbDeviceEvent.USB_EVENT_USB_PORT_PROPERTY));
             	
-            	if(usbModem == null ||
-            	   (modemInfo.getNumTtyDevs() > 0 && usbModem.getTtyDevs().size() >= modemInfo.getNumTtyDevs()) ||
-            	   (modemInfo.getNumBlockDevs() > 0 && usbModem.getBlockDevs().size() >= modemInfo.getNumBlockDevs())) {
-            		
+            	boolean createNewUsbModemDevice = false;
+            	if (usbModem == null) {
+            		createNewUsbModemDevice = true;
+            	} else if ((modemInfo.getNumTtyDevs() > 0) && (modemInfo.getNumBlockDevs() > 0)) {
+            		if ((usbModem.getTtyDevs().size() >= modemInfo.getNumTtyDevs()) && (usbModem.getBlockDevs().size() >= modemInfo.getNumBlockDevs())) {
+            			createNewUsbModemDevice = true;
+            		}
+            	} else if (((modemInfo.getNumTtyDevs() > 0) && (usbModem.getTtyDevs().size() >= modemInfo.getNumTtyDevs())) ||
+                		((modemInfo.getNumBlockDevs() > 0) && (usbModem.getBlockDevs().size() >= modemInfo.getNumBlockDevs()))) {
+            		createNewUsbModemDevice = true;
+            	}
+            	 
+            	if (createNewUsbModemDevice) {
             		if (usbModem == null) {
             			s_logger.debug("Modem not found. Create one");
             		} else {

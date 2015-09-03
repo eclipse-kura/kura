@@ -264,7 +264,6 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 				}
 			}
         } else if (topic.equals(ModemAddedEvent.MODEM_EVENT_ADDED_TOPIC)) {
-        	
         	ModemAddedEvent modemAddedEvent = (ModemAddedEvent)event;
         	final ModemDevice modemDevice = modemAddedEvent.getModemDevice();
         	if (m_serviceActivated) {
@@ -571,7 +570,6 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 			while (keySetItetrator.hasNext()) {
 				String usbPort = keySetItetrator.next();
 				CellularModem modem = m_modems.get(usbPort);
-				
 				// get signal strength only if somebody needs it
 				if ((m_listeners != null) && (m_listeners.size() > 0)) {
 					for (ModemMonitorListener listener : m_listeners) {
@@ -725,7 +723,6 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 	}
     
 	private void trackModem(ModemDevice modemDevice) {
-		
 		Class<? extends CellularModemFactory> modemFactoryClass = null;
 		
 		if (modemDevice instanceof UsbModemDevice) {
@@ -759,7 +756,6 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 					platform = m_systemService.getPlatform();
 				}
 				CellularModem modem = modemFactoryService.obtainCellularModemService(modemDevice, platform);
-				
 				try {
 					HashMap<String, String> modemInfoMap = new HashMap<String, String>();
 					modemInfoMap.put(ModemReadyEvent.IMEI, modem.getSerialNumber());
@@ -776,6 +772,12 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 				if (ifaceName != null) {
 					NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig = m_networkConfig
 							.getNetInterfaceConfig(ifaceName);
+					
+					if(netInterfaceConfig == null) {
+						m_networkConfig = m_netConfigService.getNetworkConfiguration();
+						netInterfaceConfig = m_networkConfig.getNetInterfaceConfig(ifaceName);
+					}
+					
 					if (netInterfaceConfig != null) {
 						netConfigs = getNetConfigs(netInterfaceConfig);
 						if ((netConfigs != null) && (netConfigs.size() > 0)) {

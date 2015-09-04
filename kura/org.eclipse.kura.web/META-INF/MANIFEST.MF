@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: org.eclipse.kura.web
 Bundle-SymbolicName: org.eclipse.kura.web;singleton:=true
-Bundle-Version: 1.0.5
+Bundle-Version: 1.0.6.qualifier
 Bundle-Vendor: EUROTECH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Service-Component: OSGI-INF/*.xml
@@ -24,6 +24,7 @@ Import-Package: com.allen_sauer.gwt.log.client,
  com.google.gwt.rpc.linker,
  com.google.gwt.rpc.rebind,
  com.google.gwt.rpc.server,
+ com.google.gwt.safehtml.shared,
  com.google.gwt.uibinder.client,
  com.google.gwt.user.client,
  com.google.gwt.user.client.rpc,
@@ -81,4 +82,4 @@ Import-Package: com.allen_sauer.gwt.log.client,
  org.slf4j;version="1.6.4"
 Bundle-ClassPath: .,
   lib/gxt-2.2.5.jar,
-  target/org.eclipse.kura.web-1.0.5/WEB-INF/lib/gxt-2.2.5.jar
+  target/org.eclipse.kura.web-1.0.6-SNAPSHOT/WEB-INF/lib/gxt-2.2.5.jar

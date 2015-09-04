@@ -19,6 +19,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -98,6 +99,8 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 	// contains all pids which have been configured and for which we have not
 	// received the corresponding ConfigurationEvent yet
 	private Set<String> m_pendingConfigurationPids;
+
+	private final char[] GENERIC_PLACEHOLDER = "PlaceHolder".toCharArray();
 
 	// ----------------------------------------------------------------
 	//
@@ -275,8 +278,26 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 			cc = getSelfConfiguringComponentConfiguration(pid);
 		}
 
-		decryptPasswords(cc);
+		//decryptPasswords(cc);
+		replacePasswordsWithPlaceholder(cc);
 		return cc;
+	}
+
+	private Map<String, Object> replacePasswordsWithPlaceholder(ComponentConfiguration config) {
+		Map<String, Object> configProperties = config.getConfigurationProperties();
+		Iterator<String> keys = configProperties.keySet().iterator();
+		while (keys.hasNext()) {
+			String key = keys.next();
+			Object value = configProperties.get(key);
+			if (value instanceof Password) {
+				try {
+					Password decryptedPassword = new Password(GENERIC_PLACEHOLDER );
+					configProperties.put(key, decryptedPassword);
+				} catch (Exception e) {
+				}
+			}
+		}
+		return configProperties;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -422,6 +443,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 		for (ComponentConfiguration config : configsToUpdate) {
 			if (config != null) {
 				encryptPasswords(config);
+				replacePlaceholdersWithPasswords(config);
 			}
 		}
 
@@ -450,7 +472,6 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 	// Package APIs
 	//
 	// ----------------------------------------------------------------
-
 	synchronized void registerComponentConfiguration(Bundle bundle, String pid) throws KuraException {
 		if (!m_allPids.contains(pid)) {
 
@@ -553,12 +574,39 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 			String key = keys.next();
 			Object value = propertiesToUpdate.get(key);
 			if (value != null) {
-				if (value instanceof Password) {
+				if (value instanceof Password && !Arrays.equals(value.toString().toCharArray(), GENERIC_PLACEHOLDER)) {
 					try {
 						propertiesToUpdate.put(key, new Password(m_cryptoService.encryptAes(value.toString().toCharArray())));
 					} catch (Exception e) {
 						s_logger.warn("Failed to encrypt Password property: {}", key);
 						propertiesToUpdate.remove(key);
+					}
+				}
+			}
+		}
+	}
+	
+	private void replacePlaceholdersWithPasswords(ComponentConfiguration config) {
+		Map<String, Object> propertiesToUpdate = config.getConfigurationProperties();
+		Iterator<String> keys = propertiesToUpdate.keySet().iterator();
+		while (keys.hasNext()) {
+			String key = keys.next();
+			Object value = propertiesToUpdate.get(key);
+			if (value != null) {
+				if (value instanceof Password && Arrays.equals(value.toString().toCharArray(), GENERIC_PLACEHOLDER)) {
+					try {
+
+						String pid= config.getPid();
+						Tocd ocd = m_ocds.get(pid);
+
+						Configuration cfg = m_configurationAdmin.getConfiguration(pid);
+						Map<String, Object> props = CollectionsUtil.dictionaryToMap(cfg.getProperties(), ocd);
+						
+						Password encPassword= (Password) props.get(key);
+						
+						propertiesToUpdate.put(key, encPassword);
+					} catch (Exception e) {
+						s_logger.error("Error while trying to remove placeholders for: {}", key);
 					}
 				}
 			}

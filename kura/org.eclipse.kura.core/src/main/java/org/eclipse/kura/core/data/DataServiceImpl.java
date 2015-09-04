@@ -41,13 +41,16 @@ import org.eclipse.kura.data.DataTransportListener;
 import org.eclipse.kura.data.DataTransportService;
 import org.eclipse.kura.data.DataTransportToken;
 import org.eclipse.kura.db.DbService;
+import org.eclipse.kura.status.CloudConnectionStatusComponent;
+import org.eclipse.kura.status.CloudConnectionStatusEnum;
+import org.eclipse.kura.status.CloudConnectionStatusService;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.ComponentException;
 import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class DataServiceImpl implements DataService, DataTransportListener, ConfigurableComponent {
+public class DataServiceImpl implements DataService, DataTransportListener, ConfigurableComponent, CloudConnectionStatusComponent {
 	
 	private static final Logger s_logger = LoggerFactory
 			.getLogger(DataServiceImpl.class);
@@ -82,6 +85,9 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
 
 	private ScheduledExecutorService m_congestionExecutor;
 	private ScheduledFuture<?> m_congestionFuture;
+
+	private CloudConnectionStatusService m_cloudConnectionStatusService;
+	private CloudConnectionStatusEnum m_notificationStatus = CloudConnectionStatusEnum.OFF;
 	
 	// ----------------------------------------------------------------
 	//
@@ -137,6 +143,9 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
 		// on ProSyst
 		m_dataServiceListeners = new DataServiceListeners(listenersTracker);
 		
+		//Register the component in the CloudConnectionStatus Service
+		m_cloudConnectionStatusService.register(this);
+		
 		startReconnectTask();
 	}
 	
@@ -178,6 +187,9 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
 		m_dataServiceListeners.close();
 				
 		m_store.stop();
+		
+		//Unregister the component from the CloudConnectionStatus Service
+		m_cloudConnectionStatusService.unregister(this);
 	}
 		
 	// ----------------------------------------------------------------
@@ -202,10 +214,19 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
 		this.m_dbService = null;
 	}
 	
+	public void setCloudConnectionStatusService(CloudConnectionStatusService cloudConnectionStatusService){
+		this.m_cloudConnectionStatusService = cloudConnectionStatusService;
+	}
+	
+	public void unsetCloudConnectionStatusService(CloudConnectionStatusService cloudConnectionStatusService){
+		this.m_cloudConnectionStatusService = null;
+	}
+	
 	@Override
 	public void onConnectionEstablished(boolean newSession) {
 		
 		s_logger.info("Notified connected");
+		m_cloudConnectionStatusService.updateStatus(this, CloudConnectionStatusEnum.ON);
 		
 		// On a new session all messages the were in-flight in the previous session
 		// would be lost and never confirmed by the DataPublisherService.
@@ -283,6 +304,7 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
 	public void onDisconnected() 
 	{		
 		s_logger.info("Notified disconnected");
+		m_cloudConnectionStatusService.updateStatus(this, CloudConnectionStatusEnum.OFF);
 		
 		// Notify the listeners
 		m_dataServiceListeners.onDisconnected();
@@ -456,6 +478,8 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
     	int reconnectInterval = (Integer) m_properties.get(CONNECT_DELAY_PROP_NAME);    			
 		if (autoConnect) {
 
+			// Change notification status to slow blinking when connection is expected to happen in the future
+			m_cloudConnectionStatusService.updateStatus(this, CloudConnectionStatusEnum.SLOW_BLINKING);
 			// add a delay on the reconnect
 			int maxDelay = reconnectInterval/5;
 			maxDelay = maxDelay > 0 ? maxDelay : 1;
@@ -496,6 +520,9 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
 			initialDelay, 		// initial delay
 			reconnectInterval, // repeat every reconnect interval until we stopped. 
 			TimeUnit.SECONDS);
+		}else{
+			// Change notification status to off. Connection is not expected to happen in the future
+		    m_cloudConnectionStatusService.updateStatus(this, CloudConnectionStatusEnum.OFF);
 		}
 		return autoConnect;
 	}
@@ -637,5 +664,20 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
 		if (m_congestionFuture != null && !m_congestionFuture.isDone()) {
 			m_congestionFuture.cancel(true);
 		}
+	}
+
+	@Override
+	public int getNotificationPriority() {
+		return CloudConnectionStatusService.PRIORITY_LOW;
+	}
+
+	@Override
+	public CloudConnectionStatusEnum getNotificationStatus() {
+		return m_notificationStatus;
+	}
+
+	@Override
+	public void setNotificationStatus(CloudConnectionStatusEnum status) {
+		m_notificationStatus = status;
 	}
 }

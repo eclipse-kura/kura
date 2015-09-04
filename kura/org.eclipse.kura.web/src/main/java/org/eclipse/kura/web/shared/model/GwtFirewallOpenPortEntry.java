@@ -13,9 +13,9 @@ package org.eclipse.kura.web.shared.model;
 
 import java.io.Serializable;
 
-import com.extjs.gxt.ui.client.data.BaseModelData;
+import org.eclipse.kura.web.client.util.KuraBaseModel;
 
-public class GwtFirewallOpenPortEntry extends BaseModelData implements Serializable {
+public class GwtFirewallOpenPortEntry extends KuraBaseModel implements Serializable {
 
 	/**
 	 * 

@@ -36,6 +36,7 @@ import org.eclipse.kura.core.configuration.ComponentConfigurationImpl;
 import org.eclipse.kura.core.configuration.XmlComponentConfigurations;
 import org.eclipse.kura.core.configuration.XmlSnapshotIdResult;
 import org.eclipse.kura.core.configuration.util.XmlUtil;
+import org.eclipse.kura.core.test.util.CoreTestXmlUtil;
 import org.eclipse.kura.message.KuraPayload;
 import org.eclipse.kura.message.KuraResponsePayload;
 import org.eclipse.kura.system.SystemService;
@@ -307,7 +308,8 @@ public class ConfigurationServiceTest extends TestCase implements IConfiguration
 		// unmarshall the response
 		s = new String(resp.getBody(), "UTF-8");
 		sr = new StringReader(s);
-		XmlSnapshotIdResult snapshotIds = XmlUtil.unmarshal(sr, XmlSnapshotIdResult.class);				
+		//XmlSnapshotIdResult snapshotIds = XmlUtil.unmarshal(sr, XmlSnapshotIdResult.class);
+		XmlSnapshotIdResult snapshotIds = CoreTestXmlUtil.unmarshal(sr, XmlSnapshotIdResult.class);
 
 		s_logger.info("validating configuration");
 		assertNotNull(snapshotIds);

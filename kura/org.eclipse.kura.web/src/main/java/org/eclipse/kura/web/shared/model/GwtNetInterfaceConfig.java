@@ -14,10 +14,11 @@ package org.eclipse.kura.web.shared.model;
 import java.io.Serializable;
 import java.util.Map;
 
-import com.allen_sauer.gwt.log.client.Log;
-import com.extjs.gxt.ui.client.data.BaseModelData;
+import org.eclipse.kura.web.client.util.KuraBaseModel;
 
-public class GwtNetInterfaceConfig extends BaseModelData implements Serializable
+import com.allen_sauer.gwt.log.client.Log;
+
+public class GwtNetInterfaceConfig extends KuraBaseModel implements Serializable
 {
 	private static final long serialVersionUID = 7079533925979145804L;
 	

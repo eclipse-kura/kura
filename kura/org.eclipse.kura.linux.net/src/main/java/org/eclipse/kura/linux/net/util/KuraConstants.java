@@ -19,7 +19,8 @@ public enum KuraConstants {
 	ReliaGATE_10_05("yocto", "1.2.1", "reliagate-10-05"),
 	Intel_Edison("yocto", "1.6.1", "edison"),
 	Raspberry_Pi ("raspbian", "1.0.0", "raspberry-pi"),
-	BeagleBone ("debian", "1.0.0", "beaglebone");
+	BeagleBone ("debian", "1.0.0", "beaglebone"),
+	ReliaGATE_50_21_Ubuntu("ubuntu", "14.04", "reliagate-50-21");
 	
 	private String m_imageName;
 	private String m_imageVersion;

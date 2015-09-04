@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: org.eclipse.kura.api
 Bundle-SymbolicName: org.eclipse.kura.api;singleton:=true
-Bundle-Version: 1.0.5
+Bundle-Version: 1.0.6.qualifier
 Bundle-Vendor: EUROTECH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Export-Package: org.eclipse.kura;version="1.0.0",
@@ -30,7 +30,8 @@ Export-Package: org.eclipse.kura;version="1.0.0",
  org.eclipse.kura.ssl;version="1.1.0",
  org.eclipse.kura.system;version="1.0.0",
  org.eclipse.kura.usb;version="1.1.0",
- org.eclipse.kura.watchdog;version="1.0.0"
+ org.eclipse.kura.watchdog;version="1.0.0",
+ org.eclipse.kura.status;version="1.0.0"
 Import-Package: javax.comm;version="1.2.0",
  javax.crypto,
  javax.microedition.io,

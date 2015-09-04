@@ -34,6 +34,7 @@ import org.eclipse.kura.web.server.GwtComponentServiceImpl;
 import org.eclipse.kura.web.server.GwtDeviceServiceImpl;
 import org.eclipse.kura.web.server.GwtNetworkServiceImpl;
 import org.eclipse.kura.web.server.GwtPackageServiceImpl;
+import org.eclipse.kura.web.server.GwtSecurityServiceImpl;
 import org.eclipse.kura.web.server.GwtSettingServiceImpl;
 import org.eclipse.kura.web.server.GwtSnapshotServiceImpl;
 import org.eclipse.kura.web.server.GwtStatusServiceImpl;
@@ -375,6 +376,7 @@ public class Console implements ConfigurableComponent {
 		m_httpService.registerServlet(servletRoot + "/snapshot", new GwtSnapshotServiceImpl(), null, httpCtx);
 		m_httpService.registerServlet(servletRoot + "/setting", new GwtSettingServiceImpl(), null, httpCtx);
 		m_httpService.registerServlet(servletRoot + "/certificate", new GwtCertificatesServiceImpl(), null, httpCtx);
+		m_httpService.registerServlet(servletRoot + "/security", new GwtSecurityServiceImpl(), null, httpCtx);
 		m_httpService.registerServlet(servletRoot + "/file", new FileServlet(), null, httpCtx);
 		m_httpService.registerServlet(servletRoot + "/device_snapshots", new DeviceSnapshotsServlet(), null, httpCtx);
 		m_httpService.registerServlet(servletRoot + "/skin", new SkinServlet(), null, httpCtx);

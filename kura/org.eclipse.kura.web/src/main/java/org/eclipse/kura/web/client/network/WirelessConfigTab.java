@@ -637,7 +637,7 @@ public class WirelessConfigTab extends LayoutContainer
                 return null;
             }
         });
-        m_verifyPasswordField.addListener(Events.OnMouseOver, new MouseOverListener(MSGS.netWifiToolTipPassword()));
+        m_verifyPasswordField.addListener(Events.OnMouseOver, new MouseOverListener(MSGS.netWifiToolTipVerifyPassword()));
         m_verifyPasswordField.addStyleName("kura-textfield");
                 
         // pairwise ciphers

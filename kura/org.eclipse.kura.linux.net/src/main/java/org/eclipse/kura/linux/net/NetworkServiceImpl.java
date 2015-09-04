@@ -167,7 +167,7 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
                         usbModem = m_usbModems.get(device.getUsbPort());
                     }
                     usbModem.addTtyDev(device.getDeviceNode());
-                    s_logger.debug("Adding tty resource: " + device.getDeviceNode() + " for " + device.getUsbPort());
+                    s_logger.debug("Adding tty resource: {} for {}", device.getDeviceNode(), device.getUsbPort());
                     m_usbModems.put(device.getUsbPort(), usbModem);
                 }
             }
@@ -187,7 +187,7 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
                         usbModem = m_usbModems.get(device.getUsbPort());
                     }
                     usbModem.addBlockDev(device.getDeviceNode());
-                    s_logger.debug("Adding block resource: " + device.getDeviceNode() + " for " + device.getUsbPort());
+                    s_logger.debug("Adding block resource: {} for {}", device.getDeviceNode(), device.getUsbPort());
                     m_usbModems.put(device.getUsbPort(), usbModem);
                 }
             }
@@ -203,15 +203,15 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
 			if ((modemInfo != null)
 					&& (usbModem.getTtyDevs().size() == modemInfo.getNumTtyDevs())
 					&& (usbModem.getBlockDevs().size() == modemInfo.getNumBlockDevs())) {
-            	s_logger.debug("Found modem during init: " + usbModem);
-            	s_logger.debug("posting ModemAddedEvent during init: " + usbModem);
+            	s_logger.debug("Found modem during init: {}", usbModem);
+            	s_logger.debug("posting ModemAddedEvent during init: {}", usbModem);
                 m_eventAdmin.postEvent(new ModemAddedEvent(usbModem));
                 m_addedModems.add(usbModem.getUsbPort());
             }
         }
         
         if (m_serialModem != null) {
-        	s_logger.debug("posting ModemAddedEvent during init: " + m_serialModem);
+        	s_logger.debug("posting ModemAddedEvent during init: {}", m_serialModem);
             m_eventAdmin.postEvent(new ModemAddedEvent(m_serialModem));
             m_addedModems.add(m_serialModem.getProductName());
         }
@@ -259,7 +259,7 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
 	public NetInterfaceState getState(String interfaceName) throws KuraException {
 		NetInterface<? extends NetInterfaceAddress> netInterface = getNetworkInterface(interfaceName);
 		if(netInterface == null) {
-			s_logger.error("There is no status available for network interface " + interfaceName);
+			s_logger.error("There is no status available for network interface {}", interfaceName);
 			return NetInterfaceState.UNKNOWN;
 		} else {
 			return netInterface.getState();
@@ -398,7 +398,7 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
 			for(int i=0; i<interfaces.size(); i++) {
 				NetInterface<? extends NetInterfaceAddress> iface = interfaces.get(i);
 				if(!LinuxNetworkUtil.isUp(iface.getName())) {
-					s_logger.debug("removing interface " + iface.getName() + " because it is not up");
+					s_logger.debug("removing interface {} because it is not up", iface.getName());
 					interfaces.remove(i);
 					i--;
 				}
@@ -517,11 +517,11 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
             return (modemDevice != null) ? getModemInterface(interfaceName, isUp, modemDevice) : null;
 		} else {
 			if(interfaceName.startsWith("can")) {
-				s_logger.trace("Ignoring CAN interface: " + interfaceName);
+				s_logger.trace("Ignoring CAN interface: {}", interfaceName);
 			} else if (interfaceName.startsWith("ppp")) {
-			    s_logger.debug("Ignoring unconfigured ppp interface: " + interfaceName);
+			    s_logger.debug("Ignoring unconfigured ppp interface: {}", interfaceName);
 			} else {
-				s_logger.debug("Unsupported network type - not adding to network devices: " + interfaceName + " of type: " + type.toString());
+				s_logger.debug("Unsupported network type - not adding to network devices: {} of type: ", interfaceName, type.toString());
 			}
 			return null;
 		}
@@ -804,7 +804,7 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
 							String currentSSID = LinuxNetworkUtil.getSSID(interfaceName);
 	
 							if(currentSSID != null) {
-								s_logger.debug("Adding access point SSID: " + currentSSID);
+								s_logger.debug("Adding access point SSID: {}", currentSSID);
 	
 								WifiAccessPointImpl wifiAccessPoint = new WifiAccessPointImpl(currentSSID);
 	

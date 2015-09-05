@@ -32,4 +32,15 @@ public class DownloadFileUtilities extends FileUtilities{
 		return dpFile;
 	}
 
+	public static boolean deleteDownloadedFile(DeploymentPackageInstallOptions options) throws IOException {
+		File file = getDpDownloadFile(options);
+		
+		if (file != null &&
+			file.exists() &&
+			file.isFile()){
+			return file.delete();
+		}
+		
+		return false;
+	}
 }

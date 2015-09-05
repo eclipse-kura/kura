@@ -349,23 +349,12 @@ public class CloudDeploymentHandlerV2 extends Cloudlet {
 			return;
 		}
 
-
 		if (resources[0].equals(RESOURCE_DOWNLOAD)) {
-
 			doExecDownload(reqPayload, respPayload);
-
-		} else if (resources[0].equals(RESOURCE_CANCEL)) {
-
-			doExecCancel(reqPayload, respPayload);
-
 		} else if (resources[0].equals(RESOURCE_INSTALL)) {
-
 			doExecInstall(reqPayload, respPayload);
-
 		} else if (resources[0].equals(RESOURCE_UNINSTALL)) {
-
 			doExecUninstall(reqPayload, respPayload);
-
 		} else if (resources[0].equals(RESOURCE_START)) {
 			String bundleId = resources[1];
 			doExecStartStopBundle(reqPayload, respPayload, true, bundleId);
@@ -380,7 +369,29 @@ public class CloudDeploymentHandlerV2 extends Cloudlet {
 		}
 	}
 
+	@Override
+	protected void doDel(CloudletTopic reqTopic, KuraRequestPayload reqPayload, KuraResponsePayload respPayload) throws KuraException {
 
+		String[] resources = reqTopic.getResources();
+
+		if (resources == null || resources.length == 0) {
+			s_logger.error("Bad request topic: {}", reqTopic.toString());
+			s_logger.error("Expected one resource but found {}", resources != null ? resources.length : "none");
+			respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_BAD_REQUEST);
+			return;
+		}
+
+		if (resources[0].equals(RESOURCE_DOWNLOAD)) {
+			doDelDownload(reqPayload, respPayload);
+		} else {
+			s_logger.error("Bad request topic: {}", reqTopic.toString());
+			s_logger.error("Cannot find resource with name: {}", resources[0]);
+			respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_NOTFOUND);
+			return;
+		}
+	}
+	
+	
 
 	// ----------------------------------------------------------------
 	//
@@ -388,36 +399,15 @@ public class CloudDeploymentHandlerV2 extends Cloudlet {
 	//
 	// ----------------------------------------------------------------
 
-	private void doExecCancel(KuraRequestPayload request, KuraResponsePayload response) {
-
-		String dpName = (String) request.getMetric(DeploymentPackageDownloadOptions.METRIC_DP_NAME);
-		String dpVersion = (String) request.getMetric(DeploymentPackageDownloadOptions.METRIC_DP_VERSION);
+	private void doDelDownload(KuraRequestPayload request, KuraResponsePayload response) {
 
 		try{
 			m_downloadImplementation.getDownloadHelper().cancelDownload();
+			m_downloadImplementation.deleteDownloadedFile();
 		}catch(Exception ex){
 			s_logger.info("Error cancelling download!", ex);
 		}
-
-		if ((dpName != null) && (dpVersion != null)) {
-			try {
-				String packageFilename = new StringBuilder().append(File.separator)
-						.append("tmp").append(File.separator)
-						.append(dpName).append("-").append(dpVersion).append(".dp").toString();
-
-				File dpFile = new File(packageFilename);
-				if (dpFile.exists()) {
-					if (!dpFile.delete()) {
-						throw new Exception("Could not delete file dp!");
-					}
-				}
-
-			} catch (Exception e) {
-				s_logger.info("Exception while deleting dp file!");
-				response.setResponseCode(KuraResponsePayload.RESPONSE_CODE_ERROR);
-				response.setTimestamp(new Date());
-			}
-		}
+		
 	}
 
 	private void doExecDownload(KuraRequestPayload request, KuraResponsePayload response) {
@@ -874,5 +864,4 @@ public class CloudDeploymentHandlerV2 extends Cloudlet {
 			m_installImplementation.installFailedAsync(options, dpFile.getName(), e);
 		}
 	}
-
 }

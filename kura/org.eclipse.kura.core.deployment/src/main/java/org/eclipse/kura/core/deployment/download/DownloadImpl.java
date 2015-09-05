@@ -125,6 +125,14 @@ public class DownloadImpl implements ProgressListener{
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
 		}
 	}
+	
+	public boolean deleteDownloadedFile() throws KuraException {
+		try {
+			 return DownloadFileUtilities.deleteDownloadedFile(options);
+		} catch (Exception e) {
+			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+		}
+	}
 
 
 	// ----------------------------------------------------------------

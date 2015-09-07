@@ -19,6 +19,8 @@ public class WindowsSetSystemTime {
         st.wHour = (short)wHour;
         st.wMinute = (short)wMinute;
         st.wSecond = (short)wSecond;
-        return Kernel32.INSTANCE.SetLocalTime(st);
+//	TODO: Not yet included in the latest JNA release (4.1.0), but already a part of the repo
+//        return Kernel32.INSTANCE.SetLocalTime(st);
+        return false;
     }       
 }

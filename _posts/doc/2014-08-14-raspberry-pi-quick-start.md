@@ -45,13 +45,13 @@ following steps:
 
 4.  Download the Kura package with:
 
-    <pre>wget https://s3.amazonaws.com/kura_downloads/raspbian/release/1.2.1/kura_1.2.1_raspberry-pi_armv6.deb</pre>
+    <pre>wget https://s3.amazonaws.com/kura_downloads/raspbian/release/1.2.2/kura_1.2.2_raspberry-pi_armv6.deb</pre>
 
 5.  Install Kura with: 
 
     <pre>sudo apt-get update
 
-    sudo dpkg -i kura_1.2.1_raspberry-pi_armv6.deb
+    sudo dpkg -i kura_1.2.2_raspberry-pi_armv6.deb
 
     sudo apt-get install -f</pre>
 
@@ -76,7 +76,7 @@ following steps:
 
 3.  Download the Kura user workspace archive *with* Kura web UI from
 
-    https://s3.amazonaws.com/kura_downloads/user_workspace/1.2.1/user_workspace_archive_1.2.1.zip
+    https://s3.amazonaws.com/kura_downloads/user_workspace/1.2.2/user_workspace_archive_1.2.2.zip
 
     or
 

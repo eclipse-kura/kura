@@ -888,6 +888,12 @@ public class NetworkConfiguration {
 		}
 
 		wifiConfig.setIgnoreSSID(ignoreSSID);
+		
+		key = prefix + ".pairwiseCiphers";
+		String pairwiseCiphers = (String)properties.get(key);
+		if (pairwiseCiphers != null) {
+			wifiConfig.setPairwiseCiphers(WifiCiphers.valueOf(pairwiseCiphers));
+		}
 
 		if(mode == WifiMode.INFRA) {
 			key = prefix + ".bgscan";
@@ -898,12 +904,14 @@ public class NetworkConfiguration {
 			s_logger.trace("bgscan is " + bgscan);
 			wifiConfig.setBgscan(new WifiBgscan(bgscan));
 
+			/*
 			key = prefix + ".pairwiseCiphers";
 			String pairwiseCiphers = (String)properties.get(key);
 			if (pairwiseCiphers != null) {
 				wifiConfig.setPairwiseCiphers(WifiCiphers.valueOf(pairwiseCiphers));
 			}
-
+			*/
+			
 			key = prefix + ".groupCiphers";
 			String groupCiphers = (String)properties.get(key);
 			if (groupCiphers != null) {

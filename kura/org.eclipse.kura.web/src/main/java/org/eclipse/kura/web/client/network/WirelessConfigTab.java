@@ -925,7 +925,8 @@ public class WirelessConfigTab extends LayoutContainer
         		m_pairwiseCiphersCombo.setEnabled(true);
         		m_groupCiphersCombo.setEnabled(true);
         	} else {
-        		m_pairwiseCiphersCombo.setEnabled(false);
+        		// m_pairwiseCiphersCombo.setEnabled(false); // enable it for AP mode as well
+        		m_pairwiseCiphersCombo.setEnabled(true);
         		m_groupCiphersCombo.setEnabled(false);
         	}
         } else {
@@ -1037,10 +1038,12 @@ public class WirelessConfigTab extends LayoutContainer
 				if(GwtWifiWirelessMode.netWifiWirelessModeStation.equals(m_modeCombo.getValue().getMode())) {
 					
 					// ** make sure all GwtWifiSecurity security options are listed in the m_securityCombo if in 'Station' mode
+					/* commented out to support wpa/WPA2 mode in AP mode.
 					m_securityCombo.removeAll();
 					for (GwtWifiSecurity mode : GwtWifiSecurity.values()) {
 						m_securityCombo.add(MessageUtils.get(mode.name()));
 			        }
+			        */
 					
 					for (Field<?> field : m_formPanel.getFields()) {
 						if (field != m_modeCombo
@@ -1080,13 +1083,14 @@ public class WirelessConfigTab extends LayoutContainer
                 // Access Point mode
 				} else if(GwtWifiWirelessMode.netWifiWirelessModeAccessPoint.equals(m_modeCombo.getValue().getMode())) {
 					// ** At this point, the WPA_WPA2 option is not supported in the 'Access Point' mode. 
+					/* ** commented out to support WPA_WPA2 option
 					m_securityCombo.removeAll();
 					for (GwtWifiSecurity mode : GwtWifiSecurity.values()) {
 						if (mode != GwtWifiSecurity.netWifiSecurityWPA_WPA2) {
 							m_securityCombo.add(MessageUtils.get(mode.name()));
 						}
 			        }
-								
+					*/			
 					// Disable Access Point mode when TCP/IP is set to WAN
 					if (tcpIpStatus.equals(GwtNetIfStatus.netIPv4StatusEnabledWAN)) {
 						for (Field<?> field : m_formPanel.getFields()) {
@@ -1156,9 +1160,11 @@ public class WirelessConfigTab extends LayoutContainer
 					|| (m_securityCombo.getSimpleValue().equals(MessageUtils.get(GwtWifiSecurity.netWifiSecurityWPA_WPA2.name())))) {
 					
 					for (Field<?> field : m_formPanel.getFields()) {
+						/*
 						if (field.equals(m_pairwiseCiphersCombo) 
 								|| field.equals(m_groupCiphersCombo)) {
-							
+						*/
+						if(field.equals(m_groupCiphersCombo)) {
 						    if (GwtWifiWirelessMode.netWifiWirelessModeStation.equals(m_modeCombo.getValue().getMode())) {
 								field.setEnabled(true);
 							} else {

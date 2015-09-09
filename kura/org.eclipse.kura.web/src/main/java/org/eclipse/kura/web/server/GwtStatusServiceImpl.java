@@ -28,6 +28,7 @@ import org.eclipse.kura.web.shared.model.GwtNetInterfaceConfig;
 import org.eclipse.kura.web.shared.model.GwtNetRouterMode;
 import org.eclipse.kura.web.shared.model.GwtWifiNetInterfaceConfig;
 import org.eclipse.kura.web.shared.model.GwtWifiWirelessMode;
+import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.eclipse.kura.web.shared.service.GwtStatusService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,7 +42,7 @@ public class GwtStatusServiceImpl extends OsgiRemoteServiceServlet implements Gw
 	
 	private static Logger s_logger = LoggerFactory.getLogger(GwtNetworkServiceImpl.class);
 	
-	public ListLoadResult<GwtGroupedNVPair> getDeviceConfig(boolean hasNetAdmin) throws GwtKuraException {
+	public ListLoadResult<GwtGroupedNVPair> getDeviceConfig(GwtXSRFToken xsrfToken, boolean hasNetAdmin) throws GwtKuraException {
 		List<GwtGroupedNVPair> pairs = new ArrayList<GwtGroupedNVPair>();
 
 		pairs.addAll(getCloudStatus());

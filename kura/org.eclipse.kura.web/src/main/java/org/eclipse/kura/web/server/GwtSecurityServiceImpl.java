@@ -4,6 +4,7 @@ import org.eclipse.kura.KuraException;
 import org.eclipse.kura.security.SecurityService;
 import org.eclipse.kura.web.server.util.ServiceLocator;
 import org.eclipse.kura.web.shared.GwtKuraException;
+import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.eclipse.kura.web.shared.service.GwtSecurityService;
 
 public class GwtSecurityServiceImpl extends OsgiRemoteServiceServlet implements GwtSecurityService{
@@ -18,6 +19,7 @@ public class GwtSecurityServiceImpl extends OsgiRemoteServiceServlet implements 
 		SecurityService securityService;
 		
 		try {
+			//checkXSRFToken(xsrfToken);
 			securityService = ServiceLocator.getInstance().getService(SecurityService.class);
 			if(securityService == null){
 				return false;
@@ -29,7 +31,8 @@ public class GwtSecurityServiceImpl extends OsgiRemoteServiceServlet implements 
 	}
 	
 	@Override
-	public void reloadSecurityPolicy() throws GwtKuraException {
+	public void reloadSecurityPolicy(GwtXSRFToken xsrfToken) throws GwtKuraException {
+		checkXSRFToken(xsrfToken);
 		SecurityService securityService = ServiceLocator.getInstance().getService(SecurityService.class);
 		try {
 			securityService.reloadSecurityPolicyFingerprint();

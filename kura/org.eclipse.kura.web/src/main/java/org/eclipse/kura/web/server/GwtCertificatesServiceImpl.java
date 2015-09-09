@@ -30,6 +30,7 @@ import org.eclipse.kura.ssl.SslManagerService;
 import org.eclipse.kura.web.server.util.ServiceLocator;
 import org.eclipse.kura.web.shared.GwtKuraErrorCode;
 import org.eclipse.kura.web.shared.GwtKuraException;
+import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.eclipse.kura.web.shared.service.GwtCertificatesService;
 
 public class GwtCertificatesServiceImpl extends OsgiRemoteServiceServlet implements GwtCertificatesService
@@ -42,8 +43,9 @@ public class GwtCertificatesServiceImpl extends OsgiRemoteServiceServlet impleme
 	private static final long serialVersionUID = 7402961266449489433L;
 
 
-	public Integer storePublicPrivateKeys(String privateKey, String publicKey, String password, String alias)
+	public Integer storePublicPrivateKeys(GwtXSRFToken xsrfToken, String privateKey, String publicKey, String password, String alias)
 			throws GwtKuraException {
+		checkXSRFToken(xsrfToken);
 		try {
 			// Remove header if exists
 			String key = privateKey.replace("-----BEGIN PRIVATE KEY-----", "").replace("\n", "");
@@ -89,8 +91,9 @@ public class GwtCertificatesServiceImpl extends OsgiRemoteServiceServlet impleme
 	}
 
 
-	public Integer storeLeafKey(String publicKey, String alias)
+	public Integer storeLeafKey(GwtXSRFToken xsrfToken, String publicKey, String alias)
 			throws GwtKuraException {
+		checkXSRFToken(xsrfToken);
 		try {
 			Certificate[] certs= parsePublicCertificates(publicKey);
 
@@ -115,7 +118,8 @@ public class GwtCertificatesServiceImpl extends OsgiRemoteServiceServlet impleme
 		}
 	}
 
-	public Integer storePublicChain(String publicKeys, String alias) throws GwtKuraException {
+	public Integer storePublicChain(GwtXSRFToken xsrfToken, String publicKeys, String alias) throws GwtKuraException {
+		checkXSRFToken(xsrfToken);
 		try {
 			Certificate[] certs= parsePublicCertificates(publicKeys);
 
@@ -149,8 +153,9 @@ public class GwtCertificatesServiceImpl extends OsgiRemoteServiceServlet impleme
 		}
 	}
 
-	public Integer storeCertificationAuthority(String publicCAKeys, String alias)
+	public Integer storeCertificationAuthority(GwtXSRFToken xsrfToken, String publicCAKeys, String alias)
 			throws GwtKuraException {
+		checkXSRFToken(xsrfToken);
 		try {
 			Certificate[] certs= parsePublicCertificates(publicCAKeys);
 

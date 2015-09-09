@@ -11,7 +11,6 @@
  */
 package org.eclipse.kura.web.server;
 
-import java.io.IOException;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.util.ArrayList;
@@ -38,6 +37,7 @@ import org.eclipse.kura.web.server.util.ServiceLocator;
 import org.eclipse.kura.web.shared.GwtKuraErrorCode;
 import org.eclipse.kura.web.shared.GwtKuraException;
 import org.eclipse.kura.web.shared.model.GwtGroupedNVPair;
+import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.eclipse.kura.web.shared.service.GwtDeviceService;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
@@ -56,9 +56,10 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
 	
 	private static final long serialVersionUID = -4176701819112753800L;
 
-	public ListLoadResult<GwtGroupedNVPair> findDeviceConfiguration() 
+	public ListLoadResult<GwtGroupedNVPair> findDeviceConfiguration(GwtXSRFToken xsrfToken) 
 		throws GwtKuraException 
 	{
+		checkXSRFToken(xsrfToken);
 		List<GwtGroupedNVPair> pairs = new ArrayList<GwtGroupedNVPair>();
 
 		PositionService positionService = ServiceLocator.getInstance().getService(PositionService.class);
@@ -169,9 +170,10 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
 	
 	
 	@SuppressWarnings("unchecked")
-	public ListLoadResult<GwtGroupedNVPair> findThreads() 
+	public ListLoadResult<GwtGroupedNVPair> findThreads(GwtXSRFToken xsrfToken) 
 		throws GwtKuraException 
 	{
+		checkXSRFToken(xsrfToken);
 		List<GwtGroupedNVPair> pairs = new ArrayList<GwtGroupedNVPair>();
 
 		// get root thread group
@@ -246,9 +248,10 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
 
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public ListLoadResult<GwtGroupedNVPair> findSystemProperties() 
+	public ListLoadResult<GwtGroupedNVPair> findSystemProperties(GwtXSRFToken xsrfToken) 
 		throws GwtKuraException 
 	{
+		checkXSRFToken(xsrfToken);
 		List<GwtGroupedNVPair> pairs = new ArrayList<GwtGroupedNVPair>();
 		// kura properties
 		SystemService systemService = ServiceLocator.getInstance().getService(SystemService.class);
@@ -264,9 +267,10 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
 	
 	
 	
-	public ListLoadResult<GwtGroupedNVPair> findBundles() 
+	public ListLoadResult<GwtGroupedNVPair> findBundles(GwtXSRFToken xsrfToken) 
 		throws GwtKuraException 
 	{
+		checkXSRFToken(xsrfToken);
 		List<GwtGroupedNVPair> pairs = new ArrayList<GwtGroupedNVPair>();
 
 		SystemService systemService = ServiceLocator.getInstance().getService(SystemService.class);
@@ -290,7 +294,8 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
 		return new BaseListLoadResult<GwtGroupedNVPair>(pairs);
 	}
 	
-	public String executeCommand(String cmd, String pwd) throws GwtKuraException {
+	public String executeCommand(GwtXSRFToken xsrfToken, String cmd, String pwd) throws GwtKuraException {
+		checkXSRFToken(xsrfToken);
 		PasswordCommandService commandService = ServiceLocator.getInstance().getService(PasswordCommandService.class);
 		try {
 			return commandService.execute(cmd, pwd);

@@ -12,6 +12,7 @@
 package org.eclipse.kura.web.shared.service;
 
 import org.eclipse.kura.web.shared.GwtKuraException;
+import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
@@ -21,5 +22,5 @@ public interface GwtSecurityService extends RemoteService
 {	
 	public Boolean isSecurityServiceAvailable();
 	
-	public void reloadSecurityPolicy() throws GwtKuraException;
+	public void reloadSecurityPolicy(GwtXSRFToken xsfrToken) throws GwtKuraException;
 }

@@ -12,9 +12,13 @@
 package org.eclipse.kura.web.client.settings;
 
 import org.eclipse.kura.web.client.messages.Messages;
+import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.shared.model.GwtSession;
+import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.eclipse.kura.web.shared.service.GwtSecurityService;
 import org.eclipse.kura.web.shared.service.GwtSecurityServiceAsync;
+import org.eclipse.kura.web.shared.service.GwtSecurityTokenService;
+import org.eclipse.kura.web.shared.service.GwtSecurityTokenServiceAsync;
 
 import com.extjs.gxt.ui.client.widget.Info;
 import com.extjs.gxt.ui.client.widget.LayoutContainer;
@@ -31,11 +35,14 @@ import com.google.gwt.user.client.ui.FlexTable.FlexCellFormatter;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.user.server.rpc.XsrfProtect;
 
+@XsrfProtect
 public class SecurityTab extends LayoutContainer {
 
 	private static final Messages MSGS = GWT.create(Messages.class);
 
+	private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
 	private final GwtSecurityServiceAsync gwtSecurityService = GWT.create(GwtSecurityService.class);
 
 
@@ -57,16 +64,37 @@ public class SecurityTab extends LayoutContainer {
 		ClickHandler clickHandler1 = new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
-				AsyncCallback<Void> callback = new AsyncCallback<Void>() {
-					public void onFailure(Throwable caught) {
-						Info.display(MSGS.error(), "Error reloading security policy!");
+				gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
+					@Override
+					public void onFailure(Throwable ex) {
+						FailureHandler.handle(ex);
 					}
 
-					public void onSuccess(Void result) {
-						Info.display(MSGS.info(), "Security policy successfully reloaded!");
-					}
-				};
-				gwtSecurityService.reloadSecurityPolicy(callback);
+					@Override
+					public void onSuccess(GwtXSRFToken token) {	
+						gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
+							@Override
+							public void onFailure(Throwable ex) {
+								FailureHandler.handle(ex);
+							}
+
+							@Override
+							public void onSuccess(GwtXSRFToken token) {
+								AsyncCallback<Void> callback = new AsyncCallback<Void>() {
+									public void onFailure(Throwable caught) {
+										Info.display(MSGS.error(), "Error reloading security policy!");
+									}
+
+									public void onSuccess(Void result) {
+										Info.display(MSGS.info(), "Security policy successfully reloaded!");
+									}
+								};
+								gwtSecurityService.reloadSecurityPolicy(token, callback);
+							}
+						});
+
+					}});
+
 			}
 		};
 
@@ -105,7 +133,7 @@ public class SecurityTab extends LayoutContainer {
 		DecoratorPanel decPanel = new DecoratorPanel();
 		decPanel.setWidget(layout);
 		vPanel.add(decPanel);
-		
+
 		vPanel.ensureDebugId("cwVerticalPanel");
 
 

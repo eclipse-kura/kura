@@ -12,10 +12,14 @@
 package org.eclipse.kura.web.client.device;
 
 import org.eclipse.kura.web.client.messages.Messages;
+import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.shared.GwtKuraErrorCode;
 import org.eclipse.kura.web.shared.model.GwtSession;
+import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.eclipse.kura.web.shared.service.GwtDeviceService;
 import org.eclipse.kura.web.shared.service.GwtDeviceServiceAsync;
+import org.eclipse.kura.web.shared.service.GwtSecurityTokenService;
+import org.eclipse.kura.web.shared.service.GwtSecurityTokenServiceAsync;
 
 import com.extjs.gxt.ui.client.Style.HorizontalAlignment;
 import com.extjs.gxt.ui.client.Style.Scroll;
@@ -43,12 +47,13 @@ import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
 public class CommandTab extends LayoutContainer {
-	
+
 	private static final Messages MSGS = GWT.create(Messages.class);
 	private static final String SERVLET_URL = "/" + GWT.getModuleName() + "/file/command";
 
+	private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
 	private final GwtDeviceServiceAsync gwtDeviceService = GWT.create(GwtDeviceService.class);
-	
+
 	@SuppressWarnings("unused")
 	private GwtSession			m_currentSession;
 	private LayoutContainer 	m_commandInput;
@@ -61,21 +66,21 @@ public class CommandTab extends LayoutContainer {
 	private TextField<String>	m_commandField;
 	private TextField<String>	m_passwordField;
 	private FileUploadField		m_fileUploadField;
-	
+
 	public CommandTab(GwtSession currentSession) {
 		m_currentSession = currentSession;
 	}
-	
+
 	protected void onRender(Element parent, int index) {
 		super.onRender(parent, index);         
-        setLayout(new FitLayout());
-        setId("device-command");
-        
-        FormData formData = new FormData("100%");
+		setLayout(new FitLayout());
+		setId("device-command");
 
-        //
-        // Command Form
-        //
+		FormData formData = new FormData("100%");
+
+		//
+		// Command Form
+		//
 		m_formPanel = new FormPanel();
 		m_formPanel.setFrame(true);
 		m_formPanel.setHeaderVisible(false);
@@ -88,9 +93,9 @@ public class CommandTab extends LayoutContainer {
 		m_formPanel.setButtonAlign(HorizontalAlignment.RIGHT);
 		m_buttonBar = m_formPanel.getButtonBar();
 		initButtonBar();
-		
-		
-		
+
+
+
 		m_formPanel.addListener(Events.Submit, new Listener<FormEvent>() {
 			public void handleEvent(FormEvent be) {
 				String htmlResult = be.getResultHtml();
@@ -99,29 +104,38 @@ public class CommandTab extends LayoutContainer {
 					m_commandInput.unmask();
 				}
 				else {
-					gwtDeviceService.executeCommand(m_commandField.getValue(), m_passwordField.getValue(), new AsyncCallback<String>() {
-						public void onFailure(Throwable caught) {
-							if(caught.getLocalizedMessage().equals(GwtKuraErrorCode.SERVICE_NOT_ENABLED.toString())){
-								Info.display(MSGS.error(), MSGS.commandServiceNotEnabled());
-							}else if(caught.getLocalizedMessage().equals(GwtKuraErrorCode.ILLEGAL_ARGUMENT.toString())){
-								Info.display(MSGS.error(), MSGS.commandPasswordNotCorrect());
-							}else{
-								Info.display(MSGS.error(), caught.getLocalizedMessage());
-							}
-							//FailureHandler.handle(caught);
-							m_commandInput.unmask();
+					gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
+						@Override
+						public void onFailure(Throwable ex) {
+							FailureHandler.handle(ex);
 						}
 
-						public void onSuccess(String result) {
-							m_result.clear();
-							m_result.setValue(result);
-							m_commandInput.unmask();
-						}
-					});
+						@Override
+						public void onSuccess(GwtXSRFToken token) {	
+							gwtDeviceService.executeCommand(token, m_commandField.getValue(), m_passwordField.getValue(), new AsyncCallback<String>() {
+								public void onFailure(Throwable caught) {
+									if(caught.getLocalizedMessage().equals(GwtKuraErrorCode.SERVICE_NOT_ENABLED.toString())){
+										Info.display(MSGS.error(), MSGS.commandServiceNotEnabled());
+									}else if(caught.getLocalizedMessage().equals(GwtKuraErrorCode.ILLEGAL_ARGUMENT.toString())){
+										Info.display(MSGS.error(), MSGS.commandPasswordNotCorrect());
+									}else{
+										Info.display(MSGS.error(), caught.getLocalizedMessage());
+									}
+									//FailureHandler.handle(caught);
+									m_commandInput.unmask();
+								}
+
+								public void onSuccess(String result) {
+									m_result.clear();
+									m_result.setValue(result);
+									m_commandInput.unmask();
+								}
+							});
+						}});
 				}
 			}
 		});
-		
+
 		//
 		// Command Output
 		//
@@ -129,30 +143,30 @@ public class CommandTab extends LayoutContainer {
 		m_commandOutput.setBorders(false);
 		m_commandOutput.setWidth("99.5%");
 		m_commandOutput.setLayout(new FitLayout());
-		        
+
 		m_result = new TextArea();
 		m_result.setBorders(false);
 		m_result.setReadOnly(true);
 		m_result.setEmptyText(MSGS.deviceCommandNoOutput());
-        m_commandOutput.add(m_result);
-        
-        //
-        // Input and Upload
-        //
-        m_commandField = new TextField<String>();
+		m_commandOutput.add(m_result);
+
+		//
+		// Input and Upload
+		//
+		m_commandField = new TextField<String>();
 		m_commandField.setName("command");
 		m_commandField.setAllowBlank(false);
 		m_commandField.setFieldLabel(MSGS.deviceCommandExecute());
 		m_formPanel.add(m_commandField, formData);
-		
-		
+
+
 		m_passwordField = new TextField<String>();
 		m_passwordField.setName("password");
 		m_passwordField.setPassword(true);
 		m_passwordField.setAllowBlank(true);
 		m_passwordField.setFieldLabel(MSGS.deviceCommandPassword());
 		m_formPanel.add(m_passwordField, formData);
-	
+
 
 		m_fileUploadField = new FileUploadField();
 		m_fileUploadField.setAllowBlank(true);
@@ -161,7 +175,7 @@ public class CommandTab extends LayoutContainer {
 		m_formPanel.add(m_fileUploadField, formData);
 
 		m_commandInput = m_formPanel;
-		
+
 		// Main Panel
 		ContentPanel deviceCommandPanel = new ContentPanel();
 		deviceCommandPanel.setBorders(false);
@@ -175,7 +189,7 @@ public class CommandTab extends LayoutContainer {
 
 		add(deviceCommandPanel);
 	}
-	
+
 	private void initButtonBar() {
 		m_executeButton = new Button(MSGS.deviceCommandExecute());
 		m_executeButton.addSelectionListener(new SelectionListener<ButtonEvent>() {  
@@ -184,7 +198,7 @@ public class CommandTab extends LayoutContainer {
 				if (m_formPanel.isValid()) {
 					m_result.clear();
 					m_commandInput.mask(MSGS.waiting());
-		
+
 					m_formPanel.submit();
 				}
 			}
@@ -192,16 +206,16 @@ public class CommandTab extends LayoutContainer {
 
 		m_resetButton = new Button(MSGS.reset());
 		m_resetButton.addSelectionListener(new SelectionListener<ButtonEvent>() {  
-            @Override
-            public void componentSelected(ButtonEvent ce) {
+			@Override
+			public void componentSelected(ButtonEvent ce) {
 				m_formPanel.reset();
-            }
-        });
+			}
+		});
 
 		m_buttonBar.add(m_resetButton);
 		m_buttonBar.add(m_executeButton);
-    }
-	
+	}
+
 	public void refresh() {
 		m_commandInput.unmask();
 	}

@@ -20,6 +20,7 @@ import org.eclipse.kura.web.shared.GwtKuraErrorCode;
 import org.eclipse.kura.web.shared.GwtKuraException;
 import org.eclipse.kura.web.shared.model.GwtBundleInfo;
 import org.eclipse.kura.web.shared.model.GwtDeploymentPackage;
+import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.eclipse.kura.web.shared.service.GwtPackageService;
 import org.osgi.service.deploymentadmin.BundleInfo;
 import org.osgi.service.deploymentadmin.DeploymentAdmin;
@@ -30,9 +31,10 @@ public class GwtPackageServiceImpl extends OsgiRemoteServiceServlet implements G
 	private static final long serialVersionUID = -3422518194598042896L;
 
 
-	public List<GwtDeploymentPackage> findDeviceDeploymentPackages()
+	public List<GwtDeploymentPackage> findDeviceDeploymentPackages(GwtXSRFToken xsrfToken)
 		throws GwtKuraException 
 	{
+		checkXSRFToken(xsrfToken);
 		DeploymentAdmin deploymentAdmin = ServiceLocator.getInstance().getService(DeploymentAdmin.class);
 		
 		List<GwtDeploymentPackage> gwtDeploymentPackages = new ArrayList<GwtDeploymentPackage>();
@@ -67,9 +69,10 @@ public class GwtPackageServiceImpl extends OsgiRemoteServiceServlet implements G
 
 	
 	
-	public void uninstallDeploymentPackage(String packageName)
+	public void uninstallDeploymentPackage(GwtXSRFToken xsrfToken, String packageName)
 		throws GwtKuraException 
 	{
+		checkXSRFToken(xsrfToken);
 		DeploymentAgentService deploymentAgentService = ServiceLocator.getInstance().getService(DeploymentAgentService.class);		
 		try {
 			deploymentAgentService.uninstallDeploymentPackageAsync(packageName);

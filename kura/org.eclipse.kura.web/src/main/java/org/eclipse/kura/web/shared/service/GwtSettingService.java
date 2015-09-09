@@ -13,6 +13,7 @@ package org.eclipse.kura.web.shared.service;
 
 import org.eclipse.kura.web.shared.GwtKuraException;
 import org.eclipse.kura.web.shared.model.GwtSettings;
+import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
@@ -20,7 +21,7 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 @RemoteServiceRelativePath("setting")
 public interface GwtSettingService extends RemoteService 
 {	
-	public void updateSettings(GwtSettings settings) throws GwtKuraException;
+	public void updateSettings(GwtXSRFToken xsfrToken, GwtSettings settings) throws GwtKuraException;
 
-	public void logout() throws GwtKuraException;
+	public void logout(GwtXSRFToken xsfrToken) throws GwtKuraException;
 }

@@ -12,17 +12,19 @@
 package org.eclipse.kura.web.shared.service;
 
 import org.eclipse.kura.web.shared.GwtKuraException;
+import org.eclipse.kura.web.shared.model.GwtXSRFToken;
+
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 
 @RemoteServiceRelativePath("certificate")
 public interface GwtCertificatesService extends RemoteService 
 {	
-	public Integer storePublicPrivateKeys(String privateCert, String publicCert, String password, String alias) throws GwtKuraException;
+	public Integer storePublicPrivateKeys(GwtXSRFToken xsfrToken, String privateCert, String publicCert, String password, String alias) throws GwtKuraException;
 	
-	public Integer storeLeafKey(String publicCert, String alias) throws GwtKuraException;
+	public Integer storeLeafKey(GwtXSRFToken xsfrToken, String publicCert, String alias) throws GwtKuraException;
 	
-	public Integer storePublicChain(String publicCert, String alias) throws GwtKuraException;
+	public Integer storePublicChain(GwtXSRFToken xsfrToken, String publicCert, String alias) throws GwtKuraException;
 	
-	public Integer storeCertificationAuthority(String publicCert, String alias) throws GwtKuraException;
+	public Integer storeCertificationAuthority(GwtXSRFToken xsfrToken, String publicCert, String alias) throws GwtKuraException;
 }

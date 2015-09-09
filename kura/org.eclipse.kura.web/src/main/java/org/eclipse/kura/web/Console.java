@@ -35,6 +35,7 @@ import org.eclipse.kura.web.server.GwtDeviceServiceImpl;
 import org.eclipse.kura.web.server.GwtNetworkServiceImpl;
 import org.eclipse.kura.web.server.GwtPackageServiceImpl;
 import org.eclipse.kura.web.server.GwtSecurityServiceImpl;
+import org.eclipse.kura.web.server.GwtSecurityTokenServiceImpl;
 import org.eclipse.kura.web.server.GwtSettingServiceImpl;
 import org.eclipse.kura.web.server.GwtSnapshotServiceImpl;
 import org.eclipse.kura.web.server.GwtStatusServiceImpl;
@@ -363,11 +364,13 @@ public class Console implements ConfigurableComponent {
 
 	private void initHTTPService(AuthenticationManager authMgr, String servletRoot) throws NamespaceException, ServletException {
 		// Initialize HttpService
+		
 		HttpContext httpCtx = new SecureBasicHttpContext(m_httpService.createDefaultHttpContext(), authMgr);
 		m_httpService.registerResources("/", "www", httpCtx);
 		m_httpService.registerResources(s_appRoot, "www/denali.html", httpCtx);
 		m_httpService.registerResources(s_aliasRoot, "www" + s_aliasRoot, httpCtx);
-
+		
+		m_httpService.registerServlet(servletRoot + "/xsrf", new GwtSecurityTokenServiceImpl(), null, httpCtx);
 		m_httpService.registerServlet(servletRoot + "/status", new GwtStatusServiceImpl(), null, httpCtx);
 		m_httpService.registerServlet(servletRoot + "/device", new GwtDeviceServiceImpl(), null, httpCtx);
 		m_httpService.registerServlet(servletRoot + "/network", new GwtNetworkServiceImpl(), null, httpCtx);

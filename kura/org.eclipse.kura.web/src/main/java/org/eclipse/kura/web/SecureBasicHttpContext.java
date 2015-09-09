@@ -28,6 +28,8 @@ import org.osgi.service.http.HttpContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.gwt.user.client.Cookies;
+
 /**
  * HttpContext that delegates calls to getMimeType() and getResource(), but provides
  * HTTP Basic authentication by authenticating a user against an LDAP directory. For 

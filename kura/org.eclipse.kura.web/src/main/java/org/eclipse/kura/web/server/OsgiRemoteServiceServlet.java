@@ -27,9 +27,14 @@ import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.google.gwt.user.server.rpc.SerializationPolicy;
 import com.google.gwt.user.server.rpc.SerializationPolicyLoader;
 
-public class OsgiRemoteServiceServlet extends RemoteServiceServlet
+public class OsgiRemoteServiceServlet extends KuraRemoteServiceServlet
 {
 	private static final long serialVersionUID = -8826193840033103296L;
+	
+	/*@Override
+	  public void init() throws ServletException {
+	    super.init();
+	}*/
 
 	@Override 
 	protected void service(HttpServletRequest req, HttpServletResponse resp) 

@@ -14,9 +14,13 @@ package org.eclipse.kura.web.client.settings;
 import org.eclipse.kura.web.client.configuration.ServiceTree;
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.resources.Resources;
+import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.shared.model.GwtSession;
+import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.eclipse.kura.web.shared.service.GwtSecurityService;
 import org.eclipse.kura.web.shared.service.GwtSecurityServiceAsync;
+import org.eclipse.kura.web.shared.service.GwtSecurityTokenService;
+import org.eclipse.kura.web.shared.service.GwtSecurityTokenServiceAsync;
 
 import com.allen_sauer.gwt.log.client.Log;
 import com.extjs.gxt.ui.client.widget.LayoutContainer;
@@ -27,11 +31,14 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
+import com.google.gwt.user.server.rpc.XsrfProtect;
 
+@XsrfProtect
 public class SettingsTabs extends LayoutContainer 
 {
 	private static final Messages MSGS = GWT.create(Messages.class);
 
+	private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
 	private final GwtSecurityServiceAsync gwtSecurityService = GWT.create(GwtSecurityService.class);
 
 	private GwtSession              m_currentSession;
@@ -58,6 +65,7 @@ public class SettingsTabs extends LayoutContainer
 
 		Log.debug("about to get the firewall configuration");
 		initTabs();
+
 	}
 
 
@@ -129,7 +137,8 @@ public class SettingsTabs extends LayoutContainer
 		m_securityConfig.setBorders(true);
 		m_securityConfig.setLayout(new FitLayout());
 		m_securityConfig.add(m_securityTab);
-		
+
+
 		AsyncCallback<Boolean> callback = new AsyncCallback<Boolean>() {
 			public void onFailure(Throwable caught) {
 			}
@@ -141,7 +150,8 @@ public class SettingsTabs extends LayoutContainer
 			}
 		};
 		gwtSecurityService.isSecurityServiceAvailable(callback);
-		
+
+
 
 		add(m_tabsPanel);
 	}

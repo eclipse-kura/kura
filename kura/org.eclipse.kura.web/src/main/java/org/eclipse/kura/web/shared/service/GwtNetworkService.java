@@ -20,6 +20,7 @@ import org.eclipse.kura.web.shared.model.GwtFirewallPortForwardEntry;
 import org.eclipse.kura.web.shared.model.GwtNetInterfaceConfig;
 import org.eclipse.kura.web.shared.model.GwtWifiConfig;
 import org.eclipse.kura.web.shared.model.GwtWifiHotspotEntry;
+import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 
 import com.extjs.gxt.ui.client.data.ListLoadResult;
 import com.google.gwt.user.client.rpc.RemoteService;
@@ -30,25 +31,25 @@ public interface GwtNetworkService extends RemoteService
 {
 	public ListLoadResult<GwtNetInterfaceConfig> findNetInterfaceConfigurations() throws GwtKuraException;
 
-	public void updateNetInterfaceConfigurations(GwtNetInterfaceConfig config) throws GwtKuraException;
+	public void updateNetInterfaceConfigurations(GwtXSRFToken xsfrToken, GwtNetInterfaceConfig config) throws GwtKuraException;
 		
-	public ListLoadResult<GwtFirewallOpenPortEntry> findDeviceFirewallOpenPorts() throws GwtKuraException;
+	public ListLoadResult<GwtFirewallOpenPortEntry> findDeviceFirewallOpenPorts(GwtXSRFToken xsfrToken) throws GwtKuraException;
 
-	public void updateDeviceFirewallOpenPorts(List<GwtFirewallOpenPortEntry> entries) throws GwtKuraException;
+	public void updateDeviceFirewallOpenPorts(GwtXSRFToken xsfrToken, List<GwtFirewallOpenPortEntry> entries) throws GwtKuraException;
 		
-	public ListLoadResult<GwtFirewallPortForwardEntry> findDeviceFirewallPortForwards() throws GwtKuraException;
+	public ListLoadResult<GwtFirewallPortForwardEntry> findDeviceFirewallPortForwards(GwtXSRFToken xsfrToken) throws GwtKuraException;
 	
-	public ListLoadResult<GwtFirewallNatEntry> findDeficeFirewallNATs() throws GwtKuraException;
+	public ListLoadResult<GwtFirewallNatEntry> findDeficeFirewallNATs(GwtXSRFToken xsfrToken) throws GwtKuraException;
 	
-	public void updateDeviceFirewallPortForwards(List<GwtFirewallPortForwardEntry> entries) throws GwtKuraException;
+	public void updateDeviceFirewallPortForwards(GwtXSRFToken xsfrToken, List<GwtFirewallPortForwardEntry> entries) throws GwtKuraException;
 	
-	public void updateDeviceFirewallNATs(List<GwtFirewallNatEntry> entries) throws GwtKuraException;
+	public void updateDeviceFirewallNATs(GwtXSRFToken xsfrToken, List<GwtFirewallNatEntry> entries) throws GwtKuraException;
 	
-	public void renewDhcpLease(String interfaceName) throws GwtKuraException;
+	public void renewDhcpLease(GwtXSRFToken xsfrToken, String interfaceName) throws GwtKuraException;
 	
-	public ListLoadResult<GwtWifiHotspotEntry> findWifiHotspots(String interfaceName) throws GwtKuraException;
+	public ListLoadResult<GwtWifiHotspotEntry> findWifiHotspots(GwtXSRFToken xsfrToken, String interfaceName) throws GwtKuraException;
 	
-	public boolean verifyWifiCredentials(String interfaceName, GwtWifiConfig gwtWifiConfig) throws GwtKuraException;
+	public boolean verifyWifiCredentials(GwtXSRFToken xsfrToken, String interfaceName, GwtWifiConfig gwtWifiConfig) throws GwtKuraException;
 
-	public void rollbackDefaultConfiguration();
+	public void rollbackDefaultConfiguration(GwtXSRFToken xsfrToken);
 }

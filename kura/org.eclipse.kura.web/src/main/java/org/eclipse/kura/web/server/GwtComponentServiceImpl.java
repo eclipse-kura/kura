@@ -30,6 +30,7 @@ import org.eclipse.kura.web.server.util.ServiceLocator;
 import org.eclipse.kura.web.shared.GwtKuraException;
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
 import org.eclipse.kura.web.shared.model.GwtConfigParameter;
+import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.eclipse.kura.web.shared.model.GwtConfigParameter.GwtConfigParameterType;
 import org.eclipse.kura.web.shared.service.GwtComponentService;
 
@@ -37,9 +38,10 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
 {
 	private static final long serialVersionUID = -4176701819112753800L;
 
-	public List<GwtConfigComponent> findComponentConfigurations()
+	public List<GwtConfigComponent> findComponentConfigurations(GwtXSRFToken xsrfToken)
 		throws GwtKuraException 
 	{
+		checkXSRFToken(xsrfToken);
 		ConfigurationService cs = ServiceLocator.getInstance().getService(ConfigurationService.class);		
 		List<GwtConfigComponent> gwtConfigs = new ArrayList<GwtConfigComponent>();
 		try {
@@ -130,9 +132,10 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
 		return gwtConfigs;
 	}
 	
-	public List<GwtConfigComponent> findComponentConfiguration()
+	public List<GwtConfigComponent> findComponentConfiguration(GwtXSRFToken xsrfToken)
 			throws GwtKuraException 
 		{
+		checkXSRFToken(xsrfToken);
 			ConfigurationService cs = ServiceLocator.getInstance().getService(ConfigurationService.class);		
 			List<GwtConfigComponent> gwtConfigs = new ArrayList<GwtConfigComponent>();
 			try {
@@ -222,9 +225,10 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
 		}
 
 	
-	public void updateComponentConfiguration(GwtConfigComponent gwtCompConfig)
+	public void updateComponentConfiguration(GwtXSRFToken xsrfToken, GwtConfigComponent gwtCompConfig)
 		throws GwtKuraException 
 	{
+		checkXSRFToken(xsrfToken);
 		ConfigurationService cs = ServiceLocator.getInstance().getService(ConfigurationService.class);
 		try {
 

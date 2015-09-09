@@ -13,6 +13,7 @@ package org.eclipse.kura.web.shared.service;
 
 import org.eclipse.kura.web.shared.GwtKuraException;
 import org.eclipse.kura.web.shared.model.GwtGroupedNVPair;
+import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 
 import com.extjs.gxt.ui.client.data.ListLoadResult;
 import com.google.gwt.user.client.rpc.RemoteService;
@@ -21,5 +22,5 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 @RemoteServiceRelativePath("status")
 public interface GwtStatusService extends RemoteService {
 	
-	public ListLoadResult<GwtGroupedNVPair> getDeviceConfig(boolean hasNetAdmin) throws GwtKuraException;
+	public ListLoadResult<GwtGroupedNVPair> getDeviceConfig(GwtXSRFToken xsfrToken, boolean hasNetAdmin) throws GwtKuraException;
 }

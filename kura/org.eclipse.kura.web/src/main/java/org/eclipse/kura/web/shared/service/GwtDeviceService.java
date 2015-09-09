@@ -13,6 +13,7 @@ package org.eclipse.kura.web.shared.service;
 
 import org.eclipse.kura.web.shared.GwtKuraException;
 import org.eclipse.kura.web.shared.model.GwtGroupedNVPair;
+import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 
 import com.extjs.gxt.ui.client.data.ListLoadResult;
 import com.google.gwt.user.client.rpc.RemoteService;
@@ -21,13 +22,13 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 @RemoteServiceRelativePath("device")
 public interface GwtDeviceService extends RemoteService 
 {	
-	public ListLoadResult<GwtGroupedNVPair> findDeviceConfiguration() throws GwtKuraException;
+	public ListLoadResult<GwtGroupedNVPair> findDeviceConfiguration(GwtXSRFToken xsfrToken) throws GwtKuraException;
 
-	public ListLoadResult<GwtGroupedNVPair> findBundles() throws GwtKuraException;
+	public ListLoadResult<GwtGroupedNVPair> findBundles(GwtXSRFToken xsfrToken) throws GwtKuraException;
 
-	public ListLoadResult<GwtGroupedNVPair> findThreads() throws GwtKuraException;
+	public ListLoadResult<GwtGroupedNVPair> findThreads(GwtXSRFToken xsfrToken) throws GwtKuraException;
 
-	public ListLoadResult<GwtGroupedNVPair> findSystemProperties() throws GwtKuraException; 
+	public ListLoadResult<GwtGroupedNVPair> findSystemProperties(GwtXSRFToken xsfrToken) throws GwtKuraException; 
 	
-	public String executeCommand(String cmd, String pwd) throws GwtKuraException;
+	public String executeCommand(GwtXSRFToken xsfrToken, String cmd, String pwd) throws GwtKuraException;
 }

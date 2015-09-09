@@ -42,6 +42,7 @@ public class KuraBirthPayload extends KuraPayload
 	private final static String MODEM_IMEI = "modem_imei";
 	private final static String MODEM_IMSI = "modem_imsi";
 	private final static String MODEM_ICCID = "modem_iccid";
+	private final static String MODEM_RSSI = "modem_rssi";
 
 
 	public String getUptime() {
@@ -122,7 +123,9 @@ public class KuraBirthPayload extends KuraPayload
 	public String getModemIccid() {
 		return (String) getMetric(MODEM_ICCID);
 	}
-
+	public String getModemRssi() {
+		return (String) getMetric(MODEM_RSSI);
+	}
 
 	@Override
 	public String toString() {
@@ -175,6 +178,7 @@ public class KuraBirthPayload extends KuraPayload
 		private String modemImei;
 		private String modemIccid;
 		private String modemImsi;
+		private String modemRssi;
 
 		private KuraPosition position;
 
@@ -283,6 +287,10 @@ public class KuraBirthPayload extends KuraPayload
 			this.modemImsi = modemImsi;
 			return this;
 		}
+		public KuraBirthPayloadBuilder withModemRssi(String modemRssi) {
+			this.modemRssi = modemRssi;
+			return this;
+		}
 		public KuraBirthPayloadBuilder withPosition(KuraPosition position) {
 			this.position = position;
 			return this;			
@@ -368,6 +376,9 @@ public class KuraBirthPayload extends KuraPayload
 			}
 			if (modemImsi != null) {
 				birthPayload.addMetric(MODEM_IMSI, modemImsi);
+			}
+			if (modemRssi != null) {
+				birthPayload.addMetric(MODEM_RSSI, modemRssi);
 			}
 			if (position != null) {
 				birthPayload.setPosition(position);

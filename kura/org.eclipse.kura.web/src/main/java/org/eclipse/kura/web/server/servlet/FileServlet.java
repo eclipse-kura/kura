@@ -488,9 +488,10 @@ public class FileServlet extends HttpServlet {
 			}
 
 			// BEGIN XSRF - Servlet dependent code
+			String tokenId= req.getParameter("xsrfToken");
 
 			try {
-				GwtXSRFToken token = new GwtXSRFToken(req.getParameter("xsrfToken"));
+				GwtXSRFToken token = new GwtXSRFToken(tokenId);
 				KuraRemoteServiceServlet.checkXSRFToken(req, token);
 			}
 			catch (Exception e) {

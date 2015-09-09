@@ -15,6 +15,10 @@ import java.util.List;
 
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.util.Constants;
+import org.eclipse.kura.web.client.util.FailureHandler;
+import org.eclipse.kura.web.shared.model.GwtXSRFToken;
+import org.eclipse.kura.web.shared.service.GwtSecurityTokenService;
+import org.eclipse.kura.web.shared.service.GwtSecurityTokenServiceAsync;
 
 import com.extjs.gxt.ui.client.Style.HorizontalAlignment;
 import com.extjs.gxt.ui.client.Style.Scroll;
@@ -43,10 +47,12 @@ import com.extjs.gxt.ui.client.widget.layout.FormLayout;
 import com.extjs.gxt.ui.client.widget.toolbar.FillToolItem;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Element;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 
 public class PackageInstallDialog extends Dialog {
 	
 	private static final Messages MSGS = GWT.create(Messages.class);
+	private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
 	
 	private TabPanel				m_tabsPanel;
 	private TabItem					m_tabFile;
@@ -65,6 +71,9 @@ public class PackageInstallDialog extends Dialog {
 	private Status 					m_status;
 	
 	private String 					m_actionUrl;
+	
+	private HiddenField<String>     xsrfTokenFieldFile;
+	private HiddenField<String>     xsrfTokenFieldUrl;
 	
 	
 	public PackageInstallDialog(String actionUrl, List<HiddenField<?>> hiddenFields) {
@@ -143,7 +152,34 @@ public class PackageInstallDialog extends Dialog {
         m_tabFile.setLayout(new FormLayout());
         m_tabFile.add(m_formPanelFile);
 
-        m_tabsPanel.add(m_tabFile);        
+        m_tabsPanel.add(m_tabFile);    
+
+        //
+        // xsrfToken Hidden field
+        //       
+	    gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
+			@Override
+			public void onFailure(Throwable ex) {
+				FailureHandler.handle(ex);
+			}
+
+			@Override
+			public void onSuccess(GwtXSRFToken token) {
+				xsrfTokenFieldFile.setValue(token.getToken());
+				xsrfTokenFieldUrl.setValue(token.getToken());
+			}
+		});     
+     
+        xsrfTokenFieldFile = new HiddenField<String>();
+        xsrfTokenFieldFile.setId("xsrfToken");
+        xsrfTokenFieldFile.setName("xsrfToken");
+        xsrfTokenFieldFile.setValue("");
+        
+        m_formPanelFile.add(xsrfTokenFieldFile);     
+		//	
+        
+        
+        
 
         //
         // Download URL tab
@@ -195,8 +231,22 @@ public class PackageInstallDialog extends Dialog {
 	    		urlFieldSet.add(hf);
 	    	}
 	    }
-	    	    
+	    
 	    m_formPanelUrl.add(urlFieldSet, urlFormData);
+	    
+	    
+	    //
+        // xsrfToken Hidden field
+        //   
+     
+        xsrfTokenFieldUrl = new HiddenField<String>();
+        xsrfTokenFieldUrl.setId("xsrfToken");
+        xsrfTokenFieldUrl.setName("xsrfToken");
+        xsrfTokenFieldUrl.setValue("");
+        
+        m_formPanelUrl.add(xsrfTokenFieldUrl);  
+		//	
+	   
 	    
         m_tabUrl = new TabItem(MSGS.urlLabel());
         m_tabUrl.setBorders(true);

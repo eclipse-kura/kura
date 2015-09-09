@@ -156,7 +156,18 @@ public class SnapshotsTab extends LayoutContainer {
 				new SelectionListener<ButtonEvent>() {
 			@Override
 			public void componentSelected(ButtonEvent ce) {
-				downloadSnapshot();
+				gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
+					@Override
+					public void onFailure(Throwable ex) {
+						FailureHandler.handle(ex);
+					}
+
+					@Override
+					public void onSuccess(GwtXSRFToken token) {
+						downloadSnapshot(token.getToken());
+					}
+				});
+				
 			}
 		});
 		m_downloadButton.setEnabled(false);
@@ -287,12 +298,16 @@ public class SnapshotsTab extends LayoutContainer {
 		m_loader.load();
 	}
 
-	private void downloadSnapshot() {
+	private void downloadSnapshot(String tokenId) {
+		final StringBuilder sbUrl = new StringBuilder();
+
 		GwtSnapshot snapshot = m_grid.getSelectionModel().getSelectedItem();
-		StringBuilder sbUrl = new StringBuilder();
 		sbUrl.append("/" + GWT.getModuleName() + "/device_snapshots?")
 		.append("snapshotId=")
-		.append(snapshot.getSnapshotId());
+		.append(snapshot.getSnapshotId())
+		.append("&")
+		.append("xsrfToken=")
+		.append(tokenId);
 		Window.open(sbUrl.toString(), "_blank", "location=no");
 	}
 

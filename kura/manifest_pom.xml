@@ -27,7 +27,6 @@
 		<module>org.eclipse.kura.core.deployment</module>
 		<module>org.eclipse.kura.core.log</module>
 		<module>org.eclipse.kura.core.net</module>
-		<module>org.eclipse.kura.core.test</module>
 		<module>org.eclipse.kura.deployment.agent</module>
 		<module>org.eclipse.kura.deployment.customizer</module>
 		<module>org.eclipse.kura.deployment.customizer.upgrade</module>
@@ -47,6 +46,7 @@
 		<module>org.eclipse.kura.protocol.modbus.test</module>
 		<module>org.eclipse.kura.emulator</module>
 		<module>org.eclipse.kura.emulator.gpio</module>
+		<module>org.eclipse.kura.core.test</module>
 		<module>examples</module>
 	</modules>
 

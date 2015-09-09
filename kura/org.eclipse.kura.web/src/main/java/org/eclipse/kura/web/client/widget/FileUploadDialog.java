@@ -14,6 +14,10 @@ package org.eclipse.kura.web.client.widget;
 import java.util.List;
 
 import org.eclipse.kura.web.client.messages.Messages;
+import org.eclipse.kura.web.client.util.FailureHandler;
+import org.eclipse.kura.web.shared.model.GwtXSRFToken;
+import org.eclipse.kura.web.shared.service.GwtSecurityTokenService;
+import org.eclipse.kura.web.shared.service.GwtSecurityTokenServiceAsync;
 
 import com.extjs.gxt.ui.client.Style.HorizontalAlignment;
 import com.extjs.gxt.ui.client.Style.Scroll;
@@ -35,10 +39,13 @@ import com.extjs.gxt.ui.client.widget.layout.FormLayout;
 import com.extjs.gxt.ui.client.widget.toolbar.FillToolItem;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Element;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 
 public class FileUploadDialog extends Dialog {
 	
 	private static final Messages MSGS = GWT.create(Messages.class);
+	
+	private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
 
 	private FormPanel m_formPanel;
 	private FileUploadField m_fileUploadField;
@@ -47,6 +54,7 @@ public class FileUploadDialog extends Dialog {
 	private Button m_cancelButton;
 	private Status m_status;
 	private String m_url;
+	private HiddenField<String> xsrfTokenField;  
 	
 	public FileUploadDialog(String url, List<HiddenField<?>> hiddenFields) {
 		super();
@@ -108,6 +116,31 @@ public class FileUploadDialog extends Dialog {
 	    		m_formPanel.add(hf);
 	    	}
 	    }
+	    
+	    //
+        // xsrfToken Hidden field
+        //       
+	    
+	    gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
+			@Override
+			public void onFailure(Throwable ex) {
+				FailureHandler.handle(ex);
+			}
+
+			@Override
+			public void onSuccess(GwtXSRFToken token) {
+				xsrfTokenField.setValue(token.getToken());
+			}
+		});     
+     
+        xsrfTokenField = new HiddenField<String>();
+        xsrfTokenField.setId("xsrfToken");
+        xsrfTokenField.setName("xsrfToken");
+        xsrfTokenField.setValue("");
+        
+        m_formPanel.add(xsrfTokenField);     
+		//	    
+	    
 	    add(m_formPanel);
 	}
 

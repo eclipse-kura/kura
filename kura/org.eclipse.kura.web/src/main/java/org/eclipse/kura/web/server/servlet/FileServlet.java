@@ -47,8 +47,10 @@ import org.eclipse.kura.core.configuration.XmlComponentConfigurations;
 import org.eclipse.kura.core.configuration.util.XmlUtil;
 import org.eclipse.kura.deployment.agent.DeploymentAgentService;
 import org.eclipse.kura.system.SystemService;
+import org.eclipse.kura.web.server.KuraRemoteServiceServlet;
 import org.eclipse.kura.web.server.util.ServiceLocator;
 import org.eclipse.kura.web.shared.GwtKuraException;
+import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -114,6 +116,7 @@ public class FileServlet extends HttpServlet {
 		s_logger.debug("req.getRequestURL(): {}", req.getRequestURL());
 		s_logger.debug("req.getPathInfo(): {}", req.getPathInfo());
 
+
 		if (reqPathInfo.startsWith("/deploy")) {
 			doPostDeploy(req, resp);
 		}
@@ -142,6 +145,18 @@ public class FileServlet extends HttpServlet {
 			s_logger.error("Error parsing the file upload request");
 			throw new ServletException("Error parsing the file upload request", e);			
 		}
+
+		// BEGIN XSRF - Servlet dependent code
+		Map<String,String> formFields= upload.getFormFields();
+
+		try {
+			GwtXSRFToken token = new GwtXSRFToken(formFields.get("xsrfToken"));
+			KuraRemoteServiceServlet.checkXSRFToken(req, token);
+		}
+		catch (Exception e) {
+			throw new ServletException("Security error: please retry this operation correctly.", e);
+		}
+		// END XSRF security check
 
 		List<FileItem> fileItems = null;
 		InputStream is = null;
@@ -253,6 +268,18 @@ public class FileServlet extends HttpServlet {
 			throw new ServletException("Error parsing the file upload request", e);			
 		}
 
+		// BEGIN XSRF - Servlet dependent code
+		Map<String,String> formFields= upload.getFormFields();
+
+		try {
+			GwtXSRFToken token = new GwtXSRFToken(formFields.get("xsrfToken"));
+			KuraRemoteServiceServlet.checkXSRFToken(req, token);
+		}
+		catch (Exception e) {
+			throw new ServletException("Security error: please retry this operation correctly.", e);
+		}
+		// END XSRF security check
+
 		List<FileItem> fileItems = upload.getFileItems();
 		if (fileItems.size() != 1) {
 			s_logger.error("expected 1 file item but found {}", fileItems.size());
@@ -323,6 +350,18 @@ public class FileServlet extends HttpServlet {
 			s_logger.error("Error parsing the file upload request", e);
 			throw new ServletException("Error parsing the file upload request", e);			
 		}
+
+		// BEGIN XSRF - Servlet dependent code
+		Map<String,String> formFields= upload.getFormFields();
+
+		try {
+			GwtXSRFToken token = new GwtXSRFToken(formFields.get("xsrfToken"));
+			KuraRemoteServiceServlet.checkXSRFToken(req, token);
+		}
+		catch (Exception e) {
+			throw new ServletException("Security error: please retry this operation correctly.", e);
+		}
+		// END XSRF security check
 
 		List<FileItem> fileItems = null;
 		InputStream is = null;
@@ -447,6 +486,17 @@ public class FileServlet extends HttpServlet {
 				s_logger.error("Deployment package URL parameter missing");
 				throw new ServletException("Deployment package URL parameter missing");	
 			}
+
+			// BEGIN XSRF - Servlet dependent code
+
+			try {
+				GwtXSRFToken token = new GwtXSRFToken(req.getParameter("xsrfToken"));
+				KuraRemoteServiceServlet.checkXSRFToken(req, token);
+			}
+			catch (Exception e) {
+				throw new ServletException("Security error: please retry this operation correctly.", e);
+			}
+			// END XSRF security check
 
 			try {
 				s_logger.info("Installing package...");

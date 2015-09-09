@@ -36,6 +36,7 @@ import com.extjs.gxt.ui.client.widget.button.Button;
 import com.extjs.gxt.ui.client.widget.button.ButtonBar;
 import com.extjs.gxt.ui.client.widget.form.FileUploadField;
 import com.extjs.gxt.ui.client.widget.form.FormPanel;
+import com.extjs.gxt.ui.client.widget.form.HiddenField;
 import com.extjs.gxt.ui.client.widget.form.FormPanel.Encoding;
 import com.extjs.gxt.ui.client.widget.form.FormPanel.Method;
 import com.extjs.gxt.ui.client.widget.form.TextArea;
@@ -66,6 +67,7 @@ public class CommandTab extends LayoutContainer {
 	private TextField<String>	m_commandField;
 	private TextField<String>	m_passwordField;
 	private FileUploadField		m_fileUploadField;
+	private HiddenField<String> xsrfTokenField;
 
 	public CommandTab(GwtSession currentSession) {
 		m_currentSession = currentSession;
@@ -173,6 +175,30 @@ public class CommandTab extends LayoutContainer {
 		m_fileUploadField.setName("file");
 		m_fileUploadField.setFieldLabel("File");
 		m_formPanel.add(m_fileUploadField, formData);
+
+		//
+		// xsrfToken Hidden field
+		//       
+
+		gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
+			@Override
+			public void onFailure(Throwable ex) {
+				FailureHandler.handle(ex);
+			}
+
+			@Override
+			public void onSuccess(GwtXSRFToken token) {
+				xsrfTokenField.setValue(token.getToken());
+			}
+		});     
+
+		xsrfTokenField = new HiddenField<String>();
+		xsrfTokenField.setId("xsrfToken");
+		xsrfTokenField.setName("xsrfToken");
+		xsrfTokenField.setValue("");
+
+		m_formPanel.add(xsrfTokenField);     
+		//
 
 		m_commandInput = m_formPanel;
 

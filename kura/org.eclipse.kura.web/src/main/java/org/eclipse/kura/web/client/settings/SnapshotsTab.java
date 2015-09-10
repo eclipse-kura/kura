@@ -63,7 +63,6 @@ import com.extjs.gxt.ui.client.widget.toolbar.ToolBar;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.Timer;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
 
@@ -93,6 +92,7 @@ public class SnapshotsTab extends LayoutContainer {
 	private Grid<GwtSnapshot>      m_grid;
 	private BaseListLoader<ListLoadResult<GwtSnapshot>> m_loader;
 	private FileUploadDialog       m_fileUpload;
+	private CustomWindow 		   m_downloadWindow;
 
 
 	public SnapshotsTab(GwtSession currentSession,
@@ -156,6 +156,8 @@ public class SnapshotsTab extends LayoutContainer {
 				new SelectionListener<ButtonEvent>() {
 			@Override
 			public void componentSelected(ButtonEvent ce) {
+				//please see http://stackoverflow.com/questions/13277752/gwt-open-window-after-rpc-is-prevented-by-popup-blocker
+				m_downloadWindow= CustomWindow.open(null, "_blank", "location=no"); 
 				gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
 					@Override
 					public void onFailure(Throwable ex) {
@@ -167,7 +169,6 @@ public class SnapshotsTab extends LayoutContainer {
 						downloadSnapshot(token.getToken());
 					}
 				});
-				
 			}
 		});
 		m_downloadButton.setEnabled(false);
@@ -308,7 +309,21 @@ public class SnapshotsTab extends LayoutContainer {
 		.append("&")
 		.append("xsrfToken=")
 		.append(tokenId);
-		Window.open(sbUrl.toString(), "_blank", "location=no");
+		
+		m_downloadWindow.setUrl(sbUrl.toString());
+
+//		FormPanel downloadPanel = new FormPanel();
+//		   downloadPanel.setFrame(false);
+//	        downloadPanel.setHeaderVisible(false);
+//	        downloadPanel.setBodyBorder(false);
+//	        downloadPanel.setBorders(false);
+//	        downloadPanel.setAction(sbUrl.toString());
+//	        downloadPanel.setEncoding(Encoding.MULTIPART);
+//	        downloadPanel.setMethod(Method.GET);
+//	        
+//	        downloadPanel.submit();
+		
+//		Window.open(sbUrl.toString(), "_blank", "location=no");
 	}
 
 	private void uploadSnapshot() {

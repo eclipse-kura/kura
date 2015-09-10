@@ -26,12 +26,12 @@ public class UsbModemDriver {
 	}
 	
 	public int install() throws Exception {
-		s_logger.info("installing driver: " + m_name);
+		s_logger.info("installing driver: {}", m_name);
 		return LinuxProcessUtil.start("modprobe " + m_name, true);
 	}
 	
 	public int remove() throws Exception {
-		s_logger.info("removing driver: " + m_name);
+		s_logger.info("removing driver: {}", m_name);
 		return LinuxProcessUtil.start("rmmod " + m_name, true);
 	}
 

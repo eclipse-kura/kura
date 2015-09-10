@@ -127,20 +127,9 @@
 		</dependency>
 		<dependency>
 			<groupId>org.gwtbootstrap3</groupId>
-			<artifactId>gwtbootstrap3-parent</artifactId>
-			<version>0.9.1</version>
-			<type>pom</type>
-		</dependency>
-		<dependency>
-			<groupId>org.gwtbootstrap3</groupId>
 			<artifactId>gwtbootstrap3-extras</artifactId>
 			<version>0.9.1</version>
 			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.ow2.asm</groupId>
-			<artifactId>asm</artifactId>
-			<version>5.0.4</version>
 		</dependency>
 	</dependencies>
 

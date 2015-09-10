@@ -311,19 +311,6 @@ public class SnapshotsTab extends LayoutContainer {
 		.append(tokenId);
 		
 		m_downloadWindow.setUrl(sbUrl.toString());
-
-//		FormPanel downloadPanel = new FormPanel();
-//		   downloadPanel.setFrame(false);
-//	        downloadPanel.setHeaderVisible(false);
-//	        downloadPanel.setBodyBorder(false);
-//	        downloadPanel.setBorders(false);
-//	        downloadPanel.setAction(sbUrl.toString());
-//	        downloadPanel.setEncoding(Encoding.MULTIPART);
-//	        downloadPanel.setMethod(Method.GET);
-//	        
-//	        downloadPanel.submit();
-		
-//		Window.open(sbUrl.toString(), "_blank", "location=no");
 	}
 
 	private void uploadSnapshot() {

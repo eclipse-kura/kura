@@ -93,8 +93,13 @@ public class Library {
 	 * @return Results of the load_from_java_lib_path (<code>boolean</code>) value.
 	 */
 	private static boolean load_from_java_lib_path() {
+		String processor = System.getProperty("org.osgi.framework.processor"); //$NON-NLS-1$
 		try {
-			System.loadLibrary("dkcomm"); //$NON-NLS-1$
+			if (processor.equalsIgnoreCase("x86-64")) { //$NON-NLS-1$
+				System.loadLibrary("dkcomm64"); //$NON-NLS-1$
+			} else {
+				System.loadLibrary("dkcomm"); //$NON-NLS-1$
+			}
 		} catch (final UnsatisfiedLinkError e) {
 			e.printStackTrace();
 			return false;

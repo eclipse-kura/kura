@@ -13,12 +13,12 @@ TARGETOS=WIN95
 SEHMAP = TRUE
 !include <win32.mak>
 DLLFILENAME=dkcomm.dll# declaration
-DLLPATH = Release\win32\x86\
+DLLPATH = Release\win32\x86
 DLLNAME= $(DLLPATH)\dkcomm.dll# declaration
 LIBNAME=dkcomm# declaration
 LIBPATH=.\# declaration
 .c.obj:
-	$(cc) -DWINVER=0x0400 -D_WIN32_WINNT=0x0400 $(cflags) -D_MT -D_DLL -MD -D_WINSOCKAPI_ -DWIN32 -Ogityb1 -Gs -GF -Zm400 -Zi  /IC:\IBM\osgimin11\bin\include $*.c
+	$(cc) -DWINVER=0x0400 -D_WIN32_WINNT=0x0400 $(cflags) -D_MT -D_DLL -MD -D_WINSOCKAPI_ -DWIN32 -Ogityb1 -Gs -GF -Zm400 -Zi  /I"$(JAVA_HOME)\include" /I"$(JAVA_HOME)\include\win32" $*.c
 #/IC:\IBM\osgimin11\bin\include
 .cpp.obj:
 	$(cc) -DWINVER=0x0400 -D_WIN32_WINNT=0x0400 $(cflags) -D_MT -D_DLL -MD -D_WINSOCKAPI_ -DWIN32 -Ogityb1 -Gs -GF -Zm400 -Zi  $*.cpp

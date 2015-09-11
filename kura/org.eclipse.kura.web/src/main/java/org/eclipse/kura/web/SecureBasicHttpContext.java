@@ -28,8 +28,6 @@ import org.osgi.service.http.HttpContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.gwt.user.client.Cookies;
-
 /**
  * HttpContext that delegates calls to getMimeType() and getResource(), but provides
  * HTTP Basic authentication by authenticating a user against an LDAP directory. For 
@@ -88,6 +86,11 @@ public class SecureBasicHttpContext implements HttpContext
         		session.invalidate();
         		return failAuthorization(response);
         	}
+        } else {
+        	s_logger.debug("Missing 'Session'");
+        	session = request.getSession(true);
+        	session.setMaxInactiveInterval(15 * 60);
+            return failAuthorization(response);
         }
     	
     	String authHeader = request.getHeader("Authorization");
@@ -152,7 +155,7 @@ public class SecureBasicHttpContext implements HttpContext
     					  String password) 
     {
         Subject subject = null;
-        HttpSession session = request.getSession(true);
+        HttpSession session = request.getSession();
         subject = (Subject) session.getAttribute("subject");        
         if (subject != null) {
         	// The user has already been authenticated

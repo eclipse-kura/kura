@@ -52,7 +52,7 @@ public class GwtSecurityTokenServiceImpl extends OsgiRemoteServiceServlet implem
         GwtXSRFToken token = null;
 
         // Before to generate a token we must to check if the user is correctly authenticated
-        HttpSession session = getHttpSession();
+        HttpSession session = getHttpSession(); 
         if (session != null) {
             token = new GwtXSRFToken(UUID.randomUUID().toString());
             session.setAttribute(XSRF_TOKEN_KEY, token);

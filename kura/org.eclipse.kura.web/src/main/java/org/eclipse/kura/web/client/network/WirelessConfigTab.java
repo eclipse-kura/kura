@@ -659,7 +659,7 @@ public class WirelessConfigTab extends LayoutContainer
 						refreshForm();
 					}
 				});
-		m_pairwiseCiphersCombo.addListener(Events.OnMouseOver, new MouseOverListener(MSGS.netWifiToolTipCiphers()));
+		m_pairwiseCiphersCombo.addListener(Events.OnMouseOver, new MouseOverListener(MSGS.netWifiToolTipPairwiseCiphers()));
 		m_pairwiseCiphersCombo.addStyleName("kura-combobox");
 		m_pairwiseCiphersCombo.addPlugin(m_dirtyPlugin);
         
@@ -682,7 +682,7 @@ public class WirelessConfigTab extends LayoutContainer
 				refreshForm();
 			}
 		});
-        m_groupCiphersCombo.addListener(Events.OnMouseOver, new MouseOverListener(MSGS.netWifiToolTipCiphers()));
+        m_groupCiphersCombo.addListener(Events.OnMouseOver, new MouseOverListener(MSGS.netWifiToolTipGroupCiphers()));
         m_groupCiphersCombo.addStyleName("kura-combobox");
         m_groupCiphersCombo.addPlugin(m_dirtyPlugin);
         

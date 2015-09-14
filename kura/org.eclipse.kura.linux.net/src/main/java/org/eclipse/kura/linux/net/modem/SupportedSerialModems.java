@@ -17,6 +17,10 @@ import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.eclipse.kura.linux.net.util.KuraConstants;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.FrameworkUtil;
+import org.osgi.service.event.EventAdmin;
+import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,8 +38,14 @@ public class SupportedSerialModems {
 	private static Future<?>  s_task;
     private static AtomicBoolean s_stopThread;
     private static ExecutorService s_executor;
+    
+    private static ServiceTracker<EventAdmin, EventAdmin> s_serviceTracker;
 	
 	static {
+		BundleContext bundleContext = FrameworkUtil.getBundle(SupportedSerialModems.class).getBundleContext();
+		s_serviceTracker = new ServiceTracker<EventAdmin, EventAdmin>(bundleContext, EventAdmin.class, null);
+		s_serviceTracker.open(true);
+		
 		s_stopThread = new AtomicBoolean();
 		s_stopThread.set(false);
 		s_executor = Executors.newSingleThreadExecutor();
@@ -70,7 +80,6 @@ public class SupportedSerialModems {
 	}
 	
 	public static SupportedSerialModemInfo getModem(String imageName, String imageVersion) {
-		
 		SupportedSerialModemInfo supportedSerialModemInfo = null;
 		
 		for (SupportedSerialModemInfo modem : SupportedSerialModemInfo.values()) {
@@ -106,7 +115,13 @@ public class SupportedSerialModems {
 								if (modem.getDriver().install() == 0) {
 									for (String modemModel : modem.getModemModels()) {
 										if (modemModel.equals(modem.getDriver().getModemModel())) {
-											s_logger.info("Driver for the {} modem has been installed" , modemModel);
+											s_logger.info("Driver for the {} modem has been installed. Modem is reachable as serial device." , modemModel);
+											EventAdmin eventAdmin = s_serviceTracker.getService();
+											
+											if (eventAdmin != null) {
+												s_logger.info("posting the SerialModemAddedEvent ...");
+												eventAdmin.postEvent(new SerialModemAddedEvent(modem));
+											}
 											s_stopThread.set(true);
 								        	workerNotity();
 											modemReachable = true;

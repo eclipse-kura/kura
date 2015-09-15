@@ -49,10 +49,12 @@ import org.eclipse.kura.deployment.agent.DeploymentAgentService;
 import org.eclipse.kura.system.SystemService;
 import org.eclipse.kura.web.server.KuraRemoteServiceServlet;
 import org.eclipse.kura.web.server.util.ServiceLocator;
+import org.eclipse.kura.web.shared.GwtKuraErrorCode;
 import org.eclipse.kura.web.shared.GwtKuraException;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 
 public class FileServlet extends HttpServlet {
 
@@ -218,7 +220,7 @@ public class FileServlet extends HttpServlet {
 		} catch (IOException e) {
 			throw e;
 		} catch (GwtKuraException e) {
-			throw new ServletException(e.getMessage());
+			throw new ServletException("File is outside extraction target directory.");
 		} finally {
 			if (os != null) {
 				try {
@@ -252,7 +254,7 @@ public class FileServlet extends HttpServlet {
 		if (filePath.contains(canonicalID)) {
 			return filePath;
 		} else {
-			throw new GwtKuraException("File is outside extraction target directory.");
+			throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ACCESS);
 		}
 	}
 

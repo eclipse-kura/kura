@@ -125,12 +125,35 @@ public class CommandTab extends LayoutContainer {
 									}
 									//FailureHandler.handle(caught);
 									m_commandInput.unmask();
+
+									gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
+										@Override
+										public void onFailure(Throwable ex) {
+											FailureHandler.handle(ex);
+										}
+
+										@Override
+										public void onSuccess(GwtXSRFToken token) {	
+											xsrfTokenField.setValue(token.getToken());
+										}
+									});
 								}
 
 								public void onSuccess(String result) {
 									m_result.clear();
 									m_result.setValue(result);
 									m_commandInput.unmask();
+									gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
+										@Override
+										public void onFailure(Throwable ex) {
+											FailureHandler.handle(ex);
+										}
+
+										@Override
+										public void onSuccess(GwtXSRFToken token) {	
+											xsrfTokenField.setValue(token.getToken());
+										}
+									});
 								}
 							});
 						}});

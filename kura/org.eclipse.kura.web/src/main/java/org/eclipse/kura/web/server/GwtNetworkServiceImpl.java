@@ -901,10 +901,16 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 				Iterator<WifiHotspotInfo> it = wifiHotspotInfoCollection.iterator();
 				while (it.hasNext()) {
 					WifiHotspotInfo wifiHotspotInfo = it.next();
-					if (wifiHotspotInfo.getChannel() <= systemService.getKuraWifiTopChannel()) {
+					String ssid= wifiHotspotInfo.getSsid();
+					if(!ssid.matches("[0-9A-Za-z/.@*#:\\ \\_\\-]+")){
+						ssid= null;
+					}
+					if (	   wifiHotspotInfo.getChannel() <= systemService.getKuraWifiTopChannel() 
+							&& ssid != null
+							) {
 						GwtWifiHotspotEntry gwtWifiHotspotEntry = new GwtWifiHotspotEntry();
 						gwtWifiHotspotEntry.setMacAddress(wifiHotspotInfo.getMacAddress());
-						gwtWifiHotspotEntry.setSSID(wifiHotspotInfo.getSsid());
+						gwtWifiHotspotEntry.setSSID(ssid);
 						gwtWifiHotspotEntry.setsignalStrength(wifiHotspotInfo.getSignalLevel());
 						gwtWifiHotspotEntry.setChannel(wifiHotspotInfo.getChannel());
 						gwtWifiHotspotEntry.setFrequency(wifiHotspotInfo.getFrequency());

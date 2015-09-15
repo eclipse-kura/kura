@@ -294,7 +294,6 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
 
 	@Override
 	public List<NetInterface<? extends NetInterfaceAddress>> getNetworkInterfaces() throws KuraException {
-				
 		s_logger.trace("getNetworkInterfaces()");
 		List<NetInterface<? extends NetInterfaceAddress>> netInterfaces = new ArrayList<NetInterface<? extends NetInterfaceAddress>>();
 		
@@ -333,17 +332,22 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
 		    } else {
 		    	// for Serial modem
 		    	if (m_serialModem != null) {
-		    		
 				    // only add if there is not already a ppp interface for this modem
 				    boolean addModem = true;
 				    for(NetInterface<?> netInterface : netInterfaces) {
-				        UsbDevice usbDevice = netInterface.getUsbDevice();
-				        if(usbDevice != null) {
-				            if(usbDevice.getUsbPort().equals(m_serialModem.getProductName())) {
-				                addModem = false;
-				                break;
-				            }
-				        }
+				    	String iface = netInterface.getName();
+				    	if ((iface != null) && iface.startsWith("ppp")) {
+				    		ModemInterface<ModemInterfaceAddress> pppModemInterface = getModemInterface(iface, false, m_serialModem);
+				    		ModemInterface<ModemInterfaceAddress> serialModemInterface = getModemInterface(m_serialModem.getProductName(), false, m_serialModem);
+				    		if ((pppModemInterface != null) && (serialModemInterface != null)) {
+				    			String pppModel = pppModemInterface.getModel();
+				    			String serialModel = serialModemInterface.getModel();
+				    			if((pppModel != null) && pppModel.equals(serialModel)) {
+				    				addModem = false;
+					                break;
+				    			}
+				    		}
+				    	}
 				    }
 				    if(addModem) {
 				    	netInterfaces.add(getModemInterface(m_serialModem.getProductName(), false, m_serialModem));
@@ -351,7 +355,6 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
 		    	}
 		    }
 		}
-		
 		return netInterfaces;
 	}
 

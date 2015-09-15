@@ -11,23 +11,17 @@
  */
 package org.eclipse.kura.web;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 import javax.servlet.ServletException;
 
-import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ConfigurableComponent;
-import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.configuration.KuraConfigReadyEvent;
-import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.crypto.CryptoService;
-import org.eclipse.kura.db.DbService;
 import org.eclipse.kura.system.SystemService;
 import org.eclipse.kura.web.server.GwtCertificatesServiceImpl;
 import org.eclipse.kura.web.server.GwtComponentServiceImpl;
@@ -58,24 +52,19 @@ public class Console implements ConfigurableComponent {
 
 	private static final String SERVLET_ALIAS_ROOT = "servlet.alias.root";
 	private static final String APP_ROOT = "app.root";
-	private static final String APP_PID = "service.pid";
 
 	private static final String CONSOLE_PASSWORD = "console.password.value";
 	private static final String CONSOLE_USERNAME = "console.username.value";
-	private static final String KURA_DATA_DIR = "kura.data";
 
 	private static String s_aliasRoot;
 	private static String s_appRoot;
 	private static ComponentContext s_context;
 
-	private DbService m_dbService;
 	private HttpService m_httpService;
 
 	private ExecutorService m_worker;
-	private Future<?> m_handle;
 
 	private SystemService m_systemService;
-	private ConfigurationService m_configService;
 	private CryptoService m_cryptoService;
 
 	private Map<String, Object> m_properties;
@@ -102,28 +91,12 @@ public class Console implements ConfigurableComponent {
 		this.m_httpService = null;
 	}
 
-	public void setDbService(DbService dbService) {
-		this.m_dbService = dbService;
-	}
-
-	public void unsetDbService(DbService dbService) {
-		this.m_dbService = null;
-	}
-
 	public void setSystemService(SystemService systemService) {
 		this.m_systemService = systemService;
 	}
 
 	public void unsetSystemService(SystemService systemService) {
 		this.m_systemService = null;
-	}
-
-	public void setConfigurationService(ConfigurationService configService) {
-		this.m_configService = configService;
-	}
-
-	public void unsetConfigurationService(ConfigurationService configService) {
-		this.m_configService = null;
 	}
 
 	public void setCryptoService(CryptoService cryptoService) {
@@ -160,7 +133,7 @@ public class Console implements ConfigurableComponent {
 				s_aliasRoot = (String) properties.get(SERVLET_ALIAS_ROOT);
 				s_appRoot = (String) properties.get(APP_ROOT);
 				String servletRoot = s_aliasRoot;
-				
+
 				m_properties= new HashMap<String, Object>();
 				Iterator<String> keys = properties.keySet().iterator();
 				while (keys.hasNext()) {
@@ -168,15 +141,7 @@ public class Console implements ConfigurableComponent {
 					Object value = properties.get(key);
 					m_properties.put(key, value);
 				}
-				
-				String dataDir = m_systemService.getProperties().getProperty(KURA_DATA_DIR);
 
-				char[] passwordFromDB = AuthenticationManager.isDBInitialized(m_dbService, dataDir);
-				try {
-					passwordFromDB = m_cryptoService.decryptAes(passwordFromDB);
-
-				} catch (Exception e) {
-				}
 				Object pwdProp = properties.get(CONSOLE_PASSWORD);
 				char[] propertyPassword = null;
 				if(pwdProp instanceof char[]){
@@ -189,35 +154,15 @@ public class Console implements ConfigurableComponent {
 					propertyPassword = m_cryptoService.decryptAes(propertyPassword);
 				} catch (Exception e) {
 				}
-				
 
-				if (passwordFromDB != null) {
-					if (!Arrays.equals(propertyPassword, passwordFromDB)) {
-						if (Arrays.equals(propertyPassword, "admin".toCharArray())) {
-							m_properties.put(CONSOLE_PASSWORD, passwordFromDB);
-							s_logger.info("Needed password update from db");
-							doUpdate(false);
-						} else {
-							Object value = properties.get(CONSOLE_PASSWORD);
-							char[] decryptedPassword = null;
-							try {
-								decryptedPassword = m_cryptoService.decryptAes(((String) value).toCharArray());
-							} catch (Exception e) {
-								decryptedPassword = value.toString().toCharArray();
-							}
-							propertyPassword = m_cryptoService.sha1Hash(new String(decryptedPassword)).toCharArray();
-						}
-					}
-				} else {
-					Object value = properties.get(CONSOLE_PASSWORD);
-					char[] decryptedPassword = null;
-					try {
-						decryptedPassword = m_cryptoService.decryptAes(((String) value).toCharArray());
-					} catch (Exception e) {
-						decryptedPassword = value.toString().toCharArray();
-					}
-					propertyPassword = m_cryptoService.sha1Hash(new String(decryptedPassword)).toCharArray();
+				Object value = properties.get(CONSOLE_PASSWORD);
+				char[] decryptedPassword = null;
+				try {
+					decryptedPassword = m_cryptoService.decryptAes(((String) value).toCharArray());
+				} catch (Exception e) {
+					decryptedPassword = value.toString().toCharArray();
 				}
+				propertyPassword = m_cryptoService.sha1Hash(new String(decryptedPassword)).toCharArray();
 
 				String registeredUsername= (String) properties.get(CONSOLE_USERNAME);
 				authMgr = new AuthenticationManager(registeredUsername, propertyPassword);
@@ -240,16 +185,9 @@ public class Console implements ConfigurableComponent {
 	protected void updated(Map<String, Object> properties) {
 
 		char[] propertyPassword = null;
-		String dataDir = m_systemService.getProperties().getProperty(KURA_DATA_DIR);
-		
+
 		String registeredUsername= (String) properties.get(CONSOLE_USERNAME);
 		authMgr.updateUsername(registeredUsername);
-
-		char[] passwordFromDB = AuthenticationManager.isDBInitialized(m_dbService, dataDir);
-		try {
-			passwordFromDB = m_cryptoService.decryptAes(passwordFromDB);
-		} catch (Exception e) {
-		}
 
 		try {
 			Object value = properties.get(CONSOLE_PASSWORD);
@@ -259,11 +197,9 @@ public class Console implements ConfigurableComponent {
 			} catch (Exception e) {
 				decryptedPassword = value.toString().toCharArray();
 			}
-			if (passwordFromDB != null && Arrays.equals(decryptedPassword, passwordFromDB)) {
-				propertyPassword = decryptedPassword;
-			} else {
-				propertyPassword = m_cryptoService.sha1Hash(new String(decryptedPassword)).toCharArray();
-			}
+			
+			propertyPassword = m_cryptoService.sha1Hash(new String(decryptedPassword)).toCharArray();
+			
 			authMgr.updatePassword(propertyPassword);
 		} catch (Exception e) {
 			s_logger.warn("Error Updating Web properties", e);
@@ -316,60 +252,14 @@ public class Console implements ConfigurableComponent {
 		return s_aliasRoot;
 	}
 
-	private void doUpdate(boolean onUpdate) {
-		// cancel a current worker handle if one if active
-		if (m_handle != null) {
-			m_handle.cancel(true);
-		}
-
-		m_worker = Executors.newSingleThreadExecutor();
-		m_handle = m_worker.submit(new Runnable() {
-			public void run() {
-				s_logger.debug("--> Runner started");
-				String searchedPID = (String) m_properties.get(APP_PID);
-				
-				HashMap<String, Object> propertiesCopy= new HashMap<String, Object>();
-				Iterator<String> keys = m_properties.keySet().iterator();
-				while (keys.hasNext()) {
-					String key = keys.next();
-					Object value = m_properties.get(key);
-					propertiesCopy.put(key, value);
-				}
-				Object pwdProp = m_properties.get(CONSOLE_PASSWORD);
-				if(pwdProp instanceof char[]){
-					char[] password= (char[]) m_properties.get(CONSOLE_PASSWORD);
-					propertiesCopy.put(CONSOLE_PASSWORD, new Password(password));
-				}
-						
-				while (true) {
-					s_logger.debug("--> Runner while");
-					try {
-						Thread.sleep(1000);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-					try {
-						if(s_context.getServiceReference() != null && m_configService.getComponentConfiguration(searchedPID) != null){
-							s_logger.info("Trying to update config.");
-							m_configService.updateConfiguration(searchedPID, propertiesCopy);
-							return;
-						}
-					} catch (KuraException e1) {
-					}
-					
-				}
-			}
-		});
-	}
-
 	private void initHTTPService(AuthenticationManager authMgr, String servletRoot) throws NamespaceException, ServletException {
 		// Initialize HttpService
-		
+
 		HttpContext httpCtx = new SecureBasicHttpContext(m_httpService.createDefaultHttpContext(), authMgr);
 		m_httpService.registerResources("/", "www", httpCtx);
 		m_httpService.registerResources(s_appRoot, "www/denali.html", httpCtx);
 		m_httpService.registerResources(s_aliasRoot, "www" + s_aliasRoot, httpCtx);
-		
+
 		m_httpService.registerServlet(servletRoot + "/xsrf", new GwtSecurityTokenServiceImpl(), null, httpCtx);
 		m_httpService.registerServlet(servletRoot + "/status", new GwtStatusServiceImpl(), null, httpCtx);
 		m_httpService.registerServlet(servletRoot + "/device", new GwtDeviceServiceImpl(), null, httpCtx);

@@ -43,16 +43,16 @@ public class GwtPackageServiceImpl extends OsgiRemoteServiceServlet implements G
 		if (deploymentPackages != null) {
 			for (DeploymentPackage deploymentPackage : deploymentPackages) {
 				GwtDeploymentPackage gwtDeploymentPackage = new GwtDeploymentPackage();
-				gwtDeploymentPackage.setName(deploymentPackage.getName());
-				gwtDeploymentPackage.setVersion(deploymentPackage.getVersion().toString());
+				gwtDeploymentPackage.setName(super.sanitizeString(deploymentPackage.getName()));
+				gwtDeploymentPackage.setVersion(super.sanitizeString(deploymentPackage.getVersion().toString()));
 				
 				List<GwtBundleInfo> gwtBundleInfos = new ArrayList<GwtBundleInfo>();
 				BundleInfo[] bundleInfos = deploymentPackage.getBundleInfos();
 				if (bundleInfos != null) {
 					for (BundleInfo bundleInfo : bundleInfos) {
 						GwtBundleInfo gwtBundleInfo = new GwtBundleInfo();
-						gwtBundleInfo.setName(bundleInfo.getSymbolicName());
-						gwtBundleInfo.setVersion(bundleInfo.getVersion().toString());
+						gwtBundleInfo.setName(super.sanitizeString(bundleInfo.getSymbolicName()));
+						gwtBundleInfo.setVersion(super.sanitizeString(bundleInfo.getVersion().toString()));
 						
 						gwtBundleInfos.add(gwtBundleInfo);
 					}

@@ -84,6 +84,7 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
 	String                  		m_imei;
 	String                  		m_iccid;
 	String                  		m_imsi;
+	String 							m_rssi;
 	
 	private boolean                 m_subscribed;
 	private boolean                 m_birthPublished;
@@ -269,10 +270,12 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
 			m_imei = (String)modemReadyEvent.getProperty(ModemReadyEvent.IMEI);
 			m_imsi = (String)modemReadyEvent.getProperty(ModemReadyEvent.IMSI);
 			m_iccid = (String)modemReadyEvent.getProperty(ModemReadyEvent.ICCID);
+			m_rssi = (String)modemReadyEvent.getProperty(ModemReadyEvent.RSSI);
 			s_logger.trace("handleEvent() :: IMEI={}", m_imei);
 			s_logger.trace("handleEvent() :: IMSI={}", m_imsi);
 			s_logger.trace("handleEvent() :: ICCID={}", m_iccid);
-
+			s_logger.trace("handleEvent() :: RSSI={}", m_rssi);
+			
 			if (m_dataService.isConnected() && m_options.getRepubBirthCertOnModemDetection()) {
 				if (!(((m_imei == null) || (m_imei.length() == 0) || m_imei.equals("ERROR"))
 						&& ((m_imsi == null) || (m_imsi.length() == 0) || m_imsi.equals("ERROR"))

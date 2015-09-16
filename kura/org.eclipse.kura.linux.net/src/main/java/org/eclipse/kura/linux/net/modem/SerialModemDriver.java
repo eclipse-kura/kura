@@ -40,11 +40,12 @@ public class SerialModemDriver {
 	private static final String OS_VERSION = System.getProperty("kura.os.version");
 	private static final String TARGET_NAME = System.getProperty("target.device");
 
-	private ConnectionFactory m_connectionFactory;
 	private SerialModemComm m_serialModemComm;
 	private String m_getModelAtCommand;
 	private String m_modemName;
 	private String m_modemModel;
+	
+	private ServiceTracker<ConnectionFactory, ConnectionFactory> m_serviceTracker;
 
 	public SerialModemDriver (String modemName, SerialModemComm serialModemComm, String getModelAtCommand) {
 
@@ -53,13 +54,11 @@ public class SerialModemDriver {
 		m_getModelAtCommand = getModelAtCommand;
 		BundleContext bundleContext = FrameworkUtil.getBundle(SerialModemDriver.class).getBundleContext();
 
-		ServiceTracker<ConnectionFactory, ConnectionFactory> serviceTracker = new ServiceTracker<ConnectionFactory, ConnectionFactory>(bundleContext, ConnectionFactory.class, null);
-		serviceTracker.open(true);
-		m_connectionFactory = serviceTracker.getService();
+		m_serviceTracker = new ServiceTracker<ConnectionFactory, ConnectionFactory>(bundleContext, ConnectionFactory.class, null);
+		m_serviceTracker.open(true);
 	}
 
 	public int install() throws Exception {
-
 		int status = -1;
 		boolean modemReachable = false;
 
@@ -147,9 +146,11 @@ public class SerialModemDriver {
 	}
 
 	private CommConnection openSerialPort (int tout) throws KuraException {
-
+		
+		ConnectionFactory connectionFactory;
+		connectionFactory = m_serviceTracker.getService();
 		CommConnection connection = null;
-		if(m_connectionFactory != null) {
+		if(connectionFactory != null) {
 			String uri = new CommURI.Builder(m_serialModemComm.getAtPort())
 			.withBaudRate(m_serialModemComm.getBaudRate())
 			.withDataBits(m_serialModemComm.getDataBits())
@@ -159,12 +160,13 @@ public class SerialModemDriver {
 			.build().toString();
 
 			try {
-				connection = (CommConnection) m_connectionFactory.createConnection(uri, 1, false);
+				connection = (CommConnection) connectionFactory.createConnection(uri, 1, false);
 			} catch (Exception e) {
 				s_logger.warn("Exception creating connection: " + e);
 				throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
 			}
 		}
+		
 		return connection;
 	}
 

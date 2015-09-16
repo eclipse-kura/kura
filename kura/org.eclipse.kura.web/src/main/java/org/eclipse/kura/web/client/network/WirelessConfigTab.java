@@ -647,33 +647,33 @@ public class WirelessConfigTab extends LayoutContainer
 					if(m_passwordField == null || !value.equals(m_passwordField.getValue())) {
 						return MSGS.netWifiWirelessPasswordDoesNotMatch();
 					}
-				}
-				return null;
-			}
-		});
-		m_verifyPasswordField.addListener(Events.OnMouseOver, new MouseOverListener(MSGS.netWifiToolTipPassword()));
-		m_verifyPasswordField.addStyleName("kura-textfield");
-
-		// pairwise ciphers
-		m_pairwiseCiphersCombo = new SimpleComboBox<String>();
-		m_pairwiseCiphersCombo.setName("pairwiseCiphers");
-		m_pairwiseCiphersCombo.setFieldLabel(MSGS.netWifiWirelessPairwiseCiphers());
-		m_pairwiseCiphersCombo.setEditable(false);
-		m_pairwiseCiphersCombo.setTypeAhead(true);
-		m_pairwiseCiphersCombo.setTriggerAction(TriggerAction.ALL);
-		//m_pairwiseCiphersCombo.setStyleAttribute("margin-top", Constants.LABEL_MARGIN_TOP_SEPARATOR);
-		for (GwtWifiCiphers ciphers : GwtWifiCiphers.values()) {
-			m_pairwiseCiphersCombo.add(MessageUtils.get(ciphers.name()));
-		}
-		m_pairwiseCiphersCombo.setSimpleValue(MessageUtils.get(GwtWifiCiphers.netWifiCiphers_CCMP_TKIP.name()));
+                }
+                return null;
+            }
+        });
+        m_verifyPasswordField.addListener(Events.OnMouseOver, new MouseOverListener(MSGS.netWifiToolTipVerifyPassword()));
+        m_verifyPasswordField.addStyleName("kura-textfield");
+                
+        // pairwise ciphers
+        m_pairwiseCiphersCombo = new SimpleComboBox<String>();
+        m_pairwiseCiphersCombo.setName("pairwiseCiphers");
+        m_pairwiseCiphersCombo.setFieldLabel(MSGS.netWifiWirelessPairwiseCiphers());
+        m_pairwiseCiphersCombo.setEditable(false);
+        m_pairwiseCiphersCombo.setTypeAhead(true);
+        m_pairwiseCiphersCombo.setTriggerAction(TriggerAction.ALL);
+        //m_pairwiseCiphersCombo.setStyleAttribute("margin-top", Constants.LABEL_MARGIN_TOP_SEPARATOR);
+        for (GwtWifiCiphers ciphers : GwtWifiCiphers.values()) {
+        	m_pairwiseCiphersCombo.add(MessageUtils.get(ciphers.name()));
+        }
+        m_pairwiseCiphersCombo.setSimpleValue(MessageUtils.get(GwtWifiCiphers.netWifiCiphers_CCMP_TKIP.name()));
 		m_pairwiseCiphersCombo.addSelectionChangedListener(new SelectionChangedListener<SimpleComboValue<String>>() {
-			@Override
-			public void selectionChanged(
-					SelectionChangedEvent<SimpleComboValue<String>> se) {
-				refreshForm();
-			}
-		});
-		m_pairwiseCiphersCombo.addListener(Events.OnMouseOver, new MouseOverListener(MSGS.netWifiToolTipCiphers()));
+					@Override
+					public void selectionChanged(
+							SelectionChangedEvent<SimpleComboValue<String>> se) {
+						refreshForm();
+					}
+				});
+		m_pairwiseCiphersCombo.addListener(Events.OnMouseOver, new MouseOverListener(MSGS.netWifiToolTipPairwiseCiphers()));
 		m_pairwiseCiphersCombo.addStyleName("kura-combobox");
 		m_pairwiseCiphersCombo.addPlugin(m_dirtyPlugin);
 
@@ -696,23 +696,23 @@ public class WirelessConfigTab extends LayoutContainer
 				refreshForm();
 			}
 		});
-		m_groupCiphersCombo.addListener(Events.OnMouseOver, new MouseOverListener(MSGS.netWifiToolTipCiphers()));
-		m_groupCiphersCombo.addStyleName("kura-combobox");
-		m_groupCiphersCombo.addPlugin(m_dirtyPlugin);
-
-		// bgscan module
-		m_bgscanModuleCombo = new SimpleComboBox<String>();
-		m_bgscanModuleCombo.setName("groupCiphers");
-		m_bgscanModuleCombo.setFieldLabel(MSGS.netWifiWirelessBgscanModule());
-		m_bgscanModuleCombo.setEditable(false);
-		m_bgscanModuleCombo.setTypeAhead(true);
-		m_bgscanModuleCombo.setTriggerAction(TriggerAction.ALL);
-		m_bgscanModuleCombo.setStyleAttribute("margin-top", Constants.LABEL_MARGIN_TOP_SEPARATOR);
-		for (GwtWifiBgscanModule module : GwtWifiBgscanModule.values()) {
-			m_bgscanModuleCombo.add(MessageUtils.get(module.name()));
-		}
-		m_bgscanModuleCombo.setSimpleValue(MessageUtils.get(GwtWifiBgscanModule.netWifiBgscanMode_NONE.name()));
-		m_bgscanModuleCombo.addSelectionChangedListener(new SelectionChangedListener<SimpleComboValue<String>>() {
+        m_groupCiphersCombo.addListener(Events.OnMouseOver, new MouseOverListener(MSGS.netWifiToolTipGroupCiphers()));
+        m_groupCiphersCombo.addStyleName("kura-combobox");
+        m_groupCiphersCombo.addPlugin(m_dirtyPlugin);
+        
+        // bgscan module
+        m_bgscanModuleCombo = new SimpleComboBox<String>();
+        m_bgscanModuleCombo.setName("groupCiphers");
+        m_bgscanModuleCombo.setFieldLabel(MSGS.netWifiWirelessBgscanModule());
+        m_bgscanModuleCombo.setEditable(false);
+        m_bgscanModuleCombo.setTypeAhead(true);
+        m_bgscanModuleCombo.setTriggerAction(TriggerAction.ALL);
+        m_bgscanModuleCombo.setStyleAttribute("margin-top", Constants.LABEL_MARGIN_TOP_SEPARATOR);
+        for (GwtWifiBgscanModule module : GwtWifiBgscanModule.values()) {
+        	m_bgscanModuleCombo.add(MessageUtils.get(module.name()));
+        }
+        m_bgscanModuleCombo.setSimpleValue(MessageUtils.get(GwtWifiBgscanModule.netWifiBgscanMode_NONE.name()));
+        m_bgscanModuleCombo.addSelectionChangedListener(new SelectionChangedListener<SimpleComboValue<String>>() {
 			@Override
 			public void selectionChanged(
 					SelectionChangedEvent<SimpleComboValue<String>> se) {
@@ -943,24 +943,25 @@ public class WirelessConfigTab extends LayoutContainer
 		if ((m_securityCombo.getSimpleValue().equals(MessageUtils.get(GwtWifiSecurity.netWifiSecurityWPA2.name())))
 				|| (m_securityCombo.getSimpleValue().equals(MessageUtils.get(GwtWifiSecurity.netWifiSecurityWPA.name())))
 				|| (m_securityCombo.getSimpleValue().equals(MessageUtils.get(GwtWifiSecurity.netWifiSecurityWPA_WPA2.name())))) {
-
-			if (GwtWifiWirelessMode.netWifiWirelessModeStation.equals(m_modeCombo.getValue().getMode())) {
-				m_pairwiseCiphersCombo.setEnabled(true);
-				m_groupCiphersCombo.setEnabled(true);
-			} else {
-				m_pairwiseCiphersCombo.setEnabled(false);
-				m_groupCiphersCombo.setEnabled(false);
-			}
-		} else {
-			m_pairwiseCiphersCombo.setEnabled(false);
-			m_groupCiphersCombo.setEnabled(false);
-		}
-
-		m_formPanel.add(fieldSet);
-		m_formPanel.setScrollMode(Scroll.AUTO);
-		add(m_formPanel);
-		setScrollMode(Scroll.AUTOX);
-		m_initialized = true;
+        	
+            if (GwtWifiWirelessMode.netWifiWirelessModeStation.equals(m_modeCombo.getValue().getMode())) {
+        		m_pairwiseCiphersCombo.setEnabled(true);
+        		m_groupCiphersCombo.setEnabled(true);
+        	} else {
+        		// m_pairwiseCiphersCombo.setEnabled(false); // enable it for AP mode as well
+        		m_pairwiseCiphersCombo.setEnabled(true);
+        		m_groupCiphersCombo.setEnabled(false);
+        	}
+        } else {
+        	m_pairwiseCiphersCombo.setEnabled(false);
+        	m_groupCiphersCombo.setEnabled(false);
+        }
+        	 
+	    m_formPanel.add(fieldSet);
+	    m_formPanel.setScrollMode(Scroll.AUTO);
+	    add(m_formPanel);
+	    setScrollMode(Scroll.AUTOX);
+	    m_initialized = true;
 	}
 
 	public GwtWifiWirelessMode getWirelessMode() {
@@ -1060,11 +1061,14 @@ public class WirelessConfigTab extends LayoutContainer
 				if(GwtWifiWirelessMode.netWifiWirelessModeStation.equals(m_modeCombo.getValue().getMode())) {
 
 					// ** make sure all GwtWifiSecurity security options are listed in the m_securityCombo if in 'Station' mode
+					/* commented out to support wpa/WPA2 mode in AP mode.
 					m_securityCombo.removeAll();
 					for (GwtWifiSecurity mode : GwtWifiSecurity.values()) {
 						m_securityCombo.add(MessageUtils.get(mode.name()));
-					}
 
+			        }
+			        */
+					
 					for (Field<?> field : m_formPanel.getFields()) {
 						if (field != m_modeCombo
 								&& field != m_ssidField
@@ -1103,13 +1107,14 @@ public class WirelessConfigTab extends LayoutContainer
 					// Access Point mode
 				} else if(GwtWifiWirelessMode.netWifiWirelessModeAccessPoint.equals(m_modeCombo.getValue().getMode())) {
 					// ** At this point, the WPA_WPA2 option is not supported in the 'Access Point' mode. 
+					/* ** commented out to support WPA_WPA2 option
 					m_securityCombo.removeAll();
 					for (GwtWifiSecurity mode : GwtWifiSecurity.values()) {
 						if (mode != GwtWifiSecurity.netWifiSecurityWPA_WPA2) {
 							m_securityCombo.add(MessageUtils.get(mode.name()));
 						}
-					}
-
+			        }
+					*/			
 					// Disable Access Point mode when TCP/IP is set to WAN
 					if (tcpIpStatus.equals(GwtNetIfStatus.netIPv4StatusEnabledWAN)) {
 						for (Field<?> field : m_formPanel.getFields()) {
@@ -1179,10 +1184,12 @@ public class WirelessConfigTab extends LayoutContainer
 						|| (m_securityCombo.getSimpleValue().equals(MessageUtils.get(GwtWifiSecurity.netWifiSecurityWPA_WPA2.name())))) {
 
 					for (Field<?> field : m_formPanel.getFields()) {
+						/*
 						if (field.equals(m_pairwiseCiphersCombo) 
 								|| field.equals(m_groupCiphersCombo)) {
-
-							if (GwtWifiWirelessMode.netWifiWirelessModeStation.equals(m_modeCombo.getValue().getMode())) {
+						*/
+						if(field.equals(m_groupCiphersCombo)) {
+						    if (GwtWifiWirelessMode.netWifiWirelessModeStation.equals(m_modeCombo.getValue().getMode())) {
 								field.setEnabled(true);
 							} else {
 								field.setEnabled(false);

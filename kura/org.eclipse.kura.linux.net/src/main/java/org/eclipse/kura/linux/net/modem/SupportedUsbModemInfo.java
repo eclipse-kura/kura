@@ -22,7 +22,7 @@ public enum SupportedUsbModemInfo {
     Telit_HE910_D   ("HE910-D",  "1bc7", "0021", 7, 0, 3, 0, Arrays.asList(ModemTechnologyType.HSDPA), Arrays.asList(new UsbModemDriver("cdc_acm"))),
     Telit_GE910		("GE910", "1bc7", "0022", 2, 0, 0, 1, Arrays.asList(ModemTechnologyType.HSDPA), Arrays.asList(new UsbModemDriver("cdc_acm"))),
     Telit_DE910_DUAL("DE910-DUAL",  "1bc7", "1010", 4, 0, 2, 3, Arrays.asList(ModemTechnologyType.EVDO), Arrays.asList(new De910ModemDriver())),
-    Telit_LE910		("LE910", "1bc7", "1201", 7, 1, 4, 5, Arrays.asList(ModemTechnologyType.HSDPA), Arrays.asList(new Le910ModemDriver())),
+    Telit_LE910		("LE910", "1bc7", "1201", 5, 1, 2, 3, Arrays.asList(ModemTechnologyType.HSDPA), Arrays.asList(new Le910ModemDriver())),
     Telit_CE910_DUAL("CE910-DUAL", "1bc7", "1011", 2, 0, 1, 1, Arrays.asList(ModemTechnologyType.EVDO), Arrays.asList(new Ce910ModemDriver())),
     Sierra_MC8775   ("MC8775", "1199", "6812", 3, 0, 2, 0, Arrays.asList(ModemTechnologyType.HSDPA), Arrays.asList(new UsbModemDriver("sierra"))),
     Sierra_MC8790   ("MC8790", "1199", "683c", 7, 0, 3, 4, Arrays.asList(ModemTechnologyType.HSDPA), Arrays.asList(new UsbModemDriver("sierra"))),

@@ -34,13 +34,7 @@ public class OptionModemDriver extends UsbModemDriver {
 	public int install() throws Exception {	
 		int status = super.install();
 		if (status == 0) {
-			try {
-				Thread.sleep(1000);
-			} catch (Exception e) {
-				
-			}
-			
-			s_logger.info("submiting vendorId:productId information to option driver ...");
+			s_logger.info("submiting {}:{} information to option driver ...", m_vendor, m_product);
 			File newIdFile = new File("/sys/bus/usb-serial/drivers/option1/new_id");
 			if (newIdFile.exists()) {
 				StringBuffer sb = new StringBuffer();

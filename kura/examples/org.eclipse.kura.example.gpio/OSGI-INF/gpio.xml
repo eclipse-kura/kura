@@ -27,5 +27,11 @@
    <service>
        <provide interface="org.eclipse.kura.example.gpio.GpioComponent"/>
    </service>
+   <reference name="GPIOService" 
+              cardinality="1..1" 
+              policy="static"
+              bind="setGPIOService"
+              unbind="unsetGPIOService"
+              interface="org.eclipse.kura.gpio.GPIOService"/>
    
 </scr:component>

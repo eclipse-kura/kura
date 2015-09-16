@@ -17,30 +17,11 @@ import org.eclipse.kura.KuraException;
 public interface SecurityService {
 	
 	/**
-	 * Takes a keystore path and returns the corresponding password that can be
-	 * used to access to the data saved in the specified keystore.
+	 * This method allows the reload of the security policy's fingerprint
 	 * 
-	 * @param keyStorePath A String that represents a unique identifier of the specified keystore.
-	 * @return A char array that represents the password of the specified keystore.
+	 * @throw KuraException in case an error is raised during the calculation of the fingerprint
+	 * and the consequent storage.
 	 */
 	public void reloadSecurityPolicyFingerprint() throws KuraException;
 	
-	
-	/**
-	 * Takes a keystore path and returns the corresponding password that can be
-	 * used to access to the data saved in the specified keystore.
-	 * 
-	 * @param keyStorePath A String that represents a unique identifier of the specified keystore.
-	 * @return A char array that represents the password of the specified keystore.
-	 */
-	public void reloadEnvironmentConfigurationFingerprint() throws KuraException;
-	
-	/**
-	 * Takes a keystore path and returns the corresponding password that can be
-	 * used to access to the data saved in the specified keystore.
-	 * 
-	 * @param keyStorePath A String that represents a unique identifier of the specified keystore.
-	 * @return A char array that represents the password of the specified keystore.
-	 */
-	public void reloadFingerprint(String path) throws KuraException;
 }

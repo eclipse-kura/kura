@@ -70,8 +70,8 @@ public class UninstallImpl {
 						s_logger.warn("Cannot delete file at URL: {}", sUrl);
 					}
 					callback.m_installImplementation.removePackageFromConfFile(name);
-					uninstallCompleteAsync(options, name);
 				}
+				uninstallCompleteAsync(options, name);
 			}
 		} catch (Exception e) {
 			throw KuraException.internalError(e.getMessage());

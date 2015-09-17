@@ -137,14 +137,13 @@ public class CloudDeploymentHandlerV2 extends Cloudlet {
 		}
 	}
 
-	private static String s_pendingPackageUrl = null;
+	private static String        s_pendingPackageUrl = null;
+	private static DownloadImpl  m_downloadImplementation;
+	private static UninstallImpl m_uninstallImplementation;
+	public  static InstallImpl   m_installImplementation;
 
 	private SslManagerService m_sslManagerService;
 	private DeploymentAdmin   m_deploymentAdmin;
-
-	private DownloadImpl m_downloadImplementation;
-	private UninstallImpl m_uninstallImplementation;
-	public InstallImpl m_installImplementation;
 
 	private static ExecutorService executor = Executors.newSingleThreadExecutor();
 

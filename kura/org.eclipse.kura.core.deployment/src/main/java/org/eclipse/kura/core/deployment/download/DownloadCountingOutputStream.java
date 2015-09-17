@@ -25,7 +25,7 @@ import org.eclipse.kura.ssl.SslManagerService;
 
 public abstract class DownloadCountingOutputStream extends CountingOutputStream {
 
-	private static int PROP_RESOLUTION = 1024 * 4;
+	private static Integer PROP_RESOLUTION = null;
 	private static int PROP_BUFFER_SIZE = 1024 * 4;
 	private static int PROP_CONNECT_TIMEOUT = 5000;
 	private static int PROP_READ_TIMEOUT = 6000;
@@ -65,7 +65,11 @@ public abstract class DownloadCountingOutputStream extends CountingOutputStream 
 	}
 	
 	public Long getDownloadTransferProgressPercentage(){
-		return (long) Math.floor((((Long) getByteCount()).doubleValue() / ((Long) totalBytes).doubleValue()) * 100);
+		Long percentage= (long) Math.floor((((Long) getByteCount()).doubleValue() / ((Long) totalBytes).doubleValue()) * 100);
+		if(percentage < 0){
+			return (long)50;
+		}
+		return percentage;
 	}
 	
 	public Long getTotalBytes(){
@@ -79,6 +83,9 @@ public abstract class DownloadCountingOutputStream extends CountingOutputStream 
 	@Override
 	protected void afterWrite(int n) throws IOException {
 		super.afterWrite(n);
+		if(PROP_RESOLUTION == null) {
+			PROP_RESOLUTION= Math.round((totalBytes / 100) * 5);
+		}
 		if (getByteCount() >= m_currentStep * PROP_RESOLUTION) {
 			System.out.println("Bytes read: "+ (getByteCount() - previous));
 			previous = getByteCount();
@@ -88,7 +95,6 @@ public abstract class DownloadCountingOutputStream extends CountingOutputStream 
 		try {
 			Thread.sleep(PROP_BLOCK_DELAY);
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}

@@ -423,6 +423,7 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
     			ts.load(tsReadStream, null);
     			tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
     			tmf.init(ts);
+    			tsReadStream.close();
     		}
     		else {
     			s_logger.info("Could not find trust store at {}. Using Java default.", trustStore);
@@ -469,6 +470,7 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
 				ks = KeyStore.getInstance(KeyStore.getDefaultType());
 				InputStream ksReadStream = new FileInputStream(keyStore);
 				ks.load(ksReadStream, keyStorePassword);
+				
 
 				// if we have an alias, then build KeyStore with such key
 				if (keyAlias != null) {
@@ -486,6 +488,8 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
 						ks = null;
 					}
 				}
+				
+				ksReadStream.close();
 			}
 			else {
 				s_logger.info("Could not find key store at {}. Using Java default.", keyStore);

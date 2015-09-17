@@ -130,15 +130,15 @@
                    value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.net.admin_${org.eclipse.kura.net.admin.version}.jar@5:start" />
         </propertyfile>
 
-			<!-- Conditional entries. Check for jar presence, and invoke relevant ant target-->
-			<available file="${project.build.directory}/plugins/org.eclipse.kura.web_${org.eclipse.kura.web.version}.jar" property="web.jar.present" />
-			<antcall target="web-config" />
+		<!-- Conditional entries. Check for jar presence, and invoke relevant ant target-->
+		<available file="${project.build.directory}/plugins/org.eclipse.kura.web_${org.eclipse.kura.web.version}.jar" property="web.jar.present" />
+		<antcall target="web-config" />
 
-			<available file="${project.build.directory}/plugins/org.eclipse.kura.linux.gpio_${org.eclipse.kura.linux.gpio.version}.jar" property="linux.gpio.jar.present" />
-			<antcall target="gpio-config" />
+		<available file="${project.build.directory}/plugins/org.eclipse.kura.linux.gpio_${org.eclipse.kura.linux.gpio.version}.jar" property="linux.gpio.jar.present" />
+		<antcall target="gpio-config" />
 
-			<available file="${project.build.directory}/plugins/org.eclipse.kura.emulator.gpio_${org.eclipse.kura.emulator.gpio.version}.jar" property="emulated.gpio.jar.present" />
-			<antcall target="emulated-gpio-config" />
+		<available file="${project.build.directory}/plugins/org.eclipse.kura.emulator.gpio_${org.eclipse.kura.emulator.gpio.version}.jar" property="emulated.gpio.jar.present" />
+		<antcall target="emulated-gpio-config" />
 
         <!-- Add mToolkit to config.ini -->
         <propertyfile file="${project.build.directory}/${build.output.name}/config.ini">

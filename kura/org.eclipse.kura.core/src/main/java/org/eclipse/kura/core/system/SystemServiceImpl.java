@@ -149,7 +149,9 @@ public class SystemServiceImpl implements SystemService
 			else if (kuraHome != null) {
 				File kuraPropsFile = new File (kuraHome+File.separator+KURA_PROPS_FILE);
 				if (kuraPropsFile.exists()) {
-					kuraDefaults.load( new FileReader(kuraPropsFile));
+					FileReader fr= new FileReader(kuraPropsFile);
+					kuraDefaults.load(fr);
+					fr.close();
 					s_logger.info("Loaded File kura.properties: "+kuraPropsFile);
 				} else {
 					s_logger.warn("File does not exist: " + kuraPropsFile);

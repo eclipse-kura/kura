@@ -27,7 +27,7 @@ public class GPIOServiceImpl implements GPIOService {
 	//private static final HashMap<Integer, String> pins = new HashMap<Integer, String>();
 
 	private static final HashSet<JdkDioPin> pins = new HashSet<JdkDioPin>();
-	
+
 	private SystemService m_SystemService;
 
 	public void setSystemService(SystemService systemService) {
@@ -41,6 +41,8 @@ public class GPIOServiceImpl implements GPIOService {
 	protected void activate(ComponentContext componentContext) {
 		s_logger.debug("activating jdk.dio GPIOService");
 
+		File dioPropsFile= null;
+		FileReader fr= null;
 		try {
 			String configFile = System.getProperty("jdk.dio.registry");
 			if(configFile == null){
@@ -49,18 +51,19 @@ public class GPIOServiceImpl implements GPIOService {
 			}else{
 				configFile = "file:"+configFile;
 			}
-			File dioPropsFile;
-				dioPropsFile = new File(new URL(configFile).toURI());
+			
+			dioPropsFile = new File(new URL(configFile).toURI());
 			if (dioPropsFile.exists()) {
 				Properties dioDefaults = new Properties();
-				dioDefaults.load(new FileReader(dioPropsFile));
-				
+				fr= new FileReader(dioPropsFile);
+				dioDefaults.load(fr);
+
 				pins.clear();
-				
+
 				for(Object k : dioDefaults.keySet()){
 					//s_logger.info("{} -> {}", k, dioDefaults.get(k));
 					String line = (String) dioDefaults.get(k);
-					
+
 					JdkDioPin p = JdkDioPin.parseFromProperty(k, line);
 					if(p != null){
 						pins.add(p);
@@ -79,6 +82,14 @@ public class GPIOServiceImpl implements GPIOService {
 		} catch (URISyntaxException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		} finally {
+			if (fr != null){
+				try {
+					fr.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
 		}
 
 		s_logger.debug("GPIOService activated.");
@@ -103,8 +114,8 @@ public class GPIOServiceImpl implements GPIOService {
 		for(JdkDioPin p : pins){
 			if(p.getName().equals(pinName)){
 				if((p.getDirection() != direction) ||
-				   (p.getMode() != mode) ||
-				   (p.getTrigger() != trigger)){
+						(p.getMode() != mode) ||
+						(p.getTrigger() != trigger)){
 					if(p.isOpen()){
 						try {
 							p.close();	
@@ -142,8 +153,8 @@ public class GPIOServiceImpl implements GPIOService {
 		for(JdkDioPin p : pins){
 			if(p.getIndex() == terminal){
 				if((p.getDirection() != direction) ||
-				   (p.getMode() != mode) ||
-				   (p.getTrigger() != trigger)){
+						(p.getMode() != mode) ||
+						(p.getTrigger() != trigger)){
 					if(p.isOpen()){
 						try {
 							p.close();	
@@ -172,7 +183,7 @@ public class GPIOServiceImpl implements GPIOService {
 		for(JdkDioPin p : pins){
 			result.put(p.getIndex(), p.getName());
 		}
-		
+
 		return result;
 	}
 

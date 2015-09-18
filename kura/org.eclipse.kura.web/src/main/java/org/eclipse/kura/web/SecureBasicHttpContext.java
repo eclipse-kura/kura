@@ -64,7 +64,7 @@ public class SecureBasicHttpContext implements HttpContext
 	/**
 	 * Provides Basic authentication over HTTPS.
 	 */
-	public boolean handleSecurity(HttpServletRequest request,
+	public synchronized boolean handleSecurity(HttpServletRequest request,
 			HttpServletResponse response) 
 					throws IOException 
 	{        

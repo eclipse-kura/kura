@@ -36,8 +36,8 @@ public class DeploymentPackageDownloadOptions extends DeploymentPackageInstallOp
 
 	
 	private String deployUri;
-	private int blockSize = 1024 * 4;
-	private int notifyBlockSize = 1024 * 256;
+	private int blockSize;
+	private int notifyBlockSize;
 	private int blockDelay = 0;
 	private int timeout = 4000;
 	

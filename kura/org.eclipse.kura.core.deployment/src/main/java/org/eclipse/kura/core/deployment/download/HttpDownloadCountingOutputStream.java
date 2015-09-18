@@ -118,6 +118,13 @@ public class HttpDownloadCountingOutputStream extends DownloadCountingOutputStre
 					postProgressEvent(options.getClientId(), 0, totalBytes, DOWNLOAD_STATUS.IN_PROGRESS, null);
 					
 					int bufferSize = getBufferSize();
+					
+					if (bufferSize == 0){
+						int newSize= Math.round(totalBytes/100 * 1);
+						bufferSize= newSize;
+						setBufferSize(newSize);
+					}
+					
 					long numBytes = IOUtils.copyLarge(is, HttpDownloadCountingOutputStream.this, new byte[bufferSize]);
 					postProgressEvent(options.getClientId(), numBytes, totalBytes, DOWNLOAD_STATUS.COMPLETED, null);
 

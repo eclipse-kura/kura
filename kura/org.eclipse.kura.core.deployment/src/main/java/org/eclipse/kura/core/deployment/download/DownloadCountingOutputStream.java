@@ -25,8 +25,8 @@ import org.eclipse.kura.ssl.SslManagerService;
 
 public abstract class DownloadCountingOutputStream extends CountingOutputStream {
 
-	private static Integer PROP_RESOLUTION = null;
-	private static int PROP_BUFFER_SIZE = 1024 * 4;
+	private static int PROP_RESOLUTION;
+	private static int PROP_BUFFER_SIZE;
 	private static int PROP_CONNECT_TIMEOUT = 5000;
 	private static int PROP_READ_TIMEOUT = 6000;
 	private static int PROP_BLOCK_DELAY = 1000;
@@ -83,7 +83,7 @@ public abstract class DownloadCountingOutputStream extends CountingOutputStream 
 	@Override
 	protected void afterWrite(int n) throws IOException {
 		super.afterWrite(n);
-		if(PROP_RESOLUTION == null) {
+		if(PROP_RESOLUTION == 0) {
 			PROP_RESOLUTION= Math.round((totalBytes / 100) * 5);
 		}
 		if (getByteCount() >= m_currentStep * PROP_RESOLUTION) {

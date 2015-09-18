@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.eclipse.kura</groupId>
+    <artifactId>target-platform</artifactId>
+    <version>1.2.0-SNAPSHOT</version>
+  </parent>
+
+    <groupId>org.eclipse.kura</groupId>
+    <artifactId>org.eclipse.kura.windows</artifactId>
+    <version>1.0.0</version>
+    <packaging>bundle</packaging>
+
+    <name>Native Win32 support for Kura</name>
+
+    <properties>
+        <maven.compiler.source>1.6</maven.compiler.source>
+        <maven.compiler.target>1.6</maven.compiler.target>
+    </properties>
+
+    <dependencies>
+	<dependency>
+		<groupId>org.eclipse.tycho</groupId>
+		<artifactId>org.eclipse.osgi</artifactId>
+		<version>3.8.1.v20120830-144521</version>
+	</dependency>
+    </dependencies>
+
+    <build>
+    <resources>
+      <resource>
+        <directory>src/main/resources</directory>
+      </resource>
+      <resource>
+        <directory>.</directory>
+        <includes>
+          <include>plugin.xml</include>
+        </includes>
+      </resource>
+    </resources>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.7.2</version>
+                <configuration>
+                    <systemPropertyVariables>
+                        <java.library.path>${project.basedir}/src/main/lib</java.library.path>
+                    </systemPropertyVariables>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <version>2.3.5</version>
+                <extensions>true</extensions>
+                <configuration>
+
+		    <manifestLocation>META-INF</manifestLocation>
+                    <instructions>
+                        <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
+                        <Bundle-Name>%bundle.name</Bundle-Name>
+                        <Bundle-Version>${project.version}</Bundle-Version>
+                        <Include-Resource>
+                            lib=${project.basedir}/src/main/lib,
+                            ${project.basedir}/about.html,
+                            about_files=${project.basedir}/about_files/
+                        </Include-Resource>
+                        <Bundle-NativeCode>
+                        	lib/win32/x86/KuraNativeWin.lib; osname=win32; processor=x86,
+                        	lib/win32/x64/KuraNativeWin64.lib; osname=win32; processor=x86_64,
+                        	*
+                        </Bundle-NativeCode>
+                        <Import-Package>
+				org.osgi.framework;version="[1.5.0,2.0.0)"
+                        </Import-Package>
+                        <Export-Package>
+				org.eclipse.kura.windows;version="1.0.0",
+                        </Export-Package>
+                    </instructions>
+                </configuration>
+            </plugin>
+            
+	    <plugin>
+        	<artifactId>maven-dependency-plugin</artifactId>
+        	<executions>
+        	  <execution>
+        	    <id>copy-dependencies</id>
+        	    <phase>package</phase>
+        	    <goals>
+        	      <goal>copy-dependencies</goal>
+        	    </goals>
+        	  </execution>
+        	</executions>
+	   </plugin>
+	   
+        </plugins>
+        <pluginManagement>
+        	<plugins>
+        		<!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
+        		<plugin>
+        			<groupId>org.eclipse.m2e</groupId>
+        			<artifactId>lifecycle-mapping</artifactId>
+        			<version>1.0.0</version>
+        			<configuration>
+        				<lifecycleMappingMetadata>
+        					<pluginExecutions>
+        						<pluginExecution>
+        							<pluginExecutionFilter>
+        								<groupId>
+        									org.apache.maven.plugins
+        								</groupId>
+        								<artifactId>
+        									maven-dependency-plugin
+        								</artifactId>
+        								<versionRange>
+        									[2.1,)
+        								</versionRange>
+        								<goals>
+        									<goal>
+        										copy-dependencies
+        									</goal>
+        								</goals>
+        							</pluginExecutionFilter>
+        							<action>
+        								<ignore></ignore>
+        							</action>
+        						</pluginExecution>
+        					</pluginExecutions>
+        				</lifecycleMappingMetadata>
+        			</configuration>
+        		</plugin>
+        	</plugins>
+        </pluginManagement>
+    </build>
+</project>

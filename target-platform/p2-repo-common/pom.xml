@@ -108,14 +108,9 @@
 									<version>2.6.0</version>
 								</artifactItem>
 								<artifactItem>
-									<groupId>net.java.dev.jna</groupId>
-									<artifactId>jna</artifactId>
-									<version>4.1.0</version>
-								</artifactItem>
-								<artifactItem>
-									<groupId>net.java.dev.jna</groupId>
-									<artifactId>jna-platform</artifactId>
-									<version>4.1.0</version>
+									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.kura.windows</artifactId>
+									<version>1.0.0</version>
 								</artifactItem>
 							</artifactItems>
 							<outputDirectory>${project.basedir}/target/source/plugins</outputDirectory>

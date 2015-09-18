@@ -171,7 +171,13 @@ public class DownloadImpl implements ProgressListener{
 			s_logger.info("--> Going to verify hash signature!");
 			try{
 				String checksum= HashUtil.hash(hashAlgorithm, dpFile);
-				if(hashAlgorithm == null || hashValue== null || !checksum.equals(hashValue)){
+				if(		   hashAlgorithm == null 
+						|| hashAlgorithm.equals("") 
+						|| hashValue == null 
+						|| hashValue.equals("")
+						|| checksum == null
+						|| !checksum.equals(hashValue)
+						){
 					throw new KuraException(KuraErrorCode.INTERNAL_ERROR, null, "Failed to verify checksum with algorithm: " + hashAlgorithm);
 				}
 			}catch(Exception e){

@@ -255,7 +255,7 @@ public class CloudDeploymentHandlerV2 extends Cloudlet {
 		}
 
 		String kuraDataDir= kuraProperties.getProperty(KURA_DATA_DIR);
-		
+
 		m_installImplementation = new InstallImpl(this, kuraDataDir);
 		m_installImplementation.setPackagesPath(m_packagesPath);
 		m_installImplementation.setDpaConfPath(m_dpaConfPath);
@@ -389,8 +389,8 @@ public class CloudDeploymentHandlerV2 extends Cloudlet {
 			return;
 		}
 	}
-	
-	
+
+
 
 	// ----------------------------------------------------------------
 	//
@@ -406,7 +406,7 @@ public class CloudDeploymentHandlerV2 extends Cloudlet {
 		}catch(Exception ex){
 			s_logger.info("Error cancelling download!", ex);
 		}
-		
+
 	}
 
 	private void doExecDownload(KuraRequestPayload request, KuraResponsePayload response) {
@@ -474,7 +474,7 @@ public class CloudDeploymentHandlerV2 extends Cloudlet {
 
 		try {
 			s_pendingPackageUrl = options.getDeployUrl();
-			
+
 			m_downloadImplementation.setSslManager(m_sslManagerService);
 			m_downloadImplementation.setAlreadyDownloadedFlag(alreadyDownloaded);
 			m_downloadImplementation.setVerificationDirectory(m_installVerificationDir);
@@ -490,7 +490,13 @@ public class CloudDeploymentHandlerV2 extends Cloudlet {
 
 						m_downloadImplementation.downloadDeploymentPackageInternal();
 					} catch (KuraException e) {
-
+						try {
+							File dpFile = DownloadFileUtilities.getDpDownloadFile(options);
+							if (dpFile != null){
+								dpFile.delete();
+							}
+						} catch (IOException e1) {
+						}
 					} finally{
 						s_pendingPackageUrl = null;
 					}
@@ -567,6 +573,9 @@ public class CloudDeploymentHandlerV2 extends Cloudlet {
 							installDownloadedFile(dpFile, m_installOptions);
 						} catch (KuraException e) {
 							s_logger.error("Impossible to send an exception message to the cloud platform");
+							if (dpFile != null){
+								dpFile.delete();
+							}
 						} finally {
 							m_installOptions = null;
 							m_isInstalling = false;

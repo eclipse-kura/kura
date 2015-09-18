@@ -31,7 +31,6 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<zip_workspace.prefix>user_workspace_archive_${project.version}</zip_workspace.prefix>
 		<kura.install.dir>/opt/eclipse</kura.install.dir>
-		<kura.install.dir.windows>c:/Eclipse</kura.install.dir.windows>
 	</properties>
 
 	<repositories>

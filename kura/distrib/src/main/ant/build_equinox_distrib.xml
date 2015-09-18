@@ -507,14 +507,14 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
               tofile="${project.build.directory}/${build.output.name}/kura.properties" />
         <propertyfile file="${project.build.directory}/${build.output.name}/kura.properties">
             <entry key="kura.version"   value="KURA_${kura.version}" />
-            <entry key="kura.home"   value="${kura.install.dir.windows}/kura/kura" />
-            <entry key="kura.plugins"   value="${kura.install.dir.windows}/kura/kura/plugins" />
-            <entry key="kura.packages"   value="${kura.install.dir.windows}/kura/kura/packages" />
+            <entry key="kura.home"   value="${kura.install.dir}/kura/kura" />
+            <entry key="kura.plugins"   value="${kura.install.dir}/kura/kura/plugins" />
+            <entry key="kura.packages"   value="${kura.install.dir}/kura/kura/packages" />
             <entry key="version"       value="${kura.version}" />
             <entry key="build.version" value="${buildNumber}" />
             <entry key="build.number"  value="${build.name}-${buildNumber}" />
         </propertyfile>
-        <replace file="${project.build.directory}/${build.output.name}/kura.properties" token="{kura.install.dir.windows}" value="${kura.install.dir.windows}"/>
+        <replace file="${project.build.directory}/${build.output.name}/kura.properties" token="{kura.install.dir}" value="${kura.install.dir}"/>
         <replace file="${project.build.directory}/${build.output.name}/kura.properties" token="{kura.symlink}" value="${kura.symlink}"/>
 
     	
@@ -575,30 +575,28 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
                  token="{org.eclipse.kura.windows.clock.version}" value="${org.eclipse.kura.windows.clock.version}"/>
         <propertyfile file="${project.build.directory}/${build.output.name}/dpa.properties"> 
             <entry key="kura"
-                   value="file:${kura.install.dir.windows}/kura/kura/packages/${build.output.name}.dp" />
+                   value="file:${kura.install.dir}/kura/kura/packages/${build.output.name}.dp" />
         </propertyfile>
 	<!-- Create the Kura start scripts -->
-	<echo file="${project.build.directory}/${build.output.name}/start_kura.bat" append="false">
-set KURA_DIR=C:\Eclipse\kura
-set KURA_TEMP=%KURA_DIR%\tmp
-cd %KURA_DIR%
+	<echo file="${project.build.directory}/${build.output.name}/start_kura.bat" append="false">set DIR=C:\opt\eclipse\kura\
+cd %DIR%
 
 rem set up the configuration area
-mkdir %KURA_TEMP%\.kura\configuration
-copy %KURA_DIR%\kura\config.ini %KURA_TEMP%\.kura\configuration\
+mkdir \tmp\.kura\configuration
+copy %DIR%\kura\config.ini \tmp\.kura\configuration\
 
 java -Xms256m -Xmx256m -XX:MaxPermSize=256m -Dkura.os.version=win32 ^
 	-Dkura.arch=x86_64 ^
 	-Dtarget.device=windows ^
 	-Declipse.ignoreApp=true ^
-	-Dkura.home=%KURA_DIR%\kura ^
-	-Dkura.configuration=file:%KURA_DIR%\kura\kura.properties ^
-	-Dkura.custom.configuration=file:%KURA_DIR%\kura\kura_custom.properties ^
-	-Dkura.data.dir=%KURA_DIR%\data ^
-	-Ddpa.configuration=%KURA_DIR%\kura\dpa.properties ^
-	-Dlog4j.configuration=file:%KURA_DIR%\kura\log4j.properties ^
-	-jar %KURA_DIR%\plugins\org.eclipse.osgi_3.8.1.v20120830-144521.jar ^
-	-configuration  %KURA_TEMP%\.kura\configuration ^
+	-Dkura.home=%DIR%\kura ^
+	-Dkura.configuration=file:%DIR%\kura\kura.properties ^
+	-Dkura.custom.configuration=file:%DIR%\kura\kura_custom.properties ^
+	-Dkura.data.dir=%DIR%\data ^
+	-Ddpa.configuration=%DIR%\kura\dpa.properties ^
+	-Dlog4j.configuration=file:%DIR%\kura\log4j.properties ^
+	-jar %DIR%\plugins\org.eclipse.osgi_3.8.1.v20120830-144521.jar ^
+	-configuration  \tmp\.kura\configuration ^
 	-console ^
 	-consoleLog	
 	</echo>    

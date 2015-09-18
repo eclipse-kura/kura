@@ -83,8 +83,10 @@ public abstract class DownloadCountingOutputStream extends CountingOutputStream 
 	@Override
 	protected void afterWrite(int n) throws IOException {
 		super.afterWrite(n);
-		if(PROP_RESOLUTION == 0) {
+		if(PROP_RESOLUTION == 0 && getTotalBytes() > 0) {
 			PROP_RESOLUTION= Math.round((totalBytes / 100) * 5);
+		} else if (PROP_RESOLUTION == 0) {
+			PROP_RESOLUTION= 1024 * 256;
 		}
 		if (getByteCount() >= m_currentStep * PROP_RESOLUTION) {
 			System.out.println("Bytes read: "+ (getByteCount() - previous));

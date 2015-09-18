@@ -119,8 +119,12 @@ public class HttpDownloadCountingOutputStream extends DownloadCountingOutputStre
 					
 					int bufferSize = getBufferSize();
 					
-					if (bufferSize == 0){
+					if (bufferSize == 0 && getTotalBytes() > 0){
 						int newSize= Math.round(totalBytes/100 * 1);
+						bufferSize= newSize;
+						setBufferSize(newSize);
+					} else if (bufferSize == 0) {
+						int newSize= 1024 * 4;
 						bufferSize= newSize;
 						setBufferSize(newSize);
 					}

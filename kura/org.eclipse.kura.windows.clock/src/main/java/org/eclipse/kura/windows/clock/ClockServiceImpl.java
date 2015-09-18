@@ -175,67 +175,39 @@ public class ClockServiceImpl implements ConfigurableComponent, ClockService, Cl
 	 * Called by the current ClockSyncProvider after each Clock synchronization
 	 */
 	public void onClockUpdate(long offset) {
-		
+
 		s_logger.info("Clock update. Offset: {}", offset);
-		
+
 		// set system clock if necessary
 		boolean bClockUpToDate = false;
 		if (offset != 0) {
 			long time = System.currentTimeMillis() + offset;
 			Calendar cal = Calendar.getInstance();
 			cal.setTimeInMillis( time );
-			WindowsSetSystemTime winTime = new WindowsSetSystemTime();
-			winTime.SetLocalTime(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DAY_OF_MONTH), cal.get(Calendar.HOUR_OF_DAY), cal.get(Calendar.MINUTE), cal.get(Calendar.SECOND));
-/*			Process proc = null;
 			try {
-				proc = ProcessUtil.exec("date -s @"+time/1000);		//divide by 1000 to switch to seconds
-				proc.waitFor();
-				if (proc.exitValue() == 0) {
-					bClockUpToDate = true;
-					s_logger.info("System Clock Updated to {}", new Date());
-				}
-				else {
-					s_logger.error("Unexpected error while updating System Clock - it should've been {}", new Date());
-				}
-			} 
+				WindowsSetSystemTime winTime = new WindowsSetSystemTime();
+				winTime.SetLocalTime(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH)+1, cal.get(Calendar.DAY_OF_MONTH), cal.get(Calendar.HOUR_OF_DAY), cal.get(Calendar.MINUTE), cal.get(Calendar.SECOND));
+				bClockUpToDate = true;
+				s_logger.info("System Clock Updated to {}", cal.getTime());
+			}
 			catch (Exception e) {
 				s_logger.error("Error updating System Clock", e);
 			}
-			finally {
-				ProcessUtil.destroy(proc);
-			}*/
 		}
 		else {
 			bClockUpToDate = true;
 		}
 
+		// set hardware clock - this should be done automatically above
 /*
-		// set hardware clock
 		boolean updateHwClock = false;
 		if (m_properties.containsKey("clock.set.hwclock")) {
 			updateHwClock = (Boolean) m_properties.get("clock.set.hwclock");
 		}
 		if (updateHwClock) {
-			Process proc = null;
-			try {
-				proc = ProcessUtil.exec("hwclock --utc --systohc");
-				proc.waitFor();
-				if (proc.exitValue() == 0) {
-					s_logger.info("Hardware Clock Updated");
-				}
-				else {
-					s_logger.error("Unexpected error while updating Hardware Clock");
-				}
-			} 
-			catch (Exception e) {
-				s_logger.error("Error updating Hardware Clock", e);
-			}
-			finally {
-				ProcessUtil.destroy(proc);
-			}
 		}
 */
-		
+
 		// Raise the event
 		if (bClockUpToDate) {
 			m_eventAdmin.postEvent( new ClockEvent( new HashMap<String,Object>()));

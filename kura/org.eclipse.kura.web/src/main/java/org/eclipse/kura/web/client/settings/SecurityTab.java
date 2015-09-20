@@ -82,14 +82,14 @@ public class SecurityTab extends LayoutContainer {
 							public void onSuccess(GwtXSRFToken token) {
 								AsyncCallback<Void> callback = new AsyncCallback<Void>() {
 									public void onFailure(Throwable caught) {
-										Info.display(MSGS.error(), "Error reloading security policy!");
+										Info.display(MSGS.error(), "Error reloading security policy fingerprint!");
 									}
 
 									public void onSuccess(Void result) {
-										Info.display(MSGS.info(), "Security policy successfully reloaded!");
+										Info.display(MSGS.info(), "Fingerprint successfully reloaded!");
 									}
 								};
-								gwtSecurityService.reloadSecurityPolicy(token, callback);
+								gwtSecurityService.reloadSecurityPolicyFingerprint(token, callback);
 							}
 						});
 
@@ -98,6 +98,41 @@ public class SecurityTab extends LayoutContainer {
 			}
 		};
 
+		ClickHandler clickHandler2 = new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
+				gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
+					@Override
+					public void onFailure(Throwable ex) {
+						FailureHandler.handle(ex);
+					}
+
+					@Override
+					public void onSuccess(GwtXSRFToken token) {	
+						gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
+							@Override
+							public void onFailure(Throwable ex) {
+								FailureHandler.handle(ex);
+							}
+
+							@Override
+							public void onSuccess(GwtXSRFToken token) {
+								AsyncCallback<Void> callback = new AsyncCallback<Void>() {
+									public void onFailure(Throwable caught) {
+										Info.display(MSGS.error(), "Error reloading start script fingerprint!");
+									}
+
+									public void onSuccess(Void result) {
+										Info.display(MSGS.info(), "Fingerprint successfully reloaded!");
+									}
+								};
+								gwtSecurityService.reloadStartScriptFingerprint(token, callback);
+							}
+						});
+
+					}});
+			}
+		};
 
 		VerticalPanel vPanel = new VerticalPanel();
 		vPanel.setSpacing(5);
@@ -133,7 +168,32 @@ public class SecurityTab extends LayoutContainer {
 		DecoratorPanel decPanel = new DecoratorPanel();
 		decPanel.setWidget(layout);
 		vPanel.add(decPanel);
+		
+		
+		//Button to reload start script fingerprint
+		Button startScriptReloadButton= new Button(MSGS.settingsReloadStartupFingerprint());
+		startScriptReloadButton.addDomHandler(clickHandler2, ClickEvent.getType());
 
+		FlexTable startScriptLayout = new FlexTable();
+		startScriptLayout.setCellSpacing(6);
+		FlexCellFormatter startScriptCellFormatter = startScriptLayout.getFlexCellFormatter();
+
+		// Add a title
+		startScriptLayout.setHTML(0, 0, MSGS.settingsReloadStartupFingerprintTitle());
+		startScriptCellFormatter.setColSpan(0, 0, 2);
+		startScriptCellFormatter.setHorizontalAlignment(0, 0, HasHorizontalAlignment.ALIGN_CENTER);
+
+		// Add description and reload button
+		startScriptLayout.setHTML(1, 0, MSGS.settingsReloadStartupFingerprintDescription());
+		startScriptLayout.setWidget(2, 0, startScriptReloadButton);
+		startScriptCellFormatter.setColSpan(2, 0, 2);
+		startScriptCellFormatter.setHorizontalAlignment(2, 0, HasHorizontalAlignment.ALIGN_CENTER);
+
+		// Wrap the content in a DecoratorPanel
+		DecoratorPanel startScriptDecPanel = new DecoratorPanel();
+		startScriptDecPanel.setWidget(startScriptLayout);
+
+		vPanel.add(startScriptDecPanel);
 		vPanel.ensureDebugId("cwVerticalPanel");
 
 

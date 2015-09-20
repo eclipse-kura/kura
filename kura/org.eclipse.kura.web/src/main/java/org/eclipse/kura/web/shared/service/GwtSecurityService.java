@@ -22,5 +22,7 @@ public interface GwtSecurityService extends RemoteService
 {	
 	public Boolean isSecurityServiceAvailable();
 	
-	public void reloadSecurityPolicy(GwtXSRFToken xsfrToken) throws GwtKuraException;
+	public void reloadSecurityPolicyFingerprint(GwtXSRFToken xsfrToken) throws GwtKuraException;
+	
+	public void reloadStartScriptFingerprint(GwtXSRFToken xsfrToken) throws GwtKuraException;
 }

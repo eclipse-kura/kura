@@ -88,7 +88,7 @@ public class SecureBasicHttpContext implements HttpContext
 			}
 		} else {
 			session = request.getSession(true);
-			session.setMaxInactiveInterval(60*15);
+			session.setMaxInactiveInterval(15 * 60);
 			return failAuthorization(response);
 		}
 

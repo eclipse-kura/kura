@@ -31,11 +31,22 @@ public class GwtSecurityServiceImpl extends OsgiRemoteServiceServlet implements 
 	}
 	
 	@Override
-	public void reloadSecurityPolicy(GwtXSRFToken xsrfToken) throws GwtKuraException {
+	public void reloadSecurityPolicyFingerprint(GwtXSRFToken xsrfToken) throws GwtKuraException {
 		checkXSRFToken(xsrfToken);
 		SecurityService securityService = ServiceLocator.getInstance().getService(SecurityService.class);
 		try {
 			securityService.reloadSecurityPolicyFingerprint();
+		} catch (KuraException e) {
+			throw new GwtKuraException(e.getMessage());
+		}
+	}
+	
+	@Override
+	public void reloadStartScriptFingerprint(GwtXSRFToken xsrfToken) throws GwtKuraException {
+		checkXSRFToken(xsrfToken);
+		SecurityService securityService = ServiceLocator.getInstance().getService(SecurityService.class);
+		try {
+			securityService.reloadStartScriptFingerprint();
 		} catch (KuraException e) {
 			throw new GwtKuraException(e.getMessage());
 		}

@@ -64,7 +64,7 @@ public class SecureBasicHttpContext implements HttpContext
 	/**
 	 * Provides Basic authentication over HTTPS.
 	 */
-	public boolean handleSecurity(HttpServletRequest request,
+	public synchronized boolean handleSecurity(HttpServletRequest request,
 			HttpServletResponse response) 
 					throws IOException 
 	{        
@@ -86,10 +86,6 @@ public class SecureBasicHttpContext implements HttpContext
 				session.invalidate();
 				return failAuthorization(response);
 			}
-		} else {
-			session = request.getSession(true);
-			session.setMaxInactiveInterval(60*15);
-			return failAuthorization(response);
 		}
 
 		String authHeader = request.getHeader("Authorization");
@@ -154,7 +150,7 @@ public class SecureBasicHttpContext implements HttpContext
 			String password) 
 	{
 		Subject subject = null;
-		HttpSession session = request.getSession(false);
+		HttpSession session = request.getSession(true);
 		//subject = (Subject) session.getAttribute("subject");        
 //		if (subject != null) {
 //			// The user has already been authenticated

@@ -41,6 +41,7 @@ import org.eclipse.kura.linux.net.modem.SupportedSerialModemInfo;
 import org.eclipse.kura.linux.net.modem.SupportedSerialModemsInfo;
 import org.eclipse.kura.linux.net.modem.SupportedUsbModemInfo;
 import org.eclipse.kura.linux.net.modem.SupportedUsbModemsInfo;
+import org.eclipse.kura.linux.net.modem.UsbModemDriver;
 import org.eclipse.kura.linux.net.util.IScanTool;
 import org.eclipse.kura.linux.net.util.KuraConstants;
 import org.eclipse.kura.linux.net.util.LinuxIfconfig;
@@ -148,7 +149,7 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
         
         // Add serial modem if any
         SupportedSerialModemsInfo.getModem();
-         
+        
         // Add tty devices
         List<UsbTtyDevice> ttyDevices = m_usbService.getUsbTtyDevices();
         if(ttyDevices != null && !ttyDevices.isEmpty()) {
@@ -548,6 +549,15 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
             	//This can happen if all the modem resources cannot be removed from the OS or from Kura.
             	//In this case we did not receive an UsbDeviceRemovedEvent and we did not post
             	//an ModemRemovedEvent. Should we do it here?
+            	List<? extends UsbModemDriver> drivers = modemInfo.getDeviceDrivers();
+				for (UsbModemDriver driver : drivers) {
+					try {
+						driver.install();
+					} catch (Exception e) {
+						s_logger.error("Failed to install modem device driver {} - {}", driver.getName(), e);
+					}
+				}
+            	
             	UsbModemDevice usbModem = m_usbModems.get(event.getProperty(UsbDeviceEvent.USB_EVENT_USB_PORT_PROPERTY));
             	
             	boolean createNewUsbModemDevice = false;

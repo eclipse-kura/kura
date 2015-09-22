@@ -153,7 +153,7 @@ public class DeploymentPackageDownloadOptions extends DeploymentPackageInstallOp
 		this.notifyBlockSize = notifyBlockSize;
 	}
 
-	public String getDeployUrl() {
+	public String getDeployUri() {
 		return deployUri;
 	}
 

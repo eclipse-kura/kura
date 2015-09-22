@@ -93,7 +93,7 @@ public class DownloadImpl implements ProgressListener{
 
 			if (!alreadyDownloadedFlag || forceDownload) {
 				s_logger.info("To download");
-				incrementalDownloadFromURL(dpFile, options.getDeployUrl(), downloadIndex);
+				incrementalDownloadFromURL(dpFile, options.getDeployUri(), downloadIndex);
 				downloadIndex++;
 
 				if(options.getVerifierURL() != null){
@@ -227,7 +227,7 @@ public class DownloadImpl implements ProgressListener{
 		notify.setTransferProgress(100);
 		notify.setTransferStatus(DOWNLOAD_STATUS.FAILED.getStatusString());
 		notify.setJobId(options.getJobId());
-		notify.setErrorMessage(e.getMessage());
+		notify.setErrorMessage("Error during download process and verification!"); //message to get cause
 		notify.setTransferIndex(downloadIndex);
 
 		callback.publishMessage(options, notify, RESOURCE_DOWNLOAD);

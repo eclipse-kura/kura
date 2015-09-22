@@ -42,7 +42,7 @@ public abstract class DownloadCountingOutputStream extends CountingOutputStream 
 	InputStream is = null;
 
 	private long m_currentStep = 1;
-	private long previous;
+	//private long previous;
 	private DOWNLOAD_STATUS m_downloadStatus = DOWNLOAD_STATUS.FAILED;
 	
 	
@@ -89,8 +89,8 @@ public abstract class DownloadCountingOutputStream extends CountingOutputStream 
 			PROP_RESOLUTION= 1024 * 256;
 		}
 		if (getByteCount() >= m_currentStep * PROP_RESOLUTION) {
-			System.out.println("Bytes read: "+ (getByteCount() - previous));
-			previous = getByteCount();
+			//System.out.println("Bytes read: "+ (getByteCount() - previous));
+			//previous = getByteCount();
 			m_currentStep++;
 			postProgressEvent(options.getClientId(), getByteCount(), totalBytes, DOWNLOAD_STATUS.IN_PROGRESS, null);
 		}

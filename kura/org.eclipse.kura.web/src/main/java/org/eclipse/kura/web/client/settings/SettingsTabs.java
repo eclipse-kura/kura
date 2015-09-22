@@ -14,13 +14,9 @@ package org.eclipse.kura.web.client.settings;
 import org.eclipse.kura.web.client.configuration.ServiceTree;
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.resources.Resources;
-import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.shared.model.GwtSession;
-import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.eclipse.kura.web.shared.service.GwtSecurityService;
 import org.eclipse.kura.web.shared.service.GwtSecurityServiceAsync;
-import org.eclipse.kura.web.shared.service.GwtSecurityTokenService;
-import org.eclipse.kura.web.shared.service.GwtSecurityTokenServiceAsync;
 
 import com.allen_sauer.gwt.log.client.Log;
 import com.extjs.gxt.ui.client.widget.LayoutContainer;
@@ -37,8 +33,7 @@ import com.google.gwt.user.server.rpc.XsrfProtect;
 public class SettingsTabs extends LayoutContainer 
 {
 	private static final Messages MSGS = GWT.create(Messages.class);
-
-	private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
+	
 	private final GwtSecurityServiceAsync gwtSecurityService = GWT.create(GwtSecurityService.class);
 
 	private GwtSession              m_currentSession;
@@ -49,6 +44,7 @@ public class SettingsTabs extends LayoutContainer
 	private TabItem                 m_mutualAuthConfig;
 	private TabItem                 m_snapshotsConfig;
 	private TabItem                 m_securityConfig;
+	private TabItem                 m_bundleCertsConfig;
 
 	private SnapshotsTab	        m_snapshotsTab;
 
@@ -56,6 +52,7 @@ public class SettingsTabs extends LayoutContainer
 	private MutualAuthenticationTab m_mutualAuthenticationTab;
 
 	private SecurityTab				m_securityTab;
+	private BundleCertsTab			m_bundleCertsTab;
 
 	public SettingsTabs(GwtSession currentSession,
 			ServiceTree serviceTree) 
@@ -89,11 +86,14 @@ public class SettingsTabs extends LayoutContainer
 			m_snapshotsConfig.layout();
 		}
 
-
-		Log.info("security service available inittabs");
 		m_securityTab = new SecurityTab(m_currentSession);
 		if (m_securityConfig != null) {
 			m_securityConfig.add(m_securityTab);
+		}
+		
+		m_bundleCertsTab = new BundleCertsTab(m_currentSession);
+		if (m_bundleCertsConfig != null) {
+			m_bundleCertsConfig.add(m_bundleCertsTab);
 		}
 	}
 
@@ -137,6 +137,11 @@ public class SettingsTabs extends LayoutContainer
 		m_securityConfig.setBorders(true);
 		m_securityConfig.setLayout(new FitLayout());
 		m_securityConfig.add(m_securityTab);
+		
+		m_bundleCertsConfig = new TabItem(MSGS.settingsAddBundleCerts());
+		m_bundleCertsConfig.setBorders(true);
+		m_bundleCertsConfig.setLayout(new FitLayout());
+		m_bundleCertsConfig.add(m_bundleCertsTab);
 
 
 		AsyncCallback<Boolean> callback = new AsyncCallback<Boolean>() {
@@ -146,12 +151,11 @@ public class SettingsTabs extends LayoutContainer
 			public void onSuccess(Boolean result) {
 				if(result){
 					m_tabsPanel.add(m_securityConfig);
+					m_tabsPanel.add(m_bundleCertsConfig);
 				}
 			}
 		};
 		gwtSecurityService.isSecurityServiceAvailable(callback);
-
-
 
 		add(m_tabsPanel);
 	}

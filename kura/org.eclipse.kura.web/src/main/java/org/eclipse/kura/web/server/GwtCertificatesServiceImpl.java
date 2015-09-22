@@ -26,6 +26,8 @@ import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.Collection;
 import java.util.Iterator;
 
+import org.eclipse.kura.KuraException;
+import org.eclipse.kura.certificate.CertificatesService;
 import org.eclipse.kura.ssl.SslManagerService;
 import org.eclipse.kura.web.server.util.ServiceLocator;
 import org.eclipse.kura.web.shared.GwtKuraErrorCode;
@@ -185,6 +187,98 @@ public class GwtCertificatesServiceImpl extends OsgiRemoteServiceServlet impleme
 		} catch (GeneralSecurityException e) {
 			throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT, e);
 		} catch (IOException e) {
+			throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT, e);
+		}
+	}
+	
+	public Integer storeBundleLeafKey(GwtXSRFToken xsrfToken, String publicKey, String alias)
+			throws GwtKuraException {
+		checkXSRFToken(xsrfToken);
+		try {
+			Certificate[] certs= parsePublicCertificates(publicKey);
+
+			if(certs.length == 0){
+				throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT);
+			}else{
+				//Store only the first leaf passed. Don't consider other eventual certificates
+				CertificatesService certificateService = ServiceLocator.getInstance().getService(CertificatesService.class);
+				X509Certificate leafBundleCert= (X509Certificate) certs[0];
+
+				certificateService.storeCertificate(leafBundleCert, "bundle-" + alias);
+			}
+			return 1;
+		} catch (CertificateException e) {
+			throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT, e);
+		} catch (UnsupportedEncodingException e) {
+			throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT, e);
+		} catch (KuraException e) {
+			throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT, e);
+		}
+	}
+
+	public Integer storeBundlePublicChain(GwtXSRFToken xsrfToken, String publicKeys, String alias) throws GwtKuraException {
+		checkXSRFToken(xsrfToken);
+		try {
+			Certificate[] certs= parsePublicCertificates(publicKeys);
+
+			if(certs.length == 0){
+				throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT);
+			}else{
+				int i= 0;
+				CertificatesService certificateService = ServiceLocator.getInstance().getService(CertificatesService.class);
+				X509Certificate bundleCertChain= (X509Certificate) certs[i];
+
+				certificateService.storeCertificate(bundleCertChain, "bundle-" + alias);
+				i++;
+
+				while(i < certs.length){
+					X509Certificate caCert= (X509Certificate) certs[i];
+					String certificateAlias= "bundle-"+caCert.getSerialNumber().toString();
+
+					certificateService.storeCertificate(caCert, certificateAlias);
+					i++;
+				}
+			}
+			return certs.length;
+		} catch (CertificateException e) {
+			throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT, e);
+		} catch (UnsupportedEncodingException e) {
+			throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT, e);
+		} catch (KuraException e) {
+			throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT, e);
+		}
+	}
+
+	public Integer storeBundleCertificationAuthority(GwtXSRFToken xsrfToken, String publicCAKeys, String alias)
+			throws GwtKuraException {
+		checkXSRFToken(xsrfToken);
+		try {
+			Certificate[] certs= parsePublicCertificates(publicCAKeys);
+
+			if(certs.length == 0){
+				throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT);
+			}else{
+				int i= 0;
+				CertificatesService certificateService = ServiceLocator.getInstance().getService(CertificatesService.class);
+				X509Certificate bundleCA= (X509Certificate) certs[i];
+
+				certificateService.storeCertificate(bundleCA, "ca-" + alias);
+				i++;
+
+				while(i < certs.length){
+					X509Certificate caCert= (X509Certificate) certs[i];
+					String certificateAlias= "ca-"+caCert.getSerialNumber().toString();
+
+					certificateService.storeCertificate(caCert, certificateAlias);
+					i++;
+				}
+			}
+			return certs.length;
+		} catch (CertificateException e) {
+			throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT, e);
+		} catch (UnsupportedEncodingException e) {
+			throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT, e);
+		} catch (KuraException e) {
 			throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT, e);
 		}
 	}

@@ -261,106 +261,6 @@ public class CloudDeploymentHandlerV2 extends Cloudlet {
 		m_installImplementation.setDpaConfPath(m_dpaConfPath);
 		m_installImplementation.setDeploymentAdmin(m_deploymentAdmin);
 		m_installImplementation.sendInstallConfirmations();
-		
-//		Thread t = new Thread(new Runnable() {
-//
-//			@Override
-//			public void run() {
-//				try {
-//					Thread.sleep(5000);
-//					s_logger.info("STARTING DOWNLOAD...");
-//					CloudletTopic ct = CloudletTopic.parseAppTopic("EXEC/download");
-//					KuraRequestPayload request = new KuraRequestPayload();
-//					request.setRequestId("RequestID");
-//					request.setRequesterClientId("RequesterClientId");
-//					String url = "https://s3.amazonaws.com/kura-resources/dps/heater.dp";//"http://esfdownload.eurotech-inc.com/update_site/esf3/3.0.2/user_workspace_archive_3.0.2.zip";
-//					DeploymentPackageDownloadOptions options = new DeploymentPackageDownloadOptions(url, "dpName", "dpVersion");
-//					options.setUsername("luca.dazi@eurotech.com");
-//					options.setPassword("lc2251981");
-//					// options.setPassword("errata");
-//					request.addMetric(DeploymentPackageDownloadOptions.METRIC_DP_DOWNLOAD_URI, options.getDeployUri());
-//					request.addMetric(DeploymentPackageDownloadOptions.METRIC_DP_NAME, options.getDpName());
-//					request.addMetric(DeploymentPackageDownloadOptions.METRIC_DP_VERSION, options.getDpVersion());
-//					request.addMetric(DeploymentPackageDownloadOptions.METRIC_DP_DOWNLOAD_BLOCK_DELAY, 3000); 
-//					request.addMetric(DeploymentPackageDownloadOptions.METRIC_DP_DOWNLOAD_BLOCK_SIZE, 3); 
-//					request.addMetric(DeploymentPackageDownloadOptions.METRIC_JOB_ID, Long.parseLong("1111")); 
-//					request.addMetric(DeploymentPackageDownloadOptions.METRIC_DP_INSTALL_SYSTEM_UPDATE, false);
-//					request.addMetric(DeploymentPackageDownloadOptions.METRIC_DP_REBOOT, false);
-//
-//					KuraResponsePayload response = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
-//
-//					doExec(ct, request, response);
-//
-//					s_logger.info("*******************************************");
-//					s_logger.info(response.getMetric(KuraResponsePayload.METRIC_RESPONSE_CODE).toString());
-//					if(response.getBody() != null){
-//						s_logger.info(new String(response.getBody()));
-//					}
-//					if(response.getMetric(METRIC_DOWNLOAD_STATUS) != null){
-//						s_logger.info(response.getMetric(METRIC_DOWNLOAD_STATUS).toString());
-//					}
-//					s_logger.info("*******************************************");
-//
-//				} catch (InterruptedException e) {
-//					// TODO Auto-generated catch block
-//					e.printStackTrace();
-//				} catch (KuraException e) {
-//					// TODO Auto-generated catch block
-//					e.printStackTrace();
-//				}
-//			}
-//
-//		});
-//		t.start();
-//		
-//		Thread t2 = new Thread(new Runnable() {
-//
-//			@Override
-//			public void run() {
-//				try {
-//					Thread.sleep(6000);
-//					s_logger.info("STARTING DOWNLOAD...");
-//					CloudletTopic ct = CloudletTopic.parseAppTopic("EXEC/download");
-//					KuraRequestPayload request = new KuraRequestPayload();
-//					request.setRequestId("RequestID");
-//					request.setRequesterClientId("RequesterClientId");
-//					String url = "https://s3.amazonaws.com/kura-resources/dps/heater.dp";//"http://esfdownload.eurotech-inc.com/update_site/esf3/3.0.2/user_workspace_archive_3.0.2.zip";
-//					DeploymentPackageDownloadOptions options = new DeploymentPackageDownloadOptions(url, "dpName", "dpVersion");
-//					options.setUsername("luca.dazi@eurotech.com");
-//					options.setPassword("lc2251981");
-//					// options.setPassword("errata");
-//					request.addMetric(DeploymentPackageDownloadOptions.METRIC_DP_DOWNLOAD_URI, options.getDeployUri());
-//					request.addMetric(DeploymentPackageDownloadOptions.METRIC_DP_NAME, options.getDpName());
-//					request.addMetric(DeploymentPackageDownloadOptions.METRIC_DP_VERSION, options.getDpVersion());
-//					request.addMetric(DeploymentPackageDownloadOptions.METRIC_JOB_ID, Long.parseLong("1111")); 
-//					request.addMetric(DeploymentPackageDownloadOptions.METRIC_DP_INSTALL_SYSTEM_UPDATE, false);
-//					request.addMetric(DeploymentPackageDownloadOptions.METRIC_DP_REBOOT, false);
-//
-//					KuraResponsePayload response = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
-//
-//					doExec(ct, request, response);
-//
-//					s_logger.info("*******************************************");
-//					s_logger.info(response.getMetric(KuraResponsePayload.METRIC_RESPONSE_CODE).toString());
-//					if(response.getBody() != null){
-//						s_logger.info(new String(response.getBody()));
-//					}
-//					if(response.getMetric(METRIC_DOWNLOAD_STATUS) != null){
-//						s_logger.info(response.getMetric(METRIC_DOWNLOAD_STATUS).toString());
-//					}
-//					s_logger.info("*******************************************");
-//
-//				} catch (InterruptedException e) {
-//					// TODO Auto-generated catch block
-//					e.printStackTrace();
-//				} catch (KuraException e) {
-//					// TODO Auto-generated catch block
-//					e.printStackTrace();
-//				}
-//			}
-//
-//		});
-//		t2.start();
 	}
 
 	@Override
@@ -408,8 +308,6 @@ public class CloudDeploymentHandlerV2 extends Cloudlet {
 
 	@Override
 	protected void doGet(CloudletTopic reqTopic, KuraRequestPayload reqPayload, KuraResponsePayload respPayload) throws KuraException {
-
-		//doGetResource(reqTopic, reqPayload);
 
 		String[] resources = reqTopic.getResources();
 

@@ -22,25 +22,20 @@ public class OptionModemDriver extends UsbModemDriver {
 	
 	private static final Logger s_logger = LoggerFactory.getLogger(OptionModemDriver.class);
 
-	private String m_vendor;
-	private String m_product;
-	
 	public OptionModemDriver(String vendor, String product) {
-		super("option");
-		m_vendor = vendor;
-		m_product = product;
+		super("option", vendor, product);
 	}
 	
 	public int install() throws Exception {	
 		int status = super.install();
 		if (status == 0) {
-			s_logger.info("submiting {}:{} information to option driver ...", m_vendor, m_product);
+			s_logger.info("submiting {}:{} information to option driver ...", getVendor(), getProduct());
 			File newIdFile = new File("/sys/bus/usb-serial/drivers/option1/new_id");
 			if (newIdFile.exists()) {
 				StringBuffer sb = new StringBuffer();
-				sb.append(m_vendor);
+				sb.append(getVendor());
 				sb.append(' ');
-				sb.append(m_product);
+				sb.append(getProduct());
 				
 				FileOutputStream fos = new FileOutputStream(newIdFile);
 				PrintWriter pw = new PrintWriter(fos);

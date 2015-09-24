@@ -601,158 +601,170 @@ java -Xms256m -Xmx256m -XX:MaxPermSize=256m -Dkura.os.version=win32 ^
 	-consoleLog	
 	</echo>    
 
-        <zip destfile="${project.build.directory}/${build.output.name}.zip">
+        <property name="build.install.dir" value="${project.build.directory}/InstallWin"/> 
+        <property name="build.install.dir.kura" value="${build.install.dir}/KuraFiles"/> 
 
-            <zipfileset file="${project.build.directory}/${build.output.name}/snapshot_0.xml"
-                        prefix="${build.output.name}/data/snapshots/" />
+            <copy file="${project.build.directory}/${build.output.name}/snapshot_0.xml"
+                        todir="${build.install.dir.kura}/data/snapshots/" />
 
-            <zipfileset file="${project.build.directory}/${build.output.name}/config.ini"
-                        prefix="${build.output.name}/kura/" />
+            <copy file="${project.build.directory}/${build.output.name}/config.ini"
+                        todir="${build.install.dir.kura}/kura/" />
 
-            <zipfileset file="${project.build.directory}/${build.output.name}/jdk.dio.policy"
-                        prefix="${build.output.name}/kura/" />
+            <copy file="${project.build.directory}/${build.output.name}/jdk.dio.policy"
+                        todir="${build.install.dir.kura}/kura/" failonerror="false" />
 
-			<zipfileset file="${project.build.directory}/${build.output.name}/jdk.dio.properties"
-                        prefix="${build.output.name}/kura/" />
+            <copy file="${project.build.directory}/${build.output.name}/jdk.dio.properties"
+                        todir="${build.install.dir.kura}/kura/" failonerror="false" />
 
-            <zipfileset file="src/main/resources/common/kura_custom.properties"
-                        prefix="${build.output.name}/kura/" />
+            <copy file="src/main/resources/common/kura_custom.properties"
+                        todir="${build.install.dir.kura}/kura/" />
 
-            <zipfileset file="${project.build.directory}/${build.output.name}/kura_install.bat"
-                        prefix="${build.output.name}/install/" />
+            <copy file="${project.build.directory}/${build.output.name}/kura_install.bat"
+                        todir="${build.install.dir.kura}/install/" failonerror="false" />
 
-            <zipfileset file="${project.build.directory}/${build.output.name}/recover_dflt_kura_config.sh"
-                        prefix="${build.output.name}/install/" />
+            <copy file="${project.build.directory}/${build.output.name}/recover_dflt_kura_config.sh"
+                        todir="${build.install.dir.kura}/install/" failonerror="false" />
 
-            <zipfileset file="src/main/resources/${build.name}/kuranet.conf"
-                        prefix="${build.output.name}/install/" />
+            <copy file="src/main/resources/${build.name}/kuranet.conf"
+                        todir="${build.install.dir.kura}/install/" failonerror="false" />
 
-            <zipfileset file="${project.build.directory}/${build.output.name}/kura.init.wrl"
-                        prefix="${build.output.name}/install" />
-            <zipfileset file="${project.build.directory}/${build.output.name}/kura.init.yocto"
-                        prefix="${build.output.name}/install" />
-            <zipfileset file="${project.build.directory}/${build.output.name}/kura.init.raspbian"
-                        prefix="${build.output.name}/install" />
-            <zipfileset file="src/main/resources/${build.name}/firewall.init"
-                        prefix="${build.output.name}/install" />
-            <zipfileset file="src/main/resources/common/monit.init.wrl"
-                        prefix="${build.output.name}/install" />
-            <zipfileset file="src/main/resources/common/monit.init.yocto"
-                        prefix="${build.output.name}/install" />
-            <zipfileset file="src/main/resources/common/monit.init.raspbian"
-                        prefix="${build.output.name}/install" />
-            <zipfileset file="src/main/resources/common/monitrc.wrl"
-                        prefix="${build.output.name}/install" />
-            <zipfileset file="src/main/resources/common/monitrc.yocto"
-                        prefix="${build.output.name}/install" />
-            <zipfileset file="src/main/resources/common/monitrc.raspbian"
-                        prefix="${build.output.name}/install" />
+            <copy file="${project.build.directory}/${build.output.name}/kura.init.wrl"
+                        todir="${build.install.dir.kura}/install" failonerror="false" />
+            <copy file="${project.build.directory}/${build.output.name}/kura.init.yocto"
+                        todir="${build.install.dir.kura}/install" failonerror="false" />
+            <copy file="${project.build.directory}/${build.output.name}/kura.init.raspbian"
+                        todir="${build.install.dir.kura}/install" failonerror="false" />
+            <copy file="src/main/resources/${build.name}/firewall.init"
+                        todir="${build.install.dir.kura}/install" failonerror="false" />
+            <copy file="src/main/resources/common/monit.init.wrl"
+                        todir="${build.install.dir.kura}/install" failonerror="false" />
+            <copy file="src/main/resources/common/monit.init.yocto"
+                        todir="${build.install.dir.kura}/install" failonerror="false" />
+            <copy file="src/main/resources/common/monit.init.raspbian"
+                        todir="${build.install.dir.kura}/install" failonerror="false" />
+            <copy file="src/main/resources/common/monitrc.wrl"
+                        todir="${build.install.dir.kura}/install" failonerror="false" />
+            <copy file="src/main/resources/common/monitrc.yocto"
+                        todir="${build.install.dir.kura}/install" failonerror="false" />
+            <copy file="src/main/resources/common/monitrc.raspbian"
+                        todir="${build.install.dir.kura}/install" failonerror="false" />
+
+            <copy file="src/main/resources/common/logrotate.conf"
+                        todir="${build.install.dir.kura}/install" failonerror="false" />
+            <copy file="src/main/resources/common/kura.logrotate"
+                        todir="${build.install.dir.kura}/install" failonerror="false" />
+
+            <copy file="src/main/resources/common/hostapd.conf"
+                        todir="${build.install.dir.kura}/install" failonerror="false" />
+            <copy file="src/main/resources/common/dhcpd-eth0.conf"
+                        todir="${build.install.dir.kura}/install" failonerror="false" />
+            <copy file="src/main/resources/common/dhcpd-wlan0.conf"
+                        todir="${build.install.dir.kura}/install" failonerror="false" />
+
+            <copy file="src/main/resources/common/named/named.conf"
+                        todir="${build.install.dir.kura}/install" failonerror="false" />
+            <copy file="src/main/resources/common/named/named.ca"
+                        todir="${build.install.dir.kura}/install" failonerror="false" />
+            <copy file="src/main/resources/common/named/named.rfc1912.zones"
+                        todir="${build.install.dir.kura}/install" failonerror="false" />
+            <copy file="src/main/resources/common/named/usr.sbin.named"
+        	        todir="${build.install.dir.kura}/install" failonerror="false" />
+
+            <copy file="src/main/resources/common/ifcfg-eth0"
+                        todir="${build.install.dir.kura}/install" failonerror="false" />
+            <copy file="src/main/resources/common/ifcfg-eth1"
+                        todir="${build.install.dir.kura}/install" failonerror="false" />
+            <copy file="src/main/resources/common/ifcfg-wlan0"
+                        todir="${build.install.dir.kura}/install" failonerror="false" />
+            <copy file="src/main/resources/common/network.interfaces"
+                        todir="${build.install.dir.kura}/install" failonerror="false" />
+            <copy file="src/main/resources/common/network.interfaces.raspbian"
+                        todir="${build.install.dir.kura}/install" failonerror="false" />
+
+            <copy file="src/main/resources/common/ifdown-local"
+                        todir="${build.install.dir.kura}/install" failonerror="false" />
+            <copy file="src/main/resources/common/ifup-local"
+                        todir="${build.install.dir.kura}/install" failonerror="false" />
+            <copy file="src/main/resources/common/ifup-local.debian"
+                        todir="${build.install.dir.kura}/install" failonerror="false" />
+            <copy file="src/main/resources/common/ifup-local.raspbian"
+                        todir="${build.install.dir.kura}/install" failonerror="false" />
+
+            <copy file="src/main/resources/common/ip-down.local"
+                        todir="${build.install.dir.kura}/install" failonerror="false" />
+            <copy file="src/main/resources/common/ip-up.local"
+                        todir="${build.install.dir.kura}/install" failonerror="false" />
+
+            <copy file="${project.build.directory}/${build.output.name}/start_kura.bat"
+                        todir="${build.install.dir.kura}/bin" />
+
+            <copy file="${project.build.directory}/KURAUtils/KURAUtils.exe"
+                        todir="${build.install.dir.kura}/bin" />
+
+            <copy file="RELEASE_NOTES.txt"
+                        todir="${build.install.dir.kura}/kura/" />
+            <copy file="notice.html"
+                        todir="${build.install.dir.kura}/" />
+            <copy file="epl-v10.html"
+                        todir="${build.install.dir.kura}/" />
+            <copy file="src/main/resources/${build.name}/log4j.properties"
+                        todir="${build.install.dir.kura}/kura/" />
+            <copy file="${project.build.directory}/${build.output.name}/kura.properties"
+                        todir="${build.install.dir.kura}/kura/" />
+
+            <copy todir="${build.install.dir.kura}/plugins">
+		<fileset dir="${kura.osgi.repo}/plugins" />
+            </copy>
+                        
+            <copy todir="${build.install.dir.kura}/plugins">
+		<fileset dir="../target-definition/common/repository/plugins" />
+            </copy>                        
 
 
-            <zipfileset file="src/main/resources/common/logrotate.conf"
-                        prefix="${build.output.name}/install" />
-            <zipfileset file="src/main/resources/common/kura.logrotate"
-                        prefix="${build.output.name}/install" />
+            <copy file="${project.build.directory}/plugins/org.eclipse.kura.deployment.agent_${org.eclipse.kura.deployment.agent.version}.jar"
+                        todir="${build.install.dir.kura}/kura/plugins" />
+            <copy file="${project.build.directory}/plugins/org.eclipse.kura.api_${org.eclipse.kura.api.version}.jar"
+                        todir="${build.install.dir.kura}/kura/plugins" />
+            <copy file="${project.build.directory}/plugins/org.eclipse.kura.core_${org.eclipse.kura.core.version}.jar"
+                        todir="${build.install.dir.kura}/kura/plugins" />
+            <copy file="${project.build.directory}/plugins/org.eclipse.kura.core.cloud_${org.eclipse.kura.core.cloud.version}.jar"
+                        todir="${build.install.dir.kura}/kura/plugins" />
+            <copy file="${project.build.directory}/plugins/org.eclipse.kura.core.comm_${org.eclipse.kura.core.comm.version}.jar"
+                        todir="${build.install.dir.kura}/kura/plugins" />
+            <copy file="${project.build.directory}/plugins/org.eclipse.kura.core.configuration_${org.eclipse.kura.core.configuration.version}.jar"
+                        todir="${build.install.dir.kura}/kura/plugins" />
+            <copy file="${project.build.directory}/plugins/org.eclipse.kura.core.crypto_${org.eclipse.kura.core.crypto.version}.jar"
+                        todir="${build.install.dir.kura}/kura/plugins" />
+            <copy file="${project.build.directory}/plugins/org.eclipse.kura.core.deployment_${org.eclipse.kura.core.deployment.version}.jar"
+                        todir="${build.install.dir.kura}/kura/plugins" />
+            <copy file="${project.build.directory}/plugins/org.eclipse.kura.core.net_${org.eclipse.kura.core.net.version}.jar"
+                        todir="${build.install.dir.kura}/kura/plugins" />
+            <copy file="${project.build.directory}/plugins/org.eclipse.kura.web_${org.eclipse.kura.web.version}.jar"
+                        todir="${build.install.dir.kura}/kura/plugins" />
+            <copy file="${project.build.directory}/plugins/org.eclipse.kura.windows.net_${org.eclipse.kura.windows.net.version}.jar"
+                        todir="${build.install.dir.kura}/kura/plugins" />
+            <copy file="${project.build.directory}/plugins/org.eclipse.kura.windows.position_${org.eclipse.kura.windows.position.version}.jar"
+                        todir="${build.install.dir.kura}/kura/plugins" />
+            <copy file="${project.build.directory}/plugins/org.eclipse.kura.windows.command_${org.eclipse.kura.windows.command.version}.jar"
+                        todir="${build.install.dir.kura}/kura/plugins" />
+            <copy file="${project.build.directory}/plugins/org.eclipse.kura.windows.usb_${org.eclipse.kura.windows.usb.version}.jar"
+                        todir="${build.install.dir.kura}/kura/plugins" />
+            <copy file="${project.build.directory}/plugins/org.eclipse.kura.windows.watchdog_${org.eclipse.kura.windows.watchdog.version}.jar"
+                        todir="${build.install.dir.kura}/kura/plugins" />
+            <copy file="${project.build.directory}/plugins/org.eclipse.kura.windows.clock_${org.eclipse.kura.windows.clock.version}.jar"
+                        todir="${build.install.dir.kura}/kura/plugins" />
+            <copy file="${project.build.directory}/plugins/org.eclipse.kura.emulator_${org.eclipse.kura.emulator.version}.jar"
+                        todir="${build.install.dir.kura}/kura/plugins" />
 
-            <zipfileset file="src/main/resources/common/hostapd.conf"
-                        prefix="${build.output.name}/install" />
-            <zipfileset file="src/main/resources/common/dhcpd-eth0.conf"
-                        prefix="${build.output.name}/install" />
-            <zipfileset file="src/main/resources/common/dhcpd-wlan0.conf"
-                        prefix="${build.output.name}/install" />
+            <copy file="../../target-platform/org.eclipse.soda.dk.comm/src/main/c/Release/win32/x86/dkcomm.dll"
+                        todir="${build.install.dir}/system"/>
+            <copy file="../../target-platform/org.eclipse.soda.dk.comm/src/main/c/Release/win32/x64/dkcomm64.dll"
+                        todir="${build.install.dir}/system"/>
+            <copy file="../../target-platform/org.eclipse.kura.windows/src/main/c/Release/win32/x86/KuraNativeWin.dll"
+                        todir="${build.install.dir}/system"/>
+            <copy file="../../target-platform/org.eclipse.kura.windows/src/main/c/Release/win32/x64/KuraNativeWin64.dll"
+                        todir="${build.install.dir}/system"/>
 
-            <zipfileset file="src/main/resources/common/named/named.conf"
-                        prefix="${build.output.name}/install" />
-            <zipfileset file="src/main/resources/common/named/named.ca"
-                        prefix="${build.output.name}/install" />
-            <zipfileset file="src/main/resources/common/named/named.rfc1912.zones"
-                        prefix="${build.output.name}/install" />
-        	<zipfileset file="src/main/resources/common/named/usr.sbin.named"
-        	        prefix="${build.output.name}/install" />
-
-            <zipfileset file="src/main/resources/common/ifcfg-eth0"
-                        prefix="${build.output.name}/install" />
-            <zipfileset file="src/main/resources/common/ifcfg-eth1"
-                        prefix="${build.output.name}/install" />
-            <zipfileset file="src/main/resources/common/ifcfg-wlan0"
-                        prefix="${build.output.name}/install" />
-            <zipfileset file="src/main/resources/common/network.interfaces"
-                        prefix="${build.output.name}/install" />
-            <zipfileset file="src/main/resources/common/network.interfaces.raspbian"
-                        prefix="${build.output.name}/install" />
-
-            <zipfileset file="src/main/resources/common/ifdown-local"
-                        prefix="${build.output.name}/install" />
-            <zipfileset file="src/main/resources/common/ifup-local"
-                        prefix="${build.output.name}/install" />
-            <zipfileset file="src/main/resources/common/ifup-local.debian"
-                        prefix="${build.output.name}/install" />
-            <zipfileset file="src/main/resources/common/ifup-local.raspbian"
-                        prefix="${build.output.name}/install" />
-
-            <zipfileset file="src/main/resources/common/ip-down.local"
-                        prefix="${build.output.name}/install" />
-            <zipfileset file="src/main/resources/common/ip-up.local"
-                        prefix="${build.output.name}/install" />
-
-            <zipfileset file="${project.build.directory}/${build.output.name}/start_kura.bat"
-                        fullpath="${build.output.name}/bin/start_kura.bat" />
-
-			<zipfileset file="${project.build.directory}/KURAUtils/KURAUtils.exe"
-						fullpath="${build.output.name}/bin/KURAUtils.exe" />
-
-		   <zipfileset file="RELEASE_NOTES.txt"
-                        prefix="${build.output.name}/kura/" />
-            <zipfileset file="notice.html"
-                        prefix="${build.output.name}/" />
-            <zipfileset file="epl-v10.html"
-                        prefix="${build.output.name}/" />
-            <zipfileset file="src/main/resources/${build.name}/log4j.properties"
-                        prefix="${build.output.name}/kura/" />
-            <zipfileset file="${project.build.directory}/${build.output.name}/kura.properties"
-                        prefix="${build.output.name}/kura/" />
-    
-            <zipfileset dir="${kura.osgi.repo}/plugins/"
-                        prefix="${build.output.name}/plugins"/>
-            <zipfileset dir="../target-definition/common/repository/plugins"
-                        prefix="${build.output.name}/plugins"/>
-
-
-            <zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.deployment.agent_${org.eclipse.kura.deployment.agent.version}.jar"
-                        prefix="${build.output.name}/kura/plugins" />
-            <zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.api_${org.eclipse.kura.api.version}.jar"
-                        prefix="${build.output.name}/kura/plugins" />
-            <zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.core_${org.eclipse.kura.core.version}.jar"
-                        prefix="${build.output.name}/kura/plugins" />
-            <zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.core.cloud_${org.eclipse.kura.core.cloud.version}.jar"
-                        prefix="${build.output.name}/kura/plugins" />
-            <zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.core.comm_${org.eclipse.kura.core.comm.version}.jar"
-                        prefix="${build.output.name}/kura/plugins" />
-            <zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.core.configuration_${org.eclipse.kura.core.configuration.version}.jar"
-                        prefix="${build.output.name}/kura/plugins" />
-            <zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.core.crypto_${org.eclipse.kura.core.crypto.version}.jar"
-                        prefix="${build.output.name}/kura/plugins" />
-            <zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.core.deployment_${org.eclipse.kura.core.deployment.version}.jar"
-                        prefix="${build.output.name}/kura/plugins" />
-            <zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.core.net_${org.eclipse.kura.core.net.version}.jar"
-                        prefix="${build.output.name}/kura/plugins" />
-            <zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.web_${org.eclipse.kura.web.version}.jar"
-                        prefix="${build.output.name}/kura/plugins" />
-            <zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.windows.net_${org.eclipse.kura.windows.net.version}.jar"
-                        prefix="${build.output.name}/kura/plugins" />
-            <zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.windows.position_${org.eclipse.kura.windows.position.version}.jar"
-                        prefix="${build.output.name}/kura/plugins" />
-            <zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.windows.command_${org.eclipse.kura.windows.command.version}.jar"
-                        prefix="${build.output.name}/kura/plugins" />
-            <zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.windows.usb_${org.eclipse.kura.windows.usb.version}.jar"
-                        prefix="${build.output.name}/kura/plugins" />
-            <zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.windows.watchdog_${org.eclipse.kura.windows.watchdog.version}.jar"
-                        prefix="${build.output.name}/kura/plugins" />
-            <zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.windows.clock_${org.eclipse.kura.windows.clock.version}.jar"
-                        prefix="${build.output.name}/kura/plugins" />
-            <zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.emulator_${org.eclipse.kura.emulator.version}.jar"
-                        prefix="${build.output.name}/kura/plugins" />
-        </zip>
         <echo message="Building Kura Distribution for ${build.name}-jars..." />
         
 

@@ -1,7 +1,6 @@
 package org.eclipse.kura.net.admin.modem.telit.generic;
 
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.List;
@@ -10,15 +9,13 @@ import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.comm.CommConnection;
 import org.eclipse.kura.comm.CommURI;
-import org.eclipse.kura.core.util.ProcessUtil;
-import org.eclipse.kura.core.util.SafeProcess;
+import org.eclipse.kura.linux.net.modem.ModemDriver;
 import org.eclipse.kura.linux.net.modem.SerialModemComm;
-import org.eclipse.kura.linux.net.modem.SerialModemDriver;
 import org.eclipse.kura.linux.net.modem.SupportedSerialModemInfo;
 import org.eclipse.kura.linux.net.modem.SupportedSerialModemsInfo;
 import org.eclipse.kura.linux.net.modem.SupportedUsbModemInfo;
-import org.eclipse.kura.linux.net.modem.SupportedUsbModems;
 import org.eclipse.kura.linux.net.modem.SupportedUsbModemsInfo;
+import org.eclipse.kura.linux.net.modem.UsbModemDriver;
 import org.eclipse.kura.linux.net.util.KuraConstants;
 import org.eclipse.kura.net.NetConfig;
 import org.eclipse.kura.net.admin.modem.telit.he910.TelitHe910;
@@ -719,24 +716,6 @@ public abstract class TelitModem {
     	return gpsPowered;
     }
 	
-	private boolean isOnUsb() throws Exception {
-
-		boolean isModemOn = false;
-		if (m_device instanceof UsbModemDevice) {
-			isModemOn = SupportedUsbModems.isAttached(
-					((UsbModemDevice) m_device).getVendorId(),
-					((UsbModemDevice) m_device).getProductId());
-			s_logger.info("isOn() :: USB modem attached? {}", isModemOn);
-		} else if (m_device instanceof SerialModemDevice) {
-			isModemOn = isReachable();
-			s_logger.info("isOn() :: Serial modem reachable? {}", isModemOn);
-		} else {
-			throw new KuraException(KuraErrorCode.INTERNAL_ERROR,
-					"Unsupported modem device");
-		}
-		return isModemOn;
-	}
-	
 	private boolean isOnGpio() throws Exception {
 		
 		boolean gpioOn = false;
@@ -754,89 +733,43 @@ public abstract class TelitModem {
 	private boolean turnOff() throws Exception {
 
 		boolean retVal = true;
-		int remainingAttempts = 3;
-		do {
-			if (remainingAttempts <= 0) {
-				retVal = false;
-				break;
-			}
-			s_logger.info("turnOff() :: turning modem OFF ... attempts left: {}", remainingAttempts);
-			if (m_platform.equals("Mini-Gateway")) {
-				SerialModemDriver.toggleGpio65();
-			} else if (m_platform.equals("reliagate-10-20")) {
-				FileWriter fw = new FileWriter("/sys/class/gpio/usb-rear-pwr/value");
-				fw.write("0");
-				fw.close();
-			} else if (m_platform.equals("reliagate-50-21")) {
-				SafeProcess pr = ProcessUtil.exec("/usr/sbin/vector-j21-gpio 11 0");
-				int status = pr.waitFor();
-				s_logger.info("turnOff() :: '/usr/sbin/vector-j21-gpio 11 0' returned {}", status);
-				if (status != 0) {
-					continue;
-				}
-				sleep(1000);
-
-				pr = ProcessUtil.exec("/usr/sbin/vector-j21-gpio 11 1");
-				status = pr.waitFor();
-				s_logger.info("turnOff() :: '/usr/sbin/vector-j21-gpio 11 1' returned {}", status);
-				if (status != 0) {
-					continue;
-				}
-				sleep(3000);
-
-				pr = ProcessUtil.exec("/usr/sbin/vector-j21-gpio 11 0");
-				status = pr.waitFor();
-				s_logger.info("turnOff() :: '/usr/sbin/vector-j21-gpio 11 0' returned {}", status);
-				retVal = (status == 0) ? true : false;
-			} else {
-				s_logger.warn("turnOff() :: modem turnOff operation is not supported for the {} platform", m_platform);
-			}
-			remainingAttempts--;
-			sleep(5000);
-		} while (isOnUsb());
-
-		s_logger.info("turnOff() :: Modem is OFF? - {}", retVal);
+		ModemDriver modemDriver = getModemDriver();
+		if (modemDriver != null) {
+			retVal = modemDriver.turnModemOff();
+		}
 		return retVal;
 	}
 	
 	private boolean turnOn() throws Exception {
 
 		boolean retVal = true;
-		int remainingAttempts = 3;
-
-		do {
-			if (remainingAttempts <= 0) {
-				retVal = false;
-				break;
-			}
-			s_logger.info("turnOn() :: turning modem ON ... attempts left: {}", remainingAttempts);
-			if (m_platform.equals("Mini-Gateway")) {
-				SerialModemDriver.toggleGpio65();
-			} else if (m_platform.equals("reliagate-10-20")) {
-				FileWriter fw = new FileWriter("/sys/class/gpio/usb-rear-pwr/value");
-				fw.write("1");
-				fw.close();
-			} else if (m_platform.equals("reliagate-50-21")) {
-				SafeProcess pr = ProcessUtil.exec("/usr/sbin/vector-j21-gpio 11 1");
-				int status = pr.waitFor();
-				s_logger.info("turnOn() :: '/usr/sbin/vector-j21-gpio 11 1' returned {}", status);
-				if (status != 0) {
-					continue;
-				}
-				sleep(1000);
-
-				pr = ProcessUtil.exec("/usr/sbin/vector-j21-gpio 6");
-				status = pr.waitFor();
-				s_logger.info("turnOn() :: '/usr/sbin/vector-j21-gpio 6' returned {}", status);
-				retVal = (status == 0) ? true : false;
-			} else {
-				s_logger.warn("turnOn() :: modem turnOn operation is not supported for the {} platform", m_platform);
-			}
-			remainingAttempts--;
-			sleep(7000);
-		} while (!isOnUsb());
-
-		s_logger.info("turnOn() :: Modem is ON? - {}", retVal);
+		ModemDriver modemDriver = getModemDriver();
+		if (modemDriver != null) {
+			retVal = modemDriver.turnModemOn();
+		}
 		return retVal;
+	}
+	
+	private ModemDriver getModemDriver() {
+		
+		if (m_device == null) {
+			return null;
+		}
+		ModemDriver modemDriver = null;
+		if (m_device instanceof UsbModemDevice) {
+    		SupportedUsbModemInfo usbModemInfo = SupportedUsbModemsInfo.getModem((UsbModemDevice)m_device);
+    		if (usbModemInfo != null) {
+    			List<? extends UsbModemDriver> usbDeviceDrivers = usbModemInfo.getDeviceDrivers();
+    			if ((usbDeviceDrivers != null) && (usbDeviceDrivers.size() > 0)) {
+    				modemDriver = usbDeviceDrivers.get(0);
+    			}
+    		}
+		} else if (m_device instanceof SerialModemDevice) {
+    		SupportedSerialModemInfo serialModemInfo = SupportedSerialModemsInfo.getModem();
+    		if (serialModemInfo != null) {
+    			modemDriver = serialModemInfo.getDriver();
+    		} 
+		}
+		return modemDriver;
 	}
 }

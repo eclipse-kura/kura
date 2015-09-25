@@ -12,28 +12,26 @@ d * Copyright (c) 2011, 2014 Eurotech and/or its affiliates
 package org.eclipse.kura.linux.net.modem;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
+import org.eclipse.kura.KuraErrorCode;
+import org.eclipse.kura.KuraException;
+import org.eclipse.kura.comm.CommConnection;
+import org.eclipse.kura.comm.CommURI;
+import org.eclipse.kura.core.linux.util.LinuxProcessUtil;
+import org.eclipse.kura.core.linux.util.ProcessStats;
+import org.eclipse.kura.linux.net.util.KuraConstants;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.service.io.ConnectionFactory;
 import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.eclipse.kura.KuraErrorCode;
-import org.eclipse.kura.KuraException;
-import org.eclipse.kura.comm.CommConnection;
-import org.eclipse.kura.comm.CommURI;
-import org.eclipse.kura.core.linux.util.LinuxProcessUtil;
-import org.eclipse.kura.linux.net.util.KuraConstants;
-import org.eclipse.kura.core.linux.util.ProcessStats;
 
-public class SerialModemDriver {
+public class SerialModemDriver extends ModemDriver {
 
 	private static final Logger s_logger = LoggerFactory.getLogger(SerialModemDriver.class);
 
@@ -81,7 +79,7 @@ public class SerialModemDriver {
 			if (OS_VERSION != null && OS_VERSION.equals(KuraConstants.Mini_Gateway.getImageName() + "_" + KuraConstants.Mini_Gateway.getImageVersion()) &&
 					TARGET_NAME != null && TARGET_NAME.equals(KuraConstants.Mini_Gateway.getTargetName())) {			
 				try {
-					toggleGpio65();
+					turnModemOn();
 					retries = 15;
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -115,7 +113,7 @@ public class SerialModemDriver {
 			int retries = 3;
 			if (OS_VERSION != null && OS_VERSION.equals(KuraConstants.Mini_Gateway.getImageName() + "_" + KuraConstants.Mini_Gateway.getImageVersion()) &&
 					TARGET_NAME != null && TARGET_NAME.equals(KuraConstants.Mini_Gateway.getTargetName())) {
-				toggleGpio65();
+				turnModemOff();
 				sleep (2000);
 				retries = 15;
 			}
@@ -130,6 +128,10 @@ public class SerialModemDriver {
 			s_logger.info("{} modem is still reachable, failed to remove modem driver", m_modemName);
 		}
 		return status;
+	}
+	
+	public boolean isReachable()  throws KuraException {
+		return isAtReachable(3, 1000);
 	}
 
 	public String getModemName () {
@@ -256,39 +258,6 @@ public class SerialModemDriver {
 					fLockFile.delete();
 				}
 			}
-		}
-	}
-
-	public static void toggleGpio65() throws Exception { 		
-		File fgpio65Folder = new File ("/sys/class/gpio/gpio65");
-		if (!fgpio65Folder.exists()) {
-			BufferedWriter bwGpioSelect = new BufferedWriter(new FileWriter("/sys/class/gpio/export"));
-			bwGpioSelect.write("65");
-			bwGpioSelect.flush();
-			bwGpioSelect.close();
-		}
-
-		BufferedWriter bwGpio65Direction = new BufferedWriter(new FileWriter("/sys/class/gpio/gpio65/direction"));
-		bwGpio65Direction.write("out");
-		bwGpio65Direction.flush();
-		bwGpio65Direction.close();
-
-		BufferedWriter fGpio65Value = new BufferedWriter(new FileWriter("/sys/class/gpio/gpio65/value"));
-		fGpio65Value.write("0");
-		fGpio65Value.flush();
-		fGpio65Value.write("1");
-		fGpio65Value.flush();
-		sleep(5000);
-		fGpio65Value.write("0");
-		fGpio65Value.flush();
-		fGpio65Value.close();
-	}
-
-	private static void sleep(long millis) {
-		try {
-			Thread.sleep(millis);
-		} catch (InterruptedException e) {
-			// ignore
 		}
 	}
 }

@@ -96,7 +96,7 @@ public class CloudDeploymentHandlerV2 extends Cloudlet {
 	 * failed
 	 */
 	public static enum DOWNLOAD_STATUS {
-		IN_PROGRESS("IN_PROGRESS"), COMPLETED("COMPLETED"), FAILED("FAILED"), ALREADY_DONE("ALREADY DONE");
+		IN_PROGRESS("IN_PROGRESS"), COMPLETED("COMPLETED"), FAILED("FAILED"), ALREADY_DONE("ALREADY DONE"), CANCELLED("CANCELLED");
 
 		private final String status;
 

@@ -5,6 +5,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Date;
+import java.util.concurrent.CancellationException;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
@@ -103,8 +104,11 @@ public class DownloadImpl implements ProgressListener{
 			} else {
 				alreadyDownloadedAsync();
 			}
+		} catch (CancellationException ce) {
+			s_logger.error("Download exception", ce);
+			downloadSuccess = false;
 		} catch (Exception e) {
-			s_logger.info("Download exception");
+			s_logger.info("Download exception", e);
 			downloadSuccess= false;
 			downloadFailedAsync(e, downloadIndex);
 		} 
@@ -125,10 +129,10 @@ public class DownloadImpl implements ProgressListener{
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
 		}
 	}
-	
+
 	public boolean deleteDownloadedFile() throws KuraException {
 		try {
-			 return DownloadFileUtilities.deleteDownloadedFile(options);
+			return DownloadFileUtilities.deleteDownloadedFile(options);
 		} catch (Exception e) {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
 		}

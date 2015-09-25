@@ -63,7 +63,7 @@ public class HttpDownloadCountingOutputStream extends DownloadCountingOutputStre
 				future.cancel(true);
 				executor.shutdownNow();
 				
-				postProgressEvent(options.getClientId(), getByteCount(), totalBytes, DOWNLOAD_STATUS.FAILED, "Download cancelled");
+				postProgressEvent(options.getClientId(), getByteCount(), totalBytes, DOWNLOAD_STATUS.CANCELLED, "Download cancelled");
 			}
 		}
 	}

@@ -24,6 +24,10 @@ public interface GwtDeviceService extends RemoteService
 	public ListLoadResult<GwtGroupedNVPair> findDeviceConfiguration() throws GwtKuraException;
 
 	public ListLoadResult<GwtGroupedNVPair> findBundles() throws GwtKuraException;
+	
+	public void startBundle(String bundleId) throws GwtKuraException;
+	
+	public void stopBundle(String bundleId) throws GwtKuraException;
 
 	public ListLoadResult<GwtGroupedNVPair> findThreads() throws GwtKuraException;
 

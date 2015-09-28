@@ -690,39 +690,7 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
 			                }
 		                }
 	                }
-                } else {
-	            	s_logger.warn("handleEvent() :: modem doesn't have correct number of resources, will try to toggle it ...");
-	            	
-	            	if ((s_task != null) && (!s_task.isDone())) {
-	                	s_stopThread.set(true);
-	                	toggleModemNotity();
-	            		s_logger.debug("handleEvent() :: Cancelling {} task ...", TOOGLE_MODEM_THREAD_NAME);
-	            		s_task.cancel(true);
-	            		s_logger.info("handleEvent() :: {} task cancelled? = {}", TOOGLE_MODEM_THREAD_NAME, s_task.isDone());
-	            		s_task = null;
-	            	}
-	            	
-	            	if (m_executor == null) {
-	            		m_executor = Executors.newSingleThreadScheduledExecutor();
-	            	}
-	            	s_logger.info("handleEvent() :: scheduling {} thread in {} minutes ..", 
-	            				TOOGLE_MODEM_THREAD_NAME, TOOGLE_MODEM_THREAD_EXECUTION_DELAY);
-	            	s_stopThread.set(false);
-	            	s_task = m_executor.schedule(new Runnable() {
-	            		@Override
-	            		public void run() {
-	            			Thread.currentThread().setName(TOOGLE_MODEM_THREAD_NAME);
-	            			try {
-			            		toggleModem(modemInfo);
-	            			} catch (InterruptedException interruptedException) {
-			    				Thread.interrupted();
-								s_logger.debug("handleEvent() :: modem monitor interrupted - {}", interruptedException);
-							} catch (Throwable t) {
-								s_logger.error("handleEvent() :: Exception while monitoring cellular connection {}", t);
-							}
-	            		}
-	            	}, TOOGLE_MODEM_THREAD_EXECUTION_DELAY, TimeUnit.MINUTES);
-	            }
+                }
             }
             
             /*

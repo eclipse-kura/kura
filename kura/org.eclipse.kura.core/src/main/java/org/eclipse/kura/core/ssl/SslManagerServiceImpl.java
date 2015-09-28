@@ -55,6 +55,7 @@ import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.ssl.SslManagerService;
 import org.eclipse.kura.ssl.SslServiceListener;
+import org.eclipse.kura.system.SystemService;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
@@ -77,6 +78,8 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
 
 	private boolean                  m_configurationDirty;
 	private SSLSocketFactory         m_sslSocketFactory;
+	
+	private SystemService 			 m_systemService;
 
 
 	// ----------------------------------------------------------------
@@ -99,6 +102,14 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
 
 	public void unsetConfigurationService(ConfigurationService configurationService) {
 		this.m_configurationService = null;
+	}
+	
+	public void setSystemService(SystemService systemService) {
+		this.m_systemService = systemService;
+	}
+
+	public void unsetSystemService(SystemService systemService) {
+		this.m_systemService = null;
 	}
 
 	// ----------------------------------------------------------------
@@ -579,10 +590,18 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
 		}
 	}
 	
-	private static boolean isDefaultPassword(char[] password)
+	private boolean isDefaultPassword(char[] password)
 	{
-		return Arrays.equals(password,
-				SslManagerServiceOptions.PROP_DEFAULT_TRUST_PASSWORD.toCharArray());
+		try {
+			char[] keystorePassword= m_systemService.getJavaKeyStorePassword();
+			boolean isDefaultFromInstaller= Arrays.equals(password, SslManagerServiceOptions.PROP_DEFAULT_TRUST_PASSWORD.toCharArray());
+			boolean isDefaultFromUser= Arrays.equals(password, keystorePassword);
+			return isDefaultFromInstaller || isDefaultFromUser;
+		} catch (Exception e) {
+			e.printStackTrace();
+		} 
+		
+		return false;
 	}
 	
 	private boolean changeDefaultKeystorePassword()

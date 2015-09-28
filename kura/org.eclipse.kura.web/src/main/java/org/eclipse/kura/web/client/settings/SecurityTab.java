@@ -119,14 +119,14 @@ public class SecurityTab extends LayoutContainer {
 							public void onSuccess(GwtXSRFToken token) {
 								AsyncCallback<Void> callback = new AsyncCallback<Void>() {
 									public void onFailure(Throwable caught) {
-										Info.display(MSGS.error(), "Error reloading start script fingerprint!");
+										Info.display(MSGS.error(), "Error reloading command line fingerprint!");
 									}
 
 									public void onSuccess(Void result) {
 										Info.display(MSGS.info(), "Fingerprint successfully reloaded!");
 									}
 								};
-								gwtSecurityService.reloadStartScriptFingerprint(token, callback);
+								gwtSecurityService.reloadCommandLineFingerprint(token, callback);
 							}
 						});
 

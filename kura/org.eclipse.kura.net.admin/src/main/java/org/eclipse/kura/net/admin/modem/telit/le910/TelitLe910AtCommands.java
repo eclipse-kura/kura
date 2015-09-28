@@ -9,16 +9,20 @@
  * Contributors:
  *   Eurotech
  */
-package org.eclipse.kura.net.modem;
 
-public enum ModemTechnologyType {
-    NONE,
-    CDMA,
-    EVDO,
-    LTE,
-    HSPA,
-    HSDPA,
-    UMTS,
-    GSM_GPRS,
-    GPS
+package org.eclipse.kura.net.admin.modem.telit.le910;
+
+public enum TelitLe910AtCommands {
+
+	gpsPowerUp("AT$GPSSLSR=2,3\r\n");
+	
+	private String m_command;
+	
+	private TelitLe910AtCommands(String atCommand) {
+		m_command = atCommand;
+	}
+	
+	public String getCommand () {
+		return m_command;
+	}
 }

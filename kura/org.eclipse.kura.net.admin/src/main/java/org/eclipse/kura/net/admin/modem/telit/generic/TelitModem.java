@@ -1,3 +1,15 @@
+/**
+ * Copyright (c) 2011, 2014 Eurotech and/or its affiliates
+ *
+ *  All rights reserved. This program and the accompanying materials
+ *  are made available under the terms of the Eclipse Public License v1.0
+ *  which accompanies this distribution, and is available at
+ *  http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *   Eurotech
+ */
+
 package org.eclipse.kura.net.admin.modem.telit.generic;
 
 import java.io.FileReader;
@@ -21,7 +33,6 @@ import org.eclipse.kura.net.NetConfig;
 import org.eclipse.kura.net.admin.modem.telit.he910.TelitHe910;
 import org.eclipse.kura.net.modem.CellularModem.SerialPortType;
 import org.eclipse.kura.net.modem.ModemDevice;
-import org.eclipse.kura.net.modem.ModemTechnologyType;
 import org.eclipse.kura.net.modem.SerialModemDevice;
 import org.eclipse.kura.usb.UsbModemDevice;
 import org.osgi.service.io.ConnectionFactory;
@@ -49,17 +60,14 @@ public abstract class TelitModem {
 	private ModemDevice m_device;
 	private String m_platform;
 	private ConnectionFactory m_connectionFactory;
-	private ModemTechnologyType m_technologyType;
 	private List<NetConfig> m_netConfigs = null;
 	
 	public TelitModem(ModemDevice device, String platform,
-			ConnectionFactory connectionFactory,
-			ModemTechnologyType technologyType) {
+			ConnectionFactory connectionFactory) {
 		
 		m_device = device;
 		m_platform = platform;
 		m_connectionFactory = connectionFactory;
-		m_technologyType = technologyType;
 		m_gpsEnabled = false;
 	}
 	
@@ -314,6 +322,10 @@ public abstract class TelitModem {
     }
     
     public void enableGps() throws KuraException {
+    	enableGps(TelitModemAtCommands.gpsPowerUp.getCommand());
+    }
+    
+    protected void enableGps(String gpsPowerupCommand) throws KuraException {
     	
     	if ((m_gpsSupported == null) || (m_gpsSupported == false)) {
     		s_logger.warn("enableGps() :: GPS NOT SUPPORTED");
@@ -332,8 +344,8 @@ public abstract class TelitModem {
 			while (numAttempts > 0) {
 	    		try {
 	    			if (!isGpsPowered(commAtConnection)) {
-	    				s_logger.debug("enableGps() :: sendCommand gpsPowerUp :: {}", TelitModemAtCommands.gpsPowerUp.getCommand());
-	    				commAtConnection.sendCommand(TelitModemAtCommands.gpsPowerUp.getCommand().getBytes(), 1000, 100);
+	    				s_logger.debug("enableGps() :: sendCommand gpsPowerUp :: {}", gpsPowerupCommand);
+	    				commAtConnection.sendCommand(gpsPowerupCommand.getBytes(), 1000, 100);
 	    			}
 	    			
 	    			s_logger.debug("enableGps() :: sendCommand gpsEnableNMEA :: {}", TelitModemAtCommands.gpsEnableNMEA.getCommand());
@@ -491,7 +503,7 @@ public abstract class TelitModem {
     	}
         return m_iccid;
     }
-    
+        
     public String getDataPort() throws KuraException {
     	String port = null;
     	List <String> ports = m_device.getSerialPorts();
@@ -572,10 +584,6 @@ public abstract class TelitModem {
 
 	public void setConfiguration(List<NetConfig> netConfigs) {
 		m_netConfigs = netConfigs;
-	}
-	
-	public ModemTechnologyType getTechnologyType() {
-		return m_technologyType;
 	}
 	
 	public CommURI getSerialConnectionProperties(SerialPortType portType) throws KuraException {

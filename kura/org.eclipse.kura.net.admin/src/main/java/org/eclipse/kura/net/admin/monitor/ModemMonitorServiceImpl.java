@@ -599,7 +599,18 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 							}
 							
 							if (pppState == PppState.NOT_CONNECTED) {
-								if (modem.getTechnologyType() == ModemTechnologyType.HSDPA) {
+								boolean checkIfSimCardReady = false;
+								List<ModemTechnologyType> modemTechnologyTypes = modem.getTechnologyTypes();
+								for (ModemTechnologyType modemTechnologyType : modemTechnologyTypes) {
+									if ((modemTechnologyType == ModemTechnologyType.GSM_GPRS)
+											|| (modemTechnologyType == ModemTechnologyType.UMTS)
+											|| (modemTechnologyType == ModemTechnologyType.HSDPA)
+											|| (modemTechnologyType == ModemTechnologyType.HSPA)) {
+										checkIfSimCardReady = true;
+										break;
+									}
+								}
+								if (checkIfSimCardReady) {
 									if(((HspaCellularModem)modem).isSimCardReady()) {
 										s_logger.info("monitor() :: !!! SIM CARD IS READY !!! connecting ...");
 										pppService.connect();

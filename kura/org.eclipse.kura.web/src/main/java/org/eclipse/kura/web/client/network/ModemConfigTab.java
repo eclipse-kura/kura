@@ -71,7 +71,8 @@ public class ModemConfigTab extends LayoutContainer
 	
 	private FormPanel                m_formPanel;
 	private LabelField               m_modemModel;
-	private SimpleComboBox<String>   m_networkTechCombo;
+	private LabelField				 m_networkTechnologies;
+	//private SimpleComboBox<String>   m_networkTechCombo;
 	private LabelField               m_connectionType;
     private TextField<String>        m_modemIdField;
 	private NumberField              m_ifaceNumField;
@@ -284,6 +285,13 @@ public class ModemConfigTab extends LayoutContainer
         //
         // Network Technology
         // 
+        m_networkTechnologies = new LabelField();
+        m_networkTechnologies.setName("networkTechnologies");
+        m_networkTechnologies.setFieldLabel(MSGS.netModemNetworkTechnology());
+        m_networkTechnologies.addPlugin(m_dirtyPlugin);
+        fieldSet.add(m_networkTechnologies, formData);
+        
+        /*
         m_networkTechCombo = new SimpleComboBox<String>();
         m_networkTechCombo.setName("networkTech");
         m_networkTechCombo.setFieldLabel(MSGS.netModemNetworkTechnology());
@@ -298,11 +306,11 @@ public class ModemConfigTab extends LayoutContainer
                 refreshForm();
             }
         });        
-        m_networkTechCombo.addListener(Events.OnMouseOver, new MouseOverListener(MSGS.netModemToolTipNetworkTopology()));
+        m_networkTechCombo.addListener(Events.OnMouseOver, new MouseOverListener(MSGS.netModemToolTipNetworkTechnology()));
         m_networkTechCombo.addStyleName("kura-combobox");
         m_networkTechCombo.addPlugin(m_dirtyPlugin);
         fieldSet.add(m_networkTechCombo, formData);
-       
+       	*/
         //
         // Service Type
         // 
@@ -617,6 +625,21 @@ public class ModemConfigTab extends LayoutContainer
             
 		    m_modemModel.setValue(m_selectNetIfConfig.getManufacturer() + " - " + m_selectNetIfConfig.getModel());
 		    
+		    List<String> networkTechnologies = m_selectNetIfConfig.getNetworkTechnology();
+		    if(networkTechnologies != null && networkTechnologies.size() > 0) {
+		    	StringBuilder sbNetworkTechnologies = new StringBuilder();
+    		    for(int i = 0; i < networkTechnologies.size(); i++) {
+    		    	String networkTechnology = networkTechnologies.get(i);
+    		    	sbNetworkTechnologies.append(networkTechnology);
+    		    	if (i < (networkTechnologies.size()-1)) {
+    		    		sbNetworkTechnologies.append(", ");
+    		    	}
+    		    }
+    		    m_networkTechnologies.setValue(sbNetworkTechnologies.toString());
+		    } else {
+		    	m_networkTechnologies.setValue(MSGS.unknown());
+		    }
+		    /*
 		    m_networkTechCombo.removeAll();
 		    List<String> networkTechnologies = m_selectNetIfConfig.getNetworkTechnology();
 		    if(networkTechnologies != null && networkTechnologies.size() > 0) {
@@ -629,7 +652,8 @@ public class ModemConfigTab extends LayoutContainer
 		        m_networkTechCombo.setSimpleValue(MSGS.unknown());
 		    }
             m_networkTechCombo.setOriginalValue(m_networkTechCombo.getValue());
-
+			*/
+		    
 		    m_connectionType.setValue(m_selectNetIfConfig.getConnectionType());
 		    
 			m_modemIdField.setValue(m_selectNetIfConfig.getModemId());

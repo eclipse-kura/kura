@@ -20,17 +20,17 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 @RemoteServiceRelativePath("certificate")
 public interface GwtCertificatesService extends RemoteService 
 {	
-	public Integer storePublicPrivateKeys(GwtXSRFToken xsfrToken, String privateCert, String publicCert, String password, String alias) throws GwtKuraException;
+	public Integer storePublicPrivateKeys(GwtXSRFToken xsrfToken, String privateCert, String publicCert, String password, String alias) throws GwtKuraException;
 	
-	public Integer storeLeafKey(GwtXSRFToken xsfrToken, String publicCert, String alias) throws GwtKuraException;
+	public Integer storeLeafKey(GwtXSRFToken xsrfToken, String publicCert, String alias) throws GwtKuraException;
 	
-	public Integer storePublicChain(GwtXSRFToken xsfrToken, String publicCert, String alias) throws GwtKuraException;
+	public Integer storePublicChain(GwtXSRFToken xsrfToken, String publicCert, String alias) throws GwtKuraException;
 	
-	public Integer storeCertificationAuthority(GwtXSRFToken xsfrToken, String publicCert, String alias) throws GwtKuraException;
+	public Integer storeCertificationAuthority(GwtXSRFToken xsrfToken, String publicCert, String alias) throws GwtKuraException;
 	
-	public Integer storeBundleLeafKey(GwtXSRFToken xsfrToken, String publicCert, String alias) throws GwtKuraException;
+	public Integer storeBundleLeafKey(GwtXSRFToken xsrfToken, String publicCert, String alias) throws GwtKuraException;
 	
-	public Integer storeBundlePublicChain(GwtXSRFToken xsfrToken, String publicCert, String alias) throws GwtKuraException;
+	public Integer storeBundlePublicChain(GwtXSRFToken xsrfToken, String publicCert, String alias) throws GwtKuraException;
 	
-	public Integer storeBundleCertificationAuthority(GwtXSRFToken xsfrToken, String publicCert, String alias) throws GwtKuraException;
+	public Integer storeBundleCertificationAuthority(GwtXSRFToken xsrfToken, String publicCert, String alias) throws GwtKuraException;
 }

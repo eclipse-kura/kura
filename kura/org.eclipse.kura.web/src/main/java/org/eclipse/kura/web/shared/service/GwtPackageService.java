@@ -23,8 +23,8 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 @RemoteServiceRelativePath("package")
 public interface GwtPackageService extends RemoteService 
 {
-	public List<GwtDeploymentPackage> findDeviceDeploymentPackages(GwtXSRFToken xsfrToken) throws GwtKuraException;
+	public List<GwtDeploymentPackage> findDeviceDeploymentPackages(GwtXSRFToken xsrfToken) throws GwtKuraException;
 	
-	public void uninstallDeploymentPackage(GwtXSRFToken xsfrToken, String packageName) throws GwtKuraException;
+	public void uninstallDeploymentPackage(GwtXSRFToken xsrfToken, String packageName) throws GwtKuraException;
 
 }

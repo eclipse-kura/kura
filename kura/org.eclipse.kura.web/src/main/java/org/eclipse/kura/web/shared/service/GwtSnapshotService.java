@@ -22,7 +22,7 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 @RemoteServiceRelativePath("snapshot")
 public interface GwtSnapshotService extends RemoteService
 {
-	public ListLoadResult<GwtSnapshot> findDeviceSnapshots(GwtXSRFToken xsfrToken) throws GwtKuraException;
+	public ListLoadResult<GwtSnapshot> findDeviceSnapshots(GwtXSRFToken xsrfToken) throws GwtKuraException;
 	
-	public void rollbackDeviceSnapshot(GwtXSRFToken xsfrToken, GwtSnapshot snapshot) throws GwtKuraException;
+	public void rollbackDeviceSnapshot(GwtXSRFToken xsrfToken, GwtSnapshot snapshot) throws GwtKuraException;
 }

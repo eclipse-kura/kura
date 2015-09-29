@@ -22,13 +22,17 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 @RemoteServiceRelativePath("device")
 public interface GwtDeviceService extends RemoteService 
 {	
-	public ListLoadResult<GwtGroupedNVPair> findDeviceConfiguration(GwtXSRFToken xsfrToken) throws GwtKuraException;
+	public ListLoadResult<GwtGroupedNVPair> findDeviceConfiguration(GwtXSRFToken xsrfToken) throws GwtKuraException;
 
-	public ListLoadResult<GwtGroupedNVPair> findBundles(GwtXSRFToken xsfrToken) throws GwtKuraException;
-
-	public ListLoadResult<GwtGroupedNVPair> findThreads(GwtXSRFToken xsfrToken) throws GwtKuraException;
-
-	public ListLoadResult<GwtGroupedNVPair> findSystemProperties(GwtXSRFToken xsfrToken) throws GwtKuraException; 
+	public ListLoadResult<GwtGroupedNVPair> findBundles(GwtXSRFToken xsrfToken) throws GwtKuraException;
 	
-	public String executeCommand(GwtXSRFToken xsfrToken, String cmd, String pwd) throws GwtKuraException;
+	public void startBundle(GwtXSRFToken xsrfToken, String bundleId) throws GwtKuraException;
+	
+	public void stopBundle(GwtXSRFToken xsrfToken, String bundleId) throws GwtKuraException;
+
+	public ListLoadResult<GwtGroupedNVPair> findThreads(GwtXSRFToken xsrfToken) throws GwtKuraException;
+
+	public ListLoadResult<GwtGroupedNVPair> findSystemProperties(GwtXSRFToken xsrfToken) throws GwtKuraException; 
+	
+	public String executeCommand(GwtXSRFToken xsrfToken, String cmd, String pwd) throws GwtKuraException;
 }

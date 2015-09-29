@@ -52,5 +52,6 @@ public interface CellularModemFactory {
 	 * 
 	 * @return type of modem service as <code>ModemTechnologyType</code> 
 	 */
+	@Deprecated
 	public ModemTechnologyType getType();
 }

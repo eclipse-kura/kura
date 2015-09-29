@@ -54,7 +54,7 @@ public class SierraUsb598ModemFactory implements CellularModemFactory {
 		SierraUsb598 sierraUsb598 = m_modemServices.get(key);
 
 		if (sierraUsb598 == null) {
-			sierraUsb598 = new SierraUsb598(modemDevice, m_connectionFactory, s_type);
+			sierraUsb598 = new SierraUsb598(modemDevice, m_connectionFactory);
 			sierraUsb598.bind();
 			m_modemServices.put(key, sierraUsb598);
 		} else {
@@ -76,6 +76,7 @@ public class SierraUsb598ModemFactory implements CellularModemFactory {
 	}
 
 	@Override
+	@Deprecated
 	public ModemTechnologyType getType() {
 		return s_type;
 	}

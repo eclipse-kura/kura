@@ -21,7 +21,7 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 @RemoteServiceRelativePath("setting")
 public interface GwtSettingService extends RemoteService 
 {	
-	public void updateSettings(GwtXSRFToken xsfrToken, GwtSettings settings) throws GwtKuraException;
+	public void updateSettings(GwtXSRFToken xsrfToken, GwtSettings settings) throws GwtKuraException;
 
-	public void logout(GwtXSRFToken xsfrToken) throws GwtKuraException;
+	public void logout(GwtXSRFToken xsrfToken) throws GwtKuraException;
 }

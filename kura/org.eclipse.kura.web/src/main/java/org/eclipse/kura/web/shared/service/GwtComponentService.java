@@ -28,10 +28,10 @@ public interface GwtComponentService extends RemoteService
 	 * @param device
 	 * @return
 	 */
-	public List<GwtConfigComponent> findComponentConfigurations(GwtXSRFToken xsfrToken) throws GwtKuraException;
+	public List<GwtConfigComponent> findComponentConfigurations(GwtXSRFToken xsrfToken) throws GwtKuraException;
 	
-	public List<GwtConfigComponent> findComponentConfiguration(GwtXSRFToken xsfrToken) throws GwtKuraException;
+	public List<GwtConfigComponent> findComponentConfiguration(GwtXSRFToken xsrfToken) throws GwtKuraException;
 
 	
-	public void updateComponentConfiguration(GwtXSRFToken xsfrToken, GwtConfigComponent configComponent) throws GwtKuraException; 
+	public void updateComponentConfiguration(GwtXSRFToken xsrfToken, GwtConfigComponent configComponent) throws GwtKuraException; 
 }

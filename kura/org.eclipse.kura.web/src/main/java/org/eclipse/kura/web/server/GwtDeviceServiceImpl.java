@@ -40,6 +40,7 @@ import org.eclipse.kura.web.shared.model.GwtGroupedNVPair;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.eclipse.kura.web.shared.service.GwtDeviceService;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
 import org.osgi.util.position.Position;
 import org.slf4j.Logger;
@@ -292,6 +293,52 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
 			}
 		}
 		return new BaseListLoadResult<GwtGroupedNVPair>(pairs);
+	}
+
+	public void startBundle(GwtXSRFToken xsrfToken, String bundleId) throws GwtKuraException {
+		checkXSRFToken(xsrfToken);
+		SystemService systemService = ServiceLocator.getInstance().getService(SystemService.class);
+		Bundle[] bundles = systemService.getBundles();
+		
+		s_logger.info("Starting bundle with ID: " + bundleId);
+		for (Bundle b : bundles) {
+			if (b.getBundleId() == Long.parseLong(bundleId)) {
+				try {
+					b.start();
+					return;
+				} catch (BundleException e) {
+					s_logger.error("Failed to start bundle {}: {}", new Object[] {b.getBundleId(), e});
+					throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR);
+				}
+			}
+		}
+		// Bundle was not found, throw error
+		s_logger.error("Could not find bundle with ID: " + bundleId);
+		throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR);
+	}
+	
+	public void stopBundle(GwtXSRFToken xsrfToken, String bundleId) throws GwtKuraException {
+		checkXSRFToken(xsrfToken);
+		SystemService systemService = ServiceLocator.getInstance().getService(SystemService.class);
+		Bundle[] bundles = systemService.getBundles();
+		
+		s_logger.info("Stopping bundle with ID: " + bundleId);
+		for (Bundle b : bundles) {
+			if (b.getBundleId() == Long.parseLong(bundleId)) {
+				try {
+					b.stop();
+					return;
+				} catch (BundleException e) {
+					s_logger.error("Failed to stop bundle {}: {}", new Object[] {b.getBundleId(), e});
+					throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR);
+				}
+			}
+		}
+		
+		// Bundle was not found, throw error
+		s_logger.error("Could not find bundle with ID: " + bundleId);
+		throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR);
+
 	}
 	
 	public String executeCommand(GwtXSRFToken xsrfToken, String cmd, String pwd) throws GwtKuraException {

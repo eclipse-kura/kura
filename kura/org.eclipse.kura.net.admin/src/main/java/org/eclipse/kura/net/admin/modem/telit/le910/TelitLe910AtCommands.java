@@ -10,14 +10,19 @@
  *   Eurotech
  */
 
-package org.eclipse.kura.linux.net.util;
+package org.eclipse.kura.net.admin.modem.telit.le910;
 
-import java.util.List;
+public enum TelitLe910AtCommands {
 
-import org.eclipse.kura.KuraException;
-import org.eclipse.kura.net.wifi.WifiAccessPoint;
-
-public interface IScanTool {
-
-	public List<WifiAccessPoint> scan() throws KuraException;
+	gpsPowerUp("AT$GPSSLSR=2,3\r\n");
+	
+	private String m_command;
+	
+	private TelitLe910AtCommands(String atCommand) {
+		m_command = atCommand;
+	}
+	
+	public String getCommand () {
+		return m_command;
+	}
 }

@@ -62,6 +62,7 @@ import com.google.gwt.user.client.ui.Widget;
 public class ServiceTree extends ContentPanel
 {
 	private static final Messages MSGS = GWT.create(Messages.class);
+	private static final String SERVLET_URL = "/" + GWT.getModuleName() + "/file/icon?pid=";
 	
 	private final GwtComponentServiceAsync gwtComponentService = GWT.create(GwtComponentService.class);
 
@@ -203,6 +204,10 @@ public class ServiceTree extends ContentPanel
             			     icon.toLowerCase().startsWith("https://")) &&
             				Util.isImagePath(icon)) {
             			return new ScaledAbstractImagePrototype(IconHelper.createPath(icon, 32, 32));
+            		}
+            		else if (icon != null &&
+            				Util.isImagePath(icon)) {
+            			return new ScaledAbstractImagePrototype(IconHelper.createPath(SERVLET_URL + model.get("componentId"), 32, 32));
             		}
             		else {
             			return AbstractImagePrototype.create(Resources.INSTANCE.plugin32());

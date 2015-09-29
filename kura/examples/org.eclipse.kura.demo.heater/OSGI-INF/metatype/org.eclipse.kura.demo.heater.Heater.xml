@@ -17,7 +17,7 @@
          name="Heater" 
          description="This is a simulator for an heater gateway application. Its configuration options will be passed down the smart heater. ">
         
-        <Icon resource="OSGI-INF/weather-showers.png" size="32"/>
+        <Icon resource="OSGI-INF/heater.png" size="32"/>
 
         <AD id="mode"  
             name="mode"

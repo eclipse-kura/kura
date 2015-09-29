@@ -588,11 +588,10 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 				NetInterfaceStatus netInterfaceStatus = getNetInterfaceStatus(modem.getConfiguration());
 				try {
 					String ifaceName = m_networkService.getModemPppPort(modem.getModemDevice());
-					if (netInterfaceStatus == NetInterfaceStatus.netIPv4StatusEnabledWAN) {				
+					if (netInterfaceStatus == NetInterfaceStatus.netIPv4StatusEnabledWAN) {	
 						if (ifaceName != null) {
 							pppService = PppFactory.obtainPppService(ifaceName, modem.getDataPort());
 							pppState = pppService.getPppState();
-							
 							if (m_pppState != pppState) {
 								s_logger.info("monitor() :: previous PppState={}", m_pppState);
 								s_logger.info("monitor() :: current PppState={}", pppState);
@@ -617,6 +616,8 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 										if (m_pppState == PppState.NOT_CONNECTED) {
 											m_resetTimerStart = System.currentTimeMillis();
 										}
+									} else {
+										s_logger.warn("monitor() :: ! SIM CARD IS NOT READY !");
 									}
 								} else {
 									s_logger.info("monitor() :: connecting ...");

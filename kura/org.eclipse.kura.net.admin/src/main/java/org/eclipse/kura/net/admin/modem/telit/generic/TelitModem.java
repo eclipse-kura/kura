@@ -22,13 +22,11 @@ import org.eclipse.kura.KuraException;
 import org.eclipse.kura.comm.CommConnection;
 import org.eclipse.kura.comm.CommURI;
 import org.eclipse.kura.linux.net.modem.ModemDriver;
-import org.eclipse.kura.linux.net.modem.SerialModemComm;
 import org.eclipse.kura.linux.net.modem.SupportedSerialModemInfo;
 import org.eclipse.kura.linux.net.modem.SupportedSerialModemsInfo;
 import org.eclipse.kura.linux.net.modem.SupportedUsbModemInfo;
 import org.eclipse.kura.linux.net.modem.SupportedUsbModemsInfo;
 import org.eclipse.kura.linux.net.modem.UsbModemDriver;
-import org.eclipse.kura.linux.net.util.KuraConstants;
 import org.eclipse.kura.net.NetConfig;
 import org.eclipse.kura.net.admin.modem.telit.he910.TelitHe910;
 import org.eclipse.kura.net.modem.CellularModem.SerialPortType;
@@ -42,8 +40,6 @@ import org.slf4j.LoggerFactory;
 public abstract class TelitModem {
 	
 	private static final Logger s_logger = LoggerFactory.getLogger(TelitModem.class);
-	private static final String OS_VERSION = System.getProperty("kura.os.version");
-	private static final String TARGET_NAME = System.getProperty("target.device");
 	
 	protected static Object s_atLock = new Object(); 
 	
@@ -326,14 +322,13 @@ public abstract class TelitModem {
     }
     
     protected void enableGps(String gpsPowerupCommand) throws KuraException {
-    	
     	if ((m_gpsSupported == null) || (m_gpsSupported == false)) {
     		s_logger.warn("enableGps() :: GPS NOT SUPPORTED");
     		m_gpsEnabled = false;
     		return;
     	}
     	synchronized (s_atLock) {
-    		CommConnection commAtConnection = openSerialPort(getGpsPort());
+    		CommConnection commAtConnection = openSerialPort(getAtPort());
     		if (!isAtReachable(commAtConnection)) {
     			closeSerialPort(commAtConnection);
 	    		throw new KuraException(KuraErrorCode.NOT_CONNECTED, "Modem not available for AT commands: " + TelitHe910.class.getName());
@@ -342,14 +337,16 @@ public abstract class TelitModem {
     		byte[] reply = null;
     		int numAttempts = 3;
 			while (numAttempts > 0) {
+				String atPort = getAtPort();
+		    	String gpsPort = getGpsPort();
+				String gpsEnableNMEAcommand = formGpsEnableNMEACommand(atPort, gpsPort);
 	    		try {
 	    			if (!isGpsPowered(commAtConnection)) {
 	    				s_logger.debug("enableGps() :: sendCommand gpsPowerUp :: {}", gpsPowerupCommand);
 	    				commAtConnection.sendCommand(gpsPowerupCommand.getBytes(), 1000, 100);
 	    			}
-	    			
-	    			s_logger.debug("enableGps() :: sendCommand gpsEnableNMEA :: {}", TelitModemAtCommands.gpsEnableNMEA.getCommand());
-					reply = commAtConnection.sendCommand(TelitModemAtCommands.gpsEnableNMEA.getCommand().getBytes(), 3000, 100);
+	    			s_logger.debug("enableGps() :: sendCommand gpsEnableNMEA :: {}", gpsEnableNMEAcommand);
+					reply = commAtConnection.sendCommand(gpsEnableNMEAcommand.getBytes(), 3000, 100);
 	    		} catch (IOException e) {
 					closeSerialPort(commAtConnection);
 					throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
@@ -357,13 +354,22 @@ public abstract class TelitModem {
 		
 	    		if ((reply != null) && (reply.length > 0)) {
 				    String sReply = getResponseString(reply);
-				    if((sReply != null) && !sReply.isEmpty()) {
-				    	s_logger.trace("enableGps() :: gpsEnableNMEA reply={}", sReply);
-				    	if (sReply.startsWith("CONNECT")) {
-				    		s_logger.info("Modem replied to the {} command with 'CONNECT'", TelitModemAtCommands.gpsEnableNMEA.getCommand());
-				    		s_logger.info("enableGps() :: !!! Modem GPS enabled !!!");
-				    		m_gpsEnabled = true;
-				    		break;
+				    if (sReply != null) {
+				    	if(atPort.equals(gpsPort)) {
+						    s_logger.trace("enableGps() :: gpsEnableNMEA reply={}", sReply);
+					    	if (!sReply.isEmpty() && sReply.startsWith("CONNECT")) {
+					    		s_logger.info("enableGps() :: Modem replied to the {} command with 'CONNECT'", gpsEnableNMEAcommand);
+					    		s_logger.info("enableGps() :: !!! Modem GPS enabled !!!");
+					    		m_gpsEnabled = true;
+					    		break;
+					    	}
+				    	} else {
+				    		if (sReply.isEmpty()) {
+					    		s_logger.info("enableGps() :: Modem replied to the {} command with 'OK'", gpsEnableNMEAcommand);
+					    		s_logger.info("enableGps() :: !!! Modem GPS enabled !!!");
+					    		m_gpsEnabled = true;
+					    		break;
+					    	}
 				    	}
 				    }
 	    		}
@@ -376,16 +382,17 @@ public abstract class TelitModem {
     }
     
     public void disableGps() throws KuraException {
-    	
     	if ((m_gpsSupported == null) || (m_gpsSupported == false)) {
     		s_logger.warn("disableGps() :: GPS NOT SUPPORTED");
     		m_gpsEnabled = false;
     		return;
     	}
     	synchronized (s_atLock) {
-    		CommConnection commAtConnection = openSerialPort(getGpsPort());
+    		CommConnection commAtConnection = openSerialPort(getAtPort());
     		try {
-    			if(!isAtReachable(commAtConnection)) {
+    			String atPort = getAtPort();
+        		String gpsPort = getGpsPort();
+    			if(atPort.equals(gpsPort) && !isAtReachable(commAtConnection)) {
 	    			int numAttempts = 3;
 	    			while (numAttempts > 0) {
 						s_logger.debug("disableGps() :: sendCommand gpsDisableNMEA {}", TelitModemAtCommands.gpsDisableNMEA.getCommand());
@@ -427,7 +434,7 @@ public abstract class TelitModem {
     				m_gpsEnabled = false;
     			}
 				
-				s_logger.debug("sendCommand gpsPowerDown :: {}", TelitModemAtCommands.gpsPowerDown.getCommand());
+				s_logger.debug("disableGps() :: sendCommand gpsPowerDown :: {}", TelitModemAtCommands.gpsPowerDown.getCommand());
 				commAtConnection.sendCommand(TelitModemAtCommands.gpsPowerDown.getCommand().getBytes(), 1000, 100);
 				
     		} catch (IOException e) {
@@ -559,17 +566,34 @@ public abstract class TelitModem {
     	return port;
 	}
     
+    
     public String getGpsPort() throws KuraException {
     	String port = null;
-    	if (OS_VERSION.equals(KuraConstants.Mini_Gateway.getImageName() + "_" + KuraConstants.Mini_Gateway.getImageVersion()) &&
-    			TARGET_NAME.equals(KuraConstants.Mini_Gateway.getTargetName())) {
-    		port = SerialModemComm.MiniGateway.getAtPort();
+    	List <String> ports = m_device.getSerialPorts();
+    	if ((ports != null) && (ports.size() > 0)) {
+	    	if (m_device instanceof UsbModemDevice) {
+	    		SupportedUsbModemInfo usbModemInfo = SupportedUsbModemsInfo.getModem((UsbModemDevice)m_device);
+	    		if (usbModemInfo != null) {
+	    			port = ports.get(usbModemInfo.getGpsPort());
+	    		} else {
+	    			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "No GPS serial port available");
+	    		}
+	    	} else if (m_device instanceof SerialModemDevice) {
+	    		SupportedSerialModemInfo serialModemInfo = SupportedSerialModemsInfo.getModem();
+	    		if (serialModemInfo != null) {
+	    			port = serialModemInfo.getDriver().getComm().getAtPort();
+	    		} else {
+	    			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "No GPS serial port available");
+	    		}
+	    	} else {
+	    		throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "Unsupported modem device");
+	    	}
     	} else {
-    		port = getAtPort();
+    		throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "No serial ports available");
     	}
     	return port;
     }
-	
+    
     public ModemDevice getModemDevice() {
         return m_device;
     }
@@ -592,7 +616,7 @@ public abstract class TelitModem {
 			if (portType == SerialPortType.ATPORT) {
 				port = getAtPort();
 			} else if (portType == SerialPortType.DATAPORT) {
-				port = this.getDataPort();
+				port = getDataPort();
 			} else if (portType == SerialPortType.GPSPORT) {
 				port = getGpsPort();
 			} else {
@@ -779,5 +803,17 @@ public abstract class TelitModem {
     		} 
 		}
 		return modemDriver;
+	}
+	
+	private String formGpsEnableNMEACommand(String atPort, String gpsPort) throws KuraException {
+		
+		StringBuilder sbCommand = new StringBuilder(TelitModemAtCommands.gpsEnableNMEA.getCommand());
+		if(atPort.equals(gpsPort)) {
+			sbCommand.append("3");
+		} else {
+			sbCommand.append("2");
+		}
+		sbCommand.append(",1,1,1,1,1,1\r\n");
+		return sbCommand.toString();
 	}
 }

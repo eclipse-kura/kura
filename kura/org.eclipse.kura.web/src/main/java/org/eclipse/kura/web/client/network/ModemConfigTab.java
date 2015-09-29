@@ -632,7 +632,7 @@ public class ModemConfigTab extends LayoutContainer
     		    	String networkTechnology = networkTechnologies.get(i);
     		    	sbNetworkTechnologies.append(networkTechnology);
     		    	if (i < (networkTechnologies.size()-1)) {
-    		    		sbNetworkTechnologies.append(", ");
+    		    		sbNetworkTechnologies.append('/');
     		    	}
     		    }
     		    m_networkTechnologies.setValue(sbNetworkTechnologies.toString());

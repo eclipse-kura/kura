@@ -92,7 +92,7 @@ public class TelitHe910 extends TelitModem implements HspaCellularModem {
     	boolean simReady = false;
 		String port = null;
 		
-		if (isGpsEnabled() && (getAtPort() == getGpsPort()) && (getAtPort() != getDataPort())) {
+		if (isGpsEnabled() && getAtPort().equals(getGpsPort()) && !getAtPort().equals(getDataPort())) {
 			port = getDataPort();
 		} else {
 			port = getAtPort();

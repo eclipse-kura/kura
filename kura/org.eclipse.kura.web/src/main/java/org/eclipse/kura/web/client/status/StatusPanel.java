@@ -17,28 +17,35 @@ import java.util.List;
 
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.resources.Resources;
+import org.eclipse.kura.web.client.util.Constants;
 import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.shared.model.GwtGroupedNVPair;
 import org.eclipse.kura.web.shared.model.GwtSession;
 import org.eclipse.kura.web.shared.service.GwtStatusService;
 import org.eclipse.kura.web.shared.service.GwtStatusServiceAsync;
 
+import com.allen_sauer.gwt.log.client.Log;
 import com.extjs.gxt.ui.client.data.BaseListLoader;
 import com.extjs.gxt.ui.client.data.ListLoadResult;
 import com.extjs.gxt.ui.client.data.RpcProxy;
 import com.extjs.gxt.ui.client.event.ButtonEvent;
+import com.extjs.gxt.ui.client.event.Events;
 import com.extjs.gxt.ui.client.event.SelectionListener;
 import com.extjs.gxt.ui.client.store.GroupingStore;
 import com.extjs.gxt.ui.client.store.StoreSorter;
 import com.extjs.gxt.ui.client.widget.ContentPanel;
 import com.extjs.gxt.ui.client.widget.LayoutContainer;
 import com.extjs.gxt.ui.client.widget.button.Button;
+import com.extjs.gxt.ui.client.widget.form.AdapterField;
+import com.extjs.gxt.ui.client.widget.form.FieldSet;
 import com.extjs.gxt.ui.client.widget.grid.ColumnConfig;
 import com.extjs.gxt.ui.client.widget.grid.ColumnModel;
 import com.extjs.gxt.ui.client.widget.grid.Grid;
 import com.extjs.gxt.ui.client.widget.grid.GroupingView;
 import com.extjs.gxt.ui.client.widget.layout.FillLayout;
 import com.extjs.gxt.ui.client.widget.layout.FitLayout;
+import com.extjs.gxt.ui.client.widget.layout.FormData;
+import com.extjs.gxt.ui.client.widget.layout.HBoxLayout;
 import com.extjs.gxt.ui.client.widget.toolbar.SeparatorToolItem;
 import com.extjs.gxt.ui.client.widget.toolbar.ToolBar;
 import com.google.gwt.core.client.GWT;
@@ -59,6 +66,8 @@ public class StatusPanel extends LayoutContainer {
     
     private ToolBar				m_toolBar;
     private Button				m_refreshButton;
+    private Button				m_connectDataServiceButton;
+    private Button				m_disconnectDataServiceButton;
     
     private Grid<GwtGroupedNVPair> m_grid;
     private GroupingStore<GwtGroupedNVPair> m_store;
@@ -108,8 +117,54 @@ public class StatusPanel extends LayoutContainer {
         
         m_toolBar.add(m_refreshButton);
         m_toolBar.add(new SeparatorToolItem());
+        
+        m_connectDataServiceButton = new Button(MSGS.connectButton(),
+        		null, // no image
+        		new SelectionListener<ButtonEvent>() {
+					@Override
+					public void componentSelected(ButtonEvent ce) {
+						mask(MSGS.waiting());
+						gwtStatusService.connectDataService(new AsyncCallback<Void>() {
+							public void onSuccess(Void result) {
+								unmask();
+								refresh();
+							}
+							public void onFailure(Throwable caught) {
+								Log.debug("caught: " + caught.toString());
+								FailureHandler.handle(caught);
+							}
+    					});
+					}
+            	}
+        );
+        m_toolBar.add(m_connectDataServiceButton);
+        m_toolBar.add(new SeparatorToolItem());
+        m_connectDataServiceButton.disable();
+        
+        m_disconnectDataServiceButton = new Button(MSGS.disconnectButton(),
+        		null, // no image
+        		new SelectionListener<ButtonEvent>() {
+					@Override
+					public void componentSelected(ButtonEvent ce) {
+						mask(MSGS.waiting());
+						gwtStatusService.disconnectDataService(new AsyncCallback<Void>() {
+							public void onSuccess(Void result) {
+								unmask();
+								refresh();
+							}
+							public void onFailure(Throwable caught) {
+								Log.debug("caught: " + caught.toString());
+								FailureHandler.handle(caught);
+							}
+    					});
+					}
+            	}
+        );
+        m_toolBar.add(m_disconnectDataServiceButton);
+        m_toolBar.add(new SeparatorToolItem());
+        m_disconnectDataServiceButton.disable();
     }
-    
+  
     private void initStatusPanel() {
     	
     	RpcProxy<ListLoadResult<GwtGroupedNVPair>> proxy = new RpcProxy<ListLoadResult<GwtGroupedNVPair>>() {
@@ -122,6 +177,19 @@ public class StatusPanel extends LayoutContainer {
 						FailureHandler.handle(caught);
 					}
 					public void onSuccess(ListLoadResult<GwtGroupedNVPair> pairs) {
+						List<GwtGroupedNVPair> results = pairs.getData();
+						for (GwtGroupedNVPair result : results) {
+							if ("Connection Status".equals(result.getName())) {
+								if ("CONNECTED".equals(result.getValue())) {
+									m_connectDataServiceButton.disable();
+									m_disconnectDataServiceButton.enable();
+								}
+								else {
+									m_connectDataServiceButton.enable();
+									m_disconnectDataServiceButton.disable();
+								}
+							}
+						}
 						unmask();
 						callback.onSuccess(pairs);
 					}

@@ -67,6 +67,8 @@ public class ServiceTree extends ContentPanel
 	private static final Messages MSGS = GWT.create(Messages.class);
 
 	private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
+	private static final String SERVLET_URL = "/" + GWT.getModuleName() + "/file/icon?pid=";
+
 	private final GwtComponentServiceAsync gwtComponentService = GWT.create(GwtComponentService.class);
 
 	private GwtSession           m_currentSession;
@@ -181,45 +183,49 @@ public class ServiceTree extends ContentPanel
 					if ("DiagnosticsService".equals(icon)) {
 						return AbstractImagePrototype.create(Resources.INSTANCE.diagnostics32());
 					} 
-					else if ("ClockService".equals(icon)) {
-						return AbstractImagePrototype.create(Resources.INSTANCE.clock32());
-					}
-					else if ("DataService".equals(icon)) {
-						return AbstractImagePrototype.create(Resources.INSTANCE.databaseConnect32());
-					}
-					else if ("MqttDataTransport".equals(icon)) {
-						return AbstractImagePrototype.create(Resources.INSTANCE.mqtt32());
-					}
-					else if ("PositionService".equals(icon)) {
-						return AbstractImagePrototype.create(Resources.INSTANCE.gps32());
-					}
-					else if ("WatchdogService".equals(icon)) {
-						return AbstractImagePrototype.create(Resources.INSTANCE.dog32());
-					}
-					else if ("SslManagerService".equals(icon)) {
-						return AbstractImagePrototype.create(Resources.INSTANCE.lock32());
-					}
-					else if ("VpnService".equals(icon)) {
-						return AbstractImagePrototype.create(Resources.INSTANCE.vpn32());
-					}
-					else if ("ProvisioningService".equals(icon)) {
-						return AbstractImagePrototype.create(Resources.INSTANCE.provisioning32());
-					}
-					else if ("CommandPasswordService".equals(icon)) {
-						return AbstractImagePrototype.create(Resources.INSTANCE.command32());
-					}
-					else if ("DenaliService".equals(icon)) {
-						return AbstractImagePrototype.create(Resources.INSTANCE.systemLock32());
-					}
-					else if (icon != null && 
-							(icon.toLowerCase().startsWith("http://") ||
-									icon.toLowerCase().startsWith("https://")) &&
-									Util.isImagePath(icon)) {
-						return new ScaledAbstractImagePrototype(IconHelper.createPath(icon, 32, 32));
-					}
-					else {
-						return AbstractImagePrototype.create(Resources.INSTANCE.plugin32());
-					}
+            		else if ("ClockService".equals(icon)) {
+            			return AbstractImagePrototype.create(Resources.INSTANCE.clock32());
+            		}
+            		else if ("DataService".equals(icon)) {
+            			return AbstractImagePrototype.create(Resources.INSTANCE.databaseConnect32());
+            		}
+            		else if ("MqttDataTransport".equals(icon)) {
+            			return AbstractImagePrototype.create(Resources.INSTANCE.mqtt32());
+            		}
+            		else if ("PositionService".equals(icon)) {
+            			return AbstractImagePrototype.create(Resources.INSTANCE.gps32());
+            		}
+            		else if ("WatchdogService".equals(icon)) {
+            			return AbstractImagePrototype.create(Resources.INSTANCE.dog32());
+            		}
+                    else if ("SslManagerService".equals(icon)) {
+                        return AbstractImagePrototype.create(Resources.INSTANCE.lock32());
+                    }
+            		else if ("VpnService".equals(icon)) {
+            			return AbstractImagePrototype.create(Resources.INSTANCE.vpn32());
+            		}
+            		else if ("ProvisioningService".equals(icon)) {
+            			return AbstractImagePrototype.create(Resources.INSTANCE.provisioning32());
+            		}
+            		else if ("CommandPasswordService".equals(icon)) {
+            			return AbstractImagePrototype.create(Resources.INSTANCE.command32());
+            		}
+            		else if ("DenaliService".equals(icon)) {
+            			return AbstractImagePrototype.create(Resources.INSTANCE.systemLock32());
+            		}
+            		else if (icon != null && 
+            				(icon.toLowerCase().startsWith("http://") ||
+            			     icon.toLowerCase().startsWith("https://")) &&
+            				Util.isImagePath(icon)) {
+            			return new ScaledAbstractImagePrototype(IconHelper.createPath(icon, 32, 32));
+            		}
+            		else if (icon != null &&
+            				Util.isImagePath(icon)) {
+            			return new ScaledAbstractImagePrototype(IconHelper.createPath(SERVLET_URL + model.get("componentId"), 32, 32));
+            		}
+            		else {
+            			return AbstractImagePrototype.create(Resources.INSTANCE.plugin32());
+            		}
 				} else {
 					return AbstractImagePrototype.create(Resources.INSTANCE.plugin32());
 				}

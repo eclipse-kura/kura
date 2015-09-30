@@ -580,28 +580,31 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
 	<!-- Create the Kura start scripts -->
 	<echo file="${project.build.directory}/${build.output.name}/start_kura.bat" append="false">
 @echo off
-if not exist %TEMP%\KURA mkdir %TEMP%\KURA
-if not exist %TEMP%\KURA\DATA mkdir %TEMP%\KURA\DATA
-if not exist %TEMP%\KURA\Configuration mkdir %TEMP%\KURA\Configuration
 
-cd ..
-echo "%cd%"> %TEMP%\KURA\install.txt
-set /P DIR=&lt;%TEMP%\KURA\install.txt
+set KURA_HOME=%ALLUSERSPROFILE%\kura\kura
+set KURA_DATA=%ALLUSERSPROFILE%\kura\data
+set KURA_TEMP=%TEMP%\KURA
 
-copy kura\config.ini %TEMP%\KURA\Configuration
+if not exist %KURA_TEMP% mkdir %KURA_TEMP%
+if not exist %KURA_TEMP%\Configuration mkdir %KURA_TEMP%\Configuration
+
+echo "%cd%"> %KURA_TEMP%\install.txt
+set /P KURA_INST=&lt;%KURA_TEMP%\install.txt
+
+copy %KURA_HOME%\config.ini %KURA_TEMP%\Configuration
 
 java -Xms256m -Xmx256m -XX:MaxPermSize=256m -Dkura.os.version=win32 ^
 	-Dkura.arch=x86_64 ^
 	-Dtarget.device=windows ^
 	-Declipse.ignoreApp=true ^
-	-Dkura.home=%DIR%\kura ^
-	-Dkura.configuration=file:%DIR%\kura\kura.properties ^
-	-Dkura.custom.configuration=file:%DIR%\kura\kura_custom.properties ^
-	-Dkura.data.dir=%DIR%\data ^
-	-Ddpa.configuration=%DIR%\kura\dpa.properties ^
-	-Dlog4j.configuration=file:%DIR%\kura\log4j.properties ^
-	-jar %DIR%\plugins\org.eclipse.osgi_3.8.1.v20120830-144521.jar ^
-	-configuration %TEMP%\KURA\Configuration ^
+	-Dkura.home=%KURA_HOME% ^
+	-Dkura.data.dir=%KURA_DATA% ^
+	-Dkura.configuration=file:%KURA_HOME%\kura.properties ^
+	-Dkura.custom.configuration=file:%KURA_HOME%\kura_custom.properties ^
+	-Ddpa.configuration=%KURA_HOME%\dpa.properties ^
+	-Dlog4j.configuration=file:%KURA_HOME%\log4j.properties ^
+	-jar %KURA_INST%\plugins\org.eclipse.osgi_3.8.1.v20120830-144521.jar ^
+	-configuration %KURA_TEMP%\Configuration ^
 	-console ^
 	-consoleLog	
 	</echo>    
@@ -623,7 +626,7 @@ java -Xms256m -Xmx256m -XX:MaxPermSize=256m -Dkura.os.version=win32 ^
 
             <copy file="src/main/resources/common/kura_custom.properties"
                         todir="${build.install.dir.kura}/kura/" />
-
+<!-- 
             <copy file="${project.build.directory}/${build.output.name}/kura_install.bat"
                         todir="${build.install.dir.kura}/install/" failonerror="false" />
 
@@ -699,19 +702,19 @@ java -Xms256m -Xmx256m -XX:MaxPermSize=256m -Dkura.os.version=win32 ^
                         todir="${build.install.dir.kura}/install" failonerror="false" />
             <copy file="src/main/resources/common/ip-up.local"
                         todir="${build.install.dir.kura}/install" failonerror="false" />
-
+-->
             <copy file="${project.build.directory}/${build.output.name}/start_kura.bat"
-                        todir="${build.install.dir.kura}/bin" />
+                        todir="${build.install.dir.kura}" />
 
             <copy file="${project.build.directory}/KURAUtils/KURAUtils.exe"
                         todir="${build.install.dir.kura}/bin" />
 
             <copy file="RELEASE_NOTES.txt"
-                        todir="${build.install.dir.kura}/kura/" />
+                        todir="${build.install.dir.kura}" />
             <copy file="notice.html"
-                        todir="${build.install.dir.kura}/" />
+                        todir="${build.install.dir.kura}" />
             <copy file="epl-v10.html"
-                        todir="${build.install.dir.kura}/" />
+                        todir="${build.install.dir.kura}" />
             <copy file="src/main/resources/${build.name}/log4j.properties"
                         todir="${build.install.dir.kura}/kura/" />
             <copy file="${project.build.directory}/${build.output.name}/kura.properties"

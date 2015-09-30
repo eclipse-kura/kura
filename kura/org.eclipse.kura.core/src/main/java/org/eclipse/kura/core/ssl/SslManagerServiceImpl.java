@@ -609,11 +609,11 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
 		boolean result = false;
 		
 		m_timer = new Timer(true);
-		
+		char[] snapshotPassword = null;
 		boolean needsPasswordChange = true;
 		try {
-			char[] password = m_cryptoService.decryptAes(m_options.getSslKeystorePassword().toCharArray());
-			needsPasswordChange = isDefaultPassword(password);
+			snapshotPassword = m_cryptoService.decryptAes(m_options.getSslKeystorePassword().toCharArray());
+			needsPasswordChange = isDefaultPassword(snapshotPassword);
 		} catch (KuraException e) {
 		}
 
@@ -622,8 +622,16 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
 		// password.
 		// The keystore must be accessible with the old/default password.
 		char[] oldPassword = m_cryptoService.getKeyStorePassword(m_options.getSslKeyStore());
-		if(m_cryptoService.isFrameworkSecure() && needsPasswordChange &&
-		   oldPassword != null && isKeyStoreAccessible(m_options.getSslKeyStore(), oldPassword)){
+		if(needsPasswordChange){
+			if(snapshotPassword != null && isKeyStoreAccessible(m_options.getSslKeyStore(), snapshotPassword)){
+				oldPassword = snapshotPassword;
+			}
+		}
+		if(     m_cryptoService.isFrameworkSecure() && 
+				needsPasswordChange &&
+		        oldPassword != null && 
+		        isKeyStoreAccessible(m_options.getSslKeyStore(), oldPassword)
+		        ){
 			try {
 				// generate a new random password
 				char[] newPassword = new BigInteger(160, new SecureRandom()).toString(32).toCharArray();

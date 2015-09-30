@@ -278,12 +278,14 @@ public abstract class TelitModem {
         return signalStrength;
     }
 	
-    public boolean isGpsSupported() throws KuraException 
-    {
+    public boolean isGpsSupported() throws KuraException {
         if (m_gpsSupported != null) {
             return m_gpsSupported;
         }
-    
+        if (getGpsPort() == null) {
+        	m_gpsSupported = false;
+        	return m_gpsSupported;
+        }
     	synchronized (s_atLock) {
     		if (m_gpsSupported == null) {
 	    		s_logger.debug("sendCommand isGpsSupported :: {}", TelitModemAtCommands.isGpsPowered.getCommand());
@@ -574,14 +576,17 @@ public abstract class TelitModem {
 	    	if (m_device instanceof UsbModemDevice) {
 	    		SupportedUsbModemInfo usbModemInfo = SupportedUsbModemsInfo.getModem((UsbModemDevice)m_device);
 	    		if (usbModemInfo != null) {
-	    			port = ports.get(usbModemInfo.getGpsPort());
+	    			int gpsPort = usbModemInfo.getGpsPort();
+	    			if (gpsPort >= 0) {
+	    				port = ports.get(gpsPort);
+	    			}
 	    		} else {
 	    			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "No GPS serial port available");
 	    		}
 	    	} else if (m_device instanceof SerialModemDevice) {
 	    		SupportedSerialModemInfo serialModemInfo = SupportedSerialModemsInfo.getModem();
 	    		if (serialModemInfo != null) {
-	    			port = serialModemInfo.getDriver().getComm().getAtPort();
+	    			port = serialModemInfo.getDriver().getComm().getGpsPort();
 	    		} else {
 	    			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "No GPS serial port available");
 	    		}
@@ -611,6 +616,7 @@ public abstract class TelitModem {
 	}
 	
 	public CommURI getSerialConnectionProperties(SerialPortType portType) throws KuraException {
+		CommURI commURI = null;
 		try {
 			String port;
 			if (portType == SerialPortType.ATPORT) {
@@ -622,13 +628,15 @@ public abstract class TelitModem {
 			} else {
 				throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "Invalid Port Type");
 			}
-			StringBuffer sb = new StringBuffer();
-			sb.append("comm:").append(port).append(";baudrate=115200;databits=8;stopbits=1;parity=0");
-			return CommURI.parseString(sb.toString());
-			
+			if (port != null) {
+				StringBuffer sb = new StringBuffer();
+				sb.append("comm:").append(port).append(";baudrate=115200;databits=8;stopbits=1;parity=0");
+				commURI = CommURI.parseString(sb.toString());
+			}
 		} catch (URISyntaxException e) {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "URI Syntax Exception");
 		}
+		return commURI;
 	}
 	
 	public boolean isGpsEnabled() {

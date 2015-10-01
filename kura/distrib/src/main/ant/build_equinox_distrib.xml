@@ -253,7 +253,7 @@ if [ -z "$KURA_RUNNING" ] ; then
   nohup java -Xms${kura.mem.size} -Xmx${kura.mem.size} -XX:MaxPermSize=64m -Xss128k \
 	-XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/var/log/kura-heapdump.hprof \
 	-XX:ErrorFile=/var/log/kura-error.log \
-    -Dkura.os.version=${kura.os.version} \
+        -Dkura.os.version=${kura.os.version} \
 	-Dkura.arch=${kura.arch} \
 	-Dtarget.device=${target.device} \
 	-Declipse.ignoreApp=true \

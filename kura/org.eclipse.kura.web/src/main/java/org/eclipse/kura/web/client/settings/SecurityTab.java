@@ -134,6 +134,7 @@ public class SecurityTab extends LayoutContainer {
 			}
 		};
 
+		
 		VerticalPanel vPanel = new VerticalPanel();
 		vPanel.setSpacing(5);
 
@@ -146,6 +147,13 @@ public class SecurityTab extends LayoutContainer {
 		description.setStyleAttribute("padding-bottom", "10px");
 		vPanel.add(description);
 
+		
+		VerticalPanel buttonsVPanel = new VerticalPanel();
+		buttonsVPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
+		buttonsVPanel.setWidth("100%");
+		buttonsVPanel.setHeight("100%");
+		buttonsVPanel.setSpacing(5);
+		
 		Button securityPolicyButton= new Button(MSGS.settingsSecurityReloadPolicy());
 		securityPolicyButton.addDomHandler(clickHandler1, ClickEvent.getType());
 
@@ -167,7 +175,7 @@ public class SecurityTab extends LayoutContainer {
 		// Wrap the content in a DecoratorPanel
 		DecoratorPanel decPanel = new DecoratorPanel();
 		decPanel.setWidget(layout);
-		vPanel.add(decPanel);
+		buttonsVPanel.add(decPanel);
 		
 		
 		//Button to reload start script fingerprint
@@ -193,7 +201,10 @@ public class SecurityTab extends LayoutContainer {
 		DecoratorPanel startScriptDecPanel = new DecoratorPanel();
 		startScriptDecPanel.setWidget(startScriptLayout);
 
-		vPanel.add(startScriptDecPanel);
+		buttonsVPanel.add(startScriptDecPanel);
+		
+		
+		vPanel.add(buttonsVPanel);
 		vPanel.ensureDebugId("cwVerticalPanel");
 
 

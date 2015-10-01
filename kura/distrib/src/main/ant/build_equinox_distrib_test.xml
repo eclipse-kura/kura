@@ -62,7 +62,7 @@
 	<!-- Create the Kura start scripts -->
 	<echo file="${project.build.directory}/kura-${build.name}_${project.version}/start_kura.sh" append="false">#!/bin/sh
 
-export PATH=$PATH:/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/opt/jvm/bin:/usr/java/bin
+export PATH=/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/opt/jvm/bin:/usr/java/bin:$PATH
 export MALLOC_ARENA_MAX=1
 
 cd $(dirname $0)/..
@@ -80,6 +80,7 @@ if [ -z "$KURA_RUNNING" ] ; then
 	-Dlog4j.configuration=file:/opt/eclipse/kura/kura/log4j.properties \
 	-Djava.security.policy=${DIR}/kura/jdk.dio.policy \
 	-Djdk.dio.registry=${DIR}/kura/jdk.dio.properties \
+    -Djdk.tls.trustNameService=true \
 	-jar plugins/org.eclipse.osgi_3.8.1.v20120830-144521.jar \
 	-configuration configuration \
 	-console \
@@ -88,7 +89,7 @@ fi
 	</echo>    
 	<echo file="${project.build.directory}/kura-${build.name}_${project.version}/start_kura_debug.sh" append="false">#!/bin/sh
 
-export PATH=$PATH:/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/opt/jvm/bin:/usr/java/bin
+export PATH=/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/opt/jvm/bin:/usr/java/bin:$PATH
 export MALLOC_ARENA_MAX=1
 
 cd $(dirname $0)/..
@@ -109,6 +110,7 @@ if [ -z "$KURA_RUNNING" ] ; then
 	-Dlog4j.configuration=file:/opt/eclipse/kura/kura/log4j.properties \
 	-Djava.security.policy=${DIR}/kura/jdk.dio.policy \
 	-Djdk.dio.registry=${DIR}/kura/jdk.dio.properties \
+	-Djdk.tls.trustNameService=true \
 	-jar plugins/org.eclipse.osgi_3.8.1.v20120830-144521.jar \
 	-configuration configuration \
 	-console \
@@ -119,7 +121,7 @@ fi
 
 #!/bin/sh
 
-export PATH=$PATH:/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/opt/jvm/bin:/usr/java/bin
+export PATH=/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/opt/jvm/bin:/usr/java/bin:$PATH
 export MALLOC_ARENA_MAX=1
 
 cd /opt/eclipse/kura
@@ -137,6 +139,7 @@ if [ -z "$KURA_RUNNING" ] ; then
         -Dlog4j.configuration=file:/opt/eclipse/kura/kura/log4j.properties \
         -Djava.security.policy=${DIR}/kura/jdk.dio.policy \
         -Djdk.dio.registry=${DIR}/kura/jdk.dio.properties \
+		-Djdk.tls.trustNameService=true \
         -jar plugins/org.eclipse.osgi_3.8.1.v20120830-144521.jar \
         -configuration configuration/ \
         -console 5002 \

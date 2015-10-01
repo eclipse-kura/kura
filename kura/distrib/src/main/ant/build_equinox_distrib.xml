@@ -159,7 +159,7 @@
 		<!-- Create the Kura start scripts -->
 		<echo file="${project.build.directory}/${build.output.name}/start_kura.sh" append="false">#!/bin/sh
 
-export PATH=$PATH:/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/opt/jvm/bin:/usr/java/bin
+export PATH=/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/opt/jvm/bin:/usr/java/bin:$PATH
 export MALLOC_ARENA_MAX=1
 
 DIR=$(cd $(dirname $0)/..; pwd)
@@ -187,6 +187,7 @@ if [ -z "$KURA_RUNNING" ] ; then
 	-Dlog4j.configuration=file:${DIR}/kura/log4j.properties \
 	-Djava.security.policy=${DIR}/kura/jdk.dio.policy \
 	-Djdk.dio.registry=${DIR}/kura/jdk.dio.properties \
+	-Djdk.tls.trustNameService=true \
 	-jar ${DIR}/plugins/org.eclipse.osgi_3.8.1.v20120830-144521.jar \
 	-configuration  /tmp/.kura/configuration \
 	-console \
@@ -195,7 +196,7 @@ fi
 	</echo>
 	<echo file="${project.build.directory}/${build.output.name}/start_kura_debug.sh" append="false">#!/bin/sh
 
-export PATH=$PATH:/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/opt/jvm/bin:/usr/java/bin
+export PATH=/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/opt/jvm/bin:/usr/java/bin:$PATH
 export MALLOC_ARENA_MAX=1
 
 DIR=$(cd $(dirname $0)/..; pwd)
@@ -226,6 +227,7 @@ if [ -z "$KURA_RUNNING" ] ; then
 	-Dlog4j.configuration=file:${DIR}/kura/log4j.properties \
 	-Djava.security.policy=${DIR}/kura/jdk.dio.policy \
 	-Djdk.dio.registry=${DIR}/kura/jdk.dio.properties \
+	-Djdk.tls.trustNameService=true \
 	-jar ${DIR}/plugins/org.eclipse.osgi_3.8.1.v20120830-144521.jar \
 	-configuration  /tmp/.kura/configuration \
 	-console \
@@ -235,7 +237,7 @@ fi
 	<echo file="${project.build.directory}/${build.output.name}/start_kura_background.sh" append="false">#!/bin/sh
 
 # Kura should be installed to the ${kura.install.dir} directory.
-export PATH=$PATH:/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/opt/jvm/bin:/usr/java/bin
+export PATH=/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/opt/jvm/bin:/usr/java/bin:$PATH
 export MALLOC_ARENA_MAX=1
 
 DIR=$(cd $(dirname $0)/..; pwd)
@@ -263,6 +265,7 @@ if [ -z "$KURA_RUNNING" ] ; then
 	-Dlog4j.configuration=file:${DIR}/kura/log4j.properties \
 	-Djava.security.policy=${DIR}/kura/jdk.dio.policy \
 	-Djdk.dio.registry=${DIR}/kura/jdk.dio.properties \
+	-Djdk.tls.trustNameService=true \
 	-jar ${DIR}/plugins/org.eclipse.osgi_3.8.1.v20120830-144521.jar \
 	-configuration  /tmp/.kura/configuration \
 	-console 5002 \

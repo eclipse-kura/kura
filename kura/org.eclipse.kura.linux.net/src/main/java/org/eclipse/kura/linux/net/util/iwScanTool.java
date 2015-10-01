@@ -238,7 +238,7 @@ public class iwScanTool extends ScanTool implements IScanTool {
 				//parse out the MAC
 				StringTokenizer st = new StringTokenizer(line, " ");
 				st.nextToken(); //eat BSS
-				String macAddressString = st.nextToken();
+				String macAddressString = st.nextToken().substring(0, 16);
 				if(macAddressString != null) {
 					hardwareAddress = NetworkUtil.macToBytes(macAddressString);				
 				}

@@ -745,15 +745,33 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
         	SerialModemAddedEvent serialModemAddedEvent = (SerialModemAddedEvent)event;
         	SupportedSerialModemInfo serialModemInfo = serialModemAddedEvent.getSupportedSerialModemInfo();
         	if (serialModemInfo != null) {
-    			m_serialModem = new SerialModemDevice(
-    					serialModemInfo.getModemName(),
-    					serialModemInfo.getManufacturerName(), serialModemInfo
-    							.getDriver().getComm().getSerialPorts()); 
-    			if (m_serialModem != null) {
-    	        	s_logger.debug("handleEvent() :: posting ModemAddedEvent for serial modem: {}", m_serialModem.getProductName());
-    	            m_eventAdmin.postEvent(new ModemAddedEvent(m_serialModem));
-    	            m_addedModems.add(m_serialModem.getProductName());
-    	        }
+        		if (OS_VERSION != null && OS_VERSION.equals(KuraConstants.Mini_Gateway.getImageName() + "_" + KuraConstants.Mini_Gateway.getImageVersion()) &&
+						TARGET_NAME != null && TARGET_NAME.equals(KuraConstants.Mini_Gateway.getTargetName())) {
+        			if (m_usbModems.isEmpty()) {
+        				m_serialModem = new SerialModemDevice(
+    	    					serialModemInfo.getModemName(),
+    	    					serialModemInfo.getManufacturerName(), serialModemInfo
+    	    							.getDriver().getComm().getSerialPorts()); 
+    	    			if (m_serialModem != null) {
+    	    	        	s_logger.debug("handleEvent() :: posting ModemAddedEvent for serial modem: {}", m_serialModem.getProductName());
+    	    	            m_eventAdmin.postEvent(new ModemAddedEvent(m_serialModem));
+    	    	            m_addedModems.add(m_serialModem.getProductName());
+    	    	        }
+        			} else {
+        				s_logger.info("handleEvent() :: Ignoring {} modem since it has already been detected as a USB device", 
+        						serialModemInfo.getModemName());
+        			}
+        		} else {
+	    			m_serialModem = new SerialModemDevice(
+	    					serialModemInfo.getModemName(),
+	    					serialModemInfo.getManufacturerName(), serialModemInfo
+	    							.getDriver().getComm().getSerialPorts()); 
+	    			if (m_serialModem != null) {
+	    	        	s_logger.debug("handleEvent() :: posting ModemAddedEvent for serial modem: {}", m_serialModem.getProductName());
+	    	            m_eventAdmin.postEvent(new ModemAddedEvent(m_serialModem));
+	    	            m_addedModems.add(m_serialModem.getProductName());
+	    	        }
+        		}
     		}
         } else {
             s_logger.error("handleEvent() :: Unexpected event topic: {}", topic);

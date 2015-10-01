@@ -172,26 +172,26 @@ cp ${DIR}/kura/config.ini /tmp/.kura/configuration/
 KURA_RUNNING=`ps ax | grep java | grep "org.eclipse.osgi"`
 
 if [ -z "$KURA_RUNNING" ] ; then
-	java -Xms${kura.mem.size} -Xmx${kura.mem.size} -XX:MaxPermSize=64m -Xss128k \
-	-XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/var/log/kura-heapdump.hprof \
-	-XX:ErrorFile=/var/log/kura-error.log \
-	-Dkura.os.version=${kura.os.version} \
-	-Dkura.arch=${kura.arch} \
-	-Dtarget.device=${target.device} \
-	-Declipse.ignoreApp=true \
-	-Dkura.home=${DIR}/kura \
-	-Dkura.configuration=file:${DIR}/kura/kura.properties \
-	-Dkura.custom.configuration=file:${DIR}/kura/kura_custom.properties \
-	-Dkura.data.dir=${DIR}/data \
-	-Ddpa.configuration=${DIR}/kura/dpa.properties \
-	-Dlog4j.configuration=file:${DIR}/kura/log4j.properties \
-	-Djava.security.policy=${DIR}/kura/jdk.dio.policy \
-	-Djdk.dio.registry=${DIR}/kura/jdk.dio.properties \
-	-Djdk.tls.trustNameService=true \
-	-jar ${DIR}/plugins/org.eclipse.osgi_3.8.1.v20120830-144521.jar \
-	-configuration  /tmp/.kura/configuration \
-	-console \
-	-consoleLog
+        java -Xms${kura.mem.size} -Xmx${kura.mem.size} -XX:MaxPermSize=64m -Xss128k \
+        -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/var/log/kura-heapdump.hprof \
+        -XX:ErrorFile=/var/log/kura-error.log \
+        -Dkura.os.version=${kura.os.version} \
+        -Dkura.arch=${kura.arch} \
+        -Dtarget.device=${target.device} \
+        -Declipse.ignoreApp=true \
+        -Dkura.home=${DIR}/kura \
+        -Dkura.configuration=file:${DIR}/kura/kura.properties \
+        -Dkura.custom.configuration=file:${DIR}/kura/kura_custom.properties \
+        -Dkura.data.dir=${DIR}/data \
+        -Ddpa.configuration=${DIR}/kura/dpa.properties \
+        -Dlog4j.configuration=file:${DIR}/kura/log4j.properties \
+        -Djava.security.policy=${DIR}/kura/jdk.dio.policy \
+        -Djdk.dio.registry=${DIR}/kura/jdk.dio.properties \
+        -Djdk.tls.trustNameService=true \
+        -jar ${DIR}/plugins/org.eclipse.osgi_3.8.1.v20120830-144521.jar \
+        -configuration  /tmp/.kura/configuration \
+        -console \
+        -consoleLog
 fi
 	</echo>
 	<echo file="${project.build.directory}/${build.output.name}/start_kura_debug.sh" append="false">#!/bin/sh
@@ -209,29 +209,29 @@ cp ${DIR}/kura/config.ini /tmp/.kura/configuration/
 KURA_RUNNING=`ps ax | grep java | grep "org.eclipse.osgi"`
 
 if [ -z "$KURA_RUNNING" ] ; then
-	java -Xms${kura.mem.size} -Xmx${kura.mem.size} -XX:MaxPermSize=64m -Xss128k \
-	-XX:+PrintGCDetails -XX:+PrintGCTimeStamps -Xloggc:/var/log/kura-gc.log \
-	-XX:+UseGCLogFileRotation -XX:NumberOfGCLogFiles=10 -XX:GCLogFileSize=100M \
-	-XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/var/log/kura-heapdump.hprof \
-	-XX:ErrorFile=/var/log/kura-error.log \
-	-Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=8000,suspend=n \
-	-Dkura.os.version=${kura.os.version} \
-	-Dkura.arch=${kura.arch} \
-	-Dtarget.device=${target.device} \
-	-Declipse.ignoreApp=true \
-	-Dkura.home=${DIR}/kura \
-	-Dkura.configuration=file:${DIR}/kura/kura.properties \
-	-Dkura.custom.configuration=file:${DIR}/kura/kura_custom.properties \
-	-Dkura.data.dir=${DIR}/data \
-	-Ddpa.configuration=${DIR}/kura/dpa.properties \
-	-Dlog4j.configuration=file:${DIR}/kura/log4j.properties \
-	-Djava.security.policy=${DIR}/kura/jdk.dio.policy \
-	-Djdk.dio.registry=${DIR}/kura/jdk.dio.properties \
-	-Djdk.tls.trustNameService=true \
-	-jar ${DIR}/plugins/org.eclipse.osgi_3.8.1.v20120830-144521.jar \
-	-configuration  /tmp/.kura/configuration \
-	-console \
-	-consoleLog
+        java -Xms${kura.mem.size} -Xmx${kura.mem.size} -XX:MaxPermSize=64m -Xss128k \
+        -XX:+PrintGCDetails -XX:+PrintGCTimeStamps -Xloggc:/var/log/kura-gc.log \
+        -XX:+UseGCLogFileRotation -XX:NumberOfGCLogFiles=10 -XX:GCLogFileSize=100M \
+        -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/var/log/kura-heapdump.hprof \
+        -XX:ErrorFile=/var/log/kura-error.log \
+        -Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=8000,suspend=n \
+        -Dkura.os.version=${kura.os.version} \
+        -Dkura.arch=${kura.arch} \
+        -Dtarget.device=${target.device} \
+        -Declipse.ignoreApp=true \
+        -Dkura.home=${DIR}/kura \
+        -Dkura.configuration=file:${DIR}/kura/kura.properties \
+        -Dkura.custom.configuration=file:${DIR}/kura/kura_custom.properties \
+        -Dkura.data.dir=${DIR}/data \
+        -Ddpa.configuration=${DIR}/kura/dpa.properties \
+        -Dlog4j.configuration=file:${DIR}/kura/log4j.properties \
+        -Djava.security.policy=${DIR}/kura/jdk.dio.policy \
+        -Djdk.dio.registry=${DIR}/kura/jdk.dio.properties \
+        -Djdk.tls.trustNameService=true \
+        -jar ${DIR}/plugins/org.eclipse.osgi_3.8.1.v20120830-144521.jar \
+        -configuration  /tmp/.kura/configuration \
+        -console \
+        -consoleLog
 fi
 	</echo>
 	<echo file="${project.build.directory}/${build.output.name}/start_kura_background.sh" append="false">#!/bin/sh
@@ -251,25 +251,25 @@ KURA_RUNNING=`ps ax | grep java | grep "org.eclipse.osgi"`
 
 if [ -z "$KURA_RUNNING" ] ; then
   nohup java -Xms${kura.mem.size} -Xmx${kura.mem.size} -XX:MaxPermSize=64m -Xss128k \
-	-XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/var/log/kura-heapdump.hprof \
-	-XX:ErrorFile=/var/log/kura-error.log \
+        -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/var/log/kura-heapdump.hprof \
+        -XX:ErrorFile=/var/log/kura-error.log \
         -Dkura.os.version=${kura.os.version} \
-	-Dkura.arch=${kura.arch} \
-	-Dtarget.device=${target.device} \
-	-Declipse.ignoreApp=true \
-	-Dkura.home=${DIR}/kura \
-	-Dkura.configuration=file:${DIR}/kura/kura.properties \
-	-Dkura.custom.configuration=file:${DIR}/kura/kura_custom.properties \
-	-Dkura.data.dir=${DIR}/data \
-	-Ddpa.configuration=${DIR}/kura/dpa.properties \
-	-Dlog4j.configuration=file:${DIR}/kura/log4j.properties \
-	-Djava.security.policy=${DIR}/kura/jdk.dio.policy \
-	-Djdk.dio.registry=${DIR}/kura/jdk.dio.properties \
-	-Djdk.tls.trustNameService=true \
-	-jar ${DIR}/plugins/org.eclipse.osgi_3.8.1.v20120830-144521.jar \
-	-configuration  /tmp/.kura/configuration \
-	-console 5002 \
-	-consoleLog >> /var/log/kura-console.log 2>> /var/log/kura-console.log &amp;
+        -Dkura.arch=${kura.arch} \
+        -Dtarget.device=${target.device} \
+        -Declipse.ignoreApp=true \
+        -Dkura.home=${DIR}/kura \
+        -Dkura.configuration=file:${DIR}/kura/kura.properties \
+        -Dkura.custom.configuration=file:${DIR}/kura/kura_custom.properties \
+        -Dkura.data.dir=${DIR}/data \
+        -Ddpa.configuration=${DIR}/kura/dpa.properties \
+        -Dlog4j.configuration=file:${DIR}/kura/log4j.properties \
+        -Djava.security.policy=${DIR}/kura/jdk.dio.policy \
+        -Djdk.dio.registry=${DIR}/kura/jdk.dio.properties \
+        -Djdk.tls.trustNameService=true \
+        -jar ${DIR}/plugins/org.eclipse.osgi_3.8.1.v20120830-144521.jar \
+        -configuration  /tmp/.kura/configuration \
+        -console 5002 \
+        -consoleLog >> /var/log/kura-console.log 2>> /var/log/kura-console.log &amp;
 
     #Save the PID
     KURA_PID=$!

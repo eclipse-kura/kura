@@ -137,6 +137,7 @@ public class SecurityTab extends LayoutContainer {
 		
 		VerticalPanel vPanel = new VerticalPanel();
 		vPanel.setSpacing(5);
+		vPanel.setWidth("100%");
 
 		LayoutContainer description = new LayoutContainer();
 		description.setBorders(false);
@@ -175,6 +176,8 @@ public class SecurityTab extends LayoutContainer {
 		// Wrap the content in a DecoratorPanel
 		DecoratorPanel decPanel = new DecoratorPanel();
 		decPanel.setWidget(layout);
+		decPanel.setWidth("100%");
+		decPanel.setHeight("100%");
 		buttonsVPanel.add(decPanel);
 		
 		
@@ -199,6 +202,8 @@ public class SecurityTab extends LayoutContainer {
 
 		// Wrap the content in a DecoratorPanel
 		DecoratorPanel startScriptDecPanel = new DecoratorPanel();
+		startScriptDecPanel.setWidth("100%");
+		startScriptDecPanel.setHeight("100%");
 		startScriptDecPanel.setWidget(startScriptLayout);
 
 		buttonsVPanel.add(startScriptDecPanel);

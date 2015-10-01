@@ -156,7 +156,7 @@ public class SettingsTabs extends LayoutContainer
 			}
 		};
 		gwtSecurityService.isSecurityServiceAvailable(callback);
-
+		
 		add(m_tabsPanel);
 	}
 }

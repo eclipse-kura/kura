@@ -677,11 +677,6 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 			ValidationUtil.notEmptyOrNull(brokerUrl, MQTT_BROKER_URL_PROP_NAME);
 			brokerUrl = brokerUrl.trim();
 			
-			if(m_cryptoService.isFrameworkSecure() && brokerUrl.contains(MQTT_SCHEME)){
-				s_logger.error("Secure (mqtts) connection required!");
-				throw KuraException.internalError("Secure (mqtts) connection required!");
-				
-			}
 			brokerUrl = brokerUrl.replaceAll("^" + MQTT_SCHEME, "tcp://");
 			brokerUrl = brokerUrl.replaceAll("^" + MQTTS_SCHEME, "ssl://"); 
 			

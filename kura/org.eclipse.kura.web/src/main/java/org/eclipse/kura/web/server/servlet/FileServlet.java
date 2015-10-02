@@ -70,8 +70,8 @@ public class FileServlet extends HttpServlet {
 	private static Logger s_logger = LoggerFactory.getLogger(FileServlet.class);
 
 	private static final int BUFFER = 1024;
-	private static final int TOOBIG = 0x6400000; // Max size of unzipped data, 100MB
-	private static final int TOOMANY = 1024;     // Max number of files
+	private static int tooBig = 0x6400000; // Max size of unzipped data, 100MB
+	private static int tooMany = 1024;     // Max number of files
 
 	private DiskFileItemFactory m_diskFileItemFactory;
 	private FileCleaningTracker m_fileCleaningTracker;
@@ -97,6 +97,9 @@ public class FileServlet extends HttpServlet {
 
 		ServletContext ctx = getServletContext();
 		m_fileCleaningTracker = FileCleanerCleanup.getFileCleaningTracker(ctx);
+		
+		getZipUploadSizeMax();
+		getZipUploadCountMax();
 
 		int sizeThreshold = getFileUploadInMemorySizeThreshold();
 		File repository = new File(System.getProperty("java.io.tmpdir"));
@@ -310,7 +313,7 @@ public class FileServlet extends HttpServlet {
 
 					FileOutputStream fos = new FileOutputStream(newFile);
 					int len;
-					while ((total + BUFFER <= TOOBIG) && (len = zis.read(buffer)) > 0) {
+					while ((total + BUFFER <= tooBig) && (len = zis.read(buffer)) > 0) {
 						fos.write(buffer, 0, len);
 						total += len;
 					}
@@ -318,10 +321,10 @@ public class FileServlet extends HttpServlet {
 					fos.close();
 
 					entries++;
-					if (entries > TOOMANY) {
+					if (entries > tooMany) {
 						throw new IllegalStateException("Too many files to unzip.");
 					}
-					if (total > TOOBIG) {
+					if (total > tooBig) {
 						throw new IllegalStateException("File being unzipped is too big.");
 					}
 
@@ -627,6 +630,28 @@ public class FileServlet extends HttpServlet {
 		} else {
 			s_logger.error("Unsupported package deployment request");
 			throw new ServletException("Unsupported package deployment request");			
+		}
+	}
+	
+	private void getZipUploadSizeMax(){
+		ServiceLocator locator = ServiceLocator.getInstance();
+		try {
+			SystemService systemService = locator.getService(SystemService.class);
+			int sizeInMB= systemService.getFileCommandZipMaxUploadSize();
+			int sizeInBytes= sizeInMB * 1024 * 1024;
+			tooBig = sizeInBytes;
+		} catch (GwtKuraException e) {
+			s_logger.error("Error locating SystemService", e);
+		}
+	}
+	
+	private void getZipUploadCountMax(){
+		ServiceLocator locator = ServiceLocator.getInstance();
+		try {
+			SystemService systemService = locator.getService(SystemService.class);
+			tooMany = systemService.getFileCommandZipMaxUploadNumber();
+		} catch (GwtKuraException e) {
+			s_logger.error("Error locating SystemService", e);
 		}
 	}
 

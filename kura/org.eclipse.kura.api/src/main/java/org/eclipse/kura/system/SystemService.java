@@ -62,6 +62,8 @@ public interface SystemService
 	public static final String KEY_KURA_WIFI_TOP_CHANNEL                   = "kura.wifi.top.channel";
     public static final String KEY_KURA_KEY_STORE_PWD                      = "kura.ssl.keyStorePassword";
     public static final String KEY_KURA_TRUST_STORE_PWD                    = "kura.ssl.trustStorePassword";
+    public static final String KEY_FILE_COMMAND_ZIP_MAX_SIZE               = "file.command.zip.max.size";
+    public static final String KEY_FILE_COMMAND_ZIP_MAX_NUMBER             = "file.command.zip.max.number";
 	public static final String KEY_OS_ARCH                                 = "os.arch";
 	public static final String KEY_OS_NAME                                 = "os.name";
 	public static final String KEY_OS_VER                                  = "os.version";
@@ -323,6 +325,18 @@ public interface SystemService
 	 */
 	public String getKuraDataDirectory();
 	
+    /**
+	 * Returns the size in MegaBytes of the maximum file upload size permitted by the local file servlet
+	 * @return The maximum size (in mega bytes) of files that can be uploaded using the command file upload function
+	 */
+    public int getFileCommandZipMaxUploadSize();
+    
+    /**
+	 * Returns the maximum number of files that can be uploaded by the local file servlet
+	 * @return The maximum number of files that can be uploaded using the command file upload function
+	 */
+    public int getFileCommandZipMaxUploadNumber();
+	
 	/**
 	 * Returns all KuraProperties for this system. The returned instances is 
 	 * initialized by loading the kura.properties file. Properties defined at 
@@ -377,4 +391,5 @@ public interface SystemService
 	 * @return
 	 */
     public List<String> getDeviceManagementServiceIgnore();
+
 }

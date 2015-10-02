@@ -720,7 +720,7 @@
 								</goals>
 								<configuration>
 									<verbose>true</verbose>
-									<deb>${basedir}/target/kura_${project.version}_beaglebone_debian_armv7.deb</deb>
+									<deb>${basedir}/target/kura_${project.version}_beaglebone_debian_installer.deb</deb>
 									<controlDir>${basedir}/src/main/deb/control</controlDir>
 									<dataSet>
 										<data>
@@ -834,7 +834,7 @@
 								</goals>
 								<configuration>
 									<verbose>true</verbose>
-									<deb>${basedir}/target/kura_${project.version}_beaglebone-nn_debian_armv7.deb</deb>
+									<deb>${basedir}/target/kura_${project.version}_beaglebone-nn_debian_installer.deb</deb>
 									<controlDir>${basedir}/src/main/deb/control_nn</controlDir>
 									<dataSet>
 										<data>
@@ -958,7 +958,7 @@
 								</goals>
 								<configuration>
 									<verbose>true</verbose>
-									<deb>${basedir}/target/kura_${project.version}_raspberry-pi_armv6.deb</deb>
+									<deb>${basedir}/target/kura_${project.version}_raspberry-pi_installer.deb</deb>
 									<controlDir>${basedir}/src/main/deb/control</controlDir>
 									<dataSet>
 										<data>
@@ -1069,7 +1069,7 @@
 								</goals>
 								<configuration> 
 									<verbose>true</verbose>
-									<deb>${basedir}/target/kura_${project.version}_raspberry-pi-nn_armv6.deb</deb>
+									<deb>${basedir}/target/kura_${project.version}_raspberry-pi-nn_installer.deb</deb>
 									<controlDir>${basedir}/src/main/deb/control_nn</controlDir>
 									<dataSet>
 										<data> 
@@ -1193,7 +1193,7 @@
 								</goals>
 								<configuration>
 									<verbose>true</verbose>
-									<deb>${basedir}/target/kura_${project.version}_raspberry-pi-bplus_armv6.deb</deb>
+									<deb>${basedir}/target/kura_${project.version}_raspberry-pi-bplus_installer.deb</deb>
 									<controlDir>${basedir}/src/main/deb/control</controlDir>
 									<dataSet>
 										<data>
@@ -1304,7 +1304,7 @@
 								</goals>
 								<configuration> 
 									<verbose>true</verbose>
-									<deb>${basedir}/target/kura_${project.version}_raspberry-pi-bplus-nn_armv6.deb</deb>
+									<deb>${basedir}/target/kura_${project.version}_raspberry-pi-bplus-nn_installer.deb</deb>
 									<controlDir>${basedir}/src/main/deb/control_nn</controlDir>
 									<dataSet>
 										<data> 
@@ -1418,7 +1418,7 @@
 								</goals>
 								<configuration>
 									<verbose>true</verbose>
-									<deb>${basedir}/target/kura_${project.version}_raspberry-pi-2_armv7.deb</deb>
+									<deb>${basedir}/target/kura_${project.version}_raspberry-pi-2_installer.deb</deb>
 									<controlDir>${basedir}/src/main/deb/control</controlDir>
 									<dataSet>
 										<data>
@@ -1532,7 +1532,7 @@
 								</goals>
 								<configuration>
 									<verbose>true</verbose>
-									<deb>${basedir}/target/kura_${project.version}_raspberry-pi-2-nn_armv7.deb</deb>
+									<deb>${basedir}/target/kura_${project.version}_raspberry-pi-2-nn_installer.deb</deb>
 									<controlDir>${basedir}/src/main/deb/control</controlDir>
 									<dataSet>
 										<data>

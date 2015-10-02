@@ -370,6 +370,12 @@ public class SystemServiceImpl implements SystemService
 			if(System.getProperty(KEY_KURA_TRUST_STORE_PWD) != null){
 				m_kuraProperties.put(KEY_KURA_TRUST_STORE_PWD, System.getProperty(KEY_KURA_TRUST_STORE_PWD));
 			}
+			if(System.getProperty(KEY_FILE_COMMAND_ZIP_MAX_SIZE) != null){
+				m_kuraProperties.put(KEY_FILE_COMMAND_ZIP_MAX_SIZE, System.getProperty(KEY_FILE_COMMAND_ZIP_MAX_SIZE));
+			}
+			if(System.getProperty(KEY_FILE_COMMAND_ZIP_MAX_NUMBER) != null){
+				m_kuraProperties.put(KEY_FILE_COMMAND_ZIP_MAX_NUMBER, System.getProperty(KEY_FILE_COMMAND_ZIP_MAX_NUMBER));
+			}
 			if(System.getProperty(KEY_OS_ARCH) != null){
 				m_kuraProperties.put(KEY_OS_ARCH, System.getProperty(KEY_OS_ARCH));
 			}
@@ -741,6 +747,24 @@ public class SystemServiceImpl implements SystemService
 
 	public String getKuraWebEnabled() {
 		return this.m_kuraProperties.getProperty(KEY_KURA_HAVE_WEB_INTER);
+	}
+	
+	public int getFileCommandZipMaxUploadSize(){
+		String commandMaxUpload= this.m_kuraProperties.getProperty(KEY_FILE_COMMAND_ZIP_MAX_SIZE);
+		if(commandMaxUpload != null && commandMaxUpload.trim().length() > 0){
+			return Integer.parseInt(commandMaxUpload);
+		}
+		s_logger.warn("Maximum command line upload size not available. Set default to 100 MB");
+		return 100;
+	}
+	
+	public int getFileCommandZipMaxUploadNumber(){
+		String commandMaxFilesUpload= this.m_kuraProperties.getProperty(KEY_FILE_COMMAND_ZIP_MAX_NUMBER);
+		if(commandMaxFilesUpload != null && commandMaxFilesUpload.trim().length() > 0){
+			return Integer.parseInt(commandMaxFilesUpload);
+		}
+		s_logger.warn("Missing the parameter that specifies the maximum number of files uploadable using the command servlet. Set default to 1024 files");
+		return 1024;
 	}
 
 	public String getBiosVersion() {

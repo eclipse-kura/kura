@@ -21,7 +21,7 @@ public enum SupportedUsbModemInfo {
 
 			// device name,     vendor, product, ttyDevs, blockDevs, AT Port, Data Port, GPS Port, technology types, device driver
     Telit_HE910_D   ("HE910-D",  "1bc7", "0021", 7, 0, 3, 0, 3, Arrays.asList(ModemTechnologyType.HSPA, ModemTechnologyType.UMTS), Arrays.asList(new UsbModemDriver("cdc_acm", "1bc7", "0021"))),
-    Telit_GE910		("GE910", "1bc7", "0022", 2, 0, 0, 1, -1, Arrays.asList(ModemTechnologyType.GSM_GPRS), Arrays.asList(new UsbModemDriver("cdc_acm", "1bc7", "0022"))),
+    Telit_GE910		("GE910", "1bc7", "0022", 2, 0, 0, 1, 0, Arrays.asList(ModemTechnologyType.GSM_GPRS), Arrays.asList(new UsbModemDriver("cdc_acm", "1bc7", "0022"))),
     Telit_DE910_DUAL("DE910-DUAL",  "1bc7", "1010", 4, 0, 2, 3, 1, Arrays.asList(ModemTechnologyType.EVDO, ModemTechnologyType.CDMA), Arrays.asList(new De910ModemDriver())),
     Telit_LE910		("LE910", "1bc7", "1201", 5, 1, 2, 3, 1, Arrays.asList(ModemTechnologyType.LTE, ModemTechnologyType.HSPA, ModemTechnologyType.UMTS), Arrays.asList(new Le910ModemDriver())), 
     Telit_CE910_DUAL("CE910-DUAL", "1bc7", "1011", 2, 0, 1, 1, -1, Arrays.asList(ModemTechnologyType.CDMA), Arrays.asList(new Ce910ModemDriver())),

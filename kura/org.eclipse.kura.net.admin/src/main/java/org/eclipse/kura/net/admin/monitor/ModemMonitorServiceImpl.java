@@ -875,7 +875,7 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 		do {
 			try {
 				Thread.sleep(3000);
-				if (modem.isPortReachable(modem.getGpsPort())) {
+				if (modem.isPortReachable(modem.getAtPort())) {
 					s_logger.debug("disableModemGps() modem is now reachable ...");
 					portIsReachable = true;
 					break;
@@ -905,17 +905,19 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 		
 		if (enabled) {
 			CommURI commUri = modem.getSerialConnectionProperties(CellularModem.SerialPortType.GPSPORT);
-			s_logger.trace("postModemGpsEvent() :: Modem SeralConnectionProperties: {}", commUri.toString());			
-			
-			HashMap<String, Object> modemInfoMap = new HashMap<String, Object>();
-			modemInfoMap.put(ModemGpsEnabledEvent.Port, modem.getGpsPort());
-			modemInfoMap.put(ModemGpsEnabledEvent.BaudRate, new Integer(commUri.getBaudRate()));
-			modemInfoMap.put(ModemGpsEnabledEvent.DataBits, new Integer(commUri.getDataBits()));
-			modemInfoMap.put(ModemGpsEnabledEvent.StopBits, new Integer(commUri.getStopBits()));
-			modemInfoMap.put(ModemGpsEnabledEvent.Parity, new Integer(commUri.getParity()));
-			
-			s_logger.info("postModemGpsEvent() :: posting ModemGpsEnabledEvent on topic {}", ModemGpsEnabledEvent.MODEM_EVENT_GPS_ENABLED_TOPIC);
-			m_eventAdmin.postEvent(new ModemGpsEnabledEvent(modemInfoMap));
+			if (commUri != null) {
+				s_logger.trace("postModemGpsEvent() :: Modem SeralConnectionProperties: {}", commUri.toString());			
+				
+				HashMap<String, Object> modemInfoMap = new HashMap<String, Object>();
+				modemInfoMap.put(ModemGpsEnabledEvent.Port, modem.getGpsPort());
+				modemInfoMap.put(ModemGpsEnabledEvent.BaudRate, new Integer(commUri.getBaudRate()));
+				modemInfoMap.put(ModemGpsEnabledEvent.DataBits, new Integer(commUri.getDataBits()));
+				modemInfoMap.put(ModemGpsEnabledEvent.StopBits, new Integer(commUri.getStopBits()));
+				modemInfoMap.put(ModemGpsEnabledEvent.Parity, new Integer(commUri.getParity()));
+				
+				s_logger.info("postModemGpsEvent() :: posting ModemGpsEnabledEvent on topic {}", ModemGpsEnabledEvent.MODEM_EVENT_GPS_ENABLED_TOPIC);
+				m_eventAdmin.postEvent(new ModemGpsEnabledEvent(modemInfoMap));
+			}
 		} else {
 			s_logger.info("postModemGpsEvent() :: posting ModemGpsDisableEvent on topic {}", ModemGpsDisabledEvent.MODEM_EVENT_GPS_DISABLED_TOPIC);
 			HashMap<String, Object> modemInfoMap = new HashMap<String, Object>();

@@ -505,6 +505,7 @@ public class SierraMc87xx implements HspaCellularModem {
 	}
 	
 	public CommURI getSerialConnectionProperties(SerialPortType portType) throws KuraException {
+		CommURI commURI = null;
 		try {
 			String port;
 			if (portType == SerialPortType.ATPORT) {
@@ -516,13 +517,15 @@ public class SierraMc87xx implements HspaCellularModem {
 			} else {
 				throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "Invalid Port Type");
 			}
-			StringBuffer sb = new StringBuffer();
-			sb.append("comm:").append(port).append(";baudrate=115200;databits=8;stopbits=1;parity=0");
-			return CommURI.parseString(sb.toString());
-			
+			if (port != null) {
+				StringBuffer sb = new StringBuffer();
+				sb.append("comm:").append(port).append(";baudrate=115200;databits=8;stopbits=1;parity=0");
+				commURI = CommURI.parseString(sb.toString());
+			}
 		} catch (URISyntaxException e) {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "URI Syntax Exception");
 		}
+		return commURI;
 	}
 	
 	public boolean isGpsEnabled() {

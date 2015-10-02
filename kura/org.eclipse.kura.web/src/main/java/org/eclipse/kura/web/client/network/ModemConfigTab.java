@@ -394,7 +394,16 @@ public class ModemConfigTab extends LayoutContainer
         m_apnField.setFieldLabel(MSGS.netModemAPN());
         m_apnField.addListener(Events.OnMouseOver, new MouseOverListener(MSGS.netModemToolTipApn()));
         m_apnField.addStyleName("kura-textfield");
-        m_apnField.setAllowBlank(false);
+		if (m_selectNetIfConfig != null) {
+			for (String techType : m_selectNetIfConfig.getNetworkTechnology()) {
+				if (techType.equals("HSPA") || techType.equals("HSDPA")
+						|| techType.equals("UMTS")
+						|| techType.equals("GSM_GPRS")) {
+					m_apnField.setAllowBlank(false);
+					break;
+				}
+			}
+		}
         m_apnField.addPlugin(m_dirtyPlugin);
         fieldSet.add(m_apnField, formData);
 
@@ -751,7 +760,6 @@ public class ModemConfigTab extends LayoutContainer
 	
 	
 	private void refreshForm() {
-
 		if (m_formPanel != null) {
 			for (Field<?> field : m_formPanel.getFields()) {
 				field.setEnabled(true);
@@ -782,6 +790,7 @@ public class ModemConfigTab extends LayoutContainer
 					m_authTypeCombo.setEnabled(false);
 					m_usernameField.setEnabled(false);
 	                m_passwordField.setEnabled(false);
+	                break;
 				}
 			}
 		}

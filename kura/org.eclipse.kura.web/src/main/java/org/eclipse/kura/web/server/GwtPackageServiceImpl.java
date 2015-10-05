@@ -75,7 +75,7 @@ public class GwtPackageServiceImpl extends OsgiRemoteServiceServlet implements G
 		checkXSRFToken(xsrfToken);
 		DeploymentAgentService deploymentAgentService = ServiceLocator.getInstance().getService(DeploymentAgentService.class);		
 		try {
-			deploymentAgentService.uninstallDeploymentPackageAsync(packageName);
+			deploymentAgentService.uninstallDeploymentPackageAsync(super.sanitizeString(packageName));
 		} 
 		catch (Exception e) {
 			// TODO Auto-generated catch block

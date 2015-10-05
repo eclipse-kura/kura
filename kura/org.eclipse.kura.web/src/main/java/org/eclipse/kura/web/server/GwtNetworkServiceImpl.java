@@ -103,8 +103,6 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 
 	private static Logger s_logger = LoggerFactory.getLogger(GwtNetworkServiceImpl.class);
 
-	private static final String PLACEHOLDER= "Placeholder";
-
 	public ListLoadResult<GwtNetInterfaceConfig> findNetInterfaceConfigurations() throws GwtKuraException {
 		ListLoadResult<GwtNetInterfaceConfig> result= privateFindNetInterfaceConfigurations();
 
@@ -678,7 +676,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 		checkXSRFToken(xsrfToken);
 		NetworkAdminService nas = ServiceLocator.getInstance().getService(NetworkAdminService.class);
 
-		s_logger.debug("config.getStatus(): " + config.getStatus());
+		s_logger.debug("config.getStatus(): " + super.sanitizeString(config.getStatus()));
 
 		boolean autoConnect = true;
 		if(GwtNetIfStatus.netIPv4StatusDisabled.name().equals(config.getStatus())) {
@@ -775,7 +773,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 				}
 
 				if(config.getHwTypeEnum() == GwtNetIfType.ETHERNET) {
-					nas.updateEthernetInterfaceConfig(config.getName(), autoConnect, config.getHwMTU(), netConfigs);
+					nas.updateEthernetInterfaceConfig(super.sanitizeString(config.getName()), autoConnect, config.getHwMTU(), netConfigs);
 				}
 			}
 
@@ -807,7 +805,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 						}
 
 						netConfigs.add(wifiConfig);
-						nas.updateWifiInterfaceConfig(config.getName(), autoConnect, null, netConfigs);
+						nas.updateWifiInterfaceConfig(super.sanitizeString(config.getName()), autoConnect, null, netConfigs);
 					}
 				}
 			} else if(config.getHwTypeEnum() == GwtNetIfType.MODEM) {
@@ -1193,14 +1191,14 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 
 				FirewallOpenPortConfigIP<IP4Address> firewallOpenPortConfigIP = new FirewallOpenPortConfigIP4();
 				firewallOpenPortConfigIP.setPort(entry.getPort());
-				firewallOpenPortConfigIP.setProtocol(NetProtocol.valueOf(entry.getProtocol()));
+				firewallOpenPortConfigIP.setProtocol(NetProtocol.valueOf(super.sanitizeString(entry.getProtocol())));
 				if(network != null && prefix != null) {
 					firewallOpenPortConfigIP.setPermittedNetwork(new NetworkPair<IP4Address>((IP4Address)IPAddress.parseHostAddress(network), Short.parseShort(prefix)));
 				}
-				firewallOpenPortConfigIP.setPermittedInterfaceName(entry.getPermittedInterfaceName());
-				firewallOpenPortConfigIP.setUnpermittedInterfaceName(entry.getUnpermittedInterfaceName());
-				firewallOpenPortConfigIP.setPermittedMac(entry.getPermittedMAC());
-				firewallOpenPortConfigIP.setSourcePortRange(entry.getSourcePortRange());
+				firewallOpenPortConfigIP.setPermittedInterfaceName(super.sanitizeString(entry.getPermittedInterfaceName()));
+				firewallOpenPortConfigIP.setUnpermittedInterfaceName(super.sanitizeString(entry.getUnpermittedInterfaceName()));
+				firewallOpenPortConfigIP.setPermittedMac(super.sanitizeString(entry.getPermittedMAC()));
+				firewallOpenPortConfigIP.setSourcePortRange(super.sanitizeString(entry.getSourcePortRange()));
 
 				s_logger.debug("adding open port entry for " + entry.getPort());
 				firewallOpenPortConfigIPs.add(firewallOpenPortConfigIP);
@@ -1238,10 +1236,10 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 				}
 
 				FirewallPortForwardConfigIP<IP4Address> firewallPortForwardConfigIP = new FirewallPortForwardConfigIP4();
-				firewallPortForwardConfigIP.setInboundInterface(entry.getInboundInterface());
-				firewallPortForwardConfigIP.setOutboundInterface(entry.getOutboundInterface());
-				firewallPortForwardConfigIP.setAddress((IP4Address) IPAddress.parseHostAddress(entry.getAddress()));
-				firewallPortForwardConfigIP.setProtocol(NetProtocol.valueOf(entry.getProtocol()));
+				firewallPortForwardConfigIP.setInboundInterface(super.sanitizeString(entry.getInboundInterface()));
+				firewallPortForwardConfigIP.setOutboundInterface(super.sanitizeString(entry.getOutboundInterface()));
+				firewallPortForwardConfigIP.setAddress((IP4Address) IPAddress.parseHostAddress(super.sanitizeString(entry.getAddress())));
+				firewallPortForwardConfigIP.setProtocol(NetProtocol.valueOf(super.sanitizeString(entry.getProtocol())));
 				firewallPortForwardConfigIP.setInPort(entry.getInPort());
 				firewallPortForwardConfigIP.setOutPort(entry.getOutPort());
 				boolean masquerade = entry.getMasquerade().equals("yes")? true : false;
@@ -1249,10 +1247,10 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 				if(network != null && prefix != null) {
 					firewallPortForwardConfigIP.setPermittedNetwork(new NetworkPair<IP4Address>((IP4Address)IPAddress.parseHostAddress(network), Short.parseShort(prefix)));
 				}
-				firewallPortForwardConfigIP.setPermittedMac(entry.getPermittedMAC());
-				firewallPortForwardConfigIP.setSourcePortRange(entry.getSourcePortRange());
+				firewallPortForwardConfigIP.setPermittedMac(super.sanitizeString(entry.getPermittedMAC()));
+				firewallPortForwardConfigIP.setSourcePortRange(super.sanitizeString(entry.getSourcePortRange()));
 
-				s_logger.debug("adding port forward entry for inbound iface {} - port {}", entry.getInboundInterface(), entry.getInPort());
+				s_logger.debug("adding port forward entry for inbound iface {} - port {}", super.sanitizeString(entry.getInboundInterface()), entry.getInPort());
 				firewallPortForwardConfigIPs.add(firewallPortForwardConfigIP);
 			}
 
@@ -1281,8 +1279,8 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 
 		for (GwtFirewallNatEntry entry : entries) {
 
-			String srcNetwork = entry.getSourceNetwork();
-			String dstNetwork = entry.getDestinationNetwork();
+			String srcNetwork = super.sanitizeString(entry.getSourceNetwork());
+			String dstNetwork = super.sanitizeString(entry.getDestinationNetwork());
 			if (srcNetwork == null) {
 				srcNetwork = "0.0.0.0/0";
 			}
@@ -1293,8 +1291,8 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 			boolean masquerade = entry.getMasquerade().equals("yes")? true : false;
 
 			FirewallNatConfig firewallNatConfig = new FirewallNatConfig(
-					entry.getInInterface(), entry.getOutInterface(),
-					entry.getProtocol(), srcNetwork, dstNetwork, masquerade);
+					super.sanitizeString(entry.getInInterface()), super.sanitizeString(entry.getOutInterface()),
+					super.sanitizeString(entry.getProtocol()), srcNetwork, dstNetwork, masquerade);
 
 			firewallNatConfigs.add(firewallNatConfig);
 		}
@@ -1311,7 +1309,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 		checkXSRFToken(xsrfToken);
 		NetworkAdminService nas = ServiceLocator.getInstance().getService(NetworkAdminService.class);
 		try {
-			nas.renewDhcpLease(interfaceName);
+			nas.renewDhcpLease(super.sanitizeString(interfaceName));
 		} catch (KuraException e) {
 			e.printStackTrace();
 			throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);

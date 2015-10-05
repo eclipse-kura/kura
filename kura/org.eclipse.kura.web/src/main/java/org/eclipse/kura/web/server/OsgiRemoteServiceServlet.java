@@ -30,6 +30,8 @@ import com.google.gwt.user.server.rpc.SerializationPolicyLoader;
 public class OsgiRemoteServiceServlet extends KuraRemoteServiceServlet
 {
 	private static final long serialVersionUID = -8826193840033103296L;
+	
+	static final String PLACEHOLDER= "Placeholder";
 
 	@Override 
 	protected void service(HttpServletRequest req, HttpServletResponse resp) 

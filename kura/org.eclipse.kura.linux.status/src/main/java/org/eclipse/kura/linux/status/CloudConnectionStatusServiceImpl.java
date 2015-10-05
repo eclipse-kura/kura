@@ -82,7 +82,7 @@ public class CloudConnectionStatusServiceImpl implements CloudConnectionStatusSe
 		s_logger.info("Activating CloudConnectionStatus service...");
 		
 		
-		String urlFromConfig = m_systemService.getProperties().getProperty(STATUS_NOTIFICATION_URL, "");
+		String urlFromConfig = m_systemService.getProperties().getProperty(STATUS_NOTIFICATION_URL, CloudConnectionStatusURL.S_CCS+CloudConnectionStatusURL.S_NONE);
 		
 		Properties props = CloudConnectionStatusURL.parseURL(urlFromConfig);
 		
@@ -204,6 +204,8 @@ public class CloudConnectionStatusServiceImpl implements CloudConnectionStatusSe
 			}
 		}else if(currentNotificationType == CloudConnectionStatusURL.TYPE_LOG){
 			return new LogStatusRunnable(status);
+		}else if(currentNotificationType == CloudConnectionStatusURL.TYPE_NONE){
+			return new Runnable(){@Override public void run() {	/*Empty runnable*/ }};
 		}
 		
 		return new Runnable(){

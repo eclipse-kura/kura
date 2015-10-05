@@ -40,7 +40,7 @@ public class ModemDriver {
 				retVal = false;
 				break;
 			}
-			s_logger.info("turnOff() :: turning modem OFF ... attempts left: {}", remainingAttempts);
+			s_logger.info("turnModemOff() :: turning modem OFF ... attempts left: {}", remainingAttempts);
 			if(TARGET_NAME.equals(KuraConstants.Mini_Gateway.getTargetName())) {
 				toggleGpio65();
 			} else if (TARGET_NAME.equals(KuraConstants.Reliagate_10_20.getTargetName())) {
@@ -50,7 +50,7 @@ public class ModemDriver {
 			} else if (TARGET_NAME.equals(KuraConstants.ReliaGATE_50_21_Ubuntu.getTargetName())) {
 				SafeProcess pr = ProcessUtil.exec("/usr/sbin/vector-j21-gpio 11 0");
 				int status = pr.waitFor();
-				s_logger.info("turnOff() :: '/usr/sbin/vector-j21-gpio 11 0' returned {}", status);
+				s_logger.info("turnModemOff() :: '/usr/sbin/vector-j21-gpio 11 0' returned {}", status);
 				if (status != 0) {
 					continue;
 				}
@@ -58,7 +58,7 @@ public class ModemDriver {
 
 				pr = ProcessUtil.exec("/usr/sbin/vector-j21-gpio 11 1");
 				status = pr.waitFor();
-				s_logger.info("turnOff() :: '/usr/sbin/vector-j21-gpio 11 1' returned {}", status);
+				s_logger.info("turnModemOff() :: '/usr/sbin/vector-j21-gpio 11 1' returned {}", status);
 				if (status != 0) {
 					continue;
 				}
@@ -66,16 +66,18 @@ public class ModemDriver {
 
 				pr = ProcessUtil.exec("/usr/sbin/vector-j21-gpio 11 0");
 				status = pr.waitFor();
-				s_logger.info("turnOff() :: '/usr/sbin/vector-j21-gpio 11 0' returned {}", status);
+				s_logger.info("turnModemOff() :: '/usr/sbin/vector-j21-gpio 11 0' returned {}", status);
 				retVal = (status == 0) ? true : false;
 			} else {
-				s_logger.warn("turnOff() :: modem turnOff operation is not supported for the {} platform", TARGET_NAME);
+				s_logger.warn("turnModemOff() :: modem turnOff operation is not supported for the {} platform", TARGET_NAME);
+				retVal = true;
+				break;
 			}
 			remainingAttempts--;
 			sleep(5000);
 		} while (isOn());
 
-		s_logger.info("turnOff() :: Modem is OFF? - {}", retVal);
+		s_logger.info("turnModemOff() :: Modem is OFF? - {}", retVal);
 		return retVal;
 	}
 	
@@ -90,7 +92,7 @@ public class ModemDriver {
 				retVal = false;
 				break;
 			}
-			s_logger.info("turnOn() :: turning modem ON ... attempts left: {}", remainingAttempts);
+			s_logger.info("turnModemOn() :: turning modem ON ... attempts left: {}", remainingAttempts);
 			if(TARGET_NAME.equals(KuraConstants.Mini_Gateway.getTargetName())) {
 				toggleGpio65();
 			} else if (TARGET_NAME.equals(KuraConstants.Reliagate_10_20.getTargetName())) {
@@ -100,7 +102,7 @@ public class ModemDriver {
 			} else if (TARGET_NAME.equals(KuraConstants.ReliaGATE_50_21_Ubuntu.getTargetName())) {
 				SafeProcess pr = ProcessUtil.exec("/usr/sbin/vector-j21-gpio 11 1");
 				int status = pr.waitFor();
-				s_logger.info("turnOn() :: '/usr/sbin/vector-j21-gpio 11 1' returned {}", status);
+				s_logger.info("turnModemOn() :: '/usr/sbin/vector-j21-gpio 11 1' returned {}", status);
 				if (status != 0) {
 					continue;
 				}
@@ -108,16 +110,18 @@ public class ModemDriver {
 
 				pr = ProcessUtil.exec("/usr/sbin/vector-j21-gpio 6");
 				status = pr.waitFor();
-				s_logger.info("turnOn() :: '/usr/sbin/vector-j21-gpio 6' returned {}", status);
+				s_logger.info("turnModemOn() :: '/usr/sbin/vector-j21-gpio 6' returned {}", status);
 				retVal = (status == 0) ? true : false;
 			} else {
-				s_logger.warn("turnOn() :: modem turnOn operation is not supported for the {} platform", TARGET_NAME);
+				s_logger.warn("turnModemOn() :: modem turnOn operation is not supported for the {} platform", TARGET_NAME);
+				retVal = true;
+				break;
 			}
 			remainingAttempts--;
 			sleep(10000);
 		} while (!isOn());
 
-		s_logger.info("turnOn() :: Modem is ON? - {}", retVal);
+		s_logger.info("turnModemOn() :: Modem is ON? - {}", retVal);
 		return retVal;
 	}
 	

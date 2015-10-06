@@ -14,7 +14,7 @@ package org.eclipse.kura.core.deployment.uninstall;
 
 import java.text.ParseException;
 
-import org.eclipse.kura.core.deployment.download.KuraNotifyPayload;
+import org.eclipse.kura.core.deployment.download.impl.KuraNotifyPayload;
 import org.eclipse.kura.message.KuraPayload;
 
 public class KuraUninstallPayload extends KuraPayload

@@ -9,7 +9,7 @@
  * Contributors:
  *   Eurotech
  */
-package org.eclipse.kura.core.deployment.download;
+package org.eclipse.kura.core.deployment.download.impl;
 
 import java.text.ParseException;
 
@@ -19,12 +19,12 @@ public class KuraNotifyPayload extends KuraPayload
 {
 	
 	public static final String METRIC_CLIENT_ID = "client.id";
-	public static final String METRIC_TRANSFER_SIZE = "dp.http.transfer.size";
-	public static final String METRIC_TRANSFER_PROGRESS = "dp.http.transfer.progress";
-	public static final String METRIC_TRANSFER_STATUS = "dp.http.transfer.status";
+	public static final String METRIC_TRANSFER_SIZE = "dp.download.size";
+	public static final String METRIC_TRANSFER_PROGRESS = "dp.download.progress";
+	public static final String METRIC_TRANSFER_STATUS = "dp.download.status";
 	public static final String METRIC_JOB_ID = "job.id";
-	public static final String METRIC_ERROR_MESSAGE = "dp.http.transfer.error.message";
-	public static final String METRIC_TRANSFER_INDEX = "dp.http.transfer.index";
+	public static final String METRIC_ERROR_MESSAGE = "dp.download.error.message";
+	public static final String METRIC_TRANSFER_INDEX = "dp.download.index";
 	
 	public KuraNotifyPayload(String clientId) 
 	{

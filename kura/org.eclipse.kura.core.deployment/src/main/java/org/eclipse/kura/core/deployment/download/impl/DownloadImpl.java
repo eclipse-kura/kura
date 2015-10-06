@@ -1,4 +1,4 @@
-package org.eclipse.kura.core.deployment.download;
+package org.eclipse.kura.core.deployment.download.impl;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -11,6 +11,11 @@ import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.deployment.CloudDeploymentHandlerV2;
 import org.eclipse.kura.core.deployment.CloudDeploymentHandlerV2.DOWNLOAD_STATUS;
+import org.eclipse.kura.core.deployment.download.DeploymentPackageDownloadOptions;
+import org.eclipse.kura.core.deployment.download.DownloadCountingOutputStream;
+import org.eclipse.kura.core.deployment.download.DownloadFactory;
+import org.eclipse.kura.core.deployment.download.DownloadFileUtilities;
+import org.eclipse.kura.core.deployment.download.DownloadOptions;
 import org.eclipse.kura.core.deployment.install.DeploymentPackageInstallOptions;
 import org.eclipse.kura.core.deployment.progress.ProgressEvent;
 import org.eclipse.kura.core.deployment.progress.ProgressListener;
@@ -150,7 +155,15 @@ public class DownloadImpl implements ProgressListener{
 
 		try {
 			os = new FileOutputStream(dpFile);
-			downloadHelper = new HttpDownloadCountingOutputStream(os, options, this, sslManagerService, url, downloadIndex);
+			DownloadOptions downloadOptions= new DownloadOptions();
+			downloadOptions.setOut(os);
+			downloadOptions.setRequestOptions(options);
+			downloadOptions.setCallback(this);
+			downloadOptions.setSslManagerService(sslManagerService);
+			downloadOptions.setDownloadURL(url);
+			downloadOptions.setAlreadyDownloaded(downloadIndex);
+			
+			downloadHelper = DownloadFactory.getDownloadInstance(options.getDownloadProtocol(), downloadOptions);
 			downloadHelper.startWork();
 			downloadHelper.close();
 		} finally {
@@ -192,7 +205,7 @@ public class DownloadImpl implements ProgressListener{
 	}
 
 	//Synchronous messages
-	public static void downloadInProgressSyncMessage(KuraResponsePayload respPayload, DownloadCountingOutputStream downloadHelper, DeploymentPackageDownloadOptions m_downloadOptions) {
+	public static void downloadInProgressSyncMessage(KuraResponsePayload respPayload, GenericDownloadCountingOutputStream downloadHelper, DeploymentPackageDownloadOptions m_downloadOptions) {
 		respPayload.setTimestamp(new Date());
 		respPayload.addMetric(KuraNotifyPayload.METRIC_TRANSFER_SIZE, downloadHelper.getTotalBytes().intValue());
 		respPayload.addMetric(KuraNotifyPayload.METRIC_TRANSFER_PROGRESS, downloadHelper.getDownloadTransferProgressPercentage().intValue());

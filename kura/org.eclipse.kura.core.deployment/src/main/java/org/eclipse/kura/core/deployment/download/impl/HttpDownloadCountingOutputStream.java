@@ -10,11 +10,10 @@
  *   Eurotech
  */
 
-package org.eclipse.kura.core.deployment.download;
+package org.eclipse.kura.core.deployment.download.impl;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.Authenticator;
 import java.net.HttpURLConnection;
 import java.net.PasswordAuthentication;
@@ -34,12 +33,12 @@ import org.eclipse.kura.KuraConnectException;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.deployment.CloudDeploymentHandlerV2.DOWNLOAD_STATUS;
-import org.eclipse.kura.core.deployment.progress.ProgressListener;
-import org.eclipse.kura.ssl.SslManagerService;
+import org.eclipse.kura.core.deployment.download.DownloadCountingOutputStream;
+import org.eclipse.kura.core.deployment.download.DownloadOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class HttpDownloadCountingOutputStream extends DownloadCountingOutputStream {
+public class HttpDownloadCountingOutputStream extends GenericDownloadCountingOutputStream implements DownloadCountingOutputStream {
 	private static final Logger s_logger = LoggerFactory.getLogger(HttpDownloadCountingOutputStream.class);
 
 	InputStream is = null;
@@ -48,9 +47,8 @@ public class HttpDownloadCountingOutputStream extends DownloadCountingOutputStre
 	private Future<Void> future;
 	
 
-	public HttpDownloadCountingOutputStream(OutputStream out, DeploymentPackageDownloadOptions options, ProgressListener callback,
-			SslManagerService sslManagerService, String downloadURL, int alreadyDownloaded) {
-		super(out, options, callback, sslManagerService, downloadURL, alreadyDownloaded);
+	public HttpDownloadCountingOutputStream(DownloadOptions downloadOptions) {
+		super(downloadOptions);
 		setBufferSize(options.getBlockSize());
 		setResolution(options.getNotifyBlockSize());
 		setBlockDelay(options.getBlockDelay());
@@ -143,7 +141,7 @@ public class HttpDownloadCountingOutputStream extends DownloadCountingOutputStre
 						}
 					}
 					try {
-						HttpDownloadCountingOutputStream.this.close();
+						close();
 					} catch (IOException e) {
 					}
 					localUrl = null;

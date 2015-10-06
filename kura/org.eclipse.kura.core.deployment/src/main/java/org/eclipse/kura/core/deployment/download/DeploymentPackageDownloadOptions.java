@@ -23,6 +23,7 @@ public class DeploymentPackageDownloadOptions extends DeploymentPackageInstallOp
 
 	// Metrics in RESOURCE_DOWNLOAD
 	public static final String METRIC_DP_DOWNLOAD_URI = "dp.uri";
+	public static final String METRIC_DP_DOWNLOAD_PROTOCOL = "dp.download.protocol";
 	public static final String METRIC_DP_DOWNLOAD_BLOCK_SIZE = "dp.download.block.size";
 	public static final String METRIC_DP_DOWNLOAD_BLOCK_DELAY = "dp.download.block.delay";
 	public static final String METRIC_DP_DOWNLOAD_TIMEOUT = "dp.download.timeout";
@@ -36,6 +37,7 @@ public class DeploymentPackageDownloadOptions extends DeploymentPackageInstallOp
 
 	
 	private String deployUri;
+	private String downloadProtocol;
 	private int blockSize;
 	private int notifyBlockSize;
 	private int blockDelay = 0;
@@ -49,13 +51,13 @@ public class DeploymentPackageDownloadOptions extends DeploymentPackageInstallOp
 
 	public DeploymentPackageDownloadOptions(String deployUri, String dpName, String dpVersion) {
 		super(dpName, dpVersion);
-		this.deployUri= deployUri;
+		setDeployUri(deployUri);
 	}
 
 	public DeploymentPackageDownloadOptions(KuraPayload request) throws KuraException {
 		super(null, null);
-		deployUri = (String) request.getMetric(METRIC_DP_DOWNLOAD_URI);
-		if (deployUri == null) {
+		setDeployUri((String) request.getMetric(METRIC_DP_DOWNLOAD_URI));
+		if (getDeployUri() == null) {
 			throw new KuraInvalidMessageException("Missing deployment package URL!");
 		}
 
@@ -67,6 +69,11 @@ public class DeploymentPackageDownloadOptions extends DeploymentPackageInstallOp
 		super.setDpVersion((String) request.getMetric(METRIC_DP_VERSION));
 		if (super.getDpVersion() == null) {
 			throw new KuraInvalidMessageException("Missing deployment package version!");
+		}
+		
+		setDownloadProtocol((String) request.getMetric(METRIC_DP_DOWNLOAD_PROTOCOL));
+		if (getDownloadProtocol() == null) {
+			throw new KuraInvalidMessageException("Missing download protocol!");
 		}
 		
 		super.setJobId((Long) request.getMetric(METRIC_JOB_ID));
@@ -155,6 +162,18 @@ public class DeploymentPackageDownloadOptions extends DeploymentPackageInstallOp
 
 	public String getDeployUri() {
 		return deployUri;
+	}
+	
+	public void setDeployUri(String deployUri) {
+		this.deployUri= deployUri;
+	}
+	
+	public String getDownloadProtocol() {
+		return downloadProtocol;
+	}
+	
+	public void setDownloadProtocol(String downloadProtocol) {
+		this.downloadProtocol= downloadProtocol;
 	}
 
 	public int getBlockSize() {

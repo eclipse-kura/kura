@@ -54,6 +54,8 @@ public abstract class AbstractNtpClockSyncProvider implements ClockSyncProvider
 	@Override
 	public void start() throws KuraException 
 	{		
+		m_isSynced = false;
+		m_numRetry = 0;
 		if (m_refreshInterval < 0) {			
 			// Never do any update. So Nothing to do.
 			s_logger.info("No clock update required");

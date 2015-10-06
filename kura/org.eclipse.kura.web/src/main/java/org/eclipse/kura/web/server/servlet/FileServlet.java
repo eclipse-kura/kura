@@ -49,9 +49,12 @@ import org.eclipse.kura.core.configuration.XmlComponentConfigurations;
 import org.eclipse.kura.core.configuration.util.XmlUtil;
 import org.eclipse.kura.deployment.agent.DeploymentAgentService;
 import org.eclipse.kura.system.SystemService;
+import org.eclipse.kura.web.server.KuraRemoteServiceServlet;
 import org.eclipse.kura.web.Console;
 import org.eclipse.kura.web.server.util.ServiceLocator;
+import org.eclipse.kura.web.shared.GwtKuraErrorCode;
 import org.eclipse.kura.web.shared.GwtKuraException;
+import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.metatype.MetaTypeInformation;
@@ -67,8 +70,8 @@ public class FileServlet extends HttpServlet {
 	private static Logger s_logger = LoggerFactory.getLogger(FileServlet.class);
 
 	private static final int BUFFER = 1024;
-	private static final int TOOBIG = 0x6400000; // Max size of unzipped data, 100MB
-	private static final int TOOMANY = 1024;     // Max number of files
+	private static int tooBig = 0x6400000; // Max size of unzipped data, 100MB
+	private static int tooMany = 1024;     // Max number of files
 
 	private DiskFileItemFactory m_diskFileItemFactory;
 	private FileCleaningTracker m_fileCleaningTracker;
@@ -94,6 +97,9 @@ public class FileServlet extends HttpServlet {
 
 		ServletContext ctx = getServletContext();
 		m_fileCleaningTracker = FileCleanerCleanup.getFileCleaningTracker(ctx);
+		
+		getZipUploadSizeMax();
+		getZipUploadCountMax();
 
 		int sizeThreshold = getFileUploadInMemorySizeThreshold();
 		File repository = new File(System.getProperty("java.io.tmpdir"));
@@ -144,6 +150,7 @@ public class FileServlet extends HttpServlet {
 		s_logger.debug("req.getRequestURI(): {}", req.getRequestURI());
 		s_logger.debug("req.getRequestURL(): {}", req.getRequestURL());
 		s_logger.debug("req.getPathInfo(): {}", req.getPathInfo());
+
 
 		if (reqPathInfo.startsWith("/deploy")) {
 			doPostDeploy(req, resp);
@@ -258,6 +265,18 @@ public class FileServlet extends HttpServlet {
 			throw new ServletException("Error parsing the file upload request", e);			
 		}
 
+		// BEGIN XSRF - Servlet dependent code
+		Map<String,String> formFields= upload.getFormFields();
+
+		try {
+			GwtXSRFToken token = new GwtXSRFToken(formFields.get("xsrfToken"));
+			KuraRemoteServiceServlet.checkXSRFToken(req, token);
+		}
+		catch (Exception e) {
+			throw new ServletException("Security error: please retry this operation correctly.", e);
+		}
+		// END XSRF security check
+
 		List<FileItem> fileItems = null;
 		InputStream is = null;
 		File localFolder = new File(System.getProperty("java.io.tmpdir"));
@@ -294,7 +313,7 @@ public class FileServlet extends HttpServlet {
 
 					FileOutputStream fos = new FileOutputStream(newFile);
 					int len;
-					while ((total + BUFFER <= TOOBIG) && (len = zis.read(buffer)) > 0) {
+					while ((total + BUFFER <= tooBig) && (len = zis.read(buffer)) > 0) {
 						fos.write(buffer, 0, len);
 						total += len;
 					}
@@ -302,10 +321,10 @@ public class FileServlet extends HttpServlet {
 					fos.close();
 
 					entries++;
-					if (entries > TOOMANY) {
+					if (entries > tooMany) {
 						throw new IllegalStateException("Too many files to unzip.");
 					}
-					if (total > TOOBIG) {
+					if (total > tooBig) {
 						throw new IllegalStateException("File being unzipped is too big.");
 					}
 
@@ -318,7 +337,7 @@ public class FileServlet extends HttpServlet {
 		} catch (IOException e) {
 			throw e;
 		} catch (GwtKuraException e) {
-			throw new ServletException(e.getMessage());
+			throw new ServletException("File is outside extraction target directory.");
 		} finally {
 			if (os != null) {
 				try {
@@ -352,7 +371,7 @@ public class FileServlet extends HttpServlet {
 		if (filePath.contains(canonicalID)) {
 			return filePath;
 		} else {
-			throw new GwtKuraException("File is outside extraction target directory.");
+			throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ACCESS);
 		}
 	}
 
@@ -367,6 +386,18 @@ public class FileServlet extends HttpServlet {
 			s_logger.error("Error parsing the file upload request");
 			throw new ServletException("Error parsing the file upload request", e);			
 		}
+
+		// BEGIN XSRF - Servlet dependent code
+		Map<String,String> formFields= upload.getFormFields();
+
+		try {
+			GwtXSRFToken token = new GwtXSRFToken(formFields.get("xsrfToken"));
+			KuraRemoteServiceServlet.checkXSRFToken(req, token);
+		}
+		catch (Exception e) {
+			throw new ServletException("Security error: please retry this operation correctly.", e);
+		}
+		// END XSRF security check
 
 		List<FileItem> fileItems = upload.getFileItems();
 		if (fileItems.size() != 1) {
@@ -438,6 +469,18 @@ public class FileServlet extends HttpServlet {
 			s_logger.error("Error parsing the file upload request", e);
 			throw new ServletException("Error parsing the file upload request", e);			
 		}
+
+		// BEGIN XSRF - Servlet dependent code
+		Map<String,String> formFields= upload.getFormFields();
+
+		try {
+			GwtXSRFToken token = new GwtXSRFToken(formFields.get("xsrfToken"));
+			KuraRemoteServiceServlet.checkXSRFToken(req, token);
+		}
+		catch (Exception e) {
+			throw new ServletException("Security error: please retry this operation correctly.", e);
+		}
+		// END XSRF security check
 
 		List<FileItem> fileItems = null;
 		InputStream is = null;
@@ -563,6 +606,18 @@ public class FileServlet extends HttpServlet {
 				throw new ServletException("Deployment package URL parameter missing");	
 			}
 
+			// BEGIN XSRF - Servlet dependent code
+			String tokenId= req.getParameter("xsrfToken");
+
+			try {
+				GwtXSRFToken token = new GwtXSRFToken(tokenId);
+				KuraRemoteServiceServlet.checkXSRFToken(req, token);
+			}
+			catch (Exception e) {
+				throw new ServletException("Security error: please retry this operation correctly.", e);
+			}
+			// END XSRF security check
+
 			try {
 				s_logger.info("Installing package...");
 				deploymentAgentService.installDeploymentPackageAsync(packageDownloadUrl);
@@ -575,6 +630,28 @@ public class FileServlet extends HttpServlet {
 		} else {
 			s_logger.error("Unsupported package deployment request");
 			throw new ServletException("Unsupported package deployment request");			
+		}
+	}
+	
+	private void getZipUploadSizeMax(){
+		ServiceLocator locator = ServiceLocator.getInstance();
+		try {
+			SystemService systemService = locator.getService(SystemService.class);
+			int sizeInMB= systemService.getFileCommandZipMaxUploadSize();
+			int sizeInBytes= sizeInMB * 1024 * 1024;
+			tooBig = sizeInBytes;
+		} catch (GwtKuraException e) {
+			s_logger.error("Error locating SystemService", e);
+		}
+	}
+	
+	private void getZipUploadCountMax(){
+		ServiceLocator locator = ServiceLocator.getInstance();
+		try {
+			SystemService systemService = locator.getService(SystemService.class);
+			tooMany = systemService.getFileCommandZipMaxUploadNumber();
+		} catch (GwtKuraException e) {
+			s_logger.error("Error locating SystemService", e);
 		}
 	}
 

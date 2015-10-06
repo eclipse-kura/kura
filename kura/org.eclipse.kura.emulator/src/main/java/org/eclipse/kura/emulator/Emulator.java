@@ -11,8 +11,6 @@
  */
 package org.eclipse.kura.emulator;
 
-import java.util.Properties;
-
 import org.osgi.service.component.ComponentContext;
 
 
@@ -26,8 +24,8 @@ public class Emulator
 		m_componentContext = componentContext;
 		
 		try {
-			Properties props = System.getProperties();
-			String mode = props.getProperty("org.eclipse.kura.mode");
+			//Properties props = System.getProperties();
+			String mode = System.getProperty("org.eclipse.kura.mode");
 			if(mode.equals("emulator")) {
 				System.out.println("Framework is running in emulation mode");
 			} else {

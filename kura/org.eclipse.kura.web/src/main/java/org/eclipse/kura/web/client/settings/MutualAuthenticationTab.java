@@ -12,10 +12,14 @@
 package org.eclipse.kura.web.client.settings;
 
 import org.eclipse.kura.web.client.messages.Messages;
+import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.shared.GwtKuraErrorCode;
 import org.eclipse.kura.web.shared.model.GwtSession;
+import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.eclipse.kura.web.shared.service.GwtCertificatesService;
 import org.eclipse.kura.web.shared.service.GwtCertificatesServiceAsync;
+import org.eclipse.kura.web.shared.service.GwtSecurityTokenService;
+import org.eclipse.kura.web.shared.service.GwtSecurityTokenServiceAsync;
 
 import com.extjs.gxt.ui.client.Style.HorizontalAlignment;
 import com.extjs.gxt.ui.client.Style.Scroll;
@@ -41,12 +45,16 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.server.rpc.XsrfProtect;
 
+@XsrfProtect
 public class MutualAuthenticationTab extends LayoutContainer {
 
 	private static final Messages MSGS = GWT.create(Messages.class);
 
 	private final static String SERVLET_URL = "/" + GWT.getModuleName() + "/file/certificate";
+	
+	private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
 	private final GwtCertificatesServiceAsync gwtCertificatesService = GWT.create(GwtCertificatesService.class);
 
 	@SuppressWarnings("unused")
@@ -99,8 +107,15 @@ public class MutualAuthenticationTab extends LayoutContainer {
 
 		m_formPanel.addListener(Events.Submit, new Listener<FormEvent>() {
 			public void handleEvent(FormEvent be) {
-				
-					gwtCertificatesService.storePublicPrivateKeys(m_privateCertificate.getValue(), m_publicCertificate.getValue(), m_storagePassword.getValue(), m_storageAlias.getValue(), new AsyncCallback<Integer>() {
+				gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
+					@Override
+					public void onFailure(Throwable ex) {
+						FailureHandler.handle(ex);
+					}
+
+					@Override
+					public void onSuccess(GwtXSRFToken token) {	
+					gwtCertificatesService.storePublicPrivateKeys(token, m_privateCertificate.getValue(), m_publicCertificate.getValue(), m_storagePassword.getValue(), m_storageAlias.getValue(), new AsyncCallback<Integer>() {
 						public void onFailure(Throwable caught) {
 							if(caught.getLocalizedMessage().equals(GwtKuraErrorCode.ILLEGAL_ARGUMENT.toString())){
 								Info.display(MSGS.error(), "Error while storing the private certificate in the key store");
@@ -119,6 +134,7 @@ public class MutualAuthenticationTab extends LayoutContainer {
 							m_commandInput.unmask();
 						}
 					});
+					}});
 			}
 		});
 		

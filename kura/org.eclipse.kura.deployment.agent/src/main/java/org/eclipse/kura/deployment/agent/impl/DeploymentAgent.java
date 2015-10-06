@@ -413,10 +413,20 @@ public class DeploymentAgent implements DeploymentAgentService {
 	private void installPackagesFromConfFile() {
 
 		if (m_dpaConfPath != null) {
+			FileReader fr= null;
 			try {
-				m_deployedPackages.load(new FileReader(m_dpaConfPath));
+				fr= new FileReader(m_dpaConfPath);
+				m_deployedPackages.load(fr);
 			} catch (IOException e) {
 				s_logger.error("Exception loading deployment packages configuration file", e);
+			} finally {
+				if (fr != null){
+					try {
+						fr.close();
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
 			}
 		}
 

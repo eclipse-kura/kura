@@ -55,6 +55,7 @@ import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.ssl.SslManagerService;
 import org.eclipse.kura.ssl.SslServiceListener;
+import org.eclipse.kura.system.SystemService;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
@@ -77,6 +78,8 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
 
 	private boolean                  m_configurationDirty;
 	private SSLSocketFactory         m_sslSocketFactory;
+	
+	private SystemService 			 m_systemService;
 
 
 	// ----------------------------------------------------------------
@@ -99,6 +102,14 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
 
 	public void unsetConfigurationService(ConfigurationService configurationService) {
 		this.m_configurationService = null;
+	}
+	
+	public void setSystemService(SystemService systemService) {
+		this.m_systemService = systemService;
+	}
+
+	public void unsetSystemService(SystemService systemService) {
+		this.m_systemService = null;
 	}
 
 	// ----------------------------------------------------------------
@@ -423,6 +434,7 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
     			ts.load(tsReadStream, null);
     			tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
     			tmf.init(ts);
+    			tsReadStream.close();
     		}
     		else {
     			s_logger.info("Could not find trust store at {}. Using Java default.", trustStore);
@@ -469,6 +481,7 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
 				ks = KeyStore.getInstance(KeyStore.getDefaultType());
 				InputStream ksReadStream = new FileInputStream(keyStore);
 				ks.load(ksReadStream, keyStorePassword);
+				
 
 				// if we have an alias, then build KeyStore with such key
 				if (keyAlias != null) {
@@ -486,6 +499,8 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
 						ks = null;
 					}
 				}
+				
+				ksReadStream.close();
 			}
 			else {
 				s_logger.info("Could not find key store at {}. Using Java default.", keyStore);
@@ -575,10 +590,18 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
 		}
 	}
 	
-	private static boolean isDefaultPassword(char[] password)
+	private boolean isDefaultPassword(char[] password)
 	{
-		return Arrays.equals(password,
-				SslManagerServiceOptions.PROP_DEFAULT_TRUST_PASSWORD.toCharArray());
+		try {
+			char[] keystorePassword= m_systemService.getJavaKeyStorePassword();
+			boolean isDefaultFromInstaller= Arrays.equals(password, SslManagerServiceOptions.PROP_DEFAULT_TRUST_PASSWORD.toCharArray());
+			boolean isDefaultFromUser= Arrays.equals(password, keystorePassword);
+			return isDefaultFromInstaller || isDefaultFromUser;
+		} catch (Exception e) {
+			e.printStackTrace();
+		} 
+		
+		return false;
 	}
 	
 	private boolean changeDefaultKeystorePassword()
@@ -586,11 +609,11 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
 		boolean result = false;
 		
 		m_timer = new Timer(true);
-		
+		char[] snapshotPassword = null;
 		boolean needsPasswordChange = true;
 		try {
-			char[] password = m_cryptoService.decryptAes(m_options.getSslKeystorePassword().toCharArray());
-			needsPasswordChange = isDefaultPassword(password);
+			snapshotPassword = m_cryptoService.decryptAes(m_options.getSslKeystorePassword().toCharArray());
+			needsPasswordChange = isDefaultPassword(snapshotPassword);
 		} catch (KuraException e) {
 		}
 
@@ -599,8 +622,16 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
 		// password.
 		// The keystore must be accessible with the old/default password.
 		char[] oldPassword = m_cryptoService.getKeyStorePassword(m_options.getSslKeyStore());
-		if(m_cryptoService.isFrameworkSecure() && needsPasswordChange &&
-		   oldPassword != null && isKeyStoreAccessible(m_options.getSslKeyStore(), oldPassword)){
+		if(needsPasswordChange){
+			if(snapshotPassword != null && isKeyStoreAccessible(m_options.getSslKeyStore(), snapshotPassword)){
+				oldPassword = snapshotPassword;
+			}
+		}
+		if(     m_cryptoService.isFrameworkSecure() && 
+				needsPasswordChange &&
+		        oldPassword != null && 
+		        isKeyStoreAccessible(m_options.getSslKeyStore(), oldPassword)
+		        ){
 			try {
 				// generate a new random password
 				char[] newPassword = new BigInteger(160, new SecureRandom()).toString(32).toCharArray();

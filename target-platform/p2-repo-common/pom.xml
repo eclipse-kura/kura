@@ -122,7 +122,7 @@
 								<artifactItem>
 									<groupId>jdk</groupId>
 									<artifactId>jdk.dio</artifactId>
-									<version>1.0.1</version>
+									<version>1.0.2</version>
 								</artifactItem>
 							</artifactItems>
 							<outputDirectory>${project.basedir}/target/source/plugins</outputDirectory>

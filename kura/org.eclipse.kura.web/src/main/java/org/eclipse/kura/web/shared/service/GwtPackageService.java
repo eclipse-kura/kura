@@ -15,6 +15,7 @@ import java.util.List;
 
 import org.eclipse.kura.web.shared.GwtKuraException;
 import org.eclipse.kura.web.shared.model.GwtDeploymentPackage;
+import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
@@ -22,8 +23,8 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 @RemoteServiceRelativePath("package")
 public interface GwtPackageService extends RemoteService 
 {
-	public List<GwtDeploymentPackage> findDeviceDeploymentPackages() throws GwtKuraException;
+	public List<GwtDeploymentPackage> findDeviceDeploymentPackages(GwtXSRFToken xsrfToken) throws GwtKuraException;
 	
-	public void uninstallDeploymentPackage(String packageName) throws GwtKuraException;
+	public void uninstallDeploymentPackage(GwtXSRFToken xsrfToken, String packageName) throws GwtKuraException;
 
 }

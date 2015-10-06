@@ -17,8 +17,11 @@ import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.shared.model.GwtGroupedNVPair;
 import org.eclipse.kura.web.shared.model.GwtSession;
+import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.eclipse.kura.web.shared.service.GwtDeviceService;
 import org.eclipse.kura.web.shared.service.GwtDeviceServiceAsync;
+import org.eclipse.kura.web.shared.service.GwtSecurityTokenService;
+import org.eclipse.kura.web.shared.service.GwtSecurityTokenServiceAsync;
 
 import com.allen_sauer.gwt.log.client.Log;
 import com.extjs.gxt.ui.client.GXT;
@@ -50,6 +53,7 @@ public class denali implements EntryPoint
 {
 	private static final Messages MSGS = GWT.create(Messages.class);
 	//private final boolean VIEW_LOG = true;
+	private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
 	private final GwtDeviceServiceAsync gwtDeviceService = GWT.create(GwtDeviceService.class);
 
 	/**
@@ -60,17 +64,17 @@ public class denali implements EntryPoint
 	public void onModuleLoad() 
 	{
 		/*
-	     * Install an UncaughtExceptionHandler which will produce <code>FATAL</code> log messages
-	     */
-	    Log.setUncaughtExceptionHandler();
+		 * Install an UncaughtExceptionHandler which will produce <code>FATAL</code> log messages
+		 */
+		Log.setUncaughtExceptionHandler();
 
-	    /*
+		/*
 	    // Disable the web UI log view unless VIEW_LOG is set to true
 	    if (!VIEW_LOG) {
 	    	Widget divLogger = Log.getLogger(DivLogger.class).getWidget();
 	    	divLogger.setVisible(false);
 	    }
-	    */
+		 */
 		// use deferred command to catch initialization exceptions in
 		// onModuleLoad2
 		Scheduler.get().scheduleDeferred(new ScheduledCommand() {
@@ -80,7 +84,7 @@ public class denali implements EntryPoint
 		});
 	}
 
-	
+
 	/**
 	 * This is the 'real' entry point method.
 	 */
@@ -88,45 +92,54 @@ public class denali implements EntryPoint
 
 		// set the default theme
 		GXT.setDefaultTheme(Theme.GRAY, true);
-		
+
 		// load custom CSS/JS
-    	loadCss("denali/skin/skin.css");
-    	ScriptInjector.fromUrl("skin/skin.js?v=1").inject(); // Make sure this request is not cached
-		
-		gwtDeviceService.findSystemProperties( new AsyncCallback<ListLoadResult<GwtGroupedNVPair>>() {    				
-			public void onSuccess(ListLoadResult<GwtGroupedNVPair> results) {
-				
-				GwtSession gwtSession = new GwtSession();
-				
-				if (results != null) {
-					List<GwtGroupedNVPair> pairs = results.getData();
-					if (pairs != null) {
-						for (GwtGroupedNVPair pair : pairs) {
-							String name = pair.getName();
-							if (name != null && name.equals("kura.have.net.admin")) {
-								Boolean value = Boolean.valueOf(pair.getValue());
-								gwtSession.setNetAdminAvailable(value);
-							}
-							if (name != null && name.equals("kura.version")) {
-								gwtSession.setKuraVersion(pair.getValue());
-							}
-							if (name != null && name.equals("kura.os.version")) {
-								gwtSession.setOsVersion(pair.getValue());
+		loadCss("denali/skin/skin.css");
+		ScriptInjector.fromUrl("skin/skin.js?v=1").inject(); // Make sure this request is not cached
+
+		gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
+			@Override
+			public void onFailure(Throwable ex) {
+				FailureHandler.handle(ex);
+			}
+
+			@Override
+			public void onSuccess(GwtXSRFToken token) {	
+				gwtDeviceService.findSystemProperties(token, new AsyncCallback<ListLoadResult<GwtGroupedNVPair>>() {    				
+					public void onSuccess(ListLoadResult<GwtGroupedNVPair> results) {
+
+						GwtSession gwtSession = new GwtSession();
+
+						if (results != null) {
+							List<GwtGroupedNVPair> pairs = results.getData();
+							if (pairs != null) {
+								for (GwtGroupedNVPair pair : pairs) {
+									String name = pair.getName();
+									if (name != null && name.equals("kura.have.net.admin")) {
+										Boolean value = Boolean.valueOf(pair.getValue());
+										gwtSession.setNetAdminAvailable(value);
+									}
+									if (name != null && name.equals("kura.version")) {
+										gwtSession.setKuraVersion(pair.getValue());
+									}
+									if (name != null && name.equals("kura.os.version")) {
+										gwtSession.setOsVersion(pair.getValue());
+									}
+								}
 							}
 						}
+
+						render(gwtSession);
 					}
-				}
-				
-				render(gwtSession);
-			}
-			
-			public void onFailure(Throwable caught) {
-				FailureHandler.handle(caught);
-				render( new GwtSession());
-			}
-		});
+
+					public void onFailure(Throwable caught) {
+						FailureHandler.handle(caught);
+						render( new GwtSession());
+					}
+				});
+			}});
 	}
-	
+
 	private static native void loadCss(String url) /*-{
 		var l = $doc.createElement("link");
 		l.setAttribute("id", url);
@@ -135,84 +148,84 @@ public class denali implements EntryPoint
 		l.setAttribute("href", url + "?v=1"); // Make sure this request is not cached
 		$doc.getElementsByTagName("head")[0].appendChild(l);
 	}-*/;
-	
-    private void render(GwtSession gwtSession) 
-    {    	
-    	Log.debug("Beginning page render");
-    	
-        final Viewport viewport = new Viewport();
-        
-        final BorderLayout borderLayout = new BorderLayout();
-        viewport.setLayout(borderLayout);
-        viewport.setStyleAttribute("padding", "5px");
-        
-        //
-        // north
-        BorderLayoutData northData = new BorderLayoutData(LayoutRegion.NORTH, 52);  
-        northData.setCollapsible(false);  
-        northData.setFloatable(false);  
-        northData.setHideCollapseTool(false);  
-        northData.setSplit(false);
-        northData.setMargins(new Margins(0, 0, 5, 0));  
-        viewport.add(new NorthView(gwtSession), northData);
 
-        //
-        // center
-        BorderLayoutData centerData = new BorderLayoutData(LayoutRegion.CENTER);  
-        centerData.setMargins(new Margins(0));  
+	private void render(GwtSession gwtSession) 
+	{    	
+		Log.debug("Beginning page render");
 
-        ContentPanel center = new ContentPanel();
-        center.setLayout(new FitLayout());
-        center.setBorders(false);
-        center.setBodyBorder(false);
-        center.setId("center-panel-wrapper");
-        viewport.add(center, centerData);
-        
-        //
-        // west
-        BorderLayoutData westData = new BorderLayoutData(LayoutRegion.WEST, 180);  
-        westData.setSplit(true);  
-        westData.setCollapsible(true);  
-        westData.setMargins(new Margins(0,5,0,0));
-        WestNavigationView westView = new WestNavigationView(gwtSession, center);
-        viewport.add(westView, westData);
+		final Viewport viewport = new Viewport();
 
-        //
-        // south
-        BorderLayoutData southData = new BorderLayoutData(LayoutRegion.SOUTH, 18);  
-        southData.setCollapsible(false);  
-        southData.setFloatable(false);  
-        southData.setHideCollapseTool(false);  
-        southData.setSplit(false);
-        southData.setMargins(new Margins(3, 5, 0, 0));
-        
-        HorizontalPanel south = new HorizontalPanel();
-        south.setTableWidth("100%");
-        south.setId("south-panel-wrapper");
-        Label copyright = new Label(MSGS.copyright());
-        copyright.setStyleName("x-form-label");
-        TableData td = new TableData();
-        td.setHorizontalAlign(HorizontalAlignment.LEFT);
-        south.add(copyright, td);
-        
-        Label version = new Label(gwtSession.getKuraVersion());
-        version.setStyleName("x-form-label");
-        TableData tdVersion = new TableData();
-        tdVersion.setHorizontalAlign(HorizontalAlignment.RIGHT);
-        south.add(version, tdVersion);
+		final BorderLayout borderLayout = new BorderLayout();
+		viewport.setLayout(borderLayout);
+		viewport.setStyleAttribute("padding", "5px");
 
-        viewport.add(south, southData);
+		//
+		// north
+		BorderLayoutData northData = new BorderLayoutData(LayoutRegion.NORTH, 52);  
+		northData.setCollapsible(false);  
+		northData.setFloatable(false);  
+		northData.setHideCollapseTool(false);  
+		northData.setSplit(false);
+		northData.setMargins(new Margins(0, 0, 5, 0));  
+		viewport.add(new NorthView(gwtSession), northData);
 
-        //
-        // Initial Selection
-//        center.setIconAbstractImagePrototype.create(Resources.INSTANCE.alerts()));
-//        center.setHeading(MSGS.announcements());
-//        center.removeAll();                  
-//        center.add(new Overview(currentSession));
-//        center.layout();
+		//
+		// center
+		BorderLayoutData centerData = new BorderLayoutData(LayoutRegion.CENTER);  
+		centerData.setMargins(new Margins(0));  
 
-        //
-        // RootPanel
-        RootPanel.get().add(viewport);
-    }
+		ContentPanel center = new ContentPanel();
+		center.setLayout(new FitLayout());
+		center.setBorders(false);
+		center.setBodyBorder(false);
+		center.setId("center-panel-wrapper");
+		viewport.add(center, centerData);
+
+		//
+		// west
+		BorderLayoutData westData = new BorderLayoutData(LayoutRegion.WEST, 180);  
+		westData.setSplit(true);  
+		westData.setCollapsible(true);  
+		westData.setMargins(new Margins(0,5,0,0));
+		WestNavigationView westView = new WestNavigationView(gwtSession, center);
+		viewport.add(westView, westData);
+
+		//
+		// south
+		BorderLayoutData southData = new BorderLayoutData(LayoutRegion.SOUTH, 18);  
+		southData.setCollapsible(false);  
+		southData.setFloatable(false);  
+		southData.setHideCollapseTool(false);  
+		southData.setSplit(false);
+		southData.setMargins(new Margins(3, 5, 0, 0));
+
+		HorizontalPanel south = new HorizontalPanel();
+		south.setTableWidth("100%");
+		south.setId("south-panel-wrapper");
+		Label copyright = new Label(MSGS.copyright());
+		copyright.setStyleName("x-form-label");
+		TableData td = new TableData();
+		td.setHorizontalAlign(HorizontalAlignment.LEFT);
+		south.add(copyright, td);
+
+		Label version = new Label(gwtSession.getKuraVersion());
+		version.setStyleName("x-form-label");
+		TableData tdVersion = new TableData();
+		tdVersion.setHorizontalAlign(HorizontalAlignment.RIGHT);
+		south.add(version, tdVersion);
+
+		viewport.add(south, southData);
+
+		//
+		// Initial Selection
+		//        center.setIconAbstractImagePrototype.create(Resources.INSTANCE.alerts()));
+		//        center.setHeading(MSGS.announcements());
+		//        center.removeAll();                  
+		//        center.add(new Overview(currentSession));
+		//        center.layout();
+
+		//
+		// RootPanel
+		RootPanel.get().add(viewport);
+	}
 }

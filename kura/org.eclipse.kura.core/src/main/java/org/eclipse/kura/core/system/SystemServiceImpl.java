@@ -542,18 +542,7 @@ public class SystemServiceImpl implements SystemService
 
 	public String getKuraHome() 
 	{
-		if("emulator".equals(System.getProperty("org.eclipse.kura.mode"))) 
-		{
-			StringBuffer sb = new StringBuffer();
-			sb.append(System.getProperty("java.io.tmpdir"))
-			.append(getFileSeparator())
-			.append("kura_emulator_base")
-			.append(getFileSeparator());
-			return sb.toString();
-		} 
-		else {
-			return this.m_kuraProperties.getProperty(KEY_KURA_HOME_DIR);
-		}
+		return this.m_kuraProperties.getProperty(KEY_KURA_HOME_DIR);
 	}
 
 	public String getKuraPluginsDirectory() {

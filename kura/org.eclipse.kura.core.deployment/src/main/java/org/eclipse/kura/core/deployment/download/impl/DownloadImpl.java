@@ -205,7 +205,7 @@ public class DownloadImpl implements ProgressListener{
 	}
 
 	//Synchronous messages
-	public static void downloadInProgressSyncMessage(KuraResponsePayload respPayload, GenericDownloadCountingOutputStream downloadHelper, DeploymentPackageDownloadOptions m_downloadOptions) {
+	public static void downloadInProgressSyncMessage(KuraResponsePayload respPayload, DownloadCountingOutputStream downloadHelper, DeploymentPackageDownloadOptions m_downloadOptions) {
 		respPayload.setTimestamp(new Date());
 		respPayload.addMetric(KuraNotifyPayload.METRIC_TRANSFER_SIZE, downloadHelper.getTotalBytes().intValue());
 		respPayload.addMetric(KuraNotifyPayload.METRIC_TRANSFER_PROGRESS, downloadHelper.getDownloadTransferProgressPercentage().intValue());

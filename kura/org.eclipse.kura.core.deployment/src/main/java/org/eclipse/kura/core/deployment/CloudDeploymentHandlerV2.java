@@ -29,8 +29,8 @@ import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloud.Cloudlet;
 import org.eclipse.kura.cloud.CloudletTopic;
 import org.eclipse.kura.core.deployment.download.DeploymentPackageDownloadOptions;
+import org.eclipse.kura.core.deployment.download.DownloadCountingOutputStream;
 import org.eclipse.kura.core.deployment.download.DownloadFileUtilities;
-import org.eclipse.kura.core.deployment.download.impl.GenericDownloadCountingOutputStream;
 import org.eclipse.kura.core.deployment.download.impl.DownloadImpl;
 import org.eclipse.kura.core.deployment.install.DeploymentPackageInstallOptions;
 import org.eclipse.kura.core.deployment.install.InstallImpl;
@@ -726,7 +726,7 @@ public class CloudDeploymentHandlerV2 extends Cloudlet {
 
 	private void doGetDownload(KuraRequestPayload reqPayload, KuraResponsePayload respPayload) {
 		if (s_pendingPackageUrl != null){ //A download is pending
-			GenericDownloadCountingOutputStream downloadHelper= m_downloadImplementation.getDownloadHelper();
+			DownloadCountingOutputStream downloadHelper= m_downloadImplementation.getDownloadHelper();
 			DownloadImpl.downloadInProgressSyncMessage(respPayload, downloadHelper, m_downloadOptions);
 		} else { //No pending downloads
 			DownloadImpl.downloadAlreadyDoneSyncMessage(respPayload); //is it right? Do we remove the last object

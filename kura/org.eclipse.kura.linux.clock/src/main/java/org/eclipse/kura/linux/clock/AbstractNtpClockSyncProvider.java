@@ -97,11 +97,18 @@ public abstract class AbstractNtpClockSyncProvider implements ClockSyncProvider
 								m_isSynced=true;
 								m_numRetry=0;
 							}
+							else {
+								m_numRetry++;
+								if((m_maxRetry>0)&&(m_numRetry>=m_maxRetry)) {
+									s_logger.error("Failed to synchronize System Clock. Exhausted retry attempts, giving up");
+									m_isSynced=true;
+								}
+							}
 						}
 						catch(KuraException e) {
 							m_numRetry++;
 							s_logger.error("Error Synchronizing Clock", e);
-							if(m_numRetry>=m_maxRetry) {
+							if((m_maxRetry>0)&&(m_numRetry>=m_maxRetry)) {
 								s_logger.error("Failed to synchronize System Clock. Exhausted retry attempts, giving up");
 								m_isSynced=true;
 							}

@@ -19,7 +19,6 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -78,9 +77,9 @@ public class DeploymentAgent implements DeploymentAgentService {
 
 	private static final String CONN_TIMEOUT_PROPNAME = "dpa.connection.timeout";
 	private static final String READ_TIMEOUT_PROPNAME = "dpa.read.timeout";
-	
+
 	private final static long THREAD_TERMINATION_TOUT = 1; // in seconds
-	
+
 	private static Future<?>  s_installerTask;
 	private static Future<?>  s_uninstallerTask;
 
@@ -89,10 +88,10 @@ public class DeploymentAgent implements DeploymentAgentService {
 
 	private Queue<String> m_instPackageUrls;
 	private Queue<String> m_uninstPackageNames;
-	
+
 	private ExecutorService m_installerExecutor;
 	private ExecutorService m_uninstallerExecutor;
-	
+
 	private String m_dpaConfPath;
 	private String m_packagesPath;
 
@@ -165,18 +164,18 @@ public class DeploymentAgent implements DeploymentAgentService {
 
 		File packagesDir = new File(m_packagesPath);
 		if (!packagesDir.exists()) {
-			if (!packagesDir.mkdir()) {
+			if (!packagesDir.mkdirs()) {
 				throw new ComponentException("Cannot create packages directory");
 			}
 		}
 
 		m_instPackageUrls = new ConcurrentLinkedQueue<String>();
 		m_uninstPackageNames = new ConcurrentLinkedQueue<String>();
-		
+
 		m_installerExecutor = Executors.newSingleThreadExecutor();
-		
+
 		m_uninstallerExecutor = Executors.newSingleThreadExecutor();
-		
+
 		s_installerTask = m_installerExecutor.submit(new Runnable() {
     		@Override
     		public void run() {
@@ -190,7 +189,7 @@ public class DeploymentAgent implements DeploymentAgentService {
 	    		Thread.currentThread().setName("DeploymentAgent:Uninstall");
 	    		uninstaller();
     	}});
-		
+
 		installPackagesFromConfFile();
 	}
 
@@ -198,14 +197,14 @@ public class DeploymentAgent implements DeploymentAgentService {
 		m_dpaConfPath = null;
 
 		m_deployedPackages = null;
-		
+
 		if ((s_installerTask != null) && (!s_installerTask.isDone())) {
     		s_logger.debug("Cancelling DeploymentAgent task ...");
     		s_installerTask.cancel(true);
     		s_logger.info("DeploymentAgent task cancelled? = {}", s_installerTask.isDone());
     		s_installerTask = null;
     	}
-    	
+
     	if (m_installerExecutor != null) {
     		s_logger.debug("Terminating DeploymentAgent Thread ...");
     		m_installerExecutor.shutdownNow();
@@ -217,14 +216,14 @@ public class DeploymentAgent implements DeploymentAgentService {
     		s_logger.info("DeploymentAgent Thread terminated? - {}", m_installerExecutor.isTerminated());
     		m_installerExecutor = null;
     	}
-    	
+
     	if ((s_uninstallerTask != null) && (!s_uninstallerTask.isDone())) {
     		s_logger.debug("Cancelling DeploymentAgent:Uninstall task ...");
     		s_uninstallerTask.cancel(true);
     		s_logger.info("DeploymentAgent:Uninstall task cancelled? = {}", s_uninstallerTask.isDone());
     		s_uninstallerTask = null;
     	}
-    	
+
     	if (m_uninstallerExecutor != null) {
     		s_logger.debug("Terminating DeploymentAgent:Uninstall Thread ...");
     		m_uninstallerExecutor.shutdownNow();
@@ -393,7 +392,7 @@ public class DeploymentAgent implements DeploymentAgentService {
 			props.put(EVENT_PACKAGE_VERSION, version.toString());
 		} else {
 			props.put(EVENT_PACKAGE_NAME, "UNKNOWN");
-			props.put(EVENT_PACKAGE_VERSION, "UNKNOWN");	
+			props.put(EVENT_PACKAGE_VERSION, "UNKNOWN");
 		}
 		props.put(EVENT_PACKAGE_URL, url);
 		props.put(EVENT_SUCCESSFUL, successful);
@@ -402,7 +401,7 @@ public class DeploymentAgent implements DeploymentAgentService {
 		m_eventAdmin.postEvent(new Event(EVENT_INSTALLED_TOPIC, eventProps));
 	}
 
-	private void postUninstalledEvent(String name, boolean successful, Exception e) {	
+	private void postUninstalledEvent(String name, boolean successful, Exception e) {
 		Map<String,Object> props = new HashMap<String,Object>();
 		props.put(EVENT_PACKAGE_NAME, name);
 		props.put(EVENT_SUCCESSFUL, successful);
@@ -452,7 +451,7 @@ public class DeploymentAgent implements DeploymentAgentService {
 		String dpBasename = parts[parts.length - 1];
 		String dpPersistentFilePath = m_packagesPath + File.separator + dpBasename;
 		File dpPersistentFile = new File(dpPersistentFilePath);
-		
+
 		DeploymentPackage dp = null;
 		File dpFile = null;
 		InputStream dpInputStream = null;
@@ -476,10 +475,10 @@ public class DeploymentAgent implements DeploymentAgentService {
 			// packages directory unless it's already there.
 			if (!dpFile.getCanonicalPath().equals(dpPersistentFile.getCanonicalPath())) {
 				s_logger.debug("dpFile.getCanonicalPath(): " +  dpFile.getCanonicalPath());
-				s_logger.debug("dpPersistentFile.getCanonicalPath(): " +  dpPersistentFile.getCanonicalPath());				
+				s_logger.debug("dpPersistentFile.getCanonicalPath(): " +  dpPersistentFile.getCanonicalPath());
 				FileUtils.copyFile(dpFile, dpPersistentFile);
 				addPackageToConfFile(dp.getName(), "file:" + dpPersistentFilePath);
-			}			
+			}
 		} catch (DeploymentException e) {
 			throw e;
 		} catch (IOException e) {
@@ -491,22 +490,22 @@ public class DeploymentAgent implements DeploymentAgentService {
 				}catch(IOException ex){
 					s_logger.error("I/O Exception while closing BufferedReader!");
 				}
-			}			
-			
+			}
+
 			if (dpInputStream != null) {
 				try {
 					dpInputStream.close();
 				} catch (IOException e) {
 					s_logger.warn("Cannot close input stream", e);
 				}
-			}			
+			}
 			// The file from which we have installed the deployment package will be deleted
 			// unless it's a persistent deployment package file.
 			if (dpFile != null && !dpFile.getCanonicalPath().equals(dpPersistentFile.getCanonicalPath())) {
 				dpFile.delete();
 			}
 		}
-		
+
 		return dp;
 	}
 
@@ -523,7 +522,7 @@ public class DeploymentAgent implements DeploymentAgentService {
 			m_deployedPackages.store(fos, null);
 			fos.flush();
 			fos.getFD().sync();
-			fos.close();			
+			fos.close();
 		} catch (IOException e) {
 			s_logger.error("Error writing package configuration file", e);
 		}

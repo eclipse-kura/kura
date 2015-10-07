@@ -60,7 +60,7 @@
             cardinality="0" 
             required="true"
             min="1"
-            max="255"
+            max="65535"
             default="123" 
             description="The port number that provides the system time via NTP"/>
 
@@ -96,7 +96,6 @@
             type="Integer"
             cardinality="0" 
             required="true"
-            min="-1"
             default="3600" 
             description="Whether or not to sync the clock and if so, the frequency in seconds.  If less than zero - no update, if equal to zero - sync once at startup, if greater than zero - the frequency in seconds to perform a new clock sync"/>
 

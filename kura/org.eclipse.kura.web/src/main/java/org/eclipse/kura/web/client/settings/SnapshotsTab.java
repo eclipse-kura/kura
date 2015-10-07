@@ -227,6 +227,10 @@ public class SnapshotsTab extends LayoutContainer {
 					@Override
 					public void onSuccess(GwtXSRFToken token) {	
 						gwtSnapshotService.findDeviceSnapshots(token, callback);
+						
+						// refresh the list
+						// and reselect the item
+						m_servicesTree.refreshServicePanel();
 					}
 				});
 			}
@@ -288,10 +292,6 @@ public class SnapshotsTab extends LayoutContainer {
 			m_toolBar.enable();
 			m_refreshButton.enable();
 			reload();
-
-			// refresh the list
-			// and reselect the item
-			m_servicesTree.refreshServicePanel();
 		}
 	}
 

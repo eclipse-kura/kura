@@ -20,6 +20,8 @@ import org.eclipse.kura.web.shared.model.GwtSession;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.eclipse.kura.web.shared.service.GwtDeviceService;
 import org.eclipse.kura.web.shared.service.GwtDeviceServiceAsync;
+import org.eclipse.kura.web.shared.service.GwtSecurityService;
+import org.eclipse.kura.web.shared.service.GwtSecurityServiceAsync;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenService;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenServiceAsync;
 
@@ -32,6 +34,7 @@ import com.extjs.gxt.ui.client.util.Margins;
 import com.extjs.gxt.ui.client.util.Theme;
 import com.extjs.gxt.ui.client.widget.ContentPanel;
 import com.extjs.gxt.ui.client.widget.HorizontalPanel;
+import com.extjs.gxt.ui.client.widget.Info;
 import com.extjs.gxt.ui.client.widget.Viewport;
 import com.extjs.gxt.ui.client.widget.layout.BorderLayout;
 import com.extjs.gxt.ui.client.widget.layout.BorderLayoutData;
@@ -55,6 +58,9 @@ public class denali implements EntryPoint
 	//private final boolean VIEW_LOG = true;
 	private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
 	private final GwtDeviceServiceAsync gwtDeviceService = GWT.create(GwtDeviceService.class);
+	private final GwtSecurityServiceAsync gwtSecurityService = GWT.create(GwtSecurityService.class);
+	
+	private boolean isDevelopMode = false;
 
 	/**
 	 * Note, we defer all application initialization code to
@@ -108,7 +114,7 @@ public class denali implements EntryPoint
 				gwtDeviceService.findSystemProperties(token, new AsyncCallback<ListLoadResult<GwtGroupedNVPair>>() {    				
 					public void onSuccess(ListLoadResult<GwtGroupedNVPair> results) {
 
-						GwtSession gwtSession = new GwtSession();
+						final GwtSession gwtSession = new GwtSession();
 
 						if (results != null) {
 							List<GwtGroupedNVPair> pairs = results.getData();
@@ -129,7 +135,20 @@ public class denali implements EntryPoint
 							}
 						}
 
-						render(gwtSession);
+						gwtSecurityService.isDebugMode(new AsyncCallback<Boolean>() {
+
+							public void onFailure(Throwable caught) {
+								Info.display("Bad", "Is debug mode error");
+								render(gwtSession);
+							}
+
+							public void onSuccess(Boolean result) {
+								if(result){
+									isDevelopMode= true;
+								}
+								render(gwtSession);
+							}
+						});
 					}
 
 					public void onFailure(Throwable caught) {
@@ -199,7 +218,7 @@ public class denali implements EntryPoint
 		southData.setSplit(false);
 		southData.setMargins(new Margins(3, 5, 0, 0));
 
-		HorizontalPanel south = new HorizontalPanel();
+		final HorizontalPanel south = new HorizontalPanel();
 		south.setTableWidth("100%");
 		south.setId("south-panel-wrapper");
 		Label copyright = new Label(MSGS.copyright());
@@ -207,6 +226,17 @@ public class denali implements EntryPoint
 		TableData td = new TableData();
 		td.setHorizontalAlign(HorizontalAlignment.LEFT);
 		south.add(copyright, td);
+
+
+		final Label developmentMode = new Label(MSGS.developmentMode());
+		developmentMode.setStyleName("x-form-label");
+		developmentMode.getElement().getStyle().setColor("red");
+		final TableData tdExecMode = new TableData();
+		tdExecMode.setHorizontalAlign(HorizontalAlignment.LEFT);
+		
+		if(isDevelopMode){
+			south.add(developmentMode, tdExecMode);
+		}
 
 		Label version = new Label(gwtSession.getKuraVersion());
 		version.setStyleName("x-form-label");

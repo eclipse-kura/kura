@@ -32,4 +32,11 @@ public interface SecurityService {
 	 */
 	public void reloadCommandLineFingerprint() throws KuraException;
 	
+	/**
+	 * This method returns a boolean that specifies if the debugging is permitted
+	 * 
+	 * @return true if the debug is permitted. False otherwise.
+	 */
+	public boolean isDebugEnabled();
+	
 }

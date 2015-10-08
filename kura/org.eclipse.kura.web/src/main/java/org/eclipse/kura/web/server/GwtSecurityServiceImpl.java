@@ -19,7 +19,6 @@ public class GwtSecurityServiceImpl extends OsgiRemoteServiceServlet implements 
 		SecurityService securityService;
 		
 		try {
-			//checkXSRFToken(xsrfToken);
 			securityService = ServiceLocator.getInstance().getService(SecurityService.class);
 			if(securityService == null){
 				return false;
@@ -28,6 +27,20 @@ public class GwtSecurityServiceImpl extends OsgiRemoteServiceServlet implements 
 			return false;
 		}
 		return true;
+	}
+	
+	@Override
+	public Boolean isDebugMode() {
+		SecurityService securityService;
+		
+		try {
+			securityService = ServiceLocator.getInstance().getService(SecurityService.class);
+			if(securityService != null){
+				return securityService.isDebugEnabled();
+			}
+		} catch (GwtKuraException e) {
+		}
+		return false;
 	}
 	
 	@Override

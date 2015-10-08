@@ -1623,6 +1623,11 @@
 										<copy todir="${project.build.directory}/staging/target-definition">
 											<fileset dir="../target-definition" />
 										</copy>
+										<!-- Add individual emulator bundles-->
+										<copy 
+											file="../org.eclipse.kura.emulator.gpio/target/org.eclipse.kura.emulator.gpio-${org.eclipse.kura.emulator.gpio.version}.jar"
+											todir="${project.build.directory}/staging/target-definition/common/repository/plugins"/>
+
 										<delete
 											file="${project.build.directory}/staging/target-definition/pom.xml" />
 										<delete

@@ -94,14 +94,17 @@ public class SnapshotsTab extends LayoutContainer {
 	private FileUploadDialog       m_fileUpload;
 	private CustomWindow 		   m_downloadWindow;
 
+	private boolean 			   m_isServicesReloadNeeded;
+
 
 	public SnapshotsTab(GwtSession currentSession,
 			ServiceTree serviceTree) 
 	{
-		m_currentSession = currentSession;
-		m_servicesTree   = serviceTree;
-		m_dirty          = false;
-		m_initialized    = false;
+		m_currentSession         = currentSession;
+		m_servicesTree           = serviceTree;
+		m_dirty                  = false;
+		m_initialized            = false;
+		m_isServicesReloadNeeded = false;
 	}
 
 
@@ -178,6 +181,7 @@ public class SnapshotsTab extends LayoutContainer {
 				new SelectionListener<ButtonEvent>() {
 			@Override
 			public void componentSelected(ButtonEvent ce) {
+				m_isServicesReloadNeeded= true;
 				rollbackSnapshot();
 			}
 		});
@@ -188,6 +192,7 @@ public class SnapshotsTab extends LayoutContainer {
 				new SelectionListener<ButtonEvent>() {
 			@Override
 			public void componentSelected(ButtonEvent ce) {
+				m_isServicesReloadNeeded = true;
 				uploadSnapshot();
 			}
 		});
@@ -227,10 +232,6 @@ public class SnapshotsTab extends LayoutContainer {
 					@Override
 					public void onSuccess(GwtXSRFToken token) {	
 						gwtSnapshotService.findDeviceSnapshots(token, callback);
-						
-						// refresh the list
-						// and reselect the item
-						m_servicesTree.refreshServicePanel();
 					}
 				});
 			}
@@ -309,7 +310,7 @@ public class SnapshotsTab extends LayoutContainer {
 		.append("&")
 		.append("xsrfToken=")
 		.append(tokenId);
-		
+
 		m_downloadWindow.setUrl(sbUrl.toString());
 	}
 
@@ -435,6 +436,13 @@ public class SnapshotsTab extends LayoutContainer {
 		public void loaderLoad(LoadEvent le) {
 			if (le.exception != null) {
 				FailureHandler.handle(le.exception);
+			} else {
+				if(m_isServicesReloadNeeded){
+					// refresh the list
+					// and reselect the item
+					m_servicesTree.refreshServicePanel();
+					m_isServicesReloadNeeded= false;
+				}
 			}
 		}
 

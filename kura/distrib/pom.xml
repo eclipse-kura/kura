@@ -1626,7 +1626,7 @@
 										<!-- Add individual emulator bundles-->
 										<copy 
 											file="../org.eclipse.kura.emulator.gpio/target/org.eclipse.kura.emulator.gpio-${org.eclipse.kura.emulator.gpio.version}.jar"
-											todir="${project.build.directory}/staging/target-definition/common/repository/plugins"/>
+											todir="${project.build.directory}/staging/target-definition/equinox_3.8.1/repository/plugins"/>
 
 										<delete
 											file="${project.build.directory}/staging/target-definition/pom.xml" />
@@ -1656,6 +1656,9 @@
 											todir="${project.build.directory}/staging/target-definition/equinox_3.8.1/repository/plugins" />
 										<copy
 											file="${project.build.directory}/plugins/org.eclipse.kura.deployment.agent_${org.eclipse.kura.deployment.agent.version}.jar"
+											todir="${project.build.directory}/staging/target-definition/equinox_3.8.1/repository/plugins" />
+										<copy
+											file="${project.build.directory}/plugins/org.eclipse.kura.linux.status_${org.eclipse.kura.linux.status.version}.jar"
 											todir="${project.build.directory}/staging/target-definition/equinox_3.8.1/repository/plugins" />
 										<copy
 											file="${project.build.directory}/plugins/org.eclipse.kura.core.cloud_${org.eclipse.kura.core.cloud.version}.jar"

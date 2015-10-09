@@ -421,7 +421,30 @@ public class SystemServiceImpl implements SystemService
 			if(System.getProperty(CONFIG_CONSOLE_DEVICE_MANAGE_SERVICE_IGNORE) != null){
 				m_kuraProperties.put(CONFIG_CONSOLE_DEVICE_MANAGE_SERVICE_IGNORE, System.getProperty(CONFIG_CONSOLE_DEVICE_MANAGE_SERVICE_IGNORE));
 			}
-
+			if(System.getProperty(DB_URL_PROPNAME) != null){
+				m_kuraProperties.put(DB_URL_PROPNAME, System.getProperty(DB_URL_PROPNAME));
+			}
+			if(System.getProperty(DB_CACHE_ROWS_PROPNAME) != null){
+				m_kuraProperties.put(DB_CACHE_ROWS_PROPNAME, System.getProperty(DB_CACHE_ROWS_PROPNAME));
+			}
+			if(System.getProperty(DB_LOB_FILE_PROPNAME) != null){
+				m_kuraProperties.put(DB_LOB_FILE_PROPNAME, System.getProperty(DB_LOB_FILE_PROPNAME));
+			}
+			if(System.getProperty(DB_DEFRAG_LIMIT_PROPNAME) != null){
+				m_kuraProperties.put(DB_DEFRAG_LIMIT_PROPNAME, System.getProperty(DB_DEFRAG_LIMIT_PROPNAME));
+			}
+			if(System.getProperty(DB_LOG_DATA_PROPNAME) != null){
+				m_kuraProperties.put(DB_LOG_DATA_PROPNAME, System.getProperty(DB_LOG_DATA_PROPNAME));
+			}
+			if(System.getProperty(DB_LOG_SIZE_PROPNAME) != null){
+				m_kuraProperties.put(DB_LOG_SIZE_PROPNAME, System.getProperty(DB_LOG_SIZE_PROPNAME));
+			}
+			if(System.getProperty(DB_NIO_PROPNAME) != null){
+				m_kuraProperties.put(DB_NIO_PROPNAME, System.getProperty(DB_NIO_PROPNAME));
+			}
+			if(System.getProperty(DB_WRITE_DELAY_MILLIES_PROPNAME) != null){
+				m_kuraProperties.put(DB_WRITE_DELAY_MILLIES_PROPNAME, System.getProperty(DB_WRITE_DELAY_MILLIES_PROPNAME));
+			}
 
 			if (getKuraHome() == null) {
 				s_logger.error("Did not initialize kura.home");

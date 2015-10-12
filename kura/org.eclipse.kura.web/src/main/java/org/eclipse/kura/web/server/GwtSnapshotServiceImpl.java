@@ -16,10 +16,13 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ConfigurationService;
+import org.eclipse.kura.net.NetworkAdminService;
 import org.eclipse.kura.system.SystemService;
 import org.eclipse.kura.web.server.util.KuraExceptionHandler;
 import org.eclipse.kura.web.server.util.ServiceLocator;
+import org.eclipse.kura.web.shared.GwtKuraErrorCode;
 import org.eclipse.kura.web.shared.GwtKuraException;
 import org.eclipse.kura.web.shared.model.GwtSnapshot;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
@@ -68,9 +71,21 @@ public class GwtSnapshotServiceImpl extends OsgiRemoteServiceServlet implements 
 		throws GwtKuraException
 	{
 		checkXSRFToken(xsrfToken);
-		try {			
+		try {	
+			ServiceLocator  locator = ServiceLocator.getInstance();
+			
+			if (snapshot.getSnapshotId() == 0L) {
+				NetworkAdminService nas = locator.getService(NetworkAdminService.class);
+				if (nas != null) {
+					try {
+						nas.rollbackDefaultConfiguration();
+					} catch (KuraException e) {
+						e.printStackTrace();
+						throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
+					}
+				}
+			}
 
-	        ServiceLocator  locator = ServiceLocator.getInstance();
 			ConfigurationService cs = locator.getService(ConfigurationService.class);			 
 	        cs.rollback(snapshot.getSnapshotId());
 

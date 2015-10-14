@@ -27,6 +27,8 @@ import org.eclipse.kura.web.shared.GwtKuraException;
 import org.eclipse.kura.web.shared.model.GwtSnapshot;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.eclipse.kura.web.shared.service.GwtSnapshotService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.extjs.gxt.ui.client.data.BaseListLoadResult;
 import com.extjs.gxt.ui.client.data.ListLoadResult;
@@ -35,6 +37,7 @@ public class GwtSnapshotServiceImpl extends OsgiRemoteServiceServlet implements 
 {
 	private static final long serialVersionUID = 8804372718146289179L;
 
+	private static final Logger s_logger = LoggerFactory.getLogger(GwtSnapshotServiceImpl.class);
 
 	public ListLoadResult<GwtSnapshot> findDeviceSnapshots(GwtXSRFToken xsrfToken) 
 		throws GwtKuraException
@@ -73,11 +76,12 @@ public class GwtSnapshotServiceImpl extends OsgiRemoteServiceServlet implements 
 		checkXSRFToken(xsrfToken);
 		try {	
 			ServiceLocator  locator = ServiceLocator.getInstance();
-			
+			NetworkAdminService nas = null;
 			if (snapshot.getSnapshotId() == 0L) {
-				NetworkAdminService nas = locator.getService(NetworkAdminService.class);
+				nas = locator.getService(NetworkAdminService.class);
 				if (nas != null) {
 					try {
+						s_logger.debug("rollbackDeviceSnapshot() :: rolling back default network configuration ...");
 						nas.rollbackDefaultConfiguration();
 					} catch (KuraException e) {
 						e.printStackTrace();
@@ -97,7 +101,11 @@ public class GwtSnapshotServiceImpl extends OsgiRemoteServiceServlet implements 
 			long delay = Long.parseLong(ss.getProperties().getProperty("console.updateConfigDelay", "5000"));
             if (delay > 0) {
             	Thread.sleep(delay);
-            }		
+            }	
+            if ((snapshot.getSnapshotId() == 0L) && (nas != null)) {
+            	s_logger.debug("rollbackDeviceSnapshot() :: rolling back default firewall configuration ...");
+            	nas.rollbackDefaultFirewallConfiguration();
+            }
 		} 
 		catch(Throwable t) {
 			KuraExceptionHandler.handle(t);

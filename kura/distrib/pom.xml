@@ -1533,7 +1533,7 @@
 								<configuration>
 									<verbose>true</verbose>
 									<deb>${basedir}/target/kura_${project.version}_raspberry-pi-2-nn_installer.deb</deb>
-									<controlDir>${basedir}/src/main/deb/control</controlDir>
+									<controlDir>${basedir}/src/main/deb/control_nn</controlDir>
 									<dataSet>
 										<data>
 											<src>${basedir}/target/kura_${project.version}_raspberry-pi-2-nn.zip</src>

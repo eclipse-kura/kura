@@ -28,7 +28,7 @@ update-rc.d kura remove
 
 #Delete Eclipse directory if present
 if [ -d "${INSTALL_DIR}/kura/data" ] ; then
-  rm -rf ${INSALL_DIR}/kura/data
+  rm -rf ${INSTALL_DIR}/kura/data
 fi
 
 if [ -d "${INSTALL_DIR}/kura" ] ; then

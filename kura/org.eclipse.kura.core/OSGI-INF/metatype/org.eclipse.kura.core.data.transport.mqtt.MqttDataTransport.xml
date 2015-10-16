@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright (c) 2011, 2014 Eurotech and/or its affiliates
+    Copyright (c) 2011, 2015 Eurotech and/or its affiliates, and others
 
      All rights reserved. This program and the accompanying materials
      are made available under the terms of the Eclipse Public License v1.0
@@ -10,6 +10,7 @@
 
     Contributors:
       Eurotech
+      Benjamin Cabé <benjamin@eclipse.org>
 
 -->
 <MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
@@ -39,7 +40,7 @@
             name="username"
             type="String"
             cardinality="0"
-            required="true"
+            required="false"
             default="username" 
             description="Username to be used when connecting to the MQTT broker."/>
 
@@ -47,7 +48,7 @@
             name="password"
             type="Password"
             cardinality="0" 
-            required="true"
+            required="false"
             default="password" 
             description="Password to be used when connecting to the MQTT broker."/>
 

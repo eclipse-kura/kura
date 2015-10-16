@@ -11,18 +11,21 @@
  */
 package org.eclipse.kura.core.test;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import junit.framework.TestCase;
+
 import org.eclipse.kura.core.configuration.ComponentConfigurationImpl;
+import org.eclipse.kura.core.configuration.XmlComponentConfigurations;
 import org.eclipse.kura.core.configuration.metatype.Tocd;
 import org.eclipse.kura.core.configuration.util.ComponentUtil;
 import org.eclipse.kura.core.configuration.util.StringUtil;
 import org.eclipse.kura.core.configuration.util.XmlUtil;
 import org.eclipse.kura.test.annotation.TestTarget;
 import org.junit.Test;
-
-import junit.framework.TestCase;
 
 public class ComponentConfigurationImplTest extends TestCase 
 {
@@ -82,15 +85,20 @@ public class ComponentConfigurationImplTest extends TestCase
 		properties.put("prop.character", 'a');
 		properties.put("prop.short",     Short.MAX_VALUE);
 		
+		XmlComponentConfigurations xcc = new XmlComponentConfigurations();
+		List<ComponentConfigurationImpl> ccis = new ArrayList<ComponentConfigurationImpl>();
 		ComponentConfigurationImpl config = new ComponentConfigurationImpl(pid, definition, properties);
-		String s  = XmlUtil.marshal(config);
+		ccis.add(config);
+		xcc.setConfigurations(ccis);
+		
+		String s  = XmlUtil.marshal(xcc);
 		System.err.println(s);
 		
-		ComponentConfigurationImpl config1 = XmlUtil.unmarshal(s, ComponentConfigurationImpl.class);
+		XmlComponentConfigurations config1 = XmlUtil.unmarshal(s, XmlComponentConfigurations.class);
 		String s1 = XmlUtil.marshal(config1);
 		System.err.println(s1);
 		
-		Map<String,Object> properties1 = config1.getConfigurationProperties();
+		Map<String,Object> properties1 = config1.getConfigurations().get(0).getConfigurationProperties();
 		assertEquals(properties, properties1);
 	}
 
@@ -113,15 +121,20 @@ public class ComponentConfigurationImplTest extends TestCase
 		properties.put("prop.character", 'a');
 		properties.put("prop.short",     Short.MAX_VALUE);
 		
+		XmlComponentConfigurations xcc = new XmlComponentConfigurations();
+		List<ComponentConfigurationImpl> ccis = new ArrayList<ComponentConfigurationImpl>();
 		ComponentConfigurationImpl config = new ComponentConfigurationImpl(pid, definition, properties);
-		String s  = XmlUtil.marshal(config);
+		ccis.add(config);
+		xcc.setConfigurations(ccis);
+		
+		String s  = XmlUtil.marshal(xcc);
 		System.err.println(s);
 		
-		ComponentConfigurationImpl config1 = XmlUtil.unmarshal(s, ComponentConfigurationImpl.class);
+		XmlComponentConfigurations config1 = XmlUtil.unmarshal(s, XmlComponentConfigurations.class);
 		String s1 = XmlUtil.marshal(config1);
 		System.err.println(s1);
 		
-		Map<String,Object> properties1 = config1.getConfigurationProperties();
+		Map<String,Object> properties1 = config1.getConfigurations().get(0).getConfigurationProperties();
 		assertEquals(properties, properties1);
 	}
 }

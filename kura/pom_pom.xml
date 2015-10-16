@@ -30,6 +30,8 @@
 		</maven.build.timestamp.format>
 		<kura.basedir>${project.basedir}</kura.basedir>
 		<org.eclipse.kura.web.skip>true</org.eclipse.kura.web.skip>
+		<org.eclipse.kura.dio.skip>false</org.eclipse.kura.dio.skip>
+		<org.eclipse.kura.dio.include>true</org.eclipse.kura.dio.include>
 	</properties>
 
 	<profiles>
@@ -52,6 +54,19 @@
 			</activation>
 			<modules>
 				<module>org.eclipse.kura.web</module>
+				<module>distrib</module>
+			</modules>
+		</profile>
+		<profile>
+			<id>dio.skip</id>
+			<properties>
+				<org.eclipse.kura.dio.skip>true</org.eclipse.kura.dio.skip>
+				<org.eclipse.kura.dio.include>false</org.eclipse.kura.dio.include>
+			</properties>
+			<activation>
+				<activeByDefault>false</activeByDefault>
+			</activation>
+			<modules>
 				<module>distrib</module>
 			</modules>
 		</profile>
@@ -98,7 +113,7 @@
 					</execution>
 				</executions>
 			</plugin>
-<!-- 
+<!--
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-antrun-plugin</artifactId>

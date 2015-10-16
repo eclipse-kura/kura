@@ -83,5 +83,40 @@ public class GwtWifiHotspotEntry extends KuraBaseModel implements Serializable {
     public void setSecurity(String security) {
     	set("security", security);
     }
-
+    
+    public GwtWifiCiphers getPairwiseCiphersEnum() {
+    	GwtWifiCiphers ciphers = GwtWifiCiphers.netWifiCiphers_NONE;
+    	try {
+    		ciphers = GwtWifiCiphers.valueOf(getPairwiseCiphers());
+    	} catch (Exception e) {
+    		 e.printStackTrace();
+    	}
+    	return ciphers;
+    }
+    
+    public String getPairwiseCiphers() {
+    	return get("pairwiseCiphers");
+    }
+    
+    public void setPairwiseCiphers(String pairwiseCiphers) {
+    	set("pairwiseCiphers", pairwiseCiphers);
+    }
+    
+    public GwtWifiCiphers getGroupCiphersEnum() {
+    	GwtWifiCiphers ciphers = GwtWifiCiphers.netWifiCiphers_NONE;
+    	try {
+    		ciphers = GwtWifiCiphers.valueOf(getGroupCiphers());
+    	} catch (Exception e) {
+    		e.printStackTrace();
+    	}
+    	return ciphers;
+    }
+    
+    public String getGroupCiphers() {
+    	return get("groupCiphers");
+    }
+    
+    public void setGroupCiphers(String groupCiphers) {
+    	set("groupCiphers", groupCiphers);
+    }
 }

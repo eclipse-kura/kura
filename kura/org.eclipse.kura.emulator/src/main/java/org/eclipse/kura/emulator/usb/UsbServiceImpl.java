@@ -12,7 +12,6 @@
 package org.eclipse.kura.emulator.usb;
 
 import java.util.List;
-import java.util.Properties;
 
 import javax.usb.UsbServices;
 
@@ -34,7 +33,7 @@ public class UsbServiceImpl implements UsbService {
 	
 	protected void activate(ComponentContext componentContext) {
 		//only support Linux
-		Properties props = System.getProperties();
+		//Properties props = System.getProperties();
 	}
 
 	protected void deactivate(ComponentContext componentContext) {

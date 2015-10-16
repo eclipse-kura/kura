@@ -24,14 +24,6 @@
               bind="setSystemService"
               unbind="unsetSystemService"
               interface="org.eclipse.kura.system.SystemService"/>   
-   <reference name="ConfigurationService" 
-              bind="setConfigurationService"
-              unbind="unsetConfigurationService"
-              interface="org.eclipse.kura.configuration.ConfigurationService"/>   
-   <reference name="DbService" 
-              bind="setDbService"
-              unbind="unsetDbService"
-              interface="org.eclipse.kura.db.DbService"/>
    <reference name="CryptoService"
    			  bind="setCryptoService"
    			  unbind="unsetCryptoService"

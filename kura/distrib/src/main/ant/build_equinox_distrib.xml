@@ -13,9 +13,9 @@
 -->
 <project name="build_equinox_distrib" default="dist-linux" basedir="../../../">
 
-    <target name="dist-linux"> 
-    	
-        <property name="build.output.name" value="kura_${project.version}_${build.name}"/> 
+    <target name="dist-linux">
+
+        <property name="build.output.name" value="kura_${project.version}_${build.name}"/>
 
         <!--
         Loads entries from a manifest file.
@@ -36,7 +36,7 @@
                 </loadproperties>
             </sequential>
         </macrodef>
-    	
+
     	<echo message="Building Kura Distribution for ${build.output.name}..." />
 		<echo message="Dave: ${kura.install.dir}" />
 
@@ -59,7 +59,7 @@
         <replace file="${project.build.directory}/${build.output.name}/kura.properties" token="{kura.install.dir}" value="${kura.install.dir}"/>
         <replace file="${project.build.directory}/${build.output.name}/kura.properties" token="{kura.symlink}" value="${kura.symlink}"/>
 
-    	
+
     	<condition property="kura.osgi.repo" value="../target-definition/equinox_3.8.1/repository">
     		<or>
     			<not>
@@ -68,7 +68,7 @@
     			<equals arg1="${kura.osgi}" arg2="equinox"/>
     		</or>
     	</condition>
-    	
+
         <copy file="src/main/resources/${build.name}/snapshot_0.xml"
               tofile="${project.build.directory}/${build.output.name}/snapshot_0.xml" />
         <copy file="src/main/osgi/equinox_3.8.1/configuration/config.ini"
@@ -79,7 +79,7 @@
               tofile="${project.build.directory}/${build.output.name}/jdk.dio.properties" />
         <copy file="src/main/resources/common/jdk.dio.policy"
               tofile="${project.build.directory}/${build.output.name}/jdk.dio.policy" />
-    	
+
         <!-- Populate config.ini with correct versions -->
         <replace file="${project.build.directory}/${build.output.name}/config.ini"
                  token="{kura.build.version}" value="${kura.build.version}"/>
@@ -119,7 +119,7 @@
                  token="{org.eclipse.kura.linux.position.version}" value="${org.eclipse.kura.linux.position.version}"/>
         <replace file="${project.build.directory}/${build.output.name}/config.ini"
                  token="{org.eclipse.kura.linux.usb.version}" value="${org.eclipse.kura.linux.usb.version}"/>
-		<replace file="${project.build.directory}/${build.output.name}/config.ini"
+		  <replace file="${project.build.directory}/${build.output.name}/config.ini"
                  token="{org.eclipse.kura.linux.bluetooth.version}" value="${org.eclipse.kura.linux.bluetooth.version}"/>
         <replace file="${project.build.directory}/${build.output.name}/config.ini"
                  token="{org.eclipse.kura.linux.watchdog.version}" value="${org.eclipse.kura.linux.watchdog.version}"/>
@@ -129,21 +129,37 @@
             <entry key="osgi.bundles" operation="+"
                    value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.net.admin_${org.eclipse.kura.net.admin.version}.jar@5:start" />
         </propertyfile>
-        <propertyfile file="${project.build.directory}/${build.output.name}/dpa.properties"> 
+
+		<!-- Conditional entries. Check for jar presence, and invoke relevant ant target-->
+		<available file="${project.build.directory}/plugins/org.eclipse.kura.web_${org.eclipse.kura.web.version}.jar" property="web.jar.present" />
+		<antcall target="web-config" />
+
+		<available file="${project.build.directory}/plugins/org.eclipse.kura.linux.gpio_${org.eclipse.kura.linux.gpio.version}.jar" property="linux.gpio.jar.present" />
+		<antcall target="gpio-config" />
+
+		<available file="${project.build.directory}/plugins/org.eclipse.kura.emulator.gpio_${org.eclipse.kura.emulator.gpio.version}.jar" property="emulated.gpio.jar.present" />
+		<antcall target="emulated-gpio-config" />
+
+        <!-- Add mToolkit to config.ini -->
+        <propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
+            <entry key="osgi.bundles" operation="+"
+                   value=", reference:file:../plugins/org.tigris.mtoolkit.iagent.rpc_3.0.0.20110411-0918.jar@5:start" />
+        </propertyfile>
+
+
+
+        <propertyfile file="${project.build.directory}/${build.output.name}/dpa.properties">
             <entry key="kura"
                    value="file:${kura.install.dir}/kura/kura/packages/${build.output.name}.dp" />
         </propertyfile>
-		<available file="${project.build.directory}/plugins/org.eclipse.kura.web_${org.eclipse.kura.web.version}.jar" property="web.jar.present" />
-		
+
 		<!-- Set web UI port -->
 		<antcall target="set-http-port" />
-		
-		<antcall target="web-config" />
-	
+
 		<!-- Create the Kura start scripts -->
 		<echo file="${project.build.directory}/${build.output.name}/start_kura.sh" append="false">#!/bin/sh
 
-export PATH=/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/opt/jvm/bin:/usr/java/bin
+export PATH=/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/opt/jvm/bin:/usr/java/bin:$PATH
 export MALLOC_ARENA_MAX=1
 
 DIR=$(cd $(dirname $0)/..; pwd)
@@ -156,30 +172,31 @@ cp ${DIR}/kura/config.ini /tmp/.kura/configuration/
 KURA_RUNNING=`ps ax | grep java | grep "org.eclipse.osgi"`
 
 if [ -z "$KURA_RUNNING" ] ; then
-	java -Xms${kura.mem.size} -Xmx${kura.mem.size} -XX:MaxPermSize=64m -Xss128k \
-	-XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/var/log/kura-heapdump.hprof \
-	-XX:ErrorFile=/var/log/kura-error.log \
-	-Dkura.os.version=${kura.os.version} \
-	-Dkura.arch=${kura.arch} \
-	-Dtarget.device=${target.device} \
-	-Declipse.ignoreApp=true \
-	-Dkura.home=${DIR}/kura \
-	-Dkura.configuration=file:${DIR}/kura/kura.properties \
-	-Dkura.custom.configuration=file:${DIR}/kura/kura_custom.properties \
-	-Dkura.data.dir=${DIR}/data \
-	-Ddpa.configuration=${DIR}/kura/dpa.properties \
-	-Dlog4j.configuration=file:${DIR}/kura/log4j.properties \
-	-Djava.security.policy=${DIR}/kura/jdk.dio.policy \
-	-Djdk.dio.registry=${DIR}/kura/jdk.dio.properties \
-	-jar ${DIR}/plugins/org.eclipse.osgi_3.8.1.v20120830-144521.jar \
-	-configuration  /tmp/.kura/configuration \
-	-console \
-	-consoleLog
+        java -Xms${kura.mem.size} -Xmx${kura.mem.size} -XX:MaxPermSize=64m \
+        -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/var/log/kura-heapdump.hprof \
+        -XX:ErrorFile=/var/log/kura-error.log \
+        -Dkura.os.version=${kura.os.version} \
+        -Dkura.arch=${kura.arch} \
+        -Dtarget.device=${target.device} \
+        -Declipse.ignoreApp=true \
+        -Dkura.home=${DIR}/kura \
+        -Dkura.configuration=file:${DIR}/kura/kura.properties \
+        -Dkura.custom.configuration=file:${DIR}/kura/kura_custom.properties \
+        -Dkura.data.dir=${DIR}/data \
+        -Ddpa.configuration=${DIR}/kura/dpa.properties \
+        -Dlog4j.configuration=file:${DIR}/kura/log4j.properties \
+        -Djava.security.policy=${DIR}/kura/jdk.dio.policy \
+        -Djdk.dio.registry=${DIR}/kura/jdk.dio.properties \
+        -Djdk.tls.trustNameService=true \
+        -jar ${DIR}/plugins/org.eclipse.osgi_3.8.1.v20120830-144521.jar \
+        -configuration  /tmp/.kura/configuration \
+        -console \
+        -consoleLog
 fi
-	</echo>    
+	</echo>
 	<echo file="${project.build.directory}/${build.output.name}/start_kura_debug.sh" append="false">#!/bin/sh
 
-export PATH=/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/opt/jvm/bin:/usr/java/bin
+export PATH=/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/opt/jvm/bin:/usr/java/bin:$PATH
 export MALLOC_ARENA_MAX=1
 
 DIR=$(cd $(dirname $0)/..; pwd)
@@ -192,36 +209,37 @@ cp ${DIR}/kura/config.ini /tmp/.kura/configuration/
 KURA_RUNNING=`ps ax | grep java | grep "org.eclipse.osgi"`
 
 if [ -z "$KURA_RUNNING" ] ; then
-	java -Xms${kura.mem.size} -Xmx${kura.mem.size} -XX:MaxPermSize=64m -Xss128k \
-	-XX:+PrintGCDetails -XX:+PrintGCTimeStamps -Xloggc:/var/log/kura-gc.log \
-	-XX:+UseGCLogFileRotation -XX:NumberOfGCLogFiles=10 -XX:GCLogFileSize=100M \
-	-XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/var/log/kura-heapdump.hprof \
-	-XX:ErrorFile=/var/log/kura-error.log \
-	-Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=8000,suspend=n \
-	-Dkura.os.version=${kura.os.version} \
-	-Dkura.arch=${kura.arch} \
-	-Dtarget.device=${target.device} \
-	-Declipse.ignoreApp=true \
-	-Dkura.home=${DIR}/kura \
-	-Dkura.configuration=file:${DIR}/kura/kura.properties \
-	-Dkura.custom.configuration=file:${DIR}/kura/kura_custom.properties \
-	-Dkura.data.dir=${DIR}/data \
-	-Ddpa.configuration=${DIR}/kura/dpa.properties \
-	-Dlog4j.configuration=file:${DIR}/kura/log4j.properties \
-	-Djava.security.policy=${DIR}/kura/jdk.dio.policy \
-	-Djdk.dio.registry=${DIR}/kura/jdk.dio.properties \
-	-jar ${DIR}/plugins/org.eclipse.osgi_3.8.1.v20120830-144521.jar \
-	-configuration  /tmp/.kura/configuration \
-	-console \
-	-consoleLog
+        java -Xms${kura.mem.size} -Xmx${kura.mem.size} -XX:MaxPermSize=64m \
+        -XX:+PrintGCDetails -XX:+PrintGCTimeStamps -Xloggc:/var/log/kura-gc.log \
+        -XX:+UseGCLogFileRotation -XX:NumberOfGCLogFiles=10 -XX:GCLogFileSize=100M \
+        -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/var/log/kura-heapdump.hprof \
+        -XX:ErrorFile=/var/log/kura-error.log \
+        -Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=8000,suspend=n \
+        -Dkura.os.version=${kura.os.version} \
+        -Dkura.arch=${kura.arch} \
+        -Dtarget.device=${target.device} \
+        -Declipse.ignoreApp=true \
+        -Dkura.home=${DIR}/kura \
+        -Dkura.configuration=file:${DIR}/kura/kura.properties \
+        -Dkura.custom.configuration=file:${DIR}/kura/kura_custom.properties \
+        -Dkura.data.dir=${DIR}/data \
+        -Ddpa.configuration=${DIR}/kura/dpa.properties \
+        -Dlog4j.configuration=file:${DIR}/kura/log4j.properties \
+        -Djava.security.policy=${DIR}/kura/jdk.dio.policy \
+        -Djdk.dio.registry=${DIR}/kura/jdk.dio.properties \
+        -Djdk.tls.trustNameService=true \
+        -jar ${DIR}/plugins/org.eclipse.osgi_3.8.1.v20120830-144521.jar \
+        -configuration  /tmp/.kura/configuration \
+        -console \
+        -consoleLog
 fi
-	</echo>    
+	</echo>
 	<echo file="${project.build.directory}/${build.output.name}/start_kura_background.sh" append="false">#!/bin/sh
 
 # Kura should be installed to the ${kura.install.dir} directory.
-export PATH=/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/opt/jvm/bin:/usr/java/bin
+export PATH=/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/opt/jvm/bin:/usr/java/bin:$PATH
 export MALLOC_ARENA_MAX=1
-		
+
 DIR=$(cd $(dirname $0)/..; pwd)
 cd $DIR
 
@@ -232,25 +250,26 @@ cp ${DIR}/kura/config.ini /tmp/.kura/configuration/
 KURA_RUNNING=`ps ax | grep java | grep "org.eclipse.osgi"`
 
 if [ -z "$KURA_RUNNING" ] ; then
-  nohup java -Xms${kura.mem.size} -Xmx${kura.mem.size} -XX:MaxPermSize=64m -Xss128k \
-	-XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/var/log/kura-heapdump.hprof \
-	-XX:ErrorFile=/var/log/kura-error.log \
-    -Dkura.os.version=${kura.os.version} \
-	-Dkura.arch=${kura.arch} \
-	-Dtarget.device=${target.device} \
-	-Declipse.ignoreApp=true \
-	-Dkura.home=${DIR}/kura \
-	-Dkura.configuration=file:${DIR}/kura/kura.properties \
-	-Dkura.custom.configuration=file:${DIR}/kura/kura_custom.properties \
-	-Dkura.data.dir=${DIR}/data \
-	-Ddpa.configuration=${DIR}/kura/dpa.properties \
-	-Dlog4j.configuration=file:${DIR}/kura/log4j.properties \
-	-Djava.security.policy=${DIR}/kura/jdk.dio.policy \
-	-Djdk.dio.registry=${DIR}/kura/jdk.dio.properties \
-	-jar ${DIR}/plugins/org.eclipse.osgi_3.8.1.v20120830-144521.jar \
-	-configuration  /tmp/.kura/configuration \
-	-console 5002 \
-	-consoleLog >> /var/log/kura-console.log 2>> /var/log/kura-console.log &amp;
+  nohup java -Xms${kura.mem.size} -Xmx${kura.mem.size} -XX:MaxPermSize=64m \
+        -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/var/log/kura-heapdump.hprof \
+        -XX:ErrorFile=/var/log/kura-error.log \
+        -Dkura.os.version=${kura.os.version} \
+        -Dkura.arch=${kura.arch} \
+        -Dtarget.device=${target.device} \
+        -Declipse.ignoreApp=true \
+        -Dkura.home=${DIR}/kura \
+        -Dkura.configuration=file:${DIR}/kura/kura.properties \
+        -Dkura.custom.configuration=file:${DIR}/kura/kura_custom.properties \
+        -Dkura.data.dir=${DIR}/data \
+        -Ddpa.configuration=${DIR}/kura/dpa.properties \
+        -Dlog4j.configuration=file:${DIR}/kura/log4j.properties \
+        -Djava.security.policy=${DIR}/kura/jdk.dio.policy \
+        -Djdk.dio.registry=${DIR}/kura/jdk.dio.properties \
+        -Djdk.tls.trustNameService=true \
+        -jar ${DIR}/plugins/org.eclipse.osgi_3.8.1.v20120830-144521.jar \
+        -configuration  /tmp/.kura/configuration \
+        -console 5002 \
+        -consoleLog >> /var/log/kura-console.log 2>> /var/log/kura-console.log &amp;
 
     #Save the PID
     KURA_PID=$!
@@ -271,10 +290,10 @@ fi
               tofile="${project.build.directory}/${build.output.name}/kura.init.yocto"
               failonerror="false" />
         <copy file="src/main/resources/common/kura.init.raspbian"
-              tofile="${project.build.directory}/${build.output.name}/kura.init.raspbian" 
+              tofile="${project.build.directory}/${build.output.name}/kura.init.raspbian"
         	  failonerror="false" />
         <copy file="src/main/resources/common/kura.service.edison"
-              tofile="${project.build.directory}/${build.output.name}/kura.service.edison" 
+              tofile="${project.build.directory}/${build.output.name}/kura.service.edison"
         	  failonerror="false" />
         <replaceregexp file="${project.build.directory}/${build.output.name}/kura_install.sh" match="INSTALL_DIR=.*" replace="INSTALL_DIR=${kura.install.dir}" />
         <replaceregexp file="${project.build.directory}/${build.output.name}/kura.init.wrl" match="INSTALL_DIR=.*" replace="INSTALL_DIR=${kura.install.dir}" />
@@ -284,7 +303,7 @@ fi
 
 
         <zip destfile="${project.build.directory}/${build.output.name}.zip">
-    
+
             <zipfileset file="${project.build.directory}/${build.output.name}/snapshot_0.xml"
                         prefix="${build.output.name}/data/snapshots/" />
 
@@ -294,7 +313,7 @@ fi
             <zipfileset file="${project.build.directory}/${build.output.name}/jdk.dio.policy"
                         prefix="${build.output.name}/kura/" />
 
-        	<zipfileset file="${project.build.directory}/${build.output.name}/jdk.dio.properties"
+        		<zipfileset file="${project.build.directory}/${build.output.name}/jdk.dio.properties"
                         prefix="${build.output.name}/kura/" />
 
             <zipfileset file="src/main/resources/common/kura_custom.properties"
@@ -365,8 +384,10 @@ fi
                         prefix="${build.output.name}/install" />
             <zipfileset file="src/main/resources/common/named/named.rfc1912.zones"
                         prefix="${build.output.name}/install" />
-        	<zipfileset file="src/main/resources/common/named/usr.sbin.named"
-        	        prefix="${build.output.name}/install" />
+        	  <zipfileset file="src/main/resources/common/named/usr.sbin.named"
+        	              prefix="${build.output.name}/install" />
+            <zipfileset file="src/main/resources/${build.name}/bind.init"
+                        prefix="${build.output.name}/install" />
 
             <zipfileset file="src/main/resources/common/ifcfg-eth0"
                         prefix="${build.output.name}/install" />
@@ -411,10 +432,11 @@ fi
                         prefix="${build.output.name}/kura/" />
             <zipfileset file="${project.build.directory}/${build.output.name}/kura.properties"
                         prefix="${build.output.name}/kura/" />
-    
+
             <zipfileset dir="${kura.osgi.repo}/plugins/"
                         prefix="${build.output.name}/plugins"/>
-            <zipfileset dir="../target-definition/common/repository/plugins"
+
+            <zipfileset dir="../target-definition/common/repository/plugins" excludes="com.google.protobuf_2.6.0.jar,org.eclipse.paho.*"
                         prefix="${build.output.name}/plugins"/>
 
 
@@ -456,14 +478,21 @@ fi
                         prefix="${build.output.name}/kura/plugins" />
 			<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.linux.status_${org.eclipse.kura.linux.status.version}.jar"
                         prefix="${build.output.name}/kura/plugins" />
+			<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.linux.gpio_${org.eclipse.kura.linux.gpio.version}.jar"
+                        prefix="${build.output.name}/kura/plugins" />
 			<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.linux_${org.eclipse.kura.linux.version}.jar"
                         prefix="${build.output.name}/kura/plugins" />
-            <zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.net.admin_${org.eclipse.kura.net.admin.version}.jar"
+			<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.net.admin_${org.eclipse.kura.net.admin.version}.jar"
                         prefix="${build.output.name}/kura/plugins" />
         </zip>
+		
+		<!-- Conditional inclusion of jar files in the distribution jar -->
 		<antcall target="web-jar" />
-        <echo message="Building Kura Distribution for ${build.name}-jars..." />
-        
+		<antcall target="gpio-jar" />
+		<antcall target="emulated-gpio-jar" />
+
+      <echo message="Building Kura Distribution for ${build.name}-jars..." />
+
 		<!-- Create installer script -->
         <echo message="Creating Installer for ${build.name}  ${kura.install.dir}" />
         <exec executable="${project.build.directory}/../src/main/sh/create_installer.sh">
@@ -516,9 +545,9 @@ fi
                 <zipfileset file="${project.build.directory}/${build.output.name}_upgrader.sh" />
                 <zipfileset file="src/main/sh/upgrade_wrapper.sh" />
         </zip>
-    	
-    	
-    	
+
+
+
     	<!-- Build the upgrade deployment package -->
     	<echo message="Building the upgrade DP" />
 
@@ -549,21 +578,35 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
 
         <jar destfile="${project.build.directory}/${build.output.name}_upgrader.dp"
                 manifest="${project.build.directory}/${build.output.name}/dp_upgrade_stage/META-INF/MANIFEST.MF"
-                basedir="${project.build.directory}/${build.output.name}/dp_upgrade_stage" />	
+                basedir="${project.build.directory}/${build.output.name}/dp_upgrade_stage" />
     </target>
 
-	<target name="set-http-port" if="http.port"> 
+	<target name="set-http-port" if="http.port">
     	<propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
             	<entry key="org.osgi.service.http.port" operation="="
                    value="${http.port}" />
         </propertyfile>
     </target>
-	
+
 	<target name="web-config" if="web.jar.present">
 		<propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
             	<entry key="osgi.bundles" operation="+"
                    value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.web_${org.eclipse.kura.web.version}.jar@5:start" />
         </propertyfile>
+	</target>
+
+	<target name="gpio-config" if="linux.gpio.jar.present">
+		<propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
+			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.linux.gpio_${org.eclipse.kura.linux.gpio.version}.jar@5:start" />
+		</propertyfile>
+	</target>
+
+	<target name="emulated-gpio-config" if="emulated.gpio.jar.present">
+		<propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
+			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.emulator.gpio_${org.eclipse.kura.emulator.gpio.version}.jar@5:start" />
+		</propertyfile>
 	</target>
 
 	<target name="web-jar" if="web.jar.present">
@@ -572,5 +615,26 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
                         prefix="${build.output.name}/kura/plugins" />
 		</zip>
 	</target>
-</project>
 
+	<target name="gpio-jar" if="linux.gpio.jar.present">
+		<zip destfile="${project.build.directory}/${build.output.name}.zip" update="true">
+			<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.linux.gpio_${org.eclipse.kura.linux.gpio.version}.jar"
+                        prefix="${build.output.name}/kura/plugins" />
+		</zip>
+	</target>
+
+	<target name="emulated-gpio-jar" if="emulated.gpio.jar.present">
+		<zip destfile="${project.build.directory}/${build.output.name}.zip" update="true">
+			<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.emulator.gpio_${org.eclipse.kura.emulator.gpio.version}.jar"
+                        prefix="${build.output.name}/kura/plugins" />
+		</zip>
+
+		<zip destfile="${project.build.directory}/tmp.zip"> 
+			<zipfileset src="${project.build.directory}/${build.output.name}.zip"> 
+				<exclude name="${build.output.name}/plugins/jdk.dio_1.0.1.jar" /> 
+			</zipfileset> 
+		</zip> 
+		<move file="${project.build.directory}/tmp.zip" tofile="${project.build.directory}/${build.output.name}.zip" /> 
+	</target>
+
+</project>

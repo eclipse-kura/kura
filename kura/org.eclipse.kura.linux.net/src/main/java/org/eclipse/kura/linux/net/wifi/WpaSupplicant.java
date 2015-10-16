@@ -940,7 +940,8 @@ public class WpaSupplicant {
 				}
 			}
 		} else if ((this.m_security == WifiSecurity.SECURITY_WPA)
-				|| (this.m_security == WifiSecurity.SECURITY_WPA2)) {
+				|| (this.m_security == WifiSecurity.SECURITY_WPA2)
+				|| (this.m_security == WifiSecurity.SECURITY_WPA_WPA2)) {
 
 			if (m_mode == WifiMode.INFRA) {
 				is = this.getClass().getResourceAsStream(

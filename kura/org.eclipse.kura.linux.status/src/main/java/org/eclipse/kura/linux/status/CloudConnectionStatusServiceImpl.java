@@ -6,11 +6,11 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-import jdk.dio.DeviceConfig;
-import jdk.dio.DeviceManager;
-import jdk.dio.gpio.GPIOPin;
-import jdk.dio.gpio.GPIOPinConfig;
-
+import org.eclipse.kura.gpio.GPIOService;
+import org.eclipse.kura.gpio.KuraGPIODirection;
+import org.eclipse.kura.gpio.KuraGPIOMode;
+import org.eclipse.kura.gpio.KuraGPIOPin;
+import org.eclipse.kura.gpio.KuraGPIOTrigger;
 import org.eclipse.kura.linux.status.runnables.BlinkStatusRunnable;
 import org.eclipse.kura.linux.status.runnables.HeartbeatStatusRunnable;
 import org.eclipse.kura.linux.status.runnables.LogStatusRunnable;
@@ -30,8 +30,9 @@ public class CloudConnectionStatusServiceImpl implements CloudConnectionStatusSe
 	private static final Logger s_logger = LoggerFactory.getLogger(CloudConnectionStatusServiceImpl.class);
 	
 	private SystemService m_systemService;
+	private GPIOService m_GPIOService;
 	
-	private GPIOPin notificationLED;
+	private KuraGPIOPin notificationLED;
 	
 	private ExecutorService notificationExecutor;
 	private Future<?> notificationWorker;
@@ -61,6 +62,14 @@ public class CloudConnectionStatusServiceImpl implements CloudConnectionStatusSe
 	public void unsetSystemService(SystemService systemService){
 		this.m_systemService = null;
 	}
+	
+	public void setGPIOService(GPIOService GpioService){
+		this.m_GPIOService = GpioService;
+	}
+
+	public void unsetGPIOService(GPIOService GpioService){
+		this.m_GPIOService = null;
+	}
 
 	// ----------------------------------------------------------------
 	//
@@ -73,7 +82,7 @@ public class CloudConnectionStatusServiceImpl implements CloudConnectionStatusSe
 		s_logger.info("Activating CloudConnectionStatus service...");
 		
 		
-		String urlFromConfig = m_systemService.getProperties().getProperty(STATUS_NOTIFICATION_URL, "");
+		String urlFromConfig = m_systemService.getProperties().getProperty(STATUS_NOTIFICATION_URL, CloudConnectionStatusURL.S_CCS+CloudConnectionStatusURL.S_NONE);
 		
 		Properties props = CloudConnectionStatusURL.parseURL(urlFromConfig);
 		
@@ -84,14 +93,13 @@ public class CloudConnectionStatusServiceImpl implements CloudConnectionStatusSe
 		 case CloudConnectionStatusURL.TYPE_LED:
 			 currentNotificationType = CloudConnectionStatusURL.TYPE_LED;
 			 
-			 GPIOPinConfig config = new GPIOPinConfig(DeviceConfig.DEFAULT,						
-						(Integer) props.get("led"), 
-						GPIOPinConfig.DIR_OUTPUT_ONLY, 
-						GPIOPinConfig.MODE_OUTPUT_OPEN_DRAIN, 
-						GPIOPinConfig.TRIGGER_NONE, false);
-			 
-			 notificationLED = DeviceManager.open(GPIOPin.class, config);
-			 
+			 notificationLED = m_GPIOService.getPinByTerminal(
+					 (Integer) props.get("led"), 
+					 KuraGPIODirection.OUTPUT, 
+					 KuraGPIOMode.OUTPUT_OPEN_DRAIN, 
+					 KuraGPIOTrigger.NONE);
+			 			 
+			 notificationLED.open();
 			 s_logger.info("CloudConnectionStatus active on LED {}.", props.get("led"));
 			 break;
 		 case CloudConnectionStatusURL.TYPE_LOG:
@@ -196,6 +204,8 @@ public class CloudConnectionStatusServiceImpl implements CloudConnectionStatusSe
 			}
 		}else if(currentNotificationType == CloudConnectionStatusURL.TYPE_LOG){
 			return new LogStatusRunnable(status);
+		}else if(currentNotificationType == CloudConnectionStatusURL.TYPE_NONE){
+			return new Runnable(){@Override public void run() {	/*Empty runnable*/ }};
 		}
 		
 		return new Runnable(){

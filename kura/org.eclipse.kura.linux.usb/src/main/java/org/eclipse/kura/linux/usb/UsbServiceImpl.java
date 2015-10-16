@@ -15,7 +15,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 
 import javax.usb.UsbException;
 import javax.usb.UsbHostManager;
@@ -46,12 +45,13 @@ public class UsbServiceImpl implements UsbService, LinuxUdevListener {
 	
 	protected void activate(ComponentContext componentContext) {
 		// only support Linux
-		Properties props = System.getProperties();
-		if(((String)props.getProperty("os.name")).equals("Linux")) {
+		String osName= System.getProperty("os.name");
+		String osVersion= System.getProperty("os.version");
+		if(osName.equals("Linux")) {
 			m_linuxUdevNative = new LinuxUdevNative(this);
 		} else {
-			s_logger.error("This is not Linux! - can not start the USB service.  This is " + ((String)props.getProperty("os.version")));
-			throw new ComponentException("This is not Linux! - can not start the USB service.  This is " + ((String)props.getProperty("os.version")));
+			s_logger.error("This is not Linux! - can not start the USB service.  This is " + osVersion);
+			throw new ComponentException("This is not Linux! - can not start the USB service.  This is " + osVersion);
 		}
 	}
 

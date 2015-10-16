@@ -2,13 +2,14 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: org.eclipse.kura.linux.usb
 Bundle-SymbolicName: org.eclipse.kura.linux.usb;singleton:=true
-Bundle-Version: 1.0.5.qualifier
+Bundle-Version: 1.0.7.qualifier
 Bundle-Vendor: EUROTECH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Service-Component: OSGI-INF/*.xml
 Bundle-ClassPath: .
 Bundle-ActivationPolicy: lazy
 Bundle-NativeCode: lib/linux/x86_64_32jvm/libEurotechLinuxUdev.so; osname=Linux; selection-filter="(&(kura.arch=x86_64) (kura.os.version=yocto_1.6.1_edison))",
+ lib/linux/x86_ubuntu/libEurotechLinuxUdev.so; osname=Linux; processor=x86; selection-filter="(&(kura.os.version=ubuntu_14.04))",
  lib/linux/x86/libEurotechLinuxUdev.so; osname=Linux; processor=x86,
  lib/linux/x86_64/libEurotechLinuxUdev.so; osname=Linux; processor=x86-64,
  lib/linux/armv6_hf/libEurotechLinuxUdev.so; osname=Linux; processor=ARM; selection-filter="(&(kura.arch=armv7_hf))",

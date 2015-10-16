@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: org.eclipse.kura.emulator
 Bundle-SymbolicName: org.eclipse.kura.emulator;singleton:=true
-Bundle-Version: 1.0.3.qualifier
+Bundle-Version: 1.0.4.qualifier
 Bundle-Vendor: EUROTECH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Export-Package: org.eclipse.kura.emulator; version="1.0.0"
@@ -20,7 +20,6 @@ Import-Package: javax.usb;version="1.0.2",
  org.eclipse.kura.position; version="[1.0,1.1)",
  org.eclipse.kura.usb; version="[1.1,1.2)",
  org.eclipse.kura.watchdog; version="[1.0,1.1)",
- org.eclipse.kura.status; version="[1.0,1.1)",
  org.json,
  org.osgi.framework;version="1.5.0",
  org.osgi.service.component;version="1.2.0",

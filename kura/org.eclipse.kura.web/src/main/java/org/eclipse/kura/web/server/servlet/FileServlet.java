@@ -18,7 +18,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -47,8 +49,16 @@ import org.eclipse.kura.core.configuration.XmlComponentConfigurations;
 import org.eclipse.kura.core.configuration.util.XmlUtil;
 import org.eclipse.kura.deployment.agent.DeploymentAgentService;
 import org.eclipse.kura.system.SystemService;
+import org.eclipse.kura.web.server.KuraRemoteServiceServlet;
+import org.eclipse.kura.web.Console;
 import org.eclipse.kura.web.server.util.ServiceLocator;
+import org.eclipse.kura.web.shared.GwtKuraErrorCode;
 import org.eclipse.kura.web.shared.GwtKuraException;
+import org.eclipse.kura.web.shared.model.GwtXSRFToken;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+import org.osgi.service.metatype.MetaTypeInformation;
+import org.osgi.service.metatype.MetaTypeService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,8 +70,8 @@ public class FileServlet extends HttpServlet {
 	private static Logger s_logger = LoggerFactory.getLogger(FileServlet.class);
 
 	private static final int BUFFER = 1024;
-	private static final int TOOBIG = 0x6400000; // Max size of unzipped data, 100MB
-	private static final int TOOMANY = 1024;     // Max number of files
+	private static int tooBig = 0x6400000; // Max size of unzipped data, 100MB
+	private static int tooMany = 1024;     // Max number of files
 
 	private DiskFileItemFactory m_diskFileItemFactory;
 	private FileCleaningTracker m_fileCleaningTracker;
@@ -87,6 +97,9 @@ public class FileServlet extends HttpServlet {
 
 		ServletContext ctx = getServletContext();
 		m_fileCleaningTracker = FileCleanerCleanup.getFileCleaningTracker(ctx);
+		
+		getZipUploadSizeMax();
+		getZipUploadCountMax();
 
 		int sizeThreshold = getFileUploadInMemorySizeThreshold();
 		File repository = new File(System.getProperty("java.io.tmpdir"));
@@ -98,6 +111,29 @@ public class FileServlet extends HttpServlet {
 		m_diskFileItemFactory.setFileCleaningTracker(m_fileCleaningTracker);
 	}
 
+	@Override
+	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		resp.setContentType("image/jpeg");
+
+		String reqPathInfo = req.getPathInfo();
+		
+		if (reqPathInfo == null) {
+			s_logger.error("Request path info not found");
+			throw new ServletException("Request path info not found");
+		}
+		
+		s_logger.debug("req.getRequestURI(): {}", req.getRequestURI());
+		s_logger.debug("req.getRequestURL(): {}", req.getRequestURL());
+		s_logger.debug("req.getPathInfo(): {}", req.getPathInfo());
+		
+		if (reqPathInfo.startsWith("/icon")) {
+			doGetIcon(req, resp);
+		}
+		else {
+			s_logger.error("Unknown request path info: " + reqPathInfo);
+			throw new ServletException("Unknown request path info: " + reqPathInfo);			
+		}
+	}
 
 	@Override
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp)
@@ -114,6 +150,7 @@ public class FileServlet extends HttpServlet {
 		s_logger.debug("req.getRequestURI(): {}", req.getRequestURI());
 		s_logger.debug("req.getRequestURL(): {}", req.getRequestURL());
 		s_logger.debug("req.getPathInfo(): {}", req.getPathInfo());
+
 
 		if (reqPathInfo.startsWith("/deploy")) {
 			doPostDeploy(req, resp);
@@ -133,6 +170,90 @@ public class FileServlet extends HttpServlet {
 		}
 	}
 
+	private void doGetIcon(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		String queryString = req.getQueryString();
+		
+		if (queryString == null) {
+			s_logger.error("Error parsing query string.");
+			throw new ServletException("Error parsing query string.");
+		}
+		
+		// Parse the query string
+		Map<String, String> pairs;
+		try {
+			pairs = parseQueryString(queryString);
+		} catch (UnsupportedEncodingException e) {
+			s_logger.error("Error parsing query string.");
+			throw new ServletException("Error parsing query string: " + e.getLocalizedMessage());
+		}
+		
+		// Check for malformed request
+		if (pairs == null || pairs.size() != 1) {
+			s_logger.error("Error parsing query string.");
+			throw new ServletException("Error parsing query string.");
+		}
+		
+		String pid = pairs.get("pid");
+		if (pid != null && pid.length() > 0) {
+			BundleContext ctx = Console.getBundleContext();
+			Bundle[] bundles = ctx.getBundles();
+			ServiceLocator  locator = ServiceLocator.getInstance();
+			
+			// Iterate over bundles to find PID
+			for (Bundle b : bundles) {
+				MetaTypeService mts;
+				try {
+					mts = locator.getService(MetaTypeService.class);
+				} catch (GwtKuraException e1) {
+					s_logger.error("Error parsing query string.");
+					throw new ServletException("Error parsing query string.");
+				}
+				MetaTypeInformation mti = mts.getMetaTypeInformation(b);
+				
+				String[] pids = mti.getPids();
+				for (String p : pids) {
+					if (p.equals(pid)) {
+						try {
+							InputStream is = mti.getObjectClassDefinition(pid, null).getIcon(32);
+							if (is == null) {
+								s_logger.error("Error reading icon file.");
+								throw new ServletException("Error reading icon file.");
+							}
+							OutputStream os = resp.getOutputStream();
+							byte[] buffer = new byte[1024];
+							for (int length = 0; (length = is.read(buffer)) > 0;) {
+						        os.write(buffer, 0, length);
+						    }
+							is.close();
+							os.close();
+							
+						} catch (IOException e) {
+							s_logger.error("Error reading icon file.");
+							throw new IOException("Error reading icon file.");
+						}
+					}
+				}
+			}
+		}
+		else {
+			s_logger.error("Error parsing query string.");
+			throw new ServletException("Error parsing query string.");
+		}
+		
+		
+	}
+	
+	private Map<String, String> parseQueryString(String queryString) throws UnsupportedEncodingException {
+		Map<String, String> qp = new HashMap<String, String>();
+		
+		String[] pairs = queryString.split("&");
+		for (String p : pairs) {
+			int index = p.indexOf("=");
+			qp.put(URLDecoder.decode(p.substring(0, index), "UTF-8"), URLDecoder.decode(p.substring(index + 1), "UTF-8"));
+		}
+		return qp;
+	}
+	
 	private void doPostCommand(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
 		UploadRequest upload = new UploadRequest(m_diskFileItemFactory);
@@ -143,6 +264,18 @@ public class FileServlet extends HttpServlet {
 			s_logger.error("Error parsing the file upload request");
 			throw new ServletException("Error parsing the file upload request", e);			
 		}
+
+		// BEGIN XSRF - Servlet dependent code
+		Map<String,String> formFields= upload.getFormFields();
+
+		try {
+			GwtXSRFToken token = new GwtXSRFToken(formFields.get("xsrfToken"));
+			KuraRemoteServiceServlet.checkXSRFToken(req, token);
+		}
+		catch (Exception e) {
+			throw new ServletException("Security error: please retry this operation correctly.", e);
+		}
+		// END XSRF security check
 
 		List<FileItem> fileItems = null;
 		InputStream is = null;
@@ -180,7 +313,7 @@ public class FileServlet extends HttpServlet {
 
 					FileOutputStream fos = new FileOutputStream(newFile);
 					int len;
-					while ((total + BUFFER <= TOOBIG) && (len = zis.read(buffer)) > 0) {
+					while ((total + BUFFER <= tooBig) && (len = zis.read(buffer)) > 0) {
 						fos.write(buffer, 0, len);
 						total += len;
 					}
@@ -188,10 +321,10 @@ public class FileServlet extends HttpServlet {
 					fos.close();
 
 					entries++;
-					if (entries > TOOMANY) {
+					if (entries > tooMany) {
 						throw new IllegalStateException("Too many files to unzip.");
 					}
-					if (total > TOOBIG) {
+					if (total > tooBig) {
 						throw new IllegalStateException("File being unzipped is too big.");
 					}
 
@@ -204,7 +337,7 @@ public class FileServlet extends HttpServlet {
 		} catch (IOException e) {
 			throw e;
 		} catch (GwtKuraException e) {
-			throw new ServletException(e.getMessage());
+			throw new ServletException("File is outside extraction target directory.");
 		} finally {
 			if (os != null) {
 				try {
@@ -238,7 +371,7 @@ public class FileServlet extends HttpServlet {
 		if (filePath.contains(canonicalID)) {
 			return filePath;
 		} else {
-			throw new GwtKuraException("File is outside extraction target directory.");
+			throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ACCESS);
 		}
 	}
 
@@ -253,6 +386,18 @@ public class FileServlet extends HttpServlet {
 			s_logger.error("Error parsing the file upload request");
 			throw new ServletException("Error parsing the file upload request", e);			
 		}
+
+		// BEGIN XSRF - Servlet dependent code
+		Map<String,String> formFields= upload.getFormFields();
+
+		try {
+			GwtXSRFToken token = new GwtXSRFToken(formFields.get("xsrfToken"));
+			KuraRemoteServiceServlet.checkXSRFToken(req, token);
+		}
+		catch (Exception e) {
+			throw new ServletException("Security error: please retry this operation correctly.", e);
+		}
+		// END XSRF security check
 
 		List<FileItem> fileItems = upload.getFileItems();
 		if (fileItems.size() != 1) {
@@ -324,6 +469,18 @@ public class FileServlet extends HttpServlet {
 			s_logger.error("Error parsing the file upload request", e);
 			throw new ServletException("Error parsing the file upload request", e);			
 		}
+
+		// BEGIN XSRF - Servlet dependent code
+		Map<String,String> formFields= upload.getFormFields();
+
+		try {
+			GwtXSRFToken token = new GwtXSRFToken(formFields.get("xsrfToken"));
+			KuraRemoteServiceServlet.checkXSRFToken(req, token);
+		}
+		catch (Exception e) {
+			throw new ServletException("Security error: please retry this operation correctly.", e);
+		}
+		// END XSRF security check
 
 		List<FileItem> fileItems = null;
 		InputStream is = null;
@@ -449,6 +606,18 @@ public class FileServlet extends HttpServlet {
 				throw new ServletException("Deployment package URL parameter missing");	
 			}
 
+			// BEGIN XSRF - Servlet dependent code
+			String tokenId= req.getParameter("xsrfToken");
+
+			try {
+				GwtXSRFToken token = new GwtXSRFToken(tokenId);
+				KuraRemoteServiceServlet.checkXSRFToken(req, token);
+			}
+			catch (Exception e) {
+				throw new ServletException("Security error: please retry this operation correctly.", e);
+			}
+			// END XSRF security check
+
 			try {
 				s_logger.info("Installing package...");
 				deploymentAgentService.installDeploymentPackageAsync(packageDownloadUrl);
@@ -461,6 +630,28 @@ public class FileServlet extends HttpServlet {
 		} else {
 			s_logger.error("Unsupported package deployment request");
 			throw new ServletException("Unsupported package deployment request");			
+		}
+	}
+	
+	private void getZipUploadSizeMax(){
+		ServiceLocator locator = ServiceLocator.getInstance();
+		try {
+			SystemService systemService = locator.getService(SystemService.class);
+			int sizeInMB= systemService.getFileCommandZipMaxUploadSize();
+			int sizeInBytes= sizeInMB * 1024 * 1024;
+			tooBig = sizeInBytes;
+		} catch (GwtKuraException e) {
+			s_logger.error("Error locating SystemService", e);
+		}
+	}
+	
+	private void getZipUploadCountMax(){
+		ServiceLocator locator = ServiceLocator.getInstance();
+		try {
+			SystemService systemService = locator.getService(SystemService.class);
+			tooMany = systemService.getFileCommandZipMaxUploadNumber();
+		} catch (GwtKuraException e) {
+			s_logger.error("Error locating SystemService", e);
 		}
 	}
 

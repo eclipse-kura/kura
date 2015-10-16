@@ -33,7 +33,7 @@
             type="String"
             cardinality="0"
             required="true"
-            default=""
+            default="aaaaaaaabbbbccccddddeeeeeeeeeeee"
             description="128-bit uuid for beacon advertising expressed as hex string."/>
 
         <AD id="major"  
@@ -65,7 +65,7 @@
             type="Integer"
             cardinality="0"
             required="true"
-            default="00"
+            default="0"
             description="Transmission power measured at 1m away from the beacon expressed in dBm."/>
             
         <AD id="LELimited"

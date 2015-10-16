@@ -11,7 +11,6 @@
  */
 package org.eclipse.kura.web.server;
 
-import java.sql.SQLException;
 import java.util.Enumeration;
 
 import javax.servlet.http.HttpSession;
@@ -20,14 +19,16 @@ import org.eclipse.kura.web.AuthenticationManager;
 import org.eclipse.kura.web.shared.GwtKuraErrorCode;
 import org.eclipse.kura.web.shared.GwtKuraException;
 import org.eclipse.kura.web.shared.model.GwtSettings;
+import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.eclipse.kura.web.shared.service.GwtSettingService;
 
 public class GwtSettingServiceImpl extends OsgiRemoteServiceServlet implements GwtSettingService
 {
 	private static final long serialVersionUID = -3422518194598042896L;
 
-	public void updateSettings(GwtSettings settings) throws GwtKuraException
+	public void updateSettings(GwtXSRFToken xsrfToken, GwtSettings settings) throws GwtKuraException
 	{
+		checkXSRFToken(xsrfToken);
 		AuthenticationManager authMgr = AuthenticationManager.getInstance(); 
 
 		//
@@ -53,9 +54,10 @@ public class GwtSettingServiceImpl extends OsgiRemoteServiceServlet implements G
 	
 	
 	@SuppressWarnings("rawtypes")
-	public void logout() 
+	public void logout(GwtXSRFToken xsrfToken) 
 		throws GwtKuraException
 	{
+		checkXSRFToken(xsrfToken);
 		HttpSession httpSession = this.getThreadLocalRequest().getSession();
 		Enumeration attrs = httpSession.getAttributeNames();
 		while (attrs.hasMoreElements()) {

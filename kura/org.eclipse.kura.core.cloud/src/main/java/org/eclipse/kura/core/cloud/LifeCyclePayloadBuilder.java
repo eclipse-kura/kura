@@ -106,6 +106,11 @@ public class LifeCyclePayloadBuilder
 			birthPayloadBuilder.withModemImsi(m_cloudServiceImpl.m_imsi);
 		}
 		
+		if ((m_cloudServiceImpl.m_rssi != null) 
+				&& m_cloudServiceImpl.m_rssi.length() > 0) {
+			birthPayloadBuilder.withModemRssi(m_cloudServiceImpl.m_rssi);
+		}
+		
         if (deviceProfile.getLatitude() != null &&
             deviceProfile.getLongitude() != null) {
             KuraPosition KuraPosition = new KuraPosition();

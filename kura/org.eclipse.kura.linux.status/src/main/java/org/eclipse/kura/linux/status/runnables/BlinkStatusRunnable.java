@@ -2,15 +2,17 @@ package org.eclipse.kura.linux.status.runnables;
 
 import java.io.IOException;
 
-import jdk.dio.gpio.GPIOPin;
+import org.eclipse.kura.gpio.KuraClosedDeviceException;
+import org.eclipse.kura.gpio.KuraGPIOPin;
+import org.eclipse.kura.gpio.KuraUnavailableDeviceException;
 
 public class BlinkStatusRunnable implements Runnable {
 
-	private GPIOPin local_pin;
+	private KuraGPIOPin local_pin;
 	private final int onTime;
 	private final int offTime;
 	
-	public BlinkStatusRunnable(GPIOPin local_pin, int onTime, int offTime) {
+	public BlinkStatusRunnable(KuraGPIOPin local_pin, int onTime, int offTime) {
 		this.local_pin = local_pin;
 		this.onTime = onTime;
 		this.offTime = offTime;
@@ -26,6 +28,12 @@ public class BlinkStatusRunnable implements Runnable {
 				Thread.sleep(offTime);
 			}catch(InterruptedException ex){
 				break;
+			}catch(KuraUnavailableDeviceException ex){
+				ex.printStackTrace();
+				break;				
+			}catch(KuraClosedDeviceException ex){
+				ex.printStackTrace();
+				break;				
 			}catch(IOException ex){
 				ex.printStackTrace();
 				break;

@@ -54,6 +54,8 @@ public abstract class AbstractNtpClockSyncProvider implements ClockSyncProvider
 	@Override
 	public void start() throws KuraException 
 	{		
+		m_isSynced = false;
+		m_numRetry = 0;
 		if (m_refreshInterval < 0) {			
 			// Never do any update. So Nothing to do.
 			s_logger.info("No clock update required");
@@ -97,11 +99,18 @@ public abstract class AbstractNtpClockSyncProvider implements ClockSyncProvider
 								m_isSynced=true;
 								m_numRetry=0;
 							}
+							else {
+								m_numRetry++;
+								if((m_maxRetry>0)&&(m_numRetry>=m_maxRetry)) {
+									s_logger.error("Failed to synchronize System Clock. Exhausted retry attempts, giving up");
+									m_isSynced=true;
+								}
+							}
 						}
 						catch(KuraException e) {
 							m_numRetry++;
 							s_logger.error("Error Synchronizing Clock", e);
-							if(m_numRetry>=m_maxRetry) {
+							if((m_maxRetry>0)&&(m_numRetry>=m_maxRetry)) {
 								s_logger.error("Failed to synchronize System Clock. Exhausted retry attempts, giving up");
 								m_isSynced=true;
 							}

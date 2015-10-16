@@ -24,13 +24,13 @@
 	</parent>
 
 	<artifactId>org.eclipse.kura.net.admin</artifactId>
-	<version>1.0.5-SNAPSHOT</version>
+	<version>1.0.7-SNAPSHOT</version>
 	<packaging>eclipse-plugin</packaging>
 
 	<properties>
 		<kura.basedir>${project.basedir}/..</kura.basedir>
 	</properties>
-	
+
         <build>
                 <plugins>
                         <plugin>

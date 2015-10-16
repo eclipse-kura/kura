@@ -16,7 +16,6 @@ import org.eclipse.kura.net.admin.modem.PppPeer;
 import org.eclipse.kura.net.admin.visitor.linux.util.ModemXchangePair;
 import org.eclipse.kura.net.admin.visitor.linux.util.ModemXchangeScript;
 import org.eclipse.kura.net.modem.ModemConfig;
-import org.eclipse.kura.net.modem.ModemTechnologyType;
 import org.eclipse.kura.net.modem.ModemConfig.PdpType;
 
 public class TelitHe910ConfigGenerator implements ModemPppConfigGenerator {
@@ -34,7 +33,6 @@ public class TelitHe910ConfigGenerator implements ModemPppConfigGenerator {
         // default values
         pppPeer.setBaudRate(115200);
         pppPeer.setEnableDebug(true);
-        pppPeer.setNetworkTechnology(ModemTechnologyType.HSDPA);
         pppPeer.setUseModemControlLines(true);
         pppPeer.setUseRtsCtsFlowControl(false);
         pppPeer.setLockSerialDevice(true);

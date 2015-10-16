@@ -11,6 +11,8 @@
  */
 package org.eclipse.kura.linux.usb;
 
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -29,6 +31,7 @@ import org.eclipse.kura.usb.UsbDevice;
 import org.eclipse.kura.usb.UsbNetDevice;
 import org.eclipse.kura.usb.UsbTtyDevice;
 
+@SuppressWarnings({ "unchecked", "rawtypes" })
 public class LinuxUdevNative {
 
 	private static final Logger s_logger = LoggerFactory.getLogger(LinuxUdevNative.class);
@@ -38,7 +41,30 @@ public class LinuxUdevNative {
 	 private final static long THREAD_TERMINATION_TOUT = 1; // in seconds
 	
 	static {
-		System.loadLibrary( LIBRARY_NAME );
+		try
+		{
+		    AccessController.doPrivileged(new PrivilegedAction()
+		    {
+		        public Object run()
+		        {
+		            try
+		            {
+		                // privileged code goes here, for example:
+		            	System.loadLibrary( LIBRARY_NAME );
+		                return null; // nothing to return
+		            }
+		            catch (Exception e)
+		            {
+		                System.out.println("Unable to load: " + LIBRARY_NAME);
+		                return null;
+		            }
+		        }
+		     });
+		}
+		catch (Exception e)
+		{
+		    System.out.println("Unable to load: " + LIBRARY_NAME);
+		}
 	}
 	
 	private static boolean started;

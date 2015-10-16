@@ -100,7 +100,7 @@ public class XmlUtil
 
 	//un-marshalling
 	public static <T> T unmarshal(String s, Class<T> clazz) 
-			throws Exception, XMLStreamException, FactoryConfigurationError
+			throws XMLStreamException, FactoryConfigurationError
 	{
 		StringReader sr = new StringReader(s);
 		T result=unmarshal(sr, clazz);
@@ -108,7 +108,7 @@ public class XmlUtil
 	}
 
 	public static <T> T unmarshal(Reader r, Class<T> clazz) 
-			throws Exception, XMLStreamException, FactoryConfigurationError
+			throws XMLStreamException, FactoryConfigurationError
 	{
 		DocumentBuilderFactory factory = null;
 		DocumentBuilder parser = null;

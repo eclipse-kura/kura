@@ -118,10 +118,21 @@
 									<artifactId>protobuf-java</artifactId>
 									<version>2.6.0</version>
 								</artifactItem>
+								<!-- Present here even if not distributed later. See below. -->								
+								<artifactItem>
+									<groupId>jdk</groupId>
+									<artifactId>jdk.dio</artifactId>
+									<version>1.0.2</version>
+								</artifactItem>
 							</artifactItems>
 							<outputDirectory>${project.basedir}/target/source/plugins</outputDirectory>
 						</configuration>
 					</execution>
+					<!-- Although org.eclipse.kura.dio.skip property is being used to exclude jdk.dio from the build,-->
+					<!-- jdk.dio bundle will be put in the target platform in order to compile the whole project. -->
+					<!-- During distribution however, it will be discarded -->
+					<!-- See distrib/pom.xml, and distribution ant script (build_equnox_distrib.xml) -->
+					<!--
 					<execution>
 						<id>copy-dio-bundle-for-publishing</id>
 						<phase>process-resources</phase>
@@ -140,6 +151,7 @@
 							<outputDirectory>${project.basedir}/target/source/plugins</outputDirectory>
 						</configuration>
 					</execution>
+					-->
 				</executions>
 			</plugin>
 			<plugin>

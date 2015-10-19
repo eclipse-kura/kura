@@ -14,6 +14,7 @@ package org.eclipse.kura.net.admin.visitor.linux;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -25,6 +26,7 @@ import org.eclipse.kura.core.net.NetworkConfiguration;
 import org.eclipse.kura.core.net.NetworkConfigurationVisitor;
 import org.eclipse.kura.core.net.WifiInterfaceAddressConfigImpl;
 import org.eclipse.kura.core.net.WifiInterfaceConfigImpl;
+import org.eclipse.kura.linux.net.util.KuraConstants;
 import org.eclipse.kura.net.NetConfig;
 import org.eclipse.kura.net.NetInterfaceAddressConfig;
 import org.eclipse.kura.net.NetInterfaceConfig;
@@ -44,7 +46,17 @@ public class WpaSupplicantConfigReader implements NetworkConfigurationVisitor {
 
     private static final Logger s_logger = LoggerFactory.getLogger(WpaSupplicantConfigReader.class);
     
-    private static final String WPA_CONFIG_FILE = "/etc/wpa_supplicant.conf";
+    private static String WPA_CONFIG_FILE = null;
+    
+    private static final String OS_VERSION = System.getProperty("kura.os.version");
+    
+    static {
+		if (OS_VERSION.equals(KuraConstants.Intel_Edison.getImageName() + "_" + KuraConstants.Intel_Edison.getImageVersion() + "_" + KuraConstants.Intel_Edison.getTargetName())) {
+			WPA_CONFIG_FILE = "/etc/wpa_supplicant/wpa_supplicant.conf";
+		} else {
+			WPA_CONFIG_FILE = "/etc/wpa_supplicant.conf";
+		}
+	}
 
     private static WpaSupplicantConfigReader s_instance;
     
@@ -282,19 +294,18 @@ public class WpaSupplicantConfigReader implements NetworkConfigurationVisitor {
         
         Properties props = null;
         
+        BufferedReader br = null;
         try {
             File wpaConfigFile = new File(WPA_CONFIG_FILE);
             if (wpaConfigFile.exists()) {
     
                 // Read into a string
-                BufferedReader br = new BufferedReader(
-                        new FileReader(wpaConfigFile));
+                br = new BufferedReader(new FileReader(wpaConfigFile));
                 StringBuilder sb = new StringBuilder();
                 String line = null;
                 while ((line = br.readLine()) != null) {
                     sb.append(line).append("\n");
                 }
-                br.close();
     
                 String newConfig = null;
                 int beginIndex = sb.toString().indexOf("network");
@@ -322,6 +333,15 @@ public class WpaSupplicantConfigReader implements NetworkConfigurationVisitor {
         } catch (Exception e) {
             throw KuraException
                     .internalError("wpa_supplicant failed to parse its configuration file");
+        }
+        finally{
+        	if(br != null){
+				try{
+					br.close();
+				}catch(IOException ex){
+					s_logger.error("I/O Exception while closing BufferedReader!");
+				}
+			}
         }
 
         return props;

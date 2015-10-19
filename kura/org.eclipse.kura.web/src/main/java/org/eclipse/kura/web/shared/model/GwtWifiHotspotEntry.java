@@ -13,11 +13,12 @@ package org.eclipse.kura.web.shared.model;
 
 import java.io.Serializable;
 
-import com.extjs.gxt.ui.client.data.BaseModelData;
+import org.eclipse.kura.web.client.util.KuraBaseModel;
 
-public class GwtWifiHotspotEntry extends BaseModelData implements Serializable {
+public class GwtWifiHotspotEntry extends KuraBaseModel implements Serializable {
 	
 	private static final long serialVersionUID = -7818472380334612955L;
+	
 
 	public String getSSID() {
         return get("ssid");
@@ -82,5 +83,40 @@ public class GwtWifiHotspotEntry extends BaseModelData implements Serializable {
     public void setSecurity(String security) {
     	set("security", security);
     }
-
+    
+    public GwtWifiCiphers getPairwiseCiphersEnum() {
+    	GwtWifiCiphers ciphers = GwtWifiCiphers.netWifiCiphers_NONE;
+    	try {
+    		ciphers = GwtWifiCiphers.valueOf(getPairwiseCiphers());
+    	} catch (Exception e) {
+    		 e.printStackTrace();
+    	}
+    	return ciphers;
+    }
+    
+    public String getPairwiseCiphers() {
+    	return get("pairwiseCiphers");
+    }
+    
+    public void setPairwiseCiphers(String pairwiseCiphers) {
+    	set("pairwiseCiphers", pairwiseCiphers);
+    }
+    
+    public GwtWifiCiphers getGroupCiphersEnum() {
+    	GwtWifiCiphers ciphers = GwtWifiCiphers.netWifiCiphers_NONE;
+    	try {
+    		ciphers = GwtWifiCiphers.valueOf(getGroupCiphers());
+    	} catch (Exception e) {
+    		e.printStackTrace();
+    	}
+    	return ciphers;
+    }
+    
+    public String getGroupCiphers() {
+    	return get("groupCiphers");
+    }
+    
+    public void setGroupCiphers(String groupCiphers) {
+    	set("groupCiphers", groupCiphers);
+    }
 }

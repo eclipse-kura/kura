@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: org.eclipse.kura.deployment.customizer.upgrade
 Bundle-SymbolicName: org.eclipse.kura.deployment.customizer.upgrade;singleton:=true
-Bundle-Version: 1.0.2.qualifier
+Bundle-Version: 1.0.4.qualifier
 Bundle-Vendor: EUROTECH
 Bundle-Activator: org.eclipse.kura.deployment.customizer.upgrade.rp.Activator
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
@@ -12,3 +12,4 @@ Import-Package: org.apache.commons.io;version="2.4.0",
  org.osgi.service.deploymentadmin.spi,
  org.slf4j;version="1.6.4"
 Bundle-ClassPath: .
+Bundle-ActivationPolicy: lazy

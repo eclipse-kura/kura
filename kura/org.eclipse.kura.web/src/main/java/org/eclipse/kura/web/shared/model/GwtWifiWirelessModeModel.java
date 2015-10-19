@@ -11,9 +11,10 @@
  */
 package org.eclipse.kura.web.shared.model;
 
-import com.extjs.gxt.ui.client.data.BaseModelData;
+import org.eclipse.kura.web.client.util.KuraBaseModel;
 
-public class GwtWifiWirelessModeModel extends BaseModelData {
+
+public class GwtWifiWirelessModeModel extends KuraBaseModel {
 
     private static final long serialVersionUID = -6095963356000494663L;
 

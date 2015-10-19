@@ -22,6 +22,9 @@ import java.io.InputStreamReader;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.util.ProcessUtil;
+import org.eclipse.kura.core.util.SafeProcess;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Defines mii-tool utility
@@ -30,7 +33,7 @@ import org.eclipse.kura.core.util.ProcessUtil;
  *
  */
 public class MiiTool implements LinkTool {
-	
+	private static final Logger s_logger = LoggerFactory.getLogger(MiiTool.class);
 	private String ifaceName = null; 
 	private boolean linkDetected = false;
 	private int speed = 0; // in b/s
@@ -50,13 +53,16 @@ public class MiiTool implements LinkTool {
 	 * @see org.eclipse.kura.util.net.service.ILinkTool#get()
 	 */
 	public boolean get () throws KuraException {
-		Process proc = null;
+		SafeProcess proc = null;
+		BufferedReader br = null;
+		boolean result = false;
 		try {
 			//start the process
 			proc = ProcessUtil.exec("mii-tool " + this.ifaceName);
+			result = (proc.waitFor() == 0)? true : false;
 	
 			//get the output
-	        BufferedReader br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+	        br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
 	        String line = null;
 	        boolean linkDetected = false;
 	        int speed = 0;
@@ -84,7 +90,7 @@ public class MiiTool implements LinkTool {
 								speed = -2;
 							}
 						} catch (Exception e) {
-							e.printStackTrace();
+							s_logger.warn("Exception while parsing string...");
 						}
 	        		} 
 	        	} 
@@ -93,14 +99,22 @@ public class MiiTool implements LinkTool {
 	        this.speed = speed;
 	        this.linkDetected = linkDetected;
 	        
-	        return (proc.waitFor() == 0)? true : false;
+	        return result;
 		} catch(IOException e) {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
 		} catch (InterruptedException e) {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
 		}
 		finally {
-			ProcessUtil.destroy(proc);
+			if(br != null){
+				try{
+					br.close();
+				}catch(IOException ex){
+					s_logger.error("I/O Exception while closing BufferedReader!");
+				}
+			}
+			
+			if (proc != null) ProcessUtil.destroy(proc);
 		}
 	}
 	
@@ -134,5 +148,10 @@ public class MiiTool implements LinkTool {
 	 */
 	public String getDuplex() {
 		return this.duplex;
+	}
+
+	@Override
+	public int getSignal() {
+		return 0;
 	}
 }

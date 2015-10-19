@@ -35,6 +35,7 @@ import org.apache.commons.io.FileUtils;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.util.ProcessUtil;
+import org.eclipse.kura.core.util.SafeProcess;
 import org.eclipse.kura.linux.net.util.KuraConstants;
 import org.eclipse.kura.net.IPAddress;
 import org.eclipse.kura.net.NetworkPair;
@@ -162,13 +163,16 @@ public class LinuxFirewall {
 
 	public ArrayList<String> readFileLinebyLine(String sourceFile) {
 		ArrayList<String> destination = new ArrayList<String>();
+		DataInputStream in = null;
+		BufferedReader br = null;
+		
 		try {
 			// Open the file that is the first command line parameter
 			FileInputStream fstream = new FileInputStream(sourceFile);
 
 			// Get the object of DataInputStream
-			DataInputStream in = new DataInputStream(fstream);
-			BufferedReader br = new BufferedReader(new InputStreamReader(in));
+			in = new DataInputStream(fstream);
+			br = new BufferedReader(new InputStreamReader(in));
 			String strLine;
 			int i = 0;
 
@@ -182,10 +186,25 @@ public class LinuxFirewall {
 			// Close the input stream
 			in.close();
 		} catch(FileNotFoundException e) {// Catch exception if any
-			s_logger.error("the file: " + sourceFile + " does not exist");
+			s_logger.error("the file: " + sourceFile + " does not exist", e);
 		} catch(IOException ioe) {
-			s_logger.error("IOException while trying to open: " + sourceFile);
-			ioe.printStackTrace();
+			s_logger.error("IOException while trying to open: " + sourceFile, ioe);
+		} 
+		finally {
+			if(in != null){
+				try{
+					in.close();
+				}catch(IOException ex){
+					s_logger.error("I/O Exception while closing DataInputStream!", ex);
+				}
+			}
+			if(br != null){
+				try{
+					br.close();
+				}catch(IOException ex){
+					s_logger.error("I/O Exception while closing BufferedReader!", ex);
+				}
+			}
 		}
 
 		s_logger.trace("size of destination is" + destination.size());
@@ -516,8 +535,9 @@ public class LinuxFirewall {
 
 	private boolean writeFile() throws KuraException {
 		s_logger.trace("writing to file:  " + FIREWALL_TMP_SCRIPT_NAME);
+		PrintWriter pw = null;
 		try {
-			PrintWriter pw = new PrintWriter(new FileOutputStream(FIREWALL_TMP_SCRIPT_NAME));
+			pw = new PrintWriter(new FileOutputStream(FIREWALL_TMP_SCRIPT_NAME));
 			for(String line : HEADER) {
 				pw.println(line);
 			}
@@ -584,13 +604,13 @@ public class LinuxFirewall {
 			}
 			pw.close();
 			
-			Process proc = null; 
+			SafeProcess proc = null; 
 			try {
 				proc = ProcessUtil.exec("chmod 755 " + FIREWALL_TMP_SCRIPT_NAME);
 				proc.waitFor();
 			}
 			finally {
-				ProcessUtil.destroy(proc);
+				if (proc != null) ProcessUtil.destroy(proc);
 			}
 			
 			//move the file if we made it this far
@@ -610,6 +630,11 @@ public class LinuxFirewall {
 			}
 		} catch (Exception e) {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+		} 
+		finally{
+			if(pw != null){
+				pw.close();
+			}
 		}
 	}	
 
@@ -928,7 +953,7 @@ public class LinuxFirewall {
 	}
 
 	private void runScript() throws KuraException {
-		Process proc = null;
+		SafeProcess proc = null;
 		try {
 			File file = new File(FIREWALL_SCRIPT_NAME);
 			if(!file.exists()) {
@@ -941,7 +966,7 @@ public class LinuxFirewall {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
 		}
 		finally {
-			ProcessUtil.destroy(proc);
+			if (proc != null) ProcessUtil.destroy(proc);
 		}
 	}
 	
@@ -949,9 +974,10 @@ public class LinuxFirewall {
 	 * Saves the current iptables config into /etc/sysconfig/iptables
 	 */
 	private void iptablesSave() throws KuraException {
-		Process proc = null;
+		SafeProcess proc = null;
 		try {
-			if (OS_VERSION.equals(KuraConstants.Mini_Gateway.getImageName() + "_" + KuraConstants.Mini_Gateway.getImageVersion())) {
+			if (OS_VERSION.equals(KuraConstants.Mini_Gateway.getImageName() + "_" + KuraConstants.Mini_Gateway.getImageVersion()) ||
+				(OS_VERSION.equals(KuraConstants.Intel_Edison.getImageName() + "_" + KuraConstants.Intel_Edison.getImageVersion() + "_" + KuraConstants.Intel_Edison.getTargetName()))) {
 				proc = ProcessUtil.exec("iptables-save > /opt/eurotech/firewall_rules.fw");
 				proc.waitFor();
 			} else {
@@ -962,7 +988,7 @@ public class LinuxFirewall {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
 		}
 		finally {
-			ProcessUtil.destroy(proc);
+			if (proc != null) ProcessUtil.destroy(proc);
 		}
 	}
 	

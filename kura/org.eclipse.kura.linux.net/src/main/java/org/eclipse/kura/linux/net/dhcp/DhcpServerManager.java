@@ -20,6 +20,7 @@ import java.io.File;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.linux.util.LinuxProcessUtil;
+import org.eclipse.kura.linux.net.util.LinuxNetworkUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,11 +30,26 @@ public class DhcpServerManager {
 	
 	private static final String FILE_DIR = "/etc/";
 	private static final String PID_FILE_DIR = "/var/run/";
+	private static DhcpServerTool dhcpServerTool = DhcpServerTool.NONE;
 	
+	static {
+		dhcpServerTool = getTool();
+	}
+	
+	public static DhcpServerTool getTool() {
+		if (dhcpServerTool == DhcpServerTool.NONE) {
+			if (LinuxNetworkUtil.toolExists(DhcpServerTool.DHCPD.getValue())) {
+				dhcpServerTool = DhcpServerTool.DHCPD;
+			} else if (LinuxNetworkUtil.toolExists(DhcpServerTool.UDHCPD.getValue())) {
+				dhcpServerTool = DhcpServerTool.UDHCPD;
+			}
+		}
+		return dhcpServerTool;
+	}
 	
 	public static boolean isRunning(String interfaceName) throws KuraException {
 		try {
-			// Check if dhcpd is running
+			// Check if DHCP server is running
 			int pid = LinuxProcessUtil.getPid(DhcpServerManager.formDhcpdCommand(interfaceName));
 			return (pid > -1);
 		} catch (Exception e) {
@@ -43,15 +59,16 @@ public class DhcpServerManager {
 	
 	public static boolean enable(String interfaceName) throws KuraException {
 		try {
-			// Check if dhcpd is running
+			// Check if DHCP server is running
 			if(DhcpServerManager.isRunning(interfaceName)) {
 				// If so, disable it
 				s_logger.error("DHCP server is already running for " + interfaceName + ", bringing it down...");
 				DhcpServerManager.disable(interfaceName);
 			}
-			// Start dhcpd
+			// Start DHCP server
 			File configFile = new File(DhcpServerManager.getConfigFilename(interfaceName));
 			if(configFile.exists()) {
+			    // FIXME:MC This leads to a process leak
     			if (LinuxProcessUtil.startBackground(DhcpServerManager.formDhcpdCommand(interfaceName), false) == 0) {
     				s_logger.debug("DHCP server started.");
     				return true;
@@ -70,7 +87,7 @@ public class DhcpServerManager {
         s_logger.debug("Disable DHCP server for " + interfaceName);
 
 		try {
-			// Check if dhcpd is running
+			// Check if DHCP server is running
 			int pid = LinuxProcessUtil.getPid(DhcpServerManager.formDhcpdCommand(interfaceName));
 			if(pid > -1) {
 				// If so, kill it.
@@ -95,9 +112,18 @@ public class DhcpServerManager {
 	}
 
 	public static String getConfigFilename(String interfaceName) {
-	    StringBuffer sb = new StringBuffer(FILE_DIR);
-	    sb.append("dhcpd-").append(interfaceName).append(".conf");
-
+	    StringBuilder sb = new StringBuilder(FILE_DIR);
+	    if (dhcpServerTool == DhcpServerTool.DHCPD) {
+	    	sb.append(DhcpServerTool.DHCPD.getValue());
+	    	sb.append('-');
+	    	sb.append(interfaceName);
+	    	sb.append(".conf");
+	    } else if (dhcpServerTool == DhcpServerTool.UDHCPD) {
+	    	sb.append(DhcpServerTool.UDHCPD.getValue());
+	    	sb.append('-');
+	    	sb.append(interfaceName);
+	    	sb.append(".conf");
+	    }
 		return sb.toString();
 	}
 	
@@ -108,18 +134,33 @@ public class DhcpServerManager {
 		}
 	}
 
-    private static String getPidFilename(String interfaceName) {
-        StringBuffer sb = new StringBuffer(PID_FILE_DIR);
-        sb.append("dhcpd-").append(interfaceName).append(".pid");
-
+    public static String getPidFilename(String interfaceName) {
+        StringBuilder sb = new StringBuilder(PID_FILE_DIR);
+        if (dhcpServerTool == DhcpServerTool.DHCPD) {
+        	sb.append(DhcpServerTool.DHCPD.getValue());
+        	sb.append('-');
+        	sb.append(interfaceName);
+        	sb.append(".pid");
+        } else if (dhcpServerTool == DhcpServerTool.UDHCPD) {
+        	sb.append(DhcpServerTool.UDHCPD.getValue());
+        	sb.append('-');
+        	sb.append(interfaceName);
+        	sb.append(".pid");
+        }
         return sb.toString();
     }
 	
 	private static String formDhcpdCommand(String interfaceName) {
-		StringBuffer sb = new StringBuffer("dhcpd");
-		sb.append(" -cf ").append(DhcpServerManager.getConfigFilename(interfaceName));
-		sb.append(" -pf ").append(DhcpServerManager.getPidFilename(interfaceName));
-		
+		StringBuilder sb = new StringBuilder();
+		if (dhcpServerTool == DhcpServerTool.DHCPD) {
+			sb.append(DhcpServerTool.DHCPD.getValue());
+			sb.append(" -cf ").append(DhcpServerManager.getConfigFilename(interfaceName));
+			sb.append(" -pf ").append(DhcpServerManager.getPidFilename(interfaceName));
+		} else if (dhcpServerTool == DhcpServerTool.UDHCPD) {
+			sb.append(DhcpServerTool.UDHCPD.getValue());
+			sb.append(" -f -S ");
+			sb.append(DhcpServerManager.getConfigFilename(interfaceName));
+		}
 		return sb.toString();
 	}
 }

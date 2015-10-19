@@ -12,10 +12,12 @@
 package org.eclipse.kura.core.cloud;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Map;
 
 import org.eclipse.kura.core.util.ProcessUtil;
+import org.eclipse.kura.core.util.SafeProcess;
 import org.eclipse.kura.system.SystemService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,6 +41,8 @@ public class CloudServiceOptions
 	private static final String  ENCODE_GZIP                  = "encode.gzip";
 	private static final String  REPUB_BIRTH_ON_GPS_LOCK	  = "republish.mqtt.birth.cert.on.gps.lock";
 	private static final String  REPUB_BIRTH_ON_MODEM_DETECT  = "republish.mqtt.birth.cert.on.modem.detect";
+	private static final String  DISABLE_DFLT_SUBSCRIPTIONS   = "disable.default.subscriptions";
+	private static final String  DISABLE_REPUB_BIRTH_ON_RECONNECT = "disable.republish.birth.cert.on.reconnect";
 	
 	private static final int     LIFECYCLE_QOS                = 0;
 	private static final int     LIFECYCLE_PRIORITY           = 0;
@@ -163,6 +167,26 @@ public class CloudServiceOptions
 		}
 		return prefix;
 	}
+	
+	public boolean getDisableDefaultSubscriptions() {
+		boolean disable = false;
+		if (m_properties != null &&
+			m_properties.get(DISABLE_DFLT_SUBSCRIPTIONS) != null &&
+			m_properties.get(DISABLE_DFLT_SUBSCRIPTIONS) instanceof Boolean) {
+			disable = (Boolean) m_properties.get(DISABLE_DFLT_SUBSCRIPTIONS);
+		}
+		return disable;
+	}
+	
+	public boolean getDisableRepubBirthCertOnReconnect() {
+		boolean disable = false;
+		if (m_properties != null &&
+			m_properties.get(DISABLE_REPUB_BIRTH_ON_RECONNECT) != null &&
+			m_properties.get(DISABLE_REPUB_BIRTH_ON_RECONNECT) instanceof Boolean) {
+			disable = (Boolean) m_properties.get(DISABLE_REPUB_BIRTH_ON_RECONNECT);
+		}
+		return disable;
+	}
 
 	public String getTopicSeparator() {
 		return TOPIC_SEPARATOR;
@@ -206,11 +230,12 @@ public class CloudServiceOptions
 	
 	private String getHostname(String command) {
 		StringBuffer response = new StringBuffer(); 
-		Process proc = null;
+		SafeProcess proc = null;
+		BufferedReader br = null;
 		try {
 			proc = ProcessUtil.exec(command);
 			proc.waitFor();
-			BufferedReader br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+			br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
 			String line = null;
 			String newLine = "";
 			while ((line = br.readLine()) != null) {
@@ -222,9 +247,16 @@ public class CloudServiceOptions
 			s_logger.error("failed to run commands " + command, e);
 		}
 		finally {
-			ProcessUtil.destroy(proc);
+			if(br != null){
+				try{
+					br.close();
+				}catch(IOException ex){
+					s_logger.error("I/O Exception while closing BufferedReader!");
+				}
+			}
+			if (proc != null) ProcessUtil.destroy(proc);
 		}
 		return response.toString();
-	}
+	}	
 }
 

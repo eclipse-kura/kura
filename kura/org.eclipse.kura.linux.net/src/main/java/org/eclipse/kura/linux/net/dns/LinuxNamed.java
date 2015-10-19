@@ -38,9 +38,12 @@ public class LinuxNamed {
 	private static final Logger s_logger = LoggerFactory.getLogger(LinuxNamed.class);
 
 	private static final String OS_VERSION = System.getProperty("kura.os.version");
+	private static final String TARGET_NAME = System.getProperty("target.device");
 	
 	private static LinuxNamed s_linuxNamed = null;
 	private static String s_persistentConfigFileName = null;
+	private static String s_logFileName = null;
+	private static String s_rfc1912ZonesFilename = null;
 	private static String s_procString = null;
 	
 	private DnsServerConfigIP4 m_dnsServerConfigIP4;
@@ -50,9 +53,25 @@ public class LinuxNamed {
 				OS_VERSION.equals(KuraConstants.Raspberry_Pi.getImageName()) || OS_VERSION.equals(KuraConstants.BeagleBone.getImageName())) {
 			s_persistentConfigFileName = "/etc/bind/named.conf";
 			s_procString = "/usr/sbin/named";
-		} else {
+			if (TARGET_NAME.equals(KuraConstants.ReliaGATE_15_10.getTargetName())) {
+				s_logFileName = "/var/named.log";
+				s_rfc1912ZonesFilename = "/etc/bind/named.rfc1912.zones";
+			} else {
+				s_logFileName = "/var/log/named.log";
+				s_rfc1912ZonesFilename = "/etc/named.rfc1912.zones";
+			}
+		} 
+		else if (OS_VERSION.equals(KuraConstants.ReliaGATE_50_21_Ubuntu.getImageName() + "_" + KuraConstants.ReliaGATE_50_21_Ubuntu.getImageVersion())) {
+			s_persistentConfigFileName = "/etc/bind/named.conf";
+			s_procString = "/usr/sbin/named";
+			s_logFileName = "/var/log/named.log";
+			s_rfc1912ZonesFilename = "/etc/bind/named.rfc1912.zones";
+		}
+		else {
 			s_persistentConfigFileName = "/etc/named.conf";
 			s_procString = "named -u named -t";
+			s_logFileName = "/var/log/named.log";
+			s_rfc1912ZonesFilename = "/etc/named.rfc1912.zones";
 		}
 		
 		//initialize the configuration
@@ -172,10 +191,20 @@ public class LinuxNamed {
 			if (OS_VERSION.equals(KuraConstants.Mini_Gateway.getImageName() + "_" + KuraConstants.Mini_Gateway.getImageVersion())) {
 				result = LinuxProcessUtil.start("/etc/init.d/bind start");
 			} 
+			else if (OS_VERSION.equals(KuraConstants.ReliaGATE_10_05.getImageName() + "_" + KuraConstants.ReliaGATE_10_05.getImageVersion())) {
+				result = LinuxProcessUtil.start("/etc/init.d/bind start");
+			} 
 			else if (OS_VERSION.equals(KuraConstants.Raspberry_Pi.getImageName()) || OS_VERSION.equals(KuraConstants.BeagleBone.getImageName())) {
 				result = LinuxProcessUtil.start("/etc/init.d/bind9 start");
 			}
+			else if (OS_VERSION.equals(KuraConstants.Intel_Edison.getImageName() + "_" + KuraConstants.Intel_Edison.getImageVersion() + "_" + KuraConstants.Intel_Edison.getTargetName())) {
+				result = LinuxProcessUtil.start("/etc/init.d/bind start");
+			}
+			else if (OS_VERSION.equals(KuraConstants.ReliaGATE_50_21_Ubuntu.getImageName() + "_" + KuraConstants.ReliaGATE_50_21_Ubuntu.getImageVersion())) {
+				result = LinuxProcessUtil.start("/etc/init.d/bind9 start");
+			}
 			else {
+				s_logger.info("Linux named enable fallback");
 				result = LinuxProcessUtil.start("/etc/init.d/named start");
 			}
 			if(result == 0) {
@@ -198,6 +227,12 @@ public class LinuxNamed {
 				result = LinuxProcessUtil.start("/etc/init.d/bind stop");
 			} 
 			else if (OS_VERSION.equals(KuraConstants.Raspberry_Pi.getImageName()) || OS_VERSION.equals(KuraConstants.BeagleBone.getImageName())) {
+				result = LinuxProcessUtil.start("/etc/init.d/bind9 stop");
+			}
+			else if (OS_VERSION.equals(KuraConstants.Intel_Edison.getImageName() + "_" + KuraConstants.Intel_Edison.getImageVersion() + "_" + KuraConstants.Intel_Edison.getTargetName())) {
+				result = LinuxProcessUtil.start("/etc/init.d/bind stop");
+			}
+			else if (OS_VERSION.equals(KuraConstants.ReliaGATE_50_21_Ubuntu.getImageName() + "_" + KuraConstants.ReliaGATE_50_21_Ubuntu.getImageVersion())) {
 				result = LinuxProcessUtil.start("/etc/init.d/bind9 stop");
 			}
 			else {
@@ -321,7 +356,9 @@ public class LinuxNamed {
 		sb.append("};\n")
 		.append("logging{\n")
 		.append("\tchannel named_log {\n")
-		.append("\t\tfile \"/var/log/named.log\" versions 3;\n")
+		.append("\t\tfile \"")
+		.append(s_logFileName)
+		.append("\" versions 3;\n")
 		.append("\t\tseverity info;\n")
 		.append("\t\tprint-severity yes;\n")
 		.append("\t\tprint-time yes;\n")
@@ -335,7 +372,9 @@ public class LinuxNamed {
 		.append("\ttype hint;\n")
 		.append("\tfile \"named.ca\";\n")
 		.append("};\n")
-		.append("include \"/etc/named.rfc1912.zones\";\n");
+		.append("include \"")
+		.append(s_rfc1912ZonesFilename)
+		.append("\";\n");
 
 		return sb.toString();
 	}
@@ -383,7 +422,10 @@ public class LinuxNamed {
 		.append("\tfile \"named.ca\";\n")
 		.append("};\n")
 		.append("\n")
-		.append("include \"/etc/named.rfc1912.zones\";\n");
+		.append("include \"")
+		.append(s_rfc1912ZonesFilename)
+		.append("\";\n");
+		//.append("include \"/etc/named.rfc1912.zones\";\n");
 	
 		return sb.toString();
 	}

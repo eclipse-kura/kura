@@ -13,6 +13,8 @@ package org.eclipse.kura.ssl;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
+import java.security.PrivateKey;
+import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 
 import javax.net.ssl.SSLSocketFactory;
@@ -57,7 +59,7 @@ public interface SslManagerService
     
     /**
      * Returns an SSLSocketFactory based on the specified parameters and applying best practices 
-     * like Hostname Verification and disables the legacy SSL-2.0-compatible Client Hello.<br>
+     * like Hostname Verification (enabled by default) and disables the legacy SSL-2.0-compatible Client Hello.<br>
      * @param protocol the protocol to use to initialize the SSLContext - e.g. TLSv1.2
      * @param cipherSuites allowed cipher suites for the returned SSLSocketFactory
      * @param trustStorePath Location of the Java keystore file containing the collection of CA certificates trusted by this application process (trust store). Key store type is expected to be JKS.
@@ -74,6 +76,27 @@ public interface SslManagerService
                                                 String keyAlias)
         throws GeneralSecurityException, IOException;
 
+    /**
+     * Returns an SSLSocketFactory based on the specified parameters and applying best practices 
+     * like Hostname Verification and disables the legacy SSL-2.0-compatible Client Hello.<br>
+     * @param protocol the protocol to use to initialize the SSLContext - e.g. TLSv1.2
+     * @param cipherSuites allowed cipher suites for the returned SSLSocketFactory
+     * @param trustStorePath Location of the Java keystore file containing the collection of CA certificates trusted by this application process (trust store). Key store type is expected to be JKS.
+     * @param keyStorePath Location of the Java keystore file containing an application process's own certificate and private key.  Key store type is expected to be JKS.
+     * @param keyStorePassword Password to access the private key from the keystore file. 
+     * @param keyAlias alias of the entry in the KeyStore to be used for the returned SSLSocketFactory
+     * @param hostnameVerification enable server Hostname Verification
+     * @return the SSLSocketFactory
+     */
+    public SSLSocketFactory getSSLSocketFactory(String protocol,
+                                                String cipherSuites,
+                                                String trustStorePath,
+                                                String keyStorePath,
+                                                char[] keyStorePassword,
+                                                String keyAlias,
+                                                boolean hostnameVerification)
+        throws GeneralSecurityException, IOException;
+    
     /**
      * Returns the X509 Certificates installed in the currently configured trust store.
      * If the SslManagerService configuration contains a path to a custom trust store, then the returned certificates are the ones installed in such store.
@@ -99,4 +122,14 @@ public interface SslManagerService
      * @param cn 
      */
     public void deleteTrustCertificate(String alias) throws GeneralSecurityException, IOException;
+    
+    /**
+     * Installs a private key and the correspondent public certificate chains in the configured key store with the defined alias.
+     * @param alias that is a string that will be used to identify the certificates in the key store
+     * @param privateKey that represents PrivateKey object
+     * @param password that represents the password used to encode the keys in the key store
+     * @param publicCerts that represents an array of Certificate objects that contain the public certificate chain
+     * 
+     */
+    public void installPrivateKey(String alias, PrivateKey privateKey, char[] password, Certificate[] publicCerts) throws GeneralSecurityException, IOException;
 }

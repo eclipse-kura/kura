@@ -21,8 +21,11 @@ import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.client.util.SwappableListStore;
 import org.eclipse.kura.web.shared.model.GwtFirewallNatEntry;
 import org.eclipse.kura.web.shared.model.GwtSession;
+import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.eclipse.kura.web.shared.service.GwtNetworkService;
 import org.eclipse.kura.web.shared.service.GwtNetworkServiceAsync;
+import org.eclipse.kura.web.shared.service.GwtSecurityTokenService;
+import org.eclipse.kura.web.shared.service.GwtSecurityTokenServiceAsync;
 
 import com.allen_sauer.gwt.log.client.Log;
 import com.extjs.gxt.ui.client.Style.HorizontalAlignment;
@@ -68,66 +71,67 @@ public class NatConfigTab extends LayoutContainer {
 
 	private static final Messages MSGS = GWT.create(Messages.class);
 
+	private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
 	private final GwtNetworkServiceAsync gwtNetworkService = GWT.create(GwtNetworkService.class);
-	
+
 	private GwtSession            m_currentSession;
 
 	private Grid<GwtFirewallNatEntry>   m_grid;
-	
+
 	private BaseListLoader<ListLoadResult<GwtFirewallNatEntry>> m_loader;
 	private GwtFirewallNatEntry m_selectedEntry;
 	private boolean m_dirty;
-	
+
 	private ToolBar m_natToolBar;
 	private Button m_newButton;
 	private Button m_editButton;
 	private Button m_deleteButton;
 	private Button m_applyButton;
-		
+
 	public NatConfigTab(GwtSession currentSession) {
 		m_currentSession = currentSession; 
 	}
-	
+
 	protected void onRender(final Element parent, int index) {
-		
+
 		super.onRender(parent, index);
 
 		m_dirty = false;
-		
+
 		//
 		// Border layout that expands to the whole screen
 		setLayout(new FitLayout());
 		setBorders(false);
 		setId("firewall-nat");
-		
-        LayoutContainer mf = new LayoutContainer();
-        mf.setLayout(new BorderLayout());
-		
+
+		LayoutContainer mf = new LayoutContainer();
+		mf.setLayout(new BorderLayout());
+
 		//
 		// Center Panel: NAT Table
 		BorderLayoutData centerData = new BorderLayoutData(LayoutRegion.CENTER, 1F);
 		centerData.setMargins(new Margins(0, 0, 0, 0));
 		centerData.setSplit(true);  
 		centerData.setMinSize(0);
-		
+
 		ContentPanel natTablePanel = new ContentPanel();
 		natTablePanel.setBorders(false);
 		natTablePanel.setBodyBorder(false);
 		natTablePanel.setHeaderVisible(false);
 		natTablePanel.setScrollMode(Scroll.AUTO);
 		natTablePanel.setLayout(new FitLayout());
-		
+
 		initToolBar();
-        initGrid();
-        
-        natTablePanel.setTopComponent(m_natToolBar);
-        natTablePanel.add(m_grid);
+		initGrid();
+
+		natTablePanel.setTopComponent(m_natToolBar);
+		natTablePanel.add(m_grid);
 		mf.add(natTablePanel, centerData);
-		
-        add(mf);
-        refresh();
+
+		add(mf);
+		refresh();
 	}
-	
+
 	public void refresh() {
 		if (m_loader != null) {
 			if (!m_dirty) {
@@ -137,61 +141,70 @@ public class NatConfigTab extends LayoutContainer {
 			}
 		}
 	}
-    
-    public boolean isDirty() {
-    	return m_dirty;
-    }
-    
-    public List<GwtFirewallNatEntry> getCurrentConfigurations() {
-    	if(m_grid != null) {
-    		ListStore<GwtFirewallNatEntry> store = m_grid.getStore();
-    		return (store != null)? store.getModels() : null;
-    	} else {
-    		return null;
-    	}
-    }
-    
+
+	public boolean isDirty() {
+		return m_dirty;
+	}
+
+	public List<GwtFirewallNatEntry> getCurrentConfigurations() {
+		if(m_grid != null) {
+			ListStore<GwtFirewallNatEntry> store = m_grid.getStore();
+			return (store != null)? store.getModels() : null;
+		} else {
+			return null;
+		}
+	}
+
 	private void initToolBar() {
 		m_natToolBar = new ToolBar();
 		m_natToolBar.setId("nat-toolbar");
-		
-		m_applyButton = new Button(MSGS.firewallApply(),
-        		AbstractImagePrototype.create(Resources.INSTANCE.accept()),
-                new SelectionListener<ButtonEvent>() {
-            		@Override
-            		public void componentSelected(ButtonEvent ce) {
-            			Log.debug("about to updateDeviceFirewallNats()");
-            			List<GwtFirewallNatEntry> updatedNatConf = getCurrentConfigurations();
 
-            			if(updatedNatConf != null) {
-            				Log.debug("got updatedNatsConf: " + updatedNatConf.size());
-            				mask(MSGS.applying());
-	            			gwtNetworkService.updateDeviceFirewallNATs(updatedNatConf, new AsyncCallback<Void>() {
-	            				public void onSuccess(Void result) {
+		m_applyButton = new Button(MSGS.firewallApply(),
+				AbstractImagePrototype.create(Resources.INSTANCE.accept()),
+				new SelectionListener<ButtonEvent>() {
+			@Override
+			public void componentSelected(ButtonEvent ce) {
+				Log.debug("about to updateDeviceFirewallNats()");
+				gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
+					@Override
+					public void onFailure(Throwable ex) {
+						FailureHandler.handle(ex);
+					}
+
+					@Override
+					public void onSuccess(GwtXSRFToken token) {	
+						List<GwtFirewallNatEntry> updatedNatConf = getCurrentConfigurations();
+
+						if(updatedNatConf != null) {
+							Log.debug("got updatedNatsConf: " + updatedNatConf.size());
+							mask(MSGS.applying());
+							gwtNetworkService.updateDeviceFirewallNATs(token, updatedNatConf, new AsyncCallback<Void>() {
+								public void onSuccess(Void result) {
 									Log.debug("updated!");
 									m_dirty = false;
 									m_applyButton.disable();
 									unmask();
 								}
-	            				
+
 								public void onFailure(Throwable caught) {
 									Log.debug("caught: " + caught.toString());
 									unmask();
 									FailureHandler.handle(caught);
 								}
-	            			});
-            			}
-            		}
-    	});
-		
+							});
+						}
+					}});
+			}
+		});
+
 		m_applyButton.disable();
 		m_natToolBar.add(m_applyButton);
 		m_natToolBar.add(new SeparatorToolItem());
-		
+
 		//
 		// New Open Port Button
 		m_newButton = new Button(MSGS.newButton(), 
-			    AbstractImagePrototype.create(Resources.INSTANCE.add()),
+				AbstractImagePrototype.create(Resources.INSTANCE.add()),
 				new SelectionListener<ButtonEvent>() {
 			@Override
 			public void componentSelected(ButtonEvent ce) {
@@ -227,7 +240,7 @@ public class NatConfigTab extends LayoutContainer {
 		//
 		// Edit Open Port Button
 		m_editButton = new Button(MSGS.editButton(), 
-			    AbstractImagePrototype.create(Resources.INSTANCE.edit()),
+				AbstractImagePrototype.create(Resources.INSTANCE.edit()),
 				new SelectionListener<ButtonEvent>() {
 			@Override
 			public void componentSelected(ButtonEvent ce) {
@@ -264,37 +277,37 @@ public class NatConfigTab extends LayoutContainer {
 		m_natToolBar.add(m_editButton);
 		m_natToolBar.add(new SeparatorToolItem());
 
-	    
+
 		//
 		// Delete Open Port Entry Button
 		m_deleteButton = new Button(MSGS.deleteButton(), 
-			    AbstractImagePrototype.create(Resources.INSTANCE.delete()),
+				AbstractImagePrototype.create(Resources.INSTANCE.delete()),
 				new SelectionListener<ButtonEvent>() {
 			@Override
 			public void componentSelected(ButtonEvent ce) {
-				
+
 				if (m_grid != null) {
-					
+
 					final GwtFirewallNatEntry firewallNatEntry = m_grid.getSelectionModel().getSelectedItem();
 					if (firewallNatEntry != null) {
 
 						// ask for confirmation						
 						MessageBox.confirm(MSGS.confirm(), MSGS.firewallNatDeleteConfirmation(firewallNatEntry.getInInterface()),
-							new Listener<MessageBoxEvent>() {  
-							    public void handleEvent(MessageBoxEvent ce) {
-							    	
-							    	Log.debug("Trying to delete: " + firewallNatEntry.getInInterface());
-							    	Log.debug("Button " + ce.getButtonClicked().getText());
-							    	
-							    	if(ce.getButtonClicked().getText().equals("Yes")) {
-							    		m_grid.getStore().remove(firewallNatEntry);
-							    		m_applyButton.enable();
-							    		m_dirty = true;
-										//fireEvent(Events.Change);
-							    	}
-							    }
+								new Listener<MessageBoxEvent>() {  
+							public void handleEvent(MessageBoxEvent ce) {
+
+								Log.debug("Trying to delete: " + firewallNatEntry.getInInterface());
+								Log.debug("Button " + ce.getButtonClicked().getText());
+
+								if(ce.getButtonClicked().getText().equals("Yes")) {
+									m_grid.getStore().remove(firewallNatEntry);
+									m_applyButton.enable();
+									m_dirty = true;
+									//fireEvent(Events.Change);
+								}
 							}
-						);
+						}
+								);
 					}
 				}
 			}
@@ -302,84 +315,93 @@ public class NatConfigTab extends LayoutContainer {
 		m_deleteButton.setEnabled(false);
 		m_natToolBar.add(m_deleteButton);
 	}
-	
+
 	private void initGrid() {
 		//
 		// Column Configuration
 		ColumnConfig column = null;
 		List<ColumnConfig> configs = new ArrayList<ColumnConfig>();
-		
+
 		column = new ColumnConfig("inInterface", MSGS.firewallNatInInterface(), 60);
 		column.setAlignment(HorizontalAlignment.CENTER);
 		configs.add(column);
-		
+
 		column = new ColumnConfig("outInterface", MSGS.firewallNatOutInterface(), 60);
 		column.setAlignment(HorizontalAlignment.CENTER);
 		configs.add(column);
-		
+
 		column = new ColumnConfig("protocol", MSGS.firewallNatProtocol(), 60);
 		column.setAlignment(HorizontalAlignment.CENTER);
 		configs.add(column);
-		
+
 		column = new ColumnConfig("sourceNetwork", MSGS.firewallNatSourceNetwork(), 120);
 		column.setAlignment(HorizontalAlignment.CENTER);
 		configs.add(column);
-		
+
 		column = new ColumnConfig("destinationNetwork", MSGS.firewallNatDestinationNetwork(), 120);
 		column.setAlignment(HorizontalAlignment.CENTER);
 		configs.add(column);
-		
+
 		column = new ColumnConfig("masquerade", MSGS.firewallNatMasquerade(), 60);
 		column.setAlignment(HorizontalAlignment.CENTER);
 		configs.add(column);
-		
+
 		// rpc data proxy  
 		RpcProxy<ListLoadResult<GwtFirewallNatEntry>> proxy = new RpcProxy<ListLoadResult<GwtFirewallNatEntry>>() {
 			@Override
-			protected void load(Object loadConfig, AsyncCallback<ListLoadResult<GwtFirewallNatEntry>> callback) {
-				gwtNetworkService.findDeficeFirewallNATs(callback);
+			protected void load(Object loadConfig, final AsyncCallback<ListLoadResult<GwtFirewallNatEntry>> callback) {
+				gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
+					@Override
+					public void onFailure(Throwable ex) {
+						FailureHandler.handle(ex);
+					}
+
+					@Override
+					public void onSuccess(GwtXSRFToken token) {	
+						gwtNetworkService.findDeficeFirewallNATs(token, callback);
+					}});
 			}
 		};
-        
-        m_loader = new BaseListLoader<ListLoadResult<GwtFirewallNatEntry>>(proxy);
-        m_loader.setSortDir(SortDir.DESC);  
-        m_loader.setSortField("inInterface"); 
-        
-        SwappableListStore<GwtFirewallNatEntry> m_store = new SwappableListStore<GwtFirewallNatEntry>(m_loader);
-        m_store.setKeyProvider( new ModelKeyProvider<GwtFirewallNatEntry>() {            
-            public String getKey(GwtFirewallNatEntry firewallNatEntry) {
-                return firewallNatEntry.getInInterface();
-            }
-        });
-        
-        m_grid = new Grid<GwtFirewallNatEntry>(m_store, new ColumnModel(configs));
-        m_grid.setBorders(false);
-        m_grid.setStateful(false);
-        m_grid.setLoadMask(true);
-        m_grid.setStripeRows(true);
-        m_grid.setAutoExpandColumn("inInterface");
-        m_grid.getView().setAutoFill(true);
-        
-        m_loader.addLoadListener(new DataLoadListener(m_grid));
 
-        GridSelectionModel<GwtFirewallNatEntry> selectionModel = new GridSelectionModel<GwtFirewallNatEntry>();
-        selectionModel.setSelectionMode(SelectionMode.SINGLE);
-        m_grid.setSelectionModel(selectionModel);
-        m_grid.getSelectionModel().addSelectionChangedListener(new SelectionChangedListener<GwtFirewallNatEntry>() {
-            @Override
-            public void selectionChanged(SelectionChangedEvent<GwtFirewallNatEntry> se) {
-                m_selectedEntry = se.getSelectedItem();
-                if (m_selectedEntry != null) {
-                	m_editButton.setEnabled(true);
-                	m_deleteButton.setEnabled(true);
-                } else {
-                	m_editButton.setEnabled(false);
-                	m_deleteButton.setEnabled(false);                 
-                }
-            }
-        });
+		m_loader = new BaseListLoader<ListLoadResult<GwtFirewallNatEntry>>(proxy);
+		m_loader.setSortDir(SortDir.DESC);  
+		m_loader.setSortField("inInterface"); 
+
+		SwappableListStore<GwtFirewallNatEntry> m_store = new SwappableListStore<GwtFirewallNatEntry>(m_loader);
+		m_store.setKeyProvider( new ModelKeyProvider<GwtFirewallNatEntry>() {            
+			public String getKey(GwtFirewallNatEntry firewallNatEntry) {
+				return firewallNatEntry.getInInterface();
+			}
+		});
+
+		m_grid = new Grid<GwtFirewallNatEntry>(m_store, new ColumnModel(configs));
+		m_grid.setBorders(false);
+		m_grid.setStateful(false);
+		m_grid.setLoadMask(true);
+		m_grid.setStripeRows(true);
+		m_grid.setAutoExpandColumn("inInterface");
+		m_grid.getView().setAutoFill(true);
+
+		m_loader.addLoadListener(new DataLoadListener(m_grid));
+
+		GridSelectionModel<GwtFirewallNatEntry> selectionModel = new GridSelectionModel<GwtFirewallNatEntry>();
+		selectionModel.setSelectionMode(SelectionMode.SINGLE);
+		m_grid.setSelectionModel(selectionModel);
+		m_grid.getSelectionModel().addSelectionChangedListener(new SelectionChangedListener<GwtFirewallNatEntry>() {
+			@Override
+			public void selectionChanged(SelectionChangedEvent<GwtFirewallNatEntry> se) {
+				m_selectedEntry = se.getSelectedItem();
+				if (m_selectedEntry != null) {
+					m_editButton.setEnabled(true);
+					m_deleteButton.setEnabled(true);
+				} else {
+					m_editButton.setEnabled(false);
+					m_deleteButton.setEnabled(false);                 
+				}
+			}
+		});
 	}
-	
+
 	private class DataLoadListener extends LoadListener {
 		private Grid<GwtFirewallNatEntry> m_grid;
 		private GwtFirewallNatEntry m_selectedEntry;
@@ -408,19 +430,19 @@ public class NatConfigTab extends LayoutContainer {
 			}
 		}
 	}
-	 
+
 	private boolean duplicateEntry(GwtFirewallNatEntry firewallNatEntry) {
 
 		boolean isDuplicateEntry = false;
 		List<GwtFirewallNatEntry> entries = m_grid.getStore().getModels();
 		if (entries != null && firewallNatEntry != null) {
 			for (GwtFirewallNatEntry entry : entries) {
-				
+
 				String sourceNetwork = (entry.getSourceNetwork() != null)? entry.getSourceNetwork() : "0.0.0.0/0"; 
 				String destinationNetwork = (entry.getDestinationNetwork() != null)? entry.getDestinationNetwork() : "0.0.0.0/0";
 				String newSourceNetwork = (firewallNatEntry.getSourceNetwork() != null)? firewallNatEntry.getSourceNetwork() : "0.0.0.0/0";
 				String newDestinationNetwork = (firewallNatEntry.getDestinationNetwork() != null)? firewallNatEntry.getDestinationNetwork() : "0.0.0.0/0";
-				
+
 				if (entry.getInInterface().equals(firewallNatEntry.getInInterface())
 						&& entry.getOutInterface().equals(firewallNatEntry.getOutInterface())
 						&& entry.getProtocol().equals(firewallNatEntry.getProtocol())
@@ -431,7 +453,7 @@ public class NatConfigTab extends LayoutContainer {
 				}
 			}
 		}
-		
+
 		return isDuplicateEntry;
 	}
 }

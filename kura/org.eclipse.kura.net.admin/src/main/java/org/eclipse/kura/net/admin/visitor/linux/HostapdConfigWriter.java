@@ -11,12 +11,9 @@
  */
 package org.eclipse.kura.net.admin.visitor.linux;
 
-import java.io.BufferedInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.PrintWriter;
 import java.util.List;
 
@@ -26,7 +23,10 @@ import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.net.NetworkConfiguration;
 import org.eclipse.kura.core.net.NetworkConfigurationVisitor;
 import org.eclipse.kura.core.net.WifiInterfaceAddressConfigImpl;
+import org.eclipse.kura.core.util.IOUtil;
 import org.eclipse.kura.core.util.ProcessUtil;
+import org.eclipse.kura.core.util.SafeProcess;
+import org.eclipse.kura.linux.net.util.KuraConstants;
 import org.eclipse.kura.linux.net.wifi.Hostapd;
 import org.eclipse.kura.net.NetConfig;
 import org.eclipse.kura.net.NetConfigIP4;
@@ -34,10 +34,12 @@ import org.eclipse.kura.net.NetInterfaceAddressConfig;
 import org.eclipse.kura.net.NetInterfaceConfig;
 import org.eclipse.kura.net.NetInterfaceStatus;
 import org.eclipse.kura.net.NetInterfaceType;
+import org.eclipse.kura.net.wifi.WifiCiphers;
 import org.eclipse.kura.net.wifi.WifiConfig;
 import org.eclipse.kura.net.wifi.WifiMode;
 import org.eclipse.kura.net.wifi.WifiRadioMode;
 import org.eclipse.kura.net.wifi.WifiSecurity;
+import org.osgi.framework.FrameworkUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,9 +49,18 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
 	
 	private static final String HEXES = "0123456789ABCDEF";
 	
-	private static final String HOSTAPD_CONFIG_FILE = "/etc/hostapd.conf";
-	
+	private static String HOSTAPD_CONFIG_FILE = null;
 	private static final String HOSTAPD_TMP_CONFIG_FILE = "/etc/hostapd.conf.tmp";
+	
+	private static final String OS_VERSION = System.getProperty("kura.os.version");
+	
+	static {
+		if (OS_VERSION.equals(KuraConstants.Intel_Edison.getImageName() + "_" + KuraConstants.Intel_Edison.getImageVersion() + "_" + KuraConstants.Intel_Edison.getTargetName())) {
+			HOSTAPD_CONFIG_FILE = "/etc/hostapd/hostapd.conf";
+		} else {
+			HOSTAPD_CONFIG_FILE = "/etc/hostapd.conf";
+		}
+	}
 	
 	private static HostapdConfigWriter s_instance;
 	
@@ -143,10 +154,9 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
 		if (wifiConfig.getSecurity() == WifiSecurity.SECURITY_NONE) {
 			
 			File outputFile = new File(HOSTAPD_TMP_CONFIG_FILE);
-			InputStream is = getClass().getResourceAsStream("/src/main/resources/wifi/hostapd.conf_no_security");
 			
-			//relace the necessary components
-			String fileAsString = readInputStreamAsString(is);
+			//replace the necessary components
+			String fileAsString = IOUtil.readResource(FrameworkUtil.getBundle(getClass()), "/src/main/resources/wifi/hostapd.conf_no_security");
 			if(interfaceName != null) {
 				fileAsString = fileAsString.replaceFirst("KURA_INTERFACE", interfaceName);
 			} else {
@@ -222,10 +232,9 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
 			return;
 		} else if(wifiConfig.getSecurity() == WifiSecurity.SECURITY_WEP) {
 			File outputFile = new File(HOSTAPD_TMP_CONFIG_FILE);
-			InputStream is = this.getClass().getResourceAsStream("/src/main/resources/wifi/hostapd.conf_wep");
-			
-			//relace the necessary components
-			String fileAsString = readInputStreamAsString(is);
+
+			//replace the necessary components
+			String fileAsString = IOUtil.readResource(FrameworkUtil.getBundle(getClass()), "/src/main/resources/wifi/hostapd.conf_wep");
 			if(interfaceName != null) {
 				fileAsString = fileAsString.replaceFirst("KURA_INTERFACE", interfaceName);
 			} else {
@@ -355,19 +364,24 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
 			
 			return;
 		} else if ((wifiConfig.getSecurity() == WifiSecurity.SECURITY_WPA)
-				|| (wifiConfig.getSecurity() == WifiSecurity.SECURITY_WPA2)) {
+				|| (wifiConfig.getSecurity() == WifiSecurity.SECURITY_WPA2)
+				|| (wifiConfig.getSecurity() == WifiSecurity.SECURITY_WPA_WPA2)) {
 
 		    File tmpOutputFile = new File(HOSTAPD_TMP_CONFIG_FILE);
 			
-			InputStream is = null;
+		    /*
+			String resName = null;
 			if (wifiConfig.getSecurity() == WifiSecurity.SECURITY_WPA) {
-				is = this.getClass().getResourceAsStream("/src/main/resources/wifi/hostapd.conf_master_wpa_psk");
+				resName = "/src/main/resources/wifi/hostapd.conf_master_wpa_psk";
 			} else if (wifiConfig.getSecurity() == WifiSecurity.SECURITY_WPA2) {
-				is = this.getClass().getResourceAsStream("/src/main/resources/wifi/hostapd.conf_master_wpa2_psk");
+				resName = "/src/main/resources/wifi/hostapd.conf_master_wpa2_psk";
 			}
+			*/
+		    String resName = "/src/main/resources/wifi/hostapd.conf_master_wpa_wpa2_psk";
 			
 			//replace the necessary components
-			String fileAsString = readInputStreamAsString(is);
+			String fileAsString = IOUtil.readResource(FrameworkUtil.getBundle(getClass()), resName);
+			
 			if(interfaceName != null) {
 				fileAsString = fileAsString.replaceFirst("KURA_INTERFACE", interfaceName);
 			} else {
@@ -427,6 +441,28 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
 			} else {
 				throw KuraException.internalError("the channel must be between 1 (inclusive) and 11 (inclusive) or 1 (inclusive) and 13 (inclusive) depending on your locale");
 			}
+			
+			if (wifiConfig.getSecurity() == WifiSecurity.SECURITY_WPA) {
+				fileAsString = fileAsString.replaceFirst("KURA_SECURITY", "1");
+			} else if ((wifiConfig.getSecurity() == WifiSecurity.SECURITY_WPA2)) {
+				fileAsString = fileAsString.replaceFirst("KURA_SECURITY", "2");
+			} else if (wifiConfig.getSecurity() == WifiSecurity.SECURITY_WPA_WPA2) {
+				fileAsString = fileAsString.replaceFirst("KURA_SECURITY", "3");
+			} else {
+				throw KuraException.internalError("invalid WiFi Security");
+			}
+			
+			WifiCiphers wifiCiphers = wifiConfig.getPairwiseCiphers();
+			if (wifiCiphers == WifiCiphers.TKIP) {
+				fileAsString = fileAsString.replaceFirst("KURA_PAIRWISE_CIPHER", "TKIP");
+			} else if (wifiCiphers == WifiCiphers.CCMP) {
+				fileAsString = fileAsString.replaceFirst("KURA_PAIRWISE_CIPHER", "CCMP");
+			} else if (wifiCiphers == WifiCiphers.CCMP_TKIP) {
+				fileAsString = fileAsString.replaceFirst("KURA_PAIRWISE_CIPHER", "CCMP TKIP");
+			} else {
+				throw KuraException.internalError("invalid WiFi Pairwise Ciphers");
+			}
+			
 			if(wifiConfig.getPasskey() != null && wifiConfig.getPasskey().trim().length() > 0) {
 				if((wifiConfig.getPasskey().length() < 8) || (wifiConfig.getPasskey().length() > 63)) {
 					throw KuraException.internalError("the WPA passphrase (passwd) must be between 8 (inclusive) and 63 (inclusive) characters in length: " + wifiConfig.getPasskey());
@@ -457,37 +493,33 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
 		}
 	}
 	
-	/*
-	 * This method reads supplied input stream into a string
-	 */
-	private static String readInputStreamAsString(InputStream is) throws IOException {
-		BufferedInputStream bis = new BufferedInputStream(is);
-		ByteArrayOutputStream buf = new ByteArrayOutputStream();
-		int result = bis.read();
-		while(result != -1) {
-			byte b = (byte)result;
-			buf.write(b);
-			result = bis.read();
-		}
-		return buf.toString();
-	}
 	
 	/*
 	 * This method copies supplied String to a file
 	 */
 	private void copyFile(String data, File destination) throws KuraException {
+		FileOutputStream fos = null;
+		PrintWriter pw = null;
 		try {
-			FileOutputStream fos = new FileOutputStream(destination);
-			PrintWriter pw = new PrintWriter(fos);
+			fos = new FileOutputStream(destination);
+			pw = new PrintWriter(fos);
 			pw.write(data);
 			pw.flush();
 			fos.getFD().sync();
-			pw.close();
-			fos.close();
 			
 			setPermissions(destination.toString());
 		} catch (IOException e) {
 			throw KuraException.internalError(e);
+		}
+		finally{
+			if(fos != null){
+				try{
+					fos.close();
+				}catch(IOException ex){
+					s_logger.error("I/O Exception while closing BufferedReader!");
+				}
+			}	
+			if(pw != null) pw.close();
 		}
 	}
 	
@@ -510,8 +542,8 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
 	 * This method sets permissions to hostapd configuration file 
 	 */
 	private void setPermissions(String fileName) throws KuraException {
-		Process procDos = null;
-		Process procChmod = null;
+		SafeProcess procDos = null;
+		SafeProcess procChmod = null;
 		try {
 			procChmod = ProcessUtil.exec("chmod 600 " + fileName);
 			procChmod.waitFor();
@@ -522,8 +554,8 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
 			throw KuraException.internalError(e);
 		}
 		finally {
-			ProcessUtil.destroy(procChmod);
-			ProcessUtil.destroy(procDos);			
+			if (procChmod != null) ProcessUtil.destroy(procChmod);
+			if (procDos != null) ProcessUtil.destroy(procDos);			
 		}
 	}
 	

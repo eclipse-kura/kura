@@ -14,6 +14,7 @@ package org.eclipse.kura.linux.net.util;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.List;
 import java.util.Properties;
@@ -44,6 +45,7 @@ public class RedHatNetworkInterface extends GenericNetworkInterface {
 
         NetInterfaceConfig netInterfaceConfig = null;
 
+        FileInputStream fis = null;
 		try {
 			//build up the configuration
 			Properties kuraProps = new Properties();
@@ -52,7 +54,8 @@ public class RedHatNetworkInterface extends GenericNetworkInterface {
 			if(type == NetInterfaceType.ETHERNET || type == NetInterfaceType.WIFI || type == NetInterfaceType.LOOPBACK) {
 				if(kuraFile.exists()) {
 					//found our match so load the properties
-					kuraProps.load(new FileInputStream(kuraFile));
+					fis = new FileInputStream(kuraFile);
+					kuraProps.load(fis);
 	
 					s_logger.debug("getting args for " + interfaceName);
 					
@@ -72,7 +75,15 @@ public class RedHatNetworkInterface extends GenericNetworkInterface {
 		} catch (Exception e) {
 			s_logger.error("Error getting configuration for interface: " + interfaceName, e);
 		}
-
+		finally{
+			if(fis != null){
+				try{
+					fis.close();
+				}catch(IOException ex){
+					s_logger.error("I/O Exception while closing FileInputStream!");
+				}
+			}
+		}
         return netInterfaceConfig;
 	}
 	

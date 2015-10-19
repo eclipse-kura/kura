@@ -16,6 +16,8 @@ import java.io.File;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.linux.util.LinuxProcessUtil;
 import org.eclipse.kura.core.util.ProcessUtil;
+import org.eclipse.kura.core.util.SafeProcess;
+import org.eclipse.kura.linux.net.util.KuraConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,11 +25,22 @@ public class HostapdManager {
     
     private static Logger s_logger = LoggerFactory.getLogger(HostapdManager.class);
     
-    private static final File CONFIG_FILE = new File("/etc/hostapd.conf");
+private static final String OS_VERSION = System.getProperty("kura.os.version");
+	
+	private static String HOSTAPD_CONFIG_FILE_NAME = null;
+	static {
+		if (OS_VERSION.equals(KuraConstants.Intel_Edison.getImageName() + "_" + KuraConstants.Intel_Edison.getImageVersion() + "_" + KuraConstants.Intel_Edison.getTargetName())) {
+			HOSTAPD_CONFIG_FILE_NAME = "/etc/hostapd/hostapd.conf";
+		} else {
+			HOSTAPD_CONFIG_FILE_NAME = "/etc/hostapd.conf";
+		}
+	}
+    
+    private static final File CONFIG_FILE = new File(HOSTAPD_CONFIG_FILE_NAME);
     private static final String HOSTAPD_EXEC = "hostapd";
 
     public static void start() throws KuraException {
-        Process proc = null;
+        SafeProcess proc = null;
         
         if(!CONFIG_FILE.exists()) {
             throw KuraException.internalError("Config file does not exist: " + CONFIG_FILE.getAbsolutePath());
@@ -39,8 +52,8 @@ public class HostapdManager {
             }
             
             //start hostapd
-            String launchHostapdCommand = generateCommand();
-            s_logger.debug("starting hostapd --> " + launchHostapdCommand);
+            String launchHostapdCommand = generateStartCommand();
+            s_logger.debug("starting hostapd --> {}", launchHostapdCommand);
             proc = ProcessUtil.exec(launchHostapdCommand);
             if(proc.waitFor() != 0) {
                 s_logger.error("failed to start hostapd for unknown reason");
@@ -51,40 +64,56 @@ public class HostapdManager {
             throw KuraException.internalError(e);
         }
         finally {
-            ProcessUtil.destroy(proc);
+        	if (proc != null) ProcessUtil.destroy(proc);
         }
     }
     
     public static void stop() throws KuraException {
-        Process proc = null;
+        SafeProcess proc = null;
         try {
             //kill hostapd
             s_logger.debug("stopping hostapd");
-            proc = ProcessUtil.exec("killall hostapd");
+            proc = ProcessUtil.exec(generateStopCommand());
             proc.waitFor();
             Thread.sleep(1000);
         } catch(Exception e) {
             throw KuraException.internalError(e);
         }
         finally {
-            ProcessUtil.destroy(proc);
+        	if (proc != null) ProcessUtil.destroy(proc);
         }
     }
 
     public static boolean isRunning() throws KuraException {
         try {
             // Check if hostapd is running
-            int pid = LinuxProcessUtil.getPid(generateCommand());
+            //int pid = LinuxProcessUtil.getPid(generateCommand());
+        	String [] tokens = {HOSTAPD_CONFIG_FILE_NAME};
+        	int pid = LinuxProcessUtil.getPid("hostapd", tokens);
+        	s_logger.trace("isRunning() :: pid={}", pid);
             return (pid > -1);
         } catch (Exception e) {
             throw KuraException.internalError(e);
         }
     }
     
-    private static String generateCommand() {
-        StringBuilder cmd = new StringBuilder(HOSTAPD_EXEC);
-        cmd.append(" -B ").append(CONFIG_FILE.getAbsolutePath());
-        
+    private static String generateStartCommand() {
+        StringBuilder cmd = new StringBuilder();
+        if (OS_VERSION.equals(KuraConstants.Intel_Edison.getImageName() + "_" + KuraConstants.Intel_Edison.getImageVersion() + "_" + KuraConstants.Intel_Edison.getTargetName())) {
+        	cmd.append("systemctl start hostapd");
+        } else {
+        	cmd.append(HOSTAPD_EXEC).append(" -B ").append(CONFIG_FILE.getAbsolutePath());
+        }
         return cmd.toString();
+    }
+    
+    private static String generateStopCommand() {
+    	 StringBuilder cmd = new StringBuilder();
+    	 if (OS_VERSION.equals(KuraConstants.Intel_Edison.getImageName() + "_" + KuraConstants.Intel_Edison.getImageVersion() + "_" + KuraConstants.Intel_Edison.getTargetName())) {
+    		 cmd.append("systemctl stop hostapd");
+         } else {
+         	cmd.append("killall hostapd");
+         }
+    	 return cmd.toString();
     }
 }

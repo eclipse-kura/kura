@@ -2,13 +2,15 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: org.eclipse.kura.linux.usb
 Bundle-SymbolicName: org.eclipse.kura.linux.usb;singleton:=true
-Bundle-Version: 1.0.2.qualifier
+Bundle-Version: 1.0.7.qualifier
 Bundle-Vendor: EUROTECH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Service-Component: OSGI-INF/*.xml
 Bundle-ClassPath: .
 Bundle-ActivationPolicy: lazy
-Bundle-NativeCode: lib/linux/x86/libEurotechLinuxUdev.so; osname=Linux; processor=x86,
+Bundle-NativeCode: lib/linux/x86_64_32jvm/libEurotechLinuxUdev.so; osname=Linux; selection-filter="(&(kura.arch=x86_64) (kura.os.version=yocto_1.6.1_edison))",
+ lib/linux/x86_ubuntu/libEurotechLinuxUdev.so; osname=Linux; processor=x86; selection-filter="(&(kura.os.version=ubuntu_14.04))",
+ lib/linux/x86/libEurotechLinuxUdev.so; osname=Linux; processor=x86,
  lib/linux/x86_64/libEurotechLinuxUdev.so; osname=Linux; processor=x86-64,
  lib/linux/armv6_hf/libEurotechLinuxUdev.so; osname=Linux; processor=ARM; selection-filter="(&(kura.arch=armv7_hf))",
  lib/linux/armv5_sf/libEurotechLinuxUdev.so; osname=Linux; processor=ARM; selection-filter="(&(kura.arch=armv7_sf))",
@@ -16,17 +18,12 @@ Bundle-NativeCode: lib/linux/x86/libEurotechLinuxUdev.so; osname=Linux; processo
  lib/linux/armv5_sf/libEurotechLinuxUdev.so; osname=Linux; processor=ARM; selection-filter="(&(kura.arch=armv6_sf))",
  lib/linux/armv5_sf/libEurotechLinuxUdev.so; osname=Linux; processor=ARM; selection-filter="(&(kura.arch=armv5_sf))",
  *
-Import-Package: com.ibm.jusb;version="1.0.2",
- com.ibm.jusb.event;version="1.0.2",
- com.ibm.jusb.os;version="1.0.2",
- com.ibm.jusb.util;version="1.0.2",
- javax.usb;version="1.0.2",
+Import-Package:  javax.usb;version="1.0.2",
  javax.usb.event;version="1.0.2",
  javax.usb.util;version="1.0.2",
- org.eclipse.kura; version="[1.0,2.0)",
- org.eclipse.kura.linux.udev,
- org.eclipse.kura.usb; version="[1.0,1.2)",
+ org.eclipse.kura;version="[1.0,2.0)",
+ org.eclipse.kura.linux.udev;version="[1.0,1.1)",
+ org.eclipse.kura.usb;version="[1.1,1.2)",
  org.osgi.service.component;version="1.2.0",
  org.osgi.service.event;version="1.3.0",
  org.slf4j;version="1.6.4"
-

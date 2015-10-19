@@ -57,5 +57,5 @@
               policy="static" 
               bind="setEventAdmin" 
               unbind="unsetEventAdmin"
-              interface="org.osgi.service.event.EventAdmin"/>
+              interface="org.osgi.service.event.EventAdmin"/> 	
 </scr:component>

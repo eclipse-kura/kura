@@ -22,6 +22,7 @@ import java.io.InputStreamReader;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.util.ProcessUtil;
+import org.eclipse.kura.core.util.SafeProcess;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,7 +40,6 @@ public class EthTool implements LinkTool {
 	private static final String DUPLEX = "Duplex:";
 	private static final String SPEED = "Speed:";
 	
-	private String tool = null;
 	private String ifaceName = null; 
 	private boolean linkDetected = false;
 	private int speed = 0; // in b/s
@@ -50,8 +50,7 @@ public class EthTool implements LinkTool {
 	 * 
 	 * @param ifaceName - interface name as {@link String}
 	 */
-	public EthTool (String tool, String ifaceName) {
-		this.tool = tool;
+	public EthTool (String ifaceName) {
 		this.ifaceName = ifaceName;
 	}
 	
@@ -60,10 +59,13 @@ public class EthTool implements LinkTool {
 	 * @see org.eclipse.kura.util.net.service.ILinkTool#get()
 	 */
 	public boolean get () throws KuraException {
-		Process proc = null;
+		SafeProcess proc = null;
+		BufferedReader br = null;
+		boolean result = false;
 		try {
-			proc = ProcessUtil.exec(tool + " " + this.ifaceName);			
-			BufferedReader br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+			proc = ProcessUtil.exec("ethtool " + this.ifaceName);	
+			result = (proc.waitFor() == 0)? true : false;
+			br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
 			String line = null;
 			int ind = -1;
 		    while((line = br.readLine()) != null) {
@@ -84,16 +86,24 @@ public class EthTool implements LinkTool {
 		    		}
 		    	}
 		    }
-		    
-		    return (proc.waitFor() == 0)? true : false;
 		} catch(IOException e) {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
 		} catch (InterruptedException e) {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
 		}
 		finally {
-			ProcessUtil.destroy(proc);
+			if(br != null){
+				try{
+					br.close();
+				}catch(IOException ex){
+					s_logger.error("I/O Exception while closing BufferedReader!");
+				}
+			}			
+		
+			if (proc != null) ProcessUtil.destroy(proc);
 		}
+		
+		return result;
 	}
 
 	/*
@@ -126,5 +136,10 @@ public class EthTool implements LinkTool {
 	 */
 	public String getDuplex() {
 		return this.duplex;
+	}
+
+	@Override
+	public int getSignal() {
+		return 0;
 	}
 }

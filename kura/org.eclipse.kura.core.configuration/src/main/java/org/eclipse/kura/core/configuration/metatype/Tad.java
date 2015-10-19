@@ -24,14 +24,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAnyAttribute;
-import javax.xml.bind.annotation.XmlAnyElement;
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlType;
 import javax.xml.namespace.QName;
 
 import org.eclipse.kura.configuration.metatype.AD;
@@ -70,37 +62,20 @@ import org.w3c.dom.Element;
  * 
  * 
  */
-@XmlRootElement(name="AD", namespace="http://www.osgi.org/xmlns/metatype/v1.2.0")
-@XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "Tad", propOrder = {
-    "option",
-    "any"
-})
+
 public class Tad implements AD
 {
-    @XmlElement(name = "Option", namespace="http://www.osgi.org/xmlns/metatype/v1.2.0")
     protected List<Toption> option;
-    @XmlAnyElement(lax = true)
     protected List<Object> any;
-    @XmlAttribute(name = "name")
     protected String name;
-    @XmlAttribute(name = "description")
     protected String description;
-    @XmlAttribute(name = "id", required = true)
     protected String id;
-    @XmlAttribute(name = "type", required = true)
     protected Tscalar type;
-    @XmlAttribute(name = "cardinality")
     protected Integer cardinality;
-    @XmlAttribute(name = "min")
     protected String min;
-    @XmlAttribute(name = "max")
     protected String max;
-    @XmlAttribute(name = "default")
     protected String _default;
-    @XmlAttribute(name = "required")
     protected Boolean required;
-    @XmlAnyAttribute
     private Map<QName, String> otherAttributes = new HashMap<QName, String>();
 
     /**
@@ -125,11 +100,19 @@ public class Tad implements AD
      * 
      * 
      */
-    public List<Option> getOption() {
+    @SuppressWarnings("unchecked")
+	public List<Option> getOption() {
         if (option == null) {
             option = new ArrayList<Toption>();
         }
-        return new ArrayList<Option>(this.option);
+        return (List<Option>)(List<?>) this.option;
+    }
+    
+    public void setOption(Toption o) {
+        if (option == null) {
+            option = new ArrayList<Toption>();
+        }
+        option.add(o);
     }
 
     /**

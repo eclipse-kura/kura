@@ -18,15 +18,17 @@ package org.eclipse.kura.core.linux.util;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import org.eclipse.kura.core.util.SafeProcess;
+
 public class ProcessStats {
 
-	private Process m_process;
+	private SafeProcess m_process;
 	
-	public ProcessStats (Process proc) {
+	public ProcessStats (SafeProcess proc) {
 		m_process = proc;
 	}
 	
-	public Process getProcess() {
+	public SafeProcess getProcess() {
 		return m_process;
 	}
 

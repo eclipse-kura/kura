@@ -24,14 +24,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAnyAttribute;
-import javax.xml.bind.annotation.XmlAnyElement;
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlType;
 import javax.xml.namespace.QName;
 
 import org.eclipse.kura.configuration.metatype.Designate;
@@ -64,29 +56,16 @@ import org.w3c.dom.Element;
  * 
  * 
  */
-@XmlRootElement(name="Designate", namespace="http://www.osgi.org/xmlns/metatype/v1.2.0")
-@XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "Tdesignate", propOrder = {
-    "object",
-    "any"
-})
+
 public class Tdesignate implements Designate 
 {
-    @XmlElement(name = "Object", namespace="http://www.osgi.org/xmlns/metatype/v1.2.0", required = true)
     protected Tobject object;
-    @XmlAnyElement(lax = true)
     protected List<Object> any;
-    @XmlAttribute(name = "pid")
     protected String pid;
-    @XmlAttribute(name = "factoryPid")
     protected String factoryPid;
-    @XmlAttribute(name = "bundle")
     protected String bundle;
-    @XmlAttribute(name = "optional")
     protected Boolean optional;
-    @XmlAttribute(name = "merge")
     protected Boolean merge;
-    @XmlAnyAttribute
     private Map<QName, String> otherAttributes = new HashMap<QName, String>();
 
     /**

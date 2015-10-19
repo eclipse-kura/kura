@@ -13,6 +13,7 @@ package org.eclipse.kura.core.data.transport.mqtt;
 
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -27,11 +28,15 @@ import org.eclipse.kura.KuraTooManyInflightMessagesException;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.core.data.transport.mqtt.MqttClientConfiguration.PersistenceType;
 import org.eclipse.kura.core.util.ValidationUtil;
+import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.data.DataTransportListener;
 import org.eclipse.kura.data.DataTransportService;
 import org.eclipse.kura.data.DataTransportToken;
 import org.eclipse.kura.ssl.SslManagerService;
 import org.eclipse.kura.ssl.SslServiceListener;
+import org.eclipse.kura.status.CloudConnectionStatusComponent;
+import org.eclipse.kura.status.CloudConnectionStatusEnum;
+import org.eclipse.kura.status.CloudConnectionStatusService;
 import org.eclipse.kura.system.SystemService;
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.IMqttToken;
@@ -49,26 +54,26 @@ import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class MqttDataTransport implements DataTransportService, MqttCallback,
-		ConfigurableComponent, SslServiceListener {
-	private static final Logger s_logger = LoggerFactory
-			.getLogger(MqttDataTransport.class);
+public class MqttDataTransport implements DataTransportService, MqttCallback, ConfigurableComponent, SslServiceListener, CloudConnectionStatusComponent {
+	private static final Logger s_logger = LoggerFactory.getLogger(MqttDataTransport.class);
 
 	private static final String MQTT_SCHEME = "mqtt://";
 	private static final String MQTTS_SCHEME = "mqtts://";
 	// TODO: add mqtt+ssl for secure mqtt
 
 	private static final String TOPIC_PATTERN = "#([^\\s/]+)"; // '#' followed
-																// by one or
-																// more
-																// non-whitespace
-																// but not the
-																// '/'
-	private static final Pattern s_topicPattern = Pattern
-			.compile(TOPIC_PATTERN);
+	// by one or
+	// more
+	// non-whitespace
+	// but not the
+	// '/'
+	private static final Pattern s_topicPattern = Pattern.compile(TOPIC_PATTERN);
 
 	private SystemService m_systemService;
 	private SslManagerService m_sslManagerService;
+	private CloudConnectionStatusService m_cloudConnectionStatusService;
+	
+	private CloudConnectionStatusEnum m_notificationStatus = CloudConnectionStatusEnum.OFF;
 
 	private MqttAsyncClient m_mqttClient;
 
@@ -84,6 +89,8 @@ public class MqttDataTransport implements DataTransportService, MqttCallback,
 	private Map<String, String> m_topicContext = new HashMap<String, String>();
 	private Map<String, Object> m_properties = new HashMap<String, Object>();
 
+	private CryptoService m_cryptoService;
+
 	private static final String MQTT_BROKER_URL_PROP_NAME = "broker-url";
 	private static final String MQTT_USERNAME_PROP_NAME = "username";
 	private static final String MQTT_PASSWORD_PROP_NAME = "password";
@@ -91,7 +98,7 @@ public class MqttDataTransport implements DataTransportService, MqttCallback,
 	private static final String MQTT_KEEP_ALIVE_PROP_NAME = "keep-alive";
 	private static final String MQTT_CLEAN_SESSION_PROP_NAME = "clean-session";
 	private static final String MQTT_TIMEOUT_PROP_NAME = "timeout"; // All
-																	// timeouts
+	// timeouts
 	private static final String MQTT_DEFAULT_VERSION_PROP_NAME = "protocol-version";
 
 	private static final String MQTT_LWT_QOS_PROP_NAME = "lwt.qos";
@@ -128,31 +135,62 @@ public class MqttDataTransport implements DataTransportService, MqttCallback,
 		this.m_sslManagerService = null;
 	}
 
+	public void setCryptoService(CryptoService cryptoService) {
+		this.m_cryptoService = cryptoService;
+	}
+
+	public void unsetCryptoService(CryptoService cryptoService) {
+		this.m_cryptoService = null;
+	}
+	
+	public void setCloudConnectionStatusService(CloudConnectionStatusService cloudConnectionStatusService) {
+		this.m_cloudConnectionStatusService = cloudConnectionStatusService;
+	}
+
+	public void unsetCloudConnectionStatusService(CloudConnectionStatusService cloudConnectionStatusService) {
+		this.m_cloudConnectionStatusService = null;
+	}
+	
 	// ----------------------------------------------------------------
 	//
 	// Activation APIs
 	//
 	// ----------------------------------------------------------------
 
-	protected void activate(ComponentContext componentContext,
-			Map<String, Object> properties) {
+	protected void activate(ComponentContext componentContext, Map<String, Object> properties) {
 		s_logger.info("Activating...");
-
+		
 		// We need to catch the configuration exception and activate anyway.
 		// Otherwise the ConfigurationService will not be able to track us.
-		m_properties.putAll(properties);
+		HashMap<String, Object> decryptedPropertiesMap = new HashMap<String, Object>();
+
+		Iterator<String> keys = properties.keySet().iterator();
+		while (keys.hasNext()) {
+			String key = keys.next();
+			Object value = properties.get(key);
+			if (key.equals(MQTT_PASSWORD_PROP_NAME)) {
+				try {
+					char[] decryptedPassword = m_cryptoService.decryptAes(((String) value).toCharArray());
+					decryptedPropertiesMap.put(key, decryptedPassword);
+				} catch (Exception e) {
+					s_logger.info("Password is not encrypted");
+					decryptedPropertiesMap.put(key, ((String) value).toCharArray());
+				}
+			} else {
+				decryptedPropertiesMap.put(key, value);
+			}
+		}
+
+		m_properties.putAll(decryptedPropertiesMap);
 		try {
 			m_clientConf = buildConfiguration(m_properties);
 			setupMqttSession();
 		} catch (RuntimeException e) {
-			s_logger.error(
-					"Invalid client configuration. Service will not be able to connect until the configuration is updated",
-					e);
+			s_logger.error("Invalid client configuration. Service will not be able to connect until the configuration is updated", e);			
 		}
 
 		ServiceTracker<DataTransportListener, DataTransportListener> listenersTracker = new ServiceTracker<DataTransportListener, DataTransportListener>(
-				componentContext.getBundleContext(),
-				DataTransportListener.class, null);
+				componentContext.getBundleContext(), DataTransportListener.class, null);
 
 		// Deferred open of tracker to prevent
 		// java.lang.Exception: Recursive invocation of
@@ -182,12 +220,31 @@ public class MqttDataTransport implements DataTransportService, MqttCallback,
 
 	public void updated(Map<String, Object> properties) {
 		s_logger.info("Updating...");
-
+		
 		m_properties.clear();
-		m_properties.putAll(properties);
+
+		HashMap<String, Object> decryptedPropertiesMap = new HashMap<String, Object>();
+
+		Iterator<String> keys = properties.keySet().iterator();
+		while (keys.hasNext()) {
+			String key = keys.next();
+			Object value = properties.get(key);
+			if (key.equals(MQTT_PASSWORD_PROP_NAME)) {
+				try {
+					char[] decryptedPassword = m_cryptoService.decryptAes(((String) value).toCharArray());
+					decryptedPropertiesMap.put(key, decryptedPassword);
+				} catch (Exception e) {
+					s_logger.info("Password is not encrypted");
+					decryptedPropertiesMap.put(key, ((String) value).toCharArray());
+				}
+			} else {
+				decryptedPropertiesMap.put(key, value);
+			}
+		}
+
+		m_properties.putAll(decryptedPropertiesMap);
 
 		update();
-
 	}
 
 	private void update() {
@@ -236,52 +293,36 @@ public class MqttDataTransport implements DataTransportService, MqttCallback,
 		s_logger.info("#  Connection Properties");
 		s_logger.info("#  broker    = " + m_clientConf.getBrokerUrl());
 		s_logger.info("#  clientId  = " + m_clientConf.getClientId());
-		s_logger.info("#  username  = "
-				+ m_clientConf.getConnectOptions().getUserName());
+		s_logger.info("#  username  = " + m_clientConf.getConnectOptions().getUserName());
 		s_logger.info("#  password  = XXXXXXXXXXXXXX");
-		s_logger.info("#  keepAlive = "
-				+ m_clientConf.getConnectOptions().getKeepAliveInterval());
-		s_logger.info("#  timeout   = "
-				+ m_clientConf.getConnectOptions().getConnectionTimeout());
-		s_logger.info("#  cleanSession    = "
-				+ m_clientConf.getConnectOptions().isCleanSession());
-		s_logger.info("#  MQTT version    = "
-				+ getMqttVersionLabel(m_clientConf.getConnectOptions().getMqttVersion()));
-		s_logger.info("#  willDestination = "
-				+ m_clientConf.getConnectOptions().getWillDestination());
-		s_logger.info("#  willMessage     = "
-				+ m_clientConf.getConnectOptions().getWillMessage());
+		s_logger.info("#  keepAlive = " + m_clientConf.getConnectOptions().getKeepAliveInterval());
+		s_logger.info("#  timeout   = " + m_clientConf.getConnectOptions().getConnectionTimeout());
+		s_logger.info("#  cleanSession    = " + m_clientConf.getConnectOptions().isCleanSession());
+		s_logger.info("#  MQTT version    = " + getMqttVersionLabel(m_clientConf.getConnectOptions().getMqttVersion()));
+		s_logger.info("#  willDestination = " + m_clientConf.getConnectOptions().getWillDestination());
+		s_logger.info("#  willMessage     = " + m_clientConf.getConnectOptions().getWillMessage());
 		s_logger.info("#");
 		s_logger.info("#  Connecting...");
+
+		//Register the component in the CloudConnectionStatus service
+		m_cloudConnectionStatusService.register(this);
+		//Update status notification service
+		m_cloudConnectionStatusService.updateStatus(this, CloudConnectionStatusEnum.FAST_BLINKING);
 
 		//
 		// connect
 		try {
-			IMqttToken connectToken = m_mqttClient.connect(m_clientConf
-					.getConnectOptions());
+			IMqttToken connectToken = m_mqttClient.connect(m_clientConf.getConnectOptions());
 			connectToken.waitForCompletion(getTimeToWaitMillis() * 3);
 			s_logger.info("#  Connected!");
 			s_logger.info("# ------------------------------------------------------------");
+			
+			//Update status notification service
+			m_cloudConnectionStatusService.updateStatus(this, CloudConnectionStatusEnum.ON);
+			
 		} catch (MqttException e) {
-			s_logger.warn(
-					"xxxxxxxxxx  Connect failed. Forcing disconnect. xxxxxxxxxxxxxxxx ",
-					e.getCause().getMessage());
+			s_logger.warn("xxxxx  Connect failed. Forcing disconnect. xxxxx {}", e);
 			try {
-				// FIXME: Close on CONNACK timeout.
-				// This exposes a Paho bug!
-				// If a connection is established, by mistake, to a non-MQTT
-				// server, e.g. to an SSH server,
-				// Paho will wait for a VERY long time (forever?) to get the
-				// MQTT CONNACK.
-				// We can wait on the connectToken specifying a shorter timeout.
-				// Upon connect timeout, we can:
-				// - call disconnect(0), but this does not work and an
-				// "Already Disconnecting" exception will be raised on the next
-				// connect attempt.
-				// - call close(), but this does not work and an
-				// "Already in Use Persistence" exception will be raised when
-				// retrying the connect on a new instance.
-
 				// prevent callbacks from a zombie client
 				m_mqttClient.setCallback(null);
 				m_mqttClient.close();
@@ -290,10 +331,16 @@ public class MqttDataTransport implements DataTransportService, MqttCallback,
 			} finally {
 				m_mqttClient = null;
 			}
+			
+			//Update status notification service
+			m_cloudConnectionStatusService.updateStatus(this, CloudConnectionStatusEnum.OFF);
+			
 			throw new KuraConnectException(e, "Cannot connect");
+		} finally{
+			//Always unregister from CloudConnectionStatus service so to switch to the previous state
+			m_cloudConnectionStatusService.unregister(this);
 		}
-
-		//
+		
 		// notify the listeners
 		m_dataTransportListeners.onConnectionEstablished(m_newSession);
 	}
@@ -372,8 +419,7 @@ public class MqttDataTransport implements DataTransportService, MqttCallback,
 	// ---------------------------------------------------------
 
 	@Override
-	public void subscribe(String topic, int qos) throws KuraTimeoutException,
-			KuraException, KuraNotConnectedException {
+	public void subscribe(String topic, int qos) throws KuraTimeoutException, KuraException, KuraNotConnectedException {
 
 		if (m_mqttClient == null || !m_mqttClient.isConnected()) {
 			throw new KuraNotConnectedException("Not connected");
@@ -389,19 +435,16 @@ public class MqttDataTransport implements DataTransportService, MqttCallback,
 		} catch (MqttException e) {
 			if (e.getReasonCode() == MqttException.REASON_CODE_CLIENT_TIMEOUT) {
 				s_logger.warn("Timeout subscribing to topic: {}", topic);
-				throw new KuraTimeoutException("Timeout subscribing to topic: "
-						+ topic, e);
+				throw new KuraTimeoutException("Timeout subscribing to topic: " + topic, e);
 			} else {
 				s_logger.error("Cannot subscribe to topic: " + topic, e);
-				throw KuraException.internalError(e,
-						"Cannot subscribe to topic: " + topic);
+				throw KuraException.internalError(e, "Cannot subscribe to topic: " + topic);
 			}
 		}
 	}
 
 	@Override
-	public void unsubscribe(String topic) throws KuraTimeoutException,
-			KuraException, KuraNotConnectedException {
+	public void unsubscribe(String topic) throws KuraTimeoutException, KuraException, KuraNotConnectedException {
 
 		if (m_mqttClient == null || !m_mqttClient.isConnected()) {
 			throw new KuraNotConnectedException("Not connected");
@@ -417,12 +460,10 @@ public class MqttDataTransport implements DataTransportService, MqttCallback,
 		} catch (MqttException e) {
 			if (e.getReasonCode() == MqttException.REASON_CODE_CLIENT_TIMEOUT) {
 				s_logger.warn("Timeout unsubscribing to topic: {}", topic);
-				throw new KuraTimeoutException(
-						"Timeout unsubscribing to topic: " + topic, e);
+				throw new KuraTimeoutException("Timeout unsubscribing to topic: " + topic, e);
 			} else {
 				s_logger.error("Cannot unsubscribe to topic: " + topic, e);
-				throw KuraException.internalError(e,
-						"Cannot unsubscribe to topic: " + topic);
+				throw KuraException.internalError(e, "Cannot unsubscribe to topic: " + topic);
 			}
 		}
 	}
@@ -439,9 +480,8 @@ public class MqttDataTransport implements DataTransportService, MqttCallback,
 	 * unrecoverable faults that are not recoverable by the caller.
 	 */
 	@Override
-	public DataTransportToken publish(String topic, byte[] payload, int qos,
-			boolean retain) throws KuraTooManyInflightMessagesException,
-			KuraException, KuraNotConnectedException {
+	public DataTransportToken publish(String topic, byte[] payload, int qos, boolean retain) throws KuraTooManyInflightMessagesException, KuraException,
+	KuraNotConnectedException {
 
 		if (m_mqttClient == null || !m_mqttClient.isConnected()) {
 			throw new KuraNotConnectedException("Not connected");
@@ -449,8 +489,7 @@ public class MqttDataTransport implements DataTransportService, MqttCallback,
 
 		topic = replaceTopicVariables(topic);
 
-		s_logger.info("Publishing message on topic: {} with QoS: {}", topic,
-				qos);
+		s_logger.info("Publishing message on topic: {} with QoS: {}", topic, qos);
 
 		MqttMessage message = new MqttMessage();
 		message.setPayload(payload);
@@ -472,25 +511,21 @@ public class MqttDataTransport implements DataTransportService, MqttCallback,
 			// 0.
 			// We don't want to rely on this and only return and confirm IDs
 			// of messages published with QoS > 0.
-			s_logger.debug("Published message with ID: {}",
-					token.getMessageId());
+			s_logger.debug("Published message with ID: {}", token.getMessageId());
 			if (qos > 0) {
 				messageId = Integer.valueOf(token.getMessageId());
 			}
 		} catch (MqttPersistenceException e) {
 			// This is probably an unrecoverable internal error
 			s_logger.error("Cannot publish on topic: {}", topic, e);
-			throw new IllegalStateException(
-					"Cannot publish on topic: " + topic, e);
+			throw new IllegalStateException("Cannot publish on topic: " + topic, e);
 		} catch (MqttException e) {
 			if (e.getReasonCode() == MqttException.REASON_CODE_MAX_INFLIGHT) {
 				s_logger.info("Too many inflight messages");
-				throw new KuraTooManyInflightMessagesException(e,
-						"Too many in-fligh messages");
+				throw new KuraTooManyInflightMessagesException(e, "Too many in-fligh messages");
 			} else {
 				s_logger.error("Cannot publish on topic: " + topic, e);
-				throw KuraException.internalError(e,
-						"Cannot publish on topic: " + topic);
+				throw KuraException.internalError(e, "Cannot publish on topic: " + topic);
 			}
 		}
 
@@ -570,14 +605,12 @@ public class MqttDataTransport implements DataTransportService, MqttCallback,
 		// These confirms will be lost!
 
 		// notify the listeners
-		DataTransportToken dataPublisherToken = new DataTransportToken(id,
-				m_sessionId);
+		DataTransportToken dataPublisherToken = new DataTransportToken(id, m_sessionId);
 		m_dataTransportListeners.onMessageConfirmed(dataPublisherToken);
 	}
 
 	@Override
-	public void messageArrived(String topic, MqttMessage message)
-			throws Exception {
+	public void messageArrived(String topic, MqttMessage message) throws Exception {
 
 		s_logger.debug("Message arrived on topic: {}", topic);
 
@@ -590,8 +623,7 @@ public class MqttDataTransport implements DataTransportService, MqttCallback,
 		// messages.
 
 		// notify the listeners
-		m_dataTransportListeners.onMessageArrived(topic, message.getPayload(),
-				message.getQos(), message.isRetained());
+		m_dataTransportListeners.onMessageArrived(topic, message.getPayload(), message.getQos(), message.isRetained());
 	}
 
 	private long getTimeToWaitMillis() {
@@ -619,8 +651,7 @@ public class MqttDataTransport implements DataTransportService, MqttCallback,
 	 * configuration cannot be assembled the method throws a RuntimeException
 	 * (assuming that this error is unrecoverable).
 	 */
-	private MqttClientConfiguration buildConfiguration(
-			Map<String, Object> properties) {
+	private MqttClientConfiguration buildConfiguration(Map<String, Object> properties) {
 
 		MqttClientConfiguration clientConfiguration = null;
 		MqttConnectOptions conOpt = new MqttConnectOptions();
@@ -640,71 +671,54 @@ public class MqttDataTransport implements DataTransportService, MqttCallback,
 			clientId = clientId.replace('+', '-');
 			clientId = clientId.replace('#', '-');
 
+			
 			// Configure the broker URL
 			brokerUrl = (String) properties.get(MQTT_BROKER_URL_PROP_NAME);
 			ValidationUtil.notEmptyOrNull(brokerUrl, MQTT_BROKER_URL_PROP_NAME);
-
 			brokerUrl = brokerUrl.trim();
+			
 			brokerUrl = brokerUrl.replaceAll("^" + MQTT_SCHEME, "tcp://");
-			brokerUrl = brokerUrl.replaceAll("^" + MQTTS_SCHEME, "ssl://");
+			brokerUrl = brokerUrl.replaceAll("^" + MQTTS_SCHEME, "ssl://"); 
+			
 			brokerUrl = brokerUrl.replaceAll("/$", "");
 			ValidationUtil.notEmptyOrNull(brokerUrl, "brokerUrl");
 
-			ValidationUtil.notEmptyOrNull(
-					(String) properties.get(MQTT_USERNAME_PROP_NAME),
-					MQTT_USERNAME_PROP_NAME);
-			ValidationUtil.notEmptyOrNull(
-					(String) properties.get(MQTT_PASSWORD_PROP_NAME),
-					MQTT_PASSWORD_PROP_NAME);
-			ValidationUtil.notNegative(
-					(Integer) properties.get(MQTT_KEEP_ALIVE_PROP_NAME),
-					MQTT_KEEP_ALIVE_PROP_NAME);
-			ValidationUtil.notNegative(
-					(Integer) properties.get(MQTT_TIMEOUT_PROP_NAME),
-					MQTT_TIMEOUT_PROP_NAME);
+			ValidationUtil.notEmptyOrNull((String) properties.get(MQTT_USERNAME_PROP_NAME), MQTT_USERNAME_PROP_NAME);
+			ValidationUtil.notNull(properties.get(MQTT_PASSWORD_PROP_NAME), MQTT_PASSWORD_PROP_NAME);
+			ValidationUtil.notEmptyOrNull(new String((char[]) properties.get(MQTT_PASSWORD_PROP_NAME)), MQTT_PASSWORD_PROP_NAME);			
+			ValidationUtil.notNegative((Integer) properties.get(MQTT_KEEP_ALIVE_PROP_NAME), MQTT_KEEP_ALIVE_PROP_NAME);
+			ValidationUtil.notNegative((Integer) properties.get(MQTT_TIMEOUT_PROP_NAME), MQTT_TIMEOUT_PROP_NAME);
 
-			ValidationUtil.notNull(
-					(Boolean) properties.get(MQTT_CLEAN_SESSION_PROP_NAME),
-					MQTT_CLEAN_SESSION_PROP_NAME);
+			ValidationUtil.notNull((Boolean) properties.get(MQTT_CLEAN_SESSION_PROP_NAME), MQTT_CLEAN_SESSION_PROP_NAME);
 
 			conOpt.setUserName((String) properties.get(MQTT_USERNAME_PROP_NAME));
-			conOpt.setPassword(((String) properties
-					.get(MQTT_PASSWORD_PROP_NAME)).toCharArray());
-			conOpt.setKeepAliveInterval((Integer) properties
-					.get(MQTT_KEEP_ALIVE_PROP_NAME));
-			conOpt.setConnectionTimeout((Integer) properties
-					.get(MQTT_TIMEOUT_PROP_NAME));
+			conOpt.setPassword((char[]) properties.get(MQTT_PASSWORD_PROP_NAME));
+			conOpt.setKeepAliveInterval((Integer) properties.get(MQTT_KEEP_ALIVE_PROP_NAME));
+			conOpt.setConnectionTimeout((Integer) properties.get(MQTT_TIMEOUT_PROP_NAME));
 
-			conOpt.setCleanSession((Boolean) properties
-					.get(MQTT_CLEAN_SESSION_PROP_NAME));
+			conOpt.setCleanSession((Boolean) properties.get(MQTT_CLEAN_SESSION_PROP_NAME));
 
-			conOpt.setMqttVersion((Integer) properties
-					.get(MQTT_DEFAULT_VERSION_PROP_NAME));
+			conOpt.setMqttVersion((Integer) properties.get(MQTT_DEFAULT_VERSION_PROP_NAME));
 
 			synchronized (m_topicContext) {
 				m_topicContext.clear();
 				if (properties.get(CLOUD_ACCOUNT_NAME_PROP_NAME) != null) {
-					m_topicContext.put(TOPIC_ACCOUNT_NAME_CTX_NAME,
-							(String) properties
-									.get(CLOUD_ACCOUNT_NAME_PROP_NAME));
+					m_topicContext.put(TOPIC_ACCOUNT_NAME_CTX_NAME, (String) properties.get(CLOUD_ACCOUNT_NAME_PROP_NAME));
 				}
 				m_topicContext.put(TOPIC_DEVICE_ID_CTX_NAME, clientId);
 			}
 
-			String willTopic = (String) properties
-					.get(MQTT_LWT_TOPIC_PROP_NAME);
+			String willTopic = (String) properties.get(MQTT_LWT_TOPIC_PROP_NAME);
 			if (!(willTopic == null || willTopic.isEmpty())) {
 				int willQos = 0;
 				boolean willRetain = false;
 
-				String willPayload = (String) properties
-						.get(MQTT_LWT_PAYLOAD_PROP_NAME);
+				String willPayload = (String) properties.get(MQTT_LWT_PAYLOAD_PROP_NAME);
 				if (properties.get(MQTT_LWT_QOS_PROP_NAME) != null) {
 					willQos = (Integer) properties.get(MQTT_LWT_QOS_PROP_NAME);
 				}
 				if (properties.get(MQTT_LWT_RETAIN_PROP_NAME) != null) {
-					willRetain = (Boolean) properties
-							.get(MQTT_LWT_RETAIN_PROP_NAME);
+					willRetain = (Boolean) properties.get(MQTT_LWT_RETAIN_PROP_NAME);
 				}
 
 				willTopic = replaceTopicVariables(willTopic);
@@ -722,8 +736,7 @@ public class MqttDataTransport implements DataTransportService, MqttCallback,
 			}
 		} catch (KuraException e) {
 			s_logger.error("Invalid configuration");
-			throw new IllegalStateException(
-					"Invalid MQTT client configuration", e);
+			throw new IllegalStateException("Invalid MQTT client configuration", e);
 		}
 
 		//
@@ -731,8 +744,7 @@ public class MqttDataTransport implements DataTransportService, MqttCallback,
 		if (brokerUrl.startsWith("ssl")) {
 			try {
 				String alias = m_topicContext.get(TOPIC_ACCOUNT_NAME_CTX_NAME);
-				SSLSocketFactory ssf = m_sslManagerService
-						.getSSLSocketFactory(alias);
+				SSLSocketFactory ssf = m_sslManagerService.getSSLSocketFactory(alias);
 				conOpt.setSocketFactory(ssf);
 			} catch (Exception e) {
 				s_logger.error("SSL setup failed", e);
@@ -747,13 +759,10 @@ public class MqttDataTransport implements DataTransportService, MqttCallback,
 		} else if (sType.equals("memory")) {
 			persistenceType = PersistenceType.MEMORY;
 		} else {
-			throw new IllegalStateException(
-					"Invalid MQTT client configuration: persistenceType: "
-							+ persistenceType);
+			throw new IllegalStateException("Invalid MQTT client configuration: persistenceType: " + persistenceType);
 		}
 
-		clientConfiguration = new MqttClientConfiguration(brokerUrl, clientId,
-				persistenceType, conOpt);
+		clientConfiguration = new MqttClientConfiguration(brokerUrl, clientId, persistenceType, conOpt);
 
 		return clientConfiguration;
 	}
@@ -787,8 +796,7 @@ public class MqttDataTransport implements DataTransportService, MqttCallback,
 
 		String replacedTopic = sb.toString();
 
-		s_logger.debug("Replaced tokens in topic {} with: {}", topic,
-				replacedTopic);
+		s_logger.debug("Replaced tokens in topic {} with: {}", topic, replacedTopic);
 
 		return replacedTopic;
 	}
@@ -803,20 +811,17 @@ public class MqttDataTransport implements DataTransportService, MqttCallback,
 			throw new IllegalStateException("Invalid client configuration");
 		}
 
-		// We need to construct a new client instance only if either the broker
-		// URL
+		// We need to construct a new client instance only if either the broker URL
 		// or the client ID changes.
-		// We also need to construct a new instance if
-		// the persistence type (file or memory) changes.
+		// We also need to construct a new instance if the persistence type (file or memory) changes.
 		// We MUST avoid to construct a new client instance every time because
 		// in that case the MQTT message ID is reset to 1.
 		if (m_mqttClient != null) {
 			String brokerUrl = m_mqttClient.getServerURI();
 			String clientId = m_mqttClient.getClientId();
 
-			if (!(brokerUrl.equals(m_clientConf.getBrokerUrl())
-					&& clientId.equals(m_clientConf.getClientId()) && m_persistenceType == m_clientConf
-						.getPersistenceType())) {
+			if (!(brokerUrl.equals(m_clientConf.getBrokerUrl()) && clientId.equals(m_clientConf.getClientId()) && m_persistenceType == m_clientConf
+					.getPersistenceType())) {
 				try {
 					s_logger.info("Closing client...");
 					// prevent callbacks from a zombie client
@@ -888,15 +893,11 @@ public class MqttDataTransport implements DataTransportService, MqttCallback,
 				m_persistence = new MemoryPersistence();
 			} else {
 				StringBuffer sb = new StringBuffer();
-				sb.append(m_systemService.getKuraDataDirectory())
-						.append(m_systemService.getFileSeparator())
-						.append("paho-persistence");
+				sb.append(m_systemService.getKuraDataDirectory()).append(m_systemService.getFileSeparator()).append("paho-persistence");
 
 				String dir = sb.toString();
 
-				s_logger.info(
-						"Using file persistence for in-flight messages: {}",
-						dir);
+				s_logger.info("Using file persistence for in-flight messages: {}", dir);
 
 				// Look for "Close on CONNACK timeout" FIXME in this file.
 				// Make sure persistence is closed.
@@ -906,11 +907,8 @@ public class MqttDataTransport implements DataTransportService, MqttCallback,
 					try {
 						m_persistence.close();
 					} catch (MqttPersistenceException e) {
-						s_logger.info("Failed to close persistence. Ignoring exception "
-								+ e.getMessage());
-						s_logger.debug(
-								"Failed to close persistence. Ignoring exception.",
-								e);
+						s_logger.info("Failed to close persistence. Ignoring exception " + e.getMessage());
+						s_logger.debug("Failed to close persistence. Ignoring exception.", e);
 					}
 				}
 				m_persistence = new MqttDefaultFilePersistence(dir);
@@ -920,12 +918,10 @@ public class MqttDataTransport implements DataTransportService, MqttCallback,
 			// Construct the MqttClient instance
 			MqttAsyncClient mqttClient = null;
 			try {
-				mqttClient = new MqttAsyncClient(m_clientConf.getBrokerUrl(),
-						m_clientConf.getClientId(), m_persistence);
+				mqttClient = new MqttAsyncClient(m_clientConf.getBrokerUrl(), m_clientConf.getClientId(), m_persistence);
 			} catch (MqttException e) {
 				s_logger.error("Client instantiation failed", e);
-				throw new IllegalStateException("Client instantiation failed",
-						e);
+				throw new IllegalStateException("Client instantiation failed", e);
 			}
 
 			mqttClient.setCallback(this);
@@ -935,30 +931,21 @@ public class MqttDataTransport implements DataTransportService, MqttCallback,
 
 			if (!m_clientConf.getConnectOptions().isCleanSession()) {
 				// This is tricky.
-				// The purpose of this code is to try to restore pending
-				// delivery tokens
-				// from the MQTT client persistence and determine if the next
-				// connection
+				// The purpose of this code is to try to restore pending delivery tokens
+				// from the MQTT client persistence and determine if the next connection
 				// can be considered continuing an existing session.
-				// This is needed to allow the upper layer deciding what to do
-				// with the
+				// This is needed to allow the upper layer deciding what to do with the
 				// in-flight messages it is tracking (if any).
-				// If pending delivery tokens are found we assume that the upper
-				// layer
-				// is tracking them. In this case we set the newSession flag to
-				// false
+				// If pending delivery tokens are found we assume that the upper layer
+				// is tracking them. In this case we set the newSession flag to false
 				// and notify this in the onConnectionEstablished callback.
 				// The upper layer shouldn't do anything special.
 				//
-				// Otherwise the next upper layer should decide what to do with
-				// the
-				// in-flight messages it is tracking (if any), either to
-				// republish or
+				// Otherwise the next upper layer should decide what to do with the
+				// in-flight messages it is tracking (if any), either to republish or
 				// drop them.
-				IMqttDeliveryToken[] pendingDeliveryTokens = m_mqttClient
-						.getPendingDeliveryTokens();
-				if (pendingDeliveryTokens != null
-						&& pendingDeliveryTokens.length != 0) {
+				IMqttDeliveryToken[] pendingDeliveryTokens = m_mqttClient.getPendingDeliveryTokens();
+				if (pendingDeliveryTokens != null && pendingDeliveryTokens.length != 0) {
 					newSession = false;
 				}
 			}
@@ -980,4 +967,18 @@ public class MqttDataTransport implements DataTransportService, MqttCallback,
 		}
 	}
 
+	@Override
+	public int getNotificationPriority() {
+		return CloudConnectionStatusService.PRIORITY_MEDIUM;
+	}
+
+	@Override
+	public CloudConnectionStatusEnum getNotificationStatus() {
+		return m_notificationStatus;
+	}
+
+	@Override
+	public void setNotificationStatus(CloudConnectionStatusEnum status) {
+		m_notificationStatus = status;
+	}
 }

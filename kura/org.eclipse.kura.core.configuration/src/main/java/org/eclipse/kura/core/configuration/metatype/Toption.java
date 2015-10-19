@@ -24,13 +24,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAnyAttribute;
-import javax.xml.bind.annotation.XmlAnyElement;
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlType;
 import javax.xml.namespace.QName;
 
 import org.eclipse.kura.configuration.metatype.Option;
@@ -59,20 +52,12 @@ import org.w3c.dom.Element;
  * 
  * 
  */
-@XmlRootElement(name="Option", namespace="http://www.osgi.org/xmlns/metatype/v1.2.0")
-@XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "Toption", propOrder = {
-    "any"
-})
+
 public class Toption implements Option 
 {
-    @XmlAnyElement(lax = true)
     protected List<Object> any;
-    @XmlAttribute(name = "label", required = true)
     protected String label;
-    @XmlAttribute(name = "value", required = true)
     protected String value;
-    @XmlAnyAttribute
     private Map<QName, String> otherAttributes = new HashMap<QName, String>();
 
     /**
@@ -103,6 +88,13 @@ public class Toption implements Option
             any = new ArrayList<Object>();
         }
         return this.any;
+    }
+    
+    public void setAny(Object o) {
+        if (any == null) {
+            any = new ArrayList<Object>();
+        }
+        any.add(o);
     }
 
     /**

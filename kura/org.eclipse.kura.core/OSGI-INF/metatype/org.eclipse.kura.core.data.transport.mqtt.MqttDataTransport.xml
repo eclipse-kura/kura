@@ -59,7 +59,7 @@
             min="0"
             max="23"
             default="" 
-            description="Client identifier to be used when connecting to the MQTT broker. The identifier has to be unique within your account. Characters '/', '+', and '#' are invalid and they will be replaced by '-'. If left empty, this is automatically determined by the client software as the MAC address of the main network interface."/>
+            description="Client identifier to be used when connecting to the MQTT broker. The identifier has to be unique within your account. Characters '/', '+', and '#' are invalid and they will be replaced by '-'. If left empty, this is automatically determined by the client software as the MAC address of the main network interface (in general uppercase and without ':')."/>
         
         <AD id="keep-alive"  
             name="keep-alive"
@@ -126,7 +126,7 @@
             type="String"
             cardinality="0" 
             required="true"
-            default="file"
+            default="memory"
             description="Storage type where in-flight messages are persisted across reconnections.">
            <Option label="file" value="file"/>
            <Option label="memory" value="memory"/>
@@ -137,7 +137,7 @@
             type="Integer"
             cardinality="0"
             required="false"
-            default="3"
+            default="4"
             description="MQTT Protocol Version.">
             <Option label="3.1" value="3"/>
             <Option label="3.1.1" value="4"/>

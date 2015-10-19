@@ -28,7 +28,8 @@ import org.eclipse.kura.core.net.NetworkConfiguration;
 import org.eclipse.kura.core.net.NetworkConfigurationVisitor;
 import org.eclipse.kura.core.net.WifiInterfaceAddressConfigImpl;
 import org.eclipse.kura.core.net.util.NetworkUtil;
-import org.eclipse.kura.core.util.NetUtil;
+import org.eclipse.kura.linux.net.dhcp.DhcpServerManager;
+import org.eclipse.kura.linux.net.dhcp.DhcpServerTool;
 import org.eclipse.kura.net.IP4Address;
 import org.eclipse.kura.net.IPAddress;
 import org.eclipse.kura.net.NetConfig;
@@ -45,7 +46,7 @@ public class DhcpConfigReader implements NetworkConfigurationVisitor {
 	
 	private static final Logger s_logger = LoggerFactory.getLogger(DhcpConfigReader.class);
 	
-	private static final String FILE_DIR = "/etc/";
+	//private static final String FILE_DIR = "/etc/";
 	
 	private static DhcpConfigReader s_instance;
 	
@@ -74,8 +75,9 @@ public class DhcpConfigReader implements NetworkConfigurationVisitor {
         
         NetInterfaceType type = netInterfaceConfig.getType(); 
         if (type == NetInterfaceType.ETHERNET || type == NetInterfaceType.WIFI) {
-            StringBuffer configFilename = new StringBuffer(FILE_DIR).append("dhcpd-").append(interfaceName).append(".conf");
-            File dhcpConfigFile = new File(configFilename.toString());
+            //StringBuffer configFilename = new StringBuffer(FILE_DIR).append("dhcpd-").append(interfaceName).append(".conf");
+        	String configFilename = DhcpServerManager.getConfigFilename(interfaceName);
+            File dhcpConfigFile = new File(configFilename);
             
             if (dhcpConfigFile.exists()) {
                 DhcpServerConfig4 dhcpServerConfig4 = populateConfig(interfaceName, dhcpConfigFile, kuraExtendedProps);
@@ -110,7 +112,18 @@ public class DhcpConfigReader implements NetworkConfigurationVisitor {
         }
 	}
 	
-	private DhcpServerConfig4 populateConfig(String interfaceName, File dhcpConfigFile, Properties kuraExtendedProps) throws KuraException{
+	private DhcpServerConfig4 populateConfig(String interfaceName, File dhcpConfigFile, Properties kuraExtendedProps) throws KuraException {
+		DhcpServerConfig4 dhcpServerConfig4 = null;
+		DhcpServerTool dhcpServerTool = DhcpServerManager.getTool();
+		if (dhcpServerTool == DhcpServerTool.DHCPD) {
+			dhcpServerConfig4 = populateDhcpdConfig(interfaceName, dhcpConfigFile, kuraExtendedProps);
+		} else if (dhcpServerTool == DhcpServerTool.UDHCPD) {
+			dhcpServerConfig4 = populateUdhcpdConfig(interfaceName, dhcpConfigFile, kuraExtendedProps);
+		}
+		return dhcpServerConfig4;
+	}
+	
+	private DhcpServerConfig4 populateDhcpdConfig(String interfaceName, File dhcpConfigFile, Properties kuraExtendedProps) throws KuraException {
         DhcpServerConfigIP4 dhcpServerConfigIP4 = null;
 	    BufferedReader br = null;
 	    
@@ -139,8 +152,6 @@ public class DhcpConfigReader implements NetworkConfigurationVisitor {
 					} else if(token.equals("subnet")) {
 						subnet = (IP4Address) IPAddress.parseHostAddress(st.nextToken());
 						if(!st.nextToken().equals("netmask")) {
-							br.close();
-							br = null;
 							throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR, "invalid dhcp config file: " + dhcpConfigFile.getAbsolutePath());
 						}
 						netmask = (IP4Address) IPAddress.parseHostAddress(st.nextToken());
@@ -180,8 +191,6 @@ public class DhcpConfigReader implements NetworkConfigurationVisitor {
 					}
 				}
 			}
-            br.close();
-            br = null;
 
 			StringBuilder sb = new StringBuilder().append("net.interface.").append(interfaceName).append(".config.dhcpServer4.enabled");
 			if(kuraExtendedProps != null && kuraExtendedProps.getProperty(sb.toString()) != null) {
@@ -218,8 +227,108 @@ public class DhcpConfigReader implements NetworkConfigurationVisitor {
 			throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR, e);
 		} catch (IOException e) {
 			throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR, e);
+		} finally{
+			if(br != null){
+				try{
+					br.close();
+				}catch(IOException ex){
+					s_logger.error("I/O Exception while closing BufferedReader!");
+				}
+			}	
 		}
         
         return dhcpServerConfigIP4;
+	}
+	
+	private DhcpServerConfig4 populateUdhcpdConfig(String interfaceName, File dhcpConfigFile, Properties kuraExtendedProps) throws KuraException {
+		
+		DhcpServerConfigIP4 dhcpServerConfigIP4 = null;
+		BufferedReader br = null;
+
+		try {
+			boolean enabled = false;
+			IP4Address subnet = null;
+			IP4Address netmask = null;
+			IP4Address router = null;
+			int defaultLeaseTime = -1;
+			int maxLeaseTime = -1;
+			IP4Address rangeStart = null;
+			IP4Address rangeEnd = null;
+			boolean passDns = true;
+			ArrayList<IP4Address> dnsList = new ArrayList<IP4Address>();
+
+			br = new BufferedReader(new FileReader(dhcpConfigFile));
+
+			String line = null;
+			while ((line = br.readLine()) != null) {
+				line.trim();
+				if (line.startsWith("start")) {
+					rangeStart = (IP4Address) IPAddress.parseHostAddress(line.substring("start".length()).trim());
+				} else if (line.startsWith("end")) {
+					rangeEnd = (IP4Address) IPAddress.parseHostAddress(line.substring("end".length()).trim());
+				} else if (line.startsWith("opt router")) {
+					router = (IP4Address) IPAddress.parseHostAddress(line.substring("opt router".length()).trim());
+				} else if (line.startsWith("opt subnet")) {
+					netmask = (IP4Address) IPAddress.parseHostAddress(line.substring("opt subnet".length()).trim());
+				} else if (line.startsWith("opt lease")) {
+					defaultLeaseTime = Integer.parseInt(line.substring("opt lease".length()).trim());
+					maxLeaseTime = defaultLeaseTime;
+				} else if (line.startsWith("opt dns")) {
+					line = line.substring("opt dns".length()).trim();
+					StringTokenizer st = new StringTokenizer(line);
+					while (st.hasMoreTokens()) {
+						dnsList.add((IP4Address) IPAddress.parseHostAddress(st.nextToken()));
+					}
+				}
+			}
+				
+			subnet = (IP4Address) IPAddress.parseHostAddress(NetworkUtil.calculateNetwork(router.getHostAddress(), netmask.getHostAddress()));
+				
+			StringBuilder sb = new StringBuilder().append("net.interface.").append(interfaceName).append(".config.dhcpServer4.enabled");
+			if(kuraExtendedProps != null && kuraExtendedProps.getProperty(sb.toString()) != null) {
+				enabled = Boolean.parseBoolean(kuraExtendedProps.getProperty(sb.toString()));
+			} else {
+				//the file is present and the flag is not - so assume enabled is true
+				enabled = true;
+			}
+			sb = new StringBuilder().append("net.interface.").append(interfaceName).append(".config.dhcpServer4.passDns");
+			if(kuraExtendedProps != null && kuraExtendedProps.getProperty(sb.toString()) != null) {
+				passDns = Boolean.parseBoolean(kuraExtendedProps.getProperty(sb.toString()));
+			} 
+				
+			short prefix = NetworkUtil.getNetmaskShortForm(netmask.getHostAddress());
+				
+			s_logger.info("instantiating DHCP server configuration during init with " + 
+						" | interfaceName: " + interfaceName +
+						" | enabled: " + enabled +
+						" | subnet: " + subnet.getHostAddress() +
+						" | router: " + router.getHostAddress() +
+						" | netmask: " + netmask.getHostAddress() +
+						" | prefix: " + prefix +
+						" | defaultLeaseTime: " + defaultLeaseTime +
+						" | maxLeaseTime: " + maxLeaseTime +
+						" | rangeStart: " + rangeStart.getHostAddress() +
+						" | rangeEnd: " + rangeEnd.getHostAddress() +
+						" | passDns: " + passDns +
+						" | dnsList: " + dnsList.toString());
+				
+			dhcpServerConfigIP4 = new DhcpServerConfigIP4(interfaceName,
+					enabled, subnet, router, netmask, defaultLeaseTime,
+					maxLeaseTime, prefix, rangeStart, rangeEnd, passDns,
+					dnsList);
+			
+		} catch (Exception e) {
+			throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR, e);
+		} finally {
+			if (br != null) {
+				try {
+					br.close();
+				} catch (IOException ex) {
+					s_logger.error("I/O Exception while closing BufferedReader!");
+				}
+			}
+		}
+		
+		return dhcpServerConfigIP4;
 	}
 }

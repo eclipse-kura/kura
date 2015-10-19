@@ -11,7 +11,6 @@
  */
 package org.eclipse.kura.web.server;
 
-import java.io.IOException;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.util.ArrayList;
@@ -38,8 +37,10 @@ import org.eclipse.kura.web.server.util.ServiceLocator;
 import org.eclipse.kura.web.shared.GwtKuraErrorCode;
 import org.eclipse.kura.web.shared.GwtKuraException;
 import org.eclipse.kura.web.shared.model.GwtGroupedNVPair;
+import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.eclipse.kura.web.shared.service.GwtDeviceService;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
 import org.osgi.util.position.Position;
 import org.slf4j.Logger;
@@ -56,9 +57,10 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
 	
 	private static final long serialVersionUID = -4176701819112753800L;
 
-	public ListLoadResult<GwtGroupedNVPair> findDeviceConfiguration() 
+	public ListLoadResult<GwtGroupedNVPair> findDeviceConfiguration(GwtXSRFToken xsrfToken) 
 		throws GwtKuraException 
 	{
+		checkXSRFToken(xsrfToken);
 		List<GwtGroupedNVPair> pairs = new ArrayList<GwtGroupedNVPair>();
 
 		PositionService positionService = ServiceLocator.getInstance().getService(PositionService.class);
@@ -96,8 +98,8 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
 			if (systemService.getNumberOfProcessors() != -1) {
 				pairs.add( new GwtGroupedNVPair("devJava", "devNumProc", String.valueOf(systemService.getNumberOfProcessors())));
 			}
-			pairs.add( new GwtGroupedNVPair("devJava", "devRamTot",  String.valueOf(systemService.getTotalMemory())+" MB"));
-			pairs.add( new GwtGroupedNVPair("devJava", "devRamFree", String.valueOf(systemService.getFreeMemory())+" MB"));
+			pairs.add( new GwtGroupedNVPair("devJava", "devRamTot",  String.valueOf(systemService.getTotalMemory())+" kB"));
+			pairs.add( new GwtGroupedNVPair("devJava", "devRamFree", String.valueOf(systemService.getFreeMemory())+" kB"));
 
 			// get the network information
 			String connectionIp = UNKNOWN;
@@ -169,9 +171,10 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
 	
 	
 	@SuppressWarnings("unchecked")
-	public ListLoadResult<GwtGroupedNVPair> findThreads() 
+	public ListLoadResult<GwtGroupedNVPair> findThreads(GwtXSRFToken xsrfToken) 
 		throws GwtKuraException 
 	{
+		checkXSRFToken(xsrfToken);
 		List<GwtGroupedNVPair> pairs = new ArrayList<GwtGroupedNVPair>();
 
 		// get root thread group
@@ -246,9 +249,10 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
 
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public ListLoadResult<GwtGroupedNVPair> findSystemProperties() 
+	public ListLoadResult<GwtGroupedNVPair> findSystemProperties(GwtXSRFToken xsrfToken) 
 		throws GwtKuraException 
 	{
+		checkXSRFToken(xsrfToken);
 		List<GwtGroupedNVPair> pairs = new ArrayList<GwtGroupedNVPair>();
 		// kura properties
 		SystemService systemService = ServiceLocator.getInstance().getService(SystemService.class);
@@ -264,9 +268,10 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
 	
 	
 	
-	public ListLoadResult<GwtGroupedNVPair> findBundles() 
+	public ListLoadResult<GwtGroupedNVPair> findBundles(GwtXSRFToken xsrfToken) 
 		throws GwtKuraException 
 	{
+		checkXSRFToken(xsrfToken);
 		List<GwtGroupedNVPair> pairs = new ArrayList<GwtGroupedNVPair>();
 
 		SystemService systemService = ServiceLocator.getInstance().getService(SystemService.class);
@@ -289,13 +294,60 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
 		}
 		return new BaseListLoadResult<GwtGroupedNVPair>(pairs);
 	}
+
+	public void startBundle(GwtXSRFToken xsrfToken, String bundleId) throws GwtKuraException {
+		checkXSRFToken(xsrfToken);
+		SystemService systemService = ServiceLocator.getInstance().getService(SystemService.class);
+		Bundle[] bundles = systemService.getBundles();
+		
+		s_logger.info("Starting bundle with ID: " + bundleId);
+		for (Bundle b : bundles) {
+			if (b.getBundleId() == Long.parseLong(bundleId)) {
+				try {
+					b.start();
+					return;
+				} catch (BundleException e) {
+					s_logger.error("Failed to start bundle {}: {}", new Object[] {b.getBundleId(), e});
+					throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR);
+				}
+			}
+		}
+		// Bundle was not found, throw error
+		s_logger.error("Could not find bundle with ID: " + bundleId);
+		throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR);
+	}
 	
-	public String executeCommand(String cmd, String pwd) throws GwtKuraException {
+	public void stopBundle(GwtXSRFToken xsrfToken, String bundleId) throws GwtKuraException {
+		checkXSRFToken(xsrfToken);
+		SystemService systemService = ServiceLocator.getInstance().getService(SystemService.class);
+		Bundle[] bundles = systemService.getBundles();
+		
+		s_logger.info("Stopping bundle with ID: " + bundleId);
+		for (Bundle b : bundles) {
+			if (b.getBundleId() == Long.parseLong(bundleId)) {
+				try {
+					b.stop();
+					return;
+				} catch (BundleException e) {
+					s_logger.error("Failed to stop bundle {}: {}", new Object[] {b.getBundleId(), e});
+					throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR);
+				}
+			}
+		}
+		
+		// Bundle was not found, throw error
+		s_logger.error("Could not find bundle with ID: " + bundleId);
+		throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR);
+
+	}
+	
+	public String executeCommand(GwtXSRFToken xsrfToken, String cmd, String pwd) throws GwtKuraException {
+		checkXSRFToken(xsrfToken);
 		PasswordCommandService commandService = ServiceLocator.getInstance().getService(PasswordCommandService.class);
 		try {
 			return commandService.execute(cmd, pwd);
 		} catch (KuraException e) {
-			s_logger.error(e.getLocalizedMessage());
+			//s_logger.error(e.getLocalizedMessage());
 			if(e.getCode() == KuraErrorCode.OPERATION_NOT_SUPPORTED){
 				throw new GwtKuraException(GwtKuraErrorCode.SERVICE_NOT_ENABLED);
 			}else if(e.getCode() == KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID){

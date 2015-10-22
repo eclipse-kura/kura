@@ -21,6 +21,7 @@ import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.security.AccessController;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;

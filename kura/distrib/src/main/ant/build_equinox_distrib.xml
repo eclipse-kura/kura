@@ -685,16 +685,17 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
         <replace file="${project.build.directory}/${build.output.name}/config.ini"
                  token="{org.eclipse.kura.windows.clock.version}" value="${org.eclipse.kura.windows.clock.version}"/>
 
+<!-- Linux-specifc
         <propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
             <entry key="osgi.bundles" operation="+"
-                   value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.net.admin_${org.eclipse.kura.net.admin.version}.jar@5:start" />
+                   value=", reference:file:../kura/plugins/org.eclipse.kura.net.admin_${org.eclipse.kura.net.admin.version}.jar@5:start" />
         </propertyfile>
-
+-->
 		<!-- Conditional entries. Check for jar presence, and invoke relevant ant target-->
-		<available file="${project.build.directory}/plugins/org.eclipse.kura.web_${org.eclipse.kura.web.version}.jar" property="web.jar.present" />
+		<available file="../kura/plugins/org.eclipse.kura.web_${org.eclipse.kura.web.version}.jar" property="web.jar.present" />
 		<antcall target="web-config" />
 
-		<available file="${project.build.directory}/plugins/org.eclipse.kura.emulator.gpio_${org.eclipse.kura.emulator.gpio.version}.jar" property="emulated.gpio.jar.present" />
+		<available file="../kura/plugins/org.eclipse.kura.emulator.gpio_${org.eclipse.kura.emulator.gpio.version}.jar" property="emulated.gpio.jar.present" />
 		<antcall target="emulated-gpio-config" />
 
         <!-- Add mToolkit to config.ini -->
@@ -716,6 +717,7 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
 @echo off
 
 set KURA_HOME=%ALLUSERSPROFILE%\kura\kura
+set KURA_HOME_URI=/%KURA_HOME:\=/%
 set KURA_DATA=%ALLUSERSPROFILE%\kura\data
 set KURA_TEMP=%TEMP%\KURA
 
@@ -733,10 +735,10 @@ java -Xms256m -Xmx256m -Dkura.os.version=win32 ^
 	-Declipse.ignoreApp=true ^
 	-Dkura.home=%KURA_HOME% ^
 	-Dkura.data.dir=%KURA_DATA% ^
-	-Dkura.configuration=file:%KURA_HOME%\kura.properties ^
-	-Dkura.custom.configuration=file:%KURA_HOME%\kura_custom.properties ^
+	-Dkura.configuration=file:%KURA_HOME_URI%/kura.properties ^
+	-Dkura.custom.configuration=file:%KURA_HOME_URI%/kura_custom.properties ^
 	-Ddpa.configuration=%KURA_HOME%\dpa.properties ^
-	-Dlog4j.configuration=file:%KURA_HOME%\log4j.properties ^
+	-Dlog4j.configuration=file:%KURA_HOME_URI%/log4j.properties ^
         -Djdk.tls.trustNameService=true ^
 	-jar %KURA_INST%\plugins\org.eclipse.osgi_3.8.1.v20120830-144521.jar ^
 	-configuration %KURA_TEMP%\Configuration ^
@@ -853,8 +855,10 @@ java -Xms256m -Xmx256m -Dkura.os.version=win32 ^
 		<fileset dir="${kura.osgi.repo}/plugins" />
             </copy>
                         
-            <copy todir="${build.install.dir.kura}/plugins" excludes="com.google.protobuf_2.6.0.jar,org.eclipse.paho.*">
-		<fileset dir="../target-definition/common/repository/plugins" />
+            <copy todir="${build.install.dir.kura}/plugins">
+		<fileset dir="../target-definition/common/repository/plugins">
+                <exclude name="com.google.protobuf_2.6.0.jar,org.eclipse.paho.*"/>
+                </fileset>
             </copy>                        
 
             <copy file="${project.build.directory}/plugins/org.eclipse.kura.deployment.agent_${org.eclipse.kura.deployment.agent.version}.jar"
@@ -893,8 +897,8 @@ java -Xms256m -Xmx256m -Dkura.os.version=win32 ^
                         todir="${build.install.dir.kura}/kura/plugins" />
             <copy file="${project.build.directory}/plugins/org.eclipse.kura.windows.clock_${org.eclipse.kura.windows.clock.version}.jar"
                         todir="${build.install.dir.kura}/kura/plugins" />
-            <copy file="${project.build.directory}/plugins/org.eclipse.kura.net.admin_${org.eclipse.kura.net.admin.version}.jar"
-                        todir="${build.install.dir.kura}/kura/plugins" />
+<!--            <copy file="${project.build.directory}/plugins/org.eclipse.kura.net.admin_${org.eclipse.kura.net.admin.version}.jar"
+                        todir="${build.install.dir.kura}/kura/plugins" /> -->
 
             <copy file="../../target-platform/org.eclipse.soda.dk.comm/src/main/c/Release/win32/x86/dkcomm.dll"
                         todir="${build.install.dir}/system"/>

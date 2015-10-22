@@ -20,6 +20,7 @@ import java.io.PrintWriter;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.command.CommandService;
 import org.eclipse.kura.core.util.ProcessUtil;
+import org.eclipse.kura.core.util.SafeProcess;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -103,7 +104,7 @@ public class CommandServiceImpl  implements CommandService{
 	}
 	
 	private String runScript() throws KuraException{
-		Process procUserScript = null;
+		SafeProcess procUserScript = null;
 		InputStream is = null;
 		InputStream es = null;
 		StreamGobbler isg = null;
@@ -133,7 +134,7 @@ public class CommandServiceImpl  implements CommandService{
 		} catch (Exception e) {
 			throw KuraException.internalError(e);
 		} finally {
-			ProcessUtil.destroy(procUserScript);
+			if (procUserScript != null) ProcessUtil.destroy(procUserScript);
 		}
 	}
 	

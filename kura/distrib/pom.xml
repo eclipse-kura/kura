@@ -482,7 +482,7 @@
 -->
 			</properties>
             <activation>
-                <activeByDefault>true</activeByDefault>
+                <activeByDefault>false</activeByDefault>
             </activation>
             <build>
                 <resources>
@@ -565,7 +565,7 @@
 -->
 			</properties>
             <activation>
-                <activeByDefault>true</activeByDefault>
+                <activeByDefault>false</activeByDefault>
             </activation>
             <build>
                 <resources>
@@ -650,7 +650,7 @@
 -->
 			</properties>
 			<activation>
-				<activeByDefault>true</activeByDefault>
+				<activeByDefault>false</activeByDefault>
 			</activation>		
 			<build>
 				<resources>
@@ -784,7 +784,7 @@
 -->
 			</properties>
 			<activation>
-				<activeByDefault>true</activeByDefault>
+				<activeByDefault>false</activeByDefault>
 			</activation>		
 			<build>
 				<resources>
@@ -899,7 +899,7 @@
 -->
 			</properties>
 			<activation>
-				<activeByDefault>true</activeByDefault>
+				<activeByDefault>false</activeByDefault>
 			</activation>
 			<build>
 				<resources>
@@ -1022,7 +1022,7 @@
 -->
 			</properties> 
 			<activation>
-				<activeByDefault>true</activeByDefault>
+				<activeByDefault>false</activeByDefault>
 			</activation> 
 			<build>
 				<resources>
@@ -1134,7 +1134,7 @@
 -->
 			</properties>
 			<activation>
-				<activeByDefault>true</activeByDefault>
+				<activeByDefault>false</activeByDefault>
 			</activation>
 			<build>
 				<resources>
@@ -1257,7 +1257,7 @@
 -->
 			</properties> 
 			<activation>
-				<activeByDefault>true</activeByDefault>
+				<activeByDefault>false</activeByDefault>
 			</activation> 
 			<build>
 				<resources>
@@ -1369,7 +1369,7 @@
 -->
 			</properties>
 			<activation>
-				<activeByDefault>true</activeByDefault>
+				<activeByDefault>false</activeByDefault>
 			</activation>
 			<build>
 				<resources>
@@ -1483,7 +1483,7 @@
 -->
 			</properties>
 			<activation>
-				<activeByDefault>true</activeByDefault>
+				<activeByDefault>false</activeByDefault>
 			</activation>
 			<build>
 				<resources>
@@ -1587,6 +1587,109 @@
 				</plugins>
 			</build>
 		</profile>
+
+		<profile>
+			<id>windows</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<build>
+				<resources>
+					<resource>
+						<directory>src/main/resources</directory>
+						<filtering>true</filtering>
+					</resource>
+				</resources>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-resources-plugin</artifactId>
+						<version>2.3</version>
+						<executions>
+							<execution>
+								<id>copy-resources</id>
+								<phase>validate</phase>
+								<goals>
+									<goal>copy-resources</goal>
+								</goals>
+								<configuration>
+									<outputDirectory>${basedir}/target/KURAUtils</outputDirectory>
+									<resources>
+										<resource>
+											<directory>${basedir}/../org.eclipse.kura.core/KURAUtils</directory>
+										</resource>
+									</resources>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>properties-maven-plugin</artifactId>
+						<version>1.0-alpha-1</version>
+						<executions>
+							<execution>
+								<phase>initialize</phase>
+								<goals>
+									<goal>read-project-properties</goal>
+								</goals>
+								<configuration>
+									<files>
+										<file>${basedir}/build.properties</file>
+										<file>${basedir}/config/kura.build.properties</file>
+									</files>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>buildnumber-maven-plugin</artifactId>
+						<version>1.0</version>
+						<executions>
+							<execution>
+								<phase>validate</phase>
+								<goals>
+									<goal>create-timestamp</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-antrun-plugin</artifactId>
+						<version>1.7</version>
+						<executions>
+							<execution>
+								<id>windows-jars</id>
+								<phase>install</phase>
+								<goals>
+									<goal>run</goal>
+								</goals>
+								<configuration>
+									<target>
+										<property name="buildNumber" value="buildNumber" />
+										<property name="project.version" value="${project.version}" />
+										<property name="project.build.profile" value="${project.build.profile}" />
+										<property name="project.build.directory" value="${project.build.directory}" />
+										<property name="build.name" value="windows" />
+										<property name="target.device" value="windows" />
+										<property name="kura.os.version" value="windows" />
+										<property name="kura.arch" value="x86" />
+										<property name="kura.mem.size" value="256m" />
+										<property name="kura.install.dir" value="/opt/eclipse" />
+										<ant antfile="${basedir}/src/main/ant/build_equinox_distrib.xml"
+											target="dist-windows" />
+									</target>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>	
+
 		
 		<profile>
 			<id>dev-env</id>
@@ -1867,106 +1970,5 @@
 				</plugins>
 			</build>
 		</profile>
-		<profile>
-			<id>windows</id>
-			<activation>
-				<activeByDefault>true</activeByDefault>
-			</activation>
-			<build>
-				<resources>
-					<resource>
-						<directory>src/main/resources</directory>
-						<filtering>true</filtering>
-					</resource>
-				</resources>
-				<plugins>
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-resources-plugin</artifactId>
-						<version>2.3</version>
-						<executions>
-							<execution>
-								<id>copy-resources</id>
-								<phase>validate</phase>
-								<goals>
-									<goal>copy-resources</goal>
-								</goals>
-								<configuration>
-									<outputDirectory>${basedir}/target/KURAUtils</outputDirectory>
-									<resources>
-										<resource>
-											<directory>${basedir}/../org.eclipse.kura.core/KURAUtils</directory>
-										</resource>
-									</resources>
-								</configuration>
-							</execution>
-						</executions>
-					</plugin>
-
-					<plugin>
-						<groupId>org.codehaus.mojo</groupId>
-						<artifactId>properties-maven-plugin</artifactId>
-						<version>1.0-alpha-1</version>
-						<executions>
-							<execution>
-								<phase>initialize</phase>
-								<goals>
-									<goal>read-project-properties</goal>
-								</goals>
-								<configuration>
-									<files>
-										<file>${basedir}/build.properties</file>
-										<file>${basedir}/config/kura.build.properties</file>
-									</files>
-								</configuration>
-							</execution>
-						</executions>
-					</plugin>
-					<plugin>
-						<groupId>org.codehaus.mojo</groupId>
-						<artifactId>buildnumber-maven-plugin</artifactId>
-						<version>1.0</version>
-						<executions>
-							<execution>
-								<phase>validate</phase>
-								<goals>
-									<goal>create-timestamp</goal>
-								</goals>
-							</execution>
-						</executions>
-					</plugin>
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-antrun-plugin</artifactId>
-						<version>1.7</version>
-						<executions>
-							<execution>
-								<id>windows-jars</id>
-								<phase>install</phase>
-								<goals>
-									<goal>run</goal>
-								</goals>
-								<configuration>
-									<target>
-										<property name="buildNumber" value="buildNumber" />
-										<property name="project.version" value="${project.version}" />
-										<property name="project.build.profile" value="${project.build.profile}" />
-										<property name="project.build.directory" value="${project.build.directory}" />
-										<property name="build.name" value="windows" />
-										<property name="target.device" value="windows" />
-										<property name="kura.os.version" value="windows" />
-										<property name="kura.arch" value="x86" />
-										<property name="kura.mem.size" value="256m" />
-										<property name="kura.install.dir" value="/opt/eclipse" />
-										<ant antfile="${basedir}/src/main/ant/build_equinox_distrib.xml"
-											target="dist-windows" />
-									</target>
-								</configuration>
-							</execution>
-						</executions>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>	
 	</profiles>
 </project>

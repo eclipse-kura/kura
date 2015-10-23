@@ -13,7 +13,7 @@
  * 
  */
 /**
- * Provides service for controlling hardware watchdog timer.
+ * Provides service to notify the status of the connection to the cloud.
  *
  */
 package org.eclipse.kura.status;

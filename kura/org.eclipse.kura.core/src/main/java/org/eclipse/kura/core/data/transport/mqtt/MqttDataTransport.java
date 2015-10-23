@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011, 2014 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2015 Eurotech and/or its affiliates, and others
  *
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
@@ -8,6 +8,7 @@
  *
  * Contributors:
  *   Eurotech
+ *   Benjamin Cabé <benjamin@eclipse.org>
  */
 package org.eclipse.kura.core.data.transport.mqtt;
 
@@ -677,27 +678,27 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 			ValidationUtil.notEmptyOrNull(brokerUrl, MQTT_BROKER_URL_PROP_NAME);
 			brokerUrl = brokerUrl.trim();
 			
-			if(m_cryptoService.isFrameworkSecure() && brokerUrl.contains(MQTT_SCHEME)){
-				s_logger.error("Secure (mqtts) connection required!");
-				throw KuraException.internalError("Secure (mqtts) connection required!");
-				
-			}
 			brokerUrl = brokerUrl.replaceAll("^" + MQTT_SCHEME, "tcp://");
 			brokerUrl = brokerUrl.replaceAll("^" + MQTTS_SCHEME, "ssl://"); 
 			
 			brokerUrl = brokerUrl.replaceAll("/$", "");
 			ValidationUtil.notEmptyOrNull(brokerUrl, "brokerUrl");
 
-			ValidationUtil.notEmptyOrNull((String) properties.get(MQTT_USERNAME_PROP_NAME), MQTT_USERNAME_PROP_NAME);
-			ValidationUtil.notNull(properties.get(MQTT_PASSWORD_PROP_NAME), MQTT_PASSWORD_PROP_NAME);
-			ValidationUtil.notEmptyOrNull(new String((char[]) properties.get(MQTT_PASSWORD_PROP_NAME)), MQTT_PASSWORD_PROP_NAME);			
 			ValidationUtil.notNegative((Integer) properties.get(MQTT_KEEP_ALIVE_PROP_NAME), MQTT_KEEP_ALIVE_PROP_NAME);
 			ValidationUtil.notNegative((Integer) properties.get(MQTT_TIMEOUT_PROP_NAME), MQTT_TIMEOUT_PROP_NAME);
 
 			ValidationUtil.notNull((Boolean) properties.get(MQTT_CLEAN_SESSION_PROP_NAME), MQTT_CLEAN_SESSION_PROP_NAME);
 
-			conOpt.setUserName((String) properties.get(MQTT_USERNAME_PROP_NAME));
-			conOpt.setPassword((char[]) properties.get(MQTT_PASSWORD_PROP_NAME));
+			String userName = (String) properties.get(MQTT_USERNAME_PROP_NAME);
+			if (userName != null) {
+				conOpt.setUserName(userName);
+			}
+
+			char[] password = (char[]) properties.get(MQTT_PASSWORD_PROP_NAME);
+			if (password != null) {
+				conOpt.setPassword(password);
+			}
+
 			conOpt.setKeepAliveInterval((Integer) properties.get(MQTT_KEEP_ALIVE_PROP_NAME));
 			conOpt.setConnectionTimeout((Integer) properties.get(MQTT_TIMEOUT_PROP_NAME));
 

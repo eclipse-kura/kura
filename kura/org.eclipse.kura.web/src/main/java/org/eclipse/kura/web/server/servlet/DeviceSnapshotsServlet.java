@@ -26,7 +26,9 @@ import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.core.configuration.ComponentConfigurationImpl;
 import org.eclipse.kura.core.configuration.XmlComponentConfigurations;
 import org.eclipse.kura.core.configuration.util.XmlUtil;
+import org.eclipse.kura.web.server.KuraRemoteServiceServlet;
 import org.eclipse.kura.web.server.util.ServiceLocator;
+import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,6 +41,17 @@ public class DeviceSnapshotsServlet extends HttpServlet
     
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException 
     {
+    	// BEGIN XSRF - Servlet dependent code
+
+        try {
+            GwtXSRFToken token = new GwtXSRFToken(request.getParameter("xsrfToken"));
+            KuraRemoteServiceServlet.checkXSRFToken(request, token);
+        }
+        catch (Exception e) {
+            throw new ServletException("Security error: please retry this operation correctly.", e);
+        }
+        // END XSRF security check
+        
         String snapshotId = request.getParameter("snapshotId");
 
         response.setCharacterEncoding("UTF-8");

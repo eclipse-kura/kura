@@ -19,13 +19,13 @@
 	<parent>
 		<groupId>org.eclipse.kura</groupId>
 		<artifactId>kura</artifactId>
-		<version>1.2.2</version>
+		<version>1.3.0</version>
 		<relativePath>../manifest_pom.xml</relativePath>
 	</parent>
 
 	<artifactId>org.eclipse.kura.core.test</artifactId>
 	<packaging>eclipse-test-plugin</packaging>
-	<version>1.0.3-SNAPSHOT</version>
+	<version>1.0.3</version>
 
 	<properties>
 		<kura.basedir>${project.basedir}/..</kura.basedir>
@@ -80,9 +80,8 @@
                     <useUnlimitedThreads>true</useUnlimitedThreads>
                     <argLine>${tycho.testArgLine} -DbuildingWithTycho=true -Dosgi.locking=none -Dequinox.ds.print=true -Dorg.osgi.framework.storage=/tmp/osgi/framework_storage -Dosgi.clean=true -Dorg.eclipse.kura.mode=emulator -Dkura.configuration=file:${project.basedir}/../org.eclipse.kura.emulator/src/main/resources/kura.properties -Ddpa.configuration=/tmp/kura/dpa.properties  -Dlog4j.configuration=file:../org.eclipse.kura.emulator/src/main/resources/log4j.properties</argLine>
 
-		    <!-- This can be uncommented to debug the test in the event of a failure by telneting to port 5002 and seeing the state of the OSGi runtime
-                    <appArgLine>-consoleLog -console 5002 -noExit</appArgLine>
-            -->
+		    <!-- This can be uncommented to debug the test in the event of a failure by telneting to port 5002 and seeing the state of the OSGi runtime-->
+            <!--        <appArgLine>-consoleLog -console 5002 -noExit</appArgLine>-->
             <bundleStartLevel>
 			<bundle>
 			    <id>org.eclipse.equinox.ds</id>
@@ -290,6 +289,16 @@
 			    <autoStart>true</autoStart>
 			</bundle>
 			<bundle>
+				<id>org.eclipse.kura.emulator.gpio</id>
+				<level>4</level>
+				<autoStart>true</autoStart>
+			</bundle>
+			<bundle>
+				<id>org.eclipse.kura.linux.status</id>
+				<level>4</level>
+				<autoStart>true</autoStart>
+			</bundle>
+			<bundle>
 			    <id>org.eclipse.kura.emulator</id>
 			    <level>4</level>
 			    <autoStart>true</autoStart>
@@ -475,6 +484,14 @@
                             <artifactId>org.eclipse.kura.deployment.agent</artifactId>
                         </dependency>
                         <dependency>
+                        	<type>p2-installable-unit</type>
+                            <artifactId>org.eclipse.kura.emulator.gpio</artifactId>
+                        </dependency>
+						<dependency>
+                        	<type>p2-installable-unit</type>
+                            <artifactId>org.eclipse.kura.linux.status</artifactId>
+                        </dependency>
+						<dependency>
                         	<type>p2-installable-unit</type>
                             <artifactId>org.eclipse.kura.emulator</artifactId>
                         </dependency>

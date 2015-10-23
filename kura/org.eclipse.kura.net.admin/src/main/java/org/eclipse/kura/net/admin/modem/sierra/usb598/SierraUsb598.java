@@ -54,7 +54,6 @@ public class SierraUsb598 implements EvdoCellularModem {
 	//private static final int AT_PORT = 0;
 	private static final int HIP_PORT = 1;
 	
-	private ModemTechnologyType m_technologyType = null;
 	private ConnectionFactory m_connectionFactory = null;
 	private String m_model = null;
 	private String m_manufacturer = null;
@@ -154,12 +153,10 @@ public class SierraUsb598 implements EvdoCellularModem {
      * @param technologyType - cellular technology type as {@link ModemTechnologyType}
      */
 	public SierraUsb598(ModemDevice device,
-			ConnectionFactory connectionFactory,
-			ModemTechnologyType technologyType) {
+			ConnectionFactory connectionFactory) {
         
         m_device = device;
         m_connectionFactory = connectionFactory;
-        m_technologyType = technologyType;
         m_atLock = new Object();
         s_topicsOfInterest = generateSubscribeTopics();
     	// subscribe on specific topics of interest
@@ -520,8 +517,40 @@ public class SierraUsb598 implements EvdoCellularModem {
 	}
 	
 	@Override
+	public List<ModemTechnologyType> getTechnologyTypes() throws KuraException {
+		
+		List<ModemTechnologyType>modemTechnologyTypes = null;
+		ModemDevice device = getModemDevice();
+		if (device == null) {
+			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "No modem device");
+		}
+		if (device instanceof UsbModemDevice) {
+    		SupportedUsbModemInfo usbModemInfo = SupportedUsbModemsInfo.getModem((UsbModemDevice)device);
+    		if (usbModemInfo != null)  {
+    			modemTechnologyTypes = usbModemInfo.getTechnologyTypes();
+    		} else {
+    			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "No usbModemInfo available");
+    		}
+    	} else {
+    		throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "Unsupported modem device");
+    	}
+		return modemTechnologyTypes;
+	}
+
+	
+	@Override
+	@Deprecated
 	public ModemTechnologyType getTechnologyType() {
-		return m_technologyType;
+    	ModemTechnologyType modemTechnologyType = null;
+    	try {
+			List<ModemTechnologyType> modemTechnologyTypes = getTechnologyTypes();
+			if((modemTechnologyTypes != null) && (modemTechnologyTypes.size() > 0)) {
+				modemTechnologyType = modemTechnologyTypes.get(0);
+			}
+		} catch (KuraException e) {
+			s_logger.error("Failed to obtain modem technology - {}", e);
+		}
+		return modemTechnologyType;
 	}
 	
 	private String getHipPort() throws KuraException {
@@ -549,6 +578,7 @@ public class SierraUsb598 implements EvdoCellularModem {
 	}
 	
 	public CommURI getSerialConnectionProperties(SerialPortType portType) throws KuraException {
+		CommURI commURI = null;
 		try {
 			String port;
 			if (portType == SerialPortType.ATPORT) {
@@ -560,13 +590,15 @@ public class SierraUsb598 implements EvdoCellularModem {
 			} else {
 				throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "Invalid Port Type");
 			}
-			StringBuffer sb = new StringBuffer();
-			sb.append("comm:").append(port).append(";baudrate=115200;databits=8;stopbits=1;parity=0");
-			return CommURI.parseString(sb.toString());
-			
+			if (port != null) {
+				StringBuffer sb = new StringBuffer();
+				sb.append("comm:").append(port).append(";baudrate=115200;databits=8;stopbits=1;parity=0");
+				commURI = CommURI.parseString(sb.toString());
+			}
 		} catch (URISyntaxException e) {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "URI Syntax Exception");
 		}
+		return commURI;
 	}
 	
 	public boolean isGpsEnabled() {

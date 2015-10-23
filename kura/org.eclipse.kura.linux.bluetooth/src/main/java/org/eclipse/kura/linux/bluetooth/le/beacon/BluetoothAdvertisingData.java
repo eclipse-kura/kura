@@ -51,6 +51,7 @@ public class BluetoothAdvertisingData {
 		data += to2BytesHex(major);
 		data += to2BytesHex(minor);
 		data += txPowerString;
+		data += "00";
 
 		return data;
 	}

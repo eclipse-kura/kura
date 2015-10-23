@@ -149,5 +149,8 @@ public interface CellularModem {
     
     public void setConfiguration(List<NetConfig> netConfigs);
     
+    public List<ModemTechnologyType> getTechnologyTypes() throws KuraException;
+    
+    @Deprecated
     public ModemTechnologyType getTechnologyType ();
 }

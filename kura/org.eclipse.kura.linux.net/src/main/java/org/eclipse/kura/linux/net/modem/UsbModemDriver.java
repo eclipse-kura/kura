@@ -15,27 +15,39 @@ import org.eclipse.kura.core.linux.util.LinuxProcessUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class UsbModemDriver {
+public class UsbModemDriver extends ModemDriver {
 	
 	private static final Logger s_logger = LoggerFactory.getLogger(UsbModemDriver.class);
 	
 	private String m_name;
+	private String m_vendor;
+	private String m_product;
 	
-	public UsbModemDriver (String name) {
+	public UsbModemDriver (String name, String vendor, String product) {
 		m_name = name;
+		m_vendor = vendor;
+		m_product = product;
 	}
 	
 	public int install() throws Exception {
-		s_logger.info("installing driver: " + m_name);
+		s_logger.info("installing driver: {}", m_name);
 		return LinuxProcessUtil.start("modprobe " + m_name, true);
 	}
 	
 	public int remove() throws Exception {
-		s_logger.info("removing driver: " + m_name);
+		s_logger.info("removing driver: {}", m_name);
 		return LinuxProcessUtil.start("rmmod " + m_name, true);
 	}
 
 	public String getName() {
 		return m_name;
+	}
+
+	public String getVendor() {
+		return m_vendor;
+	}
+
+	public String getProduct() {
+		return m_product;
 	}
 }

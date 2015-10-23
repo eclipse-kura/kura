@@ -1,0 +1,15 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: org.eclipse.kura.emulator.gpio
+Bundle-SymbolicName: org.eclipse.kura.emulator.gpio;singleton:=true
+Bundle-Version: 1.0.0
+Bundle-Vendor: EUROTECH
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Export-Package: org.eclipse.kura.emulator.gpio; version="1.0.0"
+Service-Component: OSGI-INF/*.xml
+Bundle-ActivationPolicy: lazy
+Import-Package: org.eclipse.kura.gpio; version="[1.0,1.1)",
+ org.osgi.framework;version="1.5.0",
+ org.osgi.service.component;version="1.2.0",
+ org.slf4j;version="1.6.4"
+Bundle-ClassPath: .

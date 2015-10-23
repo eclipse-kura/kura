@@ -21,8 +21,9 @@ import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.client.widget.FileUploadDialog;
 import org.eclipse.kura.web.shared.model.GwtSession;
 import org.eclipse.kura.web.shared.model.GwtSnapshot;
-import org.eclipse.kura.web.shared.service.GwtNetworkService;
-import org.eclipse.kura.web.shared.service.GwtNetworkServiceAsync;
+import org.eclipse.kura.web.shared.model.GwtXSRFToken;
+import org.eclipse.kura.web.shared.service.GwtSecurityTokenService;
+import org.eclipse.kura.web.shared.service.GwtSecurityTokenServiceAsync;
 import org.eclipse.kura.web.shared.service.GwtSnapshotService;
 import org.eclipse.kura.web.shared.service.GwtSnapshotServiceAsync;
 
@@ -60,7 +61,6 @@ import com.extjs.gxt.ui.client.widget.toolbar.ToolBar;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.Timer;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
 
@@ -68,8 +68,8 @@ public class SnapshotsTab extends LayoutContainer {
 
 	private static final Messages MSGS = GWT.create(Messages.class);
 
+	private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
 	private final GwtSnapshotServiceAsync gwtSnapshotService = GWT.create(GwtSnapshotService.class);
-	private final GwtNetworkServiceAsync gwtNetworkService = GWT.create(GwtNetworkService.class);
 
 	private final static String SERVLET_URL = "/" + GWT.getModuleName() + "/file/configuration/snapshot";
 
@@ -89,15 +89,19 @@ public class SnapshotsTab extends LayoutContainer {
 	private Grid<GwtSnapshot>      m_grid;
 	private BaseListLoader<ListLoadResult<GwtSnapshot>> m_loader;
 	private FileUploadDialog       m_fileUpload;
+	private CustomWindow 		   m_downloadWindow;
+
+	private boolean 			   m_isServicesReloadNeeded;
 
 
 	public SnapshotsTab(GwtSession currentSession,
 			ServiceTree serviceTree) 
 	{
-		m_currentSession = currentSession;
-		m_servicesTree   = serviceTree;
-		m_dirty          = false;
-		m_initialized    = false;
+		m_currentSession         = currentSession;
+		m_servicesTree           = serviceTree;
+		m_dirty                  = false;
+		m_initialized            = false;
+		m_isServicesReloadNeeded = false;
 	}
 
 
@@ -152,7 +156,19 @@ public class SnapshotsTab extends LayoutContainer {
 				new SelectionListener<ButtonEvent>() {
 			@Override
 			public void componentSelected(ButtonEvent ce) {
-				downloadSnapshot();
+				//please see http://stackoverflow.com/questions/13277752/gwt-open-window-after-rpc-is-prevented-by-popup-blocker
+				m_downloadWindow= CustomWindow.open(null, "_blank", "location=no"); 
+				gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
+					@Override
+					public void onFailure(Throwable ex) {
+						FailureHandler.handle(ex);
+					}
+
+					@Override
+					public void onSuccess(GwtXSRFToken token) {
+						downloadSnapshot(token.getToken());
+					}
+				});
 			}
 		});
 		m_downloadButton.setEnabled(false);
@@ -162,6 +178,7 @@ public class SnapshotsTab extends LayoutContainer {
 				new SelectionListener<ButtonEvent>() {
 			@Override
 			public void componentSelected(ButtonEvent ce) {
+				m_isServicesReloadNeeded= true;
 				rollbackSnapshot();
 			}
 		});
@@ -172,6 +189,7 @@ public class SnapshotsTab extends LayoutContainer {
 				new SelectionListener<ButtonEvent>() {
 			@Override
 			public void componentSelected(ButtonEvent ce) {
+				m_isServicesReloadNeeded = true;
 				uploadSnapshot();
 			}
 		});
@@ -201,8 +219,18 @@ public class SnapshotsTab extends LayoutContainer {
 		// loader and store
 		RpcProxy<ListLoadResult<GwtSnapshot>> proxy = new RpcProxy<ListLoadResult<GwtSnapshot>>() {
 			@Override
-			public void load(Object loadConfig, AsyncCallback<ListLoadResult<GwtSnapshot>> callback) {
-				gwtSnapshotService.findDeviceSnapshots(callback);
+			public void load(Object loadConfig, final AsyncCallback<ListLoadResult<GwtSnapshot>> callback) {
+				gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
+					@Override
+					public void onFailure(Throwable ex) {
+						FailureHandler.handle(ex);
+					}
+
+					@Override
+					public void onSuccess(GwtXSRFToken token) {	
+						gwtSnapshotService.findDeviceSnapshots(token, callback);
+					}
+				});
 			}
 		};
 		m_loader = new BaseListLoader<ListLoadResult<GwtSnapshot>>(proxy);
@@ -262,10 +290,6 @@ public class SnapshotsTab extends LayoutContainer {
 			m_toolBar.enable();
 			m_refreshButton.enable();
 			reload();
-
-			// refresh the list
-			// and reselect the item
-			m_servicesTree.refreshServicePanel();
 		}
 	}
 
@@ -273,13 +297,18 @@ public class SnapshotsTab extends LayoutContainer {
 		m_loader.load();
 	}
 
-	private void downloadSnapshot() {
+	private void downloadSnapshot(String tokenId) {
+		final StringBuilder sbUrl = new StringBuilder();
+
 		GwtSnapshot snapshot = m_grid.getSelectionModel().getSelectedItem();
-		StringBuilder sbUrl = new StringBuilder();
 		sbUrl.append("/" + GWT.getModuleName() + "/device_snapshots?")
 		.append("snapshotId=")
-		.append(snapshot.getSnapshotId());
-		Window.open(sbUrl.toString(), "_blank", "location=no");
+		.append(snapshot.getSnapshotId())
+		.append("&")
+		.append("xsrfToken=")
+		.append(tokenId);
+
+		m_downloadWindow.setUrl(sbUrl.toString());
 	}
 
 	private void uploadSnapshot() {
@@ -315,45 +344,28 @@ public class SnapshotsTab extends LayoutContainer {
 						m_grid.mask(MSGS.rollingBack());
 						m_toolBar.disable();
 						// do the rollback
-						if (snapshot.getSnapshotId() == 0L) {
-							if (gwtNetworkService != null) {
-								gwtNetworkService.rollbackDefaultConfiguration(new AsyncCallback<Void>() {                        										 	    
-									public void onFailure(Throwable caught) {
-										FailureHandler.handle(caught);
-										m_dirty = true;
-									}                        								    
-									public void onSuccess(Void arg0) {
-										gwtSnapshotService.rollbackDeviceSnapshot(
-												snapshot,  
-												new AsyncCallback<Void>() {                        										 	    
-													public void onFailure(Throwable caught) {
-														FailureHandler.handle(caught);
-														m_dirty = true;
-													}                        								    
-													public void onSuccess(Void arg0) {
-														refresh();
-													}
-												});
-										refresh();
-									}
-								});
+
+						gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
+							@Override
+							public void onFailure(Throwable ex) {
+								FailureHandler.handle(ex);
 							}
-						}else{
 
-
-							gwtSnapshotService.rollbackDeviceSnapshot(
-									snapshot,  
-									new AsyncCallback<Void>() {                        										 	    
-										public void onFailure(Throwable caught) {
-											FailureHandler.handle(caught);
-											m_dirty = true;
-										}                        								    
-										public void onSuccess(Void arg0) {
-											refresh();
-										}
-									});
-						}
-
+							@Override
+							public void onSuccess(GwtXSRFToken token) {	
+								gwtSnapshotService.rollbackDeviceSnapshot(
+										token,
+										snapshot,  
+										new AsyncCallback<Void>() {                        										 	    
+											public void onFailure(Throwable caught) {
+												FailureHandler.handle(caught);
+												m_dirty = true;
+											}                        								    
+											public void onSuccess(Void arg0) {
+												refresh();
+											}
+										});
+							}});
 					}
 				}
 			});
@@ -375,6 +387,13 @@ public class SnapshotsTab extends LayoutContainer {
 		public void loaderLoad(LoadEvent le) {
 			if (le.exception != null) {
 				FailureHandler.handle(le.exception);
+			} else {
+				if(m_isServicesReloadNeeded){
+					// refresh the list
+					// and reselect the item
+					m_servicesTree.refreshServicePanel();
+					m_isServicesReloadNeeded= false;
+				}
 			}
 		}
 

@@ -39,8 +39,8 @@ public interface SystemService
 	public static final String UNKNOWN         = "UNKNOWN";
 	public static final String UNSUPPORTED     = "UNSUPPORTED";
 	
-	public static final String KEY_KURA_NAME                                = "kura.name";
-	public static final String KEY_KURA_VERSION                             = "kura.version";
+	public static final String KEY_KURA_NAME                               = "kura.name";
+	public static final String KEY_KURA_VERSION                            = "kura.version";
 	public static final String KEY_DEVICE_NAME                             = "kura.device.name";
 	public static final String KEY_PLATFORM                                = "kura.platform";
 	public static final String KEY_MODEL_ID                                = "kura.model.id";
@@ -50,18 +50,20 @@ public interface SystemService
 	public static final String KEY_BIOS_VERSION                            = "kura.bios.version";
 	public static final String KEY_FIRMWARE_VERSION                        = "kura.firmware.version";
 	public static final String KEY_PRIMARY_NET_IFACE                       = "kura.primary.network.interface";
-	public static final String KEY_KURA_HOME_DIR                            = "kura.home";
-	public static final String KEY_KURA_PLUGINS_DIR                         = "kura.plugins";
-	public static final String KEY_KURA_DATA_DIR                            = "kura.data";
-	public static final String KEY_KURA_TMP_DIR                             = "kura.tmp";
-	public static final String KEY_KURA_SNAPSHOTS_DIR                       = "kura.snapshots";
-	public static final String KEY_KURA_SNAPSHOTS_COUNT                     = "kura.snapshots.count";
-	public static final String KEY_KURA_HAVE_NET_ADMIN                      = "kura.have.net.admin";
-	public static final String KEY_KURA_HAVE_WEB_INTER                      = "kura.have.web.inter";
+	public static final String KEY_KURA_HOME_DIR                           = "kura.home";
+	public static final String KEY_KURA_PLUGINS_DIR                        = "kura.plugins";
+	public static final String KEY_KURA_DATA_DIR                           = "kura.data";
+	public static final String KEY_KURA_TMP_DIR                            = "kura.tmp";
+	public static final String KEY_KURA_SNAPSHOTS_DIR                      = "kura.snapshots";
+	public static final String KEY_KURA_SNAPSHOTS_COUNT                    = "kura.snapshots.count";
+	public static final String KEY_KURA_HAVE_NET_ADMIN                     = "kura.have.net.admin";
+	public static final String KEY_KURA_HAVE_WEB_INTER                     = "kura.have.web.inter";
 	public static final String KEY_KURA_STYLE_DIR	                       = "kura.style.dir";
-	public static final String KEY_KURA_WIFI_TOP_CHANNEL                    = "kura.wifi.top.channel";
-    public static final String KEY_KURA_KEY_STORE_PWD                       = "kura.ssl.keyStorePassword";
-    public static final String KEY_KURA_TRUST_STORE_PWD                     = "kura.ssl.trustStorePassword";
+	public static final String KEY_KURA_WIFI_TOP_CHANNEL                   = "kura.wifi.top.channel";
+    public static final String KEY_KURA_KEY_STORE_PWD                      = "kura.ssl.keyStorePassword";
+    public static final String KEY_KURA_TRUST_STORE_PWD                    = "kura.ssl.trustStorePassword";
+    public static final String KEY_FILE_COMMAND_ZIP_MAX_SIZE               = "file.command.zip.max.size";
+    public static final String KEY_FILE_COMMAND_ZIP_MAX_NUMBER             = "file.command.zip.max.number";
 	public static final String KEY_OS_ARCH                                 = "os.arch";
 	public static final String KEY_OS_NAME                                 = "os.name";
 	public static final String KEY_OS_VER                                  = "os.version";
@@ -77,6 +79,15 @@ public interface SystemService
 	public static final String KEY_JAVA_HOME                               = "java.home";
 	public static final String KEY_FILE_SEP                                = "file.separator";
 	public static final String CONFIG_CONSOLE_DEVICE_MANAGE_SERVICE_IGNORE = "console.device.management.service.ignore";
+	
+    public static final String DB_URL_PROPNAME        	                   = "db.service.hsqldb.url";
+    public static final String DB_CACHE_ROWS_PROPNAME                      = "db.service.hsqldb.cache_rows";
+    public static final String DB_LOB_FILE_PROPNAME                        = "db.service.hsqldb.lob_file_scale";
+    public static final String DB_DEFRAG_LIMIT_PROPNAME                    = "db.service.hsqldb.defrag_limit";
+    public static final String DB_LOG_DATA_PROPNAME                        = "db.service.hsqldb.log_data";
+    public static final String DB_LOG_SIZE_PROPNAME                        = "db.service.hsqldb.log_size";
+    public static final String DB_NIO_PROPNAME                             = "db.service.hsqldb.nio_data_file";
+    public static final String DB_WRITE_DELAY_MILLIES_PROPNAME             = "db.service.hsqldb.write_delay_millis";
 	
 	/**
 	 * Gets the primary MAC address of the system
@@ -323,6 +334,18 @@ public interface SystemService
 	 */
 	public String getKuraDataDirectory();
 	
+    /**
+	 * Returns the size in MegaBytes of the maximum file upload size permitted by the local file servlet
+	 * @return The maximum size (in mega bytes) of files that can be uploaded using the command file upload function
+	 */
+    public int getFileCommandZipMaxUploadSize();
+    
+    /**
+	 * Returns the maximum number of files that can be uploaded by the local file servlet
+	 * @return The maximum number of files that can be uploaded using the command file upload function
+	 */
+    public int getFileCommandZipMaxUploadNumber();
+	
 	/**
 	 * Returns all KuraProperties for this system. The returned instances is 
 	 * initialized by loading the kura.properties file. Properties defined at 
@@ -377,4 +400,5 @@ public interface SystemService
 	 * @return
 	 */
     public List<String> getDeviceManagementServiceIgnore();
+
 }

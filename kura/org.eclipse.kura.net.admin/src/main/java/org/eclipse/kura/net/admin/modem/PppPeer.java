@@ -16,7 +16,6 @@ import java.io.PrintWriter;
 
 import org.eclipse.kura.net.admin.visitor.linux.util.ChapLinux;
 import org.eclipse.kura.net.admin.visitor.linux.util.PapLinux;
-import org.eclipse.kura.net.modem.ModemTechnologyType;
 import org.eclipse.kura.net.modem.ModemConfig.AuthType;
 
 /* 
@@ -42,9 +41,6 @@ public class PppPeer {
 	
 	/* name of the provider */
 	private String m_provider = null;
-	
-	/* network technology (e.g. EVDO, 3G) */
-	private ModemTechnologyType m_networkTechnology = null;
 	
 	/* access point name */
 	private String m_apn = null;
@@ -231,24 +227,6 @@ public class PppPeer {
 	 */
 	public void setProvider(String provider) {
 		m_provider = provider;
-	}
-	
-	/**
-	 * Reports network technology. (e.g. evdo, 3G)
-	 * 
-	 * @return - network technology
-	 */
-	public ModemTechnologyType getNetworkTechnology() {
-		return m_networkTechnology;
-	}
-
-	/**
-	 * Sets network technology
-	 * 
-	 * @param networkTechnology as ModemServiceType 
-	 */
-	public void setNetworkTechnology(ModemTechnologyType networkTechnology) {
-		m_networkTechnology = networkTechnology;
 	}
 	
 	/**

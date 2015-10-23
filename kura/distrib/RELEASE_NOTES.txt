@@ -1,3 +1,43 @@
+Eclipse Kura - 1.3.0
+-------------------------------------------------------------------------
+
+Added Features :
+  * API updates (Security, GPIOService)
+  * Enhanced web UI security, which includes:
+    * XSRF protection in all servlets
+    * Different management of user sessions
+    * Arbitrary file writes protection in file servlet for zip uploads 
+    * XSS on wireless SSID in network servlet
+    * Command injection on network servlet
+    * Password protection in client UI, in order to prevent access to secrets by unauthorized users
+    * Sanitization of user and system strings in order to prevent malicious attacks
+  * Ability to configure pairwise ciphers in AP mode in web UI.
+  * Ability to stop/start bundles from web UI.
+  * Ability to embed ConfigurableComponent icon within bundle, instead for requiring https location.
+  * Added support for Telit LE910 modems.
+  * Added test code for XML marshalling/unmarshalling.
+  * Removed Xss option from start scripts. This JVM option has a know bug in OpenJDK.
+  * Improvements to usability of Emulator.
+  * Improvements to the Development Environment.
+
+Know Issues :
+  * BLE only tested on the Raspberry Pi B with a Broadcom BCM20702 USB dongle and the TI SensorTag.
+    The only working version of BlueZ is 4.101. The deb package is not available from Raspbian so it
+    must be compiled from sources.
+  * WiFi on Raspberry Pi only tested with WiPi WiFi Dongle (Realink RT5370 chipset) and official Pi USB WiFi Dongle (Broadcom BCM43143 chipset).
+    AccessPoint WiFi mode not working for Broadcom chipest.
+  * The reference JVM is Oracle Java SE Embedded version 7 Update 40.
+    Later versions (including Oracle Java SE Embedded version 8 Update 33)
+    may be affected by a ProcessBuilder memory leak [1]
+  * Hardware watchdog: not implemented on all platforms
+  * Only one WAN interface is currently supported. A warning in displayed
+    in the WEB UI if the user attempts to enable more than one WAN interface
+  * When first modem configuration is submitted, unconfigured cellular interface for serial modem (e.g. HE910) is not being replaced by
+    ppp0 interface. Both ppp0 and HE910 interfaces are shown in the Web Admin.
+  * Gateway needs to be rebooted for static GPS coordinates to be published to the cloud.
+
+[1] https://bugs.openjdk.java.net/browse/JDK-8054841
+
 Eclipse Kura - 1.2.2
 -------------------------------------------------------------------------
 

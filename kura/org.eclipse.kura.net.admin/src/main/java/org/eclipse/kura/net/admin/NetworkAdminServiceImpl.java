@@ -109,6 +109,13 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
     private final static String[] EVENT_TOPICS = new String[] {
         NetworkConfigurationChangeEvent.NETWORK_EVENT_CONFIG_CHANGE_TOPIC,
     };
+    
+    private class NetworkRollbackItem {
+		String m_src; String m_dst;
+		NetworkRollbackItem(String src, String dst) {
+			m_src = src; m_dst = dst;
+		}
+	}
 
 	
 	// ----------------------------------------------------------------
@@ -905,7 +912,6 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 	}
 	
 	public void manageFirewall (String gatewayIface) throws KuraException {
-		
 		// get desired NAT rules interfaces
 		LinkedHashSet<NATRule> desiredNatRules = null; 
 		ComponentConfiguration networkComponentConfiguration = ((SelfConfiguringComponent)m_networkConfigurationService).getConfiguration();
@@ -943,6 +949,7 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 		} else {
 			firewall.deleteAllAutoNatRules();
 		}
+		
 		firewall.enable();
 	}
 
@@ -1308,16 +1315,9 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 	
 	@Override
 	public boolean rollbackDefaultConfiguration() throws KuraException {
-		s_logger.debug("Recovering default configuration ...");
-		
-		final class RollbackItem {
-			String m_src; String m_dst;
-			RollbackItem(String src, String dst) {
-				m_src = src; m_dst = dst;
-			}
-		}
-		
-		ArrayList<RollbackItem> rollbackItems = new ArrayList<RollbackItem>();
+		s_logger.debug("rollbackDefaultConfiguration() :: Recovering default configuration ...");
+				
+		ArrayList<NetworkRollbackItem> rollbackItems = new ArrayList<NetworkRollbackItem>();
 				
 		if (m_systemService == null) {
 			return false;
@@ -1338,16 +1338,16 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 			return false;
 		}
 		
-		rollbackItems.add(new RollbackItem(srcDataDirectory + "/kuranet.conf", dstDataDirectory + "/kuranet.conf"));
-		rollbackItems.add(new RollbackItem(srcDataDirectory + "/firewall", "/etc/init.d/firewall"));
+		rollbackItems.add(new NetworkRollbackItem(srcDataDirectory + "/kuranet.conf", dstDataDirectory + "/kuranet.conf"));
+		//rollbackItems.add(new NetworkRollbackItem(srcDataDirectory + "/firewall", "/etc/init.d/firewall"));
 		if (OS_VERSION.equals(KuraConstants.Intel_Edison.getImageName() + "_" + KuraConstants.Intel_Edison.getImageVersion() + "_" + KuraConstants.Intel_Edison.getTargetName())) {
-			rollbackItems.add(new RollbackItem(srcDataDirectory + "/hostapd.conf", "/etc/hostapd/hostapd.conf"));
-			rollbackItems.add(new RollbackItem(srcDataDirectory + "/dhcpd-eth0.conf", "/etc/udhcpd-usb0.conf"));
-			rollbackItems.add(new RollbackItem(srcDataDirectory + "/dhcpd-wlan0.conf", "/etc/udhcpd-wlan0.conf"));
+			rollbackItems.add(new NetworkRollbackItem(srcDataDirectory + "/hostapd.conf", "/etc/hostapd/hostapd.conf"));
+			rollbackItems.add(new NetworkRollbackItem(srcDataDirectory + "/dhcpd-eth0.conf", "/etc/udhcpd-usb0.conf"));
+			rollbackItems.add(new NetworkRollbackItem(srcDataDirectory + "/dhcpd-wlan0.conf", "/etc/udhcpd-wlan0.conf"));
 		} else {
-			rollbackItems.add(new RollbackItem(srcDataDirectory + "/hostapd.conf", "/etc/hostapd.conf"));
-			rollbackItems.add(new RollbackItem(srcDataDirectory + "/dhcpd-eth0.conf", "/etc/dhcpd-eth0.conf"));
-			rollbackItems.add(new RollbackItem(srcDataDirectory + "/dhcpd-wlan0.conf", "/etc/dhcpd-wlan0.conf"));
+			rollbackItems.add(new NetworkRollbackItem(srcDataDirectory + "/hostapd.conf", "/etc/hostapd.conf"));
+			rollbackItems.add(new NetworkRollbackItem(srcDataDirectory + "/dhcpd-eth0.conf", "/etc/dhcpd-eth0.conf"));
+			rollbackItems.add(new NetworkRollbackItem(srcDataDirectory + "/dhcpd-wlan0.conf", "/etc/dhcpd-wlan0.conf"));
 		}
 			
 		if (OS_VERSION.equals(KuraConstants.Mini_Gateway.getImageName() + "_" + KuraConstants.Mini_Gateway.getImageVersion()) ||
@@ -1355,29 +1355,64 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 				OS_VERSION.equals(KuraConstants.BeagleBone.getImageName()) ||
 				OS_VERSION.equals(KuraConstants.Intel_Edison.getImageName() + "_" + KuraConstants.Intel_Edison.getImageVersion() + "_" + KuraConstants.Intel_Edison.getTargetName())) {
 			// restore Debian interface configuration
-			rollbackItems.add(new RollbackItem(srcDataDirectory + "/interfaces", "/etc/network/interfaces"));
+			rollbackItems.add(new NetworkRollbackItem(srcDataDirectory + "/interfaces", "/etc/network/interfaces"));
 		} else {
 			// restore RedHat interface configuration
-			rollbackItems.add(new RollbackItem(srcDataDirectory + "/ifcfg-eth0", "/etc/sysconfig/network-scripts/ifcfg-eth0"));
-			rollbackItems.add(new RollbackItem(srcDataDirectory + "/ifcfg-eth1", "/etc/sysconfig/network-scripts/ifcfg-eth1"));
-			rollbackItems.add(new RollbackItem(srcDataDirectory + "/ifcfg-wlan0", "/etc/sysconfig/network-scripts/ifcfg-wlan0"));
+			rollbackItems.add(new NetworkRollbackItem(srcDataDirectory + "/ifcfg-eth0", "/etc/sysconfig/network-scripts/ifcfg-eth0"));
+			rollbackItems.add(new NetworkRollbackItem(srcDataDirectory + "/ifcfg-eth1", "/etc/sysconfig/network-scripts/ifcfg-eth1"));
+			rollbackItems.add(new NetworkRollbackItem(srcDataDirectory + "/ifcfg-wlan0", "/etc/sysconfig/network-scripts/ifcfg-wlan0"));
 		}
 		
-		for (RollbackItem rollbackItem : rollbackItems) {
-			File srcFile = new File (rollbackItem.m_src);
-			File dstFile = new File (rollbackItem.m_dst);
-			if (srcFile.exists()) {
-				try {
-					copyFile(srcFile, dstFile);
-				} catch (IOException e) {
-					s_logger.error("Failed to recover {} file - {}", dstFile, e);
-				}
+		for (NetworkRollbackItem rollbackItem : rollbackItems) {
+			rollbackItem(rollbackItem);
+		}
+		
+		s_logger.debug("rollbackDefaultConfiguration() :: setting network configuration ...");
+		m_networkConfigurationService.setNetworkConfiguration(m_networkConfigurationService.getNetworkConfiguration());
+		
+		return true;
+	}
+	
+	@Override
+	public boolean rollbackDefaultFirewallConfiguration() throws KuraException {
+		s_logger.debug("rollbackDefaultFirewallConfiguration() :: initializing firewall ...");
+		if (m_systemService == null) {
+			return false;
+		}
+		
+		String dstDataDirectory = m_systemService.getKuraDataDirectory();
+		if (dstDataDirectory == null) {
+			return false;
+		}
+		
+		int ind = dstDataDirectory.lastIndexOf('/');
+		String srcDataDirectory = null;
+		if (ind >= 0) {
+			srcDataDirectory = "".concat(dstDataDirectory.substring(0, ind+1).concat(".data"));
+		}
+		
+		if (srcDataDirectory == null) {
+			return false;
+		}
+		
+		NetworkRollbackItem firewallRollbackItem = new NetworkRollbackItem(srcDataDirectory + "/firewall", "/etc/init.d/firewall");
+		rollbackItem(firewallRollbackItem);
+		LinuxFirewall.getInstance().initialize();
+		LinuxFirewall.getInstance().enable();
+		return true;
+	}
+	
+	private void rollbackItem (NetworkRollbackItem rollbackItem) {
+		File srcFile = new File (rollbackItem.m_src);
+		File dstFile = new File (rollbackItem.m_dst);
+		if (srcFile.exists()) {
+			try {
+				s_logger.debug("rollbackItem() :: copying {} to {} ...", srcFile, dstFile);
+				copyFile(srcFile, dstFile);
+			} catch (IOException e) {
+				s_logger.error("rollbackItem() :: Failed to recover {} file - {}", dstFile, e);
 			}
 		}
-		
-		m_networkConfigurationService.setNetworkConfiguration(m_networkConfigurationService.getNetworkConfiguration());
-			
-		return true;
 	}
 	
 	private void copyFile(File sourceFile, File destFile) throws IOException {

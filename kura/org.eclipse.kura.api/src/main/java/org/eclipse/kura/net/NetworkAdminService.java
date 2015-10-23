@@ -189,9 +189,34 @@ public interface NetworkAdminService {
 	 */
 	public void manageFirewall (String gatewayIface) throws KuraException;
 	
+	/**
+	 * Obtains information for WiFi hotspots in range.
+	 * @param ifaceName - name of WiFi interface
+	 * @return map of SSIDs with respective hotspot information.
+	 * @throws KuraException
+	 */
 	public Map<String, WifiHotspotInfo> getWifiHotspots(String ifaceName) throws KuraException;
 	
+	/**
+	 * Verifies WiFi credentials by trying to establish connection with access point.
+	 * @param ifaceName - name of WiFi interface
+	 * @param wifiConfig WiFi configuration
+	 * @param tout - timeout (in seconds)
+	 * @return status - <i>true</i> if credentials are correct, <i>false</i> otherwise
+	 */
 	public boolean verifyWifiCredentials(String ifaceName, WifiConfig wifiConfig, int tout);
 	
+	/**
+	 * Rolls back to default network configuration.
+	 * @return status
+	 * @throws KuraException
+	 */
 	public boolean rollbackDefaultConfiguration() throws KuraException;
+	
+	/**
+	 * Rolls back to default firewall configuration. 
+	 * @return status
+	 * @throws KuraException
+	 */
+	public boolean rollbackDefaultFirewallConfiguration() throws KuraException;
 }

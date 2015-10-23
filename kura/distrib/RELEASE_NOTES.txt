@@ -2,14 +2,15 @@ Eclipse Kura - 1.3.0
 -------------------------------------------------------------------------
 
 Added Features :
+  * API updates (Security, GPIOService)
   * Enhanced web UI security, which includes:
     * XSRF protection in all servlets
-	* Different management of user sessions
-	* Arbitrary file writes protection in file servlet for zip uploads 
-	* XSS on wireless SSID in network servlet
-	* Command injection on network servlet
-	* Password protection in client UI, in order to prevent access to secrets by unauthorized users
-	* Sanitization of user and system strings in order to prevent malicious attacks
+    * Different management of user sessions
+    * Arbitrary file writes protection in file servlet for zip uploads 
+    * XSS on wireless SSID in network servlet
+    * Command injection on network servlet
+    * Password protection in client UI, in order to prevent access to secrets by unauthorized users
+    * Sanitization of user and system strings in order to prevent malicious attacks
   * Ability to configure pairwise ciphers in AP mode in web UI.
   * Ability to stop/start bundles from web UI.
   * Ability to embed ConfigurableComponent icon within bundle, instead for requiring https location.
@@ -17,6 +18,7 @@ Added Features :
   * Added test code for XML marshalling/unmarshalling.
   * Removed Xss option from start scripts. This JVM option has a know bug in OpenJDK.
   * Improvements to usability of Emulator.
+  * Improvements to the Development Environment.
 
 Know Issues :
   * BLE only tested on the Raspberry Pi B with a Broadcom BCM20702 USB dongle and the TI SensorTag.

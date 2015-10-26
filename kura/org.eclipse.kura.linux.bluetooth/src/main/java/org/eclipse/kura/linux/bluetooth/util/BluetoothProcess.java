@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory;
 public class BluetoothProcess {
 
 	private static final Logger s_logger = LoggerFactory.getLogger(BluetoothProcess.class);
-	private static final ExecutorService s_streamGobblers = Executors.newFixedThreadPool(2);
+	private static final ExecutorService s_streamGobblers = Executors.newCachedThreadPool();
 
 	private Process m_process;
 	private Future<?> m_futureInputGobbler;

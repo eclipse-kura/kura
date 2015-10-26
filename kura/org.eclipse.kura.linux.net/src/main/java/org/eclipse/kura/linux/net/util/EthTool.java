@@ -27,33 +27,33 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Defines ethtool utility 
- * 
+ * Defines ethtool utility
+ *
  * @author ilya.binshtok
  *
  */
 public class EthTool implements LinkTool {
-	
+
 	private static final Logger s_logger = LoggerFactory.getLogger(LinuxNetworkUtil.class);
-	
+
 	private static final String LINK_DETECTED = "Link detected:";
 	private static final String DUPLEX = "Duplex:";
 	private static final String SPEED = "Speed:";
-	
-	private String ifaceName = null; 
+
+	private String ifaceName = null;
 	private boolean linkDetected = false;
 	private int speed = 0; // in b/s
 	private String duplex = null;
 
 	/**
 	 * ethtool constructor
-	 * 
+	 *
 	 * @param ifaceName - interface name as {@link String}
 	 */
 	public EthTool (String ifaceName) {
 		this.ifaceName = ifaceName;
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * @see org.eclipse.kura.util.net.service.ILinkTool#get()
@@ -63,14 +63,14 @@ public class EthTool implements LinkTool {
 		BufferedReader br = null;
 		boolean result = false;
 		try {
-			proc = ProcessUtil.exec("ethtool " + this.ifaceName);	
+			proc = ProcessUtil.exec("ethtool " + this.ifaceName);
 			result = (proc.waitFor() == 0)? true : false;
 			br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
 			String line = null;
 			int ind = -1;
 		    while((line = br.readLine()) != null) {
 		    	if ((ind = line.indexOf(LINK_DETECTED)) >= 0) {
-		    		s_logger.trace("Link detected from: " + line);
+		    		s_logger.trace("Link detected from: {}", line);
 		    		line = line.substring(ind + LINK_DETECTED.length()).trim();
 		    		this.linkDetected = (line.compareTo("yes") == 0)? true : false;
 		    	} else if ((ind = line.indexOf(DUPLEX)) >= 0) {
@@ -98,11 +98,11 @@ public class EthTool implements LinkTool {
 				}catch(IOException ex){
 					s_logger.error("I/O Exception while closing BufferedReader!");
 				}
-			}			
-		
+			}
+
 			if (proc != null) ProcessUtil.destroy(proc);
 		}
-		
+
 		return result;
 	}
 

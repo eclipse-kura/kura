@@ -1625,7 +1625,7 @@
 										</copy>
 										<!-- Add individual emulator bundles-->
 										<copy 
-											file="../org.eclipse.kura.emulator.gpio/target/org.eclipse.kura.emulator.gpio-${org.eclipse.kura.emulator.gpio.version}.jar"
+											file="${project.build.directory}/plugins/org.eclipse.kura.emulator.gpio_${org.eclipse.kura.emulator.gpio.version}.jar"
 											todir="${project.build.directory}/staging/target-definition/equinox_3.8.1/repository/plugins"/>
 
 										<delete

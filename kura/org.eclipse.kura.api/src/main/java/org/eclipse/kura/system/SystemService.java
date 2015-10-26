@@ -80,6 +80,15 @@ public interface SystemService
 	public static final String KEY_FILE_SEP                                = "file.separator";
 	public static final String CONFIG_CONSOLE_DEVICE_MANAGE_SERVICE_IGNORE = "console.device.management.service.ignore";
 	
+    public static final String DB_URL_PROPNAME        	                   = "db.service.hsqldb.url";
+    public static final String DB_CACHE_ROWS_PROPNAME                      = "db.service.hsqldb.cache_rows";
+    public static final String DB_LOB_FILE_PROPNAME                        = "db.service.hsqldb.lob_file_scale";
+    public static final String DB_DEFRAG_LIMIT_PROPNAME                    = "db.service.hsqldb.defrag_limit";
+    public static final String DB_LOG_DATA_PROPNAME                        = "db.service.hsqldb.log_data";
+    public static final String DB_LOG_SIZE_PROPNAME                        = "db.service.hsqldb.log_size";
+    public static final String DB_NIO_PROPNAME                             = "db.service.hsqldb.nio_data_file";
+    public static final String DB_WRITE_DELAY_MILLIES_PROPNAME             = "db.service.hsqldb.write_delay_millis";
+	
 	/**
 	 * Gets the primary MAC address of the system
 	 * 

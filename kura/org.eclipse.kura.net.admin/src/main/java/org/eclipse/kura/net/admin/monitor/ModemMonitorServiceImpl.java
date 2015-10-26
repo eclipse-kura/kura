@@ -915,11 +915,11 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 				modemInfoMap.put(ModemGpsEnabledEvent.StopBits, new Integer(commUri.getStopBits()));
 				modemInfoMap.put(ModemGpsEnabledEvent.Parity, new Integer(commUri.getParity()));
 				
-				s_logger.info("postModemGpsEvent() :: posting ModemGpsEnabledEvent on topic {}", ModemGpsEnabledEvent.MODEM_EVENT_GPS_ENABLED_TOPIC);
+				s_logger.debug("postModemGpsEvent() :: posting ModemGpsEnabledEvent on topic {}", ModemGpsEnabledEvent.MODEM_EVENT_GPS_ENABLED_TOPIC);
 				m_eventAdmin.postEvent(new ModemGpsEnabledEvent(modemInfoMap));
 			}
 		} else {
-			s_logger.info("postModemGpsEvent() :: posting ModemGpsDisableEvent on topic {}", ModemGpsDisabledEvent.MODEM_EVENT_GPS_DISABLED_TOPIC);
+			s_logger.debug("postModemGpsEvent() :: posting ModemGpsDisableEvent on topic {}", ModemGpsDisabledEvent.MODEM_EVENT_GPS_DISABLED_TOPIC);
 			HashMap<String, Object> modemInfoMap = new HashMap<String, Object>();
 			m_eventAdmin.postEvent(new ModemGpsDisabledEvent(modemInfoMap));
 		}

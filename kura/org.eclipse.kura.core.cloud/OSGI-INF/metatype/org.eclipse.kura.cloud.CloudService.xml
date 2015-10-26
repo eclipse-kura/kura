@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright (c) 2011, 2014 Eurotech and/or its affiliates
+    Copyright (c) 2011, 2015 Eurotech and/or its affiliates, and others
 
      All rights reserved. This program and the accompanying materials
      are made available under the terms of the Eclipse Public License v1.0
@@ -10,6 +10,7 @@
 
     Contributors:
       Eurotech
+      Benjamin Cabé <benjamin@eclipse.org>
 
 -->
 <MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
@@ -42,6 +43,15 @@
         	description='Custom name for the device. This value is applied ONLY if device.display-name is set to "Custom"'>
         </AD>
                     
+        <AD id="topic.control-prefix"
+            name="topic.control-prefix"
+            type="String"
+            cardinality="0"
+            required="true"
+            default="$EDC"
+            description='Topic prefix for system messages.'>
+        </AD>
+                    
         <AD id="encode.gzip"
             name="encode.gzip"
             type="Boolean"
@@ -66,6 +76,22 @@
             required="true"
             default="false"
             description="Whether or not to republish the MQTT Birth Certificate on modem detection event"/>
+            
+        <AD id="disable.default.subscriptions"
+            name="disable.default.subscriptions"
+            type="Boolean"
+            cardinality="0"
+            required="true"
+            default="false"
+            description="By disabling default subscriptions the gateway will not be remotely manageable"/>
+            
+        <AD id="disable.republish.birth.cert.on.reconnect"
+            name="disable.republish.birth.cert.on.reconnect"
+            type="Boolean"
+            cardinality="0"
+            required="true"
+            default="false"
+            description="Disable republishing the MQTT Birth Certificate on reconnects"/>    
     </OCD>
     
     <Designate pid="org.eclipse.kura.cloud.CloudService">

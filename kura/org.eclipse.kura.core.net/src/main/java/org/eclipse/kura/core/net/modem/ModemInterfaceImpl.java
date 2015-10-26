@@ -15,8 +15,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.kura.core.net.AbstractNetInterface;
-import org.eclipse.kura.core.net.NetInterfaceAddressImpl;
-import org.eclipse.kura.net.NetInterfaceAddress;
 import org.eclipse.kura.net.NetInterfaceType;
 import org.eclipse.kura.net.modem.ModemDevice;
 import org.eclipse.kura.net.modem.ModemInterface;

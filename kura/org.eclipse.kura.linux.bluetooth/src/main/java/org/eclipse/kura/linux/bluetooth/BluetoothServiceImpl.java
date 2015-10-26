@@ -1,43 +1,32 @@
 package org.eclipse.kura.linux.bluetooth;
 
-import java.util.Map;
-
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.bluetooth.BluetoothAdapter;
+import org.eclipse.kura.bluetooth.BluetoothBeaconCommandListener;
 import org.eclipse.kura.bluetooth.BluetoothService;
-import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class BluetoothServiceImpl implements BluetoothService, ConfigurableComponent {
+public class BluetoothServiceImpl implements BluetoothService {
 
 	private static final Logger s_logger = LoggerFactory.getLogger(BluetoothServiceImpl.class);
 	
 	private static ComponentContext s_context;
-	
-	private final String PROPERTY_INAME = "iname";
-	
-	private String m_name;
-	
+	 
 	// --------------------------------------------------------------------
 	//
 	//  Activation APIs
 	//
 	// --------------------------------------------------------------------
-	protected void activate(ComponentContext context, Map<String,Object> properties) {
+	protected void activate(ComponentContext context) {
 		s_logger.info("Activating Bluetooth Service...");
 		s_context = context;
-		m_name = (String) properties.get(PROPERTY_INAME);
 	}
 	
 	protected void deactivate(ComponentContext context) {
 		s_logger.debug("Deactivating Bluetooth Service...");
-	}
-	
-	protected void updated(Map<String,Object> properties) {
-		s_logger.debug("Updating Bluetooth Service...");
 	}
 	
 	// --------------------------------------------------------------------
@@ -47,7 +36,7 @@ public class BluetoothServiceImpl implements BluetoothService, ConfigurableCompo
 	// --------------------------------------------------------------------
 	@Override
 	public BluetoothAdapter getBluetoothAdapter() {
-		return getBluetoothAdapter(m_name);
+		return getBluetoothAdapter("hci0");
 	}
 	
 	@Override
@@ -61,12 +50,23 @@ public class BluetoothServiceImpl implements BluetoothService, ConfigurableCompo
 		}
 	}
 	
+	@Override
+	public BluetoothAdapter getBluetoothAdapter(String name, BluetoothBeaconCommandListener bbcl) {
+		try {
+			BluetoothAdapterImpl bbs = new BluetoothAdapterImpl(name, bbcl);
+			return bbs;
+		} catch (KuraException e) {
+			s_logger.error("Could not get bluetooth beacon service", e);
+			return null;
+		}
+	}
+	
 	// --------------------------------------------------------------------
 	//
 	//  Local methods
 	//
 	// --------------------------------------------------------------------
-	public static BundleContext getBundleContext() {
+	static BundleContext getBundleContext() {
 		return s_context.getBundleContext();
 	}
 

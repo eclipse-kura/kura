@@ -16,24 +16,59 @@ INSTALL_DIR=/home/root/eclipse
 #create known kura install location
 ln -sf ${INSTALL_DIR}/kura_* ${INSTALL_DIR}/kura
 
+#create /etc/init.d/ folder
+mkdir -p /etc/init.d
+
 #set up Kura init
-cp ${INSTALL_DIR}/kura/install/kura.init.raspbian /etc/init.d/kura
+sed "s|^KURA_DIR=.*|KURA_DIR=${INSTALL_DIR}/kura|" ${INSTALL_DIR}/kura/install/kura.init.yocto > /etc/init.d/kura
 chmod +x /etc/init.d/kura
 chmod +x ${INSTALL_DIR}/kura/bin/*.sh
 
-# set up ${INSTALL_DIR}/kura/recover_dflt_kura_config.sh
-cp ${INSTALL_DIR}/kura/install/recover_dflt_kura_config.sh ${INSTALL_DIR}/kura/recover_dflt_kura_config.sh
-chmod +x ${INSTALL_DIR}/kura/recover_dflt_kura_config.sh
-if [ ! -d ${INSTALL_DIR}/kura/.data ]; then
-    mkdir ${INSTALL_DIR}/kura/.data
-fi
-# for md5.info should keep the same order as in the ${INSTALL_DIR}/kura/recover_dflt_kura_config.sh
-echo `md5sum ${INSTALL_DIR}/kura/data/snapshots/snapshot_0.xml` > ${INSTALL_DIR}/kura/.data/md5.info
-tar czf ${INSTALL_DIR}/kura/.data/recover_dflt_kura_config.tgz ${INSTALL_DIR}/kura/data/snapshots/snapshot_0.xml
-
 #set up runlevels to start/stop Kura by default
-update-rc.d kura defaults
+if [ ! -d /etc/rc0.d ]; then
+    mkdir -p /etc/rc0.d
+fi
+cd /etc/rc0.d
+#ln -sf ../init.d/monit K08monit
+ln -sf ../init.d/kura K09kura
+if [ ! -d /etc/rc6.d ]; then
+    mkdir -p /etc/rc6.d
+fi
+cd /etc/rc6.d
+#ln -sf ../init.d/monit K08monit
+ln -sf ../init.d/kura K09kura
+
+#set up runlevels to start Kura by default
+if [ ! -d /etc/rc2.d ]; then
+    mkdir -p /etc/rc2.d
+fi
+cd /etc/rc2.d
+ln -sf ../init.d/firewall S25firewall
+ln -sf ../init.d/kura S99kura			# this is not needed since monit handles this
+#ln -sf ../init.d/monit S99monit
+if [ ! -d /etc/rc3.d ]; then
+    mkdir -p /etc/rc3.d
+fi
+cd ../rc3.d
+ln -sf ../init.d/firewall S25firewall
+ln -sf ../init.d/kura S99kura			# this is not needed since monit handles this
+#ln -sf ../init.d/monit S99monit
+if [ ! -d /etc/rc5.d ]; then
+    mkdir -p /etc/rc5.d
+fi
+cd ../rc5.d
+ln -sf ../init.d/firewall S25firewall
+ln -sf ../init.d/kura S99kura			# this is not needed since monit handles this
+#ln -sf ../init.d/monit S99monit
 
 #set up logrotate - no need to restart as it is a cronjob
 cp ${INSTALL_DIR}/kura/install/logrotate.conf /etc/logrotate.conf
+if [ ! -d /etc/logrotate.d/ ]; then
+    mkdir -p /etc/logrotate.d/
+fi
 cp ${INSTALL_DIR}/kura/install/kura.logrotate /etc/logrotate.d/kura
+
+#change ps command in start scripts
+sed -i 's/ps ax/ps/g' ${INSTALL_DIR}/kura/bin/start_kura.sh
+sed -i 's/ps ax/ps/g' ${INSTALL_DIR}/kura/bin/start_kura_background.sh
+sed -i 's/ps ax/ps/g' ${INSTALL_DIR}/kura/bin/start_kura_debug.sh

@@ -23,6 +23,7 @@ public class TiSensorTag implements BluetoothLeNotificationListener {
 	private boolean temperatureReceived =false;
 	private double  tempAmbient = 0.0;
 	private double  tempTarget = 0.0;
+	private double  humTarget = 0.0;
 	
 	public TiSensorTag(BluetoothDevice bluetoothDevice) {
 		m_device = bluetoothDevice;
@@ -553,6 +554,7 @@ public class TiSensorTag implements BluetoothLeNotificationListener {
 			hum = hum - (hum % 4);
 			float humf = (-6f) + 125f * (hum / 65535f);
 			
+			humTarget = humf;
 			s_logger.info("Hum: " + humf);
 		}
 		else if (handle.equals(TiSensorTagGatt.HANDLE_MAG_SENSOR_VALUE)) {
@@ -673,5 +675,13 @@ public class TiSensorTag implements BluetoothLeNotificationListener {
 
 	public double getTempTarget() {
 		return tempTarget;
+	}
+
+	public double getHumTarget() {
+		return humTarget;
+	}
+
+	public void setHumTarget(double humTarget) {
+		this.humTarget = humTarget;
 	}
 }

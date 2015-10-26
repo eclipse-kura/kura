@@ -1,4 +1,18 @@
+/**
+ * Copyright (c) 2011, 2014 Eurotech and/or its affiliates
+ *
+ *  All rights reserved. This program and the accompanying materials
+ *  are made available under the terms of the Eclipse Public License v1.0
+ *  which accompanies this distribution, and is available at
+ *  http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *   Eurotech
+ */
+
 package org.eclipse.kura.linux.net.util;
+
+import java.util.Map;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.net.NetInterfaceType;
@@ -13,6 +27,7 @@ public class LinuxIfconfig {
 	private String m_inetMask;
 	private int m_mtu;
 	private boolean m_multicast;
+	private Map<String,String> m_driver;
 	
 	public LinuxIfconfig(String name) {
 		m_name = name;
@@ -62,6 +77,14 @@ public class LinuxIfconfig {
 	}
 	public void setMulticast(boolean multicast) {
 		m_multicast = multicast;
+	}
+	
+	public Map<String,String> getDriver() {
+		return m_driver;
+	}
+	
+	public void setDriver(Map<String,String> driver) {
+		m_driver = driver;
 	}
 	
 	public boolean isUp() {

@@ -23,6 +23,7 @@ import org.eclipse.kura.net.admin.modem.telit.de910.TelitDe910ConfigGenerator;
 import org.eclipse.kura.net.admin.modem.telit.de910.TelitDe910ModemFactory;
 import org.eclipse.kura.net.admin.modem.telit.he910.TelitHe910ConfigGenerator;
 import org.eclipse.kura.net.admin.modem.telit.he910.TelitHe910ModemFactory;
+import org.eclipse.kura.net.admin.modem.telit.le910.TelitLe910ModemFactory;
 
 public class SupportedUsbModemsFactoryInfo {
 
@@ -33,7 +34,7 @@ public class SupportedUsbModemsFactoryInfo {
 		Telit_GE910			(SupportedUsbModemInfo.Telit_GE910, TelitHe910ModemFactory.class, TelitHe910ConfigGenerator.class),
 		Telit_DE910_DUAL    (SupportedUsbModemInfo.Telit_DE910_DUAL, TelitDe910ModemFactory.class, TelitDe910ConfigGenerator.class),
 		Telit_CE910_DUAL	(SupportedUsbModemInfo.Telit_CE910_DUAL, TelitDe910ModemFactory.class, TelitDe910ConfigGenerator.class),
-		Telit_LE910			(SupportedUsbModemInfo.Telit_LE910, TelitHe910ModemFactory.class, TelitHe910ConfigGenerator.class),
+		Telit_LE910			(SupportedUsbModemInfo.Telit_LE910, TelitLe910ModemFactory.class, TelitHe910ConfigGenerator.class),
 		Sierra_MC8775	(SupportedUsbModemInfo.Sierra_MC8775, SierraMc87xxModemFactory.class, SierraMc87xxConfigGenerator.class),
 		Sierra_MC8790	(SupportedUsbModemInfo.Sierra_MC8790, SierraMc87xxModemFactory.class, SierraMc87xxConfigGenerator.class),
 		Sierra_USB598	(SupportedUsbModemInfo.Sierra_USB598, SierraUsb598ModemFactory.class, SierraUsb598ConfigGenerator.class);

@@ -48,7 +48,7 @@
             type="Password"
             cardinality="0" 
             required="true"
-            default="" 
+            default="changeit" 
             description="Keystore access password."/>
         
         <AD id="ssl.default.cipherSuites"

@@ -23,6 +23,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.net.NetworkConfiguration;
@@ -67,7 +68,7 @@ public class DnsMonitorServiceImpl implements DnsMonitorService, EventHandler {
     private ExecutorService m_executor;
     
     private boolean m_enabled;
-    private static boolean stopThread;
+    private static AtomicBoolean stopThread;
     private NetworkConfigurationService m_netConfigService;
     private NetworkConfiguration m_networkConfiguration;
     private Set<NetworkPair<IP4Address>> m_allowedNetworks;
@@ -94,14 +95,16 @@ public class DnsMonitorServiceImpl implements DnsMonitorService, EventHandler {
 			s_logger.error("Could not get initial network configuration", e);
 		}
         
+        stopThread = new AtomicBoolean();
+        
         //FIXME - brute force handler for DNS updates
         // m_executorUtil = ExecutorUtil.getInstance();
         m_executor = Executors.newSingleThreadExecutor();
-        stopThread = false;
+        stopThread.set(false);
         s_monitorTask = m_executor.submit(new Runnable() {
     		@Override
     		public void run() {
-    			while (!stopThread) {
+    			while (!stopThread.get()) {
 	    			Thread.currentThread().setName("DnsMonitorServiceImpl");
 	    			Set<IPAddress> dnsServers = LinuxDns.getInstance().getDnServers();
 	    			
@@ -153,9 +156,9 @@ public class DnsMonitorServiceImpl implements DnsMonitorService, EventHandler {
 	                	}
 	                }
 	                try {
-						Thread.sleep(THREAD_INTERVAL);
+						monitorWait();
 					} catch (InterruptedException e) {
-						s_logger.debug(e.getMessage());
+						s_logger.debug("DNS monitor interrupted", e);
 					}
     			}
     		}
@@ -163,9 +166,9 @@ public class DnsMonitorServiceImpl implements DnsMonitorService, EventHandler {
     }
     
     protected void deactivate(ComponentContext componentContext) {
-    	
-    	stopThread = true;
         if ((s_monitorTask != null) && (!s_monitorTask.isDone())) {
+        	stopThread.set(true);
+        	monitorNotity();
         	s_logger.debug("Cancelling DnsMonitorServiceImpl task ...");
         	s_monitorTask.cancel(true);
     		s_logger.info("DnsMonitorServiceImpl task cancelled? = {}", s_monitorTask.isDone());
@@ -306,9 +309,14 @@ public class DnsMonitorServiceImpl implements DnsMonitorService, EventHandler {
     
     private boolean isEnabledForWan(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig) {
     	for(NetInterfaceAddressConfig netInterfaceAddressConfig : netInterfaceConfig.getNetInterfaceAddresses()) {
-    		for(NetConfig netConfig : netInterfaceAddressConfig.getConfigs()) {
-    			if(netConfig instanceof NetConfigIP4) {
-    				return NetInterfaceStatus.netIPv4StatusEnabledWAN.equals(((NetConfigIP4) netConfig).getStatus());
+    		if (netInterfaceAddressConfig != null) {
+    			List<NetConfig> netConfigs = netInterfaceAddressConfig.getConfigs();
+    			if (netConfigs != null) {
+		    		for(NetConfig netConfig : netConfigs) {
+		    			if(netConfig instanceof NetConfigIP4) {
+		    				return NetInterfaceStatus.netIPv4StatusEnabledWAN.equals(((NetConfigIP4) netConfig).getStatus());
+		    			}
+		    		}
     			}
     		}
     	}
@@ -430,4 +438,20 @@ public class DnsMonitorServiceImpl implements DnsMonitorService, EventHandler {
             now = System.currentTimeMillis();
         }
     }
+    
+	private void monitorNotity() {
+		if (stopThread != null) {
+			synchronized (stopThread) {
+				stopThread.notifyAll();
+			}
+		}
+	}
+	
+	private void monitorWait() throws InterruptedException {
+		if (stopThread != null) {
+			synchronized (stopThread) {
+				stopThread.wait(THREAD_INTERVAL);
+			}
+		}
+	}
 }

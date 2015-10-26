@@ -21,12 +21,12 @@ import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.client.widget.FileUploadDialog;
 import org.eclipse.kura.web.shared.model.GwtSession;
 import org.eclipse.kura.web.shared.model.GwtSnapshot;
-import org.eclipse.kura.web.shared.service.GwtNetworkService;
-import org.eclipse.kura.web.shared.service.GwtNetworkServiceAsync;
+import org.eclipse.kura.web.shared.model.GwtXSRFToken;
+import org.eclipse.kura.web.shared.service.GwtSecurityTokenService;
+import org.eclipse.kura.web.shared.service.GwtSecurityTokenServiceAsync;
 import org.eclipse.kura.web.shared.service.GwtSnapshotService;
 import org.eclipse.kura.web.shared.service.GwtSnapshotServiceAsync;
 
-import com.allen_sauer.gwt.log.client.Log;
 import com.extjs.gxt.ui.client.Style.HorizontalAlignment;
 import com.extjs.gxt.ui.client.Style.Scroll;
 import com.extjs.gxt.ui.client.Style.SelectionMode;
@@ -61,7 +61,6 @@ import com.extjs.gxt.ui.client.widget.toolbar.ToolBar;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.Timer;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
 
@@ -69,49 +68,53 @@ public class SnapshotsTab extends LayoutContainer {
 
 	private static final Messages MSGS = GWT.create(Messages.class);
 
+	private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
 	private final GwtSnapshotServiceAsync gwtSnapshotService = GWT.create(GwtSnapshotService.class);
-	private final GwtNetworkServiceAsync gwtNetworkService = GWT.create(GwtNetworkService.class);
-	
+
 	private final static String SERVLET_URL = "/" + GWT.getModuleName() + "/file/configuration/snapshot";
-	
+
 	@SuppressWarnings("unused")
 	private GwtSession             m_currentSession;
-    private ServiceTree            m_servicesTree;
+	private ServiceTree            m_servicesTree;
 
-    private boolean    		       m_dirty;
-    private boolean                m_initialized;
-    
-    private ToolBar                m_toolBar;
-    private Button                 m_refreshButton;
-    private Button                 m_downloadButton;
-    private Button                 m_rollbackButton;
-    private Button                 m_uploadButton;
-    private ListStore<GwtSnapshot> m_store;
-    private Grid<GwtSnapshot>      m_grid;
-    private BaseListLoader<ListLoadResult<GwtSnapshot>> m_loader;
-    private FileUploadDialog       m_fileUpload;
+	private boolean    		       m_dirty;
+	private boolean                m_initialized;
 
-    
-    public SnapshotsTab(GwtSession currentSession,
-    					ServiceTree serviceTree) 
-    {
-        m_currentSession = currentSession;
-    	m_servicesTree   = serviceTree;
-        m_dirty          = false;
-    	m_initialized    = false;
-    }
-    
-    
-    protected void onRender(Element parent, int index) {
-        
-        super.onRender(parent, index);        
-        setLayout(new FitLayout());
-        setBorders(false);
-        setId("settings-snapshots");
-        
-        // init components
-        initToolBar();
-        initGrid();
+	private ToolBar                m_toolBar;
+	private Button                 m_refreshButton;
+	private Button                 m_downloadButton;
+	private Button                 m_rollbackButton;
+	private Button                 m_uploadButton;
+	private ListStore<GwtSnapshot> m_store;
+	private Grid<GwtSnapshot>      m_grid;
+	private BaseListLoader<ListLoadResult<GwtSnapshot>> m_loader;
+	private FileUploadDialog       m_fileUpload;
+	private CustomWindow 		   m_downloadWindow;
+
+	private boolean 			   m_isServicesReloadNeeded;
+
+
+	public SnapshotsTab(GwtSession currentSession,
+			ServiceTree serviceTree) 
+	{
+		m_currentSession         = currentSession;
+		m_servicesTree           = serviceTree;
+		m_dirty                  = false;
+		m_initialized            = false;
+		m_isServicesReloadNeeded = false;
+	}
+
+
+	protected void onRender(Element parent, int index) {
+
+		super.onRender(parent, index);        
+		setLayout(new FitLayout());
+		setBorders(false);
+		setId("settings-snapshots");
+
+		// init components
+		initToolBar();
+		initGrid();
 
 		ContentPanel devicesHistoryPanel = new ContentPanel();
 		devicesHistoryPanel.setBorders(false);
@@ -119,260 +122,289 @@ public class SnapshotsTab extends LayoutContainer {
 		devicesHistoryPanel.setHeaderVisible(false);
 		devicesHistoryPanel.setLayout( new FitLayout());
 		devicesHistoryPanel.setScrollMode(Scroll.AUTO);
-        devicesHistoryPanel.setTopComponent(m_toolBar);
+		devicesHistoryPanel.setTopComponent(m_toolBar);
 		devicesHistoryPanel.add(m_grid);
 
-        add(devicesHistoryPanel);
-        m_initialized = true;
-        reload();
-    }
-    
-    
-    private void initToolBar() {
-        
-        m_toolBar = new ToolBar();
-        m_toolBar.setEnabled(true);
-        m_toolBar.setId("settings-snapshots-toolbar");
-        
-        //
-        // Refresh Button
-        m_refreshButton = new Button(MSGS.refreshButton(), 
-                AbstractImagePrototype.create(Resources.INSTANCE.refresh()),
-                new SelectionListener<ButtonEvent>() {
-            @Override
-            public void componentSelected(ButtonEvent ce) {
-                reload();
-            }
-        });
-        m_refreshButton.setEnabled(true);
-        m_toolBar.add(m_refreshButton);
-        m_toolBar.add(new SeparatorToolItem());
+		add(devicesHistoryPanel);
+		m_initialized = true;
+		reload();
+	}
 
-        m_downloadButton = new Button(MSGS.download(),
-                AbstractImagePrototype.create(Resources.INSTANCE.snapshotDownload()),
-                new SelectionListener<ButtonEvent>() {
-            @Override
-            public void componentSelected(ButtonEvent ce) {
-            	downloadSnapshot();
-            }
-        });
-        m_downloadButton.setEnabled(false);
-        
-        m_rollbackButton = new Button(MSGS.rollback(),
-                AbstractImagePrototype.create(Resources.INSTANCE.snapshotRollback()),
-                new SelectionListener<ButtonEvent>() {
-            @Override
-            public void componentSelected(ButtonEvent ce) {
-            	rollbackSnapshot();
-            }
-        });
-        m_rollbackButton.setEnabled(false);
 
-        m_uploadButton = new Button(MSGS.upload(),
-                AbstractImagePrototype.create(Resources.INSTANCE.snapshotUpload()),
-                new SelectionListener<ButtonEvent>() {
-            @Override
-            public void componentSelected(ButtonEvent ce) {
-            	uploadSnapshot();
-            }
-        });
-        m_uploadButton.setEnabled(true);
+	private void initToolBar() {
 
-        m_toolBar.add(m_downloadButton);
-        m_toolBar.add(new SeparatorToolItem());
-        m_toolBar.add(m_rollbackButton);
-        m_toolBar.add(new SeparatorToolItem());
-        m_toolBar.add(m_uploadButton);
-    }
-    
-    private void initGrid() {
-        
-        List<ColumnConfig> columns = new ArrayList<ColumnConfig>();  
-        
-        ColumnConfig column = new ColumnConfig("snapshotId", MSGS.deviceSnapshotId(), 25);
-        column.setSortable(false);
-        column.setAlignment(HorizontalAlignment.CENTER);
-        columns.add(column);
+		m_toolBar = new ToolBar();
+		m_toolBar.setEnabled(true);
+		m_toolBar.setId("settings-snapshots-toolbar");
 
-        column = new ColumnConfig("createdOnFormatted", MSGS.deviceSnapshotCreatedOn(), 75);
-        column.setSortable(false);
-        column.setAlignment(HorizontalAlignment.LEFT);
-        columns.add(column);
-                          
-        // loader and store
-        RpcProxy<ListLoadResult<GwtSnapshot>> proxy = new RpcProxy<ListLoadResult<GwtSnapshot>>() {
-            @Override
-            public void load(Object loadConfig, AsyncCallback<ListLoadResult<GwtSnapshot>> callback) {
-                gwtSnapshotService.findDeviceSnapshots(callback);
-            }
-        };
-        m_loader = new BaseListLoader<ListLoadResult<GwtSnapshot>>(proxy);
-        m_loader.setSortDir(SortDir.DESC);  
-        m_loader.setSortField("createdOnFormatted"); 
-        m_loader.addLoadListener( new DataLoadListener());
-        
-        m_store = new ListStore<GwtSnapshot>(m_loader);        
-        m_grid = new Grid<GwtSnapshot>(m_store, new ColumnModel(columns));
-        m_grid.setBorders(false);   
-        m_grid.setStateful(false);
-        m_grid.setLoadMask(true);
-        m_grid.setStripeRows(true);
-        m_grid.setTrackMouseOver(false);
-        m_grid.getView().setAutoFill(true);
+		//
+		// Refresh Button
+		m_refreshButton = new Button(MSGS.refreshButton(), 
+				AbstractImagePrototype.create(Resources.INSTANCE.refresh()),
+				new SelectionListener<ButtonEvent>() {
+			@Override
+			public void componentSelected(ButtonEvent ce) {
+				reload();
+			}
+		});
+		m_refreshButton.setEnabled(true);
+		m_toolBar.add(m_refreshButton);
+		m_toolBar.add(new SeparatorToolItem());
+
+		m_downloadButton = new Button(MSGS.download(),
+				AbstractImagePrototype.create(Resources.INSTANCE.snapshotDownload()),
+				new SelectionListener<ButtonEvent>() {
+			@Override
+			public void componentSelected(ButtonEvent ce) {
+				//please see http://stackoverflow.com/questions/13277752/gwt-open-window-after-rpc-is-prevented-by-popup-blocker
+				m_downloadWindow= CustomWindow.open(null, "_blank", "location=no"); 
+				gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
+					@Override
+					public void onFailure(Throwable ex) {
+						FailureHandler.handle(ex);
+					}
+
+					@Override
+					public void onSuccess(GwtXSRFToken token) {
+						downloadSnapshot(token.getToken());
+					}
+				});
+			}
+		});
+		m_downloadButton.setEnabled(false);
+
+		m_rollbackButton = new Button(MSGS.rollback(),
+				AbstractImagePrototype.create(Resources.INSTANCE.snapshotRollback()),
+				new SelectionListener<ButtonEvent>() {
+			@Override
+			public void componentSelected(ButtonEvent ce) {
+				m_isServicesReloadNeeded= true;
+				rollbackSnapshot();
+			}
+		});
+		m_rollbackButton.setEnabled(false);
+
+		m_uploadButton = new Button(MSGS.upload(),
+				AbstractImagePrototype.create(Resources.INSTANCE.snapshotUpload()),
+				new SelectionListener<ButtonEvent>() {
+			@Override
+			public void componentSelected(ButtonEvent ce) {
+				m_isServicesReloadNeeded = true;
+				uploadSnapshot();
+			}
+		});
+		m_uploadButton.setEnabled(true);
+
+		m_toolBar.add(m_downloadButton);
+		m_toolBar.add(new SeparatorToolItem());
+		m_toolBar.add(m_rollbackButton);
+		m_toolBar.add(new SeparatorToolItem());
+		m_toolBar.add(m_uploadButton);
+	}
+
+	private void initGrid() {
+
+		List<ColumnConfig> columns = new ArrayList<ColumnConfig>();  
+
+		ColumnConfig column = new ColumnConfig("snapshotId", MSGS.deviceSnapshotId(), 25);
+		column.setSortable(false);
+		column.setAlignment(HorizontalAlignment.CENTER);
+		columns.add(column);
+
+		column = new ColumnConfig("createdOnFormatted", MSGS.deviceSnapshotCreatedOn(), 75);
+		column.setSortable(false);
+		column.setAlignment(HorizontalAlignment.LEFT);
+		columns.add(column);
+
+		// loader and store
+		RpcProxy<ListLoadResult<GwtSnapshot>> proxy = new RpcProxy<ListLoadResult<GwtSnapshot>>() {
+			@Override
+			public void load(Object loadConfig, final AsyncCallback<ListLoadResult<GwtSnapshot>> callback) {
+				gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
+					@Override
+					public void onFailure(Throwable ex) {
+						FailureHandler.handle(ex);
+					}
+
+					@Override
+					public void onSuccess(GwtXSRFToken token) {	
+						gwtSnapshotService.findDeviceSnapshots(token, callback);
+					}
+				});
+			}
+		};
+		m_loader = new BaseListLoader<ListLoadResult<GwtSnapshot>>(proxy);
+		m_loader.setSortDir(SortDir.DESC);  
+		m_loader.setSortField("createdOnFormatted"); 
+		m_loader.addLoadListener( new DataLoadListener());
+
+		m_store = new ListStore<GwtSnapshot>(m_loader);        
+		m_grid = new Grid<GwtSnapshot>(m_store, new ColumnModel(columns));
+		m_grid.setBorders(false);   
+		m_grid.setStateful(false);
+		m_grid.setLoadMask(true);
+		m_grid.setStripeRows(true);
+		m_grid.setTrackMouseOver(false);
+		m_grid.getView().setAutoFill(true);
 		m_grid.getView().setEmptyText(MSGS.deviceSnapshotsNone());
 
-        GridSelectionModel<GwtSnapshot> selectionModel = new GridSelectionModel<GwtSnapshot>();
-        selectionModel.setSelectionMode(SelectionMode.SINGLE);
-        m_grid.setSelectionModel(selectionModel);
-        m_grid.getSelectionModel().addSelectionChangedListener(new SelectionChangedListener<GwtSnapshot>() {
-            @Override
-            public void selectionChanged(SelectionChangedEvent<GwtSnapshot> se) {
-                if (se.getSelectedItem() != null) {                	
-                	m_downloadButton.setEnabled(true);
-                	m_rollbackButton.setEnabled(true);
-                }
-                else {
-                	m_downloadButton.setEnabled(false);
-                	m_rollbackButton.setEnabled(false);
-                }
-            }
-        });
-    }
+		GridSelectionModel<GwtSnapshot> selectionModel = new GridSelectionModel<GwtSnapshot>();
+		selectionModel.setSelectionMode(SelectionMode.SINGLE);
+		m_grid.setSelectionModel(selectionModel);
+		m_grid.getSelectionModel().addSelectionChangedListener(new SelectionChangedListener<GwtSnapshot>() {
+			@Override
+			public void selectionChanged(SelectionChangedEvent<GwtSnapshot> se) {
+				if (se.getSelectedItem() != null) {                	
+					m_downloadButton.setEnabled(true);
+					m_rollbackButton.setEnabled(true);
+				}
+				else {
+					m_downloadButton.setEnabled(false);
+					m_rollbackButton.setEnabled(false);
+				}
+			}
+		});
+	}
 
-    
-    
-    // --------------------------------------------------------------------------------------
-    //
-    //    Device Event List Management
-    //
-    // --------------------------------------------------------------------------------------
 
-    public void refreshWithDelay() {
-    	Timer timer = new Timer() { 
-    	    public void run() { 
-    	        refresh();    	        
-    	    } 
-    	};
-    	m_grid.mask(MSGS.waiting());
-    	timer.schedule(5000);
-    }
 
-    public void refresh() {
+	// --------------------------------------------------------------------------------------
+	//
+	//    Device Event List Management
+	//
+	// --------------------------------------------------------------------------------------
+
+	public void refreshWithDelay() {
+		Timer timer = new Timer() { 
+			public void run() { 
+				refresh();    	        
+			} 
+		};
+		m_grid.mask(MSGS.waiting());
+		timer.schedule(5000);
+	}
+
+	public void refresh() {
 		if (m_dirty && m_initialized) {
 			m_dirty = false;
 			m_toolBar.enable();
 			m_refreshButton.enable();
-		    reload();
-		    
-	    	// refresh the list
-	    	// and reselect the item
-	    	m_servicesTree.refreshServicePanel();
+			reload();
 		}
 	}
-    
-    public void reload() {
-    	m_loader.load();
-    }
-    
-    private void downloadSnapshot() {
-    	GwtSnapshot snapshot = m_grid.getSelectionModel().getSelectedItem();
-        StringBuilder sbUrl = new StringBuilder();
-        sbUrl.append("/" + GWT.getModuleName() + "/device_snapshots?")
-             .append("snapshotId=")
-             .append(snapshot.getSnapshotId());
-        Window.open(sbUrl.toString(), "_blank", "location=no");
+
+	public void reload() {
+		m_loader.load();
 	}
-    
-    private void uploadSnapshot() {
-    	List<HiddenField<?>> hiddenFields = new ArrayList<HiddenField<?>>();
-    	m_fileUpload = new FileUploadDialog(SERVLET_URL, hiddenFields);        	
-    	m_fileUpload.addListener(Events.Hide, new Listener<BaseEvent>() {
-    		public void handleEvent(BaseEvent be) {
-    			m_dirty = true;
-    			m_grid.mask(MSGS.applying());
-            	m_toolBar.disable();
+
+	private void downloadSnapshot(String tokenId) {
+		final StringBuilder sbUrl = new StringBuilder();
+
+		GwtSnapshot snapshot = m_grid.getSelectionModel().getSelectedItem();
+		sbUrl.append("/" + GWT.getModuleName() + "/device_snapshots?")
+		.append("snapshotId=")
+		.append(snapshot.getSnapshotId())
+		.append("&")
+		.append("xsrfToken=")
+		.append(tokenId);
+
+		m_downloadWindow.setUrl(sbUrl.toString());
+	}
+
+	private void uploadSnapshot() {
+		List<HiddenField<?>> hiddenFields = new ArrayList<HiddenField<?>>();
+		m_fileUpload = new FileUploadDialog(SERVLET_URL, hiddenFields);        	
+		m_fileUpload.addListener(Events.Hide, new Listener<BaseEvent>() {
+			public void handleEvent(BaseEvent be) {
+				m_dirty = true;
+				m_grid.mask(MSGS.applying());
+				m_toolBar.disable();
 
 				refresh();
-    		}
-    	});
+			}
+		});
 
-    	m_fileUpload.setHeading(MSGS.upload());
-    	m_fileUpload.show();
-    }
-    
-    private void rollbackSnapshot() {    	
-    	
-    	final GwtSnapshot snapshot = m_grid.getSelectionModel().getSelectedItem();
-    	if (snapshot != null) {
-    		
-        	MessageBox.confirm(MSGS.confirm(), 
-	            			   MSGS.deviceSnapshotRollbackConfirm(),
-                new Listener<MessageBoxEvent>() {  
-                    public void handleEvent(MessageBoxEvent ce) {
-                        // if confirmed, delete
-                        Dialog  dialog = ce.getDialog(); 
-                        if (dialog.yesText.equals(ce.getButtonClicked().getText())) {
-                        	m_dirty = true;
-                        	m_grid.mask(MSGS.rollingBack());
-                        	m_toolBar.disable();
-                        	// do the rollback
-                        	gwtSnapshotService.rollbackDeviceSnapshot(
-                        			snapshot,  
-                        			new AsyncCallback<Void>() {                        										 	    
-						                public void onFailure(Throwable caught) {
-						                    FailureHandler.handle(caught);
-						                    m_dirty = true;
-						                }                        								    
-						                public void onSuccess(Void arg0) {
-						                	refresh();
-						                }
-                        			});
-                        	
-                        	if (snapshot.getSnapshotId() == 0L) {
-		                		if (gwtNetworkService != null) {
-			                		gwtNetworkService.rollbackDefaultConfiguration(new AsyncCallback<Void>() {                        										 	    
-						                public void onFailure(Throwable caught) {
-						                    FailureHandler.handle(caught);
-						                    m_dirty = true;
-						                }                        								    
-						                public void onSuccess(Void arg0) {
-						                    refresh();
-						                }
-		                			});
-		                		}
-		                	}
-                        }
-                    }
-        	});
-    	}
-    }
-    
-    
-    // --------------------------------------------------------------------------------------
-    //
-    //    Data Load Listener
-    //
-    // --------------------------------------------------------------------------------------
+		m_fileUpload.setHeading(MSGS.upload());
+		m_fileUpload.show();
+	}
 
-    private class DataLoadListener extends LoadListener
-    {
-        public DataLoadListener() {
-        }
-        
-        public void loaderLoad(LoadEvent le) {
-        	if (le.exception != null) {
-                FailureHandler.handle(le.exception);
-            }
-        }
+	private void rollbackSnapshot() {    	
 
-        public void loaderLoadException(LoadEvent le) {
-            
-        	if (le.exception != null) {
-                FailureHandler.handle(le.exception);
-            }
-        	m_store.removeAll();
-        	m_grid.unmask();
-        	m_toolBar.enable();
-        }
-    }
+		final GwtSnapshot snapshot = m_grid.getSelectionModel().getSelectedItem();
+		if (snapshot != null) {
+
+			MessageBox.confirm(MSGS.confirm(), 
+					MSGS.deviceSnapshotRollbackConfirm(),
+					new Listener<MessageBoxEvent>() {  
+				public void handleEvent(MessageBoxEvent ce) {
+					// if confirmed, delete
+					Dialog  dialog = ce.getDialog(); 
+					if (dialog.yesText.equals(ce.getButtonClicked().getText())) {
+						m_dirty = true;
+						m_grid.mask(MSGS.rollingBack());
+						m_toolBar.disable();
+						// do the rollback
+
+						gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
+							@Override
+							public void onFailure(Throwable ex) {
+								FailureHandler.handle(ex);
+							}
+
+							@Override
+							public void onSuccess(GwtXSRFToken token) {	
+								gwtSnapshotService.rollbackDeviceSnapshot(
+										token,
+										snapshot,  
+										new AsyncCallback<Void>() {                        										 	    
+											public void onFailure(Throwable caught) {
+												FailureHandler.handle(caught);
+												m_dirty = true;
+											}                        								    
+											public void onSuccess(Void arg0) {
+												refresh();
+											}
+										});
+							}});
+					}
+				}
+			});
+		}
+	}
+
+
+	// --------------------------------------------------------------------------------------
+	//
+	//    Data Load Listener
+	//
+	// --------------------------------------------------------------------------------------
+
+	private class DataLoadListener extends LoadListener
+	{
+		public DataLoadListener() {
+		}
+
+		public void loaderLoad(LoadEvent le) {
+			if (le.exception != null) {
+				FailureHandler.handle(le.exception);
+			} else {
+				if(m_isServicesReloadNeeded){
+					// refresh the list
+					// and reselect the item
+					m_servicesTree.refreshServicePanel();
+					m_isServicesReloadNeeded= false;
+				}
+			}
+		}
+
+		public void loaderLoadException(LoadEvent le) {
+
+			if (le.exception != null) {
+				FailureHandler.handle(le.exception);
+			}
+			m_store.removeAll();
+			m_grid.unmask();
+			m_toolBar.enable();
+		}
+	}
 }

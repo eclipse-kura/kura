@@ -18,11 +18,11 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Map;
 
+import org.eclipse.kura.core.db.pool.KuraJDBCConnectionPool;
 import org.eclipse.kura.db.DbService;
 import org.eclipse.kura.system.SystemService;
-import org.hsqldb.jdbc.JDBCPool;
-import org.osgi.service.component.ComponentException;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.ComponentException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,17 +40,7 @@ public class HsqlDbServiceImpl implements DbService
 		catch (SQLException e) {
 			throw new RuntimeException(e);
 		}
-    }
-
-    private static final String DB_URL_PROPNAME        	 = "db.service.hsqldb.url";
-    private static final String DB_CACHE_ROWS_PROPNAME   = "db.service.hsqldb.cache_rows";
-	private static final String DB_LOB_FILE_PROPNAME     = "db.service.hsqldb.lob_file_scale";
-	private static final String DB_DEFRAG_LIMIT_PROPNAME = "db.service.hsqldb.defrag_limit";
-	private static final String DB_LOG_DATA_PROPNAME     = "db.service.hsqldb.log_data";
-	private static final String DB_LOG_SIZE_PROPNAME     = "db.service.hsqldb.log_size";
-	private static final String DB_NIO_PROPNAME          = "db.service.hsqldb.nio_data_file";
-	private static final String DB_WRITE_DELAY_MILLIES_PROPNAME = "db.service.hsqldb.write_delay_millis";
-	
+    }	
 
 	private static final String s_username  = "sa";
 	private static final String s_password  = "";
@@ -60,7 +50,7 @@ public class HsqlDbServiceImpl implements DbService
 	@SuppressWarnings("unused")
 	private ComponentContext m_ctx;
 	private SystemService    m_systemService;
-    private JDBCPool         m_connPool;
+    private KuraJDBCConnectionPool         m_connPool;
     
     
 	// ----------------------------------------------------------------
@@ -163,10 +153,11 @@ public class HsqlDbServiceImpl implements DbService
 	{	    
 	    if (m_connPool == null) {
 
-			String url = m_systemService.getProperties().getProperty(DB_URL_PROPNAME);			
+	    	String url = m_systemService.getProperties().getProperty(SystemService.DB_URL_PROPNAME);	
 			s_logger.info("Opening database with url: "+url);			
 			    
-		    m_connPool = new JDBCPool();
+		    //m_connPool = new JDBCPool();
+			m_connPool = new KuraJDBCConnectionPool();
 		    m_connPool.setUrl(url);
 		    m_connPool.setUser(s_username);
 		    m_connPool.setPassword(s_password);
@@ -238,7 +229,7 @@ public class HsqlDbServiceImpl implements DbService
 
 	public boolean isLogDataEnabled() {
 		boolean isLogDataEnabled = true;
-		String sIsLogDataEnabled = m_systemService.getProperties().getProperty(DB_LOG_DATA_PROPNAME);
+		String sIsLogDataEnabled = m_systemService.getProperties().getProperty(SystemService.DB_LOG_DATA_PROPNAME);
 		
 		if (sIsLogDataEnabled != null && !sIsLogDataEnabled.isEmpty()) { 
 			isLogDataEnabled = new Boolean(sIsLogDataEnabled);
@@ -269,7 +260,7 @@ public class HsqlDbServiceImpl implements DbService
 		execute("SET AUTOCOMMIT FALSE");			
 
 		// Sets the write delay_millies property, delay in milliseconds.
-		String writeDelayMillies = m_systemService.getProperties().getProperty(DB_WRITE_DELAY_MILLIES_PROPNAME);
+		String writeDelayMillies = m_systemService.getProperties().getProperty(SystemService.DB_WRITE_DELAY_MILLIES_PROPNAME);
 		if (writeDelayMillies == null || writeDelayMillies.isEmpty()) {
 			writeDelayMillies = "500";
 		}
@@ -279,32 +270,32 @@ public class HsqlDbServiceImpl implements DbService
 		// use cache tables by default as they load only part of the data in mem
 		execute("SET DATABASE DEFAULT TABLE TYPE CACHED");
 
-		String cacheRows = m_systemService.getProperties().getProperty(DB_CACHE_ROWS_PROPNAME);
+		String cacheRows = m_systemService.getProperties().getProperty(SystemService.DB_CACHE_ROWS_PROPNAME);
 		if (cacheRows != null && !cacheRows.isEmpty()) {
 			execute("SET FILES CACHE ROWS "+cacheRows);
 		}
 
-		String lobScale = m_systemService.getProperties().getProperty(DB_LOB_FILE_PROPNAME);
+		String lobScale = m_systemService.getProperties().getProperty(SystemService.DB_LOB_FILE_PROPNAME);
 		if (lobScale != null && !lobScale.isEmpty()) {
 			execute("SET FILES LOB SCALE "+lobScale);
 		}
 		
-		String defragLimit = m_systemService.getProperties().getProperty(DB_DEFRAG_LIMIT_PROPNAME);
+		String defragLimit = m_systemService.getProperties().getProperty(SystemService.DB_DEFRAG_LIMIT_PROPNAME);
 		if (defragLimit != null && !defragLimit.isEmpty()) {
 			execute("SET FILES DEFRAG "+defragLimit);
 		}
 	
-		String logData = m_systemService.getProperties().getProperty(DB_LOG_DATA_PROPNAME);
+		String logData = m_systemService.getProperties().getProperty(SystemService.DB_LOG_DATA_PROPNAME);
 		if (logData != null && !logData.isEmpty()) {
 			execute("SET FILES LOG "+logData.toUpperCase());
 		}
 		
-		String logSize = m_systemService.getProperties().getProperty(DB_LOG_SIZE_PROPNAME);
+		String logSize = m_systemService.getProperties().getProperty(SystemService.DB_LOG_SIZE_PROPNAME);
 		if (logSize != null && !logSize.isEmpty()) {
 			execute("SET FILES LOG SIZE "+logSize);
 		}
 		
-		String useNio = m_systemService.getProperties().getProperty(DB_NIO_PROPNAME);
+		String useNio = m_systemService.getProperties().getProperty(SystemService.DB_NIO_PROPNAME);
 		if (useNio != null && !useNio.isEmpty()) {
 			execute("SET FILES NIO "+useNio.toUpperCase());
 		}

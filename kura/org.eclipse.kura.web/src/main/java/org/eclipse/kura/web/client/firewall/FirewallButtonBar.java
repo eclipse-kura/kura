@@ -19,8 +19,11 @@ import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.shared.model.GwtFirewallOpenPortEntry;
 import org.eclipse.kura.web.shared.model.GwtFirewallPortForwardEntry;
 import org.eclipse.kura.web.shared.model.GwtSession;
+import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.eclipse.kura.web.shared.service.GwtNetworkService;
 import org.eclipse.kura.web.shared.service.GwtNetworkServiceAsync;
+import org.eclipse.kura.web.shared.service.GwtSecurityTokenService;
+import org.eclipse.kura.web.shared.service.GwtSecurityTokenServiceAsync;
 
 import com.allen_sauer.gwt.log.client.Log;
 import com.extjs.gxt.ui.client.Style.HorizontalAlignment;
@@ -42,21 +45,22 @@ public class FirewallButtonBar extends LayoutContainer
 {
 	private static final Messages MSGS = GWT.create(Messages.class);
 
+	private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
 	private final GwtNetworkServiceAsync gwtNetworkService = GWT.create(GwtNetworkService.class);
 
 	@SuppressWarnings("unused")
-    private GwtSession          m_currentSession;
+	private GwtSession          m_currentSession;
 	private FirewallConfigTabs	m_firewallTabs;
-	
+
 	private ButtonBar m_buttonBar;
 	private Button    m_applyButton; 
-	
+
 	public FirewallButtonBar(GwtSession currentSession,
-						    FirewallConfigTabs firewallTabs)
+			FirewallConfigTabs firewallTabs)
 	{
-        m_currentSession = currentSession;
-        m_firewallTabs   = firewallTabs;
-		
+		m_currentSession = currentSession;
+		m_firewallTabs   = firewallTabs;
+
 
 		m_firewallTabs.addListener(Events.Change, new Listener<BaseEvent>() {
 			public void handleEvent(BaseEvent be) {
@@ -68,58 +72,76 @@ public class FirewallButtonBar extends LayoutContainer
 			}
 		});
 	}
-	
-    protected void onRender(Element parent, int index) 
-    {        
-    	super.onRender(parent, index);         
-        setLayout(new FitLayout());
-        
-        m_buttonBar = new ButtonBar();
-        m_buttonBar.setHeight(20);
-        m_buttonBar.setAlignment(HorizontalAlignment.CENTER);
-        
-        m_applyButton = new Button(MSGS.firewallApply(),
-        		AbstractImagePrototype.create(Resources.INSTANCE.accept()),
-                new SelectionListener<ButtonEvent>() {
-            		@Override
-            		public void componentSelected(ButtonEvent ce) {
-            			Log.debug("about to updateDeviceFirewallOpenPorts() and updateDeviceFirewallPortForwards()");
-            			List<GwtFirewallOpenPortEntry> updatedOpenPortConf = m_firewallTabs.getUpdatedOpenPortConfiguration();
-            			List<GwtFirewallPortForwardEntry> updatedPortForwardConf = m_firewallTabs.getUpdatedPortForwardConfiguration();
 
-            			if(updatedOpenPortConf != null) {
-            				Log.debug("got updatedOpenPortConf: " + updatedOpenPortConf.size());
-	            			gwtNetworkService.updateDeviceFirewallOpenPorts(updatedOpenPortConf, new AsyncCallback<Void>() {
-	            				public void onSuccess(Void result) {
+	protected void onRender(Element parent, int index) 
+	{        
+		super.onRender(parent, index);         
+		setLayout(new FitLayout());
+
+		m_buttonBar = new ButtonBar();
+		m_buttonBar.setHeight(20);
+		m_buttonBar.setAlignment(HorizontalAlignment.CENTER);
+
+		m_applyButton = new Button(MSGS.firewallApply(),
+				AbstractImagePrototype.create(Resources.INSTANCE.accept()),
+				new SelectionListener<ButtonEvent>() {
+			@Override
+			public void componentSelected(ButtonEvent ce) {
+				Log.debug("about to updateDeviceFirewallOpenPorts() and updateDeviceFirewallPortForwards()");
+				final List<GwtFirewallOpenPortEntry> updatedOpenPortConf = m_firewallTabs.getUpdatedOpenPortConfiguration();
+				final List<GwtFirewallPortForwardEntry> updatedPortForwardConf = m_firewallTabs.getUpdatedPortForwardConfiguration();
+
+				if(updatedOpenPortConf != null) {
+					Log.debug("got updatedOpenPortConf: " + updatedOpenPortConf.size());
+					gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
+						@Override
+						public void onFailure(Throwable ex) {
+							FailureHandler.handle(ex);
+						}
+
+						@Override
+						public void onSuccess(GwtXSRFToken token) {	
+							gwtNetworkService.updateDeviceFirewallOpenPorts(token, updatedOpenPortConf, new AsyncCallback<Void>() {
+								public void onSuccess(Void result) {
 									Log.debug("updated!");
 								}
-	            				
+
 								public void onFailure(Throwable caught) {
 									Log.debug("caught: " + caught.toString());
 									FailureHandler.handle(caught);
 								}
-	            			});
-            			}
-            			
-            			if(updatedPortForwardConf != null) {
-            				Log.debug("got updatedPortForwardConf: " + updatedPortForwardConf.size());
-	            			gwtNetworkService.updateDeviceFirewallPortForwards(updatedPortForwardConf, new AsyncCallback<Void>() {
-	            				public void onSuccess(Void result) {
-									Log.debug("updated!");
-								}
-	            				
-								public void onFailure(Throwable caught) {
-									Log.debug("caught: " + caught.toString());
-									FailureHandler.handle(caught);
-								}
-	            			});
-            			}
-            		}
-    	});
-        //m_applyButton.setWidth(100);
-        m_buttonBar.add(m_applyButton);
-        
+							});
+						}});
+				}
+
+				if(updatedPortForwardConf != null) {
+					Log.debug("got updatedPortForwardConf: " + updatedPortForwardConf.size());
+					gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
+						@Override
+						public void onFailure(Throwable ex) {
+							FailureHandler.handle(ex);
+						}
+
+						@Override
+						public void onSuccess(GwtXSRFToken token) {	
+					gwtNetworkService.updateDeviceFirewallPortForwards(token, updatedPortForwardConf, new AsyncCallback<Void>() {
+						public void onSuccess(Void result) {
+							Log.debug("updated!");
+						}
+
+						public void onFailure(Throwable caught) {
+							Log.debug("caught: " + caught.toString());
+							FailureHandler.handle(caught);
+						}
+					});
+						}});
+				}
+			}
+		});
+		//m_applyButton.setWidth(100);
+		m_buttonBar.add(m_applyButton);
+
 		m_buttonBar.enable();
-        add(m_applyButton);
-    }	
+		add(m_applyButton);
+	}	
 }

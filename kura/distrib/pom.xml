@@ -18,7 +18,7 @@
 	<parent>
 		<artifactId>kura</artifactId>
 		<groupId>org.eclipse.kura</groupId>
-		<version>1.2.0</version>
+		<version>1.3.0</version>
 		<relativePath>../pom_pom.xml</relativePath>
 	</parent>
 
@@ -30,7 +30,6 @@
 		<kura.basedir>${project.parent.basedir}</kura.basedir>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<zip_workspace.prefix>user_workspace_archive_${project.version}</zip_workspace.prefix>
-		<kura.install.dir>/opt/eclipse</kura.install.dir>
 	</properties>
 
 	<repositories>
@@ -174,6 +173,11 @@
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.kura.linux.status</artifactId>
+									<version>${org.eclipse.kura.linux.status.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
 									<artifactId>org.eclipse.kura.net.admin</artifactId>
 									<version>${org.eclipse.kura.net.admin.version}</version>
 								</artifactItem>
@@ -200,6 +204,44 @@
 									<groupId>org.eclipse.kura</groupId>
 									<artifactId>org.eclipse.kura.web</artifactId>
 									<version>${org.eclipse.kura.web.version}</version>
+								</artifactItem>
+							</artifactItems>
+							<stripVersion>true</stripVersion>
+							<outputDirectory>${project.basedir}/target/plugins</outputDirectory>
+						</configuration>
+					</execution>
+					<execution>
+						<id>get-gpio-bundle</id>
+						<phase>generate-resources</phase>
+						<goals>
+							<goal>copy</goal>
+						</goals>
+						<configuration>
+							<skip>${org.eclipse.kura.dio.skip}</skip>
+							<artifactItems>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.kura.linux.gpio</artifactId>
+									<version>${org.eclipse.kura.linux.gpio.version}</version>
+								</artifactItem>
+							</artifactItems>
+							<stripVersion>true</stripVersion>
+							<outputDirectory>${project.basedir}/target/plugins</outputDirectory>
+						</configuration>
+					</execution>
+					<execution>
+						<id>get-gpio-emulated-bundle</id>
+						<phase>generate-resources</phase>
+						<goals>
+							<goal>copy</goal>
+						</goals>
+						<configuration>
+							<skip>${org.eclipse.kura.dio.include}</skip>
+							<artifactItems>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.kura.emulator.gpio</artifactId>
+									<version>${org.eclipse.kura.emulator.gpio.version}</version>
 								</artifactItem>
 							</artifactItems>
 							<stripVersion>true</stripVersion>
@@ -240,10 +282,13 @@
 							    <move file="target/plugins/org.eclipse.kura.linux.position.jar" tofile="target/plugins/org.eclipse.kura.linux.position_${org.eclipse.kura.linux.position.version}.jar"/>
 							    <move file="target/plugins/org.eclipse.kura.linux.usb.jar" tofile="target/plugins/org.eclipse.kura.linux.usb_${org.eclipse.kura.linux.usb.version}.jar"/>
 							    <move file="target/plugins/org.eclipse.kura.linux.bluetooth.jar" tofile="target/plugins/org.eclipse.kura.linux.bluetooth_${org.eclipse.kura.linux.bluetooth.version}.jar"/>
-								<move file="target/plugins/org.eclipse.kura.linux.watchdog.jar" tofile="target/plugins/org.eclipse.kura.linux.watchdog_${org.eclipse.kura.linux.watchdog.version}.jar"/>
+  								<move file="target/plugins/org.eclipse.kura.linux.watchdog.jar" tofile="target/plugins/org.eclipse.kura.linux.watchdog_${org.eclipse.kura.linux.watchdog.version}.jar"/>
+  								<move file="target/plugins/org.eclipse.kura.linux.status.jar" tofile="target/plugins/org.eclipse.kura.linux.status_${org.eclipse.kura.linux.status.version}.jar"/>
 							    <move file="target/plugins/org.eclipse.kura.net.admin.jar" tofile="target/plugins/org.eclipse.kura.net.admin_${org.eclipse.kura.net.admin.version}.jar"/>
 							    <move file="target/plugins/org.eclipse.kura.protocol.modbus.jar" tofile="target/plugins/org.eclipse.kura.protocol.modbus_${org.eclipse.kura.protocol.modbus.version}.jar"/>
 							    <move file="target/plugins/org.eclipse.kura.web.jar" tofile="target/plugins/org.eclipse.kura.web_${org.eclipse.kura.web.version}.jar" failonerror="false" />
+  								<move file="target/plugins/org.eclipse.kura.linux.gpio.jar" tofile="target/plugins/org.eclipse.kura.linux.gpio_${org.eclipse.kura.linux.gpio.version}.jar" failonerror="false"/>
+  								<move file="target/plugins/org.eclipse.kura.emulator.gpio.jar" tofile="target/plugins/org.eclipse.kura.emulator.gpio_${org.eclipse.kura.emulator.gpio.version}.jar" failonerror="false"/>
 							</tasks>
 						</configuration>
 					</execution>
@@ -394,9 +439,94 @@
 
 	<profiles>
 		<profile>
+            <id>intel-edison</id>
+			<properties>
+<!--
+				<kura.install.dir>/home/root/eclipse</kura.install.dir>
+-->
+			</properties>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <build>
+                <resources>
+                    <resource>
+                        <directory>src/main/resources</directory>
+                        <filtering>true</filtering>
+                    </resource>
+                </resources>
+                <plugins>
+                    <plugin>
+						<groupId>org.codehaus.mojo</groupId> 
+						<artifactId>properties-maven-plugin</artifactId> <version>1.0-alpha-1</version> 
+						<executions>
+							<execution>
+								<phase>initialize</phase>
+								<goals>
+									<goal>read-project-properties</goal> 
+								</goals>
+								<configuration>
+									<files>
+										<file>${basedir}/build.properties</file> 
+										<file>${basedir}/config/kura.build.properties</file> 
+									</files>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>buildnumber-maven-plugin</artifactId>
+                        <version>1.0</version>
+                        <executions>
+                            <execution>
+                                <phase>validate</phase>
+                                <goals>
+                                    <goal>create-timestamp</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <version>1.7</version>
+                        <executions>
+                            <execution>
+                                <id>intel-edison-jars</id>
+                                <phase>install</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <target>
+                                        <property name="buildNumber" value="buildNumber" />
+                                        <property name="project.version" value="${project.version}" />
+                                        <property name="project.build.profile" value="${project.build.profile}" />
+                                        <property name="project.build.directory" value="${project.build.directory}" />
+                                        <property name="target.device" value="intel-edison" />
+                                        <property name="kura.os.version" value="yocto_1.6.1_edison" />                                        
+                                        <property name="build.name" value="intel-edison" />
+                                        <property name="kura.arch" value="x86_64" />
+                                        <property name="kura.mem.size" value="256m" />
+                                        <property name="kura.install.dir" value="/home/root/eclipse" />
+													 <property name="http.port" value="8080" />
+                                        <ant antfile="${basedir}/src/main/ant/build_equinox_distrib.xml"
+                                            target="dist-linux" />
+                                    </target>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+		<profile>
             <id>intel-edison-nn</id>
 			<properties>
-				<kura.edison.install.dir>/home/root/eclipse</kura.edison.install.dir>
+<!--
+				<kura.install.dir>/home/root/eclipse</kura.install.dir>
+-->
 			</properties>
             <activation>
                 <activeByDefault>true</activeByDefault>
@@ -462,8 +592,8 @@
                                         <property name="build.name" value="intel-edison-nn" />
                                         <property name="kura.arch" value="x86_64" />
                                         <property name="kura.mem.size" value="256m" />
-                                        <property name="kura.install.dir" value="${kura.edison.install.dir}" />
-										<property name="http.port" value="8080" />
+                                        <property name="kura.install.dir" value="/home/root/eclipse" />
+					<property name="http.port" value="8080" />
                                         <ant antfile="${basedir}/src/main/ant/build_equinox_distrib.xml"
                                             target="dist-linux" />
                                     </target>
@@ -479,6 +609,9 @@
 			<properties>
 				<project.raspbian.dependencies>hostapd, isc-dhcp-server, iw,
 					dos2unix, bind9, unzip, ethtool, telnet</project.raspbian.dependencies>
+<!--
+				<kura.install.dir>/opt/eclipse</kura.install.dir>
+-->
 			</properties>
 			<activation>
 				<activeByDefault>true</activeByDefault>
@@ -546,7 +679,7 @@
 										<property name="kura.os.version" value="debian" />
 										<property name="kura.arch" value="armv7_hf" />
 										<property name="kura.mem.size" value="256m" />
-										<property name="kura.install.dir" value="${kura.install.dir}" />
+										<property name="kura.install.dir" value="/opt/eclipse" />
 										<ant antfile="${basedir}/src/main/ant/build_equinox_distrib.xml"
 											target="dist-linux" />
 									</target>
@@ -587,7 +720,7 @@
 								</goals>
 								<configuration>
 									<verbose>true</verbose>
-									<deb>${basedir}/target/kura_${project.version}_beaglebone_debian_armv7.deb</deb>
+									<deb>${basedir}/target/kura_${project.version}_beaglebone_debian_installer.deb</deb>
 									<controlDir>${basedir}/src/main/deb/control</controlDir>
 									<dataSet>
 										<data>
@@ -610,6 +743,9 @@
 			<id>beaglebone-nn</id>
 			<properties>
 				<project.raspbian.dependencies.nn>dos2unix, unzip, telnet</project.raspbian.dependencies.nn>
+<!--
+				<kura.install.dir>/opt/eclipse</kura.install.dir>
+-->
 			</properties>
 			<activation>
 				<activeByDefault>true</activeByDefault>
@@ -677,7 +813,7 @@
 										<property name="kura.os.version" value="debian" />
 										<property name="kura.arch" value="armv7_hf" />
 										<property name="kura.mem.size" value="256m" />
-										<property name="kura.install.dir" value="${kura.install.dir}" />
+										<property name="kura.install.dir" value="/opt/eclipse" />
 										<ant antfile="${basedir}/src/main/ant/build_equinox_distrib.xml"
 											target="dist-linux" />
 									</target>
@@ -698,7 +834,7 @@
 								</goals>
 								<configuration>
 									<verbose>true</verbose>
-									<deb>${basedir}/target/kura_${project.version}_beaglebone-nn_debian_armv7.deb</deb>
+									<deb>${basedir}/target/kura_${project.version}_beaglebone-nn_debian_installer.deb</deb>
 									<controlDir>${basedir}/src/main/deb/control_nn</controlDir>
 									<dataSet>
 										<data>
@@ -722,6 +858,9 @@
 			<properties>
 				<project.raspbian.dependencies>hostapd, isc-dhcp-server, iw,
 					dos2unix, bind9, unzip, ethtool, telnet</project.raspbian.dependencies>
+<!--
+				<kura.install.dir>/opt/eclipse</kura.install.dir>
+-->
 			</properties>
 			<activation>
 				<activeByDefault>true</activeByDefault>
@@ -788,7 +927,7 @@
 										<property name="kura.os.version" value="raspbian" />
 										<property name="kura.arch" value="armv6_hf" />
 										<property name="kura.mem.size" value="256m" />
-										<property name="kura.install.dir" value="${kura.install.dir}" />
+										<property name="kura.install.dir" value="/opt/eclipse" />
 										<ant antfile="${basedir}/src/main/ant/build_equinox_distrib.xml"
 											target="dist-linux" />
 									</target>
@@ -819,7 +958,7 @@
 								</goals>
 								<configuration>
 									<verbose>true</verbose>
-									<deb>${basedir}/target/kura_${project.version}_raspberry-pi_armv6.deb</deb>
+									<deb>${basedir}/target/kura_${project.version}_raspberry-pi_installer.deb</deb>
 									<controlDir>${basedir}/src/main/deb/control</controlDir>
 									<dataSet>
 										<data>
@@ -841,7 +980,10 @@
 		<profile>
 			<id>raspberry-pi-nn</id>
 			<properties>
-				<project.raspbian.dependencies.nn>dos2unix, unzip, telnet</project.raspbian.dependencies.nn> 
+				<project.raspbian.dependencies.nn>dos2unix, unzip, telnet</project.raspbian.dependencies.nn>
+<!--
+				<kura.install.dir>/opt/eclipse</kura.install.dir>
+-->
 			</properties> 
 			<activation>
 				<activeByDefault>true</activeByDefault>
@@ -907,7 +1049,7 @@
 										<property name="kura.os.version" value="raspbian" /> 
 										<property name="kura.arch" value="armv6_hf" />
 										<property name="kura.mem.size" value="256m" />
-										<property name="kura.install.dir" value="${kura.install.dir}" />
+										<property name="kura.install.dir" value="/opt/eclipse" />
 										<ant antfile="${basedir}/src/main/ant/build_equinox_distrib.xml" target="dist-linux" />
 									</target>
 								</configuration>
@@ -927,7 +1069,7 @@
 								</goals>
 								<configuration> 
 									<verbose>true</verbose>
-									<deb>${basedir}/target/kura_${project.version}_raspberry-pi-nn_armv6.deb</deb>
+									<deb>${basedir}/target/kura_${project.version}_raspberry-pi-nn_installer.deb</deb>
 									<controlDir>${basedir}/src/main/deb/control_nn</controlDir>
 									<dataSet>
 										<data> 
@@ -951,6 +1093,9 @@
 			<properties>
 				<project.raspbian.dependencies>hostapd, isc-dhcp-server, iw,
 					dos2unix, bind9, unzip, ethtool, telnet</project.raspbian.dependencies>
+<!--
+				<kura.install.dir>/opt/eclipse</kura.install.dir>
+-->
 			</properties>
 			<activation>
 				<activeByDefault>true</activeByDefault>
@@ -1017,7 +1162,7 @@
 										<property name="kura.os.version" value="raspbian" />
 										<property name="kura.arch" value="armv6_hf" />
 										<property name="kura.mem.size" value="256m" />
-										<property name="kura.install.dir" value="${kura.install.dir}" />
+										<property name="kura.install.dir" value="/opt/eclipse" />
 										<ant antfile="${basedir}/src/main/ant/build_equinox_distrib.xml"
 											target="dist-linux" />
 									</target>
@@ -1048,7 +1193,7 @@
 								</goals>
 								<configuration>
 									<verbose>true</verbose>
-									<deb>${basedir}/target/kura_${project.version}_raspberry-pi-bplus_armv6.deb</deb>
+									<deb>${basedir}/target/kura_${project.version}_raspberry-pi-bplus_installer.deb</deb>
 									<controlDir>${basedir}/src/main/deb/control</controlDir>
 									<dataSet>
 										<data>
@@ -1070,7 +1215,10 @@
 		<profile>
 			<id>raspberry-pi-bplus-nn</id>
 			<properties>
-				<project.raspbian.dependencies.nn>dos2unix, unzip, telnet</project.raspbian.dependencies.nn> 
+				<project.raspbian.dependencies.nn>dos2unix, unzip, telnet</project.raspbian.dependencies.nn>
+<!--
+				<kura.install.dir>/opt/eclipse</kura.install.dir>
+-->
 			</properties> 
 			<activation>
 				<activeByDefault>true</activeByDefault>
@@ -1136,7 +1284,7 @@
 										<property name="kura.os.version" value="raspbian" /> 
 										<property name="kura.arch" value="armv6_hf" />
 										<property name="kura.mem.size" value="256m" />
-										<property name="kura.install.dir" value="${kura.install.dir}" />
+										<property name="kura.install.dir" value="/opt/eclipse" />
 										<ant antfile="${basedir}/src/main/ant/build_equinox_distrib.xml" target="dist-linux" />
 									</target>
 								</configuration>
@@ -1156,7 +1304,7 @@
 								</goals>
 								<configuration> 
 									<verbose>true</verbose>
-									<deb>${basedir}/target/kura_${project.version}_raspberry-pi-bplus-nn_armv6.deb</deb>
+									<deb>${basedir}/target/kura_${project.version}_raspberry-pi-bplus-nn_installer.deb</deb>
 									<controlDir>${basedir}/src/main/deb/control_nn</controlDir>
 									<dataSet>
 										<data> 
@@ -1179,8 +1327,10 @@
 		<profile>
 			<id>raspberry-pi-2</id>
 			<properties>
-				<project.raspbian.dependencies>hostapd, isc-dhcp-server, iw,
-					dos2unix, bind9, unzip, ethtool, telnet</project.raspbian.dependencies>
+				<project.raspbian.dependencies>hostapd, isc-dhcp-server, iw, dos2unix, bind9, unzip, ethtool, telnet</project.raspbian.dependencies>
+<!--
+				<kura.install.dir>/opt/eclipse</kura.install.dir>
+-->
 			</properties>
 			<activation>
 				<activeByDefault>true</activeByDefault>
@@ -1247,7 +1397,7 @@
 										<property name="kura.os.version" value="raspbian" />
 										<property name="kura.arch" value="armv7_hf" />
 										<property name="kura.mem.size" value="512m" />
-										<property name="kura.install.dir" value="${kura.install.dir}" />
+										<property name="kura.install.dir" value="/opt/eclipse" />
 										<ant antfile="${basedir}/src/main/ant/build_equinox_distrib.xml"
 											target="dist-linux" />
 									</target>
@@ -1268,7 +1418,7 @@
 								</goals>
 								<configuration>
 									<verbose>true</verbose>
-									<deb>${basedir}/target/kura_${project.version}_raspberry-pi-2_armv7.deb</deb>
+									<deb>${basedir}/target/kura_${project.version}_raspberry-pi-2_installer.deb</deb>
 									<controlDir>${basedir}/src/main/deb/control</controlDir>
 									<dataSet>
 										<data>
@@ -1291,7 +1441,10 @@
 		<profile>
 			<id>raspberry-pi-2-nn</id>
 			<properties>
-				<project.raspbian.dependencies>dos2unix, unzip, telnet</project.raspbian.dependencies>
+				<project.raspbian.dependencies.nn>dos2unix, unzip, telnet</project.raspbian.dependencies.nn>
+<!--
+				<kura.install.dir>/opt/eclipse</kura.install.dir>
+-->
 			</properties>
 			<activation>
 				<activeByDefault>true</activeByDefault>
@@ -1358,7 +1511,7 @@
 										<property name="kura.os.version" value="raspbian" />
 										<property name="kura.arch" value="armv7_hf" />
 										<property name="kura.mem.size" value="512m" />
-										<property name="kura.install.dir" value="${kura.install.dir}" />
+										<property name="kura.install.dir" value="/opt/eclipse" />
 										<ant antfile="${basedir}/src/main/ant/build_equinox_distrib.xml"
 											target="dist-linux" />
 									</target>
@@ -1379,8 +1532,8 @@
 								</goals>
 								<configuration>
 									<verbose>true</verbose>
-									<deb>${basedir}/target/kura_${project.version}_raspberry-pi-2-nn_armv7.deb</deb>
-									<controlDir>${basedir}/src/main/deb/control</controlDir>
+									<deb>${basedir}/target/kura_${project.version}_raspberry-pi-2-nn_installer.deb</deb>
+									<controlDir>${basedir}/src/main/deb/control_nn</controlDir>
 									<dataSet>
 										<data>
 											<src>${basedir}/target/kura_${project.version}_raspberry-pi-2-nn.zip</src>
@@ -1470,6 +1623,11 @@
 										<copy todir="${project.build.directory}/staging/target-definition">
 											<fileset dir="../target-definition" />
 										</copy>
+										<!-- Add individual emulator bundles-->
+										<copy 
+											file="../org.eclipse.kura.emulator.gpio/target/org.eclipse.kura.emulator.gpio-${org.eclipse.kura.emulator.gpio.version}.jar"
+											todir="${project.build.directory}/staging/target-definition/equinox_3.8.1/repository/plugins"/>
+
 										<delete
 											file="${project.build.directory}/staging/target-definition/pom.xml" />
 										<delete
@@ -1478,6 +1636,7 @@
 											file="${project.build.directory}/staging/target-definition/equinox_3.8.1/repository/artifacts.xml" />
 										<delete
 											file="${project.build.directory}/staging/target-definition/equinox_3.8.1/repository/content.xml" />
+										
 										<copy
 											file="src/main/resources/common/projects/target_definition.project"
 											tofile="${project.build.directory}/staging/target-definition/.project" />
@@ -1499,6 +1658,9 @@
 											file="${project.build.directory}/plugins/org.eclipse.kura.deployment.agent_${org.eclipse.kura.deployment.agent.version}.jar"
 											todir="${project.build.directory}/staging/target-definition/equinox_3.8.1/repository/plugins" />
 										<copy
+											file="${project.build.directory}/plugins/org.eclipse.kura.linux.status_${org.eclipse.kura.linux.status.version}.jar"
+											todir="${project.build.directory}/staging/target-definition/equinox_3.8.1/repository/plugins" />
+										<copy
 											file="${project.build.directory}/plugins/org.eclipse.kura.core.cloud_${org.eclipse.kura.core.cloud.version}.jar"
 											todir="${project.build.directory}/staging/target-definition/equinox_3.8.1/repository/plugins" />
 										<copy
@@ -1517,7 +1679,7 @@
 							</execution>
 							<execution>
 								<id>dev-env</id>
-								<phase>install</phase>
+								<phase>package</phase>
 								<goals>
 									<goal>run</goal>
 								</goals>
@@ -1549,6 +1711,8 @@
 											tofile="${project.build.directory}/staging/emulator/emulator.classpath" />
 										<copy file="src/main/resources/common/projects/emulator.project"
 											tofile="${project.build.directory}/staging/emulator/.project" />
+										<replace file="${project.build.directory}/staging/emulator/src/main/resources/kura.properties" 
+												 token="kura.version=kura_emulator" value="kura.version=KURA_${kura.version}" />
 										<move
 											file="${project.build.directory}/staging/emulator/emulator.classpath"
 											tofile="${project.build.directory}/staging/emulator/.classpath" />
@@ -1599,6 +1763,23 @@
 											<zipfileset dir="${project.build.directory}/staging/demo_heater/"
 												prefix="org.eclipse.kura.demo.heater/" />
 										</zip>
+									</target>
+								</configuration>
+							</execution>
+							<execution>
+								<id>post-dev-env</id>
+								<phase>install</phase>
+								<goals>
+									<goal>run</goal>
+								</goals>
+								<configuration>
+									<target unless="${org.eclipse.kura.dio.include}">
+										<zip destfile="${project.build.directory}/tmp_ws.zip"> 
+											<zipfileset src="${project.build.directory}/${zip_workspace.prefix}.zip"> 
+												<exclude name="target-definition/common/repository/plugins/jdk.dio_1.0.1.jar" /> 
+											</zipfileset> 
+										</zip> 
+										<move file="${project.build.directory}/tmp_ws.zip" tofile="${project.build.directory}/${zip_workspace.prefix}.zip" />
 									</target>
 								</configuration>
 							</execution>

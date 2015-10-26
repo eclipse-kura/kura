@@ -16,7 +16,6 @@ import org.eclipse.kura.net.admin.modem.PppPeer;
 import org.eclipse.kura.net.admin.visitor.linux.util.ModemXchangePair;
 import org.eclipse.kura.net.admin.visitor.linux.util.ModemXchangeScript;
 import org.eclipse.kura.net.modem.ModemConfig;
-import org.eclipse.kura.net.modem.ModemTechnologyType;
 
 public class TelitDe910ConfigGenerator implements ModemPppConfigGenerator {
 
@@ -29,7 +28,6 @@ public class TelitDe910ConfigGenerator implements ModemPppConfigGenerator {
 		 // default values
 		pppPeer.setBaudRate(921600);
 		pppPeer.setEnableDebug(true);
-		pppPeer.setNetworkTechnology(ModemTechnologyType.EVDO);
 		pppPeer.setUseRtsCtsFlowControl(true);
 		pppPeer.setLockSerialDevice(true);
 		pppPeer.setPeerMustAuthenticateItself(false);

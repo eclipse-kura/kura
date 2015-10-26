@@ -23,8 +23,11 @@ import org.eclipse.kura.web.client.widget.PackageInstallDialog;
 import org.eclipse.kura.web.shared.model.GwtBundleInfo;
 import org.eclipse.kura.web.shared.model.GwtDeploymentPackage;
 import org.eclipse.kura.web.shared.model.GwtSession;
+import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.eclipse.kura.web.shared.service.GwtPackageService;
 import org.eclipse.kura.web.shared.service.GwtPackageServiceAsync;
+import org.eclipse.kura.web.shared.service.GwtSecurityTokenService;
+import org.eclipse.kura.web.shared.service.GwtSecurityTokenServiceAsync;
 
 import com.extjs.gxt.ui.client.Style.HorizontalAlignment;
 import com.extjs.gxt.ui.client.Style.Scroll;
@@ -61,48 +64,49 @@ public class PackagesPanel extends LayoutContainer
 {
 	private static final Messages MSGS = GWT.create(Messages.class);
 
+	private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
 	private final GwtPackageServiceAsync gwtPackageService = GWT.create(GwtPackageService.class);
-	
+
 	private final static String SERVLET_URL = "/" + GWT.getModuleName() + "/file/deploy";
-	
+
 	@SuppressWarnings("unused")
 	private GwtSession           m_currentSession;
-    private ServiceTree          m_servicesTree;
+	private ServiceTree          m_servicesTree;
 
-    private boolean    		     m_dirty;
-    private boolean              m_initialized;
-    
-    private ToolBar              m_toolBar;
-    private ContentPanel         m_packagesPanel;
-    private Button               m_refreshButton;
-    private Button               m_installButton;
-    private Button               m_uninstallButton;
-    
-    private TreeGrid<ModelData>  m_treeGrid;
-    private TreeStore<ModelData> m_treeStore = new TreeStore<ModelData>();
-    private PackageInstallDialog m_fileUpload;
+	private boolean    		     m_dirty;
+	private boolean              m_initialized;
 
-    
-    public PackagesPanel(GwtSession currentSession,
-					     ServiceTree serviceTree) 
-    {
-        m_currentSession = currentSession;
-    	m_servicesTree   = serviceTree;
-        m_dirty          = true;
-    	m_initialized    = false;
-    }
-    
-    
-    protected void onRender(Element parent, int index) {
-        
-        super.onRender(parent, index);        
-        setLayout(new FitLayout());
-        setBorders(false);
-        setId("packages-panel-wrapper");
-        
-        // init components
-        initToolBar();
-        initPackages();
+	private ToolBar              m_toolBar;
+	private ContentPanel         m_packagesPanel;
+	private Button               m_refreshButton;
+	private Button               m_installButton;
+	private Button               m_uninstallButton;
+
+	private TreeGrid<ModelData>  m_treeGrid;
+	private TreeStore<ModelData> m_treeStore = new TreeStore<ModelData>();
+	private PackageInstallDialog m_fileUpload;
+
+
+	public PackagesPanel(GwtSession currentSession,
+			ServiceTree serviceTree) 
+	{
+		m_currentSession = currentSession;
+		m_servicesTree   = serviceTree;
+		m_dirty          = true;
+		m_initialized    = false;
+	}
+
+
+	protected void onRender(Element parent, int index) {
+
+		super.onRender(parent, index);        
+		setLayout(new FitLayout());
+		setBorders(false);
+		setId("packages-panel-wrapper");
+
+		// init components
+		initToolBar();
+		initPackages();
 
 		ContentPanel devicesConfigurationPanel = new ContentPanel();
 		devicesConfigurationPanel.setBorders(false);
@@ -111,173 +115,181 @@ public class PackagesPanel extends LayoutContainer
 		devicesConfigurationPanel.setLayout( new FitLayout());
 		//devicesConfigurationPanel.setLayout( new FlowLayout());
 		devicesConfigurationPanel.setScrollMode(Scroll.AUTO);
-        devicesConfigurationPanel.setTopComponent(m_toolBar);
+		devicesConfigurationPanel.setTopComponent(m_toolBar);
 		devicesConfigurationPanel.add(m_packagesPanel);
 
-        add(devicesConfigurationPanel);
-        m_initialized = true;
-        
-        refresh();
-    }
-    
-    
-    private void initToolBar() {  
-    	
-        m_toolBar = new ToolBar();
-        m_toolBar.setBorders(true);
-        m_toolBar.setId("packages-toolbar");
- 
-        m_refreshButton = new Button(MSGS.refreshButton(), 
-        		AbstractImagePrototype.create(Resources.INSTANCE.refresh()),
-                new SelectionListener<ButtonEvent>() {
-            @Override
-            public void componentSelected(ButtonEvent ce) {
-            	m_dirty = true;
-		    	// refresh the list
-		    	// and reselect the item
-		    	m_servicesTree.refreshServicePanel();
-                refresh();
-            }
-        });
+		add(devicesConfigurationPanel);
+		m_initialized = true;
 
-        m_installButton = new Button(MSGS.packageAddButton(),
-        		AbstractImagePrototype.create(Resources.INSTANCE.packageAdd()),
-                new SelectionListener<ButtonEvent>() {
-            @Override
-            public void componentSelected(ButtonEvent ce) {
-                upload();
-            }
-        });
+		refresh();
+	}
 
-        m_uninstallButton = new Button(MSGS.packageDeleteButton(),
-        		AbstractImagePrototype.create(Resources.INSTANCE.packageDelete()),
-                new SelectionListener<ButtonEvent>() {
-            @Override
-            public void componentSelected(ButtonEvent ce) {
-        		ModelData selectedItem = m_treeGrid.getSelectionModel().getSelectedItem();
 
-        		if (selectedItem != null) {
-        			if (selectedItem instanceof GwtDeploymentPackage) {
-        				GwtDeploymentPackage pkg = (GwtDeploymentPackage) selectedItem;
+	private void initToolBar() {  
 
-        				MessageBox.confirm(MSGS.confirm(), 
-        						           MSGS.deviceUninstallPackage(pkg.getName()),
-        						           new Listener<MessageBoxEvent>() {  
-        					public void handleEvent(MessageBoxEvent ce) {
-        						// if confirmed, uninstall
-        						Dialog  dialog = ce.getDialog();
-        						if (dialog.yesText.equals(ce.getButtonClicked().getText())) {
-        							uninstall();
-        						}
-        					}
-        				});
-        			}
-        		}
-            }
-        });
+		m_toolBar = new ToolBar();
+		m_toolBar.setBorders(true);
+		m_toolBar.setId("packages-toolbar");
 
-        m_toolBar.add(m_refreshButton);
-        m_toolBar.add(new SeparatorToolItem());
-        m_toolBar.add(m_installButton);
-        m_toolBar.add(new SeparatorToolItem());
-        m_toolBar.add(m_uninstallButton);
-        
-        m_toolBar.disable();
-    }
-    
-    private void upload() {
-    	m_toolBar.disable();
-    	    	
-    	List<HiddenField<?>> hiddenFields = new ArrayList<HiddenField<?>>();
-    	
-    	//m_fileUpload = new FileUploadDialog(SERVLET_URL, hiddenFields);
-    	m_fileUpload = new PackageInstallDialog(SERVLET_URL, hiddenFields);
-    	
-    	m_fileUpload.addListener(Events.Hide, new Listener<BaseEvent>() {
+		m_refreshButton = new Button(MSGS.refreshButton(), 
+				AbstractImagePrototype.create(Resources.INSTANCE.refresh()),
+				new SelectionListener<ButtonEvent>() {
+			@Override
+			public void componentSelected(ButtonEvent ce) {
+				m_dirty = true;
+				// refresh the list
+				// and reselect the item
+				m_servicesTree.refreshServicePanel();
+				refresh();
+			}
+		});
 
-    		public void handleEvent(BaseEvent be) {
+		m_installButton = new Button(MSGS.packageAddButton(),
+				AbstractImagePrototype.create(Resources.INSTANCE.packageAdd()),
+				new SelectionListener<ButtonEvent>() {
+			@Override
+			public void componentSelected(ButtonEvent ce) {
+				upload();
+			}
+		});
+
+		m_uninstallButton = new Button(MSGS.packageDeleteButton(),
+				AbstractImagePrototype.create(Resources.INSTANCE.packageDelete()),
+				new SelectionListener<ButtonEvent>() {
+			@Override
+			public void componentSelected(ButtonEvent ce) {
+				ModelData selectedItem = m_treeGrid.getSelectionModel().getSelectedItem();
+
+				if (selectedItem != null) {
+					if (selectedItem instanceof GwtDeploymentPackage) {
+						GwtDeploymentPackage pkg = (GwtDeploymentPackage) selectedItem;
+
+						MessageBox.confirm(MSGS.confirm(), 
+								MSGS.deviceUninstallPackage(pkg.getName()),
+								new Listener<MessageBoxEvent>() {  
+							public void handleEvent(MessageBoxEvent ce) {
+								// if confirmed, uninstall
+								Dialog  dialog = ce.getDialog();
+								if (dialog.yesText.equals(ce.getButtonClicked().getText())) {
+									uninstall();
+								}
+							}
+						});
+					}
+				}
+			}
+		});
+
+		m_toolBar.add(m_refreshButton);
+		m_toolBar.add(new SeparatorToolItem());
+		m_toolBar.add(m_installButton);
+		m_toolBar.add(new SeparatorToolItem());
+		m_toolBar.add(m_uninstallButton);
+
+		m_toolBar.disable();
+	}
+
+	private void upload() {
+		m_toolBar.disable();
+
+		List<HiddenField<?>> hiddenFields = new ArrayList<HiddenField<?>>();
+
+		//m_fileUpload = new FileUploadDialog(SERVLET_URL, hiddenFields);
+		m_fileUpload = new PackageInstallDialog(SERVLET_URL, hiddenFields);
+
+		m_fileUpload.addListener(Events.Hide, new Listener<BaseEvent>() {
+
+			public void handleEvent(BaseEvent be) {
 				m_toolBar.enable();
 				m_uninstallButton.disable();
 				m_dirty = true;
 
-		    	// refresh the list
-		    	// and reselect the item
-		    	m_servicesTree.refreshServicePanel();
+				// refresh the list
+				// and reselect the item
+				m_servicesTree.refreshServicePanel();
 				refreshWithDelay();
-    		}
-    	});
-
-    	m_fileUpload.setHeading(MSGS.deviceInstallNewPackage());
-    	m_fileUpload.show();
-    }
-    
-    private void uninstall() {
-    	m_toolBar.disable();
-    	
-    	ModelData selectedItem = m_treeGrid.getSelectionModel().getSelectedItem();
-    	
-    	if (selectedItem != null) {
-			if (selectedItem instanceof GwtDeploymentPackage) {
-				GwtDeploymentPackage pkg = (GwtDeploymentPackage) selectedItem;
-								
-				gwtPackageService.uninstallDeploymentPackage(pkg.getName(), new AsyncCallback<Void>() {					
-					public void onSuccess(Void arg0) {
-						m_toolBar.enable();
-						m_uninstallButton.disable();
-						m_dirty = true;
-
-        		    	// refresh the list
-        		    	// and reselect the item
-        		    	m_servicesTree.refreshServicePanel();
-						refreshWithDelay();
-					}
-					
-					public void onFailure(Throwable caught) {
-						m_toolBar.enable();
-						m_uninstallButton.disable();
-						m_dirty = true;
-						FailureHandler.handle(caught);
-
-        		    	// refresh the list
-        		    	// and reselect the item
-        		    	m_servicesTree.refreshServicePanel();
-						refreshWithDelay();
-					}
-				});	
 			}
-    	}
-    }
-    
-    private void initPackages() {      
-        ColumnConfig name = new ColumnConfig("name", "Name", 100);
-        name.setRenderer(new TreeGridCellRenderer<ModelData>());
-        ColumnConfig version = new ColumnConfig("version", "Version", 150);
-        version.setSortable(false);
-        ColumnModel cm = new ColumnModel(Arrays.asList(name, version));
-      
-        m_packagesPanel = new ContentPanel();
-        m_packagesPanel.setBodyBorder(false);
-        m_packagesPanel.setButtonAlign(HorizontalAlignment.CENTER);  
-        m_packagesPanel.setLayout(new FitLayout());
-        m_packagesPanel.setFrame(false);
-        m_packagesPanel.setHeaderVisible(false);
-        m_packagesPanel.setId("packages-content-wrapper");
-        
-        m_treeGrid = new TreeGrid<ModelData>(m_treeStore, cm);
-        m_treeGrid.setBorders(true);
-        m_treeGrid.getStyle().setLeafIcon(AbstractImagePrototype.create(Resources.INSTANCE.plugin()));  
-        m_treeGrid.setAutoExpandColumn("name");
-        m_treeGrid.setTrackMouseOver(false);  
-        m_treeGrid.getAriaSupport().setLabelledBy(m_packagesPanel.getHeader().getId() + "-label");
-        m_treeGrid.getView().setAutoFill(true);
-        m_treeGrid.getView().setEmptyText(MSGS.deviceNoDeviceSelected());
-        
-        m_treeGrid.getSelectionModel().addSelectionChangedListener(new SelectionChangedListener<ModelData>() {
-			
+		});
+
+		m_fileUpload.setHeading(MSGS.deviceInstallNewPackage());
+		m_fileUpload.show();
+	}
+
+	private void uninstall() {
+		m_toolBar.disable();
+
+		ModelData selectedItem = m_treeGrid.getSelectionModel().getSelectedItem();
+
+		if (selectedItem != null) {
+			if (selectedItem instanceof GwtDeploymentPackage) {
+				final GwtDeploymentPackage pkg = (GwtDeploymentPackage) selectedItem;
+				gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
+					@Override
+					public void onFailure(Throwable ex) {
+						FailureHandler.handle(ex);
+					}
+
+					@Override
+					public void onSuccess(GwtXSRFToken token) {				
+						gwtPackageService.uninstallDeploymentPackage(token, pkg.getName(), new AsyncCallback<Void>() {					
+							public void onSuccess(Void arg0) {
+								m_toolBar.enable();
+								m_uninstallButton.disable();
+								m_dirty = true;
+
+								// refresh the list
+								// and reselect the item
+								m_servicesTree.refreshServicePanel();
+								refreshWithDelay();
+							}
+
+							public void onFailure(Throwable caught) {
+								m_toolBar.enable();
+								m_uninstallButton.disable();
+								m_dirty = true;
+								FailureHandler.handle(caught);
+
+								// refresh the list
+								// and reselect the item
+								m_servicesTree.refreshServicePanel();
+								refreshWithDelay();
+							}
+						});	
+					}});
+			}
+		}
+	}
+
+	private void initPackages() {      
+		ColumnConfig name = new ColumnConfig("name", "Name", 100);
+		name.setRenderer(new TreeGridCellRenderer<ModelData>());
+		ColumnConfig version = new ColumnConfig("version", "Version", 150);
+		version.setSortable(false);
+		ColumnModel cm = new ColumnModel(Arrays.asList(name, version));
+
+		m_packagesPanel = new ContentPanel();
+		m_packagesPanel.setBodyBorder(false);
+		m_packagesPanel.setButtonAlign(HorizontalAlignment.CENTER);  
+		m_packagesPanel.setLayout(new FitLayout());
+		m_packagesPanel.setFrame(false);
+		m_packagesPanel.setHeaderVisible(false);
+		m_packagesPanel.setId("packages-content-wrapper");
+
+		m_treeGrid = new TreeGrid<ModelData>(m_treeStore, cm);
+		m_treeGrid.setBorders(true);
+		m_treeGrid.getStyle().setLeafIcon(AbstractImagePrototype.create(Resources.INSTANCE.plugin()));  
+		m_treeGrid.setAutoExpandColumn("name");
+		m_treeGrid.setTrackMouseOver(false);  
+		m_treeGrid.getAriaSupport().setLabelledBy(m_packagesPanel.getHeader().getId() + "-label");
+		m_treeGrid.getView().setAutoFill(true);
+		m_treeGrid.getView().setEmptyText(MSGS.deviceNoDeviceSelected());
+
+		m_treeGrid.getSelectionModel().addSelectionChangedListener(new SelectionChangedListener<ModelData>() {
+
 			@Override
 			public void selectionChanged(SelectionChangedEvent<ModelData> se) {
 				ModelData selectedItem = se.getSelectedItem();
-				
+
 				// Check if it's a package or a bundle
 				if (selectedItem instanceof GwtDeploymentPackage) {
 					m_uninstallButton.enable();
@@ -286,63 +298,71 @@ public class PackagesPanel extends LayoutContainer
 				}
 			}
 		});
-        
-        m_packagesPanel.add(m_treeGrid);
-    }
 
-    
-    // --------------------------------------------------------------------------------------
-    //
-    //    Device Configuration Management
-    //
-    // --------------------------------------------------------------------------------------
+		m_packagesPanel.add(m_treeGrid);
+	}
 
-    public void refreshWithDelay() {
-    	refresh(2500);
-    }
-    
-    public void refresh() {
-    	refresh(100);
-    }
-    
-    public void refresh(int delayMillis) {
 
-    	if (m_dirty && m_initialized) {
+	// --------------------------------------------------------------------------------------
+	//
+	//    Device Configuration Management
+	//
+	// --------------------------------------------------------------------------------------
 
-    		m_dirty = false;
-    		m_toolBar.enable();
-    		m_uninstallButton.disable();
-    		m_treeGrid.getView().setEmptyText(MSGS.devicePackagesNone());
-    		m_treeStore.removeAll();
-        	m_treeGrid.mask(MSGS.loading());
-        	
-        	Timer timer = new Timer() {
-        	    public void run() {
-        	       
-            		gwtPackageService.findDeviceDeploymentPackages(new AsyncCallback<List<GwtDeploymentPackage>>() {					
-            			public void onSuccess(List<GwtDeploymentPackage> packages) {
-            				if (packages != null) {
-            					for (GwtDeploymentPackage pkg : packages) {
-            						m_treeStore.add(pkg, false);
+	public void refreshWithDelay() {
+		refresh(2500);
+	}
 
-            						if (pkg.getBundleInfos() != null) {
-            							for (GwtBundleInfo bundle : pkg.getBundleInfos()) {
-            								m_treeStore.add(pkg, bundle, false);
-            							}
-            						}
-            					}
-            				}
-            		    	m_treeGrid.unmask();
-            			}
+	public void refresh() {
+		refresh(100);
+	}
 
-            			public void onFailure(Throwable caught) {
-            				FailureHandler.handle(caught);
-            				m_treeGrid.unmask();
-            			}
-            		});
-        	    } 
-        	};
-        	timer.schedule(delayMillis);
-    	}
-    }
+	public void refresh(int delayMillis) {
+
+		if (m_dirty && m_initialized) {
+
+			m_dirty = false;
+			m_toolBar.enable();
+			m_uninstallButton.disable();
+			m_treeGrid.getView().setEmptyText(MSGS.devicePackagesNone());
+			m_treeStore.removeAll();
+			m_treeGrid.mask(MSGS.loading());
+
+			Timer timer = new Timer() {
+				public void run() {
+					gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
+						@Override
+						public void onFailure(Throwable ex) {
+							FailureHandler.handle(ex);
+						}
+
+						@Override
+						public void onSuccess(GwtXSRFToken token) {
+							gwtPackageService.findDeviceDeploymentPackages(token, new AsyncCallback<List<GwtDeploymentPackage>>() {					
+								public void onSuccess(List<GwtDeploymentPackage> packages) {
+									if (packages != null) {
+										for (GwtDeploymentPackage pkg : packages) {
+											m_treeStore.add(pkg, false);
+
+											if (pkg.getBundleInfos() != null) {
+												for (GwtBundleInfo bundle : pkg.getBundleInfos()) {
+													m_treeStore.add(pkg, bundle, false);
+												}
+											}
+										}
+									}
+									m_treeGrid.unmask();
+								}
+
+								public void onFailure(Throwable caught) {
+									FailureHandler.handle(caught);
+									m_treeGrid.unmask();
+								}
+							});
+						}});
+				} 
+			};
+			timer.schedule(delayMillis);
+		}
+	}
 }

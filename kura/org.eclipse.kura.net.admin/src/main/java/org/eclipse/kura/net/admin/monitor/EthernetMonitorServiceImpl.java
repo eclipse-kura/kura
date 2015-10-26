@@ -20,6 +20,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.net.EthernetInterfaceConfigImpl;
@@ -66,7 +67,7 @@ public class EthernetMonitorServiceImpl implements EthernetMonitorService, Event
 	private static Object s_lock = new Object();
 	
 	private static Map<String, Future<?>> tasks;
-	private static Map<String, Boolean> stopThreads;
+	private static Map<String, AtomicBoolean> stopThreads;
 	
 	private EventAdmin m_eventAdmin;
 	private NetworkAdminService m_netAdminService;
@@ -469,9 +470,14 @@ public class EthernetMonitorServiceImpl implements EthernetMonitorService, Event
 		
 		if (ethernetInterfaceConfig != null) {
 			for (NetInterfaceAddressConfig addresses : ethernetInterfaceConfig.getNetInterfaceAddresses()) {
-				for (NetConfig netConfig : addresses.getConfigs()) {
-					if (netConfig instanceof NetConfigIP4) {
-						status = ((NetConfigIP4)netConfig).getStatus();
+				if (addresses != null) {
+					List<NetConfig> netConfigs = addresses.getConfigs();
+					if (netConfigs != null) {
+						for (NetConfig netConfig : netConfigs) {
+							if (netConfig instanceof NetConfigIP4) {
+								status = ((NetConfigIP4)netConfig).getStatus();
+							}
+						}
 					}
 				}
 			}
@@ -495,22 +501,21 @@ public class EthernetMonitorServiceImpl implements EthernetMonitorService, Event
 				tasks = new HashMap<String, Future<?>>();
 			}
 			if (stopThreads == null) {
-				stopThreads = new HashMap<String, Boolean>();
+				stopThreads = new HashMap<String, AtomicBoolean>();
 			}
-			
-			stopThreads.put(interfaceName, false);
-			
+						
 			// Ensure monitor doesn't already exist for this interface
 			if (tasks.get(interfaceName) == null) {
 				s_logger.info("Starting monitor for {}", interfaceName);
+				stopThreads.put(interfaceName, new AtomicBoolean(false));
 				Future<?> task = m_executor.submit(new Runnable() {
 		    		@Override
 		    		public void run() {
 			    			Thread.currentThread().setName("EthernetMonitor_" + interfaceName);
-			    			while (!stopThreads.get(interfaceName)) {
+			    			while (!stopThreads.get(interfaceName).get()) {
 			    				try {
 			    					monitor(interfaceName);
-			    					Thread.sleep(THREAD_INTERVAL);
+			    					monitorWait(interfaceName);
 			    				} catch (InterruptedException interruptedException) {
 			    					Thread.interrupted();
 			    					s_logger.debug("Ethernet monitor interrupted - {}", interruptedException);
@@ -520,6 +525,9 @@ public class EthernetMonitorServiceImpl implements EthernetMonitorService, Event
 			    			}
 		    	}});			
 				tasks.put(interfaceName, task);
+			} else {
+				// The monitor is already running.
+				monitorNotity(interfaceName);
 			}
 		}
 	}
@@ -530,7 +538,11 @@ public class EthernetMonitorServiceImpl implements EthernetMonitorService, Event
 		
 		Future<?> task = tasks.get(interfaceName);
 		if ((task != null) && (!task.isDone())) {
-			stopThreads.put(interfaceName, true);
+			AtomicBoolean stop = stopThreads.get(interfaceName);
+			if (stop != null) {
+				stop.set(true);
+			}
+			monitorNotity(interfaceName);
 			s_logger.debug("Stopping monitor for {} ...", interfaceName);
 			task.cancel(true);
 			s_logger.info("Monitor for {} cancelled? = {}", interfaceName, task.isDone());
@@ -543,5 +555,23 @@ public class EthernetMonitorServiceImpl implements EthernetMonitorService, Event
 		LinuxNetworkUtil.disableInterface(interfaceName);
 		// LinuxNetworkUtil.powerOnEthernetController(interfaceName); // already called by NetworkUtil.disableInterface 
 		m_netAdminService.manageDhcpServer(interfaceName, false);
+	}
+	
+	private void monitorNotity(String interfaceName) {
+		Object o = stopThreads.get(interfaceName);
+		if (o != null) {
+			synchronized (o) {
+				o.notifyAll();
+			}
+		}
+	}
+	
+	private void monitorWait(String interfaceName) throws InterruptedException {
+		Object o = stopThreads.get(interfaceName);
+		if (o != null) {
+			synchronized (o) {
+				o.wait(THREAD_INTERVAL);
+			}
+		}
 	}
 }

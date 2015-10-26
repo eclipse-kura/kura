@@ -25,14 +25,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAnyAttribute;
-import javax.xml.bind.annotation.XmlAnyElement;
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlSchemaType;
-import javax.xml.bind.annotation.XmlType;
 import javax.xml.namespace.QName;
 
 import org.eclipse.kura.configuration.metatype.Icon;
@@ -61,21 +53,12 @@ import org.w3c.dom.Element;
  * 
  * 
  */
-@XmlRootElement(name="Icon", namespace="http://www.osgi.org/xmlns/metatype/v1.2.0")
-@XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "Ticon", propOrder = {
-    "any"
-})
+
 public class Ticon implements Icon  
 {
-    @XmlAnyElement(lax = true)
     protected List<Object> any;
-    @XmlAttribute(name = "resource", required = true)
     protected String resource;
-    @XmlAttribute(name = "size", required = true)
-    @XmlSchemaType(name = "positiveInteger")
     protected BigInteger size;
-    @XmlAnyAttribute
     private Map<QName, String> otherAttributes = new HashMap<QName, String>();
 
     /**
@@ -106,6 +89,13 @@ public class Ticon implements Icon
             any = new ArrayList<Object>();
         }
         return this.any;
+    }
+    
+    public void setAny(Object o) {
+        if (any == null) {
+            any = new ArrayList<Object>();
+        }
+        any.add(o);
     }
 
     /**

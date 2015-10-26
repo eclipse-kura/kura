@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>org.eclipse.kura</groupId>
 		<artifactId>kura</artifactId>
-		<version>1.2.0</version>
+		<version>1.3.0</version>
 		<relativePath>../manifest_pom.xml</relativePath>
 	</parent>
 
@@ -196,12 +196,12 @@
 			    <autoStart>true</autoStart>
 			</bundle>
 			<bundle>
-			    <id>org.apache.servicemix.bundles.protobuf-java</id>
+			    <id>com.google.protobuf</id>
 			    <level>4</level>
 			    <autoStart>true</autoStart>
 			</bundle>
 			<bundle>
-			    <id>mqtt-client</id>
+			    <id>org.eclipse.paho.client.mqttv3</id>
 			    <level>4</level>
 			    <autoStart>true</autoStart>
 			</bundle>
@@ -363,11 +363,11 @@
                         </dependency>
                         <dependency>
                             <type>p2-installable-unit</type>
-                            <artifactId>org.apache.servicemix.bundles.protobuf-java</artifactId>
+                            <artifactId>com.google.protobuf</artifactId>
                         </dependency>
                         <dependency>
                             <type>p2-installable-unit</type>
-                            <artifactId>mqtt-client</artifactId>
+                            <artifactId>org.eclipse.paho.client.mqttv3</artifactId>
                         </dependency>
                         <dependency>
                             <type>p2-installable-unit</type>

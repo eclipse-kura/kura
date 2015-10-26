@@ -66,7 +66,7 @@ public class TelitHe910ModemFactory implements CellularModemFactory {
 		TelitHe910 telitHe910 = m_modemServices.get(key);
 
 		if (telitHe910 == null) {
-			telitHe910 = new TelitHe910(modemDevice, platform, m_connectionFactory, s_type);
+			telitHe910 = new TelitHe910(modemDevice, platform, m_connectionFactory);
 			m_modemServices.put(key, telitHe910);
 		} else {
 			telitHe910.setModemDevice(modemDevice);
@@ -86,6 +86,7 @@ public class TelitHe910ModemFactory implements CellularModemFactory {
 	}
 
 	@Override
+	@Deprecated
 	public ModemTechnologyType getType() {
 		return s_type;
 	}

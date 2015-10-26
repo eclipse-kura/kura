@@ -12,10 +12,14 @@
 package org.eclipse.kura.web.client.settings;
 
 import org.eclipse.kura.web.client.messages.Messages;
+import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.shared.GwtKuraErrorCode;
 import org.eclipse.kura.web.shared.model.GwtSession;
+import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.eclipse.kura.web.shared.service.GwtCertificatesService;
 import org.eclipse.kura.web.shared.service.GwtCertificatesServiceAsync;
+import org.eclipse.kura.web.shared.service.GwtSecurityTokenService;
+import org.eclipse.kura.web.shared.service.GwtSecurityTokenServiceAsync;
 
 import com.extjs.gxt.ui.client.Style.HorizontalAlignment;
 import com.extjs.gxt.ui.client.Style.Scroll;
@@ -38,29 +42,39 @@ import com.extjs.gxt.ui.client.widget.layout.ColumnLayout;
 import com.extjs.gxt.ui.client.widget.layout.FitLayout;
 import com.extjs.gxt.ui.client.widget.layout.FormData;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.ListBox;
+import com.google.gwt.user.server.rpc.XsrfProtect;
 
+@XsrfProtect
 public class CertificatesTab extends LayoutContainer {
 
 	private static final Messages MSGS = GWT.create(Messages.class);
 
 	private final static String SERVLET_URL = "/" + GWT.getModuleName() + "/file/certificate";
-	private final GwtCertificatesServiceAsync gwtCertificatesService = GWT.create(GwtCertificatesService.class);
+
+	private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
+	private final GwtCertificatesServiceAsync gwtCertificatesService= GWT.create(GwtCertificatesService.class);
 
 	@SuppressWarnings("unused")
 	private GwtSession			m_currentSession;
 	private LayoutContainer 	m_commandInput;
 	private FormPanel			m_formPanel;
 	private TextArea			m_publicCertificate;
-	private TextArea			m_privateCertificate;
-	private TextField<String>	m_storagePassword;
+	private ListBox			    m_certificateType;
 	private TextField<String>   m_storageAlias;
 
 	private Button				m_executeButton;
 	private Button				m_resetButton;
 	private ButtonBar			m_buttonBar;
+
+	private String 				certPublicSSLLeaf = "SSL leaf certificate";
+	private String 				certPublicSSLChain = "SSL complete certificate chain";
+	private String 				certCertificationAuthority = "Certification authority";
 
 
 	public CertificatesTab(GwtSession currentSession) 
@@ -95,53 +109,99 @@ public class CertificatesTab extends LayoutContainer {
 		m_buttonBar = m_formPanel.getButtonBar();
 		initButtonBar();
 
-
-
 		m_formPanel.addListener(Events.Submit, new Listener<FormEvent>() {
 			public void handleEvent(FormEvent be) {
-				if(m_privateCertificate.getValue() != null && m_privateCertificate.getValue() != ""){
-					gwtCertificatesService.storePrivateSSLCertificate(m_privateCertificate.getValue(), m_publicCertificate.getValue(), m_storagePassword.getValue(), m_storageAlias.getValue(), new AsyncCallback<Integer>() {
-						public void onFailure(Throwable caught) {
-							if(caught.getLocalizedMessage().equals(GwtKuraErrorCode.ILLEGAL_ARGUMENT.toString())){
-								Info.display(MSGS.error(), "Error while storing the private certificate in the key store");
-							}else{
-								Info.display(MSGS.error(), caught.getLocalizedMessage());
-							}
-							m_commandInput.unmask();
+				switch(m_certificateType.getSelectedIndex()){
+				case 0:
+					gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
+						@Override
+						public void onFailure(Throwable ex) {
+							FailureHandler.handle(ex);
 						}
 
-						public void onSuccess(Integer certsStored) {
-							m_publicCertificate.clear();
-							m_privateCertificate.clear();
-							m_storagePassword.clear();
-							m_storageAlias.clear();
-							Info.display(MSGS.info(), "Storage success. Stored private and public certificates.");
-							m_commandInput.unmask();
-						}
-					});
-				}else{
-					gwtCertificatesService.storePublicSSLCertificate(m_publicCertificate.getValue(), m_storageAlias.getValue(), new AsyncCallback<Integer>() {
-						public void onFailure(Throwable caught) {
-							if(caught.getLocalizedMessage().equals(GwtKuraErrorCode.ILLEGAL_ARGUMENT.toString())){
-								Info.display(MSGS.error(), "Error while storing the public certificate(s) in the key store");
-							}else{
-								Info.display(MSGS.error(), caught.getLocalizedMessage());
-							}
-							m_commandInput.unmask();
+						@Override
+						public void onSuccess(GwtXSRFToken token) {	
+							gwtCertificatesService.storeLeafKey(token, m_publicCertificate.getValue(), m_storageAlias.getValue(), new AsyncCallback<Integer>() {
+								public void onFailure(Throwable caught) {
+									if(caught.getLocalizedMessage().equals(GwtKuraErrorCode.ILLEGAL_ARGUMENT.toString())){
+										Info.display(MSGS.error(), "Error while storing the public key in the key store");
+									}else{
+										Info.display(MSGS.error(), caught.getLocalizedMessage());
+									}
+									m_commandInput.unmask();
+								}
+
+								public void onSuccess(Integer certsStored) {
+									m_publicCertificate.clear();
+									m_storageAlias.clear();
+									Info.display(MSGS.info(), "Storage success. Stored " + certsStored + " public key.");
+									m_commandInput.unmask();
+								}
+							});
+						}});
+					break;
+
+				case 1:
+					gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
+						@Override
+						public void onFailure(Throwable ex) {
+							FailureHandler.handle(ex);
 						}
 
-						public void onSuccess(Integer certsStored) {
-							m_publicCertificate.clear();
-							m_storagePassword.clear();
-							m_storageAlias.clear();
-							Info.display(MSGS.info(), "Storage success. Stored " + certsStored + " public certificate(s).");
-							m_commandInput.unmask();
+						@Override
+						public void onSuccess(GwtXSRFToken token) {	
+							gwtCertificatesService.storePublicChain(token, m_publicCertificate.getValue(), m_storageAlias.getValue(), new AsyncCallback<Integer>() {
+								public void onFailure(Throwable caught) {
+									if(caught.getLocalizedMessage().equals(GwtKuraErrorCode.ILLEGAL_ARGUMENT.toString())){
+										Info.display(MSGS.error(), "Error while storing the public keys in the key store");
+									}else{
+										Info.display(MSGS.error(), caught.getLocalizedMessage());
+									}
+									m_commandInput.unmask();
+								}
+
+								public void onSuccess(Integer certsStored) {
+									m_publicCertificate.clear();
+									m_storageAlias.clear();
+									Info.display(MSGS.info(), "Storage success. Stored " + certsStored + " public keys.");
+									m_commandInput.unmask();
+								}
+							});
+						}});
+					break;
+
+				case 2:
+					gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
+						@Override
+						public void onFailure(Throwable ex) {
+							FailureHandler.handle(ex);
 						}
-					});
+
+						@Override
+						public void onSuccess(GwtXSRFToken token) {	
+							gwtCertificatesService.storeCertificationAuthority(token, m_publicCertificate.getValue(), m_storageAlias.getValue(), new AsyncCallback<Integer>() {
+								public void onFailure(Throwable caught) {
+									if(caught.getLocalizedMessage().equals(GwtKuraErrorCode.ILLEGAL_ARGUMENT.toString())){
+										Info.display(MSGS.error(), "Error while storing the CA public keys in the key store");
+									}else{
+										Info.display(MSGS.error(), caught.getLocalizedMessage());
+									}
+									m_commandInput.unmask();
+								}
+
+								public void onSuccess(Integer certsStored) {
+									m_publicCertificate.clear();
+									m_storageAlias.clear();
+									Info.display(MSGS.info(), "Storage success. Stored " + certsStored + " CA public keys.");
+									m_commandInput.unmask();
+								}
+							});
+						}});
+					break;
 				}
 			}
 		});
-		
+
 		//
 		// Initial description
 		// 
@@ -149,36 +209,13 @@ public class CertificatesTab extends LayoutContainer {
 		description.setBorders(false);
 		description.setLayout(new ColumnLayout());
 
-		Label descriptionLabel = new Label(MSGS.settingsSSLDescription1());
-		Label descriptionLabel2 = new Label(MSGS.settingsSSLDescription2());
-		
+		Label descriptionLabel = new Label(MSGS.settingsAddCertDescription1());
+		Label descriptionLabel2 = new Label(MSGS.settingsAddCertDescription2());
+
 		description.add(descriptionLabel);
 		description.add(descriptionLabel2);
 		description.setStyleAttribute("padding-bottom", "10px");
 		m_formPanel.add(description);
-
-		//
-		// Private Certificate
-		//       
-		m_privateCertificate = new TextArea();
-		m_privateCertificate.setBorders(false);
-		m_privateCertificate.setReadOnly(false);
-		m_privateCertificate.setEmptyText(MSGS.settingsPrivateCertLabel());
-		m_privateCertificate.setName(MSGS.settingsPrivateCertLabel());
-		m_privateCertificate.setAllowBlank(true);
-		m_privateCertificate.setFieldLabel(MSGS.settingsPrivateCertLabel());
-		m_formPanel.add(m_privateCertificate, formData);
-		
-		//
-		//
-		//
-		m_storagePassword = new TextField<String>();
-		m_storagePassword.setName(MSGS.settingsStoragePasswordLabel());
-		m_storagePassword.setPassword(true);
-		m_storagePassword.setAllowBlank(false);
-		m_storagePassword.setEmptyText("* " + MSGS.settingsStoragePasswordLabel());
-		m_storagePassword.setFieldLabel(MSGS.settingsStoragePasswordLabel());
-		m_formPanel.add(m_storagePassword, new FormData("95%"));
 
 		//
 		// Public Certificate
@@ -191,13 +228,29 @@ public class CertificatesTab extends LayoutContainer {
 		m_publicCertificate.setAllowBlank(false);
 		m_publicCertificate.setFieldLabel(MSGS.settingsPublicCertLabel());
 		m_formPanel.add(m_publicCertificate, formData);
-		
+
 		//
+		// Certificate Type
 		//
+		HorizontalPanel hp= new HorizontalPanel();
+
+		m_certificateType = new ListBox();
+		m_certificateType.addItem(certPublicSSLLeaf);
+		m_certificateType.addItem(certPublicSSLChain);
+		m_certificateType.addItem(certCertificationAuthority);
+		m_certificateType.setName(MSGS.settingsPublicCertLabel());
+
+		hp.getElement().getStyle().setMarginLeft(80, Unit.PX);
+		hp.getElement().getStyle().setMarginBottom(7, Unit.PX);
+		hp.add(m_certificateType);
+		m_formPanel.add(hp, new FormData("50%"));
+
+		//
+		// Storage alias
 		//
 		m_storageAlias = new TextField<String>();
 		m_storageAlias.setName(MSGS.settingsStorageAliasLabel());
-		m_storageAlias.setPassword(true);
+		m_storageAlias.setPassword(false);
 		m_storageAlias.setAllowBlank(false);
 		m_storageAlias.setEmptyText("* " + MSGS.settingsStorageAliasLabel());
 		m_storageAlias.setFieldLabel(MSGS.settingsStorageAliasLabel());
@@ -214,11 +267,7 @@ public class CertificatesTab extends LayoutContainer {
 		deviceCommandPanel.setHeaderVisible(false);
 		deviceCommandPanel.setScrollMode(Scroll.AUTO);
 		deviceCommandPanel.setLayout(new FitLayout());
-		//deviceCommandPanel.setHeight("100%");
-
-		//deviceCommandPanel.setTopComponent(m_commandInput);
 		deviceCommandPanel.add(m_commandInput);
-		//deviceCommandPanel.add(m_publicCertificateArea);
 
 		add(deviceCommandPanel);
 	}

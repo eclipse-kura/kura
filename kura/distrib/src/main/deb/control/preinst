@@ -1,6 +1,6 @@
 #!/bin/bash
 
-INSTALL_DIR=[[kura.install.dir]]
+INSTALL_DIR=/opt/eclipse
 
 ##############################################
 # PRE-INSTALL SCRIPT

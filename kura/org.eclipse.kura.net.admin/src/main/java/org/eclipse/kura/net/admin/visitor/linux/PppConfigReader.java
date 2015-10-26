@@ -143,7 +143,7 @@ public class PppConfigReader implements NetworkConfigurationVisitor {
     
     private static ModemConfig getModemConfig(String ifaceName, UsbDevice usbDevice) throws KuraException {
         s_logger.debug("parsePppPeerConfig()");
-        boolean isHspa = false;
+        boolean isGsmGprsUmtsHspa = false;
         List<ModemTechnologyType> technologyTypes = null;
         if (usbDevice != null) {
 	        SupportedUsbModemInfo usbModemInfo = SupportedUsbModemsInfo.getModem(usbDevice);
@@ -160,8 +160,11 @@ public class PppConfigReader implements NetworkConfigurationVisitor {
         
         if (technologyTypes != null) {
         	for (ModemTechnologyType technologyType : technologyTypes) {
-            	if (technologyType == ModemTechnologyType.HSDPA) {
-            		isHspa = true;
+            	if ((technologyType == ModemTechnologyType.GSM_GPRS)
+            			|| (technologyType == ModemTechnologyType.UMTS)
+            			|| (technologyType == ModemTechnologyType.HSDPA)
+            			|| (technologyType == ModemTechnologyType.HSPA)) {
+            		isGsmGprsUmtsHspa = true;
             		break;
             	}
             }
@@ -304,7 +307,7 @@ public class PppConfigReader implements NetworkConfigurationVisitor {
 	                    // apn
 	                    if(sendStr.contains(",")) {
 	                        String[] sendArgs = sendStr.split(",");
-	                        if((sendArgs.length == 3) && isHspa) {
+	                        if((sendArgs.length == 3) && isGsmGprsUmtsHspa) {
 	                            pdpType = removeQuotes(sendArgs[1]);
 	                            apn = removeQuotes(sendArgs[2]);
 	                        }
@@ -336,7 +339,7 @@ public class PppConfigReader implements NetworkConfigurationVisitor {
 	        // Get the auth type and credentials
 	        // pppd will use CHAP if available, else PAP
 	        String secret = "";
-	        if (isHspa) {
+	        if (isGsmGprsUmtsHspa) {
 	        	String chapSecret = ChapLinux.getInstance().getSecret(model, username, "*", "*");
 	        	String papSecret = PapLinux.getInstance().getSecret(model, username, "*", "*");
 	        	if ((chapSecret != null) && (papSecret != null) && chapSecret.equals(papSecret)) {
@@ -388,7 +391,7 @@ public class PppConfigReader implements NetworkConfigurationVisitor {
         modemConfig.setGpsEnabled(gpsEnabled);
         modemConfig.setResetTimeout(resetTout);
         
-		if (isHspa) {
+		if (isGsmGprsUmtsHspa) {
 			modemConfig.setApn(apn);
 			modemConfig.setAuthType(authType);
 			modemConfig.setPassword(password);

@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
 
 @RunWith(Suite.class)
 @SuiteClasses({ DataServiceTest.class, CloudDeploymentHandlerTest.class, CloudServiceTest.class, CommURITest.class, ComponentConfigurationImplTest.class, ConfigurationServiceTest.class, NetUtilTest.class,
-				NetworkServiceTest.class, SystemAdminServiceTest.class, SystemServiceTest.class })
+				NetworkServiceTest.class, SystemAdminServiceTest.class, SystemServiceTest.class, XmlUtilTest.class })
 public class AllCoreTests {
 	private static final Logger s_logger = LoggerFactory.getLogger(AllCoreTests.class);
 
@@ -84,17 +84,10 @@ public class AllCoreTests {
 			Configuration mqttConfig = s_configAdmin.getConfiguration("org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport");
 			Dictionary<String, Object> mqttProps = mqttConfig.getProperties();
 			
-			/*
-			mqttProps.put("broker-url", "mqtt://broker-stage.everyware-cloud.com:1883/");
-			mqttProps.put("topic.context.account-name", "edcguest");
-			mqttProps.put("username", "edcguest_broker");
-			mqttProps.put("password", "Welcome1");
-			*/
-			
-			mqttProps.put("broker-url", "mqtt://broker-sandbox.everyware-cloud.com:1883/");
-			mqttProps.put("topic.context.account-name", "edcguest");
-			mqttProps.put("username", "edcguest_broker");
-			mqttProps.put("password", "1nv1t3!");
+	         mqttProps.put("broker-url", "mqtt://iot.eclipse.org:1883/");
+	         mqttProps.put("topic.context.account-name", "guest");
+	         mqttProps.put("username", "guest");
+	         mqttProps.put("password", "welcome");
 			
 			// cloudbees fails in getting the primary MAC address
 			// we need to compensate for it.

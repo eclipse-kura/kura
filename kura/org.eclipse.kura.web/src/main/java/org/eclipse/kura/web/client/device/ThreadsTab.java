@@ -18,8 +18,11 @@ import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.shared.model.GwtGroupedNVPair;
 import org.eclipse.kura.web.shared.model.GwtSession;
+import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.eclipse.kura.web.shared.service.GwtDeviceService;
 import org.eclipse.kura.web.shared.service.GwtDeviceServiceAsync;
+import org.eclipse.kura.web.shared.service.GwtSecurityTokenService;
+import org.eclipse.kura.web.shared.service.GwtSecurityTokenServiceAsync;
 
 import com.extjs.gxt.ui.client.data.BaseListLoader;
 import com.extjs.gxt.ui.client.data.ListLoadResult;
@@ -40,71 +43,81 @@ public class ThreadsTab extends LayoutContainer
 {
 	private static final Messages MSGS = GWT.create(Messages.class);
 
+	private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
 	private final GwtDeviceServiceAsync gwtDeviceService = GWT.create(GwtDeviceService.class);
 
 	@SuppressWarnings("unused")
-    private GwtSession      m_currentSession;
+	private GwtSession      m_currentSession;
 
-    private boolean         m_initialized;
-	
+	private boolean         m_initialized;
+
 	private Grid<GwtGroupedNVPair> m_grid;
 	private GroupingStore<GwtGroupedNVPair> m_store;	
 	private BaseListLoader<ListLoadResult<GwtGroupedNVPair>> m_loader;	
-    
-    public ThreadsTab(GwtSession currentSession) {
-        m_currentSession = currentSession;
-    	m_initialized    = false;
-    }
-    
-    
-    protected void onRender(Element parent, int index) 
-    {        
-    	super.onRender(parent, index);         
-        setLayout(new FitLayout());
-        setId("device-threads");
 
-        RpcProxy<ListLoadResult<GwtGroupedNVPair>> proxy = new RpcProxy<ListLoadResult<GwtGroupedNVPair>>() {  
-            @Override  
-            protected void load(Object loadConfig, final AsyncCallback<ListLoadResult<GwtGroupedNVPair>> callback) {
-            	gwtDeviceService.findThreads( new AsyncCallback<ListLoadResult<GwtGroupedNVPair>>() {    				
-    				public void onSuccess(ListLoadResult<GwtGroupedNVPair> pairs) {
-    					callback.onSuccess(pairs);
-    				}    				
-    				public void onFailure(Throwable caught) {
-    					FailureHandler.handle(caught);
-    				}
-    			});
-            }
-        };
+	public ThreadsTab(GwtSession currentSession) {
+		m_currentSession = currentSession;
+		m_initialized    = false;
+	}
 
-        m_loader = new BaseListLoader<ListLoadResult<GwtGroupedNVPair>>(proxy);
 
-        m_store = new GroupingStore<GwtGroupedNVPair>(m_loader);  
-        m_store.groupBy("group");  
+	protected void onRender(Element parent, int index) 
+	{        
+		super.onRender(parent, index);         
+		setLayout(new FitLayout());
+		setId("device-threads");
 
-        ColumnConfig name  = new ColumnConfig("name",  MSGS.deviceThreadName(), 50);  
-        ColumnConfig value = new ColumnConfig("value", MSGS.deviceThreadInfo(), 50);  
+		RpcProxy<ListLoadResult<GwtGroupedNVPair>> proxy = new RpcProxy<ListLoadResult<GwtGroupedNVPair>>() {  
+			@Override  
+			protected void load(Object loadConfig, final AsyncCallback<ListLoadResult<GwtGroupedNVPair>> callback) {
+				gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
+					@Override
+					public void onFailure(Throwable ex) {
+						FailureHandler.handle(ex);
+					}
 
-        List<ColumnConfig> config = new ArrayList<ColumnConfig>();  
-        config.add(name);  
-        config.add(value);  
+					@Override
+					public void onSuccess(GwtXSRFToken token) {	
+						gwtDeviceService.findThreads(token, new AsyncCallback<ListLoadResult<GwtGroupedNVPair>>() {    				
+							public void onSuccess(ListLoadResult<GwtGroupedNVPair> pairs) {
+								callback.onSuccess(pairs);
+							}    				
+							public void onFailure(Throwable caught) {
+								FailureHandler.handle(caught);
+							}
+						});
+					}});
+			}
+		};
 
-        ColumnModel cm = new ColumnModel(config);    
-        GroupingView view = new GroupingView();  
-        view.setShowGroupedColumn(false);  
-        view.setForceFit(true);  
-      
-        m_grid = new Grid<GwtGroupedNVPair>(m_store, cm);  
-        m_grid.setView(view);  
-        m_grid.setBorders(false);
-        m_grid.setLoadMask(true);
-        m_grid.setStripeRows(true);
+		m_loader = new BaseListLoader<ListLoadResult<GwtGroupedNVPair>>(proxy);
 
-        add(m_grid);
-        m_initialized = true;
-    }
-    
-    
+		m_store = new GroupingStore<GwtGroupedNVPair>(m_loader);  
+		m_store.groupBy("group");  
+
+		ColumnConfig name  = new ColumnConfig("name",  MSGS.deviceThreadName(), 50);  
+		ColumnConfig value = new ColumnConfig("value", MSGS.deviceThreadInfo(), 50);  
+
+		List<ColumnConfig> config = new ArrayList<ColumnConfig>();  
+		config.add(name);  
+		config.add(value);  
+
+		ColumnModel cm = new ColumnModel(config);    
+		GroupingView view = new GroupingView();  
+		view.setShowGroupedColumn(false);  
+		view.setForceFit(true);  
+
+		m_grid = new Grid<GwtGroupedNVPair>(m_store, cm);  
+		m_grid.setView(view);  
+		m_grid.setBorders(false);
+		m_grid.setLoadMask(true);
+		m_grid.setStripeRows(true);
+
+		add(m_grid);
+		m_initialized = true;
+	}
+
+
 	public void refresh() 
 	{
 		if (m_initialized) {

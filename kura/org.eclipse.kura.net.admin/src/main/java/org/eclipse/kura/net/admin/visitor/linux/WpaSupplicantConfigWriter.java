@@ -49,11 +49,19 @@ import org.slf4j.LoggerFactory;
 public class WpaSupplicantConfigWriter implements NetworkConfigurationVisitor {
 	private static final Logger s_logger = LoggerFactory.getLogger(WpaSupplicantConfigWriter.class);
 	
-	private static final String WPA_CONFIG_FILE = "/etc/wpa_supplicant.conf";
+	private static String WPA_CONFIG_FILE = null;
 	private static final String WPA_TMP_CONFIG_FILE = "/etc/wpa_supplicant.conf.tmp";
 	private static final String TMP_WPA_CONFIG_FILE = "/tmp/wpa_supplicant.conf";
 	
 	private static final String OS_VERSION = System.getProperty("kura.os.version");
+	
+	static {
+		if (OS_VERSION.equals(KuraConstants.Intel_Edison.getImageName() + "_" + KuraConstants.Intel_Edison.getImageVersion() + "_" + KuraConstants.Intel_Edison.getTargetName())) {
+			WPA_CONFIG_FILE = "/etc/wpa_supplicant/wpa_supplicant.conf";
+		} else {
+			WPA_CONFIG_FILE = "/etc/wpa_supplicant.conf";
+		}
+	}
 	
 	private static final String HEXES = "0123456789ABCDEF";
 	
@@ -303,7 +311,8 @@ public class WpaSupplicantConfigWriter implements NetworkConfigurationVisitor {
 			copyFile(fileAsString, outputFile);
 			return;
 		} else if ((wifiConfig.getSecurity() == WifiSecurity.SECURITY_WPA)
-				|| (wifiConfig.getSecurity() == WifiSecurity.SECURITY_WPA2)) {
+				|| (wifiConfig.getSecurity() == WifiSecurity.SECURITY_WPA2)
+				|| (wifiConfig.getSecurity() == WifiSecurity.SECURITY_WPA_WPA2)) {
 
 			File outputFile = new File(configFile);
 			String fileAsString = null;

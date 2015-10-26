@@ -19,7 +19,7 @@
 	<parent>
 		<groupId>org.eclipse.kura</groupId>
 		<artifactId>kura</artifactId>
-		<version>1.2.0</version>
+		<version>1.3.0</version>
 		<relativePath>../manifest_pom.xml</relativePath>
 	</parent>
 
@@ -44,6 +44,7 @@
 				<module>org.eclipse.kura.example.serial.publisher</module>
 				<module>org.eclipse.kura.example.gpio</module>
 				<module>org.eclipse.kura.example.ble.tisensortag</module>
+				<module>org.eclipse.kura.example.beacon</module>
 			</modules>
 		</profile>
 		<profile>
@@ -60,7 +61,6 @@
 				<module>org.eclipse.kura.example.project</module>
 				<module>org.eclipse.kura.example.publisher</module>
 				<module>org.eclipse.kura.example.serial.publisher</module>
-				<module>org.eclipse.kura.example.ble.tisensortag</module>
 			</modules>
 		</profile>
 	</profiles>

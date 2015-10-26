@@ -19,7 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class BluetoothUtil {
-	
+
 	private static final Logger s_logger = LoggerFactory.getLogger(BluetoothUtil.class);
 	private static final ExecutorService s_processExecutor = Executors.newSingleThreadExecutor();
 
@@ -28,7 +28,7 @@ public class BluetoothUtil {
 	private static final String HCICONFIG     = "hciconfig";
 	private static final String HCITOOL       = "hcitool";
 	private static final String GATTTOOL      = "gatttool";
-	
+
 	/*
 	 * Use hciconfig utility to return information about the bluetooth adapter
 	 */
@@ -52,8 +52,8 @@ public class BluetoothUtil {
 				}
 				sb.append(line + "\n");
 			}
-			
-			//TODO: Pull more parameters from hciconfig? 
+
+			//TODO: Pull more parameters from hciconfig?
 			String[] results = sb.toString().split("\n");
 			props.put("leReady", "false");
 			for (String result : results) {
@@ -72,7 +72,7 @@ public class BluetoothUtil {
 //					String[] tmpAddress = address.split("\\s", 2);
 //					address = tmpAddress[0].trim();
 					props.put("address", address);
-					s_logger.trace("Bluetooth adapter address set to: " + address);
+					s_logger.trace("Bluetooth adapter address set to: {}", address);
 				}
 				if((result.indexOf(HCI_VERSION)) >= 0) {
 					// HCI version : 4.0 (0x6) or HCI version : 4.1 (0x7)
@@ -82,7 +82,7 @@ public class BluetoothUtil {
 					}
 				}
 			}
-			
+
 		} catch (Exception e) {
 			s_logger.error("Failed to execute command: " + command, e);
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR);
@@ -93,21 +93,21 @@ public class BluetoothUtil {
 			} catch (IOException e) {
 				s_logger.error("Error closing read buffer", e);
 			}
-			
+
 		}
-		
+
 		return props;
 	}
-	
+
 	/*
 	 * Use hciconfig utility to determine status of bluetooth adapter
 	 */
 	public static boolean isEnabled(String name) {
-		
+
 		String[] command = { HCICONFIG, name };
 		BluetoothSafeProcess proc = null;
 		BufferedReader br = null;
-		
+
 		try {
 			proc = BluetoothProcessUtil.exec(command);
 			br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
@@ -130,10 +130,10 @@ public class BluetoothUtil {
 				s_logger.error("Error closing read buffer", e);
 			}
 		}
-		
+
 		return false;
 	}
-	
+
 	/*
 	 * Utility method that allows sending any hciconfig command. The buffered
 	 * response is returned in case results are needed.
@@ -157,7 +157,7 @@ public class BluetoothUtil {
 		}
 		return br;
 	}
-	
+
 	/*
 	 * Utility method to send specific kill commands to processes.
 	 */
@@ -171,13 +171,13 @@ public class BluetoothUtil {
 			proc.waitFor();
 			br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
 			String pid = br.readLine();
-			
+
 			// Check if the pid is not empty
 			if (pid != null) {
 				String[] commandKill = { "kill", "-" + signal, pid };
 				proc = BluetoothProcessUtil.exec(commandKill);
 			}
-			
+
 		} catch (IOException e) {
 			s_logger.error("Error executing command: " + commandPidOf, e);
 		} catch (InterruptedException e) {
@@ -191,10 +191,10 @@ public class BluetoothUtil {
 			}
 		}
 	}
-	
+
 	/*
 	 * Method to utilize BluetoothProcess and the hcitool utility. These processes run indefinitely, so the
-	 * BluetoothProcessListener is used to receive output from the process. 
+	 * BluetoothProcessListener is used to receive output from the process.
 	 */
 	public static BluetoothProcess hcitoolCmd (String name, String cmd, BluetoothProcessListener listener) {
 		String[] command = { HCITOOL, "-i", name, cmd };
@@ -205,13 +205,13 @@ public class BluetoothUtil {
 		} catch (Exception e) {
 			s_logger.error("Error executing command: " + command, e);
 		}
-		
+
 		return proc;
 	}
-	
+
 	/*
 	 * Method to utilize BluetoothProcess and the hcitool utility. These processes run indefinitely, so the
-	 * BluetoothProcessListener is used to receive output from the process. 
+	 * BluetoothProcessListener is used to receive output from the process.
 	 */
 	public static BluetoothProcess hcitoolCmd (String name, String[] cmd, BluetoothProcessListener listener) {
 		String[] command = new String[3 + cmd.length];
@@ -227,13 +227,13 @@ public class BluetoothUtil {
 		} catch (Exception e) {
 			s_logger.error("Error executing command: " + command, e);
 		}
-		
+
 		return proc;
 	}
-	
+
 	/*
 	 * Method to start an interactive session with a remote Bluetooth LE device using the gatttool utility. The
-	 * listener is used to receive output from the process. 
+	 * listener is used to receive output from the process.
 	 */
 	public static BluetoothProcess startSession(String address, BluetoothProcessListener listener) {
 		String[] command = { GATTTOOL, "-b", address, "-I" };
@@ -245,7 +245,7 @@ public class BluetoothUtil {
 		}
 		return proc;
 	}
-	
+
 	/*
 	 * Method to create a separate thread for the BluetoothProcesses.
 	 */
@@ -259,12 +259,12 @@ public class BluetoothUtil {
                 BluetoothProcess bluetoothProcess = new BluetoothProcess();
                 bluetoothProcess.exec(cmdArray, listener);
                 return bluetoothProcess;
-            }           
+            }
         });
-        
+
         try {
             return futureSafeProcess.get();
-        } 
+        }
         catch (Exception e) {
             s_logger.error("Error waiting from SafeProcess output", e);
             throw new IOException(e);

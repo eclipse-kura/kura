@@ -258,13 +258,13 @@ public class IfcfgConfigWriter implements NetworkConfigurationVisitor {
 				try {
 					if(!FileUtils.contentEquals(tmpFile, outputFile)) {
 						if(tmpFile.renameTo(outputFile)){
-							s_logger.trace("Successfully wrote network interface file for " + interfaceName);
+							s_logger.trace("Successfully wrote network interface file for {}", interfaceName);
 						}else{
 							s_logger.error("Failed to write network interface file");
 							throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR, "error while building up new configuration file for network interface " + interfaceName);
 						}
 					} else {
-						s_logger.info("Not rewriting network interfaces file for " + interfaceName + " because it is the same");
+						s_logger.info("Not rewriting network interfaces file for {} because it is the same", interfaceName);
 					}
 				} catch(IOException e) {
 					throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);

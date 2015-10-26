@@ -361,7 +361,7 @@ public class DnsMonitorServiceImpl implements DnsMonitorService, EventHandler {
 			        	if(isEnabledForWan(netInterfaceConfig)) {
 			        		try {
 			        			Set<IPAddress> servers = getConfiguredDnsServers(netInterfaceConfig);
-			        			s_logger.trace(netInterfaceConfig.getName() + " is WAN, adding its dns servers: " + servers);
+			        			s_logger.trace("{} is WAN, adding its dns servers: {}", netInterfaceConfig.getName(), servers);
 								serverList.addAll(servers);
 							} catch (KuraException e) {
 								s_logger.error("Error adding dns servers for " + netInterfaceConfig.getName(), e);
@@ -377,7 +377,7 @@ public class DnsMonitorServiceImpl implements DnsMonitorService, EventHandler {
 	// Get a list of dns servers for the specified NetInterfaceConfig
     private Set<IPAddress> getConfiguredDnsServers(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig) throws KuraException {
     	String interfaceName = netInterfaceConfig.getName();
-    	s_logger.trace("Getting dns servers for " + interfaceName);
+    	s_logger.trace("Getting dns servers for {}", interfaceName);
     	LinuxDns linuxDns = LinuxDns.getInstance();
     	LinkedHashSet<IPAddress> serverList = new LinkedHashSet<IPAddress>();
     	

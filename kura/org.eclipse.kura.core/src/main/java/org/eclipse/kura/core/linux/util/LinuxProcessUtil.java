@@ -11,7 +11,7 @@
  */
 package org.eclipse.kura.core.linux.util;
 
-/* 
+/*
  * Copyright (c) 2013 Eurotech Inc. All rights reserved.
  */
 
@@ -179,7 +179,7 @@ public class LinuxProcessUtil {
 		try {
 
 			if (command != null && !command.isEmpty()) {
-				s_logger.trace("searching process list for " + command);
+				s_logger.trace("searching process list for {}", command);
 
 				if ("intel-edison".equals(s_platform)) {
 					proc = ProcessUtil.exec("ps");
@@ -203,8 +203,7 @@ public class LinuxProcessUtil {
 
 					// see if the line has our command
 					if (line.indexOf(command) >= 0) {
-						s_logger.trace("found pid " + pid + " for command: "
-								+ command);
+						s_logger.trace("found pid {} for command: {}", pid, command);
 						return Integer.parseInt(pid);
 					}
 				}
@@ -227,7 +226,7 @@ public class LinuxProcessUtil {
 		SafeProcess proc = null;
 		try {
 			if(command != null && !command.isEmpty()) {
-				s_logger.trace("searching process list for " + command);
+				s_logger.trace("searching process list for {}", command);
 				if ("intel-edison".equals(s_platform)) {
 					proc = ProcessUtil.exec("ps");
 				} else {
@@ -257,7 +256,7 @@ public class LinuxProcessUtil {
 							}
 						}
 						if (allTokensPresent) {
-							s_logger.trace("found pid " + pid + " for command: " + command);
+							s_logger.trace("found pid {} for command: {}", pid, command);
 							return Integer.parseInt(pid);
 						}
 					}
@@ -271,7 +270,7 @@ public class LinuxProcessUtil {
 		finally {
 			ProcessUtil.destroy(proc);
 		}
-	}	
+	}
 
 	public static int getKuraPid() throws Exception {
 
@@ -349,9 +348,9 @@ public class LinuxProcessUtil {
 			while ((len = br.read(cbuf)) > 0) {
 				sb.append(cbuf, 0, len);
 			}
-		} 
+		}
 		finally {
-			if(br != null) br.close();		
+			if(br != null) br.close();
 		}
 		return sb.toString();
 	}

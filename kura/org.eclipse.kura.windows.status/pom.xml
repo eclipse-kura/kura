@@ -23,8 +23,8 @@
 		<relativePath>../manifest_pom.xml</relativePath>
 	</parent>
 
-	<artifactId>org.eclipse.kura.windows.position</artifactId>
-	<version>1.0.2</version>
+	<artifactId>org.eclipse.kura.windows.status</artifactId>
+	<version>1.0.0</version>
 	<packaging>eclipse-plugin</packaging>
 
 	<properties>

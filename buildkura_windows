@@ -166,7 +166,7 @@ cd $root/target-platform;
 mvn $skip clean install; 
 
 cd ../kura ; 
-mvn $skip -f manifest_pom.xml  clean install -Pcan && mvn $skip -f manifest_pom.xml eclipse:eclipse && mvn -Pweb $skip -f pom_pom.xml $last_arg clean install
+mvn $skip -f manifest_pom.xml  clean install -Pcan && mvn $skip -f manifest_pom.xml eclipse:eclipse && mvn -Pweb -Pdio.skip $skip -f pom_pom.xml $last_arg clean install
 
 if [[ "$0" == *windows* ]]
 then

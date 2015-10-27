@@ -53,6 +53,7 @@
 		<module>org.eclipse.kura.windows.usb</module>
 		<module>org.eclipse.kura.windows.watchdog</module>
 		<module>org.eclipse.kura.windows.clock</module>
+		<module>org.eclipse.kura.windows.status</module>
 		<module>examples</module>
 	</modules>
 

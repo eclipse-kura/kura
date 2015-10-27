@@ -771,7 +771,7 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
                         tad = objectFactory.createTad();
                         tad.setId((new StringBuffer().append(prefix).append(ifaceName).append(".config.wifi.infra.passphrase")).toString());
                         tad.setName((new StringBuffer().append(prefix).append(ifaceName).append(".config.wifi.infra.passphrase")).toString());
-                        tad.setType(Tscalar.STRING);
+                        tad.setType(Tscalar.PASSWORD);
                         tad.setCardinality(0);
                         tad.setRequired(false);
                         tad.setDefault("");
@@ -863,7 +863,7 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
                         tad = objectFactory.createTad();
                         tad.setId((new StringBuffer().append(prefix).append(ifaceName).append(".config.wifi.master.passphrase")).toString());
                         tad.setName((new StringBuffer().append(prefix).append(ifaceName).append(".config.wifi.master.passphrase")).toString());
-                        tad.setType(Tscalar.STRING);
+                        tad.setType(Tscalar.PASSWORD);
                         tad.setCardinality(0);
                         tad.setRequired(false);
                         tad.setDefault("");

@@ -4,15 +4,14 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.eclipse.kura</groupId>
 	<artifactId>target-platform</artifactId>
-	<version>1.3.0-SNAPSHOT</version>
+	<version>1.4.0-SNAPSHOT</version>
 
 	<packaging>pom</packaging>
 
 	<modules>
 		<module>com.codeminders.hidapi</module>
-		<module>javax.usb.api</module>
-		<module>javax.usb.common</module>
-		<module>javax.usb.linux</module>
+		<module>org.usb4java</module>
+		<module>usb4java-javax</module>
 		<module>org.eclipse.soda.dk.comm</module>
 		<module>p2-repo-common</module>
 		<module>p2-repo-equinox_3.8.1</module>
@@ -48,7 +47,7 @@
                         <url>https://repo.eclipse.org/content/repositories/paho-releases/</url>
                 </repository>
 	</repositories>
-	
+
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>

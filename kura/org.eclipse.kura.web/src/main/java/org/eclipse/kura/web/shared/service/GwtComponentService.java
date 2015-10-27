@@ -15,6 +15,7 @@ import java.util.List;
 
 import org.eclipse.kura.web.shared.GwtKuraException;
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
+import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
@@ -27,10 +28,10 @@ public interface GwtComponentService extends RemoteService
 	 * @param device
 	 * @return
 	 */
-	public List<GwtConfigComponent> findComponentConfigurations() throws GwtKuraException;
+	public List<GwtConfigComponent> findComponentConfigurations(GwtXSRFToken xsrfToken) throws GwtKuraException;
 	
-	public List<GwtConfigComponent> findComponentConfiguration() throws GwtKuraException;
+	public List<GwtConfigComponent> findComponentConfiguration(GwtXSRFToken xsrfToken) throws GwtKuraException;
 
 	
-	public void updateComponentConfiguration(GwtConfigComponent configComponent) throws GwtKuraException; 
+	public void updateComponentConfiguration(GwtXSRFToken xsrfToken, GwtConfigComponent configComponent) throws GwtKuraException; 
 }

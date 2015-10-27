@@ -106,6 +106,8 @@ public class LinuxFirewall {
 											"source /etc/init.d/firewall_cust 2> /dev/null"};
 
 	private static LinuxFirewall s_linuxFirewall;
+	
+	private static Object s_lock = new Object();
 
 	private static final String FIREWALL_SCRIPT_NAME = "/etc/init.d/firewall";
 	private static final String FIREWALL_TMP_SCRIPT_NAME = "/etc/init.d/firewall.tmp";
@@ -137,15 +139,6 @@ public class LinuxFirewall {
 			} catch (IOException e) {
 				s_logger.error("cannot create or read file");// File did not exist and was created
 			}
-			
-			m_localRules = new LinkedHashSet<LocalRule>();
-			m_portForwardRules = new LinkedHashSet<PortForwardRule>();
-			m_autoNatRules = new LinkedHashSet<NATRule>();
-			m_natRules = new LinkedHashSet<NATRule>();
-			m_customRules = new LinkedHashSet<String>();
-			m_allowIcmp = true;
-			m_allowForwarding = false;
-			
 			initialize();
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -228,9 +221,24 @@ public class LinuxFirewall {
 		}
 	}
 
-	private void initialize() throws KuraException {
+	public void initialize() throws KuraException {
 		
-		s_logger.debug("Parsing current firewall configuraion");
+		s_logger.debug("initializing firewall ...");
+		m_localRules = new LinkedHashSet<LocalRule>();
+		m_portForwardRules = new LinkedHashSet<PortForwardRule>();
+		m_autoNatRules = new LinkedHashSet<NATRule>();
+		m_natRules = new LinkedHashSet<NATRule>();
+		m_customRules = new LinkedHashSet<String>();
+		m_allowIcmp = true;
+		m_allowForwarding = false;
+		
+		s_logger.debug("initialize() :: Parsing current firewall configuraion");
+		
+		File tmpFirewallFile = new File(FIREWALL_TMP_SCRIPT_NAME);
+		if(tmpFirewallFile.exists()) {
+			tmpFirewallFile.delete();
+		}
+		
 		BufferedReader br = null;
 		
 		try {
@@ -618,14 +626,14 @@ public class LinuxFirewall {
 			File firewallFile = new File(FIREWALL_SCRIPT_NAME);
 			if(!FileUtils.contentEquals(tmpFirewallFile, firewallFile)) {
 				if(tmpFirewallFile.renameTo(firewallFile)) {
-					s_logger.trace("Successfully wrote firewall file");
+					s_logger.info("writeFile() :: Successfully wrote firewall file");
 					return true;
 				} else {
-					s_logger.error("Failed to write firewall file");
+					s_logger.error("writeFile() :: Failed to write firewall file");
 					throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR, "error while building up new configuration file for firewall");
 				}
 			} else {
-				s_logger.info("Not rewriting firewall file because it is the same");
+				s_logger.info("writeFile() :: Not rewriting firewall file because it is the same");
 				return false;
 			}
 		} catch (Exception e) {
@@ -976,7 +984,8 @@ public class LinuxFirewall {
 	private void iptablesSave() throws KuraException {
 		SafeProcess proc = null;
 		try {
-			if (OS_VERSION.equals(KuraConstants.Mini_Gateway.getImageName() + "_" + KuraConstants.Mini_Gateway.getImageVersion())) {
+			if (OS_VERSION.equals(KuraConstants.Mini_Gateway.getImageName() + "_" + KuraConstants.Mini_Gateway.getImageVersion()) ||
+				(OS_VERSION.equals(KuraConstants.Intel_Edison.getImageName() + "_" + KuraConstants.Intel_Edison.getImageVersion() + "_" + KuraConstants.Intel_Edison.getTargetName()))) {
 				proc = ProcessUtil.exec("iptables-save > /opt/eurotech/firewall_rules.fw");
 				proc.waitFor();
 			} else {
@@ -1016,14 +1025,14 @@ public class LinuxFirewall {
 			File firewallFile = new File(FIREWALL_SCRIPT_NAME);
 			if(!FileUtils.contentEquals(tmpFirewallFile, firewallFile)) {
 				if(tmpFirewallFile.renameTo(firewallFile)){
-					s_logger.trace("Successfully wrote firewall file");
+					s_logger.info("disable() :: Successfully wrote firewall file");
 					runScript();
 				}else{
-					s_logger.error("Failed to write firewall file");
+					s_logger.error("disable() :: Failed to write firewall file");
 					throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR, "error while building up new configuration file for firewall");
 				}
 			} else {
-				s_logger.info("Not rewriting firewall file because it is the same");
+				s_logger.info("disable() :: Not rewriting firewall file because it is the same");
 			}
 		} catch (Exception e) {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
@@ -1047,8 +1056,10 @@ public class LinuxFirewall {
 	}
 	
 	private void update() throws KuraException {
-	    if(writeFile()) {
-	    	runScript();
-	    }
+		synchronized(s_lock) {
+		    if(writeFile()) {
+		    	runScript();
+		    }
+		}
 	}
 }

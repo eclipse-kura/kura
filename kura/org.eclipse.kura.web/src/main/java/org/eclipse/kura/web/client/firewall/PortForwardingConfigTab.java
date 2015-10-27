@@ -20,8 +20,11 @@ import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.client.util.SwappableListStore;
 import org.eclipse.kura.web.shared.model.GwtFirewallPortForwardEntry;
 import org.eclipse.kura.web.shared.model.GwtSession;
+import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.eclipse.kura.web.shared.service.GwtNetworkService;
 import org.eclipse.kura.web.shared.service.GwtNetworkServiceAsync;
+import org.eclipse.kura.web.shared.service.GwtSecurityTokenService;
+import org.eclipse.kura.web.shared.service.GwtSecurityTokenServiceAsync;
 
 import com.allen_sauer.gwt.log.client.Log;
 import com.extjs.gxt.ui.client.Style.HorizontalAlignment;
@@ -67,117 +70,128 @@ public class PortForwardingConfigTab extends LayoutContainer
 {
 	private static final Messages MSGS = GWT.create(Messages.class);
 
+	private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
 	private final GwtNetworkServiceAsync gwtNetworkService = GWT.create(GwtNetworkService.class);
 
-    private GwtSession            m_currentSession;
+	private GwtSession            m_currentSession;
 
 	private Grid<GwtFirewallPortForwardEntry>   m_grid;
 	private BaseListLoader<ListLoadResult<GwtFirewallPortForwardEntry>> m_loader;
 	private GwtFirewallPortForwardEntry m_selectedEntry;
 	private boolean m_dirty;
-	
+
 	private ToolBar            m_portForwardToolBar;
 	private Button             m_newButton;
 	private Button             m_editButton;
 	private Button             m_deleteButton;
 	private Button				m_applyButton;
-	
-    public PortForwardingConfigTab(GwtSession currentSession) {
-    	m_currentSession = currentSession;
-    }
+
+	public PortForwardingConfigTab(GwtSession currentSession) {
+		m_currentSession = currentSession;
+	}
 
 	protected void onRender(final Element parent, int index) {
-		
+
 		super.onRender(parent, index);
 
 		m_dirty = false;
-		
+
 		//
 		// Borderlayout that expands to the whole screen
 		setLayout(new FitLayout());
 		setBorders(false);
 		setId("firewall-port-forwarding");
-		
-        LayoutContainer mf = new LayoutContainer();
-        mf.setLayout(new BorderLayout());
-		
+
+		LayoutContainer mf = new LayoutContainer();
+		mf.setLayout(new BorderLayout());
+
 		//
 		// Center Panel: Open Ports Table
 		BorderLayoutData centerData = new BorderLayoutData(LayoutRegion.CENTER, 1F);
 		centerData.setMargins(new Margins(0, 0, 0, 0));
 		centerData.setSplit(true);  
 		centerData.setMinSize(0);
-		
+
 		ContentPanel portForwardTablePanel = new ContentPanel();
 		portForwardTablePanel.setBorders(false);
 		portForwardTablePanel.setBodyBorder(false);
 		portForwardTablePanel.setHeaderVisible(false);
 		portForwardTablePanel.setScrollMode(Scroll.AUTO);
 		portForwardTablePanel.setLayout(new FitLayout());
-		
+
 		initToolBar();
-        initGrid();
-        
-        portForwardTablePanel.setTopComponent(m_portForwardToolBar);
-        portForwardTablePanel.add(m_grid);
+		initGrid();
+
+		portForwardTablePanel.setTopComponent(m_portForwardToolBar);
+		portForwardTablePanel.add(m_grid);
 		mf.add(portForwardTablePanel, centerData);
-		
-        add(mf);
-        
-        refresh();
+
+		add(mf);
+
+		refresh();
 	}
-	
-    public void refresh() {
-        m_loader.load();                    
-    }
-    
-    public List<GwtFirewallPortForwardEntry> getCurrentConfigurations() {
-    	if(m_grid != null) {
-    		ListStore<GwtFirewallPortForwardEntry> store = m_grid.getStore();
-    		return store.getModels();
-    	} else {
-    		return null;
-    	}
-    }
-    
-    public boolean isDirty() {
-    	return m_dirty;
-    }
-	
+
+	public void refresh() {
+		m_loader.load();                    
+	}
+
+	public List<GwtFirewallPortForwardEntry> getCurrentConfigurations() {
+		if(m_grid != null) {
+			ListStore<GwtFirewallPortForwardEntry> store = m_grid.getStore();
+			return store.getModels();
+		} else {
+			return null;
+		}
+	}
+
+	public boolean isDirty() {
+		return m_dirty;
+	}
+
 	private void initToolBar() {
-		
+
 		m_portForwardToolBar = new ToolBar();
 		m_portForwardToolBar.setId("firewall-port-forwarding-toolbar");
-		
-		m_applyButton = new Button(MSGS.firewallApply(),
-        		AbstractImagePrototype.create(Resources.INSTANCE.accept()),
-                new SelectionListener<ButtonEvent>() {
-            		@Override
-            		public void componentSelected(ButtonEvent ce) {
-            			Log.debug("about to updateDeviceFirewallPortForwards()");
-            			List<GwtFirewallPortForwardEntry> updatedPortForwardConf = getCurrentConfigurations();
 
-            			if(updatedPortForwardConf != null) {
-            				Log.debug("got updatedPortForwardConf: " + updatedPortForwardConf.size());
-            				mask(MSGS.applying());
-	            			gwtNetworkService.updateDeviceFirewallPortForwards(updatedPortForwardConf, new AsyncCallback<Void>() {
-	            				public void onSuccess(Void result) {
+		m_applyButton = new Button(MSGS.firewallApply(),
+				AbstractImagePrototype.create(Resources.INSTANCE.accept()),
+				new SelectionListener<ButtonEvent>() {
+			@Override
+			public void componentSelected(ButtonEvent ce) {
+				Log.debug("about to updateDeviceFirewallPortForwards()");
+
+				gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
+					@Override
+					public void onFailure(Throwable ex) {
+						FailureHandler.handle(ex);
+					}
+
+					@Override
+					public void onSuccess(GwtXSRFToken token) {	
+						List<GwtFirewallPortForwardEntry> updatedPortForwardConf = getCurrentConfigurations();
+
+						if(updatedPortForwardConf != null) {
+							Log.debug("got updatedPortForwardConf: " + updatedPortForwardConf.size());
+							mask(MSGS.applying());
+							gwtNetworkService.updateDeviceFirewallPortForwards(token, updatedPortForwardConf, new AsyncCallback<Void>() {
+								public void onSuccess(Void result) {
 									Log.debug("updated!");
 									m_dirty = false;
 									m_applyButton.disable();
 									unmask();
 								}
-	            				
+
 								public void onFailure(Throwable caught) {
 									Log.debug("caught: " + caught.toString());
 									unmask();
 									FailureHandler.handle(caught);
 								}
-	            			});
-            			}
-            		}
-    	});
-		
+							});
+						}
+					}});
+			}
+		});
+
 		m_applyButton.disable();
 		m_portForwardToolBar.add(m_applyButton);
 		m_portForwardToolBar.add(new SeparatorToolItem());
@@ -185,7 +199,7 @@ public class PortForwardingConfigTab extends LayoutContainer
 		//
 		// New Open Port Button
 		m_newButton = new Button(MSGS.newButton(), 
-			    AbstractImagePrototype.create(Resources.INSTANCE.add()),
+				AbstractImagePrototype.create(Resources.INSTANCE.add()),
 				new SelectionListener<ButtonEvent>() {
 			@Override
 			public void componentSelected(ButtonEvent ce) {
@@ -220,7 +234,7 @@ public class PortForwardingConfigTab extends LayoutContainer
 		//
 		// Edit Open Port Button
 		m_editButton = new Button(MSGS.editButton(), 
-			    AbstractImagePrototype.create(Resources.INSTANCE.edit()),
+				AbstractImagePrototype.create(Resources.INSTANCE.edit()),
 				new SelectionListener<ButtonEvent>() {
 			@Override
 			public void componentSelected(ButtonEvent ce) {
@@ -256,36 +270,36 @@ public class PortForwardingConfigTab extends LayoutContainer
 		m_portForwardToolBar.add(m_editButton);
 		m_portForwardToolBar.add(new SeparatorToolItem());
 
-	    
+
 		//
 		// Delete Open Port Entry Button
 		m_deleteButton = new Button(MSGS.deleteButton(), 
-			    AbstractImagePrototype.create(Resources.INSTANCE.delete()),
+				AbstractImagePrototype.create(Resources.INSTANCE.delete()),
 				new SelectionListener<ButtonEvent>() {
 			@Override
 			public void componentSelected(ButtonEvent ce) {
-				
+
 				if (m_grid != null) {
-					
+
 					final GwtFirewallPortForwardEntry portForwardEntry = m_grid.getSelectionModel().getSelectedItem();
 					if (portForwardEntry != null) {
 
 						// ask for confirmation						
 						MessageBox.confirm(MSGS.confirm(), MSGS.firewallPortForwardDeleteConfirmation(portForwardEntry.getInPort().toString()),
-							new Listener<MessageBoxEvent>() {  
-							    public void handleEvent(MessageBoxEvent ce) {
-							    	
-							    	Log.debug("Trying to delete: " + portForwardEntry.getInPort().toString());
-							    	Log.debug("Button " + ce.getButtonClicked().getText());
-							    	
-							    	if(ce.getButtonClicked().getText().equals("Yes")) {
-							    		m_grid.getStore().remove(portForwardEntry);
-							    		m_applyButton.enable();
-							    		m_dirty = true;
-							    	}
-							    }
+								new Listener<MessageBoxEvent>() {  
+							public void handleEvent(MessageBoxEvent ce) {
+
+								Log.debug("Trying to delete: " + portForwardEntry.getInPort().toString());
+								Log.debug("Button " + ce.getButtonClicked().getText());
+
+								if(ce.getButtonClicked().getText().equals("Yes")) {
+									m_grid.getStore().remove(portForwardEntry);
+									m_applyButton.enable();
+									m_dirty = true;
+								}
 							}
-						);
+						}
+								);
 					}
 				}
 			}
@@ -293,135 +307,144 @@ public class PortForwardingConfigTab extends LayoutContainer
 		m_deleteButton.setEnabled(false);
 		m_portForwardToolBar.add(m_deleteButton);
 	}
-	
+
 	private void initGrid() {
 
 		//
 		// Column Configuration
 		ColumnConfig column = null;
 		List<ColumnConfig> configs = new ArrayList<ColumnConfig>();
-		
+
 		column = new ColumnConfig("inboundInterface", MSGS.firewallPortForwardInboundInterface(), 80);
 		column.setAlignment(HorizontalAlignment.CENTER);
 		configs.add(column);
-		
+
 		column = new ColumnConfig("outboundInterface", MSGS.firewallPortForwardOutboundInterface(), 80);
 		column.setAlignment(HorizontalAlignment.CENTER);
 		configs.add(column);
-		
+
 		column = new ColumnConfig("address", MSGS.firewallPortForwardAddress(), 120);
 		column.setAlignment(HorizontalAlignment.CENTER);
 		configs.add(column);
-		
+
 		column = new ColumnConfig("protocol", MSGS.firewallPortForwardProtocol(), 60);
 		column.setAlignment(HorizontalAlignment.CENTER);
 		configs.add(column);
-		
+
 		column = new ColumnConfig("inPort", MSGS.firewallPortForwardInPort(), 60);
 		column.setAlignment(HorizontalAlignment.CENTER);
 		configs.add(column);
-		
+
 		column = new ColumnConfig("outPort", MSGS.firewallPortForwardOutPort(), 60);
 		column.setAlignment(HorizontalAlignment.CENTER);
 		configs.add(column);
-		
+
 		column = new ColumnConfig("masquerade", MSGS.firewallPortForwardMasquerade(), 60);
 		column.setAlignment(HorizontalAlignment.CENTER);
 		configs.add(column);
-		
+
 		column = new ColumnConfig("permittedNetwork", MSGS.firewallPortForwardPermittedNetwork(), 120);
 		column.setAlignment(HorizontalAlignment.CENTER);
 		configs.add(column);
-		
+
 		column = new ColumnConfig("permittedMAC", MSGS.firewallPortForwardPermittedMac(), 120);
 		column.setAlignment(HorizontalAlignment.CENTER);
 		configs.add(column);
-		
+
 		column = new ColumnConfig("sourcePortRange", MSGS.firewallPortForwardSourcePortRange(), 120);
 		column.setAlignment(HorizontalAlignment.CENTER);
 		configs.add(column);
 
-        // rpc data proxy  
-        RpcProxy<ListLoadResult<GwtFirewallPortForwardEntry>> proxy = new RpcProxy<ListLoadResult<GwtFirewallPortForwardEntry>>() {  
-          @Override  
-          protected void load(Object loadConfig, AsyncCallback<ListLoadResult<GwtFirewallPortForwardEntry>> callback) {  
-        	  gwtNetworkService.findDeviceFirewallPortForwards(callback);
-          }  
-        };  
-        
-        m_loader = new BaseListLoader<ListLoadResult<GwtFirewallPortForwardEntry>>(proxy);
-        m_loader.setSortDir(SortDir.DESC);  
-        m_loader.setSortField("inPort"); 
-        m_loader.setRemoteSort(true);  
-        
-        SwappableListStore<GwtFirewallPortForwardEntry> m_store = new SwappableListStore<GwtFirewallPortForwardEntry>(m_loader);
-        m_store.setKeyProvider( new ModelKeyProvider<GwtFirewallPortForwardEntry>() {            
-            public String getKey(GwtFirewallPortForwardEntry portForwardEntry) {
-                return portForwardEntry.getInPort().toString();
-            }
-        });
-        
-        m_grid = new Grid<GwtFirewallPortForwardEntry>(m_store, new ColumnModel(configs));
-        m_grid.setBorders(false);
-        m_grid.setStateful(false);
-        m_grid.setLoadMask(true);
-        m_grid.setStripeRows(true);
-        m_grid.setAutoExpandColumn("inPort");
-        m_grid.getView().setAutoFill(true);
-        //m_grid.getView().setEmptyText(MSGS.deviceTableNoDevices());
+		// rpc data proxy  
+		RpcProxy<ListLoadResult<GwtFirewallPortForwardEntry>> proxy = new RpcProxy<ListLoadResult<GwtFirewallPortForwardEntry>>() {  
+			@Override  
+			protected void load(Object loadConfig, final AsyncCallback<ListLoadResult<GwtFirewallPortForwardEntry>> callback) {  
+				gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
+					@Override
+					public void onFailure(Throwable ex) {
+						FailureHandler.handle(ex);
+					}
 
-        m_loader.addLoadListener(new DataLoadListener(m_grid));
+					@Override
+					public void onSuccess(GwtXSRFToken token) {	
+						gwtNetworkService.findDeviceFirewallPortForwards(token, callback);
+					}});
+			}  
+		};  
 
-        GridSelectionModel<GwtFirewallPortForwardEntry> selectionModel = new GridSelectionModel<GwtFirewallPortForwardEntry>();
-        selectionModel.setSelectionMode(SelectionMode.SINGLE);
-        m_grid.setSelectionModel(selectionModel);
-        m_grid.getSelectionModel().addSelectionChangedListener(new SelectionChangedListener<GwtFirewallPortForwardEntry>() {
-            @Override
-            public void selectionChanged(SelectionChangedEvent<GwtFirewallPortForwardEntry> se) {
-                m_selectedEntry = se.getSelectedItem();
-                if (m_selectedEntry != null) {
-                	m_editButton.setEnabled(true);
-                	m_deleteButton.setEnabled(true);
-                } else {
-                	m_editButton.setEnabled(false);
-                	m_deleteButton.setEnabled(false);                 
-                }
-            }
-        });
+		m_loader = new BaseListLoader<ListLoadResult<GwtFirewallPortForwardEntry>>(proxy);
+		m_loader.setSortDir(SortDir.DESC);  
+		m_loader.setSortField("inPort"); 
+		m_loader.setRemoteSort(true);  
+
+		SwappableListStore<GwtFirewallPortForwardEntry> m_store = new SwappableListStore<GwtFirewallPortForwardEntry>(m_loader);
+		m_store.setKeyProvider( new ModelKeyProvider<GwtFirewallPortForwardEntry>() {            
+			public String getKey(GwtFirewallPortForwardEntry portForwardEntry) {
+				return portForwardEntry.getInPort().toString();
+			}
+		});
+
+		m_grid = new Grid<GwtFirewallPortForwardEntry>(m_store, new ColumnModel(configs));
+		m_grid.setBorders(false);
+		m_grid.setStateful(false);
+		m_grid.setLoadMask(true);
+		m_grid.setStripeRows(true);
+		m_grid.setAutoExpandColumn("inPort");
+		m_grid.getView().setAutoFill(true);
+		//m_grid.getView().setEmptyText(MSGS.deviceTableNoDevices());
+
+		m_loader.addLoadListener(new DataLoadListener(m_grid));
+
+		GridSelectionModel<GwtFirewallPortForwardEntry> selectionModel = new GridSelectionModel<GwtFirewallPortForwardEntry>();
+		selectionModel.setSelectionMode(SelectionMode.SINGLE);
+		m_grid.setSelectionModel(selectionModel);
+		m_grid.getSelectionModel().addSelectionChangedListener(new SelectionChangedListener<GwtFirewallPortForwardEntry>() {
+			@Override
+			public void selectionChanged(SelectionChangedEvent<GwtFirewallPortForwardEntry> se) {
+				m_selectedEntry = se.getSelectedItem();
+				if (m_selectedEntry != null) {
+					m_editButton.setEnabled(true);
+					m_deleteButton.setEnabled(true);
+				} else {
+					m_editButton.setEnabled(false);
+					m_deleteButton.setEnabled(false);                 
+				}
+			}
+		});
 	}
-	
-    private class DataLoadListener extends LoadListener
-    {
-        private Grid<GwtFirewallPortForwardEntry> m_grid;
-        private GwtFirewallPortForwardEntry       m_selectedEntry;
 
-        public DataLoadListener(Grid<GwtFirewallPortForwardEntry> grid) {
-            m_grid 			 = grid;
-            m_selectedEntry = null;
-        }
-        
-        public void loaderBeforeLoad(LoadEvent le) {
-        	m_selectedEntry = m_grid.getSelectionModel().getSelectedItem();
-        }
-        
-        public void loaderLoad(LoadEvent le) {
-        	if (le.exception != null) {
-                FailureHandler.handle(le.exception);
-            }
-        	
-            if (m_selectedEntry != null) {
-                ListStore<GwtFirewallPortForwardEntry> store = m_grid.getStore();
-                GwtFirewallPortForwardEntry modelEntry = store.findModel(m_selectedEntry.getInPort().toString());
-                if (modelEntry != null) {
-                    m_grid.getSelectionModel().select(modelEntry, false);
-                    m_grid.getView().focusRow(store.indexOf(modelEntry));
-                }
-            }
-        }
-    }
-    
-    private boolean duplicateEntry(GwtFirewallPortForwardEntry portForwardEntry) {
-		
+	private class DataLoadListener extends LoadListener
+	{
+		private Grid<GwtFirewallPortForwardEntry> m_grid;
+		private GwtFirewallPortForwardEntry       m_selectedEntry;
+
+		public DataLoadListener(Grid<GwtFirewallPortForwardEntry> grid) {
+			m_grid 			 = grid;
+			m_selectedEntry = null;
+		}
+
+		public void loaderBeforeLoad(LoadEvent le) {
+			m_selectedEntry = m_grid.getSelectionModel().getSelectedItem();
+		}
+
+		public void loaderLoad(LoadEvent le) {
+			if (le.exception != null) {
+				FailureHandler.handle(le.exception);
+			}
+
+			if (m_selectedEntry != null) {
+				ListStore<GwtFirewallPortForwardEntry> store = m_grid.getStore();
+				GwtFirewallPortForwardEntry modelEntry = store.findModel(m_selectedEntry.getInPort().toString());
+				if (modelEntry != null) {
+					m_grid.getSelectionModel().select(modelEntry, false);
+					m_grid.getView().focusRow(store.indexOf(modelEntry));
+				}
+			}
+		}
+	}
+
+	private boolean duplicateEntry(GwtFirewallPortForwardEntry portForwardEntry) {
+
 		boolean isDuplicateEntry = false; 
 		List<GwtFirewallPortForwardEntry> entries = m_grid.getStore().getModels();
 		if (entries != null && portForwardEntry != null) {
@@ -432,14 +455,14 @@ public class PortForwardingConfigTab extends LayoutContainer
 						&& entry.getProtocol().equals(portForwardEntry.getProtocol())
 						&& entry.getOutPort().equals(portForwardEntry.getOutPort())
 						&& entry.getInPort().equals(portForwardEntry.getInPort())) {
-					
+
 					String permittedNetwork = (entry.getPermittedNetwork() != null)? entry.getPermittedNetwork() : "0.0.0.0/0";
 					String newPermittedNetwork = (portForwardEntry.getPermittedNetwork() != null)?  portForwardEntry.getPermittedNetwork() : "0.0.0.0/0";
 					String permittedMAC = (entry.getPermittedMAC() != null)? entry.getPermittedMAC().toUpperCase() : "";
 					String newPermittedMAC = (portForwardEntry.getPermittedMAC() != null)? portForwardEntry.getPermittedMAC().toUpperCase() : "";
 					String sourcePortRange = (entry.getSourcePortRange() != null)? entry.getSourcePortRange() : "";
 					String newSourcePortRange = (portForwardEntry.getSourcePortRange() != null)? portForwardEntry.getSourcePortRange() : "";
-					
+
 					if (permittedNetwork.equals(newPermittedNetwork)
 							&& permittedMAC.equals(newPermittedMAC)
 							&& sourcePortRange.equals(newSourcePortRange)) {

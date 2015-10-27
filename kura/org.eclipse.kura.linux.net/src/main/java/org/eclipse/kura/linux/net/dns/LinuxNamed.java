@@ -60,7 +60,14 @@ public class LinuxNamed {
 				s_logFileName = "/var/log/named.log";
 				s_rfc1912ZonesFilename = "/etc/named.rfc1912.zones";
 			}
-		} else {
+		} 
+		else if (OS_VERSION.equals(KuraConstants.ReliaGATE_50_21_Ubuntu.getImageName() + "_" + KuraConstants.ReliaGATE_50_21_Ubuntu.getImageVersion())) {
+			s_persistentConfigFileName = "/etc/bind/named.conf";
+			s_procString = "/usr/sbin/named";
+			s_logFileName = "/var/log/named.log";
+			s_rfc1912ZonesFilename = "/etc/bind/named.rfc1912.zones";
+		}
+		else {
 			s_persistentConfigFileName = "/etc/named.conf";
 			s_procString = "named -u named -t";
 			s_logFileName = "/var/log/named.log";
@@ -190,6 +197,12 @@ public class LinuxNamed {
 			else if (OS_VERSION.equals(KuraConstants.Raspberry_Pi.getImageName()) || OS_VERSION.equals(KuraConstants.BeagleBone.getImageName())) {
 				result = LinuxProcessUtil.start("/etc/init.d/bind9 start");
 			}
+			else if (OS_VERSION.equals(KuraConstants.Intel_Edison.getImageName() + "_" + KuraConstants.Intel_Edison.getImageVersion() + "_" + KuraConstants.Intel_Edison.getTargetName())) {
+				result = LinuxProcessUtil.start("/etc/init.d/bind start");
+			}
+			else if (OS_VERSION.equals(KuraConstants.ReliaGATE_50_21_Ubuntu.getImageName() + "_" + KuraConstants.ReliaGATE_50_21_Ubuntu.getImageVersion())) {
+				result = LinuxProcessUtil.start("/etc/init.d/bind9 start");
+			}
 			else {
 				s_logger.info("Linux named enable fallback");
 				result = LinuxProcessUtil.start("/etc/init.d/named start");
@@ -214,6 +227,12 @@ public class LinuxNamed {
 				result = LinuxProcessUtil.start("/etc/init.d/bind stop");
 			} 
 			else if (OS_VERSION.equals(KuraConstants.Raspberry_Pi.getImageName()) || OS_VERSION.equals(KuraConstants.BeagleBone.getImageName())) {
+				result = LinuxProcessUtil.start("/etc/init.d/bind9 stop");
+			}
+			else if (OS_VERSION.equals(KuraConstants.Intel_Edison.getImageName() + "_" + KuraConstants.Intel_Edison.getImageVersion() + "_" + KuraConstants.Intel_Edison.getTargetName())) {
+				result = LinuxProcessUtil.start("/etc/init.d/bind stop");
+			}
+			else if (OS_VERSION.equals(KuraConstants.ReliaGATE_50_21_Ubuntu.getImageName() + "_" + KuraConstants.ReliaGATE_50_21_Ubuntu.getImageVersion())) {
 				result = LinuxProcessUtil.start("/etc/init.d/bind9 stop");
 			}
 			else {

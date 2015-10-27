@@ -22,6 +22,7 @@ import java.util.StringTokenizer;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.core.net.modem.ModemInterfaceAddressConfigImpl;
 import org.eclipse.kura.core.net.modem.ModemInterfaceConfigImpl;
 import org.eclipse.kura.core.net.util.NetworkUtil;
@@ -750,8 +751,9 @@ public class NetworkConfiguration {
 			properties.put(prefix+".securityType", WifiSecurity.NONE.toString());
 		}
 		properties.put(prefix+".channel", sbChannel.toString());
-		if(wifiConfig != null && wifiConfig.getPasskey() != null) {
-			properties.put(prefix+".passphrase", wifiConfig.getPasskey());
+		Password psswd= wifiConfig.getPasskey();
+		if(wifiConfig != null && psswd != null) {
+			properties.put(prefix+".passphrase", psswd);
 		} else {
 			properties.put(prefix+".passphrase", "");
 		}
@@ -861,10 +863,9 @@ public class NetworkConfiguration {
 
 		// passphrase
 		key = prefix + ".passphrase";
-		String passphrase = (String)properties.get(key);
-		if(passphrase == null) {
-			passphrase = "";
-		}
+		Password psswd= (Password)properties.get(key);
+		String passphrase = new String(psswd.getPassword());
+		
 		s_logger.trace("passphrase is " + passphrase);
 		wifiConfig.setPasskey(passphrase);       
 
@@ -888,6 +889,12 @@ public class NetworkConfiguration {
 		}
 
 		wifiConfig.setIgnoreSSID(ignoreSSID);
+		
+		key = prefix + ".pairwiseCiphers";
+		String pairwiseCiphers = (String)properties.get(key);
+		if (pairwiseCiphers != null) {
+			wifiConfig.setPairwiseCiphers(WifiCiphers.valueOf(pairwiseCiphers));
+		}
 
 		if(mode == WifiMode.INFRA) {
 			key = prefix + ".bgscan";
@@ -898,12 +905,14 @@ public class NetworkConfiguration {
 			s_logger.trace("bgscan is " + bgscan);
 			wifiConfig.setBgscan(new WifiBgscan(bgscan));
 
+			/*
 			key = prefix + ".pairwiseCiphers";
 			String pairwiseCiphers = (String)properties.get(key);
 			if (pairwiseCiphers != null) {
 				wifiConfig.setPairwiseCiphers(WifiCiphers.valueOf(pairwiseCiphers));
 			}
-
+			*/
+			
 			key = prefix + ".groupCiphers";
 			String groupCiphers = (String)properties.get(key);
 			if (groupCiphers != null) {

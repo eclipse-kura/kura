@@ -97,6 +97,8 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 	
 	private static final String OS_VERSION = System.getProperty("kura.os.version");
 	
+	private static final String SSID_REGEXP = "[0-9A-Za-z/.@#:\\ \\_\\-]+";
+	
     private ComponentContext                   m_ctx;
 	private ConfigurationService               m_configurationService;
 	private NetworkConfigurationService		   m_networkConfigurationService;
@@ -107,6 +109,13 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
     private final static String[] EVENT_TOPICS = new String[] {
         NetworkConfigurationChangeEvent.NETWORK_EVENT_CONFIG_CHANGE_TOPIC,
     };
+    
+    private class NetworkRollbackItem {
+		String m_src; String m_dst;
+		NetworkRollbackItem(String src, String dst) {
+			m_src = src; m_dst = dst;
+		}
+	}
 
 	
 	// ----------------------------------------------------------------
@@ -900,19 +909,9 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 		
 		DhcpClientManager.releaseCurrentLease(interfaceName);
 		DhcpClientManager.enable(interfaceName);
-
-		/*
-		try {
-			LinuxProcessUtil.start("dhclient -r " + interfaceName + "\n", true);
-			LinuxProcessUtil.start("dhclient " + interfaceName + "\n", true);
-		} catch (Exception e) {
-			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
-		}
-		*/
 	}
 	
 	public void manageFirewall (String gatewayIface) throws KuraException {
-		
 		// get desired NAT rules interfaces
 		LinkedHashSet<NATRule> desiredNatRules = null; 
 		ComponentConfiguration networkComponentConfiguration = ((SelfConfiguringComponent)m_networkConfigurationService).getConfiguration();
@@ -950,6 +949,7 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 		} else {
 			firewall.deleteAllAutoNatRules();
 		}
+		
 		firewall.enable();
 	}
 
@@ -1121,6 +1121,7 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 		    	StringBuilder key = new StringBuilder("net.interface." +  ifaceName + ".config.wifi.infra.driver");
 		    	String driver = KuranetConfig.getProperty(key.toString());
 		    	WpaSupplicantManager.startTemp(ifaceName, WifiMode.INFRA, driver);
+		    	wifiModeWait(ifaceName, WifiMode.INFRA, 10);
 		    }
 		    
 		    s_logger.info("getWifiHotspots() :: scanning for available access points ...");
@@ -1131,6 +1132,11 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 			    	
 			    	if ((wap.getSSID() == null) || (wap.getSSID().length() == 0)) {
 			    		s_logger.debug("Skipping hidden SSID");
+			    		continue;
+			    	}
+			    	
+			    	if (!wap.getSSID().matches(SSID_REGEXP)){
+			    		s_logger.debug("Skipping undesired SSID");
 			    		continue;
 			    	}
 			    	
@@ -1188,7 +1194,63 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 			    	int frequency = (int)wap.getFrequency();
 			    	int channel = frequencyMhz2Channel(frequency);
 			    	
-			    	WifiHotspotInfo wifiHotspotInfo = new WifiHotspotInfo(wap.getSSID(), sbMacAddress.toString(), 0-wap.getStrength(), channel, frequency, wifiSecurity);
+			    	EnumSet<WifiSecurity>pairCiphers = EnumSet.noneOf(WifiSecurity.class);
+			    	EnumSet<WifiSecurity>groupCiphers = EnumSet.noneOf(WifiSecurity.class);
+			    	if (wifiSecurity == WifiSecurity.SECURITY_WPA_WPA2) {
+			    		Iterator<WifiSecurity> itWpaSecurity = esWpaSecurity.iterator();
+			    		while (itWpaSecurity.hasNext()) {
+			    			WifiSecurity securityEntry = itWpaSecurity.next();
+			    			if ((securityEntry == WifiSecurity.PAIR_CCMP) || 
+					    	    (securityEntry == WifiSecurity.PAIR_TKIP)) {
+			    				pairCiphers.add(securityEntry);
+			    			} else if ((securityEntry == WifiSecurity.GROUP_CCMP) || 
+			    					   (securityEntry == WifiSecurity.GROUP_TKIP)) {
+			    				groupCiphers.add(securityEntry);
+			    			}
+			    		}
+			    		Iterator<WifiSecurity> itRsnSecurity = esRsnSecurity.iterator();
+			    		while (itRsnSecurity.hasNext()) {
+			    			WifiSecurity securityEntry = itRsnSecurity.next();
+			    			if ((securityEntry == WifiSecurity.PAIR_CCMP) || 
+				    			(securityEntry == WifiSecurity.PAIR_TKIP)) {
+			    				if (!pairCiphers.contains(securityEntry))
+			    					pairCiphers.add(securityEntry);
+			    			} else if ((securityEntry == WifiSecurity.GROUP_CCMP) || 
+			    					   (securityEntry == WifiSecurity.GROUP_TKIP)) {
+			    				if (!groupCiphers.contains(securityEntry))
+			    					groupCiphers.add(securityEntry);
+			    			}
+			    		}
+			    	} else if (wifiSecurity == WifiSecurity.SECURITY_WPA) {
+			    		Iterator<WifiSecurity> itWpaSecurity = esWpaSecurity.iterator();
+			    		while (itWpaSecurity.hasNext()) {
+			    			WifiSecurity securityEntry = itWpaSecurity.next();
+			    			if ((securityEntry == WifiSecurity.PAIR_CCMP) || 
+			    				(securityEntry == WifiSecurity.PAIR_TKIP)) {
+			    				pairCiphers.add(securityEntry);
+			    			} else if ((securityEntry == WifiSecurity.GROUP_CCMP) || 
+			    					   (securityEntry == WifiSecurity.GROUP_TKIP)) {
+			    				groupCiphers.add(securityEntry);
+			    			}
+			    		}
+			    	} else if (wifiSecurity == WifiSecurity.SECURITY_WPA2) {
+			    		Iterator<WifiSecurity> itRsnSecurity = esRsnSecurity.iterator();
+			    		while (itRsnSecurity.hasNext()) {
+			    			WifiSecurity securityEntry = itRsnSecurity.next();
+			    			if ((securityEntry == WifiSecurity.PAIR_CCMP) || 
+				    			(securityEntry == WifiSecurity.PAIR_TKIP)) {
+			    				pairCiphers.add(securityEntry);
+			    			} else if ((securityEntry == WifiSecurity.GROUP_CCMP) || 
+			    					   (securityEntry == WifiSecurity.GROUP_TKIP)) {
+			    				groupCiphers.add(securityEntry);
+			    			}
+			    		}
+			    	}
+			    	
+					WifiHotspotInfo wifiHotspotInfo = new WifiHotspotInfo(
+							wap.getSSID(), sbMacAddress.toString(),
+							0 - wap.getStrength(), channel, frequency,
+							wifiSecurity, pairCiphers, groupCiphers);
 			    	mWifiHotspotInfo.put(wap.getSSID(), wifiHotspotInfo);
 			    }
 	    	}
@@ -1222,6 +1284,7 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 			}
 			s_logger.debug("verifyWifiCredentials() :: Restarting temporary instance of wpa_supplicant");
 			WpaSupplicantManager.startTemp(ifaceName, WifiMode.INFRA, wifiConfig.getDriver());
+			wifiModeWait(ifaceName, WifiMode.INFRA, 10);
 			ret = isWifiConnectionCompleted(ifaceName, tout);
 			
 			if (WpaSupplicantManager.isTempRunning()) {
@@ -1252,16 +1315,9 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 	
 	@Override
 	public boolean rollbackDefaultConfiguration() throws KuraException {
-		s_logger.debug("Recovering default configuration ...");
-		
-		final class RollbackItem {
-			String m_src; String m_dst;
-			RollbackItem(String src, String dst) {
-				m_src = src; m_dst = dst;
-			}
-		}
-		
-		ArrayList<RollbackItem> rollbackItems = new ArrayList<RollbackItem>();
+		s_logger.debug("rollbackDefaultConfiguration() :: Recovering default configuration ...");
+				
+		ArrayList<NetworkRollbackItem> rollbackItems = new ArrayList<NetworkRollbackItem>();
 				
 		if (m_systemService == null) {
 			return false;
@@ -1282,39 +1338,81 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 			return false;
 		}
 		
-		rollbackItems.add(new RollbackItem(srcDataDirectory + "/kuranet.conf", dstDataDirectory + "/kuranet.conf"));
-		rollbackItems.add(new RollbackItem(srcDataDirectory + "/firewall", "/etc/init.d/firewall"));
-		rollbackItems.add(new RollbackItem(srcDataDirectory + "/hostapd.conf", "/etc/hostapd.conf"));
+		rollbackItems.add(new NetworkRollbackItem(srcDataDirectory + "/kuranet.conf", dstDataDirectory + "/kuranet.conf"));
+		//rollbackItems.add(new NetworkRollbackItem(srcDataDirectory + "/firewall", "/etc/init.d/firewall"));
+		if (OS_VERSION.equals(KuraConstants.Intel_Edison.getImageName() + "_" + KuraConstants.Intel_Edison.getImageVersion() + "_" + KuraConstants.Intel_Edison.getTargetName())) {
+			rollbackItems.add(new NetworkRollbackItem(srcDataDirectory + "/hostapd.conf", "/etc/hostapd/hostapd.conf"));
+			rollbackItems.add(new NetworkRollbackItem(srcDataDirectory + "/dhcpd-eth0.conf", "/etc/udhcpd-usb0.conf"));
+			rollbackItems.add(new NetworkRollbackItem(srcDataDirectory + "/dhcpd-wlan0.conf", "/etc/udhcpd-wlan0.conf"));
+		} else {
+			rollbackItems.add(new NetworkRollbackItem(srcDataDirectory + "/hostapd.conf", "/etc/hostapd.conf"));
+			rollbackItems.add(new NetworkRollbackItem(srcDataDirectory + "/dhcpd-eth0.conf", "/etc/dhcpd-eth0.conf"));
+			rollbackItems.add(new NetworkRollbackItem(srcDataDirectory + "/dhcpd-wlan0.conf", "/etc/dhcpd-wlan0.conf"));
+		}
 			
-		// TODO add other platforms ... 
 		if (OS_VERSION.equals(KuraConstants.Mini_Gateway.getImageName() + "_" + KuraConstants.Mini_Gateway.getImageVersion()) ||
-				OS_VERSION.equals(KuraConstants.Raspberry_Pi.getImageName()) || OS_VERSION.equals(KuraConstants.BeagleBone.getImageName())) {
-			// restore debian interface configuration
-			rollbackItems.add(new RollbackItem(srcDataDirectory + "/interfaces", "/etc/network/interfaces"));
+				OS_VERSION.equals(KuraConstants.Raspberry_Pi.getImageName()) || 
+				OS_VERSION.equals(KuraConstants.BeagleBone.getImageName()) ||
+				OS_VERSION.equals(KuraConstants.Intel_Edison.getImageName() + "_" + KuraConstants.Intel_Edison.getImageVersion() + "_" + KuraConstants.Intel_Edison.getTargetName())) {
+			// restore Debian interface configuration
+			rollbackItems.add(new NetworkRollbackItem(srcDataDirectory + "/interfaces", "/etc/network/interfaces"));
 		} else {
 			// restore RedHat interface configuration
-			rollbackItems.add(new RollbackItem(srcDataDirectory + "/ifcfg-eth0", "/etc/sysconfig/network-scripts/ifcfg-eth0"));
-			rollbackItems.add(new RollbackItem(srcDataDirectory + "/ifcfg-eth1", "/etc/sysconfig/network-scripts/ifcfg-eth1"));
-			rollbackItems.add(new RollbackItem(srcDataDirectory + "/ifcfg-wlan0", "/etc/sysconfig/network-scripts/ifcfg-wlan0"));
+			rollbackItems.add(new NetworkRollbackItem(srcDataDirectory + "/ifcfg-eth0", "/etc/sysconfig/network-scripts/ifcfg-eth0"));
+			rollbackItems.add(new NetworkRollbackItem(srcDataDirectory + "/ifcfg-eth1", "/etc/sysconfig/network-scripts/ifcfg-eth1"));
+			rollbackItems.add(new NetworkRollbackItem(srcDataDirectory + "/ifcfg-wlan0", "/etc/sysconfig/network-scripts/ifcfg-wlan0"));
 		}
-		rollbackItems.add(new RollbackItem(srcDataDirectory + "/dhcpd-eth0.conf", "/etc/dhcpd-eth0.conf"));
-		rollbackItems.add(new RollbackItem(srcDataDirectory + "/dhcpd-wlan0.conf", "/etc/dhcpd-wlan0.conf"));
 		
-		for (RollbackItem rollbackItem : rollbackItems) {
-			File srcFile = new File (rollbackItem.m_src);
-			File dstFile = new File (rollbackItem.m_dst);
-			if (srcFile.exists()) {
-				try {
-					copyFile(srcFile, dstFile);
-				} catch (IOException e) {
-					s_logger.error("Failed to recover {} file - {}", dstFile, e);
-				}
+		for (NetworkRollbackItem rollbackItem : rollbackItems) {
+			rollbackItem(rollbackItem);
+		}
+		
+		s_logger.debug("rollbackDefaultConfiguration() :: setting network configuration ...");
+		m_networkConfigurationService.setNetworkConfiguration(m_networkConfigurationService.getNetworkConfiguration());
+		
+		return true;
+	}
+	
+	@Override
+	public boolean rollbackDefaultFirewallConfiguration() throws KuraException {
+		s_logger.debug("rollbackDefaultFirewallConfiguration() :: initializing firewall ...");
+		if (m_systemService == null) {
+			return false;
+		}
+		
+		String dstDataDirectory = m_systemService.getKuraDataDirectory();
+		if (dstDataDirectory == null) {
+			return false;
+		}
+		
+		int ind = dstDataDirectory.lastIndexOf('/');
+		String srcDataDirectory = null;
+		if (ind >= 0) {
+			srcDataDirectory = "".concat(dstDataDirectory.substring(0, ind+1).concat(".data"));
+		}
+		
+		if (srcDataDirectory == null) {
+			return false;
+		}
+		
+		NetworkRollbackItem firewallRollbackItem = new NetworkRollbackItem(srcDataDirectory + "/firewall", "/etc/init.d/firewall");
+		rollbackItem(firewallRollbackItem);
+		LinuxFirewall.getInstance().initialize();
+		LinuxFirewall.getInstance().enable();
+		return true;
+	}
+	
+	private void rollbackItem (NetworkRollbackItem rollbackItem) {
+		File srcFile = new File (rollbackItem.m_src);
+		File dstFile = new File (rollbackItem.m_dst);
+		if (srcFile.exists()) {
+			try {
+				s_logger.debug("rollbackItem() :: copying {} to {} ...", srcFile, dstFile);
+				copyFile(srcFile, dstFile);
+			} catch (IOException e) {
+				s_logger.error("rollbackItem() :: Failed to recover {} file - {}", dstFile, e);
 			}
 		}
-		
-		m_networkConfigurationService.setNetworkConfiguration(m_networkConfigurationService.getNetworkConfiguration());
-			
-		return true;
 	}
 	
 	private void copyFile(File sourceFile, File destFile) throws IOException {
@@ -1367,6 +1465,23 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 		} while (System.currentTimeMillis()-start < tout*1000);
 		
 		return ret;
+    }
+    
+    private void wifiModeWait(String ifaceName, WifiMode mode, int tout) {
+    	long startTimer = System.currentTimeMillis();
+    	do {
+    		try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+			}
+    		try {
+				if (LinuxNetworkUtil.getWifiMode(ifaceName) == mode) {
+					break;
+				}
+			} catch (KuraException e) {
+				s_logger.error("wifiModeWait() :: Failed to obtain WiFi mode - {}", e);
+			}
+    	} while((System.currentTimeMillis()-startTimer) < 1000L*tout);
     }
 	
 	// ----------------------------------------------------------------
@@ -1480,18 +1595,4 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 		int channel = (frequency - 2407)/5;
 		return channel;
 	}
-	
-	/*
-	private static String formDhclientCommand(String interfaceName, boolean usePidFile) {
-		StringBuffer sb = new StringBuffer();
-		sb.append("dhclient ");
-		if (usePidFile) {
-			sb.append("-pf /var/run/dhclient.");
-			sb.append(interfaceName);
-			sb.append(".pid ");
-		} 
-		sb.append(interfaceName);
-		return sb.toString();
-	}
-	*/
 }

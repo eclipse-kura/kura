@@ -14,6 +14,7 @@ package org.eclipse.kura.web.server;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.kura.KuraConnectException;
 import org.eclipse.kura.data.DataService;
 import org.eclipse.kura.data.DataTransportService;
 import org.eclipse.kura.position.PositionService;
@@ -28,6 +29,7 @@ import org.eclipse.kura.web.shared.model.GwtNetInterfaceConfig;
 import org.eclipse.kura.web.shared.model.GwtNetRouterMode;
 import org.eclipse.kura.web.shared.model.GwtWifiNetInterfaceConfig;
 import org.eclipse.kura.web.shared.model.GwtWifiWirelessMode;
+import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.eclipse.kura.web.shared.service.GwtStatusService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,7 +43,8 @@ public class GwtStatusServiceImpl extends OsgiRemoteServiceServlet implements Gw
 	
 	private static Logger s_logger = LoggerFactory.getLogger(GwtNetworkServiceImpl.class);
 	
-	public ListLoadResult<GwtGroupedNVPair> getDeviceConfig(boolean hasNetAdmin) throws GwtKuraException {
+	public ListLoadResult<GwtGroupedNVPair> getDeviceConfig(GwtXSRFToken xsrfToken, boolean hasNetAdmin) throws GwtKuraException {
+		checkXSRFToken(xsrfToken);
 		List<GwtGroupedNVPair> pairs = new ArrayList<GwtGroupedNVPair>();
 
 		pairs.addAll(getCloudStatus());
@@ -50,6 +53,31 @@ public class GwtStatusServiceImpl extends OsgiRemoteServiceServlet implements Gw
 		pairs.addAll(getPositionStatus());
 
 		return new BaseListLoadResult<GwtGroupedNVPair>(pairs);
+	}
+	
+	public void connectDataService(GwtXSRFToken xsrfToken) throws GwtKuraException {
+		checkXSRFToken(xsrfToken);
+		DataService dataService = ServiceLocator.getInstance().getService(DataService.class);
+		int counter = 10;
+		try {
+			dataService.connect();
+			while (!dataService.isConnected() && counter > 0) {
+				Thread.sleep(1000);
+				counter--;
+			}
+		} catch (KuraConnectException e) {
+			s_logger.error("Error connecting.");
+			throw new GwtKuraException("Error connecting: " + e.getLocalizedMessage());
+		} catch (InterruptedException e) {
+			s_logger.error("Interrupt Exception.");
+			throw new GwtKuraException("Interrupt Exception: " + e.getLocalizedMessage());
+		}
+	}
+	
+	public void disconnectDataService(GwtXSRFToken xsrfToken) throws GwtKuraException {
+		checkXSRFToken(xsrfToken);
+		DataService dataService = ServiceLocator.getInstance().getService(DataService.class);
+		dataService.disconnect(10);
 	}
 	
 	private List<GwtGroupedNVPair> getCloudStatus() {

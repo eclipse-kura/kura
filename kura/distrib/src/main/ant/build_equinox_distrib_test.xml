@@ -62,7 +62,7 @@
 	<!-- Create the Kura start scripts -->
 	<echo file="${project.build.directory}/kura-${build.name}_${project.version}/start_kura.sh" append="false">#!/bin/sh
 
-export PATH=/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/opt/jvm/bin:/usr/java/bin
+export PATH=/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/opt/jvm/bin:/usr/java/bin:$PATH
 export MALLOC_ARENA_MAX=1
 
 cd $(dirname $0)/..
@@ -70,25 +70,26 @@ cd $(dirname $0)/..
 KURA_RUNNING=`ps ax | grep java | grep "org.eclipse.osgi"`
 
 if [ -z "$KURA_RUNNING" ] ; then
-    java -Xms${kura.mem.size} -Xmx${kura.mem.size} -XX:MaxPermSize=64m -Xss128k \ 
-    -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/var/log/kura-heapdump.hprof \
-    -XX:ErrorFile=/var/log/kura-error.log \
-    -Dkura.os.version=${kura.os.version} \
-	-Declipse.ignoreApp=true \
-	-Dkura.configuration=file:/opt/eclipse/kura/kura/kura.properties \
-	-Ddpa.configuration=/opt/eclipse/kura/kura/dpa.properties \
-	-Dlog4j.configuration=file:/opt/eclipse/kura/kura/log4j.properties \
-	-Djava.security.policy=${DIR}/kura/jdk.dio.policy \
-	-Djdk.dio.registry=${DIR}/kura/jdk.dio.properties \
-	-jar plugins/org.eclipse.osgi_3.8.1.v20120830-144521.jar \
-	-configuration configuration \
-	-console \
-	-consoleLog
+        java -Xms${kura.mem.size} -Xmx${kura.mem.size} -XX:MaxPermSize=64m \ 
+        -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/var/log/kura-heapdump.hprof \
+        -XX:ErrorFile=/var/log/kura-error.log \
+        -Dkura.os.version=${kura.os.version} \
+        -Declipse.ignoreApp=true \
+        -Dkura.configuration=file:/opt/eclipse/kura/kura/kura.properties \
+        -Ddpa.configuration=/opt/eclipse/kura/kura/dpa.properties \
+        -Dlog4j.configuration=file:/opt/eclipse/kura/kura/log4j.properties \
+        -Djava.security.policy=${DIR}/kura/jdk.dio.policy \
+        -Djdk.dio.registry=${DIR}/kura/jdk.dio.properties \
+        -Djdk.tls.trustNameService=true \
+        -jar plugins/org.eclipse.osgi_3.8.1.v20120830-144521.jar \
+        -configuration configuration \
+        -console \
+        -consoleLog
 fi
 	</echo>    
 	<echo file="${project.build.directory}/kura-${build.name}_${project.version}/start_kura_debug.sh" append="false">#!/bin/sh
 
-export PATH=/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/opt/jvm/bin:/usr/java/bin
+export PATH=/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/opt/jvm/bin:/usr/java/bin:$PATH
 export MALLOC_ARENA_MAX=1
 
 cd $(dirname $0)/..
@@ -96,30 +97,31 @@ cd $(dirname $0)/..
 KURA_RUNNING=`ps ax | grep java | grep "org.eclipse.osgi"`
 
 if [ -z "$KURA_RUNNING" ] ; then
-    java -Xms${kura.mem.size} -Xmx${kura.mem.size} -XX:MaxPermSize=64m -Xss128k \
-    -XX:+PrintGCDetails -XX:+PrintGCTimeStamps -Xloggc:/var/log/kura-gc.log \
-	-XX:+UseGCLogFileRotation -XX:NumberOfGCLogFiles=10 -XX:GCLogFileSize=100M \
-	-XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/var/log/kura-heapdump.hprof \
-	-XX:ErrorFile=/var/log/kura-error.log \
-	-Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=8000,suspend=n \
-	-Dkura.os.version=${kura.os.version} \
-	-Declipse.ignoreApp=true \
-	-Dkura.configuration=file:/opt/eclipse/kura/kura/kura.properties \
-    -Ddpa.configuration=/opt/eclipse/kura/kura/dpa.properties \
-	-Dlog4j.configuration=file:/opt/eclipse/kura/kura/log4j.properties \
-	-Djava.security.policy=${DIR}/kura/jdk.dio.policy \
-	-Djdk.dio.registry=${DIR}/kura/jdk.dio.properties \
-	-jar plugins/org.eclipse.osgi_3.8.1.v20120830-144521.jar \
-	-configuration configuration \
-	-console \
-	-consoleLog
+        java -Xms${kura.mem.size} -Xmx${kura.mem.size} -XX:MaxPermSize=64m \
+        -XX:+PrintGCDetails -XX:+PrintGCTimeStamps -Xloggc:/var/log/kura-gc.log \
+        -XX:+UseGCLogFileRotation -XX:NumberOfGCLogFiles=10 -XX:GCLogFileSize=100M \
+        -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/var/log/kura-heapdump.hprof \
+        -XX:ErrorFile=/var/log/kura-error.log \
+        -Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=8000,suspend=n \
+        -Dkura.os.version=${kura.os.version} \
+        -Declipse.ignoreApp=true \
+        -Dkura.configuration=file:/opt/eclipse/kura/kura/kura.properties \
+        -Ddpa.configuration=/opt/eclipse/kura/kura/dpa.properties \
+        -Dlog4j.configuration=file:/opt/eclipse/kura/kura/log4j.properties \
+        -Djava.security.policy=${DIR}/kura/jdk.dio.policy \
+        -Djdk.dio.registry=${DIR}/kura/jdk.dio.properties \
+        -Djdk.tls.trustNameService=true \
+        -jar plugins/org.eclipse.osgi_3.8.1.v20120830-144521.jar \
+        -configuration configuration \
+        -console \
+        -consoleLog
 fi
 	</echo>    
 	<echo file="${project.build.directory}/kura-${build.name}_${project.version}/start_kura_background.sh" append="false"># Kura should be installed to the /opt/eclipse directory.
 
 #!/bin/sh
 
-export PATH=/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/opt/jvm/bin:/usr/java/bin
+export PATH=/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/opt/jvm/bin:/usr/java/bin:$PATH
 export MALLOC_ARENA_MAX=1
 
 cd /opt/eclipse/kura
@@ -127,16 +129,17 @@ cd /opt/eclipse/kura
 KURA_RUNNING=`ps ax | grep java | grep "org.eclipse.osgi"`
 
 if [ -z "$KURA_RUNNING" ] ; then
-    nohup java -Xms${kura.mem.size} -Xmx${kura.mem.size} -XX:MaxPermSize=64m -Xss128k \
-	    -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/var/log/kura-heapdump.hprof \
-	    -XX:ErrorFile=/var/log/kura-error.log \
-		-Dkura.os.version=${kura.os.version} \
+    nohup java -Xms${kura.mem.size} -Xmx${kura.mem.size} -XX:MaxPermSize=64m \
+        -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/var/log/kura-heapdump.hprof \
+        -XX:ErrorFile=/var/log/kura-error.log \
+        -Dkura.os.version=${kura.os.version} \
         -Declipse.ignoreApp=true \
         -Dkura.configuration=file:/opt/eclipse/kura/kura/kura.properties \
         -Ddpa.configuration=/opt/eclipse/kura/kura/dpa.properties \
         -Dlog4j.configuration=file:/opt/eclipse/kura/kura/log4j.properties \
         -Djava.security.policy=${DIR}/kura/jdk.dio.policy \
         -Djdk.dio.registry=${DIR}/kura/jdk.dio.properties \
+        -Djdk.tls.trustNameService=true \
         -jar plugins/org.eclipse.osgi_3.8.1.v20120830-144521.jar \
         -configuration configuration/ \
         -console 5002 \

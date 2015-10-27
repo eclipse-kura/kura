@@ -26,4 +26,10 @@
    			  bind="setCryptoService"
    			  unbind="unsetCryptoService"
    			  interface="org.eclipse.kura.crypto.CryptoService"/>
+   <reference name="SystemService"
+              bind="setSystemService"
+              unbind="unsetSystemService"
+              cardinality="1..1"
+              policy="static"
+              interface="org.eclipse.kura.system.SystemService"/>
 </scr:component>

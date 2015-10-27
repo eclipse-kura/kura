@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011, 2014 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2015 Eurotech and/or its affiliates, and others
  *
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
@@ -8,6 +8,7 @@
  *
  * Contributors:
  *   Eurotech
+ *   Benjamin Cabé <benjamin@eclipse.org>
  */
 package org.eclipse.kura.core.data.transport.mqtt;
 
@@ -34,6 +35,9 @@ import org.eclipse.kura.data.DataTransportService;
 import org.eclipse.kura.data.DataTransportToken;
 import org.eclipse.kura.ssl.SslManagerService;
 import org.eclipse.kura.ssl.SslServiceListener;
+import org.eclipse.kura.status.CloudConnectionStatusComponent;
+import org.eclipse.kura.status.CloudConnectionStatusEnum;
+import org.eclipse.kura.status.CloudConnectionStatusService;
 import org.eclipse.kura.system.SystemService;
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.IMqttToken;
@@ -51,7 +55,7 @@ import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class MqttDataTransport implements DataTransportService, MqttCallback, ConfigurableComponent, SslServiceListener {
+public class MqttDataTransport implements DataTransportService, MqttCallback, ConfigurableComponent, SslServiceListener, CloudConnectionStatusComponent {
 	private static final Logger s_logger = LoggerFactory.getLogger(MqttDataTransport.class);
 
 	private static final String MQTT_SCHEME = "mqtt://";
@@ -68,6 +72,9 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 
 	private SystemService m_systemService;
 	private SslManagerService m_sslManagerService;
+	private CloudConnectionStatusService m_cloudConnectionStatusService;
+	
+	private CloudConnectionStatusEnum m_notificationStatus = CloudConnectionStatusEnum.OFF;
 
 	private MqttAsyncClient m_mqttClient;
 
@@ -136,7 +143,15 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 	public void unsetCryptoService(CryptoService cryptoService) {
 		this.m_cryptoService = null;
 	}
+	
+	public void setCloudConnectionStatusService(CloudConnectionStatusService cloudConnectionStatusService) {
+		this.m_cloudConnectionStatusService = cloudConnectionStatusService;
+	}
 
+	public void unsetCloudConnectionStatusService(CloudConnectionStatusService cloudConnectionStatusService) {
+		this.m_cloudConnectionStatusService = null;
+	}
+	
 	// ----------------------------------------------------------------
 	//
 	// Activation APIs
@@ -172,7 +187,7 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 			m_clientConf = buildConfiguration(m_properties);
 			setupMqttSession();
 		} catch (RuntimeException e) {
-			s_logger.error("Invalid client configuration. Service will not be able to connect until the configuration is updated", e);
+			s_logger.error("Invalid client configuration. Service will not be able to connect until the configuration is updated", e);			
 		}
 
 		ServiceTracker<DataTransportListener, DataTransportListener> listenersTracker = new ServiceTracker<DataTransportListener, DataTransportListener>(
@@ -290,6 +305,11 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 		s_logger.info("#");
 		s_logger.info("#  Connecting...");
 
+		//Register the component in the CloudConnectionStatus service
+		m_cloudConnectionStatusService.register(this);
+		//Update status notification service
+		m_cloudConnectionStatusService.updateStatus(this, CloudConnectionStatusEnum.FAST_BLINKING);
+
 		//
 		// connect
 		try {
@@ -297,6 +317,10 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 			connectToken.waitForCompletion(getTimeToWaitMillis() * 3);
 			s_logger.info("#  Connected!");
 			s_logger.info("# ------------------------------------------------------------");
+			
+			//Update status notification service
+			m_cloudConnectionStatusService.updateStatus(this, CloudConnectionStatusEnum.ON);
+			
 		} catch (MqttException e) {
 			s_logger.warn("xxxxx  Connect failed. Forcing disconnect. xxxxx {}", e);
 			try {
@@ -308,10 +332,16 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 			} finally {
 				m_mqttClient = null;
 			}
+			
+			//Update status notification service
+			m_cloudConnectionStatusService.updateStatus(this, CloudConnectionStatusEnum.OFF);
+			
 			throw new KuraConnectException(e, "Cannot connect");
+		} finally{
+			//Always unregister from CloudConnectionStatus service so to switch to the previous state
+			m_cloudConnectionStatusService.unregister(this);
 		}
-
-		//
+		
 		// notify the listeners
 		m_dataTransportListeners.onConnectionEstablished(m_newSession);
 	}
@@ -648,27 +678,27 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 			ValidationUtil.notEmptyOrNull(brokerUrl, MQTT_BROKER_URL_PROP_NAME);
 			brokerUrl = brokerUrl.trim();
 			
-			if(m_cryptoService.isFrameworkSecure() && brokerUrl.contains(MQTT_SCHEME)){
-				s_logger.error("Secure (mqtts) connection required!");
-				throw KuraException.internalError("Secure (mqtts) connection required!");
-				
-			}
 			brokerUrl = brokerUrl.replaceAll("^" + MQTT_SCHEME, "tcp://");
 			brokerUrl = brokerUrl.replaceAll("^" + MQTTS_SCHEME, "ssl://"); 
 			
 			brokerUrl = brokerUrl.replaceAll("/$", "");
 			ValidationUtil.notEmptyOrNull(brokerUrl, "brokerUrl");
 
-			ValidationUtil.notEmptyOrNull((String) properties.get(MQTT_USERNAME_PROP_NAME), MQTT_USERNAME_PROP_NAME);
-			ValidationUtil.notNull(properties.get(MQTT_PASSWORD_PROP_NAME), MQTT_PASSWORD_PROP_NAME);
-			ValidationUtil.notEmptyOrNull(new String((char[]) properties.get(MQTT_PASSWORD_PROP_NAME)), MQTT_PASSWORD_PROP_NAME);			
 			ValidationUtil.notNegative((Integer) properties.get(MQTT_KEEP_ALIVE_PROP_NAME), MQTT_KEEP_ALIVE_PROP_NAME);
 			ValidationUtil.notNegative((Integer) properties.get(MQTT_TIMEOUT_PROP_NAME), MQTT_TIMEOUT_PROP_NAME);
 
 			ValidationUtil.notNull((Boolean) properties.get(MQTT_CLEAN_SESSION_PROP_NAME), MQTT_CLEAN_SESSION_PROP_NAME);
 
-			conOpt.setUserName((String) properties.get(MQTT_USERNAME_PROP_NAME));
-			conOpt.setPassword((char[]) properties.get(MQTT_PASSWORD_PROP_NAME));
+			String userName = (String) properties.get(MQTT_USERNAME_PROP_NAME);
+			if (userName != null) {
+				conOpt.setUserName(userName);
+			}
+
+			char[] password = (char[]) properties.get(MQTT_PASSWORD_PROP_NAME);
+			if (password != null) {
+				conOpt.setPassword(password);
+			}
+
 			conOpt.setKeepAliveInterval((Integer) properties.get(MQTT_KEEP_ALIVE_PROP_NAME));
 			conOpt.setConnectionTimeout((Integer) properties.get(MQTT_TIMEOUT_PROP_NAME));
 
@@ -941,5 +971,20 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 		default:
 			return String.valueOf(MqttVersion);
 		}
+	}
+
+	@Override
+	public int getNotificationPriority() {
+		return CloudConnectionStatusService.PRIORITY_MEDIUM;
+	}
+
+	@Override
+	public CloudConnectionStatusEnum getNotificationStatus() {
+		return m_notificationStatus;
+	}
+
+	@Override
+	public void setNotificationStatus(CloudConnectionStatusEnum status) {
+		m_notificationStatus = status;
 	}
 }

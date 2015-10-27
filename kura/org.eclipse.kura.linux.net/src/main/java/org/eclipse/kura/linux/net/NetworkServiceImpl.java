@@ -23,6 +23,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
@@ -36,10 +41,13 @@ import org.eclipse.kura.core.net.modem.ModemInterfaceAddressImpl;
 import org.eclipse.kura.core.net.modem.ModemInterfaceImpl;
 import org.eclipse.kura.core.net.util.NetworkUtil;
 import org.eclipse.kura.linux.net.dns.LinuxDns;
+import org.eclipse.kura.linux.net.modem.ModemDriver;
+import org.eclipse.kura.linux.net.modem.SerialModemAddedEvent;
 import org.eclipse.kura.linux.net.modem.SupportedSerialModemInfo;
 import org.eclipse.kura.linux.net.modem.SupportedSerialModemsInfo;
 import org.eclipse.kura.linux.net.modem.SupportedUsbModemInfo;
 import org.eclipse.kura.linux.net.modem.SupportedUsbModemsInfo;
+import org.eclipse.kura.linux.net.modem.UsbModemDriver;
 import org.eclipse.kura.linux.net.util.IScanTool;
 import org.eclipse.kura.linux.net.util.KuraConstants;
 import org.eclipse.kura.linux.net.util.LinuxIfconfig;
@@ -93,9 +101,15 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
 	
     private static final String[] EVENT_TOPICS = new String[] {
         UsbDeviceAddedEvent.USB_EVENT_DEVICE_ADDED_TOPIC,
-        UsbDeviceRemovedEvent.USB_EVENT_DEVICE_REMOVED_TOPIC
+        UsbDeviceRemovedEvent.USB_EVENT_DEVICE_REMOVED_TOPIC,
+        SerialModemAddedEvent.SERIAL_MODEM_EVENT_ADDED_TOPIC
     };
-	
+
+    private static final String TOOGLE_MODEM_THREAD_NAME = "ToggleModem";
+    private static final long TOOGLE_MODEM_THREAD_INTERVAL = 10000; // in msec
+    private static final long TOOGLE_MODEM_THREAD_TERMINATION_TOUT = 1; // in sec
+    private static final long TOOGLE_MODEM_THREAD_EXECUTION_DELAY = 2; // in min
+    
     private ComponentContext      m_ctx;
     
     private EventAdmin m_eventAdmin;
@@ -105,6 +119,11 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
     private SerialModemDevice m_serialModem;
     
     private List<String> m_addedModems;	
+    
+    private ScheduledExecutorService m_executor;
+    
+    private static ScheduledFuture<?>  s_task;
+    private static AtomicBoolean s_stopThread;
     
 	// ----------------------------------------------------------------
 	//
@@ -137,6 +156,7 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
         // save the bundle context
         m_ctx = componentContext;
         
+        s_stopThread = new AtomicBoolean();
         m_usbModems = new HashMap<String, UsbModemDevice>();
         m_addedModems = new ArrayList<String>();
         
@@ -145,17 +165,12 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
         m_ctx.getBundleContext().registerService(EventHandler.class.getName(), this, d);
         
         // Add serial modem if any
-        SupportedSerialModemInfo serialModemInfo = SupportedSerialModemsInfo.getModem();
-		if (serialModemInfo != null) {
-			m_serialModem = new SerialModemDevice(
-					serialModemInfo.getModemName(),
-					serialModemInfo.getManufacturerName(), serialModemInfo
-							.getDriver().getComm().getSerialPorts()); 
-		}
+        SupportedSerialModemsInfo.getModem();
         
         // Add tty devices
         List<UsbTtyDevice> ttyDevices = m_usbService.getUsbTtyDevices();
         if(ttyDevices != null && !ttyDevices.isEmpty()) {
+        	s_logger.debug("activate() :: Total tty devices reported by UsbService: {}", ttyDevices.size());
             for(UsbTtyDevice device : ttyDevices) {
                 if(SupportedUsbModemsInfo.isSupported(device.getVendorId(), device.getProductId())) {
                     UsbModemDevice usbModem = null;
@@ -167,7 +182,7 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
                         usbModem = m_usbModems.get(device.getUsbPort());
                     }
                     usbModem.addTtyDev(device.getDeviceNode());
-                    s_logger.debug("Adding tty resource: " + device.getDeviceNode() + " for " + device.getUsbPort());
+                    s_logger.debug("activate() :: Adding tty resource: {} for {}", device.getDeviceNode(), device.getUsbPort());
                     m_usbModems.put(device.getUsbPort(), usbModem);
                 }
             }
@@ -176,6 +191,7 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
         // Add block devices
         List<UsbBlockDevice> blockDevices = m_usbService.getUsbBlockDevices();
         if(blockDevices != null && !blockDevices.isEmpty()) {
+        	s_logger.debug("activate() :: Total block devices reported by UsbService: {}", blockDevices.size());
             for(UsbBlockDevice device : blockDevices) {
                 if(SupportedUsbModemsInfo.isSupported(device.getVendorId(), device.getProductId())) {
                     UsbModemDevice usbModem = null;
@@ -187,7 +203,7 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
                         usbModem = m_usbModems.get(device.getUsbPort());
                     }
                     usbModem.addBlockDev(device.getDeviceNode());
-                    s_logger.debug("Adding block resource: " + device.getDeviceNode() + " for " + device.getUsbPort());
+                    s_logger.debug("activate() :: Adding block resource: {} for {}", device.getDeviceNode(), device.getUsbPort());
                     m_usbModems.put(device.getUsbPort(), usbModem);
                 }
             }
@@ -197,28 +213,68 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
         Iterator<Entry<String, UsbModemDevice>> it = m_usbModems.entrySet().iterator();
         while(it.hasNext()) {
             final UsbModemDevice usbModem = it.next().getValue();
-            SupportedUsbModemInfo modemInfo = SupportedUsbModemsInfo.getModem(usbModem.getVendorId(), usbModem.getProductId());
+            final SupportedUsbModemInfo modemInfo = SupportedUsbModemsInfo.getModem(usbModem.getVendorId(), usbModem.getProductId());
+            
+            s_logger.debug("activate() :: Found modem: {}", usbModem);
+            
+            s_logger.debug("activate() :: usbModem.getTtyDevs().size()={}, modemInfo.getNumTtyDevs()={}",
+            		usbModem.getTtyDevs().size(), modemInfo.getNumTtyDevs());
+            s_logger.debug("activate() :: usbModem.getBlockDevs().size()={}, modemInfo.getNumBlockDevs()={}",
+            		usbModem.getBlockDevs().size(), modemInfo.getNumBlockDevs());
             
             // Check for correct number of resources
-			if ((modemInfo != null)
-					&& (usbModem.getTtyDevs().size() == modemInfo.getNumTtyDevs())
-					&& (usbModem.getBlockDevs().size() == modemInfo.getNumBlockDevs())) {
-				
-            	s_logger.debug("Found modem during init: " + usbModem);            	
-            	s_logger.debug("posting ModemAddedEvent during init: " + usbModem);
-                m_eventAdmin.postEvent(new ModemAddedEvent(usbModem));
-                m_addedModems.add(usbModem.getUsbPort());
+            if (modemInfo != null) {
+	            if ((usbModem.getTtyDevs().size() == modemInfo.getNumTtyDevs())
+						&& (usbModem.getBlockDevs().size() == modemInfo.getNumBlockDevs())) {
+	            	s_logger.info("activate () :: posting ModemAddedEvent ... {}", usbModem);
+	                m_eventAdmin.postEvent(new ModemAddedEvent(usbModem));
+	                m_addedModems.add(usbModem.getUsbPort());
+	            } else {
+	            	s_logger.warn("activate() :: modem doesn't have correct number of resources, will try to toggle it ...");
+	            	m_executor = Executors.newSingleThreadScheduledExecutor();
+	            	s_logger.info("activate() :: scheduling {} thread in {} minutes ..", TOOGLE_MODEM_THREAD_NAME, TOOGLE_MODEM_THREAD_EXECUTION_DELAY);
+	            	s_stopThread.set(false);
+	            	s_task = m_executor.schedule(new Runnable() {
+	            		@Override
+	            		public void run() {
+	            			Thread.currentThread().setName(TOOGLE_MODEM_THREAD_NAME);
+	            			try {
+			            		toggleModem(modemInfo);
+	            			} catch (InterruptedException interruptedException) {
+			    				Thread.interrupted();
+								s_logger.debug("activate() :: modem monitor interrupted - {}", interruptedException);
+							} catch (Throwable t) {
+								s_logger.error("activate() :: Exception while monitoring cellular connection {}", t);
+							}
+	            		}
+	            	}, TOOGLE_MODEM_THREAD_EXECUTION_DELAY, TimeUnit.MINUTES);
+	            }
             }
-        }
-        
-        if (m_serialModem != null) {
-        	s_logger.debug("posting ModemAddedEvent during init: " + m_serialModem);
-            m_eventAdmin.postEvent(new ModemAddedEvent(m_serialModem));
-            m_addedModems.add(m_serialModem.getProductName());
         }
 	}	
 	
 	protected void deactivate(ComponentContext componentContext) {
+		if ((s_task != null) && (!s_task.isDone())) {
+        	s_stopThread.set(true);
+        	toggleModemNotity();
+    		s_logger.debug("deactivate() :: Cancelling {} task ...", TOOGLE_MODEM_THREAD_NAME);
+    		s_task.cancel(true);
+    		s_logger.info("deactivate() :: {} task cancelled? = {}", TOOGLE_MODEM_THREAD_NAME, s_task.isDone());
+    		s_task = null;
+    	}
+    	
+    	if (m_executor != null) {
+    		s_logger.debug("deactivate() :: Terminating {} Thread ...", TOOGLE_MODEM_THREAD_NAME);
+    		m_executor.shutdownNow();
+    		try {
+				m_executor.awaitTermination(TOOGLE_MODEM_THREAD_TERMINATION_TOUT, TimeUnit.SECONDS);
+			} catch (InterruptedException e) {
+				s_logger.warn("Interrupted", e);
+			}
+    		s_logger.info("deactivate() :: {} Thread terminated? - {}", TOOGLE_MODEM_THREAD_NAME, m_executor.isTerminated());
+			m_executor = null;
+    	}
+    	s_stopThread = null;
 	    m_usbModems = null;
         m_ctx = null;
 	}
@@ -260,7 +316,7 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
 	public NetInterfaceState getState(String interfaceName) throws KuraException {
 		NetInterface<? extends NetInterfaceAddress> netInterface = getNetworkInterface(interfaceName);
 		if(netInterface == null) {
-			s_logger.error("There is no status available for network interface " + interfaceName);
+			s_logger.error("There is no status available for network interface {}", interfaceName);
 			return NetInterfaceState.UNKNOWN;
 		} else {
 			return netInterface.getState();
@@ -305,7 +361,6 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
 
 	@Override
 	public List<NetInterface<? extends NetInterfaceAddress>> getNetworkInterfaces() throws KuraException {
-				
 		s_logger.trace("getNetworkInterfaces()");
 		List<NetInterface<? extends NetInterfaceAddress>> netInterfaces = new ArrayList<NetInterface<? extends NetInterfaceAddress>>();
 		
@@ -344,17 +399,22 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
 		    } else {
 		    	// for Serial modem
 		    	if (m_serialModem != null) {
-		    		
 				    // only add if there is not already a ppp interface for this modem
 				    boolean addModem = true;
 				    for(NetInterface<?> netInterface : netInterfaces) {
-				        UsbDevice usbDevice = netInterface.getUsbDevice();
-				        if(usbDevice != null) {
-				            if(usbDevice.getUsbPort().equals(m_serialModem.getProductName())) {
-				                addModem = false;
-				                break;
-				            }
-				        }
+				    	String iface = netInterface.getName();
+				    	if ((iface != null) && iface.startsWith("ppp")) {
+				    		ModemInterface<ModemInterfaceAddress> pppModemInterface = getModemInterface(iface, false, m_serialModem);
+				    		ModemInterface<ModemInterfaceAddress> serialModemInterface = getModemInterface(m_serialModem.getProductName(), false, m_serialModem);
+				    		if ((pppModemInterface != null) && (serialModemInterface != null)) {
+				    			String pppModel = pppModemInterface.getModel();
+				    			String serialModel = serialModemInterface.getModel();
+				    			if((pppModel != null) && pppModel.equals(serialModel)) {
+				    				addModem = false;
+					                break;
+				    			}
+				    		}
+				    	}
 				    }
 				    if(addModem) {
 				    	netInterfaces.add(getModemInterface(m_serialModem.getProductName(), false, m_serialModem));
@@ -362,7 +422,6 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
 		    	}
 		    }
 		}
-		
 		return netInterfaces;
 	}
 
@@ -399,7 +458,7 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
 			for(int i=0; i<interfaces.size(); i++) {
 				NetInterface<? extends NetInterfaceAddress> iface = interfaces.get(i);
 				if(!LinuxNetworkUtil.isUp(iface.getName())) {
-					s_logger.debug("removing interface " + iface.getName() + " because it is not up");
+					s_logger.debug("removing interface {} because it is not up", iface.getName());
 					interfaces.remove(i);
 					i--;
 				}
@@ -518,11 +577,11 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
             return (modemDevice != null) ? getModemInterface(interfaceName, isUp, modemDevice) : null;
 		} else {
 			if(interfaceName.startsWith("can")) {
-				s_logger.trace("Ignoring CAN interface: " + interfaceName);
+				s_logger.trace("Ignoring CAN interface: {}", interfaceName);
 			} else if (interfaceName.startsWith("ppp")) {
-			    s_logger.debug("Ignoring unconfigured ppp interface: " + interfaceName);
+			    s_logger.debug("Ignoring unconfigured ppp interface: {}", interfaceName);
 			} else {
-				s_logger.debug("Unsupported network type - not adding to network devices: " + interfaceName + " of type: " + type.toString());
+				s_logger.debug("Unsupported network type - not adding to network devices: {} of type: ", interfaceName, type.toString());
 			}
 			return null;
 		}
@@ -530,7 +589,7 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
 	
     @Override
     public void handleEvent(Event event) {
-        s_logger.debug("handleEvent - topic: {}", event.getTopic());
+        s_logger.debug("handleEvent() :: topic: {}", event.getTopic());
         String topic = event.getTopic();
         if (topic.equals(UsbDeviceAddedEvent.USB_EVENT_DEVICE_ADDED_TOPIC)) {
         	//validate mandatory properties
@@ -548,7 +607,7 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
         	}
         	
             //do we care?
-            SupportedUsbModemInfo modemInfo = SupportedUsbModemsInfo.getModem((String) event.getProperty(UsbDeviceEvent.USB_EVENT_VENDOR_ID_PROPERTY),
+            final SupportedUsbModemInfo modemInfo = SupportedUsbModemsInfo.getModem((String) event.getProperty(UsbDeviceEvent.USB_EVENT_VENDOR_ID_PROPERTY),
             		                                                          (String) event.getProperty(UsbDeviceEvent.USB_EVENT_PRODUCT_ID_PROPERTY));
             if(modemInfo != null) {
             	//Found one - see if we have some info for it.
@@ -556,16 +615,34 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
             	//This can happen if all the modem resources cannot be removed from the OS or from Kura.
             	//In this case we did not receive an UsbDeviceRemovedEvent and we did not post
             	//an ModemRemovedEvent. Should we do it here?
+            	List<? extends UsbModemDriver> drivers = modemInfo.getDeviceDrivers();
+				for (UsbModemDriver driver : drivers) {
+					try {
+						driver.install();
+					} catch (Exception e) {
+						s_logger.error("handleEvent() :: Failed to install modem device driver {} - {}", driver.getName(), e);
+					}
+				}
+            	
             	UsbModemDevice usbModem = m_usbModems.get(event.getProperty(UsbDeviceEvent.USB_EVENT_USB_PORT_PROPERTY));
             	
-            	if(usbModem == null ||
-            	   (modemInfo.getNumTtyDevs() > 0 && usbModem.getTtyDevs().size() >= modemInfo.getNumTtyDevs()) ||
-            	   (modemInfo.getNumBlockDevs() > 0 && usbModem.getBlockDevs().size() >= modemInfo.getNumBlockDevs())) {
-            		
+            	boolean createNewUsbModemDevice = false;
+            	if (usbModem == null) {
+            		createNewUsbModemDevice = true;
+            	} else if ((modemInfo.getNumTtyDevs() > 0) && (modemInfo.getNumBlockDevs() > 0)) {
+            		if ((usbModem.getTtyDevs().size() >= modemInfo.getNumTtyDevs()) && (usbModem.getBlockDevs().size() >= modemInfo.getNumBlockDevs())) {
+            			createNewUsbModemDevice = true;
+            		}
+            	} else if (((modemInfo.getNumTtyDevs() > 0) && (usbModem.getTtyDevs().size() >= modemInfo.getNumTtyDevs())) ||
+                		((modemInfo.getNumBlockDevs() > 0) && (usbModem.getBlockDevs().size() >= modemInfo.getNumBlockDevs()))) {
+            		createNewUsbModemDevice = true;
+            	}
+            	 
+            	if (createNewUsbModemDevice) {
             		if (usbModem == null) {
-            			s_logger.debug("Modem not found. Create one");
+            			s_logger.debug("handleEvent() :: Modem not found. Create one");
             		} else {
-            			s_logger.debug("Found modem with too many resources: {}. Create a new one", usbModem);
+            			s_logger.debug("handleEvent() :: Found modem with too many resources: {}. Create a new one", usbModem);
             		}
 
             		usbModem = new UsbModemDevice(
@@ -579,7 +656,7 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
 
                 String resource = (String) event.getProperty(UsbDeviceEvent.USB_EVENT_RESOURCE_PROPERTY);
                 
-                s_logger.debug("Adding resource: {} for: {}", resource, usbModem.getUsbPort());
+                s_logger.debug("handleEvent() :: Adding resource: {} for: {}", resource, usbModem.getUsbPort());
                 if(resource.contains("tty")) { 
                 	usbModem.addTtyDev(resource);
                 } else {
@@ -589,13 +666,17 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
                 m_usbModems.put((String) usbModem.getUsbPort(), usbModem);
 
                 //At this point, we should have some modems - display them
-                s_logger.info("Modified modem (Added resource): {}", usbModem);
+                s_logger.info("handleEvent() :: Modified modem (Added resource): {}", usbModem);
+                
+                s_logger.debug("handleEvent() :: usbModem.getTtyDevs().size()={}, modemInfo.getNumTtyDevs()={}",
+                		usbModem.getTtyDevs().size(), modemInfo.getNumTtyDevs());
+                s_logger.debug("handleEvent() :: usbModem.getBlockDevs().size()={}, modemInfo.getNumBlockDevs()={}",
+                		usbModem.getBlockDevs().size(), modemInfo.getNumBlockDevs());
                 
                 // Check for correct number of resources
 				if ((usbModem.getTtyDevs().size() == modemInfo.getNumTtyDevs()) &&
 					(usbModem.getBlockDevs().size() == modemInfo.getNumBlockDevs())) {
-					
-					s_logger.debug("posting ModemAddedEvent -- USB_EVENT_DEVICE_ADDED_TOPIC: {}", usbModem);
+					s_logger.info("handleEvent() :: posting ModemAddedEvent -- USB_EVENT_DEVICE_ADDED_TOPIC: {}", usbModem);
 	                m_eventAdmin.postEvent(new ModemAddedEvent(usbModem));
 	                m_addedModems.add(usbModem.getUsbPort());
 	                
@@ -604,7 +685,7 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
 		                if (m_serialModem != null) {
 		                	if (SupportedUsbModemInfo.Telit_HE910_D.getVendorId().equals( usbModem.getVendorId())
 			                		&& SupportedUsbModemInfo.Telit_HE910_D.getProductId().equals(usbModem.getProductId())) {
-		                		s_logger.info("Removing {} from addedModems", m_serialModem.getProductName());
+		                		s_logger.info("handleEvent() :: Removing {} from addedModems", m_serialModem.getProductName());
 			                	m_addedModems.remove(m_serialModem.getProductName());
 			                }
 		                }
@@ -638,7 +719,7 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
             	//found one - remove if it exists
             	UsbModemDevice usbModem = m_usbModems.remove(event.getProperty(UsbDeviceEvent.USB_EVENT_USB_PORT_PROPERTY));
             	if(usbModem != null) {
-            		s_logger.info("Removing modem: {}", usbModem);
+            		s_logger.info("handleEvent() :: Removing modem: {}", usbModem);
             		m_addedModems.remove(usbModem.getUsbPort());
 
             		Map<String, String> properties = new HashMap<String, String>();
@@ -660,8 +741,40 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
             System.out.println("\t" + event.getProperty(UsbDeviceAddedEvent.USB_EVENT_PRODUCT_NAME_PROPERTY));
             System.out.println("\t" + event.getProperty(UsbDeviceAddedEvent.USB_EVENT_USB_PORT_PROPERTY));
             */
+        } else if (topic.equals(SerialModemAddedEvent.SERIAL_MODEM_EVENT_ADDED_TOPIC)) { 
+        	SerialModemAddedEvent serialModemAddedEvent = (SerialModemAddedEvent)event;
+        	SupportedSerialModemInfo serialModemInfo = serialModemAddedEvent.getSupportedSerialModemInfo();
+        	if (serialModemInfo != null) {
+        		if (OS_VERSION != null && OS_VERSION.equals(KuraConstants.Mini_Gateway.getImageName() + "_" + KuraConstants.Mini_Gateway.getImageVersion()) &&
+						TARGET_NAME != null && TARGET_NAME.equals(KuraConstants.Mini_Gateway.getTargetName())) {
+        			if (m_usbModems.isEmpty()) {
+        				m_serialModem = new SerialModemDevice(
+    	    					serialModemInfo.getModemName(),
+    	    					serialModemInfo.getManufacturerName(), serialModemInfo
+    	    							.getDriver().getComm().getSerialPorts()); 
+    	    			if (m_serialModem != null) {
+    	    	        	s_logger.debug("handleEvent() :: posting ModemAddedEvent for serial modem: {}", m_serialModem.getProductName());
+    	    	            m_eventAdmin.postEvent(new ModemAddedEvent(m_serialModem));
+    	    	            m_addedModems.add(m_serialModem.getProductName());
+    	    	        }
+        			} else {
+        				s_logger.info("handleEvent() :: Ignoring {} modem since it has already been detected as a USB device", 
+        						serialModemInfo.getModemName());
+        			}
+        		} else {
+	    			m_serialModem = new SerialModemDevice(
+	    					serialModemInfo.getModemName(),
+	    					serialModemInfo.getManufacturerName(), serialModemInfo
+	    							.getDriver().getComm().getSerialPorts()); 
+	    			if (m_serialModem != null) {
+	    	        	s_logger.debug("handleEvent() :: posting ModemAddedEvent for serial modem: {}", m_serialModem.getProductName());
+	    	            m_eventAdmin.postEvent(new ModemAddedEvent(m_serialModem));
+	    	            m_addedModems.add(m_serialModem.getProductName());
+	    	        }
+        		}
+    		}
         } else {
-            s_logger.error("Unexpected event topic: {}", topic);
+            s_logger.error("handleEvent() :: Unexpected event topic: {}", topic);
         }
     }
 	
@@ -796,7 +909,7 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
 							String currentSSID = LinuxNetworkUtil.getSSID(interfaceName);
 	
 							if(currentSSID != null) {
-								s_logger.debug("Adding access point SSID: " + currentSSID);
+								s_logger.debug("Adding access point SSID: {}", currentSSID);
 	
 								WifiAccessPointImpl wifiAccessPoint = new WifiAccessPointImpl(currentSSID);
 	
@@ -1002,5 +1115,52 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
 	private boolean isVirtual() {
 		//FIXME - assuming only one to one relationship for network interfaces today
 		return false;
+	}
+	
+	private void toggleModem(SupportedUsbModemInfo modemInfo) throws Exception {
+		while (!s_stopThread.get()) {
+    		ModemDriver modemDriver = null;
+    		List<? extends UsbModemDriver> usbDeviceDrivers = modemInfo.getDeviceDrivers();
+    		if ((usbDeviceDrivers != null) && (usbDeviceDrivers.size() > 0)) {
+    			modemDriver = usbDeviceDrivers.get(0);
+    		}
+    		if (modemDriver != null) {
+    			boolean status = false;
+    			try {
+    				s_logger.info("toggleModem() :: turning modem off ...");
+					if(modemDriver.turnModemOff()) {
+						modemDriver.sleep(3000);
+						s_logger.info("toggleModem() :: turning modem on ...");
+						status = modemDriver.turnModemOn();
+						if (status) {
+							s_logger.info("toggleModem() :: modem has been toggled successfully ...");
+							s_stopThread.set(status);
+							toggleModemNotity();
+						}
+					}
+				} catch (Exception e) {
+					s_logger.error("toggleModem() :: failed to toggle modem - {}", e);
+				}
+    		}
+    		if (!s_stopThread.get()) {
+    			toggleModemWait();
+    		}
+		}
+	}
+	
+	private void toggleModemNotity() {
+		if (s_stopThread != null) {
+			synchronized (s_stopThread) {
+				s_stopThread.notifyAll();
+			}
+		}
+	}
+	
+	private void toggleModemWait() throws InterruptedException {
+		if (s_stopThread != null) {
+			synchronized (s_stopThread) {
+				s_stopThread.wait(TOOGLE_MODEM_THREAD_INTERVAL);
+			}
+		}
 	}
 }

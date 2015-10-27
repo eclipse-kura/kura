@@ -20,6 +20,7 @@ import org.eclipse.kura.web.shared.GwtKuraErrorCode;
 import org.eclipse.kura.web.shared.GwtKuraException;
 import org.eclipse.kura.web.shared.model.GwtBundleInfo;
 import org.eclipse.kura.web.shared.model.GwtDeploymentPackage;
+import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.eclipse.kura.web.shared.service.GwtPackageService;
 import org.osgi.service.deploymentadmin.BundleInfo;
 import org.osgi.service.deploymentadmin.DeploymentAdmin;
@@ -30,9 +31,10 @@ public class GwtPackageServiceImpl extends OsgiRemoteServiceServlet implements G
 	private static final long serialVersionUID = -3422518194598042896L;
 
 
-	public List<GwtDeploymentPackage> findDeviceDeploymentPackages()
+	public List<GwtDeploymentPackage> findDeviceDeploymentPackages(GwtXSRFToken xsrfToken)
 		throws GwtKuraException 
 	{
+		checkXSRFToken(xsrfToken);
 		DeploymentAdmin deploymentAdmin = ServiceLocator.getInstance().getService(DeploymentAdmin.class);
 		
 		List<GwtDeploymentPackage> gwtDeploymentPackages = new ArrayList<GwtDeploymentPackage>();
@@ -41,16 +43,16 @@ public class GwtPackageServiceImpl extends OsgiRemoteServiceServlet implements G
 		if (deploymentPackages != null) {
 			for (DeploymentPackage deploymentPackage : deploymentPackages) {
 				GwtDeploymentPackage gwtDeploymentPackage = new GwtDeploymentPackage();
-				gwtDeploymentPackage.setName(deploymentPackage.getName());
-				gwtDeploymentPackage.setVersion(deploymentPackage.getVersion().toString());
+				gwtDeploymentPackage.setName(super.sanitizeString(deploymentPackage.getName()));
+				gwtDeploymentPackage.setVersion(super.sanitizeString(deploymentPackage.getVersion().toString()));
 				
 				List<GwtBundleInfo> gwtBundleInfos = new ArrayList<GwtBundleInfo>();
 				BundleInfo[] bundleInfos = deploymentPackage.getBundleInfos();
 				if (bundleInfos != null) {
 					for (BundleInfo bundleInfo : bundleInfos) {
 						GwtBundleInfo gwtBundleInfo = new GwtBundleInfo();
-						gwtBundleInfo.setName(bundleInfo.getSymbolicName());
-						gwtBundleInfo.setVersion(bundleInfo.getVersion().toString());
+						gwtBundleInfo.setName(super.sanitizeString(bundleInfo.getSymbolicName()));
+						gwtBundleInfo.setVersion(super.sanitizeString(bundleInfo.getVersion().toString()));
 						
 						gwtBundleInfos.add(gwtBundleInfo);
 					}
@@ -67,12 +69,13 @@ public class GwtPackageServiceImpl extends OsgiRemoteServiceServlet implements G
 
 	
 	
-	public void uninstallDeploymentPackage(String packageName)
+	public void uninstallDeploymentPackage(GwtXSRFToken xsrfToken, String packageName)
 		throws GwtKuraException 
 	{
+		checkXSRFToken(xsrfToken);
 		DeploymentAgentService deploymentAgentService = ServiceLocator.getInstance().getService(DeploymentAgentService.class);		
 		try {
-			deploymentAgentService.uninstallDeploymentPackageAsync(packageName);
+			deploymentAgentService.uninstallDeploymentPackageAsync(super.sanitizeString(packageName));
 		} 
 		catch (Exception e) {
 			// TODO Auto-generated catch block

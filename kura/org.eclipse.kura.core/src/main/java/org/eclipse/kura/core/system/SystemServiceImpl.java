@@ -18,8 +18,10 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.net.URL;
+import java.security.AccessController;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.security.PrivilegedAction;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -50,8 +52,8 @@ import org.slf4j.LoggerFactory;
 public class SystemServiceImpl implements SystemService 
 {
 	private static final Logger s_logger = LoggerFactory.getLogger(SystemServiceImpl.class);
-		
-	private static final boolean onCloudbees = (new File("/private/eurotech/settings-security.xml")).exists();
+
+	private static boolean onCloudbees = false;
 
 	private Properties       m_kuraProperties;
 	private ComponentContext m_ctx;
@@ -72,16 +74,35 @@ public class SystemServiceImpl implements SystemService
 		m_networkService = null;
 	}
 
-	
+
 	// ----------------------------------------------------------------
 	//
 	//   Activation APIs
 	//
 	// ----------------------------------------------------------------
 
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	protected void activate(ComponentContext componentContext) 
 	{
 		m_ctx = componentContext;
+
+		AccessController.doPrivileged(new PrivilegedAction()
+		{
+			public Object run()
+			{
+				try
+				{
+					// privileged code goes here, for example:
+					onCloudbees = (new File("/private/eurotech/settings-security.xml")).exists();
+					return null; // nothing to return
+				}
+				catch (Exception e)
+				{
+					System.out.println("Unable to execute privileged in SystemService");
+					return null;
+				}
+			}
+		});
 
 		// load the defaults from the kura.properties files
 		Properties kuraDefaults = new Properties();
@@ -103,14 +124,14 @@ public class SystemServiceImpl implements SystemService
 				updateTriggered = true;
 				s_logger.warn("Overridding invalid log4j.properties location");
 			}
-			
+
 			// load the default kura.properties
 			// look for kura.properties as resource in the classpath
 			// if not found, look for such file in the kura.home directory
 			String kuraHome = System.getProperty(KEY_KURA_HOME_DIR);
 			String kuraConfig = System.getProperty(KURA_CONFIG);
 			String kuraProperties = IOUtil.readResource(KURA_PROPS_FILE);
-			
+
 			if (kuraProperties != null) {
 				kuraDefaults.load( new StringReader(kuraProperties));
 				s_logger.info("Loaded Jar Resource kura.properties.");
@@ -128,7 +149,9 @@ public class SystemServiceImpl implements SystemService
 			else if (kuraHome != null) {
 				File kuraPropsFile = new File (kuraHome+File.separator+KURA_PROPS_FILE);
 				if (kuraPropsFile.exists()) {
-					kuraDefaults.load( new FileReader(kuraPropsFile));
+					FileReader fr= new FileReader(kuraPropsFile);
+					kuraDefaults.load(fr);
+					fr.close();
 					s_logger.info("Loaded File kura.properties: "+kuraPropsFile);
 				} else {
 					s_logger.warn("File does not exist: " + kuraPropsFile);
@@ -138,14 +161,14 @@ public class SystemServiceImpl implements SystemService
 			else {
 				s_logger.error("Could not located kura.properties with kura.home "+kuraHome);
 			}
-			
+
 			// load custom kura properties
 			// look for kura_custom.properties as resource in the classpath
 			// if not found, look for such file in the kura.home directory
 			Properties kuraCustomProps = new Properties();
 			String kuraCustomConfig = System.getProperty(KURA_CUSTOM_CONFIG);
 			String kuraCustomProperties = IOUtil.readResource(KURA_CUSTOM_PROPS_FILE);
-			
+
 			if (kuraCustomProperties != null) {
 				kuraCustomProps.load( new StringReader(kuraCustomProperties));
 				s_logger.info("Loaded Jar Resource: " + KURA_CUSTOM_PROPS_FILE);
@@ -172,10 +195,10 @@ public class SystemServiceImpl implements SystemService
 			else {
 				s_logger.info("Did not locate a kura_custom.properties file in " + kuraHome);
 			}
-			
+
 			// Override defaults with values from kura_custom.properties
 			kuraDefaults.putAll(kuraCustomProps);
-			
+
 			//more path overrides based on earlier Kura problem with relative paths
 			if(kuraDefaults.getProperty(KEY_KURA_HOME_DIR) != null && kuraDefaults.getProperty(KEY_KURA_HOME_DIR).trim().equals("kura")) {
 				kuraDefaults.setProperty(KEY_KURA_HOME_DIR, "/opt/eclipse/kura/kura");
@@ -192,24 +215,24 @@ public class SystemServiceImpl implements SystemService
 				updateTriggered = true;
 				s_logger.warn("Overridding invalid kura.packages location");
 			}
-			
-			
-			if(updateTriggered) {
-		        File    directory;       // Desired current working directory
 
-		        directory = new File("/opt/eclipse/kura").getAbsoluteFile();
-		        if (directory.exists() || directory.mkdirs())
-		        {
-		        	String oldDir = System.getProperty("user.dir");
-		            boolean result = (System.setProperty("user.dir", directory.getAbsolutePath()) != null);
-		            if(result) {
-		            	s_logger.warn("Changed working directory to /opt/eclipse/kura from " + oldDir);
-		            }
-		        }
-		        
-		        
-		        
-		        /*
+
+			if(updateTriggered) {
+				File    directory;       // Desired current working directory
+
+				directory = new File("/opt/eclipse/kura").getAbsoluteFile();
+				if (directory.exists() || directory.mkdirs())
+				{
+					String oldDir = System.getProperty("user.dir");
+					boolean result = (System.setProperty("user.dir", directory.getAbsolutePath()) != null);
+					if(result) {
+						s_logger.warn("Changed working directory to /opt/eclipse/kura from " + oldDir);
+					}
+				}
+
+
+
+				/*
 				// we were updated so we need to reload the DeploymentAdmin so it reads in the correct values
 				s_logger.info("kura.home = " + kuraDefaults.getProperty(KEY_KURA_HOME_DIR));
 				s_logger.info("kura.plugins = " + kuraDefaults.getProperty(KEY_KURA_PLUGINS_DIR));
@@ -275,8 +298,153 @@ public class SystemServiceImpl implements SystemService
 			s_logger.info("Kura version? " + kuraVersion);
 
 			// load the System properties for what it makes sense
-			Properties systemProperties = System.getProperties();
-			m_kuraProperties.putAll(systemProperties);
+			//Properties systemProperties = System.getProperties();
+			//m_kuraProperties.putAll(systemProperties);
+
+			if(System.getProperty(KEY_KURA_NAME) != null){
+				m_kuraProperties.put(KEY_KURA_NAME, System.getProperty(KEY_KURA_NAME));
+			}
+			if(System.getProperty(KEY_KURA_VERSION) != null){
+				m_kuraProperties.put(KEY_KURA_VERSION, System.getProperty(KEY_KURA_VERSION));
+			}
+			if(System.getProperty(KEY_DEVICE_NAME) != null){
+				m_kuraProperties.put(KEY_DEVICE_NAME, System.getProperty(KEY_DEVICE_NAME));
+			}
+			if(System.getProperty(KEY_PLATFORM) != null){
+				m_kuraProperties.put(KEY_PLATFORM, System.getProperty(KEY_PLATFORM));
+			}
+			if(System.getProperty(KEY_MODEL_ID) != null){
+				m_kuraProperties.put(KEY_MODEL_ID, System.getProperty(KEY_MODEL_ID));
+			}
+			if(System.getProperty(KEY_MODEL_NAME) != null){
+				m_kuraProperties.put(KEY_MODEL_NAME, System.getProperty(KEY_MODEL_NAME));
+			}
+			if(System.getProperty(KEY_PART_NUMBER) != null){
+				m_kuraProperties.put(KEY_PART_NUMBER, System.getProperty(KEY_PART_NUMBER));
+			}
+			if(System.getProperty(KEY_SERIAL_NUM) != null){
+				m_kuraProperties.put(KEY_SERIAL_NUM, System.getProperty(KEY_SERIAL_NUM));
+			}
+			if(System.getProperty(KEY_BIOS_VERSION) != null){
+				m_kuraProperties.put(KEY_BIOS_VERSION, System.getProperty(KEY_BIOS_VERSION));
+			}
+			if(System.getProperty(KEY_FIRMWARE_VERSION) != null){
+				m_kuraProperties.put(KEY_FIRMWARE_VERSION, System.getProperty(KEY_FIRMWARE_VERSION));
+			}
+			if(System.getProperty(KEY_PRIMARY_NET_IFACE) != null){
+				m_kuraProperties.put(KEY_PRIMARY_NET_IFACE, System.getProperty(KEY_PRIMARY_NET_IFACE));
+			}
+			if(System.getProperty(KEY_KURA_HOME_DIR) != null){
+				m_kuraProperties.put(KEY_KURA_HOME_DIR, System.getProperty(KEY_KURA_HOME_DIR));
+			}
+			if(System.getProperty(KEY_KURA_PLUGINS_DIR) != null){
+				m_kuraProperties.put(KEY_KURA_PLUGINS_DIR, System.getProperty(KEY_KURA_PLUGINS_DIR));
+			}
+			if(System.getProperty(KEY_KURA_DATA_DIR) != null){
+				m_kuraProperties.put(KEY_KURA_DATA_DIR, System.getProperty(KEY_KURA_DATA_DIR));
+			}
+			if(System.getProperty(KEY_KURA_TMP_DIR) != null){
+				m_kuraProperties.put(KEY_KURA_TMP_DIR, System.getProperty(KEY_KURA_TMP_DIR));
+			}
+			if(System.getProperty(KEY_KURA_SNAPSHOTS_DIR) != null){
+				m_kuraProperties.put(KEY_KURA_SNAPSHOTS_DIR, System.getProperty(KEY_KURA_SNAPSHOTS_DIR));
+			}
+			if(System.getProperty(KEY_KURA_SNAPSHOTS_COUNT) != null){
+				m_kuraProperties.put(KEY_KURA_SNAPSHOTS_COUNT, System.getProperty(KEY_KURA_SNAPSHOTS_COUNT));
+			}
+			if(System.getProperty(KEY_KURA_HAVE_NET_ADMIN) != null){
+				m_kuraProperties.put(KEY_KURA_HAVE_NET_ADMIN, System.getProperty(KEY_KURA_HAVE_NET_ADMIN));
+			}
+			if(System.getProperty(KEY_KURA_HAVE_WEB_INTER) != null){
+				m_kuraProperties.put(KEY_KURA_HAVE_WEB_INTER, System.getProperty(KEY_KURA_HAVE_WEB_INTER));
+			}
+			if(System.getProperty(KEY_KURA_STYLE_DIR) != null){
+				m_kuraProperties.put(KEY_KURA_STYLE_DIR, System.getProperty(KEY_KURA_STYLE_DIR));
+			}
+			if(System.getProperty(KEY_KURA_WIFI_TOP_CHANNEL) != null){
+				m_kuraProperties.put(KEY_KURA_WIFI_TOP_CHANNEL, System.getProperty(KEY_KURA_WIFI_TOP_CHANNEL));
+			}
+			if(System.getProperty(KEY_KURA_KEY_STORE_PWD) != null){
+				m_kuraProperties.put(KEY_KURA_KEY_STORE_PWD, System.getProperty(KEY_KURA_KEY_STORE_PWD));
+			}
+			if(System.getProperty(KEY_KURA_TRUST_STORE_PWD) != null){
+				m_kuraProperties.put(KEY_KURA_TRUST_STORE_PWD, System.getProperty(KEY_KURA_TRUST_STORE_PWD));
+			}
+			if(System.getProperty(KEY_FILE_COMMAND_ZIP_MAX_SIZE) != null){
+				m_kuraProperties.put(KEY_FILE_COMMAND_ZIP_MAX_SIZE, System.getProperty(KEY_FILE_COMMAND_ZIP_MAX_SIZE));
+			}
+			if(System.getProperty(KEY_FILE_COMMAND_ZIP_MAX_NUMBER) != null){
+				m_kuraProperties.put(KEY_FILE_COMMAND_ZIP_MAX_NUMBER, System.getProperty(KEY_FILE_COMMAND_ZIP_MAX_NUMBER));
+			}
+			if(System.getProperty(KEY_OS_ARCH) != null){
+				m_kuraProperties.put(KEY_OS_ARCH, System.getProperty(KEY_OS_ARCH));
+			}
+			if(System.getProperty(KEY_OS_NAME) != null){
+				m_kuraProperties.put(KEY_OS_NAME, System.getProperty(KEY_OS_NAME));
+			}
+			if(System.getProperty(KEY_OS_VER) != null){
+				m_kuraProperties.put(KEY_OS_VER, System.getProperty(KEY_OS_VER));
+			}
+			if(System.getProperty(KEY_OS_DISTRO) != null){
+				m_kuraProperties.put(KEY_OS_DISTRO, System.getProperty(KEY_OS_DISTRO));
+			}
+			if(System.getProperty(KEY_OS_DISTRO_VER) != null){
+				m_kuraProperties.put(KEY_OS_DISTRO_VER, System.getProperty(KEY_OS_DISTRO_VER));
+			}
+			if(System.getProperty(KEY_JAVA_VERSION) != null){
+				m_kuraProperties.put(KEY_JAVA_VERSION, System.getProperty(KEY_JAVA_VERSION));
+			}
+			if(System.getProperty(KEY_JAVA_VENDOR) != null){
+				m_kuraProperties.put(KEY_JAVA_VENDOR, System.getProperty(KEY_JAVA_VENDOR));
+			}
+			if(System.getProperty(KEY_JAVA_VM_NAME) != null){
+				m_kuraProperties.put(KEY_JAVA_VM_NAME, System.getProperty(KEY_JAVA_VM_NAME));
+			}
+			if(System.getProperty(KEY_JAVA_VM_VERSION) != null){
+				m_kuraProperties.put(KEY_JAVA_VM_VERSION, System.getProperty(KEY_JAVA_VM_VERSION));
+			}
+			if(System.getProperty(KEY_JAVA_VM_INFO) != null){
+				m_kuraProperties.put(KEY_JAVA_VM_INFO, System.getProperty(KEY_JAVA_VM_INFO));
+			}
+			if(System.getProperty(KEY_OSGI_FW_NAME) != null){
+				m_kuraProperties.put(KEY_OSGI_FW_NAME, System.getProperty(KEY_OSGI_FW_NAME));
+			}
+			if(System.getProperty(KEY_OSGI_FW_VERSION) != null){
+				m_kuraProperties.put(KEY_OSGI_FW_VERSION, System.getProperty(KEY_OSGI_FW_VERSION));
+			}
+			if(System.getProperty(KEY_JAVA_HOME) != null){
+				m_kuraProperties.put(KEY_JAVA_HOME, System.getProperty(KEY_JAVA_HOME));
+			}
+			if(System.getProperty(KEY_FILE_SEP) != null){
+				m_kuraProperties.put(KEY_FILE_SEP, System.getProperty(KEY_FILE_SEP));
+			}
+			if(System.getProperty(CONFIG_CONSOLE_DEVICE_MANAGE_SERVICE_IGNORE) != null){
+				m_kuraProperties.put(CONFIG_CONSOLE_DEVICE_MANAGE_SERVICE_IGNORE, System.getProperty(CONFIG_CONSOLE_DEVICE_MANAGE_SERVICE_IGNORE));
+			}
+			if(System.getProperty(DB_URL_PROPNAME) != null){
+				m_kuraProperties.put(DB_URL_PROPNAME, System.getProperty(DB_URL_PROPNAME));
+			}
+			if(System.getProperty(DB_CACHE_ROWS_PROPNAME) != null){
+				m_kuraProperties.put(DB_CACHE_ROWS_PROPNAME, System.getProperty(DB_CACHE_ROWS_PROPNAME));
+			}
+			if(System.getProperty(DB_LOB_FILE_PROPNAME) != null){
+				m_kuraProperties.put(DB_LOB_FILE_PROPNAME, System.getProperty(DB_LOB_FILE_PROPNAME));
+			}
+			if(System.getProperty(DB_DEFRAG_LIMIT_PROPNAME) != null){
+				m_kuraProperties.put(DB_DEFRAG_LIMIT_PROPNAME, System.getProperty(DB_DEFRAG_LIMIT_PROPNAME));
+			}
+			if(System.getProperty(DB_LOG_DATA_PROPNAME) != null){
+				m_kuraProperties.put(DB_LOG_DATA_PROPNAME, System.getProperty(DB_LOG_DATA_PROPNAME));
+			}
+			if(System.getProperty(DB_LOG_SIZE_PROPNAME) != null){
+				m_kuraProperties.put(DB_LOG_SIZE_PROPNAME, System.getProperty(DB_LOG_SIZE_PROPNAME));
+			}
+			if(System.getProperty(DB_NIO_PROPNAME) != null){
+				m_kuraProperties.put(DB_NIO_PROPNAME, System.getProperty(DB_NIO_PROPNAME));
+			}
+			if(System.getProperty(DB_WRITE_DELAY_MILLIES_PROPNAME) != null){
+				m_kuraProperties.put(DB_WRITE_DELAY_MILLIES_PROPNAME, System.getProperty(DB_WRITE_DELAY_MILLIES_PROPNAME));
+			}
 
 			if (getKuraHome() == null) {
 				s_logger.error("Did not initialize kura.home");
@@ -299,7 +467,7 @@ public class SystemServiceImpl implements SystemService
 				s_logger.info("Kura tmp directory is " + getKuraTemporaryConfigDirectory());
 				createDirIfNotExists(getKuraTemporaryConfigDirectory());
 			}
-			
+
 			s_logger.info(new StringBuffer().append("Kura version ").append(getKuraVersion()).append(" is starting").toString());
 		}
 		catch (IOException e) {
@@ -407,13 +575,13 @@ public class SystemServiceImpl implements SystemService
 			return this.m_kuraProperties.getProperty(KEY_PRIMARY_NET_IFACE);
 		} else {
 			if (OS_MAC_OSX.equals(getOsName())) {
-        	                return "en0";
-        	        } else if (OS_LINUX.equals(getOsName())) {
-        	                return "eth0";
+				return "en0";
+			} else if (OS_LINUX.equals(getOsName())) {
+				return "eth0";
 			} else {
-	                        s_logger.error("Unsupported platform");
+				s_logger.error("Unsupported platform");
 				return null;
-        	        }
+			}
 		}
 	}
 
@@ -542,18 +710,7 @@ public class SystemServiceImpl implements SystemService
 
 	public String getKuraHome() 
 	{
-		if("emulator".equals(System.getProperty("org.eclipse.kura.mode"))) 
-		{
-			StringBuffer sb = new StringBuffer();
-			sb.append(System.getProperty("java.io.tmpdir"))
-			.append(getFileSeparator())
-			.append("kura_emulator_base")
-			.append(getFileSeparator());
-			return sb.toString();
-		} 
-		else {
-			return this.m_kuraProperties.getProperty(KEY_KURA_HOME_DIR);
-		}
+		return this.m_kuraProperties.getProperty(KEY_KURA_HOME_DIR);
 	}
 
 	public String getKuraPluginsDirectory() {
@@ -571,7 +728,7 @@ public class SystemServiceImpl implements SystemService
 	public String getKuraSnapshotsDirectory() {
 		return this.m_kuraProperties.getProperty(KEY_KURA_SNAPSHOTS_DIR);
 	}
-	
+
 	public int getKuraSnapshotsCount() {
 		int iMaxCount   = 10;
 		String maxCount = this.m_kuraProperties.getProperty(KEY_KURA_SNAPSHOTS_COUNT);
@@ -585,23 +742,41 @@ public class SystemServiceImpl implements SystemService
 		}
 		return iMaxCount;
 	}
-	
+
 	public int getKuraWifiTopChannel() {
 		String topWifiChannel = m_kuraProperties.getProperty(KEY_KURA_WIFI_TOP_CHANNEL);
 		if(topWifiChannel != null && topWifiChannel.trim().length() > 0) {
 			return Integer.parseInt(topWifiChannel);
 		}
-		
+
 		s_logger.warn("The last wifi channel is not defined for this system - setting to lowest common value of 11");
 		return 11;
 	}
-	
+
 	public String getKuraStyleDirectory() {
 		return this.m_kuraProperties.getProperty(KEY_KURA_STYLE_DIR);
 	}
-	
+
 	public String getKuraWebEnabled() {
 		return this.m_kuraProperties.getProperty(KEY_KURA_HAVE_WEB_INTER);
+	}
+	
+	public int getFileCommandZipMaxUploadSize(){
+		String commandMaxUpload= this.m_kuraProperties.getProperty(KEY_FILE_COMMAND_ZIP_MAX_SIZE);
+		if(commandMaxUpload != null && commandMaxUpload.trim().length() > 0){
+			return Integer.parseInt(commandMaxUpload);
+		}
+		s_logger.warn("Maximum command line upload size not available. Set default to 100 MB");
+		return 100;
+	}
+	
+	public int getFileCommandZipMaxUploadNumber(){
+		String commandMaxFilesUpload= this.m_kuraProperties.getProperty(KEY_FILE_COMMAND_ZIP_MAX_NUMBER);
+		if(commandMaxFilesUpload != null && commandMaxFilesUpload.trim().length() > 0){
+			return Integer.parseInt(commandMaxFilesUpload);
+		}
+		s_logger.warn("Missing the parameter that specifies the maximum number of files uploadable using the command servlet. Set default to 1024 files");
+		return 1024;
 	}
 
 	public String getBiosVersion() {
@@ -745,44 +920,44 @@ public class SystemServiceImpl implements SystemService
 		return serialNum;
 	}
 
-    public char[] getJavaKeyStorePassword() throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, IOException {
-        String keyStorePwd = this.m_kuraProperties.getProperty(KEY_KURA_KEY_STORE_PWD);
-        if (keyStorePwd != null) {
-            return keyStorePwd.toCharArray();
-        }
-        return null;
-    }
-	
-    public char[] getJavaTrustStorePassword() throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, IOException {
-        String trustStorePwd = this.m_kuraProperties.getProperty(KEY_KURA_TRUST_STORE_PWD);
-        if (trustStorePwd != null) {
-            return trustStorePwd.toCharArray();
-        }
-        return null;
-    }
+	public char[] getJavaKeyStorePassword() throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, IOException {
+		String keyStorePwd = this.m_kuraProperties.getProperty(KEY_KURA_KEY_STORE_PWD);
+		if (keyStorePwd != null) {
+			return keyStorePwd.toCharArray();
+		}
+		return null;
+	}
 
-    public Bundle[] getBundles() {
+	public char[] getJavaTrustStorePassword() throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, IOException {
+		String trustStorePwd = this.m_kuraProperties.getProperty(KEY_KURA_TRUST_STORE_PWD);
+		if (trustStorePwd != null) {
+			return trustStorePwd.toCharArray();
+		}
+		return null;
+	}
+
+	public Bundle[] getBundles() {
 		if (m_ctx == null) {
 			return null;
 		}
 		return m_ctx.getBundleContext().getBundles();
 	}
-	
-    public List<String> getDeviceManagementServiceIgnore() {
-        String servicesToIgnore = m_kuraProperties.getProperty(CONFIG_CONSOLE_DEVICE_MANAGE_SERVICE_IGNORE);
-        if(servicesToIgnore != null && !servicesToIgnore.trim().isEmpty()) {
-        	String[] servicesArray = servicesToIgnore.split(",");
-        	if(servicesArray != null && servicesArray.length > 0) {
-        		List<String> services = new ArrayList<String>();
-        		for(String service : servicesArray) {
-        			services.add(service);
-        		}
-        		return services;
-        	}
-        }
-        
-        return null;
-    }
+
+	public List<String> getDeviceManagementServiceIgnore() {
+		String servicesToIgnore = m_kuraProperties.getProperty(CONFIG_CONSOLE_DEVICE_MANAGE_SERVICE_IGNORE);
+		if(servicesToIgnore != null && !servicesToIgnore.trim().isEmpty()) {
+			String[] servicesArray = servicesToIgnore.split(",");
+			if(servicesArray != null && servicesArray.length > 0) {
+				List<String> services = new ArrayList<String>();
+				for(String service : servicesArray) {
+					services.add(service);
+				}
+				return services;
+			}
+		}
+
+		return null;
+	}
 
 	// ----------------------------------------------------------------
 	//

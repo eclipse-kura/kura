@@ -31,7 +31,7 @@
             name="clock.set.hwclock"
             type="Boolean"
             cardinality="0" 
-            required="false"
+            required="true"
             default="true" 
             description="Whether or not to sync the system hardware clock after the system time gets set"/>
         
@@ -50,7 +50,7 @@
             name="clock.ntp.host"
             type="String"
             cardinality="0" 
-            required="false"
+            required="true"
             default="0.pool.ntp.org" 
             description="The hostname that provides the system time via NTP"/>
 
@@ -58,7 +58,9 @@
             name="clock.ntp.port"
             type="Integer"
             cardinality="0" 
-            required="false"
+            required="true"
+            min="1"
+            max="65535"
             default="123" 
             description="The port number that provides the system time via NTP"/>
 
@@ -66,7 +68,8 @@
             name="clock.ntp.timeout"
             type="Integer"
             cardinality="0" 
-            required="false"
+            required="true"
+            min="1000"
             default="10000" 
             description="The NTP timeout in milliseconds"/>
 
@@ -74,9 +77,10 @@
             name="clock.ntp.max-retry"
             type="Integer"
             cardinality="0" 
-            required="false"
-            default="10" 
-            description="When sync fails the system retries every minute for max-retry times. After, the next retry will occur on next refresh-interval"/>
+            required="true"
+            min="0"
+            default="0" 
+            description="The maximum number of retries for the initial synchronization (with interval clock.ntp.retry.interval). If set to 0 the service will retry forever."/>
 
         <AD id="clock.ntp.retry.interval"  
             name="clock.ntp.retry.interval"
@@ -85,15 +89,15 @@
             required="true"
             min="1"
             default="5" 
-            description="When sync fails, interval in seconds between each retry. If clock.ntp.refresh-interval is less than 0 - no update, if equal to zero - try only once at startup"/>
+            description="When sync fails, interval in seconds between each retry."/>
 
         <AD id="clock.ntp.refresh-interval"  
             name="clock.ntp.refresh-interval"
             type="Integer"
             cardinality="0" 
-            required="false"
+            required="true"
             default="3600" 
-            description="Whether or not to sync the clock and if so, the frequency in seconds.  If less than 0 - no update, if equal to zero - sync once at startup, if greater than zero - the frequency in seconds to perform a new clock sync"/>
+            description="Whether or not to sync the clock and if so, the frequency in seconds.  If less than zero - no update, if equal to zero - sync once at startup, if greater than zero - the frequency in seconds to perform a new clock sync"/>
 
     </OCD>
     <Designate pid="org.eclipse.kura.clock.ClockService">

@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
 
 @RunWith(Suite.class)
 @SuiteClasses({ DataServiceTest.class, CloudDeploymentHandlerTest.class, CloudServiceTest.class, CommURITest.class, ComponentConfigurationImplTest.class, ConfigurationServiceTest.class, NetUtilTest.class,
-				NetworkServiceTest.class, SystemAdminServiceTest.class, SystemServiceTest.class })
+				NetworkServiceTest.class, SystemAdminServiceTest.class, SystemServiceTest.class, XmlUtilTest.class })
 public class AllCoreTests {
 	private static final Logger s_logger = LoggerFactory.getLogger(AllCoreTests.class);
 

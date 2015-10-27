@@ -204,6 +204,7 @@ public class PositionServiceImpl implements PositionService, ConfigurableCompone
 		try {
 			if ((Boolean)m_properties.get("enabled") && (Boolean) m_properties.get("static")) {
 				initializeDefaultPosition((Double) m_properties.get("latitude"), (Double) m_properties.get("longitude"), (Double) m_properties.get("altitude"));
+				m_eventAdmin.postEvent( new PositionLockedEvent( new HashMap<String,Object>()));
 			}
 			else {
 				configureGpsDevice();

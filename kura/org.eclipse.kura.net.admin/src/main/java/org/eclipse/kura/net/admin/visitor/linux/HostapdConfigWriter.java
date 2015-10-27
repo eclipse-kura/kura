@@ -26,6 +26,7 @@ import org.eclipse.kura.core.net.WifiInterfaceAddressConfigImpl;
 import org.eclipse.kura.core.util.IOUtil;
 import org.eclipse.kura.core.util.ProcessUtil;
 import org.eclipse.kura.core.util.SafeProcess;
+import org.eclipse.kura.linux.net.util.KuraConstants;
 import org.eclipse.kura.linux.net.wifi.Hostapd;
 import org.eclipse.kura.net.NetConfig;
 import org.eclipse.kura.net.NetConfigIP4;
@@ -33,6 +34,7 @@ import org.eclipse.kura.net.NetInterfaceAddressConfig;
 import org.eclipse.kura.net.NetInterfaceConfig;
 import org.eclipse.kura.net.NetInterfaceStatus;
 import org.eclipse.kura.net.NetInterfaceType;
+import org.eclipse.kura.net.wifi.WifiCiphers;
 import org.eclipse.kura.net.wifi.WifiConfig;
 import org.eclipse.kura.net.wifi.WifiMode;
 import org.eclipse.kura.net.wifi.WifiRadioMode;
@@ -47,9 +49,18 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
 	
 	private static final String HEXES = "0123456789ABCDEF";
 	
-	private static final String HOSTAPD_CONFIG_FILE = "/etc/hostapd.conf";
-	
+	private static String HOSTAPD_CONFIG_FILE = null;
 	private static final String HOSTAPD_TMP_CONFIG_FILE = "/etc/hostapd.conf.tmp";
+	
+	private static final String OS_VERSION = System.getProperty("kura.os.version");
+	
+	static {
+		if (OS_VERSION.equals(KuraConstants.Intel_Edison.getImageName() + "_" + KuraConstants.Intel_Edison.getImageVersion() + "_" + KuraConstants.Intel_Edison.getTargetName())) {
+			HOSTAPD_CONFIG_FILE = "/etc/hostapd/hostapd.conf";
+		} else {
+			HOSTAPD_CONFIG_FILE = "/etc/hostapd.conf";
+		}
+	}
 	
 	private static HostapdConfigWriter s_instance;
 	
@@ -283,7 +294,7 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
 			} else {
 				throw KuraException.internalError("the channel must be between 1 (inclusive) and 11 (inclusive) or 1 (inclusive) and 13 (inclusive) depending on your locale");
 			}
-			String passKey = wifiConfig.getPasskey();
+			String passKey = new String(wifiConfig.getPasskey().getPassword());
 			if(passKey != null) {
 				if(passKey.length() == 10) {
 					//check to make sure it is all hex
@@ -353,16 +364,20 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
 			
 			return;
 		} else if ((wifiConfig.getSecurity() == WifiSecurity.SECURITY_WPA)
-				|| (wifiConfig.getSecurity() == WifiSecurity.SECURITY_WPA2)) {
+				|| (wifiConfig.getSecurity() == WifiSecurity.SECURITY_WPA2)
+				|| (wifiConfig.getSecurity() == WifiSecurity.SECURITY_WPA_WPA2)) {
 
 		    File tmpOutputFile = new File(HOSTAPD_TMP_CONFIG_FILE);
 			
+		    /*
 			String resName = null;
 			if (wifiConfig.getSecurity() == WifiSecurity.SECURITY_WPA) {
 				resName = "/src/main/resources/wifi/hostapd.conf_master_wpa_psk";
 			} else if (wifiConfig.getSecurity() == WifiSecurity.SECURITY_WPA2) {
 				resName = "/src/main/resources/wifi/hostapd.conf_master_wpa2_psk";
 			}
+			*/
+		    String resName = "/src/main/resources/wifi/hostapd.conf_master_wpa_wpa2_psk";
 			
 			//replace the necessary components
 			String fileAsString = IOUtil.readResource(FrameworkUtil.getBundle(getClass()), resName);
@@ -426,11 +441,34 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
 			} else {
 				throw KuraException.internalError("the channel must be between 1 (inclusive) and 11 (inclusive) or 1 (inclusive) and 13 (inclusive) depending on your locale");
 			}
-			if(wifiConfig.getPasskey() != null && wifiConfig.getPasskey().trim().length() > 0) {
-				if((wifiConfig.getPasskey().length() < 8) || (wifiConfig.getPasskey().length() > 63)) {
+			
+			if (wifiConfig.getSecurity() == WifiSecurity.SECURITY_WPA) {
+				fileAsString = fileAsString.replaceFirst("KURA_SECURITY", "1");
+			} else if ((wifiConfig.getSecurity() == WifiSecurity.SECURITY_WPA2)) {
+				fileAsString = fileAsString.replaceFirst("KURA_SECURITY", "2");
+			} else if (wifiConfig.getSecurity() == WifiSecurity.SECURITY_WPA_WPA2) {
+				fileAsString = fileAsString.replaceFirst("KURA_SECURITY", "3");
+			} else {
+				throw KuraException.internalError("invalid WiFi Security");
+			}
+			
+			WifiCiphers wifiCiphers = wifiConfig.getPairwiseCiphers();
+			if (wifiCiphers == WifiCiphers.TKIP) {
+				fileAsString = fileAsString.replaceFirst("KURA_PAIRWISE_CIPHER", "TKIP");
+			} else if (wifiCiphers == WifiCiphers.CCMP) {
+				fileAsString = fileAsString.replaceFirst("KURA_PAIRWISE_CIPHER", "CCMP");
+			} else if (wifiCiphers == WifiCiphers.CCMP_TKIP) {
+				fileAsString = fileAsString.replaceFirst("KURA_PAIRWISE_CIPHER", "CCMP TKIP");
+			} else {
+				throw KuraException.internalError("invalid WiFi Pairwise Ciphers");
+			}
+			
+			String passKey= new String(wifiConfig.getPasskey().getPassword());
+			if(wifiConfig.getPasskey() != null && passKey.trim().length() > 0) {
+				if((passKey.length() < 8) || (passKey.length() > 63)) {
 					throw KuraException.internalError("the WPA passphrase (passwd) must be between 8 (inclusive) and 63 (inclusive) characters in length: " + wifiConfig.getPasskey());
 				} else {
-					fileAsString = fileAsString.replaceFirst("KURA_PASSPHRASE", wifiConfig.getPasskey().trim());
+					fileAsString = fileAsString.replaceFirst("KURA_PASSPHRASE", passKey.trim());
 				}
 			} else {
 				throw KuraException.internalError("the passwd can not be null");

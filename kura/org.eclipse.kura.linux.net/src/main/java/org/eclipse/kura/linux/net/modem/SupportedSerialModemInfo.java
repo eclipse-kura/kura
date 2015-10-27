@@ -20,7 +20,7 @@ import org.eclipse.kura.net.modem.ModemTechnologyType;
 public enum SupportedSerialModemInfo {
 
 	MiniGateway_Telit_HE910_NAD("HE910", new String[]{"HE910-NAD", "HE910-EUD"}, "Telit", KuraConstants.Mini_Gateway.getImageName(), 
-			KuraConstants.Mini_Gateway.getImageVersion(),  Arrays.asList(ModemTechnologyType.HSDPA), 
+			KuraConstants.Mini_Gateway.getImageVersion(),  Arrays.asList(ModemTechnologyType.HSPA, ModemTechnologyType.UMTS), 
 			new SerialModemDriver("HE910", SerialModemComm.MiniGateway, "at+gmm\r\n"));
 	
 	private String m_modemName;

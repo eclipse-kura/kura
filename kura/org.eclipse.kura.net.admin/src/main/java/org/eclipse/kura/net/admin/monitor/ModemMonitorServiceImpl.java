@@ -264,7 +264,6 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 				}
 			}
         } else if (topic.equals(ModemAddedEvent.MODEM_EVENT_ADDED_TOPIC)) {
-        	
         	ModemAddedEvent modemAddedEvent = (ModemAddedEvent)event;
         	final ModemDevice modemDevice = modemAddedEvent.getModemDevice();
         	if (m_serviceActivated) {
@@ -571,7 +570,6 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 			while (keySetItetrator.hasNext()) {
 				String usbPort = keySetItetrator.next();
 				CellularModem modem = m_modems.get(usbPort);
-				
 				// get signal strength only if somebody needs it
 				if ((m_listeners != null) && (m_listeners.size() > 0)) {
 					for (ModemMonitorListener listener : m_listeners) {
@@ -590,24 +588,36 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 				NetInterfaceStatus netInterfaceStatus = getNetInterfaceStatus(modem.getConfiguration());
 				try {
 					String ifaceName = m_networkService.getModemPppPort(modem.getModemDevice());
-					if (netInterfaceStatus == NetInterfaceStatus.netIPv4StatusEnabledWAN) {				
+					if (netInterfaceStatus == NetInterfaceStatus.netIPv4StatusEnabledWAN) {	
 						if (ifaceName != null) {
 							pppService = PppFactory.obtainPppService(ifaceName, modem.getDataPort());
 							pppState = pppService.getPppState();
-							
 							if (m_pppState != pppState) {
 								s_logger.info("monitor() :: previous PppState={}", m_pppState);
 								s_logger.info("monitor() :: current PppState={}", pppState);
 							}
 							
 							if (pppState == PppState.NOT_CONNECTED) {
-								if (modem.getTechnologyType() == ModemTechnologyType.HSDPA) {
+								boolean checkIfSimCardReady = false;
+								List<ModemTechnologyType> modemTechnologyTypes = modem.getTechnologyTypes();
+								for (ModemTechnologyType modemTechnologyType : modemTechnologyTypes) {
+									if ((modemTechnologyType == ModemTechnologyType.GSM_GPRS)
+											|| (modemTechnologyType == ModemTechnologyType.UMTS)
+											|| (modemTechnologyType == ModemTechnologyType.HSDPA)
+											|| (modemTechnologyType == ModemTechnologyType.HSPA)) {
+										checkIfSimCardReady = true;
+										break;
+									}
+								}
+								if (checkIfSimCardReady) {
 									if(((HspaCellularModem)modem).isSimCardReady()) {
 										s_logger.info("monitor() :: !!! SIM CARD IS READY !!! connecting ...");
 										pppService.connect();
 										if (m_pppState == PppState.NOT_CONNECTED) {
 											m_resetTimerStart = System.currentTimeMillis();
 										}
+									} else {
+										s_logger.warn("monitor() :: ! SIM CARD IS NOT READY !");
 									}
 								} else {
 									s_logger.info("monitor() :: connecting ...");
@@ -725,7 +735,6 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 	}
     
 	private void trackModem(ModemDevice modemDevice) {
-		
 		Class<? extends CellularModemFactory> modemFactoryClass = null;
 		
 		if (modemDevice instanceof UsbModemDevice) {
@@ -759,12 +768,12 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 					platform = m_systemService.getPlatform();
 				}
 				CellularModem modem = modemFactoryService.obtainCellularModemService(modemDevice, platform);
-				
 				try {
 					HashMap<String, String> modemInfoMap = new HashMap<String, String>();
 					modemInfoMap.put(ModemReadyEvent.IMEI, modem.getSerialNumber());
 					modemInfoMap.put(ModemReadyEvent.IMSI, modem.getMobileSubscriberIdentity());
 					modemInfoMap.put(ModemReadyEvent.ICCID, modem.getIntegratedCirquitCardId());
+					modemInfoMap.put(ModemReadyEvent.RSSI, Integer.toString(modem.getSignalStrength()));
 					s_logger.info("posting ModemReadyEvent on topic {}", ModemReadyEvent.MODEM_EVENT_READY_TOPIC);
 					m_eventAdmin.postEvent(new ModemReadyEvent(modemInfoMap));
 				} catch (Exception e) {
@@ -776,6 +785,12 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 				if (ifaceName != null) {
 					NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig = m_networkConfig
 							.getNetInterfaceConfig(ifaceName);
+					
+					if(netInterfaceConfig == null) {
+						m_networkConfig = m_netConfigService.getNetworkConfiguration();
+						netInterfaceConfig = m_networkConfig.getNetInterfaceConfig(ifaceName);
+					}
+					
 					if (netInterfaceConfig != null) {
 						netConfigs = getNetConfigs(netInterfaceConfig);
 						if ((netConfigs != null) && (netConfigs.size() > 0)) {
@@ -860,7 +875,7 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 		do {
 			try {
 				Thread.sleep(3000);
-				if (modem.isPortReachable(modem.getGpsPort())) {
+				if (modem.isPortReachable(modem.getAtPort())) {
 					s_logger.debug("disableModemGps() modem is now reachable ...");
 					portIsReachable = true;
 					break;
@@ -890,19 +905,21 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 		
 		if (enabled) {
 			CommURI commUri = modem.getSerialConnectionProperties(CellularModem.SerialPortType.GPSPORT);
-			s_logger.trace("postModemGpsEvent() :: Modem SeralConnectionProperties: {}", commUri.toString());			
-			
-			HashMap<String, Object> modemInfoMap = new HashMap<String, Object>();
-			modemInfoMap.put(ModemGpsEnabledEvent.Port, modem.getGpsPort());
-			modemInfoMap.put(ModemGpsEnabledEvent.BaudRate, new Integer(commUri.getBaudRate()));
-			modemInfoMap.put(ModemGpsEnabledEvent.DataBits, new Integer(commUri.getDataBits()));
-			modemInfoMap.put(ModemGpsEnabledEvent.StopBits, new Integer(commUri.getStopBits()));
-			modemInfoMap.put(ModemGpsEnabledEvent.Parity, new Integer(commUri.getParity()));
-			
-			s_logger.info("postModemGpsEvent() :: posting ModemGpsEnabledEvent on topic {}", ModemGpsEnabledEvent.MODEM_EVENT_GPS_ENABLED_TOPIC);
-			m_eventAdmin.postEvent(new ModemGpsEnabledEvent(modemInfoMap));
+			if (commUri != null) {
+				s_logger.trace("postModemGpsEvent() :: Modem SeralConnectionProperties: {}", commUri.toString());			
+				
+				HashMap<String, Object> modemInfoMap = new HashMap<String, Object>();
+				modemInfoMap.put(ModemGpsEnabledEvent.Port, modem.getGpsPort());
+				modemInfoMap.put(ModemGpsEnabledEvent.BaudRate, new Integer(commUri.getBaudRate()));
+				modemInfoMap.put(ModemGpsEnabledEvent.DataBits, new Integer(commUri.getDataBits()));
+				modemInfoMap.put(ModemGpsEnabledEvent.StopBits, new Integer(commUri.getStopBits()));
+				modemInfoMap.put(ModemGpsEnabledEvent.Parity, new Integer(commUri.getParity()));
+				
+				s_logger.debug("postModemGpsEvent() :: posting ModemGpsEnabledEvent on topic {}", ModemGpsEnabledEvent.MODEM_EVENT_GPS_ENABLED_TOPIC);
+				m_eventAdmin.postEvent(new ModemGpsEnabledEvent(modemInfoMap));
+			}
 		} else {
-			s_logger.info("postModemGpsEvent() :: posting ModemGpsDisableEvent on topic {}", ModemGpsDisabledEvent.MODEM_EVENT_GPS_DISABLED_TOPIC);
+			s_logger.debug("postModemGpsEvent() :: posting ModemGpsDisableEvent on topic {}", ModemGpsDisabledEvent.MODEM_EVENT_GPS_DISABLED_TOPIC);
 			HashMap<String, Object> modemInfoMap = new HashMap<String, Object>();
 			m_eventAdmin.postEvent(new ModemGpsDisabledEvent(modemInfoMap));
 		}

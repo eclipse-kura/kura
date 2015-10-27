@@ -23,9 +23,11 @@ import org.eclipse.kura.core.net.NetworkConfiguration;
 import org.eclipse.kura.core.net.NetworkConfigurationVisitor;
 import org.eclipse.kura.core.net.WifiInterfaceAddressConfigImpl;
 import org.eclipse.kura.core.net.WifiInterfaceConfigImpl;
+import org.eclipse.kura.linux.net.util.KuraConstants;
 import org.eclipse.kura.net.NetConfig;
 import org.eclipse.kura.net.NetInterfaceAddressConfig;
 import org.eclipse.kura.net.NetInterfaceConfig;
+import org.eclipse.kura.net.wifi.WifiCiphers;
 import org.eclipse.kura.net.wifi.WifiConfig;
 import org.eclipse.kura.net.wifi.WifiInterfaceAddressConfig;
 import org.eclipse.kura.net.wifi.WifiMode;
@@ -38,7 +40,17 @@ public class HostapdConfigReader implements NetworkConfigurationVisitor {
 
 	private static final Logger s_logger = LoggerFactory.getLogger(HostapdConfigReader.class);
 
-	private static final String HOSTAPD_CONFIG_FILE = "/etc/hostapd.conf";
+	private static String HOSTAPD_CONFIG_FILE = null;
+	
+	private static final String OS_VERSION = System.getProperty("kura.os.version");
+	
+	static {
+		if (OS_VERSION.equals(KuraConstants.Intel_Edison.getImageName() + "_" + KuraConstants.Intel_Edison.getImageVersion() + "_" + KuraConstants.Intel_Edison.getTargetName())) {
+			HOSTAPD_CONFIG_FILE = "/etc/hostapd/hostapd.conf";
+		} else {
+			HOSTAPD_CONFIG_FILE = "/etc/hostapd.conf";
+		}
+	}
 
 	private static HostapdConfigReader s_instance;
 
@@ -175,6 +187,8 @@ public class HostapdConfigReader implements NetworkConfigurationVisitor {
 							security = WifiSecurity.SECURITY_WPA;
 						} else if ("2".equals(hostapdProps.getProperty("wpa"))) {
 							security = WifiSecurity.SECURITY_WPA2;
+						} else if ("3".equals(hostapdProps.getProperty("wpa"))) {
+							security = WifiSecurity.SECURITY_WPA_WPA2;
 						} else {
 							throw KuraException
 									.internalError("malformatted config file: "
@@ -195,6 +209,21 @@ public class HostapdConfigReader implements NetworkConfigurationVisitor {
 						security = WifiSecurity.SECURITY_WEP;
 						password = hostapdProps.getProperty("wep_key0");
 					}
+					
+					WifiCiphers pairwise = null;
+					if (hostapdProps.containsKey("wpa_pairwise")) {
+						if ("TKIP".equals(hostapdProps.getProperty("wpa_pairwise"))) {
+							pairwise = WifiCiphers.TKIP;
+						} else if ("CCMP".equals(hostapdProps.getProperty("wpa_pairwise"))) {
+							pairwise = WifiCiphers.CCMP;
+						} else if ("CCMP TKIP".equals(hostapdProps.getProperty("wpa_pairwise"))) {
+							pairwise = WifiCiphers.CCMP_TKIP;
+						} else {
+							throw KuraException
+							.internalError("malformatted config file: "
+									+ configFile.getAbsolutePath());
+						}
+					}
 
 					// Populate the config
 					wifiConfig.setSSID(essid);
@@ -204,6 +233,7 @@ public class HostapdConfigReader implements NetworkConfigurationVisitor {
 					wifiConfig.setBroadcast(true); // TODO: always true? is this
 													// needed?
 					wifiConfig.setSecurity(security);
+					wifiConfig.setPairwiseCiphers(pairwise);
 					wifiConfig.setRadioMode(wifiRadioMode);
 
 					if (ignoreSSID == 0) {

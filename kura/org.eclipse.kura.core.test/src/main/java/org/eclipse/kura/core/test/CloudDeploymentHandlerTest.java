@@ -11,8 +11,6 @@
  */
 package org.eclipse.kura.core.test;
 
-import java.io.InputStream;
-import java.net.URL;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -34,8 +32,6 @@ import org.eclipse.kura.test.annotation.TestTarget;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.FrameworkUtil;
 import org.osgi.service.deploymentadmin.DeploymentAdmin;
 import org.osgi.service.deploymentadmin.DeploymentPackage;
 
@@ -51,18 +47,8 @@ public class CloudDeploymentHandlerTest extends TestCase {
 	private static final String DP_VERSION = "1.0.0";
 	private static final String BUNDLE_NAME = "org.eclipse.kura.demo.heater";
 	private static final String BUNDLE_VERSION = "1.0.2.201504080206";
-	
-	private URL getTestDpUrl() {
-		BundleContext ctx = FrameworkUtil.getBundle(this.getClass()).getBundleContext();
-
-		URL packageUrl = ctx.getBundle().getResource("src/main/resources/"+DP_NAME+".dp");
-		if(packageUrl == null) {
-			//handle case where running from a jar on a real target
-			packageUrl = ctx.getBundle().getResource(DP_NAME+".dp");
-		}
-		
-		return packageUrl;
-	}
+	private static final String DOWNLOAD_URI = "http://s3.amazonaws.com/kura-resources/dps/heater.dp";
+	private static final String DOWNLOAD_PROTOCOL = "HTTP";
 	
 	public void setUp() {
 		// Wait for OSGi dependencies
@@ -120,10 +106,10 @@ public class CloudDeploymentHandlerTest extends TestCase {
 
 		
 		KuraPayload payload = new KuraPayload();
-		payload.addMetric(DeploymentPackageDownloadOptions.METRIC_DP_DOWNLOAD_URI, "http://s3.amazonaws.com/kura-resources/dps/heater.dp");
-		payload.addMetric(DeploymentPackageDownloadOptions.METRIC_DP_NAME, "heater");
-		payload.addMetric(DeploymentPackageDownloadOptions.METRIC_DP_VERSION, "1.0.0");
-		payload.addMetric(DeploymentPackageDownloadOptions.METRIC_DP_DOWNLOAD_PROTOCOL, "HTTP");
+		payload.addMetric(DeploymentPackageDownloadOptions.METRIC_DP_DOWNLOAD_URI, DOWNLOAD_URI);
+		payload.addMetric(DeploymentPackageDownloadOptions.METRIC_DP_NAME, DP_NAME);
+		payload.addMetric(DeploymentPackageDownloadOptions.METRIC_DP_VERSION, DP_VERSION);
+		payload.addMetric(DeploymentPackageDownloadOptions.METRIC_DP_DOWNLOAD_PROTOCOL, DOWNLOAD_PROTOCOL);
 		payload.addMetric(DeploymentPackageDownloadOptions.METRIC_JOB_ID, Long.parseLong("1111")); 
 		payload.addMetric(DeploymentPackageDownloadOptions.METRIC_DP_INSTALL_SYSTEM_UPDATE, false);
 		//payload.addMetric(DeploymentPackageDownloadOptions.METRIC_DP_REBOOT, false);
@@ -134,6 +120,8 @@ public class CloudDeploymentHandlerTest extends TestCase {
 				payload,
 				5000);
 
+		System.out.println("Response code: " + resp.getResponseCode());
+		System.out.println("Response message: " + resp.getExceptionMessage());
 		assertEquals(KuraResponsePayload.RESPONSE_CODE_OK, resp.getResponseCode());
 	}
 
@@ -146,8 +134,12 @@ public class CloudDeploymentHandlerTest extends TestCase {
 		
 		DeploymentPackage dp = s_deploymentAdmin.getDeploymentPackage(DP_NAME);
 		if (dp == null) {
-			InputStream is = getTestDpUrl().openStream();
-			dp = s_deploymentAdmin.installDeploymentPackage(is);
+			testExecInstallDeploymentPackage();
+			while(dp == null){
+				Thread.sleep(1000);
+				dp = s_deploymentAdmin.getDeploymentPackage(DP_NAME);
+			}
+			assertNotNull(dp);
 		}
 		
 		StringBuilder sb = new StringBuilder(CloudletTopic.Method.GET.toString())
@@ -196,7 +188,10 @@ public class CloudDeploymentHandlerTest extends TestCase {
 		DeploymentPackage dp = s_deploymentAdmin.getDeploymentPackage(DP_NAME);
 		if (dp == null) {
 			testExecInstallDeploymentPackage();
-			dp = s_deploymentAdmin.getDeploymentPackage(DP_NAME);
+			while(dp == null){
+				Thread.sleep(1000);
+				dp = s_deploymentAdmin.getDeploymentPackage(DP_NAME);
+			}
 			assertNotNull(dp);
 		}
 		
@@ -223,7 +218,7 @@ public class CloudDeploymentHandlerTest extends TestCase {
 		if (bundles != null) {
 			for (int i = 0; i < bundles.length; i++) {
 				System.out.println("Bundle name: " + bundles[i].getName());
-				if (bundles[i].getName().equals("org.eclipse.kura.demo.heater")) {
+				if (bundles[i].getName().equals(BUNDLE_NAME)) {
 					bundle = bundles[i];
 					break;
 				}
@@ -243,7 +238,10 @@ public class CloudDeploymentHandlerTest extends TestCase {
 		DeploymentPackage dp = s_deploymentAdmin.getDeploymentPackage(DP_NAME);
 		if (dp == null) {
 			testExecInstallDeploymentPackage();
-			dp = s_deploymentAdmin.getDeploymentPackage(DP_NAME);
+			while(dp == null){
+				Thread.sleep(1000);
+				dp = s_deploymentAdmin.getDeploymentPackage(DP_NAME);
+			}
 			assertNotNull(dp);
 		}
 		
@@ -300,7 +298,10 @@ public class CloudDeploymentHandlerTest extends TestCase {
 		DeploymentPackage dp = s_deploymentAdmin.getDeploymentPackage(DP_NAME);
 		if (dp == null) {
 			testExecInstallDeploymentPackage();
-			dp = s_deploymentAdmin.getDeploymentPackage(DP_NAME);
+			while(dp == null){
+				Thread.sleep(1000);
+				dp = s_deploymentAdmin.getDeploymentPackage(DP_NAME);
+			}
 			assertNotNull(dp);
 		}
 		
@@ -312,7 +313,7 @@ public class CloudDeploymentHandlerTest extends TestCase {
 		
 		KuraPayload payload = new KuraPayload();
 		//payload.setBody("org.eclipse.kura.test.helloworld".getBytes("UTF-8"));
-		payload.addMetric(DeploymentPackageDownloadOptions.METRIC_DP_NAME, "org.eclipse.kura.demo.heater");
+		payload.addMetric(DeploymentPackageDownloadOptions.METRIC_DP_NAME, BUNDLE_NAME);
 		payload.addMetric(DeploymentPackageDownloadOptions.METRIC_JOB_ID, Long.parseLong("1111")); 
 		
 		KuraResponsePayload resp = s_cloudCallService.call(
@@ -322,6 +323,6 @@ public class CloudDeploymentHandlerTest extends TestCase {
 				5000);
 		
 		assertEquals(KuraResponsePayload.RESPONSE_CODE_OK, resp.getResponseCode());
-		assertNull(s_deploymentAdmin.getDeploymentPackage("org.eclipse.kura.demo.heater"));
+		assertNull(s_deploymentAdmin.getDeploymentPackage(BUNDLE_NAME));
 	}
 }

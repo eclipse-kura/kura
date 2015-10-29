@@ -35,7 +35,6 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.FileUtils;
 import org.eclipse.kura.deployment.agent.DeploymentAgentService;
-import org.eclipse.kura.deployment.agent.DeploymentPackageDownloadOptions;
 import org.osgi.framework.Version;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.ComponentException;
@@ -546,12 +545,5 @@ public class DeploymentAgent implements DeploymentAgentService {
 		} catch (IOException e) {
 			s_logger.error("Error writing package configuration file", e);
 		}
-	}
-
-	@Override
-	public void installDeploymentPackageAsync(
-			DeploymentPackageDownloadOptions options) throws Exception {
-		// TODO Auto-generated method stub
-		
 	}
 }

@@ -19,12 +19,6 @@ public interface DeploymentAgentService {
 	 */
 	public static final String EVENT_INSTALLED_TOPIC = DeploymentAgentService.class.getPackage().getName().replace('.', '/') + "/INSTALLED";
 
-	/**
-	 * {@linkplain org.osgi.service.event.Event Event} topic on which the progress
-	 * of the deployment package download is posted.
-	 */
-	public static final String EVENT_PROGRESS_TOPIC = DeploymentAgentService.class.getPackage().getName().replace('.', '/') + "/PROGRESS";
-
 	
 	/**
 	 * {@linkplain org.osgi.service.event.Event Event} property
@@ -64,37 +58,6 @@ public interface DeploymentAgentService {
 	
 	public static final String EVENT_PACKAGE_VERSION = "deploymentpackage.version";
 	
-	public static final String EVENT_CURRENT_PROGRESS = "dp.http.transfer.progress";
-	
-	public static final String EVENT_TOTAL_SIZE = "dp.http.transfer.size";
-	
-	public static final String EVENT_PROGRESS_STATUS = "dp.http.transfer.status";
-	
-	public static final String EVENT_CLIENT_ID = "client.id";
-	
-	/**
-	 * Enum representing the different status of the download process
-	 * 
-	 * {@link DeploymentAgentService.DOWNLOAD_STATUS.PROGRESS}		Download in progress
-	 * {@link DeploymentAgentService.DOWNLOAD_STATUS.COMPLETE}		Download completed
-	 * {@link DeploymentAgentService.DOWNLOAD_STATUS.FAILED} 		Download failed
-	 */
-	public static enum DOWNLOAD_STATUS {
-		PROGRESS 	("PROGRESS"),
-		COMPLETE 	("COMPLETE"),
-		FAILED 		("FAILED");
-		
-		private final String status;
-		
-		DOWNLOAD_STATUS(String status) {
-			this.status = status;
-		}
-		
-	    public String getStatusString(){
-	    	return status;
-	    }
-	}
-	
 	/**
 	 * Installs a Deployment Package asynchronously fetching it at the given URL.
 	 * The method queues the package URL and returns immediately.
@@ -110,19 +73,6 @@ public interface DeploymentAgentService {
 	 */
 	public void installDeploymentPackageAsync(String url) throws Exception;
 
-	/**
-	 * Installs a Deployment Package asynchronously fetching it using the given options.
-	 * The method queues the package URL and returns immediately.
-	 * The result of the package installation is notified asynchronously
-	 * posting an {@linkplain org.osgi.service.event.Event Event} 
-	 * on the topic {@linkplain #EVENT_INSTALLED_TOPIC}
-	 * 
-	 * @see org.osgi.service.deploymentadmin.DeploymentAdmin#installDeploymentPackage installDeploymentPackage
-	 *  
-	 * @param options		the {@linkplain DeploymentPackageDownloadOptions} object to extract download info from
-	 * @throws Exception	If the installation of a deployment package from the same URL is still pending
-	 */
-	public void installDeploymentPackageAsync(DeploymentPackageDownloadOptions options) throws Exception;
 	
 	/**
 	 * Uninstalls a Deployment Package asynchronously.

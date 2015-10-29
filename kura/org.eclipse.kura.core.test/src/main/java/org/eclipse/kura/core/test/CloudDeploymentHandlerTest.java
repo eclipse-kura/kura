@@ -42,6 +42,7 @@ public class CloudDeploymentHandlerTest extends TestCase {
 	private static DeploymentAdmin s_deploymentAdmin;
 	
 	private static long s_countdown = 30000;
+	private static int s_cycles = 60;
 
 	private static final String DP_NAME = "heater";
 	private static final String DP_VERSION = "1.0.0";
@@ -135,8 +136,10 @@ public class CloudDeploymentHandlerTest extends TestCase {
 		DeploymentPackage dp = s_deploymentAdmin.getDeploymentPackage(DP_NAME);
 		if (dp == null) {
 			testExecInstallDeploymentPackage();
-			while(dp == null){
+			int cycles= s_cycles;
+			while(dp == null || cycles == 0){
 				Thread.sleep(1000);
+				cycles--;
 				dp = s_deploymentAdmin.getDeploymentPackage(DP_NAME);
 			}
 			assertNotNull(dp);
@@ -188,8 +191,10 @@ public class CloudDeploymentHandlerTest extends TestCase {
 		DeploymentPackage dp = s_deploymentAdmin.getDeploymentPackage(DP_NAME);
 		if (dp == null) {
 			testExecInstallDeploymentPackage();
-			while(dp == null){
+			int cycles= s_cycles;
+			while(dp == null || cycles == 0){
 				Thread.sleep(1000);
+				cycles--;
 				dp = s_deploymentAdmin.getDeploymentPackage(DP_NAME);
 			}
 			assertNotNull(dp);
@@ -238,8 +243,10 @@ public class CloudDeploymentHandlerTest extends TestCase {
 		DeploymentPackage dp = s_deploymentAdmin.getDeploymentPackage(DP_NAME);
 		if (dp == null) {
 			testExecInstallDeploymentPackage();
-			while(dp == null){
+			int cycles= s_cycles;
+			while(dp == null || cycles == 0){
 				Thread.sleep(1000);
+				cycles--;
 				dp = s_deploymentAdmin.getDeploymentPackage(DP_NAME);
 			}
 			assertNotNull(dp);
@@ -298,8 +305,10 @@ public class CloudDeploymentHandlerTest extends TestCase {
 		DeploymentPackage dp = s_deploymentAdmin.getDeploymentPackage(DP_NAME);
 		if (dp == null) {
 			testExecInstallDeploymentPackage();
-			while(dp == null){
+			int cycles= s_cycles;
+			while(dp == null || cycles == 0){
 				Thread.sleep(1000);
+				cycles--;
 				dp = s_deploymentAdmin.getDeploymentPackage(DP_NAME);
 			}
 			assertNotNull(dp);

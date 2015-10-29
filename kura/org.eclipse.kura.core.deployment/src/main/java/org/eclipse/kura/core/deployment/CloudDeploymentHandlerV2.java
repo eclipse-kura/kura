@@ -358,7 +358,7 @@ public class CloudDeploymentHandlerV2 extends Cloudlet {
 		} else if (resources[0].equals(RESOURCE_STOP)) {
 			String bundleId = resources[1];
 			doExecStartStopBundle(reqPayload, respPayload, false, bundleId);
-		}else {
+		} else {
 			s_logger.error("Bad request topic: {}", reqTopic.toString());
 			s_logger.error("Cannot find resource with name: {}", resources[0]);
 			respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_NOTFOUND);
@@ -512,7 +512,7 @@ public class CloudDeploymentHandlerV2 extends Cloudlet {
 			options = new DeploymentPackageInstallOptions(request);
 			options.setClientId(m_clientId);
 		} catch (Exception ex) {
-			s_logger.info("Malformed install request!");
+			s_logger.error("Malformed install request!");
 			response.setResponseCode(KuraResponsePayload.RESPONSE_CODE_ERROR);
 			response.setTimestamp(new Date());
 			try {
@@ -596,7 +596,7 @@ public class CloudDeploymentHandlerV2 extends Cloudlet {
 			options = new DeploymentPackageUninstallOptions(request);
 			options.setClientId(m_clientId);
 		} catch (Exception ex) {
-			s_logger.info("Malformed uninstall request!");
+			s_logger.error("Malformed uninstall request!");
 			response.setResponseCode(KuraResponsePayload.RESPONSE_CODE_ERROR);
 			response.setTimestamp(new Date());
 			try {
@@ -614,7 +614,7 @@ public class CloudDeploymentHandlerV2 extends Cloudlet {
 		//
 		// We only allow one request at a time
 		if (!m_isInstalling && m_pendingUninstPackageName != null) {
-			s_logger.info("Antother request seems still pending: {}. Checking if stale...", m_pendingUninstPackageName);
+			s_logger.info("Another request seems still pending: {}. Checking if stale...", m_pendingUninstPackageName);
 
 			response = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_ERROR);
 			response.setTimestamp(new Date());

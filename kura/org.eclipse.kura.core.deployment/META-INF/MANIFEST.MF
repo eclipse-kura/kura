@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: org.eclipse.kura.core.deployment
 Bundle-SymbolicName: org.eclipse.kura.core.deployment;singleton:=true
-Bundle-Version: 1.0.4.qualifier
+Bundle-Version: 1.1.0.qualifier
 Bundle-Vendor: EUROTECH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Service-Component: OSGI-INF/*.xml
@@ -35,4 +35,5 @@ Import-Package: javax.annotation,
  org.w3c.dom
 Export-Package: org.eclipse.kura.core.deployment;version="1.0.0",
  org.eclipse.kura.core.deployment.download;version="1.0.0",
+ org.eclipse.kura.core.deployment.install;version="1.0.0",
  org.eclipse.kura.core.deployment.xml;version="1.0.0"

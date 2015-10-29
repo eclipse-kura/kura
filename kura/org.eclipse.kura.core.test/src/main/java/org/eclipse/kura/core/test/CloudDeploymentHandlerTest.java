@@ -38,7 +38,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class CloudDeploymentHandlerTest extends TestCase {
-	private static final Logger s_logger = LoggerFactory.getLogger(AllCoreTests.class);
+	private static final Logger s_logger = LoggerFactory.getLogger(CloudDeploymentHandlerTest.class);
 
 	private static CountDownLatch s_dependencyLatch = new CountDownLatch(2);	// initialize with number of dependencies
 	private static CloudCallService s_cloudCallService;

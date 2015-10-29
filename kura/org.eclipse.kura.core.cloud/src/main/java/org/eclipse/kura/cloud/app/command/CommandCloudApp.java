@@ -289,7 +289,12 @@ public class CommandCloudApp extends Cloudlet implements ConfigurableComponent,
 
 	// command service defaults getters
 	private String getDefaultWorkDir() {
-		return (String) properties.get(COMMAND_WORKDIR_ID);
+		String workDir = (String)properties.get(COMMAND_WORKDIR_ID);
+		// For Windows override the default "/tmp" working dir with null, which means it will be inherited from current process
+		if(workDir!=null && "/tmp".equals(workDir) && System.getProperty("os.name").toLowerCase().contains("windows")) {
+			return null;
+		}
+		return workDir;
 	}
 
 	private int getDefaultTimeout() {

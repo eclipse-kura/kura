@@ -34,8 +34,11 @@ import org.junit.Test;
 import org.osgi.framework.Bundle;
 import org.osgi.service.deploymentadmin.DeploymentAdmin;
 import org.osgi.service.deploymentadmin.DeploymentPackage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class CloudDeploymentHandlerTest extends TestCase {
+	private static final Logger s_logger = LoggerFactory.getLogger(AllCoreTests.class);
 
 	private static CountDownLatch s_dependencyLatch = new CountDownLatch(2);	// initialize with number of dependencies
 	private static CloudCallService s_cloudCallService;
@@ -137,10 +140,10 @@ public class CloudDeploymentHandlerTest extends TestCase {
 		if (dp == null) {
 			testExecInstallDeploymentPackage();
 			int cycles= s_cycles;
-			while(dp == null || cycles > 0){
+			while(dp == null && cycles > 0){
 				Thread.sleep(1000);
 				cycles--;
-				System.out.println("Get packages. Cycles available: " + cycles);
+				s_logger.warn("Get packages. Cycles available: " + cycles);
 				dp = s_deploymentAdmin.getDeploymentPackage(DP_NAME);
 			}
 			assertNotNull(dp);
@@ -193,10 +196,10 @@ public class CloudDeploymentHandlerTest extends TestCase {
 		if (dp == null) {
 			testExecInstallDeploymentPackage();
 			int cycles= s_cycles;
-			while(dp == null || cycles > 0){
+			while(dp == null && cycles > 0){
 				Thread.sleep(1000);
 				cycles--;
-				System.out.println("Get bundles. Cycles available: " + cycles);
+				s_logger.warn("Get bundles. Cycles available: " + cycles);
 				dp = s_deploymentAdmin.getDeploymentPackage(DP_NAME);
 			}
 			assertNotNull(dp);
@@ -246,10 +249,10 @@ public class CloudDeploymentHandlerTest extends TestCase {
 		if (dp == null) {
 			testExecInstallDeploymentPackage();
 			int cycles= s_cycles;
-			while(dp == null || cycles > 0){
+			while(dp == null && cycles > 0){
 				Thread.sleep(1000);
 				cycles--;
-				System.out.println("Exec start stop. Cycles available: " + cycles);
+				s_logger.warn("Exec start stop. Cycles available: " + cycles);
 				dp = s_deploymentAdmin.getDeploymentPackage(DP_NAME);
 			}
 			assertNotNull(dp);
@@ -309,10 +312,10 @@ public class CloudDeploymentHandlerTest extends TestCase {
 		if (dp == null) {
 			testExecInstallDeploymentPackage();
 			int cycles= s_cycles;
-			while(dp == null || cycles > 0){
+			while(dp == null && cycles > 0){
 				Thread.sleep(1000);
 				cycles--;
-				System.out.println("Uninstall. Cycles available: " + cycles);
+				s_logger.warn("Uninstall. Cycles available: " + cycles);
 				dp = s_deploymentAdmin.getDeploymentPackage(DP_NAME);
 			}
 			assertNotNull(dp);

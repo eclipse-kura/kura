@@ -116,7 +116,7 @@ public class CloudDeploymentHandlerTest extends TestCase {
 		payload.addMetric(DeploymentPackageDownloadOptions.METRIC_DP_DOWNLOAD_PROTOCOL, DOWNLOAD_PROTOCOL);
 		payload.addMetric(DeploymentPackageDownloadOptions.METRIC_JOB_ID, Long.parseLong("1111")); 
 		payload.addMetric(DeploymentPackageDownloadOptions.METRIC_DP_INSTALL_SYSTEM_UPDATE, false);
-		//payload.addMetric(DeploymentPackageDownloadOptions.METRIC_DP_REBOOT, false);
+		payload.addMetric(DeploymentPackageDownloadOptions.METRIC_DP_INSTALL, true);
 
 		KuraResponsePayload resp = s_cloudCallService.call(
 				CloudDeploymentHandlerV2.APP_ID,

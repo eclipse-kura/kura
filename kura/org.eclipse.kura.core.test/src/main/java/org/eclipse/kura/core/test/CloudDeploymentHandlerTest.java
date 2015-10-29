@@ -106,7 +106,7 @@ public class CloudDeploymentHandlerTest extends TestCase {
 		StringBuilder sb = new StringBuilder(CloudletTopic.Method.EXEC.toString())
 		.append("/")
 		.append(CloudDeploymentHandlerV2.RESOURCE_DOWNLOAD);
-		System.out.println(sb.toString());
+		s_logger.warn(sb.toString());
 
 		
 		KuraPayload payload = new KuraPayload();
@@ -124,8 +124,8 @@ public class CloudDeploymentHandlerTest extends TestCase {
 				payload,
 				5000);
 
-		System.out.println("Response code: " + resp.getResponseCode());
-		System.out.println("Response message: " + resp.getExceptionMessage());
+		s_logger.warn("Response code: " + resp.getResponseCode());
+		s_logger.warn("Response message: " + resp.getExceptionMessage());
 		assertEquals(KuraResponsePayload.RESPONSE_CODE_OK, resp.getResponseCode());
 	}
 
@@ -227,7 +227,7 @@ public class CloudDeploymentHandlerTest extends TestCase {
 		XmlBundle bundle = null;
 		if (bundles != null) {
 			for (int i = 0; i < bundles.length; i++) {
-				System.out.println("Bundle name: " + bundles[i].getName());
+				s_logger.warn("Bundle name: " + bundles[i].getName());
 				if (bundles[i].getName().equals(BUNDLE_NAME)) {
 					bundle = bundles[i];
 					break;
@@ -325,7 +325,7 @@ public class CloudDeploymentHandlerTest extends TestCase {
 		.append("/")
 		.append(CloudDeploymentHandlerV2.RESOURCE_UNINSTALL); 
 		
-		System.out.println("Uninstall topic: " + sb.toString());
+		s_logger.warn("Uninstall topic: " + sb.toString());
 		
 		KuraPayload payload = new KuraPayload();
 		//payload.setBody("org.eclipse.kura.test.helloworld".getBytes("UTF-8"));

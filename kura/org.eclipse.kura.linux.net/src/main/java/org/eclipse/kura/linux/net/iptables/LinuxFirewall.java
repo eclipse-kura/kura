@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011, 2014 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2015 Eurotech and/or its affiliates
  *
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
@@ -57,26 +57,26 @@ public class LinuxFirewall {
 	private static final String[] DEFAULT_POLICY = HEADER;
 
 	private static final String[] CLEAR_ALL_CHAINS = {"",
-			"#Clear all Built-in Chains",
-			"iptables -F INPUT",
-			"iptables -F OUTPUT",
-			"iptables -F FORWARD",
-			"iptables -t nat -F",
+		"#Clear all Built-in Chains",
+		"iptables -F INPUT",
+		"iptables -F OUTPUT",
+		"iptables -F FORWARD",
+		"iptables -t nat -F",
 	""};
 
 	private static final String[] BLOCK_POLICY = {"",
-			"#Block all ports for input traffic",
-			"iptables -P INPUT DROP",
-			"#block Output Traffic",
-			"iptables -P OUTPUT ACCEPT",
-			"#block forward Traffic",
-			"iptables -P FORWARD DROP",
-			"",
-			"#Allow all traffic to the loop back interface",
-			"iptables -A INPUT -i lo -j ACCEPT",
-			"",
-			"#Allow Only incoming connection related to Outgoing connection",
-			"iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT",
+		"#Block all ports for input traffic",
+		"iptables -P INPUT DROP",
+		"#block Output Traffic",
+		"iptables -P OUTPUT ACCEPT",
+		"#block forward Traffic",
+		"iptables -P FORWARD DROP",
+		"",
+		"#Allow all traffic to the loop back interface",
+		"iptables -A INPUT -i lo -j ACCEPT",
+		"",
+		"#Allow Only incoming connection related to Outgoing connection",
+		"iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT",
 	""};
 
 	/*
@@ -87,13 +87,13 @@ public class LinuxFirewall {
 	 */
 
 	private static final String[] ALLOW_ICMP = {"#allow inbound ICMP requests",
-			"iptables -A INPUT -p icmp --icmp-type 8 -m state --state NEW,ESTABLISHED,RELATED -j ACCEPT",
-			"iptables -A OUTPUT -p icmp --icmp-type 0 -m state --state ESTABLISHED,RELATED -j ACCEPT",
+		"iptables -A INPUT -p icmp --icmp-type 8 -m state --state NEW,ESTABLISHED,RELATED -j ACCEPT",
+		"iptables -A OUTPUT -p icmp --icmp-type 0 -m state --state ESTABLISHED,RELATED -j ACCEPT",
 	""};
 
 	private static final String[] DO_NOT_ALLOW_ICMP = {"#Do not allow inbound ICMP requests",
-			"iptables -A INPUT -p icmp --icmp-type 8 -m state --state NEW,ESTABLISHED,RELATED -j DROP",
-			"iptables -A OUTPUT -p icmp --icmp-type 0 -m state --state ESTABLISHED,RELATED -j DROP",
+		"iptables -A INPUT -p icmp --icmp-type 8 -m state --state NEW,ESTABLISHED,RELATED -j DROP",
+		"iptables -A OUTPUT -p icmp --icmp-type 0 -m state --state ESTABLISHED,RELATED -j DROP",
 	""};
 
 	private static final String[] ALLOW_FORWARDING = {"#allow fowarding if any masquerade is defined",
@@ -1046,7 +1046,7 @@ public class LinuxFirewall {
 				proc = ProcessUtil.exec(DO_NOT_ALLOW_FORWARDING[1]);
 				proc.waitFor();
 			}
-			
+
 		} catch (Exception e) {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
 		}

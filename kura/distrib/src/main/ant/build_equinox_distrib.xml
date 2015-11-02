@@ -11,7 +11,7 @@
       Eurotech
 
 -->
-<project name="build_equinox_distrib" default="dist-windows" basedir="../../../">
+<project name="build_equinox_distrib" default="dist-linux" basedir="../../../">
 
     <target name="dist-linux">
 
@@ -506,28 +506,28 @@ fi
 
 		<!-- Get version information for the bundles/files in this build -->
         <echo message="Gathering version information for the bundles/files in ${build.name}" />
-<!--    <exec executable="src/main/sh/get_build_versions.sh">
+        <exec executable="src/main/sh/get_build_versions.sh">
                 <arg value="${project.build.directory}" />
                 <arg value="${build.output.name}.zip" />
                 <arg value="kura_${project.version}_${build.name}.catalog" />
                 <arg value="${build.name}" />
-        </exec> -->
+        </exec>
 
 
 		<!-- Diff with the previous version -->
         <property file="RELEASE_INFO/version.properties" />
         <echo message="Diff version information with ${build.name} version ${project.version.previous}" />
-<!--    <exec executable="src/main/sh/diff_build_versions.sh">
+        <exec executable="src/main/sh/diff_build_versions.sh">
                 <arg value="RELEASE_INFO/${project.version.previous}/kura_${project.version.previous}_${build.name}.catalog" />
                 <arg value="${project.build.directory}/${build.output.name}.catalog" />
                 <arg value="${project.build.directory}/kura_${project.version.previous}_to_${project.version}_${build.name}" />
                 <arg value="${build.name}" />
-        </exec> -->
+        </exec>
 
 
         <!-- Create upgrader -->
         <echo message="Creating Upgrader for ${build.name}" />
-<!--    <exec executable="${project.build.directory}/../src/main/sh/create_upgrader.sh">
+        <exec executable="${project.build.directory}/../src/main/sh/create_upgrader.sh">
                 <arg value="${project.build.directory}" />
                 <arg value="${project.build.directory}/${build.output.name}.zip" />
                 <arg value="kura_${project.version}_${build.name}_upgrade.zip" />
@@ -538,7 +538,7 @@ fi
                 <arg value="kura_${project.version.previous}_to_${project.version}_${build.name}.keep" />
                 <arg value="${build.output.name}_upgrader.sh" />
                 <arg value="${build.name}" />
-        </exec> -->
+        </exec>
 
         <!-- Zip the upgrader -->
         <zip destfile="${project.build.directory}/${build.output.name}_upgrade.zip">

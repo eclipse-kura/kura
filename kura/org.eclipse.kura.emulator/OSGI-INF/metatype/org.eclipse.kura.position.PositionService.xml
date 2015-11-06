@@ -24,7 +24,7 @@
             type="Boolean"
             cardinality="0"
             required="true"
-            default="false"
+            default="true"
             description="The emulated PositionService is always enabled and using sample GPS positions."/>
         
         <AD id="useGpsd"

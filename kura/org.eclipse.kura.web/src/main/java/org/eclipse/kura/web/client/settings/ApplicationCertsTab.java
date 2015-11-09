@@ -42,16 +42,14 @@ import com.extjs.gxt.ui.client.widget.layout.ColumnLayout;
 import com.extjs.gxt.ui.client.widget.layout.FitLayout;
 import com.extjs.gxt.ui.client.widget.layout.FormData;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.server.rpc.XsrfProtect;
 
 @XsrfProtect
-public class BundleCertsTab extends LayoutContainer {
+public class ApplicationCertsTab extends LayoutContainer {
 
 	private static final Messages MSGS = GWT.create(Messages.class);
 
@@ -65,19 +63,14 @@ public class BundleCertsTab extends LayoutContainer {
 	private LayoutContainer 	m_commandInput;
 	private FormPanel			m_formPanel;
 	private TextArea			m_publicCertificate;
-	private ListBox			    m_certificateType;
 	private TextField<String>   m_storageAlias;
 
-	private Button				m_executeButton;
+	private Button				m_applyButton;
 	private Button				m_resetButton;
 	private ButtonBar			m_buttonBar;
 
-	private String 				bundleLeafPubCert = "Bundle leaf certificate";
-	private String 				bundleChainPubCert = "Bundle complete certificate chain";
-	private String 				bundleCA = "Certification authority";
 
-
-	public BundleCertsTab(GwtSession currentSession) 
+	public ApplicationCertsTab(GwtSession currentSession) 
 	{
 		m_currentSession = currentSession;
 	}
@@ -111,94 +104,33 @@ public class BundleCertsTab extends LayoutContainer {
 
 		m_formPanel.addListener(Events.Submit, new Listener<FormEvent>() {
 			public void handleEvent(FormEvent be) {
-				switch(m_certificateType.getSelectedIndex()){
-				case 0:
-					gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
-						@Override
-						public void onFailure(Throwable ex) {
-							FailureHandler.handle(ex);
-						}
 
-						@Override
-						public void onSuccess(GwtXSRFToken token) {	
-							gwtCertificatesService.storeBundleLeafKey(token, m_publicCertificate.getValue(), m_storageAlias.getValue(), new AsyncCallback<Integer>() {
-								public void onFailure(Throwable caught) {
-									if(caught.getLocalizedMessage().equals(GwtKuraErrorCode.ILLEGAL_ARGUMENT.toString())){
-										Info.display(MSGS.error(), "Error while storing the public key in the key store");
-									}else{
-										Info.display(MSGS.error(), caught.getLocalizedMessage());
-									}
-									m_commandInput.unmask();
+				gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
+					@Override
+					public void onFailure(Throwable ex) {
+						FailureHandler.handle(ex);
+					}
+
+					@Override
+					public void onSuccess(GwtXSRFToken token) {	
+						gwtCertificatesService.storeApplicationPublicChain(token, m_publicCertificate.getValue(), m_storageAlias.getValue(), new AsyncCallback<Integer>() {
+							public void onFailure(Throwable caught) {
+								if(caught.getLocalizedMessage().equals(GwtKuraErrorCode.ILLEGAL_ARGUMENT.toString())){
+									Info.display(MSGS.error(), "Error while storing the public keys in the key store");
+								}else{
+									Info.display(MSGS.error(), caught.getLocalizedMessage());
 								}
+								m_commandInput.unmask();
+							}
 
-								public void onSuccess(Integer certsStored) {
-									m_publicCertificate.clear();
-									m_storageAlias.clear();
-									Info.display(MSGS.info(), "Storage success. Stored " + certsStored + " public key.");
-									m_commandInput.unmask();
-								}
-							});
-						}});
-					break;
-
-				case 1:
-					gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
-						@Override
-						public void onFailure(Throwable ex) {
-							FailureHandler.handle(ex);
-						}
-
-						@Override
-						public void onSuccess(GwtXSRFToken token) {	
-							gwtCertificatesService.storeBundlePublicChain(token, m_publicCertificate.getValue(), m_storageAlias.getValue(), new AsyncCallback<Integer>() {
-								public void onFailure(Throwable caught) {
-									if(caught.getLocalizedMessage().equals(GwtKuraErrorCode.ILLEGAL_ARGUMENT.toString())){
-										Info.display(MSGS.error(), "Error while storing the public keys in the key store");
-									}else{
-										Info.display(MSGS.error(), caught.getLocalizedMessage());
-									}
-									m_commandInput.unmask();
-								}
-
-								public void onSuccess(Integer certsStored) {
-									m_publicCertificate.clear();
-									m_storageAlias.clear();
-									Info.display(MSGS.info(), "Storage success. Stored " + certsStored + " public keys.");
-									m_commandInput.unmask();
-								}
-							});
-						}});
-					break;
-
-				case 2:
-					gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
-						@Override
-						public void onFailure(Throwable ex) {
-							FailureHandler.handle(ex);
-						}
-
-						@Override
-						public void onSuccess(GwtXSRFToken token) {	
-							gwtCertificatesService.storeBundleCertificationAuthority(token, m_publicCertificate.getValue(), m_storageAlias.getValue(), new AsyncCallback<Integer>() {
-								public void onFailure(Throwable caught) {
-									if(caught.getLocalizedMessage().equals(GwtKuraErrorCode.ILLEGAL_ARGUMENT.toString())){
-										Info.display(MSGS.error(), "Error while storing the CA public keys in the key store");
-									}else{
-										Info.display(MSGS.error(), caught.getLocalizedMessage());
-									}
-									m_commandInput.unmask();
-								}
-
-								public void onSuccess(Integer certsStored) {
-									m_publicCertificate.clear();
-									m_storageAlias.clear();
-									Info.display(MSGS.info(), "Storage success. Stored " + certsStored + " CA public keys.");
-									m_commandInput.unmask();
-								}
-							});
-						}});
-					break;
-				}
+							public void onSuccess(Integer certsStored) {
+								m_publicCertificate.clear();
+								m_storageAlias.clear();
+								Info.display(MSGS.info(), "Storage success. Stored " + certsStored + " public keys.");
+								m_commandInput.unmask();
+							}
+						});
+					}});
 			}
 		});
 
@@ -216,34 +148,6 @@ public class BundleCertsTab extends LayoutContainer {
 		m_formPanel.add(description);
 
 		//
-		// Public Certificate
-		//
-		m_publicCertificate = new TextArea();
-		m_publicCertificate.setBorders(false);
-		m_publicCertificate.setReadOnly(false);
-		m_publicCertificate.setEmptyText("* " + MSGS.settingsPublicCertLabel());
-		m_publicCertificate.setName(MSGS.settingsPublicCertLabel());
-		m_publicCertificate.setAllowBlank(false);
-		m_publicCertificate.setFieldLabel(MSGS.settingsPublicCertLabel());
-		m_formPanel.add(m_publicCertificate, formData);
-
-		//
-		// Certificate Type
-		//
-		HorizontalPanel hp= new HorizontalPanel();
-
-		m_certificateType = new ListBox();
-		m_certificateType.addItem(bundleLeafPubCert);
-		m_certificateType.addItem(bundleChainPubCert);
-		m_certificateType.addItem(bundleCA);
-		m_certificateType.setName(MSGS.settingsPublicCertLabel());
-
-		hp.getElement().getStyle().setMarginLeft(80, Unit.PX);
-		hp.getElement().getStyle().setMarginBottom(7, Unit.PX);
-		hp.add(m_certificateType);
-		m_formPanel.add(hp, new FormData("50%"));
-
-		//
 		// Storage alias
 		//
 		m_storageAlias = new TextField<String>();
@@ -254,6 +158,17 @@ public class BundleCertsTab extends LayoutContainer {
 		m_storageAlias.setFieldLabel(MSGS.settingsStorageAliasLabel());
 		m_formPanel.add(m_storageAlias, new FormData("95%"));
 
+		//
+		// Public Certificate
+		//
+		m_publicCertificate = new TextArea();
+		m_publicCertificate.setBorders(false);
+		m_publicCertificate.setReadOnly(false);
+		m_publicCertificate.setEmptyText("* " + MSGS.settingsAddCertLabel());
+		m_publicCertificate.setName(MSGS.settingsAddCertLabel());
+		m_publicCertificate.setAllowBlank(false);
+		m_publicCertificate.setFieldLabel(MSGS.settingsAddCertLabel());
+		m_formPanel.add(m_publicCertificate, formData);
 
 
 		m_commandInput = m_formPanel;
@@ -271,8 +186,8 @@ public class BundleCertsTab extends LayoutContainer {
 	}
 
 	private void initButtonBar() {
-		m_executeButton = new Button(MSGS.deviceCommandExecute());
-		m_executeButton.addSelectionListener(new SelectionListener<ButtonEvent>() {  
+		m_applyButton = new Button(MSGS.apply());
+		m_applyButton.addSelectionListener(new SelectionListener<ButtonEvent>() {  
 			@Override  
 			public void componentSelected(ButtonEvent ce) {
 				if (m_formPanel.isValid()) {
@@ -292,7 +207,7 @@ public class BundleCertsTab extends LayoutContainer {
 		});
 
 		m_buttonBar.add(m_resetButton);
-		m_buttonBar.add(m_executeButton);
+		m_buttonBar.add(m_applyButton);
 	}
 
 	public void refresh() {

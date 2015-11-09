@@ -22,15 +22,7 @@ public interface GwtCertificatesService extends RemoteService
 {	
 	public Integer storePublicPrivateKeys(GwtXSRFToken xsrfToken, String privateCert, String publicCert, String password, String alias) throws GwtKuraException;
 	
-	public Integer storeLeafKey(GwtXSRFToken xsrfToken, String publicCert, String alias) throws GwtKuraException;
+	public Integer storeSSLPublicChain(GwtXSRFToken xsrfToken, String publicCert, String alias) throws GwtKuraException;
 	
-	public Integer storePublicChain(GwtXSRFToken xsrfToken, String publicCert, String alias) throws GwtKuraException;
-	
-	public Integer storeCertificationAuthority(GwtXSRFToken xsrfToken, String publicCert, String alias) throws GwtKuraException;
-	
-	public Integer storeBundleLeafKey(GwtXSRFToken xsrfToken, String publicCert, String alias) throws GwtKuraException;
-	
-	public Integer storeBundlePublicChain(GwtXSRFToken xsrfToken, String publicCert, String alias) throws GwtKuraException;
-	
-	public Integer storeBundleCertificationAuthority(GwtXSRFToken xsrfToken, String publicCert, String alias) throws GwtKuraException;
+	public Integer storeApplicationPublicChain(GwtXSRFToken xsrfToken, String publicCert, String alias) throws GwtKuraException;
 }

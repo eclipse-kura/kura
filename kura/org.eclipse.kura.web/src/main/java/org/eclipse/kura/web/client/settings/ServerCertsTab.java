@@ -45,33 +45,32 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.server.rpc.XsrfProtect;
 
 @XsrfProtect
-public class MutualAuthenticationTab extends LayoutContainer {
+public class ServerCertsTab extends LayoutContainer {
 
 	private static final Messages MSGS = GWT.create(Messages.class);
 
 	private final static String SERVLET_URL = "/" + GWT.getModuleName() + "/file/certificate";
-	
+
 	private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
-	private final GwtCertificatesServiceAsync gwtCertificatesService = GWT.create(GwtCertificatesService.class);
+	private final GwtCertificatesServiceAsync gwtCertificatesService= GWT.create(GwtCertificatesService.class);
 
 	@SuppressWarnings("unused")
 	private GwtSession			m_currentSession;
 	private LayoutContainer 	m_commandInput;
 	private FormPanel			m_formPanel;
 	private TextArea			m_publicCertificate;
-	private TextArea			m_privateCertificate;
-	private TextField<String>	m_storagePassword;
 	private TextField<String>   m_storageAlias;
 
-	private Button				m_executeButton;
+	private Button				m_applyButton;
 	private Button				m_resetButton;
 	private ButtonBar			m_buttonBar;
 
 
-	public MutualAuthenticationTab(GwtSession currentSession) 
+	public ServerCertsTab(GwtSession currentSession) 
 	{
 		m_currentSession = currentSession;
 	}
@@ -103,8 +102,6 @@ public class MutualAuthenticationTab extends LayoutContainer {
 		m_buttonBar = m_formPanel.getButtonBar();
 		initButtonBar();
 
-
-
 		m_formPanel.addListener(Events.Submit, new Listener<FormEvent>() {
 			public void handleEvent(FormEvent be) {
 				gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
@@ -115,29 +112,27 @@ public class MutualAuthenticationTab extends LayoutContainer {
 
 					@Override
 					public void onSuccess(GwtXSRFToken token) {	
-					gwtCertificatesService.storePublicPrivateKeys(token, m_privateCertificate.getValue(), m_publicCertificate.getValue(), m_storagePassword.getValue(), m_storageAlias.getValue(), new AsyncCallback<Integer>() {
-						public void onFailure(Throwable caught) {
-							if(caught.getLocalizedMessage().equals(GwtKuraErrorCode.ILLEGAL_ARGUMENT.toString())){
-								Info.display(MSGS.error(), "Error while storing the private certificate in the key store");
-							}else{
-								Info.display(MSGS.error(), caught.getLocalizedMessage());
+						gwtCertificatesService.storeSSLPublicChain(token, m_publicCertificate.getValue(), m_storageAlias.getValue(), new AsyncCallback<Integer>() {
+							public void onFailure(Throwable caught) {
+								if(caught.getLocalizedMessage().equals(GwtKuraErrorCode.ILLEGAL_ARGUMENT.toString())){
+									Info.display(MSGS.error(), "Error while storing the public keys in the key store");
+								}else{
+									Info.display(MSGS.error(), caught.getLocalizedMessage());
+								}
+								m_commandInput.unmask();
 							}
-							m_commandInput.unmask();
-						}
 
-						public void onSuccess(Integer certsStored) {
-							m_publicCertificate.clear();
-							m_privateCertificate.clear();
-							m_storagePassword.clear();
-							m_storageAlias.clear();
-							Info.display(MSGS.info(), "Storage success. Stored private and public certificates.");
-							m_commandInput.unmask();
-						}
-					});
+							public void onSuccess(Integer certsStored) {
+								m_publicCertificate.clear();
+								m_storageAlias.clear();
+								Info.display(MSGS.info(), "Storage success. Stored " + certsStored + " public keys.");
+								m_commandInput.unmask();
+							}
+						});
 					}});
 			}
 		});
-		
+
 		//
 		// Initial description
 		// 
@@ -145,36 +140,24 @@ public class MutualAuthenticationTab extends LayoutContainer {
 		description.setBorders(false);
 		description.setLayout(new ColumnLayout());
 
-		Label descriptionLabel = new Label(MSGS.settingsMAuthDescription1());
-		Label descriptionLabel2 = new Label(MSGS.settingsMAuthDescription2());
-		
+		Label descriptionLabel = new Label(MSGS.settingsAddCertDescription1());
+		Label descriptionLabel2 = new Label(MSGS.settingsAddCertDescription2());
+
 		description.add(descriptionLabel);
 		description.add(descriptionLabel2);
 		description.setStyleAttribute("padding-bottom", "10px");
 		m_formPanel.add(description);
 
 		//
-		// Private Certificate
-		//       
-		m_privateCertificate = new TextArea();
-		m_privateCertificate.setBorders(false);
-		m_privateCertificate.setReadOnly(false);
-		m_privateCertificate.setEmptyText("* " +MSGS.settingsPrivateCertLabel());
-		m_privateCertificate.setName(MSGS.settingsPrivateCertLabel());
-		m_privateCertificate.setAllowBlank(false);
-		m_privateCertificate.setFieldLabel(MSGS.settingsPrivateCertLabel());
-		m_formPanel.add(m_privateCertificate, formData);
-		
+		// Storage alias
 		//
-		//
-		//
-		m_storagePassword = new TextField<String>();
-		m_storagePassword.setName(MSGS.settingsStoragePasswordLabel());
-		m_storagePassword.setPassword(true);
-		m_storagePassword.setAllowBlank(false);
-		m_storagePassword.setEmptyText("* " + MSGS.settingsStoragePasswordLabel());
-		m_storagePassword.setFieldLabel(MSGS.settingsStoragePasswordLabel());
-		m_formPanel.add(m_storagePassword, new FormData("95%"));
+		m_storageAlias = new TextField<String>();
+		m_storageAlias.setName(MSGS.settingsStorageAliasLabel());
+		m_storageAlias.setPassword(false);
+		m_storageAlias.setAllowBlank(false);
+		m_storageAlias.setEmptyText("* " + MSGS.settingsStorageAliasLabel());
+		m_storageAlias.setFieldLabel(MSGS.settingsStorageAliasLabel());
+		m_formPanel.add(m_storageAlias, new FormData("95%"));
 
 		//
 		// Public Certificate
@@ -187,18 +170,6 @@ public class MutualAuthenticationTab extends LayoutContainer {
 		m_publicCertificate.setAllowBlank(false);
 		m_publicCertificate.setFieldLabel(MSGS.settingsPublicCertLabel());
 		m_formPanel.add(m_publicCertificate, formData);
-		
-		//
-		//
-		//
-		m_storageAlias = new TextField<String>();
-		m_storageAlias.setName(MSGS.settingsStorageAliasLabel());
-		m_storageAlias.setPassword(false);
-		m_storageAlias.setAllowBlank(false);
-		m_storageAlias.setEmptyText("* " + MSGS.settingsStorageAliasLabel());
-		m_storageAlias.setFieldLabel(MSGS.settingsStorageAliasLabel());
-		m_formPanel.add(m_storageAlias, new FormData("95%"));
-
 
 
 		m_commandInput = m_formPanel;
@@ -216,8 +187,8 @@ public class MutualAuthenticationTab extends LayoutContainer {
 	}
 
 	private void initButtonBar() {
-		m_executeButton = new Button(MSGS.deviceCommandExecute());
-		m_executeButton.addSelectionListener(new SelectionListener<ButtonEvent>() {  
+		m_applyButton = new Button(MSGS.apply());
+		m_applyButton.addSelectionListener(new SelectionListener<ButtonEvent>() {  
 			@Override  
 			public void componentSelected(ButtonEvent ce) {
 				if (m_formPanel.isValid()) {
@@ -237,7 +208,7 @@ public class MutualAuthenticationTab extends LayoutContainer {
 		});
 
 		m_buttonBar.add(m_resetButton);
-		m_buttonBar.add(m_executeButton);
+		m_buttonBar.add(m_applyButton);
 	}
 
 	public void refresh() {

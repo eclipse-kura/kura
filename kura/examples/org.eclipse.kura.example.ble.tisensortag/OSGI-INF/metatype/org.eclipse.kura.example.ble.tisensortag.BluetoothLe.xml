@@ -6,21 +6,13 @@
          
         <Icon resource="http://s3.amazonaws.com/kura-resources/application/icon/sensortag.png" size="32"/>
 
-        <AD id="cc2650"
-            name="cc2650"
-            type="Boolean"
-            cardinality="0"
-            required="true"
-            default="true"
-            description="Type of TI Sensor Tag, if CC2650 select true." />
-
          <AD id="scan_time"
             name="scan_time"
             type="Integer"
             cardinality="0"
             required="true"
             default="5"
-            description="Length of time to scan for devices (seconds)" />
+            description="Scan for devices duration in seconds." />
 
         <AD id="period"
             name="period"
@@ -28,8 +20,73 @@
             cardinality="0"
             required="true"
             default="120"
-            description="Period in seconds between 2 publishes."/>
+            description="Period in seconds between 2 publishes. It must be greater than scan_time."/>
+            
+        <AD id="enableTermometer"
+            name="enableTermometer"
+            type="Boolean"
+            cardinality="0"
+            required="true"
+            default="false"
+            description="Enable temperature sensor."/>
 
+        <AD id="enableAccelerometer"
+            name="enableAccelerometer"
+            type="Boolean"
+            cardinality="0"
+            required="true"
+            default="false"
+            description="Enable accelerometer sensor."/>
+            
+
+        <AD id="enableHygrometer"
+            name="enableHygrometer"
+            type="Boolean"
+            cardinality="0"
+            required="true"
+            default="false"
+            description="Enable humidity sensor."/>
+            
+        <AD id="enableMagnetometer"
+            name="enableMagnetometer"
+            type="Boolean"
+            cardinality="0"
+            required="true"
+            default="false"
+            description="Enable magnetometer sensor."/>
+            
+        <AD id="enableBarometer"
+            name="enableBarometer"
+            type="Boolean"
+            cardinality="0"
+            required="true"
+            default="false"
+            description="Enable pressure sensor."/>
+            
+        <AD id="enableGyroscope"
+            name="enableGyroscope"
+            type="Boolean"
+            cardinality="0"
+            required="true"
+            default="false"
+            description="Enable gyroscope sensor."/>
+            
+        <AD id="enableLuxometer"
+            name="enableLuxometer"
+            type="Boolean"
+            cardinality="0"
+            required="true"
+            default="false"
+            description="Enable light sensor (CC2650 only)."/>
+            
+        <AD id="enableButtons"
+            name="enableButtons"
+            type="Boolean"
+            cardinality="0"
+            required="true"
+            default="false"
+            description="Enable buttons."/>
+            
         <AD id="publishTopic"  
             name="publishTopic"
             type="String"

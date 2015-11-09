@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011, 2014 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2015 Eurotech and/or its affiliates
  *
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
@@ -10,8 +10,8 @@
  *   Eurotech
  */
 /*
-* Copyright (c) 2013 Eurotech Inc. All rights reserved.
-*/
+ * Copyright (c) 2013 Eurotech Inc. All rights reserved.
+ */
 
 package org.eclipse.kura.linux.net.iptables;
 
@@ -49,35 +49,35 @@ import org.slf4j.LoggerFactory;
  */
 public class LinuxFirewall {
 	private static final Logger s_logger = LoggerFactory.getLogger(LinuxFirewall.class);
-	
+
 	private static final String[] HEADER = {"#!/bin/sh", "# IPTables Firewall script", ""};
-	
+
 	private static final String OS_VERSION = System.getProperty("kura.os.version");
-	
+
 	private static final String[] DEFAULT_POLICY = HEADER;
-	
+
 	private static final String[] CLEAR_ALL_CHAINS = {"",
-						"#Clear all Built-in Chains",
-						"iptables -F INPUT",
-						"iptables -F OUTPUT",
-						"iptables -F FORWARD",
-						"iptables -t nat -F",
-						""};
+		"#Clear all Built-in Chains",
+		"iptables -F INPUT",
+		"iptables -F OUTPUT",
+		"iptables -F FORWARD",
+		"iptables -t nat -F",
+	""};
 
 	private static final String[] BLOCK_POLICY = {"",
-													"#Block all ports for input traffic",
-													"iptables -P INPUT DROP",
-													"#block Output Traffic",
-													"iptables -P OUTPUT ACCEPT",
-													"#block forward Traffic",
-													"iptables -P FORWARD DROP",
-													"",
-													"#Allow all traffic to the loop back interface",
-													"iptables -A INPUT -i lo -j ACCEPT",
-													"",
-													"#Allow Only incoming connection related to Outgoing connection",
-													"iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT",
-													""};
+		"#Block all ports for input traffic",
+		"iptables -P INPUT DROP",
+		"#block Output Traffic",
+		"iptables -P OUTPUT ACCEPT",
+		"#block forward Traffic",
+		"iptables -P FORWARD DROP",
+		"",
+		"#Allow all traffic to the loop back interface",
+		"iptables -A INPUT -i lo -j ACCEPT",
+		"",
+		"#Allow Only incoming connection related to Outgoing connection",
+		"iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT",
+	""};
 
 	/*
 	private static final String UNBLOCK_POLICY = "\n" + "#unBlock all ports for input traffic\n" + "iptables -P INPUT ACCEPT\n" + "#Accept Output Traffic\n" + "iptables -P OUTPUT ACCEPT\n"
@@ -85,28 +85,28 @@ public class LinuxFirewall {
 						+ "#Allow all traffic to loop back interface\n" + "iptables -A INPUT -i lo -j ACCEPT\n" + "\n"
 						+ "#Allow Only incoming connection related to Outgoing connection\n" + "iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT\n" + "\n";
 	 */
-	
+
 	private static final String[] ALLOW_ICMP = {"#allow inbound ICMP requests",
-												"iptables -A INPUT -p icmp --icmp-type 8 -m state --state NEW,ESTABLISHED,RELATED -j ACCEPT",
-												"iptables -A OUTPUT -p icmp --icmp-type 0 -m state --state ESTABLISHED,RELATED -j ACCEPT",
-												""};
+		"iptables -A INPUT -p icmp --icmp-type 8 -m state --state NEW,ESTABLISHED,RELATED -j ACCEPT",
+		"iptables -A OUTPUT -p icmp --icmp-type 0 -m state --state ESTABLISHED,RELATED -j ACCEPT",
+	""};
 
 	private static final String[] DO_NOT_ALLOW_ICMP = {"#Do not allow inbound ICMP requests",
-														"iptables -A INPUT -p icmp --icmp-type 8 -m state --state NEW,ESTABLISHED,RELATED -j DROP",
-														"iptables -A OUTPUT -p icmp --icmp-type 0 -m state --state ESTABLISHED,RELATED -j DROP",
-														""};
+		"iptables -A INPUT -p icmp --icmp-type 8 -m state --state NEW,ESTABLISHED,RELATED -j DROP",
+		"iptables -A OUTPUT -p icmp --icmp-type 0 -m state --state ESTABLISHED,RELATED -j DROP",
+	""};
 
 	private static final String[] ALLOW_FORWARDING = {"#allow fowarding if any masquerade is defined",
-														"echo 1 > /proc/sys/net/ipv4/ip_forward"};
+	"echo 1 > /proc/sys/net/ipv4/ip_forward"};
 
 	private static final String[] DO_NOT_ALLOW_FORWARDING = {"#do not allow fowarding unless masquerade is defined",
-																"echo 0 > /proc/sys/net/ipv4/ip_forward"};
+	"echo 0 > /proc/sys/net/ipv4/ip_forward"};
 
 	private static final String[] FOOTER = {"#source a custom firewall script",
-											"source /etc/init.d/firewall_cust 2> /dev/null"};
+	"source /etc/init.d/firewall_cust 2> /dev/null"};
 
 	private static LinuxFirewall s_linuxFirewall;
-	
+
 	private static Object s_lock = new Object();
 
 	private static final String FIREWALL_SCRIPT_NAME = "/etc/init.d/firewall";
@@ -145,12 +145,12 @@ public class LinuxFirewall {
 			s_logger.error("failed to initialize LinuxFirewall");
 		}
 	}
-	
+
 	public static LinuxFirewall getInstance() {
 		if(s_linuxFirewall == null) {
 			s_linuxFirewall = new LinuxFirewall();
 		}
-		
+
 		return s_linuxFirewall;
 	}
 
@@ -158,7 +158,7 @@ public class LinuxFirewall {
 		ArrayList<String> destination = new ArrayList<String>();
 		DataInputStream in = null;
 		BufferedReader br = null;
-		
+
 		try {
 			// Open the file that is the first command line parameter
 			FileInputStream fstream = new FileInputStream(sourceFile);
@@ -222,7 +222,7 @@ public class LinuxFirewall {
 	}
 
 	public void initialize() throws KuraException {
-		
+
 		s_logger.debug("initializing firewall ...");
 		m_localRules = new LinkedHashSet<LocalRule>();
 		m_portForwardRules = new LinkedHashSet<PortForwardRule>();
@@ -231,301 +231,301 @@ public class LinuxFirewall {
 		m_customRules = new LinkedHashSet<String>();
 		m_allowIcmp = true;
 		m_allowForwarding = false;
-		
+
 		s_logger.debug("initialize() :: Parsing current firewall configuraion");
-		
+
 		File tmpFirewallFile = new File(FIREWALL_TMP_SCRIPT_NAME);
 		if(tmpFirewallFile.exists()) {
 			tmpFirewallFile.delete();
 		}
-		
+
 		BufferedReader br = null;
-		
+
 		try {
 			br = new BufferedReader(new FileReader(FIREWALL_SCRIPT_NAME));
 			String line = null;
-			
-			lineloop:
-			while((line = br.readLine()) != null) {
-				//skip any predefined lines or comment lines
-				if(line.trim().equals("")) {
-					continue;
-				}
-				if(line.trim().startsWith("#")) {
-					continue;
-				}
-				for(String headerLine : HEADER) {
-					if(line.equals(headerLine)) {
-						continue lineloop;
-					}
-				}
-				for(String clearAllChains : CLEAR_ALL_CHAINS) {
-					if(line.equals(clearAllChains)) {
-						continue lineloop;
-					}
-				}
-				for(String blockPolicy : BLOCK_POLICY) {
-					if(line.equals(blockPolicy)) {
-						continue lineloop;
-					}
-				}
-				for(String allowIcmp : ALLOW_ICMP) {
-					if(line.equals(allowIcmp)) {
-						m_allowIcmp = true;
-						continue lineloop;
-					}
-				}
-				for(String doNotAllowIcmp : DO_NOT_ALLOW_ICMP) {
-					if(line.equals(doNotAllowIcmp)) {
-						m_allowIcmp = false;
-						continue lineloop;
-					}
-				}
-				for(String allowForwarding : ALLOW_FORWARDING) {
-					if(line.equals(allowForwarding)) {
-						m_allowForwarding = true;
-						continue lineloop;
-					}
-				}
-				for(String doNotAllowForwarding : DO_NOT_ALLOW_FORWARDING) {
-					if(line.equals(doNotAllowForwarding)) {
-						m_allowForwarding = false;
-						continue lineloop;
-					}
-				}
-				for(String footer : FOOTER) {
-					if(line.equals(footer)) {
-						continue lineloop;
-					}
-				}
 
-				if(line.startsWith("iptables -I INPUT -p")) {
-					s_logger.debug("Found local rule");
-					
-					//Local Rule
-					int dport = -1;
-					String sport = null;
-					String permittedMac = null;
-					String permittedNetwork = null;
-					String permittedInterfaceName = null;
-					String unpermittedInterfaceName = null;
-					int permittedNetworkMask = -1;
-					String protocol = null;
-					
-					StringTokenizer st = new StringTokenizer(line);
-					while(st.hasMoreTokens()) {
-						String token = st.nextToken();
-						if(token.equals("iptables")) {
-							st.nextToken();	//skip -I
-							st.nextToken(); //skip INPUT
-						} else if(token.equals("-p")) {
-							protocol = st.nextToken();
-						} else if(token.equals("--dport")) {
-							dport = Integer.parseInt(st.nextToken());
-						} else if(token.equals("--sport")) {
-							sport = st.nextToken();
-						} else if(token.equals("--mac-source")) {
-							permittedMac = st.nextToken();
-						} else if(token.equals("-m")) {
-							st.nextToken();	//skip mac
-						} else if(token.equals("-s")) {
-							String[] permitted = st.nextToken().split("/");							
-							permittedNetwork = permitted[0];
-							permittedNetworkMask = Integer.parseInt(permitted[1]);
-						} else if(token.equals("!")) {
-							st.nextToken(); //skip -i
-							unpermittedInterfaceName = st.nextToken();
-						} else if(token.equals("-i")) {
-							permittedInterfaceName = st.nextToken();
-						} else if(token.equals("-j")) {
-							//got to the end of the line...
-							break;
-						} else {
-							throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR, "Error parsing LocalRule: " + line);
+			lineloop:
+				while((line = br.readLine()) != null) {
+					//skip any predefined lines or comment lines
+					if(line.trim().equals("")) {
+						continue;
+					}
+					if(line.trim().startsWith("#")) {
+						continue;
+					}
+					for(String headerLine : HEADER) {
+						if(line.equals(headerLine)) {
+							continue lineloop;
 						}
 					}
-					
-					LocalRule localRule = new LocalRule(dport, protocol, new NetworkPair(IPAddress.parseHostAddress(permittedNetwork), (short) permittedNetworkMask), permittedInterfaceName, unpermittedInterfaceName, permittedMac, sport);
-					s_logger.debug("Adding local rule: " + localRule.toString());
-					m_localRules.add(localRule);
-				} else if(line.startsWith("iptables -t nat -A PREROUTING")) {
-					s_logger.debug("Found port forward rule");
-					
-					//Port Forward Rule
-					String inboundIfaceName = null;
-					String outboundIfaceName = null;
-					String protocol = null;
-					int inPort = -1;
-					int outPort = -1;
-					boolean masquerade = false;
-					String sport = null;
-					String permittedMac = null;
-					String permittedNetwork = null;
-					int permittedNetworkMask = -1;
-					String address = null;
-					
-					StringTokenizer st = new StringTokenizer(line, "; \t\n\r\f");
-					while(st.hasMoreTokens()) {
-						String token = st.nextToken();
-						if(token.equals("iptables")) {
-							String tok1 = st.nextToken();	//skip -t
-							String tok2 = st.nextToken(); //skip nat
-							if (tok1.equals("-t") && tok2.equals("nat")) {
-								st.nextToken();	//skip -A
-								String tok3 = st.nextToken();	//skip PREROUTING/POSTROUTING
-								if (tok3.equals("POSTROUTING")) {
-									// this is masquerading rule, set out-bound interface, masquerade flag and skip the rest
-									st.nextToken();	//skip -o 
-									outboundIfaceName = st.nextToken();
-									masquerade = true;
-									break;
-								}
-							} else if (tok1.equals("-A") && tok2.equals("FORWARD")) {
-								// this is a forwarding rule, skip it
+					for(String clearAllChains : CLEAR_ALL_CHAINS) {
+						if(line.equals(clearAllChains)) {
+							continue lineloop;
+						}
+					}
+					for(String blockPolicy : BLOCK_POLICY) {
+						if(line.equals(blockPolicy)) {
+							continue lineloop;
+						}
+					}
+					for(String allowIcmp : ALLOW_ICMP) {
+						if(line.equals(allowIcmp)) {
+							m_allowIcmp = true;
+							continue lineloop;
+						}
+					}
+					for(String doNotAllowIcmp : DO_NOT_ALLOW_ICMP) {
+						if(line.equals(doNotAllowIcmp)) {
+							m_allowIcmp = false;
+							continue lineloop;
+						}
+					}
+					for(String allowForwarding : ALLOW_FORWARDING) {
+						if(line.equals(allowForwarding)) {
+							m_allowForwarding = true;
+							continue lineloop;
+						}
+					}
+					for(String doNotAllowForwarding : DO_NOT_ALLOW_FORWARDING) {
+						if(line.equals(doNotAllowForwarding)) {
+							m_allowForwarding = false;
+							continue lineloop;
+						}
+					}
+					for(String footer : FOOTER) {
+						if(line.equals(footer)) {
+							continue lineloop;
+						}
+					}
+
+					if(line.startsWith("iptables -I INPUT -p")) {
+						s_logger.debug("Found local rule");
+
+						//Local Rule
+						int dport = -1;
+						String sport = null;
+						String permittedMac = null;
+						String permittedNetwork = null;
+						String permittedInterfaceName = null;
+						String unpermittedInterfaceName = null;
+						int permittedNetworkMask = -1;
+						String protocol = null;
+
+						StringTokenizer st = new StringTokenizer(line);
+						while(st.hasMoreTokens()) {
+							String token = st.nextToken();
+							if(token.equals("iptables")) {
+								st.nextToken();	//skip -I
+								st.nextToken(); //skip INPUT
+							} else if(token.equals("-p")) {
+								protocol = st.nextToken();
+							} else if(token.equals("--dport")) {
+								dport = Integer.parseInt(st.nextToken());
+							} else if(token.equals("--sport")) {
+								sport = st.nextToken();
+							} else if(token.equals("--mac-source")) {
+								permittedMac = st.nextToken();
+							} else if(token.equals("-m")) {
+								st.nextToken();	//skip mac
+							} else if(token.equals("-s")) {
+								String[] permitted = st.nextToken().split("/");							
+								permittedNetwork = permitted[0];
+								permittedNetworkMask = Integer.parseInt(permitted[1]);
+							} else if(token.equals("!")) {
+								st.nextToken(); //skip -i
+								unpermittedInterfaceName = st.nextToken();
+							} else if(token.equals("-i")) {
+								permittedInterfaceName = st.nextToken();
+							} else if(token.equals("-j")) {
+								//got to the end of the line...
 								break;
 							} else {
 								throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR, "Error parsing LocalRule: " + line);
 							}
-						} else if(token.equals("-i")) {
-							inboundIfaceName = st.nextToken();
-						} else if(token.equals("-p")) {
-							protocol = st.nextToken();
-						} else if(token.equals("--dport")) {
-							inPort = Integer.parseInt(st.nextToken());
-						} else if(token.equals("--sport")) {
-							sport = st.nextToken();
-						} else if(token.equals("--mac-source")) {
-							permittedMac = st.nextToken();
-						} else if(token.equals("-m")) {
-							st.nextToken();	//skip mac
-						} else if(token.equals("-j")) {
-							st.nextToken(); //skip DNAT
-						} else if(token.equals("--to")) {
-							String[] to = st.nextToken().split(":");							
-							address = to[0];
-							outPort = Integer.parseInt(to[1]);
-						} else if(token.equals("-s")) {
-							String[] permitted = st.nextToken().split("/");							
-							permittedNetwork = permitted[0];
-							permittedNetworkMask = Integer.parseInt(permitted[1]);
-						} else {
-							throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR, "Error parsing LocalRule: " + line);
 						}
-					}
-					
-					PortForwardRule portForwardRule = new PortForwardRule(
-							inboundIfaceName, outboundIfaceName, address, protocol, inPort, outPort,
-							masquerade, permittedNetwork, permittedNetworkMask,
-							permittedMac, sport);
-					
-					s_logger.debug("Adding port forward rule: " + portForwardRule.toString());
-					m_portForwardRules.add(portForwardRule);
-				} else if(line.startsWith("iptables -t nat -A POSTROUTING")) {
-					s_logger.debug("Found NAT rule");
-					
-					//NAT Rule
-					String destinationInterface = null;
-					String sourceInterface = null;
-					boolean masquerade = false;
-					
-					String protocol = null;
-					String source = null;
-					String destination = null;
-					
-					//just do this one by one
-					StringTokenizer st = new StringTokenizer(line);
-					st.nextToken();		//skip iptables
-					String token = st.nextToken();		//get -t or -A (depending on whether or not masquerade is enabled)
-					if(token.equals("-t")) {
-						masquerade = true;
-						st.nextToken();		//skip nat
-						st.nextToken();		//skip -A
-						st.nextToken();		//skip POSTROUTING
-						String tok = st.nextToken();		//skip -o or -p
+
+						LocalRule localRule = new LocalRule(dport, protocol, new NetworkPair(IPAddress.parseHostAddress(permittedNetwork), (short) permittedNetworkMask), permittedInterfaceName, unpermittedInterfaceName, permittedMac, sport);
+						s_logger.debug("Adding local rule: " + localRule.toString());
+						m_localRules.add(localRule);
+					} else if(line.startsWith("iptables -t nat -A PREROUTING")) {
+						s_logger.debug("Found port forward rule");
+
+						//Port Forward Rule
+						String inboundIfaceName = null;
+						String outboundIfaceName = null;
+						String protocol = null;
+						int inPort = -1;
+						int outPort = -1;
+						boolean masquerade = false;
+						String sport = null;
+						String permittedMac = null;
+						String permittedNetwork = null;
+						int permittedNetworkMask = -1;
+						String address = null;
+
+						StringTokenizer st = new StringTokenizer(line, "; \t\n\r\f");
+						while(st.hasMoreTokens()) {
+							String token = st.nextToken();
+							if(token.equals("iptables")) {
+								String tok1 = st.nextToken();	//skip -t
+								String tok2 = st.nextToken(); //skip nat
+								if (tok1.equals("-t") && tok2.equals("nat")) {
+									st.nextToken();	//skip -A
+									String tok3 = st.nextToken();	//skip PREROUTING/POSTROUTING
+									if (tok3.equals("POSTROUTING")) {
+										// this is masquerading rule, set out-bound interface, masquerade flag and skip the rest
+										st.nextToken();	//skip -o 
+										outboundIfaceName = st.nextToken();
+										masquerade = true;
+										break;
+									}
+								} else if (tok1.equals("-A") && tok2.equals("FORWARD")) {
+									// this is a forwarding rule, skip it
+									break;
+								} else {
+									throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR, "Error parsing LocalRule: " + line);
+								}
+							} else if(token.equals("-i")) {
+								inboundIfaceName = st.nextToken();
+							} else if(token.equals("-p")) {
+								protocol = st.nextToken();
+							} else if(token.equals("--dport")) {
+								inPort = Integer.parseInt(st.nextToken());
+							} else if(token.equals("--sport")) {
+								sport = st.nextToken();
+							} else if(token.equals("--mac-source")) {
+								permittedMac = st.nextToken();
+							} else if(token.equals("-m")) {
+								st.nextToken();	//skip mac
+							} else if(token.equals("-j")) {
+								st.nextToken(); //skip DNAT
+							} else if(token.equals("--to")) {
+								String[] to = st.nextToken().split(":");							
+								address = to[0];
+								outPort = Integer.parseInt(to[1]);
+							} else if(token.equals("-s")) {
+								String[] permitted = st.nextToken().split("/");							
+								permittedNetwork = permitted[0];
+								permittedNetworkMask = Integer.parseInt(permitted[1]);
+							} else {
+								throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR, "Error parsing LocalRule: " + line);
+							}
+						}
+
+						PortForwardRule portForwardRule = new PortForwardRule(
+								inboundIfaceName, outboundIfaceName, address, protocol, inPort, outPort,
+								masquerade, permittedNetwork, permittedNetworkMask,
+								permittedMac, sport);
+
+						s_logger.debug("Adding port forward rule: " + portForwardRule.toString());
+						m_portForwardRules.add(portForwardRule);
+					} else if(line.startsWith("iptables -t nat -A POSTROUTING")) {
+						s_logger.debug("Found NAT rule");
+
+						//NAT Rule
+						String destinationInterface = null;
+						String sourceInterface = null;
+						boolean masquerade = false;
+
+						String protocol = null;
+						String source = null;
+						String destination = null;
+
+						//just do this one by one
+						StringTokenizer st = new StringTokenizer(line);
+						st.nextToken();		//skip iptables
+						String token = st.nextToken();		//get -t or -A (depending on whether or not masquerade is enabled)
+						if(token.equals("-t")) {
+							masquerade = true;
+							st.nextToken();		//skip nat
+							st.nextToken();		//skip -A
+							st.nextToken();		//skip POSTROUTING
+							String tok = st.nextToken();		//skip -o or -p
+							if (tok.equals("-p")) {
+								protocol = st.nextToken();
+								st.nextToken(); 	// skip -s
+								source = st.nextToken();
+								st.nextToken(); 	// skip -d
+								destination = st.nextToken();
+								st.nextToken(); 	// skip -o
+								destinationInterface = st.nextToken();
+							} else {
+								destinationInterface = st.nextToken();
+							}
+							st.nextToken();		//skip -j
+							st.nextToken();		//skip MASQUERADE
+							st.nextToken();		//skip iptables
+							st.nextToken();		//skip -A
+						}
+
+						//get the rest (or continue on if no MASQ)
+						st.nextToken();		//skip FORWARD
+						String tok = st.nextToken();		//skip -i or -p
 						if (tok.equals("-p")) {
-							protocol = st.nextToken();
-							st.nextToken(); 	// skip -s
-							source = st.nextToken();
-							st.nextToken(); 	// skip -d
-							destination = st.nextToken();
-							st.nextToken(); 	// skip -o
-							destinationInterface = st.nextToken();
+							st.nextToken(); // skip protocol
+							st.nextToken(); // skip -s
+							st.nextToken(); // skip source
+							st.nextToken(); // skip -d
+							st.nextToken(); // skip destination
+							st.nextToken(); // skip -i
+							st.nextToken(); // skip destination interface
+							st.nextToken();		//skip -o
+							sourceInterface = st.nextToken();
 						} else {
 							destinationInterface = st.nextToken();
+							st.nextToken();		//skip -o
+							sourceInterface = st.nextToken();
 						}
-						st.nextToken();		//skip -j
-						st.nextToken();		//skip MASQUERADE
+
+						if (protocol == null) {
+							// used to be s_logger.debug
+							s_logger.debug("Parsed auto NAT rule with" +
+									"   sourceInterface: " + sourceInterface +
+									"   destinationInterface: " + destinationInterface +
+									"   masquerade: " + masquerade );
+
+							NATRule natRule = new NATRule(sourceInterface, destinationInterface, masquerade);
+							s_logger.debug("Adding auto NAT rule " + natRule.toString());
+							m_autoNatRules.add(natRule);
+						} else {
+							s_logger.debug("Parsed NAT rule with" +
+									"   sourceInterface: " + sourceInterface +
+									"   destinationInterface: " + destinationInterface +
+									"   masquerade: " + masquerade + 
+									"	protocol: " + protocol + 
+									"	source network/host: " + source + 
+									"	destination network/host + destination");
+							NATRule natRule = new NATRule(sourceInterface, destinationInterface, protocol, source, destination, masquerade);
+							s_logger.warn("Adding NAT rule " + natRule.toString());
+							m_natRules.add(natRule);
+						}
+					} else if (line.startsWith("iptables -A FORWARD")) { 
+						s_logger.debug("Found FORWARD rule");
+
+						//just do this one by one
+						StringTokenizer st = new StringTokenizer(line);
 						st.nextToken();		//skip iptables
 						st.nextToken();		//skip -A
-					}
+						st.nextToken();		//skip FORWARD
+						st.nextToken();		//skip -p
+						String protocol = st.nextToken();
+						st.nextToken(); 	// skip -s
+						String source = st.nextToken();
+						st.nextToken(); 	// skip -d
+						String destination = st.nextToken();
+						st.nextToken(); 	// skip -i
+						String destinationInterface = st.nextToken();
+						st.nextToken(); 	// skip -o
+						String sourceInterface = st.nextToken();
 
-					//get the rest (or continue on if no MASQ)
-					st.nextToken();		//skip FORWARD
-					String tok = st.nextToken();		//skip -i or -p
-					if (tok.equals("-p")) {
-						st.nextToken(); // skip protocol
-						st.nextToken(); // skip -s
-						st.nextToken(); // skip source
-						st.nextToken(); // skip -d
-						st.nextToken(); // skip destination
-						st.nextToken(); // skip -i
-						st.nextToken(); // skip destination interface
-						st.nextToken();		//skip -o
-						sourceInterface = st.nextToken();
-					} else {
-						destinationInterface = st.nextToken();
-						st.nextToken();		//skip -o
-						sourceInterface = st.nextToken();
-					}
-					
-					if (protocol == null) {
-						// used to be s_logger.debug
-						s_logger.debug("Parsed auto NAT rule with" +
-								"   sourceInterface: " + sourceInterface +
-								"   destinationInterface: " + destinationInterface +
-								"   masquerade: " + masquerade );
-	
-						NATRule natRule = new NATRule(sourceInterface, destinationInterface, masquerade);
-						s_logger.debug("Adding auto NAT rule " + natRule.toString());
-						m_autoNatRules.add(natRule);
-					} else {
-						s_logger.debug("Parsed NAT rule with" +
-								"   sourceInterface: " + sourceInterface +
-								"   destinationInterface: " + destinationInterface +
-								"   masquerade: " + masquerade + 
-								"	protocol: " + protocol + 
-								"	source network/host: " + source + 
-								"	destination network/host + destination");
-						NATRule natRule = new NATRule(sourceInterface, destinationInterface, protocol, source, destination, masquerade);
-						s_logger.warn("Adding NAT rule " + natRule.toString());
+						NATRule natRule = new NATRule(sourceInterface, destinationInterface, protocol, source, destination, false);
+						s_logger.warn("Adding NAT rule (no MASQUERADING)" + natRule.toString());
 						m_natRules.add(natRule);
+					} else {
+						throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "invalid line in /etc/init.d/firewall: " + line);
 					}
-				} else if (line.startsWith("iptables -A FORWARD")) { 
-					s_logger.debug("Found FORWARD rule");
-					
-					//just do this one by one
-					StringTokenizer st = new StringTokenizer(line);
-					st.nextToken();		//skip iptables
-					st.nextToken();		//skip -A
-					st.nextToken();		//skip FORWARD
-					st.nextToken();		//skip -p
-					String protocol = st.nextToken();
-					st.nextToken(); 	// skip -s
-					String source = st.nextToken();
-					st.nextToken(); 	// skip -d
-					String destination = st.nextToken();
-					st.nextToken(); 	// skip -i
-					String destinationInterface = st.nextToken();
-					st.nextToken(); 	// skip -o
-					String sourceInterface = st.nextToken();
-					
-					NATRule natRule = new NATRule(sourceInterface, destinationInterface, protocol, source, destination, false);
-					s_logger.warn("Adding NAT rule (no MASQUERADING)" + natRule.toString());
-					m_natRules.add(natRule);
-				} else {
-					throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "invalid line in /etc/init.d/firewall: " + line);
-				}
-			}			
+				}			
 		} catch(Exception e) {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
 		} finally {
@@ -555,7 +555,7 @@ public class LinuxFirewall {
 			for(String line : BLOCK_POLICY) {
 				pw.println(line);
 			}
-			
+
 			if(m_allowIcmp) {
 				for(String line : ALLOW_ICMP) {
 					pw.println(line);
@@ -565,35 +565,35 @@ public class LinuxFirewall {
 					pw.println(line);
 				}
 			}
-			
+
 			pw.println("#custom local service rules");
 			Iterator<LocalRule> itLocalRules = m_localRules.iterator();
 			while(itLocalRules.hasNext()) {
-			    pw.println(itLocalRules.next());
+				pw.println(itLocalRules.next());
 			}
 			pw.println();
 			pw.println("#custom port forward service rules");
 			Iterator<PortForwardRule> itPortForwardRules = m_portForwardRules.iterator();
 			while(itPortForwardRules.hasNext()) {
-			    pw.println(itPortForwardRules.next());
+				pw.println(itPortForwardRules.next());
 			}
 			pw.println();
 			pw.println("#custom automatic NAT service rules (if NAT option is enabled for LAN interface)");
 			Iterator<NATRule> itAutoNatRules = m_autoNatRules.iterator();
 			while(itAutoNatRules.hasNext()) {
-			    pw.println(itAutoNatRules.next());
+				pw.println(itAutoNatRules.next());
 			}
 			pw.println();
 			pw.println("#custom NAT service rules");
 			Iterator<NATRule> itNatRules = m_natRules.iterator();
 			while(itNatRules.hasNext()) {
-			    pw.println(itNatRules.next());
+				pw.println(itNatRules.next());
 			}
 			pw.println();
 			pw.println("#custom rules");
 			Iterator<String> itCustomRules = m_customRules.iterator();
 			while(itCustomRules.hasNext()) {
-			    pw.println(itCustomRules.next());
+				pw.println(itCustomRules.next());
 			}
 			pw.println();
 			if(m_allowForwarding) {
@@ -611,7 +611,7 @@ public class LinuxFirewall {
 				pw.println(line);
 			}
 			pw.close();
-			
+
 			SafeProcess proc = null; 
 			try {
 				proc = ProcessUtil.exec("chmod 755 " + FIREWALL_TMP_SCRIPT_NAME);
@@ -620,7 +620,7 @@ public class LinuxFirewall {
 			finally {
 				if (proc != null) ProcessUtil.destroy(proc);
 			}
-			
+
 			//move the file if we made it this far
 			File tmpFirewallFile = new File(FIREWALL_TMP_SCRIPT_NAME);
 			File firewallFile = new File(FIREWALL_SCRIPT_NAME);
@@ -655,19 +655,19 @@ public class LinuxFirewall {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
 		}
 	}
-	
+
 	public void addLocalRule(int port, String protocol, String permittedNetwork, String permittedNetworkPrefix, String permittedInterfaceName, String unpermittedInterfaceName, String permittedMAC, String sourcePortRange) throws KuraException {
 		try {
 			LocalRule newLocalRule = null;
 			if(permittedNetwork != null && permittedNetworkPrefix != null) {
 				s_logger.debug("permittedNetwork: " + permittedNetwork);
 				s_logger.debug("permittedNetworkPrefix: " + permittedNetworkPrefix);
-				
+
 				newLocalRule = new LocalRule(port, protocol, new NetworkPair(IPAddress.parseHostAddress(permittedNetwork), Short.parseShort(permittedNetworkPrefix)), permittedInterfaceName, unpermittedInterfaceName, permittedMAC, sourcePortRange);
 			} else {
 				newLocalRule = new LocalRule(port, protocol, new NetworkPair(IPAddress.parseHostAddress("0.0.0.0"), (short)0), permittedInterfaceName, permittedInterfaceName, permittedMAC, sourcePortRange);
 			}
-			
+
 			//make sure it is not already present
 			for(LocalRule localRule : m_localRules) {
 				if(newLocalRule.equals(localRule)) {
@@ -675,7 +675,7 @@ public class LinuxFirewall {
 					return;
 				}
 			}
-			
+
 			s_logger.info("adding local rule to firewall configuration: " + newLocalRule.toString());
 			m_localRules.add(newLocalRule);
 			this.update();
@@ -703,7 +703,7 @@ public class LinuxFirewall {
 						masquerade, permittedNetwork, -1, permittedMAC,
 						sourcePortRange);
 			}
-			
+
 			//make sure it is not already present
 			for(PortForwardRule portForwardRule : m_portForwardRules) {
 				if(newPortForwardRule.equals(portForwardRule)) {
@@ -711,10 +711,10 @@ public class LinuxFirewall {
 					return;
 				}
 			}
-			
+
 			s_logger.info("adding port forward rule to firewall configuration: " + newPortForwardRule.toString());
 			m_portForwardRules.add(newPortForwardRule);
-			
+
 			m_allowForwarding = true;
 			this.update();
 		} catch (Exception e) {
@@ -731,18 +731,18 @@ public class LinuxFirewall {
 	 * @throws EsfException
 	 */
 	public void addNatRule(String sourceInterface, String destinationInterface, boolean masquerade) throws KuraException {
-		
+
 		try {
-		    if(sourceInterface == null || sourceInterface.isEmpty()) {
-		        s_logger.warn("Can't add auto NAT rule - source interface not specified");
-		        return;
-		    } else if(destinationInterface == null || destinationInterface.isEmpty()) {
-                s_logger.warn("Can't add auto NAT rule - destination interface not specified");
-                return;
-		    }
-		    
+			if(sourceInterface == null || sourceInterface.isEmpty()) {
+				s_logger.warn("Can't add auto NAT rule - source interface not specified");
+				return;
+			} else if(destinationInterface == null || destinationInterface.isEmpty()) {
+				s_logger.warn("Can't add auto NAT rule - destination interface not specified");
+				return;
+			}
+
 			NATRule newNatRule = new NATRule(sourceInterface, destinationInterface, masquerade);
-			
+
 			//make sure it is not already present
 			for(NATRule natRule : m_autoNatRules) {
 				if(newNatRule.equals(natRule)) {
@@ -750,7 +750,7 @@ public class LinuxFirewall {
 					return;
 				}
 			}
-			
+
 			s_logger.info("adding auto NAT rule to firewall configuration: " + newNatRule.toString());
 			m_autoNatRules.add(newNatRule);
 			m_allowForwarding = true;
@@ -760,7 +760,7 @@ public class LinuxFirewall {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
 		}
 	}
-	
+
 	/**
 	 * Adds NAT Rule
 	 * 
@@ -775,16 +775,16 @@ public class LinuxFirewall {
 	public void addNatRule(String sourceInterface, String destinationInterface,
 			String protocol, String source, String destination,
 			boolean masquerade) throws KuraException {
-		
+
 		try {
 			if(sourceInterface == null || sourceInterface.isEmpty()) {
-		        s_logger.warn("Can't add NAT rule - source interface not specified");
-		        return;
-		    } else if(destinationInterface == null || destinationInterface.isEmpty()) {
-	            s_logger.warn("Can't add NAT rule - destination interface not specified");
-	            return;
-		    }
-			
+				s_logger.warn("Can't add NAT rule - source interface not specified");
+				return;
+			} else if(destinationInterface == null || destinationInterface.isEmpty()) {
+				s_logger.warn("Can't add NAT rule - destination interface not specified");
+				return;
+			}
+
 			NATRule newNatRule = new NATRule(sourceInterface,
 					destinationInterface, protocol, source, destination,
 					masquerade);
@@ -824,7 +824,7 @@ public class LinuxFirewall {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
 		}
 	}
-	
+
 	public Set<NATRule> getNatRules() throws KuraException {
 		try {
 			return m_natRules;
@@ -833,7 +833,7 @@ public class LinuxFirewall {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
 		}
 	}
-	
+
 	public void deleteLocalRule(LocalRule rule) throws KuraException {
 		try {
 			m_localRules.remove(rule);
@@ -850,7 +850,7 @@ public class LinuxFirewall {
 			if (((m_autoNatRules != null) && (m_autoNatRules.size() < 1))
 					&& ((m_natRules != null) && (m_natRules.size() < 1))
 					&& ((m_portForwardRules != null) && (m_portForwardRules.size() < 1))) {
-				
+
 				m_allowForwarding = false;
 			}
 			this.update();
@@ -866,7 +866,7 @@ public class LinuxFirewall {
 			if (((m_autoNatRules != null) && (m_autoNatRules.size() < 1))
 					&& ((m_natRules != null) && (m_natRules.size() < 1))
 					&& ((m_portForwardRules != null) && (m_portForwardRules.size() < 1))) {
-				
+
 				m_allowForwarding = false;
 			}
 			update();
@@ -891,7 +891,7 @@ public class LinuxFirewall {
 			m_portForwardRules.clear();
 			if (((m_autoNatRules != null) && (m_autoNatRules.size() < 1))
 					&& ((m_natRules != null) && (m_natRules.size() < 1))) {
-				
+
 				m_allowForwarding = false;
 			}
 			this.update();
@@ -900,14 +900,14 @@ public class LinuxFirewall {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
 		}
 	}
-	
+
 	public void replaceAllNatRules(LinkedHashSet<NATRule> newNatRules) throws KuraException {
 		try {
 			m_autoNatRules = newNatRules;
 			if (((m_autoNatRules != null) && (m_autoNatRules.size() > 0))
 					|| ((m_natRules != null) && (m_natRules.size() > 0))
 					|| ((m_portForwardRules != null) && (m_portForwardRules.size() > 0))) {
-				
+
 				m_allowForwarding = true;
 			} else {
 				m_allowForwarding = false;
@@ -917,13 +917,13 @@ public class LinuxFirewall {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
 		}
 	}
-	
+
 	public void deleteAllAutoNatRules() throws KuraException {
 		try {
 			m_autoNatRules.clear();
 			if ((m_natRules != null) && (m_natRules.size() < 1)
 					&& ((m_portForwardRules != null) && (m_portForwardRules.size() < 1))) {
-				
+
 				m_allowForwarding = false;
 			}
 			this.update();
@@ -932,7 +932,7 @@ public class LinuxFirewall {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
 		}
 	}
-	
+
 	public void deleteAllNatRules() throws KuraException {
 		try {
 			m_natRules.clear();
@@ -967,9 +967,86 @@ public class LinuxFirewall {
 			if(!file.exists()) {
 				throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "Firewall configuration file: " + FIREWALL_SCRIPT_NAME + " does not exist.");
 			}
-			s_logger.info("Running the firewall script");			
-			proc = ProcessUtil.exec("sh " + FIREWALL_SCRIPT_NAME);
-			proc.waitFor();
+			s_logger.info("Running the firewall script");
+
+			s_logger.debug("Cleaning chains...");
+			for(String clearRule: CLEAR_ALL_CHAINS){
+				if(clearRule.startsWith("iptables")){
+					proc = ProcessUtil.exec(clearRule.toString());
+					proc.waitFor();
+				}
+			}
+
+			s_logger.debug("Setting block policy...");
+			for(String blockRule: BLOCK_POLICY){
+				if(blockRule.startsWith("iptables")){
+					proc = ProcessUtil.exec(blockRule.toString());
+					proc.waitFor();
+				}
+			}
+
+			s_logger.debug("Applying local rules...");	
+			if(m_localRules != null){
+				for(LocalRule lr: m_localRules){
+					proc = ProcessUtil.exec(lr.toString());
+					proc.waitFor();
+				}
+			}
+
+			s_logger.debug("Applying port forward rules...");	
+			if(m_portForwardRules != null){
+				for(PortForwardRule pfr: m_portForwardRules){
+					proc = ProcessUtil.exec(pfr.toString());
+					proc.waitFor();
+				}
+			}
+
+			s_logger.debug("Applying auto NAT rules...");	
+			if(m_autoNatRules != null){
+				for(NATRule autoNatRule: m_autoNatRules){
+					proc = ProcessUtil.exec(autoNatRule.toString());
+					proc.waitFor();
+				}
+			}
+
+			s_logger.debug("Applying NAT rules...");	
+			if(m_natRules != null){
+				for(NATRule natRule: m_natRules){
+					proc = ProcessUtil.exec(natRule.toString());
+					proc.waitFor();
+				}
+			}
+
+			s_logger.debug("Applying custom rules...");	
+			if(m_customRules != null){
+				for(String customRule: m_customRules){
+					proc = ProcessUtil.exec(customRule.toString());
+					proc.waitFor();
+				}
+			}
+
+			s_logger.debug("Managing ICMP...");	
+			if(m_allowIcmp){
+				proc = ProcessUtil.exec(ALLOW_ICMP[1]);
+				proc.waitFor();
+				proc = ProcessUtil.exec(ALLOW_ICMP[2]);
+				proc.waitFor();
+			} else {
+				proc = ProcessUtil.exec(DO_NOT_ALLOW_ICMP[1]);
+				proc.waitFor();
+				proc = ProcessUtil.exec(DO_NOT_ALLOW_ICMP[2]);
+				proc.waitFor();
+			}
+
+			s_logger.debug("Managing port forwarding...");	
+			if(m_allowForwarding){
+				proc = ProcessUtil.exec(ALLOW_FORWARDING[1]);
+				proc.waitFor();
+			} else {
+				proc = ProcessUtil.exec(DO_NOT_ALLOW_FORWARDING[1]);
+				proc.waitFor();
+			}
+
 		} catch (Exception e) {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
 		}
@@ -977,7 +1054,7 @@ public class LinuxFirewall {
 			if (proc != null) ProcessUtil.destroy(proc);
 		}
 	}
-	
+
 	/*
 	 * Saves the current iptables config into /etc/sysconfig/iptables
 	 */
@@ -985,7 +1062,7 @@ public class LinuxFirewall {
 		SafeProcess proc = null;
 		try {
 			if (OS_VERSION.equals(KuraConstants.Mini_Gateway.getImageName() + "_" + KuraConstants.Mini_Gateway.getImageVersion()) ||
-				(OS_VERSION.equals(KuraConstants.Intel_Edison.getImageName() + "_" + KuraConstants.Intel_Edison.getImageVersion() + "_" + KuraConstants.Intel_Edison.getTargetName()))) {
+					(OS_VERSION.equals(KuraConstants.Intel_Edison.getImageName() + "_" + KuraConstants.Intel_Edison.getImageVersion() + "_" + KuraConstants.Intel_Edison.getTargetName()))) {
 				proc = ProcessUtil.exec("iptables-save > /opt/eurotech/firewall_rules.fw");
 				proc.waitFor();
 			} else {
@@ -999,12 +1076,12 @@ public class LinuxFirewall {
 			if (proc != null) ProcessUtil.destroy(proc);
 		}
 	}
-	
+
 	public void enable() throws KuraException {
 		this.update();
 		this.iptablesSave();
 	}
-	
+
 	public void disable() throws KuraException {
 		this.iptablesSave();
 
@@ -1019,7 +1096,7 @@ public class LinuxFirewall {
 			}
 			pw.flush();
 			pw.close();
-			
+
 			//move the file if we made it this far
 			File tmpFirewallFile = new File(FIREWALL_TMP_SCRIPT_NAME);
 			File firewallFile = new File(FIREWALL_SCRIPT_NAME);
@@ -1042,24 +1119,24 @@ public class LinuxFirewall {
 	public void allowIcmp() {
 		m_allowIcmp = true;
 	}
-	
+
 	public void disableIcmp() {
 		m_allowIcmp = false;
 	}
-	
+
 	public void enableForwarding() {
 		m_allowForwarding = true;
 	}
-	
+
 	public void disableForwarding() {
 		m_allowForwarding = false;
 	}
-	
+
 	private void update() throws KuraException {
 		synchronized(s_lock) {
-		    if(writeFile()) {
-		    	runScript();
-		    }
+			if(writeFile()) {
+				runScript();
+			}
 		}
 	}
 }

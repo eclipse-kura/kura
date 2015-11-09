@@ -21,6 +21,7 @@ import java.util.Map;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.core.net.util.NetworkUtil;
 import org.eclipse.kura.core.util.NetUtil;
 import org.eclipse.kura.net.IP4Address;
@@ -409,7 +410,9 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 									gwtWifiConfig.setIgnoreSSID(wifiConfig.ignoreSSID());
 
 									// passkey
-									gwtWifiConfig.setPassword(wifiConfig.getPasskey());
+									Password psswd= wifiConfig.getPasskey();
+									String password= new String(psswd.getPassword());
+									gwtWifiConfig.setPassword(password);
 
 									// channel
 									int [] channels = wifiConfig.getChannels();
@@ -789,7 +792,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 						gwtWifiConfig.setWirelessMode(((GwtWifiNetInterfaceConfig)config).getWirelessMode());
 						WifiConfig wifiConfig = this.getWifiConfig(gwtWifiConfig);
 
-						String passKey= wifiConfig.getPasskey();
+						String passKey= new String(wifiConfig.getPasskey().getPassword());
 						if(passKey != null && passKey.equals(PLACEHOLDER)){
 
 							ListLoadResult<GwtNetInterfaceConfig> result= privateFindNetInterfaceConfigurations();

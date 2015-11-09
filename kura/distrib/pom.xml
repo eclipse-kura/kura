@@ -138,6 +138,11 @@
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.kura.emulator.gpio</artifactId>
+									<version>${org.eclipse.kura.emulator.gpio.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
 									<artifactId>org.eclipse.kura.linux.clock</artifactId>
 									<version>${org.eclipse.kura.linux.clock.version}</version>
 								</artifactItem>
@@ -223,25 +228,6 @@
 									<groupId>org.eclipse.kura</groupId>
 									<artifactId>org.eclipse.kura.linux.gpio</artifactId>
 									<version>${org.eclipse.kura.linux.gpio.version}</version>
-								</artifactItem>
-							</artifactItems>
-							<stripVersion>true</stripVersion>
-							<outputDirectory>${project.basedir}/target/plugins</outputDirectory>
-						</configuration>
-					</execution>
-					<execution>
-						<id>get-gpio-emulated-bundle</id>
-						<phase>generate-resources</phase>
-						<goals>
-							<goal>copy</goal>
-						</goals>
-						<configuration>
-							<skip>${org.eclipse.kura.dio.include}</skip>
-							<artifactItems>
-								<artifactItem>
-									<groupId>org.eclipse.kura</groupId>
-									<artifactId>org.eclipse.kura.emulator.gpio</artifactId>
-									<version>${org.eclipse.kura.emulator.gpio.version}</version>
 								</artifactItem>
 							</artifactItems>
 							<stripVersion>true</stripVersion>
@@ -1625,7 +1611,7 @@
 										</copy>
 										<!-- Add individual emulator bundles-->
 										<copy 
-											file="../org.eclipse.kura.emulator.gpio/target/org.eclipse.kura.emulator.gpio-${org.eclipse.kura.emulator.gpio.version}.jar"
+											file="${project.build.directory}/plugins/org.eclipse.kura.emulator.gpio_${org.eclipse.kura.emulator.gpio.version}.jar"
 											todir="${project.build.directory}/staging/target-definition/equinox_3.8.1/repository/plugins"/>
 
 										<delete

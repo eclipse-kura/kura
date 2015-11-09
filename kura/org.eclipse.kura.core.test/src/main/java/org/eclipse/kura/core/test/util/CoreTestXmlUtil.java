@@ -14,11 +14,11 @@ import javax.xml.stream.FactoryConfigurationError;
 import javax.xml.stream.XMLStreamException;
 
 import org.eclipse.kura.core.configuration.XmlSnapshotIdResult;
-import org.eclipse.kura.core.deployment.XmlBundle;
-import org.eclipse.kura.core.deployment.XmlBundleInfo;
-import org.eclipse.kura.core.deployment.XmlBundles;
-import org.eclipse.kura.core.deployment.XmlDeploymentPackage;
-import org.eclipse.kura.core.deployment.XmlDeploymentPackages;
+import org.eclipse.kura.core.deployment.xml.XmlBundle;
+import org.eclipse.kura.core.deployment.xml.XmlBundleInfo;
+import org.eclipse.kura.core.deployment.xml.XmlBundles;
+import org.eclipse.kura.core.deployment.xml.XmlDeploymentPackage;
+import org.eclipse.kura.core.deployment.xml.XmlDeploymentPackages;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;

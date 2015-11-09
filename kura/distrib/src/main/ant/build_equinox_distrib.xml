@@ -137,9 +137,6 @@
 		<available file="${project.build.directory}/plugins/org.eclipse.kura.linux.gpio_${org.eclipse.kura.linux.gpio.version}.jar" property="linux.gpio.jar.present" />
 		<antcall target="gpio-config" />
 
-		<available file="${project.build.directory}/plugins/org.eclipse.kura.emulator.gpio_${org.eclipse.kura.emulator.gpio.version}.jar" property="emulated.gpio.jar.present" />
-		<antcall target="emulated-gpio-config" />
-
         <!-- Add mToolkit to config.ini -->
         <propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
             <entry key="osgi.bundles" operation="+"
@@ -489,7 +486,6 @@ fi
 		<!-- Conditional inclusion of jar files in the distribution jar -->
 		<antcall target="web-jar" />
 		<antcall target="gpio-jar" />
-		<antcall target="emulated-gpio-jar" />
 
       <echo message="Building Kura Distribution for ${build.name}-jars..." />
 
@@ -602,13 +598,6 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
 		</propertyfile>
 	</target>
 
-	<target name="emulated-gpio-config" if="emulated.gpio.jar.present">
-		<propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
-			<entry key="osgi.bundles" operation="+"
-				value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.emulator.gpio_${org.eclipse.kura.emulator.gpio.version}.jar@5:start" />
-		</propertyfile>
-	</target>
-
 	<target name="web-jar" if="web.jar.present">
 		<zip destfile="${project.build.directory}/${build.output.name}.zip" update="true">
 			<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.web_${org.eclipse.kura.web.version}.jar"
@@ -622,19 +611,4 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
                         prefix="${build.output.name}/kura/plugins" />
 		</zip>
 	</target>
-
-	<target name="emulated-gpio-jar" if="emulated.gpio.jar.present">
-		<zip destfile="${project.build.directory}/${build.output.name}.zip" update="true">
-			<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.emulator.gpio_${org.eclipse.kura.emulator.gpio.version}.jar"
-                        prefix="${build.output.name}/kura/plugins" />
-		</zip>
-
-		<zip destfile="${project.build.directory}/tmp.zip"> 
-			<zipfileset src="${project.build.directory}/${build.output.name}.zip"> 
-				<exclude name="${build.output.name}/plugins/jdk.dio_1.0.1.jar" /> 
-			</zipfileset> 
-		</zip> 
-		<move file="${project.build.directory}/tmp.zip" tofile="${project.build.directory}/${build.output.name}.zip" /> 
-	</target>
-
 </project>

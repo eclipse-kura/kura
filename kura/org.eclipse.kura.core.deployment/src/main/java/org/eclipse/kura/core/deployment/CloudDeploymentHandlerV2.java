@@ -165,7 +165,6 @@ public class CloudDeploymentHandlerV2 extends Cloudlet {
 
 	private String m_pendingUninstPackageName;
 	private String m_installVerificationDir;
-	private String m_clientId;
 
 
 
@@ -216,7 +215,6 @@ public class CloudDeploymentHandlerV2 extends Cloudlet {
 		super.activate(componentContext);
 
 		m_bundleContext = componentContext.getBundleContext();
-		m_clientId= m_dataTransportService.getClientId();
 
 		m_dpaConfPath = System.getProperty(DPA_CONF_PATH_PROPNAME);
 		if (m_dpaConfPath == null || m_dpaConfPath.isEmpty()) {
@@ -412,7 +410,7 @@ public class CloudDeploymentHandlerV2 extends Cloudlet {
 		final DeploymentPackageDownloadOptions options;
 		try {
 			options = new DeploymentPackageDownloadOptions(request);
-			options.setClientId(m_clientId);
+			options.setClientId(m_dataTransportService.getClientId());
 			m_downloadImplementation= new DownloadImpl(options, this);
 		} catch (Exception ex) {
 			s_logger.info("Malformed download request!");
@@ -510,7 +508,7 @@ public class CloudDeploymentHandlerV2 extends Cloudlet {
 		final DeploymentPackageInstallOptions options;
 		try {
 			options = new DeploymentPackageInstallOptions(request);
-			options.setClientId(m_clientId);
+			options.setClientId(m_dataTransportService.getClientId());
 		} catch (Exception ex) {
 			s_logger.error("Malformed install request!");
 			response.setResponseCode(KuraResponsePayload.RESPONSE_CODE_ERROR);
@@ -594,7 +592,7 @@ public class CloudDeploymentHandlerV2 extends Cloudlet {
 		final DeploymentPackageUninstallOptions options;
 		try {
 			options = new DeploymentPackageUninstallOptions(request);
-			options.setClientId(m_clientId);
+			options.setClientId(m_dataTransportService.getClientId());
 		} catch (Exception ex) {
 			s_logger.error("Malformed uninstall request!");
 			response.setResponseCode(KuraResponsePayload.RESPONSE_CODE_ERROR);

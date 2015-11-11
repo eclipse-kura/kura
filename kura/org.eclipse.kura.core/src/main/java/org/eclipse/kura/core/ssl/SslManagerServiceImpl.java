@@ -54,6 +54,7 @@ import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.ssl.SslManagerService;
+import org.eclipse.kura.ssl.SslManagerServiceOptions;
 import org.eclipse.kura.ssl.SslServiceListener;
 import org.eclipse.kura.system.SystemService;
 import org.osgi.service.component.ComponentContext;
@@ -386,6 +387,12 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
 			close(tsReadStream);
 			close(tsOutStream);
 		}
+	}
+	
+	@Override
+	public SslManagerServiceOptions getConfigurationOptions() throws GeneralSecurityException, IOException {
+		// TODO Auto-generated method stub
+		return m_options;
 	}
 
 	// ----------------------------------------------------------------

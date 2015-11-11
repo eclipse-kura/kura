@@ -45,10 +45,8 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.ListBox;
-import com.google.gwt.user.server.rpc.XsrfProtect;
 
-@XsrfProtect
+
 public class ServerCertsTab extends LayoutContainer {
 
 	private static final Messages MSGS = GWT.create(Messages.class);

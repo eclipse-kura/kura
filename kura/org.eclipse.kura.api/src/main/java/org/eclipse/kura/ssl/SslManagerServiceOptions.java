@@ -9,25 +9,25 @@
  * Contributors:
  *   Eurotech
  */
-package org.eclipse.kura.core.ssl;
+package org.eclipse.kura.ssl;
 
 import java.util.Map;
 
-class SslManagerServiceOptions
+public class SslManagerServiceOptions
 {
-    static final String  PROP_PROTOCOL       = "ssl.default.protocol";
-    static final String  PROP_TRUST_STORE    = "ssl.default.trustStore";
-    static final String  PROP_CIPHERS        = "ssl.default.cipherSuites";    
-    static final String  PROP_HN_VERIFY      = "ssl.hostname.verification";
-    static final String  PROP_TRUST_PASSWORD = "ssl.keystore.password";
+    public static final String  PROP_PROTOCOL       = "ssl.default.protocol";
+    public static final String  PROP_TRUST_STORE    = "ssl.default.trustStore";
+    public static final String  PROP_CIPHERS        = "ssl.default.cipherSuites";    
+    public static final String  PROP_HN_VERIFY      = "ssl.hostname.verification";
+    public static final String  PROP_TRUST_PASSWORD = "ssl.keystore.password";
 
-    static final String  PROP_DEFAULT_PROTOCOL      = "TLSv1";
-    static final Boolean PROP_DEFAULT_HN_VERIFY     = true;
-    static final String PROP_DEFAULT_TRUST_PASSWORD = "changeit";
+    public static final String  PROP_DEFAULT_PROTOCOL      = "TLSv1";
+    public  static final Boolean PROP_DEFAULT_HN_VERIFY     = true;
+    public static final String PROP_DEFAULT_TRUST_PASSWORD = "changeit";
 
     private Map<String,Object> m_properties;
     
-    SslManagerServiceOptions(Map<String,Object> properties) {
+    public SslManagerServiceOptions(Map<String,Object> properties) {
         m_properties = properties;
     }
     

@@ -406,7 +406,7 @@ public class SslTab extends LayoutContainer {
 		//
 		m_keystorePassword = new TextField<String>();
 		m_keystorePassword.setName(MSGS.settingsSSLConfigurationKeystorePassword());
-		m_keystorePassword.setPassword(false);
+		m_keystorePassword.setPassword(true);
 		m_keystorePassword.setAllowBlank(false);
 		m_keystorePassword.setFieldLabel(MSGS.settingsSSLConfigurationKeystorePassword());
 		m_keystorePassword.addPlugin(m_dirtyPlugin);

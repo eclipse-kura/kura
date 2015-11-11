@@ -89,6 +89,29 @@ public class BluetoothGattImpl implements BluetoothGatt, BluetoothProcessListene
 			s_logger.info("Disconnected");
 		}
 	}
+	
+	@Override
+	public boolean checkConnection() {
+		if (m_proc != null) {
+			m_bufferedWriter = m_proc.getWriter();
+			s_logger.info("Check for connection...");
+			m_ready = false;
+			String command = "\n";
+			sendCmd(command);
+
+			// Wait for connection or timeout
+			long startTime = System.currentTimeMillis();
+			while (!m_ready && (System.currentTimeMillis() - startTime) < 2000) {
+				try {
+					Thread.sleep(10);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+
+		return m_connected;
+	}
 
 	@Override
 	public void setBluetoothLeNotificationListener(BluetoothLeNotificationListener listener) {

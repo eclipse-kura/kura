@@ -1,3 +1,26 @@
+Eclipse Kura - 1.4.0
+-------------------------------------------------------------------------
+
+Added Features :   
+
+Know Issues :
+  * BLE only tested on the Raspberry Pi B with a Broadcom BCM20702 USB dongle and the TI SensorTag. The kernel version was "Linux raspberrypi 3.18.11-v7+ #781 SMP PREEMPT Tue Apr 21 18:07:59 BST 2015 armv7l GNU/Linux". Note that on the kernel "Linux version 4.1.7-v7+ (dc4@dc4-XPS13-9333) (gcc version 4.8.3 20140303 (prerelease) (crosstool-NG linaro-1.13.1+bzr2650 - Linaro GCC 2014.03) ) #817 SMP PREEMPT Sat Sep 19 15:32:00 BST 2015" has a bug on gatttool and the BLE connection failes.
+    The only working version of BlueZ is 4.101. The deb package is not available from Raspbian so it
+    must be compiled from sources.
+  * WiFi on Raspberry Pi only tested with WiPi WiFi Dongle (Realink RT5370 chipset) and official Pi USB WiFi Dongle (Broadcom BCM43143 chipset).
+    AccessPoint WiFi mode not working for Broadcom chipest.
+  * The reference JVM is Oracle Java SE Embedded version 7 Update 40.
+    Later versions (including Oracle Java SE Embedded version 8 Update 33)
+    may be affected by a ProcessBuilder memory leak [1]
+  * Hardware watchdog: not implemented on all platforms
+  * Only one WAN interface is currently supported. A warning in displayed
+    in the WEB UI if the user attempts to enable more than one WAN interface
+  * When first modem configuration is submitted, unconfigured cellular interface for serial modem (e.g. HE910) is not being replaced by
+    ppp0 interface. Both ppp0 and HE910 interfaces are shown in the Web Admin.
+  * Gateway needs to be rebooted for static GPS coordinates to be published to the cloud.
+
+[1] https://bugs.openjdk.java.net/browse/JDK-8054841
+
 Eclipse Kura - 1.3.0
 -------------------------------------------------------------------------
 

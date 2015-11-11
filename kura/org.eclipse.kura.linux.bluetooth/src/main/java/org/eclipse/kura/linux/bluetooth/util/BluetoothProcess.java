@@ -19,7 +19,8 @@ import org.slf4j.LoggerFactory;
 public class BluetoothProcess {
 
 	private static final Logger s_logger = LoggerFactory.getLogger(BluetoothProcess.class);
-	private static final ExecutorService s_streamGobblers = Executors.newFixedThreadPool(2);
+//	private static final ExecutorService s_streamGobblers = Executors.newFixedThreadPool(2);
+	private static final ExecutorService s_streamGobblers = Executors.newCachedThreadPool();
 
 	private Process m_process;
 	private Future<?> m_futureInputGobbler;
@@ -44,7 +45,7 @@ public class BluetoothProcess {
 				try {
 					readInputStreamFully(m_process.getInputStream(), listener);
 				} catch (IOException e) {
-					s_logger.warn("Error in processing the input stream : ", e);
+//					s_logger.warn("Error in processing the input stream : ", e);
 				}
 			}
 			
@@ -58,7 +59,7 @@ public class BluetoothProcess {
                 try {
 					readErrorStreamFully(m_process.getErrorStream(), listener);
 				} catch (IOException e) {
-					s_logger.warn("Error in processing the error stream : ", e);
+//					s_logger.warn("Error in processing the error stream : ", e);
 				}                    
             }
         });

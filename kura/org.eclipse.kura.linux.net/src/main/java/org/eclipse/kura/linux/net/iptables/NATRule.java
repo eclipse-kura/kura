@@ -11,6 +11,10 @@
  */
 package org.eclipse.kura.linux.net.iptables;
 
+import org.eclipse.kura.KuraException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 
 /* 
@@ -40,6 +44,8 @@ package org.eclipse.kura.linux.net.iptables;
  *   NATRule0_masquerade=true
  */
 public class NATRule {
+	
+	private static final Logger s_logger = LoggerFactory.getLogger(NATRule.class);
 	
 	/*
 	masquerading/NAT
@@ -257,60 +263,21 @@ public class NATRule {
 		return m_masquerade;
 	}
 	
-	@Override
-	public boolean equals(Object o) {
-	    if(!(o instanceof NATRule)) {
-	        return false;
-	    }
-	    
-	    NATRule other = (NATRule) o;
-
-	    if (!compareObjects(m_sourceInterface, other.m_sourceInterface)) {
-	        return false;
-	    } else if (!compareObjects(m_destinationInterface, other.m_destinationInterface)) {
-	        return false;
-	    } else if (m_masquerade != other.isMasquerade()) {
-	        return false;
-	    }
-	    
-	    if (m_protocol == null) {
-			if (other.m_protocol != null) {
-				return false;
+	public NatPostroutingChainRule getNatPostroutingChainRule() {
+		NatPostroutingChainRule ret = null;
+		if (m_protocol == null) {
+			ret = new NatPostroutingChainRule(m_destinationInterface, m_masquerade);
+		} else {
+			try {
+				ret = new NatPostroutingChainRule(m_destinationInterface, m_protocol, m_destination, m_source, m_masquerade);
+			} catch (KuraException e) {
+				s_logger.error("failed to obtain NatPostroutingChainRule {}", e);
 			}
-		} else if (!compareObjects(m_protocol, other.m_protocol)) {
-			return false;
 		}
-	    
-	    if (m_source == null) {
-			if (other.m_source != null) {
-				return false;
-			}
-		} else if (!compareObjects(m_source, other.m_source)) {
-			return false;
-		}
-	    
-	    if (m_destination == null) {
-			if (other.m_destination != null) {
-				return false;
-			}
-		} else if (!compareObjects(m_destination, other.m_destination)) {
-			return false;
-		}
-	    
-	    return true;
+		return ret;
 	}
 	
-    private boolean compareObjects(Object obj1, Object obj2) {
-        if(obj1 != null) {
-            return obj1.equals(obj2);
-        } else if(obj2 != null) {
-            return false;
-        }
-        
-        return true;
-    }
-    
-    @Override
+	@Override
     public int hashCode() {
         final int prime = 71;
         int result = 1;
@@ -333,6 +300,37 @@ public class NATRule {
         result = prime * result + (m_masquerade ? 1277 : 1279);
         
         return result;
+    }
+	
+	@Override
+	public boolean equals(Object o) {
+	    if(!(o instanceof NATRule)) {
+	        return false;
+	    }
+	    NATRule other = (NATRule) o;
+	    if (!compareObjects(m_sourceInterface, other.m_sourceInterface)) {
+	        return false;
+	    } else if (!compareObjects(m_destinationInterface, other.m_destinationInterface)) {
+	        return false;
+	    } else if (m_masquerade != other.isMasquerade()) {
+	        return false;
+	    } else if (!compareObjects(m_protocol, other.m_protocol)) {
+			return false;
+		} else if (!compareObjects(m_source, other.m_source)) {
+			return false;
+		}  else if (!compareObjects(m_destination, other.m_destination)) {
+			return false;
+		}
+	    return true;
+	}
+	
+    private boolean compareObjects(Object obj1, Object obj2) {
+        if(obj1 != null) {
+            return obj1.equals(obj2);
+        } else if(obj2 != null) {
+            return false;
+        }
+        return true;
     }
 }
 

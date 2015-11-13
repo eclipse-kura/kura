@@ -1020,11 +1020,11 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 	public void setFirewallOpenPortConfiguration(
 			List<FirewallOpenPortConfigIP<? extends IPAddress>> firewallConfiguration)
 			throws KuraException {
-		
 		s_logger.debug("Deleting local rules");
 		LinuxFirewall firewall = LinuxFirewall.getInstance();
 		firewall.deleteAllLocalRules();
 		
+		ArrayList<LocalRule> localRules = new ArrayList<LocalRule>();
 		for(FirewallOpenPortConfigIP<? extends IPAddress> openPortEntry : firewallConfiguration) {
 			s_logger.debug("Adding local rule for: " + openPortEntry.getPort());
 			
@@ -1036,15 +1036,20 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 				}
 			}
 			
-			firewall.addLocalRule(openPortEntry.getPort(), 
-					openPortEntry.getProtocol().name(), 
-					openPortEntry.getPermittedNetwork().getIpAddress().getHostAddress(), 
-					Short.toString(openPortEntry.getPermittedNetwork().getPrefix()), 
-					openPortEntry.getPermittedInterfaceName(),
-					openPortEntry.getUnpermittedInterfaceName(),
-					openPortEntry.getPermittedMac(), 
-					openPortEntry.getSourcePortRange());
+			try {
+				LocalRule localRule = 
+						new LocalRule(openPortEntry.getPort(), openPortEntry.getProtocol().name(),				
+								new NetworkPair(IPAddress.parseHostAddress(openPortEntry.getPermittedNetwork().getIpAddress().getHostAddress()), 
+										openPortEntry.getPermittedNetwork().getPrefix()),
+								openPortEntry.getPermittedInterfaceName(), openPortEntry.getUnpermittedInterfaceName(),
+								openPortEntry.getPermittedMac(), openPortEntry.getSourcePortRange());
+				localRules.add(localRule);
+			} catch (Exception e) {
+				s_logger.error("Failed to add local rule for: {} - {}", openPortEntry.getPort(), e);
+			}
 		}
+		
+		firewall.addLocalRules(localRules);
 	}
 
 	@Override
@@ -1055,6 +1060,7 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 		LinuxFirewall firewall = LinuxFirewall.getInstance();
 		firewall.deleteAllPortForwardRules();
 		
+		ArrayList<PortForwardRule> portForwardRules = new ArrayList<PortForwardRule>();
 		for(FirewallPortForwardConfigIP<? extends IPAddress> portForwardEntry : firewallConfiguration) {
 			s_logger.debug("Adding port forward rule for: " + portForwardEntry.getInPort());
 			
@@ -1066,18 +1072,17 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 				}
 			}
 			
-			firewall.addPortForwardRule(portForwardEntry.getInboundInterface(), 
-					portForwardEntry.getOutboundInterface(),
-					portForwardEntry.getAddress().getHostAddress(), 
-					portForwardEntry.getProtocol().name(), 
-					portForwardEntry.getInPort(), 
-					portForwardEntry.getOutPort(),
-					portForwardEntry.isMasquerade(),
+			PortForwardRule portForwardRule = 
+				new PortForwardRule(portForwardEntry.getInboundInterface(), portForwardEntry.getOutboundInterface(), 
+					portForwardEntry.getAddress().getHostAddress(), portForwardEntry.getProtocol().name(), 
+					portForwardEntry.getInPort(), portForwardEntry.getOutPort(), portForwardEntry.isMasquerade(),
 					portForwardEntry.getPermittedNetwork().getIpAddress().getHostAddress(), 
-					Short.toString(portForwardEntry.getPermittedNetwork().getPrefix()), 
-					portForwardEntry.getPermittedMac(), 
+					portForwardEntry.getPermittedNetwork().getPrefix(), portForwardEntry.getPermittedMac(), 
 					portForwardEntry.getSourcePortRange());
+			portForwardRules.add(portForwardRule);
 		}
+		
+		firewall.addPortForwardRules(portForwardRules);
 	}
 	
 	@Override
@@ -1085,12 +1090,17 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 		
 		LinuxFirewall firewall = LinuxFirewall.getInstance();
 		firewall.deleteAllNatRules();
+		
+		ArrayList<NATRule> natRules = new ArrayList<NATRule>();
 		for (FirewallNatConfig natConfig : natConfigs) {
-			firewall.addNatRule(natConfig.getSourceInterface(),
+			NATRule natRule = new NATRule(natConfig.getSourceInterface(),
 					natConfig.getDestinationInterface(),
 					natConfig.getProtocol(), natConfig.getSource(),
 					natConfig.getDestination(), natConfig.isMasquerade());
+			natRules.add(natRule);
 		}
+		
+		firewall.addNatRules(natRules);
 	}
 	
 	public Map<String, WifiHotspotInfo> getWifiHotspots(String ifaceName) throws KuraException {

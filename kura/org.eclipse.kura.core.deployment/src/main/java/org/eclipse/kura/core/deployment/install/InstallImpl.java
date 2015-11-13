@@ -29,12 +29,12 @@ import org.slf4j.LoggerFactory;
 public class InstallImpl {
 	private static final Logger s_logger = LoggerFactory.getLogger(InstallImpl.class);
 	public static final String RESOURCE_INSTALL = "install";
-	
+
 	public static final String PERSISTANCE_SUFFIX = "_persistance";
 	public static final String PERSISTANCE_FOLDER_NAME= "persistance";
 	public static final String PERSISTANCE_VERIFICATION_FOLDER_NAME= "verification";
 	public static final String PERSISTANCE_FILE_NAME = "persistance.file.name";
-	
+
 	private DeploymentPackageInstallOptions options;
 	private CloudDeploymentHandlerV2 callback;
 	private DeploymentAdmin deploymentAdmin;
@@ -47,7 +47,7 @@ public class InstallImpl {
 
 	public InstallImpl(CloudDeploymentHandlerV2 callback, String kuraDataDir){
 		this.callback = callback;
-		
+
 		deployedPackages = new Properties();
 		m_installPersistanceDir= kuraDataDir + File.separator + PERSISTANCE_FOLDER_NAME;
 		File installPersistanceDir = new File(m_installPersistanceDir);
@@ -61,27 +61,27 @@ public class InstallImpl {
 			installVerificationDir.mkdir();
 		}
 	}
-	
+
 	public Properties getDeployedPackages(){
 		return deployedPackages;
 	}
-	
+
 	public void setOptions(DeploymentPackageInstallOptions options){
 		this.options = options;
 	}
-	
+
 	public void setPackagesPath(String packagesPath){
 		this.packagesPath= packagesPath;
 	}
-	
+
 	public void setDeploymentAdmin(DeploymentAdmin deploymentAdmin){
 		this.deploymentAdmin= deploymentAdmin;
 	}
-	
+
 	public void setDeployedPackages(Properties deployedPackages){
 		this.deployedPackages = deployedPackages;
 	}
-	
+
 	public void setDpaConfPath(String dpaConfPath){
 		this.dpaConfPath= dpaConfPath;
 	}
@@ -136,12 +136,12 @@ public class InstallImpl {
 		respPayload.addMetric(KuraInstallPayload.METRIC_DP_NAME, options.getDpName());
 		respPayload.addMetric(KuraInstallPayload.METRIC_DP_VERSION, options.getDpVersion());
 	}
-	
+
 	public void installIdleSyncMessage(KuraResponsePayload respPayload) {
 		respPayload.setTimestamp(new Date());
 		respPayload.addMetric(KuraInstallPayload.METRIC_INSTALL_STATUS, INSTALL_STATUS.IDLE);
 	}
-	
+
 	public void installCompleteAsync(DeploymentPackageOptions options, String dpName) throws KuraException{
 		KuraInstallPayload notify = null;
 
@@ -170,41 +170,43 @@ public class InstallImpl {
 
 		callback.publishMessage(options, notify, RESOURCE_INSTALL);
 	}
-	
+
 	public void sendInstallConfirmations(){
 		s_logger.info("Ready to send Confirmations");
 		File verificationDir= new File(m_installVerifDir);
-		for (File fileEntry : verificationDir.listFiles()) {
-			if (fileEntry.isFile() && fileEntry.getName().endsWith(".sh")) {
-				SafeProcess proc = null;
-				try {
-					proc = ProcessUtil.exec("chmod +x " + fileEntry.getCanonicalPath());
-				} catch (IOException e) {
+		if (verificationDir.listFiles() != null) {
+			for (File fileEntry : verificationDir.listFiles()) {
+				if (fileEntry.isFile() && fileEntry.getName().endsWith(".sh")) {
+					SafeProcess proc = null;
+					try {
+						proc = ProcessUtil.exec("chmod +x " + fileEntry.getCanonicalPath());
+					} catch (IOException e) {
 
-				} finally {
-					if (proc != null) ProcessUtil.destroy(proc);
-				}
-
-				SafeProcess proc2 = null;
-				try {
-					proc2 = ProcessUtil.exec(fileEntry.getCanonicalPath());
-					int exitValue = proc2.exitValue();
-					if(exitValue == 0){
-						sendSysUpdateSuccess(fileEntry);
-					} else {
-						sendSysUpdateFailure(fileEntry);
+					} finally {
+						if (proc != null) ProcessUtil.destroy(proc);
 					}
-				} catch (Exception e) {
 
-				} finally {
-					fileEntry.delete();
-					if (proc2 != null) ProcessUtil.destroy(proc2);
+					SafeProcess proc2 = null;
+					try {
+						proc2 = ProcessUtil.exec(fileEntry.getCanonicalPath());
+						int exitValue = proc2.exitValue();
+						if(exitValue == 0){
+							sendSysUpdateSuccess(fileEntry);
+						} else {
+							sendSysUpdateFailure(fileEntry);
+						}
+					} catch (Exception e) {
+
+					} finally {
+						fileEntry.delete();
+						if (proc2 != null) ProcessUtil.destroy(proc2);
+					}
+
 				}
-
 			}
 		}
 	}
-	
+
 	private DeploymentPackage installDeploymentPackageInternal(File fileReference, DeploymentPackageOptions options) 
 			throws DeploymentException, IOException {
 
@@ -253,7 +255,7 @@ public class InstallImpl {
 
 		return dp;
 	}
-	
+
 	private void updateInstallPersistance(String fileName, DeploymentPackageOptions options){
 		m_installPersistance = new Properties();
 		m_installPersistance.setProperty(DeploymentPackageOptions.METRIC_DP_CLIENT_ID, options.getClientId());
@@ -287,7 +289,7 @@ public class InstallImpl {
 			}
 		}
 	}
-	
+
 	private void addPackageToConfFile(String packageName, String packageUrl) {
 		deployedPackages.setProperty(packageName, packageUrl);
 
@@ -306,7 +308,7 @@ public class InstallImpl {
 			s_logger.error("Error writing package configuration file", e);
 		}
 	}
-	
+
 	public void removePackageFromConfFile(String packageName) {
 		deployedPackages.remove(packageName);
 
@@ -387,7 +389,7 @@ public class InstallImpl {
 			}
 		}
 	}
-	
+
 	private Properties loadInstallPersistance(File installedDpPersistance){
 		Properties downloadProperies= new Properties();
 		try {

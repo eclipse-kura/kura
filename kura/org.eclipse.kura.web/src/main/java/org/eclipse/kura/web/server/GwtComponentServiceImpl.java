@@ -59,7 +59,8 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
 				// ignore items we want to hide
 				if (config.getPid().endsWith("SystemPropertiesService") || 
 						config.getPid().endsWith("NetworkAdminService") ||
-						config.getPid().endsWith("NetworkConfigurationService")) {
+						config.getPid().endsWith("NetworkConfigurationService") ||
+						config.getPid().endsWith("SslManagerService")) {
 					continue;
 				}
 

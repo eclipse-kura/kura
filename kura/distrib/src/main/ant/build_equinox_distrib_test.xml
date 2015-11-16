@@ -184,6 +184,8 @@ fi
                         prefix="kura-${build.name}-test_${project.version}/install" />
             <zipfileset file="src/main/resources/${build.name}/firewall.init"
                         prefix="kura-${build.name}-test_${project.version}/install" />
+            <zipfileset file="src/main/resources/${build.name}/iptables.init"
+                        prefix="kura-${build.name}-test_${project.version}/install" />
             <zipfileset file="src/main/resources/common/monit.init.wrl"
                         prefix="kura-${build.name}-test_${project.version}/install" />
             <zipfileset file="src/main/resources/common/monit.init.yocto"

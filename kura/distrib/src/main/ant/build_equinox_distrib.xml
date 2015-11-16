@@ -332,6 +332,8 @@ fi
                         prefix="${build.output.name}/install" />
             <zipfileset file="src/main/resources/${build.name}/firewall.init"
                         prefix="${build.output.name}/install" />
+           <zipfileset file="src/main/resources/${build.name}/iptables.init"
+                        prefix="${build.output.name}/install" />
             <zipfileset file="src/main/resources/common/monit.init.wrl"
                         prefix="${build.output.name}/install" />
             <zipfileset file="src/main/resources/common/monit.init.yocto"

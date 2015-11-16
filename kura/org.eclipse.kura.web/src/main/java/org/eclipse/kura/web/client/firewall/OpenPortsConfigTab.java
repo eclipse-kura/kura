@@ -240,13 +240,13 @@ public class OpenPortsConfigTab extends LayoutContainer
 				if (m_grid != null) {
 					final GwtFirewallOpenPortEntry openPortEntry = m_grid.getSelectionModel().getSelectedItem();
 					if (openPortEntry != null) {
-						if(openPortEntry.getPort().equals(22)) {
+						if(openPortEntry.getPortRange().equals("22")) {
 							MessageBox.alert(MSGS.firewallOpenPortsCaution(), MSGS.firewallOpenPorts22(), new Listener<MessageBoxEvent>() {  
 								public void handleEvent(MessageBoxEvent ce) {
 									showEditOpenPort(openPortEntry);
 								}
 							});
-						} else if(openPortEntry.getPort().equals(80)) {
+						} else if(openPortEntry.getPortRange().equals("80")) {
 							MessageBox.alert(MSGS.firewallOpenPortsCaution(), MSGS.firewallOpenPorts80(), new Listener<MessageBoxEvent>() {  
 								public void handleEvent(MessageBoxEvent ce) {
 									showEditOpenPort(openPortEntry);
@@ -278,13 +278,13 @@ public class OpenPortsConfigTab extends LayoutContainer
 					final GwtFirewallOpenPortEntry openPortEntry = m_grid.getSelectionModel().getSelectedItem();
 					if (openPortEntry != null) {
 
-						if(openPortEntry.getPort().equals(22)) {
+						if(openPortEntry.getPortRange().equals("22")) {
 							// ask for confirmation						
-							MessageBox.confirm(MSGS.confirm(), MSGS.firewallOpenPortDeleteConfirmation22(openPortEntry.getPort().toString()),
+							MessageBox.confirm(MSGS.confirm(), MSGS.firewallOpenPortDeleteConfirmation22(openPortEntry.getPortRange()),
 									new Listener<MessageBoxEvent>() {  
 								public void handleEvent(MessageBoxEvent ce) {
 
-									Log.debug("Trying to delete: " + openPortEntry.getPort().toString());
+									Log.debug("Trying to delete: " + openPortEntry.getPortRange());
 									Log.debug("Button " + ce.getButtonClicked().getText());
 
 									if(ce.getButtonClicked().getText().equals("Yes")) {
@@ -295,13 +295,13 @@ public class OpenPortsConfigTab extends LayoutContainer
 								}
 							}
 									);
-						} else if(openPortEntry.getPort().equals(80)) {
+						} else if(openPortEntry.getPortRange().equals("80")) {
 							// ask for confirmation						
-							MessageBox.confirm(MSGS.confirm(), MSGS.firewallOpenPortDeleteConfirmation80(openPortEntry.getPort().toString()),
+							MessageBox.confirm(MSGS.confirm(), MSGS.firewallOpenPortDeleteConfirmation80(openPortEntry.getPortRange()),
 									new Listener<MessageBoxEvent>() {  
 								public void handleEvent(MessageBoxEvent ce) {
 
-									Log.debug("Trying to delete: " + openPortEntry.getPort().toString());
+									Log.debug("Trying to delete: " + openPortEntry.getPortRange());
 									Log.debug("Button " + ce.getButtonClicked().getText());
 
 									if(ce.getButtonClicked().getText().equals("Yes")) {
@@ -314,11 +314,11 @@ public class OpenPortsConfigTab extends LayoutContainer
 									);
 						} else {
 							// ask for confirmation						
-							MessageBox.confirm(MSGS.confirm(), MSGS.firewallOpenPortDeleteConfirmation(openPortEntry.getPort().toString()),
+							MessageBox.confirm(MSGS.confirm(), MSGS.firewallOpenPortDeleteConfirmation(openPortEntry.getPortRange()),
 									new Listener<MessageBoxEvent>() {  
 								public void handleEvent(MessageBoxEvent ce) {
 
-									Log.debug("Trying to delete: " + openPortEntry.getPort().toString());
+									Log.debug("Trying to delete: " + openPortEntry.getPortRange());
 									Log.debug("Button " + ce.getButtonClicked().getText());
 
 									if(ce.getButtonClicked().getText().equals("Yes")) {
@@ -345,7 +345,7 @@ public class OpenPortsConfigTab extends LayoutContainer
 		ColumnConfig column = null;
 		List<ColumnConfig> configs = new ArrayList<ColumnConfig>();
 
-		column = new ColumnConfig("port", MSGS.firewallOpenPort(), 100);
+		column = new ColumnConfig("portRange", MSGS.firewallOpenPort(), 100);
 		column.setAlignment(HorizontalAlignment.CENTER);
 		configs.add(column);
 
@@ -398,7 +398,7 @@ public class OpenPortsConfigTab extends LayoutContainer
 		SwappableListStore<GwtFirewallOpenPortEntry> m_store = new SwappableListStore<GwtFirewallOpenPortEntry>(m_openPortsLoader);
 		m_store.setKeyProvider( new ModelKeyProvider<GwtFirewallOpenPortEntry>() {            
 			public String getKey(GwtFirewallOpenPortEntry openPortEntry) {
-				return openPortEntry.getPort().toString();
+				return openPortEntry.getPortRange();
 			}
 		});
 
@@ -407,7 +407,7 @@ public class OpenPortsConfigTab extends LayoutContainer
 		m_grid.setStateful(false);
 		m_grid.setLoadMask(true);
 		m_grid.setStripeRows(true);
-		m_grid.setAutoExpandColumn("port");
+		m_grid.setAutoExpandColumn("portRange");
 		m_grid.getView().setAutoFill(true);
 		//m_grid.getView().setEmptyText(MSGS.deviceTableNoDevices());
 
@@ -452,7 +452,7 @@ public class OpenPortsConfigTab extends LayoutContainer
 
 			if (m_selectedEntry != null) {
 				ListStore<GwtFirewallOpenPortEntry> store = m_grid.getStore();
-				GwtFirewallOpenPortEntry modelEntry = store.findModel(m_selectedEntry.getPort().toString());
+				GwtFirewallOpenPortEntry modelEntry = store.findModel(m_selectedEntry.getPortRange());
 				if (modelEntry != null) {
 					m_grid.getSelectionModel().select(modelEntry, false);
 					m_grid.getView().focusRow(store.indexOf(modelEntry));
@@ -465,7 +465,8 @@ public class OpenPortsConfigTab extends LayoutContainer
 		List<GwtFirewallOpenPortEntry> entries = m_grid.getStore().getModels();
 		if (entries != null && openPortEntry != null) {
 			for(GwtFirewallOpenPortEntry entry : entries) {
-				if (entry.getPort().equals(openPortEntry.getPort()) &&
+				if (entry.getPortRange().equals(openPortEntry.getPortRange()) &&
+						entry.getProtocol().equals(openPortEntry.getProtocol()) &&
 						entry.getPermittedNetwork().equals(openPortEntry.getPermittedNetwork())) {
 					return true;
 				}

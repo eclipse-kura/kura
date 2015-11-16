@@ -965,14 +965,25 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 		Iterator<LocalRule> localRules = firewall.getLocalRules().iterator();
 		while(localRules.hasNext()) {
 		    LocalRule localRule = localRules.next();
-			s_logger.debug("Adding local rule " + localRule.getPort());
-			netConfigs.add(new FirewallOpenPortConfigIP4(localRule.getPort(), 
-					NetProtocol.valueOf(localRule.getProtocol()), 
-					localRule.getPermittedNetwork(),
-					localRule.getPermittedInterfaceName(),
-					localRule.getUnpermittedInterfaceName(),
-					localRule.getPermittedMAC(), 
-					localRule.getSourcePortRange()));
+		    if (localRule.getPortRange() != null) {
+		    	s_logger.debug("Adding local rule for {}", localRule.getPortRange());
+				netConfigs.add(new FirewallOpenPortConfigIP4(localRule.getPortRange(), 
+						NetProtocol.valueOf(localRule.getProtocol()), 
+						localRule.getPermittedNetwork(),
+						localRule.getPermittedInterfaceName(),
+						localRule.getUnpermittedInterfaceName(),
+						localRule.getPermittedMAC(), 
+						localRule.getSourcePortRange()));
+		    } else {
+				s_logger.debug("Adding local rule for {}", localRule.getPort());
+				netConfigs.add(new FirewallOpenPortConfigIP4(localRule.getPort(), 
+						NetProtocol.valueOf(localRule.getProtocol()), 
+						localRule.getPermittedNetwork(),
+						localRule.getPermittedInterfaceName(),
+						localRule.getUnpermittedInterfaceName(),
+						localRule.getPermittedMAC(), 
+						localRule.getSourcePortRange()));
+		    }
 		}
 		Iterator<PortForwardRule> portForwardRules = firewall.getPortForwardRules().iterator();
 		while(portForwardRules.hasNext()) {
@@ -1026,8 +1037,6 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 		
 		ArrayList<LocalRule> localRules = new ArrayList<LocalRule>();
 		for(FirewallOpenPortConfigIP<? extends IPAddress> openPortEntry : firewallConfiguration) {
-			s_logger.debug("Adding local rule for: " + openPortEntry.getPort());
-			
 			if(openPortEntry.getPermittedNetwork() == null || openPortEntry.getPermittedNetwork().getIpAddress() == null) {
 				try {
 					openPortEntry.setPermittedNetwork(new NetworkPair(IPAddress.parseHostAddress("0.0.0.0"), (short) 0));
@@ -1037,12 +1046,24 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 			}
 			
 			try {
-				LocalRule localRule = 
+				LocalRule localRule = null;
+				if (openPortEntry.getPortRange() != null) {
+					s_logger.debug("Adding local rule for: {}", openPortEntry.getPortRange());
+					localRule = 
+						new LocalRule(openPortEntry.getPortRange(), openPortEntry.getProtocol().name(),				
+							new NetworkPair(IPAddress.parseHostAddress(openPortEntry.getPermittedNetwork().getIpAddress().getHostAddress()), 
+									openPortEntry.getPermittedNetwork().getPrefix()),
+							openPortEntry.getPermittedInterfaceName(), openPortEntry.getUnpermittedInterfaceName(),
+							openPortEntry.getPermittedMac(), openPortEntry.getSourcePortRange());
+				} else {
+					s_logger.debug("Adding local rule for: {}", openPortEntry.getPort());
+					localRule = 
 						new LocalRule(openPortEntry.getPort(), openPortEntry.getProtocol().name(),				
 								new NetworkPair(IPAddress.parseHostAddress(openPortEntry.getPermittedNetwork().getIpAddress().getHostAddress()), 
 										openPortEntry.getPermittedNetwork().getPrefix()),
 								openPortEntry.getPermittedInterfaceName(), openPortEntry.getUnpermittedInterfaceName(),
 								openPortEntry.getPermittedMac(), openPortEntry.getSourcePortRange());
+				}
 				localRules.add(localRule);
 			} catch (Exception e) {
 				s_logger.error("Failed to add local rule for: {} - {}", openPortEntry.getPort(), e);
@@ -1405,7 +1426,7 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 			return false;
 		}
 		
-		NetworkRollbackItem firewallRollbackItem = new NetworkRollbackItem(srcDataDirectory + "/firewall", "/etc/init.d/firewall");
+		NetworkRollbackItem firewallRollbackItem = new NetworkRollbackItem(srcDataDirectory + "/iptables", "/etc/sysconfig/iptables");
 		rollbackItem(firewallRollbackItem);
 		LinuxFirewall.getInstance().initialize();
 		LinuxFirewall.getInstance().enable();

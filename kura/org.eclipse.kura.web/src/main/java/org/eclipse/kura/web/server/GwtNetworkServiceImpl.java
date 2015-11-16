@@ -901,7 +901,11 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 					if(netConfig instanceof FirewallOpenPortConfigIP4) {
 						s_logger.debug("findDeviceFirewallOpenPorts() :: adding new Open Port Entry: " + ((FirewallOpenPortConfigIP4) netConfig).getPort());
 						GwtFirewallOpenPortEntry entry = new GwtFirewallOpenPortEntry();
-						entry.setPort(((FirewallOpenPortConfigIP4) netConfig).getPort());
+						if (((FirewallOpenPortConfigIP4) netConfig).getPortRange() != null) {
+							entry.setPortRange(((FirewallOpenPortConfigIP4) netConfig).getPortRange());
+						} else {
+							entry.setPortRange(String.valueOf(((FirewallOpenPortConfigIP4)netConfig).getPort()));
+						}
 						entry.setProtocol(((FirewallOpenPortConfigIP4) netConfig).getProtocol().toString());
 						entry.setPermittedNetwork(((FirewallOpenPortConfigIP4) netConfig).getPermittedNetwork().getIpAddress().getHostAddress() + "/" + ((FirewallOpenPortConfigIP4) netConfig).getPermittedNetwork().getPrefix());
 						entry.setPermittedInterfaceName(((FirewallOpenPortConfigIP4) netConfig).getPermittedInterfaceName());
@@ -1193,7 +1197,13 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 				}
 
 				FirewallOpenPortConfigIP<IP4Address> firewallOpenPortConfigIP = new FirewallOpenPortConfigIP4();
-				firewallOpenPortConfigIP.setPort(entry.getPort());
+				if (entry.getPortRange() != null) {
+					if (entry.getPortRange().indexOf(':') > 0) {
+						firewallOpenPortConfigIP.setPortRange(entry.getPortRange());
+					} else {
+						firewallOpenPortConfigIP.setPort(Integer.parseInt(entry.getPortRange()));
+					}
+				}
 				firewallOpenPortConfigIP.setProtocol(NetProtocol.valueOf(super.sanitizeString(entry.getProtocol())));
 				if(network != null && prefix != null) {
 					firewallOpenPortConfigIP.setPermittedNetwork(new NetworkPair<IP4Address>((IP4Address)IPAddress.parseHostAddress(network), Short.parseShort(prefix)));
@@ -1203,7 +1213,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 				firewallOpenPortConfigIP.setPermittedMac(super.sanitizeString(entry.getPermittedMAC()));
 				firewallOpenPortConfigIP.setSourcePortRange(super.sanitizeString(entry.getSourcePortRange()));
 
-				s_logger.debug("adding open port entry for " + entry.getPort());
+				s_logger.debug("adding open port entry for {}", entry.getPortRange());
 				firewallOpenPortConfigIPs.add(firewallOpenPortConfigIP);
 			}
 

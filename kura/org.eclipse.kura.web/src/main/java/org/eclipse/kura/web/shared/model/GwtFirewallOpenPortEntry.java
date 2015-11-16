@@ -24,6 +24,7 @@ public class GwtFirewallOpenPortEntry extends KuraBaseModel implements Serializa
 
 	public GwtFirewallOpenPortEntry() {}
 	
+	/*
 	public Integer getPort() {
     	if (get("port") != null) {
     		return (Integer) get("port");
@@ -35,6 +36,15 @@ public class GwtFirewallOpenPortEntry extends KuraBaseModel implements Serializa
 
     public void setPort(int port) {
         set("port", port);
+    }
+    */
+    
+    public String getPortRange() {
+    	return get("portRange");
+    }
+    
+    public void setPortRange(String portRange) {
+    	set("portRange", portRange);
     }
     
     public String getProtocol() {

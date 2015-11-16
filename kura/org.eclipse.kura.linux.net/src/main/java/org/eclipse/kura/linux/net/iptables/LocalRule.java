@@ -16,6 +16,8 @@ import org.eclipse.kura.KuraException;
 import org.eclipse.kura.net.IP4Address;
 import org.eclipse.kura.net.IPAddress;
 import org.eclipse.kura.net.NetworkPair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /* 
  * Copyright (c) 2013 Eurotech Inc. All rights reserved.
@@ -46,6 +48,8 @@ import org.eclipse.kura.net.NetworkPair;
  *   LocalRule0_sourcePortRange=3333:4444
  */
 public class LocalRule {
+	
+	private static final Logger s_logger = LoggerFactory.getLogger(LocalRule.class);
 	
 	//required vars
 	private int m_port;
@@ -145,7 +149,13 @@ public class LocalRule {
 				} else if ("-p".equals(aRuleTokens[i])) {
 					m_protocol = aRuleTokens[++i];
 				} else if ("--dport".equals(aRuleTokens[i])) {
-					m_port = Integer.parseInt(aRuleTokens[++i]);
+					if (aRuleTokens[i+1].indexOf(':') > 0) {
+						m_portRange = aRuleTokens[++i];
+						m_port = -1;
+					} else {
+						m_port = Integer.parseInt(aRuleTokens[++i]);
+						m_portRange = null;
+					}
 				} else if ("--sport".equals(aRuleTokens[i])) {
 					m_sourcePortRange = aRuleTokens[++i];
 				} else if ("--mac-source".equals(aRuleTokens[i])) {

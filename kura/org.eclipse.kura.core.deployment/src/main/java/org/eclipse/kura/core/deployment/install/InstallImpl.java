@@ -113,7 +113,7 @@ public class InstallImpl {
 		//Esecuzione script
 		SafeProcess proc = null;
 		try {
-			proc = ProcessUtil.exec("chmod +x " + shFile.getCanonicalPath());
+			proc = ProcessUtil.exec("chmod 700 " + shFile.getCanonicalPath());
 		} catch (IOException e) {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR);
 		} finally {
@@ -179,7 +179,7 @@ public class InstallImpl {
 				if (fileEntry.isFile() && fileEntry.getName().endsWith(".sh")) {
 					SafeProcess proc = null;
 					try {
-						proc = ProcessUtil.exec("chmod +x " + fileEntry.getCanonicalPath());
+						proc = ProcessUtil.exec("chmod 700 " + fileEntry.getCanonicalPath());
 					} catch (IOException e) {
 
 					} finally {

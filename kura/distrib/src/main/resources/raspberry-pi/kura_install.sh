@@ -26,6 +26,11 @@ if [ ! -d ${INSTALL_DIR}/kura/.data ]; then
     mkdir ${INSTALL_DIR}/kura/.data
 fi
 
+# setup /etc/sysconfig folder for iptables configuration file
+if [ ! -d /etc/sysconfig ]; then
+    mkdir /etc/sysconfig
+fi
+
 #set up default networking file
 cp ${INSTALL_DIR}/kura/install/network.interfaces.raspbian /etc/network/interfaces
 cp ${INSTALL_DIR}/kura/install/network.interfaces.raspbian ${INSTALL_DIR}/kura/.data/interfaces

@@ -28,7 +28,9 @@ public class DownloadFileUtilities extends FileUtilities{
 					.toString();
 		}
 
-		File dpFile = new File(packageFilename);
+		File localFolder = new File(System.getProperty("java.io.tmpdir"));
+		String fileName = validateFileName(packageFilename, localFolder.getPath());
+		File dpFile = new File(fileName);
 		return dpFile;
 	}
 
@@ -42,5 +44,19 @@ public class DownloadFileUtilities extends FileUtilities{
 		}
 		
 		return false;
+	}
+	
+	private static String validateFileName(String destFileName, String intendedDir) throws IOException{
+		File destFile = new File(destFileName);
+		String filePath = destFile.getCanonicalPath();
+
+		File iD = new File(intendedDir);
+		String canonicalID = iD.getCanonicalPath();
+
+		if (filePath.startsWith(canonicalID)) {
+			return filePath;
+		} else {
+			throw new IOException();
+		}
 	}
 }

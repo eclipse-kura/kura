@@ -18,6 +18,7 @@ package org.eclipse.kura.linux.net.iptables;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
@@ -75,13 +76,11 @@ public class LinuxFirewall {
 		"iptables -A OUTPUT -p icmp -m icmp --icmp-type 0 -m state --state RELATED,ESTABLISHED -j DROP"
 	};
 
-	private static final String ALLOW_FORWARDING = "echo 1 > /proc/sys/net/ipv4/ip_forward";
-	private static final String DO_NOT_ALLOW_FORWARDING = "echo 0 > /proc/sys/net/ipv4/ip_forward";
-
 	private static LinuxFirewall s_linuxFirewall;
 
 	private static Object s_lock = new Object();
 
+	private static final String IP_FORWARD_FILE_NAME = "/proc/sys/net/ipv4/ip_forward";
 	private static final String FIREWALL_CONFIG_FILE_NAME = "/etc/sysconfig/iptables";
 	
 	private LinkedHashSet<LocalRule> m_localRules;
@@ -770,20 +769,36 @@ public class LinuxFirewall {
 				proc = ProcessUtil.exec(DO_NOT_ALLOW_ICMP[1]);
 				proc.waitFor();
 			}
-
-			s_logger.debug("Managing port forwarding...");	
-			if(m_allowForwarding){
-				proc = ProcessUtil.exec(ALLOW_FORWARDING);
-				proc.waitFor();
-			} else {
-				proc = ProcessUtil.exec(DO_NOT_ALLOW_FORWARDING);
-				proc.waitFor();
-			}
+			
+			s_logger.debug("Managing port forwarding...");
+			enableForwarding(m_allowForwarding);
 		} catch (Exception e) {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
 		}
 		finally {
 			if (proc != null) ProcessUtil.destroy(proc);
+		}
+	}
+	
+	private void enableForwarding(boolean allow) throws KuraException {
+		FileWriter fw = null;
+		try {
+			fw = new FileWriter(IP_FORWARD_FILE_NAME);
+			if (allow) {
+				fw.write('1');
+			} else {
+				fw.write('0');
+			}
+		} catch (Exception e) {
+			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+		} finally {
+			if (fw != null) {
+				try {
+					fw.close();
+				} catch (IOException e) {
+					throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+				}
+			}
 		}
 	}
 	
@@ -844,13 +859,14 @@ public class LinuxFirewall {
 		try {
 			int status = -1;
 			if (OS_VERSION.equals(KuraConstants.Mini_Gateway.getImageName() + "_" + KuraConstants.Mini_Gateway.getImageVersion()) ||
-					(OS_VERSION.equals(KuraConstants.Intel_Edison.getImageName() + "_" + KuraConstants.Intel_Edison.getImageVersion() + "_" + KuraConstants.Intel_Edison.getTargetName()))) {
+					OS_VERSION.equals(KuraConstants.Raspberry_Pi.getImageName()) || 
+					OS_VERSION.equals(KuraConstants.BeagleBone.getImageName()) ||
+					OS_VERSION.equals(KuraConstants.Intel_Edison.getImageName() + "_" + KuraConstants.Intel_Edison.getImageVersion() + "_" + KuraConstants.Intel_Edison.getTargetName())) {
 				proc = ProcessUtil.exec("iptables-save");
 				status = proc.waitFor();
 				if (status != 0) {
 					throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "Failed to execute the iptable-save command");
 				}
-				
 				String line = null;
 				br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
 				out = new PrintWriter(FIREWALL_CONFIG_FILE_NAME);

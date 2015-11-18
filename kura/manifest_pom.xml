@@ -347,7 +347,7 @@
 						</goals>
 						<configuration>
 							<tasks>
-								<apply executable="jdeps" failonerror="false">
+								<apply executable="jdeps" failonerror="false" failifexecutionfails="false">
   									<arg value="-P"/>
   									<arg value="-dotoutput"/>
   									<arg value="${project.build.directory}/logfiles"/>

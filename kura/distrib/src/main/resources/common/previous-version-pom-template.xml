@@ -1,36 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+	This POM is used to build the target platform of a previous release of Kura.
+	It has to be copied inside RELEASE_INFO/{current-version} after the build.
+	It will be used together with the target-platform p2-repo-* poms, and the kura.target-platform.properties file
+
+	After the build all the dependencies will be available inside the target folder of the specified modules
+	and have to be retrieved by the distribution process at a later stage.
+	
+	Versions of the previous bundles are specified in the config/kura.target-platform.properties file
+
+	Repositories have to be specified basing on the version of Kura
+-->
 <project>
 
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.eclipse.kura</groupId>
-	<artifactId>target-platform</artifactId>
-	<version>1.4.0-SNAPSHOT</version>
+	<artifactId>target-platform-for-previous-version</artifactId>
+	<version>1.0.0</version>
 
 	<packaging>pom</packaging>
 
 	<modules>
-		<module>com.codeminders.hidapi</module>
-		<module>org.usb4java</module>
-		<module>usb4java-javax</module>
-		<module>org.eclipse.soda.dk.comm</module>
 		<module>p2-repo-common</module>
 		<module>p2-repo-equinox_3.8.1</module>
 	</modules>
-
-	<profiles>
-		<profile>
-			<id>dio-skip</id>
-			<activation>
-				<property>
-					<name>dio.skip</name>
-					<value>true</value>
-				</property>
-			</activation>
-			<properties>
-				<org.eclipse.kura.dio.skip>true</org.eclipse.kura.dio.skip>
-			</properties>
-		</profile>
-	</profiles>
 
 	<repositories>
 		<repository>
@@ -51,14 +44,4 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
-
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-site-plugin</artifactId>
-				<version>3.3</version>
-			</plugin>
-		</plugins>
-	</build>
 </project>

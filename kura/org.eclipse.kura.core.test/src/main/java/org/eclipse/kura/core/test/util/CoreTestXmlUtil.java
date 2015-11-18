@@ -6,7 +6,7 @@ import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.xml.bind.JAXBException;
+
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -35,7 +35,7 @@ public class CoreTestXmlUtil {
 	 *  
 	 */
 	public static <T> T unmarshal(String s, Class<T> clazz) 
-			throws JAXBException, XMLStreamException, FactoryConfigurationError 
+			throws XMLStreamException, FactoryConfigurationError 
 		{
 			StringReader sr = new StringReader(s);
 			System.out.println("CoreTestXmlUtil: 30");
@@ -44,7 +44,7 @@ public class CoreTestXmlUtil {
 
 
 	public static <T> T unmarshal(Reader r, Class<T> clazz) 
-		throws JAXBException, XMLStreamException, FactoryConfigurationError 
+		throws XMLStreamException, FactoryConfigurationError 
 	{
 		DocumentBuilderFactory factory = null;
 		DocumentBuilder parser = null;

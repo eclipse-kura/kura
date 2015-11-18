@@ -336,7 +336,6 @@
 							<goal>single</goal>
 						</goals>
 						<configuration>
-							<finalName>${project.artifactId}_${project.version}.v${kura.build.version}</finalName>
 							<appendAssemblyId>false</appendAssemblyId>
 							<archive>
 								<manifestFile>META-INF/MANIFEST.MF</manifestFile>
@@ -367,6 +366,51 @@
 							<archiverConfig>
             					<compress>false</compress>
         					</archiverConfig>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<version>1.8</version>
+				<executions>
+					<execution>
+						<id>verify-compact2-compliance</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
+						<configuration>
+							<tasks>
+							
+								<apply executable="jdeps" failonerror="false">
+  									<arg value="-P"/>
+  									<arg value="-dotoutput"/>
+  									<arg value="${project.build.directory}/logfiles"/>
+  									<fileset dir="${project.build.directory}">
+  										<include name="*.jar"/>
+  									</fileset>
+								</apply>
+								
+								<fileset id="compact3.file" dir="${project.build.directory}/logfiles" includes="*.dot" erroronmissingdir="false">
+    								<contains text="compact3"/>
+								</fileset>
+								<fail message="Compact3 profile not allowed!">
+    								<condition>
+        								<resourcecount when="greater" count="0" refid="compact3.file" />
+    								</condition>
+								</fail>
+								
+								<fileset id="fulljre.file" dir="${project.build.directory}/logfiles" includes="*.dot" erroronmissingdir="false">
+    								<contains text="Full JRE"/>
+								</fileset>
+								<fail message="Full JRE profile not allowed!">
+    								<condition>
+        								<resourcecount when="greater" count="0" refid="fulljre.file" />
+    								</condition>
+								</fail>
+							</tasks>
 						</configuration>
 					</execution>
 				</executions>

@@ -51,18 +51,6 @@
                 					</archive>
                                 	<format>'${kura.build.version}'</format>
                                 </configuration>
-                                <executions>
-                                        <execution>
-                                                <phase>package</phase>
-                                                <id>package-plugin</id>
-                                                <goals>
-                                                        <goal>package-plugin</goal>
-                                                </goals>
-                                                <configuration>
-                                                        <finalName>${project.artifactId}_${project.version}.v${kura.build.version}</finalName>
-                                                </configuration>
-                                        </execution>
-                                </executions>
                         </plugin>
                 </plugins>
                 <pluginManagement>

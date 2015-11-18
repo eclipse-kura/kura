@@ -340,14 +340,28 @@
 				<version>1.8</version>
 				<executions>
 					<execution>
+						<id>verify-jdeps</id>
+						<phase>package</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
+						<configuration>
+							<exportAntProperties>true</exportAntProperties>
+							<target name="verify.jdeps">
+    							<available file="jdeps" filepath="${env.PATH}" property="jdeps.present"/> 		
+    						</target>
+						</configuration>
+					</execution>
+					<execution>
 						<id>verify-compact2-compliance</id>
 						<phase>package</phase>
 						<goals>
 							<goal>run</goal>
 						</goals>
 						<configuration>
-							<tasks>
-								<apply executable="jdeps" failonerror="false" failifexecutionfails="false">
+  								<target name="exec.jdeps" if="jdeps.present">
+  								<echo message="Executing exec.jdeps step"/>
+    							<apply executable="jdeps">
   									<arg value="-P"/>
   									<arg value="-dotoutput"/>
   									<arg value="${project.build.directory}/logfiles"/>
@@ -373,7 +387,7 @@
         								<resourcecount when="greater" count="0" refid="fulljre.file" />
     								</condition>
 								</fail>
-							</tasks>
+								</target>
 						</configuration>
 					</execution>
 				</executions>

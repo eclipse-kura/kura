@@ -514,11 +514,11 @@ fi
 
 		<!-- Diff with the previous version -->
         <property file="RELEASE_INFO/version.properties" />
-        <echo message="Diff version information with ${build.name} version ${project.version.previous}" />
+        <echo message="Diff version information with ${build.name} version ${kura.project.version.previous}" />
         <exec executable="src/main/sh/diff_build_versions.sh">
-                <arg value="RELEASE_INFO/${project.version.previous}/kura_${project.version.previous}_${build.name}.catalog" />
+                <arg value="RELEASE_INFO/${kura.project.version.previous}/kura_${kura.project.version.previous}_${build.name}.catalog" />
                 <arg value="${project.build.directory}/${build.output.name}.catalog" />
-                <arg value="${project.build.directory}/kura_${project.version.previous}_to_${project.version}_${build.name}" />
+                <arg value="${project.build.directory}/kura_${kura.project.version.previous}_to_${project.version}_${build.name}" />
                 <arg value="${build.name}" />
         </exec>
 
@@ -529,11 +529,11 @@ fi
                 <arg value="${project.build.directory}" />
                 <arg value="${project.build.directory}/${build.output.name}.zip" />
                 <arg value="kura_${project.version}_${build.name}_upgrade.zip" />
-                <arg value="KURA_${project.version.previous}" />
+                <arg value="KURA_${kura.project.version.previous}" />
                 <arg value="${kura.install.dir}" />
                 <arg value="${build.output.name}" />
-                <arg value="kura_${project.version.previous}_to_${project.version}_${build.name}.removed" />
-                <arg value="kura_${project.version.previous}_to_${project.version}_${build.name}.keep" />
+                <arg value="kura_${kura.project.version.previous}_to_${project.version}_${build.name}.removed" />
+                <arg value="kura_${kura.project.version.previous}_to_${project.version}_${build.name}.keep" />
                 <arg value="${build.output.name}_upgrader.sh" />
                 <arg value="${build.name}" />
         </exec>

@@ -20,6 +20,7 @@ public enum TelitModemAtCommands {
     getSerialNumber("at#cgsn\r\n"),
     getIMSI("at#cimi\r\n"),
     getICCID("at#ccid\r\n"),
+    getSubscriberNumber("at+cnum\r\n"),
     getRevision("at+gmr\r\n"),
     getSignalStrength("at+csq\r\n"),
     isGpsPowered("at$GPSP?\r\n"),

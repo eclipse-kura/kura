@@ -15,7 +15,6 @@
 
 package org.eclipse.kura.net.admin.modem.telit.he910;
 
-import java.io.IOException;
 import java.util.List;
 
 import org.eclipse.kura.KuraErrorCode;
@@ -26,6 +25,7 @@ import org.eclipse.kura.linux.net.modem.SupportedSerialModemsInfo;
 import org.eclipse.kura.linux.net.modem.SupportedUsbModemInfo;
 import org.eclipse.kura.linux.net.modem.SupportedUsbModemsInfo;
 import org.eclipse.kura.net.admin.modem.HspaCellularModem;
+import org.eclipse.kura.net.admin.modem.SimCardSlot;
 import org.eclipse.kura.net.admin.modem.telit.generic.TelitModem;
 import org.eclipse.kura.net.modem.ModemDevice;
 import org.eclipse.kura.net.modem.ModemRegistrationStatus;
@@ -71,6 +71,12 @@ public class TelitHe910 extends TelitModem implements HspaCellularModem {
 					m_gpsSupported = isGpsSupported();
 					m_rssi = getSignalStrength();
 					
+					s_logger.warn("<IAB> Sim Card Slot: {}", getSimCardSlot());
+					setSimCardSlot(SimCardSlot.B);
+					s_logger.warn("<IAB> Sim Card Slot: {}", getSimCardSlot());
+					setSimCardSlot(SimCardSlot.A);
+					s_logger.warn("<IAB> Sim Card Slot: {}", getSimCardSlot());
+					
 					s_logger.trace("{} :: Serial Number={}", getClass().getName(), m_serialNumber);
 					s_logger.trace("{} :: IMSI={}", getClass().getName(), m_imsi);
 					s_logger.trace("{} :: ICCID={}", getClass().getName(), m_iccid);
@@ -85,6 +91,90 @@ public class TelitHe910 extends TelitModem implements HspaCellularModem {
 			e.printStackTrace();
 		}
     }
+	
+	public SimCardSlot getSimCardSlot() throws KuraException {
+		SimCardSlot simCardSlot = null;
+		String port = null;
+		
+		if (isGpsEnabled() && getAtPort().equals(getGpsPort()) && !getAtPort().equals(getDataPort())) {
+			port = getDataPort();
+		} else {
+			port = getAtPort();
+		}
+		synchronized (s_atLock) {
+			s_logger.warn("<IAB> getSimCardSlot() :: sendCommand getCurrentSimSlot :: {} command to port {}", TelitHe910AtCommands.getCurrentSimSlot.getCommand(), port);
+			s_logger.debug("sendCommand getCurrentSimSlot :: {} command to port {}", TelitHe910AtCommands.getCurrentSimSlot.getCommand(), port);
+			byte[] reply = null;
+	    	CommConnection commAtConnection = null;
+	    	try {
+	    		commAtConnection = openSerialPort(port);
+	    		if (!isAtReachable(commAtConnection)) {	    		
+	    			throw new KuraException(KuraErrorCode.NOT_CONNECTED, "Modem not available for AT commands: " + TelitHe910.class.getName());
+	    		}   
+	    		reply = commAtConnection.sendCommand(TelitHe910AtCommands.getCurrentSimSlot.getCommand().getBytes(), 500, 1000);
+	    	} catch (Exception e) {
+                throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+            } finally {	        
+    	        closeSerialPort(commAtConnection);
+        	}
+	    	try {
+		    	if (reply != null) {
+		        	String sReply = getResponseString(reply);
+		        	String [] asReply = sReply.split("\r\n");
+		        	int ind = -1;
+		        	if ((asReply.length >= 2) && ((ind=asReply[1].indexOf(",")) > 0)) {
+		        		int simSlot = Integer.parseInt(asReply[1].substring(ind+1));
+		        		simCardSlot = SimCardSlot.getSimCardSlot(simSlot);
+		        	}
+		        }
+	    	} catch (Exception e) {
+	    		throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+	    	}
+		}
+		return simCardSlot;
+	}
+	
+	public boolean setSimCardSlot(SimCardSlot simCardSlot) throws KuraException {
+		
+		boolean ret = false;
+		String cmd = null;
+		if (simCardSlot == SimCardSlot.A) {
+			cmd = TelitHe910AtCommands.setSimSlotA.getCommand();
+		} else if (simCardSlot == SimCardSlot.B) {
+			cmd = TelitHe910AtCommands.setSimSlotB.getCommand();
+		} else {
+			s_logger.error("Invalid SIM card slot");
+			return false;
+		}
+		String port = null;
+		
+		if (isGpsEnabled() && getAtPort().equals(getGpsPort()) && !getAtPort().equals(getDataPort())) {
+			port = getDataPort();
+		} else {
+			port = getAtPort();
+		}
+		synchronized (s_atLock) {
+			s_logger.warn("<IAB> setSimCardSlot() :: sendCommand setSimSlot{} command to port {}", simCardSlot, port);
+			s_logger.debug("sendCommand setSimSlot{} command to port {}", simCardSlot, port);
+	    	CommConnection commAtConnection = null;
+	    	try {
+	    		commAtConnection = openSerialPort(port);
+	    		if (!isAtReachable(commAtConnection)) {	    		
+	    			throw new KuraException(KuraErrorCode.NOT_CONNECTED, "Modem not available for AT commands: " + TelitHe910.class.getName());
+	    		}
+		    	commAtConnection.sendCommand(cmd.getBytes(), 500, 1000);    	
+	    	} catch (Exception e) {
+                throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+            } finally {	        
+    	        closeSerialPort(commAtConnection);
+        	}
+	    	if (simCardSlot == this.getSimCardSlot() && isSimCardReady()) {
+				ret = true;
+			}
+		}
+		
+		return ret;
+	}
     
     @Override
 	public boolean isSimCardReady() throws KuraException {
@@ -103,7 +193,6 @@ public class TelitHe910 extends TelitModem implements HspaCellularModem {
 	    	byte[] reply = null;
 	    	CommConnection commAtConnection = null;
 	    	try {
-
 	    	    commAtConnection = openSerialPort(port);
 	    	    if (!isAtReachable(commAtConnection)) {	    		
 	    	        throw new KuraException(KuraErrorCode.NOT_CONNECTED, "Modem not available for AT commands: " + TelitHe910.class.getName());
@@ -137,14 +226,9 @@ public class TelitHe910 extends TelitModem implements HspaCellularModem {
 						}
 					}
 	        	}
-	    	}
-        	catch (IOException e) {
+	    	} catch (Exception e) {
                 throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
-            }
-        	catch (KuraException e) {
-        	    throw e;
-        	}
-        	finally {	        
+            } finally {	        
     	        closeSerialPort(commAtConnection);
         	}
     	}
@@ -157,40 +241,45 @@ public class TelitHe910 extends TelitModem implements HspaCellularModem {
     	ModemRegistrationStatus modemRegistrationStatus = ModemRegistrationStatus.UNKNOWN;
     	synchronized (s_atLock) {
     		s_logger.debug("sendCommand getRegistrationStatus :: {}", TelitHe910AtCommands.getRegistrationStatus.getCommand());
+    		CommConnection commAtConnection = null;
 	    	byte[] reply = null;
-	    	CommConnection commAtConnection = openSerialPort(getAtPort());
-	    	if (!isAtReachable(commAtConnection)) {
-	    		closeSerialPort(commAtConnection);
-	    		throw new KuraException(KuraErrorCode.NOT_CONNECTED, "Modem not available for AT commands: " + TelitHe910.class.getName());
-	    	}
-			try {
+	    	try {
+		    	commAtConnection = openSerialPort(getAtPort());
+		    	if (!isAtReachable(commAtConnection)) {
+		    		closeSerialPort(commAtConnection);
+		    		throw new KuraException(KuraErrorCode.NOT_CONNECTED, "Modem not available for AT commands: " + TelitHe910.class.getName());
+		    	}
 				reply = commAtConnection.sendCommand(TelitHe910AtCommands.getRegistrationStatus.getCommand().getBytes(), 1000, 100);
-			} catch (IOException e) {
+			} catch (Exception e) {
+				throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+			} finally {
 				closeSerialPort(commAtConnection);
+			}
+			try {
+		        if (reply != null) {
+		            String sRegStatus = getResponseString(reply);
+		            String[] regStatusSplit = sRegStatus.split(",");
+		            if(regStatusSplit.length >= 2) {
+		                int status = Integer.parseInt(regStatusSplit[1]);
+		                switch (status) {
+		                case 0:
+		                	modemRegistrationStatus = ModemRegistrationStatus.NOT_REGISTERED;
+		                	break;
+		                case 1:
+		                	modemRegistrationStatus = ModemRegistrationStatus.REGISTERED_HOME;
+		                	break;
+		                case 3:
+		                	modemRegistrationStatus = ModemRegistrationStatus.REGISTRATION_DENIED;
+		                	break;
+		                case 5:
+		                	modemRegistrationStatus = ModemRegistrationStatus.REGISTERED_ROAMING;
+		                	break;
+		                }
+		            } 
+		        }
+			} catch (Exception e) {
 				throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
 			}
-			closeSerialPort(commAtConnection);
-	        if (reply != null) {
-	            String sRegStatus = getResponseString(reply);
-	            String[] regStatusSplit = sRegStatus.split(",");
-	            if(regStatusSplit.length >= 2) {
-	                int status = Integer.parseInt(regStatusSplit[1]);
-	                switch (status) {
-	                case 0:
-	                	modemRegistrationStatus = ModemRegistrationStatus.NOT_REGISTERED;
-	                	break;
-	                case 1:
-	                	modemRegistrationStatus = ModemRegistrationStatus.REGISTERED_HOME;
-	                	break;
-	                case 3:
-	                	modemRegistrationStatus = ModemRegistrationStatus.REGISTRATION_DENIED;
-	                	break;
-	                case 5:
-	                	modemRegistrationStatus = ModemRegistrationStatus.REGISTERED_ROAMING;
-	                	break;
-	                }
-	            } 
-	        }
     	}
         return modemRegistrationStatus;
     }
@@ -201,38 +290,43 @@ public class TelitHe910 extends TelitModem implements HspaCellularModem {
     	long txCnt = 0;
     	synchronized (s_atLock) {
 	    	s_logger.debug("sendCommand getGprsSessionDataVolume :: {}", TelitHe910AtCommands.getGprsSessionDataVolume.getCommand());
+	    	CommConnection commAtConnection = null;
 	    	byte[] reply = null;
-	    	CommConnection commAtConnection = openSerialPort(getAtPort());
-	    	if (!isAtReachable(commAtConnection)) {
-	    		closeSerialPort(commAtConnection);
-	    		throw new KuraException(KuraErrorCode.NOT_CONNECTED, "Modem not available for AT commands: " + TelitHe910.class.getName());
-	    	}
-			try {
+	    	try {
+		    	commAtConnection = openSerialPort(getAtPort());
+		    	if (!isAtReachable(commAtConnection)) {
+		    		closeSerialPort(commAtConnection);
+		    		throw new KuraException(KuraErrorCode.NOT_CONNECTED, "Modem not available for AT commands: " + TelitHe910.class.getName());
+		    	}
 				reply = commAtConnection.sendCommand(TelitHe910AtCommands.getGprsSessionDataVolume.getCommand().getBytes(), 1000, 100);
-			} catch (IOException e) {
-				closeSerialPort(commAtConnection);
+			} catch (Exception e) {
 				throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+			} finally {
+				closeSerialPort(commAtConnection);
 			}
-			closeSerialPort(commAtConnection);
-			if (reply != null) {
-				String [] splitPdp = null;
-				String [] splitData = null;
-				String sDataVolume = this.getResponseString(reply);
-				splitPdp = sDataVolume.split("#GDATAVOL:");
-				if (splitPdp.length > 1) {
-					for (String pdp : splitPdp) {
-						if (pdp.trim().length() > 0) {
-							splitData = pdp.trim().split(",");
-							if (splitData.length >= 4) {
-								int pdpNo = Integer.parseInt(splitData[0]);
-								if (pdpNo == m_pdpContext) {
-									txCnt = Integer.parseInt(splitData[2]);
+			try {
+				if (reply != null) {
+					String [] splitPdp = null;
+					String [] splitData = null;
+					String sDataVolume = this.getResponseString(reply);
+					splitPdp = sDataVolume.split("#GDATAVOL:");
+					if (splitPdp.length > 1) {
+						for (String pdp : splitPdp) {
+							if (pdp.trim().length() > 0) {
+								splitData = pdp.trim().split(",");
+								if (splitData.length >= 4) {
+									int pdpNo = Integer.parseInt(splitData[0]);
+									if (pdpNo == m_pdpContext) {
+										txCnt = Integer.parseInt(splitData[2]);
+									}
 								}
 							}
 						}
 					}
+					reply = null;
 				}
-				reply = null;
+			} catch (Exception e) {
+				throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
 			}
     	}
         return txCnt;
@@ -243,39 +337,44 @@ public class TelitHe910 extends TelitModem implements HspaCellularModem {
     	long rxCnt = 0;
     	synchronized (s_atLock) {
 	    	s_logger.debug("sendCommand getGprsSessionDataVolume :: {}", TelitHe910AtCommands.getGprsSessionDataVolume.getCommand());
+	    	CommConnection commAtConnection = null;
 	    	byte[] reply = null;
-	    	CommConnection commAtConnection = openSerialPort(getAtPort());
-	    	if (!isAtReachable(commAtConnection)) {
-	    		closeSerialPort(commAtConnection);
-	    		throw new KuraException(KuraErrorCode.NOT_CONNECTED, "Modem not available for AT commands: " + TelitHe910.class.getName());
-	    	}
-			try {
+	    	try {
+		    	commAtConnection = openSerialPort(getAtPort());
+		    	if (!isAtReachable(commAtConnection)) {
+		    		closeSerialPort(commAtConnection);
+		    		throw new KuraException(KuraErrorCode.NOT_CONNECTED, "Modem not available for AT commands: " + TelitHe910.class.getName());
+		    	}
 				reply = commAtConnection.sendCommand(TelitHe910AtCommands.getGprsSessionDataVolume.getCommand().getBytes(), 1000, 100);
-			} catch (IOException e) {
-				closeSerialPort(commAtConnection);
+			} catch (Exception e) {
 				throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+			} finally {
+				closeSerialPort(commAtConnection);
 			}
-			closeSerialPort(commAtConnection);
-			if (reply != null) {
-				String [] splitPdp = null;
-				String [] splitData = null;
-				String sDataVolume = this.getResponseString(reply);
-				splitPdp = sDataVolume.split("#GDATAVOL:");
-				if (splitPdp.length > 1) {
-					for (String pdp : splitPdp) {
-						if (pdp.trim().length() > 0) {
-							splitData = pdp.trim().split(",");
-							if (splitData.length >= 4) {
-								int pdpNo = Integer.parseInt(splitData[0]);
-								if (pdpNo == m_pdpContext) {
-									rxCnt = Integer.parseInt(splitData[3]);
+	    	try {
+				if (reply != null) {
+					String [] splitPdp = null;
+					String [] splitData = null;
+					String sDataVolume = this.getResponseString(reply);
+					splitPdp = sDataVolume.split("#GDATAVOL:");
+					if (splitPdp.length > 1) {
+						for (String pdp : splitPdp) {
+							if (pdp.trim().length() > 0) {
+								splitData = pdp.trim().split(",");
+								if (splitData.length >= 4) {
+									int pdpNo = Integer.parseInt(splitData[0]);
+									if (pdpNo == m_pdpContext) {
+										rxCnt = Integer.parseInt(splitData[3]);
+									}
 								}
 							}
 						}
 					}
+					reply = null;
 				}
-				reply = null;
-			}
+	    	} catch (Exception e) {
+	    		throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+	    	}
     	}
         return rxCnt;
     }
@@ -285,35 +384,40 @@ public class TelitHe910 extends TelitModem implements HspaCellularModem {
     	String serviceType = null;
     	synchronized (s_atLock) {
     		s_logger.debug("sendCommand getMobileStationClass :: {}", TelitHe910AtCommands.getMobileStationClass.getCommand());
-	    	byte[] reply = null;
-	    	CommConnection commAtConnection = openSerialPort(getAtPort());
-	    	if (!isAtReachable(commAtConnection)) {
-	    		closeSerialPort(commAtConnection);
-	    		throw new KuraException(KuraErrorCode.NOT_CONNECTED, "Modem not available for AT commands: " + TelitHe910.class.getName());
-	    	}
-			try {
+    		CommConnection commAtConnection = null;
+    		byte[] reply = null;
+    		try {
+		    	commAtConnection = openSerialPort(getAtPort());
+		    	if (!isAtReachable(commAtConnection)) {
+		    		closeSerialPort(commAtConnection);
+		    		throw new KuraException(KuraErrorCode.NOT_CONNECTED, "Modem not available for AT commands: " + TelitHe910.class.getName());
+		    	}
 				reply = commAtConnection.sendCommand(TelitHe910AtCommands.getMobileStationClass.getCommand().getBytes(), 1000, 100);
-			} catch (IOException e) {
-				closeSerialPort(commAtConnection);
+			} catch (Exception e) {
 				throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+			} finally {
+				closeSerialPort(commAtConnection);
 			}
-			closeSerialPort(commAtConnection);
-			if (reply != null) {
-				String sCgclass = this.getResponseString(reply);
-				if (sCgclass.startsWith("+CGCLASS:")) {
-					sCgclass = sCgclass.substring("+CGCLASS:".length()).trim();
-					if (sCgclass.equals("\"A\"")) {
-						serviceType = "UMTS";
-					} else if (sCgclass.equals("\"B\"")) {
-						serviceType = "GSM/GPRS";
-					} else if (sCgclass.equals("\"CG\"")) {
-						serviceType = "GPRS";
-					} else if (sCgclass.equals("\"CC\"")) {
-						serviceType = "GSM";
+    		try {
+				if (reply != null) {
+					String sCgclass = this.getResponseString(reply);
+					if (sCgclass.startsWith("+CGCLASS:")) {
+						sCgclass = sCgclass.substring("+CGCLASS:".length()).trim();
+						if (sCgclass.equals("\"A\"")) {
+							serviceType = "UMTS";
+						} else if (sCgclass.equals("\"B\"")) {
+							serviceType = "GSM/GPRS";
+						} else if (sCgclass.equals("\"CG\"")) {
+							serviceType = "GPRS";
+						} else if (sCgclass.equals("\"CC\"")) {
+							serviceType = "GSM";
+						}
 					}
+					reply = null;
 				}
-				reply = null;
-			}
+    		} catch (Exception e) {
+    			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+    		}
     	}
 		
 		return serviceType;

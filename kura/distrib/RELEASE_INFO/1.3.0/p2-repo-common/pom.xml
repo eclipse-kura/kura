@@ -19,7 +19,7 @@
 			<plugin>
             <groupId>org.codehaus.mojo</groupId>
             <artifactId>properties-maven-plugin</artifactId>
-            <version>1.0-alpha-1</version>
+            <version>1.0-alpha-2</version>
             <executions>
                <execution>
                   <phase>initialize</phase>
@@ -163,6 +163,7 @@
                             <version>${org.eclipse.soda.dk.comm.version}</version>					
 								</artifactItem>    
 							</artifactItems>
+							<stripVersion>true</stripVersion>
 							<outputDirectory>${project.basedir}/target/source/plugins</outputDirectory>
 						</configuration>
 					</execution>

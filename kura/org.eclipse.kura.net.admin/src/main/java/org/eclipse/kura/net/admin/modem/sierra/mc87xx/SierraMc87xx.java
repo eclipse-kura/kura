@@ -27,6 +27,7 @@ import org.eclipse.kura.net.admin.modem.telit.he910.TelitHe910;
 import org.eclipse.kura.net.modem.ModemDevice;
 import org.eclipse.kura.net.modem.ModemRegistrationStatus;
 import org.eclipse.kura.net.modem.ModemTechnologyType;
+import org.eclipse.kura.net.modem.SubscriberInfo;
 import org.eclipse.kura.usb.UsbModemDevice;
 import org.osgi.service.io.ConnectionFactory;
 import org.slf4j.Logger;
@@ -431,6 +432,11 @@ public class SierraMc87xx implements HspaCellularModem {
 	@Override
 	public void setConfiguration(List<NetConfig> netConfigs) {
 		m_netConfigs = netConfigs;
+	}
+	
+	@Override
+	public SubscriberInfo [] getSubscriberInfo() throws KuraException {
+		return null;
 	}
 	
 	@Override

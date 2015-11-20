@@ -31,6 +31,7 @@ import org.eclipse.kura.net.modem.ModemDevice;
 import org.eclipse.kura.net.modem.ModemRegistrationStatus;
 import org.eclipse.kura.net.modem.ModemTechnologyType;
 import org.eclipse.kura.net.modem.SerialModemDevice;
+import org.eclipse.kura.net.modem.SubscriberInfo;
 import org.eclipse.kura.usb.UsbModemDevice;
 import org.osgi.service.io.ConnectionFactory;
 import org.slf4j.Logger;
@@ -63,34 +64,89 @@ public class TelitHe910 extends TelitModem implements HspaCellularModem {
 			if (atPort != null) {
 				if (atPort.equals(getDataPort()) || atPort.equals(gpsPort)) {
 					m_serialNumber = getSerialNumber();
-					m_imsi = getMobileSubscriberIdentity();
-					m_iccid = getIntegratedCirquitCardId();
 					m_model = getModel();
 					m_manufacturer = getManufacturer();		
 					m_revisionId = getRevisionID();
 					m_gpsSupported = isGpsSupported();
 					m_rssi = getSignalStrength();
+					m_subscriberInfo = getSubscriberInfo();
 					
+					/*
 					s_logger.warn("<IAB> Sim Card Slot: {}", getSimCardSlot());
 					setSimCardSlot(SimCardSlot.B);
 					s_logger.warn("<IAB> Sim Card Slot: {}", getSimCardSlot());
 					setSimCardSlot(SimCardSlot.A);
 					s_logger.warn("<IAB> Sim Card Slot: {}", getSimCardSlot());
+					*/
 					
 					s_logger.trace("{} :: Serial Number={}", getClass().getName(), m_serialNumber);
-					s_logger.trace("{} :: IMSI={}", getClass().getName(), m_imsi);
-					s_logger.trace("{} :: ICCID={}", getClass().getName(), m_iccid);
 					s_logger.trace("{} :: Model={}", getClass().getName(), m_model);
 					s_logger.trace("{} :: Manufacturer={}", getClass().getName(), m_manufacturer);
 					s_logger.trace("{} :: Revision ID={}", getClass().getName(), m_revisionId);
 					s_logger.trace("{} :: GPS Supported={}", getClass().getName(), m_gpsSupported);
 					s_logger.trace("{} :: RSSI={}", getClass().getName(), m_rssi);
+					for (SubscriberInfo subscriberInfo : m_subscriberInfo) {
+						if (subscriberInfo != null) {
+							s_logger.trace("{} :: SubscriberInfo={}", getClass().getName(), subscriberInfo);
+						}
+					}
 				}
 			}
 		} catch (KuraException e) {
 			e.printStackTrace();
 		}
     }
+	
+	@Override
+	public String getMobileSubscriberIdentity() throws KuraException {
+		return getMobileSubscriberIdentity(getSimCardSlot().getValue());
+	}
+
+	@Override
+	public String getIntegratedCirquitCardId() throws KuraException {
+		return getIntegratedCirquitCardId(getSimCardSlot().getValue());
+	}
+	
+	@Override
+	public SubscriberInfo [] getSubscriberInfo() throws KuraException {
+		SubscriberInfo [] ret = new SubscriberInfo [2]; ret[0] = null; ret[1] = null;
+		SimCardSlot originalSimSlot = getSimCardSlot();
+		if (originalSimSlot == SimCardSlot.A) {
+			if (isSimCardReady()) {
+				ret[0] = new SubscriberInfo(getMobileSubscriberIdentity(SimCardSlot.A.getValue()), 
+						getIntegratedCirquitCardId(SimCardSlot.A.getValue()), 
+						getSubscriberNumber(SimCardSlot.A.getValue()));
+			}
+			if (setSimCardSlot(SimCardSlot.B)) {
+				if (isSimCardReady()) {
+					SubscriberInfo subscriberInfo = new SubscriberInfo(getMobileSubscriberIdentity(SimCardSlot.B.getValue()), 
+							getIntegratedCirquitCardId(SimCardSlot.B.getValue()), 
+							getSubscriberNumber(SimCardSlot.B.getValue()));
+					if (!subscriberInfo.equals(ret[0])) {
+						ret[1] = subscriberInfo;
+					}
+				}
+			}
+		} else if (originalSimSlot == SimCardSlot.B) {
+			if (isSimCardReady()) {
+				ret[1] = new SubscriberInfo(getMobileSubscriberIdentity(SimCardSlot.B.getValue()), 
+						getIntegratedCirquitCardId(SimCardSlot.B.getValue()), 
+						getSubscriberNumber(SimCardSlot.B.getValue()));
+			}
+			if (setSimCardSlot(SimCardSlot.A)) {
+				if (isSimCardReady()) {
+					SubscriberInfo subscriberInfo = new SubscriberInfo(getMobileSubscriberIdentity(SimCardSlot.A.getValue()), 
+							getIntegratedCirquitCardId(SimCardSlot.A.getValue()), 
+							getSubscriberNumber(SimCardSlot.A.getValue()));
+					if (!subscriberInfo.equals(ret[1])) {
+						ret[0] = subscriberInfo;
+					}
+				}
+			}
+		}
+		setSimCardSlot(originalSimSlot);
+		return ret;
+	}
 	
 	public SimCardSlot getSimCardSlot() throws KuraException {
 		SimCardSlot simCardSlot = null;
@@ -168,7 +224,7 @@ public class TelitHe910 extends TelitModem implements HspaCellularModem {
             } finally {	        
     	        closeSerialPort(commAtConnection);
         	}
-	    	if (simCardSlot == this.getSimCardSlot() && isSimCardReady()) {
+	    	if (simCardSlot == getSimCardSlot() && isSimCardReady()) {
 				ret = true;
 			}
 		}

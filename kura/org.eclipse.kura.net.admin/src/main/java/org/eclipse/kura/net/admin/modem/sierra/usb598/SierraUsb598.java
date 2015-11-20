@@ -40,6 +40,7 @@ import org.eclipse.kura.net.modem.ModemDevice;
 import org.eclipse.kura.net.modem.ModemRegistrationStatus;
 import org.eclipse.kura.net.modem.ModemTechnologyType;
 import org.eclipse.kura.net.modem.SerialModemDevice;
+import org.eclipse.kura.net.modem.SubscriberInfo;
 import org.eclipse.kura.usb.UsbModemDevice;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.io.ConnectionFactory;
@@ -372,6 +373,12 @@ public class SierraUsb598 implements EvdoCellularModem {
 		} catch (Exception e) {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
 		}
+	}
+	
+	@Override
+	public SubscriberInfo [] getSubscriberInfo() throws KuraException {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	@Override

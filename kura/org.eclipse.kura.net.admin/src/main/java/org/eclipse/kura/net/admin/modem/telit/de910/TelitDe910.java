@@ -24,6 +24,7 @@ import org.eclipse.kura.net.modem.ModemCdmaServiceProvider;
 import org.eclipse.kura.net.modem.ModemDevice;
 import org.eclipse.kura.net.modem.ModemRegistrationStatus;
 import org.eclipse.kura.net.modem.ModemTechnologyType;
+import org.eclipse.kura.net.modem.SubscriberInfo;
 import org.eclipse.kura.usb.UsbModemDevice;
 import org.osgi.service.io.ConnectionFactory;
 import org.slf4j.Logger;
@@ -51,22 +52,20 @@ public class TelitDe910 extends TelitModem implements EvdoCellularModem {
 			if (atPort != null) {
 				if (atPort.equals(getDataPort()) || atPort.equals(gpsPort)) {
 					m_serialNumber = getSerialNumber();
-					m_imsi = getMobileSubscriberIdentity();
-					m_iccid = getIntegratedCirquitCardId();
 					m_model = getModel();
 					m_manufacturer = getManufacturer();		
 					m_revisionId = getRevisionID();
 					m_gpsSupported = isGpsSupported();
 					m_rssi = getSignalStrength();
+					m_subscriberInfo = getSubscriberInfo();
 					
 					s_logger.trace("TelitDe910() :: Serial Number={}", m_serialNumber);
-					s_logger.trace("TelitDe910() :: IMSI={}", m_imsi);
-					s_logger.trace("TelitDe910() :: ICCID={}", m_iccid);
 					s_logger.trace("TelitDe910() :: Model={}", m_model);
 					s_logger.trace("TelitDe910() :: Manufacturer={}", m_manufacturer);
 					s_logger.trace("TelitDe910() :: Revision ID={}", m_revisionId);
 					s_logger.trace("TelitDe910() :: GPS Supported={}", m_gpsSupported);
 					s_logger.trace("TelitDe910() :: RSSI={}", m_rssi);
+					s_logger.trace("TelitDe910() :: SubscriberInfo={}", m_subscriberInfo[0]);
 				}
 			}
 		} catch (KuraException e) {
@@ -78,7 +77,12 @@ public class TelitDe910 extends TelitModem implements EvdoCellularModem {
 	public String getIntegratedCirquitCardId() throws KuraException {
 		return "";
 	}
-
+	
+	@Override
+	public String getMobileSubscriberIdentity() throws KuraException {
+		return getMobileSubscriberIdentity(0);
+	}
+	
 	@Override
 	public ModemRegistrationStatus getRegistrationStatus() throws KuraException {
 		ModemRegistrationStatus modemRegistrationStatus = ModemRegistrationStatus.UNKNOWN;
@@ -433,6 +437,15 @@ public class TelitDe910 extends TelitModem implements EvdoCellularModem {
     		throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "Unsupported modem device");
     	}
 		return modemTechnologyTypes;
+	}
+	
+	@Override
+	public SubscriberInfo [] getSubscriberInfo() throws KuraException {
+		SubscriberInfo [] ret = new SubscriberInfo [1]; ret[0] = null; 
+		ret[0] = new SubscriberInfo(getMobileSubscriberIdentity(0), 
+				getIntegratedCirquitCardId(0), 
+				getSubscriberNumber(0));
+		return ret;
 	}
 	
 	@Override

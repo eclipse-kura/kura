@@ -32,6 +32,7 @@ import org.eclipse.kura.net.admin.modem.telit.he910.TelitHe910;
 import org.eclipse.kura.net.modem.CellularModem.SerialPortType;
 import org.eclipse.kura.net.modem.ModemDevice;
 import org.eclipse.kura.net.modem.SerialModemDevice;
+import org.eclipse.kura.net.modem.SubscriberInfo;
 import org.eclipse.kura.usb.UsbModemDevice;
 import org.osgi.service.io.ConnectionFactory;
 import org.slf4j.Logger;
@@ -49,9 +50,10 @@ public abstract class TelitModem {
 	protected String m_revisionId;
 	protected int m_rssi;
 	protected Boolean m_gpsSupported;
-	protected String m_imsi;
-	protected String m_iccid;
-	protected String m_subscriberNumber;
+	//protected String m_imsi;
+	//protected String m_iccid;
+	//protected String m_subscriberNumber;
+	protected SubscriberInfo [] m_subscriberInfo;
 	
 	private boolean m_gpsEnabled;
 	private ModemDevice m_device;
@@ -456,14 +458,14 @@ public abstract class TelitModem {
     	}
     }
     
-    public String getMobileSubscriberIdentity() throws KuraException {
+    public String getMobileSubscriberIdentity(int subscriberIndex) throws KuraException {
     	synchronized (s_atLock) {
     		String atPort = getAtPort();
     		String gpsPort = getGpsPort();
 			if ((atPort.equals(getDataPort()) || (atPort.equals(gpsPort) && m_gpsEnabled)) 
-					&& (m_imsi == null)) {
+					&& (m_subscriberInfo[subscriberIndex].getInternationalMobileSubscriberIdentity() != null)) {
 				s_logger.trace("returning previously obtained MobileSubscriberIdentity={} :: m_gpsEnabled={}, m_imsi, m_gpsEnabled");
-				return m_imsi;
+				return m_subscriberInfo[subscriberIndex].getInternationalMobileSubscriberIdentity();
 			}
     		if (isSimCardReady()) {
     			s_logger.debug("sendCommand getIMSI :: {}", TelitModemAtCommands.getIMSI.getCommand());
@@ -487,7 +489,7 @@ public abstract class TelitModem {
 							if (imsi.startsWith("#CIMI:")) {
 								imsi = imsi.substring("#CIMI:".length()).trim();
 						    }
-						    m_imsi = imsi;        
+							m_subscriberInfo[subscriberIndex].setInternationalMobileSubscriberIdentity(imsi);
 						}
 					}
     			} catch (Exception e) {
@@ -495,17 +497,17 @@ public abstract class TelitModem {
     			}
 	    	}
     	}
-        return m_imsi;
+        return m_subscriberInfo[subscriberIndex].getInternationalMobileSubscriberIdentity();
     }
     
-    public String getSubscriberNumber() throws KuraException {
+    public String getSubscriberNumber(int subscriberIndex) throws KuraException {
     	synchronized (s_atLock) {
     		String atPort = getAtPort();
     		String gpsPort = getGpsPort();
 			if ((atPort.equals(getDataPort()) || (atPort.equals(gpsPort) && m_gpsEnabled)) 
-					&& (m_subscriberNumber == null)) {
+					&& (m_subscriberInfo[subscriberIndex].getSubscriberNumber() != null)) {
 				s_logger.trace("returning previously obtained SubscriberNumber={} :: m_gpsEnabled={}, m_subscriberNumber, m_gpsEnabled");
-				return m_subscriberNumber;
+				return m_subscriberInfo[subscriberIndex].getSubscriberNumber();
 			}
 			if (isSimCardReady()) {
 				s_logger.debug("sendCommand getSubscriberNumber :: {}", TelitModemAtCommands.getSubscriberNumber.getCommand());
@@ -529,7 +531,8 @@ public abstract class TelitModem {
 		    				if (subscriber.startsWith("+CNUM:")) {
 		    					subscriber = subscriber.substring("+CNUM:".length()).trim();
 		    					String [] abSubscriber = subscriber.split(",");
-		    					m_subscriberNumber = abSubscriber[1].substring(1, subscriber.lastIndexOf('"'));
+		    					String subscriberNumber = abSubscriber[1].substring(1, subscriber.lastIndexOf('"'));
+		    					m_subscriberInfo[subscriberIndex].setSubscriberNumber(subscriberNumber);
 						    }
 		    			}
 		    		}
@@ -539,17 +542,17 @@ public abstract class TelitModem {
 		    	
 			}
     	}
-    	return m_subscriberNumber;
+    	return m_subscriberInfo[subscriberIndex].getSubscriberNumber();
     }
     
-    public String getIntegratedCirquitCardId() throws KuraException {
+    public String getIntegratedCirquitCardId(int subscriberIndex) throws KuraException {
     	synchronized (s_atLock) {
     		String atPort = getAtPort();
     		String gpsPort = getGpsPort();
 			if ((atPort.equals(getDataPort()) || (atPort.equals(gpsPort) && m_gpsEnabled)) 
-					&& (m_iccid == null)) {
+					&& (m_subscriberInfo[subscriberIndex].getIntegratedCircuitCardIdentification() != null)) {
 				s_logger.trace("returning previously obtained IntegratedCirquitCardId={} :: m_gpsEnabled={}, m_iccid, m_gpsEnabled");
-				return m_iccid;
+				return m_subscriberInfo[subscriberIndex].getIntegratedCircuitCardIdentification();
 			}
 	    	if (isSimCardReady()) {
 		    	s_logger.debug("sendCommand getICCID :: {}", TelitModemAtCommands.getICCID.getCommand());
@@ -573,7 +576,7 @@ public abstract class TelitModem {
 							if (iccid.startsWith("#CCID:")) {
 								iccid = iccid.substring("#CCID:".length()).trim();
 						    }
-						    m_iccid = iccid;        
+						    m_subscriberInfo[subscriberIndex].setIntegratedCircuitCardIdentification(iccid);
 						}
 					}
 		    	} catch (Exception e) {
@@ -581,7 +584,7 @@ public abstract class TelitModem {
 		    	}
 	    	}
     	}
-        return m_iccid;
+        return m_subscriberInfo[subscriberIndex].getIntegratedCircuitCardIdentification();
     }
         
     public String getDataPort() throws KuraException {

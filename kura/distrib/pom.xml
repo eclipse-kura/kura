@@ -326,6 +326,10 @@
 								<replace token="&lt;artifactId&gt;target-platform&lt;/artifactId&gt;" value="&lt;artifactId&gt;target-platform-previous&lt;/artifactId&gt;" dir="RELEASE_INFO/${project.version}/p2-repo-common">
 									<include name="pom.xml"/>
 								</replace>
+								<!-- Add strip version -->
+								<replace token="&lt;/artifactItems&gt;" value="&lt;/artifactItems&gt;&lt;stripVersion&gt;true&lt;/stripVersion&gt;" dir="RELEASE_INFO/${project.version}/p2-repo-common">
+									<include name="pom.xml"/>
+								</replace>
 								<!-- execute script to add artifacts to pom file -->
 								<exec executable="src/main/sh/generate_p2_repo_pom.sh" output="RELEASE_INFO/${project.version}/p2-repo-common/pom.xml">
 									<arg value="RELEASE_INFO/${project.version}/p2-repo-common/pom.xml" />
@@ -337,6 +341,10 @@
 									tofile="RELEASE_INFO/${project.version}/p2-repo-equinox_3.8.1/pom.xml" />
 								<!-- replace artifactId -->
 								<replace token="&lt;artifactId&gt;target-platform&lt;/artifactId&gt;" value="&lt;artifactId&gt;target-platform-previous&lt;/artifactId&gt;" dir="RELEASE_INFO/${project.version}/p2-repo-equinox_3.8.1">
+									<include name="pom.xml"/>
+								</replace>
+								<!-- Add strip version -->
+								<replace token="&lt;/artifactItems&gt;" value="&lt;/artifactItems&gt;&lt;stripVersion&gt;true&lt;/stripVersion&gt;" dir="RELEASE_INFO/${project.version}/p2-repo-equinox_3.8.1">
 									<include name="pom.xml"/>
 								</replace>
 								<!-- execute script to add artifacts to pom file -->

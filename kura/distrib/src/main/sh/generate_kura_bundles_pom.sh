@@ -1,13 +1,13 @@
 #!/bin/bash
 while IFS='=' read -r name version
 do
-    if [[ $name != *"kura.version"* ]] && [[ $name != *"emulator"* ]] && [[ $name != *"test"* ]] && [[ $name != *"demo"* ]] && [[ $name != *"protocol"* ]] && [[ $name != *"examples"* ]]
+    if [[ $name != *"kura.version"* ]] && [[ $name != *"emulator"* ]] && [[ $name != *"test"* ]] && [[ $name != *"demo"* ]] && [[ $name != *"protocol"* ]] && [[ $name != *"examples"* ]] && [[ $name != *"example"* ]] && [[ $name != *"web"* ]]
       then
-        echo "                                <artifactItem>" >> "$2";
-        echo "                                    <groupId>org.eclipse.kura</groupId>" >> "$2";
-        echo "                                    <artifactId>${name%.version}</artifactId>" >> "$2";
-        echo "                                    <version>$version</version>" >> "$2";
-        echo "                                </artifactItem>" >> "$2";
+        echo "                                <artifactItem>";
+        echo "                                    <groupId>org.eclipse.kura</groupId>";
+        echo "                                    <artifactId>${name%.version}</artifactId>";
+        echo "                                    <version>$version</version>";
+        echo "                                </artifactItem>";
     fi
 done < "$1"
 
@@ -20,4 +20,4 @@ echo "                          </artifactItems>
              </plugin>
         </plugins>
      </build>
-</project>" >> "$2";
+</project>";

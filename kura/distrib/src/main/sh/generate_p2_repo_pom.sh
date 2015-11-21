@@ -7,16 +7,16 @@ while read -r line || [[ -n "$line" ]]; do
       then
         if [[ $index == 1 ]];
           then
-            echo -e "</plugin>" >> "$2";
-            echo -e "</plugins>" >> "$2";
-	          echo -e "</build>" >> "$2";
-            echo -e "</project>" >> "$2";
+            echo -e "            </plugin>";
+            echo -e "        </plugins>";
+	        echo -e "    </build>";
+            echo -e "</project>";
             exit 0;
           else
             index=$[index + 1];
-            echo -e $line >> "$2";
+            echo -e $line;
           fi
     else
-      echo -e $line >> "$2";
+      echo -e $line;
     fi
 done < "$1"

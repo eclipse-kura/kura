@@ -286,16 +286,24 @@
 						</goals>
 						<configuration>
 							<target>
+								<condition property="is.not.snapshot">
+    								<not>
+      									<contains string="${project.version}" substring="-SNAPSHOT"/>
+    								</not>
+  								</condition>
+							</target>
+
+							<target if="${is.not.snapshot}">
 								<!-- Copy distrib/config/kura.build.properties in distrib/RELEASE_INFO/${project.version}/config -->
 								<copy
 									file="config/kura.build.properties"
 									todir="RELEASE_INFO/${project.version}/config" />
-									
+
                 				<!-- Copy target-platform/config/kura.target-platform.build.properties in distrib/RELEASE_INFO/${project.version}/config -->
 								<copy
 									file="${kura.basedir}/../../../target-platform/config/kura.target-platform.build.properties"
 									todir="RELEASE_INFO/${project.version}/config" />
-							    
+
 							    <!-- Copy src/main/resources/common/previous-version-pom-template.xml in distrib/RELEASE_INFO/${project.version}/pom.xml -->
 								<copy
 									file="src/main/resources/common/release-info.root.pom.xml"
@@ -304,7 +312,7 @@
 								<replace token="&lt;version&gt;[kura-version]&lt;/version&gt;" value="&lt;version&gt;${project.version}&lt;/version&gt;" dir="RELEASE_INFO/${project.version}">
 									<include name="pom.xml"/>
 								</replace>
-								
+
 								<!-- Copy src/main/resources/common/kura-bundles-pom.xml in distrib/RELEASE_INFO/${project.version}/kura-bundles/pom.xml -->
 								<copy
 									file="src/main/resources/common/kura-bundles-pom.xml"
@@ -317,7 +325,7 @@
 								<exec executable="src/main/sh/generate_kura_bundles_pom.sh" output="RELEASE_INFO/${project.version}/kura-bundles/pom.xml" append="true">
 									<arg value="RELEASE_INFO/${project.version}/config/kura.build.properties" />
 								</exec>
-								
+
 								<!-- Copy target-platform/p2-repo-common/pom.xml in distrib/RELEASE_INFO/${project.version}/p2-repo-common/pom.xml -->
 								<copy
 									file="${kura.basedir}/../../../target-platform/p2-repo-common/pom.xml"
@@ -334,7 +342,7 @@
 								<exec executable="src/main/sh/generate_p2_repo_pom.sh" output="RELEASE_INFO/${project.version}/p2-repo-common/pom.xml">
 									<arg value="RELEASE_INFO/${project.version}/p2-repo-common/pom.xml" />
 								</exec>
-								
+
 								<!-- Copy target-platform/p2-repo-equinox_3.8.1/pom.xml in distrib/RELEASE_INFO/${project.version}/p2-repo-equinox_3.8.1/pom.xml -->
 								<copy
 									file="${kura.basedir}/../../../target-platform/p2-repo-equinox_3.8.1/pom.xml"

@@ -1,0 +1,5 @@
+*.map
+*.obj
+*.lib
+*.pdb
+*.exp

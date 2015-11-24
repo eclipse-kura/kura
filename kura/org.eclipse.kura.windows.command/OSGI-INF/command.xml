@@ -12,10 +12,9 @@
       Eurotech
 
 -->
-<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" activate="activate" deactivate="deactivate" immediate="true" name="org.eclipse.kura.net.NetworkService">
-   <implementation class="org.eclipse.kura.emulator.net.EmulatedNetworkServiceImpl"/>
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" activate="activate" deactivate="deactivate" name="org.eclipse.kura.command.CommandService">
+   <implementation class="org.eclipse.kura.windows.command.CommandServiceImpl"/>
    <service>
-      <provide interface="org.eclipse.kura.net.NetworkService"/>
+      <provide interface="org.eclipse.kura.command.CommandService"/>
    </service>
-   <property name="service.pid" value="org.eclipse.kura.net.NetworkService"/>
 </scr:component>

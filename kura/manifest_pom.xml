@@ -10,7 +10,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.eclipse.kura</groupId>
 	<artifactId>kura</artifactId>
-	<version>1.3.0-SNAPSHOT</version>
+	<version>1.3.0</version>
 
 	<packaging>pom</packaging>
 
@@ -47,6 +47,13 @@
 		<module>org.eclipse.kura.emulator</module>
 		<module>org.eclipse.kura.emulator.gpio</module>
 		<module>org.eclipse.kura.core.test</module>
+		<module>org.eclipse.kura.windows.net</module>
+		<module>org.eclipse.kura.windows.position</module>
+		<module>org.eclipse.kura.windows.command</module>
+		<module>org.eclipse.kura.windows.usb</module>
+		<module>org.eclipse.kura.windows.watchdog</module>
+		<module>org.eclipse.kura.windows.clock</module>
+		<module>org.eclipse.kura.windows.status</module>
 		<module>examples</module>
 	</modules>
 

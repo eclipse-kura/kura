@@ -18,7 +18,7 @@
 	<parent>
 		<artifactId>kura</artifactId>
 		<groupId>org.eclipse.kura</groupId>
-		<version>1.3.0-SNAPSHOT</version>
+		<version>1.3.0</version>
 		<relativePath>../pom_pom.xml</relativePath>
 	</parent>
 
@@ -186,6 +186,41 @@
 									<artifactId>org.eclipse.kura.protocol.modbus</artifactId>
 									<version>${org.eclipse.kura.protocol.modbus.version}</version>
 								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.kura.windows.net</artifactId>
+									<version>${org.eclipse.kura.windows.net.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.kura.windows.position</artifactId>
+									<version>${org.eclipse.kura.windows.position.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.kura.windows.command</artifactId>
+									<version>${org.eclipse.kura.windows.command.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.kura.windows.usb</artifactId>
+									<version>${org.eclipse.kura.windows.usb.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.kura.windows.watchdog</artifactId>
+									<version>${org.eclipse.kura.windows.watchdog.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.kura.windows.clock</artifactId>
+									<version>${org.eclipse.kura.windows.clock.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.kura.windows.status</artifactId>
+									<version>${org.eclipse.kura.windows.status.version}</version>
+								</artifactItem>
 							</artifactItems>
 							<stripVersion>true</stripVersion>
 							<outputDirectory>${project.basedir}/target/plugins</outputDirectory>
@@ -289,6 +324,13 @@
 							    <move file="target/plugins/org.eclipse.kura.web.jar" tofile="target/plugins/org.eclipse.kura.web_${org.eclipse.kura.web.version}.jar" failonerror="false" />
   								<move file="target/plugins/org.eclipse.kura.linux.gpio.jar" tofile="target/plugins/org.eclipse.kura.linux.gpio_${org.eclipse.kura.linux.gpio.version}.jar" failonerror="false"/>
   								<move file="target/plugins/org.eclipse.kura.emulator.gpio.jar" tofile="target/plugins/org.eclipse.kura.emulator.gpio_${org.eclipse.kura.emulator.gpio.version}.jar" failonerror="false"/>
+							    <move file="target/plugins/org.eclipse.kura.windows.net.jar" tofile="target/plugins/org.eclipse.kura.windows.net_${org.eclipse.kura.windows.position.version}.jar"/>
+							    <move file="target/plugins/org.eclipse.kura.windows.position.jar" tofile="target/plugins/org.eclipse.kura.windows.position_${org.eclipse.kura.windows.position.version}.jar"/>
+							    <move file="target/plugins/org.eclipse.kura.windows.command.jar" tofile="target/plugins/org.eclipse.kura.windows.command_${org.eclipse.kura.windows.command.version}.jar"/>
+							    <move file="target/plugins/org.eclipse.kura.windows.usb.jar" tofile="target/plugins/org.eclipse.kura.windows.usb_${org.eclipse.kura.windows.usb.version}.jar"/>
+							    <move file="target/plugins/org.eclipse.kura.windows.watchdog.jar" tofile="target/plugins/org.eclipse.kura.windows.watchdog_${org.eclipse.kura.windows.watchdog.version}.jar"/>
+							    <move file="target/plugins/org.eclipse.kura.windows.clock.jar" tofile="target/plugins/org.eclipse.kura.windows.clock_${org.eclipse.kura.windows.clock.version}.jar"/>
+							    <move file="target/plugins/org.eclipse.kura.windows.status.jar" tofile="target/plugins/org.eclipse.kura.windows.status_${org.eclipse.kura.windows.status.version}.jar"/>
 							</tasks>
 						</configuration>
 					</execution>
@@ -446,7 +488,9 @@
 -->
 			</properties>
             <activation>
-                <activeByDefault>true</activeByDefault>
+                <os>
+	                <family>unix</family>
+                </os>
             </activation>
             <build>
                 <resources>
@@ -529,7 +573,9 @@
 -->
 			</properties>
             <activation>
-                <activeByDefault>true</activeByDefault>
+                <os>
+	                <family>unix</family>
+                </os>
             </activation>
             <build>
                 <resources>
@@ -614,7 +660,9 @@
 -->
 			</properties>
 			<activation>
-				<activeByDefault>true</activeByDefault>
+	                <os>
+		                <family>unix</family>
+	                </os>
 			</activation>		
 			<build>
 				<resources>
@@ -748,7 +796,9 @@
 -->
 			</properties>
 			<activation>
-				<activeByDefault>true</activeByDefault>
+	                <os>
+		                <family>unix</family>
+	                </os>
 			</activation>		
 			<build>
 				<resources>
@@ -863,7 +913,9 @@
 -->
 			</properties>
 			<activation>
-				<activeByDefault>true</activeByDefault>
+	                <os>
+		                <family>unix</family>
+	                </os>
 			</activation>
 			<build>
 				<resources>
@@ -986,7 +1038,9 @@
 -->
 			</properties> 
 			<activation>
-				<activeByDefault>true</activeByDefault>
+	                <os>
+		                <family>unix</family>
+	                </os>
 			</activation> 
 			<build>
 				<resources>
@@ -1098,7 +1152,9 @@
 -->
 			</properties>
 			<activation>
-				<activeByDefault>true</activeByDefault>
+	                <os>
+		                <family>unix</family>
+	                </os>
 			</activation>
 			<build>
 				<resources>
@@ -1221,7 +1277,9 @@
 -->
 			</properties> 
 			<activation>
-				<activeByDefault>true</activeByDefault>
+	                <os>
+		                <family>unix</family>
+	                </os>
 			</activation> 
 			<build>
 				<resources>
@@ -1333,7 +1391,9 @@
 -->
 			</properties>
 			<activation>
-				<activeByDefault>true</activeByDefault>
+	                <os>
+		                <family>unix</family>
+	                </os>
 			</activation>
 			<build>
 				<resources>
@@ -1447,7 +1507,9 @@
 -->
 			</properties>
 			<activation>
-				<activeByDefault>true</activeByDefault>
+	                <os>
+		                <family>unix</family>
+	                </os>
 			</activation>
 			<build>
 				<resources>
@@ -1533,7 +1595,7 @@
 								<configuration>
 									<verbose>true</verbose>
 									<deb>${basedir}/target/kura_${project.version}_raspberry-pi-2-nn_installer.deb</deb>
-									<controlDir>${basedir}/src/main/deb/control</controlDir>
+									<controlDir>${basedir}/src/main/deb/control_nn</controlDir>
 									<dataSet>
 										<data>
 											<src>${basedir}/target/kura_${project.version}_raspberry-pi-2-nn.zip</src>
@@ -1551,6 +1613,111 @@
 				</plugins>
 			</build>
 		</profile>
+
+		<profile>
+			<id>windows</id>
+			<activation>
+	                <os>
+		                <family>windows</family>
+	                </os>
+			</activation>
+			<build>
+				<resources>
+					<resource>
+						<directory>src/main/resources</directory>
+						<filtering>true</filtering>
+					</resource>
+				</resources>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-resources-plugin</artifactId>
+						<version>2.3</version>
+						<executions>
+							<execution>
+								<id>copy-resources</id>
+								<phase>validate</phase>
+								<goals>
+									<goal>copy-resources</goal>
+								</goals>
+								<configuration>
+									<outputDirectory>${basedir}/target/KURAUtils</outputDirectory>
+									<resources>
+										<resource>
+											<directory>${basedir}/../org.eclipse.kura.core/KURAUtils</directory>
+										</resource>
+									</resources>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>properties-maven-plugin</artifactId>
+						<version>1.0-alpha-1</version>
+						<executions>
+							<execution>
+								<phase>initialize</phase>
+								<goals>
+									<goal>read-project-properties</goal>
+								</goals>
+								<configuration>
+									<files>
+										<file>${basedir}/build.properties</file>
+										<file>${basedir}/config/kura.build.properties</file>
+									</files>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>buildnumber-maven-plugin</artifactId>
+						<version>1.0</version>
+						<executions>
+							<execution>
+								<phase>validate</phase>
+								<goals>
+									<goal>create-timestamp</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-antrun-plugin</artifactId>
+						<version>1.7</version>
+						<executions>
+							<execution>
+								<id>windows-jars</id>
+								<phase>install</phase>
+								<goals>
+									<goal>run</goal>
+								</goals>
+								<configuration>
+									<target>
+										<property name="buildNumber" value="buildNumber" />
+										<property name="project.version" value="${project.version}" />
+										<property name="project.build.profile" value="${project.build.profile}" />
+										<property name="project.build.directory" value="${project.build.directory}" />
+										<property name="build.name" value="windows" />
+										<property name="target.device" value="windows" />
+										<property name="kura.os.version" value="windows" />
+										<property name="kura.arch" value="x86" />
+										<property name="kura.mem.size" value="256m" />
+										<property name="kura.install.dir" value="/opt/eclipse" />
+										<ant antfile="${basedir}/src/main/ant/build_equinox_distrib.xml"
+											target="dist-windows" />
+									</target>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>	
+
 		
 		<profile>
 			<id>dev-env</id>
@@ -1623,6 +1790,11 @@
 										<copy todir="${project.build.directory}/staging/target-definition">
 											<fileset dir="../target-definition" />
 										</copy>
+										<!-- Add individual emulator bundles-->
+										<copy 
+											file="../org.eclipse.kura.emulator.gpio/target/org.eclipse.kura.emulator.gpio-${org.eclipse.kura.emulator.gpio.version}.jar"
+											todir="${project.build.directory}/staging/target-definition/equinox_3.8.1/repository/plugins"/>
+
 										<delete
 											file="${project.build.directory}/staging/target-definition/pom.xml" />
 										<delete
@@ -1651,6 +1823,12 @@
 											todir="${project.build.directory}/staging/target-definition/equinox_3.8.1/repository/plugins" />
 										<copy
 											file="${project.build.directory}/plugins/org.eclipse.kura.deployment.agent_${org.eclipse.kura.deployment.agent.version}.jar"
+											todir="${project.build.directory}/staging/target-definition/equinox_3.8.1/repository/plugins" />
+										<copy
+											file="${project.build.directory}/plugins/org.eclipse.kura.linux.status_${org.eclipse.kura.linux.status.version}.jar"
+											todir="${project.build.directory}/staging/target-definition/equinox_3.8.1/repository/plugins" />
+										<copy
+											file="${project.build.directory}/plugins/org.eclipse.kura.windows.status_${org.eclipse.kura.windows.status.version}.jar"
 											todir="${project.build.directory}/staging/target-definition/equinox_3.8.1/repository/plugins" />
 										<copy
 											file="${project.build.directory}/plugins/org.eclipse.kura.core.cloud_${org.eclipse.kura.core.cloud.version}.jar"

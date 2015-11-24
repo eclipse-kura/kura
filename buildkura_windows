@@ -42,7 +42,7 @@ then
 elif [[ "$0" == *windows* ]]
 then
   kura_eth_branch=""
-  kura_branch="windows_beta"
+  kura_branch="develop"
 else
 
   #echo "its NOT the release version, so look for some ENV variables that tell us what to build"

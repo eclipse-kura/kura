@@ -63,11 +63,6 @@
                             <version>${org.apache.commons.net.version}</version>
                         </artifactItem>
 								<artifactItem>
-                            <groupId>com.google</groupId>
-                            <artifactId>com.google.protobuf</artifactId>
-                            <version>${com.google.protobuf.version}</version>
-                        </artifactItem>
-								<artifactItem>
                             <groupId>org.eclipse</groupId>
                             <artifactId>org.eclipse.paho.client.mqttv3</artifactId>
                             <version>${org.eclipse.paho.client.mqttv3.version}</version>

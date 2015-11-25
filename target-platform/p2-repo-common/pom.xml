@@ -145,11 +145,6 @@
 									<artifactId>camel-kura</artifactId>
 									<version>${camel.version}</version>
 								</artifactItem>
-								<artifactItem>
-									<groupId>org.apache.camel</groupId>
-									<artifactId>camel-paho</artifactId>
-									<version>${camel.version}</version>
-								</artifactItem>
 							</artifactItems>
 							<outputDirectory>${project.basedir}/target/source/plugins</outputDirectory>
 						</configuration>

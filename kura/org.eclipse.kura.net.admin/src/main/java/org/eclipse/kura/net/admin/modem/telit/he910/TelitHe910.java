@@ -16,6 +16,9 @@
 package org.eclipse.kura.net.admin.modem.telit.he910;
 
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
@@ -45,6 +48,8 @@ public class TelitHe910 extends TelitModem implements HspaCellularModem {
 	private static final Logger s_logger = LoggerFactory.getLogger(TelitHe910.class);
 	
 	private int m_pdpContext = 1;
+	
+	private ScheduledExecutorService m_executorUtil;
 
     /**
      * TelitHe910 modem constructor
@@ -76,10 +81,21 @@ public class TelitHe910 extends TelitModem implements HspaCellularModem {
 					s_logger.trace("{} :: GPS Supported={}", getClass().getName(), m_gpsSupported);
 					s_logger.trace("{} :: RSSI={}", getClass().getName(), m_rssi);
 				}
-				m_subscriberInfo = obtainSubscriberInfo();
+				
+				m_executorUtil = Executors.newSingleThreadScheduledExecutor();
+				m_executorUtil.schedule(new Runnable() {
+		    		@Override
+		    		public void run() {
+		    			try {
+							m_subscriberInfo = obtainSubscriberInfo();
+						} catch (KuraException e) {
+							s_logger.error("failed to initialize Telit HE910 modem - {}", e);
+						}
+		    		}
+		    	}, 10, TimeUnit.MILLISECONDS);
 			}
 		} catch (KuraException e) {
-			e.printStackTrace();
+			s_logger.error("failed to initialize Telit HE910 modem - {}", e);
 		}
     }
 	

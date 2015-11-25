@@ -12,6 +12,9 @@
 package org.eclipse.kura.net.admin.modem.telit.de910;
 
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
@@ -34,6 +37,8 @@ public class TelitDe910 extends TelitModem implements EvdoCellularModem {
 
 	private static final Logger s_logger = LoggerFactory.getLogger(TelitDe910.class);
 		
+	private ScheduledExecutorService m_executorUtil;
+	
 	 /**
      * TelitDe910 modem constructor
      * 
@@ -57,19 +62,27 @@ public class TelitDe910 extends TelitModem implements EvdoCellularModem {
 					m_revisionId = getRevisionID();
 					m_gpsSupported = isGpsSupported();
 					m_rssi = getSignalStrength();
-					m_subscriberInfo = getSubscriberInfo();
-					
 					s_logger.trace("TelitDe910() :: Serial Number={}", m_serialNumber);
 					s_logger.trace("TelitDe910() :: Model={}", m_model);
 					s_logger.trace("TelitDe910() :: Manufacturer={}", m_manufacturer);
 					s_logger.trace("TelitDe910() :: Revision ID={}", m_revisionId);
 					s_logger.trace("TelitDe910() :: GPS Supported={}", m_gpsSupported);
 					s_logger.trace("TelitDe910() :: RSSI={}", m_rssi);
-					s_logger.trace("TelitDe910() :: SubscriberInfo={}", m_subscriberInfo[0]);
 				}
+				m_executorUtil = Executors.newSingleThreadScheduledExecutor();
+				m_executorUtil.schedule(new Runnable() {
+		    		@Override
+		    		public void run() {
+		    			try {
+							m_subscriberInfo = obtainSubscriberInfo();
+						} catch (KuraException e) {
+							s_logger.error("failed to initialize Telit DE910 modem - {}", e);
+						}
+		    		}
+		    	}, 10, TimeUnit.MILLISECONDS);
 			}
 		} catch (KuraException e) {
-			e.printStackTrace();
+			s_logger.error("failed to initialize Telit DE910 modem - {}", e);
 		}
     }
 	

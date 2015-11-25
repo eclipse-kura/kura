@@ -1,3 +1,14 @@
+/**
+ * Copyright (c) 2011, 2014 Eurotech and/or its affiliates
+ *
+ *  All rights reserved. This program and the accompanying materials
+ *  are made available under the terms of the Eclipse Public License v1.0
+ *  which accompanies this distribution, and is available at
+ *  http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *   Eurotech
+ */
 package org.eclipse.kura.net.modem;
 
 public class SubscriberInfo {
@@ -18,12 +29,28 @@ public class SubscriberInfo {
 	 * Subscriber Number
 	 * This is phone number of the device
 	 */
-	private String m_subscriber;
+	//private String m_subscriber;
 	
-	public SubscriberInfo(String imsi, String iccid, String subscriber) {
+	/**
+	 * Default constructor
+	 */
+	public SubscriberInfo() {
+		m_imsi = "";
+		m_iccid = "";
+		//m_subscriber = "";
+	}
+	
+	/**
+	 * Constructor
+	 * 
+	 * @param imsi - International Mobile Subscriber Identity as {@link String}
+	 * @param iccid - Integrated Circuit Card Identification as {@link String}
+	 * @param subscriber - Subscriber Number as {@link String}
+	 */
+	public SubscriberInfo(String imsi, String iccid/*, String subscriber*/) {
 		m_imsi = imsi;
 		m_iccid = iccid;
-		m_subscriber = subscriber;
+		//m_subscriber = subscriber;
 	}
 	
 	@Override
@@ -34,8 +61,10 @@ public class SubscriberInfo {
 				+ ((m_imsi == null) ? 0 : m_imsi.hashCode());
 		result = prime * result
 				+ ((m_iccid == null) ? 0 : m_iccid.hashCode());
+		/*
 		result = prime * result
 				+ ((m_subscriber == null) ? 0 : m_subscriber.hashCode());
+		*/
 		return result;
 	}
 	
@@ -47,11 +76,15 @@ public class SubscriberInfo {
 		SubscriberInfo other = (SubscriberInfo)obj;
 		if (!m_imsi.equals(other.m_imsi)) {
 			return false;
-		} else if (!m_iccid.equals(other.m_iccid)) {
+		}
+		if (!m_iccid.equals(other.m_iccid)) {
 			return false;
-		} else if (!m_subscriber.equals(other.m_subscriber)) {
+		} 
+		/*
+		if (!m_subscriber.equals(other.m_subscriber)) {
 			return false;
 		}
+		*/
 		return true;
 	}
 	
@@ -60,31 +93,64 @@ public class SubscriberInfo {
 		StringBuilder sb = new StringBuilder();
 		sb.append("IMSI=").append(m_imsi);
 		sb.append("; ICCID=").append(m_iccid);
-		sb.append("; Subscriber Number=").append(m_subscriber);
+		//sb.append("; Subscriber Number=").append(m_subscriber);
 		return sb.toString();
 	}
 
+	/**
+	 * Reports International Mobile Subscriber Identity
+	 * 
+	 * @return - International Mobile Subscriber Identity as {@link String}
+	 */
 	public String getInternationalMobileSubscriberIdentity() {
 		return m_imsi;
 	}
 
+	/**
+	 * Reports Integrated Circuit Card Identification
+	 * 
+	 * @return Integrated Circuit Card Identification as {@link String}
+	 */
 	public String getIntegratedCircuitCardIdentification() {
 		return m_iccid;
 	}
 
+	/**
+	 * Reports Subscriber Number
+	 * 
+	 * @return Subscriber Number as {@link String}
+	 */
+	/*
 	public String getSubscriberNumber() {
 		return m_subscriber;
 	}
-	
+	*/
+	/**
+	 * Sets International Mobile Subscriber Identity
+	 * 
+	 * @param imsi - International Mobile Subscriber Identity as {@link String}
+	 */
 	public void setInternationalMobileSubscriberIdentity(String imsi) {
 		m_imsi = imsi;
 	}
 
+	/**
+	 * Sets Integrated Circuit Card Identification
+	 * 
+	 * @param iccid - Integrated Circuit Card Identification as {@link String}
+	 */
 	public void setIntegratedCircuitCardIdentification(String iccid) {
 		m_iccid = iccid;
 	}
 
+	/**
+	 * Sets Subscriber Number
+	 * 
+	 * @param subscriber - Subscriber Number as {@link String}
+	 */
+	/*
 	public void setSubscriberNumber(String subscriber) {
 		m_subscriber = subscriber;
 	}
+	*/
 }

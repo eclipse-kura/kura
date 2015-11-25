@@ -376,7 +376,12 @@ public class SierraUsb598 implements EvdoCellularModem {
 	}
 	
 	@Override
-	public SubscriberInfo [] getSubscriberInfo() throws KuraException {
+	public SubscriberInfo [] getSubscriberInfo() {
+		return null;
+	}
+	
+	@Override
+	public SubscriberInfo [] obtainSubscriberInfo() throws KuraException {
 		// TODO Auto-generated method stub
 		return null;
 	}

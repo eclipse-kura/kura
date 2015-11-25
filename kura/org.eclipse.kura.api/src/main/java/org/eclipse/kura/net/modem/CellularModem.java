@@ -151,7 +151,9 @@ public interface CellularModem {
     
     public List<ModemTechnologyType> getTechnologyTypes() throws KuraException;
     
-    public SubscriberInfo [] getSubscriberInfo() throws KuraException;
+    public SubscriberInfo [] getSubscriberInfo();
+    
+    public SubscriberInfo [] obtainSubscriberInfo() throws KuraException;
     
     @Deprecated
     public ModemTechnologyType getTechnologyType ();

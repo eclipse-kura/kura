@@ -54,6 +54,7 @@ import org.eclipse.kura.net.modem.ModemInterfaceAddressConfig;
 import org.eclipse.kura.net.modem.ModemManagerService;
 import org.eclipse.kura.net.modem.ModemTechnologyType;
 import org.eclipse.kura.net.modem.SerialModemDevice;
+import org.eclipse.kura.net.modem.SubscriberInfo;
 import org.eclipse.kura.net.wifi.WifiBgscan;
 import org.eclipse.kura.net.wifi.WifiBgscanModule;
 import org.eclipse.kura.net.wifi.WifiCiphers;
@@ -508,7 +509,10 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 										if (modemServiceId != null) {
 											CellularModem cellModemService = modemManagerService.getModemService(modemServiceId); 
 											if (cellModemService != null) { 
-
+												SubscriberInfo subscriberInfo [] = cellModemService.getSubscriberInfo();
+												for (SubscriberInfo subscriber : subscriberInfo) {
+													s_logger.warn("<IAB> subscriber -> {}", subscriber);
+												}
 												try {
 													String imei = cellModemService.getSerialNumber();
 													s_logger.debug("Setting IMEI/MEID to {}", imei);

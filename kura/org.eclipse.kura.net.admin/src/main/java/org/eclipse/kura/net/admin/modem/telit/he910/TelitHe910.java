@@ -69,28 +69,14 @@ public class TelitHe910 extends TelitModem implements HspaCellularModem {
 					m_revisionId = getRevisionID();
 					m_gpsSupported = isGpsSupported();
 					m_rssi = getSignalStrength();
-					m_subscriberInfo = getSubscriberInfo();
-					
-					/*
-					s_logger.warn("<IAB> Sim Card Slot: {}", getSimCardSlot());
-					setSimCardSlot(SimCardSlot.B);
-					s_logger.warn("<IAB> Sim Card Slot: {}", getSimCardSlot());
-					setSimCardSlot(SimCardSlot.A);
-					s_logger.warn("<IAB> Sim Card Slot: {}", getSimCardSlot());
-					*/
-					
 					s_logger.trace("{} :: Serial Number={}", getClass().getName(), m_serialNumber);
 					s_logger.trace("{} :: Model={}", getClass().getName(), m_model);
 					s_logger.trace("{} :: Manufacturer={}", getClass().getName(), m_manufacturer);
 					s_logger.trace("{} :: Revision ID={}", getClass().getName(), m_revisionId);
 					s_logger.trace("{} :: GPS Supported={}", getClass().getName(), m_gpsSupported);
 					s_logger.trace("{} :: RSSI={}", getClass().getName(), m_rssi);
-					for (SubscriberInfo subscriberInfo : m_subscriberInfo) {
-						if (subscriberInfo != null) {
-							s_logger.trace("{} :: SubscriberInfo={}", getClass().getName(), subscriberInfo);
-						}
-					}
 				}
+				m_subscriberInfo = obtainSubscriberInfo();
 			}
 		} catch (KuraException e) {
 			e.printStackTrace();
@@ -108,39 +94,39 @@ public class TelitHe910 extends TelitModem implements HspaCellularModem {
 	}
 	
 	@Override
-	public SubscriberInfo [] getSubscriberInfo() throws KuraException {
-		SubscriberInfo [] ret = new SubscriberInfo [2]; ret[0] = null; ret[1] = null;
+	public SubscriberInfo [] getSubscriberInfo() {
+		return m_subscriberInfo;
+	}
+	
+	@Override
+	public SubscriberInfo [] obtainSubscriberInfo() throws KuraException {
+		SubscriberInfo [] ret = new SubscriberInfo [2];
+		ret[0] = new SubscriberInfo(); ret[1] = new SubscriberInfo();
 		SimCardSlot originalSimSlot = getSimCardSlot();
 		if (originalSimSlot == SimCardSlot.A) {
 			if (isSimCardReady()) {
 				ret[0] = new SubscriberInfo(getMobileSubscriberIdentity(SimCardSlot.A.getValue()), 
-						getIntegratedCirquitCardId(SimCardSlot.A.getValue()), 
-						getSubscriberNumber(SimCardSlot.A.getValue()));
+						getIntegratedCirquitCardId(SimCardSlot.A.getValue()));
 			}
 			if (setSimCardSlot(SimCardSlot.B)) {
-				if (isSimCardReady()) {
-					SubscriberInfo subscriberInfo = new SubscriberInfo(getMobileSubscriberIdentity(SimCardSlot.B.getValue()), 
-							getIntegratedCirquitCardId(SimCardSlot.B.getValue()), 
-							getSubscriberNumber(SimCardSlot.B.getValue()));
-					if (!subscriberInfo.equals(ret[0])) {
-						ret[1] = subscriberInfo;
-					}
+				sleep(7000);
+				SubscriberInfo subscriberInfo = new SubscriberInfo(getMobileSubscriberIdentity(SimCardSlot.B.getValue()), 
+							getIntegratedCirquitCardId(SimCardSlot.B.getValue()));	
+				if (!subscriberInfo.equals(ret[0])) {
+					ret[1] = subscriberInfo;
 				}
 			}
 		} else if (originalSimSlot == SimCardSlot.B) {
 			if (isSimCardReady()) {
 				ret[1] = new SubscriberInfo(getMobileSubscriberIdentity(SimCardSlot.B.getValue()), 
-						getIntegratedCirquitCardId(SimCardSlot.B.getValue()), 
-						getSubscriberNumber(SimCardSlot.B.getValue()));
+						getIntegratedCirquitCardId(SimCardSlot.B.getValue()));
 			}
 			if (setSimCardSlot(SimCardSlot.A)) {
-				if (isSimCardReady()) {
-					SubscriberInfo subscriberInfo = new SubscriberInfo(getMobileSubscriberIdentity(SimCardSlot.A.getValue()), 
-							getIntegratedCirquitCardId(SimCardSlot.A.getValue()), 
-							getSubscriberNumber(SimCardSlot.A.getValue()));
-					if (!subscriberInfo.equals(ret[1])) {
-						ret[0] = subscriberInfo;
-					}
+				sleep(7000);
+				SubscriberInfo subscriberInfo = new SubscriberInfo(getMobileSubscriberIdentity(SimCardSlot.A.getValue()), 
+							getIntegratedCirquitCardId(SimCardSlot.A.getValue()));
+				if (!subscriberInfo.equals(ret[1])) {
+					ret[0] = subscriberInfo;
 				}
 			}
 		}
@@ -158,7 +144,6 @@ public class TelitHe910 extends TelitModem implements HspaCellularModem {
 			port = getAtPort();
 		}
 		synchronized (s_atLock) {
-			s_logger.warn("<IAB> getSimCardSlot() :: sendCommand getCurrentSimSlot :: {} command to port {}", TelitHe910AtCommands.getCurrentSimSlot.getCommand(), port);
 			s_logger.debug("sendCommand getCurrentSimSlot :: {} command to port {}", TelitHe910AtCommands.getCurrentSimSlot.getCommand(), port);
 			byte[] reply = null;
 	    	CommConnection commAtConnection = null;
@@ -167,7 +152,7 @@ public class TelitHe910 extends TelitModem implements HspaCellularModem {
 	    		if (!isAtReachable(commAtConnection)) {	    		
 	    			throw new KuraException(KuraErrorCode.NOT_CONNECTED, "Modem not available for AT commands: " + TelitHe910.class.getName());
 	    		}   
-	    		reply = commAtConnection.sendCommand(TelitHe910AtCommands.getCurrentSimSlot.getCommand().getBytes(), 500, 1000);
+	    		reply = commAtConnection.sendCommand(TelitHe910AtCommands.getCurrentSimSlot.getCommand().getBytes(), 500/*500, 100*/);
 	    	} catch (Exception e) {
                 throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
             } finally {	        
@@ -210,7 +195,6 @@ public class TelitHe910 extends TelitModem implements HspaCellularModem {
 			port = getAtPort();
 		}
 		synchronized (s_atLock) {
-			s_logger.warn("<IAB> setSimCardSlot() :: sendCommand setSimSlot{} command to port {}", simCardSlot, port);
 			s_logger.debug("sendCommand setSimSlot{} command to port {}", simCardSlot, port);
 	    	CommConnection commAtConnection = null;
 	    	try {
@@ -218,17 +202,20 @@ public class TelitHe910 extends TelitModem implements HspaCellularModem {
 	    		if (!isAtReachable(commAtConnection)) {	    		
 	    			throw new KuraException(KuraErrorCode.NOT_CONNECTED, "Modem not available for AT commands: " + TelitHe910.class.getName());
 	    		}
-		    	commAtConnection.sendCommand(cmd.getBytes(), 500, 1000);    	
+		    	commAtConnection.sendCommand(cmd.getBytes(), 500, 100);    	
 	    	} catch (Exception e) {
                 throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
             } finally {	        
     	        closeSerialPort(commAtConnection);
         	}
-	    	if (simCardSlot == getSimCardSlot() && isSimCardReady()) {
-				ret = true;
+	    	if (simCardSlot == getSimCardSlot()) {
+	    		ret = true;
+	    		if (isSimCardReady()) {
+		    		s_logger.warn("<IAB> setSimCardSlot() :: successfully switched to simCardSlot {}", simCardSlot);
+					ret = true;
+	    		}
 			}
 		}
-		
 		return ret;
 	}
     
@@ -254,7 +241,7 @@ public class TelitHe910 extends TelitModem implements HspaCellularModem {
 	    	        throw new KuraException(KuraErrorCode.NOT_CONNECTED, "Modem not available for AT commands: " + TelitHe910.class.getName());
 	    	    }
 	    	    
-				reply = commAtConnection.sendCommand(TelitHe910AtCommands.getSimStatus.getCommand().getBytes(), 1000, 100);
+				reply = commAtConnection.sendCommand(TelitHe910AtCommands.getSimStatus.getCommand().getBytes(), 500, 100/*1000, 100*/);
     	        if (reply != null) {
     	            String simStatus = getResponseString(reply);
     	            String[] simStatusSplit = simStatus.split(",");

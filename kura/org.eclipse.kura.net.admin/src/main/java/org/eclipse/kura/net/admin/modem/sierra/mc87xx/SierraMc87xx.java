@@ -434,8 +434,12 @@ public class SierraMc87xx implements HspaCellularModem {
 		m_netConfigs = netConfigs;
 	}
 	
+	public SubscriberInfo [] getSubscriberInfo() {
+		return null;
+	}
+	
 	@Override
-	public SubscriberInfo [] getSubscriberInfo() throws KuraException {
+	public SubscriberInfo [] obtainSubscriberInfo() throws KuraException {
 		return null;
 	}
 	

@@ -50,9 +50,6 @@ public abstract class TelitModem {
 	protected String m_revisionId;
 	protected int m_rssi;
 	protected Boolean m_gpsSupported;
-	//protected String m_imsi;
-	//protected String m_iccid;
-	//protected String m_subscriberNumber;
 	protected SubscriberInfo [] m_subscriberInfo;
 	
 	private boolean m_gpsEnabled;
@@ -68,6 +65,9 @@ public abstract class TelitModem {
 		m_platform = platform;
 		m_connectionFactory = connectionFactory;
 		m_gpsEnabled = false;
+		m_subscriberInfo = new SubscriberInfo [2];
+		m_subscriberInfo[0] = new SubscriberInfo();
+		m_subscriberInfo[1] = new SubscriberInfo();
 	}
 	
 	public void reset() throws KuraException {
@@ -489,6 +489,7 @@ public abstract class TelitModem {
 							if (imsi.startsWith("#CIMI:")) {
 								imsi = imsi.substring("#CIMI:".length()).trim();
 						    }
+							s_logger.warn("<IAB> [IMSI-1] Settng IMSI .. m_subscriberInfo[{}] to {}", subscriberIndex, imsi);
 							m_subscriberInfo[subscriberIndex].setInternationalMobileSubscriberIdentity(imsi);
 						}
 					}
@@ -497,9 +498,11 @@ public abstract class TelitModem {
     			}
 	    	}
     	}
+    	
+    	s_logger.warn("<IAB> [IMSI-2] returning IMSI .. m_subscriberInfo[{}] to {}", subscriberIndex, m_subscriberInfo[subscriberIndex]);
         return m_subscriberInfo[subscriberIndex].getInternationalMobileSubscriberIdentity();
     }
-    
+    /*
     public String getSubscriberNumber(int subscriberIndex) throws KuraException {
     	synchronized (s_atLock) {
     		String atPort = getAtPort();
@@ -518,7 +521,7 @@ public abstract class TelitModem {
 			    	if (!isAtReachable(commAtConnection)) {
 				    	throw new KuraException(KuraErrorCode.NOT_CONNECTED, "Modem not available for AT commands: " + TelitHe910.class.getName());
 				    }
-			    	reply = commAtConnection.sendCommand(TelitModemAtCommands.getSubscriberNumber.getCommand().getBytes(), 1000, 100);
+			    	reply = commAtConnection.sendCommand(TelitModemAtCommands.getSubscriberNumber.getCommand().getBytes(), 500, 100);
 		    	} catch (Exception e) {
 		    		throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
  		    	} finally {
@@ -531,7 +534,11 @@ public abstract class TelitModem {
 		    				if (subscriber.startsWith("+CNUM:")) {
 		    					subscriber = subscriber.substring("+CNUM:".length()).trim();
 		    					String [] abSubscriber = subscriber.split(",");
-		    					String subscriberNumber = abSubscriber[1].substring(1, subscriber.lastIndexOf('"'));
+		    					s_logger.warn("<IAB> @@@ abSubscriber[1]={}", abSubscriber[1]);
+		    					String subscriberNumber = abSubscriber[1].substring(1, abSubscriber[1].lastIndexOf('"'));
+		    					if (m_subscriberInfo[subscriberIndex] == null) {
+									m_subscriberInfo[subscriberIndex] = new SubscriberInfo();
+								}
 		    					m_subscriberInfo[subscriberIndex].setSubscriberNumber(subscriberNumber);
 						    }
 		    			}
@@ -544,6 +551,7 @@ public abstract class TelitModem {
     	}
     	return m_subscriberInfo[subscriberIndex].getSubscriberNumber();
     }
+    */
     
     public String getIntegratedCirquitCardId(int subscriberIndex) throws KuraException {
     	synchronized (s_atLock) {
@@ -576,6 +584,7 @@ public abstract class TelitModem {
 							if (iccid.startsWith("#CCID:")) {
 								iccid = iccid.substring("#CCID:".length()).trim();
 						    }
+							s_logger.warn("<IAB> [ICCID-1] Settng ICCID .. m_subscriberInfo[{}] to {}", subscriberIndex, iccid);
 						    m_subscriberInfo[subscriberIndex].setIntegratedCircuitCardIdentification(iccid);
 						}
 					}
@@ -584,6 +593,8 @@ public abstract class TelitModem {
 		    	}
 	    	}
     	}
+    	
+    	s_logger.warn("<IAB> [ICCID-2] Retunting ICCID .. m_subscriberInfo[{}] to {}", subscriberIndex, m_subscriberInfo[subscriberIndex]);
         return m_subscriberInfo[subscriberIndex].getIntegratedCircuitCardIdentification();
     }
         

@@ -440,11 +440,15 @@ public class TelitDe910 extends TelitModem implements EvdoCellularModem {
 	}
 	
 	@Override
-	public SubscriberInfo [] getSubscriberInfo() throws KuraException {
+	public SubscriberInfo [] getSubscriberInfo() {
+		return m_subscriberInfo;
+	}
+	
+	@Override
+	public SubscriberInfo [] obtainSubscriberInfo() throws KuraException {
 		SubscriberInfo [] ret = new SubscriberInfo [1]; ret[0] = null; 
 		ret[0] = new SubscriberInfo(getMobileSubscriberIdentity(0), 
-				getIntegratedCirquitCardId(0), 
-				getSubscriberNumber(0));
+				getIntegratedCirquitCardId(0));
 		return ret;
 	}
 	

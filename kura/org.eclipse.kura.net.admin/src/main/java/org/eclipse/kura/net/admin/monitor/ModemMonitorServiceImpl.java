@@ -771,8 +771,8 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 				try {
 					HashMap<String, String> modemInfoMap = new HashMap<String, String>();
 					modemInfoMap.put(ModemReadyEvent.IMEI, modem.getSerialNumber());
-					modemInfoMap.put(ModemReadyEvent.IMSI, modem.getMobileSubscriberIdentity());
-					modemInfoMap.put(ModemReadyEvent.ICCID, modem.getIntegratedCirquitCardId());
+					//modemInfoMap.put(ModemReadyEvent.IMSI, modem.getMobileSubscriberIdentity()); <IAB> commented out for now
+					//modemInfoMap.put(ModemReadyEvent.ICCID, modem.getIntegratedCirquitCardId()); <IAB> commented out for now
 					modemInfoMap.put(ModemReadyEvent.RSSI, Integer.toString(modem.getSignalStrength()));
 					s_logger.info("posting ModemReadyEvent on topic {}", ModemReadyEvent.MODEM_EVENT_READY_TOPIC);
 					m_eventAdmin.postEvent(new ModemReadyEvent(modemInfoMap));

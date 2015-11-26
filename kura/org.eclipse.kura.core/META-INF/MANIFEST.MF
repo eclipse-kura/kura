@@ -28,6 +28,7 @@ Import-Package: javax.crypto,
  org.osgi.framework;version="1.5.0",
  org.osgi.service.component;version="1.2.0",
  org.osgi.util.tracker;version="1.5.0",
- org.slf4j;version="1.6.4"
+ org.slf4j;version="1.6.4",
+ org.eclipse.kura.windows;version="1.0.1"
 Bundle-ClassPath: .,
  lib/org.eclipse.paho.client.mqttv3-1.0.1.2.jar

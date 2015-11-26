@@ -839,9 +839,6 @@ java -Xms256m -Xmx256m -Dkura.os.version=win32 ^
             <copy file="${project.build.directory}/${build.output.name}/start_kura.bat"
                         todir="${build.install.dir.kura}" />
 
-            <copy file="${project.build.directory}/KURAUtils/KURAUtils.exe"
-                        todir="${build.install.dir.kura}/bin" />
-
             <copy file="RELEASE_NOTES.txt"
                         todir="${build.install.dir.kura}" />
             <copy file="notice.html"

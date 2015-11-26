@@ -24,6 +24,7 @@ import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.eclipse.kura.windows.KuraNativeWin;
 
 public class SystemAdminServiceImpl implements SystemAdminService 
 {
@@ -36,9 +37,6 @@ public class SystemAdminServiceImpl implements SystemAdminService
 	
 	@SuppressWarnings("unused")
 	private ComponentContext      m_ctx;
-
-	// Holds the full path of the KURAUtils.exe command 
-	private String winUtilCommand;
 
 	// ----------------------------------------------------------------
 	//
@@ -58,8 +56,6 @@ public class SystemAdminServiceImpl implements SystemAdminService
 		//
 		// save the bundle context
 		m_ctx = componentContext;
-
-		winUtilCommand = System.getProperty("user.dir") + "\\bin\\KURAUtils.exe";
 	}
 	
 	
@@ -84,7 +80,9 @@ public class SystemAdminServiceImpl implements SystemAdminService
 		if(this.getOsName().toLowerCase().contains(OS_WINDOWS))
 		{
 			try {
-				uptimeStr = runSystemCommand(winUtilCommand + " -up");
+				KuraNativeWin nativeWin = new KuraNativeWin();
+				uptime = nativeWin.getTickCount();
+				uptimeStr = Long.toString(uptime);
 			}
 
 			catch(Exception e) {

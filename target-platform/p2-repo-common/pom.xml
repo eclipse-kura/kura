@@ -127,7 +127,7 @@
 								<artifactItem>
 									<groupId>org.eclipse.kura</groupId>
 									<artifactId>org.eclipse.kura.windows</artifactId>
-									<version>1.0.0</version>
+									<version>1.0.1</version>
 								</artifactItem>
 							</artifactItems>
 							<outputDirectory>${project.basedir}/target/source/plugins</outputDirectory>

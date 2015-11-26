@@ -386,7 +386,12 @@ public class XmlJavaMetadataMapper implements XmlJavaDataMapper{
 		String id= adElement.getAttribute(METADATA_AD_ID);
 		String name= adElement.getAttribute(METADATA_AD_NAME);
 		Tscalar type= Tscalar.fromValue(adElement.getAttribute(METADATA_AD_TYPE));
-		Integer cardinality= Integer.parseInt(adElement.getAttribute(METADATA_AD_CARDINALITY));
+		Integer cardinality;
+		try{
+			cardinality = Integer.parseInt(adElement.getAttribute(METADATA_AD_CARDINALITY));
+		} catch (NumberFormatException e){
+			cardinality= null;
+		}
 		Boolean required= Boolean.parseBoolean(adElement.getAttribute(METADATA_AD_REQUIRED));
 		String defaultVal= adElement.getAttribute(METADATA_AD_DEFAULT);
 		String description= adElement.getAttribute(METADATA_AD_DESCRIPTION);

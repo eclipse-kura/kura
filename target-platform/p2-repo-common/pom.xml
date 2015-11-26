@@ -14,6 +14,10 @@
 	<version>1.0.0</version>
 	<packaging>pom</packaging>
 
+	<properties>
+		<camel.version>2.16.0</camel.version>
+	</properties>
+
 	<build>
 		<plugins>
 			<!-- Copying common artifacts across all platforms into a known location 
@@ -123,6 +127,23 @@
 									<groupId>jdk</groupId>
 									<artifactId>jdk.dio</artifactId>
 									<version>1.0.2</version>
+								</artifactItem>
+
+								<!-- Apache Camel core bundles -->
+								<artifactItem>
+									<groupId>org.apache.camel</groupId>
+									<artifactId>camel-core</artifactId>
+									<version>${camel.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.apache.camel</groupId>
+									<artifactId>camel-core-osgi</artifactId>
+									<version>${camel.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.apache.camel</groupId>
+									<artifactId>camel-kura</artifactId>
+									<version>${camel.version}</version>
 								</artifactItem>
 							</artifactItems>
 							<outputDirectory>${project.basedir}/target/source/plugins</outputDirectory>

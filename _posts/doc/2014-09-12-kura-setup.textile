@@ -41,7 +41,7 @@ Before installing Eclipse, you should choose directory locations for the Eclipse
 * Each workspace should be used with only one Eclipse install.  You should avoid opening the workspace from more than one installation of Eclipse.
 * For the purposes of this guide, only a single Eclipse installation will be covered.
 
-Download the current distribution of Eclipse for your OS from the ["http://www.eclipse.org/downloads/":http://www.eclipse.org/downloads/)].  Choose the Eclipse IDE for Java EE Developers.
+Download the current distribution of Eclipse for your OS from ["http://www.eclipse.org/downloads/":http://www.eclipse.org/downloads/].  Choose the Eclipse IDE for Java EE Developers.
 
 The zipped Eclipse file will be downloaded to the local file system and can be saved to a temporary location that can be deleted after Eclipse has been installed. After the file has been downloaded, it should be extracted to the Eclipse installs directory.  The following screen capture shows the installation in Linux using an eclipse\installs\ directory. The Eclipse executable will then be found in the eclipse\installs\eclipse\ directory.  This installation will be different depending on the operating system.
 

@@ -279,21 +279,30 @@
 						</configuration>
 					</execution>
 					<execution>
-						<id>release-copy</id>
+						<id>verify-if-snapshot</id>
 						<phase>install</phase>
 						<goals>
 							<goal>run</goal>
 						</goals>
 						<configuration>
-							<target>
+							<exportAntProperties>true</exportAntProperties>
+							<target name="is-snapshot-check">
 								<condition property="is.not.snapshot">
     								<not>
       									<contains string="${project.version}" substring="-SNAPSHOT"/>
     								</not>
   								</condition>
 							</target>
-
-							<target if="${is.not.snapshot}">
+						</configuration>
+					</execution>
+					<execution>
+						<id>release-copy</id>
+						<phase>install</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
+						<configuration>
+							<target name="distrib-store-files" if="${is.not.snapshot}">
 								<!-- Copy distrib/config/kura.build.properties in distrib/RELEASE_INFO/${project.version}/config -->
 								<copy
 									file="config/kura.build.properties"

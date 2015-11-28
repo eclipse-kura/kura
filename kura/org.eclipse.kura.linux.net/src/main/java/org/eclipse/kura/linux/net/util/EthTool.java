@@ -70,7 +70,7 @@ public class EthTool implements LinkTool {
 			int ind = -1;
 		    while((line = br.readLine()) != null) {
 		    	if ((ind = line.indexOf(LINK_DETECTED)) >= 0) {
-		    		s_logger.trace("Link detected from: " + line);
+		    		s_logger.trace("Link detected from: {}", line);
 		    		line = line.substring(ind + LINK_DETECTED.length()).trim();
 		    		this.linkDetected = (line.compareTo("yes") == 0)? true : false;
 		    	} else if ((ind = line.indexOf(DUPLEX)) >= 0) {

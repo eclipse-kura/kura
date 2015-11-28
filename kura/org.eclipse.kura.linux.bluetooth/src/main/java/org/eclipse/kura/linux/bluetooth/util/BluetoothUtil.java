@@ -200,7 +200,7 @@ public class BluetoothUtil {
 		String[] command = { HCITOOL, "-i", name, cmd };
 		BluetoothProcess proc = null;
 		try {
-			s_logger.debug("Command executed : " + Arrays.toString(command));
+			s_logger.debug("Command executed : {}", Arrays.toString(command));
 			proc = exec(command, listener);
 		} catch (Exception e) {
 			s_logger.error("Error executing command: " + command, e);
@@ -222,7 +222,7 @@ public class BluetoothUtil {
 			command[i+3] = cmd[i];
 		BluetoothProcess proc = null;
 		try {
-			s_logger.debug("Command executed : " + Arrays.toString(command));
+			s_logger.debug("Command executed : {}", Arrays.toString(command));
 			proc = exec(command, listener);
 		} catch (Exception e) {
 			s_logger.error("Error executing command: " + command, e);

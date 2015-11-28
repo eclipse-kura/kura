@@ -80,8 +80,8 @@ public class LinuxProcessUtil {
 							.getInputStream());
 					String stderr = getInputStreamAsString(proc
 							.getErrorStream());
-					s_logger.debug("stdout: " + stdout);
-					s_logger.debug("stderr: " + stderr);
+					s_logger.debug("stdout: {}", stdout);
+					s_logger.debug("stderr: {}", stderr);
 				}
 				return proc.exitValue();
 			} else {
@@ -149,12 +149,12 @@ public class LinuxProcessUtil {
 			for (String cmd : command) {
 				cmdBuilder.append(cmd).append(' ');
 			}
-			s_logger.debug("executing: " + cmdBuilder);
+			s_logger.debug("executing: {}", cmdBuilder);
 			proc = ProcessUtil.exec(command);
 
 			try {
 				int exitVal = proc.waitFor();
-				s_logger.debug(cmdBuilder + " returned with exit value:"
+				s_logger.debug("{} returned with exit value:{}", cmdBuilder,
 						+ exitVal);
 			} catch (InterruptedException e) {
 				s_logger.error("error executing " + command + " command" + e);

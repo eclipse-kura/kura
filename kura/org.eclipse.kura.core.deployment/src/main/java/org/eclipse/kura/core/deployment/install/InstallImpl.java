@@ -229,8 +229,8 @@ public class InstallImpl {
 			// packages directory unless it's already there.
 
 			if (!downloadedFile.getCanonicalPath().equals(dpPersistentFile.getCanonicalPath())) {
-				s_logger.debug("dpFile.getCanonicalPath(): " + downloadedFile.getCanonicalPath());
-				s_logger.debug("dpPersistentFile.getCanonicalPath(): " + dpPersistentFile.getCanonicalPath());
+				s_logger.debug("dpFile.getCanonicalPath(): {}", downloadedFile.getCanonicalPath());
+				s_logger.debug("dpPersistentFile.getCanonicalPath(): {}", dpPersistentFile.getCanonicalPath());
 				FileUtils.copyFile(downloadedFile, dpPersistentFile);
 				addPackageToConfFile(dp.getName(), "file:" + dpPersistentFilePath);
 			}

@@ -54,7 +54,7 @@ public class DebianNetworkInterface extends GenericNetworkInterface {
 				//found our match so load the properties
 				Scanner scanner = null;
 
-				s_logger.debug("getting args for " + interfaceName);
+				s_logger.debug("getting args for {}", interfaceName);
 				
 				//Debian specific routine to create Properties object
 	            kuraProps.setProperty("ONBOOT", "no");
@@ -116,7 +116,7 @@ public class DebianNetworkInterface extends GenericNetworkInterface {
 	                scanner.close();
 	            }
             } else if(type == NetInterfaceType.MODEM) {
-                s_logger.debug("getting args for " + interfaceName);
+                s_logger.debug("getting args for {}", interfaceName);
                 kuraProps.setProperty("BOOTPROTO", "dhcp");
                 netInterfaceConfig = getCurrentConfig(interfaceName, type, status, dhcpServerEnabled, passDns, kuraProps);
             }

@@ -57,14 +57,14 @@ public class RedHatNetworkInterface extends GenericNetworkInterface {
 					fis = new FileInputStream(kuraFile);
 					kuraProps.load(fis);
 	
-					s_logger.debug("getting args for " + interfaceName);
+					s_logger.debug("getting args for {}", interfaceName);
 					
 					netInterfaceConfig = getCurrentConfig(interfaceName, type, status, dhcpServerEnabled, passDns, kuraProps);
 				} else {
 					netInterfaceConfig = getCurrentConfig(interfaceName, type, NetInterfaceStatus.netIPv4StatusDisabled, dhcpServerEnabled, passDns, null);
 				}
 			} else if(type == NetInterfaceType.MODEM) {
-			    s_logger.debug("getting args for " + interfaceName);
+			    s_logger.debug("getting args for {}", interfaceName);
 			    kuraProps.setProperty("BOOTPROTO", "dhcp");
 			    kuraProps.setProperty("ONBOOT", "yes");
 			    netInterfaceConfig = getCurrentConfig(interfaceName, type, status, dhcpServerEnabled, passDns, kuraProps);

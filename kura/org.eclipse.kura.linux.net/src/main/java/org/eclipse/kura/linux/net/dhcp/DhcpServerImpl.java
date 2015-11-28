@@ -79,7 +79,7 @@ public class DhcpServerImpl implements DhcpServer {
 		File configFile = new File(persistentConfigFileName);
 		if(configFile.exists()) {
 			
-			s_logger.debug("initing DHCP Server configuration for " + m_interfaceName);
+			s_logger.debug("initing DHCP Server configuration for {}", m_interfaceName);
 			//parse the file
 			/*
 			# dhcpd.conf - DHCPD configuration file
@@ -189,7 +189,7 @@ public class DhcpServerImpl implements DhcpServer {
 				throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR, e);
 			}	
 		} else {
-			s_logger.debug("There is no current DHCP server configuration for " + m_interfaceName);
+			s_logger.debug("There is no current DHCP server configuration for {}", m_interfaceName);
 		}
 	}
 	

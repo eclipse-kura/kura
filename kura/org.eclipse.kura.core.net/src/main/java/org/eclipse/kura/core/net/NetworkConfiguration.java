@@ -113,7 +113,7 @@ public class NetworkConfiguration {
 		}
 
 		if (availableInterfaces != null) {
-			s_logger.debug("There are " + availableInterfaces.length + " interfaces to add to the new configuration");
+			s_logger.debug("There are {} interfaces to add to the new configuration", availableInterfaces.length);
 			for(int i=0; i<availableInterfaces.length; i++) {
 				String currentNetInterface = availableInterfaces[i];
 				StringBuffer keyBuffer = new StringBuffer();
@@ -468,8 +468,9 @@ public class NetworkConfiguration {
 				prefix = ",";
 				sb.append(interfaceName);
 			}
-			s_logger.debug("Set modified interface names: " + sb.toString());
-			properties.put("modified.interface.names", sb.toString());
+			String result = sb.toString();
+			s_logger.debug("Set modified interface names: {}", result);
+			properties.put("modified.interface.names", result);
 		}
 
 		Iterator<String> it = m_netInterfaceConfigs.keySet().iterator();

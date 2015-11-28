@@ -221,7 +221,7 @@ public class GenericNetworkInterface {
 				
 
 			} else if(type == NetInterfaceType.ETHERNET) {
-				s_logger.debug("Adding an Ethernet interface - " + interfaceName);
+				s_logger.debug("Adding an Ethernet interface - {}", interfaceName);
 				netInterfaceConfig = new EthernetInterfaceConfigImpl(interfaceName);
 				
 				((EthernetInterfaceImpl)netInterfaceConfig).setMTU(mtu);
@@ -279,7 +279,7 @@ public class GenericNetworkInterface {
 					}
 				}
 			} else if(type == NetInterfaceType.WIFI) {
-				s_logger.debug("Adding a Wireless interface - " + interfaceName);
+				s_logger.debug("Adding a Wireless interface - {}", interfaceName);
 				WifiInterfaceConfigImpl wifiInterfaceConfig = new WifiInterfaceConfigImpl(interfaceName);
 				netInterfaceConfig = wifiInterfaceConfig;
 
@@ -319,7 +319,7 @@ public class GenericNetworkInterface {
 						WifiAccessPointImpl ap = null;
 						 
 						if(currentSSID != null) {
-							s_logger.debug("Adding access point SSID: " + currentSSID);
+							s_logger.debug("Adding access point SSID: {}", currentSSID);
 	
 							ap = new WifiAccessPointImpl(currentSSID);
 	
@@ -346,7 +346,7 @@ public class GenericNetworkInterface {
 					// get from config file
 					String mode = (String) kuraProps.getProperty("MODE");
 					if (mode != null) {
-						s_logger.debug("Getting wifi mode from " + kuraFile.getAbsolutePath());
+						s_logger.debug("Getting wifi mode from {}", kuraFile.getAbsolutePath());
 						if (mode.equalsIgnoreCase("Managed")) {
 							wifiMode = WifiMode.INFRA;
 						} else if (mode.equalsIgnoreCase("Master")) {
@@ -365,7 +365,7 @@ public class GenericNetworkInterface {
 					// leave as unknown
 				}					
 
-				s_logger.debug("Current WifiMode: " + wifiMode);
+				s_logger.debug("Current WifiMode: {}", wifiMode);
 				wifiInterfaceAddressConfig.setMode(wifiMode);
 				
 				wifiInterfaceConfig.setNetInterfaceAddresses(wifiInterfaceAddressConfigs);

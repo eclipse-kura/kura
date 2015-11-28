@@ -130,7 +130,7 @@ public class LinuxNamed {
 								while(st2.hasMoreTokens()) {
 									String forwarder = st2.nextToken();
 									if(forwarder != null && !forwarder.trim().equals("")) {
-										s_logger.debug("found forwarder: " + forwarder);
+										s_logger.debug("found forwarder: {}", forwarder);
 										forwarders.add((IP4Address) IPAddress.parseHostAddress(forwarder));
 									}
 								}

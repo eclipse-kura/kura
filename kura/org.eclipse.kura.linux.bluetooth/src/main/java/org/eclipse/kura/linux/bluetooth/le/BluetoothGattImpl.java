@@ -239,7 +239,7 @@ public class BluetoothGattImpl implements BluetoothGatt, BluetoothProcessListene
 
 	private void sendCmd(String command) {
 		try {
-			s_logger.debug("send command = "+command);
+			s_logger.debug("send command = {}", command);
 			m_bufferedWriter.write(command);
 			m_bufferedWriter.flush();
 		} catch (IOException e) {
@@ -264,7 +264,7 @@ public class BluetoothGattImpl implements BluetoothGatt, BluetoothProcessListene
 		}
 		// characteristic read by UUID returned
 		else if (line.matches(REGEX_READ_CHAR_UUID)) {
-			s_logger.debug("Characteristic value by UUID received: " + line);
+			s_logger.debug("Characteristic value by UUID received: {}", line);
 			// Parse the characteristic line, line is expected to be:
 			// handle: 0xmmmm value: <value>
 			String[] attr = line.split(":");
@@ -273,7 +273,7 @@ public class BluetoothGattImpl implements BluetoothGatt, BluetoothProcessListene
 		}
 		// services are being returned
 		else if (line.startsWith("attr handle:")){  //(line.matches(REGEX_SERVICES)) { 
-			s_logger.debug("Service : " + line);
+			s_logger.debug("Service : {}", line);
 			// Parse the services line, line is expected to be:
 			// attr handle: 0xnnnn, end grp handle: 0xmmmm uuid: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 			String[] attr = line.split("\\s");
@@ -287,7 +287,7 @@ public class BluetoothGattImpl implements BluetoothGatt, BluetoothProcessListene
 		}
 		// characteristics are being returned
 		else if (line.startsWith("handle:")){  //(line.matches(REGEX_CHARACTERISTICS)) { 
-			s_logger.debug("Characteristic : " + line);
+			s_logger.debug("Characteristic : {}", line);
 			// Parse the characteristic line, line is expected to be:
 			// handle: 0xnnnn, char properties: 0xmm, char value handle: 0xpppp, uuid: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 			String[] attr = line.split(" ");
@@ -296,14 +296,14 @@ public class BluetoothGattImpl implements BluetoothGatt, BluetoothProcessListene
 			String valueHandle = attr[8].substring(0,  attr[8].length() - 1);
 			String uuid = attr[10].substring(0,  attr[10].length() - 1);
 			if (m_bluetoothGattCharacteristics != null) {
-				s_logger.debug("Adding new GATT characteristic: " + uuid);
+				s_logger.debug("Adding new GATT characteristic: {}", uuid);
 				s_logger.debug(handle+"  "+properties+"  "+valueHandle);
 				m_bluetoothGattCharacteristics.add(new BluetoothGattCharacteristicImpl(uuid, handle, properties, valueHandle));
 			}
 		}
 		// characteristic read by handle returned
 		else if (line.matches(REGEX_READ_CHAR)) {
-			s_logger.debug("Characteristic value by handle received: " + line);
+			s_logger.debug("Characteristic value by handle received: {}", line);
 			// Parse the characteristic line, line is expected to be:
 			// Characteristic value/descriptor: <value>
 			String[] attr = line.split(":");

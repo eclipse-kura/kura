@@ -474,8 +474,8 @@ public class DeploymentAgent implements DeploymentAgentService {
 			// Now we need to copy the deployment package file to the Kura
 			// packages directory unless it's already there.
 			if (!dpFile.getCanonicalPath().equals(dpPersistentFile.getCanonicalPath())) {
-				s_logger.debug("dpFile.getCanonicalPath(): " +  dpFile.getCanonicalPath());
-				s_logger.debug("dpPersistentFile.getCanonicalPath(): " +  dpPersistentFile.getCanonicalPath());
+				s_logger.debug("dpFile.getCanonicalPath(): {}",  dpFile.getCanonicalPath());
+				s_logger.debug("dpPersistentFile.getCanonicalPath(): {}",  dpPersistentFile.getCanonicalPath());
 				FileUtils.copyFile(dpFile, dpPersistentFile);
 				addPackageToConfFile(dp.getName(), "file:" + dpPersistentFilePath);
 			}

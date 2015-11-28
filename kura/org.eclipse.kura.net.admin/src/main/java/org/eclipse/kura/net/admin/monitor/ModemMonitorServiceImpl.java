@@ -717,7 +717,7 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 						m_eventAdmin.postEvent(new NetworkStatusChangeEvent(interfaceName, newStatuses.get(interfaceName), null));
 					}
 				} else {
-					s_logger.debug("Posting NetworkStatusChangeEvent on enabled interface: " + interfaceName);
+					s_logger.debug("Posting NetworkStatusChangeEvent on enabled interface: {}", interfaceName);
 					m_eventAdmin.postEvent(new NetworkStatusChangeEvent(interfaceName, newStatuses.get(interfaceName), null));
 				}
 			}

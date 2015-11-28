@@ -87,7 +87,7 @@ private static final Logger s_logger = LoggerFactory.getLogger(DhcpConfigWriter.
 		String dhcpConfigFileName = DhcpServerManager.getConfigFilename(interfaceName);
 		String tmpDhcpConfigFileName = new StringBuilder(dhcpConfigFileName).append(".tmp").toString();
 		
-		s_logger.debug("Writing DHCP config for " + interfaceName);
+		s_logger.debug("Writing DHCP config for {}", interfaceName);
 		
 		List<? extends NetInterfaceAddressConfig> netInterfaceAddressConfigs = netInterfaceConfig.getNetInterfaceAddresses();
 		

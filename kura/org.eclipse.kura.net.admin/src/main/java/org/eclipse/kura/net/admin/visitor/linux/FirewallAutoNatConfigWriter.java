@@ -67,7 +67,7 @@ public class FirewallAutoNatConfigWriter implements NetworkConfigurationVisitor 
 			Properties kuraProps) throws KuraException {
 		
 		String interfaceName = netInterfaceConfig.getName();
-		s_logger.debug("Writing NAT config for " + interfaceName);
+		s_logger.debug("Writing NAT config for {}", interfaceName);
 
 		List<? extends NetInterfaceAddressConfig> netInterfaceAddressConfigs = null;
 		netInterfaceAddressConfigs = netInterfaceConfig.getNetInterfaceAddresses();

@@ -63,7 +63,7 @@ public class FirewallAutoNatConfigReader implements NetworkConfigurationVisitor 
 		
 		NetInterfaceType type = netInterfaceConfig.getType();
 		if (type == NetInterfaceType.ETHERNET || type == NetInterfaceType.WIFI) {
-			s_logger.debug("Getting NAT config for " + interfaceName);
+			s_logger.debug("Getting NAT config for {}", interfaceName);
 			if(kuraProps != null) {
 				s_logger.debug("Getting NAT config from kuraProps");
 				boolean natEnabled = false;
@@ -126,7 +126,7 @@ public class FirewallAutoNatConfigReader implements NetworkConfigurationVisitor 
 					while(it.hasNext()) {
 						NATRule rule = it.next();
 						if(rule.getSourceInterface().equals(interfaceName)) {
-							s_logger.debug("found NAT rule: " + rule);
+							s_logger.debug("found NAT rule: {}", rule);
 							
 							//this is the one we care about
 							FirewallAutoNatConfig natConfig = new FirewallAutoNatConfig(rule.getSourceInterface(), rule.getDestinationInterface(), rule.isMasquerade());

@@ -100,7 +100,7 @@ public class IfcfgConfigWriter implements NetworkConfigurationVisitor {
 		String interfaceName = netInterfaceConfig.getName();
 		String outputFileName = new StringBuffer().append(REDHAT_NET_CONFIGURATION_DIRECTORY).append("ifcfg-").append(interfaceName).toString();
 		String tmpOutputFileName = new StringBuffer().append(REDHAT_NET_CONFIGURATION_DIRECTORY).append("ifcfg-").append(interfaceName).append(".tmp").toString();
-		s_logger.debug("Writing config for " + interfaceName);
+		s_logger.debug("Writing config for {}", interfaceName);
 
 		NetInterfaceType type = netInterfaceConfig.getType();
 		if (type == NetInterfaceType.ETHERNET || type == NetInterfaceType.WIFI || type == NetInterfaceType.LOOPBACK) {
@@ -626,9 +626,9 @@ public class IfcfgConfigWriter implements NetworkConfigurationVisitor {
 		Properties oldConfig = IfcfgConfigReader.parseDebianConfigFile(new File(DEBIAN_NET_CONFIGURATION_FILE), netInterfaceConfig.getName());
 		Properties newConfig = parseNetInterfaceAddressConfig(netInterfaceConfig.getNetInterfaceAddresses().get(0));	// FIXME: assumes only one addressConfig
 
-		s_logger.debug("Comparing configs for " + netInterfaceConfig.getName());
-		s_logger.debug("oldProps: " + oldConfig);
-		s_logger.debug("newProps: " + newConfig);
+		s_logger.debug("Comparing configs for {}", netInterfaceConfig.getName());
+		s_logger.debug("oldProps: {}", oldConfig);
+		s_logger.debug("newProps: {}", newConfig);
 
 		if(!compare(oldConfig, newConfig, "ONBOOT")) {
 			s_logger.debug("ONBOOT differs");

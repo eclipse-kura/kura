@@ -151,7 +151,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 			for (NetInterfaceConfig<? extends NetInterfaceAddressConfig> netIfConfig : nas.getNetworkInterfaceConfigs()) {
 				s_logger.debug("Getting config for " + netIfConfig.getName() + " with type " + netIfConfig.getType());
 
-				s_logger.debug("Interface State: " + netIfConfig.getState());
+				s_logger.debug("Interface State: {}", netIfConfig.getState());
 
 				if (netIfConfig.getType() == NetInterfaceType.WIFI) {
 					gwtNetConfig = new GwtWifiNetInterfaceConfig();
@@ -182,7 +182,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 				if (netIfConfig.getState() != null) {
 					gwtNetConfig.setHwState(netIfConfig.getState().name());
 				}
-				s_logger.debug("MAC: "+NetUtil.hardwareAddressToString(netIfConfig.getHardwareAddress()));
+				s_logger.debug("MAC: {}", NetUtil.hardwareAddressToString(netIfConfig.getHardwareAddress()));
 				gwtNetConfig.setHwAddress(NetUtil.hardwareAddressToString(netIfConfig.getHardwareAddress()));
 				gwtNetConfig.setHwDriver(netIfConfig.getDriver());
 				gwtNetConfig.setHwDriverVersion(netIfConfig.getDriverVersion());
@@ -201,13 +201,13 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 					for (NetInterfaceAddressConfig addressConfig : addressConfigs) {
 						//current status - not configuration!
 						if(addressConfig.getAddress() != null) {
-							s_logger.debug("current address: "+addressConfig.getAddress().getHostAddress());
+							s_logger.debug("current address: {}", addressConfig.getAddress().getHostAddress());
 						}
 						if(addressConfig.getNetworkPrefixLength() >= 0 && addressConfig.getNetworkPrefixLength() <= 32) {
-							s_logger.debug("current prefix length: "+addressConfig.getNetworkPrefixLength());
+							s_logger.debug("current prefix length: {}", addressConfig.getNetworkPrefixLength());
 						}
 						if(addressConfig.getNetmask() != null) {
-							s_logger.debug("current netmask: "+addressConfig.getNetmask().getHostAddress());						
+							s_logger.debug("current netmask: {}", addressConfig.getNetmask().getHostAddress());						
 						}
 
 						List<NetConfig> netConfigs = addressConfig.getConfigs();

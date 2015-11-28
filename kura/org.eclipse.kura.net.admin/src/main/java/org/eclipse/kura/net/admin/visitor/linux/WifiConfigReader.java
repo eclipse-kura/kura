@@ -69,7 +69,7 @@ public class WifiConfigReader implements NetworkConfigurationVisitor{
     // Get common wifi config
     private void getConfig(WifiInterfaceConfigImpl wifiInterfaceConfig) throws KuraException {
         String interfaceName = wifiInterfaceConfig.getName();
-        s_logger.debug("Getting wifi config for " + interfaceName);
+        s_logger.debug("Getting wifi config for {}", interfaceName);
         
         List<WifiInterfaceAddressConfig> wifiInterfaceAddressConfigs = wifiInterfaceConfig.getNetInterfaceAddresses();
         
@@ -89,7 +89,7 @@ public class WifiConfigReader implements NetworkConfigurationVisitor{
                     wifiMode = WifiMode.valueOf(wifiModeString);
                 }
                 
-                s_logger.debug("Got wifiMode: " + wifiMode);
+                s_logger.debug("Got wifiMode: {}", wifiMode);
                 ((WifiInterfaceAddressConfigImpl) wifiInterfaceAddressConfig).setMode(wifiMode);
             }
         }

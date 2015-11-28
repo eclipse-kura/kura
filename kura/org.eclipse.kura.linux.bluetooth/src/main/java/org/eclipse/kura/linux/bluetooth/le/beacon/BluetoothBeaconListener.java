@@ -24,7 +24,7 @@ public class BluetoothBeaconListener implements BluetoothProcessListener {
 	public void processInputStream(String string) {
 
 		// Check if the command succedeed and return the last line
-		s_logger.debug("Command response : " + string);
+		s_logger.debug("Command response : {}", string);
 		String[] lines = string.split("\n");
 		if (lines[0].toLowerCase().contains("usage")) {
 			s_logger.info("Command failed. Error in command syntax.");

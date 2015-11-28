@@ -492,7 +492,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 			return;
 		}
 
-		s_logger.debug("Removing component configuration for " + pid);
+		s_logger.debug("Removing component configuration for {}", pid);
 		m_allPids.remove(pid);
 		m_ocds.remove(pid);
 		m_selfConfigComponents.remove(pid);

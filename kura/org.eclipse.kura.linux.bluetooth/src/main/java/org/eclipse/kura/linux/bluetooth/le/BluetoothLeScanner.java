@@ -106,12 +106,12 @@ public class BluetoothLeScanner implements BluetoothProcessListener {
 				if(address.matches(s_mac_regex)) {
 					if (m_devices.containsKey(address)) {
 						if (!name.equals("(unknown)") && !m_devices.get(address).equals(name)) {
-							s_logger.debug("Updating device: " + address + " - " + name);
+							s_logger.debug("Updating device: {} - {}", address, name);
 							m_devices.put(address, name);
 						}
 					}
 					else {
-						s_logger.debug("Device found: " + address + " - " + name);
+						s_logger.debug("Device found: {} - {}", address, name);
 						m_devices.put(address, name);
 					}
 				}

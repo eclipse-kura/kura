@@ -1097,7 +1097,7 @@ public class LinuxNetworkUtil {
 				while((line = br1.readLine()) != null) {
 					int index = line.indexOf("type ");
 					if(index > -1) {
-						s_logger.debug("line: " + line);
+						s_logger.debug("line: {}", line);
 						String sMode = line.substring(index+"type ".length());
 						if("AP".equals(sMode)) {
 							mode = WifiMode.MASTER;
@@ -1122,7 +1122,7 @@ public class LinuxNetworkUtil {
 					while((line = br2.readLine()) != null) {
 						int index = line.indexOf("Mode:");
 						if(index > -1) {
-							s_logger.debug("line: " + line);
+							s_logger.debug("line: {}", line);
 							StringTokenizer st = new StringTokenizer(line.substring(index));
 							String modeStr = st.nextToken().substring(5);
 							if("Managed".equals(modeStr)) {
@@ -1190,7 +1190,7 @@ public class LinuxNetworkUtil {
 			while((line = br.readLine()) != null) {
 				int index = line.indexOf("Bit Rate=");
 				if(index > -1) {
-					s_logger.debug("line: " + line);
+					s_logger.debug("line: {}", line);
 					StringTokenizer st = new StringTokenizer(line.substring(index));
 					st.nextToken();	// skip 'Bit'
 					Double rate = Double.parseDouble(st.nextToken().substring(5));
@@ -1252,7 +1252,7 @@ public class LinuxNetworkUtil {
 			while((line = br.readLine()) != null) {
 				int index = line.indexOf("ESSID:");
 				if(index > -1) {
-					s_logger.debug("line: " + line);
+					s_logger.debug("line: {}", line);
 					String lineSub = line.substring(index);
 					StringTokenizer st = new StringTokenizer(lineSub);
 					String ssidStr = st.nextToken();

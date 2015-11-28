@@ -250,7 +250,7 @@ public class EthernetMonitorServiceImpl implements EthernetMonitorService, Event
 		        		            		//dhcpServerSubnet = ((DhcpServerConfig4) netConfig).getSubnet();
 		        		            		//dhcpServerPrefix = ((DhcpServerConfig4) netConfig).getPrefix();
 		        		            	} else {
-		        		            		s_logger.trace("Not enabling DHCP server for " + interfaceName + " since it is set to " + netInterfaceStatus);
+		        		            		s_logger.trace("Not enabling DHCP server for {} since it is set to {}", interfaceName, netInterfaceStatus);
 		        		            	}
 									} else if (netConfig instanceof NetConfigIP4) {
 										isDhcpClient = ((NetConfigIP4) netConfig).isDhcp();

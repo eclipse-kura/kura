@@ -479,8 +479,8 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
 			}
 			catch (Exception e) {
 				// Wrap the received bytes payload into an KuraPayload					
-				s_logger.debug("Received message on topic "+topic+" that could not be decoded. Wrapping it into an KuraPayload.");
-				kuraPayload = new KuraPayload();
+				s_logger.debug("Received message on topic {} that could not be decoded. Wrapping it into an KuraPayload.", topic);
+				kuraPayload = new KuraPayload();"
 				kuraPayload.setBody(payload);
 			}
 

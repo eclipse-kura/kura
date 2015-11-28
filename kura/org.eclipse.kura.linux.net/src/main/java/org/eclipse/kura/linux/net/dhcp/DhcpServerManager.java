@@ -74,7 +74,7 @@ public class DhcpServerManager {
     				return true;
     			}
 			} else {
-			    s_logger.debug("Can't start DHCP server, config file does not exist: " + configFile.getAbsolutePath());
+			    s_logger.debug("Can't start DHCP server, config file does not exist: {}", configFile.getAbsolutePath());
 			}
 		} catch(Exception e) {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
@@ -84,7 +84,7 @@ public class DhcpServerManager {
 	}
 
 	public static boolean disable(String interfaceName) throws KuraException {
-        s_logger.debug("Disable DHCP server for " + interfaceName);
+        s_logger.debug("Disable DHCP server for {}", interfaceName);
 
 		try {
 			// Check if DHCP server is running

@@ -71,7 +71,7 @@ public class DhcpConfigReader implements NetworkConfigurationVisitor {
 	
 	private void getConfig(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig, Properties kuraExtendedProps) throws KuraException{
         String interfaceName = netInterfaceConfig.getName();
-        s_logger.debug("Getting DHCP server config for " + interfaceName);
+        s_logger.debug("Getting DHCP server config for {}", interfaceName);
         
         NetInterfaceType type = netInterfaceConfig.getType(); 
         if (type == NetInterfaceType.ETHERNET || type == NetInterfaceType.WIFI) {
@@ -107,7 +107,7 @@ public class DhcpConfigReader implements NetworkConfigurationVisitor {
                     }
                 }
             } else {
-                s_logger.debug("There is no current DHCP server configuration for " + interfaceName);
+                s_logger.debug("There is no current DHCP server configuration for {}", interfaceName);
             }
         }
 	}

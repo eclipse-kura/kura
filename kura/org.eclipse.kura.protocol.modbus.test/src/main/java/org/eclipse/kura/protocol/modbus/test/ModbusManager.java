@@ -575,14 +575,14 @@ public class ModbusManager implements ConfigurableComponent, CriticalComponent, 
 	@Override
 	public void onControlMessageArrived(String deviceId, String appTopic,
 			KuraPayload msg, int qos, boolean retain) {
-		s_logger.debug("EDC control message received on topic: " + appTopic);
+		s_logger.debug("EDC control message received on topic: {}", appTopic);
 		ProcessKuraPayload(deviceId, appTopic, msg, qos, retain);
 	}
 
 	@Override
 	public void onMessageArrived(String deviceId, String appTopic,
 			KuraPayload msg, int qos, boolean retain) {
-		s_logger.debug("EDC message received on topic: " + appTopic);
+		s_logger.debug("EDC message received on topic: {}", appTopic);
 		ProcessKuraPayload(deviceId, appTopic, msg, qos, retain) ;
 	}
 

@@ -110,7 +110,7 @@ public class RedHatNetworkInterface extends GenericNetworkInterface {
 			.append("\n");
 			
 			List<? extends NetInterfaceAddressConfig> netInterfaceConfigs = netInterfaceConfig.getNetInterfaceAddresses();
-			s_logger.debug("There are " + netInterfaceConfigs.size() + " NetInterfaceConfigs in this configuration");
+			s_logger.debug("There are {} NetInterfaceConfigs in this configuration", netInterfaceConfigs.size());
 			
 			boolean allowWrite = false;
 			for(NetInterfaceAddressConfig netInterfaceAddressConfig : netInterfaceConfigs) {

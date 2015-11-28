@@ -142,7 +142,7 @@ public class GenericNetworkInterface {
 					broadcast = kuraProps.getProperty("BROADCAST");
 					try {
 						gateway = kuraProps.getProperty("GATEWAY");
-						s_logger.debug("got gateway for " + interfaceName + ": " + gateway);
+						s_logger.debug("got gateway for {}: {}", interfaceName, gateway);
 					} catch(Exception e) {
 						s_logger.warn("missing gateway stanza for " + interfaceName);
 					}

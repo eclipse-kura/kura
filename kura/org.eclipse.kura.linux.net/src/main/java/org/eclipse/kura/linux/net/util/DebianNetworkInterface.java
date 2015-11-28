@@ -152,7 +152,7 @@ public class DebianNetworkInterface extends GenericNetworkInterface {
                         	if (args[1].equals(iName)) {
                                 
 								List<? extends NetInterfaceAddressConfig> netInterfaceConfigs = netInterfaceConfig.getNetInterfaceAddresses();
-								s_logger.debug("There are " + netInterfaceConfigs.size() + " NetInterfaceConfigs in this configuration");
+								s_logger.debug("There are {} NetInterfaceConfigs in this configuration", netInterfaceConfigs.size());
 								
 								for(NetInterfaceAddressConfig netInterfaceAddressConfig : netInterfaceConfigs) {
 									List<NetConfig> netConfigs =  netInterfaceAddressConfig.getConfigs();

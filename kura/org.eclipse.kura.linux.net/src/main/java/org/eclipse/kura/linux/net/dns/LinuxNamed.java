@@ -307,10 +307,10 @@ public class LinuxNamed {
 			//build up the file
 			if(m_dnsServerConfigIP4 == null || m_dnsServerConfigIP4.getForwarders() == null || m_dnsServerConfigIP4.getAllowedNetworks() == null ||
 					m_dnsServerConfigIP4.getForwarders().size() == 0 || m_dnsServerConfigIP4.getAllowedNetworks().size() == 0) {
-				s_logger.debug("writing default named.conf to " + s_persistentConfigFileName + " with: " + m_dnsServerConfigIP4.toString());
+				s_logger.debug("writing default named.conf to {} with: {}", s_persistentConfigFileName, m_dnsServerConfigIP4.toString());
 				pw.print(getDefaultNamedFile());
 			} else {
-				s_logger.debug("writing custom named.conf to " + s_persistentConfigFileName + " with: " + m_dnsServerConfigIP4.toString());
+				s_logger.debug("writing custom named.conf to {} with: {}", s_persistentConfigFileName, m_dnsServerConfigIP4.toString());
 				pw.print(getForwardingNamedFile());
 			}
 			

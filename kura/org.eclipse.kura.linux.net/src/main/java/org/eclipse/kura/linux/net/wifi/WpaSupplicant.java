@@ -542,10 +542,10 @@ public class WpaSupplicant {
 		
 		WpaSupplicant supplicant = (WpaSupplicant)obj;
 		
-		s_logger.debug("comparing " + m_wpaSupplicant.hashCode() + " with " + supplicant.hashCode());
+		s_logger.debug("comparing {} with {}", m_wpaSupplicant.hashCode(), supplicant.hashCode());
 			
 		if (!m_wpaSupplicant.m_iface.equals(supplicant.m_iface)) {
-			s_logger.debug("current supplicant doesn't match config file: ifaceName " + this.m_iface + ":" + supplicant.m_iface);
+			s_logger.debug("current supplicant doesn't match config file: ifaceName {}:{}", this.m_iface, supplicant.m_iface);
 			return false;
 		}
 		if (!m_wpaSupplicant.m_essid.equals(supplicant.m_essid)) {

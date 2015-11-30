@@ -24,6 +24,11 @@ public interface BluetoothGatt {
 	public void disconnect();
 	
 	/**
+	 * Check if the device is connected.
+	 */
+	public boolean checkConnection();
+	
+	/**
 	 * Sets the listener by which asynchronous actions of the GATT
 	 * server will be communicated.
 	 * 

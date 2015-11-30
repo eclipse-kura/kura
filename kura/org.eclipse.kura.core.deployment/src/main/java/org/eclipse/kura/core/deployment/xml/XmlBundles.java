@@ -9,28 +9,18 @@
  * Contributors:
  *   Eurotech
  */
-package org.eclipse.kura.core.deployment;
+package org.eclipse.kura.core.deployment.xml;
 
 
-public class XmlBundleInfo {
+public class XmlBundles {
 	
-	public String name;
-	
-	public String version;
+	public XmlBundle[] bundles;
 
-	public String getName() {
-		return name;
+	public XmlBundle[] getBundles() {
+		return bundles;
 	}
 
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public String getVersion() {
-		return version;
-	}
-
-	public void setVersion(String version) {
-		this.version = version;
+	public void setBundles(XmlBundle[] bundles) {
+		this.bundles = bundles;
 	}
 }

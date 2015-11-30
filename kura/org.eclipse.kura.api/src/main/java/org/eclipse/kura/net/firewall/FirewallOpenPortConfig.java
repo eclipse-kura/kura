@@ -30,6 +30,13 @@ public interface FirewallOpenPortConfig extends NetConfig {
 	 * @return		The port number representing the inbound network port
 	 */
 	public int getPort();
+	
+	/**
+	 * Gets range of ports that are open for inbound connections
+	 * 
+	 * @return		The port range representing the inbound network port
+	 */
+	public String getPortRange();
 
 	/**
 	 * Gets the type of network protocol (TCP or UDP) that is open for inbound connections

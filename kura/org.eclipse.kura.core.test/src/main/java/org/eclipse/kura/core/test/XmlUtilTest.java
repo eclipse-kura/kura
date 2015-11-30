@@ -29,11 +29,12 @@ import org.eclipse.kura.core.configuration.XmlSnapshotIdResult;
 import org.eclipse.kura.core.configuration.metatype.Tad;
 import org.eclipse.kura.core.configuration.metatype.Tocd;
 import org.eclipse.kura.core.configuration.metatype.Tscalar;
-import org.eclipse.kura.core.deployment.XmlBundle;
-import org.eclipse.kura.core.deployment.XmlBundleInfo;
-import org.eclipse.kura.core.deployment.XmlBundles;
-import org.eclipse.kura.core.deployment.XmlDeploymentPackage;
-import org.eclipse.kura.core.deployment.XmlDeploymentPackages;
+import org.eclipse.kura.core.deployment.xml.XmlBundle;
+import org.eclipse.kura.core.deployment.xml.XmlBundleInfo;
+import org.eclipse.kura.core.deployment.xml.XmlBundles;
+import org.eclipse.kura.core.deployment.xml.XmlDeploymentPackage;
+import org.eclipse.kura.core.deployment.xml.XmlDeploymentPackages;
+import org.eclipse.kura.core.deployment.xml.XmlUtil;
 import org.eclipse.kura.test.annotation.TestTarget;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -159,7 +160,7 @@ public class XmlUtilTest extends TestCase {
 		try {
 
 			XmlDeploymentPackages xmlDeploymentPackages = getSampleXmlDeploymentPackagesObject();
-			String marshalledString = org.eclipse.kura.core.deployment.XmlUtil.marshal(xmlDeploymentPackages);
+			String marshalledString = XmlUtil.marshal(xmlDeploymentPackages);
 			Assert.assertTrue(String.format(missingItemsMessage, xmlDeploymentPackages.getDeploymentPackages()[0].getName()), marshalledString.contains(xmlDeploymentPackages.getDeploymentPackages()[0].getName()));
 			Assert.assertTrue(String.format(missingItemsMessage, xmlDeploymentPackages.getDeploymentPackages()[0].getVersion()), marshalledString.contains(xmlDeploymentPackages.getDeploymentPackages()[0].getVersion()));
 			Assert.assertTrue(String.format(missingItemsMessage, xmlDeploymentPackages.getDeploymentPackages()[0].getBundleInfos()[0].getName()),
@@ -179,7 +180,7 @@ public class XmlUtilTest extends TestCase {
 		try {
 
 			XmlBundles xmlBundles = getSampleXmlBundlesObject();
-			String marshalledString = org.eclipse.kura.core.deployment.XmlUtil.marshal(xmlBundles);
+			String marshalledString = XmlUtil.marshal(xmlBundles);
 			Assert.assertTrue(String.format(missingItemsMessage, xmlBundles.getBundles()[0].getId()), marshalledString.contains(Long.toString(xmlBundles.getBundles()[0].getId())));
 			Assert.assertTrue(String.format(missingItemsMessage, xmlBundles.getBundles()[0].getName()), marshalledString.contains(xmlBundles.getBundles()[0].getName()));
 			Assert.assertTrue(String.format(missingItemsMessage, xmlBundles.getBundles()[0].getState()), marshalledString.contains(xmlBundles.getBundles()[0].getState()));

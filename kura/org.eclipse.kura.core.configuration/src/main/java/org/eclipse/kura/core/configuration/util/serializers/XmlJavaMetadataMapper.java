@@ -72,7 +72,7 @@ public class XmlJavaMetadataMapper implements XmlJavaDataMapper{
 
 	private final static String METADATA_DESIGNATE_OBJECT_ATTRIBUTE = "Attribute";
 	private final static String METADATA_DESIGNATE_OBJECT_OCDREF = "ocdref";
-	
+
 	private Document mashallDoc= null;
 
 	//
@@ -83,7 +83,7 @@ public class XmlJavaMetadataMapper implements XmlJavaDataMapper{
 		mashallDoc= doc;
 		if(o instanceof Tocd ){
 			Tocd configOCD= (Tocd) o;
-			
+
 			String ocdName= configOCD.getName();
 			String ocdDescription= configOCD.getDescription();
 			String ocdID= configOCD.getId();
@@ -175,7 +175,7 @@ public class XmlJavaMetadataMapper implements XmlJavaDataMapper{
 			icon.setAttributeNode(attrSize);
 		}
 	}
-	
+
 	private  void marshallAD(AD ocdAD, Element ad) {
 		String adId= ocdAD.getId();
 		String adName= ocdAD.getName();
@@ -242,7 +242,7 @@ public class XmlJavaMetadataMapper implements XmlJavaDataMapper{
 			}
 		}
 	}
-	
+
 	private void marshallOption(Option adOption, Element option) {
 		String label= adOption.getLabel();
 		String value= adOption.getValue();
@@ -258,8 +258,8 @@ public class XmlJavaMetadataMapper implements XmlJavaDataMapper{
 			option.setAttributeNode(attrValue);
 		}
 	}
-	
-	
+
+
 	private Tocd parseOCD(Element ocd) {
 		String ocdName= ocd.getAttribute(METADATA_OCD_NAME);
 		String ocdID= ocd.getAttribute(METADATA_OCD_ID);
@@ -365,10 +365,14 @@ public class XmlJavaMetadataMapper implements XmlJavaDataMapper{
 
 		String iconSize= icon.getAttribute(METADATA_ICON_SIZE);
 		if(iconSize != null){
-			BigInteger size= new BigInteger(iconSize);
-			if(size.signum() >= 0){
-				result.setSize(size);
-			}else{
+			try{
+				BigInteger size= new BigInteger(iconSize);
+				if(size.signum() >= 0){
+					result.setSize(size);
+				}else{
+					result.setSize(new BigInteger("0"));
+				}
+			} catch (NumberFormatException e){
 				result.setSize(new BigInteger("0"));
 			}
 		}
@@ -382,7 +386,12 @@ public class XmlJavaMetadataMapper implements XmlJavaDataMapper{
 		String id= adElement.getAttribute(METADATA_AD_ID);
 		String name= adElement.getAttribute(METADATA_AD_NAME);
 		Tscalar type= Tscalar.fromValue(adElement.getAttribute(METADATA_AD_TYPE));
-		Integer cardinality= Integer.parseInt(adElement.getAttribute(METADATA_AD_CARDINALITY));
+		Integer cardinality;
+		try{
+			cardinality = Integer.parseInt(adElement.getAttribute(METADATA_AD_CARDINALITY));
+		} catch (NumberFormatException e){
+			cardinality= null;
+		}
 		Boolean required= Boolean.parseBoolean(adElement.getAttribute(METADATA_AD_REQUIRED));
 		String defaultVal= adElement.getAttribute(METADATA_AD_DEFAULT);
 		String description= adElement.getAttribute(METADATA_AD_DESCRIPTION);

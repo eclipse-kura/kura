@@ -11,9 +11,9 @@
  */
 package org.eclipse.kura.core.deployment.util;
 
-import org.eclipse.kura.core.deployment.XmlBundleInfo;
-import org.eclipse.kura.core.deployment.XmlDeploymentPackage;
-import org.eclipse.kura.core.deployment.XmlDeploymentPackages;
+import org.eclipse.kura.core.deployment.xml.XmlBundleInfo;
+import org.eclipse.kura.core.deployment.xml.XmlDeploymentPackage;
+import org.eclipse.kura.core.deployment.xml.XmlDeploymentPackages;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 

@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>org.eclipse.kura</groupId>
 		<artifactId>kura</artifactId>
-		<version>1.3.0</version>
+		<version>1.4.0-SNAPSHOT</version>
 		<relativePath>../manifest_pom.xml</relativePath>
 	</parent>
 
@@ -27,18 +27,6 @@
                     <configuration>
                             <format>'${kura.build.version}'</format>
                     </configuration>
-                    <executions>
-                            <execution>
-                                    <phase>package</phase>
-                                    <id>package-plugin</id>
-                                    <goals>
-                                            <goal>package-plugin</goal>
-                                    </goals>
-                                    <configuration>
-                                            <finalName>${project.artifactId}_${project.version}.v${kura.build.version}</finalName>
-                                    </configuration>
-                            </execution>
-                    </executions>
             </plugin>
             <plugin>
                 <groupId>org.eclipse.tycho</groupId>
@@ -182,11 +170,6 @@
 			</bundle>
 			<bundle>
 			    <id>org.eclipse.soda.dk.comm</id>
-			    <level>4</level>
-			    <autoStart>true</autoStart>
-			</bundle>
-			<bundle>
-			    <id>javax.usb.api</id>
 			    <level>4</level>
 			    <autoStart>true</autoStart>
 			</bundle>
@@ -352,10 +335,6 @@
                         <dependency>
                             <type>p2-installable-unit</type>
                             <artifactId>org.eclipse.soda.dk.comm</artifactId>
-                        </dependency>
-                        <dependency>
-                            <type>p2-installable-unit</type>
-                            <artifactId>javax.usb.api</artifactId>
                         </dependency>
                         <dependency>
                             <type>p2-installable-unit</type>

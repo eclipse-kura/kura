@@ -26,6 +26,11 @@ if [ ! -d ${INSTALL_DIR}/kura/.data ]; then
     mkdir ${INSTALL_DIR}/kura/.data
 fi
 
+# setup /etc/sysconfig folder for iptables configuration file
+if [ ! -d /etc/sysconfig ]; then
+    mkdir /etc/sysconfig
+fi
+
 #set up default networking file
 cp ${INSTALL_DIR}/kura/install/network.interfaces.raspbian /etc/network/interfaces
 cp ${INSTALL_DIR}/kura/install/network.interfaces.raspbian ${INSTALL_DIR}/kura/.data/interfaces
@@ -39,7 +44,8 @@ chmod +x /etc/network/if-down.d/ifdown-local
 #set up default firewall configuration
 cp ${INSTALL_DIR}/kura/install/firewall.init /etc/init.d/firewall
 chmod +x /etc/init.d/firewall
-cp /etc/init.d/firewall ${INSTALL_DIR}/kura/.data/firewall
+cp ${INSTALL_DIR}/kura/install/iptables.init /etc/sysconfig/iptables
+cp /etc/sysconfig/iptables ${INSTALL_DIR}/kura/.data/iptables
 
 #set up networking configuration
 mac_addr=$(head -1 /sys/class/net/eth0/address | tr '[:lower:]' '[:upper:]')

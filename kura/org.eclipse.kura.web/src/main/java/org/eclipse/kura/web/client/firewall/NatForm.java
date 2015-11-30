@@ -193,7 +193,7 @@ public class NatForm extends Window {
         for (GwtFirewallNatProtocol protocol : GwtFirewallNatProtocol.values()) {
         	protocolCombo.add(protocol.name());
         }
-        protocolCombo.setSimpleValue(GwtFirewallNatProtocol.all.name());
+        protocolCombo.setSimpleValue(GwtFirewallNatProtocol.tcp.name());
         fieldSet.add(protocolCombo, formData);
         
         //

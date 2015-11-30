@@ -16,6 +16,8 @@ import org.eclipse.kura.KuraException;
 import org.eclipse.kura.net.IP4Address;
 import org.eclipse.kura.net.IPAddress;
 import org.eclipse.kura.net.NetworkPair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /* 
  * Copyright (c) 2013 Eurotech Inc. All rights reserved.
@@ -47,17 +49,19 @@ import org.eclipse.kura.net.NetworkPair;
  */
 public class LocalRule {
 	
+	private static final Logger s_logger = LoggerFactory.getLogger(LocalRule.class);
+	
 	//required vars
-	private int port;
-	private String portRange;
-	private String protocol;
+	private int m_port;
+	private String m_portRange;
+	private String m_protocol;
 	
 	//optional vars
-	private String permittedNetworkString;
-	private String permittedInterfaceName;
-	private String unpermittedInterfaceName;
-	private String permittedMAC;
-	private String sourcePortRange;
+	private String m_permittedNetworkString;
+	private String m_permittedInterfaceName;
+	private String m_unpermittedInterfaceName;
+	private String m_permittedMAC;
+	private String m_sourcePortRange;
 	
 	/**
 	 * Constructor of <code>LocalRule</code> object.
@@ -71,20 +75,20 @@ public class LocalRule {
 	 * @param permittedMAC	MAC address from which connection is allowed (such as AA:BB:CC:DD:EE:FF)
 	 */
 	public LocalRule(int port, String protocol, NetworkPair<IP4Address> permittedNetwork, String permittedInterfaceName, String unpermittedInterfaceName, String permittedMAC, String sourcePortRange) {
-		this.port = port;
-		this.portRange = null;
-		this.protocol = protocol;
-		this.sourcePortRange = sourcePortRange;
+		m_port = port;
+		m_portRange = null;
+		m_protocol = protocol;
+		m_sourcePortRange = sourcePortRange;
 		
 		if(permittedNetwork != null) {
-			permittedNetworkString = permittedNetwork.getIpAddress().getHostAddress() + "/" + permittedNetwork.getPrefix();
+			m_permittedNetworkString = permittedNetwork.getIpAddress().getHostAddress() + "/" + permittedNetwork.getPrefix();
 		} else {
-			permittedNetworkString = "0.0.0.0/0";
+			m_permittedNetworkString = "0.0.0.0/0";
 		}
 		
-		this.permittedInterfaceName = permittedInterfaceName;
-		this.unpermittedInterfaceName = unpermittedInterfaceName;
-		this.permittedMAC = permittedMAC;
+		m_permittedInterfaceName = permittedInterfaceName;
+		m_unpermittedInterfaceName = unpermittedInterfaceName;
+		m_permittedMAC = permittedMAC;
 	}
 	
 	/**
@@ -99,34 +103,71 @@ public class LocalRule {
 	 * @param permittedMAC	MAC address from which connection is allowed (such as AA:BB:CC:DD:EE:FF)
 	 */
 	public LocalRule(String portRange, String protocol, NetworkPair<IP4Address> permittedNetwork, String permittedInterfaceName, String unpermittedInterfaceName, String permittedMAC, String sourcePortRange) {
-		this.port = -1;
-		this.portRange = portRange;
-		this.protocol = protocol;
-		this.sourcePortRange = sourcePortRange;	
+		m_port = -1;
+		m_portRange = portRange;
+		m_protocol = protocol;
+		m_sourcePortRange = sourcePortRange;	
 
 		if(permittedNetwork != null) {
-			permittedNetworkString = permittedNetwork.getIpAddress().getHostAddress() + "/" + permittedNetwork.getPrefix();
+			m_permittedNetworkString = permittedNetwork.getIpAddress().getHostAddress() + "/" + permittedNetwork.getPrefix();
 		} else {
-			permittedNetworkString = "0.0.0.0/0";
+			m_permittedNetworkString = "0.0.0.0/0";
 		}
 
-		this.permittedInterfaceName = permittedInterfaceName;
-		this.unpermittedInterfaceName = unpermittedInterfaceName;
-		this.permittedMAC = permittedMAC;
+		m_permittedInterfaceName = permittedInterfaceName;
+		m_unpermittedInterfaceName = unpermittedInterfaceName;
+		m_permittedMAC = permittedMAC;
 	}
 	
 	/**
 	 * Constructor of <code>LocalRule</code> object.
 	 */
 	public LocalRule() {
-		port = -1;
-		portRange = null;
-		protocol = null;
-		permittedNetworkString = null;
-		permittedInterfaceName = null;
-		unpermittedInterfaceName = null;
-		permittedMAC = null;
-		sourcePortRange = null;
+		m_port = -1;
+		m_portRange = null;
+		m_protocol = null;
+		m_permittedNetworkString = null;
+		m_permittedInterfaceName = null;
+		m_unpermittedInterfaceName = null;
+		m_permittedMAC = null;
+		m_sourcePortRange = null;
+	}
+	
+	public LocalRule(String rule) throws KuraException {
+		try {
+			String [] aRuleTokens = rule.split(" ");
+			for (int i = 0; i < aRuleTokens.length; i++) {
+				if("-i".equals(aRuleTokens[i])) {
+					if("!".equals(aRuleTokens[i-1])) {
+						m_unpermittedInterfaceName = aRuleTokens[++i];
+					} else {
+						m_permittedInterfaceName = aRuleTokens[++i];
+					}
+				}
+				else if("-s".equals(aRuleTokens[i])) {
+					m_permittedNetworkString = aRuleTokens[++i];
+				} else if ("-p".equals(aRuleTokens[i])) {
+					m_protocol = aRuleTokens[++i];
+				} else if ("--dport".equals(aRuleTokens[i])) {
+					if (aRuleTokens[i+1].indexOf(':') > 0) {
+						m_portRange = aRuleTokens[++i];
+						m_port = -1;
+					} else {
+						m_port = Integer.parseInt(aRuleTokens[++i]);
+						m_portRange = null;
+					}
+				} else if ("--sport".equals(aRuleTokens[i])) {
+					m_sourcePortRange = aRuleTokens[++i];
+				} else if ("--mac-source".equals(aRuleTokens[i])) {
+					m_permittedMAC = aRuleTokens[++i];
+				}
+			}
+			if (m_permittedNetworkString == null) {
+				m_permittedNetworkString = "0.0.0.0/0";
+			}
+		} catch (Exception e) {
+			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+		}
 	}
 	
 	/**
@@ -135,10 +176,10 @@ public class LocalRule {
 	 * @return		A boolean representing whether all parameters have been set.
 	 */
 	public boolean isComplete() {
-		if(protocol != null && port != -1) {
+		if(m_protocol != null && m_port != -1) {
 			return true; 
-		} else if(protocol != null && portRange != null) {
-			if(isPortRangeValid(portRange)) {
+		} else if(m_protocol != null && m_portRange != null) {
+			if(isPortRangeValid(m_portRange)) {
 				return true;
 			} else {
 				return false;
@@ -154,7 +195,7 @@ public class LocalRule {
 	 * @param protocol	A String representing the protocol.
 	 */
 	public void setProtocol(String protocol) {
-		this.protocol = protocol;
+		m_protocol = protocol;
 	}
 	
 	/**
@@ -164,9 +205,9 @@ public class LocalRule {
 	 */
 	public void setPermittedNetwork(NetworkPair<IP4Address> permittedNetwork) {
 		if(permittedNetwork != null) {
-			permittedNetworkString = permittedNetwork.getIpAddress().getHostAddress() + "/" + permittedNetwork.getPrefix();
+			m_permittedNetworkString = permittedNetwork.getIpAddress().getHostAddress() + "/" + permittedNetwork.getPrefix();
 		} else {
-			permittedNetworkString = "0.0.0.0/0";
+			m_permittedNetworkString = "0.0.0.0/0";
 		}
 	}
 	
@@ -176,7 +217,7 @@ public class LocalRule {
 	 * @param permittedInterfaceName	A String representing the only interface allowed on this open port
 	 */
 	public void setPermittedInterfaceName(String permittedInterfaceName) {
-		this.permittedInterfaceName = permittedInterfaceName;
+		m_permittedInterfaceName = permittedInterfaceName;
 	}
 	
 	/**
@@ -185,7 +226,7 @@ public class LocalRule {
 	 * @param unpermittedInterfaceName	A String representing the only interface not allowed on this open port
 	 */
 	public void setUnpermittedInterfaceName(String unpermittedInterfaceName) {
-		this.unpermittedInterfaceName = unpermittedInterfaceName;
+		m_unpermittedInterfaceName = unpermittedInterfaceName;
 	}
 	
 	/**
@@ -194,7 +235,7 @@ public class LocalRule {
 	 * @param permittedMAC	A String representing the permittedMAC.
 	 */
 	public void setPermittedMAC(String permittedMAC) {
-		this.permittedMAC = permittedMAC;
+		m_permittedMAC = permittedMAC;
 	}
 	
 	/**
@@ -203,7 +244,7 @@ public class LocalRule {
 	 * @param sourcePortRange	A String representing the sourcePortRange.
 	 */
 	public void setSourcePortRange(String sourcePortRange) {
-		this.sourcePortRange = sourcePortRange;
+		m_sourcePortRange = sourcePortRange;
 	}
 	
 	/**
@@ -212,8 +253,8 @@ public class LocalRule {
 	 * @param port	An int representing the port.
 	 */
 	public void setPort(int port) {
-		this.port = port;
-		this.portRange = null;
+		m_port = port;
+		m_portRange = null;
 	}
 	
 	/**
@@ -222,8 +263,8 @@ public class LocalRule {
 	 * @param portRange	A string representing the port range of the form X:Y where X < Y and both are valid ports
 	 */
 	public void setPortRange(String portRange) {
-		this.port = -1;
-		this.portRange = portRange;
+		m_port = -1;
+		m_portRange = portRange;
 	}
 	
 	/**
@@ -232,7 +273,7 @@ public class LocalRule {
 	 * @return the sourcePortRange
 	 */
 	public String getSourcePortRange() {
-		return this.sourcePortRange;
+		return m_sourcePortRange;
 	}
 	
 	/**
@@ -241,7 +282,7 @@ public class LocalRule {
 	 * @param permittedInterfaceName	A String representing the only interface allowed on this open port
 	 */
 	public String getPermittedInterfaceName() {
-		return permittedInterfaceName;
+		return m_permittedInterfaceName;
 	}
 	
 	/**
@@ -250,7 +291,7 @@ public class LocalRule {
 	 * @param unpermittedInterfaceName	A String representing the only interface not allowed on this open port
 	 */
 	public String getUnpermittedInterfaceName() {
-		return unpermittedInterfaceName;
+		return m_unpermittedInterfaceName;
 	}
 
 	/**
@@ -259,7 +300,7 @@ public class LocalRule {
 	 * @return the port
 	 */
 	public int getPort() {
-		return port;
+		return m_port;
 	}
 	
 	/**
@@ -268,7 +309,7 @@ public class LocalRule {
 	 * @return the portRange
 	 */
 	public String getPortRange() {
-		return portRange;
+		return m_portRange;
 	}
 
 	/**
@@ -277,7 +318,7 @@ public class LocalRule {
 	 * @return the protocol
 	 */
 	public String getProtocol() {
-		return protocol;
+		return m_protocol;
 	}
 
 	/**
@@ -287,8 +328,8 @@ public class LocalRule {
 	 */
 	public NetworkPair<IP4Address> getPermittedNetwork() throws KuraException {
 		try {
-			if(permittedNetworkString != null) {
-				String[] split = permittedNetworkString.split("/");
+			if(m_permittedNetworkString != null) {
+				String[] split = m_permittedNetworkString.split("/");
 				return new NetworkPair(IPAddress.parseHostAddress(split[0]), Short.parseShort(split[1]));
 			} else {
 				return new NetworkPair(IPAddress.parseHostAddress("0.0.0.0"), (short)0);
@@ -304,7 +345,7 @@ public class LocalRule {
 	 * @return the permittedMAC
 	 */
 	public String getPermittedMAC() {
-		return permittedMAC;
+		return m_permittedMAC;
 	}
 
 	/**
@@ -324,33 +365,33 @@ public class LocalRule {
 	public String toString() {
 		
 		String interfaceString = null;
-		if(permittedInterfaceName != null) {
-			interfaceString = new StringBuffer().append(" -i " ).append(permittedInterfaceName).toString();
-		} else if(unpermittedInterfaceName != null) {
-			interfaceString = new StringBuffer().append(" ! -i " ).append(unpermittedInterfaceName).toString();
+		if(m_permittedInterfaceName != null) {
+			interfaceString = new StringBuffer().append(" -i " ).append(m_permittedInterfaceName).toString();
+		} else if(m_unpermittedInterfaceName != null) {
+			interfaceString = new StringBuffer().append(" ! -i " ).append(m_unpermittedInterfaceName).toString();
 		}
 		
-		if(port != -1) {
-			if (this.permittedMAC == null && this.sourcePortRange == null) {
-				return new String("iptables -I INPUT -p " + this.protocol + " -s " + permittedNetworkString + ((interfaceString != null) ? interfaceString : "") + " --dport " + this.port + " -j ACCEPT");
-			} else if (this.permittedMAC == null && this.sourcePortRange != null) {
-				return new String("iptables -I INPUT -p " + this.protocol + " -s " + permittedNetworkString + ((interfaceString != null) ? interfaceString : "") + " --sport " + this.sourcePortRange + " --dport " + this.port + " -j ACCEPT");
-			} else if (this.permittedMAC != null && this.sourcePortRange == null) {
-				return new String("iptables -I INPUT -p " + this.protocol + " -s " + permittedNetworkString + ((interfaceString != null) ? interfaceString : "") + " -m mac --mac-source " + this.permittedMAC + " --dport " + this.port + " -j ACCEPT");
-			} else if (this.permittedMAC != null && this.sourcePortRange != null) {
-				return new String("iptables -I INPUT -p " + this.protocol + " -s " + permittedNetworkString + ((interfaceString != null) ? interfaceString : "") + " -m mac --mac-source " + this.permittedMAC + " --sport " + this.sourcePortRange + " --dport " + this.port + " -j ACCEPT");
+		if(m_port != -1) {
+			if (m_permittedMAC == null && m_sourcePortRange == null) {
+				return new String("iptables -I INPUT -p " + m_protocol + " -s " + m_permittedNetworkString + ((interfaceString != null) ? interfaceString : "") + " --dport " + m_port + " -j ACCEPT");
+			} else if (m_permittedMAC == null && m_sourcePortRange != null) {
+				return new String("iptables -I INPUT -p " + m_protocol + " -s " + m_permittedNetworkString + ((interfaceString != null) ? interfaceString : "") + " --sport " + m_sourcePortRange + " --dport " + m_port + " -j ACCEPT");
+			} else if (m_permittedMAC != null && m_sourcePortRange == null) {
+				return new String("iptables -I INPUT -p " + m_protocol + " -s " + m_permittedNetworkString + ((interfaceString != null) ? interfaceString : "") + " -m mac --mac-source " + m_permittedMAC + " --dport " + m_port + " -j ACCEPT");
+			} else if (m_permittedMAC != null && m_sourcePortRange != null) {
+				return new String("iptables -I INPUT -p " + m_protocol + " -s " + m_permittedNetworkString + ((interfaceString != null) ? interfaceString : "") + " -m mac --mac-source " + m_permittedMAC + " --sport " + m_sourcePortRange + " --dport " + m_port + " -j ACCEPT");
 			} else {
 				return null;
 			}
 		} else {
-			if (this.permittedMAC == null && this.sourcePortRange == null) {
-				return new String("iptables -I INPUT -p " + this.protocol + " -s " + permittedNetworkString + ((interfaceString != null) ? interfaceString : "") + " --dport " + this.portRange + " -j ACCEPT");
-			} else if (this.permittedMAC == null && this.sourcePortRange != null) {
-				return new String("iptables -I INPUT -p " + this.protocol + " -s " + permittedNetworkString + ((interfaceString != null) ? interfaceString : "") + " --sport " + this.sourcePortRange + " --dport " + this.portRange + " -j ACCEPT");
-			} else if (this.permittedMAC != null && this.sourcePortRange == null) {
-				return new String("iptables -I INPUT -p " + this.protocol + " -s " + permittedNetworkString + ((interfaceString != null) ? interfaceString : "") + " -m mac --mac-source " + this.permittedMAC + " --dport " + this.portRange + " -j ACCEPT");
-			} else if (this.permittedMAC != null && this.sourcePortRange != null) {
-				return new String("iptables -I INPUT -p " + this.protocol + " -s " + permittedNetworkString + ((interfaceString != null) ? interfaceString : "") + " -m mac --mac-source " + this.permittedMAC + " --sport " + this.sourcePortRange + " --dport " + this.portRange + " -j ACCEPT");
+			if (m_permittedMAC == null && m_sourcePortRange == null) {
+				return new String("iptables -I INPUT -p " + m_protocol + " -s " + m_permittedNetworkString + ((interfaceString != null) ? interfaceString : "") + " --dport " + m_portRange + " -j ACCEPT");
+			} else if (m_permittedMAC == null && m_sourcePortRange != null) {
+				return new String("iptables -I INPUT -p " + m_protocol + " -s " + m_permittedNetworkString + ((interfaceString != null) ? interfaceString : "") + " --sport " + m_sourcePortRange + " --dport " + m_portRange + " -j ACCEPT");
+			} else if (m_permittedMAC != null && m_sourcePortRange == null) {
+				return new String("iptables -I INPUT -p " + m_protocol + " -s " + m_permittedNetworkString + ((interfaceString != null) ? interfaceString : "") + " -m mac --mac-source " + m_permittedMAC + " --dport " + m_portRange + " -j ACCEPT");
+			} else if (m_permittedMAC != null && m_sourcePortRange != null) {
+				return new String("iptables -I INPUT -p " + m_protocol + " -s " + m_permittedNetworkString + ((interfaceString != null) ? interfaceString : "") + " -m mac --mac-source " + m_permittedMAC + " --sport " + m_sourcePortRange + " --dport " + m_portRange + " -j ACCEPT");
 			} else {
 				return null;
 			}
@@ -387,21 +428,21 @@ public class LocalRule {
 	    
         LocalRule other = (LocalRule) o;
         
-        if(port != other.getPort()) {
+        if(m_port != other.getPort()) {
             return false;
-        } else if (!compareObjects(this.portRange, other.portRange)) {
+        } else if (!compareObjects(m_portRange, other.m_portRange)) {
             return false;
-        } else if (!compareObjects(this.protocol, other.protocol)) {
+        } else if (!compareObjects(m_protocol, other.m_protocol)) {
             return false;
-        } else if (!compareObjects(this.permittedMAC, other.permittedMAC)) {
+        } else if (!compareObjects(m_permittedMAC, other.m_permittedMAC)) {
             return false;
-        } else if (!compareObjects(this.sourcePortRange, other.sourcePortRange)) {
+        } else if (!compareObjects(m_sourcePortRange, other.m_sourcePortRange)) {
             return false;
-        } else if (!compareObjects(this.permittedInterfaceName, other.permittedInterfaceName)) {
+        } else if (!compareObjects(m_permittedInterfaceName, other.m_permittedInterfaceName)) {
             return false;
-        } else if (!compareObjects(this.unpermittedInterfaceName, other.unpermittedInterfaceName)) {
+        } else if (!compareObjects(m_unpermittedInterfaceName, other.m_unpermittedInterfaceName)) {
             return false;
-        } else if (!compareObjects(this.permittedNetworkString, other.permittedNetworkString)) {
+        } else if (!compareObjects(m_permittedNetworkString, other.m_permittedNetworkString)) {
             return false;
         }
 	    
@@ -422,21 +463,21 @@ public class LocalRule {
     public int hashCode() {
         final int prime = 73;
         int result = 1;
-        result = prime * result + port;
+        result = prime * result + m_port;
         result = prime * result
-                + ((portRange == null) ? 0 : portRange.hashCode());
+                + ((m_portRange == null) ? 0 : m_portRange.hashCode());
         result = prime * result
-                + ((protocol == null) ? 0 : protocol.hashCode());
+                + ((m_protocol == null) ? 0 : m_protocol.hashCode());
         result = prime * result
-                + ((sourcePortRange == null) ? 0 : sourcePortRange.hashCode());
+                + ((m_sourcePortRange == null) ? 0 : m_sourcePortRange.hashCode());
         result = prime * result
-                + ((permittedInterfaceName == null) ? 0 : permittedInterfaceName.hashCode());
+                + ((m_permittedInterfaceName == null) ? 0 : m_permittedInterfaceName.hashCode());
         result = prime * result
-                + ((unpermittedInterfaceName == null) ? 0 : unpermittedInterfaceName.hashCode());
+                + ((m_unpermittedInterfaceName == null) ? 0 : m_unpermittedInterfaceName.hashCode());
         result = prime * result
-                + ((permittedMAC == null) ? 0 : permittedMAC.hashCode());
+                + ((m_permittedMAC == null) ? 0 : m_permittedMAC.hashCode());
         result = prime * result
-                + ((permittedNetworkString == null) ? 0 : permittedNetworkString.hashCode());
+                + ((m_permittedNetworkString == null) ? 0 : m_permittedNetworkString.hashCode());
         
         return result;
     }

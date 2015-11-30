@@ -13,6 +13,7 @@ package org.eclipse.kura.net.wifi;
 
 import java.util.Arrays;
 
+import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.net.NetConfig;
 
 /**
@@ -39,7 +40,7 @@ public class WifiConfig implements NetConfig {
 	private WifiCiphers m_groupCiphers;
 	
 	/** The passkey for the wifi interface **/
-	private String m_passkey;
+	private Password m_passkey;
 	
 	/** The hardware mode **/
 	private String m_hwMode;
@@ -75,7 +76,7 @@ public class WifiConfig implements NetConfig {
 		this.m_ssid = ssid;
 		this.m_channels = channels;
 		this.m_security = security;
-		this.m_passkey = passkey;
+		this.m_passkey = new Password(passkey);
 		this.m_hwMode = hwMode;
 		this.m_broadcast = broadcast;
 		this.m_bgscan = bgscan;
@@ -137,12 +138,13 @@ public class WifiConfig implements NetConfig {
 		this.m_groupCiphers = group;
 	}
 	
-	public String getPasskey() {
+	public Password getPasskey() {
 		return this.m_passkey;
 	}
 	
 	public void setPasskey(String key) {
-		this.m_passkey = key;
+		Password psswd= new Password(key);
+		this.m_passkey = psswd;
 	}
 	
 	public String getHardwareMode() {

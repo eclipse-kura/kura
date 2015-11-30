@@ -121,6 +121,7 @@ public class WirelessConfigTab extends LayoutContainer
 	private static final String PASSWORD_REGEX_WPA  = "^[ -~]{8,63}$"; // Match all ASCII printable characters
 	//private static final String PASSWORD_REGEX_WEP  = "^(?:\\w{5}|\\w{13}|\\w{16}|[a-fA-F0-9]{10}|[a-fA-F0-9]{26}|[a-fA-F0-9]{32})$";
 	private static final String PASSWORD_REGEX_WEP  = "^(?:\\w{5}|\\w{13}|[a-fA-F0-9]{10}|[a-fA-F0-9]{26})$";
+	private static final int	MAX_SSID_LENGTH		= 32;
 	private static final int	MAX_WIFI_CHANNEL	= 13;
 
 	//private final TextArea toolTipField = new TextArea();
@@ -510,6 +511,7 @@ public class WirelessConfigTab extends LayoutContainer
 		m_ssidField.addPlugin(m_dirtyPlugin);
 		m_ssidField.addListener(Events.OnMouseOver, new MouseOverListener(MSGS.netWifiToolTipNetworkName()));
 		m_ssidField.setStyleAttribute("margin-top", Constants.LABEL_MARGIN_TOP_SEPARATOR);
+		m_ssidField.setMaxLength(MAX_SSID_LENGTH);
 
 		//
 		// Radio Mode

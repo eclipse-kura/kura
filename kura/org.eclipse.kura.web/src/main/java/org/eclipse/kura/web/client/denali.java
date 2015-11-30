@@ -138,6 +138,7 @@ public class denali implements EntryPoint
 						gwtSecurityService.isDebugMode(new AsyncCallback<Boolean>() {
 
 							public void onFailure(Throwable caught) {
+								Info.display("Bad", "Is debug mode error");
 								render(gwtSession);
 							}
 

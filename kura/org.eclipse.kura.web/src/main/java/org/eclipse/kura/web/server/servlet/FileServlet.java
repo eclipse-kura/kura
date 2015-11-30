@@ -368,7 +368,7 @@ public class FileServlet extends HttpServlet {
 		File iD = new File(intendedDir);
 		String canonicalID = iD.getCanonicalPath();
 
-		if (filePath.contains(canonicalID)) {
+		if (filePath.startsWith(canonicalID)) {
 			return filePath;
 		} else {
 			throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ACCESS);

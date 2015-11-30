@@ -33,26 +33,28 @@ import com.google.gwt.user.server.rpc.XsrfProtect;
 public class SettingsTabs extends LayoutContainer 
 {
 	private static final Messages MSGS = GWT.create(Messages.class);
-	
+
 	private final GwtSecurityServiceAsync gwtSecurityService = GWT.create(GwtSecurityService.class);
 
 	private GwtSession              m_currentSession;
 	private ServiceTree             m_servicesTree;
 
 	private TabPanel                m_tabsPanel;
-	private TabItem                 m_certificatesConfig;
-	private TabItem                 m_mutualAuthConfig;
 	private TabItem                 m_snapshotsConfig;
+	private TabItem                 m_applicationCertsConfig;
+	private TabItem                 m_sslConfig;
+	private TabItem                 m_serverSSLConfig;
+	private TabItem                 m_deviceSSLConfig;
 	private TabItem                 m_securityConfig;
-	private TabItem                 m_bundleCertsConfig;
 
 	private SnapshotsTab	        m_snapshotsTab;
+	private ApplicationCertsTab		m_bundleCertsTab;
 
-	private CertificatesTab         m_certificatesTab;
-	private MutualAuthenticationTab m_mutualAuthenticationTab;
+	private SslTab          		m_sslTab;
+	private ServerCertsTab          m_serverSSLTab;
+	private DeviceCertsTab          m_deviceSSLTab;
 
 	private SecurityTab				m_securityTab;
-	private BundleCertsTab			m_bundleCertsTab;
 
 	public SettingsTabs(GwtSession currentSession,
 			ServiceTree serviceTree) 
@@ -68,32 +70,38 @@ public class SettingsTabs extends LayoutContainer
 
 	private void initTabs()
 	{
-		m_certificatesTab = new CertificatesTab(m_currentSession);
-		if (m_certificatesConfig != null) {
-			m_certificatesConfig.add(m_certificatesTab);
-			m_certificatesConfig.layout();
-		}
-
-		m_mutualAuthenticationTab = new MutualAuthenticationTab(m_currentSession);
-		if (m_mutualAuthConfig != null) {
-			m_mutualAuthConfig.add(m_mutualAuthenticationTab);
-			m_mutualAuthConfig.layout();
-		}
-
 		m_snapshotsTab = new SnapshotsTab(m_currentSession, m_servicesTree);
 		if (m_snapshotsConfig != null) {
 			m_snapshotsConfig.add(m_snapshotsTab);
 			m_snapshotsConfig.layout();
 		}
 
+		m_bundleCertsTab = new ApplicationCertsTab(m_currentSession);
+		if (m_applicationCertsConfig != null) {
+			m_applicationCertsConfig.add(m_bundleCertsTab);
+		}
+
+		m_sslTab = new SslTab(m_currentSession);
+		if (m_sslTab != null) {
+			m_sslTab.add(m_sslTab);
+			m_sslTab.layout();
+		}
+		
+		m_serverSSLTab = new ServerCertsTab(m_currentSession);
+		if (m_serverSSLConfig != null) {
+			m_serverSSLConfig.add(m_serverSSLTab);
+			m_serverSSLConfig.layout();
+		}
+
+		m_deviceSSLTab = new DeviceCertsTab(m_currentSession);
+		if (m_deviceSSLConfig != null) {
+			m_deviceSSLConfig.add(m_deviceSSLTab);
+			m_deviceSSLConfig.layout();
+		}
+
 		m_securityTab = new SecurityTab(m_currentSession);
 		if (m_securityConfig != null) {
 			m_securityConfig.add(m_securityTab);
-		}
-		
-		m_bundleCertsTab = new BundleCertsTab(m_currentSession);
-		if (m_bundleCertsConfig != null) {
-			m_bundleCertsConfig.add(m_bundleCertsTab);
 		}
 	}
 
@@ -119,44 +127,57 @@ public class SettingsTabs extends LayoutContainer
 		m_snapshotsConfig.setBorders(true);
 		m_snapshotsConfig.setLayout(new FitLayout());
 		m_snapshotsConfig.add(m_snapshotsTab);
-		m_tabsPanel.add(m_snapshotsConfig);
 
-		m_certificatesConfig = new TabItem(MSGS.settingsAddCertificates());
-		m_certificatesConfig.setBorders(true);
-		m_certificatesConfig.setLayout(new FitLayout());
-		m_certificatesConfig.add(m_certificatesTab);
-		m_tabsPanel.add(m_certificatesConfig);
+		m_applicationCertsConfig = new TabItem(MSGS.settingsAddBundleCerts());
+		m_applicationCertsConfig.setBorders(true);
+		m_applicationCertsConfig.setLayout(new FitLayout());
+		m_applicationCertsConfig.add(m_bundleCertsTab);
+		
+		m_sslConfig = new TabItem(MSGS.settingsSSLConfiguration());
+		m_sslConfig.setBorders(true);
+		m_sslConfig.setLayout(new FitLayout());
+		m_sslConfig.add(m_sslTab);
 
-		m_mutualAuthConfig = new TabItem(MSGS.settingsAddMAuthCertificates());
-		m_mutualAuthConfig.setBorders(true);
-		m_mutualAuthConfig.setLayout(new FitLayout());
-		m_mutualAuthConfig.add(m_mutualAuthenticationTab);
-		m_tabsPanel.add(m_mutualAuthConfig);
+		m_serverSSLConfig = new TabItem(MSGS.settingsAddCertificates());
+		m_serverSSLConfig.setBorders(true);
+		m_serverSSLConfig.setLayout(new FitLayout());
+		m_serverSSLConfig.add(m_serverSSLTab);
+
+		m_deviceSSLConfig = new TabItem(MSGS.settingsAddMAuthCertificates());
+		m_deviceSSLConfig.setBorders(true);
+		m_deviceSSLConfig.setLayout(new FitLayout());
+		m_deviceSSLConfig.add(m_deviceSSLTab);
 
 		m_securityConfig = new TabItem(MSGS.settingsSecurityOptions());
 		m_securityConfig.setBorders(true);
 		m_securityConfig.setLayout(new FitLayout());
 		m_securityConfig.add(m_securityTab);
-		
-		m_bundleCertsConfig = new TabItem(MSGS.settingsAddBundleCerts());
-		m_bundleCertsConfig.setBorders(true);
-		m_bundleCertsConfig.setLayout(new FitLayout());
-		m_bundleCertsConfig.add(m_bundleCertsTab);
+
 
 
 		AsyncCallback<Boolean> callback = new AsyncCallback<Boolean>() {
 			public void onFailure(Throwable caught) {
+				m_tabsPanel.add(m_snapshotsConfig);
+				m_tabsPanel.add(m_sslConfig);
+				m_tabsPanel.add(m_serverSSLConfig);
+				m_tabsPanel.add(m_deviceSSLConfig);
 			}
 
 			public void onSuccess(Boolean result) {
+				m_tabsPanel.add(m_snapshotsConfig);
+				if(result){
+					m_tabsPanel.add(m_applicationCertsConfig);
+				}
+				m_tabsPanel.add(m_sslConfig);
+				m_tabsPanel.add(m_serverSSLConfig);
+				m_tabsPanel.add(m_deviceSSLConfig);
 				if(result){
 					m_tabsPanel.add(m_securityConfig);
-					m_tabsPanel.add(m_bundleCertsConfig);
 				}
 			}
 		};
 		gwtSecurityService.isSecurityServiceAvailable(callback);
-		
+
 		add(m_tabsPanel);
 	}
 }

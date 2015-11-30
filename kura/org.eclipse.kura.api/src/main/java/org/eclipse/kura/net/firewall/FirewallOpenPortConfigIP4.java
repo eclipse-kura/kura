@@ -29,4 +29,8 @@ public class FirewallOpenPortConfigIP4 extends FirewallOpenPortConfigIP<IP4Addre
 	public FirewallOpenPortConfigIP4(int port, NetProtocol protocol, NetworkPair<IP4Address> permittedNetwork, String permittedInterfaceName, String unpermittedInterfaceName, String permittedMac, String sourcePortRange) { 	
 		super(port, protocol, permittedNetwork, permittedInterfaceName, unpermittedInterfaceName, permittedMac, sourcePortRange);
 	}
+	
+	public FirewallOpenPortConfigIP4(String portRange, NetProtocol protocol, NetworkPair<IP4Address> permittedNetwork, String permittedInterfaceName, String unpermittedInterfaceName, String permittedMac, String sourcePortRange) { 	
+		super(portRange, protocol, permittedNetwork, permittedInterfaceName, unpermittedInterfaceName, permittedMac, sourcePortRange);
+	}
 }

@@ -9,18 +9,18 @@
  * Contributors:
  *   Eurotech
  */
-package org.eclipse.kura.core.deployment;
+package org.eclipse.kura.core.deployment.xml;
 
 
-public class XmlBundles {
+public class XmlDeploymentPackages {
 	
-	public XmlBundle[] bundles;
+	public XmlDeploymentPackage[] deploymentPackages;
 
-	public XmlBundle[] getBundles() {
-		return bundles;
+	public XmlDeploymentPackage[] getDeploymentPackages() {
+		return deploymentPackages;
 	}
 
-	public void setBundles(XmlBundle[] bundles) {
-		this.bundles = bundles;
+	public void setDeploymentPackages(XmlDeploymentPackage[] deploymentPackages) {
+		this.deploymentPackages = deploymentPackages;
 	}
 }

@@ -728,7 +728,7 @@
 		<profile>
 			<id>beaglebone-nn</id>
 			<properties>
-				<project.raspbian.dependencies.nn>dos2unix, unzip, telnet</project.raspbian.dependencies.nn>
+				<project.raspbian.dependencies.nn>dos2unix, unzip, telnet, ethtool</project.raspbian.dependencies.nn>
 <!--
 				<kura.install.dir>/opt/eclipse</kura.install.dir>
 -->
@@ -966,7 +966,7 @@
 		<profile>
 			<id>raspberry-pi-nn</id>
 			<properties>
-				<project.raspbian.dependencies.nn>dos2unix, unzip, telnet</project.raspbian.dependencies.nn>
+				<project.raspbian.dependencies.nn>dos2unix, unzip, telnet, ethtool</project.raspbian.dependencies.nn>
 <!--
 				<kura.install.dir>/opt/eclipse</kura.install.dir>
 -->
@@ -1201,7 +1201,7 @@
 		<profile>
 			<id>raspberry-pi-bplus-nn</id>
 			<properties>
-				<project.raspbian.dependencies.nn>dos2unix, unzip, telnet</project.raspbian.dependencies.nn>
+				<project.raspbian.dependencies.nn>dos2unix, unzip, telnet, ethtool</project.raspbian.dependencies.nn>
 <!--
 				<kura.install.dir>/opt/eclipse</kura.install.dir>
 -->
@@ -1427,7 +1427,7 @@
 		<profile>
 			<id>raspberry-pi-2-nn</id>
 			<properties>
-				<project.raspbian.dependencies.nn>dos2unix, unzip, telnet</project.raspbian.dependencies.nn>
+				<project.raspbian.dependencies.nn>dos2unix, unzip, telnet, ethtool</project.raspbian.dependencies.nn>
 <!--
 				<kura.install.dir>/opt/eclipse</kura.install.dir>
 -->

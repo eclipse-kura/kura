@@ -82,6 +82,7 @@ public class LinuxFirewall {
 
 	private static final String IP_FORWARD_FILE_NAME = "/proc/sys/net/ipv4/ip_forward";
 	private static final String FIREWALL_CONFIG_FILE_NAME = "/etc/sysconfig/iptables";
+	private static final String CUSTOM_FIREWALL_SCRIPT_NAME = "/etc/init.d/firewall_cust";
 	
 	private LinkedHashSet<LocalRule> m_localRules;
 	private LinkedHashSet<PortForwardRule> m_portForwardRules;
@@ -772,6 +773,7 @@ public class LinuxFirewall {
 			
 			s_logger.debug("Managing port forwarding...");
 			enableForwarding(m_allowForwarding);
+			runCustomFirewallScript();
 		} catch (Exception e) {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
 		}
@@ -848,6 +850,25 @@ public class LinuxFirewall {
 		}
 		return ret;
 	}
+	
+	/*
+	 * Runs custom firewall script
+	 */
+	private void runCustomFirewallScript() throws KuraException {
+		SafeProcess proc = null;
+		try {
+			File file = new File(CUSTOM_FIREWALL_SCRIPT_NAME);
+			if(file.exists()) {
+				s_logger.info("Running custom firewall script - {}", CUSTOM_FIREWALL_SCRIPT_NAME);			
+				proc = ProcessUtil.exec("sh " + CUSTOM_FIREWALL_SCRIPT_NAME);
+				proc.waitFor();
+			}
+		} catch (Exception e) {
+			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+		} finally {
+			if (proc != null) ProcessUtil.destroy(proc);
+		}
+	}
 
 	/*
 	 * Saves the current iptables config into /etc/sysconfig/iptables
@@ -859,6 +880,7 @@ public class LinuxFirewall {
 		try {
 			int status = -1;
 			if (OS_VERSION.equals(KuraConstants.Mini_Gateway.getImageName() + "_" + KuraConstants.Mini_Gateway.getImageVersion()) ||
+					OS_VERSION.equals(KuraConstants.ReliaGATE_50_21_Ubuntu.getImageName() + "_" + KuraConstants.ReliaGATE_50_21_Ubuntu.getImageVersion()) ||
 					OS_VERSION.equals(KuraConstants.Raspberry_Pi.getImageName()) || 
 					OS_VERSION.equals(KuraConstants.BeagleBone.getImageName()) ||
 					OS_VERSION.equals(KuraConstants.Intel_Edison.getImageName() + "_" + KuraConstants.Intel_Edison.getImageVersion() + "_" + KuraConstants.Intel_Edison.getTargetName())) {

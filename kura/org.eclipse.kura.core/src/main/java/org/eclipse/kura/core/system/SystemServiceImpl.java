@@ -13,6 +13,7 @@ package org.eclipse.kura.core.system;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -383,7 +384,7 @@ public class SystemServiceImpl implements SystemService
 				m_kuraProperties.put(KEY_OS_NAME, System.getProperty(KEY_OS_NAME));
 			}
 			if(System.getProperty(KEY_OS_VER) != null){
-				m_kuraProperties.put(KEY_OS_VER, System.getProperty(KEY_OS_VER));
+				m_kuraProperties.put(KEY_OS_VER, getOsVersion()); //System.getProperty(KEY_OS_VER)
 			}
 			if(System.getProperty(KEY_OS_DISTRO) != null){
 				m_kuraProperties.put(KEY_OS_DISTRO, System.getProperty(KEY_OS_DISTRO));
@@ -607,7 +608,42 @@ public class SystemServiceImpl implements SystemService
 		String override = this.m_kuraProperties.getProperty(KEY_OS_VER);
 		if(override != null) return override;
 
-		return System.getProperty(KEY_OS_VER);
+		StringBuilder sbOsVersion= new StringBuilder();
+		sbOsVersion.append(System.getProperty(KEY_OS_VER));
+		if (OS_LINUX.equals(getOsName())) {
+			BufferedReader in= null;
+			File linuxKernelVersion= null;
+			FileReader fr= null;
+			try{
+				linuxKernelVersion = new File ("/proc/sys/kernel/version");
+				if (linuxKernelVersion.exists()) {
+					StringBuilder kernelVersionData= new StringBuilder();
+					fr= new FileReader(linuxKernelVersion);
+					in = new BufferedReader(fr);
+					String tempLine= null;
+					while ((tempLine = in.readLine()) != null) { 
+						kernelVersionData.append(" ");
+						kernelVersionData.append(tempLine);
+					}
+					sbOsVersion.append(kernelVersionData.toString());
+				}
+			} catch (FileNotFoundException e){
+			} catch (IOException e){
+			} finally {
+				try {
+					if(fr != null){
+						fr.close();
+					}
+					if(in != null){
+						in.close();
+					}
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+
+		return sbOsVersion.toString();
 	}
 
 	public String getOsDistro() {
@@ -760,7 +796,7 @@ public class SystemServiceImpl implements SystemService
 	public String getKuraWebEnabled() {
 		return this.m_kuraProperties.getProperty(KEY_KURA_HAVE_WEB_INTER);
 	}
-	
+
 	public int getFileCommandZipMaxUploadSize(){
 		String commandMaxUpload= this.m_kuraProperties.getProperty(KEY_FILE_COMMAND_ZIP_MAX_SIZE);
 		if(commandMaxUpload != null && commandMaxUpload.trim().length() > 0){
@@ -769,7 +805,7 @@ public class SystemServiceImpl implements SystemService
 		s_logger.warn("Maximum command line upload size not available. Set default to 100 MB");
 		return 100;
 	}
-	
+
 	public int getFileCommandZipMaxUploadNumber(){
 		String commandMaxFilesUpload= this.m_kuraProperties.getProperty(KEY_FILE_COMMAND_ZIP_MAX_NUMBER);
 		if(commandMaxFilesUpload != null && commandMaxFilesUpload.trim().length() > 0){

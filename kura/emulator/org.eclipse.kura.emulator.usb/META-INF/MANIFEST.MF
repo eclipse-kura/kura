@@ -1,0 +1,16 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: org.eclipse.kura.emulator.usb
+Bundle-SymbolicName: org.eclipse.kura.emulator.usb;singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Bundle-Vendor: EUROTECH
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Export-Package: org.eclipse.kura.emulator.usb; version="1.0.0"
+Service-Component: OSGI-INF/*.xml
+Bundle-ActivationPolicy: lazy
+Import-Package: javax.usb;version="1.0.2",
+ org.eclipse.kura;version="[1.0,2.0)",
+ org.eclipse.kura.usb;version="[1.1, 1.2)",
+ org.osgi.service.component;version="1.2.0",
+ org.slf4j;version="1.6.4"
+Bundle-ClassPath: .

@@ -28,7 +28,7 @@
 	<packaging>eclipse-plugin</packaging>
 
 	<properties>
-		<kura.basedir>${project.basedir}/..</kura.basedir>
+		<kura.basedir>${project.basedir}/../..</kura.basedir>
 	</properties>
 
 	<dependencies>

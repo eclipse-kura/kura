@@ -1166,10 +1166,10 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 			    		continue;
 			    	}
 			    	
-			    	if (!wap.getSSID().matches(SSID_REGEXP)){
-			    		s_logger.debug("Skipping undesired SSID");
-			    		continue;
-			    	}
+//			    	if (!wap.getSSID().matches(SSID_REGEXP)){
+//			    		s_logger.debug("Skipping undesired SSID");
+//			    		continue;
+//			    	}
 			    	
 			    	s_logger.trace("getWifiHotspots() :: SSID={}", wap.getSSID());
 			    	s_logger.trace("getWifiHotspots() :: Signal={}", wap.getStrength());

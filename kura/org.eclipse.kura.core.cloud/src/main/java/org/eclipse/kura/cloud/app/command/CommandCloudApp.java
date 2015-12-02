@@ -30,7 +30,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class CommandCloudApp extends Cloudlet implements ConfigurableComponent,
-		PasswordCommandService {
+PasswordCommandService {
 	private static final Logger s_logger = LoggerFactory.getLogger(CommandCloudApp.class);
 	private static final String EDC_PASSWORD_METRIC_NAME = "command.password";
 	private static final String COMMAND_ENABLED_ID = "command.enable";
@@ -47,6 +47,8 @@ public class CommandCloudApp extends Cloudlet implements ConfigurableComponent,
 	private ComponentContext compCtx;
 	private CryptoService m_cryptoService;
 
+	private boolean currentStatus;
+
 	/* EXEC */
 	public static final String RESOURCE_COMMAND = "command";
 
@@ -62,7 +64,7 @@ public class CommandCloudApp extends Cloudlet implements ConfigurableComponent,
 
 	// This component inherits the required dependencies from the parent
 	// class CloudApp.
-	
+
 	public void setCryptoService(CryptoService cryptoService) {
 		this.m_cryptoService = cryptoService;
 	}
@@ -83,14 +85,18 @@ public class CommandCloudApp extends Cloudlet implements ConfigurableComponent,
 			Map<String, Object> properties) {
 		s_logger.info("Bundle " + APP_ID + " has started with config!");
 		this.compCtx = componentContext;
+		currentStatus = (Boolean) properties.get(COMMAND_ENABLED_ID);
+		if (currentStatus) {
+			super.activate(compCtx);
+		}
 		updated(properties);
 	}
 
 	public void updated(Map<String, Object> properties) {
 		s_logger.info("updated...: " + properties);
-		
+
 		this.properties= new HashMap<String, Object>();
-		
+
 		Iterator<String> keys = properties.keySet().iterator();
 		while (keys.hasNext()) {
 			String key = keys.next();
@@ -107,12 +113,15 @@ public class CommandCloudApp extends Cloudlet implements ConfigurableComponent,
 			}
 		}
 
-		boolean serviceEnabled = (Boolean) properties.get(COMMAND_ENABLED_ID);
-		if (serviceEnabled) {
-			super.activate(compCtx);
-		} else {
-			if (getCloudApplicationClient() != null) {
+		boolean newStatus = (Boolean) properties.get(COMMAND_ENABLED_ID);
+		boolean stateChanged= currentStatus != newStatus;
+		if(stateChanged){
+			currentStatus= newStatus;
+			if (!currentStatus && getCloudApplicationClient() != null) {
 				super.deactivate(compCtx);
+			}
+			if (currentStatus) {
+				super.activate(compCtx);
 			}
 		}
 	}
@@ -127,7 +136,7 @@ public class CommandCloudApp extends Cloudlet implements ConfigurableComponent,
 	@Override
 	protected void doExec(CloudletTopic reqTopic,
 			KuraRequestPayload reqPayload, KuraResponsePayload respPayload)
-			throws KuraException {
+					throws KuraException {
 
 		String[] resources = reqTopic.getResources();
 
@@ -178,7 +187,7 @@ public class CommandCloudApp extends Cloudlet implements ConfigurableComponent,
 			if (command == null) {
 				s_logger.error("null command");
 				commandResp
-						.setResponseCode(KuraResponsePayload.RESPONSE_CODE_BAD_REQUEST);
+				.setResponseCode(KuraResponsePayload.RESPONSE_CODE_BAD_REQUEST);
 			}
 
 			String[] cmdarray = prepareCommandArray(commandReq, command);
@@ -203,35 +212,35 @@ public class CommandCloudApp extends Cloudlet implements ConfigurableComponent,
 			} catch (Throwable t) {
 				s_logger.error("Error executing command {}", t);
 				commandResp
-						.setResponseCode(KuraResponsePayload.RESPONSE_CODE_ERROR);
+				.setResponseCode(KuraResponsePayload.RESPONSE_CODE_ERROR);
 				commandResp.setException(t);
 
 			}
 
 			boolean runAsync = commandReq.isRunAsync() != null ? commandReq
 					.isRunAsync() : false;
-			int timeout = getTimeout(commandReq);
+					int timeout = getTimeout(commandReq);
 
-			ProcessMonitorThread pmt = null;
-			pmt = new ProcessMonitorThread(proc, commandReq.getStdin(), timeout);
-			pmt.start();
+					ProcessMonitorThread pmt = null;
+					pmt = new ProcessMonitorThread(proc, commandReq.getStdin(), timeout);
+					pmt.start();
 
-			if (!runAsync) {
-				try {
-					pmt.join();
-					prepareResponseNoTimeout(commandResp, pmt);
-				} catch (InterruptedException e) {
-					Thread.interrupted();
-					pmt.interrupt();
-					prepareTimeoutResponse(commandResp, pmt);
-				}
-			}
+					if (!runAsync) {
+						try {
+							pmt.join();
+							prepareResponseNoTimeout(commandResp, pmt);
+						} catch (InterruptedException e) {
+							Thread.interrupted();
+							pmt.interrupt();
+							prepareTimeoutResponse(commandResp, pmt);
+						}
+					}
 
 		} else {
 
 			s_logger.error("Password required but not correct and/or missing");
 			commandResp
-					.setResponseCode(KuraResponsePayload.RESPONSE_CODE_ERROR);
+			.setResponseCode(KuraResponsePayload.RESPONSE_CODE_ERROR);
 			commandResp.setExceptionMessage("Password missing or not correct");
 		}
 

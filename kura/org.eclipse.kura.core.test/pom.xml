@@ -282,7 +282,7 @@
 				<autoStart>true</autoStart>
 			</bundle>
 			<bundle>
-				<id>org.eclipse.kura.linux.status</id>
+				<id>org.eclipse.kura.core.status</id>
 				<level>4</level>
 				<autoStart>true</autoStart>
 			</bundle>
@@ -477,7 +477,7 @@
                         </dependency>
 						<dependency>
                         	<type>p2-installable-unit</type>
-                            <artifactId>org.eclipse.kura.linux.status</artifactId>
+                            <artifactId>org.eclipse.kura.core.status</artifactId>
                         </dependency>
 						<dependency>
                         	<type>p2-installable-unit</type>

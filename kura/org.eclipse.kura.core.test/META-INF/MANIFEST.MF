@@ -30,5 +30,5 @@ Bundle-ActivationPolicy: lazy
 Comment: org.eclipse.kura.emulator is needed as we need to start-up the emulator to run the tests!!
 Require-Bundle: org.eclipse.equinox.io;bundle-version="1.0.400",
  org.junit;bundle-version="4.10.0",
- org.eclipse.kura.emulator;bundle-version="0.7.1",
- org.eclipse.kura.test;bundle-version="0.7.1"
+ org.eclipse.kura.test;bundle-version="[0.7.1,2.0.0)",
+ org.eclipse.kura.emulator;bundle-version="[0.7.1,2.0.0)"

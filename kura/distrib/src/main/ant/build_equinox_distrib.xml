@@ -124,7 +124,7 @@
         <replace file="${project.build.directory}/${build.output.name}/config.ini"
                  token="{org.eclipse.kura.linux.watchdog.version}" value="${org.eclipse.kura.linux.watchdog.version}"/>
         <replace file="${project.build.directory}/${build.output.name}/config.ini"
-                 token="{org.eclipse.kura.linux.status.version}" value="${org.eclipse.kura.linux.status.version}"/>
+                 token="{org.eclipse.kura.core.status.version}" value="${org.eclipse.kura.core.status.version}"/>
         <propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
             <entry key="osgi.bundles" operation="+"
                    value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.net.admin_${org.eclipse.kura.net.admin.version}.jar@5:start" />
@@ -475,7 +475,7 @@ fi
                         prefix="${build.output.name}/kura/plugins" />
 			<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.linux.watchdog_${org.eclipse.kura.linux.watchdog.version}.jar"
                         prefix="${build.output.name}/kura/plugins" />
-			<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.linux.status_${org.eclipse.kura.linux.status.version}.jar"
+			<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.core.status_${org.eclipse.kura.core.status.version}.jar"
                         prefix="${build.output.name}/kura/plugins" />
 			<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.linux.gpio_${org.eclipse.kura.linux.gpio.version}.jar"
                         prefix="${build.output.name}/kura/plugins" />
@@ -514,11 +514,11 @@ fi
 
 		<!-- Diff with the previous version -->
         <property file="RELEASE_INFO/version.properties" />
-        <echo message="Diff version information with ${build.name} version ${project.version.previous}" />
+        <echo message="Diff version information with ${build.name} version ${kura.project.version.previous}" />
         <exec executable="src/main/sh/diff_build_versions.sh">
-                <arg value="RELEASE_INFO/${project.version.previous}/kura_${project.version.previous}_${build.name}.catalog" />
+                <arg value="RELEASE_INFO/${kura.project.version.previous}/kura_${kura.project.version.previous}_${build.name}.catalog" />
                 <arg value="${project.build.directory}/${build.output.name}.catalog" />
-                <arg value="${project.build.directory}/kura_${project.version.previous}_to_${project.version}_${build.name}" />
+                <arg value="${project.build.directory}/kura_${kura.project.version.previous}_to_${project.version}_${build.name}" />
                 <arg value="${build.name}" />
         </exec>
 
@@ -529,11 +529,11 @@ fi
                 <arg value="${project.build.directory}" />
                 <arg value="${project.build.directory}/${build.output.name}.zip" />
                 <arg value="kura_${project.version}_${build.name}_upgrade.zip" />
-                <arg value="KURA_${project.version.previous}" />
+                <arg value="KURA_${kura.project.version.previous}" />
                 <arg value="${kura.install.dir}" />
                 <arg value="${build.output.name}" />
-                <arg value="kura_${project.version.previous}_to_${project.version}_${build.name}.removed" />
-                <arg value="kura_${project.version.previous}_to_${project.version}_${build.name}.keep" />
+                <arg value="kura_${kura.project.version.previous}_to_${project.version}_${build.name}.removed" />
+                <arg value="kura_${kura.project.version.previous}_to_${project.version}_${build.name}.keep" />
                 <arg value="${build.output.name}_upgrader.sh" />
                 <arg value="${build.name}" />
         </exec>

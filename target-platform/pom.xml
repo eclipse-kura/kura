@@ -42,10 +42,10 @@
 				<updatePolicy>always</updatePolicy>
 			</snapshots>
 		</repository>
-                <repository>
-                        <id>Eclipse Paho Repo</id>
-                        <url>https://repo.eclipse.org/content/repositories/paho-releases/</url>
-                </repository>
+		<repository>
+			<id>Eclipse Paho Repo</id>
+			<url>https://repo.eclipse.org/content/repositories/paho-releases/</url>
+		</repository>
 	</repositories>
 
 	<properties>

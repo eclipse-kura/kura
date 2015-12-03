@@ -13,6 +13,8 @@ package org.eclipse.kura.net.modem;
 
 public class SubscriberInfo {
 
+	private boolean m_isActive;
+	
 	/*
 	 * International Mobile Subscriber Identity
 	 * 
@@ -35,6 +37,7 @@ public class SubscriberInfo {
 	 * Default constructor
 	 */
 	public SubscriberInfo() {
+		m_isActive = false;
 		m_imsi = "";
 		m_iccid = "";
 		//m_subscriber = "";
@@ -48,6 +51,7 @@ public class SubscriberInfo {
 	 * @param subscriber - Subscriber Number as {@link String}
 	 */
 	public SubscriberInfo(String imsi, String iccid/*, String subscriber*/) {
+		m_isActive = false;
 		m_imsi = imsi;
 		m_iccid = iccid;
 		//m_subscriber = subscriber;
@@ -95,6 +99,14 @@ public class SubscriberInfo {
 		sb.append("; ICCID=").append(m_iccid);
 		//sb.append("; Subscriber Number=").append(m_subscriber);
 		return sb.toString();
+	}
+	
+	public boolean isActive() {
+		return m_isActive;
+	}
+
+	public void setActive(boolean isActive) {
+		m_isActive = isActive;
 	}
 
 	/**

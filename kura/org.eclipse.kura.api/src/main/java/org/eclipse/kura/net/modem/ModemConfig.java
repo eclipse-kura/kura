@@ -33,6 +33,7 @@ public class ModemConfig implements NetConfig {
 	private PdpType m_pdpType = PdpType.IP;
 	private AuthType m_authType = AuthType.NONE;
 	private String m_apn = "";
+	private SimCardSlot m_activeSimCardSlot = SimCardSlot.A;
 	private String m_username = "";
 	private String m_password = "";
 	private boolean m_persist = false;
@@ -348,6 +349,25 @@ public class ModemConfig implements NetConfig {
 		this.m_apn = apn;
 	}
 	
+	
+	/**
+	 * Reports active SIM card slot
+	 * 
+	 * @return active SIM card slot as {@link SimCardSlot}
+	 */
+	public SimCardSlot getActiveSimCardSlot() {
+		return m_activeSimCardSlot;
+	}
+
+	/**
+	 * Sets active SIM card slot
+	 * 
+	 * @param activeSimCardSlot - SIM card slot as {@link SimCardSlot}
+	 */
+	public void setActiveSimCardSlot(SimCardSlot activeSimCardSlot) {
+		m_activeSimCardSlot = activeSimCardSlot;
+	}
+
 	/**
 	 * Reports PDP IP address.
 	 * 
@@ -449,6 +469,8 @@ public class ModemConfig implements NetConfig {
 				+ ((m_authType == null) ? 0 : m_authType.hashCode());
         result = prime * result
                 + ((m_apn == null) ? 0 : m_apn.hashCode());
+        result = prime * result
+                + ((m_activeSimCardSlot == null) ? 0 : m_activeSimCardSlot.hashCode());
 		result = prime * result
 				+ ((m_username == null) ? 0 : m_username.hashCode());
 		result = prime * result
@@ -561,6 +583,16 @@ public class ModemConfig implements NetConfig {
                 return false;
             }
         }
+        
+        if(this.m_activeSimCardSlot != null) {
+        	if (this.m_activeSimCardSlot != otherConfig.getActiveSimCardSlot()) {
+        		return false;
+        	}
+        } else {
+        	if (otherConfig.getActiveSimCardSlot() != null) {
+        		return false;
+        	}
+        }
 
 		if ((this.m_username != null) && (this.m_username.length() > 0)) {
 			if (!this.m_username.equals(otherConfig.getUsername())) {
@@ -621,6 +653,7 @@ public class ModemConfig implements NetConfig {
         sb.append(" - PDP Type: ").append(m_pdpType);
         sb.append(" - Auth Type: ").append(m_authType);
         sb.append(" - APN: ").append(m_apn);
+        sb.append(" - Active SIM slot: ").append(m_activeSimCardSlot);
         sb.append(" - Username: ").append(m_username);
         sb.append(" - Password: ").append(m_password);
         sb.append(" - IP Address: ").append((m_ipAddress == null) ? "null" : m_ipAddress.getHostAddress());

@@ -17,6 +17,7 @@ import org.eclipse.kura.web.shared.GwtKuraException;
 import org.eclipse.kura.web.shared.model.GwtFirewallNatEntry;
 import org.eclipse.kura.web.shared.model.GwtFirewallOpenPortEntry;
 import org.eclipse.kura.web.shared.model.GwtFirewallPortForwardEntry;
+import org.eclipse.kura.web.shared.model.GwtModemSimCardEntry;
 import org.eclipse.kura.web.shared.model.GwtNetInterfaceConfig;
 import org.eclipse.kura.web.shared.model.GwtWifiConfig;
 import org.eclipse.kura.web.shared.model.GwtWifiHotspotEntry;
@@ -52,4 +53,8 @@ public interface GwtNetworkService extends RemoteService
 	public boolean verifyWifiCredentials(GwtXSRFToken xsrfToken, String interfaceName, GwtWifiConfig gwtWifiConfig) throws GwtKuraException;
 
 	public void rollbackDefaultConfiguration(GwtXSRFToken xsrfToken);
+	
+	public ListLoadResult<GwtModemSimCardEntry> findSimCardInfo(GwtXSRFToken xsrfToken, String deviceServiceId) throws GwtKuraException;
+	
+	public void refreshSimCardInfo(GwtXSRFToken xsrfToken, String deviceServiceId) throws GwtKuraException;
 }

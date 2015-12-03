@@ -28,12 +28,12 @@ import org.eclipse.kura.linux.net.modem.SupportedSerialModemsInfo;
 import org.eclipse.kura.linux.net.modem.SupportedUsbModemInfo;
 import org.eclipse.kura.linux.net.modem.SupportedUsbModemsInfo;
 import org.eclipse.kura.net.admin.modem.HspaCellularModem;
-import org.eclipse.kura.net.admin.modem.SimCardSlot;
 import org.eclipse.kura.net.admin.modem.telit.generic.TelitModem;
 import org.eclipse.kura.net.modem.ModemDevice;
 import org.eclipse.kura.net.modem.ModemRegistrationStatus;
 import org.eclipse.kura.net.modem.ModemTechnologyType;
 import org.eclipse.kura.net.modem.SerialModemDevice;
+import org.eclipse.kura.net.modem.SimCardSlot;
 import org.eclipse.kura.net.modem.SubscriberInfo;
 import org.eclipse.kura.usb.UsbModemDevice;
 import org.osgi.service.io.ConnectionFactory;
@@ -123,6 +123,7 @@ public class TelitHe910 extends TelitModem implements HspaCellularModem {
 			if (isSimCardReady()) {
 				ret[0] = new SubscriberInfo(getMobileSubscriberIdentity(SimCardSlot.A.getValue()), 
 						getIntegratedCirquitCardId(SimCardSlot.A.getValue()));
+				ret[0].setActive(true);
 			}
 			if (setSimCardSlot(SimCardSlot.B)) {
 				sleep(7000);
@@ -136,6 +137,7 @@ public class TelitHe910 extends TelitModem implements HspaCellularModem {
 			if (isSimCardReady()) {
 				ret[1] = new SubscriberInfo(getMobileSubscriberIdentity(SimCardSlot.B.getValue()), 
 						getIntegratedCirquitCardId(SimCardSlot.B.getValue()));
+				ret[1].setActive(true);
 			}
 			if (setSimCardSlot(SimCardSlot.A)) {
 				sleep(7000);

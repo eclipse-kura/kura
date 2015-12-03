@@ -13,6 +13,8 @@ package org.eclipse.kura.web.shared.model;
 
 import java.util.List;
 
+import org.eclipse.kura.net.modem.SimCardSlot;
+
 
 public class GwtModemInterfaceConfig extends GwtNetInterfaceConfig
 {
@@ -52,6 +54,14 @@ public class GwtModemInterfaceConfig extends GwtNetInterfaceConfig
 	
 	public void setModemId(String modemId) {
 	    set("modemId", modemId);
+	}
+	
+	public String getModemServiceId() {
+	    return get("modemServiceId");
+	}
+	
+	public void setModemServiceId(String modemServiceId) {
+	    set("modemServiceId", modemServiceId);
 	}
 	
 	public String getDialString() {
@@ -172,6 +182,18 @@ public class GwtModemInterfaceConfig extends GwtNetInterfaceConfig
 	
 	public void setApn(String apn) {
 		set("apn", apn);
+	}
+	
+	public SimCardSlot getActiveSimCardSlot() {
+		if (get("activeSimCardSlot") != null) {
+			return SimCardSlot.valueOf((String)get("activeSimCardSlot"));
+		} else {
+			return null;
+		}
+	}
+	
+	public void setActiveSimCardSlot(SimCardSlot activeSimCardSlot) {
+		set("activeSimCardSlot", activeSimCardSlot.name());
 	}
 	
 	public int getDataCompression() {

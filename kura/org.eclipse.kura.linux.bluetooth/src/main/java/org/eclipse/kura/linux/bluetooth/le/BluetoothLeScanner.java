@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.eclipse.kura.bluetooth.BluetoothDevice;
 import org.eclipse.kura.bluetooth.BluetoothLeScanListener;
@@ -66,9 +67,9 @@ public class BluetoothLeScanner implements BluetoothProcessListener {
 		}
 
 		m_scanResult = new ArrayList<BluetoothDevice>();
-		for (String key : m_devices.keySet()) {
-			m_scanResult.add(new BluetoothDeviceImpl(key, m_devices.get(key)));
-			s_logger.info("m_scanResult.add "+key+" - "+ m_devices.get(key));
+		for (Entry<String, String> device : m_devices.entrySet()) {
+			m_scanResult.add(new BluetoothDeviceImpl(device.getKey(), device.getValue()));
+			s_logger.info("m_scanResult.add {} - {}", device.getKey(), device.getValue());
 		}
 
 		// Alert listener that scan is complete

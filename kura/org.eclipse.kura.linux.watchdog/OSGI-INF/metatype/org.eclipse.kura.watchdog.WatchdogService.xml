@@ -25,7 +25,7 @@
             cardinality="0" 
             required="true"
             default="false" 
-            description="If set to false the watchdog will be disabled"/>
+            description="If set to true the watchdog will be enabled."/>
         
         <AD id="pingInterval"
             name="pingInterval"
@@ -33,7 +33,7 @@
             cardinality="0"
             required="true"
             default="10000"
-            description="Ping periodicity in ms."/>
+            description="Ping periodicity in ms. A value between 1 and 30 seconds is suggested."/>
             
     </OCD>
     <Designate pid="org.eclipse.kura.watchdog.WatchdogService">

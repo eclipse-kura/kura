@@ -397,8 +397,11 @@ public class CloudDeploymentHandlerV2 extends Cloudlet {
 	private void doDelDownload(KuraRequestPayload request, KuraResponsePayload response) {
 
 		try{
-			m_downloadImplementation.getDownloadHelper().cancelDownload();
-			m_downloadImplementation.deleteDownloadedFile();
+			DownloadCountingOutputStream downloadHelper= m_downloadImplementation.getDownloadHelper();
+			if(downloadHelper != null){
+				downloadHelper.cancelDownload();
+				m_downloadImplementation.deleteDownloadedFile();
+			}
 		}catch(Exception ex){
 			s_logger.info("Error cancelling download!", ex);
 		}

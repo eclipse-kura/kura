@@ -57,19 +57,16 @@ public class UninstallImpl {
 		try{
 			String name = packageName;
 			if (name != null) {
-				s_logger.info("About to uninstall package ", name);
 				DeploymentPackage dp = null;
-
 				dp = m_deploymentAdmin.getDeploymentPackage(name);
 				if (dp != null) {
 					dp.uninstall();
-
-					String sUrl = callback.m_installImplementation.getDeployedPackages().getProperty(name);
+					String sUrl = CloudDeploymentHandlerV2.m_installImplementation.getDeployedPackages().getProperty(name);
 					File dpFile = new File(new URL(sUrl).getPath());
 					if (!dpFile.delete()) {
 						s_logger.warn("Cannot delete file at URL: {}", sUrl);
 					}
-					callback.m_installImplementation.removePackageFromConfFile(name);
+					CloudDeploymentHandlerV2.m_installImplementation.removePackageFromConfFile(name);
 				}
 				uninstallCompleteAsync(options, name);
 			}

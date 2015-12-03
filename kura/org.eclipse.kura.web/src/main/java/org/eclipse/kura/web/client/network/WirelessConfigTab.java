@@ -19,6 +19,7 @@ import org.eclipse.kura.web.client.resources.Resources;
 import org.eclipse.kura.web.client.util.Constants;
 import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.client.util.FormUtils;
+import org.eclipse.kura.web.client.util.GwtSafeHtmlUtils;
 import org.eclipse.kura.web.client.util.MessageUtils;
 import org.eclipse.kura.web.client.util.SwappableListStore;
 import org.eclipse.kura.web.client.util.TextFieldWithButton;
@@ -1521,7 +1522,7 @@ public class WirelessConfigTab extends LayoutContainer
 						if ((list != null) && (list.size() > 0)) {
 							GwtWifiHotspotEntry wifiHotspotEntry = list.get(0);
 							if (wifiHotspotEntry != null) {
-								m_ssidField.setValue(wifiHotspotEntry.getSSID());
+								m_ssidField.setValue(GwtSafeHtmlUtils.htmlUnescape(wifiHotspotEntry.getSSID()));
 								String security = wifiHotspotEntry.getSecurity();
 								if (security.equals("None")) {
 									m_securityCombo.setSimpleValue(MessageUtils.get(GwtWifiSecurity.netWifiSecurityNONE.name()));
@@ -1601,7 +1602,7 @@ public class WirelessConfigTab extends LayoutContainer
 		gwtWifiConfig.setWirelessMode(wifiMode.name());
 
 		// ssid
-		gwtWifiConfig.setWirelessSsid(m_ssidField.getValue());
+		gwtWifiConfig.setWirelessSsid(GwtSafeHtmlUtils.htmlUnescape(m_ssidField.getValue()));
 
 		// driver
 		String driver = "";

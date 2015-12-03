@@ -46,6 +46,9 @@ import org.slf4j.LoggerFactory;
 public class ModbusProtocolDevice implements ModbusProtocolDeviceService {
 	private static final Logger s_logger = LoggerFactory.getLogger(ModbusProtocolDevice.class);
 	
+	private static final String GPIO_BASE_PATH = "/sys/class/gpio/";
+	private static final String GPIO_EXPORT_PATH = "export";
+	
 	private ConnectionFactory 	   m_connectionFactory;
 	private UsbService			   m_usbService;
 	
@@ -62,7 +65,7 @@ public class ModbusProtocolDevice implements ModbusProtocolDeviceService {
 	private boolean 			m_protConfigd = false;
 	private String 				m_connType = null;
 	private Communicate 		m_comm;
-	private static Properties 	m_modbusProperties=null;
+	private Properties 	m_modbusProperties=null;
 	
 	public void setConnectionFactory(ConnectionFactory connectionFactory) {
 		this.m_connectionFactory = connectionFactory;
@@ -405,12 +408,12 @@ public class ModbusProtocolDevice implements ModbusProtocolDeviceService {
 			};
 
 			for (String gpio : requiredGpio) {
-				File gpioFile = new File("/sys/class/gpio/" + gpio);
+				File gpioFile = new File(GPIO_BASE_PATH + gpio);
 				if (!gpioFile.exists()) {
 					// # Pin is not exported, so do it now
 					FileWriter fwExport = null;
 					try {
-						fwExport = new FileWriter(new File("/sys/class/gpio/export"));
+						fwExport = new FileWriter(new File(GPIO_BASE_PATH + GPIO_EXPORT_PATH));
 						// write only the PIN number
 						fwExport.write(gpio.replace("gpio", ""));
 						fwExport.flush();
@@ -431,13 +434,13 @@ public class ModbusProtocolDevice implements ModbusProtocolDeviceService {
 					} catch (InterruptedException e) {
 						Thread.currentThread().interrupt();
 					}
-				};
+				}
 
 
 				// After exporting the pin, set the direction to "out"
 				FileWriter fwDirection = null;
 				try {
-					fwDirection = new FileWriter(new File("/sys/class/gpio/" + gpio + "/direction"));
+					fwDirection = new FileWriter(new File(GPIO_BASE_PATH + gpio + "/direction"));
 					fwDirection.write("out");
 					fwDirection.flush();
 					s_logger.debug("Direction GPIO {}", gpio);
@@ -455,7 +458,7 @@ public class ModbusProtocolDevice implements ModbusProtocolDeviceService {
 				//Switch to RS485 mode
 				FileWriter fwValue = null;
 				try {
-					fwValue = new FileWriter(new File("/sys/class/gpio/" + gpio + "/value"));
+					fwValue = new FileWriter(new File(GPIO_BASE_PATH + gpio + "/value"));
 					fwValue.write("1");
 					fwValue.flush();
 					s_logger.debug("Value GPIO {}", gpio);
@@ -554,7 +557,7 @@ public class ModbusProtocolDevice implements ModbusProtocolDeviceService {
 			for(int i=0; i<msg.length; i++) 
 				llrc+=(int)msg[i] & 0xff;
 			llrc = (llrc ^ 0xff) + 1;
-			byte lrc=(byte)(llrc & 0x0ff);
+			//byte lrc=(byte)(llrc & 0x0ff);
 			return llrc;
 		}
 		
@@ -590,11 +593,11 @@ public class ModbusProtocolDevice implements ModbusProtocolDeviceService {
 			int l = (len-5)/2;
 			byte[] ab=new byte[l];
 			char[] ac=new char[2];
-			String s=new String(msg);
+			//String s=new String(msg);
 			for(int i=0; i<l; i++){
 				ac[0]=(char) msg[i*2 + 1]; ac[1]=(char) msg[i*2 + 2];
-				s=new String(ac);
-				ab[i]=(byte) Integer.parseInt(s,16);
+				//String s=new String(ac);
+				ab[i]=(byte) Integer.parseInt(new String(ac),16);
 			}
 			return ab;
 		}

@@ -309,10 +309,12 @@ public class CloudDeploymentHandlerTest extends TestCase {
 
 		assertTrue(s_cloudCallService.isConnected());
 		
-		DeploymentPackage dp = s_deploymentAdmin.getDeploymentPackage(LOCAL_DP_NAME);
+		DeploymentPackage dp = s_deploymentAdmin.getDeploymentPackage(BUNDLE_NAME);//LOCAL_DP_NAME);
+		s_logger.warn("dp value: {}", dp);
 		if (dp == null) {
-			InputStream is = getTestDpUrl().openStream();
-			dp = s_deploymentAdmin.installDeploymentPackage(is);
+//			InputStream is = getTestDpUrl().openStream();
+//			dp = s_deploymentAdmin.installDeploymentPackage(is);
+			testExecInstallDeploymentPackage();
 		}
 		
 		StringBuilder sb = new StringBuilder(CloudletTopic.Method.EXEC.toString())
@@ -323,7 +325,7 @@ public class CloudDeploymentHandlerTest extends TestCase {
 		
 		KuraPayload payload = new KuraPayload();
 		//payload.setBody("org.eclipse.kura.test.helloworld".getBytes("UTF-8"));
-		payload.addMetric(DeploymentPackageDownloadOptions.METRIC_DP_NAME, LOCAL_BUNDLE_NAME);
+		payload.addMetric(DeploymentPackageDownloadOptions.METRIC_DP_NAME, BUNDLE_NAME);
 		payload.addMetric(DeploymentPackageDownloadOptions.METRIC_JOB_ID, Long.parseLong("1111")); 
 		
 		KuraResponsePayload resp = s_cloudCallService.call(
@@ -340,6 +342,6 @@ public class CloudDeploymentHandlerTest extends TestCase {
 			countdown -= 1000;
 		}
 		
-		assertNull(s_deploymentAdmin.getDeploymentPackage(LOCAL_BUNDLE_NAME));
+		assertNull(s_deploymentAdmin.getDeploymentPackage(BUNDLE_NAME));
 	}
 }

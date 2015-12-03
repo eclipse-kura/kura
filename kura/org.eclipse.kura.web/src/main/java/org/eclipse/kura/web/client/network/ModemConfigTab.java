@@ -1006,7 +1006,6 @@ public class ModemConfigTab extends LayoutContainer
 							Log.warn("<IAB> ### Modem Service ID = " + m_selectNetIfConfig.getModemServiceId() + " ###");
 						}
 						gwtNetworkService.findSimCardInfo(token, m_selectNetIfConfig.getModemServiceId(), callback);
-						callback.
 					}});
 				}  
 		};

@@ -36,7 +36,7 @@ public class BluetoothGattImpl implements BluetoothGatt, BluetoothProcessListene
 	private List<BluetoothGattCharacteristic> m_bluetoothGattCharacteristics;
 	private BluetoothLeNotificationListener m_listener;
 	private String m_charValue;
-	private static String m_charValueUuid;
+	private String m_charValueUuid;
 
 	private BluetoothProcess m_proc;
 	private BufferedWriter   m_bufferedWriter;
@@ -281,9 +281,10 @@ public class BluetoothGattImpl implements BluetoothGatt, BluetoothProcessListene
 			String endHandle = attr[6];
 			String uuid = attr[8];
 
-			if (m_bluetoothServices != null)
+			if (m_bluetoothServices != null) {
 				s_logger.debug("Adding new GATT service: " + uuid + ":" + startHandle + ":" + endHandle);
-			m_bluetoothServices.add(new BluetoothGattServiceImpl(uuid, startHandle, endHandle));
+				m_bluetoothServices.add(new BluetoothGattServiceImpl(uuid, startHandle, endHandle));
+			}
 		}
 		// characteristics are being returned
 		else if (line.startsWith("handle:")){  //(line.matches(REGEX_CHARACTERISTICS)) { 

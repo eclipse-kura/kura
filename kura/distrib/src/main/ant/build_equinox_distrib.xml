@@ -716,10 +716,11 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
 	<echo file="${project.build.directory}/${build.output.name}/start_kura.bat" append="false">
 @echo off
 
-set KURA_HOME=%ALLUSERSPROFILE%\kura\kura
+set KURA_ROOT=c:\opt\eclipse
+set KURA_HOME=%KURA_ROOT%\kura\kura
 set KURA_HOME_URI=/%KURA_HOME:\=/%
-set KURA_DATA=%ALLUSERSPROFILE%\kura\data
-set KURA_TEMP=%TEMP%\KURA
+set KURA_DATA=%KURA_ROOT%\kura\data
+set KURA_TEMP=\tmp\.kura
 
 if not exist %KURA_TEMP% mkdir %KURA_TEMP%
 if not exist %KURA_TEMP%\Configuration mkdir %KURA_TEMP%\Configuration

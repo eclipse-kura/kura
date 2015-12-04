@@ -56,7 +56,7 @@ public class SerialModemDriver extends ModemDriver {
 		m_serviceTracker.open(true);
 	}
 
-	public int install() throws Exception {
+	public int install() throws KuraException {
 		int status = -1;
 		boolean modemReachable = false;
 
@@ -172,7 +172,7 @@ public class SerialModemDriver extends ModemDriver {
 		return connection;
 	}
 
-	private void closeSerialPort (CommConnection connection) throws KuraException {
+	private static void closeSerialPort (CommConnection connection) throws KuraException {
 		if(connection != null){
 			try {
 				connection.close();
@@ -189,7 +189,7 @@ public class SerialModemDriver extends ModemDriver {
 		do {
 			numAttempts--;
 			try {
-				status = (connection.sendCommand("at\r\n".getBytes(), 500).length > 0);
+				status = connection.sendCommand("at\r\n".getBytes(), 500).length > 0;
 				if (status) {
 					byte [] reply = connection.sendCommand(m_getModelAtCommand.getBytes(), 1000, 100);
 					if (reply != null) {
@@ -211,7 +211,7 @@ public class SerialModemDriver extends ModemDriver {
 	}
 
 	// Parse the AT command response for the relevant info
-	private String getResponseString(String resp) {
+	private static String getResponseString(String resp) {
 		if(resp == null) {
 			return "";
 		}
@@ -220,7 +220,7 @@ public class SerialModemDriver extends ModemDriver {
 		return resp.replaceFirst("^\\S*\\s*", "").replaceFirst("\\s*(OK)?\\s*$", "");
 	}
 
-	private String getResponseString(byte[] resp) {
+	private static String getResponseString(byte[] resp) {
 		if (resp == null) {
 			return "";
 		}

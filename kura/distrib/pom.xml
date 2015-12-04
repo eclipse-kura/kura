@@ -474,9 +474,7 @@
 -->
 			</properties>
             <activation>
-                <os>
-	                <family>unix</family>
-                </os>
+                <activeByDefault>true</activeByDefault>
             </activation>
             <build>
                 <resources>
@@ -559,9 +557,7 @@
 -->
 			</properties>
             <activation>
-                <os>
-	                <family>unix</family>
-                </os>
+                <activeByDefault>true</activeByDefault>
             </activation>
             <build>
                 <resources>
@@ -646,9 +642,7 @@
 -->
 			</properties>
 			<activation>
-	                <os>
-		                <family>unix</family>
-	                </os>
+				<activeByDefault>true</activeByDefault>
 			</activation>		
 			<build>
 				<resources>
@@ -782,9 +776,7 @@
 -->
 			</properties>
 			<activation>
-	                <os>
-		                <family>unix</family>
-	                </os>
+				<activeByDefault>true</activeByDefault>
 			</activation>		
 			<build>
 				<resources>
@@ -899,9 +891,7 @@
 -->
 			</properties>
 			<activation>
-	                <os>
-		                <family>unix</family>
-	                </os>
+				<activeByDefault>true</activeByDefault>
 			</activation>
 			<build>
 				<resources>
@@ -1024,9 +1014,7 @@
 -->
 			</properties> 
 			<activation>
-	                <os>
-		                <family>unix</family>
-	                </os>
+				<activeByDefault>true</activeByDefault>
 			</activation> 
 			<build>
 				<resources>
@@ -1138,9 +1126,7 @@
 -->
 			</properties>
 			<activation>
-	                <os>
-		                <family>unix</family>
-	                </os>
+				<activeByDefault>true</activeByDefault>
 			</activation>
 			<build>
 				<resources>
@@ -1263,9 +1249,7 @@
 -->
 			</properties> 
 			<activation>
-	                <os>
-		                <family>unix</family>
-	                </os>
+				<activeByDefault>true</activeByDefault>
 			</activation> 
 			<build>
 				<resources>
@@ -1377,9 +1361,7 @@
 -->
 			</properties>
 			<activation>
-	                <os>
-		                <family>unix</family>
-	                </os>
+				<activeByDefault>true</activeByDefault>
 			</activation>
 			<build>
 				<resources>
@@ -1493,9 +1475,7 @@
 -->
 			</properties>
 			<activation>
-	                <os>
-		                <family>unix</family>
-	                </os>
+				<activeByDefault>true</activeByDefault>
 			</activation>
 			<build>
 				<resources>
@@ -1603,9 +1583,7 @@
 		<profile>
 			<id>windows</id>
 			<activation>
-	                <os>
-		                <family>windows</family>
-	                </os>
+				<activeByDefault>true</activeByDefault>
 			</activation>
 			<build>
 				<resources>

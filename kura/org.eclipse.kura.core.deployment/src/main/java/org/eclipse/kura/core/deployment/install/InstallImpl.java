@@ -28,7 +28,9 @@ import org.slf4j.LoggerFactory;
 
 public class InstallImpl {
 	private static final Logger s_logger = LoggerFactory.getLogger(InstallImpl.class);
+	
 	private static final int   PROGRESS_COMPLETE = 100;
+	private static final String MESSAGE_CONFIGURATION_FILE_NOT_SPECIFIED = "Configuration file not specified";
 
 	public static final String RESOURCE_INSTALL = "install";
 
@@ -51,13 +53,21 @@ public class InstallImpl {
 		this.callback = callback;
 
 		deployedPackages = new Properties();
-		m_installPersistanceDir= kuraDataDir + File.separator + PERSISTANCE_FOLDER_NAME;
+		StringBuilder pathSB= new StringBuilder();
+		pathSB.append(kuraDataDir);
+		pathSB.append(File.separator);
+		pathSB.append(PERSISTANCE_FOLDER_NAME);
+		m_installPersistanceDir= pathSB.toString();
 		File installPersistanceDir = new File(m_installPersistanceDir);
 		if (!installPersistanceDir.exists()) {
 			installPersistanceDir.mkdir();
 		}
 
-		m_installVerifDir= m_installPersistanceDir + File.separator + PERSISTANCE_VERIFICATION_FOLDER_NAME;
+		pathSB= new StringBuilder();
+		pathSB.append(m_installPersistanceDir);
+		pathSB.append(File.separator);
+		pathSB.append(PERSISTANCE_VERIFICATION_FOLDER_NAME);
+		m_installVerifDir= pathSB.toString();
 		File installVerificationDir = new File(m_installVerifDir);
 		if (!installVerificationDir.exists()) {
 			installVerificationDir.mkdir();
@@ -224,7 +234,11 @@ public class InstallImpl {
 
 		try {
 			String dpBasename = fileReference.getName();
-			String dpPersistentFilePath = packagesPath + File.separator + dpBasename;
+			StringBuilder pathSB= new StringBuilder();
+			pathSB.append(packagesPath);
+			pathSB.append(File.separator);
+			pathSB.append(dpBasename);
+			String dpPersistentFilePath = pathSB.toString();
 			dpPersistentFile = new File(dpPersistentFilePath);
 
 
@@ -275,13 +289,18 @@ public class InstallImpl {
 		m_installPersistance.setProperty(PERSISTANCE_FILE_NAME, fileName);
 
 		if (m_installPersistanceDir == null) {
-			s_logger.warn("Configuration file not specified");
+			s_logger.warn(MESSAGE_CONFIGURATION_FILE_NOT_SPECIFIED);
 			return;
 		}
 
 		FileOutputStream fos= null;
 		try {
-			String persistanceFile= m_installPersistanceDir + File.separator + fileName + PERSISTANCE_SUFFIX;
+			StringBuilder pathSB= new StringBuilder();
+			pathSB.append(m_installPersistanceDir);
+			pathSB.append(File.separator);
+			pathSB.append(fileName);
+			pathSB.append(PERSISTANCE_SUFFIX);
+			String persistanceFile= pathSB.toString();
 			fos = new FileOutputStream(persistanceFile);
 			m_installPersistance.store(fos, null);
 			fos.flush();
@@ -293,7 +312,7 @@ public class InstallImpl {
 				try {
 					fos.close();
 				} catch (IOException e) {
-					e.printStackTrace();
+					s_logger.error("Exception while closing the stream!", e);
 				}
 			}
 		}
@@ -303,7 +322,7 @@ public class InstallImpl {
 		deployedPackages.setProperty(packageName, packageUrl);
 
 		if (dpaConfPath == null) {
-			s_logger.warn("Configuration file not specified");
+			s_logger.warn(MESSAGE_CONFIGURATION_FILE_NOT_SPECIFIED);
 			return;
 		}
 
@@ -321,7 +340,7 @@ public class InstallImpl {
 					fos.close();
 				}
 			} catch (IOException e){
-				e.printStackTrace();
+				s_logger.error("Exception while closing opened resources!", e);
 			}
 		}
 	}
@@ -330,7 +349,7 @@ public class InstallImpl {
 		deployedPackages.remove(packageName);
 
 		if (dpaConfPath == null) {
-			s_logger.warn("Configuration file not specified");
+			s_logger.warn(MESSAGE_CONFIGURATION_FILE_NOT_SPECIFIED);
 			return;
 		}
 
@@ -349,7 +368,7 @@ public class InstallImpl {
 					fos.close();
 				}
 			} catch (IOException e){
-				e.printStackTrace();
+				s_logger.error("Exception while closing opened resources!", e);
 			}
 		}
 	}
@@ -434,7 +453,7 @@ public class InstallImpl {
 					fr.close();
 				}
 			} catch (IOException e){
-				e.printStackTrace();
+				s_logger.error("Exception while closing opened resources!", e);
 			}
 		}
 		return downloadProperies;

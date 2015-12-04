@@ -140,11 +140,11 @@ public class GenericDownloadCountingOutputStream extends CountingOutputStream {
 		return propConnectTimeout;
 	}
 
-	protected int getPROP_READ_TIMEOUT() {
+	protected int getPropReadTimeout() {
 		return propReadTimeout;
 	}
 
-	protected int getPROP_BLOCK_DELAY() {
+	protected int getPropBlockDelay() {
 		return propBlockDelay;
 	}
 }

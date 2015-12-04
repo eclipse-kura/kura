@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011, 2014 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2015 Eurotech and/or its affiliates
  *
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
@@ -14,11 +14,11 @@ package org.eclipse.kura.core.deployment.xml;
 
 public class XmlDeploymentPackage {
 	
-	public String name;
+	private String name;
 	
-	public String version;
+	private String version;
 	
-	public XmlBundleInfo[] bundleInfos;
+	private XmlBundleInfo[] bundleInfos;
 
 	public String getName() {
 		return name;

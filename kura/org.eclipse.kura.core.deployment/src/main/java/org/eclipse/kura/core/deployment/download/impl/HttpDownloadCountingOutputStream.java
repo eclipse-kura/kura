@@ -42,10 +42,10 @@ public class HttpDownloadCountingOutputStream extends GenericDownloadCountingOut
 	private static final Logger s_logger = LoggerFactory.getLogger(HttpDownloadCountingOutputStream.class);
 
 	InputStream is = null;
-	
+
 	private ExecutorService executor;
 	private Future<Void> future;
-	
+
 
 	public HttpDownloadCountingOutputStream(DownloadOptions downloadOptions) {
 		super(downloadOptions);
@@ -55,21 +55,21 @@ public class HttpDownloadCountingOutputStream extends GenericDownloadCountingOut
 		setConnectTimeout(options.getTimeout());
 	}
 
+	@Override
 	public void cancelDownload() throws Exception{
-		if(executor != null){
-			if(future != null){
-				future.cancel(true);
-				executor.shutdownNow();
-				
-				postProgressEvent(options.getClientId(), getByteCount(), totalBytes, DOWNLOAD_STATUS.CANCELLED, "Download cancelled");
-			}
+		if(executor != null && future != null){
+			future.cancel(true);
+			executor.shutdownNow();
+
+			postProgressEvent(options.getClientId(), getByteCount(), totalBytes, DOWNLOAD_STATUS.CANCELLED, "Download cancelled");
 		}
 	}
-	
+
+	@Override
 	public void startWork() throws KuraException {
-		
+
 		executor = Executors.newSingleThreadExecutor();
-		
+
 		future = executor.submit(new Callable<Void>(){
 
 			@Override
@@ -82,6 +82,7 @@ public class HttpDownloadCountingOutputStream extends GenericDownloadCountingOut
 
 					if (shouldAuthenticate) {
 						Authenticator.setDefault(new Authenticator() {
+							@Override
 							protected PasswordAuthentication getPasswordAuthentication() {
 								return new PasswordAuthentication(options.getUsername(), options.getPassword().toCharArray());
 							}
@@ -91,7 +92,7 @@ public class HttpDownloadCountingOutputStream extends GenericDownloadCountingOut
 					localUrl = new URL(m_downloadURL);
 					URLConnection urlConnection = localUrl.openConnection();
 					int connectTimeout = getConnectTimeout();
-					int readTimeout = getPROP_READ_TIMEOUT();
+					int readTimeout = getPropReadTimeout();
 					urlConnection.setConnectTimeout(connectTimeout);
 					urlConnection.setReadTimeout(readTimeout);
 
@@ -114,9 +115,9 @@ public class HttpDownloadCountingOutputStream extends GenericDownloadCountingOut
 
 					setTotalBytes(s != null ? Integer.parseInt(s) : -1);
 					postProgressEvent(options.getClientId(), 0, totalBytes, DOWNLOAD_STATUS.IN_PROGRESS, null);
-					
+
 					int bufferSize = getBufferSize();
-					
+
 					if (bufferSize == 0 && getTotalBytes() > 0){
 						int newSize= Math.round(totalBytes/100 * 1);
 						bufferSize= newSize;
@@ -126,7 +127,7 @@ public class HttpDownloadCountingOutputStream extends GenericDownloadCountingOut
 						bufferSize= newSize;
 						setBufferSize(newSize);
 					}
-					
+
 					long numBytes = IOUtils.copyLarge(is, HttpDownloadCountingOutputStream.this, new byte[bufferSize]);
 					postProgressEvent(options.getClientId(), numBytes, totalBytes, DOWNLOAD_STATUS.COMPLETED, null);
 
@@ -149,12 +150,12 @@ public class HttpDownloadCountingOutputStream extends GenericDownloadCountingOut
 						Authenticator.setDefault(null);
 					}
 				}
-				
+
 				return null;
 			}
-			
+
 		});
-		
+
 		try{
 			future.get();
 		}catch(ExecutionException ex){

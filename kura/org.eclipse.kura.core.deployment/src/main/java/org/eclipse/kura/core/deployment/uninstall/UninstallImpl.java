@@ -26,9 +26,7 @@ public class UninstallImpl {
 	}
 	
 	private void uninstallCompleteAsync(DeploymentPackageUninstallOptions options, String dpName) throws KuraException{
-		KuraUninstallPayload notify = null;
-
-		notify = new KuraUninstallPayload(options.getClientId());
+		KuraUninstallPayload notify = new KuraUninstallPayload(options.getClientId());
 		notify.setTimestamp(new Date());
 		notify.setUninstallStatus(UNINSTALL_STATUS.COMPLETED.getStatusString());
 		notify.setJobId(options.getJobId());
@@ -39,9 +37,7 @@ public class UninstallImpl {
 	}
 
 	public void uninstallFailedAsync(DeploymentPackageUninstallOptions options, String dpName, Exception e) throws KuraException{
-		KuraUninstallPayload notify = null;
-
-		notify = new KuraUninstallPayload(options.getClientId());
+		KuraUninstallPayload notify = new KuraUninstallPayload(options.getClientId());
 		notify.setTimestamp(new Date());
 		notify.setUninstallStatus(UNINSTALL_STATUS.FAILED.getStatusString());
 		notify.setJobId(options.getJobId());
@@ -57,16 +53,15 @@ public class UninstallImpl {
 		try{
 			String name = packageName;
 			if (name != null) {
-				DeploymentPackage dp = null;
-				dp = m_deploymentAdmin.getDeploymentPackage(name);
+				DeploymentPackage dp = m_deploymentAdmin.getDeploymentPackage(name);
 				if (dp != null) {
 					dp.uninstall();
-					String sUrl = CloudDeploymentHandlerV2.m_installImplementation.getDeployedPackages().getProperty(name);
+					String sUrl = CloudDeploymentHandlerV2.s_installImplementation.getDeployedPackages().getProperty(name);
 					File dpFile = new File(new URL(sUrl).getPath());
 					if (!dpFile.delete()) {
 						s_logger.warn("Cannot delete file at URL: {}", sUrl);
 					}
-					CloudDeploymentHandlerV2.m_installImplementation.removePackageFromConfFile(name);
+					CloudDeploymentHandlerV2.s_installImplementation.removePackageFromConfFile(name);
 				}
 				uninstallCompleteAsync(options, name);
 			}

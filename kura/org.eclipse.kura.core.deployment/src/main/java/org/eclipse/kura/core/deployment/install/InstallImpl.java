@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
 
 public class InstallImpl {
 	private static final Logger s_logger = LoggerFactory.getLogger(InstallImpl.class);
-	private final static int   PROGRESS_COMPLETE = 100;
+	private static final int   PROGRESS_COMPLETE = 100;
 
 	public static final String RESOURCE_INSTALL = "install";
 
@@ -150,9 +150,7 @@ public class InstallImpl {
 	}
 
 	public void installCompleteAsync(DeploymentPackageOptions options, String dpName) throws KuraException{
-		KuraInstallPayload notify = null;
-
-		notify = new KuraInstallPayload(options.getClientId());
+		KuraInstallPayload notify = new KuraInstallPayload(options.getClientId());
 		notify.setTimestamp(new Date());
 		notify.setInstallStatus(INSTALL_STATUS.COMPLETED.getStatusString());
 		notify.setJobId(options.getJobId());
@@ -163,9 +161,7 @@ public class InstallImpl {
 	}
 
 	public void installFailedAsync(DeploymentPackageInstallOptions options, String dpName, Exception e) throws KuraException{
-		KuraInstallPayload notify = null;
-
-		notify = new KuraInstallPayload(options.getClientId());
+		KuraInstallPayload notify = new KuraInstallPayload(options.getClientId());
 		notify.setTimestamp(new Date());
 		notify.setInstallStatus(INSTALL_STATUS.FAILED.getStatusString());
 		notify.setJobId(options.getJobId());
@@ -230,7 +226,6 @@ public class InstallImpl {
 			String dpBasename = fileReference.getName();
 			String dpPersistentFilePath = packagesPath + File.separator + dpBasename;
 			dpPersistentFile = new File(dpPersistentFilePath);
-			//downloadedFile = getDpDownloadFile(options);
 
 
 			dpInputStream = new FileInputStream(downloadedFile);
@@ -259,7 +254,10 @@ public class InstallImpl {
 			}
 			// The file from which we have installed the deployment package will be deleted
 			// unless it's a persistent deployment package file.
-			if (downloadedFile != null && !downloadedFile.getCanonicalPath().equals(dpPersistentFile.getCanonicalPath())) {
+			if (    downloadedFile != null && 
+					dpPersistentFile != null && 
+					!downloadedFile.getCanonicalPath().equals(dpPersistentFile.getCanonicalPath())
+					) {
 				downloadedFile.delete();
 			}			
 		}

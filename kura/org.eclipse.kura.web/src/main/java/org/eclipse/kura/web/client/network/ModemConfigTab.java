@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.kura.web.client.messages.Messages;
+import org.eclipse.kura.web.client.resources.Resources;
 import org.eclipse.kura.web.client.util.Constants;
 import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.client.util.FormUtils;
@@ -36,15 +37,18 @@ import com.allen_sauer.gwt.log.client.Log;
 import com.extjs.gxt.ui.client.Style.Scroll;
 import com.extjs.gxt.ui.client.data.ListLoadResult;
 import com.extjs.gxt.ui.client.event.BaseEvent;
+import com.extjs.gxt.ui.client.event.ButtonEvent;
 import com.extjs.gxt.ui.client.event.ComponentEvent;
 import com.extjs.gxt.ui.client.event.Events;
 import com.extjs.gxt.ui.client.event.FieldEvent;
 import com.extjs.gxt.ui.client.event.Listener;
 import com.extjs.gxt.ui.client.event.SelectionChangedEvent;
 import com.extjs.gxt.ui.client.event.SelectionChangedListener;
+import com.extjs.gxt.ui.client.event.SelectionListener;
 import com.extjs.gxt.ui.client.widget.Component;
 import com.extjs.gxt.ui.client.widget.ComponentPlugin;
 import com.extjs.gxt.ui.client.widget.LayoutContainer;
+import com.extjs.gxt.ui.client.widget.button.Button;
 import com.extjs.gxt.ui.client.widget.form.ComboBox.TriggerAction;
 import com.extjs.gxt.ui.client.widget.form.Field;
 import com.extjs.gxt.ui.client.widget.form.FieldSet;
@@ -64,6 +68,7 @@ import com.extjs.gxt.ui.client.widget.layout.FormLayout;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.AbstractImagePrototype;
 
 public class ModemConfigTab extends LayoutContainer 
 {
@@ -86,7 +91,6 @@ public class ModemConfigTab extends LayoutContainer
 	private FormPanel                m_formPanel;
 	private LabelField               m_modemModel;
 	private LabelField				 m_networkTechnologies;
-	//private SimpleComboBox<String>   m_networkTechCombo;
 	private LabelField               m_connectionType;
     private TextField<String>        m_modemIdField;
 	private NumberField              m_ifaceNumField;
@@ -94,6 +98,8 @@ public class ModemConfigTab extends LayoutContainer
 	private Radio					 m_simSlotAradio;
 	private Radio					 m_simSlotBradio;
 	private RadioGroup				 m_selectSimSlotRadioGroup;
+	
+	private Button 					 m_refreshSimInfoButton;;
 	
 	private LabelField               m_imsiLabelField;
 	private LabelField               m_iccidLabelField;
@@ -312,26 +318,6 @@ public class ModemConfigTab extends LayoutContainer
         m_networkTechnologies.addPlugin(m_dirtyPlugin);
         fieldSet.add(m_networkTechnologies, formData);
         
-        /*
-        m_networkTechCombo = new SimpleComboBox<String>();
-        m_networkTechCombo.setName("networkTech");
-        m_networkTechCombo.setFieldLabel(MSGS.netModemNetworkTechnology());
-        m_networkTechCombo.setEditable(false);
-        m_networkTechCombo.setTypeAhead(true);
-        m_networkTechCombo.setTriggerAction(TriggerAction.ALL);
-        m_networkTechCombo.add(MSGS.unknown());
-        m_networkTechCombo.setSimpleValue(MSGS.unknown());
-        m_networkTechCombo.addSelectionChangedListener( new SelectionChangedListener<SimpleComboValue<String>>() {         
-            @Override
-            public void selectionChanged(SelectionChangedEvent<SimpleComboValue<String>> se) {
-                refreshForm();
-            }
-        });        
-        m_networkTechCombo.addListener(Events.OnMouseOver, new MouseOverListener(MSGS.netModemToolTipNetworkTechnology()));
-        m_networkTechCombo.addStyleName("kura-combobox");
-        m_networkTechCombo.addPlugin(m_dirtyPlugin);
-        fieldSet.add(m_networkTechCombo, formData);
-       	*/
         //
         // Service Type
         // 
@@ -373,42 +359,51 @@ public class ModemConfigTab extends LayoutContainer
             }
         });
         fieldSet.add(m_ifaceNumField, formData);
+        
+        m_refreshSimInfoButton = new Button(MSGS.netModemRefreshSimCardInfo(), 
+				AbstractImagePrototype.create(Resources.INSTANCE.refresh()),
+				new SelectionListener<ButtonEvent>() {
+			@Override
+			public void componentSelected(ButtonEvent ce) {
+				gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
+					@Override
+					public void onFailure(Throwable ex) {
+						FailureHandler.handle(ex);
+					}
 
-        // TODO
+					@Override
+					public void onSuccess(GwtXSRFToken token) {
+							Log.warn("<IAB> Refresh SIM Info button selected");
+							gwtNetworkService.findSimCardInfo(token, m_selectNetIfConfig.getModemServiceId(), true, new AsyncCallback<ListLoadResult<GwtModemSimCardEntry>> () {
+				    			public void onSuccess(ListLoadResult<GwtModemSimCardEntry> result) {
+				    				List<GwtModemSimCardEntry> gwtModemSimCardEntries = result.getData();
+				    				m_imsiLabelField.setValue(MSGS.netModemNoSimCardDetected());
+		    						m_iccidLabelField.setValue(MSGS.netModemNoSimCardDetected());
+				    				for (GwtModemSimCardEntry gwtModemSimCardEntry : gwtModemSimCardEntries) {
+										if (gwtModemSimCardEntry.isActive()) {
+											m_imsiLabelField.setValue(gwtModemSimCardEntry.getInternationalMobileSubscriberIdentity());
+											m_iccidLabelField.setValue(gwtModemSimCardEntry.getIntegratedCircuitCardIdentification());
+										}
+									}
+				    			}
+				    			public void onFailure(Throwable caught) {
+				    				FailureHandler.handle(caught);
+				    			}
+				    		});
+					}});
+			}
+		});
+        m_refreshSimInfoButton.setStyleAttribute("margin-top", Constants.LABEL_MARGIN_TOP_SEPARATOR);
+        fieldSet.add(m_refreshSimInfoButton, formData);
+        
         m_simSlotAradio = new Radio();  
         m_simSlotAradio.setItemId("SlotA");
         m_simSlotAradio.setBoxLabel(MSGS.netModemSimSlotAlabel());
-        m_simSlotAradio.addListener(Events.Change,new Listener<FieldEvent>(){
-            @Override public void handleEvent(FieldEvent be) {
-            	// TODO
-            	Log.warn("<IAB> Slot A Radio change !!!");
-            	
-            	if (m_simSlotAradio.getValue()) {
-                
-              } else {
-               
-              }
-            }
-          }
-        );
         //m_simSlotAradio.addListener(Events.OnMouseOver, new MouseOverListener(MSGS.netModemToolTipPersist()));
         
         m_simSlotBradio = new Radio();  
         m_simSlotBradio.setItemId("SlotB");
         m_simSlotBradio.setBoxLabel(MSGS.netModemSimSlotBlabel());
-        m_simSlotBradio.addListener(Events.Change,new Listener<FieldEvent>() {
-            @Override public void handleEvent(FieldEvent be){
-            	// TODO
-            	Log.warn("<IAB> Slot B Radio change !!!");
-            	
-            	if (m_simSlotAradio.getValue()) {
-                
-              } else {
-               
-              }
-            }
-          }
-        );
         //m_simSlotBradio.addListener(Events.OnMouseOver, new MouseOverListener(MSGS.netModemToolTipPersist()));
         
         m_selectSimSlotRadioGroup = new RadioGroup();
@@ -416,15 +411,45 @@ public class ModemConfigTab extends LayoutContainer
         m_selectSimSlotRadioGroup.setFieldLabel(MSGS.netModemSelectSimSlot()); 
         m_selectSimSlotRadioGroup.add(m_simSlotAradio);  
         m_selectSimSlotRadioGroup.add(m_simSlotBradio);
-        m_selectSimSlotRadioGroup.addPlugin(m_dirtyPlugin);  
-        m_selectSimSlotRadioGroup.setStyleAttribute("margin-top", Constants.LABEL_MARGIN_TOP_SEPARATOR);
+        m_selectSimSlotRadioGroup.addPlugin(m_dirtyPlugin);
         m_selectSimSlotRadioGroup.addListener(Events.Change,new Listener<FieldEvent>(){
             @Override public void handleEvent(FieldEvent be) {
-            	// TODO
             	Log.warn("<IAB> Radio Group change !!!");
+            	Log.warn("<IAB> getModemSimCardInfo() :: generating security token ...");
+    			gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
+    	        	@Override
+    				public void onFailure(Throwable ex) {
+    					FailureHandler.handle(ex);
+    				}
+    	        	public void onSuccess(GwtXSRFToken token) {	
+    	        		Log.warn("<IAB> onRender() :: security token generated, getting SIM card info ...");
+    	        		gwtNetworkService.findSimCardInfo(token, m_selectNetIfConfig.getModemServiceId(), false, new AsyncCallback<ListLoadResult<GwtModemSimCardEntry>> () {
+    	        			public void onSuccess(ListLoadResult<GwtModemSimCardEntry> result) {
+    	        				List<GwtModemSimCardEntry> gwtModemSimCardEntries = result.getData();
+    	        				Log.warn("<IAB> onRender() :: gwtModemSimCardEntries.size()=" + gwtModemSimCardEntries.size());
+    	        				m_imsiLabelField.setValue(MSGS.netModemNoSimCardDetected());
+	    						m_iccidLabelField.setValue(MSGS.netModemNoSimCardDetected());
+    	        				for (GwtModemSimCardEntry gwtModemSimCardEntry : gwtModemSimCardEntries) {
+	    	        				if (m_simSlotAradio.getValue() && (gwtModemSimCardEntry.getSimSlot() == GwtSimCardSlot.A)) {
+	    	    						m_imsiLabelField.setValue(gwtModemSimCardEntry.getInternationalMobileSubscriberIdentity());
+	    	    						m_iccidLabelField.setValue(gwtModemSimCardEntry.getIntegratedCircuitCardIdentification());
+	    	    						break;
+	    	        				}
+	    	        				if (m_simSlotBradio.getValue() && (gwtModemSimCardEntry.getSimSlot() == GwtSimCardSlot.B)) {
+	    	        					m_imsiLabelField.setValue(gwtModemSimCardEntry.getInternationalMobileSubscriberIdentity());
+	    								m_iccidLabelField.setValue(gwtModemSimCardEntry.getIntegratedCircuitCardIdentification());
+	    								break;
+	    	        				}
+    	        				}
+    	        			}
+    	        			public void onFailure(Throwable caught) {
+    	        				FailureHandler.handle(caught);
+    	        			}
+    	        		});
+    	        	}
+    	        });
             }
-          }
-        );
+        });
         
         fieldSet.add(m_selectSimSlotRadioGroup, formData);
         
@@ -432,14 +457,12 @@ public class ModemConfigTab extends LayoutContainer
         m_imsiLabelField.setName("imsi");
         m_imsiLabelField.setFieldLabel(MSGS.netModemInternationalMobileSubscriberIdentity());
         m_imsiLabelField.addPlugin(m_dirtyPlugin);
-        //m_imsiLabelField.setStyleAttribute("margin-top", Constants.LABEL_MARGIN_TOP_SEPARATOR);
         fieldSet.add(m_imsiLabelField, formData);
         
         m_iccidLabelField = new LabelField();
         m_iccidLabelField.setName("imsi");
         m_iccidLabelField.setFieldLabel(MSGS.netModemIntegratedCircuitCardIdentification());
         m_iccidLabelField.addPlugin(m_dirtyPlugin);
-        //m_iccidLabelField.setStyleAttribute("margin-top", Constants.LABEL_MARGIN_TOP_SEPARATOR);
         fieldSet.add(m_iccidLabelField, formData);
          
         //
@@ -518,7 +541,7 @@ public class ModemConfigTab extends LayoutContainer
         m_authTypeCombo.addListener(Events.OnMouseOver, new MouseOverListener(MSGS.netModemToolTipAuthentication()));
         m_authTypeCombo.addStyleName("kura-combobox");
         m_authTypeCombo.addPlugin(m_dirtyPlugin);
-        m_authTypeCombo.setStyleAttribute("margin-top", Constants.LABEL_MARGIN_TOP_SEPARATOR);
+        //m_authTypeCombo.setStyleAttribute("margin-top", Constants.LABEL_MARGIN_TOP_SEPARATOR);
         fieldSet.add(m_authTypeCombo, formData);
 
         //
@@ -763,41 +786,39 @@ public class ModemConfigTab extends LayoutContainer
             
             // TODO
             gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
-            	@Override
+	        	@Override
 				public void onFailure(Throwable ex) {
 					FailureHandler.handle(ex);
 				}
-            	public void onSuccess(GwtXSRFToken token) {	
-            		gwtNetworkService.findSimCardInfo(token, m_selectNetIfConfig.getModemServiceId(), new AsyncCallback<ListLoadResult<GwtModemSimCardEntry>> () {
-            			public void onSuccess(ListLoadResult<GwtModemSimCardEntry> result) {
-            				List<GwtModemSimCardEntry> gwtModemSimCardEntries = result.getData();
-            				for (GwtModemSimCardEntry gwtModemSimCardEntry : gwtModemSimCardEntries) {
-            					GwtSimCardSlot gwtSimSlot = gwtModemSimCardEntry.getSimSlot();
-            					if (gwtModemSimCardEntry.isActive()) {
-            						m_imsiLabelField.setValue(gwtModemSimCardEntry.getInternationalMobileSubscriberIdentity());
-        							m_iccidLabelField.setValue(gwtModemSimCardEntry.getIntegratedCircuitCardIdentification());
-        							if (gwtSimSlot == GwtSimCardSlot.A) {
-        								m_simSlotAradio.setValue(true);
-            							m_simSlotBradio.setValue(false);
-        							} else if (gwtSimSlot == GwtSimCardSlot.B) {
-        								m_simSlotAradio.setValue(false);
-            							m_simSlotBradio.setValue(true);
-        							}
-            					}
-            				}
-            			}
-            			
-            			public void onFailure(Throwable caught) {
-            				FailureHandler.handle(caught);
-            			}
-            		});
-            	}
-            }
-            
-            		
-            		
-            		);
-            //gwtNetworkService.findSimCardInfo(xsrfToken, deviceServiceId, callback)
+	        	public void onSuccess(GwtXSRFToken token) {	
+	        		Log.warn("<IAB> update() :: security token generated, getting SIM card info ...");
+	        		gwtNetworkService.findSimCardInfo(token, m_selectNetIfConfig.getModemServiceId(), false, new AsyncCallback<ListLoadResult<GwtModemSimCardEntry>> () {
+	        			public void onSuccess(ListLoadResult<GwtModemSimCardEntry> result) {
+	        				List<GwtModemSimCardEntry> gwtModemSimCardEntries = result.getData();
+	        				Log.warn("<IAB> update() :: gwtModemSimCardEntries.size()=" + gwtModemSimCardEntries.size());
+	        				m_imsiLabelField.setValue(MSGS.netModemNoSimCardDetected());
+    						m_iccidLabelField.setValue(MSGS.netModemNoSimCardDetected());
+	        				for (GwtModemSimCardEntry gwtModemSimCardEntry : gwtModemSimCardEntries) {
+	        					GwtSimCardSlot gwtSimSlot = gwtModemSimCardEntry.getSimSlot();
+	        					if (gwtModemSimCardEntry.isActive()) {
+	        						m_imsiLabelField.setValue(gwtModemSimCardEntry.getInternationalMobileSubscriberIdentity());
+	        						m_iccidLabelField.setValue(gwtModemSimCardEntry.getIntegratedCircuitCardIdentification());
+	        						if (gwtSimSlot == GwtSimCardSlot.A) {
+	        							m_simSlotAradio.setValue(true);
+	        							m_simSlotBradio.setValue(false);
+	        						} else if (gwtSimSlot == GwtSimCardSlot.B) {
+	        							m_simSlotAradio.setValue(false);
+	        							m_simSlotBradio.setValue(true);
+	        						}
+	        					}
+	        				}
+	        			}
+	        			public void onFailure(Throwable caught) {
+	        				FailureHandler.handle(caught);
+	        			}
+	        		});
+	        	}
+	        });
             
 			m_dialStringField.setValue(m_selectNetIfConfig.getDialString());
 			m_dialStringField.setOriginalValue(m_dialStringField.getValue());

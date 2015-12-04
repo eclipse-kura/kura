@@ -933,77 +933,21 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 		}
 	}
 	
-	public void refreshSimCardInfo(GwtXSRFToken xsrfToken, String deviceServiceId) throws GwtKuraException {
+	public ListLoadResult<GwtModemSimCardEntry> findSimCardInfo(GwtXSRFToken xsrfToken, String deviceServiceId, boolean refresh) throws GwtKuraException {
+		s_logger.warn("<IAB> [+] findSimCardInfo() :: refresh={}", refresh);
 		checkXSRFToken(xsrfToken);
-		NetworkAdminService nas = null;
-		ModemManagerService modemManagerService = null;
+		SubscriberInfo subscriberInfo [] = null;
 		try {
-			nas = ServiceLocator.getInstance().getService(NetworkAdminService.class);
-			try {
-				modemManagerService = ServiceLocator.getInstance().getService(ModemManagerService.class);
-			} catch (Throwable t) {
-				s_logger.warn("refreshSimCardInfo() :: {ModemManagerService} Exception: {}", t.toString());
-			}
-			if (modemManagerService != null) {
-				for (NetInterfaceConfig<? extends NetInterfaceAddressConfig> netIfConfig : nas.getNetworkInterfaceConfigs()) {
-					s_logger.debug("refreshSimCardInfo() :: Getting config for " + netIfConfig.getName() + " with type " + netIfConfig.getType());
-					
-					s_logger.debug("refreshSimCardInfo() :: Interface State: " + netIfConfig.getState());
-	
-					if (netIfConfig.getType() == NetInterfaceType.MODEM) {
-						UsbDevice usbDevice = netIfConfig.getUsbDevice();
-						String modemServiceId = null;
-						if (usbDevice != null) {
-							modemServiceId = netIfConfig.getUsbDevice().getUsbPort();
-						} else {
-							Collection<CellularModem> modemServices = modemManagerService.getAllModemServices();
-							for (CellularModem modemService : modemServices) {
-								ModemDevice modemDevice = modemService.getModemDevice();
-								if (modemDevice instanceof SerialModemDevice) {
-									modemServiceId = modemDevice.getProductName();
-									break;
-								}
-							}
-						}
-	
-						if ((modemServiceId != null) && modemServiceId.equals(deviceServiceId)) {
-							s_logger.warn("<IAB> refreshSimCardInfo() :: modemServiceId={}", modemServiceId);
-							CellularModem cellModemService = modemManagerService.getModemService(modemServiceId); 
-							if (cellModemService != null) { 
-								cellModemService.obtainSubscriberInfo();
-							}
-						}
-					}
-				}
-			}
-		} catch (KuraException e) {
-			throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
-		}
-	}
-	
-	
-	public ListLoadResult<GwtModemSimCardEntry> findSimCardInfo(GwtXSRFToken xsrfToken, String deviceServiceId) throws GwtKuraException {
-		checkXSRFToken(xsrfToken);
-		
-		List<GwtModemSimCardEntry> gwtSimCardEntries = new ArrayList<GwtModemSimCardEntry>();
-		NetworkAdminService nas = null;
-		try {
-			nas = ServiceLocator.getInstance().getService(NetworkAdminService.class);
-		} catch (Throwable t) {
-			s_logger.warn("findSimCardInfo() :: Exception: {}", t.toString());
-			return null;
-		}
-		
-		try {
+			NetworkAdminService nas = null;
 			ModemManagerService modemManagerService = null;
 			try {
+				nas = ServiceLocator.getInstance().getService(NetworkAdminService.class);
 				modemManagerService = ServiceLocator.getInstance().getService(ModemManagerService.class);
 			} catch (Throwable t) {
-				s_logger.warn("findSimCardInfo() :: {ModemManagerService} Exception: {}", t.toString());
+				s_logger.warn("findSimCardInfo() :: Exception getting service: {}", t.toString());
 			}
 			
-			SubscriberInfo subscriberInfo [] = null;
-			if (modemManagerService != null) {
+			if ((nas != null) && (modemManagerService != null)) {
 				for (NetInterfaceConfig<? extends NetInterfaceAddressConfig> netIfConfig : nas.getNetworkInterfaceConfigs()) {
 					s_logger.debug("findSimCardInfo() :: Getting config for " + netIfConfig.getName() + " with type " + netIfConfig.getType());
 	
@@ -1028,52 +972,58 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 						if ((modemServiceId != null) && modemServiceId.equals(deviceServiceId)) {
 							s_logger.warn("<IAB> findSimCardInfo() :: modemServiceId={}", modemServiceId);
 							CellularModem cellModemService = modemManagerService.getModemService(modemServiceId); 
-							if (cellModemService != null) { 
-								subscriberInfo = cellModemService.getSubscriberInfo();
+							if (cellModemService != null) {
+								if (refresh) {
+									s_logger.warn("<IAB> findSimCardInfo() :: obtaining Subscriber Info");
+									subscriberInfo = cellModemService.obtainSubscriberInfo();
+ 								} else {
+ 									s_logger.warn("<IAB> findSimCardInfo() :: getting Subscriber Info");
+ 									subscriberInfo = cellModemService.getSubscriberInfo();
+ 								}
 							}
 						}
 					}
 				}
 			}
-			
-			if (subscriberInfo != null) {
-				int ind = 0;
-				for (SubscriberInfo subscriber : subscriberInfo) {
-					s_logger.warn("<IAB> findSimCardInfo() :: !! :-) !! subscriber -> {}", subscriber);
-					boolean isActive = subscriber.isActive();
-					String imsi = subscriber.getInternationalMobileSubscriberIdentity();
-					String iccid = subscriber.getIntegratedCircuitCardIdentification();
-					
-					if (!(imsi.isEmpty() && iccid.isEmpty())) {
-						GwtModemSimCardEntry gwtModemSimCardEntry = new GwtModemSimCardEntry();
-						switch (ind) {
-						case 0:
-							gwtModemSimCardEntry.setSimSlot(GwtSimCardSlot.A);
-							break;
-						case 1:
-							gwtModemSimCardEntry.setSimSlot(GwtSimCardSlot.B);
-							break;
-						}
-						
-						gwtModemSimCardEntry.setActive(isActive);
-						gwtModemSimCardEntry.setInternationalMobileSubscriberIdentity(imsi);
-						gwtModemSimCardEntry.setIntegratedCircuitCardIdentification(iccid);
-						
-						s_logger.warn("<IAB> findSimCardInfo() :: !! :-) !! gwtModemSimCardEntry.SimSlot = {}", gwtModemSimCardEntry.getSimSlot());
-						s_logger.warn("<IAB> findSimCardInfo() :: !! :-) !! gwtModemSimCardEntry.IMSI = {}", gwtModemSimCardEntry.getInternationalMobileSubscriberIdentity());
-						s_logger.warn("<IAB> findSimCardInfo() :: !! :-) !! gwtModemSimCardEntry.ICCID = {}", gwtModemSimCardEntry.getIntegratedCircuitCardIdentification());
-						gwtSimCardEntries.add(gwtModemSimCardEntry);
-					}
-					ind++;
-				}
-			}
-			
 		} catch (KuraException e) {
 			throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
 		}
-		
-		
-		return new BaseListLoadResult<GwtModemSimCardEntry>(gwtSimCardEntries);
+		List<GwtModemSimCardEntry> ret = findSimCardInfo(subscriberInfo);
+		s_logger.warn("<IAB> [-] findSimCardInfo() :: refresh={}", refresh);
+		return new BaseListLoadResult<GwtModemSimCardEntry>(ret);
+	}
+	
+	private List<GwtModemSimCardEntry> findSimCardInfo(SubscriberInfo subscriberInfo[]) {
+		List<GwtModemSimCardEntry> gwtSimCardEntries = new ArrayList<GwtModemSimCardEntry>();
+		if (subscriberInfo != null) {
+			int ind = 0;
+			for (SubscriberInfo subscriber : subscriberInfo) {
+				s_logger.warn("<IAB> findSimCardInfo() :: !! :-) !! subscriber -> {}", subscriber);
+				boolean isActive = subscriber.isActive();
+				String imsi = subscriber.getInternationalMobileSubscriberIdentity();
+				String iccid = subscriber.getIntegratedCircuitCardIdentification();
+				
+				if (!(imsi.isEmpty() && iccid.isEmpty())) {
+					GwtModemSimCardEntry gwtModemSimCardEntry = new GwtModemSimCardEntry();
+					switch (ind) {
+					case 0:
+						gwtModemSimCardEntry.setSimSlot(GwtSimCardSlot.A);
+						break;
+					case 1:
+						gwtModemSimCardEntry.setSimSlot(GwtSimCardSlot.B);
+						break;
+					}
+					
+					gwtModemSimCardEntry.setActive(isActive);
+					gwtModemSimCardEntry.setInternationalMobileSubscriberIdentity(imsi);
+					gwtModemSimCardEntry.setIntegratedCircuitCardIdentification(iccid);
+					s_logger.warn("<IAB> findSimCardInfo() :: !! :-) !! gwtModemSimCardEntry={}", gwtModemSimCardEntry);
+					gwtSimCardEntries.add(gwtModemSimCardEntry);
+				}
+				ind++;
+			}
+		}
+		return gwtSimCardEntries;
 	}
 
 	public ListLoadResult<GwtWifiHotspotEntry> findWifiHotspots(GwtXSRFToken xsrfToken, String interfaceName) throws GwtKuraException {

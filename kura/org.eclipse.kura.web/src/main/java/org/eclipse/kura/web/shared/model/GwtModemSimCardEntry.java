@@ -26,16 +26,6 @@ public class GwtModemSimCardEntry extends KuraBaseModel implements Serializable 
 		set("isActive", isActive);
 	}
 	
-	/*
-	public String getSimSlot() {
-		return get("simSlot");
-	}
-	
-	public void setSimSlot(String simSlot) {
-		set("simSlot", simSlot);
-	}
-	*/
-	
 	public GwtSimCardSlot getSimSlot() {
 		if (get("simSlot") != null) {
 			return GwtSimCardSlot.valueOf((String)get("simSlot"));
@@ -48,8 +38,6 @@ public class GwtModemSimCardEntry extends KuraBaseModel implements Serializable 
 		set("simSlot", simSlot.name());
 	}
 	
-	
-
 	public String getInternationalMobileSubscriberIdentity() {
 		return get("IMSI");
 	}
@@ -65,5 +53,14 @@ public class GwtModemSimCardEntry extends KuraBaseModel implements Serializable 
 	
 	public void setIntegratedCircuitCardIdentification(String iccid) {
 		set("ICCID", iccid);
+	}
+	
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("Slot: ").append(getSimSlot());
+		sb.append("; isActive=").append(isActive());
+		sb.append("; IMSI=").append(getInternationalMobileSubscriberIdentity());
+		sb.append("; ICCID=").append(getIntegratedCircuitCardIdentification());
+		return sb.toString();
 	}
 }

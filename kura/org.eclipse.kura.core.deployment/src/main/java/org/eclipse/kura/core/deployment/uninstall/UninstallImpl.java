@@ -7,6 +7,8 @@ import java.util.Date;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.deployment.CloudDeploymentHandlerV2;
 import org.eclipse.kura.core.deployment.CloudDeploymentHandlerV2.UNINSTALL_STATUS;
+import org.eclipse.kura.core.util.ProcessUtil;
+import org.eclipse.kura.core.util.SafeProcess;
 import org.osgi.service.deploymentadmin.DeploymentAdmin;
 import org.osgi.service.deploymentadmin.DeploymentPackage;
 import org.slf4j.Logger;
@@ -64,9 +66,32 @@ public class UninstallImpl {
 					CloudDeploymentHandlerV2.s_installImplementation.removePackageFromConfFile(name);
 				}
 				uninstallCompleteAsync(options, name);
+				
+				//Reboot?
+				deviceReboot(options);
 			}
 		} catch (Exception e) {
 			throw KuraException.internalError(e.getMessage());
+		}
+	}
+	
+	private static void deviceReboot(DeploymentPackageUninstallOptions options) {
+		if (options.isReboot()) {
+			s_logger.info("Reboot requested...");
+			SafeProcess proc = null;
+			try {
+				int delay = options.getRebootDelay();
+				s_logger.info("Sleeping for {} seconds.", delay);
+				Thread.sleep(delay);
+				s_logger.info("Rebooting...");
+				proc = ProcessUtil.exec("reboot");
+			} catch (Exception e) {
+				s_logger.info("Rebooting... Failure!");
+			} finally {
+				if (proc != null) {
+					ProcessUtil.destroy(proc);
+				}
+			}
 		}
 	}
 

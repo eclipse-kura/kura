@@ -910,10 +910,10 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 				
 				HashMap<String, Object> modemInfoMap = new HashMap<String, Object>();
 				modemInfoMap.put(ModemGpsEnabledEvent.Port, modem.getGpsPort());
-				modemInfoMap.put(ModemGpsEnabledEvent.BaudRate, new Integer(commUri.getBaudRate()));
-				modemInfoMap.put(ModemGpsEnabledEvent.DataBits, new Integer(commUri.getDataBits()));
-				modemInfoMap.put(ModemGpsEnabledEvent.StopBits, new Integer(commUri.getStopBits()));
-				modemInfoMap.put(ModemGpsEnabledEvent.Parity, new Integer(commUri.getParity()));
+				modemInfoMap.put(ModemGpsEnabledEvent.BaudRate, Integer.valueOf(commUri.getBaudRate()));
+				modemInfoMap.put(ModemGpsEnabledEvent.DataBits, Integer.valueOf(commUri.getDataBits()));
+				modemInfoMap.put(ModemGpsEnabledEvent.StopBits, Integer.valueOf(commUri.getStopBits()));
+				modemInfoMap.put(ModemGpsEnabledEvent.Parity, Integer.valueOf(commUri.getParity()));
 				
 				s_logger.debug("postModemGpsEvent() :: posting ModemGpsEnabledEvent on topic {}", ModemGpsEnabledEvent.MODEM_EVENT_GPS_ENABLED_TOPIC);
 				m_eventAdmin.postEvent(new ModemGpsEnabledEvent(modemInfoMap));

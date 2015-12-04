@@ -265,7 +265,7 @@ public class XmlConfigPropertiesAdapter
 						break;
 					case charType:
 						String s = adaptedProp.getValues()[0];
-						propvalue = new Character(s.charAt(0));
+						propvalue = Character.valueOf(s.charAt(0));
 						break;
 					case booleanType:
 						propvalue = Boolean.parseBoolean(adaptedProp.getValues()[0]);

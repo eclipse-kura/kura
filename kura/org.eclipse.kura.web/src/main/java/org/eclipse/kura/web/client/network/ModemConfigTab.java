@@ -11,23 +11,21 @@
  */
 package org.eclipse.kura.web.client.network;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.eclipse.kura.web.client.messages.Messages;
-import org.eclipse.kura.web.client.resources.Resources;
 import org.eclipse.kura.web.client.util.Constants;
 import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.client.util.FormUtils;
 import org.eclipse.kura.web.client.util.MessageUtils;
-import org.eclipse.kura.web.client.util.SwappableListStore;
 import org.eclipse.kura.web.shared.model.GwtModemAuthType;
 import org.eclipse.kura.web.shared.model.GwtModemInterfaceConfig;
 import org.eclipse.kura.web.shared.model.GwtModemSimCardEntry;
 import org.eclipse.kura.web.shared.model.GwtNetInterfaceConfig;
 import org.eclipse.kura.web.shared.model.GwtSession;
+import org.eclipse.kura.web.shared.model.GwtSimCardSlot;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.eclipse.kura.web.shared.service.GwtNetworkService;
 import org.eclipse.kura.web.shared.service.GwtNetworkServiceAsync;
@@ -35,30 +33,18 @@ import org.eclipse.kura.web.shared.service.GwtSecurityTokenService;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenServiceAsync;
 
 import com.allen_sauer.gwt.log.client.Log;
-import com.extjs.gxt.ui.client.Style.HorizontalAlignment;
 import com.extjs.gxt.ui.client.Style.Scroll;
-import com.extjs.gxt.ui.client.Style.SelectionMode;
-import com.extjs.gxt.ui.client.Style.SortDir;
-import com.extjs.gxt.ui.client.data.BaseListLoader;
 import com.extjs.gxt.ui.client.data.ListLoadResult;
-import com.extjs.gxt.ui.client.data.LoadEvent;
-import com.extjs.gxt.ui.client.data.ModelKeyProvider;
-import com.extjs.gxt.ui.client.data.RpcProxy;
 import com.extjs.gxt.ui.client.event.BaseEvent;
-import com.extjs.gxt.ui.client.event.ButtonEvent;
 import com.extjs.gxt.ui.client.event.ComponentEvent;
 import com.extjs.gxt.ui.client.event.Events;
+import com.extjs.gxt.ui.client.event.FieldEvent;
 import com.extjs.gxt.ui.client.event.Listener;
-import com.extjs.gxt.ui.client.event.LoadListener;
 import com.extjs.gxt.ui.client.event.SelectionChangedEvent;
 import com.extjs.gxt.ui.client.event.SelectionChangedListener;
-import com.extjs.gxt.ui.client.event.SelectionListener;
-import com.extjs.gxt.ui.client.store.ListStore;
 import com.extjs.gxt.ui.client.widget.Component;
 import com.extjs.gxt.ui.client.widget.ComponentPlugin;
-import com.extjs.gxt.ui.client.widget.ContentPanel;
 import com.extjs.gxt.ui.client.widget.LayoutContainer;
-import com.extjs.gxt.ui.client.widget.button.Button;
 import com.extjs.gxt.ui.client.widget.form.ComboBox.TriggerAction;
 import com.extjs.gxt.ui.client.widget.form.Field;
 import com.extjs.gxt.ui.client.widget.form.FieldSet;
@@ -71,10 +57,6 @@ import com.extjs.gxt.ui.client.widget.form.SimpleComboBox;
 import com.extjs.gxt.ui.client.widget.form.SimpleComboValue;
 import com.extjs.gxt.ui.client.widget.form.TextField;
 import com.extjs.gxt.ui.client.widget.form.Validator;
-import com.extjs.gxt.ui.client.widget.grid.CheckBoxSelectionModel;
-import com.extjs.gxt.ui.client.widget.grid.ColumnConfig;
-import com.extjs.gxt.ui.client.widget.grid.ColumnModel;
-import com.extjs.gxt.ui.client.widget.grid.Grid;
 import com.extjs.gxt.ui.client.widget.layout.FitLayout;
 import com.extjs.gxt.ui.client.widget.layout.FlowLayout;
 import com.extjs.gxt.ui.client.widget.layout.FormData;
@@ -82,7 +64,6 @@ import com.extjs.gxt.ui.client.widget.layout.FormLayout;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.AbstractImagePrototype;
 
 public class ModemConfigTab extends LayoutContainer 
 {
@@ -109,6 +90,14 @@ public class ModemConfigTab extends LayoutContainer
 	private LabelField               m_connectionType;
     private TextField<String>        m_modemIdField;
 	private NumberField              m_ifaceNumField;
+	
+	private Radio					 m_simSlotAradio;
+	private Radio					 m_simSlotBradio;
+	private RadioGroup				 m_selectSimSlotRadioGroup;
+	
+	private LabelField               m_imsiLabelField;
+	private LabelField               m_iccidLabelField;
+	
 	private TextField<String>        m_dialStringField;
 	private TextField<String>        m_apnField;
 	private SimpleComboBox<String>   m_authTypeCombo;
@@ -131,20 +120,8 @@ public class ModemConfigTab extends LayoutContainer
 	private Radio 				   	 m_enableGpsRadioTrue;
 	private Radio 				   	 m_enableGpsRadioFalse;
 	private RadioGroup 			   	 m_enableGpsRadioGroup;
-	
-	private Button 					 m_refreshSimInfoButton;
-	
     private ComponentPlugin          m_dirtyPlugin;
-    
-    private ContentPanel			m_simCardPanel;
-    private Grid<GwtModemSimCardEntry>   m_grid;
-    private BaseListLoader<ListLoadResult<GwtModemSimCardEntry>> m_simCardInfoLoader;
-	
-    
-    private CheckBoxSelectionModel<GwtModemSimCardEntry> m_checkboxSelectionModel = new CheckBoxSelectionModel<GwtModemSimCardEntry>() {
-		
-    };
-    
+     
     private class MouseOverListener implements Listener<BaseEvent> {
 
     	private String  html;
@@ -397,6 +374,74 @@ public class ModemConfigTab extends LayoutContainer
         });
         fieldSet.add(m_ifaceNumField, formData);
 
+        // TODO
+        m_simSlotAradio = new Radio();  
+        m_simSlotAradio.setItemId("SlotA");
+        m_simSlotAradio.setBoxLabel(MSGS.netModemSimSlotAlabel());
+        m_simSlotAradio.addListener(Events.Change,new Listener<FieldEvent>(){
+            @Override public void handleEvent(FieldEvent be) {
+            	// TODO
+            	Log.warn("<IAB> Slot A Radio change !!!");
+            	
+            	if (m_simSlotAradio.getValue()) {
+                
+              } else {
+               
+              }
+            }
+          }
+        );
+        //m_simSlotAradio.addListener(Events.OnMouseOver, new MouseOverListener(MSGS.netModemToolTipPersist()));
+        
+        m_simSlotBradio = new Radio();  
+        m_simSlotBradio.setItemId("SlotB");
+        m_simSlotBradio.setBoxLabel(MSGS.netModemSimSlotBlabel());
+        m_simSlotBradio.addListener(Events.Change,new Listener<FieldEvent>() {
+            @Override public void handleEvent(FieldEvent be){
+            	// TODO
+            	Log.warn("<IAB> Slot B Radio change !!!");
+            	
+            	if (m_simSlotAradio.getValue()) {
+                
+              } else {
+               
+              }
+            }
+          }
+        );
+        //m_simSlotBradio.addListener(Events.OnMouseOver, new MouseOverListener(MSGS.netModemToolTipPersist()));
+        
+        m_selectSimSlotRadioGroup = new RadioGroup();
+        m_selectSimSlotRadioGroup.setName("selectSimSlot");
+        m_selectSimSlotRadioGroup.setFieldLabel(MSGS.netModemSelectSimSlot()); 
+        m_selectSimSlotRadioGroup.add(m_simSlotAradio);  
+        m_selectSimSlotRadioGroup.add(m_simSlotBradio);
+        m_selectSimSlotRadioGroup.addPlugin(m_dirtyPlugin);  
+        m_selectSimSlotRadioGroup.setStyleAttribute("margin-top", Constants.LABEL_MARGIN_TOP_SEPARATOR);
+        m_selectSimSlotRadioGroup.addListener(Events.Change,new Listener<FieldEvent>(){
+            @Override public void handleEvent(FieldEvent be) {
+            	// TODO
+            	Log.warn("<IAB> Radio Group change !!!");
+            }
+          }
+        );
+        
+        fieldSet.add(m_selectSimSlotRadioGroup, formData);
+        
+        m_imsiLabelField = new LabelField();
+        m_imsiLabelField.setName("imsi");
+        m_imsiLabelField.setFieldLabel(MSGS.netModemInternationalMobileSubscriberIdentity());
+        m_imsiLabelField.addPlugin(m_dirtyPlugin);
+        //m_imsiLabelField.setStyleAttribute("margin-top", Constants.LABEL_MARGIN_TOP_SEPARATOR);
+        fieldSet.add(m_imsiLabelField, formData);
+        
+        m_iccidLabelField = new LabelField();
+        m_iccidLabelField.setName("imsi");
+        m_iccidLabelField.setFieldLabel(MSGS.netModemIntegratedCircuitCardIdentification());
+        m_iccidLabelField.addPlugin(m_dirtyPlugin);
+        //m_iccidLabelField.setStyleAttribute("margin-top", Constants.LABEL_MARGIN_TOP_SEPARATOR);
+        fieldSet.add(m_iccidLabelField, formData);
+         
         //
         // Dial String
         // 
@@ -451,75 +496,6 @@ public class ModemConfigTab extends LayoutContainer
         m_apnField.addPlugin(m_dirtyPlugin);
         fieldSet.add(m_apnField, formData);
         
-        initModemSimCardGrid();
-        
-        m_refreshSimInfoButton = new Button("Refresh SIM Info", 
-				AbstractImagePrototype.create(Resources.INSTANCE.edit()),
-				new SelectionListener<ButtonEvent>() {
-			@Override
-			public void componentSelected(ButtonEvent ce) {
-				gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
-					@Override
-					public void onFailure(Throwable ex) {
-						FailureHandler.handle(ex);
-					}
-
-					@Override
-					public void onSuccess(GwtXSRFToken token) {	
-
-						if (m_grid != null) {
-							Log.warn("<IAB> [2] Refresh SIM Info button selected");
-							// TODO
-							gwtNetworkService.refreshSimCardInfo(token, m_selectNetIfConfig.getModemServiceId(), new AsyncCallback<Void>() {
-								public void onSuccess(Void result) {
-									Log.debug("updated!");
-									m_dirty = false;
-									m_simCardInfoLoader.load();
-									//initModemSimCardGrid();
-									//refresh();
-									unmask();
-								}
-
-								public void onFailure(Throwable caught) {
-									Log.debug("caught: " + caught.toString());
-									unmask();
-									FailureHandler.handle(caught);
-								}
-							});
-						}
-					}});
-				
-				
-				/*
-				Log.warn("<IAB> [1] Refresh SIM Info button selected");
-				if (m_grid != null) {
-					Log.warn("<IAB> [2] Refresh SIM Info button selected");
-					// TODO
-					gwtNetworkService.refreshSimCardInfo(m_selectNetIfConfig.getModemServiceId());
-					initModemSimCardGrid();
-				}
-				*/
-			}
-		});
-        
-        //fieldSet.add(m_refreshSimInfoButton);
-        
-        m_simCardPanel = new ContentPanel();
-        m_simCardPanel.setHeading("Select SIM Slot");
-        m_simCardPanel.setCollapsible(true);
-        m_simCardPanel.setFrame(true);
-        m_simCardPanel.setSize(430, 150);
-        
-        m_simCardPanel.setLayout(new FitLayout());
-        m_simCardPanel.setStyleAttribute("margin-top", Constants.LABEL_MARGIN_TOP_SEPARATOR);
-        
-        m_simCardPanel.addButton(m_refreshSimInfoButton);
-        m_simCardPanel.add(m_grid);
-        
-        
-        //m_simCardPanel.addListener(Events.OnMouseOver, new MouseOverListener(MSGS.netWifiToolTipChannels()));
-        fieldSet.add(m_simCardPanel);
-
         //
     	// Auth Type
         //
@@ -734,8 +710,6 @@ public class ModemConfigTab extends LayoutContainer
 				update();				
 			}		
 		}
-		
-		m_simCardInfoLoader.load();
 	}	
 	
 	private void update()
@@ -786,6 +760,44 @@ public class ModemConfigTab extends LayoutContainer
 
             m_ifaceNumField.setValue(m_selectNetIfConfig.getPppNum());
             m_ifaceNumField.setOriginalValue(m_ifaceNumField.getValue());
+            
+            // TODO
+            gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
+            	@Override
+				public void onFailure(Throwable ex) {
+					FailureHandler.handle(ex);
+				}
+            	public void onSuccess(GwtXSRFToken token) {	
+            		gwtNetworkService.findSimCardInfo(token, m_selectNetIfConfig.getModemServiceId(), new AsyncCallback<ListLoadResult<GwtModemSimCardEntry>> () {
+            			public void onSuccess(ListLoadResult<GwtModemSimCardEntry> result) {
+            				List<GwtModemSimCardEntry> gwtModemSimCardEntries = result.getData();
+            				for (GwtModemSimCardEntry gwtModemSimCardEntry : gwtModemSimCardEntries) {
+            					GwtSimCardSlot gwtSimSlot = gwtModemSimCardEntry.getSimSlot();
+            					if (gwtModemSimCardEntry.isActive()) {
+            						m_imsiLabelField.setValue(gwtModemSimCardEntry.getInternationalMobileSubscriberIdentity());
+        							m_iccidLabelField.setValue(gwtModemSimCardEntry.getIntegratedCircuitCardIdentification());
+        							if (gwtSimSlot == GwtSimCardSlot.A) {
+        								m_simSlotAradio.setValue(true);
+            							m_simSlotBradio.setValue(false);
+        							} else if (gwtSimSlot == GwtSimCardSlot.B) {
+        								m_simSlotAradio.setValue(false);
+            							m_simSlotBradio.setValue(true);
+        							}
+            					}
+            				}
+            			}
+            			
+            			public void onFailure(Throwable caught) {
+            				FailureHandler.handle(caught);
+            			}
+            		});
+            	}
+            }
+            
+            		
+            		
+            		);
+            //gwtNetworkService.findSimCardInfo(xsrfToken, deviceServiceId, callback)
             
 			m_dialStringField.setValue(m_selectNetIfConfig.getDialString());
 			m_dialStringField.setOriginalValue(m_dialStringField.getValue());
@@ -967,129 +979,4 @@ public class ModemConfigTab extends LayoutContainer
 		
 		Log.warn("<IAB> ModemConfigTab: [-] reset()");
 	}
-	
-	private void initModemSimCardGrid() {
-		//
-		// Column Configuration
-		ColumnConfig column = null;
-		List<ColumnConfig> configs = new ArrayList<ColumnConfig>();
-		
-		m_checkboxSelectionModel.setSelectionMode(SelectionMode.SINGLE);
-		configs.add(m_checkboxSelectionModel.getColumn());
-		
-		column = new ColumnConfig("simSlot", MSGS.netModemSimSlot(), 40);
-		column.setAlignment(HorizontalAlignment.CENTER);
-		configs.add(column);
-		
-		column = new ColumnConfig("IMSI", MSGS.netModemInternationalMobileSubscriberIdentity(), 100);
-		column.setAlignment(HorizontalAlignment.CENTER);
-		configs.add(column);
-
-		column = new ColumnConfig("ICCID", MSGS.netModemIntegratedCircuitCardIdentification(), 100);
-		column.setAlignment(HorizontalAlignment.CENTER);
-		configs.add(column);
-		
-		// rpc data proxy  
-		RpcProxy<ListLoadResult<GwtModemSimCardEntry>> proxy = new RpcProxy<ListLoadResult<GwtModemSimCardEntry>>() {  
-			@Override  
-			protected void load(Object loadConfig, final AsyncCallback<ListLoadResult<GwtModemSimCardEntry>> callback) {  
-				gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
-					@Override
-					public void onFailure(Throwable ex) {
-						FailureHandler.handle(ex);
-					}
-
-					@Override
-					public void onSuccess(GwtXSRFToken token) {	
-								// TODO <IAB>
-						if(m_selectNetIfConfig != null) {
-							Log.warn("<IAB> ### Modem Service ID = " + m_selectNetIfConfig.getModemServiceId() + " ###");
-						}
-						gwtNetworkService.findSimCardInfo(token, m_selectNetIfConfig.getModemServiceId(), callback);
-					}});
-				}  
-		};
-		
-		m_simCardInfoLoader = new BaseListLoader<ListLoadResult<GwtModemSimCardEntry>>(proxy);
-		m_simCardInfoLoader.setSortDir(SortDir.DESC);  
-		m_simCardInfoLoader.setSortField("simSlot"); 
-		m_simCardInfoLoader.setRemoteSort(true);  
-		
-		SwappableListStore<GwtModemSimCardEntry> m_store = new SwappableListStore<GwtModemSimCardEntry>(m_simCardInfoLoader);
-		m_store.setKeyProvider( new ModelKeyProvider<GwtModemSimCardEntry>() {            
-			public String getKey(GwtModemSimCardEntry simCardEntry) {
-				return simCardEntry.getSimSlot();
-			}
-		});
-
-		m_grid = new Grid<GwtModemSimCardEntry>(m_store, new ColumnModel(configs));
-		m_grid.setBorders(false);
-		m_grid.setStateful(false);
-		m_grid.setLoadMask(true);
-		m_grid.setStripeRows(true);
-		
-		//m_grid.setColumnLines(true);
-		//m_grid.setAutoHeight(true);
-		
-		m_grid.setAutoExpandColumn("simSlot");
-		m_grid.getView().setAutoFill(true);
-		
-		m_grid.getView().setEmptyText(MSGS.netModemNoSimCardDetected());
-
-		m_simCardInfoLoader.addLoadListener(new DataLoadListener(m_grid));
-
-		/*
-		GridSelectionModel<GwtModemSimCardEntry> selectionModel = new GridSelectionModel<GwtModemSimCardEntry>();
-		selectionModel.setSelectionMode(SelectionMode.SINGLE);
-		m_grid.setSelectionModel(selectionModel);
-		*/
-		m_grid.setSelectionModel(m_checkboxSelectionModel);
-		m_grid.getSelectionModel().addSelectionChangedListener(new SelectionChangedListener<GwtModemSimCardEntry>() {
-			@Override
-			public void selectionChanged(SelectionChangedEvent<GwtModemSimCardEntry> se) {
-				Log.warn("<IAB> SELECTION changed - " + m_checkboxSelectionModel.isSelected(se.getSelectedItem()));
-				/* TODO <IAB>
-				m_selectedEntry = se.getSelectedItem();
-				if (m_selectedEntry != null) {
-					m_editButton.setEnabled(true);
-					m_deleteButton.setEnabled(true);
-				} else {
-					m_editButton.setEnabled(false);
-					m_deleteButton.setEnabled(false);                 
-				}
-				*/
-			}
-		});
-	}
-	
-	
-	private class DataLoadListener extends LoadListener {
-		private Grid<GwtModemSimCardEntry> m_grid;
-		private GwtModemSimCardEntry       m_selectedEntry;
-
-		public DataLoadListener(Grid<GwtModemSimCardEntry> grid) {
-			m_grid 			 = grid;
-			m_selectedEntry = null;
-		}
-
-		public void loaderBeforeLoad(LoadEvent le) {
-			m_selectedEntry = m_grid.getSelectionModel().getSelectedItem();
-		}
-
-		public void loaderLoad(LoadEvent le) {
-			if (le.exception != null) {
-				FailureHandler.handle(le.exception);
-			}
-			Log.warn("<IAB> loaderLoad() :: m_selectedEntry=" + m_selectedEntry.getSimSlot());
-			if (m_selectedEntry != null) {
-				ListStore<GwtModemSimCardEntry> store = m_grid.getStore();
-				GwtModemSimCardEntry modelEntry = store.findModel(m_selectedEntry.getSimSlot());
-				if (modelEntry != null) {
-					m_grid.getSelectionModel().select(modelEntry, false);
-					m_grid.getView().focusRow(store.indexOf(modelEntry));
-				}
-			}
-		}
-	}
-
 }

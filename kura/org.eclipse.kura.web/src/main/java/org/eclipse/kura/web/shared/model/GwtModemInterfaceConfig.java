@@ -184,15 +184,15 @@ public class GwtModemInterfaceConfig extends GwtNetInterfaceConfig
 		set("apn", apn);
 	}
 	
-	public SimCardSlot getActiveSimCardSlot() {
+	public GwtSimCardSlot getActiveSimCardSlot() {
 		if (get("activeSimCardSlot") != null) {
-			return SimCardSlot.valueOf((String)get("activeSimCardSlot"));
+			return GwtSimCardSlot.valueOf((String)get("activeSimCardSlot"));
 		} else {
 			return null;
 		}
 	}
 	
-	public void setActiveSimCardSlot(SimCardSlot activeSimCardSlot) {
+	public void setActiveSimCardSlot(GwtSimCardSlot activeSimCardSlot) {
 		set("activeSimCardSlot", activeSimCardSlot.name());
 	}
 	

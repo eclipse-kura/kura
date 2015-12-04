@@ -83,6 +83,7 @@ import org.eclipse.kura.web.shared.model.GwtNetIfStatus;
 import org.eclipse.kura.web.shared.model.GwtNetIfType;
 import org.eclipse.kura.web.shared.model.GwtNetInterfaceConfig;
 import org.eclipse.kura.web.shared.model.GwtNetRouterMode;
+import org.eclipse.kura.web.shared.model.GwtSimCardSlot;
 import org.eclipse.kura.web.shared.model.GwtWifiBgscanModule;
 import org.eclipse.kura.web.shared.model.GwtWifiCiphers;
 import org.eclipse.kura.web.shared.model.GwtWifiConfig;
@@ -1047,10 +1048,10 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 						GwtModemSimCardEntry gwtModemSimCardEntry = new GwtModemSimCardEntry();
 						switch (ind) {
 						case 0:
-							gwtModemSimCardEntry.setSimSlot("A");
+							gwtModemSimCardEntry.setSimSlot(GwtSimCardSlot.A);
 							break;
 						case 1:
-							gwtModemSimCardEntry.setSimSlot("B");
+							gwtModemSimCardEntry.setSimSlot(GwtSimCardSlot.B);
 							break;
 						}
 						

@@ -56,7 +56,6 @@ public class WpaSupplicantManager {
 		
 		s_logger.debug("enable WPA Supplicant");
 		
-		SafeProcess proc = null;
 		try {
 			if(WpaSupplicantManager.isRunning()) {
                 stop();
@@ -79,11 +78,8 @@ public class WpaSupplicantManager {
 			s_logger.debug("starting wpa_supplicant -> {}", wpaSupplicantCommand);
 			LinuxProcessUtil.start(wpaSupplicantCommand);
 		} catch (Exception e) {
-			e.printStackTrace();
+			s_logger.error("Exception while enabling WPA Supplicant!", e);
 			throw KuraException.internalError(e);
-		}
-		finally {
-			if (proc != null) ProcessUtil.destroy(proc);
 		}
 	}
 

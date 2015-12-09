@@ -249,6 +249,10 @@ public class PppConfigWriter implements NetworkConfigurationVisitor {
 					key = new StringBuilder().append("net.interface.").append(newInterfaceName).append(".config.resetTimeout");
 					s_logger.debug("Setting modem resetTimeout for " + newInterfaceName);
 					KuranetConfig.setProperty(key.toString(), Integer.toString(modemConfig.getResetTimeout()));
+					
+					key = new StringBuilder().append("net.interface.").append(newInterfaceName).append(".config.activeSimSlot");
+					s_logger.debug("Setting active SIM card slot for " + newInterfaceName);
+					KuranetConfig.setProperty(key.toString(), Integer.toString(modemConfig.getActiveSimCardSlot().getValue()));
 				} else {
 					s_logger.error("Error writing connect scripts - modemConfig is null");
 				}

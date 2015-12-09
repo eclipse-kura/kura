@@ -61,11 +61,11 @@ public class NetInterfaceConfigTabs extends LayoutContainer
 	    
 		m_currentSession   = currentSession;
 	    
-	    initTabs();
+	    initTabs(null);
 	}
 
 	
-    private void initTabs()
+    private void initTabs(GwtNetInterfaceConfig netIfConfig)
     {    	
 	    final NetInterfaceConfigTabs theTabs = this;
 
@@ -103,7 +103,7 @@ public class NetInterfaceConfigTabs extends LayoutContainer
 	    if (m_modemConfigTab != null) {
 	    	m_modemConfigTab.removeFromParent();
     	}
-	    m_modemConfigTab = new ModemConfigTab(m_currentSession);
+	    m_modemConfigTab = new ModemConfigTab(m_currentSession, netIfConfig);
 	    m_modemConfigTab.addListener(Events.Change, new Listener<BaseEvent>() {
 			public void handleEvent(BaseEvent be) {
 				theTabs.fireEvent(be.getType());
@@ -153,7 +153,7 @@ public class NetInterfaceConfigTabs extends LayoutContainer
     	m_netIfConfig = netIfConfig;
     	
     	// refresh the tabs so the dirty state is cleaned up
-    	initTabs();
+    	initTabs(netIfConfig);
     			
      	m_tcpIpConfigTab.setNetInterface(netIfConfig);     	
     	m_dhcpNatConfigTab.setNetInterface(netIfConfig);

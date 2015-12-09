@@ -13,8 +13,6 @@ package org.eclipse.kura.web.shared.model;
 
 import java.util.List;
 
-import org.eclipse.kura.net.modem.SimCardSlot;
-
 
 public class GwtModemInterfaceConfig extends GwtNetInterfaceConfig
 {

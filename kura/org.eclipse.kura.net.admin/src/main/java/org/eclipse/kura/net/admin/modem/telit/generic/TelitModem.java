@@ -58,6 +58,8 @@ public abstract class TelitModem {
 	private ConnectionFactory m_connectionFactory;
 	private List<NetConfig> m_netConfigs = null;
 	
+	private String NUMERIC_REGEX = "-?\\d+(\\.\\d+)?";
+	
 	public TelitModem(ModemDevice device, String platform,
 			ConnectionFactory connectionFactory) {
 		
@@ -489,8 +491,9 @@ public abstract class TelitModem {
 							if (imsi.startsWith("#CIMI:")) {
 								imsi = imsi.substring("#CIMI:".length()).trim();
 						    }
-							s_logger.warn("<IAB> [IMSI-1] Settng IMSI .. m_subscriberInfo[{}] to {}", subscriberIndex, imsi);
-							m_subscriberInfo[subscriberIndex].setInternationalMobileSubscriberIdentity(imsi);
+							if (imsi.matches(NUMERIC_REGEX)) {
+								m_subscriberInfo[subscriberIndex].setInternationalMobileSubscriberIdentity(imsi);
+							}
 						}
 					}
     			} catch (Exception e) {
@@ -499,7 +502,6 @@ public abstract class TelitModem {
 	    	}
     	}
     	
-    	s_logger.warn("<IAB> [IMSI-2] returning IMSI .. m_subscriberInfo[{}] to {}", subscriberIndex, m_subscriberInfo[subscriberIndex]);
         return m_subscriberInfo[subscriberIndex].getInternationalMobileSubscriberIdentity();
     }
     /*
@@ -534,7 +536,6 @@ public abstract class TelitModem {
 		    				if (subscriber.startsWith("+CNUM:")) {
 		    					subscriber = subscriber.substring("+CNUM:".length()).trim();
 		    					String [] abSubscriber = subscriber.split(",");
-		    					s_logger.warn("<IAB> @@@ abSubscriber[1]={}", abSubscriber[1]);
 		    					String subscriberNumber = abSubscriber[1].substring(1, abSubscriber[1].lastIndexOf('"'));
 		    					if (m_subscriberInfo[subscriberIndex] == null) {
 									m_subscriberInfo[subscriberIndex] = new SubscriberInfo();
@@ -584,8 +585,9 @@ public abstract class TelitModem {
 							if (iccid.startsWith("#CCID:")) {
 								iccid = iccid.substring("#CCID:".length()).trim();
 						    }
-							s_logger.warn("<IAB> [ICCID-1] Settng ICCID .. m_subscriberInfo[{}] to {}", subscriberIndex, iccid);
-						    m_subscriberInfo[subscriberIndex].setIntegratedCircuitCardIdentification(iccid);
+							if (iccid.matches(NUMERIC_REGEX)) {
+								m_subscriberInfo[subscriberIndex].setIntegratedCircuitCardIdentification(iccid);
+							}
 						}
 					}
 		    	} catch (Exception e) {
@@ -594,7 +596,6 @@ public abstract class TelitModem {
 	    	}
     	}
     	
-    	s_logger.warn("<IAB> [ICCID-2] Retunting ICCID .. m_subscriberInfo[{}] to {}", subscriberIndex, m_subscriberInfo[subscriberIndex]);
         return m_subscriberInfo[subscriberIndex].getIntegratedCircuitCardIdentification();
     }
         

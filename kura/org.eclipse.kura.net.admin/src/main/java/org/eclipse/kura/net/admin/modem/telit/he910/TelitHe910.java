@@ -50,6 +50,8 @@ public class TelitHe910 extends TelitModem implements HspaCellularModem {
 	private int m_pdpContext = 1;
 	
 	private ScheduledExecutorService m_executorUtil;
+	
+	private static final Object s_simLock = new Object();
 
     /**
      * TelitHe910 modem constructor
@@ -62,7 +64,7 @@ public class TelitHe910 extends TelitModem implements HspaCellularModem {
 			ConnectionFactory connectionFactory) {
         
 		super(device, platform, connectionFactory);
-        
+		m_executorUtil = Executors.newSingleThreadScheduledExecutor();
         try {
 			String atPort = getAtPort();
 			String gpsPort = getGpsPort();
@@ -81,18 +83,6 @@ public class TelitHe910 extends TelitModem implements HspaCellularModem {
 					s_logger.trace("{} :: GPS Supported={}", getClass().getName(), m_gpsSupported);
 					s_logger.trace("{} :: RSSI={}", getClass().getName(), m_rssi);
 				}
-				
-				m_executorUtil = Executors.newSingleThreadScheduledExecutor();
-				m_executorUtil.schedule(new Runnable() {
-		    		@Override
-		    		public void run() {
-		    			try {
-							m_subscriberInfo = obtainSubscriberInfo();
-						} catch (KuraException e) {
-							s_logger.error("failed to initialize Telit HE910 modem - {}", e);
-						}
-		    		}
-		    	}, 10, TimeUnit.MILLISECONDS);
 			}
 		} catch (KuraException e) {
 			s_logger.error("failed to initialize Telit HE910 modem - {}", e);
@@ -110,48 +100,89 @@ public class TelitHe910 extends TelitModem implements HspaCellularModem {
 	}
 	
 	@Override
-	public SubscriberInfo [] getSubscriberInfo() {
+	public SubscriberInfo [] getSubscriberInfo(boolean refreshActiveSimInfo) throws KuraException {
+		if (refreshActiveSimInfo) {
+			SimCardSlot simCardSlot = getSimCardSlot();
+			if (simCardSlot == SimCardSlot.A) {
+				m_subscriberInfo[0].setActive(true);
+				m_subscriberInfo[1].setActive(false);
+			} else if (simCardSlot == SimCardSlot.B) {
+				m_subscriberInfo[0].setActive(false);
+				m_subscriberInfo[1].setActive(true);
+			}
+		}
 		return m_subscriberInfo;
 	}
 	
 	@Override
-	public SubscriberInfo [] obtainSubscriberInfo() throws KuraException {
+	public SubscriberInfo [] obtainSubscriberInfo(SimCardSlot cfgSimCardSlot, int execDelay) {
+		final SimCardSlot simCardSlot = cfgSimCardSlot;
+		m_executorUtil.schedule(new Runnable() {
+    		@Override
+    		public void run() {
+    			try {
+					m_subscriberInfo = obtainSubscriberInfo(simCardSlot);
+				} catch (KuraException e) {
+					s_logger.error("failed to obtain subscriber info for Telit modem - {}", e);
+				}
+    		}
+    	}, execDelay, TimeUnit.MILLISECONDS);
+		return m_subscriberInfo;
+	}
+	
+	@Override
+	public SubscriberInfo [] obtainSubscriberInfo(SimCardSlot cfgSimCardSlot) throws KuraException {
 		SubscriberInfo [] ret = new SubscriberInfo [2];
-		ret[0] = new SubscriberInfo(); ret[1] = new SubscriberInfo();
-		SimCardSlot originalSimSlot = getSimCardSlot();
-		if (originalSimSlot == SimCardSlot.A) {
-			if (isSimCardReady()) {
-				ret[0] = new SubscriberInfo(getMobileSubscriberIdentity(SimCardSlot.A.getValue()), 
-						getIntegratedCirquitCardId(SimCardSlot.A.getValue()));
-				ret[0].setActive(true);
-			}
-			if (setSimCardSlot(SimCardSlot.B)) {
-				sleep(7000);
-				SubscriberInfo subscriberInfo = new SubscriberInfo(getMobileSubscriberIdentity(SimCardSlot.B.getValue()), 
-							getIntegratedCirquitCardId(SimCardSlot.B.getValue()));	
-				if (!subscriberInfo.equals(ret[0])) {
-					ret[1] = subscriberInfo;
-				}
-			}
-		} else if (originalSimSlot == SimCardSlot.B) {
-			if (isSimCardReady()) {
-				ret[1] = new SubscriberInfo(getMobileSubscriberIdentity(SimCardSlot.B.getValue()), 
-						getIntegratedCirquitCardId(SimCardSlot.B.getValue()));
-				ret[1].setActive(true);
-			}
-			if (setSimCardSlot(SimCardSlot.A)) {
-				sleep(7000);
-				SubscriberInfo subscriberInfo = new SubscriberInfo(getMobileSubscriberIdentity(SimCardSlot.A.getValue()), 
+		synchronized (s_simLock) {
+			ret[0] = new SubscriberInfo(); ret[1] = new SubscriberInfo();
+			SimCardSlot simSlot = getSimCardSlot();
+			s_logger.debug("obtainSubscriberInfo() :: original simSlot={}", simSlot);
+			if (simSlot == SimCardSlot.A) {
+				if (isSimCardReady()) {
+					ret[0] = new SubscriberInfo(getMobileSubscriberIdentity(SimCardSlot.A.getValue()), 
 							getIntegratedCirquitCardId(SimCardSlot.A.getValue()));
-				if (!subscriberInfo.equals(ret[1])) {
-					ret[0] = subscriberInfo;
+					ret[0].setActive(true);
 				}
+				s_logger.debug("obtainSubscriberInfo() :: switching to SIM Slot {}", SimCardSlot.B);
+				if (setSimCardSlot(SimCardSlot.B)) {
+					sleep(9000);
+					SubscriberInfo subscriberInfo = new SubscriberInfo(getMobileSubscriberIdentity(SimCardSlot.B.getValue()), 
+								getIntegratedCirquitCardId(SimCardSlot.B.getValue()));	
+					if (!subscriberInfo.equals(ret[0])) {
+						ret[1] = subscriberInfo;
+					}
+				}
+			} else if (simSlot == SimCardSlot.B) {
+				if (isSimCardReady()) {
+					ret[1] = new SubscriberInfo(getMobileSubscriberIdentity(SimCardSlot.B.getValue()), 
+							getIntegratedCirquitCardId(SimCardSlot.B.getValue()));
+					ret[1].setActive(true);
+				}
+				s_logger.debug("obtainSubscriberInfo() :: switching to SIM Slot {}", SimCardSlot.A);
+				if (setSimCardSlot(SimCardSlot.A)) {
+					sleep(9000);
+					SubscriberInfo subscriberInfo = new SubscriberInfo(getMobileSubscriberIdentity(SimCardSlot.A.getValue()), 
+								getIntegratedCirquitCardId(SimCardSlot.A.getValue()));
+					if (!subscriberInfo.equals(ret[1])) {
+						ret[0] = subscriberInfo;
+					}
+				}
+			}
+			if (cfgSimCardSlot != null) {
+				simSlot = getSimCardSlot();
+				if (simSlot != cfgSimCardSlot) {
+					s_logger.debug("obtainSubscriberInfo() :: switching to configured SIM Slot {}", cfgSimCardSlot);
+					setSimCardSlot(cfgSimCardSlot);
+				}
+			} else {
+				s_logger.debug("obtainSubscriberInfo() :: switching to original SIM Slot {}",simSlot);
+				setSimCardSlot(simSlot);
 			}
 		}
-		setSimCardSlot(originalSimSlot);
 		return ret;
 	}
 	
+	@Override
 	public SimCardSlot getSimCardSlot() throws KuraException {
 		SimCardSlot simCardSlot = null;
 		String port = null;
@@ -183,7 +214,7 @@ public class TelitHe910 extends TelitModem implements HspaCellularModem {
 		        	int ind = -1;
 		        	if ((asReply.length >= 2) && ((ind=asReply[1].indexOf(",")) > 0)) {
 		        		int simSlot = Integer.parseInt(asReply[1].substring(ind+1));
-		        		simCardSlot = SimCardSlot.getSimCardSlot(simSlot);
+		        		simCardSlot = SimCardSlot.getSimCardSlot(simSlot, true);
 		        	}
 		        }
 	    	} catch (Exception e) {
@@ -193,6 +224,7 @@ public class TelitHe910 extends TelitModem implements HspaCellularModem {
 		return simCardSlot;
 	}
 	
+	@Override
 	public boolean setSimCardSlot(SimCardSlot simCardSlot) throws KuraException {
 		
 		boolean ret = false;
@@ -229,7 +261,7 @@ public class TelitHe910 extends TelitModem implements HspaCellularModem {
 	    	if (simCardSlot == getSimCardSlot()) {
 	    		ret = true;
 	    		if (isSimCardReady()) {
-		    		s_logger.warn("<IAB> setSimCardSlot() :: successfully switched to simCardSlot {}", simCardSlot);
+		    		s_logger.info("setSimCardSlot() :: successfully switched to simCardSlot {}", simCardSlot);
 					ret = true;
 	    		}
 			}

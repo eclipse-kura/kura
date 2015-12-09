@@ -53,6 +53,7 @@ import org.eclipse.kura.net.modem.ModemConfig;
 import org.eclipse.kura.net.modem.ModemTechnologyType;
 import org.eclipse.kura.net.modem.ModemConfig.AuthType;
 import org.eclipse.kura.net.modem.ModemConfig.PdpType;
+import org.eclipse.kura.net.modem.SimCardSlot;
 import org.eclipse.kura.usb.UsbDevice;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -367,6 +368,13 @@ public class PppConfigReader implements NetworkConfigurationVisitor {
             gpsEnabled = Boolean.parseBoolean(statusString);
         }
         
+        SimCardSlot activeSimSlot = SimCardSlot.A;
+        key = new StringBuilder().append("net.interface.").append(ifaceName).append(".config.activeSimSlot");
+        statusString = KuranetConfig.getProperty(key.toString());
+        if(statusString != null && !statusString.isEmpty()) {
+        	activeSimSlot = SimCardSlot.getSimCardSlot(Integer.parseInt(statusString), false);
+        }
+        
         int resetTout = 5;
         key = new StringBuilder().append("net.interface.").append(ifaceName).append(".config.resetTimeout");
         statusString = KuranetConfig.getProperty(key.toString());
@@ -392,6 +400,7 @@ public class PppConfigReader implements NetworkConfigurationVisitor {
         modemConfig.setResetTimeout(resetTout);
         
 		if (isGsmGprsUmtsHspa) {
+			modemConfig.setActiveSimCardSlot(activeSimSlot);
 			modemConfig.setApn(apn);
 			modemConfig.setAuthType(authType);
 			modemConfig.setPassword(password);

@@ -13,8 +13,11 @@ package org.eclipse.kura.net.admin.modem;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.net.modem.CellularModem;
+import org.eclipse.kura.net.modem.SimCardSlot;
 
 public interface HspaCellularModem extends CellularModem {
 
-	 public boolean isSimCardReady() throws KuraException;
+	public SimCardSlot getSimCardSlot() throws KuraException;
+	public boolean setSimCardSlot(SimCardSlot simCardSlot) throws KuraException;
+	public boolean isSimCardReady() throws KuraException;
 }

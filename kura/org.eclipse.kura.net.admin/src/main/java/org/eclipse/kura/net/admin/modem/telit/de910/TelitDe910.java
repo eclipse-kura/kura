@@ -27,6 +27,7 @@ import org.eclipse.kura.net.modem.ModemCdmaServiceProvider;
 import org.eclipse.kura.net.modem.ModemDevice;
 import org.eclipse.kura.net.modem.ModemRegistrationStatus;
 import org.eclipse.kura.net.modem.ModemTechnologyType;
+import org.eclipse.kura.net.modem.SimCardSlot;
 import org.eclipse.kura.net.modem.SubscriberInfo;
 import org.eclipse.kura.usb.UsbModemDevice;
 import org.osgi.service.io.ConnectionFactory;
@@ -50,7 +51,7 @@ public class TelitDe910 extends TelitModem implements EvdoCellularModem {
 			ConnectionFactory connectionFactory) {
 		
 		super(device, platform, connectionFactory);
-		
+		m_executorUtil = Executors.newSingleThreadScheduledExecutor();
 		try {
 			String atPort = getAtPort();
 			String gpsPort = getGpsPort();
@@ -69,17 +70,6 @@ public class TelitDe910 extends TelitModem implements EvdoCellularModem {
 					s_logger.trace("TelitDe910() :: GPS Supported={}", m_gpsSupported);
 					s_logger.trace("TelitDe910() :: RSSI={}", m_rssi);
 				}
-				m_executorUtil = Executors.newSingleThreadScheduledExecutor();
-				m_executorUtil.schedule(new Runnable() {
-		    		@Override
-		    		public void run() {
-		    			try {
-							m_subscriberInfo = obtainSubscriberInfo();
-						} catch (KuraException e) {
-							s_logger.error("failed to initialize Telit DE910 modem - {}", e);
-						}
-		    		}
-		    	}, 10, TimeUnit.MILLISECONDS);
 			}
 		} catch (KuraException e) {
 			s_logger.error("failed to initialize Telit DE910 modem - {}", e);
@@ -453,12 +443,28 @@ public class TelitDe910 extends TelitModem implements EvdoCellularModem {
 	}
 	
 	@Override
-	public SubscriberInfo [] getSubscriberInfo() {
+	public SubscriberInfo [] getSubscriberInfo(boolean refreshActiveSimInfo) throws KuraException {
 		return m_subscriberInfo;
 	}
 	
 	@Override
-	public SubscriberInfo [] obtainSubscriberInfo() throws KuraException {
+	public SubscriberInfo [] obtainSubscriberInfo(SimCardSlot cfgSimCardSlot, int execDelay) {
+		final SimCardSlot simCardSlot = cfgSimCardSlot;
+		m_executorUtil.schedule(new Runnable() {
+    		@Override
+    		public void run() {
+    			try {
+					m_subscriberInfo = obtainSubscriberInfo(simCardSlot);
+				} catch (KuraException e) {
+					s_logger.error("failed to obtain subscriber info for Telit modem - {}", e);
+				}
+    		}
+    	}, execDelay, TimeUnit.MILLISECONDS);
+		return m_subscriberInfo;
+	}
+	
+	@Override
+	public SubscriberInfo [] obtainSubscriberInfo(SimCardSlot activeSimCardSlot) throws KuraException {
 		SubscriberInfo [] ret = new SubscriberInfo [1]; ret[0] = null; 
 		ret[0] = new SubscriberInfo(getMobileSubscriberIdentity(0), 
 				getIntegratedCirquitCardId(0));

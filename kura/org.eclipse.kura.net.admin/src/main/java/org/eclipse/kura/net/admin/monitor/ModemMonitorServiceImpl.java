@@ -72,6 +72,7 @@ import org.eclipse.kura.net.modem.ModemReadyEvent;
 import org.eclipse.kura.net.modem.ModemRemovedEvent;
 import org.eclipse.kura.net.modem.ModemTechnologyType;
 import org.eclipse.kura.net.modem.SerialModemDevice;
+import org.eclipse.kura.net.modem.SimCardSlot;
 import org.eclipse.kura.system.SystemService;
 import org.eclipse.kura.usb.UsbDeviceEvent;
 import org.eclipse.kura.usb.UsbModemDevice;
@@ -239,7 +240,6 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
     	s_logger.debug("handleEvent - topic: {}", event.getTopic());
         String topic = event.getTopic();
         if (topic.equals(NetworkConfigurationChangeEvent.NETWORK_EVENT_CONFIG_CHANGE_TOPIC)) {
-        	
         	NetworkConfigurationChangeEvent netConfigChangedEvent = (NetworkConfigurationChangeEvent)event;
         	 String [] propNames = netConfigChangedEvent.getPropertyNames();
 			if ((propNames != null) && (propNames.length > 0)) {
@@ -449,6 +449,12 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 		                                postModemGpsEvent(modem, true);
 									}
 								}
+		    				} else {
+		    					ModemConfig modemConfig = getModemConfig(newNetConfigs);
+		    					SimCardSlot currentSimSlot = ((HspaCellularModem)modem).getSimCardSlot();
+		    					if ((currentSimSlot != null) && (currentSimSlot != modemConfig.getActiveSimCardSlot())) {
+		    						((HspaCellularModem)modem).setSimCardSlot(modemConfig.getActiveSimCardSlot());
+		    					}
 		    				}
 		    			}
 	    			}
@@ -795,8 +801,12 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 						netConfigs = getNetConfigs(netInterfaceConfig);
 						if ((netConfigs != null) && (netConfigs.size() > 0)) {
 							modem.setConfiguration(netConfigs);
+							ModemConfig modemConfig = getModemConfig(netConfigs);
+							modem.obtainSubscriberInfo(modemConfig.getActiveSimCardSlot(), 10);
 						}
 					}
+				} else {
+					modem.obtainSubscriberInfo(null, 10);
 				}
 				
 				if (modemDevice instanceof UsbModemDevice) {

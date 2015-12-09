@@ -13,14 +13,14 @@ public enum SimCardSlot {
 		return m_slot;
 	}
 	
-	public static SimCardSlot getSimCardSlot(int slot) {
+	public static SimCardSlot getSimCardSlot(int slot, boolean invert) {
 		SimCardSlot ret = null;
 		switch (slot) {
 		case 0:
-			ret = B;
+			ret = invert? B : A;
 			break;
 		case 1:
-			ret = A;
+			ret = invert? A : B;
 			break;
 		}
 		return ret;

@@ -40,6 +40,7 @@ import org.eclipse.kura.net.modem.ModemDevice;
 import org.eclipse.kura.net.modem.ModemRegistrationStatus;
 import org.eclipse.kura.net.modem.ModemTechnologyType;
 import org.eclipse.kura.net.modem.SerialModemDevice;
+import org.eclipse.kura.net.modem.SimCardSlot;
 import org.eclipse.kura.net.modem.SubscriberInfo;
 import org.eclipse.kura.usb.UsbModemDevice;
 import org.osgi.service.event.EventConstants;
@@ -376,12 +377,17 @@ public class SierraUsb598 implements EvdoCellularModem {
 	}
 	
 	@Override
-	public SubscriberInfo [] getSubscriberInfo() {
+	public SubscriberInfo [] getSubscriberInfo(boolean refreshActiveSimInfo) throws KuraException {
 		return null;
 	}
 	
 	@Override
-	public SubscriberInfo [] obtainSubscriberInfo() throws KuraException {
+	public SubscriberInfo [] obtainSubscriberInfo(SimCardSlot cfgSimCardSlot, int execDelay) {
+		return null;
+	}
+	
+	@Override
+	public SubscriberInfo [] obtainSubscriberInfo(SimCardSlot activeSimCardSlot) throws KuraException {
 		// TODO Auto-generated method stub
 		return null;
 	}

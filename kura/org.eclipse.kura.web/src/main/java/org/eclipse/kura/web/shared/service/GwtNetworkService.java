@@ -54,5 +54,5 @@ public interface GwtNetworkService extends RemoteService
 
 	public void rollbackDefaultConfiguration(GwtXSRFToken xsrfToken);
 	
-	public ListLoadResult<GwtModemSimCardEntry> findSimCardInfo(GwtXSRFToken xsrfToken, String deviceServiceId, boolean refresh) throws GwtKuraException;
+	public ListLoadResult<GwtModemSimCardEntry> findSimCardInfo(GwtXSRFToken xsrfToken, String deviceServiceId, boolean obtainSimCardInfo, boolean refreshActiveSimInfo) throws GwtKuraException;
 }

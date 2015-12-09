@@ -27,6 +27,7 @@ import org.eclipse.kura.net.admin.modem.telit.he910.TelitHe910;
 import org.eclipse.kura.net.modem.ModemDevice;
 import org.eclipse.kura.net.modem.ModemRegistrationStatus;
 import org.eclipse.kura.net.modem.ModemTechnologyType;
+import org.eclipse.kura.net.modem.SimCardSlot;
 import org.eclipse.kura.net.modem.SubscriberInfo;
 import org.eclipse.kura.usb.UsbModemDevice;
 import org.osgi.service.io.ConnectionFactory;
@@ -434,12 +435,27 @@ public class SierraMc87xx implements HspaCellularModem {
 		m_netConfigs = netConfigs;
 	}
 	
-	public SubscriberInfo [] getSubscriberInfo() {
+	public SubscriberInfo [] getSubscriberInfo(boolean refreshActiveSimInfo) throws KuraException {
 		return null;
 	}
 	
 	@Override
-	public SubscriberInfo [] obtainSubscriberInfo() throws KuraException {
+	public SubscriberInfo [] obtainSubscriberInfo(SimCardSlot cfgSimCardSlot, int execDelay) {
+		return null;
+	}
+	
+	@Override
+	public SimCardSlot getSimCardSlot() throws KuraException {
+		return null;
+	}
+	
+	@Override
+	public boolean setSimCardSlot(SimCardSlot simCardSlot) throws KuraException {
+		return false;
+	}
+	
+	@Override
+	public SubscriberInfo [] obtainSubscriberInfo(SimCardSlot activeSimCardSlot) throws KuraException {
 		return null;
 	}
 	

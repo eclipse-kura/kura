@@ -151,9 +151,11 @@ public interface CellularModem {
     
     public List<ModemTechnologyType> getTechnologyTypes() throws KuraException;
     
-    public SubscriberInfo [] getSubscriberInfo();
+    public SubscriberInfo [] getSubscriberInfo(boolean refreshActiveSimInfo) throws KuraException;
     
-    public SubscriberInfo [] obtainSubscriberInfo() throws KuraException;
+    public SubscriberInfo [] obtainSubscriberInfo(SimCardSlot cfgSimCardSlot, int execDelay);
+    
+    public SubscriberInfo [] obtainSubscriberInfo(SimCardSlot cfgSimCardSlot) throws KuraException;
     
     @Deprecated
     public ModemTechnologyType getTechnologyType ();

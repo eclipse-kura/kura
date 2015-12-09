@@ -217,13 +217,13 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
             
             s_logger.debug("activate() :: Found modem: {}", usbModem);
             
-            s_logger.debug("activate() :: usbModem.getTtyDevs().size()={}, modemInfo.getNumTtyDevs()={}",
-            		usbModem.getTtyDevs().size(), modemInfo.getNumTtyDevs());
-            s_logger.debug("activate() :: usbModem.getBlockDevs().size()={}, modemInfo.getNumBlockDevs()={}",
-            		usbModem.getBlockDevs().size(), modemInfo.getNumBlockDevs());
-            
             // Check for correct number of resources
             if (modemInfo != null) {
+            	s_logger.debug("activate() :: usbModem.getTtyDevs().size()={}, modemInfo.getNumTtyDevs()={}",
+                		usbModem.getTtyDevs().size(), modemInfo.getNumTtyDevs());
+                s_logger.debug("activate() :: usbModem.getBlockDevs().size()={}, modemInfo.getNumBlockDevs()={}",
+                		usbModem.getBlockDevs().size(), modemInfo.getNumBlockDevs());
+                
 	            if ((usbModem.getTtyDevs().size() == modemInfo.getNumTtyDevs())
 						&& (usbModem.getBlockDevs().size() == modemInfo.getNumBlockDevs())) {
 	            	s_logger.info("activate () :: posting ModemAddedEvent ... {}", usbModem);

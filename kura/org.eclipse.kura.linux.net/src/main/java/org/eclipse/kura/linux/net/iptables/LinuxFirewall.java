@@ -83,7 +83,7 @@ public class LinuxFirewall {
 	private static final String IP_FORWARD_FILE_NAME = "/proc/sys/net/ipv4/ip_forward";
 	private static final String FIREWALL_CONFIG_FILE_NAME = "/etc/sysconfig/iptables";
 	private static final String CUSTOM_FIREWALL_SCRIPT_NAME = "/etc/init.d/firewall_cust";
-	
+
 	private LinkedHashSet<LocalRule> m_localRules;
 	private LinkedHashSet<PortForwardRule> m_portForwardRules;
 	private LinkedHashSet<NATRule> m_autoNatRules;
@@ -94,23 +94,21 @@ public class LinuxFirewall {
 
 	private LinuxFirewall() {
 		try {
-			try {
-				File oscfile = new File(FIREWALL_CONFIG_FILE_NAME);
-				if (!oscfile.exists()) {
-					applyClearAllChainsRules();
-					applyBlockAllRules();
-					iptablesSave();
-				} else {
-					s_logger.debug("{} file already exists", oscfile);
-				}
-			} catch (Exception e) {
-				s_logger.error("cannot create or read file");// File did not exist and was created
+			File oscfile = new File(FIREWALL_CONFIG_FILE_NAME);
+			if (!oscfile.exists()) {
+				applyClearAllChainsRules();
+				applyBlockAllRules();
+				iptablesSave();
+			} else {
+				s_logger.debug("{} file already exists", oscfile);
 			}
-			
-			initialize();
 		} catch (Exception e) {
-			e.printStackTrace();
-			s_logger.error("failed to initialize LinuxFirewall");
+			s_logger.error("cannot create or read file", e);// File did not exist and was created
+		}
+		try {
+			initialize();
+		} catch (KuraException e) {
+			s_logger.error("failed to initialize LinuxFirewall", e);
 		}
 	}
 
@@ -135,74 +133,74 @@ public class LinuxFirewall {
 		s_logger.debug("initialize() :: Parsing current firewall configuraion");
 		parseFirewallConfigurationFile();
 	}
-	
+
 	private void parseFirewallConfigurationFile() throws KuraException {
 		BufferedReader br = null;
 		try {
 			List<NatPreroutingChainRule> natPreroutingChain = new ArrayList<NatPreroutingChainRule>();
 			List<NatPostroutingChainRule> natPostroutingChain = new ArrayList<NatPostroutingChainRule>();
 			List<FilterForwardChainRule> filterForwardChain = new ArrayList<FilterForwardChainRule>();
-			
+
 			br = new BufferedReader(new FileReader(FIREWALL_CONFIG_FILE_NAME));
 			String line = null;
 			boolean readingNatTable = false;
 			boolean readingFilterTable = false;
 			lineloop:
-			while((line = br.readLine()) != null) {
-				line = line.trim();
-				//skip any predefined lines or comment lines
-				if(line.equals("")) {
-					continue;
-				}
-				if(line.startsWith("#") || line.startsWith(":")) {
-					continue;
-				}
-				if (line.equals("*nat")) {
-					readingNatTable = true;
-				} else if (line.equals("*filter")) {
-					readingFilterTable = true;
-				} else if (line.equals("COMMIT")) {
-					if (readingNatTable) {
-						readingNatTable = false;
-					}
-					if (readingFilterTable) {
-						readingFilterTable = false;
-					}
-				} else if (readingNatTable && line.startsWith("-A PREROUTING")) {
-					natPreroutingChain.add(new NatPreroutingChainRule(line));
-				} else if (readingNatTable && line.startsWith("-A POSTROUTING")) {
-					natPostroutingChain.add(new NatPostroutingChainRule(line));
-				} else if (readingFilterTable && line.startsWith("-A FORWARD")) {
-					filterForwardChain.add(new FilterForwardChainRule(line));
-				} else if (readingFilterTable && line.startsWith("-A INPUT")) {
-					if (ALLOW_ALL_TRAFFIC_TO_LOOPBACK.contains(line)) {
+				while((line = br.readLine()) != null) {
+					line = line.trim();
+					//skip any predefined lines or comment lines
+					if(line.equals("")) {
 						continue;
 					}
-					if (ALLOW_ONLY_INCOMING_TO_OUTGOING.contains(line)) {
+					if(line.startsWith("#") || line.startsWith(":")) {
 						continue;
 					}
-					for(String allowIcmp : ALLOW_ICMP) {
-						if(allowIcmp.contains(line)) {
-							m_allowIcmp = true;
-							continue lineloop;
+					if (line.equals("*nat")) {
+						readingNatTable = true;
+					} else if (line.equals("*filter")) {
+						readingFilterTable = true;
+					} else if (line.equals("COMMIT")) {
+						if (readingNatTable) {
+							readingNatTable = false;
 						}
-					}
-					for(String allowIcmp : DO_NOT_ALLOW_ICMP) {
-						if(allowIcmp.contains(line)) {
-							m_allowIcmp = false;
-							continue lineloop;
+						if (readingFilterTable) {
+							readingFilterTable = false;
 						}
-					}
-					try {
-						LocalRule localRule = new LocalRule(line);
-						s_logger.debug("parseFirewallConfigurationFile() :: Adding local rule: {}", localRule);
-						m_localRules.add(localRule);
-					} catch (KuraException e) {
-						s_logger.error("Failed to parse Local Rule: {} - {}", line, e);
+					} else if (readingNatTable && line.startsWith("-A PREROUTING")) {
+						natPreroutingChain.add(new NatPreroutingChainRule(line));
+					} else if (readingNatTable && line.startsWith("-A POSTROUTING")) {
+						natPostroutingChain.add(new NatPostroutingChainRule(line));
+					} else if (readingFilterTable && line.startsWith("-A FORWARD")) {
+						filterForwardChain.add(new FilterForwardChainRule(line));
+					} else if (readingFilterTable && line.startsWith("-A INPUT")) {
+						if (ALLOW_ALL_TRAFFIC_TO_LOOPBACK.contains(line)) {
+							continue;
+						}
+						if (ALLOW_ONLY_INCOMING_TO_OUTGOING.contains(line)) {
+							continue;
+						}
+						for(String allowIcmp : ALLOW_ICMP) {
+							if(allowIcmp.contains(line)) {
+								m_allowIcmp = true;
+								continue lineloop;
+							}
+						}
+						for(String allowIcmp : DO_NOT_ALLOW_ICMP) {
+							if(allowIcmp.contains(line)) {
+								m_allowIcmp = false;
+								continue lineloop;
+							}
+						}
+						try {
+							LocalRule localRule = new LocalRule(line);
+							s_logger.debug("parseFirewallConfigurationFile() :: Adding local rule: {}", localRule);
+							m_localRules.add(localRule);
+						} catch (KuraException e) {
+							s_logger.error("Failed to parse Local Rule: {} - {}", line, e);
+						}
 					}
 				}
-			}
-			
+
 			// ! done parsing !
 			for (NatPreroutingChainRule natPreroutingChainRule : natPreroutingChain) {
 				// found port forwarding rule ...
@@ -218,7 +216,7 @@ public class LinuxFirewall {
 				String permittedNetwork = natPreroutingChainRule.getPermittedNetwork();
 				int permittedNetworkMask = natPreroutingChainRule.getPermittedNetworkMask();
 				String address = natPreroutingChainRule.getDstIpAddress();
-				
+
 				for (NatPostroutingChainRule natPostroutingChainRule : natPostroutingChain) {
 					if (natPreroutingChainRule.getDstIpAddress().equals(natPostroutingChainRule.getDstNetwork())) {
 						outboundIfaceName = natPostroutingChainRule.getDstInterface();
@@ -234,7 +232,7 @@ public class LinuxFirewall {
 				s_logger.debug("Adding port forward rule: {}", portForwardRule);
 				m_portForwardRules.add(portForwardRule);
 			}
-			
+
 			for (NatPostroutingChainRule natPostroutingChainRule : natPostroutingChain) {
 				String destinationInterface = natPostroutingChainRule.getDstInterface();
 				boolean masquerade = natPostroutingChainRule.isMasquerade();
@@ -317,8 +315,8 @@ public class LinuxFirewall {
 				br = null;
 			}
 		}
- 	}
-		
+	}
+
 	public void addCustomRule(String rule) throws KuraException {
 		try {			
 			s_logger.info("adding custom local rule to  firewall configuration");
@@ -348,7 +346,7 @@ public class LinuxFirewall {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
 		}
 	}
-	
+
 	public void addLocalRules(List<LocalRule> newLocalRules) throws KuraException {
 		try {
 			boolean doUpdate = false;
@@ -396,7 +394,7 @@ public class LinuxFirewall {
 						masquerade, permittedNetwork, -1, permittedMAC,
 						sourcePortRange);
 			}
-			
+
 			ArrayList<PortForwardRule> portForwardRules = new ArrayList<PortForwardRule>();
 			portForwardRules.add(newPortForwardRule);
 			addPortForwardRules(portForwardRules);
@@ -404,7 +402,7 @@ public class LinuxFirewall {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
 		}
 	}
-	
+
 	public void addPortForwardRules(List<PortForwardRule> newPortForwardRules) throws KuraException {
 		try {
 			boolean doUpdate = false;
@@ -461,7 +459,7 @@ public class LinuxFirewall {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
 		}
 	}
-	
+
 	/**
 	 * Adds NAT Rule
 	 * 
@@ -489,7 +487,7 @@ public class LinuxFirewall {
 			NATRule newNatRule = new NATRule(sourceInterface,
 					destinationInterface, protocol, source, destination,
 					masquerade);
-			
+
 			ArrayList<NATRule> natRules = new ArrayList<NATRule>();
 			natRules.add(newNatRule);
 			addNatRules(natRules);
@@ -497,15 +495,15 @@ public class LinuxFirewall {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
 		}
 	}
-	
+
 	public void addAutoNatRules(List<NATRule> newNatRules) throws KuraException {
 		addNatRules(newNatRules, m_autoNatRules);
 	}
-	
+
 	public void addNatRules(List<NATRule> newNatRules) throws KuraException {
 		addNatRules(newNatRules, m_natRules);
 	}
-	
+
 	private void addNatRules(List<NATRule> newNatRules, LinkedHashSet<NATRule> rules) throws KuraException {
 		try {
 			boolean doUpdate = false;
@@ -582,6 +580,9 @@ public class LinuxFirewall {
 	}
 
 	public void deletePortForwardRule(PortForwardRule rule) throws KuraException {
+		if (m_portForwardRules == null){
+			return;
+		}
 		try {
 			m_portForwardRules.remove(rule);
 			if (((m_autoNatRules != null) && (m_autoNatRules.size() < 1))
@@ -591,13 +592,15 @@ public class LinuxFirewall {
 				m_allowForwarding = false;
 			}
 			this.update();
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
 		}
 	}
 
 	public void deleteAutoNatRule(NATRule rule) throws KuraException {
+		if (m_autoNatRules == null){
+			return;
+		}
 		try {
 			m_autoNatRules.remove(rule);
 			if (((m_autoNatRules != null) && (m_autoNatRules.size() < 1))
@@ -726,7 +729,7 @@ public class LinuxFirewall {
 					boolean found = false;
 					NatPostroutingChainRule natPostroutingChainRule = autoNatRule.getNatPostroutingChainRule();;
 					for (NatPostroutingChainRule appliedNatPostroutingChainRule : appliedNatPostroutingChainRules) {
-						
+
 						if(appliedNatPostroutingChainRule.equals(natPostroutingChainRule)) {
 							found = true;
 							break;
@@ -735,7 +738,7 @@ public class LinuxFirewall {
 					if (found) {
 						autoNatRule.setMasquerade(false);
 					} 
-					
+
 					boolean status = applyRule(autoNatRule.toString());
 					s_logger.trace("applyRules() :: Auto NAT rule: {} has been applied with status={}", autoNatRule, status);	
 					if (status) {
@@ -770,19 +773,20 @@ public class LinuxFirewall {
 				proc = ProcessUtil.exec(DO_NOT_ALLOW_ICMP[1]);
 				proc.waitFor();
 			}
-			
+
 			s_logger.debug("Managing port forwarding...");
 			enableForwarding(m_allowForwarding);
 			runCustomFirewallScript();
 		} catch (Exception e) {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
-		}
-		finally {
-			if (proc != null) ProcessUtil.destroy(proc);
+		} finally {
+			if (proc != null) {
+				ProcessUtil.destroy(proc);
+			}
 		}
 	}
-	
-	private void enableForwarding(boolean allow) throws KuraException {
+
+	private static void enableForwarding(boolean allow) throws KuraException {
 		FileWriter fw = null;
 		try {
 			fw = new FileWriter(IP_FORWARD_FILE_NAME);
@@ -803,42 +807,50 @@ public class LinuxFirewall {
 			}
 		}
 	}
-	
-	private void applyClearAllChainsRules() throws KuraException {
+
+	private static void applyClearAllChainsRules() throws KuraException {
 		s_logger.debug("Cleaning chains...");
+		SafeProcess proc = null;
 		try {
-			SafeProcess proc = null;
 			for(String clearRule: CLEAR_ALL_CHAINS){
 				if(clearRule.startsWith("iptables")){
-					proc = ProcessUtil.exec(clearRule.toString());
+					proc = ProcessUtil.exec(clearRule);
 					proc.waitFor();
 				}
 			}
 		} catch (Exception e) {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+		} finally {
+			if (proc != null) {
+				ProcessUtil.destroy(proc);
+			}
 		}
 	}
-	
-	private void applyBlockAllRules() throws KuraException {
+
+	private static void applyBlockAllRules() throws KuraException {
 		s_logger.debug("Setting block policy...");
+		SafeProcess proc = null;
 		try {
-			SafeProcess proc = null;
 			for(String blockRule: BLOCK_POLICY){
 				if(blockRule.startsWith("iptables")){
-					proc = ProcessUtil.exec(blockRule.toString());
+					proc = ProcessUtil.exec(blockRule);
 					proc.waitFor();
 				}
 			}
 		} catch (Exception e) {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+		} finally {
+			if (proc != null) {
+				ProcessUtil.destroy(proc);
+			}
 		}
 	}
-	
-	
-	private boolean applyRule(String ruleToApply) throws KuraException {
+
+
+	private static boolean applyRule(String ruleToApply) throws KuraException {
 		boolean ret = false;
+		SafeProcess proc = null;
 		try {
-			SafeProcess proc = null;
 			String [] aRules = ruleToApply.split(RULE_DELIMETER);
 			for (String rule : aRules) {	
 				proc = ProcessUtil.exec(rule.trim());
@@ -847,14 +859,18 @@ public class LinuxFirewall {
 			}
 		} catch (Exception e) {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+		} finally {
+			if (proc != null) {
+				ProcessUtil.destroy(proc);
+			}
 		}
 		return ret;
 	}
-	
+
 	/*
 	 * Runs custom firewall script
 	 */
-	private void runCustomFirewallScript() throws KuraException {
+	private static void runCustomFirewallScript() throws KuraException {
 		SafeProcess proc = null;
 		try {
 			File file = new File(CUSTOM_FIREWALL_SCRIPT_NAME);
@@ -866,7 +882,9 @@ public class LinuxFirewall {
 		} catch (Exception e) {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
 		} finally {
-			if (proc != null) ProcessUtil.destroy(proc);
+			if (proc != null) {
+				ProcessUtil.destroy(proc);
+			}
 		}
 	}
 
@@ -892,9 +910,9 @@ public class LinuxFirewall {
 				String line = null;
 				br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
 				out = new PrintWriter(FIREWALL_CONFIG_FILE_NAME);
-		    	while ((line = br.readLine()) != null) {
-		    		out.println(line);
-		    	}
+				while ((line = br.readLine()) != null) {
+					out.println(line);
+				}
 			} else {
 				proc= ProcessUtil.exec("service iptables save");
 				status = proc.waitFor();
@@ -902,8 +920,7 @@ public class LinuxFirewall {
 			s_logger.debug("iptablesSave() :: completed!, status={}", status);
 		} catch (Exception e) {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
-		}
-		finally {
+		} finally {
 			if (out != null) {
 				out.flush();
 				out.close();

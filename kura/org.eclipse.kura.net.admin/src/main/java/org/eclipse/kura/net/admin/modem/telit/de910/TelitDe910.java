@@ -467,7 +467,8 @@ public class TelitDe910 extends TelitModem implements EvdoCellularModem {
 	public SubscriberInfo [] obtainSubscriberInfo(SimCardSlot activeSimCardSlot) throws KuraException {
 		SubscriberInfo [] ret = new SubscriberInfo [1]; ret[0] = null; 
 		ret[0] = new SubscriberInfo(getMobileSubscriberIdentity(0), 
-				getIntegratedCirquitCardId(0));
+				getIntegratedCirquitCardId(0),
+				getSubscriberNumber(0));
 		return ret;
 	}
 	

@@ -896,8 +896,6 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 			} else {
 				//TODO - more types
 			}
-
-
 		} catch(Exception e) {
 			e.printStackTrace();
 			throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
@@ -1022,7 +1020,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 				boolean isActive = subscriber.isActive();
 				String imsi = subscriber.getInternationalMobileSubscriberIdentity();
 				String iccid = subscriber.getIntegratedCircuitCardIdentification();
-				
+				String subscriberNumber = subscriber.getSubscriberNumber();
 				if (!(imsi.isEmpty() && iccid.isEmpty())) {
 					GwtModemSimCardEntry gwtModemSimCardEntry = new GwtModemSimCardEntry();			
 					switch (ind) {
@@ -1037,6 +1035,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 					gwtModemSimCardEntry.setActive(isActive);
 					gwtModemSimCardEntry.setInternationalMobileSubscriberIdentity(imsi);
 					gwtModemSimCardEntry.setIntegratedCircuitCardIdentification(iccid);
+					gwtModemSimCardEntry.setSubscriberNumber(subscriberNumber);
 					gwtSimCardEntries.add(gwtModemSimCardEntry);
 				}
 				ind++;

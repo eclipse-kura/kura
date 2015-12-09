@@ -635,7 +635,6 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 			String serialNum, String modemId, int pppNumber,
 			boolean autoConnect, int mtu, List<NetConfig> netConfigs)
 			throws KuraException {
-		
 	    NetConfigIP4 netConfig4 = null;
 		NetConfigIP6 netConfig6 = null;
 		ModemConfig modemConfig = null;
@@ -750,7 +749,7 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 									} else {
 										hadModemConfig = true;
                                         newNetConfigs.add(modemConfig);
-										if(!netConfig.equals(modemConfig)) {	
+										if(!netConfig.equals(modemConfig)) {
 											s_logger.debug("updating ModemConfig for " + interfaceName);
 											configurationChanged = true;
 											if(!modifiedInterfaceNames.contains(interfaceName)) {modifiedInterfaceNames.add(interfaceName);}

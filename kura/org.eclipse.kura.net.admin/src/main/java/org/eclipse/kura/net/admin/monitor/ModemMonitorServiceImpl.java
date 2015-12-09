@@ -377,8 +377,7 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 			    				}
 		    				}
 		    			}
-		    			
-		    			if((oldNetConfigs == null) || !isConfigsEqual(oldNetConfigs, newNetConfigs)) {	
+		    			if((oldNetConfigs == null) || !isConfigsEqual(oldNetConfigs, newNetConfigs)) {
 		    				s_logger.info("new configuration for cellular modem on usb port {} netinterface {}", usbPort, ifaceName); 
 		    				m_networkConfig = newNetworkConfig;
 		    				
@@ -399,7 +398,6 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 		    				}
 		    				
 		    				modem.setConfiguration(newNetConfigs);
-		    				
 		    				if (modem instanceof EvdoCellularModem) {
 			    				NetInterfaceStatus netIfaceStatus = getNetInterfaceStatus(newNetConfigs);
 								if (netIfaceStatus == NetInterfaceStatus.netIPv4StatusEnabledWAN) {
@@ -439,7 +437,7 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 											monitorNotity();
 										}
 									} else {
-										s_logger.info("NetworkConfigurationChangeEvent :: The " + modem.getModel() + " is provisioned");
+										s_logger.info("processNetworkConfigurationChangeEvent() :: The {} is provisioned", modem.getModel());
 									}	
 								}
 								
@@ -453,6 +451,7 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 		    					ModemConfig modemConfig = getModemConfig(newNetConfigs);
 		    					SimCardSlot currentSimSlot = ((HspaCellularModem)modem).getSimCardSlot();
 		    					if ((currentSimSlot != null) && (currentSimSlot != modemConfig.getActiveSimCardSlot())) {
+		    						
 		    						((HspaCellularModem)modem).setSimCardSlot(modemConfig.getActiveSimCardSlot());
 		    					}
 		    				}

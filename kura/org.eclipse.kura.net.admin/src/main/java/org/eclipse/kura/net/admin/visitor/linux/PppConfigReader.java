@@ -407,7 +407,6 @@ public class PppConfigReader implements NetworkConfigurationVisitor {
 			modemConfig.setPdpType(PdpType.valueOf(pdpType.toUpperCase()));
 			modemConfig.setUsername(username);
 		}
-        
         return modemConfig;
     }
     

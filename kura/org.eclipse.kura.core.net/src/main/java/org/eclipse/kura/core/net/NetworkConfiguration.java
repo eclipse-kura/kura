@@ -53,6 +53,7 @@ import org.eclipse.kura.net.modem.ModemInterfaceAddress;
 import org.eclipse.kura.net.modem.ModemInterfaceAddressConfig;
 import org.eclipse.kura.net.modem.ModemPowerMode;
 import org.eclipse.kura.net.modem.ModemTechnologyType;
+import org.eclipse.kura.net.modem.SimCardSlot;
 import org.eclipse.kura.net.wifi.WifiAccessPoint;
 import org.eclipse.kura.net.wifi.WifiBgscan;
 import org.eclipse.kura.net.wifi.WifiCiphers;
@@ -966,6 +967,7 @@ public class NetworkConfiguration {
 			String prefix, 
 			Map<String, Object> properties) {
 
+		properties.put(prefix+"activeSimSlot", modemConfig.getActiveSimCardSlot().getValue());
 		properties.put(prefix+"apn", modemConfig.getApn());
 		properties.put(prefix+"authType", (modemConfig.getAuthType() != null) ? modemConfig.getAuthType().toString() : "");
 		properties.put(prefix+"dataCompression", modemConfig.getDataCompression());
@@ -994,7 +996,18 @@ public class NetworkConfiguration {
 
 		String key;
 		ModemConfig modemConfig = new ModemConfig();
-
+		
+		// activeSimSlot
+		key = prefix + "activeSimSlot";
+		if(properties.get(key) != null) {
+			int iActiveSimSlot = (Integer)properties.get(key);
+			s_logger.trace("activeSimSlot is " + iActiveSimSlot);
+			SimCardSlot activeSimSlot = SimCardSlot.getSimCardSlot(iActiveSimSlot, false);
+			modemConfig.setActiveSimCardSlot(activeSimSlot);
+		} else {
+			s_logger.trace("activeSimSlot is null");
+		}
+		
 		// apn
 		key = prefix + "apn";
 		String apn = (String)properties.get(key);

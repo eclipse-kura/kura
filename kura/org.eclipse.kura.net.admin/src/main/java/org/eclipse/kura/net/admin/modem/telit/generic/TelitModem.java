@@ -504,7 +504,7 @@ public abstract class TelitModem {
     	
         return m_subscriberInfo[subscriberIndex].getInternationalMobileSubscriberIdentity();
     }
-    /*
+    
     public String getSubscriberNumber(int subscriberIndex) throws KuraException {
     	synchronized (s_atLock) {
     		String atPort = getAtPort();
@@ -552,7 +552,6 @@ public abstract class TelitModem {
     	}
     	return m_subscriberInfo[subscriberIndex].getSubscriberNumber();
     }
-    */
     
     public String getIntegratedCirquitCardId(int subscriberIndex) throws KuraException {
     	synchronized (s_atLock) {

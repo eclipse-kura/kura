@@ -103,6 +103,7 @@ public class ModemConfigTab extends LayoutContainer
 	
 	private LabelField               m_imsiLabelField;
 	private LabelField               m_iccidLabelField;
+	private LabelField				 m_subscriberNumberField;
 	
 	private TextField<String>        m_dialStringField;
 	private TextField<String>        m_apnField;
@@ -377,6 +378,7 @@ public class ModemConfigTab extends LayoutContainer
 				m_selectSimSlotRadioGroup.setEnabled(false);
 				m_imsiLabelField.setEnabled(false);
 				m_iccidLabelField.setEnabled(false);
+				m_subscriberNumberField.setEnabled(false);
 				gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
 					@Override
 					public void onFailure(Throwable ex) {
@@ -391,13 +393,16 @@ public class ModemConfigTab extends LayoutContainer
 				    				m_selectSimSlotRadioGroup.setEnabled(true);
 				    				m_imsiLabelField.setEnabled(true);
 				    				m_iccidLabelField.setEnabled(true);
+				    				m_subscriberNumberField.setEnabled(true);
 				    				List<GwtModemSimCardEntry> gwtModemSimCardEntries = result.getData();
 				    				m_imsiLabelField.setValue(MSGS.netModemNoSimCardDetected());
 		    						m_iccidLabelField.setValue(MSGS.netModemNoSimCardDetected());
+		    						m_subscriberNumberField.setValue(MSGS.netModemNoSimCardDetected());
 				    				for (GwtModemSimCardEntry gwtModemSimCardEntry : gwtModemSimCardEntries) {
 										if (gwtModemSimCardEntry.isActive()) {
 											m_imsiLabelField.setValue(gwtModemSimCardEntry.getInternationalMobileSubscriberIdentity());
 											m_iccidLabelField.setValue(gwtModemSimCardEntry.getIntegratedCircuitCardIdentification());
+											m_subscriberNumberField.setValue(gwtModemSimCardEntry.getSubscriberNumber());
 										}
 									}
 				    			}
@@ -409,16 +414,17 @@ public class ModemConfigTab extends LayoutContainer
 			}
 		});
         m_refreshSimInfoButton.setStyleAttribute("margin-top", Constants.LABEL_MARGIN_TOP_SEPARATOR);
+        m_refreshSimInfoButton.addListener(Events.OnMouseOver, new MouseOverListener(MSGS.netModemToolTipRefreshSimInfo()));
         
         m_simSlotAradio = new Radio();  
         m_simSlotAradio.setItemId("SlotA");
         m_simSlotAradio.setBoxLabel(MSGS.netModemSimSlotAlabel());
-        //m_simSlotAradio.addListener(Events.OnMouseOver, new MouseOverListener(MSGS.netModemToolTipPersist()));
+        m_simSlotAradio.addListener(Events.OnMouseOver, new MouseOverListener(MSGS.netModemToolTipSelectSimSlot()));
         
         m_simSlotBradio = new Radio();  
         m_simSlotBradio.setItemId("SlotB");
         m_simSlotBradio.setBoxLabel(MSGS.netModemSimSlotBlabel());
-        //m_simSlotBradio.addListener(Events.OnMouseOver, new MouseOverListener(MSGS.netModemToolTipPersist()));
+        m_simSlotBradio.addListener(Events.OnMouseOver, new MouseOverListener(MSGS.netModemToolTipSelectSimSlot()));
         
         m_selectSimSlotRadioGroup = new RadioGroup();
         m_selectSimSlotRadioGroup.setName("selectSimSlot");
@@ -439,15 +445,18 @@ public class ModemConfigTab extends LayoutContainer
     	        				List<GwtModemSimCardEntry> gwtModemSimCardEntries = result.getData();
     	        				m_imsiLabelField.setValue(MSGS.netModemNoSimCardDetected());
 	    						m_iccidLabelField.setValue(MSGS.netModemNoSimCardDetected());
+	    						m_subscriberNumberField.setValue(MSGS.netModemNoSimCardDetected());
     	        				for (GwtModemSimCardEntry gwtModemSimCardEntry : gwtModemSimCardEntries) {
 	    	        				if (m_simSlotAradio.getValue() && (gwtModemSimCardEntry.getSimSlot() == GwtSimCardSlot.A)) {
 	    	    						m_imsiLabelField.setValue(gwtModemSimCardEntry.getInternationalMobileSubscriberIdentity());
 	    	    						m_iccidLabelField.setValue(gwtModemSimCardEntry.getIntegratedCircuitCardIdentification());
+	    	    						m_subscriberNumberField.setValue(gwtModemSimCardEntry.getSubscriberNumber());
 	    	    						break;
 	    	        				}
 	    	        				if (m_simSlotBradio.getValue() && (gwtModemSimCardEntry.getSimSlot() == GwtSimCardSlot.B)) {
 	    	        					m_imsiLabelField.setValue(gwtModemSimCardEntry.getInternationalMobileSubscriberIdentity());
 	    								m_iccidLabelField.setValue(gwtModemSimCardEntry.getIntegratedCircuitCardIdentification());
+	    								m_subscriberNumberField.setValue(gwtModemSimCardEntry.getSubscriberNumber());
 	    								break;
 	    	        				}
     	        				}
@@ -470,6 +479,11 @@ public class ModemConfigTab extends LayoutContainer
         m_iccidLabelField.setName("iccid");
         m_iccidLabelField.setFieldLabel(MSGS.netModemIntegratedCircuitCardIdentification());
         m_iccidLabelField.addPlugin(m_dirtyPlugin);
+        
+        m_subscriberNumberField = new LabelField();
+        m_subscriberNumberField.setName("subscriberNumber");
+        m_subscriberNumberField.setFieldLabel(MSGS.netModemSubscriberNumber());
+        m_subscriberNumberField.addPlugin(m_dirtyPlugin);
         
         //
         // Dial String
@@ -589,6 +603,7 @@ public class ModemConfigTab extends LayoutContainer
         	fieldSet.add(m_selectSimSlotRadioGroup, formData);
         	fieldSet.add(m_imsiLabelField, formData);
         	fieldSet.add(m_iccidLabelField, formData);
+        	fieldSet.add(m_subscriberNumberField, formData);
         }
         fieldSet.add(m_dialStringField, formData);
         if (isHspaModem) {

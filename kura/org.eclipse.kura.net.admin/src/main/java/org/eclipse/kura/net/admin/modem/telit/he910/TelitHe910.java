@@ -139,30 +139,38 @@ public class TelitHe910 extends TelitModem implements HspaCellularModem {
 			s_logger.debug("obtainSubscriberInfo() :: original simSlot={}", simSlot);
 			if (simSlot == SimCardSlot.A) {
 				if (isSimCardReady()) {
-					ret[0] = new SubscriberInfo(getMobileSubscriberIdentity(SimCardSlot.A.getValue()), 
-							getIntegratedCirquitCardId(SimCardSlot.A.getValue()));
+					ret[0] = new SubscriberInfo(
+								getMobileSubscriberIdentity(SimCardSlot.A.getValue()), 
+								getIntegratedCirquitCardId(SimCardSlot.A.getValue()),
+								getSubscriberNumber(SimCardSlot.A.getValue()));
 					ret[0].setActive(true);
 				}
 				s_logger.debug("obtainSubscriberInfo() :: switching to SIM Slot {}", SimCardSlot.B);
 				if (setSimCardSlot(SimCardSlot.B)) {
 					sleep(9000);
-					SubscriberInfo subscriberInfo = new SubscriberInfo(getMobileSubscriberIdentity(SimCardSlot.B.getValue()), 
-								getIntegratedCirquitCardId(SimCardSlot.B.getValue()));	
+					SubscriberInfo subscriberInfo = new SubscriberInfo(
+							getMobileSubscriberIdentity(SimCardSlot.B.getValue()), 
+							getIntegratedCirquitCardId(SimCardSlot.B.getValue()),
+							getSubscriberNumber(SimCardSlot.B.getValue()));	
 					if (!subscriberInfo.equals(ret[0])) {
 						ret[1] = subscriberInfo;
 					}
 				}
 			} else if (simSlot == SimCardSlot.B) {
 				if (isSimCardReady()) {
-					ret[1] = new SubscriberInfo(getMobileSubscriberIdentity(SimCardSlot.B.getValue()), 
-							getIntegratedCirquitCardId(SimCardSlot.B.getValue()));
+					ret[1] = new SubscriberInfo(
+							getMobileSubscriberIdentity(SimCardSlot.B.getValue()), 
+							getIntegratedCirquitCardId(SimCardSlot.B.getValue()),
+							getSubscriberNumber(SimCardSlot.B.getValue()));
 					ret[1].setActive(true);
 				}
 				s_logger.debug("obtainSubscriberInfo() :: switching to SIM Slot {}", SimCardSlot.A);
 				if (setSimCardSlot(SimCardSlot.A)) {
 					sleep(9000);
-					SubscriberInfo subscriberInfo = new SubscriberInfo(getMobileSubscriberIdentity(SimCardSlot.A.getValue()), 
-								getIntegratedCirquitCardId(SimCardSlot.A.getValue()));
+					SubscriberInfo subscriberInfo = new SubscriberInfo(
+							getMobileSubscriberIdentity(SimCardSlot.A.getValue()), 
+							getIntegratedCirquitCardId(SimCardSlot.A.getValue()),
+							getSubscriberNumber(SimCardSlot.A.getValue()));
 					if (!subscriberInfo.equals(ret[1])) {
 						ret[0] = subscriberInfo;
 					}

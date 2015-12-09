@@ -643,7 +643,7 @@ public class ModemConfig implements NetConfig {
         StringBuffer sb = new StringBuffer();
         sb.append(super.toString());
         
-        sb.append("ModemConfig - ");
+        sb.append(" -> ModemConfig - ");
         
         sb.append("Enabled: ").append(m_enabled);
         sb.append(" - PPP Number: ").append(m_pppNumber);
@@ -656,9 +656,17 @@ public class ModemConfig implements NetConfig {
         sb.append(" - Active SIM slot: ").append(m_activeSimCardSlot);
         sb.append(" - Username: ").append(m_username);
         sb.append(" - Password: ").append(m_password);
+        sb.append(" - Persist: ").append(m_persist);
+        sb.append(" - MaxFail: ").append(m_maxFail);
+        sb.append(" - Idle: ").append(m_idle);
+        sb.append(" - Active Filter: ").append(m_activeFilter);
+        sb.append(" - LCP Echo Interval: ").append(m_lcpEchoInterval);
+        sb.append(" - LCP Echo Failure: ").append(m_lcpEchoFailure);
         sb.append(" - IP Address: ").append((m_ipAddress == null) ? "null" : m_ipAddress.getHostAddress());
         sb.append(" - Data Compression: ").append(m_dataCompression);
         sb.append(" - Header Compression: ").append(m_headerCompression);
+        sb.append(" - GPS Enabled: ").append(m_gpsEnabled);
+        sb.append(" - Reset Timeout: ").append(m_resetTimeout);
         
         return sb.toString();
 	}

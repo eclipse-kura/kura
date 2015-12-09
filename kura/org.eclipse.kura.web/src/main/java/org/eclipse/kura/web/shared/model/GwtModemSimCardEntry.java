@@ -55,12 +55,21 @@ public class GwtModemSimCardEntry extends KuraBaseModel implements Serializable 
 		set("ICCID", iccid);
 	}
 	
+	public String getSubscriberNumber() {
+		return get("subscriberNumber");
+	}
+	
+	public void setSubscriberNumber(String subscriberNumber) {
+		set("subscriberNumber", subscriberNumber);
+	}
+	
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("Slot: ").append(getSimSlot());
 		sb.append("; isActive=").append(isActive());
 		sb.append("; IMSI=").append(getInternationalMobileSubscriberIdentity());
 		sb.append("; ICCID=").append(getIntegratedCircuitCardIdentification());
+		sb.append("; Subscriber number=").append(getSubscriberNumber());
 		return sb.toString();
 	}
 }

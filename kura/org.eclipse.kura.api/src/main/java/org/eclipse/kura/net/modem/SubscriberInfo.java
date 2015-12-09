@@ -31,7 +31,7 @@ public class SubscriberInfo {
 	 * Subscriber Number
 	 * This is phone number of the device
 	 */
-	//private String m_subscriber;
+	private String m_subscriber;
 	
 	/**
 	 * Default constructor
@@ -40,7 +40,7 @@ public class SubscriberInfo {
 		m_isActive = false;
 		m_imsi = "";
 		m_iccid = "";
-		//m_subscriber = "";
+		m_subscriber = "";
 	}
 	
 	/**
@@ -50,11 +50,11 @@ public class SubscriberInfo {
 	 * @param iccid - Integrated Circuit Card Identification as {@link String}
 	 * @param subscriber - Subscriber Number as {@link String}
 	 */
-	public SubscriberInfo(String imsi, String iccid/*, String subscriber*/) {
+	public SubscriberInfo(String imsi, String iccid, String subscriber) {
 		m_isActive = false;
 		m_imsi = imsi;
 		m_iccid = iccid;
-		//m_subscriber = subscriber;
+		m_subscriber = subscriber;
 	}
 	
 	@Override
@@ -132,11 +132,10 @@ public class SubscriberInfo {
 	 * 
 	 * @return Subscriber Number as {@link String}
 	 */
-	/*
 	public String getSubscriberNumber() {
 		return m_subscriber;
 	}
-	*/
+	
 	/**
 	 * Sets International Mobile Subscriber Identity
 	 * 
@@ -160,9 +159,7 @@ public class SubscriberInfo {
 	 * 
 	 * @param subscriber - Subscriber Number as {@link String}
 	 */
-	/*
 	public void setSubscriberNumber(String subscriber) {
 		m_subscriber = subscriber;
 	}
-	*/
 }

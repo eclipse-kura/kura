@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011, 2014 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2015 Eurotech and/or its affiliates
  *
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
@@ -14,8 +14,8 @@ package org.eclipse.kura.cloud.app.command;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
+
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloud.Cloudlet;
@@ -97,10 +97,9 @@ PasswordCommandService {
 
 		this.properties= new HashMap<String, Object>();
 
-		Iterator<String> keys = properties.keySet().iterator();
-		while (keys.hasNext()) {
-			String key = keys.next();
-			Object value = properties.get(key);
+		for (Map.Entry<String, Object> entry : properties.entrySet()) {
+			String key = entry.getKey();
+			Object value = entry.getValue();
 			if (key.equals(COMMAND_PASSWORD_ID)) {
 				try {
 					char[] decryptedPassword= m_cryptoService.decryptAes(value.toString().toCharArray());

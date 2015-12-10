@@ -29,7 +29,9 @@ import org.eclipse.kura.linux.net.modem.SupportedUsbModemInfo;
 import org.eclipse.kura.linux.net.modem.SupportedUsbModemsInfo;
 import org.eclipse.kura.net.admin.modem.HspaCellularModem;
 import org.eclipse.kura.net.admin.modem.telit.generic.TelitModem;
+import org.eclipse.kura.net.modem.CellularModem;
 import org.eclipse.kura.net.modem.ModemDevice;
+import org.eclipse.kura.net.modem.ModemReadyService;
 import org.eclipse.kura.net.modem.ModemRegistrationStatus;
 import org.eclipse.kura.net.modem.ModemTechnologyType;
 import org.eclipse.kura.net.modem.SerialModemDevice;
@@ -115,13 +117,16 @@ public class TelitHe910 extends TelitModem implements HspaCellularModem {
 	}
 	
 	@Override
-	public SubscriberInfo [] obtainSubscriberInfo(SimCardSlot cfgSimCardSlot, int execDelay) {
+	public SubscriberInfo [] obtainSubscriberInfo(SimCardSlot cfgSimCardSlot, int execDelay, ModemReadyService callback) {
 		final SimCardSlot simCardSlot = cfgSimCardSlot;
+		final ModemReadyService modemReadyService = callback;
+		final CellularModem modem = this;
 		m_executorUtil.schedule(new Runnable() {
     		@Override
     		public void run() {
     			try {
 					m_subscriberInfo = obtainSubscriberInfo(simCardSlot);
+					modemReadyService.postModemReadyEvent(modem);
 				} catch (KuraException e) {
 					s_logger.error("failed to obtain subscriber info for Telit modem - {}", e);
 				}

@@ -153,7 +153,7 @@ public interface CellularModem {
     
     public SubscriberInfo [] getSubscriberInfo(boolean refreshActiveSimInfo) throws KuraException;
     
-    public SubscriberInfo [] obtainSubscriberInfo(SimCardSlot cfgSimCardSlot, int execDelay);
+    public SubscriberInfo [] obtainSubscriberInfo(SimCardSlot cfgSimCardSlot, int execDelay, ModemReadyService callback);
     
     public SubscriberInfo [] obtainSubscriberInfo(SimCardSlot cfgSimCardSlot) throws KuraException;
     

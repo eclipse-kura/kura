@@ -27,6 +27,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.comm.CommURI;
 import org.eclipse.kura.core.net.NetworkConfiguration;
@@ -69,10 +70,12 @@ import org.eclipse.kura.net.modem.ModemManagerService;
 import org.eclipse.kura.net.modem.ModemMonitorListener;
 import org.eclipse.kura.net.modem.ModemMonitorService;
 import org.eclipse.kura.net.modem.ModemReadyEvent;
+import org.eclipse.kura.net.modem.ModemReadyService;
 import org.eclipse.kura.net.modem.ModemRemovedEvent;
 import org.eclipse.kura.net.modem.ModemTechnologyType;
 import org.eclipse.kura.net.modem.SerialModemDevice;
 import org.eclipse.kura.net.modem.SimCardSlot;
+import org.eclipse.kura.net.modem.SubscriberInfo;
 import org.eclipse.kura.system.SystemService;
 import org.eclipse.kura.usb.UsbDeviceEvent;
 import org.eclipse.kura.usb.UsbModemDevice;
@@ -84,7 +87,7 @@ import org.osgi.service.event.EventHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManagerService, EventHandler {
+public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManagerService, EventHandler, ModemReadyService {
 	
 	private static final Logger s_logger = LoggerFactory.getLogger(ModemMonitorServiceImpl.class);
 	
@@ -334,6 +337,31 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 					m_listeners.remove(i);
 				}
 			}
+		}
+	}
+	
+	@Override
+	public void postModemReadyEvent(CellularModem modem) throws KuraException {
+		try {
+			SubscriberInfo [] subscriberInfo = modem.getSubscriberInfo(false);
+			SubscriberInfo subscriber = null;
+			for (SubscriberInfo sub : subscriberInfo) {
+				if(sub.isActive()) {
+					subscriber = sub;
+					break;
+				}
+			}
+			HashMap<String, String> modemInfoMap = new HashMap<String, String>();
+			modemInfoMap.put(ModemReadyEvent.IMEI, modem.getSerialNumber());
+			if (subscriber != null) {
+				modemInfoMap.put(ModemReadyEvent.IMSI, subscriber.getInternationalMobileSubscriberIdentity());
+				modemInfoMap.put(ModemReadyEvent.ICCID, subscriber.getIntegratedCircuitCardIdentification());
+			}
+			modemInfoMap.put(ModemReadyEvent.RSSI, Integer.toString(modem.getSignalStrength()));
+			s_logger.info("posting ModemReadyEvent on topic {}", ModemReadyEvent.MODEM_EVENT_READY_TOPIC);
+			m_eventAdmin.postEvent(new ModemReadyEvent(modemInfoMap));
+		} catch (Exception e) {
+			throw new KuraException (KuraErrorCode.INTERNAL_ERROR, "Failed to post the ModemReadyEvent");
 		}
 	}
 	
@@ -773,18 +801,6 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 					platform = m_systemService.getPlatform();
 				}
 				CellularModem modem = modemFactoryService.obtainCellularModemService(modemDevice, platform);
-				try {
-					HashMap<String, String> modemInfoMap = new HashMap<String, String>();
-					modemInfoMap.put(ModemReadyEvent.IMEI, modem.getSerialNumber());
-					//modemInfoMap.put(ModemReadyEvent.IMSI, modem.getMobileSubscriberIdentity()); <IAB> commented out for now
-					//modemInfoMap.put(ModemReadyEvent.ICCID, modem.getIntegratedCirquitCardId()); <IAB> commented out for now
-					modemInfoMap.put(ModemReadyEvent.RSSI, Integer.toString(modem.getSignalStrength()));
-					s_logger.info("posting ModemReadyEvent on topic {}", ModemReadyEvent.MODEM_EVENT_READY_TOPIC);
-					m_eventAdmin.postEvent(new ModemReadyEvent(modemInfoMap));
-				} catch (Exception e) {
-					s_logger.error("Failed to post the ModemReadyEvent - {}", e);
-				}
-				
 				String ifaceName = m_networkService.getModemPppPort(modemDevice);
 				List<NetConfig> netConfigs = null;
 				if (ifaceName != null) {
@@ -801,11 +817,11 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 						if ((netConfigs != null) && (netConfigs.size() > 0)) {
 							modem.setConfiguration(netConfigs);
 							ModemConfig modemConfig = getModemConfig(netConfigs);
-							modem.obtainSubscriberInfo(modemConfig.getActiveSimCardSlot(), 10);
+							modem.obtainSubscriberInfo(modemConfig.getActiveSimCardSlot(), 10, this);
 						}
 					}
 				} else {
-					modem.obtainSubscriberInfo(null, 10);
+					modem.obtainSubscriberInfo(null, 10, this);
 				}
 				
 				if (modemDevice instanceof UsbModemDevice) {

@@ -37,6 +37,7 @@ import org.eclipse.kura.net.admin.modem.sierra.CnsAppIDs;
 import org.eclipse.kura.net.admin.modem.sierra.CnsOpTypes;
 import org.eclipse.kura.net.modem.ModemCdmaServiceProvider;
 import org.eclipse.kura.net.modem.ModemDevice;
+import org.eclipse.kura.net.modem.ModemReadyService;
 import org.eclipse.kura.net.modem.ModemRegistrationStatus;
 import org.eclipse.kura.net.modem.ModemTechnologyType;
 import org.eclipse.kura.net.modem.SerialModemDevice;
@@ -382,7 +383,7 @@ public class SierraUsb598 implements EvdoCellularModem {
 	}
 	
 	@Override
-	public SubscriberInfo [] obtainSubscriberInfo(SimCardSlot cfgSimCardSlot, int execDelay) {
+	public SubscriberInfo [] obtainSubscriberInfo(SimCardSlot cfgSimCardSlot, int execDelay, ModemReadyService callback) {
 		return null;
 	}
 	

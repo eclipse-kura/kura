@@ -25,6 +25,7 @@ import org.eclipse.kura.net.NetConfig;
 import org.eclipse.kura.net.admin.modem.HspaCellularModem;
 import org.eclipse.kura.net.admin.modem.telit.he910.TelitHe910;
 import org.eclipse.kura.net.modem.ModemDevice;
+import org.eclipse.kura.net.modem.ModemReadyService;
 import org.eclipse.kura.net.modem.ModemRegistrationStatus;
 import org.eclipse.kura.net.modem.ModemTechnologyType;
 import org.eclipse.kura.net.modem.SimCardSlot;
@@ -440,7 +441,7 @@ public class SierraMc87xx implements HspaCellularModem {
 	}
 	
 	@Override
-	public SubscriberInfo [] obtainSubscriberInfo(SimCardSlot cfgSimCardSlot, int execDelay) {
+	public SubscriberInfo [] obtainSubscriberInfo(SimCardSlot cfgSimCardSlot, int execDelay, ModemReadyService callback) {
 		return null;
 	}
 	

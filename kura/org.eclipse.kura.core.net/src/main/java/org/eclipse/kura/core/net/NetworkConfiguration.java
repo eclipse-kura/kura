@@ -862,7 +862,14 @@ public class NetworkConfiguration {
 
 		// passphrase
 		key = prefix + ".passphrase";
-		Password psswd= (Password)properties.get(key);
+		Object psswdObj = properties.get(key);
+		Password psswd = null;
+		if (psswdObj instanceof Password) {
+			psswd = (Password) psswdObj;
+		} else if (psswdObj instanceof String) {
+			char[] tempPsswd= ((String) psswdObj).toCharArray();
+			psswd= new Password(tempPsswd);
+		}
 		String passphrase = new String(psswd.getPassword());
 		
 		s_logger.trace("passphrase is " + passphrase);

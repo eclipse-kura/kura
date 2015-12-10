@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011, 2014 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2015 Eurotech and/or its affiliates
  *
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
@@ -15,8 +15,6 @@ import java.io.File;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.linux.util.LinuxProcessUtil;
-import org.eclipse.kura.core.util.ProcessUtil;
-import org.eclipse.kura.core.util.SafeProcess;
 import org.eclipse.kura.linux.net.util.KuraConstants;
 import org.eclipse.kura.linux.net.util.LinuxNetworkUtil;
 import org.eclipse.kura.net.wifi.WifiMode;
@@ -56,7 +54,6 @@ public class WpaSupplicantManager {
 		
 		s_logger.debug("enable WPA Supplicant");
 		
-		SafeProcess proc = null;
 		try {
 			if(WpaSupplicantManager.isRunning()) {
                 stop();
@@ -79,11 +76,8 @@ public class WpaSupplicantManager {
 			s_logger.debug("starting wpa_supplicant -> {}", wpaSupplicantCommand);
 			LinuxProcessUtil.start(wpaSupplicantCommand);
 		} catch (Exception e) {
-			e.printStackTrace();
+			s_logger.error("Exception while enabling WPA Supplicant!", e);
 			throw KuraException.internalError(e);
-		}
-		finally {
-			if (proc != null) ProcessUtil.destroy(proc);
 		}
 	}
 

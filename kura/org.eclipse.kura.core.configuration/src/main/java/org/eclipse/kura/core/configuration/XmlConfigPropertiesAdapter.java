@@ -352,7 +352,7 @@ public class XmlConfigPropertiesAdapter
 						for (int i=0; i<adaptedProp.getValues().length; i++) {
 							if (adaptedProp.getValues()[i] != null) {
 								String s = adaptedProp.getValues()[i];
-								charValues[i] = new Character(s.charAt(0));
+								charValues[i] = Character.valueOf(s.charAt(0));
 							}
 						}
 						propvalue = charValues;

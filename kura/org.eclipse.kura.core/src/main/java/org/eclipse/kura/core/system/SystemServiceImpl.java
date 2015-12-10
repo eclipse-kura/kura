@@ -163,7 +163,7 @@ public class SystemServiceImpl implements SystemService
 
 			}
 			else {
-				s_logger.error("Could not located kura.properties with kura.home "+kuraHome);
+				s_logger.error("Could not located kura.properties with kura.home "); //+kuraHome
 			}
 
 			// load custom kura properties
@@ -531,6 +531,9 @@ public class SystemServiceImpl implements SystemService
 						if(line.startsWith(primaryNetworkInterfaceName)) {
 							//get the next line and save the MAC
 							line = br.readLine();
+							if (line == null) {
+								throw new IOException("Null imput!");
+							}
 							if (!line.trim().startsWith("ether")) {
 								line = br.readLine();
 							}
@@ -541,7 +544,7 @@ public class SystemServiceImpl implements SystemService
 						}
 					}
 				} catch(InterruptedException e) {
-					e.printStackTrace();
+					s_logger.error("Exception while executing ifconfig!", e);
 				} finally {
 					if(br != null){
 						try{
@@ -1104,13 +1107,14 @@ public class SystemServiceImpl implements SystemService
 				newLine = "\n";
 			}
 		} catch(Exception e) {
-			String command = "";
+			StringBuilder command = new StringBuilder();
 			String delim = "";
 			for(int i=0; i<commands.length; i++) {
-				command += delim + commands[i];
+				command.append(delim);
+				command.append(commands[i]);
 				delim = " ";
 			}
-			s_logger.error("failed to run commands " + command, e);
+			s_logger.error("failed to run commands " + command.toString(), e);
 		}
 		finally {
 			if(br != null){

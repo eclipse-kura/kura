@@ -594,7 +594,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 
 	private void encryptPlainSnapshots() throws Exception {
 		Set<Long> snapshotIDs = getSnapshots();
-		if (snapshotIDs == null || snapshotIDs.size() == 0) {
+		if (snapshotIDs == null || snapshotIDs.isEmpty()) {
 			return;
 		}
 		Long[] snapshots = snapshotIDs.toArray(new Long[] {});
@@ -614,12 +614,15 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 				fr = new FileReader(fSnapshot);
 				br = new BufferedReader(fr);
 				String line = "";
-				String entireFile = "";
+				StringBuilder entireFile = new StringBuilder();
 				while ((line = br.readLine()) != null) {
-					entireFile += line;
+					entireFile.append(line);
 				} // end while
-				xmlConfigs = XmlUtil.unmarshal(entireFile, XmlComponentConfigurations.class);
+				xmlConfigs = XmlUtil.unmarshal(entireFile.toString(), XmlComponentConfigurations.class);
 			} finally {
+				if (br != null) {
+					br.close();
+				}
 				if (fr != null) {
 					fr.close();
 				}
@@ -943,13 +946,13 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 			fr = new FileReader(fSnapshot);
 			br = new BufferedReader(fr);
 			String line = "";
-			String entireFile = "";
+			StringBuilder entireFile = new StringBuilder();
 			while ((line = br.readLine()) != null) {
-				entireFile += line;
+				entireFile.append(line);
 			}
 
 			//File loaded, try to decrypt and unmarshall
-			String decryptedContent = new String(m_cryptoService.decryptAes(entireFile.toCharArray()));
+			String decryptedContent = new String(m_cryptoService.decryptAes(entireFile.toString().toCharArray()));
 			xmlConfigs = XmlUtil.unmarshal(decryptedContent, XmlComponentConfigurations.class);
 		} catch (KuraException e) {
 			s_logger.debug("KuraException: {}", e.getCode().toString());
@@ -964,17 +967,16 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 			s_logger.error("Error parsing xml: {}", e.getMessage());
 		}finally {			
 			try {
-				if (fr != null) {
-					fr.close();
-				}
-			} catch (IOException e) {
-			}
-			try {
 				if (br != null) {
 					br.close();
 				}
 			} catch (IOException e) {
-
+			}
+			try {
+				if (fr != null) {
+					fr.close();
+				}
+			} catch (IOException e) {
 			}
 		}
 		return xmlConfigs;

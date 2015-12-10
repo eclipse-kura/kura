@@ -641,7 +641,9 @@ public class LinuxNetworkUtil {
 				}
 			}
 					
-			if (proc != null) ProcessUtil.destroy(proc);
+			if (proc != null) {
+				ProcessUtil.destroy(proc);
+			}
 		}
 		
 		if ((linuxIfconfig.getType() == NetInterfaceType.ETHERNET) || (linuxIfconfig.getType() == NetInterfaceType.WIFI)) {
@@ -685,7 +687,7 @@ public class LinuxNetworkUtil {
 			proc = ProcessUtil.exec("ifconfig " + ifaceName);
 			if (proc.waitFor() != 0) {
                 s_logger.warn("getMacAddress() :: error executing command --- ifconfig {} --- exit value = {}", ifaceName , proc.exitValue());
-                return mac;
+                return null;
 			}
 
 			//get the output
@@ -713,7 +715,9 @@ public class LinuxNetworkUtil {
 				}
 			}
 			
-			if (proc != null) ProcessUtil.destroy(proc);
+			if (proc != null) {
+				ProcessUtil.destroy(proc);
+			}
 		}
 		
 		s_logger.trace("getMacAddress() :: interface={}, MAC Address={}", ifaceName, mac);
@@ -787,8 +791,7 @@ public class LinuxNetworkUtil {
 			}
 		} catch(Exception e) {
 		    s_logger.warn("Error reading multicast info", e);
-		}
-		finally {
+		} finally {
 			if(br != null){
 				try{
 					br.close();
@@ -797,7 +800,9 @@ public class LinuxNetworkUtil {
 				}
 			}
 			
-			if (proc != null) ProcessUtil.destroy(proc);
+			if (proc != null) {
+				ProcessUtil.destroy(proc);
+			}
 		}
 		
 		s_logger.trace("isSupportsMulticast() :: interface={}, multicast?={}", ifaceName, suportsMulticast);
@@ -822,7 +827,9 @@ public class LinuxNetworkUtil {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
 		}
 		finally {
-			if (proc != null) ProcessUtil.destroy(proc);
+			if (proc != null) {
+				ProcessUtil.destroy(proc);
+			}
 		}
 	}
 	
@@ -877,8 +884,7 @@ public class LinuxNetworkUtil {
 			}
 		} catch (Exception e) {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
-		} 
-		finally {
+		} finally {
 			if(br != null){
 				try{
 					br.close();
@@ -887,7 +893,9 @@ public class LinuxNetworkUtil {
 				}
 			}
 			
-			if (proc != null) ProcessUtil.destroy(proc);
+			if (proc != null) {
+				ProcessUtil.destroy(proc);
+			}
 		}
 		
 		s_logger.trace("getType() :: interface={}, type={}", ifaceName, ifaceType);
@@ -1010,7 +1018,9 @@ public class LinuxNetworkUtil {
 					s_logger.error("I/O Exception while closing BufferedReader!");
 				}
 			}			
-			if (procEthtool != null) ProcessUtil.destroy(procEthtool);
+			if (procEthtool != null) {
+				ProcessUtil.destroy(procEthtool);
+			}
 		}
 		return driver;
 	}
@@ -1071,7 +1081,9 @@ public class LinuxNetworkUtil {
 				}
 			}
 			
-			if (proc != null) ProcessUtil.destroy(proc);
+			if (proc != null) {
+				ProcessUtil.destroy(proc);
+			}
 		}
 		return capabilities;
 	}
@@ -1160,8 +1172,12 @@ public class LinuxNetworkUtil {
 				}
 			}	
 			
-			if (procIw != null) ProcessUtil.destroy(procIw);
-			if (procIwConfig != null) ProcessUtil.destroy(procIwConfig);
+			if (procIw != null) {
+				ProcessUtil.destroy(procIw);
+			}
+			if (procIwConfig != null) {
+				ProcessUtil.destroy(procIwConfig);
+			}
 		}
 		
 		return mode;
@@ -1225,7 +1241,9 @@ public class LinuxNetworkUtil {
 				}
 			}
 			
-			if (proc != null) ProcessUtil.destroy(proc);
+			if (proc != null) {
+				ProcessUtil.destroy(proc);
+			}
 		}
 		
 		return bitRate;
@@ -1279,7 +1297,9 @@ public class LinuxNetworkUtil {
 				}
 			}
 			
-			if (proc != null) ProcessUtil.destroy(proc);
+			if (proc != null) {
+				ProcessUtil.destroy(proc);
+			}
 		}
 		
 		return ssid;
@@ -1366,7 +1386,9 @@ public class LinuxNetworkUtil {
 				}
 			}
 			
-			if (proc != null) ProcessUtil.destroy(proc);
+			if (proc != null) {
+				ProcessUtil.destroy(proc);
+			}
 		}
 		
 		//power the controller since it is not on
@@ -1385,7 +1407,9 @@ public class LinuxNetworkUtil {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
 		}
 		finally {
-			if (proc != null) ProcessUtil.destroy(proc);
+			if (proc != null) {
+				ProcessUtil.destroy(proc);
+			}
 		}
 	}
 	
@@ -1429,7 +1453,9 @@ public class LinuxNetworkUtil {
 				}
 			}
 			
-			if (proc != null) ProcessUtil.destroy(proc);
+			if (proc != null) {
+				ProcessUtil.destroy(proc);
+			}
 		}
 
 		return false;

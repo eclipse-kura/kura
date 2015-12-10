@@ -148,7 +148,6 @@ public class TelitHe910 extends TelitModem implements HspaCellularModem {
 								getMobileSubscriberIdentity(SimCardSlot.A.getValue()), 
 								getIntegratedCirquitCardId(SimCardSlot.A.getValue()),
 								getSubscriberNumber(SimCardSlot.A.getValue()));
-					ret[0].setActive(true);
 				}
 				s_logger.debug("obtainSubscriberInfo() :: switching to SIM Slot {}", SimCardSlot.B);
 				if (setSimCardSlot(SimCardSlot.B)) {
@@ -167,7 +166,6 @@ public class TelitHe910 extends TelitModem implements HspaCellularModem {
 							getMobileSubscriberIdentity(SimCardSlot.B.getValue()), 
 							getIntegratedCirquitCardId(SimCardSlot.B.getValue()),
 							getSubscriberNumber(SimCardSlot.B.getValue()));
-					ret[1].setActive(true);
 				}
 				s_logger.debug("obtainSubscriberInfo() :: switching to SIM Slot {}", SimCardSlot.A);
 				if (setSimCardSlot(SimCardSlot.A)) {
@@ -185,11 +183,19 @@ public class TelitHe910 extends TelitModem implements HspaCellularModem {
 				simSlot = getSimCardSlot();
 				if (simSlot != cfgSimCardSlot) {
 					s_logger.debug("obtainSubscriberInfo() :: switching to configured SIM Slot {}", cfgSimCardSlot);
-					setSimCardSlot(cfgSimCardSlot);
+					if(setSimCardSlot(cfgSimCardSlot)) {
+						simSlot = cfgSimCardSlot;
+					}
 				}
 			} else {
 				s_logger.debug("obtainSubscriberInfo() :: switching to original SIM Slot {}",simSlot);
 				setSimCardSlot(simSlot);
+			}
+			
+			if (simSlot == SimCardSlot.A) {
+				ret[0].setActive(true);
+			} else if (simSlot == SimCardSlot.B) {
+				ret[1].setActive(true);
 			}
 		}
 		return ret;

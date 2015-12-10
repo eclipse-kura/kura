@@ -413,6 +413,7 @@ public class ModemConfigTab extends LayoutContainer
 					}});
 			}
 		});
+        m_refreshSimInfoButton.addPlugin(m_dirtyPlugin);
         m_refreshSimInfoButton.setStyleAttribute("margin-top", Constants.LABEL_MARGIN_TOP_SEPARATOR);
         m_refreshSimInfoButton.addListener(Events.OnMouseOver, new MouseOverListener(MSGS.netModemToolTipRefreshSimInfo()));
         
@@ -813,7 +814,6 @@ public class ModemConfigTab extends LayoutContainer
             m_ifaceNumField.setValue(m_selectNetIfConfig.getPppNum());
             m_ifaceNumField.setOriginalValue(m_ifaceNumField.getValue());
             
-            // TODO
             gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
 	        	@Override
 				public void onFailure(Throwable ex) {
@@ -832,12 +832,23 @@ public class ModemConfigTab extends LayoutContainer
 	        						m_iccidLabelField.setValue(gwtModemSimCardEntry.getIntegratedCircuitCardIdentification());
 	        						if (gwtSimSlot == GwtSimCardSlot.A) {
 	        							m_simSlotAradio.setValue(true);
+	        							m_simSlotAradio.setOriginalValue(m_simSlotAradio.getValue());
 	        							m_simSlotBradio.setValue(false);
+	        							m_simSlotBradio.setOriginalValue(m_simSlotBradio.getValue());
+	        							m_selectSimSlotRadioGroup.setOriginalValue(m_simSlotAradio);
+	        							m_selectSimSlotRadioGroup.setValue(m_selectSimSlotRadioGroup.getValue());
 	        						} else if (gwtSimSlot == GwtSimCardSlot.B) {
 	        							m_simSlotAradio.setValue(false);
+	        							m_simSlotAradio.setOriginalValue(m_simSlotAradio.getValue());
 	        							m_simSlotBradio.setValue(true);
+	        							m_simSlotBradio.setOriginalValue(m_simSlotBradio.getValue());
+	        							m_selectSimSlotRadioGroup.setOriginalValue(m_simSlotBradio);
+	        							m_selectSimSlotRadioGroup.setValue(m_selectSimSlotRadioGroup.getValue());
 	        						}
 	        					}
+	        				}
+	        				for (Field<?> field : m_formPanel.getFields()) {
+	        					FormUtils.removeDirtyFieldIcon(field);
 	        				}
 	        			}
 	        			public void onFailure(Throwable caught) {
@@ -926,11 +937,9 @@ public class ModemConfigTab extends LayoutContainer
 		} else {
 			Log.debug("selected Network Interface Config is null");
 		}
-		
 		for (Field<?> field : m_formPanel.getFields()) {
 			FormUtils.removeDirtyFieldIcon(field);
 		}
-		
 		refreshForm();
 	}
 	
@@ -984,6 +993,9 @@ public class ModemConfigTab extends LayoutContainer
         m_ifaceNumField.setValue(null);
         m_ifaceNumField.setOriginalValue(m_ifaceNumField.getValue());
         
+        m_selectSimSlotRadioGroup.setValue(m_simSlotAradio);
+        m_selectSimSlotRadioGroup.setOriginalValue(m_selectSimSlotRadioGroup.getValue());
+        
 		m_dialStringField.setValue("");
 		m_dialStringField.setOriginalValue(m_dialStringField.getValue());
 		
@@ -1001,6 +1013,9 @@ public class ModemConfigTab extends LayoutContainer
 		
 		m_resetTimeoutField.setValue(null);
 		m_resetTimeoutField.setOriginalValue(m_resetTimeoutField.getValue());
+		
+		m_persistRadioGroup.setValue(m_persistRadioFalse);
+		m_persistRadioGroup.setOriginalValue(m_persistRadioGroup.getValue());
 		
 		m_maxFailField.setValue(null);
 		m_maxFailField.setOriginalValue(m_maxFailField.getValue());

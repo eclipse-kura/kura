@@ -142,7 +142,8 @@ public class StatusPanel extends LayoutContainer {
 								refresh();
 							}
 							public void onFailure(Throwable caught) {
-								Log.debug("caught: " + caught.toString());
+								unmask();
+								refresh();
 								FailureHandler.handle(caught);
 							}
 						});
@@ -174,7 +175,6 @@ public class StatusPanel extends LayoutContainer {
 								refresh();
 							}
 							public void onFailure(Throwable caught) {
-								Log.debug("caught: " + caught.toString());
 								FailureHandler.handle(caught);
 							}
 						});

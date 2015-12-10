@@ -19,6 +19,7 @@ import org.eclipse.kura.data.DataService;
 import org.eclipse.kura.data.DataTransportService;
 import org.eclipse.kura.position.PositionService;
 import org.eclipse.kura.web.server.util.ServiceLocator;
+import org.eclipse.kura.web.shared.GwtKuraErrorCode;
 import org.eclipse.kura.web.shared.GwtKuraException;
 import org.eclipse.kura.web.shared.model.GwtGroupedNVPair;
 import org.eclipse.kura.web.shared.model.GwtModemInterfaceConfig;
@@ -66,11 +67,14 @@ public class GwtStatusServiceImpl extends OsgiRemoteServiceServlet implements Gw
 				counter--;
 			}
 		} catch (KuraConnectException e) {
-			s_logger.error("Error connecting.");
-			throw new GwtKuraException("Error connecting: " + e.getLocalizedMessage());
+			s_logger.warn("Error connecting", e);
+			throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e, "Error connecting");
 		} catch (InterruptedException e) {
-			s_logger.error("Interrupt Exception.");
-			throw new GwtKuraException("Interrupt Exception: " + e.getLocalizedMessage());
+			s_logger.warn("Interrupt Exception", e);
+			throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e, "Interrupt Exception");
+		} catch (IllegalStateException e) {
+			s_logger.warn("Illegal client state", e);
+			throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e, "Illegal client state");			
 		}
 	}
 	
@@ -80,30 +84,31 @@ public class GwtStatusServiceImpl extends OsgiRemoteServiceServlet implements Gw
 		dataService.disconnect(10);
 	}
 	
-	private List<GwtGroupedNVPair> getCloudStatus() {
+	private List<GwtGroupedNVPair> getCloudStatus() throws GwtKuraException {
 		List<GwtGroupedNVPair> pairs = new ArrayList<GwtGroupedNVPair>();
 		
 		try {
-		DataService dataService = ServiceLocator.getInstance().getService(DataService.class);
-		DataTransportService dataTransportService = ServiceLocator.getInstance().getService(DataTransportService.class);
-		if (dataService != null) {
-			pairs.add(new GwtGroupedNVPair("cloudStatus", "Connection Status", dataService.isConnected() ? "CONNECTED" : "DISCONNECTED"));
-			pairs.add(new GwtGroupedNVPair("cloudStatus", "Auto-connect", dataService.isAutoConnectEnabled() ? "ON (Retry Interval is " + Integer.toString(dataService.getRetryInterval()) + "s)": "OFF"));
-		}
-		if (dataTransportService != null) {
-			pairs.add(new GwtGroupedNVPair("cloudStatus", "Broker URL", dataTransportService.getBrokerUrl()));
-			pairs.add(new GwtGroupedNVPair("cloudStatus", "Account", dataTransportService.getAccountName()));
-			pairs.add(new GwtGroupedNVPair("cloudStatus", "Username", dataTransportService.getUsername()));
-			pairs.add(new GwtGroupedNVPair("cloudStatus", "Client ID", dataTransportService.getClientId()));
-		}
+			DataService dataService = ServiceLocator.getInstance().getService(DataService.class);
+			DataTransportService dataTransportService = ServiceLocator.getInstance().getService(DataTransportService.class);
+			if (dataService != null) {
+				pairs.add(new GwtGroupedNVPair("cloudStatus", "Connection Status", dataService.isConnected() ? "CONNECTED" : "DISCONNECTED"));
+				pairs.add(new GwtGroupedNVPair("cloudStatus", "Auto-connect", dataService.isAutoConnectEnabled() ? "ON (Retry Interval is " + Integer.toString(dataService.getRetryInterval()) + "s)": "OFF"));
+			}
+			if (dataTransportService != null) {
+				pairs.add(new GwtGroupedNVPair("cloudStatus", "Broker URL", dataTransportService.getBrokerUrl()));
+				pairs.add(new GwtGroupedNVPair("cloudStatus", "Account", dataTransportService.getAccountName()));
+				pairs.add(new GwtGroupedNVPair("cloudStatus", "Username", dataTransportService.getUsername()));
+				pairs.add(new GwtGroupedNVPair("cloudStatus", "Client ID", dataTransportService.getClientId()));
+			}
 		} catch (GwtKuraException e) {
-			s_logger.debug(e.getMessage());
+			s_logger.warn("Get cloud status failed", e);
+			throw e;
 		}
 		
 		return pairs;
 	}
 	
-	private List<GwtGroupedNVPair> getNetworkStatus() {
+	private List<GwtGroupedNVPair> getNetworkStatus() throws GwtKuraException {
 		List<GwtGroupedNVPair> pairs = new ArrayList<GwtGroupedNVPair>();
 		String nl = "<br />";
 		String tab = "&nbsp&nbsp&nbsp&nbsp";
@@ -167,14 +172,14 @@ public class GwtStatusServiceImpl extends OsgiRemoteServiceServlet implements Gw
 				}
 			}
 		} catch (GwtKuraException e) {
-			s_logger.debug(e.getMessage());
+			s_logger.warn("Get network status failed", e);
+			throw e;
 		}
 
 		return pairs;
-		
 	}
 	
-	private List<GwtGroupedNVPair> getPositionStatus() {
+	private List<GwtGroupedNVPair> getPositionStatus() throws GwtKuraException {
 		List<GwtGroupedNVPair> pairs = new ArrayList<GwtGroupedNVPair>();
 		
 		try {
@@ -185,12 +190,11 @@ public class GwtStatusServiceImpl extends OsgiRemoteServiceServlet implements Gw
 				pairs.add(new GwtGroupedNVPair("positionStatus", "Latitude", positionService.getPosition().getLatitude().toString()));
 				pairs.add(new GwtGroupedNVPair("positionStatus", "Altitude", positionService.getPosition().getAltitude().toString()));
 			}
-			
 		} catch (GwtKuraException e) {
-			s_logger.debug(e.getMessage());
+			s_logger.warn("Get position status failed", e);
+			throw e;
 		}
 		
 		return pairs;
 	}
-
 }

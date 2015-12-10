@@ -65,10 +65,8 @@ public class SubscriberInfo {
 				+ ((m_imsi == null) ? 0 : m_imsi.hashCode());
 		result = prime * result
 				+ ((m_iccid == null) ? 0 : m_iccid.hashCode());
-		/*
 		result = prime * result
 				+ ((m_subscriber == null) ? 0 : m_subscriber.hashCode());
-		*/
 		return result;
 	}
 	
@@ -84,11 +82,9 @@ public class SubscriberInfo {
 		if (!m_iccid.equals(other.m_iccid)) {
 			return false;
 		} 
-		/*
 		if (!m_subscriber.equals(other.m_subscriber)) {
 			return false;
 		}
-		*/
 		return true;
 	}
 	
@@ -97,7 +93,7 @@ public class SubscriberInfo {
 		StringBuilder sb = new StringBuilder();
 		sb.append("IMSI=").append(m_imsi);
 		sb.append("; ICCID=").append(m_iccid);
-		//sb.append("; Subscriber Number=").append(m_subscriber);
+		sb.append("; Subscriber Number=").append(m_subscriber);
 		return sb.toString();
 	}
 	

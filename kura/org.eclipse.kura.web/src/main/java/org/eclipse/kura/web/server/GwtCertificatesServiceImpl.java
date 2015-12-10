@@ -79,8 +79,12 @@ public class GwtCertificatesServiceImpl extends OsgiRemoteServiceServlet impleme
 			if(privKey == null){
 				throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT);
 			}else{
+				char[] privateKeyPassword= new char[0];
+				if(password != null){
+					privateKeyPassword= password.toCharArray();
+				}
 				SslManagerService sslService = ServiceLocator.getInstance().getService(SslManagerService.class);
-				sslService.installPrivateKey(alias, privKey, password.toCharArray(), certs);
+				sslService.installPrivateKey(alias, privKey, privateKeyPassword, certs);
 			}
 			return 1;
 		} catch (UnsupportedEncodingException e) {

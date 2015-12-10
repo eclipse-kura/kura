@@ -84,12 +84,14 @@ public class BluetoothUtil {
 			}
 			
 		} catch (Exception e) {
-			s_logger.error("Failed to execute command: " + command, e);
+			s_logger.error("Failed to execute command: {}", command, e);
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR);
 		} finally {
 			try {
-				br.close();
-				proc.destroy();
+				if (br != null)
+					br.close();
+				if (proc != null)
+					proc.destroy();
 			} catch (IOException e) {
 				s_logger.error("Error closing read buffer", e);
 			}
@@ -121,11 +123,13 @@ public class BluetoothUtil {
 				}
 			}
 		} catch (Exception e) {
-			s_logger.error("Error executing command: " + command, e);
+			s_logger.error("Error executing command: {}", command, e);
 		} finally {
 			try {
-				br.close();
-				proc.destroy();
+				if (br != null)
+					br.close();
+				if (proc != null)
+					proc.destroy();
 			} catch (IOException e) {
 				s_logger.error("Error closing read buffer", e);
 			}
@@ -146,11 +150,13 @@ public class BluetoothUtil {
 			proc = BluetoothProcessUtil.exec(command);
 			br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
 		} catch (Exception e) {
-			s_logger.error("Error executing command: " + command, e);
+			s_logger.error("Error executing command: {}", command, e);
 		} finally {
 			try {
-				br.close();
-				proc.destroy();
+				if (br != null)
+					br.close();
+				if (proc != null)
+					proc.destroy();
 			} catch (IOException e) {
 				s_logger.error("Error closing read buffer", e);
 			}
@@ -179,15 +185,17 @@ public class BluetoothUtil {
 			}
 			
 		} catch (IOException e) {
-			s_logger.error("Error executing command: " + commandPidOf, e);
+			s_logger.error("Error executing command: {}", commandPidOf, e);
 		} catch (InterruptedException e) {
-			s_logger.warn("Error executing command: " + commandPidOf, e);
+			s_logger.warn("Error executing command: {}", commandPidOf, e);
 		} finally {
-			proc.destroy();
+			if (proc != null)
+				proc.destroy();
 			try {
-				br.close();
+				if (proc != null)
+					br.close();
 			} catch (IOException e) {
-				s_logger.warn("Error closing process for command: " + commandPidOf, e);
+				s_logger.warn("Error closing process for command: {}", commandPidOf, e);
 			}
 		}
 	}
@@ -200,10 +208,10 @@ public class BluetoothUtil {
 		String[] command = { HCITOOL, "-i", name, cmd };
 		BluetoothProcess proc = null;
 		try {
-			s_logger.debug("Command executed : " + Arrays.toString(command));
+			s_logger.debug("Command executed : {}", Arrays.toString(command));
 			proc = exec(command, listener);
 		} catch (Exception e) {
-			s_logger.error("Error executing command: " + command, e);
+			s_logger.error("Error executing command: {}", command, e);
 		}
 		
 		return proc;
@@ -222,10 +230,10 @@ public class BluetoothUtil {
 			command[i+3] = cmd[i];
 		BluetoothProcess proc = null;
 		try {
-			s_logger.debug("Command executed : " + Arrays.toString(command));
+			s_logger.debug("Command executed: {}", Arrays.toString(command));
 			proc = exec(command, listener);
 		} catch (Exception e) {
-			s_logger.error("Error executing command: " + command, e);
+			s_logger.error("Error executing command: {}", command, e);
 		}
 		
 		return proc;
@@ -241,7 +249,7 @@ public class BluetoothUtil {
 		try {
 			proc = exec(command, listener);
 		} catch (Exception e) {
-			s_logger.error("Error executing command: "+ command, e);
+			s_logger.error("Error executing command: ", command, e);
 		}
 		return proc;
 	}

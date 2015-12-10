@@ -1,0 +1,18 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: org.eclipse.kura.emulator.net
+Bundle-SymbolicName: org.eclipse.kura.emulator.net;singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Bundle-Vendor: EUROTECH
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Export-Package: org.eclipse.kura.emulator.net; version="1.0.0"
+Service-Component: OSGI-INF/*.xml
+Bundle-ActivationPolicy: lazy
+Import-Package: org.eclipse.kura;version="[1.0,2.0)",
+ org.eclipse.kura.core.net;version="[1.0,1.1)",
+ org.eclipse.kura.net;version="[1.1,1.2)",
+ org.eclipse.kura.net.modem;version="[1.0,2.0)",
+ org.eclipse.kura.net.wifi;version="[1.0,2.0)",
+ org.osgi.service.component;version="1.2.0",
+ org.slf4j;version="1.6.4"
+Bundle-ClassPath: .

@@ -14,9 +14,9 @@ package org.eclipse.kura.core.deployment.xml;
 
 public class XmlBundleInfo {
 	
-	public String name;
+	private String name;
 	
-	public String version;
+	private String version;
 
 	public String getName() {
 		return name;

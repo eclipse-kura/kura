@@ -217,13 +217,13 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
             
             s_logger.debug("activate() :: Found modem: {}", usbModem);
             
-            s_logger.debug("activate() :: usbModem.getTtyDevs().size()={}, modemInfo.getNumTtyDevs()={}",
-            		usbModem.getTtyDevs().size(), modemInfo.getNumTtyDevs());
-            s_logger.debug("activate() :: usbModem.getBlockDevs().size()={}, modemInfo.getNumBlockDevs()={}",
-            		usbModem.getBlockDevs().size(), modemInfo.getNumBlockDevs());
-            
             // Check for correct number of resources
             if (modemInfo != null) {
+            	s_logger.debug("activate() :: usbModem.getTtyDevs().size()={}, modemInfo.getNumTtyDevs()={}",
+                		usbModem.getTtyDevs().size(), modemInfo.getNumTtyDevs());
+                s_logger.debug("activate() :: usbModem.getBlockDevs().size()={}, modemInfo.getNumBlockDevs()={}",
+                		usbModem.getBlockDevs().size(), modemInfo.getNumBlockDevs());
+                
 	            if ((usbModem.getTtyDevs().size() == modemInfo.getNumTtyDevs())
 						&& (usbModem.getBlockDevs().size() == modemInfo.getNumBlockDevs())) {
 	            	s_logger.info("activate () :: posting ModemAddedEvent ... {}", usbModem);
@@ -428,7 +428,7 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
 	@Override
 	public List<WifiAccessPoint> getAllWifiAccessPoints() throws KuraException {
 		List<String> interfaceNames = getAllNetworkInterfaceNames();
-		if(interfaceNames != null && interfaceNames.size() > 0) {
+		if(interfaceNames != null && !interfaceNames.isEmpty()) {
 			List<WifiAccessPoint> accessPoints = new ArrayList<WifiAccessPoint>();
 			for(String interfaceName : interfaceNames) {
 				if(LinuxNetworkUtil.getType(interfaceName) == NetInterfaceType.WIFI) {
@@ -475,7 +475,7 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
         	return null;
         }
         // ignore usb0 for beaglebone
-        if (interfaceName.startsWith("usb0") && System.getProperty("target.device").equals("beaglebone")) {
+        if (interfaceName.startsWith("usb0") && "beaglebone".equals(System.getProperty("target.device"))) {
         	s_logger.debug("Ignoring usb0 for beaglebone.");
         	return null;
         }
@@ -1012,7 +1012,7 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
 	
 	private UsbNetDevice getUsbDevice(String interfaceName) {
 		List<UsbNetDevice> usbNetDevices = m_usbService.getUsbNetDevices();
-		if(usbNetDevices != null && usbNetDevices.size() > 0) {
+		if(usbNetDevices != null && !usbNetDevices.isEmpty()) {
 			for(UsbNetDevice usbNetDevice : usbNetDevices) {
 				if(usbNetDevice.getInterfaceName().equals(interfaceName)) {
 					return usbNetDevice;
@@ -1042,7 +1042,7 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
                             String[] filenameParts = peerFilename.split("_");
                             return filenameParts[filenameParts.length - 1];
                         } catch (IOException e) {
-                            e.printStackTrace();
+                            s_logger.error("Error splitting peer filename!", e);
                         }
     	            }
                 }
@@ -1121,7 +1121,7 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
 		while (!s_stopThread.get()) {
     		ModemDriver modemDriver = null;
     		List<? extends UsbModemDriver> usbDeviceDrivers = modemInfo.getDeviceDrivers();
-    		if ((usbDeviceDrivers != null) && (usbDeviceDrivers.size() > 0)) {
+    		if ((usbDeviceDrivers != null) && (!usbDeviceDrivers.isEmpty())) {
     			modemDriver = usbDeviceDrivers.get(0);
     		}
     		if (modemDriver != null) {

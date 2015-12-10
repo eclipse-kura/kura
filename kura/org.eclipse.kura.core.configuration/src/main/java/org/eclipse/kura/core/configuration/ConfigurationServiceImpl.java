@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011, 2014 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2015 Eurotech and/or its affiliates
  *
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
@@ -26,6 +26,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
@@ -521,18 +522,16 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 
 	Map<String, Object> decryptPasswords(ComponentConfiguration config) {
 		Map<String, Object> configProperties = config.getConfigurationProperties();
-		Iterator<String> keys = configProperties.keySet().iterator();
-		while (keys.hasNext()) {
-			String key = keys.next();
-			Object value = configProperties.get(key);
-			if (value instanceof Password) {
+		for (Entry<String, Object> property : configProperties.entrySet()) {
+			if (property.getValue() instanceof Password) {
 				try {
-					Password decryptedPassword = new Password(m_cryptoService.decryptAes(value.toString().toCharArray()));
-					configProperties.put(key, decryptedPassword);
+					Password decryptedPassword = new Password(m_cryptoService.decryptAes(property.getValue().toString().toCharArray()));
+					configProperties.put(property.getKey(), decryptedPassword);
 				} catch (Exception e) {
 				}
 			}
 		}
+
 		return configProperties;
 	}
 
@@ -548,17 +547,14 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 	}
 
 	private void encryptPasswords(Map<String, Object> propertiesToUpdate){
-		Iterator<String> keys = propertiesToUpdate.keySet().iterator();
-		while (keys.hasNext()) {
-			String key = keys.next();
-			Object value = propertiesToUpdate.get(key);
-			if (value != null) {
-				if (value instanceof Password) {
+		for (Entry<String, Object> property : propertiesToUpdate.entrySet()) {
+			if (property.getValue() != null) {
+				if (property.getValue() instanceof Password) {
 					try {
-						propertiesToUpdate.put(key, new Password(m_cryptoService.encryptAes(value.toString().toCharArray())));
+						propertiesToUpdate.put(property.getKey(), new Password(m_cryptoService.encryptAes(property.getValue().toString().toCharArray())));
 					} catch (Exception e) {
-						s_logger.warn("Failed to encrypt Password property: {}", key);
-						propertiesToUpdate.remove(key);
+						s_logger.warn("Failed to encrypt Password property: {}", property.getKey());
+						propertiesToUpdate.remove(property.getKey());
 					}
 				}
 			}
@@ -773,26 +769,22 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 
 												Map<String, Object> props = cc.getConfigurationProperties();
 												if (props != null) {
-													for (String propName : props.keySet()) {
-														if (propName.equals(adId)) {
-															Object value = props.get(propName);
-															if (value != null) {
-																String propType = value.getClass().getSimpleName();
-																try {
-																	s_logger.debug("pid: {}, property name: {}, type: {}, value: {}", new Object[] {pid, propName, propType, value});
-																	Scalar.fromValue(propType);
-																	if (!propType.equals(adType)) {
-																		s_logger.error("Type: {} for property named: {} does not match the AD type: {} for returned Configuration of SelfConfiguringComponent with pid: {}",
-																				new Object[] {propType, propName, adType, pid});
-																		cc = null;
-																		return cc;  // do not return the invalid configuration															
-																	}
-																} catch (IllegalArgumentException e) {
-																	s_logger.error("Invalid class: {} for property named: {} for returned Configuration of SelfConfiguringComponent with pid: " + pid, propType, propName);
-																	cc = null;
-																	return cc;  // do not return the invalid configuration
-																}
+													Object value = props.get(adId);
+													if (value != null) {
+														String propType = value.getClass().getSimpleName();
+														try {
+															s_logger.debug("pid: {}, property name: {}, type: {}, value: {}", new Object[] {pid, adId, propType, value});
+															Scalar.fromValue(propType);
+															if (!propType.equals(adType)) {
+																s_logger.error("Type: {} for property named: {} does not match the AD type: {} for returned Configuration of SelfConfiguringComponent with pid: {}",
+																		new Object[] {propType, adId, adType, pid});
+																cc = null;
+																return cc;  // do not return the invalid configuration															
 															}
+														} catch (IllegalArgumentException e) {
+															s_logger.error("Invalid class: {} for property named: {} for returned Configuration of SelfConfiguringComponent with pid: " + pid, propType, adId);
+															cc = null;
+															return cc;  // do not return the invalid configuration
 														}
 													}
 												}
@@ -1004,7 +996,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 
 		// Try to get the OCD from the registered ConfigurableComponents
 		OCD registerdOCD = getRegisteredOCD(pid);
-		
+
 		try {
 			if (!m_selfConfigComponents.contains(pid) && registerdOCD != null) {
 				//get the actual running configuration for the selected component
@@ -1077,7 +1069,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 			throw new KuraException(KuraErrorCode.CONFIGURATION_UPDATE, e, pid);
 		}
 	}
-	
+
 	private void updateComponentConfiguration(String pid, Map<String, Object> mergedProperties, boolean snapshotOnConfirmation) throws KuraException, IOException{
 		if (!m_selfConfigComponents.contains(pid)) {
 
@@ -1132,12 +1124,11 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 
 			// loop over the proposed property values
 			// and validate them against the definition
-			Iterator<String> keys = updatedProps.keySet().iterator();
-			while (keys.hasNext()) {
-
-				String key = keys.next();
+			for (Entry<String, Object> property : updatedProps.entrySet()) {
+				
+				String key = property.getKey();
 				AttributeDefinition attrDef = attrDefs.get(key);
-
+				
 				// is attribute undefined?
 				if (attrDef == null) {
 					// we do not have an attribute descriptor to the validation
@@ -1148,9 +1139,9 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 					// just accept them.
 					continue;
 				}
-
+				
 				// validate the attribute value
-				Object objectValue = updatedProps.get(key);
+				Object objectValue = property.getValue(); 
 				String stringValue = StringUtil.valueToString(objectValue);
 				if (stringValue != null) {
 					String result = attrDef.validate(stringValue);
@@ -1158,6 +1149,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 						throw new KuraException(KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID, attrDef.getID() + ": " + result);
 					}
 				}
+				
 			}
 
 			// make sure all required properties are set

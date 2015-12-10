@@ -7,6 +7,8 @@ import java.util.Date;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.deployment.CloudDeploymentHandlerV2;
 import org.eclipse.kura.core.deployment.CloudDeploymentHandlerV2.UNINSTALL_STATUS;
+import org.eclipse.kura.core.util.ProcessUtil;
+import org.eclipse.kura.core.util.SafeProcess;
 import org.osgi.service.deploymentadmin.DeploymentAdmin;
 import org.osgi.service.deploymentadmin.DeploymentPackage;
 import org.slf4j.Logger;
@@ -26,9 +28,7 @@ public class UninstallImpl {
 	}
 	
 	private void uninstallCompleteAsync(DeploymentPackageUninstallOptions options, String dpName) throws KuraException{
-		KuraUninstallPayload notify = null;
-
-		notify = new KuraUninstallPayload(options.getClientId());
+		KuraUninstallPayload notify = new KuraUninstallPayload(options.getClientId());
 		notify.setTimestamp(new Date());
 		notify.setUninstallStatus(UNINSTALL_STATUS.COMPLETED.getStatusString());
 		notify.setJobId(options.getJobId());
@@ -39,9 +39,7 @@ public class UninstallImpl {
 	}
 
 	public void uninstallFailedAsync(DeploymentPackageUninstallOptions options, String dpName, Exception e) throws KuraException{
-		KuraUninstallPayload notify = null;
-
-		notify = new KuraUninstallPayload(options.getClientId());
+		KuraUninstallPayload notify = new KuraUninstallPayload(options.getClientId());
 		notify.setTimestamp(new Date());
 		notify.setUninstallStatus(UNINSTALL_STATUS.FAILED.getStatusString());
 		notify.setJobId(options.getJobId());
@@ -57,24 +55,43 @@ public class UninstallImpl {
 		try{
 			String name = packageName;
 			if (name != null) {
-				s_logger.info("About to uninstall package ", name);
-				DeploymentPackage dp = null;
-
-				dp = m_deploymentAdmin.getDeploymentPackage(name);
+				DeploymentPackage dp = m_deploymentAdmin.getDeploymentPackage(name);
 				if (dp != null) {
 					dp.uninstall();
-
-					String sUrl = callback.m_installImplementation.getDeployedPackages().getProperty(name);
+					String sUrl = CloudDeploymentHandlerV2.s_installImplementation.getDeployedPackages().getProperty(name);
 					File dpFile = new File(new URL(sUrl).getPath());
 					if (!dpFile.delete()) {
 						s_logger.warn("Cannot delete file at URL: {}", sUrl);
 					}
-					callback.m_installImplementation.removePackageFromConfFile(name);
+					CloudDeploymentHandlerV2.s_installImplementation.removePackageFromConfFile(name);
 				}
 				uninstallCompleteAsync(options, name);
+				
+				//Reboot?
+				deviceReboot(options);
 			}
 		} catch (Exception e) {
 			throw KuraException.internalError(e.getMessage());
+		}
+	}
+	
+	private static void deviceReboot(DeploymentPackageUninstallOptions options) {
+		if (options.isReboot()) {
+			s_logger.info("Reboot requested...");
+			SafeProcess proc = null;
+			try {
+				int delay = options.getRebootDelay();
+				s_logger.info("Sleeping for {} seconds.", delay);
+				Thread.sleep(delay);
+				s_logger.info("Rebooting...");
+				proc = ProcessUtil.exec("reboot");
+			} catch (Exception e) {
+				s_logger.info("Rebooting... Failure!");
+			} finally {
+				if (proc != null) {
+					ProcessUtil.destroy(proc);
+				}
+			}
 		}
 	}
 

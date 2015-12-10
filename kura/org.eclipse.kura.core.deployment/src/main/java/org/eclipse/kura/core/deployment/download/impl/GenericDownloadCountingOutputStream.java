@@ -25,11 +25,11 @@ import org.eclipse.kura.ssl.SslManagerService;
 
 public class GenericDownloadCountingOutputStream extends CountingOutputStream {
 
-	private static int PROP_RESOLUTION;
-	private static int PROP_BUFFER_SIZE;
-	private static int PROP_CONNECT_TIMEOUT = 5000;
-	private static int PROP_READ_TIMEOUT = 6000;
-	private static int PROP_BLOCK_DELAY = 1000;
+	private int propResolution;
+	private int propBufferSize;
+	private int propConnectTimeout = 5000;
+	private int propReadTimeout = 6000;
+	private int propBlockDelay = 1000;
 
 	long totalBytes;
 
@@ -78,19 +78,19 @@ public class GenericDownloadCountingOutputStream extends CountingOutputStream {
 	@Override
 	protected void afterWrite(int n) throws IOException {
 		super.afterWrite(n);
-		if(PROP_RESOLUTION == 0 && getTotalBytes() > 0) {
-			PROP_RESOLUTION= Math.round((totalBytes / 100) * 5);
-		} else if (PROP_RESOLUTION == 0) {
-			PROP_RESOLUTION= 1024 * 256;
+		if(propResolution == 0 && getTotalBytes() > 0) {
+			propResolution= Math.round((totalBytes / 100) * 5);
+		} else if (propResolution == 0) {
+			propResolution= 1024 * 256;
 		}
-		if (getByteCount() >= m_currentStep * PROP_RESOLUTION) {
+		if (getByteCount() >= m_currentStep * propResolution) {
 			//System.out.println("Bytes read: "+ (getByteCount() - previous));
 			//previous = getByteCount();
 			m_currentStep++;
 			postProgressEvent(options.getClientId(), getByteCount(), totalBytes, DOWNLOAD_STATUS.IN_PROGRESS, null);
 		}
 		try {
-			Thread.sleep(PROP_BLOCK_DELAY);
+			Thread.sleep(propBlockDelay);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
@@ -109,42 +109,42 @@ public class GenericDownloadCountingOutputStream extends CountingOutputStream {
 	}
 	
 	protected void setResolution(int resolution) {
-		PROP_RESOLUTION = resolution;
+		propResolution = resolution;
 	}
 
 	protected void setBufferSize(int size) {
-		PROP_BUFFER_SIZE = size;
+		propBufferSize = size;
 	}
 
 	protected void setConnectTimeout(int timeout) {
-		PROP_CONNECT_TIMEOUT = timeout;
+		propConnectTimeout = timeout;
 	}
 
 	protected void setReadTimeout(int timeout) {
-		PROP_READ_TIMEOUT = timeout;
+		propReadTimeout = timeout;
 	}
 	
 	protected void setBlockDelay(int delay) {
-		PROP_BLOCK_DELAY = delay;
+		propBlockDelay = delay;
 	}
 	
-	protected static int getResolution() {
-		return PROP_RESOLUTION;
+	protected int getResolution() {
+		return propResolution;
 	}
 
-	protected static int getBufferSize() {
-		return PROP_BUFFER_SIZE;
+	protected int getBufferSize() {
+		return propBufferSize;
 	}
 	
-	protected static int getConnectTimeout() {
-		return PROP_CONNECT_TIMEOUT;
+	protected int getConnectTimeout() {
+		return propConnectTimeout;
 	}
 
-	protected static int getPROP_READ_TIMEOUT() {
-		return PROP_READ_TIMEOUT;
+	protected int getPropReadTimeout() {
+		return propReadTimeout;
 	}
 
-	protected static int getPROP_BLOCK_DELAY() {
-		return PROP_BLOCK_DELAY;
+	protected int getPropBlockDelay() {
+		return propBlockDelay;
 	}
 }

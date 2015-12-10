@@ -981,17 +981,19 @@ public class LinuxNetworkUtil {
 			}
 			
 			//get the output
-			br = new BufferedReader(new InputStreamReader(procEthtool.getInputStream()));
-			String line = null;
-			while ((line = br.readLine()) != null) {
-				if (line.startsWith("driver: ")) {
-					driver.put("name", line.substring(line.indexOf(": ") + 1));
-				}
-				else if (line.startsWith("version: ")) {
-					driver.put("version", line.substring(line.indexOf(": ") + 1));
-				}
-				else if (line.startsWith("firmware-version: ")) {
-					driver.put("firmware", line.substring(line.indexOf(": ") + 1));
+			if (procEthtool != null) {
+				br = new BufferedReader(new InputStreamReader(procEthtool.getInputStream()));
+				String line = null;
+				while ((line = br.readLine()) != null) {
+					if (line.startsWith("driver: ")) {
+						driver.put("name", line.substring(line.indexOf(": ") + 1));
+					}
+					else if (line.startsWith("version: ")) {
+						driver.put("version", line.substring(line.indexOf(": ") + 1));
+					}
+					else if (line.startsWith("firmware-version: ")) {
+						driver.put("firmware", line.substring(line.indexOf(": ") + 1));
+					}
 				}
 			}
 			

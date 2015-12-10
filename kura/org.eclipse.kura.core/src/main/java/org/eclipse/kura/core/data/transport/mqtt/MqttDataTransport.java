@@ -14,7 +14,6 @@ package org.eclipse.kura.core.data.transport.mqtt;
 
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -73,7 +72,7 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 	private SystemService m_systemService;
 	private SslManagerService m_sslManagerService;
 	private CloudConnectionStatusService m_cloudConnectionStatusService;
-	
+
 	private CloudConnectionStatusEnum m_notificationStatus = CloudConnectionStatusEnum.OFF;
 
 	private MqttAsyncClient m_mqttClient;
@@ -143,7 +142,7 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 	public void unsetCryptoService(CryptoService cryptoService) {
 		this.m_cryptoService = null;
 	}
-	
+
 	public void setCloudConnectionStatusService(CloudConnectionStatusService cloudConnectionStatusService) {
 		this.m_cloudConnectionStatusService = cloudConnectionStatusService;
 	}
@@ -151,7 +150,7 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 	public void unsetCloudConnectionStatusService(CloudConnectionStatusService cloudConnectionStatusService) {
 		this.m_cloudConnectionStatusService = null;
 	}
-	
+
 	// ----------------------------------------------------------------
 	//
 	// Activation APIs
@@ -160,15 +159,14 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 
 	protected void activate(ComponentContext componentContext, Map<String, Object> properties) {
 		s_logger.info("Activating...");
-		
+
 		// We need to catch the configuration exception and activate anyway.
 		// Otherwise the ConfigurationService will not be able to track us.
 		HashMap<String, Object> decryptedPropertiesMap = new HashMap<String, Object>();
 
-		Iterator<String> keys = properties.keySet().iterator();
-		while (keys.hasNext()) {
-			String key = keys.next();
-			Object value = properties.get(key);
+		for (Map.Entry<String, Object> entry : properties.entrySet()) {
+			String key = entry.getKey();
+			Object value = entry.getValue();
 			if (key.equals(MQTT_PASSWORD_PROP_NAME)) {
 				try {
 					char[] decryptedPassword = m_cryptoService.decryptAes(((String) value).toCharArray());
@@ -221,15 +219,14 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 
 	public void updated(Map<String, Object> properties) {
 		s_logger.info("Updating...");
-		
+
 		m_properties.clear();
 
 		HashMap<String, Object> decryptedPropertiesMap = new HashMap<String, Object>();
 
-		Iterator<String> keys = properties.keySet().iterator();
-		while (keys.hasNext()) {
-			String key = keys.next();
-			Object value = properties.get(key);
+		for (Map.Entry<String, Object> entry : properties.entrySet()) {
+			String key = entry.getKey();
+			Object value = entry.getValue();
 			if (key.equals(MQTT_PASSWORD_PROP_NAME)) {
 				try {
 					char[] decryptedPassword = m_cryptoService.decryptAes(((String) value).toCharArray());
@@ -317,10 +314,10 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 			connectToken.waitForCompletion(getTimeToWaitMillis() * 3);
 			s_logger.info("#  Connected!");
 			s_logger.info("# ------------------------------------------------------------");
-			
+
 			//Update status notification service
 			m_cloudConnectionStatusService.updateStatus(this, CloudConnectionStatusEnum.ON);
-			
+
 		} catch (MqttException e) {
 			s_logger.warn("xxxxx  Connect failed. Forcing disconnect. xxxxx {}", e);
 			try {
@@ -332,20 +329,21 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 			} finally {
 				m_mqttClient = null;
 			}
-			
+
 			//Update status notification service
 			m_cloudConnectionStatusService.updateStatus(this, CloudConnectionStatusEnum.OFF);
-			
+
 			throw new KuraConnectException(e, "Cannot connect");
 		} finally{
 			//Always unregister from CloudConnectionStatus service so to switch to the previous state
 			m_cloudConnectionStatusService.unregister(this);
 		}
-		
+
 		// notify the listeners
 		m_dataTransportListeners.onConnectionEstablished(m_newSession);
 	}
 
+	@Override
 	public boolean isConnected() {
 		if (m_mqttClient != null) {
 			return m_mqttClient.isConnected();
@@ -353,6 +351,7 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 		return false;
 	}
 
+	@Override
 	public String getBrokerUrl() {
 		if (m_clientConf != null) {
 			return m_clientConf.getBrokerUrl();
@@ -360,6 +359,7 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 		return "";
 	}
 
+	@Override
 	public String getAccountName() {
 		if (m_clientConf != null) {
 			return m_topicContext.get(TOPIC_ACCOUNT_NAME_CTX_NAME);
@@ -367,6 +367,7 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 		return "";
 	}
 
+	@Override
 	public String getUsername() {
 		if (m_clientConf != null) {
 			return m_clientConf.getConnectOptions().getUserName();
@@ -385,6 +386,7 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 	// TODO: java.lang.reflect.Proxy for every listener in order to catch
 	// runtime exceptions thrown by listener implementor and log them.
 
+	@Override
 	public synchronized void disconnect(long quiesceTimeout) {
 		// Disconnect the client if it's connected. If it fails log the
 		// exception.
@@ -629,8 +631,7 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 
 	private long getTimeToWaitMillis() {
 		// We use the same value for every timeout
-		long timeout = m_clientConf.getConnectOptions().getConnectionTimeout() * 1000L;
-		return timeout;
+		return m_clientConf.getConnectOptions().getConnectionTimeout() * 1000L;
 	}
 
 	// ---------------------------------------------------------
@@ -654,7 +655,7 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 	 */
 	private MqttClientConfiguration buildConfiguration(Map<String, Object> properties) {
 
-		MqttClientConfiguration clientConfiguration = null;
+		MqttClientConfiguration clientConfiguration;
 		MqttConnectOptions conOpt = new MqttConnectOptions();
 		String clientId = null;
 		String brokerUrl = null;
@@ -672,15 +673,15 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 			clientId = clientId.replace('+', '-');
 			clientId = clientId.replace('#', '-');
 
-			
+
 			// Configure the broker URL
 			brokerUrl = (String) properties.get(MQTT_BROKER_URL_PROP_NAME);
 			ValidationUtil.notEmptyOrNull(brokerUrl, MQTT_BROKER_URL_PROP_NAME);
 			brokerUrl = brokerUrl.trim();
-			
+
 			brokerUrl = brokerUrl.replaceAll("^" + MQTT_SCHEME, "tcp://");
 			brokerUrl = brokerUrl.replaceAll("^" + MQTTS_SCHEME, "ssl://"); 
-			
+
 			brokerUrl = brokerUrl.replaceAll("/$", "");
 			ValidationUtil.notEmptyOrNull(brokerUrl, "brokerUrl");
 
@@ -760,9 +761,9 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 
 		String sType = (String) properties.get(PERSISTENCE_TYPE_PROP_NAME);
 		PersistenceType persistenceType = null;
-		if (sType.equals("file")) {
+		if ("file".equals(sType)) {
 			persistenceType = PersistenceType.FILE;
-		} else if (sType.equals("memory")) {
+		} else if ("memory".equals(sType)) {
 			persistenceType = PersistenceType.MEMORY;
 		} else {
 			throw new IllegalStateException("Invalid MQTT client configuration: persistenceType: " + persistenceType);
@@ -961,15 +962,15 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 		m_sessionId = generateSessionId();
 	}
 
-	private String getMqttVersionLabel(int MqttVersion) {
+	private static String getMqttVersionLabel(int mqttVersion) {
 
-		switch (MqttVersion) {
+		switch (mqttVersion) {
 		case MqttConnectOptions.MQTT_VERSION_3_1:
 			return "3.1";
 		case MqttConnectOptions.MQTT_VERSION_3_1_1:
 			return "3.1.1";
 		default:
-			return String.valueOf(MqttVersion);
+			return String.valueOf(mqttVersion);
 		}
 	}
 

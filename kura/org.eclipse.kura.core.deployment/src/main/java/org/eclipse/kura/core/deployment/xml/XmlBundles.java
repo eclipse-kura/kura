@@ -14,7 +14,7 @@ package org.eclipse.kura.core.deployment.xml;
 
 public class XmlBundles {
 	
-	public XmlBundle[] bundles;
+	private XmlBundle[] bundles;
 
 	public XmlBundle[] getBundles() {
 		return bundles;

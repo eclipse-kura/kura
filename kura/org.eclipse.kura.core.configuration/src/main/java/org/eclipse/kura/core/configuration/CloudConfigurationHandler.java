@@ -194,7 +194,7 @@ public class CloudConfigurationHandler extends Cloudlet
 		
 		if (resources.length > 2) {
 			s_logger.error("Bad request topic: {}", reqTopic.toString()); 
-			s_logger.error("Expected one or two resource(s) but found {}", resources !=null ? resources.length: "none");
+			s_logger.error("Expected one or two resource(s) but found {}", resources.length);
 			respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_BAD_REQUEST);
 			return;
 		}
@@ -264,7 +264,7 @@ public class CloudConfigurationHandler extends Cloudlet
 		String[] resources = reqTopic.getResources();		
 		if (resources.length > 2) {
 			s_logger.error("Bad request topic: {}", reqTopic.toString()); 
-			s_logger.error("Expected at most two resource(s) but found {}", resources !=null ? resources.length: "none");
+			s_logger.error("Expected at most two resource(s) but found {}", resources.length);
 			respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_BAD_REQUEST);
 			return;
 		}
@@ -350,7 +350,7 @@ public class CloudConfigurationHandler extends Cloudlet
 		
 		if (resources.length > 2) {
 			s_logger.error("Bad request topic: {}", reqTopic.toString()); 
-			s_logger.error("Expected at most two resource(s) but found {}", resources !=null ? resources.length: "none");
+			s_logger.error("Expected at most two resource(s) but found {}", resources.length);
 			respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_BAD_REQUEST);
 			return;
 		}

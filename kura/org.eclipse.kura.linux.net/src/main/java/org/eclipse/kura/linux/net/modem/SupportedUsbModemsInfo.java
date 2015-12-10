@@ -37,7 +37,6 @@ public class SupportedUsbModemsInfo {
     
     public static boolean isSupported(String vendorId, String productId) {
         return SupportedUsbModems.isSupported(vendorId, productId);
-    	//return (SupportedUsbModems.getModem(vendorId, productId) != null);
     }
 }
 

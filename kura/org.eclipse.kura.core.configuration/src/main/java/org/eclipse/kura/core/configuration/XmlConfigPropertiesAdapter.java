@@ -13,10 +13,9 @@ package org.eclipse.kura.core.configuration;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
+import java.util.Map.Entry;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.Password;
@@ -36,15 +35,15 @@ public class XmlConfigPropertiesAdapter
 	{
 		List<XmlConfigPropertyAdapted> adaptedValues = new ArrayList<XmlConfigPropertyAdapted>();
 		if (props != null) {
-			Iterator<String> keys = props.keySet().iterator();
-			while (keys.hasNext()) {
+			
+			for (Entry<String, Object> prop : props.entrySet()) {
 	
 				XmlConfigPropertyAdapted adaptedValue = new XmlConfigPropertyAdapted();
 				
-				String key = keys.next();			
+				String key = prop.getKey();
 				adaptedValue.setName(key);
 	
-				Object value = props.get(key);
+				Object value = prop.getValue();
 				if (value instanceof String) {
 		    		adaptedValue.setArray(false);
 		    		adaptedValue.setType(ConfigPropertyType.stringType);
@@ -266,7 +265,7 @@ public class XmlConfigPropertiesAdapter
 						break;
 					case charType:
 						String s = adaptedProp.getValues()[0];
-						propvalue = new Character(s.charAt(0));
+						propvalue = Character.valueOf(s.charAt(0));
 						break;
 					case booleanType:
 						propvalue = Boolean.parseBoolean(adaptedProp.getValues()[0]);

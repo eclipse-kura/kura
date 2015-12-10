@@ -14,13 +14,13 @@ package org.eclipse.kura.core.deployment.xml;
 
 public class XmlBundle {
 	
-	public String name;
+	private String name;
 	
-	public String version;
+	private String version;
 	
-	public long id;
+	private long id;
 	
-	public String state;
+	private String state;
 
 	public String getName() {
 		return name;

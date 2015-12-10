@@ -149,7 +149,7 @@ public class Hostapd {
 	 */
 	public boolean equals (Object obj) {
 		
-		if (!(obj instanceof WpaSupplicant)) {
+		if (!(obj instanceof Hostapd)) {
 			return false;
 		}
 		

@@ -70,9 +70,7 @@ public class DownloadImpl implements ProgressListener{
 
 		s_logger.info("{}% downloaded", progress.getTransferProgress());
 
-		KuraNotifyPayload notify = null;
-
-		notify = new KuraNotifyPayload(progress.getClientId());
+		KuraNotifyPayload notify = new KuraNotifyPayload(progress.getClientId());
 		notify.setTimestamp(new Date());
 		notify.setTransferSize(progress.getTransferSize());
 		notify.setTransferProgress(progress.getTransferProgress());
@@ -115,7 +113,7 @@ public class DownloadImpl implements ProgressListener{
 		} catch (Exception e) {
 			s_logger.info("Download exception", e);
 			downloadSuccess= false;
-			downloadFailedAsync(e, downloadIndex);
+			downloadFailedAsync(downloadIndex);
 		} 
 
 
@@ -189,9 +187,9 @@ public class DownloadImpl implements ProgressListener{
 			try{
 				String checksum= HashUtil.hash(hashAlgorithm, dpFile);
 				if(		   hashAlgorithm == null 
-						|| hashAlgorithm.equals("") 
+						|| "".equals(hashAlgorithm) 
 						|| hashValue == null 
-						|| hashValue.equals("")
+						|| "".equals(hashValue)
 						|| checksum == null
 						|| !checksum.equals(hashValue)
 						){
@@ -205,12 +203,12 @@ public class DownloadImpl implements ProgressListener{
 	}
 
 	//Synchronous messages
-	public static void downloadInProgressSyncMessage(KuraResponsePayload respPayload, DownloadCountingOutputStream downloadHelper, DeploymentPackageDownloadOptions m_downloadOptions) {
+	public static void downloadInProgressSyncMessage(KuraResponsePayload respPayload, DownloadCountingOutputStream downloadHelper, DeploymentPackageDownloadOptions downloadOptions) {
 		respPayload.setTimestamp(new Date());
 		respPayload.addMetric(KuraNotifyPayload.METRIC_TRANSFER_SIZE, downloadHelper.getTotalBytes().intValue());
 		respPayload.addMetric(KuraNotifyPayload.METRIC_TRANSFER_PROGRESS, downloadHelper.getDownloadTransferProgressPercentage().intValue());
 		respPayload.addMetric(KuraNotifyPayload.METRIC_TRANSFER_STATUS, downloadHelper.getDownloadTransferStatus().getStatusString());
-		respPayload.addMetric(KuraNotifyPayload.METRIC_JOB_ID, m_downloadOptions.getJobId());
+		respPayload.addMetric(KuraNotifyPayload.METRIC_JOB_ID, downloadOptions.getJobId());
 	}
 
 	public static void downloadAlreadyDoneSyncMessage(KuraResponsePayload respPayload) {
@@ -218,13 +216,10 @@ public class DownloadImpl implements ProgressListener{
 		respPayload.addMetric(KuraNotifyPayload.METRIC_TRANSFER_SIZE, 0);
 		respPayload.addMetric(KuraNotifyPayload.METRIC_TRANSFER_PROGRESS, 100);
 		respPayload.addMetric(KuraNotifyPayload.METRIC_TRANSFER_STATUS, DOWNLOAD_STATUS.ALREADY_DONE);
-		//respPayload.addMetric(METRIC_JOB_ID, m_options.getJobId());
 	}
 
 	private void alreadyDownloadedAsync(){
-		KuraNotifyPayload notify = null;
-
-		notify = new KuraNotifyPayload(options.getClientId());
+		KuraNotifyPayload notify = new KuraNotifyPayload(options.getClientId());
 		notify.setTimestamp(new Date());
 		notify.setTransferSize(0);
 		notify.setTransferProgress(100);
@@ -235,10 +230,8 @@ public class DownloadImpl implements ProgressListener{
 		callback.publishMessage(options, notify, RESOURCE_DOWNLOAD);
 	}
 
-	private void downloadFailedAsync(Exception e, int downloadIndex) {
-		KuraNotifyPayload notify = null;
-
-		notify = new KuraNotifyPayload(options.getClientId());
+	private void downloadFailedAsync(int downloadIndex) {
+		KuraNotifyPayload notify = new KuraNotifyPayload(options.getClientId());
 		notify.setTimestamp(new Date());
 		notify.setTransferSize(0);
 		notify.setTransferProgress(100);
@@ -251,15 +244,13 @@ public class DownloadImpl implements ProgressListener{
 	}
 
 	private File getDpVerifierFile(DeploymentPackageInstallOptions options) throws IOException {
-		String packageFilename = null;
 
 		String shName= FileUtilities.getFileName(options.getDpName(), options.getDpVersion(), "_verifier.sh");
-		packageFilename = new StringBuilder().append(verificationDirectory)
+		String packageFilename = new StringBuilder().append(verificationDirectory)
 				.append(File.separator)
 				.append(shName)
 				.toString();
 
-		File dpFile = new File(packageFilename);
-		return dpFile;
+		return new File(packageFilename);
 	}
 }

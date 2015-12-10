@@ -720,12 +720,9 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 
 			Tocd ocd = m_ocds.get(pid);
 
-			Configuration cfg = m_configurationAdmin.getConfiguration(pid);
+			Configuration cfg = m_configurationAdmin.getConfiguration(pid, null);
 			Map<String, Object> props = CollectionsUtil.dictionaryToMap(cfg.getProperties(), ocd);
-
-			Map<String, Object> cleanedProps= cleanProperties(props, pid);
-
-			cc = new ComponentConfigurationImpl(pid, ocd, cleanedProps); 
+			cc = new ComponentConfigurationImpl(pid, ocd, props);
 		} catch (Exception e) {
 			s_logger.error("Error getting Configuration for component: " + pid + ". Ignoring it.", e);
 		}
@@ -896,7 +893,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 					s_logger.debug("Pushing config to config admin: {}", config.getPid());
 
 					// push it to the ConfigAdmin
-					cfg = m_configurationAdmin.getConfiguration(config.getPid());
+					cfg = m_configurationAdmin.getConfiguration(config.getPid(), null);
 					cfg.update(CollectionsUtil.mapToDictionary(config.getConfigurationProperties()));
 
 					// track it as a pending Configuration
@@ -1011,7 +1008,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 		try {
 			if (!m_selfConfigComponents.contains(pid) && registerdOCD != null) {
 				//get the actual running configuration for the selected component
-				Configuration config = m_configurationAdmin.getConfiguration(pid);
+				Configuration config = m_configurationAdmin.getConfiguration(pid, null);
 				Map<String, Object> runningProps = CollectionsUtil.dictionaryToMap(config.getProperties(), registerdOCD);
 
 				//iterate through all the running properties and include in mergedProperties 
@@ -1103,12 +1100,10 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 			s_logger.info("Snapshot on EventAdmin configuration will be taken for {}.", pid);
 		}
 
-		Map<String, Object> cleanedProperties= cleanProperties(mergedProperties, pid);
-
 		// Update the new properties
 		// use ConfigurationAdmin to do the update
-		Configuration config = m_configurationAdmin.getConfiguration(pid);
-		config.update(CollectionsUtil.mapToDictionary(cleanedProperties));
+		Configuration config = m_configurationAdmin.getConfiguration(pid, null);
+		config.update(CollectionsUtil.mapToDictionary(mergedProperties));
 	}
 
 	private OCD getRegisteredOCD(String pid){
@@ -1182,38 +1177,6 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 		}
 	}
 
-	private Map<String, Object> cleanProperties(Map<String, Object> mergedProperties, String pid) {
-		if (!m_selfConfigComponents.contains(pid)) {
-			Tocd componentOcd= m_ocds.get(pid);
-			Set<String> metatypeNames= new HashSet<String>();
-			if (componentOcd != null) {
-				List<AD> attrDefs = componentOcd.getAD();
-				if (attrDefs != null) {
-					for (AD attrDef : attrDefs) {
-						String name = attrDef.getName();
-						if (!metatypeNames.contains(name)) {
-							metatypeNames.add(name);
-						}
-					}
-				}
-			}
-
-			Map<String, Object> cleanedProperties= new HashMap<String, Object> ();
-			Set<String> mergedKeys= mergedProperties.keySet();
-
-			for(String key: mergedKeys){
-				if(metatypeNames.contains(key)){
-					Object value= mergedProperties.get(key);
-					cleanedProperties.put(key, value);
-				}
-			}
-			return cleanedProperties;
-		}else{
-			Map<String, Object> cleanedProperties= new HashMap<String, Object> (mergedProperties);
-			return cleanedProperties;
-		}
-	}
-
 	private synchronized List<ComponentConfiguration> buildCurrentConfiguration(List<ComponentConfiguration> configsToUpdate) throws KuraException {
 		// Build the current configuration
 		ComponentConfiguration cc = null;
@@ -1230,9 +1193,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 					if (configToUpdate.getPid().equals(pid)) {
 						// found a match
 						isConfigToUpdate = true;
-						Map<String, Object> cleanedProps= cleanProperties(configToUpdate.getConfigurationProperties(), pid);
-						ComponentConfiguration cleanedConfig= new ComponentConfigurationImpl(pid, (Tocd) configToUpdate.getDefinition(), cleanedProps);
-						configs.add(cleanedConfig);
+						configs.add(configToUpdate);
 						break;
 					}
 				}

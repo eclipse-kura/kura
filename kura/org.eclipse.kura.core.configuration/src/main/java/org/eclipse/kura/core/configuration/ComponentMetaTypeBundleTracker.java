@@ -112,7 +112,7 @@ public class ComponentMetaTypeBundleTracker extends BundleTracker<Bundle>
 			try {
 
 				OCD ocd = ocds.get(pid);
-				Configuration config = m_configurationAdmin.getConfiguration(pid);
+				Configuration config = m_configurationAdmin.getConfiguration(pid, null);
 				if (config != null) {
 
 					// get the properties from ConfigurationAdmin if any are present

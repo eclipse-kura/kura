@@ -31,7 +31,7 @@ public class SubscriberInfo {
 	 * Subscriber Number
 	 * This is phone number of the device
 	 */
-	private String m_subscriber;
+	private String m_subscriberNumber;
 	
 	/**
 	 * Default constructor
@@ -40,7 +40,7 @@ public class SubscriberInfo {
 		m_isActive = false;
 		m_imsi = "";
 		m_iccid = "";
-		m_subscriber = "";
+		m_subscriberNumber = "";
 	}
 	
 	/**
@@ -48,13 +48,13 @@ public class SubscriberInfo {
 	 * 
 	 * @param imsi - International Mobile Subscriber Identity as {@link String}
 	 * @param iccid - Integrated Circuit Card Identification as {@link String}
-	 * @param subscriber - Subscriber Number as {@link String}
+	 * @param subscriberNumber - Subscriber Number as {@link String}
 	 */
-	public SubscriberInfo(String imsi, String iccid, String subscriber) {
+	public SubscriberInfo(String imsi, String iccid, String subscriberNumber) {
 		m_isActive = false;
 		m_imsi = imsi;
 		m_iccid = iccid;
-		m_subscriber = subscriber;
+		m_subscriberNumber = subscriberNumber;
 	}
 	
 	@Override
@@ -66,7 +66,7 @@ public class SubscriberInfo {
 		result = prime * result
 				+ ((m_iccid == null) ? 0 : m_iccid.hashCode());
 		result = prime * result
-				+ ((m_subscriber == null) ? 0 : m_subscriber.hashCode());
+				+ ((m_subscriberNumber == null) ? 0 : m_subscriberNumber.hashCode());
 		return result;
 	}
 	
@@ -82,9 +82,11 @@ public class SubscriberInfo {
 		if (!m_iccid.equals(other.m_iccid)) {
 			return false;
 		} 
-		if (!m_subscriber.equals(other.m_subscriber)) {
+		/* don't compare subscriber number
+		if (!m_subscriberNumber.equals(other.m_subscriberNumber)) {
 			return false;
 		}
+		*/
 		return true;
 	}
 	
@@ -93,7 +95,7 @@ public class SubscriberInfo {
 		StringBuilder sb = new StringBuilder();
 		sb.append("IMSI=").append(m_imsi);
 		sb.append("; ICCID=").append(m_iccid);
-		sb.append("; Subscriber Number=").append(m_subscriber);
+		sb.append("; Subscriber Number=").append(m_subscriberNumber);
 		return sb.toString();
 	}
 	
@@ -129,7 +131,7 @@ public class SubscriberInfo {
 	 * @return Subscriber Number as {@link String}
 	 */
 	public String getSubscriberNumber() {
-		return m_subscriber;
+		return m_subscriberNumber;
 	}
 	
 	/**
@@ -155,7 +157,7 @@ public class SubscriberInfo {
 	 * 
 	 * @param subscriber - Subscriber Number as {@link String}
 	 */
-	public void setSubscriberNumber(String subscriber) {
-		m_subscriber = subscriber;
+	public void setSubscriberNumber(String subscriberNumber) {
+		m_subscriberNumber = subscriberNumber;
 	}
 }

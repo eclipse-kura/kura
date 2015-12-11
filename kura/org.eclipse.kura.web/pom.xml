@@ -286,6 +286,7 @@
 				<!-- Plugin configuration. There are many available options, see gwt-maven-plugin
 					documentation at codehaus.org -->
 				<configuration>
+					<extraJvmArgs>-Xmx768M -Xss1024k</extraJvmArgs>
 					<runTarget>denali.html</runTarget>
 					<hostedWebapp>${webappDirectory}</hostedWebapp>
 					<i18nMessagesBundle>org.eclipse.kura.web.client.messages.Messages</i18nMessagesBundle>

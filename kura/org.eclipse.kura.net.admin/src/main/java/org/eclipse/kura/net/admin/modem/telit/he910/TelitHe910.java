@@ -125,7 +125,7 @@ public class TelitHe910 extends TelitModem implements HspaCellularModem {
     		@Override
     		public void run() {
     			try {
-					m_subscriberInfo = obtainSubscriberInfo(simCardSlot);
+					m_subscriberInfo = obtainSubscriberInfoPrivate(simCardSlot);
 					modemReadyService.postModemReadyEvent(modem);
 				} catch (KuraException e) {
 					s_logger.error("failed to obtain subscriber info for Telit modem - {}", e);
@@ -137,6 +137,11 @@ public class TelitHe910 extends TelitModem implements HspaCellularModem {
 	
 	@Override
 	public SubscriberInfo [] obtainSubscriberInfo(SimCardSlot cfgSimCardSlot) throws KuraException {
+		m_subscriberInfo = obtainSubscriberInfoPrivate(cfgSimCardSlot);
+		return m_subscriberInfo;
+	}
+	
+	private SubscriberInfo [] obtainSubscriberInfoPrivate(SimCardSlot cfgSimCardSlot) throws KuraException {
 		SubscriberInfo [] ret = new SubscriberInfo [2];
 		synchronized (s_simLock) {
 			ret[0] = new SubscriberInfo(); ret[1] = new SubscriberInfo();

@@ -492,6 +492,9 @@ public abstract class TelitModem {
 								imsi = imsi.substring("#CIMI:".length()).trim();
 						    }
 							if (imsi.matches(NUMERIC_REGEX)) {
+								if (m_subscriberInfo[subscriberIndex] == null) {
+									m_subscriberInfo[subscriberIndex] = new SubscriberInfo();
+								}
 								m_subscriberInfo[subscriberIndex].setInternationalMobileSubscriberIdentity(imsi);
 							}
 						}
@@ -537,10 +540,12 @@ public abstract class TelitModem {
 		    					subscriber = subscriber.substring("+CNUM:".length()).trim();
 		    					String [] abSubscriber = subscriber.split(",");
 		    					String subscriberNumber = abSubscriber[1].substring(1, abSubscriber[1].lastIndexOf('"'));
-		    					if (m_subscriberInfo[subscriberIndex] == null) {
-									m_subscriberInfo[subscriberIndex] = new SubscriberInfo();
-								}
-		    					m_subscriberInfo[subscriberIndex].setSubscriberNumber(subscriberNumber);
+		    					if (subscriberNumber.matches(NUMERIC_REGEX)) {
+			    					if (m_subscriberInfo[subscriberIndex] == null) {
+										m_subscriberInfo[subscriberIndex] = new SubscriberInfo();
+									}
+			    					m_subscriberInfo[subscriberIndex].setSubscriberNumber(subscriberNumber);
+		    					}
 						    }
 		    			}
 		    		}
@@ -585,6 +590,9 @@ public abstract class TelitModem {
 								iccid = iccid.substring("#CCID:".length()).trim();
 						    }
 							if (iccid.matches(NUMERIC_REGEX)) {
+								if (m_subscriberInfo[subscriberIndex] == null) {
+									m_subscriberInfo[subscriberIndex] = new SubscriberInfo();
+								}
 								m_subscriberInfo[subscriberIndex].setIntegratedCircuitCardIdentification(iccid);
 							}
 						}

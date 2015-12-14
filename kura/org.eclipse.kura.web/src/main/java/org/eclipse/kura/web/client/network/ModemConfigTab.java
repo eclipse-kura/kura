@@ -403,6 +403,8 @@ public class ModemConfigTab extends LayoutContainer
 											m_imsiLabelField.setValue(gwtModemSimCardEntry.getInternationalMobileSubscriberIdentity());
 											m_iccidLabelField.setValue(gwtModemSimCardEntry.getIntegratedCircuitCardIdentification());
 											m_subscriberNumberField.setValue(gwtModemSimCardEntry.getSubscriberNumber());
+											GwtSimCardSlot gwtSimSlot = gwtModemSimCardEntry.getSimSlot();
+											setSelectSimSlotRadioGroup(gwtSimSlot);
 										}
 									}
 				    			}
@@ -830,21 +832,7 @@ public class ModemConfigTab extends LayoutContainer
 	        					if (gwtModemSimCardEntry.isActive()) {
 	        						m_imsiLabelField.setValue(gwtModemSimCardEntry.getInternationalMobileSubscriberIdentity());
 	        						m_iccidLabelField.setValue(gwtModemSimCardEntry.getIntegratedCircuitCardIdentification());
-	        						if (gwtSimSlot == GwtSimCardSlot.A) {
-	        							m_simSlotAradio.setValue(true);
-	        							m_simSlotAradio.setOriginalValue(m_simSlotAradio.getValue());
-	        							m_simSlotBradio.setValue(false);
-	        							m_simSlotBradio.setOriginalValue(m_simSlotBradio.getValue());
-	        							m_selectSimSlotRadioGroup.setOriginalValue(m_simSlotAradio);
-	        							m_selectSimSlotRadioGroup.setValue(m_selectSimSlotRadioGroup.getValue());
-	        						} else if (gwtSimSlot == GwtSimCardSlot.B) {
-	        							m_simSlotAradio.setValue(false);
-	        							m_simSlotAradio.setOriginalValue(m_simSlotAradio.getValue());
-	        							m_simSlotBradio.setValue(true);
-	        							m_simSlotBradio.setOriginalValue(m_simSlotBradio.getValue());
-	        							m_selectSimSlotRadioGroup.setOriginalValue(m_simSlotBradio);
-	        							m_selectSimSlotRadioGroup.setValue(m_selectSimSlotRadioGroup.getValue());
-	        						}
+	        						setSelectSimSlotRadioGroup(gwtSimSlot);
 	        					}
 	        				}
 	        				for (Field<?> field : m_formPanel.getFields()) {
@@ -1036,5 +1024,23 @@ public class ModemConfigTab extends LayoutContainer
 		m_enableGpsRadioGroup.setOriginalValue(m_enableGpsRadioGroup.getValue());
 
 		update();
+	}
+	
+	private void setSelectSimSlotRadioGroup(GwtSimCardSlot gwtSimSlot) {
+		if (gwtSimSlot == GwtSimCardSlot.A) {
+			m_simSlotAradio.setValue(true);
+			m_simSlotAradio.setOriginalValue(m_simSlotAradio.getValue());
+			m_simSlotBradio.setValue(false);
+			m_simSlotBradio.setOriginalValue(m_simSlotBradio.getValue());
+			m_selectSimSlotRadioGroup.setOriginalValue(m_simSlotAradio);
+			m_selectSimSlotRadioGroup.setValue(m_selectSimSlotRadioGroup.getValue());
+		} else if (gwtSimSlot == GwtSimCardSlot.B) {
+			m_simSlotAradio.setValue(false);
+			m_simSlotAradio.setOriginalValue(m_simSlotAradio.getValue());
+			m_simSlotBradio.setValue(true);
+			m_simSlotBradio.setOriginalValue(m_simSlotBradio.getValue());
+			m_selectSimSlotRadioGroup.setOriginalValue(m_simSlotBradio);
+			m_selectSimSlotRadioGroup.setValue(m_selectSimSlotRadioGroup.getValue());
+		}
 	}
 }

@@ -660,14 +660,14 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 										}
 										ind++;
 									}
-									if(((HspaCellularModem)modem).isSimCardReady()) {
+									if((activeSimSlot != null) && ((HspaCellularModem)modem).isSimCardReady()) {
 										s_logger.info("monitor() :: !!! SIM CARD in Slot {} IS READY !!! connecting ...", activeSimSlot);
 										pppService.connect();
 										if (m_pppState == PppState.NOT_CONNECTED) {
 											m_resetTimerStart = System.currentTimeMillis();
 										}
 									} else {
-										s_logger.warn("monitor() :: ! SIM CARD slot {} IS NOT READY !", activeSimSlot);
+										s_logger.warn("monitor() :: ! SIM CARD in Slot {} IS NOT READY !", activeSimSlot);
 									}
 								} else {
 									s_logger.info("monitor() :: connecting ...");

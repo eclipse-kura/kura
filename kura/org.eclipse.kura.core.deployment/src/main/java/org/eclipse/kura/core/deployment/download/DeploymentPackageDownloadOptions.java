@@ -144,7 +144,7 @@ public class DeploymentPackageDownloadOptions extends DeploymentPackageInstallOp
 			
 			metric = request.getMetric(METRIC_INSTALL_VERIFIER_URI);
 			if (metric != null) {
-				super.setVerifierURL((String) metric);
+				super.setVerifierURI((String) metric);
 			}
 
 		} catch (Exception ex) {

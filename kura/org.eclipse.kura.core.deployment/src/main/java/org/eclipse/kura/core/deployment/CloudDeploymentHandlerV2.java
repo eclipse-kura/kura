@@ -404,7 +404,15 @@ public class CloudDeploymentHandlerV2 extends Cloudlet {
 				s_downloadImplementation.deleteDownloadedFile();
 			}
 		} catch(Exception ex){
-			s_logger.info("Error cancelling download!", ex);
+			String errMsg = "Error cancelling download!";
+			s_logger.warn(errMsg, ex);
+			response.setResponseCode(KuraResponsePayload.RESPONSE_CODE_ERROR);
+			response.setTimestamp(new Date());
+			try {
+				response.setBody(errMsg.getBytes("UTF-8"));
+				response.setException(ex);
+			} catch (UnsupportedEncodingException uee) {
+			}
 		}
 
 	}
@@ -421,7 +429,7 @@ public class CloudDeploymentHandlerV2 extends Cloudlet {
 			response.setResponseCode(KuraResponsePayload.RESPONSE_CODE_ERROR);
 			response.setTimestamp(new Date());
 			try {
-				response.setBody("Malformed donwload request".getBytes("UTF-8"));
+				response.setBody("Malformed download request".getBytes("UTF-8"));
 			} catch (UnsupportedEncodingException e) {
 				s_logger.info("Unsupported encoding");
 			}

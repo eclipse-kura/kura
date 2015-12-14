@@ -44,7 +44,7 @@ You will learn how to perform the following functions:
 
 * Hardware
 
-  * Use an embedded device running ESF with Bluetooth 4.0 (LE) capabilities
+  * Use an embedded device running Kura with Bluetooth 4.0 (LE) capabilities
 
   * Use at least one TI SensorTag
 

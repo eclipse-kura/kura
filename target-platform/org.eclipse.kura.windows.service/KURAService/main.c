@@ -4,8 +4,6 @@
 #include "KURAService.h"
 
 BOOL g_bTerminate;							// Set to true to indicate the service should terminate
-//SERVICE_STATUS g_ServiceStatus;
-//SERVICE_STATUS_HANDLE g_StatusHandle;
 
 extern void WINAPI ServiceCtrlHandler(DWORD CtrlCode);
 

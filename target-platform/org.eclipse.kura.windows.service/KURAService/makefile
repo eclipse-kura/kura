@@ -1,5 +1,7 @@
 
-all : Release/x86/KURAService.exe Release/x64/KURAService.exe
+KURAService32 : Release/x86/KURAService.exe
+
+KURAService64 : Release/x64/KURAService.exe
 
 
 Objs/main32.o : main.c

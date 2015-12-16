@@ -18,6 +18,9 @@ import org.eclipse.kura.net.modem.SimCardSlot;
 public interface HspaCellularModem extends CellularModem {
 
 	public SimCardSlot getSimCardSlot() throws KuraException;
+	public SimCardSlot getSimCardSlot(String port) throws KuraException;
 	public boolean setSimCardSlot(SimCardSlot simCardSlot) throws KuraException;
+	public boolean setSimCardSlot(SimCardSlot simCardSlot, String port) throws KuraException;
 	public boolean isSimCardReady() throws KuraException;
+	public boolean isSimCardReady(String port) throws KuraException;
 }

@@ -27,10 +27,12 @@ public class Ppp implements IModemLinkService {
 	private static Object s_lock = new Object();
 	private String m_iface;
 	private String m_port;
+	private boolean m_enabled;
 		
 	public Ppp(String iface, String port) {
 		m_iface = iface;
 		m_port = port;
+		m_enabled = true;
 	}
 
 	@Override
@@ -87,4 +89,16 @@ public class Ppp implements IModemLinkService {
 		}
 		return pppState;
 	}
+
+	@Override
+	public boolean isEnabled() {
+		return m_enabled;
+	}
+
+	@Override
+	public void setEnabled(boolean enabled) {
+		m_enabled = enabled;
+	}
+	
+	
 }

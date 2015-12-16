@@ -422,6 +422,11 @@ public class TelitDe910 extends TelitModem implements EvdoCellularModem {
 	public boolean isSimCardReady() throws KuraException {
 		return true;
 	}
+	
+	@Override
+	public boolean isSimCardReady(String port) throws KuraException {
+		return true;
+	}
 
 	@Override
 	public List<ModemTechnologyType> getTechnologyTypes() throws KuraException {
@@ -446,6 +451,11 @@ public class TelitDe910 extends TelitModem implements EvdoCellularModem {
 	
 	@Override
 	public SubscriberInfo [] getSubscriberInfo(boolean refreshActiveSimInfo) throws KuraException {
+		return m_subscriberInfo;
+	}
+	
+	@Override
+	public SubscriberInfo [] getSubscriberInfo(boolean refreshActiveSimInfo, String port) throws KuraException {
 		return m_subscriberInfo;
 	}
 	

@@ -49,7 +49,7 @@ public interface CellularModem {
      * @throws KuraException
      */
     public String getIntegratedCirquitCardId() throws KuraException;
-    
+      
     /**
      * Reports modem's revision identification
      * 
@@ -90,6 +90,14 @@ public interface CellularModem {
     public int getSignalStrength() throws KuraException;
     
     /**
+     *  Reports signal strength in dBm
+     * @param port - serial port as {@link String}
+     * @return signal strength
+     * @throws KuraException
+     */
+    public int getSignalStrength(String port) throws KuraException;
+    
+    /**
      * Reports modem registration status
      * 
      * @throws Exception
@@ -120,7 +128,6 @@ public interface CellularModem {
      * @return service indication
      */
     public String getServiceType() throws KuraException;
-    
     
     /**
      * Returns the associated UsbModemDevice
@@ -153,10 +160,12 @@ public interface CellularModem {
     
     public SubscriberInfo [] getSubscriberInfo(boolean refreshActiveSimInfo) throws KuraException;
     
+    public SubscriberInfo [] getSubscriberInfo(boolean refreshActiveSimInfo, String port) throws KuraException;
+    
     public SubscriberInfo [] obtainSubscriberInfo(SimCardSlot cfgSimCardSlot, int execDelay, ModemReadyService callback);
     
     public SubscriberInfo [] obtainSubscriberInfo(SimCardSlot cfgSimCardSlot) throws KuraException;
-    
+     
     @Deprecated
     public ModemTechnologyType getTechnologyType ();
 }

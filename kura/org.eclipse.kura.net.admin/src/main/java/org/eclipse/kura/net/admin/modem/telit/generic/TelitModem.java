@@ -240,22 +240,27 @@ public abstract class TelitModem {
 	}
 	
 	public int getSignalStrength() throws KuraException {
+		String atPort = getAtPort();
+		String gpsPort = getGpsPort();
+		if ((atPort.equals(getDataPort()) || (atPort.equals(gpsPort)
+				&& m_gpsEnabled)) && (m_rssi < 0)) {
+			s_logger.trace("returning previously obtained RSSI={} :: m_gpsEnabled={}, m_rssi, m_gpsEnabled");
+			return m_rssi;
+		}
+		return getSignalStrength(atPort);
+	}
+	
+	public int getSignalStrength(String port) throws KuraException {
     	
     	int signalStrength = -113;
     	synchronized (s_atLock) {
-    		String atPort = getAtPort();
-    		String gpsPort = getGpsPort();
-			if ((atPort.equals(getDataPort()) || (atPort.equals(gpsPort)
-					&& m_gpsEnabled)) && (m_rssi < 0)) {
-				s_logger.trace("returning previously obtained RSSI={} :: m_gpsEnabled={}, m_rssi, m_gpsEnabled");
-				return m_rssi;
-			}
+    		
 				
 	    	s_logger.debug("sendCommand getSignalStrength :: {}", TelitModemAtCommands.getSignalStrength.getCommand());
 	    	CommConnection commAtConnection = null;
 	    	byte[] reply = null;
 	    	try {
-		    	commAtConnection = openSerialPort(atPort);
+		    	commAtConnection = openSerialPort(port);
 		    	if (!isAtReachable(commAtConnection)) {
 		    		throw new KuraException(KuraErrorCode.NOT_CONNECTED, "Modem not available for AT commands: " + TelitHe910.class.getName());
 		    	}
@@ -461,20 +466,24 @@ public abstract class TelitModem {
     }
     
     public String getMobileSubscriberIdentity(int subscriberIndex) throws KuraException {
+    	String atPort = getAtPort();
+		String gpsPort = getGpsPort();
+		if ((atPort.equals(getDataPort()) || (atPort.equals(gpsPort) && m_gpsEnabled)) 
+				&& (m_subscriberInfo[subscriberIndex].getInternationalMobileSubscriberIdentity() != null)) {
+			s_logger.trace("returning previously obtained MobileSubscriberIdentity={} :: m_gpsEnabled={}, m_imsi, m_gpsEnabled");
+			return m_subscriberInfo[subscriberIndex].getInternationalMobileSubscriberIdentity();
+		}
+		return getMobileSubscriberIdentity(subscriberIndex, atPort);
+    }
+    
+    public String getMobileSubscriberIdentity(int subscriberIndex, String port) throws KuraException {
     	synchronized (s_atLock) {
-    		String atPort = getAtPort();
-    		String gpsPort = getGpsPort();
-			if ((atPort.equals(getDataPort()) || (atPort.equals(gpsPort) && m_gpsEnabled)) 
-					&& (m_subscriberInfo[subscriberIndex].getInternationalMobileSubscriberIdentity() != null)) {
-				s_logger.trace("returning previously obtained MobileSubscriberIdentity={} :: m_gpsEnabled={}, m_imsi, m_gpsEnabled");
-				return m_subscriberInfo[subscriberIndex].getInternationalMobileSubscriberIdentity();
-			}
-    		if (isSimCardReady()) {
+    		if (isSimCardReady(port)) {
     			s_logger.debug("sendCommand getIMSI :: {}", TelitModemAtCommands.getIMSI.getCommand());
     			CommConnection commAtConnection = null;
     			byte[] reply = null;
     			try {
-			    	commAtConnection = openSerialPort(getAtPort());
+			    	commAtConnection = openSerialPort(port);
 			    	if (!isAtReachable(commAtConnection)) {
 				    	throw new KuraException(KuraErrorCode.NOT_CONNECTED, "Modem not available for AT commands: " + TelitHe910.class.getName());
 				    }
@@ -509,20 +518,24 @@ public abstract class TelitModem {
     }
     
     public String getSubscriberNumber(int subscriberIndex) throws KuraException {
+    	String atPort = getAtPort();
+		String gpsPort = getGpsPort();
+		if ((atPort.equals(getDataPort()) || (atPort.equals(gpsPort) && m_gpsEnabled)) 
+				&& (m_subscriberInfo[subscriberIndex].getSubscriberNumber() != null)) {
+			s_logger.trace("returning previously obtained SubscriberNumber={} :: m_gpsEnabled={}, m_subscriberNumber, m_gpsEnabled");
+			return m_subscriberInfo[subscriberIndex].getSubscriberNumber();
+		}
+		return getSubscriberNumber(subscriberIndex, atPort);
+    }
+    
+    public String getSubscriberNumber(int subscriberIndex, String port) throws KuraException {
     	synchronized (s_atLock) {
-    		String atPort = getAtPort();
-    		String gpsPort = getGpsPort();
-			if ((atPort.equals(getDataPort()) || (atPort.equals(gpsPort) && m_gpsEnabled)) 
-					&& (m_subscriberInfo[subscriberIndex].getSubscriberNumber() != null)) {
-				s_logger.trace("returning previously obtained SubscriberNumber={} :: m_gpsEnabled={}, m_subscriberNumber, m_gpsEnabled");
-				return m_subscriberInfo[subscriberIndex].getSubscriberNumber();
-			}
-			if (isSimCardReady()) {
+			if (isSimCardReady(port)) {
 				s_logger.debug("sendCommand getSubscriberNumber :: {}", TelitModemAtCommands.getSubscriberNumber.getCommand());
 				CommConnection commAtConnection = null;
 		    	byte[] reply = null;
 		    	try {
-		    		commAtConnection = openSerialPort(getAtPort());
+		    		commAtConnection = openSerialPort(port);
 			    	if (!isAtReachable(commAtConnection)) {
 				    	throw new KuraException(KuraErrorCode.NOT_CONNECTED, "Modem not available for AT commands: " + TelitHe910.class.getName());
 				    }
@@ -559,20 +572,24 @@ public abstract class TelitModem {
     }
     
     public String getIntegratedCirquitCardId(int subscriberIndex) throws KuraException {
+    	String atPort = getAtPort();
+		String gpsPort = getGpsPort();
+		if ((atPort.equals(getDataPort()) || (atPort.equals(gpsPort) && m_gpsEnabled)) 
+				&& (m_subscriberInfo[subscriberIndex].getIntegratedCircuitCardIdentification() != null)) {
+			s_logger.trace("returning previously obtained IntegratedCirquitCardId={} :: m_gpsEnabled={}, m_iccid, m_gpsEnabled");
+			return m_subscriberInfo[subscriberIndex].getIntegratedCircuitCardIdentification();
+		}
+		return getIntegratedCirquitCardId(subscriberIndex, atPort);
+    }
+    
+    public String getIntegratedCirquitCardId(int subscriberIndex, String port) throws KuraException {
     	synchronized (s_atLock) {
-    		String atPort = getAtPort();
-    		String gpsPort = getGpsPort();
-			if ((atPort.equals(getDataPort()) || (atPort.equals(gpsPort) && m_gpsEnabled)) 
-					&& (m_subscriberInfo[subscriberIndex].getIntegratedCircuitCardIdentification() != null)) {
-				s_logger.trace("returning previously obtained IntegratedCirquitCardId={} :: m_gpsEnabled={}, m_iccid, m_gpsEnabled");
-				return m_subscriberInfo[subscriberIndex].getIntegratedCircuitCardIdentification();
-			}
-	    	if (isSimCardReady()) {
+	    	if (isSimCardReady(port)) {
 		    	s_logger.debug("sendCommand getICCID :: {}", TelitModemAtCommands.getICCID.getCommand());
 		    	CommConnection commAtConnection = null;
 		    	byte[] reply = null;
 		    	try {
-			    	commAtConnection = openSerialPort(getAtPort());
+			    	commAtConnection = openSerialPort(port);
 			    	if (!isAtReachable(commAtConnection)) {
 				    	throw new KuraException(KuraErrorCode.NOT_CONNECTED, "Modem not available for AT commands: " + TelitHe910.class.getName());
 				    }
@@ -700,7 +717,7 @@ public abstract class TelitModem {
     	m_device = device;
     }
     
-    public List<NetConfig> getConfiguration() {
+	public List<NetConfig> getConfiguration() {
 		return m_netConfigs;
 	}
 
@@ -737,6 +754,8 @@ public abstract class TelitModem {
 	}
 	
 	public abstract boolean isSimCardReady() throws KuraException;
+	
+	public abstract boolean isSimCardReady(String port) throws KuraException;
 	
 	protected CommConnection openSerialPort (String port) throws KuraException {
     	

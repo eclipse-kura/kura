@@ -284,7 +284,6 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
         }	
 	}
 
-	
     @Override
 	public CellularModem getModemService (String usbPort) {
 		return m_modems.get(usbPort);
@@ -343,7 +342,7 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 	@Override
 	public void postModemReadyEvent(CellularModem modem) throws KuraException {
 		try {
-			SubscriberInfo [] subscriberInfo = modem.getSubscriberInfo(false);
+			SubscriberInfo [] subscriberInfo = modem.getSubscriberInfo(false, modem.getDataPort());
 			SubscriberInfo subscriber = null;
 			for (SubscriberInfo sub : subscriberInfo) {
 				if(sub.isActive()) {
@@ -357,11 +356,27 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 				modemInfoMap.put(ModemReadyEvent.IMSI, subscriber.getInternationalMobileSubscriberIdentity());
 				modemInfoMap.put(ModemReadyEvent.ICCID, subscriber.getIntegratedCircuitCardIdentification());
 			}
-			modemInfoMap.put(ModemReadyEvent.RSSI, Integer.toString(modem.getSignalStrength()));
+			modemInfoMap.put(ModemReadyEvent.RSSI, Integer.toString(modem.getSignalStrength(modem.getDataPort())));
 			s_logger.info("posting ModemReadyEvent on topic {}", ModemReadyEvent.MODEM_EVENT_READY_TOPIC);
 			m_eventAdmin.postEvent(new ModemReadyEvent(modemInfoMap));
 		} catch (Exception e) {
-			throw new KuraException (KuraErrorCode.INTERNAL_ERROR, "Failed to post the ModemReadyEvent");
+			e.printStackTrace();
+			throw new KuraException (KuraErrorCode.INTERNAL_ERROR, "Failed to post the ModemReadyEvent - {}", e);
+		}
+	}
+	
+	@Override
+	public void enableConnection(String ifaceName, CellularModem modem, boolean enable) throws KuraException {
+		synchronized (s_lock) {
+			IModemLinkService pppService = PppFactory.obtainPppService(ifaceName, modem.getDataPort());
+			PppState pppState = pppService.getPppState();
+			if (!enable && ((pppState == PppState.CONNECTED) || (pppState == PppState.IN_PROGRESS))) {
+				pppService.disconnect();
+				try {
+					Thread.sleep(2000);
+				} catch (InterruptedException e) {}
+			}
+			pppService.setEnabled(enable);
 		}
 	}
 	
@@ -471,6 +486,7 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 								
 								if (modem.isGpsSupported()) {
 									if (isGpsEnabledInConfig(newNetConfigs) && !modem.isGpsEnabled()) {
+										s_logger.info("processNetworkConfigurationChangeEvent() :: enabling modem GPS ...");
 		                                modem.enableGps();
 		                                postModemGpsEvent(modem, true);
 									}
@@ -479,8 +495,9 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 		    					ModemConfig modemConfig = getModemConfig(newNetConfigs);
 		    					SimCardSlot currentSimSlot = ((HspaCellularModem)modem).getSimCardSlot();
 		    					if ((currentSimSlot != null) && (currentSimSlot != modemConfig.getActiveSimCardSlot())) {
-		    						
-		    						((HspaCellularModem)modem).setSimCardSlot(modemConfig.getActiveSimCardSlot());
+		    						if (((HspaCellularModem)modem).setSimCardSlot(modemConfig.getActiveSimCardSlot())) {
+		    							modem.getSubscriberInfo(true, modem.getDataPort());
+		    						}
 		    					}
 		    				}
 		    			}
@@ -624,13 +641,14 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 					if (netInterfaceStatus == NetInterfaceStatus.netIPv4StatusEnabledWAN) {	
 						if (ifaceName != null) {
 							pppService = PppFactory.obtainPppService(ifaceName, modem.getDataPort());
+							s_logger.info("monitor() :: PPP service for {} is enabled? - {}", ifaceName, pppService.isEnabled());
 							pppState = pppService.getPppState();
 							if (m_pppState != pppState) {
 								s_logger.info("monitor() :: previous PppState={}", m_pppState);
 								s_logger.info("monitor() :: current PppState={}", pppState);
 							}
 							
-							if (pppState == PppState.NOT_CONNECTED) {
+							if ((pppState == PppState.NOT_CONNECTED) && (pppService.isEnabled())) {
 								boolean checkIfSimCardReady = false;
 								List<ModemTechnologyType> modemTechnologyTypes = modem.getTechnologyTypes();
 								for (ModemTechnologyType modemTechnologyType : modemTechnologyTypes) {
@@ -713,6 +731,7 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 						if (isGpsEnabledInConfig(modem.getConfiguration())) {
 							if (modem instanceof HspaCellularModem) {
 								if (!modem.isGpsEnabled()) {
+									s_logger.info("monitor() :: enabling modem GPS ...");
 							        modem.enableGps();
 								}
 							}
@@ -896,6 +915,7 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 					
 					if (modem.isGpsSupported()) {
 						if (isGpsEnabledInConfig(netConfigs) && !modem.isGpsEnabled()) {
+							s_logger.info("trackModem() :: enabling modem GPS ...");
                             modem.enableGps();
                             postModemGpsEvent(modem, true);
 						}
@@ -907,8 +927,8 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 		}
 	}
 	
-	
-	private boolean disableModemGps(CellularModem modem) throws KuraException {
+	@Override
+	public boolean disableModemGps(CellularModem modem) throws KuraException {
 		
 		postModemGpsEvent(modem, false);
 		

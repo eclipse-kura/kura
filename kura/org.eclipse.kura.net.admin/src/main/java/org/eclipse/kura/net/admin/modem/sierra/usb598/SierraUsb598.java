@@ -62,7 +62,6 @@ public class SierraUsb598 implements EvdoCellularModem {
 	private String m_manufacturer = null;
 	private String m_esn = null;
 	private String m_revisionId = null;
-	
 	private Object m_atLock = null; 
 	
 	private int m_callStatus = -1; // current call status
@@ -383,6 +382,11 @@ public class SierraUsb598 implements EvdoCellularModem {
 	}
 	
 	@Override
+	public SubscriberInfo [] getSubscriberInfo(boolean refreshActiveSimInfo, String port) throws KuraException {
+		return null;
+	}
+	
+	@Override
 	public SubscriberInfo [] obtainSubscriberInfo(SimCardSlot cfgSimCardSlot, int execDelay, ModemReadyService callback) {
 		return null;
 	}
@@ -392,9 +396,14 @@ public class SierraUsb598 implements EvdoCellularModem {
 		// TODO Auto-generated method stub
 		return null;
 	}
-
+	
 	@Override
 	public int getSignalStrength() throws KuraException {
+		return getSignalStrength(getAtPort());
+	}
+	
+	@Override
+	public int getSignalStrength(String port) throws KuraException {
 		// TODO Auto-generated method stub
 		return 0;
 	}

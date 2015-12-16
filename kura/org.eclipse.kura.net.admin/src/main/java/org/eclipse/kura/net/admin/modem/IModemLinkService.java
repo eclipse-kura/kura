@@ -47,4 +47,9 @@ public interface IModemLinkService {
 	* @return network interface name as <code>String</code>
 	*/
 	public String getIfaceName();
+	
+	
+	public boolean isEnabled();
+	
+	public void setEnabled(boolean enabled);
 }

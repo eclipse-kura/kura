@@ -53,12 +53,12 @@ public class PppLinux {
 	}
 	
 	public static void disconnect(String iface, String port) throws KuraException {
-		
 		int pid = getPid(iface, port);
 		if(pid >= 0) {
     		s_logger.info("killing {}  pid={}", iface, pid);
-    		LinuxProcessUtil.kill(pid);
-    		
+    		if (!LinuxProcessUtil.stop(pid)) {
+    			LinuxProcessUtil.kill(pid);
+    		}
     		if (port.startsWith("/dev/")) {
     			port = port.substring("/dev/".length());
     		}

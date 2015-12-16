@@ -212,15 +212,20 @@ public class SierraMc87xx implements HspaCellularModem {
 		// TODO
 		// not supported
 	}
-
+	
 	@Override
 	public int getSignalStrength() throws KuraException {
+		return getSignalStrength(getAtPort());
+	}
+
+	@Override
+	public int getSignalStrength(String port) throws KuraException {
 		
 		int rssi = -113;
     	synchronized (m_atLock) {
 	    	s_logger.debug("sendCommand getSignalStrength :: " + SierraMc87xxAtCommands.getSignalStrength.getCommand());
 	    	byte[] reply = null;
-	    	CommConnection commAtConnection = openSerialPort(getAtPort());
+	    	CommConnection commAtConnection = openSerialPort(port);
 	    	if (!isAtReachable(commAtConnection)) {
 	    		closeSerialPort(commAtConnection);
 	    		throw new KuraException(KuraErrorCode.NOT_CONNECTED, "Modem not available for AT commands: " + TelitHe910.class.getName());
@@ -441,6 +446,11 @@ public class SierraMc87xx implements HspaCellularModem {
 	}
 	
 	@Override
+	public SubscriberInfo [] getSubscriberInfo(boolean refreshActiveSimInfo, String port) throws KuraException {
+		return null;
+	}
+	
+	@Override
 	public SubscriberInfo [] obtainSubscriberInfo(SimCardSlot cfgSimCardSlot, int execDelay, ModemReadyService callback) {
 		return null;
 	}
@@ -451,7 +461,17 @@ public class SierraMc87xx implements HspaCellularModem {
 	}
 	
 	@Override
+	public SimCardSlot getSimCardSlot(String port) throws KuraException {
+		return null;
+	}
+	
+	@Override
 	public boolean setSimCardSlot(SimCardSlot simCardSlot) throws KuraException {
+		return false;
+	}
+	
+	@Override
+	public boolean setSimCardSlot(SimCardSlot simCardSlot, String port) throws KuraException {
 		return false;
 	}
 	
@@ -498,12 +518,16 @@ public class SierraMc87xx implements HspaCellularModem {
 
 	@Override
 	public boolean isSimCardReady() throws KuraException {
-		
+		return isSimCardReady(getAtPort());
+	}
+	
+	@Override
+	public boolean isSimCardReady(String port) throws KuraException {
 		boolean simReady = false;
 		synchronized (m_atLock) {
 			s_logger.debug("sendCommand getSystemInfo :: " + SierraMc87xxAtCommands.getSystemInfo.getCommand());
     		byte[] reply = null;
-    		CommConnection commAtConnection = openSerialPort(getAtPort());
+    		CommConnection commAtConnection = openSerialPort(port);
     		if (!isAtReachable(commAtConnection)) {
     			closeSerialPort(commAtConnection);
 	    		throw new KuraException(KuraErrorCode.NOT_CONNECTED, "Modem not available for AT commands: " + TelitHe910.class.getName());

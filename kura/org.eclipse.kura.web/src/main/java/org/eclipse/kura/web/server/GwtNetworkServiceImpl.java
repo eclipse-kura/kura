@@ -981,6 +981,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 							if (cellModemService != null) {
 								if (obtainSimCardInfo) {
 									s_logger.debug("findSimCardInfo() :: obtaining Subscriber Info");
+									modemManagerService.enableConnection(netIfConfig.getName(), cellModemService, false);
 									ModemConfig modemConfig = null;
 									List<NetConfig> netConfigs = cellModemService.getConfiguration();
 									if (netConfigs != null) {
@@ -991,14 +992,23 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 											}
 										}
 									}
-									if (modemConfig != null) {
-										subscriberInfo = cellModemService.obtainSubscriberInfo(modemConfig.getActiveSimCardSlot());
-									} else {
-										subscriberInfo = cellModemService.obtainSubscriberInfo(null);
+									try {
+										if (modemConfig != null) {
+											subscriberInfo = cellModemService.obtainSubscriberInfo(modemConfig.getActiveSimCardSlot());
+										} else {
+											subscriberInfo = cellModemService.obtainSubscriberInfo(null);
+										}
+									} catch (KuraException e) {
+										s_logger.error("Failed to obtain subscriber information - {}", e);
 									}
+									modemManagerService.enableConnection(netIfConfig.getName(), cellModemService, true);
  								} else {
  									s_logger.debug("findSimCardInfo() :: getting Subscriber Info");
- 									subscriberInfo = cellModemService.getSubscriberInfo(refreshActiveSimInfo);
+ 									try {
+ 										subscriberInfo = cellModemService.getSubscriberInfo(refreshActiveSimInfo);
+ 									} catch (KuraException e) {
+ 										s_logger.error("Failed to get subscriber information - {}", e);
+ 									}
  								}
 							}
 						}

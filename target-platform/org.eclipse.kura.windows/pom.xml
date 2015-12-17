@@ -96,6 +96,42 @@
         	  </execution>
         	</executions>
 	   </plugin>
+
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>exec-maven-plugin</artifactId>
+				<version>1.2</version>
+				<executions>
+					<execution>
+						<id>org.eclipse.kura.windows.build</id>
+						<phase>compile</phase>
+						<goals>
+							<goal>exec</goal>
+						</goals>
+						<configuration>
+							<executable>bash</executable>
+							<arguments>
+								<argument>build_native.sh</argument>
+								<argument>build</argument>
+							</arguments>
+						</configuration>
+					</execution>
+					<execution>
+						<id>org.eclipse.kura.windows.clean</id>
+						<phase>clean</phase>
+						<goals>
+							<goal>exec</goal>
+						</goals>
+						<configuration>
+							<executable>bash</executable>
+							<arguments>
+								<argument>build_native.sh</argument>
+								<argument>clean</argument>
+							</arguments>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 	   
         </plugins>
         <pluginManagement>

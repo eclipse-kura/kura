@@ -36,13 +36,27 @@ if [ "$1" == "clean" ]; then
 fi
 
 #===============================================================================================================================
-# If the argument is 'build' change to the source directory then check to see if we have viable 32 bit compiler if so call make
-# with the 32 bit target. Next check for 64 bit compiler and run make with the 64 bit target. If the compilers are not found
-# just issue a warning and continue without doing anything. This will leave the pre built binaries in the Release directory to
-# be used in the final installer. This should mean that you get a working installer even if you don't have mingw installed
+# If the argument is 'build' change to the source directory, create the Objs and Release directories if required, then check to
+# see if we have viable 32 bit compiler if so call make with the 32 bit target. Next check for 64 bit compiler and run make with
+# the 64 bit target. If the compilers are not found just issue a warning and continue without doing anything. This will leave the
+# pre built binaries in the Release directory to be used in the final installer. This should mean that you get a working installer
+# even if you don't have mingw installed
 #
 if [ "$1" == "build" ]; then
+		
 		cd KURAService
+		if [ ! -d Objs ]; then
+			mkdir Objs
+		fi
+
+		if [ ! -d Release/x86 ]; then
+			mkdir -p Release/x86
+		fi
+
+		if [ ! -d Release/x64 ]; then
+			mkdir -p Release/x64
+		fi
+
 		if [ -x "$(command -v i686-w64-mingw32-gcc)" ]; then
 			$MAKECMD KURAService32
 		else

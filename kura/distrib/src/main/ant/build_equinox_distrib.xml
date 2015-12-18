@@ -725,9 +725,6 @@ set KURA_TEMP=\tmp\.kura
 if not exist %KURA_TEMP% mkdir %KURA_TEMP%
 if not exist %KURA_TEMP%\Configuration mkdir %KURA_TEMP%\Configuration
 
-echo "%cd%"> %KURA_TEMP%\install.txt
-set /P KURA_INST=&lt;%KURA_TEMP%\install.txt
-
 copy %KURA_HOME%\config.ini %KURA_TEMP%\Configuration
 
 java -Xms256m -Xmx256m -Dkura.os.version=win32 ^
@@ -740,8 +737,8 @@ java -Xms256m -Xmx256m -Dkura.os.version=win32 ^
 	-Dkura.custom.configuration=file:%KURA_HOME_URI%/kura_custom.properties ^
 	-Ddpa.configuration=%KURA_HOME%\dpa.properties ^
 	-Dlog4j.configuration=file:%KURA_HOME_URI%/log4j.properties ^
-        -Djdk.tls.trustNameService=true ^
-	-jar %KURA_INST%\plugins\org.eclipse.osgi_3.8.1.v20120830-144521.jar ^
+	-Djdk.tls.trustNameService=true ^
+	-jar "%~dp0\plugins\org.eclipse.osgi_3.8.1.v20120830-144521.jar" ^
 	-configuration %KURA_TEMP%\Configuration ^
 	-console ^
 	-consoleLog	

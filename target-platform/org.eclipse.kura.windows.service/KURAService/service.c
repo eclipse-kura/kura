@@ -1,7 +1,4 @@
 
-#include <windows.h>
-#include <tchar.h>
-
 #include "KURAService.h"
 
 //===================================================================================================================================
@@ -11,11 +8,10 @@
 //	executable terminates while this flag is clear it just died and we try to restart it. If the executable fails to start wait for
 //	20 seconds (arbitratry vale) and try again.
 //
-void RunService(void)
+void RunService(TCHAR *pszCommand)
 {
 	STARTUPINFO mStartInfo;
 	PROCESS_INFORMATION mProcInfo;
-	TCHAR wszProcess[] = _T("cmd /C C:\\Opt\\Eclipse\\KURA\\Start_Kura.bat");
 
 	memset(&mStartInfo, 0, sizeof(mStartInfo));
 
@@ -36,7 +32,7 @@ void RunService(void)
 				mStartInfo.hStdOutput = g_hOUTWrite;
 
 				// Start the actual KURA process
-				if(CreateProcess(NULL, wszProcess, NULL, NULL, TRUE, 0, NULL, NULL, &mStartInfo, &mProcInfo))
+				if(CreateProcess(NULL, pszCommand, NULL, NULL, TRUE, 0, NULL, NULL, &mStartInfo, &mProcInfo))
 				{
 					UpdateStatus(SERVICE_RUNNING, SERVICE_ACCEPT_STOP, 0, NO_ERROR);
 

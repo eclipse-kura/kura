@@ -14,6 +14,7 @@
 		<module>usb4java-javax</module>
 		<module>org.eclipse.soda.dk.comm</module>
 		<module>org.eclipse.kura.windows</module>
+		<module>org.eclipse.kura.windows.service</module>
 		<module>p2-repo-common</module>
 		<module>p2-repo-equinox_3.8.1</module>
 	</modules>

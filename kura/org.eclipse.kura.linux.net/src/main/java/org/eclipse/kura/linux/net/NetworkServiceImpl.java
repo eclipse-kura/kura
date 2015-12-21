@@ -11,7 +11,9 @@
  */
 package org.eclipse.kura.linux.net;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -1085,9 +1087,34 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
             for(int i=0; i<peerFiles.length; i++) {
                 File peerFile = peerFiles[i];
                 String peerFilename = peerFile.getName();
-                if(peerFilename.startsWith(deviceName) && peerFilename.endsWith(/*usbPort*/ modemId)) {                    
+                if(peerFilename.startsWith(deviceName) && peerFilename.endsWith(/*usbPort*/ modemId)) {
+                	BufferedReader br = null;
+                	try {
+	                	br = new BufferedReader(new FileReader(peerFile));
+	                	String line = null;
+	                	StringBuilder sbIfaceName = null;
+	                	while ((line = br.readLine()) != null) {
+	                		if (line.startsWith("unit")) {
+	                			sbIfaceName = new StringBuilder("ppp");
+	                			sbIfaceName.append(line.substring("unit".length()).trim());
+	                			break;
+	                		}
+	                	}
+	                	return sbIfaceName.toString();
+                	} catch (Exception e) {
+                		s_logger.error("failed to parse peers file - {}", e);
+                	} finally {
+                		if (br != null) {
+                			try {
+								br.close();
+							} catch (IOException e) {
+								s_logger.error("failed to close buffered reader - {}", e);
+							}
+                		}
+                	}
                     // find a 'pppX' symlink to this peer file
-                    for(int j=0; j<peerFiles.length; j++) {
+                    /*
+                	for(int j=0; j<peerFiles.length; j++) {
                         File pppFile = peerFiles[j];
                         
                         if(peerFilename.equals(pppFile.getName())) {
@@ -1104,6 +1131,7 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
                             throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
                         }
                     }
+                    */
                     
                     break;
                 }

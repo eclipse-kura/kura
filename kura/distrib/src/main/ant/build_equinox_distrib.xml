@@ -609,21 +609,23 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
 
         <copy file="src/main/resources/${build.name}/kura.properties"
               tofile="${project.build.directory}/${build.output.name}/kura.properties" />
-        <propertyfile file="${project.build.directory}/${build.output.name}/kura.properties">
-            <entry key="kura.version"   value="KURA_${kura.version}" />
-            <entry key="kura.home"   value="${kura.install.dir}/kura/kura" />
-            <entry key="kura.plugins"   value="${kura.install.dir}/kura/kura/plugins" />
-            <entry key="kura.packages"   value="${kura.install.dir}/kura/kura/packages" />
+        
+		<propertyfile file="${project.build.directory}/${build.output.name}/kura.properties">
+			<entry key="kura.version"   value="KURA_${kura.version}" />
+			<entry key="kura.home"   value="${kura.install.dir}/kura/kura" />
+			<entry key="kura.plugins"   value="${kura.install.dir}/kura/kura/plugins" />
+			<entry key="kura.packages"   value="${kura.install.dir}/kura/kura/packages" />
 
-	    <entry key="kura.data"   value="${kura.install.dir}/kura/data" />
-	    <entry key="kura.snapshots"   value="${kura.install.dir}/kura/data/snapshots" />
-	    <entry key="kura.style.dir"   value="${kura.install.dir}/kura/console/skin" />
+			<entry key="kura.data"   value="${kura.install.dir}/kura/data" />
+			<entry key="kura.snapshots"   value="${kura.install.dir}/kura/data/snapshots" />
+			<entry key="kura.style.dir"   value="${kura.install.dir}/kura/console/skin" />
 
             <entry key="version"       value="${kura.version}" />
             <entry key="build.version" value="${buildNumber}" />
             <entry key="build.number"  value="${build.name}-${buildNumber}" />
         </propertyfile>
-        <replace file="${project.build.directory}/${build.output.name}/kura.properties" token="{kura.install.dir}" value="${kura.install.dir}"/>
+
+		<replace file="${project.build.directory}/${build.output.name}/kura.properties" token="{kura.install.dir}" value="${kura.install.dir}"/>
         <replace file="${project.build.directory}/${build.output.name}/kura.properties" token="{kura.symlink}" value="${kura.symlink}"/>
 
     	
@@ -636,10 +638,12 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
     		</or>
     	</condition>
     	
-        <copy file="src/main/resources/${build.name}/snapshot_0.xml"
-              tofile="${project.build.directory}/${build.output.name}/snapshot_0.xml" />
-        <copy file="src/main/osgi/equinox_3.8.1/configwindows/config.ini"
-              tofile="${project.build.directory}/${build.output.name}/config.ini" />
+		<copy file="src/main/resources/${build.name}/Kura_x64.nsi" tofile="${project.build.directory}/${build.output.name}/Kura_x64.nsi" />
+		<replace file="${project.build.directory}/${build.output.name}/Kura_x64.nsi" token="{build.output.name}" value="${build.output.name}"/>
+
+        <copy file="src/main/resources/${build.name}/snapshot_0.xml" tofile="${project.build.directory}/${build.output.name}/snapshot_0.xml" />
+
+		<copy file="src/main/osgi/equinox_3.8.1/configwindows/config.ini" tofile="${project.build.directory}/${build.output.name}/config.ini" />
 
         <!-- Populate config.ini with correct versions -->
         <replace file="${project.build.directory}/${build.output.name}/config.ini"
@@ -747,162 +751,113 @@ java -Xms256m -Xmx256m -Dkura.os.version=win32 ^
         <property name="build.install.dir" value="${project.build.directory}/InstallWin"/> 
         <property name="build.install.dir.kura" value="${build.install.dir}/KuraFiles"/> 
 
-            <copy file="${project.build.directory}/${build.output.name}/snapshot_0.xml"
-                        todir="${build.install.dir.kura}/data/snapshots/" />
+		<copy file="${project.build.directory}/${build.output.name}/snapshot_0.xml"
+			todir="${build.install.dir.kura}/data/snapshots/" />
 
-            <copy file="${project.build.directory}/${build.output.name}/config.ini"
-                        todir="${build.install.dir.kura}/kura/" />
+		<copy file="${project.build.directory}/${build.output.name}/config.ini"
+			todir="${build.install.dir.kura}/kura/" />
 
-            <copy file="src/main/resources/common/kura_custom.properties"
-                        todir="${build.install.dir.kura}/kura/" />
-<!-- 
-            <copy file="${project.build.directory}/${build.output.name}/kura_install.bat"
-                        todir="${build.install.dir.kura}/install/" failonerror="false" />
+		<copy file="src/main/resources/common/kura_custom.properties"
+			todir="${build.install.dir.kura}/kura/" />
 
-            <copy file="${project.build.directory}/${build.output.name}/recover_dflt_kura_config.sh"
-                        todir="${build.install.dir.kura}/install/" failonerror="false" />
+		<copy file="${project.build.directory}/${build.output.name}/start_kura.bat"
+			todir="${build.install.dir.kura}" />
 
-            <copy file="src/main/resources/${build.name}/kuranet.conf"
-                        todir="${build.install.dir.kura}/install/" failonerror="false" />
+		<copy file="RELEASE_NOTES.txt"
+			todir="${build.install.dir.kura}" />
+            
+		<copy file="notice.html"
+			todir="${build.install.dir.kura}" />
+            
+		<copy file="epl-v10.html"
+			todir="${build.install.dir.kura}" />
+            
+		<copy file="src/main/resources/${build.name}/log4j.properties"
+			todir="${build.install.dir.kura}/kura/" />
+            
+		<copy file="${project.build.directory}/${build.output.name}/kura.properties"
+			todir="${build.install.dir.kura}/kura/" />
 
-            <copy file="${project.build.directory}/${build.output.name}/kura.init.wrl"
-                        todir="${build.install.dir.kura}/install" failonerror="false" />
-            <copy file="${project.build.directory}/${build.output.name}/kura.init.yocto"
-                        todir="${build.install.dir.kura}/install" failonerror="false" />
-            <copy file="${project.build.directory}/${build.output.name}/kura.init.raspbian"
-                        todir="${build.install.dir.kura}/install" failonerror="false" />
-            <copy file="src/main/resources/${build.name}/firewall.init"
-                        todir="${build.install.dir.kura}/install" failonerror="false" />
-            <copy file="src/main/resources/common/monit.init.wrl"
-                        todir="${build.install.dir.kura}/install" failonerror="false" />
-            <copy file="src/main/resources/common/monit.init.yocto"
-                        todir="${build.install.dir.kura}/install" failonerror="false" />
-            <copy file="src/main/resources/common/monit.init.raspbian"
-                        todir="${build.install.dir.kura}/install" failonerror="false" />
-            <copy file="src/main/resources/common/monitrc.wrl"
-                        todir="${build.install.dir.kura}/install" failonerror="false" />
-            <copy file="src/main/resources/common/monitrc.yocto"
-                        todir="${build.install.dir.kura}/install" failonerror="false" />
-            <copy file="src/main/resources/common/monitrc.raspbian"
-                        todir="${build.install.dir.kura}/install" failonerror="false" />
+		<copy file="src/main/resources/${build.name}/license.rtf" todir="${build.install.dir.kura}/" />
+		<copy file="src/main/resources/${build.name}/set_kura_paths.bat" todir="${build.install.dir.kura}/" />
+		<copy file="${project.build.directory}/${build.output.name}/Kura_x64.nsi" todir="${build.install.dir}/" />
 
-            <copy file="src/main/resources/common/logrotate.conf"
-                        todir="${build.install.dir.kura}/install" failonerror="false" />
-            <copy file="src/main/resources/common/kura.logrotate"
-                        todir="${build.install.dir.kura}/install" failonerror="false" />
-
-            <copy file="src/main/resources/common/hostapd.conf"
-                        todir="${build.install.dir.kura}/install" failonerror="false" />
-            <copy file="src/main/resources/common/dhcpd-eth0.conf"
-                        todir="${build.install.dir.kura}/install" failonerror="false" />
-            <copy file="src/main/resources/common/dhcpd-wlan0.conf"
-                        todir="${build.install.dir.kura}/install" failonerror="false" />
-
-            <copy file="src/main/resources/common/named/named.conf"
-                        todir="${build.install.dir.kura}/install" failonerror="false" />
-            <copy file="src/main/resources/common/named/named.ca"
-                        todir="${build.install.dir.kura}/install" failonerror="false" />
-            <copy file="src/main/resources/common/named/named.rfc1912.zones"
-                        todir="${build.install.dir.kura}/install" failonerror="false" />
-            <copy file="src/main/resources/common/named/usr.sbin.named"
-        	        todir="${build.install.dir.kura}/install" failonerror="false" />
-
-            <copy file="src/main/resources/common/ifcfg-eth0"
-                        todir="${build.install.dir.kura}/install" failonerror="false" />
-            <copy file="src/main/resources/common/ifcfg-eth1"
-                        todir="${build.install.dir.kura}/install" failonerror="false" />
-            <copy file="src/main/resources/common/ifcfg-wlan0"
-                        todir="${build.install.dir.kura}/install" failonerror="false" />
-            <copy file="src/main/resources/common/network.interfaces"
-                        todir="${build.install.dir.kura}/install" failonerror="false" />
-            <copy file="src/main/resources/common/network.interfaces.raspbian"
-                        todir="${build.install.dir.kura}/install" failonerror="false" />
-
-            <copy file="src/main/resources/common/ifdown-local"
-                        todir="${build.install.dir.kura}/install" failonerror="false" />
-            <copy file="src/main/resources/common/ifup-local"
-                        todir="${build.install.dir.kura}/install" failonerror="false" />
-            <copy file="src/main/resources/common/ifup-local.debian"
-                        todir="${build.install.dir.kura}/install" failonerror="false" />
-            <copy file="src/main/resources/common/ifup-local.raspbian"
-                        todir="${build.install.dir.kura}/install" failonerror="false" />
-
-            <copy file="src/main/resources/common/ip-down.local"
-                        todir="${build.install.dir.kura}/install" failonerror="false" />
-            <copy file="src/main/resources/common/ip-up.local"
-                        todir="${build.install.dir.kura}/install" failonerror="false" />
--->
-            <copy file="${project.build.directory}/${build.output.name}/start_kura.bat"
-                        todir="${build.install.dir.kura}" />
-
-            <copy file="RELEASE_NOTES.txt"
-                        todir="${build.install.dir.kura}" />
-            <copy file="notice.html"
-                        todir="${build.install.dir.kura}" />
-            <copy file="epl-v10.html"
-                        todir="${build.install.dir.kura}" />
-            <copy file="src/main/resources/${build.name}/log4j.properties"
-                        todir="${build.install.dir.kura}/kura/" />
-            <copy file="${project.build.directory}/${build.output.name}/kura.properties"
-                        todir="${build.install.dir.kura}/kura/" />
-
-            <copy todir="${build.install.dir.kura}/plugins">
-		<fileset dir="${kura.osgi.repo}/plugins" />
-            </copy>
+		<copy todir="${build.install.dir.kura}/plugins">
+			<fileset dir="${kura.osgi.repo}/plugins" />
+		</copy>
                         
-            <copy todir="${build.install.dir.kura}/plugins">
-		<fileset dir="../target-definition/common/repository/plugins">
-                <exclude name="com.google.protobuf_2.6.0.jar,org.eclipse.paho.*"/>
-                </fileset>
-            </copy>                        
+		<copy todir="${build.install.dir.kura}/plugins">
+			<fileset dir="../target-definition/common/repository/plugins">
+				<exclude name="com.google.protobuf_2.6.0.jar,org.eclipse.paho.*"/>
+			</fileset>
+		</copy>                        
 
-            <copy file="${project.build.directory}/plugins/org.eclipse.kura.deployment.agent_${org.eclipse.kura.deployment.agent.version}.jar"
-                        todir="${build.install.dir.kura}/kura/plugins" />
-            <copy file="${project.build.directory}/plugins/org.eclipse.kura.api_${org.eclipse.kura.api.version}.jar"
-                        todir="${build.install.dir.kura}/kura/plugins" />
-            <copy file="${project.build.directory}/plugins/org.eclipse.kura.core_${org.eclipse.kura.core.version}.jar"
-                        todir="${build.install.dir.kura}/kura/plugins" />
-            <copy file="${project.build.directory}/plugins/org.eclipse.kura.core.certificates_${org.eclipse.kura.core.certificates.version}.jar"
-                        todir="${build.install.dir.kura}/kura/plugins" />
-            <copy file="${project.build.directory}/plugins/org.eclipse.kura.core.cloud_${org.eclipse.kura.core.cloud.version}.jar"
-                        todir="${build.install.dir.kura}/kura/plugins" />
-            <copy file="${project.build.directory}/plugins/org.eclipse.kura.core.comm_${org.eclipse.kura.core.comm.version}.jar"
-                        todir="${build.install.dir.kura}/kura/plugins" />
-            <copy file="${project.build.directory}/plugins/org.eclipse.kura.core.configuration_${org.eclipse.kura.core.configuration.version}.jar"
-                        todir="${build.install.dir.kura}/kura/plugins" />
-            <copy file="${project.build.directory}/plugins/org.eclipse.kura.core.crypto_${org.eclipse.kura.core.crypto.version}.jar"
-                        todir="${build.install.dir.kura}/kura/plugins" />
-            <copy file="${project.build.directory}/plugins/org.eclipse.kura.core.deployment_${org.eclipse.kura.core.deployment.version}.jar"
-                        todir="${build.install.dir.kura}/kura/plugins" />
-            <copy file="${project.build.directory}/plugins/org.eclipse.kura.core.log_${org.eclipse.kura.core.log.version}.jar"
-                        todir="${build.install.dir.kura}/kura/plugins" />
-            <copy file="${project.build.directory}/plugins/org.eclipse.kura.core.net_${org.eclipse.kura.core.net.version}.jar"
-                        todir="${build.install.dir.kura}/kura/plugins" />
-            <copy file="${project.build.directory}/plugins/org.eclipse.kura.windows.net_${org.eclipse.kura.windows.net.version}.jar"
-                        todir="${build.install.dir.kura}/kura/plugins" />
-            <copy file="${project.build.directory}/plugins/org.eclipse.kura.windows.position_${org.eclipse.kura.windows.position.version}.jar"
-                        todir="${build.install.dir.kura}/kura/plugins" />
-            <copy file="${project.build.directory}/plugins/org.eclipse.kura.windows.command_${org.eclipse.kura.windows.command.version}.jar"
-                        todir="${build.install.dir.kura}/kura/plugins" />
-            <copy file="${project.build.directory}/plugins/org.eclipse.kura.windows.usb_${org.eclipse.kura.windows.usb.version}.jar"
-                        todir="${build.install.dir.kura}/kura/plugins" />
-            <copy file="${project.build.directory}/plugins/org.eclipse.kura.windows.watchdog_${org.eclipse.kura.windows.watchdog.version}.jar"
-                        todir="${build.install.dir.kura}/kura/plugins" />
-            <copy file="${project.build.directory}/plugins/org.eclipse.kura.windows.clock_${org.eclipse.kura.windows.clock.version}.jar"
-                        todir="${build.install.dir.kura}/kura/plugins" />
-            <copy file="${project.build.directory}/plugins/org.eclipse.kura.windows.status_${org.eclipse.kura.windows.status.version}.jar"
-                        todir="${build.install.dir.kura}/kura/plugins" />
-<!--            <copy file="${project.build.directory}/plugins/org.eclipse.kura.net.admin_${org.eclipse.kura.net.admin.version}.jar"
-                        todir="${build.install.dir.kura}/kura/plugins" /> -->
+		<copy file="${project.build.directory}/plugins/org.eclipse.kura.deployment.agent_${org.eclipse.kura.deployment.agent.version}.jar"
+			todir="${build.install.dir.kura}/kura/plugins" />
 
-            <copy file="../../target-platform/org.eclipse.soda.dk.comm/src/main/c/Release/win32/x86/dkcomm.dll"
-                        todir="${build.install.dir}/system"/>
-            <copy file="../../target-platform/org.eclipse.soda.dk.comm/src/main/c/Release/win32/x64/dkcomm64.dll"
-                        todir="${build.install.dir}/system"/>
-            <copy file="../../target-platform/org.eclipse.kura.windows/src/main/c/Release/win32/x86/KuraNativeWin.dll"
-                        todir="${build.install.dir}/system"/>
-            <copy file="../../target-platform/org.eclipse.kura.windows/src/main/c/Release/win32/x64/KuraNativeWin64.dll"
-                        todir="${build.install.dir}/system"/>
+		<copy file="${project.build.directory}/plugins/org.eclipse.kura.api_${org.eclipse.kura.api.version}.jar"
+			todir="${build.install.dir.kura}/kura/plugins" />
+
+		<copy file="${project.build.directory}/plugins/org.eclipse.kura.core_${org.eclipse.kura.core.version}.jar"
+			todir="${build.install.dir.kura}/kura/plugins" />
+
+		<copy file="${project.build.directory}/plugins/org.eclipse.kura.core.certificates_${org.eclipse.kura.core.certificates.version}.jar"
+			todir="${build.install.dir.kura}/kura/plugins" />
+
+		<copy file="${project.build.directory}/plugins/org.eclipse.kura.core.cloud_${org.eclipse.kura.core.cloud.version}.jar"
+			todir="${build.install.dir.kura}/kura/plugins" />
+
+		<copy file="${project.build.directory}/plugins/org.eclipse.kura.core.comm_${org.eclipse.kura.core.comm.version}.jar"
+			todir="${build.install.dir.kura}/kura/plugins" />
+
+		<copy file="${project.build.directory}/plugins/org.eclipse.kura.core.configuration_${org.eclipse.kura.core.configuration.version}.jar"
+			todir="${build.install.dir.kura}/kura/plugins" />
+
+		<copy file="${project.build.directory}/plugins/org.eclipse.kura.core.crypto_${org.eclipse.kura.core.crypto.version}.jar"
+			todir="${build.install.dir.kura}/kura/plugins" />
+
+		<copy file="${project.build.directory}/plugins/org.eclipse.kura.core.deployment_${org.eclipse.kura.core.deployment.version}.jar"
+			todir="${build.install.dir.kura}/kura/plugins" />
+
+		<copy file="${project.build.directory}/plugins/org.eclipse.kura.core.log_${org.eclipse.kura.core.log.version}.jar"
+			todir="${build.install.dir.kura}/kura/plugins" />
+
+		<copy file="${project.build.directory}/plugins/org.eclipse.kura.core.net_${org.eclipse.kura.core.net.version}.jar"
+			todir="${build.install.dir.kura}/kura/plugins" />
+
+		<copy file="${project.build.directory}/plugins/org.eclipse.kura.windows.net_${org.eclipse.kura.windows.net.version}.jar"
+			todir="${build.install.dir.kura}/kura/plugins" />
+
+		<copy file="${project.build.directory}/plugins/org.eclipse.kura.windows.position_${org.eclipse.kura.windows.position.version}.jar"
+			todir="${build.install.dir.kura}/kura/plugins" />
+
+		<copy file="${project.build.directory}/plugins/org.eclipse.kura.windows.command_${org.eclipse.kura.windows.command.version}.jar"
+			todir="${build.install.dir.kura}/kura/plugins" />
+
+		<copy file="${project.build.directory}/plugins/org.eclipse.kura.windows.usb_${org.eclipse.kura.windows.usb.version}.jar"
+			todir="${build.install.dir.kura}/kura/plugins" />
+
+		<copy file="${project.build.directory}/plugins/org.eclipse.kura.windows.watchdog_${org.eclipse.kura.windows.watchdog.version}.jar"
+			todir="${build.install.dir.kura}/kura/plugins" />
+
+		<copy file="${project.build.directory}/plugins/org.eclipse.kura.windows.clock_${org.eclipse.kura.windows.clock.version}.jar"
+			todir="${build.install.dir.kura}/kura/plugins" />
+
+		<copy file="${project.build.directory}/plugins/org.eclipse.kura.windows.status_${org.eclipse.kura.windows.status.version}.jar"
+			todir="${build.install.dir.kura}/kura/plugins" />
+
+
+		<copy file="../../target-platform/org.eclipse.soda.dk.comm/src/main/c/Release/Win32/x86/dkcomm.dll" todir="${build.install.dir}/system/x86"/>
+
+		<copy file="../../target-platform/org.eclipse.soda.dk.comm/src/main/c/Release/Win32/x64/dkcomm64.dll" todir="${build.install.dir}/system/x64"/>
+
+		<copy file="../../target-platform/org.eclipse.kura.windows/src/main/c/Release/Win32/x86/KuraNativeWin.dll" todir="${build.install.dir}/system/x86"/>
+
+		<copy file="../../target-platform/org.eclipse.kura.windows/src/main/c/Release/Win32/x64/KuraNativeWin64.dll" todir="${build.install.dir}/system/x64"/>
+
+		<copy file="../../target-platform/org.eclipse.kura.windows.service/src/main/c/Release/Win32/x86/KURAService.exe" todir="${build.install.dir}/system/x86"/>
+		
+		<copy file="../../target-platform/org.eclipse.kura.windows.service/src/main/c/Release/Win32/x64/KURAService.exe" todir="${build.install.dir}/system/x64"/>
 
 		<!-- Conditional inclusion of jar files in the distribution jar -->
 		<antcall target="web-jar-win" />

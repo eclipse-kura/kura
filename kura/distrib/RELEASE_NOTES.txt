@@ -8,6 +8,8 @@ Added Features :
   * Modified build in order to include checks for Java 8 compact 2 compliance
   * Introduced new deployment application (named DEPLOY-V2) that improves updates download from the cloud platform
   * New firewall management, now based on iptables-save and iptables-restore
+  * Firewall: allowed open port entries for tcp and udp on the same port
+  * Firewall: enabled the support for port ranges when defining open port entries
   * Emulator bundle split into 6 separate bundles, one for each function.
   * Reviewed no-network profiles: removed net.admin bundle and linux.net. Now those bundles are replaced by emulator.net.
   * Linux build date/version is now published in the birth certificate as part of the os.version metric

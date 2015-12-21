@@ -27,13 +27,13 @@ fi
 # If the argument is 'clean' just work through all the files in the Objs directory and delete them.
 #
 if [ "$1" == "clean" ]; then
-	for f in KURAService/Objs/x86/*; do
+	for f in src/main/c/Objs/x86/*; do
 		if [ -f "$f" ]; then
 			echo Deleting $f
 			rm $f
 		fi
 	done
-	for f in KURAService/Objs/x64/*; do
+	for f in src/main/c/Objs/x64/*; do
 		if [ -f "$f" ]; then
 			echo Deleting $f
 			rm $f
@@ -50,31 +50,31 @@ fi
 #
 if [ "$1" == "build" ]; then
 		
-		cd KURAService
+		cd src/main/c
 		if [ ! -d Objs/x86 ]; then
-			mkdir Objs/x86
+			mkdir -p Objs/x86
 		fi
 
 		if [ ! -d Objs/x64 ]; then
-			mkdir Objs/x64
+			mkdir -p Objs/x64
 		fi
 
-		if [ ! -d Release/x86 ]; then
-			mkdir -p Release/x86
+		if [ ! -d Release/Win32/x86 ]; then
+			mkdir -p Release/Win32/x86
 		fi
 
-		if [ ! -d Release/x64 ]; then
-			mkdir -p Release/x64
+		if [ ! -d Release/Win32/x64 ]; then
+			mkdir -p Release/Win32/x64
 		fi
 
 		if [ -x "$(command -v i686-w64-mingw32-gcc)" ]; then
-			$MAKECMD KURAService32
+			$MAKECMD -f makefile.mingw KURAService32
 		else
 			echo "  WARNING: No viable 32 bit 'mingw' compiler installed. 32 bit KURA Windows Service will not be rebuilt"
 		fi
 
 		if [ -x "$(command -v x86_64-w64-mingw32-gcc)" ]; then
-			$MAKECMD KURAService64
+			$MAKECMD -f makefile.mingw KURAService64
 		else
 			echo "  WARNING: No viable 64 bit 'mingw' compiler installed. 64 bit KURA Windows Service will not be rebuilt"
 		fi

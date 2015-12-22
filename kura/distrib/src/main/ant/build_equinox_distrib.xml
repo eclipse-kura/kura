@@ -638,6 +638,8 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
     		</or>
     	</condition>
     	
+		<!-- Copy the NSIS script to the intermediate directory then modify it to set the output filename based on the current build type -->
+
 		<copy file="src/main/resources/${build.name}/Kura_x64.nsi" tofile="${project.build.directory}/${build.output.name}/Kura_x64.nsi" />
 		<replace file="${project.build.directory}/${build.output.name}/Kura_x64.nsi" token="{build.output.name}" value="${build.output.name}"/>
 
@@ -747,6 +749,7 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
 			todir="${build.install.dir.kura}/kura/" />
 
 		<copy file="src/main/resources/${build.name}/license.rtf" todir="${build.install.dir.kura}/" />
+		<copy file="src/main/resources/${build.name}/build_installer.sh" todir="${build.install.dir}/" />
 		<copy file="src/main/resources/${build.name}/set_kura_paths.bat" todir="${build.install.dir.kura}/" />
 		<copy file="${project.build.directory}/${build.output.name}/Kura_x64.nsi" todir="${build.install.dir}/" />
 
@@ -815,9 +818,9 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
 			todir="${build.install.dir.kura}/kura/plugins" />
 
 
-		<copy file="../../target-platform/org.eclipse.soda.dk.comm/src/main/c/Release/Win32/x86/dkcomm.dll" todir="${build.install.dir}/system/x86"/>
+		<copy file="../../target-platform/org.eclipse.soda.dk.comm/src/main/c/Release/win32/x86/dkcomm.dll" todir="${build.install.dir}/system/x86"/>
 
-		<copy file="../../target-platform/org.eclipse.soda.dk.comm/src/main/c/Release/Win32/x64/dkcomm64.dll" todir="${build.install.dir}/system/x64"/>
+		<copy file="../../target-platform/org.eclipse.soda.dk.comm/src/main/c/Release/win32/x64/dkcomm64.dll" todir="${build.install.dir}/system/x64"/>
 
 		<copy file="../../target-platform/org.eclipse.kura.windows/src/main/c/Release/Win32/x86/KuraNativeWin.dll" todir="${build.install.dir}/system/x86"/>
 
@@ -833,12 +836,16 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
 
         <echo message="Building Kura Distribution for ${build.name}-jars..." />
         
+		<exec executable="bash" dir="${build.install.dir}">
+			<arg value="build_installer.sh" />
+		</exec>
+		<copy file="${build.install.dir}/${build.output.name}_x64.exe" todir="${project.build.directory}" />
 
-        <!-- Zip the upgrader -->
-        <zip destfile="${project.build.directory}/${build.output.name}_upgrade.zip">
+		<!-- Zip the upgrader -->
+<!--        <zip destfile="${project.build.directory}/${build.output.name}_upgrade.zip">
                 <zipfileset file="${project.build.directory}/${build.output.name}_upgrader.sh" />
                 <zipfileset file="src/main/sh/upgrade_wrapper.sh" />
-        </zip>
+        </zip>-->
     	
     	
     	

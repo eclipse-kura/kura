@@ -42,7 +42,6 @@ public class InstallImpl {
 	private DeploymentPackageInstallOptions options;
 	private CloudDeploymentHandlerV2 callback;
 	private DeploymentAdmin deploymentAdmin;
-	private Properties deployedPackages;
 	private Properties m_installPersistance;
 	private String dpaConfPath;
 	private String m_installVerifDir;
@@ -52,7 +51,6 @@ public class InstallImpl {
 	public InstallImpl(CloudDeploymentHandlerV2 callback, String kuraDataDir){
 		this.callback = callback;
 
-		deployedPackages = new Properties();
 		StringBuilder pathSB= new StringBuilder();
 		pathSB.append(kuraDataDir);
 		pathSB.append(File.separator);
@@ -75,6 +73,22 @@ public class InstallImpl {
 	}
 
 	public Properties getDeployedPackages(){
+		FileInputStream fis= null;
+		Properties deployedPackages= new Properties();
+		try {
+			fis = new FileInputStream(dpaConfPath);
+			deployedPackages.load(fis);
+		} catch (IOException e) {
+			s_logger.error("Error opening package configuration file", e);
+		} finally {
+			try{
+				if (fis != null){
+					fis.close();
+				}
+			} catch (IOException e){
+				s_logger.error("Exception while closing opened resources!", e);
+			}
+		}
 		return deployedPackages;
 	}
 
@@ -88,10 +102,6 @@ public class InstallImpl {
 
 	public void setDeploymentAdmin(DeploymentAdmin deploymentAdmin){
 		this.deploymentAdmin= deploymentAdmin;
-	}
-
-	public void setDeployedPackages(Properties deployedPackages){
-		this.deployedPackages = deployedPackages;
 	}
 
 	public void setDpaConfPath(String dpaConfPath){
@@ -319,6 +329,7 @@ public class InstallImpl {
 	}
 
 	private void addPackageToConfFile(String packageName, String packageUrl) {
+		Properties deployedPackages= getDeployedPackages();
 		deployedPackages.setProperty(packageName, packageUrl);
 
 		if (dpaConfPath == null) {
@@ -346,6 +357,7 @@ public class InstallImpl {
 	}
 
 	public void removePackageFromConfFile(String packageName) {
+		Properties deployedPackages= getDeployedPackages();
 		deployedPackages.remove(packageName);
 
 		if (dpaConfPath == null) {
@@ -359,7 +371,6 @@ public class InstallImpl {
 			deployedPackages.store(fos, null);
 			fos.flush();
 			fos.getFD().sync();
-			fos.close();
 		} catch (IOException e) {
 			s_logger.error("Error writing package configuration file", e);
 		} finally {

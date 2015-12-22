@@ -1,6 +1,2 @@
-*.map
-*.obj
-*.lib
-*.pdb
-*.exp
-*.o
+*.bak
+Objs/

@@ -16,7 +16,8 @@ import java.util.List;
 
 public enum SerialModemComm {
 	
-	MiniGateway("/dev/ttyO5", "/dev/ttyO5", null, 115200, 8, 1, 0);
+	MiniGateway("/dev/ttyO5", "/dev/ttyO5", null, 115200, 8, 1, 0),
+	Reliagate_10_11("/dev/ttyACM0", "/dev/ttyACM0", null, 115200, 8, 1, 0);
 	
 	private String m_atPort;
 	private String m_dataPort;

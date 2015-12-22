@@ -682,8 +682,11 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
 	                m_eventAdmin.postEvent(new ModemAddedEvent(usbModem));
 	                m_addedModems.add(usbModem.getUsbPort());
 	                
-	                if (OS_VERSION != null && OS_VERSION.equals(KuraConstants.Mini_Gateway.getImageName() + "_" + KuraConstants.Mini_Gateway.getImageVersion()) &&
-							TARGET_NAME != null && TARGET_NAME.equals(KuraConstants.Mini_Gateway.getTargetName())) {
+	    			if ((OS_VERSION != null && TARGET_NAME != null) && 
+	    					(OS_VERSION.equals(KuraConstants.Mini_Gateway.getImageName() + "_" + KuraConstants.Mini_Gateway.getImageVersion()) &&
+	    					TARGET_NAME.equals(KuraConstants.Mini_Gateway.getTargetName())) ||
+	    					(OS_VERSION.equals(KuraConstants.Reliagate_10_11.getImageName() + "_" + KuraConstants.Reliagate_10_11.getImageVersion()) &&
+	    					TARGET_NAME.equals(KuraConstants.Reliagate_10_11.getTargetName()))) {	
 		                if (m_serialModem != null) {
 		                	if (SupportedUsbModemInfo.Telit_HE910_D.getVendorId().equals( usbModem.getVendorId())
 			                		&& SupportedUsbModemInfo.Telit_HE910_D.getProductId().equals(usbModem.getProductId())) {
@@ -747,8 +750,11 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
         	SerialModemAddedEvent serialModemAddedEvent = (SerialModemAddedEvent)event;
         	SupportedSerialModemInfo serialModemInfo = serialModemAddedEvent.getSupportedSerialModemInfo();
         	if (serialModemInfo != null) {
-        		if (OS_VERSION != null && OS_VERSION.equals(KuraConstants.Mini_Gateway.getImageName() + "_" + KuraConstants.Mini_Gateway.getImageVersion()) &&
-						TARGET_NAME != null && TARGET_NAME.equals(KuraConstants.Mini_Gateway.getTargetName())) {
+    			if ((OS_VERSION != null && TARGET_NAME != null) && 
+    					(OS_VERSION.equals(KuraConstants.Mini_Gateway.getImageName() + "_" + KuraConstants.Mini_Gateway.getImageVersion()) &&
+    					TARGET_NAME.equals(KuraConstants.Mini_Gateway.getTargetName())) ||
+    					(OS_VERSION.equals(KuraConstants.Reliagate_10_11.getImageName() + "_" + KuraConstants.Reliagate_10_11.getImageVersion()) &&
+    					TARGET_NAME.equals(KuraConstants.Reliagate_10_11.getTargetName()))) {	
         			if (m_usbModems.isEmpty()) {
         				m_serialModem = new SerialModemDevice(
     	    					serialModemInfo.getModemName(),

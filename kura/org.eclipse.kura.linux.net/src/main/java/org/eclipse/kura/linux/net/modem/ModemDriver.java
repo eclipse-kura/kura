@@ -32,7 +32,10 @@ public class ModemDriver {
 	private static final String TARGET_NAME = System.getProperty("target.device");
 	private static final String GPIO_65_PATH = "/sys/class/gpio/gpio65";
 	private static final String GPIO_65_DIRECTION_PATH = GPIO_65_PATH + "/direction";
-	private static final String GPIO_65_VALUE_PATH = GPIO_65_PATH + "/value"; 
+	private static final String GPIO_65_VALUE_PATH = GPIO_65_PATH + "/value";
+	private static final String GPIO_60_PATH = "/sys/class/gpio/gpio60";
+	private static final String GPIO_60_DIRECTION_PATH = GPIO_60_PATH + "/direction";
+	private static final String GPIO_60_VALUE_PATH = GPIO_60_PATH + "/value"; 
 	private static final String GPIO_EXPORT_PATH = "/sys/class/gpio/export";
 	
 	private static final String RELIAGATE_10_20_GPIO_PATH = "/sys/class/gpio/usb-rear-pwr/value";
@@ -55,7 +58,9 @@ public class ModemDriver {
 			}
 			s_logger.info("turnModemOff() :: turning modem OFF ... attempts left: {}", remainingAttempts);
 			if(TARGET_NAME.equals(KuraConstants.Mini_Gateway.getTargetName())) {
-				toggleGpio65();
+				toggleGpio("65", GPIO_65_PATH, GPIO_65_DIRECTION_PATH, GPIO_65_VALUE_PATH);
+			} else if(TARGET_NAME.equals(KuraConstants.Reliagate_10_11.getTargetName())) {
+				toggleGpio("60", GPIO_60_PATH, GPIO_60_DIRECTION_PATH, GPIO_60_VALUE_PATH);
 			} else if (TARGET_NAME.equals(KuraConstants.Reliagate_10_20.getTargetName())) {
 				disable1020Gpio();
 			} else if (TARGET_NAME.equals(KuraConstants.ReliaGATE_50_21_Ubuntu.getTargetName())) {
@@ -102,7 +107,9 @@ public class ModemDriver {
 			}
 			s_logger.info("turnModemOn() :: turning modem ON ... attempts left: {}", remainingAttempts);
 			if(TARGET_NAME.equals(KuraConstants.Mini_Gateway.getTargetName())) {
-				toggleGpio65();
+				toggleGpio("65", GPIO_65_PATH, GPIO_65_DIRECTION_PATH, GPIO_65_VALUE_PATH);
+			} else if(TARGET_NAME.equals(KuraConstants.Reliagate_10_11.getTargetName())) {
+				toggleGpio("60", GPIO_60_PATH, GPIO_60_DIRECTION_PATH, GPIO_60_VALUE_PATH);
 			} else if (TARGET_NAME.equals(KuraConstants.Reliagate_10_20.getTargetName())) {
 				enable1020Gpio();
 			} else if (TARGET_NAME.equals(KuraConstants.ReliaGATE_50_21_Ubuntu.getTargetName())) {
@@ -137,29 +144,29 @@ public class ModemDriver {
 		}
 	}
 	
-	protected void toggleGpio65() throws IOException { 		
-		File fgpio65Folder = new File (GPIO_65_PATH);
-		if (!fgpio65Folder.exists()) {
+	protected void toggleGpio(String gpio, String gpioPath, String directionPath, String valuePath) throws IOException { 		
+		File fgpioFolder = new File (gpioPath);
+		if (!fgpioFolder.exists()) {
 			BufferedWriter bwGpioSelect = new BufferedWriter(new FileWriter(GPIO_EXPORT_PATH));
-			bwGpioSelect.write("65");
+			bwGpioSelect.write(gpio);
 			bwGpioSelect.flush();
 			bwGpioSelect.close();
 		}
 
-		BufferedWriter bwGpio65Direction = new BufferedWriter(new FileWriter(GPIO_65_DIRECTION_PATH));
-		bwGpio65Direction.write("out");
-		bwGpio65Direction.flush();
-		bwGpio65Direction.close();
+		BufferedWriter bwGpioDirection = new BufferedWriter(new FileWriter(directionPath));
+		bwGpioDirection.write("out");
+		bwGpioDirection.flush();
+		bwGpioDirection.close();
 
-		BufferedWriter fGpio65Value = new BufferedWriter(new FileWriter(GPIO_65_VALUE_PATH));
-		fGpio65Value.write("0");
-		fGpio65Value.flush();
-		fGpio65Value.write("1");
-		fGpio65Value.flush();
+		BufferedWriter fGpioValue = new BufferedWriter(new FileWriter(valuePath));
+		fGpioValue.write("0");
+		fGpioValue.flush();
+		fGpioValue.write("1");
+		fGpioValue.flush();
 		sleep(5000);
-		fGpio65Value.write("0");
-		fGpio65Value.flush();
-		fGpio65Value.close();
+		fGpioValue.write("0");
+		fGpioValue.flush();
+		fGpioValue.close();
 	}
 	
 	private boolean isOn() throws Exception {

@@ -204,10 +204,10 @@ Section "kura (required)"
 	SetOutPath $WINDIR\Sysnative
 	File system\x64\KURAService.exe
 
-	; batch file to replace Kura paths in config files
-	SetOutPath $INSTDIR
-	File "KuraFiles\set_kura_paths.bat"
-	ExecWait '"$INSTDIR\set_kura_paths.bat" "$INSTDIR"'
+	; batch file to replace Kura paths in config files - now it's done during start
+	;SetOutPath $INSTDIR
+	;File "KuraFiles\set_kura_paths.bat"
+	;ExecWait '"$INSTDIR\set_kura_paths.bat" "$INSTDIR"'
 
 	;=============================================================================================================
 	; Now setup the service that will run Kura using the service manager sc. NB: the installer will be running as
@@ -219,7 +219,7 @@ Section "kura (required)"
 	ExecWait '$WINDIR\Sysnative\sc description KURAService "KURA MQTT communitaction service for IOT devices."'
 
 	; Add a registry entry with the command that actually starts KURA then start the service
-	WriteRegStr HKLM System\CurrentControlSet\Services\KURAService "ServiceCommand" 'cmd /C "$INSTDIR\start_kura.bat"'
+	WriteRegStr HKLM System\CurrentControlSet\Services\KURAService "ServiceCommand" 'cmd /C "$INSTDIR\start_kura_service.bat"'
 	ExecWait '$WINDIR\Sysnative\sc start KURAService'
 
 	; Write the installation path into the registry

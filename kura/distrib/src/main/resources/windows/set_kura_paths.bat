@@ -1,22 +1,7 @@
 @echo off
 
 @rem Arg1 is the install directory
-set INST_DIR=%1
-
-@rem Replace start_kura.bat 
-cd %INST_DIR%
-set textfile=start_kura.bat
-@echo off &setlocal
-(for /f "delims=" %%i in (%textfile%) do (
-    set "line=%%i"
-    setlocal enabledelayedexpansion
-    set "line=!line:c:\opt\eclipse=%ALLUSERSPROFILE%!"
-    set "line=!line:\tmp\.kura=%TEMP%\kura!"
-    echo(!line!
-    endlocal
-))>"repl_out.txt"
-del %textfile%
-rename repl_out.txt %textfile%
+set INST_DIR=%~dp0
 
 rem Config files will need to change path to Unix-style / and remove "
 set INST_DIR_=%INST_DIR:"=%
@@ -46,6 +31,19 @@ set textfile=log4j.properties
     set "line=%%i"
     setlocal enabledelayedexpansion
     set "line=!line:/var=%TEMP_DIR%/kura!"
+    echo(!line!
+    endlocal
+))>"repl_out.txt"
+del %textfile%
+rename repl_out.txt %textfile%
+
+@echo off &setlocal
+cd %ALLUSERSPROFILE%\Kura\kura
+set textfile=config.ini
+(for /f "delims=" %%i in (%textfile%) do (
+    set "line=%%i"
+    setlocal enabledelayedexpansion
+    set "line=!line:/tmp/kura=%TEMP_DIR%/kura!"
     echo(!line!
     endlocal
 ))>"repl_out.txt"

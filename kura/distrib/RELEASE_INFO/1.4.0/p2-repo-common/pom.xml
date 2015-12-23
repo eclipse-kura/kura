@@ -162,7 +162,7 @@
                             <artifactId>org.eclipse.soda.dk.comm</artifactId>
                             <version>${org.eclipse.soda.dk.comm.version}</version>					
 								</artifactItem>    
-							</artifactItems><stripVersion>true</stripVersion>
+							</artifactItems><stripVersion>true</stripVersion><stripVersion>true</stripVersion><stripVersion>true</stripVersion><stripVersion>true</stripVersion><stripVersion>true</stripVersion>
 							<outputDirectory>${project.basedir}/target/source/plugins</outputDirectory>
 						</configuration>
 					</execution>

@@ -233,7 +233,7 @@
                             <artifactId>osgi.cmpn</artifactId>
                             <version>${osgi.cmpn.version}</version>
                         </artifactItem>
-							</artifactItems><stripVersion>true</stripVersion>
+							</artifactItems><stripVersion>true</stripVersion><stripVersion>true</stripVersion><stripVersion>true</stripVersion><stripVersion>true</stripVersion><stripVersion>true</stripVersion>
 							<outputDirectory>${project.basedir}/target/source/plugins</outputDirectory>
 						</configuration>
 					</execution>

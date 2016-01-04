@@ -56,21 +56,11 @@
             <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
             <Bundle-Name>%bundle.name</Bundle-Name>
             <Bundle-Version>${project.version}</Bundle-Version>
-            <Include-Resource>
-                            lib=${project.basedir}/src/main/lib,
-                            ${project.basedir}/about.html,
-                            about_files=${project.basedir}/about_files/
-                        </Include-Resource>
-            <!--                        <Bundle-NativeCode>
-                        	lib/win32/x86/KuraNativeWin.lib; osname=win32; processor=x86,
-                        	lib/win32/x64/KuraNativeWin.lib; osname=win32; processor=x86_64,
-                        	*
-                        </Bundle-NativeCode>-->
             <Import-Package>
 				org.osgi.framework;version="[1.5.0,2.0.0)"
                         </Import-Package>
             <Export-Package>
-				org.eclipse.kura.windows;version="1.0.1",
+				org.eclipse.kura.windows.native;version="1.0.1",
                         </Export-Package>
           </instructions>
         </configuration>

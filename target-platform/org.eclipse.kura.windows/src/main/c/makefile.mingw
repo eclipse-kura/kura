@@ -1,7 +1,7 @@
 CFLAGS=-Wall -O0 -g -Wl,--subsystem,windows -I "$(JAVA_HOME)/include" -I "."
 LFLAGS=-Wl,--subsystem,windows -shared
 RELEASE32=Release/Win32/x86/KuraNativeWin.dll
-RELEASE64=Release/Win32/x64/KuraNativeWin64.dll
+RELEASE64=Release/Win32/x64/KuraNativeWin.dll
 
 KuraNativeWin32 : $(RELEASE32)
 KuraNativeWin64 : $(RELEASE64)

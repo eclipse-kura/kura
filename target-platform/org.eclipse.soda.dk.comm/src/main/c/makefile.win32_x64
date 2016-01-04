@@ -12,9 +12,9 @@ APPVER=4.0
 TARGETOS=WIN95
 SEHMAP = TRUE
 !include <win32.mak>
-DLLFILENAME=dkcomm64.dll# declaration
+DLLFILENAME=dkcomm.dll# declaration
 DLLPATH = Release\win32\x64
-DLLNAME= $(DLLPATH)\dkcomm64.dll# declaration
+DLLNAME= $(DLLPATH)\dkcomm.dll# declaration
 LIBNAME=dkcomm# declaration
 LIBPATH=.\# declaration
 .c.obj:

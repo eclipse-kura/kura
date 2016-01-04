@@ -1,7 +1,7 @@
 CFLAGS=-Wall -O0 -g -Wl,--subsystem,windows -I "$(JAVA_HOME)\include" -I "$(JAVA_HOME)\include\win32"
 LFLAGS=-Wl,--subsystem,windows -shared
 RELEASE32=Release/win32/x86/dkcomm.dll
-RELEASE64=Release/win32/x64/dkcomm64.dll
+RELEASE64=Release/win32/x64/dkcomm.dll
 
 SodaDkComm32 : $(RELEASE32)
 SodaDkComm64 : $(RELEASE64)

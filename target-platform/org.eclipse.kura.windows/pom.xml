@@ -69,11 +69,11 @@
                             ${project.basedir}/about.html,
                             about_files=${project.basedir}/about_files/
                         </Include-Resource>
-                        <Bundle-NativeCode>
+<!--                        <Bundle-NativeCode>
                         	lib/win32/x86/KuraNativeWin.lib; osname=win32; processor=x86,
-                        	lib/win32/x64/KuraNativeWin64.lib; osname=win32; processor=x86_64,
+                        	lib/win32/x64/KuraNativeWin.lib; osname=win32; processor=x86_64,
                         	*
-                        </Bundle-NativeCode>
+                        </Bundle-NativeCode>-->
                         <Import-Package>
 				org.osgi.framework;version="[1.5.0,2.0.0)"
                         </Import-Package>

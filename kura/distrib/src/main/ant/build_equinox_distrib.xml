@@ -823,11 +823,11 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
 
 		<copy file="../../target-platform/org.eclipse.soda.dk.comm/src/main/c/Release/win32/x86/dkcomm.dll" todir="${build.install.dir}/system/x86"/>
 
-		<copy file="../../target-platform/org.eclipse.soda.dk.comm/src/main/c/Release/win32/x64/dkcomm64.dll" todir="${build.install.dir}/system/x64"/>
+		<copy file="../../target-platform/org.eclipse.soda.dk.comm/src/main/c/Release/win32/x64/dkcomm.dll" todir="${build.install.dir}/system/x64"/>
 
 		<copy file="../../target-platform/org.eclipse.kura.windows/src/main/c/Release/Win32/x86/KuraNativeWin.dll" todir="${build.install.dir}/system/x86"/>
 
-		<copy file="../../target-platform/org.eclipse.kura.windows/src/main/c/Release/Win32/x64/KuraNativeWin64.dll" todir="${build.install.dir}/system/x64"/>
+		<copy file="../../target-platform/org.eclipse.kura.windows/src/main/c/Release/Win32/x64/KuraNativeWin.dll" todir="${build.install.dir}/system/x64"/>
 
 		<copy file="../../target-platform/org.eclipse.kura.windows.service/src/main/c/Release/Win32/x86/KURAService.exe" todir="${build.install.dir}/system/x86"/>
 		

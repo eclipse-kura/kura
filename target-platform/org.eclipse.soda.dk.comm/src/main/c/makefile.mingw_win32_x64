@@ -8,7 +8,7 @@
 # Contributors:                                                         #
 #     IBM - initial API and implementation                              #
 #########################################################################
-TARGETNAME=dkcomm64
+TARGETNAME=dkcomm
 DLLFILENAME=$(TARGETNAME).dll
 DLLPATH=Release\win32\x64
 DLLNAME=$(DLLPATH)\$(DLLFILENAME)

@@ -10,11 +10,11 @@ public class KuraNativeWin {
     static {
 	String processor = System.getProperty("org.osgi.framework.processor");
 	try {
-		if (processor.equalsIgnoreCase("x86-64")) {
+/*		if (processor.equalsIgnoreCase("x86-64")) {
 			System.loadLibrary("KuraNativeWin64");
-		} else {
+		} else {*/
 			System.loadLibrary("KuraNativeWin");
-		}
+/*		}*/
 	} catch (final UnsatisfiedLinkError e) {
 		e.printStackTrace();
 	}

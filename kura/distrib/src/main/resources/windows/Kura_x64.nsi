@@ -198,8 +198,8 @@ Section "kura (required)"
 	; rather than System32
 
 	!define LIBRARY_X64
-	!insertmacro InstallLib DLL NOTSHARED NOREBOOT_NOTPROTECTED system\x64\dkcomm64.dll $SYSDIR\dkcomm64.dll $SYSDIR
-	!insertmacro InstallLib DLL NOTSHARED NOREBOOT_NOTPROTECTED system\x64\KuraNativeWin64.dll $SYSDIR\KuraNativeWin64.dll $SYSDIR
+	!insertmacro InstallLib DLL NOTSHARED NOREBOOT_NOTPROTECTED system\x64\dkcomm.dll $SYSDIR\dkcomm.dll $SYSDIR
+	!insertmacro InstallLib DLL NOTSHARED NOREBOOT_NOTPROTECTED system\x64\KuraNativeWin.dll $SYSDIR\KuraNativeWin.dll $SYSDIR
 
 	SetOutPath $WINDIR\Sysnative
 	File system\x64\KURAService.exe

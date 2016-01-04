@@ -126,7 +126,7 @@
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.eclipse.kura</groupId>
-									<artifactId>org.eclipse.kura.windows</artifactId>
+									<artifactId>org.eclipse.kura.windows.native</artifactId>
 									<version>1.0.1</version>
 								</artifactItem>
 							</artifactItems>

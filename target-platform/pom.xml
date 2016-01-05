@@ -10,7 +10,7 @@
     <module>org.usb4java</module>
     <module>usb4java-javax</module>
     <module>org.eclipse.soda.dk.comm</module>
-    <module>org.eclipse.kura.windows.native</module>
+    <module>org.eclipse.kura.windows.system</module>
     <module>org.eclipse.kura.windows.service</module>
     <module>p2-repo-common</module>
     <module>p2-repo-equinox_3.8.1</module>

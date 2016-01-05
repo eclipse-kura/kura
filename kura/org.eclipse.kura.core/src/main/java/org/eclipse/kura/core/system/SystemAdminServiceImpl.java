@@ -24,7 +24,7 @@ import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.eclipse.kura.windows.KuraNativeWin;
+import org.eclipse.kura.windows.system.KuraNativeWin;
 
 public class SystemAdminServiceImpl implements SystemAdminService 
 {

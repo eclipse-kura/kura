@@ -1,6 +1,6 @@
 package org.eclipse.kura.windows.clock;
 
-import org.eclipse.kura.windows.KuraNativeWin;
+import org.eclipse.kura.windows.system.KuraNativeWin;
 
 public class WindowsSetSystemTime {
 

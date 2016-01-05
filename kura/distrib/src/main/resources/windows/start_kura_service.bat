@@ -1,6 +1,6 @@
 @echo off
 
-call set_kura_paths.bat
+call "%~dp0\set_kura_paths.bat"
 
 set KURA_ROOT=%ALLUSERSPROFILE%
 set KURA_HOME=%KURA_ROOT%\kura\kura

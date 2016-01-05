@@ -2,7 +2,7 @@
 #include <windows.h>
 #include <jni.h>
 
-JNIEXPORT void JNICALL Java_org_eclipse_kura_windows_KuraNativeWin_setSystemTime(JNIEnv *env, jobject obj, jshort year, jshort month, jshort day, jshort hour, jshort minute, jshort second, jshort msec)
+JNIEXPORT void JNICALL Java_org_eclipse_kura_windows_system_KuraNativeWin_setSystemTime(JNIEnv *env, jobject obj, jshort year, jshort month, jshort day, jshort hour, jshort minute, jshort second, jshort msec)
 {
     SYSTEMTIME st;
 //    GetLocalTime(&st);
@@ -23,7 +23,7 @@ JNIEXPORT void JNICALL Java_org_eclipse_kura_windows_KuraNativeWin_setSystemTime
 
 typedef ULONGLONG (WINAPI *__GetTickCount64)(void);
 
-JNIEXPORT jlong JNICALL Java_org_eclipse_kura_windows_KuraNativeWin_getTickCount(JNIEnv *env, jobject obj)
+JNIEXPORT jlong JNICALL Java_org_eclipse_kura_windows_system_KuraNativeWin_getTickCount(JNIEnv *env, jobject obj)
 {
     HMODULE hDllKenel32;
     __GetTickCount64 pGetTickCount64;

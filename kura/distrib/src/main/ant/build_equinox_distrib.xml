@@ -718,7 +718,7 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
 		<!-- Set web UI port -->
 		<antcall target="set-http-port" />
 
-        <property name="build.install.dir" value="${project.build.directory}/InstallWin"/> 
+        <property name="build.install.dir" value="${project.build.directory}/${build.output.name}"/> 
         <property name="build.install.dir.kura" value="${build.install.dir}/KuraFiles"/> 
 
 		<copy file="${project.build.directory}/${build.output.name}/snapshot_0.xml"

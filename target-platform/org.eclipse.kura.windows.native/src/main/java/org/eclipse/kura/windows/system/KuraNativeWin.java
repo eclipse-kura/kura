@@ -1,4 +1,4 @@
-package org.eclipse.kura.windows;
+package org.eclipse.kura.windows.system;
 
 import java.io.IOException;
 

@@ -71,7 +71,7 @@ public class UninstallImpl {
 				deviceReboot(options);
 			}
 		} catch (Exception e) {
-			throw KuraException.internalError(e.getMessage());
+			throw KuraException.internalError(e);
 		}
 	}
 	

@@ -72,6 +72,9 @@
             <esf:property name="net.interface.wlan0.config.wifi.master.securityType" array="false" encrypted="false" type="String">
                 <esf:value>SECURITY_WPA2</esf:value>
             </esf:property>
+            <esf:property array="false" encrypted="false" name="net.interface.wlan0.config.wifi.master.pairwiseCiphers" type="String">
+                <esf:value>CCMP</esf:value>
+            </esf:property>
             <esf:property name="net.interface.lo.config.ip4.prefix" array="false" encrypted="false" type="Short">
                 <esf:value>8</esf:value>
             </esf:property>

@@ -11,6 +11,9 @@ set KURA_TEMP=%TEMP%\kura
 if not exist %KURA_TEMP% mkdir %KURA_TEMP%
 if not exist %KURA_TEMP%\Configuration mkdir %KURA_TEMP%\Configuration
 
+@rem Temporary patch for hardcoded /tmp paths
+if not exist c:\tmp mkdir c:\tmp
+
 copy %KURA_HOME%\config.ini %KURA_TEMP%\Configuration
 
 java -Xms256m -Xmx256m -Dkura.os.version=win32 ^

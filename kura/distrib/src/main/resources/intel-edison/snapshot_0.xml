@@ -357,7 +357,7 @@
                 <esf:value>7200</esf:value>
             </esf:property>
             <esf:property name="net.interface.wlan0.config.ip4.status" array="false" encrypted="false" type="String">
-                <esf:value>netIPv4StatusDisabled</esf:value>
+                <esf:value>netIPv4StatusEnabledLAN</esf:value>
             </esf:property>
             <esf:property name="net.interface.wlan0.driver.version" array="false" encrypted="false" type="String">
                 <esf:value>unknown</esf:value>

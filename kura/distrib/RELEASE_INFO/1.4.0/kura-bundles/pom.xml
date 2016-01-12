@@ -87,7 +87,7 @@
                                 <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>
                                     <artifactId>org.eclipse.kura.deployment.agent</artifactId>
-                                    <version>1.0.4</version>
+                                    <version>1.0.5</version>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>

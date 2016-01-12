@@ -218,9 +218,9 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
             	//s_logger.debug("m_currentNetworkConfiguration: " + m_currentNetworkConfiguration);
              	
                 if(m_newNetConfiguration != null && !m_newNetConfiguration.equals(m_currentNetworkConfiguration)) {
-                    s_logger.info("monitor() :: Found a new WiFi network configuration");
+                    s_logger.info("monitor() :: Found a new network configuration, will check if wifi has been reconfigured ...");
                     
-                    List<String> interfacesToReconfigure = new ArrayList<String>();    
+                    List<String> interfacesToReconfigure = new ArrayList<String>();
                     interfacesToReconfigure.addAll(getReconfiguredWifiInterfaces());
                         
                     m_currentNetworkConfiguration = m_newNetConfiguration;

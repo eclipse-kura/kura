@@ -109,7 +109,6 @@ public class HostapdConfigReader implements NetworkConfigurationVisitor {
 
 	private static WifiConfig getWifiHostConfig(String ifaceName)
 			throws KuraException {
-
 		try {
 			WifiConfig wifiConfig = new WifiConfig();
 			wifiConfig.setMode(WifiMode.MASTER);
@@ -230,16 +229,16 @@ public class HostapdConfigReader implements NetworkConfigurationVisitor {
 					wifiConfig.setDriver(driver);
 					wifiConfig.setChannels(new int[] { channel });
 					wifiConfig.setPasskey(password);
-					wifiConfig.setBroadcast(true); // TODO: always true? is this
-													// needed?
 					wifiConfig.setSecurity(security);
 					wifiConfig.setPairwiseCiphers(pairwise);
 					wifiConfig.setRadioMode(wifiRadioMode);
 
 					if (ignoreSSID == 0) {
 						wifiConfig.setIgnoreSSID(false);
+						wifiConfig.setBroadcast(true);
 					} else {
 						wifiConfig.setIgnoreSSID(true);
+						wifiConfig.setBroadcast(false);
 					}
 
 					// hw mode
@@ -256,7 +255,6 @@ public class HostapdConfigReader implements NetworkConfigurationVisitor {
 					}
 				}
 			}
-
 			return wifiConfig;
 		} catch (Exception e) {
 			s_logger.error("Exception getting WiFi configuration", e);

@@ -1470,6 +1470,9 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 
 			// ignore SSID?
 			wifiConfig.setIgnoreSSID(gwtWifiConfig.ignoreSSID());
+			
+			// broadcast SSID
+			wifiConfig.setBroadcast(!gwtWifiConfig.ignoreSSID());
 		}
 
 		return wifiConfig;

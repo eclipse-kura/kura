@@ -59,6 +59,16 @@ public interface BluetoothAdapter {
 	 */
 	public void startLeScan(BluetoothLeScanListener listener);
 	
+
+    /**
+     * Starts an asynchronous scan for Bluetooth LE beacons. Beacon data is
+     * relayed through the {@link BluetoothBeaconScanListener} as it arrives.
+     * 
+     * @param listener Interface for collecting beacon data.
+     */
+    void startBeaconScan(BluetoothBeaconScanListener listener);
+	
+	
 	/**
 	 * Get a remote Bluetooth device based on hardware adress
 	 * 

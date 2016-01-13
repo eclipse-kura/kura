@@ -1,20 +1,23 @@
 package org.eclipse.kura.linux.bluetooth.util;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import org.apache.commons.io.FileUtils;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
-import org.eclipse.kura.linux.bluetooth.util.BluetoothSafeProcess;
-import org.eclipse.kura.linux.bluetooth.util.BluetoothProcessUtil;
+import org.eclipse.kura.bluetooth.BluetoothBeaconData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,11 +26,31 @@ public class BluetoothUtil {
 	private static final Logger s_logger = LoggerFactory.getLogger(BluetoothUtil.class);
 	private static final ExecutorService s_processExecutor = Executors.newSingleThreadExecutor();
 
+	public static final String HCITOOL        = "hcitool";
+	public static final String BTDUMP         = "/tmp/BluetoothUtil.btsnoopdump.sh";
 	private static final String BD_ADDRESS    = "BD Address:";
 	private static final String HCI_VERSION   = "HCI Version:";
 	private static final String HCICONFIG     = "hciconfig";
-	private static final String HCITOOL       = "hcitool";
 	private static final String GATTTOOL      = "gatttool";
+	
+	
+	// Write bluetooth dumping script into /tmp
+	static {
+		try {
+			File f = new File(BTDUMP);
+			FileUtils.writeStringToFile(f,
+					"#!/bin/bash\n"													+ 
+					"set -e\n"														+
+					"ADAPTER=$1\n"													+
+					"{ hcidump -i $ADAPTER -R -w /dev/fd/3 >/dev/null; } 3>&1", false);
+			
+			f.setExecutable(true);
+		} catch (IOException e) {
+			
+			s_logger.info("Unable to update", e);
+		}
+		
+	}
 	
 	/*
 	 * Use hciconfig utility to return information about the bluetooth adapter
@@ -200,6 +223,26 @@ public class BluetoothUtil {
 		}
 	}
 	
+	/**
+	 * Start an hci dump process for the examination of BLE advertisement packets
+	 * @param name Name of HCI device (hci0, for example)
+	 * @param listener Listener for receiving btsnoop records
+	 * @return BluetoothProcess created
+	 */
+	public static BluetoothProcess btdumpCmd (String name, BTSnoopListener listener) {
+		String[] command = { BTDUMP, name };
+
+		BluetoothProcess proc = null;
+		try {
+			s_logger.debug("Command executed : {}", Arrays.toString(command));
+			proc = execSnoop(command, listener);
+		} catch (Exception e) {
+			s_logger.error("Error executing command: {}", command, e);
+		}
+		
+		return proc;
+	}
+	
 	/*
 	 * Method to utilize BluetoothProcess and the hcitool utility. These processes run indefinitely, so the
 	 * BluetoothProcessListener is used to receive output from the process. 
@@ -230,7 +273,7 @@ public class BluetoothUtil {
 			command[i+3] = cmd[i];
 		BluetoothProcess proc = null;
 		try {
-			s_logger.debug("Command executed: {}", Arrays.toString(command));
+			s_logger.debug("Command executed : {}", Arrays.toString(command));
 			proc = exec(command, listener);
 		} catch (Exception e) {
 			s_logger.error("Error executing command: {}", command, e);
@@ -249,7 +292,7 @@ public class BluetoothUtil {
 		try {
 			proc = exec(command, listener);
 		} catch (Exception e) {
-			s_logger.error("Error executing command: ", command, e);
+			s_logger.error("Error executing command: {}", command, e);
 		}
 		return proc;
 	}
@@ -277,5 +320,151 @@ public class BluetoothUtil {
             s_logger.error("Error waiting from SafeProcess output", e);
             throw new IOException(e);
         }
+	}
+	
+	/*
+	 * Method to create a separate thread for the BluetoothProcesses.
+	 */
+	private static BluetoothProcess execSnoop(final String[] cmdArray, final BTSnoopListener listener) throws IOException {
+
+		// Serialize process executions. One at a time so we can consume all streams.
+        Future<BluetoothProcess> futureSafeProcess = s_processExecutor.submit( new Callable<BluetoothProcess>() {
+            @Override
+            public BluetoothProcess call() throws Exception {
+                Thread.currentThread().setName("BTSnoopProcessExecutor");
+                BluetoothProcess bluetoothProcess = new BluetoothProcess();
+                bluetoothProcess.execSnoop(cmdArray, listener);
+                return bluetoothProcess;
+            }           
+        });
+        
+        try {
+            return futureSafeProcess.get();
+        } 
+        catch (Exception e) {
+            s_logger.error("Error waiting from SafeProcess output", e);
+            throw new IOException(e);
+        }
+	}
+	
+	/**
+	 * Parse EIR data from a BLE advertising report,
+	 * extracting UUID, major and minor number.
+	 * 
+	 * See Bluetooth Core 4.0; 8 EXTENDED INQUIRY RESPONSE DATA FORMAT
+	 * 
+	 * @param b Array containing EIR data
+	 * @param i Index of first byte of EIR data
+	 * @return BeaconInfo or null if no beacon data present
+	 */
+	private static BluetoothBeaconData parseEIRData(byte[] b, int payloadPtr, int len) {
+		
+		for(int ptr = payloadPtr; ptr < payloadPtr + len;) {
+			
+			int structSize = b[ptr];
+			if(structSize == 0)
+				break;
+			
+			byte dataType = b[ptr+1];
+
+			if(dataType == (byte)0xFF) { // Data-Type: Manufacturer-Specific
+
+				int prefixPtr = ptr + 2;
+				byte[] prefix = new byte[] {
+						0x4c,
+						0x00,
+						0x02,
+						0x15
+				};
+				
+				if(Arrays.equals(prefix, Arrays.copyOfRange(b, prefixPtr, prefixPtr + prefix.length))) {
+					BluetoothBeaconData bi = new BluetoothBeaconData();
+					
+					int uuidPtr = ptr + 2 + prefix.length;
+					int majorPtr = uuidPtr + 16;
+					int minorPtr = uuidPtr + 18;
+					
+					bi.uuid = "";
+					for(byte ub : Arrays.copyOfRange(b, uuidPtr, majorPtr)) {
+						bi.uuid += String.format("%02X", (byte)ub);
+					}
+					
+					int majorl = b[majorPtr+1] & 0xFF;
+					int majorh = b[majorPtr] & 0xFF;
+					int minorl = b[minorPtr+1] & 0xFF;
+					int minorh = b[minorPtr] & 0xFF;
+					bi.major = majorh << 8 | majorl;
+					bi.minor = minorh << 8 | minorl;
+					// Can't fill this in from here
+					bi.address = "";
+					return bi;
+				}
+			}
+			
+			ptr += structSize + 1;	
+		}
+		
+		return null;
+	}
+	
+	
+	/**
+	 * Parse BLE beacons out of an HCL LE Advertising Report Event
+	 * 
+	 * See Bluetooth Core 4.0; 7.7.65.2 LE Advertising Report Event
+	 * @param b
+	 * @return
+	 */
+	@SuppressWarnings("unused")
+	public static List<BluetoothBeaconData> parseLEAdvertisingReport(byte[] b) {
+		
+		List<BluetoothBeaconData> results = new LinkedList<BluetoothBeaconData>();
+		
+		// Packet Type: Event
+		if(b[0] != 4)
+			return results;
+		
+		// Event Type: LE Advertisement Report
+		if(b[1] != 0x3E)
+			return results;
+
+		int paramLen = b[2];
+		
+		// LE Advertisement Subevent Code: 0x02
+		if(b[3] != 0x02)
+			return results;
+		
+		int numReports = b[4];
+		
+		int ptr = 5;
+		for(int i = 0; i < numReports; i++) {
+			int eventType = b[ptr++];
+			int addressType = b[ptr++];
+			
+			// Extract remote address
+			String address = String.format("%02X:%02X:%02X:%02X:%02X:%02X",
+											b[ptr+5],
+											b[ptr+4],
+											b[ptr+3],
+											b[ptr+2],
+											b[ptr+1],
+											b[ptr+0]);
+			ptr += 6;
+			
+			
+			int len = b[ptr++];
+			
+			BluetoothBeaconData bi = parseEIRData(b, ptr, len);
+			if(bi != null) {
+
+				bi.address = address;
+				bi.rssi = b[ptr + len];
+				results.add(bi);
+			}
+			
+			ptr += len;
+		}
+		
+		return results;
 	}
 }

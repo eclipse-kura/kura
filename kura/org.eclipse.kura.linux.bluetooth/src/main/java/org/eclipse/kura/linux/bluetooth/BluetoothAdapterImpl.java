@@ -9,11 +9,12 @@ import java.util.Map;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.bluetooth.BluetoothAdapter;
 import org.eclipse.kura.bluetooth.BluetoothBeaconCommandListener;
+import org.eclipse.kura.bluetooth.BluetoothBeaconScanListener;
 import org.eclipse.kura.bluetooth.BluetoothDevice;
 import org.eclipse.kura.bluetooth.BluetoothLeScanListener;
 import org.eclipse.kura.linux.bluetooth.le.BluetoothLeScanner;
 import org.eclipse.kura.linux.bluetooth.le.beacon.BluetoothAdvertisingData;
-import org.eclipse.kura.linux.bluetooth.le.beacon.BluetoothBeaconListener;
+import org.eclipse.kura.linux.bluetooth.le.beacon.BluetoothConfigurationProcessListener;
 import org.eclipse.kura.linux.bluetooth.util.BluetoothUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -110,8 +111,16 @@ public class BluetoothAdapterImpl implements BluetoothAdapter {
 
 	@Override
 	public void startLeScan(BluetoothLeScanListener listener) {
+		killLeScan();
 		m_bls = new BluetoothLeScanner();
 		m_bls.startScan(m_name, listener);
+	}
+	
+	@Override
+	public void startBeaconScan(BluetoothBeaconScanListener listener) {
+		killLeScan();
+		m_bls = new BluetoothLeScanner();
+		m_bls.startBeaconScan(m_name, listener);
 	}
 
 	public void killLeScan() {
@@ -150,7 +159,7 @@ public class BluetoothAdapterImpl implements BluetoothAdapter {
 	@Override
 	public void startBeaconAdvertising() {
 		
-		BluetoothBeaconListener bbl = new BluetoothBeaconListener(m_bbcl);
+		BluetoothConfigurationProcessListener bbl = new BluetoothConfigurationProcessListener(m_bbcl);
 		
 		s_logger.debug("Start Advertising : hcitool -i " + m_name + " cmd " + OGF_CONTROLLER_CMD + " " + OCF_ADVERTISING_ENABLE_CMD + " 01");
 		s_logger.info("Start Advertising on interface " + m_name);
@@ -162,7 +171,7 @@ public class BluetoothAdapterImpl implements BluetoothAdapter {
 	@Override
 	public void stopBeaconAdvertising() {
 		
-		BluetoothBeaconListener bbl = new BluetoothBeaconListener(m_bbcl);
+		BluetoothConfigurationProcessListener bbl = new BluetoothConfigurationProcessListener(m_bbcl);
 		
 		s_logger.debug("Stop Advertising : hcitool -i " + m_name + " cmd " + OGF_CONTROLLER_CMD + " " + OCF_ADVERTISING_ENABLE_CMD + " 00");
 		s_logger.info("Stop Advertising on interface " + m_name);
@@ -173,7 +182,7 @@ public class BluetoothAdapterImpl implements BluetoothAdapter {
 	@Override
 	public void setBeaconAdvertisingInterval(Integer min, Integer max) {
 		
-		BluetoothBeaconListener bbl = new BluetoothBeaconListener(m_bbcl);
+		BluetoothConfigurationProcessListener bbl = new BluetoothConfigurationProcessListener(m_bbcl);
 		
 		// See http://stackoverflow.com/questions/21124993/is-there-a-way-to-increase-ble-advertisement-frequency-in-bluez
 		String[] minHex = toStringArray(BluetoothAdvertisingData.to2BytesHex(min));
@@ -190,7 +199,7 @@ public class BluetoothAdapterImpl implements BluetoothAdapter {
 	public void setBeaconAdvertisingData(String uuid, Integer major, Integer minor, String companyCode, Integer txPower, boolean LELimited, boolean LEGeneral,
 			boolean BR_EDRSupported, boolean LE_BRController, boolean LE_BRHost) {
 		
-		BluetoothBeaconListener bbl = new BluetoothBeaconListener(m_bbcl);
+		BluetoothConfigurationProcessListener bbl = new BluetoothConfigurationProcessListener(m_bbcl);
 		
 		String[] dataHex = toStringArray(BluetoothAdvertisingData.getData(uuid, major, minor, companyCode, txPower, LELimited, LEGeneral, BR_EDRSupported, LE_BRController, LE_BRHost));
 		String[] cmd = new String[3 + dataHex.length];
@@ -209,7 +218,7 @@ public class BluetoothAdapterImpl implements BluetoothAdapter {
 	@Override
 	public void ExecuteCmd(String ogf, String ocf, String parameter) {
 		
-		BluetoothBeaconListener bbl = new BluetoothBeaconListener(m_bbcl);
+		BluetoothConfigurationProcessListener bbl = new BluetoothConfigurationProcessListener(m_bbcl);
 		
 		String[] paramArray = toStringArray(parameter);
 		s_logger.info("Execute custom command : hcitool -i " + m_name + "cmd " + ogf + " " + ocf + " " + Arrays.toString(paramArray));

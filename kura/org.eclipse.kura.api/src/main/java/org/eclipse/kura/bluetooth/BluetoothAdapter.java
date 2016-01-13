@@ -62,8 +62,7 @@ public interface BluetoothAdapter {
 
     /**
      * Starts an asynchronous scan for Bluetooth LE beacons. Beacon data is
-     * relayed through the {@link BluetoothBeaconScanListener} when the scan
-     * is complete.
+     * relayed through the {@link BluetoothBeaconScanListener} as it arrives.
      * 
      * @param listener Interface for collecting beacon data.
      */

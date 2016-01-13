@@ -191,8 +191,9 @@ PasswordCommandService {
 
 			String[] cmdarray = prepareCommandArray(commandReq, command);
 
+//			String dir = getDir(commandReq);
+			String dir = getDefaultWorkDir();
 			String[] envp = getEnvironment(commandReq);
-			String dir = getDir(commandReq);
 
 			byte[] zipBytes = commandReq.getZipBytes();
 			if (zipBytes != null) {
@@ -297,7 +298,16 @@ PasswordCommandService {
 
 	// command service defaults getters
 	private String getDefaultWorkDir() {
-		return (String) properties.get(COMMAND_WORKDIR_ID);
+
+		String workDir = (String)properties.get(COMMAND_WORKDIR_ID);
+		if(workDir != null)
+		{
+			if(!workDir.isEmpty())
+			{
+				return workDir;
+			}
+		}
+		return System.getProperty("java.io.tmpdir");
 	}
 
 	private int getDefaultTimeout() {

@@ -42,7 +42,7 @@
         	type="String"
         	cardinality="0"
         	required="false"
-        	default="/tmp"
+        	default=""
         	description="Specifies the working directory where the command execution is performed.">
         </AD>
         

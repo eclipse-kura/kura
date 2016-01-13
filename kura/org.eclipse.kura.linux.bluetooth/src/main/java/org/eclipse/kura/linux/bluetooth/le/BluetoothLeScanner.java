@@ -6,16 +6,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.eclipse.kura.bluetooth.BluetoothBeaconData;
+import org.eclipse.kura.bluetooth.BluetoothBeaconScanListener;
 import org.eclipse.kura.bluetooth.BluetoothDevice;
 import org.eclipse.kura.bluetooth.BluetoothLeScanListener;
 import org.eclipse.kura.linux.bluetooth.BluetoothDeviceImpl;
+import org.eclipse.kura.linux.bluetooth.util.BTSnoopListener;
 import org.eclipse.kura.linux.bluetooth.util.BluetoothProcess;
 import org.eclipse.kura.linux.bluetooth.util.BluetoothProcessListener;
 import org.eclipse.kura.linux.bluetooth.util.BluetoothUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class BluetoothLeScanner implements BluetoothProcessListener {
+public class BluetoothLeScanner implements BluetoothProcessListener, BTSnoopListener {
 
 	private static final Logger s_logger = LoggerFactory.getLogger(BluetoothLeScanner.class); 
 	private static final String s_mac_regex = "^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$";
@@ -26,18 +29,37 @@ public class BluetoothLeScanner implements BluetoothProcessListener {
 	private Map<String, String> m_devices;
 	private List<BluetoothDevice> m_scanResult;
 	private BluetoothProcess m_proc = null;
+	private BluetoothProcess m_dump_proc = null;
 	private BluetoothLeScanListener m_listener = null;
+	private BluetoothBeaconScanListener m_beacon_listener = null;
 	private boolean m_scanRunning = false;
 
 	public BluetoothLeScanner() {
 		m_devices = new HashMap<String, String>();
 	}
-
+	
 	public void startScan(String name, BluetoothLeScanListener listener) {
 		m_listener = listener;
 
 		s_logger.info("Starting bluetooth le scan...");
+		
+		// Start scan process
 		m_proc = BluetoothUtil.hcitoolCmd(name, "lescan", this);
+					
+		set_scanRunning(true);
+	}
+	
+
+	public void startBeaconScan(String name, BluetoothBeaconScanListener listener) {
+		m_beacon_listener = listener;
+
+		s_logger.info("Starting bluetooth le beacon scan...");
+
+		// Start scan process
+		m_proc = BluetoothUtil.hcitoolCmd(name, new String[]{ "lescan-passive", "--duplicates" }, this);
+		
+		// Start dump process
+		m_dump_proc = BluetoothUtil.btdumpCmd(name, this);
 					
 		set_scanRunning(true);
 	}
@@ -46,11 +68,22 @@ public class BluetoothLeScanner implements BluetoothProcessListener {
 		// SIGINT must be sent to the hcitool process. Otherwise the adapter must be toggled (down/up).
 		if (m_proc != null) {
 			s_logger.info("Killing hcitool...");
-			BluetoothUtil.killCmd("hcitool", SIGINT);
-			set_scanRunning(false);
+			BluetoothUtil.killCmd(BluetoothUtil.HCITOOL, SIGINT);
+			m_proc = null;
 		}
 		else
 			s_logger.info("Cannot Kill hcitool, m_proc = null ...");
+		
+		// Shut down btdump process
+		if (m_dump_proc != null) {
+			s_logger.info("Killing btdump...");
+			m_dump_proc.destroy();
+			m_dump_proc = null;
+		}
+		else
+			s_logger.info("Cannot Kill btdump, m_dump_proc = null ...");
+		
+		set_scanRunning(false);
 	}
 
 	// --------------------------------------------------------------------
@@ -73,8 +106,9 @@ public class BluetoothLeScanner implements BluetoothProcessListener {
 		}
 
 		// Alert listener that scan is complete
-		m_listener.onScanResults(m_scanResult);
 
+		if(m_listener != null)
+			m_listener.onScanResults(m_scanResult);
 	}
 
 	@Override
@@ -119,6 +153,35 @@ public class BluetoothLeScanner implements BluetoothProcessListener {
 			}
 		}
 	}
+	
+
+	@Override
+	public void processBTSnoopRecord(byte[] record) {
+
+		try {
+			
+			// Extract beacon advertisements
+			List<BluetoothBeaconData> beaconDatas = BluetoothUtil.parseLEAdvertisingReport(record);
+
+			// Extract beacon data
+			for(BluetoothBeaconData beaconData : beaconDatas) {
+				
+				// Notify the listener
+				try {
+					
+					if(m_beacon_listener != null)
+						m_beacon_listener.onBeaconDataReceived(beaconData);
+					
+				} catch(Exception e) {
+					s_logger.error("Scan listener threw exception", e);
+				}
+			}
+			
+		} catch(Exception e) {
+			s_logger.error("Error processing advertising report", e);
+		}
+		
+	}
 
 	public boolean is_scanRunning() {
 		return m_scanRunning;
@@ -127,5 +190,6 @@ public class BluetoothLeScanner implements BluetoothProcessListener {
 	public void set_scanRunning(boolean m_scanRunning) {
 		this.m_scanRunning = m_scanRunning;
 	}
+
 
 }

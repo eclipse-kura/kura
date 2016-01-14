@@ -46,6 +46,7 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
 	private boolean 						m_enabled; 
 	private boolean 						m_watchdogToStop = false;
 	private boolean							m_serviceToStop = false;
+	private String                          watchdogDevice = "/dev/watchdog";
 
 	protected void activate(ComponentContext componentContext, Map<String,Object> properties) {
 		m_properties=properties;
@@ -61,6 +62,9 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
 			}
 			if(m_properties.get("pingInterval") != null){
 				pingInterval = (Integer) m_properties.get("pingInterval");
+			}
+			if(!((String) m_properties.get("watchdogDevice")).isEmpty()){
+				watchdogDevice = (String) m_properties.get("watchdogDevice");
 			}
 		}
 		s_criticalServiceList = new ArrayList<CriticalComponentImpl>();
@@ -85,7 +89,7 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
 			File f= null;
 			FileWriter bw= null;
 			try {
-				f = new File("/dev/watchdog");
+				f = new File(watchdogDevice);
 				bw = new FileWriter(f);
 				bw.write('V');
 				m_enabled=false;
@@ -140,6 +144,9 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
 			}
 			if(m_properties.get("pingInterval") != null) {
 				pingInterval = (Integer) m_properties.get("pingInterval");
+			}
+			if(!((String) m_properties.get("watchdogDevice")).isEmpty()){
+				watchdogDevice = (String) m_properties.get("watchdogDevice");
 			}
 
 			s_pollThreadTask = m_pollThreadExecutor.scheduleAtFixedRate(new Runnable() {
@@ -234,7 +241,7 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
 				File f = null;
 				FileWriter bw = null;
 				try {
-					f = new File("/dev/watchdog");
+					f = new File(watchdogDevice);
 					bw = new FileWriter(f);
 					bw.write('V');
 					s_logger.info("watchdog stopped");
@@ -269,7 +276,7 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
 					File f = null;
 					FileWriter bw = null;
 					try {
-						f = new File("/dev/watchdog");
+						f = new File(watchdogDevice);
 						bw = new FileWriter(f);
 						bw.write('w');
 						bw.flush();
@@ -293,7 +300,7 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
 				File f = null;
 				FileWriter bw = null;
 				try {
-					f = new File("/dev/watchdog");
+					f = new File(watchdogDevice);
 					bw = new FileWriter(f);
 					bw.write('w');
 					bw.flush();

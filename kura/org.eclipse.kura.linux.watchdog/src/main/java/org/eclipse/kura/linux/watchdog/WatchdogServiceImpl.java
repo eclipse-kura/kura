@@ -63,7 +63,7 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
 			if(m_properties.get("pingInterval") != null){
 				pingInterval = (Integer) m_properties.get("pingInterval");
 			}
-			if(!((String) m_properties.get("watchdogDevice")).isEmpty()){
+			if(m_properties.get("watchdogDevice") != null && !((String) m_properties.get("watchdogDevice")).isEmpty()){
 				watchdogDevice = (String) m_properties.get("watchdogDevice");
 			}
 		}

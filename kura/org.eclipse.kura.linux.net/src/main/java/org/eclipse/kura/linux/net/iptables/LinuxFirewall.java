@@ -210,8 +210,12 @@ public class LinuxFirewall {
 				int inPort = natPreroutingChainRule.getExternalPort();
 				int outPort = natPreroutingChainRule.getInternalPort();
 				boolean masquerade = false;
-				StringBuilder sbSport = new StringBuilder().append(natPreroutingChainRule.getSrcPortFirst()).append(':').append(natPreroutingChainRule.getSrcPortLast());
-				String sport = sbSport.toString();
+				String sport = null;
+				if ((natPreroutingChainRule.getSrcPortFirst() > 0) && 
+						(natPreroutingChainRule.getSrcPortFirst() <= natPreroutingChainRule.getSrcPortLast())) {
+					StringBuilder sbSport = new StringBuilder().append(natPreroutingChainRule.getSrcPortFirst()).append(':').append(natPreroutingChainRule.getSrcPortLast());
+					sport = sbSport.toString();
+				}
 				String permittedMac = natPreroutingChainRule.getPermittedMacAddress();
 				String permittedNetwork = natPreroutingChainRule.getPermittedNetwork();
 				int permittedNetworkMask = natPreroutingChainRule.getPermittedNetworkMask();
@@ -224,6 +228,9 @@ public class LinuxFirewall {
 							masquerade = true;
 						}	
 					}
+				}
+				if (permittedNetwork == null) {
+					permittedNetwork = "0.0.0.0";
 				}
 				PortForwardRule portForwardRule = new PortForwardRule(
 						inboundIfaceName, outboundIfaceName, address, protocol, inPort, outPort,

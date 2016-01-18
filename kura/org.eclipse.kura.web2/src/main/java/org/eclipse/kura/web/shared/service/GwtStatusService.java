@@ -11,11 +11,12 @@
  */
 package org.eclipse.kura.web.shared.service;
 
+import java.util.ArrayList;
+
 import org.eclipse.kura.web.shared.GwtKuraException;
 import org.eclipse.kura.web.shared.model.GwtGroupedNVPair;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 
-import com.extjs.gxt.ui.client.data.ListLoadResult;
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 
@@ -30,7 +31,7 @@ public interface GwtStatusService extends RemoteService {
 	 * @return
 	 * @throws GwtKuraException
 	 */
-	public ListLoadResult<GwtGroupedNVPair> getDeviceConfig(GwtXSRFToken xsrfToken, boolean hasNetAdmin) throws GwtKuraException;
+	public ArrayList<GwtGroupedNVPair> getDeviceConfig(GwtXSRFToken xsrfToken, boolean hasNetAdmin) throws GwtKuraException;
 	
 	/**
 	 * Connects the local MQTT client to the specified broker.

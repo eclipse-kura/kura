@@ -1,12 +1,16 @@
-package org.eclipse.kura.web.client.bootstrap.ui.Device;
+package org.eclipse.kura.web.client.ui.Device;
 
 import java.util.ArrayList;
 
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.messages.ValidationMessages;
-import org.eclipse.kura.web.shared.model.GwtBSGroupedNVPair;
-import org.eclipse.kura.web.shared.service.GwtBSDeviceService;
-import org.eclipse.kura.web.shared.service.GwtBSDeviceServiceAsync;
+import org.eclipse.kura.web.client.util.FailureHandler;
+import org.eclipse.kura.web.shared.model.GwtGroupedNVPair;
+import org.eclipse.kura.web.shared.model.GwtXSRFToken;
+import org.eclipse.kura.web.shared.service.GwtDeviceService;
+import org.eclipse.kura.web.shared.service.GwtDeviceServiceAsync;
+import org.eclipse.kura.web.shared.service.GwtSecurityTokenService;
+import org.eclipse.kura.web.shared.service.GwtSecurityTokenServiceAsync;
 import org.gwtbootstrap3.client.ui.gwt.DataGrid;
 
 import com.google.gwt.core.client.GWT;
@@ -20,20 +24,20 @@ import com.google.gwt.view.client.ListDataProvider;
 
 public class BundlesTabUi extends Composite {
 
-	private static BundlesTabUiUiBinder uiBinder = GWT
-			.create(BundlesTabUiUiBinder.class);
+	private static BundlesTabUiUiBinder uiBinder = GWT.create(BundlesTabUiUiBinder.class);
 
 	interface BundlesTabUiUiBinder extends UiBinder<Widget, BundlesTabUi> {
 	}
 
 	private static final Messages MSGS = GWT.create(Messages.class);
-	private static final ValidationMessages msgs = GWT
-			.create(ValidationMessages.class);
-	private final GwtBSDeviceServiceAsync gwtDeviceService = GWT.create(GwtBSDeviceService.class);
+	private static final ValidationMessages msgs = GWT.create(ValidationMessages.class);
+	
+	private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
+	private final GwtDeviceServiceAsync gwtDeviceService = GWT.create(GwtDeviceService.class);
 	
 	@UiField
-	DataGrid<GwtBSGroupedNVPair> bundlesGrid = new DataGrid<GwtBSGroupedNVPair>();
-	private ListDataProvider<GwtBSGroupedNVPair> bundlesDataProvider = new ListDataProvider<GwtBSGroupedNVPair>();
+	DataGrid<GwtGroupedNVPair> bundlesGrid = new DataGrid<GwtGroupedNVPair>();
+	private ListDataProvider<GwtGroupedNVPair> bundlesDataProvider = new ListDataProvider<GwtGroupedNVPair>();
 
 	public BundlesTabUi() {
 		initWidget(uiBinder.createAndBindUi(this));
@@ -41,40 +45,40 @@ public class BundlesTabUi extends Composite {
 		//loadBundlesData();
 	}
 
-	private void loadBundlesTable(DataGrid<GwtBSGroupedNVPair> grid,
+	private void loadBundlesTable(DataGrid<GwtGroupedNVPair> grid,
 
-	ListDataProvider<GwtBSGroupedNVPair> dataProvider) {
+	ListDataProvider<GwtGroupedNVPair> dataProvider) {
 
-		TextColumn<GwtBSGroupedNVPair> col1 = new TextColumn<GwtBSGroupedNVPair>() {
+		TextColumn<GwtGroupedNVPair> col1 = new TextColumn<GwtGroupedNVPair>() {
 			@Override
-			public String getValue(GwtBSGroupedNVPair object) {
+			public String getValue(GwtGroupedNVPair object) {
 				return object.getId();
 			}
 		};
 		col1.setCellStyleNames("status-table-row");
 		grid.addColumn(col1, MSGS.deviceBndId());
 
-		TextColumn<GwtBSGroupedNVPair> col2 = new TextColumn<GwtBSGroupedNVPair>() {
+		TextColumn<GwtGroupedNVPair> col2 = new TextColumn<GwtGroupedNVPair>() {
 			@Override
-			public String getValue(GwtBSGroupedNVPair object) {
+			public String getValue(GwtGroupedNVPair object) {
 				return object.getName();
 			}
 		};
 		col2.setCellStyleNames("status-table-row");
 		grid.addColumn(col2, MSGS.deviceBndName());
 
-		TextColumn<GwtBSGroupedNVPair> col3 = new TextColumn<GwtBSGroupedNVPair>() {
+		TextColumn<GwtGroupedNVPair> col3 = new TextColumn<GwtGroupedNVPair>() {
 			@Override
-			public String getValue(GwtBSGroupedNVPair object) {
+			public String getValue(GwtGroupedNVPair object) {
 				return msgs.getString(object.getStatus());
 			}
 		};
 		col3.setCellStyleNames("status-table-row");
 		grid.addColumn(col3, MSGS.deviceBndState());
 
-		TextColumn<GwtBSGroupedNVPair> col4 = new TextColumn<GwtBSGroupedNVPair>() {
+		TextColumn<GwtGroupedNVPair> col4 = new TextColumn<GwtGroupedNVPair>() {
 			@Override
-			public String getValue(GwtBSGroupedNVPair object) {
+			public String getValue(GwtGroupedNVPair object) {
 				return object.getVersion();
 			}
 		};
@@ -87,13 +91,22 @@ public class BundlesTabUi extends Composite {
 	public void loadBundlesData() {
 
 		bundlesDataProvider.getList().clear();
-		gwtDeviceService
-				.findBundles(new AsyncCallback<ArrayList<GwtBSGroupedNVPair>>() {
+		
+		gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
+
+			@Override
+			public void onFailure(Throwable ex) {
+				FailureHandler.handle(ex);
+			}
+
+			@Override
+			public void onSuccess(GwtXSRFToken token) {
+				gwtDeviceService.findBundles(token, new AsyncCallback<ArrayList<GwtGroupedNVPair>>() {
 
 					@Override
 					public void onFailure(Throwable caught) {
 						bundlesDataProvider.getList().add(
-								new GwtBSGroupedNVPair(
+								new GwtGroupedNVPair(
 										"Not Available, please click Refresh",
 										"Not Available, please click Refresh",
 										"Not Available, please click Refresh"));
@@ -102,14 +115,17 @@ public class BundlesTabUi extends Composite {
 					}
 
 					@Override
-					public void onSuccess(ArrayList<GwtBSGroupedNVPair> result) {
-						for (GwtBSGroupedNVPair resultPair : result) {
+					public void onSuccess(ArrayList<GwtGroupedNVPair> result) {
+						for (GwtGroupedNVPair resultPair : result) {
 							bundlesDataProvider.getList().add(resultPair);
 						}
 						bundlesDataProvider.flush();
 
 					}
 				});
+			}
+			
+		});
 	}
 
 }

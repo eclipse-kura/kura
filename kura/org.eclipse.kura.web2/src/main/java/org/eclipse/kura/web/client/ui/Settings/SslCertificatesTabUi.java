@@ -1,9 +1,13 @@
-package org.eclipse.kura.web.client.bootstrap.ui.Settings;
+package org.eclipse.kura.web.client.ui.Settings;
 
 import org.eclipse.kura.web.client.messages.Messages;
+import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.shared.GwtKuraErrorCode;
-import org.eclipse.kura.web.shared.service.GwtBSCertificatesService;
-import org.eclipse.kura.web.shared.service.GwtBSCertificatesServiceAsync;
+import org.eclipse.kura.web.shared.model.GwtXSRFToken;
+import org.eclipse.kura.web.shared.service.GwtCertificatesService;
+import org.eclipse.kura.web.shared.service.GwtCertificatesServiceAsync;
+import org.eclipse.kura.web.shared.service.GwtSecurityTokenService;
+import org.eclipse.kura.web.shared.service.GwtSecurityTokenServiceAsync;
 import org.gwtbootstrap3.client.ui.Button;
 import org.gwtbootstrap3.client.ui.Form;
 import org.gwtbootstrap3.client.ui.FormGroup;
@@ -14,7 +18,6 @@ import org.gwtbootstrap3.client.ui.base.form.AbstractForm.SubmitCompleteEvent;
 import org.gwtbootstrap3.client.ui.base.form.AbstractForm.SubmitCompleteHandler;
 import org.gwtbootstrap3.client.ui.constants.ValidationState;
 import org.gwtbootstrap3.client.ui.html.Span;
-import org.gwtbootstrap3.extras.growl.client.ui.Growl;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -29,8 +32,7 @@ import com.google.gwt.user.client.ui.Widget;
 
 public class SslCertificatesTabUi extends Composite {
 
-	private static SslCertificatesTabUiUiBinder uiBinder = GWT
-			.create(SslCertificatesTabUiUiBinder.class);
+	private static SslCertificatesTabUiUiBinder uiBinder = GWT.create(SslCertificatesTabUiUiBinder.class);
 
 	interface SslCertificatesTabUiUiBinder extends
 			UiBinder<Widget, SslCertificatesTabUi> {
@@ -39,7 +41,9 @@ public class SslCertificatesTabUi extends Composite {
 	private static final Messages MSGS = GWT.create(Messages.class);
 
 	private final static String SERVLET_URL = "/" + GWT.getModuleName() + "/file/certificate";
-	private final GwtBSCertificatesServiceAsync gwtCertificatesService = GWT.create(GwtBSCertificatesService.class);
+	
+	private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
+	private final GwtCertificatesServiceAsync gwtCertificatesService = GWT.create(GwtCertificatesService.class);
 	
 	@UiField
 	Form sslForm;
@@ -58,7 +62,7 @@ public class SslCertificatesTabUi extends Composite {
 	
 	public SslCertificatesTabUi() {
 		initWidget(uiBinder.createAndBindUi(this));
-		
+		/*
 		sslForm.setAction(SERVLET_URL);
 		sslForm.setEncoding( FormPanel.ENCODING_MULTIPART);
 		sslForm.setMethod(FormPanel.METHOD_POST);
@@ -98,21 +102,33 @@ public class SslCertificatesTabUi extends Composite {
 			@Override
 			public void onSubmitComplete(SubmitCompleteEvent event) {
 				if(formPrivCert.getText()!=null && formPrivCert.getText()!=""){
-					gwtCertificatesService.storePrivateSSLCertificate(formPrivCert.getValue(), formPubCert.getValue(), formPassword.getValue(), formStorageAlias.getText(), new AsyncCallback<Integer>() {
+					gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
+
 						@Override
-						public void onFailure(Throwable caught) {
-							if(caught.getLocalizedMessage().equals(GwtKuraErrorCode.ILLEGAL_ARGUMENT.toString())){
-								Growl.growl(MSGS.error()+": ", "Error while storing the private certificate in the key store");
-							}else{
-								Growl.growl(MSGS.error()+": ", caught.getLocalizedMessage());
-							}
-							
+						public void onFailure(Throwable ex) {
+							FailureHandler.handle(ex);
 						}
 
 						@Override
-						public void onSuccess(Integer result) {
-							sslForm.reset();
-							Growl.growl(MSGS.info()+": ", "Storage success. Stored private and public certificates.");
+						public void onSuccess(GwtXSRFToken token) {
+							gwtCertificatesService.storePrivateSSLCertificate(token, formPrivCert.getValue(), formPubCert.getValue(), formPassword.getValue(), formStorageAlias.getText(), new AsyncCallback<Integer>() {
+								@Override
+								public void onFailure(Throwable caught) {
+									if(caught.getLocalizedMessage().equals(GwtKuraErrorCode.ILLEGAL_ARGUMENT.toString())){
+										//Growl.growl(MSGS.error()+": ", "Error while storing the private certificate in the key store");
+									}else{
+										//Growl.growl(MSGS.error()+": ", caught.getLocalizedMessage());
+									}
+									
+								}
+
+								@Override
+								public void onSuccess(Integer result) {
+									sslForm.reset();
+									//Growl.growl(MSGS.info()+": ", "Storage success. Stored private and public certificates.");
+								}
+								
+							});
 						}
 						
 					});
@@ -136,7 +152,7 @@ public class SslCertificatesTabUi extends Composite {
 					});
 						
 				}
-			}});
+			}});*/
 	}
 
 	private boolean blankValidation(){

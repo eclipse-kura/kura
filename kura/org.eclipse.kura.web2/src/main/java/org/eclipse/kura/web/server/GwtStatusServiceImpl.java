@@ -35,16 +35,13 @@ import org.eclipse.kura.web.shared.service.GwtStatusService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.extjs.gxt.ui.client.data.BaseListLoadResult;
-import com.extjs.gxt.ui.client.data.ListLoadResult;
-
 public class GwtStatusServiceImpl extends OsgiRemoteServiceServlet implements GwtStatusService {
 
 	private static final long serialVersionUID = 8256280782910423734L;
 	
 	private static Logger s_logger = LoggerFactory.getLogger(GwtNetworkServiceImpl.class);
 	
-	public ListLoadResult<GwtGroupedNVPair> getDeviceConfig(GwtXSRFToken xsrfToken, boolean hasNetAdmin) throws GwtKuraException {
+	public ArrayList<GwtGroupedNVPair> getDeviceConfig(GwtXSRFToken xsrfToken, boolean hasNetAdmin) throws GwtKuraException {
 		checkXSRFToken(xsrfToken);
 		List<GwtGroupedNVPair> pairs = new ArrayList<GwtGroupedNVPair>();
 
@@ -53,7 +50,7 @@ public class GwtStatusServiceImpl extends OsgiRemoteServiceServlet implements Gw
 			pairs.addAll(getNetworkStatus());
 		pairs.addAll(getPositionStatus());
 
-		return new BaseListLoadResult<GwtGroupedNVPair>(pairs);
+		return new ArrayList<GwtGroupedNVPair>(pairs);
 	}
 	
 	public void connectDataService(GwtXSRFToken xsrfToken) throws GwtKuraException {
@@ -116,7 +113,7 @@ public class GwtStatusServiceImpl extends OsgiRemoteServiceServlet implements Gw
 		GwtNetworkServiceImpl gwtNetworkService = new GwtNetworkServiceImpl();
 
 		try {
-			List<GwtNetInterfaceConfig> gwtNetInterfaceConfigs = gwtNetworkService.findNetInterfaceConfigurations().getData();
+			List<GwtNetInterfaceConfig> gwtNetInterfaceConfigs = gwtNetworkService.findNetInterfaceConfigurations();
 			for (GwtNetInterfaceConfig gwtNetInterfaceConfig : gwtNetInterfaceConfigs) {
 				
 				String currentAddress    = gwtNetInterfaceConfig.getIpAddress();

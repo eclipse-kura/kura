@@ -1,4 +1,4 @@
-package org.eclipse.kura.web.client.bootstrap.ui.Device;
+package org.eclipse.kura.web.client.ui.Device;
 
 
 import org.eclipse.kura.web.client.messages.Messages;

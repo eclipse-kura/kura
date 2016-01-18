@@ -1,9 +1,13 @@
-package org.eclipse.kura.web.client.bootstrap.ui.Device;
+package org.eclipse.kura.web.client.ui.Device;
 
 import org.eclipse.kura.web.client.messages.Messages;
+import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.shared.GwtKuraErrorCode;
-import org.eclipse.kura.web.shared.service.GwtBSDeviceService;
-import org.eclipse.kura.web.shared.service.GwtBSDeviceServiceAsync;
+import org.eclipse.kura.web.shared.model.GwtXSRFToken;
+import org.eclipse.kura.web.shared.service.GwtDeviceService;
+import org.eclipse.kura.web.shared.service.GwtDeviceServiceAsync;
+import org.eclipse.kura.web.shared.service.GwtSecurityTokenService;
+import org.eclipse.kura.web.shared.service.GwtSecurityTokenServiceAsync;
 import org.gwtbootstrap3.client.ui.Button;
 import org.gwtbootstrap3.client.ui.Input;
 import org.gwtbootstrap3.client.ui.PanelBody;
@@ -28,18 +32,16 @@ import com.google.gwt.user.client.ui.Widget;
 
 public class CommandTabUi extends Composite {
 
-	private static CommandTabUiUiBinder uiBinder = GWT
-			.create(CommandTabUiUiBinder.class);
+	private static CommandTabUiUiBinder uiBinder = GWT.create(CommandTabUiUiBinder.class);
 
 	private static final Messages MSGS = GWT.create(Messages.class);
-	private static final String SERVLET_URL = "/" + GWT.getModuleName()
-			+ "/file/command";
+	private static final String SERVLET_URL = "/" + GWT.getModuleName()	+ "/file/command";
 
 	interface CommandTabUiUiBinder extends UiBinder<Widget, CommandTabUi> {
 	}
 
-	private final GwtBSDeviceServiceAsync gwtDeviceService = GWT
-			.create(GwtBSDeviceService.class);
+	private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
+	private final GwtDeviceServiceAsync gwtDeviceService = GWT.create(GwtDeviceService.class);
 
 	@UiField
 	TextBox formExecute;
@@ -114,55 +116,61 @@ public class CommandTabUi extends Composite {
 					public void onSubmitComplete(SubmitCompleteEvent event) {
 
 						String result = event.getResults();
-						String command = formExecute.getText();
-						String password = formPassword.getText();
-						if (password.isEmpty() || password.equals(null)) {
-							password = null;
-						}
 
 						if (result.startsWith("HTTP ERROR")) {							
 							display(MSGS.fileUploadFailure());
 						} else {
-							gwtDeviceService.executeCommand(command, password,
-									new AsyncCallback<String>() {
+							gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
 
-										@Override
-										public void onFailure(Throwable caught) {
-											
-											
-											if (caught
-													.getLocalizedMessage()
-													.equals(GwtKuraErrorCode.SERVICE_NOT_ENABLED
-															.toString())) {
-												display(MSGS
-														.error()
-														+ "\n"
-														+ MSGS.commandServiceNotEnabled());
+								@Override
+								public void onFailure(Throwable ex) {
+									FailureHandler.handle(ex);
+								}
 
-											} else if (caught
-													.getLocalizedMessage()
-													.equals(GwtKuraErrorCode.ILLEGAL_ARGUMENT
-															.toString())) {
-												display(MSGS
-														.error()
-														+ "\n"
-														+ MSGS.commandPasswordNotCorrect());
-											} else {
-												display(MSGS.error()
-														+ "\n"
-														+ caught.getLocalizedMessage());
-												
-											}
+								@Override
+								public void onSuccess(GwtXSRFToken token) {
+									gwtDeviceService.executeCommand(token, formExecute.getText(), formPassword.getText(),
+											new AsyncCallback<String>() {
 
-										}
+												@Override
+												public void onFailure(Throwable caught) {
+													
+													
+													if (caught
+															.getLocalizedMessage()
+															.equals(GwtKuraErrorCode.SERVICE_NOT_ENABLED
+																	.toString())) {
+														display(MSGS
+																.error()
+																+ "\n"
+																+ MSGS.commandServiceNotEnabled());
 
-										@Override
-										public void onSuccess(String result) {											
-											display(result);
-										}
+													} else if (caught
+															.getLocalizedMessage()
+															.equals(GwtKuraErrorCode.ILLEGAL_ARGUMENT
+																	.toString())) {
+														display(MSGS
+																.error()
+																+ "\n"
+																+ MSGS.commandPasswordNotCorrect());
+													} else {
+														display(MSGS.error()
+																+ "\n"
+																+ caught.getLocalizedMessage());
+														
+													}
 
-									});
+												}
 
+												@Override
+												public void onSuccess(String result) {											
+													display(result);
+												}
+
+											});
+								}
+								
+							});
 						}
 
 					}

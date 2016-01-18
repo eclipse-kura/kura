@@ -1,15 +1,19 @@
-package org.eclipse.kura.web.client.bootstrap.ui.Firewall;
+package org.eclipse.kura.web.client.ui.Firewall;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.kura.web.client.messages.Messages;
-import org.eclipse.kura.web.client.util.ValidationUtils.FieldType;
-import org.eclipse.kura.web.shared.model.GwtBSFirewallNatMasquerade;
-import org.eclipse.kura.web.shared.model.GwtBSFirewallPortForwardEntry;
-import org.eclipse.kura.web.shared.model.GwtBSNetProtocol;
-import org.eclipse.kura.web.shared.service.GwtBSNetworkService;
-import org.eclipse.kura.web.shared.service.GwtBSNetworkServiceAsync;
+import org.eclipse.kura.web.client.util.FailureHandler;
+import org.eclipse.kura.web.client.util.TextFieldValidator.FieldType;
+import org.eclipse.kura.web.shared.model.GwtFirewallNatMasquerade;
+import org.eclipse.kura.web.shared.model.GwtFirewallPortForwardEntry;
+import org.eclipse.kura.web.shared.model.GwtNetProtocol;
+import org.eclipse.kura.web.shared.model.GwtXSRFToken;
+import org.eclipse.kura.web.shared.service.GwtNetworkService;
+import org.eclipse.kura.web.shared.service.GwtNetworkServiceAsync;
+import org.eclipse.kura.web.shared.service.GwtSecurityTokenService;
+import org.eclipse.kura.web.shared.service.GwtSecurityTokenServiceAsync;
 import org.gwtbootstrap3.client.ui.Alert;
 import org.gwtbootstrap3.client.ui.AnchorListItem;
 import org.gwtbootstrap3.client.ui.Button;
@@ -24,7 +28,6 @@ import org.gwtbootstrap3.client.ui.Tooltip;
 import org.gwtbootstrap3.client.ui.constants.ValidationState;
 import org.gwtbootstrap3.client.ui.gwt.DataGrid;
 import org.gwtbootstrap3.client.ui.html.Span;
-import org.gwtbootstrap3.extras.growl.client.ui.Growl;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.BlurEvent;
@@ -42,17 +45,18 @@ import com.google.gwt.view.client.SingleSelectionModel;
 
 public class PortForwardingTabUi extends Composite {
 
-	private static PortForwardingTabUiUiBinder uiBinder = GWT
-			.create(PortForwardingTabUiUiBinder.class);
+	private static PortForwardingTabUiUiBinder uiBinder = GWT.create(PortForwardingTabUiUiBinder.class);
 
 	interface PortForwardingTabUiUiBinder extends
 			UiBinder<Widget, PortForwardingTabUi> {
 	}
 
 	private static final Messages MSGS = GWT.create(Messages.class);
-	private final GwtBSNetworkServiceAsync gwtNetworkService = GWT
-			.create(GwtBSNetworkService.class);
-	GwtBSFirewallPortForwardEntry portForwardEntry;
+	
+	private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
+	private final GwtNetworkServiceAsync gwtNetworkService = GWT.create(GwtNetworkService.class);
+	
+	GwtFirewallPortForwardEntry portForwardEntry;
 
 
 	@UiField
@@ -60,9 +64,9 @@ public class PortForwardingTabUi extends Composite {
 	@UiField
 	Alert notification;
 	@UiField
-	DataGrid<GwtBSFirewallPortForwardEntry> portForwardGrid = new DataGrid<GwtBSFirewallPortForwardEntry>();
-	private ListDataProvider<GwtBSFirewallPortForwardEntry> portForwardDataProvider = new ListDataProvider<GwtBSFirewallPortForwardEntry>();
-	final SingleSelectionModel<GwtBSFirewallPortForwardEntry> selectionModel = new SingleSelectionModel<GwtBSFirewallPortForwardEntry>();
+	DataGrid<GwtFirewallPortForwardEntry> portForwardGrid = new DataGrid<GwtFirewallPortForwardEntry>();
+	private ListDataProvider<GwtFirewallPortForwardEntry> portForwardDataProvider = new ListDataProvider<GwtFirewallPortForwardEntry>();
+	final SingleSelectionModel<GwtFirewallPortForwardEntry> selectionModel = new SingleSelectionModel<GwtFirewallPortForwardEntry>();
 
 	@UiField
 	Modal confirm;
@@ -108,9 +112,9 @@ public class PortForwardingTabUi extends Composite {
 
 	private void initTable() {
 
-		TextColumn<GwtBSFirewallPortForwardEntry> col1 = new TextColumn<GwtBSFirewallPortForwardEntry>() {
+		TextColumn<GwtFirewallPortForwardEntry> col1 = new TextColumn<GwtFirewallPortForwardEntry>() {
 			@Override
-			public String getValue(GwtBSFirewallPortForwardEntry object) {
+			public String getValue(GwtFirewallPortForwardEntry object) {
 				return String.valueOf(object.getInboundInterface());
 			}
 		};
@@ -118,9 +122,9 @@ public class PortForwardingTabUi extends Composite {
 		portForwardGrid.addColumn(col1,
 				MSGS.firewallPortForwardInboundInterface());
 
-		TextColumn<GwtBSFirewallPortForwardEntry> col2 = new TextColumn<GwtBSFirewallPortForwardEntry>() {
+		TextColumn<GwtFirewallPortForwardEntry> col2 = new TextColumn<GwtFirewallPortForwardEntry>() {
 			@Override
-			public String getValue(GwtBSFirewallPortForwardEntry object) {
+			public String getValue(GwtFirewallPortForwardEntry object) {
 				return String.valueOf(object.getOutboundInterface());
 			}
 		};
@@ -128,54 +132,54 @@ public class PortForwardingTabUi extends Composite {
 		portForwardGrid.addColumn(col2,
 				MSGS.firewallPortForwardOutboundInterface());
 
-		TextColumn<GwtBSFirewallPortForwardEntry> col3 = new TextColumn<GwtBSFirewallPortForwardEntry>() {
+		TextColumn<GwtFirewallPortForwardEntry> col3 = new TextColumn<GwtFirewallPortForwardEntry>() {
 			@Override
-			public String getValue(GwtBSFirewallPortForwardEntry object) {
+			public String getValue(GwtFirewallPortForwardEntry object) {
 				return String.valueOf(object.getAddress());
 			}
 		};
 		col3.setCellStyleNames("status-table-row");
 		portForwardGrid.addColumn(col3, MSGS.firewallPortForwardAddress());
 
-		TextColumn<GwtBSFirewallPortForwardEntry> col4 = new TextColumn<GwtBSFirewallPortForwardEntry>() {
+		TextColumn<GwtFirewallPortForwardEntry> col4 = new TextColumn<GwtFirewallPortForwardEntry>() {
 			@Override
-			public String getValue(GwtBSFirewallPortForwardEntry object) {
+			public String getValue(GwtFirewallPortForwardEntry object) {
 				return String.valueOf(object.getProtocol());
 			}
 		};
 		col4.setCellStyleNames("status-table-row");
 		portForwardGrid.addColumn(col4, MSGS.firewallPortForwardProtocol());
 
-		TextColumn<GwtBSFirewallPortForwardEntry> col5 = new TextColumn<GwtBSFirewallPortForwardEntry>() {
+		TextColumn<GwtFirewallPortForwardEntry> col5 = new TextColumn<GwtFirewallPortForwardEntry>() {
 			@Override
-			public String getValue(GwtBSFirewallPortForwardEntry object) {
+			public String getValue(GwtFirewallPortForwardEntry object) {
 				return String.valueOf(object.getInPort());
 			}
 		};
 		col5.setCellStyleNames("status-table-row");
 		portForwardGrid.addColumn(col5, MSGS.firewallPortForwardInPort());
 
-		TextColumn<GwtBSFirewallPortForwardEntry> col6 = new TextColumn<GwtBSFirewallPortForwardEntry>() {
+		TextColumn<GwtFirewallPortForwardEntry> col6 = new TextColumn<GwtFirewallPortForwardEntry>() {
 			@Override
-			public String getValue(GwtBSFirewallPortForwardEntry object) {
+			public String getValue(GwtFirewallPortForwardEntry object) {
 				return String.valueOf(object.getOutPort());
 			}
 		};
 		col6.setCellStyleNames("status-table-row");
 		portForwardGrid.addColumn(col6, MSGS.firewallPortForwardOutPort());
 
-		TextColumn<GwtBSFirewallPortForwardEntry> col7 = new TextColumn<GwtBSFirewallPortForwardEntry>() {
+		TextColumn<GwtFirewallPortForwardEntry> col7 = new TextColumn<GwtFirewallPortForwardEntry>() {
 			@Override
-			public String getValue(GwtBSFirewallPortForwardEntry object) {
+			public String getValue(GwtFirewallPortForwardEntry object) {
 				return String.valueOf(object.getMasquerade());
 			}
 		};
 		col7.setCellStyleNames("status-table-row");
 		portForwardGrid.addColumn(col7, MSGS.firewallPortForwardMasquerade());
 
-		TextColumn<GwtBSFirewallPortForwardEntry> col8 = new TextColumn<GwtBSFirewallPortForwardEntry>() {
+		TextColumn<GwtFirewallPortForwardEntry> col8 = new TextColumn<GwtFirewallPortForwardEntry>() {
 			@Override
-			public String getValue(GwtBSFirewallPortForwardEntry object) {
+			public String getValue(GwtFirewallPortForwardEntry object) {
 				return String.valueOf(object.getPermittedNetwork());
 			}
 		};
@@ -183,18 +187,18 @@ public class PortForwardingTabUi extends Composite {
 		portForwardGrid.addColumn(col8,
 				MSGS.firewallPortForwardPermittedNetwork());
 
-		TextColumn<GwtBSFirewallPortForwardEntry> col9 = new TextColumn<GwtBSFirewallPortForwardEntry>() {
+		TextColumn<GwtFirewallPortForwardEntry> col9 = new TextColumn<GwtFirewallPortForwardEntry>() {
 			@Override
-			public String getValue(GwtBSFirewallPortForwardEntry object) {
+			public String getValue(GwtFirewallPortForwardEntry object) {
 				return String.valueOf(object.getPermittedMAC());
 			}
 		};
 		col9.setCellStyleNames("status-table-row");
 		portForwardGrid.addColumn(col9, MSGS.firewallPortForwardPermittedMac());
 
-		TextColumn<GwtBSFirewallPortForwardEntry> col10 = new TextColumn<GwtBSFirewallPortForwardEntry>() {
+		TextColumn<GwtFirewallPortForwardEntry> col10 = new TextColumn<GwtFirewallPortForwardEntry>() {
 			@Override
-			public String getValue(GwtBSFirewallPortForwardEntry object) {
+			public String getValue(GwtFirewallPortForwardEntry object) {
 				return String.valueOf(object.getSourcePortRange());
 			}
 		};
@@ -211,8 +215,16 @@ public class PortForwardingTabUi extends Composite {
 		portForwardGrid.setVisible(false);
 		notification.setVisible(false);
 
-		gwtNetworkService
-				.findDeviceFirewallPortForwards(new AsyncCallback<ArrayList<GwtBSFirewallPortForwardEntry>>() {
+		gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
+
+			@Override
+			public void onFailure(Throwable ex) {
+				FailureHandler.handle(ex);
+			}
+
+			@Override
+			public void onSuccess(GwtXSRFToken token) {
+				gwtNetworkService.findDeviceFirewallPortForwards(token, new AsyncCallback<ArrayList<GwtFirewallPortForwardEntry>>() {
 
 					@Override
 					public void onFailure(Throwable caught) {
@@ -224,8 +236,8 @@ public class PortForwardingTabUi extends Composite {
 
 					@Override
 					public void onSuccess(
-							ArrayList<GwtBSFirewallPortForwardEntry> result) {
-						for (GwtBSFirewallPortForwardEntry pair : result) {
+							ArrayList<GwtFirewallPortForwardEntry> result) {
+						for (GwtFirewallPortForwardEntry pair : result) {
 							portForwardDataProvider.getList().add(pair);
 						}
 						portForwardDataProvider.flush();
@@ -236,6 +248,9 @@ public class PortForwardingTabUi extends Composite {
 						apply.setEnabled(false);
 					}
 				});
+			}
+			
+		});
 	}
 
 	private void initButtons() {
@@ -244,24 +259,35 @@ public class PortForwardingTabUi extends Composite {
 		apply.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
-				List<GwtBSFirewallPortForwardEntry> updatedPortForwardConf = portForwardDataProvider
+				final List<GwtFirewallPortForwardEntry> updatedPortForwardConf = portForwardDataProvider
 						.getList();
 
 				if (updatedPortForwardConf.size() > 0) {
-					gwtNetworkService.updateDeviceFirewallPortForwards(
-							updatedPortForwardConf, new AsyncCallback<Void>() {
-								@Override
-								public void onFailure(Throwable caught) {
-									Growl.growl(MSGS.error() + ": ",
-											caught.getLocalizedMessage());
-								}
+					gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
 
-								@Override
-								public void onSuccess(Void result) {
-									apply.setEnabled(false);
-								}
+						@Override
+						public void onFailure(Throwable ex) {
+							FailureHandler.handle(ex);
+						}
 
-							});
+						@Override
+						public void onSuccess(GwtXSRFToken token) {
+							gwtNetworkService.updateDeviceFirewallPortForwards(token,
+									updatedPortForwardConf, new AsyncCallback<Void>() {
+										@Override
+										public void onFailure(Throwable ex) {
+											FailureHandler.handle(ex);
+										}
+
+										@Override
+										public void onSuccess(Void result) {
+											apply.setEnabled(false);
+										}
+
+									});
+						}
+						
+					});
 				}
 			}
 		});
@@ -278,7 +304,7 @@ public class PortForwardingTabUi extends Composite {
 		edit.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
-				final GwtBSFirewallPortForwardEntry selection = selectionModel
+				final GwtFirewallPortForwardEntry selection = selectionModel
 						.getSelectedObject();
 
 				if (selection != null) {
@@ -291,7 +317,7 @@ public class PortForwardingTabUi extends Composite {
 		delete.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
-				final GwtBSFirewallPortForwardEntry selection = selectionModel
+				final GwtFirewallPortForwardEntry selection = selectionModel
 						.getSelectedObject();
 
 				if (selection != null) {
@@ -330,8 +356,8 @@ public class PortForwardingTabUi extends Composite {
 		});
 	}
 
-	private void initModal(final GwtBSFirewallPortForwardEntry existingEntry) {
-		final GwtBSFirewallPortForwardEntry oldEntry =existingEntry;
+	private void initModal(final GwtFirewallPortForwardEntry existingEntry) {
+		final GwtFirewallPortForwardEntry oldEntry =existingEntry;
 		
 		if (existingEntry == null) {
 			// new
@@ -390,11 +416,11 @@ public class PortForwardingTabUi extends Composite {
 
 		// set ListBoxes
 		protocol.clear();
-		for (GwtBSNetProtocol prot : GwtBSNetProtocol.values()) {
+		for (GwtNetProtocol prot : GwtNetProtocol.values()) {
 			protocol.addItem(prot.name());
 		}
 		enable.clear();
-		for (GwtBSFirewallNatMasquerade masquerade : GwtBSFirewallNatMasquerade
+		for (GwtFirewallNatMasquerade masquerade : GwtFirewallNatMasquerade
 				.values()) {
 			enable.addItem(masquerade.name());
 		}
@@ -410,7 +436,7 @@ public class PortForwardingTabUi extends Composite {
 			permittedMac.setText(existingEntry.getPermittedMAC());
 			source.setText(existingEntry.getSourcePortRange());
 
-			for (GwtBSNetProtocol prot : GwtBSNetProtocol.values()) {
+			for (GwtNetProtocol prot : GwtNetProtocol.values()) {
 				int i = 0;
 				if (existingEntry.getProtocol().equals(prot.name())) {
 					protocol.setSelectedIndex(i);
@@ -418,7 +444,7 @@ public class PortForwardingTabUi extends Composite {
 				}
 			}
 
-			for (GwtBSFirewallNatMasquerade masquerade : GwtBSFirewallNatMasquerade
+			for (GwtFirewallNatMasquerade masquerade : GwtFirewallNatMasquerade
 					.values()) {
 				int j = 0;
 				if (existingEntry.getMasquerade().equals(masquerade.name())) {
@@ -541,12 +567,12 @@ public class PortForwardingTabUi extends Composite {
 						||groupPermittedNw.getValidationState().equals(ValidationState.ERROR)
 						||groupPermittedMac.getValidationState().equals(ValidationState.ERROR)
 						||groupSource.getValidationState().equals(ValidationState.ERROR)){
-					Growl.growl(MSGS.deviceConfigError());
+					//Growl.growl(MSGS.deviceConfigError());
 					return;
 				}
 					
 					
-				portForwardEntry = new GwtBSFirewallPortForwardEntry();
+				portForwardEntry = new GwtFirewallPortForwardEntry();
 				portForwardEntry.setInboundInterface(input.getText());
 				portForwardEntry.setOutboundInterface(output.getText());
 				portForwardEntry.setAddress(lan.getText());
@@ -585,10 +611,10 @@ public class PortForwardingTabUi extends Composite {
 
 									
 									if (oldEntry != null) {
-										Growl.growl("invoking edit entry0");
+										//Growl.growl("invoking edit entry0");
 										editEntry(portForwardEntry,oldEntry);
 									} else {
-										Growl.growl("invoking new entry0");
+										//Growl.growl("invoking new entry0");
 										addNewEntry(portForwardEntry);											 
 									}
 									portForwardEntry=null;
@@ -602,12 +628,12 @@ public class PortForwardingTabUi extends Composite {
 					
 					
 					//Add values to table
-					Growl.growl(String.valueOf(existingEntry==null));
+					//Growl.growl(String.valueOf(existingEntry==null));
 					if (oldEntry != null) {
-						Growl.growl("invoking edit entry1");
+						//Growl.growl("invoking edit entry1");
 						editEntry(portForwardEntry,oldEntry);	
 					} else {
-						Growl.growl("invoking new entry1");
+						//Growl.growl("invoking new entry1");
 						addNewEntry(portForwardEntry);										 
 					}
 					portForwardEntry=null;
@@ -621,13 +647,13 @@ public class PortForwardingTabUi extends Composite {
 	}// end initModal
 
 	private boolean duplicateEntry(
-			GwtBSFirewallPortForwardEntry portForwardEntry) {
+			GwtFirewallPortForwardEntry portForwardEntry) {
 
 		boolean isDuplicateEntry = false;
-		List<GwtBSFirewallPortForwardEntry> entries = portForwardDataProvider
+		List<GwtFirewallPortForwardEntry> entries = portForwardDataProvider
 				.getList();
 		if (entries != null && portForwardEntry != null) {
-			for (GwtBSFirewallPortForwardEntry entry : entries) {
+			for (GwtFirewallPortForwardEntry entry : entries) {
 				if (entry.getInboundInterface().equals(
 						portForwardEntry.getInboundInterface())
 						&& entry.getOutboundInterface().equals(
@@ -669,10 +695,10 @@ public class PortForwardingTabUi extends Composite {
 		return isDuplicateEntry;
 	}
 
-	private void addNewEntry(GwtBSFirewallPortForwardEntry portForwardEntry){
+	private void addNewEntry(GwtFirewallPortForwardEntry portForwardEntry){
 		if (!duplicateEntry(portForwardEntry)) {
             portForwardDataProvider.getList().add(portForwardEntry);
-            Growl.growl("Adding new Entry");
+            //Growl.growl("Adding new Entry");
             portForwardDataProvider.flush();
             if(portForwardDataProvider.getList().size()>0){
                 portForwardGrid.setVisible(true);
@@ -682,16 +708,16 @@ public class PortForwardingTabUi extends Composite {
             portForwardGrid.redraw();
             portForwardEntry=null;
         } else {
-            Growl.growl(MSGS.firewallPortForwardFormError()
-                    + ": ",
-                    MSGS.firewallPortForwardFormDuplicate());
+            //Growl.growl(MSGS.firewallPortForwardFormError()
+              //      + ": ",
+                //    MSGS.firewallPortForwardFormDuplicate());
         }
 		
 	}
 	
-	private void editEntry(GwtBSFirewallPortForwardEntry portForwardEntry, GwtBSFirewallPortForwardEntry existingEntry){
+	private void editEntry(GwtFirewallPortForwardEntry portForwardEntry, GwtFirewallPortForwardEntry existingEntry){
 		if(!duplicateEntry(portForwardEntry)){
-			Growl.growl("Adding edited Entry");
+			//Growl.growl("Adding edited Entry");
             portForwardDataProvider.getList().remove(existingEntry);
             portForwardDataProvider.flush();
             portForwardDataProvider.getList().add(portForwardEntry);

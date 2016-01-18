@@ -46,9 +46,6 @@ import org.osgi.util.position.Position;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.extjs.gxt.ui.client.data.BaseListLoadResult;
-import com.extjs.gxt.ui.client.data.ListLoadResult;
-
 public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements GwtDeviceService 
 {
 	private static final Logger s_logger = LoggerFactory.getLogger(GwtDeviceServiceImpl.class);
@@ -57,7 +54,7 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
 	
 	private static final long serialVersionUID = -4176701819112753800L;
 
-	public ListLoadResult<GwtGroupedNVPair> findDeviceConfiguration(GwtXSRFToken xsrfToken) 
+	public ArrayList<GwtGroupedNVPair> findDeviceConfiguration(GwtXSRFToken xsrfToken) 
 		throws GwtKuraException 
 	{
 		checkXSRFToken(xsrfToken);
@@ -165,13 +162,13 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
 			t.printStackTrace();
 			throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, t);
 		}
-		return new BaseListLoadResult<GwtGroupedNVPair>(pairs);
+		return new ArrayList<GwtGroupedNVPair>(pairs);
 	}
 		
 	
 	
 	@SuppressWarnings("unchecked")
-	public ListLoadResult<GwtGroupedNVPair> findThreads(GwtXSRFToken xsrfToken) 
+	public ArrayList<GwtGroupedNVPair> findThreads(GwtXSRFToken xsrfToken) 
 		throws GwtKuraException 
 	{
 		checkXSRFToken(xsrfToken);
@@ -243,13 +240,13 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
 	            }
         	}
         }
-		return new BaseListLoadResult<GwtGroupedNVPair>(pairs);
+		return new ArrayList<GwtGroupedNVPair>(pairs);
 	}
 
 
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public ListLoadResult<GwtGroupedNVPair> findSystemProperties(GwtXSRFToken xsrfToken) 
+	public ArrayList<GwtGroupedNVPair> findSystemProperties(GwtXSRFToken xsrfToken) 
 		throws GwtKuraException 
 	{
 		checkXSRFToken(xsrfToken);
@@ -263,12 +260,12 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
             Object key = ki.next();
             pairs.add( new GwtGroupedNVPair("propsKura", key.toString(), kuraProps.get(key).toString()));
         }		
-		return new BaseListLoadResult<GwtGroupedNVPair>(pairs);
+		return new ArrayList<GwtGroupedNVPair>(pairs);
 	}
 	
 	
 	
-	public ListLoadResult<GwtGroupedNVPair> findBundles(GwtXSRFToken xsrfToken) 
+	public ArrayList<GwtGroupedNVPair> findBundles(GwtXSRFToken xsrfToken) 
 		throws GwtKuraException 
 	{
 		checkXSRFToken(xsrfToken);
@@ -292,7 +289,7 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
 				}
 			}
 		}
-		return new BaseListLoadResult<GwtGroupedNVPair>(pairs);
+		return new ArrayList<GwtGroupedNVPair>(pairs);
 	}
 
 	public void startBundle(GwtXSRFToken xsrfToken, String bundleId) throws GwtKuraException {

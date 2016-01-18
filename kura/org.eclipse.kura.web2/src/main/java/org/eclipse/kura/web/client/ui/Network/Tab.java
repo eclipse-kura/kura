@@ -1,13 +1,13 @@
-package org.eclipse.kura.web.client.bootstrap.ui.Network;
+package org.eclipse.kura.web.client.ui.Network;
 
-import org.eclipse.kura.web.shared.model.GwtBSNetInterfaceConfig;
+import org.eclipse.kura.web.shared.model.GwtNetInterfaceConfig;
 
 public interface Tab {
 	
 	public void setDirty(boolean flag);
 	public boolean isDirty();
 	public boolean isValid();
-	public void setNetInterface(GwtBSNetInterfaceConfig config);
-	public void getUpdatedNetInterface(GwtBSNetInterfaceConfig updatedNetIf);
+	public void setNetInterface(GwtNetInterfaceConfig config);
+	public void getUpdatedNetInterface(GwtNetInterfaceConfig updatedNetIf);
 	public void refresh();
 }

@@ -1,15 +1,19 @@
-package org.eclipse.kura.web.client.bootstrap.ui.Firewall;
+package org.eclipse.kura.web.client.ui.Firewall;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.kura.web.client.messages.Messages;
-import org.eclipse.kura.web.shared.model.GwtBSFirewallNatEntry;
-import org.eclipse.kura.web.shared.model.GwtBSFirewallNatMasquerade;
-import org.eclipse.kura.web.shared.model.GwtBSFirewallNatProtocol;
-import org.eclipse.kura.web.shared.model.GwtBSNetProtocol;
-import org.eclipse.kura.web.shared.service.GwtBSNetworkService;
-import org.eclipse.kura.web.shared.service.GwtBSNetworkServiceAsync;
+import org.eclipse.kura.web.client.util.FailureHandler;
+import org.eclipse.kura.web.shared.model.GwtFirewallNatEntry;
+import org.eclipse.kura.web.shared.model.GwtFirewallNatMasquerade;
+import org.eclipse.kura.web.shared.model.GwtFirewallNatProtocol;
+import org.eclipse.kura.web.shared.model.GwtNetProtocol;
+import org.eclipse.kura.web.shared.model.GwtXSRFToken;
+import org.eclipse.kura.web.shared.service.GwtNetworkService;
+import org.eclipse.kura.web.shared.service.GwtNetworkServiceAsync;
+import org.eclipse.kura.web.shared.service.GwtSecurityTokenService;
+import org.eclipse.kura.web.shared.service.GwtSecurityTokenServiceAsync;
 import org.gwtbootstrap3.client.ui.Alert;
 import org.gwtbootstrap3.client.ui.AnchorListItem;
 import org.gwtbootstrap3.client.ui.Button;
@@ -24,7 +28,6 @@ import org.gwtbootstrap3.client.ui.Tooltip;
 import org.gwtbootstrap3.client.ui.constants.ValidationState;
 import org.gwtbootstrap3.client.ui.gwt.DataGrid;
 import org.gwtbootstrap3.client.ui.html.Span;
-import org.gwtbootstrap3.extras.growl.client.ui.Growl;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.BlurEvent;
@@ -42,26 +45,26 @@ import com.google.gwt.view.client.SingleSelectionModel;
 
 public class NatTabUi extends Composite {
 
-	private static NatTabUiUiBinder uiBinder = GWT
-			.create(NatTabUiUiBinder.class);
+	private static NatTabUiUiBinder uiBinder = GWT.create(NatTabUiUiBinder.class);
 
 	interface NatTabUiUiBinder extends UiBinder<Widget, NatTabUi> {
 	}
 
 	private static final Messages MSGS = GWT.create(Messages.class);
 
-	private final GwtBSNetworkServiceAsync gwtNetworkService = GWT
-			.create(GwtBSNetworkService.class);
-	GwtBSFirewallNatEntry natEntry;
+	private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
+	private final GwtNetworkServiceAsync gwtNetworkService = GWT.create(GwtNetworkService.class);
+	
+	GwtFirewallNatEntry natEntry;
 
 	@UiField
 	AnchorListItem apply, create, edit, delete;
 	@UiField
 	Alert notification;
 	@UiField
-	DataGrid<GwtBSFirewallNatEntry> natGrid = new DataGrid<GwtBSFirewallNatEntry>();
-	private ListDataProvider<GwtBSFirewallNatEntry> natDataProvider = new ListDataProvider<GwtBSFirewallNatEntry>();
-	final SingleSelectionModel<GwtBSFirewallNatEntry> selectionModel = new SingleSelectionModel<GwtBSFirewallNatEntry>();
+	DataGrid<GwtFirewallNatEntry> natGrid = new DataGrid<GwtFirewallNatEntry>();
+	private ListDataProvider<GwtFirewallNatEntry> natDataProvider = new ListDataProvider<GwtFirewallNatEntry>();
+	final SingleSelectionModel<GwtFirewallNatEntry> selectionModel = new SingleSelectionModel<GwtFirewallNatEntry>();
 
 	@UiField
 	Modal natForm;
@@ -94,54 +97,54 @@ public class NatTabUi extends Composite {
 
 	private void initTable() {
 
-		TextColumn<GwtBSFirewallNatEntry> col1 = new TextColumn<GwtBSFirewallNatEntry>() {
+		TextColumn<GwtFirewallNatEntry> col1 = new TextColumn<GwtFirewallNatEntry>() {
 			@Override
-			public String getValue(GwtBSFirewallNatEntry object) {
+			public String getValue(GwtFirewallNatEntry object) {
 				return String.valueOf(object.getInInterface());
 			}
 		};
 		col1.setCellStyleNames("status-table-row");
 		natGrid.addColumn(col1, MSGS.firewallNatInInterface());
 
-		TextColumn<GwtBSFirewallNatEntry> col2 = new TextColumn<GwtBSFirewallNatEntry>() {
+		TextColumn<GwtFirewallNatEntry> col2 = new TextColumn<GwtFirewallNatEntry>() {
 			@Override
-			public String getValue(GwtBSFirewallNatEntry object) {
+			public String getValue(GwtFirewallNatEntry object) {
 				return String.valueOf(object.getOutInterface());
 			}
 		};
 		col2.setCellStyleNames("status-table-row");
 		natGrid.addColumn(col2, MSGS.firewallNatOutInterface());
 
-		TextColumn<GwtBSFirewallNatEntry> col3 = new TextColumn<GwtBSFirewallNatEntry>() {
+		TextColumn<GwtFirewallNatEntry> col3 = new TextColumn<GwtFirewallNatEntry>() {
 			@Override
-			public String getValue(GwtBSFirewallNatEntry object) {
+			public String getValue(GwtFirewallNatEntry object) {
 				return String.valueOf(object.getProtocol());
 			}
 		};
 		col3.setCellStyleNames("status-table-row");
 		natGrid.addColumn(col3, MSGS.firewallNatProtocol());
 
-		TextColumn<GwtBSFirewallNatEntry> col4 = new TextColumn<GwtBSFirewallNatEntry>() {
+		TextColumn<GwtFirewallNatEntry> col4 = new TextColumn<GwtFirewallNatEntry>() {
 			@Override
-			public String getValue(GwtBSFirewallNatEntry object) {
+			public String getValue(GwtFirewallNatEntry object) {
 				return String.valueOf(object.getSourceNetwork());
 			}
 		};
 		col4.setCellStyleNames("status-table-row");
 		natGrid.addColumn(col4, MSGS.firewallNatSourceNetwork());
 
-		TextColumn<GwtBSFirewallNatEntry> col5 = new TextColumn<GwtBSFirewallNatEntry>() {
+		TextColumn<GwtFirewallNatEntry> col5 = new TextColumn<GwtFirewallNatEntry>() {
 			@Override
-			public String getValue(GwtBSFirewallNatEntry object) {
+			public String getValue(GwtFirewallNatEntry object) {
 				return String.valueOf(object.getDestinationNetwork());
 			}
 		};
 		col5.setCellStyleNames("status-table-row");
 		natGrid.addColumn(col5, MSGS.firewallNatDestinationNetwork());
 
-		TextColumn<GwtBSFirewallNatEntry> col6 = new TextColumn<GwtBSFirewallNatEntry>() {
+		TextColumn<GwtFirewallNatEntry> col6 = new TextColumn<GwtFirewallNatEntry>() {
 			@Override
-			public String getValue(GwtBSFirewallNatEntry object) {
+			public String getValue(GwtFirewallNatEntry object) {
 				return String.valueOf(object.getMasquerade());
 			}
 		};
@@ -157,8 +160,16 @@ public class NatTabUi extends Composite {
 		natGrid.setVisible(false);
 		notification.setVisible(false);
 
-		gwtNetworkService
-				.findDeficeFirewallNATs(new AsyncCallback<ArrayList<GwtBSFirewallNatEntry>>() {
+		gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
+
+			@Override
+			public void onFailure(Throwable ex) {
+				FailureHandler.handle(ex);
+			}
+
+			@Override
+			public void onSuccess(GwtXSRFToken token) {
+				gwtNetworkService.findDeficeFirewallNATs(token, new AsyncCallback<ArrayList<GwtFirewallNatEntry>>() {
 					@Override
 					public void onFailure(Throwable caught) {
 						notification.setVisible(true);
@@ -168,8 +179,8 @@ public class NatTabUi extends Composite {
 
 					@Override
 					public void onSuccess(
-							ArrayList<GwtBSFirewallNatEntry> result) {
-						for (GwtBSFirewallNatEntry pair : result) {
+							ArrayList<GwtFirewallNatEntry> result) {
+						for (GwtFirewallNatEntry pair : result) {
 							natDataProvider.getList().add(pair);
 						}
 						natDataProvider.flush();
@@ -180,6 +191,9 @@ public class NatTabUi extends Composite {
 						apply.setEnabled(false);
 					}
 				});
+			}
+			
+		});
 	}
 
 	private void initButtons() {
@@ -187,22 +201,33 @@ public class NatTabUi extends Composite {
 		apply.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
-				List<GwtBSFirewallNatEntry> updatedNatConf = natDataProvider
-						.getList();
+				final List<GwtFirewallNatEntry> updatedNatConf = natDataProvider.getList();
 				if (updatedNatConf != null) {
-					gwtNetworkService.updateDeviceFirewallNATs(updatedNatConf,
-							new AsyncCallback<Void>() {
-								@Override
-								public void onFailure(Throwable caught) {
-									Growl.growl(MSGS.error() + ": ",
-											caught.getLocalizedMessage());
-								}
+					gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
 
-								@Override
-								public void onSuccess(Void result) {
-									apply.setEnabled(false);
-								}
-							});
+						@Override
+						public void onFailure(Throwable ex) {
+							FailureHandler.handle(ex);
+						}
+
+						@Override
+						public void onSuccess(GwtXSRFToken token) {
+							gwtNetworkService.updateDeviceFirewallNATs(token, updatedNatConf,
+									new AsyncCallback<Void>() {
+										@Override
+										public void onFailure(Throwable caught) {
+											//Growl.growl(MSGS.error() + ": ",
+											//		caught.getLocalizedMessage());
+										}
+
+										@Override
+										public void onSuccess(Void result) {
+											apply.setEnabled(false);
+										}
+									});
+						}
+						
+					});
 				}
 			}
 		});
@@ -219,7 +244,7 @@ public class NatTabUi extends Composite {
 		edit.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
-				GwtBSFirewallNatEntry selection = selectionModel
+				GwtFirewallNatEntry selection = selectionModel
 						.getSelectedObject();
 				if (selection != null) {
 					initModal(selection);
@@ -231,7 +256,7 @@ public class NatTabUi extends Composite {
 		delete.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
-				final GwtBSFirewallNatEntry selection = selectionModel
+				final GwtFirewallNatEntry selection = selectionModel
 						.getSelectedObject();
 				if (selection != null) {
 					final Modal confirm = new Modal();
@@ -278,7 +303,7 @@ public class NatTabUi extends Composite {
 
 	}
 
-	private void initModal(final GwtBSFirewallNatEntry existingEntry) {
+	private void initModal(final GwtFirewallNatEntry existingEntry) {
 
 		if (existingEntry == null) {
 			natForm.setTitle(MSGS.firewallNatFormInformation());
@@ -315,11 +340,11 @@ public class NatTabUi extends Composite {
 
 		// set ListBox
 		protocol.clear();
-		for (GwtBSFirewallNatProtocol prot : GwtBSFirewallNatProtocol.values()) {
+		for (GwtFirewallNatProtocol prot : GwtFirewallNatProtocol.values()) {
 			protocol.addItem(prot.name());
 		}
 		enable.clear();
-		for (GwtBSFirewallNatMasquerade masquerade : GwtBSFirewallNatMasquerade
+		for (GwtFirewallNatMasquerade masquerade : GwtFirewallNatMasquerade
 				.values()) {
 			enable.addItem(masquerade.name());
 		}
@@ -330,7 +355,7 @@ public class NatTabUi extends Composite {
 			output.setText(existingEntry.getOutInterface());
 			source.setText(existingEntry.getSourceNetwork());
 			destination.setText(existingEntry.getDestinationNetwork());
-			for (GwtBSNetProtocol prot : GwtBSNetProtocol.values()) {
+			for (GwtNetProtocol prot : GwtNetProtocol.values()) {
 				int i = 0;
 				if (existingEntry.getProtocol().equals(prot.name())) {
 					protocol.setSelectedIndex(i);
@@ -338,7 +363,7 @@ public class NatTabUi extends Composite {
 				}
 			}
 
-			for (GwtBSFirewallNatMasquerade masquerade : GwtBSFirewallNatMasquerade
+			for (GwtFirewallNatMasquerade masquerade : GwtFirewallNatMasquerade
 					.values()) {
 				int j = 0;
 				if (existingEntry.getMasquerade().equals(masquerade.name())) {
@@ -422,11 +447,11 @@ public class NatTabUi extends Composite {
 						|| (groupOutput.getValidationState() == ValidationState.ERROR)
 						|| (groupSource.getValidationState() == ValidationState.ERROR)
 						|| (groupDestination.getValidationState() == ValidationState.ERROR)) {
-					Growl.growl(MSGS.deviceConfigError());
+					//Growl.growl(MSGS.deviceConfigError());
 					return;
 				}
 				// Fetch form data
-				natEntry = new GwtBSFirewallNatEntry();
+				natEntry = new GwtFirewallNatEntry();
 				natEntry.setInInterface(input.getText());
 				natEntry.setOutInterface(output.getText());
 				natEntry.setProtocol(protocol.getSelectedItemText());
@@ -447,8 +472,8 @@ public class NatTabUi extends Composite {
 		natForm.show();
 	}
 
-	protected void editEntry(GwtBSFirewallNatEntry natEntry,
-			GwtBSFirewallNatEntry existingEntry) {
+	protected void editEntry(GwtFirewallNatEntry natEntry,
+			GwtFirewallNatEntry existingEntry) {
 		if (!duplicateEntry(natEntry)) {
 			natDataProvider.getList().remove(existingEntry);
 			natDataProvider.getList().add(natEntry);
@@ -462,7 +487,7 @@ public class NatTabUi extends Composite {
 		apply.setEnabled(true);
 	}
 
-	private void addNewEntry(GwtBSFirewallNatEntry natEntry) {
+	private void addNewEntry(GwtFirewallNatEntry natEntry) {
 		if (!duplicateEntry(natEntry)) {
 			natDataProvider.getList().add(natEntry);
 			natDataProvider.flush();
@@ -472,18 +497,18 @@ public class NatTabUi extends Composite {
 				natGrid.setVisible(false);
 			}
 		} else {
-			Growl.growl(MSGS.firewallNatFormError() + ": ",
-					MSGS.firewallNatFormDuplicate());
+			//Growl.growl(MSGS.firewallNatFormError() + ": ",
+			//		MSGS.firewallNatFormDuplicate());
 		}
 		apply.setEnabled(true);
 	}
 
-	private boolean duplicateEntry(GwtBSFirewallNatEntry firewallNatEntry) {
+	private boolean duplicateEntry(GwtFirewallNatEntry firewallNatEntry) {
 
 		boolean isDuplicateEntry = false;
-		List<GwtBSFirewallNatEntry> entries = natDataProvider.getList();
+		List<GwtFirewallNatEntry> entries = natDataProvider.getList();
 		if (entries != null && firewallNatEntry != null) {
-			for (GwtBSFirewallNatEntry entry : entries) {
+			for (GwtFirewallNatEntry entry : entries) {
 
 				String sourceNetwork = (entry.getSourceNetwork() != null) ? entry
 						.getSourceNetwork() : "0.0.0.0/0";

@@ -11,6 +11,7 @@
  */
 package org.eclipse.kura.web.shared.service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.kura.web.shared.GwtKuraException;
@@ -22,24 +23,23 @@ import org.eclipse.kura.web.shared.model.GwtWifiConfig;
 import org.eclipse.kura.web.shared.model.GwtWifiHotspotEntry;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 
-import com.extjs.gxt.ui.client.data.ListLoadResult;
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 
 @RemoteServiceRelativePath("network")
 public interface GwtNetworkService extends RemoteService
 {
-	public ListLoadResult<GwtNetInterfaceConfig> findNetInterfaceConfigurations() throws GwtKuraException;
+	public ArrayList<GwtNetInterfaceConfig> findNetInterfaceConfigurations() throws GwtKuraException;
 
 	public void updateNetInterfaceConfigurations(GwtXSRFToken xsrfToken, GwtNetInterfaceConfig config) throws GwtKuraException;
 		
-	public ListLoadResult<GwtFirewallOpenPortEntry> findDeviceFirewallOpenPorts(GwtXSRFToken xsrfToken) throws GwtKuraException;
+	public ArrayList<GwtFirewallOpenPortEntry> findDeviceFirewallOpenPorts(GwtXSRFToken xsrfToken) throws GwtKuraException;
 
 	public void updateDeviceFirewallOpenPorts(GwtXSRFToken xsrfToken, List<GwtFirewallOpenPortEntry> entries) throws GwtKuraException;
 		
-	public ListLoadResult<GwtFirewallPortForwardEntry> findDeviceFirewallPortForwards(GwtXSRFToken xsrfToken) throws GwtKuraException;
+	public ArrayList<GwtFirewallPortForwardEntry> findDeviceFirewallPortForwards(GwtXSRFToken xsrfToken) throws GwtKuraException;
 	
-	public ListLoadResult<GwtFirewallNatEntry> findDeficeFirewallNATs(GwtXSRFToken xsrfToken) throws GwtKuraException;
+	public ArrayList<GwtFirewallNatEntry> findDeficeFirewallNATs(GwtXSRFToken xsrfToken) throws GwtKuraException;
 	
 	public void updateDeviceFirewallPortForwards(GwtXSRFToken xsrfToken, List<GwtFirewallPortForwardEntry> entries) throws GwtKuraException;
 	
@@ -47,7 +47,7 @@ public interface GwtNetworkService extends RemoteService
 	
 	public void renewDhcpLease(GwtXSRFToken xsrfToken, String interfaceName) throws GwtKuraException;
 	
-	public ListLoadResult<GwtWifiHotspotEntry> findWifiHotspots(GwtXSRFToken xsrfToken, String interfaceName) throws GwtKuraException;
+	public ArrayList<GwtWifiHotspotEntry> findWifiHotspots(GwtXSRFToken xsrfToken, String interfaceName) throws GwtKuraException;
 	
 	public boolean verifyWifiCredentials(GwtXSRFToken xsrfToken, String interfaceName, GwtWifiConfig gwtWifiConfig) throws GwtKuraException;
 

@@ -1,12 +1,16 @@
-package org.eclipse.kura.web.client.bootstrap.ui.Device;
+package org.eclipse.kura.web.client.ui.Device;
 
 import java.util.ArrayList;
 
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.messages.ValidationMessages;
-import org.eclipse.kura.web.shared.model.GwtBSGroupedNVPair;
-import org.eclipse.kura.web.shared.service.GwtBSDeviceService;
-import org.eclipse.kura.web.shared.service.GwtBSDeviceServiceAsync;
+import org.eclipse.kura.web.client.util.FailureHandler;
+import org.eclipse.kura.web.shared.model.GwtGroupedNVPair;
+import org.eclipse.kura.web.shared.model.GwtXSRFToken;
+import org.eclipse.kura.web.shared.service.GwtDeviceService;
+import org.eclipse.kura.web.shared.service.GwtDeviceServiceAsync;
+import org.eclipse.kura.web.shared.service.GwtSecurityTokenService;
+import org.eclipse.kura.web.shared.service.GwtSecurityTokenServiceAsync;
 import org.gwtbootstrap3.client.ui.gwt.DataGrid;
 
 import com.google.gwt.core.client.GWT;
@@ -21,31 +25,30 @@ import com.google.gwt.view.client.ListDataProvider;
 
 public class SystemPropertiesTabUi extends Composite {
 
-	private static SystemPropertiesTabUiUiBinder uiBinder = GWT
-			.create(SystemPropertiesTabUiUiBinder.class);
+	private static SystemPropertiesTabUiUiBinder uiBinder = GWT.create(SystemPropertiesTabUiUiBinder.class);
 
 	interface SystemPropertiesTabUiUiBinder extends
 			UiBinder<Widget, SystemPropertiesTabUi> {
 	}
 
 	private static final Messages MSGS = GWT.create(Messages.class);
-	private static final ValidationMessages msgs = GWT
-			.create(ValidationMessages.class);
+	private static final ValidationMessages msgs = GWT.create(ValidationMessages.class);
 
-	private final GwtBSDeviceServiceAsync gwtDeviceService = GWT.create(GwtBSDeviceService.class);
+	private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
+	private final GwtDeviceServiceAsync gwtDeviceService = GWT.create(GwtDeviceService.class);
 	
 	@UiField
-	DataGrid<GwtBSGroupedNVPair> systemPropertiesGrid = new DataGrid<GwtBSGroupedNVPair>();
-	private ListDataProvider<GwtBSGroupedNVPair> systemPropertiesDataProvider = new ListDataProvider<GwtBSGroupedNVPair>();
+	DataGrid<GwtGroupedNVPair> systemPropertiesGrid = new DataGrid<GwtGroupedNVPair>();
+	private ListDataProvider<GwtGroupedNVPair> systemPropertiesDataProvider = new ListDataProvider<GwtGroupedNVPair>();
 
 
 	public SystemPropertiesTabUi() {
 		initWidget(uiBinder.createAndBindUi(this));
 		
 		
-		systemPropertiesGrid.setRowStyles(new RowStyles<GwtBSGroupedNVPair>() {
+		systemPropertiesGrid.setRowStyles(new RowStyles<GwtGroupedNVPair>() {
 			@Override
-			public String getStyleNames(GwtBSGroupedNVPair row, int rowIndex) {
+			public String getStyleNames(GwtGroupedNVPair row, int rowIndex) {
 				return row.getValue().contains("  ") ? "rowHeader" : " ";
 			}
 		});
@@ -58,20 +61,20 @@ public class SystemPropertiesTabUi extends Composite {
 
 
 	private void loadSystemPropertiesTable(
-			DataGrid<GwtBSGroupedNVPair> grid,
-			ListDataProvider<GwtBSGroupedNVPair> dataProvider) {
-		TextColumn<GwtBSGroupedNVPair> col1 = new TextColumn<GwtBSGroupedNVPair>() {
+			DataGrid<GwtGroupedNVPair> grid,
+			ListDataProvider<GwtGroupedNVPair> dataProvider) {
+		TextColumn<GwtGroupedNVPair> col1 = new TextColumn<GwtGroupedNVPair>() {
 			@Override
-			public String getValue(GwtBSGroupedNVPair object) {
+			public String getValue(GwtGroupedNVPair object) {
 				return String.valueOf(object.getName());
 			}
 		};
 		col1.setCellStyleNames("status-table-row");
 		grid.addColumn(col1, MSGS.devicePropName());
 
-		TextColumn<GwtBSGroupedNVPair> col2 = new TextColumn<GwtBSGroupedNVPair>() {
+		TextColumn<GwtGroupedNVPair> col2 = new TextColumn<GwtGroupedNVPair>() {
 			@Override
-			public String getValue(GwtBSGroupedNVPair object) {
+			public String getValue(GwtGroupedNVPair object) {
 				return String.valueOf(object.getValue());
 			}
 		};
@@ -85,28 +88,40 @@ public class SystemPropertiesTabUi extends Composite {
 	public void loadSystemPropertiesData(){
 		systemPropertiesDataProvider.getList().clear();
 		
-		gwtDeviceService.findSystemProperties(new AsyncCallback<ArrayList<GwtBSGroupedNVPair>>() {
+		gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
 
 			@Override
-			public void onFailure(Throwable caught) {
-				systemPropertiesDataProvider.getList().clear();
-				systemPropertiesDataProvider.getList().add(
-						new GwtBSGroupedNVPair(
-								"Not Available, please click Refresh",
-								"Not Available, please click Refresh",
-								"Not Available, please click Refresh"));
-				systemPropertiesDataProvider.flush();
-
-				
+			public void onFailure(Throwable ex) {
+				FailureHandler.handle(ex);
 			}
 
 			@Override
-			public void onSuccess(ArrayList<GwtBSGroupedNVPair> result) {
-				for (GwtBSGroupedNVPair resultPair : result) {
-					systemPropertiesDataProvider.getList().add(resultPair);
-				}						
-				systemPropertiesDataProvider.flush();
+			public void onSuccess(GwtXSRFToken token) {
+				gwtDeviceService.findSystemProperties(token, new AsyncCallback<ArrayList<GwtGroupedNVPair>>() {
 
+					@Override
+					public void onFailure(Throwable caught) {
+						systemPropertiesDataProvider.getList().clear();
+						systemPropertiesDataProvider.getList().add(
+								new GwtGroupedNVPair(
+										"Not Available, please click Refresh",
+										"Not Available, please click Refresh",
+										"Not Available, please click Refresh"));
+						systemPropertiesDataProvider.flush();
+
+						
+					}
+
+					@Override
+					public void onSuccess(ArrayList<GwtGroupedNVPair> result) {
+						for (GwtGroupedNVPair resultPair : result) {
+							systemPropertiesDataProvider.getList().add(resultPair);
+						}						
+						systemPropertiesDataProvider.flush();
+
+					}
+					
+				});
 			}
 			
 		});

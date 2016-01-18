@@ -39,10 +39,10 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
 {
 	private static final long serialVersionUID = -4176701819112753800L;
 
-	public List<GwtConfigComponent> findComponentConfigurations(GwtXSRFToken xsrfToken) throws GwtKuraException {
+	public ArrayList<GwtConfigComponent> findComponentConfigurations(GwtXSRFToken xsrfToken) throws GwtKuraException {
 		checkXSRFToken(xsrfToken);
 		ConfigurationService cs = ServiceLocator.getInstance().getService(ConfigurationService.class);		
-		List<GwtConfigComponent> gwtConfigs = new ArrayList<GwtConfigComponent>();
+		ArrayList<GwtConfigComponent> gwtConfigs = new ArrayList<GwtConfigComponent>();
 		try {
 
 			List<ComponentConfiguration> configs = cs.getComponentConfigurations();

@@ -1,6 +1,6 @@
-package org.eclipse.kura.web.client.bootstrap.ui.Settings;
+package org.eclipse.kura.web.client.ui.Settings;
 
-import org.eclipse.kura.web.shared.model.GwtBSSession;
+import org.eclipse.kura.web.shared.model.GwtSession;
 import org.gwtbootstrap3.client.ui.AnchorListItem;
 import org.gwtbootstrap3.client.ui.Well;
 
@@ -22,7 +22,7 @@ public class SettingsPanelUi extends Composite {
 	private static SnapshotsTabUi snapshotsBinder = GWT.create(SnapshotsTabUi.class);
 	private static SslCertificatesTabUi sslBinder = GWT.create(SslCertificatesTabUi.class);
 	
-	GwtBSSession Session;
+	GwtSession Session;
 	@UiField
 	AnchorListItem snapshots, ssl;
 	@UiField
@@ -53,7 +53,7 @@ public class SettingsPanelUi extends Composite {
 	
 	}
 
-	public void setSession(GwtBSSession currentSession) {
+	public void setSession(GwtSession currentSession) {
 		Session = currentSession;
 	}
 

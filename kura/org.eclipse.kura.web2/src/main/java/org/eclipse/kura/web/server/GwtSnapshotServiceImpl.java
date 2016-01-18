@@ -30,16 +30,13 @@ import org.eclipse.kura.web.shared.service.GwtSnapshotService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.extjs.gxt.ui.client.data.BaseListLoadResult;
-import com.extjs.gxt.ui.client.data.ListLoadResult;
-
 public class GwtSnapshotServiceImpl extends OsgiRemoteServiceServlet implements GwtSnapshotService
 {
 	private static final long serialVersionUID = 8804372718146289179L;
 
 	private static final Logger s_logger = LoggerFactory.getLogger(GwtSnapshotServiceImpl.class);
 
-	public ListLoadResult<GwtSnapshot> findDeviceSnapshots(GwtXSRFToken xsrfToken) 
+	public ArrayList<GwtSnapshot> findDeviceSnapshots(GwtXSRFToken xsrfToken) 
 		throws GwtKuraException
 	{
 		checkXSRFToken(xsrfToken);
@@ -66,7 +63,7 @@ public class GwtSnapshotServiceImpl extends OsgiRemoteServiceServlet implements 
 			KuraExceptionHandler.handle(t);
 	    }        
 		
-		return new BaseListLoadResult<GwtSnapshot>(snapshots);
+		return new ArrayList<GwtSnapshot>(snapshots);
 	}
 
 

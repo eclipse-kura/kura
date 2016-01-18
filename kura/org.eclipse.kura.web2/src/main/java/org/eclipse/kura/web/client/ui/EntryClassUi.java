@@ -1,18 +1,23 @@
-package org.eclipse.kura.web.client.bootstrap.ui;
+package org.eclipse.kura.web.client.ui;
 
 import java.util.ArrayList;
+import java.util.List;
 
-import org.eclipse.kura.web.client.bootstrap.ui.Device.DevicePanelUi;
-import org.eclipse.kura.web.client.bootstrap.ui.Firewall.FirewallPanelUi;
-import org.eclipse.kura.web.client.bootstrap.ui.Network.NetworkPanelUi;
-import org.eclipse.kura.web.client.bootstrap.ui.Packages.PackagesPanelUi;
-import org.eclipse.kura.web.client.bootstrap.ui.Settings.SettingsPanelUi;
-import org.eclipse.kura.web.client.bootstrap.ui.Status.StatusPanelUi;
 import org.eclipse.kura.web.client.messages.Messages;
-import org.eclipse.kura.web.shared.model.GwtBSConfigComponent;
-import org.eclipse.kura.web.shared.model.GwtBSSession;
-import org.eclipse.kura.web.shared.service.GwtBSComponentService;
-import org.eclipse.kura.web.shared.service.GwtBSComponentServiceAsync;
+import org.eclipse.kura.web.client.ui.Device.DevicePanelUi;
+import org.eclipse.kura.web.client.ui.Firewall.FirewallPanelUi;
+import org.eclipse.kura.web.client.ui.Network.NetworkPanelUi;
+import org.eclipse.kura.web.client.ui.Packages.PackagesPanelUi;
+import org.eclipse.kura.web.client.ui.Settings.SettingsPanelUi;
+import org.eclipse.kura.web.client.ui.Status.StatusPanelUi;
+import org.eclipse.kura.web.client.util.FailureHandler;
+import org.eclipse.kura.web.shared.model.GwtConfigComponent;
+import org.eclipse.kura.web.shared.model.GwtSession;
+import org.eclipse.kura.web.shared.model.GwtXSRFToken;
+import org.eclipse.kura.web.shared.service.GwtComponentService;
+import org.eclipse.kura.web.shared.service.GwtComponentServiceAsync;
+import org.eclipse.kura.web.shared.service.GwtSecurityTokenService;
+import org.eclipse.kura.web.shared.service.GwtSecurityTokenServiceAsync;
 import org.gwtbootstrap3.client.ui.AnchorListItem;
 import org.gwtbootstrap3.client.ui.Button;
 import org.gwtbootstrap3.client.ui.Image;
@@ -25,7 +30,6 @@ import org.gwtbootstrap3.client.ui.Panel;
 import org.gwtbootstrap3.client.ui.PanelBody;
 import org.gwtbootstrap3.client.ui.PanelHeader;
 import org.gwtbootstrap3.client.ui.html.Span;
-import org.gwtbootstrap3.extras.growl.client.ui.Growl;
 
 import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.core.client.GWT;
@@ -42,20 +46,20 @@ import com.google.gwt.user.client.ui.Widget;
 
 public class EntryClassUi extends Composite {
 
-	private static EntryClassUIUiBinder uiBinder = GWT
-			.create(EntryClassUIUiBinder.class);
+	private static EntryClassUIUiBinder uiBinder = GWT.create(EntryClassUIUiBinder.class);
 	private static final Messages MSGS = GWT.create(Messages.class);
-	private final GwtBSComponentServiceAsync gwtComponentService = GWT
-			.create(GwtBSComponentService.class);
+	
+	private final GwtComponentServiceAsync gwtComponentService = GWT.create(GwtComponentService.class);
+	private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
 
-	public GwtBSConfigComponent selected = null;
+	public GwtConfigComponent selected = null;
 
 	interface EntryClassUIUiBinder extends UiBinder<Widget, EntryClassUi> {
 	}
 
-	GwtBSSession currentSession;
+	GwtSession currentSession;
 	AnchorListItem service;
-	GwtBSConfigComponent addedItem;
+	GwtConfigComponent addedItem;
 	EntryClassUi ui;
 	Modal modal;
 	boolean servicesDirty,networkDirty;
@@ -90,31 +94,31 @@ public class EntryClassUi extends Composite {
 	NavPills servicesMenu;
 
 	public EntryClassUi() {
-		Growl.growl("1----------------");
+		//Growl.growl("1----------------");
 		Log.debug("Initiating UiBinder");
 		ui = this;
-		Growl.growl("2----------------");
+		//Growl.growl("2----------------");
 		initWidget(uiBinder.createAndBindUi(this));
-		Growl.growl("3----------------");
+		//Growl.growl("3----------------");
 		// TODO : standardize the URL?
 		header.setUrl("eclipse/kura/icons/kura_logo_small.png");
 		footerLeft.setText(MSGS.copyright());
 		contentPanel.setVisible(false);
 	}
 
-	public void setSession(GwtBSSession gwtBSSession) {
-		currentSession = gwtBSSession;
+	public void setSession(GwtSession GwtSession) {
+		currentSession = GwtSession;
 	}
 
-	public void setFooter(GwtBSSession gwtBSSession) {
+	public void setFooter(GwtSession GwtSession) {
 
-		footerRight.setText(gwtBSSession.getKuraVersion());
+		footerRight.setText(GwtSession.getKuraVersion());
 
 	}
 
-	public void initSystemPanel(GwtBSSession gwtBSSession) {
-		if (!gwtBSSession.isNetAdminAvailable()) {
-			Growl.growl("4----------------");
+	public void initSystemPanel(GwtSession GwtSession) {
+		if (!GwtSession.isNetAdminAvailable()) {
+			//Growl.growl("4----------------");
 			//network.setVisible(false);
 			//firewall.setVisible(false);
 		}
@@ -325,28 +329,38 @@ public class EntryClassUi extends Composite {
 
 	public void initServicesTree() {
 		// (Re)Fetch Available Services
+		gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
 
-		gwtComponentService
-				.findComponentConfigurations(new AsyncCallback<ArrayList<GwtBSConfigComponent>>() {
+			@Override
+			public void onFailure(Throwable ex) {
+				FailureHandler.handle(ex);
+			}
+
+			@Override
+			public void onSuccess(GwtXSRFToken token) {
+				gwtComponentService.findComponentConfigurations(token, new AsyncCallback<List<GwtConfigComponent>>() {
 					@Override
-					public void onFailure(Throwable caught) {
-						caught.printStackTrace();
-						Growl.growl(MSGS.error() + ": ",
-								caught.getLocalizedMessage());
+					public void onFailure(Throwable ex) {
+						FailureHandler.handle(ex);
+						//Growl.growl(MSGS.error() + ": ",
+						//		caught.getLocalizedMessage());
 					}
 
 					@Override
-					public void onSuccess(ArrayList<GwtBSConfigComponent> result) {
+					public void onSuccess(List<GwtConfigComponent> result) {
 						servicesMenu.clear();
-						for (GwtBSConfigComponent pair : result) {
+						for (GwtConfigComponent pair : result) {
 							servicesMenu.add(new ServicesAnchorListItem(pair,
 									ui));
 						}
 					}
 				});
+			}
+		});
+		
 	}
 
-	public void render(GwtBSConfigComponent item) {
+	public void render(GwtConfigComponent item) {
 		// Do everything Content Panel related in ServicesUi
 		contentPanelBody.clear();
 		servicesUi = new ServicesUi(item, this);

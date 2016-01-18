@@ -26,12 +26,12 @@
   <!-- Inherit the default GWT style sheet.  You can change       -->
   <!-- the theme of your GWT application by uncommenting          -->
   <!-- any one of the following lines.                            -->
-  <inherits name='com.google.gwt.user.theme.standard.Standard' />
+  <!-- <inherits name='com.google.gwt.user.theme.standard.Standard' />-->
   <!-- <inherits name='com.google.gwt.user.theme.chrome.Chrome'/> -->
-  <!-- <inherits name='com.google.gwt.user.theme.dark.Dark'/>     -->
+  <inherits name='com.google.gwt.user.theme.dark.Dark'/>
 
   <!-- Other module inherits                                      -->
-  <inherits name='com.extjs.gxt.ui.GXT' />
+  <inherits name='org.gwtbootstrap3.GwtBootstrap3'/>
   <inherits name="com.google.gwt.i18n.I18N"/>
 
   <!-- Locales: English language, independent of country -->

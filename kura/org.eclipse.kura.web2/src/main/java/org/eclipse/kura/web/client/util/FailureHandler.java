@@ -18,11 +18,6 @@ import org.eclipse.kura.web.client.messages.ValidationMessages;
 import org.eclipse.kura.web.shared.GwtKuraErrorCode;
 import org.eclipse.kura.web.shared.GwtKuraException;
 
-import com.extjs.gxt.ui.client.widget.Info;
-import com.extjs.gxt.ui.client.widget.form.Field;
-import com.extjs.gxt.ui.client.widget.form.FormPanel;
-import com.extjs.gxt.ui.client.widget.form.TextArea;
-import com.extjs.gxt.ui.client.widget.form.TextField;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.StatusCodeException;
 
@@ -45,7 +40,7 @@ public class FailureHandler
 			switch (code) {
 			
 			default:
-				Info.display(CMSGS.error(), caught.getLocalizedMessage());
+				//Info.display(CMSGS.error(), caught.getLocalizedMessage());
 				break;
 			}
 		}
@@ -58,12 +53,12 @@ public class FailureHandler
 		}
 		else {
 
-			Info.display(CMSGS.error(), caught.getLocalizedMessage());
+			//Info.display(CMSGS.error(), caught.getLocalizedMessage());
 			caught.printStackTrace();			
 		}
 	}
 
-
+/*
 	@SuppressWarnings("unchecked")
 	public static boolean handleFormException(FormPanel form, Throwable caught) {
 		
@@ -141,5 +136,5 @@ public class FailureHandler
 		}
 		
 		return isWarning;
-	}
+	}*/
 }

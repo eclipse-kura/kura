@@ -1,8 +1,8 @@
 package org.eclipse.kura.web.client.util;
 
-import com.extjs.gxt.ui.client.data.BaseModel;
+import org.eclipse.kura.web.shared.model.GwtBaseModel;
 
-public class KuraBaseModel extends BaseModel{
+public class KuraBaseModel extends GwtBaseModel {
 
 	/**
 	 * 
@@ -13,13 +13,12 @@ public class KuraBaseModel extends BaseModel{
 		super();
 	}
 	
-	@SuppressWarnings("unchecked")
 	@Override
-	public <X> X set(String name, X value){
+	public void set(String name, Object value){
 		if (value instanceof String) {
-			value = (X) GwtSafeHtmlUtils.inputSanitize((String) value);
+			value = (String) GwtSafeHtmlUtils.inputSanitize((String) value);
 		}
-		return super.set(name, value);
+		super.set(name, value);
 	}
 
 }

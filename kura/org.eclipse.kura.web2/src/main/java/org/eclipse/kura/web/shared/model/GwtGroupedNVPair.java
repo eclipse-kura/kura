@@ -15,11 +15,11 @@ import java.io.Serializable;
 
 import org.eclipse.kura.web.client.messages.ValidationMessages;
 
-import com.extjs.gxt.ui.client.data.BaseModel;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.user.client.rpc.IsSerializable;
 
-public class GwtGroupedNVPair extends BaseModel implements Serializable 
-{
+public class GwtGroupedNVPair extends GwtBaseModel implements IsSerializable, Serializable  {
+	
 	private static final long serialVersionUID = 6017065568183482351L;
 
 	

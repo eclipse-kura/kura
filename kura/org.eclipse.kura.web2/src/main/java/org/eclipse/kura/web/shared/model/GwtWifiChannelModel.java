@@ -14,9 +14,7 @@ package org.eclipse.kura.web.shared.model;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.extjs.gxt.ui.client.data.BaseModel;
-
-public class GwtWifiChannelModel extends BaseModel {
+public class GwtWifiChannelModel extends GwtBaseModel {
 	
 	private static final long serialVersionUID = -1471520645150788770L;
 	private static final String BAND2400MHZ = "2.4 GHz";

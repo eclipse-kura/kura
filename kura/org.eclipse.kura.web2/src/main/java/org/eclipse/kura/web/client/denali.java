@@ -11,9 +11,12 @@
  */
 package org.eclipse.kura.web.client;
 
+import java.awt.BorderLayout;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.kura.web.client.messages.Messages;
+import org.eclipse.kura.web.client.ui.EntryClassUi;
 import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.shared.model.GwtGroupedNVPair;
 import org.eclipse.kura.web.shared.model.GwtSession;
@@ -26,26 +29,14 @@ import org.eclipse.kura.web.shared.service.GwtSecurityTokenService;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenServiceAsync;
 
 import com.allen_sauer.gwt.log.client.Log;
-import com.extjs.gxt.ui.client.GXT;
-import com.extjs.gxt.ui.client.Style.HorizontalAlignment;
-import com.extjs.gxt.ui.client.Style.LayoutRegion;
-import com.extjs.gxt.ui.client.data.ListLoadResult;
-import com.extjs.gxt.ui.client.util.Margins;
-import com.extjs.gxt.ui.client.util.Theme;
-import com.extjs.gxt.ui.client.widget.ContentPanel;
-import com.extjs.gxt.ui.client.widget.HorizontalPanel;
-import com.extjs.gxt.ui.client.widget.Info;
-import com.extjs.gxt.ui.client.widget.Viewport;
-import com.extjs.gxt.ui.client.widget.layout.BorderLayout;
-import com.extjs.gxt.ui.client.widget.layout.BorderLayoutData;
-import com.extjs.gxt.ui.client.widget.layout.FitLayout;
-import com.extjs.gxt.ui.client.widget.layout.TableData;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.core.client.ScriptInjector;
+import com.google.gwt.logging.client.DefaultLevel.Info;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
 
@@ -59,6 +50,8 @@ public class denali implements EntryPoint
 	private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
 	private final GwtDeviceServiceAsync gwtDeviceService = GWT.create(GwtDeviceService.class);
 	private final GwtSecurityServiceAsync gwtSecurityService = GWT.create(GwtSecurityService.class);
+	
+	private final EntryClassUi binder = GWT.create(EntryClassUi.class);
 	
 	private boolean isDevelopMode = false;
 
@@ -96,8 +89,7 @@ public class denali implements EntryPoint
 	 */
 	public void onModuleLoad2() {
 
-		// set the default theme
-		GXT.setDefaultTheme(Theme.GRAY, true);
+		RootPanel.get().add(binder);
 
 		// load custom CSS/JS
 		loadCss("denali/skin/skin.css");
@@ -111,13 +103,13 @@ public class denali implements EntryPoint
 
 			@Override
 			public void onSuccess(GwtXSRFToken token) {	
-				gwtDeviceService.findSystemProperties(token, new AsyncCallback<ListLoadResult<GwtGroupedNVPair>>() {    				
-					public void onSuccess(ListLoadResult<GwtGroupedNVPair> results) {
+				gwtDeviceService.findSystemProperties(token, new AsyncCallback<ArrayList<GwtGroupedNVPair>>() {    				
+					public void onSuccess(ArrayList<GwtGroupedNVPair> results) {
 
 						final GwtSession gwtSession = new GwtSession();
 
 						if (results != null) {
-							List<GwtGroupedNVPair> pairs = results.getData();
+							List<GwtGroupedNVPair> pairs = results;
 							if (pairs != null) {
 								for (GwtGroupedNVPair pair : pairs) {
 									String name = pair.getName();
@@ -138,22 +130,33 @@ public class denali implements EntryPoint
 						gwtSecurityService.isDebugMode(new AsyncCallback<Boolean>() {
 
 							public void onFailure(Throwable caught) {
-								Info.display("Bad", "Is debug mode error");
-								render(gwtSession);
+								//Info.display("Bad", "Is debug mode error");
+								//render(gwtSession);
+								binder.setFooter(gwtSession);
+								binder.initSystemPanel(gwtSession);
+								binder.setSession(gwtSession);
+								binder.initServicesTree();
+								binder.setDirty(false);
 							}
 
 							public void onSuccess(Boolean result) {
 								if(result){
 									isDevelopMode= true;
 								}
-								render(gwtSession);
+								binder.setFooter(gwtSession);
+								binder.initSystemPanel(gwtSession);
+								binder.setSession(gwtSession);
+								binder.initServicesTree();
+								binder.setDirty(false);
 							}
 						});
 					}
 
 					public void onFailure(Throwable caught) {
 						FailureHandler.handle(caught);
-						render( new GwtSession());
+						binder.setFooter(new GwtSession());
+						binder.initSystemPanel(new GwtSession());
+						binder.setSession(new GwtSession());
 					}
 				});
 			}});
@@ -168,94 +171,4 @@ public class denali implements EntryPoint
 		$doc.getElementsByTagName("head")[0].appendChild(l);
 	}-*/;
 
-	private void render(GwtSession gwtSession) 
-	{    	
-		Log.debug("Beginning page render");
-
-		final Viewport viewport = new Viewport();
-
-		final BorderLayout borderLayout = new BorderLayout();
-		viewport.setLayout(borderLayout);
-		viewport.setStyleAttribute("padding", "5px");
-
-		//
-		// north
-		BorderLayoutData northData = new BorderLayoutData(LayoutRegion.NORTH, 52);  
-		northData.setCollapsible(false);  
-		northData.setFloatable(false);  
-		northData.setHideCollapseTool(false);  
-		northData.setSplit(false);
-		northData.setMargins(new Margins(0, 0, 5, 0));  
-		viewport.add(new NorthView(gwtSession), northData);
-
-		//
-		// center
-		BorderLayoutData centerData = new BorderLayoutData(LayoutRegion.CENTER);  
-		centerData.setMargins(new Margins(0));  
-
-		ContentPanel center = new ContentPanel();
-		center.setLayout(new FitLayout());
-		center.setBorders(false);
-		center.setBodyBorder(false);
-		center.setId("center-panel-wrapper");
-		viewport.add(center, centerData);
-
-		//
-		// west
-		BorderLayoutData westData = new BorderLayoutData(LayoutRegion.WEST, 180);  
-		westData.setSplit(true);  
-		westData.setCollapsible(true);  
-		westData.setMargins(new Margins(0,5,0,0));
-		WestNavigationView westView = new WestNavigationView(gwtSession, center);
-		viewport.add(westView, westData);
-
-		//
-		// south
-		BorderLayoutData southData = new BorderLayoutData(LayoutRegion.SOUTH, 18);  
-		southData.setCollapsible(false);  
-		southData.setFloatable(false);  
-		southData.setHideCollapseTool(false);  
-		southData.setSplit(false);
-		southData.setMargins(new Margins(3, 5, 0, 0));
-
-		final HorizontalPanel south = new HorizontalPanel();
-		south.setTableWidth("100%");
-		south.setId("south-panel-wrapper");
-		Label copyright = new Label(MSGS.copyright());
-		copyright.setStyleName("x-form-label");
-		TableData td = new TableData();
-		td.setHorizontalAlign(HorizontalAlignment.LEFT);
-		south.add(copyright, td);
-
-
-		final Label developmentMode = new Label(MSGS.developmentMode());
-		developmentMode.setStyleName("x-form-label");
-		developmentMode.getElement().getStyle().setColor("red");
-		final TableData tdExecMode = new TableData();
-		tdExecMode.setHorizontalAlign(HorizontalAlignment.LEFT);
-		
-		if(isDevelopMode){
-			south.add(developmentMode, tdExecMode);
-		}
-
-		Label version = new Label(gwtSession.getKuraVersion());
-		version.setStyleName("x-form-label");
-		TableData tdVersion = new TableData();
-		tdVersion.setHorizontalAlign(HorizontalAlignment.RIGHT);
-		south.add(version, tdVersion);
-
-		viewport.add(south, southData);
-
-		//
-		// Initial Selection
-		//        center.setIconAbstractImagePrototype.create(Resources.INSTANCE.alerts()));
-		//        center.setHeading(MSGS.announcements());
-		//        center.removeAll();                  
-		//        center.add(new Overview(currentSession));
-		//        center.layout();
-
-		//
-		// RootPanel
-		RootPanel.get().add(viewport);
-	}
 }

@@ -1,16 +1,16 @@
-package org.eclipse.kura.web.client.bootstrap.ui.Network;
+package org.eclipse.kura.web.client.ui.Network;
 
 import java.util.ArrayList;
 
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.util.MessageUtils;
-import org.eclipse.kura.web.shared.model.GwtBSModemInterfaceConfig;
-import org.eclipse.kura.web.shared.model.GwtBSNetIfStatus;
-import org.eclipse.kura.web.shared.model.GwtBSNetIfType;
-import org.eclipse.kura.web.shared.model.GwtBSNetInterfaceConfig;
-import org.eclipse.kura.web.shared.model.GwtBSSession;
-import org.eclipse.kura.web.shared.model.GwtBSWifiNetInterfaceConfig;
-import org.eclipse.kura.web.shared.model.GwtBSWifiWirelessMode;
+import org.eclipse.kura.web.shared.model.GwtModemInterfaceConfig;
+import org.eclipse.kura.web.shared.model.GwtNetIfStatus;
+import org.eclipse.kura.web.shared.model.GwtNetIfType;
+import org.eclipse.kura.web.shared.model.GwtNetInterfaceConfig;
+import org.eclipse.kura.web.shared.model.GwtSession;
+import org.eclipse.kura.web.shared.model.GwtWifiNetInterfaceConfig;
+import org.eclipse.kura.web.shared.model.GwtWifiWirelessMode;
 import org.gwtbootstrap3.client.ui.AnchorListItem;
 import org.gwtbootstrap3.client.ui.NavbarNav;
 import org.gwtbootstrap3.client.ui.PanelBody;
@@ -47,23 +47,23 @@ public class NetworkTabsUi extends Composite {
 	TabWirelessUi wireless;
 	TabModemUi modem;
 
-	GwtBSNetInterfaceConfig netIfConfig;
+	GwtNetInterfaceConfig netIfConfig;
 
-	GwtBSSession session;
+	GwtSession session;
 
 	@UiField
 	NavbarNav tabsPanel;
 	@UiField
 	PanelBody content;
 
-	public NetworkTabsUi(GwtBSSession session) {
+	public NetworkTabsUi(GwtSession session) {
 		visibleTabs = new ArrayList<AnchorListItem>();
 		initWidget(uiBinder.createAndBindUi(this));
 		this.session = session;
 		initTabs();
 	}
 
-	public void setNetInterface(GwtBSNetInterfaceConfig selection) {
+	public void setNetInterface(GwtNetInterfaceConfig selection) {
 		netIfConfig = selection;
 		initTabs();
 
@@ -76,7 +76,7 @@ public class NetworkTabsUi extends Composite {
 		// set the tabs for this interface
 		removeInterfaceTabs();
 
-		if (!GwtBSNetIfStatus.netIPv4StatusDisabled.equals(selection
+		if (!GwtNetIfStatus.netIPv4StatusDisabled.equals(selection
 				.getStatusEnum())) {
 			adjustInterfaceTabs();			
 		}
@@ -140,9 +140,9 @@ public class NetworkTabsUi extends Composite {
 		String netIfStatus = tcpIp.getStatus();
 		boolean includeDhcpNat = !tcpIp.isDhcp()
 				&& netIfStatus.equals(MessageUtils
-						.get(GwtBSNetIfStatus.netIPv4StatusEnabledLAN.name()));
+						.get(GwtNetIfStatus.netIPv4StatusEnabledLAN.name()));
 
-		if (netIfConfig instanceof GwtBSWifiNetInterfaceConfig) {
+		if (netIfConfig instanceof GwtWifiNetInterfaceConfig) {
 			// insert Wifi tab
 			removeTab(modemTab);
 			insertTab(wirelessTab, 1);
@@ -151,11 +151,11 @@ public class NetworkTabsUi extends Composite {
 			}
 			insertTab(dhcpNatTab, 2);
 			// remove Dhcp/Nat Tab if not an access point
-			if (!GwtBSWifiWirelessMode.netWifiWirelessModeAccessPoint
+			if (!GwtWifiWirelessMode.netWifiWirelessModeAccessPoint
 					.equals(wireless.getWirelessMode())) {
 				includeDhcpNat = false;
 			}
-		} else if (netIfConfig instanceof GwtBSModemInterfaceConfig) {
+		} else if (netIfConfig instanceof GwtModemInterfaceConfig) {
 			includeDhcpNat = false;
 			removeTab(wirelessTab);
 			removeTab(dhcpNatTab);
@@ -168,7 +168,7 @@ public class NetworkTabsUi extends Composite {
 			removeTab(wirelessTab);
 			removeTab(modemTab);
 
-			if (netIfConfig.getHwTypeEnum() == GwtBSNetIfType.LOOPBACK
+			if (netIfConfig.getHwTypeEnum() == GwtNetIfType.LOOPBACK
 					|| netIfConfig.getName().startsWith("mon.wlan")) {
 				removeTab(dhcpNatTab);
 			} else {
@@ -183,21 +183,21 @@ public class NetworkTabsUi extends Composite {
 			dhcpNatTab.setEnabled(false);
 		}
 
-		if (netIfStatus.equals(GwtBSNetIfStatus.netIPv4StatusDisabled.name())) {
+		if (netIfStatus.equals(GwtNetIfStatus.netIPv4StatusDisabled.name())) {
 			// disabled - rmove tabs
 			disableInterfaceTabs();
 		}
 	}
 
-	// Get GwtBSNetInterfaceConfig with current form values updated
-	public GwtBSNetInterfaceConfig getUpdatedInterface() {
-		GwtBSNetInterfaceConfig updatedNetIf = null;
-		if (netIfConfig instanceof GwtBSWifiNetInterfaceConfig) {
-			updatedNetIf = new GwtBSWifiNetInterfaceConfig();
-		} else if (netIfConfig instanceof GwtBSModemInterfaceConfig) {
-			updatedNetIf = new GwtBSModemInterfaceConfig();
+	// Get GwtNetInterfaceConfig with current form values updated
+	public GwtNetInterfaceConfig getUpdatedInterface() {
+		GwtNetInterfaceConfig updatedNetIf = null;
+		if (netIfConfig instanceof GwtWifiNetInterfaceConfig) {
+			updatedNetIf = new GwtWifiNetInterfaceConfig();
+		} else if (netIfConfig instanceof GwtModemInterfaceConfig) {
+			updatedNetIf = new GwtModemInterfaceConfig();
 		} else {
-			updatedNetIf = new GwtBSNetInterfaceConfig();
+			updatedNetIf = new GwtNetInterfaceConfig();
 		}
 
 		// copy previous values

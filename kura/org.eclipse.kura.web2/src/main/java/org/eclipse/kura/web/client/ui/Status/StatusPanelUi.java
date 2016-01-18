@@ -1,13 +1,17 @@
-package org.eclipse.kura.web.client.bootstrap.ui.Status;
+package org.eclipse.kura.web.client.ui.Status;
 
 import java.util.ArrayList;
 
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.messages.ValidationMessages;
-import org.eclipse.kura.web.shared.model.GwtBSGroupedNVPair;
-import org.eclipse.kura.web.shared.model.GwtBSSession;
-import org.eclipse.kura.web.shared.service.GwtBSStatusServiceAsync;
-import org.eclipse.kura.web.shared.service.GwtBSStatusService;
+import org.eclipse.kura.web.client.util.FailureHandler;
+import org.eclipse.kura.web.shared.model.GwtGroupedNVPair;
+import org.eclipse.kura.web.shared.model.GwtSession;
+import org.eclipse.kura.web.shared.model.GwtXSRFToken;
+import org.eclipse.kura.web.shared.service.GwtSecurityTokenService;
+import org.eclipse.kura.web.shared.service.GwtSecurityTokenServiceAsync;
+import org.eclipse.kura.web.shared.service.GwtStatusService;
+import org.eclipse.kura.web.shared.service.GwtStatusServiceAsync;
 import org.gwtbootstrap3.client.ui.AnchorListItem;
 import org.gwtbootstrap3.client.ui.Well;
 import org.gwtbootstrap3.client.ui.gwt.DataGrid;
@@ -36,25 +40,26 @@ public class StatusPanelUi extends Composite {
 	private static final ValidationMessages msgs = GWT.create(ValidationMessages.class);
 	private static final Messages MSG = GWT.create(Messages.class);
 	
-	private final GwtBSStatusServiceAsync gwtStatusService = GWT
-			.create(GwtBSStatusService.class);	
-	GwtBSSession currentSession;
+	private final GwtStatusServiceAsync gwtStatusService = GWT.create(GwtStatusService.class);
+	private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
+	
+	GwtSession currentSession;
 
 	@UiField
 	Well statusWell;
 	@UiField
 	AnchorListItem statusRefresh;
 	@UiField
-	DataGrid<GwtBSGroupedNVPair> statusGrid = new DataGrid<GwtBSGroupedNVPair>();
-	private ListDataProvider<GwtBSGroupedNVPair> statusGridProvider = new ListDataProvider<GwtBSGroupedNVPair>();
+	DataGrid<GwtGroupedNVPair> statusGrid = new DataGrid<GwtGroupedNVPair>();
+	private ListDataProvider<GwtGroupedNVPair> statusGridProvider = new ListDataProvider<GwtGroupedNVPair>();
 
 	public StatusPanelUi() {
 		initWidget(uiBinder.createAndBindUi(this));
 		statusRefresh.setText(MSG.refresh());
 
-		statusGrid.setRowStyles(new RowStyles<GwtBSGroupedNVPair>() {
+		statusGrid.setRowStyles(new RowStyles<GwtGroupedNVPair>() {
 			@Override
-			public String getStyleNames(GwtBSGroupedNVPair row, int rowIndex) {
+			public String getStyleNames(GwtGroupedNVPair row, int rowIndex) {
 				return row.getName().contains("_") ? "rowHeader" : " ";
 			}
 		});
@@ -73,27 +78,27 @@ public class StatusPanelUi extends Composite {
 		}
 
 	// get current session from UI parent
-	public void setSession(GwtBSSession gwtBSSession) {
+	public void setSession(GwtSession gwtBSSession) {
 		currentSession = gwtBSSession;
 	}
 
 	// create table layout
-	public void loadStatusTable(DataGrid<GwtBSGroupedNVPair> grid,
-			ListDataProvider<GwtBSGroupedNVPair> dataProvider) {
-		TextColumn<GwtBSGroupedNVPair> col1 = new TextColumn<GwtBSGroupedNVPair>() {
+	public void loadStatusTable(DataGrid<GwtGroupedNVPair> grid,
+			ListDataProvider<GwtGroupedNVPair> dataProvider) {
+		TextColumn<GwtGroupedNVPair> col1 = new TextColumn<GwtGroupedNVPair>() {
 
 			@Override
-			public String getValue(GwtBSGroupedNVPair object) {
+			public String getValue(GwtGroupedNVPair object) {
 				return String.valueOf(object.getName());
 			}
 		};
 		col1.setCellStyleNames("status-table-row");
 		grid.addColumn(col1, "Property");
 
-		TextColumn<GwtBSGroupedNVPair> col2 = new TextColumn<GwtBSGroupedNVPair>() {
+		TextColumn<GwtGroupedNVPair> col2 = new TextColumn<GwtGroupedNVPair>() {
 
 			@Override
-			public String getValue(GwtBSGroupedNVPair object) {
+			public String getValue(GwtGroupedNVPair object) {
 				return String.valueOf(object.getValue());
 			}
 		};
@@ -105,46 +110,57 @@ public class StatusPanelUi extends Composite {
 	// fetch table data
 	public void loadStatusData() {
 		statusGridProvider.getList().clear();
-		gwtStatusService.getDeviceConfig(currentSession.isNetAdminAvailable(),
-				new AsyncCallback<ArrayList<GwtBSGroupedNVPair>>() {
-
-					@Override
-					public void onFailure(Throwable caught) {
-						statusGridProvider.getList().add(
-								new GwtBSGroupedNVPair(
-										"Not Available, please click Refresh",
-										"Not Available, please click Refresh",
-										"Not Available, please click Refresh"));
-						statusGridProvider.flush();
-
-					}
-
-					@Override
-					public void onSuccess(ArrayList<GwtBSGroupedNVPair> result) {
-
-						String oldGroup = "cloudStatus";
-						String title;
-						statusGridProvider
-								.getList()
-								.add(new GwtBSGroupedNVPair(" ","_"+msgs.getString("cloudStatus")+"_"
-										, " "));
-						for (GwtBSGroupedNVPair resultPair : result) {
-							if (!oldGroup.equals(resultPair.getGroup())) {
-								title = getTitle(resultPair.getGroup());
-								statusGridProvider.getList()
-										.add(new GwtBSGroupedNVPair(" ", title,
-												" "));
-								oldGroup = resultPair.getGroup();
-							}
-							statusGridProvider.getList().add(resultPair);
-						}
-						statusGridProvider.flush();
-
-					}
-
-				});
 		
+		gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
 
+			@Override
+			public void onFailure(Throwable ex) {
+				FailureHandler.handle(ex);
+			}
+			
+			@Override
+			public void onSuccess(GwtXSRFToken token) {
+				gwtStatusService.getDeviceConfig(token, currentSession.isNetAdminAvailable(),
+						new AsyncCallback<ArrayList<GwtGroupedNVPair>>() {
+
+							@Override
+							public void onFailure(Throwable caught) {
+								statusGridProvider.getList().add(
+										new GwtGroupedNVPair(
+												"Not Available, please click Refresh",
+												"Not Available, please click Refresh",
+												"Not Available, please click Refresh"));
+								statusGridProvider.flush();
+
+							}
+
+							@Override
+							public void onSuccess(ArrayList<GwtGroupedNVPair> result) {
+
+								String oldGroup = "cloudStatus";
+								String title;
+								statusGridProvider
+										.getList()
+										.add(new GwtGroupedNVPair(" ","_"+msgs.getString("cloudStatus")+"_"
+												, " "));
+								for (GwtGroupedNVPair resultPair : result) {
+									if (!oldGroup.equals(resultPair.getGroup())) {
+										title = getTitle(resultPair.getGroup());
+										statusGridProvider.getList()
+												.add(new GwtGroupedNVPair(" ", title,
+														" "));
+										oldGroup = resultPair.getGroup();
+									}
+									statusGridProvider.getList().add(resultPair);
+								}
+								statusGridProvider.flush();
+
+							}
+
+						});
+			}
+			
+		});
 	}
 
 	public String getTitle(String group) {

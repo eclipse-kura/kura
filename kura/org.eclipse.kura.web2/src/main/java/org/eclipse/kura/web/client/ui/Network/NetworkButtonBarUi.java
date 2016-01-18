@@ -1,13 +1,16 @@
-package org.eclipse.kura.web.client.bootstrap.ui.Network;
+package org.eclipse.kura.web.client.ui.Network;
 
 import org.eclipse.kura.web.client.messages.Messages;
-import org.eclipse.kura.web.shared.model.GwtBSNetIfConfigMode;
-import org.eclipse.kura.web.shared.model.GwtBSNetInterfaceConfig;
-import org.eclipse.kura.web.shared.model.GwtBSSession;
-import org.eclipse.kura.web.shared.service.GwtBSNetworkService;
-import org.eclipse.kura.web.shared.service.GwtBSNetworkServiceAsync;
+import org.eclipse.kura.web.client.util.FailureHandler;
+import org.eclipse.kura.web.shared.model.GwtNetIfConfigMode;
+import org.eclipse.kura.web.shared.model.GwtNetInterfaceConfig;
+import org.eclipse.kura.web.shared.model.GwtSession;
+import org.eclipse.kura.web.shared.model.GwtXSRFToken;
+import org.eclipse.kura.web.shared.service.GwtNetworkService;
+import org.eclipse.kura.web.shared.service.GwtNetworkServiceAsync;
+import org.eclipse.kura.web.shared.service.GwtSecurityTokenService;
+import org.eclipse.kura.web.shared.service.GwtSecurityTokenServiceAsync;
 import org.gwtbootstrap3.client.ui.AnchorButton;
-import org.gwtbootstrap3.extras.growl.client.ui.Growl;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -23,24 +26,25 @@ import com.google.gwt.view.client.SelectionChangeEvent;
 
 public class NetworkButtonBarUi extends Composite {
 
-	private static NetworkButtonBarUiUiBinder uiBinder = GWT
-			.create(NetworkButtonBarUiUiBinder.class);
+	private static NetworkButtonBarUiUiBinder uiBinder = GWT.create(NetworkButtonBarUiUiBinder.class);
 
 	interface NetworkButtonBarUiUiBinder extends
 			UiBinder<Widget, NetworkButtonBarUi> {
 	}
 
-	private final GwtBSNetworkServiceAsync gwtNetworkService = GWT
-			.create(GwtBSNetworkService.class);
+	private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
+	private final GwtNetworkServiceAsync gwtNetworkService = GWT.create(GwtNetworkService.class);
+	
 	private static final Messages MSGS = GWT.create(Messages.class);
-	GwtBSSession session;
+	
+	GwtSession session;
 	NetworkInterfacesTableUi table;
 	NetworkTabsUi tabs;
 
 	@UiField
 	AnchorButton apply, refresh;
 
-	public NetworkButtonBarUi(GwtBSSession currentSession,
+	public NetworkButtonBarUi(GwtSession currentSession,
 			NetworkTabsUi tabsPanel, NetworkInterfacesTableUi interfaces) {
 		initWidget(uiBinder.createAndBindUi(this));
 		this.session = currentSession;
@@ -58,9 +62,9 @@ public class NetworkButtonBarUi extends Composite {
 			@Override
 			public void onClick(ClickEvent event) {
 				if (tabs.visibleTabs.size() > 0 && tabs.isValid()) {
-					GwtBSNetInterfaceConfig prevNetIf = table.selectionModel
+					GwtNetInterfaceConfig prevNetIf = table.selectionModel
 							.getSelectedObject();
-					final GwtBSNetInterfaceConfig updatedNetIf = tabs
+					final GwtNetInterfaceConfig updatedNetIf = tabs
 							.getUpdatedInterface();
 
 					// submit updated netInterfaceConfig and priorities
@@ -77,10 +81,10 @@ public class NetworkButtonBarUi extends Composite {
 									Window.Location.getHost(),
 									updatedNetIf.getSubnetMask());
 						} catch (Exception e) {
-							Growl.growl("Network detection failed for ipAddress: "
-									+ Window.Location.getHost()
-									+ ", and subnet: "
-									+ updatedNetIf.getSubnetMask());
+							//Growl.growl("Network detection failed for ipAddress: "
+							//		+ Window.Location.getHost()
+							//		+ ", and subnet: "
+							//		+ updatedNetIf.getSubnetMask());
 						}
 
 						if (newNetwork != null) {
@@ -88,7 +92,7 @@ public class NetworkButtonBarUi extends Composite {
 							// location
 							if (updatedNetIf
 									.getConfigMode()
-									.equals(GwtBSNetIfConfigMode.netIPv4ConfigModeManual
+									.equals(GwtNetIfConfigMode.netIPv4ConfigModeManual
 											.name())
 									&& newNetwork.equals(prevNetwork)
 									&& Window.Location.getHost().equals(
@@ -96,8 +100,8 @@ public class NetworkButtonBarUi extends Composite {
 								Timer t = new Timer() {
 									@Override
 									public void run() {
-										Growl.growl("redirecting to new address: "
-												+ updatedNetIf.getIpAddress());
+										//Growl.growl("redirecting to new address: "
+										//		+ updatedNetIf.getIpAddress());
 										Window.Location.replace("http://"
 												+ updatedNetIf.getIpAddress());
 									}
@@ -106,26 +110,37 @@ public class NetworkButtonBarUi extends Composite {
 							}
 						}
 
-						gwtNetworkService.updateNetInterfaceConfigurations(
-								updatedNetIf, new AsyncCallback<Void>() {
-									@Override
-									public void onFailure(Throwable caught) {
-										Growl.growl(MSGS.error() + ": ",
-												caught.getLocalizedMessage());
-									}
+						gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
 
-									@Override
-									public void onSuccess(Void result) {
-										Growl.growl("successfully updated net interface config");
-										table.refresh();
-										apply.setEnabled(false);
-									}
+							@Override
+							public void onFailure(Throwable ex) {
+								FailureHandler.handle(ex);
+							}
 
-								});
+							@Override
+							public void onSuccess(GwtXSRFToken token) {
+								gwtNetworkService.updateNetInterfaceConfigurations(token,
+										updatedNetIf, new AsyncCallback<Void>() {
+											@Override
+											public void onFailure(Throwable ex) {
+												FailureHandler.handle(ex);
+											}
+
+											@Override
+											public void onSuccess(Void result) {
+												//Growl.growl("successfully updated net interface config");
+												table.refresh();
+												apply.setEnabled(false);
+											}
+
+										});
+							}
+							
+						});
 					}
 				} else {
-					Growl.growl(MSGS.information() + ": ",
-							MSGS.deviceConfigError());
+					//Growl.growl(MSGS.information() + ": ",
+					//		MSGS.deviceConfigError());
 				}
 			}
 
@@ -180,9 +195,9 @@ public class NetworkButtonBarUi extends Composite {
 
 			network = dottedQuad(ipAddressValue & netmaskValue);
 		} catch (Exception e) {
-			Growl.growl("Error calculating network for ip address: "
-					+ ipAddress + " and netmask: " + netmask,
-					e.getLocalizedMessage());
+			//Growl.growl("Error calculating network for ip address: "
+			//		+ ipAddress + " and netmask: " + netmask,
+			//		e.getLocalizedMessage());
 		}
 		return network;
 	}

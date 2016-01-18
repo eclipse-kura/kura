@@ -1,12 +1,12 @@
-package org.eclipse.kura.web.client.bootstrap.ui.Network;
+package org.eclipse.kura.web.client.ui.Network;
 
 import java.util.ArrayList;
 
 import org.eclipse.kura.web.client.messages.Messages;
-import org.eclipse.kura.web.shared.model.GwtBSNetInterfaceConfig;
-import org.eclipse.kura.web.shared.model.GwtBSSession;
-import org.eclipse.kura.web.shared.service.GwtBSNetworkService;
-import org.eclipse.kura.web.shared.service.GwtBSNetworkServiceAsync;
+import org.eclipse.kura.web.shared.model.GwtNetInterfaceConfig;
+import org.eclipse.kura.web.shared.model.GwtSession;
+import org.eclipse.kura.web.shared.service.GwtNetworkService;
+import org.eclipse.kura.web.shared.service.GwtNetworkServiceAsync;
 import org.gwtbootstrap3.client.ui.Alert;
 import org.gwtbootstrap3.client.ui.Button;
 import org.gwtbootstrap3.client.ui.Modal;
@@ -14,7 +14,6 @@ import org.gwtbootstrap3.client.ui.ModalBody;
 import org.gwtbootstrap3.client.ui.ModalFooter;
 import org.gwtbootstrap3.client.ui.gwt.DataGrid;
 import org.gwtbootstrap3.client.ui.html.Span;
-import org.gwtbootstrap3.extras.growl.client.ui.Growl;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -39,20 +38,20 @@ public class NetworkInterfacesTableUi extends Composite {
 	}
 
 	private static final Messages MSGS = GWT.create(Messages.class);
-	private final GwtBSNetworkServiceAsync gwtNetworkService = GWT
-			.create(GwtBSNetworkService.class);
-	GwtBSSession session;
+	private final GwtNetworkServiceAsync gwtNetworkService = GWT
+			.create(GwtNetworkService.class);
+	GwtSession session;
 	NetworkTabsUi tabs;
-	GwtBSNetInterfaceConfig selection;
+	GwtNetInterfaceConfig selection;
 
 	@UiField
 	Alert notification;
 	@UiField
-	DataGrid<GwtBSNetInterfaceConfig> interfacesGrid = new DataGrid<GwtBSNetInterfaceConfig>();
-	private ListDataProvider<GwtBSNetInterfaceConfig> interfacesProvider = new ListDataProvider<GwtBSNetInterfaceConfig>();
-	final SingleSelectionModel<GwtBSNetInterfaceConfig> selectionModel = new SingleSelectionModel<GwtBSNetInterfaceConfig>();
+	DataGrid<GwtNetInterfaceConfig> interfacesGrid = new DataGrid<GwtNetInterfaceConfig>();
+	private ListDataProvider<GwtNetInterfaceConfig> interfacesProvider = new ListDataProvider<GwtNetInterfaceConfig>();
+	final SingleSelectionModel<GwtNetInterfaceConfig> selectionModel = new SingleSelectionModel<GwtNetInterfaceConfig>();
 
-	public NetworkInterfacesTableUi(GwtBSSession session,
+	public NetworkInterfacesTableUi(GwtSession session,
 			NetworkTabsUi tabsPanel) {
 		initWidget(uiBinder.createAndBindUi(this));
 		this.session = session;
@@ -155,9 +154,9 @@ public class NetworkInterfacesTableUi extends Composite {
 	 --------------------------------------*/
 	
 	private void initTable() {
-		TextColumn<GwtBSNetInterfaceConfig> col1 = new TextColumn<GwtBSNetInterfaceConfig>() {
+		TextColumn<GwtNetInterfaceConfig> col1 = new TextColumn<GwtNetInterfaceConfig>() {
 			@Override
-			public String getValue(GwtBSNetInterfaceConfig object) {
+			public String getValue(GwtNetInterfaceConfig object) {
 				return object.getName();
 			}
 		};
@@ -172,28 +171,28 @@ public class NetworkInterfacesTableUi extends Composite {
 	private void loadData() {
 		interfacesProvider.getList().clear();
 		gwtNetworkService
-				.findNetInterfaceConfigurations(new AsyncCallback<ArrayList<GwtBSNetInterfaceConfig>>() {
+				.findNetInterfaceConfigurations(new AsyncCallback<ArrayList<GwtNetInterfaceConfig>>() {
 					;
 					@Override
 					public void onFailure(Throwable caught) {
-						Growl.growl(MSGS.error() + ": "
-								+ caught.getLocalizedMessage());
+						//Growl.growl(MSGS.error() + ": "
+						//		+ caught.getLocalizedMessage());
 					}
 
 					@Override
 					public void onSuccess(
-							ArrayList<GwtBSNetInterfaceConfig> result) {
-						for (GwtBSNetInterfaceConfig pair : result) {
+							ArrayList<GwtNetInterfaceConfig> result) {
+						for (GwtNetInterfaceConfig pair : result) {
 							interfacesProvider.getList().add(pair);
 						}
 					}
 				});
 
-		GwtBSNetInterfaceConfig ex = new GwtBSNetInterfaceConfig();
+		GwtNetInterfaceConfig ex = new GwtNetInterfaceConfig();
 		ex.setName("Wifi");
 		ex.setHwName("1-2-1-2");
 		interfacesProvider.getList().add(ex);
-		GwtBSNetInterfaceConfig ex2 = new GwtBSNetInterfaceConfig();
+		GwtNetInterfaceConfig ex2 = new GwtNetInterfaceConfig();
 		ex2.setName("eth0");
 		interfacesProvider.getList().add(ex2);
 		interfacesProvider.flush();

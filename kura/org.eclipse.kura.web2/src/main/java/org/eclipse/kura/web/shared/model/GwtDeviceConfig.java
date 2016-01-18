@@ -16,9 +16,7 @@ import java.util.Date;
 
 import org.eclipse.kura.web.client.util.DateUtils;
 
-import com.extjs.gxt.ui.client.data.BaseModel;
-
-public class GwtDeviceConfig extends BaseModel implements Serializable {
+public class GwtDeviceConfig extends GwtBaseModel implements Serializable {
 
     private static final long serialVersionUID = 1708831984640005284L;
     

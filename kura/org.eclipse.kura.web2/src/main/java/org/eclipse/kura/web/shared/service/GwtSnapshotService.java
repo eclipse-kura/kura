@@ -11,18 +11,19 @@
  */
 package org.eclipse.kura.web.shared.service;
 
+import java.util.ArrayList;
+
 import org.eclipse.kura.web.shared.GwtKuraException;
 import org.eclipse.kura.web.shared.model.GwtSnapshot;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 
-import com.extjs.gxt.ui.client.data.ListLoadResult;
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 
 @RemoteServiceRelativePath("snapshot")
 public interface GwtSnapshotService extends RemoteService
 {
-	public ListLoadResult<GwtSnapshot> findDeviceSnapshots(GwtXSRFToken xsrfToken) throws GwtKuraException;
+	public ArrayList<GwtSnapshot> findDeviceSnapshots(GwtXSRFToken xsrfToken) throws GwtKuraException;
 	
 	public void rollbackDeviceSnapshot(GwtXSRFToken xsrfToken, GwtSnapshot snapshot) throws GwtKuraException;
 }

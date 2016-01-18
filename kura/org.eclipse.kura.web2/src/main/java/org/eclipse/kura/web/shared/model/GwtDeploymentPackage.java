@@ -14,9 +14,7 @@ package org.eclipse.kura.web.shared.model;
 import java.io.Serializable;
 import java.util.List;
 
-import com.extjs.gxt.ui.client.data.BaseModel;
-
-public class GwtDeploymentPackage extends BaseModel implements Serializable {
+public class GwtDeploymentPackage extends GwtBaseModel implements Serializable {
 
 	private static final long serialVersionUID = -7648638193931336835L;
 		

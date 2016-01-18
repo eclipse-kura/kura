@@ -1,13 +1,15 @@
-package org.eclipse.kura.web.client.bootstrap.ui.Settings;
+package org.eclipse.kura.web.client.ui.Settings;
 
 import java.util.ArrayList;
 
 import org.eclipse.kura.web.client.messages.Messages;
-import org.eclipse.kura.web.shared.model.GwtBSSnapshot;
-import org.eclipse.kura.web.shared.service.GwtBSNetworkService;
-import org.eclipse.kura.web.shared.service.GwtBSNetworkServiceAsync;
-import org.eclipse.kura.web.shared.service.GwtBSSnapshotService;
-import org.eclipse.kura.web.shared.service.GwtBSSnapshotServiceAsync;
+import org.eclipse.kura.web.client.util.FailureHandler;
+import org.eclipse.kura.web.shared.model.GwtSnapshot;
+import org.eclipse.kura.web.shared.model.GwtXSRFToken;
+import org.eclipse.kura.web.shared.service.GwtSecurityTokenService;
+import org.eclipse.kura.web.shared.service.GwtSecurityTokenServiceAsync;
+import org.eclipse.kura.web.shared.service.GwtSnapshotService;
+import org.eclipse.kura.web.shared.service.GwtSnapshotServiceAsync;
 import org.gwtbootstrap3.client.ui.Alert;
 import org.gwtbootstrap3.client.ui.AnchorListItem;
 import org.gwtbootstrap3.client.ui.Button;
@@ -16,7 +18,6 @@ import org.gwtbootstrap3.client.ui.ModalBody;
 import org.gwtbootstrap3.client.ui.ModalFooter;
 import org.gwtbootstrap3.client.ui.gwt.DataGrid;
 import org.gwtbootstrap3.client.ui.html.Span;
-import org.gwtbootstrap3.extras.growl.client.ui.Growl;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -36,18 +37,15 @@ import com.google.gwt.view.client.SingleSelectionModel;
 
 public class SnapshotsTabUi extends Composite {
 
-	private static SnapshotsTabUiUiBinder uiBinder = GWT
-			.create(SnapshotsTabUiUiBinder.class);
+	private static SnapshotsTabUiUiBinder uiBinder = GWT.create(SnapshotsTabUiUiBinder.class);
 
 	interface SnapshotsTabUiUiBinder extends UiBinder<Widget, SnapshotsTabUi> {
 	}
 
 	private static final Messages MSGS = GWT.create(Messages.class);
 
-	private final GwtBSSnapshotServiceAsync gwtSnapshotService = GWT
-			.create(GwtBSSnapshotService.class);
-	private final GwtBSNetworkServiceAsync gwtNetworkService = GWT
-			.create(GwtBSNetworkService.class);
+	private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
+	private final GwtSnapshotServiceAsync gwtSnapshotService = GWT.create(GwtSnapshotService.class);
 
 	private final static String SERVLET_URL = "/" + GWT.getModuleName()
 			+ "/file/configuration/snapshot";
@@ -64,10 +62,10 @@ public class SnapshotsTabUi extends Composite {
 	@UiField
 	Alert notification;
 	@UiField
-	DataGrid<GwtBSSnapshot> snapshotsGrid = new DataGrid<GwtBSSnapshot>();
-	private ListDataProvider<GwtBSSnapshot> snapshotsDataProvider = new ListDataProvider<GwtBSSnapshot>();
-	final SingleSelectionModel<GwtBSSnapshot> selectionModel = new SingleSelectionModel<GwtBSSnapshot>();
-	GwtBSSnapshot selected;
+	DataGrid<GwtSnapshot> snapshotsGrid = new DataGrid<GwtSnapshot>();
+	private ListDataProvider<GwtSnapshot> snapshotsDataProvider = new ListDataProvider<GwtSnapshot>();
+	final SingleSelectionModel<GwtSnapshot> selectionModel = new SingleSelectionModel<GwtSnapshot>();
+	GwtSnapshot selected;
 
 	public SnapshotsTabUi() {
 		initWidget(uiBinder.createAndBindUi(this));
@@ -82,6 +80,7 @@ public class SnapshotsTabUi extends Composite {
 			}
 		});
 
+		//TODO: DW - Add CustomWindow
 		download.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
@@ -114,18 +113,18 @@ public class SnapshotsTabUi extends Composite {
 
 	private void initTable() {
 
-		TextColumn<GwtBSSnapshot> col1 = new TextColumn<GwtBSSnapshot>() {
+		TextColumn<GwtSnapshot> col1 = new TextColumn<GwtSnapshot>() {
 			@Override
-			public String getValue(GwtBSSnapshot object) {
+			public String getValue(GwtSnapshot object) {
 				return String.valueOf(object.getSnapshotId());
 			}
 		};
 		col1.setCellStyleNames("status-table-row");
 		snapshotsGrid.addColumn(col1, MSGS.deviceSnapshotId());
 
-		TextColumn<GwtBSSnapshot> col2 = new TextColumn<GwtBSSnapshot>() {
+		TextColumn<GwtSnapshot> col2 = new TextColumn<GwtSnapshot>() {
 			@Override
-			public String getValue(GwtBSSnapshot object) {
+			public String getValue(GwtSnapshot object) {
 				return String.valueOf(object.getCreatedOnFormatted());
 			}
 		};
@@ -138,21 +137,32 @@ public class SnapshotsTabUi extends Composite {
 	private void refresh() {
 		notification.setVisible(false);
 
-		gwtSnapshotService
-				.findDeviceSnapshots(new AsyncCallback<ArrayList<GwtBSSnapshot>>() {
+		gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
+
+			@Override
+			public void onFailure(Throwable ex) {
+				FailureHandler.handle(ex);
+			}
+
+			@Override
+			public void onSuccess(GwtXSRFToken token) {
+				gwtSnapshotService.findDeviceSnapshots(token, new AsyncCallback<ArrayList<GwtSnapshot>>() {
 					@Override
-					public void onFailure(Throwable caught) {
-						Growl.growl("Failed: ", caught.getLocalizedMessage());
+					public void onFailure(Throwable ex) {
+						FailureHandler.handle(ex);
 					}
 
 					@Override
-					public void onSuccess(ArrayList<GwtBSSnapshot> result) {
-						for (GwtBSSnapshot pair : result) {
+					public void onSuccess(ArrayList<GwtSnapshot> result) {
+						for (GwtSnapshot pair : result) {
 							snapshotsDataProvider.getList().add(pair);
 						}
 						snapshotsDataProvider.flush();
 					}
 				});
+			}
+			
+		});
 
 		if (snapshotsDataProvider.getList().size() == 0) {
 			snapshotsGrid.setVisible(false);
@@ -169,45 +179,43 @@ public class SnapshotsTabUi extends Composite {
 	}
 
 	private void rollback() {
-		final GwtBSSnapshot snapshot = selectionModel.getSelectedObject();
+		final GwtSnapshot snapshot = selectionModel.getSelectedObject();
 		if (snapshot != null) {
 			final Modal rollbackModal = new Modal();
 			ModalBody rollbackModalBody = new ModalBody();
 			ModalFooter rollbackModalFooter = new ModalFooter();
 			rollbackModal.setTitle(MSGS.confirm());
 			rollbackModal.setClosable(true);
-			rollbackModalBody
-					.add(new Span(MSGS.deviceSnapshotRollbackConfirm()));
+			rollbackModalBody.add(new Span(MSGS.deviceSnapshotRollbackConfirm()));
 
 			rollbackModalFooter.add(new Button("Yes", new ClickHandler() {
 				@Override
 				public void onClick(ClickEvent event) {
-					gwtSnapshotService.rollbackDeviceSnapshot(snapshot,new AsyncCallback<Void>() {
+					gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
 
 						@Override
-						public void onFailure(Throwable caught) {
-							Growl.growl("Error: "+ caught.getLocalizedMessage());
+						public void onFailure(Throwable ex) {
+							FailureHandler.handle(ex);
 						}
 
 						@Override
-						public void onSuccess(Void result) {
-							refresh();
-						}
-					});// end callback
-					
-					if (snapshot.getSnapshotId() == 0L) {
-						if (gwtNetworkService != null) {
-							gwtNetworkService.rollbackDefaultConfiguration(new AsyncCallback<Void>() {
-								public void onFailure(Throwable caught) {
-									Growl.growl("Error: "+ caught.getLocalizedMessage());
+						public void onSuccess(GwtXSRFToken token) {
+							gwtSnapshotService.rollbackDeviceSnapshot(token, snapshot,new AsyncCallback<Void>() {
+
+								@Override
+								public void onFailure(Throwable ex) {
+									FailureHandler.handle(ex);
 								}
 
-								public void onSuccess(Void arg0) {
+								@Override
+								public void onSuccess(Void result) {
 									refresh();
 								}
-							});// end callback
+							});
 						}
-					}//end if snapshotId==0
+						
+					});
+					
 					rollbackModal.hide();
 				}
 			}));
@@ -252,12 +260,12 @@ public class SnapshotsTabUi extends Composite {
 			public void onSubmitComplete(SubmitCompleteEvent event) {
 				String htmlResponse = event.getResults();
 				if (htmlResponse == null || htmlResponse.isEmpty()) {
-					Growl.growl(MSGS.information() + ": ",
-							MSGS.fileUploadSuccess());
+					//Growl.growl(MSGS.information() + ": ",
+					//		MSGS.fileUploadSuccess());
 					uploadModal.hide();
 				} else {
-					Growl.growl(MSGS.information() + ": ",
-							MSGS.fileUploadFailure());
+					//Growl.growl(MSGS.information() + ": ",
+					//		MSGS.fileUploadFailure());
 				}
 
 			}

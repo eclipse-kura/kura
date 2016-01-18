@@ -16,11 +16,7 @@ import java.util.ArrayList;
 
 import org.eclipse.kura.web.client.util.GwtSafeHtmlUtils;
 
-import com.extjs.gxt.ui.client.data.BaseModel;
-
-
-
-public class GwtWifiConfig extends BaseModel implements Serializable {
+public class GwtWifiConfig extends GwtBaseModel implements Serializable {
 
 	private static final long serialVersionUID = -7610506986073264800L;
 	
@@ -31,13 +27,12 @@ public class GwtWifiConfig extends BaseModel implements Serializable {
 		setSecurity(GwtWifiSecurity.netWifiSecurityWPA2.name());
 	}
 	
-	@SuppressWarnings("unchecked")
 	@Override
-	public <X> X set(String name, X value){
+	public void set(String name, Object value){
 		if (value instanceof String) {
-			value = (X) GwtSafeHtmlUtils.htmlEscape((String) value);
+			value = (Object) GwtSafeHtmlUtils.htmlEscape((String) value);
 		}
-		return super.set(name, value);
+		super.set(name, value);
 	}
 	
 //	@SuppressWarnings("unchecked")

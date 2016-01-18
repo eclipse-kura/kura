@@ -1,4 +1,4 @@
-package org.eclipse.kura.web.client.bootstrap.ui.Firewall;
+package org.eclipse.kura.web.client.ui.Firewall;
 
 import org.eclipse.kura.web.client.messages.Messages;
 import org.gwtbootstrap3.client.ui.AnchorListItem;

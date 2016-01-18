@@ -1,7 +1,7 @@
-package org.eclipse.kura.web.client.bootstrap.ui;
+package org.eclipse.kura.web.client.ui;
 
 import org.eclipse.kura.web.client.messages.Messages;
-import org.eclipse.kura.web.shared.model.GwtBSConfigComponent;
+import org.eclipse.kura.web.shared.model.GwtConfigComponent;
 import org.gwtbootstrap3.client.ui.AnchorListItem;
 import org.gwtbootstrap3.client.ui.Button;
 import org.gwtbootstrap3.client.ui.Modal;
@@ -19,11 +19,11 @@ import com.google.gwt.user.client.Timer;
 public class ServicesAnchorListItem extends AnchorListItem {
 
 	EntryClassUi ui;
-	GwtBSConfigComponent item;
+	GwtConfigComponent item;
 	ServicesAnchorListItem instance;
 	private static final Messages MSGS = GWT.create(Messages.class);
 
-	public ServicesAnchorListItem(GwtBSConfigComponent service,
+	public ServicesAnchorListItem(GwtConfigComponent service,
 			EntryClassUi mainUi) {
 		super();
 		ui = mainUi;

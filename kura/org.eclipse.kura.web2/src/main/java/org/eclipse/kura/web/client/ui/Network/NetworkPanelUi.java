@@ -1,7 +1,7 @@
-package org.eclipse.kura.web.client.bootstrap.ui.Network;
+package org.eclipse.kura.web.client.ui.Network;
 
 import org.eclipse.kura.web.client.messages.Messages;
-import org.eclipse.kura.web.shared.model.GwtBSSession;
+import org.eclipse.kura.web.shared.model.GwtSession;
 import org.gwtbootstrap3.client.ui.Container;
 import org.gwtbootstrap3.client.ui.PanelBody;
 import org.gwtbootstrap3.client.ui.Well;
@@ -24,7 +24,7 @@ public class NetworkPanelUi extends Composite {
 
 	private static final Messages MSGS = GWT.create(Messages.class);
 	
-	GwtBSSession session;
+	GwtSession session;
 	private NetworkInterfacesTableUi table;
 	private NetworkButtonBarUi buttons;
 	private NetworkTabsUi tabs;
@@ -60,7 +60,7 @@ public class NetworkPanelUi extends Composite {
 		return tabs.isDirty();		
 	}
 	
-	public void setSession(GwtBSSession currentSession) {
+	public void setSession(GwtSession currentSession) {
 		this.session = currentSession;
 	}
 

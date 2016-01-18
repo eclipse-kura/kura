@@ -1,8 +1,8 @@
-package org.eclipse.kura.web.client.bootstrap.ui.Network;
+package org.eclipse.kura.web.client.ui.Network;
 
 import org.eclipse.kura.web.client.messages.Messages;
-import org.eclipse.kura.web.shared.model.GwtBSNetInterfaceConfig;
-import org.eclipse.kura.web.shared.model.GwtBSSession;
+import org.eclipse.kura.web.shared.model.GwtNetInterfaceConfig;
+import org.eclipse.kura.web.shared.model.GwtSession;
 import org.gwtbootstrap3.client.ui.FormControlStatic;
 import org.gwtbootstrap3.client.ui.FormLabel;
 
@@ -21,15 +21,15 @@ public class TabHardwareUi extends Composite implements Tab {
 	}
 
 	private static final Messages MSGS = GWT.create(Messages.class);
-	GwtBSSession session;
-	GwtBSNetInterfaceConfig SelectednetIfConfig;
+	GwtSession session;
+	GwtNetInterfaceConfig SelectednetIfConfig;
 	
 	@UiField
 	FormLabel labelState,labelName,labelType,labelHardware,labelSerial,labelDriver,labelVersion,labelFirmware,labelMtu,labelUsb,labelRssi;
 	@UiField
 	FormControlStatic state,name,type,hardware,serial,driver,version,firmware,mtu,usb,rssi;
 	
-	public TabHardwareUi(GwtBSSession currentSession) {
+	public TabHardwareUi(GwtSession currentSession) {
 		initWidget(uiBinder.createAndBindUi(this));
 		session=currentSession;
 		setDirty(false);
@@ -60,7 +60,7 @@ public class TabHardwareUi extends Composite implements Tab {
 		return true;
 	}
 	
-	public void setNetInterface(GwtBSNetInterfaceConfig config){
+	public void setNetInterface(GwtNetInterfaceConfig config){
 		SelectednetIfConfig=config;
 	}
 
@@ -104,7 +104,7 @@ public class TabHardwareUi extends Composite implements Tab {
 		rssi.setText("");
 	}
 
-	public void getUpdatedNetInterface(GwtBSNetInterfaceConfig updatedNetIf) {
+	public void getUpdatedNetInterface(GwtNetInterfaceConfig updatedNetIf) {
 		if(session!=null){
 			updatedNetIf.setHwState(state.getText());
 			updatedNetIf.setHwName(name.getText());

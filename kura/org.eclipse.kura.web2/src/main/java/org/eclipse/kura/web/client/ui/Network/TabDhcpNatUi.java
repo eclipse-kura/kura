@@ -1,13 +1,13 @@
-package org.eclipse.kura.web.client.bootstrap.ui.Network;
+package org.eclipse.kura.web.client.ui.Network;
 
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.util.MessageUtils;
-import org.eclipse.kura.web.client.util.ValidationUtils.FieldType;
-import org.eclipse.kura.web.shared.model.GwtBSNetIfType;
-import org.eclipse.kura.web.shared.model.GwtBSNetInterfaceConfig;
-import org.eclipse.kura.web.shared.model.GwtBSNetRouterMode;
-import org.eclipse.kura.web.shared.model.GwtBSSession;
-import org.eclipse.kura.web.shared.model.GwtBSWifiWirelessMode;
+import org.eclipse.kura.web.client.util.TextFieldValidator.FieldType;
+import org.eclipse.kura.web.shared.model.GwtNetIfType;
+import org.eclipse.kura.web.shared.model.GwtNetInterfaceConfig;
+import org.eclipse.kura.web.shared.model.GwtNetRouterMode;
+import org.eclipse.kura.web.shared.model.GwtSession;
+import org.eclipse.kura.web.shared.model.GwtWifiWirelessMode;
 import org.gwtbootstrap3.client.ui.Form;
 import org.gwtbootstrap3.client.ui.FormGroup;
 import org.gwtbootstrap3.client.ui.FormLabel;
@@ -44,11 +44,11 @@ public class TabDhcpNatUi extends Composite implements Tab {
 
 	private static final String REGEX_IPV4 = "\\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\b";
 	private static final Messages MSGS = GWT.create(Messages.class);
-	GwtBSSession session;
+	GwtSession session;
 	TabTcpIpUi tcpTab;
 	TabWirelessUi wirelessTab;
 	Boolean dirty;
-	GwtBSNetInterfaceConfig selectedNetIfConfig;
+	GwtNetInterfaceConfig selectedNetIfConfig;
 
 	@UiField
 	Form form;
@@ -71,7 +71,7 @@ public class TabDhcpNatUi extends Composite implements Tab {
 	@UiField
 	PanelBody helpText;
 
-	public TabDhcpNatUi(GwtBSSession currentSession, TabTcpIpUi tcp,
+	public TabDhcpNatUi(GwtSession currentSession, TabTcpIpUi tcp,
 			TabWirelessUi wireless) {
 		initWidget(uiBinder.createAndBindUi(this));
 		tcpTab = tcp;
@@ -108,7 +108,7 @@ public class TabDhcpNatUi extends Composite implements Tab {
 	}
 
 	@Override
-	public void setNetInterface(GwtBSNetInterfaceConfig config) {
+	public void setNetInterface(GwtNetInterfaceConfig config) {
 		selectedNetIfConfig = config;
 	}
 
@@ -124,10 +124,10 @@ public class TabDhcpNatUi extends Composite implements Tab {
 		}
 	}
 
-	public void getUpdatedNetInterface(GwtBSNetInterfaceConfig updatedNetIf) {
+	public void getUpdatedNetInterface(GwtNetInterfaceConfig updatedNetIf) {
 		if (session != null) {
 
-			for (GwtBSNetRouterMode mode : GwtBSNetRouterMode.values()) {
+			for (GwtNetRouterMode mode : GwtNetRouterMode.values()) {
 				if (MessageUtils.get(mode.name()).equals(
 						router.getSelectedItemText())) {
 					updatedNetIf.setRouterMode(mode.name());
@@ -185,9 +185,9 @@ public class TabDhcpNatUi extends Composite implements Tab {
 			radio1.setEnabled(false);
 			radio2.setEnabled(false);
 		} else {
-			GwtBSWifiWirelessMode wirelessMode = wirelessTab.getWirelessMode();
-			if (selectedNetIfConfig.getHwTypeEnum() == GwtBSNetIfType.WIFI
-					&& (wirelessMode == GwtBSWifiWirelessMode.netWifiWirelessModeStation || wirelessMode == GwtBSWifiWirelessMode.netWifiWirelessModeDisabled)) {
+			GwtWifiWirelessMode wirelessMode = wirelessTab.getWirelessMode();
+			if (selectedNetIfConfig.getHwTypeEnum() == GwtNetIfType.WIFI
+					&& (wirelessMode == GwtWifiWirelessMode.netWifiWirelessModeStation || wirelessMode == GwtWifiWirelessMode.netWifiWirelessModeDisabled)) {
 				router.setEnabled(false);
 				begin.setEnabled(false);
 				end.setEnabled(false);
@@ -208,9 +208,9 @@ public class TabDhcpNatUi extends Composite implements Tab {
 
 				String modeValue = router.getSelectedItemText();
 				if (modeValue == MessageUtils
-						.get(GwtBSNetRouterMode.netRouterNat.name())
+						.get(GwtNetRouterMode.netRouterNat.name())
 						|| modeValue == MessageUtils
-								.get(GwtBSNetRouterMode.netRouterOff.name())) {
+								.get(GwtNetRouterMode.netRouterOff.name())) {
 					router.setEnabled(true);
 					begin.setEnabled(false);
 					end.setEnabled(false);
@@ -249,9 +249,9 @@ public class TabDhcpNatUi extends Composite implements Tab {
 		// Router Mode
 		labelRouter.setText(MSGS.netRouterMode());
 		int i = 0;
-		for (GwtBSNetRouterMode mode : GwtBSNetRouterMode.values()) {
+		for (GwtNetRouterMode mode : GwtNetRouterMode.values()) {
 			router.addItem(MessageUtils.get(mode.name()));
-			if (tcpTab.isDhcp() && mode.equals(GwtBSNetRouterMode.netRouterOff)) {
+			if (tcpTab.isDhcp() && mode.equals(GwtNetRouterMode.netRouterOff)) {
 				router.setSelectedIndex(i);
 			}
 			i++;
@@ -279,7 +279,7 @@ public class TabDhcpNatUi extends Composite implements Tab {
 				if (tcpTab.isDhcp()
 						&& !box.getSelectedItemText().equals(
 								MessageUtils
-										.get(GwtBSNetRouterMode.netRouterOff
+										.get(GwtNetRouterMode.netRouterOff
 												.toString()))) {
 					groupRouter.setValidationState(ValidationState.ERROR);
 					helpRouter.setText(MSGS.netRouterConfiguredForDhcpError());

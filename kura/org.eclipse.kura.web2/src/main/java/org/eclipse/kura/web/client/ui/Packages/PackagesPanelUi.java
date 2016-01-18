@@ -1,12 +1,16 @@
-package org.eclipse.kura.web.client.bootstrap.ui.Packages;
+package org.eclipse.kura.web.client.ui.Packages;
 
 import java.util.List;
 
 import org.eclipse.kura.web.client.messages.Messages;
-import org.eclipse.kura.web.shared.model.GwtBSDeploymentPackage;
-import org.eclipse.kura.web.shared.model.GwtBSSession;
-import org.eclipse.kura.web.shared.service.GwtBSPackageService;
-import org.eclipse.kura.web.shared.service.GwtBSPackageServiceAsync;
+import org.eclipse.kura.web.client.util.FailureHandler;
+import org.eclipse.kura.web.shared.model.GwtDeploymentPackage;
+import org.eclipse.kura.web.shared.model.GwtSession;
+import org.eclipse.kura.web.shared.model.GwtXSRFToken;
+import org.eclipse.kura.web.shared.service.GwtPackageService;
+import org.eclipse.kura.web.shared.service.GwtPackageServiceAsync;
+import org.eclipse.kura.web.shared.service.GwtSecurityTokenService;
+import org.eclipse.kura.web.shared.service.GwtSecurityTokenServiceAsync;
 import org.gwtbootstrap3.client.ui.Alert;
 import org.gwtbootstrap3.client.ui.AnchorListItem;
 import org.gwtbootstrap3.client.ui.Button;
@@ -16,7 +20,6 @@ import org.gwtbootstrap3.client.ui.ModalFooter;
 import org.gwtbootstrap3.client.ui.TabListItem;
 import org.gwtbootstrap3.client.ui.gwt.DataGrid;
 import org.gwtbootstrap3.client.ui.html.Span;
-import org.gwtbootstrap3.extras.growl.client.ui.Growl;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -36,11 +39,10 @@ import com.google.gwt.view.client.SingleSelectionModel;
 
 public class PackagesPanelUi extends Composite {
 
-	private static PackagesPanelUiUiBinder uiBinder = GWT
-			.create(PackagesPanelUiUiBinder.class);
+	private static PackagesPanelUiUiBinder uiBinder = GWT.create(PackagesPanelUiUiBinder.class);
 
-	private final GwtBSPackageServiceAsync gwtPackageService = GWT
-			.create(GwtBSPackageService.class);
+	private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
+	private final GwtPackageServiceAsync gwtPackageService = GWT.create(GwtPackageService.class);
 
 	private final static String SERVLET_URL = "/" + GWT.getModuleName()
 			+ "/file/deploy";
@@ -63,12 +65,12 @@ public class PackagesPanelUi extends Composite {
 	@UiField
 	AnchorListItem packagesRefresh, packagesInstall, packagesUninstall;
 	@UiField
-	DataGrid<GwtBSDeploymentPackage> packagesGrid = new DataGrid<GwtBSDeploymentPackage>();
-	private ListDataProvider<GwtBSDeploymentPackage> packagesDataProvider = new ListDataProvider<GwtBSDeploymentPackage>();
-	final SingleSelectionModel<GwtBSDeploymentPackage> selectionModel = new SingleSelectionModel<GwtBSDeploymentPackage>();
+	DataGrid<GwtDeploymentPackage> packagesGrid = new DataGrid<GwtDeploymentPackage>();
+	private ListDataProvider<GwtDeploymentPackage> packagesDataProvider = new ListDataProvider<GwtDeploymentPackage>();
+	final SingleSelectionModel<GwtDeploymentPackage> selectionModel = new SingleSelectionModel<GwtDeploymentPackage>();
 
-	GwtBSSession gwtSession;
-	GwtBSDeploymentPackage selected;
+	GwtSession gwtSession;
+	GwtDeploymentPackage selected;
 
 	public PackagesPanelUi() {
 
@@ -132,7 +134,7 @@ public class PackagesPanelUi extends Composite {
 		refresh();
 	}
 
-	public void setSession(GwtBSSession currentSession) {
+	public void setSession(GwtSession currentSession) {
 		gwtSession = currentSession;
 	}
 
@@ -163,11 +165,11 @@ public class PackagesPanelUi extends Composite {
 			public void onSubmitComplete(SubmitCompleteEvent event) {
 				String result = event.getResults();
 				if (result == null || result.isEmpty()) {
-					Growl.growl(MSGS.information()+": ", MSGS.fileUploadSuccess());
+					//Growl.growl(MSGS.information()+": ", MSGS.fileUploadSuccess());
 					uploadModal.hide();
 					refresh(2500);
 				} else {
-					Growl.growl(MSGS.information()+": ", MSGS.fileUploadFailure());
+					//Growl.growl(MSGS.information()+": ", MSGS.fileUploadFailure());
 				}
 			}
 		});
@@ -192,7 +194,7 @@ public class PackagesPanelUi extends Composite {
 			public void onSubmitComplete(SubmitCompleteEvent event) {
 				String result = event.getResults();
 				if (result == null || result.isEmpty()) {
-					Growl.growl(MSGS.information()+": ", MSGS.fileDownloadSuccess());
+					//Growl.growl(MSGS.information()+": ", MSGS.fileDownloadSuccess());
 					uploadModal.hide();
 					refresh(2500);
 				} else {
@@ -202,7 +204,7 @@ public class PackagesPanelUi extends Composite {
 					if (startIdx != -1 && endIndex != -1) {
 						errMsg = result.substring(startIdx+5, endIndex);
 					}
-					Growl.growl(MSGS.error()+": ", MSGS.fileDownloadFailure()+": "+errMsg);
+					//Growl.growl(MSGS.error()+": ", MSGS.fileDownloadFailure()+": "+errMsg);
 				}
 			}
 		});
@@ -221,39 +223,51 @@ public class PackagesPanelUi extends Composite {
 		
 	}
 
-	private void uninstall(GwtBSDeploymentPackage selected) {
+	private void uninstall(final GwtDeploymentPackage selected) {
 		
-		gwtPackageService.uninstallDeploymentPackage(selected.getName(), new AsyncCallback<Void>() {
+		gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
 
 			@Override
-			public void onFailure(Throwable caught) {
-				// TODO Auto-generated method stub
-				Growl.growl("Uninstall Failed: ",caught.getLocalizedMessage());
-				refresh(2500);
+			public void onFailure(Throwable ex) {
+				FailureHandler.handle(ex);
 			}
 
 			@Override
-			public void onSuccess(Void result) {
-				// TODO Auto-generated method stub
-				Growl.growl("Uninstalled!");
-				refresh(2500);
-			}});
+			public void onSuccess(GwtXSRFToken token) {
+				gwtPackageService.uninstallDeploymentPackage(token, selected.getName(), new AsyncCallback<Void>() {
+
+					@Override
+					public void onFailure(Throwable caught) {
+						// TODO Auto-generated method stub
+						//Growl.growl("Uninstall Failed: ",caught.getLocalizedMessage());
+						refresh(2500);
+					}
+
+					@Override
+					public void onSuccess(Void result) {
+						// TODO Auto-generated method stub
+						//Growl.growl("Uninstalled!");
+						refresh(2500);
+					}});
+			}
+			
+		});
 	}
 
 	private void initTable() {
 
-		TextColumn<GwtBSDeploymentPackage> col1 = new TextColumn<GwtBSDeploymentPackage>() {
+		TextColumn<GwtDeploymentPackage> col1 = new TextColumn<GwtDeploymentPackage>() {
 			@Override
-			public String getValue(GwtBSDeploymentPackage object) {
+			public String getValue(GwtDeploymentPackage object) {
 				return object.getName();
 			}
 		};
 		col1.setCellStyleNames("status-table-row");
 		packagesGrid.addColumn(col1, "Name");
 
-		TextColumn<GwtBSDeploymentPackage> col2 = new TextColumn<GwtBSDeploymentPackage>() {
+		TextColumn<GwtDeploymentPackage> col2 = new TextColumn<GwtDeploymentPackage>() {
 			@Override
-			public String getValue(GwtBSDeploymentPackage object) {
+			public String getValue(GwtDeploymentPackage object) {
 				return object.getName();
 			}
 		};
@@ -266,22 +280,35 @@ public class PackagesPanelUi extends Composite {
 	private void loadPackagesData() {
 		packagesDataProvider.getList().clear();
 		
-		gwtPackageService.findDeviceDeploymentPackages(new AsyncCallback<List<GwtBSDeploymentPackage>>() {
+		gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
+
 			@Override
-			public void onFailure(Throwable caught) {
-				GwtBSDeploymentPackage pkg = new GwtBSDeploymentPackage();
-				pkg.setName("Unavailable! Please click refresh");
-				pkg.setVersion(caught.getLocalizedMessage());
-				packagesDataProvider.getList().add(pkg);
+			public void onFailure(Throwable ex) {
+				FailureHandler.handle(ex);
 			}
 
 			@Override
-			public void onSuccess(List<GwtBSDeploymentPackage> result) {
-				for(GwtBSDeploymentPackage pair : result){
-					packagesDataProvider.getList().add(pair);
-				}
-				packagesDataProvider.flush();
-			}});
+			public void onSuccess(GwtXSRFToken token) {
+				gwtPackageService.findDeviceDeploymentPackages(token, new AsyncCallback<List<GwtDeploymentPackage>>() {
+					@Override
+					public void onFailure(Throwable caught) {
+						GwtDeploymentPackage pkg = new GwtDeploymentPackage();
+						pkg.setName("Unavailable! Please click refresh");
+						pkg.setVersion(caught.getLocalizedMessage());
+						packagesDataProvider.getList().add(pkg);
+					}
+
+					@Override
+					public void onSuccess(List<GwtDeploymentPackage> result) {
+						for(GwtDeploymentPackage pair : result){
+							packagesDataProvider.getList().add(pair);
+						}
+						packagesDataProvider.flush();
+					}});
+				
+			}
+			
+		});
 			
 		if(packagesDataProvider.getList().size()==0){
 			packagesGrid.setVisible(false);

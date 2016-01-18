@@ -95,21 +95,17 @@ import org.eclipse.kura.web.shared.service.GwtNetworkService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.extjs.gxt.ui.client.data.BaseListLoadResult;
-import com.extjs.gxt.ui.client.data.ListLoadResult;
-
-
 public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements GwtNetworkService 
 {
 	private static final long serialVersionUID = -4188750359099902616L;
 
 	private static Logger s_logger = LoggerFactory.getLogger(GwtNetworkServiceImpl.class);
 
-	public ListLoadResult<GwtNetInterfaceConfig> findNetInterfaceConfigurations() throws GwtKuraException {
-		ListLoadResult<GwtNetInterfaceConfig> result= privateFindNetInterfaceConfigurations();
+	public ArrayList<GwtNetInterfaceConfig> findNetInterfaceConfigurations() throws GwtKuraException {
+		ArrayList<GwtNetInterfaceConfig> result= privateFindNetInterfaceConfigurations();
 
-		List<GwtNetInterfaceConfig> listResult= result.getData();
-		for(GwtNetInterfaceConfig netConfig: listResult){
+		//List<GwtNetInterfaceConfig> listResult= result.
+		for(GwtNetInterfaceConfig netConfig: result){
 			if(netConfig instanceof GwtWifiNetInterfaceConfig){
 				GwtWifiNetInterfaceConfig wifiConfig= (GwtWifiNetInterfaceConfig) netConfig;
 				GwtWifiConfig gwtWifiConfig= wifiConfig.getActiveWifiConfig();
@@ -120,7 +116,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private ListLoadResult<GwtNetInterfaceConfig> privateFindNetInterfaceConfigurations() throws GwtKuraException {
+	private ArrayList<GwtNetInterfaceConfig> privateFindNetInterfaceConfigurations() throws GwtKuraException {
 		s_logger.debug("Starting");
 
 		NetworkAdminService nas = null;
@@ -669,7 +665,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 		}
 
 		s_logger.debug("Returning");
-		return new BaseListLoadResult<GwtNetInterfaceConfig>(gwtNetConfigs);
+		return new ArrayList<GwtNetInterfaceConfig>(gwtNetConfigs);
 	}
 
 
@@ -796,10 +792,10 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 						String passKey= new String(wifiConfig.getPasskey().getPassword());
 						if(passKey != null && passKey.equals(PLACEHOLDER)){
 
-							ListLoadResult<GwtNetInterfaceConfig> result= privateFindNetInterfaceConfigurations();
+							ArrayList<GwtNetInterfaceConfig> result= privateFindNetInterfaceConfigurations();
 
-							List<GwtNetInterfaceConfig> listResult= result.getData();
-							for(GwtNetInterfaceConfig netConfig: listResult){
+							//List<GwtNetInterfaceConfig> listResult= result.getData();
+							for(GwtNetInterfaceConfig netConfig: result){
 								if(netConfig instanceof GwtWifiNetInterfaceConfig){
 									GwtWifiNetInterfaceConfig oldWifiConfig= (GwtWifiNetInterfaceConfig) netConfig;
 									GwtWifiConfig oldGwtWifiConfig= oldWifiConfig.getActiveWifiConfig();
@@ -889,7 +885,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 	}
 
 
-	public ListLoadResult<GwtFirewallOpenPortEntry> findDeviceFirewallOpenPorts(GwtXSRFToken xsrfToken) throws GwtKuraException 
+	public ArrayList<GwtFirewallOpenPortEntry> findDeviceFirewallOpenPorts(GwtXSRFToken xsrfToken) throws GwtKuraException 
 	{
 		checkXSRFToken(xsrfToken);
 		NetworkAdminService nas = ServiceLocator.getInstance().getService(NetworkAdminService.class);
@@ -919,7 +915,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 				}
 			}
 
-			return new BaseListLoadResult<GwtFirewallOpenPortEntry>(gwtOpenPortEntries);
+			return new ArrayList<GwtFirewallOpenPortEntry>(gwtOpenPortEntries);
 
 		} catch (KuraException e) {
 			e.printStackTrace();
@@ -927,7 +923,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 		}
 	}
 
-	public ListLoadResult<GwtWifiHotspotEntry> findWifiHotspots(GwtXSRFToken xsrfToken, String interfaceName) throws GwtKuraException {
+	public ArrayList<GwtWifiHotspotEntry> findWifiHotspots(GwtXSRFToken xsrfToken, String interfaceName) throws GwtKuraException {
 
 		checkXSRFToken(xsrfToken);
 		NetworkAdminService nas = ServiceLocator.getInstance().getService(NetworkAdminService.class);
@@ -1028,7 +1024,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 			KuraExceptionHandler.handle(t);
 		}
 
-		return new BaseListLoadResult<GwtWifiHotspotEntry>(gwtWifiHotspotsEntries);
+		return new ArrayList<GwtWifiHotspotEntry>(gwtWifiHotspotsEntries);
 	}
 
 	public boolean verifyWifiCredentials(GwtXSRFToken xsrfToken, String interfaceName, GwtWifiConfig gwtWifiConfig) throws GwtKuraException {
@@ -1040,7 +1036,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 		return status;
 	}
 
-	public ListLoadResult<GwtFirewallPortForwardEntry> findDeviceFirewallPortForwards(GwtXSRFToken xsrfToken) throws GwtKuraException 
+	public ArrayList<GwtFirewallPortForwardEntry> findDeviceFirewallPortForwards(GwtXSRFToken xsrfToken) throws GwtKuraException 
 	{
 		checkXSRFToken(xsrfToken);
 		NetworkAdminService nas = ServiceLocator.getInstance().getService(NetworkAdminService.class);
@@ -1070,7 +1066,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 				}
 			}
 
-			return new BaseListLoadResult<GwtFirewallPortForwardEntry>(gwtPortForwardEntries);
+			return new ArrayList<GwtFirewallPortForwardEntry>(gwtPortForwardEntries);
 
 		} catch (KuraException e) {
 			// TODO Auto-generated catch block
@@ -1079,7 +1075,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 		}
 	}
 
-	public ListLoadResult<GwtFirewallNatEntry> findDeficeFirewallNATs(GwtXSRFToken xsrfToken) throws GwtKuraException {
+	public ArrayList<GwtFirewallNatEntry> findDeficeFirewallNATs(GwtXSRFToken xsrfToken) throws GwtKuraException {
 
 		checkXSRFToken(xsrfToken);
 		NetworkAdminService nas = ServiceLocator.getInstance().getService(NetworkAdminService.class);
@@ -1104,7 +1100,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 				}
 			}
 
-			return new BaseListLoadResult<GwtFirewallNatEntry>(gwtNatEntries);
+			return new ArrayList<GwtFirewallNatEntry>(gwtNatEntries);
 
 		} catch (KuraException e) {
 			e.printStackTrace();

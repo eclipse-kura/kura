@@ -1,4 +1,4 @@
-package org.eclipse.kura.web.client.bootstrap.ui.Network;
+package org.eclipse.kura.web.client.ui.Network;
 
 import java.util.HashMap;
 import java.util.List;
@@ -6,10 +6,10 @@ import java.util.Map;
 
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.util.MessageUtils;
-import org.eclipse.kura.web.shared.model.GwtBSModemAuthType;
-import org.eclipse.kura.web.shared.model.GwtBSModemInterfaceConfig;
-import org.eclipse.kura.web.shared.model.GwtBSNetInterfaceConfig;
-import org.eclipse.kura.web.shared.model.GwtBSSession;
+import org.eclipse.kura.web.shared.model.GwtModemAuthType;
+import org.eclipse.kura.web.shared.model.GwtModemInterfaceConfig;
+import org.eclipse.kura.web.shared.model.GwtNetInterfaceConfig;
+import org.eclipse.kura.web.shared.model.GwtSession;
 import org.gwtbootstrap3.client.ui.FieldSet;
 import org.gwtbootstrap3.client.ui.FormControlStatic;
 import org.gwtbootstrap3.client.ui.FormGroup;
@@ -22,7 +22,6 @@ import org.gwtbootstrap3.client.ui.RadioButton;
 import org.gwtbootstrap3.client.ui.TextBox;
 import org.gwtbootstrap3.client.ui.constants.ValidationState;
 import org.gwtbootstrap3.client.ui.html.Span;
-import org.gwtbootstrap3.extras.growl.client.ui.Growl;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ChangeEvent;
@@ -50,9 +49,9 @@ public class TabModemUi extends Composite implements Tab {
 	private static final Messages MSGS = GWT.create(Messages.class);
 	private static final String REGEX_NUM = "(?:\\d*)?\\d+";
 
-	GwtBSSession session;
+	GwtSession session;
 	boolean dirty;
-	GwtBSModemInterfaceConfig selectedNetIfConfig;
+	GwtModemInterfaceConfig selectedNetIfConfig;
 	private final Map<String, String> defaultDialString = new HashMap<String, String>();
 	String dialString;
 
@@ -85,7 +84,7 @@ public class TabModemUi extends Composite implements Tab {
 	@UiField
 	FieldSet field;
 
-	public TabModemUi(GwtBSSession currentSession) {
+	public TabModemUi(GwtSession currentSession) {
 		initWidget(uiBinder.createAndBindUi(this));
 		session = currentSession;
 		defaultDialString.put("HE910", "atd*99***1#");
@@ -119,9 +118,9 @@ public class TabModemUi extends Composite implements Tab {
 	}
 	
 	@Override
-	public void setNetInterface(GwtBSNetInterfaceConfig config) {
-		if (config instanceof GwtBSModemInterfaceConfig) {
-			selectedNetIfConfig = (GwtBSModemInterfaceConfig) config;
+	public void setNetInterface(GwtNetInterfaceConfig config) {
+		if (config instanceof GwtModemInterfaceConfig) {
+			selectedNetIfConfig = (GwtModemInterfaceConfig) config;
 		}
 	}
 
@@ -137,8 +136,8 @@ public class TabModemUi extends Composite implements Tab {
 		}
 	}
 
-	public void getUpdatedNetInterface(GwtBSNetInterfaceConfig updatedNetIf) {
-		GwtBSModemInterfaceConfig updatedModemNetIf = (GwtBSModemInterfaceConfig) updatedNetIf;
+	public void getUpdatedNetInterface(GwtNetInterfaceConfig updatedNetIf) {
+		GwtModemInterfaceConfig updatedModemNetIf = (GwtModemInterfaceConfig) updatedNetIf;
 
 		if (model.getText() != null && service.getText() != null) {
 			// note - status is set in tcp/ip tab
@@ -153,13 +152,13 @@ public class TabModemUi extends Composite implements Tab {
 					.getText().trim() : "");
 
 			String authValue = auth.getSelectedValue();
-			for (GwtBSModemAuthType authT : GwtBSModemAuthType.values()) {
+			for (GwtModemAuthType authT : GwtModemAuthType.values()) {
 				if (MessageUtils.get(authT.name()).equals(authValue)) {
 					updatedModemNetIf.setAuthType(authT);
 				}
 			}
 
-			if (updatedModemNetIf.getAuthType() != GwtBSModemAuthType.netModemAuthNONE) {
+			if (updatedModemNetIf.getAuthType() != GwtModemAuthType.netModemAuthNONE) {
 				updatedModemNetIf
 						.setUsername((username.getText().trim() != null) ? username
 								.getText().trim() : "");
@@ -237,7 +236,7 @@ public class TabModemUi extends Composite implements Tab {
 			@Override
 			public void onChange(ChangeEvent event) {
 				setDirty(true);
-				Growl.growl("Network changes");
+				//Growl.growl("Network changes");
 				refreshForm();
 			}
 		});
@@ -394,7 +393,7 @@ public class TabModemUi extends Composite implements Tab {
 
 		// AUTH TYPE
 		labelAuth.setText(MSGS.netModemAuthType());
-		for (GwtBSModemAuthType a : GwtBSModemAuthType.values()) {
+		for (GwtModemAuthType a : GwtModemAuthType.values()) {
 			auth.addItem(MessageUtils.get(a.name()));
 		}
 		auth.addMouseOverHandler(new MouseOverHandler() {
@@ -799,7 +798,7 @@ public class TabModemUi extends Composite implements Tab {
 			dial.setText(selectedNetIfConfig.getDialString());
 			apn.setText(selectedNetIfConfig.getApn());
 
-			GwtBSModemAuthType authType = GwtBSModemAuthType.netModemAuthNONE;
+			GwtModemAuthType authType = GwtModemAuthType.netModemAuthNONE;
 			if (selectedNetIfConfig.getAuthType() != null) {
 				authType = selectedNetIfConfig.getAuthType();
 			}
@@ -865,7 +864,7 @@ public class TabModemUi extends Composite implements Tab {
 
 		if (authTypeVal == null
 				|| authTypeVal.equalsIgnoreCase(MessageUtils
-						.get(GwtBSModemAuthType.netModemAuthNONE.name()))) {
+						.get(GwtModemAuthType.netModemAuthNONE.name()))) {
 			username.setEnabled(false);
 			password.setEnabled(false);
 		} else {

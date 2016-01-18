@@ -15,46 +15,50 @@ import java.util.MissingResourceException;
 
 import org.eclipse.kura.web.client.messages.ValidationMessages;
 
-import com.extjs.gxt.ui.client.widget.form.Field;
-import com.extjs.gxt.ui.client.widget.form.TextField;
-import com.extjs.gxt.ui.client.widget.form.Validator;
-import com.google.gwt.core.client.GWT;
+import org.gwtbootstrap3.client.ui.FormGroup;
+import org.gwtbootstrap3.client.ui.TextBox;
+import org.gwtbootstrap3.client.ui.constants.ValidationState;
 
-public class TextFieldValidator implements Validator {
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ChangeHandler;
+
+public class TextFieldValidator {
 
 	private static final ValidationMessages MSGS = GWT.create(ValidationMessages.class);
 
-	protected FieldType         m_textFieldType;
-	protected TextField<String> m_textField;
-	
-	public TextFieldValidator(TextField<String> textField, FieldType textFieldType) {		
+	TextBox Tbox;
+	FormGroup group;
+	FieldType type;
+	boolean required;
 
-		m_textField = textField;
-		m_textFieldType = textFieldType;
+	public void validate( TextBox textBox,FormGroup formGroup, FieldType fieldType,  boolean req){		
+		type=fieldType;
+		required=req;
+		group=formGroup;
 		
-		// initialize the field for its validation
-		if (m_textFieldType.getRegex() != null) {
-			m_textField.setRegex(m_textFieldType.getRegex());
-		}
-		if (m_textFieldType.getToolTipMessage() != null) {
-			m_textField.setToolTip(m_textFieldType.getToolTipMessage());
-		}
-		if (m_textFieldType.getRequiredMessage() != null) {
-			m_textField.getMessages().setBlankText(m_textFieldType.getRequiredMessage());
-		}
-		if (m_textFieldType.getRegexMessage() != null) {
-			m_textField.getMessages().setRegexText(m_textFieldType.getRegexMessage());
-		}
-	}
+		textBox.addChangeHandler(new ChangeHandler(){
+			@Override
+			public void onChange(ChangeEvent event) {
+				//value format
+				TextBox box = (TextBox)event.getSource();
 
-
-	public String validate(Field<?> field, String value) {
-		
-		String result = null;
-		if (!value.matches(m_textFieldType.getRegex())) {
-			result = m_textFieldType.getRegexMessage();
-		}
-		return result;
+				if(!box.getText().matches(type.getRegex())){
+					group.setValidationState(ValidationState.ERROR);
+					box.setPlaceholder(type.getRegexMessage());
+				}else{
+					group.setValidationState(ValidationState.NONE);
+					box.setPlaceholder("");
+				}
+				//value required
+				if(required && (box.getText().trim()=="" || box.getText()==null)){
+					group.setValidationState(ValidationState.ERROR);
+					box.setPlaceholder(type.getRequiredMessage());
+				}else{
+					group.setValidationState(ValidationState.NONE);
+					box.setPlaceholder("");
+				}
+			}});
 	}
 	
 

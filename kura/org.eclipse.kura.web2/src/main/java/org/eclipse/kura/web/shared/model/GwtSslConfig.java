@@ -15,9 +15,7 @@ import java.io.Serializable;
 
 import org.eclipse.kura.web.client.util.GwtSafeHtmlUtils;
 
-import com.extjs.gxt.ui.client.data.BaseModel;
-
-public class GwtSslConfig extends BaseModel implements Serializable{
+public class GwtSslConfig extends GwtBaseModel implements Serializable{
 	
 	/**
 	 * 
@@ -28,13 +26,12 @@ public class GwtSslConfig extends BaseModel implements Serializable{
 		super();
 	}
 	
-	@SuppressWarnings("unchecked")
 	@Override
-	public <X> X set(String name, X value){
+	public void set(String name, Object value){
 		if (value instanceof String) {
-			value = (X) GwtSafeHtmlUtils.htmlEscape((String) value);
+			value = (Object) GwtSafeHtmlUtils.htmlEscape((String) value);
 		}
-		return super.set(name, value);
+		super.set(name, value);
 	}
 
 	public String getProtocol() {

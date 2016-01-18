@@ -4,27 +4,30 @@
  * Fields are rendered based on their type (Password(Input), Choice(Dropboxes) etc. with Text fields rendered
  * for both numeric and other textual field with validate() checking if value in numeric fields is numeric
  */
-package org.eclipse.kura.web.client.bootstrap.ui;
+package org.eclipse.kura.web.client.ui;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.lang.Integer;
 
 import org.eclipse.kura.web.client.messages.Messages;
+import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.client.util.MessageUtils;
-import org.eclipse.kura.web.shared.model.GwtBSConfigComponent;
-import org.eclipse.kura.web.shared.model.GwtBSConfigParameter;
-import org.eclipse.kura.web.shared.model.GwtBSConfigParameter.GwtBSConfigParameterType;
-import org.eclipse.kura.web.shared.service.GwtBSComponentService;
-import org.eclipse.kura.web.shared.service.GwtBSComponentServiceAsync;
+import org.eclipse.kura.web.shared.model.GwtConfigComponent;
+import org.eclipse.kura.web.shared.model.GwtConfigParameter;
+import org.eclipse.kura.web.shared.model.GwtConfigParameter.GwtConfigParameterType;
+import org.eclipse.kura.web.shared.model.GwtXSRFToken;
+import org.eclipse.kura.web.shared.service.GwtComponentService;
+import org.eclipse.kura.web.shared.service.GwtComponentServiceAsync;
+import org.eclipse.kura.web.shared.service.GwtSecurityTokenService;
+import org.eclipse.kura.web.shared.service.GwtSecurityTokenServiceAsync;
 import org.gwtbootstrap3.client.ui.AnchorListItem;
 import org.gwtbootstrap3.client.ui.Button;
 import org.gwtbootstrap3.client.ui.ButtonGroup;
 import org.gwtbootstrap3.client.ui.FieldSet;
 import org.gwtbootstrap3.client.ui.Form;
-import org.gwtbootstrap3.client.ui.HelpBlock;
 import org.gwtbootstrap3.client.ui.FormGroup;
 import org.gwtbootstrap3.client.ui.FormLabel;
+import org.gwtbootstrap3.client.ui.HelpBlock;
 import org.gwtbootstrap3.client.ui.InlineRadio;
 import org.gwtbootstrap3.client.ui.Input;
 import org.gwtbootstrap3.client.ui.ListBox;
@@ -39,7 +42,6 @@ import org.gwtbootstrap3.client.ui.constants.InputType;
 import org.gwtbootstrap3.client.ui.constants.ValidationState;
 import org.gwtbootstrap3.client.ui.gwt.FlowPanel;
 import org.gwtbootstrap3.client.ui.html.Span;
-import org.gwtbootstrap3.extras.growl.client.ui.Growl;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ChangeEvent;
@@ -63,7 +65,8 @@ public class ServicesUi extends Composite {
 	}
 
 	private static final Messages MSGS = GWT.create(Messages.class);
-	private final GwtBSComponentServiceAsync gwtComponentService = GWT.create(GwtBSComponentService.class);
+	private final GwtComponentServiceAsync gwtComponentService = GWT.create(GwtComponentService.class);
+	private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
 
 	private final static String REGEX_NUM = "^[0-9][\\.\\d]*(,\\d+)?$";
 	HashMap<String, Boolean> valid = new HashMap<String, Boolean>();
@@ -71,7 +74,7 @@ public class ServicesUi extends Composite {
 	NavPills menu;
 	PanelBody content;
 	AnchorListItem service;
-	GwtBSConfigComponent selected;
+	GwtConfigComponent selected;
 	private boolean dirty, initialized;
 	TextBox validated;
 	FormGroup validatedGroup;
@@ -85,7 +88,7 @@ public class ServicesUi extends Composite {
 	@UiField
 	Form form;
 
-	public ServicesUi(final GwtBSConfigComponent addedItem, EntryClassUi entryClassUi) {
+	public ServicesUi(final GwtConfigComponent addedItem, EntryClassUi entryClassUi) {
 		initWidget(uiBinder.createAndBindUi(this));
 		initialized = false;
 		entryClass = entryClassUi;
@@ -147,24 +150,34 @@ public class ServicesUi extends Composite {
 						yes.setText(MSGS.yesButton());
 						yes.addClickHandler(new ClickHandler(){
 								@Override
-								public void onClick(ClickEvent event) {									
-									gwtComponentService.updateComponentConfiguration(selected, new AsyncCallback<Void>(){
+								public void onClick(ClickEvent event) {
+									gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
+
 										@Override
-										public void onFailure(Throwable caught) {
-											Growl.growl(MSGS.error()+": ",caught.getLocalizedMessage());
+										public void onFailure(Throwable ex) {
+											FailureHandler.handle(ex);
 										}
 
 										@Override
-										public void onSuccess(Void result) {
-											modal.hide();	
-											Growl.growl(MSGS.info()+": ",MSGS.deviceConfigApplied());
-											apply.setEnabled(false);
-											reset.setEnabled(false);
-											setDirty(false);
-											entryClass.initServicesTree();
-										}});
-									
+										public void onSuccess(GwtXSRFToken token) {
+											gwtComponentService.updateComponentConfiguration(token, selected, new AsyncCallback<Void>(){
+												@Override
+												public void onFailure(Throwable caught) {
+													//Growl.growl(MSGS.error()+": ",caught.getLocalizedMessage());
+												}
 
+												@Override
+												public void onSuccess(Void result) {
+													modal.hide();	
+													//Growl.growl(MSGS.info()+": ",MSGS.deviceConfigApplied());
+													apply.setEnabled(false);
+													reset.setEnabled(false);
+													setDirty(false);
+													entryClass.initServicesTree();
+												}});
+											
+										}
+									});
 								}});
 					group.add(yes);
 						Button no = new Button();
@@ -184,7 +197,7 @@ public class ServicesUi extends Composite {
 				
 			}//end isDirty()
 		}else{
-			Growl.growl(MSGS.deviceConfigError());
+			//Growl.growl(MSGS.deviceConfigError());
 		}//end else isValid	
 	}
 
@@ -233,7 +246,7 @@ public class ServicesUi extends Composite {
 	//Iterates through all GwtBSConfigParameter in the selected GwtBSConfigComponent
 	public void renderForm() {
 		fields.clear();
-		for (GwtBSConfigParameter param : selected.getParameters()) {
+		for (GwtConfigParameter param : selected.getParameters()) {
 			if (param.getCardinality() == 0 || param.getCardinality() == 1
 					|| param.getCardinality() == -1) {
 				renderConfigParameter(param);				
@@ -244,7 +257,7 @@ public class ServicesUi extends Composite {
 		initialized = true;
 	}
 
-	private void renderMultiFieldConfigParameter(GwtBSConfigParameter mParam) {
+	private void renderMultiFieldConfigParameter(GwtConfigParameter mParam) {
 		String value = null;
 		String[] values = mParam.getValues();
 		for (int i = 0; i < Math.min(mParam.getCardinality(), 10); i++) {
@@ -263,13 +276,13 @@ public class ServicesUi extends Composite {
 	}
 
 	//passes the parameter to the corressponding method depending on the type of field to be rendered
-	private void renderConfigParameter(GwtBSConfigParameter param) {
+	private void renderConfigParameter(GwtConfigParameter param) {
 		Map<String, String> options = param.getOptions();
 		if (options != null && options.size() > 0) {
 			renderChoiceField(param);
-		} else if (param.getType().equals(GwtBSConfigParameterType.BOOLEAN)) {
+		} else if (param.getType().equals(GwtConfigParameterType.BOOLEAN)) {
 			renderBooleanField(param);
-		} else if (param.getType().equals(GwtBSConfigParameterType.PASSWORD)) {
+		} else if (param.getType().equals(GwtConfigParameterType.PASSWORD)) {
 			renderPasswordField(param);
 		} else {
 			renderTextField(param);
@@ -277,7 +290,7 @@ public class ServicesUi extends Composite {
 	}
 
 	// Field Render based on Type
-	private void renderTextField(final GwtBSConfigParameter param) {
+	private void renderTextField(final GwtConfigParameter param) {
 
 		valid.put(param.getName(), true);
 		FormGroup formGroup = new FormGroup();
@@ -298,8 +311,8 @@ public class ServicesUi extends Composite {
 		if (param.getDescription().contains("\u200B\u200B\u200B\u200B\u200B")) {
 			textBox.setHeight("120px");
 		}
-		if (param.getOriginalValue() != null) {
-			textBox.setText(param.getOriginalValue());
+		if (param.getValue() != null) {
+			textBox.setText(param.getValue());
 		} else {
 			textBox.setText("");
 		}
@@ -319,7 +332,7 @@ public class ServicesUi extends Composite {
 
 	}
 
-	private void renderPasswordField(final GwtBSConfigParameter param) {
+	private void renderPasswordField(final GwtConfigParameter param) {
 
 		valid.put(param.getName(), true);
 		FormGroup formGroup = new FormGroup();
@@ -340,8 +353,8 @@ public class ServicesUi extends Composite {
 
 		Input input = new Input();
 		input.setType(InputType.PASSWORD);
-		if (param.getOriginalValue() != null) {
-			input.setText((String) param.getOriginalValue());
+		if (param.getValue() != null) {
+			input.setText((String) param.getValue());
 		} else {
 			input.setText("");
 		}
@@ -374,7 +387,7 @@ public class ServicesUi extends Composite {
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	private void renderBooleanField(final GwtBSConfigParameter param) {
+	private void renderBooleanField(final GwtConfigParameter param) {
 
 		valid.put(param.getName(), true);
 
@@ -404,8 +417,8 @@ public class ServicesUi extends Composite {
 		radioFalse.setText(MSGS.falseLabel());
 		radioFalse.setFormValue("false");
 
-		radioTrue.setValue(param.getOriginalValue().equalsIgnoreCase("true"));
-		radioFalse.setValue(!param.getOriginalValue().equalsIgnoreCase("true"));
+		radioTrue.setValue(param.getValue().equalsIgnoreCase("true"));
+		radioFalse.setValue(!param.getValue().equalsIgnoreCase("true"));
 
 		flowPanel.add(radioTrue);
 		flowPanel.add(radioFalse);
@@ -436,7 +449,7 @@ public class ServicesUi extends Composite {
 		fields.add(formGroup);
 	}
 
-	private void renderChoiceField(final GwtBSConfigParameter param) {
+	private void renderChoiceField(final GwtConfigParameter param) {
 
 		valid.put(param.getName(), true);
 		FormGroup formGroup = new FormGroup();
@@ -469,8 +482,8 @@ public class ServicesUi extends Composite {
 				listBox.setSelectedIndex(i);
 			}
 
-			if (param.getOriginalValue() != null
-					&& oMap.get(current).equals(param.getOriginalValue())) {
+			if (param.getValue() != null
+					&& oMap.get(current).equals(param.getValue())) {
 				listBox.setSelectedIndex(i);
 			}
 			i++;
@@ -492,7 +505,7 @@ public class ServicesUi extends Composite {
 
 	// -------------
 
-	public GwtBSConfigComponent getConfiguration() {
+	public GwtConfigComponent getConfiguration() {
 		return selected;
 	}
 
@@ -507,14 +520,14 @@ public class ServicesUi extends Composite {
 		return true;
 	}
 
-	private void setOriginalValues(GwtBSConfigComponent component) {
-		for (GwtBSConfigParameter parameter : component.getParameters()) {
-			parameter.setOriginalValue(parameter.getValue());
+	private void setOriginalValues(GwtConfigComponent component) {
+		for (GwtConfigParameter parameter : component.getParameters()) {
+			parameter.setValue(parameter.getValue());
 		}
 	}
 	
 	//Validates all the entered values
-	private boolean validate(GwtBSConfigParameter param, TextBox box, FormGroup group){
+	private boolean validate(GwtConfigParameter param, TextBox box, FormGroup group){
 		
 		if(param.isRequired() && (box.getText().trim()==null || box.getText().trim()=="")){
 			group.setValidationState(ValidationState.ERROR);
@@ -522,7 +535,7 @@ public class ServicesUi extends Composite {
 			box.setPlaceholder(MSGS.formRequiredParameter());
 			return false;
 		}else{
-			if(param.getType().equals(GwtBSConfigParameterType.CHAR)){
+			if(param.getType().equals(GwtConfigParameterType.CHAR)){
 				if(param.getMin()!=null){
 					if(Character.valueOf(param.getMin().charAt(0)).charValue() > Character.valueOf(box.getText().trim().charAt(0)).charValue()){
 						group.setValidationState(ValidationState.ERROR);
@@ -539,7 +552,7 @@ public class ServicesUi extends Composite {
 						return false;
 					}
 				}
-			}else if(param.getType().equals(GwtBSConfigParameterType.STRING)){
+			}else if(param.getType().equals(GwtConfigParameterType.STRING)){
 				if((String.valueOf(box.getText().trim()).length())<0){
 					group.setValidationState(ValidationState.ERROR);
 					valid.put(param.getName(), false);
@@ -561,7 +574,7 @@ public class ServicesUi extends Composite {
 			}else{
 				try{
 					//numeric value
-					if(param.getType().equals(GwtBSConfigParameterType.FLOAT)){
+					if(param.getType().equals(GwtConfigParameterType.FLOAT)){
 						if(param.getMin()!=null){
 							if(Float.valueOf(param.getMin()).floatValue() > Float.valueOf(box.getText().trim()).floatValue()){
 								group.setValidationState(ValidationState.ERROR);
@@ -578,7 +591,7 @@ public class ServicesUi extends Composite {
 								return false;
 							}
 						}
-					}else if(param.getType().equals(GwtBSConfigParameterType.INTEGER)){
+					}else if(param.getType().equals(GwtConfigParameterType.INTEGER)){
 						if(param.getMin()!=null){
 							if(Integer.valueOf(param.getMin()).intValue() > Integer.valueOf(box.getText().trim()).intValue()){
 								group.setValidationState(ValidationState.ERROR);
@@ -595,7 +608,7 @@ public class ServicesUi extends Composite {
 								return false;
 							}
 						}
-					}else if(param.getType().equals(GwtBSConfigParameterType.SHORT)){
+					}else if(param.getType().equals(GwtConfigParameterType.SHORT)){
 						if(param.getMin()!=null){
 							if(Short.valueOf(param.getMin()).shortValue() > Short.valueOf(box.getText().trim()).shortValue()){
 								group.setValidationState(ValidationState.ERROR);
@@ -612,7 +625,7 @@ public class ServicesUi extends Composite {
 								return false;
 							}
 						}
-					}else if(param.getType().equals(GwtBSConfigParameterType.BYTE)){
+					}else if(param.getType().equals(GwtConfigParameterType.BYTE)){
 						if(param.getMin()!=null){
 							if(Byte.valueOf(param.getMin()).byteValue() > Byte.valueOf(box.getText().trim()).byteValue()){
 								group.setValidationState(ValidationState.ERROR);
@@ -629,7 +642,7 @@ public class ServicesUi extends Composite {
 								return false;
 							}
 						}
-					}else if(param.getType().equals(GwtBSConfigParameterType.LONG)){
+					}else if(param.getType().equals(GwtConfigParameterType.LONG)){
 						if(param.getMin()!=null){
 							if(Long.valueOf(param.getMin()).longValue() > Long.valueOf(box.getText().trim()).longValue()){
 								group.setValidationState(ValidationState.ERROR);
@@ -646,7 +659,7 @@ public class ServicesUi extends Composite {
 								return false;
 							}
 						}
-					}else if(param.getType().equals(GwtBSConfigParameterType.DOUBLE)){
+					}else if(param.getType().equals(GwtConfigParameterType.DOUBLE)){
 						if(param.getMin()!=null){
 							if(Double.valueOf(param.getMin()).doubleValue() > Double.valueOf(box.getText().trim()).doubleValue()){
 								group.setValidationState(ValidationState.ERROR);

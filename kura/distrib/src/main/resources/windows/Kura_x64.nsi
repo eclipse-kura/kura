@@ -1,4 +1,11 @@
 !include "Library.nsh"
+!include "nsDialogs.nsh"
+!include "winmessages.nsh"
+!include "logiclib.nsh"
+!include "StrFunc.nsh"
+
+${StrStr} # Supportable for Install Sections and Functions
+${StrRep} # Supportable for Install Sections and Functions
 
 ; The name of the installer
 Name "Kura for Windows"
@@ -31,6 +38,7 @@ LicenseData "KuraFiles\license.rtf"
 
 Page license
 Page directory
+Page custom inst_as_init inst_as_leave
 Page instfiles
 
 UninstPage uninstConfirm
@@ -38,68 +46,73 @@ UninstPage instfiles
 
 ;--------------------------------
 
-!define StrStr "!insertmacro StrStr"
- 
-!macro StrStr ResultVar String SubString
-  Push `${String}`
-  Push `${SubString}`
-  Call StrStr
-  Pop `${ResultVar}`
+!macro _ReplaceInFile SOURCE_FILE SEARCH_TEXT REPLACEMENT
+  Push "${SOURCE_FILE}"
+  Push "${SEARCH_TEXT}"
+  Push "${REPLACEMENT}"
+  Call RIF
 !macroend
+
+Function RIF
  
-Function StrStr
-/*After this point:
-  ------------------------------------------
-  $R0 = SubString (input)
-  $R1 = String (input)
-  $R2 = SubStringLen (temp)
-  $R3 = StrLen (temp)
-  $R4 = StartCharPos (temp)
-  $R5 = TempStr (temp)*/
+  ClearErrors  ; want to be a newborn
  
-  ;Get input from user
-  Exch $R0
+  Exch $0      ; REPLACEMENT
   Exch
-  Exch $R1
-  Push $R2
-  Push $R3
-  Push $R4
-  Push $R5
+  Exch $1      ; SEARCH_TEXT
+  Exch 2
+  Exch $2      ; SOURCE_FILE
  
-  ;Get "String" and "SubString" length
-  StrLen $R2 $R0
-  StrLen $R3 $R1
-  ;Start "StartCharPos" counter
-  StrCpy $R4 0
+  Push $R0     ; SOURCE_FILE file handle
+  Push $R1     ; temporary file handle
+  Push $R2     ; unique temporary file name
+  Push $R3     ; a line to sar/save
+  Push $R4     ; shift puffer
  
-  ;Loop until "SubString" is found or "String" reaches its end
-  loop:
-    ;Remove everything before and after the searched part ("TempStr")
-    StrCpy $R5 $R1 $R2 $R4
+  IfFileExists $2 +1 RIF_error      ; knock-knock
+  FileOpen $R0 $2 "r"               ; open the door
  
-    ;Compare "TempStr" with "SubString"
-    StrCmp $R5 $R0 done
-    ;If not "SubString", this could be "String"'s end
-    IntCmp $R4 $R3 done 0 done
-    ;If not, continue the loop
-    IntOp $R4 $R4 + 1
-    Goto loop
-  done:
+  GetTempFileName $R2               ; who's new?
+  FileOpen $R1 $R2 "w"              ; the escape, please!
  
-/*After this point:
-  ------------------------------------------
-  $R0 = ResultVar (output)*/
+  RIF_loop:                         ; round'n'round we go
+    FileRead $R0 $R3                ; read one line
+    IfErrors RIF_leaveloop          ; enough is enough
+    RIF_sar:                        ; sar - search and replace
+      Push "$R3"                    ; (hair)stack
+      Push "$1"                     ; needle
+      Push "$0"                     ; blood
+      Call StrRep                   ; do the bartwalk
+      StrCpy $R4 "$R3"              ; remember previous state
+      Pop $R3                       ; gimme s.th. back in return!
+      StrCmp "$R3" "$R4" +1 RIF_sar ; loop, might change again!
+    FileWrite $R1 "$R3"             ; save the newbie
+  Goto RIF_loop                     ; gimme more
  
-  ;Remove part before "SubString" on "String" (if there has one)
-  StrCpy $R0 $R1 `` $R4
+  RIF_leaveloop:                    ; over'n'out, Sir!
+    FileClose $R1                   ; S'rry, Ma'am - clos'n now
+    FileClose $R0                   ; me 2
  
-  ;Return output to user
-  Pop $R5
+    Delete "$2.old"                 ; go away, Sire
+    Rename "$2" "$2.old"            ; step aside, Ma'am
+    Rename "$R2" "$2"               ; hi, baby!
+ 
+    ClearErrors                     ; now i AM a newborn
+    Goto RIF_out                    ; out'n'away
+ 
+  RIF_error:                        ; ups - s.th. went wrong...
+    SetErrors                       ; ...so cry, boy!
+ 
+  RIF_out:                          ; your wardrobe?
   Pop $R4
   Pop $R3
   Pop $R2
   Pop $R1
-  Exch $R0
+  Pop $R0
+  Pop $2
+  Pop $0
+  Pop $1
+ 
 FunctionEnd
 
 ;--------------------------------
@@ -125,9 +138,55 @@ FunctionEnd
 
 ;--------------------------------
 
+var dialog
+var hwnd
+var inst_as_service
+ 
+Function inst_as_init
+	nsDialogs::Create 1018
+		Pop $dialog
+
+	Push false
+	Pop $inst_as_service
+ 
+	${NSD_CreateLabel} 0 0 100% 10u "Select how to install Kura:"
+
+	${NSD_CreateRadioButton} 10 20 90% 10u "Run Kura automatically at logon (allows user interaction)"
+		Pop $hwnd
+		${NSD_AddStyle} $hwnd ${WS_GROUP}
+		${NSD_OnClick} $hwnd RadioClickInstAsLogon
+		SendMessage $hwnd ${BM_SETCHECK} 1 0
+	${NSD_CreateRadioButton} 10 40 90% 10u "Install Kura as a service (no user interaction)"
+		Pop $hwnd
+		${NSD_OnClick} $hwnd RadioClickInstAsSvc
+ 
+	nsDialogs::Show
+FunctionEnd
+ 
+Function RadioClickInstAsLogon
+	Pop $hwnd
+	Push false
+	Pop $inst_as_service
+FunctionEnd
+
+Function RadioClickInstAsSvc
+	Pop $hwnd
+	Push true
+	Pop $inst_as_service
+FunctionEnd
+ 
+Function inst_as_leave
+FunctionEnd
+
+;--------------------------------
+
 ; The stuff to install
 
 var JREx64
+var inst_dir_
+var data_dir
+var data_dir_
+var temp_dir_
 
 Section "kura (required)"
 
@@ -201,26 +260,71 @@ Section "kura (required)"
 	!insertmacro InstallLib DLL NOTSHARED NOREBOOT_NOTPROTECTED system\x64\dkcomm.dll $SYSDIR\dkcomm.dll $SYSDIR
 	!insertmacro InstallLib DLL NOTSHARED NOREBOOT_NOTPROTECTED system\x64\KuraNativeWin.dll $SYSDIR\KuraNativeWin.dll $SYSDIR
 
-	SetOutPath $WINDIR\Sysnative
-	File system\x64\KURAService.exe
+	;==========================================================================================================================
+	; Now replace fixed paths in startup and config files
+	; Config files will need to change path to Unix-style / and remove "
+	StrCpy     $inst_dir_ $INSTDIR
+	ReadEnvStr $data_dir "ALLUSERSPROFILE"
+	ReadEnvStr $temp_dir_ "TEMP"
 
-	; batch file to replace Kura paths in config files - now it's done during start
-	;SetOutPath $INSTDIR
-	;File "KuraFiles\set_kura_paths.bat"
-	;ExecWait '"$INSTDIR\set_kura_paths.bat" "$INSTDIR"'
+	${StrRep} $inst_dir_ $inst_dir_ `"` ``
+	${StrRep} $inst_dir_ $inst_dir_ `\` `/`
 
-	;=============================================================================================================
-	; Now setup the service that will run Kura using the service manager sc. NB: the installer will be running as
-	; a 32 bit process but we want a 64 bit service so we must call sc with it's full path using Sysnative. The
-	; Sysnative directory is only available to 32 bit processes and is the real System32 directory not SysWOW64
+	${StrRep} $data_dir_ $data_dir `"` ``
+	${StrRep} $data_dir_ $data_dir_ `\` `/`
 
-	ExecWait '$WINDIR\Sysnative\sc create KURAService binpath= $SYSDIR\KURAService.exe'
-	ExecWait '$WINDIR\Sysnative\sc config KURAService start= auto displayname= "KURA Service"'
-	ExecWait '$WINDIR\Sysnative\sc description KURAService "KURA MQTT communitaction service for IOT devices."'
+	${StrRep} $temp_dir_ $temp_dir_ `"` ``
+	${StrRep} $temp_dir_ $temp_dir_ `\` `/`
+;  DetailPrint "Replacing..."
+;  DetailPrint $inst_dir_
+;  DetailPrint $data_dir_
+;  DetailPrint $temp_dir_
 
-	; Add a registry entry with the command that actually starts KURA then start the service
-	WriteRegStr HKLM System\CurrentControlSet\Services\KURAService "ServiceCommand" 'cmd /C "$INSTDIR\start_kura_service.bat"'
-	ExecWait '$WINDIR\Sysnative\sc start KURAService'
+	!insertmacro _ReplaceInFile "$data_dir\Kura\kura\kura.properties"  "/opt/eclipse/kura/kura/plugins" "$inst_dir_/kura/plugins"
+	!insertmacro _ReplaceInFile "$data_dir\Kura\kura\kura.properties"  "/opt/eclipse/kura"              "$data_dir_/kura"
+	!insertmacro _ReplaceInFile "$data_dir\Kura\kura\kura.properties"  "/tmp/.kura"                     "$temp_dir_/kura"
+
+	!insertmacro _ReplaceInFile "$data_dir\Kura\kura\log4j.properties" "/var"                           "$temp_dir_/kura"
+
+	!insertmacro _ReplaceInFile "$data_dir\Kura\kura\config.ini"       "/tmp/kura"                      "$temp_dir_/kura"
+
+	!insertmacro _ReplaceInFile "$INSTDIR\start_kura.bat"              "c:\opt\eclipse"                 `%ALLUSERSPROFILE%`
+	!insertmacro _ReplaceInFile "$INSTDIR\start_kura.bat"              "\tmp\.kura"                     `%TEMP%\kura`
+
+	!insertmacro _ReplaceInFile "$INSTDIR\SCH_Kura.xml"                "C:\Program Files\Kura\"         "$INSTDIR\"
+
+
+	${If} $inst_as_service == 1
+
+		;=============================================================================================================
+		; Install as a service
+
+		; Copy the Service helper
+		SetOutPath $WINDIR\Sysnative
+		File system\x64\KURAService.exe
+
+		;=============================================================================================================
+		; Now setup the service that will run Kura using the service manager sc. NB: the installer will be running as
+		; a 32 bit process but we want a 64 bit service so we must call sc with it's full path using Sysnative. The
+		; Sysnative directory is only available to 32 bit processes and is the real System32 directory not SysWOW64
+
+		ExecWait '$WINDIR\Sysnative\sc create KURAService binpath= $SYSDIR\KURAService.exe'
+		ExecWait '$WINDIR\Sysnative\sc config KURAService start= auto displayname= "KURA Service"'
+		ExecWait '$WINDIR\Sysnative\sc description KURAService "KURA MQTT communitaction service for IOT devices."'
+
+		; Add a registry entry with the command that actually starts KURA then start the service
+		WriteRegStr HKLM System\CurrentControlSet\Services\KURAService "ServiceCommand" 'cmd /C "$INSTDIR\start_kura.bat"'
+		ExecWait '$WINDIR\Sysnative\sc start KURAService'
+	${Else}
+
+		;=============================================================================================================
+		; Install as an application automatically started after logon
+		; This is done using Windows Task Schduler - supplying an XML configuration file for the new task to create
+
+		; First adjust the default path in the xml file with the chosen install directory
+		ExecWait 'schtasks /Create /TN "Kura" /XML "$INSTDIR\SCH_Kura.xml"'
+
+	${Endif}
 
 	; Write the installation path into the registry
 	WriteRegStr HKLM SOFTWARE\Kura "Install_Dir" "$INSTDIR"

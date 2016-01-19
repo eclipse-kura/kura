@@ -275,7 +275,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 		} else {
 			cc = getSelfConfiguringComponentConfiguration(pid);
 		}
-		if(cc != null){
+		if(cc != null && cc.getConfigurationProperties() != null){
 			decryptPasswords(cc);
 		}
 		return cc;

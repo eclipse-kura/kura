@@ -335,9 +335,11 @@ fi
                         prefix="${build.output.name}/install" />
             <zipfileset file="${project.build.directory}/${build.output.name}/kura.service.edison"
                         prefix="${build.output.name}/install" />
-            <zipfileset file="src/main/resources/${build.name}/firewall.init"
+ 	    <zipfileset file="src/main/resources/${build.name}/recover_default_config.init"
+                        prefix="${build.output.name}/install" />           
+	    <zipfileset file="src/main/resources/${build.name}/firewall.init"
                         prefix="${build.output.name}/install" />
-           <zipfileset file="src/main/resources/${build.name}/iptables.init"
+            <zipfileset file="src/main/resources/${build.name}/iptables.init"
                         prefix="${build.output.name}/install" />
             <zipfileset file="src/main/resources/common/monit.init.wrl"
                         prefix="${build.output.name}/install" />

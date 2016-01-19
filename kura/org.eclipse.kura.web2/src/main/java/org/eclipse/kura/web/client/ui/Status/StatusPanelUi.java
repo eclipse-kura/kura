@@ -125,11 +125,7 @@ public class StatusPanelUi extends Composite {
 
 							@Override
 							public void onFailure(Throwable caught) {
-								statusGridProvider.getList().add(
-										new GwtGroupedNVPair(
-												"Not Available, please click Refresh",
-												"Not Available, please click Refresh",
-												"Not Available, please click Refresh"));
+								FailureHandler.handle(caught);
 								statusGridProvider.flush();
 
 							}

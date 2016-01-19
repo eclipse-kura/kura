@@ -82,7 +82,7 @@
 		<dependency>
 			<groupId>com.allen-sauer.gwt.log</groupId>
 			<artifactId>gwt-log</artifactId>
-			<version>3.1.8</version>
+			<version>3.3.2</version>
 		</dependency>
 		<dependency>
 			<groupId>org.osgi</groupId>
@@ -124,6 +124,11 @@
 			<groupId>org.gwtbootstrap3</groupId>
 			<artifactId>gwtbootstrap3</artifactId>
 			<version>0.9.1</version>
+		</dependency>
+        <dependency>
+			<groupId>org.ow2.asm</groupId>
+			<artifactId>asm</artifactId>
+			<version>5.0.4</version>
 		</dependency>
 	</dependencies>
 
@@ -259,7 +264,7 @@
 				<version>3.3</version>
 				<configuration>
 					<source>1.6</source>
-					<target>1.6</target>
+					<target>1.7</target>
 				</configuration>
 			</plugin>
 			<plugin>

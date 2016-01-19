@@ -105,11 +105,7 @@ public class BundlesTabUi extends Composite {
 
 					@Override
 					public void onFailure(Throwable caught) {
-						bundlesDataProvider.getList().add(
-								new GwtGroupedNVPair(
-										"Not Available, please click Refresh",
-										"Not Available, please click Refresh",
-										"Not Available, please click Refresh"));
+						FailureHandler.handle(caught);
 						bundlesDataProvider.flush();
 
 					}

@@ -45,7 +45,6 @@ public class AuthenticationManager
 	public boolean authenticate(String username, String password)
 	{
 		try {			
-
 			CryptoService cryptoService = ServiceLocator.getInstance().getService(CryptoService.class);
 			String sha1Password= cryptoService.sha1Hash(password);
 			boolean isUsernameMatching= username.equals(this.username);

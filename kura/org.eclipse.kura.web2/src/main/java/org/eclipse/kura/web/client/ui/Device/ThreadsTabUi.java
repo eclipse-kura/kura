@@ -89,11 +89,7 @@ public class ThreadsTabUi extends Composite {
 					@Override
 					public void onFailure(Throwable caught) {
 						threadsDataProvider.getList().clear();
-						threadsDataProvider.getList().add(
-								new GwtGroupedNVPair(
-										"Not Available, please click Refresh",
-										"Not Available, please click Refresh",
-										"Not Available, please click Refresh"));
+						FailureHandler.handle(caught);
 						threadsDataProvider.flush();
 	
 					}

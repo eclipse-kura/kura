@@ -18,7 +18,11 @@
   <inherits name='com.google.gwt.user.User' />
   
   <inherits name="com.allen_sauer.gwt.log.gwt-log-OFF"/>
-
+  <inherits name="com.google.gwt.logging.Logging" />
+  <set-property name="gwt.logging.logLevel" value="INFO"/>
+  <set-property name="gwt.logging.enabled" value="TRUE"/>
+  <set-property name="gwt.logging.consoleHandler" value="ENABLED"/>
+  
   <!-- We need the JUnit module in the main module,               -->
   <!-- otherwise eclipse complains (Google plugin bug?)           -->
   <!-- inherits name='com.google.gwt.junit.JUnit' />              -->
@@ -40,9 +44,9 @@
   
   <!-- Specify the app entry point class.                         -->
   <entry-point class='org.eclipse.kura.web.client.denali' />
-<!--
+
   <set-property name='user.agent' value='safari'/>  
--->
+
   <!-- Specify the paths for translatable code                    -->
   <source path='client' />
   <source path='shared' />

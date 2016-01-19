@@ -102,11 +102,7 @@ public class SystemPropertiesTabUi extends Composite {
 					@Override
 					public void onFailure(Throwable caught) {
 						systemPropertiesDataProvider.getList().clear();
-						systemPropertiesDataProvider.getList().add(
-								new GwtGroupedNVPair(
-										"Not Available, please click Refresh",
-										"Not Available, please click Refresh",
-										"Not Available, please click Refresh"));
+						FailureHandler.handle(caught);
 						systemPropertiesDataProvider.flush();
 
 						

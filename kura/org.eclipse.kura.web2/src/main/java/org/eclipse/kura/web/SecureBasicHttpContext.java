@@ -116,7 +116,7 @@ public class SecureBasicHttpContext implements HttpContext
 		String userid = credentials.substring(0, colon);
 		String password = credentials.substring(colon + 1);
 
-		Subject subject = login(request, userid, password);            
+		Subject subject = login(request, userid, password);
 		if (subject == null) {
 			return failAuthorization(response);
 		}

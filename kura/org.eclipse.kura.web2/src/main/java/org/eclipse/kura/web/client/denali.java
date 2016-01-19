@@ -14,6 +14,7 @@ package org.eclipse.kura.web.client;
 import java.awt.BorderLayout;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.ui.EntryClassUi;
@@ -46,6 +47,7 @@ import com.google.gwt.user.client.ui.RootPanel;
 public class denali implements EntryPoint 
 {
 	private static final Messages MSGS = GWT.create(Messages.class);
+	Logger logger = Logger.getLogger("NameOfYourLogger");
 	//private final boolean VIEW_LOG = true;
 	private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
 	private final GwtDeviceServiceAsync gwtDeviceService = GWT.create(GwtDeviceService.class);
@@ -88,7 +90,7 @@ public class denali implements EntryPoint
 	 * This is the 'real' entry point method.
 	 */
 	public void onModuleLoad2() {
-
+		logger.info("Hi");
 		RootPanel.get().add(binder);
 
 		// load custom CSS/JS

@@ -100,11 +100,7 @@ public class ProfileTabUi extends Composite {
 					@Override
 					public void onFailure(Throwable caught) {
 						profileDataProvider.getList().clear();
-						profileDataProvider.getList().add(
-								new GwtGroupedNVPair(
-										"Not Available, please click Refresh",
-										"Not Available, please click Refresh",
-										"Not Available, please click Refresh"));
+						FailureHandler.handle(caught);
 						profileDataProvider.flush();
 
 					}

@@ -25,7 +25,7 @@ import java.util.Properties;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.net.NetworkConfiguration;
-import org.eclipse.kura.core.net.NetworkConfigurationVisitor;
+import org.eclipse.kura.core.net.NetworkConfigurationReader;
 import org.eclipse.kura.core.net.modem.ModemInterfaceAddressConfigImpl;
 import org.eclipse.kura.core.net.modem.ModemInterfaceConfigImpl;
 import org.eclipse.kura.linux.net.dns.LinuxDns;
@@ -50,15 +50,15 @@ import org.eclipse.kura.net.admin.visitor.linux.util.ModemXchangeScript;
 import org.eclipse.kura.net.admin.visitor.linux.util.PapLinux;
 import org.eclipse.kura.net.admin.visitor.linux.util.PppUtil;
 import org.eclipse.kura.net.modem.ModemConfig;
-import org.eclipse.kura.net.modem.ModemTechnologyType;
 import org.eclipse.kura.net.modem.ModemConfig.AuthType;
 import org.eclipse.kura.net.modem.ModemConfig.PdpType;
+import org.eclipse.kura.net.modem.ModemTechnologyType;
 import org.eclipse.kura.usb.UsbDevice;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
-public class PppConfigReader implements NetworkConfigurationVisitor {
+public class PppConfigReader implements NetworkConfigurationReader {
 	
 	private static class FileFilter implements FilenameFilter {
 
@@ -84,7 +84,7 @@ public class PppConfigReader implements NetworkConfigurationVisitor {
     }
     
     @Override
-    public void visit(NetworkConfiguration config) throws KuraException {
+    public void read(NetworkConfiguration config) throws KuraException {
     	
         List<NetInterfaceConfig<? extends NetInterfaceAddressConfig>> netInterfaceConfigs = config.getNetInterfaceConfigs();
         

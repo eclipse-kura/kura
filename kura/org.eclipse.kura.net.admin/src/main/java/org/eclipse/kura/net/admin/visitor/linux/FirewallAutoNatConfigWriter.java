@@ -19,7 +19,7 @@ import java.util.Properties;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.net.NetworkConfiguration;
-import org.eclipse.kura.core.net.NetworkConfigurationVisitor;
+import org.eclipse.kura.core.net.NetworkConfigurationWriter;
 import org.eclipse.kura.linux.net.iptables.LinuxFirewall;
 import org.eclipse.kura.linux.net.iptables.NATRule;
 import org.eclipse.kura.net.NetConfig;
@@ -34,7 +34,7 @@ import org.eclipse.kura.net.firewall.FirewallNatConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class FirewallAutoNatConfigWriter implements NetworkConfigurationVisitor {
+public class FirewallAutoNatConfigWriter implements NetworkConfigurationWriter {
 	
 	private static final Logger s_logger = LoggerFactory.getLogger(FirewallAutoNatConfigWriter.class);
 
@@ -49,7 +49,7 @@ public class FirewallAutoNatConfigWriter implements NetworkConfigurationVisitor 
 	}
 	
 	@Override
-	public void visit(NetworkConfiguration config) throws KuraException {
+	public void write(NetworkConfiguration config) throws KuraException {
 			
 		List<NetInterfaceConfig<? extends NetInterfaceAddressConfig>> netInterfaceConfigs = config.getModifiedNetInterfaceConfigs();
 		 

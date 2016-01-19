@@ -23,7 +23,7 @@ import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.net.EthernetInterfaceConfigImpl;
 import org.eclipse.kura.core.net.NetworkConfiguration;
-import org.eclipse.kura.core.net.NetworkConfigurationVisitor;
+import org.eclipse.kura.core.net.NetworkConfigurationWriter;
 import org.eclipse.kura.core.net.WifiInterfaceConfigImpl;
 import org.eclipse.kura.linux.net.dhcp.DhcpServerManager;
 import org.eclipse.kura.linux.net.dhcp.DhcpServerTool;
@@ -37,7 +37,7 @@ import org.eclipse.kura.net.dhcp.DhcpServerConfig4;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class DhcpConfigWriter implements NetworkConfigurationVisitor {
+public class DhcpConfigWriter implements NetworkConfigurationWriter {
 	
 private static final Logger s_logger = LoggerFactory.getLogger(DhcpConfigWriter.class);
 	
@@ -55,7 +55,7 @@ private static final Logger s_logger = LoggerFactory.getLogger(DhcpConfigWriter.
 	}
 
 	@Override
-	public void visit(NetworkConfiguration config) throws KuraException {
+	public void write(NetworkConfiguration config) throws KuraException {
 		List<NetInterfaceConfig<? extends NetInterfaceAddressConfig>> netInterfaceConfigs = config.getModifiedNetInterfaceConfigs();
 		 
 		for (NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig : netInterfaceConfigs) {

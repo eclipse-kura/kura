@@ -11,7 +11,6 @@
  */
 package org.eclipse.kura.net.admin;
 
-import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -36,7 +35,8 @@ import org.eclipse.kura.core.configuration.metatype.Tscalar;
 import org.eclipse.kura.core.net.EthernetInterfaceConfigImpl;
 import org.eclipse.kura.core.net.LoopbackInterfaceConfigImpl;
 import org.eclipse.kura.core.net.NetworkConfiguration;
-import org.eclipse.kura.core.net.NetworkConfigurationVisitor;
+import org.eclipse.kura.core.net.NetworkConfigurationReader;
+import org.eclipse.kura.core.net.NetworkConfigurationWriter;
 import org.eclipse.kura.core.net.WifiInterfaceConfigImpl;
 import org.eclipse.kura.core.net.WifiInterfaceImpl;
 import org.eclipse.kura.core.net.modem.ModemInterfaceConfigImpl;
@@ -53,8 +53,7 @@ import org.eclipse.kura.net.NetInterfaceType;
 import org.eclipse.kura.net.NetworkService;
 import org.eclipse.kura.net.admin.event.NetworkConfigurationChangeEvent;
 import org.eclipse.kura.net.admin.modem.SupportedUsbModemsFactoryInfo;
-import org.eclipse.kura.net.admin.visitor.linux.LinuxReadVisitor;
-import org.eclipse.kura.net.admin.visitor.linux.LinuxWriteVisitor;
+import org.eclipse.kura.net.admin.visitor.linux.LinuxNetworkConfigurationProcessors;
 import org.eclipse.kura.net.modem.CellularModem;
 import org.eclipse.kura.net.modem.ModemManagerService;
 import org.eclipse.kura.usb.UsbModemDevice;
@@ -82,8 +81,8 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
     private UsbService m_usbService;
     private ModemManagerService m_modemManagerService;
     
-    private List<NetworkConfigurationVisitor> m_readVisitors;
-    private List<NetworkConfigurationVisitor> m_writeVisitors;
+    private List<NetworkConfigurationReader> m_readers;
+    private List<NetworkConfigurationWriter> m_writers;
     
     private ScheduledExecutorService m_executorUtil;
     private boolean m_firstConfig = true;
@@ -140,11 +139,9 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
     {
         s_logger.debug("activate(componentContext, properties)...");
         
-        m_readVisitors = new ArrayList<NetworkConfigurationVisitor>();
-        m_readVisitors.add(LinuxReadVisitor.getInstance());
+        m_readers = LinuxNetworkConfigurationProcessors.getReaders();
 
-        m_writeVisitors = new ArrayList<NetworkConfigurationVisitor>();
-        m_writeVisitors.add(LinuxWriteVisitor.getInstance());
+        m_writers = LinuxNetworkConfigurationProcessors.getWriters();
         
         // we are intentionally ignoring the properties from ConfigAdmin at startup
         if(properties == null) {
@@ -170,8 +167,8 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
     
     protected void deactivate(ComponentContext componentContext) {
         s_logger.debug("deactivate()");
-        m_writeVisitors = null;
-        m_readVisitors = null;
+        m_writers = null;
+        m_readers = null;
         m_executorUtil.shutdownNow();
     }
     
@@ -241,8 +238,8 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
         		
         		NetworkConfiguration networkConfig = new NetworkConfiguration(modifiedProps);
         	
-        		for(NetworkConfigurationVisitor visitor : m_writeVisitors) {
-        			networkConfig.accept(visitor);
+        		for(NetworkConfigurationWriter writer : m_writers) {
+        			writer.write(networkConfig);
         		}
     
         		//raise the event because there was a change
@@ -362,8 +359,8 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
         }
             
         // populate the NetInterfaceConfigs
-        for(NetworkConfigurationVisitor visitor : m_readVisitors) {
-            networkConfiguration.accept(visitor);
+        for(NetworkConfigurationReader reader : m_readers) {
+            reader.read(networkConfiguration);
         }
 
         return networkConfiguration;

@@ -25,7 +25,7 @@ import org.apache.commons.io.FileUtils;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.net.NetworkConfiguration;
-import org.eclipse.kura.core.net.NetworkConfigurationVisitor;
+import org.eclipse.kura.core.net.NetworkConfigurationWriter;
 import org.eclipse.kura.linux.net.util.KuraConstants;
 import org.eclipse.kura.net.IPAddress;
 import org.eclipse.kura.net.NetConfig;
@@ -44,7 +44,7 @@ import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class IfcfgConfigWriter implements NetworkConfigurationVisitor {
+public class IfcfgConfigWriter implements NetworkConfigurationWriter {
 
 	private static final Logger s_logger = LoggerFactory.getLogger(IfcfgConfigWriter.class);
 
@@ -64,7 +64,7 @@ public class IfcfgConfigWriter implements NetworkConfigurationVisitor {
 	}
 
 	@Override
-	public void visit(NetworkConfiguration config) throws KuraException {
+	public void write(NetworkConfiguration config) throws KuraException {
 		List<NetInterfaceConfig<? extends NetInterfaceAddressConfig>> netInterfaceConfigs = config.getModifiedNetInterfaceConfigs();
 
 		if(!netInterfaceConfigs.isEmpty()){

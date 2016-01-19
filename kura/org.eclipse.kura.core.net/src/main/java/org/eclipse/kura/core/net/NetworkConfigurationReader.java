@@ -13,7 +13,7 @@ package org.eclipse.kura.core.net;
 
 import org.eclipse.kura.KuraException;
 
-public interface NetworkConfigurationVisitor {
+public interface NetworkConfigurationReader {
 
-    public void visit(NetworkConfiguration config) throws KuraException;
+    public void read(NetworkConfiguration config) throws KuraException;
 }

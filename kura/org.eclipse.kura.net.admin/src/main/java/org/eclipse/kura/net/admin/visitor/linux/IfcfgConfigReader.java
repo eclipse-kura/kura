@@ -25,7 +25,7 @@ import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.net.NetInterfaceAddressConfigImpl;
 import org.eclipse.kura.core.net.NetworkConfiguration;
-import org.eclipse.kura.core.net.NetworkConfigurationVisitor;
+import org.eclipse.kura.core.net.NetworkConfigurationReader;
 import org.eclipse.kura.core.net.WifiInterfaceAddressConfigImpl;
 import org.eclipse.kura.core.net.util.NetworkUtil;
 import org.eclipse.kura.linux.net.dns.LinuxDns;
@@ -42,7 +42,7 @@ import org.eclipse.kura.net.admin.visitor.linux.util.KuranetConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class IfcfgConfigReader implements NetworkConfigurationVisitor {
+public class IfcfgConfigReader implements NetworkConfigurationReader {
 
 	private static final Logger s_logger = LoggerFactory
 			.getLogger(IfcfgConfigReader.class);
@@ -63,7 +63,7 @@ public class IfcfgConfigReader implements NetworkConfigurationVisitor {
 	}
 
 	@Override
-	public void visit(NetworkConfiguration config) throws KuraException {
+	public void read(NetworkConfiguration config) throws KuraException {
 		List<NetInterfaceConfig<? extends NetInterfaceAddressConfig>> netInterfaceConfigs = config
 				.getNetInterfaceConfigs();
 

@@ -16,7 +16,7 @@ import java.util.List;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.net.NetworkConfiguration;
-import org.eclipse.kura.core.net.NetworkConfigurationVisitor;
+import org.eclipse.kura.core.net.NetworkConfigurationReader;
 import org.eclipse.kura.core.net.WifiInterfaceAddressConfigImpl;
 import org.eclipse.kura.core.net.WifiInterfaceConfigImpl;
 import org.eclipse.kura.net.NetInterfaceAddressConfig;
@@ -28,16 +28,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
-public class WifiConfigReader implements NetworkConfigurationVisitor{
+public class WifiConfigReader implements NetworkConfigurationReader {
 
     private static final Logger s_logger = LoggerFactory.getLogger(WifiConfigReader.class);
             
     private static WifiConfigReader s_instance;
     
-    private List<NetworkConfigurationVisitor> m_visitors;
+    private List<NetworkConfigurationReader> m_visitors;
     
     private WifiConfigReader() {
-        m_visitors = new ArrayList<NetworkConfigurationVisitor>();
+        m_visitors = new ArrayList<NetworkConfigurationReader>();
         m_visitors.add(WpaSupplicantConfigReader.getInstance());
         m_visitors.add(HostapdConfigReader.getInstance());
     }
@@ -51,7 +51,7 @@ public class WifiConfigReader implements NetworkConfigurationVisitor{
     }
     
     @Override
-    public void visit(NetworkConfiguration config) throws KuraException {
+    public void read(NetworkConfiguration config) throws KuraException {
         List<NetInterfaceConfig<? extends NetInterfaceAddressConfig>> netInterfaceConfigs = config.getNetInterfaceConfigs();
         
         for(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig : netInterfaceConfigs) {
@@ -61,8 +61,8 @@ public class WifiConfigReader implements NetworkConfigurationVisitor{
         }
         
         // Get wpa_supplicant and hostapd configs
-        for(NetworkConfigurationVisitor visitor : m_visitors) {
-            visitor.visit(config);
+        for(NetworkConfigurationReader reader : m_visitors) {
+            reader.read(config);
         }
     }
 

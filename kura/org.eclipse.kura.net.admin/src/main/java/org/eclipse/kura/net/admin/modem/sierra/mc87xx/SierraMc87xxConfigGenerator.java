@@ -14,8 +14,8 @@ package org.eclipse.kura.net.admin.modem.sierra.mc87xx;
 import org.eclipse.kura.net.admin.modem.ModemPppConfigGenerator;
 import org.eclipse.kura.net.admin.modem.PppPeer;
 import org.eclipse.kura.net.admin.modem.telit.he910.TelitHe910AtCommands;
-import org.eclipse.kura.net.admin.visitor.linux.util.ModemXchangePair;
-import org.eclipse.kura.net.admin.visitor.linux.util.ModemXchangeScript;
+import org.eclipse.kura.net.admin.processor.linux.util.ModemXchangePair;
+import org.eclipse.kura.net.admin.processor.linux.util.ModemXchangeScript;
 import org.eclipse.kura.net.modem.ModemConfig;
 import org.eclipse.kura.net.modem.ModemConfig.PdpType;
 

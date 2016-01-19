@@ -13,7 +13,7 @@ package org.eclipse.kura.net.admin.modem.sierra.usb598;
 
 import org.eclipse.kura.net.admin.modem.ModemPppConfigGenerator;
 import org.eclipse.kura.net.admin.modem.PppPeer;
-import org.eclipse.kura.net.admin.visitor.linux.util.ModemXchangeScript;
+import org.eclipse.kura.net.admin.processor.linux.util.ModemXchangeScript;
 import org.eclipse.kura.net.modem.ModemConfig;
 
 public class SierraUsb598ConfigGenerator implements ModemPppConfigGenerator{

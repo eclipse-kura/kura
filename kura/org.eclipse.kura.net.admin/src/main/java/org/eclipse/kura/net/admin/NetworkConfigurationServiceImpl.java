@@ -53,7 +53,7 @@ import org.eclipse.kura.net.NetInterfaceType;
 import org.eclipse.kura.net.NetworkService;
 import org.eclipse.kura.net.admin.event.NetworkConfigurationChangeEvent;
 import org.eclipse.kura.net.admin.modem.SupportedUsbModemsFactoryInfo;
-import org.eclipse.kura.net.admin.visitor.linux.LinuxNetworkConfigurationProcessors;
+import org.eclipse.kura.net.admin.processor.linux.LinuxNetworkConfigurationProcessors;
 import org.eclipse.kura.net.modem.CellularModem;
 import org.eclipse.kura.net.modem.ModemManagerService;
 import org.eclipse.kura.usb.UsbModemDevice;

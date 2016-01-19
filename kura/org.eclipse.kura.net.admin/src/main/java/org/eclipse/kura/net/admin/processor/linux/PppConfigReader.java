@@ -9,7 +9,7 @@
  * Contributors:
  *   Eurotech
  */
-package org.eclipse.kura.net.admin.visitor.linux;
+package org.eclipse.kura.net.admin.processor.linux;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -43,12 +43,12 @@ import org.eclipse.kura.net.NetInterfaceConfig;
 import org.eclipse.kura.net.NetInterfaceStatus;
 import org.eclipse.kura.net.NetInterfaceType;
 import org.eclipse.kura.net.admin.NetworkConfigurationServiceImpl;
-import org.eclipse.kura.net.admin.visitor.linux.util.ChapLinux;
-import org.eclipse.kura.net.admin.visitor.linux.util.KuranetConfig;
-import org.eclipse.kura.net.admin.visitor.linux.util.ModemXchangePair;
-import org.eclipse.kura.net.admin.visitor.linux.util.ModemXchangeScript;
-import org.eclipse.kura.net.admin.visitor.linux.util.PapLinux;
-import org.eclipse.kura.net.admin.visitor.linux.util.PppUtil;
+import org.eclipse.kura.net.admin.processor.linux.util.ChapLinux;
+import org.eclipse.kura.net.admin.processor.linux.util.KuranetConfig;
+import org.eclipse.kura.net.admin.processor.linux.util.ModemXchangePair;
+import org.eclipse.kura.net.admin.processor.linux.util.ModemXchangeScript;
+import org.eclipse.kura.net.admin.processor.linux.util.PapLinux;
+import org.eclipse.kura.net.admin.processor.linux.util.PppUtil;
 import org.eclipse.kura.net.modem.ModemConfig;
 import org.eclipse.kura.net.modem.ModemConfig.AuthType;
 import org.eclipse.kura.net.modem.ModemConfig.PdpType;

@@ -714,7 +714,7 @@ public class LinuxFirewall {
 			applyBlockAllRules();
 
 			s_logger.debug("Applying local rules...");	
-			if(m_localRules != null){
+			if ((m_localRules != null) && (m_localRules.size() > 0)) {
 				for(LocalRule lr: m_localRules){	
 					boolean status = applyRule(lr.toString());
 					s_logger.trace("applyRules() :: Local rule: {} has been applied with status={}", lr, status);
@@ -722,7 +722,8 @@ public class LinuxFirewall {
 			}
 
 			s_logger.debug("Applying port forward rules...");	
-			if(m_portForwardRules != null){
+			if ((m_portForwardRules != null) && (m_portForwardRules.size() > 0)) {
+				m_allowForwarding = true;
 				for(PortForwardRule pfr: m_portForwardRules) {
 					boolean status = applyRule(pfr.toString());
 					s_logger.trace("applyRules() :: Port Forward rule: {} has been applied with status={}", pfr, status);
@@ -730,7 +731,8 @@ public class LinuxFirewall {
 			}
 
 			s_logger.debug("Applying auto NAT rules...");	
-			if(m_autoNatRules != null){
+			if ((m_autoNatRules != null) && (m_autoNatRules.size() > 0)) {
+				m_allowForwarding = true;
 				List<NatPostroutingChainRule> appliedNatPostroutingChainRules = new ArrayList<NatPostroutingChainRule>();
 				for(NATRule autoNatRule: m_autoNatRules) {
 					boolean found = false;
@@ -755,14 +757,15 @@ public class LinuxFirewall {
 			}
 
 			s_logger.debug("Applying NAT rules...");	
-			if(m_natRules != null){
-				for(NATRule natRule: m_natRules){
+			if ((m_natRules != null) && (m_natRules.size() > 0)) {
+				m_allowForwarding = true;
+				for(NATRule natRule : m_natRules){
 					applyRule(natRule.toString());
 				}
 			}
 
 			s_logger.debug("Applying custom rules...");	
-			if(m_customRules != null){
+			if ((m_customRules != null) && (m_customRules.size() > 0)) {
 				for(String customRule: m_customRules){
 					applyRule(customRule.toString());
 				}

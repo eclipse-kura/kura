@@ -324,6 +324,9 @@ Section "kura (required)"
 		; First adjust the default path in the xml file with the chosen install directory
 		ExecWait 'schtasks /Create /TN "Kura" /XML "$INSTDIR\SCH_Kura.xml"'
 
+		; And start the task manually
+		Exec 'schtasks /Run /TN "Kura"'
+
 	${Endif}
 
 	; Write the installation path into the registry

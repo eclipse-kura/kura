@@ -33,12 +33,12 @@ public class WifiConfigWriter implements NetworkConfigurationWriter{
             
     private static WifiConfigWriter s_instance;
     
-    private List<NetworkConfigurationWriter> m_visitors;
+    private List<NetworkConfigurationWriter> m_writers;
     
     private WifiConfigWriter() {
-        m_visitors = new ArrayList<NetworkConfigurationWriter>();
-        m_visitors.add(WpaSupplicantConfigWriter.getInstance());
-        m_visitors.add(HostapdConfigWriter.getInstance());
+        m_writers = new ArrayList<NetworkConfigurationWriter>();
+        m_writers.add(WpaSupplicantConfigWriter.getInstance());
+        m_writers.add(HostapdConfigWriter.getInstance());
     }
     
     public static WifiConfigWriter getInstance() {
@@ -60,8 +60,8 @@ public class WifiConfigWriter implements NetworkConfigurationWriter{
         }
         
         // Write wpa_supplicant and hostapd configs
-        for(NetworkConfigurationWriter visitor : m_visitors) {
-            visitor.write(config);
+        for(NetworkConfigurationWriter writer : m_writers) {
+            writer.write(config);
         }
     }
 

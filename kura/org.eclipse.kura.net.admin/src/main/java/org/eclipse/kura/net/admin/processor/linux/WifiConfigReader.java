@@ -34,12 +34,12 @@ public class WifiConfigReader implements NetworkConfigurationReader {
             
     private static WifiConfigReader s_instance;
     
-    private List<NetworkConfigurationReader> m_visitors;
+    private List<NetworkConfigurationReader> m_readers;
     
     private WifiConfigReader() {
-        m_visitors = new ArrayList<NetworkConfigurationReader>();
-        m_visitors.add(WpaSupplicantConfigReader.getInstance());
-        m_visitors.add(HostapdConfigReader.getInstance());
+        m_readers = new ArrayList<NetworkConfigurationReader>();
+        m_readers.add(WpaSupplicantConfigReader.getInstance());
+        m_readers.add(HostapdConfigReader.getInstance());
     }
     
     public static WifiConfigReader getInstance() {
@@ -61,7 +61,7 @@ public class WifiConfigReader implements NetworkConfigurationReader {
         }
         
         // Get wpa_supplicant and hostapd configs
-        for(NetworkConfigurationReader reader : m_visitors) {
+        for(NetworkConfigurationReader reader : m_readers) {
             reader.read(config);
         }
     }

@@ -751,7 +751,7 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
 		<copy file="src/main/resources/${build.name}/license.rtf" todir="${build.install.dir.kura}/" />
 		<copy file="src/main/resources/${build.name}/build_installer.sh" todir="${build.install.dir}/" />
 		<copy file="${project.build.directory}/${build.output.name}/Kura_x64.nsi" todir="${build.install.dir}/" />
-		<copy file="src/main/resources/${build.name}/SCH_Kura.xml" todir="${build.install.dir}/" />
+		<copy file="src/main/resources/${build.name}/SCH_Kura.xml" todir="${build.install.dir.kura}/" />
 
 		<copy todir="${build.install.dir.kura}/plugins">
 			<fileset dir="${kura.osgi.repo}/plugins" />

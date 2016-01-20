@@ -34,7 +34,7 @@
   <Actions Context="Author">
     <Exec>
       <Command>"C:\Program Files\Kura\start_kura.bat"</Command>
-      <WorkingDirectory>"C:\Program Files\Kura\"</WorkingDirectory>
+      <WorkingDirectory>C:\Program Files\Kura\</WorkingDirectory>
     </Exec>
   </Actions>
 </Task>

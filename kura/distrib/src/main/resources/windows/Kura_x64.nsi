@@ -350,6 +350,10 @@ Section "Uninstall"
 	ExecWait '$WINDIR\Sysnative\sc stop KURAService'		; Issue stop
 	Sleep 2000												; Small delay to wait for it to stop
 	ExecWait '$WINDIR\Sysnative\sc delete KURAService'		; Delete the service from the system
+
+	; In case of auto-run install, stop and delete the task
+	ExecWait 'schtasks /End /TN "Kura"'
+	ExecWait 'schtasks /Delete /F /TN "Kura"'
   
 	; Remove registry keys
 	DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Kura"

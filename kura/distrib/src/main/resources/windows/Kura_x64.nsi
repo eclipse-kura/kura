@@ -96,6 +96,8 @@ Function RIF
     Delete "$2.old"                 ; go away, Sire
     Rename "$2" "$2.old"            ; step aside, Ma'am
     Rename "$R2" "$2"               ; hi, baby!
+
+    Delete "$2.old"                 ; we don't need you anymore, Sire
  
     ClearErrors                     ; now i AM a newborn
     Goto RIF_out                    ; out'n'away

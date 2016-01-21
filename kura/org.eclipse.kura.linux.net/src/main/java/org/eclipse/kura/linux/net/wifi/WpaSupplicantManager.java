@@ -174,11 +174,11 @@ public class WpaSupplicantManager {
 		try {
 
 			if (TARGET_NAME.equals(KuraConstants.ReliaGATE_10_05.getTargetName())) {
-				s_logger.info("--> executing wpa_s rmmod");
+				s_logger.debug("--> executing wpa_s rmmod");
 				proc = ProcessUtil.exec("rmmod bcmdhd");
 				proc.waitFor();
 
-				s_logger.info("--> executing wpa_s modprobe");
+				s_logger.debug("--> executing wpa_s modprobe");
 				proc = ProcessUtil.exec("modprobe -S 3.12.6 bcmdhd");
 				if(proc.waitFor() != 0) {
 					s_logger.error("failed modprobe");
@@ -186,7 +186,7 @@ public class WpaSupplicantManager {
 				}
 				Thread.sleep(1000);
 
-				s_logger.info("--> executing wpa_s ifconfig");
+				s_logger.debug("--> executing wpa_s ifconfig");
 				proc = ProcessUtil.exec("ifconfig wlan0 up");
 				if(proc.waitFor() != 0) {
 					s_logger.error("failed ifconfig wlan0 up");

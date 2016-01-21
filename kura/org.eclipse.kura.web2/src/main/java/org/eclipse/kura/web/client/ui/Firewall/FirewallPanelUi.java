@@ -52,6 +52,7 @@ public class FirewallPanelUi extends Composite {
 				setSelectedActive(openPorts);
 				content.clear();
 				content.add(openPortsBinder);
+				openPortsBinder.loadData();
 			}});
 		
 		portForwarding.addClickHandler(new ClickHandler(){
@@ -60,6 +61,7 @@ public class FirewallPanelUi extends Composite {
 				setSelectedActive(portForwarding);
 				content.clear();
 				content.add(portForwardingBinder);
+				portForwardingBinder.loadData();
 			}});
 		
 		ipForwarding.addClickHandler(new ClickHandler(){
@@ -68,6 +70,7 @@ public class FirewallPanelUi extends Composite {
 				setSelectedActive(ipForwarding);
 				content.clear();
 				content.add(natBinder);
+				natBinder.loadData();
 			}});
 	}
 	

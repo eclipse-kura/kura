@@ -14,16 +14,14 @@ package org.eclipse.kura.web.shared.model;
 
 import java.io.Serializable;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.eclipse.kura.web.client.util.KuraBaseModel;
 
-import com.allen_sauer.gwt.log.client.Log;
-
 public class GwtFirewallNatEntry extends KuraBaseModel implements Serializable {
 	
-	/**
-	 * 
-	 */
+	private static final Logger logger = Logger.getLogger(GwtFirewallNatEntry.class.getSimpleName());
 	private static final long serialVersionUID = 6603318099742645871L;
 	
 	public String getInInterface() {
@@ -87,7 +85,7 @@ public class GwtFirewallNatEntry extends KuraBaseModel implements Serializable {
                 return false;
             }            
             if(properties.size() != otherProps.size()) {
-                Log.debug("Sizes differ");
+                logger.log(Level.FINER, "Sizes differ");
                 return false;
             }
             
@@ -97,7 +95,7 @@ public class GwtFirewallNatEntry extends KuraBaseModel implements Serializable {
                 newVal = otherProps.get(key);                
                 if(oldVal != null) {
                     if(!oldVal.equals(newVal)) {
-                        Log.debug("Values differ - Key: " + key + " oldVal: " + oldVal + ", newVal: " + newVal);
+                    	logger.log(Level.FINER, "Values differ - Key: " + key + " oldVal: " + oldVal + ", newVal: " + newVal);
                         return false;
                     }
                 } else if(newVal != null) {

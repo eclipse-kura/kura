@@ -25,8 +25,7 @@ import com.google.gwt.user.client.ui.Widget;
 
 public class NetworkTabsUi extends Composite {
 
-	private static NetworkTabsUiUiBinder uiBinder = GWT
-			.create(NetworkTabsUiUiBinder.class);
+	private static NetworkTabsUiUiBinder uiBinder = GWT.create(NetworkTabsUiUiBinder.class);
 
 	interface NetworkTabsUiUiBinder extends UiBinder<Widget, NetworkTabsUi> {
 	}

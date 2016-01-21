@@ -70,7 +70,6 @@ public class SnapshotsTabUi extends Composite {
 	public SnapshotsTabUi() {
 		initWidget(uiBinder.createAndBindUi(this));
 		initTable();
-		refresh();
 		snapshotsGrid.setSelectionModel(selectionModel);
 
 		refresh.addClickHandler(new ClickHandler() {
@@ -134,7 +133,7 @@ public class SnapshotsTabUi extends Composite {
 		snapshotsDataProvider.addDataDisplay(snapshotsGrid);
 	}
 
-	private void refresh() {
+	public void refresh() {
 		notification.setVisible(false);
 
 		gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {

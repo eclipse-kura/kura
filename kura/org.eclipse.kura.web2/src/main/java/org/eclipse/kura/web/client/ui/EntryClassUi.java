@@ -1,7 +1,8 @@
 package org.eclipse.kura.web.client.ui;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.ui.Device.DevicePanelUi;
@@ -18,6 +19,8 @@ import org.eclipse.kura.web.shared.service.GwtComponentService;
 import org.eclipse.kura.web.shared.service.GwtComponentServiceAsync;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenService;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenServiceAsync;
+import org.gwtbootstrap3.client.shared.event.ModalHideEvent;
+import org.gwtbootstrap3.client.shared.event.ModalHideHandler;
 import org.gwtbootstrap3.client.ui.AnchorListItem;
 import org.gwtbootstrap3.client.ui.Button;
 import org.gwtbootstrap3.client.ui.Image;
@@ -31,10 +34,10 @@ import org.gwtbootstrap3.client.ui.PanelBody;
 import org.gwtbootstrap3.client.ui.PanelHeader;
 import org.gwtbootstrap3.client.ui.html.Span;
 
-import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.logging.client.HasWidgetsLogHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Timer;
@@ -42,12 +45,15 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ScrollPanel;
+import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 public class EntryClassUi extends Composite {
 
 	private static EntryClassUIUiBinder uiBinder = GWT.create(EntryClassUIUiBinder.class);
 	private static final Messages MSGS = GWT.create(Messages.class);
+	private static final Logger logger = Logger.getLogger(EntryClassUi.class.getSimpleName());
+	private static Logger errorLogger = Logger.getLogger("ErrorLogger");
 	
 	private final GwtComponentServiceAsync gwtComponentService = GWT.create(GwtComponentService.class);
 	private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
@@ -64,16 +70,13 @@ public class EntryClassUi extends Composite {
 	Modal modal;
 	boolean servicesDirty,networkDirty;
 
-	private final StatusPanelUi statusBinder = GWT.create(StatusPanelUi.class);
-	private final DevicePanelUi deviceBinder = GWT.create(DevicePanelUi.class);
-	private final PackagesPanelUi packagesBinder = GWT
-			.create(PackagesPanelUi.class);
-	private final SettingsPanelUi settingsBinder = GWT
-			.create(SettingsPanelUi.class);
-	private final FirewallPanelUi firewallBinder = GWT
-			.create(FirewallPanelUi.class);
-	private final NetworkPanelUi networkBinder = GWT
-			.create(NetworkPanelUi.class);
+	private final StatusPanelUi statusBinder     = GWT.create(StatusPanelUi.class);
+	private final DevicePanelUi deviceBinder     = GWT.create(DevicePanelUi.class);
+	private final PackagesPanelUi packagesBinder = GWT.create(PackagesPanelUi.class);
+	private final SettingsPanelUi settingsBinder = GWT.create(SettingsPanelUi.class);
+	private final FirewallPanelUi firewallBinder = GWT.create(FirewallPanelUi.class);
+	private final NetworkPanelUi networkBinder   = GWT.create(NetworkPanelUi.class);
+	
 	ServicesUi servicesUi;
 
 	@UiField
@@ -92,18 +95,30 @@ public class EntryClassUi extends Composite {
 	ScrollPanel servicesPanel;
 	@UiField
 	NavPills servicesMenu;
+	@UiField
+	VerticalPanel errorLogArea;
+	@UiField
+	Modal errorPopup;
 
 	public EntryClassUi() {
-		//Growl.growl("1----------------");
-		Log.debug("Initiating UiBinder");
+		logger.log(Level.FINER, "Initiating UiBinder");
 		ui = this;
-		//Growl.growl("2----------------");
 		initWidget(uiBinder.createAndBindUi(this));
-		//Growl.growl("3----------------");
+		
 		// TODO : standardize the URL?
 		header.setUrl("eclipse/kura/icons/kura_logo_small.png");
 		footerLeft.setText(MSGS.copyright());
 		contentPanel.setVisible(false);
+		
+		// Set client side logging
+		errorLogger.addHandler(new HasWidgetsLogHandler(errorLogArea));
+		errorPopup.addHideHandler(new ModalHideHandler() {
+			@Override
+			public void onHide(ModalHideEvent evt) {
+				errorLogArea.clear();
+			}
+		});
+		FailureHandler.setPopup(errorPopup);
 	}
 
 	public void setSession(GwtSession GwtSession) {
@@ -117,43 +132,44 @@ public class EntryClassUi extends Composite {
 	}
 
 	public void initSystemPanel(GwtSession GwtSession) {
+
 		if (!GwtSession.isNetAdminAvailable()) {
-			//Growl.growl("4----------------");
-			//network.setVisible(false);
-			//firewall.setVisible(false);
+			network.setVisible(false);
+			firewall.setVisible(false);
 		}
-			// Status Panel
-			status.addClickHandler(new ClickHandler() {
-				@Override
-				public void onClick(ClickEvent event) {
-					Button b = new Button(MSGS.yesButton(), new ClickHandler() {
-						@Override
-						public void onClick(ClickEvent event) { 
-							if (modal!=null ) {
-								modal.hide();
-							}
-							if (servicesUi != null) {
-								servicesUi.renderForm();
-							}
-							status.setIconSpin(true);
-							contentPanel.setVisible(true);
-							contentPanelHeader.setText("Status");
-							contentPanelBody.clear();
-							contentPanelBody.add(statusBinder);
-							statusBinder.setSession(currentSession);
-							Timer timer = new Timer() {
-								@Override
-								public void run() {
-									status.setIconSpin(false);
-								}
-							};
-							timer.schedule(2000);
-							statusBinder.loadStatusData();
+
+		// Status Panel
+		status.addClickHandler(new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
+				Button b = new Button(MSGS.yesButton(), new ClickHandler() {
+					@Override
+					public void onClick(ClickEvent event) {
+						if (modal!=null ) {
+							modal.hide();
 						}
-					});
-					renderDirtyConfigModal(b);
-				}
-			});
+						if (servicesUi != null) {
+							servicesUi.renderForm();
+						}
+						status.setIconSpin(true);
+						contentPanel.setVisible(true);
+						contentPanelHeader.setText("Status");
+						contentPanelBody.clear();
+						contentPanelBody.add(statusBinder);
+						statusBinder.setSession(currentSession);
+						Timer timer = new Timer() {
+							@Override
+							public void run() {
+								status.setIconSpin(false);
+							}
+						};
+						timer.schedule(2000);
+						statusBinder.loadStatusData();
+					}
+				});
+				renderDirtyConfigModal(b);
+			}
+		});
 
 			// Device Panel
 			device.addClickHandler(new ClickHandler() {
@@ -204,12 +220,10 @@ public class EntryClassUi extends Composite {
 										}
 										network.setIconSpin(true);
 										contentPanel.setVisible(true);
-										contentPanelHeader.setText(MSGS
-												.network());
+										contentPanelHeader.setText(MSGS.network());
 										contentPanelBody.clear();
 										contentPanelBody.add(networkBinder);
-										networkBinder
-												.setSession(currentSession);
+										networkBinder.setSession(currentSession);
 										Timer timer = new Timer() {
 											@Override
 											public void run() {
@@ -217,6 +231,7 @@ public class EntryClassUi extends Composite {
 											}
 										};
 										timer.schedule(2000);
+										networkBinder.initNetworkPanel();
 									}
 								});
 						renderDirtyConfigModal(b);
@@ -286,7 +301,7 @@ public class EntryClassUi extends Composite {
 								}
 							};
 							timer.schedule(2000);
-
+							packagesBinder.refresh();
 						}
 					});
 					renderDirtyConfigModal(b);
@@ -333,7 +348,7 @@ public class EntryClassUi extends Composite {
 
 			@Override
 			public void onFailure(Throwable ex) {
-				FailureHandler.handle(ex);
+				FailureHandler.handle(ex, EntryClassUi.class.getName());
 			}
 
 			@Override
@@ -341,17 +356,14 @@ public class EntryClassUi extends Composite {
 				gwtComponentService.findComponentConfigurations(token, new AsyncCallback<List<GwtConfigComponent>>() {
 					@Override
 					public void onFailure(Throwable ex) {
-						FailureHandler.handle(ex);
-						//Growl.growl(MSGS.error() + ": ",
-						//		caught.getLocalizedMessage());
+						FailureHandler.handle(ex, EntryClassUi.class.getName());
 					}
 
 					@Override
 					public void onSuccess(List<GwtConfigComponent> result) {
 						servicesMenu.clear();
 						for (GwtConfigComponent pair : result) {
-							servicesMenu.add(new ServicesAnchorListItem(pair,
-									ui));
+							servicesMenu.add(new ServicesAnchorListItem(pair, ui));
 						}
 					}
 				});
@@ -376,13 +388,18 @@ public class EntryClassUi extends Composite {
 		if(servicesUi!=null){
 			servicesDirty=servicesUi.isDirty();
 		}
-		networkDirty = networkBinder.isDirty();
 		
-		if ((servicesUi!=null && servicesUi.isDirty()) || networkBinder.isDirty()) {
-			if(servicesUi!=null){
+		if (network.isVisible())
+			networkDirty = networkBinder.isDirty();
+		else
+			networkDirty = false;
+		
+		if ((servicesUi!=null && servicesUi.isDirty()) || networkDirty) {
+			if (servicesUi != null){
 				servicesUi.setDirty(false);
 			}
-			networkBinder.setDirty(false);
+			if (network.isVisible())
+				networkBinder.setDirty(false);
 			modal = new Modal();
 
 			ModalHeader header = new ModalHeader();
@@ -399,10 +416,11 @@ public class EntryClassUi extends Composite {
 				@Override
 				public void onClick(ClickEvent event) {
 					//reset sevices and networks Dirty flags to their original values
-					if(servicesUi!=null){
+					if (servicesUi != null){
 						servicesUi.setDirty(servicesDirty);
 					}
-					networkBinder.setDirty(networkDirty);
+					if (network.isVisible())
+						networkBinder.setDirty(networkDirty);
 					modal.hide();
 				}
 			}));
@@ -416,13 +434,17 @@ public class EntryClassUi extends Composite {
 	}
 
 	public boolean isNetworkDirty(){
-		return networkBinder.isDirty();
+		if (network.isVisible())
+			return networkBinder.isDirty();
+		else
+			return false;
 	}
 	
 	public void setDirty(boolean b) {
-		if(servicesUi!=null){
+		if (servicesUi != null){
 			servicesUi.setDirty(false);
 		}
-		networkBinder.setDirty(false);
+		if (network.isVisible())
+			networkBinder.setDirty(false);
 	}
 }

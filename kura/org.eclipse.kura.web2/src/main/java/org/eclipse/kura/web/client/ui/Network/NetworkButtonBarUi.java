@@ -28,8 +28,7 @@ public class NetworkButtonBarUi extends Composite {
 
 	private static NetworkButtonBarUiUiBinder uiBinder = GWT.create(NetworkButtonBarUiUiBinder.class);
 
-	interface NetworkButtonBarUiUiBinder extends
-			UiBinder<Widget, NetworkButtonBarUi> {
+	interface NetworkButtonBarUiUiBinder extends UiBinder<Widget, NetworkButtonBarUi> {
 	}
 
 	private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
@@ -114,7 +113,7 @@ public class NetworkButtonBarUi extends Composite {
 
 							@Override
 							public void onFailure(Throwable ex) {
-								FailureHandler.handle(ex);
+								FailureHandler.handle(ex, NetworkButtonBarUi.class.getSimpleName());
 							}
 
 							@Override
@@ -123,12 +122,11 @@ public class NetworkButtonBarUi extends Composite {
 										updatedNetIf, new AsyncCallback<Void>() {
 											@Override
 											public void onFailure(Throwable ex) {
-												FailureHandler.handle(ex);
+												FailureHandler.handle(ex, NetworkButtonBarUi.class.getSimpleName());
 											}
 
 											@Override
 											public void onSuccess(Void result) {
-												//Growl.growl("successfully updated net interface config");
 												table.refresh();
 												apply.setEnabled(false);
 											}

@@ -41,7 +41,6 @@
 		margin-bottom: -20px;
 	}
 	</ui:style>
-
 	<b:Container fluid="true">
 		<b:Column addStyleNames="{style.outer-column}" size="XS_12">
 
@@ -58,11 +57,17 @@
 				</b:Row>
 			</b:Row>
 
-
 			<!-- ROW#2 content -->
 			<b:Row>
 				<b:Panel>
 					<b:PanelBody>
+						<b:Modal title="Error" ui:field='errorPopup'>
+							<b:ModalBody>
+								<g:ScrollPanel styleName='customLogScrollPanel'>
+	 								<g:VerticalPanel ui:field='errorLogArea' styleName='errorLogArea'/>
+								</g:ScrollPanel>
+							</b:ModalBody>									
+						</b:Modal>
 						<b:Row>
 							<b:Column size="MD_2" addStyleNames="{style.center-panel}">
 								<b:Row>

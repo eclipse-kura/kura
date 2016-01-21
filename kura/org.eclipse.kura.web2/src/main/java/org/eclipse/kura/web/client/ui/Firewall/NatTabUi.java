@@ -91,8 +91,6 @@ public class NatTabUi extends Composite {
 		initWidget(uiBinder.createAndBindUi(this));
 		initButtons();
 		initTable();
-		loadData();
-
 	}
 
 	private void initTable() {
@@ -155,7 +153,7 @@ public class NatTabUi extends Composite {
 		natGrid.setSelectionModel(selectionModel);
 	}
 
-	private void loadData() {
+	public void loadData() {
 		natDataProvider.getList().clear();
 		natGrid.setVisible(false);
 		notification.setVisible(false);

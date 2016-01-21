@@ -29,7 +29,6 @@ import org.eclipse.kura.web.shared.service.GwtSecurityServiceAsync;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenService;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenServiceAsync;
 
-import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
@@ -47,8 +46,7 @@ import com.google.gwt.user.client.ui.RootPanel;
 public class denali implements EntryPoint 
 {
 	private static final Messages MSGS = GWT.create(Messages.class);
-	Logger logger = Logger.getLogger("NameOfYourLogger");
-	//private final boolean VIEW_LOG = true;
+	Logger logger = Logger.getLogger(denali.class.getSimpleName());
 	private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
 	private final GwtDeviceServiceAsync gwtDeviceService = GWT.create(GwtDeviceService.class);
 	private final GwtSecurityServiceAsync gwtSecurityService = GWT.create(GwtSecurityService.class);
@@ -64,18 +62,6 @@ public class denali implements EntryPoint
 	 */
 	public void onModuleLoad() 
 	{
-		/*
-		 * Install an UncaughtExceptionHandler which will produce <code>FATAL</code> log messages
-		 */
-		Log.setUncaughtExceptionHandler();
-
-		/*
-	    // Disable the web UI log view unless VIEW_LOG is set to true
-	    if (!VIEW_LOG) {
-	    	Widget divLogger = Log.getLogger(DivLogger.class).getWidget();
-	    	divLogger.setVisible(false);
-	    }
-		 */
 		// use deferred command to catch initialization exceptions in
 		// onModuleLoad2
 		Scheduler.get().scheduleDeferred(new ScheduledCommand() {
@@ -90,7 +76,7 @@ public class denali implements EntryPoint
 	 * This is the 'real' entry point method.
 	 */
 	public void onModuleLoad2() {
-		logger.info("Hi");
+
 		RootPanel.get().add(binder);
 
 		// load custom CSS/JS
@@ -100,7 +86,7 @@ public class denali implements EntryPoint
 		gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
 			@Override
 			public void onFailure(Throwable ex) {
-				FailureHandler.handle(ex);
+				FailureHandler.handle(ex, denali.class.getSimpleName());
 			}
 
 			@Override
@@ -132,8 +118,7 @@ public class denali implements EntryPoint
 						gwtSecurityService.isDebugMode(new AsyncCallback<Boolean>() {
 
 							public void onFailure(Throwable caught) {
-								//Info.display("Bad", "Is debug mode error");
-								//render(gwtSession);
+								FailureHandler.handle(caught, denali.class.getSimpleName());
 								binder.setFooter(gwtSession);
 								binder.initSystemPanel(gwtSession);
 								binder.setSession(gwtSession);
@@ -143,19 +128,19 @@ public class denali implements EntryPoint
 
 							public void onSuccess(Boolean result) {
 								if(result){
-									isDevelopMode= true;
+									isDevelopMode = true;
 								}
 								binder.setFooter(gwtSession);
 								binder.initSystemPanel(gwtSession);
 								binder.setSession(gwtSession);
-								binder.initServicesTree();
+								//binder.initServicesTree();
 								binder.setDirty(false);
 							}
 						});
 					}
 
 					public void onFailure(Throwable caught) {
-						FailureHandler.handle(caught);
+						FailureHandler.handle(caught, denali.class.getSimpleName());
 						binder.setFooter(new GwtSession());
 						binder.initSystemPanel(new GwtSession());
 						binder.setSession(new GwtSession());

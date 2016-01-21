@@ -1,6 +1,8 @@
 package org.eclipse.kura.web.client.ui.Network;
 
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.messages.ValidationMessages;
@@ -30,7 +32,6 @@ import org.gwtbootstrap3.client.ui.TextBox;
 import org.gwtbootstrap3.client.ui.constants.ValidationState;
 import org.gwtbootstrap3.client.ui.html.Span;
 
-import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
@@ -49,6 +50,7 @@ import com.google.gwt.user.client.ui.Widget;
 public class TabTcpIpUi extends Composite implements Tab {
 
 	private static TabTcpIpUiUiBinder uiBinder = GWT.create(TabTcpIpUiUiBinder.class);
+	private static final Logger logger = Logger.getLogger(TabTcpIpUi.class.getSimpleName());
 	
 	private static final Messages MSGS = GWT.create(Messages.class);
 	private static final ValidationMessages VMSGS = GWT.create(ValidationMessages.class);
@@ -230,7 +232,7 @@ public class TabTcpIpUi extends Composite implements Tab {
 
 	public boolean isDhcp() {
 		if (configure == null) {
-			Log.debug("TcpIpConfigTab.isDhcp() - m_configureCombo is null");
+			logger.log(Level.FINER, "TcpIpConfigTab.isDhcp() - m_configureCombo is null");
 			return true;
 		}
 		return (MessageUtils.get(GwtNetIfConfigMode.netIPv4ConfigModeDHCP

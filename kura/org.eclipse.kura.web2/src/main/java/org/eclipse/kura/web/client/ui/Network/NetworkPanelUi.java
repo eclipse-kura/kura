@@ -16,8 +16,7 @@ import com.google.gwt.user.client.ui.Widget;
 
 public class NetworkPanelUi extends Composite {
 
-	private static NetworkPanelUiUiBinder uiBinder = GWT
-			.create(NetworkPanelUiUiBinder.class);
+	private static NetworkPanelUiUiBinder uiBinder = GWT.create(NetworkPanelUiUiBinder.class);
 
 	interface NetworkPanelUiUiBinder extends UiBinder<Widget, NetworkPanelUi> {
 	}
@@ -44,6 +43,10 @@ public class NetworkPanelUi extends Composite {
 		initWidget(uiBinder.createAndBindUi(this));	
 		networkIntro.add(new Span("<p>"+MSGS.netIntro()+"</p>"));
 		
+				
+	}
+
+	public void initNetworkPanel() {
 		tabs=new NetworkTabsUi(session);
 		tabsPanel.add(tabs);
 		
@@ -53,9 +56,9 @@ public class NetworkPanelUi extends Composite {
 		buttons= new NetworkButtonBarUi(session, tabs,table);
 		buttonBar.add(buttons);
 		
-		tabs.setDirty(false);		
+		tabs.setDirty(false);
 	}
-
+	
 	public boolean isDirty(){
 		return tabs.isDirty();		
 	}

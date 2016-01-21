@@ -131,14 +131,13 @@ public class PackagesPanelUi extends Composite {
 				}// end if null
 			}// end on click
 		});
-		refresh();
 	}
 
 	public void setSession(GwtSession currentSession) {
 		gwtSession = currentSession;
 	}
 
-	private void refresh() {
+	public void refresh() {
 		refresh(100);
 	}	
 

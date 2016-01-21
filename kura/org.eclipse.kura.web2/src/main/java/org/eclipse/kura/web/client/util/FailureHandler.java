@@ -11,12 +11,12 @@
  */
 package org.eclipse.kura.web.client.util;
 
-import java.util.List;
+import java.util.logging.Logger;
 
 import org.eclipse.kura.web.client.messages.Messages;
-import org.eclipse.kura.web.client.messages.ValidationMessages;
 import org.eclipse.kura.web.shared.GwtKuraErrorCode;
 import org.eclipse.kura.web.shared.GwtKuraException;
+import org.gwtbootstrap3.client.ui.Modal;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.StatusCodeException;
@@ -29,10 +29,21 @@ import com.google.gwt.user.client.rpc.StatusCodeException;
  */
 public class FailureHandler 
 {
+	
 	private static final Messages          CMSGS = GWT.create(Messages.class);
-	private static final ValidationMessages MSGS = GWT.create(ValidationMessages.class);
-
+	//private static final ValidationMessages MSGS = GWT.create(ValidationMessages.class);
+	
+	private static Logger logger = Logger.getLogger("ErrorLogger");
+	private static Modal popup;
+	
+	public static void handle(Throwable caught, String name) {
+		printMessage(caught, name);
+	}
 	public static void handle(Throwable caught) {
+		printMessage(caught, "");
+	}
+	
+	private static void printMessage(Throwable caught, String name) {
 		if (caught instanceof GwtKuraException) {
 
 			GwtKuraException  gee = (GwtKuraException) caught;   
@@ -40,22 +51,26 @@ public class FailureHandler
 			switch (code) {
 			
 			default:
-				//Info.display(CMSGS.error(), caught.getLocalizedMessage());
+				logger.info(name + ": " + caught.getLocalizedMessage());
+				popup.show();
 				break;
 			}
 		}
 		else if (caught instanceof StatusCodeException && 
 		         ((StatusCodeException) caught).getStatusCode() == 0) {
-
 	        // the current operation was interrupted as the user started a new one 
 	        // or navigated away from the page.
 	        // we can ignore this error and do nothing.
 		}
 		else {
-
-			//Info.display(CMSGS.error(), caught.getLocalizedMessage());
+			logger.info(name + ": " + caught.getLocalizedMessage());
+			popup.show();
 			caught.printStackTrace();			
 		}
+	}
+	
+	public static void setPopup(Modal uiElement) {
+		popup = uiElement;
 	}
 
 /*

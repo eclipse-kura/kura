@@ -107,7 +107,6 @@ public class PortForwardingTabUi extends Composite {
 
 		initButtons();
 		initTable();
-		loadData();
 	}
 
 	private void initTable() {
@@ -210,7 +209,7 @@ public class PortForwardingTabUi extends Composite {
 		portForwardGrid.setSelectionModel(selectionModel);
 	}
 
-	private void loadData() {
+	public void loadData() {
 		portForwardDataProvider.getList().clear();
 		portForwardGrid.setVisible(false);
 		notification.setVisible(false);

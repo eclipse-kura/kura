@@ -96,8 +96,7 @@ public class OpenPortsTabUi extends Composite {
 		openPortsGrid.setSelectionModel(selectionModel);
 
 		initButtons();
-		initTable();
-		loadData();		
+		initTable();	
 	}
 
 	private void initTable() {
@@ -170,7 +169,7 @@ public class OpenPortsTabUi extends Composite {
 		openPortsDataProvider.addDataDisplay(openPortsGrid);
 	}
 
-	private void loadData() {
+	public void loadData() {
 		openPortsDataProvider.getList().clear();
 		gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
 
@@ -185,9 +184,7 @@ public class OpenPortsTabUi extends Composite {
 					@Override
 					public void onFailure(Throwable caught) {
 						openPortsGrid.setVisible(false);
-						notification.setVisible(true);
-						notification.setText(MSGS.error() + ": "
-								+ caught.getLocalizedMessage());
+						FailureHandler.handle(caught, gwtNetworkService.getClass().getSimpleName());
 					}
 
 					@Override
@@ -218,7 +215,7 @@ public class OpenPortsTabUi extends Composite {
 
 						@Override
 						public void onFailure(Throwable ex) {
-							FailureHandler.handle(ex);
+							FailureHandler.handle(ex, gwtXSRFService.getClass().getName());
 						}
 
 						@Override
@@ -227,8 +224,7 @@ public class OpenPortsTabUi extends Composite {
 									new AsyncCallback<Void>() {
 										@Override
 										public void onFailure(Throwable caught) {
-											//Growl.growl(MSGS.error() + ": ",
-												//	caught.getLocalizedMessage());
+											FailureHandler.handle(caught, gwtNetworkService.getClass().getSimpleName());
 										}
 
 										@Override

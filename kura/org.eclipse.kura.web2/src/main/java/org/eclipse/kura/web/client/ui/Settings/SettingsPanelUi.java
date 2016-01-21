@@ -40,6 +40,7 @@ public class SettingsPanelUi extends Composite {
 				setSelectedActive(snapshots);
 				content.clear();
 				content.add(snapshotsBinder);
+				snapshotsBinder.refresh();
 				
 			}});
 		

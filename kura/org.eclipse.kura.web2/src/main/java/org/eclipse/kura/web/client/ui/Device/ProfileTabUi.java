@@ -49,12 +49,8 @@ public class ProfileTabUi extends Composite {
 				return row.getValue().contains("  ") ? "rowHeader" : " ";
 			}
 		});
-		
-		
 
 		loadProfileTable(profileGrid, profileDataProvider);
-		
-
 	}
 
 	private void loadProfileTable(DataGrid<GwtGroupedNVPair> grid,

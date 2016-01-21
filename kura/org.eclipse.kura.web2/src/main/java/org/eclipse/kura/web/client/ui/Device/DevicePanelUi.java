@@ -17,13 +17,12 @@ import com.google.gwt.user.client.ui.Widget;
 
 public class DevicePanelUi extends Composite {
 
-	private static DevicePanelUiUiBinder uiBinder = GWT
-			.create(DevicePanelUiUiBinder.class);
-	private static ProfileTabUi profileBinder = GWT.create(ProfileTabUi.class);
-	private static BundlesTabUi bundlesBinder = GWT.create(BundlesTabUi.class);
-	private static ThreadsTabUi threadsBinder = GWT.create(ThreadsTabUi.class);
-	private static SystemPropertiesTabUi systemPropertiesBinder = GWT
-			.create(SystemPropertiesTabUi.class);
+	private static DevicePanelUiUiBinder uiBinder = GWT.create(DevicePanelUiUiBinder.class);
+	private static ProfileTabUi profileBinder     = GWT.create(ProfileTabUi.class);
+	private static BundlesTabUi bundlesBinder     = GWT.create(BundlesTabUi.class);
+	private static ThreadsTabUi threadsBinder     = GWT.create(ThreadsTabUi.class);
+	
+	private static SystemPropertiesTabUi systemPropertiesBinder = GWT.create(SystemPropertiesTabUi.class);
 	private static CommandTabUi commandBinder = GWT.create(CommandTabUi.class);
 
 
@@ -47,8 +46,6 @@ public class DevicePanelUi extends Composite {
 		content.clear();
 		setSelectedActive(profile);
 		content.add(profileBinder);
-		profileBinder.loadProfileData();
-		
 		
 		profile.addClickHandler(new ClickHandler(){
 			@Override
@@ -101,6 +98,10 @@ public class DevicePanelUi extends Composite {
 		
 
 
+	}
+	
+	public void initDevicePanel() {
+		profileBinder.loadProfileData();
 	}
 	
 	public void setSelectedActive(AnchorListItem item){

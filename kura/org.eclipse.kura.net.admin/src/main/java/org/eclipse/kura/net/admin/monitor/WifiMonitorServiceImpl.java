@@ -44,7 +44,9 @@ import org.eclipse.kura.linux.net.util.LinkTool;
 import org.eclipse.kura.linux.net.util.LinuxNetworkUtil;
 import org.eclipse.kura.linux.net.util.ScanTool;
 import org.eclipse.kura.linux.net.util.iwconfigLinkTool;
+import org.eclipse.kura.linux.net.wifi.HostapdManager;
 import org.eclipse.kura.linux.net.wifi.WifiOptions;
+import org.eclipse.kura.linux.net.wifi.WpaSupplicantManager;
 import org.eclipse.kura.net.IPAddress;
 import org.eclipse.kura.net.NetConfig;
 import org.eclipse.kura.net.NetConfigIP4;
@@ -303,9 +305,11 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
                         // State is currently down
                     	try {
 	                        if(WifiMode.MASTER.equals(wifiConfig.getMode())) {
+	                        	HostapdManager.loadKernelModules();
 	                            s_logger.debug("monitor() :: enable {} in master mode", interfaceName);                            
 	                            enableInterface(wifiInterfaceConfig);
 	                        } else if (WifiMode.INFRA.equals(wifiConfig.getMode())) {
+	                        	WpaSupplicantManager.loadKernelModules();
 	                        	if (wifiConfig.ignoreSSID()) {
 	                        		s_logger.info("monitor() :: enable {} in infra mode", interfaceName);                                
 	                        		enableInterface(wifiInterfaceConfig);

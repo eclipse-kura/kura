@@ -97,7 +97,7 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 	
 	private static final String OS_VERSION = System.getProperty("kura.os.version");
 	
-	private static final String SSID_REGEXP = "[0-9A-Za-z/.@#:\\ \\_\\-]+";
+	//private static final String SSID_REGEXP = "[0-9A-Za-z/.@#:\\ \\_\\-]+";
 	
     private ComponentContext                   m_ctx;
 	private ConfigurationService               m_configurationService;
@@ -1399,8 +1399,15 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 		}
 		
 		s_logger.debug("rollbackDefaultConfiguration() :: setting network configuration ...");
-		m_networkConfigurationService.setNetworkConfiguration(m_networkConfigurationService.getNetworkConfiguration());
-		
+		ComponentConfiguration networkComponentConfiguration = ((SelfConfiguringComponent)m_networkConfigurationService).getConfiguration();
+		if (networkComponentConfiguration != null) {
+			try {
+				NetworkConfiguration netConfiguration = new NetworkConfiguration(networkComponentConfiguration.getConfigurationProperties());
+				m_networkConfigurationService.setNetworkConfiguration(netConfiguration);
+			} catch (UnknownHostException e) {
+				s_logger.error("relback to snapshot_0 has failed - {}", e); 
+			}
+		}
 		return true;
 	}
 	

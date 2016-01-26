@@ -636,6 +636,7 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 										s_logger.error("monitor() :: Failed to disable modem GPS");
 									}
 									modem.reset();
+									pppState = PppState.NOT_CONNECTED;
 								} else {
 									int timeTillReset = (int)(modemResetTout - timeElapsed) / 1000;
 									s_logger.info("monitor() :: PPP connection in progress. Modem will be reset in {} sec if not connected", timeTillReset);

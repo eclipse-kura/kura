@@ -27,7 +27,8 @@ public enum SupportedUsbModemInfo {
     Telit_CE910_DUAL("CE910-DUAL", "1bc7", "1011", 2, 0, 1, 1, -1, Arrays.asList(ModemTechnologyType.CDMA), Arrays.asList(new Ce910ModemDriver())),
     Sierra_MC8775   ("MC8775", "1199", "6812", 3, 0, 2, 0, -1, Arrays.asList(ModemTechnologyType.HSDPA), Arrays.asList(new UsbModemDriver("sierra", "1199", "6812"))),
     Sierra_MC8790   ("MC8790", "1199", "683c", 7, 0, 3, 4, -1, Arrays.asList(ModemTechnologyType.HSDPA), Arrays.asList(new UsbModemDriver("sierra", "1199", "683c"))),
-    Sierra_USB598   ("USB598", "1199", "0025", 4, 1, 0, 0, -1, Arrays.asList(ModemTechnologyType.EVDO), Arrays.asList(new UsbModemDriver("sierra", "1199", "0025")));
+    Sierra_USB598   ("USB598", "1199", "0025", 4, 1, 0, 0, -1, Arrays.asList(ModemTechnologyType.EVDO), Arrays.asList(new UsbModemDriver("sierra", "1199", "0025"))),
+    Ublox_SARA_U2   ("SARA-U2", "1546", "1102", 7, 0, 1, 0, -1, Arrays.asList(ModemTechnologyType.HSPA), Arrays.asList(new UsbModemDriver("cdc_acm", "1546", "1102")));
 
     private static final String TARGET_NAME = System.getProperty("target.device");
     

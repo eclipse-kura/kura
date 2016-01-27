@@ -80,9 +80,8 @@ public class KuraNotifyPayload extends KuraPayload
 	{
 		if (payload.getMetric(METRIC_CLIENT_ID) == null) {
 			throw new ParseException("Not a valid notify payload", 0);
-		}		
-		KuraNotifyPayload notifyPayload = new KuraNotifyPayload(payload);
-		return notifyPayload;
+		}
+		return new KuraNotifyPayload(payload);
 	}
 	
 	public void setJobId(long jobId) {

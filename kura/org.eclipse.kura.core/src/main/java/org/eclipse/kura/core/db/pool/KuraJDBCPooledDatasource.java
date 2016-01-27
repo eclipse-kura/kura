@@ -54,7 +54,6 @@ public class KuraJDBCPooledDatasource implements ConnectionPoolDataSource, Commo
 		return loginTimeout;
 	}
 
-	@Override
 	public Logger getParentLogger() throws SQLFeatureNotSupportedException {
 		throw new SQLFeatureNotSupportedException("Not supported!");
 	}

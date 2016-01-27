@@ -395,34 +395,34 @@ public class ModbusManager implements ConfigurableComponent, CriticalComponent, 
 
 		digitalInputs = m_protocolDevice.readDiscreteInputs(slaveAddr, 2048, 8);
 
-		payload.addMetric("t3", new Boolean(digitalInputs[2]));
+		payload.addMetric("t3", Boolean.valueOf(digitalInputs[2]));
 		if((digitalInputs[2] != lastDigitalInputs[2]) || iJustConnected){
 			metricsChanged=true;
 			s_logger.info("t3=" + digitalInputs[2]);
 		}
 		lastDigitalInputs[2] = digitalInputs[2];
 
-		payload.addMetric("t4", new Boolean(digitalInputs[3]));
+		payload.addMetric("t4", Boolean.valueOf(digitalInputs[3]));
 		if(digitalInputs[3])it4=1; 
-		payload.addMetric("it4", new Integer(it4));
+		payload.addMetric("it4", Integer.valueOf(it4));
 		if((digitalInputs[3] != lastDigitalInputs[3]) || iJustConnected){
 			s_logger.info("t4=" + digitalInputs[3]);
 			metricsChanged=true;
 		}
 		lastDigitalInputs[3] = digitalInputs[3];
 
-		payload.addMetric("t5", new Boolean(digitalInputs[4]));
+		payload.addMetric("t5", Boolean.valueOf(digitalInputs[4]));
 		if(digitalInputs[4])it5=1; 
-		payload.addMetric("it5", new Integer(it5));
+		payload.addMetric("it5", Integer.valueOf(it5));
 		if((digitalInputs[4] != lastDigitalInputs[4]) || iJustConnected){
 			s_logger.info("t5=" + digitalInputs[4]);
 			metricsChanged=true;
 		}
 		lastDigitalInputs[4] = digitalInputs[4];
 
-		payload.addMetric("t6", new Boolean(digitalInputs[5]));
+		payload.addMetric("t6", Boolean.valueOf(digitalInputs[5]));
 		if(digitalInputs[5])it6=1; 
-		payload.addMetric("it6", new Integer(it6));
+		payload.addMetric("it6", Integer.valueOf(it6));
 		if((digitalInputs[5] != lastDigitalInputs[5]) || iJustConnected){
 			s_logger.info("t6=" + digitalInputs[5]);
 			metricsChanged=true;
@@ -432,7 +432,7 @@ public class ModbusManager implements ConfigurableComponent, CriticalComponent, 
 		int[] analogInputs = m_protocolDevice.readInputRegisters(slaveAddr, 512, 8);
 
 		int c3 = bcd2Dec(analogInputs[2]);
-		payload.addMetric("c3", new Integer(c3));
+		payload.addMetric("c3", Integer.valueOf(c3));
 		if((c3 != lastAnalogInputs[2]) || iJustConnected){
 			s_logger.info("c3=" + c3);
 			metricsChanged=true;
@@ -440,7 +440,7 @@ public class ModbusManager implements ConfigurableComponent, CriticalComponent, 
 		lastAnalogInputs[2] = c3;
 
 		int qc = bcd2Dec(analogInputs[7]);
-		payload.addMetric("qc", new Integer(qc));
+		payload.addMetric("qc", Integer.valueOf(qc));
 		if((qc != lastAnalogInputs[7]) || iJustConnected){
 			s_logger.info("qc=" + qc);
 			metricsChanged=true;
@@ -450,42 +450,42 @@ public class ModbusManager implements ConfigurableComponent, CriticalComponent, 
 		// LEDs 
 		boolean[] digitalOutputs = m_protocolDevice.readCoils(slaveAddr, 2048, 6); 
 
-		payload.addMetric("LED1", new Boolean(digitalOutputs[0])); 
+		payload.addMetric("LED1", Boolean.valueOf(digitalOutputs[0])); 
 		if((digitalOutputs[0] != lastDigitalOutputs[0]) || iJustConnected){
 			s_logger.info("LED1=" + digitalOutputs[0]); 
 			metricsChanged=true; 
 		}
 		lastDigitalOutputs[0] = digitalOutputs[0]; 
 
-		payload.addMetric("LED2", new Boolean(digitalOutputs[1])); 
+		payload.addMetric("LED2", Boolean.valueOf(digitalOutputs[1])); 
 		if((digitalOutputs[1] != lastDigitalOutputs[1]) || iJustConnected){
 			s_logger.info("LED2=" + digitalOutputs[1]); 
 			metricsChanged=true; 
 		}
 		lastDigitalOutputs[1] = digitalOutputs[1]; 
 
-		payload.addMetric("LED3", new Boolean(digitalOutputs[2])); 
+		payload.addMetric("LED3", Boolean.valueOf(digitalOutputs[2])); 
 		if((digitalOutputs[2] != lastDigitalOutputs[2]) || iJustConnected){
 			s_logger.info("LED3=" + digitalOutputs[2]); 
 			metricsChanged=true; 
 		}
 		lastDigitalOutputs[2] = digitalOutputs[2]; 
 
-		payload.addMetric("LED4red", new Boolean(digitalOutputs[3])); 
+		payload.addMetric("LED4red", Boolean.valueOf(digitalOutputs[3])); 
 		if((digitalOutputs[3] != lastDigitalOutputs[3]) || iJustConnected){
 			s_logger.info("LED4red=" + digitalOutputs[3]); 
 			metricsChanged=true; 
 		}
 		lastDigitalOutputs[3] = digitalOutputs[3]; 
 
-		payload.addMetric("LED4green", new Boolean(digitalOutputs[4])); 
+		payload.addMetric("LED4green", Boolean.valueOf(digitalOutputs[4])); 
 		if((digitalOutputs[4] != lastDigitalOutputs[4]) || iJustConnected){
 			s_logger.info("LED4green=" + digitalOutputs[4]); 
 			metricsChanged=true; 
 		}
 		lastDigitalOutputs[4] = digitalOutputs[4]; 
 
-		payload.addMetric("LED4blue", new Boolean(digitalOutputs[5])); 
+		payload.addMetric("LED4blue", Boolean.valueOf(digitalOutputs[5])); 
 		if((digitalOutputs[5] != lastDigitalOutputs[5]) || iJustConnected){
 			s_logger.info("LED4blue=" + digitalOutputs[5]); 
 			metricsChanged=true; 

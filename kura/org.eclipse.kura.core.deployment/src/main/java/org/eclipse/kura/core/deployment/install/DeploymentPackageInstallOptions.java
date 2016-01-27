@@ -24,7 +24,7 @@ public class DeploymentPackageInstallOptions extends DeploymentPackageOptions{
 	public static final String METRIC_INSTALL_VERIFIER_URI = "dp.install.verifier.uri";
 	
 	private Boolean systemUpdate = false;
-	private String verifierURL = null; 
+	private String verifierURI = null; 
 
 	// Metrics in RESOURCE_INSTALL
 	public DeploymentPackageInstallOptions(String dpName, String dpVersion) {
@@ -52,7 +52,7 @@ public class DeploymentPackageInstallOptions extends DeploymentPackageOptions{
 		
 		setSystemUpdate((Boolean) request.getMetric(METRIC_DP_INSTALL_SYSTEM_UPDATE));
 		if (getSystemUpdate() == null){
-			throw new KuraInvalidMessageException("Missing SystemUpdate!");
+			throw new KuraInvalidMessageException("Missing System Update!");
 		}
 		
 		try {
@@ -72,7 +72,7 @@ public class DeploymentPackageInstallOptions extends DeploymentPackageOptions{
 			
 			metric = request.getMetric(METRIC_INSTALL_VERIFIER_URI);
 			if (metric != null) {
-				setVerifierURL((String) metric);
+				setVerifierURI((String) metric);
 			}
 
 		} catch (Exception ex) {
@@ -88,11 +88,11 @@ public class DeploymentPackageInstallOptions extends DeploymentPackageOptions{
 		return systemUpdate;
 	}
 	
-	public void setVerifierURL(String verifierURL) {
-		this.verifierURL = verifierURL;
+	public void setVerifierURI(String verifierURI) {
+		this.verifierURI = verifierURI;
 	}
 
 	public String getVerifierURL() {
-		return verifierURL;
+		return verifierURI;
 	}
 }

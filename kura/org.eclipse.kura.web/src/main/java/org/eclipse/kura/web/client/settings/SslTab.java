@@ -363,7 +363,7 @@ public class SslTab extends LayoutContainer {
 		m_protocol.setFieldLabel(MSGS.settingsSSLConfigurationProtocol());
 		m_protocol.addPlugin(m_dirtyPlugin);
 		m_protocol.addPlugin(m_infoPlugin);
-		m_protocol.setData("text", MSGS.settingsSSLConfigurationHostnameVerificationDescr()); 
+		m_protocol.setData("text", MSGS.settingsSSLConfigurationProtocolDescr()); 
 		m_actionFieldSet.add(m_protocol, formData);
 
 		//

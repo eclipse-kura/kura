@@ -246,11 +246,11 @@ public class ModemConfiguration {
 	public ModemConfiguration (Properties configProps) {
 		
 		this.configProps = configProps;
-		this.enabled = new Boolean((String)this.configProps.getProperty(ENABLED, "false")).booleanValue();
-		this.serviceMode =  new Integer((String)this.configProps.getProperty(SERVICE_MODE, "0")).intValue();
-		this.carrierImageID = new Integer((String)this.configProps.getProperty(CARRIER_IMAGE_ID, "1")).intValue();		
-		this.umtsProfileID = new Integer((String)this.configProps.getProperty(UMTS_PROFILE_ID, "1")).intValue();
-		this.pppUnitNumber = new Integer ((String)this.configProps.getProperty(PPP_UNIT_NUMBER, "0")).intValue();
+		this.enabled = Boolean.valueOf((String)this.configProps.getProperty(ENABLED, "false")).booleanValue();
+		this.serviceMode =  Integer.valueOf((String)this.configProps.getProperty(SERVICE_MODE, "0")).intValue();
+		this.carrierImageID = Integer.valueOf((String)this.configProps.getProperty(CARRIER_IMAGE_ID, "1")).intValue();		
+		this.umtsProfileID = Integer.valueOf((String)this.configProps.getProperty(UMTS_PROFILE_ID, "1")).intValue();
+		this.pppUnitNumber = Integer.valueOf ((String)this.configProps.getProperty(PPP_UNIT_NUMBER, "0")).intValue();
 		this.dialstring = (String)this.configProps.getProperty(DIALSTRING);
 		this.profileName = (String) this.configProps.getProperty(PROFILE_NAME);
 		this.pdpType = (String) this.configProps.getProperty(PDP_TYPE);
@@ -259,7 +259,7 @@ public class ModemConfiguration {
 		this.authType = (String) this.configProps.getProperty(AUTH_TYPE);
 		this.username = (String) this.configProps.getProperty(USERNAME);
 		this.password = (String) this.configProps.getProperty(PASSWORD);
-		this.pdpProfileID = new Integer((String)this.configProps.getProperty(PDP_PROFILE_ID, "1")).intValue();
+		this.pdpProfileID = Integer.valueOf((String)this.configProps.getProperty(PDP_PROFILE_ID, "1")).intValue();
 	}
 
 	/**

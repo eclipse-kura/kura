@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011, 2014 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2015 Eurotech and/or its affiliates
  *
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
@@ -248,10 +248,9 @@ public class NetworkConfiguration {
 								if(((NetConfigIP4) netConfig).isDhcp()) {
 									sb.append(" :: is DHCP client");
 									Map<String, Object> dhcp4Map = ((NetConfigIP4)netConfig).getProperties();
-									Iterator<String> it2 = dhcp4Map.keySet().iterator();
-									while(it2.hasNext()) {
-										String dhcpKey = it2.next();
-										sb.append(" :: " + dhcpKey + ": " + dhcp4Map.get(dhcpKey));
+									for (Map.Entry<String, Object> entry : dhcp4Map.entrySet()) {
+										String dhcpKey = entry.getKey();
+										sb.append(" :: " + dhcpKey + ": " + entry.getValue());
 									}
 								} else if(((NetConfigIP4)netConfig).getAddress() == null) {
 									sb.append(" :: is not configured for STATIC or DHCP");
@@ -521,7 +520,7 @@ public class NetworkConfiguration {
 				properties.put(netIfReadOnlyPrefix+"eth.link.up",		((EthernetInterfaceConfigImpl)netInterfaceConfig).isLinkUp());
 			} else if(netInterfaceConfig instanceof WifiInterfaceConfigImpl) {
 				EnumSet<Capability> capabilities = ((WifiInterfaceConfigImpl)netInterfaceConfig).getCapabilities();
-				if(capabilities != null && capabilities.size() > 0) {
+				if(capabilities != null && !capabilities.isEmpty()) {
 					StringBuilder sb = new StringBuilder();
 					for(Capability capability : capabilities) {
 						sb.append(capability.toString());
@@ -715,7 +714,7 @@ public class NetworkConfiguration {
 		m_properties = properties;
 	}
 
-	private void addWifiConfigIP4Properties(WifiConfig wifiConfig,
+	private static void addWifiConfigIP4Properties(WifiConfig wifiConfig,
 			String netIfConfigPrefix, 
 			Map<String,Object> properties) {
 
@@ -793,7 +792,7 @@ public class NetworkConfiguration {
 		}*/
 	}
 
-	private WifiConfig getWifiConfig(String netIfConfigPrefix,
+	private static WifiConfig getWifiConfig(String netIfConfigPrefix,
 			WifiMode mode,
 			Map<String, Object> properties) throws KuraException {
 
@@ -853,7 +852,7 @@ public class NetworkConfiguration {
 						try {
 							channels[i] = Integer.parseInt(token);
 						} catch (Exception e) {
-							e.printStackTrace();
+							s_logger.error("Error parsing channels!", e);
 						}
 					}
 					wifiConfig.setChannels(channels);
@@ -863,7 +862,14 @@ public class NetworkConfiguration {
 
 		// passphrase
 		key = prefix + ".passphrase";
-		Password psswd= (Password)properties.get(key);
+		Object psswdObj = properties.get(key);
+		Password psswd = null;
+		if (psswdObj instanceof Password) {
+			psswd = (Password) psswdObj;
+		} else if (psswdObj instanceof String) {
+			char[] tempPsswd= ((String) psswdObj).toCharArray();
+			psswd= new Password(tempPsswd);
+		}
 		String passphrase = new String(psswd.getPassword());
 		
 		s_logger.trace("passphrase is " + passphrase);
@@ -989,7 +995,7 @@ public class NetworkConfiguration {
 		properties.put(prefix+"gpsEnabled", modemConfig.isGpsEnabled());
 	}
 
-	private ModemConfig getModemConfig(String prefix,
+	private static ModemConfig getModemConfig(String prefix,
 			Map<String, Object> properties) throws KuraException {
 
 		String key;
@@ -1196,7 +1202,7 @@ public class NetworkConfiguration {
 		return modemConfig;
 	}
 
-	private void addNetConfigIP4Properties(NetConfigIP4 nc,
+	private static void addNetConfigIP4Properties(NetConfigIP4 nc,
 			String netIfConfigPrefix, 
 			Map<String,Object> properties) {
 
@@ -1257,7 +1263,7 @@ public class NetworkConfiguration {
 		}
 	}
 
-	private void addNetConfigIP6Properties(NetConfigIP6 nc,
+	private static void addNetConfigIP6Properties(NetConfigIP6 nc,
 			String netIfConfigPrefix, 
 			Map<String,Object> properties) {
 
@@ -1314,7 +1320,7 @@ public class NetworkConfiguration {
 
 	}
 
-	private void addFirewallNatConfig(FirewallAutoNatConfig nc,
+	private static void addFirewallNatConfig(FirewallAutoNatConfig nc,
 			String netIfConfigPrefix, 
 			Map<String,Object> properties) {
 
@@ -1327,8 +1333,7 @@ public class NetworkConfiguration {
 
 	private void addInterfaceConfiguration(String interfaceName, NetInterfaceType type,
 			Map<String,Object> props)
-					throws UnknownHostException, KuraException
-	{
+					throws UnknownHostException, KuraException {
 		if(type == null) {
 			s_logger.error("Null type for " + interfaceName);
 			return;
@@ -1833,8 +1838,7 @@ public class NetworkConfiguration {
 						try {
 							netConfigIP4.setNetworkPrefixLength(networkPrefixLength);
 						} catch (KuraException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
+							s_logger.error("Exception while setting Network Prefix length!", e);
 						}
 
 						/*

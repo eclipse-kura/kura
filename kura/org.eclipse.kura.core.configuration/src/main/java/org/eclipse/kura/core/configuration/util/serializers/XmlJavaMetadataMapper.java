@@ -392,7 +392,13 @@ public class XmlJavaMetadataMapper implements XmlJavaDataMapper{
 		} catch (NumberFormatException e){
 			cardinality= null;
 		}
-		Boolean required= Boolean.parseBoolean(adElement.getAttribute(METADATA_AD_REQUIRED));
+		
+		Boolean required= null;
+		String requiredAttr= adElement.getAttribute(METADATA_AD_REQUIRED);
+		if(requiredAttr != null && !requiredAttr.trim().isEmpty()){
+			required= Boolean.parseBoolean(adElement.getAttribute(METADATA_AD_REQUIRED));
+		}
+		
 		String defaultVal= adElement.getAttribute(METADATA_AD_DEFAULT);
 		String description= adElement.getAttribute(METADATA_AD_DESCRIPTION);
 		String min= adElement.getAttribute(METADATA_AD_MIN);

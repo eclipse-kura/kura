@@ -269,7 +269,8 @@ public class LinuxProcessUtil {
 			throw e;
 		}
 		finally {
-			ProcessUtil.destroy(proc);
+			if (proc != null)
+				ProcessUtil.destroy(proc);
 		}
 	}	
 

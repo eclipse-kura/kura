@@ -24,9 +24,9 @@ public class Ce910ModemDriver extends OptionModemDriver {
 		super(s_vendor, s_product);
 	}
 	
+	@Override
 	public int install() throws Exception {	
 		s_logger.info("Installing {} driver for Telit CE910 modem", getName());
-		int status = super.install();
-		return status;
+		return super.install();
 	}
 }

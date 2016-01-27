@@ -15,6 +15,7 @@ package org.eclipse.kura.linux.net.modem;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
+import java.io.IOException;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
@@ -27,8 +28,20 @@ import org.slf4j.LoggerFactory;
 public class ModemDriver {
 	
 	private static final Logger s_logger = LoggerFactory.getLogger(ModemDriver.class);
+	
 	private static final String TARGET_NAME = System.getProperty("target.device");
-
+	private static final String GPIO_65_PATH = "/sys/class/gpio/gpio65";
+	private static final String GPIO_65_DIRECTION_PATH = GPIO_65_PATH + "/direction";
+	private static final String GPIO_65_VALUE_PATH = GPIO_65_PATH + "/value"; 
+	private static final String GPIO_EXPORT_PATH = "/sys/class/gpio/export";
+	
+	private static final String RELIAGATE_10_20_GPIO_PATH = "/sys/class/gpio/usb-rear-pwr/value";
+	private static final String RELIAGATE_50_21_GPIO_11_0_CMD = "/usr/sbin/vector-j21-gpio 11 0";
+	private static final String RELIAGATE_50_21_GPIO_11_1_CMD = "/usr/sbin/vector-j21-gpio 11 1"; 
+	private static final String RELIAGATE_50_21_GPIO_6_CMD = "/usr/sbin/vector-j21-gpio 6";
+	
+	
+	
 	public boolean turnModemOff() throws Exception {
 		if (TARGET_NAME == null) {
 			return false;
@@ -44,29 +57,24 @@ public class ModemDriver {
 			if(TARGET_NAME.equals(KuraConstants.Mini_Gateway.getTargetName())) {
 				toggleGpio65();
 			} else if (TARGET_NAME.equals(KuraConstants.Reliagate_10_20.getTargetName())) {
-				FileWriter fw = new FileWriter("/sys/class/gpio/usb-rear-pwr/value");
-				fw.write("0");
-				fw.close();
+				disable1020Gpio();
 			} else if (TARGET_NAME.equals(KuraConstants.ReliaGATE_50_21_Ubuntu.getTargetName())) {
-				SafeProcess pr = ProcessUtil.exec("/usr/sbin/vector-j21-gpio 11 0");
-				int status = pr.waitFor();
-				s_logger.info("turnModemOff() :: '/usr/sbin/vector-j21-gpio 11 0' returned {}", status);
+				int status = exec5021Gpio110();
+				s_logger.info("turnModemOff() :: '{}' returned {}", RELIAGATE_50_21_GPIO_11_0_CMD, status);
 				if (status != 0) {
 					continue;
 				}
 				sleep(1000);
 
-				pr = ProcessUtil.exec("/usr/sbin/vector-j21-gpio 11 1");
-				status = pr.waitFor();
-				s_logger.info("turnModemOff() :: '/usr/sbin/vector-j21-gpio 11 1' returned {}", status);
+				status = exec5021Gpio111();
+				s_logger.info("turnModemOff() :: '{}' returned {}", RELIAGATE_50_21_GPIO_11_1_CMD, status);
 				if (status != 0) {
 					continue;
 				}
 				sleep(3000);
 
-				pr = ProcessUtil.exec("/usr/sbin/vector-j21-gpio 11 0");
-				status = pr.waitFor();
-				s_logger.info("turnModemOff() :: '/usr/sbin/vector-j21-gpio 11 0' returned {}", status);
+				status = exec5021Gpio110();
+				s_logger.info("turnModemOff() :: '{}' returned {}", RELIAGATE_50_21_GPIO_11_0_CMD, status);
 				retVal = (status == 0) ? true : false;
 			} else {
 				s_logger.warn("turnModemOff() :: modem turnOff operation is not supported for the {} platform", TARGET_NAME);
@@ -80,7 +88,7 @@ public class ModemDriver {
 		s_logger.info("turnModemOff() :: Modem is OFF? - {}", retVal);
 		return retVal;
 	}
-	
+
 	public boolean turnModemOn() throws Exception {
 		if (TARGET_NAME == null) {
 			return false;
@@ -96,21 +104,17 @@ public class ModemDriver {
 			if(TARGET_NAME.equals(KuraConstants.Mini_Gateway.getTargetName())) {
 				toggleGpio65();
 			} else if (TARGET_NAME.equals(KuraConstants.Reliagate_10_20.getTargetName())) {
-				FileWriter fw = new FileWriter("/sys/class/gpio/usb-rear-pwr/value");
-				fw.write("1");
-				fw.close();
+				enable1020Gpio();
 			} else if (TARGET_NAME.equals(KuraConstants.ReliaGATE_50_21_Ubuntu.getTargetName())) {
-				SafeProcess pr = ProcessUtil.exec("/usr/sbin/vector-j21-gpio 11 1");
-				int status = pr.waitFor();
-				s_logger.info("turnModemOn() :: '/usr/sbin/vector-j21-gpio 11 1' returned {}", status);
+				int status = exec5021Gpio111();
+				s_logger.info("turnModemOn() :: '{}' returned {}", RELIAGATE_50_21_GPIO_11_1_CMD, status);
 				if (status != 0) {
 					continue;
 				}
 				sleep(1000);
 
-				pr = ProcessUtil.exec("/usr/sbin/vector-j21-gpio 6");
-				status = pr.waitFor();
-				s_logger.info("turnModemOn() :: '/usr/sbin/vector-j21-gpio 6' returned {}", status);
+				status = exec5021Gpio6();
+				s_logger.info("turnModemOn() :: '{}' returned {}", RELIAGATE_50_21_GPIO_6_CMD, status);
 				retVal = (status == 0) ? true : false;
 			} else {
 				s_logger.warn("turnModemOn() :: modem turnOn operation is not supported for the {} platform", TARGET_NAME);
@@ -133,21 +137,21 @@ public class ModemDriver {
 		}
 	}
 	
-	protected void toggleGpio65() throws Exception { 		
-		File fgpio65Folder = new File ("/sys/class/gpio/gpio65");
+	protected void toggleGpio65() throws IOException { 		
+		File fgpio65Folder = new File (GPIO_65_PATH);
 		if (!fgpio65Folder.exists()) {
-			BufferedWriter bwGpioSelect = new BufferedWriter(new FileWriter("/sys/class/gpio/export"));
+			BufferedWriter bwGpioSelect = new BufferedWriter(new FileWriter(GPIO_EXPORT_PATH));
 			bwGpioSelect.write("65");
 			bwGpioSelect.flush();
 			bwGpioSelect.close();
 		}
 
-		BufferedWriter bwGpio65Direction = new BufferedWriter(new FileWriter("/sys/class/gpio/gpio65/direction"));
+		BufferedWriter bwGpio65Direction = new BufferedWriter(new FileWriter(GPIO_65_DIRECTION_PATH));
 		bwGpio65Direction.write("out");
 		bwGpio65Direction.flush();
 		bwGpio65Direction.close();
 
-		BufferedWriter fGpio65Value = new BufferedWriter(new FileWriter("/sys/class/gpio/gpio65/value"));
+		BufferedWriter fGpio65Value = new BufferedWriter(new FileWriter(GPIO_65_VALUE_PATH));
 		fGpio65Value.write("0");
 		fGpio65Value.flush();
 		fGpio65Value.write("1");
@@ -174,5 +178,71 @@ public class ModemDriver {
 					"Unsupported modem device");
 		}
 		return isModemOn;
+	}
+	
+	private static void disable1020Gpio() throws IOException {
+		FileWriter fw = null;
+		try{
+			fw = new FileWriter(RELIAGATE_10_20_GPIO_PATH);
+			fw.write("0");
+		} finally {
+			if (fw != null){
+				fw.close();
+			}
+		}
+	}
+	
+	private static void enable1020Gpio() throws IOException {
+		FileWriter fw = null;
+		try{
+			fw = new FileWriter(RELIAGATE_10_20_GPIO_PATH);
+			fw.write("1");
+		} finally {
+			if (fw != null){
+				fw.close();
+			}
+		}
+	}
+	
+	private static int exec5021Gpio110() throws IOException, InterruptedException {
+		int status;
+		SafeProcess pr = null;
+		try {
+			pr = ProcessUtil.exec(RELIAGATE_50_21_GPIO_11_0_CMD);
+			status = pr.waitFor();	
+		} finally {
+			if (pr != null) {
+				ProcessUtil.destroy(pr);
+			}
+		}
+		return status;
+	}
+	
+	private static int exec5021Gpio111() throws IOException, InterruptedException {
+		int status;
+		SafeProcess pr = null;
+		try {
+			pr = ProcessUtil.exec(RELIAGATE_50_21_GPIO_11_1_CMD);
+			status = pr.waitFor();	
+		} finally {
+			if (pr != null) {
+				ProcessUtil.destroy(pr);
+			}
+		}
+		return status;
+	}
+	
+	private static int exec5021Gpio6() throws IOException, InterruptedException {
+		int status;
+		SafeProcess pr = null;
+		try {
+			pr = ProcessUtil.exec(RELIAGATE_50_21_GPIO_6_CMD);
+			status = pr.waitFor();	
+		} finally {
+			if (pr != null) {
+				ProcessUtil.destroy(pr);
+			}
+		}
+		return status;
 	}
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011, 2014 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2015 Eurotech and/or its affiliates
  *
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
@@ -26,12 +26,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
-import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.ComponentException;
 import org.osgi.service.deploymentadmin.DeploymentPackage;
 import org.osgi.service.deploymentadmin.spi.DeploymentSession;
@@ -144,11 +142,11 @@ public class ShellScriptResourceProcessorImpl implements ResourceProcessor {
 		}
 		
 		// Copy source resource files to Deployment Package resource directory
-		Set<String> sourceResources = m_sourceResourceFiles.keySet();
-		for (String resource : sourceResources) {
+		for (Map.Entry<String, File> entry : m_sourceResourceFiles.entrySet()) {
+			String resource = entry.getKey();
 			s_logger.info("Copy file for resource: '{}'", resource);
 			// Get the source resource file
-			File sourceResourceFile = m_sourceResourceFiles.get(resource);
+			File sourceResourceFile = entry.getValue();
 			
 			// Construct the destination file
 			File dir = new File(getResourcesRootDirectory(), m_sourceDP.getName());
@@ -196,10 +194,10 @@ public class ShellScriptResourceProcessorImpl implements ResourceProcessor {
 		
 		// Iterate over all resources belonging to the source Deployment Package.
 		// Some resources might be new and other resources might be updated.
-		Set<String> sourceResources = m_sourceResourceFiles.keySet();
-		for (String resource : sourceResources) {
+		for (Map.Entry<String, File> entry : m_sourceResourceFiles.entrySet()) {
+			String resource = entry.getKey();
 			// Get the source resource file
-			File sourceResourceFile = m_sourceResourceFiles.get(resource);
+			File sourceResourceFile = entry.getValue();
 			
 			// Get the target resource file
 			File targetResourceFile = getDPResourceFile(resource);
@@ -340,7 +338,7 @@ public class ShellScriptResourceProcessorImpl implements ResourceProcessor {
 		}
 	}
 		
-	private void executeScript(File file, String action) throws Exception {
+	private static void executeScript(File file, String action) throws Exception {
 		String path = file.getCanonicalPath();
 		String[] cmdarray = {"/bin/bash", path, action};
 		Runtime rt = Runtime.getRuntime();
@@ -410,7 +408,7 @@ public class ShellScriptResourceProcessorImpl implements ResourceProcessor {
 		if (root == null) {
 			return null;
 		} else {
-			String dpName = null;
+			String dpName;
 			if (!m_sourceDP.getName().isEmpty()) {
 				dpName = m_sourceDP.getName();
 			} else {
@@ -443,7 +441,7 @@ public class ShellScriptResourceProcessorImpl implements ResourceProcessor {
 //		return result;
 //	}
 	
-	private byte[] computeDigest(InputStream is) throws NoSuchAlgorithmException, IOException {
+	private static byte[] computeDigest(InputStream is) throws NoSuchAlgorithmException, IOException {
 		MessageDigest md = MessageDigest.getInstance("MD5");
 		DigestInputStream dis = new DigestInputStream(is, md);
 		while (dis.read() != -1);
@@ -451,7 +449,7 @@ public class ShellScriptResourceProcessorImpl implements ResourceProcessor {
 		return digest;
 	}
 	
-	private boolean digestsMatch(byte[] d1, byte[] d2) {
+	private static boolean digestsMatch(byte[] d1, byte[] d2) {
 		if (d1 == null || d2 == null) {
 			return false;
 		}

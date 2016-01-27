@@ -34,7 +34,7 @@ public class SystemAdminServiceImpl implements SystemAdminService
 	private static final String OS_MAC_OSX  = "Mac OS X";
 	private static final String OS_WINDOWS  = "windows";
 	private static final String UNKNOWN     = "UNKNOWN";
-	
+
 	@SuppressWarnings("unused")
 	private ComponentContext      m_ctx;
 
@@ -44,36 +44,37 @@ public class SystemAdminServiceImpl implements SystemAdminService
 	//
 	// ----------------------------------------------------------------
 
-	
+
 	// ----------------------------------------------------------------
 	//
 	//   Activation APIs
 	//
 	// ----------------------------------------------------------------
-	
+
 	protected void activate(ComponentContext componentContext) 
 	{			
 		//
 		// save the bundle context
 		m_ctx = componentContext;
 	}
-	
-	
+
+
 	protected void deactivate(ComponentContext componentContext) 
 	{
 		m_ctx = null;
 	}
 
-	
-	
+
+
 	// ----------------------------------------------------------------
 	//
 	//   Service APIs
 	//
 	// ----------------------------------------------------------------
-		
+
+	@Override
 	public String getUptime() {
-		
+
 		String uptimeStr = UNKNOWN;
 		long uptime = 0;
 
@@ -91,18 +92,34 @@ public class SystemAdminServiceImpl implements SystemAdminService
 			}
 		}
 		else if(OS_LINUX.equals(this.getOsName())) {
+			File file;
+			FileReader fr = null;
+			BufferedReader br = null;
 			try {
-				File file = new File("/proc/uptime");
-				FileReader fr = new FileReader(file);
-				BufferedReader br = new BufferedReader(fr);
-	
+				file = new File("/proc/uptime");
+				fr = new FileReader(file);
+				br = new BufferedReader(fr);
+
 				String line = br.readLine();
-				br.close();
-				
-				uptime = (long) (Double.parseDouble(line.substring(0, line.indexOf(" "))) * 1000);
-				uptimeStr = Long.toString(uptime);
+				if (line != null) {
+					uptime = (long) (Double.parseDouble(line.substring(0, line.indexOf(" "))) * 1000);
+					uptimeStr = Long.toString(uptime);
+				}
 			} catch (Exception e) {
 				s_logger.error("Could not read uptime", e);
+			} finally {
+				if (br != null) {
+					try {
+						br.close();
+					} catch (IOException e) {
+					}
+				}
+				if (fr != null) {
+					try {
+						fr.close();
+					} catch (IOException e) {
+					}
+				}
 			}
 		} else if(OS_MAC_OSX.equals(this.getOsName())) {
 			try {
@@ -112,7 +129,7 @@ public class SystemAdminServiceImpl implements SystemAdminService
 					int days = 0, hours = 0, mins = 0;
 
 					String uptimePart = uptimeParts[0];
-					
+
 					// If up less than a day, it will only show the number of mins, hr, or HH:MM
 					if(uptimePart.contains("days")) {
 						days = Integer.parseInt(uptimePart.split("\\s+days")[0]);
@@ -122,7 +139,7 @@ public class SystemAdminServiceImpl implements SystemAdminService
 						days = Integer.parseInt(uptimePart.split("\\s+day")[0]);
 						uptimePart = uptimeParts[1];
 					}
-					
+
 					if(uptimePart.contains(":")) {
 						// Showing HH:MM
 						hours = Integer.parseInt(uptimePart.split(":")[0]);
@@ -137,7 +154,7 @@ public class SystemAdminServiceImpl implements SystemAdminService
 						s_logger.error("uptime could not be parsed correctly: " + uptimeParts[0]);
 					}
 
-					uptime = (((days * 24) + hours) * 60 + mins) * 60;
+					uptime = (long) (((days * 24) + hours) * 60 + mins) * 60;
 					uptimeStr = Long.toString(uptime * 1000);
 				}
 			} catch (Exception e) {
@@ -146,7 +163,8 @@ public class SystemAdminServiceImpl implements SystemAdminService
 		}
 		return uptimeStr;
 	}
-	
+
+	@Override
 	public void reboot() {
 		String cmd = "";
 		if(OS_LINUX.equals(this.getOsName()) || OS_MAC_OSX.equals(this.getOsName())) {		
@@ -165,10 +183,13 @@ public class SystemAdminServiceImpl implements SystemAdminService
 			s_logger.error("failed to issue reboot", e);
 		}
 		finally {
-			if (proc != null) ProcessUtil.destroy(proc);
+			if (proc != null) {
+				ProcessUtil.destroy(proc);
+			}
 		}
 	}
-	
+
+	@Override
 	public void sync() {
 		String cmd = "";
 		if(OS_LINUX.equals(this.getOsName()) || OS_MAC_OSX.equals(this.getOsName())) {		
@@ -188,19 +209,21 @@ public class SystemAdminServiceImpl implements SystemAdminService
 			s_logger.error("failed to issue sync command", e);
 		}
 		finally {
-			if (proc != null) ProcessUtil.destroy(proc);
+			if (proc != null) {
+				ProcessUtil.destroy(proc);
+			}
 		}
 	}
 
-	
+
 	private String getOsName() {
 		return System.getProperty("os.name");
 	}
-	
+
 	private String runSystemCommand(String command) {
 		return this.runSystemCommand(command.split("\\s+"));
 	}
-	
+
 	private String runSystemCommand(String[] commands) {
 		SafeProcess proc = null;
 		StringBuffer response = new StringBuffer(); 
@@ -217,13 +240,14 @@ public class SystemAdminServiceImpl implements SystemAdminService
 				newLine = "\n";
 			}
 		} catch(Exception e) {
-			String command = "";
+			StringBuilder command = new StringBuilder();
 			String delim = "";
 			for(int i=0; i<commands.length; i++) {
-				command += delim + commands[i];
+				command.append(delim);
+				command.append(commands[i]);
 				delim = " ";
 			}
-			s_logger.error("failed to run commands " + command, e);
+			s_logger.error("failed to run commands " + command.toString(), e);
 		}
 		finally {
 			if(br != null){
@@ -233,9 +257,11 @@ public class SystemAdminServiceImpl implements SystemAdminService
 					s_logger.error("I/O Exception while closing BufferedReader!");
 				}
 			}
-			if (proc != null) ProcessUtil.destroy(proc);
+			if (proc != null) {
+				ProcessUtil.destroy(proc);
+			}
 		}
-		
+
 		return response.toString();
 	}
 }

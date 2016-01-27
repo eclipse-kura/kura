@@ -35,6 +35,7 @@
 		<module>org.eclipse.kura.core.deployment</module>
 		<module>org.eclipse.kura.core.log</module>
 		<module>org.eclipse.kura.core.net</module>
+		<module>org.eclipse.kura.core.status</module>
 		<module>org.eclipse.kura.deployment.agent</module>
 		<module>org.eclipse.kura.deployment.customizer</module>
 		<module>org.eclipse.kura.deployment.customizer.upgrade</module>
@@ -46,14 +47,14 @@
 		<module>org.eclipse.kura.linux.net</module>
 		<module>org.eclipse.kura.linux.net.test</module>
 		<module>org.eclipse.kura.linux.position</module>
-		<module>org.eclipse.kura.linux.status</module>
 		<module>org.eclipse.kura.linux.usb</module>
 		<module>org.eclipse.kura.linux.watchdog</module>
 		<module>org.eclipse.kura.net.admin</module>
 		<module>org.eclipse.kura.protocol.modbus</module>
 		<module>org.eclipse.kura.protocol.modbus.test</module>
-		<module>org.eclipse.kura.emulator</module>
-		<module>org.eclipse.kura.emulator.gpio</module>
+		<module>emulator</module>
+		<!--<module>org.eclipse.kura.emulator</module>-->
+		<!--<module>org.eclipse.kura.emulator.gpio</module>-->
 		<module>org.eclipse.kura.core.test</module>
 		<module>org.eclipse.kura.windows.net</module>
 		<module>org.eclipse.kura.windows.position</module>
@@ -398,7 +399,7 @@
 						</configuration>
 					</execution>
 				</executions>
-			</plugin>
+			</plugin>		
 		</plugins>
 		<pluginManagement>
 			<plugins>

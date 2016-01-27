@@ -105,7 +105,6 @@ public abstract class Cloudlet implements CloudClientListener
 		if(m_cloudClient != null){
 			m_cloudClient.release();
 		}
-		m_cloudService = null;
 	}
 
 	protected Cloudlet(String appId) {

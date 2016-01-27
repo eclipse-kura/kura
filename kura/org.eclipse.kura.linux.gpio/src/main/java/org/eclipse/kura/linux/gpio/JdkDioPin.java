@@ -1,3 +1,14 @@
+/**
+ * Copyright (c) 2011, 2015 Eurotech and/or its affiliates
+ *
+ *  All rights reserved. This program and the accompanying materials
+ *  are made available under the terms of the Eclipse Public License v1.0
+ *  which accompanies this distribution, and is available at
+ *  http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *   Eurotech
+ */
 package org.eclipse.kura.linux.gpio;
 
 import java.io.IOException;
@@ -34,6 +45,20 @@ public class JdkDioPin implements KuraGPIOPin {
 	private KuraGPIOTrigger trigger = null;
 
 	PinStatusListener localListener;
+	
+	public JdkDioPin(int pinIndex) {
+		super();
+		this.pinIndex = pinIndex;
+	}
+	
+	public JdkDioPin(int pinIndex, String pinName, KuraGPIODirection direction, KuraGPIOMode mode, KuraGPIOTrigger trigger) {
+		super();
+		this.pinIndex = pinIndex;
+		this.pinName = pinName;
+		this.direction = direction;
+		this.mode = mode;
+		this.trigger = trigger;
+	}
 
 	public static JdkDioPin parseFromProperty(Object key, String property) {
 		try {
@@ -43,7 +68,7 @@ public class JdkDioPin implements KuraGPIOPin {
 
 			String name = getValueByToken("name", tokens);
 			String deviceType = getValueByToken("deviceType", tokens);
-			if (deviceType.trim().equals("gpio.GPIOPin")) {
+			if ("gpio.GPIOPin".equals(deviceType.trim())) {
 				KuraGPIODirection d = parseDirection(getValueByToken("direction", tokens));
 				KuraGPIOMode m = parseMode(getValueByToken("mode", tokens));
 				KuraGPIOTrigger t = parseTrigger(getValueByToken("trigger", tokens));
@@ -70,20 +95,6 @@ public class JdkDioPin implements KuraGPIOPin {
 			return null;
 		}
 		return null;
-	}
-
-	public JdkDioPin(int pinIndex) {
-		super();
-		this.pinIndex = pinIndex;
-	}
-
-	public JdkDioPin(int pinIndex, String pinName, KuraGPIODirection direction, KuraGPIOMode mode, KuraGPIOTrigger trigger) {
-		super();
-		this.pinIndex = pinIndex;
-		this.pinName = pinName;
-		this.direction = direction;
-		this.mode = mode;
-		this.trigger = trigger;
 	}
 
 	@Override
@@ -195,8 +206,9 @@ public class JdkDioPin implements KuraGPIOPin {
 			return GPIOPinConfig.DIR_INPUT_ONLY;
 		case OUTPUT:
 			return GPIOPinConfig.DIR_OUTPUT_ONLY;
+		default:
+			return -1;
 		}
-		return -1;
 	}
 
 	private static KuraGPIODirection parseDirection(String d) {
@@ -208,13 +220,15 @@ public class JdkDioPin implements KuraGPIOPin {
 			case GPIOPinConfig.DIR_BOTH_INIT_OUTPUT:
 			case GPIOPinConfig.DIR_OUTPUT_ONLY:
 				return KuraGPIODirection.OUTPUT;
+			default:
+				return KuraGPIODirection.OUTPUT;
 			}
 		} catch (Exception e) {
-		}
+		} 
 		return KuraGPIODirection.OUTPUT;
 	}
 
-	private static  KuraGPIOMode parseMode(String m) {
+	private static KuraGPIOMode parseMode(String m) {
 		try {
 			switch (Integer.decode(m)) {
 			case GPIOPinConfig.MODE_INPUT_PULL_DOWN:
@@ -225,13 +239,15 @@ public class JdkDioPin implements KuraGPIOPin {
 				return KuraGPIOMode.OUTPUT_OPEN_DRAIN;
 			case GPIOPinConfig.MODE_OUTPUT_PUSH_PULL:
 				return KuraGPIOMode.OUTPUT_PUSH_PULL;
+			default:
+				return KuraGPIOMode.OUTPUT_OPEN_DRAIN;
 			}
 		} catch (Exception e) {
 		}
 		return KuraGPIOMode.OUTPUT_OPEN_DRAIN;
 	}
 
-	private static  KuraGPIOTrigger parseTrigger(String t) {
+	private static KuraGPIOTrigger parseTrigger(String t) {
 		try {
 			switch (Integer.decode(t)) {
 			case GPIOPinConfig.TRIGGER_BOTH_EDGES:
@@ -248,6 +264,8 @@ public class JdkDioPin implements KuraGPIOPin {
 				return KuraGPIOTrigger.NONE;
 			case GPIOPinConfig.TRIGGER_RISING_EDGE:
 				return KuraGPIOTrigger.RAISING_EDGE;
+			default: 
+				return KuraGPIOTrigger.NONE;
 			}
 		} catch (Exception e) {
 		}
@@ -264,8 +282,9 @@ public class JdkDioPin implements KuraGPIOPin {
 			return GPIOPinConfig.MODE_OUTPUT_OPEN_DRAIN;
 		case OUTPUT_PUSH_PULL:
 			return GPIOPinConfig.MODE_OUTPUT_PUSH_PULL;
+		default:
+			return -1;
 		}
-		return -1;
 	}
 
 	private int getTriggerInternal() {
@@ -284,8 +303,9 @@ public class JdkDioPin implements KuraGPIOPin {
 			return GPIOPinConfig.TRIGGER_NONE;
 		case RAISING_EDGE:
 			return GPIOPinConfig.TRIGGER_RISING_EDGE;
+		default:
+			return -1;
 		}
-		return -1;
 	}
 
 	@Override

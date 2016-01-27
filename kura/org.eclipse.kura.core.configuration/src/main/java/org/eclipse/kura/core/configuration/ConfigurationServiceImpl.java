@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011, 2014 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2015 Eurotech and/or its affiliates
  *
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
@@ -26,6 +26,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
@@ -521,18 +522,16 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 
 	Map<String, Object> decryptPasswords(ComponentConfiguration config) {
 		Map<String, Object> configProperties = config.getConfigurationProperties();
-		Iterator<String> keys = configProperties.keySet().iterator();
-		while (keys.hasNext()) {
-			String key = keys.next();
-			Object value = configProperties.get(key);
-			if (value instanceof Password) {
+		for (Entry<String, Object> property : configProperties.entrySet()) {
+			if (property.getValue() instanceof Password) {
 				try {
-					Password decryptedPassword = new Password(m_cryptoService.decryptAes(value.toString().toCharArray()));
-					configProperties.put(key, decryptedPassword);
+					Password decryptedPassword = new Password(m_cryptoService.decryptAes(property.getValue().toString().toCharArray()));
+					configProperties.put(property.getKey(), decryptedPassword);
 				} catch (Exception e) {
 				}
 			}
 		}
+
 		return configProperties;
 	}
 
@@ -548,17 +547,14 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 	}
 
 	private void encryptPasswords(Map<String, Object> propertiesToUpdate){
-		Iterator<String> keys = propertiesToUpdate.keySet().iterator();
-		while (keys.hasNext()) {
-			String key = keys.next();
-			Object value = propertiesToUpdate.get(key);
-			if (value != null) {
-				if (value instanceof Password) {
+		for (Entry<String, Object> property : propertiesToUpdate.entrySet()) {
+			if (property.getValue() != null) {
+				if (property.getValue() instanceof Password) {
 					try {
-						propertiesToUpdate.put(key, new Password(m_cryptoService.encryptAes(value.toString().toCharArray())));
+						propertiesToUpdate.put(property.getKey(), new Password(m_cryptoService.encryptAes(property.getValue().toString().toCharArray())));
 					} catch (Exception e) {
-						s_logger.warn("Failed to encrypt Password property: {}", key);
-						propertiesToUpdate.remove(key);
+						s_logger.warn("Failed to encrypt Password property: {}", property.getKey());
+						propertiesToUpdate.remove(property.getKey());
 					}
 				}
 			}
@@ -598,7 +594,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 
 	private void encryptPlainSnapshots() throws Exception {
 		Set<Long> snapshotIDs = getSnapshots();
-		if (snapshotIDs == null || snapshotIDs.size() == 0) {
+		if (snapshotIDs == null || snapshotIDs.isEmpty()) {
 			return;
 		}
 		Long[] snapshots = snapshotIDs.toArray(new Long[] {});
@@ -618,12 +614,15 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 				fr = new FileReader(fSnapshot);
 				br = new BufferedReader(fr);
 				String line = "";
-				String entireFile = "";
+				StringBuilder entireFile = new StringBuilder();
 				while ((line = br.readLine()) != null) {
-					entireFile += line;
+					entireFile.append(line);
 				} // end while
-				xmlConfigs = XmlUtil.unmarshal(entireFile, XmlComponentConfigurations.class);
+				xmlConfigs = XmlUtil.unmarshal(entireFile.toString(), XmlComponentConfigurations.class);
 			} finally {
+				if (br != null) {
+					br.close();
+				}
 				if (fr != null) {
 					fr.close();
 				}
@@ -720,12 +719,9 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 
 			Tocd ocd = m_ocds.get(pid);
 
-			Configuration cfg = m_configurationAdmin.getConfiguration(pid);
+			Configuration cfg = m_configurationAdmin.getConfiguration(pid, null);
 			Map<String, Object> props = CollectionsUtil.dictionaryToMap(cfg.getProperties(), ocd);
-
-			Map<String, Object> cleanedProps= cleanProperties(props, pid);
-
-			cc = new ComponentConfigurationImpl(pid, ocd, cleanedProps); 
+			cc = new ComponentConfigurationImpl(pid, ocd, props);
 		} catch (Exception e) {
 			s_logger.error("Error getting Configuration for component: " + pid + ". Ignoring it.", e);
 		}
@@ -776,26 +772,22 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 
 												Map<String, Object> props = cc.getConfigurationProperties();
 												if (props != null) {
-													for (String propName : props.keySet()) {
-														if (propName.equals(adId)) {
-															Object value = props.get(propName);
-															if (value != null) {
-																String propType = value.getClass().getSimpleName();
-																try {
-																	s_logger.debug("pid: {}, property name: {}, type: {}, value: {}", new Object[] {pid, propName, propType, value});
-																	Scalar.fromValue(propType);
-																	if (!propType.equals(adType)) {
-																		s_logger.error("Type: {} for property named: {} does not match the AD type: {} for returned Configuration of SelfConfiguringComponent with pid: {}",
-																				new Object[] {propType, propName, adType, pid});
-																		cc = null;
-																		return cc;  // do not return the invalid configuration															
-																	}
-																} catch (IllegalArgumentException e) {
-																	s_logger.error("Invalid class: {} for property named: {} for returned Configuration of SelfConfiguringComponent with pid: " + pid, propType, propName);
-																	cc = null;
-																	return cc;  // do not return the invalid configuration
-																}
+													Object value = props.get(adId);
+													if (value != null) {
+														String propType = value.getClass().getSimpleName();
+														try {
+															s_logger.debug("pid: {}, property name: {}, type: {}, value: {}", new Object[] {pid, adId, propType, value});
+															Scalar.fromValue(propType);
+															if (!propType.equals(adType)) {
+																s_logger.error("Type: {} for property named: {} does not match the AD type: {} for returned Configuration of SelfConfiguringComponent with pid: {}",
+																		new Object[] {propType, adId, adType, pid});
+																cc = null;
+																return cc;  // do not return the invalid configuration															
 															}
+														} catch (IllegalArgumentException e) {
+															s_logger.error("Invalid class: {} for property named: {} for returned Configuration of SelfConfiguringComponent with pid: " + pid, propType, adId);
+															cc = null;
+															return cc;  // do not return the invalid configuration
 														}
 													}
 												}
@@ -896,7 +888,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 					s_logger.debug("Pushing config to config admin: {}", config.getPid());
 
 					// push it to the ConfigAdmin
-					cfg = m_configurationAdmin.getConfiguration(config.getPid());
+					cfg = m_configurationAdmin.getConfiguration(config.getPid(), null);
 					cfg.update(CollectionsUtil.mapToDictionary(config.getConfigurationProperties()));
 
 					// track it as a pending Configuration
@@ -954,13 +946,13 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 			fr = new FileReader(fSnapshot);
 			br = new BufferedReader(fr);
 			String line = "";
-			String entireFile = "";
+			StringBuilder entireFile = new StringBuilder();
 			while ((line = br.readLine()) != null) {
-				entireFile += line;
+				entireFile.append(line);
 			}
 
 			//File loaded, try to decrypt and unmarshall
-			String decryptedContent = new String(m_cryptoService.decryptAes(entireFile.toCharArray()));
+			String decryptedContent = new String(m_cryptoService.decryptAes(entireFile.toString().toCharArray()));
 			xmlConfigs = XmlUtil.unmarshal(decryptedContent, XmlComponentConfigurations.class);
 		} catch (KuraException e) {
 			s_logger.debug("KuraException: {}", e.getCode().toString());
@@ -975,17 +967,16 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 			s_logger.error("Error parsing xml: {}", e.getMessage());
 		}finally {			
 			try {
-				if (fr != null) {
-					fr.close();
-				}
-			} catch (IOException e) {
-			}
-			try {
 				if (br != null) {
 					br.close();
 				}
 			} catch (IOException e) {
-
+			}
+			try {
+				if (fr != null) {
+					fr.close();
+				}
+			} catch (IOException e) {
 			}
 		}
 		return xmlConfigs;
@@ -1007,11 +998,11 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 
 		// Try to get the OCD from the registered ConfigurableComponents
 		OCD registerdOCD = getRegisteredOCD(pid);
-		
+
 		try {
 			if (!m_selfConfigComponents.contains(pid) && registerdOCD != null) {
 				//get the actual running configuration for the selected component
-				Configuration config = m_configurationAdmin.getConfiguration(pid);
+				Configuration config = m_configurationAdmin.getConfiguration(pid, null);
 				Map<String, Object> runningProps = CollectionsUtil.dictionaryToMap(config.getProperties(), registerdOCD);
 
 				//iterate through all the running properties and include in mergedProperties 
@@ -1080,7 +1071,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 			throw new KuraException(KuraErrorCode.CONFIGURATION_UPDATE, e, pid);
 		}
 	}
-	
+
 	private void updateComponentConfiguration(String pid, Map<String, Object> mergedProperties, boolean snapshotOnConfirmation) throws KuraException, IOException{
 		if (!m_selfConfigComponents.contains(pid)) {
 
@@ -1103,12 +1094,10 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 			s_logger.info("Snapshot on EventAdmin configuration will be taken for {}.", pid);
 		}
 
-		Map<String, Object> cleanedProperties= cleanProperties(mergedProperties, pid);
-
 		// Update the new properties
 		// use ConfigurationAdmin to do the update
-		Configuration config = m_configurationAdmin.getConfiguration(pid);
-		config.update(CollectionsUtil.mapToDictionary(cleanedProperties));
+		Configuration config = m_configurationAdmin.getConfiguration(pid, null);
+		config.update(CollectionsUtil.mapToDictionary(mergedProperties));
 	}
 
 	private OCD getRegisteredOCD(String pid){
@@ -1137,12 +1126,11 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 
 			// loop over the proposed property values
 			// and validate them against the definition
-			Iterator<String> keys = updatedProps.keySet().iterator();
-			while (keys.hasNext()) {
-
-				String key = keys.next();
+			for (Entry<String, Object> property : updatedProps.entrySet()) {
+				
+				String key = property.getKey();
 				AttributeDefinition attrDef = attrDefs.get(key);
-
+				
 				// is attribute undefined?
 				if (attrDef == null) {
 					// we do not have an attribute descriptor to the validation
@@ -1153,9 +1141,9 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 					// just accept them.
 					continue;
 				}
-
+				
 				// validate the attribute value
-				Object objectValue = updatedProps.get(key);
+				Object objectValue = property.getValue(); 
 				String stringValue = StringUtil.valueToString(objectValue);
 				if (stringValue != null) {
 					String result = attrDef.validate(stringValue);
@@ -1163,6 +1151,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 						throw new KuraException(KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID, attrDef.getID() + ": " + result);
 					}
 				}
+				
 			}
 
 			// make sure all required properties are set
@@ -1182,38 +1171,6 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 		}
 	}
 
-	private Map<String, Object> cleanProperties(Map<String, Object> mergedProperties, String pid) {
-		if (!m_selfConfigComponents.contains(pid)) {
-			Tocd componentOcd= m_ocds.get(pid);
-			Set<String> metatypeNames= new HashSet<String>();
-			if (componentOcd != null) {
-				List<AD> attrDefs = componentOcd.getAD();
-				if (attrDefs != null) {
-					for (AD attrDef : attrDefs) {
-						String name = attrDef.getName();
-						if (!metatypeNames.contains(name)) {
-							metatypeNames.add(name);
-						}
-					}
-				}
-			}
-
-			Map<String, Object> cleanedProperties= new HashMap<String, Object> ();
-			Set<String> mergedKeys= mergedProperties.keySet();
-
-			for(String key: mergedKeys){
-				if(metatypeNames.contains(key)){
-					Object value= mergedProperties.get(key);
-					cleanedProperties.put(key, value);
-				}
-			}
-			return cleanedProperties;
-		}else{
-			Map<String, Object> cleanedProperties= new HashMap<String, Object> (mergedProperties);
-			return cleanedProperties;
-		}
-	}
-
 	private synchronized List<ComponentConfiguration> buildCurrentConfiguration(List<ComponentConfiguration> configsToUpdate) throws KuraException {
 		// Build the current configuration
 		ComponentConfiguration cc = null;
@@ -1230,9 +1187,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 					if (configToUpdate.getPid().equals(pid)) {
 						// found a match
 						isConfigToUpdate = true;
-						Map<String, Object> cleanedProps= cleanProperties(configToUpdate.getConfigurationProperties(), pid);
-						ComponentConfiguration cleanedConfig= new ComponentConfigurationImpl(pid, (Tocd) configToUpdate.getDefinition(), cleanedProps);
-						configs.add(cleanedConfig);
+						configs.add(configToUpdate);
 						break;
 					}
 				}

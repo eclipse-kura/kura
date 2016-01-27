@@ -124,7 +124,7 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
 	
 	public void unsetModemManagerService(ModemManagerService modemManagerService) {
     	s_logger.debug("Unset the modem manager service");
-		modemManagerService = null;
+    	m_modemManagerService = null;
 	}
     
 	// ----------------------------------------------------------------

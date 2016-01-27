@@ -641,7 +641,9 @@ public class LinuxNetworkUtil {
 				}
 			}
 					
-			if (proc != null) ProcessUtil.destroy(proc);
+			if (proc != null) {
+				ProcessUtil.destroy(proc);
+			}
 		}
 		
 		if ((linuxIfconfig.getType() == NetInterfaceType.ETHERNET) || (linuxIfconfig.getType() == NetInterfaceType.WIFI)) {
@@ -685,7 +687,7 @@ public class LinuxNetworkUtil {
 			proc = ProcessUtil.exec("ifconfig " + ifaceName);
 			if (proc.waitFor() != 0) {
                 s_logger.warn("getMacAddress() :: error executing command --- ifconfig {} --- exit value = {}", ifaceName , proc.exitValue());
-                return mac;
+                return null;
 			}
 
 			//get the output
@@ -713,7 +715,9 @@ public class LinuxNetworkUtil {
 				}
 			}
 			
-			if (proc != null) ProcessUtil.destroy(proc);
+			if (proc != null) {
+				ProcessUtil.destroy(proc);
+			}
 		}
 		
 		s_logger.trace("getMacAddress() :: interface={}, MAC Address={}", ifaceName, mac);
@@ -787,8 +791,7 @@ public class LinuxNetworkUtil {
 			}
 		} catch(Exception e) {
 		    s_logger.warn("Error reading multicast info", e);
-		}
-		finally {
+		} finally {
 			if(br != null){
 				try{
 					br.close();
@@ -797,7 +800,9 @@ public class LinuxNetworkUtil {
 				}
 			}
 			
-			if (proc != null) ProcessUtil.destroy(proc);
+			if (proc != null) {
+				ProcessUtil.destroy(proc);
+			}
 		}
 		
 		s_logger.trace("isSupportsMulticast() :: interface={}, multicast?={}", ifaceName, suportsMulticast);
@@ -822,7 +827,9 @@ public class LinuxNetworkUtil {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
 		}
 		finally {
-			if (proc != null) ProcessUtil.destroy(proc);
+			if (proc != null) {
+				ProcessUtil.destroy(proc);
+			}
 		}
 	}
 	
@@ -877,8 +884,7 @@ public class LinuxNetworkUtil {
 			}
 		} catch (Exception e) {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
-		} 
-		finally {
+		} finally {
 			if(br != null){
 				try{
 					br.close();
@@ -887,7 +893,9 @@ public class LinuxNetworkUtil {
 				}
 			}
 			
-			if (proc != null) ProcessUtil.destroy(proc);
+			if (proc != null) {
+				ProcessUtil.destroy(proc);
+			}
 		}
 		
 		s_logger.trace("getType() :: interface={}, type={}", ifaceName, ifaceType);
@@ -981,17 +989,19 @@ public class LinuxNetworkUtil {
 			}
 			
 			//get the output
-			br = new BufferedReader(new InputStreamReader(procEthtool.getInputStream()));
-			String line = null;
-			while ((line = br.readLine()) != null) {
-				if (line.startsWith("driver: ")) {
-					driver.put("name", line.substring(line.indexOf(": ") + 1));
-				}
-				else if (line.startsWith("version: ")) {
-					driver.put("version", line.substring(line.indexOf(": ") + 1));
-				}
-				else if (line.startsWith("firmware-version: ")) {
-					driver.put("firmware", line.substring(line.indexOf(": ") + 1));
+			if (procEthtool != null) {
+				br = new BufferedReader(new InputStreamReader(procEthtool.getInputStream()));
+				String line = null;
+				while ((line = br.readLine()) != null) {
+					if (line.startsWith("driver: ")) {
+						driver.put("name", line.substring(line.indexOf(": ") + 1));
+					}
+					else if (line.startsWith("version: ")) {
+						driver.put("version", line.substring(line.indexOf(": ") + 1));
+					}
+					else if (line.startsWith("firmware-version: ")) {
+						driver.put("firmware", line.substring(line.indexOf(": ") + 1));
+					}
 				}
 			}
 			
@@ -1008,7 +1018,9 @@ public class LinuxNetworkUtil {
 					s_logger.error("I/O Exception while closing BufferedReader!");
 				}
 			}			
-			if (procEthtool != null) ProcessUtil.destroy(procEthtool);
+			if (procEthtool != null) {
+				ProcessUtil.destroy(procEthtool);
+			}
 		}
 		return driver;
 	}
@@ -1069,7 +1081,9 @@ public class LinuxNetworkUtil {
 				}
 			}
 			
-			if (proc != null) ProcessUtil.destroy(proc);
+			if (proc != null) {
+				ProcessUtil.destroy(proc);
+			}
 		}
 		return capabilities;
 	}
@@ -1158,8 +1172,12 @@ public class LinuxNetworkUtil {
 				}
 			}	
 			
-			if (procIw != null) ProcessUtil.destroy(procIw);
-			if (procIwConfig != null) ProcessUtil.destroy(procIwConfig);
+			if (procIw != null) {
+				ProcessUtil.destroy(procIw);
+			}
+			if (procIwConfig != null) {
+				ProcessUtil.destroy(procIwConfig);
+			}
 		}
 		
 		return mode;
@@ -1175,39 +1193,81 @@ public class LinuxNetworkUtil {
 		
 		SafeProcess proc = null;
 		BufferedReader br = null;
+		String line = null;
 		try {
-			//start the process
-			proc = ProcessUtil.exec("iwconfig " + ifaceName);
-			if (proc.waitFor() != 0) {
-				s_logger.warn("error executing command --- iwconfig --- exit value = {}", proc.exitValue());
-				return bitRate;
-			}
-
-			//get the output
-			br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
-			String line = null;
-
-			while((line = br.readLine()) != null) {
-				int index = line.indexOf("Bit Rate=");
-				if(index > -1) {
-					s_logger.debug("line: " + line);
-					StringTokenizer st = new StringTokenizer(line.substring(index));
-					st.nextToken();	// skip 'Bit'
-					Double rate = Double.parseDouble(st.nextToken().substring(5));
-					int mult = 1;
-					
-					String unit = st.nextToken();
-					if(unit.startsWith("kb")) {
-						mult = 1000;
-					} else if (unit.startsWith("Mb")) {
-						mult = 1000000;
-					} else if (unit.startsWith("Gb")) {
-						mult = 1000000000;
-					}
-					
-					bitRate = (long) (rate * mult);
+			if (toolExists("iw")) {
+				//start the process
+				proc = ProcessUtil.exec("iw dev " + ifaceName + " link");
+				if (proc.waitFor() != 0) {
+					s_logger.warn("error executing command --- iw --- exit value = {}", proc.exitValue());
+					return bitRate;
 				}
-			}			
+				else {	
+					//get the output
+					br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+					line = null;
+		
+					while((line = br.readLine()) != null) {
+						int index = line.indexOf("tx bitrate: ");
+						if(index > -1) {
+							s_logger.debug("line: " + line);
+							StringTokenizer st = new StringTokenizer(line.substring(index));
+							st.nextToken();	// skip 'tx'
+							st.nextToken(); // skip 'bitrate:'
+							Double rate = Double.parseDouble(st.nextToken());
+							int mult = 1;
+							
+							String unit = st.nextToken();
+							if(unit.startsWith("kb")) {
+								mult = 1000;
+							} else if (unit.startsWith("Mb")) {
+								mult = 1000000;
+							} else if (unit.startsWith("Gb")) {
+								mult = 1000000000;
+							}
+							
+							bitRate = (long) (rate * mult);
+							return bitRate;
+						}
+					}
+				}
+			}
+			
+			else if(toolExists("iwconfig")) {
+				//start the process
+				proc = ProcessUtil.exec("iwconfig " + ifaceName);
+				if (proc.waitFor() != 0) {
+					s_logger.warn("error executing command --- iwconfig --- exit value = {}", proc.exitValue());
+					return bitRate;
+				}
+	
+				//get the output
+				br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+				line = null;
+	
+				while((line = br.readLine()) != null) {
+					int index = line.indexOf("Bit Rate=");
+					if(index > -1) {
+						s_logger.debug("line: " + line);
+						StringTokenizer st = new StringTokenizer(line.substring(index));
+						st.nextToken();	// skip 'Bit'
+						Double rate = Double.parseDouble(st.nextToken().substring(5));
+						int mult = 1;
+						
+						String unit = st.nextToken();
+						if(unit.startsWith("kb")) {
+							mult = 1000;
+						} else if (unit.startsWith("Mb")) {
+							mult = 1000000;
+						} else if (unit.startsWith("Gb")) {
+							mult = 1000000000;
+						}
+						
+						bitRate = (long) (rate * mult);
+						return bitRate;
+					}
+				}
+			}
 			
 		} catch (IOException e) {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
@@ -1223,7 +1283,9 @@ public class LinuxNetworkUtil {
 				}
 			}
 			
-			if (proc != null) ProcessUtil.destroy(proc);
+			if (proc != null) {
+				ProcessUtil.destroy(proc);
+			}
 		}
 		
 		return bitRate;
@@ -1234,34 +1296,62 @@ public class LinuxNetworkUtil {
 		if (Character.isDigit(ifaceName.charAt(0))) {
 			return null;
 		}
+		
 		String ssid = null;
 		SafeProcess proc = null;
 		BufferedReader br = null;
 		try {
-			//start the process
-			proc = ProcessUtil.exec("iwconfig " + ifaceName);
-			if (proc.waitFor() != 0) {
-				s_logger.warn("error executing command --- ifconfig --- exit value = {}", proc.exitValue());
-				return ssid;
-			}
-
-			//get the output
-			br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
-			String line = null;
-
-			while((line = br.readLine()) != null) {
-				int index = line.indexOf("ESSID:");
-				if(index > -1) {
-					s_logger.debug("line: " + line);
-					String lineSub = line.substring(index);
-					StringTokenizer st = new StringTokenizer(lineSub);
-					String ssidStr = st.nextToken();
-					if(ssidStr.startsWith("\"") && ssidStr.endsWith("\"")) {
-						ssid = ssidStr.substring(lineSub.indexOf('"') + 1, lineSub.lastIndexOf('"')); // get value between quotes
+			if(toolExists("iw")) {
+				//start the process
+				proc = ProcessUtil.exec("iw dev " + ifaceName + " link");
+				if (proc.waitFor() != 0) {
+					s_logger.warn("error executing command --- iw --- exit value = {}", proc.exitValue());
+					return ssid;
+				}
+	
+				//get the output
+				br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+				String line = null;
+	
+				while((line = br.readLine()) != null) {
+					int index = line.indexOf("SSID:");
+					if(index > -1) {
+						s_logger.debug("line: " + line);
+						String lineSub = line.substring(index);
+						StringTokenizer st = new StringTokenizer(lineSub);
+						st.nextToken();
+						ssid = st.nextToken();
+						return ssid;
 					}
 				}
-			}
+			}			
 			
+			else if(toolExists("iwconfig")) {
+				//start the process
+				proc = ProcessUtil.exec("iwconfig " + ifaceName);
+				if (proc.waitFor() != 0) {
+					s_logger.warn("error executing command --- iwconfig --- exit value = {}", proc.exitValue());
+					return ssid;
+				}
+	
+				//get the output
+				br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+				String line = null;
+	
+				while((line = br.readLine()) != null) {
+					int index = line.indexOf("ESSID:");
+					if(index > -1) {
+						s_logger.debug("line: " + line);
+						String lineSub = line.substring(index);
+						StringTokenizer st = new StringTokenizer(lineSub);
+						String ssidStr = st.nextToken();
+						if(ssidStr.startsWith("\"") && ssidStr.endsWith("\"")) {
+							ssid = ssidStr.substring(lineSub.indexOf('"') + 1, lineSub.lastIndexOf('"')); // get value between quotes
+						}
+					}
+					return ssid;
+				}
+			}
 			
 		} catch (IOException e) {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
@@ -1277,7 +1367,9 @@ public class LinuxNetworkUtil {
 				}
 			}
 			
-			if (proc != null) ProcessUtil.destroy(proc);
+			if (proc != null) {
+				ProcessUtil.destroy(proc);
+			}
 		}
 		
 		return ssid;
@@ -1364,7 +1456,9 @@ public class LinuxNetworkUtil {
 				}
 			}
 			
-			if (proc != null) ProcessUtil.destroy(proc);
+			if (proc != null) {
+				ProcessUtil.destroy(proc);
+			}
 		}
 		
 		//power the controller since it is not on
@@ -1383,7 +1477,9 @@ public class LinuxNetworkUtil {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
 		}
 		finally {
-			if (proc != null) ProcessUtil.destroy(proc);
+			if (proc != null) {
+				ProcessUtil.destroy(proc);
+			}
 		}
 	}
 	
@@ -1427,7 +1523,9 @@ public class LinuxNetworkUtil {
 				}
 			}
 			
-			if (proc != null) ProcessUtil.destroy(proc);
+			if (proc != null) {
+				ProcessUtil.destroy(proc);
+			}
 		}
 
 		return false;

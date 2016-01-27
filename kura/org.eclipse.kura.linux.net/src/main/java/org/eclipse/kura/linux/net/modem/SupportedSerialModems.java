@@ -76,7 +76,8 @@ public class SupportedSerialModems {
     		    	s_logger.info("Terminating {} Thread ...", SERIAL_MODEM_INIT_WORKER_THREAD_NAME);
     		    	s_executor.shutdownNow();
     		    }
-    	}});
+    	}
+    		});
 	}
 	
 	public static SupportedSerialModemInfo getModem(String imageName, String imageVersion) {
@@ -137,7 +138,7 @@ public class SupportedSerialModems {
 								modemReachable = true;
 							}
 						} catch (Exception e) {
-							e.printStackTrace();
+							s_logger.error("Worker exception", e);
 						}
 					}
 				}

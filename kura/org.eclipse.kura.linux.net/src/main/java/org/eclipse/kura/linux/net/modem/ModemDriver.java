@@ -35,15 +35,17 @@ public class ModemDriver {
 	private static final String GPIO_65_VALUE_PATH = GPIO_65_PATH + "/value";
 	private static final String GPIO_60_PATH = "/sys/class/gpio/gpio60";
 	private static final String GPIO_60_DIRECTION_PATH = GPIO_60_PATH + "/direction";
-	private static final String GPIO_60_VALUE_PATH = GPIO_60_PATH + "/value"; 
-	private static final String GPIO_EXPORT_PATH = "/sys/class/gpio/export";
+	private static final String GPIO_60_VALUE_PATH = GPIO_60_PATH + "/value";
+	private static final String GPIO_PATH = "/sys/class/gpio";
+	private static final String GPIO_EXPORT_PATH = GPIO_PATH + "/export";
 	
 	private static final String RELIAGATE_10_20_GPIO_PATH = "/sys/class/gpio/usb-rear-pwr/value";
 	private static final String RELIAGATE_50_21_GPIO_11_0_CMD = "/usr/sbin/vector-j21-gpio 11 0";
 	private static final String RELIAGATE_50_21_GPIO_11_1_CMD = "/usr/sbin/vector-j21-gpio 11 1"; 
 	private static final String RELIAGATE_50_21_GPIO_6_CMD = "/usr/sbin/vector-j21-gpio 6";
 	
-	
+	private static final int RELIAGATE_10_05_GSM_RESET_GPIO_NUM = 252;
+	private static final int RELIAGATE_10_05_GSM_POWERKEY_GPIO_NUM = 123;
 	
 	public boolean turnModemOff() throws Exception {
 		if (TARGET_NAME == null) {
@@ -136,11 +138,90 @@ public class ModemDriver {
 		return retVal;
 	}
 	
+	public boolean resetModem() {
+		boolean retVal = true;
+		if(KuraConstants.ReliaGATE_10_05.equals(TARGET_NAME)) {
+			// just pulse the modem reset pin
+			try {
+				if (!isSysfsGpioExported(RELIAGATE_10_05_GSM_RESET_GPIO_NUM)) {
+					initSysfsGpio(RELIAGATE_10_05_GSM_RESET_GPIO_NUM, false);
+				}
+				pulseSysfsGpio(RELIAGATE_10_05_GSM_RESET_GPIO_NUM, true, 1000);
+				
+				// wait until the modem is on again
+				int cnt = 10;
+				while (!isOn() && cnt > 0) {
+					sleep(1000);
+					cnt--;
+				}
+				if (!isOn()) {
+					retVal = false;
+				}
+			} catch (Exception e) {
+				retVal = false;
+			}
+		} else {
+			s_logger.warn("resetModem() :: modem reset operation is not supported for the {} platform", TARGET_NAME);
+		}
+		return retVal;
+	}
+	
 	public void sleep(long millis) {
 		try {
 			Thread.sleep(millis);
 		} catch (InterruptedException e) {
 			// ignore
+		}
+	}
+	
+	protected boolean isSysfsGpioExported(int gpioNum) {
+		boolean exported = false;
+		final String gpioPath = GPIO_PATH + "/gpio" + String.valueOf(RELIAGATE_10_05_GSM_RESET_GPIO_NUM);
+		File fgpioFolder = new File (gpioPath);
+		if (!fgpioFolder.exists()) {
+			exported = true;
+		}
+		return exported;
+	}
+	
+	protected void initSysfsGpio(int gpioNum, boolean level) throws IOException {
+		final String gpioPath = GPIO_PATH + "/gpio" + String.valueOf(RELIAGATE_10_05_GSM_RESET_GPIO_NUM);
+		BufferedWriter bwGpioSelect = new BufferedWriter(new FileWriter(GPIO_EXPORT_PATH));
+		try {
+			bwGpioSelect.write(gpioNum);
+			bwGpioSelect.flush();
+		} finally {
+			bwGpioSelect.close();
+		}
+
+		BufferedWriter bwGpioDirection = new BufferedWriter(new FileWriter(gpioPath + "/direction"));
+		try {
+			bwGpioDirection.write("out");
+			bwGpioDirection.flush();
+		} finally {
+			bwGpioDirection.close();
+		}
+
+		BufferedWriter fGpioValue = new BufferedWriter(new FileWriter(gpioPath + "/value"));
+		try {
+			fGpioValue.write(level ? "1" : "0");
+			fGpioValue.flush();
+		} finally {
+			fGpioValue.close();
+		}
+	}
+	
+	protected void pulseSysfsGpio(int gpioNum, boolean level, long duration) throws IOException {
+		final String gpioPath = GPIO_PATH + "/gpio" + String.valueOf(RELIAGATE_10_05_GSM_RESET_GPIO_NUM);
+		BufferedWriter fGpioValue = new BufferedWriter(new FileWriter(gpioPath + "/value"));
+		try {
+			fGpioValue.write(level ? "1" : "0");
+			fGpioValue.flush();
+			sleep(duration);
+			fGpioValue.write(level ? "0" : "1");
+			fGpioValue.flush();
+		} finally {
+			fGpioValue.close();
 		}
 	}
 	

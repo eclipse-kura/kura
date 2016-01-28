@@ -2,20 +2,40 @@ Eclipse Kura - 1.4.0
 -------------------------------------------------------------------------
 
 Added Features :
-  * Reordered the SSL features: now are all in Settings
-  * Modified the local web-UI adding a check in order to block SSIDs longer than 32 characters
-  * Removed web-UI filtering for SSIDs: now all is demanded to the wi-fi system applications
+  * Grouped Web UI SSL configuration in a single place under 'Settings'
+  * Modified the Web UI adding a check in order to block SSIDs longer than 32 characters
+  * Rolled-back Web UI filtering of SSID
+  * Added some security headers to the Web UI
+  * Refactored security related tabs in the Web UI 
+  * Added property to the WatchdogService to specify the watchdog device  
   * Modified build in order to include checks for Java 8 compact 2 compliance
   * Introduced new deployment application (named DEPLOY-V2) that improves updates download from the cloud platform
   * New firewall management, now based on iptables-save and iptables-restore
   * Firewall: allowed open port entries for tcp and udp on the same port
   * Firewall: enabled the support for port ranges when defining open port entries
-  * Emulator bundle split into 6 separate bundles, one for each function.
-  * Reviewed no-network profiles: removed net.admin bundle and linux.net. Now those bundles are replaced by emulator.net.
+  * Added support for Ublox SARA-U2 modem
+  * Added support to switch between AP and station mode on radios supported by the 'bcmdhd' kernel module
+  * Emulator bundle split into 6 separate bundles, one for each function
+  * Reviewed no-network profiles: removed net.admin bundle and linux.net. Now those bundles are replaced by emulator.net
   * Linux build date/version is now published in the birth certificate as part of the os.version metric
-  * Improvements to the Development Environment.
-  * Minor bugfixes and improvements
+  * Improvements to the Development Environment
+  * ConfigurationService: treat an OSGi ManagedService as a ConfigurableComponent
   * Updated documentation
+  
+Bug Fixes :
+  * Fixed github issue #80
+  * Fixed github issue #84
+  * Fixed github issue #85
+  * Fixed github issue #87
+  * Fixed configuration rollback to snapshot 0
+  * Fixed toggling WiFi interface when Ethernet interface is reconfigured
+  * Better Web UI exception handling when manually (dis)connecting to the Cloud
+  * Added various null pointer checks
+  * Started work to fix warnings emitted by Sonar
+  * Fixed JUnit tests
+  * Fixed GPIO example
+  * Fixed bug when image in metatype has no size
+  * Fixed and improved the BLE TI SensorTag example
 
 Know Issues :
   * BLE only tested on the Raspberry Pi B with a Broadcom BCM20702 USB dongle and the TI SensorTag. The kernel version was "Linux raspberrypi 3.18.11-v7+ #781 SMP PREEMPT Tue Apr 21 18:07:59 BST 2015 armv7l GNU/Linux". Note that on the kernel "Linux version 4.1.7-v7+ (dc4@dc4-XPS13-9333) (gcc version 4.8.3 20140303 (prerelease) (crosstool-NG linaro-1.13.1+bzr2650 - Linaro GCC 2014.03) ) #817 SMP PREEMPT Sat Sep 19 15:32:00 BST 2015" has a bug on gatttool and the BLE connection failes.

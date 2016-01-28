@@ -23,3 +23,5 @@ www-test
 *.cache.*
 manifests
 
++# IntelliJ Idea
++.idea/

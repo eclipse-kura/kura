@@ -21,11 +21,18 @@ import java.io.InputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import org.eclipse.kura.KuraErrorCode;
+import org.eclipse.kura.KuraException;
+
 public class UnZip
 {
     private static final String INPUT_ZIP_FILE = "/tmp/test.zip";
 	//private static final String INPUT_ZIP_FILE = "/tmp/zip_with_script.zip";
 	private static final String OUTPUT_FOLDER = "/tmp/";
+	
+	private static final int BUFFER = 1024;
+	private static int tooBig = 0x6400000; // Max size of unzipped data, 100MB
+	private static int tooMany = 1024;     // Max number of files
 
 	public static void main( String[] args )
 	{
@@ -75,13 +82,16 @@ public class UnZip
 				folder.mkdirs();
 			}
 	
+			int entries = 0;
+			long total = 0;
 			ZipEntry ze = zis.getNextEntry();
 	
 			while(ze!=null){
-				byte[] buffer = new byte[1024];
+				byte[] buffer = new byte[BUFFER];
 	
-				String fileName = ze.getName();
-				File newFile = new File(outputFolder + File.separator + fileName);
+				String expectedFilePath = new StringBuilder(folder.getPath()).append(File.separator).append(ze.getName()).toString();
+				String fileName = validateFileName(expectedFilePath, folder.getPath());
+				File newFile = new File(fileName);
 	
 				if (newFile.isDirectory()) {
 					newFile.mkdirs();
@@ -97,18 +107,47 @@ public class UnZip
 				FileOutputStream fos = new FileOutputStream(newFile);
 	
 				int len;
-				while ((len = zis.read(buffer)) > 0) {
+				while ((total + BUFFER <= tooBig) && (len = zis.read(buffer)) > 0) {
 					fos.write(buffer, 0, len);
+					total += len;
 				}
-	
-				fos.close();   
+				fos.flush();
+				fos.close();
+
+				entries++;
+				if (entries > tooMany) {
+					throw new IllegalStateException("Too many files to unzip.");
+				}
+				if (total > tooBig) {
+					throw new IllegalStateException("File being unzipped is too big.");
+				}
+
 				ze = zis.getNextEntry();
 			}
 	
 			zis.closeEntry();
+		} catch (IOException e) {
+			throw e;
+		} catch (KuraException e) {
+			throw new IOException("File is outside extraction target directory.");
+		} finally {
+			if (zis != null) {
+				zis.close();
+			}
 		}
-		finally{
-			zis.close();
+	}
+	
+	private static String validateFileName(String zipFileName, String intendedDir) throws IOException, KuraException{
+		File zipFile = new File(zipFileName);
+		String filePath = zipFile.getCanonicalPath();
+
+		File iD = new File(intendedDir);
+		String canonicalID = iD.getCanonicalPath();
+
+		if (filePath.startsWith(canonicalID)) {
+			return filePath;
+		} else {
+			throw new KuraException(KuraErrorCode.SECURITY_EXCEPTION);
 		}
 	}
 

@@ -1,5 +1,6 @@
 package org.eclipse.kura.web.client.ui;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -356,6 +357,7 @@ public class EntryClassUi extends Composite {
 				gwtComponentService.findComponentConfigurations(token, new AsyncCallback<List<GwtConfigComponent>>() {
 					@Override
 					public void onFailure(Throwable ex) {
+						logger.log(Level.SEVERE, ex.getMessage(), ex);;
 						FailureHandler.handle(ex, EntryClassUi.class.getName());
 					}
 
@@ -363,6 +365,7 @@ public class EntryClassUi extends Composite {
 					public void onSuccess(List<GwtConfigComponent> result) {
 						servicesMenu.clear();
 						for (GwtConfigComponent pair : result) {
+							logger.info(pair.getComponentId());
 							servicesMenu.add(new ServicesAnchorListItem(pair, ui));
 						}
 					}

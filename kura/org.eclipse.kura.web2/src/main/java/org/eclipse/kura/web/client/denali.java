@@ -11,7 +11,6 @@
  */
 package org.eclipse.kura.web.client;
 
-import java.awt.BorderLayout;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
@@ -34,10 +33,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.core.client.ScriptInjector;
-import com.google.gwt.logging.client.DefaultLevel.Info;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
 
 /**
@@ -133,7 +129,7 @@ public class denali implements EntryPoint
 								binder.setFooter(gwtSession);
 								binder.initSystemPanel(gwtSession);
 								binder.setSession(gwtSession);
-								//binder.initServicesTree();
+								binder.initServicesTree();
 								binder.setDirty(false);
 							}
 						});

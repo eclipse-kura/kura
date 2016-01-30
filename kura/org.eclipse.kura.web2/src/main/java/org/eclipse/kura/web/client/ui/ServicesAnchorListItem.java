@@ -23,8 +23,7 @@ public class ServicesAnchorListItem extends AnchorListItem {
 	ServicesAnchorListItem instance;
 	private static final Messages MSGS = GWT.create(Messages.class);
 
-	public ServicesAnchorListItem(GwtConfigComponent service,
-			EntryClassUi mainUi) {
+	public ServicesAnchorListItem(GwtConfigComponent service, EntryClassUi mainUi) {
 		super();
 		ui = mainUi;
 		item = service;

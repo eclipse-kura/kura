@@ -312,7 +312,7 @@ public class ServicesUi extends Composite {
 			textBox.setHeight("120px");
 		}
 		if (param.getValue() != null) {
-			textBox.setText(param.getValue());
+			textBox.setText((String) param.getValue());
 		} else {
 			textBox.setText("");
 		}
@@ -417,8 +417,8 @@ public class ServicesUi extends Composite {
 		radioFalse.setText(MSGS.falseLabel());
 		radioFalse.setFormValue("false");
 
-		radioTrue.setValue(param.getValue().equalsIgnoreCase("true"));
-		radioFalse.setValue(!param.getValue().equalsIgnoreCase("true"));
+		radioTrue.setValue(Boolean.parseBoolean(param.getValue()));
+		radioFalse.setValue(!Boolean.parseBoolean(param.getValue()));
 
 		flowPanel.add(radioTrue);
 		flowPanel.add(radioFalse);
@@ -478,12 +478,12 @@ public class ServicesUi extends Composite {
 			current = it.next();
 			listBox.addItem(current);
 			if (param.getDefault() != null
-					&& oMap.get(current).equals(param.getDefault())) {
+					&& oMap.get(current).equals((String) param.getDefault())) {
 				listBox.setSelectedIndex(i);
 			}
 
 			if (param.getValue() != null
-					&& oMap.get(current).equals(param.getValue())) {
+					&& oMap.get(current).equals((String) param.getValue())) {
 				listBox.setSelectedIndex(i);
 			}
 			i++;

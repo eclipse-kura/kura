@@ -39,10 +39,10 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
 {
 	private static final long serialVersionUID = -4176701819112753800L;
 
-	public ArrayList<GwtConfigComponent> findComponentConfigurations(GwtXSRFToken xsrfToken) throws GwtKuraException {
+	public List<GwtConfigComponent> findComponentConfigurations(GwtXSRFToken xsrfToken) throws GwtKuraException {
 		checkXSRFToken(xsrfToken);
 		ConfigurationService cs = ServiceLocator.getInstance().getService(ConfigurationService.class);		
-		ArrayList<GwtConfigComponent> gwtConfigs = new ArrayList<GwtConfigComponent>();
+		List<GwtConfigComponent> gwtConfigs = new ArrayList<GwtConfigComponent>();
 		try {
 
 			List<ComponentConfiguration> configs = cs.getComponentConfigurations();
@@ -63,7 +63,7 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
 						config.getPid().endsWith("SslManagerService")) {
 					continue;
 				}
-
+				System.out.println(config.getPid());
 				OCD ocd = config.getDefinition();
 				if (ocd != null) {
 
@@ -79,7 +79,6 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
 					List<GwtConfigParameter> gwtParams = new ArrayList<GwtConfigParameter>();
 					gwtConfig.setParameters(gwtParams);
 					for (AD ad : ocd.getAD()) {
-
 						GwtConfigParameter gwtParam = new GwtConfigParameter();
 						gwtParam.setId(ad.getId());
 						gwtParam.setName(ad.getName());

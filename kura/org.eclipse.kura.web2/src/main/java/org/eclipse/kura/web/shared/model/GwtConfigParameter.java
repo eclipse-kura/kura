@@ -11,16 +11,13 @@
  */
 package org.eclipse.kura.web.shared.model;
 
-import java.io.Serializable;
 import java.util.Map;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 
-public class GwtConfigParameter implements Serializable {
+public class GwtConfigParameter implements IsSerializable {
 
-	private static final long serialVersionUID = -1738441153196315880L;
-
-	public enum GwtConfigParameterType implements Serializable, IsSerializable {		
+	public enum GwtConfigParameterType {		
 	    STRING,
 	    LONG,
 	    DOUBLE,

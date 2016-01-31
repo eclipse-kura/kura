@@ -1,13 +1,20 @@
 package org.eclipse.kura.web.shared.model;
 
 import java.io.Serializable;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-public class GwtBaseModel implements Serializable {
+import com.google.gwt.user.client.rpc.IsSerializable;
+
+@SuppressWarnings("unused")
+public class GwtBaseModel implements IsSerializable, Serializable {
 
 	private static final long serialVersionUID = -4890171188631895494L;
-
+	
+	// Unused members needed for GWT serialization
+	private Date _date;
+	
 	protected HashMap<String, Object> data;
 
 	public GwtBaseModel() {

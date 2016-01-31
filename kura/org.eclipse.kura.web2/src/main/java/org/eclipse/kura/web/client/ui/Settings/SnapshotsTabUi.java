@@ -1,6 +1,7 @@
 package org.eclipse.kura.web.client.ui.Settings;
 
 import java.util.ArrayList;
+import java.util.logging.Logger;
 
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.util.FailureHandler;
@@ -25,7 +26,6 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.cellview.client.TextColumn;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FormPanel;
@@ -38,6 +38,7 @@ import com.google.gwt.view.client.SingleSelectionModel;
 public class SnapshotsTabUi extends Composite {
 
 	private static SnapshotsTabUiUiBinder uiBinder = GWT.create(SnapshotsTabUiUiBinder.class);
+	private static final Logger logger = Logger.getLogger(SnapshotsTabUi.class.getSimpleName());
 
 	interface SnapshotsTabUiUiBinder extends UiBinder<Widget, SnapshotsTabUi> {
 	}
@@ -63,8 +64,11 @@ public class SnapshotsTabUi extends Composite {
 	Alert notification;
 	@UiField
 	DataGrid<GwtSnapshot> snapshotsGrid = new DataGrid<GwtSnapshot>();
+	
 	private ListDataProvider<GwtSnapshot> snapshotsDataProvider = new ListDataProvider<GwtSnapshot>();
 	final SingleSelectionModel<GwtSnapshot> selectionModel = new SingleSelectionModel<GwtSnapshot>();
+	
+	private CustomWindow m_downloadWindow;
 	GwtSnapshot selected;
 
 	public SnapshotsTabUi() {
@@ -79,18 +83,24 @@ public class SnapshotsTabUi extends Composite {
 			}
 		});
 
-		//TODO: DW - Add CustomWindow
 		download.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
 				selected = selectionModel.getSelectedObject();
 				if (selected != null) {
-					StringBuilder sbUrl = new StringBuilder();
-					sbUrl.append(
-							"/" + GWT.getModuleName() + "/device_snapshots?")
-							.append("snapshotId=")
-							.append(selected.getSnapshotId());
-					Window.open(sbUrl.toString(), "_blank", "location=no");
+					//please see http://stackoverflow.com/questions/13277752/gwt-open-window-after-rpc-is-prevented-by-popup-blocker
+					m_downloadWindow= CustomWindow.open(null, "_blank", "location=no"); 
+					gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
+						@Override
+						public void onFailure(Throwable ex) {
+							FailureHandler.handle(ex);
+						}
+
+						@Override
+						public void onSuccess(GwtXSRFToken token) {
+							downloadSnapshot(token.getToken());
+						}
+					});
 				}
 			}
 		});
@@ -135,7 +145,6 @@ public class SnapshotsTabUi extends Composite {
 
 	public void refresh() {
 		notification.setVisible(false);
-
 		gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
 
 			@Override
@@ -233,6 +242,20 @@ public class SnapshotsTabUi extends Composite {
 		}
 	}
 
+	private void downloadSnapshot(String tokenId) {
+		final StringBuilder sbUrl = new StringBuilder();
+
+		Long snapshot = selected.getSnapshotId();
+		sbUrl.append("/" + GWT.getModuleName() + "/device_snapshots?")
+		.append("snapshotId=")
+		.append(snapshot)
+		.append("&")
+		.append("xsrfToken=")
+		.append(tokenId);
+
+		m_downloadWindow.setUrl(sbUrl.toString());
+	}
+	
 	private void uploadAndApply() {
 		uploadModal.show();
 		uploadModal.setTitle(MSGS.upload());

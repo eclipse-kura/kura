@@ -63,7 +63,7 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
 						config.getPid().endsWith("SslManagerService")) {
 					continue;
 				}
-				System.out.println(config.getPid());
+
 				OCD ocd = config.getDefinition();
 				if (ocd != null) {
 

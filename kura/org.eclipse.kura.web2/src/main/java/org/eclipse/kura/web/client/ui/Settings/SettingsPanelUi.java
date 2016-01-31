@@ -1,5 +1,7 @@
 package org.eclipse.kura.web.client.ui.Settings;
 
+import java.util.logging.Logger;
+
 import org.eclipse.kura.web.shared.model.GwtSession;
 import org.gwtbootstrap3.client.ui.AnchorListItem;
 import org.gwtbootstrap3.client.ui.Well;
@@ -14,8 +16,8 @@ import com.google.gwt.user.client.ui.Widget;
 
 public class SettingsPanelUi extends Composite {
 
-	private static SettingsPanelUiUiBinder uiBinder = GWT
-			.create(SettingsPanelUiUiBinder.class);
+	private static SettingsPanelUiUiBinder uiBinder = GWT.create(SettingsPanelUiUiBinder.class);
+	private static final Logger logger = Logger.getLogger(SettingsPanelUi.class.getSimpleName());
 
 	interface SettingsPanelUiUiBinder extends UiBinder<Widget, SettingsPanelUi> {
 	}
@@ -54,6 +56,10 @@ public class SettingsPanelUi extends Composite {
 	
 	}
 
+	public void load() {
+		snapshotsBinder.refresh();
+	}
+	
 	public void setSession(GwtSession currentSession) {
 		Session = currentSession;
 	}

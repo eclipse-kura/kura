@@ -219,6 +219,7 @@
 					documentation at codehaus.org -->
 				<configuration>
 				    <style>DETAILED</style>
+					<failOnError>true</failOnError>
 					<extraJvmArgs>-Xmx768M -Xss1024k</extraJvmArgs>
 					<runTarget>denali.html</runTarget>
 					<hostedWebapp>${webappDirectory}</hostedWebapp>

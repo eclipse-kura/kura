@@ -17,10 +17,11 @@ import java.util.Date;
 import org.eclipse.kura.web.client.util.DateUtils;
 import org.eclipse.kura.web.client.util.MessageUtils;
 
-public class GwtSnapshot extends GwtBaseModel implements Serializable 
+import com.google.gwt.user.client.rpc.IsSerializable;
+
+public class GwtSnapshot extends GwtBaseModel implements IsSerializable, Serializable 
 {
 	private static final long serialVersionUID = 204571826084819719L;
-
 	
 	public GwtSnapshot()
 	{}
@@ -55,6 +56,6 @@ public class GwtSnapshot extends GwtBaseModel implements Serializable
     }    
 
     public void setCreatedOn(Date createdOn) {
-        set("createdOn", createdOn);
+       set("createdOn", createdOn);
     }
 }

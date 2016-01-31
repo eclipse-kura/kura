@@ -1,6 +1,5 @@
 package org.eclipse.kura.web.client.ui;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -335,7 +334,7 @@ public class EntryClassUi extends Composite {
 								}
 							};
 							timer.schedule(2000);
-
+							settingsBinder.load();
 						}
 					});
 					renderDirtyConfigModal(b);
@@ -365,7 +364,6 @@ public class EntryClassUi extends Composite {
 					public void onSuccess(List<GwtConfigComponent> result) {
 						servicesMenu.clear();
 						for (GwtConfigComponent pair : result) {
-							logger.info(pair.getComponentId());
 							servicesMenu.add(new ServicesAnchorListItem(pair, ui));
 						}
 					}

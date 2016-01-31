@@ -7,7 +7,10 @@
 package org.eclipse.kura.web.client.ui;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.util.FailureHandler;
@@ -58,8 +61,9 @@ import com.google.gwt.user.client.ui.Widget;
 
 public class ServicesUi extends Composite {
 
-	private static ServicesUiUiBinder uiBinder = GWT
-			.create(ServicesUiUiBinder.class);
+	private static ServicesUiUiBinder uiBinder = GWT.create(ServicesUiUiBinder.class);
+	private static final Logger logger = Logger.getLogger(ServicesUi.class.getSimpleName());
+	private static Logger errorLogger = Logger.getLogger("ErrorLogger");
 
 	interface ServicesUiUiBinder extends UiBinder<Widget, ServicesUi> {
 	}
@@ -74,7 +78,7 @@ public class ServicesUi extends Composite {
 	NavPills menu;
 	PanelBody content;
 	AnchorListItem service;
-	GwtConfigComponent selected;
+	GwtConfigComponent m_configurableComponent;
 	private boolean dirty, initialized;
 	TextBox validated;
 	FormGroup validatedGroup;
@@ -92,9 +96,9 @@ public class ServicesUi extends Composite {
 		initWidget(uiBinder.createAndBindUi(this));
 		initialized = false;
 		entryClass = entryClassUi;
-		selected = addedItem;
+		m_configurableComponent = addedItem;
 		fields.clear();
-		setOriginalValues(selected);
+		setOriginalValues(m_configurableComponent);
 
 		apply.setText(MSGS.apply());
 		apply.addClickHandler(new ClickHandler() {
@@ -141,7 +145,7 @@ public class ServicesUi extends Composite {
 				modal.add(header);
 				
 				ModalBody body = new ModalBody();
-				body.add(new Span(MSGS.deviceConfigConfirmation(selected.getComponentName())));
+				body.add(new Span(MSGS.deviceConfigConfirmation(m_configurableComponent.getComponentName())));
 				modal.add(body);
 				
 				ModalFooter footer = new ModalFooter();
@@ -151,6 +155,7 @@ public class ServicesUi extends Composite {
 						yes.addClickHandler(new ClickHandler(){
 								@Override
 								public void onClick(ClickEvent event) {
+									getUpdatedConfiguration();
 									gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
 
 										@Override
@@ -160,16 +165,16 @@ public class ServicesUi extends Composite {
 
 										@Override
 										public void onSuccess(GwtXSRFToken token) {
-											gwtComponentService.updateComponentConfiguration(token, selected, new AsyncCallback<Void>(){
+											gwtComponentService.updateComponentConfiguration(token, m_configurableComponent, new AsyncCallback<Void>(){
 												@Override
 												public void onFailure(Throwable caught) {
-													//Growl.growl(MSGS.error()+": ",caught.getLocalizedMessage());
+													errorLogger.log(Level.SEVERE, caught.getLocalizedMessage());
 												}
 
 												@Override
 												public void onSuccess(Void result) {
 													modal.hide();	
-													//Growl.growl(MSGS.info()+": ",MSGS.deviceConfigApplied());
+													logger.info(MSGS.info()+": " + MSGS.deviceConfigApplied());
 													apply.setEnabled(false);
 													reset.setEnabled(false);
 													setDirty(false);
@@ -197,7 +202,7 @@ public class ServicesUi extends Composite {
 				
 			}//end isDirty()
 		}else{
-			//Growl.growl(MSGS.deviceConfigError());
+			errorLogger.log(Level.SEVERE, "Device configuration error!");
 		}//end else isValid	
 	}
 
@@ -243,10 +248,76 @@ public class ServicesUi extends Composite {
 		}//end is dirty	
 	}
 
-	//Iterates through all GwtBSConfigParameter in the selected GwtBSConfigComponent
+	// Get updated parameters
+	private GwtConfigComponent getUpdatedConfiguration() {
+		Iterator<Widget> it = fields.iterator();
+		while (it.hasNext()) {
+			Widget w = it.next();
+			if (w instanceof FormGroup) {
+				FormGroup fg = (FormGroup) w;
+				int fgwCount = fg.getWidgetCount();
+				for (int i = 0; i < fgwCount; i++) {
+					if (fg.getWidget(i) instanceof FormLabel) {
+						String id = ((FormLabel) fg.getWidget(i)).getText();
+						GwtConfigParameter param = m_configurableComponent.getParameter(id.trim().replaceAll("\\*$", ""));
+						String value = getUpdatedFieldConfiguration(param, fg);
+						param.setValue(value);
+					}
+				}
+			}
+		}
+		return m_configurableComponent;
+	}
+	
+	private String getUpdatedFieldConfiguration(GwtConfigParameter param, FormGroup fg) {
+		Map<String, String> options = param.getOptions();   	
+		if (options != null && options.size() > 0) {
+			Map<String, String> oMap = param.getOptions();
+			if (fg.getWidget(1) instanceof ListBox)
+				return oMap.get(((ListBox) fg.getWidget(1)).getSelectedItemText());
+			else if (fg.getWidget(2) instanceof ListBox)
+				return oMap.get(((ListBox) fg.getWidget(2)).getSelectedItemText());
+			else
+				return null;
+		}
+		else {
+			switch (param.getType()) {
+			case BOOLEAN:
+				return param.getValue();
+			case LONG:
+			case DOUBLE:
+			case FLOAT:
+			case INTEGER:
+			case SHORT:
+			case BYTE:
+			case CHAR:
+			case STRING:
+				TextBox tb = (TextBox) fg.getWidget(2);
+				String value = tb.getText();
+				if (value != null) {
+					return value;
+				}
+				else {
+					return null;
+				}
+			case PASSWORD:
+				if (fg.getWidget(1) instanceof Input)
+					return ((Input) fg.getWidget(1)).getValue();
+				else if (fg.getWidget(2) instanceof Input)
+					return ((Input) fg.getWidget(2)).getValue();
+				else
+					return null;
+			default:
+				break;
+			}
+		}
+		return null;
+	}
+	//TODO: Separate reder methods for each type (ex: Boolean, String, Password, etc.). See latest org.eclipse.kura.web code.
+	//Iterates through all GwtConfigParameter in the selected GwtConfigComponent
 	public void renderForm() {
 		fields.clear();
-		for (GwtConfigParameter param : selected.getParameters()) {
+		for (GwtConfigParameter param : m_configurableComponent.getParameters()) {
 			if (param.getCardinality() == 0 || param.getCardinality() == 1
 					|| param.getCardinality() == -1) {
 				renderConfigParameter(param);				
@@ -506,7 +577,7 @@ public class ServicesUi extends Composite {
 	// -------------
 
 	public GwtConfigComponent getConfiguration() {
-		return selected;
+		return m_configurableComponent;
 	}
 
 	//Checks if all the fields are valid according to the Validate() method

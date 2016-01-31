@@ -1,6 +1,7 @@
 package org.eclipse.kura.web.client.ui.Settings;
 
 import java.util.ArrayList;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.kura.web.client.messages.Messages;
@@ -72,6 +73,7 @@ public class SnapshotsTabUi extends Composite {
 	GwtSnapshot selected;
 
 	public SnapshotsTabUi() {
+		logger.log(Level.FINER, "Initiating SnapshotsTabUI...");
 		initWidget(uiBinder.createAndBindUi(this));
 		initTable();
 		snapshotsGrid.setSelectionModel(selectionModel);
@@ -162,28 +164,31 @@ public class SnapshotsTabUi extends Composite {
 
 					@Override
 					public void onSuccess(ArrayList<GwtSnapshot> result) {
+						snapshotsDataProvider.getList().clear();
 						for (GwtSnapshot pair : result) {
 							snapshotsDataProvider.getList().add(pair);
 						}
 						snapshotsDataProvider.flush();
+						
+						if (snapshotsDataProvider.getList().size() == 0) {
+							snapshotsGrid.setVisible(false);
+							notification.setVisible(true);
+							notification.setText("No Snapshots Available");
+							download.setEnabled(false);
+							rollback.setEnabled(false);
+						} else {
+							snapshotsGrid.setVisible(true);
+							notification.setVisible(false);
+							download.setEnabled(true);
+							rollback.setEnabled(true);
+						}
 					}
 				});
 			}
 			
 		});
 
-		if (snapshotsDataProvider.getList().size() == 0) {
-			snapshotsGrid.setVisible(false);
-			notification.setVisible(true);
-			notification.setText("No Snapshots Available");
-			download.setEnabled(false);
-			rollback.setEnabled(false);
-		} else {
-			snapshotsGrid.setVisible(true);
-			notification.setVisible(false);
-			download.setEnabled(true);
-			rollback.setEnabled(true);
-		}
+		
 	}
 
 	private void rollback() {

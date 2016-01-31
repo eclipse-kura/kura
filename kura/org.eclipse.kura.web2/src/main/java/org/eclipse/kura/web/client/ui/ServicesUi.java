@@ -75,15 +75,16 @@ public class ServicesUi extends Composite {
 	private final static String REGEX_NUM = "^[0-9][\\.\\d]*(,\\d+)?$";
 	HashMap<String, Boolean> valid = new HashMap<String, Boolean>();
 
-	NavPills menu;
-	PanelBody content;
-	AnchorListItem service;
-	GwtConfigComponent m_configurableComponent;
-	private boolean dirty, initialized;
-	TextBox validated;
-	FormGroup validatedGroup;
-	EntryClassUi entryClass;
-	Modal modal;
+	GwtConfigComponent	m_configurableComponent;
+	private boolean		dirty, initialized;
+	
+	NavPills 		menu;
+	PanelBody 		content;
+	AnchorListItem 	service;
+	TextBox 		validated;
+	FormGroup 		validatedGroup;
+	EntryClassUi 	entryClass;
+	Modal 			modal;
 	
 	@UiField
 	AnchorListItem apply, reset;

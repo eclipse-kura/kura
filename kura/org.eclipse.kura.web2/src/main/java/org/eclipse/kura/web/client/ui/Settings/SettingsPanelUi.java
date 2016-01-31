@@ -1,5 +1,6 @@
 package org.eclipse.kura.web.client.ui.Settings;
 
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.kura.web.shared.model.GwtSession;
@@ -31,6 +32,7 @@ public class SettingsPanelUi extends Composite {
 	Well content;
 
 	public SettingsPanelUi() {
+		logger.log(Level.FINER, "Initiating SettingsPanelUI...");
 		initWidget(uiBinder.createAndBindUi(this));
 		setSelectedActive(snapshots);
 		content.clear();
@@ -57,6 +59,9 @@ public class SettingsPanelUi extends Composite {
 	}
 
 	public void load() {
+		setSelectedActive(snapshots);
+		content.clear();
+		content.add(snapshotsBinder);
 		snapshotsBinder.refresh();
 	}
 	

@@ -23,7 +23,7 @@
 	}
 	
 	.center-panel {
-		
+
 	}
 	
 	.top-row-padding {
@@ -40,6 +40,17 @@
 	.outer-column {
 		margin-bottom: -20px;
 	}
+	
+	.system-list {
+		padding-left: 10px;
+		padding-right: 0px;
+	}
+	
+	.services-list {
+		padding-left: 10px;
+		padding-right: 0px;
+	}
+	
 	</ui:style>
 	<b:Container fluid="true">
 		<b:Column addStyleNames="{style.outer-column}" size="XS_12">
@@ -71,7 +82,7 @@
 						<b:Row>
 							<b:Column size="MD_2" addStyleNames="{style.center-panel}">
 								<b:Row>
-									<b:Column size="MD_12,XS_6">
+									<b:Column size="MD_12,XS_6" addStyleNames="{style.system-list}">
 										<b:Panel>
 											<b:PanelHeader>
 												<b:Heading size="H3" text="System" />
@@ -99,7 +110,7 @@
 											</b:PanelBody>
 										</b:Panel>
 									</b:Column>
-									<b:Column size="MD_12,XS_6">
+									<b:Column size="MD_12,XS_6" addStyleNames="{style.services-list}">
 										<b:Panel>
 											<b:PanelHeader>
 												<b:Heading size="H3" text="Services" />

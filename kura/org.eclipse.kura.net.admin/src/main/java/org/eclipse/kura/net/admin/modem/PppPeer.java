@@ -14,8 +14,8 @@ package org.eclipse.kura.net.admin.modem;
 import java.io.FileOutputStream;
 import java.io.PrintWriter;
 
-import org.eclipse.kura.net.admin.visitor.linux.util.ChapLinux;
-import org.eclipse.kura.net.admin.visitor.linux.util.PapLinux;
+import org.eclipse.kura.net.admin.processor.linux.util.ChapLinux;
+import org.eclipse.kura.net.admin.processor.linux.util.PapLinux;
 import org.eclipse.kura.net.modem.ModemConfig.AuthType;
 
 /* 

@@ -9,7 +9,7 @@
  * Contributors:
  *   Eurotech
  */
-package org.eclipse.kura.net.admin.visitor.linux;
+package org.eclipse.kura.net.admin.processor.linux;
 
 import java.io.File;
 import java.io.IOException;
@@ -19,7 +19,7 @@ import java.util.List;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.net.NetworkConfiguration;
-import org.eclipse.kura.core.net.NetworkConfigurationVisitor;
+import org.eclipse.kura.core.net.NetworkConfigurationWriter;
 import org.eclipse.kura.core.net.modem.ModemInterfaceConfigImpl;
 import org.eclipse.kura.linux.net.modem.SupportedSerialModemInfo;
 import org.eclipse.kura.linux.net.modem.SupportedSerialModemsInfo;
@@ -36,16 +36,16 @@ import org.eclipse.kura.net.admin.modem.SupportedSerialModemsFactoryInfo;
 import org.eclipse.kura.net.admin.modem.SupportedUsbModemsFactoryInfo;
 import org.eclipse.kura.net.admin.modem.SupportedSerialModemsFactoryInfo.SerialModemFactoryInfo;
 import org.eclipse.kura.net.admin.modem.SupportedUsbModemsFactoryInfo.UsbModemFactoryInfo;
+import org.eclipse.kura.net.admin.processor.linux.util.KuranetConfig;
+import org.eclipse.kura.net.admin.processor.linux.util.ModemXchangeScript;
 import org.eclipse.kura.net.admin.util.LinuxFileUtil;
-import org.eclipse.kura.net.admin.visitor.linux.util.KuranetConfig;
-import org.eclipse.kura.net.admin.visitor.linux.util.ModemXchangeScript;
 import org.eclipse.kura.net.modem.ModemConfig;
 import org.eclipse.kura.net.modem.ModemInterfaceAddressConfig;
 import org.eclipse.kura.usb.UsbDevice;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class PppConfigWriter implements NetworkConfigurationVisitor {
+public class PppConfigWriter implements NetworkConfigurationWriter {
 
     private static final Logger s_logger = LoggerFactory.getLogger(PppConfigWriter.class);
 
@@ -85,7 +85,7 @@ public class PppConfigWriter implements NetworkConfigurationVisitor {
     }
     
     @Override
-    public void visit(NetworkConfiguration config) throws KuraException {
+    public void write(NetworkConfiguration config) throws KuraException {
     	
         List<NetInterfaceConfig<? extends NetInterfaceAddressConfig>> netInterfaceConfigs = config.getModifiedNetInterfaceConfigs();
         for(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig : netInterfaceConfigs) {

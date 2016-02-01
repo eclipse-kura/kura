@@ -9,7 +9,7 @@
  * Contributors:
  *   Eurotech
  */
-package org.eclipse.kura.net.admin.visitor.linux;
+package org.eclipse.kura.net.admin.processor.linux;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -25,7 +25,7 @@ import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.net.NetInterfaceAddressConfigImpl;
 import org.eclipse.kura.core.net.NetworkConfiguration;
-import org.eclipse.kura.core.net.NetworkConfigurationVisitor;
+import org.eclipse.kura.core.net.NetworkConfigurationReader;
 import org.eclipse.kura.core.net.WifiInterfaceAddressConfigImpl;
 import org.eclipse.kura.core.net.util.NetworkUtil;
 import org.eclipse.kura.linux.net.dhcp.DhcpServerManager;
@@ -36,13 +36,13 @@ import org.eclipse.kura.net.NetConfig;
 import org.eclipse.kura.net.NetInterfaceAddressConfig;
 import org.eclipse.kura.net.NetInterfaceConfig;
 import org.eclipse.kura.net.NetInterfaceType;
-import org.eclipse.kura.net.admin.visitor.linux.util.KuranetConfig;
+import org.eclipse.kura.net.admin.processor.linux.util.KuranetConfig;
 import org.eclipse.kura.net.dhcp.DhcpServerConfig4;
 import org.eclipse.kura.net.dhcp.DhcpServerConfigIP4;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class DhcpConfigReader implements NetworkConfigurationVisitor {
+public class DhcpConfigReader implements NetworkConfigurationReader {
 	
 	private static final Logger s_logger = LoggerFactory.getLogger(DhcpConfigReader.class);
 	
@@ -59,7 +59,7 @@ public class DhcpConfigReader implements NetworkConfigurationVisitor {
 	}
 	
 	@Override
-	public void visit(NetworkConfiguration config) throws KuraException {
+	public void read(NetworkConfiguration config) throws KuraException {
 		List<NetInterfaceConfig<? extends NetInterfaceAddressConfig>> netInterfaceConfigs = config.getNetInterfaceConfigs();
         
 		Properties kuraExtendedProps = KuranetConfig.getProperties();

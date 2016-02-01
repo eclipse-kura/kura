@@ -13,7 +13,7 @@
 * Copyright (c) 2013 Eurotech Inc. All rights reserved.
 */
 
-package org.eclipse.kura.net.admin.visitor.linux.util;
+package org.eclipse.kura.net.admin.processor.linux.util;
 
 
 /**

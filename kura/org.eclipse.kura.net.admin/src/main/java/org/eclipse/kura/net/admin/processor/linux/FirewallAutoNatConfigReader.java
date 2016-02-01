@@ -9,7 +9,7 @@
  * Contributors:
  *   Eurotech
  */
-package org.eclipse.kura.net.admin.visitor.linux;
+package org.eclipse.kura.net.admin.processor.linux;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -20,7 +20,7 @@ import java.util.Set;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.net.NetInterfaceAddressConfigImpl;
 import org.eclipse.kura.core.net.NetworkConfiguration;
-import org.eclipse.kura.core.net.NetworkConfigurationVisitor;
+import org.eclipse.kura.core.net.NetworkConfigurationReader;
 import org.eclipse.kura.core.net.WifiInterfaceAddressConfigImpl;
 import org.eclipse.kura.linux.net.iptables.LinuxFirewall;
 import org.eclipse.kura.linux.net.iptables.NATRule;
@@ -28,12 +28,12 @@ import org.eclipse.kura.net.NetConfig;
 import org.eclipse.kura.net.NetInterfaceAddressConfig;
 import org.eclipse.kura.net.NetInterfaceConfig;
 import org.eclipse.kura.net.NetInterfaceType;
-import org.eclipse.kura.net.admin.visitor.linux.util.KuranetConfig;
+import org.eclipse.kura.net.admin.processor.linux.util.KuranetConfig;
 import org.eclipse.kura.net.firewall.FirewallAutoNatConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class FirewallAutoNatConfigReader implements NetworkConfigurationVisitor {
+public class FirewallAutoNatConfigReader implements NetworkConfigurationReader {
 	
 	private static final Logger s_logger = LoggerFactory.getLogger(FirewallAutoNatConfigReader.class);
 	
@@ -48,7 +48,7 @@ public class FirewallAutoNatConfigReader implements NetworkConfigurationVisitor 
 	}
 	
 	@Override
-	public void visit(NetworkConfiguration config) throws KuraException {
+	public void read(NetworkConfiguration config) throws KuraException {
 		List<NetInterfaceConfig<? extends NetInterfaceAddressConfig>> netInterfaceConfigs = config.getNetInterfaceConfigs();
 		for(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig : netInterfaceConfigs) {
             getConfig(netInterfaceConfig, KuranetConfig.getProperties());

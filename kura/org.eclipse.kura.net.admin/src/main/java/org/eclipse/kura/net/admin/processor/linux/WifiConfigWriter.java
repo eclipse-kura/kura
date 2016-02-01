@@ -9,36 +9,36 @@
  * Contributors:
  *   Eurotech
  */
-package org.eclipse.kura.net.admin.visitor.linux;
+package org.eclipse.kura.net.admin.processor.linux;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.net.NetworkConfiguration;
-import org.eclipse.kura.core.net.NetworkConfigurationVisitor;
+import org.eclipse.kura.core.net.NetworkConfigurationWriter;
 import org.eclipse.kura.core.net.WifiInterfaceConfigImpl;
 import org.eclipse.kura.net.NetInterfaceAddressConfig;
 import org.eclipse.kura.net.NetInterfaceConfig;
-import org.eclipse.kura.net.admin.visitor.linux.util.KuranetConfig;
+import org.eclipse.kura.net.admin.processor.linux.util.KuranetConfig;
 import org.eclipse.kura.net.wifi.WifiInterfaceAddressConfig;
 import org.eclipse.kura.net.wifi.WifiMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
-public class WifiConfigWriter implements NetworkConfigurationVisitor{
+public class WifiConfigWriter implements NetworkConfigurationWriter{
 
     private static final Logger s_logger = LoggerFactory.getLogger(WifiConfigWriter.class);
             
     private static WifiConfigWriter s_instance;
     
-    private List<NetworkConfigurationVisitor> m_visitors;
+    private List<NetworkConfigurationWriter> m_writers;
     
     private WifiConfigWriter() {
-        m_visitors = new ArrayList<NetworkConfigurationVisitor>();
-        m_visitors.add(WpaSupplicantConfigWriter.getInstance());
-        m_visitors.add(HostapdConfigWriter.getInstance());
+        m_writers = new ArrayList<NetworkConfigurationWriter>();
+        m_writers.add(WpaSupplicantConfigWriter.getInstance());
+        m_writers.add(HostapdConfigWriter.getInstance());
     }
     
     public static WifiConfigWriter getInstance() {
@@ -50,7 +50,7 @@ public class WifiConfigWriter implements NetworkConfigurationVisitor{
     }
     
     @Override
-    public void visit(NetworkConfiguration config) throws KuraException {
+    public void write(NetworkConfiguration config) throws KuraException {
         List<NetInterfaceConfig<? extends NetInterfaceAddressConfig>> netInterfaceConfigs = config.getModifiedNetInterfaceConfigs();
         
         for(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig : netInterfaceConfigs) {
@@ -60,8 +60,8 @@ public class WifiConfigWriter implements NetworkConfigurationVisitor{
         }
         
         // Write wpa_supplicant and hostapd configs
-        for(NetworkConfigurationVisitor visitor : m_visitors) {
-            visitor.visit(config);
+        for(NetworkConfigurationWriter writer : m_writers) {
+            writer.write(config);
         }
     }
 

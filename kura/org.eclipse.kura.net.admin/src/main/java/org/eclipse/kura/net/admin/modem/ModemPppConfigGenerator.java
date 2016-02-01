@@ -11,7 +11,7 @@
  */
 package org.eclipse.kura.net.admin.modem;
 
-import org.eclipse.kura.net.admin.visitor.linux.util.ModemXchangeScript;
+import org.eclipse.kura.net.admin.processor.linux.util.ModemXchangeScript;
 import org.eclipse.kura.net.modem.ModemConfig;
 
 public interface ModemPppConfigGenerator {

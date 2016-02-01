@@ -151,10 +151,6 @@ public class NetworkConfiguration {
 		return m_modifiedInterfaceNames;
 	}
 
-	public void accept(NetworkConfigurationVisitor visitor) throws KuraException {
-		visitor.visit(this);
-	}
-
 	public void addNetInterfaceConfig(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig)
 	{
 		m_netInterfaceConfigs.put(netInterfaceConfig.getName(), netInterfaceConfig);

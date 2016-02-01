@@ -9,7 +9,7 @@
  * Contributors:
  *   Eurotech
  */
-package org.eclipse.kura.net.admin.visitor.linux.util;
+package org.eclipse.kura.net.admin.processor.linux.util;
 
 public class WpaSupplicantUtil {
     

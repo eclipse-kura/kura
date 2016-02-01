@@ -13,8 +13,8 @@ package org.eclipse.kura.net.admin.modem.telit.de910;
 
 import org.eclipse.kura.net.admin.modem.ModemPppConfigGenerator;
 import org.eclipse.kura.net.admin.modem.PppPeer;
-import org.eclipse.kura.net.admin.visitor.linux.util.ModemXchangePair;
-import org.eclipse.kura.net.admin.visitor.linux.util.ModemXchangeScript;
+import org.eclipse.kura.net.admin.processor.linux.util.ModemXchangePair;
+import org.eclipse.kura.net.admin.processor.linux.util.ModemXchangeScript;
 import org.eclipse.kura.net.modem.ModemConfig;
 
 public class TelitDe910ConfigGenerator implements ModemPppConfigGenerator {

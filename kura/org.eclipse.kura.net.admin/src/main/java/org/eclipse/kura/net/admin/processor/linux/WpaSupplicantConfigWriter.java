@@ -9,7 +9,7 @@
  * Contributors:
  *   Eurotech
  */
-package org.eclipse.kura.net.admin.visitor.linux;
+package org.eclipse.kura.net.admin.processor.linux;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
@@ -24,7 +24,7 @@ import org.apache.commons.io.FileUtils;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.net.NetworkConfiguration;
-import org.eclipse.kura.core.net.NetworkConfigurationVisitor;
+import org.eclipse.kura.core.net.NetworkConfigurationWriter;
 import org.eclipse.kura.core.net.WifiInterfaceAddressConfigImpl;
 import org.eclipse.kura.core.util.IOUtil;
 import org.eclipse.kura.core.util.ProcessUtil;
@@ -36,8 +36,8 @@ import org.eclipse.kura.net.NetInterfaceAddressConfig;
 import org.eclipse.kura.net.NetInterfaceConfig;
 import org.eclipse.kura.net.NetInterfaceStatus;
 import org.eclipse.kura.net.NetInterfaceType;
-import org.eclipse.kura.net.admin.visitor.linux.util.KuranetConfig;
-import org.eclipse.kura.net.admin.visitor.linux.util.WpaSupplicantUtil;
+import org.eclipse.kura.net.admin.processor.linux.util.KuranetConfig;
+import org.eclipse.kura.net.admin.processor.linux.util.WpaSupplicantUtil;
 import org.eclipse.kura.net.wifi.WifiCiphers;
 import org.eclipse.kura.net.wifi.WifiConfig;
 import org.eclipse.kura.net.wifi.WifiMode;
@@ -46,7 +46,7 @@ import org.osgi.framework.FrameworkUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class WpaSupplicantConfigWriter implements NetworkConfigurationVisitor {
+public class WpaSupplicantConfigWriter implements NetworkConfigurationWriter {
 	private static final Logger s_logger = LoggerFactory.getLogger(WpaSupplicantConfigWriter.class);
 	
 	private static String WPA_CONFIG_FILE = null;
@@ -76,7 +76,7 @@ public class WpaSupplicantConfigWriter implements NetworkConfigurationVisitor {
 	}
 
 	@Override
-	public void visit(NetworkConfiguration config) throws KuraException {
+	public void write(NetworkConfiguration config) throws KuraException {
 		List<NetInterfaceConfig<? extends NetInterfaceAddressConfig>> netInterfaceConfigs = config.getModifiedNetInterfaceConfigs();
         
         for(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig : netInterfaceConfigs) {

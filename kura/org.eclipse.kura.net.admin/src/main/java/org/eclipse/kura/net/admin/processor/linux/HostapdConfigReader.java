@@ -9,7 +9,7 @@
  * Contributors:
  *   Eurotech
  */
-package org.eclipse.kura.net.admin.visitor.linux;
+package org.eclipse.kura.net.admin.processor.linux;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -20,7 +20,7 @@ import java.util.Properties;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.net.NetworkConfiguration;
-import org.eclipse.kura.core.net.NetworkConfigurationVisitor;
+import org.eclipse.kura.core.net.NetworkConfigurationReader;
 import org.eclipse.kura.core.net.WifiInterfaceAddressConfigImpl;
 import org.eclipse.kura.core.net.WifiInterfaceConfigImpl;
 import org.eclipse.kura.linux.net.util.KuraConstants;
@@ -36,7 +36,7 @@ import org.eclipse.kura.net.wifi.WifiSecurity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class HostapdConfigReader implements NetworkConfigurationVisitor {
+public class HostapdConfigReader implements NetworkConfigurationReader {
 
 	private static final Logger s_logger = LoggerFactory.getLogger(HostapdConfigReader.class);
 
@@ -63,7 +63,7 @@ public class HostapdConfigReader implements NetworkConfigurationVisitor {
 	}
 
 	@Override
-	public void visit(NetworkConfiguration config) throws KuraException {
+	public void read(NetworkConfiguration config) throws KuraException {
 		List<NetInterfaceConfig<? extends NetInterfaceAddressConfig>> netInterfaceConfigs = config
 				.getNetInterfaceConfigs();
 

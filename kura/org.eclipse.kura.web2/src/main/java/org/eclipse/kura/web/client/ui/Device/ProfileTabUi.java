@@ -2,8 +2,8 @@ package org.eclipse.kura.web.client.ui.Device;
 
 import java.util.ArrayList;
 
-import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.messages.ValidationMessages;
+import org.eclipse.kura.web.client.ui.EntryClassUi;
 import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.shared.model.GwtGroupedNVPair;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
@@ -30,7 +30,6 @@ public class ProfileTabUi extends Composite {
 	interface ProfileTabUiUiBinder extends UiBinder<Widget, ProfileTabUi> {
 	}
 
-	private static final Messages MSGS = GWT.create(Messages.class);
 	private static final ValidationMessages msgs = GWT.create(ValidationMessages.class);
 
 	private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
@@ -64,7 +63,7 @@ public class ProfileTabUi extends Composite {
 			}
 		};
 		col1.setCellStyleNames("status-table-row");
-		grid.addColumn(col1, MSGS.devicePropName());
+		grid.addColumn(col1);
 
 		TextColumn<GwtGroupedNVPair> col2 = new TextColumn<GwtGroupedNVPair>() {
 			@Override
@@ -73,19 +72,20 @@ public class ProfileTabUi extends Composite {
 			}
 		};
 		col2.setCellStyleNames("status-table-row");
-		grid.addColumn(col2, MSGS.devicePropValue());
+		grid.addColumn(col2);
 
 		dataProvider.addDataDisplay(grid);
-		//loadProfileData();
 	}
 
 	public void loadProfileData() {
 		profileDataProvider.getList().clear();
 
+		EntryClassUi.showWaitModal();
 		gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
 
 			@Override
 			public void onFailure(Throwable ex) {
+				EntryClassUi.hideWaitModal();
 				FailureHandler.handle(ex);
 			}
 
@@ -95,6 +95,7 @@ public class ProfileTabUi extends Composite {
 
 					@Override
 					public void onFailure(Throwable caught) {
+						EntryClassUi.hideWaitModal();
 						profileDataProvider.getList().clear();
 						FailureHandler.handle(caught);
 						profileDataProvider.flush();
@@ -115,7 +116,7 @@ public class ProfileTabUi extends Composite {
 							profileDataProvider.getList().add(resultPair);
 						}						
 						profileDataProvider.flush();
-
+						EntryClassUi.hideWaitModal();
 					}
 				});
 			}

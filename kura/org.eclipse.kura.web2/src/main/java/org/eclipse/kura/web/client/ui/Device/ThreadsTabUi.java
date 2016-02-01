@@ -3,7 +3,7 @@ package org.eclipse.kura.web.client.ui.Device;
 import java.util.ArrayList;
 
 import org.eclipse.kura.web.client.messages.Messages;
-import org.eclipse.kura.web.client.messages.ValidationMessages;
+import org.eclipse.kura.web.client.ui.EntryClassUi;
 import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.shared.model.GwtGroupedNVPair;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
@@ -30,7 +30,6 @@ public class ThreadsTabUi extends Composite {
 	}
 	
 	private static final Messages MSGS = GWT.create(Messages.class);
-	private static final ValidationMessages msgs = GWT.create(ValidationMessages.class);
 
 	private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
 	private final GwtDeviceServiceAsync gwtDeviceService = GWT.create(GwtDeviceService.class);
@@ -75,10 +74,12 @@ public class ThreadsTabUi extends Composite {
 	public void loadThreadsData() {
 		threadsDataProvider.getList().clear();
 	
+		EntryClassUi.showWaitModal();
 		gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
 	
 			@Override
 			public void onFailure(Throwable ex) {
+				EntryClassUi.hideWaitModal();
 				FailureHandler.handle(ex);
 			}
 	
@@ -88,6 +89,7 @@ public class ThreadsTabUi extends Composite {
 	
 					@Override
 					public void onFailure(Throwable caught) {
+						EntryClassUi.hideWaitModal();
 						threadsDataProvider.getList().clear();
 						FailureHandler.handle(caught);
 						threadsDataProvider.flush();
@@ -100,7 +102,7 @@ public class ThreadsTabUi extends Composite {
 							threadsDataProvider.getList().add(resultPair);
 						}						
 						threadsDataProvider.flush();
-	
+						EntryClassUi.hideWaitModal();
 					}
 	
 				});

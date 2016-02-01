@@ -4,52 +4,18 @@
 	xmlns:g="urn:import:com.google.gwt.user.client.ui">
 
 	<ui:style>
-	.important {
-		font-weight: bold;
-	}
 	
-	.column {
-		border: 1px solid #000000;
-		text-align: center;
-	}
-	
-	.image {
-		text-align: left;
-		height: 38px;
-		width: 127px;
-		vertical-align: baseline;
-		background-repeat: no-repeat;
-		background-size: contain;
-	}
-	
-	.center-panel {
-
-	}
-	
-	.top-row-padding {
-		margin-right: 30px;
-		margin-top: 20px;
-		margin-bottom: -10px;
-	}
-	
-	.bottom-row-padding {
-		margin-top: -10px;
-		margin-bottom: -30px;
-	}
-	
-	.outer-column {
-		margin-bottom: -20px;
-	}
-	
-	.system-list {
-		padding-left: 10px;
-		padding-right: 0px;
-	}
-	
-	.services-list {
-		padding-left: 10px;
-		padding-right: 0px;
-	}
+	.important { font-weight: bold; }
+	.column { border: 1px solid #000000; text-align: center; }
+	.image { text-align: left; height: 38px; width: 127px; vertical-align: baseline; background-repeat: no-repeat; background-size: contain; }
+	.center-panel {	}
+	.top-row-padding { margin-right: 30px; margin-top: 20px; margin-bottom: -10px; }
+	.bottom-row-padding { margin-top: -10px; margin-bottom: -30px; }
+	.outer-column {	margin-bottom: -20px; }
+	.system-list { padding-left: 10px; padding-right: 0px; }
+	.services-list { padding-left: 10px; padding-right: 0px; }
+	.content-panel-body { padding: 1px; }
+	.modal-wait {background-color: black; border: solid 1px red; }
 	
 	</ui:style>
 	<b:Container fluid="true">
@@ -129,7 +95,7 @@
 								<b:Panel ui:field="contentPanel">
 									<b:PanelHeader ui:field="contentPanelHeader">
 									</b:PanelHeader>
-									<b:PanelBody ui:field="contentPanelBody">
+									<b:PanelBody ui:field="contentPanelBody" addStyleNames="{style.content-panel-body}">
 									</b:PanelBody>
 								</b:Panel>
 							</b:Column>

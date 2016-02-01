@@ -3,18 +3,11 @@
 	xmlns:b="urn:import:org.gwtbootstrap3.client.ui" xmlns:b.html="urn:import:org.gwtbootstrap3.client.ui.html"
 	xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:gwt="urn:import:org.gwtbootstrap3.client.ui.gwt">
 	<ui:style>
-	.important {
-		font-weight: bold;
-	}
 	
-	.spacing {
-		margin-top: 10px;
-		margin-left: -20px;
-	}
+	.important { font-weight: bold; }
+	.spacing { margin-top: 10px; margin-left: -20px; }
+	.center-panel {	height: 572px; padding: 0px; }
 	
-	.center-panel {
-		height: 572px;
-	}
 	</ui:style>
 
 	<b:Container fluid="true">
@@ -30,8 +23,7 @@
 			<b:Navbar>
 				<b:NavbarNav>
 					<b:AnchorListItem text="Snapshots" ui:field="snapshots" />
-					<b:AnchorListItem text="SSL Certificates"
-						ui:field="ssl" />
+					<b:AnchorListItem text="SSL Certificates" ui:field="ssl" />
 				</b:NavbarNav>
 			</b:Navbar>
 		</b:Row>

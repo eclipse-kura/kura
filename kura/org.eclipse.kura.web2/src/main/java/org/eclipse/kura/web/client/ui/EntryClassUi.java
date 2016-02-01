@@ -23,6 +23,7 @@ import org.gwtbootstrap3.client.shared.event.ModalHideEvent;
 import org.gwtbootstrap3.client.shared.event.ModalHideHandler;
 import org.gwtbootstrap3.client.ui.AnchorListItem;
 import org.gwtbootstrap3.client.ui.Button;
+import org.gwtbootstrap3.client.ui.Icon;
 import org.gwtbootstrap3.client.ui.Image;
 import org.gwtbootstrap3.client.ui.Modal;
 import org.gwtbootstrap3.client.ui.ModalBody;
@@ -32,6 +33,8 @@ import org.gwtbootstrap3.client.ui.NavPills;
 import org.gwtbootstrap3.client.ui.Panel;
 import org.gwtbootstrap3.client.ui.PanelBody;
 import org.gwtbootstrap3.client.ui.PanelHeader;
+import org.gwtbootstrap3.client.ui.constants.IconSize;
+import org.gwtbootstrap3.client.ui.constants.IconType;
 import org.gwtbootstrap3.client.ui.html.Span;
 
 import com.google.gwt.core.client.GWT;
@@ -44,6 +47,7 @@ import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -76,6 +80,8 @@ public class EntryClassUi extends Composite {
 	private final SettingsPanelUi settingsBinder = GWT.create(SettingsPanelUi.class);
 	private final FirewallPanelUi firewallBinder = GWT.create(FirewallPanelUi.class);
 	private final NetworkPanelUi networkBinder   = GWT.create(NetworkPanelUi.class);
+
+	static PopupPanel m_waitModal;
 	
 	ServicesUi servicesUi;
 
@@ -197,6 +203,7 @@ public class EntryClassUi extends Composite {
 								}
 							};
 							timer.schedule(2000);
+							deviceBinder.initDevicePanel();
 						}
 					});
 					renderDirtyConfigModal(b);
@@ -447,5 +454,21 @@ public class EntryClassUi extends Composite {
 		}
 		if (network.isVisible())
 			networkBinder.setDirty(false);
+	}
+	
+	public static void showWaitModal() {
+		m_waitModal = new PopupPanel(false, true);
+		Icon icon = new Icon();
+		icon.setType(IconType.COG);
+		icon.setSize(IconSize.TIMES4);
+		icon.setSpin(true);
+		m_waitModal.setWidget(icon);
+		m_waitModal.setGlassEnabled(true);
+		m_waitModal.center();
+		m_waitModal.show();
+	}
+	
+	public static void hideWaitModal() {
+		m_waitModal.hide();
 	}
 }

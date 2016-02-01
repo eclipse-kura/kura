@@ -37,13 +37,10 @@
 		<b:Column size="MD_12">
 			<b:Row>
 				<b:Panel>
-					<b:NavPills justified="true">
-						<b:AnchorListItem icon="CHECK" iconFixedWidth="true"
-							ui:field="apply" />
-
-						<b:AnchorListItem icon="TIMES" iconFixedWidth="true"
-							ui:field="reset" />
-					</b:NavPills>
+					<b:ButtonGroup size="SMALL">
+						<b:Button ui:field="apply" addStyleNames="fa fa-check"></b:Button>
+						<b:Button ui:field="reset" addStyleNames="fa fa-times"></b:Button>
+					</b:ButtonGroup>
 				</b:Panel>
 			</b:Row>
 

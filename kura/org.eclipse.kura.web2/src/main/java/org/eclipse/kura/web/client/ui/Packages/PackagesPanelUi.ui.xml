@@ -24,16 +24,11 @@
 		<!-- <b:Column size="MD_12"> -->
 		<b:Row>
 			<b:Panel>
-				<b:NavPills justified="true">
-					<b:AnchorListItem icon="REFRESH" iconFixedWidth="true" addStyleNames="{style.button}"
-						ui:field="packagesRefresh" />
-
-					<b:AnchorListItem icon="PLUS" iconFixedWidth="true" addStyleNames="{style.button}"
-						ui:field="packagesInstall" />
-
-					<b:AnchorListItem icon="MINUS" iconFixedWidth="true" addStyleNames="{style.button}"
-						ui:field="packagesUninstall" />
-				</b:NavPills>
+				<b:ButtonGroup size="SMALL">
+						<b:Button ui:field="packagesRefresh" addStyleNames="fa fa-refresh"></b:Button>
+						<b:Button ui:field="packagesInstall" addStyleNames="fa fa-plus"></b:Button>
+						<b:Button ui:field="packagesUninstall" addStyleNames="fa fa-minus"></b:Button>
+					</b:ButtonGroup>
 			</b:Panel>
 		</b:Row>
 

@@ -3,13 +3,9 @@
 	xmlns:b="urn:import:org.gwtbootstrap3.client.ui" xmlns:b.html="urn:import:org.gwtbootstrap3.client.ui.html"
 	xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:gwt="urn:import:org.gwtbootstrap3.client.ui.gwt">
 	<ui:style>
-	.important {
-		font-weight: bold;
-	}
 	
-	.center-panel {
-		height: 572px;
-	}
+	.important { font-weight: bold; }
+	
 	</ui:style>
 		<gwt:DataGrid bordered="true" condensed="true" striped="true"
 			hover="true" height="100%" width="100%" ui:field="profileGrid" />	

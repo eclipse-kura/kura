@@ -13,6 +13,8 @@
 
 
 /** Example rules used by the template application (remove for your app) */
+body { background-color: #009AE0 !important; }
+
 h1 {
   font-size: 2em;
   font-weight: bold;
@@ -59,6 +61,31 @@ img.x-tree3-node-icon {
 
 /******************************
 ***
+*** gwtbootstrap3 CSS rules 
+***
+*******************************/
+.gwt-PopupPanelGlass { width: 100%; background-color: #009AE0; opacity: 0.3; }
+
+.nav-pills>li>a { border-bottom: 1px solid !important; }
+
+.btn { background-color: #009AE0 !important; color: white !important; }
+
+.table { font-size: 12px; }
+.rowHeader { background-color: #009AE0 !important; font-size: 14px !important; color: white !important; pointer-events: none !important;  }
+
+.fa-refresh:before { margin-right: 5px; }
+.fa-toggle-on:before { margin-right: 5px; }
+.fa-toggle-off:before { margin-right: 5px; }
+.fa-download:before { margin-right: 5px; }
+.fa-reply:before { margin-right: 5px; }
+.fa-share:before { margin-right: 5px; }
+.fa-check:before { margin-right: 5px; }
+.fa-times:before { margin-right: 6px; }
+.fa-plus:before { margin-right: 6px; }
+.fa-minus:before { margin-right: 6px; }
+
+/******************************
+***
 *** Custom CSS rules 
 ***
 *******************************/
@@ -91,24 +118,6 @@ img.x-tree3-node-icon {
 #wifi-password input {
 	width: 218px !important;
 }
-
-/** Custom tooltip box */
-.tool-tip-textarea {
-	top: 41px;
-	font: normal 12px tahoma, arial, helvetica, sans-serif;
-	padding: 1px 3px;
-	width: 242px;
-}
-
-.tool-tip-label {
-	background: url(../gxt/images/default/window/icon-info.gif) no-repeat center left #eee;
-	background-size: 6%;
-	height: 18px;
-	width: 222px;
-	padding-left: 26px;
-	font: bold 12px tahoma, arial, helvetica, sans-serif;
-}
-
 
 div.headerLogo { 
 	height: 			38px;

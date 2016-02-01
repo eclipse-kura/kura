@@ -1,8 +1,11 @@
 package org.eclipse.kura.web.client.ui.Packages;
 
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.eclipse.kura.web.client.messages.Messages;
+import org.eclipse.kura.web.client.ui.EntryClassUi;
 import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.shared.model.GwtDeploymentPackage;
 import org.eclipse.kura.web.shared.model.GwtSession;
@@ -40,6 +43,7 @@ import com.google.gwt.view.client.SingleSelectionModel;
 public class PackagesPanelUi extends Composite {
 
 	private static PackagesPanelUiUiBinder uiBinder = GWT.create(PackagesPanelUiUiBinder.class);
+	private static final Logger logger = Logger.getLogger(PackagesPanelUi.class.getSimpleName());
 
 	private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
 	private final GwtPackageServiceAsync gwtPackageService = GWT.create(GwtPackageService.class);
@@ -63,7 +67,7 @@ public class PackagesPanelUi extends Composite {
 	@UiField
 	Alert notification;
 	@UiField
-	AnchorListItem packagesRefresh, packagesInstall, packagesUninstall;
+	Button packagesRefresh, packagesInstall, packagesUninstall;
 	@UiField
 	DataGrid<GwtDeploymentPackage> packagesGrid = new DataGrid<GwtDeploymentPackage>();
 	private ListDataProvider<GwtDeploymentPackage> packagesDataProvider = new ListDataProvider<GwtDeploymentPackage>();
@@ -203,7 +207,7 @@ public class PackagesPanelUi extends Composite {
 					if (startIdx != -1 && endIndex != -1) {
 						errMsg = result.substring(startIdx+5, endIndex);
 					}
-					//Growl.growl(MSGS.error()+": ", MSGS.fileDownloadFailure()+": "+errMsg);
+					logger.log(Level.SEVERE, MSGS.error()+": " + MSGS.fileDownloadFailure()+": "+errMsg);
 				}
 			}
 		});
@@ -223,11 +227,13 @@ public class PackagesPanelUi extends Composite {
 	}
 
 	private void uninstall(final GwtDeploymentPackage selected) {
-		
+
+		EntryClassUi.showWaitModal();
 		gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
 
 			@Override
 			public void onFailure(Throwable ex) {
+				EntryClassUi.hideWaitModal();
 				FailureHandler.handle(ex);
 			}
 
@@ -237,16 +243,15 @@ public class PackagesPanelUi extends Composite {
 
 					@Override
 					public void onFailure(Throwable caught) {
-						// TODO Auto-generated method stub
-						//Growl.growl("Uninstall Failed: ",caught.getLocalizedMessage());
+						EntryClassUi.hideWaitModal();
+						FailureHandler.handle(caught);
 						refresh(2500);
 					}
 
 					@Override
 					public void onSuccess(Void result) {
-						// TODO Auto-generated method stub
-						//Growl.growl("Uninstalled!");
 						refresh(2500);
+						EntryClassUi.hideWaitModal();
 					}});
 			}
 			
@@ -279,10 +284,12 @@ public class PackagesPanelUi extends Composite {
 	private void loadPackagesData() {
 		packagesDataProvider.getList().clear();
 		
+		EntryClassUi.showWaitModal();
 		gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
 
 			@Override
 			public void onFailure(Throwable ex) {
+				EntryClassUi.hideWaitModal();
 				FailureHandler.handle(ex);
 			}
 
@@ -291,6 +298,7 @@ public class PackagesPanelUi extends Composite {
 				gwtPackageService.findDeviceDeploymentPackages(token, new AsyncCallback<List<GwtDeploymentPackage>>() {
 					@Override
 					public void onFailure(Throwable caught) {
+						EntryClassUi.hideWaitModal();
 						GwtDeploymentPackage pkg = new GwtDeploymentPackage();
 						pkg.setName("Unavailable! Please click refresh");
 						pkg.setVersion(caught.getLocalizedMessage());
@@ -303,6 +311,7 @@ public class PackagesPanelUi extends Composite {
 							packagesDataProvider.getList().add(pair);
 						}
 						packagesDataProvider.flush();
+						EntryClassUi.hideWaitModal();
 					}});
 				
 			}

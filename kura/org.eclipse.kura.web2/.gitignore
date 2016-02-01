@@ -6,6 +6,7 @@ src/main/webapp/denali/gwt-log-triangle-10x10.png
 src/main/webapp/denali/gwt/standard/*
 src/main/webapp/denali/.junit*
 src/main/webapp/denali/*.gwt.rpc
+src/main/webapp/denali/*
 src/main/webapp/WEB-INF/deploy/denali/rpcPolicyManifest/manifest.txt
 denali/*
 src/main/webapp/com.eurotech.framework.web.denaliJUnit/*

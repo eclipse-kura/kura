@@ -4,13 +4,9 @@
 	xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:gwt="urn:import:org.gwtbootstrap3.client.ui.gwt">
 
 	<ui:style>
-	.important {
-		font-weight: bold;
-	}
+	.important { }
 	
-	.center-panel {
-		<!-- height: 572px; -->
-	}
+	.center-panel { padding: 0px; border: none; }
 
 	</ui:style>
 	
@@ -18,10 +14,11 @@
 		<b:Column size="MD12">
 			<b:Row>
 				<b:Panel>
-					<b:NavPills justified="true">
-						<b:AnchorListItem icon="REFRESH" 
-							iconFixedWidth="true" ui:field="statusRefresh" />
-					</b:NavPills>
+					<b:ButtonGroup size="SMALL">
+						<b:Button ui:field="statusRefresh" addStyleNames="fa fa-refresh"></b:Button>
+						<b:Button ui:field="statusConnect" addStyleNames="fa fa-toggle-on"></b:Button>
+						<b:Button ui:field="statusDisconnect" addStyleNames="fa fa-toggle-off"></b:Button>
+					</b:ButtonGroup>
 				</b:Panel>
 			</b:Row>
 			<b:Row>

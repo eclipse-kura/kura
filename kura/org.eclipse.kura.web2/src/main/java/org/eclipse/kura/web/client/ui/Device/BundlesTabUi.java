@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.messages.ValidationMessages;
+import org.eclipse.kura.web.client.ui.EntryClassUi;
 import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.shared.model.GwtGroupedNVPair;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
@@ -92,10 +93,12 @@ public class BundlesTabUi extends Composite {
 
 		bundlesDataProvider.getList().clear();
 		
+		EntryClassUi.showWaitModal();
 		gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
 
 			@Override
 			public void onFailure(Throwable ex) {
+				EntryClassUi.hideWaitModal();
 				FailureHandler.handle(ex);
 			}
 
@@ -105,6 +108,7 @@ public class BundlesTabUi extends Composite {
 
 					@Override
 					public void onFailure(Throwable caught) {
+						EntryClassUi.hideWaitModal();
 						FailureHandler.handle(caught);
 						bundlesDataProvider.flush();
 
@@ -116,6 +120,7 @@ public class BundlesTabUi extends Composite {
 							bundlesDataProvider.getList().add(resultPair);
 						}
 						bundlesDataProvider.flush();
+						EntryClassUi.hideWaitModal();
 
 					}
 				});

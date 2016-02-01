@@ -87,7 +87,7 @@ public class ServicesUi extends Composite {
 	Modal 			modal;
 	
 	@UiField
-	AnchorListItem apply, reset;
+	Button apply, reset;
 	@UiField
 	FieldSet fields;
 	@UiField
@@ -156,11 +156,13 @@ public class ServicesUi extends Composite {
 						yes.addClickHandler(new ClickHandler(){
 								@Override
 								public void onClick(ClickEvent event) {
+									EntryClassUi.showWaitModal();
 									getUpdatedConfiguration();
 									gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
 
 										@Override
 										public void onFailure(Throwable ex) {
+											EntryClassUi.hideWaitModal();
 											FailureHandler.handle(ex);
 										}
 
@@ -169,6 +171,7 @@ public class ServicesUi extends Composite {
 											gwtComponentService.updateComponentConfiguration(token, m_configurableComponent, new AsyncCallback<Void>(){
 												@Override
 												public void onFailure(Throwable caught) {
+													EntryClassUi.hideWaitModal();
 													errorLogger.log(Level.SEVERE, caught.getLocalizedMessage());
 												}
 
@@ -180,6 +183,7 @@ public class ServicesUi extends Composite {
 													reset.setEnabled(false);
 													setDirty(false);
 													entryClass.initServicesTree();
+													EntryClassUi.hideWaitModal();
 												}});
 											
 										}

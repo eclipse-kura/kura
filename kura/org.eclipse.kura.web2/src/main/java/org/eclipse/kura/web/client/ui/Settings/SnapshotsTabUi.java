@@ -5,6 +5,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.kura.web.client.messages.Messages;
+import org.eclipse.kura.web.client.ui.EntryClassUi;
 import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.shared.model.GwtSnapshot;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
@@ -13,7 +14,6 @@ import org.eclipse.kura.web.shared.service.GwtSecurityTokenServiceAsync;
 import org.eclipse.kura.web.shared.service.GwtSnapshotService;
 import org.eclipse.kura.web.shared.service.GwtSnapshotServiceAsync;
 import org.gwtbootstrap3.client.ui.Alert;
-import org.gwtbootstrap3.client.ui.AnchorListItem;
 import org.gwtbootstrap3.client.ui.Button;
 import org.gwtbootstrap3.client.ui.Modal;
 import org.gwtbootstrap3.client.ui.ModalBody;
@@ -60,7 +60,7 @@ public class SnapshotsTabUi extends Composite {
 	Button uploadCancel, uploadUpload;
 
 	@UiField
-	AnchorListItem refresh, download, rollback, upload;
+	Button refresh, download, rollback, upload;
 	@UiField
 	Alert notification;
 	@UiField
@@ -78,6 +78,7 @@ public class SnapshotsTabUi extends Composite {
 		initTable();
 		snapshotsGrid.setSelectionModel(selectionModel);
 
+		refresh.setText(MSGS.refresh());
 		refresh.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
@@ -85,6 +86,7 @@ public class SnapshotsTabUi extends Composite {
 			}
 		});
 
+		download.setText(MSGS.download());
 		download.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
@@ -107,6 +109,7 @@ public class SnapshotsTabUi extends Composite {
 			}
 		});
 
+		rollback.setText(MSGS.rollback());
 		rollback.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
@@ -114,6 +117,7 @@ public class SnapshotsTabUi extends Composite {
 			}
 		});
 
+		upload.setText(MSGS.upload());
 		upload.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
@@ -147,10 +151,12 @@ public class SnapshotsTabUi extends Composite {
 
 	public void refresh() {
 		notification.setVisible(false);
+		EntryClassUi.showWaitModal();
 		gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
 
 			@Override
 			public void onFailure(Throwable ex) {
+				EntryClassUi.hideWaitModal();
 				FailureHandler.handle(ex);
 			}
 
@@ -159,6 +165,7 @@ public class SnapshotsTabUi extends Composite {
 				gwtSnapshotService.findDeviceSnapshots(token, new AsyncCallback<ArrayList<GwtSnapshot>>() {
 					@Override
 					public void onFailure(Throwable ex) {
+						EntryClassUi.hideWaitModal();
 						FailureHandler.handle(ex);
 					}
 
@@ -182,6 +189,7 @@ public class SnapshotsTabUi extends Composite {
 							download.setEnabled(true);
 							rollback.setEnabled(true);
 						}
+						EntryClassUi.hideWaitModal();
 					}
 				});
 			}
@@ -204,10 +212,12 @@ public class SnapshotsTabUi extends Composite {
 			rollbackModalFooter.add(new Button("Yes", new ClickHandler() {
 				@Override
 				public void onClick(ClickEvent event) {
+					EntryClassUi.showWaitModal();
 					gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
 
 						@Override
 						public void onFailure(Throwable ex) {
+							EntryClassUi.hideWaitModal();
 							FailureHandler.handle(ex);
 						}
 
@@ -217,11 +227,13 @@ public class SnapshotsTabUi extends Composite {
 
 								@Override
 								public void onFailure(Throwable ex) {
+									EntryClassUi.hideWaitModal();
 									FailureHandler.handle(ex);
 								}
 
 								@Override
 								public void onSuccess(Void result) {
+									EntryClassUi.hideWaitModal();
 									refresh();
 								}
 							});

@@ -7,32 +7,18 @@
 	.important {
 		font-weight: bold;
 	}
-	
-	.center-panel {
-		
-	}
-	
-	.button {
-
-	}
 	</ui:style>
 
 	<b:Container fluid="true">
 		<b:Row>
 			<b:Panel>
 				<b:NavPills justified="true">
-					<b:AnchorListItem icon="REFRESH" iconFixedWidth="true"
-						addStyleNames="{style.button}" text="Refresh" ui:field="refresh" />
-
-					<b:AnchorListItem icon="DOWNLOAD" iconFixedWidth="true"
-						addStyleNames="{style.button}" text="Download" ui:field="download" />
-
-					<b:AnchorListItem icon="MAIL_REPLY" addStyleNames="{style.button}"
-						iconFixedWidth="true" text="Rollback" ui:field="rollback" />
-
-					<b:AnchorListItem icon="MAIL_FORWARD"
-						addStyleNames="{style.button}" iconFixedWidth="true" text="Upload and Apply"
-						ui:field="upload" />
+					<b:ButtonGroup size="SMALL">
+						<b:Button ui:field="refresh" addStyleNames="fa fa-refresh"></b:Button>
+						<b:Button ui:field="download" addStyleNames="fa fa-download"></b:Button>
+						<b:Button ui:field="rollback" addStyleNames="fa fa-reply"></b:Button>
+						<b:Button ui:field="upload" addStyleNames="fa fa-share"></b:Button>
+					</b:ButtonGroup>
 				</b:NavPills>
 			</b:Panel>
 		</b:Row>

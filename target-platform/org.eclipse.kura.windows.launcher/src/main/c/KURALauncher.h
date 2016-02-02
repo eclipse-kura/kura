@@ -1,0 +1,16 @@
+#ifndef _kuralauncher_h_
+#define _kuralauncher_h_
+
+#include <windows.h>
+#include <tchar.h>
+
+// Defined in utils.c, handles for the read and write ends of the two pipes used for STDIO of the child process 
+extern HANDLE g_hOUTRead, g_hOUTWrite, g_hINRead, g_hINWrite;
+
+// Defined in utils.c, this function is used to create a thread to absorb the STDOUT data from the child process
+extern DWORD WINAPI STDOUT_Thread(void *lpParameter);
+
+// Defined in utils.c, this function creates two pipes which are used for the STDIN & STDOUT of the child process
+extern BOOL CreatePipes(void);
+
+#endif

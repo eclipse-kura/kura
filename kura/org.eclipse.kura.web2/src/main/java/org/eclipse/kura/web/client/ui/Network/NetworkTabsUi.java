@@ -99,19 +99,19 @@ public class NetworkTabsUi extends Composite {
 	}
 
 	public boolean isDirty() {
-		if (tcpIp.isDirty()) {
+		if (tcpIp != null && tcpIp.isDirty()) {
 			return true;
 		}
-		if (hardware.isDirty()) {
+		if (hardware !=null && hardware.isDirty()) {
 			return true;
 		}
-		if (dhcpNat.isDirty()) {
+		if (dhcpNat !=null && dhcpNat.isDirty()) {
 			return true;
 		}
-		if (wireless.isDirty()) {
+		if (wireless != null && wireless.isDirty()) {
 			return true;
 		}
-		if (modem.isDirty()) {
+		if (modem != null && modem.isDirty()) {
 			return true;
 		}
 
@@ -119,19 +119,19 @@ public class NetworkTabsUi extends Composite {
 	}
 
 	public void setDirty(boolean b) {
-		tcpIp.setDirty(b);
-		hardware.setDirty(b);
-		dhcpNat.setDirty(b);
-		wireless.setDirty(b);
-		modem.setDirty(b);
+		if (tcpIp != null) tcpIp.setDirty(b);
+		if (hardware != null) hardware.setDirty(b);
+		if (dhcpNat != null) dhcpNat.setDirty(b);
+		if (wireless != null) wireless.setDirty(b);
+		if (modem != null) modem.setDirty(b);
 	}
 
 	public void refresh() {
-		tcpIp.refresh();
-		hardware.refresh();
-		dhcpNat.refresh();
-		wireless.refresh();
-		modem.refresh();
+		if (tcpIp != null) tcpIp.refresh();
+		if (hardware != null) hardware.refresh();
+		if (dhcpNat != null) dhcpNat.refresh();
+		if (wireless != null) wireless.refresh();
+		if (modem != null) modem.refresh();
 	}
 
 	// Add/remove tabs based on the selected settings in the various tabs

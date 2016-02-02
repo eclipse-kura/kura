@@ -119,7 +119,7 @@ public class denali implements EntryPoint
 								binder.initSystemPanel(gwtSession);
 								binder.setSession(gwtSession);
 								binder.initServicesTree();
-								binder.setDirty(false);
+								//binder.setDirty(false);
 							}
 
 							public void onSuccess(Boolean result) {
@@ -130,7 +130,7 @@ public class denali implements EntryPoint
 								binder.initSystemPanel(gwtSession);
 								binder.setSession(gwtSession);
 								binder.initServicesTree();
-								binder.setDirty(false);
+								//binder.setDirty(false);
 							}
 						});
 					}

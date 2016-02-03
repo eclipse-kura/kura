@@ -313,7 +313,7 @@ public class BluetoothGattImpl implements BluetoothGatt, BluetoothProcessListene
 		}
 		// receiving notifications, need to notify listener
 		else if (line.matches(REGEX_NOTIFICATION)) {
-			s_logger.info("Receiving notification: " + line);
+			s_logger.debug("Receiving notification: " + line);
 			// Parse the characteristic line, line is expected to be:
 			// Notification handle = 0xmmmm value: <value>
 			String x = "Notification hanlde = ";

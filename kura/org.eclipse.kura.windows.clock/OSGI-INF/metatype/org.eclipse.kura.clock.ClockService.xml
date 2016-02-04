@@ -27,14 +27,7 @@
             default="true"
             description="Whether or not to enable the ClockService"/>
             
-        <AD id="clock.set.hwclock"  
-            name="clock.set.hwclock"
-            type="Boolean"
-            cardinality="0" 
-            required="false"
-            default="true" 
-            description="Whether or not to sync the system hardware clock after the system time gets set"/>
-        
+                
         <AD id="clock.provider"  
             name="clock.provider"
             type="String"

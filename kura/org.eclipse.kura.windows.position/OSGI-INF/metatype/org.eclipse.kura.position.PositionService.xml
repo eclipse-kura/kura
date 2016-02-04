@@ -64,15 +64,15 @@
             type="String"
             cardinality="0"
             required="false"
-            default="/dev/ttyACM0"
-            description="The USB or serial port of the GPS device (e.g. 1-3.2 or /dev/ttyACM0)."/>
+            default="COM3"
+            description="The serial port of the GPS device, eg COM1 (without a colon)."/>
         
         <AD id="baudRate"  
             name="baudRate"
             type="Integer"
             cardinality="0" 
             required="false"
-            default="115200" 
+            default="4800" 
             description="The baud rate of the GPS device.">
             <Option label="110" value="110"/>
             <Option label="300" value="300"/>

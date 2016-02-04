@@ -131,7 +131,7 @@
     <esf:configuration pid="org.eclipse.kura.position.PositionService">
         <esf:properties>
             <esf:property name="port" array="false" encrypted="false" type="String">
-                <esf:value>1-3.2</esf:value>
+                <esf:value>COM3</esf:value>
             </esf:property>
             <esf:property name="enabled" array="false" encrypted="false" type="Boolean">
                 <esf:value>false</esf:value>
@@ -143,7 +143,7 @@
                 <esf:value>1</esf:value>
             </esf:property>
             <esf:property name="baudRate" array="false" encrypted="false" type="Integer">
-                <esf:value>115200</esf:value>
+                <esf:value>4800</esf:value>
             </esf:property>
             <esf:property name="service.pid" array="false" encrypted="false" type="String">
                 <esf:value>org.eclipse.kura.position.PositionService</esf:value>

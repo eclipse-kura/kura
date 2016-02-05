@@ -148,7 +148,9 @@ public class ModemDriver {
 					initSysfsGpio(RELIAGATE_10_05_GSM_RESET_GPIO_NUM, false);
 				}
 				echoSysfsResource(RELIAGATE_10_05_GSM_USB_PATH, false);
+				Thread.sleep(1000);
 				pulseSysfsGpio(RELIAGATE_10_05_GSM_RESET_GPIO_NUM, true, 1000);
+				Thread.sleep(1000);
 				echoSysfsResource(RELIAGATE_10_05_GSM_USB_PATH, true);
 				
 				// wait until the modem is on again

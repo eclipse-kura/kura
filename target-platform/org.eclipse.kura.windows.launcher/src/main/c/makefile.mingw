@@ -18,7 +18,7 @@ Objs/x64/utils64.o : utils.c
 
 
 Release/Win32/x86/KuraLauncher.exe : Objs/x86/main32.o Objs/x86/utils32.o
-	i686-w64-mingw32-gcc Objs/x86/main32.o Objs/x86/utils32.o -o $@
+	i686-w64-mingw32-gcc -Wl,--subsystem,windows Objs/x86/main32.o Objs/x86/utils32.o -o $@
 
 Release/Win32/x64/KuraLauncher.exe : Objs/x64/main64.o Objs/x64/utils64.o
-	x86_64-w64-mingw32-gcc Objs/x64/main64.o Objs/x64/utils64.o -o $@
+	x86_64-w64-mingw32-gcc -Wl,--subsystem,windows Objs/x64/main64.o Objs/x64/utils64.o -o $@

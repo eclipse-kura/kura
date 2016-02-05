@@ -33,7 +33,7 @@
   </Settings>
   <Actions Context="Author">
     <Exec>
-      <Command>"C:\Program Files\Kura\start_kura.bat"</Command>
+      <Command>"C:\Program Files\Kura\KuraLauncher.exe"</Command>
       <WorkingDirectory>C:\Program Files\Kura\</WorkingDirectory>
     </Exec>
   </Actions>

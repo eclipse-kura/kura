@@ -140,7 +140,7 @@ public class SnapshotsTabUi extends Composite {
 		TextColumn<GwtSnapshot> col2 = new TextColumn<GwtSnapshot>() {
 			@Override
 			public String getValue(GwtSnapshot object) {
-				return String.valueOf(object.getCreatedOnFormatted());
+				return String.valueOf(object.get("createdOnFormatted"));
 			}
 		};
 		col2.setCellStyleNames("status-table-row");

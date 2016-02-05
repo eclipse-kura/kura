@@ -2,8 +2,11 @@ package org.eclipse.kura.web.client.ui.Firewall;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.eclipse.kura.web.client.messages.Messages;
+import org.eclipse.kura.web.client.ui.EntryClassUi;
 import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.shared.model.GwtFirewallNatEntry;
 import org.eclipse.kura.web.shared.model.GwtFirewallNatMasquerade;
@@ -15,7 +18,6 @@ import org.eclipse.kura.web.shared.service.GwtNetworkServiceAsync;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenService;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenServiceAsync;
 import org.gwtbootstrap3.client.ui.Alert;
-import org.gwtbootstrap3.client.ui.AnchorListItem;
 import org.gwtbootstrap3.client.ui.Button;
 import org.gwtbootstrap3.client.ui.FormGroup;
 import org.gwtbootstrap3.client.ui.FormLabel;
@@ -46,6 +48,7 @@ import com.google.gwt.view.client.SingleSelectionModel;
 public class NatTabUi extends Composite {
 
 	private static NatTabUiUiBinder uiBinder = GWT.create(NatTabUiUiBinder.class);
+	private static final Logger logger = Logger.getLogger(NatTabUi.class.getSimpleName());
 
 	interface NatTabUiUiBinder extends UiBinder<Widget, NatTabUi> {
 	}
@@ -58,7 +61,7 @@ public class NatTabUi extends Composite {
 	GwtFirewallNatEntry natEntry;
 
 	@UiField
-	AnchorListItem apply, create, edit, delete;
+	Button apply, create, edit, delete;
 	@UiField
 	Alert notification;
 	@UiField
@@ -154,14 +157,13 @@ public class NatTabUi extends Composite {
 	}
 
 	public void loadData() {
+		EntryClassUi.showWaitModal();
 		natDataProvider.getList().clear();
-		natGrid.setVisible(false);
-		notification.setVisible(false);
-
 		gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
 
 			@Override
 			public void onFailure(Throwable ex) {
+				EntryClassUi.hideWaitModal();
 				FailureHandler.handle(ex);
 			}
 
@@ -170,23 +172,18 @@ public class NatTabUi extends Composite {
 				gwtNetworkService.findDeficeFirewallNATs(token, new AsyncCallback<ArrayList<GwtFirewallNatEntry>>() {
 					@Override
 					public void onFailure(Throwable caught) {
-						notification.setVisible(true);
-						notification.setText(MSGS.error() + ": "
-								+ caught.getLocalizedMessage());
+						EntryClassUi.hideWaitModal();
+						FailureHandler.handle(caught);
 					}
 
 					@Override
-					public void onSuccess(
-							ArrayList<GwtFirewallNatEntry> result) {
+					public void onSuccess(ArrayList<GwtFirewallNatEntry> result) {
 						for (GwtFirewallNatEntry pair : result) {
 							natDataProvider.getList().add(pair);
 						}
 						natDataProvider.flush();
-
-						if (natDataProvider.getList().size() > 0) {
-							natGrid.setVisible(true);
-						}
 						apply.setEnabled(false);
+						EntryClassUi.hideWaitModal();
 					}
 				});
 			}
@@ -201,10 +198,12 @@ public class NatTabUi extends Composite {
 			public void onClick(ClickEvent event) {
 				final List<GwtFirewallNatEntry> updatedNatConf = natDataProvider.getList();
 				if (updatedNatConf != null) {
+					EntryClassUi.showWaitModal();
 					gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
 
 						@Override
 						public void onFailure(Throwable ex) {
+							EntryClassUi.hideWaitModal();
 							FailureHandler.handle(ex);
 						}
 
@@ -214,13 +213,14 @@ public class NatTabUi extends Composite {
 									new AsyncCallback<Void>() {
 										@Override
 										public void onFailure(Throwable caught) {
-											//Growl.growl(MSGS.error() + ": ",
-											//		caught.getLocalizedMessage());
+											EntryClassUi.hideWaitModal();
+											FailureHandler.handle(caught);
 										}
 
 										@Override
 										public void onSuccess(Void result) {
 											apply.setEnabled(false);
+											EntryClassUi.hideWaitModal();
 										}
 									});
 						}
@@ -273,12 +273,6 @@ public class NatTabUi extends Composite {
 									natDataProvider.flush();
 									apply.setEnabled(true);
 									confirm.hide();
-
-									if (natDataProvider.getList().size() > 0) {
-										natGrid.setVisible(true);
-									} else {
-										natGrid.setVisible(false);
-									}
 								}
 
 							}));
@@ -476,11 +470,6 @@ public class NatTabUi extends Composite {
 			natDataProvider.getList().remove(existingEntry);
 			natDataProvider.getList().add(natEntry);
 			natDataProvider.flush();
-			if (natDataProvider.getList().size() > 0) {
-				natGrid.setVisible(true);
-			} else {
-				natGrid.setVisible(false);
-			}
 		}
 		apply.setEnabled(true);
 	}
@@ -489,14 +478,8 @@ public class NatTabUi extends Composite {
 		if (!duplicateEntry(natEntry)) {
 			natDataProvider.getList().add(natEntry);
 			natDataProvider.flush();
-			if (natDataProvider.getList().size() > 0) {
-				natGrid.setVisible(true);
-			} else {
-				natGrid.setVisible(false);
-			}
 		} else {
-			//Growl.growl(MSGS.firewallNatFormError() + ": ",
-			//		MSGS.firewallNatFormDuplicate());
+			logger.log(Level.FINER, MSGS.firewallNatFormError() + ": " + MSGS.firewallNatFormDuplicate());
 		}
 		apply.setEnabled(true);
 	}

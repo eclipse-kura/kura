@@ -16,8 +16,7 @@ import com.google.gwt.user.client.ui.Widget;
 
 public class FirewallPanelUi extends Composite {
 
-	private static FirewallPanelUiUiBinder uiBinder = GWT
-			.create(FirewallPanelUiUiBinder.class);
+	private static FirewallPanelUiUiBinder uiBinder = GWT.create(FirewallPanelUiUiBinder.class);
 
 	interface FirewallPanelUiUiBinder extends UiBinder<Widget, FirewallPanelUi> {
 	}
@@ -74,6 +73,9 @@ public class FirewallPanelUi extends Composite {
 			}});
 	}
 	
+	public void initFirewallPanel() {
+		openPortsBinder.loadData();
+	}
 	
 	public void setSelectedActive(AnchorListItem item){
 		openPorts.setActive(false);

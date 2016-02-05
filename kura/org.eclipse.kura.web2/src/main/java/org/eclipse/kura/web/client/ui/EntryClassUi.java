@@ -156,19 +156,11 @@ public class EntryClassUi extends Composite {
 						if (servicesUi != null) {
 							servicesUi.renderForm();
 						}
-						status.setIconSpin(true);
 						contentPanel.setVisible(true);
 						contentPanelHeader.setText("Status");
 						contentPanelBody.clear();
 						contentPanelBody.add(statusBinder);
 						statusBinder.setSession(currentSession);
-						Timer timer = new Timer() {
-							@Override
-							public void run() {
-								status.setIconSpin(false);
-							}
-						};
-						timer.schedule(2000);
 						statusBinder.loadStatusData();
 					}
 				});
@@ -190,18 +182,10 @@ public class EntryClassUi extends Composite {
 							if (servicesUi != null) {
 								servicesUi.renderForm();
 							}
-							device.setIconSpin(true);
 							contentPanel.setVisible(true);
 							contentPanelHeader.setText(MSGS.device());
 							contentPanelBody.clear();
 							contentPanelBody.add(deviceBinder);
-							Timer timer = new Timer() {
-								@Override
-								public void run() {
-									device.setIconSpin(false);
-								}
-							};
-							timer.schedule(2000);
 							deviceBinder.initDevicePanel();
 						}
 					});
@@ -242,8 +226,7 @@ public class EntryClassUi extends Composite {
 				firewall.addClickHandler(new ClickHandler() {
 					@Override
 					public void onClick(ClickEvent event) {
-						Button b = new Button(MSGS.yesButton(),
-								new ClickHandler() {
+						Button b = new Button(MSGS.yesButton(),	new ClickHandler() {
 									@Override
 									public void onClick(ClickEvent event) {
 										if (modal!=null ) {
@@ -252,20 +235,11 @@ public class EntryClassUi extends Composite {
 										if (servicesUi != null) {
 											servicesUi.renderForm();
 										}
-										firewall.setIconSpin(true);
 										contentPanel.setVisible(true);
-										contentPanelHeader.setText(MSGS
-												.firewall());
+										contentPanelHeader.setText(MSGS.firewall());
 										contentPanelBody.clear();
 										contentPanelBody.add(firewallBinder);
-										Timer timer = new Timer() {
-											@Override
-											public void run() {
-												firewall.setIconSpin(false);
-											}
-										};
-										timer.schedule(2000);
-
+										firewallBinder.initFirewallPanel();
 									}
 								});
 						renderDirtyConfigModal(b);
@@ -286,19 +260,11 @@ public class EntryClassUi extends Composite {
 							if (servicesUi != null) {
 								servicesUi.renderForm();
 							}
-							packages.setIconSpin(true);
 							contentPanel.setVisible(true);
 							contentPanelHeader.setText(MSGS.packages());
 							contentPanelBody.clear();
 							contentPanelBody.add(packagesBinder);
 							packagesBinder.setSession(currentSession);
-							Timer timer = new Timer() {
-								@Override
-								public void run() {
-									packages.setIconSpin(false);
-								}
-							};
-							timer.schedule(2000);
 							packagesBinder.refresh();
 						}
 					});
@@ -319,19 +285,11 @@ public class EntryClassUi extends Composite {
 							if (servicesUi != null) {
 								servicesUi.renderForm();
 							}
-							settings.setIconSpin(true);
 							contentPanel.setVisible(true);
 							contentPanelHeader.setText(MSGS.settings());
 							contentPanelBody.clear();
 							contentPanelBody.add(settingsBinder);
 							settingsBinder.setSession(currentSession);
-							Timer timer = new Timer() {
-								@Override
-								public void run() {
-									settings.setIconSpin(false);
-								}
-							};
-							timer.schedule(2000);
 							settingsBinder.load();
 						}
 					});

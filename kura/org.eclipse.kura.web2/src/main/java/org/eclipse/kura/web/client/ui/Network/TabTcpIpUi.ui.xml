@@ -4,23 +4,10 @@
 	xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:gwt="urn:import:org.gwtbootstrap3.client.ui.gwt">
 
 	<ui:style>
-	.important {
-		font-weight: bold;
-	}
-	
-	.center-panel {
-		height: 450px;
-		font-size: 0.6 em;
-		font-weight: normal;
-	}
-	
-	.padding {
-		margin-bottom: 50px;
-	}
-	
-	.help {
-		height: 300px;
-	}
+	.important { font-weight: bold;	}
+	.center-panel {	height: 450px; font-size: 11px; font-weight: normal; }
+	.padding { margin-bottom: 50px; }
+	.help {	height: 300px; }
 	</ui:style>
 	<b:Container fluid="true">
 		<b:Column size="MD_7" addStyleNames="{style.center-panel}">
@@ -32,7 +19,7 @@
 							<b:FormGroup>
 								<b:FormLabel for="status" ui:field="labelStatus"></b:FormLabel>
 								<g:FlowPanel>
-									<b:ListBox b:id="status" ui:field="status" />
+									<b:ListBox b:id="status" ui:field="status"/>
 								</g:FlowPanel>
 							</b:FormGroup>
 

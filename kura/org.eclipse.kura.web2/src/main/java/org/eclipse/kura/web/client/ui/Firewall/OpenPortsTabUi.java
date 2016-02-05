@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.kura.web.client.messages.Messages;
+import org.eclipse.kura.web.client.ui.EntryClassUi;
 import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.client.util.TextFieldValidator.FieldType;
 import org.eclipse.kura.web.shared.model.GwtFirewallOpenPortEntry;
@@ -16,7 +17,6 @@ import org.eclipse.kura.web.shared.service.GwtSecurityTokenServiceAsync;
 import org.gwtbootstrap3.client.shared.event.ModalHideEvent;
 import org.gwtbootstrap3.client.shared.event.ModalHideHandler;
 import org.gwtbootstrap3.client.ui.Alert;
-import org.gwtbootstrap3.client.ui.AnchorListItem;
 import org.gwtbootstrap3.client.ui.Button;
 import org.gwtbootstrap3.client.ui.FormGroup;
 import org.gwtbootstrap3.client.ui.FormLabel;
@@ -56,10 +56,10 @@ public class OpenPortsTabUi extends Composite {
 	interface OpenPortsTabUiUiBinder extends UiBinder<Widget, OpenPortsTabUi> {
 	}
 
-	GwtFirewallOpenPortEntry editOpenPortEntry, newOpenPortEntry,
-			openPortEntry;
+	GwtFirewallOpenPortEntry editOpenPortEntry, newOpenPortEntry, openPortEntry;
+	
 	@UiField
-	AnchorListItem apply, create, edit, delete;
+	Button apply, create, edit, delete;
 	@UiField
 	Alert notification;
 
@@ -84,6 +84,7 @@ public class OpenPortsTabUi extends Composite {
 
 	@UiField
 	DataGrid<GwtFirewallOpenPortEntry> openPortsGrid = new DataGrid<GwtFirewallOpenPortEntry>();
+	
 	private ListDataProvider<GwtFirewallOpenPortEntry> openPortsDataProvider = new ListDataProvider<GwtFirewallOpenPortEntry>();
 	final SingleSelectionModel<GwtFirewallOpenPortEntry> selectionModel = new SingleSelectionModel<GwtFirewallOpenPortEntry>();
 
@@ -170,11 +171,14 @@ public class OpenPortsTabUi extends Composite {
 	}
 
 	public void loadData() {
+		EntryClassUi.showWaitModal();
 		openPortsDataProvider.getList().clear();
+		notification.setVisible(false);
 		gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
 
 			@Override
 			public void onFailure(Throwable ex) {
+				EntryClassUi.hideWaitModal();
 				FailureHandler.handle(ex);
 			}
 
@@ -183,19 +187,19 @@ public class OpenPortsTabUi extends Composite {
 				gwtNetworkService.findDeviceFirewallOpenPorts(token, new AsyncCallback<ArrayList<GwtFirewallOpenPortEntry>>() {
 					@Override
 					public void onFailure(Throwable caught) {
-						openPortsGrid.setVisible(false);
+						EntryClassUi.hideWaitModal();
 						FailureHandler.handle(caught, gwtNetworkService.getClass().getSimpleName());
 					}
 
 					@Override
-					public void onSuccess(
-							ArrayList<GwtFirewallOpenPortEntry> result) {
+					public void onSuccess(ArrayList<GwtFirewallOpenPortEntry> result) {
 						for (GwtFirewallOpenPortEntry pair : result) {
 							openPortsDataProvider.getList().add(pair);
 						}
 						openPortsDataProvider.flush();
 						setVisibility();
 						apply.setEnabled(false);
+						EntryClassUi.hideWaitModal();
 					}
 				});
 			}
@@ -211,10 +215,12 @@ public class OpenPortsTabUi extends Composite {
 				final List<GwtFirewallOpenPortEntry> updatedOpenPortConf = openPortsDataProvider.getList();
 
 				if (updatedOpenPortConf.size() > 0) {
+					EntryClassUi.showWaitModal();
 					gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
 
 						@Override
 						public void onFailure(Throwable ex) {
+							EntryClassUi.hideWaitModal();
 							FailureHandler.handle(ex, gwtXSRFService.getClass().getName());
 						}
 
@@ -224,12 +230,14 @@ public class OpenPortsTabUi extends Composite {
 									new AsyncCallback<Void>() {
 										@Override
 										public void onFailure(Throwable caught) {
+											EntryClassUi.hideWaitModal();
 											FailureHandler.handle(caught, gwtNetworkService.getClass().getSimpleName());
 										}
 
 										@Override
 										public void onSuccess(Void result) {
 											apply.setEnabled(false);
+											EntryClassUi.hideWaitModal();
 										}
 									});
 						}

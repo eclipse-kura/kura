@@ -4,37 +4,19 @@
 	xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:gwt="urn:import:org.gwtbootstrap3.client.ui.gwt">
 
 	<ui:style>
-	.important {
-		font-weight: bold;
-	}
-	
-	.center-panel {
-		height: 572px;
-	}
-	
-	.button {
-<!-- 		border-style: solid;
-		border-radius: 5px;
-		border-width: 1px; -->
-	}
+	.important { font-weight: bold; }
+	.center-panel {	height: 572px; padding: 2px; }
 	</ui:style>
 
-	<b:Container fluid="true">
+	<b:Container fluid="true" addStyleNames="{style.center-panel}">
 		<b:Row>
 			<b:Panel>
-				<b:NavPills justified="true">
-					<b:AnchorListItem icon="CHECK" iconFixedWidth="true"
-						addStyleNames="{style.button}" ui:field="apply" />
-
-					<b:AnchorListItem icon="PLUS_SQUARE"
-						addStyleNames="{style.button}" iconFixedWidth="true" ui:field="create">
-					</b:AnchorListItem>
-					<b:AnchorListItem icon="PENCIL_SQUARE"
-						addStyleNames="{style.button}" iconFixedWidth="true" ui:field="edit" />
-
-					<b:AnchorListItem icon="TRASH" iconFixedWidth="true"
-						ui:field="delete" addStyleNames="{style.button}" />
-				</b:NavPills>
+				<b:ButtonGroup size="SMALL">
+					<b:Button ui:field="apply" addStyleNames="fa fa-check"></b:Button>
+					<b:Button ui:field="create" addStyleNames="fa fa-plus"></b:Button>
+					<b:Button ui:field="edit" addStyleNames="fa fa-pencil"></b:Button>
+					<b:Button ui:field="delete" addStyleNames="fa fa-trash"></b:Button>
+				</b:ButtonGroup>
 			</b:Panel>
 		</b:Row>
 

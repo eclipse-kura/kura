@@ -20,10 +20,10 @@
 	}
 	</ui:style>
 
-	<b:Column size="MD_12">
+	<b:Column size="MD_4">
 		<b:Row>
 			<b:Row>
-				<b:ButtonGroup justified="true">
+				<b:ButtonGroup justified="true" size="SMALL">
 					<b:AnchorButton icon="CHECK" iconFixedWidth="true"
 						ui:field="apply" addStyleNames="{style.button}"/>
 
@@ -31,9 +31,6 @@
 						ui:field="refresh" addStyleNames="{style.button}"/>
 
 				</b:ButtonGroup>
-				<!-- <b:NavPills justified="true"> <b:AnchorListItem icon="CHECK" iconFixedWidth="true" 
-					ui:field="apply" /> <b:AnchorListItem icon="REFRESH" iconFixedWidth="true" 
-					ui:field="refresh"/> </b:NavPills> -->
 			</b:Row>
 		</b:Row>
 	</b:Column>

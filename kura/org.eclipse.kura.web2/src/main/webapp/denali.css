@@ -66,9 +66,9 @@ img.x-tree3-node-icon {
 *******************************/
 .gwt-PopupPanelGlass { width: 100%; background-color: #009AE0; opacity: 0.3; }
 
-.nav-pills>li>a { border-bottom: 1px solid !important; }
-
 .btn { background-color: #009AE0 !important; color: white !important; }
+
+.form-control { font-size: 11px !important; width: 95% !important; }
 
 .table { font-size: 12px; }
 .rowHeader { background-color: #009AE0 !important; font-size: 14px !important; color: white !important; pointer-events: none !important;  }
@@ -83,6 +83,8 @@ img.x-tree3-node-icon {
 .fa-times:before { margin-right: 6px; }
 .fa-plus:before { margin-right: 6px; }
 .fa-minus:before { margin-right: 6px; }
+.fa-pencil:before { margin-right: 6px; }
+.fa-trash:before { margin-right: 6px; }
 
 /******************************
 ***

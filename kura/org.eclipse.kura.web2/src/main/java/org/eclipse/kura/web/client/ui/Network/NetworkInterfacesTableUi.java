@@ -3,6 +3,7 @@ package org.eclipse.kura.web.client.ui.Network;
 import java.util.ArrayList;
 
 import org.eclipse.kura.web.client.messages.Messages;
+import org.eclipse.kura.web.client.ui.EntryClassUi;
 import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.shared.model.GwtNetInterfaceConfig;
 import org.eclipse.kura.web.shared.model.GwtSession;
@@ -168,17 +169,18 @@ public class NetworkInterfacesTableUi extends Composite {
 	}
 
 	private void loadData() {
+		EntryClassUi.showWaitModal();
 		interfacesProvider.getList().clear();
 		gwtNetworkService.findNetInterfaceConfigurations(new AsyncCallback<ArrayList<GwtNetInterfaceConfig>>() {
 					
 					@Override
 					public void onFailure(Throwable caught) {
+						EntryClassUi.hideWaitModal();
 						FailureHandler.handle(caught);
 					}
 
 					@Override
-					public void onSuccess(
-							ArrayList<GwtNetInterfaceConfig> result) {
+					public void onSuccess(ArrayList<GwtNetInterfaceConfig> result) {
 						for (GwtNetInterfaceConfig pair : result) {
 							interfacesProvider.getList().add(pair);
 						}
@@ -196,6 +198,7 @@ public class NetworkInterfacesTableUi extends Composite {
 							notification.setVisible(true);
 							notification.setText(MSGS.netTableNoInterfaces());
 						}
+						EntryClassUi.hideWaitModal();
 					}
 				});
 	}

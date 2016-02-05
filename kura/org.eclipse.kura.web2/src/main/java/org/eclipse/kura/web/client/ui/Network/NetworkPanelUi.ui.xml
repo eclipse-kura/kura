@@ -4,13 +4,8 @@
 	xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:gwt="urn:import:org.gwtbootstrap3.client.ui.gwt">
 
 	<ui:style>
-	.important {
-		font-weight: bold;
-	}
-	
-	.center-panel {
-		height: 650px;
-	}
+	.important { font-weight: bold;	}
+	.center-panel {	height: 650px; padding: 0px; margin: 2px; }
 	</ui:style>
 
 	<b:Container fluid="true">
@@ -19,15 +14,12 @@
 			</g:HTMLPanel>
 		</b:Row>
 		<b:Row>
-			<b:Column addStyleNames="{style.center-panel}" size="MD_3">
+			<b:Column addStyleNames="{style.center-panel}" size="MD_2">
 				<b:Well addStyleNames="{style.center-panel}" ui:field="interfacesTable" />
 			</b:Column>
 
 			<b:Column size="MD_9" addStyleNames="{style.center-panel}">
-				<b:Well addStyleNames="{style.center-panel}">
-					<!-- <b:Panel >	
-						<b:PanelBody ui:field="buttonBar" />					
-					</b:Panel> -->
+				<b:Well addStyleNames="{style.center-panel}">				
 					<b:Container fluid="true" ui:field="buttonBar" />
 					<b:Panel>
 						<b:PanelBody ui:field="tabsPanel">

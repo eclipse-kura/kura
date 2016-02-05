@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.kura.web.client.messages.Messages;
+import org.eclipse.kura.web.client.ui.EntryClassUi;
 import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.client.util.TextFieldValidator.FieldType;
 import org.eclipse.kura.web.shared.model.GwtFirewallNatMasquerade;
@@ -15,7 +16,6 @@ import org.eclipse.kura.web.shared.service.GwtNetworkServiceAsync;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenService;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenServiceAsync;
 import org.gwtbootstrap3.client.ui.Alert;
-import org.gwtbootstrap3.client.ui.AnchorListItem;
 import org.gwtbootstrap3.client.ui.Button;
 import org.gwtbootstrap3.client.ui.FormGroup;
 import org.gwtbootstrap3.client.ui.FormLabel;
@@ -60,11 +60,12 @@ public class PortForwardingTabUi extends Composite {
 
 
 	@UiField
-	AnchorListItem apply, create, edit, delete;
+	Button apply, create, edit, delete;
 	@UiField
 	Alert notification;
 	@UiField
 	DataGrid<GwtFirewallPortForwardEntry> portForwardGrid = new DataGrid<GwtFirewallPortForwardEntry>();
+	
 	private ListDataProvider<GwtFirewallPortForwardEntry> portForwardDataProvider = new ListDataProvider<GwtFirewallPortForwardEntry>();
 	final SingleSelectionModel<GwtFirewallPortForwardEntry> selectionModel = new SingleSelectionModel<GwtFirewallPortForwardEntry>();
 
@@ -210,14 +211,15 @@ public class PortForwardingTabUi extends Composite {
 	}
 
 	public void loadData() {
+		EntryClassUi.showWaitModal();
 		portForwardDataProvider.getList().clear();
-		portForwardGrid.setVisible(false);
 		notification.setVisible(false);
 
 		gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
 
 			@Override
 			public void onFailure(Throwable ex) {
+				EntryClassUi.hideWaitModal();
 				FailureHandler.handle(ex);
 			}
 
@@ -227,24 +229,18 @@ public class PortForwardingTabUi extends Composite {
 
 					@Override
 					public void onFailure(Throwable caught) {
-						notification.setVisible(true);
-						notification.setText(MSGS.error() + ": "
-								+ caught.getLocalizedMessage());
-
+						EntryClassUi.hideWaitModal();
+						FailureHandler.handle(caught);
 					}
 
 					@Override
-					public void onSuccess(
-							ArrayList<GwtFirewallPortForwardEntry> result) {
+					public void onSuccess(ArrayList<GwtFirewallPortForwardEntry> result) {
 						for (GwtFirewallPortForwardEntry pair : result) {
 							portForwardDataProvider.getList().add(pair);
 						}
 						portForwardDataProvider.flush();
-
-						if (portForwardDataProvider.getList().size() > 0) {
-							portForwardGrid.setVisible(true);
-						}
 						apply.setEnabled(false);
+						EntryClassUi.hideWaitModal();
 					}
 				});
 			}
@@ -339,13 +335,7 @@ public class PortForwardingTabUi extends Composite {
 							portForwardDataProvider.getList().remove(selection);
 							portForwardDataProvider.flush();
 							apply.setEnabled(true);
-							// Growl.growl("Delete Success");
-
-							portForwardGrid.setVisible(false);
 							notification.setVisible(false);
-							if (portForwardDataProvider.getList().size() > 0) {
-								portForwardGrid.setVisible(true);
-							}
 						}
 					});
 					alert.show();
@@ -699,13 +689,9 @@ public class PortForwardingTabUi extends Composite {
             portForwardDataProvider.getList().add(portForwardEntry);
             //Growl.growl("Adding new Entry");
             portForwardDataProvider.flush();
-            if(portForwardDataProvider.getList().size()>0){
-                portForwardGrid.setVisible(true);
-                notification.setVisible(false);
-            }
             apply.setEnabled(true);
             portForwardGrid.redraw();
-            portForwardEntry=null;
+            portForwardEntry = null;
         } else {
             //Growl.growl(MSGS.firewallPortForwardFormError()
               //      + ": ",
@@ -721,10 +707,6 @@ public class PortForwardingTabUi extends Composite {
             portForwardDataProvider.flush();
             portForwardDataProvider.getList().add(portForwardEntry);
             portForwardDataProvider.flush();
-            if(portForwardDataProvider.getList().size()>0){
-                portForwardGrid.setVisible(true);
-                notification.setVisible(false);
-            }
             apply.setEnabled(true);
             portForwardGrid.redraw();
         }

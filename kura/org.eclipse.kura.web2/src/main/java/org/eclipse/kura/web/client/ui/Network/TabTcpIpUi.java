@@ -6,6 +6,7 @@ import java.util.logging.Logger;
 
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.messages.ValidationMessages;
+import org.eclipse.kura.web.client.ui.EntryClassUi;
 import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.client.util.MessageUtils;
 import org.eclipse.kura.web.client.util.TextFieldValidator.FieldType;
@@ -303,8 +304,10 @@ public class TabTcpIpUi extends Composite implements Tab {
 				// Check for other WAN interfaces if current interface is
 				// changed to WAN
 				if (isWanEnabled()) {
+					EntryClassUi.showWaitModal();
 					gwtNetworkService.findNetInterfaceConfigurations(new AsyncCallback<ArrayList<GwtNetInterfaceConfig>>() {
 						public void onFailure(Throwable caught) {
+							EntryClassUi.hideWaitModal();
 							FailureHandler.handle(caught);
 						}
 
@@ -314,6 +317,7 @@ public class TabTcpIpUi extends Composite implements Tab {
 									logger.log(Level.SEVERE, "Error: Status Invalid");
 									}
 								}
+							EntryClassUi.hideWaitModal();
 							}
 
 						});
@@ -512,10 +516,12 @@ public class TabTcpIpUi extends Composite implements Tab {
 		renew.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
+				EntryClassUi.showWaitModal();
 				gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
 
 					@Override
 					public void onFailure(Throwable ex) {
+						EntryClassUi.hideWaitModal();
 						FailureHandler.handle(ex);
 					}
 
@@ -525,12 +531,14 @@ public class TabTcpIpUi extends Composite implements Tab {
 								new AsyncCallback<Void>() {
 									@Override
 									public void onFailure(Throwable ex) {
+										EntryClassUi.hideWaitModal();
 										FailureHandler.handle(ex);
 									}
 
 									@Override
 									public void onSuccess(Void result) {
 										refresh();
+										EntryClassUi.hideWaitModal();
 									}
 								});
 					}

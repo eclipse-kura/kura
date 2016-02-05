@@ -1,6 +1,10 @@
 package org.eclipse.kura.web.client.ui.Network;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import org.eclipse.kura.web.client.messages.Messages;
+import org.eclipse.kura.web.client.ui.EntryClassUi;
 import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.shared.model.GwtNetIfConfigMode;
 import org.eclipse.kura.web.shared.model.GwtNetInterfaceConfig;
@@ -27,6 +31,7 @@ import com.google.gwt.view.client.SelectionChangeEvent;
 public class NetworkButtonBarUi extends Composite {
 
 	private static NetworkButtonBarUiUiBinder uiBinder = GWT.create(NetworkButtonBarUiUiBinder.class);
+	private static final Logger logger = Logger.getLogger(NetworkButtonBarUi.class.getSimpleName());
 
 	interface NetworkButtonBarUiUiBinder extends UiBinder<Widget, NetworkButtonBarUi> {
 	}
@@ -109,19 +114,21 @@ public class NetworkButtonBarUi extends Composite {
 							}
 						}
 
+						EntryClassUi.showWaitModal();
 						gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
 
 							@Override
 							public void onFailure(Throwable ex) {
+								EntryClassUi.hideWaitModal();
 								FailureHandler.handle(ex, NetworkButtonBarUi.class.getSimpleName());
 							}
 
 							@Override
 							public void onSuccess(GwtXSRFToken token) {
-								gwtNetworkService.updateNetInterfaceConfigurations(token,
-										updatedNetIf, new AsyncCallback<Void>() {
+								gwtNetworkService.updateNetInterfaceConfigurations(token, updatedNetIf, new AsyncCallback<Void>() {
 											@Override
 											public void onFailure(Throwable ex) {
+												EntryClassUi.hideWaitModal();
 												FailureHandler.handle(ex, NetworkButtonBarUi.class.getSimpleName());
 											}
 
@@ -129,6 +136,7 @@ public class NetworkButtonBarUi extends Composite {
 											public void onSuccess(Void result) {
 												table.refresh();
 												apply.setEnabled(false);
+												EntryClassUi.hideWaitModal();
 											}
 
 										});
@@ -137,8 +145,7 @@ public class NetworkButtonBarUi extends Composite {
 						});
 					}
 				} else {
-					//Growl.growl(MSGS.information() + ": ",
-					//		MSGS.deviceConfigError());
+					logger.log(Level.FINER, MSGS.information() + ": " + MSGS.deviceConfigError());
 				}
 			}
 

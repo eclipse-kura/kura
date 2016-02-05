@@ -4,30 +4,19 @@
 	xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:gwt="urn:import:org.gwtbootstrap3.client.ui.gwt">
 
 	<ui:style>
-	.important {
-		font-weight: bold;
-	}
-	
-	.center-panel {
-		height: 572px;
-	}
+	.important { font-weight: bold; }
+	.center-panel { padding: 5px; }
+	.center-panel-nav { font-size: 12px; }
 	</ui:style>
 
-	<b:Container fluid="true">
+	<b:Container fluid="true" addStyleNames="{style.center-panel}">
 		<b:Row>
-			<g:HTMLPanel ui:field="firewallIntro">
-			</g:HTMLPanel>
-		</b:Row>
-		<b:Row>
-
 			<b:Navbar>
-				<b:NavbarNav ui:field="tabsPanel" />
+				<b:NavbarNav ui:field="tabsPanel" addStyleNames="{style.center-panel-nav}"/>
 			</b:Navbar>
 		</b:Row>
 
 		<b:Row>
-			<!-- <b:Container ui:field="content" /> -->
-			<!-- <g:ScrollPanel addStyleNames="{style.center-panel}" ui:field="content"/> -->
 			<b:PanelBody ui:field="content"/>
 		</b:Row>
 

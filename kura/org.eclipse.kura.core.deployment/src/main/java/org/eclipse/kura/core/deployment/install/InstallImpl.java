@@ -133,7 +133,7 @@ public class InstallImpl {
 
 		updateInstallPersistance(shFile.getName(), options);
 
-		//Esecuzione script
+		//Script Exec
 		SafeProcess proc = null;
 		try {
 			proc = ProcessUtil.exec("chmod 700 " + shFile.getCanonicalPath());

@@ -36,8 +36,7 @@ import com.google.gwt.user.client.ui.Widget;
 
 public class TabDhcpNatUi extends Composite implements Tab {
 
-	private static TabDhcpNatUiUiBinder uiBinder = GWT
-			.create(TabDhcpNatUiUiBinder.class);
+	private static TabDhcpNatUiUiBinder uiBinder = GWT.create(TabDhcpNatUiUiBinder.class);
 
 	interface TabDhcpNatUiUiBinder extends UiBinder<Widget, TabDhcpNatUi> {
 	}

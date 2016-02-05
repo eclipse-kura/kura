@@ -14,6 +14,8 @@ public class GwtBaseModel implements IsSerializable, Serializable {
 	
 	// Unused members needed for GWT serialization
 	private Date _date;
+	private Integer _integer;
+	private Boolean _boolean;
 	
 	protected HashMap<String, Object> data;
 

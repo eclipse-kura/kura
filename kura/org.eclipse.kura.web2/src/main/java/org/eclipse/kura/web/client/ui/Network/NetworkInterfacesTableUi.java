@@ -3,6 +3,7 @@ package org.eclipse.kura.web.client.ui.Network;
 import java.util.ArrayList;
 
 import org.eclipse.kura.web.client.messages.Messages;
+import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.shared.model.GwtNetInterfaceConfig;
 import org.eclipse.kura.web.shared.model.GwtSession;
 import org.eclipse.kura.web.shared.service.GwtNetworkService;
@@ -30,16 +31,15 @@ import com.google.gwt.view.client.SingleSelectionModel;
 
 public class NetworkInterfacesTableUi extends Composite {
 
-	private static NetworkInterfacesTableUiUiBinder uiBinder = GWT
-			.create(NetworkInterfacesTableUiUiBinder.class);
+	private static NetworkInterfacesTableUiUiBinder uiBinder = GWT.create(NetworkInterfacesTableUiUiBinder.class);
 
 	interface NetworkInterfacesTableUiUiBinder extends
 			UiBinder<Widget, NetworkInterfacesTableUi> {
 	}
 
 	private static final Messages MSGS = GWT.create(Messages.class);
-	private final GwtNetworkServiceAsync gwtNetworkService = GWT
-			.create(GwtNetworkService.class);
+	private final GwtNetworkServiceAsync gwtNetworkService = GWT.create(GwtNetworkService.class);
+	
 	GwtSession session;
 	NetworkTabsUi tabs;
 	GwtNetInterfaceConfig selection;
@@ -47,20 +47,20 @@ public class NetworkInterfacesTableUi extends Composite {
 	@UiField
 	Alert notification;
 	@UiField
+	
 	DataGrid<GwtNetInterfaceConfig> interfacesGrid = new DataGrid<GwtNetInterfaceConfig>();
+	
 	private ListDataProvider<GwtNetInterfaceConfig> interfacesProvider = new ListDataProvider<GwtNetInterfaceConfig>();
 	final SingleSelectionModel<GwtNetInterfaceConfig> selectionModel = new SingleSelectionModel<GwtNetInterfaceConfig>();
 
-	public NetworkInterfacesTableUi(GwtSession session,
-			NetworkTabsUi tabsPanel) {
+	public NetworkInterfacesTableUi(GwtSession session,	NetworkTabsUi tabsPanel) {
 		initWidget(uiBinder.createAndBindUi(this));
 		this.session = session;
 		this.tabs = tabsPanel;
 		initTable();
 		loadData();
 
-		selectionModel
-				.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
+		selectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
 
 					@Override
 					public void onSelectionChange(SelectionChangeEvent event) {
@@ -78,8 +78,7 @@ public class NetworkInterfacesTableUi extends Composite {
 										@Override
 										public void onClick(ClickEvent event) {
 											confirm.hide();
-											selection = selectionModel
-													.getSelectedObject();
+											selection = selectionModel.getSelectedObject();
 											if (selection != null) {
 												tabs.setNetInterface(selection);
 												tabs.setDirty(false);
@@ -170,13 +169,11 @@ public class NetworkInterfacesTableUi extends Composite {
 
 	private void loadData() {
 		interfacesProvider.getList().clear();
-		gwtNetworkService
-				.findNetInterfaceConfigurations(new AsyncCallback<ArrayList<GwtNetInterfaceConfig>>() {
-					;
+		gwtNetworkService.findNetInterfaceConfigurations(new AsyncCallback<ArrayList<GwtNetInterfaceConfig>>() {
+					
 					@Override
 					public void onFailure(Throwable caught) {
-						//Growl.growl(MSGS.error() + ": "
-						//		+ caught.getLocalizedMessage());
+						FailureHandler.handle(caught);
 					}
 
 					@Override
@@ -185,31 +182,22 @@ public class NetworkInterfacesTableUi extends Composite {
 						for (GwtNetInterfaceConfig pair : result) {
 							interfacesProvider.getList().add(pair);
 						}
+						
+						interfacesProvider.flush();
+						
+						if (interfacesProvider.getList().size() > 0) {
+							interfacesGrid.setVisible(true);
+							notification.setVisible(false);
+							selectionModel.setSelected(interfacesProvider.getList().get(0),	true);
+							interfacesGrid.getSelectionModel().setSelected(interfacesProvider.getList().get(0), true);
+
+						} else {
+							interfacesGrid.setVisible(false);
+							notification.setVisible(true);
+							notification.setText(MSGS.netTableNoInterfaces());
+						}
 					}
 				});
-
-		GwtNetInterfaceConfig ex = new GwtNetInterfaceConfig();
-		ex.setName("Wifi");
-		ex.setHwName("1-2-1-2");
-		interfacesProvider.getList().add(ex);
-		GwtNetInterfaceConfig ex2 = new GwtNetInterfaceConfig();
-		ex2.setName("eth0");
-		interfacesProvider.getList().add(ex2);
-		interfacesProvider.flush();
-
-		if (interfacesProvider.getList().size() > 0) {
-			interfacesGrid.setVisible(true);
-			notification.setVisible(false);
-			selectionModel.setSelected(interfacesProvider.getList().get(0),
-					true);
-			interfacesGrid.getSelectionModel().setSelected(
-					interfacesProvider.getList().get(0), true);
-
-		} else {
-			interfacesGrid.setVisible(false);
-			notification.setVisible(true);
-			notification.setText(MSGS.netTableNoInterfaces());
-		}
 	}
 
 }

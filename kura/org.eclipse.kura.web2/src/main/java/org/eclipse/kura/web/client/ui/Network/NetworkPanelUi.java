@@ -27,10 +27,11 @@ public class NetworkPanelUi extends Composite {
 	private NetworkInterfacesTableUi table;
 	private NetworkButtonBarUi buttons;
 	private NetworkTabsUi tabs;
+	
+	private boolean isInitialized;
 
 	@UiField
 	HTMLPanel networkIntro;
-
 	@UiField
 	Well interfacesTable;
 	@UiField
@@ -42,25 +43,30 @@ public class NetworkPanelUi extends Composite {
 	public NetworkPanelUi() {
 		initWidget(uiBinder.createAndBindUi(this));	
 		networkIntro.add(new Span("<p>"+MSGS.netIntro()+"</p>"));
-		
-				
+		isInitialized = false;
 	}
 
 	public void initNetworkPanel() {
-		tabs=new NetworkTabsUi(session);
-		tabsPanel.add(tabs);
-		
-		table=new NetworkInterfacesTableUi(session, tabs);
-		interfacesTable.add(table);
-		
-		buttons= new NetworkButtonBarUi(session, tabs,table);
-		buttonBar.add(buttons);
-		
-		tabs.setDirty(false);
+		if (!isInitialized) {
+			tabs = new NetworkTabsUi(session);
+			tabsPanel.add(tabs);
+			
+			table = new NetworkInterfacesTableUi(session, tabs);
+			interfacesTable.add(table);
+			
+			buttons= new NetworkButtonBarUi(session, tabs,table);
+			buttonBar.add(buttons);
+			
+			tabs.setDirty(false);
+			isInitialized = true;
+		}
 	}
 	
 	public boolean isDirty(){
-		return tabs.isDirty();		
+		if (tabs != null)
+			return tabs.isDirty();
+		else
+			return false;
 	}
 	
 	public void setSession(GwtSession currentSession) {
@@ -68,7 +74,8 @@ public class NetworkPanelUi extends Composite {
 	}
 
 	public void setDirty(boolean b) {
-		tabs.setDirty(b);
+		if (tabs != null)
+			tabs.setDirty(b);
 	}
 
 }

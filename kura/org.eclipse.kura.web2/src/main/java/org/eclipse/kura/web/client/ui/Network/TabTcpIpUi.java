@@ -62,7 +62,7 @@ public class TabTcpIpUi extends Composite implements Tab {
 	}
 
 	GwtSession session;
-	boolean dirty;
+	boolean m_dirty;
 	GwtNetInterfaceConfig selectedNetIfConfig;
 	NetworkTabsUi tabs;
 
@@ -95,38 +95,37 @@ public class TabTcpIpUi extends Composite implements Tab {
 		helpTitle.setText("Help Text");
 		initForm();
 		dnsRead.setVisible(false);
-
 	}
 
 	@Override
 	public void setDirty(boolean flag) {
-		dirty = flag;
+		m_dirty = flag;
 	}
 
 	@Override
 	public boolean isDirty() {
-		return dirty;
+		return m_dirty;
 	}
 
 	@Override
 	public void setNetInterface(GwtNetInterfaceConfig config) {
 
-		if (config != null && config.getSubnetMask() != null
-				&& config.getSubnetMask().equals("255.255.255.255")) {
+		
+		if (config != null && config.getSubnetMask() != null && config.getSubnetMask().equals("255.255.255.255")) {
 			config.setSubnetMask("");
 		}
-		// selectedNetIfConfig=config;
+		setDirty(true);
+		selectedNetIfConfig = config;
+		logger.info(selectedNetIfConfig.getName());
+		logger.info(selectedNetIfConfig.getConfigMode());
+		logger.info(selectedNetIfConfig.getIpAddress());
+		
 
 		// Remove LAN option for modems
-		if (selectedNetIfConfig != null
-				&& selectedNetIfConfig.getHwTypeEnum() == GwtNetIfType.MODEM) {
+		if (selectedNetIfConfig != null	&& selectedNetIfConfig.getHwTypeEnum() == GwtNetIfType.MODEM) {
 			if (status != null) {
 				for (int i = 0; i < status.getItemCount(); i++) {
-					if (status
-							.getItemText(i)
-							.equals(MessageUtils
-									.get(GwtNetIfStatus.netIPv4StatusEnabledLAN
-											.name()))) {
+					if (status.getItemText(i).equals(MessageUtils.get(GwtNetIfStatus.netIPv4StatusEnabledLAN.name()))) {
 						status.removeItem(i);
 
 					}
@@ -145,16 +144,10 @@ public class TabTcpIpUi extends Composite implements Tab {
 	public void getUpdatedNetInterface(GwtNetInterfaceConfig updatedNetIf) {
 		if (form != null) {
 			updatedNetIf.setStatus(status.getSelectedItemText());
-			if (MessageUtils.get(
-					GwtNetIfConfigMode.netIPv4ConfigModeDHCP.name()).equals(
-					configure.getSelectedItemText())) {
-				updatedNetIf
-						.setConfigMode(GwtNetIfConfigMode.netIPv4ConfigModeDHCP
-								.name());
+			if (MessageUtils.get(GwtNetIfConfigMode.netIPv4ConfigModeDHCP.name()).equals(configure.getSelectedItemText())) {
+				updatedNetIf.setConfigMode(GwtNetIfConfigMode.netIPv4ConfigModeDHCP.name());
 			} else {
-				updatedNetIf
-						.setConfigMode(GwtNetIfConfigMode.netIPv4ConfigModeManual
-								.name());
+				updatedNetIf.setConfigMode(GwtNetIfConfigMode.netIPv4ConfigModeManual.name());
 			}
 
 			if (ip.getValue() != null) {
@@ -268,8 +261,7 @@ public class TabTcpIpUi extends Composite implements Tab {
 		}
 
 		// Populate status list
-		if (selectedNetIfConfig != null
-				&& selectedNetIfConfig.getHwTypeEnum() == GwtNetIfType.MODEM) {
+		if (selectedNetIfConfig != null	&& selectedNetIfConfig.getHwTypeEnum() == GwtNetIfType.MODEM) {
 			if (status != null) {
 				status.clear();
 				status.addItem(MessageUtils.get("netIPv4StatusDisabled"));
@@ -311,26 +303,20 @@ public class TabTcpIpUi extends Composite implements Tab {
 				// Check for other WAN interfaces if current interface is
 				// changed to WAN
 				if (isWanEnabled()) {
-					gwtNetworkService
-							.findNetInterfaceConfigurations(new AsyncCallback<ArrayList<GwtNetInterfaceConfig>>() {
-								public void onFailure(Throwable caught) {
-								}
+					gwtNetworkService.findNetInterfaceConfigurations(new AsyncCallback<ArrayList<GwtNetInterfaceConfig>>() {
+						public void onFailure(Throwable caught) {
+							FailureHandler.handle(caught);
+						}
 
-								public void onSuccess(
-										ArrayList<GwtNetInterfaceConfig> result) {
-									for (GwtNetInterfaceConfig config : result) {
-										if (config
-												.getStatusEnum()
-												.equals(GwtNetIfStatus.netIPv4StatusEnabledWAN)
-												&& !config.getName().equals(
-														selectedNetIfConfig
-																.getName())) {
-											//Growl.growl("Error: Status Invalid");
-										}
+						public void onSuccess(ArrayList<GwtNetInterfaceConfig> result) {
+							for (GwtNetInterfaceConfig config : result) {
+								if (config.getStatusEnum().equals(GwtNetIfStatus.netIPv4StatusEnabledWAN) && !config.getName().equals(selectedNetIfConfig.getName())) {
+									logger.log(Level.SEVERE, "Error: Status Invalid");
 									}
 								}
+							}
 
-							});
+						});
 				}
 			}
 		});
@@ -356,8 +342,7 @@ public class TabTcpIpUi extends Composite implements Tab {
 			public void onChange(ChangeEvent event) {
 				setDirty(true);
 				tabs.adjustInterfaceTabs();
-				if (configure.getSelectedItemText().equalsIgnoreCase(
-						VMSGS.netIPv4ConfigModeDHCP())) {
+				if (configure.getSelectedItemText().equalsIgnoreCase(VMSGS.netIPv4ConfigModeDHCP())) {
 					// Using DHCP selected
 					ip.setEnabled(false);
 					subnet.setEnabled(false);
@@ -366,8 +351,7 @@ public class TabTcpIpUi extends Composite implements Tab {
 					dnsRead.setVisible(true);
 					dns.setVisible(false);
 
-				} else if (configure.getSelectedItemText().equalsIgnoreCase(
-						VMSGS.netIPv4ConfigModeManual())) {
+				} else if (configure.getSelectedItemText().equalsIgnoreCase(VMSGS.netIPv4ConfigModeManual())) {
 					// Manually selected
 					ip.setEnabled(true);
 					subnet.setEnabled(true);
@@ -379,16 +363,14 @@ public class TabTcpIpUi extends Composite implements Tab {
 			}
 		});
 		// Initial view of configure
-		if (configure.getSelectedItemText().equalsIgnoreCase(
-				VMSGS.netIPv4ConfigModeDHCP())) {
+		if (configure.getSelectedItemText().equalsIgnoreCase(VMSGS.netIPv4ConfigModeDHCP())) {
 			// Using DHCP selected
 			ip.setEnabled(false);
 			subnet.setEnabled(false);
 			gateway.setEnabled(false);
 			renew.setEnabled(true);
 
-		} else if (configure.getSelectedItemText().equalsIgnoreCase(
-				VMSGS.netIPv4ConfigModeManual())) {
+		} else if (configure.getSelectedItemText().equalsIgnoreCase(VMSGS.netIPv4ConfigModeManual())) {
 			// Manually selected
 			ip.setEnabled(true);
 			subnet.setEnabled(true);
@@ -577,26 +559,26 @@ public class TabTcpIpUi extends Composite implements Tab {
 
 	private void resetHelp() {
 		helpText.clear();
-		helpText.add(new Span(
-				"Mouse over enabled items on the left to see help text."));
+		helpText.add(new Span("Mouse over enabled items on the left to see help text."));
 	}
 
 	private void update() {
 		if (selectedNetIfConfig != null) {
 			// Status
 			int i = 0;
-			while (status.getItemText(i) != null) {
+			logger.info(selectedNetIfConfig.getStatus());
+			for (i = 0; i < status.getItemCount(); i++) {
 				if (status.getValue(i).equals(selectedNetIfConfig.getStatus())) {
 					status.setSelectedIndex(i);
+					break;
 				}
 			}
 
 			// Configure
-			i = 0;
-			while (configure.getValue(i) != null) {
-				if (configure.getValue(i).equals(
-						selectedNetIfConfig.getConfigMode())) {
+			for (i = 0; i < configure.getItemCount(); i++) {
+				if (configure.getValue(i).equals(selectedNetIfConfig.getConfigMode())) {
 					configure.setSelectedIndex(i);
+					break;
 				}
 			}
 
@@ -605,7 +587,6 @@ public class TabTcpIpUi extends Composite implements Tab {
 			ip.setText(selectedNetIfConfig.getIpAddress());
 			subnet.setText(selectedNetIfConfig.getSubnetMask());
 			gateway.setText(selectedNetIfConfig.getGateway());
-
 			if (selectedNetIfConfig.getReadOnlyDnsServers() != null) {
 				dnsRead.setText(selectedNetIfConfig.getReadOnlyDnsServers());
 				dnsRead.setVisible(true);// ???
@@ -626,15 +607,14 @@ public class TabTcpIpUi extends Composite implements Tab {
 			} else {
 				search.setText("");
 			}
-
+			
 			refreshForm();
 		}
 	}
 
 	private void refreshForm() {
 
-		if (selectedNetIfConfig != null
-				&& selectedNetIfConfig.getHwTypeEnum() == GwtNetIfType.MODEM) {
+		if (selectedNetIfConfig != null	&& selectedNetIfConfig.getHwTypeEnum() == GwtNetIfType.MODEM) {
 			status.setEnabled(true);
 			configure.setEnabled(false);
 			ip.setEnabled(false);
@@ -667,9 +647,7 @@ public class TabTcpIpUi extends Composite implements Tab {
 				configure.setEnabled(true);
 				String configureValue = configure.getSelectedValue();
 				if (configureValue
-						.equals(MessageUtils
-								.get(GwtNetIfConfigMode.netIPv4ConfigModeDHCP
-										.name()))) {
+						.equals(MessageUtils.get(GwtNetIfConfigMode.netIPv4ConfigModeDHCP.name()))) {
 					ip.setEnabled(false);
 					subnet.setEnabled(false);
 					gateway.setEnabled(false);
@@ -680,8 +658,7 @@ public class TabTcpIpUi extends Composite implements Tab {
 					subnet.setEnabled(true);
 					gateway.setEnabled(true);
 
-					if (GwtNetIfStatus.netIPv4StatusEnabledWAN
-							.equals(configureValue)) {
+					if (GwtNetIfStatus.netIPv4StatusEnabledWAN.equals(configureValue)) {
 						// enable gateway field
 						gateway.setEnabled(true);
 					} else {
@@ -699,8 +676,7 @@ public class TabTcpIpUi extends Composite implements Tab {
 		// Show read-only dns field when DHCP is selected and there are no
 		// custom DNS entries
 		String configureValue = configure.getSelectedItemText();
-		if (configureValue.equals(MessageUtils
-				.get(GwtNetIfConfigMode.netIPv4ConfigModeDHCP.name()))
+		if (configureValue.equals(MessageUtils.get(GwtNetIfConfigMode.netIPv4ConfigModeDHCP.name()))
 				&& (dns.getValue() == null || dns.getValue().isEmpty())) {
 			dnsRead.setVisible(true);
 		} else {

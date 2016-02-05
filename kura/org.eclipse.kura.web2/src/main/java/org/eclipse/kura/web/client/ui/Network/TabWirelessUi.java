@@ -2,8 +2,10 @@ package org.eclipse.kura.web.client.ui.Network;
 
 import java.util.ArrayList;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import org.eclipse.kura.web.client.messages.Messages;
+import org.eclipse.kura.web.client.ui.ServicesUi;
 import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.client.util.MessageUtils;
 import org.eclipse.kura.web.shared.model.GwtGroupedNVPair;
@@ -56,7 +58,6 @@ import com.google.gwt.event.dom.client.MouseOutEvent;
 import com.google.gwt.event.dom.client.MouseOutHandler;
 import com.google.gwt.event.dom.client.MouseOverEvent;
 import com.google.gwt.event.dom.client.MouseOverHandler;
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
@@ -72,6 +73,7 @@ import com.google.gwt.view.client.SingleSelectionModel;
 public class TabWirelessUi extends Composite implements Tab {
 
 	private static TabWirelessUiUiBinder uiBinder = GWT.create(TabWirelessUiUiBinder.class);
+	private static final Logger logger = Logger.getLogger(TabWirelessUi.class.getSimpleName());
 
 	interface TabWirelessUiUiBinder extends UiBinder<Widget, TabWirelessUi> {
 	}
@@ -332,6 +334,7 @@ public class TabWirelessUi extends Composite implements Tab {
 	}
 
 	private void refreshForm() {
+		logger.info("refreshForm()");
 		String tcpipStatus = tcpTab.getStatus();
 
 		// Tcp/IP disabled
@@ -689,8 +692,7 @@ public class TabWirelessUi extends Composite implements Tab {
 								new AsyncCallback<Boolean>() {
 									@Override
 									public void onFailure(Throwable caught) {
-										//Growl.growl(MSGS.warning() + ": ",
-										//		caught.getLocalizedMessage());
+										FailureHandler.handle(caught);
 										buttonPassword.setEnabled(true);
 									}
 
@@ -1001,11 +1003,11 @@ public class TabWirelessUi extends Composite implements Tab {
 
 	private void resetHelp() {
 		helpText.clear();
-		helpText.add(new Span(
-				"Mouse over enabled items on the left to see help text."));
+		helpText.add(new Span("Mouse over enabled items on the left to see help text."));
 	}
 
 	private void initGrid() {
+		
 		// CHECKBOXES
 		Column<GwtWifiChannelModel, Boolean> checkColumn = new Column<GwtWifiChannelModel, Boolean>(
 				new CheckboxCell()) {
@@ -1015,8 +1017,7 @@ public class TabWirelessUi extends Composite implements Tab {
 			}
 
 		};
-		checkColumn
-				.setFieldUpdater(new FieldUpdater<GwtWifiChannelModel, Boolean>() {
+		checkColumn.setFieldUpdater(new FieldUpdater<GwtWifiChannelModel, Boolean>() {
 					@Override
 					public void update(int index, GwtWifiChannelModel object,
 							Boolean value) {
@@ -1068,6 +1069,7 @@ public class TabWirelessUi extends Composite implements Tab {
 
 	private void loadChannelData() {
 		channelDataProvider.getList().clear();
+		channelDataProvider.setList(GwtWifiChannelModel.getChannels());
 		
 		gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
 
@@ -1082,8 +1084,7 @@ public class TabWirelessUi extends Composite implements Tab {
 					@Override
 					public void onFailure(Throwable caught) {
 						channelGrid.setVisible(false);
-						//Growl.growl(MSGS.error() + ": "
-						//		+ caught.getLocalizedMessage());
+						FailureHandler.handle(caught);
 					}
 
 					@Override
@@ -1092,16 +1093,12 @@ public class TabWirelessUi extends Composite implements Tab {
 							channelGrid.setVisible(true);
 							for (GwtGroupedNVPair pair : result) {
 								String name = pair.getName();
-								if (name != null
-										&& name.equals("devLastWifiChannel")) {
-									int topChannel = Integer.parseInt(pair
-											.getValue());
+								if (name != null && name.equals("devLastWifiChannel")) {
+									int topChannel = Integer.parseInt(pair.getValue());
 									// Remove channels 12 and 13
 									if (topChannel < MAX_WIFI_CHANNEL) {
-										channelDataProvider.getList().remove(
-												MAX_WIFI_CHANNEL - 1);
-										channelDataProvider.getList().remove(
-												MAX_WIFI_CHANNEL - 2);
+										channelDataProvider.getList().remove(MAX_WIFI_CHANNEL - 1);
+										channelDataProvider.getList().remove(MAX_WIFI_CHANNEL - 2);
 									}
 								}
 							}
@@ -1219,8 +1216,7 @@ public class TabWirelessUi extends Composite implements Tab {
 
 		ssidGrid.setSelectionModel(ssidSelectionModel);
 
-		selectionModel
-				.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
+		selectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
 					@Override
 					public void onSelectionChange(SelectionChangeEvent event) {
 						GwtWifiHotspotEntry wifiHotspotEntry = ssidSelectionModel
@@ -1241,8 +1237,7 @@ public class TabWirelessUi extends Composite implements Tab {
 							}
 
 							selectionModel.setSelected(
-									channelDataProvider.getList().get(
-											wifiHotspotEntry.getChannel() - 1),
+									channelDataProvider.getList().get(wifiHotspotEntry.getChannel() - 1),
 									true);
 							ssidModal.hide();
 						}
@@ -1263,17 +1258,14 @@ public class TabWirelessUi extends Composite implements Tab {
 
 				@Override
 				public void onSuccess(GwtXSRFToken token) {
-					gwtNetworkService.findWifiHotspots(token, selectedNetIfConfig.getName(),
-							new AsyncCallback<ArrayList<GwtWifiHotspotEntry>>() {
+					gwtNetworkService.findWifiHotspots(token, selectedNetIfConfig.getName(), new AsyncCallback<ArrayList<GwtWifiHotspotEntry>>() {
 								@Override
 								public void onFailure(Throwable caught) {
-									//Growl.growl(MSGS.error() + ": ",
-									//		caught.getLocalizedMessage());
+									FailureHandler.handle(caught);
 								}
 
 								@Override
-								public void onSuccess(
-										ArrayList<GwtWifiHotspotEntry> result) {
+								public void onSuccess(ArrayList<GwtWifiHotspotEntry> result) {
 									for (GwtWifiHotspotEntry pair : result) {
 										ssidDataProvider.getList().add(pair);
 									}

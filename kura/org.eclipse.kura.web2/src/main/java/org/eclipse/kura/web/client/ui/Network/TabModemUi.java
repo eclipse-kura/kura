@@ -40,8 +40,7 @@ import com.google.gwt.user.client.ui.Widget;
 
 public class TabModemUi extends Composite implements Tab {
 
-	private static TabModemUiUiBinder uiBinder = GWT
-			.create(TabModemUiUiBinder.class);
+	private static TabModemUiUiBinder uiBinder = GWT.create(TabModemUiUiBinder.class);
 
 	interface TabModemUiUiBinder extends UiBinder<Widget, TabModemUi> {
 	}

@@ -14,8 +14,7 @@ import com.google.gwt.user.client.ui.Widget;
 
 public class TabHardwareUi extends Composite implements Tab {
 
-	private static TabHardwareUiUiBinder uiBinder = GWT
-			.create(TabHardwareUiUiBinder.class);
+	private static TabHardwareUiUiBinder uiBinder = GWT.create(TabHardwareUiUiBinder.class);
 
 	interface TabHardwareUiUiBinder extends UiBinder<Widget, TabHardwareUi>  {
 	}

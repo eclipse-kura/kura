@@ -138,7 +138,6 @@ public class EntryClassUi extends Composite {
 	}
 
 	public void initSystemPanel(GwtSession GwtSession) {
-
 		if (!GwtSession.isNetAdminAvailable()) {
 			network.setVisible(false);
 			firewall.setVisible(false);
@@ -225,19 +224,11 @@ public class EntryClassUi extends Composite {
 										if (servicesUi != null) {
 											servicesUi.renderForm();
 										}
-										network.setIconSpin(true);
 										contentPanel.setVisible(true);
 										contentPanelHeader.setText(MSGS.network());
 										contentPanelBody.clear();
 										contentPanelBody.add(networkBinder);
 										networkBinder.setSession(currentSession);
-										Timer timer = new Timer() {
-											@Override
-											public void run() {
-												network.setIconSpin(false);
-											}
-										};
-										timer.schedule(2000);
 										networkBinder.initNetworkPanel();
 									}
 								});
@@ -393,7 +384,7 @@ public class EntryClassUi extends Composite {
 
 	// create the prompt for dirty configuration before switching to another tab
 	private void renderDirtyConfigModal(Button b) {
-		if(servicesUi!=null){
+		if(servicesUi != null){
 			servicesDirty=servicesUi.isDirty();
 		}
 		

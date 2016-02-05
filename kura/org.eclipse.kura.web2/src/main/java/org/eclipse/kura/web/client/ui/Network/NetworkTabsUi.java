@@ -1,6 +1,7 @@
 package org.eclipse.kura.web.client.ui.Network;
 
 import java.util.ArrayList;
+import java.util.logging.Logger;
 
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.util.MessageUtils;
@@ -26,6 +27,7 @@ import com.google.gwt.user.client.ui.Widget;
 public class NetworkTabsUi extends Composite {
 
 	private static NetworkTabsUiUiBinder uiBinder = GWT.create(NetworkTabsUiUiBinder.class);
+	private static final Logger logger = Logger.getLogger(NetworkTabsUi.class.getSimpleName());
 
 	interface NetworkTabsUiUiBinder extends UiBinder<Widget, NetworkTabsUi> {
 	}
@@ -64,7 +66,7 @@ public class NetworkTabsUi extends Composite {
 
 	public void setNetInterface(GwtNetInterfaceConfig selection) {
 		netIfConfig = selection;
-		initTabs();
+		//initTabs();
 
 		tcpIp.setNetInterface(selection);
 		hardware.setNetInterface(selection);
@@ -75,13 +77,16 @@ public class NetworkTabsUi extends Composite {
 		// set the tabs for this interface
 		removeInterfaceTabs();
 
-		if (!GwtNetIfStatus.netIPv4StatusDisabled.equals(selection
-				.getStatusEnum())) {
+		if (!GwtNetIfStatus.netIPv4StatusDisabled.equals(selection.getStatusEnum())) {
 			adjustInterfaceTabs();			
 		}
 
 		// refresh all visible tabs
 		if (visibleTabs.contains(tcpIpTab)) {
+			setSelected(tcpIpTab);
+			selectedTab = tcpIp;
+			content.clear();
+			content.add(tcpIp);
 			tcpIp.refresh();
 		}
 		if (visibleTabs.contains(hardwareTab)) {
@@ -138,8 +143,7 @@ public class NetworkTabsUi extends Composite {
 	public void adjustInterfaceTabs() {
 		String netIfStatus = tcpIp.getStatus();
 		boolean includeDhcpNat = !tcpIp.isDhcp()
-				&& netIfStatus.equals(MessageUtils
-						.get(GwtNetIfStatus.netIPv4StatusEnabledLAN.name()));
+				&& netIfStatus.equals(MessageUtils.get(GwtNetIfStatus.netIPv4StatusEnabledLAN.name()));
 
 		if (netIfConfig instanceof GwtWifiNetInterfaceConfig) {
 			// insert Wifi tab
@@ -150,8 +154,7 @@ public class NetworkTabsUi extends Composite {
 			}
 			insertTab(dhcpNatTab, 2);
 			// remove Dhcp/Nat Tab if not an access point
-			if (!GwtWifiWirelessMode.netWifiWirelessModeAccessPoint
-					.equals(wireless.getWirelessMode())) {
+			if (!GwtWifiWirelessMode.netWifiWirelessModeAccessPoint	.equals(wireless.getWirelessMode())) {
 				includeDhcpNat = false;
 			}
 		} else if (netIfConfig instanceof GwtModemInterfaceConfig) {
@@ -167,8 +170,7 @@ public class NetworkTabsUi extends Composite {
 			removeTab(wirelessTab);
 			removeTab(modemTab);
 
-			if (netIfConfig.getHwTypeEnum() == GwtNetIfType.LOOPBACK
-					|| netIfConfig.getName().startsWith("mon.wlan")) {
+			if (netIfConfig.getHwTypeEnum() == GwtNetIfType.LOOPBACK || netIfConfig.getName().startsWith("mon.wlan")) {
 				removeTab(dhcpNatTab);
 			} else {
 				insertTab(dhcpNatTab, 1);
@@ -271,7 +273,7 @@ public class NetworkTabsUi extends Composite {
 			}
 		});
 		tabsPanel.add(tcpIpTab);
-
+		
 		// DHCP and NAT
 		dhcpNatTab = new AnchorListItem(MSGS.netRouter());
 		visibleTabs.add(dhcpNatTab);
@@ -288,6 +290,7 @@ public class NetworkTabsUi extends Composite {
 		});
 		tabsPanel.add(dhcpNatTab);
 
+		
 		// Hardware
 		hardwareTab = new AnchorListItem(MSGS.netHwHardware());
 		visibleTabs.add(hardwareTab);
@@ -332,6 +335,11 @@ public class NetworkTabsUi extends Composite {
 			}
 		});
 		tabsPanel.add(modemTab);
+		
+		setSelected(tcpIpTab);
+		selectedTab = tcpIp;
+		content.clear();
+		content.add(tcpIp);
 
 	}
 
@@ -348,14 +356,22 @@ public class NetworkTabsUi extends Composite {
 
 	private void removeTab(AnchorListItem tab) {
 		if (visibleTabs.contains(tab)) {
-			tabsPanel.remove(tab);
 			visibleTabs.remove(tab);
+		}
+		
+		if (tabsPanel.getWidgetIndex(tab) > -1) {
+			tabsPanel.remove(tab);
 		}
 	}
 
 	private void insertTab(AnchorListItem tab, int index) {
+		logger.info("inserting - " + tab.getText() + " at - " + index);
 		if (!visibleTabs.contains(tab)) {
 			visibleTabs.add(index, tab);
+		}
+
+		if (tabsPanel.getWidgetIndex(tab) == -1) {
+			tabsPanel.insert(tab, index);
 		}
 	}
 

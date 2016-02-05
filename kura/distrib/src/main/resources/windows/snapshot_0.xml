@@ -155,6 +155,9 @@
     </esf:configuration>
     <esf:configuration pid="org.eclipse.kura.cloud.CloudService">
         <esf:properties>
+            <esf:property array="false" encrypted="false" name="republish.mqtt.birth.cert.on.gps.lock" type="Boolean">
+                <esf:value>true</esf:value>
+            </esf:property>
             <esf:property name="encode.gzip" array="false" encrypted="false" type="Boolean">
                 <esf:value>true</esf:value>
             </esf:property>

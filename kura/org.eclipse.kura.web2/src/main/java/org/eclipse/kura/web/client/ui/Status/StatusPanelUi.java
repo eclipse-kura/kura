@@ -19,11 +19,17 @@ import org.gwtbootstrap3.client.ui.Button;
 import org.gwtbootstrap3.client.ui.Well;
 import org.gwtbootstrap3.client.ui.gwt.DataGrid;
 
+import com.google.gwt.cell.client.Cell;
+import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.RowStyles;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -119,13 +125,13 @@ public class StatusPanelUi extends Composite {
 		col1.setCellStyleNames("status-table-row");
 		grid.addColumn(col1);
 
-		TextColumn<GwtGroupedNVPair> col2 = new TextColumn<GwtGroupedNVPair>() {
+		Column<GwtGroupedNVPair, SafeHtml> col2 = new Column<GwtGroupedNVPair, SafeHtml>(new SafeHtmlCell()) {
 
-			@Override
-			public String getValue(GwtGroupedNVPair object) {
-				return String.valueOf(object.getValue());
+			public SafeHtml getValue(GwtGroupedNVPair object) {
+				return SafeHtmlUtils.fromTrustedString(String.valueOf(object.getValue()));
 			}
 		};
+		
 		col2.setCellStyleNames("status-table-row");
 		grid.addColumn(col2);
 		dataProvider.addDataDisplay(grid);

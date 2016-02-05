@@ -1,9 +1,9 @@
 #include <windows.h>
-#include "KuraLauncher.h"
+#include "KURALauncher.h"
 
 
 HINSTANCE hInst;								// current instance
-TCHAR szTitle[] = "KuraLauncher";
+TCHAR szTitle[] = "KURALauncher";
 TCHAR szWindowClass[] = "KURALAUNCHER";
 
 ATOM				MyRegisterClass(HINSTANCE hInstance);

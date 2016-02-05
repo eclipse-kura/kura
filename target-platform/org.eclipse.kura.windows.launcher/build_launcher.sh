@@ -68,13 +68,13 @@ if [ "$1" == "build" ]; then
 		fi
 
 		if [ -x "$(command -v i686-w64-mingw32-gcc)" ]; then
-			$MAKECMD -f makefile.mingw KuraLauncher32
+			$MAKECMD -f makefile.mingw KURALauncher32
 		else
 			echo "  WARNING: No viable 32 bit 'mingw' compiler installed. 32 bit KURA Windows Launcher will not be rebuilt"
 		fi
 
 		if [ -x "$(command -v x86_64-w64-mingw32-gcc)" ]; then
-			$MAKECMD -f makefile.mingw KuraLauncher64
+			$MAKECMD -f makefile.mingw KURALauncher64
 		else
 			echo "  WARNING: No viable 64 bit 'mingw' compiler installed. 64 bit KURA Windows Launcher will not be rebuilt"
 		fi

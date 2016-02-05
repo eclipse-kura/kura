@@ -32,6 +32,7 @@ public class SupportedUsbModemsFactoryInfo {
 	public enum UsbModemFactoryInfo {
 		
 	                    // modem info, implementation factory, config reader/writer class
+		Telit_HE910_DG   (SupportedUsbModemInfo.Telit_HE910_DG, TelitHe910ModemFactory.class, TelitHe910ConfigGenerator.class),
 		Telit_HE910_D    (SupportedUsbModemInfo.Telit_HE910_D, TelitHe910ModemFactory.class, TelitHe910ConfigGenerator.class),
 		Telit_GE910      (SupportedUsbModemInfo.Telit_GE910, TelitHe910ModemFactory.class, TelitHe910ConfigGenerator.class),
 		Telit_DE910_DUAL (SupportedUsbModemInfo.Telit_DE910_DUAL, TelitDe910ModemFactory.class, TelitDe910ConfigGenerator.class),

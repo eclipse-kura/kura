@@ -461,7 +461,7 @@ public class TiSensorTag implements BluetoothLeNotificationListener {
 		int lsbHum = Integer.parseInt(tmp[2], 16);
 		int msbHum = Integer.parseInt(tmp[3], 16);
 
-		int hum = (unsignedToSigned(msbHum) << 8) + lsbHum;
+		int hum = (msbHum << 8) + lsbHum;
 		hum = hum - (hum % 4);
 		float humf = (-6f) + 125f * (hum / 65535f);
 		

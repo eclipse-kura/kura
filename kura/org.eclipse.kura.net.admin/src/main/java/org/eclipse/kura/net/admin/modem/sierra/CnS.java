@@ -1,14 +1,13 @@
-/**
- * Copyright (c) 2011, 2014 Eurotech and/or its affiliates
- *
- *  All rights reserved. This program and the accompanying materials
- *  are made available under the terms of the Eclipse Public License v1.0
- *  which accompanies this distribution, and is available at
- *  http://www.eclipse.org/legal/epl-v10.html
+/*******************************************************************************
+ * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Eurotech
- */
+ *     Eurotech
+ *******************************************************************************/
 package org.eclipse.kura.net.admin.modem.sierra;
 
 import java.util.ArrayList;
@@ -31,9 +30,6 @@ import java.util.List;
  * <p>
  * The maximum length of a CnS message is 255 bytes. The minimum length is 10.
  * <p>
- * 
- *
- * Copyright (c) 2009 Eurotech Inc. All rights reserved.
  *
  */
 public class CnS {

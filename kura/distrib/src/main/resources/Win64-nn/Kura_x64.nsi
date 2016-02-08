@@ -32,6 +32,9 @@ RequestExecutionLevel admin
 
 LicenseData "KuraFiles\license.rtf"
 
+ShowInstDetails show
+ShowUninstDetails show
+
 ;--------------------------------
 
 ; Pages
@@ -42,6 +45,7 @@ Page custom inst_as_init inst_as_leave
 Page instfiles
 
 UninstPage uninstConfirm
+UninstPage custom un.custom_init un.custom_leave
 UninstPage instfiles
 
 ;--------------------------------
@@ -182,6 +186,25 @@ FunctionEnd
 
 ;--------------------------------
 
+Var CompleteUninstCheckbox
+Var CompleteUninstCheckboxState
+
+Function un.custom_init
+	nsDialogs::Create 1018
+
+	${NSD_CreateCheckbox} 0 10 100% 10u "Perform a complete uninstall (including custom settings and snapshots)"
+	Pop $CompleteUninstCheckbox
+	${NSD_SetState} $CompleteUninstCheckbox ${BST_UNCHECKED}
+
+	nsDialogs::Show
+FunctionEnd
+
+Function un.custom_leave
+	${NSD_GetState} $CompleteUninstCheckbox $CompleteUninstCheckboxState
+FunctionEnd
+
+;--------------------------------
+
 ; The stuff to install
 
 var JREx64
@@ -238,6 +261,20 @@ Section "kura (required)"
   ${EndIf}
 
 
+	;=================================================================================================
+	; If reinstalling first make sure to stop the service and/or stop+delete the Kura task, so we can overwrite it
+
+	DetailPrint "Terminating Kura..."
+	ExecWait '$WINDIR\Sysnative\sc stop KURAService'		; Issue stop
+	Sleep 2000												; Small delay to wait for it to stop
+	ExecWait '$WINDIR\Sysnative\sc delete KURAService'		; Delete the service from the system
+
+	; In case of auto-run install, stop and delete the task
+	ExecWait 'schtasks /End /TN "Kura"'
+	ExecWait 'schtasks /Delete /F /TN "Kura"'
+
+
+	DetailPrint "Copying files..."
 	; Executable and other files that are not modified during runtime go to dest dir
 	SetOutPath $INSTDIR
 	File    KuraFiles\*
@@ -265,6 +302,8 @@ Section "kura (required)"
 	;==========================================================================================================================
 	; Now replace fixed paths in startup and config files
 	; Config files will need to change path to Unix-style / and remove "
+	DetailPrint "Updating settings files..."
+
 	StrCpy     $inst_dir_ $INSTDIR
 	ReadEnvStr $data_dir "ALLUSERSPROFILE"
 	ReadEnvStr $temp_dir_ "TEMP"
@@ -301,6 +340,8 @@ Section "kura (required)"
 		;=============================================================================================================
 		; Install as a service
 
+		DetailPrint "Installing Kura service..."
+
 		; Copy the Service helper
 		SetOutPath $WINDIR\Sysnative
 		File system\x64\KURAService.exe
@@ -322,6 +363,8 @@ Section "kura (required)"
 		;=============================================================================================================
 		; Install as an application automatically started after logon
 		; This is done using Windows Task Schduler - supplying an XML configuration file for the new task to create
+
+		DetailPrint "Installing Kura autorun task..."
 
 		; First adjust the default path in the xml file with the chosen install directory
 		ExecWait 'schtasks /Create /TN "Kura" /XML "$INSTDIR\SCH_Kura.xml"'
@@ -349,8 +392,10 @@ SectionEnd
 Section "Uninstall"
 
 	;=================================================================================================
-	; First we stop and thene delete the KURA service. Take care here we must run the 64 bit version
+	; First we stop and then delete the KURA service. Take care here we must run the 64 bit version
 	; of sc so must use the full path with sysnative not system32
+
+	DetailPrint "Terminating Kura..."
 
 	ExecWait '$WINDIR\Sysnative\sc stop KURAService'		; Issue stop
 	Sleep 2000												; Small delay to wait for it to stop
@@ -361,10 +406,12 @@ Section "Uninstall"
 	ExecWait 'schtasks /Delete /F /TN "Kura"'
   
 	; Remove registry keys
+	DetailPrint "Removing Kura settings..."
 	DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Kura"
 	DeleteRegKey HKLM SOFTWARE\Kura
 
 	; Remove files and uninstaller
+	DetailPrint "Removing Kura files..."
 	Delete $INSTDIR\kura\plugins\*.*
 	RMDir "$INSTDIR\kura\plugins"
 	RMDir "$INSTDIR\kura"
@@ -373,10 +420,20 @@ Section "Uninstall"
 	Delete $INSTDIR\*.*
 	Delete $INSTDIR\uninstall.exe
 	RMDir "$INSTDIR"
-	;Delete $%ALLUSERSPROFILE%\Kura\*.*
 
 	; Remove shortcuts, if any
 	Delete "$SMPROGRAMS\Kura\*.*"
 	RMDir "$SMPROGRAMS\Kura"
+
+	${If} $CompleteUninstCheckboxState == ${BST_CHECKED}
+
+		; Full uninstall including all settings and temporary data
+		DetailPrint "Removing Kura user settings..."
+		RMDir /r "$TEMP\kura"
+		ReadEnvStr $0 "ALLUSERSPROFILE"
+		RMDir /r "$0\kura"
+
+	${EndIf}
+
 
 SectionEnd

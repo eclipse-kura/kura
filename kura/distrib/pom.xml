@@ -1704,7 +1704,7 @@
 		</profile>
 
 		<profile>
-			<id>windows</id>
+			<id>Win64-nn</id>
 			<activation>
 				<activeByDefault>true</activeByDefault>
 			</activation>
@@ -1754,7 +1754,7 @@
 						<version>1.7</version>
 						<executions>
 							<execution>
-								<id>windows-jars</id>
+								<id>Win64-nn-jars</id>
 								<phase>install</phase>
 								<goals>
 									<goal>run</goal>
@@ -1765,10 +1765,10 @@
 										<property name="project.version" value="${project.version}" />
 										<property name="project.build.profile" value="${project.build.profile}" />
 										<property name="project.build.directory" value="${project.build.directory}" />
-										<property name="build.name" value="windows" />
-										<property name="target.device" value="windows" />
-										<property name="kura.os.version" value="windows" />
-										<property name="kura.arch" value="x86" />
+										<property name="build.name" value="Win64-nn" />
+										<property name="target.device" value="Win64" />
+										<property name="kura.os.version" value="Windows 64" />
+										<property name="kura.arch" value="x64" />
 										<property name="kura.mem.size" value="256m" />
 										<property name="kura.install.dir" value="/opt/eclipse" />
 										<ant antfile="${basedir}/src/main/ant/build_equinox_distrib.xml"

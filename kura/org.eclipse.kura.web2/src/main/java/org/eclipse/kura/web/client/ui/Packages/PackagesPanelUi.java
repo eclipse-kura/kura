@@ -36,6 +36,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.FormPanel.SubmitCompleteEvent;
 import com.google.gwt.user.client.ui.FormPanel.SubmitCompleteHandler;
+import com.google.gwt.user.client.ui.Hidden;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SingleSelectionModel;
@@ -48,8 +49,7 @@ public class PackagesPanelUi extends Composite {
 	private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
 	private final GwtPackageServiceAsync gwtPackageService = GWT.create(GwtPackageService.class);
 
-	private final static String SERVLET_URL = "/" + GWT.getModuleName()
-			+ "/file/deploy";
+	private final static String SERVLET_URL = "/" + GWT.getModuleName()	+ "/file/deploy";
 	private static final Messages MSGS = GWT.create(Messages.class);
 
 	interface PackagesPanelUiUiBinder extends UiBinder<Widget, PackagesPanelUi> {
@@ -70,6 +70,11 @@ public class PackagesPanelUi extends Composite {
 	Button packagesRefresh, packagesInstall, packagesUninstall;
 	@UiField
 	DataGrid<GwtDeploymentPackage> packagesGrid = new DataGrid<GwtDeploymentPackage>();
+	@UiField
+	Hidden xsrfTokenFieldFile;
+	
+	
+	private Hidden    xsrfTokenFieldUrl;
 	private ListDataProvider<GwtDeploymentPackage> packagesDataProvider = new ListDataProvider<GwtDeploymentPackage>();
 	final SingleSelectionModel<GwtDeploymentPackage> selectionModel = new SingleSelectionModel<GwtDeploymentPackage>();
 
@@ -158,8 +163,28 @@ public class PackagesPanelUi extends Composite {
 	private void upload() {
 		uploadModal.show();
 		
-		//******File TAB ****//
+		//******FILE TAB ****//
 		fileLabel.setText(MSGS.fileLabel());
+		
+		xsrfTokenFieldFile = new Hidden();
+		xsrfTokenFieldFile.setID("xsrfToken");
+		xsrfTokenFieldFile.setName("xsrfToken");
+		xsrfTokenFieldFile.setValue("");
+		packagesFormFile.add(xsrfTokenFieldFile);
+		
+		gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
+			@Override
+			public void onFailure(Throwable ex) {
+				FailureHandler.handle(ex);
+			}
+
+			@Override
+			public void onSuccess(GwtXSRFToken token) {
+				xsrfTokenFieldFile.setValue(token.getToken());
+				//xsrfTokenFieldUrl.setValue(token.getToken());
+			}
+		});
+		
 		packagesFormFile.setAction(SERVLET_URL + "/upload");
 		packagesFormFile.setEncoding(FormPanel.ENCODING_MULTIPART);
 		packagesFormFile.setMethod(FormPanel.METHOD_POST);

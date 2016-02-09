@@ -69,6 +69,7 @@
 											<b:FormLabel for="formUrl">Execute</b:FormLabel>
 											<b:TextBox b:id="formUrl" ui:field="formUrl" />
 										</b:FormGroup>
+										<g:Hidden ui:field="xsrfTokenFieldFile"></g:Hidden>
 										<b:ButtonGroup pull="RIGHT">
 											<b:Button ui:field="urlCancel">Cancel</b:Button>
 											<b:Button ui:field="urlSubmit">Submit</b:Button>

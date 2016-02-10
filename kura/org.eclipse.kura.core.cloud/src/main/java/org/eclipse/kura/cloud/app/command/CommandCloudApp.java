@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011, 2015 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
  *
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
@@ -167,26 +167,22 @@ PasswordCommandService {
 
 	@Override
 	public KuraCommandResponsePayload execute(KuraRequestPayload reqPayload) {
-		KuraCommandRequestPayload commandReq = new KuraCommandRequestPayload(
-				reqPayload);
+		KuraCommandRequestPayload commandReq = new KuraCommandRequestPayload(reqPayload);
 
 		// String receivedPassword= (String)
 		// reqPayload.getMetric(EDC_PASSWORD_METRIC_NAME);
 		String receivedPassword = (String) commandReq.getMetric(EDC_PASSWORD_METRIC_NAME);
 		char[] commandPassword = (char[])properties.get(COMMAND_PASSWORD_ID);
 
-		KuraCommandResponsePayload commandResp = new KuraCommandResponsePayload(
-				KuraResponsePayload.RESPONSE_CODE_OK);
+		KuraCommandResponsePayload commandResp = new KuraCommandResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
 
-		boolean isExecutionAllowed = verifyPasswords(commandPassword,
-				receivedPassword);
+		boolean isExecutionAllowed = verifyPasswords(commandPassword, receivedPassword);
 		if (isExecutionAllowed) {
 
 			String command = commandReq.getCommand();
 			if (command == null) {
 				s_logger.error("null command");
-				commandResp
-				.setResponseCode(KuraResponsePayload.RESPONSE_CODE_BAD_REQUEST);
+				commandResp.setResponseCode(KuraResponsePayload.RESPONSE_CODE_BAD_REQUEST);
 			}
 
 			String[] cmdarray = prepareCommandArray(commandReq, command);
@@ -200,7 +196,6 @@ PasswordCommandService {
 					UnZip.unZipBytes(zipBytes, dir);
 				} catch (IOException e) {
 					s_logger.error("Error unzipping command zip bytes", e);
-
 					commandResp.setException(e);
 				}
 			}
@@ -210,8 +205,7 @@ PasswordCommandService {
 				proc = createExecutionProcess(dir, cmdarray, envp);
 			} catch (Throwable t) {
 				s_logger.error("Error executing command {}", t);
-				commandResp
-				.setResponseCode(KuraResponsePayload.RESPONSE_CODE_ERROR);
+				commandResp.setResponseCode(KuraResponsePayload.RESPONSE_CODE_ERROR);
 				commandResp.setException(t);
 
 			}
@@ -238,8 +232,7 @@ PasswordCommandService {
 		} else {
 
 			s_logger.error("Password required but not correct and/or missing");
-			commandResp
-			.setResponseCode(KuraResponsePayload.RESPONSE_CODE_ERROR);
+			commandResp.setResponseCode(KuraResponsePayload.RESPONSE_CODE_ERROR);
 			commandResp.setExceptionMessage("Password missing or not correct");
 		}
 

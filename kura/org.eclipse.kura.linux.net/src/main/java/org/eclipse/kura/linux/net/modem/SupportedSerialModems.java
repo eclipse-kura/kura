@@ -80,11 +80,11 @@ public class SupportedSerialModems {
     		});
 	}
 	
-	public static SupportedSerialModemInfo getModem(String imageName, String imageVersion) {
+	public static SupportedSerialModemInfo getModem(String imageName, String imageVersion, String targetName) {
 		SupportedSerialModemInfo supportedSerialModemInfo = null;
 		
 		for (SupportedSerialModemInfo modem : SupportedSerialModemInfo.values()) {
-			if (modem.getOsImageName().equals(imageName) && modem.getOsImageVersion().equals(imageVersion)) {
+			if (modem.getOsImageName().equals(imageName) && modem.getOsImageVersion().equals(imageVersion) && modem.getTargetName().equals(targetName)) {
 				if (modemReachable) {
 					s_logger.debug("The {} modem is attached", modem.getModemName());
 					supportedSerialModemInfo = modem;
@@ -100,49 +100,54 @@ public class SupportedSerialModems {
 	}
 	
 	private static void worker() {
-		breakout:
-			for (SupportedSerialModemInfo modem : SupportedSerialModemInfo.values()) {
-				if (modem == SupportedSerialModemInfo.MiniGateway_Telit_HE910_NAD) {
-					if (OS_VERSION != null && OS_VERSION.equals(KuraConstants.Mini_Gateway.getImageName() + "_" + KuraConstants.Mini_Gateway.getImageVersion()) &&
-							TARGET_NAME != null && TARGET_NAME.equals(KuraConstants.Mini_Gateway.getTargetName())) {
-						s_logger.info("Installing modem driver for {} ...", modem.getModemName());
-						try {
-							if (!SupportedUsbModems.isAttached(
-									SupportedUsbModemInfo.Telit_HE910_D.getVendorId(),
-									SupportedUsbModemInfo.Telit_HE910_D.getProductId())) {
-								s_logger.warn("USB modem {}:{} is not detected ...",
-										SupportedUsbModemInfo.Telit_HE910_D.getVendorId(),
-										SupportedUsbModemInfo.Telit_HE910_D.getProductId());
-								if (modem.getDriver().install() == 0) {
-									for (String modemModel : modem.getModemModels()) {
-										if (modemModel.equals(modem.getDriver().getModemModel())) {
-											s_logger.info("Driver for the {} modem has been installed. Modem is reachable as serial device." , modemModel);
-											EventAdmin eventAdmin = s_serviceTracker.getService();
-											
-											if (eventAdmin != null) {
-												s_logger.info("posting the SerialModemAddedEvent ...");
-												eventAdmin.postEvent(new SerialModemAddedEvent(modem));
-											}
-											s_stopThread.set(true);
-								        	workerNotity();
-											modemReachable = true;
-											break breakout;
-										}
-									}
+		SupportedSerialModemInfo modem = null;
+		if ((OS_VERSION != null && OS_VERSION.equals(KuraConstants.Mini_Gateway.getImageName() + "_" + KuraConstants.Mini_Gateway.getImageVersion())) &&
+				(TARGET_NAME != null && TARGET_NAME.equals(KuraConstants.Mini_Gateway.getTargetName()))) {
+			
+			modem = SupportedSerialModemInfo.MiniGateway_Telit_HE910_NAD;
+			
+		} else if ((OS_VERSION != null && OS_VERSION.equals(KuraConstants.Reliagate_10_11.getImageName() + "_" + KuraConstants.Reliagate_10_11.getImageVersion())) &&
+				(TARGET_NAME != null && TARGET_NAME.equals(KuraConstants.Reliagate_10_11.getTargetName()))) {
+			
+			modem = SupportedSerialModemInfo.Reliagate_10_11_Telit_HE910_NAD;
+			
+		}
+		
+		if (modem != null) {
+			
+			s_logger.info("Installing modem driver for {} ...", modem.getModemName());
+			try {
+				if (!SupportedUsbModems.isAttached(SupportedUsbModemInfo.Telit_HE910_D.getVendorId(), SupportedUsbModemInfo.Telit_HE910_D.getProductId())) {
+					s_logger.warn("USB modem {}:{} is not detected ...", SupportedUsbModemInfo.Telit_HE910_D.getVendorId(), SupportedUsbModemInfo.Telit_HE910_D.getProductId());
+					if (modem.getDriver().install() == 0) {
+						for (String modemModel : modem.getModemModels()) {
+							if (modemModel.equals(modem.getDriver().getModemModel())) {
+								s_logger.info("Driver for the {} modem has been installed. Modem is reachable as serial device." , modemModel);
+								EventAdmin eventAdmin = s_serviceTracker.getService();
+								
+								if (eventAdmin != null) {
+									s_logger.info("posting the SerialModemAddedEvent ...");
+									eventAdmin.postEvent(new SerialModemAddedEvent(modem));
 								}
-								s_logger.warn("Failed to install modem driver for {}", modem.getModemName());
-							} else {
-								s_logger.info("{} modem is reachable as a USB device ...", modem.getModemName());
 								s_stopThread.set(true);
 					        	workerNotity();
 								modemReachable = true;
 							}
-						} catch (Exception e) {
-							s_logger.error("Worker exception", e);
 						}
 					}
+					s_logger.warn("Failed to install modem driver for {}", modem.getModemName());
+				} else {
+					s_logger.info("{} modem is reachable as a USB device ...", modem.getModemName());
+					s_stopThread.set(true);
+		        	workerNotity();
+					modemReachable = true;
 				}
+			} catch (Exception e) {
+				s_logger.error("Worker exception", e);
 			}
+			
+		}
+			
 	}
 	
 	private static void workerNotity() {

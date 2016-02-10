@@ -20,7 +20,7 @@ import org.eclipse.kura.net.NetConfig;
  * Configuration for a wifi interface based on IPv4 addresses.
  */
 public class WifiConfig implements NetConfig {
-
+	
 	/** Mode for the configuration **/
 	private WifiMode m_mode;
 	
@@ -288,7 +288,7 @@ public class WifiConfig implements NetConfig {
         if(!compare(this.m_groupCiphers, other.m_groupCiphers)) {
             return false;
         }
-        if(!compare(this.m_passkey, other.m_passkey)) {
+        if(!compare(this.m_passkey.toString(), other.m_passkey.toString())) {
             return false;
         }
         if(!compare(this.m_hwMode, other.m_hwMode)) {
@@ -309,7 +309,6 @@ public class WifiConfig implements NetConfig {
 		if (this.m_ignoreSSID != other.ignoreSSID()) {
 			return false;
 		}
-		
 		return true;
 	}
 	

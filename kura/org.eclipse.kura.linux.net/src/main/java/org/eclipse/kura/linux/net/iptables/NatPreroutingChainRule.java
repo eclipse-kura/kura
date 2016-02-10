@@ -44,8 +44,13 @@ public class NatPreroutingChainRule {
 				} else if ("--dport".equals(aRuleTokens[i])) {
 					m_externalPort = Integer.parseInt(aRuleTokens[++i]);
 				} else if ("--sport".equals(aRuleTokens[i])) {
-					m_srcPortFirst = Integer.parseInt(aRuleTokens[i+1].split(":")[0]);
-					m_srcPortLast = Integer.parseInt(aRuleTokens[++i].split(":")[1]);
+					if (aRuleTokens[i+1].indexOf(':') > 0) {
+						m_srcPortFirst = Integer.parseInt(aRuleTokens[i+1].split(":")[0]);
+						m_srcPortLast = Integer.parseInt(aRuleTokens[++i].split(":")[1]);
+					} else {
+						m_srcPortFirst = Integer.parseInt(aRuleTokens[++i]);
+						m_srcPortLast = m_srcPortFirst;
+					}
 				} else if ("--to-destination".equals(aRuleTokens[i])) {
 					m_dstIpAddress = aRuleTokens[i+1].split(":")[0];
 					m_internalPort = Integer.parseInt(aRuleTokens[++i].split(":")[1]);

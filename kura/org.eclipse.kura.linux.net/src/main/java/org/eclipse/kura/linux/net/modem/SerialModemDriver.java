@@ -76,20 +76,28 @@ public class SerialModemDriver extends ModemDriver {
 		if (!modemReachable) {
 			s_logger.info("{} modem is not reachable, installing driver ...", m_modemName);
 			int retries = 3;
-			if (OS_VERSION != null && OS_VERSION.equals(KuraConstants.Mini_Gateway.getImageName() + "_" + KuraConstants.Mini_Gateway.getImageVersion()) &&
-					TARGET_NAME != null && TARGET_NAME.equals(KuraConstants.Mini_Gateway.getTargetName())) {			
+			if ((OS_VERSION != null && TARGET_NAME != null) && 
+				(OS_VERSION.equals(KuraConstants.Mini_Gateway.getImageName() + "_" + KuraConstants.Mini_Gateway.getImageVersion()) &&
+				TARGET_NAME.equals(KuraConstants.Mini_Gateway.getTargetName())) ||
+				(OS_VERSION.equals(KuraConstants.Reliagate_10_11.getImageName() + "_" + KuraConstants.Reliagate_10_11.getImageVersion()) &&
+				TARGET_NAME.equals(KuraConstants.Reliagate_10_11.getTargetName()))) {			
 				try {
 					turnModemOn();
 					retries = 15;
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
-			}
+			} 
 
 			modemReachable = isAtReachable(retries, 1000);
 		}
 
 		if (modemReachable) {
+			if ((OS_VERSION != null && TARGET_NAME != null) && 
+				(OS_VERSION.equals(KuraConstants.Reliagate_10_11.getImageName() + "_" + KuraConstants.Reliagate_10_11.getImageVersion()) &&
+				TARGET_NAME.equals(KuraConstants.Reliagate_10_11.getTargetName()))) {
+				enableSIM();
+			}
 			status = 0;
 			s_logger.info("{} modem is reachable !!!", m_modemName);
 		} else {
@@ -111,8 +119,11 @@ public class SerialModemDriver extends ModemDriver {
 		}
 		if (modemReachable) {
 			int retries = 3;
-			if (OS_VERSION != null && OS_VERSION.equals(KuraConstants.Mini_Gateway.getImageName() + "_" + KuraConstants.Mini_Gateway.getImageVersion()) &&
-					TARGET_NAME != null && TARGET_NAME.equals(KuraConstants.Mini_Gateway.getTargetName())) {
+			if ((OS_VERSION != null && TARGET_NAME != null) && 
+				(OS_VERSION.equals(KuraConstants.Mini_Gateway.getImageName() + "_" + KuraConstants.Mini_Gateway.getImageVersion()) &&
+				TARGET_NAME.equals(KuraConstants.Mini_Gateway.getTargetName())) ||
+				(OS_VERSION.equals(KuraConstants.Reliagate_10_11.getImageName() + "_" + KuraConstants.Reliagate_10_11.getImageVersion()) &&
+				TARGET_NAME.equals(KuraConstants.Reliagate_10_11.getTargetName()))) {
 				turnModemOff();
 				sleep (2000);
 				retries = 15;
@@ -260,4 +271,30 @@ public class SerialModemDriver extends ModemDriver {
 			}
 		}
 	}
+	
+	private void enableSIM() {
+		
+		CommConnection connection = null;
+		try {
+			connection = openSerialPort(10000);
+
+			connection.sendCommand("AT#SIMDET=0\r\n".getBytes(), 500);
+			Thread.sleep(5000);
+			connection.sendCommand("AT#SIMDET=1\r\n".getBytes(), 500);
+			Thread.sleep(1000);
+			connection.sendCommand("AT#QSS?\r\n".getBytes(), 500);
+			Thread.sleep(1000);
+		} catch (Exception e) {
+			s_logger.error("Error in enabling SIM.");
+		} finally {	
+			if (connection != null) {
+				try {
+					closeSerialPort(connection);
+				} catch (KuraException e) {
+					s_logger.error("Error in closing serial port.");
+				}
+			}
+		}
+	}
+	
 }

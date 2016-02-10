@@ -177,18 +177,18 @@ public class DeploymentAgent implements DeploymentAgentService {
 		m_uninstallerExecutor = Executors.newSingleThreadExecutor();
 
 		s_installerTask = m_installerExecutor.submit(new Runnable() {
-    		@Override
-    		public void run() {
-	    		Thread.currentThread().setName("DeploymentAgent");
-	    		installer();
-    	}});
+			@Override
+			public void run() {
+				Thread.currentThread().setName("DeploymentAgent");
+				installer();
+			}});
 
 		s_uninstallerTask = m_uninstallerExecutor.submit(new Runnable() {
-    		@Override
-    		public void run() {
-	    		Thread.currentThread().setName("DeploymentAgent:Uninstall");
-	    		uninstaller();
-    	}});
+			@Override
+			public void run() {
+				Thread.currentThread().setName("DeploymentAgent:Uninstall");
+				uninstaller();
+			}});
 
 		installPackagesFromConfFile();
 	}
@@ -199,42 +199,42 @@ public class DeploymentAgent implements DeploymentAgentService {
 		m_deployedPackages = null;
 
 		if ((s_installerTask != null) && (!s_installerTask.isDone())) {
-    		s_logger.debug("Cancelling DeploymentAgent task ...");
-    		s_installerTask.cancel(true);
-    		s_logger.info("DeploymentAgent task cancelled? = {}", s_installerTask.isDone());
-    		s_installerTask = null;
-    	}
+			s_logger.debug("Cancelling DeploymentAgent task ...");
+			s_installerTask.cancel(true);
+			s_logger.info("DeploymentAgent task cancelled? = {}", s_installerTask.isDone());
+			s_installerTask = null;
+		}
 
-    	if (m_installerExecutor != null) {
-    		s_logger.debug("Terminating DeploymentAgent Thread ...");
-    		m_installerExecutor.shutdownNow();
-    		try {
-    			m_installerExecutor.awaitTermination(THREAD_TERMINATION_TOUT, TimeUnit.SECONDS);
+		if (m_installerExecutor != null) {
+			s_logger.debug("Terminating DeploymentAgent Thread ...");
+			m_installerExecutor.shutdownNow();
+			try {
+				m_installerExecutor.awaitTermination(THREAD_TERMINATION_TOUT, TimeUnit.SECONDS);
 			} catch (InterruptedException e) {
 				s_logger.warn("Interrupted", e);
 			}
-    		s_logger.info("DeploymentAgent Thread terminated? - {}", m_installerExecutor.isTerminated());
-    		m_installerExecutor = null;
-    	}
+			s_logger.info("DeploymentAgent Thread terminated? - {}", m_installerExecutor.isTerminated());
+			m_installerExecutor = null;
+		}
 
-    	if ((s_uninstallerTask != null) && (!s_uninstallerTask.isDone())) {
-    		s_logger.debug("Cancelling DeploymentAgent:Uninstall task ...");
-    		s_uninstallerTask.cancel(true);
-    		s_logger.info("DeploymentAgent:Uninstall task cancelled? = {}", s_uninstallerTask.isDone());
-    		s_uninstallerTask = null;
-    	}
+		if ((s_uninstallerTask != null) && (!s_uninstallerTask.isDone())) {
+			s_logger.debug("Cancelling DeploymentAgent:Uninstall task ...");
+			s_uninstallerTask.cancel(true);
+			s_logger.info("DeploymentAgent:Uninstall task cancelled? = {}", s_uninstallerTask.isDone());
+			s_uninstallerTask = null;
+		}
 
-    	if (m_uninstallerExecutor != null) {
-    		s_logger.debug("Terminating DeploymentAgent:Uninstall Thread ...");
-    		m_uninstallerExecutor.shutdownNow();
-    		try {
-    			m_uninstallerExecutor.awaitTermination(THREAD_TERMINATION_TOUT, TimeUnit.SECONDS);
+		if (m_uninstallerExecutor != null) {
+			s_logger.debug("Terminating DeploymentAgent:Uninstall Thread ...");
+			m_uninstallerExecutor.shutdownNow();
+			try {
+				m_uninstallerExecutor.awaitTermination(THREAD_TERMINATION_TOUT, TimeUnit.SECONDS);
 			} catch (InterruptedException e) {
 				s_logger.warn("Interrupted", e);
 			}
-    		s_logger.info("DeploymentAgent:Uninstall Thread terminated? - {}", m_uninstallerExecutor.isTerminated());
-    		m_uninstallerExecutor = null;
-    	}
+			s_logger.info("DeploymentAgent:Uninstall Thread terminated? - {}", m_uninstallerExecutor.isTerminated());
+			m_uninstallerExecutor = null;
+		}
 
 		m_uninstPackageNames = null;
 		m_instPackageUrls = null;
@@ -300,27 +300,27 @@ public class DeploymentAgent implements DeploymentAgentService {
 		do {
 			try {
 				try {
-					synchronized(m_instPackageUrls) {
-						m_instPackageUrls.wait();
+					while (m_instPackageUrls.isEmpty()) {
+						synchronized (m_instPackageUrls){
+							m_instPackageUrls.wait();
+						}
 					}
 
-					while (!m_instPackageUrls.isEmpty()) {
-						String url = m_instPackageUrls.peek();
-						if (url != null) {
-							s_logger.info("About to install package at URL {}", url);
-							DeploymentPackage dp = null;
-							Exception ex = null;
-							try {
-								dp = installDeploymentPackageInternal(url);
-							} catch (Exception e) {
-								ex = e;
-								s_logger.error("Exception installing package at URL {}", url, e);
-							} finally {
-								boolean successful = dp != null ? true : false;
-								s_logger.info("Posting INSTALLED event for package at URL {}: {}", url, successful ? "successful" : "unsuccessful");
-								m_instPackageUrls.poll();
-								postInstalledEvent(dp, url, successful, ex);
-							}
+					String url = m_instPackageUrls.peek();
+					if (url != null) {
+						s_logger.info("About to install package at URL {}", url);
+						DeploymentPackage dp = null;
+						Exception ex = null;
+						try {
+							dp = installDeploymentPackageInternal(url);
+						} catch (Exception e) {
+							ex = e;
+							s_logger.error("Exception installing package at URL {}", url, e);
+						} finally {
+							boolean successful = dp != null ? true : false;
+							s_logger.info("Posting INSTALLED event for package at URL {}: {}", url, successful ? "successful" : "unsuccessful");
+							m_instPackageUrls.poll();
+							postInstalledEvent(dp, url, successful, ex);
 						}
 					}
 				} catch (InterruptedException e) {
@@ -338,38 +338,38 @@ public class DeploymentAgent implements DeploymentAgentService {
 		do {
 			try {
 				try {
-					synchronized(m_uninstPackageNames) {
-						m_uninstPackageNames.wait();
+					while (m_uninstPackageNames.isEmpty()) {
+						synchronized(m_uninstPackageNames) {
+							m_uninstPackageNames.wait();
+						}
 					}
 
-					while (!m_uninstPackageNames.isEmpty()) {
-						String name = m_uninstPackageNames.peek();
-						if (name != null) {
-							s_logger.info("About to uninstall package ", name);
-							DeploymentPackage dp = null;
-							boolean successful = false;
-							Exception ex = null;
-							try {
-								dp = m_deploymentAdmin.getDeploymentPackage(name);
-								if (dp != null) {
-									dp.uninstall();
+					String name = m_uninstPackageNames.peek();
+					if (name != null) {
+						s_logger.info("About to uninstall package ", name);
+						DeploymentPackage dp = null;
+						boolean successful = false;
+						Exception ex = null;
+						try {
+							dp = m_deploymentAdmin.getDeploymentPackage(name);
+							if (dp != null) {
+								dp.uninstall();
 
-									String sUrl = m_deployedPackages.getProperty(name);
-									File dpFile = new File(new URL(sUrl).getPath());
-									if (!dpFile.delete()) {
-										s_logger.warn("Cannot delete file at URL: {}", sUrl);
-									}
-									successful = true;
-									removePackageFromConfFile(name);
+								String sUrl = m_deployedPackages.getProperty(name);
+								File dpFile = new File(new URL(sUrl).getPath());
+								if (!dpFile.delete()) {
+									s_logger.warn("Cannot delete file at URL: {}", sUrl);
 								}
-							} catch (Exception e) {
-								ex = e;
-								s_logger.error("Exception uninstalling package {}", name, e);
-							} finally {
-								s_logger.info("Posting UNINSTALLED event for package {}: {}", name, successful ? "successful" : "unsuccessful");
-								m_uninstPackageNames.poll();
-								postUninstalledEvent(name, successful, ex);
+								successful = true;
+								removePackageFromConfFile(name);
 							}
+						} catch (Exception e) {
+							ex = e;
+							s_logger.error("Exception uninstalling package {}", name, e);
+						} finally {
+							s_logger.info("Posting UNINSTALLED event for package {}: {}", name, successful ? "successful" : "unsuccessful");
+							m_uninstPackageNames.poll();
+							postUninstalledEvent(name, successful, ex);
 						}
 					}
 				} catch (InterruptedException e) {
@@ -482,7 +482,7 @@ public class DeploymentAgent implements DeploymentAgentService {
 		} catch (DeploymentException e) {
 			throw e;
 		} catch (IOException e) {
-		    throw e;
+			throw e;
 		} finally {
 			if(br != null){
 				try{

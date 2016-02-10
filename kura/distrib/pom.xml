@@ -18,7 +18,7 @@
 	<parent>
 		<artifactId>kura</artifactId>
 		<groupId>org.eclipse.kura</groupId>
-		<version>1.4.0-SNAPSHOT</version>
+		<version>1.4.0</version>
 		<relativePath>../pom_pom.xml</relativePath>
 	</parent>
 
@@ -336,17 +336,20 @@
 								<!-- Copy distrib/config/kura.build.properties in distrib/RELEASE_INFO/${project.version}/config -->
 								<copy
 									file="config/kura.build.properties"
-									todir="RELEASE_INFO/${project.version}/config" />
+									todir="RELEASE_INFO/${project.version}/config" 
+									overwrite="true" />
 
                 				<!-- Copy target-platform/config/kura.target-platform.build.properties in distrib/RELEASE_INFO/${project.version}/config -->
 								<copy
 									file="${kura.basedir}/../../../target-platform/config/kura.target-platform.build.properties"
-									todir="RELEASE_INFO/${project.version}/config" />
+									todir="RELEASE_INFO/${project.version}/config" 
+									overwrite="true" />
 
 							    <!-- Copy src/main/resources/common/previous-version-pom-template.xml in distrib/RELEASE_INFO/${project.version}/pom.xml -->
 								<copy
 									file="src/main/resources/common/release-info.root.pom.xml"
-									tofile="RELEASE_INFO/${project.version}/pom.xml" />
+									tofile="RELEASE_INFO/${project.version}/pom.xml" 
+									overwrite="true" />
 								<!-- replace kura version -->
 								<replace token="&lt;version&gt;[kura-version]&lt;/version&gt;" value="&lt;version&gt;${project.version}&lt;/version&gt;" dir="RELEASE_INFO/${project.version}">
 									<include name="pom.xml"/>
@@ -355,7 +358,8 @@
 								<!-- Copy src/main/resources/common/kura-bundles-pom.xml in distrib/RELEASE_INFO/${project.version}/kura-bundles/pom.xml -->
 								<copy
 									file="src/main/resources/common/kura-bundles-pom.xml"
-									tofile="RELEASE_INFO/${project.version}/kura-bundles/pom.xml" />
+									tofile="RELEASE_INFO/${project.version}/kura-bundles/pom.xml" 
+									overwrite="true" />
 								<!-- replace kura version -->
 								<replace token="&lt;version&gt;[kura-version]&lt;/version&gt;" value="&lt;version&gt;${project.version}&lt;/version&gt;" dir="RELEASE_INFO/${project.version}/kura-bundles">
 									<include name="pom.xml"/>
@@ -368,7 +372,8 @@
 								<!-- Copy target-platform/p2-repo-common/pom.xml in distrib/RELEASE_INFO/${project.version}/p2-repo-common/pom.xml -->
 								<copy
 									file="${kura.basedir}/../../../target-platform/p2-repo-common/pom.xml"
-									tofile="RELEASE_INFO/${project.version}/p2-repo-common/pom.xml" />
+									tofile="RELEASE_INFO/${project.version}/p2-repo-common/pom.xml" 
+									overwrite="true" />
 								<!-- replace artifactId -->
 								<replace token="&lt;artifactId&gt;target-platform&lt;/artifactId&gt;" value="&lt;artifactId&gt;target-platform-previous&lt;/artifactId&gt;" dir="RELEASE_INFO/${project.version}/p2-repo-common">
 									<include name="pom.xml"/>
@@ -385,7 +390,8 @@
 								<!-- Copy target-platform/p2-repo-equinox_3.8.1/pom.xml in distrib/RELEASE_INFO/${project.version}/p2-repo-equinox_3.8.1/pom.xml -->
 								<copy
 									file="${kura.basedir}/../../../target-platform/p2-repo-equinox_3.8.1/pom.xml"
-									tofile="RELEASE_INFO/${project.version}/p2-repo-equinox_3.8.1/pom.xml" />
+									tofile="RELEASE_INFO/${project.version}/p2-repo-equinox_3.8.1/pom.xml" 
+									overwrite="true" />
 								<!-- replace artifactId -->
 								<replace token="&lt;artifactId&gt;target-platform&lt;/artifactId&gt;" value="&lt;artifactId&gt;target-platform-previous&lt;/artifactId&gt;" dir="RELEASE_INFO/${project.version}/p2-repo-equinox_3.8.1">
 									<include name="pom.xml"/>
@@ -845,6 +851,34 @@
 							</execution>
 						</executions>
 					</plugin>
+					<plugin>
+        				<groupId>net.ju-n.maven.plugins</groupId>
+        				<artifactId>checksum-maven-plugin</artifactId>
+        				<version>1.3</version>
+        				<executions>
+          					<execution>
+          						<id>beaglebone-deb-checksums</id>
+								<phase>install</phase>
+            					<goals>
+              						<goal>files</goal>
+            					</goals>
+          					</execution>
+        				</executions>
+        				<configuration>
+          					<algorithms>
+             					<algorithm>MD5</algorithm>
+             					<algorithm>SHA-1</algorithm>
+             				</algorithms>
+             				<fileSets>
+  								<fileSet>
+    								<directory>${basedir}/target</directory>
+    								<includes>
+      									<include>*.deb</include>
+    								</includes>
+  								</fileSet>
+							</fileSets>
+        				</configuration>
+      				</plugin>
 				</plugins>
 			</build>
 		</profile>
@@ -959,6 +993,34 @@
 							</execution>
 						</executions>
 					</plugin>
+					<plugin>
+        				<groupId>net.ju-n.maven.plugins</groupId>
+        				<artifactId>checksum-maven-plugin</artifactId>
+        				<version>1.3</version>
+        				<executions>
+          					<execution>
+          						<id>beaglebone-nn-deb-checksums</id>
+								<phase>install</phase>
+            					<goals>
+              						<goal>files</goal>
+            					</goals>
+          					</execution>
+        				</executions>
+        				<configuration>
+          					<algorithms>
+             					<algorithm>MD5</algorithm>
+             					<algorithm>SHA-1</algorithm>
+             				</algorithms>
+             				<fileSets>
+  								<fileSet>
+    								<directory>${basedir}/target</directory>
+    								<includes>
+      									<include>*.deb</include>
+    								</includes>
+  								</fileSet>
+							</fileSets>
+        				</configuration>
+      				</plugin>
 				</plugins>
 			</build>
 		</profile>
@@ -1083,6 +1145,34 @@
 							</execution>
 						</executions>
 					</plugin>
+					<plugin>
+        				<groupId>net.ju-n.maven.plugins</groupId>
+        				<artifactId>checksum-maven-plugin</artifactId>
+        				<version>1.3</version>
+        				<executions>
+          					<execution>
+          						<id>raspberry-pi-deb-checksums</id>
+								<phase>install</phase>
+            					<goals>
+              						<goal>files</goal>
+            					</goals>
+          					</execution>
+        				</executions>
+        				<configuration>
+          					<algorithms>
+             					<algorithm>MD5</algorithm>
+             					<algorithm>SHA-1</algorithm>
+             				</algorithms>
+             				<fileSets>
+  								<fileSet>
+    								<directory>${basedir}/target</directory>
+    								<includes>
+      									<include>*.deb</include>
+    								</includes>
+  								</fileSet>
+							</fileSets>
+        				</configuration>
+      				</plugin>
 				</plugins>
 			</build>
 		</profile>
@@ -1194,6 +1284,34 @@
 							</execution>
 						</executions>
 					</plugin>
+					<plugin>
+        				<groupId>net.ju-n.maven.plugins</groupId>
+        				<artifactId>checksum-maven-plugin</artifactId>
+        				<version>1.3</version>
+        				<executions>
+          					<execution>
+          						<id>raspberry-pi-nn-deb-checksums</id>
+								<phase>install</phase>
+            					<goals>
+              						<goal>files</goal>
+            					</goals>
+          					</execution>
+        				</executions>
+        				<configuration>
+          					<algorithms>
+             					<algorithm>MD5</algorithm>
+             					<algorithm>SHA-1</algorithm>
+             				</algorithms>
+             				<fileSets>
+  								<fileSet>
+    								<directory>${basedir}/target</directory>
+    								<includes>
+      									<include>*.deb</include>
+    								</includes>
+  								</fileSet>
+							</fileSets>
+        				</configuration>
+      				</plugin>
 				</plugins>
 			</build>
 		</profile>
@@ -1318,6 +1436,34 @@
 							</execution>
 						</executions>
 					</plugin>
+					<plugin>
+        				<groupId>net.ju-n.maven.plugins</groupId>
+        				<artifactId>checksum-maven-plugin</artifactId>
+        				<version>1.3</version>
+        				<executions>
+          					<execution>
+          						<id>raspberry-pi-bplus-deb-checksums</id>
+								<phase>install</phase>
+            					<goals>
+              						<goal>files</goal>
+            					</goals>
+          					</execution>
+        				</executions>
+        				<configuration>
+          					<algorithms>
+             					<algorithm>MD5</algorithm>
+             					<algorithm>SHA-1</algorithm>
+             				</algorithms>
+             				<fileSets>
+  								<fileSet>
+    								<directory>${basedir}/target</directory>
+    								<includes>
+      									<include>*.deb</include>
+    								</includes>
+  								</fileSet>
+							</fileSets>
+        				</configuration>
+      				</plugin>
 				</plugins>
 			</build>
 		</profile>
@@ -1429,6 +1575,34 @@
 							</execution>
 						</executions>
 					</plugin>
+					<plugin>
+        				<groupId>net.ju-n.maven.plugins</groupId>
+        				<artifactId>checksum-maven-plugin</artifactId>
+        				<version>1.3</version>
+        				<executions>
+          					<execution>
+          						<id>raspberry-pi-bplus-nn-deb-checksums</id>
+								<phase>install</phase>
+            					<goals>
+              						<goal>files</goal>
+            					</goals>
+          					</execution>
+        				</executions>
+        				<configuration>
+          					<algorithms>
+             					<algorithm>MD5</algorithm>
+             					<algorithm>SHA-1</algorithm>
+             				</algorithms>
+             				<fileSets>
+  								<fileSet>
+    								<directory>${basedir}/target</directory>
+    								<includes>
+      									<include>*.deb</include>
+    								</includes>
+  								</fileSet>
+							</fileSets>
+        				</configuration>
+      				</plugin>
 				</plugins>
 			</build>
 		</profile>
@@ -1543,6 +1717,34 @@
 							</execution>
 						</executions>
 					</plugin>
+					<plugin>
+        				<groupId>net.ju-n.maven.plugins</groupId>
+        				<artifactId>checksum-maven-plugin</artifactId>
+        				<version>1.3</version>
+        				<executions>
+          					<execution>
+          						<id>raspberry-pi-2-deb-checksums</id>
+								<phase>install</phase>
+            					<goals>
+              						<goal>files</goal>
+            					</goals>
+          					</execution>
+        				</executions>
+        				<configuration>
+          					<algorithms>
+             					<algorithm>MD5</algorithm>
+             					<algorithm>SHA-1</algorithm>
+             				</algorithms>
+             				<fileSets>
+  								<fileSet>
+    								<directory>${basedir}/target</directory>
+    								<includes>
+      									<include>*.deb</include>
+    								</includes>
+  								</fileSet>
+							</fileSets>
+        				</configuration>
+      				</plugin>
 				</plugins>
 			</build>
 		</profile>
@@ -1657,6 +1859,34 @@
 							</execution>
 						</executions>
 					</plugin>
+					<plugin>
+        				<groupId>net.ju-n.maven.plugins</groupId>
+        				<artifactId>checksum-maven-plugin</artifactId>
+        				<version>1.3</version>
+        				<executions>
+          					<execution>
+          						<id>raspberry-pi-2-nn-deb-checksums</id>
+								<phase>install</phase>
+            					<goals>
+              						<goal>files</goal>
+            					</goals>
+          					</execution>
+        				</executions>
+        				<configuration>
+          					<algorithms>
+             					<algorithm>MD5</algorithm>
+             					<algorithm>SHA-1</algorithm>
+             				</algorithms>
+             				<fileSets>
+  								<fileSet>
+    								<directory>${basedir}/target</directory>
+    								<includes>
+      									<include>*.deb</include>
+    								</includes>
+  								</fileSet>
+							</fileSets>
+        				</configuration>
+      				</plugin>
 				</plugins>
 			</build>
 		</profile>
@@ -1887,6 +2117,16 @@
 											<zipfileset dir="${project.build.directory}/staging/demo_heater/"
 												prefix="org.eclipse.kura.demo.heater/" />
 										</zip>
+										<checksum algorithm="md5">
+    										<fileset dir="./target/" >
+    											<include name="${zip_workspace.prefix}.zip"/>
+    										</fileset>
+										</checksum>
+										<checksum algorithm="SHA-1">
+    										<fileset dir="./target/" >
+    											<include name="${zip_workspace.prefix}.zip"/>
+    										</fileset>
+										</checksum>
 									</target>
 								</configuration>
 							</execution>

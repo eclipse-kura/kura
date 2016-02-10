@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011, 2014 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
  *
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
@@ -1470,6 +1470,9 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 
 			// ignore SSID?
 			wifiConfig.setIgnoreSSID(gwtWifiConfig.ignoreSSID());
+			
+			// broadcast SSID
+			wifiConfig.setBroadcast(!gwtWifiConfig.ignoreSSID());
 		}
 
 		return wifiConfig;

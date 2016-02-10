@@ -81,12 +81,15 @@ public class SupportedUsbModems {
 		}
 	}
 
-	public static SupportedUsbModemInfo getModem(String vendorId, String productId) {
+	public static SupportedUsbModemInfo getModem(String vendorId, String productId, String productName) {
 		if (vendorId == null || productId == null)
 			return null;
 
 		for (SupportedUsbModemInfo modem : SupportedUsbModemInfo.values()) {
-			if (vendorId.equals(modem.getVendorId()) && productId.equals(modem.getProductId())) {
+			if (       vendorId.equals(modem.getVendorId()) 
+					&& productId.equals(modem.getProductId()) 
+					&& (modem.getProductName().isEmpty() || productName.equals(modem.getProductName()))
+					) {
 				return modem;
 			}
 		}
@@ -94,8 +97,8 @@ public class SupportedUsbModems {
 		return null;
 	}
 
-	public static boolean isSupported(String vendorId, String productId) {
-		return SupportedUsbModems.getModem(vendorId, productId) != null;
+	public static boolean isSupported(String vendorId, String productId, String productName) {
+		return SupportedUsbModems.getModem(vendorId, productId, productName) != null;
 	}
 
 	public static boolean isAttached (String vendor, String product) throws Exception {

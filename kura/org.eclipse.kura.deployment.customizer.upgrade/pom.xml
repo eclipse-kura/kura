@@ -41,7 +41,8 @@
                                 	<archive>
                 						<compress>false</compress>
                 					</archive>
-                                    <format>'${kura.build.version}'</format>
+                        			<format>'${kura.build.version}'</format>
+                        			<strictVersions>true</strictVersions>
                                 </configuration>
                         </plugin>
                 </plugins>

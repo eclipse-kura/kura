@@ -2104,6 +2104,60 @@
 										<move
 											file="${project.build.directory}/staging/demo_heater/demo_heater.classpath"
 											tofile="${project.build.directory}/staging/demo_heater/.classpath" />
+											
+										<!-- Stage the org.eclipse.kura.example.beacon Project -->
+										<copy todir="${project.build.directory}/staging/beacon">
+											<fileset dir="../examples/org.eclipse.kura.example.beacon" />
+										</copy>
+										<delete
+											file="${project.build.directory}/staging/beacon/pom.xml" />
+										<delete dir="${project.build.directory}/staging/beacon/bin" />
+										<delete
+											dir="${project.build.directory}/staging/beacon/target" />
+										<copy
+											file="src/main/resources/common/classpaths/beacon.classpath"
+											tofile="${project.build.directory}/staging/beacon/beacon.classpath" />
+										<copy file="src/main/resources/common/projects/beacon.project"
+											tofile="${project.build.directory}/staging/beacon/.project" />
+										<move
+											file="${project.build.directory}/staging/beacon/beacon.classpath"
+											tofile="${project.build.directory}/staging/beacon/.classpath" />
+											
+										<!-- Stage the org.eclipse.kura.example.ble.tisensortag Project -->
+										<copy todir="${project.build.directory}/staging/tisensortag">
+											<fileset dir="../examples/org.eclipse.kura.example.ble.tisensortag" />
+										</copy>
+										<delete
+											file="${project.build.directory}/staging/tisensortag/pom.xml" />
+										<delete dir="${project.build.directory}/staging/tisensortag/bin" />
+										<delete
+											dir="${project.build.directory}/staging/tisensortag/target" />
+										<copy
+											file="src/main/resources/common/classpaths/tisensortag.classpath"
+											tofile="${project.build.directory}/staging/tisensortag/tisensortag.classpath" />
+										<copy file="src/main/resources/common/projects/tisensortag.project"
+											tofile="${project.build.directory}/staging/tisensortag/.project" />
+										<move
+											file="${project.build.directory}/staging/tisensortag/tisensortag.classpath"
+											tofile="${project.build.directory}/staging/tisensortag/.classpath" />
+											
+										<!-- Stage the org.eclipse.kura.example.publisher Project -->
+										<copy todir="${project.build.directory}/staging/publisher">
+											<fileset dir="../examples/org.eclipse.kura.example.publisher" />
+										</copy>
+										<delete
+											file="${project.build.directory}/staging/publisher/pom.xml" />
+										<delete dir="${project.build.directory}/staging/publisher/bin" />
+										<delete
+											dir="${project.build.directory}/staging/publisher/target" />
+										<copy
+											file="src/main/resources/common/classpaths/publisher.classpath"
+											tofile="${project.build.directory}/staging/publisher/publisher.classpath" />
+										<copy file="src/main/resources/common/projects/publisher.project"
+											tofile="${project.build.directory}/staging/publisher/.project" />
+										<move
+											file="${project.build.directory}/staging/publisher/publisher.classpath"
+											tofile="${project.build.directory}/staging/publisher/.classpath" />
 
 										<!-- Create the archive file with the components -->
 										<zip destfile="${project.build.directory}/${zip_workspace.prefix}.zip">
@@ -2116,6 +2170,12 @@
 												prefix="org.eclipse.kura.api/" />
 											<zipfileset dir="${project.build.directory}/staging/demo_heater/"
 												prefix="org.eclipse.kura.demo.heater/" />
+											<zipfileset dir="${project.build.directory}/staging/beacon/"
+												prefix="org.eclipse.kura.example.beacon/" />
+											<zipfileset dir="${project.build.directory}/staging/tisensortag/"
+												prefix="org.eclipse.kura.example.ble.tisensortag/" />
+											<zipfileset dir="${project.build.directory}/staging/publisher/"
+												prefix="org.eclipse.kura.example.publisher/" />
 										</zip>
 										<checksum algorithm="md5">
     										<fileset dir="./target/" >

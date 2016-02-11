@@ -14,7 +14,8 @@ if not exist c:\tmp mkdir c:\tmp
 
 copy %KURA_HOME%\config.ini %KURA_TEMP%\Configuration
 
-java -Xms256m -Xmx256m -Dkura.os.version=win32 ^
+java	-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=8000 ^
+	-Xms256m -Xmx256m -Dkura.os.version=win32 ^
 	-Dkura.arch=x86_64 ^
 	-Dtarget.device=windows ^
 	-Declipse.ignoreApp=true ^

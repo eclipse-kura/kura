@@ -737,7 +737,7 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
 		<copy file="src/main/resources/common/kura_custom.properties"
 			todir="${build.install.dir.kura}/kura/" />
 
-		<copy file="src/main/resources/${build.name}/start_kura.bat"
+		<copy file="src/main/resources/${build.name}/start_kura_debug.bat"
 			todir="${build.install.dir.kura}" />
 
 		<copy file="RELEASE_NOTES.txt"

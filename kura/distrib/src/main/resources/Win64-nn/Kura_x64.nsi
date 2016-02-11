@@ -329,8 +329,8 @@ Section "kura (required)"
 
 	!insertmacro _ReplaceInFile "$data_dir\Kura\kura\config.ini"       "/tmp/kura"                      "$temp_dir_/kura"
 
-	!insertmacro _ReplaceInFile "$INSTDIR\start_kura.bat"              "c:\opt\eclipse"                 `%ALLUSERSPROFILE%`
-	!insertmacro _ReplaceInFile "$INSTDIR\start_kura.bat"              "\tmp\.kura"                     `%TEMP%\kura`
+	!insertmacro _ReplaceInFile "$INSTDIR\start_kura_debug.bat"        "c:\opt\eclipse"                 `%ALLUSERSPROFILE%`
+	!insertmacro _ReplaceInFile "$INSTDIR\start_kura_debug.bat"        "\tmp\.kura"                     `%TEMP%\kura`
 
 	!insertmacro _ReplaceInFile "$INSTDIR\SCH_Kura.xml"                "C:\Program Files\Kura\"         "$INSTDIR\"
 
@@ -356,7 +356,7 @@ Section "kura (required)"
 		ExecWait '$WINDIR\Sysnative\sc description KURAService "KURA MQTT communitaction service for IOT devices."'
 
 		; Add a registry entry with the command that actually starts KURA then start the service
-		WriteRegStr HKLM System\CurrentControlSet\Services\KURAService "ServiceCommand" 'cmd /C "$INSTDIR\start_kura.bat"'
+		;WriteRegStr HKLM System\CurrentControlSet\Services\KURAService "ServiceCommand" 'cmd /C "$INSTDIR\start_kura.bat"'
 		ExecWait '$WINDIR\Sysnative\sc start KURAService'
 	${Else}
 

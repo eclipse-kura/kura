@@ -1,0 +1,65 @@
+<?xml version="1.0"?>
+<!--
+
+    Copyright (c) 2011, 2014 Eurotech and/or its affiliates
+
+     All rights reserved. This program and the accompanying materials
+     are made available under the terms of the Eclipse Public License v1.0
+     which accompanies this distribution, and is available at
+     http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Eurotech
+
+-->
+<assembly>
+    <id>bundle</id>
+    <formats>
+        <format>jar</format>
+    </formats>
+    <includeBaseDirectory>false</includeBaseDirectory>
+    <fileSets>
+        <fileSet>
+            <directory>${project.build.directory}/${project.name}-${project.version}/WEB-INF/classes/</directory>
+            <outputDirectory></outputDirectory>
+            <includes>
+                <include>**</include>
+            </includes>
+        </fileSet>
+        <fileSet>
+            <directory>${project.build.directory}/${project.name}-${project.version}/</directory>
+            <outputDirectory>www</outputDirectory>
+            <includes>
+                <include>denali.html</include>
+                <include>denali.css</include>
+                <include>denali/**</include>
+                <include>kura/**</include>
+                <include>gxt/**</include>
+				<include>eclipse/**</include>
+            </includes>
+        </fileSet>
+        <fileSet>
+            <directory>lib</directory>
+            <outputDirectory>lib</outputDirectory>
+            <includes>
+                <include>*</include>
+            </includes>
+        </fileSet>
+        <fileSet>
+            <directory>${project.build.directory}/${project.name}-${project.version}/WEB-INF/lib/</directory>
+            <outputDirectory>lib</outputDirectory>
+            <includes>
+                <include>gxt-2.2.5.jar</include>
+            </includes>
+        </fileSet>
+        <fileSet>
+            <directory>OSGI-INF</directory>
+            <outputDirectory>OSGI-INF</outputDirectory>
+            <includes>
+            	<include>*</include>
+                <include>metatype/*</include>
+            </includes>
+        </fileSet>
+    </fileSets>
+</assembly>
+

@@ -93,6 +93,8 @@ char KuraJavaArgs[] = "java \
 -Djdk.tls.trustNameService=true \
 -jar \"%~dp0\\plugins\\org.eclipse.osgi_3.8.1.v20120830-144521.jar\" \
 -configuration %KURA_TEMP%\\Configuration \
+-console \
+-consoleLog \
 ";
 
 // Replace substr with replacement in string and return number of replacements made

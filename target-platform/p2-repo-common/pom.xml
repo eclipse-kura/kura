@@ -77,12 +77,17 @@
                             <artifactId>org.tigris.mtoolkit.iagent.rpc</artifactId>
                             <version>${org.tigris.mtoolkit.iagent.rpc.version}</version>
                         </artifactItem>
-								<artifactItem>
+						<artifactItem>
                             <groupId>com.gwt</groupId>
                             <artifactId>com.gwt.user</artifactId>
                             <version>${com.gwt.user.version}</version>
                         </artifactItem>
-								<artifactItem>
+						<artifactItem>
+                            <groupId>com.gwt</groupId>
+                            <artifactId>com.gwt.user</artifactId>
+                            <version>0.2.0</version>
+                        </artifactItem>
+						<artifactItem>
                             <groupId>org.hamcrest</groupId>
                             <artifactId>org.hamcrest.core</artifactId>
                             <version>${org.hamcrest.core.version}</version>

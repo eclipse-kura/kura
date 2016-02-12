@@ -1,6 +1,8 @@
 
 #include "KURAService.h"
 
+HANDLE g_hKuraProcess = NULL;
+
 //===================================================================================================================================
 //	RunService
 //
@@ -34,11 +36,13 @@ void RunService(TCHAR *pszCommand)
 				// Start the actual KURA process
 				if(CreateProcess(NULL, pszCommand, NULL, NULL, TRUE, 0, NULL, NULL, &mStartInfo, &mProcInfo))
 				{
+					g_hKuraProcess = mProcInfo.hProcess;
 					UpdateStatus(SERVICE_RUNNING, SERVICE_ACCEPT_STOP, 0, NO_ERROR);
 
 					// Wait for the KURA Service process to terminate then clean up the handles associated with the process
 					WaitForSingleObject(mProcInfo.hProcess, INFINITE);
-					CloseHandle(mProcInfo.hThread); CloseHandle(mProcInfo.hProcess);
+					CloseHandle(mProcInfo.hThread);
+					CloseHandle(mProcInfo.hProcess);
 
 					// LOG: Service process terminated unexpectedly
 				}
@@ -53,8 +57,10 @@ void RunService(TCHAR *pszCommand)
 			}
 
 			// Close the handles associated with the STDIO pipes a new set gets created if required
-			CloseHandle(g_hINWrite); CloseHandle(g_hINRead);
-			CloseHandle(g_hOUTWrite); CloseHandle(g_hOUTRead);
+			CloseHandle(g_hINWrite);
+			CloseHandle(g_hINRead);
+			CloseHandle(g_hOUTWrite);
+			CloseHandle(g_hOUTRead);
 		}
 		else
 		{
@@ -70,15 +76,28 @@ VOID WINAPI ServiceCtrlHandler (DWORD CtrlCode)
 	DWORD dwValue;
 	switch (CtrlCode) 
 	{
-		case SERVICE_CONTROL_STOP :		if(g_ServiceStatus.dwCurrentState == SERVICE_RUNNING)
-										{
-											UpdateStatus(SERVICE_STOP_PENDING, 0, 4, NO_ERROR);
- 
-											g_bTerminate = 1;
-											WriteFile(g_hINWrite, "exit\ny\n", 7, &dwValue, NULL);
-										}
-										break;
- 
-		default :						break;
+	case SERVICE_CONTROL_STOP:
+
+		if(g_ServiceStatus.dwCurrentState == SERVICE_RUNNING)
+		{
+			UpdateStatus(SERVICE_STOP_PENDING, 0, 4, NO_ERROR);
+
+			// Stop Kura gracefully
+			// Sending "exit" will terminate Kura and the console, but it doesn't send a Death Certificate (DC)
+			// So we better send "shutdown" which does send a DC too. After this we can't use other commands like 'exit', so need to kill it
+			g_bTerminate = 1;
+			WriteFile(g_hINWrite, "shutdown\n", 9, &dwValue, NULL);
+			// We're already waiting for the process handle, so don't issue a second one.
+			// Also since "shutdown" doesn't terminate it, the wait would timeout anyway
+			Sleep( 6000 );
+			//if( WaitForSingleObject( g_hKuraProcess, 6000 ) == WAIT_TIMEOUT )
+			{
+				// If the console is still running, kill it
+				if( g_hKuraProcess )
+					TerminateProcess( g_hKuraProcess, 0 );
+			//	WaitForSingleObject( g_hKuraProcess, 2000 );
+			}
+		}
+		break;
 	}
 }  

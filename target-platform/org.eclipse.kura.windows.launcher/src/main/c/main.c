@@ -42,7 +42,7 @@ DWORD WINAPI KuraStarter( LPVOID lpThreadParameter )
 				mStartInfo.hStdError = g_hOUTWrite;
 				mStartInfo.hStdOutput = g_hOUTWrite;
 
-				// Start the KURA process (java)
+				// Start the KURA process (java) and don't show the console window
 				if(CreateProcess(NULL, g_pszKuraCommandLine, NULL, NULL, TRUE, CREATE_NO_WINDOW, NULL, NULL, &mStartInfo, &mProcInfo))
 				{
 					g_hKuraProcess = mProcInfo.hProcess;
@@ -323,6 +323,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	int wmId, wmEvent;
+	DWORD dwValue;
 
 	switch (message)
 	{
@@ -339,9 +340,18 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	case WM_DESTROY:
 		// If the launcher is being terminated, kill the child Kura process too 
 		g_fKuraStarterActive = FALSE;
-		if( g_hKuraProcess )
-			TerminateProcess( g_hKuraProcess, 0 );
-		WaitForSingleObject( g_hKuraStarterThread, 3000 );		// wait for the starter to terminate
+		// Stop Kura gracefully
+		// Sending "exit" will terminate Kura and the console, but it doesn't send a Death Certificate (DC)
+		// So we better send "shutdown" which does send a DC too. After this we can't use other commands like 'exit', so need to kill it
+		WriteFile(g_hINWrite, "shutdown\n", 9, &dwValue, NULL);
+		// "shutdown" takes a few seconds to finish...
+		if( WaitForSingleObject( g_hKuraStarterThread, 6000 ) == WAIT_TIMEOUT )
+		{
+			// If the console is still running, kill it
+			if( g_hKuraProcess )
+				TerminateProcess( g_hKuraProcess, 0 );
+			WaitForSingleObject( g_hKuraStarterThread, 2000 );		// wait for the starter to terminate
+		}
 		PostQuitMessage(0);
 		break;
 

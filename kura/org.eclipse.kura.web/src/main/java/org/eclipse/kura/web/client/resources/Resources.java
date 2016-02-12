@@ -167,5 +167,11 @@ public interface Resources extends ClientBundleWithLookup {
     
     @Source("icons/16x16/apps/bluetooth.png")
     ImageResource bluetooth();
+    
+    @Source("icons/32x32/status/green_plug.png")
+    ImageResource greenPlug32();
+    
+    @Source("icons/32x32/status/red_plug.png")
+    ImageResource redPlug32();
 
 }

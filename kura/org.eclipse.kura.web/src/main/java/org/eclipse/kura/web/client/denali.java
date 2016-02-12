@@ -11,6 +11,7 @@
  *******************************************************************************/
 package org.eclipse.kura.web.client;
 
+import java.util.Date;
 import java.util.List;
 
 import org.eclipse.kura.web.client.messages.Messages;
@@ -252,8 +253,12 @@ public class denali implements EntryPoint
 		final HorizontalPanel south = new HorizontalPanel();
 		south.setTableWidth("100%");
 		south.setId("south-panel-wrapper");
-		Label copyright = new Label(MSGS.copyright());
-		copyright.setStyleName("x-form-label");
+		
+		Date now = new Date();
+        @SuppressWarnings("deprecation")
+        int year = now.getYear() + 1900;
+        Label copyright = new Label(MSGS.copyright(String.valueOf(year)));
+        copyright.setStyleName("x-form-label");
 		TableData td = new TableData();
 		td.setHorizontalAlign(HorizontalAlignment.LEFT);
 		south.add(copyright, td);

@@ -58,6 +58,19 @@
 			</modules>
 		</profile>
 		<profile>
+			<id>web2</id>
+			<properties>
+				<org.eclipse.kura.web2.skip>false</org.eclipse.kura.web2.skip>
+			</properties>
+			<activation>
+				<activeByDefault>false</activeByDefault>
+			</activation>
+			<modules>
+				<module>org.eclipse.kura.web2</module>
+				<module>distrib</module>
+			</modules>
+		</profile>
+		<profile>
 			<id>dio.skip</id>
 			<properties>
 				<org.eclipse.kura.dio.skip>true</org.eclipse.kura.dio.skip>

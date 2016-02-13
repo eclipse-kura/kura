@@ -191,7 +191,7 @@ public class WestNavigationView extends LayoutContainer
 					}
 
 					imgRefreshLabel = new Label("<image src=\""+ img.getUrl() +"\" "
-							+ "width=\"28\" height=\"28\" "
+							+ "width=\"23\" height=\"23\" "
 							+ "style=\"vertical-align: middle\" title=\"" + status + "\"/>");
 					
 

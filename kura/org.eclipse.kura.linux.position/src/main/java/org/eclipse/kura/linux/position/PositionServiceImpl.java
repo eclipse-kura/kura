@@ -27,6 +27,7 @@ import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.net.modem.ModemGpsDisabledEvent;
 import org.eclipse.kura.net.modem.ModemGpsEnabledEvent;
 import org.eclipse.kura.position.NmeaPosition;
+import org.eclipse.kura.position.PositionListener;
 import org.eclipse.kura.position.PositionLockedEvent;
 import org.eclipse.kura.position.PositionLostEvent;
 import org.eclipse.kura.position.PositionService;
@@ -58,6 +59,7 @@ public class PositionServiceImpl implements PositionService, ConfigurableCompone
 	private Map<String,Object>				m_properties;
 	private Map<String,Object>				m_positionServiceProperties;
 	private ConnectionFactory 	            m_connectionFactory;
+	private Map<String,PositionListener>    m_positionListeners;
 	private GpsDevice					 	m_gpsDevice;
 	private ExecutorService                 m_executor;
 	private EventAdmin            			m_eventAdmin;
@@ -261,6 +263,25 @@ public class PositionServiceImpl implements PositionService, ConfigurableCompone
 		else if(m_gpsDevice!=null)
 			return m_gpsDevice.getDateNmea();
 		else return null;
+	}
+	
+	public void registerListener(String listenerId, PositionListener positionListener) {
+		if (m_positionListeners == null) {
+			m_positionListeners = new HashMap<String, PositionListener>();
+		}
+		m_positionListeners.put(listenerId, positionListener);
+		if (m_gpsDevice != null) {
+			m_gpsDevice.setListeners(m_positionListeners.values());
+		}
+	}
+	
+	public void unregisterListener(String listenerId) {
+		if ((m_positionListeners != null) && m_positionListeners.containsKey(listenerId)) {
+			m_positionListeners.remove(listenerId);
+			if (m_gpsDevice != null) {
+				m_gpsDevice.setListeners(m_positionListeners.values());
+			}
+		}
 	}
 
 	public String getLastSentence() {

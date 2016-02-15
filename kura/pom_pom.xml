@@ -30,6 +30,7 @@
 		</maven.build.timestamp.format>
 		<kura.basedir>${project.basedir}</kura.basedir>
 		<org.eclipse.kura.web.skip>true</org.eclipse.kura.web.skip>
+		<org.eclipse.kura.web2.skip>true</org.eclipse.kura.web2.skip>
 		<org.eclipse.kura.dio.skip>false</org.eclipse.kura.dio.skip>
 		<org.eclipse.kura.dio.include>true</org.eclipse.kura.dio.include>
 	</properties>

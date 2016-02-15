@@ -21,7 +21,7 @@
 	<ui:style>
 	.important { }
 	
-	.center-panel { padding: 0px; border: none; }
+	.center-panel { height: 543px; padding: 0px; border: none; }
 
 	</ui:style>
 	

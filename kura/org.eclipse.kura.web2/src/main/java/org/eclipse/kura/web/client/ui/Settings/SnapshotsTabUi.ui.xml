@@ -44,8 +44,7 @@
 				hover="true" height="500px" width="100%" ui:field="snapshotsGrid" />
 		</b:Row>
 		<!-- Modal -->
-		<b:Modal title="Upload" closable="true" fade="true" b:id="uploadModal"
-			ui:field="uploadModal">
+		<b:Modal title="Upload" closable="true" fade="true" b:id="uploadModal" ui:field="uploadModal">
 			<b:ModalBody>
 				<b:Well>
 					<b:Container fluid="true">
@@ -59,7 +58,7 @@
 									<b:Button ui:field="uploadCancel">Cancel</b:Button>
 									<b:Button ui:field="uploadUpload">Upload</b:Button>
 								</b:ButtonGroup>
-
+								<g:Hidden ui:field="xsrfTokenField"></g:Hidden>
 							</b:FieldSet>
 						</g:FormPanel>
 					</b:Container>

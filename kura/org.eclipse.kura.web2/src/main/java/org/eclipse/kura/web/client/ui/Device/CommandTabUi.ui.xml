@@ -50,8 +50,7 @@
 					<b:Button ui:field="reset">Reset</b:Button>
 					<b:Button ui:field="execute">Execute</b:Button>
 					</b:ButtonGroup>
-
-
+					<g:Hidden ui:field="xsrfTokenField"></g:Hidden>
 				</b:FieldSet>
 			</gwt:FormPanel>			
 			<b:Panel addStyleNames="{style.output-panel}">

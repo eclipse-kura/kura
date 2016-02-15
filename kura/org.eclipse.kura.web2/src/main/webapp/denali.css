@@ -70,6 +70,8 @@ img.x-tree3-node-icon {
 
 .form-control { font-size: 11px !important; width: 95% !important; }
 
+.well div { cursor: default; }
+
 .table { font-size: 12px; }
 .rowHeader { background-color: #009AE0 !important; font-size: 14px !important; color: white !important; pointer-events: none !important;  }
 

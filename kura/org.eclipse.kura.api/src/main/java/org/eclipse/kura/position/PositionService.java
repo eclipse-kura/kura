@@ -71,4 +71,19 @@ public interface PositionService
 	 * Returns the last sentence received from the gps.
 	 */
 	public String getLastSentence();
+	
+	/**
+	 * Registers position listener
+	 * 
+	 * @param listenerId - listener ID as {@link String}
+	 * @param positionListener - position listener as {@link PositionListener}
+	 */
+	public void registerListener(String listenerId, PositionListener positionListener);
+	
+	/**
+	 * Unregisters position listener
+	 * 
+	 * @param listenerId - listener ID as {@link String}
+	 */
+	public void unregisterListener(String listenerId);
 }

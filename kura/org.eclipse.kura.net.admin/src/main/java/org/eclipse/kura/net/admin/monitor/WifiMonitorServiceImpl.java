@@ -689,7 +689,6 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
             	//FIXME - assuming one InterfaceAddressConfig for now
             	WifiInterfaceAddressConfig currentInterfaceAddressConfig = currentInterfaceAddressConfigs.get(0);
             	WifiInterfaceAddressConfig newInterfaceAddressConfig = newInterfaceAddressConfigs.get(0);
-            	
             	WifiMode newWifiMode = newInterfaceAddressConfig.getMode();
             	
             	if(currentInterfaceAddressConfig.getConfigs() == null && newInterfaceAddressConfig.getConfigs() == null) {
@@ -711,6 +710,7 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
             		if(nc instanceof WifiConfig && ((WifiConfig) nc).getMode() != newWifiMode) {
             			s_logger.debug("removing current non-active WifiConfig for comparison: " + nc);
 						it.remove();
+						reconfiguredInterfaces.add(interfaceName);
         			}
             	}
             	

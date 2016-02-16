@@ -33,6 +33,7 @@ import org.eclipse.kura.linux.net.NetworkServiceImpl;
 import org.eclipse.kura.linux.net.dhcp.DhcpClientTool;
 import org.eclipse.kura.linux.net.wifi.WifiOptions;
 import org.eclipse.kura.net.NetInterfaceType;
+import org.eclipse.kura.net.wifi.WifiConfig;
 import org.eclipse.kura.net.wifi.WifiInterface.Capability;
 import org.eclipse.kura.net.wifi.WifiMode;
 import org.slf4j.Logger;
@@ -1529,5 +1530,121 @@ public class LinuxNetworkUtil {
 		}
 
 		return false;
+	}
+	
+	public static boolean isKernelModuleLoaded(String interfaceName, WifiConfig wifiConfig) throws KuraException {
+		boolean result = false;
+
+		// FIXME: how to find the right kernel module by interface name?
+		// Assume for now the interface name does not change
+		// Note that WiFiConfig.getDriver() below usually returns the "nl80211", not the
+		// the chipset kernel module (e.g. bcmdhd)
+		// s_logger.info("{} driver: '{}'", interfaceName, wifiConfig.getDriver());
+
+		if (KuraConstants.ReliaGATE_10_05.getTargetName().equals(OS_VERSION) &&
+				interfaceName.equals("wlan0")) {
+			SafeProcess proc = null;
+			BufferedReader br = null;
+			String cmd = "lsmod";
+			try {
+				s_logger.debug("Executing '{}'", cmd);
+				proc = ProcessUtil.exec(cmd);
+				int code = -1;
+				if ((code = proc.waitFor()) != 0) {
+					throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "'"+cmd+"' exited with code: "+code);
+				}
+
+				//get the output
+				br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+				String line = null;
+				while ((line = br.readLine()) != null) {
+					if (line.contains("bcmdhd")) {
+						result = true;
+						break;
+					}
+				}
+			} catch (IOException e) {
+				throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e, "'"+cmd+"' failed");
+			} catch (InterruptedException e) {
+				throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e, "'"+cmd+"' interrupted");
+			} finally {
+				if (br != null) {
+					try {
+						br.close();
+					} catch (IOException e) {
+						s_logger.warn("Failed to close process input stream", e);
+					}
+				}
+				if (proc != null) {
+					proc.destroy();
+				}
+			}
+		}
+		return result;
+	}
+
+	public static void unloadKernelModule(String interfaceName, WifiConfig wifiConfig) throws KuraException {
+		// FIXME: how to find the right kernel module by interface name?
+		// Assume for now the interface name does not change
+		if (KuraConstants.ReliaGATE_10_05.getTargetName().equals(OS_VERSION) &&
+				interfaceName.equals("wlan0")) {
+			SafeProcess proc = null;
+			try {
+				String cmd = "rmmod bcmdhd";
+				s_logger.debug("Executing '{}'", cmd);
+				proc = ProcessUtil.exec(cmd);
+				int code = -1;
+				if ((code = proc.waitFor()) != 0) {
+					throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "'"+cmd+"' exited with code: "+code);
+				}
+			} catch (IOException e) {
+				throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e,"'rmmod bcmdhd' failed");
+			} catch (InterruptedException e) {
+				throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e,"'rmmod bcmdhd' interrupted");
+			} finally {
+				if (proc != null) {
+					proc.destroy();
+				}
+			}
+		} else {
+			s_logger.debug("Kernel module unload not needed by platform '{}'", OS_VERSION);
+		}
+	}
+
+	public static void loadKernelModule(String interfaceName, WifiConfig wifiConfig) throws KuraException {
+		// FIXME: how to find the right kernel module by interface name?
+		// Assume for now the interface name does not change
+		if (KuraConstants.ReliaGATE_10_05.getTargetName().equals(OS_VERSION) &&
+				interfaceName.equals("wlan0")) {
+			SafeProcess proc = null;
+			String cmd = null;
+			WifiMode wifiMode = wifiConfig.getMode();
+			if (wifiMode == WifiMode.MASTER) {
+				cmd = "modprobe -S 3.12.6 bcmdhd firmware_path=\"/system/etc/firmware/fw_bcm43438a0_apsta.bin\" op_mode=2";
+			} else if (wifiMode == WifiMode.INFRA || wifiMode == WifiMode.ADHOC) {
+				cmd = "modprobe -S 3.12.6 bcmdhd";
+			} else {
+				throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "Don't know what to load for WifiMode " + wifiMode);
+			}
+
+			try {
+				s_logger.debug("Executing '{}'", cmd);
+				proc = ProcessUtil.exec(cmd);
+				int code = -1;
+				if ((code = proc.waitFor()) != 0) {
+					throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "'"+cmd+"' exited with code: "+code);
+				}
+			} catch (IOException e) {
+				throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e, "'"+cmd+"' failed");
+			} catch (InterruptedException e) {
+				throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e, "'"+cmd+"' interrupted");
+			} finally {
+				if (proc != null) {
+					proc.destroy();
+				}
+			}
+		} else {
+			s_logger.debug("Kernel module load not needed by platform '{}'", OS_VERSION);
+		}
 	}
 }

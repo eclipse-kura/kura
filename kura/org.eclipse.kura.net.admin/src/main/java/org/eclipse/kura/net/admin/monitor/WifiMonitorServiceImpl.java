@@ -44,9 +44,7 @@ import org.eclipse.kura.linux.net.util.LinkTool;
 import org.eclipse.kura.linux.net.util.LinuxNetworkUtil;
 import org.eclipse.kura.linux.net.util.ScanTool;
 import org.eclipse.kura.linux.net.util.iwconfigLinkTool;
-import org.eclipse.kura.linux.net.wifi.HostapdManager;
 import org.eclipse.kura.linux.net.wifi.WifiOptions;
-import org.eclipse.kura.linux.net.wifi.WpaSupplicantManager;
 import org.eclipse.kura.net.IPAddress;
 import org.eclipse.kura.net.NetConfig;
 import org.eclipse.kura.net.NetConfigIP4;
@@ -218,11 +216,12 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
                 // Check to see if the configuration has changed
             	//s_logger.debug("m_newNetConfiguration: " + m_newNetConfiguration);
             	//s_logger.debug("m_currentNetworkConfiguration: " + m_currentNetworkConfiguration);
+            	
+            	List<String> interfacesToReconfigure = new ArrayList<String>();
              	
                 if(m_newNetConfiguration != null && !m_newNetConfiguration.equals(m_currentNetworkConfiguration)) {
                     s_logger.info("monitor() :: Found a new network configuration, will check if wifi has been reconfigured ...");
                     
-                    List<String> interfacesToReconfigure = new ArrayList<String>();
                     interfacesToReconfigure.addAll(getReconfiguredWifiInterfaces());
                         
                     m_currentNetworkConfiguration = m_newNetConfiguration;
@@ -308,13 +307,26 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
                         }
                     } else {
                         // State is currently down
+                    	for (String name : interfacesToReconfigure) {
+                    		if (name.equals(interfaceName)) {
+                    			try {
+                    				s_logger.info("monitor() :: reconfigure {} kernel module for WiFi mode {}",
+                    						interfaceName, wifiConfig.getMode());
+                    				reconfigureKernelModule(interfaceName, wifiConfig);
+                    			} catch (KuraException e) {
+                    				s_logger.warn("monitor() :: failed to reconfigure {} kernel module for WiFi mode {}."
+                    						+ " FIXME: THIS WON'T BE RETRIED",
+                    						interfaceName, wifiConfig.getMode());
+                    			}
+                    			break;
+                    		}
+                    	}
+
                     	try {
 	                        if(WifiMode.MASTER.equals(wifiConfig.getMode())) {
-	                        	HostapdManager.loadKernelModules();
 	                            s_logger.debug("monitor() :: enable {} in master mode", interfaceName);                            
 	                            enableInterface(wifiInterfaceConfig);
 	                        } else if (WifiMode.INFRA.equals(wifiConfig.getMode())) {
-	                        	WpaSupplicantManager.loadKernelModules();
 	                        	if (wifiConfig.ignoreSSID()) {
 	                        		s_logger.info("monitor() :: enable {} in infra mode", interfaceName);                                
 	                        		enableInterface(wifiInterfaceConfig);
@@ -572,6 +584,15 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
                 }
             }
         }
+    }
+    
+    private void reconfigureKernelModule(String interfaceName, WifiConfig wifiConfig) throws KuraException {
+    	s_logger.info("monitor() :: reconfigure {} using kernel module for WiFi mode {}",
+    			interfaceName, wifiConfig.getMode());
+    	if (LinuxNetworkUtil.isKernelModuleLoaded(interfaceName, wifiConfig)) {
+    		LinuxNetworkUtil.unloadKernelModule(interfaceName, wifiConfig);
+    	}
+    	LinuxNetworkUtil.loadKernelModule(interfaceName, wifiConfig);
     }
     
     private void initializeMonitoredInterfaces(NetworkConfiguration networkConfiguration) throws KuraException {

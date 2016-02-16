@@ -77,7 +77,7 @@ public class DhcpClientManager {
 				disable(interfaceName);
 			}
 			s_logger.info("enable() :: Starting DHCP client for {}", interfaceName);
-			LinuxProcessUtil.start(formCommand(interfaceName, true, true), true);
+			LinuxProcessUtil.start(formCommand(interfaceName, true, true, true), true);
 		} catch (Exception e) {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
 		}
@@ -136,18 +136,22 @@ public class DhcpClientManager {
         return sb.toString();
     }
 	
-	private static String formCommand(String interfaceName, boolean useLeasesFile, boolean usePidFile) {
+	private static String formCommand(String interfaceName, boolean useLeasesFile, boolean usePidFile, boolean dontWait) {
 		StringBuilder sb = new StringBuilder();
 		
 		if (dhcpClientTool == DhcpClientTool.DHCLIENT) {
 			sb.append(DhcpClientTool.DHCLIENT.getValue());
 			sb.append(' ');
+			if (dontWait) {
+				sb.append("-nw");
+				sb.append(' ');
+			}
 			if (useLeasesFile) {
 				sb.append(formLeasesOption(interfaceName));
 				sb.append(' ');
 			}
 			if (usePidFile) {
-				sb.append(" -pf ");
+				sb.append("-pf ");
 				sb.append(getPidFilename(interfaceName));
 				sb.append(' ');
 			} 

@@ -242,6 +242,11 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
     
                     //s_logger.debug("Evaluating: " + interfaceName + " and is currently up? " + wifiState.isUp());
                     //s_logger.debug("Evaluating: " + interfaceName + " and is currently link up? " + wifiState.isLinkUp());
+                    
+                    // Get fresh interface status and post status change events
+                    Map<String, InterfaceState> newStatuses = getInterfaceStatuses(m_enabledInterfaces); 
+                    checkStatusChange(m_interfaceStatuses, newStatuses);
+                    m_interfaceStatuses = newStatuses;
                      
                     if(wifiConfig != null && wifiState != null && wifiState.isUp()) {
                         if(WifiMode.INFRA.equals(wifiConfig.getMode())) {
@@ -337,12 +342,7 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
                         disableInterface(interfaceName);
                     }
                 }
-                
-                // Post event for any status changes
-                Map<String, InterfaceState> newStatuses = getInterfaceStatuses(m_enabledInterfaces); 
-                checkStatusChange(m_interfaceStatuses, newStatuses);
-                m_interfaceStatuses = newStatuses;
-                
+                                
                 // Shut down the monitor if no interface is enabled
                 if(m_enabledInterfaces.size() == 0) {
                     if(monitorTask != null) {

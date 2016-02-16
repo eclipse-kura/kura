@@ -25,6 +25,7 @@ import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
 import org.eclipse.kura.position.NmeaPosition;
+import org.eclipse.kura.position.PositionListener;
 import org.eclipse.kura.position.PositionLockedEvent;
 import org.eclipse.kura.position.PositionService;
 import org.osgi.framework.BundleContext;
@@ -222,5 +223,18 @@ public class PositionServiceImpl implements PositionService {
 		index++;
 		
 		return;
+	}
+
+	@Override
+	public void registerListener(String listenerId,
+			PositionListener positionListener) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void unregisterListener(String listenerId) {
+		// TODO Auto-generated method stub
+		
 	}
 }

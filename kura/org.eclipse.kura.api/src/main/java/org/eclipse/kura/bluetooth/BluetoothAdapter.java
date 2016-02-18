@@ -14,7 +14,7 @@ public interface BluetoothAdapter {
 	public String getAddress();
 	
 	/**
-	 * Kill the process started by startLeScan.<br>
+	 * Kill the process started by startLeScan or startBeaconScan.<br>
 	 * SIGINT must be sent to the hcitool process. Otherwise the adapter must be toggled (down/up).
 	 * 
 	 */

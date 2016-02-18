@@ -91,19 +91,17 @@ public class BeaconExample implements ConfigurableComponent, BluetoothBeaconScan
 			Object value = entry.getValue();
 			
 			try {
-				switch(key) {
-				case PROPERTY_INAME:
+				
+				if(key.equals(PROPERTY_INAME)) {
 					adapterName = (String)value;
-					break;
 					
-				case PROPERTY_TOPIC_PREFIX:
+				} else if(key.equals(PROPERTY_TOPIC_PREFIX)) {
 					topicPrefix = (String)value;
-					break;
 					
-				case PROPERTY_RATE_LIMIT:
+				} else if(key.equals(PROPERTY_RATE_LIMIT)) {
 					rateLimit = (Integer)value;
-					break;
 				}
+
 			} catch(Exception e) {
 				log.error("Bad property type {} ({})", key, value.getClass().getSimpleName());
 			}
@@ -116,7 +114,7 @@ public class BeaconExample implements ConfigurableComponent, BluetoothBeaconScan
 	
 	private void setup() {
 		
-		publishTimes = new HashMap<>();
+		publishTimes = new HashMap<String, Long>();
 		
 		bluetoothAdapter = bluetoothService.getBluetoothAdapter(adapterName);
 		if(bluetoothAdapter != null) {

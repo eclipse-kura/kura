@@ -10,6 +10,10 @@ import org.eclipse.kura.bluetooth.BluetoothLeNotificationListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+
+// More documentation can be found in http://processors.wiki.ti.com/index.php/SensorTag_User_Guide for the CC2541
+// and http://processors.wiki.ti.com/index.php/CC2650_SensorTag_User's_Guide for the CC2650
+
 public class TiSensorTag implements BluetoothLeNotificationListener {
 
 	private static final Logger s_logger = LoggerFactory.getLogger(TiSensorTag.class);
@@ -213,14 +217,16 @@ public class TiSensorTag implements BluetoothLeNotificationListener {
 		int lsbAmb = Integer.parseInt(tmp[2], 16);
 		int msbAmb = Integer.parseInt(tmp[3], 16);
 		
-		int objT = (unsignedToSigned(msbObj) << 8) + lsbObj;
+		int objT = unsignedToSigned((msbObj << 8) + lsbObj, 16);
 		int ambT = (msbAmb << 8) + lsbAmb;
 		
-		temperatures[0] = ambT / 128.0;
-		
-		if (CC2650) { 
-			temperatures[1] = objT / 128.0;
+		if (CC2650) {
+			temperatures[0] = (double) ((ambT >> 2) * 0.03125);
+			temperatures[1] = (double) ((objT >> 2) * 0.03125);
 		} else {
+			
+			temperatures[0] = ambT / 128.0;
+			
 			double Vobj2 = objT;
 			Vobj2 *= 0.00000015625;
 
@@ -354,18 +360,18 @@ public class TiSensorTag implements BluetoothLeNotificationListener {
 			int zlsb = Integer.parseInt(tmp[10], 16);
 			int zmsb = Integer.parseInt(tmp[11], 16);
 			
-			int x = (unsignedToSigned(xmsb) << 8) + xlsb;
-			int y = (unsignedToSigned(ymsb) << 8) + ylsb;
-			int z = (unsignedToSigned(zmsb) << 8) + zlsb; 
+			int x = unsignedToSigned((xmsb << 8) + xlsb, 16);
+			int y = unsignedToSigned((ymsb << 8) + ylsb, 16);
+			int z = unsignedToSigned((zmsb << 8) + zlsb, 16); 
 			
 			acceleration[0] = (x / SCALE) * -1;
 			acceleration[1] = (y / SCALE);
 			acceleration[2] = (z / SCALE) * -1;
 		}
 		else {
-			int x = unsignedToSigned(Integer.parseInt(tmp[0], 16));
-			int y = unsignedToSigned(Integer.parseInt(tmp[1], 16));
-			int z = unsignedToSigned(Integer.parseInt(tmp[2], 16)) * -1;
+			int x = unsignedToSigned(Integer.parseInt(tmp[0], 16), 8);
+			int y = unsignedToSigned(Integer.parseInt(tmp[1], 16), 8);
+			int z = unsignedToSigned(Integer.parseInt(tmp[2], 16), 8) * -1;
 	
 			acceleration[0] = x / 64.0;
 			acceleration[1] = y / 64.0;
@@ -461,10 +467,16 @@ public class TiSensorTag implements BluetoothLeNotificationListener {
 		int lsbHum = Integer.parseInt(tmp[2], 16);
 		int msbHum = Integer.parseInt(tmp[3], 16);
 
-		int hum = (unsignedToSigned(msbHum) << 8) + lsbHum;
-		hum = hum - (hum % 4);
-		float humf = (-6f) + 125f * (hum / 65535f);
+		int hum = (msbHum << 8) + lsbHum;
+		float humf = 0f;
 		
+		if (CC2650) {
+			humf = (hum / 65536f) * 100f;
+		}
+		else {
+			hum = hum - (hum % 4);
+			humf = (-6f) + 125f * (hum / 65535f);
+		}
 		return humf;
 	}
 	
@@ -571,25 +583,25 @@ public class TiSensorTag implements BluetoothLeNotificationListener {
 			int zlsb = Integer.parseInt(tmp[16], 16);
 			int zmsb = Integer.parseInt(tmp[17], 16);
 			
-			int x = (unsignedToSigned(xmsb) << 8) + xlsb;
-			int y = (unsignedToSigned(ymsb) << 8) + ylsb;
-			int z = (unsignedToSigned(zmsb) << 8) + zlsb;
+			int x = unsignedToSigned((xmsb << 8) + xlsb, 16);
+			int y = unsignedToSigned((ymsb << 8) + ylsb, 16);
+			int z = unsignedToSigned((zmsb << 8) + zlsb, 16);
 			
 			magneticField[0] = x / SCALE;
 			magneticField[1] = y / SCALE; 
 			magneticField[2] = z / SCALE;
 		}
 		else {
-			int msbX = Integer.parseInt(tmp[0], 16);
-			int lsbX = Integer.parseInt(tmp[1], 16);
-			int msbY = Integer.parseInt(tmp[2], 16);
-			int lsbY = Integer.parseInt(tmp[3], 16);
-			int msbZ = Integer.parseInt(tmp[4], 16);
-			int lsbZ = Integer.parseInt(tmp[5], 16);
+			int lsbX = Integer.parseInt(tmp[0], 16);
+			int msbX = Integer.parseInt(tmp[1], 16);
+			int lsbY = Integer.parseInt(tmp[2], 16);
+			int msbY = Integer.parseInt(tmp[3], 16);
+			int lsbZ = Integer.parseInt(tmp[4], 16);
+			int msbZ = Integer.parseInt(tmp[5], 16);
 
-			int x = (unsignedToSigned(msbX) << 8) + lsbX;
-			int y = (unsignedToSigned(msbY) << 8) + lsbY;
-			int z = (unsignedToSigned(msbZ) << 8) + lsbZ;
+			int x = unsignedToSigned((msbX << 8) + lsbX, 16);
+			int y = unsignedToSigned((msbY << 8) + lsbY, 16);
+			int z = unsignedToSigned((msbZ << 8) + lsbZ, 16);
 
 			magneticField[0] = x * (2000f / 65536f) * -1;
 			magneticField[1] = y * (2000f / 65536f) * -1;
@@ -730,11 +742,11 @@ public class TiSensorTag implements BluetoothLeNotificationListener {
 		String[] tmp = value.split("\\s");
 		
 		if (CC2650) {
-			
+            
             if (tmp.length > 4) {
-        		int lsbPre = Integer.parseInt(tmp[2], 16);
-        		int mmsbPre = Integer.parseInt(tmp[3], 16);
-        		int msbPre = Integer.parseInt(tmp[4], 16);
+        		int lsbPre = Integer.parseInt(tmp[3], 16);
+        		int mmsbPre = Integer.parseInt(tmp[4], 16);
+        		int msbPre = Integer.parseInt(tmp[5], 16);
                 Integer val = (msbPre << 16) + (mmsbPre << 8) + lsbPre;
                 p_a = val / 100.0f;
             }
@@ -743,15 +755,15 @@ public class TiSensorTag implements BluetoothLeNotificationListener {
                 int exponent;
         		int lsbPre = Integer.parseInt(tmp[2], 16);
         		int msbPre = Integer.parseInt(tmp[3], 16);
-                Integer sfloat = (msbPre << 8) + lsbPre;
+                Integer pre = (msbPre << 8) + lsbPre;
 
-                mantissa = sfloat & 0x0FFF;
-                exponent = (sfloat >> 12) & 0xFF;
+                mantissa = pre & 0x0FFF;
+                exponent = (pre >> 12) & 0xFF;
 
                 double output;
                 double magnitude = Math.pow(2.0, (double) exponent);
                 output = (mantissa * magnitude);
-                p_a = output / 100.0f;
+                p_a = output / 100.0;
             }
             
 		}
@@ -762,7 +774,7 @@ public class TiSensorTag implements BluetoothLeNotificationListener {
 			int lsbPre = Integer.parseInt(tmp[2], 16);
 			int msbPre = Integer.parseInt(tmp[3], 16);
 	
-			int t_r = (unsignedToSigned(msbTemp) << 8) + lsbTemp;
+			int t_r = unsignedToSigned((msbTemp << 8) + lsbTemp, 16);
 			int p_r = (msbPre << 8) + lsbPre;
 			
 			tmp = pressureCalibration.split("\\s");
@@ -788,16 +800,16 @@ public class TiSensorTag implements BluetoothLeNotificationListener {
 			c[1] = (msbc2 << 8) + lsbc2;
 			c[2] = (msbc3 << 8) + lsbc3;
 			c[3] = (msbc4 << 8) + lsbc4;
-			c[4] = (unsignedToSigned(msbc5) << 8) + lsbc5;
-			c[5] = (unsignedToSigned(msbc6) << 8) + lsbc6;
-			c[6] = (unsignedToSigned(msbc7) << 8) + lsbc7;
-			c[7] = (unsignedToSigned(msbc8) << 8) + lsbc8;
+			c[4] = unsignedToSigned((msbc5 << 8) + lsbc5, 16);
+			c[5] = unsignedToSigned((msbc6 << 8) + lsbc6, 16);
+			c[6] = unsignedToSigned((msbc7 << 8) + lsbc7, 16);
+			c[7] = unsignedToSigned((msbc8 << 8) + lsbc8, 16);
 			
 			// Ignore temperature from pressure sensor
 			// double t_a = (100 * (c[0] * t_r / Math.pow(2,8) + c[1] * Math.pow(2,6))) / Math.pow(2,16);
 		    double S = c[2] + c[3] * t_r / Math.pow(2,17) + ((c[4] * t_r / Math.pow(2,15)) * t_r) / Math.pow(2,19);
 		    double O = c[5] * Math.pow(2,14) + c[6] * t_r / Math.pow(2,3) + ((c[7] * t_r / Math.pow(2,15)) * t_r) / Math.pow(2,4);
-		    p_a = (S * p_r + O) / Math.pow(2,14);
+		    p_a = (S * p_r + O) / Math.pow(2,14) / 100.0;
 		    
 		}
 		
@@ -893,20 +905,20 @@ public class TiSensorTag implements BluetoothLeNotificationListener {
 		
 		float[] gyroscope = new float[3];
 		String[] tmp = value.split("\\s");
-		int msbX = Integer.parseInt(tmp[0], 16);
-		int lsbX = Integer.parseInt(tmp[1], 16);
-		int msbY = Integer.parseInt(tmp[2], 16);
-		int lsbY = Integer.parseInt(tmp[3], 16);
-		int msbZ = Integer.parseInt(tmp[4], 16);
-		int lsbZ = Integer.parseInt(tmp[5], 16);
+		int lsbX = Integer.parseInt(tmp[0], 16);
+		int msbX = Integer.parseInt(tmp[1], 16);
+		int lsbY = Integer.parseInt(tmp[2], 16);
+		int msbY = Integer.parseInt(tmp[3], 16);
+		int lsbZ = Integer.parseInt(tmp[4], 16);
+		int msbZ = Integer.parseInt(tmp[5], 16);
 
-		int x = (unsignedToSigned(msbX) << 8) + lsbX;
-		int y = (unsignedToSigned(msbY) << 8) + lsbY;
-		int z = (unsignedToSigned(msbZ) << 8) + lsbZ;
+		int x = unsignedToSigned((msbX << 8) + lsbX, 16);
+		int y = unsignedToSigned((msbY << 8) + lsbY, 16);
+		int z = unsignedToSigned((msbZ << 8) + lsbZ, 16);
 		
 		if (CC2650) {
 			
-			final float SCALE = (float) 128.0;
+			final float SCALE = (float) (65535 / 500);
 			
 			gyroscope[0] = x / SCALE;
 			gyroscope[1] = y / SCALE;
@@ -1019,10 +1031,10 @@ public class TiSensorTag implements BluetoothLeNotificationListener {
 		int sfloat = (msbLight << 8) + lsbLight;
 
 		mantissa = sfloat & 0x0FFF;
-		exponent = (sfloat >> 12) & 0xFF;
+		exponent = (sfloat & 0xF000) >> 12;
 
-		double magnitude = Math.pow(2.0, (double) exponent);
-		return (mantissa * magnitude) / 100.0f;
+		return (double) mantissa * (0.01 * Math.pow(2.0, (double) exponent)); 
+		
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -1090,9 +1102,9 @@ public class TiSensorTag implements BluetoothLeNotificationListener {
 	//  Auxiliary methods
 	//
 	// ---------------------------------------------------------------------------------------------
-	private int unsignedToSigned(int unsigned) {
-		if ((unsigned & (1 << 8-1)) != 0) {
-            unsigned = -1 * ((1 << 8-1) - (unsigned & ((1 << 8-1) - 1)));
+	private int unsignedToSigned(int unsigned, int bitLength) {
+		if ((unsigned & (1 << bitLength-1)) != 0) {
+            unsigned = -1 * ((1 << bitLength-1) - (unsigned & ((1 << bitLength-1) - 1)));
         }
         return unsigned;
 	}

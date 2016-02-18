@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011, 2014 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
  *
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
@@ -10,10 +10,6 @@
  *   Eurotech
  */
 package org.eclipse.kura.protocol.modbus;
-
-/* 
- * Copyright � 2009 Eurotech Inc. All rights reserved.
- */
 
 /**
  * Used to calculate the CRC-16 (cyclical redundancy check) for an array of bytes.

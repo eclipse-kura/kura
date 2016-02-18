@@ -140,6 +140,20 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
     {
         s_logger.debug("activate(componentContext, properties)...");
         
+        Dictionary<String, String[]> d = new Hashtable<String, String[]>();
+        d.put(EventConstants.EVENT_TOPIC, EVENT_TOPICS);
+        componentContext.getBundleContext().registerService(EventHandler.class.getName(), this, d);
+        
+        m_executorUtil = Executors.newSingleThreadScheduledExecutor();
+        
+        m_executorUtil.schedule(new Runnable() {
+    		@Override
+    		public void run() {
+    			//make sure we don't miss the setting of firstConfig
+    			m_firstConfig = false;
+    		}
+    	}, 3, TimeUnit.MINUTES);
+        
         m_readVisitors = new ArrayList<NetworkConfigurationVisitor>();
         m_readVisitors.add(LinuxReadVisitor.getInstance());
 
@@ -152,20 +166,6 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
         } else {
         	s_logger.debug("Props..." + properties);
         }
-        
-        m_executorUtil = Executors.newSingleThreadScheduledExecutor();
-        
-        Dictionary<String, String[]> d = new Hashtable<String, String[]>();
-        d.put(EventConstants.EVENT_TOPIC, EVENT_TOPICS);
-        componentContext.getBundleContext().registerService(EventHandler.class.getName(), this, d);
-        
-        m_executorUtil.schedule(new Runnable() {
-    		@Override
-    		public void run() {
-    			//make sure we don't miss the setting of firstConfig
-    			m_firstConfig = false;
-    		}
-    	}, 3, TimeUnit.MINUTES);
     }
     
     protected void deactivate(ComponentContext componentContext) {

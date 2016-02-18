@@ -5,8 +5,8 @@
 
 	<parent>
 		<groupId>org.eclipse.kura</groupId>
-		<artifactId>target-platform</artifactId>
-		<version>1.4.0-SNAPSHOT</version>
+		<artifactId>target-platform-previous</artifactId>
+		<version>1.4.0</version>
 	</parent>
 
 	<groupId>org.eclipse.kura</groupId>
@@ -162,69 +162,12 @@
                             <artifactId>org.eclipse.soda.dk.comm</artifactId>
                             <version>${org.eclipse.soda.dk.comm.version}</version>					
 								</artifactItem>    
-							</artifactItems>
+							</artifactItems><stripVersion>true</stripVersion>
 							<outputDirectory>${project.basedir}/target/source/plugins</outputDirectory>
 						</configuration>
 					</execution>
 				</executions>
-			</plugin>
-			<plugin>
-				<artifactId>maven-antrun-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>setup</id>
-						<phase>process-resources</phase>
-						<goals>
-							<goal>run</goal>
-						</goals>
-						<configuration>
-							<tasks>
-								<mkdir dir="target/source/plugins/" />
-								<copy todir="target/source/plugins/">
-									<fileset dir="plugins" />
-								</copy>
-							</tasks>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.sonatype.tycho</groupId>
-				<artifactId>tycho-p2-extras-plugin</artifactId>
-				<version>0.11.0</version>
-				<executions>
-					<execution>
-						<phase>prepare-package</phase>
-						<goals>
-							<goal>publish-features-and-bundles</goal>
-						</goals>
-					</execution>
-				</executions>
-				<configuration>
-					<compress>false</compress>
-				</configuration>
-			</plugin>
-			<plugin>
-				<artifactId>maven-antrun-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>install-commons</id>
-						<phase>install</phase>
-						<goals>
-							<goal>run</goal>
-						</goals>
-						<configuration>
-							<tasks>
-								<delete dir="../../kura/target-definition/common/" />
-								<mkdir dir="../../kura/target-definition/common/repository" />
-								<copy todir="../../kura/target-definition/common/repository">
-									<fileset dir="${project.build.directory}/repository" />
-								</copy>
-							</tasks>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-		</plugins>
-	</build>
+            </plugin>
+        </plugins>
+    </build>
 </project>

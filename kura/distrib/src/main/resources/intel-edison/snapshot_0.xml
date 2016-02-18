@@ -197,6 +197,9 @@
             <esf:property name="net.interface.wlan0.config.wifi.master.securityType" array="false" encrypted="false" type="String">
                 <esf:value>SECURITY_WPA2</esf:value>
             </esf:property>
+            <esf:property array="false" encrypted="false" name="net.interface.wlan0.config.wifi.master.pairwiseCiphers" type="String">
+                <esf:value>CCMP</esf:value>
+            </esf:property>
             <esf:property name="net.interface.usb0.ip4.prefix" array="false" encrypted="false" type="Short">
                 <esf:value>24</esf:value>
             </esf:property>
@@ -354,7 +357,7 @@
                 <esf:value>7200</esf:value>
             </esf:property>
             <esf:property name="net.interface.wlan0.config.ip4.status" array="false" encrypted="false" type="String">
-                <esf:value>netIPv4StatusDisabled</esf:value>
+                <esf:value>netIPv4StatusEnabledLAN</esf:value>
             </esf:property>
             <esf:property name="net.interface.wlan0.driver.version" array="false" encrypted="false" type="String">
                 <esf:value>unknown</esf:value>

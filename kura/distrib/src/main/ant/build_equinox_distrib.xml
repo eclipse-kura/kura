@@ -335,9 +335,11 @@ fi
                         prefix="${build.output.name}/install" />
             <zipfileset file="${project.build.directory}/${build.output.name}/kura.service.edison"
                         prefix="${build.output.name}/install" />
-            <zipfileset file="src/main/resources/${build.name}/firewall.init"
+ 	    <zipfileset file="src/main/resources/${build.name}/recover_default_config.init"
+                        prefix="${build.output.name}/install" />           
+	    <zipfileset file="src/main/resources/${build.name}/firewall.init"
                         prefix="${build.output.name}/install" />
-           <zipfileset file="src/main/resources/${build.name}/iptables.init"
+            <zipfileset file="src/main/resources/${build.name}/iptables.init"
                         prefix="${build.output.name}/install" />
             <zipfileset file="src/main/resources/common/monit.init.wrl"
                         prefix="${build.output.name}/install" />
@@ -507,6 +509,7 @@ fi
                 <arg value="${build.name}" />
 				<arg value="${kura.install.dir}" />
         </exec>
+        
 
 
 		<!-- Get version information for the bundles/files in this build -->
@@ -584,6 +587,19 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
         <jar destfile="${project.build.directory}/${build.output.name}_upgrader.dp"
                 manifest="${project.build.directory}/${build.output.name}/dp_upgrade_stage/META-INF/MANIFEST.MF"
                 basedir="${project.build.directory}/${build.output.name}/dp_upgrade_stage" />
+                
+        <checksum algorithm="md5">
+    		<fileset dir="./target/" >
+    			<include name="kura_${project.version}_${build.name}*.sh"/>
+    			<include name="kura_${project.version}_${build.name}*.dp"/>
+    		</fileset>
+		</checksum>
+		<checksum algorithm="SHA-1">
+    		<fileset dir="./target/" >
+    			<include name="kura_${project.version}_${build.name}*.sh"/>
+    			<include name="kura_${project.version}_${build.name}*.dp"/>
+    		</fileset>
+		</checksum>
     </target>
 
 <!-- ### WINDOWS ########################################################################################################################### -->
@@ -903,7 +919,7 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
 	<target name="web-config" if="web.jar.present">
 		<propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
             	<entry key="osgi.bundles" operation="+"
-                   value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.web_${org.eclipse.kura.web.version}.jar@5:start" />
+                   value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.web_${org.eclipse.kura.web.version}.jar@6:start" />
         </propertyfile>
 	</target>
 

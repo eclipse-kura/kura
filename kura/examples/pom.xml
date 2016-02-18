@@ -45,6 +45,7 @@
 				<module>org.eclipse.kura.example.gpio</module>
 				<module>org.eclipse.kura.example.ble.tisensortag</module>
 				<module>org.eclipse.kura.example.beacon</module>
+				<module>org.eclipse.kura.example.beacon_scanner</module>
 			</modules>
 		</profile>
 		<profile>

@@ -194,10 +194,6 @@ public class DeploymentAgent implements DeploymentAgentService {
 	}
 
 	protected void deactivate(ComponentContext componentContext) {
-		m_dpaConfPath = null;
-
-		m_deployedPackages = null;
-
 		if ((s_installerTask != null) && (!s_installerTask.isDone())) {
 			s_logger.debug("Cancelling DeploymentAgent task ...");
 			s_installerTask.cancel(true);
@@ -236,6 +232,8 @@ public class DeploymentAgent implements DeploymentAgentService {
 			m_uninstallerExecutor = null;
 		}
 
+		m_dpaConfPath = null;
+		m_deployedPackages = null;
 		m_uninstPackageNames = null;
 		m_instPackageUrls = null;
 	}

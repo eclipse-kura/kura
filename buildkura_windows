@@ -168,7 +168,7 @@ mvn $skip clean install;
 cd ../kura ; 
 mvn $skip -f manifest_pom.xml clean install -Pcan
 mvn $skip -f manifest_pom.xml eclipse:eclipse
-mvn $skip -f pom_pom.xml $last_arg clean install -Pwindows -Pweb -Pdio.skip
+mvn $skip -f pom_pom.xml $last_arg clean install -PWin64-nn -Pweb -Pdio.skip
 
 if [[ "$0" == *windows* ]]
 then

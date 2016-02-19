@@ -407,7 +407,8 @@
 									<include name="pom.xml"/>
 								</replace>
 								<!-- execute script to add artifacts to pom file -->
-								<exec executable="src/main/sh/generate_kura_bundles_pom.sh" output="RELEASE_INFO/${project.version}/kura-bundles/pom.xml" append="true">
+								<exec executable="bash" output="RELEASE_INFO/${project.version}/kura-bundles/pom.xml" append="true">
+									<arg value="src/main/sh/generate_kura_bundles_pom.sh" />
 									<arg value="RELEASE_INFO/${project.version}/config/kura.build.properties" />
 								</exec>
 
@@ -424,10 +425,12 @@
 								<replace token="&lt;/artifactItems&gt;" value="&lt;/artifactItems&gt;&lt;stripVersion&gt;true&lt;/stripVersion&gt;" dir="RELEASE_INFO/${project.version}/p2-repo-common">
 									<include name="pom.xml"/>
 								</replace>
-								<!-- execute script to add artifacts to pom file -->
-								<exec executable="src/main/sh/generate_p2_repo_pom.sh" output="RELEASE_INFO/${project.version}/p2-repo-common/pom.xml">
+								<!-- execute script to add artifacts to pom file - need to have different input/output files (Win) -->
+								<exec executable="bash" output="RELEASE_INFO/${project.version}/p2-repo-common/pom_.xml">
+									<arg value="src/main/sh/generate_p2_repo_pom.sh" />
 									<arg value="RELEASE_INFO/${project.version}/p2-repo-common/pom.xml" />
 								</exec>
+								<move file="RELEASE_INFO/${project.version}/p2-repo-common/pom_.xml" tofile="RELEASE_INFO/${project.version}/p2-repo-common/pom.xml"/>
 
 								<!-- Copy target-platform/p2-repo-equinox_3.8.1/pom.xml in distrib/RELEASE_INFO/${project.version}/p2-repo-equinox_3.8.1/pom.xml -->
 								<copy
@@ -442,10 +445,12 @@
 								<replace token="&lt;/artifactItems&gt;" value="&lt;/artifactItems&gt;&lt;stripVersion&gt;true&lt;/stripVersion&gt;" dir="RELEASE_INFO/${project.version}/p2-repo-equinox_3.8.1">
 									<include name="pom.xml"/>
 								</replace>
-								<!-- execute script to add artifacts to pom file -->
-								<exec executable="src/main/sh/generate_p2_repo_pom.sh" output="RELEASE_INFO/${project.version}/p2-repo-equinox_3.8.1/pom.xml">
+								<!-- execute script to add artifacts to pom file - need to have different input/output files (Win) -->
+								<exec executable="bash" output="RELEASE_INFO/${project.version}/p2-repo-equinox_3.8.1/pom_.xml">
+									<arg value="src/main/sh/generate_p2_repo_pom.sh" />
 									<arg value="RELEASE_INFO/${project.version}/p2-repo-equinox_3.8.1/pom.xml" />
 								</exec>
+								<move file="RELEASE_INFO/${project.version}/p2-repo-equinox_3.8.1/pom_.xml" tofile="RELEASE_INFO/${project.version}/p2-repo-equinox_3.8.1/pom.xml"/>
 							</target>
 						</configuration>
 					</execution>

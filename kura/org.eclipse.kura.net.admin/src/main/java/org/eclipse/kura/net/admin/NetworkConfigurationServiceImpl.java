@@ -164,7 +164,7 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
         if(properties == null) {
         	s_logger.debug("Got null properties...");
         } else {
-        	s_logger.debug("Props..." + properties);
+        	s_logger.debug("Props...{}", properties);
         }
     }
     
@@ -177,7 +177,7 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
     
     @Override
 	public void handleEvent(Event event) {
-		s_logger.debug("handleEvent - topic: " + event.getTopic());
+		s_logger.debug("handleEvent - topic: {}", event.getTopic());
         String topic = event.getTopic();
         if (topic.equals(KuraConfigReadyEvent.KURA_CONFIG_EVENT_READY_TOPIC)) {
         	m_firstConfig = false;
@@ -210,7 +210,7 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
         try {
         	if(properties != null) {
         		s_logger.debug("new properties - updating");
-        		s_logger.debug("modified.interface.names: " + properties.get("modified.interface.names"));
+        		s_logger.debug("modified.interface.names: {}", properties.get("modified.interface.names"));
         		
         		//dynamically insert the type properties..
         		Map<String,Object> modifiedProps = new HashMap<String, Object>();

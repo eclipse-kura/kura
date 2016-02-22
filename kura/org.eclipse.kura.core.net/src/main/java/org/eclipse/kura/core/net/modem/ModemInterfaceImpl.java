@@ -68,7 +68,7 @@ public class ModemInterfaceImpl<T extends ModemInterfaceAddress> extends Abstrac
                     ModemInterfaceAddressImpl copiedInterfaceAddressImpl = new ModemInterfaceAddressImpl(modemInterfaceAddress);
                     interfaceAddresses.add((T)copiedInterfaceAddressImpl);
                 } catch (Exception e) {
-                    s_logger.debug("Could not copy interface address: " + modemInterfaceAddress);
+                    s_logger.debug("Could not copy interface address: {}", modemInterfaceAddress);
                 }
             }
         }

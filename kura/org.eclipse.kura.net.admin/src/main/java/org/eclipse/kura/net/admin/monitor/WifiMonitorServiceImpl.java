@@ -368,11 +368,11 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
 				String interfaceName = it.next();
 				if ((oldStatuses != null) && oldStatuses.containsKey(interfaceName)) {
 					if (!newStatuses.get(interfaceName).equals(oldStatuses.get(interfaceName))) {
-						s_logger.debug("Posting NetworkStatusChangeEvent on interface: " + interfaceName);
+						s_logger.debug("Posting NetworkStatusChangeEvent on interface: {}", interfaceName);
 						m_eventAdmin.postEvent(new NetworkStatusChangeEvent(interfaceName, newStatuses.get(interfaceName), null));
 					}
 				} else {
-					s_logger.debug("Posting NetworkStatusChangeEvent on enabled interface: " + interfaceName);
+					s_logger.debug("Posting NetworkStatusChangeEvent on enabled interface: {}", interfaceName);
 					m_eventAdmin.postEvent(new NetworkStatusChangeEvent(interfaceName, newStatuses.get(interfaceName), null));
 				}
 			}
@@ -383,7 +383,7 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
                 while (it.hasNext()) {                    
                     String interfaceName = it.next();
                     if(!newStatuses.containsKey(interfaceName)) {
-                        s_logger.debug("Posting NetworkStatusChangeEvent on disabled interface: " + interfaceName);
+                        s_logger.debug("Posting NetworkStatusChangeEvent on disabled interface: {}", interfaceName);
                         m_eventAdmin.postEvent(new NetworkStatusChangeEvent(interfaceName, oldStatuses.get(interfaceName), null));
                     }
                 }
@@ -523,14 +523,14 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
     }
     
     private void disableInterface(String interfaceName) throws KuraException {
-        s_logger.debug("Disabling " + interfaceName);
+        s_logger.debug("Disabling {}", interfaceName);
         m_netAdminService.disableInterface(interfaceName);
         m_netAdminService.manageDhcpServer(interfaceName, false);
     }
     
     private void enableInterface(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig) throws KuraException {
         
-        s_logger.debug("enableInterface: " + netInterfaceConfig);
+        s_logger.debug("enableInterface: {}", netInterfaceConfig);
         WifiInterfaceConfigImpl wifiInterfaceConfig = null;
         
         if(netInterfaceConfig instanceof WifiInterfaceConfigImpl) {
@@ -594,10 +594,10 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
                     
                     if(netInterfaceConfig instanceof WifiInterfaceConfigImpl) {
                         if(isWifiEnabled((WifiInterfaceConfigImpl)netInterfaceConfig)) {
-                        	s_logger.debug("Adding " + interfaceName + " to enabledInterfaces");
+                            s_logger.debug("Adding {} to enabledInterfaces", interfaceName);
                             m_enabledInterfaces.add(interfaceName);
                         } else {
-                        	s_logger.debug("Adding " + interfaceName + " to disabledInterfaces");
+                            s_logger.debug("Adding {} to disabledInterfaces", interfaceName);
                             m_disabledInterfaces.add(interfaceName);
                         }
                     }
@@ -709,7 +709,7 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
             	while(it.hasNext()) {
             		NetConfig nc = it.next();
             		if(nc instanceof WifiConfig && ((WifiConfig) nc).getMode() != newWifiMode) {
-            			s_logger.debug("removing current non-active WifiConfig for comparison: " + nc);
+            			s_logger.debug("removing current non-active WifiConfig for comparison: {}", nc);
 						it.remove();
         			}
             	}
@@ -718,14 +718,14 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
             	while(it.hasNext()) {
             		NetConfig nc = it.next();
             		if(nc instanceof WifiConfig && ((WifiConfig) nc).getMode() != newWifiMode) {
-            			s_logger.debug("removing new non-active WifiConfig for comparison: " + nc);
+            			s_logger.debug("removing new non-active WifiConfig for comparison: {}", nc);
 						it.remove();
         			}
             	}
             	
             	if(currentNetConfigs.size() != newNetConfigs.size()) {
-            	    s_logger.debug("\tNumber of configs changed - Old config has: " + currentNetConfigs.size());
-            	    s_logger.debug("\tNumber of configs changed - New config has: " + newNetConfigs.size());
+            	    s_logger.debug("\tNumber of configs changed - Old config has: {}", currentNetConfigs.size());
+            	    s_logger.debug("\tNumber of configs changed - New config has: {}", newNetConfigs.size());
                     reconfiguredInterfaces.add(interfaceName);
             	} else {
                 	for(int i = 0; i < currentNetConfigs.size(); i++) {
@@ -739,8 +739,8 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
         						
         						//if the config is different and is not the FirewallNatConfig
         						if(!newNetConfig.equals(currentNetConfig) && newNetConfig.getClass() != FirewallAutoNatConfig.class) {
-        							s_logger.debug("\tConfig changed - Old config: " + currentNetConfig.toString());
-        							s_logger.debug("\tConfig changed - New config: " + newNetConfig.toString());
+        							s_logger.debug("\tConfig changed - Old config: {}", currentNetConfig);
+        							s_logger.debug("\tConfig changed - New config: {}", newNetConfig);
         							reconfiguredInterfaces.add(interfaceName);
         						}
         						break;
@@ -748,7 +748,7 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
                 		}
                 		
                 		if(!foundConfigMatch) {
-                		    s_logger.debug("\tConfig was removed - Old config: " + currentNetConfig.toString());
+                		    s_logger.debug("\tConfig was removed - Old config: {}", currentNetConfig);
                 			reconfiguredInterfaces.add(interfaceName);
                 			break;
                 		}
@@ -765,9 +765,9 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
             	s_logger.debug("oldConfig was null, adding newConfig");
             	reconfiguredInterfaces.add(interfaceName);
             } else if(currentConfig != null) {
-                s_logger.debug("Configuration for " + interfaceName + " has changed");
+                s_logger.debug("Configuration for {} has changed", interfaceName);
                 reconfiguredInterfaces.add(interfaceName);
-                s_logger.debug("Removing " + interfaceName + " from list of enabled interfaces because it is not configured");
+                s_logger.debug("Removing {} from list of enabled interfaces because it is not configured", interfaceName);
                 m_disabledInterfaces.add(interfaceName);
             } else {
             	s_logger.debug("old and new wifi config are null...");
@@ -775,10 +775,10 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
             
             // do we need to monitor?
             if(isWifiEnabled(newConfig)) {
-                s_logger.debug("Adding " + interfaceName + " to list of enabled interfaces");
+                s_logger.debug("Adding {} to list of enabled interfaces", interfaceName);
                 m_enabledInterfaces.add(interfaceName);
             } else {
-                s_logger.debug("Removing " + interfaceName + " from list of enabled interfaces because it is disabled");
+                s_logger.debug("Removing {} from list of enabled interfaces because it is disabled", interfaceName);
                 m_disabledInterfaces.add(interfaceName);
             }
         }

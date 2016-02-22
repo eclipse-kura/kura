@@ -534,11 +534,11 @@ public class PositionServiceImpl implements PositionService, ConfigurableCompone
 			prop.setProperty("parity", Integer.toString(parity));
 			prop.setProperty("bitsPerWord", Integer.toString(bitsPerWord));
 			
-			s_logger.debug("port name: " + portName);
-			s_logger.debug("baud rate " + baudRate);
-			s_logger.debug("stop bits " + stopBits);
-			s_logger.debug("parity " + parity);
-			s_logger.debug("bits per word " + bitsPerWord);
+			s_logger.debug("port name: {}", portName);
+			s_logger.debug("baud rate {}", baudRate);
+			s_logger.debug("stop bits {}", stopBits);
+			s_logger.debug("parity {}", parity);
+			s_logger.debug("bits per word {}", bitsPerWord);
 			return prop;
 		} else {
 			return null;

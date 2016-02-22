@@ -78,7 +78,7 @@ public class IfcfgConfigReader implements NetworkConfigurationVisitor {
 			NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig,
 			Properties kuraExtendedProps) throws KuraException {
 		String interfaceName = netInterfaceConfig.getName();
-		s_logger.debug("Getting config for " + interfaceName);
+		s_logger.debug("Getting config for {}", interfaceName);
 
 		NetInterfaceType type = netInterfaceConfig.getType();
 		if (type == NetInterfaceType.ETHERNET || type == NetInterfaceType.WIFI
@@ -290,7 +290,7 @@ public class IfcfgConfigReader implements NetworkConfigurationVisitor {
 							netInterfaceStatus, autoConnect);
 					setNetConfigIP4(netConfig, autoConnect, dhcp, address,
 							gateway, prefixString, netmask, kuraProps);
-					s_logger.debug("NetConfig: " + netConfig.toString());
+					s_logger.debug("NetConfig: {}", netConfig);
 					netConfigs.add(netConfig);
 				}
 			}

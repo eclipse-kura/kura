@@ -11,6 +11,7 @@
  *******************************************************************************/
 package org.eclipse.kura.web.client;
 
+import java.util.Date;
 import java.util.List;
 
 import org.eclipse.kura.web.client.messages.Messages;
@@ -24,6 +25,8 @@ import org.eclipse.kura.web.shared.service.GwtSecurityService;
 import org.eclipse.kura.web.shared.service.GwtSecurityServiceAsync;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenService;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenServiceAsync;
+import org.eclipse.kura.web.shared.service.GwtStatusService;
+import org.eclipse.kura.web.shared.service.GwtStatusServiceAsync;
 
 import com.allen_sauer.gwt.log.client.Log;
 import com.extjs.gxt.ui.client.GXT;
@@ -56,11 +59,13 @@ public class denali implements EntryPoint
 {
 	private static final Messages MSGS = GWT.create(Messages.class);
 	//private final boolean VIEW_LOG = true;
+	private final GwtStatusServiceAsync gwtStatusService = GWT.create(GwtStatusService.class);
 	private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
 	private final GwtDeviceServiceAsync gwtDeviceService = GWT.create(GwtDeviceService.class);
 	private final GwtSecurityServiceAsync gwtSecurityService = GWT.create(GwtSecurityService.class);
-	
+
 	private boolean isDevelopMode = false;
+	private boolean m_connected;
 
 	/**
 	 * Note, we defer all application initialization code to
@@ -135,20 +140,47 @@ public class denali implements EntryPoint
 							}
 						}
 
-						gwtSecurityService.isDebugMode(new AsyncCallback<Boolean>() {
-
-							public void onFailure(Throwable caught) {
-								Info.display("Bad", "Is debug mode error");
-								render(gwtSession);
+						gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
+							@Override
+							public void onFailure(Throwable ex) {
+								FailureHandler.handle(ex);
 							}
 
-							public void onSuccess(Boolean result) {
-								if(result){
-									isDevelopMode= true;
-								}
-								render(gwtSession);
-							}
-						});
+							@Override
+							public void onSuccess(GwtXSRFToken token) {     
+								gwtStatusService.getDeviceConfig(token, gwtSession.isNetAdminAvailable(), new AsyncCallback<ListLoadResult<GwtGroupedNVPair>>() {
+									public void onFailure(Throwable caught) {
+
+										FailureHandler.handle(caught);
+									}
+									public void onSuccess(ListLoadResult<GwtGroupedNVPair> pairs) {
+										List<GwtGroupedNVPair> results = pairs.getData();
+										for (GwtGroupedNVPair result : results) {
+											if ("Connection Status".equals(result.getName())) {
+												if ("CONNECTED".equals(result.getValue())) {
+													m_connected = true;
+												} else {
+													m_connected = false;
+												}
+											}
+										}
+										gwtSecurityService.isDebugMode(new AsyncCallback<Boolean>() {
+
+											public void onFailure(Throwable caught) {
+												Info.display("Bad", "Is debug mode error");
+												render(gwtSession);
+											}
+
+											public void onSuccess(Boolean result) {
+												if(result){
+													isDevelopMode= true;
+												}
+												render(gwtSession);
+											}
+										});
+									}
+								});
+							}});
 					}
 
 					public void onFailure(Throwable caught) {
@@ -206,7 +238,7 @@ public class denali implements EntryPoint
 		westData.setSplit(true);  
 		westData.setCollapsible(true);  
 		westData.setMargins(new Margins(0,5,0,0));
-		WestNavigationView westView = new WestNavigationView(gwtSession, center);
+		WestNavigationView westView = new WestNavigationView(gwtSession, center, m_connected);
 		viewport.add(westView, westData);
 
 		//
@@ -221,8 +253,12 @@ public class denali implements EntryPoint
 		final HorizontalPanel south = new HorizontalPanel();
 		south.setTableWidth("100%");
 		south.setId("south-panel-wrapper");
-		Label copyright = new Label(MSGS.copyright());
-		copyright.setStyleName("x-form-label");
+		
+		Date now = new Date();
+        @SuppressWarnings("deprecation")
+        int year = now.getYear() + 1900;
+        Label copyright = new Label(MSGS.copyright(String.valueOf(year)));
+        copyright.setStyleName("x-form-label");
 		TableData td = new TableData();
 		td.setHorizontalAlign(HorizontalAlignment.LEFT);
 		south.add(copyright, td);
@@ -233,7 +269,7 @@ public class denali implements EntryPoint
 		developmentMode.getElement().getStyle().setColor("red");
 		final TableData tdExecMode = new TableData();
 		tdExecMode.setHorizontalAlign(HorizontalAlignment.LEFT);
-		
+
 		if(isDevelopMode){
 			south.add(developmentMode, tdExecMode);
 		}

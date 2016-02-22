@@ -1,3 +1,14 @@
+/*******************************************************************************
+ * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     Eurotech
+ *******************************************************************************/
 package org.eclipse.kura.web.client.ui.Device;
 
 import org.eclipse.kura.web.client.messages.Messages;
@@ -28,6 +39,7 @@ import com.google.gwt.user.client.ui.FileUpload;
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.FormPanel.SubmitCompleteEvent;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.Hidden;
 import com.google.gwt.user.client.ui.Widget;
 
 public class CommandTabUi extends Composite {
@@ -55,6 +67,8 @@ public class CommandTabUi extends Composite {
 	FileUpload docPath;
 	@UiField
 	PanelBody resultPanel;
+	@UiField
+	Hidden xsrfTokenField;
 
 	String command, password;
 	SafeHtmlBuilder safeHtml= new SafeHtmlBuilder();
@@ -73,6 +87,22 @@ public class CommandTabUi extends Composite {
 			}
 		});
 
+		xsrfTokenField.setID("xsrfToken");
+		xsrfTokenField.setName("xsrfToken");
+		xsrfTokenField.setValue("");
+		
+		gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
+			@Override
+			public void onFailure(Throwable ex) {
+				FailureHandler.handle(ex);
+			}
+
+			@Override
+			public void onSuccess(GwtXSRFToken token) {
+				xsrfTokenField.setValue(token.getToken());
+			}
+		});
+		
 		formPassword.setText("");
 		formPassword.addKeyDownHandler(new KeyDownHandler() {
 			@Override
@@ -110,8 +140,7 @@ public class CommandTabUi extends Composite {
 		commandForm.setEncoding(FormPanel.ENCODING_MULTIPART);
 		commandForm.setMethod(FormPanel.METHOD_POST);
 		commandForm.setAction(SERVLET_URL);
-		commandForm
-				.addSubmitCompleteHandler(new FormPanel.SubmitCompleteHandler() {
+		commandForm.addSubmitCompleteHandler(new FormPanel.SubmitCompleteHandler() {
 					@Override
 					public void onSubmitComplete(SubmitCompleteEvent event) {
 

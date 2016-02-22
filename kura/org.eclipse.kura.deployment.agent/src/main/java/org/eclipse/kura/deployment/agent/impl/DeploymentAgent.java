@@ -194,10 +194,6 @@ public class DeploymentAgent implements DeploymentAgentService {
 	}
 
 	protected void deactivate(ComponentContext componentContext) {
-		m_dpaConfPath = null;
-
-		m_deployedPackages = null;
-
 		if ((s_installerTask != null) && (!s_installerTask.isDone())) {
 			s_logger.debug("Cancelling DeploymentAgent task ...");
 			s_installerTask.cancel(true);
@@ -236,6 +232,8 @@ public class DeploymentAgent implements DeploymentAgentService {
 			m_uninstallerExecutor = null;
 		}
 
+		m_dpaConfPath = null;
+		m_deployedPackages = null;
 		m_uninstPackageNames = null;
 		m_instPackageUrls = null;
 	}
@@ -474,8 +472,8 @@ public class DeploymentAgent implements DeploymentAgentService {
 			// Now we need to copy the deployment package file to the Kura
 			// packages directory unless it's already there.
 			if (!dpFile.getCanonicalPath().equals(dpPersistentFile.getCanonicalPath())) {
-				s_logger.debug("dpFile.getCanonicalPath(): " +  dpFile.getCanonicalPath());
-				s_logger.debug("dpPersistentFile.getCanonicalPath(): " +  dpPersistentFile.getCanonicalPath());
+				s_logger.debug("dpFile.getCanonicalPath(): {}",  dpFile.getCanonicalPath());
+				s_logger.debug("dpPersistentFile.getCanonicalPath(): {}",  dpPersistentFile.getCanonicalPath());
 				FileUtils.copyFile(dpFile, dpPersistentFile);
 				addPackageToConfFile(dp.getName(), "file:" + dpPersistentFilePath);
 			}

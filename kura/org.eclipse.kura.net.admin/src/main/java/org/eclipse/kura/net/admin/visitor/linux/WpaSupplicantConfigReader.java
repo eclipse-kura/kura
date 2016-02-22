@@ -81,7 +81,7 @@ public class WpaSupplicantConfigReader implements NetworkConfigurationVisitor {
     
     private void getConfig(WifiInterfaceConfigImpl wifiInterfaceConfig) throws KuraException {
         String interfaceName = wifiInterfaceConfig.getName();
-        s_logger.debug("Getting wpa_supplicant config for " + interfaceName);
+        s_logger.debug("Getting wpa_supplicant config for {}", interfaceName);
         
         List<WifiInterfaceAddressConfig> wifiInterfaceAddressConfigs = wifiInterfaceConfig.getNetInterfaceAddresses();
         
@@ -135,17 +135,17 @@ public class WpaSupplicantConfigReader implements NetworkConfigurationVisitor {
 	        if(ssid == null) {
 	            s_logger.warn("WPA in client mode is not configured");
 	        } else {
-		        s_logger.debug("curent wpa_supplicant.conf: ssid=" + ssid);
+		        s_logger.debug("curent wpa_supplicant.conf: ssid={}", ssid);
 		        
 		        // wifi mode
 		        int currentMode = (props.getProperty("mode") != null) ? Integer.parseInt(props.getProperty("mode")) : WpaSupplicantUtil.MODE_INFRA;
-		        s_logger.debug("current wpa_supplicant.conf: mode=" + currentMode);
+		        s_logger.debug("current wpa_supplicant.conf: mode={}", currentMode);
 		
 		        switch (wifiMode) {
 		        case INFRA:
 		            String scan_freq = props.getProperty("scan_freq");
 		            if (scan_freq != null) {
-		                s_logger.debug("current wpa_supplicant.conf: scan_freq=" + scan_freq);
+		                s_logger.debug("current wpa_supplicant.conf: scan_freq={}", scan_freq);
 		                String [] saScanFreq = scan_freq.split(" ");
 		                channels = new int [saScanFreq.length];
 		                for (int i = 0; i < channels.length; i++) {
@@ -185,12 +185,12 @@ public class WpaSupplicantConfigReader implements NetworkConfigurationVisitor {
 		        
 		        String proto = props.getProperty("proto");
 		        if (proto != null) {
-		            s_logger.debug("current wpa_supplicant.conf: proto=" + proto);
+		            s_logger.debug("current wpa_supplicant.conf: proto={}", proto);
 		        }
 		        
 		        String pairwise = props.getProperty("pairwise");
 		        if (pairwise != null) {
-		            s_logger.debug("current wpa_supplicant.conf: pairwise=" + pairwise);
+		            s_logger.debug("current wpa_supplicant.conf: pairwise={}", pairwise);
 		            if(pairwise.contains(WifiCiphers.toString(WifiCiphers.CCMP_TKIP))) {
 		                pairwiseCiphers = WifiCiphers.CCMP_TKIP;
 		            } else if(pairwise.contains(WifiCiphers.toString(WifiCiphers.TKIP))) {
@@ -202,7 +202,7 @@ public class WpaSupplicantConfigReader implements NetworkConfigurationVisitor {
 		        
 		        String group = props.getProperty("group");
 		        if (group != null) {
-		            s_logger.debug("current wpa_supplicant.conf: group=" + group);
+		            s_logger.debug("current wpa_supplicant.conf: group={}", group);
 		            if(group.contains(WifiCiphers.toString(WifiCiphers.CCMP_TKIP))) {
 		                groupCiphers = WifiCiphers.CCMP_TKIP;
 		            } else if(group.contains(WifiCiphers.toString(WifiCiphers.TKIP))) {
@@ -214,7 +214,7 @@ public class WpaSupplicantConfigReader implements NetworkConfigurationVisitor {
 		        
 		        // security
 		        String keyMgmt = props.getProperty("key_mgmt");
-		        s_logger.debug("current wpa_supplicant.conf: key_mgmt=" + keyMgmt);
+		        s_logger.debug("current wpa_supplicant.conf: key_mgmt={}", keyMgmt);
 		        if (keyMgmt != null && keyMgmt.equalsIgnoreCase("WPA-PSK")) {
 		            password = props.getProperty("psk");
 		            if (proto != null) {
@@ -244,7 +244,7 @@ public class WpaSupplicantConfigReader implements NetworkConfigurationVisitor {
 		        
 		        String sBgscan = props.getProperty("bgscan");
 		        if (sBgscan != null) {
-		            s_logger.debug("current wpa_supplicant.conf: bgscan=" + sBgscan);
+		            s_logger.debug("current wpa_supplicant.conf: bgscan={}", sBgscan);
 		            bgscan = new WifiBgscan(sBgscan);
 		        }
 	        }

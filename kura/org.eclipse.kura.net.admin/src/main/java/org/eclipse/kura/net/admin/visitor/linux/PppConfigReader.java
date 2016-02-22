@@ -98,7 +98,7 @@ public class PppConfigReader implements NetworkConfigurationVisitor {
     private void getConfig(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig) throws KuraException {
     	
         String interfaceName = netInterfaceConfig.getName();
-        s_logger.debug("Getting ppp config for " + interfaceName);
+        s_logger.debug("Getting ppp config for {}", interfaceName);
         
         if(netInterfaceConfig instanceof ModemInterfaceConfigImpl) {
             StringBuilder key = new StringBuilder("net.interface." + netInterfaceConfig.getName() + ".modem.identifier");
@@ -231,7 +231,7 @@ public class PppConfigReader implements NetworkConfigurationVisitor {
 	        	}
 	        }
 	        
-	        s_logger.debug("peer properties: " + props);
+	        s_logger.debug("peer properties: {}", props);
 	
 	        if(props.getProperty("unit") != null) {
 	            unitNum = Integer.parseInt(props.getProperty("unit"));
@@ -353,10 +353,10 @@ public class PppConfigReader implements NetworkConfigurationVisitor {
 	        		secret = papSecret;
 	        	} 
 	        	
-		        s_logger.debug("* APN: " + apn);
-		        s_logger.debug("* auth: " + authType);
-		        s_logger.debug("* username: " + username);
-		        s_logger.debug("* password: " + secret);
+		        s_logger.debug("* APN: {}", apn);
+		        s_logger.debug("* auth: {}", authType);
+		        s_logger.debug("* username: {}", username);
+		        s_logger.debug("* password: {}", secret);
 	        }
         }
         

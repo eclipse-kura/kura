@@ -1,3 +1,14 @@
+/*******************************************************************************
+ * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     Eurotech
+ *******************************************************************************/
 package org.eclipse.kura.web.client.ui.Packages;
 
 import java.util.List;
@@ -15,12 +26,12 @@ import org.eclipse.kura.web.shared.service.GwtPackageServiceAsync;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenService;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenServiceAsync;
 import org.gwtbootstrap3.client.ui.Alert;
-import org.gwtbootstrap3.client.ui.AnchorListItem;
 import org.gwtbootstrap3.client.ui.Button;
 import org.gwtbootstrap3.client.ui.Modal;
 import org.gwtbootstrap3.client.ui.ModalBody;
 import org.gwtbootstrap3.client.ui.ModalFooter;
 import org.gwtbootstrap3.client.ui.TabListItem;
+import org.gwtbootstrap3.client.ui.TextBox;
 import org.gwtbootstrap3.client.ui.gwt.DataGrid;
 import org.gwtbootstrap3.client.ui.html.Span;
 
@@ -33,6 +44,7 @@ import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.FileUpload;
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.FormPanel.SubmitCompleteEvent;
 import com.google.gwt.user.client.ui.FormPanel.SubmitCompleteHandler;
@@ -71,10 +83,12 @@ public class PackagesPanelUi extends Composite {
 	@UiField
 	DataGrid<GwtDeploymentPackage> packagesGrid = new DataGrid<GwtDeploymentPackage>();
 	@UiField
-	Hidden xsrfTokenFieldFile;
+	FileUpload filePath;
+	@UiField
+	TextBox formUrl;
+	@UiField
+	Hidden xsrfTokenFieldFile, xsrfTokenFieldUrl;
 	
-	
-	private Hidden    xsrfTokenFieldUrl;
 	private ListDataProvider<GwtDeploymentPackage> packagesDataProvider = new ListDataProvider<GwtDeploymentPackage>();
 	final SingleSelectionModel<GwtDeploymentPackage> selectionModel = new SingleSelectionModel<GwtDeploymentPackage>();
 
@@ -166,11 +180,11 @@ public class PackagesPanelUi extends Composite {
 		//******FILE TAB ****//
 		fileLabel.setText(MSGS.fileLabel());
 		
-		xsrfTokenFieldFile = new Hidden();
+		filePath.setName("uploadedFile");
+		
 		xsrfTokenFieldFile.setID("xsrfToken");
 		xsrfTokenFieldFile.setName("xsrfToken");
 		xsrfTokenFieldFile.setValue("");
-		packagesFormFile.add(xsrfTokenFieldFile);
 		
 		gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
 			@Override
@@ -181,7 +195,7 @@ public class PackagesPanelUi extends Composite {
 			@Override
 			public void onSuccess(GwtXSRFToken token) {
 				xsrfTokenFieldFile.setValue(token.getToken());
-				//xsrfTokenFieldUrl.setValue(token.getToken());
+				xsrfTokenFieldUrl.setValue(token.getToken());
 			}
 		});
 		
@@ -193,11 +207,10 @@ public class PackagesPanelUi extends Composite {
 			public void onSubmitComplete(SubmitCompleteEvent event) {
 				String result = event.getResults();
 				if (result == null || result.isEmpty()) {
-					//Growl.growl(MSGS.information()+": ", MSGS.fileUploadSuccess());
 					uploadModal.hide();
 					refresh(2500);
 				} else {
-					//Growl.growl(MSGS.information()+": ", MSGS.fileUploadFailure());
+					logger.log(Level.SEVERE, "Error uploading package!");
 				}
 			}
 		});
@@ -215,6 +228,12 @@ public class PackagesPanelUi extends Composite {
 		
 		
 		//******URL TAB ****//
+		formUrl.setName("packageUrl");
+
+		xsrfTokenFieldUrl.setID("xsrfToken");
+		xsrfTokenFieldUrl.setName("xsrfToken");
+		xsrfTokenFieldUrl.setValue("");
+		
 		packagesFormUrl.setAction(SERVLET_URL + "/url");
 		packagesFormUrl.setMethod(FormPanel.METHOD_POST);
 		packagesFormUrl.addSubmitCompleteHandler(new SubmitCompleteHandler() {
@@ -247,8 +266,6 @@ public class PackagesPanelUi extends Composite {
 			public void onClick(ClickEvent event) {			
 				uploadModal.hide();
 			}});
-
-		
 	}
 
 	private void uninstall(final GwtDeploymentPackage selected) {
@@ -297,7 +314,7 @@ public class PackagesPanelUi extends Composite {
 		TextColumn<GwtDeploymentPackage> col2 = new TextColumn<GwtDeploymentPackage>() {
 			@Override
 			public String getValue(GwtDeploymentPackage object) {
-				return object.getName();
+				return object.getVersion();
 			}
 		};
 		col2.setCellStyleNames("status-table-row");
@@ -336,22 +353,21 @@ public class PackagesPanelUi extends Composite {
 							packagesDataProvider.getList().add(pair);
 						}
 						packagesDataProvider.flush();
+						
+						if(packagesDataProvider.getList().size() == 0){
+							packagesGrid.setVisible(false);
+							notification.setVisible(true);
+							notification.setText(MSGS.devicePackagesNone());
+						} else {
+							packagesGrid.setVisible(true);
+							notification.setVisible(false);
+						}
+						
 						EntryClassUi.hideWaitModal();
 					}});
 				
 			}
 			
 		});
-			
-		if(packagesDataProvider.getList().size()==0){
-			packagesGrid.setVisible(false);
-			notification.setVisible(true);
-			notification.setText(MSGS.devicePackagesNone());
-		}else {
-			packagesGrid.setVisible(true);
-			notification.setVisible(false);
-		}
-			
-		
 	}
 }

@@ -1,5 +1,17 @@
+/*******************************************************************************
+ * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     Eurotech
+ *******************************************************************************/
 package org.eclipse.kura.web.client.ui;
 
+import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -113,7 +125,10 @@ public class EntryClassUi extends Composite {
 		
 		// TODO : standardize the URL?
 		header.setUrl("eclipse/kura/icons/kura_logo_small.png");
-		footerLeft.setText(MSGS.copyright());
+		Date now = new Date();
+        @SuppressWarnings("deprecation")
+        int year = now.getYear() + 1900;
+		footerLeft.setText(MSGS.copyright(String.valueOf(year)));
 		contentPanel.setVisible(false);
 		
 		// Set client side logging

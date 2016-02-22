@@ -68,7 +68,7 @@ public class WifiConfigWriter implements NetworkConfigurationVisitor{
     // Write common wifi config
     private void writeConfig(WifiInterfaceConfigImpl wifiInterfaceConfig) throws KuraException {
         String interfaceName = wifiInterfaceConfig.getName();
-        s_logger.debug("Writing wifi config for " + interfaceName);
+        s_logger.debug("Writing wifi config for {}", interfaceName);
         
         List<WifiInterfaceAddressConfig> wifiInterfaceAddressConfigs = wifiInterfaceConfig.getNetInterfaceAddresses();
         
@@ -77,7 +77,7 @@ public class WifiConfigWriter implements NetworkConfigurationVisitor{
                 // Store the selected wifi mode
                 WifiMode wifiMode = wifiInterfaceAddressConfig.getMode();
 
-                s_logger.debug("Store wifiMode: " + wifiMode);
+                s_logger.debug("Store wifiMode: {}", wifiMode);
                 StringBuilder key = new StringBuilder("net.interface." + interfaceName + ".config.wifi.mode");
                 try {
                     KuranetConfig.setProperty(key.toString(), wifiMode.toString());

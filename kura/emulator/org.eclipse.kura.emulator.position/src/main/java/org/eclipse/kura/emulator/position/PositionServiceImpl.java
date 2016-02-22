@@ -25,6 +25,7 @@ import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
 import org.eclipse.kura.position.NmeaPosition;
+import org.eclipse.kura.position.PositionListener;
 import org.eclipse.kura.position.PositionLockedEvent;
 import org.eclipse.kura.position.PositionService;
 import org.osgi.framework.BundleContext;
@@ -152,7 +153,7 @@ public class PositionServiceImpl implements PositionService {
 		try {
 			// Create the builder and parse the file
 			SAXParser parser = factory.newSAXParser();
-			s_logger.debug("Parsing: " + fileName);
+			s_logger.debug("Parsing: {}", fileName);
 
 			BundleContext bundleContext = m_ctx.getBundleContext();
 			URL url = bundleContext.getBundle().getResource(fileName);
@@ -202,7 +203,7 @@ public class PositionServiceImpl implements PositionService {
 	}
 	
 	private void updateGps() {
-		s_logger.debug("GPS Emulator index: " + index);
+		s_logger.debug("GPS Emulator index: {}", index);
 		if ((index + 1) == gpsPoints.length) {
 			s_logger.debug("GPS Emulator - wrapping index");
 			index = 0;
@@ -222,5 +223,18 @@ public class PositionServiceImpl implements PositionService {
 		index++;
 		
 		return;
+	}
+
+	@Override
+	public void registerListener(String listenerId,
+			PositionListener positionListener) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void unregisterListener(String listenerId) {
+		// TODO Auto-generated method stub
+		
 	}
 }

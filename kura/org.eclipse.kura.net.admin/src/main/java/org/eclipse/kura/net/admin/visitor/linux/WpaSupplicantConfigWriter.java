@@ -114,7 +114,7 @@ public class WpaSupplicantConfigWriter implements NetworkConfigurationVisitor {
 	
 	private void writeConfig(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig) throws KuraException{
 		String interfaceName = netInterfaceConfig.getName();
-        s_logger.debug("Writing wpa_supplicant config for " + interfaceName);
+        s_logger.debug("Writing wpa_supplicant config for {}", interfaceName);
         
         List<? extends NetInterfaceAddressConfig> netInterfaceAddressConfigs = netInterfaceConfig.getNetInterfaceAddresses();
         
@@ -190,7 +190,7 @@ public class WpaSupplicantConfigWriter implements NetworkConfigurationVisitor {
                     // Write the config
 	        		try {
     	        		if(wpaSupplicantConfig != null) {
-                            s_logger.debug("Writing wifiConfig: " + wpaSupplicantConfig);
+                            s_logger.debug("Writing wifiConfig: {}", wpaSupplicantConfig);
                             generateWpaSupplicantConf(wpaSupplicantConfig, interfaceName, WPA_TMP_CONFIG_FILE);
                             moveWpaSupplicantConf(WPA_TMP_CONFIG_FILE);
     	        		}
@@ -208,7 +208,7 @@ public class WpaSupplicantConfigWriter implements NetworkConfigurationVisitor {
 	 */
 	private void generateWpaSupplicantConf(WifiConfig wifiConfig, String interfaceName, String configFile) throws Exception {
 		s_logger.debug("Generating WPA Supplicant Config");
-		s_logger.debug("Store wifiMode driver: " + wifiConfig.getDriver());
+		s_logger.debug("Store wifiMode driver: {}", wifiConfig.getDriver());
         StringBuilder key = new StringBuilder("net.interface." +  interfaceName + ".config.wifi." + wifiConfig.getMode().toString().toLowerCase() + ".driver");
 		try {
             KuranetConfig.setProperty(key.toString(), wifiConfig.getDriver());

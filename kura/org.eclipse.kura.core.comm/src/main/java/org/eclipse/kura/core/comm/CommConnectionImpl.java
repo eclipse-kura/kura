@@ -152,7 +152,7 @@ public class CommConnectionImpl implements CommConnection
 	@Override
 	public synchronized void sendMessage(byte[] message) throws KuraException, IOException {
 		if (message != null) {
-			s_logger.debug("sendMessage() - " + getBytesAsString(message));
+			s_logger.debug("sendMessage() - {}", getBytesAsString(message));
 			
 			if(m_outputStream == null) {
 				openOutputStream();
@@ -168,7 +168,7 @@ public class CommConnectionImpl implements CommConnection
 	@Override
 	public synchronized byte[] sendCommand(byte[] command, int timeout) throws KuraException, IOException {
 		if (command != null) {
-			s_logger.debug("sendMessage() - " + getBytesAsString(command));
+			s_logger.debug("sendMessage() - {}", getBytesAsString(command));
 
 			if(m_outputStream == null) {
 				openOutputStream();
@@ -200,7 +200,7 @@ public class CommConnectionImpl implements CommConnection
 	@Override
 	public synchronized byte[] sendCommand(byte[] command, int timeout, int demark) throws KuraException, IOException {
 		if (command != null) {
-			s_logger.debug("sendMessage() - " + getBytesAsString(command));
+			s_logger.debug("sendMessage() - {}", getBytesAsString(command));
 
 			if(m_outputStream == null) {
 				openOutputStream();

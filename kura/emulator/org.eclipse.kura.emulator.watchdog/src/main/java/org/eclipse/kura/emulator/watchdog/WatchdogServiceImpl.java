@@ -47,7 +47,7 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
 		if(properties == null) {
 			s_logger.debug("activating WatchdogService with null props");
 		} else {
-			s_logger.debug("activating WatchdogService with " + properties.toString());
+			s_logger.debug("activating WatchdogService with {}", properties.toString());
 		}
 		s_criticalServiceList = new ArrayList<CriticalServiceImpl>();
 		m_enabled=false;

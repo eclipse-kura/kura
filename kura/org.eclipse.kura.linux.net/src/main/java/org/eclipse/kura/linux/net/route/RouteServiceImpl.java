@@ -85,7 +85,7 @@ public class RouteServiceImpl implements RouteService {
 		
 		SafeProcess proc = null;
 		try {
-			s_logger.debug("Executing command:  " + command.toString());
+			s_logger.debug("Executing command:  {}", command.toString());
 			proc = ProcessUtil.exec(command.toString());
 			proc.waitFor();
 			if(proc.exitValue() != 0) {
@@ -123,7 +123,7 @@ public class RouteServiceImpl implements RouteService {
 		
 		// If no default routes exist, return null
 		if(defaultRoutes.size() == 0) {
-			s_logger.debug("No default routes exist for inteface: " + iface);
+			s_logger.debug("No default routes exist for inteface: {}", iface);
 			return null;
 		}
 		
@@ -138,7 +138,7 @@ public class RouteServiceImpl implements RouteService {
 		}
 		
 		s_logger.info("Default route found for interface: " + iface);
-		s_logger.debug("Default route:\n" + defaultRoute.getDescription());
+		s_logger.debug("Default route:\n{}", defaultRoute.getDescription());
 		return defaultRoute;
 	}
 
@@ -213,7 +213,7 @@ public class RouteServiceImpl implements RouteService {
 		
 		SafeProcess proc = null;
 		try {
-			s_logger.debug("Executing command:  " + command.toString());
+			s_logger.debug("Executing command: {}", command.toString());
 			proc = ProcessUtil.exec(command.toString());
 			proc.waitFor();
 			if(proc.exitValue() != 0) {
@@ -291,7 +291,7 @@ public class RouteServiceImpl implements RouteService {
 			s_logger.debug("Found defualt interface " + dRoute.getInterfaceName() + " for destination " + destination.getHostAddress());
 			return dRoute.getInterfaceName();
 		}
-		s_logger.debug("No default interface exists for destination " + destination.getHostAddress());
+		s_logger.debug("No default interface exists for destination {}", destination.getHostAddress());
 		return null;
 	}
 	

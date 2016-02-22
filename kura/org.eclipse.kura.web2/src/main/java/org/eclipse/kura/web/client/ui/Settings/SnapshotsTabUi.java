@@ -1,3 +1,14 @@
+/*******************************************************************************
+ * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     Eurotech
+ *******************************************************************************/
 package org.eclipse.kura.web.client.ui.Settings;
 
 import java.util.ArrayList;
@@ -29,9 +40,11 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.FileUpload;
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.FormPanel.SubmitCompleteEvent;
 import com.google.gwt.user.client.ui.FormPanel.SubmitCompleteHandler;
+import com.google.gwt.user.client.ui.Hidden;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SingleSelectionModel;
@@ -49,8 +62,7 @@ public class SnapshotsTabUi extends Composite {
 	private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
 	private final GwtSnapshotServiceAsync gwtSnapshotService = GWT.create(GwtSnapshotService.class);
 
-	private final static String SERVLET_URL = "/" + GWT.getModuleName()
-			+ "/file/configuration/snapshot";
+	private final static String SERVLET_URL = "/" + GWT.getModuleName()	+ "/file/configuration/snapshot";
 
 	@UiField
 	Modal uploadModal;
@@ -63,6 +75,10 @@ public class SnapshotsTabUi extends Composite {
 	Button refresh, download, rollback, upload;
 	@UiField
 	Alert notification;
+	@UiField
+	FileUpload filePath;
+	@UiField
+	Hidden xsrfTokenField;
 	@UiField
 	DataGrid<GwtSnapshot> snapshotsGrid = new DataGrid<GwtSnapshot>();
 	
@@ -279,6 +295,24 @@ public class SnapshotsTabUi extends Composite {
 		snapshotsForm.setEncoding(FormPanel.ENCODING_MULTIPART);
 		snapshotsForm.setMethod(FormPanel.METHOD_POST);
 		snapshotsForm.setAction(SERVLET_URL);
+		
+		filePath.setName("uploadedFile");
+		
+		xsrfTokenField.setID("xsrfToken");
+        xsrfTokenField.setName("xsrfToken");
+        xsrfTokenField.setValue("");
+        
+        gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
+			@Override
+			public void onFailure(Throwable ex) {
+				FailureHandler.handle(ex);
+			}
+
+			@Override
+			public void onSuccess(GwtXSRFToken token) {
+				xsrfTokenField.setValue(token.getToken());
+			}
+		});
 
 		uploadCancel.addClickHandler(new ClickHandler() {
 			@Override
@@ -299,12 +333,10 @@ public class SnapshotsTabUi extends Composite {
 			public void onSubmitComplete(SubmitCompleteEvent event) {
 				String htmlResponse = event.getResults();
 				if (htmlResponse == null || htmlResponse.isEmpty()) {
-					//Growl.growl(MSGS.information() + ": ",
-					//		MSGS.fileUploadSuccess());
+					logger.log(Level.FINER, MSGS.information() + ": " + MSGS.fileUploadSuccess());
 					uploadModal.hide();
 				} else {
-					//Growl.growl(MSGS.information() + ": ",
-					//		MSGS.fileUploadFailure());
+					logger.log(Level.SEVERE, MSGS.information() + ": " + MSGS.fileUploadFailure());
 				}
 
 			}

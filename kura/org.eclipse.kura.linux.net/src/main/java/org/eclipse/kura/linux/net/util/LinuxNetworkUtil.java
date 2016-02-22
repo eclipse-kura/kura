@@ -14,6 +14,7 @@ package org.eclipse.kura.linux.net.util;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
@@ -33,7 +34,6 @@ import org.eclipse.kura.linux.net.NetworkServiceImpl;
 import org.eclipse.kura.linux.net.dhcp.DhcpClientTool;
 import org.eclipse.kura.linux.net.wifi.WifiOptions;
 import org.eclipse.kura.net.NetInterfaceType;
-import org.eclipse.kura.net.wifi.WifiConfig;
 import org.eclipse.kura.net.wifi.WifiInterface.Capability;
 import org.eclipse.kura.net.wifi.WifiMode;
 import org.slf4j.Logger;
@@ -1532,7 +1532,7 @@ public class LinuxNetworkUtil {
 		return false;
 	}
 	
-	public static boolean isKernelModuleLoaded(String interfaceName, WifiConfig wifiConfig) throws KuraException {
+	public static boolean isKernelModuleLoaded(String interfaceName, WifiMode wifiMode) throws KuraException {
 		boolean result = false;
 
 		// FIXME: how to find the right kernel module by interface name?
@@ -1541,8 +1541,8 @@ public class LinuxNetworkUtil {
 		// the chipset kernel module (e.g. bcmdhd)
 		// s_logger.info("{} driver: '{}'", interfaceName, wifiConfig.getDriver());
 
-		if (KuraConstants.ReliaGATE_10_05.getTargetName().equals(OS_VERSION) &&
-				interfaceName.equals("wlan0")) {
+		if (KuraConstants.ReliaGATE_10_05.getTargetName().equals(TARGET_NAME) &&
+				"wlan0".equals(interfaceName)) {
 			SafeProcess proc = null;
 			BufferedReader br = null;
 			String cmd = "lsmod";
@@ -1583,11 +1583,11 @@ public class LinuxNetworkUtil {
 		return result;
 	}
 
-	public static void unloadKernelModule(String interfaceName, WifiConfig wifiConfig) throws KuraException {
+	public static void unloadKernelModule(String interfaceName) throws KuraException {
 		// FIXME: how to find the right kernel module by interface name?
 		// Assume for now the interface name does not change
-		if (KuraConstants.ReliaGATE_10_05.getTargetName().equals(OS_VERSION) &&
-				interfaceName.equals("wlan0")) {
+		if (KuraConstants.ReliaGATE_10_05.getTargetName().equals(TARGET_NAME) &&
+				"wlan0".equals(interfaceName)) {
 			SafeProcess proc = null;
 			try {
 				String cmd = "rmmod bcmdhd";
@@ -1607,18 +1607,17 @@ public class LinuxNetworkUtil {
 				}
 			}
 		} else {
-			s_logger.debug("Kernel module unload not needed by platform '{}'", OS_VERSION);
+			s_logger.debug("Kernel module unload not needed by platform '{}'", TARGET_NAME);
 		}
 	}
 
-	public static void loadKernelModule(String interfaceName, WifiConfig wifiConfig) throws KuraException {
+	public static void loadKernelModule(String interfaceName, WifiMode wifiMode) throws KuraException {
 		// FIXME: how to find the right kernel module by interface name?
 		// Assume for now the interface name does not change
-		if (KuraConstants.ReliaGATE_10_05.getTargetName().equals(OS_VERSION) &&
-				interfaceName.equals("wlan0")) {
+		if (KuraConstants.ReliaGATE_10_05.getTargetName().equals(TARGET_NAME) &&
+				"wlan0".equals(interfaceName)) {
 			SafeProcess proc = null;
 			String cmd = null;
-			WifiMode wifiMode = wifiConfig.getMode();
 			if (wifiMode == WifiMode.MASTER) {
 				cmd = "modprobe -S 3.12.6 bcmdhd firmware_path=\"/system/etc/firmware/fw_bcm43438a0_apsta.bin\" op_mode=2";
 			} else if (wifiMode == WifiMode.INFRA || wifiMode == WifiMode.ADHOC) {
@@ -1644,7 +1643,54 @@ public class LinuxNetworkUtil {
 				}
 			}
 		} else {
-			s_logger.debug("Kernel module load not needed by platform '{}'", OS_VERSION);
+			s_logger.debug("Kernel module load not needed by platform '{}'", TARGET_NAME);
 		}
 	}
+	
+	public static boolean isKernelModuleLoadedForMode(String interfaceName, WifiMode wifiMode) throws KuraException {
+		// FIXME: how to find the right kernel module by interface name?
+		// Assume for now the interface name does not change.
+		if (KuraConstants.ReliaGATE_10_05.getTargetName().equals(TARGET_NAME) &&
+				"wlan0".equals(interfaceName)) {
+			return false;
+		} else {
+			return true;
+		}
+	}
+	
+    public static boolean isWifiDeviceOn(String interfaceName) {
+    	boolean deviceOn = false;
+    	// FIXME Assume for now the interface name does not change
+		if (KuraConstants.Reliagate_10_20.getTargetName().equals(TARGET_NAME) &&
+				"wlan0".equals(interfaceName)) {
+    		File fDevice = new File("/sys/bus/pci/devices/0000:01:00.0");
+    		if (fDevice.exists()) {
+    			deviceOn = true;
+    		}
+    	}
+    	s_logger.debug("isWifiDeviceOn()? {}", deviceOn);
+    	return deviceOn;
+    }
+    
+    public static void turnWifiDeviceOn(String interfaceName) throws Exception {
+    	// FIXME Assume for now the interface name does not change
+		if (KuraConstants.Reliagate_10_20.getTargetName().equals(TARGET_NAME) &&
+				"wlan0".equals(interfaceName)) {
+    		s_logger.info("Turning Wifi device ON ...");
+    		FileWriter fw = new FileWriter("/sys/bus/pci/rescan");
+			fw.write("1");
+			fw.close();
+    	}
+    }
+    
+    public static void turnWifiDeviceOff(String interfaceName) throws Exception {
+    	// FIXME Assume for now the interface name does not change
+		if (KuraConstants.Reliagate_10_20.getTargetName().equals(TARGET_NAME) &&
+				"wlan0".equals(interfaceName)) {
+    		s_logger.info("Turning Wifi device OFF ...");
+			FileWriter fw = new FileWriter("/sys/bus/pci/devices/0000:01:00.0/remove");
+			fw.write("1");
+			fw.close();
+    	}
+    }
 }

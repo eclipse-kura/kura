@@ -84,9 +84,6 @@ public class IfcfgConfigWriter implements NetworkConfigurationVisitor {
 			NetInterfaceType type = netInterfaceConfig.getType();
 			if(type == NetInterfaceType.LOOPBACK || type == NetInterfaceType.ETHERNET || type == NetInterfaceType.WIFI) {					
 				if(configHasChanged(netInterfaceConfig)) {
-					if(netInterfaceConfig.getType() != NetInterfaceType.LOOPBACK) {
-						disableInterface(netInterfaceConfig.getName());
-					}
 					writeDebianConfig(netInterfaceConfig);
 				}
 			}

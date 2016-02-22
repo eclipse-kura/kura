@@ -41,7 +41,7 @@ public class PppFactory {
 		if (s_pppServices.containsKey(iface)) {
 			modemLinkService = s_pppServices.get(iface);
 		} else {
-		    s_logger.debug("Creating new modemLinkService for " + iface);
+		    s_logger.debug("Creating new modemLinkService for {}", iface);
 			modemLinkService = new Ppp(iface, port);
 			s_pppServices.put(iface, modemLinkService);
 		}
@@ -53,7 +53,7 @@ public class PppFactory {
 	    IModemLinkService modemLinkService = null;
 	    
 		if (s_pppServices.containsKey(iface)) {
-		    s_logger.debug("Removing modemLinkService for " + iface);
+		    s_logger.debug("Removing modemLinkService for {}", iface);
 		    modemLinkService = s_pppServices.remove(iface);
 		}
 		

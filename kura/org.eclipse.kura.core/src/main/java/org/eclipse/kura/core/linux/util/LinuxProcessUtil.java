@@ -76,8 +76,8 @@ public class LinuxProcessUtil {
 							.getInputStream());
 					String stderr = getInputStreamAsString(proc
 							.getErrorStream());
-					s_logger.debug("stdout: " + stdout);
-					s_logger.debug("stderr: " + stderr);
+					s_logger.debug("stdout: {}", stdout);
+					s_logger.debug("stderr: {}", stderr);
 				}
 				return proc.exitValue();
 			} else {
@@ -145,12 +145,12 @@ public class LinuxProcessUtil {
 			for (String cmd : command) {
 				cmdBuilder.append(cmd).append(' ');
 			}
-			s_logger.debug("executing: " + cmdBuilder);
+			s_logger.debug("executing: {}", cmdBuilder);
 			proc = ProcessUtil.exec(command);
 
 			try {
 				int exitVal = proc.waitFor();
-				s_logger.debug(cmdBuilder + " returned with exit value:"
+				s_logger.debug("{} returned with exit value:{}", cmdBuilder,
 						+ exitVal);
 			} catch (InterruptedException e) {
 				s_logger.error("error executing " + command + " command" + e);
@@ -175,7 +175,7 @@ public class LinuxProcessUtil {
 		try {
 
 			if (command != null && !command.isEmpty()) {
-				s_logger.trace("searching process list for " + command);
+				s_logger.trace("searching process list for {}", command);
 
 				if ("intel-edison".equals(s_platform)) {
 					proc = ProcessUtil.exec("ps");
@@ -199,8 +199,8 @@ public class LinuxProcessUtil {
 
 					// see if the line has our command
 					if (line.indexOf(command) >= 0) {
-						s_logger.trace("found pid " + pid + " for command: "
-								+ command);
+						s_logger.trace("found pid {} for command: {}",
+								pid, command);
 						return Integer.parseInt(pid);
 					}
 				}
@@ -224,7 +224,7 @@ public class LinuxProcessUtil {
 		BufferedReader br = null;
 		try {
 			if(command != null && !command.isEmpty()) {
-				s_logger.trace("searching process list for " + command);
+				s_logger.trace("searching process list for {}", command);
 				if ("intel-edison".equals(s_platform)) {
 					proc = ProcessUtil.exec("ps");
 				} else {
@@ -254,7 +254,7 @@ public class LinuxProcessUtil {
 							}
 						}
 						if (allTokensPresent) {
-							s_logger.trace("found pid " + pid + " for command: " + command);
+							s_logger.trace("found pid {} for command: {}", pid, command);
 							return Integer.parseInt(pid);
 						}
 					}

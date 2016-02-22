@@ -207,7 +207,7 @@ public class LinuxDns {
 	    							}
 	    							while(st.hasMoreTokens()) {
 	    								String nameServer = st.nextToken();
-	    								s_logger.debug("Found nameserver... " + nameServer); 
+	    								s_logger.debug("Found nameserver... {}", nameServer); 
 	    								IPAddress ipa = IPAddress.parseHostAddress(nameServer);
 	    								if (!servers.contains(ipa)) {
 	    								servers.add(IPAddress.parseHostAddress(nameServer));
@@ -253,7 +253,7 @@ public class LinuxDns {
 	    							servers = new ArrayList<IPAddress>();
 	    							while(st.hasMoreTokens()) {
 	    								String nameServer = st.nextToken();
-	    								s_logger.debug("Found nameserver... " + nameServer); 
+	    								s_logger.debug("Found nameserver... {}", nameServer); 
 	    								servers.add(IPAddress.parseHostAddress(nameServer));
 	    							}
 	    							break;
@@ -302,7 +302,7 @@ public class LinuxDns {
 	    							servers = new ArrayList<IPAddress>();
 	    							while(st.hasMoreTokens()) {
 	    								String nameServer = st.nextToken();
-	    								s_logger.debug("Found nameserver... " + nameServer); 
+	    								s_logger.debug("Found nameserver... {}", nameServer); 
 	    								servers.add(IPAddress.parseHostAddress(nameServer));
 	    							}
 	    							break;

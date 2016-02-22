@@ -153,7 +153,7 @@ public class PositionServiceImpl implements PositionService {
 		try {
 			// Create the builder and parse the file
 			SAXParser parser = factory.newSAXParser();
-			s_logger.debug("Parsing: " + fileName);
+			s_logger.debug("Parsing: {}", fileName);
 
 			BundleContext bundleContext = m_ctx.getBundleContext();
 			URL url = bundleContext.getBundle().getResource(fileName);
@@ -203,7 +203,7 @@ public class PositionServiceImpl implements PositionService {
 	}
 	
 	private void updateGps() {
-		s_logger.debug("GPS Emulator index: " + index);
+		s_logger.debug("GPS Emulator index: {}", index);
 		if ((index + 1) == gpsPoints.length) {
 			s_logger.debug("GPS Emulator - wrapping index");
 			index = 0;

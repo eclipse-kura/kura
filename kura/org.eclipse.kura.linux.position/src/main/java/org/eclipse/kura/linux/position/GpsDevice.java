@@ -327,7 +327,7 @@ public class GpsDevice {
 					}
 					try {
 						if (readBuffer.length() > 0) {
-							s_logger.debug("GPS RAW: " + readBuffer.toString());
+							s_logger.debug("GPS RAW: {}", readBuffer.toString());
 							if ((m_listeners != null) && !m_listeners.isEmpty()) {
 								for (PositionListener listener : m_listeners) {
 									listener.newNmeaSentence(readBuffer.toString());
@@ -382,7 +382,7 @@ public class GpsDevice {
 			scannedInput = scannedInput.substring(3);			
 			
 			if(scannedInput.startsWith("TXT")) {
-				s_logger.debug("U-Blox init message: " + scannedInput);
+				s_logger.debug("U-Blox init message: {}", scannedInput);
 			} else if (scannedInput.startsWith("GGA")) {
 				try {
 					lon = gpsParser.get_longNmea();

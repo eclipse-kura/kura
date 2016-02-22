@@ -110,7 +110,7 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
 								        s_logger.debug("Found wifiConfig with mode set to master");
 								        interfaceDriver = ((WifiConfig)netConfig).getDriver();
 								        if(interfaceDriver != null) {
-    								        s_logger.debug("Writing wifiConfig: " + netConfig);
+    								        s_logger.debug("Writing wifiConfig: {}", netConfig);
     								        apConfig = (WifiConfig)netConfig;
 								        } else {
 								            s_logger.error("Can't generate hostapd config - no driver specified");

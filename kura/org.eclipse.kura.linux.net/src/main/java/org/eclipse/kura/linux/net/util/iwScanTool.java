@@ -291,7 +291,7 @@ public class iwScanTool extends ScanTool implements IScanTool {
 							rsnSecurity.add(WifiSecurity.KEY_MGMT_PSK);
 						}
 					} else {
-						s_logger.debug("Ignoring line in RSN: " + line);
+						s_logger.debug("Ignoring line in RSN: {}", line);
 					}
 					
 					if(foundGroup && foundPairwise && foundAuthSuites) {
@@ -341,7 +341,7 @@ public class iwScanTool extends ScanTool implements IScanTool {
 							wpaSecurity.add(WifiSecurity.KEY_MGMT_PSK);
 						}
 					} else {
-						s_logger.debug("Ignoring line in WPA: " + line);
+						s_logger.debug("Ignoring line in WPA: {}", line);
 					}
 					
 					if(foundGroup && foundPairwise && foundAuthSuites) {
@@ -386,7 +386,7 @@ public class iwScanTool extends ScanTool implements IScanTool {
 						strength = Math.abs((int)Float.parseFloat(strengthRaw));
 					}
 				} catch (RuntimeException e) {
-					s_logger.debug("Cannot parse signal strength " + line);
+					s_logger.debug("Cannot parse signal strength {}", line);
 				}
 			} else if (line.contains("capability:")) {
 				capabilities = new ArrayList<String>();

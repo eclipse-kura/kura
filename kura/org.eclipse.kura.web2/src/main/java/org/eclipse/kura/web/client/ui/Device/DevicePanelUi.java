@@ -13,6 +13,7 @@ package org.eclipse.kura.web.client.ui.Device;
 
 
 import org.eclipse.kura.web.client.messages.Messages;
+import org.eclipse.kura.web.shared.model.GwtSession;
 import org.gwtbootstrap3.client.ui.AnchorListItem;
 import org.gwtbootstrap3.client.ui.Well;
 import org.gwtbootstrap3.client.ui.html.Span;
@@ -35,6 +36,8 @@ public class DevicePanelUi extends Composite {
 	
 	private static SystemPropertiesTabUi systemPropertiesBinder = GWT.create(SystemPropertiesTabUi.class);
 	private static CommandTabUi commandBinder = GWT.create(CommandTabUi.class);
+	
+	private GwtSession session;
 
 
 	interface DevicePanelUiUiBinder extends UiBinder<Widget, DevicePanelUi> {
@@ -113,6 +116,11 @@ public class DevicePanelUi extends Composite {
 	
 	public void initDevicePanel() {
 		profileBinder.loadProfileData();
+		commandBinder.setSession(session);
+	}
+	
+	public void setSession(GwtSession currentSession) {
+		this.session = currentSession;
 	}
 	
 	public void setSelectedActive(AnchorListItem item){

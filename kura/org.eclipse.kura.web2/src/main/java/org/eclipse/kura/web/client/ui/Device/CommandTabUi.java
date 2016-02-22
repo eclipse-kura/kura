@@ -12,8 +12,10 @@
 package org.eclipse.kura.web.client.ui.Device;
 
 import org.eclipse.kura.web.client.messages.Messages;
+import org.eclipse.kura.web.client.ui.EntryClassUi;
 import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.shared.GwtKuraErrorCode;
+import org.eclipse.kura.web.shared.model.GwtSession;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.eclipse.kura.web.shared.service.GwtDeviceService;
 import org.eclipse.kura.web.shared.service.GwtDeviceServiceAsync;
@@ -48,6 +50,9 @@ public class CommandTabUi extends Composite {
 
 	private static final Messages MSGS = GWT.create(Messages.class);
 	private static final String SERVLET_URL = "/" + GWT.getModuleName()	+ "/file/command";
+	
+	@SuppressWarnings("unused")
+	private GwtSession session;
 
 	interface CommandTabUiUiBinder extends UiBinder<Widget, CommandTabUi> {
 	}
@@ -78,6 +83,7 @@ public class CommandTabUi extends Composite {
 
 		formExecute.clear();
 		formExecute.setFocus(true);
+		formExecute.setName("command");
 		formExecute.addKeyDownHandler(new KeyDownHandler() {
 			@Override
 			public void onKeyDown(KeyDownEvent event) {
@@ -103,7 +109,8 @@ public class CommandTabUi extends Composite {
 			}
 		});
 		
-		formPassword.setText("");
+		formPassword.setText(null);
+		formPassword.setName("password");
 		formPassword.addKeyDownHandler(new KeyDownHandler() {
 			@Override
 			public void onKeyDown(KeyDownEvent event) {
@@ -149,54 +156,58 @@ public class CommandTabUi extends Composite {
 						if (result.startsWith("HTTP ERROR")) {							
 							display(MSGS.fileUploadFailure());
 						} else {
+							EntryClassUi.showWaitModal();
 							gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
 
 								@Override
 								public void onFailure(Throwable ex) {
+									EntryClassUi.hideWaitModal();
 									FailureHandler.handle(ex);
 								}
 
 								@Override
 								public void onSuccess(GwtXSRFToken token) {
-									gwtDeviceService.executeCommand(token, formExecute.getText(), formPassword.getText(),
-											new AsyncCallback<String>() {
-
+									gwtDeviceService.executeCommand(token, formExecute.getText(), formPassword.getText(), new AsyncCallback<String>() {
+										@Override
+										public void onFailure(Throwable caught) {
+											if (caught.getLocalizedMessage().equals(GwtKuraErrorCode.SERVICE_NOT_ENABLED.toString())) {
+												display(MSGS.error() + "\n" + MSGS.commandServiceNotEnabled());
+											} else if (caught.getLocalizedMessage().equals(GwtKuraErrorCode.ILLEGAL_ARGUMENT.toString())) {
+												display(MSGS.error() + "\n"+ MSGS.commandPasswordNotCorrect());
+											} else {
+												display(MSGS.error() + "\n" + caught.getLocalizedMessage());
+											}
+											EntryClassUi.hideWaitModal();
+											gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
 												@Override
-												public void onFailure(Throwable caught) {
-													
-													
-													if (caught
-															.getLocalizedMessage()
-															.equals(GwtKuraErrorCode.SERVICE_NOT_ENABLED
-																	.toString())) {
-														display(MSGS
-																.error()
-																+ "\n"
-																+ MSGS.commandServiceNotEnabled());
-
-													} else if (caught
-															.getLocalizedMessage()
-															.equals(GwtKuraErrorCode.ILLEGAL_ARGUMENT
-																	.toString())) {
-														display(MSGS
-																.error()
-																+ "\n"
-																+ MSGS.commandPasswordNotCorrect());
-													} else {
-														display(MSGS.error()
-																+ "\n"
-																+ caught.getLocalizedMessage());
-														
-													}
-
+												public void onFailure(Throwable ex) {
+													FailureHandler.handle(ex);
 												}
 
 												@Override
-												public void onSuccess(String result) {											
-													display(result);
+												public void onSuccess(GwtXSRFToken token) {	
+													xsrfTokenField.setValue(token.getToken());
 												}
-
 											});
+										}
+
+										@Override
+										public void onSuccess(String result) {									
+											display(result);
+											EntryClassUi.hideWaitModal();
+											gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
+												@Override
+												public void onFailure(Throwable ex) {
+													FailureHandler.handle(ex);
+												}
+												@Override
+												public void onSuccess(GwtXSRFToken token) {	
+													xsrfTokenField.setValue(token.getToken());
+												}
+											});
+										}
+
+									});
 								}
 								
 							});
@@ -212,6 +223,10 @@ public class CommandTabUi extends Composite {
 		resultPanel.clear();		
 		resultPanel.add(new HTML((new SafeHtmlBuilder().appendEscapedLines(string).toSafeHtml())));
 
+	}
+	
+	public void setSession(GwtSession currentSession) {
+		this.session = currentSession;
 	}
 
 }

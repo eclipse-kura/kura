@@ -1,14 +1,14 @@
-/**
- * Copyright (c) 2011, 2014 Eurotech and/or its affiliates
+/*******************************************************************************
+ * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
  *
- *  All rights reserved. This program and the accompanying materials
- *  are made available under the terms of the Eclipse Public License v1.0
- *  which accompanies this distribution, and is available at
- *  http://www.eclipse.org/legal/epl-v10.html
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Eurotech
- */
+ *     Eurotech
+ *******************************************************************************/
 package org.eclipse.kura.emulator.position;
 
 import java.io.InputStream;
@@ -25,6 +25,7 @@ import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
 import org.eclipse.kura.position.NmeaPosition;
+import org.eclipse.kura.position.PositionListener;
 import org.eclipse.kura.position.PositionLockedEvent;
 import org.eclipse.kura.position.PositionService;
 import org.osgi.framework.BundleContext;
@@ -227,5 +228,18 @@ public class PositionServiceImpl implements PositionService {
 		index++;
 		
 		return;
+	}
+
+	@Override
+	public void registerListener(String listenerId,
+			PositionListener positionListener) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void unregisterListener(String listenerId) {
+		// TODO Auto-generated method stub
+		
 	}
 }

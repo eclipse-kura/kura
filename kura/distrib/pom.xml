@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright (c) 2011, 2014 Eurotech and/or its affiliates
+    Copyright (c) 2011, 2016 Eurotech and/or its affiliates
 
      All rights reserved. This program and the accompanying materials
      are made available under the terms of the Eclipse Public License v1.0
@@ -18,7 +18,7 @@
 	<parent>
 		<artifactId>kura</artifactId>
 		<groupId>org.eclipse.kura</groupId>
-		<version>1.4.0</version>
+		<version>1.5.0-SNAPSHOT</version>
 		<relativePath>../pom_pom.xml</relativePath>
 	</parent>
 
@@ -276,6 +276,25 @@
 						</configuration>
 					</execution>
 					<execution>
+						<id>get-web2-bundle</id>
+						<phase>generate-resources</phase>
+						<goals>
+							<goal>copy</goal>
+						</goals>
+						<configuration>
+							<skip>${org.eclipse.kura.web2.skip}</skip>
+							<artifactItems>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.kura.web2</artifactId>
+									<version>${org.eclipse.kura.web2.version}</version>
+								</artifactItem>
+							</artifactItems>
+							<stripVersion>true</stripVersion>
+							<outputDirectory>${project.basedir}/target/plugins</outputDirectory>
+						</configuration>
+					</execution>
+					<execution>
 						<id>get-gpio-bundle</id>
 						<phase>generate-resources</phase>
 						<goals>
@@ -333,8 +352,9 @@
 							    <move file="target/plugins/org.eclipse.kura.net.admin.jar" tofile="target/plugins/org.eclipse.kura.net.admin_${org.eclipse.kura.net.admin.version}.jar"/>
 							    <move file="target/plugins/org.eclipse.kura.protocol.modbus.jar" tofile="target/plugins/org.eclipse.kura.protocol.modbus_${org.eclipse.kura.protocol.modbus.version}.jar"/>
 							    <move file="target/plugins/org.eclipse.kura.web.jar" tofile="target/plugins/org.eclipse.kura.web_${org.eclipse.kura.web.version}.jar" failonerror="false" />
-  								<move file="target/plugins/org.eclipse.kura.linux.gpio.jar" tofile="target/plugins/org.eclipse.kura.linux.gpio_${org.eclipse.kura.linux.gpio.version}.jar" failonerror="false"/>
-								<move file="target/plugins/org.eclipse.kura.emulator.clock.jar" tofile="target/plugins/org.eclipse.kura.emulator.clock_${org.eclipse.kura.emulator.clock.version}.jar"/>
+  								<move file="target/plugins/org.eclipse.kura.web2.jar" tofile="target/plugins/org.eclipse.kura.web2_${org.eclipse.kura.web2.version}.jar" failonerror="false" />
+								<move file="target/plugins/org.eclipse.kura.linux.gpio.jar" tofile="target/plugins/org.eclipse.kura.linux.gpio_${org.eclipse.kura.linux.gpio.version}.jar" failonerror="false"/>
+  								<move file="target/plugins/org.eclipse.kura.emulator.clock.jar" tofile="target/plugins/org.eclipse.kura.emulator.clock_${org.eclipse.kura.emulator.clock.version}.jar"/>
   								<move file="target/plugins/org.eclipse.kura.emulator.gpio.jar" tofile="target/plugins/org.eclipse.kura.emulator.gpio_${org.eclipse.kura.emulator.gpio.version}.jar" />
   								<move file="target/plugins/org.eclipse.kura.emulator.net.jar" tofile="target/plugins/org.eclipse.kura.emulator.net_${org.eclipse.kura.emulator.net.version}.jar" />
   								<move file="target/plugins/org.eclipse.kura.emulator.position.jar" tofile="target/plugins/org.eclipse.kura.emulator.position_${org.eclipse.kura.emulator.position.version}.jar" />
@@ -2231,6 +2251,60 @@
 										<move
 											file="${project.build.directory}/staging/demo_heater/demo_heater.classpath"
 											tofile="${project.build.directory}/staging/demo_heater/.classpath" />
+											
+										<!-- Stage the org.eclipse.kura.example.beacon Project -->
+										<copy todir="${project.build.directory}/staging/beacon">
+											<fileset dir="../examples/org.eclipse.kura.example.beacon" />
+										</copy>
+										<delete
+											file="${project.build.directory}/staging/beacon/pom.xml" />
+										<delete dir="${project.build.directory}/staging/beacon/bin" />
+										<delete
+											dir="${project.build.directory}/staging/beacon/target" />
+										<copy
+											file="src/main/resources/common/classpaths/beacon.classpath"
+											tofile="${project.build.directory}/staging/beacon/beacon.classpath" />
+										<copy file="src/main/resources/common/projects/beacon.project"
+											tofile="${project.build.directory}/staging/beacon/.project" />
+										<move
+											file="${project.build.directory}/staging/beacon/beacon.classpath"
+											tofile="${project.build.directory}/staging/beacon/.classpath" />
+											
+										<!-- Stage the org.eclipse.kura.example.ble.tisensortag Project -->
+										<copy todir="${project.build.directory}/staging/tisensortag">
+											<fileset dir="../examples/org.eclipse.kura.example.ble.tisensortag" />
+										</copy>
+										<delete
+											file="${project.build.directory}/staging/tisensortag/pom.xml" />
+										<delete dir="${project.build.directory}/staging/tisensortag/bin" />
+										<delete
+											dir="${project.build.directory}/staging/tisensortag/target" />
+										<copy
+											file="src/main/resources/common/classpaths/tisensortag.classpath"
+											tofile="${project.build.directory}/staging/tisensortag/tisensortag.classpath" />
+										<copy file="src/main/resources/common/projects/tisensortag.project"
+											tofile="${project.build.directory}/staging/tisensortag/.project" />
+										<move
+											file="${project.build.directory}/staging/tisensortag/tisensortag.classpath"
+											tofile="${project.build.directory}/staging/tisensortag/.classpath" />
+											
+										<!-- Stage the org.eclipse.kura.example.publisher Project -->
+										<copy todir="${project.build.directory}/staging/publisher">
+											<fileset dir="../examples/org.eclipse.kura.example.publisher" />
+										</copy>
+										<delete
+											file="${project.build.directory}/staging/publisher/pom.xml" />
+										<delete dir="${project.build.directory}/staging/publisher/bin" />
+										<delete
+											dir="${project.build.directory}/staging/publisher/target" />
+										<copy
+											file="src/main/resources/common/classpaths/publisher.classpath"
+											tofile="${project.build.directory}/staging/publisher/publisher.classpath" />
+										<copy file="src/main/resources/common/projects/publisher.project"
+											tofile="${project.build.directory}/staging/publisher/.project" />
+										<move
+											file="${project.build.directory}/staging/publisher/publisher.classpath"
+											tofile="${project.build.directory}/staging/publisher/.classpath" />
 
 										<!-- Create the archive file with the components -->
 										<zip destfile="${project.build.directory}/${zip_workspace.prefix}.zip">
@@ -2243,6 +2317,12 @@
 												prefix="org.eclipse.kura.api/" />
 											<zipfileset dir="${project.build.directory}/staging/demo_heater/"
 												prefix="org.eclipse.kura.demo.heater/" />
+											<zipfileset dir="${project.build.directory}/staging/beacon/"
+												prefix="org.eclipse.kura.example.beacon/" />
+											<zipfileset dir="${project.build.directory}/staging/tisensortag/"
+												prefix="org.eclipse.kura.example.ble.tisensortag/" />
+											<zipfileset dir="${project.build.directory}/staging/publisher/"
+												prefix="org.eclipse.kura.example.publisher/" />
 										</zip>
 										<checksum algorithm="md5">
     										<fileset dir="./target/" >

@@ -1,18 +1,19 @@
-/**
- * Copyright (c) 2011, 2014 Eurotech and/or its affiliates
+/*******************************************************************************
+ * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
  *
- *  All rights reserved. This program and the accompanying materials
- *  are made available under the terms of the Eclipse Public License v1.0
- *  which accompanies this distribution, and is available at
- *  http://www.eclipse.org/legal/epl-v10.html
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Eurotech
- */
+ *     Eurotech
+ *******************************************************************************/
 package org.eclipse.kura.linux.position;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Collection;
 import java.util.Properties;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -24,6 +25,7 @@ import org.eclipse.kura.comm.CommConnection;
 import org.eclipse.kura.comm.CommURI;
 import org.eclipse.kura.position.NmeaPosition;
 import org.eclipse.kura.position.PositionException;
+import org.eclipse.kura.position.PositionListener;
 import org.osgi.service.io.ConnectionFactory;
 import org.osgi.util.measurement.Measurement;
 import org.osgi.util.measurement.Unit;
@@ -67,6 +69,7 @@ public class GpsDevice {
 	private int m_3Dfix = 0;
 	private String m_dateNmea="";
 	private String m_timeNmea="";
+	private Collection<PositionListener> m_listeners;
 	
 	public GpsDevice() {
 		m_latitude = new Measurement(java.lang.Math.toRadians(0),Unit.rad);
@@ -325,10 +328,15 @@ public class GpsDevice {
 					try {
 						if (readBuffer.length() > 0) {
 							s_logger.debug("GPS RAW: " + readBuffer.toString());
+							if ((m_listeners != null) && !m_listeners.isEmpty()) {
+								for (PositionListener listener : m_listeners) {
+									listener.newNmeaSentence(readBuffer.toString());
+								}
+							}
 							parseNmeaSentence(readBuffer.toString());
 						}
 					} catch (Exception e) {
-						s_logger.error("Exception in parseNmeaSentence ");
+						s_logger.error("Exception in parseNmeaSentence - {}", e);
 					}
 				} else {
 					s_logger.debug("GPS InputStream is null");
@@ -503,5 +511,9 @@ public class GpsDevice {
 		sb.append("\n fixQuality=");
 		sb.append(m_fixQuality);
 		return sb.toString();
+	}
+	
+	public void setListeners(Collection<PositionListener> listeners) {
+		m_listeners = listeners;
 	}
 }

@@ -1,14 +1,14 @@
-/**
- * Copyright (c) 2011, 2014 Eurotech and/or its affiliates
+/*******************************************************************************
+ * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
  *
- *  All rights reserved. This program and the accompanying materials
- *  are made available under the terms of the Eclipse Public License v1.0
- *  which accompanies this distribution, and is available at
- *  http://www.eclipse.org/legal/epl-v10.html
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Eurotech
- */
+ *     Eurotech
+ *******************************************************************************/
 package org.eclipse.kura.deployment.agent.impl;
 
 import java.io.BufferedReader;
@@ -194,10 +194,6 @@ public class DeploymentAgent implements DeploymentAgentService {
 	}
 
 	protected void deactivate(ComponentContext componentContext) {
-		m_dpaConfPath = null;
-
-		m_deployedPackages = null;
-
 		if ((s_installerTask != null) && (!s_installerTask.isDone())) {
 			s_logger.debug("Cancelling DeploymentAgent task ...");
 			s_installerTask.cancel(true);
@@ -236,6 +232,8 @@ public class DeploymentAgent implements DeploymentAgentService {
 			m_uninstallerExecutor = null;
 		}
 
+		m_dpaConfPath = null;
+		m_deployedPackages = null;
 		m_uninstPackageNames = null;
 		m_instPackageUrls = null;
 	}

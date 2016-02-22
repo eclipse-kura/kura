@@ -1,18 +1,19 @@
-/**
- * Copyright (c) 2011, 2014 Eurotech and/or its affiliates
+/*******************************************************************************
+ * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
  *
- *  All rights reserved. This program and the accompanying materials
- *  are made available under the terms of the Eclipse Public License v1.0
- *  which accompanies this distribution, and is available at
- *  http://www.eclipse.org/legal/epl-v10.html
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Eurotech
- */
+ *     Eurotech
+ *******************************************************************************/
 package org.eclipse.kura.windows.position;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Collection;
 import java.util.Properties;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -24,6 +25,7 @@ import org.eclipse.kura.comm.CommConnection;
 import org.eclipse.kura.comm.CommURI;
 import org.eclipse.kura.position.NmeaPosition;
 import org.eclipse.kura.position.PositionException;
+import org.eclipse.kura.position.PositionListener;
 import org.osgi.service.io.ConnectionFactory;
 import org.osgi.util.measurement.Measurement;
 import org.osgi.util.measurement.Unit;
@@ -39,6 +41,7 @@ import org.slf4j.LoggerFactory;
 public class GpsDevice {
 	private static final Logger s_logger = LoggerFactory.getLogger(GpsDevice.class);
 
+	private static Object s_lock = new Object();
 	static final String PROTOCOL_NAME = "position";
 	
 	//private String unitName = PROTOCOL_NAME;
@@ -66,6 +69,7 @@ public class GpsDevice {
 	private int m_3Dfix = 0;
 	private String m_dateNmea="";
 	private String m_timeNmea="";
+	private Collection<PositionListener> m_listeners;
 	
 	public GpsDevice() {
 		m_latitude = new Measurement(java.lang.Math.toRadians(0),Unit.rad);
@@ -243,7 +247,10 @@ public class GpsDevice {
 	    		@Override
 	    		public void run() {
 		    		Thread.currentThread().setName("GpsSerialCommunicate");
-		    		doPollWork();
+		    		if (!doPollWork()) {
+		    			s_logger.info("The doPollWork() method returned 'false' - disconnecting ...");
+		    			disconnect();
+		    		}
 	    	}}, 0, 20, TimeUnit.MILLISECONDS);			
 		}
 
@@ -254,37 +261,38 @@ public class GpsDevice {
 		}
 
 		public void disconnect() {
-			
-			if ((m_task != null) && (!m_task.isDone())) {
-	    		s_logger.debug("disconnect() :: Cancelling GpsSerialCommunicate task ...");
-	    		m_task.cancel(true);
-	    		s_logger.info("disconnect() :: GpsSerialCommunicate task cancelled? = {}", m_task.isDone());
-	    		m_task = null;
-	    	}
-	    	
-	    	if (m_executor != null) {
-	    		s_logger.debug("disconnect() :: Terminating GpsSerialCommunicate Thread ...");
-	    		m_executor.shutdownNow();
-	    		try {
-					m_executor.awaitTermination(THREAD_TERMINATION_TOUT, TimeUnit.SECONDS);
-				} catch (InterruptedException e) {
-					s_logger.warn("Interrupted", e);
-				}
-	    		s_logger.info("disconnect() :: GpsSerialCommunicate Thread terminated? - {}", m_executor.isTerminated());
-				m_executor = null;
-	    	}
-			
-			if (conn!=null) {
-				try {
-					if(in!=null){
-						in.close();
-						in=null;
+			synchronized (s_lock) {
+				if ((m_task != null) && (!m_task.isDone())) {
+		    		s_logger.debug("disconnect() :: Cancelling GpsSerialCommunicate task ...");
+		    		m_task.cancel(true);
+		    		s_logger.info("disconnect() :: GpsSerialCommunicate task cancelled? = {}", m_task.isDone());
+		    		m_task = null;
+		    	}
+		    	
+		    	if (m_executor != null) {
+		    		s_logger.debug("disconnect() :: Terminating GpsSerialCommunicate Thread ...");
+		    		m_executor.shutdownNow();
+		    		try {
+						m_executor.awaitTermination(THREAD_TERMINATION_TOUT, TimeUnit.SECONDS);
+					} catch (InterruptedException e) {
+						s_logger.warn("Interrupted - {}", e);
 					}
-					conn.close();
-				} catch (IOException e) {
-					e.printStackTrace();
+		    		s_logger.info("disconnect() :: GpsSerialCommunicate Thread terminated? - {}", m_executor.isTerminated());
+					m_executor = null;
+		    	}
+				
+				if (conn!=null) {
+					try {
+						if(in!=null){
+							in.close();
+							in=null;
+						}
+						conn.close();
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+					conn = null;
 				}
-				conn = null;
 			}
 		}
 
@@ -296,25 +304,22 @@ public class GpsDevice {
 			return connConfig;
 		}
 
-		public void doPollWork() {
+		public boolean doPollWork() {
 			try {
 				StringBuffer readBuffer = new StringBuffer();
 				int c=-1;
 				if (in != null) {
 					while (c != 10) {
 						try {
-							if(true/*in.available() > 0*/) {
-								c = in.read();
-							}
-							else {
-								Thread.sleep(10);								
-							}
+							c = in.read();
 						} catch (Exception e) {
-							s_logger.error("IOexception in gps read");
+							s_logger.error("Exception in gps read - {}", e);
 							try {
 								Thread.sleep(1000);
 							} catch (InterruptedException e1) {
+								s_logger.warn("Interrupted - {}", e1);
 							}
+							return false;
 						}
 						if (c != 13 && c != -1) {
 							readBuffer.append((char) c);
@@ -323,10 +328,15 @@ public class GpsDevice {
 					try {
 						if (readBuffer.length() > 0) {
 							s_logger.debug("GPS RAW: " + readBuffer.toString());
+							if ((m_listeners != null) && !m_listeners.isEmpty()) {
+								for (PositionListener listener : m_listeners) {
+									listener.newNmeaSentence(readBuffer.toString());
+								}
+							}
 							parseNmeaSentence(readBuffer.toString());
 						}
 					} catch (Exception e) {
-						s_logger.error("Exception in parseNmeaSentence ");
+						s_logger.error("Exception in parseNmeaSentence - {}", e);
 					}
 				} else {
 					s_logger.debug("GPS InputStream is null");
@@ -340,6 +350,7 @@ public class GpsDevice {
 					Thread.sleep(1000);
 				} catch (InterruptedException e1) {}
 			}
+			return true;
 		}
 
 		private void parseNmeaSentence(String scannedInput) {
@@ -500,5 +511,9 @@ public class GpsDevice {
 		sb.append("\n fixQuality=");
 		sb.append(m_fixQuality);
 		return sb.toString();
+	}
+	
+	public void setListeners(Collection<PositionListener> listeners) {
+		m_listeners = listeners;
 	}
 }

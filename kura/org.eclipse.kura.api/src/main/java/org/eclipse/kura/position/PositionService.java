@@ -1,14 +1,14 @@
-/**
- * Copyright (c) 2011, 2014 Eurotech and/or its affiliates
+/*******************************************************************************
+ * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
  *
- *  All rights reserved. This program and the accompanying materials
- *  are made available under the terms of the Eclipse Public License v1.0
- *  which accompanies this distribution, and is available at
- *  http://www.eclipse.org/legal/epl-v10.html
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Eurotech
- */
+ *     Eurotech
+ *******************************************************************************/
 package org.eclipse.kura.position;
 
 import org.osgi.util.position.Position;
@@ -71,4 +71,19 @@ public interface PositionService
 	 * Returns the last sentence received from the gps.
 	 */
 	public String getLastSentence();
+	
+	/**
+	 * Registers position listener
+	 * 
+	 * @param listenerId - listener ID as {@link String}
+	 * @param positionListener - position listener as {@link PositionListener}
+	 */
+	public void registerListener(String listenerId, PositionListener positionListener);
+	
+	/**
+	 * Unregisters position listener
+	 * 
+	 * @param listenerId - listener ID as {@link String}
+	 */
+	public void unregisterListener(String listenerId);
 }

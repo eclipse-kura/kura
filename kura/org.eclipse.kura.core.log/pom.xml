@@ -19,7 +19,7 @@
 	<parent>
 		<groupId>org.eclipse.kura</groupId>
 		<artifactId>kura</artifactId>
-		<version>1.4.0</version>
+		<version>1.5.0-SNAPSHOT</version>
 		<relativePath>../manifest_pom.xml</relativePath>
 	</parent>
 
@@ -42,6 +42,7 @@
                 						<compress>false</compress>
                 					</archive>
                                 	<format>'${kura.build.version}'</format>
+                                	<strictVersions>true</strictVersions>
                                 </configuration>
                         </plugin>
                 </plugins>

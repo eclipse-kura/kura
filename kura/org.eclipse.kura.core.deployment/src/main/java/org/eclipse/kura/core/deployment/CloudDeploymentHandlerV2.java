@@ -291,7 +291,7 @@ public class CloudDeploymentHandlerV2 extends Cloudlet {
 					.append(messageType)
 					.toString();
 
-			getCloudApplicationClient().controlPublish(options.getRequestClientId(), messageTopic, messagePayload, 2, DFLT_RETAIN, DFLT_PRIORITY);
+			getCloudApplicationClient().controlPublish(options.getRequestClientId(), messageTopic, messagePayload, 1, DFLT_RETAIN, DFLT_PRIORITY);
 		} catch (KuraException e) {
 			s_logger.error("Error publishing response for command {} {}", messageType, e);
 		}

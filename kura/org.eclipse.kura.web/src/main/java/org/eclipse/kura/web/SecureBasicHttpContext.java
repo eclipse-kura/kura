@@ -181,7 +181,7 @@ public class SecureBasicHttpContext implements HttpContext
 	 */
 	private Subject authorize(String userid, String password) 
 	{        
-		s_logger.debug("Authenticating user [" + userid + "]");
+		s_logger.debug("Authenticating user [{}]", userid);
 		try {
 			if (m_authMgr.authenticate(userid, password)) {
 				// TODO : We are temporarily returning an empty Subject, 

@@ -347,6 +347,9 @@ PasswordCommandService {
 		if (commandPassword == null && receivedPassword == null) {
 			return true;
 		}
+		if (commandPassword == null && receivedPassword.equals("")) {
+			return true;
+		}
 		if(commandPassword == null){
 			return false;
 		}

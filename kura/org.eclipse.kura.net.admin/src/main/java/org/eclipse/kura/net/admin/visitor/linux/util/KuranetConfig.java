@@ -34,7 +34,7 @@ public class KuranetConfig {
     public static Properties getProperties() {
         Properties kuraExtendedProps = null;   
         
-        s_logger.debug("Getting " + KURANET_FILENAME);
+        s_logger.debug("Getting {}", KURANET_FILENAME);
 
         File kuranetFile = new File(KURANET_FILENAME);
 
@@ -57,7 +57,7 @@ public class KuranetConfig {
             	}
             }
         } else {
-            s_logger.debug("File does not exist: " + KURANET_FILENAME);
+            s_logger.debug("File does not exist: {}", KURANET_FILENAME);
         }
 
         return kuraExtendedProps;
@@ -123,11 +123,11 @@ public class KuranetConfig {
         
         if(properties != null) {
         	if(properties.containsKey(key)) {
-            	s_logger.debug("Deleting property " + key);
+            	s_logger.debug("Deleting property {}", key);
         		properties.remove(key);
         		KuranetConfig.storeProperties(properties);
         	} else {
-        		s_logger.debug("Property does not exist " + key);
+        		s_logger.debug("Property does not exist {}", key);
         	}
         }
     }

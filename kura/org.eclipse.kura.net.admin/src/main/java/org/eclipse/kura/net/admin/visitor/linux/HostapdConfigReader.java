@@ -77,7 +77,7 @@ public class HostapdConfigReader implements NetworkConfigurationVisitor {
 	private void getConfig(WifiInterfaceConfigImpl wifiInterfaceConfig)
 			throws KuraException {
 		String interfaceName = wifiInterfaceConfig.getName();
-		s_logger.debug("Getting hostapd config for " + interfaceName);
+		s_logger.debug("Getting hostapd config for {}", interfaceName);
 
 		List<WifiInterfaceAddressConfig> wifiInterfaceAddressConfigs = wifiInterfaceConfig
 				.getNetInterfaceAddresses();

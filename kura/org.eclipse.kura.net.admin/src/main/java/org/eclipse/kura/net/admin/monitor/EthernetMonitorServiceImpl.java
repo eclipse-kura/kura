@@ -250,7 +250,7 @@ public class EthernetMonitorServiceImpl implements EthernetMonitorService, Event
 		        		            		//dhcpServerSubnet = ((DhcpServerConfig4) netConfig).getSubnet();
 		        		            		//dhcpServerPrefix = ((DhcpServerConfig4) netConfig).getPrefix();
 		        		            	} else {
-		        		            		s_logger.trace("Not enabling DHCP server for " + interfaceName + " since it is set to " + netInterfaceStatus);
+		        		            		s_logger.trace("Not enabling DHCP server for {} since it is set to {}", interfaceName, netInterfaceStatus);
 		        		            	}
 									} else if (netConfig instanceof NetConfigIP4) {
 										isDhcpClient = ((NetConfigIP4) netConfig).isDhcp();
@@ -527,7 +527,7 @@ public class EthernetMonitorServiceImpl implements EthernetMonitorService, Event
 				tasks.put(interfaceName, task);
 			} else {
 				// The monitor is already running.
-				monitorNotity(interfaceName);
+				monitorNotify(interfaceName);
 			}
 		}
 	}
@@ -542,7 +542,7 @@ public class EthernetMonitorServiceImpl implements EthernetMonitorService, Event
 			if (stop != null) {
 				stop.set(true);
 			}
-			monitorNotity(interfaceName);
+			monitorNotify(interfaceName);
 			s_logger.debug("Stopping monitor for {} ...", interfaceName);
 			task.cancel(true);
 			s_logger.info("Monitor for {} cancelled? = {}", interfaceName, task.isDone());
@@ -557,7 +557,7 @@ public class EthernetMonitorServiceImpl implements EthernetMonitorService, Event
 		m_netAdminService.manageDhcpServer(interfaceName, false);
 	}
 	
-	private void monitorNotity(String interfaceName) {
+	private void monitorNotify(String interfaceName) {
 		Object o = stopThreads.get(interfaceName);
 		if (o != null) {
 			synchronized (o) {

@@ -15,8 +15,6 @@ import java.io.File;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.linux.util.LinuxProcessUtil;
-import org.eclipse.kura.core.util.ProcessUtil;
-import org.eclipse.kura.core.util.SafeProcess;
 import org.eclipse.kura.linux.net.util.KuraConstants;
 import org.eclipse.kura.linux.net.util.LinuxNetworkUtil;
 import org.eclipse.kura.net.wifi.WifiMode;
@@ -28,7 +26,6 @@ public class WpaSupplicantManager {
 	private static Logger s_logger = LoggerFactory.getLogger(WpaSupplicantManager.class);
 
 	private static final String OS_VERSION = System.getProperty("kura.os.version");
-	private static final String TARGET_NAME = System.getProperty("target.device");
 
 	private static String WPA_CONFIG_FILE_NAME = null;
 	static {
@@ -72,8 +69,6 @@ public class WpaSupplicantManager {
 			} else {
 				m_driver = driver;
 			}
-
-			loadKernelModules();
 
 			// start wpa_supplicant
 			String wpaSupplicantCommand = formSupplicantStartCommand(configFile);
@@ -165,41 +160,6 @@ public class WpaSupplicantManager {
 			Thread.sleep(1000);
 		} catch (Exception e) {
 			throw KuraException.internalError(e);
-		}
-	}
-
-	public static void loadKernelModules() throws KuraException {
-		SafeProcess proc = null;
-
-		try {
-
-			if (TARGET_NAME.equals(KuraConstants.ReliaGATE_10_05.getTargetName())) {
-				s_logger.debug("--> executing wpa_s rmmod");
-				proc = ProcessUtil.exec("rmmod bcmdhd");
-				proc.waitFor();
-
-				s_logger.debug("--> executing wpa_s modprobe");
-				proc = ProcessUtil.exec("modprobe -S 3.12.6 bcmdhd");
-				if(proc.waitFor() != 0) {
-					s_logger.error("failed modprobe");
-					throw KuraException.internalError("failed modprobe"); 
-				}
-				Thread.sleep(1000);
-
-				s_logger.debug("--> executing wpa_s ifconfig");
-				proc = ProcessUtil.exec("ifconfig wlan0 up");
-				if(proc.waitFor() != 0) {
-					s_logger.error("failed ifconfig wlan0 up");
-					throw KuraException.internalError("failed ifconfig wlan0 up"); 
-				}
-			}
-		} catch (Exception e) {
-			s_logger.error("Exception while preparing WPA Supplicant!", e);
-			throw KuraException.internalError(e);
-		} finally {
-			if (proc != null) {
-				ProcessUtil.destroy(proc);
-			}
 		}
 	}
 }

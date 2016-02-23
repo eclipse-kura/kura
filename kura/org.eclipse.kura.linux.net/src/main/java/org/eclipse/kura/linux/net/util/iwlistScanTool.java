@@ -310,7 +310,7 @@ public class iwlistScanTool implements IScanTool {
 							rsnSecurity.add(WifiSecurity.KEY_MGMT_PSK);
 						}
 					} else {
-						s_logger.debug("Ignoring line in RSN: " + line);
+						s_logger.debug("Ignoring line in RSN: {}", line);
 					}
 					
 					if(foundGroup && foundPairwise && foundAuthSuites) {
@@ -361,7 +361,7 @@ public class iwlistScanTool implements IScanTool {
 							wpaSecurity.add(WifiSecurity.KEY_MGMT_PSK);
 						}
 					} else {
-						s_logger.debug("Ignoring line in WPA: " + line);
+						s_logger.debug("Ignoring line in WPA: {}", line);
 					}
 					
 					if(foundGroup && foundPairwise && foundAuthSuites) {

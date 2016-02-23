@@ -83,7 +83,7 @@ public class BluetoothUtil {
 //					String[] tmpAddress = address.split("\\s", 2);
 //					address = tmpAddress[0].trim();
 					props.put("address", address);
-					s_logger.trace("Bluetooth adapter address set to: " + address);
+					s_logger.trace("Bluetooth adapter address set to: {}", address);
 				}
 				if((result.indexOf(HCI_VERSION)) >= 0) {
 					// HCI version : 4.0 (0x6) or HCI version : 4.1 (0x7)

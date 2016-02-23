@@ -180,7 +180,7 @@ public class DownloadImpl implements ProgressListener{
 				try {
 					os.close();
 				} catch (IOException e1) {
-					e1.printStackTrace();
+					s_logger.error("Exception while trying to close stream.", e1);
 				}
 			}
 		}

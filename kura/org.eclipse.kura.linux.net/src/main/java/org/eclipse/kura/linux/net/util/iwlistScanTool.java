@@ -231,12 +231,7 @@ public class iwlistScanTool implements IScanTool {
 						// Could also be of format 39/100
 						final String[] parts = signalLevel.split("/");
 						strength = (int) Float.parseFloat(parts[0]);
-						if(strength <= 0)
-							strength = -100;
-					    else if(strength >= 100)
-					    	strength = -50;
-					    else
-					    	strength = (strength / 2) - 100;
+						strength = SignalStrengthConversion.getRssi(strength);
 					} else {
 						strength = (int)Float.parseFloat(signalLevel);
 					}

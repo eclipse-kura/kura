@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.kura.deployment.agent.DeploymentAgentService;
+import org.eclipse.kura.web.client.util.GwtSafeHtmlUtils;
 import org.eclipse.kura.web.server.util.ServiceLocator;
 import org.eclipse.kura.web.shared.GwtKuraErrorCode;
 import org.eclipse.kura.web.shared.GwtKuraException;
@@ -43,16 +44,16 @@ public class GwtPackageServiceImpl extends OsgiRemoteServiceServlet implements G
 		if (deploymentPackages != null) {
 			for (DeploymentPackage deploymentPackage : deploymentPackages) {
 				GwtDeploymentPackage gwtDeploymentPackage = new GwtDeploymentPackage();
-				gwtDeploymentPackage.setName(super.sanitizeString(deploymentPackage.getName()));
-				gwtDeploymentPackage.setVersion(super.sanitizeString(deploymentPackage.getVersion().toString()));
+				gwtDeploymentPackage.setName(GwtSafeHtmlUtils.htmlEscape(deploymentPackage.getName()));
+				gwtDeploymentPackage.setVersion(GwtSafeHtmlUtils.htmlEscape(deploymentPackage.getVersion().toString()));
 				
 				List<GwtBundleInfo> gwtBundleInfos = new ArrayList<GwtBundleInfo>();
 				BundleInfo[] bundleInfos = deploymentPackage.getBundleInfos();
 				if (bundleInfos != null) {
 					for (BundleInfo bundleInfo : bundleInfos) {
 						GwtBundleInfo gwtBundleInfo = new GwtBundleInfo();
-						gwtBundleInfo.setName(super.sanitizeString(bundleInfo.getSymbolicName()));
-						gwtBundleInfo.setVersion(super.sanitizeString(bundleInfo.getVersion().toString()));
+						gwtBundleInfo.setName(GwtSafeHtmlUtils.htmlEscape(bundleInfo.getSymbolicName()));
+						gwtBundleInfo.setVersion(GwtSafeHtmlUtils.htmlEscape(bundleInfo.getVersion().toString()));
 						
 						gwtBundleInfos.add(gwtBundleInfo);
 					}
@@ -75,7 +76,7 @@ public class GwtPackageServiceImpl extends OsgiRemoteServiceServlet implements G
 		checkXSRFToken(xsrfToken);
 		DeploymentAgentService deploymentAgentService = ServiceLocator.getInstance().getService(DeploymentAgentService.class);		
 		try {
-			deploymentAgentService.uninstallDeploymentPackageAsync(super.sanitizeString(packageName));
+			deploymentAgentService.uninstallDeploymentPackageAsync(GwtSafeHtmlUtils.htmlEscape(packageName));
 		} 
 		catch (Exception e) {
 			// TODO Auto-generated catch block

@@ -79,52 +79,52 @@ public class SierraUsb598Status {
 
 	static {
 		// channel state
-		s_ChannelState.put(new Integer(SierraUsb598StatusCodes.CHANSTATE_NOT_ACQUIRED.getStatusCode()), new String(
+		s_ChannelState.put(Integer.valueOf(SierraUsb598StatusCodes.CHANSTATE_NOT_ACQUIRED.getStatusCode()), new String(
 				"Not Acquired"));
-		s_ChannelState.put(new Integer(SierraUsb598StatusCodes.CHANSTATE_ACQUIRED.getStatusCode()), new String(
+		s_ChannelState.put(Integer.valueOf(SierraUsb598StatusCodes.CHANSTATE_ACQUIRED.getStatusCode()), new String(
 				"Acquired"));
-		s_ChannelState.put(new Integer(SierraUsb598StatusCodes.CHANSTATE_SCANNING.getStatusCode()), new String(
+		s_ChannelState.put(Integer.valueOf(SierraUsb598StatusCodes.CHANSTATE_SCANNING.getStatusCode()), new String(
 				"Scanning"));
 
 		// current band class
 		s_BandClass
-				.put(new Integer(SierraUsb598StatusCodes.BANDCLASS_CELLULAR.getStatusCode()), new String("Cellular"));
-		s_BandClass.put(new Integer(SierraUsb598StatusCodes.BANDCLASS_PCS.getStatusCode()), new String("PCS"));
+				.put(Integer.valueOf(SierraUsb598StatusCodes.BANDCLASS_CELLULAR.getStatusCode()), new String("Cellular"));
+		s_BandClass.put(Integer.valueOf(SierraUsb598StatusCodes.BANDCLASS_PCS.getStatusCode()), new String("PCS"));
 
 		// activation status
-		s_ActivationStatus.put(new Integer(SierraUsb598StatusCodes.ACTSTAT_NOT_ACTIVATED.getStatusCode()), new String(
+		s_ActivationStatus.put(Integer.valueOf(SierraUsb598StatusCodes.ACTSTAT_NOT_ACTIVATED.getStatusCode()), new String(
 				"not activated"));
-		s_ActivationStatus.put(new Integer(SierraUsb598StatusCodes.ACTSTAT_ACTIVATED.getStatusCode()), new String(
+		s_ActivationStatus.put(Integer.valueOf(SierraUsb598StatusCodes.ACTSTAT_ACTIVATED.getStatusCode()), new String(
 				"activated"));
 
 		// roaming status
-		s_RoamingStatus.put(new Integer(SierraUsb598StatusCodes.ROAMSTAT_NOT_ROAMING.getStatusCode()), new String(
+		s_RoamingStatus.put(Integer.valueOf(SierraUsb598StatusCodes.ROAMSTAT_NOT_ROAMING.getStatusCode()), new String(
 				"Not roaming"));
-		s_RoamingStatus.put(new Integer(SierraUsb598StatusCodes.ROAMSTAT_W_SID.getStatusCode()), new String(
+		s_RoamingStatus.put(Integer.valueOf(SierraUsb598StatusCodes.ROAMSTAT_W_SID.getStatusCode()), new String(
 				"Roaming with guaranteed SID"));
-		s_RoamingStatus.put(new Integer(SierraUsb598StatusCodes.ROAMSTAT_WO_SID.getStatusCode()), new String(
+		s_RoamingStatus.put(Integer.valueOf(SierraUsb598StatusCodes.ROAMSTAT_WO_SID.getStatusCode()), new String(
 				"Roaming w/o guaranteed SID"));
 
 		// service indication
-		s_ServiceIndication.put(new Integer(SierraUsb598StatusCodes.SRVCIND_NO.getStatusCode()), new String(
+		s_ServiceIndication.put(Integer.valueOf(SierraUsb598StatusCodes.SRVCIND_NO.getStatusCode()), new String(
 				"No service"));
-		s_ServiceIndication.put(new Integer(SierraUsb598StatusCodes.SRVCIND_CDMA.getStatusCode()), new String(
+		s_ServiceIndication.put(Integer.valueOf(SierraUsb598StatusCodes.SRVCIND_CDMA.getStatusCode()), new String(
 				"Digital CDMA"));
-		s_ServiceIndication.put(new Integer(SierraUsb598StatusCodes.SRVCIND_GPS.getStatusCode()), new String("GPS"));
+		s_ServiceIndication.put(Integer.valueOf(SierraUsb598StatusCodes.SRVCIND_GPS.getStatusCode()), new String("GPS"));
 
 		// call status
-		s_CallStatus.put(new Integer(SierraUsb598StatusCodes.CALLSTAT_DISCONNECTED.getStatusCode()), new String(
+		s_CallStatus.put(Integer.valueOf(SierraUsb598StatusCodes.CALLSTAT_DISCONNECTED.getStatusCode()), new String(
 				"Disconnected"));
-		s_CallStatus.put(new Integer(SierraUsb598StatusCodes.CALLSTAT_CONNECTING.getStatusCode()), new String(
+		s_CallStatus.put(Integer.valueOf(SierraUsb598StatusCodes.CALLSTAT_CONNECTING.getStatusCode()), new String(
 				"Connecting"));
-		s_CallStatus.put(new Integer(SierraUsb598StatusCodes.CALLSTAT_CONNECTED.getStatusCode()), new String(
+		s_CallStatus.put(Integer.valueOf(SierraUsb598StatusCodes.CALLSTAT_CONNECTED.getStatusCode()), new String(
 				"Connected"));
-		s_CallStatus.put(new Integer(SierraUsb598StatusCodes.CALLSTAT_DORMANT.getStatusCode()), new String(
+		s_CallStatus.put(Integer.valueOf(SierraUsb598StatusCodes.CALLSTAT_DORMANT.getStatusCode()), new String(
 				"Dormant Packet Call"));
 
 		// power mode
-		s_PowerMode.put(new Integer(SierraUsb598StatusCodes.PMODE_LPM.getStatusCode()), "Low Power Mode");
-		s_PowerMode.put(new Integer(SierraUsb598StatusCodes.PMODE_ONLINE.getStatusCode()), "Online");
+		s_PowerMode.put(Integer.valueOf(SierraUsb598StatusCodes.PMODE_LPM.getStatusCode()), "Low Power Mode");
+		s_PowerMode.put(Integer.valueOf(SierraUsb598StatusCodes.PMODE_ONLINE.getStatusCode()), "Online");
 
 	}
 
@@ -135,7 +135,7 @@ public class SierraUsb598Status {
 	 * @return channel state
 	 */
 	public static String getChannelState(int chanState) {
-		Object o = s_ChannelState.get(new Integer(chanState));
+		Object o = s_ChannelState.get(Integer.valueOf(chanState));
 		return (o != null) ? (String) o : NOT_AVAIL;
 	}
 
@@ -146,7 +146,7 @@ public class SierraUsb598Status {
 	 * @return band class
 	 */
 	public static String getBandClass(int bandClass) {
-		Object o = s_BandClass.get(new Integer(bandClass));
+		Object o = s_BandClass.get(Integer.valueOf(bandClass));
 		return (o != null) ? (String) o : NOT_AVAIL;
 	}
 
@@ -157,7 +157,7 @@ public class SierraUsb598Status {
 	 * @return roaming status
 	 */
 	public static String getRoamingStatus(int roamingStatus) {
-		Object o = s_RoamingStatus.get(new Integer(roamingStatus));
+		Object o = s_RoamingStatus.get(Integer.valueOf(roamingStatus));
 		return (o != null) ? (String) o : NOT_AVAIL;
 	}
 
@@ -169,7 +169,7 @@ public class SierraUsb598Status {
 	 * @return
 	 */
 	public static String getActivationStatus(int activationStatus) {
-		Object o = s_ActivationStatus.get(new Integer(activationStatus));
+		Object o = s_ActivationStatus.get(Integer.valueOf(activationStatus));
 		return (o != null) ? (String) o : NOT_AVAIL;
 	}
 
@@ -180,7 +180,7 @@ public class SierraUsb598Status {
 	 * @return service indication
 	 */
 	public static String getServiceIndication(int serviceIndication) {
-		Object o = s_ServiceIndication.get(new Integer(serviceIndication));
+		Object o = s_ServiceIndication.get(Integer.valueOf(serviceIndication));
 		return (o != null) ? (String) o : NOT_AVAIL;
 	}
 
@@ -191,7 +191,7 @@ public class SierraUsb598Status {
 	 * @return call status
 	 */
 	public static String getCallStatus(int callStatus) {
-		Object o = s_CallStatus.get(new Integer(callStatus));
+		Object o = s_CallStatus.get(Integer.valueOf(callStatus));
 		return (o != null) ? (String) o : NOT_AVAIL;
 	}
 
@@ -202,7 +202,7 @@ public class SierraUsb598Status {
 	 * @return power mode string
 	 */
 	public static String getPowerMode(int powerMode) {
-		Object o = s_PowerMode.get(new Integer(powerMode));
+		Object o = s_PowerMode.get(Integer.valueOf(powerMode));
 		return (o != null) ? (String) o : NOT_AVAIL;
 	}
 }

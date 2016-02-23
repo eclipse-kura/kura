@@ -114,21 +114,19 @@
         <replace file="${project.build.directory}/${build.output.name}/config.ini"
                  token="{org.eclipse.kura.linux.command.version}" value="${org.eclipse.kura.linux.command.version}"/>
         <replace file="${project.build.directory}/${build.output.name}/config.ini"
-                 token="{org.eclipse.kura.linux.net.version}" value="${org.eclipse.kura.linux.net.version}"/>
-        <replace file="${project.build.directory}/${build.output.name}/config.ini"
                  token="{org.eclipse.kura.linux.position.version}" value="${org.eclipse.kura.linux.position.version}"/>
         <replace file="${project.build.directory}/${build.output.name}/config.ini"
                  token="{org.eclipse.kura.linux.usb.version}" value="${org.eclipse.kura.linux.usb.version}"/>
-		  <replace file="${project.build.directory}/${build.output.name}/config.ini"
+		<replace file="${project.build.directory}/${build.output.name}/config.ini"
                  token="{org.eclipse.kura.linux.bluetooth.version}" value="${org.eclipse.kura.linux.bluetooth.version}"/>
         <replace file="${project.build.directory}/${build.output.name}/config.ini"
                  token="{org.eclipse.kura.linux.watchdog.version}" value="${org.eclipse.kura.linux.watchdog.version}"/>
         <replace file="${project.build.directory}/${build.output.name}/config.ini"
-                 token="{org.eclipse.kura.linux.status.version}" value="${org.eclipse.kura.linux.status.version}"/>
-        <propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
+                 token="{org.eclipse.kura.core.status.version}" value="${org.eclipse.kura.core.status.version}"/>
+        <!-- <propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
             <entry key="osgi.bundles" operation="+"
                    value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.net.admin_${org.eclipse.kura.net.admin.version}.jar@5:start" />
-        </propertyfile>
+        </propertyfile> -->
 
 		<!-- Conditional entries. Check for jar presence, and invoke relevant ant target-->
 		<available file="${project.build.directory}/plugins/org.eclipse.kura.web_${org.eclipse.kura.web.version}.jar" property="web.jar.present" />
@@ -136,9 +134,13 @@
 
 		<available file="${project.build.directory}/plugins/org.eclipse.kura.linux.gpio_${org.eclipse.kura.linux.gpio.version}.jar" property="linux.gpio.jar.present" />
 		<antcall target="gpio-config" />
-
-		<available file="${project.build.directory}/plugins/org.eclipse.kura.emulator.gpio_${org.eclipse.kura.emulator.gpio.version}.jar" property="emulated.gpio.jar.present" />
-		<antcall target="emulated-gpio-config" />
+		
+		<condition property="is.nn">
+    		<contains string="${build.name}" substring="-nn"/>
+  		</condition>
+  		<antcall target="emulator-config" />
+  		<antcall target="linux-config" />
+  		
 
         <!-- Add mToolkit to config.ini -->
         <propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
@@ -333,7 +335,11 @@ fi
                         prefix="${build.output.name}/install" />
             <zipfileset file="${project.build.directory}/${build.output.name}/kura.service.edison"
                         prefix="${build.output.name}/install" />
-            <zipfileset file="src/main/resources/${build.name}/firewall.init"
+ 	    <zipfileset file="src/main/resources/${build.name}/recover_default_config.init"
+                        prefix="${build.output.name}/install" />           
+	    <zipfileset file="src/main/resources/${build.name}/firewall.init"
+                        prefix="${build.output.name}/install" />
+            <zipfileset file="src/main/resources/${build.name}/iptables.init"
                         prefix="${build.output.name}/install" />
             <zipfileset file="src/main/resources/common/monit.init.wrl"
                         prefix="${build.output.name}/install" />
@@ -466,8 +472,8 @@ fi
                         prefix="${build.output.name}/kura/plugins" />
             <zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.linux.command_${org.eclipse.kura.linux.command.version}.jar"
                         prefix="${build.output.name}/kura/plugins" />
-            <zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.linux.net_${org.eclipse.kura.linux.net.version}.jar"
-                        prefix="${build.output.name}/kura/plugins" />
+            <!-- <zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.linux.net_${org.eclipse.kura.linux.net.version}.jar"
+                        prefix="${build.output.name}/kura/plugins" /> -->
             <zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.linux.position_${org.eclipse.kura.linux.position.version}.jar"
                         prefix="${build.output.name}/kura/plugins" />
             <zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.linux.usb_${org.eclipse.kura.linux.usb.version}.jar"
@@ -476,20 +482,21 @@ fi
                         prefix="${build.output.name}/kura/plugins" />
 			<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.linux.watchdog_${org.eclipse.kura.linux.watchdog.version}.jar"
                         prefix="${build.output.name}/kura/plugins" />
-			<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.linux.status_${org.eclipse.kura.linux.status.version}.jar"
+			<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.core.status_${org.eclipse.kura.core.status.version}.jar"
                         prefix="${build.output.name}/kura/plugins" />
 			<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.linux.gpio_${org.eclipse.kura.linux.gpio.version}.jar"
                         prefix="${build.output.name}/kura/plugins" />
 			<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.linux_${org.eclipse.kura.linux.version}.jar"
                         prefix="${build.output.name}/kura/plugins" />
-			<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.net.admin_${org.eclipse.kura.net.admin.version}.jar"
-                        prefix="${build.output.name}/kura/plugins" />
+			<!--<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.net.admin_${org.eclipse.kura.net.admin.version}.jar"
+                        prefix="${build.output.name}/kura/plugins" /> -->
         </zip>
 		
 		<!-- Conditional inclusion of jar files in the distribution jar -->
 		<antcall target="web-jar" />
 		<antcall target="gpio-jar" />
-		<antcall target="emulated-gpio-jar" />
+		<antcall target="emulator-jars" />
+  		<antcall target="linux-jars" />
 
       <echo message="Building Kura Distribution for ${build.name}-jars..." />
 
@@ -502,6 +509,7 @@ fi
                 <arg value="${build.name}" />
 				<arg value="${kura.install.dir}" />
         </exec>
+        
 
 
 		<!-- Get version information for the bundles/files in this build -->
@@ -516,11 +524,11 @@ fi
 
 		<!-- Diff with the previous version -->
         <property file="RELEASE_INFO/version.properties" />
-        <echo message="Diff version information with ${build.name} version ${project.version.previous}" />
+        <echo message="Diff version information with ${build.name} version ${kura.project.version.previous}" />
         <exec executable="src/main/sh/diff_build_versions.sh">
-                <arg value="RELEASE_INFO/${project.version.previous}/kura_${project.version.previous}_${build.name}.catalog" />
+                <arg value="RELEASE_INFO/${kura.project.version.previous}/kura_${kura.project.version.previous}_${build.name}.catalog" />
                 <arg value="${project.build.directory}/${build.output.name}.catalog" />
-                <arg value="${project.build.directory}/kura_${project.version.previous}_to_${project.version}_${build.name}" />
+                <arg value="${project.build.directory}/kura_${kura.project.version.previous}_to_${project.version}_${build.name}" />
                 <arg value="${build.name}" />
         </exec>
 
@@ -531,11 +539,11 @@ fi
                 <arg value="${project.build.directory}" />
                 <arg value="${project.build.directory}/${build.output.name}.zip" />
                 <arg value="kura_${project.version}_${build.name}_upgrade.zip" />
-                <arg value="KURA_${project.version.previous}" />
+                <arg value="KURA_${kura.project.version.previous}" />
                 <arg value="${kura.install.dir}" />
                 <arg value="${build.output.name}" />
-                <arg value="kura_${project.version.previous}_to_${project.version}_${build.name}.removed" />
-                <arg value="kura_${project.version.previous}_to_${project.version}_${build.name}.keep" />
+                <arg value="kura_${kura.project.version.previous}_to_${project.version}_${build.name}.removed" />
+                <arg value="kura_${kura.project.version.previous}_to_${project.version}_${build.name}.keep" />
                 <arg value="${build.output.name}_upgrader.sh" />
                 <arg value="${build.name}" />
         </exec>
@@ -579,6 +587,19 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
         <jar destfile="${project.build.directory}/${build.output.name}_upgrader.dp"
                 manifest="${project.build.directory}/${build.output.name}/dp_upgrade_stage/META-INF/MANIFEST.MF"
                 basedir="${project.build.directory}/${build.output.name}/dp_upgrade_stage" />
+                
+        <checksum algorithm="md5">
+    		<fileset dir="./target/" >
+    			<include name="kura_${project.version}_${build.name}*.sh"/>
+    			<include name="kura_${project.version}_${build.name}*.dp"/>
+    		</fileset>
+		</checksum>
+		<checksum algorithm="SHA-1">
+    		<fileset dir="./target/" >
+    			<include name="kura_${project.version}_${build.name}*.sh"/>
+    			<include name="kura_${project.version}_${build.name}*.dp"/>
+    		</fileset>
+		</checksum>
     </target>
 
 	<target name="set-http-port" if="http.port">
@@ -591,7 +612,7 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
 	<target name="web-config" if="web.jar.present">
 		<propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
             	<entry key="osgi.bundles" operation="+"
-                   value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.web_${org.eclipse.kura.web.version}.jar@5:start" />
+                   value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.web_${org.eclipse.kura.web.version}.jar@6:start" />
         </propertyfile>
 	</target>
 
@@ -599,13 +620,6 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
 		<propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
 			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.linux.gpio_${org.eclipse.kura.linux.gpio.version}.jar@5:start" />
-		</propertyfile>
-	</target>
-
-	<target name="emulated-gpio-config" if="emulated.gpio.jar.present">
-		<propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
-			<entry key="osgi.bundles" operation="+"
-				value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.emulator.gpio_${org.eclipse.kura.emulator.gpio.version}.jar@5:start" />
 		</propertyfile>
 	</target>
 
@@ -622,19 +636,36 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
                         prefix="${build.output.name}/kura/plugins" />
 		</zip>
 	</target>
-
-	<target name="emulated-gpio-jar" if="emulated.gpio.jar.present">
-		<zip destfile="${project.build.directory}/${build.output.name}.zip" update="true">
-			<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.emulator.gpio_${org.eclipse.kura.emulator.gpio.version}.jar"
+	
+	<target name="emulator-config" if="is.nn">
+		<replace file="${project.build.directory}/${build.output.name}/config.ini"
+                 token="{org.eclipse.kura.linux.net.version}" value="${org.eclipse.kura.emulator.net.version}"/>
+        <replace file="${project.build.directory}/${build.output.name}/config.ini"
+                 token="org.eclipse.kura.linux.net_" value="org.eclipse.kura.emulator.net_"/>
+	</target>
+	
+	<target name="linux-config" unless="is.nn">
+		<replace file="${project.build.directory}/${build.output.name}/config.ini"
+                 token="{org.eclipse.kura.linux.net.version}" value="${org.eclipse.kura.linux.net.version}"/>
+        <propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
+            <entry key="osgi.bundles" operation="+"
+                   value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.net.admin_${org.eclipse.kura.net.admin.version}.jar@5:start" />
+        </propertyfile>
+	</target>
+	
+	<target name="emulator-jars" if="is.nn">
+        <zip destfile="${project.build.directory}/${build.output.name}.zip" update="true">
+			<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.emulator.net_${org.eclipse.kura.emulator.net.version}.jar"
                         prefix="${build.output.name}/kura/plugins" />
 		</zip>
-
-		<zip destfile="${project.build.directory}/tmp.zip"> 
-			<zipfileset src="${project.build.directory}/${build.output.name}.zip"> 
-				<exclude name="${build.output.name}/plugins/jdk.dio_1.0.1.jar" /> 
-			</zipfileset> 
-		</zip> 
-		<move file="${project.build.directory}/tmp.zip" tofile="${project.build.directory}/${build.output.name}.zip" /> 
 	</target>
-
+	
+	<target name="linux-jars" unless="is.nn">
+        <zip destfile="${project.build.directory}/${build.output.name}.zip" update="true">
+			<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.linux.net_${org.eclipse.kura.linux.net.version}.jar"
+                        prefix="${build.output.name}/kura/plugins" />
+            <zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.net.admin_${org.eclipse.kura.net.admin.version}.jar"
+                        prefix="${build.output.name}/kura/plugins" />
+		</zip>
+	</target>
 </project>

@@ -32,20 +32,21 @@ import org.slf4j.LoggerFactory;
 public class WatchdogServiceImpl implements WatchdogService, ConfigurableComponent {
 
 	private static final Logger s_logger = LoggerFactory.getLogger(WatchdogServiceImpl.class);
-	
+
 	private final static long THREAD_TERMINATION_TOUT = 1; // in seconds
-	
+
 	private static ScheduledFuture<?>  		s_pollThreadTask;
 	private ScheduledExecutorService     	m_pollThreadExecutor;
-	
+
 	private Map<String,Object>				m_properties;	
-	
+
 	private int 							pingInterval = 2000;	//milliseconds
 	private static ArrayList<CriticalComponentImpl>	s_criticalServiceList;
 	private boolean 						m_configEnabled = false;	// initialized in properties, if false -> no watchdog
 	private boolean 						m_enabled; 
 	private boolean 						m_watchdogToStop = false;
 	private boolean							m_serviceToStop = false;
+	private String                          watchdogDevice = "/dev/watchdog";
 
 	protected void activate(ComponentContext componentContext, Map<String,Object> properties) {
 		m_properties=properties;
@@ -62,65 +63,77 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
 			if(m_properties.get("pingInterval") != null){
 				pingInterval = (Integer) m_properties.get("pingInterval");
 			}
+			if(m_properties.get("watchdogDevice") != null && !((String) m_properties.get("watchdogDevice")).isEmpty()){
+				watchdogDevice = (String) m_properties.get("watchdogDevice");
+			}
 		}
 		s_criticalServiceList = new ArrayList<CriticalComponentImpl>();
 		m_enabled=false;
 		m_serviceToStop=false;
-		
+
 		m_pollThreadExecutor = Executors.newSingleThreadScheduledExecutor();
-		
+
 		updated(properties);
 	}
-	
+
 	protected void deactivate(ComponentContext componentContext) {
-		
+
 		if ((s_pollThreadTask != null) && (!s_pollThreadTask.isDone())) {
 			s_logger.debug("Cancelling WatchdogServiceImpl task ...");
 			s_pollThreadTask.cancel(true);
-    		s_logger.info("WatchdogServiceImpl task cancelled? = {}", s_pollThreadTask.isDone());
+			s_logger.info("WatchdogServiceImpl task cancelled? = {}", s_pollThreadTask.isDone());
 			s_pollThreadTask = null;
 		}
-		
+
 		if(m_enabled){
+			File f= null;
+			FileWriter bw= null;
 			try {
-				File f = new File("/dev/watchdog");
-				FileWriter bw = new FileWriter(f);
+				f = new File(watchdogDevice);
+				bw = new FileWriter(f);
 				bw.write('V');
-				bw.close();
 				m_enabled=false;
 				m_serviceToStop=true;
 				s_logger.info("watchdog stopped");
 			} catch (IOException e) {
 				e.printStackTrace();
+			} finally {
+				try {
+					if (bw != null) {
+						bw.close();
+					}
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
 			}
 		}		
-		
+
 		if (m_pollThreadExecutor != null) {
 			s_logger.debug("Terminating WatchdogServiceImpl Thread ...");
 			m_pollThreadExecutor.shutdownNow();
-    		try {
-    			m_pollThreadExecutor.awaitTermination(THREAD_TERMINATION_TOUT, TimeUnit.SECONDS);
+			try {
+				m_pollThreadExecutor.awaitTermination(THREAD_TERMINATION_TOUT, TimeUnit.SECONDS);
 			} catch (InterruptedException e) {
 				s_logger.warn("Interrupted", e);
 			}
-    		s_logger.info("WatchdogServiceImpl Thread terminated? - {}", m_pollThreadExecutor.isTerminated());	
+			s_logger.info("WatchdogServiceImpl Thread terminated? - {}", m_pollThreadExecutor.isTerminated());	
 			m_pollThreadExecutor = null;
 		}
-		
+
 		s_criticalServiceList = null;
 	}
-	
+
 	public void updated(Map<String,Object> properties)
 	{
 		s_logger.debug("updated...");		
 		m_properties = properties;
 		if(m_properties!=null) {
-			
+
 			//clean up if this is not our first run
 			if ((s_pollThreadTask != null) && (!s_pollThreadTask.isCancelled())) {
 				s_pollThreadTask.cancel(true);
 			}
-			
+
 			if(m_properties.get("enabled") != null) {
 				m_configEnabled = (Boolean) m_properties.get("enabled");
 			}
@@ -132,25 +145,28 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
 			if(m_properties.get("pingInterval") != null) {
 				pingInterval = (Integer) m_properties.get("pingInterval");
 			}
-			
+			if(!((String) m_properties.get("watchdogDevice")).isEmpty()){
+				watchdogDevice = (String) m_properties.get("watchdogDevice");
+			}
+
 			s_pollThreadTask = m_pollThreadExecutor.scheduleAtFixedRate(new Runnable() {
-	    		@Override
-	    		public void run() {
-	    			Thread.currentThread().setName("WatchdogServiceImpl");
-		    		doWatchdogLoop();	
-	    		}
-	    	}, 0, pingInterval, TimeUnit.MILLISECONDS);
-			
+				@Override
+				public void run() {
+					Thread.currentThread().setName("WatchdogServiceImpl");
+					doWatchdogLoop();	
+				}
+			}, 0, pingInterval, TimeUnit.MILLISECONDS);
+
 		}
 	}
-	
+
 	@Override
-    @Deprecated
+	@Deprecated
 	public void startWatchdog() {
 	}
 
 	@Override
-    @Deprecated
+	@Deprecated
 	public void stopWatchdog() {
 	}
 
@@ -173,16 +189,16 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
 			if(!existing)
 				s_criticalServiceList.add(service);
 		}
-		
+
 		s_logger.debug("Added " + criticalComponent.getCriticalComponentName() + ", with timeout = " + criticalComponent.getCriticalComponentTimeout() +
-		", list contains " + s_criticalServiceList.size() + " critical services");
+				", list contains " + s_criticalServiceList.size() + " critical services");
 	}
-	
-    @Override
-    @Deprecated
-    public void registerCriticalService(CriticalComponent criticalComponent) {
-        registerCriticalComponent(criticalComponent);
-    }
+
+	@Override
+	@Deprecated
+	public void registerCriticalService(CriticalComponent criticalComponent) {
+		registerCriticalComponent(criticalComponent);
+	}
 
 
 	@Override
@@ -197,13 +213,13 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
 		}
 	}
 
-    @Override
-    @Deprecated
-    public void unregisterCriticalService(CriticalComponent criticalComponent) {
-        unregisterCriticalComponent(criticalComponent);
-    }
+	@Override
+	@Deprecated
+	public void unregisterCriticalService(CriticalComponent criticalComponent) {
+		unregisterCriticalComponent(criticalComponent);
+	}
 
-    @Override
+	@Override
 	public List<CriticalComponent> getCriticalComponents() {
 		return null;
 	}
@@ -222,14 +238,23 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
 	private void doWatchdogLoop() {
 		if (m_enabled) {
 			if (m_watchdogToStop) {
+				File f = null;
+				FileWriter bw = null;
 				try {
-					File f = new File("/dev/watchdog");
-					FileWriter bw = new FileWriter(f);
+					f = new File(watchdogDevice);
+					bw = new FileWriter(f);
 					bw.write('V');
-					bw.close();
 					s_logger.info("watchdog stopped");
 				} catch (IOException e) {
 					e.printStackTrace();
+				} finally {
+					try {
+						if (bw != null) {
+							bw.close();
+						}
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
 				}
 				m_watchdogToStop = false;
 				m_enabled = false;
@@ -248,24 +273,35 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
 				}
 
 				if (!failure) { // refresh watchdog
+					File f = null;
+					FileWriter bw = null;
 					try {
-						File f = new File("/dev/watchdog");
-						FileWriter bw = new FileWriter(f);
+						f = new File(watchdogDevice);
+						bw = new FileWriter(f);
 						bw.write('w');
 						bw.flush();
-						bw.close();
 						s_logger.debug("watchdog refreshed");
 					} catch (IOException e) {
 						s_logger.info("IOException : " + e.getMessage());
 						e.printStackTrace();
+					} finally {
+						try {
+							if (bw != null) {
+								bw.close();
+							}
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
 					}
 				}
 			}
 		} else { // ! m_enabled
 			if (m_configEnabled) {
+				File f = null;
+				FileWriter bw = null;
 				try {
-					File f = new File("/dev/watchdog");
-					FileWriter bw = new FileWriter(f);
+					f = new File(watchdogDevice);
+					bw = new FileWriter(f);
 					bw.write('w');
 					bw.flush();
 					bw.close();
@@ -274,6 +310,14 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
 					s_logger.info("watchdog started");
 				} catch (IOException e) {
 					e.printStackTrace();
+				} finally {
+					try {
+						if (bw != null) {
+							bw.close();
+						}
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
 				}
 			}
 		}

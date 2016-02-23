@@ -124,7 +124,7 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
 	
 	public void unsetModemManagerService(ModemManagerService modemManagerService) {
     	s_logger.debug("Unset the modem manager service");
-		modemManagerService = null;
+    	m_modemManagerService = null;
 	}
     
 	// ----------------------------------------------------------------
@@ -140,6 +140,20 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
     {
         s_logger.debug("activate(componentContext, properties)...");
         
+        Dictionary<String, String[]> d = new Hashtable<String, String[]>();
+        d.put(EventConstants.EVENT_TOPIC, EVENT_TOPICS);
+        componentContext.getBundleContext().registerService(EventHandler.class.getName(), this, d);
+        
+        m_executorUtil = Executors.newSingleThreadScheduledExecutor();
+        
+        m_executorUtil.schedule(new Runnable() {
+    		@Override
+    		public void run() {
+    			//make sure we don't miss the setting of firstConfig
+    			m_firstConfig = false;
+    		}
+    	}, 3, TimeUnit.MINUTES);
+        
         m_readVisitors = new ArrayList<NetworkConfigurationVisitor>();
         m_readVisitors.add(LinuxReadVisitor.getInstance());
 
@@ -152,20 +166,6 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
         } else {
         	s_logger.debug("Props..." + properties);
         }
-        
-        m_executorUtil = Executors.newSingleThreadScheduledExecutor();
-        
-        Dictionary<String, String[]> d = new Hashtable<String, String[]>();
-        d.put(EventConstants.EVENT_TOPIC, EVENT_TOPICS);
-        componentContext.getBundleContext().registerService(EventHandler.class.getName(), this, d);
-        
-        m_executorUtil.schedule(new Runnable() {
-    		@Override
-    		public void run() {
-    			//make sure we don't miss the setting of firstConfig
-    			m_firstConfig = false;
-    		}
-    	}, 3, TimeUnit.MINUTES);
     }
     
     protected void deactivate(ComponentContext componentContext) {
@@ -771,7 +771,7 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
                         tad = objectFactory.createTad();
                         tad.setId((new StringBuffer().append(prefix).append(ifaceName).append(".config.wifi.infra.passphrase")).toString());
                         tad.setName((new StringBuffer().append(prefix).append(ifaceName).append(".config.wifi.infra.passphrase")).toString());
-                        tad.setType(Tscalar.STRING);
+                        tad.setType(Tscalar.PASSWORD);
                         tad.setCardinality(0);
                         tad.setRequired(false);
                         tad.setDefault("");
@@ -863,7 +863,7 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
                         tad = objectFactory.createTad();
                         tad.setId((new StringBuffer().append(prefix).append(ifaceName).append(".config.wifi.master.passphrase")).toString());
                         tad.setName((new StringBuffer().append(prefix).append(ifaceName).append(".config.wifi.master.passphrase")).toString());
-                        tad.setType(Tscalar.STRING);
+                        tad.setType(Tscalar.PASSWORD);
                         tad.setCardinality(0);
                         tad.setRequired(false);
                         tad.setDefault("");

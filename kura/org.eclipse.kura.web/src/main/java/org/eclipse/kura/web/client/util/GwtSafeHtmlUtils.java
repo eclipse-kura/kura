@@ -16,8 +16,8 @@ public class GwtSafeHtmlUtils {
 	{
 		if (unsafeHtml == null){
 			return null;
-		} else if (!unsafeHtml.matches("[0-9A-Za-z/.@*#:\\ \\_\\-]+")){
-			return "";
+//		} else if (!unsafeHtml.matches("[0-9A-Za-z/.@*#:\\ \\_\\-]+")){
+//			return "";
 		}
 		return SafeHtmlUtils.htmlEscape(unsafeHtml);
 	}

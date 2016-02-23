@@ -39,6 +39,7 @@ import org.slf4j.LoggerFactory;
 public class GpsDevice {
 	private static final Logger s_logger = LoggerFactory.getLogger(GpsDevice.class);
 
+	private static Object s_lock = new Object();
 	static final String PROTOCOL_NAME = "position";
 	
 	//private String unitName = PROTOCOL_NAME;
@@ -243,7 +244,10 @@ public class GpsDevice {
 	    		@Override
 	    		public void run() {
 		    		Thread.currentThread().setName("GpsSerialCommunicate");
-		    		doPollWork();
+		    		if (!doPollWork()) {
+		    			s_logger.info("The doPollWork() method returned 'false' - disconnecting ...");
+		    			disconnect();
+		    		}
 	    	}}, 0, 20, TimeUnit.MILLISECONDS);			
 		}
 
@@ -254,37 +258,38 @@ public class GpsDevice {
 		}
 
 		public void disconnect() {
-			
-			if ((m_task != null) && (!m_task.isDone())) {
-	    		s_logger.debug("disconnect() :: Cancelling GpsSerialCommunicate task ...");
-	    		m_task.cancel(true);
-	    		s_logger.info("disconnect() :: GpsSerialCommunicate task cancelled? = {}", m_task.isDone());
-	    		m_task = null;
-	    	}
-	    	
-	    	if (m_executor != null) {
-	    		s_logger.debug("disconnect() :: Terminating GpsSerialCommunicate Thread ...");
-	    		m_executor.shutdownNow();
-	    		try {
-					m_executor.awaitTermination(THREAD_TERMINATION_TOUT, TimeUnit.SECONDS);
-				} catch (InterruptedException e) {
-					s_logger.warn("Interrupted", e);
-				}
-	    		s_logger.info("disconnect() :: GpsSerialCommunicate Thread terminated? - {}", m_executor.isTerminated());
-				m_executor = null;
-	    	}
-			
-			if (conn!=null) {
-				try {
-					if(in!=null){
-						in.close();
-						in=null;
+			synchronized (s_lock) {
+				if ((m_task != null) && (!m_task.isDone())) {
+		    		s_logger.debug("disconnect() :: Cancelling GpsSerialCommunicate task ...");
+		    		m_task.cancel(true);
+		    		s_logger.info("disconnect() :: GpsSerialCommunicate task cancelled? = {}", m_task.isDone());
+		    		m_task = null;
+		    	}
+		    	
+		    	if (m_executor != null) {
+		    		s_logger.debug("disconnect() :: Terminating GpsSerialCommunicate Thread ...");
+		    		m_executor.shutdownNow();
+		    		try {
+						m_executor.awaitTermination(THREAD_TERMINATION_TOUT, TimeUnit.SECONDS);
+					} catch (InterruptedException e) {
+						s_logger.warn("Interrupted - {}", e);
 					}
-					conn.close();
-				} catch (IOException e) {
-					e.printStackTrace();
+		    		s_logger.info("disconnect() :: GpsSerialCommunicate Thread terminated? - {}", m_executor.isTerminated());
+					m_executor = null;
+		    	}
+				
+				if (conn!=null) {
+					try {
+						if(in!=null){
+							in.close();
+							in=null;
+						}
+						conn.close();
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+					conn = null;
 				}
-				conn = null;
 			}
 		}
 
@@ -296,7 +301,7 @@ public class GpsDevice {
 			return connConfig;
 		}
 
-		public void doPollWork() {
+		public boolean doPollWork() {
 			try {
 				StringBuffer readBuffer = new StringBuffer();
 				int c=-1;
@@ -305,11 +310,13 @@ public class GpsDevice {
 						try {
 							c = in.read();
 						} catch (Exception e) {
-							s_logger.error("IOexception in gps read");
+							s_logger.error("Exception in gps read - {}", e);
 							try {
 								Thread.sleep(1000);
 							} catch (InterruptedException e1) {
+								s_logger.warn("Interrupted - {}", e1);
 							}
+							return false;
 						}
 						if (c != 13 && c != -1) {
 							readBuffer.append((char) c);
@@ -335,6 +342,7 @@ public class GpsDevice {
 					Thread.sleep(1000);
 				} catch (InterruptedException e1) {}
 			}
+			return true;
 		}
 
 		private void parseNmeaSentence(String scannedInput) {

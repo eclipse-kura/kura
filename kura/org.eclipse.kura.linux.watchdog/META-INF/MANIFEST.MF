@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: org.eclipse.kura.linux.watchdog
 Bundle-SymbolicName: org.eclipse.kura.linux.watchdog;singleton:=true
-Bundle-Version: 1.0.4.qualifier
+Bundle-Version: 1.0.4
 Bundle-Vendor: EUROTECH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Service-Component: OSGI-INF/*.xml

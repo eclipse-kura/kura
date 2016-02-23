@@ -1,3 +1,15 @@
+/**
+ * Copyright (c) 2011, 2015 Eurotech and/or its affiliates
+ *
+ *  All rights reserved. This program and the accompanying materials
+ *  are made available under the terms of the Eclipse Public License v1.0
+ *  which accompanies this distribution, and is available at
+ *  http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *   Eurotech
+ */
+
 package org.eclipse.kura.core.certificates;
 
 import java.io.FileInputStream;
@@ -10,6 +22,10 @@ import java.security.cert.CertificateException;
 
 final class KeyStoreManagement {
 	private static final String ENV_JAVA_KEYSTORE= System.getenv("JAVA_HOME") + "/jre/lib/security/cacerts";
+	
+	private KeyStoreManagement(){
+		
+	}
 	
 	static KeyStore loadKeyStore(byte[] password) throws NoSuchAlgorithmException, CertificateException, KeyStoreException, IOException{
 		return loadKeyStore(new String(password).toCharArray());

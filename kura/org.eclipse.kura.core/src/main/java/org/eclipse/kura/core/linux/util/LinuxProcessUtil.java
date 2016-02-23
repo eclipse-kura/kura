@@ -225,6 +225,7 @@ public class LinuxProcessUtil {
 		String line = null;
 		String pid = null;
 		SafeProcess proc = null;
+		BufferedReader br = null;
 		try {
 			if(command != null && !command.isEmpty()) {
 				s_logger.trace("searching process list for " + command);
@@ -236,7 +237,7 @@ public class LinuxProcessUtil {
 				proc.waitFor();
 
 				//get the output
-				BufferedReader br = new BufferedReader( new InputStreamReader(proc.getInputStream()));
+				br = new BufferedReader( new InputStreamReader(proc.getInputStream()));
 				while ((line = br.readLine()) != null) {
 					st = new StringTokenizer(line);
 					pid = st.nextToken();
@@ -269,7 +270,9 @@ public class LinuxProcessUtil {
 			throw e;
 		}
 		finally {
-			ProcessUtil.destroy(proc);
+			if(br != null) br.close();
+			if (proc != null)
+				ProcessUtil.destroy(proc);
 		}
 	}	
 

@@ -247,10 +247,11 @@ public class GpioComponent implements ConfigurableComponent {
 		case 2:
 			return KuraGPIOTrigger.RAISING_EDGE;
 		case 3:
-			return KuraGPIOTrigger.FALLING_EDGE;
+			return KuraGPIOTrigger.BOTH_EDGES;
 		case 1:
-			default:
-				return KuraGPIOTrigger.NONE;
+			return KuraGPIOTrigger.FALLING_EDGE;
+		default:
+			return KuraGPIOTrigger.NONE;
 		}
 	}
 }

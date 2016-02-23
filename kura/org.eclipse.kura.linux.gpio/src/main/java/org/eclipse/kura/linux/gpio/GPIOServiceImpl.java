@@ -1,3 +1,14 @@
+/**
+ * Copyright (c) 2011, 2015 Eurotech and/or its affiliates
+ *
+ *  All rights reserved. This program and the accompanying materials
+ *  are made available under the terms of the Eclipse Public License v1.0
+ *  which accompanies this distribution, and is available at
+ *  http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *   Eurotech
+ */
 package org.eclipse.kura.linux.gpio;
 
 import java.io.File;
@@ -60,9 +71,10 @@ public class GPIOServiceImpl implements GPIOService {
 
 				pins.clear();
 
-				for(Object k : dioDefaults.keySet()){
+				for (Map.Entry<Object, Object> entry : dioDefaults.entrySet()) {
+					Object k = entry.getKey();
 					//s_logger.info("{} -> {}", k, dioDefaults.get(k));
-					String line = (String) dioDefaults.get(k);
+					String line = (String) entry.getValue();
 
 					JdkDioPin p = JdkDioPin.parseFromProperty(k, line);
 					if(p != null){
@@ -74,20 +86,17 @@ public class GPIOServiceImpl implements GPIOService {
 				s_logger.warn("File does not exist: " + dioPropsFile);
 			}
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			s_logger.error("Exception while accessing resource!", e);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			s_logger.error("Exception while accessing resource!", e);
 		} catch (URISyntaxException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			s_logger.error("Exception while accessing resource!", e);
 		} finally {
 			if (fr != null){
 				try {
 					fr.close();
 				} catch (IOException e) {
-					e.printStackTrace();
+					s_logger.error("Exception while releasing resource!", e);
 				}
 			}
 		}

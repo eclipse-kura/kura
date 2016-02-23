@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011, 2014 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
  *
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
@@ -138,6 +138,7 @@ public class denali implements EntryPoint
 						gwtSecurityService.isDebugMode(new AsyncCallback<Boolean>() {
 
 							public void onFailure(Throwable caught) {
+								Info.display("Bad", "Is debug mode error");
 								render(gwtSession);
 							}
 

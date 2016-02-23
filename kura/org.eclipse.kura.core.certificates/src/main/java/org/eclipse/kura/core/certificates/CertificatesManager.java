@@ -85,26 +85,22 @@ public final class CertificatesManager implements CertificatesService{
 
 	@Override
 	public Enumeration<String> listBundleCertificatesAliases() {
-		Enumeration<String> certificates= listStoredCertificatesAliases();
-		return certificates;
+		return listStoredCertificatesAliases();
 	}
 
 	@Override
 	public Enumeration<String> listDMCertificatesAliases() {
-		Enumeration<String> certificates= listStoredCertificatesAliases();
-		return certificates;
+		return listStoredCertificatesAliases();
 	}
 
 	@Override
 	public Enumeration<String> listSSLCertificatesAliases() {
-		Enumeration<String> certificates= listStoredCertificatesAliases();
-		return certificates;
+		return listStoredCertificatesAliases();
 	}
 
 	@Override
 	public Enumeration<String> listCACertificatesAliases() {
-		Enumeration<String> certificates= listStoredCertificatesAliases();
-		return certificates;
+		return listStoredCertificatesAliases();
 	}
 
 	@Override

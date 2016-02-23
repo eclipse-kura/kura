@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (c) 2011, 2014 Eurotech and/or its affiliates
+
+     All rights reserved. This program and the accompanying materials
+     are made available under the terms of the Eclipse Public License v1.0
+     which accompanies this distribution, and is available at
+     http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Eurotech
+
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>org.eclipse.kura</groupId>
+		<artifactId>kura</artifactId>
+		<version>1.4.0</version>
+		<relativePath>../manifest_pom.xml</relativePath>
+	</parent>
+
+	<artifactId>emulator</artifactId>
+	<packaging>pom</packaging>
+
+	<properties>
+		<kura.basedir>${project.basedir}/..</kura.basedir>
+	</properties>
+	
+	<modules>
+		<module>org.eclipse.kura.emulator</module>
+		<module>org.eclipse.kura.emulator.gpio</module>
+		<module>org.eclipse.kura.emulator.clock</module>
+		<module>org.eclipse.kura.emulator.net</module>
+		<module>org.eclipse.kura.emulator.position</module>
+		<module>org.eclipse.kura.emulator.usb</module>
+		<module>org.eclipse.kura.emulator.watchdog</module>
+	</modules>
+</project>

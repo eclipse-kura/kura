@@ -242,7 +242,7 @@ public class WpaSupplicantConfigWriter implements NetworkConfigurationVisitor {
 			} else {
 				throw KuraException.internalError("the essid can not be null");
 			}
-			String passKey = wifiConfig.getPasskey();
+			String passKey = new String(wifiConfig.getPasskey().getPassword());
 			if (passKey != null) {
 				if (passKey.length() == 10) {
 					// check to make sure it is all hex
@@ -341,7 +341,7 @@ public class WpaSupplicantConfigWriter implements NetworkConfigurationVisitor {
 			} else {
 				throw KuraException.internalError("the essid can not be null");
 			}
-			String passKey = wifiConfig.getPasskey();
+			String passKey = new String(wifiConfig.getPasskey().getPassword());
 			if (passKey != null && passKey.trim().length() > 0) {
 				if ((passKey.length() < 8)
 						|| (passKey.length() > 63)) {

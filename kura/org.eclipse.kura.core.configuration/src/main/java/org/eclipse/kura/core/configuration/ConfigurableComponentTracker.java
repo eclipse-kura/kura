@@ -18,6 +18,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
+import org.osgi.service.cm.ManagedService;
 import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,7 +73,10 @@ public class ConfigurableComponentTracker extends ServiceTracker
 			ServiceReference[] refs = context.getServiceReferences((String) null, null);
 			if (refs != null) {
 				for (ServiceReference ref : refs) {
-					String pid = (String) ref.getProperty("component.name");
+					String pid = (String) ref.getProperty(Constants.SERVICE_PID);
+					if (pid == null) {
+						pid = (String) ref.getProperty("component.name");
+					}
 					if (pid != null && !m_confService.hasConfigurableComponent(pid)) {
 
 						Object obj = context.getService(ref);
@@ -87,6 +91,9 @@ public class ConfigurableComponentTracker extends ServiceTracker
 							else if (obj instanceof SelfConfiguringComponent) {
 								s_logger.info("Adding SelfConfiguringComponent {}", pid);
 								m_confService.registerSelfConfiguringComponent(pid);			    		
+							} else if (obj instanceof ManagedService) {
+								s_logger.info("Adding ManagedService as a ConfigurableComponent {}", pid);
+								m_confService.registerComponentConfiguration(ref.getBundle(), pid);								
 							}
 						}
 						finally {
@@ -111,9 +118,11 @@ public class ConfigurableComponentTracker extends ServiceTracker
 	{
 		Object service = super.addingService(ref);
 		
-		String pid = (String) ref.getProperty("component.name");
+		String pid = (String) ref.getProperty(Constants.SERVICE_PID);
+		if (pid == null) {
+			pid = (String) ref.getProperty("component.name");
+		}
 		if (pid != null) {
-
 			if (service instanceof ConfigurableComponent) {
 				s_logger.info("Adding ConfigurableComponent {}", pid);
 				try {
@@ -130,6 +139,14 @@ public class ConfigurableComponentTracker extends ServiceTracker
 				catch (KuraException e) {
 					s_logger.info("Error adding SelfConfiguringComponent {} {}", pid, e);
 				}
+			} else if (service instanceof ManagedService) {
+				s_logger.info("Adding ManagedService as a ConfigurableComponent {}", pid);
+				try {
+					m_confService.registerComponentConfiguration(ref.getBundle(), pid);
+				} 
+				catch (KuraException e) {
+					s_logger.info("Error adding ManagedService as a ConfigurableComponent {} {}", pid, e);
+				}
 			}
 		}
 
@@ -143,14 +160,20 @@ public class ConfigurableComponentTracker extends ServiceTracker
 	{
 		super.removedService(reference, service);
 
-		String pid = (String) reference.getProperty("component.name");
+		String pid = (String) reference.getProperty(Constants.SERVICE_PID);
+		if (pid == null) {
+			pid = (String) reference.getProperty("component.name");
+		}
 		if (pid != null) {
 			if (service instanceof ConfigurableComponent) {
-				s_logger.info("Removed  ConfigurableComponent {}", pid);
+				s_logger.info("Removed ConfigurableComponent {}", pid);
 				m_confService.unregisterComponentConfiguration(pid);
 			} else if (service instanceof SelfConfiguringComponent) {
-				s_logger.info("Removed  SelfConfiguringComponent {}", pid);
+				s_logger.info("Removed SelfConfiguringComponent {}", pid);
 				m_confService.unregisterComponentConfiguration(pid);
+			} else if (service instanceof ManagedService) {
+				s_logger.info("Removed ManagedService as a ConfigurableComponent {}", pid);
+				m_confService.unregisterComponentConfiguration(pid);				
 			}
 		}
 	};

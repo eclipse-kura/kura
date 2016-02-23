@@ -354,18 +354,20 @@ public class WpaSupplicant {
 			}
 		}
 
-		if ((driver.compareTo(WifiOptions.WIFI_MANAGED_DRIVER_WEXT) != 0)
-				&& (driver.compareTo(WifiOptions.WIFI_MANAGED_DRIVER_HOSTAP) != 0)
-				&& (driver.compareTo(WifiOptions.WIFI_MANAGED_DRIVER_ATMEL) != 0)
-				&& (driver.compareTo(WifiOptions.WIFI_MANAGED_DRIVER_WIRED) != 0)
-				&& (driver.compareTo(WifiOptions.WIFI_MANAGED_DRIVER_NL80211) != 0)) {
-			throw KuraException
-					.internalError("the driver must be one of the following:\n"
-							+ "\t\tIWifiDeviceService.WIFI_MANAGED_DRIVER_WEXT\n"
-							+ "\t\tIWifiDeviceService.WIFI_MANAGED_DRIVER_HOSTAP\n"
-							+ "\t\tIWifiDeviceService.WIFI_MANAGED_DRIVER_ATMEL\n"
-							+ "\t\tIWifiDeviceService.WIFI_MANAGED_DRIVER_WIRED\n"
-							+ "\t\tIWifiDeviceService.WIFI_MANAGED_DRIVER_NL80211\n");
+		if (driver != null) {
+			if ((driver.compareTo(WifiOptions.WIFI_MANAGED_DRIVER_WEXT) != 0)
+					&& (driver.compareTo(WifiOptions.WIFI_MANAGED_DRIVER_HOSTAP) != 0)
+					&& (driver.compareTo(WifiOptions.WIFI_MANAGED_DRIVER_ATMEL) != 0)
+					&& (driver.compareTo(WifiOptions.WIFI_MANAGED_DRIVER_WIRED) != 0)
+					&& (driver.compareTo(WifiOptions.WIFI_MANAGED_DRIVER_NL80211) != 0)) {
+				throw KuraException
+				.internalError("the driver must be one of the following:\n"
+						+ "\t\tIWifiDeviceService.WIFI_MANAGED_DRIVER_WEXT\n"
+						+ "\t\tIWifiDeviceService.WIFI_MANAGED_DRIVER_HOSTAP\n"
+						+ "\t\tIWifiDeviceService.WIFI_MANAGED_DRIVER_ATMEL\n"
+						+ "\t\tIWifiDeviceService.WIFI_MANAGED_DRIVER_WIRED\n"
+						+ "\t\tIWifiDeviceService.WIFI_MANAGED_DRIVER_NL80211\n");
+			}
 		}
 
 		// make sure our directory exists

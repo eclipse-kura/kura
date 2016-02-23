@@ -13,6 +13,7 @@ package org.eclipse.kura.core.configuration;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.eclipse.kura.configuration.metatype.OCD;
 import org.eclipse.kura.core.configuration.util.CollectionsUtil;
@@ -108,11 +109,11 @@ public class ComponentMetaTypeBundleTracker extends BundleTracker<Bundle>
 		// the meta-type are not purged.
 
 		Map<String,OCD> ocds = ComponentUtil.getObjectClassDefinition(m_context, bundle);
-		for (String pid : ocds.keySet()) {			
+		for (Entry<String, OCD> ocdEntry : ocds.entrySet()) {
+			String pid = ocdEntry.getKey();
 			try {
-
-				OCD ocd = ocds.get(pid);
-				Configuration config = m_configurationAdmin.getConfiguration(pid);
+				OCD ocd = ocdEntry.getValue();
+				Configuration config = m_configurationAdmin.getConfiguration(pid ,null);
 				if (config != null) {
 
 					// get the properties from ConfigurationAdmin if any are present

@@ -11,8 +11,8 @@
  */
 package org.eclipse.kura.core.deployment.util;
 
-import org.eclipse.kura.core.deployment.XmlBundle;
-import org.eclipse.kura.core.deployment.XmlBundles;
+import org.eclipse.kura.core.deployment.xml.XmlBundle;
+import org.eclipse.kura.core.deployment.xml.XmlBundles;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -42,7 +42,6 @@ public class XmlJavaBundlesMapper implements XmlJavaDataMapper{
 
 	@Override
 	public <T> T unmarshal(Document doc) throws Exception {
-		// TODO Auto-generated method stub
 		return null;
 	}
 	

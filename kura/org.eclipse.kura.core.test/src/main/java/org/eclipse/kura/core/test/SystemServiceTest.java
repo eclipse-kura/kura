@@ -11,6 +11,11 @@
  */
 package org.eclipse.kura.core.test;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
@@ -28,7 +33,7 @@ public class SystemServiceTest extends TestCase {
 	private static SystemService systemService = null;
 	private static CountDownLatch dependencyLatch = new CountDownLatch(1);	// initialize with number of dependencies
 	private static boolean onCloudbees = false;
-	
+
 	@BeforeClass
 	public void setUp() {
 		// Wait for OSGi dependencies
@@ -38,46 +43,46 @@ public class SystemServiceTest extends TestCase {
 			fail("OSGi dependencies unfulfilled");
 		}
 	}	
-	
+
 	public static void setSystemService(SystemService sms) {
 		systemService = sms;
 		onCloudbees = systemService.getOsName().contains("Cloudbees");		
 		dependencyLatch.countDown();
 	}
-	
+
 	@Test
 	public void testDummy() {
 		assertTrue(true);
 	}
-	
+
 	@TestTarget(targetPlatforms={TestTarget.PLATFORM_ALL})
 	@Test
 	public void testServiceExists() {
 		assertNotNull(systemService);
 	}
-	
+
 	@TestTarget(targetPlatforms={TestTarget.PLATFORM_ALL})
 	@Test
 	public void testGetPrimaryMacAddress() {
-		
+
 		String actual = systemService.getPrimaryMacAddress();
 		System.out.println("MAC: " + actual);
 
 		Pattern regex = Pattern.compile("[0-9a-fA-F:]{12}");
 		Matcher match = regex.matcher(actual);
-		
+
 		assertEquals("getPrimaryMacAddress() length", 17, actual.length());
 		assertTrue("getPrimaryMacAddress() is string with colons", match.find());
 	}
-	
+
 	@TestTarget(targetPlatforms={TestTarget.PLATFORM_ALL})
 	@Test
 	public void testGetPlatform() {
 		String[] expected = { "dynacor", 					//emulated
 				"Ubuntu", 									//Ubuntu
 				"BeagleBone"								//BeagleBone
-				};
-		
+		};
+
 		try {
 			boolean foundMatch = false;
 			for(String possibility : expected) {
@@ -97,8 +102,8 @@ public class SystemServiceTest extends TestCase {
 	public void testGetOsDistro() {
 		String[] expected = { "DevOsDitribution", 			//emulated
 				"Linux" 									//Ubuntu
-				};
-		
+		};
+
 		try {
 			boolean foundMatch = false;
 			for(String possibility : expected) {
@@ -112,14 +117,14 @@ public class SystemServiceTest extends TestCase {
 			fail("getOsDistro() failed: " + e.getMessage());
 		}	
 	}
-	
+
 	@TestTarget(targetPlatforms={TestTarget.PLATFORM_ALL})
 	@Test
 	public void testGetOsDistroVersion() {
 		String[] expected = { "DevOsDitributionVersion", 	//emulated
 				"N/A" 										//Ubuntu
-				};
-		
+		};
+
 		try {
 			boolean foundMatch = false;
 			for(String possibility : expected) {
@@ -133,35 +138,71 @@ public class SystemServiceTest extends TestCase {
 			fail("getOsDistroVersion() failed: " + e.getMessage());
 		}		
 	}
-	
+
 	@TestTarget(targetPlatforms={TestTarget.PLATFORM_ALL})
 	@Test
 	public void testGetOsArch() {
 		String expected = System.getProperty("os.arch");		
 		String actual = systemService.getOsArch();
-		
+
 		assertNotNull("getOsArch() not null", actual);
 		assertEquals("getOsArch() value", expected, actual);
 	}
-	
+
 	@TestTarget(targetPlatforms={TestTarget.PLATFORM_ALL})
 	@Test
 	public void testGetOsName() {
 		String expected = System.getProperty("os.name");
 		if(onCloudbees) expected = "Linux (Cloudbees)";
-		
+
 		String actual = systemService.getOsName();
-		
+
 		assertNotNull("getOsName() not null", actual);
 		assertEquals("getOsName() value", expected, actual);
 	}
-	
+
 	@TestTarget(targetPlatforms={TestTarget.PLATFORM_ALL})
 	@Test
 	public void testGetOsVersion() {
-		String expected = System.getProperty("os.version");		
+		String osVersion = System.getProperty("os.version");	
+		StringBuilder sbOsVersion= new StringBuilder();
+		sbOsVersion.append(osVersion);
+
+		BufferedReader in= null;
+		File linuxKernelVersion= null;
+		FileReader fr= null;
+		try{
+			linuxKernelVersion = new File ("/proc/sys/kernel/version");
+			if (linuxKernelVersion.exists()) {
+				StringBuilder kernelVersionData= new StringBuilder();
+				fr= new FileReader(linuxKernelVersion);
+				in = new BufferedReader(fr);
+				String tempLine= null;
+				while ((tempLine = in.readLine()) != null) { 
+					kernelVersionData.append(" ");
+					kernelVersionData.append(tempLine);
+				}
+				sbOsVersion.append(kernelVersionData.toString());
+			}
+		} catch (FileNotFoundException e){
+		} catch (IOException e){
+		} finally {
+			try {
+				if(fr != null){
+					fr.close();
+				}
+				if(in != null){
+					in.close();
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+
+
+		String expected= sbOsVersion.toString();
 		String actual = systemService.getOsVersion();
-		
+
 		assertNotNull("getOsVersion() not null", actual);
 		assertEquals("getOsVersion() value", expected, actual);
 	}
@@ -175,7 +216,7 @@ public class SystemServiceTest extends TestCase {
 		assertNotNull("getJavaVersion() not null", actual);
 		assertEquals("getJavaVersion() value", expected, actual);
 	}
-	
+
 	@TestTarget(targetPlatforms={TestTarget.PLATFORM_ALL})
 	@Test
 	public void testGetJavaVmName() {
@@ -205,26 +246,26 @@ public class SystemServiceTest extends TestCase {
 		assertNotNull("getFileSeparator() not null", actual);
 		assertEquals("getFileSeparator() value", expected, actual);
 	}
-	
+
 	@TestTarget(targetPlatforms={TestTarget.PLATFORM_ALL})
 	@Test
 	public void testJavaHome() {
 		String actual = systemService.getJavaHome();
 		assertNotNull("getJavaHome() not null", actual);
 	}
-	
+
 	@TestTarget(targetPlatforms={TestTarget.PLATFORM_ALL})
 	@Test
 	public void testGetProductVersion() {
 		assertTrue(true);
 	}
-	
+
 	@TestTarget(targetPlatforms={TestTarget.PLATFORM_ALL})
 	@Test
 	public void testKuraTemporaryConfigDirectory() {
 		assertNotNull(systemService.getKuraTemporaryConfigDirectory());
 	}
-	
+
 	@TestTarget(targetPlatforms={TestTarget.PLATFORM_ALL})
 	@Test
 	public void testGetBiosVersion() {

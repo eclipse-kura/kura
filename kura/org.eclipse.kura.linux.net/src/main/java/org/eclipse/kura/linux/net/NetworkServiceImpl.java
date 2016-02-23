@@ -11,7 +11,9 @@
  */
 package org.eclipse.kura.linux.net;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -172,7 +174,7 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
         if(ttyDevices != null && !ttyDevices.isEmpty()) {
         	s_logger.debug("activate() :: Total tty devices reported by UsbService: {}", ttyDevices.size());
             for(UsbTtyDevice device : ttyDevices) {
-                if(SupportedUsbModemsInfo.isSupported(device.getVendorId(), device.getProductId())) {
+                if(SupportedUsbModemsInfo.isSupported(device.getVendorId(), device.getProductId(), device.getProductName())) {
                     UsbModemDevice usbModem = null;
 
                     //found one - see if we have some info for it
@@ -193,7 +195,7 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
         if(blockDevices != null && !blockDevices.isEmpty()) {
         	s_logger.debug("activate() :: Total block devices reported by UsbService: {}", blockDevices.size());
             for(UsbBlockDevice device : blockDevices) {
-                if(SupportedUsbModemsInfo.isSupported(device.getVendorId(), device.getProductId())) {
+                if(SupportedUsbModemsInfo.isSupported(device.getVendorId(), device.getProductId(), device.getProductName())) {
                     UsbModemDevice usbModem = null;
 
                     //found one - see if we have some info for it
@@ -213,17 +215,18 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
         Iterator<Entry<String, UsbModemDevice>> it = m_usbModems.entrySet().iterator();
         while(it.hasNext()) {
             final UsbModemDevice usbModem = it.next().getValue();
-            final SupportedUsbModemInfo modemInfo = SupportedUsbModemsInfo.getModem(usbModem.getVendorId(), usbModem.getProductId());
+            final SupportedUsbModemInfo modemInfo = SupportedUsbModemsInfo.getModem(usbModem.getVendorId(), usbModem.getProductId(), usbModem.getProductName());
             
             s_logger.debug("activate() :: Found modem: {}", usbModem);
             
-            s_logger.debug("activate() :: usbModem.getTtyDevs().size()={}, modemInfo.getNumTtyDevs()={}",
-            		usbModem.getTtyDevs().size(), modemInfo.getNumTtyDevs());
-            s_logger.debug("activate() :: usbModem.getBlockDevs().size()={}, modemInfo.getNumBlockDevs()={}",
-            		usbModem.getBlockDevs().size(), modemInfo.getNumBlockDevs());
-            
             // Check for correct number of resources
             if (modemInfo != null) {
+            	s_logger.debug("activate() :: usbModem.getTtyDevs().size()={}, modemInfo.getNumTtyDevs()={}",
+                		usbModem.getTtyDevs().size(), modemInfo.getNumTtyDevs());
+                s_logger.debug("activate() :: usbModem.getBlockDevs().size()={}, modemInfo.getNumBlockDevs()={}",
+                		usbModem.getBlockDevs().size(), modemInfo.getNumBlockDevs());
+                
+                //s_logger.info("Product name: {}", usbModem.getProductName());
 	            if ((usbModem.getTtyDevs().size() == modemInfo.getNumTtyDevs())
 						&& (usbModem.getBlockDevs().size() == modemInfo.getNumBlockDevs())) {
 	            	s_logger.info("activate () :: posting ModemAddedEvent ... {}", usbModem);
@@ -428,7 +431,7 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
 	@Override
 	public List<WifiAccessPoint> getAllWifiAccessPoints() throws KuraException {
 		List<String> interfaceNames = getAllNetworkInterfaceNames();
-		if(interfaceNames != null && interfaceNames.size() > 0) {
+		if(interfaceNames != null && !interfaceNames.isEmpty()) {
 			List<WifiAccessPoint> accessPoints = new ArrayList<WifiAccessPoint>();
 			for(String interfaceName : interfaceNames) {
 				if(LinuxNetworkUtil.getType(interfaceName) == NetInterfaceType.WIFI) {
@@ -475,7 +478,7 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
         	return null;
         }
         // ignore usb0 for beaglebone
-        if (interfaceName.startsWith("usb0") && System.getProperty("target.device").equals("beaglebone")) {
+        if (interfaceName.startsWith("usb0") && "beaglebone".equals(System.getProperty("target.device"))) {
         	s_logger.debug("Ignoring usb0 for beaglebone.");
         	return null;
         }
@@ -608,7 +611,9 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
         	
             //do we care?
             final SupportedUsbModemInfo modemInfo = SupportedUsbModemsInfo.getModem((String) event.getProperty(UsbDeviceEvent.USB_EVENT_VENDOR_ID_PROPERTY),
-            		                                                          (String) event.getProperty(UsbDeviceEvent.USB_EVENT_PRODUCT_ID_PROPERTY));
+            		                                                          (String) event.getProperty(UsbDeviceEvent.USB_EVENT_PRODUCT_ID_PROPERTY),
+            		                                                          (String) event.getProperty(UsbDeviceEvent.USB_EVENT_PRODUCT_NAME_PROPERTY)
+            		                                                          );
             if(modemInfo != null) {
             	//Found one - see if we have some info for it.
             	//Also check if we are getting more devices than expected.
@@ -680,8 +685,11 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
 	                m_eventAdmin.postEvent(new ModemAddedEvent(usbModem));
 	                m_addedModems.add(usbModem.getUsbPort());
 	                
-	                if (OS_VERSION != null && OS_VERSION.equals(KuraConstants.Mini_Gateway.getImageName() + "_" + KuraConstants.Mini_Gateway.getImageVersion()) &&
-							TARGET_NAME != null && TARGET_NAME.equals(KuraConstants.Mini_Gateway.getTargetName())) {
+	    			if ((OS_VERSION != null && TARGET_NAME != null) && 
+	    					(OS_VERSION.equals(KuraConstants.Mini_Gateway.getImageName() + "_" + KuraConstants.Mini_Gateway.getImageVersion()) &&
+	    					TARGET_NAME.equals(KuraConstants.Mini_Gateway.getTargetName())) ||
+	    					(OS_VERSION.equals(KuraConstants.Reliagate_10_11.getImageName() + "_" + KuraConstants.Reliagate_10_11.getImageVersion()) &&
+	    					TARGET_NAME.equals(KuraConstants.Reliagate_10_11.getTargetName()))) {	
 		                if (m_serialModem != null) {
 		                	if (SupportedUsbModemInfo.Telit_HE910_D.getVendorId().equals( usbModem.getVendorId())
 			                		&& SupportedUsbModemInfo.Telit_HE910_D.getProductId().equals(usbModem.getProductId())) {
@@ -714,7 +722,8 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
 
             //do we care?
             SupportedUsbModemInfo modemInfo = SupportedUsbModemsInfo.getModem((String)event.getProperty(UsbDeviceEvent.USB_EVENT_VENDOR_ID_PROPERTY),
-            		                                                          (String)event.getProperty(UsbDeviceEvent.USB_EVENT_PRODUCT_ID_PROPERTY));
+            		                                                          (String)event.getProperty(UsbDeviceEvent.USB_EVENT_PRODUCT_ID_PROPERTY),
+            		                                                          (String)event.getProperty(UsbDeviceEvent.USB_EVENT_PRODUCT_NAME_PROPERTY));
             if(modemInfo != null) {
             	//found one - remove if it exists
             	UsbModemDevice usbModem = m_usbModems.remove(event.getProperty(UsbDeviceEvent.USB_EVENT_USB_PORT_PROPERTY));
@@ -745,8 +754,11 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
         	SerialModemAddedEvent serialModemAddedEvent = (SerialModemAddedEvent)event;
         	SupportedSerialModemInfo serialModemInfo = serialModemAddedEvent.getSupportedSerialModemInfo();
         	if (serialModemInfo != null) {
-        		if (OS_VERSION != null && OS_VERSION.equals(KuraConstants.Mini_Gateway.getImageName() + "_" + KuraConstants.Mini_Gateway.getImageVersion()) &&
-						TARGET_NAME != null && TARGET_NAME.equals(KuraConstants.Mini_Gateway.getTargetName())) {
+    			if ((OS_VERSION != null && TARGET_NAME != null) && 
+    					(OS_VERSION.equals(KuraConstants.Mini_Gateway.getImageName() + "_" + KuraConstants.Mini_Gateway.getImageVersion()) &&
+    					TARGET_NAME.equals(KuraConstants.Mini_Gateway.getTargetName())) ||
+    					(OS_VERSION.equals(KuraConstants.Reliagate_10_11.getImageName() + "_" + KuraConstants.Reliagate_10_11.getImageVersion()) &&
+    					TARGET_NAME.equals(KuraConstants.Reliagate_10_11.getTargetName()))) {	
         			if (m_usbModems.isEmpty()) {
         				m_serialModem = new SerialModemDevice(
     	    					serialModemInfo.getModemName(),
@@ -802,7 +814,7 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
 
             UsbModemDevice usbModemDevice = (UsbModemDevice) modemDevice;
             SupportedUsbModemInfo supportedUsbModemInfo = null;
-        	supportedUsbModemInfo = SupportedUsbModemsInfo.getModem(usbModemDevice.getVendorId(), usbModemDevice.getProductId());
+        	supportedUsbModemInfo = SupportedUsbModemsInfo.getModem(usbModemDevice.getVendorId(), usbModemDevice.getProductId(), usbModemDevice.getProductName());
             modemInterface.setTechnologyTypes(supportedUsbModemInfo.getTechnologyTypes());
             modemInterface.setUsbDevice((UsbModemDevice)modemDevice);        	
         } 
@@ -1012,7 +1024,7 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
 	
 	private UsbNetDevice getUsbDevice(String interfaceName) {
 		List<UsbNetDevice> usbNetDevices = m_usbService.getUsbNetDevices();
-		if(usbNetDevices != null && usbNetDevices.size() > 0) {
+		if(usbNetDevices != null && !usbNetDevices.isEmpty()) {
 			for(UsbNetDevice usbNetDevice : usbNetDevices) {
 				if(usbNetDevice.getInterfaceName().equals(interfaceName)) {
 					return usbNetDevice;
@@ -1042,7 +1054,7 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
                             String[] filenameParts = peerFilename.split("_");
                             return filenameParts[filenameParts.length - 1];
                         } catch (IOException e) {
-                            e.printStackTrace();
+                            s_logger.error("Error splitting peer filename!", e);
                         }
     	            }
                 }
@@ -1069,7 +1081,7 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
 		
 		if (modemDevice instanceof UsbModemDevice) {
 			UsbModemDevice usbModem = (UsbModemDevice)modemDevice;
-			SupportedUsbModemInfo modemInfo = SupportedUsbModemsInfo.getModem(usbModem.getVendorId(), usbModem.getProductId());
+			SupportedUsbModemInfo modemInfo = SupportedUsbModemsInfo.getModem(usbModem.getVendorId(), usbModem.getProductId(), usbModem.getProductName());
 			 deviceName = modemInfo.getDeviceName();
 			 modemId = usbModem.getUsbPort();
 		} else if (modemDevice instanceof SerialModemDevice) {
@@ -1085,9 +1097,34 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
             for(int i=0; i<peerFiles.length; i++) {
                 File peerFile = peerFiles[i];
                 String peerFilename = peerFile.getName();
-                if(peerFilename.startsWith(deviceName) && peerFilename.endsWith(/*usbPort*/ modemId)) {                    
+                if(peerFilename.startsWith(deviceName) && peerFilename.endsWith(/*usbPort*/ modemId)) {
+                	BufferedReader br = null;
+                	try {
+	                	br = new BufferedReader(new FileReader(peerFile));
+	                	String line = null;
+	                	StringBuilder sbIfaceName = null;
+	                	while ((line = br.readLine()) != null) {
+	                		if (line.startsWith("unit")) {
+	                			sbIfaceName = new StringBuilder("ppp");
+	                			sbIfaceName.append(line.substring("unit".length()).trim());
+	                			break;
+	                		}
+	                	}
+	                	return sbIfaceName.toString();
+                	} catch (Exception e) {
+                		s_logger.error("failed to parse peers file - {}", e);
+                	} finally {
+                		if (br != null) {
+                			try {
+								br.close();
+							} catch (IOException e) {
+								s_logger.error("failed to close buffered reader - {}", e);
+							}
+                		}
+                	}
                     // find a 'pppX' symlink to this peer file
-                    for(int j=0; j<peerFiles.length; j++) {
+                    /*
+                	for(int j=0; j<peerFiles.length; j++) {
                         File pppFile = peerFiles[j];
                         
                         if(peerFilename.equals(pppFile.getName())) {
@@ -1104,6 +1141,7 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
                             throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
                         }
                     }
+                    */
                     
                     break;
                 }
@@ -1121,7 +1159,7 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
 		while (!s_stopThread.get()) {
     		ModemDriver modemDriver = null;
     		List<? extends UsbModemDriver> usbDeviceDrivers = modemInfo.getDeviceDrivers();
-    		if ((usbDeviceDrivers != null) && (usbDeviceDrivers.size() > 0)) {
+    		if ((usbDeviceDrivers != null) && (!usbDeviceDrivers.isEmpty())) {
     			modemDriver = usbDeviceDrivers.get(0);
     		}
     		if (modemDriver != null) {

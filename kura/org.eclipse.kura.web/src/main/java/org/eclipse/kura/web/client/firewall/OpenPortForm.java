@@ -50,7 +50,7 @@ public class OpenPortForm extends Window {
 
     private static final int  LABEL_WIDTH_FORM = 190; 
     
-    private GwtSession   				m_currentSession;
+    //private GwtSession   				m_currentSession;
     private GwtFirewallOpenPortEntry	m_newOpenPortEntry;
     private GwtFirewallOpenPortEntry	m_existingOpenPortEntry;
     private FormPanel    				m_formPanel;
@@ -61,7 +61,7 @@ public class OpenPortForm extends Window {
     
     public OpenPortForm(GwtSession session) {
         
-    	m_currentSession = session;
+    	//m_currentSession = session;
     	m_existingOpenPortEntry = null;
     	
         setModal(true);
@@ -76,7 +76,7 @@ public class OpenPortForm extends Window {
         this(session);
         m_existingOpenPortEntry = existingEntry;
         if (m_existingOpenPortEntry != null) {
-            setHeading(MSGS.firewallOpenPortFormUpdate(m_existingOpenPortEntry.getPort().toString()));
+            setHeading(MSGS.firewallOpenPortFormUpdate(m_existingOpenPortEntry.getPortRange()));
         }
     }
     
@@ -113,7 +113,7 @@ public class OpenPortForm extends Window {
         fieldSet.setLayout(layoutAccount);
         
         //
-    	// port number
+    	// port (or range of ports) to be opened for inbound connections
         //
         final LabelField portLabel = new LabelField();
         portLabel.setName("portLabel");
@@ -125,7 +125,8 @@ public class OpenPortForm extends Window {
         portField.setAllowBlank(false);
         portField.setName("port");
         portField.setFieldLabel(MSGS.firewallOpenPortFormPort());
-        portField.setValidator(new TextFieldValidator(portField, FieldType.NUMERIC));
+        portField.setValidator(new TextFieldValidator(portField, FieldType.PORT_RANGE));
+        portField.setToolTip(MSGS.firewallOpenPortFormPortToolTip());
         fieldSet.add(portField, formData);
         
         //
@@ -147,6 +148,7 @@ public class OpenPortForm extends Window {
         	protocolCombo.add(protocol.name());
         }
         protocolCombo.setSimpleValue(GwtNetProtocol.tcp.name());
+        protocolCombo.setToolTip(MSGS.firewallOpenPortFormProtocolToolTip());
         fieldSet.add(protocolCombo, formData);
         
         //
@@ -157,6 +159,7 @@ public class OpenPortForm extends Window {
         permittedNetworkField.setName("permittedNetwork");
         permittedNetworkField.setFieldLabel(MSGS.firewallOpenPortFormPermittedNetwork());
         permittedNetworkField.setValidator(new TextFieldValidator(permittedNetworkField, FieldType.NETWORK));
+        permittedNetworkField.setToolTip(MSGS.firewallOpenPortFormPermittedNetworkToolTip());
         fieldSet.add(permittedNetworkField, formData);
         
         //
@@ -210,6 +213,7 @@ public class OpenPortForm extends Window {
         permittedMacField.setName("permittedMac");
         permittedMacField.setFieldLabel(MSGS.firewallOpenPortFormPermittedMac());
         permittedMacField.setValidator(new TextFieldValidator(permittedMacField, FieldType.MAC_ADDRESS));
+        permittedMacField.setToolTip(MSGS.firewallOpenPortFormPermittedMacAddress());
         fieldSet.add(permittedMacField, formData);
         
         //
@@ -220,6 +224,7 @@ public class OpenPortForm extends Window {
         sourcePortRangeField.setName("sourcePortRange");
         sourcePortRangeField.setFieldLabel(MSGS.firewallOpenPortFormSourcePortRange());
         sourcePortRangeField.setValidator(new TextFieldValidator(sourcePortRangeField, FieldType.PORT_RANGE));
+        sourcePortRangeField.setToolTip(MSGS.firewallOpenPortFormSourcePortRangeToolTip());
         fieldSet.add(sourcePortRangeField, formData);
         
         //add the fieldSet to the panel
@@ -255,7 +260,7 @@ public class OpenPortForm extends Window {
             	if(m_existingOpenPortEntry == null) {
             		//create a new entry
             		m_newOpenPortEntry = new GwtFirewallOpenPortEntry();
-            		m_newOpenPortEntry.setPort(Integer.parseInt(portField.getValue()));
+            		m_newOpenPortEntry.setPortRange(portField.getValue());
             		m_newOpenPortEntry.setProtocol(protocolCombo.getValue().getValue());
             		if(permittedNetworkField.getValue() != null) {
             			m_newOpenPortEntry.setPermittedNetwork(permittedNetworkField.getValue());
@@ -278,7 +283,7 @@ public class OpenPortForm extends Window {
             	} else {
             		//update the current entry
             		m_existingOpenPortEntry = new GwtFirewallOpenPortEntry();
-            		m_existingOpenPortEntry.setPort(Integer.parseInt(portField.getValue()));
+            		m_existingOpenPortEntry.setPortRange(portField.getValue());
             		m_existingOpenPortEntry.setProtocol(protocolCombo.getValue().getValue());
             		if(permittedNetworkField.getValue() != null) {
             			m_existingOpenPortEntry.setPermittedNetwork(permittedNetworkField.getValue());
@@ -317,9 +322,9 @@ public class OpenPortForm extends Window {
         // populate if necessary
         if (m_existingOpenPortEntry != null) {
         	
-        	portLabel.setValue(m_existingOpenPortEntry.getPort());
-        	portField.setValue(m_existingOpenPortEntry.getPort().toString());
-        	portField.setOriginalValue(m_existingOpenPortEntry.getPort().toString());
+        	portLabel.setValue(m_existingOpenPortEntry.getPortRange());
+        	portField.setValue(m_existingOpenPortEntry.getPortRange());
+        	portField.setOriginalValue(m_existingOpenPortEntry.getPortRange());
         	
         	protocolLabel.setValue(m_existingOpenPortEntry.getProtocol());
         	protocolCombo.setSimpleValue(m_existingOpenPortEntry.getProtocol());

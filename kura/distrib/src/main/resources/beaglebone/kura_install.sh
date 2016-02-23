@@ -36,10 +36,15 @@ cp ${INSTALL_DIR}/kura/install/ifdown-local /etc/network/if-down.d/ifdown-local
 chmod +x /etc/network/if-up.d/ifup-local
 chmod +x /etc/network/if-down.d/ifdown-local
 
+#set up recover default configuration script
+cp ${INSTALL_DIR}/kura/install/recover_default_config.init ${INSTALL_DIR}/kura/.data/.recoverDefaultConfig.sh
+chmod +x ${INSTALL_DIR}/kura/.data/.recoverDefaultConfig.sh
+
 #set up default firewall configuration
 cp ${INSTALL_DIR}/kura/install/firewall.init /etc/init.d/firewall
 chmod +x /etc/init.d/firewall
-cp /etc/init.d/firewall ${INSTALL_DIR}/kura/.data/firewall
+cp ${INSTALL_DIR}/kura/install/iptables.init /etc/sysconfig/iptables
+cp /etc/sysconfig/iptables ${INSTALL_DIR}/kura/.data/iptables
 
 #set up networking configuration
 mac_addr=$(head -1 /sys/class/net/eth0/address | tr '[:lower:]' '[:upper:]')

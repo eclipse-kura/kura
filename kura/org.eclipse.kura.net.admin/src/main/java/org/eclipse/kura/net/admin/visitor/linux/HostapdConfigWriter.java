@@ -294,7 +294,7 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
 			} else {
 				throw KuraException.internalError("the channel must be between 1 (inclusive) and 11 (inclusive) or 1 (inclusive) and 13 (inclusive) depending on your locale");
 			}
-			String passKey = wifiConfig.getPasskey();
+			String passKey = new String(wifiConfig.getPasskey().getPassword());
 			if(passKey != null) {
 				if(passKey.length() == 10) {
 					//check to make sure it is all hex
@@ -463,11 +463,12 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
 				throw KuraException.internalError("invalid WiFi Pairwise Ciphers");
 			}
 			
-			if(wifiConfig.getPasskey() != null && wifiConfig.getPasskey().trim().length() > 0) {
-				if((wifiConfig.getPasskey().length() < 8) || (wifiConfig.getPasskey().length() > 63)) {
+			String passKey= new String(wifiConfig.getPasskey().getPassword());
+			if(wifiConfig.getPasskey() != null && passKey.trim().length() > 0) {
+				if((passKey.length() < 8) || (passKey.length() > 63)) {
 					throw KuraException.internalError("the WPA passphrase (passwd) must be between 8 (inclusive) and 63 (inclusive) characters in length: " + wifiConfig.getPasskey());
 				} else {
-					fileAsString = fileAsString.replaceFirst("KURA_PASSPHRASE", wifiConfig.getPasskey().trim());
+					fileAsString = fileAsString.replaceFirst("KURA_PASSPHRASE", passKey.trim());
 				}
 			} else {
 				throw KuraException.internalError("the passwd can not be null");

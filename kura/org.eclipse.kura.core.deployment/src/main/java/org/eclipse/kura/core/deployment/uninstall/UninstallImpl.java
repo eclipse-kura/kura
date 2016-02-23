@@ -92,7 +92,7 @@ public class UninstallImpl {
 			SafeProcess proc = null;
 			try {
 				int delay = options.getRebootDelay();
-				s_logger.info("Sleeping for {} seconds.", delay);
+				s_logger.info("Sleeping for {} ms.", delay);
 				Thread.sleep(delay);
 				s_logger.info("Rebooting...");
 				proc = ProcessUtil.exec("reboot");

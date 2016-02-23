@@ -180,7 +180,7 @@ public class DownloadImpl implements ProgressListener{
 				try {
 					os.close();
 				} catch (IOException e1) {
-					e1.printStackTrace();
+					s_logger.error("Exception while trying to close stream.", e1);
 				}
 			}
 		}
@@ -245,7 +245,7 @@ public class DownloadImpl implements ProgressListener{
 		KuraNotifyPayload notify = new KuraNotifyPayload(options.getClientId());
 		notify.setTimestamp(new Date());
 		notify.setTransferSize(0);
-		notify.setTransferProgress(100);
+		notify.setTransferProgress(0);
 		notify.setTransferStatus(DOWNLOAD_STATUS.FAILED.getStatusString());
 		notify.setJobId(options.getJobId());
 		notify.setErrorMessage("Error during download process and verification!"); //message to get cause

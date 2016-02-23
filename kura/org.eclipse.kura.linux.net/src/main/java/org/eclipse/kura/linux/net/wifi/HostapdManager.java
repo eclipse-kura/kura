@@ -26,7 +26,6 @@ public class HostapdManager {
 	private static Logger s_logger = LoggerFactory.getLogger(HostapdManager.class);
 
 	private static final String OS_VERSION = System.getProperty("kura.os.version");
-	private static final String TARGET_NAME = System.getProperty("target.device");
 
 	private static String HOSTAPD_CONFIG_FILE_NAME = null; 
 	static {
@@ -51,8 +50,6 @@ public class HostapdManager {
 			if(HostapdManager.isRunning()) {
 				stop();
 			}
-
-			loadKernelModules();
 			
 			//start hostapd
 			String launchHostapdCommand = generateStartCommand();
@@ -121,30 +118,5 @@ public class HostapdManager {
 			cmd.append("killall hostapd");
 		}
 		return cmd.toString();
-	}
-
-	public static void loadKernelModules() throws KuraException {
-		SafeProcess proc = null;
-		try{
-			if (TARGET_NAME.equals(KuraConstants.ReliaGATE_10_05.getTargetName())) {
-				s_logger.debug("--> executing rmmod bcmdhd");
-				proc = ProcessUtil.exec("rmmod bcmdhd");
-				proc.waitFor();
-
-				s_logger.debug("--> executing modprobe");
-				proc = ProcessUtil.exec("modprobe -S 3.12.6 bcmdhd firmware_path=\"/system/etc/firmware/fw_bcm43438a0_apsta.bin\" op_mode=2");
-				if(proc.waitFor() != 0) {
-					s_logger.error("failed modprobe");
-					throw KuraException.internalError("failed modprobe"); 
-				}
-				Thread.sleep(1000);
-			}
-		} catch(Exception e) {
-			throw KuraException.internalError(e);
-		} finally {
-			if (proc != null) {
-				ProcessUtil.destroy(proc);
-			}
-		}
 	}
 }

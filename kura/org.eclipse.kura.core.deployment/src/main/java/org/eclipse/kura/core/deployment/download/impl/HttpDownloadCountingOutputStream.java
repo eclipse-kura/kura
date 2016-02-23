@@ -9,11 +9,9 @@
  * Contributors:
  *     Eurotech
  *******************************************************************************/
-
 package org.eclipse.kura.core.deployment.download.impl;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.Authenticator;
 import java.net.HttpURLConnection;
 import java.net.PasswordAuthentication;
@@ -40,8 +38,6 @@ import org.slf4j.LoggerFactory;
 
 public class HttpDownloadCountingOutputStream extends GenericDownloadCountingOutputStream implements DownloadCountingOutputStream {
 	private static final Logger s_logger = LoggerFactory.getLogger(HttpDownloadCountingOutputStream.class);
-
-	InputStream is = null;
 
 	private ExecutorService executor;
 	private Future<Void> future;
@@ -96,17 +92,7 @@ public class HttpDownloadCountingOutputStream extends GenericDownloadCountingOut
 					urlConnection.setConnectTimeout(connectTimeout);
 					urlConnection.setReadTimeout(readTimeout);
 
-					try {
-						if (urlConnection instanceof HttpsURLConnection) {
-							((HttpsURLConnection) urlConnection).setSSLSocketFactory(m_sslManagerService.getSSLSocketFactory());
-						} else if (!(urlConnection instanceof HttpURLConnection)) {
-							postProgressEvent(options.getClientId(), getByteCount(), totalBytes, DOWNLOAD_STATUS.FAILED, "The request URL is not supported");
-							throw new KuraConnectException("Unsupported protocol!");
-						}
-					} catch (GeneralSecurityException e) {
-						postProgressEvent(options.getClientId(), getByteCount(), totalBytes, DOWNLOAD_STATUS.FAILED, e.getMessage());
-						throw new KuraConnectException(e, "Unsupported protocol!");
-					}
+					testConnectionProtocol(urlConnection);
 
 					is = localUrl.openStream();
 
@@ -162,6 +148,21 @@ public class HttpDownloadCountingOutputStream extends GenericDownloadCountingOut
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, ex);
 		}catch(InterruptedException ex){
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, ex);
+		}
+	}
+	
+	private void testConnectionProtocol(URLConnection urlConnection)
+			throws IOException, KuraConnectException {
+		try {
+			if (urlConnection instanceof HttpsURLConnection) {
+				((HttpsURLConnection) urlConnection).setSSLSocketFactory(m_sslManagerService.getSSLSocketFactory());
+			} else if (!(urlConnection instanceof HttpURLConnection)) {
+				postProgressEvent(options.getClientId(), getByteCount(), totalBytes, DOWNLOAD_STATUS.FAILED, "The request URL is not supported");
+				throw new KuraConnectException("Unsupported protocol!");
+			}
+		} catch (GeneralSecurityException e) {
+			postProgressEvent(options.getClientId(), getByteCount(), totalBytes, DOWNLOAD_STATUS.FAILED, e.getMessage());
+			throw new KuraConnectException(e, "Unsupported protocol!");
 		}
 	}
 }

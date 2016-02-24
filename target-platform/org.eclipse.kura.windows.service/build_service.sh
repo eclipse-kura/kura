@@ -20,6 +20,20 @@ if [ -x "$(command -v mingw32-make)" ] || [ -x "$(command -v make)" ]; then
 	fi
 else
 	echo "  WARNING: No viable 'make' command installed. KURA Windows Service will not be rebuilt"
+
+# Just copy the release files into the intermediate Release dir
+if [ "$1" == "build" ]; then
+	if [ ! -d src/main/c/Release/Win32/x86 ]; then
+		mkdir -p src/main/c/Release/Win32/x86
+	fi
+	if [ ! -d src/main/c/Release/Win32/x64 ]; then
+		mkdir -p src/main/c/Release/Win32/x64
+	fi
+
+	cp src/main/bin/Win32/x86/* src/main/c/Release/Win32/x86
+	cp src/main/bin/Win32/x64/* src/main/c/Release/Win32/x64
+fi
+
 	exit 0
 fi
 

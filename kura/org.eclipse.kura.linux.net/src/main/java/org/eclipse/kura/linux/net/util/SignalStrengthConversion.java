@@ -2,7 +2,7 @@ package org.eclipse.kura.linux.net.util;
 
 public class SignalStrengthConversion {
 	
-	private static final int[] s_lookup = { -113, -112, -111, -110, -109, -108,
+	private static final byte[] s_lookup = { -113, -112, -111, -110, -109, -108,
 			-107, -106, -105, -104, -103, -102, -101, -99, -98, -97, -96, -95,
 			-94, -93, -92, -91, -90, -89, -88, -87, -86, -85, -84, -83, -82,
 			-81, -80, -79, -78, -77, -75, -74, -73, -72, -70, -69, -68, -67,

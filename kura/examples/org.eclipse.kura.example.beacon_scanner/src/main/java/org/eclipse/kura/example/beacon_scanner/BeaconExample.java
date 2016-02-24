@@ -148,6 +148,7 @@ public class BeaconExample implements ConfigurableComponent, BluetoothBeaconScan
 			// Publish the beacon data to the beacon's topic
 			KuraPayload kp = new KuraPayload();
 			kp.addMetric("uuid", beaconData.uuid);
+			kp.addMetric("txpower",beaconData.txpower);
 			kp.addMetric("rssi",beaconData.rssi);
 			kp.addMetric("major",beaconData.major);
 			kp.addMetric("minor",beaconData.minor);

@@ -395,6 +395,7 @@ public class BluetoothUtil {
 					int minorh = b[minorPtr] & 0xFF;
 					bi.major = majorh << 8 | majorl;
 					bi.minor = minorh << 8 | minorl;
+					bi.txpower = b[minorPtr + 2];
 					// Can't fill this in from here
 					bi.address = "";
 					return bi;

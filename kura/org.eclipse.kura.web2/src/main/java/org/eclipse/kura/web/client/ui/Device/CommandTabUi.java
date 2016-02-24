@@ -40,7 +40,6 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FileUpload;
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.FormPanel.SubmitCompleteEvent;
-import com.google.gwt.user.client.ui.FormPanel.SubmitEvent;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Hidden;
 import com.google.gwt.user.client.ui.Widget;
@@ -109,6 +108,7 @@ public class CommandTabUi extends Composite {
 			}
 		});
 
+		docPath.setName("file");
 
 		display(MSGS.deviceCommandNoOutput());
 
@@ -180,33 +180,12 @@ public class CommandTabUi extends Composite {
 										display(MSGS.error() + "\n" + caught.getLocalizedMessage());
 									}
 									EntryClassUi.hideWaitModal();
-									gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
-										@Override
-										public void onFailure(Throwable ex) {
-											FailureHandler.handle(ex);
-										}
-
-										@Override
-										public void onSuccess(GwtXSRFToken token) {	
-											xsrfTokenField.setValue(token.getToken());
-										}
-									});
 								}
 
 								@Override
 								public void onSuccess(String result) {									
 									display(result);
 									EntryClassUi.hideWaitModal();
-									gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
-										@Override
-										public void onFailure(Throwable ex) {
-											FailureHandler.handle(ex);
-										}
-										@Override
-										public void onSuccess(GwtXSRFToken token) {	
-											xsrfTokenField.setValue(token.getToken());
-										}
-									});
 								}
 
 							});

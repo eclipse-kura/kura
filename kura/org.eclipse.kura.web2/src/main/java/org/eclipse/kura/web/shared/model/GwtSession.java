@@ -20,6 +20,7 @@ public class GwtSession extends GwtBaseModel implements Serializable
 	private boolean m_netAdminAvailable;
 	private String m_kuraVersion;
 	private String m_osVersion;
+	private boolean m_developMode;
 	
 	public GwtSession()
 	{
@@ -49,5 +50,13 @@ public class GwtSession extends GwtBaseModel implements Serializable
 	
 	public void setOsVersion(String osVersion) {
 		m_osVersion = osVersion;
+	}
+	
+	public boolean isDevelopMode() {
+		return m_developMode;
+	}
+	
+	public void setDevelopMode(boolean developMode) {
+		m_developMode = developMode;
 	}
 }

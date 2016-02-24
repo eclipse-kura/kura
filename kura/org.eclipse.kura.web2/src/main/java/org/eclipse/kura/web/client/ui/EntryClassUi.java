@@ -101,7 +101,7 @@ public class EntryClassUi extends Composite {
 	@UiField
 	Image header;
 	@UiField
-	Label footerLeft, footerRight;
+	Label footerLeft, footerCenter, footerRight;
 	@UiField
 	Panel contentPanel;
 	@UiField
@@ -150,6 +150,10 @@ public class EntryClassUi extends Composite {
 	public void setFooter(GwtSession GwtSession) {
 
 		footerRight.setText(GwtSession.getKuraVersion());
+		
+		if (GwtSession.isDevelopMode()) {
+			footerCenter.setText(MSGS.developmentMode());
+		}
 
 	}
 

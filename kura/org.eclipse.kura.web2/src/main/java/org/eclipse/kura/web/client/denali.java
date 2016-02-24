@@ -125,6 +125,7 @@ public class denali implements EntryPoint
 							public void onSuccess(Boolean result) {
 								if(result){
 									isDevelopMode = true;
+									gwtSession.setDevelopMode(true);
 								}
 								binder.setFooter(gwtSession);
 								binder.initSystemPanel(gwtSession);

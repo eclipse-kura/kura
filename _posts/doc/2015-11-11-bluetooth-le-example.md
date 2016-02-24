@@ -115,6 +115,17 @@ sudo gatttool -b BC:6A:29:AE:CC:96 -I
 [CON][BC:6A:29:AE:CC:96][LE]>
 ```
 
+If the output of the connect command is
+```
+connect: Connection refused (111)
+```
+then you have to enable LE capabilities on your BT interface:
+
+```
+cd bluez-4.101/mgmt
+sudo ./btmgmt le on
+```
+
 In order to read the sensor values from the SensorTag, you need to write some registers on the device. For details, please refer to the CC2541 user guide:  <http://processors.wiki.ti.com/index.php/SensorTag_User_Guide>. Note that the reported BLE handles are not up-to-date on this page.
 
 Also refer to this updated attribute table: <http://processors.wiki.ti.com/images/archive/a/a8/20130111154127!BLE_SensorTag_GATT_Server.pdf>.

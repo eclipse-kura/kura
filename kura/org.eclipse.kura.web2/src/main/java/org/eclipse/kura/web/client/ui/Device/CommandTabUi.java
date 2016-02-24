@@ -153,9 +153,8 @@ public class CommandTabUi extends Composite {
 			public void onSubmitComplete(SubmitCompleteEvent event) {
 
 				String result = event.getResults();
-				display(result);
 
-				if (result.startsWith("HTTP ERROR")) {							
+				if (result.contains("HTTP ERROR")) {							
 					display(MSGS.fileUploadFailure());
 				} else {
 					EntryClassUi.showWaitModal();

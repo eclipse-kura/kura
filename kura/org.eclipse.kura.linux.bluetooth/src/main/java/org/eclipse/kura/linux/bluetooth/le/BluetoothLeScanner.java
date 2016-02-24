@@ -1,3 +1,14 @@
+/*******************************************************************************
+ * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     Eurotech
+ *******************************************************************************/
 package org.eclipse.kura.linux.bluetooth.le;
 
 import java.util.ArrayList;
@@ -141,12 +152,12 @@ public class BluetoothLeScanner implements BluetoothProcessListener, BTSnoopList
 				if(address.matches(s_mac_regex)) {
 					if (m_devices.containsKey(address)) {
 						if (!name.equals("(unknown)") && !m_devices.get(address).equals(name)) {
-							s_logger.debug("Updating device: " + address + " - " + name);
+							s_logger.debug("Updating device: {} - {}", address, name);
 							m_devices.put(address, name);
 						}
 					}
 					else {
-						s_logger.debug("Device found: " + address + " - " + name);
+						s_logger.debug("Device found: {} - {}", address, name);
 						m_devices.put(address, name);
 					}
 				}

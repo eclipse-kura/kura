@@ -1,14 +1,14 @@
-/**
- * Copyright (c) 2011, 2014 Eurotech and/or its affiliates
+/*******************************************************************************
+ * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
  *
- *  All rights reserved. This program and the accompanying materials
- *  are made available under the terms of the Eclipse Public License v1.0
- *  which accompanies this distribution, and is available at
- *  http://www.eclipse.org/legal/epl-v10.html
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Eurotech
- */
+ *     Eurotech
+ *******************************************************************************/
 package org.eclipse.kura.net.admin.visitor.linux;
 
 import java.util.ArrayList;
@@ -69,7 +69,7 @@ public class WifiConfigReader implements NetworkConfigurationVisitor{
     // Get common wifi config
     private void getConfig(WifiInterfaceConfigImpl wifiInterfaceConfig) throws KuraException {
         String interfaceName = wifiInterfaceConfig.getName();
-        s_logger.debug("Getting wifi config for " + interfaceName);
+        s_logger.debug("Getting wifi config for {}", interfaceName);
         
         List<WifiInterfaceAddressConfig> wifiInterfaceAddressConfigs = wifiInterfaceConfig.getNetInterfaceAddresses();
         
@@ -89,7 +89,7 @@ public class WifiConfigReader implements NetworkConfigurationVisitor{
                     wifiMode = WifiMode.valueOf(wifiModeString);
                 }
                 
-                s_logger.debug("Got wifiMode: " + wifiMode);
+                s_logger.debug("Got wifiMode: {}", wifiMode);
                 ((WifiInterfaceAddressConfigImpl) wifiInterfaceAddressConfig).setMode(wifiMode);
             }
         }

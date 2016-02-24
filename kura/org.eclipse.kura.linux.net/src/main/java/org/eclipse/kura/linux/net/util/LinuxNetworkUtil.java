@@ -1,19 +1,20 @@
-/**
- * Copyright (c) 2011, 2014 Eurotech and/or its affiliates
+/*******************************************************************************
+ * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
  *
- *  All rights reserved. This program and the accompanying materials
- *  are made available under the terms of the Eclipse Public License v1.0
- *  which accompanies this distribution, and is available at
- *  http://www.eclipse.org/legal/epl-v10.html
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Eurotech
- */
+ *     Eurotech
+ *******************************************************************************/
 package org.eclipse.kura.linux.net.util;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
@@ -1111,7 +1112,7 @@ public class LinuxNetworkUtil {
 				while((line = br1.readLine()) != null) {
 					int index = line.indexOf("type ");
 					if(index > -1) {
-						s_logger.debug("line: " + line);
+						s_logger.debug("line: {}", line);
 						String sMode = line.substring(index+"type ".length());
 						if("AP".equals(sMode)) {
 							mode = WifiMode.MASTER;
@@ -1136,7 +1137,7 @@ public class LinuxNetworkUtil {
 					while((line = br2.readLine()) != null) {
 						int index = line.indexOf("Mode:");
 						if(index > -1) {
-							s_logger.debug("line: " + line);
+							s_logger.debug("line: {}", line);
 							StringTokenizer st = new StringTokenizer(line.substring(index));
 							String modeStr = st.nextToken().substring(5);
 							if("Managed".equals(modeStr)) {
@@ -1248,7 +1249,7 @@ public class LinuxNetworkUtil {
 				while((line = br.readLine()) != null) {
 					int index = line.indexOf("Bit Rate=");
 					if(index > -1) {
-						s_logger.debug("line: " + line);
+						s_logger.debug("line: {}", line);
 						StringTokenizer st = new StringTokenizer(line.substring(index));
 						st.nextToken();	// skip 'Bit'
 						Double rate = Double.parseDouble(st.nextToken().substring(5));
@@ -1316,7 +1317,7 @@ public class LinuxNetworkUtil {
 				while((line = br.readLine()) != null) {
 					int index = line.indexOf("SSID:");
 					if(index > -1) {
-						s_logger.debug("line: " + line);
+						s_logger.debug("line: {}", line);
 						String lineSub = line.substring(index);
 						StringTokenizer st = new StringTokenizer(lineSub);
 						st.nextToken();
@@ -1341,7 +1342,7 @@ public class LinuxNetworkUtil {
 				while((line = br.readLine()) != null) {
 					int index = line.indexOf("ESSID:");
 					if(index > -1) {
-						s_logger.debug("line: " + line);
+						s_logger.debug("line: {}", line);
 						String lineSub = line.substring(index);
 						StringTokenizer st = new StringTokenizer(lineSub);
 						String ssidStr = st.nextToken();
@@ -1530,4 +1531,166 @@ public class LinuxNetworkUtil {
 
 		return false;
 	}
+	
+	public static boolean isKernelModuleLoaded(String interfaceName, WifiMode wifiMode) throws KuraException {
+		boolean result = false;
+
+		// FIXME: how to find the right kernel module by interface name?
+		// Assume for now the interface name does not change
+		// Note that WiFiConfig.getDriver() below usually returns the "nl80211", not the
+		// the chipset kernel module (e.g. bcmdhd)
+		// s_logger.info("{} driver: '{}'", interfaceName, wifiConfig.getDriver());
+
+		if (KuraConstants.ReliaGATE_10_05.getTargetName().equals(TARGET_NAME) &&
+				"wlan0".equals(interfaceName)) {
+			SafeProcess proc = null;
+			BufferedReader br = null;
+			String cmd = "lsmod";
+			try {
+				s_logger.debug("Executing '{}'", cmd);
+				proc = ProcessUtil.exec(cmd);
+				int code = -1;
+				if ((code = proc.waitFor()) != 0) {
+					throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "'"+cmd+"' exited with code: "+code);
+				}
+
+				//get the output
+				br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+				String line = null;
+				while ((line = br.readLine()) != null) {
+					if (line.contains("bcmdhd")) {
+						result = true;
+						break;
+					}
+				}
+			} catch (IOException e) {
+				throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e, "'"+cmd+"' failed");
+			} catch (InterruptedException e) {
+				throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e, "'"+cmd+"' interrupted");
+			} finally {
+				if (br != null) {
+					try {
+						br.close();
+					} catch (IOException e) {
+						s_logger.warn("Failed to close process input stream", e);
+					}
+				}
+				if (proc != null) {
+					proc.destroy();
+				}
+			}
+		}
+		return result;
+	}
+
+	public static void unloadKernelModule(String interfaceName) throws KuraException {
+		// FIXME: how to find the right kernel module by interface name?
+		// Assume for now the interface name does not change
+		if (KuraConstants.ReliaGATE_10_05.getTargetName().equals(TARGET_NAME) &&
+				"wlan0".equals(interfaceName)) {
+			SafeProcess proc = null;
+			try {
+				String cmd = "rmmod bcmdhd";
+				s_logger.debug("Executing '{}'", cmd);
+				proc = ProcessUtil.exec(cmd);
+				int code = -1;
+				if ((code = proc.waitFor()) != 0) {
+					throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "'"+cmd+"' exited with code: "+code);
+				}
+			} catch (IOException e) {
+				throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e,"'rmmod bcmdhd' failed");
+			} catch (InterruptedException e) {
+				throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e,"'rmmod bcmdhd' interrupted");
+			} finally {
+				if (proc != null) {
+					proc.destroy();
+				}
+			}
+		} else {
+			s_logger.debug("Kernel module unload not needed by platform '{}'", TARGET_NAME);
+		}
+	}
+
+	public static void loadKernelModule(String interfaceName, WifiMode wifiMode) throws KuraException {
+		// FIXME: how to find the right kernel module by interface name?
+		// Assume for now the interface name does not change
+		if (KuraConstants.ReliaGATE_10_05.getTargetName().equals(TARGET_NAME) &&
+				"wlan0".equals(interfaceName)) {
+			SafeProcess proc = null;
+			String cmd = null;
+			if (wifiMode == WifiMode.MASTER) {
+				cmd = "modprobe -S 3.12.6 bcmdhd firmware_path=\"/system/etc/firmware/fw_bcm43438a0_apsta.bin\" op_mode=2";
+			} else if (wifiMode == WifiMode.INFRA || wifiMode == WifiMode.ADHOC) {
+				cmd = "modprobe -S 3.12.6 bcmdhd";
+			} else {
+				throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "Don't know what to load for WifiMode " + wifiMode);
+			}
+
+			try {
+				s_logger.debug("Executing '{}'", cmd);
+				proc = ProcessUtil.exec(cmd);
+				int code = -1;
+				if ((code = proc.waitFor()) != 0) {
+					throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "'"+cmd+"' exited with code: "+code);
+				}
+			} catch (IOException e) {
+				throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e, "'"+cmd+"' failed");
+			} catch (InterruptedException e) {
+				throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e, "'"+cmd+"' interrupted");
+			} finally {
+				if (proc != null) {
+					proc.destroy();
+				}
+			}
+		} else {
+			s_logger.debug("Kernel module load not needed by platform '{}'", TARGET_NAME);
+		}
+	}
+	
+	public static boolean isKernelModuleLoadedForMode(String interfaceName, WifiMode wifiMode) throws KuraException {
+		// FIXME: how to find the right kernel module by interface name?
+		// Assume for now the interface name does not change.
+		if (KuraConstants.ReliaGATE_10_05.getTargetName().equals(TARGET_NAME) &&
+				"wlan0".equals(interfaceName)) {
+			return false;
+		} else {
+			return true;
+		}
+	}
+	
+    public static boolean isWifiDeviceOn(String interfaceName) {
+    	boolean deviceOn = false;
+    	// FIXME Assume for now the interface name does not change
+		if (KuraConstants.Reliagate_10_20.getTargetName().equals(TARGET_NAME) &&
+				"wlan0".equals(interfaceName)) {
+    		File fDevice = new File("/sys/bus/pci/devices/0000:01:00.0");
+    		if (fDevice.exists()) {
+    			deviceOn = true;
+    		}
+    	}
+    	s_logger.debug("isWifiDeviceOn()? {}", deviceOn);
+    	return deviceOn;
+    }
+    
+    public static void turnWifiDeviceOn(String interfaceName) throws Exception {
+    	// FIXME Assume for now the interface name does not change
+		if (KuraConstants.Reliagate_10_20.getTargetName().equals(TARGET_NAME) &&
+				"wlan0".equals(interfaceName)) {
+    		s_logger.info("Turning Wifi device ON ...");
+    		FileWriter fw = new FileWriter("/sys/bus/pci/rescan");
+			fw.write("1");
+			fw.close();
+    	}
+    }
+    
+    public static void turnWifiDeviceOff(String interfaceName) throws Exception {
+    	// FIXME Assume for now the interface name does not change
+		if (KuraConstants.Reliagate_10_20.getTargetName().equals(TARGET_NAME) &&
+				"wlan0".equals(interfaceName)) {
+    		s_logger.info("Turning Wifi device OFF ...");
+			FileWriter fw = new FileWriter("/sys/bus/pci/devices/0000:01:00.0/remove");
+			fw.write("1");
+			fw.close();
+    	}
+    }
 }

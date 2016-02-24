@@ -1,14 +1,14 @@
-/**
- * Copyright (c) 2011, 2014 Eurotech and/or its affiliates
+/*******************************************************************************
+ * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
  *
- *  All rights reserved. This program and the accompanying materials
- *  are made available under the terms of the Eclipse Public License v1.0
- *  which accompanies this distribution, and is available at
- *  http://www.eclipse.org/legal/epl-v10.html
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Eurotech
- */
+ *     Eurotech
+ *******************************************************************************/
 package org.eclipse.kura.linux.net.modem;
 
 import org.eclipse.kura.linux.net.util.KuraConstants;
@@ -32,8 +32,13 @@ public class SupportedSerialModemsInfo {
 			if (OS_VERSION != null && OS_VERSION.equals(KuraConstants.Mini_Gateway.getImageName() + "_" + KuraConstants.Mini_Gateway.getImageVersion()) &&
 					TARGET_NAME != null && TARGET_NAME.equals(KuraConstants.Mini_Gateway.getTargetName())) {
 				s_logger.debug("obtaining serial modem info for {}", KuraConstants.Mini_Gateway.getImageName());
-				supportedSerialModemInfo = SupportedSerialModems.getModem(KuraConstants.Mini_Gateway.getImageName(), KuraConstants.Mini_Gateway.getImageVersion());
+				supportedSerialModemInfo = SupportedSerialModems.getModem(KuraConstants.Mini_Gateway.getImageName(), KuraConstants.Mini_Gateway.getImageVersion(), KuraConstants.Mini_Gateway.getTargetName());
 				m_supportedSerialModemInfo = supportedSerialModemInfo;
+			} else if (OS_VERSION != null && OS_VERSION.equals(KuraConstants.Reliagate_10_11.getImageName() + "_" + KuraConstants.Reliagate_10_11.getImageVersion()) &&
+					TARGET_NAME != null && TARGET_NAME.equals(KuraConstants.Reliagate_10_11.getTargetName())) {
+				s_logger.debug("obtaining serial modem info for {}", KuraConstants.Reliagate_10_11.getImageName());
+				supportedSerialModemInfo = SupportedSerialModems.getModem(KuraConstants.Reliagate_10_11.getImageName(), KuraConstants.Reliagate_10_11.getImageVersion(), KuraConstants.Reliagate_10_11.getTargetName());
+				m_supportedSerialModemInfo = supportedSerialModemInfo;				
 			}
 		}
 		return supportedSerialModemInfo;

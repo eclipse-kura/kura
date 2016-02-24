@@ -1,14 +1,14 @@
-/**
- * Copyright (c) 2011, 2015 Eurotech and/or its affiliates
+/*******************************************************************************
+ * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
  *
- *  All rights reserved. This program and the accompanying materials
- *  are made available under the terms of the Eclipse Public License v1.0
- *  which accompanies this distribution, and is available at
- *  http://www.eclipse.org/legal/epl-v10.html
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Eurotech
- */
+ *     Eurotech
+ *******************************************************************************/
 
 package org.eclipse.kura.linux.net.iptables;
 
@@ -44,8 +44,13 @@ public class NatPreroutingChainRule {
 				} else if ("--dport".equals(aRuleTokens[i])) {
 					m_externalPort = Integer.parseInt(aRuleTokens[++i]);
 				} else if ("--sport".equals(aRuleTokens[i])) {
-					m_srcPortFirst = Integer.parseInt(aRuleTokens[i+1].split(":")[0]);
-					m_srcPortLast = Integer.parseInt(aRuleTokens[++i].split(":")[1]);
+					if (aRuleTokens[i+1].indexOf(':') > 0) {
+						m_srcPortFirst = Integer.parseInt(aRuleTokens[i+1].split(":")[0]);
+						m_srcPortLast = Integer.parseInt(aRuleTokens[++i].split(":")[1]);
+					} else {
+						m_srcPortFirst = Integer.parseInt(aRuleTokens[++i]);
+						m_srcPortLast = m_srcPortFirst;
+					}
 				} else if ("--to-destination".equals(aRuleTokens[i])) {
 					m_dstIpAddress = aRuleTokens[i+1].split(":")[0];
 					m_internalPort = Integer.parseInt(aRuleTokens[++i].split(":")[1]);

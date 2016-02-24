@@ -1,14 +1,14 @@
-/**
- * Copyright (c) 2011, 2014 Eurotech and/or its affiliates
+/*******************************************************************************
+ * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
  *
- *  All rights reserved. This program and the accompanying materials
- *  are made available under the terms of the Eclipse Public License v1.0
- *  which accompanies this distribution, and is available at
- *  http://www.eclipse.org/legal/epl-v10.html
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Eurotech
- */
+ *     Eurotech
+ *******************************************************************************/
 
 package org.eclipse.kura.linux.net.util;
 
@@ -291,7 +291,7 @@ public class iwScanTool extends ScanTool implements IScanTool {
 							rsnSecurity.add(WifiSecurity.KEY_MGMT_PSK);
 						}
 					} else {
-						s_logger.debug("Ignoring line in RSN: " + line);
+						s_logger.debug("Ignoring line in RSN: {}", line);
 					}
 					
 					if(foundGroup && foundPairwise && foundAuthSuites) {
@@ -341,7 +341,7 @@ public class iwScanTool extends ScanTool implements IScanTool {
 							wpaSecurity.add(WifiSecurity.KEY_MGMT_PSK);
 						}
 					} else {
-						s_logger.debug("Ignoring line in WPA: " + line);
+						s_logger.debug("Ignoring line in WPA: {}", line);
 					}
 					
 					if(foundGroup && foundPairwise && foundAuthSuites) {
@@ -382,11 +382,12 @@ public class iwScanTool extends ScanTool implements IScanTool {
 						// Could also be of format 39/100
 						final String[] parts = strengthRaw.split("/");
 						strength = (int) Float.parseFloat(parts[0]);
+						strength = SignalStrengthConversion.getRssi(strength);
 					} else {
 						strength = Math.abs((int)Float.parseFloat(strengthRaw));
 					}
 				} catch (RuntimeException e) {
-					s_logger.debug("Cannot parse signal strength " + line);
+					s_logger.debug("Cannot parse signal strength {}", line);
 				}
 			} else if (line.contains("capability:")) {
 				capabilities = new ArrayList<String>();

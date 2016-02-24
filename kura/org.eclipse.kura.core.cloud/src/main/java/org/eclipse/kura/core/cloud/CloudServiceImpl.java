@@ -1,18 +1,14 @@
-/**
- * Copyright (c) 2011, 2015 Eurotech and/or its affiliates
+/*******************************************************************************
+ * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
  *
- *  All rights reserved. This program and the accompanying materials
- *  are made available under the terms of the Eclipse Public License v1.0
- *  which accompanies this distribution, and is available at
- *  http://www.eclipse.org/legal/epl-v10.html
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Eurotech
- */
-/*
- * Copyright (c) 2011 Eurotech Inc. All rights reserved.
- */
-
+ *     Eurotech
+ *******************************************************************************/
 package org.eclipse.kura.core.cloud;
 
 import java.io.IOException;
@@ -476,7 +472,7 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
 			}
 			catch (Exception e) {
 				// Wrap the received bytes payload into an KuraPayload					
-				s_logger.debug("Received message on topic "+topic+" that could not be decoded. Wrapping it into an KuraPayload.");
+				s_logger.debug("Received message on topic {} that could not be decoded. Wrapping it into an KuraPayload.", topic);
 				kuraPayload = new KuraPayload();
 				kuraPayload.setBody(payload);
 			}

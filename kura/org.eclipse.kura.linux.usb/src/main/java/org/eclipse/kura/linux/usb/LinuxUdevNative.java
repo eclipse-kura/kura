@@ -1,14 +1,14 @@
-/**
- * Copyright (c) 2011, 2014 Eurotech and/or its affiliates
+/*******************************************************************************
+ * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
  *
- *  All rights reserved. This program and the accompanying materials
- *  are made available under the terms of the Eclipse Public License v1.0
- *  which accompanies this distribution, and is available at
- *  http://www.eclipse.org/legal/epl-v10.html
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Eurotech
- */
+ *     Eurotech
+ *******************************************************************************/
 package org.eclipse.kura.linux.usb;
 
 import java.security.AccessController;
@@ -169,12 +169,12 @@ public class LinuxUdevNative {
 	 */
 	private void callback(String type, UsbDevice usbDevice) {
 		
-		s_logger.debug("TYPE: " + usbDevice.getClass().toString());
-		s_logger.debug("\tmanfufacturer name: " + usbDevice.getManufacturerName());
-		s_logger.debug("\tproduct name: " + usbDevice.getProductName());
-		s_logger.debug("\tvendor ID: " + usbDevice.getVendorId());
-		s_logger.debug("\tproduct ID: " + usbDevice.getProductId());
-		s_logger.debug("\tUSB Bus Number: " + usbDevice.getUsbBusNumber());
+		s_logger.debug("TYPE: {}", usbDevice.getClass());
+		s_logger.debug("\tmanfufacturer name: {}", usbDevice.getManufacturerName());
+		s_logger.debug("\tproduct name: {}", usbDevice.getProductName());
+		s_logger.debug("\tvendor ID: {}", usbDevice.getVendorId());
+		s_logger.debug("\tproduct ID: {}", usbDevice.getProductId());
+		s_logger.debug("\tUSB Bus Number: {}", usbDevice.getUsbBusNumber());
 		
 		if(usbDevice instanceof UsbBlockDevice) {
 			String name = ((UsbBlockDevice) usbDevice).getDeviceNode();
@@ -197,7 +197,7 @@ public class LinuxUdevNative {
 						m_linuxUdevListener.detached(removedDevice);
 					}
 				} else {
-					s_logger.debug("Unknown udev event: " + type);
+					s_logger.debug("Unknown udev event: {}", type);
 				}
 			}
 		} else if(usbDevice instanceof UsbNetDevice) {
@@ -212,7 +212,7 @@ public class LinuxUdevNative {
 						m_linuxUdevListener.detached(removedDevice);
 					}
 				} else {
-					s_logger.debug("Unknown udev event: " + type);
+					s_logger.debug("Unknown udev event: {}", type);
 				}
 			}
 		} else if(usbDevice instanceof UsbTtyDevice) {
@@ -227,7 +227,7 @@ public class LinuxUdevNative {
 						m_linuxUdevListener.detached(removedDevice);
 					}
 				} else {
-					s_logger.debug("Unknown udev event: " + type);
+					s_logger.debug("Unknown udev event: {}", type);
 				}
 			}
 		}

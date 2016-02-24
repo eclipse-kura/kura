@@ -1,14 +1,14 @@
-/**
- * Copyright (c) 2011, 2014 Eurotech and/or its affiliates
+/*******************************************************************************
+ * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
  *
- *  All rights reserved. This program and the accompanying materials
- *  are made available under the terms of the Eclipse Public License v1.0
- *  which accompanies this distribution, and is available at
- *  http://www.eclipse.org/legal/epl-v10.html
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Eurotech
- */
+ *     Eurotech
+ *******************************************************************************/
 package org.eclipse.kura.net.admin.visitor.linux;
 
 import java.util.ArrayList;
@@ -68,7 +68,7 @@ public class WifiConfigWriter implements NetworkConfigurationVisitor{
     // Write common wifi config
     private void writeConfig(WifiInterfaceConfigImpl wifiInterfaceConfig) throws KuraException {
         String interfaceName = wifiInterfaceConfig.getName();
-        s_logger.debug("Writing wifi config for " + interfaceName);
+        s_logger.debug("Writing wifi config for {}", interfaceName);
         
         List<WifiInterfaceAddressConfig> wifiInterfaceAddressConfigs = wifiInterfaceConfig.getNetInterfaceAddresses();
         
@@ -77,7 +77,7 @@ public class WifiConfigWriter implements NetworkConfigurationVisitor{
                 // Store the selected wifi mode
                 WifiMode wifiMode = wifiInterfaceAddressConfig.getMode();
 
-                s_logger.debug("Store wifiMode: " + wifiMode);
+                s_logger.debug("Store wifiMode: {}", wifiMode);
                 StringBuilder key = new StringBuilder("net.interface." + interfaceName + ".config.wifi.mode");
                 try {
                     KuranetConfig.setProperty(key.toString(), wifiMode.toString());

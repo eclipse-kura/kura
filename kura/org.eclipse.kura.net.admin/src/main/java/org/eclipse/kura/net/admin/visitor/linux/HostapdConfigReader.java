@@ -1,14 +1,14 @@
-/**
- * Copyright (c) 2011, 2014 Eurotech and/or its affiliates
+/*******************************************************************************
+ * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
  *
- *  All rights reserved. This program and the accompanying materials
- *  are made available under the terms of the Eclipse Public License v1.0
- *  which accompanies this distribution, and is available at
- *  http://www.eclipse.org/legal/epl-v10.html
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Eurotech
- */
+ *     Eurotech
+ *******************************************************************************/
 package org.eclipse.kura.net.admin.visitor.linux;
 
 import java.io.File;
@@ -77,7 +77,7 @@ public class HostapdConfigReader implements NetworkConfigurationVisitor {
 	private void getConfig(WifiInterfaceConfigImpl wifiInterfaceConfig)
 			throws KuraException {
 		String interfaceName = wifiInterfaceConfig.getName();
-		s_logger.debug("Getting hostapd config for " + interfaceName);
+		s_logger.debug("Getting hostapd config for {}", interfaceName);
 
 		List<WifiInterfaceAddressConfig> wifiInterfaceAddressConfigs = wifiInterfaceConfig
 				.getNetInterfaceAddresses();
@@ -109,7 +109,6 @@ public class HostapdConfigReader implements NetworkConfigurationVisitor {
 
 	private static WifiConfig getWifiHostConfig(String ifaceName)
 			throws KuraException {
-
 		try {
 			WifiConfig wifiConfig = new WifiConfig();
 			wifiConfig.setMode(WifiMode.MASTER);
@@ -230,16 +229,16 @@ public class HostapdConfigReader implements NetworkConfigurationVisitor {
 					wifiConfig.setDriver(driver);
 					wifiConfig.setChannels(new int[] { channel });
 					wifiConfig.setPasskey(password);
-					wifiConfig.setBroadcast(true); // TODO: always true? is this
-													// needed?
 					wifiConfig.setSecurity(security);
 					wifiConfig.setPairwiseCiphers(pairwise);
 					wifiConfig.setRadioMode(wifiRadioMode);
 
 					if (ignoreSSID == 0) {
 						wifiConfig.setIgnoreSSID(false);
+						wifiConfig.setBroadcast(true);
 					} else {
 						wifiConfig.setIgnoreSSID(true);
+						wifiConfig.setBroadcast(false);
 					}
 
 					// hw mode
@@ -256,7 +255,6 @@ public class HostapdConfigReader implements NetworkConfigurationVisitor {
 					}
 				}
 			}
-
 			return wifiConfig;
 		} catch (Exception e) {
 			s_logger.error("Exception getting WiFi configuration", e);

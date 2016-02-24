@@ -132,6 +132,9 @@
 		<available file="${project.build.directory}/plugins/org.eclipse.kura.web_${org.eclipse.kura.web.version}.jar" property="web.jar.present" />
 		<antcall target="web-config" />
 
+		<available file="${project.build.directory}/plugins/org.eclipse.kura.web2_${org.eclipse.kura.web2.version}.jar" property="web2.jar.present" />
+		<antcall target="web2-config" />
+
 		<available file="${project.build.directory}/plugins/org.eclipse.kura.linux.gpio_${org.eclipse.kura.linux.gpio.version}.jar" property="linux.gpio.jar.present" />
 		<antcall target="gpio-config" />
 		
@@ -335,9 +338,11 @@ fi
                         prefix="${build.output.name}/install" />
             <zipfileset file="${project.build.directory}/${build.output.name}/kura.service.edison"
                         prefix="${build.output.name}/install" />
-            <zipfileset file="src/main/resources/${build.name}/firewall.init"
+ 	    <zipfileset file="src/main/resources/${build.name}/recover_default_config.init"
+                        prefix="${build.output.name}/install" />           
+	    <zipfileset file="src/main/resources/${build.name}/firewall.init"
                         prefix="${build.output.name}/install" />
-           <zipfileset file="src/main/resources/${build.name}/iptables.init"
+            <zipfileset file="src/main/resources/${build.name}/iptables.init"
                         prefix="${build.output.name}/install" />
             <zipfileset file="src/main/resources/common/monit.init.wrl"
                         prefix="${build.output.name}/install" />
@@ -492,6 +497,7 @@ fi
 		
 		<!-- Conditional inclusion of jar files in the distribution jar -->
 		<antcall target="web-jar" />
+		<antcall target="web2-jar" />
 		<antcall target="gpio-jar" />
 		<antcall target="emulator-jars" />
   		<antcall target="linux-jars" />
@@ -507,6 +513,7 @@ fi
                 <arg value="${build.name}" />
 				<arg value="${kura.install.dir}" />
         </exec>
+        
 
 
 		<!-- Get version information for the bundles/files in this build -->
@@ -584,6 +591,19 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
         <jar destfile="${project.build.directory}/${build.output.name}_upgrader.dp"
                 manifest="${project.build.directory}/${build.output.name}/dp_upgrade_stage/META-INF/MANIFEST.MF"
                 basedir="${project.build.directory}/${build.output.name}/dp_upgrade_stage" />
+                
+        <checksum algorithm="md5">
+    		<fileset dir="./target/" >
+    			<include name="kura_${project.version}_${build.name}*.sh"/>
+    			<include name="kura_${project.version}_${build.name}*.dp"/>
+    		</fileset>
+		</checksum>
+		<checksum algorithm="SHA-1">
+    		<fileset dir="./target/" >
+    			<include name="kura_${project.version}_${build.name}*.sh"/>
+    			<include name="kura_${project.version}_${build.name}*.dp"/>
+    		</fileset>
+		</checksum>
     </target>
 
 	<target name="set-http-port" if="http.port">
@@ -596,8 +616,17 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
 	<target name="web-config" if="web.jar.present">
 		<propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
             	<entry key="osgi.bundles" operation="+"
-                   value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.web_${org.eclipse.kura.web.version}.jar@5:start" />
+                   value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.web_${org.eclipse.kura.web.version}.jar@6:start" />
         </propertyfile>
+	</target>
+
+	<target name="web2-config" if="web2.jar.present">
+		<propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
+            	<entry key="osgi.bundles" operation="+"
+                   value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.web2_${org.eclipse.kura.web2.version}.jar@6:start" />
+        </propertyfile>
+		<replace file="${project.build.directory}/${build.output.name}/config.ini"
+                 token="com.gwt.user_0.2.0" value="com.gwt.user_1.0.0"/>
 	</target>
 
 	<target name="gpio-config" if="linux.gpio.jar.present">
@@ -614,6 +643,13 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
 		</zip>
 	</target>
 
+	<target name="web2-jar" if="web2.jar.present">
+		<zip destfile="${project.build.directory}/${build.output.name}.zip" update="true">
+			<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.web2_${org.eclipse.kura.web2.version}.jar"
+                        prefix="${build.output.name}/kura/plugins" />
+		</zip>
+	</target>
+	
 	<target name="gpio-jar" if="linux.gpio.jar.present">
 		<zip destfile="${project.build.directory}/${build.output.name}.zip" update="true">
 			<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.linux.gpio_${org.eclipse.kura.linux.gpio.version}.jar"

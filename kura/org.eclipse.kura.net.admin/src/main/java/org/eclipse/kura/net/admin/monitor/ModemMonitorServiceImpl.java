@@ -1,14 +1,14 @@
-/**
- * Copyright (c) 2011, 2015 Eurotech and/or its affiliates
+/*******************************************************************************
+ * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
  *
- *  All rights reserved. This program and the accompanying materials
- *  are made available under the terms of the Eclipse Public License v1.0
- *  which accompanies this distribution, and is available at
- *  http://www.eclipse.org/legal/epl-v10.html
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Eurotech
- */
+ *     Eurotech
+ *******************************************************************************/
 package org.eclipse.kura.net.admin.monitor;
 
 import java.lang.reflect.Method;
@@ -56,6 +56,7 @@ import org.eclipse.kura.net.admin.modem.SupportedSerialModemsFactoryInfo;
 import org.eclipse.kura.net.admin.modem.SupportedSerialModemsFactoryInfo.SerialModemFactoryInfo;
 import org.eclipse.kura.net.admin.modem.SupportedUsbModemsFactoryInfo;
 import org.eclipse.kura.net.admin.modem.SupportedUsbModemsFactoryInfo.UsbModemFactoryInfo;
+import org.eclipse.kura.net.admin.visitor.linux.util.KuranetConfig;
 import org.eclipse.kura.net.modem.CellularModem;
 import org.eclipse.kura.net.modem.ModemAddedEvent;
 import org.eclipse.kura.net.modem.ModemConfig;
@@ -303,6 +304,17 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 		}
 		return interfaceStatus;
 	}
+	
+	private void setNetInterfaceStatus(NetInterfaceStatus netInterfaceStatus, List<NetConfig> netConfigs) {
+		if ((netConfigs != null) && !netConfigs.isEmpty()) {
+			for (NetConfig netConfig : netConfigs) {
+				if (netConfig instanceof NetConfigIP4) {
+					((NetConfigIP4) netConfig).setStatus(netInterfaceStatus);
+					break;
+				}
+			}
+		}
+	}
 
 	@Override
 	public void registerListener(ModemMonitorListener newListener) {
@@ -366,10 +378,18 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 						} else {
 							if ((oldNetConfigs != null) && (pppService != null)) {
 								if (!ifaceName.equals(pppService.getIfaceName())) {
+									StringBuilder key = new StringBuilder().append("net.interface.").append(ifaceName).append(".config.ip4.status");
+							        String statusString = KuranetConfig.getProperty(key.toString());
+							        NetInterfaceStatus netInterfaceStatus = NetInterfaceStatus.netIPv4StatusDisabled;
+							        if(statusString != null && !statusString.isEmpty()) {
+							            netInterfaceStatus = NetInterfaceStatus.valueOf(statusString);
+							        }
+									
 									newNetConfigs = oldNetConfigs;
 									oldNetConfigs = null;
 									try {
 										setInterfaceNumber(ifaceName, newNetConfigs);
+										setNetInterfaceStatus(netInterfaceStatus, newNetConfigs);
 									} catch (NumberFormatException e) {
 										s_logger.error("failed to set new interface number - {}", e);
 									}
@@ -636,6 +656,7 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 										s_logger.error("monitor() :: Failed to disable modem GPS");
 									}
 									modem.reset();
+									pppState = PppState.NOT_CONNECTED;
 								} else {
 									int timeTillReset = (int)(modemResetTout - timeElapsed) / 1000;
 									s_logger.info("monitor() :: PPP connection in progress. Modem will be reset in {} sec if not connected", timeTillReset);
@@ -712,7 +733,7 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 						m_eventAdmin.postEvent(new NetworkStatusChangeEvent(interfaceName, newStatuses.get(interfaceName), null));
 					}
 				} else {
-					s_logger.debug("Posting NetworkStatusChangeEvent on enabled interface: " + interfaceName);
+					s_logger.debug("Posting NetworkStatusChangeEvent on enabled interface: {}", interfaceName);
 					m_eventAdmin.postEvent(new NetworkStatusChangeEvent(interfaceName, newStatuses.get(interfaceName), null));
 				}
 			}

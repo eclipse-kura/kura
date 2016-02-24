@@ -1,14 +1,14 @@
-/**
- * Copyright (c) 2011, 2015 Eurotech and/or its affiliates
+/*******************************************************************************
+ * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
  *
- *  All rights reserved. This program and the accompanying materials
- *  are made available under the terms of the Eclipse Public License v1.0
- *  which accompanies this distribution, and is available at
- *  http://www.eclipse.org/legal/epl-v10.html
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Eurotech
- */
+ *     Eurotech
+ *******************************************************************************/
 package org.eclipse.kura.core.configuration;
 
 import java.io.BufferedReader;
@@ -275,7 +275,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 		} else {
 			cc = getSelfConfiguringComponentConfiguration(pid);
 		}
-		if(cc != null){
+		if(cc != null && cc.getConfigurationProperties() != null){
 			decryptPasswords(cc);
 		}
 		return cc;
@@ -493,7 +493,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 			return;
 		}
 
-		s_logger.debug("Removing component configuration for " + pid);
+		s_logger.debug("Removing component configuration for {}", pid);
 		m_allPids.remove(pid);
 		m_ocds.remove(pid);
 		m_selfConfigComponents.remove(pid);

@@ -1,18 +1,14 @@
-/**
- * Copyright (c) 2011, 2014 Eurotech and/or its affiliates
+/*******************************************************************************
+ * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
  *
- *  All rights reserved. This program and the accompanying materials
- *  are made available under the terms of the Eclipse Public License v1.0
- *  which accompanies this distribution, and is available at
- *  http://www.eclipse.org/legal/epl-v10.html
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Eurotech
- */
-/*
-* Copyright (c) 2013 Eurotech Inc. All rights reserved.
-*/
-
+ *     Eurotech
+ *******************************************************************************/
 package org.eclipse.kura.linux.net.dhcp;
 
 import java.io.BufferedReader;
@@ -79,7 +75,7 @@ public class DhcpServerImpl implements DhcpServer {
 		File configFile = new File(persistentConfigFileName);
 		if(configFile.exists()) {
 			
-			s_logger.debug("initing DHCP Server configuration for " + m_interfaceName);
+			s_logger.debug("initing DHCP Server configuration for {}", m_interfaceName);
 			//parse the file
 			/*
 			# dhcpd.conf - DHCPD configuration file
@@ -189,7 +185,7 @@ public class DhcpServerImpl implements DhcpServer {
 				throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR, e);
 			}	
 		} else {
-			s_logger.debug("There is no current DHCP server configuration for " + m_interfaceName);
+			s_logger.debug("There is no current DHCP server configuration for {}", m_interfaceName);
 		}
 	}
 	

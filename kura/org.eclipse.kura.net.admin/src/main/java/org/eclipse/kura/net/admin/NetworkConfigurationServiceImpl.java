@@ -1,14 +1,14 @@
-/**
- * Copyright (c) 2011, 2014 Eurotech and/or its affiliates
+/*******************************************************************************
+ * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
  *
- *  All rights reserved. This program and the accompanying materials
- *  are made available under the terms of the Eclipse Public License v1.0
- *  which accompanies this distribution, and is available at
- *  http://www.eclipse.org/legal/epl-v10.html
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Eurotech
- */
+ *     Eurotech
+ *******************************************************************************/
 package org.eclipse.kura.net.admin;
 
 import java.util.ArrayList;
@@ -140,6 +140,20 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
     {
         s_logger.debug("activate(componentContext, properties)...");
         
+        Dictionary<String, String[]> d = new Hashtable<String, String[]>();
+        d.put(EventConstants.EVENT_TOPIC, EVENT_TOPICS);
+        componentContext.getBundleContext().registerService(EventHandler.class.getName(), this, d);
+        
+        m_executorUtil = Executors.newSingleThreadScheduledExecutor();
+        
+        m_executorUtil.schedule(new Runnable() {
+    		@Override
+    		public void run() {
+    			//make sure we don't miss the setting of firstConfig
+    			m_firstConfig = false;
+    		}
+    	}, 3, TimeUnit.MINUTES);
+        
         m_readVisitors = new ArrayList<NetworkConfigurationVisitor>();
         m_readVisitors.add(LinuxReadVisitor.getInstance());
 
@@ -150,22 +164,8 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
         if(properties == null) {
         	s_logger.debug("Got null properties...");
         } else {
-        	s_logger.debug("Props..." + properties);
+        	s_logger.debug("Props...{}", properties);
         }
-        
-        m_executorUtil = Executors.newSingleThreadScheduledExecutor();
-        
-        Dictionary<String, String[]> d = new Hashtable<String, String[]>();
-        d.put(EventConstants.EVENT_TOPIC, EVENT_TOPICS);
-        componentContext.getBundleContext().registerService(EventHandler.class.getName(), this, d);
-        
-        m_executorUtil.schedule(new Runnable() {
-    		@Override
-    		public void run() {
-    			//make sure we don't miss the setting of firstConfig
-    			m_firstConfig = false;
-    		}
-    	}, 3, TimeUnit.MINUTES);
     }
     
     protected void deactivate(ComponentContext componentContext) {
@@ -177,7 +177,7 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
     
     @Override
 	public void handleEvent(Event event) {
-		s_logger.debug("handleEvent - topic: " + event.getTopic());
+		s_logger.debug("handleEvent - topic: {}", event.getTopic());
         String topic = event.getTopic();
         if (topic.equals(KuraConfigReadyEvent.KURA_CONFIG_EVENT_READY_TOPIC)) {
         	m_firstConfig = false;
@@ -210,7 +210,7 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
         try {
         	if(properties != null) {
         		s_logger.debug("new properties - updating");
-        		s_logger.debug("modified.interface.names: " + properties.get("modified.interface.names"));
+        		s_logger.debug("modified.interface.names: {}", properties.get("modified.interface.names"));
         		
         		//dynamically insert the type properties..
         		Map<String,Object> modifiedProps = new HashMap<String, Object>();

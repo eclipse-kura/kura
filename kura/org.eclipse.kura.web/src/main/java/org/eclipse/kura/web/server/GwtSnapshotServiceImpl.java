@@ -1,14 +1,14 @@
-/**
- * Copyright (c) 2011, 2014 Eurotech and/or its affiliates
+/*******************************************************************************
+ * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
  *
- *  All rights reserved. This program and the accompanying materials
- *  are made available under the terms of the Eclipse Public License v1.0
- *  which accompanies this distribution, and is available at
- *  http://www.eclipse.org/legal/epl-v10.html
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Eurotech
- */
+ *     Eurotech
+ *******************************************************************************/
 package org.eclipse.kura.web.server;
 
 import java.util.ArrayList;
@@ -77,19 +77,7 @@ public class GwtSnapshotServiceImpl extends OsgiRemoteServiceServlet implements 
 		try {	
 			ServiceLocator  locator = ServiceLocator.getInstance();
 			NetworkAdminService nas = null;
-			if (snapshot.getSnapshotId() == 0L) {
-				nas = locator.getService(NetworkAdminService.class);
-				if (nas != null) {
-					try {
-						s_logger.debug("rollbackDeviceSnapshot() :: rolling back default network configuration ...");
-						nas.rollbackDefaultConfiguration();
-					} catch (KuraException e) {
-						e.printStackTrace();
-						throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
-					}
-				}
-			}
-
+			
 			ConfigurationService cs = locator.getService(ConfigurationService.class);			 
 	        cs.rollback(snapshot.getSnapshotId());
 
@@ -102,7 +90,19 @@ public class GwtSnapshotServiceImpl extends OsgiRemoteServiceServlet implements 
             if (delay > 0) {
             	Thread.sleep(delay);
             }	
-            if ((snapshot.getSnapshotId() == 0L) && (nas != null)) {
+            
+            if (snapshot.getSnapshotId() == 0L) {
+            	nas = locator.getService(NetworkAdminService.class);
+				if (nas != null) {
+					try {
+						s_logger.debug("rollbackDeviceSnapshot() :: rolling back default network configuration ...");
+						nas.rollbackDefaultConfiguration();
+					} catch (KuraException e) {
+						e.printStackTrace();
+						throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
+					}
+				}
+            	
             	s_logger.debug("rollbackDeviceSnapshot() :: rolling back default firewall configuration ...");
             	nas.rollbackDefaultFirewallConfiguration();
             }

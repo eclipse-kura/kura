@@ -1,14 +1,14 @@
-/**
- * Copyright (c) 2011, 2014 Eurotech and/or its affiliates
+/*******************************************************************************
+ * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
  *
- *  All rights reserved. This program and the accompanying materials
- *  are made available under the terms of the Eclipse Public License v1.0
- *  which accompanies this distribution, and is available at
- *  http://www.eclipse.org/legal/epl-v10.html
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Eurotech
- */
+ *     Eurotech
+ *******************************************************************************/
 package org.eclipse.kura.linux.net.util;
 
 import java.io.File;
@@ -57,14 +57,14 @@ public class RedHatNetworkInterface extends GenericNetworkInterface {
 					fis = new FileInputStream(kuraFile);
 					kuraProps.load(fis);
 	
-					s_logger.debug("getting args for " + interfaceName);
+					s_logger.debug("getting args for {}", interfaceName);
 					
 					netInterfaceConfig = getCurrentConfig(interfaceName, type, status, dhcpServerEnabled, passDns, kuraProps);
 				} else {
 					netInterfaceConfig = getCurrentConfig(interfaceName, type, NetInterfaceStatus.netIPv4StatusDisabled, dhcpServerEnabled, passDns, null);
 				}
 			} else if(type == NetInterfaceType.MODEM) {
-			    s_logger.debug("getting args for " + interfaceName);
+			    s_logger.debug("getting args for {}", interfaceName);
 			    kuraProps.setProperty("BOOTPROTO", "dhcp");
 			    kuraProps.setProperty("ONBOOT", "yes");
 			    netInterfaceConfig = getCurrentConfig(interfaceName, type, status, dhcpServerEnabled, passDns, kuraProps);
@@ -110,7 +110,7 @@ public class RedHatNetworkInterface extends GenericNetworkInterface {
 			.append("\n");
 			
 			List<? extends NetInterfaceAddressConfig> netInterfaceConfigs = netInterfaceConfig.getNetInterfaceAddresses();
-			s_logger.debug("There are " + netInterfaceConfigs.size() + " NetInterfaceConfigs in this configuration");
+			s_logger.debug("There are {} NetInterfaceConfigs in this configuration", netInterfaceConfigs.size());
 			
 			boolean allowWrite = false;
 			for(NetInterfaceAddressConfig netInterfaceAddressConfig : netInterfaceConfigs) {

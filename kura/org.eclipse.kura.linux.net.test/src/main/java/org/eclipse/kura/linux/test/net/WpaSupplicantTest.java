@@ -1,14 +1,14 @@
-/**
- * Copyright (c) 2011, 2014 Eurotech and/or its affiliates
+/*******************************************************************************
+ * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
  *
- *  All rights reserved. This program and the accompanying materials
- *  are made available under the terms of the Eclipse Public License v1.0
- *  which accompanies this distribution, and is available at
- *  http://www.eclipse.org/legal/epl-v10.html
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Eurotech
- */
+ *     Eurotech
+ *******************************************************************************/
 package org.eclipse.kura.linux.test.net;
 
 import java.io.File;
@@ -134,7 +134,7 @@ public class WpaSupplicantTest extends TestCase {
 			assertNotNull(s_wpaSupplicant);
 			
 			s_wpaSupplicant.saveConfig();
-			s_logger.debug("config:\n" + getConfig());
+			s_logger.debug("config:\n{}", getConfig());
 			
 			s_wpaSupplicant.enable();
 			assertTrue("wpa_supplicant is enabled", s_wpaSupplicant.isEnabled());
@@ -167,7 +167,7 @@ public class WpaSupplicantTest extends TestCase {
 			assertNotNull(s_wpaSupplicant);
 			
 			s_wpaSupplicant.saveConfig();
-			s_logger.debug("config:\n" + getConfig());
+			s_logger.debug("config:\n{}", getConfig());
 			
 			s_wpaSupplicant.enable();
 			assertTrue("wpa_supplicant is enabled",
@@ -204,7 +204,7 @@ public class WpaSupplicantTest extends TestCase {
 			assertNotNull(s_wpaSupplicant);
 			
 			s_wpaSupplicant.saveConfig();
-			s_logger.debug("config:\n" + getConfig());
+			s_logger.debug("config:\n{}", getConfig());
 			
 			s_wpaSupplicant.enable();
 			assertTrue("wpa_supplicant is enabled", s_wpaSupplicant.isEnabled());

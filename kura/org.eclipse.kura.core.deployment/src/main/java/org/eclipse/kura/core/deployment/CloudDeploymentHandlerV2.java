@@ -1,14 +1,14 @@
-/**
- * Copyright (c) 2011, 2015 Eurotech and/or its affiliates
+/*******************************************************************************
+ * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
  *
- *  All rights reserved. This program and the accompanying materials
- *  are made available under the terms of the Eclipse Public License v1.0
- *  which accompanies this distribution, and is available at
- *  http://www.eclipse.org/legal/epl-v10.html
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Eurotech
- */
+ *     Eurotech
+ *******************************************************************************/
 
 package org.eclipse.kura.core.deployment;
 
@@ -291,7 +291,7 @@ public class CloudDeploymentHandlerV2 extends Cloudlet {
 					.append(messageType)
 					.toString();
 
-			getCloudApplicationClient().controlPublish(options.getRequestClientId(), messageTopic, messagePayload, 2, DFLT_RETAIN, DFLT_PRIORITY);
+			getCloudApplicationClient().controlPublish(options.getRequestClientId(), messageTopic, messagePayload, 1, DFLT_RETAIN, DFLT_PRIORITY);
 		} catch (KuraException e) {
 			s_logger.error("Error publishing response for command {} {}", messageType, e);
 		}

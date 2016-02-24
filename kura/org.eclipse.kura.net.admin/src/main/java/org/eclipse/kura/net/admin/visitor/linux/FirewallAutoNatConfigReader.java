@@ -1,14 +1,14 @@
-/**
- * Copyright (c) 2011, 2014 Eurotech and/or its affiliates
+/*******************************************************************************
+ * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
  *
- *  All rights reserved. This program and the accompanying materials
- *  are made available under the terms of the Eclipse Public License v1.0
- *  which accompanies this distribution, and is available at
- *  http://www.eclipse.org/legal/epl-v10.html
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Eurotech
- */
+ *     Eurotech
+ *******************************************************************************/
 package org.eclipse.kura.net.admin.visitor.linux;
 
 import java.util.ArrayList;
@@ -63,7 +63,7 @@ public class FirewallAutoNatConfigReader implements NetworkConfigurationVisitor 
 		
 		NetInterfaceType type = netInterfaceConfig.getType();
 		if (type == NetInterfaceType.ETHERNET || type == NetInterfaceType.WIFI) {
-			s_logger.debug("Getting NAT config for " + interfaceName);
+			s_logger.debug("Getting NAT config for {}", interfaceName);
 			if(kuraProps != null) {
 				s_logger.debug("Getting NAT config from kuraProps");
 				boolean natEnabled = false;
@@ -126,7 +126,7 @@ public class FirewallAutoNatConfigReader implements NetworkConfigurationVisitor 
 					while(it.hasNext()) {
 						NATRule rule = it.next();
 						if(rule.getSourceInterface().equals(interfaceName)) {
-							s_logger.debug("found NAT rule: " + rule);
+							s_logger.debug("found NAT rule: {}", rule);
 							
 							//this is the one we care about
 							FirewallAutoNatConfig natConfig = new FirewallAutoNatConfig(rule.getSourceInterface(), rule.getDestinationInterface(), rule.isMasquerade());

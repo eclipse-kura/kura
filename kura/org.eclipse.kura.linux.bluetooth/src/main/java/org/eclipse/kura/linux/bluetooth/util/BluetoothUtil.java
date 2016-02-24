@@ -1,3 +1,14 @@
+/*******************************************************************************
+ * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     Eurotech
+ *******************************************************************************/
 package org.eclipse.kura.linux.bluetooth.util;
 
 import java.io.BufferedReader;
@@ -95,7 +106,7 @@ public class BluetoothUtil {
 //					String[] tmpAddress = address.split("\\s", 2);
 //					address = tmpAddress[0].trim();
 					props.put("address", address);
-					s_logger.trace("Bluetooth adapter address set to: " + address);
+					s_logger.trace("Bluetooth adapter address set to: {}", address);
 				}
 				if((result.indexOf(HCI_VERSION)) >= 0) {
 					// HCI version : 4.0 (0x6) or HCI version : 4.1 (0x7)

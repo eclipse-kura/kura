@@ -1,18 +1,16 @@
-/**
- * Copyright (c) 2011, 2014 Eurotech and/or its affiliates
+/*******************************************************************************
+ * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
  *
- *  All rights reserved. This program and the accompanying materials
- *  are made available under the terms of the Eclipse Public License v1.0
- *  which accompanies this distribution, and is available at
- *  http://www.eclipse.org/legal/epl-v10.html
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Eurotech
- */
+ *     Eurotech
+ *******************************************************************************/
 package org.eclipse.kura.net.admin.monitor;
 
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -92,7 +90,9 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
     
     private static Future<?> monitorTask;
     private static AtomicBoolean stopThread;
-            
+    
+    private boolean m_first;
+    
     private NetworkService m_networkService;
     private SystemService m_systemService;
     private EventAdmin m_eventAdmin;
@@ -165,6 +165,8 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
 
         s_logger.debug("Activating WifiMonitor Service...");
 
+        m_first = true;
+        
         m_enabledInterfaces = new HashSet<String>();
         m_disabledInterfaces = new HashSet<String>();
         m_interfaceStatuses = new HashMap<String, InterfaceState>();
@@ -183,14 +185,14 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
         	
         } catch (KuraException e) {
             s_logger.error("Could not update list of interfaces", e);
-        }        
+        }
     }
 
     protected void deactivate(ComponentContext componentContext) {
     	m_listeners = null;
         if ((monitorTask != null) && (!monitorTask.isDone())) {
         	stopThread.set(true);
-        	monitorNotity();
+        	monitorNotify();
         	s_logger.debug("Cancelling WifiMonitor task ...");
         	monitorTask.cancel(true);
     		s_logger.info("WifiMonitor task cancelled? = {}", monitorTask.isDone());
@@ -213,35 +215,89 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
     private void monitor() {
         synchronized(s_lock) {
             try {
+            	// Track the interfaces being reconfigured
+            	List<String> interfacesToReconfigure = new ArrayList<String>();
+            	
                 // Check to see if the configuration has changed
             	//s_logger.debug("m_newNetConfiguration: " + m_newNetConfiguration);
             	//s_logger.debug("m_currentNetworkConfiguration: " + m_currentNetworkConfiguration);
-             	
+            	
+            	// Find and disable interfaces affected by the configuration change
                 if(m_newNetConfiguration != null && !m_newNetConfiguration.equals(m_currentNetworkConfiguration)) {
-                    s_logger.info("monitor() :: Found a new WiFi network configuration");
+                    s_logger.info("monitor() :: Found a new network configuration, will check if wifi has been reconfigured ...");
                     
-                    List<String> interfacesToReconfigure = new ArrayList<String>();    
+                    // Note that the call to getReconfiguredWifiInterfaces() may also update
+                    // m_enabledInterfaces or m_disabledInterfaces
                     interfacesToReconfigure.addAll(getReconfiguredWifiInterfaces());
                         
                     m_currentNetworkConfiguration = m_newNetConfiguration;
                     
-                    // Reconfigure the interface
+                    // The interface being reconfigured is first disabled calling disableInterface().
+                    // Note that calling disableInterface() does not update
+                    // m_enabledInterfaces or m_disabledInterfaces.
+                    // After calling disableInterface() and refreshing the list of
+                    // interface statuses, a call to WifiState.isUp() should return false.
                     for(String interfaceName : interfacesToReconfigure) {
                         s_logger.debug("monitor() :: configuration has changed for {} , disabling...", interfaceName);
                         disableInterface(interfaceName);
                     }
                 }
-                
-                // Check all interfaces configured to be enabled
+
+                // Check all interfaces configured to be enabled.
+                // This includes the interfaces that might have been enabled by the above configuration change.
+                // Get fresh interface statuses and post status change events.
+                Map<String, InterfaceState> newStatuses = getInterfaceStatuses(m_enabledInterfaces);
+                checkStatusChange(m_interfaceStatuses, newStatuses);
+                m_interfaceStatuses = newStatuses;
+
                 for(String interfaceName : m_enabledInterfaces) {
-                    InterfaceState wifiState = m_interfaceStatuses.get(interfaceName);
-                    WifiInterfaceConfigImpl wifiInterfaceConfig = (WifiInterfaceConfigImpl) m_currentNetworkConfiguration.getNetInterfaceConfig(interfaceName);
+                	// Get current configuration
+                	WifiInterfaceConfigImpl wifiInterfaceConfig = (WifiInterfaceConfigImpl) m_currentNetworkConfiguration.getNetInterfaceConfig(interfaceName);
                     WifiConfig wifiConfig = getWifiConfig(wifiInterfaceConfig);
     
+                    // Make sure we have enough information
+                    if (wifiInterfaceConfig == null) {
+                    	s_logger.warn("monitor() :: missing WifiInterfaceConfigImpl for {}", interfaceName);
+                    	continue;
+                    }
+                    if (wifiConfig == null) {
+                    	s_logger.warn("monitor() :: missing WifiConfig for {}", interfaceName);
+                    	continue;
+                    }
+                    
+                    // There are interfaces for which we need to initially check if
+                    // the right kernel module is loaded for the desired mode.
+                    // If not we treat the interface as if needing to be reconfigured.
+                    if (m_first &&
+                    	!LinuxNetworkUtil.isKernelModuleLoadedForMode(interfaceName, wifiConfig.getMode())) {
+                    	s_logger.info("monitor() :: {} kernel module not suitable for WiFi mode {}", interfaceName, wifiConfig.getMode());
+                    	m_first = false;
+                    	interfacesToReconfigure.add(interfaceName);
+                    	disableInterface(interfaceName);
+                    }
+
+                	// Get current state
+                	InterfaceState wifiState = m_interfaceStatuses.get(interfaceName);
+                    if (wifiState == null) {
+                    	s_logger.warn("monitor() :: missing InterfaceState for {}", interfaceName);
+                    	continue;
+                    }
+                    
                     //s_logger.debug("Evaluating: " + interfaceName + " and is currently up? " + wifiState.isUp());
                     //s_logger.debug("Evaluating: " + interfaceName + " and is currently link up? " + wifiState.isLinkUp());
-                     
-                    if(wifiConfig != null && wifiState != null && wifiState.isUp()) {
+                    
+                    // This flag is changed if the interface is disabled intentionally by the code below
+                	boolean up = wifiState.isUp();
+                    if(up) {
+                    	// Infrastructure (Station) mode:
+                    	// * Notify RSSI to listeners
+                    	// * Detect interface link down: disable the interface
+                    	// * Cannot ping Access Point: renew DHCP lease
+                    	// * Check if enabled for LAN in DHCP mode: remove default gateway from route table
+                    	//
+                    	// Master (Access Point) mode:
+                    	// * Detect interface link down: enable interface.
+                    	//   FIXME should we just disable it like in the Infrastructure case above?
                         if(WifiMode.INFRA.equals(wifiConfig.getMode())) {
                         	// get signal strength only if somebody needs it
                         	if ((m_listeners != null) && (m_listeners.size() > 0)) {
@@ -263,6 +319,7 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
                         	if(!wifiState.isLinkUp()) {
                                 s_logger.debug("monitor() :: link is down - disabling {}", interfaceName);                                
                                 disableInterface(interfaceName);
+                                up = false;
                             }
                             
                         	s_logger.debug("monitor() :: pingAccessPoint()? {}", wifiConfig.pingAccessPoint());
@@ -299,8 +356,35 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
                         		enableInterface(wifiInterfaceConfig);
                         	}
                         }
-                    } else {
-                        // State is currently down
+                    }
+                    
+                    // Either initially down or initially up and we disabled it explicitly
+                    // * Check if the interface is being reconfigured and
+                    //   reload the kernel module (this may be ignored by the platform)
+                    // * Infrastructure (Station) mode:
+                    //   * Configured to ignore SSID: just enable interface. Otherwise:
+                    //   * enable interface only if Access Point is available
+                    //
+                    // * Master (Access Point) mode:
+                    //   * just enable interface
+                    if (!up) {
+                    	// Some interfaces may require reloading the kernel module
+                    	// accordingly to the desired WifiMode.
+                    	// FIXME ideally we only need to this if the WifiMode changes.
+                    	// FIXME if reloading fails it won't be retried.
+                    	if (interfacesToReconfigure.contains(interfaceName)) {
+                    		try {
+                    			s_logger.info("monitor() :: reload {} kernel module for WiFi mode {}",
+                    					interfaceName, wifiConfig.getMode());
+                    			reloadKernelModule(interfaceName, wifiConfig.getMode());
+                    		} catch (KuraException e) {
+                    			s_logger.warn("monitor() :: failed to reload {} kernel module."
+                    					+ " FIXME: THIS WON'T BE RETRIED",
+                    					interfaceName, e);
+                    			continue;
+                    		}
+                    	}
+
                     	try {
 	                        if(WifiMode.MASTER.equals(wifiConfig.getMode())) {
 	                            s_logger.debug("monitor() :: enable {} in master mode", interfaceName);                            
@@ -320,7 +404,7 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
 	                        }
 						} catch (KuraException e) {
 							s_logger.error("monitor() :: Error enabling {} interface, will try to reset wifi", interfaceName, e);
-							resetWifiDevice();
+							resetWifiDevice(interfaceName);
 						}
                     }
                 }
@@ -333,13 +417,8 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
                         disableInterface(interfaceName);
                     }
                 }
-                
-                // Post event for any status changes
-                Map<String, InterfaceState> newStatuses = getInterfaceStatuses(m_enabledInterfaces); 
-                checkStatusChange(m_interfaceStatuses, newStatuses);
-                m_interfaceStatuses = newStatuses;
-                
-                // Shut down the monitor if no interface is enabled
+                                
+                // Shut down the monitor if no interface is configured to be enabled
                 if(m_enabledInterfaces.size() == 0) {
                     if(monitorTask != null) {
                         s_logger.debug("monitor() :: No enabled wifi interfaces - shutting down monitor thread");
@@ -364,11 +443,11 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
 				String interfaceName = it.next();
 				if ((oldStatuses != null) && oldStatuses.containsKey(interfaceName)) {
 					if (!newStatuses.get(interfaceName).equals(oldStatuses.get(interfaceName))) {
-						s_logger.debug("Posting NetworkStatusChangeEvent on interface: " + interfaceName);
+						s_logger.debug("Posting NetworkStatusChangeEvent on interface: {}", interfaceName);
 						m_eventAdmin.postEvent(new NetworkStatusChangeEvent(interfaceName, newStatuses.get(interfaceName), null));
 					}
 				} else {
-					s_logger.debug("Posting NetworkStatusChangeEvent on enabled interface: " + interfaceName);
+					s_logger.debug("Posting NetworkStatusChangeEvent on enabled interface: {}", interfaceName);
 					m_eventAdmin.postEvent(new NetworkStatusChangeEvent(interfaceName, newStatuses.get(interfaceName), null));
 				}
 			}
@@ -379,7 +458,7 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
                 while (it.hasNext()) {                    
                     String interfaceName = it.next();
                     if(!newStatuses.containsKey(interfaceName)) {
-                        s_logger.debug("Posting NetworkStatusChangeEvent on disabled interface: " + interfaceName);
+                        s_logger.debug("Posting NetworkStatusChangeEvent on disabled interface: {}", interfaceName);
                         m_eventAdmin.postEvent(new NetworkStatusChangeEvent(interfaceName, oldStatuses.get(interfaceName), null));
                     }
                 }
@@ -440,6 +519,8 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
                     // Initialize the monitor thread if needed
                     if(monitorTask == null) {
                         initializeMonitoredInterfaces(m_newNetConfiguration);
+                    } else {
+                    	monitorNotify();
                     }
                 } catch (Exception e) {
                     s_logger.warn("Error during WiFi Monitor handle event", e);
@@ -519,14 +600,14 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
     }
     
     private void disableInterface(String interfaceName) throws KuraException {
-        s_logger.debug("Disabling " + interfaceName);
+        s_logger.debug("Disabling {}", interfaceName);
         m_netAdminService.disableInterface(interfaceName);
         m_netAdminService.manageDhcpServer(interfaceName, false);
     }
     
     private void enableInterface(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig) throws KuraException {
         
-        s_logger.debug("enableInterface: " + netInterfaceConfig);
+        s_logger.debug("enableInterface: {}", netInterfaceConfig);
         WifiInterfaceConfigImpl wifiInterfaceConfig = null;
         
         if(netInterfaceConfig instanceof WifiInterfaceConfigImpl) {
@@ -569,6 +650,15 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
             }
         }
     }
+        
+    private void reloadKernelModule(String interfaceName, WifiMode wifiMode) throws KuraException {
+    	s_logger.info("monitor() :: reload {} using kernel module for WiFi mode {}",
+    			interfaceName, wifiMode);
+    	if (LinuxNetworkUtil.isKernelModuleLoaded(interfaceName, wifiMode)) {
+    		LinuxNetworkUtil.unloadKernelModule(interfaceName);
+    	}
+    	LinuxNetworkUtil.loadKernelModule(interfaceName, wifiMode);
+    }
     
     private void initializeMonitoredInterfaces(NetworkConfiguration networkConfiguration) throws KuraException {
         synchronized (s_lock) {
@@ -590,10 +680,10 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
                     
                     if(netInterfaceConfig instanceof WifiInterfaceConfigImpl) {
                         if(isWifiEnabled((WifiInterfaceConfigImpl)netInterfaceConfig)) {
-                        	s_logger.debug("Adding " + interfaceName + " to enabledInterfaces");
+                            s_logger.debug("Adding {} to enabledInterfaces", interfaceName);
                             m_enabledInterfaces.add(interfaceName);
                         } else {
-                        	s_logger.debug("Adding " + interfaceName + " to disabledInterfaces");
+                            s_logger.debug("Adding {} to disabledInterfaces", interfaceName);
                             m_disabledInterfaces.add(interfaceName);
                         }
                     }
@@ -625,7 +715,7 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
 	                    	}
 	                }});
                 } else {
-                	monitorNotity();
+                	monitorNotify();
                 }
             }
         }
@@ -685,7 +775,6 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
             	//FIXME - assuming one InterfaceAddressConfig for now
             	WifiInterfaceAddressConfig currentInterfaceAddressConfig = currentInterfaceAddressConfigs.get(0);
             	WifiInterfaceAddressConfig newInterfaceAddressConfig = newInterfaceAddressConfigs.get(0);
-            	
             	WifiMode newWifiMode = newInterfaceAddressConfig.getMode();
             	
             	if(currentInterfaceAddressConfig.getConfigs() == null && newInterfaceAddressConfig.getConfigs() == null) {
@@ -705,8 +794,9 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
             	while(it.hasNext()) {
             		NetConfig nc = it.next();
             		if(nc instanceof WifiConfig && ((WifiConfig) nc).getMode() != newWifiMode) {
-            			s_logger.debug("removing current non-active WifiConfig for comparison: " + nc);
+            			s_logger.debug("removing current non-active WifiConfig for comparison: {}", nc);
 						it.remove();
+						reconfiguredInterfaces.add(interfaceName);
         			}
             	}
             	
@@ -714,14 +804,14 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
             	while(it.hasNext()) {
             		NetConfig nc = it.next();
             		if(nc instanceof WifiConfig && ((WifiConfig) nc).getMode() != newWifiMode) {
-            			s_logger.debug("removing new non-active WifiConfig for comparison: " + nc);
+            			s_logger.debug("removing new non-active WifiConfig for comparison: {}", nc);
 						it.remove();
         			}
             	}
             	
             	if(currentNetConfigs.size() != newNetConfigs.size()) {
-            	    s_logger.debug("\tNumber of configs changed - Old config has: " + currentNetConfigs.size());
-            	    s_logger.debug("\tNumber of configs changed - New config has: " + newNetConfigs.size());
+            	    s_logger.debug("\tNumber of configs changed - Old config has: {}", currentNetConfigs.size());
+            	    s_logger.debug("\tNumber of configs changed - New config has: {}", newNetConfigs.size());
                     reconfiguredInterfaces.add(interfaceName);
             	} else {
                 	for(int i = 0; i < currentNetConfigs.size(); i++) {
@@ -735,8 +825,8 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
         						
         						//if the config is different and is not the FirewallNatConfig
         						if(!newNetConfig.equals(currentNetConfig) && newNetConfig.getClass() != FirewallAutoNatConfig.class) {
-        							s_logger.debug("\tConfig changed - Old config: " + currentNetConfig.toString());
-        							s_logger.debug("\tConfig changed - New config: " + newNetConfig.toString());
+        							s_logger.debug("\tConfig changed - Old config: {}", currentNetConfig);
+        							s_logger.debug("\tConfig changed - New config: {}", newNetConfig);
         							reconfiguredInterfaces.add(interfaceName);
         						}
         						break;
@@ -744,7 +834,7 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
                 		}
                 		
                 		if(!foundConfigMatch) {
-                		    s_logger.debug("\tConfig was removed - Old config: " + currentNetConfig.toString());
+                		    s_logger.debug("\tConfig was removed - Old config: {}", currentNetConfig);
                 			reconfiguredInterfaces.add(interfaceName);
                 			break;
                 		}
@@ -761,9 +851,9 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
             	s_logger.debug("oldConfig was null, adding newConfig");
             	reconfiguredInterfaces.add(interfaceName);
             } else if(currentConfig != null) {
-                s_logger.debug("Configuration for " + interfaceName + " has changed");
+                s_logger.debug("Configuration for {} has changed", interfaceName);
                 reconfiguredInterfaces.add(interfaceName);
-                s_logger.debug("Removing " + interfaceName + " from list of enabled interfaces because it is not configured");
+                s_logger.debug("Removing {} from list of enabled interfaces because it is not configured", interfaceName);
                 m_disabledInterfaces.add(interfaceName);
             } else {
             	s_logger.debug("old and new wifi config are null...");
@@ -771,10 +861,10 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
             
             // do we need to monitor?
             if(isWifiEnabled(newConfig)) {
-                s_logger.debug("Adding " + interfaceName + " to list of enabled interfaces");
+                s_logger.debug("Adding {} to list of enabled interfaces", interfaceName);
                 m_enabledInterfaces.add(interfaceName);
             } else {
-                s_logger.debug("Removing " + interfaceName + " from list of enabled interfaces because it is disabled");
+                s_logger.debug("Removing {} from list of enabled interfaces because it is disabled", interfaceName);
                 m_disabledInterfaces.add(interfaceName);
             }
         }
@@ -891,19 +981,19 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
         return statuses;
     }
     
-    private boolean resetWifiDevice() throws Exception {
+    private boolean resetWifiDevice(String interfaceName) throws Exception {
     	boolean ret = false;
-    	if (isWifiDeviceOn()) {
-    		turnWifiDeviceOff();
+    	if (LinuxNetworkUtil.isWifiDeviceOn(interfaceName)) {
+    		LinuxNetworkUtil.turnWifiDeviceOff(interfaceName);
     	}
-    	if (isWifiDeviceReady(false, 10)) {
-    		turnWifiDeviceOn();
-    		ret = this.isWifiDeviceReady(true, 20);
+    	if (isWifiDeviceReady(interfaceName, false, 10)) {
+    		LinuxNetworkUtil.turnWifiDeviceOn(interfaceName);
+    		ret = this.isWifiDeviceReady(interfaceName, true, 20);
     	}
     	return ret;
     }
     
-    private boolean isWifiDeviceReady(boolean expected, int tout) {
+    private boolean isWifiDeviceReady(String interfaceName, boolean expected, int tout) {
     	boolean deviceReady = false;
     	long tmrStart = System.currentTimeMillis();
     	do {
@@ -911,7 +1001,7 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
 				Thread.sleep(1000);
 			} catch (InterruptedException e) {
 			}
-    		boolean deviceOn = isWifiDeviceOn();
+    		boolean deviceOn = LinuxNetworkUtil.isWifiDeviceOn(interfaceName);
     		s_logger.trace("isWifiDeviceReady()? :: deviceOn={}, expected={}", deviceOn, expected);
     		if (deviceOn == expected) {
     			deviceReady = true;
@@ -922,41 +1012,8 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
     	s_logger.debug("isWifiDeviceReady()? :: deviceReady={}", deviceReady);
     	return deviceReady;
     }
-    
-    private boolean isWifiDeviceOn() {
-    	boolean deviceOn = false;
-    	String platform = m_systemService.getPlatform();
-    	if (platform.equals("reliagate-10-20")) {
-    		File fDevice = new File("/sys/bus/pci/devices/0000:01:00.0");
-    		if (fDevice.exists()) {
-    			deviceOn = true;
-    		}
-    	}
-    	s_logger.debug("isWifiDeviceOn()? {}", deviceOn);
-    	return deviceOn;
-    }
-    
-    private void turnWifiDeviceOn() throws Exception {
-    	String platform = m_systemService.getPlatform();
-    	if (platform.equals("reliagate-10-20")) {
-    		s_logger.info("Turning Wifi device ON ...");
-    		FileWriter fw = new FileWriter("/sys/bus/pci/rescan");
-			fw.write("1");
-			fw.close();
-    	}
-    }
-    
-    private void turnWifiDeviceOff() throws Exception {
-    	String platform = m_systemService.getPlatform();
-    	if (platform.equals("reliagate-10-20")) {
-    		s_logger.info("Turning Wifi device OFF ...");
-			FileWriter fw = new FileWriter("/sys/bus/pci/devices/0000:01:00.0/remove");
-			fw.write("1");
-			fw.close();
-    	}
-    }
-    
-	private void monitorNotity() {
+        
+	private void monitorNotify() {
 		if (stopThread != null) {
 			synchronized (stopThread) {
 				stopThread.notifyAll();

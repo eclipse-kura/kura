@@ -1,18 +1,14 @@
-/**
- * Copyright (c) 2011, 2015 Eurotech and/or its affiliates
+/*******************************************************************************
+ * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
  *
- *  All rights reserved. This program and the accompanying materials
- *  are made available under the terms of the Eclipse Public License v1.0
- *  which accompanies this distribution, and is available at
- *  http://www.eclipse.org/legal/epl-v10.html
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Eurotech
- */
-/*
- * Copyright (c) 2013 Eurotech Inc. All rights reserved.
- */
-
+ *     Eurotech
+ *******************************************************************************/
 package org.eclipse.kura.linux.net.iptables;
 
 import java.io.BufferedReader;
@@ -210,8 +206,12 @@ public class LinuxFirewall {
 				int inPort = natPreroutingChainRule.getExternalPort();
 				int outPort = natPreroutingChainRule.getInternalPort();
 				boolean masquerade = false;
-				StringBuilder sbSport = new StringBuilder().append(natPreroutingChainRule.getSrcPortFirst()).append(':').append(natPreroutingChainRule.getSrcPortLast());
-				String sport = sbSport.toString();
+				String sport = null;
+				if ((natPreroutingChainRule.getSrcPortFirst() > 0) && 
+						(natPreroutingChainRule.getSrcPortFirst() <= natPreroutingChainRule.getSrcPortLast())) {
+					StringBuilder sbSport = new StringBuilder().append(natPreroutingChainRule.getSrcPortFirst()).append(':').append(natPreroutingChainRule.getSrcPortLast());
+					sport = sbSport.toString();
+				}
 				String permittedMac = natPreroutingChainRule.getPermittedMacAddress();
 				String permittedNetwork = natPreroutingChainRule.getPermittedNetwork();
 				int permittedNetworkMask = natPreroutingChainRule.getPermittedNetworkMask();
@@ -224,6 +224,9 @@ public class LinuxFirewall {
 							masquerade = true;
 						}	
 					}
+				}
+				if (permittedNetwork == null) {
+					permittedNetwork = "0.0.0.0";
 				}
 				PortForwardRule portForwardRule = new PortForwardRule(
 						inboundIfaceName, outboundIfaceName, address, protocol, inPort, outPort,
@@ -585,9 +588,9 @@ public class LinuxFirewall {
 		}
 		try {
 			m_portForwardRules.remove(rule);
-			if (((m_autoNatRules != null) && (m_autoNatRules.size() < 1))
-					&& ((m_natRules != null) && (m_natRules.size() < 1))
-					&& ((m_portForwardRules != null) && (m_portForwardRules.size() < 1))) {
+			if (((m_autoNatRules != null) && m_autoNatRules.isEmpty())
+					&& ((m_natRules != null) && m_natRules.isEmpty())
+					&& ((m_portForwardRules != null) && m_portForwardRules.isEmpty())) {
 
 				m_allowForwarding = false;
 			}
@@ -603,9 +606,9 @@ public class LinuxFirewall {
 		}
 		try {
 			m_autoNatRules.remove(rule);
-			if (((m_autoNatRules != null) && (m_autoNatRules.size() < 1))
-					&& ((m_natRules != null) && (m_natRules.size() < 1))
-					&& ((m_portForwardRules != null) && (m_portForwardRules.size() < 1))) {
+			if (((m_autoNatRules != null) && m_autoNatRules.isEmpty())
+					&& ((m_natRules != null) && m_natRules.isEmpty())
+					&& ((m_portForwardRules != null) && m_portForwardRules.isEmpty())) {
 
 				m_allowForwarding = false;
 			}
@@ -629,8 +632,8 @@ public class LinuxFirewall {
 	public void deleteAllPortForwardRules() throws KuraException {
 		try {
 			m_portForwardRules.clear();
-			if (((m_autoNatRules != null) && (m_autoNatRules.size() < 1))
-					&& ((m_natRules != null) && (m_natRules.size() < 1))) {
+			if (((m_autoNatRules != null) && m_autoNatRules.isEmpty())
+					&& ((m_natRules != null) && m_natRules.isEmpty())) {
 
 				m_allowForwarding = false;
 			}
@@ -644,9 +647,9 @@ public class LinuxFirewall {
 	public void replaceAllNatRules(LinkedHashSet<NATRule> newNatRules) throws KuraException {
 		try {
 			m_autoNatRules = newNatRules;
-			if (((m_autoNatRules != null) && (m_autoNatRules.size() > 0))
-					|| ((m_natRules != null) && (m_natRules.size() > 0))
-					|| ((m_portForwardRules != null) && (m_portForwardRules.size() > 0))) {
+			if (((m_autoNatRules != null) && !m_autoNatRules.isEmpty())
+					|| ((m_natRules != null) && !m_natRules.isEmpty())
+					|| ((m_portForwardRules != null) && !m_portForwardRules.isEmpty())) {
 
 				m_allowForwarding = true;
 			} else {
@@ -661,8 +664,8 @@ public class LinuxFirewall {
 	public void deleteAllAutoNatRules() throws KuraException {
 		try {
 			m_autoNatRules.clear();
-			if ((m_natRules != null) && (m_natRules.size() < 1)
-					&& ((m_portForwardRules != null) && (m_portForwardRules.size() < 1))) {
+			if ((m_natRules != null) && m_natRules.isEmpty()
+					&& ((m_portForwardRules != null) && m_portForwardRules.isEmpty())) {
 
 				m_allowForwarding = false;
 			}
@@ -676,8 +679,8 @@ public class LinuxFirewall {
 	public void deleteAllNatRules() throws KuraException {
 		try {
 			m_natRules.clear();
-			if (((m_autoNatRules != null) && (m_autoNatRules.size() < 1))
-					&& ((m_portForwardRules != null) && (m_portForwardRules.size() < 1))) {
+			if (((m_autoNatRules != null) && m_autoNatRules.isEmpty())
+					&& ((m_portForwardRules != null) && m_portForwardRules.isEmpty())) {
 				m_allowForwarding = false;
 			}
 			this.update();
@@ -707,7 +710,7 @@ public class LinuxFirewall {
 			applyBlockAllRules();
 
 			s_logger.debug("Applying local rules...");	
-			if(m_localRules != null){
+			if ((m_localRules != null) && !m_localRules.isEmpty()) {
 				for(LocalRule lr: m_localRules){	
 					boolean status = applyRule(lr.toString());
 					s_logger.trace("applyRules() :: Local rule: {} has been applied with status={}", lr, status);
@@ -715,7 +718,8 @@ public class LinuxFirewall {
 			}
 
 			s_logger.debug("Applying port forward rules...");	
-			if(m_portForwardRules != null){
+			if ((m_portForwardRules != null) && !m_portForwardRules.isEmpty()) {
+				m_allowForwarding = true;
 				for(PortForwardRule pfr: m_portForwardRules) {
 					boolean status = applyRule(pfr.toString());
 					s_logger.trace("applyRules() :: Port Forward rule: {} has been applied with status={}", pfr, status);
@@ -723,7 +727,8 @@ public class LinuxFirewall {
 			}
 
 			s_logger.debug("Applying auto NAT rules...");	
-			if(m_autoNatRules != null){
+			if ((m_autoNatRules != null) && !m_autoNatRules.isEmpty()) {
+				m_allowForwarding = true;
 				List<NatPostroutingChainRule> appliedNatPostroutingChainRules = new ArrayList<NatPostroutingChainRule>();
 				for(NATRule autoNatRule: m_autoNatRules) {
 					boolean found = false;
@@ -748,14 +753,15 @@ public class LinuxFirewall {
 			}
 
 			s_logger.debug("Applying NAT rules...");	
-			if(m_natRules != null){
-				for(NATRule natRule: m_natRules){
+			if ((m_natRules != null) && !m_natRules.isEmpty()) {
+				m_allowForwarding = true;
+				for(NATRule natRule : m_natRules){
 					applyRule(natRule.toString());
 				}
 			}
 
 			s_logger.debug("Applying custom rules...");	
-			if(m_customRules != null){
+			if ((m_customRules != null) && !m_customRules.isEmpty()) {
 				for(String customRule: m_customRules){
 					applyRule(customRule.toString());
 				}

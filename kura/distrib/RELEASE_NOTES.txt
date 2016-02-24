@@ -1,7 +1,41 @@
 Eclipse Kura - 1.4.0
 -------------------------------------------------------------------------
 
-Added Features :   
+Added Features :
+  * Grouped Web UI SSL configuration in a single place under 'Settings'
+  * Modified the Web UI adding a check in order to block SSIDs longer than 32 characters
+  * Rolled-back Web UI filtering of SSID
+  * Added some security headers to the Web UI
+  * Refactored security related tabs in the Web UI 
+  * Added property to the WatchdogService to specify the watchdog device  
+  * Modified build in order to include checks for Java 8 compact 2 compliance
+  * Introduced new deployment application (named DEPLOY-V2) that improves updates download from the cloud platform
+  * New firewall management, now based on iptables-save and iptables-restore
+  * Firewall: allowed open port entries for tcp and udp on the same port
+  * Firewall: enabled the support for port ranges when defining open port entries
+  * Added support for Ublox SARA-U2 modem
+  * Added support to switch between AP and station mode on radios supported by the 'bcmdhd' kernel module
+  * Emulator bundle split into 6 separate bundles, one for each function
+  * Reviewed no-network profiles: removed net.admin bundle and linux.net. Now those bundles are replaced by emulator.net
+  * Linux build date/version is now published in the birth certificate as part of the os.version metric
+  * Improvements to the Development Environment
+  * ConfigurationService: treat an OSGi ManagedService as a ConfigurableComponent
+  * Updated documentation
+  
+Bug Fixes :
+  * Fixed github issue #80
+  * Fixed github issue #84
+  * Fixed github issue #85
+  * Fixed github issue #87
+  * Fixed configuration rollback to snapshot 0
+  * Fixed toggling WiFi interface when Ethernet interface is reconfigured
+  * Better Web UI exception handling when manually (dis)connecting to the Cloud
+  * Added various null pointer checks
+  * Started work to fix warnings emitted by Sonar
+  * Fixed JUnit tests
+  * Fixed GPIO example
+  * Fixed bug when image in metatype has no size
+  * Fixed and improved the BLE TI SensorTag example
 
 Know Issues :
   * BLE only tested on the Raspberry Pi B with a Broadcom BCM20702 USB dongle and the TI SensorTag. The kernel version was "Linux raspberrypi 3.18.11-v7+ #781 SMP PREEMPT Tue Apr 21 18:07:59 BST 2015 armv7l GNU/Linux". Note that on the kernel "Linux version 4.1.7-v7+ (dc4@dc4-XPS13-9333) (gcc version 4.8.3 20140303 (prerelease) (crosstool-NG linaro-1.13.1+bzr2650 - Linaro GCC 2014.03) ) #817 SMP PREEMPT Sat Sep 19 15:32:00 BST 2015" has a bug on gatttool and the BLE connection failes.
@@ -9,17 +43,15 @@ Know Issues :
     must be compiled from sources.
   * WiFi on Raspberry Pi only tested with WiPi WiFi Dongle (Realink RT5370 chipset) and official Pi USB WiFi Dongle (Broadcom BCM43143 chipset).
     AccessPoint WiFi mode not working for Broadcom chipest.
-  * The reference JVM is Oracle Java SE Embedded version 7 Update 40.
-    Later versions (including Oracle Java SE Embedded version 8 Update 33)
-    may be affected by a ProcessBuilder memory leak [1]
+  * The reference JVMs are Oracle Java SE Embedded version 7 Update 40 and Java SE Embedded version 8 Update 65.
   * Hardware watchdog: not implemented on all platforms
   * Only one WAN interface is currently supported. A warning in displayed
     in the WEB UI if the user attempts to enable more than one WAN interface
   * When first modem configuration is submitted, unconfigured cellular interface for serial modem (e.g. HE910) is not being replaced by
     ppp0 interface. Both ppp0 and HE910 interfaces are shown in the Web Admin.
-  * Gateway needs to be rebooted for static GPS coordinates to be published to the cloud.
+  * Web UI may hang when configuration snapshot is apploaded. This happens because HTTP connection is lost due to toogling of the network interface which happened even if network configuration hasn't been mo	   dified. 
 
-[1] https://bugs.openjdk.java.net/browse/JDK-8054841
+
 
 Eclipse Kura - 1.3.0
 -------------------------------------------------------------------------
@@ -29,7 +61,7 @@ Added Features :
   * Enhanced web UI security, which includes:
     * XSRF protection in all servlets
     * Different management of user sessions
-    * Arbitrary file writes protection in file servlet for zip uploads 
+    * Arbitrary file writes protection in file servlet for zip uploads
     * XSS on wireless SSID in network servlet
     * Command injection on network servlet
     * Password protection in client UI, in order to prevent access to secrets by unauthorized users
@@ -66,7 +98,7 @@ Eclipse Kura - 1.2.2
 
 Added Features :
   * Added support for Ubuntu 14.04. Note, this is just the initial support for Ubuntu, there are no installation files in this
-    release. 
+    release.
 
 Known Issues :
   * BLE only tested on the Raspberry Pi B with a Broadcom BCM20702 USB dongle and the TI SensorTag.

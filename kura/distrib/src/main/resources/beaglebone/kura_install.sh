@@ -36,6 +36,10 @@ cp ${INSTALL_DIR}/kura/install/ifdown-local /etc/network/if-down.d/ifdown-local
 chmod +x /etc/network/if-up.d/ifup-local
 chmod +x /etc/network/if-down.d/ifdown-local
 
+#set up recover default configuration script
+cp ${INSTALL_DIR}/kura/install/recover_default_config.init ${INSTALL_DIR}/kura/.data/.recoverDefaultConfig.sh
+chmod +x ${INSTALL_DIR}/kura/.data/.recoverDefaultConfig.sh
+
 #set up default firewall configuration
 cp ${INSTALL_DIR}/kura/install/firewall.init /etc/init.d/firewall
 chmod +x /etc/init.d/firewall

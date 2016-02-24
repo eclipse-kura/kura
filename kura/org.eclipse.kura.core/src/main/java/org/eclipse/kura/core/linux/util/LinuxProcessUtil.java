@@ -1,19 +1,15 @@
-/**
- * Copyright (c) 2011, 2014 Eurotech and/or its affiliates
+/*******************************************************************************
+ * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
  *
- *  All rights reserved. This program and the accompanying materials
- *  are made available under the terms of the Eclipse Public License v1.0
- *  which accompanies this distribution, and is available at
- *  http://www.eclipse.org/legal/epl-v10.html
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Eurotech
- */
+ *     Eurotech
+ *******************************************************************************/
 package org.eclipse.kura.core.linux.util;
-
-/* 
- * Copyright (c) 2013 Eurotech Inc. All rights reserved.
- */
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -80,8 +76,8 @@ public class LinuxProcessUtil {
 							.getInputStream());
 					String stderr = getInputStreamAsString(proc
 							.getErrorStream());
-					s_logger.debug("stdout: " + stdout);
-					s_logger.debug("stderr: " + stderr);
+					s_logger.debug("stdout: {}", stdout);
+					s_logger.debug("stderr: {}", stderr);
 				}
 				return proc.exitValue();
 			} else {
@@ -149,12 +145,12 @@ public class LinuxProcessUtil {
 			for (String cmd : command) {
 				cmdBuilder.append(cmd).append(' ');
 			}
-			s_logger.debug("executing: " + cmdBuilder);
+			s_logger.debug("executing: {}", cmdBuilder);
 			proc = ProcessUtil.exec(command);
 
 			try {
 				int exitVal = proc.waitFor();
-				s_logger.debug(cmdBuilder + " returned with exit value:"
+				s_logger.debug("{} returned with exit value:{}", cmdBuilder,
 						+ exitVal);
 			} catch (InterruptedException e) {
 				s_logger.error("error executing " + command + " command" + e);
@@ -179,7 +175,7 @@ public class LinuxProcessUtil {
 		try {
 
 			if (command != null && !command.isEmpty()) {
-				s_logger.trace("searching process list for " + command);
+				s_logger.trace("searching process list for {}", command);
 
 				if ("intel-edison".equals(s_platform)) {
 					proc = ProcessUtil.exec("ps");
@@ -203,8 +199,8 @@ public class LinuxProcessUtil {
 
 					// see if the line has our command
 					if (line.indexOf(command) >= 0) {
-						s_logger.trace("found pid " + pid + " for command: "
-								+ command);
+						s_logger.trace("found pid {} for command: {}",
+								pid, command);
 						return Integer.parseInt(pid);
 					}
 				}
@@ -225,9 +221,10 @@ public class LinuxProcessUtil {
 		String line = null;
 		String pid = null;
 		SafeProcess proc = null;
+		BufferedReader br = null;
 		try {
 			if(command != null && !command.isEmpty()) {
-				s_logger.trace("searching process list for " + command);
+				s_logger.trace("searching process list for {}", command);
 				if ("intel-edison".equals(s_platform)) {
 					proc = ProcessUtil.exec("ps");
 				} else {
@@ -236,7 +233,7 @@ public class LinuxProcessUtil {
 				proc.waitFor();
 
 				//get the output
-				BufferedReader br = new BufferedReader( new InputStreamReader(proc.getInputStream()));
+				br = new BufferedReader( new InputStreamReader(proc.getInputStream()));
 				while ((line = br.readLine()) != null) {
 					st = new StringTokenizer(line);
 					pid = st.nextToken();
@@ -257,7 +254,7 @@ public class LinuxProcessUtil {
 							}
 						}
 						if (allTokensPresent) {
-							s_logger.trace("found pid " + pid + " for command: " + command);
+							s_logger.trace("found pid {} for command: {}", pid, command);
 							return Integer.parseInt(pid);
 						}
 					}
@@ -269,6 +266,7 @@ public class LinuxProcessUtil {
 			throw e;
 		}
 		finally {
+			if(br != null) br.close();
 			if (proc != null)
 				ProcessUtil.destroy(proc);
 		}

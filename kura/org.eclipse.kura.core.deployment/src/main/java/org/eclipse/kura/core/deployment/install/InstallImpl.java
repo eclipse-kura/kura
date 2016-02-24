@@ -1,3 +1,14 @@
+/*******************************************************************************
+ * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     Eurotech
+ *******************************************************************************/
 package org.eclipse.kura.core.deployment.install;
 
 import java.io.File;
@@ -42,7 +53,6 @@ public class InstallImpl {
 	private DeploymentPackageInstallOptions options;
 	private CloudDeploymentHandlerV2 callback;
 	private DeploymentAdmin deploymentAdmin;
-	private Properties deployedPackages;
 	private Properties m_installPersistance;
 	private String dpaConfPath;
 	private String m_installVerifDir;
@@ -52,7 +62,6 @@ public class InstallImpl {
 	public InstallImpl(CloudDeploymentHandlerV2 callback, String kuraDataDir){
 		this.callback = callback;
 
-		deployedPackages = new Properties();
 		StringBuilder pathSB= new StringBuilder();
 		pathSB.append(kuraDataDir);
 		pathSB.append(File.separator);
@@ -75,6 +84,22 @@ public class InstallImpl {
 	}
 
 	public Properties getDeployedPackages(){
+		FileInputStream fis= null;
+		Properties deployedPackages= new Properties();
+		try {
+			fis = new FileInputStream(dpaConfPath);
+			deployedPackages.load(fis);
+		} catch (IOException e) {
+			s_logger.error("Error opening package configuration file", e);
+		} finally {
+			try{
+				if (fis != null){
+					fis.close();
+				}
+			} catch (IOException e){
+				s_logger.error("Exception while closing opened resources!", e);
+			}
+		}
 		return deployedPackages;
 	}
 
@@ -88,10 +113,6 @@ public class InstallImpl {
 
 	public void setDeploymentAdmin(DeploymentAdmin deploymentAdmin){
 		this.deploymentAdmin= deploymentAdmin;
-	}
-
-	public void setDeployedPackages(Properties deployedPackages){
-		this.deployedPackages = deployedPackages;
 	}
 
 	public void setDpaConfPath(String dpaConfPath){
@@ -123,7 +144,7 @@ public class InstallImpl {
 
 		updateInstallPersistance(shFile.getName(), options);
 
-		//Esecuzione script
+		//Script Exec
 		SafeProcess proc = null;
 		try {
 			proc = ProcessUtil.exec("chmod 700 " + shFile.getCanonicalPath());
@@ -249,8 +270,8 @@ public class InstallImpl {
 			// packages directory unless it's already there.
 
 			if (!downloadedFile.getCanonicalPath().equals(dpPersistentFile.getCanonicalPath())) {
-				s_logger.debug("dpFile.getCanonicalPath(): " + downloadedFile.getCanonicalPath());
-				s_logger.debug("dpPersistentFile.getCanonicalPath(): " + dpPersistentFile.getCanonicalPath());
+				s_logger.debug("dpFile.getCanonicalPath(): {}", downloadedFile.getCanonicalPath());
+				s_logger.debug("dpPersistentFile.getCanonicalPath(): {}", dpPersistentFile.getCanonicalPath());
 				FileUtils.copyFile(downloadedFile, dpPersistentFile);
 				addPackageToConfFile(dp.getName(), "file:" + dpPersistentFilePath);
 			}
@@ -319,6 +340,7 @@ public class InstallImpl {
 	}
 
 	private void addPackageToConfFile(String packageName, String packageUrl) {
+		Properties deployedPackages= getDeployedPackages();
 		deployedPackages.setProperty(packageName, packageUrl);
 
 		if (dpaConfPath == null) {
@@ -346,6 +368,7 @@ public class InstallImpl {
 	}
 
 	public void removePackageFromConfFile(String packageName) {
+		Properties deployedPackages= getDeployedPackages();
 		deployedPackages.remove(packageName);
 
 		if (dpaConfPath == null) {
@@ -359,7 +382,6 @@ public class InstallImpl {
 			deployedPackages.store(fos, null);
 			fos.flush();
 			fos.getFD().sync();
-			fos.close();
 		} catch (IOException e) {
 			s_logger.error("Error writing package configuration file", e);
 		} finally {

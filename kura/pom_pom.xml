@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright (c) 2011, 2014 Eurotech and/or its affiliates
+    Copyright (c) 2011, 2016 Eurotech and/or its affiliates
 
      All rights reserved. This program and the accompanying materials
      are made available under the terms of the Eclipse Public License v1.0
@@ -17,7 +17,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.eclipse.kura</groupId>
 	<artifactId>kura</artifactId>
-	<version>1.4.0-SNAPSHOT</version>
+	<version>1.5.0-SNAPSHOT</version>
 
 	<packaging>pom</packaging>
 
@@ -30,6 +30,7 @@
 		</maven.build.timestamp.format>
 		<kura.basedir>${project.basedir}</kura.basedir>
 		<org.eclipse.kura.web.skip>true</org.eclipse.kura.web.skip>
+		<org.eclipse.kura.web2.skip>true</org.eclipse.kura.web2.skip>
 		<org.eclipse.kura.dio.skip>false</org.eclipse.kura.dio.skip>
 		<org.eclipse.kura.dio.include>true</org.eclipse.kura.dio.include>
 	</properties>
@@ -54,6 +55,19 @@
 			</activation>
 			<modules>
 				<module>org.eclipse.kura.web</module>
+				<module>distrib</module>
+			</modules>
+		</profile>
+		<profile>
+			<id>web2</id>
+			<properties>
+				<org.eclipse.kura.web2.skip>false</org.eclipse.kura.web2.skip>
+			</properties>
+			<activation>
+				<activeByDefault>false</activeByDefault>
+			</activation>
+			<modules>
+				<module>org.eclipse.kura.web2</module>
 				<module>distrib</module>
 			</modules>
 		</profile>

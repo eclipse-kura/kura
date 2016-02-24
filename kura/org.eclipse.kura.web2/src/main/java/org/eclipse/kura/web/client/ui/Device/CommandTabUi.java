@@ -50,7 +50,7 @@ public class CommandTabUi extends Composite {
 
 	private static final Messages MSGS = GWT.create(Messages.class);
 	private static final String SERVLET_URL = "/" + GWT.getModuleName()	+ "/file/command";
-	
+
 	@SuppressWarnings("unused")
 	private GwtSession session;
 
@@ -77,7 +77,7 @@ public class CommandTabUi extends Composite {
 
 	String command, password;
 	SafeHtmlBuilder safeHtml= new SafeHtmlBuilder();
-	
+
 	public CommandTabUi() {
 		initWidget(uiBinder.createAndBindUi(this));
 
@@ -96,19 +96,7 @@ public class CommandTabUi extends Composite {
 		xsrfTokenField.setID("xsrfToken");
 		xsrfTokenField.setName("xsrfToken");
 		xsrfTokenField.setValue("");
-		
-		gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
-			@Override
-			public void onFailure(Throwable ex) {
-				FailureHandler.handle(ex);
-			}
 
-			@Override
-			public void onSuccess(GwtXSRFToken token) {
-				xsrfTokenField.setValue(token.getToken());
-			}
-		});
-		
 		formPassword.setText(null);
 		formPassword.setName("password");
 		formPassword.addKeyDownHandler(new KeyDownHandler() {
@@ -120,9 +108,10 @@ public class CommandTabUi extends Composite {
 			}
 		});
 
-		
+		docPath.setName("file");
+
 		display(MSGS.deviceCommandNoOutput());
-		
+
 		reset.setText(MSGS.reset());
 		reset.addClickHandler(new ClickHandler() {
 			@Override
@@ -137,9 +126,20 @@ public class CommandTabUi extends Composite {
 		execute.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
-				
-				commandForm.submit();
-				formExecute.setFocus(true);
+
+				gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
+					@Override
+					public void onFailure(Throwable ex) {
+						FailureHandler.handle(ex);
+					}
+
+					@Override
+					public void onSuccess(GwtXSRFToken token) {
+						xsrfTokenField.setValue(token.getToken());
+						commandForm.submit();
+						formExecute.setFocus(true);
+					}
+				});
 				// http://www.gwtproject.org/javadoc/latest/com/google/gwt/user/client/ui/FileUpload.html
 			}
 		});
@@ -147,84 +147,64 @@ public class CommandTabUi extends Composite {
 		commandForm.setEncoding(FormPanel.ENCODING_MULTIPART);
 		commandForm.setMethod(FormPanel.METHOD_POST);
 		commandForm.setAction(SERVLET_URL);
+		
 		commandForm.addSubmitCompleteHandler(new FormPanel.SubmitCompleteHandler() {
-					@Override
-					public void onSubmitComplete(SubmitCompleteEvent event) {
+			@Override
+			public void onSubmitComplete(SubmitCompleteEvent event) {
 
-						String result = event.getResults();
+				String result = event.getResults();
 
-						if (result.startsWith("HTTP ERROR")) {							
-							display(MSGS.fileUploadFailure());
-						} else {
-							EntryClassUi.showWaitModal();
-							gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
+				if (result.contains("HTTP ERROR")) {							
+					display(MSGS.fileUploadFailure());
+				} else {
+					EntryClassUi.showWaitModal();
+					gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
 
+						@Override
+						public void onFailure(Throwable ex) {
+							EntryClassUi.hideWaitModal();
+							FailureHandler.handle(ex);
+						}
+
+						@Override
+						public void onSuccess(GwtXSRFToken token) {
+							gwtDeviceService.executeCommand(token, formExecute.getText(), formPassword.getText(), new AsyncCallback<String>() {
 								@Override
-								public void onFailure(Throwable ex) {
+								public void onFailure(Throwable caught) {
+									if (caught.getLocalizedMessage().equals(GwtKuraErrorCode.SERVICE_NOT_ENABLED.toString())) {
+										display(MSGS.error() + "\n" + MSGS.commandServiceNotEnabled());
+									} else if (caught.getLocalizedMessage().equals(GwtKuraErrorCode.ILLEGAL_ARGUMENT.toString())) {
+										display(MSGS.error() + "\n"+ MSGS.commandPasswordNotCorrect());
+									} else {
+										display(MSGS.error() + "\n" + caught.getLocalizedMessage());
+									}
 									EntryClassUi.hideWaitModal();
-									FailureHandler.handle(ex);
 								}
 
 								@Override
-								public void onSuccess(GwtXSRFToken token) {
-									gwtDeviceService.executeCommand(token, formExecute.getText(), formPassword.getText(), new AsyncCallback<String>() {
-										@Override
-										public void onFailure(Throwable caught) {
-											if (caught.getLocalizedMessage().equals(GwtKuraErrorCode.SERVICE_NOT_ENABLED.toString())) {
-												display(MSGS.error() + "\n" + MSGS.commandServiceNotEnabled());
-											} else if (caught.getLocalizedMessage().equals(GwtKuraErrorCode.ILLEGAL_ARGUMENT.toString())) {
-												display(MSGS.error() + "\n"+ MSGS.commandPasswordNotCorrect());
-											} else {
-												display(MSGS.error() + "\n" + caught.getLocalizedMessage());
-											}
-											EntryClassUi.hideWaitModal();
-											gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
-												@Override
-												public void onFailure(Throwable ex) {
-													FailureHandler.handle(ex);
-												}
-
-												@Override
-												public void onSuccess(GwtXSRFToken token) {	
-													xsrfTokenField.setValue(token.getToken());
-												}
-											});
-										}
-
-										@Override
-										public void onSuccess(String result) {									
-											display(result);
-											EntryClassUi.hideWaitModal();
-											gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
-												@Override
-												public void onFailure(Throwable ex) {
-													FailureHandler.handle(ex);
-												}
-												@Override
-												public void onSuccess(GwtXSRFToken token) {	
-													xsrfTokenField.setValue(token.getToken());
-												}
-											});
-										}
-
-									});
+								public void onSuccess(String result) {									
+									display(result);
+									EntryClassUi.hideWaitModal();
 								}
-								
+
 							});
 						}
 
-					}
+					});
+				}
 
-				});
+			}
+
+		});
 
 	}
-	
+
 	public void display(String string){
 		resultPanel.clear();		
 		resultPanel.add(new HTML((new SafeHtmlBuilder().appendEscapedLines(string).toSafeHtml())));
 
 	}
-	
+
 	public void setSession(GwtSession currentSession) {
 		this.session = currentSession;
 	}

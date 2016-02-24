@@ -242,8 +242,8 @@ public class StatusPanelUi extends Composite {
 			public void onSuccess(GwtXSRFToken token) {
 				gwtStatusService.disconnectDataService(token, new AsyncCallback<Void>() {
 					public void onSuccess(Void result) {
-						loadStatusData();
 						EntryClassUi.hideWaitModal();
+						loadStatusData();
 					}
 					public void onFailure(Throwable caught) {
 						EntryClassUi.hideWaitModal();

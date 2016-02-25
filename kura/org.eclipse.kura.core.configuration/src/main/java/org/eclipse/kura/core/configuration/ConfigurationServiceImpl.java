@@ -287,7 +287,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 		List<ComponentConfigurationImpl> configs = new ArrayList<ComponentConfigurationImpl>();
 		ComponentConfigurationImpl cci = new ComponentConfigurationImpl(pidToUpdate, null, propertiesToUpdate);
 		configs.add(cci);
-		updateConfigurations((List<ComponentConfiguration>) (List<?>) configs);	
+		updateConfigurations((List<ComponentConfiguration>) (List<?>) configs);
 	}
 
 	@Override

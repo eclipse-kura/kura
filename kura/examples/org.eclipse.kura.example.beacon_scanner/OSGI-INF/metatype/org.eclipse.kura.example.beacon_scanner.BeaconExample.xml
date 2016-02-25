@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
+    <OCD id="org.eclipse.kura.example.beacon_scanner.BeaconExample"
+         name="Beacon Scanner" 
+         description="iBeacon Scanning Example.">
+         
+         <AD id="topicPrefix"
+            name="topicPrefix"
+            type="String"
+            cardinality="0"
+            required="true"
+            default="beacons"
+            description="Prefix for discovered items' topic"/>
+            
+        <AD id="iname"
+            name="iname"
+            type="String"
+            cardinality="0"
+            required="true"
+            default="hci0"
+            description="Name of bluetooth adapter."/>
+            
+        <AD id="rate_limit"
+            name="rate_limit"
+            type="Integer"
+            cardinality="0"
+            required="true"
+            default="10000"
+            description="Shortest time between publishes per beacon in ms"/>
+                    
+    </OCD>
+
+    <Designate pid="org.eclipse.kura.example.beacon_scanner.BeaconExample">
+        <Object ocdref="org.eclipse.kura.example.beacon_scanner.BeaconExample"/>
+    </Designate>
+</MetaData>

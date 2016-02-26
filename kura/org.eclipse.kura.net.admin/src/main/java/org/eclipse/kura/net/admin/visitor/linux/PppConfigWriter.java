@@ -13,8 +13,11 @@ package org.eclipse.kura.net.admin.visitor.linux;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Properties;
+import java.util.Set;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
@@ -33,8 +36,8 @@ import org.eclipse.kura.net.NetInterfaceConfig;
 import org.eclipse.kura.net.admin.modem.ModemPppConfigGenerator;
 import org.eclipse.kura.net.admin.modem.PppPeer;
 import org.eclipse.kura.net.admin.modem.SupportedSerialModemsFactoryInfo;
-import org.eclipse.kura.net.admin.modem.SupportedUsbModemsFactoryInfo;
 import org.eclipse.kura.net.admin.modem.SupportedSerialModemsFactoryInfo.SerialModemFactoryInfo;
+import org.eclipse.kura.net.admin.modem.SupportedUsbModemsFactoryInfo;
 import org.eclipse.kura.net.admin.modem.SupportedUsbModemsFactoryInfo.UsbModemFactoryInfo;
 import org.eclipse.kura.net.admin.util.LinuxFileUtil;
 import org.eclipse.kura.net.admin.visitor.linux.util.KuranetConfig;
@@ -86,12 +89,16 @@ public class PppConfigWriter implements NetworkConfigurationVisitor {
     
     @Override
     public void visit(NetworkConfiguration config) throws KuraException {
-    	
         List<NetInterfaceConfig<? extends NetInterfaceAddressConfig>> netInterfaceConfigs = config.getModifiedNetInterfaceConfigs();
+        boolean foundModemInterfaceConfigImpl = false;
         for(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig : netInterfaceConfigs) {
             if(netInterfaceConfig instanceof ModemInterfaceConfigImpl) {
+            	foundModemInterfaceConfigImpl = true;
                 writeConfig((ModemInterfaceConfigImpl)netInterfaceConfig);
             }
+        }
+        if (!foundModemInterfaceConfigImpl) {
+        	removeKuraExtendedCellularConfig();
         }
     }
     
@@ -359,5 +366,29 @@ public class PppConfigWriter implements NetworkConfigurationVisitor {
                 }
             }
         }
+    }
+    
+    private void removeKuraExtendedCellularConfig() throws KuraException {
+    	Properties props = KuranetConfig.getProperties();
+    	if (!props.isEmpty()) {
+    		List<String> keysToRemove = new ArrayList<String>(); 
+	    	Set<Object> keys = props.keySet();
+	    	for (Object obj : keys) {
+	    		String key = (String)obj;
+	    		if (key.startsWith("net.interface.ppp")) {
+	    			keysToRemove.add(key);
+	    		}
+	    	}
+	    	if (!keysToRemove.isEmpty()) {
+		    	for (String key : keysToRemove) {
+		    		props.remove(key);
+		    	}
+		    	try {
+		    		KuranetConfig.storeProperties(props);
+		    	} catch (Exception e) {
+		    		throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+		    	}
+	    	}
+    	}
     }
 }

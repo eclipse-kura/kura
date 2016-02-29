@@ -77,24 +77,20 @@ public class NetworkButtonBarUi extends Composite {
 			@Override
 			public void onClick(ClickEvent event) {
 				if (tabs.visibleTabs.size() > 0 && tabs.isValid()) {
-					GwtNetInterfaceConfig prevNetIf = table.selectionModel
-							.getSelectedObject();
-					final GwtNetInterfaceConfig updatedNetIf = tabs
-							.getUpdatedInterface();
+					GwtNetInterfaceConfig prevNetIf = table.selectionModel.getSelectedObject();
+					final GwtNetInterfaceConfig updatedNetIf = tabs.getUpdatedInterface();
 
 					// submit updated netInterfaceConfig and priorities
 					if (prevNetIf != null && prevNetIf.equals(updatedNetIf)) {
 						table.refresh();
 						apply.setEnabled(false);
 					} else {
-						String newNetwork = calculateNetwork(
-								updatedNetIf.getIpAddress(),
-								updatedNetIf.getSubnetMask());
-						String prevNetwork = Window.Location.getHost();
+						String newNetwork = null;
+						String prevNetwork = null;
 						try {
-							prevNetwork = calculateNetwork(
-									Window.Location.getHost(),
-									updatedNetIf.getSubnetMask());
+							newNetwork = calculateNetwork(updatedNetIf.getIpAddress(), updatedNetIf.getSubnetMask());
+							prevNetwork = Window.Location.getHost();
+							prevNetwork = calculateNetwork(Window.Location.getHost(), updatedNetIf.getSubnetMask());
 						} catch (Exception e) {
 							//Growl.growl("Network detection failed for ipAddress: "
 							//		+ Window.Location.getHost()
@@ -117,8 +113,8 @@ public class NetworkButtonBarUi extends Composite {
 									public void run() {
 										//Growl.growl("redirecting to new address: "
 										//		+ updatedNetIf.getIpAddress());
-										Window.Location.replace("http://"
-												+ updatedNetIf.getIpAddress());
+										Window.Location.replace("http://" + updatedNetIf.getIpAddress());
+										logger.info("after Location.replace");
 									}
 								};
 								t.schedule(500);
@@ -136,6 +132,7 @@ public class NetworkButtonBarUi extends Composite {
 
 							@Override
 							public void onSuccess(GwtXSRFToken token) {
+								logger.info("gwtXSRFService success");
 								gwtNetworkService.updateNetInterfaceConfigurations(token, updatedNetIf, new AsyncCallback<Void>() {
 											@Override
 											public void onFailure(Throwable ex) {
@@ -145,9 +142,11 @@ public class NetworkButtonBarUi extends Composite {
 
 											@Override
 											public void onSuccess(Void result) {
-												table.refresh();
-												apply.setEnabled(false);
 												EntryClassUi.hideWaitModal();
+												tabs.setDirty(false);
+												table.refresh();
+												tabs.refresh();
+												apply.setEnabled(false);
 											}
 
 										});
@@ -197,15 +196,18 @@ public class NetworkButtonBarUi extends Composite {
 			int ipAddressValue = 0;
 			int netmaskValue = 0;
 
+			logger.info("ipAddress: "+ipAddress);
 			String[] sa = this.splitIp(ipAddress);
 
 			for (int i = 24, t = 0; i >= 0; i -= 8, t++) {
-				ipAddressValue = ipAddressValue
-						| (Integer.parseInt(sa[t]) << i);
+				logger.info("ipAddressValue: "+ipAddressValue);
+				ipAddressValue = ipAddressValue | (Integer.parseInt(sa[t]) << i);
 			}
 
+			logger.info("netmask: "+netmask);
 			sa = this.splitIp(netmask);
 			for (int i = 24, t = 0; i >= 0; i -= 8, t++) {
+				logger.info("netmaskValue: "+netmaskValue);
 				netmaskValue = netmaskValue | (Integer.parseInt(sa[t]) << i);
 			}
 

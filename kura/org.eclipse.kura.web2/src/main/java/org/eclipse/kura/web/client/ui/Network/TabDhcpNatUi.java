@@ -119,6 +119,7 @@ public class TabDhcpNatUi extends Composite implements Tab {
 
 	@Override
 	public void setNetInterface(GwtNetInterfaceConfig config) {
+		setDirty(true);
 		selectedNetIfConfig = config;
 	}
 
@@ -147,12 +148,10 @@ public class TabDhcpNatUi extends Composite implements Tab {
 			updatedNetIf.setRouterDhcpEndAddress(end.getText());
 			updatedNetIf.setRouterDhcpSubnetMask(subnet.getText());
 			if (defaultL.getText() != null) {
-				updatedNetIf.setRouterDhcpDefaultLease(Integer
-						.parseInt(defaultL.getText()));
+				updatedNetIf.setRouterDhcpDefaultLease(Integer.parseInt(defaultL.getText()));
 			}
 			if (max.getText() != null) {
-				updatedNetIf.setRouterDhcpMaxLease(Integer.parseInt(max
-						.getText()));
+				updatedNetIf.setRouterDhcpMaxLease(Integer.parseInt(max.getText()));
 			}
 			updatedNetIf.setRouterDnsPass(radio1.isActive());
 
@@ -164,18 +163,15 @@ public class TabDhcpNatUi extends Composite implements Tab {
 	private void update() {
 		if (selectedNetIfConfig != null) {
 			for (int i = 0; i < router.getItemCount(); i++) {
-				if (router.getItemText(i).equals(
-						MessageUtils.get(selectedNetIfConfig.getRouterMode()))) {
+				if (router.getItemText(i).equals(MessageUtils.get(selectedNetIfConfig.getRouterMode()))) {
 					router.setSelectedIndex(i);
 				}
 			}
 			begin.setText(selectedNetIfConfig.getRouterDhcpBeginAddress());
 			end.setText(selectedNetIfConfig.getRouterDhcpEndAddress());
 			subnet.setText(selectedNetIfConfig.getRouterDhcpSubnetMask());
-			defaultL.setText(String.valueOf(selectedNetIfConfig
-					.getRouterDhcpDefaultLease()));
-			max.setText(String.valueOf(selectedNetIfConfig
-					.getRouterDhcpMaxLease()));
+			defaultL.setText(String.valueOf(selectedNetIfConfig.getRouterDhcpDefaultLease()));
+			max.setText(String.valueOf(selectedNetIfConfig.getRouterDhcpMaxLease()));
 			radio1.setActive(selectedNetIfConfig.getRouterDnsPass());
 			radio2.setActive(!selectedNetIfConfig.getRouterDnsPass());
 
@@ -185,19 +181,18 @@ public class TabDhcpNatUi extends Composite implements Tab {
 
 	// enable/disable fields depending on values in other tabs
 	private void refreshForm() {
-		if (!tcpTab.isLanEnabled()) {
-			router.setEnabled(false);
-			begin.setEnabled(false);
-			end.setEnabled(false);
-			subnet.setEnabled(false);
-			defaultL.setEnabled(false);
-			max.setEnabled(false);
-			radio1.setEnabled(false);
-			radio2.setEnabled(false);
-		} else {
-			GwtWifiWirelessMode wirelessMode = wirelessTab.getWirelessMode();
-			if (selectedNetIfConfig.getHwTypeEnum() == GwtNetIfType.WIFI
-					&& (wirelessMode == GwtWifiWirelessMode.netWifiWirelessModeStation || wirelessMode == GwtWifiWirelessMode.netWifiWirelessModeDisabled)) {
+//		if (!tcpTab.isLanEnabled()) {
+//			router.setEnabled(false);
+//			begin.setEnabled(false);
+//			end.setEnabled(false);
+//			subnet.setEnabled(false);
+//			defaultL.setEnabled(false);
+//			max.setEnabled(false);
+//			radio1.setEnabled(false);
+//			radio2.setEnabled(false);
+//		} else {
+			if (selectedNetIfConfig.getHwTypeEnum() == GwtNetIfType.WIFI && wirelessTab != null
+					&& (wirelessTab.getWirelessMode() == GwtWifiWirelessMode.netWifiWirelessModeStation || wirelessTab.getWirelessMode() == GwtWifiWirelessMode.netWifiWirelessModeDisabled)) {
 				router.setEnabled(false);
 				begin.setEnabled(false);
 				end.setEnabled(false);
@@ -217,10 +212,8 @@ public class TabDhcpNatUi extends Composite implements Tab {
 				radio2.setEnabled(true);
 
 				String modeValue = router.getSelectedItemText();
-				if (modeValue == MessageUtils
-						.get(GwtNetRouterMode.netRouterNat.name())
-						|| modeValue == MessageUtils
-								.get(GwtNetRouterMode.netRouterOff.name())) {
+				if (modeValue == MessageUtils.get(GwtNetRouterMode.netRouterNat.name())
+						|| modeValue == MessageUtils.get(GwtNetRouterMode.netRouterOff.name())) {
 					router.setEnabled(true);
 					begin.setEnabled(false);
 					end.setEnabled(false);
@@ -240,7 +233,7 @@ public class TabDhcpNatUi extends Composite implements Tab {
 					radio2.setEnabled(true);
 				}
 			}
-		}
+//		}
 	}
 
 	private void reset() {
@@ -261,6 +254,7 @@ public class TabDhcpNatUi extends Composite implements Tab {
 		int i = 0;
 		for (GwtNetRouterMode mode : GwtNetRouterMode.values()) {
 			router.addItem(MessageUtils.get(mode.name()));
+		
 			if (tcpTab.isDhcp() && mode.equals(GwtNetRouterMode.netRouterOff)) {
 				router.setSelectedIndex(i);
 			}
@@ -287,10 +281,7 @@ public class TabDhcpNatUi extends Composite implements Tab {
 				setDirty(true);
 				ListBox box = (ListBox) event.getSource();
 				if (tcpTab.isDhcp()
-						&& !box.getSelectedItemText().equals(
-								MessageUtils
-										.get(GwtNetRouterMode.netRouterOff
-												.toString()))) {
+						&& !box.getSelectedItemText().equals(MessageUtils.get(GwtNetRouterMode.netRouterOff.toString()))) {
 					groupRouter.setValidationState(ValidationState.ERROR);
 					helpRouter.setText(MSGS.netRouterConfiguredForDhcpError());
 					helpRouter.setColor("red");
@@ -411,7 +402,7 @@ public class TabDhcpNatUi extends Composite implements Tab {
 			@Override
 			public void onValueChange(ValueChangeEvent<String> event) {
 				setDirty(true);
-				if(defaultL.getText().trim().matches(FieldType.NUMERIC.getRegex())){
+				if(!defaultL.getText().trim().matches(FieldType.NUMERIC.getRegex())){
 					groupDefaultL.setValidationState(ValidationState.ERROR);
 				}else{
 					groupDefaultL.setValidationState(ValidationState.NONE);
@@ -440,7 +431,7 @@ public class TabDhcpNatUi extends Composite implements Tab {
 			@Override
 			public void onValueChange(ValueChangeEvent<String> event) {
 				setDirty(true);
-				if(max.getText().trim().matches(FieldType.NUMERIC.getRegex())){
+				if(!max.getText().trim().matches(FieldType.NUMERIC.getRegex())){
 					groupMax.setValidationState(ValidationState.ERROR);
 				}else{
 					groupMax.setValidationState(ValidationState.NONE);

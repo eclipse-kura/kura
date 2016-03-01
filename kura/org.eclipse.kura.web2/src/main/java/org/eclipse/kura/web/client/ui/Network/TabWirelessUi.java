@@ -588,6 +588,9 @@ public class TabWirelessUi extends Composite implements Tab {
 			public void onClick(ClickEvent event) {
 				if (!ssidInit) {
 					initSsid();
+					ssidDataProvider.getList().clear();
+					noSsid.setVisible(true);
+					ssidGrid.setVisible(false);
 				}
 				initModal();
 				loadSsidData();
@@ -1231,6 +1234,8 @@ public class TabWirelessUi extends Composite implements Tab {
 			}
 		});
 		
+		
+		//refer here: https://groups.google.com/d/msg/gwt-bootstrap/whNFEfWP18E/hi71b3lry1QJ
 //		double customWidth = 900; 
 //		ssidModal.setWidth(customWidth+"px");
 //        // half, minus 30 on left for scroll bar
@@ -1238,7 +1243,7 @@ public class TabWirelessUi extends Composite implements Tab {
 //        ssidModal.getElement().getStyle().setMarginLeft(customMargin, Unit.PX);
 //        ssidModal.getElement().getStyle().setMarginRight(customMargin, Unit.PX);
         
-		loadSsidData();
+		//loadSsidData();
 	}
 
 	private void loadSsidData() {

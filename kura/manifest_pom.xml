@@ -52,6 +52,7 @@
 		<module>org.eclipse.kura.net.admin</module>
 		<module>org.eclipse.kura.protocol.modbus</module>
 		<module>org.eclipse.kura.protocol.modbus.test</module>
+		<module>org.eclipse.kura.stress</module>
 		<module>emulator</module>
 		<!--<module>org.eclipse.kura.emulator</module>-->
 		<!--<module>org.eclipse.kura.emulator.gpio</module>-->

@@ -1203,11 +1203,12 @@ public class TabWirelessUi extends Composite implements Tab {
 		};
 		col6.setCellStyleNames("status-table-row");
 		ssidGrid.addColumn(col6, "Security");
+//		ssidGrid.setColumnWidth(col6, width);
 		ssidDataProvider.addDataDisplay(ssidGrid);
 
 		ssidGrid.setSelectionModel(ssidSelectionModel);
 
-		selectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
+		ssidSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
 			@Override
 			public void onSelectionChange(SelectionChangeEvent event) {
 				GwtWifiHotspotEntry wifiHotspotEntry = ssidSelectionModel.getSelectedObject();
@@ -1229,17 +1230,27 @@ public class TabWirelessUi extends Composite implements Tab {
 				}
 			}
 		});
+		
+//		double customWidth = 900; 
+//		ssidModal.setWidth(customWidth+"px");
+//        // half, minus 30 on left for scroll bar
+//        double customMargin = -1*(customWidth/2);
+//        ssidModal.getElement().getStyle().setMarginLeft(customMargin, Unit.PX);
+//        ssidModal.getElement().getStyle().setMarginRight(customMargin, Unit.PX);
+        
 		loadSsidData();
 	}
 
 	private void loadSsidData() {
 		ssidDataProvider.getList().clear();
+		//EntryClassUi.showWaitModal();
 		if (selectedNetIfConfig != null) {
 			gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
 
 				@Override
 				public void onFailure(Throwable ex) {
 					FailureHandler.handle(ex);
+					//EntryClassUi.hideWaitModal();
 				}
 
 				@Override
@@ -1247,7 +1258,10 @@ public class TabWirelessUi extends Composite implements Tab {
 					gwtNetworkService.findWifiHotspots(token, selectedNetIfConfig.getName(), new AsyncCallback<ArrayList<GwtWifiHotspotEntry>>() {
 						@Override
 						public void onFailure(Throwable caught) {
+							//EntryClassUi.hideWaitModal();
 							FailureHandler.handle(caught);
+							noSsid.setVisible(true);
+							ssidGrid.setVisible(false);
 						}
 
 						@Override
@@ -1256,19 +1270,19 @@ public class TabWirelessUi extends Composite implements Tab {
 								ssidDataProvider.getList().add(pair);
 							}
 							ssidDataProvider.flush();
+							if (ssidDataProvider.getList().size() > 0) {
+								noSsid.setVisible(false);
+								ssidGrid.setVisible(true);
+							} else {
+								noSsid.setVisible(true);
+								ssidGrid.setVisible(false);
+							}
+							//EntryClassUi.hideWaitModal();
 						}
 					});
 				}
 
 			});
-		}
-
-		if (ssidDataProvider.getList().size() > 0) {
-			noSsid.setVisible(false);
-			ssidGrid.setVisible(true);
-		} else {
-			noSsid.setVisible(true);
-			ssidGrid.setVisible(false);
 		}
 	}
 

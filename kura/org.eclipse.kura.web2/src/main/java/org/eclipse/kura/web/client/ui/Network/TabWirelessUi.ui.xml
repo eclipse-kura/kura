@@ -176,13 +176,13 @@
 		</b:Column>
 
 		<!-- WIFI Networks (SSID) Modal -->
-		<b:Modal ui:field="ssidModal">
+		<b:Modal closable="true" dataKeyboard="true" ui:field="ssidModal">
 			<b:ModalBody>
 				<b:Panel>
 					<b:PanelHeader ui:field="ssidTitle" />
 					<b:PanelBody>
 						<gwt:DataGrid bordered="true" condensed="true"
-							striped="true" hover="true" height="100px" width="100%" ui:field="ssidGrid" />
+							striped="true" hover="true" height="200px" width="100%" ui:field="ssidGrid" />
 						<b:Alert type="WARNING" ui:field="noSsid">
 							<b.html:Text text="No Networks found" />
 						</b:Alert>

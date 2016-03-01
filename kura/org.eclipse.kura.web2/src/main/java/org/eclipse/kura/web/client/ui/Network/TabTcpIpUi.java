@@ -596,7 +596,7 @@ public class TabTcpIpUi extends Composite implements Tab {
 
 			// Configure
 			for (int i = 0; i < configure.getItemCount(); i++) {
-				if (configure.getValue(i).equals(selectedNetIfConfig.getConfigMode())) {
+				if (configure.getValue(i).equals(MessageUtils.get(selectedNetIfConfig.getConfigMode()))) {
 					configure.setSelectedIndex(i);
 					break;
 				}

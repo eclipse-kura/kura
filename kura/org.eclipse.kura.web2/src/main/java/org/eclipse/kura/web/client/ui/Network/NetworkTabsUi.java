@@ -153,8 +153,7 @@ public class NetworkTabsUi extends Composite {
 	// Add/remove tabs based on the selected settings in the various tabs
 	public void adjustInterfaceTabs() {
 		String netIfStatus = tcpIp.getStatus();
-		boolean includeDhcpNat = !tcpIp.isDhcp()
-				&& netIfStatus.equals(MessageUtils.get(GwtNetIfStatus.netIPv4StatusEnabledLAN.name()));
+		boolean includeDhcpNat = !tcpIp.isDhcp() && netIfStatus.equals(MessageUtils.get(GwtNetIfStatus.netIPv4StatusEnabledLAN.name()));
 
 		if (netIfConfig instanceof GwtWifiNetInterfaceConfig) {
 			// insert Wifi tab
@@ -165,11 +164,12 @@ public class NetworkTabsUi extends Composite {
 			}
 			insertTab(dhcpNatTab, 2);
 			// remove Dhcp/Nat Tab if not an access point
-			if (!GwtWifiWirelessMode.netWifiWirelessModeAccessPoint	.equals(wireless.getWirelessMode())) {
+			if (!GwtWifiWirelessMode.netWifiWirelessModeAccessPoint.equals(wireless.getWirelessMode())) {
 				includeDhcpNat = false;
 			}
 		} else if (netIfConfig instanceof GwtModemInterfaceConfig) {
 			includeDhcpNat = false;
+			//modemTab.setEnabled(false);
 			removeTab(wirelessTab);
 			removeTab(dhcpNatTab);
 			// insert Modem tab
@@ -195,8 +195,8 @@ public class NetworkTabsUi extends Composite {
 			dhcpNatTab.setEnabled(false);
 		}
 
-		if (netIfStatus.equals(GwtNetIfStatus.netIPv4StatusDisabled.name())) {
-			// disabled - rmove tabs
+		if (netIfStatus.equals(MessageUtils.get(GwtNetIfStatus.netIPv4StatusDisabled.name()))) {
+			// disabled - remove tabs
 			disableInterfaceTabs();
 		}
 	}

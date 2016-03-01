@@ -67,12 +67,12 @@ public class TabModemUi extends Composite implements Tab {
 
 	@UiField
 	FormGroup groupReset, groupMaxfail, groupIdle, groupInterval, groupFailure,
-			groupNumber, groupDial,groupApn;
+	groupNumber, groupDial,groupApn;
 	@UiField
 	FormLabel labelModel, labelNetwork, labelService, labelModem, labelNumber,
-			labelDial, labelApn, labelAuth, labelUsername, labelPassword,
-			labelReset, labelPersist, labelMaxfail, labelIdle, labelActive,
-			labelInterval, labelFailure, labelGps;
+	labelDial, labelApn, labelAuth, labelUsername, labelPassword,
+	labelReset, labelPersist, labelMaxfail, labelIdle, labelActive,
+	labelInterval, labelFailure, labelGps;
 	@UiField
 	HelpBlock helpReset, helpMaxfail, helpIdle, helpInterval, helpFailure, helpNumber;
 
@@ -80,7 +80,7 @@ public class TabModemUi extends Composite implements Tab {
 	ListBox network, auth;
 	@UiField
 	TextBox modem, number, dial, apn, username, reset, maxfail, idle, active,
-			interval, failure;
+	interval, failure;
 	@UiField
 	FormControlStatic model, service;
 	@UiField
@@ -126,7 +126,7 @@ public class TabModemUi extends Composite implements Tab {
 			return true;
 		}
 	}
-	
+
 	@Override
 	public void setNetInterface(GwtNetInterfaceConfig config) {
 		if (config instanceof GwtModemInterfaceConfig) {
@@ -152,14 +152,9 @@ public class TabModemUi extends Composite implements Tab {
 		if (model.getText() != null && service.getText() != null) {
 			// note - status is set in tcp/ip tab
 			updatedModemNetIf.setPppNum(Integer.parseInt(number.getText()));
-			updatedModemNetIf
-					.setModemId((modem.getText().trim() != null) ? modem
-							.getText().trim() : "");
-			updatedModemNetIf
-					.setDialString((dial.getText().trim() != null) ? dial
-							.getText().trim() : "");
-			updatedModemNetIf.setApn((apn.getText().trim() != null) ? apn
-					.getText().trim() : "");
+			updatedModemNetIf.setModemId((modem.getText().trim() != null) ? modem.getText().trim() : "");
+			updatedModemNetIf.setDialString((dial.getText().trim() != null) ? dial.getText().trim() : "");
+			updatedModemNetIf.setApn((apn.getText().trim() != null) ? apn.getText().trim() : "");
 
 			String authValue = auth.getSelectedValue();
 			for (GwtModemAuthType authT : GwtModemAuthType.values()) {
@@ -169,26 +164,17 @@ public class TabModemUi extends Composite implements Tab {
 			}
 
 			if (updatedModemNetIf.getAuthType() != GwtModemAuthType.netModemAuthNONE) {
-				updatedModemNetIf
-						.setUsername((username.getText().trim() != null) ? username
-								.getText().trim() : "");
-				updatedModemNetIf
-						.setPassword((password.getText().trim() != null) ? password
-								.getText().trim() : "");
+				updatedModemNetIf.setUsername((username.getText().trim() != null) ? username.getText().trim() : "");
+				updatedModemNetIf.setPassword((password.getText().trim() != null) ? password.getText().trim() : "");
 			}
 
-			updatedModemNetIf.setResetTimeout(Integer.parseInt(reset.getValue()
-					.trim()));
+			updatedModemNetIf.setResetTimeout(Integer.parseInt(reset.getValue().trim()));
 			updatedModemNetIf.setPersist(radio1.isActive());
-			updatedModemNetIf.setMaxFail(Integer.parseInt(maxfail.getText()
-					.trim()));
+			updatedModemNetIf.setMaxFail(Integer.parseInt(maxfail.getText().trim()));
 			updatedModemNetIf.setIdle(Integer.parseInt(idle.getText().trim()));
-			updatedModemNetIf.setActiveFilter((active.getText() != "") ? active
-					.getText().trim() : "");
-			updatedModemNetIf.setLcpEchoInterval(Integer.parseInt(interval
-					.getText().trim()));
-			updatedModemNetIf.setLcpEchoFailure(Integer.parseInt(failure
-					.getText().trim()));
+			updatedModemNetIf.setActiveFilter((active.getText() != "") ? active.getText().trim() : "");
+			updatedModemNetIf.setLcpEchoInterval(Integer.parseInt(interval.getText().trim()));
+			updatedModemNetIf.setLcpEchoFailure(Integer.parseInt(failure.getText().trim()));
 			updatedModemNetIf.setGpsEnabled(radio3.isActive());
 			// ---
 		} else {
@@ -196,23 +182,18 @@ public class TabModemUi extends Composite implements Tab {
 
 			updatedModemNetIf.setPppNum(selectedNetIfConfig.getPppNum());
 			updatedModemNetIf.setModemId(selectedNetIfConfig.getModemId());
-			updatedModemNetIf
-					.setDialString(selectedNetIfConfig.getDialString());
+			updatedModemNetIf.setDialString(selectedNetIfConfig.getDialString());
 			updatedModemNetIf.setApn(selectedNetIfConfig.getApn());
 			updatedModemNetIf.setAuthType(selectedNetIfConfig.getAuthType());
 			updatedModemNetIf.setUsername(selectedNetIfConfig.getUsername());
 			updatedModemNetIf.setPassword(selectedNetIfConfig.getPassword());
-			updatedModemNetIf.setResetTimeout(selectedNetIfConfig
-					.getResetTimeout());
+			updatedModemNetIf.setResetTimeout(selectedNetIfConfig.getResetTimeout());
 			updatedModemNetIf.setPersist(selectedNetIfConfig.isPersist());
 			updatedModemNetIf.setMaxFail(selectedNetIfConfig.getMaxFail());
 			updatedModemNetIf.setIdle(selectedNetIfConfig.getIdle());
-			updatedModemNetIf.setActiveFilter(selectedNetIfConfig
-					.getActiveFilter());
-			updatedModemNetIf.setLcpEchoInterval(selectedNetIfConfig
-					.getLcpEchoInterval());
-			updatedModemNetIf.setLcpEchoFailure(selectedNetIfConfig
-					.getLcpEchoFailure());
+			updatedModemNetIf.setActiveFilter(selectedNetIfConfig.getActiveFilter());
+			updatedModemNetIf.setLcpEchoInterval(selectedNetIfConfig.getLcpEchoInterval());
+			updatedModemNetIf.setLcpEchoFailure(selectedNetIfConfig.getLcpEchoFailure());
 			updatedModemNetIf.setGpsEnabled(selectedNetIfConfig.isGpsEnabled());
 		}
 
@@ -261,8 +242,7 @@ public class TabModemUi extends Composite implements Tab {
 			public void onMouseOver(MouseOverEvent event) {
 				if (modem.isEnabled()) {
 					helpText.clear();
-					helpText.add(new Span(MSGS
-							.netModemToolTipModemIndentifier()));
+					helpText.add(new Span(MSGS.netModemToolTipModemIndentifier()));
 				}
 			}
 		});
@@ -285,11 +265,11 @@ public class TabModemUi extends Composite implements Tab {
 			@Override
 			public void onChange(ChangeEvent event) {
 				setDirty(true);
-				if (number.getText().trim() != null
-						&& (!number.getText().trim().matches(REGEX_NUM) || Integer
-								.parseInt(number.getText()) < 0)) {
-				helpNumber.setText("This Field requires a numeric input");
-				groupNumber.setValidationState(ValidationState.ERROR);
+				if ( number.getText().trim() != null && 
+					 ( !number.getText().trim().matches(REGEX_NUM) || 
+					   Integer.parseInt(number.getText()) < 0) ) {
+					helpNumber.setText("This Field requires a numeric input");
+					groupNumber.setValidationState(ValidationState.ERROR);
 				}else{
 					helpNumber.setText("");
 					groupNumber.setValidationState(ValidationState.NONE);
@@ -301,8 +281,7 @@ public class TabModemUi extends Composite implements Tab {
 			public void onMouseOver(MouseOverEvent event) {
 				if (number.isEnabled()) {
 					helpText.clear();
-					helpText.add(new Span(MSGS
-							.netModemToolTipModemInterfaceNumber()));
+					helpText.add(new Span(MSGS.netModemToolTipModemInterfaceNumber()));
 				}
 			}
 		});
@@ -316,7 +295,7 @@ public class TabModemUi extends Composite implements Tab {
 			groupNumber.setValidationState(ValidationState.ERROR);
 		}
 
-		
+
 		// DIAL STRING
 		labelDial.setText(MSGS.netModemDialString()+"*");
 
@@ -346,11 +325,9 @@ public class TabModemUi extends Composite implements Tab {
 				if (dial.isEnabled()) {
 					helpText.clear();
 					if (dialString.equals("")) {
-						helpText.add(new Span(MSGS
-								.netModemToolTipDialStringDefault()));
+						helpText.add(new Span(MSGS.netModemToolTipDialStringDefault()));
 					} else {
-						helpText.add(new Span(MSGS
-								.netModemToolTipDialString(dial.getText())));
+						helpText.add(new Span(MSGS.netModemToolTipDialString(dial.getText())));
 					}
 				}
 			}
@@ -496,10 +473,10 @@ public class TabModemUi extends Composite implements Tab {
 			@Override
 			public void onChange(ChangeEvent event) {
 				setDirty(true);
-				if (reset.getText().trim() != null
-						&& (!reset.getText().trim().matches(REGEX_NUM) || (Integer
-								.parseInt(reset.getText()) < 0 || Integer
-								.parseInt(reset.getText()) == 1))) {
+				if ( reset.getText().trim() != null && 
+					 ( !reset.getText().trim().matches(REGEX_NUM) || 
+					   ( Integer.parseInt(reset.getText()) < 0 || 
+					     Integer.parseInt(reset.getText()) == 1)) ) {
 					helpReset.setText(MSGS.netModemInvalidResetTimeout());
 					groupReset.setValidationState(ValidationState.ERROR);
 				} else {
@@ -555,8 +532,8 @@ public class TabModemUi extends Composite implements Tab {
 			public void onValueChange(ValueChangeEvent<Boolean> event) {
 				setDirty(true);
 			}});
-		
-		
+
+
 		// CONNECTION ATTEMPTS
 		labelMaxfail.setText(MSGS.netModemMaxFail()+"*");
 		maxfail.addMouseOverHandler(new MouseOverHandler() {
@@ -578,10 +555,10 @@ public class TabModemUi extends Composite implements Tab {
 			@Override
 			public void onChange(ChangeEvent event) {
 				setDirty(true);
-				if (maxfail.getText().trim() != null
-						&& (!maxfail.getText().trim().matches(REGEX_NUM) || Integer
-								.parseInt(maxfail.getText()) <= 0)
-						|| maxfail.getText().trim().length() <= 0) {
+				if ( maxfail.getText().trim() != null && 
+					 ( !maxfail.getText().trim().matches(REGEX_NUM) || 
+					   Integer.parseInt(maxfail.getText() ) <= 0) || 
+					   maxfail.getText().trim().length() <= 0 ) {
 					helpMaxfail.setText(MSGS.netModemInvalidMaxFail());
 					groupMaxfail.setValidationState(ValidationState.ERROR);
 				} else {
@@ -615,9 +592,9 @@ public class TabModemUi extends Composite implements Tab {
 			@Override
 			public void onChange(ChangeEvent event) {
 				setDirty(true);
-				if (idle.getText().trim() != null
-						&& (!idle.getText().trim().matches(REGEX_NUM) || Integer
-								.parseInt(idle.getText()) < 0)) {
+				if ( idle.getText().trim() != null && 
+					 ( !idle.getText().trim().matches(REGEX_NUM) || 
+					   Integer.parseInt(idle.getText()) < 0) ) {
 					helpIdle.setText(MSGS.netModemInvalidIdle());
 					groupIdle.setValidationState(ValidationState.ERROR);
 				} else {
@@ -674,9 +651,9 @@ public class TabModemUi extends Composite implements Tab {
 			@Override
 			public void onChange(ChangeEvent event) {
 				setDirty(true);
-				if (interval.getText().trim() != null
-						&& (!interval.getText().trim().matches(REGEX_NUM) || Integer
-								.parseInt(interval.getText()) < 0)) {
+				if ( interval.getText().trim() != null && 
+					 ( !interval.getText().trim().matches(REGEX_NUM) || 
+					   Integer.parseInt(interval.getText()) < 0) ) {
 					helpInterval.setText(MSGS.netModemInvalidLcpEchoInterval());
 					groupInterval.setValidationState(ValidationState.ERROR);
 				}else{
@@ -709,9 +686,9 @@ public class TabModemUi extends Composite implements Tab {
 			@Override
 			public void onChange(ChangeEvent event) {
 				setDirty(true);
-				if (failure.getText().trim() != null
-						&& (!failure.getText().trim().matches(REGEX_NUM) || Integer
-								.parseInt(failure.getText()) < 0)) {
+				if ( failure.getText().trim() != null && 
+					 ( !failure.getText().trim().matches(REGEX_NUM) || 
+					   Integer.parseInt(failure.getText()) < 0) ) {
 					helpFailure.setText(MSGS.netModemInvalidLcpEchoFailure());
 					groupFailure.setValidationState(ValidationState.ERROR);
 				} else {
@@ -773,7 +750,7 @@ public class TabModemUi extends Composite implements Tab {
 		radio2.setText(MSGS.falseLabel());
 		radio3.setText(MSGS.trueLabel());
 		radio4.setText(MSGS.falseLabel());
-		
+
 		radio1.setValue(true);
 		radio2.setValue(false);
 		radio3.setValue(true);
@@ -783,20 +760,17 @@ public class TabModemUi extends Composite implements Tab {
 
 	private void resetHelp() {
 		helpText.clear();
-		helpText.add(new Span(
-				"Mouse over enabled items on the left to see help text."));
+		helpText.add(new Span("Mouse over enabled items on the left to see help text."));
 	}
 
 	private void update() {
 		if (selectedNetIfConfig != null) {
-			model.setText(selectedNetIfConfig.getManufacturer() + "-"
-					+ selectedNetIfConfig.getModel());
+			model.setText(selectedNetIfConfig.getManufacturer() + "-" + selectedNetIfConfig.getModel());
 			network.clear();
 			List<String> networkTechnologies = selectedNetIfConfig
 					.getNetworkTechnology();
-			if (networkTechnologies != null && networkTechnologies.size() > 0) {
-				for (String techType : selectedNetIfConfig
-						.getNetworkTechnology()) {
+			if (networkTechnologies != null && !networkTechnologies.isEmpty()) {
+				for (String techType : selectedNetIfConfig.getNetworkTechnology()) {
 					network.addItem(techType);
 				}
 			} else {
@@ -872,9 +846,8 @@ public class TabModemUi extends Composite implements Tab {
 
 		String authTypeVal = auth.getSelectedItemText().trim();
 
-		if (authTypeVal == null
-				|| authTypeVal.equalsIgnoreCase(MessageUtils
-						.get(GwtModemAuthType.netModemAuthNONE.name()))) {
+		if ( authTypeVal == null || 
+			 authTypeVal.equalsIgnoreCase(MessageUtils.get(GwtModemAuthType.netModemAuthNONE.name())) ) {
 			username.setEnabled(false);
 			password.setEnabled(false);
 		} else {

@@ -208,8 +208,7 @@ public class TabWirelessUi extends Composite implements Tab {
 			}
 		} else {
 			if (activeConfig != null) {
-				return GwtWifiWirelessMode.valueOf(activeConfig
-						.getWirelessMode());
+				return GwtWifiWirelessMode.valueOf(activeConfig.getWirelessMode());
 			}
 		}
 		return null;
@@ -1161,6 +1160,7 @@ public class TabWirelessUi extends Composite implements Tab {
 		};
 		col1.setCellStyleNames("status-table-row");
 		ssidGrid.addColumn(col1, "SSID");
+		ssidGrid.setColumnWidth(col1, "240px");
 
 		TextColumn<GwtWifiHotspotEntry> col2 = new TextColumn<GwtWifiHotspotEntry>() {
 			@Override
@@ -1170,6 +1170,7 @@ public class TabWirelessUi extends Composite implements Tab {
 		};
 		col2.setCellStyleNames("status-table-row");
 		ssidGrid.addColumn(col2, "MAC Address");
+		ssidGrid.setColumnWidth(col2, "140px");
 
 		TextColumn<GwtWifiHotspotEntry> col3 = new TextColumn<GwtWifiHotspotEntry>() {
 			@Override
@@ -1179,6 +1180,7 @@ public class TabWirelessUi extends Composite implements Tab {
 		};
 		col3.setCellStyleNames("status-table-row");
 		ssidGrid.addColumn(col3, "Signal Strength (dBm)");
+		ssidGrid.setColumnWidth(col3, "70px");
 
 		TextColumn<GwtWifiHotspotEntry> col4 = new TextColumn<GwtWifiHotspotEntry>() {
 			@Override
@@ -1188,6 +1190,7 @@ public class TabWirelessUi extends Composite implements Tab {
 		};
 		col4.setCellStyleNames("status-table-row");
 		ssidGrid.addColumn(col4, "Channel");
+		ssidGrid.setColumnWidth(col4, "70px");
 
 		TextColumn<GwtWifiHotspotEntry> col5 = new TextColumn<GwtWifiHotspotEntry>() {
 			@Override
@@ -1197,6 +1200,7 @@ public class TabWirelessUi extends Composite implements Tab {
 		};
 		col5.setCellStyleNames("status-table-row");
 		ssidGrid.addColumn(col5, "Frequency");
+		ssidGrid.setColumnWidth(col5, "70px");
 
 		TextColumn<GwtWifiHotspotEntry> col6 = new TextColumn<GwtWifiHotspotEntry>() {
 			@Override
@@ -1206,7 +1210,7 @@ public class TabWirelessUi extends Composite implements Tab {
 		};
 		col6.setCellStyleNames("status-table-row");
 		ssidGrid.addColumn(col6, "Security");
-//		ssidGrid.setColumnWidth(col6, width);
+		ssidGrid.setColumnWidth(col6, "70px");
 		ssidDataProvider.addDataDisplay(ssidGrid);
 
 		ssidGrid.setSelectionModel(ssidSelectionModel);

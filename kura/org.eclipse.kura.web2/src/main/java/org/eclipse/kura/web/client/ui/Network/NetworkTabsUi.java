@@ -153,8 +153,7 @@ public class NetworkTabsUi extends Composite {
 	// Add/remove tabs based on the selected settings in the various tabs
 	public void adjustInterfaceTabs() {
 		String netIfStatus = tcpIp.getStatus();
-		boolean includeDhcpNat = !tcpIp.isDhcp()
-				&& netIfStatus.equals(MessageUtils.get(GwtNetIfStatus.netIPv4StatusEnabledLAN.name()));
+		boolean includeDhcpNat = !tcpIp.isDhcp() && netIfStatus.equals(MessageUtils.get(GwtNetIfStatus.netIPv4StatusEnabledLAN.name()));
 
 		if (netIfConfig instanceof GwtWifiNetInterfaceConfig) {
 			// insert Wifi tab
@@ -165,11 +164,12 @@ public class NetworkTabsUi extends Composite {
 			}
 			insertTab(dhcpNatTab, 2);
 			// remove Dhcp/Nat Tab if not an access point
-			if (!GwtWifiWirelessMode.netWifiWirelessModeAccessPoint	.equals(wireless.getWirelessMode())) {
+			if (!GwtWifiWirelessMode.netWifiWirelessModeAccessPoint.equals(wireless.getWirelessMode())) {
 				includeDhcpNat = false;
 			}
 		} else if (netIfConfig instanceof GwtModemInterfaceConfig) {
 			includeDhcpNat = false;
+			//modemTab.setEnabled(false);
 			removeTab(wirelessTab);
 			removeTab(dhcpNatTab);
 			// insert Modem tab
@@ -195,8 +195,8 @@ public class NetworkTabsUi extends Composite {
 			dhcpNatTab.setEnabled(false);
 		}
 
-		if (netIfStatus.equals(GwtNetIfStatus.netIPv4StatusDisabled.name())) {
-			// disabled - rmove tabs
+		if (netIfStatus.equals(MessageUtils.get(GwtNetIfStatus.netIPv4StatusDisabled.name()))) {
+			// disabled - remove tabs
 			disableInterfaceTabs();
 		}
 	}
@@ -218,7 +218,7 @@ public class NetworkTabsUi extends Composite {
 		// get updated values from visible tabs
 		if (visibleTabs.contains(tcpIpTab)) {
 			tcpIp.getUpdatedNetInterface(updatedNetIf);
-		}
+		} 
 		if (visibleTabs.contains(hardwareTab)) {
 			hardware.getUpdatedNetInterface(updatedNetIf);
 		}
@@ -231,7 +231,6 @@ public class NetworkTabsUi extends Composite {
 		if (visibleTabs.contains(modemTab)) {
 			modem.getUpdatedNetInterface(updatedNetIf);
 		}
-
 		return updatedNetIf;
 	}
 
@@ -284,38 +283,6 @@ public class NetworkTabsUi extends Composite {
 			}
 		});
 		tabsPanel.add(tcpIpTab);
-		
-		// DHCP and NAT
-		dhcpNatTab = new AnchorListItem(MSGS.netRouter());
-		visibleTabs.add(dhcpNatTab);
-		dhcpNat = new TabDhcpNatUi(session, tcpIp, wireless);
-		dhcpNatTab.addClickHandler(new ClickHandler() {
-
-			@Override
-			public void onClick(ClickEvent event) {
-				setSelected(dhcpNatTab);
-				selectedTab = dhcpNat;
-				content.clear();
-				content.add(dhcpNat);
-			}
-		});
-		tabsPanel.add(dhcpNatTab);
-
-		
-		// Hardware
-		hardwareTab = new AnchorListItem(MSGS.netHwHardware());
-		visibleTabs.add(hardwareTab);
-		hardware = new TabHardwareUi(session);
-		hardwareTab.addClickHandler(new ClickHandler() {
-			@Override
-			public void onClick(ClickEvent event) {
-				setSelected(hardwareTab);
-				selectedTab = hardware;
-				content.clear();
-				content.add(hardware);
-			}
-		});
-		tabsPanel.add(hardwareTab);
 
 		// Wireless
 		wirelessTab = new AnchorListItem(MSGS.netWifiWireless());
@@ -346,7 +313,39 @@ public class NetworkTabsUi extends Composite {
 			}
 		});
 		tabsPanel.add(modemTab);
-		
+
+		// DHCP and NAT
+		dhcpNatTab = new AnchorListItem(MSGS.netRouter());
+		visibleTabs.add(dhcpNatTab);
+		dhcpNat = new TabDhcpNatUi(session, tcpIp, wireless);
+		dhcpNatTab.addClickHandler(new ClickHandler() {
+
+			@Override
+			public void onClick(ClickEvent event) {
+				setSelected(dhcpNatTab);
+				selectedTab = dhcpNat;
+				content.clear();
+				content.add(dhcpNat);
+			}
+		});
+		tabsPanel.add(dhcpNatTab);
+
+
+		// Hardware
+		hardwareTab = new AnchorListItem(MSGS.netHwHardware());
+		visibleTabs.add(hardwareTab);
+		hardware = new TabHardwareUi(session);
+		hardwareTab.addClickHandler(new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
+				setSelected(hardwareTab);
+				selectedTab = hardware;
+				content.clear();
+				content.add(hardware);
+			}
+		});
+		tabsPanel.add(hardwareTab);
+
 		setSelected(tcpIpTab);
 		selectedTab = tcpIp;
 		content.clear();
@@ -369,7 +368,7 @@ public class NetworkTabsUi extends Composite {
 		if (visibleTabs.contains(tab)) {
 			visibleTabs.remove(tab);
 		}
-		
+
 		if (tabsPanel.getWidgetIndex(tab) > -1) {
 			tabsPanel.remove(tab);
 		}

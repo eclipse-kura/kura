@@ -382,6 +382,7 @@ public class iwScanTool extends ScanTool implements IScanTool {
 						// Could also be of format 39/100
 						final String[] parts = strengthRaw.split("/");
 						strength = (int) Float.parseFloat(parts[0]);
+						strength = SignalStrengthConversion.getRssi(strength);
 					} else {
 						strength = Math.abs((int)Float.parseFloat(strengthRaw));
 					}

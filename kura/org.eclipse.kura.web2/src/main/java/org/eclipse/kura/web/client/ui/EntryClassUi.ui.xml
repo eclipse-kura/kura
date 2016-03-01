@@ -31,6 +31,7 @@
 	.services-list { padding-left: 10px; padding-right: 0px; }
 	.content-panel-body { padding: 1px; }
 	.modal-wait {background-color: black; border: solid 1px red; }
+	.red { color: red; }
 	
 	</ui:style>
 	<b:Container fluid="true">
@@ -87,6 +88,9 @@
 
 													<b:AnchorListItem icon="GEAR"
 														iconFixedWidth="true" text="Settings" ui:field="settings" />
+													
+													<b:AnchorListItem icon="GEAR"
+														iconFixedWidth="true" text="Kura Wires" ui:field="wires"/>
 												</b:NavPills>
 											</b:PanelBody>
 										</b:Panel>
@@ -126,12 +130,17 @@
 						<b:Panel>
 							<b:PanelFooter>
 								<b:Row>
-									<b:Column size="MD_8">
+									<b:Column size="MD_7">
 										<b.html:Paragraph alignment="LEFT">
 											<g:Label ui:field='footerLeft' text="Footer Left" />
 										</b.html:Paragraph>
 									</b:Column>
-									<b:Column size="MD_4">
+									<b:Column size="MD_2">
+										<b.html:Paragraph alignment="CENTER">
+											<g:Label ui:field='footerCenter' text="" addStyleNames="{style.red}"/>
+										</b.html:Paragraph>
+									</b:Column>
+									<b:Column size="MD_3">
 										<b.html:Paragraph alignment="RIGHT">
 											<g:Label ui:field='footerRight' text="Footer Right" />
 										</b.html:Paragraph>

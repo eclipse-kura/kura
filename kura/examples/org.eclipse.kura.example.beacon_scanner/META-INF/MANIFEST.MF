@@ -1,0 +1,13 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: org.eclipse.kura.example.beacon_scanner
+Bundle-SymbolicName: org.eclipse.kura.example.beacon_scanner;singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Service-Component: OSGI-INF/*.xml
+Bundle-ActivationPolicy: lazy
+Bundle-ClassPath: .
+Require-Bundle: org.eclipse.kura.api,
+ org.eclipse.kura.core.cloud;bundle-version="1.0.7",
+ slf4j.api;bundle-version="1.6.4",
+ org.eclipse.osgi.services;bundle-version="3.3.100"

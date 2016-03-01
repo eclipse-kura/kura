@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Copyright (c) 2011, 2014 Eurotech and/or its affiliates
+# Copyright (c) 2011, 2016 Eurotech and/or its affiliates
 #
 #  All rights reserved. This program and the accompanying materials
 #  are made available under the terms of the Eclipse Public License v1.0
@@ -27,6 +27,20 @@ SUCCESS=1
 
 # Signal handler. Also called on exit
 cleanup() {
+	# remove .dp file and dpa.properties entry if it exists
+	# wait for the dp to get written to disk first
+	sync
+	sleep 3
+	KURA_DP=`grep -e "^kura-upgrade=" ${BASE_DIR}/kura/kura/dpa.properties |cut -d'=' -f2`
+	KURA_DP=${KURA_DP#file\\:}
+	echo "Found kura upgrade deployment package file: $KURA_DP" >> $LOG 2>&1
+	if [ -n "$KURA_DP" ]; then
+		echo "Removing kura upgrade deployment package" >> $LOG 2>&1
+   	 	sed "/^kura-upgrade=.*/d" ${BASE_DIR}/kura/kura/dpa.properties > /tmp/dpa.properties
+    	mv -f /tmp/dpa.properties ${BASE_DIR}/kura/kura/dpa.properties >> $LOG 2>&1
+    	rm -f $KURA_DP >> $LOG 2>&1
+	fi
+
     # Remove the upgrade installation directory on fail
     if [ $SUCCESS -ne 0 ]; then
         echo "Could not upgrade - Remove the upgrade installation directory" >> $LOG 2>&1
@@ -82,19 +96,6 @@ if [ -d "/tmp/.kura/configuration" ]; then
 	rm -rf /tmp/.kura/configuration >> $LOG 2>&1
 fi
 
-# remove .dp file and dpa.properties entry if it exists
-# wait for the dp to get written to disk first
-sync
-sleep 3
-KURA_DP=`grep -e "^kura-upgrade=" ${BASE_DIR}/kura/kura/dpa.properties |cut -d'=' -f2`
-KURA_DP=${KURA_DP#file\\:}
-echo "Found kura upgrade deployment package file: $KURA_DP" >> $LOG 2>&1
-if [ -n "$KURA_DP" ]; then
-	echo "Removing kura upgrade deployment package" >> $LOG 2>&1
-    sed "/^kura-upgrade=.*/d" ${BASE_DIR}/kura/kura/dpa.properties > /tmp/dpa.properties
-    mv -f /tmp/dpa.properties ${BASE_DIR}/kura/kura/dpa.properties >> $LOG 2>&1
-    rm -f $KURA_DP >> $LOG 2>&1
-fi
 
 # Make a copy of the previous installation using hard links
 echo "Creating hard link copy of previous version into ${INSTALL_DIR}" >> $LOG 2>&1

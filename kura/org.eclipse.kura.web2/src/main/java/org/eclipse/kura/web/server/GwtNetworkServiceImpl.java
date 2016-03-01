@@ -677,9 +677,10 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 		NetworkAdminService nas = ServiceLocator.getInstance().getService(NetworkAdminService.class);
 
 		s_logger.debug("config.getStatus(): " + GwtSafeHtmlUtils.htmlEscape(config.getStatus()));
+		String status= config.getStatus();
 
 		boolean autoConnect = true;
-		if(GwtNetIfStatus.netIPv4StatusDisabled.name().equals(config.getStatus())) {
+		if(GwtNetIfStatus.netIPv4StatusDisabled.name().equals(status)) {
 			autoConnect = false;
 		}
 

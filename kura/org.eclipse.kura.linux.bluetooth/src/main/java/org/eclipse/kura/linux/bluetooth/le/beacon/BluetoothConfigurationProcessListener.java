@@ -16,13 +16,13 @@ import org.eclipse.kura.linux.bluetooth.util.BluetoothProcessListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class BluetoothBeaconListener implements BluetoothProcessListener {
+public class BluetoothConfigurationProcessListener implements BluetoothProcessListener {
 
-	private static final Logger s_logger = LoggerFactory.getLogger(BluetoothBeaconListener.class);
+	private static final Logger s_logger = LoggerFactory.getLogger(BluetoothConfigurationProcessListener.class);
 	
 	private BluetoothBeaconCommandListener m_listener = null;
 	
-	public BluetoothBeaconListener(BluetoothBeaconCommandListener listener) {
+	public BluetoothConfigurationProcessListener(BluetoothBeaconCommandListener listener) {
 		m_listener = listener;
 	}
 	

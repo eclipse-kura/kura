@@ -81,8 +81,8 @@ public class NetworkTabsUi extends Composite {
 
 		tcpIp.setNetInterface(selection);
 		hardware.setNetInterface(selection);
-		dhcpNat.setNetInterface(selection);
 		wireless.setNetInterface(selection);
+		dhcpNat.setNetInterface(selection);
 		modem.setNetInterface(selection);
 
 		// set the tabs for this interface
@@ -157,6 +157,7 @@ public class NetworkTabsUi extends Composite {
 
 		if (netIfConfig instanceof GwtWifiNetInterfaceConfig) {
 			// insert Wifi tab
+			includeDhcpNat = true;
 			removeTab(modemTab);
 			insertTab(wirelessTab, 1);
 			if (!wirelessTab.isEnabled()) {
@@ -164,7 +165,8 @@ public class NetworkTabsUi extends Composite {
 			}
 			insertTab(dhcpNatTab, 2);
 			// remove Dhcp/Nat Tab if not an access point
-			if (!GwtWifiWirelessMode.netWifiWirelessModeAccessPoint.equals(wireless.getWirelessMode())) {
+			String mode= wireless.getWirelessMode().name();
+			if ( mode != null && !mode.equals(GwtWifiWirelessMode.netWifiWirelessModeAccessPoint.name()) ) {
 				includeDhcpNat = false;
 			}
 		} else if (netIfConfig instanceof GwtModemInterfaceConfig) {

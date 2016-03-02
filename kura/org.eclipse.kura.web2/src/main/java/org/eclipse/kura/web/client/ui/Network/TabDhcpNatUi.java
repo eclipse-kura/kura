@@ -64,7 +64,7 @@ public class TabDhcpNatUi extends Composite implements Tab {
 	Form form;
 	@UiField
 	FormLabel labelRouter, labelBegin, labelEnd, labelSubnet, labelDefaultL,
-			labelMax, labelPass;
+	labelMax, labelPass;
 	@UiField
 	ListBox router;
 	@UiField
@@ -73,7 +73,7 @@ public class TabDhcpNatUi extends Composite implements Tab {
 	RadioButton radio1, radio2;
 	@UiField
 	FormGroup groupRouter, groupBegin, groupEnd, groupSubnet, groupDefaultL,
-			groupMax;
+	groupMax;
 	@UiField
 	HelpBlock helpRouter;
 	@UiField
@@ -102,15 +102,12 @@ public class TabDhcpNatUi extends Composite implements Tab {
 	}
 
 	public boolean isValid() {
-		if (groupRouter.getValidationState().equals(ValidationState.ERROR)
-				|| groupBegin.getValidationState()
-						.equals(ValidationState.ERROR)
-				|| groupEnd.getValidationState().equals(ValidationState.ERROR)
-				|| groupSubnet.getValidationState().equals(
-						ValidationState.ERROR)
-				|| groupDefaultL.getValidationState().equals(
-						ValidationState.ERROR)
-				|| groupMax.getValidationState().equals(ValidationState.ERROR)) {
+		if (	groupRouter.getValidationState().equals(ValidationState.ERROR)   || 
+				groupBegin.getValidationState().equals(ValidationState.ERROR)    || 
+				groupEnd.getValidationState().equals(ValidationState.ERROR)      || 
+				groupSubnet.getValidationState().equals(ValidationState.ERROR)   || 
+				groupDefaultL.getValidationState().equals(ValidationState.ERROR) || 
+				groupMax.getValidationState().equals(ValidationState.ERROR) ) {
 			return false;
 		} else {
 			return true;
@@ -165,6 +162,7 @@ public class TabDhcpNatUi extends Composite implements Tab {
 			for (int i = 0; i < router.getItemCount(); i++) {
 				if (router.getItemText(i).equals(MessageUtils.get(selectedNetIfConfig.getRouterMode()))) {
 					router.setSelectedIndex(i);
+					break;
 				}
 			}
 			begin.setText(selectedNetIfConfig.getRouterDhcpBeginAddress());
@@ -181,19 +179,41 @@ public class TabDhcpNatUi extends Composite implements Tab {
 
 	// enable/disable fields depending on values in other tabs
 	private void refreshForm() {
-//		if (!tcpTab.isLanEnabled()) {
-//			router.setEnabled(false);
-//			begin.setEnabled(false);
-//			end.setEnabled(false);
-//			subnet.setEnabled(false);
-//			defaultL.setEnabled(false);
-//			max.setEnabled(false);
-//			radio1.setEnabled(false);
-//			radio2.setEnabled(false);
-//		} else {
-			if ( selectedNetIfConfig.getHwTypeEnum() == GwtNetIfType.WIFI && wirelessTab != null && 
-				 (wirelessTab.getWirelessMode() == GwtWifiWirelessMode.netWifiWirelessModeStation || wirelessTab.getWirelessMode() == GwtWifiWirelessMode.netWifiWirelessModeDisabled)) {
-				router.setEnabled(false);
+		//		if (!tcpTab.isLanEnabled()) {
+		//			router.setEnabled(false);
+		//			begin.setEnabled(false);
+		//			end.setEnabled(false);
+		//			subnet.setEnabled(false);
+		//			defaultL.setEnabled(false);
+		//			max.setEnabled(false);
+		//			radio1.setEnabled(false);
+		//			radio2.setEnabled(false);
+		//		} else {
+		String mode= wirelessTab.activeConfig.getWirelessMode();
+		if ( selectedNetIfConfig.getHwTypeEnum() == GwtNetIfType.WIFI && wirelessTab != null && 
+				(mode.equals(GwtWifiWirelessMode.netWifiWirelessModeStation.name()) || mode.equals(GwtWifiWirelessMode.netWifiWirelessModeDisabled.name())) ) {
+			router.setEnabled(false);
+			begin.setEnabled(false);
+			end.setEnabled(false);
+			subnet.setEnabled(false);
+			defaultL.setEnabled(false);
+			max.setEnabled(false);
+			radio1.setEnabled(false);
+			radio2.setEnabled(false);
+		} else {
+			router.setEnabled(true);
+			begin.setEnabled(true);
+			end.setEnabled(true);
+			subnet.setEnabled(true);
+			defaultL.setEnabled(true);
+			max.setEnabled(true);
+			radio1.setEnabled(true);
+			radio2.setEnabled(true);
+
+			String modeValue = router.getSelectedItemText();
+			if ( modeValue.equals(MessageUtils.get(GwtNetRouterMode.netRouterNat.name())) || 
+					modeValue.equals(MessageUtils.get(GwtNetRouterMode.netRouterOff.name())) ) {
+				router.setEnabled(true);
 				begin.setEnabled(false);
 				end.setEnabled(false);
 				subnet.setEnabled(false);
@@ -210,30 +230,9 @@ public class TabDhcpNatUi extends Composite implements Tab {
 				max.setEnabled(true);
 				radio1.setEnabled(true);
 				radio2.setEnabled(true);
-
-				String modeValue = router.getSelectedItemText();
-				if ( modeValue.equals(MessageUtils.get(GwtNetRouterMode.netRouterNat.name())) || 
-					 modeValue.equals(MessageUtils.get(GwtNetRouterMode.netRouterOff.name())) ) {
-					router.setEnabled(true);
-					begin.setEnabled(false);
-					end.setEnabled(false);
-					subnet.setEnabled(false);
-					defaultL.setEnabled(false);
-					max.setEnabled(false);
-					radio1.setEnabled(false);
-					radio2.setEnabled(false);
-				} else {
-					router.setEnabled(true);
-					begin.setEnabled(true);
-					end.setEnabled(true);
-					subnet.setEnabled(true);
-					defaultL.setEnabled(true);
-					max.setEnabled(true);
-					radio1.setEnabled(true);
-					radio2.setEnabled(true);
-				}
 			}
-//		}
+		}
+		//		}
 	}
 
 	private void reset() {
@@ -254,7 +253,7 @@ public class TabDhcpNatUi extends Composite implements Tab {
 		int i = 0;
 		for (GwtNetRouterMode mode : GwtNetRouterMode.values()) {
 			router.addItem(MessageUtils.get(mode.name()));
-		
+
 			if (tcpTab.isDhcp() && mode.equals(GwtNetRouterMode.netRouterOff)) {
 				router.setSelectedIndex(i);
 			}
@@ -280,8 +279,8 @@ public class TabDhcpNatUi extends Composite implements Tab {
 			public void onChange(ChangeEvent event) {
 				setDirty(true);
 				ListBox box = (ListBox) event.getSource();
-				if (tcpTab.isDhcp()
-						&& !box.getSelectedItemText().equals(MessageUtils.get(GwtNetRouterMode.netRouterOff.toString()))) {
+				if (	tcpTab.isDhcp() && 
+						!box.getSelectedItemText().equals(MessageUtils.get(GwtNetRouterMode.netRouterOff.toString()))) {
 					groupRouter.setValidationState(ValidationState.ERROR);
 					helpRouter.setText(MSGS.netRouterConfiguredForDhcpError());
 					helpRouter.setColor("red");
@@ -387,8 +386,7 @@ public class TabDhcpNatUi extends Composite implements Tab {
 			public void onMouseOver(MouseOverEvent event) {
 				if (router.isEnabled()) {
 					helpText.clear();
-					helpText.add(new Span(MSGS
-							.netRouterToolTipDhcpDefaultLeaseTime()));
+					helpText.add(new Span(MSGS.netRouterToolTipDhcpDefaultLeaseTime()));
 				}
 			}
 		});
@@ -399,7 +397,6 @@ public class TabDhcpNatUi extends Composite implements Tab {
 			}
 		});
 		defaultL.addValueChangeHandler(new ValueChangeHandler<String>(){
-
 			@Override
 			public void onValueChange(ValueChangeEvent<String> event) {
 				setDirty(true);
@@ -409,7 +406,7 @@ public class TabDhcpNatUi extends Composite implements Tab {
 					groupDefaultL.setValidationState(ValidationState.NONE);
 				}
 			}});
-		
+
 		// DHCP Max Lease
 		labelMax.setText(MSGS.netRouterDhcpMaxLease());
 		max.addMouseOverHandler(new MouseOverHandler() {
@@ -417,8 +414,7 @@ public class TabDhcpNatUi extends Composite implements Tab {
 			public void onMouseOver(MouseOverEvent event) {
 				if (router.isEnabled()) {
 					helpText.clear();
-					helpText.add(new Span(MSGS
-							.netRouterToolTipDhcpMaxLeaseTime()));
+					helpText.add(new Span(MSGS.netRouterToolTipDhcpMaxLeaseTime()));
 				}
 			}
 		});
@@ -485,13 +481,12 @@ public class TabDhcpNatUi extends Composite implements Tab {
 				setDirty(true);
 			}});
 
-		
+
 		helpTitle.setText("Help Text");
 	}
 
 	private void resetHelp() {
 		helpText.clear();
-		helpText.add(new Span(
-				"Mouse over enabled items on the left to see help text."));
+		helpText.add(new Span("Mouse over enabled items on the left to see help text."));
 	}
 }

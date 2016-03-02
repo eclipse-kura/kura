@@ -202,7 +202,7 @@ public class TabWirelessUi extends Composite implements Tab {
 	public GwtWifiWirelessMode getWirelessMode() {		
 		if (wireless != null) {
 			for (GwtWifiWirelessMode mode : GwtWifiWirelessMode.values()) {
-				if (mode.name().equals(wireless.getSelectedItemText())) {
+				if (wireless.getSelectedItemText().equals(MessageUtils.get(mode.name()))) {
 					return mode;
 				}
 			}

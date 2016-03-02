@@ -129,6 +129,7 @@ public class TabModemUi extends Composite implements Tab {
 
 	@Override
 	public void setNetInterface(GwtNetInterfaceConfig config) {
+		setDirty(true);
 		if (config instanceof GwtModemInterfaceConfig) {
 			selectedNetIfConfig = (GwtModemInterfaceConfig) config;
 		}

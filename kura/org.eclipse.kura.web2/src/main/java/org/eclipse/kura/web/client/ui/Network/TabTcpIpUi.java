@@ -201,24 +201,22 @@ public class TabTcpIpUi extends Composite implements Tab {
 		boolean flag = true;
 		// check and make sure if 'Enabled for WAN' then either DHCP is selected
 		// or STATIC and a gateway is set
-		if (   !GwtNetIfStatus.netIPv4StatusDisabled.equals(status.getSelectedValue())
-			&& configure.getSelectedItemText().equalsIgnoreCase(VMSGS.netIPv4ConfigModeManual())) {
-			if ((gateway.getValue() == null
-					|| gateway.getValue().trim().equals("")) 
-					&& GwtNetIfStatus.netIPv4StatusEnabledWAN.equals(status.getSelectedValue())) {
+		if ( !MessageUtils.get(GwtNetIfStatus.netIPv4StatusDisabled.name()).equals(status.getSelectedValue()) && 
+			 configure.getSelectedItemText().equalsIgnoreCase(VMSGS.netIPv4ConfigModeManual()) ) {
+			if ( (gateway.getValue() == null || gateway.getValue().trim().equals("")) && 
+				 MessageUtils.get(GwtNetIfStatus.netIPv4StatusEnabledWAN.name()).equals(status.getSelectedValue()) ) {
 				flag = false;
 			}
-			if (ip.getValue() == null
-					|| ip.getValue().trim().equals("")) {
+			if (ip.getValue() == null || ip.getValue().trim().equals("")) {
 				groupIp.setValidationState(ValidationState.ERROR);
 				helpIp.setText(MSGS.netIPv4InvalidAddress());
 			}
 
 		}
-		if (groupIp.getValidationState().equals(ValidationState.ERROR)
-				|| groupSubnet.getValidationState().equals(ValidationState.ERROR)
-				|| groupGateway.getValidationState().equals(ValidationState.ERROR)
-				|| groupDns.getValidationState().equals(ValidationState.ERROR)) {
+		if ( groupIp.getValidationState().equals(ValidationState.ERROR)      || 
+			 groupSubnet.getValidationState().equals(ValidationState.ERROR)  || 
+			 groupGateway.getValidationState().equals(ValidationState.ERROR) || 
+			 groupDns.getValidationState().equals(ValidationState.ERROR) ) {
 			flag = false;
 		}
 		return flag;
@@ -228,14 +226,14 @@ public class TabTcpIpUi extends Composite implements Tab {
 		if (status == null) {
 			return false;
 		}
-		return GwtNetIfStatus.netIPv4StatusEnabledLAN.equals(status.getSelectedValue());
+		return MessageUtils.get(GwtNetIfStatus.netIPv4StatusEnabledLAN.name()).equals(status.getSelectedValue());
 	}
 
 	public boolean isWanEnabled() {
 		if (status == null) {
 			return false;
 		}
-		return GwtNetIfStatus.netIPv4StatusEnabledWAN.equals(status.getSelectedValue());
+		return MessageUtils.get(GwtNetIfStatus.netIPv4StatusEnabledWAN.name()).equals(status.getSelectedValue());
 	}
 
 	public String getStatus() {
@@ -642,12 +640,13 @@ public class TabTcpIpUi extends Composite implements Tab {
 			gateway.setEnabled(false);
 			dns.setEnabled(true);
 			search.setEnabled(false);
-			configure.setSelectedIndex(configure.getItemText(0).equals(GwtNetIfConfigMode.netIPv4ConfigModeDHCP) ? 0 : 1);
+			configure.setSelectedIndex(configure.getItemText(0).equals(MessageUtils.get(GwtNetIfConfigMode.netIPv4ConfigModeDHCP.name())) ? 0 : 1);
 
 		} else {
 
 			if (VMSGS.netIPv4StatusDisabled().equals(status.getSelectedValue())) {
-				configure.setSelectedIndex(configure.getItemText(0).equals(GwtNetIfConfigMode.netIPv4ConfigModeDHCP) ? 0 : 1);
+				String configureVal= configure.getItemText(0);
+				configure.setSelectedIndex(configureVal.equals(MessageUtils.get(GwtNetIfConfigMode.netIPv4ConfigModeDHCP.name())) ? 0 : 1);
 				ip.setText("");
 				status.setEnabled(false);
 				configure.setEnabled(false);
@@ -673,7 +672,7 @@ public class TabTcpIpUi extends Composite implements Tab {
 					subnet.setEnabled(true);
 					gateway.setEnabled(true);
 
-					if (GwtNetIfStatus.netIPv4StatusEnabledWAN.equals(configureValue)) {
+					if (configureValue.equals(MessageUtils.get(GwtNetIfStatus.netIPv4StatusEnabledWAN.name()))) {
 						// enable gateway field
 						gateway.setEnabled(true);
 					} else {

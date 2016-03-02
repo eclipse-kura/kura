@@ -115,19 +115,19 @@ public class NetworkTabsUi extends Composite {
 	}
 
 	public boolean isDirty() {
-		if (tcpIp != null && tcpIp.isDirty()) {
+		if (tcpIp != null && visibleTabs.contains(tcpIp) && tcpIp.isDirty()) {
 			return true;
 		}
-		if (hardware !=null && hardware.isDirty()) {
+		if (hardware !=null && visibleTabs.contains(hardware) && hardware.isDirty()) {
 			return true;
 		}
-		if (dhcpNat !=null && dhcpNat.isDirty()) {
+		if (dhcpNat !=null && visibleTabs.contains(dhcpNat) && dhcpNat.isDirty()) {
 			return true;
 		}
-		if (wireless != null && wireless.isDirty()) {
+		if (wireless != null && visibleTabs.contains(wireless) && wireless.isDirty()) {
 			return true;
 		}
-		if (modem != null && modem.isDirty()) {
+		if (modem != null && visibleTabs.contains(modem) && modem.isDirty()) {
 			return true;
 		}
 
@@ -277,6 +277,7 @@ public class NetworkTabsUi extends Composite {
 			@Override
 			public void onClick(ClickEvent event) {
 				setSelected(tcpIpTab);
+				tcpIp.refresh();
 				selectedTab = tcpIp;
 				content.clear();
 				content.add(tcpIp);
@@ -292,6 +293,7 @@ public class NetworkTabsUi extends Composite {
 			@Override
 			public void onClick(ClickEvent event) {
 				setSelected(wirelessTab);
+				wireless.refresh();
 				selectedTab = wireless;
 				content.clear();
 				content.add(wireless);
@@ -307,6 +309,7 @@ public class NetworkTabsUi extends Composite {
 			@Override
 			public void onClick(ClickEvent event) {
 				setSelected(modemTab);
+				modem.refresh();  //TODO: to check if needed here or can be invoked elsewhere
 				selectedTab = modem;
 				content.clear();
 				content.add(modem);
@@ -323,6 +326,7 @@ public class NetworkTabsUi extends Composite {
 			@Override
 			public void onClick(ClickEvent event) {
 				setSelected(dhcpNatTab);
+				dhcpNat.refresh();
 				selectedTab = dhcpNat;
 				content.clear();
 				content.add(dhcpNat);
@@ -339,6 +343,7 @@ public class NetworkTabsUi extends Composite {
 			@Override
 			public void onClick(ClickEvent event) {
 				setSelected(hardwareTab);
+				hardware.refresh();
 				selectedTab = hardware;
 				content.clear();
 				content.add(hardware);

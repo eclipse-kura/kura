@@ -191,8 +191,8 @@ public class TabDhcpNatUi extends Composite implements Tab {
 //			radio1.setEnabled(false);
 //			radio2.setEnabled(false);
 //		} else {
-			if (selectedNetIfConfig.getHwTypeEnum() == GwtNetIfType.WIFI && wirelessTab != null
-					&& (wirelessTab.getWirelessMode() == GwtWifiWirelessMode.netWifiWirelessModeStation || wirelessTab.getWirelessMode() == GwtWifiWirelessMode.netWifiWirelessModeDisabled)) {
+			if ( selectedNetIfConfig.getHwTypeEnum() == GwtNetIfType.WIFI && wirelessTab != null && 
+				 (wirelessTab.getWirelessMode() == GwtWifiWirelessMode.netWifiWirelessModeStation || wirelessTab.getWirelessMode() == GwtWifiWirelessMode.netWifiWirelessModeDisabled)) {
 				router.setEnabled(false);
 				begin.setEnabled(false);
 				end.setEnabled(false);
@@ -212,8 +212,8 @@ public class TabDhcpNatUi extends Composite implements Tab {
 				radio2.setEnabled(true);
 
 				String modeValue = router.getSelectedItemText();
-				if (modeValue == MessageUtils.get(GwtNetRouterMode.netRouterNat.name())
-						|| modeValue == MessageUtils.get(GwtNetRouterMode.netRouterOff.name())) {
+				if ( modeValue.equals(MessageUtils.get(GwtNetRouterMode.netRouterNat.name())) || 
+					 modeValue.equals(MessageUtils.get(GwtNetRouterMode.netRouterOff.name())) ) {
 					router.setEnabled(true);
 					begin.setEnabled(false);
 					end.setEnabled(false);
@@ -289,6 +289,7 @@ public class TabDhcpNatUi extends Composite implements Tab {
 					groupRouter.setValidationState(ValidationState.NONE);
 					helpRouter.setText("");
 				}
+				refreshForm();
 			}
 		});
 

@@ -648,7 +648,6 @@ public class TabTcpIpUi extends Composite implements Tab {
 				String configureVal= configure.getItemText(0);
 				configure.setSelectedIndex(configureVal.equals(MessageUtils.get(GwtNetIfConfigMode.netIPv4ConfigModeDHCP.name())) ? 0 : 1);
 				ip.setText("");
-				status.setEnabled(false);
 				configure.setEnabled(false);
 				ip.setEnabled(false);
 				subnet.setEnabled(false);
@@ -690,8 +689,8 @@ public class TabTcpIpUi extends Composite implements Tab {
 		// Show read-only dns field when DHCP is selected and there are no
 		// custom DNS entries
 		String configureValue = configure.getSelectedItemText();
-		if (configureValue.equals(MessageUtils.get(GwtNetIfConfigMode.netIPv4ConfigModeDHCP.name()))
-				&& (dns.getValue() == null || dns.getValue().isEmpty())) {
+		if ( configureValue.equals(MessageUtils.get(GwtNetIfConfigMode.netIPv4ConfigModeDHCP.name())) && 
+			 (dns.getValue() == null || dns.getValue().isEmpty()) ) {
 			dnsRead.setVisible(true);
 		} else {
 			dnsRead.setVisible(false);
@@ -722,6 +721,7 @@ public class TabTcpIpUi extends Composite implements Tab {
 	}
 	
 	private void enableFields() {
+		configure.setEnabled(true);
 		if (configure.getSelectedItemText().equalsIgnoreCase(VMSGS.netIPv4ConfigModeDHCP())) {
 			// Using DHCP selected
 			ip.setEnabled(false);

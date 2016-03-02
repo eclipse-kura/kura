@@ -42,9 +42,7 @@ import org.eclipse.kura.linux.net.dhcp.DhcpClientManager;
 import org.eclipse.kura.linux.net.dhcp.DhcpServerManager;
 import org.eclipse.kura.linux.net.dns.LinuxNamed;
 import org.eclipse.kura.linux.net.iptables.LinuxFirewall;
-import org.eclipse.kura.linux.net.iptables.LocalRule;
 import org.eclipse.kura.linux.net.iptables.NATRule;
-import org.eclipse.kura.linux.net.iptables.PortForwardRule;
 import org.eclipse.kura.linux.net.util.IScanTool;
 import org.eclipse.kura.linux.net.util.KuraConstants;
 import org.eclipse.kura.linux.net.util.LinuxNetworkUtil;
@@ -53,7 +51,6 @@ import org.eclipse.kura.linux.net.wifi.HostapdManager;
 import org.eclipse.kura.linux.net.wifi.WpaSupplicant;
 import org.eclipse.kura.linux.net.wifi.WpaSupplicantManager;
 import org.eclipse.kura.linux.net.wifi.WpaSupplicantStatus;
-import org.eclipse.kura.net.IP4Address;
 import org.eclipse.kura.net.IPAddress;
 import org.eclipse.kura.net.NetConfig;
 import org.eclipse.kura.net.NetConfig6;
@@ -63,9 +60,8 @@ import org.eclipse.kura.net.NetInterfaceAddressConfig;
 import org.eclipse.kura.net.NetInterfaceConfig;
 import org.eclipse.kura.net.NetInterfaceStatus;
 import org.eclipse.kura.net.NetInterfaceType;
-import org.eclipse.kura.net.NetProtocol;
 import org.eclipse.kura.net.NetworkAdminService;
-import org.eclipse.kura.net.NetworkPair;
+import org.eclipse.kura.net.admin.event.FirewallConfigurationChangeEvent;
 import org.eclipse.kura.net.admin.event.NetworkConfigurationChangeEvent;
 import org.eclipse.kura.net.admin.visitor.linux.WpaSupplicantConfigWriter;
 import org.eclipse.kura.net.admin.visitor.linux.util.KuranetConfig;
@@ -73,9 +69,7 @@ import org.eclipse.kura.net.dhcp.DhcpServerConfigIP4;
 import org.eclipse.kura.net.firewall.FirewallAutoNatConfig;
 import org.eclipse.kura.net.firewall.FirewallNatConfig;
 import org.eclipse.kura.net.firewall.FirewallOpenPortConfigIP;
-import org.eclipse.kura.net.firewall.FirewallOpenPortConfigIP4;
 import org.eclipse.kura.net.firewall.FirewallPortForwardConfigIP;
-import org.eclipse.kura.net.firewall.FirewallPortForwardConfigIP4;
 import org.eclipse.kura.net.modem.ModemConfig;
 import org.eclipse.kura.net.wifi.WifiAccessPoint;
 import org.eclipse.kura.net.wifi.WifiConfig;
@@ -102,9 +96,11 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
     private ComponentContext                   m_ctx;
 	private ConfigurationService               m_configurationService;
 	private NetworkConfigurationService		   m_networkConfigurationService;
+	private FirewallConfigurationService 	   m_firewallConfigurationService;	
 	private SystemService 					   m_systemService;
 	
-	private boolean m_pendingChange = false;
+	private boolean m_pendingNetworkConfigurationChange = false;
+	private boolean m_pendingFirewallConfigurationChange = false;
 	
     private final static String[] EVENT_TOPICS = new String[] {
         NetworkConfigurationChangeEvent.NETWORK_EVENT_CONFIG_CHANGE_TOPIC,
@@ -137,6 +133,14 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
     
     public void unsetNetworkConfigurationService(NetworkConfigurationService networkConfigurationService) {
         m_networkConfigurationService = null;
+    }
+    
+    public void setFirewallConfigurationService(FirewallConfigurationService firewallConfigurationService) {
+        m_firewallConfigurationService = firewallConfigurationService;
+    }
+    
+    public void unsetFirewallConfigurationService(FirewallConfigurationService firewallConfigurationService) {
+        m_firewallConfigurationService = null;
     }
     
 	public void setSystemService(SystemService systemService) {
@@ -406,7 +410,7 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 			}
 			
 			if (configurationChanged) {
-			    submitConfiguration(modifiedInterfaceNames, newNetworkConfiguration);
+			    submitNetworkConfiguration(modifiedInterfaceNames, newNetworkConfiguration);
 			}
 		} catch (UnknownHostException e) {
 			e.printStackTrace();
@@ -623,7 +627,7 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 			}
 			
 			if (configurationChanged) {
-			    submitConfiguration(modifiedInterfaceNames, newNetworkConfiguration);
+			    submitNetworkConfiguration(modifiedInterfaceNames, newNetworkConfiguration);
 			}
 		} catch (UnknownHostException e) {
 			e.printStackTrace();
@@ -801,7 +805,7 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 			}
 			
 			if (configurationChanged) {
-			    submitConfiguration(modifiedInterfaceNames, newNetworkConfiguration);
+			    submitNetworkConfiguration(modifiedInterfaceNames, newNetworkConfiguration);
 			}
 		} catch (UnknownHostException e) {
 			e.printStackTrace();
@@ -957,6 +961,9 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 	public List<NetConfig> getFirewallConfiguration() throws KuraException {
 		
 		s_logger.debug("getting the firewall configuration");
+		return m_firewallConfigurationService.getFirewallConfiguration().getConfigs();
+		
+		/*
 		LinuxFirewall firewall = LinuxFirewall.getInstance();
 		List<NetConfig> netConfigs = new ArrayList<NetConfig>();
 
@@ -1025,12 +1032,16 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 		}
 
 		return netConfigs;
+		*/
 	}
 
 	@Override
 	public void setFirewallOpenPortConfiguration(
 			List<FirewallOpenPortConfigIP<? extends IPAddress>> firewallConfiguration)
 			throws KuraException {
+		
+		m_firewallConfigurationService.setFirewallOpenPortConfiguration(firewallConfiguration);
+		/*
 		s_logger.debug("Deleting local rules");
 		LinuxFirewall firewall = LinuxFirewall.getInstance();
 		firewall.deleteAllLocalRules();
@@ -1071,12 +1082,16 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 		}
 		
 		firewall.addLocalRules(localRules);
+		*/
 	}
 
 	@Override
 	public void setFirewallPortForwardingConfiguration(
 			List<FirewallPortForwardConfigIP<? extends IPAddress>> firewallConfiguration)
 			throws KuraException {
+		
+		m_firewallConfigurationService.setFirewallPortForwardingConfiguration(firewallConfiguration);
+		/*
 		s_logger.debug("Deleting port forward rules");
 		LinuxFirewall firewall = LinuxFirewall.getInstance();
 		firewall.deleteAllPortForwardRules();
@@ -1104,11 +1119,13 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 		}
 		
 		firewall.addPortForwardRules(portForwardRules);
+		*/
 	}
 	
 	@Override
 	public void setFirewallNatConfiguration(List<FirewallNatConfig> natConfigs) throws KuraException {
-		
+		m_firewallConfigurationService.setFirewallNatConfiguration(natConfigs);
+		/*
 		LinuxFirewall firewall = LinuxFirewall.getInstance();
 		firewall.deleteAllNatRules();
 		
@@ -1122,6 +1139,7 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 		}
 		
 		firewall.addNatRules(natRules);
+		*/
 	}
 	
 	public Map<String, WifiHotspotInfo> getWifiHotspots(String ifaceName) throws KuraException {
@@ -1481,7 +1499,9 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
         s_logger.debug("handleEvent - topic: {}", event.getTopic());
         String topic = event.getTopic();
         if(topic.equals(NetworkConfigurationChangeEvent.NETWORK_EVENT_CONFIG_CHANGE_TOPIC)) {
-            m_pendingChange = false;
+            m_pendingNetworkConfigurationChange = false;
+        } else if (topic.equals(FirewallConfigurationChangeEvent.FIREWALL_EVENT_CONFIG_CHANGE_TOPIC)) {
+        	m_pendingFirewallConfigurationChange = false;
         }
     }
     
@@ -1602,10 +1622,10 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 	
 	
 	// Submit new configuration, waiting for network configuration change event before returning
-	private void submitConfiguration(List<String> modifiedInterfaceNames, NetworkConfiguration networkConfiguration) throws KuraException {
+	private void submitNetworkConfiguration(List<String> modifiedInterfaceNames, NetworkConfiguration networkConfiguration) throws KuraException {
 		short timeout = 30;		// in seconds
 	    
-	    m_pendingChange = true;
+	    m_pendingNetworkConfigurationChange = true;
 	    if(modifiedInterfaceNames != null && !modifiedInterfaceNames.isEmpty()) {
 	    	networkConfiguration.setModifiedInterfaceNames(modifiedInterfaceNames);
 	    	s_logger.debug("Set modified interface names: {}", modifiedInterfaceNames.toString());
@@ -1613,7 +1633,7 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 	    m_networkConfigurationService.setNetworkConfiguration(networkConfiguration);
 	    m_configurationService.snapshot();
 	    
-        while(m_pendingChange && timeout > 0) {
+        while(m_pendingNetworkConfigurationChange && timeout > 0) {
             timeout -= 0.5;
             try {
                 Thread.sleep(500);
@@ -1622,9 +1642,32 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
             }
         }
         
-        if(m_pendingChange) {
+        if(m_pendingNetworkConfigurationChange) {
             s_logger.warn("Did not receive a network configuration change event");
-            m_pendingChange = false;
+            m_pendingNetworkConfigurationChange = false;
+        }
+	}
+	
+	private void submitFirewallConfiguration() throws KuraException {
+		// TODO
+		short timeout = 30;		// in seconds
+	    
+	    m_pendingFirewallConfigurationChange = true;
+	    
+	    m_configurationService.snapshot();
+	    
+        while(m_pendingFirewallConfigurationChange && timeout > 0) {
+            timeout -= 0.5;
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException e) {
+                // ignore
+            }
+        }
+        
+        if(m_pendingFirewallConfigurationChange) {
+            s_logger.warn("Did not receive a firewall configuration change event");
+            m_pendingFirewallConfigurationChange = false;
         }
 	}
 	

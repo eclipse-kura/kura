@@ -13,6 +13,19 @@
 
 -->
 <esf:configurations xmlns:ocd="http://www.osgi.org/xmlns/metatype/v1.2.0" xmlns:esf="http://eurotech.com/esf/2.0">
+    <esf:configuration pid="org.eclipse.kura.net.admin.FirewallConfigurationService">
+	<esf:properties>
+	    <esf:property array="false" encrypted="false" name="firewall.open.ports" type="String">
+                <esf:value>22,tcp,,,,,#;80,tcp,,eth0,,,#;80,tcp,,wlan0,,,#;80,tcp,10.234.0.0/16,,,,#;1450,tcp,,eth0,,,#;1450,tcp,,wlan0,,,#;502,tcp,127.0.0.1/32,,,,#;53,udp,,eth0,,,#;53,udp,,wlan0,,,#;67,udp,,eth0,,,#;67,udp,,wlan0,,,#;8000,tcp,,eth0,,,#;8000,tcp,,wlan0,,,#</esf:value>
+            </esf:property>
+	    <esf:property array="false" encrypted="false" name="firewall.port.forwarding" type="String">
+                <esf:value></esf:value>
+            </esf:property>
+	    <esf:property array="false" encrypted="false" name="firewall.nat" type="String">
+                <esf:value></esf:value>
+            </esf:property>
+	</esf:properties>
+    </esf:configuration>
     <esf:configuration pid="org.eclipse.kura.net.admin.NetworkConfigurationService">
         <esf:properties>
             <esf:property name="net.interface.wlan0.config.wifi.master.broadcast" array="false" encrypted="false" type="Boolean">

@@ -25,7 +25,4 @@
       <provide interface="org.eclipse.kura.net.admin.FirewallConfigurationService"/>
    </service>
    <reference bind="setEventAdmin" cardinality="1..1" interface="org.osgi.service.event.EventAdmin" name="EventAdmin" policy="static" unbind="unsetEventAdmin"/>
-<!--
-   <reference bind="setNetworkAdminService" cardinality="1..1" interface="org.eclipse.kura.net.NetworkAdminService" name="NetworkAdminService" policy="static" unbind="unsetNetworkAdminService"/>
--->
 </scr:component>

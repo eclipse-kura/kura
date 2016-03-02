@@ -42,17 +42,6 @@ public class FirewallConfigurationServiceImpl implements
 	private static final Logger s_logger = LoggerFactory.getLogger(FirewallConfigurationServiceImpl.class);
 
 	private EventAdmin m_eventAdmin;
-	/*
-	private NetworkAdminService m_netAdminService;
-	
-	public void setNetworkAdminService(NetworkAdminService netAdminService) {
-    	m_netAdminService = netAdminService;
-    }
-    
-    public void unsetNetworkAdminService(NetworkAdminService netAdminService) {
-    	m_netAdminService = null;
-    }
-    */
 	
 	public void setEventAdmin(EventAdmin eventAdmin) {
 		m_eventAdmin = eventAdmin;
@@ -114,15 +103,18 @@ public class FirewallConfigurationServiceImpl implements
 	@Override
 	public FirewallConfiguration getFirewallConfiguration() throws KuraException  {
 		
+		s_logger.warn("<IAB> [+] getFirewallConfiguration()");
+		s_logger.debug("getting the firewall configuration");
+		
 		FirewallConfiguration firewallConfiguration = new FirewallConfiguration();
 		
-		s_logger.debug("getting the firewall configuration");
 		LinuxFirewall firewall = LinuxFirewall.getInstance();
 
 		Iterator<LocalRule> localRules = firewall.getLocalRules().iterator();
 		while(localRules.hasNext()) {
 		    LocalRule localRule = localRules.next();
 		    if (localRule.getPortRange() != null) {
+		    	s_logger.warn("<IAB> getFirewallConfiguration() :: Adding local rule for {}", localRule.getPortRange());
 		    	s_logger.debug("Adding local rule for {}", localRule.getPortRange());
 		    	firewallConfiguration.addConfig(new FirewallOpenPortConfigIP4(localRule.getPortRange(), 
 						NetProtocol.valueOf(localRule.getProtocol()), 
@@ -132,6 +124,7 @@ public class FirewallConfigurationServiceImpl implements
 						localRule.getPermittedMAC(), 
 						localRule.getSourcePortRange()));
 		    } else {
+		    	s_logger.warn("<IAB> getFirewallConfiguration() :: Adding local rule for {}", localRule.getPort());
 				s_logger.debug("Adding local rule for {}", localRule.getPort());
 				firewallConfiguration.addConfig(new FirewallOpenPortConfigIP4(localRule.getPort(), 
 						NetProtocol.valueOf(localRule.getProtocol()), 
@@ -146,6 +139,7 @@ public class FirewallConfigurationServiceImpl implements
 		while(portForwardRules.hasNext()) {
 		    PortForwardRule portForwardRule = portForwardRules.next();
 			try {
+				s_logger.warn("<IAB> getFirewallConfiguration() :: Adding port forwarding - inbound iface is {}", portForwardRule.getInboundIface());
 				s_logger.debug("Adding port forwarding - inbound iface is {}", portForwardRule.getInboundIface());
 				firewallConfiguration.addConfig(new FirewallPortForwardConfigIP4(portForwardRule.getInboundIface(),
 						portForwardRule.getOutboundIface(),
@@ -166,7 +160,8 @@ public class FirewallConfigurationServiceImpl implements
 		Iterator<NATRule> autoNatRules = firewall.getAutoNatRules().iterator();
 		while(autoNatRules.hasNext()) {
 		    NATRule autoNatRule = autoNatRules.next();
-			s_logger.debug("Adding auto NAT rules {}", autoNatRule.getSourceInterface() );
+		    s_logger.warn("<IAB> getFirewallConfiguration() :: Adding auto NAT rules {}", autoNatRule.getSourceInterface());
+			s_logger.debug("Adding auto NAT rules {}", autoNatRule.getSourceInterface());
 			firewallConfiguration.addConfig(new FirewallAutoNatConfig(autoNatRule.getSourceInterface(),
 					autoNatRule.getDestinationInterface(),
 					autoNatRule.isMasquerade()));
@@ -175,12 +170,14 @@ public class FirewallConfigurationServiceImpl implements
 		Iterator<NATRule> natRules = firewall.getNatRules().iterator();
 		while (natRules.hasNext()) {
 		    NATRule natRule = natRules.next();
+		    s_logger.warn("<IAB> getFirewallConfiguration() :: Adding NAT rules {}", natRule.getSourceInterface());
 			s_logger.debug("Adding NAT rules {}", natRule.getSourceInterface());
 			firewallConfiguration.addConfig(new FirewallNatConfig(natRule.getSourceInterface(),
 					natRule.getDestinationInterface(), natRule.getProtocol(),
 					natRule.getSource(), natRule.getDestination(), natRule.isMasquerade()));
 		}
 		
+		s_logger.warn("<IAB> [-] getFirewallConfiguration()");
 		return firewallConfiguration;
 	}
 

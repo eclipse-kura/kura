@@ -378,7 +378,6 @@ public class NetworkTabsUi extends Composite {
 	}
 
 	private void insertTab(AnchorListItem tab, int index) {
-		logger.info("inserting - " + tab.getText() + " at - " + index);
 		if (!visibleTabs.contains(tab)) {
 			visibleTabs.add(index, tab);
 		}

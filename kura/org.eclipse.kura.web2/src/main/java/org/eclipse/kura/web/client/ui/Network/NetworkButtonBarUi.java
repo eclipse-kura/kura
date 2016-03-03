@@ -17,6 +17,8 @@ import java.util.logging.Logger;
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.ui.EntryClassUi;
 import org.eclipse.kura.web.client.util.FailureHandler;
+import org.eclipse.kura.web.shared.GwtKuraErrorCode;
+import org.eclipse.kura.web.shared.GwtKuraException;
 import org.eclipse.kura.web.shared.model.GwtNetIfConfigMode;
 import org.eclipse.kura.web.shared.model.GwtNetInterfaceConfig;
 import org.eclipse.kura.web.shared.model.GwtSession;
@@ -156,6 +158,8 @@ public class NetworkButtonBarUi extends Composite {
 					}
 				} else {
 					logger.log(Level.FINER, MSGS.information() + ": " + MSGS.deviceConfigError());
+					GwtKuraException e= new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT); //TODO: improve message
+					FailureHandler.handle(e);
 				}
 			}
 

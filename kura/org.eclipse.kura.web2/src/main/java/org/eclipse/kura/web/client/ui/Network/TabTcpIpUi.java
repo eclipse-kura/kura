@@ -130,9 +130,9 @@ public class TabTcpIpUi extends Composite implements Tab {
 		}
 		
 		selectedNetIfConfig = config;
-		logger.info(selectedNetIfConfig.getName());
-		logger.info(selectedNetIfConfig.getConfigMode());
-		logger.info(selectedNetIfConfig.getIpAddress());
+		logger.fine(selectedNetIfConfig.getName());
+		logger.fine(selectedNetIfConfig.getConfigMode());
+		logger.fine(selectedNetIfConfig.getIpAddress());
 
 		// Remove LAN option for modems
 		if (selectedNetIfConfig != null	&& selectedNetIfConfig.getHwTypeEnum() == GwtNetIfType.MODEM) {

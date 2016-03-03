@@ -1116,13 +1116,13 @@ public class TabWirelessUi extends Composite implements Tab {
 
 	private void setPasswordValidation() {
 
-		if (security.getSelectedItemText() == MessageUtils.get(GwtWifiSecurity.netWifiSecurityWPA.name())) {
+		if (security.getSelectedItemText().equals(MessageUtils.get(GwtWifiSecurity.netWifiSecurityWPA.name()))) {
 			passwordRegex = REGEX_PASSWORD_WPA;
 			passwordError = MSGS.netWifiWirelessInvalidWPAPassword();
-		} else if (security.getSelectedItemText() == MessageUtils.get(GwtWifiSecurity.netWifiSecurityWPA2.name())) {
+		} else if (security.getSelectedItemText().equals(MessageUtils.get(GwtWifiSecurity.netWifiSecurityWPA2.name()))) {
 			passwordRegex = REGEX_PASSWORD_WPA;
 			passwordError = MSGS.netWifiWirelessInvalidWPAPassword();
-		} else if (security.getSelectedItemText() == MessageUtils.get(GwtWifiSecurity.netWifiSecurityWEP.name())) {
+		} else if (security.getSelectedItemText().equals(MessageUtils.get(GwtWifiSecurity.netWifiSecurityWEP.name()))) {
 			passwordRegex = REGEX_PASSWORD_WEP;
 			passwordError = MSGS.netWifiWirelessInvalidWEPPassword();
 		} else {

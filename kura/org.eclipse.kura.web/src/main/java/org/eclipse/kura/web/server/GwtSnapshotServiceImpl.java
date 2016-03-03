@@ -69,7 +69,6 @@ public class GwtSnapshotServiceImpl extends OsgiRemoteServiceServlet implements 
 		return new BaseListLoadResult<GwtSnapshot>(snapshots);
 	}
 
-
 	public void rollbackDeviceSnapshot(GwtXSRFToken xsrfToken, GwtSnapshot snapshot) 
 		throws GwtKuraException
 	{
@@ -91,6 +90,7 @@ public class GwtSnapshotServiceImpl extends OsgiRemoteServiceServlet implements 
             	Thread.sleep(delay);
             }	
             
+            /*
             if (snapshot.getSnapshotId() == 0L) {
             	nas = locator.getService(NetworkAdminService.class);
 				if (nas != null) {
@@ -106,6 +106,7 @@ public class GwtSnapshotServiceImpl extends OsgiRemoteServiceServlet implements 
             	s_logger.debug("rollbackDeviceSnapshot() :: rolling back default firewall configuration ...");
             	nas.rollbackDefaultFirewallConfiguration();
             }
+            */
 		} 
 		catch(Throwable t) {
 			KuraExceptionHandler.handle(t);

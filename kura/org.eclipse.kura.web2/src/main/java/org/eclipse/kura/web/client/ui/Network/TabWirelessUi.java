@@ -264,6 +264,31 @@ public class TabWirelessUi extends Composite implements Tab {
 		}
 
 	}
+	
+	public void getUpdatedNetInterface(GwtNetInterfaceConfig updatedNetIf) {
+		GwtWifiNetInterfaceConfig updatedWifiNetIf = (GwtWifiNetInterfaceConfig) updatedNetIf;
+
+		if(session!=null){
+			GwtWifiConfig updatedWifiConfig = getGwtWifiConfig();
+			updatedWifiNetIf.setWirelessMode(updatedWifiConfig.getWirelessMode());
+
+			//update the wifi config
+			updatedWifiNetIf.setWifiConfig(updatedWifiConfig);
+		}else{
+			if(selectedNetIfConfig!=null){
+				updatedWifiNetIf.setAccessPointWifiConfig(selectedNetIfConfig.getAccessPointWifiConfigProps());
+				updatedWifiNetIf.setStationWifiConfig(selectedNetIfConfig.getStationWifiConfigProps());
+
+				//select the correct mode
+				for(GwtWifiWirelessMode mode: GwtWifiWirelessMode.values()){
+					if(mode.name().equals(selectedNetIfConfig.getWirelessMode())){
+						updatedWifiNetIf.setWirelessMode(mode.name());
+					}
+				}
+			}
+		}
+	}
+	
 
 	// -----Private methods-------//
 	private void update() {
@@ -646,6 +671,7 @@ public class TabWirelessUi extends Composite implements Tab {
 			public void onChange(ChangeEvent event) {
 				setPasswordValidation();
 				refreshForm();
+				checkPassword();
 			}
 		});
 
@@ -714,13 +740,7 @@ public class TabWirelessUi extends Composite implements Tab {
 			@Override
 			public void onChange(ChangeEvent event) {
 				refreshForm();
-				if (!password.getText().matches(passwordRegex)) {
-					groupPassword.setValidationState(ValidationState.ERROR);
-					helpPassword.setText(passwordError);
-				} else {
-					groupPassword.setValidationState(ValidationState.NONE);
-					helpPassword.setText("");
-				}
+				checkPassword();
 			}
 		});
 
@@ -1421,28 +1441,14 @@ public class TabWirelessUi extends Composite implements Tab {
 		radio4.setEnabled(b);
 		groupVerify.setVisible(b);
 	}
-
-	public void getUpdatedNetInterface(GwtNetInterfaceConfig updatedNetIf) {
-		GwtWifiNetInterfaceConfig updatedWifiNetIf = (GwtWifiNetInterfaceConfig) updatedNetIf;
-
-		if(session!=null){
-			GwtWifiConfig updatedWifiConfig = getGwtWifiConfig();
-			updatedWifiNetIf.setWirelessMode(updatedWifiConfig.getWirelessMode());
-
-			//update the wifi config
-			updatedWifiNetIf.setWifiConfig(updatedWifiConfig);
-		}else{
-			if(selectedNetIfConfig!=null){
-				updatedWifiNetIf.setAccessPointWifiConfig(selectedNetIfConfig.getAccessPointWifiConfigProps());
-				updatedWifiNetIf.setStationWifiConfig(selectedNetIfConfig.getStationWifiConfigProps());
-
-				//select the correct mode
-				for(GwtWifiWirelessMode mode: GwtWifiWirelessMode.values()){
-					if(mode.name().equals(selectedNetIfConfig.getWirelessMode())){
-						updatedWifiNetIf.setWirelessMode(mode.name());
-					}
-				}
-			}
+	
+	private void checkPassword() {
+		if (!password.getText().matches(passwordRegex)) {
+			groupPassword.setValidationState(ValidationState.ERROR);
+			helpPassword.setText(passwordError);
+		} else {
+			groupPassword.setValidationState(ValidationState.NONE);
+			helpPassword.setText("");
 		}
 	}
 }

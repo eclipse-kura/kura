@@ -35,6 +35,8 @@ import org.gwtbootstrap3.client.ui.constants.ValidationState;
 import org.gwtbootstrap3.client.ui.html.Span;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.BlurEvent;
+import com.google.gwt.event.dom.client.BlurHandler;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.MouseOutEvent;
@@ -114,13 +116,35 @@ public class TabModemUi extends Composite implements Tab {
 	}
 
 	public boolean isValid(){
-		if(groupNumber.getValidationState().equals(ValidationState.ERROR)
-				||groupDial.getValidationState().equals(ValidationState.ERROR)
-				||groupApn.getValidationState().equals(ValidationState.ERROR)
-				||groupMaxfail.getValidationState().equals(ValidationState.ERROR)
-				||groupIdle.getValidationState().equals(ValidationState.ERROR)
-				||groupInterval.getValidationState().equals(ValidationState.ERROR)
-				||groupFailure.getValidationState().equals(ValidationState.ERROR)){
+		if (number.getText() == null || "".equals(number.getText().trim())) {
+			groupNumber.setValidationState(ValidationState.ERROR);
+		}
+		if (dial.getText() == null || "".equals(dial.getText().trim())) {
+			groupDial.setValidationState(ValidationState.ERROR);
+		}
+		if (apn.getText() == null || "".equals(apn.getText().trim())) {
+			groupApn.setValidationState(ValidationState.ERROR);
+		}
+		if (maxfail.getText() == null || "".equals(maxfail.getText().trim())) {
+			groupMaxfail.setValidationState(ValidationState.ERROR);
+		}
+		if (idle.getText() == null || "".equals(idle.getText().trim())) {
+			groupIdle.setValidationState(ValidationState.ERROR);
+		}
+		if (interval.getText() == null || "".equals(interval.getText().trim())) {
+			groupInterval.setValidationState(ValidationState.ERROR);
+		}
+		if (failure.getText() == null || "".equals(failure.getText().trim())) {
+			groupFailure.setValidationState(ValidationState.ERROR);
+		}
+		
+		if( groupNumber.getValidationState().equals(ValidationState.ERROR)   ||
+			groupDial.getValidationState().equals(ValidationState.ERROR)     ||
+			groupApn.getValidationState().equals(ValidationState.ERROR)      || 
+			groupMaxfail.getValidationState().equals(ValidationState.ERROR)  ||
+			groupIdle.getValidationState().equals(ValidationState.ERROR)     ||
+			groupInterval.getValidationState().equals(ValidationState.ERROR) ||
+			groupFailure.getValidationState().equals(ValidationState.ERROR)){
 			return false;
 		}else{
 			return true;
@@ -262,9 +286,9 @@ public class TabModemUi extends Composite implements Tab {
 
 		// INTERFACE NUMBER
 		labelNumber.setText(MSGS.netModemInterfaceNum() + "*");
-		number.addChangeHandler(new ChangeHandler() {
+		number.addBlurHandler(new BlurHandler() {
 			@Override
-			public void onChange(ChangeEvent event) {
+			public void onBlur(BlurEvent event) {
 				setDirty(true);
 				if ( number.getText().trim() != null && 
 					 ( !number.getText().trim().matches(REGEX_NUM) || 
@@ -292,9 +316,9 @@ public class TabModemUi extends Composite implements Tab {
 				resetHelp();
 			}
 		});
-		if (number.getText().trim() == "" || number.getText() == null) {
-			groupNumber.setValidationState(ValidationState.ERROR);
-		}
+//		if (number.getText() == null || "".equals(number.getText().trim())) {
+//			groupNumber.setValidationState(ValidationState.ERROR);
+//		}
 
 
 		// DIAL STRING
@@ -333,20 +357,19 @@ public class TabModemUi extends Composite implements Tab {
 				}
 			}
 		});
-		dial.addChangeHandler(new ChangeHandler(){
-
+		dial.addBlurHandler(new BlurHandler() {
 			@Override
-			public void onChange(ChangeEvent event) {
+			public void onBlur(BlurEvent event) {
 				setDirty(true);
-				if (dial.getText().trim() == "" || dial.getText() == null) {
+				if (dial.getText() == null || "".equals(dial.getText().trim())) {
 					groupDial.setValidationState(ValidationState.ERROR);
 				}else{
 					groupDial.setValidationState(ValidationState.NONE);
 				}
 			}});
-		if (dial.getText().trim() == "" || dial.getText() == null) {
-			groupDial.setValidationState(ValidationState.ERROR);
-		}
+//		if (dial.getText() == null || "".equals(dial.getText().trim())) {
+//			groupDial.setValidationState(ValidationState.ERROR);
+//		}
 
 		// APN
 		labelApn.setText(MSGS.netModemAPN()+"*");
@@ -365,19 +388,19 @@ public class TabModemUi extends Composite implements Tab {
 				resetHelp();
 			}
 		});
-		apn.addChangeHandler(new ChangeHandler(){
+		apn.addBlurHandler(new BlurHandler() {
 			@Override
-			public void onChange(ChangeEvent event) {
+			public void onBlur(BlurEvent event) {
 				setDirty(true);
-				if(apn.getText().trim()==""|| apn.getText()==null){
+				if(apn.getText() == null || "".equals(apn.getText().trim())){
 					groupApn.setValidationState(ValidationState.ERROR);
 				}else{
 					groupApn.setValidationState(ValidationState.NONE);
 				}
 			}});
-		if (apn.getText().trim() == "" || apn.getText() == null) {
-			groupApn.setValidationState(ValidationState.ERROR);
-		}
+//		if (apn.getText() == null || "".equals(apn.getText().trim())) {
+//			groupApn.setValidationState(ValidationState.ERROR);
+//		}
 
 		// AUTH TYPE
 		labelAuth.setText(MSGS.netModemAuthType());
@@ -470,9 +493,9 @@ public class TabModemUi extends Composite implements Tab {
 				resetHelp();
 			}
 		});
-		reset.addChangeHandler(new ChangeHandler() {
+		reset.addBlurHandler(new BlurHandler() {
 			@Override
-			public void onChange(ChangeEvent event) {
+			public void onBlur(BlurEvent event) {
 				setDirty(true);
 				if ( reset.getText().trim() != null && 
 					 ( !reset.getText().trim().matches(REGEX_NUM) || 
@@ -486,9 +509,9 @@ public class TabModemUi extends Composite implements Tab {
 				}
 			}
 		});
-		if (reset.getText().trim() == "" || reset.getText() == null) {
-			groupReset.setValidationState(ValidationState.ERROR);
-		}
+//		if (reset.getText() == null || "".equals(reset.getText().trim())) {
+//			groupReset.setValidationState(ValidationState.ERROR);
+//		}
 
 		// REOPEN CONNECTION ON TERMINATION
 		labelPersist.setText(MSGS.netModemPersist());
@@ -552,9 +575,9 @@ public class TabModemUi extends Composite implements Tab {
 				resetHelp();
 			}
 		});
-		maxfail.addChangeHandler(new ChangeHandler() {
+		maxfail.addBlurHandler(new BlurHandler() {
 			@Override
-			public void onChange(ChangeEvent event) {
+			public void onBlur(BlurEvent event) {
 				setDirty(true);
 				if ( maxfail.getText().trim() != null && 
 					 ( !maxfail.getText().trim().matches(REGEX_NUM) || 
@@ -568,9 +591,9 @@ public class TabModemUi extends Composite implements Tab {
 				}
 			}
 		});
-		if (maxfail.getText().trim() == "" || maxfail.getText() == null) {
-			groupMaxfail.setValidationState(ValidationState.ERROR);
-		}
+//		if (maxfail.getText() == null || "".equals(maxfail.getText().trim())) {
+//			groupMaxfail.setValidationState(ValidationState.ERROR);
+//		}
 
 		// DISCONNET IF IDLE
 		labelIdle.setText(MSGS.netModemIdle()+"*");
@@ -589,9 +612,9 @@ public class TabModemUi extends Composite implements Tab {
 				resetHelp();
 			}
 		});
-		idle.addChangeHandler(new ChangeHandler() {
+		idle.addBlurHandler(new BlurHandler() {
 			@Override
-			public void onChange(ChangeEvent event) {
+			public void onBlur(BlurEvent event) {
 				setDirty(true);
 				if ( idle.getText().trim() != null && 
 					 ( !idle.getText().trim().matches(REGEX_NUM) || 
@@ -604,9 +627,9 @@ public class TabModemUi extends Composite implements Tab {
 				}
 			}
 		});
-		if (idle.getText().trim() == "" || idle.getText() == null) {
-			groupIdle.setValidationState(ValidationState.ERROR);
-		}
+//		if (idle.getText() == null || "".equals(idle.getText().trim())) {
+//			groupIdle.setValidationState(ValidationState.ERROR);
+//		}
 
 		// ACTIVE FILTER
 		labelActive.setText(MSGS.netModemActiveFilter());
@@ -648,9 +671,9 @@ public class TabModemUi extends Composite implements Tab {
 				resetHelp();
 			}
 		});
-		interval.addChangeHandler(new ChangeHandler() {
+		interval.addBlurHandler(new BlurHandler() {
 			@Override
-			public void onChange(ChangeEvent event) {
+			public void onBlur(BlurEvent event) {
 				setDirty(true);
 				if ( interval.getText().trim() != null && 
 					 ( !interval.getText().trim().matches(REGEX_NUM) || 
@@ -662,9 +685,9 @@ public class TabModemUi extends Composite implements Tab {
 				}
 			}
 		});
-		if (interval.getText().trim() == "" || interval.getText() == null) {
-			groupInterval.setValidationState(ValidationState.ERROR);
-		}
+//		if (interval.getText() == null || "".equals(interval.getText().trim())) {
+//			groupInterval.setValidationState(ValidationState.ERROR);
+//		}
 
 		// LCP ECHO FAILURE
 		labelFailure.setText(MSGS.netModemLcpEchoFailure()+"*");
@@ -683,9 +706,9 @@ public class TabModemUi extends Composite implements Tab {
 				resetHelp();
 			}
 		});
-		failure.addChangeHandler(new ChangeHandler() {
+		failure.addBlurHandler(new BlurHandler() {
 			@Override
-			public void onChange(ChangeEvent event) {
+			public void onBlur(BlurEvent event) {
 				setDirty(true);
 				if ( failure.getText().trim() != null && 
 					 ( !failure.getText().trim().matches(REGEX_NUM) || 
@@ -698,9 +721,6 @@ public class TabModemUi extends Composite implements Tab {
 				}
 			}
 		});
-		if (failure.getText().trim() == "" || failure.getText() == null) {
-			groupFailure.setValidationState(ValidationState.ERROR);
-		}
 
 		// ENABLE GPS
 		labelGps.setText(MSGS.netModemEnableGps());
@@ -809,10 +829,8 @@ public class TabModemUi extends Composite implements Tab {
 			maxfail.setText(String.valueOf(selectedNetIfConfig.getMaxFail()));
 			idle.setText(String.valueOf(selectedNetIfConfig.getIdle()));
 			active.setText(selectedNetIfConfig.getActiveFilter());
-			interval.setText(String.valueOf(selectedNetIfConfig
-					.getLcpEchoInterval()));
-			failure.setText(String.valueOf(selectedNetIfConfig
-					.getLcpEchoFailure()));
+			interval.setText(String.valueOf(selectedNetIfConfig.getLcpEchoInterval()));
+			failure.setText(String.valueOf(selectedNetIfConfig.getLcpEchoFailure()));
 
 			if (selectedNetIfConfig.isGpsEnabled()) {
 				radio3.setActive(true);

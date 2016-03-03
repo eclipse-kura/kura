@@ -52,30 +52,26 @@ public class FirewallConfigurationServiceImpl implements
 	}
 	
 	protected void activate(ComponentContext componentContext, Map<String, Object> properties) {
-		s_logger.warn("<IAB> [+] activate()");
+		s_logger.debug("activate()");
 		
 		// we are intentionally ignoring the properties from ConfigAdmin at startup
         if(properties == null) {
-        	s_logger.warn("<IAB> activate() :: Got null properties...");
+        	s_logger.debug("activate() :: Got null properties...");
         } else {
-        	s_logger.warn("<IAB> activate() :: Props... {}", properties);
-        	/*
         	for (String key : properties.keySet()) {
-    			s_logger.warn("<IAB> activate() :: Props... {}={}", key, properties.get(key));
+    			s_logger.debug("activate() :: Props... {}={}", key, properties.get(key));
     		}
-    		*/
         }
-		s_logger.warn("<IAB> [-] activate()");
 	}
 	
 	protected void deactivate(ComponentContext componentContext) {
-		s_logger.warn("<IAB> [+] deactivate()");
+		s_logger.debug("deactivate()");
 	}
 
 	public synchronized void updated(Map<String, Object> properties) {
-		s_logger.warn("<IAB> [+] [###] updated()");
+		s_logger.debug("updated()");
 		for (String key : properties.keySet()) {
-			s_logger.warn("<IAB> updated() :: Props... {}={}", key, properties.get(key));
+			s_logger.debug("updated() :: Props... {}={}", key, properties.get(key));
 		}
 		FirewallConfiguration firewallConfiguration = new FirewallConfiguration(properties);
 		try {
@@ -96,26 +92,20 @@ public class FirewallConfigurationServiceImpl implements
 		
 		//raise the event because there was a change
 		m_eventAdmin.postEvent(new FirewallConfigurationChangeEvent(properties));
-		
-		s_logger.warn("<IAB> [-] [###] updated()");
 	}
 	
 	@Override
 	public FirewallConfiguration getFirewallConfiguration() throws KuraException  {
-		
-		s_logger.warn("<IAB> [+] getFirewallConfiguration()");
 		s_logger.debug("getting the firewall configuration");
 		
 		FirewallConfiguration firewallConfiguration = new FirewallConfiguration();
-		
 		LinuxFirewall firewall = LinuxFirewall.getInstance();
 
 		Iterator<LocalRule> localRules = firewall.getLocalRules().iterator();
 		while(localRules.hasNext()) {
 		    LocalRule localRule = localRules.next();
 		    if (localRule.getPortRange() != null) {
-		    	s_logger.warn("<IAB> getFirewallConfiguration() :: Adding local rule for {}", localRule.getPortRange());
-		    	s_logger.debug("Adding local rule for {}", localRule.getPortRange());
+		    	s_logger.debug("getFirewallConfiguration() :: Adding local rule for {}", localRule.getPortRange());
 		    	firewallConfiguration.addConfig(new FirewallOpenPortConfigIP4(localRule.getPortRange(), 
 						NetProtocol.valueOf(localRule.getProtocol()), 
 						localRule.getPermittedNetwork(),
@@ -124,8 +114,7 @@ public class FirewallConfigurationServiceImpl implements
 						localRule.getPermittedMAC(), 
 						localRule.getSourcePortRange()));
 		    } else {
-		    	s_logger.warn("<IAB> getFirewallConfiguration() :: Adding local rule for {}", localRule.getPort());
-				s_logger.debug("Adding local rule for {}", localRule.getPort());
+				s_logger.debug("getFirewallConfiguration() :: Adding local rule for {}", localRule.getPort());
 				firewallConfiguration.addConfig(new FirewallOpenPortConfigIP4(localRule.getPort(), 
 						NetProtocol.valueOf(localRule.getProtocol()), 
 						localRule.getPermittedNetwork(),
@@ -139,8 +128,7 @@ public class FirewallConfigurationServiceImpl implements
 		while(portForwardRules.hasNext()) {
 		    PortForwardRule portForwardRule = portForwardRules.next();
 			try {
-				s_logger.warn("<IAB> getFirewallConfiguration() :: Adding port forwarding - inbound iface is {}", portForwardRule.getInboundIface());
-				s_logger.debug("Adding port forwarding - inbound iface is {}", portForwardRule.getInboundIface());
+				s_logger.debug("getFirewallConfiguration() :: Adding port forwarding - inbound iface is {}", portForwardRule.getInboundIface());
 				firewallConfiguration.addConfig(new FirewallPortForwardConfigIP4(portForwardRule.getInboundIface(),
 						portForwardRule.getOutboundIface(),
 						(IP4Address) IPAddress.parseHostAddress(portForwardRule.getAddress()),
@@ -160,8 +148,7 @@ public class FirewallConfigurationServiceImpl implements
 		Iterator<NATRule> autoNatRules = firewall.getAutoNatRules().iterator();
 		while(autoNatRules.hasNext()) {
 		    NATRule autoNatRule = autoNatRules.next();
-		    s_logger.warn("<IAB> getFirewallConfiguration() :: Adding auto NAT rules {}", autoNatRule.getSourceInterface());
-			s_logger.debug("Adding auto NAT rules {}", autoNatRule.getSourceInterface());
+			s_logger.debug("getFirewallConfiguration() :: Adding auto NAT rules {}", autoNatRule.getSourceInterface());
 			firewallConfiguration.addConfig(new FirewallAutoNatConfig(autoNatRule.getSourceInterface(),
 					autoNatRule.getDestinationInterface(),
 					autoNatRule.isMasquerade()));
@@ -170,27 +157,17 @@ public class FirewallConfigurationServiceImpl implements
 		Iterator<NATRule> natRules = firewall.getNatRules().iterator();
 		while (natRules.hasNext()) {
 		    NATRule natRule = natRules.next();
-		    s_logger.warn("<IAB> getFirewallConfiguration() :: Adding NAT rules {}", natRule.getSourceInterface());
-			s_logger.debug("Adding NAT rules {}", natRule.getSourceInterface());
+			s_logger.debug("getFirewallConfiguration() :: Adding NAT rules {}", natRule.getSourceInterface());
 			firewallConfiguration.addConfig(new FirewallNatConfig(natRule.getSourceInterface(),
 					natRule.getDestinationInterface(), natRule.getProtocol(),
 					natRule.getSource(), natRule.getDestination(), natRule.isMasquerade()));
 		}
-		
-		s_logger.warn("<IAB> [-] getFirewallConfiguration()");
 		return firewallConfiguration;
 	}
 
 	@Override
 	public ComponentConfiguration getConfiguration() throws KuraException {
-		s_logger.warn("<IAB> [+] getConfiguration()");
-
-		/*
-		for (StackTraceElement ste : Thread.currentThread().getStackTrace()) {
-			s_logger.warn("<IAB> STE: {}", ste);
-		}
-		*/
-		 
+		s_logger.debug("getConfiguration()"); 
 		try {
 			FirewallConfiguration firewallConfiguration = getFirewallConfiguration();
 			return new ComponentConfigurationImpl(PID, getDefinition(),
@@ -203,10 +180,10 @@ public class FirewallConfigurationServiceImpl implements
 	
 	
 	@Override
-	public void setFirewallOpenPortConfiguration(
+	public void setFirewallOpenPortConfiguration (
 			List<FirewallOpenPortConfigIP<? extends IPAddress>> firewallConfiguration)
 			throws KuraException {
-		s_logger.debug("Deleting local rules");
+		s_logger.debug("setFirewallOpenPortConfiguration() :: Deleting local rules");
 		LinuxFirewall firewall = LinuxFirewall.getInstance();
 		firewall.deleteAllLocalRules();
 		
@@ -223,7 +200,7 @@ public class FirewallConfigurationServiceImpl implements
 			try {
 				LocalRule localRule = null;
 				if (openPortEntry.getPortRange() != null) {
-					s_logger.debug("Adding local rule for: {}", openPortEntry.getPortRange());
+					s_logger.debug("setFirewallOpenPortConfiguration() :: Adding local rule for: {}", openPortEntry.getPortRange());
 					localRule = 
 						new LocalRule(openPortEntry.getPortRange(), openPortEntry.getProtocol().name(),				
 							new NetworkPair(IPAddress.parseHostAddress(openPortEntry.getPermittedNetwork().getIpAddress().getHostAddress()), 
@@ -231,7 +208,7 @@ public class FirewallConfigurationServiceImpl implements
 							openPortEntry.getPermittedInterfaceName(), openPortEntry.getUnpermittedInterfaceName(),
 							openPortEntry.getPermittedMac(), openPortEntry.getSourcePortRange());
 				} else {
-					s_logger.debug("Adding local rule for: {}", openPortEntry.getPort());
+					s_logger.debug("setFirewallOpenPortConfiguration() :: Adding local rule for: {}", openPortEntry.getPort());
 					localRule = 
 						new LocalRule(openPortEntry.getPort(), openPortEntry.getProtocol().name(),				
 								new NetworkPair(IPAddress.parseHostAddress(openPortEntry.getPermittedNetwork().getIpAddress().getHostAddress()), 
@@ -241,7 +218,7 @@ public class FirewallConfigurationServiceImpl implements
 				}
 				localRules.add(localRule);
 			} catch (Exception e) {
-				s_logger.error("Failed to add local rule for: {} - {}", openPortEntry.getPort(), e);
+				s_logger.error("setFirewallOpenPortConfiguration() :: Failed to add local rule for: {} - {}", openPortEntry.getPort(), e);
 			}
 		}
 		
@@ -252,13 +229,13 @@ public class FirewallConfigurationServiceImpl implements
 	public void setFirewallPortForwardingConfiguration(
 			List<FirewallPortForwardConfigIP<? extends IPAddress>> firewallConfiguration)
 			throws KuraException {
-		s_logger.debug("Deleting port forward rules");
+		s_logger.debug("setFirewallPortForwardingConfiguration() :: Deleting port forward rules");
 		LinuxFirewall firewall = LinuxFirewall.getInstance();
 		firewall.deleteAllPortForwardRules();
 		
 		ArrayList<PortForwardRule> portForwardRules = new ArrayList<PortForwardRule>();
 		for(FirewallPortForwardConfigIP<? extends IPAddress> portForwardEntry : firewallConfiguration) {
-			s_logger.debug("Adding port forward rule for: {}", portForwardEntry.getInPort());
+			s_logger.debug("setFirewallPortForwardingConfiguration() :: Adding port forward rule for: {}", portForwardEntry.getInPort());
 			
 			if(portForwardEntry.getPermittedNetwork() == null || portForwardEntry.getPermittedNetwork().getIpAddress() == null) {
 				try {
@@ -300,7 +277,7 @@ public class FirewallConfigurationServiceImpl implements
 	}
 	
 	private Tocd getDefinition() throws KuraException {
-		s_logger.warn("<IAB> [+] getDefinition()");
+		
 		ObjectFactory objectFactory = new ObjectFactory();
 		Tocd tocd = objectFactory.createTocd();
 		
@@ -337,8 +314,6 @@ public class FirewallConfigurationServiceImpl implements
 		tad.setDefault(FirewallConfiguration.DFLT_NAT_VALUE);
 		tad.setDescription(NetworkAdminConfigurationMessages.getMessage(NetworkAdminConfiguration.PLATFORM_INTERFACES));
 		tocd.addAD(tad);
-		
-		s_logger.warn("<IAB> [-] getDefinition()");
 		
 		return tocd;
 	}

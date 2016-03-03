@@ -186,6 +186,9 @@
 						<b:Alert type="WARNING" ui:field="noSsid">
 							<b.html:Text text="No Networks found" />
 						</b:Alert>
+						<b:Alert type="DANGER" ui:field="scanFail">
+							<b.html:Text text="The scan operation failed. Please retry." />
+						</b:Alert>
 					</b:PanelBody>
 				</b:Panel>
 			</b:ModalBody>

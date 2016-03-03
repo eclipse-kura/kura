@@ -141,9 +141,9 @@ public class TabWirelessUi extends Composite implements Tab {
 	@UiField
 	Button buttonSsid, buttonPassword;
 	@UiField
-	FormGroup groupVerify, groupRssi, groupPassword, groupWireless,groupShortI,groupLongI;
+	FormGroup groupVerify, groupRssi, groupPassword, groupWireless, groupShortI, groupLongI;
 	@UiField
-	HelpBlock helpWireless, helpPassword,helpVerify;
+	HelpBlock helpWireless, helpPassword, helpVerify;
 	@UiField
 	Modal ssidModal;
 	@UiField
@@ -153,7 +153,7 @@ public class TabWirelessUi extends Composite implements Tab {
 	private ListDataProvider<GwtWifiHotspotEntry> ssidDataProvider = new ListDataProvider<GwtWifiHotspotEntry>();
 	final SingleSelectionModel<GwtWifiHotspotEntry> ssidSelectionModel = new SingleSelectionModel<GwtWifiHotspotEntry>();
 	@UiField
-	Alert noSsid;
+	Alert noSsid, scanFail;
 
 	String passwordRegex, passwordError, tcpStatus;
 
@@ -590,6 +590,7 @@ public class TabWirelessUi extends Composite implements Tab {
 					ssidDataProvider.getList().clear();
 					noSsid.setVisible(true);
 					ssidGrid.setVisible(false);
+					scanFail.setVisible(false);
 				}
 				initModal();
 				loadSsidData();
@@ -1252,6 +1253,9 @@ public class TabWirelessUi extends Composite implements Tab {
 
 	private void loadSsidData() {
 		ssidDataProvider.getList().clear();
+		noSsid.setVisible(true);
+		ssidGrid.setVisible(false);
+		scanFail.setVisible(false);
 		//EntryClassUi.showWaitModal();
 		if (selectedNetIfConfig != null) {
 			gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
@@ -1268,9 +1272,10 @@ public class TabWirelessUi extends Composite implements Tab {
 						@Override
 						public void onFailure(Throwable caught) {
 							//EntryClassUi.hideWaitModal();
-							FailureHandler.handle(caught);
-							noSsid.setVisible(true);
+							//FailureHandler.handle(caught);
+							noSsid.setVisible(false);
 							ssidGrid.setVisible(false);
+							scanFail.setVisible(true);
 						}
 
 						@Override
@@ -1282,9 +1287,11 @@ public class TabWirelessUi extends Composite implements Tab {
 							if (ssidDataProvider.getList().size() > 0) {
 								noSsid.setVisible(false);
 								ssidGrid.setVisible(true);
+								scanFail.setVisible(false);
 							} else {
 								noSsid.setVisible(true);
 								ssidGrid.setVisible(false);
+								scanFail.setVisible(false);
 							}
 							//EntryClassUi.hideWaitModal();
 						}

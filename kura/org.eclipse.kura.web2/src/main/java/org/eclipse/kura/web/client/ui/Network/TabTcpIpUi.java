@@ -319,6 +319,7 @@ public class TabTcpIpUi extends Composite implements Tab {
 				//TODO: to disable if disabled selected
 				if (VMSGS.netIPv4StatusDisabled().equals(status.getSelectedValue())) {
 					// Using DHCP selected
+					configure.setEnabled(false);
 					ip.setEnabled(false);
 					subnet.setEnabled(false);
 					gateway.setEnabled(false);

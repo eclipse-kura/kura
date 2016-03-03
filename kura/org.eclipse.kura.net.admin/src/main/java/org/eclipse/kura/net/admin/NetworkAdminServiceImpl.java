@@ -1204,6 +1204,7 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 	}
 	
 	@Override
+	@Deprecated
 	public boolean rollbackDefaultConfiguration() throws KuraException {
 		s_logger.debug("rollbackDefaultConfiguration() :: Recovering default configuration ...");
 				
@@ -1271,6 +1272,7 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 	}
 	
 	@Override
+	@Deprecated
 	public boolean rollbackDefaultFirewallConfiguration() throws KuraException {
 		s_logger.debug("rollbackDefaultFirewallConfiguration() :: initializing firewall ...");
 		if (m_systemService == null) {

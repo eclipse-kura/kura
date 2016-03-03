@@ -27,7 +27,7 @@ public class FirewallConfiguration {
 	public static final String PORT_FORWARDING_PROP_NAME = "firewall.port.forwarding";
 	public static final String NAT_PROP_NAME = "firewall.nat";
 	
-	public static final String DFLT_OPEN_PORTS_VALUE = "22,tcp,,,,,#;80,tcp,,eth0,,,#;80,tcp,,eth1,,,#;80,tcp,,wlan0,,,#;80,tcp,10.234.0.0/16,,,,#;1450,tcp,,eth0,,,#;1450,tcp,,eth1,,,#;1450,tcp,,wlan0,,,#;502,tcp,127.0.0.1/32,,,,#;53,udp,,eth0,,,#;53,udp,,eth1,,,#;53,udp,,wlan0,,,#;67,udp,,eth0,,,#;67,udp,,eth1,,,#;67,udp,,wlan0,,,#;8000,tcp,,eth0,,,#;8000,tcp,,eth1,,,#;8000,tcp,,wlan0,,,#";
+	public static final String DFLT_OPEN_PORTS_VALUE = "22,tcp,,,,,,#;80,tcp,,eth0,,,,#;80,tcp,,eth1,,,,#;80,tcp,,wlan0,,,,#;80,tcp,10.234.0.0/16,,,,,#;1450,tcp,,eth0,,,,#;1450,tcp,,eth1,,,,#;1450,tcp,,wlan0,,,,#;502,tcp,127.0.0.1/32,,,,,#;53,udp,,eth0,,,,#;53,udp,,eth1,,,,#;53,udp,,wlan0,,,,#;67,udp,,eth0,,,,#;67,udp,,eth1,,,,#;67,udp,,wlan0,,,,#;8000,tcp,,eth0,,,,#;8000,tcp,,eth1,,,,#;8000,tcp,,wlan0,,,,#";
 	public static final String DFLT_PORT_FORWARDING_VALUE = "";
 	public static final String DFLT_NAT_VALUE ="";
 	
@@ -62,10 +62,22 @@ public class FirewallConfiguration {
 								permittedNetwork = sa[2].split("/")[0];
 								permittedNetworkMask = Short.parseShort(sa[2].split("/")[1]);
 							}
-							String permittedIface = sa[3];
-							String unpermittedIface = sa[4];
-							String permittedMAC = sa[5];
-							String sourcePortRange = sa[6];
+							String permittedIface = null;
+							if (!sa[3].isEmpty()) {
+								permittedIface = sa[3];
+							}
+							String unpermittedIface = null;
+							if (!sa[4].isEmpty()) {
+								unpermittedIface = sa[4];
+							}
+							String permittedMAC = null;
+							if (!sa[5].isEmpty()) {
+								permittedMAC = sa[5];
+							}
+							String sourcePortRange = null;
+							if (!sa[6].isEmpty()) {
+								sourcePortRange = sa[6];
+							}
 							int port = 0;
 							String portRange = null;
 							FirewallOpenPortConfigIP<? extends IPAddress> openPortEntry = null;
@@ -103,14 +115,20 @@ public class FirewallConfiguration {
 							int inPort = Integer.parseInt(sa[4]);
 							int outPort = Integer.parseInt(sa[5]);
 							boolean masquerade = Boolean.parseBoolean(sa[6]);
-							String permittedNetwork = sa[7];
+							String permittedNetwork = null;
 							short permittedNetworkMask = 0;
-							if ((permittedNetwork != null) && !permittedNetwork.isEmpty()) {	
+							if (!sa[7].isEmpty()) { 
 								permittedNetwork = sa[7].split("/")[0];
 								permittedNetworkMask = Short.parseShort(sa[7].split("/")[1]);
 							}
-							String permittedMAC = sa[8]; 
-							String sourcePortRange = sa[9];
+							String permittedMAC = null;
+							if (!sa[8].isEmpty()) {
+								permittedMAC = sa[8];
+							}
+							String sourcePortRange = null;
+							if (!sa[9].isEmpty()) {
+								sourcePortRange = sa[9];
+							}
 							FirewallPortForwardConfigIP<? extends IPAddress> portForwardEntry = 
 									new FirewallPortForwardConfigIP4(inboundIface, outboundIface, address, protocol, inPort, outPort, masquerade, 
 											new NetworkPair<IP4Address>((IP4Address) IPAddress.parseHostAddress(permittedNetwork), permittedNetworkMask),
@@ -133,8 +151,14 @@ public class FirewallConfiguration {
 						String srcIface = sa[0];
 						String dstIface = sa[1];
 						String protocol = sa[2];
-						String src = sa[4];
-						String dst = sa[5];
+						String src = null;
+						if (!sa[4].isEmpty()) {
+							src = sa[4];
+						}
+						String dst = null;
+						if (!sa[5].isEmpty()) {
+							dst = sa[5];
+						}
 						boolean masquerade = Boolean.parseBoolean(sa[6]);
 						FirewallNatConfig natEntry = new FirewallNatConfig(srcIface, dstIface, protocol, src, dst, masquerade);
 						m_natConfigs.add(natEntry);
@@ -200,7 +224,6 @@ public class FirewallConfiguration {
 	}
 	
 	private String formOpenPortConfigPropValue() {
-		s_logger.warn("<IAB> [+] formOpenPortConfigPropValue()");
 		StringBuilder sb = new StringBuilder();
 		for (FirewallOpenPortConfigIP<? extends IPAddress> openPortConfig : m_openPortConfigs) {
 			String port = openPortConfig.getPortRange();
@@ -234,7 +257,6 @@ public class FirewallConfiguration {
 		if (ind > 0) {
 			sb.deleteCharAt(ind);
 		}
-		s_logger.warn("<IAB> [-] formOpenPortConfigPropValue() ::-> {}", sb.toString());
 		return sb.toString();
 	}
 	

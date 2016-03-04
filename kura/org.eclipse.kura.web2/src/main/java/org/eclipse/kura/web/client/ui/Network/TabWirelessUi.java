@@ -58,11 +58,13 @@ import org.gwtbootstrap3.client.ui.html.Span;
 import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Document;
 import com.google.gwt.event.dom.client.BlurEvent;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.DomEvent;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.event.dom.client.MouseOutEvent;
@@ -397,6 +399,8 @@ public class TabWirelessUi extends Composite implements Tab {
 	private void refreshForm() {
 		logger.info("refreshForm()");
 		String tcpipStatus = tcpTab.getStatus();
+		
+		//resetValidations();
 
 		// Tcp/IP disabled
 		if (tcpipStatus.equals(GwtNetIfStatus.netIPv4StatusDisabled)) {
@@ -1244,12 +1248,10 @@ public class TabWirelessUi extends Composite implements Tab {
 					ssid.setValue(wifiHotspotEntry.getSSID());
 					String sec = wifiHotspotEntry.getSecurity();
 					for (int i = 0; i < security.getItemCount(); i++) {
-						if (sec.contains("WPA2")) {
-							if (security.getItemText(i).contains("WPA2")) {
-								security.setSelectedIndex(i);
-							}
-						} else if (sec.equals(security.getItemText(i))) {
+						if (sec.equals(security.getItemText(i))) {
 							security.setSelectedIndex(i);
+							DomEvent.fireNativeEvent(Document.get().createChangeEvent(), security);
+							break;
 						}
 					}
 
@@ -1451,4 +1453,13 @@ public class TabWirelessUi extends Composite implements Tab {
 			helpPassword.setText("");
 		}
 	}
+	
+//	private void resetValidations() {
+//		groupPassword.setValidationState(ValidationState.NONE);
+//		helpPassword.setText("");
+//		groupVerify.setValidationState(ValidationState.NONE);
+//		helpVerify.setText("");
+//		groupWireless.setValidationState(ValidationState.NONE);
+//		helpWireless.setText("");
+//	}
 }

@@ -211,6 +211,7 @@ public interface NetworkAdminService {
 	 * @return status
 	 * @throws KuraException
 	 */
+	@Deprecated
 	public boolean rollbackDefaultConfiguration() throws KuraException;
 	
 	/**
@@ -218,5 +219,6 @@ public interface NetworkAdminService {
 	 * @return status
 	 * @throws KuraException
 	 */
+	@Deprecated
 	public boolean rollbackDefaultFirewallConfiguration() throws KuraException;
 }

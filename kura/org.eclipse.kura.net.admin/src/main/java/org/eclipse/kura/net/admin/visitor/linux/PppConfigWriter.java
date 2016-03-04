@@ -103,7 +103,6 @@ public class PppConfigWriter implements NetworkConfigurationVisitor {
     }
     
     private void writeConfig(ModemInterfaceConfigImpl modemInterfaceConfig) throws KuraException {
-    	
         String oldInterfaceName = modemInterfaceConfig.getName();
         String newInterfaceName = modemInterfaceConfig.getName();
         
@@ -130,7 +129,7 @@ public class PppConfigWriter implements NetworkConfigurationVisitor {
                 modemInterfaceConfig.setName(newInterfaceName);
             }
         }
-
+        
         // Save the status and priority
         IfcfgConfigWriter.writeKuraExtendedConfig(modemInterfaceConfig);
         

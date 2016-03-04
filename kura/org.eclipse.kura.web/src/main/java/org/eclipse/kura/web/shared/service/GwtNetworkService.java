@@ -51,5 +51,6 @@ public interface GwtNetworkService extends RemoteService
 	
 	public boolean verifyWifiCredentials(GwtXSRFToken xsrfToken, String interfaceName, GwtWifiConfig gwtWifiConfig) throws GwtKuraException;
 
+	@Deprecated
 	public void rollbackDefaultConfiguration(GwtXSRFToken xsrfToken);
 }

@@ -199,7 +199,6 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
     }
     
     public synchronized void updated(Map<String,Object> properties) {
-
         //skip the first config
 		if(m_firstConfig) {
 			s_logger.debug("Ignoring first configuration");

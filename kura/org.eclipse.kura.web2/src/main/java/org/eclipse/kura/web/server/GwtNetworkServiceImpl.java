@@ -1327,6 +1327,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 		}
 	}
 
+	@Deprecated
 	public void rollbackDefaultConfiguration(GwtXSRFToken xsrfToken) {
 		s_logger.debug("Rolling back to default configuration ...");
 		try {

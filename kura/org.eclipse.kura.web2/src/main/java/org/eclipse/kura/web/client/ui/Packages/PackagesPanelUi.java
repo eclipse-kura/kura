@@ -75,20 +75,20 @@ public class PackagesPanelUi extends Composite {
 	Button fileCancel, fileSubmit, urlCancel, urlSubmit;
 	@UiField
 	TabListItem fileLabel;
-	
+
 	@UiField
 	Alert notification;
 	@UiField
 	Button packagesRefresh, packagesInstall, packagesUninstall;
 	@UiField
-	DataGrid<GwtDeploymentPackage> packagesGrid = new DataGrid<GwtDeploymentPackage>();
+	DataGrid<GwtDeploymentPackage> packagesGrid = new DataGrid<GwtDeploymentPackage>(10);
 	@UiField
 	FileUpload filePath;
 	@UiField
 	TextBox formUrl;
 	@UiField
 	Hidden xsrfTokenFieldFile, xsrfTokenFieldUrl;
-	
+
 	private ListDataProvider<GwtDeploymentPackage> packagesDataProvider = new ListDataProvider<GwtDeploymentPackage>();
 	final SingleSelectionModel<GwtDeploymentPackage> selectionModel = new SingleSelectionModel<GwtDeploymentPackage>();
 
@@ -119,7 +119,7 @@ public class PackagesPanelUi extends Composite {
 				upload();
 			}
 		});
-		
+
 		// Uninstall Button
 		packagesUninstall.setText(MSGS.packageDeleteButton());
 		packagesUninstall.addClickHandler(new ClickHandler() {
@@ -127,30 +127,30 @@ public class PackagesPanelUi extends Composite {
 			public void onClick(ClickEvent event) {
 				selected = selectionModel.getSelectedObject();
 				if (selected != null && selected.getVersion()!=null) {
-				final Modal modal = new Modal();
-				ModalBody modalBody = new ModalBody();
-				ModalFooter modalFooter = new ModalFooter();
-				modal.setClosable(true);
-				modal.setTitle(MSGS.confirm());
-				modalBody.add(new Span(MSGS.deviceUninstallPackage(selected.getName())));
-				modalFooter.add(new Button("Yes", new ClickHandler() {
-					@Override
-					public void onClick(ClickEvent event) {
-						modal.hide();
-						uninstall(selected);
-					}
-				}));
-				modalFooter.add(new Button("No", new ClickHandler() {
-					@Override
-					public void onClick(ClickEvent event) {
-						modal.hide();
-					}
-				}));
-				
+					final Modal modal = new Modal();
+					ModalBody modalBody = new ModalBody();
+					ModalFooter modalFooter = new ModalFooter();
+					modal.setClosable(true);
+					modal.setTitle(MSGS.confirm());
+					modalBody.add(new Span(MSGS.deviceUninstallPackage(selected.getName())));
+					modalFooter.add(new Button("Yes", new ClickHandler() {
+						@Override
+						public void onClick(ClickEvent event) {
+							modal.hide();
+							uninstall(selected);
+						}
+					}));
+					modalFooter.add(new Button("No", new ClickHandler() {
+						@Override
+						public void onClick(ClickEvent event) {
+							modal.hide();
+						}
+					}));
 
-				modal.add(modalBody);
-				modal.add(modalFooter);
-				modal.show();
+
+					modal.add(modalBody);
+					modal.add(modalFooter);
+					modal.show();
 				}// end if null
 			}// end on click
 		});
@@ -165,27 +165,27 @@ public class PackagesPanelUi extends Composite {
 	}	
 
 	private void refresh(int delay) {
-			Timer timer = new Timer() {
-				@Override
-				public void run() {
-					loadPackagesData();
-				}
-			};
-			timer.schedule(delay);
+		Timer timer = new Timer() {
+			@Override
+			public void run() {
+				loadPackagesData();
+			}
+		};
+		timer.schedule(delay);
 	}
 
 	private void upload() {
 		uploadModal.show();
-		
+
 		//******FILE TAB ****//
 		fileLabel.setText(MSGS.fileLabel());
-		
+
 		filePath.setName("uploadedFile");
-		
+
 		xsrfTokenFieldFile.setID("xsrfToken");
 		xsrfTokenFieldFile.setName("xsrfToken");
 		xsrfTokenFieldFile.setValue("");
-		
+
 		gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
 			@Override
 			public void onFailure(Throwable ex) {
@@ -198,7 +198,7 @@ public class PackagesPanelUi extends Composite {
 				xsrfTokenFieldUrl.setValue(token.getToken());
 			}
 		});
-		
+
 		packagesFormFile.setAction(SERVLET_URL + "/upload");
 		packagesFormFile.setEncoding(FormPanel.ENCODING_MULTIPART);
 		packagesFormFile.setMethod(FormPanel.METHOD_POST);
@@ -214,7 +214,7 @@ public class PackagesPanelUi extends Composite {
 				}
 			}
 		});
-		
+
 		fileSubmit.addClickHandler(new ClickHandler(){
 			@Override
 			public void onClick(ClickEvent event) {
@@ -225,15 +225,15 @@ public class PackagesPanelUi extends Composite {
 			public void onClick(ClickEvent event) {			
 				uploadModal.hide();
 			}});
-		
-		
+
+
 		//******URL TAB ****//
 		formUrl.setName("packageUrl");
 
 		xsrfTokenFieldUrl.setID("xsrfToken");
 		xsrfTokenFieldUrl.setName("xsrfToken");
 		xsrfTokenFieldUrl.setValue("");
-		
+
 		packagesFormUrl.setAction(SERVLET_URL + "/url");
 		packagesFormUrl.setMethod(FormPanel.METHOD_POST);
 		packagesFormUrl.addSubmitCompleteHandler(new SubmitCompleteHandler() {
@@ -241,7 +241,6 @@ public class PackagesPanelUi extends Composite {
 			public void onSubmitComplete(SubmitCompleteEvent event) {
 				String result = event.getResults();
 				if (result == null || result.isEmpty()) {
-					//Growl.growl(MSGS.information()+": ", MSGS.fileDownloadSuccess());
 					uploadModal.hide();
 					refresh(2500);
 				} else {
@@ -255,7 +254,7 @@ public class PackagesPanelUi extends Composite {
 				}
 			}
 		});
-		
+
 		urlSubmit.addClickHandler(new ClickHandler(){
 			@Override
 			public void onClick(ClickEvent event) {
@@ -296,7 +295,7 @@ public class PackagesPanelUi extends Composite {
 						EntryClassUi.hideWaitModal();
 					}});
 			}
-			
+
 		});
 	}
 
@@ -319,19 +318,19 @@ public class PackagesPanelUi extends Composite {
 		};
 		col2.setCellStyleNames("status-table-row");
 		packagesGrid.addColumn(col2, "Version");
-		
+
 		packagesDataProvider.addDataDisplay(packagesGrid);
 	}
 
 	private void loadPackagesData() {
 		packagesDataProvider.getList().clear();
-		
-		EntryClassUi.showWaitModal();
+
+		//EntryClassUi.showWaitModal();
 		gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
 
 			@Override
 			public void onFailure(Throwable ex) {
-				EntryClassUi.hideWaitModal();
+				//EntryClassUi.hideWaitModal();
 				FailureHandler.handle(ex);
 			}
 
@@ -353,8 +352,8 @@ public class PackagesPanelUi extends Composite {
 							packagesDataProvider.getList().add(pair);
 						}
 						packagesDataProvider.flush();
-						
-						if(packagesDataProvider.getList().size() == 0){
+
+						if(packagesDataProvider.getList().isEmpty()){
 							packagesGrid.setVisible(false);
 							notification.setVisible(true);
 							notification.setText(MSGS.devicePackagesNone());
@@ -362,12 +361,12 @@ public class PackagesPanelUi extends Composite {
 							packagesGrid.setVisible(true);
 							notification.setVisible(false);
 						}
-						
-						EntryClassUi.hideWaitModal();
+
+						//EntryClassUi.hideWaitModal();
 					}});
-				
+
 			}
-			
+
 		});
 	}
 }

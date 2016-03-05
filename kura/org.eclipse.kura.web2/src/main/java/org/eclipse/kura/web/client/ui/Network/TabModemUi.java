@@ -101,7 +101,6 @@ public class TabModemUi extends Composite implements Tab {
 		session = currentSession;
 		defaultDialString.put("HE910", "atd*99***1#");
 		defaultDialString.put("DE910", "atd#777");
-		// final TabModemUi theTab = this;
 		initForm();
 	}
 
@@ -144,7 +143,7 @@ public class TabModemUi extends Composite implements Tab {
 			groupMaxfail.getValidationState().equals(ValidationState.ERROR)  ||
 			groupIdle.getValidationState().equals(ValidationState.ERROR)     ||
 			groupInterval.getValidationState().equals(ValidationState.ERROR) ||
-			groupFailure.getValidationState().equals(ValidationState.ERROR)){
+			groupFailure.getValidationState().equals(ValidationState.ERROR)  ){
 			return false;
 		}else{
 			return true;
@@ -252,7 +251,6 @@ public class TabModemUi extends Composite implements Tab {
 			@Override
 			public void onChange(ChangeEvent event) {
 				setDirty(true);
-				//Growl.growl("Network changes");
 				refreshForm();
 			}
 		});
@@ -316,10 +314,6 @@ public class TabModemUi extends Composite implements Tab {
 				resetHelp();
 			}
 		});
-//		if (number.getText() == null || "".equals(number.getText().trim())) {
-//			groupNumber.setValidationState(ValidationState.ERROR);
-//		}
-
 
 		// DIAL STRING
 		labelDial.setText(MSGS.netModemDialString()+"*");
@@ -367,9 +361,6 @@ public class TabModemUi extends Composite implements Tab {
 					groupDial.setValidationState(ValidationState.NONE);
 				}
 			}});
-//		if (dial.getText() == null || "".equals(dial.getText().trim())) {
-//			groupDial.setValidationState(ValidationState.ERROR);
-//		}
 
 		// APN
 		labelApn.setText(MSGS.netModemAPN()+"*");
@@ -398,9 +389,6 @@ public class TabModemUi extends Composite implements Tab {
 					groupApn.setValidationState(ValidationState.NONE);
 				}
 			}});
-//		if (apn.getText() == null || "".equals(apn.getText().trim())) {
-//			groupApn.setValidationState(ValidationState.ERROR);
-//		}
 
 		// AUTH TYPE
 		labelAuth.setText(MSGS.netModemAuthType());
@@ -509,9 +497,6 @@ public class TabModemUi extends Composite implements Tab {
 				}
 			}
 		});
-//		if (reset.getText() == null || "".equals(reset.getText().trim())) {
-//			groupReset.setValidationState(ValidationState.ERROR);
-//		}
 
 		// REOPEN CONNECTION ON TERMINATION
 		labelPersist.setText(MSGS.netModemPersist());
@@ -591,9 +576,6 @@ public class TabModemUi extends Composite implements Tab {
 				}
 			}
 		});
-//		if (maxfail.getText() == null || "".equals(maxfail.getText().trim())) {
-//			groupMaxfail.setValidationState(ValidationState.ERROR);
-//		}
 
 		// DISCONNET IF IDLE
 		labelIdle.setText(MSGS.netModemIdle()+"*");
@@ -627,9 +609,6 @@ public class TabModemUi extends Composite implements Tab {
 				}
 			}
 		});
-//		if (idle.getText() == null || "".equals(idle.getText().trim())) {
-//			groupIdle.setValidationState(ValidationState.ERROR);
-//		}
 
 		// ACTIVE FILTER
 		labelActive.setText(MSGS.netModemActiveFilter());
@@ -685,9 +664,6 @@ public class TabModemUi extends Composite implements Tab {
 				}
 			}
 		});
-//		if (interval.getText() == null || "".equals(interval.getText().trim())) {
-//			groupInterval.setValidationState(ValidationState.ERROR);
-//		}
 
 		// LCP ECHO FAILURE
 		labelFailure.setText(MSGS.netModemLcpEchoFailure()+"*");

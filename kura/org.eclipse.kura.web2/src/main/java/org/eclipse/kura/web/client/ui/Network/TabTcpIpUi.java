@@ -331,7 +331,6 @@ public class TabTcpIpUi extends Composite implements Tab {
 					enableFields();
 				}
 				
-				//refresh();
 				// Check for other WAN interfaces if current interface is
 				// changed to WAN
 				if (isWanEnabled()) {
@@ -449,8 +448,8 @@ public class TabTcpIpUi extends Composite implements Tab {
 			@Override
 			public void onChange(ChangeEvent event) {
 				setDirty(true);
-				if (!subnet.getText().trim().matches(FieldType.IPv4_ADDRESS.getRegex())
-						&& subnet.getText().trim().length() > 0) {
+				if (!subnet.getText().trim().matches(FieldType.IPv4_ADDRESS.getRegex()) && 
+						subnet.getText().trim().length() > 0) {
 					groupSubnet.setValidationState(ValidationState.ERROR);
 					helpSubnet.setText(MSGS.netIPv4InvalidAddress());
 				} else {
@@ -480,9 +479,8 @@ public class TabTcpIpUi extends Composite implements Tab {
 			@Override
 			public void onChange(ChangeEvent event) {
 				setDirty(true);
-				if (!gateway.getText().trim()
-						.matches(FieldType.IPv4_ADDRESS.getRegex())
-						&& gateway.getText().trim().length() > 0) {
+				if (!gateway.getText().trim().matches(FieldType.IPv4_ADDRESS.getRegex()) && 
+						gateway.getText().trim().length() > 0) {
 					groupGateway.setValidationState(ValidationState.ERROR);
 					helpGateway.setText(MSGS.netIPv4InvalidAddress());
 				} else {
@@ -512,8 +510,8 @@ public class TabTcpIpUi extends Composite implements Tab {
 			@Override
 			public void onChange(ChangeEvent event) {
 				setDirty(true);
-				if (!dns.getText().trim().matches(FieldType.IPv4_ADDRESS.getRegex())
-						&& dns.getText().trim().length() > 0) {
+				if (!dns.getText().trim().matches(FieldType.IPv4_ADDRESS.getRegex()) && 
+						dns.getText().trim().length() > 0) {
 					groupDns.setValidationState(ValidationState.ERROR);
 					helpDns.setText(MSGS.netIPv4InvalidAddress());
 				} else {
@@ -540,8 +538,7 @@ public class TabTcpIpUi extends Composite implements Tab {
 
 					@Override
 					public void onSuccess(GwtXSRFToken token) {
-						gwtNetworkService.renewDhcpLease(token, selectedNetIfConfig.getName(),
-								new AsyncCallback<Void>() {
+						gwtNetworkService.renewDhcpLease(token, selectedNetIfConfig.getName(), new AsyncCallback<Void>() {
 							@Override
 							public void onFailure(Throwable ex) {
 								EntryClassUi.hideWaitModal();

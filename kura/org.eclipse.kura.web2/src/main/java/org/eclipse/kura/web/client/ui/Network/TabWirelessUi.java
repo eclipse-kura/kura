@@ -229,12 +229,12 @@ public class TabWirelessUi extends Composite implements Tab {
 	}
 
 	public boolean isValid(){
-		if(		groupWireless.getValidationState().equals(ValidationState.ERROR)
-			||  groupPassword.getValidationState().equals(ValidationState.ERROR)
-			||  groupVerify.getValidationState().equals(ValidationState.ERROR)
-			||  groupRssi.getValidationState().equals(ValidationState.ERROR)
-			||  groupShortI.getValidationState().equals(ValidationState.ERROR)
-			||  groupLongI.getValidationState().equals(ValidationState.ERROR)){
+		if(		groupWireless.getValidationState().equals(ValidationState.ERROR) || 
+				groupPassword.getValidationState().equals(ValidationState.ERROR) ||  
+				groupVerify.getValidationState().equals(ValidationState.ERROR)   ||  
+				groupRssi.getValidationState().equals(ValidationState.ERROR)     ||  
+				groupShortI.getValidationState().equals(ValidationState.ERROR)   ||  
+				groupLongI.getValidationState().equals(ValidationState.ERROR)){
 			return false;
 		}else{
 			return true;
@@ -478,7 +478,7 @@ public class TabWirelessUi extends Composite implements Tab {
 					pairwise.setEnabled(true);
 					group.setEnabled(true);
 				} else {
-					pairwise.setEnabled(false);
+					pairwise.setEnabled(true);
 					group.setEnabled(false);
 				}
 			} else {
@@ -733,7 +733,7 @@ public class TabWirelessUi extends Composite implements Tab {
 		password.addKeyUpHandler(new KeyUpHandler() {
 			@Override
 			public void onKeyUp(KeyUpEvent event) {
-				if (!verify.getText().equals(password.getText())) {
+				if (verify.isEnabled() && !verify.getText().equals(password.getText())) {
 					groupVerify.setValidationState(ValidationState.ERROR);
 				} else {
 					groupVerify.setValidationState(ValidationState.NONE);

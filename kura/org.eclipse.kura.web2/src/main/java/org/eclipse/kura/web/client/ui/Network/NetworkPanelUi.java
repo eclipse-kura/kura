@@ -44,7 +44,7 @@ public class NetworkPanelUi extends Composite {
 	@UiField
 	HTMLPanel networkIntro;
 	@UiField
-	Well interfacesTable;
+	PanelBody interfacesTable;
 	@UiField
 	PanelBody tabsPanel;
 	@UiField

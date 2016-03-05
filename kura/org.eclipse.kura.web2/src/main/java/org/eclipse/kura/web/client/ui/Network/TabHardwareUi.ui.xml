@@ -24,7 +24,6 @@
 	}
 	
 	.center-panel {
-		height: 450px;
 		font-size: 0.6 em;
 		font-weight: normal;
 	}

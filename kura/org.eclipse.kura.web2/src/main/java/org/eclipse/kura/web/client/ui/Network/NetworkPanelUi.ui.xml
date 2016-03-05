@@ -20,7 +20,10 @@
 
 	<ui:style>
 	.important { font-weight: bold;	}
-	.center-panel {	height: 650px; padding: 0px; margin: 2px; }
+	
+	.center-panel {	height: 100%; padding: 0px; margin: 2px; }
+	
+	.interfaces { height: 40vh; }
 	</ui:style>
 
 	<b:Container fluid="true">
@@ -30,7 +33,12 @@
 		</b:Row>
 		<b:Row>
 			<b:Column addStyleNames="{style.center-panel}" size="MD_2">
-				<b:Well addStyleNames="{style.center-panel}" ui:field="interfacesTable" />
+				<b:Well addStyleNames="{style.center-panel}">
+					<b:Panel>
+						<b:PanelBody ui:field="interfacesTable">
+						</b:PanelBody>
+					</b:Panel>
+				</b:Well>
 			</b:Column>
 
 			<b:Column size="MD_9" addStyleNames="{style.center-panel}">

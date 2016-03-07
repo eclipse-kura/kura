@@ -85,6 +85,18 @@ import com.google.gwt.view.client.SingleSelectionModel;
 
 public class TabWirelessUi extends Composite implements Tab {
 
+	private static final String WIFI_MODE_STATION = GwtWifiWirelessMode.netWifiWirelessModeStation.name();
+	private static final String WIFI_MODE_STATION_MESSAGE = MessageUtils.get(WIFI_MODE_STATION);
+	private static final String WIFI_SECURITY_WEP_MESSAGE = MessageUtils.get(GwtWifiSecurity.netWifiSecurityWEP.name());
+	private static final String WIFI_SECURITY_WPA_MESSAGE = MessageUtils.get(GwtWifiSecurity.netWifiSecurityWPA.name());
+	private static final String WIFI_SECURITY_WPA2_MESSAGE = MessageUtils.get(GwtWifiSecurity.netWifiSecurityWPA2.name());
+	private static final String WIFI_BGSCAN_NONE_MESSAGE = MessageUtils.get(GwtWifiBgscanModule.netWifiBgscanMode_NONE.name());
+	private static final String WIFI_CIPHERS_CCMP_TKIP_MESSAGE = MessageUtils.get(GwtWifiCiphers.netWifiCiphers_CCMP_TKIP.name());
+	private static final String WIFI_RADIO_BGN_MESSAGE = MessageUtils.get(GwtWifiRadioMode.netWifiRadioModeBGN.name());
+	private static final String WIFI_SECURITY_NONE_MESSAGE = MessageUtils.get(GwtWifiSecurity.netWifiSecurityNONE.name());
+	private static final String IPV4_STATUS_WAN_MESSAGE = MessageUtils.get(GwtNetIfStatus.netIPv4StatusEnabledWAN.name());
+	private static final String WIFI_MODE_ACCESS_POINT_MESSAGE = MessageUtils.get(GwtWifiWirelessMode.netWifiWirelessModeAccessPoint.name());
+	
 	private static TabWirelessUiUiBinder uiBinder = GWT.create(TabWirelessUiUiBinder.class);
 	private static final Logger logger = Logger.getLogger(TabWirelessUi.class.getSimpleName());
 
@@ -408,16 +420,13 @@ public class TabWirelessUi extends Composite implements Tab {
 		} else {
 			setForm(true);
 			// Station mode
-			String stationModeMessage= MessageUtils.get(GwtWifiWirelessMode.netWifiWirelessModeStation.name()); //TODO: move those strings as static at the class start
-			String accessPointMessage= MessageUtils.get(GwtWifiWirelessMode.netWifiWirelessModeAccessPoint.name());
-			String enabledWANMessage= MessageUtils.get(GwtNetIfStatus.netIPv4StatusEnabledWAN.name());
-			if (stationModeMessage.equals(wireless.getSelectedItemText())) {  //TODO: take a look at the logic here and at next if: couldn't it be unified?
+			if (WIFI_MODE_STATION_MESSAGE.equals(wireless.getSelectedItemText())) {  //TODO: take a look at the logic here and at next if: couldn't it be unified?
 				radio.setEnabled(false);
 				groupVerify.setVisible(false);
-			} else if (accessPointMessage.equals(wireless.getSelectedItemText())) {
+			} else if (WIFI_MODE_ACCESS_POINT_MESSAGE.equals(wireless.getSelectedItemText())) {
 				// access point mode
 				// disable access point when TCP/IP is set to WAN
-				if (tcpipStatus.equals(enabledWANMessage)) {
+				if (tcpipStatus.equals(IPV4_STATUS_WAN_MESSAGE)) {
 					setForm(false);
 				}
 				radio.setEnabled(true);
@@ -425,15 +434,15 @@ public class TabWirelessUi extends Composite implements Tab {
 			}
 
 			// disable Password if security is none
-			if (security.getSelectedItemText().equals(MessageUtils.get(GwtWifiSecurity.netWifiSecurityNONE.name()))) {
+			if (security.getSelectedItemText().equals(WIFI_SECURITY_NONE_MESSAGE)) {
 				password.setEnabled(false);
 				verify.setEnabled(false);
 				buttonPassword.setEnabled(false);
 			}
 
-			if (stationModeMessage.equals(wireless.getSelectedItemText())) {
+			if (WIFI_MODE_STATION_MESSAGE.equals(wireless.getSelectedItemText())) {
 				ssid.setEnabled(true);
-				if (!security.getSelectedItemText().equals(MessageUtils.get(GwtWifiSecurity.netWifiSecurityNONE.name()))) {
+				if (!security.getSelectedItemText().equals(WIFI_SECURITY_NONE_MESSAGE)) {
 					if ( password.getValue() != null && 
 						 password.getValue().length() > 0 ) {
 						password.setEnabled(true);
@@ -459,7 +468,7 @@ public class TabWirelessUi extends Composite implements Tab {
 			} else {
 				ssid.setEnabled(true);
 				buttonSsid.setEnabled(false);
-				if (!security.getSelectedItemText().equals(MessageUtils.get(GwtWifiSecurity.netWifiSecurityNONE.name()))) {
+				if (!security.getSelectedItemText().equals(WIFI_SECURITY_NONE_MESSAGE)) {
 					password.setEnabled(true);
 					buttonPassword.setEnabled(false);
 				}
@@ -471,10 +480,10 @@ public class TabWirelessUi extends Composite implements Tab {
 				radio2.setEnabled(false);
 			}
 
-			if ( security.getSelectedItemText().equals(MessageUtils.get(GwtWifiSecurity.netWifiSecurityWPA2.name())) || 
-				 security.getSelectedItemText().equals(MessageUtils.get(GwtWifiSecurity.netWifiSecurityWPA.name()))  || 
+			if ( security.getSelectedItemText().equals(WIFI_SECURITY_WPA2_MESSAGE) || 
+				 security.getSelectedItemText().equals(WIFI_SECURITY_WPA_MESSAGE)  || 
 				 security.getSelectedItemText().equals(MessageUtils.get(GwtWifiSecurity.netWifiSecurityWPA_WPA2.name())) ) {
-				if ( stationModeMessage.equals(wireless.getSelectedItemText()) ) {
+				if ( WIFI_MODE_STATION_MESSAGE.equals(wireless.getSelectedItemText()) ) {
 					pairwise.setEnabled(true);
 					group.setEnabled(true);
 				} else {
@@ -494,19 +503,19 @@ public class TabWirelessUi extends Composite implements Tab {
 	private void reset() {
 
 		for (int i = 0; i < wireless.getItemCount(); i++) {
-			if (wireless.getSelectedItemText().equals(MessageUtils.get(GwtWifiWirelessMode.netWifiWirelessModeStation.name()))) {
+			if (wireless.getSelectedItemText().equals(WIFI_MODE_STATION_MESSAGE)) {
 				wireless.setSelectedIndex(i);
 			}
 		}
 		ssid.setText("");
 		for (int i = 0; i < radio.getItemCount(); i++) {
-			if (radio.getItemText(i).equals(MessageUtils.get(GwtWifiRadioMode.netWifiRadioModeBGN.name()))) {
+			if (radio.getItemText(i).equals(WIFI_RADIO_BGN_MESSAGE)) {
 				radio.setSelectedIndex(i);
 			}
 		}
 
 		for (int i = 0; i < security.getItemCount(); i++) {
-			if (security.getItemText(i).equals(MessageUtils.get(GwtWifiSecurity.netWifiSecurityWPA2.name()))) {
+			if (security.getItemText(i).equals(WIFI_SECURITY_WPA2_MESSAGE)) {
 				security.setSelectedIndex(i);
 			}
 		}
@@ -515,19 +524,19 @@ public class TabWirelessUi extends Composite implements Tab {
 		verify.setText("");
 
 		for (int i = 0; i < pairwise.getItemCount(); i++) {
-			if (pairwise.getItemText(i).equals(MessageUtils.get(GwtWifiCiphers.netWifiCiphers_CCMP_TKIP.name()))) {
+			if (pairwise.getItemText(i).equals(WIFI_CIPHERS_CCMP_TKIP_MESSAGE)) {
 				pairwise.setSelectedIndex(i);
 			}
 		}
 
 		for (int i = 0; i < group.getItemCount(); i++) {
-			if (group.getItemText(i).equals(MessageUtils.get(GwtWifiCiphers.netWifiCiphers_CCMP_TKIP.name()))) {
+			if (group.getItemText(i).equals(WIFI_CIPHERS_CCMP_TKIP_MESSAGE)) {
 				group.setSelectedIndex(i);
 			}
 		}
 
 		for (int i = 0; i < bgscan.getItemCount(); i++) {
-			if (bgscan.getItemText(i).equals(MessageUtils.get(GwtWifiBgscanModule.netWifiBgscanMode_NONE.name()))) {
+			if (bgscan.getItemText(i).equals(WIFI_BGSCAN_NONE_MESSAGE)) {
 				bgscan.setSelectedIndex(i);
 			}
 		}
@@ -569,8 +578,8 @@ public class TabWirelessUi extends Composite implements Tab {
 		wireless.addChangeHandler(new ChangeHandler() {
 			@Override
 			public void onChange(ChangeEvent event) {
-				String accessPointName= MessageUtils.get(GwtWifiWirelessMode.netWifiWirelessModeAccessPoint.name());
-				String stationModeName= MessageUtils.get(GwtWifiWirelessMode.netWifiWirelessModeStation.name());
+				String accessPointName= WIFI_MODE_ACCESS_POINT_MESSAGE;
+				String stationModeName= WIFI_MODE_STATION_MESSAGE;
 				if (tcpTab.getStatus().equals(GwtNetIfStatus.netIPv4StatusEnabledWAN) &&
 					wireless.getSelectedItemText().equals(accessPointName)) {
 					helpWireless.setText(MSGS.netWifiWirelessEnabledForWANError());
@@ -1140,13 +1149,13 @@ public class TabWirelessUi extends Composite implements Tab {
 
 	private void setPasswordValidation() {
 
-		if (security.getSelectedItemText().equals(MessageUtils.get(GwtWifiSecurity.netWifiSecurityWPA.name()))) {
+		if (security.getSelectedItemText().equals(WIFI_SECURITY_WPA_MESSAGE)) {
 			passwordRegex = REGEX_PASSWORD_WPA;
 			passwordError = MSGS.netWifiWirelessInvalidWPAPassword();
-		} else if (security.getSelectedItemText().equals(MessageUtils.get(GwtWifiSecurity.netWifiSecurityWPA2.name()))) {
+		} else if (security.getSelectedItemText().equals(WIFI_SECURITY_WPA2_MESSAGE)) {
 			passwordRegex = REGEX_PASSWORD_WPA;
 			passwordError = MSGS.netWifiWirelessInvalidWPAPassword();
-		} else if (security.getSelectedItemText().equals(MessageUtils.get(GwtWifiSecurity.netWifiSecurityWEP.name()))) {
+		} else if (security.getSelectedItemText().equals(WIFI_SECURITY_WEP_MESSAGE)) {
 			passwordRegex = REGEX_PASSWORD_WEP;
 			passwordError = MSGS.netWifiWirelessInvalidWEPPassword();
 		} else {
@@ -1329,8 +1338,7 @@ public class TabWirelessUi extends Composite implements Tab {
 
 		// mode
 		GwtWifiWirelessMode wifiMode;
-		String stationModeName= GwtWifiWirelessMode.netWifiWirelessModeStation.name();
-		if (wireless.getSelectedItemText().equals(MessageUtils.get(stationModeName))) {
+		if (wireless.getSelectedItemText().equals(MessageUtils.get(WIFI_MODE_STATION))) {
 			wifiMode = GwtWifiWirelessMode.netWifiWirelessModeStation;
 		} else {
 			wifiMode = GwtWifiWirelessMode.netWifiWirelessModeAccessPoint;

@@ -53,6 +53,7 @@ import com.google.gwt.user.client.ui.Widget;
 
 public class TabModemUi extends Composite implements Tab {
 
+	private static final String MODEM_AUTH_NONE_MESSAGE = MessageUtils.get(GwtModemAuthType.netModemAuthNONE.name());
 	private static TabModemUiUiBinder uiBinder = GWT.create(TabModemUiUiBinder.class);
 
 	interface TabModemUiUiBinder extends UiBinder<Widget, TabModemUi> {
@@ -842,7 +843,7 @@ public class TabModemUi extends Composite implements Tab {
 		String authTypeVal = auth.getSelectedItemText().trim();
 
 		if ( authTypeVal == null || 
-			 authTypeVal.equalsIgnoreCase(MessageUtils.get(GwtModemAuthType.netModemAuthNONE.name())) ) {
+			 authTypeVal.equalsIgnoreCase(MODEM_AUTH_NONE_MESSAGE) ) {
 			username.setEnabled(false);
 			password.setEnabled(false);
 		} else {

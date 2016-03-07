@@ -17,8 +17,6 @@ import java.util.logging.Logger;
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.ui.EntryClassUi;
 import org.eclipse.kura.web.client.util.FailureHandler;
-import org.eclipse.kura.web.shared.GwtKuraErrorCode;
-import org.eclipse.kura.web.shared.GwtKuraException;
 import org.eclipse.kura.web.shared.model.GwtNetIfConfigMode;
 import org.eclipse.kura.web.shared.model.GwtNetInterfaceConfig;
 import org.eclipse.kura.web.shared.model.GwtSession;
@@ -27,7 +25,10 @@ import org.eclipse.kura.web.shared.service.GwtNetworkService;
 import org.eclipse.kura.web.shared.service.GwtNetworkServiceAsync;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenService;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenServiceAsync;
+import org.gwtbootstrap3.client.ui.Alert;
 import org.gwtbootstrap3.client.ui.AnchorButton;
+import org.gwtbootstrap3.client.ui.Modal;
+import org.gwtbootstrap3.client.ui.PanelHeader;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -43,6 +44,8 @@ import com.google.gwt.view.client.SelectionChangeEvent;
 
 public class NetworkButtonBarUi extends Composite {
 
+	private static final String IPV4_MODE_MANUAL_NAME = GwtNetIfConfigMode.netIPv4ConfigModeManual.name();
+	
 	private static NetworkButtonBarUiUiBinder uiBinder = GWT.create(NetworkButtonBarUiUiBinder.class);
 	private static final Logger logger = Logger.getLogger(NetworkButtonBarUi.class.getSimpleName());
 
@@ -60,6 +63,14 @@ public class NetworkButtonBarUi extends Composite {
 
 	@UiField
 	AnchorButton apply, refresh;
+	
+	@UiField
+	Modal incompleteFieldsModal;
+	@UiField
+	PanelHeader incompleteFieldsTitle;
+	@UiField
+	Alert incompleteFields;
+	
 
 	public NetworkButtonBarUi(GwtSession currentSession,
 			NetworkTabsUi tabsPanel, NetworkInterfacesTableUi interfaces) {
@@ -68,7 +79,7 @@ public class NetworkButtonBarUi extends Composite {
 		this.table = interfaces;
 		this.tabs = tabsPanel;
 		initButtons();
-
+		initModal();
 	}
 
 	private void initButtons() {
@@ -78,7 +89,7 @@ public class NetworkButtonBarUi extends Composite {
 		apply.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
-				if (tabs.visibleTabs.size() > 0 && tabs.isValid()) {
+				if (!tabs.visibleTabs.isEmpty() && tabs.isValid()) {
 					GwtNetInterfaceConfig prevNetIf = table.selectionModel.getSelectedObject();
 					final GwtNetInterfaceConfig updatedNetIf = tabs.getUpdatedInterface();
 
@@ -91,32 +102,22 @@ public class NetworkButtonBarUi extends Composite {
 						String prevNetwork = null;
 						try {
 							newNetwork = calculateNetwork(updatedNetIf.getIpAddress(), updatedNetIf.getSubnetMask());
-							prevNetwork = Window.Location.getHost();
+							//prevNetwork = Window.Location.getHost();
 							prevNetwork = calculateNetwork(Window.Location.getHost(), updatedNetIf.getSubnetMask());
 						} catch (Exception e) {
-							//Growl.growl("Network detection failed for ipAddress: "
-							//		+ Window.Location.getHost()
-							//		+ ", and subnet: "
-							//		+ updatedNetIf.getSubnetMask());
+							
 						}
 
 						if (newNetwork != null) {
 							// if a static ip assigned, re-direct to the new
 							// location
-							if (updatedNetIf
-									.getConfigMode()
-									.equals(GwtNetIfConfigMode.netIPv4ConfigModeManual
-											.name())
-									&& newNetwork.equals(prevNetwork)
-									&& Window.Location.getHost().equals(
-											prevNetIf.getIpAddress())) {
+							if (    updatedNetIf.getConfigMode().equals(IPV4_MODE_MANUAL_NAME) && 
+									newNetwork.equals(prevNetwork) && 
+									Window.Location.getHost().equals(prevNetIf.getIpAddress()) ) {
 								Timer t = new Timer() {
 									@Override
 									public void run() {
-										//Growl.growl("redirecting to new address: "
-										//		+ updatedNetIf.getIpAddress());
 										Window.Location.replace("http://" + updatedNetIf.getIpAddress());
-										logger.info("after Location.replace");
 									}
 								};
 								t.schedule(500);
@@ -134,7 +135,6 @@ public class NetworkButtonBarUi extends Composite {
 
 							@Override
 							public void onSuccess(GwtXSRFToken token) {
-								logger.info("gwtXSRFService success");
 								gwtNetworkService.updateNetInterfaceConfigurations(token, updatedNetIf, new AsyncCallback<Void>() {
 											@Override
 											public void onFailure(Throwable ex) {
@@ -158,8 +158,7 @@ public class NetworkButtonBarUi extends Composite {
 					}
 				} else {
 					logger.log(Level.FINER, MSGS.information() + ": " + MSGS.deviceConfigError());
-					GwtKuraException e= new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT); //TODO: improve message
-					FailureHandler.handle(e);
+					incompleteFieldsModal.show();
 				}
 			}
 
@@ -189,8 +188,10 @@ public class NetworkButtonBarUi extends Composite {
 	}
 
 	private String calculateNetwork(String ipAddress, String netmask) {
-		if (ipAddress == null || ipAddress.isEmpty() || netmask == null
-				|| netmask.isEmpty()) {
+		if (	ipAddress == null   || 
+				ipAddress.isEmpty() || 
+				netmask == null     || 
+				netmask.isEmpty()   ) {
 			return null;
 		}
 
@@ -200,26 +201,20 @@ public class NetworkButtonBarUi extends Composite {
 			int ipAddressValue = 0;
 			int netmaskValue = 0;
 
-			logger.info("ipAddress: "+ipAddress);
 			String[] sa = this.splitIp(ipAddress);
 
 			for (int i = 24, t = 0; i >= 0; i -= 8, t++) {
-				logger.info("ipAddressValue: "+ipAddressValue);
 				ipAddressValue = ipAddressValue | (Integer.parseInt(sa[t]) << i);
 			}
 
-			logger.info("netmask: "+netmask);
 			sa = this.splitIp(netmask);
 			for (int i = 24, t = 0; i >= 0; i -= 8, t++) {
-				logger.info("netmaskValue: "+netmaskValue);
 				netmaskValue = netmaskValue | (Integer.parseInt(sa[t]) << i);
 			}
 
 			network = dottedQuad(ipAddressValue & netmaskValue);
 		} catch (Exception e) {
-			//Growl.growl("Error calculating network for ip address: "
-			//		+ ipAddress + " and netmask: " + netmask,
-			//		e.getLocalizedMessage());
+			logger.warning(e.getLocalizedMessage());
 		}
 		return network;
 	}
@@ -251,6 +246,11 @@ public class NetworkButtonBarUi extends Composite {
 			}
 		}
 		return ret;
+	}
+	
+	private void initModal() {
+		incompleteFieldsModal.setTitle("Warning!");
+		incompleteFieldsTitle.setText("Submitted data check");
 	}
 
 }

@@ -37,6 +37,10 @@ import com.google.gwt.user.client.ui.Widget;
 
 public class NetworkTabsUi extends Composite {
 
+	private static final String WIFI_ACCESS_POINT = GwtWifiWirelessMode.netWifiWirelessModeAccessPoint.name();
+	private static final String IPV4_STATUS_DISABLED_MESSAGE = MessageUtils.get(GwtNetIfStatus.netIPv4StatusDisabled.name());
+	private static final String IPV4_STATUS_ENABLED_LAN_MESSAGE = MessageUtils.get(GwtNetIfStatus.netIPv4StatusEnabledLAN.name());
+	
 	private static NetworkTabsUiUiBinder uiBinder = GWT.create(NetworkTabsUiUiBinder.class);
 	private static final Logger logger = Logger.getLogger(NetworkTabsUi.class.getSimpleName());
 
@@ -153,7 +157,7 @@ public class NetworkTabsUi extends Composite {
 	// Add/remove tabs based on the selected settings in the various tabs
 	public void adjustInterfaceTabs() {
 		String netIfStatus = tcpIp.getStatus();
-		boolean includeDhcpNat = !tcpIp.isDhcp() && netIfStatus.equals(MessageUtils.get(GwtNetIfStatus.netIPv4StatusEnabledLAN.name()));
+		boolean includeDhcpNat = !tcpIp.isDhcp() && netIfStatus.equals(IPV4_STATUS_ENABLED_LAN_MESSAGE);
 
 		if (netIfConfig instanceof GwtWifiNetInterfaceConfig) {
 			// insert Wifi tab
@@ -166,7 +170,7 @@ public class NetworkTabsUi extends Composite {
 			insertTab(dhcpNatTab, 2);
 			// remove Dhcp/Nat Tab if not an access point
 			String mode= wireless.getWirelessMode().name();
-			if ( mode != null && !mode.equals(GwtWifiWirelessMode.netWifiWirelessModeAccessPoint.name()) ) {
+			if ( mode != null && !mode.equals(WIFI_ACCESS_POINT) ) {
 				includeDhcpNat = false;
 			}
 		} else if (netIfConfig instanceof GwtModemInterfaceConfig) {
@@ -197,7 +201,7 @@ public class NetworkTabsUi extends Composite {
 			dhcpNatTab.setEnabled(false);
 		}
 
-		if (netIfStatus.equals(MessageUtils.get(GwtNetIfStatus.netIPv4StatusDisabled.name()))) {
+		if (netIfStatus.equals(IPV4_STATUS_DISABLED_MESSAGE)) {
 			// disabled - remove tabs
 			disableInterfaceTabs();
 		}

@@ -47,6 +47,10 @@ import com.google.gwt.user.client.ui.Widget;
 
 public class TabDhcpNatUi extends Composite implements Tab {
 
+	private static final String ROUTER_OFF_MESSAGE = MessageUtils.get(GwtNetRouterMode.netRouterOff.name());
+	private static final String ROUTER_NAT_MESSAGE = MessageUtils.get(GwtNetRouterMode.netRouterNat.name());
+	private static final String WIFI_DISABLED = GwtWifiWirelessMode.netWifiWirelessModeDisabled.name();
+	private static final String WIFI_STATION_MODE = GwtWifiWirelessMode.netWifiWirelessModeStation.name();
 	private static TabDhcpNatUiUiBinder uiBinder = GWT.create(TabDhcpNatUiUiBinder.class);
 
 	interface TabDhcpNatUiUiBinder extends UiBinder<Widget, TabDhcpNatUi> {
@@ -81,8 +85,7 @@ public class TabDhcpNatUi extends Composite implements Tab {
 	@UiField
 	PanelBody helpText;
 
-	public TabDhcpNatUi(GwtSession currentSession, TabTcpIpUi tcp,
-			TabWirelessUi wireless) {
+	public TabDhcpNatUi(GwtSession currentSession, TabTcpIpUi tcp, TabWirelessUi wireless) {
 		initWidget(uiBinder.createAndBindUi(this));
 		tcpTab = tcp;
 		wirelessTab = wireless;
@@ -136,8 +139,7 @@ public class TabDhcpNatUi extends Composite implements Tab {
 		if (session != null) {
 
 			for (GwtNetRouterMode mode : GwtNetRouterMode.values()) {
-				if (MessageUtils.get(mode.name()).equals(
-						router.getSelectedItemText())) {
+				if (MessageUtils.get(mode.name()).equals(router.getSelectedItemText())) {
 					updatedNetIf.setRouterMode(mode.name());
 				}
 			}
@@ -190,8 +192,9 @@ public class TabDhcpNatUi extends Composite implements Tab {
 		//			radio2.setEnabled(false);
 		//		} else {
 		String mode= wirelessTab.activeConfig.getWirelessMode();
-		if ( selectedNetIfConfig.getHwTypeEnum() == GwtNetIfType.WIFI && wirelessTab != null && 
-				(mode.equals(GwtWifiWirelessMode.netWifiWirelessModeStation.name()) || mode.equals(GwtWifiWirelessMode.netWifiWirelessModeDisabled.name())) ) {
+		if ( selectedNetIfConfig.getHwTypeEnum() == GwtNetIfType.WIFI && 
+				wirelessTab != null && 
+				(mode.equals(WIFI_STATION_MODE) || mode.equals(WIFI_DISABLED)) ) {
 			router.setEnabled(false);
 			begin.setEnabled(false);
 			end.setEnabled(false);
@@ -211,8 +214,8 @@ public class TabDhcpNatUi extends Composite implements Tab {
 			radio2.setEnabled(true);
 
 			String modeValue = router.getSelectedItemText();
-			if ( modeValue.equals(MessageUtils.get(GwtNetRouterMode.netRouterNat.name())) || 
-					modeValue.equals(MessageUtils.get(GwtNetRouterMode.netRouterOff.name())) ) {
+			if ( 	modeValue.equals(ROUTER_NAT_MESSAGE) || 
+					modeValue.equals(ROUTER_OFF_MESSAGE) ) {
 				router.setEnabled(true);
 				begin.setEnabled(false);
 				end.setEnabled(false);
@@ -280,7 +283,7 @@ public class TabDhcpNatUi extends Composite implements Tab {
 				setDirty(true);
 				ListBox box = (ListBox) event.getSource();
 				if (	tcpTab.isDhcp() && 
-						!box.getSelectedItemText().equals(MessageUtils.get(GwtNetRouterMode.netRouterOff.toString()))) {
+						!box.getSelectedItemText().equals(ROUTER_OFF_MESSAGE)){ //MessageUtils.get(GwtNetRouterMode.netRouterOff.name()))) { TODO:check
 					groupRouter.setValidationState(ValidationState.ERROR);
 					helpRouter.setText(MSGS.netRouterConfiguredForDhcpError());
 					helpRouter.setColor("red");

@@ -329,19 +329,19 @@ public class TabTcpIpUi extends Composite implements Tab {
 				setDirty(true);
 				tabs.adjustInterfaceTabs();
 				//TODO: to disable if disabled selected
-				if (VMSGS.netIPv4StatusDisabled().equals(status.getSelectedValue())) {
-					// Using DHCP selected
-					configure.setEnabled(false);
-					ip.setEnabled(false);
-					subnet.setEnabled(false);
-					gateway.setEnabled(false);
-					renew.setEnabled(false);
-					dnsRead.setVisible(false);
-					dns.setVisible(false);
-
-				} else {
-					enableFields();
-				}
+//				if (VMSGS.netIPv4StatusDisabled().equals(status.getSelectedValue())) {
+//					// Using DHCP selected
+//					configure.setEnabled(false);
+//					ip.setEnabled(false);
+//					subnet.setEnabled(false);
+//					gateway.setEnabled(false);
+//					renew.setEnabled(false);
+//					dnsRead.setVisible(false);
+//					dns.setVisible(false);
+//
+//				} else {
+					refreshForm();
+//				}
 				
 				// Check for other WAN interfaces if current interface is
 				// changed to WAN
@@ -388,7 +388,7 @@ public class TabTcpIpUi extends Composite implements Tab {
 			public void onChange(ChangeEvent event) {
 				setDirty(true);
 				tabs.adjustInterfaceTabs();
-				enableFields();
+				refreshForm();
 				resetValidations();
 			}
 		});
@@ -681,7 +681,7 @@ public class TabTcpIpUi extends Composite implements Tab {
 					subnet.setEnabled(true);
 					gateway.setEnabled(true);
 
-					if (configureValue.equals(IPV4_STATUS_WAN_MESSAGE)) {
+					if (status.getSelectedValue().equals(IPV4_STATUS_WAN_MESSAGE)) {
 						// enable gateway field
 						gateway.setEnabled(true);
 					} else {
@@ -729,27 +729,4 @@ public class TabTcpIpUi extends Composite implements Tab {
 		groupDns.setValidationState(ValidationState.NONE);
 		helpDns.setText("");
 	}
-	
-	private void enableFields() {
-		configure.setEnabled(true);
-		if (configure.getSelectedItemText().equalsIgnoreCase(VMSGS.netIPv4ConfigModeDHCP())) {
-			// Using DHCP selected
-			ip.setEnabled(false);
-			subnet.setEnabled(false);
-			gateway.setEnabled(false);
-			renew.setEnabled(true);
-			dnsRead.setVisible(true);
-			dns.setVisible(false);
-
-		} else if (configure.getSelectedItemText().equalsIgnoreCase(VMSGS.netIPv4ConfigModeManual())) {
-			// Manually selected
-			ip.setEnabled(true);
-			subnet.setEnabled(true);
-			gateway.setEnabled(true);
-			renew.setEnabled(false);
-			dns.setVisible(true);
-			dnsRead.setVisible(false);
-		}
-	}
-
 }

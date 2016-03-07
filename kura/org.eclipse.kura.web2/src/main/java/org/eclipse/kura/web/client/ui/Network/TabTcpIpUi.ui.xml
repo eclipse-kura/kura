@@ -97,6 +97,19 @@
 				</b:Row>
 			</b:Column>
 		</b:Column>
+		
+		<b:Modal closable="true" dataKeyboard="true" ui:field="wanModal">
+			<b:ModalBody>
+				<b:Panel>
+					<b:PanelBody>
+						<b:Alert type="WARNING" ui:field="multipleWanWarn">
+							<b.html:Text
+								text="Multiple WAN interfaces enabled at the same time!" />
+						</b:Alert>
+					</b:PanelBody>
+				</b:Panel>
+			</b:ModalBody>
+		</b:Modal>
 
 	</b:Container>
 </ui:UiBinder> 

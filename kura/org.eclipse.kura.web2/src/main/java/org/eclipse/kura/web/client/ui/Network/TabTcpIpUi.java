@@ -31,6 +31,7 @@ import org.eclipse.kura.web.shared.service.GwtNetworkService;
 import org.eclipse.kura.web.shared.service.GwtNetworkServiceAsync;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenService;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenServiceAsync;
+import org.gwtbootstrap3.client.ui.Alert;
 import org.gwtbootstrap3.client.ui.Button;
 import org.gwtbootstrap3.client.ui.Form;
 import org.gwtbootstrap3.client.ui.FormControlStatic;
@@ -38,6 +39,7 @@ import org.gwtbootstrap3.client.ui.FormGroup;
 import org.gwtbootstrap3.client.ui.FormLabel;
 import org.gwtbootstrap3.client.ui.HelpBlock;
 import org.gwtbootstrap3.client.ui.ListBox;
+import org.gwtbootstrap3.client.ui.Modal;
 import org.gwtbootstrap3.client.ui.PanelBody;
 import org.gwtbootstrap3.client.ui.PanelHeader;
 import org.gwtbootstrap3.client.ui.TextBox;
@@ -111,6 +113,11 @@ public class TabTcpIpUi extends Composite implements Tab {
 	Form form;
 	@UiField
 	FormControlStatic dnsRead;
+	
+	@UiField
+	Modal wanModal;
+	@UiField
+	Alert multipleWanWarn;
 
 	public TabTcpIpUi(GwtSession currentSession, NetworkTabsUi netTabs) {
 		initWidget(uiBinder.createAndBindUi(this));
@@ -119,6 +126,8 @@ public class TabTcpIpUi extends Composite implements Tab {
 		helpTitle.setText("Help Text");
 		initForm();
 		dnsRead.setVisible(false);
+		
+		initModal();
 	}
 
 	@Override
@@ -354,12 +363,14 @@ public class TabTcpIpUi extends Composite implements Tab {
 						}
 
 						public void onSuccess(ArrayList<GwtNetInterfaceConfig> result) {
+							EntryClassUi.hideWaitModal();
 							for (GwtNetInterfaceConfig config : result) {
 								if (config.getStatusEnum().equals(GwtNetIfStatus.netIPv4StatusEnabledWAN) && !config.getName().equals(selectedNetIfConfig.getName())) {
 									logger.log(Level.SEVERE, "Error: Status Invalid");
+									wanModal.show();
+									break;
 								}
 							}
-							EntryClassUi.hideWaitModal();
 						}
 
 					});
@@ -728,5 +739,9 @@ public class TabTcpIpUi extends Composite implements Tab {
 		helpGateway.setText("");
 		groupDns.setValidationState(ValidationState.NONE);
 		helpDns.setText("");
+	}
+	
+	private void initModal() {
+		wanModal.setTitle("Warning!");
 	}
 }

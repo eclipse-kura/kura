@@ -226,6 +226,8 @@ public class TabTcpIpUi extends Composite implements Tab {
 			 configure.getSelectedItemText().equalsIgnoreCase(VMSGS.netIPv4ConfigModeManual()) ) {
 			if ( (gateway.getValue() == null || gateway.getValue().trim().equals("")) && 
 				 IPV4_STATUS_WAN_MESSAGE.equals(status.getSelectedValue()) ) {
+				groupGateway.setValidationState(ValidationState.ERROR);
+				helpGateway.setText(MSGS.netIPv4InvalidAddress());
 				flag = false;
 			}
 			if (ip.getValue() == null || ip.getValue().trim().equals("")) {

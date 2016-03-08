@@ -16,6 +16,7 @@ import java.util.List;
 
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.ui.EntryClassUi;
+import org.eclipse.kura.web.client.ui.Network.NetworkButtonBarUi;
 import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.client.util.TextFieldValidator.FieldType;
 import org.eclipse.kura.web.shared.model.GwtFirewallOpenPortEntry;
@@ -61,14 +62,14 @@ public class OpenPortsTabUi extends Composite {
 
 	private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
 	private final GwtNetworkServiceAsync gwtNetworkService = GWT.create(GwtNetworkService.class);
-	
+
 	private static final Messages MSGS = GWT.create(Messages.class);
 
 	interface OpenPortsTabUiUiBinder extends UiBinder<Widget, OpenPortsTabUi> {
 	}
 
 	GwtFirewallOpenPortEntry editOpenPortEntry, newOpenPortEntry, openPortEntry;
-	
+
 	@UiField
 	Button apply, create, edit, delete;
 	@UiField
@@ -80,7 +81,7 @@ public class OpenPortsTabUi extends Composite {
 	FormGroup groupPort, groupPermittedNw,groupPermittedI,groupUnpermittedI,groupPermittedMac,groupSource;
 	@UiField
 	FormLabel labelPort, labelProtocol, labelPermitttedNw, labelPermitttedI,
-			labelUnPermitttedI, labelPermitttedMac, labelsource;
+	labelUnPermitttedI, labelPermitttedMac, labelsource;
 	@UiField
 	TextBox port, permittedNw, permittedI, unpermittedI, permittedMac, source;
 	@UiField
@@ -95,7 +96,7 @@ public class OpenPortsTabUi extends Composite {
 
 	@UiField
 	DataGrid<GwtFirewallOpenPortEntry> openPortsGrid = new DataGrid<GwtFirewallOpenPortEntry>();
-	
+
 	private ListDataProvider<GwtFirewallOpenPortEntry> openPortsDataProvider = new ListDataProvider<GwtFirewallOpenPortEntry>();
 	final SingleSelectionModel<GwtFirewallOpenPortEntry> selectionModel = new SingleSelectionModel<GwtFirewallOpenPortEntry>();
 
@@ -111,6 +112,55 @@ public class OpenPortsTabUi extends Composite {
 		initTable();	
 	}
 
+	public void loadData() {
+		EntryClassUi.showWaitModal();
+		openPortsDataProvider.getList().clear();
+		notification.setVisible(false);
+		gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
+
+			@Override
+			public void onFailure(Throwable ex) {
+				EntryClassUi.hideWaitModal();
+				FailureHandler.handle(ex);
+			}
+
+			@Override
+			public void onSuccess(GwtXSRFToken token) {
+				gwtNetworkService.findDeviceFirewallOpenPorts(token, new AsyncCallback<ArrayList<GwtFirewallOpenPortEntry>>() {
+					@Override
+					public void onFailure(Throwable caught) {
+						EntryClassUi.hideWaitModal();
+						FailureHandler.handle(caught, gwtNetworkService.getClass().getSimpleName());
+					}
+
+					@Override
+					public void onSuccess(ArrayList<GwtFirewallOpenPortEntry> result) {
+						for (GwtFirewallOpenPortEntry pair : result) {
+							openPortsDataProvider.getList().add(pair);
+						}
+						openPortsDataProvider.flush();
+						setVisibility();
+						apply.setEnabled(false);
+						EntryClassUi.hideWaitModal();
+					}
+				});
+			}
+
+		});
+	}
+
+	public GwtFirewallOpenPortEntry getNewOpenPortEntry() {
+		return newOpenPortEntry;
+	}
+
+	public GwtFirewallOpenPortEntry getEditOpenPortEntry() {
+		return editOpenPortEntry;
+	}
+
+
+	//
+	//Private methods
+	//
 	private void initTable() {
 
 		TextColumn<GwtFirewallOpenPortEntry> col1 = new TextColumn<GwtFirewallOpenPortEntry>() {
@@ -207,45 +257,18 @@ public class OpenPortsTabUi extends Composite {
 		openPortsDataProvider.addDataDisplay(openPortsGrid);
 	}
 
-	public void loadData() {
-		EntryClassUi.showWaitModal();
-		openPortsDataProvider.getList().clear();
-		notification.setVisible(false);
-		gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
+	//Initialize tab buttons
+	private void initButtons() {
+		initApplyButton();
 
-			@Override
-			public void onFailure(Throwable ex) {
-				EntryClassUi.hideWaitModal();
-				FailureHandler.handle(ex);
-			}
+		initCreateButton();
 
-			@Override
-			public void onSuccess(GwtXSRFToken token) {
-				gwtNetworkService.findDeviceFirewallOpenPorts(token, new AsyncCallback<ArrayList<GwtFirewallOpenPortEntry>>() {
-					@Override
-					public void onFailure(Throwable caught) {
-						EntryClassUi.hideWaitModal();
-						FailureHandler.handle(caught, gwtNetworkService.getClass().getSimpleName());
-					}
+		initEditButton();
 
-					@Override
-					public void onSuccess(ArrayList<GwtFirewallOpenPortEntry> result) {
-						for (GwtFirewallOpenPortEntry pair : result) {
-							openPortsDataProvider.getList().add(pair);
-						}
-						openPortsDataProvider.flush();
-						setVisibility();
-						apply.setEnabled(false);
-						EntryClassUi.hideWaitModal();
-					}
-				});
-			}
-			
-		});
+		initDeleteButton();
 	}
 
-	private void initButtons() {
-
+	private void initApplyButton() {
 		apply.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
@@ -255,7 +278,7 @@ public class OpenPortsTabUi extends Composite {
 				for (GwtFirewallOpenPortEntry entry: intermediateList) {
 					tempList.add(entry);
 				}
-				
+
 
 				if (updatedOpenPortConf.size() > 0) {
 					EntryClassUi.showWaitModal();
@@ -270,25 +293,26 @@ public class OpenPortsTabUi extends Composite {
 						@Override
 						public void onSuccess(GwtXSRFToken token) {
 							gwtNetworkService.updateDeviceFirewallOpenPorts(token, updatedOpenPortConf, new AsyncCallback<Void>() {
-										@Override
-										public void onFailure(Throwable caught) {
-											EntryClassUi.hideWaitModal();
-											FailureHandler.handle(caught, gwtNetworkService.getClass().getSimpleName());
-										}
+								@Override
+								public void onFailure(Throwable caught) {
+									EntryClassUi.hideWaitModal();
+									FailureHandler.handle(caught, gwtNetworkService.getClass().getSimpleName());
+								}
 
-										@Override
-										public void onSuccess(Void result) {
-											apply.setEnabled(false);
-											EntryClassUi.hideWaitModal();
-										}
-									});
+								@Override
+								public void onSuccess(Void result) {
+									apply.setEnabled(false);
+									EntryClassUi.hideWaitModal();
+								}
+							});
 						}
-						
 					});
 				}
 			}
 		});
+	}
 
+	private void initCreateButton() {
 		create.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
@@ -297,7 +321,7 @@ public class OpenPortsTabUi extends Composite {
 				openPortsForm.addHideHandler(new ModalHideHandler() {
 					@Override
 					public void onHide(ModalHideEvent evt) {
-						
+
 						if (getNewOpenPortEntry()!= null) {
 							GwtFirewallOpenPortEntry newEntry = getNewOpenPortEntry();
 							if (!duplicateEntry(newEntry)) {
@@ -317,12 +341,13 @@ public class OpenPortsTabUi extends Composite {
 
 			}
 		});
+	}
 
+	private void initEditButton() {
 		edit.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
-				final GwtFirewallOpenPortEntry selection = selectionModel
-						.getSelectedObject();
+				final GwtFirewallOpenPortEntry selection = selectionModel.getSelectedObject();
 				if (selection != null) {
 					if (selection.getPortRange().equals("22")) {
 						// show warning
@@ -371,14 +396,12 @@ public class OpenPortsTabUi extends Composite {
 					openPortsForm.addHideHandler(new ModalHideHandler() {
 						@Override
 						public void onHide(ModalHideEvent evt) {
-							
+
 							if (getEditOpenPortEntry() != null) {
 								final GwtFirewallOpenPortEntry editEntry = getEditOpenPortEntry();
 								if (!duplicateEntry(getEditOpenPortEntry())) {
-									openPortsDataProvider.getList().remove(
-											selection);
-									openPortsDataProvider.getList().add(
-											editEntry);
+									openPortsDataProvider.getList().remove(selection);
+									openPortsDataProvider.getList().add(editEntry);
 									openPortsDataProvider.flush();
 									apply.setEnabled(true);
 									setVisibility();
@@ -387,18 +410,17 @@ public class OpenPortsTabUi extends Composite {
 							}//end !=null
 						}//end onHide
 					});
-
 				}
 			}
 		});
+	}
 
+	private void initDeleteButton() {
 		delete.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
-				final GwtFirewallOpenPortEntry selection = selectionModel
-						.getSelectedObject();
+				final GwtFirewallOpenPortEntry selection = selectionModel.getSelectedObject();
 				if (selection != null) {
-					
 					alert.setTitle(MSGS.confirm());
 					alertBody.setText(MSGS.firewallOpenPortDeleteConfirmation(String.valueOf(selection.getPortRange())));
 					yes.setText(MSGS.yesButton());
@@ -416,18 +438,13 @@ public class OpenPortsTabUi extends Composite {
 							openPortsDataProvider.getList().remove(selection);
 							openPortsDataProvider.flush();
 							apply.setEnabled(true);
-							// Growl.growl("Delete Success");
 							setVisibility();
 						}
 					});
 					alert.show();
-
-					
-					
 				}
 			}
 		});
-
 	}
 
 	private void initModal(final GwtFirewallOpenPortEntry existingEntry) {
@@ -437,135 +454,18 @@ public class OpenPortsTabUi extends Composite {
 			openPortsForm.setTitle(MSGS.firewallOpenPortFormInformation());
 		} else {
 			// edit existing entry
-			openPortsForm.setTitle(MSGS
-					.firewallOpenPortFormUpdate(String.valueOf(existingEntry.getPortRange())));
+			openPortsForm.setTitle(MSGS.firewallOpenPortFormUpdate(String.valueOf(existingEntry.getPortRange())));
 		}
 
-		// set Labels
-		labelPort.setText(MSGS.firewallOpenPortFormPort()+"*");
-		labelProtocol.setText(MSGS.firewallOpenPortFormProtocol());
-		protocol.clear();
-		protocol.addItem(GwtNetProtocol.tcp.name());
-		protocol.addItem(GwtNetProtocol.udp.name());
-		labelPermitttedNw.setText(MSGS.firewallOpenPortFormPermittedNetwork());
-		labelPermitttedI.setText(MSGS
-				.firewallOpenPortFormPermittedInterfaceName());
-		labelUnPermitttedI.setText(MSGS
-				.firewallOpenPortFormUnpermittedInterfaceName());
-		labelPermitttedMac.setText(MSGS.firewallOpenPortFormPermittedMac());
-		labelsource.setText(MSGS.firewallOpenPortFormSourcePortRange());
+		setModalFieldsLabels();
 
-		// Permitted Interface config
-		tooltipPermittedI.setTitle(MSGS
-				.firewallOpenPortFormPermittedInterfaceToolTip());
-		tooltipPermittedI.reconfigure();
-		permittedI.addChangeHandler(new ChangeHandler() {
-			@Override
-			public void onChange(ChangeEvent event) {
-				if (permittedI.getText() != null && permittedI.getText() != "") {
-					unpermittedI.clear();
-					unpermittedI.setEnabled(false);
-				} else {
-					unpermittedI.setEnabled(true);
-				}
-			}
-		});
+		setModalFieldsValues(existingEntry);
 
-		// UnPermitted Interface config
-		tooltipUnpermittedI.setTitle(MSGS
-				.firewallOpenPortFormUnpermittedInterfaceToolTip());
-		tooltipUnpermittedI.reconfigure();
-		unpermittedI.addChangeHandler(new ChangeHandler() {
-			@Override
-			public void onChange(ChangeEvent event) {
-				if (unpermittedI.getText() != null
-						&& unpermittedI.getText() != "") {
-					permittedI.clear();
-					permittedI.setEnabled(false);
-				} else {
-					permittedI.setEnabled(true);
-				}
-			}
-		});
+		setModalFieldsTooltips();
 
-		// populate existing values
-		if (existingEntry != null) {
-			port.setText(String.valueOf(existingEntry.getPortRange()));
-			protocol.setSelectedIndex(existingEntry.getProtocol() == GwtNetProtocol.tcp
-					.name() ? 0 : 1);
+		setModalFieldsHandlers();
 
-			permittedNw.setText(existingEntry.getPermittedNetwork());
-			permittedI.setText(existingEntry.getPermittedInterfaceName());
-			unpermittedI.setText(existingEntry.getUnpermittedInterfaceName());
-			permittedMac.setText(existingEntry.getPermittedMAC());
-			source.setText(existingEntry.getSourcePortRange());
-		}
 
-		
-		//set up validation
-		//groupPort, groupPermittedNw,groupPermittedI,grourUnpermittedI,groupPermittedMac,groupSource;
-		port.addBlurHandler(new BlurHandler(){
-			@Override
-			public void onBlur(BlurEvent event) {
-				if((!port.getText().trim().matches(FieldType.NUMERIC.getRegex()) && port.getText().trim().length()!=0)
-						|| (port.getText()==null || port.getText().trim()=="")){
-					groupPort.setValidationState(ValidationState.ERROR);
-				}else{					
-					groupPort.setValidationState(ValidationState.NONE);
-				}
-			}});
-		//set Port to be in error state by default, if empty
-		if(port.getText()==null || port.getText().trim()==""){
-			groupPort.setValidationState(ValidationState.ERROR);
-		}
-		
-		permittedNw.addBlurHandler(new BlurHandler(){
-			@Override
-			public void onBlur(BlurEvent event) {
-				if(!permittedNw.getText().trim().matches(FieldType.NETWORK.getRegex()) && permittedNw.getText().trim().length()>0){					
-					groupPermittedNw.setValidationState(ValidationState.ERROR);
-				}else{				
-					groupPermittedNw.setValidationState(ValidationState.NONE);
-				}
-			}});
-		permittedI.addBlurHandler(new BlurHandler(){
-			@Override
-			public void onBlur(BlurEvent event) {
-				if(!permittedI.getText().trim().matches(FieldType.ALPHANUMERIC.getRegex()) && permittedI.getText().trim().length()>0){
-					groupPermittedI.setValidationState(ValidationState.ERROR);
-				}else{					
-					groupPermittedI.setValidationState(ValidationState.NONE);
-				}
-			}});
-		unpermittedI.addBlurHandler(new BlurHandler(){
-			@Override
-			public void onBlur(BlurEvent event) {
-				if(!unpermittedI.getText().trim().matches(FieldType.ALPHANUMERIC.getRegex()) && unpermittedI.getText().trim().length()>0){
-					groupUnpermittedI.setValidationState(ValidationState.ERROR);
-				}else{					
-					groupPermittedI.setValidationState(ValidationState.NONE);
-				}
-			}});
-		permittedMac.addBlurHandler(new BlurHandler(){
-			@Override
-			public void onBlur(BlurEvent event) {
-				if(!permittedMac.getText().trim().matches(FieldType.MAC_ADDRESS.getRegex()) && permittedMac.getText().trim().length()>0){
-					groupPermittedMac.setValidationState(ValidationState.ERROR);
-				}else{					
-					groupPermittedMac.setValidationState(ValidationState.NONE);
-				}
-			}});
-		source.addBlurHandler(new BlurHandler(){
-			@Override
-			public void onBlur(BlurEvent event) {
-				if(!source.getText().trim().matches(FieldType.PORT_RANGE.getRegex()) && source.getText().trim().length()>0){
-					groupSource.setValidationState(ValidationState.ERROR);
-				}else{					
-					groupSource.setValidationState(ValidationState.NONE);
-				}
-			}});
-		
-		
 		cancel.setText(MSGS.cancelButton());
 		cancel.addClickHandler(new ClickHandler() {
 			@Override
@@ -582,46 +482,48 @@ public class OpenPortsTabUi extends Composite {
 			@Override
 			public void onClick(ClickEvent event) {
 
-				if((groupPort.getValidationState()==ValidationState.ERROR)||
-					(groupPermittedNw.getValidationState()==ValidationState.ERROR)||
-					(groupPermittedI.getValidationState()==ValidationState.ERROR)||
-					(groupUnpermittedI.getValidationState()==ValidationState.ERROR)||
-					(groupPermittedMac.getValidationState()==ValidationState.ERROR)||
-					(groupSource.getValidationState()==ValidationState.ERROR)){
-					//Growl.growl(MSGS.deviceConfigError());
+				checkFieldsValues();
+
+				if(     groupPort.getValidationState() == ValidationState.ERROR       ||
+						groupPermittedNw.getValidationState()==ValidationState.ERROR  ||
+						groupPermittedI.getValidationState()==ValidationState.ERROR   ||
+						groupUnpermittedI.getValidationState()==ValidationState.ERROR ||
+						groupPermittedMac.getValidationState()==ValidationState.ERROR ||
+						groupSource.getValidationState()==ValidationState.ERROR){
 					return;
 				}
+
 				// create a new entry
 				openPortEntry = new GwtFirewallOpenPortEntry();
 				openPortEntry.setPortRange(port.getText());
 				openPortEntry.setProtocol(protocol.getSelectedItemText());
-				if (permittedNw.getText() != null
-						&& permittedNw.getText() != "") {
+				if (permittedNw.getText() != null && 
+						!"".equals(permittedNw.getText().trim())) {
 					openPortEntry.setPermittedNetwork(permittedNw.getText());
 				} else {
 					openPortEntry.setPermittedNetwork("0.0.0.0/0");
 				}
-				if (permittedI.getText() != null && permittedI.getText() != "") {
-					openPortEntry.setPermittedInterfaceName(permittedI
-							.getText());
+				if (permittedI.getText() != null && 
+						!"".equals(permittedI.getText().trim())) {
+					openPortEntry.setPermittedInterfaceName(permittedI.getText());
 				}
-				if (unpermittedI.getText() != null
-						&& unpermittedI.getText() != "") {
-					openPortEntry.setUnpermittedInterfaceName(unpermittedI
-							.getText());
+				if (unpermittedI.getText() != null && 
+						!"".equals(unpermittedI.getText().trim())) {
+					openPortEntry.setUnpermittedInterfaceName(unpermittedI.getText());
 				}
-				if (permittedMac.getText() != null
-						&& permittedMac.getText() != "") {
+				if (permittedMac.getText() != null && 
+						!"".equals(permittedMac.getText().trim())) {
 					openPortEntry.setPermittedMAC(permittedMac.getText());
 				}
-				if (source.getText() != null && source.getText() != "") {
+				if (source.getText() != null && 
+						!"".equals(source.getText().trim())) {
 					openPortEntry.setSourcePortRange(source.getText());
 				}
 				openPortsForm.hide();
 
 				editOpenPortEntry = null;
 				newOpenPortEntry = null;
-				
+
 				if (existingEntry == null) {
 					newOpenPortEntry = openPortEntry;
 				} else {
@@ -633,22 +535,155 @@ public class OpenPortsTabUi extends Composite {
 		openPortsForm.show();
 	}
 
-	public GwtFirewallOpenPortEntry getNewOpenPortEntry() {
-		return newOpenPortEntry;
+	private void setModalFieldsHandlers() {
+		permittedI.addChangeHandler(new ChangeHandler() {
+			@Override
+			public void onChange(ChangeEvent event) {
+				if (permittedI.getText() != null && !"".equals(permittedI.getText())) {
+					unpermittedI.clear();
+					unpermittedI.setEnabled(false);
+				} else {
+					unpermittedI.setEnabled(true);
+				}
+			}
+		});
+
+		unpermittedI.addChangeHandler(new ChangeHandler() {
+			@Override
+			public void onChange(ChangeEvent event) {
+				if (unpermittedI.getText() != null && !"".equals(unpermittedI.getText())) {
+					permittedI.clear();
+					permittedI.setEnabled(false);
+				} else {
+					permittedI.setEnabled(true);
+				}
+			}
+		});
+
+		//set up validation
+		//groupPort, groupPermittedNw,groupPermittedI,grourUnpermittedI,groupPermittedMac,groupSource;
+		port.addBlurHandler(new BlurHandler(){
+			@Override
+			public void onBlur(BlurEvent event) {
+				if((!port.getText().trim().matches(FieldType.NUMERIC.getRegex()) && port.getText().trim().length() != 0) || 
+						(port.getText()==null || "".equals(port.getText().trim()))){
+					groupPort.setValidationState(ValidationState.ERROR);
+				}else{					
+					groupPort.setValidationState(ValidationState.NONE);
+				}
+			}});
+
+		permittedNw.addBlurHandler(new BlurHandler(){
+			@Override
+			public void onBlur(BlurEvent event) {
+				if(!permittedNw.getText().trim().matches(FieldType.NETWORK.getRegex()) && 
+						permittedNw.getText().trim().length() > 0){					
+					groupPermittedNw.setValidationState(ValidationState.ERROR);
+				}else{				
+					groupPermittedNw.setValidationState(ValidationState.NONE);
+				}
+			}});
+		permittedI.addBlurHandler(new BlurHandler(){
+			@Override
+			public void onBlur(BlurEvent event) {
+				if(!permittedI.getText().trim().matches(FieldType.ALPHANUMERIC.getRegex()) && 
+						permittedI.getText().trim().length() > 0){
+					groupPermittedI.setValidationState(ValidationState.ERROR);
+				}else{					
+					groupPermittedI.setValidationState(ValidationState.NONE);
+				}
+			}});
+		unpermittedI.addBlurHandler(new BlurHandler(){
+			@Override
+			public void onBlur(BlurEvent event) {
+				if(!unpermittedI.getText().trim().matches(FieldType.ALPHANUMERIC.getRegex()) && 
+						unpermittedI.getText().trim().length() > 0){
+					groupUnpermittedI.setValidationState(ValidationState.ERROR);
+				}else{					
+					groupPermittedI.setValidationState(ValidationState.NONE);
+				}
+			}});
+		permittedMac.addBlurHandler(new BlurHandler(){
+			@Override
+			public void onBlur(BlurEvent event) {
+				if(!permittedMac.getText().trim().matches(FieldType.MAC_ADDRESS.getRegex()) && 
+						permittedMac.getText().trim().length() > 0){
+					groupPermittedMac.setValidationState(ValidationState.ERROR);
+				}else{					
+					groupPermittedMac.setValidationState(ValidationState.NONE);
+				}
+			}});
+		source.addBlurHandler(new BlurHandler(){
+			@Override
+			public void onBlur(BlurEvent event) {
+				if(!source.getText().trim().matches(FieldType.PORT_RANGE.getRegex()) && 
+						source.getText().trim().length() > 0){
+					groupSource.setValidationState(ValidationState.ERROR);
+				}else{					
+					groupSource.setValidationState(ValidationState.NONE);
+				}
+			}});
 	}
 
-	public GwtFirewallOpenPortEntry getEditOpenPortEntry() {
-		return editOpenPortEntry;
+	private void setModalFieldsTooltips() {
+		// Permitted Interface config
+		tooltipPermittedI.setTitle(MSGS.firewallOpenPortFormPermittedInterfaceToolTip());
+		tooltipPermittedI.reconfigure();
+
+		// UnPermitted Interface config
+		tooltipUnpermittedI.setTitle(MSGS.firewallOpenPortFormUnpermittedInterfaceToolTip());
+		tooltipUnpermittedI.reconfigure();
+	}
+
+	private void setModalFieldsValues(final GwtFirewallOpenPortEntry existingEntry) {
+		// populate existing values
+		if (existingEntry != null) {
+			port.setText(String.valueOf(existingEntry.getPortRange()));
+			protocol.setSelectedIndex(existingEntry.getProtocol().equals(GwtNetProtocol.tcp.name()) ? 0 : 1);
+
+			permittedNw.setText(existingEntry.getPermittedNetwork());
+			permittedI.setText(existingEntry.getPermittedInterfaceName());
+			unpermittedI.setText(existingEntry.getUnpermittedInterfaceName());
+			permittedMac.setText(existingEntry.getPermittedMAC());
+			source.setText(existingEntry.getSourcePortRange());
+		} else {
+			port.setText("");
+			protocol.setSelectedIndex(0);
+
+			permittedNw.setText("");
+			permittedI.setText("");
+			unpermittedI.setText("");
+			permittedMac.setText("");
+			source.setText("");
+		}
+	}
+
+	private void setModalFieldsLabels() {
+		// set Labels
+		labelPort.setText(MSGS.firewallOpenPortFormPort()+"*");
+		labelProtocol.setText(MSGS.firewallOpenPortFormProtocol());
+		protocol.clear();
+		protocol.addItem(GwtNetProtocol.tcp.name());
+		protocol.addItem(GwtNetProtocol.udp.name());
+		labelPermitttedNw.setText(MSGS.firewallOpenPortFormPermittedNetwork());
+		labelPermitttedI.setText(MSGS.firewallOpenPortFormPermittedInterfaceName());
+		labelUnPermitttedI.setText(MSGS.firewallOpenPortFormUnpermittedInterfaceName());
+		labelPermitttedMac.setText(MSGS.firewallOpenPortFormPermittedMac());
+		labelsource.setText(MSGS.firewallOpenPortFormSourcePortRange());
+	}
+
+	private void checkFieldsValues() {
+		if (port.getText().trim().isEmpty()) {
+			groupPort.setValidationState(ValidationState.ERROR);
+		}
 	}
 
 	private boolean duplicateEntry(GwtFirewallOpenPortEntry openPortEntry) {
-		List<GwtFirewallOpenPortEntry> entries = openPortsDataProvider
-				.getList();
+		List<GwtFirewallOpenPortEntry> entries = openPortsDataProvider.getList();
 		if (entries != null && openPortEntry != null) {
 			for (GwtFirewallOpenPortEntry entry : entries) {
-				if (entry.getPortRange().equals(openPortEntry.getPortRange())
-						&& entry.getPermittedNetwork().equals(
-								openPortEntry.getPermittedNetwork())) {
+				if (entry.getPortRange().equals(openPortEntry.getPortRange()) && 
+						entry.getPermittedNetwork().equals(openPortEntry.getPermittedNetwork())) {
 					return true;
 				}
 			}
@@ -657,7 +692,7 @@ public class OpenPortsTabUi extends Composite {
 	}
 
 	private void setVisibility() {
-		if (openPortsDataProvider.getList().size() == 0) {
+		if (openPortsDataProvider.getList().isEmpty()) {
 			openPortsGrid.setVisible(false);
 			notification.setVisible(true);
 			notification.setText(MSGS.firewallOpenPortTableNoPorts());
@@ -666,5 +701,4 @@ public class OpenPortsTabUi extends Composite {
 			notification.setVisible(false);
 		}
 	}
-
 }

@@ -116,7 +116,11 @@ public class OpenPortsTabUi extends Composite {
 		TextColumn<GwtFirewallOpenPortEntry> col1 = new TextColumn<GwtFirewallOpenPortEntry>() {
 			@Override
 			public String getValue(GwtFirewallOpenPortEntry object) {
-				return String.valueOf(object.getPortRange());
+				if (object.getPortRange() != null) {
+					return String.valueOf(object.getPortRange());
+				} else {
+					return "";
+				}
 			}
 		};
 		col1.setCellStyleNames("status-table-row");
@@ -125,7 +129,11 @@ public class OpenPortsTabUi extends Composite {
 		TextColumn<GwtFirewallOpenPortEntry> col2 = new TextColumn<GwtFirewallOpenPortEntry>() {
 			@Override
 			public String getValue(GwtFirewallOpenPortEntry object) {
-				return String.valueOf(object.getProtocol());
+				if (object.getProtocol() != null) {
+					return String.valueOf(object.getProtocol());
+				} else {
+					return "";
+				}
 			}
 		};
 		col2.setCellStyleNames("status-table-row");
@@ -134,7 +142,11 @@ public class OpenPortsTabUi extends Composite {
 		TextColumn<GwtFirewallOpenPortEntry> col3 = new TextColumn<GwtFirewallOpenPortEntry>() {
 			@Override
 			public String getValue(GwtFirewallOpenPortEntry object) {
-				return String.valueOf(object.getPermittedNetwork());
+				if (object.getPermittedNetwork() != null) {
+					return String.valueOf(object.getPermittedNetwork());
+				} else {
+					return "";
+				}
 			}
 		};
 		col3.setCellStyleNames("status-table-row");
@@ -143,27 +155,37 @@ public class OpenPortsTabUi extends Composite {
 		TextColumn<GwtFirewallOpenPortEntry> col4 = new TextColumn<GwtFirewallOpenPortEntry>() {
 			@Override
 			public String getValue(GwtFirewallOpenPortEntry object) {
-				return String.valueOf(object.getPermittedInterfaceName());
+				if (object.getPermittedInterfaceName() != null) {
+					return String.valueOf(object.getPermittedInterfaceName());
+				} else {
+					return "";
+				}
 			}
 		};
 		col4.setCellStyleNames("status-table-row");
-		openPortsGrid.addColumn(col4,
-				MSGS.firewallOpenPortPermittedInterfaceName());
+		openPortsGrid.addColumn(col4, MSGS.firewallOpenPortPermittedInterfaceName());
 
 		TextColumn<GwtFirewallOpenPortEntry> col5 = new TextColumn<GwtFirewallOpenPortEntry>() {
 			@Override
 			public String getValue(GwtFirewallOpenPortEntry object) {
-				return String.valueOf(object.getUnpermittedInterfaceName());
+				if (object.getUnpermittedInterfaceName() != null) {
+					return String.valueOf(object.getUnpermittedInterfaceName());
+				} else {
+					return "";
+				}
 			}
 		};
 		col5.setCellStyleNames("status-table-row");
-		openPortsGrid.addColumn(col5,
-				MSGS.firewallOpenPortUnpermittedInterfaceName());
+		openPortsGrid.addColumn(col5, MSGS.firewallOpenPortUnpermittedInterfaceName());
 
 		TextColumn<GwtFirewallOpenPortEntry> col6 = new TextColumn<GwtFirewallOpenPortEntry>() {
 			@Override
 			public String getValue(GwtFirewallOpenPortEntry object) {
-				return String.valueOf(object.getPermittedMAC());
+				if (object.getPermittedMAC() != null) {
+					return String.valueOf(object.getPermittedMAC());
+				} else {
+					return "";
+				}
 			}
 		};
 		col6.setCellStyleNames("status-table-row");
@@ -172,7 +194,11 @@ public class OpenPortsTabUi extends Composite {
 		TextColumn<GwtFirewallOpenPortEntry> col7 = new TextColumn<GwtFirewallOpenPortEntry>() {
 			@Override
 			public String getValue(GwtFirewallOpenPortEntry object) {
-				return String.valueOf(object.getSourcePortRange());
+				if (object.getSourcePortRange() != null) {
+					return String.valueOf(object.getSourcePortRange());
+				} else {
+					return "";
+				}
 			}
 		};
 		col7.setCellStyleNames("status-table-row");
@@ -223,7 +249,13 @@ public class OpenPortsTabUi extends Composite {
 		apply.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
-				final List<GwtFirewallOpenPortEntry> updatedOpenPortConf = openPortsDataProvider.getList();
+				List<GwtFirewallOpenPortEntry> intermediateList = openPortsDataProvider.getList();
+				ArrayList<GwtFirewallOpenPortEntry> tempList = new ArrayList<GwtFirewallOpenPortEntry>();
+				final List<GwtFirewallOpenPortEntry> updatedOpenPortConf = tempList;
+				for (GwtFirewallOpenPortEntry entry: intermediateList) {
+					tempList.add(entry);
+				}
+				
 
 				if (updatedOpenPortConf.size() > 0) {
 					EntryClassUi.showWaitModal();
@@ -237,8 +269,7 @@ public class OpenPortsTabUi extends Composite {
 
 						@Override
 						public void onSuccess(GwtXSRFToken token) {
-							gwtNetworkService.updateDeviceFirewallOpenPorts(token, updatedOpenPortConf,
-									new AsyncCallback<Void>() {
+							gwtNetworkService.updateDeviceFirewallOpenPorts(token, updatedOpenPortConf, new AsyncCallback<Void>() {
 										@Override
 										public void onFailure(Throwable caught) {
 											EntryClassUi.hideWaitModal();

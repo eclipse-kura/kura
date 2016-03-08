@@ -221,21 +221,18 @@ public class TiSensorTag implements BluetoothLeNotificationListener {
 		s_logger.info("Received temperature value: " + value);
 		
 		double[] temperatures = new double[2];
-		
-		String[] tmp = value.split("\\s");
-		int lsbObj = Integer.parseInt(tmp[0], 16);
-		int msbObj = Integer.parseInt(tmp[1], 16);
-		int lsbAmb = Integer.parseInt(tmp[2], 16);
-		int msbAmb = Integer.parseInt(tmp[3], 16);
-		
-		int objT = unsignedToSigned((msbObj << 8) + lsbObj, 16);
-		int ambT = (msbAmb << 8) + lsbAmb;
-		
+
+		byte[] valueByte = hexStringToByteArray(value.replace(" ", ""));
+				
 		if (CC2650) {
+			int ambT = shortUnsignedAtOffset(valueByte, 2);
+			int objT = shortUnsignedAtOffset(valueByte, 0);
 			temperatures[0] = (double) ((ambT >> 2) * 0.03125);
 			temperatures[1] = (double) ((objT >> 2) * 0.03125);
 		} else {
 			
+			int ambT = shortUnsignedAtOffset(valueByte, 2);
+			int objT = shortSignedAtOffset(valueByte, 0);
 			temperatures[0] = ambT / 128.0;
 			
 			double Vobj2 = objT;
@@ -359,27 +356,21 @@ public class TiSensorTag implements BluetoothLeNotificationListener {
 		s_logger.info("Received accelerometer value: " + value);
 		
 		double[] acceleration = new double[3];
-		String[] tmp = value.split("\\s");
+		byte[] valueByte = hexStringToByteArray(value.replace(" ", ""));
 		
 		if (CC2650) {
 			final float SCALE = (float) 4096.0;
 		
-			int xlsb = Integer.parseInt(tmp[6], 16);
-			int xmsb = Integer.parseInt(tmp[7], 16);
-			int ylsb = Integer.parseInt(tmp[8], 16);
-			int ymsb = Integer.parseInt(tmp[9], 16);
-			int zlsb = Integer.parseInt(tmp[10], 16);
-			int zmsb = Integer.parseInt(tmp[11], 16);
-			
-			int x = unsignedToSigned((xmsb << 8) + xlsb, 16);
-			int y = unsignedToSigned((ymsb << 8) + ylsb, 16);
-			int z = unsignedToSigned((zmsb << 8) + zlsb, 16); 
+			int x = shortSignedAtOffset(valueByte, 6);
+			int y = shortSignedAtOffset(valueByte, 8);
+			int z = shortSignedAtOffset(valueByte, 10);
 			
 			acceleration[0] = (x / SCALE) * -1;
 			acceleration[1] = (y / SCALE);
 			acceleration[2] = (z / SCALE) * -1;
 		}
 		else {
+			String[] tmp = value.split("\\s");
 			int x = unsignedToSigned(Integer.parseInt(tmp[0], 16), 8);
 			int y = unsignedToSigned(Integer.parseInt(tmp[1], 16), 8);
 			int z = unsignedToSigned(Integer.parseInt(tmp[2], 16), 8) * -1;
@@ -473,12 +464,10 @@ public class TiSensorTag implements BluetoothLeNotificationListener {
 		
 		s_logger.info("Received barometer value: " + value);
 		
-		String[] tmp = value.split("\\s");
-		// Ignore temperature value from humidity sensor
-		int lsbHum = Integer.parseInt(tmp[2], 16);
-		int msbHum = Integer.parseInt(tmp[3], 16);
-
-		int hum = (msbHum << 8) + lsbHum;
+		byte[] valueByte = hexStringToByteArray(value.replace(" ", ""));
+		
+		int hum = shortUnsignedAtOffset(valueByte, 2);
+		
 		float humf = 0f;
 		
 		if (CC2650) {
@@ -580,40 +569,27 @@ public class TiSensorTag implements BluetoothLeNotificationListener {
 		s_logger.info("Received magnetometer value: " + value);
 		
 		float[] magneticField = new float[3];
-
-		String [] tmp = value.split("\\s");
+		
+		byte[] valueByte = hexStringToByteArray(value.replace(" ", ""));
 		
 		if (CC2650) {
 			
 			final float SCALE = (float) (32768 / 4912);
 			
-			int xlsb = Integer.parseInt(tmp[12], 16);
-			int xmsb = Integer.parseInt(tmp[13], 16);
-			int ylsb = Integer.parseInt(tmp[14], 16);
-			int ymsb = Integer.parseInt(tmp[15], 16);
-			int zlsb = Integer.parseInt(tmp[16], 16);
-			int zmsb = Integer.parseInt(tmp[17], 16);
-			
-			int x = unsignedToSigned((xmsb << 8) + xlsb, 16);
-			int y = unsignedToSigned((ymsb << 8) + ylsb, 16);
-			int z = unsignedToSigned((zmsb << 8) + zlsb, 16);
+			int x = shortSignedAtOffset(valueByte, 12);
+			int y = shortSignedAtOffset(valueByte, 14);
+			int z = shortSignedAtOffset(valueByte, 16);
 			
 			magneticField[0] = x / SCALE;
 			magneticField[1] = y / SCALE; 
 			magneticField[2] = z / SCALE;
 		}
 		else {
-			int lsbX = Integer.parseInt(tmp[0], 16);
-			int msbX = Integer.parseInt(tmp[1], 16);
-			int lsbY = Integer.parseInt(tmp[2], 16);
-			int msbY = Integer.parseInt(tmp[3], 16);
-			int lsbZ = Integer.parseInt(tmp[4], 16);
-			int msbZ = Integer.parseInt(tmp[5], 16);
 
-			int x = unsignedToSigned((msbX << 8) + lsbX, 16);
-			int y = unsignedToSigned((msbY << 8) + lsbY, 16);
-			int z = unsignedToSigned((msbZ << 8) + lsbZ, 16);
-
+			int x = shortSignedAtOffset(valueByte, 0);
+			int y = shortSignedAtOffset(valueByte, 2);
+			int z = shortSignedAtOffset(valueByte, 4);
+			
 			magneticField[0] = x * (2000f / 65536f) * -1;
 			magneticField[1] = y * (2000f / 65536f) * -1;
 			magneticField[2] = z * (2000f / 65536f);
@@ -750,23 +726,18 @@ public class TiSensorTag implements BluetoothLeNotificationListener {
 		s_logger.info("Received pressure value: " + value);
 		
 		double p_a = 0.0;
-		String[] tmp = value.split("\\s");
+		byte[] valueByte = hexStringToByteArray(value.replace(" ", ""));
 		
 		if (CC2650) {
             
-            if (tmp.length > 4) {
-        		int lsbPre = Integer.parseInt(tmp[3], 16);
-        		int mmsbPre = Integer.parseInt(tmp[4], 16);
-        		int msbPre = Integer.parseInt(tmp[5], 16);
-                Integer val = (msbPre << 16) + (mmsbPre << 8) + lsbPre;
-                p_a = val / 100.0f;
+            if (valueByte.length > 4) {
+            	Integer val = twentyFourBitUnsignedAtOffset(valueByte, 2);
+                p_a = val / 10000.0;
             }
 			else {
                 int mantissa;
                 int exponent;
-        		int lsbPre = Integer.parseInt(tmp[2], 16);
-        		int msbPre = Integer.parseInt(tmp[3], 16);
-                Integer pre = (msbPre << 8) + lsbPre;
+                Integer pre = shortUnsignedAtOffset(valueByte, 2);
 
                 mantissa = pre & 0x0FFF;
                 exponent = (pre >> 12) & 0xFF;
@@ -774,47 +745,25 @@ public class TiSensorTag implements BluetoothLeNotificationListener {
                 double output;
                 double magnitude = Math.pow(2.0, (double) exponent);
                 output = (mantissa * magnitude);
-                p_a = output / 100.0;
+                p_a = output / 10000.0;
             }
             
 		}
 		else {
 			
-			int lsbTemp = Integer.parseInt(tmp[0], 16);
-			int msbTemp = Integer.parseInt(tmp[1], 16);
-			int lsbPre = Integer.parseInt(tmp[2], 16);
-			int msbPre = Integer.parseInt(tmp[3], 16);
-	
-			int t_r = unsignedToSigned((msbTemp << 8) + lsbTemp, 16);
-			int p_r = (msbPre << 8) + lsbPre;
+			int t_r = shortSignedAtOffset(valueByte, 0);
+			int p_r = shortUnsignedAtOffset(valueByte, 2);
 			
-			tmp = pressureCalibration.split("\\s");
-			int lsbc1 = Integer.parseInt(tmp[0], 16);
-			int msbc1 = Integer.parseInt(tmp[1], 16);
-			int lsbc2 = Integer.parseInt(tmp[2], 16);
-			int msbc2 = Integer.parseInt(tmp[3], 16);
-			int lsbc3 = Integer.parseInt(tmp[4], 16);
-			int msbc3 = Integer.parseInt(tmp[5], 16);
-			int lsbc4 = Integer.parseInt(tmp[6], 16);
-			int msbc4 = Integer.parseInt(tmp[7], 16);
-			int lsbc5 = Integer.parseInt(tmp[8], 16);
-			int msbc5 = Integer.parseInt(tmp[9], 16);
-			int lsbc6 = Integer.parseInt(tmp[10], 16);
-			int msbc6 = Integer.parseInt(tmp[11], 16);
-			int lsbc7 = Integer.parseInt(tmp[12], 16);
-			int msbc7 = Integer.parseInt(tmp[13], 16);
-			int lsbc8 = Integer.parseInt(tmp[14], 16);
-			int msbc8 = Integer.parseInt(tmp[15], 16);
-			
+			byte[] pressureCalibrationByte = hexStringToByteArray(pressureCalibration.replace(" ", ""));
 			int c[] = new int[8];
-			c[0] = (msbc1 << 8) + lsbc1;
-			c[1] = (msbc2 << 8) + lsbc2;
-			c[2] = (msbc3 << 8) + lsbc3;
-			c[3] = (msbc4 << 8) + lsbc4;
-			c[4] = unsignedToSigned((msbc5 << 8) + lsbc5, 16);
-			c[5] = unsignedToSigned((msbc6 << 8) + lsbc6, 16);
-			c[6] = unsignedToSigned((msbc7 << 8) + lsbc7, 16);
-			c[7] = unsignedToSigned((msbc8 << 8) + lsbc8, 16);
+			c[0] = shortUnsignedAtOffset(pressureCalibrationByte, 0);
+			c[1] = shortUnsignedAtOffset(pressureCalibrationByte, 2);
+			c[2] = shortUnsignedAtOffset(pressureCalibrationByte, 4);
+			c[3] = shortUnsignedAtOffset(pressureCalibrationByte, 6);
+			c[4] = shortSignedAtOffset(pressureCalibrationByte, 8);
+			c[5] = shortSignedAtOffset(pressureCalibrationByte, 10);
+			c[6] = shortSignedAtOffset(pressureCalibrationByte, 12);
+			c[7] = shortSignedAtOffset(pressureCalibrationByte, 14);
 			
 			// Ignore temperature from pressure sensor
 			// double t_a = (100 * (c[0] * t_r / Math.pow(2,8) + c[1] * Math.pow(2,6))) / Math.pow(2,16);
@@ -915,17 +864,11 @@ public class TiSensorTag implements BluetoothLeNotificationListener {
 		s_logger.info("Received gyro value: " + value);
 		
 		float[] gyroscope = new float[3];
-		String[] tmp = value.split("\\s");
-		int lsbX = Integer.parseInt(tmp[0], 16);
-		int msbX = Integer.parseInt(tmp[1], 16);
-		int lsbY = Integer.parseInt(tmp[2], 16);
-		int msbY = Integer.parseInt(tmp[3], 16);
-		int lsbZ = Integer.parseInt(tmp[4], 16);
-		int msbZ = Integer.parseInt(tmp[5], 16);
-
-		int x = unsignedToSigned((msbX << 8) + lsbX, 16);
-		int y = unsignedToSigned((msbY << 8) + lsbY, 16);
-		int z = unsignedToSigned((msbZ << 8) + lsbZ, 16);
+		byte[] valueByte = hexStringToByteArray(value.replace(" ", ""));
+		
+		int y = shortSignedAtOffset(valueByte, 0);
+		int x = shortSignedAtOffset(valueByte, 2); 
+		int z = shortSignedAtOffset(valueByte, 4);
 		
 		if (CC2650) {
 			
@@ -1033,13 +976,11 @@ public class TiSensorTag implements BluetoothLeNotificationListener {
 		
 		s_logger.info("Received luxometer value: " + value);
 		
-		String[] tmp = value.split("\\s");
-		int lsbLight = Integer.parseInt(tmp[0], 16);
-		int msbLight = Integer.parseInt(tmp[1], 16);
+		byte[] valueByte = hexStringToByteArray(value.replace(" ", ""));
+		int sfloat = shortUnsignedAtOffset(valueByte, 0);
 		
 		int mantissa;
 		int exponent;
-		int sfloat = (msbLight << 8) + lsbLight;
 
 		mantissa = sfloat & 0x0FFF;
 		exponent = (sfloat & 0xF000) >> 12;
@@ -1121,7 +1062,6 @@ public class TiSensorTag implements BluetoothLeNotificationListener {
 	}
 
 	private String hexAsciiToString(String hex) {
-	
 		hex = hex.replaceAll(" ", "");
 		StringBuilder output = new StringBuilder();
 		for (int i = 0; i < hex.length(); i+=2) {
@@ -1129,7 +1069,33 @@ public class TiSensorTag implements BluetoothLeNotificationListener {
 			output.append((char)Integer.parseInt(str, 16));
 		}
 		return output.toString();
-		
 	}
 	
+	public static byte[] hexStringToByteArray(String s) {
+	    int len = s.length();
+	    byte[] data = new byte[len / 2];
+	    for (int i = 0; i < len; i += 2) {
+	        data[i / 2] = (byte) ((Character.digit(s.charAt(i), 16) << 4)
+	                             + Character.digit(s.charAt(i+1), 16));
+	    }
+	    return data;
+	}
+	
+    private static Integer shortSignedAtOffset(byte[] c, int offset) {
+        Integer lowerByte = (int) c[offset] & 0xFF;
+        Integer upperByte = (int) c[offset+1]; // Interpret MSB as signed
+        return (upperByte << 8) + lowerByte;
+    }
+
+    private static Integer shortUnsignedAtOffset(byte[] c, int offset) {
+        Integer lowerByte = (int) c[offset] & 0xFF;
+        Integer upperByte = (int) c[offset+1] & 0xFF;
+        return (upperByte << 8) + lowerByte;
+    }
+    private static Integer twentyFourBitUnsignedAtOffset(byte[] c, int offset) {
+        Integer lowerByte = (int) c[offset] & 0xFF;
+        Integer mediumByte = (int) c[offset+1] & 0xFF;
+        Integer upperByte = (int) c[offset + 2] & 0xFF;
+        return (upperByte << 16) + (mediumByte << 8) + lowerByte;
+    }
 }

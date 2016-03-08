@@ -59,14 +59,14 @@ public class PortForwardingTabUi extends Composite {
 	private static PortForwardingTabUiUiBinder uiBinder = GWT.create(PortForwardingTabUiUiBinder.class);
 
 	interface PortForwardingTabUiUiBinder extends
-			UiBinder<Widget, PortForwardingTabUi> {
+	UiBinder<Widget, PortForwardingTabUi> {
 	}
 
 	private static final Messages MSGS = GWT.create(Messages.class);
-	
+
 	private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
 	private final GwtNetworkServiceAsync gwtNetworkService = GWT.create(GwtNetworkService.class);
-	
+
 	GwtFirewallPortForwardEntry portForwardEntry;
 
 
@@ -76,7 +76,7 @@ public class PortForwardingTabUi extends Composite {
 	Alert notification;
 	@UiField
 	DataGrid<GwtFirewallPortForwardEntry> portForwardGrid = new DataGrid<GwtFirewallPortForwardEntry>();
-	
+
 	private ListDataProvider<GwtFirewallPortForwardEntry> portForwardDataProvider = new ListDataProvider<GwtFirewallPortForwardEntry>();
 	final SingleSelectionModel<GwtFirewallPortForwardEntry> selectionModel = new SingleSelectionModel<GwtFirewallPortForwardEntry>();
 
@@ -98,17 +98,17 @@ public class PortForwardingTabUi extends Composite {
 	Modal portForwardingForm;
 	@UiField
 	FormLabel labelInput, labelOutput, labelLan, labelProtocol, labelExternal,
-			labelInternal, labelEnable, labelPermitttedNw, labelPermitttedMac,
-			labelSource;
+	labelInternal, labelEnable, labelPermitttedNw, labelPermitttedMac,
+	labelSource;
 	@UiField
 	FormGroup groupInput,groupOutput,groupLan,groupExternal,groupInternal,groupPermittedNw,groupPermittedMac,groupSource;
 	@UiField
 	Tooltip tooltipInput, tooltipOutput, tooltipLan, tooltipProtocol,
-			tooltipExternal, tooltipInternal, tooltipEnable,
-			tooltipPermittedNw, tooltipPermittedMac, tooltipSource;
+	tooltipExternal, tooltipInternal, tooltipEnable,
+	tooltipPermittedNw, tooltipPermittedMac, tooltipSource;
 	@UiField
 	TextBox input, output, lan, external, internal, permittedNw, permittedMac,
-			source;
+	source;
 	@UiField
 	ListBox protocol, enable;
 	@UiField
@@ -214,8 +214,7 @@ public class PortForwardingTabUi extends Composite {
 			}
 		};
 		col10.setCellStyleNames("status-table-row");
-		portForwardGrid.addColumn(col10,
-				MSGS.firewallPortForwardSourcePortRange());
+		portForwardGrid.addColumn(col10, MSGS.firewallPortForwardSourcePortRange());
 
 		portForwardDataProvider.addDataDisplay(portForwardGrid);
 		portForwardGrid.setSelectionModel(selectionModel);
@@ -255,82 +254,32 @@ public class PortForwardingTabUi extends Composite {
 					}
 				});
 			}
-			
+
 		});
 	}
 
+	//Initialize buttons
 	private void initButtons() {
+		initApplyButton();
 
-		apply.setText(MSGS.firewallApply());
-		apply.addClickHandler(new ClickHandler() {
-			@Override
-			public void onClick(ClickEvent event) {
-				final List<GwtFirewallPortForwardEntry> updatedPortForwardConf = portForwardDataProvider
-						.getList();
+		initCreateButton();
 
-				if (updatedPortForwardConf.size() > 0) {
-					gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
+		initEditButton();
 
-						@Override
-						public void onFailure(Throwable ex) {
-							FailureHandler.handle(ex);
-						}
+		initDeleteButton();
+	}
 
-						@Override
-						public void onSuccess(GwtXSRFToken token) {
-							gwtNetworkService.updateDeviceFirewallPortForwards(token,
-									updatedPortForwardConf, new AsyncCallback<Void>() {
-										@Override
-										public void onFailure(Throwable ex) {
-											FailureHandler.handle(ex);
-										}
-
-										@Override
-										public void onSuccess(Void result) {
-											apply.setEnabled(false);
-										}
-
-									});
-						}
-						
-					});
-				}
-			}
-		});
-
-		create.setText(MSGS.newButton());
-		create.addClickHandler(new ClickHandler() {
-			@Override
-			public void onClick(ClickEvent event) {
-				initModal(null);
-			}
-		});
-
-		edit.setText(MSGS.editButton());
-		edit.addClickHandler(new ClickHandler() {
-			@Override
-			public void onClick(ClickEvent event) {
-				final GwtFirewallPortForwardEntry selection = selectionModel
-						.getSelectedObject();
-
-				if (selection != null) {
-					initModal(selection);
-				}
-			}
-		});
-
+	private void initDeleteButton() {
 		delete.setText(MSGS.deleteButton());
 		delete.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
-				final GwtFirewallPortForwardEntry selection = selectionModel
-						.getSelectedObject();
+				final GwtFirewallPortForwardEntry selection = selectionModel.getSelectedObject();
 
 				if (selection != null) {
 
 					alert.setTitle(MSGS.confirm());
-					alertBody.setText(MSGS
-							.firewallOpenPortDeleteConfirmation(String.valueOf(selection.getInPort())));
+					alertBody.setText(MSGS.firewallOpenPortDeleteConfirmation(String.valueOf(selection.getInPort())));
 					yes.setText(MSGS.yesButton());
 					no.setText(MSGS.noButton());
 					no.addClickHandler(new ClickHandler() {
@@ -350,78 +299,269 @@ public class PortForwardingTabUi extends Composite {
 						}
 					});
 					alert.show();
+				}
+			}
+		});
+	}
 
+	private void initEditButton() {
+		edit.setText(MSGS.editButton());
+		edit.addClickHandler(new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
+				final GwtFirewallPortForwardEntry selection = selectionModel.getSelectedObject();
+
+				if (selection != null) {
+					initModal(selection);
+				}
+			}
+		});
+	}
+
+	private void initCreateButton() {
+		create.setText(MSGS.newButton());
+		create.addClickHandler(new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
+				initModal(null);
+			}
+		});
+	}
+
+	private void initApplyButton() {
+		apply.setText(MSGS.firewallApply());
+		apply.addClickHandler(new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
+				List<GwtFirewallPortForwardEntry> intermediateList = portForwardDataProvider.getList();
+				ArrayList<GwtFirewallPortForwardEntry> tempList = new ArrayList<GwtFirewallPortForwardEntry>();
+				final List<GwtFirewallPortForwardEntry> updatedPortForwardConf = tempList;
+				for (GwtFirewallPortForwardEntry entry: intermediateList) {
+					tempList.add(entry);
+				}
+
+				if (updatedPortForwardConf != null) {
+					EntryClassUi.showWaitModal();
+					gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
+
+						@Override
+						public void onFailure(Throwable ex) {
+							EntryClassUi.hideWaitModal();
+							FailureHandler.handle(ex);
+						}
+
+						@Override
+						public void onSuccess(GwtXSRFToken token) {
+							gwtNetworkService.updateDeviceFirewallPortForwards(token, updatedPortForwardConf, new AsyncCallback<Void>() {
+								@Override
+								public void onFailure(Throwable ex) {
+									FailureHandler.handle(ex);
+									EntryClassUi.hideWaitModal();
+								}
+
+								@Override
+								public void onSuccess(Void result) {
+									apply.setEnabled(false);
+									EntryClassUi.hideWaitModal();
+								}
+							});
+						}
+					});
 				}
 			}
 		});
 	}
 
 	private void initModal(final GwtFirewallPortForwardEntry existingEntry) {
-		final GwtFirewallPortForwardEntry oldEntry =existingEntry;
-		
+		final GwtFirewallPortForwardEntry oldEntry= existingEntry;
+
 		if (existingEntry == null) {
 			// new
-			portForwardingForm.setTitle(MSGS
-					.firewallPortForwardFormInformation());
+			portForwardingForm.setTitle(MSGS.firewallPortForwardFormInformation());
 		} else {
 			// edit existing entry
-			portForwardingForm.setTitle(MSGS
-					.firewallPortForwardFormUpdate(String.valueOf(existingEntry.getInPort())));
+			portForwardingForm.setTitle(MSGS.firewallPortForwardFormUpdate(String.valueOf(existingEntry.getInPort())));
 		}
 
-		// setLabels
-		labelInput.setText(MSGS.firewallPortForwardFormInboundInterface());
-		labelOutput.setText(MSGS.firewallPortForwardFormOutboundInterface());
-		labelLan.setText(MSGS.firewallPortForwardFormAddress());
-		labelProtocol.setText(MSGS.firewallPortForwardFormProtocol());
-		labelExternal.setText(MSGS.firewallPortForwardFormOutPort());
-		labelInternal.setText(MSGS.firewallPortForwardFormInPort());
-		labelEnable.setText(MSGS.firewallNatFormMasquerade());
-		labelPermitttedNw.setText(MSGS
-				.firewallPortForwardFormPermittedNetwork());
-		labelPermitttedMac.setText(MSGS.firewallPortForwardFormPermittedMac());
-		labelSource.setText(MSGS.firewallPortForwardFormSourcePortRange());
-		submit.setText(MSGS.submitButton());
-		cancel.setText(MSGS.cancelButton());
+		setModalFieldsLabels();
 
-		// set Tooltips
-		tooltipInput.setTitle(MSGS
-				.firewallPortForwardFormInboundInterfaceToolTip());
-		tooltipOutput.setTitle(MSGS
-				.firewallPortForwardFormOutboundInterfaceToolTip());
-		tooltipLan.setTitle(MSGS.firewallPortForwardFormLanAddressToolTip());
-		tooltipProtocol.setTitle(MSGS.firewallPortForwardFormProtocolToolTip());
-		tooltipInternal.setTitle(MSGS
-				.firewallPortForwardFormExternalPortToolTip());
-		tooltipExternal.setTitle(MSGS
-				.firewallPortForwardFormInternalPortToolTip());
-		tooltipEnable.setTitle(MSGS
-				.firewallPortForwardFormMasqueradingToolTip());
-		tooltipPermittedNw.setTitle(MSGS
-				.firewallPortForwardFormPermittedNetworkToolTip());
-		tooltipPermittedMac.setTitle(MSGS
-				.firewallPortForwardFormPermittedMacAddressToolTip());
-		tooltipSource.setTitle(MSGS
-				.firewallPortForwardFormSourcePortRangeToolTip());
-		tooltipInput.reconfigure();
-		tooltipOutput.reconfigure();
-		tooltipLan.reconfigure();
-		tooltipProtocol.reconfigure();
-		tooltipExternal.reconfigure();
-		tooltipInternal.reconfigure();
-		tooltipEnable.reconfigure();
-		tooltipPermittedNw.reconfigure();
-		tooltipPermittedMac.reconfigure();
-		tooltipSource.reconfigure();
+		setModalFieldsTooltips();
 
+		setModalFieldsValues(existingEntry);
+
+		setModalFieldsHandlers();
+
+		// handle buttons
+		cancel.addClickHandler(new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
+				portForwardEntry = null;
+				portForwardingForm.hide();
+			}
+		});
+
+
+		submit.addClickHandler(new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
+				checkFieldsValues();
+
+				if (    groupInput.getValidationState().equals(ValidationState.ERROR)        ||
+						groupOutput.getValidationState().equals(ValidationState.ERROR)       ||
+						groupLan.getValidationState().equals(ValidationState.ERROR)          ||
+						groupInternal.getValidationState().equals(ValidationState.ERROR)     ||
+						groupExternal.getValidationState().equals(ValidationState.ERROR)     ||
+						groupPermittedNw.getValidationState().equals(ValidationState.ERROR)  ||
+						groupPermittedMac.getValidationState().equals(ValidationState.ERROR) ||
+						groupSource.getValidationState().equals(ValidationState.ERROR)){
+					return;
+				}
+
+
+				portForwardEntry = new GwtFirewallPortForwardEntry();
+				portForwardEntry.setInboundInterface(input.getText());
+				portForwardEntry.setOutboundInterface(output.getText());
+				portForwardEntry.setAddress(lan.getText());
+				portForwardEntry.setProtocol(protocol.getSelectedItemText());
+				if (internal.getText() != null && !"".equals(internal.getText())) {
+					portForwardEntry.setInPort(Integer.parseInt(internal.getText()));
+				}
+				if (external.getText() != null && !"".equals(external.getText())) {
+					portForwardEntry.setOutPort(Integer.parseInt(external.getText()));
+				}
+				portForwardEntry.setMasquerade(enable.getSelectedItemText());
+				if (permittedNw.getText() != null && !"".equals(permittedNw.getText())) {
+					portForwardEntry.setPermittedNetwork(permittedNw.getText());
+				} else {
+					portForwardEntry.setPermittedNetwork("0.0.0.0/0");
+				}
+				if (permittedMac.getText() != null && !"".equals(permittedMac.getText())) {
+					confirm.setTitle(MSGS.firewallPortForwardFormNotification());
+					confirmBody.clear();
+					confirmBody.add(new Span(MSGS.firewallPortForwardFormNotificationMacFiltering()));
+					confirmFooter.clear();
+					confirmFooter.add(new Button(MSGS.okButton(), new ClickHandler() {
+						@Override
+						public void onClick(ClickEvent event) {
+							portForwardEntry.setPermittedMAC(permittedMac.getText());
+							confirm.hide();
+							portForwardEntry.setSourcePortRange(source.getText());
+
+							if (oldEntry != null) {
+								editEntry(portForwardEntry,oldEntry);
+							} else {
+								addNewEntry(portForwardEntry);											 
+							}
+							portForwardEntry=null;
+							portForwardingForm.hide();
+						}
+					}));
+					confirm.show();
+
+				} else {
+					portForwardEntry.setSourcePortRange(source.getText());
+
+					//Add values to table
+					if (oldEntry != null) {
+						editEntry(portForwardEntry,oldEntry);	
+					} else {
+						addNewEntry(portForwardEntry);										 
+					}
+					portForwardEntry=null;
+					portForwardingForm.hide();
+				} //end else (mac!=null)
+
+			}
+
+		});// end submit click handler
+
+		portForwardingForm.show();
+	}// end initModal
+
+	private void setModalFieldsHandlers() {
+		//Set validations
+		input.addBlurHandler(new BlurHandler(){
+			@Override
+			public void onBlur(BlurEvent event) {
+				if(input.getText().trim().length() == 0 || !input.getText().trim().matches(FieldType.ALPHANUMERIC.getRegex())){
+					groupInput.setValidationState(ValidationState.ERROR);
+				}else{
+					groupInput.setValidationState(ValidationState.NONE);
+				}
+			}});
+		output.addBlurHandler(new BlurHandler(){
+			@Override
+			public void onBlur(BlurEvent event) {
+				if(output.getText().trim().length() == 0 || !output.getText().trim().matches(FieldType.ALPHANUMERIC.getRegex())){
+					groupOutput.setValidationState(ValidationState.ERROR);
+				}else{
+					groupOutput.setValidationState(ValidationState.NONE);
+				}
+			}});
+		lan.addBlurHandler(new BlurHandler(){
+			@Override
+			public void onBlur(BlurEvent event) {
+				if(lan.getText().trim().length() == 0 || !lan.getText().trim().matches(FieldType.IPv4_ADDRESS.getRegex())){
+					groupLan.setValidationState(ValidationState.ERROR);
+				}else{
+					groupLan.setValidationState(ValidationState.NONE);
+				}
+			}});
+		internal.addBlurHandler(new BlurHandler(){
+			@Override
+			public void onBlur(BlurEvent event) {
+				if(internal.getText().trim().length() == 0 || !internal.getText().trim().matches(FieldType.NUMERIC.getRegex())){
+					groupInternal.setValidationState(ValidationState.ERROR);
+				}else{
+					groupInternal.setValidationState(ValidationState.NONE);
+				}
+			}});
+		external.addBlurHandler(new BlurHandler(){
+			@Override
+			public void onBlur(BlurEvent event) {
+				if(external.getText().trim().length() == 0 || !external.getText().trim().matches(FieldType.NUMERIC.getRegex())){
+					groupExternal.setValidationState(ValidationState.ERROR);
+				}else{
+					groupExternal.setValidationState(ValidationState.NONE);
+				}
+			}});
+		permittedNw.addBlurHandler(new BlurHandler(){
+			@Override
+			public void onBlur(BlurEvent event) {
+				if(permittedNw.getText().trim().length() != 0 && !permittedNw.getText().trim().matches(FieldType.NETWORK.getRegex())){
+					groupPermittedNw.setValidationState(ValidationState.ERROR);
+				}else{
+					groupPermittedNw.setValidationState(ValidationState.NONE);
+				}
+			}});
+		permittedMac.addBlurHandler(new BlurHandler(){
+			@Override
+			public void onBlur(BlurEvent event) {
+				if(permittedMac.getText().trim().length() != 0 && !permittedMac.getText().trim().matches(FieldType.MAC_ADDRESS.getRegex())){
+					groupPermittedMac.setValidationState(ValidationState.ERROR);
+				}else{
+					groupPermittedMac.setValidationState(ValidationState.NONE);
+				}
+			}});
+		source.addBlurHandler(new BlurHandler(){
+			@Override
+			public void onBlur(BlurEvent event) {
+				if(source.getText().trim().length() != 0 && !source.getText().trim().matches(FieldType.PORT_RANGE.getRegex())){
+					groupSource.setValidationState(ValidationState.ERROR);
+				}else{
+					groupSource.setValidationState(ValidationState.NONE);
+				}
+			}});
+	}
+
+	private void setModalFieldsValues(final GwtFirewallPortForwardEntry existingEntry) {
 		// set ListBoxes
 		protocol.clear();
 		for (GwtNetProtocol prot : GwtNetProtocol.values()) {
 			protocol.addItem(prot.name());
 		}
 		enable.clear();
-		for (GwtFirewallNatMasquerade masquerade : GwtFirewallNatMasquerade
-				.values()) {
+		for (GwtFirewallNatMasquerade masquerade : GwtFirewallNatMasquerade.values()) {
 			enable.addItem(masquerade.name());
 		}
 
@@ -444,248 +584,91 @@ public class PortForwardingTabUi extends Composite {
 				}
 			}
 
-			for (GwtFirewallNatMasquerade masquerade : GwtFirewallNatMasquerade
-					.values()) {
+			for (GwtFirewallNatMasquerade masquerade : GwtFirewallNatMasquerade.values()) {
 				int j = 0;
 				if (existingEntry.getMasquerade().equals(masquerade.name())) {
 					enable.setSelectedIndex(j);
 					j++;
 				}
 			}
+		} else {
+			input.setText("");
+			output.setText("");
+			lan.setText("");
+			external.setText("");
+			internal.setText("");
+			permittedNw.setText("");
+			permittedMac.setText("");
+			source.setText("");
 
-		}// end existing values
-
-		//Set validations
-		input.addBlurHandler(new BlurHandler(){
-			@Override
-			public void onBlur(BlurEvent event) {
-				if(input.getText().trim().length()==0 || !input.getText().trim().matches(FieldType.ALPHANUMERIC.getRegex())){
-					groupInput.setValidationState(ValidationState.ERROR);
-				}else{
-					groupInput.setValidationState(ValidationState.NONE);
-				}
-			}});
-		output.addBlurHandler(new BlurHandler(){
-			@Override
-			public void onBlur(BlurEvent event) {
-				if(output.getText().trim().length()==0 || !output.getText().trim().matches(FieldType.ALPHANUMERIC.getRegex())){
-					groupOutput.setValidationState(ValidationState.ERROR);
-				}else{
-					groupOutput.setValidationState(ValidationState.NONE);
-				}
-			}});
-		lan.addBlurHandler(new BlurHandler(){
-			@Override
-			public void onBlur(BlurEvent event) {
-				if(lan.getText().trim().length()==0 || !lan.getText().trim().matches(FieldType.IPv4_ADDRESS.getRegex())){
-					groupLan.setValidationState(ValidationState.ERROR);
-				}else{
-					groupLan.setValidationState(ValidationState.NONE);
-				}
-			}});
-		internal.addBlurHandler(new BlurHandler(){
-			@Override
-			public void onBlur(BlurEvent event) {
-				if(internal.getText().trim().length()==0 || !internal.getText().trim().matches(FieldType.NUMERIC.getRegex())){
-					groupInternal.setValidationState(ValidationState.ERROR);
-				}else{
-					groupInternal.setValidationState(ValidationState.NONE);
-				}
-			}});
-		external.addBlurHandler(new BlurHandler(){
-			@Override
-			public void onBlur(BlurEvent event) {
-				if(external.getText().trim().length()==0 || !external.getText().trim().matches(FieldType.NUMERIC.getRegex())){
-					groupExternal.setValidationState(ValidationState.ERROR);
-				}else{
-					groupExternal.setValidationState(ValidationState.NONE);
-				}
-			}});
-		permittedNw.addBlurHandler(new BlurHandler(){
-			@Override
-			public void onBlur(BlurEvent event) {
-				if(permittedNw.getText().trim().length()!=0 && !permittedNw.getText().trim().matches(FieldType.NETWORK.getRegex())){
-					groupPermittedNw.setValidationState(ValidationState.ERROR);
-				}else{
-					groupPermittedNw.setValidationState(ValidationState.NONE);
-				}
-			}});
-		permittedMac.addBlurHandler(new BlurHandler(){
-			@Override
-			public void onBlur(BlurEvent event) {
-				if(permittedMac.getText().trim().length()!=0 && !permittedMac.getText().trim().matches(FieldType.MAC_ADDRESS.getRegex())){
-					groupPermittedMac.setValidationState(ValidationState.ERROR);
-				}else{
-					groupPermittedMac.setValidationState(ValidationState.NONE);
-				}
-			}});
-		source.addBlurHandler(new BlurHandler(){
-			@Override
-			public void onBlur(BlurEvent event) {
-				if(source.getText().trim().length()!=0 && !source.getText().trim().matches(FieldType.PORT_RANGE.getRegex())){
-					groupSource.setValidationState(ValidationState.ERROR);
-				}else{
-					groupSource.setValidationState(ValidationState.NONE);
-				}
-			}});
-		
-		//set required fields in error state by default if empty
-		if(input.getText()==null || input.getText().trim()==""){
-			groupInput.setValidationState(ValidationState.ERROR);
+			protocol.setSelectedIndex(0);
+			enable.setSelectedIndex(0);
 		}
-		if(output.getText()==null || output.getText().trim()==""){
-			groupOutput.setValidationState(ValidationState.ERROR);
-		}
-		if(lan.getText()==null || lan.getText().trim()==""){
-			groupLan.setValidationState(ValidationState.ERROR);
-		}
-		if(internal.getText()==null || internal.getText().trim()==""){
-			groupInternal.setValidationState(ValidationState.ERROR);
-		}
-		if(external.getText()==null || external.getText().trim()==""){
-			groupExternal.setValidationState(ValidationState.ERROR);
-		}
-		
-		// handle buttons
-		cancel.addClickHandler(new ClickHandler() {
-			@Override
-			public void onClick(ClickEvent event) {
-				portForwardEntry = null;
-				portForwardingForm.hide();
-			}
-		});
+	}
 
-		
-		submit.addClickHandler(new ClickHandler() {
-			@Override
-			public void onClick(ClickEvent event) {
-				if(groupInput.getValidationState().equals(ValidationState.ERROR)
-						||groupOutput.getValidationState().equals(ValidationState.ERROR)
-						||groupLan.getValidationState().equals(ValidationState.ERROR)
-						||groupInternal.getValidationState().equals(ValidationState.ERROR)
-						||groupExternal.getValidationState().equals(ValidationState.ERROR)
-						||groupPermittedNw.getValidationState().equals(ValidationState.ERROR)
-						||groupPermittedMac.getValidationState().equals(ValidationState.ERROR)
-						||groupSource.getValidationState().equals(ValidationState.ERROR)){
-					//Growl.growl(MSGS.deviceConfigError());
-					return;
-				}
-					
-					
-				portForwardEntry = new GwtFirewallPortForwardEntry();
-				portForwardEntry.setInboundInterface(input.getText());
-				portForwardEntry.setOutboundInterface(output.getText());
-				portForwardEntry.setAddress(lan.getText());
-				portForwardEntry.setProtocol(protocol.getSelectedItemText());
-				if (internal.getText() != null && internal.getText() != "") {
-					portForwardEntry.setInPort(Integer.parseInt(internal
-							.getText()));
-				}
-				if (external.getText() != null && external.getText() != "") {
-					portForwardEntry.setOutPort(Integer.parseInt(external
-							.getText()));
-				}
-				portForwardEntry.setMasquerade(enable.getSelectedItemText());
-				if (permittedNw.getText() != null) {
-					portForwardEntry.setPermittedNetwork(permittedNw.getText());
-				} else {
-					portForwardEntry.setPermittedNetwork("0.0.0.0/0");
-				}
-				if (permittedMac.getText() != null
-						&& permittedMac.getText() != "") {
-					
-					confirm.setTitle(MSGS.firewallPortForwardFormNotification());
-					confirmBody.clear();
-					confirmBody.add(new Span(MSGS
-							.firewallPortForwardFormNotificationMacFiltering()));
-					confirmFooter.clear();
-					confirmFooter.add(new Button(MSGS.okButton(),
-							new ClickHandler() {
-								@Override
-								public void onClick(ClickEvent event) {
-									portForwardEntry
-											.setPermittedMAC(permittedMac
-													.getText());
-									confirm.hide();
-									portForwardEntry.setSourcePortRange(source.getText());
+	private void setModalFieldsTooltips() {
+		// set Tooltips
+		tooltipInput.setTitle(MSGS.firewallPortForwardFormInboundInterfaceToolTip());
+		tooltipOutput.setTitle(MSGS.firewallPortForwardFormOutboundInterfaceToolTip());
+		tooltipLan.setTitle(MSGS.firewallPortForwardFormLanAddressToolTip());
+		tooltipProtocol.setTitle(MSGS.firewallPortForwardFormProtocolToolTip());
+		tooltipInternal.setTitle(MSGS.firewallPortForwardFormExternalPortToolTip());
+		tooltipExternal.setTitle(MSGS.firewallPortForwardFormInternalPortToolTip());
+		tooltipEnable.setTitle(MSGS.firewallPortForwardFormMasqueradingToolTip());
+		tooltipPermittedNw.setTitle(MSGS.firewallPortForwardFormPermittedNetworkToolTip());
+		tooltipPermittedMac.setTitle(MSGS.firewallPortForwardFormPermittedMacAddressToolTip());
+		tooltipSource.setTitle(MSGS.firewallPortForwardFormSourcePortRangeToolTip());
+		tooltipInput.reconfigure();
+		tooltipOutput.reconfigure();
+		tooltipLan.reconfigure();
+		tooltipProtocol.reconfigure();
+		tooltipExternal.reconfigure();
+		tooltipInternal.reconfigure();
+		tooltipEnable.reconfigure();
+		tooltipPermittedNw.reconfigure();
+		tooltipPermittedMac.reconfigure();
+		tooltipSource.reconfigure();
+	}
 
-									
-									if (oldEntry != null) {
-										//Growl.growl("invoking edit entry0");
-										editEntry(portForwardEntry,oldEntry);
-									} else {
-										//Growl.growl("invoking new entry0");
-										addNewEntry(portForwardEntry);											 
-									}
-									portForwardEntry=null;
-									portForwardingForm.hide();
-								}
-							}));
-					confirm.show();
-					
-				} else {
-					portForwardEntry.setSourcePortRange(source.getText());
-					
-					
-					//Add values to table
-					//Growl.growl(String.valueOf(existingEntry==null));
-					if (oldEntry != null) {
-						//Growl.growl("invoking edit entry1");
-						editEntry(portForwardEntry,oldEntry);	
-					} else {
-						//Growl.growl("invoking new entry1");
-						addNewEntry(portForwardEntry);										 
-					}
-					portForwardEntry=null;
-					portForwardingForm.hide();
+	private void setModalFieldsLabels() {
+		// setLabels
+		labelInput.setText(MSGS.firewallPortForwardFormInboundInterface());
+		labelOutput.setText(MSGS.firewallPortForwardFormOutboundInterface());
+		labelLan.setText(MSGS.firewallPortForwardFormAddress());
+		labelProtocol.setText(MSGS.firewallPortForwardFormProtocol());
+		labelExternal.setText(MSGS.firewallPortForwardFormOutPort());
+		labelInternal.setText(MSGS.firewallPortForwardFormInPort());
+		labelEnable.setText(MSGS.firewallNatFormMasquerade());
+		labelPermitttedNw.setText(MSGS.firewallPortForwardFormPermittedNetwork());
+		labelPermitttedMac.setText(MSGS.firewallPortForwardFormPermittedMac());
+		labelSource.setText(MSGS.firewallPortForwardFormSourcePortRange());
+		submit.setText(MSGS.submitButton());
+		cancel.setText(MSGS.cancelButton());
+	}
 
-				} //end else (mac!=null)
-
-			}});// end submit click handler
-
-		portForwardingForm.show();
-	}// end initModal
-
-	private boolean duplicateEntry(
-			GwtFirewallPortForwardEntry portForwardEntry) {
+	private boolean duplicateEntry(GwtFirewallPortForwardEntry portForwardEntry) {
 
 		boolean isDuplicateEntry = false;
-		List<GwtFirewallPortForwardEntry> entries = portForwardDataProvider
-				.getList();
+		List<GwtFirewallPortForwardEntry> entries = portForwardDataProvider.getList();
 		if (entries != null && portForwardEntry != null) {
 			for (GwtFirewallPortForwardEntry entry : entries) {
-				if (entry.getInboundInterface().equals(
-						portForwardEntry.getInboundInterface())
-						&& entry.getOutboundInterface().equals(
-								portForwardEntry.getOutboundInterface())
-						&& entry.getAddress().equals(
-								portForwardEntry.getAddress())
-						&& entry.getProtocol().equals(
-								portForwardEntry.getProtocol())
-						&& entry.getOutPort()==(
-								portForwardEntry.getOutPort())
-						&& entry.getInPort()==(
-								portForwardEntry.getInPort())) {
+				if (    entry.getInboundInterface().equals(portForwardEntry.getInboundInterface()) && 
+						entry.getOutboundInterface().equals(portForwardEntry.getOutboundInterface()) && 
+						entry.getAddress().equals(portForwardEntry.getAddress()) && 
+						entry.getProtocol().equals(portForwardEntry.getProtocol()) && 
+						entry.getOutPort() == portForwardEntry.getOutPort() && 
+						entry.getInPort() == portForwardEntry.getInPort()) {
 
-					String permittedNetwork = (entry.getPermittedNetwork() != null) ? entry
-							.getPermittedNetwork() : "0.0.0.0/0";
-					String newPermittedNetwork = (portForwardEntry
-							.getPermittedNetwork() != null) ? portForwardEntry
-							.getPermittedNetwork() : "0.0.0.0/0";
-					String permittedMAC = (entry.getPermittedMAC() != null) ? entry
-							.getPermittedMAC().toUpperCase() : "";
-					String newPermittedMAC = (portForwardEntry
-							.getPermittedMAC() != null) ? portForwardEntry
-							.getPermittedMAC().toUpperCase() : "";
-					String sourcePortRange = (entry.getSourcePortRange() != null) ? entry
-							.getSourcePortRange() : "";
-					String newSourcePortRange = (portForwardEntry
-							.getSourcePortRange() != null) ? portForwardEntry
-							.getSourcePortRange() : "";
+					String permittedNetwork = (entry.getPermittedNetwork() != null) ? entry.getPermittedNetwork() : "0.0.0.0/0";
+					String newPermittedNetwork = (portForwardEntry.getPermittedNetwork() != null) ? portForwardEntry.getPermittedNetwork() : "0.0.0.0/0";
+					String permittedMAC = (entry.getPermittedMAC() != null) ? entry.getPermittedMAC().toUpperCase() : "";
+					String newPermittedMAC = (portForwardEntry.getPermittedMAC() != null) ? portForwardEntry.getPermittedMAC().toUpperCase() : "";
+					String sourcePortRange = (entry.getSourcePortRange() != null) ? entry.getSourcePortRange() : "";
+					String newSourcePortRange = (portForwardEntry.getSourcePortRange() != null) ? portForwardEntry.getSourcePortRange() : "";
 
-					if (permittedNetwork.equals(newPermittedNetwork)
-							&& permittedMAC.equals(newPermittedMAC)
-							&& sourcePortRange.equals(newSourcePortRange)) {
+					if (    permittedNetwork.equals(newPermittedNetwork) && 
+							permittedMAC.equals(newPermittedMAC)         && 
+							sourcePortRange.equals(newSourcePortRange)) {
 						isDuplicateEntry = true;
 						break;
 					}
@@ -697,30 +680,46 @@ public class PortForwardingTabUi extends Composite {
 
 	private void addNewEntry(GwtFirewallPortForwardEntry portForwardEntry){
 		if (!duplicateEntry(portForwardEntry)) {
-            portForwardDataProvider.getList().add(portForwardEntry);
-            //Growl.growl("Adding new Entry");
-            portForwardDataProvider.flush();
-            apply.setEnabled(true);
-            portForwardGrid.redraw();
-            portForwardEntry = null;
-        } else {
-            //Growl.growl(MSGS.firewallPortForwardFormError()
-              //      + ": ",
-                //    MSGS.firewallPortForwardFormDuplicate());
-        }
-		
-	}
-	
-	private void editEntry(GwtFirewallPortForwardEntry portForwardEntry, GwtFirewallPortForwardEntry existingEntry){
-		if(!duplicateEntry(portForwardEntry)){
-			//Growl.growl("Adding edited Entry");
-            portForwardDataProvider.getList().remove(existingEntry);
-            portForwardDataProvider.flush();
-            portForwardDataProvider.getList().add(portForwardEntry);
-            portForwardDataProvider.flush();
-            apply.setEnabled(true);
-            portForwardGrid.redraw();
-        }
+			portForwardDataProvider.getList().add(portForwardEntry);
+			portForwardDataProvider.flush();
+			apply.setEnabled(true);
+			portForwardGrid.redraw();
+			portForwardEntry = null;
+		} else {
+			//Growl.growl(MSGS.firewallPortForwardFormError()
+			//      + ": ",
+			//    MSGS.firewallPortForwardFormDuplicate());
+		}
+
 	}
 
+	private void editEntry(GwtFirewallPortForwardEntry portForwardEntry, GwtFirewallPortForwardEntry existingEntry){
+		if(!duplicateEntry(portForwardEntry)){
+			portForwardDataProvider.getList().remove(existingEntry);
+			portForwardDataProvider.flush();
+			portForwardDataProvider.getList().add(portForwardEntry);
+			portForwardDataProvider.flush();
+			apply.setEnabled(true);
+			portForwardGrid.redraw();
+		}
+	}
+
+	private void checkFieldsValues() {
+		//set required fields in error state by default if empty
+		if(input.getText()==null || "".equals(input.getText().trim())){
+			groupInput.setValidationState(ValidationState.ERROR);
+		}
+		if(output.getText()==null || "".equals(output.getText().trim())){
+			groupOutput.setValidationState(ValidationState.ERROR);
+		}
+		if(lan.getText()==null || "".equals(lan.getText().trim())){
+			groupLan.setValidationState(ValidationState.ERROR);
+		}
+		if(internal.getText()==null || "".equals(internal.getText().trim())){
+			groupInternal.setValidationState(ValidationState.ERROR);
+		}
+		if(external.getText()==null || "".equals(external.getText().trim())){
+			groupExternal.setValidationState(ValidationState.ERROR);
+		}
+	}
 }

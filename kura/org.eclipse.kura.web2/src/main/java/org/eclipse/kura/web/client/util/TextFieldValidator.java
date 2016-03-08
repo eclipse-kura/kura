@@ -51,7 +51,7 @@ public class TextFieldValidator {
 					box.setPlaceholder("");
 				}
 				//value required
-				if(required && (box.getText().trim()=="" || box.getText()==null)){
+				if(required && ("".equals(box.getText().trim()) || box.getText()==null)){
 					group.setValidationState(ValidationState.ERROR);
 					box.setPlaceholder(type.getRequiredMessage());
 				}else{

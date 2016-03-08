@@ -279,7 +279,7 @@ public class OpenPortsTabUi extends Composite {
 				}
 
 
-				if (updatedOpenPortConf.size() > 0) {
+				if (updatedOpenPortConf != null) {
 					EntryClassUi.showWaitModal();
 					gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
 
@@ -480,7 +480,6 @@ public class OpenPortsTabUi extends Composite {
 		submit.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
-
 				checkFieldsValues();
 
 				if(     groupPort.getValidationState() == ValidationState.ERROR       ||

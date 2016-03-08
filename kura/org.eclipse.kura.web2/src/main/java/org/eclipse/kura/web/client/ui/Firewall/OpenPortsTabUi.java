@@ -16,7 +16,6 @@ import java.util.List;
 
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.ui.EntryClassUi;
-import org.eclipse.kura.web.client.ui.Network.NetworkButtonBarUi;
 import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.client.util.TextFieldValidator.FieldType;
 import org.eclipse.kura.web.shared.model.GwtFirewallOpenPortEntry;

@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.eclipse.kura.KuraException;
 import org.eclipse.kura.bluetooth.BluetoothBeaconData;
 import org.eclipse.kura.bluetooth.BluetoothBeaconScanListener;
 import org.eclipse.kura.bluetooth.BluetoothDevice;
@@ -118,8 +119,14 @@ public class BluetoothLeScanner implements BluetoothProcessListener, BTSnoopList
 
 		// Alert listener that scan is complete
 
-		if(m_listener != null)
-			m_listener.onScanResults(m_scanResult);
+		if(m_listener != null) {
+			try {
+				m_listener.onScanResults(m_scanResult);
+			} catch (KuraException e) {
+				// TODO Check if throws or try-catch
+				e.printStackTrace();
+			}
+		}
 	}
 
 	@Override

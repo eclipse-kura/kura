@@ -13,6 +13,8 @@ package org.eclipse.kura.bluetooth;
 
 import java.util.List;
 
+import org.eclipse.kura.KuraException;
+
 /**
  * BluetoothLeScanListener must be implemented by any class
  * wishing to receive notifications on Bluetooth LE
@@ -26,13 +28,13 @@ public interface BluetoothLeScanListener {
 	 * 
 	 * @param errorCode
 	 */
-	public void onScanFailed(int errorCode);
+	public void onScanFailed(int errorCode) throws KuraException;
 	
 	/**
 	 * Fired when the Bluetooth LE scan is complete.
 	 * 
 	 * @param devices	A list of found devices
 	 */
-	public void onScanResults(List<BluetoothDevice> devices);
+	public void onScanResults(List<BluetoothDevice> devices) throws KuraException;
 	
 }

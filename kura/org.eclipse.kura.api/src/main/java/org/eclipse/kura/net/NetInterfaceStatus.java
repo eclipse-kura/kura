@@ -40,5 +40,8 @@ public enum NetInterfaceStatus {
 	netIPv6StatusEnabledWAN,
 	
 	/** IPv6 configuration is unknown **/
-	netIPv6StatusUnknown;
+	netIPv6StatusUnknown,
+	
+	/** Enabled for GPS only **/
+	netStatusEnabledGPS;
 }

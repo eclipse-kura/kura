@@ -163,11 +163,17 @@ public class TcpIpConfigTab extends LayoutContainer
 		if(m_selectNetIfConfig != null && m_selectNetIfConfig.getHwTypeEnum() == GwtNetIfType.MODEM) {
 			if(m_statusCombo != null) {
 				m_statusListStore.remove(m_statusListStore.findModel(GwtNetIfStatusModel.STATUS, GwtNetIfStatus.netIPv4StatusEnabledLAN.name()));
+				GwtNetIfStatusModel model = m_statusListStore.findModel(GwtNetIfStatusModel.STATUS, GwtNetIfStatus.netIPv4StatusEnabledGPS.name());
+				if (model == null) {
+					m_statusListStore.add(new GwtNetIfStatusModel(GwtNetIfStatus.netIPv4StatusEnabledGPS,
+							MessageUtils.get("netIPv4StatusEnabledGPS"), MSGS.netIPv4ToolTipStatusEnabledGPS()));
+				}
 				m_statusCombo.addListener(Events.OnMouseOver, new MouseOverListener(MSGS.netIPv4ModemToolTipStatus()));
 			}
 		} else {
 			if(m_statusCombo != null) {
 				initializeStatusListStore();
+				m_statusListStore.remove(m_statusListStore.findModel(GwtNetIfStatusModel.STATUS, GwtNetIfStatus.netIPv4StatusEnabledGPS.name()));
 				m_statusCombo.addListener(Events.OnMouseOver, new MouseOverListener(MSGS.netIPv4ToolTipStatus()));
 			}
 		}
@@ -410,9 +416,21 @@ public class TcpIpConfigTab extends LayoutContainer
 		for (GwtNetIfConfigMode mode : GwtNetIfConfigMode.values()) {
 			m_configureCombo.add(MessageUtils.get(mode.name()));
 		}
-		if(m_selectNetIfConfig != null && m_selectNetIfConfig.getHwTypeEnum() == GwtNetIfType.MODEM) {
-			m_statusListStore.remove(m_statusListStore.findModel(GwtNetIfStatusModel.STATUS, GwtNetIfStatus.netIPv4StatusEnabledLAN.name()));
+		if(m_selectNetIfConfig != null) {
+			if(m_selectNetIfConfig.getHwTypeEnum() == GwtNetIfType.MODEM) {
+				m_statusListStore.remove(m_statusListStore.findModel(GwtNetIfStatusModel.STATUS, GwtNetIfStatus.netIPv4StatusEnabledLAN.name()));
+				GwtNetIfStatusModel model = m_statusListStore.findModel(GwtNetIfStatusModel.STATUS, GwtNetIfStatus.netIPv4StatusEnabledGPS.name());
+				if (model == null) {
+					m_statusListStore.add(new GwtNetIfStatusModel(GwtNetIfStatus.netIPv4StatusEnabledGPS,
+							MessageUtils.get("netIPv4StatusEnabledGPS"), MSGS.netIPv4ToolTipStatusEnabledGPS()));
+				}
+			} else {
+				m_statusListStore.remove(m_statusListStore.findModel(GwtNetIfStatusModel.STATUS, GwtNetIfStatus.netIPv4StatusEnabledGPS.name()));
+			}
+		} else {
+			m_statusListStore.remove(m_statusListStore.findModel(GwtNetIfStatusModel.STATUS, GwtNetIfStatus.netIPv4StatusEnabledGPS.name()));
 		}
+		
 		m_configureCombo.setSimpleValue(MessageUtils.get(GwtNetIfConfigMode.netIPv4ConfigModeDHCP.name()));
 		m_configureCombo.addSelectionChangedListener( new SelectionChangedListener<SimpleComboValue<String>>() {			
 			@Override
@@ -742,12 +760,18 @@ public class TcpIpConfigTab extends LayoutContainer
 		m_statusListStore.add(new GwtNetIfStatusModel(GwtNetIfStatus.netIPv4StatusDisabled,
 				MessageUtils.get("netIPv4StatusDisabled"),
 				MSGS.netIPv4ToolTipStatusDisabled()));
+		
 		m_statusListStore.add(new GwtNetIfStatusModel(GwtNetIfStatus.netIPv4StatusEnabledLAN,
 				MessageUtils.get("netIPv4StatusEnabledLAN"),
 				MSGS.netIPv4ToolTipStatusEnabledLAN()));
+		
 		m_statusListStore.add(new GwtNetIfStatusModel(GwtNetIfStatus.netIPv4StatusEnabledWAN,
 				MessageUtils.get("netIPv4StatusEnabledWAN"),
 				MSGS.netIPv4ToolTipStatusEnabledWAN()));
+		
+		m_statusListStore.add(new GwtNetIfStatusModel(GwtNetIfStatus.netIPv4StatusEnabledGPS,
+				MessageUtils.get("netIPv4StatusEnabledGPS"),
+				MSGS.netIPv4ToolTipStatusEnabledGPS()));
 	}
 
 	// Combo box item template

@@ -225,6 +225,8 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 										gwtNetConfig.setStatus(GwtNetIfStatus.netIPv4StatusEnabledLAN.name());
 									} else if(((NetConfigIP4)netConfig).getStatus() == NetInterfaceStatus.netIPv4StatusEnabledWAN) {
 										gwtNetConfig.setStatus(GwtNetIfStatus.netIPv4StatusEnabledWAN.name());
+									} else if(((NetConfigIP4)netConfig).getStatus() == NetInterfaceStatus.netStatusEnabledGPS) {
+										gwtNetConfig.setStatus(GwtNetIfStatus.netIPv4StatusEnabledGPS.name());
 									} else {
 										gwtNetConfig.setStatus(GwtNetIfStatus.netIPv4StatusDisabled.name());
 									}
@@ -696,8 +698,9 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 				netInterfaceStatus = NetInterfaceStatus.netIPv4StatusEnabledLAN;
 			} else if(config.getStatus().equals(GwtNetIfStatus.netIPv4StatusEnabledWAN.name())) {
 				netInterfaceStatus = NetInterfaceStatus.netIPv4StatusEnabledWAN;
+			} else if(config.getStatus().equals(GwtNetIfStatus.netIPv4StatusEnabledGPS.name())) {
+				netInterfaceStatus = NetInterfaceStatus.netStatusEnabledGPS;
 			}
-
 
 			//Set up configs
 			List<NetConfig> netConfigs = new ArrayList<NetConfig>();

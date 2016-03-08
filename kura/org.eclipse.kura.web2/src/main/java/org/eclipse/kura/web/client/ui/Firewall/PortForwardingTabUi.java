@@ -591,8 +591,19 @@ public class PortForwardingTabUi extends Composite {
 					j++;
 				}
 			}
+		} else {
+			input.setText("");
+			output.setText("");
+			lan.setText("");
+			external.setText("");
+			internal.setText("");
+			permittedNw.setText("");
+			permittedMac.setText("");
+			source.setText("");
 
-		}// end existing values
+			protocol.setSelectedIndex(0);
+			enable.setSelectedIndex(0);
+		}
 	}
 
 	private void setModalFieldsTooltips() {

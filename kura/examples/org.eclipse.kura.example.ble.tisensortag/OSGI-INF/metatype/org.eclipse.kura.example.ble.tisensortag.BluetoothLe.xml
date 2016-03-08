@@ -19,6 +19,14 @@
          
         <Icon resource="http://s3.amazonaws.com/kura-resources/application/icon/sensortag.png" size="32"/>
 
+         <AD id="scan_enable"
+            name="scan_enable"
+            type="Boolean"
+            cardinality="0"
+            required="true"
+            default="false"
+            description="Enable scan for TI SensorTags." />
+            
          <AD id="scan_time"
             name="scan_time"
             type="Integer"

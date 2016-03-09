@@ -575,20 +575,18 @@ public class PortForwardingTabUi extends Composite {
 			permittedNw.setText(existingEntry.getPermittedNetwork());
 			permittedMac.setText(existingEntry.getPermittedMAC());
 			source.setText(existingEntry.getSourcePortRange());
-
-			for (GwtNetProtocol prot : GwtNetProtocol.values()) {
-				int i = 0;
-				if (existingEntry.getProtocol().equals(prot.name())) {
+			
+			for (int i = 0; i < protocol.getItemCount(); i++) {
+				if (existingEntry.getProtocol().equals(protocol.getItemText(i))) {
 					protocol.setSelectedIndex(i);
-					i++;
+					break;
 				}
 			}
-
-			for (GwtFirewallNatMasquerade masquerade : GwtFirewallNatMasquerade.values()) {
-				int j = 0;
-				if (existingEntry.getMasquerade().equals(masquerade.name())) {
-					enable.setSelectedIndex(j);
-					j++;
+			
+			for (int i = 0; i < enable.getItemCount(); i++) {
+				if (existingEntry.getMasquerade().equals(enable.getItemText(i))) {
+					enable.setSelectedIndex(i);
+					break;
 				}
 			}
 		} else {

@@ -20,7 +20,7 @@
 
 	<ui:style>
 	.important { font-weight: bold; }
-	.center-panel {	height: 572px; padding: 2px; }
+	.center-panel {	padding: 2px; }
 	</ui:style>
 
 	<b:Container fluid="true" addStyleNames="{style.center-panel}">
@@ -38,7 +38,7 @@
 		<b:Row>
 			<b:Alert type="WARNING" ui:field="notification" />
 			<gwt:DataGrid bordered="true" condensed="true" striped="true"
-				hover="true" height="370px" width="100%" ui:field="openPortsGrid" />
+				hover="true" height="100vh" width="100%" ui:field="openPortsGrid" />
 		</b:Row>
 
 		<b:Modal ui:field="openPortsForm">

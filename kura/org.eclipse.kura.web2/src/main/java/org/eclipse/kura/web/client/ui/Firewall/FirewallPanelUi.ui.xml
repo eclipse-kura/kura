@@ -24,7 +24,7 @@
 	}
 	
 	.center-panel {
-		height: 572px;
+		height: 100%;
 	}
 	</ui:style>
 

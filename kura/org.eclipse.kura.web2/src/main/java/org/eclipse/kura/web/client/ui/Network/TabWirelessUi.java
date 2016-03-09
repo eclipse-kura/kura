@@ -171,8 +171,7 @@ public class TabWirelessUi extends Composite implements Tab {
 
 	String passwordRegex, passwordError, tcpStatus;
 
-	public TabWirelessUi(GwtSession currentSession, TabTcpIpUi tcp,
-			NetworkTabsUi tabs) {
+	public TabWirelessUi(GwtSession currentSession, TabTcpIpUi tcp, NetworkTabsUi tabs) {
 		ssidInit = false;
 		initWidget(uiBinder.createAndBindUi(this));
 		session = currentSession;
@@ -742,7 +741,7 @@ public class TabWirelessUi extends Composite implements Tab {
 		password.addKeyUpHandler(new KeyUpHandler() {
 			@Override
 			public void onKeyUp(KeyUpEvent event) {
-				if (verify.isEnabled() && !verify.getText().equals(password.getText())) {
+				if (groupVerify.isVisible() && !verify.getText().equals(password.getText())) {
 					groupVerify.setValidationState(ValidationState.ERROR);
 				} else {
 					groupVerify.setValidationState(ValidationState.NONE);
@@ -1169,7 +1168,8 @@ public class TabWirelessUi extends Composite implements Tab {
 			groupPassword.setValidationState(ValidationState.NONE);
 		}
 		if ( password.getText() != null && 
-			 verify.getText() != null && 
+			 groupVerify.isVisible()    &&
+			 verify.getText() != null   && 
 			 !password.getText().equals(verify.getText()) ) {
 			groupVerify.setValidationState(ValidationState.ERROR);
 		} else {
@@ -1263,7 +1263,31 @@ public class TabWirelessUi extends Composite implements Tab {
 							break;
 						}
 					}
+					
+					String pairwiseCiphers = wifiHotspotEntry.getPairwiseCiphersEnum().name();
+					for (int i = 0; i < pairwise.getItemCount(); i++) {
+						if (MessageUtils.get(pairwiseCiphers).equals(pairwise.getItemText(i))) {
+							pairwise.setSelectedIndex(i);
+							break;
+						}
+					}
 
+					String groupCiphers = wifiHotspotEntry.getGroupCiphersEnum().name();
+					for (int i = 0; i < group.getItemCount(); i++) {
+						if (MessageUtils.get(groupCiphers).equals(group.getItemText(i))) {
+							group.setSelectedIndex(i);
+							break;
+						}
+					}
+
+
+					int channelListSize= channelDataProvider.getList().size();
+					int maxIndex= Math.min(channelListSize, MAX_WIFI_CHANNEL);
+					// deselect all channels
+					for (int channel = 1; channel <= maxIndex; channel++) {
+						selectionModel.setSelected(channelDataProvider.getList().get(channel - 1), false);
+					}
+					
 					selectionModel.setSelected(channelDataProvider.getList().get(wifiHotspotEntry.getChannel() - 1), true);
 					ssidModal.hide();
 				}

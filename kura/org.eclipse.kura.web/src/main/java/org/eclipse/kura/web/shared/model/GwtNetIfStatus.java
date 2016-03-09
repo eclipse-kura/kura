@@ -18,6 +18,5 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 public enum GwtNetIfStatus implements Serializable, IsSerializable {
 	netIPv4StatusDisabled,
 	netIPv4StatusEnabledLAN,  
-	netIPv4StatusEnabledWAN,
-	netIPv4StatusEnabledGPS;
+	netIPv4StatusEnabledWAN;
 }

@@ -31,74 +31,82 @@ public class FirewallPanelUi extends Composite {
 
 	interface FirewallPanelUiUiBinder extends UiBinder<Widget, FirewallPanelUi> {
 	}
-	
+
 	private static OpenPortsTabUi openPortsBinder = GWT.create(OpenPortsTabUi.class);
 	private static PortForwardingTabUi portForwardingBinder = GWT.create(PortForwardingTabUi.class);
 	private static NatTabUi ipForwardingBinder = GWT.create(NatTabUi.class);
-	
+
 	private static final Messages MSGS = GWT.create(Messages.class);
+	
+	
 	@UiField
 	HTMLPanel firewallIntro;
 	@UiField
 	AnchorListItem openPorts, portForwarding, ipForwarding; 
 	@UiField
 	Well content;
-	
+
 	public FirewallPanelUi() {
 		initWidget(uiBinder.createAndBindUi(this));
 		firewallIntro.add(new Span("<p>"+MSGS.firewallIntro()+"</p>"));
 		openPorts.setText(MSGS.firewallOpenPorts());
 		portForwarding.setText(MSGS.firewallPortForwarding());
 		ipForwarding.setText(MSGS.firewallNat());
-		
-		//set open ports selected by default
-		setSelectedActive(openPorts);
-		content.clear();
-		content.add(openPortsBinder);
-		
+
+
+
 		openPorts.addClickHandler(new ClickHandler(){
 			@Override
 			public void onClick(ClickEvent event) {
 				setSelectedActive(openPorts);
 				content.clear();
 				content.add(openPortsBinder);
-				openPortsBinder.loadData();
+				if (!openPortsBinder.isDirty()) {
+					openPortsBinder.loadData();
+				}
 			}});
-		
+
 		portForwarding.addClickHandler(new ClickHandler(){
 			@Override
 			public void onClick(ClickEvent event) {
 				setSelectedActive(portForwarding);
 				content.clear();
 				content.add(portForwardingBinder);
-				portForwardingBinder.loadData();
+				if (!portForwardingBinder.isDirty()) {
+					portForwardingBinder.loadData();
+				}
 			}});
-		
+
 		ipForwarding.addClickHandler(new ClickHandler(){
 			@Override
 			public void onClick(ClickEvent event) {
 				setSelectedActive(ipForwarding);
 				content.clear();
 				content.add(ipForwardingBinder);
-				ipForwardingBinder.loadData();
+				if (!ipForwardingBinder.isDirty()) {
+					ipForwardingBinder.loadData();
+				}
 			}});
 	}
-	
+
 	public void initFirewallPanel() {
+		setSelectedActive(openPorts);
+		content.clear();
+		content.add(openPortsBinder);
 		openPortsBinder.loadData();
 	}
-	
+
 	public void setSelectedActive(AnchorListItem item){
 		openPorts.setActive(false);
 		portForwarding.setActive(false);
 		ipForwarding.setActive(false);
 		item.setActive(true);
 	}
-	
+
 	public boolean isDirty() {
 		return openPortsBinder.isDirty() || portForwardingBinder.isDirty() || ipForwardingBinder.isDirty();
 	}
-	
+
 	public void setDirty(boolean b) {
 		if (openPortsBinder != null) {
 			openPortsBinder.setDirty(b);

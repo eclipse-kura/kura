@@ -313,7 +313,7 @@ public class PortForwardingTabUi extends Composite {
 							portForwardDataProvider.flush();
 							apply.setEnabled(true);
 							notification.setVisible(false);
-							m_dirty = true;
+							setDirty(true);
 						}
 					});
 					alert.show();
@@ -382,7 +382,7 @@ public class PortForwardingTabUi extends Composite {
 									apply.setEnabled(false);
 									EntryClassUi.hideWaitModal();
 									
-									m_dirty = false;
+									setDirty(false);
 								}
 							});
 						}
@@ -490,7 +490,7 @@ public class PortForwardingTabUi extends Composite {
 					portForwardEntry=null;
 					portForwardingForm.hide();
 				} //end else (mac!=null)
-				m_dirty = true;
+				setDirty(true);
 			}
 		});// end submit click handler
 

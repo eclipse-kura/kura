@@ -260,7 +260,7 @@ public class NatTabUi extends Composite {
 							natDataProvider.flush();
 							apply.setEnabled(true);
 							confirm.hide();
-							m_dirty = true;
+							setDirty(true);
 						}
 					}));
 
@@ -334,7 +334,7 @@ public class NatTabUi extends Composite {
 
 								@Override
 								public void onSuccess(Void result) {
-									m_dirty = false;
+									setDirty(false);
 									apply.setEnabled(false);
 									EntryClassUi.hideWaitModal();
 								}
@@ -397,7 +397,7 @@ public class NatTabUi extends Composite {
 				}
 				natForm.hide();
 				
-				m_dirty = true;
+				setDirty(true);
 			}
 
 		});

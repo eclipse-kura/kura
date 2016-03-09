@@ -315,7 +315,7 @@ public class OpenPortsTabUi extends Composite {
 								public void onSuccess(Void result) {
 									apply.setEnabled(false);
 									EntryClassUi.hideWaitModal();
-									m_dirty = false;
+									setDirty(false);
 								}
 							});
 						}
@@ -453,7 +453,7 @@ public class OpenPortsTabUi extends Composite {
 							apply.setEnabled(true);
 							setVisibility();
 							
-							m_dirty = true;
+							setDirty(true);
 						}
 					});
 					alert.show();
@@ -533,8 +533,7 @@ public class OpenPortsTabUi extends Composite {
 						!"".equals(source.getText().trim())) {
 					openPortEntry.setSourcePortRange(source.getText());
 				}
-				openPortsForm.hide();
-
+				
 				editOpenPortEntry = null;
 				newOpenPortEntry = null;
 
@@ -544,7 +543,9 @@ public class OpenPortsTabUi extends Composite {
 					editOpenPortEntry = openPortEntry;
 				}
 				
-				m_dirty = true;
+				setDirty(true);
+				
+				openPortsForm.hide();
 			}
 		});
 

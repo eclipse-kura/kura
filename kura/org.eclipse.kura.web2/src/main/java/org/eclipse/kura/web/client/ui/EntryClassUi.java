@@ -65,7 +65,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 public class EntryClassUi extends Composite {
-	
+
 	interface EntryClassUIUiBinder extends UiBinder<Widget, EntryClassUi> {
 	}
 
@@ -73,7 +73,7 @@ public class EntryClassUi extends Composite {
 	private static final Messages MSGS = GWT.create(Messages.class);
 	private static final Logger logger = Logger.getLogger(EntryClassUi.class.getSimpleName());
 	private static Logger errorLogger = Logger.getLogger("ErrorLogger");
-	
+
 	private final StatusPanelUi statusBinder     = GWT.create(StatusPanelUi.class);
 	private final DevicePanelUi deviceBinder     = GWT.create(DevicePanelUi.class);
 	private final PackagesPanelUi packagesBinder = GWT.create(PackagesPanelUi.class);
@@ -81,7 +81,7 @@ public class EntryClassUi extends Composite {
 	private final FirewallPanelUi firewallBinder = GWT.create(FirewallPanelUi.class);
 	private final NetworkPanelUi networkBinder   = GWT.create(NetworkPanelUi.class);
 	private final WiresPanelUi   wiresBinder     = GWT.create(WiresPanelUi.class);
-	
+
 	private final GwtComponentServiceAsync gwtComponentService = GWT.create(GwtComponentService.class);
 	private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
 
@@ -94,7 +94,7 @@ public class EntryClassUi extends Composite {
 	EntryClassUi ui;
 	Modal modal;
 	ServicesUi servicesUi;
-	
+
 	private boolean servicesDirty;
 	private boolean networkDirty;
 	private boolean firewallDirty;
@@ -120,21 +120,21 @@ public class EntryClassUi extends Composite {
 	VerticalPanel errorLogArea;
 	@UiField
 	Modal errorPopup;
-	
+
 
 	public EntryClassUi() {
 		logger.log(Level.FINER, "Initiating UiBinder");
 		ui = this;
 		initWidget(uiBinder.createAndBindUi(this));
-		
+
 		// TODO : standardize the URL?
 		header.setUrl("eclipse/kura/icons/kura_logo_small.png");
 		Date now = new Date();
-        @SuppressWarnings("deprecation")
-        int year = now.getYear() + 1900;
+		@SuppressWarnings("deprecation")
+		int year = now.getYear() + 1900;
 		footerLeft.setText(MSGS.copyright(String.valueOf(year)));
 		contentPanel.setVisible(false);
-		
+
 		// Set client side logging
 		errorLogger.addHandler(new HasWidgetsLogHandler(errorLogArea));
 		errorPopup.addHideHandler(new ModalHideHandler() {
@@ -153,7 +153,7 @@ public class EntryClassUi extends Composite {
 	public void setFooter(GwtSession GwtSession) {
 
 		footerRight.setText(GwtSession.getKuraVersion());
-		
+
 		if (GwtSession.isDevelopMode()) {
 			footerCenter.setText(MSGS.developmentMode());
 		}
@@ -173,6 +173,7 @@ public class EntryClassUi extends Composite {
 				Button b = new Button(MSGS.yesButton(), new ClickHandler() {
 					@Override
 					public void onClick(ClickEvent event) {
+						forceTabsCleaning();
 						if (modal != null ) {
 							modal.hide();
 						}
@@ -199,6 +200,7 @@ public class EntryClassUi extends Composite {
 				Button b = new Button(MSGS.yesButton(), new ClickHandler() {
 					@Override
 					public void onClick(ClickEvent event) {
+						forceTabsCleaning();
 						if (modal != null ) {
 							modal.hide();
 						}
@@ -222,24 +224,24 @@ public class EntryClassUi extends Composite {
 			network.addClickHandler(new ClickHandler() {
 				@Override
 				public void onClick(ClickEvent event) {
-					Button b = new Button(MSGS.yesButton(),
-							new ClickHandler() {
-								@Override
-								public void onClick(ClickEvent event) {
-									if (modal != null ) {
-										modal.hide();
-									}
-									if (servicesUi != null) {
-										servicesUi.renderForm();
-									}
-									contentPanel.setVisible(true);
-									contentPanelHeader.setText(MSGS.network());
-									contentPanelBody.clear();
-									contentPanelBody.add(networkBinder);
-									networkBinder.setSession(currentSession);
-									networkBinder.initNetworkPanel();
-								}
-							});
+					Button b = new Button(MSGS.yesButton(), new ClickHandler() {
+						@Override
+						public void onClick(ClickEvent event) {
+							forceTabsCleaning();
+							if (modal != null ) {
+								modal.hide();
+							}
+							if (servicesUi != null) {
+								servicesUi.renderForm();
+							}
+							contentPanel.setVisible(true);
+							contentPanelHeader.setText(MSGS.network());
+							contentPanelBody.clear();
+							contentPanelBody.add(networkBinder);
+							networkBinder.setSession(currentSession);
+							networkBinder.initNetworkPanel();
+						}
+					});
 					renderDirtyConfigModal(b);
 				}
 			});
@@ -251,21 +253,22 @@ public class EntryClassUi extends Composite {
 				@Override
 				public void onClick(ClickEvent event) {
 					Button b = new Button(MSGS.yesButton(),	new ClickHandler() {
-								@Override
-								public void onClick(ClickEvent event) {
-									if (modal != null ) {
-										modal.hide();
-									}
-									if (servicesUi != null) {
-										servicesUi.renderForm();
-									}
-									contentPanel.setVisible(true);
-									contentPanelHeader.setText(MSGS.firewall());
-									contentPanelBody.clear();
-									contentPanelBody.add(firewallBinder);
-									firewallBinder.initFirewallPanel();
-								}
-							});
+						@Override
+						public void onClick(ClickEvent event) {
+							forceTabsCleaning();
+							if (modal != null ) {
+								modal.hide();
+							}
+							if (servicesUi != null) {
+								servicesUi.renderForm();
+							}
+							contentPanel.setVisible(true);
+							contentPanelHeader.setText(MSGS.firewall());
+							contentPanelBody.clear();
+							contentPanelBody.add(firewallBinder);
+							firewallBinder.initFirewallPanel();
+						}
+					});
 					renderDirtyConfigModal(b);
 				}
 			});
@@ -278,6 +281,7 @@ public class EntryClassUi extends Composite {
 				Button b = new Button(MSGS.yesButton(), new ClickHandler() {
 					@Override
 					public void onClick(ClickEvent event) {
+						forceTabsCleaning();
 						if (modal != null ) {
 							modal.hide();
 						}
@@ -303,6 +307,7 @@ public class EntryClassUi extends Composite {
 				Button b = new Button(MSGS.yesButton(), new ClickHandler() {
 					@Override
 					public void onClick(ClickEvent event) {
+						forceTabsCleaning();
 						if (modal != null ) {
 							modal.hide();
 						}
@@ -320,7 +325,7 @@ public class EntryClassUi extends Composite {
 				renderDirtyConfigModal(b);
 			}
 		});
-		
+
 		// Status Panel
 		wires.addClickHandler(new ClickHandler() {
 			@Override
@@ -328,6 +333,7 @@ public class EntryClassUi extends Composite {
 				Button b = new Button(MSGS.yesButton(), new ClickHandler() {
 					@Override
 					public void onClick(ClickEvent event) {
+						forceTabsCleaning();
 						if (modal != null ) {
 							modal.hide();
 						}
@@ -338,7 +344,7 @@ public class EntryClassUi extends Composite {
 						contentPanelHeader.setText("Kura Wires");
 						contentPanelBody.clear();
 						contentPanelBody.add(wiresBinder);
-						
+
 					}
 				});
 				renderDirtyConfigModal(b);
@@ -374,7 +380,7 @@ public class EntryClassUi extends Composite {
 				});
 			}
 		});
-		
+
 	}
 
 	public void render(GwtConfigComponent item) {
@@ -393,29 +399,20 @@ public class EntryClassUi extends Composite {
 		if(servicesUi != null) {
 			servicesDirty=servicesUi.isDirty();
 		}
-		
+
 		if (network.isVisible()) {
 			networkDirty = networkBinder.isDirty();
 		} else {
 			networkDirty = false;
 		}
-		
+
 		if (firewall.isVisible()) {
 			firewallDirty = firewallBinder.isDirty();
 		} else {
 			firewallDirty = false;
 		}
-		
+
 		if ((servicesUi!=null && servicesUi.isDirty()) || networkDirty || firewallDirty) {
-			if (servicesUi != null){
-				servicesUi.setDirty(false);
-			}
-			if (network.isVisible()) {
-				networkBinder.setDirty(false);
-			}
-			if (firewall.isVisible()) {
-				firewallBinder.setDirty(false);
-			}
 			modal = new Modal();
 
 			ModalHeader header = new ModalHeader();
@@ -431,22 +428,12 @@ public class EntryClassUi extends Composite {
 			footer.add(new Button(MSGS.noButton(), new ClickHandler() {
 				@Override
 				public void onClick(ClickEvent event) {
-					//reset sevices and networks Dirty flags to their original values
-					if (servicesUi != null) {
-						servicesUi.setDirty(servicesDirty);
-					}
-					if (network.isVisible()) {
-						networkBinder.setDirty(networkDirty);
-					}
-					if (firewall.isVisible()) {
-						firewallBinder.setDirty(firewallDirty);
-					}
 					modal.hide();
 				}
 			}));
 			modal.add(footer);
 			modal.show();
-			
+
 		} else {
 			b.click();
 		}
@@ -454,12 +441,13 @@ public class EntryClassUi extends Composite {
 	}
 
 	public boolean isNetworkDirty(){
-		if (network.isVisible())
+		if (network.isVisible()) {
 			return networkBinder.isDirty();
-		else
+		} else {
 			return false;
+		}
 	}
-	
+
 	public boolean isFirewallDirty(){
 		if (firewall.isVisible()) {
 			return firewallBinder.isDirty();
@@ -467,7 +455,7 @@ public class EntryClassUi extends Composite {
 			return false;
 		}
 	}
-	
+
 	public void setDirty(boolean b) {
 		if (servicesUi != null){
 			servicesUi.setDirty(false);
@@ -479,7 +467,7 @@ public class EntryClassUi extends Composite {
 			firewallBinder.setDirty(false);
 		}
 	}
-	
+
 	public static void showWaitModal() {
 		m_waitModal = new PopupPanel(false, true);
 		Icon icon = new Icon();
@@ -491,8 +479,20 @@ public class EntryClassUi extends Composite {
 		m_waitModal.center();
 		m_waitModal.show();
 	}
-	
+
 	public static void hideWaitModal() {
 		m_waitModal.hide();
+	}
+
+	private void forceTabsCleaning() {
+		if (servicesUi != null){
+			servicesUi.setDirty(false);
+		}
+		if (network.isVisible()) {
+			networkBinder.setDirty(false);
+		}
+		if (firewall.isVisible()) {
+			firewallBinder.setDirty(false);
+		}
 	}
 }

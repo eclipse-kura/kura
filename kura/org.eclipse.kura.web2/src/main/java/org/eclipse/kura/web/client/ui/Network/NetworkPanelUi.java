@@ -73,10 +73,11 @@ public class NetworkPanelUi extends Composite {
 	}
 	
 	public boolean isDirty(){
-		if (tabs != null)
+		if (tabs != null) {
 			return tabs.isDirty();
-		else
+		} else {
 			return false;
+		}
 	}
 	
 	public void setSession(GwtSession currentSession) {
@@ -84,8 +85,9 @@ public class NetworkPanelUi extends Composite {
 	}
 
 	public void setDirty(boolean b) {
-		if (tabs != null)
+		if (tabs != null) {
 			tabs.setDirty(b);
+		}
 	}
 
 }

@@ -65,27 +65,15 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 public class EntryClassUi extends Composite {
+	
+	interface EntryClassUIUiBinder extends UiBinder<Widget, EntryClassUi> {
+	}
 
 	private static EntryClassUIUiBinder uiBinder = GWT.create(EntryClassUIUiBinder.class);
 	private static final Messages MSGS = GWT.create(Messages.class);
 	private static final Logger logger = Logger.getLogger(EntryClassUi.class.getSimpleName());
 	private static Logger errorLogger = Logger.getLogger("ErrorLogger");
 	
-	private final GwtComponentServiceAsync gwtComponentService = GWT.create(GwtComponentService.class);
-	private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
-
-	public GwtConfigComponent selected = null;
-
-	interface EntryClassUIUiBinder extends UiBinder<Widget, EntryClassUi> {
-	}
-
-	GwtSession currentSession;
-	AnchorListItem service;
-	GwtConfigComponent addedItem;
-	EntryClassUi ui;
-	Modal modal;
-	boolean servicesDirty,networkDirty;
-
 	private final StatusPanelUi statusBinder     = GWT.create(StatusPanelUi.class);
 	private final DevicePanelUi deviceBinder     = GWT.create(DevicePanelUi.class);
 	private final PackagesPanelUi packagesBinder = GWT.create(PackagesPanelUi.class);
@@ -93,10 +81,24 @@ public class EntryClassUi extends Composite {
 	private final FirewallPanelUi firewallBinder = GWT.create(FirewallPanelUi.class);
 	private final NetworkPanelUi networkBinder   = GWT.create(NetworkPanelUi.class);
 	private final WiresPanelUi   wiresBinder     = GWT.create(WiresPanelUi.class);
+	
+	private final GwtComponentServiceAsync gwtComponentService = GWT.create(GwtComponentService.class);
+	private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
+
+	public GwtConfigComponent selected = null;
 
 	static PopupPanel m_waitModal;
-	
+	GwtSession currentSession;
+	AnchorListItem service;
+	GwtConfigComponent addedItem;
+	EntryClassUi ui;
+	Modal modal;
 	ServicesUi servicesUi;
+	
+	private boolean servicesDirty;
+	private boolean networkDirty;
+	private boolean firewallDirty;
+
 
 	@UiField
 	Image header;
@@ -118,6 +120,7 @@ public class EntryClassUi extends Composite {
 	VerticalPanel errorLogArea;
 	@UiField
 	Modal errorPopup;
+	
 
 	public EntryClassUi() {
 		logger.log(Level.FINER, "Initiating UiBinder");
@@ -170,7 +173,7 @@ public class EntryClassUi extends Composite {
 				Button b = new Button(MSGS.yesButton(), new ClickHandler() {
 					@Override
 					public void onClick(ClickEvent event) {
-						if (modal!=null ) {
+						if (modal != null ) {
 							modal.hide();
 						}
 						if (servicesUi != null) {
@@ -196,7 +199,7 @@ public class EntryClassUi extends Composite {
 				Button b = new Button(MSGS.yesButton(), new ClickHandler() {
 					@Override
 					public void onClick(ClickEvent event) {
-						if (modal!=null ) {
+						if (modal != null ) {
 							modal.hide();
 						}
 						if (servicesUi != null) {
@@ -223,7 +226,7 @@ public class EntryClassUi extends Composite {
 							new ClickHandler() {
 								@Override
 								public void onClick(ClickEvent event) {
-									if (modal!=null ) {
+									if (modal != null ) {
 										modal.hide();
 									}
 									if (servicesUi != null) {
@@ -250,7 +253,7 @@ public class EntryClassUi extends Composite {
 					Button b = new Button(MSGS.yesButton(),	new ClickHandler() {
 								@Override
 								public void onClick(ClickEvent event) {
-									if (modal!=null ) {
+									if (modal != null ) {
 										modal.hide();
 									}
 									if (servicesUi != null) {
@@ -275,7 +278,7 @@ public class EntryClassUi extends Composite {
 				Button b = new Button(MSGS.yesButton(), new ClickHandler() {
 					@Override
 					public void onClick(ClickEvent event) {
-						if (modal!=null ) {
+						if (modal != null ) {
 							modal.hide();
 						}
 						if (servicesUi != null) {
@@ -300,7 +303,7 @@ public class EntryClassUi extends Composite {
 				Button b = new Button(MSGS.yesButton(), new ClickHandler() {
 					@Override
 					public void onClick(ClickEvent event) {
-						if (modal!=null ) {
+						if (modal != null ) {
 							modal.hide();
 						}
 						if (servicesUi != null) {
@@ -325,7 +328,7 @@ public class EntryClassUi extends Composite {
 				Button b = new Button(MSGS.yesButton(), new ClickHandler() {
 					@Override
 					public void onClick(ClickEvent event) {
-						if (modal!=null ) {
+						if (modal != null ) {
 							modal.hide();
 						}
 						if (servicesUi != null) {
@@ -357,7 +360,7 @@ public class EntryClassUi extends Composite {
 				gwtComponentService.findComponentConfigurations(token, new AsyncCallback<List<GwtConfigComponent>>() {
 					@Override
 					public void onFailure(Throwable ex) {
-						logger.log(Level.SEVERE, ex.getMessage(), ex);;
+						logger.log(Level.SEVERE, ex.getMessage(), ex);
 						FailureHandler.handle(ex, EntryClassUi.class.getName());
 					}
 
@@ -387,21 +390,32 @@ public class EntryClassUi extends Composite {
 
 	// create the prompt for dirty configuration before switching to another tab
 	private void renderDirtyConfigModal(Button b) {
-		if(servicesUi != null){
+		if(servicesUi != null) {
 			servicesDirty=servicesUi.isDirty();
 		}
 		
-		if (network.isVisible())
+		if (network.isVisible()) {
 			networkDirty = networkBinder.isDirty();
-		else
+		} else {
 			networkDirty = false;
+		}
 		
-		if ((servicesUi!=null && servicesUi.isDirty()) || networkDirty) {
+		if (firewall.isVisible()) {
+			firewallDirty = firewallBinder.isDirty();
+		} else {
+			firewallDirty = false;
+		}
+		
+		if ((servicesUi!=null && servicesUi.isDirty()) || networkDirty || firewallDirty) {
 			if (servicesUi != null){
 				servicesUi.setDirty(false);
 			}
-			if (network.isVisible())
+			if (network.isVisible()) {
 				networkBinder.setDirty(false);
+			}
+			if (firewall.isVisible()) {
+				firewallBinder.setDirty(false);
+			}
 			modal = new Modal();
 
 			ModalHeader header = new ModalHeader();
@@ -418,11 +432,15 @@ public class EntryClassUi extends Composite {
 				@Override
 				public void onClick(ClickEvent event) {
 					//reset sevices and networks Dirty flags to their original values
-					if (servicesUi != null){
+					if (servicesUi != null) {
 						servicesUi.setDirty(servicesDirty);
 					}
-					if (network.isVisible())
+					if (network.isVisible()) {
 						networkBinder.setDirty(networkDirty);
+					}
+					if (firewall.isVisible()) {
+						firewallBinder.setDirty(firewallDirty);
+					}
 					modal.hide();
 				}
 			}));
@@ -442,12 +460,24 @@ public class EntryClassUi extends Composite {
 			return false;
 	}
 	
+	public boolean isFirewallDirty(){
+		if (firewall.isVisible()) {
+			return firewallBinder.isDirty();
+		} else {
+			return false;
+		}
+	}
+	
 	public void setDirty(boolean b) {
 		if (servicesUi != null){
 			servicesUi.setDirty(false);
 		}
-		if (network.isVisible())
+		if (network.isVisible()) {
 			networkBinder.setDirty(false);
+		}
+		if (firewall.isVisible()) {
+			firewallBinder.setDirty(false);
+		}
 	}
 	
 	public static void showWaitModal() {

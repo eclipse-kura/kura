@@ -66,6 +66,14 @@ public class NatTabUi extends Composite {
 
 	private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
 	private final GwtNetworkServiceAsync gwtNetworkService = GWT.create(GwtNetworkService.class);
+	
+	private ListDataProvider<GwtFirewallNatEntry> natDataProvider = new ListDataProvider<GwtFirewallNatEntry>();
+	final SingleSelectionModel<GwtFirewallNatEntry> selectionModel = new SingleSelectionModel<GwtFirewallNatEntry>();
+	
+	private final String REGEX_ALPHANUMERIC = "^[a-zA-Z0-9_]+$";
+	private final String REGEX_NETWORK = "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,3})";
+	
+	private boolean m_dirty;
 
 	GwtFirewallNatEntry natEntry;
 
@@ -73,8 +81,6 @@ public class NatTabUi extends Composite {
 	Button apply, create, edit, delete;
 	@UiField
 	DataGrid<GwtFirewallNatEntry> natGrid = new DataGrid<GwtFirewallNatEntry>();
-	private ListDataProvider<GwtFirewallNatEntry> natDataProvider = new ListDataProvider<GwtFirewallNatEntry>();
-	final SingleSelectionModel<GwtFirewallNatEntry> selectionModel = new SingleSelectionModel<GwtFirewallNatEntry>();
 
 	@UiField
 	Modal natForm;
@@ -94,8 +100,6 @@ public class NatTabUi extends Composite {
 	@UiField
 	Button submit, cancel;
 
-	String REGEX_ALPHANUMERIC = "^[a-zA-Z0-9_]+$";
-	String REGEX_NETWORK = "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,3})";
 
 	public NatTabUi() {
 		initWidget(uiBinder.createAndBindUi(this));
@@ -103,6 +107,68 @@ public class NatTabUi extends Composite {
 		initTable();
 	}
 
+	
+	//
+	// Public methods
+	//
+	public void loadData() {
+		EntryClassUi.showWaitModal();
+		natDataProvider.getList().clear();
+		gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
+			@Override
+			public void onFailure(Throwable ex) {
+				EntryClassUi.hideWaitModal();
+				FailureHandler.handle(ex);
+			}
+
+			@Override
+			public void onSuccess(GwtXSRFToken token) {
+				gwtNetworkService.findDeficeFirewallNATs(token, new AsyncCallback<ArrayList<GwtFirewallNatEntry>>() {
+					@Override
+					public void onFailure(Throwable caught) {
+						EntryClassUi.hideWaitModal();
+						FailureHandler.handle(caught);
+					}
+
+					@Override
+					public void onSuccess(ArrayList<GwtFirewallNatEntry> result) {
+						for (GwtFirewallNatEntry pair : result) {
+							natDataProvider.getList().add(pair);
+						}
+						natDataProvider.flush();
+						apply.setEnabled(false);
+						EntryClassUi.hideWaitModal();
+					}
+				});
+			}
+		});
+	}
+	
+	public boolean isDirty() {
+		return m_dirty;
+	}
+	
+	public void setDirty(boolean b) {
+		m_dirty = b;
+	}
+	
+	
+	//
+	// Protected methods
+	//
+	protected void editEntry(GwtFirewallNatEntry natEntry, GwtFirewallNatEntry existingEntry) {
+		if (!duplicateEntry(natEntry)) {
+			natDataProvider.getList().remove(existingEntry);
+			natDataProvider.getList().add(natEntry);
+			natDataProvider.flush();
+		}
+		apply.setEnabled(true);
+	}
+	
+	
+	//
+	// Private methods
+	//
 	private void initTable() {
 
 		TextColumn<GwtFirewallNatEntry> col1 = new TextColumn<GwtFirewallNatEntry>() {
@@ -163,39 +229,6 @@ public class NatTabUi extends Composite {
 		natGrid.setSelectionModel(selectionModel);
 	}
 
-	public void loadData() {
-		EntryClassUi.showWaitModal();
-		natDataProvider.getList().clear();
-		gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
-			@Override
-			public void onFailure(Throwable ex) {
-				EntryClassUi.hideWaitModal();
-				FailureHandler.handle(ex);
-			}
-
-			@Override
-			public void onSuccess(GwtXSRFToken token) {
-				gwtNetworkService.findDeficeFirewallNATs(token, new AsyncCallback<ArrayList<GwtFirewallNatEntry>>() {
-					@Override
-					public void onFailure(Throwable caught) {
-						EntryClassUi.hideWaitModal();
-						FailureHandler.handle(caught);
-					}
-
-					@Override
-					public void onSuccess(ArrayList<GwtFirewallNatEntry> result) {
-						for (GwtFirewallNatEntry pair : result) {
-							natDataProvider.getList().add(pair);
-						}
-						natDataProvider.flush();
-						apply.setEnabled(false);
-						EntryClassUi.hideWaitModal();
-					}
-				});
-			}
-		});
-	}
-
 	//Initialize tab buttons
 	private void initButtons() {
 		initApplyButton();
@@ -227,6 +260,7 @@ public class NatTabUi extends Composite {
 							natDataProvider.flush();
 							apply.setEnabled(true);
 							confirm.hide();
+							m_dirty = true;
 						}
 					}));
 
@@ -300,6 +334,7 @@ public class NatTabUi extends Composite {
 
 								@Override
 								public void onSuccess(Void result) {
+									m_dirty = false;
 									apply.setEnabled(false);
 									EntryClassUi.hideWaitModal();
 								}
@@ -361,6 +396,8 @@ public class NatTabUi extends Composite {
 					editEntry(natEntry, existingEntry);
 				}
 				natForm.hide();
+				
+				m_dirty = true;
 			}
 
 		});
@@ -481,15 +518,6 @@ public class NatTabUi extends Composite {
 		for (GwtFirewallNatMasquerade masquerade : GwtFirewallNatMasquerade.values()) {
 			enable.addItem(masquerade.name());
 		}
-	}
-
-	protected void editEntry(GwtFirewallNatEntry natEntry, GwtFirewallNatEntry existingEntry) {
-		if (!duplicateEntry(natEntry)) {
-			natDataProvider.getList().remove(existingEntry);
-			natDataProvider.getList().add(natEntry);
-			natDataProvider.flush();
-		}
-		apply.setEnabled(true);
 	}
 
 	private void addNewEntry(GwtFirewallNatEntry natEntry) {

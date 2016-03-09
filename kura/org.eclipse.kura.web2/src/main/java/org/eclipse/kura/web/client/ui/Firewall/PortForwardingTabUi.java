@@ -58,16 +58,20 @@ public class PortForwardingTabUi extends Composite {
 
 	private static PortForwardingTabUiUiBinder uiBinder = GWT.create(PortForwardingTabUiUiBinder.class);
 
-	interface PortForwardingTabUiUiBinder extends
-	UiBinder<Widget, PortForwardingTabUi> {
+	interface PortForwardingTabUiUiBinder extends UiBinder<Widget, PortForwardingTabUi> {
 	}
 
 	private static final Messages MSGS = GWT.create(Messages.class);
 
 	private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
 	private final GwtNetworkServiceAsync gwtNetworkService = GWT.create(GwtNetworkService.class);
+	
+	private ListDataProvider<GwtFirewallPortForwardEntry> portForwardDataProvider = new ListDataProvider<GwtFirewallPortForwardEntry>();
+	final SingleSelectionModel<GwtFirewallPortForwardEntry> selectionModel = new SingleSelectionModel<GwtFirewallPortForwardEntry>();
 
 	GwtFirewallPortForwardEntry portForwardEntry;
+	
+	private boolean m_dirty;
 
 
 	@UiField
@@ -76,9 +80,6 @@ public class PortForwardingTabUi extends Composite {
 	Alert notification;
 	@UiField
 	DataGrid<GwtFirewallPortForwardEntry> portForwardGrid = new DataGrid<GwtFirewallPortForwardEntry>();
-
-	private ListDataProvider<GwtFirewallPortForwardEntry> portForwardDataProvider = new ListDataProvider<GwtFirewallPortForwardEntry>();
-	final SingleSelectionModel<GwtFirewallPortForwardEntry> selectionModel = new SingleSelectionModel<GwtFirewallPortForwardEntry>();
 
 	@UiField
 	Modal confirm;
@@ -113,6 +114,7 @@ public class PortForwardingTabUi extends Composite {
 	ListBox protocol, enable;
 	@UiField
 	Button submit, cancel;
+	
 
 	public PortForwardingTabUi() {
 		initWidget(uiBinder.createAndBindUi(this));
@@ -121,6 +123,59 @@ public class PortForwardingTabUi extends Composite {
 		initTable();
 	}
 
+	//
+	// Public methods
+	//
+	public void loadData() {
+		EntryClassUi.showWaitModal();
+		portForwardDataProvider.getList().clear();
+		notification.setVisible(false);
+
+		gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
+
+			@Override
+			public void onFailure(Throwable ex) {
+				EntryClassUi.hideWaitModal();
+				FailureHandler.handle(ex);
+			}
+
+			@Override
+			public void onSuccess(GwtXSRFToken token) {
+				gwtNetworkService.findDeviceFirewallPortForwards(token, new AsyncCallback<ArrayList<GwtFirewallPortForwardEntry>>() {
+
+					@Override
+					public void onFailure(Throwable caught) {
+						EntryClassUi.hideWaitModal();
+						FailureHandler.handle(caught);
+					}
+
+					@Override
+					public void onSuccess(ArrayList<GwtFirewallPortForwardEntry> result) {
+						for (GwtFirewallPortForwardEntry pair : result) {
+							portForwardDataProvider.getList().add(pair);
+						}
+						portForwardDataProvider.flush();
+						apply.setEnabled(false);
+						EntryClassUi.hideWaitModal();
+					}
+				});
+			}
+
+		});
+	}
+	
+	public boolean isDirty() {
+		return m_dirty;
+	}
+	
+	public void setDirty(boolean b) {
+		m_dirty = b;
+	}
+	
+	
+	//
+	// Private methods
+	//
 	private void initTable() {
 
 		TextColumn<GwtFirewallPortForwardEntry> col1 = new TextColumn<GwtFirewallPortForwardEntry>() {
@@ -220,44 +275,6 @@ public class PortForwardingTabUi extends Composite {
 		portForwardGrid.setSelectionModel(selectionModel);
 	}
 
-	public void loadData() {
-		EntryClassUi.showWaitModal();
-		portForwardDataProvider.getList().clear();
-		notification.setVisible(false);
-
-		gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
-
-			@Override
-			public void onFailure(Throwable ex) {
-				EntryClassUi.hideWaitModal();
-				FailureHandler.handle(ex);
-			}
-
-			@Override
-			public void onSuccess(GwtXSRFToken token) {
-				gwtNetworkService.findDeviceFirewallPortForwards(token, new AsyncCallback<ArrayList<GwtFirewallPortForwardEntry>>() {
-
-					@Override
-					public void onFailure(Throwable caught) {
-						EntryClassUi.hideWaitModal();
-						FailureHandler.handle(caught);
-					}
-
-					@Override
-					public void onSuccess(ArrayList<GwtFirewallPortForwardEntry> result) {
-						for (GwtFirewallPortForwardEntry pair : result) {
-							portForwardDataProvider.getList().add(pair);
-						}
-						portForwardDataProvider.flush();
-						apply.setEnabled(false);
-						EntryClassUi.hideWaitModal();
-					}
-				});
-			}
-
-		});
-	}
-
 	//Initialize buttons
 	private void initButtons() {
 		initApplyButton();
@@ -296,6 +313,7 @@ public class PortForwardingTabUi extends Composite {
 							portForwardDataProvider.flush();
 							apply.setEnabled(true);
 							notification.setVisible(false);
+							m_dirty = true;
 						}
 					});
 					alert.show();
@@ -363,6 +381,8 @@ public class PortForwardingTabUi extends Composite {
 								public void onSuccess(Void result) {
 									apply.setEnabled(false);
 									EntryClassUi.hideWaitModal();
+									
+									m_dirty = false;
 								}
 							});
 						}
@@ -470,9 +490,8 @@ public class PortForwardingTabUi extends Composite {
 					portForwardEntry=null;
 					portForwardingForm.hide();
 				} //end else (mac!=null)
-
+				m_dirty = true;
 			}
-
 		});// end submit click handler
 
 		portForwardingForm.show();
@@ -645,7 +664,6 @@ public class PortForwardingTabUi extends Composite {
 	}
 
 	private boolean duplicateEntry(GwtFirewallPortForwardEntry portForwardEntry) {
-
 		boolean isDuplicateEntry = false;
 		List<GwtFirewallPortForwardEntry> entries = portForwardDataProvider.getList();
 		if (entries != null && portForwardEntry != null) {

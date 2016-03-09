@@ -34,7 +34,7 @@ public class FirewallPanelUi extends Composite {
 	
 	private static OpenPortsTabUi openPortsBinder = GWT.create(OpenPortsTabUi.class);
 	private static PortForwardingTabUi portForwardingBinder = GWT.create(PortForwardingTabUi.class);
-	private static NatTabUi natBinder = GWT.create(NatTabUi.class);
+	private static NatTabUi ipForwardingBinder = GWT.create(NatTabUi.class);
 	
 	private static final Messages MSGS = GWT.create(Messages.class);
 	@UiField
@@ -79,8 +79,8 @@ public class FirewallPanelUi extends Composite {
 			public void onClick(ClickEvent event) {
 				setSelectedActive(ipForwarding);
 				content.clear();
-				content.add(natBinder);
-				natBinder.loadData();
+				content.add(ipForwardingBinder);
+				ipForwardingBinder.loadData();
 			}});
 	}
 	
@@ -94,6 +94,20 @@ public class FirewallPanelUi extends Composite {
 		ipForwarding.setActive(false);
 		item.setActive(true);
 	}
-
 	
+	public boolean isDirty() {
+		return openPortsBinder.isDirty() || portForwardingBinder.isDirty() || ipForwardingBinder.isDirty();
+	}
+	
+	public void setDirty(boolean b) {
+		if (openPortsBinder != null) {
+			openPortsBinder.setDirty(b);
+		}
+		if (portForwardingBinder != null) {
+			portForwardingBinder.setDirty(b);
+		}
+		if (ipForwardingBinder != null) {
+			ipForwardingBinder.setDirty(b);
+		}
+	}
 }

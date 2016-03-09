@@ -66,6 +66,11 @@ public class OpenPortsTabUi extends Composite {
 
 	interface OpenPortsTabUiUiBinder extends UiBinder<Widget, OpenPortsTabUi> {
 	}
+	
+	private ListDataProvider<GwtFirewallOpenPortEntry> openPortsDataProvider = new ListDataProvider<GwtFirewallOpenPortEntry>();
+	final SingleSelectionModel<GwtFirewallOpenPortEntry> selectionModel = new SingleSelectionModel<GwtFirewallOpenPortEntry>();
+
+	private boolean m_dirty;
 
 	GwtFirewallOpenPortEntry editOpenPortEntry, newOpenPortEntry, openPortEntry;
 
@@ -96,9 +101,7 @@ public class OpenPortsTabUi extends Composite {
 	@UiField
 	DataGrid<GwtFirewallOpenPortEntry> openPortsGrid = new DataGrid<GwtFirewallOpenPortEntry>();
 
-	private ListDataProvider<GwtFirewallOpenPortEntry> openPortsDataProvider = new ListDataProvider<GwtFirewallOpenPortEntry>();
-	final SingleSelectionModel<GwtFirewallOpenPortEntry> selectionModel = new SingleSelectionModel<GwtFirewallOpenPortEntry>();
-
+	
 	public OpenPortsTabUi() {
 		initWidget(uiBinder.createAndBindUi(this));
 		apply.setText(MSGS.firewallApply());
@@ -111,12 +114,14 @@ public class OpenPortsTabUi extends Composite {
 		initTable();	
 	}
 
+	//
+	// Public methods
+	//
 	public void loadData() {
 		EntryClassUi.showWaitModal();
 		openPortsDataProvider.getList().clear();
 		notification.setVisible(false);
 		gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
-
 			@Override
 			public void onFailure(Throwable ex) {
 				EntryClassUi.hideWaitModal();
@@ -154,6 +159,14 @@ public class OpenPortsTabUi extends Composite {
 
 	public GwtFirewallOpenPortEntry getEditOpenPortEntry() {
 		return editOpenPortEntry;
+	}
+	
+	public boolean isDirty() {
+		return m_dirty;
+	}
+	
+	public void setDirty(boolean b) {
+		m_dirty = b;
 	}
 
 
@@ -302,6 +315,7 @@ public class OpenPortsTabUi extends Composite {
 								public void onSuccess(Void result) {
 									apply.setEnabled(false);
 									EntryClassUi.hideWaitModal();
+									m_dirty = false;
 								}
 							});
 						}
@@ -438,6 +452,8 @@ public class OpenPortsTabUi extends Composite {
 							openPortsDataProvider.flush();
 							apply.setEnabled(true);
 							setVisibility();
+							
+							m_dirty = true;
 						}
 					});
 					alert.show();
@@ -527,6 +543,8 @@ public class OpenPortsTabUi extends Composite {
 				} else {
 					editOpenPortEntry = openPortEntry;
 				}
+				
+				m_dirty = true;
 			}
 		});
 

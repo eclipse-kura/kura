@@ -24,6 +24,7 @@ import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.eclipse.kura.windows.system.KuraNativeWin;
 
 public class SystemAdminServiceImpl implements SystemAdminService 
 {
@@ -31,7 +32,7 @@ public class SystemAdminServiceImpl implements SystemAdminService
 
 	private static final String OS_LINUX    = "Linux";
 	private static final String OS_MAC_OSX  = "Mac OS X";
-	private static final String OS_WINDOWS  = "Windows";
+	private static final String OS_WINDOWS  = "windows";
 	private static final String UNKNOWN     = "UNKNOWN";
 
 	@SuppressWarnings("unused")
@@ -77,7 +78,20 @@ public class SystemAdminServiceImpl implements SystemAdminService
 		String uptimeStr = UNKNOWN;
 		long uptime = 0;
 
-		if(OS_LINUX.equals(this.getOsName())) {
+		if(this.getOsName().toLowerCase().contains(OS_WINDOWS))
+		{
+			try {
+				KuraNativeWin nativeWin = new KuraNativeWin();
+				uptime = nativeWin.getTickCount();
+				uptimeStr = Long.toString(uptime);
+			}
+
+			catch(Exception e) {
+				uptimeStr = "0";
+				s_logger.error("Could not read uptime", e);
+			}
+		}
+		else if(OS_LINUX.equals(this.getOsName())) {
 			File file;
 			FileReader fr = null;
 			BufferedReader br = null;

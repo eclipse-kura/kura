@@ -1,0 +1,34 @@
+# /etc/hostapd/hostapd.conf
+
+#example: wlan0
+interface=KURA_INTERFACE
+#example: nl80211
+driver=KURA_DRIVER
+
+# SSID to use. This will be the "name" of the accesspoint
+#example: catalyst
+ssid=KURA_ESSID
+
+# basic operational settings
+#example: g
+hw_mode=KURA_HW_MODE
+
+wme_enabled=KURA_WME_ENABLED
+ieee80211n=KURA_IEEE80211N
+ht_capab=KURA_HTCAPAB
+
+#example: 1
+channel=KURA_CHANNEL
+
+# Logging and debugging settings: more of this in original config file
+logger_syslog=-1
+logger_syslog_level=2
+logger_stdout=-1
+logger_stdout_level=2
+dump_file=/tmp/hostapd.dump
+
+# WEP KEY The key length should be 5, 13, or 16 characters, or 10, 26, or 32
+# digits, depending on whether 40-bit (64-bit), 104-bit (128-bit), or
+# 128-bit (152-bit) WEP is used.
+#example: 123456789a
+wep_key0=KURA_WEP_KEY

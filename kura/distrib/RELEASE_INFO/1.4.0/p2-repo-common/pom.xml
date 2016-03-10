@@ -157,6 +157,11 @@
                             <artifactId>org.apache.commons.lang3</artifactId>
                             <version>${org.apache.commons.lang3.version}</version>
                         </artifactItem>
+						<artifactItem>
+							<groupId>org.eclipse.kura</groupId>
+							<artifactId>org.eclipse.kura.windows.system</artifactId>
+							<version>1.0.1</version>
+						</artifactItem>
 								<artifactItem>
                             <groupId>org.eclipse</groupId>
                             <artifactId>org.eclipse.soda.dk.comm</artifactId>

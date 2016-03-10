@@ -105,20 +105,19 @@ public class BluetoothLeScanner implements BluetoothProcessListener, BTSnoopList
 	@Override
 	public void processInputStream(String string) {
 
-		String[] lines = string.split("\n");
-		for (String line : lines) {
-			processLine(line);
-		}
-
-		m_scanResult = new ArrayList<BluetoothDevice>();
-		for (Entry<String, String> device : m_devices.entrySet()) {
-			m_scanResult.add(new BluetoothDeviceImpl(device.getKey(), device.getValue()));
-			s_logger.info("m_scanResult.add {} - {}", device.getKey(), device.getValue());
-		}
-
-		// Alert listener that scan is complete
-
 		if(m_listener != null) {
+			String[] lines = string.split("\n");
+			for (String line : lines) {
+				processLine(line);
+			}
+		
+			m_scanResult = new ArrayList<BluetoothDevice>();
+			for (Entry<String, String> device : m_devices.entrySet()) {
+				m_scanResult.add(new BluetoothDeviceImpl(device.getKey(), device.getValue()));
+				s_logger.info("m_scanResult.add {} - {}", device.getKey(), device.getValue());
+			}
+
+			// Alert listener that scan is complete
 			m_listener.onScanResults(m_scanResult);
 		}
 	}

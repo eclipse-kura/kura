@@ -14,10 +14,10 @@
 -->
 <MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
     <OCD id="org.eclipse.kura.example.beacon.BeaconExample"
-         name="BeaconExample" 
+         name="Beacon Example" 
          description="Simple Beacon example.">
          
-         <Icon resource="OSGI-INF/beacon.png" size="32"/>
+         <Icon resource="http://s3.amazonaws.com/kura-resources/application/icon/beacon.png" size="32"/>
          
         <AD id="enableAdvertising"
             name="enableAdvertising"

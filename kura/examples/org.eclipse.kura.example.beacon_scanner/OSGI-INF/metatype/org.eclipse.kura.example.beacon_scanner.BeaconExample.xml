@@ -4,7 +4,7 @@
          name="Beacon Scanner" 
          description="iBeacon Scanning Example.">
          
-         <Icon resource="OSGI-INF/beacon_scanner.png" size="32"/>
+         <Icon resource="http://s3.amazonaws.com/kura-resources/application/icon/beacon_scanner.png" size="32"/>
          
          <AD id="topicPrefix"
             name="topicPrefix"

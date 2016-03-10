@@ -131,6 +131,26 @@ public class BeaconExample implements ConfigurableComponent, BluetoothBeaconScan
 		}
 		
 	}
+	
+	private double calculateDistance(int rssi, int txpower) {
+		
+		double distance = 0.0;
+		
+		int ratio_dB = txpower - rssi;
+		double ratio_linear = Math.pow(10, (ratio_dB/10)); 
+		distance = Math.sqrt(ratio_linear);
+		
+//      See http://stackoverflow.com/questions/20416218/understanding-ibeacon-distancing/20434019#20434019		
+//		double ratio = rssi*1.0/txpower;
+//		if (ratio < 1.0) {
+//			distance =  Math.pow(ratio,10);
+//		}
+//		else {
+//			distance =  (0.89976)*Math.pow(ratio,7.7095) + 0.111;    
+//		}
+		
+		return distance;
+	}
 
 	@Override
 	public void onBeaconDataReceived(BluetoothBeaconData beaconData) {
@@ -152,6 +172,7 @@ public class BeaconExample implements ConfigurableComponent, BluetoothBeaconScan
 			kp.addMetric("rssi",beaconData.rssi);
 			kp.addMetric("major",beaconData.major);
 			kp.addMetric("minor",beaconData.minor);
+			kp.addMetric("distance",calculateDistance(beaconData.rssi, beaconData.txpower));
 			try {
 				cloudClient.publish(topicPrefix + "/" + beaconData.address, kp, 2, false);
 			} catch (KuraException e) {

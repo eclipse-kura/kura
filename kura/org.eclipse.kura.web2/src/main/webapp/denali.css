@@ -123,6 +123,10 @@ img.x-tree3-node-icon {
 	width: 218px !important;
 }
 
+div.copyright:after {
+	content: ' Eurotech Inc., and others. Made available under the terms of the Eclipse Public License v1.0';
+}
+
 div.headerLogo { 
 	height: 			38px;
 	width: 				127px;

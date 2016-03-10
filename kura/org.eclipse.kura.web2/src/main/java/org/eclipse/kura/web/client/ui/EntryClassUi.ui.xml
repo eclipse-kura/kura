@@ -132,7 +132,7 @@
 								<b:Row>
 									<b:Column size="MD_7">
 										<b.html:Paragraph alignment="LEFT">
-											<g:Label ui:field='footerLeft' text="Footer Left" />
+											<g:Label ui:field='footerLeft' text="Footer Left"/>
 										</b.html:Paragraph>
 									</b:Column>
 									<b:Column size="MD_2">

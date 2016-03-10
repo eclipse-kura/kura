@@ -134,6 +134,7 @@ public class EntryClassUi extends Composite {
 		@SuppressWarnings("deprecation")
 		int year = now.getYear() + 1900;
 		footerLeft.setText(MSGS.copyright(String.valueOf(year)));
+		footerLeft.setStyleName("copyright");
 		contentPanel.setVisible(false);
 
 		// Set client side logging

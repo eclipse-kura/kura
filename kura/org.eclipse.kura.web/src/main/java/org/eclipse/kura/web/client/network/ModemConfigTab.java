@@ -95,10 +95,6 @@ public class ModemConfigTab extends LayoutContainer
 	private NumberField 			 m_lcpEchoIntervalField;
 	private NumberField				 m_lcpEchoFailureField;
 	
-	private Radio 				   	 m_enableGpsRadioTrue;
-	private Radio 				   	 m_enableGpsRadioFalse;
-	private RadioGroup 			   	 m_enableGpsRadioGroup;
-	
     private ComponentPlugin          m_dirtyPlugin;
 	
     private class MouseOverListener implements Listener<BaseEvent> {
@@ -190,7 +186,6 @@ public class ModemConfigTab extends LayoutContainer
     		
     		updatedModemNetIf.setLcpEchoInterval(m_lcpEchoIntervalField.getValue().intValue());
     		updatedModemNetIf.setLcpEchoFailure(m_lcpEchoFailureField.getValue().intValue());
-    		updatedModemNetIf.setGpsEnabled(m_enableGpsRadioTrue.getValue().booleanValue());
     	} else {
     	    if(m_selectNetIfConfig != null) {
     	        Log.debug("Modem config tab not yet rendered, using original values");
@@ -209,7 +204,6 @@ public class ModemConfigTab extends LayoutContainer
         	    updatedModemNetIf.setActiveFilter(m_selectNetIfConfig.getActiveFilter());
         	    updatedModemNetIf.setLcpEchoInterval(m_selectNetIfConfig.getLcpEchoInterval());
         	    updatedModemNetIf.setLcpEchoFailure(m_selectNetIfConfig.getLcpEchoFailure());
-        	    updatedModemNetIf.setGpsEnabled(m_selectNetIfConfig.isGpsEnabled());
     	    }
     	}
     }
@@ -582,25 +576,6 @@ public class ModemConfigTab extends LayoutContainer
         });
         fieldSet.add(m_lcpEchoFailureField, formData);
         
-        m_enableGpsRadioTrue = new Radio();  
-        m_enableGpsRadioTrue.setBoxLabel(MSGS.trueLabel());
-        m_enableGpsRadioTrue.setItemId("true");
-        m_enableGpsRadioTrue.addListener(Events.OnMouseOver, new MouseOverListener(MSGS.netModemToolTipEnableGps()));
-        
-        m_enableGpsRadioFalse = new Radio();  
-        m_enableGpsRadioFalse.setBoxLabel(MSGS.falseLabel());  
-        m_enableGpsRadioFalse.setItemId("false");
-        m_enableGpsRadioFalse.addListener(Events.OnMouseOver, new MouseOverListener(MSGS.netModemToolTipEnableGps()));
-        
-        m_enableGpsRadioGroup = new RadioGroup();
-        m_enableGpsRadioGroup.setName("modemEnableGps");
-        m_enableGpsRadioGroup.setFieldLabel(MSGS.netModemEnableGps()); 
-        m_enableGpsRadioGroup.add(m_enableGpsRadioTrue);  
-        m_enableGpsRadioGroup.add(m_enableGpsRadioFalse);
-        m_enableGpsRadioGroup.addPlugin(m_dirtyPlugin);  
-        m_enableGpsRadioGroup.setStyleAttribute("margin-top", Constants.LABEL_MARGIN_TOP_SEPARATOR);
-        fieldSet.add(m_enableGpsRadioGroup, formData);
-        
 	    m_formPanel.add(fieldSet);
 	    m_formPanel.setScrollMode(Scroll.AUTO);
 	    add(m_formPanel);
@@ -727,26 +702,6 @@ public class ModemConfigTab extends LayoutContainer
 			
 			m_lcpEchoFailureField.setValue(m_selectNetIfConfig.getLcpEchoFailure());
 			m_lcpEchoFailureField.setOriginalValue(m_lcpEchoFailureField.getValue());
-			
-			if (m_selectNetIfConfig.isGpsEnabled()) {
-				m_enableGpsRadioTrue.setValue(true);
-				m_enableGpsRadioTrue.setOriginalValue(m_enableGpsRadioTrue.getValue());
-				
-				m_enableGpsRadioFalse.setValue(false);
-				m_enableGpsRadioFalse.setOriginalValue(m_enableGpsRadioFalse.getValue());
-				
-				m_enableGpsRadioGroup.setOriginalValue(m_enableGpsRadioTrue);
-				m_enableGpsRadioGroup.setValue(m_enableGpsRadioGroup.getValue());
-			} else {
-				m_enableGpsRadioTrue.setValue(false);
-				m_enableGpsRadioTrue.setOriginalValue(m_enableGpsRadioTrue.getValue());
-
-				m_enableGpsRadioFalse.setValue(true);
-				m_enableGpsRadioFalse.setOriginalValue(m_enableGpsRadioFalse.getValue());
-
-				m_enableGpsRadioGroup.setOriginalValue(m_enableGpsRadioFalse);
-				m_enableGpsRadioGroup.setValue(m_enableGpsRadioGroup.getValue());
-			}
 		} else {
 			Log.debug("selected Network Interface Config is null");
 		}
@@ -772,16 +727,6 @@ public class ModemConfigTab extends LayoutContainer
             } else {
                 m_usernameField.setEnabled(true);
                 m_passwordField.setEnabled(true);
-            }
-            
-            if (m_selectNetIfConfig.isGpsSupported()) {
-            	 m_enableGpsRadioTrue.setEnabled(true);
-                 m_enableGpsRadioFalse.setEnabled(true);
-                 m_enableGpsRadioGroup.setEnabled(true);
-            } else {
-            	 m_enableGpsRadioTrue.setEnabled(false);
-                 m_enableGpsRadioFalse.setEnabled(false);
-                 m_enableGpsRadioGroup.setEnabled(false);
             }
             
             for (String techType : m_selectNetIfConfig.getNetworkTechnology()) {
@@ -840,9 +785,6 @@ public class ModemConfigTab extends LayoutContainer
 		m_lcpEchoFailureField.setValue(null);
 		m_lcpEchoFailureField.setOriginalValue(m_lcpEchoFailureField.getValue());
 		
-		m_enableGpsRadioGroup.setValue(m_enableGpsRadioFalse);
-		m_enableGpsRadioGroup.setOriginalValue(m_enableGpsRadioGroup.getValue());
-
 		update();
 	}
 }

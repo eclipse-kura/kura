@@ -43,7 +43,7 @@
 					<b:Column addStyleNames="{style.top-row-padding}" size="XS_12">
 						<b:Panel>
 							<b:PanelHeader>
-								<b:Image addStyleNames="{style.image}" ui:field="header" />
+								<b:Panel addStyleNames="{style.image}" ui:field="header" />
 							</b:PanelHeader>
 						</b:Panel>
 					</b:Column>

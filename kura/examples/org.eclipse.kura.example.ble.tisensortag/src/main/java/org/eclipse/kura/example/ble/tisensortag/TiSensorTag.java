@@ -13,6 +13,7 @@ package org.eclipse.kura.example.ble.tisensortag;
 
 import java.util.List;
 
+import org.eclipse.kura.KuraException;
 import org.eclipse.kura.bluetooth.BluetoothDevice;
 import org.eclipse.kura.bluetooth.BluetoothGatt;
 import org.eclipse.kura.bluetooth.BluetoothGattCharacteristic;
@@ -61,7 +62,12 @@ public class TiSensorTag implements BluetoothLeNotificationListener {
 	
     public boolean connect() {
         m_bluetoothGatt = m_device.getBluetoothGatt();
-        boolean connected = m_bluetoothGatt.connect();
+        boolean connected = false;
+		try {
+			connected = m_bluetoothGatt.connect();
+		} catch (KuraException e) {
+			s_logger.error(e.toString());
+		}
         if(connected) {
             m_bluetoothGatt.setBluetoothLeNotificationListener(this);
             m_connected = true;
@@ -84,7 +90,12 @@ public class TiSensorTag implements BluetoothLeNotificationListener {
 	
     public boolean checkConnection() {
     	if (m_bluetoothGatt != null) {
-    		boolean connected = m_bluetoothGatt.checkConnection();
+    		boolean connected = false;
+			try {
+				connected = m_bluetoothGatt.checkConnection();
+			} catch (KuraException e) {
+				s_logger.error(e.toString());
+			}
     		if(connected) {
     			m_connected = true;
     			return true;
@@ -131,12 +142,18 @@ public class TiSensorTag implements BluetoothLeNotificationListener {
 	}
 
 	public String firmwareRevision() {
-		if (CC2650)
-			return hexAsciiToString(m_bluetoothGatt.readCharacteristicValue(TiSensorTagGatt.HANDLE_FIRMWARE_REVISION_2650));
-		else {
-			String aaa = m_bluetoothGatt.readCharacteristicValue(TiSensorTagGatt.HANDLE_FIRMWARE_REVISION_2541);
-			return hexAsciiToString(aaa.substring(0,aaa.length()-3));
+		String firmwareVersion = "";
+		try {
+			if (CC2650)
+				firmwareVersion = hexAsciiToString(m_bluetoothGatt.readCharacteristicValue(TiSensorTagGatt.HANDLE_FIRMWARE_REVISION_2650));
+			else {
+				String firmware = m_bluetoothGatt.readCharacteristicValue(TiSensorTagGatt.HANDLE_FIRMWARE_REVISION_2541);
+				firmwareVersion = hexAsciiToString(firmware.substring(0,firmware.length()-3));
+			}
+		} catch (KuraException e) {
+			s_logger.error(e.toString());
 		}
+		return firmwareVersion;
 	}
 	
 	// ----------------------------------------------------------------------------------------------------------
@@ -170,18 +187,30 @@ public class TiSensorTag implements BluetoothLeNotificationListener {
 	 * Read temperature sensor
 	 */
 	public double[] readTemperature() {
+		double[] temperatures = new double[2];
 		// Read value
-		if (CC2650)
-			return calculateTemperature(m_bluetoothGatt.readCharacteristicValue(TiSensorTagGatt.HANDLE_TEMP_SENSOR_VALUE_2650));
-		else
-			return calculateTemperature(m_bluetoothGatt.readCharacteristicValue(TiSensorTagGatt.HANDLE_TEMP_SENSOR_VALUE_2541));
+		try {
+			if (CC2650)
+				temperatures = calculateTemperature(m_bluetoothGatt.readCharacteristicValue(TiSensorTagGatt.HANDLE_TEMP_SENSOR_VALUE_2650));
+			else
+				temperatures = calculateTemperature(m_bluetoothGatt.readCharacteristicValue(TiSensorTagGatt.HANDLE_TEMP_SENSOR_VALUE_2541));
+		} catch (KuraException e) {
+			s_logger.error(e.toString());
+		}
+		return temperatures;
 	}
 	
 	/*
 	 * Read temperature sensor by UUID
 	 */
 	public double[] readTemperatureByUuid() {
-		return calculateTemperature(m_bluetoothGatt.readCharacteristicValueByUuid(TiSensorTagGatt.UUID_TEMP_SENSOR_VALUE));
+		double[] temperatures = new double[2];
+		try {
+			temperatures = calculateTemperature(m_bluetoothGatt.readCharacteristicValueByUuid(TiSensorTagGatt.UUID_TEMP_SENSOR_VALUE));
+		} catch (KuraException e) {
+			s_logger.error(e.toString());
+		}
+		return temperatures;
 	}
 	
 	/*
@@ -299,21 +328,33 @@ public class TiSensorTag implements BluetoothLeNotificationListener {
 	 * Read accelerometer sensor
 	 */
 	public double[] readAcceleration() {
+		double[] acceleration = new double[3];
 		// Read value 
-		if (CC2650)
-			return calculateAcceleration(m_bluetoothGatt.readCharacteristicValue(TiSensorTagGatt.HANDLE_MOV_SENSOR_VALUE_2650));
-		else
-			return calculateAcceleration(m_bluetoothGatt.readCharacteristicValue(TiSensorTagGatt.HANDLE_ACC_SENSOR_VALUE_2541));
+		try {
+			if (CC2650)
+				acceleration = calculateAcceleration(m_bluetoothGatt.readCharacteristicValue(TiSensorTagGatt.HANDLE_MOV_SENSOR_VALUE_2650));
+			else
+				acceleration = calculateAcceleration(m_bluetoothGatt.readCharacteristicValue(TiSensorTagGatt.HANDLE_ACC_SENSOR_VALUE_2541));
+		} catch (KuraException e) {
+			s_logger.error(e.toString());
+		}
+		return acceleration;
 	}
 	
 	/*
 	 * Read accelerometer sensor by UUID
 	 */
 	public double[] readAccelerationByUuid() {
-		if (CC2650)
-			return calculateAcceleration(m_bluetoothGatt.readCharacteristicValueByUuid(TiSensorTagGatt.UUID_MOV_SENSOR_VALUE));
-		else
-			return calculateAcceleration(m_bluetoothGatt.readCharacteristicValueByUuid(TiSensorTagGatt.UUID_ACC_SENSOR_VALUE));
+		double[] acceleration = new double[3];
+		try {
+			if (CC2650)
+				return calculateAcceleration(m_bluetoothGatt.readCharacteristicValueByUuid(TiSensorTagGatt.UUID_MOV_SENSOR_VALUE));
+			else
+				return calculateAcceleration(m_bluetoothGatt.readCharacteristicValueByUuid(TiSensorTagGatt.UUID_ACC_SENSOR_VALUE));
+		} catch (KuraException e) {
+			s_logger.error(e.toString());
+		}
+		return acceleration;
 	}
 	
 	/*
@@ -414,18 +455,30 @@ public class TiSensorTag implements BluetoothLeNotificationListener {
 	 * Read humidity sensor
 	 */
 	public float readHumidity() {
+		float humidity = 0F;
 		// Read value
-		if (CC2650)
-			return calculateHumidity(m_bluetoothGatt.readCharacteristicValue(TiSensorTagGatt.HANDLE_HUM_SENSOR_VALUE_2650));
-		else
-			return calculateHumidity(m_bluetoothGatt.readCharacteristicValue(TiSensorTagGatt.HANDLE_HUM_SENSOR_VALUE_2541));
+		try {
+			if (CC2650)
+				humidity = calculateHumidity(m_bluetoothGatt.readCharacteristicValue(TiSensorTagGatt.HANDLE_HUM_SENSOR_VALUE_2650));
+			else
+				humidity = calculateHumidity(m_bluetoothGatt.readCharacteristicValue(TiSensorTagGatt.HANDLE_HUM_SENSOR_VALUE_2541));
+		} catch (KuraException e) {
+			s_logger.error(e.toString());
+		}
+		return humidity;
 	}
 	
 	/*
 	 * Read humidity sensor by UUID
 	 */
 	public float readHumidityByUuid() {
-		return calculateHumidity(m_bluetoothGatt.readCharacteristicValueByUuid(TiSensorTagGatt.UUID_HUM_SENSOR_VALUE));
+		float humidity = 0F;
+		try {
+			humidity = calculateHumidity(m_bluetoothGatt.readCharacteristicValueByUuid(TiSensorTagGatt.UUID_HUM_SENSOR_VALUE));
+		} catch (KuraException e) {
+			s_logger.error(e.toString());
+		}
+		return humidity;
 	}
 	
 	/*
@@ -512,21 +565,33 @@ public class TiSensorTag implements BluetoothLeNotificationListener {
 	 * Read magnetometer sensor
 	 */
 	public float[] readMagneticField() {
+		float[] magnetic = new float[3];
 		// Read value
-		if (CC2650)
-			return calculateMagneticField(m_bluetoothGatt.readCharacteristicValue(TiSensorTagGatt.HANDLE_MOV_SENSOR_VALUE_2650));
-		else
-			return calculateMagneticField(m_bluetoothGatt.readCharacteristicValue(TiSensorTagGatt.HANDLE_MAG_SENSOR_VALUE_2541));
+		try {
+			if (CC2650)
+				magnetic = calculateMagneticField(m_bluetoothGatt.readCharacteristicValue(TiSensorTagGatt.HANDLE_MOV_SENSOR_VALUE_2650));
+			else
+				magnetic = calculateMagneticField(m_bluetoothGatt.readCharacteristicValue(TiSensorTagGatt.HANDLE_MAG_SENSOR_VALUE_2541));
+		} catch (KuraException e) {
+			s_logger.error(e.toString());
+		}
+		return magnetic;
 	}
 	
 	/*
 	 * Read magnetometer sensor by UUID
 	 */
 	public float[] readMagneticFieldByUuid() {
-		if (CC2650)
-			return calculateMagneticField(m_bluetoothGatt.readCharacteristicValueByUuid(TiSensorTagGatt.UUID_MOV_SENSOR_VALUE));
-		else
-			return calculateMagneticField(m_bluetoothGatt.readCharacteristicValueByUuid(TiSensorTagGatt.UUID_MAG_SENSOR_VALUE));
+		float[] magnetic = new float[3];
+		try {
+			if (CC2650)
+				magnetic = calculateMagneticField(m_bluetoothGatt.readCharacteristicValueByUuid(TiSensorTagGatt.UUID_MOV_SENSOR_VALUE));
+			else
+				magnetic = calculateMagneticField(m_bluetoothGatt.readCharacteristicValueByUuid(TiSensorTagGatt.UUID_MAG_SENSOR_VALUE));
+		} catch (KuraException e) {
+			s_logger.error(e.toString());
+		}
+		return magnetic;
 	}
 	
 	/*
@@ -650,37 +715,52 @@ public class TiSensorTag implements BluetoothLeNotificationListener {
 	 * Read calibration pressure sensor
 	 */
 	public String readCalibrationBarometer() {
+		pressureCalibration = "";
 		// Read value
-		if (!CC2650) {
-			if (firmwareRevision.contains("1.4")) 
-				pressureCalibration = m_bluetoothGatt.readCharacteristicValue(TiSensorTagGatt.HANDLE_PRE_CALIBRATION_2541_1_4);
-			else
-				pressureCalibration = m_bluetoothGatt.readCharacteristicValue(TiSensorTagGatt.HANDLE_PRE_CALIBRATION_2541_1_5);
-			return pressureCalibration;
+		try {
+			if (!CC2650) {
+				if (firmwareRevision.contains("1.4")) 
+					pressureCalibration = m_bluetoothGatt.readCharacteristicValue(TiSensorTagGatt.HANDLE_PRE_CALIBRATION_2541_1_4);
+				else
+					pressureCalibration = m_bluetoothGatt.readCharacteristicValue(TiSensorTagGatt.HANDLE_PRE_CALIBRATION_2541_1_5);
+			}
+		} catch (KuraException e) {
+			s_logger.error(e.toString());
 		}
-		else
-			return "";
+		return pressureCalibration;
 	}
 	
 	/*
 	 * Read pressure sensor
 	 */
 	public double readPressure() {
+		double pressure = 0.0;
 		// Read value
-		if (CC2650)
-			return calculatePressure(m_bluetoothGatt.readCharacteristicValue(TiSensorTagGatt.HANDLE_PRE_SENSOR_VALUE_2650));
-		else
-			if (firmwareRevision.contains("1.4")) 
-				return calculatePressure(m_bluetoothGatt.readCharacteristicValue(TiSensorTagGatt.HANDLE_PRE_SENSOR_VALUE_2541_1_4));
+		try {
+			if (CC2650)
+				pressure = calculatePressure(m_bluetoothGatt.readCharacteristicValue(TiSensorTagGatt.HANDLE_PRE_SENSOR_VALUE_2650));
 			else
-				return calculatePressure(m_bluetoothGatt.readCharacteristicValue(TiSensorTagGatt.HANDLE_PRE_SENSOR_VALUE_2541_1_5));
+				if (firmwareRevision.contains("1.4")) 
+					pressure = calculatePressure(m_bluetoothGatt.readCharacteristicValue(TiSensorTagGatt.HANDLE_PRE_SENSOR_VALUE_2541_1_4));
+				else
+					pressure = calculatePressure(m_bluetoothGatt.readCharacteristicValue(TiSensorTagGatt.HANDLE_PRE_SENSOR_VALUE_2541_1_5));
+		} catch (KuraException e) {
+			s_logger.error(e.toString());
+		}
+		return pressure;
 	}
 	
 	/*
 	 * Read pressure sensor by UUID
 	 */
 	public double readPressureByUuid() {
-		return calculatePressure(m_bluetoothGatt.readCharacteristicValueByUuid(TiSensorTagGatt.UUID_PRE_SENSOR_VALUE));
+		double pressure = 0.0;
+		try {
+			pressure = calculatePressure(m_bluetoothGatt.readCharacteristicValueByUuid(TiSensorTagGatt.UUID_PRE_SENSOR_VALUE));
+		} catch (KuraException e) {
+			s_logger.error(e.toString());
+		}
+		return pressure;		
 	}
 	
 	/*
@@ -731,8 +811,8 @@ public class TiSensorTag implements BluetoothLeNotificationListener {
 		if (CC2650) {
             
             if (valueByte.length > 4) {
-            	Integer val = twentyFourBitUnsignedAtOffset(valueByte, 2);
-                p_a = val / 10000.0;
+            	Integer val = twentyFourBitUnsignedAtOffset(valueByte, 3);
+                p_a = val / 100.0;
             }
 			else {
                 int mantissa;
@@ -745,7 +825,7 @@ public class TiSensorTag implements BluetoothLeNotificationListener {
                 double output;
                 double magnitude = Math.pow(2.0, (double) exponent);
                 output = (mantissa * magnitude);
-                p_a = output / 10000.0;
+                p_a = output / 100.0;
             }
             
 		}
@@ -810,21 +890,33 @@ public class TiSensorTag implements BluetoothLeNotificationListener {
 	 * Read gyroscope sensor
 	 */
 	public float[] readGyroscope() {
+		float[] gyroscope = new float[3];
 		// Read value
-		if (CC2650)
-			return calculateGyroscope(m_bluetoothGatt.readCharacteristicValue(TiSensorTagGatt.HANDLE_MOV_SENSOR_VALUE_2650));
-		else
-			return calculateGyroscope(m_bluetoothGatt.readCharacteristicValue(TiSensorTagGatt.HANDLE_GYR_SENSOR_VALUE_2541));
+		try {
+			if (CC2650)
+				gyroscope = calculateGyroscope(m_bluetoothGatt.readCharacteristicValue(TiSensorTagGatt.HANDLE_MOV_SENSOR_VALUE_2650));
+			else
+				gyroscope = calculateGyroscope(m_bluetoothGatt.readCharacteristicValue(TiSensorTagGatt.HANDLE_GYR_SENSOR_VALUE_2541));
+		} catch (KuraException e) {
+			s_logger.error(e.toString());
+		}
+		return gyroscope;
 	}
 	
 	/*
 	 * Read gyroscope sensor by UUID
 	 */
 	public float[] readGyroscopeByUuid() {
-		if (CC2650)
-			return calculateGyroscope(m_bluetoothGatt.readCharacteristicValueByUuid(TiSensorTagGatt.UUID_MOV_SENSOR_VALUE));
-		else
-			return calculateGyroscope(m_bluetoothGatt.readCharacteristicValueByUuid(TiSensorTagGatt.UUID_GYR_SENSOR_VALUE));
+		float[] gyroscope = new float[3];
+		try {
+			if (CC2650)
+				gyroscope = calculateGyroscope(m_bluetoothGatt.readCharacteristicValueByUuid(TiSensorTagGatt.UUID_MOV_SENSOR_VALUE));
+			else
+				gyroscope = calculateGyroscope(m_bluetoothGatt.readCharacteristicValueByUuid(TiSensorTagGatt.UUID_GYR_SENSOR_VALUE));
+		} catch (KuraException e) {
+			s_logger.error(e.toString());
+		}
+		return gyroscope;			
 	}
 	
 	/*
@@ -919,25 +1011,37 @@ public class TiSensorTag implements BluetoothLeNotificationListener {
 	 * Read optical sensor
 	 */
 	public double readLight() {
+		double light = 0.0;
 		// Read value
-		if (CC2650)
-			return calculateLight(m_bluetoothGatt.readCharacteristicValue(TiSensorTagGatt.HANDLE_OPTO_SENSOR_VALUE_2650));
-		else {
-			s_logger.info("Not optical sensor on CC2541.");
-			return 0.0;
+		try {
+			if (CC2650)
+				light = calculateLight(m_bluetoothGatt.readCharacteristicValue(TiSensorTagGatt.HANDLE_OPTO_SENSOR_VALUE_2650));
+			else {
+				s_logger.info("Not optical sensor on CC2541.");
+				light = 0.0;
+			}
+		} catch (KuraException e) {
+			s_logger.error(e.toString());
 		}
+		return light;
 	}
 	
 	/*
 	 * Read optical sensor by UUID
 	 */
 	public double readLightByUuid() {
-		if (CC2650)
-			return calculateLight(m_bluetoothGatt.readCharacteristicValueByUuid(TiSensorTagGatt.UUID_OPTO_SENSOR_VALUE));
-		else {
-			s_logger.info("Not optical sensor on CC2541.");
-			return 0.0;
+		double light = 0.0;
+		try {
+			if (CC2650)
+				light = calculateLight(m_bluetoothGatt.readCharacteristicValueByUuid(TiSensorTagGatt.UUID_OPTO_SENSOR_VALUE));
+			else {
+				s_logger.info("Not optical sensor on CC2541.");
+				light = 0.0;
+			}
+		} catch (KuraException e) {
+			s_logger.error(e.toString());
 		}
+		return light;
 	}
 	
 	/*
@@ -998,18 +1102,30 @@ public class TiSensorTag implements BluetoothLeNotificationListener {
 	 * Read keys status
 	 */
 	public String readKeysStatus() {
+		String key = "";
 		// Read value
-		if (CC2650)
-			return m_bluetoothGatt.readCharacteristicValue(TiSensorTagGatt.HANDLE_KEYS_STATUS_2650);
-		else
-			return m_bluetoothGatt.readCharacteristicValue(TiSensorTagGatt.HANDLE_KEYS_STATUS_2541);
+		try {
+			if (CC2650)
+				key = m_bluetoothGatt.readCharacteristicValue(TiSensorTagGatt.HANDLE_KEYS_STATUS_2650);
+			else
+				key = m_bluetoothGatt.readCharacteristicValue(TiSensorTagGatt.HANDLE_KEYS_STATUS_2541);
+		} catch (KuraException e) {
+			s_logger.error(e.toString());
+		}
+		return key;
 	}
 	
 	/*
 	 * Read keys status by UUID
 	 */
 	public String readKeysStatusByUuid() {
-		return m_bluetoothGatt.readCharacteristicValueByUuid(TiSensorTagGatt.UUID_KEYS_STATUS);
+		String key = "";
+		try {
+			key = m_bluetoothGatt.readCharacteristicValueByUuid(TiSensorTagGatt.UUID_KEYS_STATUS);
+		} catch (KuraException e) {
+			s_logger.error(e.toString());
+		}
+		return key;			
 	}
 	
 	/*
@@ -1083,7 +1199,7 @@ public class TiSensorTag implements BluetoothLeNotificationListener {
 	
     private static Integer shortSignedAtOffset(byte[] c, int offset) {
         Integer lowerByte = (int) c[offset] & 0xFF;
-        Integer upperByte = (int) c[offset+1]; // Interpret MSB as signed
+        Integer upperByte = (int) c[offset+1]; // Interpret MSB as signedan
         return (upperByte << 8) + lowerByte;
     }
 

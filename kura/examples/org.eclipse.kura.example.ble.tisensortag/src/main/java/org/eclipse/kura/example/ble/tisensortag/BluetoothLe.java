@@ -135,14 +135,21 @@ public class BluetoothLe implements ConfigurableComponent, CloudClientListener, 
 		}
 
 		m_tiSensorTagList = new ArrayList<TiSensorTag>();
+
+		try {
+			m_cloudClient = m_cloudService.newCloudClient(APP_ID);
+			m_cloudClient.addCloudClientListener(this);
+		} catch (KuraException e1) {
+			s_logger.error("Error starting component", e1);
+			throw new ComponentException(e1);
+		}
+		
 		
 		if (enableScan) {
 			
 			m_worker = Executors.newSingleThreadScheduledExecutor();
 		
 			try {
-				m_cloudClient = m_cloudService.newCloudClient(APP_ID);
-				m_cloudClient.addCloudClientListener(this);
 
 				// Get Bluetooth adapter and ensure it is enabled
 				m_bluetoothAdapter = m_bluetoothService.getBluetoothAdapter(iname);
@@ -176,9 +183,11 @@ public class BluetoothLe implements ConfigurableComponent, CloudClientListener, 
 	protected void deactivate(ComponentContext context) {
 
 		s_logger.debug("Deactivating BluetoothLe...");
-		if(m_bluetoothAdapter.isScanning()){
-			s_logger.debug("m_bluetoothAdapter.isScanning");
-			m_bluetoothAdapter.killLeScan();
+		if (m_bluetoothAdapter != null) {
+			if(m_bluetoothAdapter.isScanning()){
+				s_logger.debug("m_bluetoothAdapter.isScanning");
+				m_bluetoothAdapter.killLeScan();
+			}
 		}
 
 		// disconnect SensorTags
@@ -401,6 +410,8 @@ public class BluetoothLe implements ConfigurableComponent, CloudClientListener, 
 			}
 		}
 		
+		s_logger.debug("Found " + m_tiSensorTagList.size() + " SensorTags");
+		
 		// connect to TiSensorTags
 		for (TiSensorTag myTiSensorTag : m_tiSensorTagList) {
 			
@@ -565,9 +576,10 @@ public class BluetoothLe implements ConfigurableComponent, CloudClientListener, 
 				
 				try {
 					// Publish only if there are metrics to be published!
-					if (!payload.metricNames().isEmpty())
+					if (!payload.metricNames().isEmpty()) {
 						m_cloudClient.publish(m_topic + "/" + myTiSensorTag.getBluetoothDevice().getAdress() , payload, 0, false);
-				} catch (KuraException e) {
+					}
+				} catch (Exception e) {
 					e.printStackTrace();
 				}
 			}

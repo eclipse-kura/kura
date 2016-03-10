@@ -1,0 +1,81 @@
+CFLAGS=-Wall -O0 -g -Wl,--subsystem,windows -I "$(JAVA_HOME)\include" -I "$(JAVA_HOME)\include\win32"
+LFLAGS=-Wl,--subsystem,windows -shared
+RELEASE32=Release/win32/x86/dkcomm.dll
+RELEASE64=Release/win32/x64/dkcomm.dll
+
+SodaDkComm32 : $(RELEASE32)
+SodaDkComm64 : $(RELEASE64)
+
+Objs/x86/CommPortIdentifier.o:
+	i686-w64-mingw32-gcc $(CFLAGS) -c CommPortIdentifier.c -o $@
+Objs/x86/NSCommDriver.o:
+	i686-w64-mingw32-gcc $(CFLAGS) -c NSCommDriver.c -o $@
+Objs/x86/NSDeviceInputStream.o:
+	i686-w64-mingw32-gcc $(CFLAGS) -c NSDeviceInputStream.c -o $@
+Objs/x86/NSDeviceOutputStream.o:
+	i686-w64-mingw32-gcc $(CFLAGS) -c NSDeviceOutputStream.c -o $@
+Objs/x86/NSSerialPort.o:
+	i686-w64-mingw32-gcc $(CFLAGS) -c NSSerialPort.c -o $@
+Objs/x86/SerialDataEventThread.o:
+	i686-w64-mingw32-gcc $(CFLAGS) -c SerialDataEventThread.c -o $@
+Objs/x86/SerialStatusEventThread.o:
+	i686-w64-mingw32-gcc $(CFLAGS) -c SerialStatusEventThread.c -o $@
+Objs/x86/w32CommDriver.o:
+	i686-w64-mingw32-gcc $(CFLAGS) -c w32CommDriver.c -o $@
+Objs/x86/w32CommPortIdentifier.o:
+	i686-w64-mingw32-gcc $(CFLAGS) -c w32CommPortIdentifier.c -o $@
+Objs/x86/w32DeviceInputStream.o:
+	i686-w64-mingw32-gcc $(CFLAGS) -c w32DeviceInputStream.c -o $@
+Objs/x86/w32DeviceOutputStream.o:
+	i686-w64-mingw32-gcc $(CFLAGS) -c w32DeviceOutputStream.c -o $@
+Objs/x86/w32SerialDataEventThread.o:
+	i686-w64-mingw32-gcc $(CFLAGS) -c w32SerialDataEventThread.c -o $@
+Objs/x86/w32SerialPort.o:
+	i686-w64-mingw32-gcc $(CFLAGS) -c w32SerialPort.c -o $@
+Objs/x86/w32SerialStatusEventThread.o:
+	i686-w64-mingw32-gcc $(CFLAGS) -c w32SerialStatusEventThread.c -o $@
+Objs/x86/NSCommLOG.o:
+	i686-w64-mingw32-gcc $(CFLAGS) -c NSCommLOG.c -o $@
+
+Objs/x64/CommPortIdentifier.o:
+	x86_64-w64-mingw32-gcc -m64 $(CFLAGS) -c CommPortIdentifier.c -o $@
+Objs/x64/NSCommDriver.o:
+	x86_64-w64-mingw32-gcc -m64 $(CFLAGS) -c NSCommDriver.c -o $@
+Objs/x64/NSDeviceInputStream.o:
+	x86_64-w64-mingw32-gcc -m64 $(CFLAGS) -c NSDeviceInputStream.c -o $@
+Objs/x64/NSDeviceOutputStream.o:
+	x86_64-w64-mingw32-gcc -m64 $(CFLAGS) -c NSDeviceOutputStream.c -o $@
+Objs/x64/NSSerialPort.o:
+	x86_64-w64-mingw32-gcc -m64 $(CFLAGS) -c NSSerialPort.c -o $@
+Objs/x64/SerialDataEventThread.o:
+	x86_64-w64-mingw32-gcc -m64 $(CFLAGS) -c SerialDataEventThread.c -o $@
+Objs/x64/SerialStatusEventThread.o:
+	x86_64-w64-mingw32-gcc -m64 $(CFLAGS) -c SerialStatusEventThread.c -o $@
+Objs/x64/w32CommDriver.o:
+	x86_64-w64-mingw32-gcc -m64 $(CFLAGS) -c w32CommDriver.c -o $@
+Objs/x64/w32CommPortIdentifier.o:
+	x86_64-w64-mingw32-gcc -m64 $(CFLAGS) -c w32CommPortIdentifier.c -o $@
+Objs/x64/w32DeviceInputStream.o:
+	x86_64-w64-mingw32-gcc -m64 $(CFLAGS) -c w32DeviceInputStream.c -o $@
+Objs/x64/w32DeviceOutputStream.o:
+	x86_64-w64-mingw32-gcc -m64 $(CFLAGS) -c w32DeviceOutputStream.c -o $@
+Objs/x64/w32SerialDataEventThread.o:
+	x86_64-w64-mingw32-gcc -m64 $(CFLAGS) -c w32SerialDataEventThread.c -o $@
+Objs/x64/w32SerialPort.o:
+	x86_64-w64-mingw32-gcc -m64 $(CFLAGS) -c w32SerialPort.c -o $@
+Objs/x64/w32SerialStatusEventThread.o:
+	x86_64-w64-mingw32-gcc -m64 $(CFLAGS) -c w32SerialStatusEventThread.c -o $@
+Objs/x64/NSCommLOG.o:
+	x86_64-w64-mingw32-gcc -m64 $(CFLAGS) -c NSCommLOG.c -o $@
+
+$(RELEASE32): Objs/x86/CommPortIdentifier.o Objs/x86/NSCommDriver.o Objs/x86/NSDeviceInputStream.o Objs/x86/NSDeviceOutputStream.o Objs/x86/NSSerialPort.o\
+              Objs/x86/SerialDataEventThread.o Objs/x86/SerialStatusEventThread.o Objs/x86/w32CommDriver.o Objs/x86/w32CommPortIdentifier.o\
+              Objs/x86/w32DeviceInputStream.o Objs/x86/w32DeviceOutputStream.o Objs/x86/w32SerialDataEventThread.o\
+              Objs/x86/w32SerialPort.o Objs/x86/w32SerialStatusEventThread.o Objs/x86/NSCommLOG.o
+	i686-w64-mingw32-gcc $(LFLAGS) -o $@ $^ -lws2_32
+
+$(RELEASE64): Objs/x64/CommPortIdentifier.o Objs/x64/NSCommDriver.o Objs/x64/NSDeviceInputStream.o Objs/x64/NSDeviceOutputStream.o Objs/x64/NSSerialPort.o\
+              Objs/x64/SerialDataEventThread.o Objs/x64/SerialStatusEventThread.o Objs/x64/w32CommDriver.o Objs/x64/w32CommPortIdentifier.o\
+              Objs/x64/w32DeviceInputStream.o Objs/x64/w32DeviceOutputStream.o Objs/x64/w32SerialDataEventThread.o\
+              Objs/x64/w32SerialPort.o Objs/x64/w32SerialStatusEventThread.o Objs/x64/NSCommLOG.o
+	x86_64-w64-mingw32-gcc $(LFLAGS) -o $@ $^ -lws2_32

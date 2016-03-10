@@ -55,6 +55,7 @@ public class PositionServiceImpl implements PositionService {
 	private Date currentTime;
 	private int index = 0;
 	private boolean m_useGpsd;
+	private boolean isEnabled=false;
 
 	public void setEventAdmin(EventAdmin eventAdmin) {
 		this.m_eventAdmin = eventAdmin;
@@ -76,6 +77,9 @@ public class PositionServiceImpl implements PositionService {
 		m_ctx = componentContext;
 		m_useGpsd = false;
 		if(properties!=null){
+			if(properties.get("enabled")!=null)
+				isEnabled = (Boolean)properties.get("enabled");
+				
 			if(properties.get("useGpsd")!=null)
 				m_useGpsd = (Boolean)properties.get("useGpsd");
 			if(m_useGpsd)
@@ -185,6 +189,7 @@ public class PositionServiceImpl implements PositionService {
         m_handle = m_worker.scheduleAtFixedRate(new Runnable() {
                 @Override
                 public void run() {
+                	if(isEnabled)
                         updateGps();
                 }
         }, 0, 5, TimeUnit.SECONDS);

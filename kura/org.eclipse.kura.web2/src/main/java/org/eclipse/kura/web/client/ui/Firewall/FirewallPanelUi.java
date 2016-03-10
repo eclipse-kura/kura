@@ -53,8 +53,6 @@ public class FirewallPanelUi extends Composite {
 		portForwarding.setText(MSGS.firewallPortForwarding());
 		ipForwarding.setText(MSGS.firewallNat());
 
-
-
 		openPorts.addClickHandler(new ClickHandler(){
 			@Override
 			public void onClick(ClickEvent event) {

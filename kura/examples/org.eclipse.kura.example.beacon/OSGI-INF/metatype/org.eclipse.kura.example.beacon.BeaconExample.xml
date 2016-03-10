@@ -17,6 +17,8 @@
          name="BeaconExample" 
          description="Simple Beacon example.">
          
+         <Icon resource="OSGI-INF/beacon.png" size="32"/>
+         
         <AD id="enableAdvertising"
             name="enableAdvertising"
             type="Boolean"

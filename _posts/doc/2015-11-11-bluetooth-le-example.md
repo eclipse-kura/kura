@@ -75,10 +75,11 @@ sudo make
 sudo make install
 ```
 
-Finally, change the location of the hciconfig command:
+Finally, change the location of the hciconfig and gatttool commands:
 
 ```
 sudo mv /usr/local/sbin/hciconfig /usr/sbin
+sudo mv /usr/local/bin/gatttool /usr/sbin
 ```
 
 <span id="sensortag_command_line" class="anchor"><span id="sensortag_command_line_1" class="anchor"></span></span>SensorTag Communication via Command Line

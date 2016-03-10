@@ -101,7 +101,7 @@ public class EntryClassUi extends Composite {
 
 
 	@UiField
-	Image header;
+	Panel header;
 	@UiField
 	Label footerLeft, footerCenter, footerRight;
 	@UiField
@@ -128,11 +128,13 @@ public class EntryClassUi extends Composite {
 		initWidget(uiBinder.createAndBindUi(this));
 
 		// TODO : standardize the URL?
-		header.setUrl("eclipse/kura/icons/kura_logo_small.png");
+//		header.setUrl("eclipse/kura/icons/kura_logo_small.png");
+		header.setStyleName("headerLogo");
 		Date now = new Date();
 		@SuppressWarnings("deprecation")
 		int year = now.getYear() + 1900;
 		footerLeft.setText(MSGS.copyright(String.valueOf(year)));
+		footerLeft.setStyleName("copyright");
 		contentPanel.setVisible(false);
 
 		// Set client side logging

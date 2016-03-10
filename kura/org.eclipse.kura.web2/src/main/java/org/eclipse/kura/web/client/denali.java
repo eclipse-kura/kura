@@ -77,7 +77,7 @@ public class denali implements EntryPoint
 
 		// load custom CSS/JS
 		loadCss("denali/skin/skin.css");
-		ScriptInjector.fromUrl("skin/skin.js?v=1").inject(); // Make sure this request is not cached
+		ScriptInjector.fromUrl("denali/skin/skin.js?v=1").inject(); // Make sure this request is not cached
 
 		gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
 			@Override

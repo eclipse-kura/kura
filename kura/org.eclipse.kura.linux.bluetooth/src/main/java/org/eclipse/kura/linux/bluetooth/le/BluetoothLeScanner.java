@@ -17,7 +17,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.eclipse.kura.KuraException;
 import org.eclipse.kura.bluetooth.BluetoothBeaconData;
 import org.eclipse.kura.bluetooth.BluetoothBeaconScanListener;
 import org.eclipse.kura.bluetooth.BluetoothDevice;
@@ -106,26 +105,20 @@ public class BluetoothLeScanner implements BluetoothProcessListener, BTSnoopList
 	@Override
 	public void processInputStream(String string) {
 
-		String[] lines = string.split("\n");
-		for (String line : lines) {
-			processLine(line);
-		}
-
-		m_scanResult = new ArrayList<BluetoothDevice>();
-		for (Entry<String, String> device : m_devices.entrySet()) {
-			m_scanResult.add(new BluetoothDeviceImpl(device.getKey(), device.getValue()));
-			s_logger.info("m_scanResult.add {} - {}", device.getKey(), device.getValue());
-		}
-
-		// Alert listener that scan is complete
-
 		if(m_listener != null) {
-			try {
-				m_listener.onScanResults(m_scanResult);
-			} catch (KuraException e) {
-				// TODO Check if throws or try-catch
-				e.printStackTrace();
+			String[] lines = string.split("\n");
+			for (String line : lines) {
+				processLine(line);
 			}
+		
+			m_scanResult = new ArrayList<BluetoothDevice>();
+			for (Entry<String, String> device : m_devices.entrySet()) {
+				m_scanResult.add(new BluetoothDeviceImpl(device.getKey(), device.getValue()));
+				s_logger.info("m_scanResult.add {} - {}", device.getKey(), device.getValue());
+			}
+
+			// Alert listener that scan is complete
+			m_listener.onScanResults(m_scanResult);
 		}
 	}
 

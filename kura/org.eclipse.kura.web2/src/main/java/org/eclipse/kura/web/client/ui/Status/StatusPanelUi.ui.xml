@@ -21,7 +21,7 @@
 	<ui:style>
 	.important { }
 	
-	.center-panel { height: 543px; padding: 0px; border: none; }
+	.center-panel { height: 100%; padding: 0px; border: none; }
 
 	</ui:style>
 	
@@ -39,7 +39,7 @@
 			<b:Row>
 				<b:Well addStyleNames="{style.center-panel}" ui:field="statusWell">
 					<gwt:DataGrid bordered="true" condensed="true"
-						striped="true" hover="true" height="500px" width="100%" ui:field="statusGrid" />						
+						striped="true" hover="true" height="100vh" width="100%" ui:field="statusGrid" />						
 				</b:Well>
 			</b:Row>
 		</b:Column>

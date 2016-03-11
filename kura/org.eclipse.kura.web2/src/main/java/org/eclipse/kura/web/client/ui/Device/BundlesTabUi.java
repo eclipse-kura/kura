@@ -23,7 +23,7 @@ import org.eclipse.kura.web.shared.service.GwtDeviceService;
 import org.eclipse.kura.web.shared.service.GwtDeviceServiceAsync;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenService;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenServiceAsync;
-import org.gwtbootstrap3.client.ui.gwt.DataGrid;
+import org.gwtbootstrap3.client.ui.gwt.CellTable;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -48,7 +48,7 @@ public class BundlesTabUi extends Composite {
 	private final GwtDeviceServiceAsync gwtDeviceService = GWT.create(GwtDeviceService.class);
 	
 	@UiField
-	DataGrid<GwtGroupedNVPair> bundlesGrid = new DataGrid<GwtGroupedNVPair>();
+	CellTable<GwtGroupedNVPair> bundlesGrid = new CellTable<GwtGroupedNVPair>();
 	private ListDataProvider<GwtGroupedNVPair> bundlesDataProvider = new ListDataProvider<GwtGroupedNVPair>();
 
 	public BundlesTabUi() {
@@ -57,7 +57,7 @@ public class BundlesTabUi extends Composite {
 		//loadBundlesData();
 	}
 
-	private void loadBundlesTable(DataGrid<GwtGroupedNVPair> grid,
+	private void loadBundlesTable(CellTable<GwtGroupedNVPair> bundlesGrid2,
 
 	ListDataProvider<GwtGroupedNVPair> dataProvider) {
 
@@ -68,7 +68,7 @@ public class BundlesTabUi extends Composite {
 			}
 		};
 		col1.setCellStyleNames("status-table-row");
-		grid.addColumn(col1, MSGS.deviceBndId());
+		bundlesGrid2.addColumn(col1, MSGS.deviceBndId());
 
 		TextColumn<GwtGroupedNVPair> col2 = new TextColumn<GwtGroupedNVPair>() {
 			@Override
@@ -77,7 +77,7 @@ public class BundlesTabUi extends Composite {
 			}
 		};
 		col2.setCellStyleNames("status-table-row");
-		grid.addColumn(col2, MSGS.deviceBndName());
+		bundlesGrid2.addColumn(col2, MSGS.deviceBndName());
 
 		TextColumn<GwtGroupedNVPair> col3 = new TextColumn<GwtGroupedNVPair>() {
 			@Override
@@ -86,7 +86,7 @@ public class BundlesTabUi extends Composite {
 			}
 		};
 		col3.setCellStyleNames("status-table-row");
-		grid.addColumn(col3, MSGS.deviceBndState());
+		bundlesGrid2.addColumn(col3, MSGS.deviceBndState());
 
 		TextColumn<GwtGroupedNVPair> col4 = new TextColumn<GwtGroupedNVPair>() {
 			@Override
@@ -95,9 +95,9 @@ public class BundlesTabUi extends Composite {
 			}
 		};
 		col4.setCellStyleNames("status-table-row");
-		grid.addColumn(col4, MSGS.deviceBndVersion());
+		bundlesGrid2.addColumn(col4, MSGS.deviceBndVersion());
 
-		dataProvider.addDataDisplay(grid);
+		dataProvider.addDataDisplay(bundlesGrid2);
 	}
 
 	public void loadBundlesData() {
@@ -127,6 +127,8 @@ public class BundlesTabUi extends Composite {
 
 					@Override
 					public void onSuccess(ArrayList<GwtGroupedNVPair> result) {
+						int size= result.size();
+						bundlesGrid.setVisibleRange(0, size);
 						for (GwtGroupedNVPair resultPair : result) {
 							bundlesDataProvider.getList().add(resultPair);
 						}

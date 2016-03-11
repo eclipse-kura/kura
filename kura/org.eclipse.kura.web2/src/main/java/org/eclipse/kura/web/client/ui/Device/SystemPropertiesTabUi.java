@@ -22,7 +22,7 @@ import org.eclipse.kura.web.shared.service.GwtDeviceService;
 import org.eclipse.kura.web.shared.service.GwtDeviceServiceAsync;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenService;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenServiceAsync;
-import org.gwtbootstrap3.client.ui.gwt.DataGrid;
+import org.gwtbootstrap3.client.ui.gwt.CellTable;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -48,13 +48,12 @@ public class SystemPropertiesTabUi extends Composite {
 	private final GwtDeviceServiceAsync gwtDeviceService = GWT.create(GwtDeviceService.class);
 	
 	@UiField
-	DataGrid<GwtGroupedNVPair> systemPropertiesGrid = new DataGrid<GwtGroupedNVPair>();
+	CellTable<GwtGroupedNVPair> systemPropertiesGrid = new CellTable<GwtGroupedNVPair>();
 	private ListDataProvider<GwtGroupedNVPair> systemPropertiesDataProvider = new ListDataProvider<GwtGroupedNVPair>();
 
 
 	public SystemPropertiesTabUi() {
 		initWidget(uiBinder.createAndBindUi(this));
-		
 		
 		systemPropertiesGrid.setRowStyles(new RowStyles<GwtGroupedNVPair>() {
 			@Override
@@ -62,17 +61,12 @@ public class SystemPropertiesTabUi extends Composite {
 				return row.getValue().contains("  ") ? "rowHeader" : " ";
 			}
 		});
-		
-		
-
+	
 		loadSystemPropertiesTable(systemPropertiesGrid, systemPropertiesDataProvider);
-		
 	}
 
 
-	private void loadSystemPropertiesTable(
-			DataGrid<GwtGroupedNVPair> grid,
-			ListDataProvider<GwtGroupedNVPair> dataProvider) {
+	private void loadSystemPropertiesTable(CellTable<GwtGroupedNVPair> grid, ListDataProvider<GwtGroupedNVPair> dataProvider) {
 		TextColumn<GwtGroupedNVPair> col1 = new TextColumn<GwtGroupedNVPair>() {
 			@Override
 			public String getValue(GwtGroupedNVPair object) {
@@ -121,6 +115,8 @@ public class SystemPropertiesTabUi extends Composite {
 
 					@Override
 					public void onSuccess(ArrayList<GwtGroupedNVPair> result) {
+						int size= result.size();
+						systemPropertiesGrid.setVisibleRange(0, size);
 						for (GwtGroupedNVPair resultPair : result) {
 							systemPropertiesDataProvider.getList().add(resultPair);
 						}						

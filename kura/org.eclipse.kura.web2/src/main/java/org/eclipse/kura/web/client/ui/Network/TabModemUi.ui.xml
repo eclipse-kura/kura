@@ -145,17 +145,6 @@
 								<b:HelpBlock color="red" ui:field="helpFailure"/>
 								<b:TextBox b:id="failure" ui:field="failure" />								
 							</b:FormGroup>	
-							
-							<b:FormGroup>
-								<b:FormLabel for="gps" ui:field="labelGps" />
-								<g:FlowPanel>
-									<b:RadioButton name="radio2" formValue="true"
-										ui:field="radio3" />
-									<b:RadioButton name="radio2" formValue="false"
-										ui:field="radio4" />
-								</g:FlowPanel>
-							</b:FormGroup>
-							
 						</b:FieldSet>
 					</b:Form>
 

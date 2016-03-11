@@ -75,7 +75,7 @@ public class TabModemUi extends Composite implements Tab {
 	FormLabel labelModel, labelNetwork, labelService, labelModem, labelNumber,
 	labelDial, labelApn, labelAuth, labelUsername, labelPassword,
 	labelReset, labelPersist, labelMaxfail, labelIdle, labelActive,
-	labelInterval, labelFailure, labelGps;
+	labelInterval, labelFailure;
 	@UiField
 	HelpBlock helpReset, helpMaxfail, helpIdle, helpInterval, helpFailure, helpNumber;
 
@@ -89,7 +89,7 @@ public class TabModemUi extends Composite implements Tab {
 	@UiField
 	Input password;
 	@UiField
-	RadioButton radio1, radio2, radio3, radio4;
+	RadioButton radio1, radio2;
 	@UiField
 	PanelHeader helpTitle;
 	@UiField
@@ -200,7 +200,6 @@ public class TabModemUi extends Composite implements Tab {
 			updatedModemNetIf.setActiveFilter((active.getText() != "") ? active.getText().trim() : "");
 			updatedModemNetIf.setLcpEchoInterval(Integer.parseInt(interval.getText().trim()));
 			updatedModemNetIf.setLcpEchoFailure(Integer.parseInt(failure.getText().trim()));
-			updatedModemNetIf.setGpsEnabled(radio3.isActive());
 			// ---
 		} else {
 			// initForm hasn't been called yet
@@ -219,7 +218,6 @@ public class TabModemUi extends Composite implements Tab {
 			updatedModemNetIf.setActiveFilter(selectedNetIfConfig.getActiveFilter());
 			updatedModemNetIf.setLcpEchoInterval(selectedNetIfConfig.getLcpEchoInterval());
 			updatedModemNetIf.setLcpEchoFailure(selectedNetIfConfig.getLcpEchoFailure());
-			updatedModemNetIf.setGpsEnabled(selectedNetIfConfig.isGpsEnabled());
 		}
 
 	}
@@ -699,61 +697,12 @@ public class TabModemUi extends Composite implements Tab {
 			}
 		});
 
-		// ENABLE GPS
-		labelGps.setText(MSGS.netModemEnableGps());
-		radio3.addMouseOverHandler(new MouseOverHandler() {
-			@Override
-			public void onMouseOver(MouseOverEvent event) {
-				if (radio3.isEnabled()) {
-					helpText.clear();
-					helpText.add(new Span(MSGS.netModemToolTipEnableGps()));
-				}
-			}
-		});
-		radio3.addMouseOutHandler(new MouseOutHandler() {
-			@Override
-			public void onMouseOut(MouseOutEvent event) {
-				resetHelp();
-			}
-		});
-		radio4.addMouseOverHandler(new MouseOverHandler() {
-			@Override
-			public void onMouseOver(MouseOverEvent event) {
-				if (radio4.isEnabled()) {
-					helpText.clear();
-					helpText.add(new Span(MSGS.netModemToolTipEnableGps()));
-				}
-			}
-		});
-		radio4.addMouseOutHandler(new MouseOutHandler() {
-			@Override
-			public void onMouseOut(MouseOutEvent event) {
-				resetHelp();
-			}
-		});
-		radio3.addValueChangeHandler(new ValueChangeHandler<Boolean>(){
-			@Override
-			public void onValueChange(ValueChangeEvent<Boolean> event) {
-				setDirty(true);
-			}});
-		radio4.addValueChangeHandler(new ValueChangeHandler<Boolean>(){
-			@Override
-			public void onValueChange(ValueChangeEvent<Boolean> event) {
-				setDirty(true);
-			}});
-
-
 		helpTitle.setText("Help Text");
 		radio1.setText(MSGS.trueLabel());
 		radio2.setText(MSGS.falseLabel());
-		radio3.setText(MSGS.trueLabel());
-		radio4.setText(MSGS.falseLabel());
-
+		
 		radio1.setValue(true);
 		radio2.setValue(false);
-		radio3.setValue(true);
-		radio4.setValue(false);
-
 	}
 
 	private void resetHelp() {
@@ -808,14 +757,6 @@ public class TabModemUi extends Composite implements Tab {
 			active.setText(selectedNetIfConfig.getActiveFilter());
 			interval.setText(String.valueOf(selectedNetIfConfig.getLcpEchoInterval()));
 			failure.setText(String.valueOf(selectedNetIfConfig.getLcpEchoFailure()));
-
-			if (selectedNetIfConfig.isGpsEnabled()) {
-				radio3.setActive(true);
-				radio4.setActive(false);
-			} else {
-				radio3.setActive(false);
-				radio4.setActive(true);
-			}
 		}
 		refreshForm();
 	}
@@ -837,9 +778,7 @@ public class TabModemUi extends Composite implements Tab {
 		active.setEnabled(true);
 		interval.setEnabled(true);
 		failure.setEnabled(true);
-		radio3.setEnabled(true);
-		radio4.setEnabled(true);
-
+		
 		String authTypeVal = auth.getSelectedItemText().trim();
 
 		if ( authTypeVal == null || 
@@ -851,6 +790,7 @@ public class TabModemUi extends Composite implements Tab {
 			password.setEnabled(true);
 		}
 
+		/*
 		if (selectedNetIfConfig.isGpsSupported()) {
 			radio1.setEnabled(true);
 			radio2.setEnabled(true);
@@ -858,7 +798,8 @@ public class TabModemUi extends Composite implements Tab {
 			radio1.setEnabled(false);
 			radio2.setEnabled(false);
 		}
-
+		*/
+		
 		for (String techType : selectedNetIfConfig.getNetworkTechnology()) {
 			if (techType.equals("EVDO") || techType.equals("CDMA")) {
 				apn.setEnabled(false);
@@ -888,9 +829,6 @@ public class TabModemUi extends Composite implements Tab {
 		active.setText(null);
 		interval.setText(null);
 		failure.setText(null);
-		radio3.setActive(true);
-		radio4.setActive(false);
-
 		update();
 	}
 }

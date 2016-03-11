@@ -28,5 +28,5 @@
 	</ui:style>
 	
 		<gwt:CellTable bordered="true" condensed="true" striped="true"
-			hover="true" height="100vh" width="100%" ui:field="bundlesGrid" />	
+			hover="true" height="100%" width="100%" ui:field="bundlesGrid" />	
 </ui:UiBinder> 

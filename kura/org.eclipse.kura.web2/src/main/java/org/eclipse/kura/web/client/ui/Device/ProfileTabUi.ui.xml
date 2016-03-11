@@ -22,6 +22,6 @@
 	.important { font-weight: bold; }
 	
 	</ui:style>
-		<gwt:DataGrid bordered="true" condensed="true" striped="true"
+		<gwt:CellTable bordered="true" condensed="true" striped="true"
 			hover="true" height="100%" width="100%" ui:field="profileGrid" />	
 </ui:UiBinder> 

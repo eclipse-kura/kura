@@ -21,7 +21,7 @@
 	
 	.important { font-weight: bold; }
 	.spacing { margin-top: 10px; margin-left: -20px; }
-	.center-panel { height: 572px; padding: 0px; }
+	.center-panel { height: 100%; padding: 0px; }
 	
 	</ui:style>
 	<b:Container fluid="true">
@@ -43,7 +43,8 @@
 			</b:Navbar>
 		</b:Row>
 		<b:Row>
-			<b:Well addStyleNames="{style.center-panel}" ui:field="content"/>
+			<b:Well addStyleNames="{style.center-panel}" ui:field="content">
+			</b:Well>
 		</b:Row>
 	</b:Container>
 </ui:UiBinder> 

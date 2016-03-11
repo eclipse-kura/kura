@@ -22,7 +22,7 @@ import org.eclipse.kura.web.shared.service.GwtDeviceService;
 import org.eclipse.kura.web.shared.service.GwtDeviceServiceAsync;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenService;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenServiceAsync;
-import org.gwtbootstrap3.client.ui.gwt.DataGrid;
+import org.gwtbootstrap3.client.ui.gwt.CellTable;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -47,7 +47,7 @@ public class ProfileTabUi extends Composite {
 	private final GwtDeviceServiceAsync gwtDeviceService = GWT.create(GwtDeviceService.class);
 
 	@UiField
-	DataGrid<GwtGroupedNVPair> profileGrid = new DataGrid<GwtGroupedNVPair>();
+	CellTable<GwtGroupedNVPair> profileGrid = new CellTable<GwtGroupedNVPair>();
 	private ListDataProvider<GwtGroupedNVPair> profileDataProvider = new ListDataProvider<GwtGroupedNVPair>();
 
 	public ProfileTabUi() {
@@ -63,9 +63,7 @@ public class ProfileTabUi extends Composite {
 		loadProfileTable(profileGrid, profileDataProvider);
 	}
 
-	private void loadProfileTable(DataGrid<GwtGroupedNVPair> grid,
-			
-			ListDataProvider<GwtGroupedNVPair> dataProvider) {
+	private void loadProfileTable(CellTable<GwtGroupedNVPair> profileGrid2, ListDataProvider<GwtGroupedNVPair> dataProvider) {
 						
 		TextColumn<GwtGroupedNVPair> col1 = new TextColumn<GwtGroupedNVPair>() {
 			@Override
@@ -74,7 +72,7 @@ public class ProfileTabUi extends Composite {
 			}
 		};
 		col1.setCellStyleNames("status-table-row");
-		grid.addColumn(col1);
+		profileGrid2.addColumn(col1);
 
 		TextColumn<GwtGroupedNVPair> col2 = new TextColumn<GwtGroupedNVPair>() {
 			@Override
@@ -83,9 +81,9 @@ public class ProfileTabUi extends Composite {
 			}
 		};
 		col2.setCellStyleNames("status-table-row");
-		grid.addColumn(col2);
+		profileGrid2.addColumn(col2);
 
-		dataProvider.addDataDisplay(grid);
+		dataProvider.addDataDisplay(profileGrid2);
 	}
 
 	public void loadProfileData() {
@@ -117,11 +115,11 @@ public class ProfileTabUi extends Composite {
 					public void onSuccess(ArrayList<GwtGroupedNVPair> result) {
 						String oldGroup = "devInfo";
 						profileDataProvider.getList().add(new GwtGroupedNVPair("devInfo","devInfo","  "));
+						int size= result.size() + 6; //TODO: implement a better solution
+						profileGrid.setVisibleRange(0, size);
 						for (GwtGroupedNVPair resultPair : result) {
 							if (!oldGroup.equals(resultPair.getGroup())) {
-								profileDataProvider.getList()
-										.add(new GwtGroupedNVPair(resultPair.getGroup(), resultPair.getGroup(),
-												"  "));
+								profileDataProvider.getList().add(new GwtGroupedNVPair(resultPair.getGroup(), resultPair.getGroup(), "  "));
 								oldGroup = resultPair.getGroup();
 							}
 							profileDataProvider.getList().add(resultPair);

@@ -38,7 +38,7 @@ public class DevicePanelUi extends Composite {
 	private static CommandTabUi commandBinder = GWT.create(CommandTabUi.class);
 	
 	private GwtSession session;
-
+	
 
 	interface DevicePanelUiUiBinder extends UiBinder<Widget, DevicePanelUi> {
 	}
@@ -68,6 +68,7 @@ public class DevicePanelUi extends Composite {
 				content.clear();
 				content.add(profileBinder);
 				profileBinder.loadProfileData();
+				//test.setSize("12345px", "16512px");
 			}
 		});
 

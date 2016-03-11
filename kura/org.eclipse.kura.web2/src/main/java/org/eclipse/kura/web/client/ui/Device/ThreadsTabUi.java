@@ -22,7 +22,7 @@ import org.eclipse.kura.web.shared.service.GwtDeviceService;
 import org.eclipse.kura.web.shared.service.GwtDeviceServiceAsync;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenService;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenServiceAsync;
-import org.gwtbootstrap3.client.ui.gwt.DataGrid;
+import org.gwtbootstrap3.client.ui.gwt.CellTable;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -46,7 +46,7 @@ public class ThreadsTabUi extends Composite {
 	private final GwtDeviceServiceAsync gwtDeviceService = GWT.create(GwtDeviceService.class);
 	
 	@UiField
-	DataGrid<GwtGroupedNVPair> threadsGrid = new DataGrid<GwtGroupedNVPair>();
+	CellTable<GwtGroupedNVPair> threadsGrid = new CellTable<GwtGroupedNVPair>();
 	private ListDataProvider<GwtGroupedNVPair> threadsDataProvider = new ListDataProvider<GwtGroupedNVPair>();
 
 
@@ -57,7 +57,7 @@ public class ThreadsTabUi extends Composite {
 	}
 	
 	
-	private void loadProfileTable(DataGrid<GwtGroupedNVPair> grid,
+	private void loadProfileTable(CellTable<GwtGroupedNVPair> threadsGrid2,
 			
 			ListDataProvider<GwtGroupedNVPair> dataProvider) {
 						
@@ -68,7 +68,7 @@ public class ThreadsTabUi extends Composite {
 			}
 		};
 		col1.setCellStyleNames("status-table-row");
-		grid.addColumn(col1, MSGS.deviceThreadName());
+		threadsGrid2.addColumn(col1, MSGS.deviceThreadName());
 
 		TextColumn<GwtGroupedNVPair> col2 = new TextColumn<GwtGroupedNVPair>() {
 			@Override
@@ -77,9 +77,9 @@ public class ThreadsTabUi extends Composite {
 			}
 		};
 		col2.setCellStyleNames("status-table-row");
-		grid.addColumn(col2, MSGS.deviceThreadInfo());
+		threadsGrid2.addColumn(col2, MSGS.deviceThreadInfo());
 
-		dataProvider.addDataDisplay(grid);
+		dataProvider.addDataDisplay(threadsGrid2);
 	}
 
 	public void loadThreadsData() {
@@ -109,6 +109,8 @@ public class ThreadsTabUi extends Composite {
 	
 					@Override
 					public void onSuccess(ArrayList<GwtGroupedNVPair> result) {
+						int size= result.size();
+						threadsGrid.setVisibleRange(0, size);
 						for (GwtGroupedNVPair resultPair : result) {
 							threadsDataProvider.getList().add(resultPair);
 						}						

@@ -28,7 +28,7 @@ import org.eclipse.kura.web.shared.service.GwtStatusService;
 import org.eclipse.kura.web.shared.service.GwtStatusServiceAsync;
 import org.gwtbootstrap3.client.ui.Button;
 import org.gwtbootstrap3.client.ui.Well;
-import org.gwtbootstrap3.client.ui.gwt.DataGrid;
+import org.gwtbootstrap3.client.ui.gwt.CellTable;
 
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.core.client.GWT;
@@ -68,7 +68,7 @@ public class StatusPanelUi extends Composite {
 	@UiField
 	Button statusRefresh, statusConnect, statusDisconnect;
 	@UiField
-	DataGrid<GwtGroupedNVPair> statusGrid = new DataGrid<GwtGroupedNVPair>();
+	CellTable<GwtGroupedNVPair> statusGrid = new CellTable<GwtGroupedNVPair>();
 	private ListDataProvider<GwtGroupedNVPair> statusGridProvider = new ListDataProvider<GwtGroupedNVPair>();
 
 	public StatusPanelUi() {
@@ -123,7 +123,7 @@ public class StatusPanelUi extends Composite {
 	}
 
 	// create table layout
-	public void loadStatusTable(DataGrid<GwtGroupedNVPair> grid, ListDataProvider<GwtGroupedNVPair> dataProvider) {
+	public void loadStatusTable(CellTable<GwtGroupedNVPair> grid, ListDataProvider<GwtGroupedNVPair> dataProvider) {
 		TextColumn<GwtGroupedNVPair> col1 = new TextColumn<GwtGroupedNVPair>() {
 
 			@Override
@@ -172,8 +172,9 @@ public class StatusPanelUi extends Composite {
 
 							@Override
 							public void onSuccess(ArrayList<GwtGroupedNVPair> result) {
-
-								String title = "cloudStatus";;
+								int size= result.size() + 3; //TODO: implement a better solution
+								statusGrid.setVisibleRange(0, size);
+								String title = "cloudStatus";
 								statusGridProvider.getList().add(new GwtGroupedNVPair(" ",msgs.getString(title), " "));
 								for (GwtGroupedNVPair resultPair : result) {
 									if ("Connection Status".equals(resultPair.getName())) {

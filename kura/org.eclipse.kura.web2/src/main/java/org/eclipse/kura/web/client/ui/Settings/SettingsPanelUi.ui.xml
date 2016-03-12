@@ -21,7 +21,7 @@
 	
 	.important { font-weight: bold; }
 	.spacing { margin-top: 10px; margin-left: -20px; }
-	.center-panel {	height: 572px; padding: 0px; }
+	.center-panel {	padding: 0px; }
 	
 	</ui:style>
 

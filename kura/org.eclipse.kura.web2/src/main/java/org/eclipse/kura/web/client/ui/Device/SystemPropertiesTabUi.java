@@ -115,11 +115,11 @@ public class SystemPropertiesTabUi extends Composite {
 
 					@Override
 					public void onSuccess(ArrayList<GwtGroupedNVPair> result) {
-						int size= result.size();
-						systemPropertiesGrid.setVisibleRange(0, size);
 						for (GwtGroupedNVPair resultPair : result) {
 							systemPropertiesDataProvider.getList().add(resultPair);
-						}						
+						}	
+						int size= systemPropertiesDataProvider.getList().size();
+						systemPropertiesGrid.setVisibleRange(0, size);
 						systemPropertiesDataProvider.flush();
 						EntryClassUi.hideWaitModal();
 					}

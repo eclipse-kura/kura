@@ -31,8 +31,8 @@
 	<b:Column size="MD_12">
 		<b:Row>
 			<b:Alert type="WARNING" ui:field="notification" />
-			<gwt:DataGrid bordered="true" condensed="true" striped="true"
-				hover="true" height="30vh" width="100%" ui:field="interfacesGrid" />
+			<gwt:CellTable bordered="true" condensed="true" striped="true"
+				hover="true" height="100%" width="100%" ui:field="interfacesGrid" />
 		</b:Row>
 	</b:Column>
 </ui:UiBinder> 

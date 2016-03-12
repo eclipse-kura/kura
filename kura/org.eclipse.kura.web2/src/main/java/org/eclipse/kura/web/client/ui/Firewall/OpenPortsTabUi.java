@@ -36,7 +36,7 @@ import org.gwtbootstrap3.client.ui.Modal;
 import org.gwtbootstrap3.client.ui.TextBox;
 import org.gwtbootstrap3.client.ui.Tooltip;
 import org.gwtbootstrap3.client.ui.constants.ValidationState;
-import org.gwtbootstrap3.client.ui.gwt.DataGrid;
+import org.gwtbootstrap3.client.ui.gwt.CellTable;
 import org.gwtbootstrap3.client.ui.html.Span;
 
 import com.google.gwt.core.client.GWT;
@@ -99,7 +99,7 @@ public class OpenPortsTabUi extends Composite {
 	Span alertBody;
 
 	@UiField
-	DataGrid<GwtFirewallOpenPortEntry> openPortsGrid = new DataGrid<GwtFirewallOpenPortEntry>();
+	CellTable<GwtFirewallOpenPortEntry> openPortsGrid = new CellTable<GwtFirewallOpenPortEntry>();
 
 	
 	public OpenPortsTabUi() {
@@ -142,6 +142,8 @@ public class OpenPortsTabUi extends Composite {
 						for (GwtFirewallOpenPortEntry pair : result) {
 							openPortsDataProvider.getList().add(pair);
 						}
+						int size = openPortsDataProvider.getList().size();
+						openPortsGrid.setVisibleRange(0, size);
 						openPortsDataProvider.flush();
 						setVisibility();
 						apply.setEnabled(false);

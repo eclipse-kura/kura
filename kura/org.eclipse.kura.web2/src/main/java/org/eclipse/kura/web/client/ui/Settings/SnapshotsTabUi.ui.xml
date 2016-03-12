@@ -40,8 +40,8 @@
 
 		<b:Row>
 			<b:Alert type="WARNING" ui:field="notification" />
-			<gwt:DataGrid bordered="true" condensed="true" striped="true"
-				hover="true" height="500px" width="100%" ui:field="snapshotsGrid" />
+			<gwt:CellTable bordered="true" condensed="true" striped="true"
+				hover="true" height="100%" width="100%" ui:field="snapshotsGrid" />
 		</b:Row>
 		<!-- Modal -->
 		<b:Modal title="Upload" closable="true" fade="true" b:id="uploadModal" ui:field="uploadModal">

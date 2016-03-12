@@ -172,8 +172,6 @@ public class StatusPanelUi extends Composite {
 
 							@Override
 							public void onSuccess(ArrayList<GwtGroupedNVPair> result) {
-								int size= result.size() + 3; //TODO: implement a better solution
-								statusGrid.setVisibleRange(0, size);
 								String title = "cloudStatus";
 								statusGridProvider.getList().add(new GwtGroupedNVPair(" ",msgs.getString(title), " "));
 								for (GwtGroupedNVPair resultPair : result) {
@@ -193,6 +191,8 @@ public class StatusPanelUi extends Composite {
 									}
 									statusGridProvider.getList().add(resultPair);
 								}
+								int size= statusGridProvider.getList().size();
+								statusGrid.setVisibleRange(0, size);
 								statusGridProvider.flush();
 								EntryClassUi.hideWaitModal();
 							}

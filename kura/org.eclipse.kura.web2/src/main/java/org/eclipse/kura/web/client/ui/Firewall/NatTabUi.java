@@ -37,7 +37,7 @@ import org.gwtbootstrap3.client.ui.ModalFooter;
 import org.gwtbootstrap3.client.ui.TextBox;
 import org.gwtbootstrap3.client.ui.Tooltip;
 import org.gwtbootstrap3.client.ui.constants.ValidationState;
-import org.gwtbootstrap3.client.ui.gwt.DataGrid;
+import org.gwtbootstrap3.client.ui.gwt.CellTable;
 import org.gwtbootstrap3.client.ui.html.Span;
 
 import com.google.gwt.core.client.GWT;
@@ -80,7 +80,7 @@ public class NatTabUi extends Composite {
 	@UiField
 	Button apply, create, edit, delete;
 	@UiField
-	DataGrid<GwtFirewallNatEntry> natGrid = new DataGrid<GwtFirewallNatEntry>();
+	CellTable<GwtFirewallNatEntry> natGrid = new CellTable<GwtFirewallNatEntry>();
 
 	@UiField
 	Modal natForm;
@@ -135,6 +135,8 @@ public class NatTabUi extends Composite {
 						for (GwtFirewallNatEntry pair : result) {
 							natDataProvider.getList().add(pair);
 						}
+						int size = natDataProvider.getList().size();
+						natGrid.setVisibleRange(0, size);
 						natDataProvider.flush();
 						apply.setEnabled(false);
 						EntryClassUi.hideWaitModal();

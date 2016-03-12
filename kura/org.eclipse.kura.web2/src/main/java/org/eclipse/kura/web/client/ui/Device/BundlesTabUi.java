@@ -127,11 +127,11 @@ public class BundlesTabUi extends Composite {
 
 					@Override
 					public void onSuccess(ArrayList<GwtGroupedNVPair> result) {
-						int size= result.size();
-						bundlesGrid.setVisibleRange(0, size);
 						for (GwtGroupedNVPair resultPair : result) {
 							bundlesDataProvider.getList().add(resultPair);
 						}
+						int size= bundlesDataProvider.getList().size();
+						bundlesGrid.setVisibleRange(0, size);
 						bundlesDataProvider.flush();
 						EntryClassUi.hideWaitModal();
 

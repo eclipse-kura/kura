@@ -29,7 +29,7 @@ import org.gwtbootstrap3.client.ui.Button;
 import org.gwtbootstrap3.client.ui.Modal;
 import org.gwtbootstrap3.client.ui.ModalBody;
 import org.gwtbootstrap3.client.ui.ModalFooter;
-import org.gwtbootstrap3.client.ui.gwt.DataGrid;
+import org.gwtbootstrap3.client.ui.gwt.CellTable;
 import org.gwtbootstrap3.client.ui.html.Span;
 
 import com.google.gwt.core.client.GWT;
@@ -80,7 +80,7 @@ public class SnapshotsTabUi extends Composite {
 	@UiField
 	Hidden xsrfTokenField;
 	@UiField
-	DataGrid<GwtSnapshot> snapshotsGrid = new DataGrid<GwtSnapshot>();
+	CellTable<GwtSnapshot> snapshotsGrid = new CellTable<GwtSnapshot>();
 	
 	private ListDataProvider<GwtSnapshot> snapshotsDataProvider = new ListDataProvider<GwtSnapshot>();
 	final SingleSelectionModel<GwtSnapshot> selectionModel = new SingleSelectionModel<GwtSnapshot>();
@@ -191,20 +191,21 @@ public class SnapshotsTabUi extends Composite {
 						for (GwtSnapshot pair : result) {
 							snapshotsDataProvider.getList().add(pair);
 						}
-						snapshotsDataProvider.flush();
-						
-						if (snapshotsDataProvider.getList().size() == 0) {
+						int snapshotsDataSize= snapshotsDataProvider.getList().size();
+						if (snapshotsDataSize == 0) {
 							snapshotsGrid.setVisible(false);
 							notification.setVisible(true);
 							notification.setText("No Snapshots Available");
 							download.setEnabled(false);
 							rollback.setEnabled(false);
 						} else {
+							snapshotsGrid.setVisibleRange(0, snapshotsDataSize);
 							snapshotsGrid.setVisible(true);
 							notification.setVisible(false);
 							download.setEnabled(true);
 							rollback.setEnabled(true);
 						}
+						snapshotsDataProvider.flush();
 						EntryClassUi.hideWaitModal();
 					}
 				});

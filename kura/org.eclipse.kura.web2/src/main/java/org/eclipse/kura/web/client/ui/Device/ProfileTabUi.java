@@ -115,15 +115,15 @@ public class ProfileTabUi extends Composite {
 					public void onSuccess(ArrayList<GwtGroupedNVPair> result) {
 						String oldGroup = "devInfo";
 						profileDataProvider.getList().add(new GwtGroupedNVPair("devInfo","devInfo","  "));
-						int size= result.size() + 6; //TODO: implement a better solution
-						profileGrid.setVisibleRange(0, size);
 						for (GwtGroupedNVPair resultPair : result) {
 							if (!oldGroup.equals(resultPair.getGroup())) {
 								profileDataProvider.getList().add(new GwtGroupedNVPair(resultPair.getGroup(), resultPair.getGroup(), "  "));
 								oldGroup = resultPair.getGroup();
 							}
 							profileDataProvider.getList().add(resultPair);
-						}						
+						}
+						int size= profileDataProvider.getList().size();
+						profileGrid.setVisibleRange(0, size);
 						profileDataProvider.flush();
 						EntryClassUi.hideWaitModal();
 					}

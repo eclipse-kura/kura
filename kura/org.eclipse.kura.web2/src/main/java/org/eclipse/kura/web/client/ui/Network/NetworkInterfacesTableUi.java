@@ -25,7 +25,7 @@ import org.gwtbootstrap3.client.ui.Button;
 import org.gwtbootstrap3.client.ui.Modal;
 import org.gwtbootstrap3.client.ui.ModalBody;
 import org.gwtbootstrap3.client.ui.ModalFooter;
-import org.gwtbootstrap3.client.ui.gwt.DataGrid;
+import org.gwtbootstrap3.client.ui.gwt.CellTable;
 import org.gwtbootstrap3.client.ui.html.Span;
 
 import com.google.gwt.core.client.GWT;
@@ -60,7 +60,7 @@ public class NetworkInterfacesTableUi extends Composite {
 	Alert notification;
 	@UiField
 	
-	DataGrid<GwtNetInterfaceConfig> interfacesGrid = new DataGrid<GwtNetInterfaceConfig>();
+	CellTable<GwtNetInterfaceConfig> interfacesGrid = new CellTable<GwtNetInterfaceConfig>();
 	
 	private ListDataProvider<GwtNetInterfaceConfig> interfacesProvider = new ListDataProvider<GwtNetInterfaceConfig>();
 	final SingleSelectionModel<GwtNetInterfaceConfig> selectionModel = new SingleSelectionModel<GwtNetInterfaceConfig>();

@@ -52,6 +52,7 @@ import org.gwtbootstrap3.client.ui.PanelHeader;
 import org.gwtbootstrap3.client.ui.RadioButton;
 import org.gwtbootstrap3.client.ui.TextBox;
 import org.gwtbootstrap3.client.ui.constants.ValidationState;
+import org.gwtbootstrap3.client.ui.gwt.CellTable;
 import org.gwtbootstrap3.client.ui.gwt.DataGrid;
 import org.gwtbootstrap3.client.ui.html.Span;
 
@@ -128,7 +129,7 @@ public class TabWirelessUi extends Composite implements Tab {
 	GwtWifiConfig activeConfig;
 
 	@UiField
-	DataGrid<GwtWifiChannelModel> channelGrid = new DataGrid<GwtWifiChannelModel>();
+	CellTable<GwtWifiChannelModel> channelGrid = new CellTable<GwtWifiChannelModel>();
 	private ListDataProvider<GwtWifiChannelModel> channelDataProvider = new ListDataProvider<GwtWifiChannelModel>();
 	final SingleSelectionModel<GwtWifiChannelModel> selectionModel = new SingleSelectionModel<GwtWifiChannelModel>();
 	@UiField
@@ -1398,7 +1399,7 @@ public class TabWirelessUi extends Composite implements Tab {
 		for (GwtWifiChannelModel item : lSelectedChannels) {
 			alChannels.add(new Integer(item.getChannel()));
 		}
-		if (alChannels.size() == 0) {
+		if (alChannels.isEmpty()) {
 			alChannels.add(1);
 		}
 		gwtWifiConfig.setChannels(alChannels);
@@ -1445,10 +1446,10 @@ public class TabWirelessUi extends Composite implements Tab {
 		}
 
 		// ping access point
-		gwtWifiConfig.setPingAccessPoint(radio1.isActive());
+		gwtWifiConfig.setPingAccessPoint(radio1.getValue());
 
 		// ignore SSID
-		gwtWifiConfig.setIgnoreSSID(radio3.isActive());
+		gwtWifiConfig.setIgnoreSSID(radio3.getValue());
 
 		return gwtWifiConfig;
 	}
@@ -1485,13 +1486,4 @@ public class TabWirelessUi extends Composite implements Tab {
 			helpPassword.setText("");
 		}
 	}
-	
-//	private void resetValidations() {
-//		groupPassword.setValidationState(ValidationState.NONE);
-//		helpPassword.setText("");
-//		groupVerify.setValidationState(ValidationState.NONE);
-//		helpVerify.setText("");
-//		groupWireless.setValidationState(ValidationState.NONE);
-//		helpWireless.setText("");
-//	}
 }

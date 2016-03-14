@@ -81,7 +81,7 @@ public class TabModemGpsUi extends Composite implements Tab {
 	public void getUpdatedNetInterface(GwtNetInterfaceConfig updatedNetIf) {
 		GwtModemInterfaceConfig updatedModemNetIf = (GwtModemInterfaceConfig) updatedNetIf;
 		if (formInitialized) {
-			updatedModemNetIf.setGpsEnabled(radio1.isActive());
+			updatedModemNetIf.setGpsEnabled(radio1.getValue());
 		} else {
 			// initForm hasn't been called yet
 			updatedModemNetIf.setGpsEnabled(selectedModemIfConfig.isGpsEnabled());

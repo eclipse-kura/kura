@@ -194,7 +194,7 @@ public class TabModemUi extends Composite implements Tab {
 			}
 
 			updatedModemNetIf.setResetTimeout(Integer.parseInt(reset.getValue().trim()));
-			updatedModemNetIf.setPersist(radio1.isActive());
+			updatedModemNetIf.setPersist(radio1.getValue());
 			updatedModemNetIf.setMaxFail(Integer.parseInt(maxfail.getText().trim()));
 			updatedModemNetIf.setIdle(Integer.parseInt(idle.getText().trim()));
 			updatedModemNetIf.setActiveFilter((active.getText() != "") ? active.getText().trim() : "");
@@ -714,8 +714,7 @@ public class TabModemUi extends Composite implements Tab {
 		if (selectedNetIfConfig != null) {
 			model.setText(selectedNetIfConfig.getManufacturer() + "-" + selectedNetIfConfig.getModel());
 			network.clear();
-			List<String> networkTechnologies = selectedNetIfConfig
-					.getNetworkTechnology();
+			List<String> networkTechnologies = selectedNetIfConfig.getNetworkTechnology();
 			if (networkTechnologies != null && !networkTechnologies.isEmpty()) {
 				for (String techType : selectedNetIfConfig.getNetworkTechnology()) {
 					network.addItem(techType);
@@ -734,8 +733,7 @@ public class TabModemUi extends Composite implements Tab {
 				authType = selectedNetIfConfig.getAuthType();
 			}
 			for (int i = 0; i < auth.getItemCount(); i++) {
-				if (auth.getItemText(i).equals(
-						MessageUtils.get(authType.name()))) {
+				if (auth.getItemText(i).equals(MessageUtils.get(authType.name()))) {
 					auth.setSelectedIndex(i);
 				}
 			}

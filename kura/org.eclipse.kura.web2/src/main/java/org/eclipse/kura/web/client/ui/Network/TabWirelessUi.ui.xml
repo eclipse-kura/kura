@@ -146,8 +146,8 @@
 							</b:FormGroup>
 
 							<b:FormGroup>
-								<gwt:DataGrid bordered="true" condensed="true"
-									striped="true" hover="true" height="100px" width="100%"
+								<gwt:CellTable bordered="true" condensed="true"
+									striped="true" hover="true" height="100%" width="100%"
 									ui:field="channelGrid" />
 								<b:Alert type="WARNING" ui:field="noChannels">
 									<b.html:Text text="No Available Channels." />

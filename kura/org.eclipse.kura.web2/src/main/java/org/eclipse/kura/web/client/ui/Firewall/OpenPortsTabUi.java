@@ -341,6 +341,8 @@ public class OpenPortsTabUi extends Composite {
 							GwtFirewallOpenPortEntry newEntry = getNewOpenPortEntry();
 							if (!duplicateEntry(newEntry)) {
 								openPortsDataProvider.getList().add(newEntry);
+								int size = openPortsDataProvider.getList().size();
+								openPortsGrid.setVisibleRange(0, size);
 								openPortsDataProvider.flush();
 								apply.setEnabled(true);
 								setVisibility();

@@ -525,6 +525,8 @@ public class NatTabUi extends Composite {
 	private void addNewEntry(GwtFirewallNatEntry natEntry) {
 		if (!duplicateEntry(natEntry)) {
 			natDataProvider.getList().add(natEntry);
+			int size = natDataProvider.getList().size();
+			natGrid.setVisibleRange(0, size);
 			natDataProvider.flush();
 		} else {
 			logger.log(Level.FINER, MSGS.firewallNatFormError() + ": " + MSGS.firewallNatFormDuplicate());

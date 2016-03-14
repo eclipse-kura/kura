@@ -698,6 +698,8 @@ public class PortForwardingTabUi extends Composite {
 	private void addNewEntry(GwtFirewallPortForwardEntry portForwardEntry){
 		if (!duplicateEntry(portForwardEntry)) {
 			portForwardDataProvider.getList().add(portForwardEntry);
+			int size = portForwardDataProvider.getList().size();
+			portForwardGrid.setVisibleRange(0, size);
 			portForwardDataProvider.flush();
 			apply.setEnabled(true);
 			portForwardGrid.redraw();

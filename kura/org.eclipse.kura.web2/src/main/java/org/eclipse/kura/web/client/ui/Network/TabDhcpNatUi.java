@@ -152,7 +152,7 @@ public class TabDhcpNatUi extends Composite implements Tab {
 			if (max.getText() != null) {
 				updatedNetIf.setRouterDhcpMaxLease(Integer.parseInt(max.getText()));
 			}
-			updatedNetIf.setRouterDnsPass(radio1.isActive());
+			updatedNetIf.setRouterDnsPass(radio1.getValue());
 
 		}
 	}

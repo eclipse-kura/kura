@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+
+     All rights reserved. This program and the accompanying materials
+     are made available under the terms of the Eclipse Public License v1.0
+     which accompanies this distribution, and is available at
+     http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Eurotech
+
+-->
+<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
+    <OCD id="org.eclipse.kura.position.PositionService"
+         name="PositionService" 
+         description="The PositionService provides GPS positions for Kura.  The parameters define the serial port configuration of the device.">
+        
+        <Icon resource="PositionService" size="32"/>
+        
+        <AD id="enabled"
+            name="enabled"
+            type="Boolean"
+            cardinality="0"
+            required="true"
+            default="false"
+            description="Whether or not to enable the PositionService"/>
+            
+        <AD id="static"
+        	name="static"
+        	type="Boolean"
+        	cardinality="0"
+        	required="true"
+        	default="false"
+        	description="Specify static position instead of using GPS"/>
+        	
+       	<AD id="latitude"
+       		name="latitude"
+       		type="Double"
+       		cardinality="0"
+       		required="false"
+       		default="0"
+       		description="Static latitude value in degrees"/>
+       		
+       	<AD id="longitude"
+       		name="longitude"
+       		type="Double"
+       		cardinality="0"
+       		required="false"
+       		default="0"
+       		description="Static longitude value in degrees"/>
+       		
+       	<AD id="altitude"
+       		name="altitude"
+       		type="Double"
+       		cardinality="0"
+       		required="false"
+       		default="0"
+       		description="Static altitude value in meters"/>
+        
+        <AD id="port"
+            name="port"
+            type="String"
+            cardinality="0"
+            required="false"
+            default="COM3"
+            description="The serial port of the GPS device, eg COM1 (without a colon)."/>
+        
+        <AD id="baudRate"  
+            name="baudRate"
+            type="Integer"
+            cardinality="0" 
+            required="false"
+            default="4800" 
+            description="The baud rate of the GPS device.">
+            <Option label="110" value="110"/>
+            <Option label="300" value="300"/>
+            <Option label="600" value="600"/>
+            <Option label="1200" value="1200"/>
+            <Option label="2400" value="2400"/>
+            <Option label="4800" value="4800"/>
+            <Option label="9600" value="9600"/>
+            <Option label="14400" value="14400"/>
+            <Option label="19200" value="19200"/>
+            <Option label="28800" value="28800"/>
+            <Option label="38400" value="38400"/>
+            <Option label="56000" value="56000"/>
+            <Option label="57600" value="57600"/>
+            <Option label="115200" value="115200"/>
+            <Option label="128000" value="128000"/>
+            <Option label="153600" value="153600"/>
+            <Option label="230400" value="230400"/>
+            <Option label="256000" value="256000"/>
+            <Option label="460800" value="460800"/>
+            <Option label="921600" value="921600"/>
+		</AD>
+		
+        <AD id="bitsPerWord"  
+            name="bitsPerWord"
+            type="Integer"
+            cardinality="0" 
+            required="false"
+            default="8" 
+            description="The number of bits per word or the 'data bits' for the serial communication to the GPS device.">
+            <Option label="5" value="5"/>
+            <Option label="6" value="6"/>
+            <Option label="7" value="7"/>
+            <Option label="8" value="8"/>
+		</AD>
+		
+        <AD id="stopBits"  
+            name="stopBits"
+            type="Integer"
+            cardinality="0" 
+            required="false"
+            default="1" 
+            description="The stop bits for the serial communication to the GPS device.">
+            <Option label="1" value="1"/>
+            <Option label="2" value="2"/>
+            <Option label="1.5" value="3"/>
+        </AD>
+
+        <AD id="parity"  
+            name="parity"
+            type="Integer"
+            cardinality="0" 
+            required="false"
+            default="0" 
+            description="The parity for the serial communication to the GPS device.">
+            <Option label="None" value="0"/>
+            <Option label="Odd" value="1"/>
+            <Option label="Even" value="2"/>
+            <Option label="Mark" value="3"/>
+            <Option label="Space" value="4"/>
+        </AD>
+
+    </OCD>
+    <Designate pid="org.eclipse.kura.position.PositionService">
+        <Object ocdref="org.eclipse.kura.position.PositionService"/>
+    </Designate>
+</MetaData>

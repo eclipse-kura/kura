@@ -863,8 +863,8 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
 		
 		<copy file="../../target-platform/org.eclipse.kura.windows.service/src/main/c/Release/Win32/x64/KURAService.exe" todir="${build.install.dir}/system/x64"/>
 
-		<!-- <copy file="../../target-platform/org.eclipse.kura.windows.launcher/src/main/c/Release/Win32/x86/KuraLauncher.exe" todir="${build.install.dir.kura}"/> -->
-		<copy file="../../target-platform/org.eclipse.kura.windows.launcher/src/main/c/Release/Win32/x64/KuraLauncher.exe" todir="${build.install.dir.kura}"/>
+		<!-- <copy file="../../target-platform/org.eclipse.kura.windows.launcher/src/main/c/Release/Win32/x86/KURALauncher.exe" todir="${build.install.dir.kura}"/> -->
+		<copy file="../../target-platform/org.eclipse.kura.windows.launcher/src/main/c/Release/Win32/x64/KURALauncher.exe" todir="${build.install.dir.kura}"/>
 
 		<!-- Conditional inclusion of jar files in the distribution jar -->
 		<antcall target="web-jar-win" />

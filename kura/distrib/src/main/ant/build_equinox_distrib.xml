@@ -123,7 +123,6 @@
                  token="{org.eclipse.kura.linux.watchdog.version}" value="${org.eclipse.kura.linux.watchdog.version}"/>
         <replace file="${project.build.directory}/${build.output.name}/config.ini"
                  token="{org.eclipse.kura.core.status.version}" value="${org.eclipse.kura.core.status.version}"/>
-        
 
 		<!-- Conditional entries. Check for jar presence, and invoke relevant ant target-->
 		<available file="${project.build.directory}/plugins/org.eclipse.kura.web_${org.eclipse.kura.web.version}.jar" property="web.jar.present" />
@@ -607,6 +606,321 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
 		</checksum>
     </target>
 
+<!-- ### WINDOWS ########################################################################################################################### -->
+
+    <target name="dist-windows"> 
+    	
+        <property name="build.output.name" value="kura_${project.version}_${build.name}"/> 
+
+        <!--
+        Loads entries from a manifest file.
+        @jar     The jar from where to read
+        @prefix  A prefix to prepend
+        -->
+        <macrodef name="loadmf">
+            <attribute name="jar"/>
+            <attribute name="prefix" default=""/>
+            <sequential>
+                <loadproperties>
+                    <!-- Load the manifest entries -->
+                    <zipentry zipfile="@{jar}" name="META-INF/MANIFEST.MF"/>
+                    <!-- Add the prefix -->
+                    <filterchain>
+                        <prefixlines prefix="@{prefix}"/>
+                    </filterchain>
+                </loadproperties>
+            </sequential>
+        </macrodef>
+    	
+    	<echo message="Building Kura Distribution for ${build.output.name}..." />
+
+        <copy file="src/main/resources/${build.name}/kura.properties"
+              tofile="${project.build.directory}/${build.output.name}/kura.properties" />
+        
+		<propertyfile file="${project.build.directory}/${build.output.name}/kura.properties">
+			<entry key="kura.version"   value="KURA_${kura.version}" />
+			<entry key="kura.home"   value="${kura.install.dir}/kura/kura" />
+			<entry key="kura.plugins"   value="${kura.install.dir}/kura/kura/plugins" />
+			<entry key="kura.packages"   value="${kura.install.dir}/kura/kura/packages" />
+
+			<entry key="kura.data"   value="${kura.install.dir}/kura/data" />
+			<entry key="kura.snapshots"   value="${kura.install.dir}/kura/data/snapshots" />
+			<entry key="kura.style.dir"   value="${kura.install.dir}/kura/console/skin" />
+
+            <entry key="version"       value="${kura.version}" />
+            <entry key="build.version" value="${buildNumber}" />
+            <entry key="build.number"  value="${build.name}-${buildNumber}" />
+        </propertyfile>
+
+		<replace file="${project.build.directory}/${build.output.name}/kura.properties" token="{kura.install.dir}" value="${kura.install.dir}"/>
+        <replace file="${project.build.directory}/${build.output.name}/kura.properties" token="{kura.symlink}" value="${kura.symlink}"/>
+
+    	
+    	<condition property="kura.osgi.repo" value="../target-definition/equinox_3.8.1/repository">
+    		<or>
+    			<not>
+    				<isset property="kura.osgi"/>
+    			</not>
+    			<equals arg1="${kura.osgi}" arg2="equinox"/>
+    		</or>
+    	</condition>
+    	
+		<!-- Copy the NSIS script to the intermediate directory then modify it to set the output filename based on the current build type -->
+
+		<copy file="src/main/resources/${build.name}/Kura_x64.nsi" tofile="${project.build.directory}/${build.output.name}/Kura_x64.nsi" />
+		<replace file="${project.build.directory}/${build.output.name}/Kura_x64.nsi" token="{build.output.name}" value="${build.output.name}"/>
+
+        <copy file="src/main/resources/${build.name}/snapshot_0.xml" tofile="${project.build.directory}/${build.output.name}/snapshot_0.xml" />
+
+		<copy file="src/main/osgi/equinox_3.8.1/configwindows/config.ini" tofile="${project.build.directory}/${build.output.name}/config.ini" />
+
+        <!-- Populate config.ini with correct versions -->
+        <replace file="${project.build.directory}/${build.output.name}/config.ini"
+                 token="{kura.build.version}" value="${kura.build.version}"/>
+        <replace file="${project.build.directory}/${build.output.name}/config.ini"
+                 token="{org.eclipse.kura.api.version}" value="${org.eclipse.kura.api.version}"/>
+        <replace file="${project.build.directory}/${build.output.name}/config.ini"
+                 token="{org.eclipse.kura.core.version}" value="${org.eclipse.kura.core.version}"/>
+        <replace file="${project.build.directory}/${build.output.name}/config.ini"
+                 token="{org.eclipse.kura.core.certificates.version}" value="${org.eclipse.kura.core.certificates.version}"/>
+        <replace file="${project.build.directory}/${build.output.name}/config.ini"
+                 token="{org.eclipse.kura.core.cloud.version}" value="${org.eclipse.kura.core.cloud.version}"/>
+        <replace file="${project.build.directory}/${build.output.name}/config.ini"
+                 token="{org.eclipse.kura.core.comm.version}" value="${org.eclipse.kura.core.comm.version}"/>
+        <replace file="${project.build.directory}/${build.output.name}/config.ini"
+                 token="{org.eclipse.kura.core.configuration.version}" value="${org.eclipse.kura.core.configuration.version}"/>
+        <replace file="${project.build.directory}/${build.output.name}/config.ini"
+                 token="{org.eclipse.kura.core.crypto.version}" value="${org.eclipse.kura.core.crypto.version}"/>
+        <replace file="${project.build.directory}/${build.output.name}/config.ini"
+                 token="{org.eclipse.kura.core.deployment.version}" value="${org.eclipse.kura.core.deployment.version}"/>
+        <replace file="${project.build.directory}/${build.output.name}/config.ini"
+                 token="{org.eclipse.kura.core.log.version}" value="${org.eclipse.kura.core.log.version}"/>
+        <replace file="${project.build.directory}/${build.output.name}/config.ini"
+                 token="{org.eclipse.kura.core.net.version}" value="${org.eclipse.kura.core.net.version}"/>
+        <replace file="${project.build.directory}/${build.output.name}/config.ini"
+                 token="{org.eclipse.kura.deployment.agent.version}" value="${org.eclipse.kura.deployment.agent.version}"/>
+        <replace file="${project.build.directory}/${build.output.name}/config.ini"
+                 token="{org.eclipse.kura.deployment.customizer.version}" value="${org.eclipse.kura.deployment.customizer.version}"/>
+        <replace file="${project.build.directory}/${build.output.name}/config.ini"
+                 token="{org.eclipse.kura.deployment.update.version}" value="${org.eclipse.kura.deployment.update.version}"/>
+        <replace file="${project.build.directory}/${build.output.name}/config.ini"
+                 token="{org.eclipse.kura.windows.net.version}" value="${org.eclipse.kura.windows.net.version}"/>
+        <replace file="${project.build.directory}/${build.output.name}/config.ini"
+                 token="{org.eclipse.kura.windows.position.version}" value="${org.eclipse.kura.windows.position.version}"/>
+        <replace file="${project.build.directory}/${build.output.name}/config.ini"
+                 token="{org.eclipse.kura.windows.command.version}" value="${org.eclipse.kura.windows.command.version}"/>
+        <replace file="${project.build.directory}/${build.output.name}/config.ini"
+                 token="{org.eclipse.kura.windows.usb.version}" value="${org.eclipse.kura.windows.usb.version}"/>
+        <replace file="${project.build.directory}/${build.output.name}/config.ini"
+                 token="{org.eclipse.kura.windows.watchdog.version}" value="${org.eclipse.kura.windows.watchdog.version}"/>
+        <replace file="${project.build.directory}/${build.output.name}/config.ini"
+                 token="{org.eclipse.kura.windows.clock.version}" value="${org.eclipse.kura.windows.clock.version}"/>
+        <replace file="${project.build.directory}/${build.output.name}/config.ini"
+                 token="{org.eclipse.kura.windows.status.version}" value="${org.eclipse.kura.windows.status.version}"/>
+
+<!-- Linux-specifc
+        <propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
+            <entry key="osgi.bundles" operation="+"
+                   value=", reference:file:../kura/plugins/org.eclipse.kura.net.admin_${org.eclipse.kura.net.admin.version}.jar@5:start" />
+        </propertyfile>
+-->
+		<!-- Conditional entries. Check for jar presence, and invoke relevant ant target-->
+		<available file="${project.build.directory}/plugins/org.eclipse.kura.web_${org.eclipse.kura.web.version}.jar" property="web.jar.present" />
+		<antcall target="web-config-win" />
+
+		<available file="${project.build.directory}/plugins/org.eclipse.kura.web2_${org.eclipse.kura.web2.version}.jar" property="web2.jar.present" />
+		<antcall target="web2-config-win" />
+
+		<available file="${project.build.directory}/plugins/org.eclipse.kura.protocol.can_${org.eclipse.kura.protocol.can.version}.jar" property="can.jar.present" />
+		<antcall target="can-config-win" />
+
+		<available file="${project.build.directory}/plugins/org.eclipse.kura.emulator.gpio_${org.eclipse.kura.emulator.gpio.version}.jar" property="emulated.gpio.jar.present" />
+		<antcall target="emulated-gpio-config-win" />
+
+        <!-- Add mToolkit to config.ini -->
+        <propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
+            <entry key="osgi.bundles" operation="+"
+                   value=", reference:file:../plugins/org.tigris.mtoolkit.iagent.rpc_3.0.0.20110411-0918.jar@5:start" />
+        </propertyfile>
+
+        <propertyfile file="${project.build.directory}/${build.output.name}/dpa.properties"> 
+            <entry key="kura"
+                   value="file:${kura.install.dir}/kura/kura/packages/${build.output.name}.dp" />
+        </propertyfile>
+
+		<!-- Set web UI port -->
+		<antcall target="set-http-port" />
+
+        <property name="build.install.dir" value="${project.build.directory}/${build.output.name}"/> 
+        <property name="build.install.dir.kura" value="${build.install.dir}/KuraFiles"/> 
+
+		<copy file="${project.build.directory}/${build.output.name}/snapshot_0.xml"
+			todir="${build.install.dir.kura}/data/snapshots/" />
+
+		<copy file="${project.build.directory}/${build.output.name}/config.ini"
+			todir="${build.install.dir.kura}/kura/" />
+
+		<copy file="src/main/resources/common/kura_custom.properties"
+			todir="${build.install.dir.kura}/kura/" />
+
+		<copy file="src/main/resources/${build.name}/start_kura_debug.bat"
+			todir="${build.install.dir.kura}" />
+
+		<copy file="RELEASE_NOTES.txt"
+			todir="${build.install.dir.kura}" />
+            
+		<copy file="notice.html"
+			todir="${build.install.dir.kura}" />
+            
+		<copy file="epl-v10.html"
+			todir="${build.install.dir.kura}" />
+            
+		<copy file="src/main/resources/${build.name}/log4j.properties"
+			todir="${build.install.dir.kura}/kura/" />
+            
+		<copy file="${project.build.directory}/${build.output.name}/kura.properties"
+			todir="${build.install.dir.kura}/kura/" />
+
+		<copy file="src/main/resources/${build.name}/license.rtf" todir="${build.install.dir.kura}/" />
+		<copy file="src/main/resources/${build.name}/build_installer.sh" todir="${build.install.dir}/" />
+		<copy file="${project.build.directory}/${build.output.name}/Kura_x64.nsi" todir="${build.install.dir}/" />
+		<copy file="src/main/resources/${build.name}/SCH_Kura.xml" todir="${build.install.dir.kura}/" />
+
+		<copy todir="${build.install.dir.kura}/plugins">
+			<fileset dir="${kura.osgi.repo}/plugins" />
+		</copy>
+                        
+		<copy todir="${build.install.dir.kura}/plugins">
+			<fileset dir="../target-definition/common/repository/plugins">
+				<exclude name="com.google.protobuf_2.6.0.jar,org.eclipse.paho.*"/>
+			</fileset>
+		</copy>                        
+
+		<copy file="${project.build.directory}/plugins/org.eclipse.kura.deployment.agent_${org.eclipse.kura.deployment.agent.version}.jar"
+			todir="${build.install.dir.kura}/kura/plugins" />
+
+		<copy file="${project.build.directory}/plugins/org.eclipse.kura.api_${org.eclipse.kura.api.version}.jar"
+			todir="${build.install.dir.kura}/kura/plugins" />
+
+		<copy file="${project.build.directory}/plugins/org.eclipse.kura.core_${org.eclipse.kura.core.version}.jar"
+			todir="${build.install.dir.kura}/kura/plugins" />
+
+		<copy file="${project.build.directory}/plugins/org.eclipse.kura.core.certificates_${org.eclipse.kura.core.certificates.version}.jar"
+			todir="${build.install.dir.kura}/kura/plugins" />
+
+		<copy file="${project.build.directory}/plugins/org.eclipse.kura.core.cloud_${org.eclipse.kura.core.cloud.version}.jar"
+			todir="${build.install.dir.kura}/kura/plugins" />
+
+		<copy file="${project.build.directory}/plugins/org.eclipse.kura.core.comm_${org.eclipse.kura.core.comm.version}.jar"
+			todir="${build.install.dir.kura}/kura/plugins" />
+
+		<copy file="${project.build.directory}/plugins/org.eclipse.kura.core.configuration_${org.eclipse.kura.core.configuration.version}.jar"
+			todir="${build.install.dir.kura}/kura/plugins" />
+
+		<copy file="${project.build.directory}/plugins/org.eclipse.kura.core.crypto_${org.eclipse.kura.core.crypto.version}.jar"
+			todir="${build.install.dir.kura}/kura/plugins" />
+
+		<copy file="${project.build.directory}/plugins/org.eclipse.kura.core.deployment_${org.eclipse.kura.core.deployment.version}.jar"
+			todir="${build.install.dir.kura}/kura/plugins" />
+
+		<copy file="${project.build.directory}/plugins/org.eclipse.kura.core.log_${org.eclipse.kura.core.log.version}.jar"
+			todir="${build.install.dir.kura}/kura/plugins" />
+
+		<copy file="${project.build.directory}/plugins/org.eclipse.kura.core.net_${org.eclipse.kura.core.net.version}.jar"
+			todir="${build.install.dir.kura}/kura/plugins" />
+
+		<copy file="${project.build.directory}/plugins/org.eclipse.kura.windows.net_${org.eclipse.kura.windows.net.version}.jar"
+			todir="${build.install.dir.kura}/kura/plugins" />
+
+		<copy file="${project.build.directory}/plugins/org.eclipse.kura.windows.position_${org.eclipse.kura.windows.position.version}.jar"
+			todir="${build.install.dir.kura}/kura/plugins" />
+
+		<copy file="${project.build.directory}/plugins/org.eclipse.kura.windows.command_${org.eclipse.kura.windows.command.version}.jar"
+			todir="${build.install.dir.kura}/kura/plugins" />
+
+		<copy file="${project.build.directory}/plugins/org.eclipse.kura.windows.usb_${org.eclipse.kura.windows.usb.version}.jar"
+			todir="${build.install.dir.kura}/kura/plugins" />
+
+		<copy file="${project.build.directory}/plugins/org.eclipse.kura.windows.watchdog_${org.eclipse.kura.windows.watchdog.version}.jar"
+			todir="${build.install.dir.kura}/kura/plugins" />
+
+		<copy file="${project.build.directory}/plugins/org.eclipse.kura.windows.clock_${org.eclipse.kura.windows.clock.version}.jar"
+			todir="${build.install.dir.kura}/kura/plugins" />
+
+		<copy file="${project.build.directory}/plugins/org.eclipse.kura.windows.status_${org.eclipse.kura.windows.status.version}.jar"
+			todir="${build.install.dir.kura}/kura/plugins" />
+
+
+		<copy file="../../target-platform/org.eclipse.soda.dk.comm/src/main/c/Release/win32/x86/dkcomm.dll" todir="${build.install.dir}/system/x86"/>
+
+		<copy file="../../target-platform/org.eclipse.soda.dk.comm/src/main/c/Release/win32/x64/dkcomm.dll" todir="${build.install.dir}/system/x64"/>
+
+		<copy file="../../target-platform/org.eclipse.kura.windows.system/src/main/c/Release/Win32/x86/KuraNativeWin.dll" todir="${build.install.dir}/system/x86"/>
+
+		<copy file="../../target-platform/org.eclipse.kura.windows.system/src/main/c/Release/Win32/x64/KuraNativeWin.dll" todir="${build.install.dir}/system/x64"/>
+
+		<copy file="../../target-platform/org.eclipse.kura.windows.service/src/main/c/Release/Win32/x86/KURAService.exe" todir="${build.install.dir}/system/x86"/>
+		
+		<copy file="../../target-platform/org.eclipse.kura.windows.service/src/main/c/Release/Win32/x64/KURAService.exe" todir="${build.install.dir}/system/x64"/>
+
+		<!-- <copy file="../../target-platform/org.eclipse.kura.windows.launcher/src/main/c/Release/Win32/x86/KURALauncher.exe" todir="${build.install.dir.kura}"/> -->
+		<copy file="../../target-platform/org.eclipse.kura.windows.launcher/src/main/c/Release/Win32/x64/KURALauncher.exe" todir="${build.install.dir.kura}"/>
+
+		<!-- Conditional inclusion of jar files in the distribution jar -->
+		<antcall target="web-jar-win" />
+		<antcall target="web2-jar-win" />
+		<antcall target="can-jar-win" />
+		<antcall target="emulated-gpio-jar-win" />
+
+        <echo message="Building Kura Distribution for ${build.name}-jars..." />
+        
+		<exec executable="bash" dir="${build.install.dir}">
+			<arg value="build_installer.sh" />
+		</exec>
+		<copy file="${build.install.dir}/${build.output.name}_x64.exe" todir="${project.build.directory}" />
+
+		<!-- Zip the upgrader -->
+<!--        <zip destfile="${project.build.directory}/${build.output.name}_upgrade.zip">
+                <zipfileset file="${project.build.directory}/${build.output.name}_upgrader.sh" />
+                <zipfileset file="src/main/sh/upgrade_wrapper.sh" />
+        </zip>-->
+    	
+    	
+    	
+    	<!-- Build the upgrade deployment package -->
+    	<echo message="Building the upgrade DP" />
+
+        <!-- Create the manifest -->
+
+    	<!-- Read mf entries -->
+        <loadmf jar="${project.build.directory}/plugins/org.eclipse.kura.deployment.customizer.upgrade_${org.eclipse.kura.deployment.customizer.upgrade.version}.jar" prefix="customizer-mf."/>
+
+        <echo file="${project.build.directory}/${build.output.name}/dp_upgrade_stage/META-INF/MANIFEST.MF" append="false">Manifest-Version: 1.0
+DeploymentPackage-SymbolicName: kura-upgrade
+DeploymentPackage-Version: ${deployment.package.version}
+
+Name: org.eclipse.kura.deployment.customizer.upgrade_${org.eclipse.kura.deployment.customizer.upgrade.version}.jar
+Bundle-SymbolicName: org.eclipse.kura.deployment.customizer.upgrade
+Bundle-Version: ${customizer-mf.Bundle-Version}
+DeploymentPackage-Customizer: true
+
+Name: z_kura_dp_upgrader.sh
+Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScriptResourceProcessor
+</echo>
+
+
+        <!-- move everything into place -->
+<!--        <copy    file="${project.build.directory}/${build.output.name}_upgrader.sh"
+                 tofile="${project.build.directory}/${build.output.name}/dp_upgrade_stage/z_kura_dp_upgrader.sh" />
+		<copy    file="${project.build.directory}/plugins/org.eclipse.kura.deployment.customizer.upgrade_${org.eclipse.kura.deployment.customizer.upgrade.version}.jar"
+                 todir="${project.build.directory}/${build.output.name}/dp_upgrade_stage" />
+
+        <jar destfile="${project.build.directory}/${build.output.name}_upgrader.dp"
+                manifest="${project.build.directory}/${build.output.name}/dp_upgrade_stage/META-INF/MANIFEST.MF"
+                basedir="${project.build.directory}/${build.output.name}/dp_upgrade_stage" />	-->
+    </target>
+
+	
 	<target name="set-http-port" if="http.port">
     	<propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
             	<entry key="org.osgi.service.http.port" operation="="
@@ -657,7 +971,7 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
                         prefix="${build.output.name}/kura/plugins" />
 		</zip>
 	</target>
-	
+
 	<target name="can-jar" if="can.jar.present">
 		<zip destfile="${project.build.directory}/${build.output.name}.zip" update="true">
 			<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.protocol.can_${org.eclipse.kura.protocol.can.version}.jar"
@@ -671,14 +985,14 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
                         prefix="${build.output.name}/kura/plugins" />
 		</zip>
 	</target>
-	
+
 	<target name="emulator-config" if="is.nn">
 		<replace file="${project.build.directory}/${build.output.name}/config.ini"
                  token="{org.eclipse.kura.linux.net.version}" value="${org.eclipse.kura.emulator.net.version}"/>
         <replace file="${project.build.directory}/${build.output.name}/config.ini"
                  token="org.eclipse.kura.linux.net_" value="org.eclipse.kura.emulator.net_"/>
 	</target>
-	
+
 	<target name="linux-config" unless="is.nn">
 		<replace file="${project.build.directory}/${build.output.name}/config.ini"
                  token="{org.eclipse.kura.linux.net.version}" value="${org.eclipse.kura.linux.net.version}"/>
@@ -687,14 +1001,14 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
                    value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.net.admin_${org.eclipse.kura.net.admin.version}.jar@5:start" />
         </propertyfile>
 	</target>
-	
+
 	<target name="emulator-jars" if="is.nn">
         <zip destfile="${project.build.directory}/${build.output.name}.zip" update="true">
 			<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.emulator.net_${org.eclipse.kura.emulator.net.version}.jar"
                         prefix="${build.output.name}/kura/plugins" />
 		</zip>
 	</target>
-	
+
 	<target name="linux-jars" unless="is.nn">
         <zip destfile="${project.build.directory}/${build.output.name}.zip" update="true">
 			<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.linux.net_${org.eclipse.kura.linux.net.version}.jar"
@@ -703,4 +1017,56 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
                         prefix="${build.output.name}/kura/plugins" />
 		</zip>
 	</target>
+	<target name="web-config-win" if="web.jar.present">
+		<propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
+            	<entry key="osgi.bundles" operation="+"
+                   value=", reference:file:../kura/plugins/org.eclipse.kura.web_${org.eclipse.kura.web.version}.jar@5:start" />
+        </propertyfile>
+	</target>
+
+	<target name="web2-config-win" if="web2.jar.present">
+		<propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
+            	<entry key="osgi.bundles" operation="+"
+                   value=", reference:file:../kura/plugins/org.eclipse.kura.web2_${org.eclipse.kura.web2.version}.jar@6:start" />
+        </propertyfile>
+		<replace file="${project.build.directory}/${build.output.name}/config.ini"
+                 token="com.gwt.user_0.2.0" value="com.gwt.user_1.0.0"/>
+	</target>
+
+	<target name="can-config-win" if="can.jar.present">
+		<propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
+            	<entry key="osgi.bundles" operation="+"
+                   value=", reference:file:../kura/plugins/org.eclipse.kura.protocol.can_${org.eclipse.kura.protocol.can.version}.jar@5" />
+        </propertyfile>
+	</target>
+
+	<target name="emulated-gpio-config-win" if="emulated.gpio.jar.present">
+		<propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
+			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:../kura/plugins/org.eclipse.kura.emulator.gpio_${org.eclipse.kura.emulator.gpio.version}.jar@5:start" />
+		</propertyfile>
+	</target>
+
+	<target name="web-jar-win" if="web.jar.present">
+    	<echo message="web-jar-win ${project.build.directory}/${build.output.name}/config.ini..." />
+		<copy file="${project.build.directory}/plugins/org.eclipse.kura.web_${org.eclipse.kura.web.version}.jar"
+			todir="${build.install.dir.kura}/kura/plugins" />
+	</target>
+
+	<target name="web2-jar-win" if="web2.jar.present">
+		<copy file="${project.build.directory}/plugins/org.eclipse.kura.web2_${org.eclipse.kura.web2.version}.jar"
+			todir="${build.install.dir.kura}/kura/plugins" />
+	</target>
+
+	<target name="can-jar-win" if="can.jar.present">
+		<copy file="${project.build.directory}/plugins/org.eclipse.kura.protocol.can_${org.eclipse.kura.protocol.can.version}.jar"
+			todir="${build.install.dir.kura}/kura/plugins" />
+	</target>
+
+	<target name="emulated-gpio-jar-win" if="emulated.gpio.jar.present">
+    	<echo message="emul-gpio-jar-win ${project.build.directory}/${build.output.name}/config.ini..." />
+		<copy file="${project.build.directory}/plugins/org.eclipse.kura.emulator.gpio_${org.eclipse.kura.emulator.gpio.version}.jar"
+			todir="${build.install.dir.kura}/kura/plugins" />
+	</target>
+
 </project>

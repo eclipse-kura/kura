@@ -23,7 +23,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
 
-public class TabModemGpsUi extends Composite implements Tab {
+public class TabModemGpsUi extends Composite implements NetworkTab {
 	
 	private static TabModemGpsUiUiBinder uiBinder = GWT.create(TabModemGpsUiUiBinder.class);
 	interface TabModemGpsUiUiBinder extends UiBinder<Widget, TabModemGpsUi> {

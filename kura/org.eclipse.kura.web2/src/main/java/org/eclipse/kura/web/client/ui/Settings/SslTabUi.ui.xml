@@ -1,0 +1,82 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+
+<!-- Copyright (c) 2011, 2016 Eurotech and/or its affiliates All rights reserved. 
+	This program and the accompanying materials are made available under the 
+	terms of the Eclipse Public License v1.0 which accompanies this distribution, 
+	and is available at http://www.eclipse.org/legal/epl-v10.html Contributors: 
+	Eurotech -->
+
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+	xmlns:b="urn:import:org.gwtbootstrap3.client.ui" xmlns:b.html="urn:import:org.gwtbootstrap3.client.ui.html"
+	xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:gwt="urn:import:org.gwtbootstrap3.client.ui.gwt">
+
+	<ui:style>
+	.important {
+		font-weight: bold;
+	}
+	
+	.center-panel {
+		height: 100%;
+	}
+	
+	.small-text {
+		font-size: 0.90em;
+	}
+	</ui:style>
+
+	<b:Container fluid="true">
+		<b:Column size="MD_12">
+			<b:Row>
+				<b:Panel>
+					<b:ButtonGroup size="SMALL">
+						<b:Button ui:field="apply" addStyleNames="fa fa-check"></b:Button>
+						<b:Button ui:field="reset" addStyleNames="fa fa-times"></b:Button>
+					</b:ButtonGroup>
+				</b:Panel>
+			</b:Row>
+			
+			<b:Row>
+				<g:HTMLPanel ui:field="description">
+				</g:HTMLPanel>
+
+				<b:Form ui:field="sslForm">
+					<b:FieldSet>
+						<b:FormGroup ui:field="defaultProtocolFormGroup">
+							<b:FormLabel for="defaultProtocolInput" ui:field="defaultProtocolFormLabel" />
+							<b:Input type="TEXT" b:id="defaultProtocol" ui:field="defaultProtocolInput" />
+						</b:FormGroup>
+
+						<b:FormGroup ui:field="hostnameVerificationFormGroup">
+							<b:FormLabel for="hostnameVerificationInput"
+								ui:field="hostnameVerificationFormLabel" />
+							<g:FlowPanel>
+								<b:RadioButton name="radio1" formValue="true"
+									ui:field="radio1" />
+								<b:RadioButton name="radio1" formValue="false"
+									ui:field="radio2" />
+							</g:FlowPanel>
+						</b:FormGroup>
+
+						<b:FormGroup ui:field="keystorePathFormGroup">
+							<b:FormLabel for="keystorePathInput" ui:field="keystorePathFormLabel" />
+							<b:Input type="TEXT" b:id="keystorePath" ui:field="keystorePathInput" />
+						</b:FormGroup>
+
+						<b:FormGroup ui:field="keystorePasswordFormGroup">
+							<b:FormLabel for="defaultProtocolInput" ui:field="keystorePasswordFormLabel" />
+							<b:Input type="PASSWORD" b:id="keystorePassword"
+								ui:field="keystorePasswordInput" />
+						</b:FormGroup>
+
+						<b:FormGroup ui:field="cipherSuitesFormGroup">
+							<b:FormLabel for="cipherSuitesInput" ui:field="cipherSuitesFormLabel" />
+							<b:Input type="TEXT" b:id="cipherSuites" ui:field="cipherSuitesInput" />
+						</b:FormGroup>
+
+					</b:FieldSet>
+				</b:Form>
+			</b:Row>
+		</b:Column>
+	</b:Container>
+
+</ui:UiBinder> 

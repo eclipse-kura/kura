@@ -34,11 +34,12 @@ public class SettingsPanelUi extends Composite {
 	interface SettingsPanelUiUiBinder extends UiBinder<Widget, SettingsPanelUi> {
 	}
 	private static SnapshotsTabUi snapshotsBinder = GWT.create(SnapshotsTabUi.class);
-	private static SslCertificatesTabUi sslBinder = GWT.create(SslCertificatesTabUi.class);
+	private static ApplicationCertsTabUi appCertBinder = GWT.create(ApplicationCertsTabUi.class);
+	private static SslTabUi sslConfigBinder = GWT.create(SslTabUi.class);
 	
 	GwtSession Session;
 	@UiField
-	AnchorListItem snapshots, ssl;
+	AnchorListItem snapshots, appCert, sslConfig;
 	@UiField
 	Well content;
 
@@ -59,14 +60,21 @@ public class SettingsPanelUi extends Composite {
 				
 			}});
 		
-		ssl.addClickHandler(new ClickHandler(){
+		appCert.addClickHandler(new ClickHandler(){
 			@Override
 			public void onClick(ClickEvent event) {
-				setSelectedActive(ssl);
+				setSelectedActive(appCert);
 				content.clear();
-				content.add(sslBinder);
+				content.add(appCertBinder);
 			}});
-	
+		
+		sslConfig.addClickHandler(new ClickHandler(){
+			@Override
+			public void onClick(ClickEvent event) {
+				setSelectedActive(sslConfig);
+				content.clear();
+				content.add(sslConfigBinder);
+			}});
 	}
 
 	public void load() {
@@ -82,9 +90,8 @@ public class SettingsPanelUi extends Composite {
 
 	public void setSelectedActive(AnchorListItem item){
 		snapshots.setActive(false);
-		ssl.setActive(false);
-		item.setActive(true);
-		
+		appCert.setActive(false);
+		sslConfig.setActive(false);
+		item.setActive(true);	
 	}
-
 }

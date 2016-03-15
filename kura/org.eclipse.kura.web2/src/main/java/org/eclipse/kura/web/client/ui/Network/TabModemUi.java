@@ -51,7 +51,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
 
-public class TabModemUi extends Composite implements Tab {
+public class TabModemUi extends Composite implements NetworkTab {
 
 	private static final String MODEM_AUTH_NONE_MESSAGE = MessageUtils.get(GwtModemAuthType.netModemAuthNONE.name());
 	private static TabModemUiUiBinder uiBinder = GWT.create(TabModemUiUiBinder.class);

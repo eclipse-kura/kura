@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+
+     All rights reserved. This program and the accompanying materials
+     are made available under the terms of the Eclipse Public License v1.0
+     which accompanies this distribution, and is available at
+     http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Eurotech
+
+-->
+<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
+    <OCD id="org.eclipse.kura.watchdog.WatchdogService"
+         name="WatchdogService" 
+         description="The WatchdogService handles the hardware watchdog of the platform.  The parameter define the ping periodicity of the hardware watchdog to ensure it doesn't reboot.">
+        
+        <Icon resource="WatchdogService" size="32"/>
+        
+        <AD id="enabled"  
+            name="enabled"
+            type="Boolean"
+            cardinality="0" 
+            required="true"
+            default="false" 
+            description="If set to false the watchdog will be disabled"/>
+        
+        <AD id="pingInterval"
+            name="pingInterval"
+            type="Integer"
+            cardinality="0"
+            required="true"
+            default="10000"
+            description="Ping periodicity in ms."/>
+            
+    </OCD>
+    <Designate pid="org.eclipse.kura.watchdog.WatchdogService">
+        <Object ocdref="org.eclipse.kura.watchdog.WatchdogService"/>
+    </Designate>
+</MetaData>

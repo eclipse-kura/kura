@@ -622,9 +622,10 @@ int w32SerialPort_setSerialPortParamsNC
         return success;
     }
     memset(&commTimeouts,0,sizeof(commTimeouts));
+    // this will wait for a char for 500ms and then return
     commTimeouts.ReadIntervalTimeout		 = MAXDWORD;
-    commTimeouts.ReadTotalTimeoutConstant	 = 0;
-    commTimeouts.ReadTotalTimeoutMultiplier	 = 0;
+    commTimeouts.ReadTotalTimeoutConstant	 = 500;
+    commTimeouts.ReadTotalTimeoutMultiplier	 = MAXDWORD;
     commTimeouts.WriteTotalTimeoutConstant	 = 0;
     commTimeouts.WriteTotalTimeoutMultiplier = 0;
     success = SetCommTimeouts(osHandle,&commTimeouts);

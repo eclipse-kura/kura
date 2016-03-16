@@ -15,6 +15,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.kura.web.shared.model.GwtSession;
+import org.eclipse.kura.web.shared.service.GwtSecurityService;
+import org.eclipse.kura.web.shared.service.GwtSecurityServiceAsync;
 import org.gwtbootstrap3.client.ui.AnchorListItem;
 import org.gwtbootstrap3.client.ui.Well;
 
@@ -23,6 +25,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -30,6 +33,8 @@ public class SettingsPanelUi extends Composite {
 
 	private static SettingsPanelUiUiBinder uiBinder = GWT.create(SettingsPanelUiUiBinder.class);
 	private static final Logger logger = Logger.getLogger(SettingsPanelUi.class.getSimpleName());
+	
+	private final GwtSecurityServiceAsync gwtSecurityService = GWT.create(GwtSecurityService.class);
 
 	interface SettingsPanelUiUiBinder extends UiBinder<Widget, SettingsPanelUi> {
 	}
@@ -52,6 +57,26 @@ public class SettingsPanelUi extends Composite {
 		setSelectedActive(snapshots);
 		content.clear();
 		content.add(snapshotsBinder);
+		
+		snapshots.setVisible(true);
+		appCert.setVisible(false);
+		sslConfig.setVisible(true);
+		serverCert.setVisible(true);
+		deviceCert.setVisible(true);
+		security.setVisible(false);
+		
+		AsyncCallback<Boolean> callback = new AsyncCallback<Boolean>() {
+			public void onFailure(Throwable caught) {
+			}
+
+			public void onSuccess(Boolean result) {
+				if(result){
+					appCert.setVisible(true);
+					security.setVisible(true);
+				}
+			}
+		};
+		gwtSecurityService.isSecurityServiceAvailable(callback);
 		
 		snapshots.addClickHandler(new ClickHandler(){
 			@Override

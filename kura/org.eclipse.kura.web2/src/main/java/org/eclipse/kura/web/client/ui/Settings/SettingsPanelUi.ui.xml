@@ -42,6 +42,7 @@
 					<b:AnchorListItem text="SSL Configuration" ui:field="sslConfig" />
 					<b:AnchorListItem text="Server SSL Certificate" ui:field="serverCert" />
 					<b:AnchorListItem text="Device SSL Certificate" ui:field="deviceCert" />
+					<b:AnchorListItem text="Security Policies" ui:field="security" />
 				</b:NavbarNav>
 			</b:Navbar>
 		</b:Row>

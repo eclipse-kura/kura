@@ -1,3 +1,14 @@
+/*******************************************************************************
+ * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     Eurotech
+ *******************************************************************************/
 package org.eclipse.kura.web.client.ui.Settings;
 
 import org.eclipse.kura.web.client.Tab;
@@ -124,7 +135,7 @@ public class ServerCertsTabUi extends Composite implements Tab {
 
 					@Override
 					public void onSuccess(GwtXSRFToken token) {	
-						gwtCertificatesService.storeSSLPublicChain(token, storageAliasInput.getValue(), certificateInput.getValue(), new AsyncCallback<Integer>() {
+						gwtCertificatesService.storeSSLPublicChain(token, certificateInput.getValue(), storageAliasInput.getValue(), new AsyncCallback<Integer>() {
 							public void onFailure(Throwable caught) {
 								FailureHandler.handle(caught);
 								EntryClassUi.hideWaitModal();

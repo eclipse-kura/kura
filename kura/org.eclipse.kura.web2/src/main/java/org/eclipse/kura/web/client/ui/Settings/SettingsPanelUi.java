@@ -37,10 +37,11 @@ public class SettingsPanelUi extends Composite {
 	private static ApplicationCertsTabUi appCertBinder = GWT.create(ApplicationCertsTabUi.class);
 	private static SslTabUi sslConfigBinder = GWT.create(SslTabUi.class);
 	private static ServerCertsTabUi serverCertBinder = GWT.create(ServerCertsTabUi.class);
+	private static DeviceCertsTabUi deviceCertBinder = GWT.create(DeviceCertsTabUi.class);
 	
 	GwtSession Session;
 	@UiField
-	AnchorListItem snapshots, appCert, sslConfig, serverCert;
+	AnchorListItem snapshots, appCert, sslConfig, serverCert, deviceCert;
 	@UiField
 	Well content;
 
@@ -86,6 +87,15 @@ public class SettingsPanelUi extends Composite {
 				content.add(serverCertBinder);
 				serverCertBinder.refresh();
 			}});
+		
+		deviceCert.addClickHandler(new ClickHandler(){
+			@Override
+			public void onClick(ClickEvent event) {
+				setSelectedActive(deviceCert);
+				content.clear();
+				content.add(deviceCertBinder);
+				deviceCertBinder.refresh();
+			}});
 	}
 
 	public void load() {
@@ -104,6 +114,7 @@ public class SettingsPanelUi extends Composite {
 		appCert.setActive(false);
 		sslConfig.setActive(false);
 		serverCert.setActive(false);
+		deviceCert.setActive(false);
 		item.setActive(true);	
 	}
 }

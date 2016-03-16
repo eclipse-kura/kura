@@ -35,6 +35,16 @@
 	
 	<b:Container fluid="true">
 		<b:Row>
+			<b:Panel>
+				<b:NavPills justified="true">
+					<b:ButtonGroup size="SMALL">
+						<b:Button ui:field="apply" addStyleNames="fa fa-check"></b:Button>
+						<b:Button ui:field="reset" addStyleNames="fa fa-times"></b:Button>
+					</b:ButtonGroup>
+				</b:NavPills>
+			</b:Panel>
+		</b:Row>
+		<b:Row>
 			<g:HTMLPanel ui:field="description">
 			</g:HTMLPanel>
 
@@ -50,12 +60,6 @@
 						<b:TextArea b:id="formCert" addStyleNames="{style.center-panel}"
 							ui:field="formCert" />
 					</b:FormGroup>
-
-					<b:ButtonGroup pull="RIGHT">
-						<b:AnchorButton ui:field="reset">Reset</b:AnchorButton>
-						<b:AnchorButton ui:field="execute">Execute</b:AnchorButton>
-					</b:ButtonGroup>
-
 				</b:FieldSet>
 			</b:Form>
 		</b:Row>

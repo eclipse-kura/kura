@@ -20,7 +20,7 @@ import org.eclipse.kura.web.shared.service.GwtCertificatesService;
 import org.eclipse.kura.web.shared.service.GwtCertificatesServiceAsync;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenService;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenServiceAsync;
-import org.gwtbootstrap3.client.ui.AnchorButton;
+import org.gwtbootstrap3.client.ui.Button;
 import org.gwtbootstrap3.client.ui.Form;
 import org.gwtbootstrap3.client.ui.FormGroup;
 import org.gwtbootstrap3.client.ui.FormLabel;
@@ -83,11 +83,17 @@ public class DeviceCertsTabUi extends Composite implements Tab {
 	@UiField
 	TextArea certificateInput;
 	@UiField
-	AnchorButton reset, execute;
+	Button reset;
+	@UiField
+	Button apply;
 
 	public DeviceCertsTabUi() {
 		initWidget(uiBinder.createAndBindUi(this));
 		initForm();
+		
+		setDirty(false);
+		apply.setEnabled(false);
+		reset.setEnabled(false);
 	}
 
 	@Override
@@ -153,6 +159,8 @@ public class DeviceCertsTabUi extends Composite implements Tab {
 							public void onSuccess(Integer certsStored) {
 								reset();
 								setDirty(false);
+								apply.setEnabled(false);
+								reset.setEnabled(false);
 								EntryClassUi.hideWaitModal();
 							}
 						});
@@ -167,6 +175,8 @@ public class DeviceCertsTabUi extends Composite implements Tab {
 			public void onChange(ChangeEvent event) {
 				isAliasValid();
 				setDirty(true);
+				apply.setEnabled(true);
+				reset.setEnabled(true);
 			}
 		});
 		
@@ -177,6 +187,8 @@ public class DeviceCertsTabUi extends Composite implements Tab {
 			public void onChange(ChangeEvent event) {
 				isPrivateKeyValid();
 				setDirty(true);
+				apply.setEnabled(true);
+				reset.setEnabled(true);
 			}
 		});
 
@@ -187,21 +199,24 @@ public class DeviceCertsTabUi extends Composite implements Tab {
 			public void onChange(ChangeEvent event) {
 				isDeviceCertValid();
 				setDirty(true);
+				apply.setEnabled(true);
+				reset.setEnabled(true);
 			}
 		});
 
-		execute.setText(MSGS.deviceCommandExecute());
 		reset.setText(MSGS.reset());
-
 		reset.addClickHandler(new ClickHandler(){
 			@Override
 			public void onClick(ClickEvent event) {
 				reset();
 				setDirty(false);
+				apply.setEnabled(false);
+				reset.setEnabled(false);
 			}
 		});
 
-		execute.addClickHandler(new ClickHandler(){
+		apply.setText(MSGS.apply());
+		apply.addClickHandler(new ClickHandler(){
 			@Override
 			public void onClick(ClickEvent event) {
 				if(isValid()){

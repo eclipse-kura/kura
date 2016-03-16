@@ -36,10 +36,12 @@
 		<b:Column size="MD_12">
 			<b:Row>
 				<b:Panel>
-					<b:ButtonGroup size="SMALL">
-						<b:Button ui:field="apply" addStyleNames="fa fa-check"></b:Button>
-						<b:Button ui:field="reset" addStyleNames="fa fa-times"></b:Button>
-					</b:ButtonGroup>
+					<b:NavPills justified="true">
+						<b:ButtonGroup size="SMALL">
+							<b:Button ui:field="apply" addStyleNames="fa fa-check"></b:Button>
+							<b:Button ui:field="reset" addStyleNames="fa fa-times"></b:Button>
+						</b:ButtonGroup>
+					</b:NavPills>
 				</b:Panel>
 			</b:Row>
 			

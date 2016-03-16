@@ -37,7 +37,6 @@ import org.gwtbootstrap3.client.shared.event.ModalHideHandler;
 import org.gwtbootstrap3.client.ui.AnchorListItem;
 import org.gwtbootstrap3.client.ui.Button;
 import org.gwtbootstrap3.client.ui.Icon;
-import org.gwtbootstrap3.client.ui.Image;
 import org.gwtbootstrap3.client.ui.Modal;
 import org.gwtbootstrap3.client.ui.ModalBody;
 import org.gwtbootstrap3.client.ui.ModalFooter;
@@ -98,6 +97,7 @@ public class EntryClassUi extends Composite {
 	private boolean servicesDirty;
 	private boolean networkDirty;
 	private boolean firewallDirty;
+	private boolean settingsDirty;
 
 
 	@UiField
@@ -398,23 +398,30 @@ public class EntryClassUi extends Composite {
 
 	// create the prompt for dirty configuration before switching to another tab
 	private void renderDirtyConfigModal(Button b) {
-		if(servicesUi != null) {
-			servicesDirty=servicesUi.isDirty();
+		if (servicesUi != null) {
+			servicesDirty= servicesUi.isDirty();
 		}
 
 		if (network.isVisible()) {
-			networkDirty = networkBinder.isDirty();
+			networkDirty= networkBinder.isDirty();
 		} else {
-			networkDirty = false;
+			networkDirty= false;
 		}
 
 		if (firewall.isVisible()) {
-			firewallDirty = firewallBinder.isDirty();
+			firewallDirty= firewallBinder.isDirty();
 		} else {
-			firewallDirty = false;
+			firewallDirty= false;
+		}
+		
+		if (settings.isVisible()) {
+			settingsDirty= settingsBinder.isDirty(); 
 		}
 
-		if ((servicesUi!=null && servicesUi.isDirty()) || networkDirty || firewallDirty) {
+		if (	(servicesUi!=null && servicesUi.isDirty()) || 
+				networkDirty  || 
+				firewallDirty || 
+				settingsDirty ) {
 			modal = new Modal();
 
 			ModalHeader header = new ModalHeader();
@@ -457,6 +464,14 @@ public class EntryClassUi extends Composite {
 			return false;
 		}
 	}
+	
+	public boolean isSettingsDirty(){
+		if (settings.isVisible()) {
+			return settingsBinder.isDirty();
+		} else {
+			return false;
+		}
+	}
 
 	public void setDirty(boolean b) {
 		if (servicesUi != null){
@@ -467,6 +482,9 @@ public class EntryClassUi extends Composite {
 		}
 		if (firewall.isVisible()) {
 			firewallBinder.setDirty(false);
+		}
+		if (settings.isVisible()) {
+			settingsBinder.setDirty(false);
 		}
 	}
 
@@ -495,6 +513,9 @@ public class EntryClassUi extends Composite {
 		}
 		if (firewall.isVisible()) {
 			firewallBinder.setDirty(false);
+		}
+		if (settings.isVisible()) {
+			settingsBinder.setDirty(false);
 		}
 	}
 }

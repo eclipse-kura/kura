@@ -11,9 +11,9 @@
  *******************************************************************************/
 package org.eclipse.kura.web.client.ui.Settings;
 
-import org.eclipse.kura.web.client.Tab;
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.ui.EntryClassUi;
+import org.eclipse.kura.web.client.ui.Tab;
 import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.eclipse.kura.web.shared.service.GwtSecurityService;

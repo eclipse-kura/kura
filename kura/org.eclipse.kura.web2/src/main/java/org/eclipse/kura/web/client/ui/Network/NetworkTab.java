@@ -11,7 +11,7 @@
  *******************************************************************************/
 package org.eclipse.kura.web.client.ui.Network;
 
-import org.eclipse.kura.web.client.Tab;
+import org.eclipse.kura.web.client.ui.Tab;
 import org.eclipse.kura.web.shared.model.GwtNetInterfaceConfig;
 
 public interface NetworkTab extends Tab {

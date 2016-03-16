@@ -17,6 +17,7 @@ import java.util.logging.Logger;
 
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.ui.EntryClassUi;
+import org.eclipse.kura.web.client.ui.Tab;
 import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.shared.model.GwtSnapshot;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
@@ -49,7 +50,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SingleSelectionModel;
 
-public class SnapshotsTabUi extends Composite {
+public class SnapshotsTabUi extends Composite implements Tab {
 
 	private static SnapshotsTabUiUiBinder uiBinder = GWT.create(SnapshotsTabUiUiBinder.class);
 	private static final Logger logger = Logger.getLogger(SnapshotsTabUi.class.getSimpleName());
@@ -141,30 +142,22 @@ public class SnapshotsTabUi extends Composite {
 			}
 		});
 	}
-
-	private void initTable() {
-
-		TextColumn<GwtSnapshot> col1 = new TextColumn<GwtSnapshot>() {
-			@Override
-			public String getValue(GwtSnapshot object) {
-				return String.valueOf(object.getSnapshotId());
-			}
-		};
-		col1.setCellStyleNames("status-table-row");
-		snapshotsGrid.addColumn(col1, MSGS.deviceSnapshotId());
-
-		TextColumn<GwtSnapshot> col2 = new TextColumn<GwtSnapshot>() {
-			@Override
-			public String getValue(GwtSnapshot object) {
-				return String.valueOf(object.get("createdOnFormatted"));
-			}
-		};
-		col2.setCellStyleNames("status-table-row");
-		snapshotsGrid.addColumn(col2, MSGS.deviceSnapshotCreatedOn());
-
-		snapshotsDataProvider.addDataDisplay(snapshotsGrid);
+	
+	@Override
+	public void setDirty(boolean flag) {
 	}
 
+	@Override
+	public boolean isDirty() {
+		return false;
+	}
+
+	@Override
+	public boolean isValid() {
+		return true;
+	}
+
+	@Override
 	public void refresh() {
 		notification.setVisible(false);
 		EntryClassUi.showWaitModal();
@@ -211,11 +204,32 @@ public class SnapshotsTabUi extends Composite {
 				});
 			}
 			
-		});
-
-		
+		});		
 	}
 
+	private void initTable() {
+
+		TextColumn<GwtSnapshot> col1 = new TextColumn<GwtSnapshot>() {
+			@Override
+			public String getValue(GwtSnapshot object) {
+				return String.valueOf(object.getSnapshotId());
+			}
+		};
+		col1.setCellStyleNames("status-table-row");
+		snapshotsGrid.addColumn(col1, MSGS.deviceSnapshotId());
+
+		TextColumn<GwtSnapshot> col2 = new TextColumn<GwtSnapshot>() {
+			@Override
+			public String getValue(GwtSnapshot object) {
+				return String.valueOf(object.get("createdOnFormatted"));
+			}
+		};
+		col2.setCellStyleNames("status-table-row");
+		snapshotsGrid.addColumn(col2, MSGS.deviceSnapshotCreatedOn());
+
+		snapshotsDataProvider.addDataDisplay(snapshotsGrid);
+	}
+	
 	private void rollback() {
 		final GwtSnapshot snapshot = selectionModel.getSelectedObject();
 		if (snapshot != null) {
@@ -344,5 +358,4 @@ public class SnapshotsTabUi extends Composite {
 		});
 
 	}
-
 }

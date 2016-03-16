@@ -84,7 +84,9 @@ public class SettingsPanelUi extends Composite {
 				setSelectedActive(snapshots);
 				content.clear();
 				content.add(snapshotsBinder);
-				snapshotsBinder.refresh();
+				if (!snapshotsBinder.isDirty()) {
+					snapshotsBinder.refresh();
+				}
 			}});
 		
 		appCert.addClickHandler(new ClickHandler(){
@@ -93,7 +95,9 @@ public class SettingsPanelUi extends Composite {
 				setSelectedActive(appCert);
 				content.clear();
 				content.add(appCertBinder);
-				appCertBinder.refresh();
+				if (!appCertBinder.isDirty()) {
+					appCertBinder.refresh();
+				}
 			}});
 		
 		sslConfig.addClickHandler(new ClickHandler(){
@@ -102,7 +106,9 @@ public class SettingsPanelUi extends Composite {
 				setSelectedActive(sslConfig);
 				content.clear();
 				content.add(sslConfigBinder);
-				sslConfigBinder.refresh();
+				if (!sslConfigBinder.isDirty()) {
+					sslConfigBinder.refresh();
+				}
 			}});
 		
 		serverCert.addClickHandler(new ClickHandler(){
@@ -111,7 +117,9 @@ public class SettingsPanelUi extends Composite {
 				setSelectedActive(serverCert);
 				content.clear();
 				content.add(serverCertBinder);
-				serverCertBinder.refresh();
+				if (!serverCertBinder.isDirty()) {
+					serverCertBinder.refresh();
+				}
 			}});
 		
 		deviceCert.addClickHandler(new ClickHandler(){
@@ -120,7 +128,9 @@ public class SettingsPanelUi extends Composite {
 				setSelectedActive(deviceCert);
 				content.clear();
 				content.add(deviceCertBinder);
-				deviceCertBinder.refresh();
+				if (!deviceCertBinder.isDirty()) {
+					deviceCertBinder.refresh();
+				}
 			}});
 		
 		security.addClickHandler(new ClickHandler(){
@@ -129,7 +139,9 @@ public class SettingsPanelUi extends Composite {
 				setSelectedActive(security);
 				content.clear();
 				content.add(securityBinder);
-				securityBinder.refresh();
+				if (!securityBinder.isDirty()) {
+					securityBinder.refresh();
+				}
 			}});
 	}
 
@@ -137,7 +149,9 @@ public class SettingsPanelUi extends Composite {
 		setSelectedActive(snapshots);
 		content.clear();
 		content.add(snapshotsBinder);
-		snapshotsBinder.refresh();
+		if (!snapshotsBinder.isDirty()) {
+			snapshotsBinder.refresh();
+		}
 	}
 	
 	public void setSession(GwtSession currentSession) {
@@ -152,5 +166,37 @@ public class SettingsPanelUi extends Composite {
 		deviceCert.setActive(false);
 		security.setActive(false);
 		item.setActive(true);	
+	}
+	
+	public boolean isDirty() {
+		boolean snapshotsDirty= snapshotsBinder.isDirty();
+		boolean appCertDirty= appCertBinder.isDirty();
+		boolean sslConfigDirty= sslConfigBinder.isDirty();
+		boolean serverCertDirty= serverCertBinder.isDirty();
+		boolean deviceCertDirty= deviceCertBinder.isDirty();
+		boolean securityDirty= securityBinder.isDirty();
+		
+		return snapshotsDirty || appCertDirty || sslConfigDirty || serverCertDirty || deviceCertDirty || securityDirty;
+	}
+
+	public void setDirty(boolean b) {
+		if (snapshotsBinder != null) {
+			snapshotsBinder.setDirty(b);
+		}
+		if (appCertBinder != null) {
+			appCertBinder.setDirty(b);
+		}
+		if (sslConfigBinder != null) {
+			sslConfigBinder.setDirty(b);
+		}
+		if (serverCertBinder != null) {
+			serverCertBinder.setDirty(b);
+		}
+		if (deviceCertBinder != null) {
+			deviceCertBinder.setDirty(b);
+		}
+		if (securityBinder != null) {
+			securityBinder.setDirty(b);
+		}
 	}
 }

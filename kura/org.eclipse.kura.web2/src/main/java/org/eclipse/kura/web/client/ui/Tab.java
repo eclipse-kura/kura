@@ -9,7 +9,7 @@
  * Contributors:
  *     Eurotech
  *******************************************************************************/
-package org.eclipse.kura.web.client;
+package org.eclipse.kura.web.client.ui;
 
 public interface Tab {
 	

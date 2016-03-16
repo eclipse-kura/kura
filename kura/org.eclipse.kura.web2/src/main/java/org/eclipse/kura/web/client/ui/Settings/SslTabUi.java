@@ -11,9 +11,9 @@
  *******************************************************************************/
 package org.eclipse.kura.web.client.ui.Settings;
 
-import org.eclipse.kura.web.client.Tab;
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.ui.EntryClassUi;
+import org.eclipse.kura.web.client.ui.Tab;
 import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.shared.model.GwtSslConfig;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
@@ -117,7 +117,7 @@ public class SslTabUi extends Composite implements Tab {
 
 		//loadData();
 
-		setDirty(true);
+		setDirty(false);
 		apply.setEnabled(false);
 		reset.setEnabled(false);
 	}
@@ -139,10 +139,10 @@ public class SslTabUi extends Composite implements Tab {
 
 	@Override
 	public void refresh() {
-		if (isDirty()) {
+//		if (isDirty()) {  //necessary due to the fact that if enabled the loadData in the constructor, we get an XSRF error. If setDirty is set to true, it causes a problem to switch tab.
 			setDirty(false);
 			loadData();
-		}
+//		}
 	}
 
 	private void initButtonBar() {
@@ -310,13 +310,10 @@ public class SslTabUi extends Composite implements Tab {
 			footer.add(group);
 			modal.add(footer);
 			modal.show();							
-		}//end is dirty	
+		}
 	}
 
 	private void loadData(){
-		//
-		// Retrieve content
-		//
 		gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
 			@Override
 			public void onFailure(Throwable ex) {

@@ -40,6 +40,7 @@
 					<b:AnchorListItem text="Snapshots" ui:field="snapshots" />
 					<b:AnchorListItem text="Application Certificate" ui:field="appCert" />
 					<b:AnchorListItem text="SSL Configuration" ui:field="sslConfig" />
+					<b:AnchorListItem text="Server SSL Certificate" ui:field="serverCert" />
 				</b:NavbarNav>
 			</b:Navbar>
 		</b:Row>

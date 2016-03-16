@@ -104,9 +104,9 @@ public class SslTabUi extends Composite implements Tab {
 		initButtonBar();
 		initForm();
 
-		loadData();
+		//loadData();
 
-		setDirty(false);
+		setDirty(true);
 		apply.setEnabled(false);
 		reset.setEnabled(false);
 	}
@@ -219,45 +219,43 @@ public class SslTabUi extends Composite implements Tab {
 	}
 
 	private void apply() {		
-		if (isValid()) {
-			if(isDirty()){
-				EntryClassUi.showWaitModal();
-				gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
-					@Override
-					public void onFailure(Throwable ex) {
-						FailureHandler.handle(ex);
-						EntryClassUi.hideWaitModal();
+		if (isValid() && isDirty()){
+			EntryClassUi.showWaitModal();
+			gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
+				@Override
+				public void onFailure(Throwable ex) {
+					FailureHandler.handle(ex);
+					EntryClassUi.hideWaitModal();
+				}
+
+				@Override
+				public void onSuccess(GwtXSRFToken token) {	
+					GwtSslConfig sslConfig= new GwtSslConfig();
+					sslConfig.setProtocol(defaultProtocolInput.getValue());
+					if(radio1.getValue()){
+						sslConfig.setHostnameVerification(true);
+					} else {
+						sslConfig.setHostnameVerification(false);
 					}
+					sslConfig.setKeyStore(keystorePathInput.getValue());
+					sslConfig.setKeystorePassword(keystorePasswordInput.getValue());
+					sslConfig.setCiphers(cipherSuitesInput.getValue());
 
-					@Override
-					public void onSuccess(GwtXSRFToken token) {	
-						GwtSslConfig sslConfig= new GwtSslConfig();
-						sslConfig.setProtocol(defaultProtocolInput.getValue());
-						if(radio1.getValue()){
-							sslConfig.setHostnameVerification(true);
-						} else {
-							sslConfig.setHostnameVerification(false);
+					gwtSslService.updateSslConfiguration(token, sslConfig, new AsyncCallback<Void>() {
+						public void onFailure(Throwable caught) {
+							FailureHandler.handle(caught);
+							EntryClassUi.hideWaitModal();
 						}
-						sslConfig.setKeyStore(keystorePathInput.getValue());
-						sslConfig.setKeystorePassword(keystorePasswordInput.getValue());
-						sslConfig.setCiphers(cipherSuitesInput.getValue());
 
-						gwtSslService.updateSslConfiguration(token, sslConfig, new AsyncCallback<Void>() {
-							public void onFailure(Throwable caught) {
-								FailureHandler.handle(caught);
-								EntryClassUi.hideWaitModal();
-							}
-
-							public void onSuccess(Void result) {
-								//refresh();
-								setDirty(false);
-								apply.setEnabled(false);
-								reset.setEnabled(false);
-								EntryClassUi.hideWaitModal();
-							}
-						});
-					}});
-			}
+						public void onSuccess(Void result) {
+							//refresh();
+							setDirty(false);
+							apply.setEnabled(false);
+							reset.setEnabled(false);
+							EntryClassUi.hideWaitModal();
+						}
+					});
+				}});
 		}
 	}
 

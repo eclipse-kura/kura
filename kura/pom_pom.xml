@@ -48,19 +48,6 @@
 		<profile>
 			<id>web</id>
 			<properties>
-				<org.eclipse.kura.web.skip>false</org.eclipse.kura.web.skip>
-			</properties>
-			<activation>
-				<activeByDefault>false</activeByDefault>
-			</activation>
-			<modules>
-				<module>org.eclipse.kura.web</module>
-				<module>distrib</module>
-			</modules>
-		</profile>
-		<profile>
-			<id>web2</id>
-			<properties>
 				<org.eclipse.kura.web2.skip>false</org.eclipse.kura.web2.skip>
 			</properties>
 			<activation>
@@ -68,6 +55,19 @@
 			</activation>
 			<modules>
 				<module>org.eclipse.kura.web2</module>
+				<module>distrib</module>
+			</modules>
+		</profile>
+		<profile>
+			<id>web-classic</id>
+			<properties>
+				<org.eclipse.kura.web.skip>false</org.eclipse.kura.web.skip>
+			</properties>
+			<activation>
+				<activeByDefault>false</activeByDefault>
+			</activation>
+			<modules>
+				<module>org.eclipse.kura.web</module>
 				<module>distrib</module>
 			</modules>
 		</profile>

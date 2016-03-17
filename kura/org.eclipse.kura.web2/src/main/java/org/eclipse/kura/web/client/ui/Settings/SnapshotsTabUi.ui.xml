@@ -25,45 +25,48 @@
 	</ui:style>
 
 	<b:Container fluid="true">
-		<b:Row>
-			<b:Panel>
-				<b:NavPills justified="true">
-					<b:ButtonGroup size="SMALL">
-						<b:Button ui:field="refresh" addStyleNames="fa fa-refresh"></b:Button>
-						<b:Button ui:field="download" addStyleNames="fa fa-download"></b:Button>
-						<b:Button ui:field="rollback" addStyleNames="fa fa-reply"></b:Button>
-						<b:Button ui:field="upload" addStyleNames="fa fa-share"></b:Button>
-					</b:ButtonGroup>
-				</b:NavPills>
-			</b:Panel>
-		</b:Row>
+		<b:Column size="MD_12">
+			<b:Row>
+				<b:Panel>
+					<b:NavPills justified="true">
+						<b:ButtonGroup size="SMALL">
+							<b:Button ui:field="refresh" addStyleNames="fa fa-refresh"></b:Button>
+							<b:Button ui:field="download" addStyleNames="fa fa-download"></b:Button>
+							<b:Button ui:field="rollback" addStyleNames="fa fa-reply"></b:Button>
+							<b:Button ui:field="upload" addStyleNames="fa fa-share"></b:Button>
+						</b:ButtonGroup>
+					</b:NavPills>
+				</b:Panel>
+			</b:Row>
 
-		<b:Row>
-			<b:Alert type="WARNING" ui:field="notification" />
-			<gwt:CellTable bordered="true" condensed="true" striped="true"
-				hover="true" height="100%" width="100%" ui:field="snapshotsGrid" />
-		</b:Row>
-		<!-- Modal -->
-		<b:Modal title="Upload" closable="true" fade="true" b:id="uploadModal" ui:field="uploadModal">
-			<b:ModalBody>
-				<b:Well>
-					<b:Container fluid="true">
-						<g:FormPanel ui:field="snapshotsForm">
-							<b:FieldSet>
-								<b:FormGroup>
-									<b:FormLabel>File</b:FormLabel>
-									<g:FileUpload ui:field="filePath"></g:FileUpload>
-								</b:FormGroup>
-								<b:ButtonGroup pull="RIGHT">
-									<b:Button ui:field="uploadCancel">Cancel</b:Button>
-									<b:Button ui:field="uploadUpload">Upload</b:Button>
-								</b:ButtonGroup>
-								<g:Hidden ui:field="xsrfTokenField"></g:Hidden>
-							</b:FieldSet>
-						</g:FormPanel>
-					</b:Container>
-				</b:Well>
-			</b:ModalBody>
-		</b:Modal>
+			<b:Row>
+				<b:Alert type="WARNING" ui:field="notification" />
+				<gwt:CellTable bordered="true" condensed="true"
+					striped="true" hover="true" height="100%" width="100%" ui:field="snapshotsGrid" />
+			</b:Row>
+			<!-- Modal -->
+			<b:Modal title="Upload" closable="true" fade="true" b:id="uploadModal"
+				ui:field="uploadModal">
+				<b:ModalBody>
+					<b:Well>
+						<b:Container fluid="true">
+							<g:FormPanel ui:field="snapshotsForm">
+								<b:FieldSet>
+									<b:FormGroup>
+										<b:FormLabel>File</b:FormLabel>
+										<g:FileUpload ui:field="filePath"></g:FileUpload>
+									</b:FormGroup>
+									<b:ButtonGroup pull="RIGHT">
+										<b:Button ui:field="uploadCancel">Cancel</b:Button>
+										<b:Button ui:field="uploadUpload">Upload</b:Button>
+									</b:ButtonGroup>
+									<g:Hidden ui:field="xsrfTokenField"></g:Hidden>
+								</b:FieldSet>
+							</g:FormPanel>
+						</b:Container>
+					</b:Well>
+				</b:ModalBody>
+			</b:Modal>
+		</b:Column>
 	</b:Container>
 </ui:UiBinder> 

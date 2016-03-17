@@ -131,9 +131,6 @@
 
 		<available file="${project.build.directory}/plugins/org.eclipse.kura.web2_${org.eclipse.kura.web2.version}.jar" property="web2.jar.present" />
 		<antcall target="web2-config" />
-		
-		<available file="${project.build.directory}/plugins/org.eclipse.kura.protocol.can_${org.eclipse.kura.protocol.can.version}.jar" property="can.jar.present" />
-		<antcall target="can-config" />
 
 		<available file="${project.build.directory}/plugins/org.eclipse.kura.linux.gpio_${org.eclipse.kura.linux.gpio.version}.jar" property="linux.gpio.jar.present" />
 		<antcall target="gpio-config" />
@@ -498,7 +495,6 @@ fi
 		<!-- Conditional inclusion of jar files in the distribution jar -->
 		<antcall target="web-jar" />
 		<antcall target="web2-jar" />
-		<antcall target="can-jar" />
 		<antcall target="gpio-jar" />
 		<antcall target="emulator-jars" />
   		<antcall target="linux-jars" />
@@ -629,13 +625,6 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
 		<replace file="${project.build.directory}/${build.output.name}/config.ini"
                  token="com.gwt.user_0.2.0" value="com.gwt.user_1.0.0"/>
 	</target>
-	
-	<target name="can-config" if="can.jar.present">
-		<propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
-            	<entry key="osgi.bundles" operation="+"
-                   value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.protocol.can_${org.eclipse.kura.protocol.can.version}.jar@5" />
-        </propertyfile>
-	</target>
 
 	<target name="gpio-config" if="linux.gpio.jar.present">
 		<propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
@@ -654,13 +643,6 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
 	<target name="web2-jar" if="web2.jar.present">
 		<zip destfile="${project.build.directory}/${build.output.name}.zip" update="true">
 			<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.web2_${org.eclipse.kura.web2.version}.jar"
-                        prefix="${build.output.name}/kura/plugins" />
-		</zip>
-	</target>
-	
-	<target name="can-jar" if="can.jar.present">
-		<zip destfile="${project.build.directory}/${build.output.name}.zip" update="true">
-			<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.protocol.can_${org.eclipse.kura.protocol.can.version}.jar"
                         prefix="${build.output.name}/kura/plugins" />
 		</zip>
 	</target>

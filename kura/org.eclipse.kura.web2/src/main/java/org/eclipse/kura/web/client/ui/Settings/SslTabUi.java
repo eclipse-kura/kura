@@ -26,6 +26,7 @@ import org.gwtbootstrap3.client.ui.ButtonGroup;
 import org.gwtbootstrap3.client.ui.Form;
 import org.gwtbootstrap3.client.ui.FormGroup;
 import org.gwtbootstrap3.client.ui.FormLabel;
+import org.gwtbootstrap3.client.ui.HelpBlock;
 import org.gwtbootstrap3.client.ui.Input;
 import org.gwtbootstrap3.client.ui.Modal;
 import org.gwtbootstrap3.client.ui.ModalBody;
@@ -93,6 +94,17 @@ public class SslTabUi extends Composite implements Tab {
 	FormLabel keystorePasswordFormLabel;
 	@UiField
 	FormLabel cipherSuitesFormLabel;
+	
+	@UiField
+	HelpBlock defaultProtocolHelpBlock;
+	@UiField
+	HelpBlock hostnameVerificationHelpBlock;
+	@UiField
+	HelpBlock keystorePathHelpBlock;
+	@UiField
+	HelpBlock keystorePasswordHelpBlock;
+	@UiField
+	HelpBlock cipherSuitesHelpBlock;
 
 	@UiField
 	Input defaultProtocolInput;
@@ -139,7 +151,7 @@ public class SslTabUi extends Composite implements Tab {
 
 	@Override
 	public void refresh() {
-//		if (isDirty()) {  //necessary due to the fact that if enabled the loadData in the constructor, we get an XSRF error. If setDirty is set to true, it causes a problem to switch tab.
+//		if (isDirty()) {  //necessary due to the fact that if the loadData is enabled in the constructor, we get an XSRF error. If setDirty is set to true, it causes a problem to switch tab.
 			setDirty(false);
 			loadData();
 //		}
@@ -164,16 +176,10 @@ public class SslTabUi extends Composite implements Tab {
 	}
 
 	private void initForm() {
-		description.add(new Span("<p>" + MSGS.settingsSSLConfigurationDescription() + "</p>"));
-		defaultProtocolFormLabel.setText(MSGS.settingsSSLConfigurationProtocol());
-		hostnameVerificationFormLabel.setText("Hostname Verification"); //TODO: externalize string
-		radio1.setText(MSGS.trueLabel());
-		radio2.setText(MSGS.falseLabel());
-		keystorePathFormLabel.setText(MSGS.settingsSSLConfigurationKeystorePath());
-		keystorePasswordFormLabel.setText(MSGS.settingsSSLConfigurationKeystorePassword());
-		cipherSuitesFormLabel.setText(MSGS.settingsSSLConfigurationCipherSuites());
+		initFormLabels();
 
-
+		initFormHelpBlocks();
+		
 		defaultProtocolInput.addChangeHandler(new ChangeHandler() {
 			@Override
 			public void onChange(ChangeEvent event) {
@@ -227,6 +233,25 @@ public class SslTabUi extends Composite implements Tab {
 				reset.setEnabled(true);
 			}
 		});
+	}
+
+	private void initFormHelpBlocks() {
+		defaultProtocolHelpBlock.setText(MSGS.settingsSSLConfigurationProtocolDescr());
+		hostnameVerificationHelpBlock.setText(MSGS.settingsSSLConfigurationHostnameVerificationDescr());
+		keystorePathHelpBlock.setText(MSGS.settingsSSLConfigurationKeystorePathDescr());
+		keystorePasswordHelpBlock.setText(MSGS.settingsSSLConfigurationKeystorePasswordDescr());
+		cipherSuitesHelpBlock.setText(MSGS.settingsSSLConfigurationCipherSuitesDescr());
+	}
+
+	private void initFormLabels() {
+		description.add(new Span("<p>" + MSGS.settingsSSLConfigurationDescription() + "</p>"));
+		defaultProtocolFormLabel.setText(MSGS.settingsSSLConfigurationProtocol());  //TODO: From here: must be changed. Fetch in some way the metatype values!
+		hostnameVerificationFormLabel.setText("Hostname Verification"); //TODO: externalize string
+		radio1.setText(MSGS.trueLabel());
+		radio2.setText(MSGS.falseLabel());
+		keystorePathFormLabel.setText(MSGS.settingsSSLConfigurationKeystorePath());
+		keystorePasswordFormLabel.setText(MSGS.settingsSSLConfigurationKeystorePassword());
+		cipherSuitesFormLabel.setText(MSGS.settingsSSLConfigurationCipherSuites());
 	}
 
 	private void apply() {		
@@ -328,7 +353,7 @@ public class SslTabUi extends Composite implements Tab {
 					}
 
 					public void onSuccess(GwtSslConfig sslConfig) {
-						defaultProtocolInput.setValue(sslConfig.getProtocol());
+						defaultProtocolInput.setValue(sslConfig.getProtocol()); 
 						if(sslConfig.isHostnameVerification()){
 							radio1.setActive(true);
 							radio2.setActive(false);
@@ -340,6 +365,8 @@ public class SslTabUi extends Composite implements Tab {
 						keystorePathInput.setValue(sslConfig.getKeyStore());
 						keystorePasswordInput.setValue(sslConfig.getKeystorePassword());
 						cipherSuitesInput.setValue(sslConfig.getCiphers());
+						
+						initFormHelpBlocks();
 					}
 				});
 			}

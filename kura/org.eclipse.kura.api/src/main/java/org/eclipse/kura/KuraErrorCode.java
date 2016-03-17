@@ -45,5 +45,10 @@ public enum KuraErrorCode {
 	OPERATION_NOT_SUPPORTED,
 	UNAVAILABLE_DEVICE,
 	CLOSED_DEVICE,
-	GPIO_EXCEPTION;
+	GPIO_EXCEPTION,
+	/**
+	 * Error executing an OS command.
+	 * @since package org.eclipse.kura 1.1.0
+	 */
+	OS_COMMAND_ERROR;
 }

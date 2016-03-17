@@ -865,7 +865,6 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
 			ConnectionInfo conInfo = new ConnectionInfoImpl(interfaceName);			
 			NetInterfaceAddressImpl netInterfaceAddress = new NetInterfaceAddressImpl();
 			try {
-			    // FIXME:MC The whole block of information can be fetched with a single ifconfig?
 				LinuxIfconfig ifconfig = LinuxNetworkUtil.getInterfaceConfiguration(interfaceName);
 				if (ifconfig != null) {
 					String currentNetmask = ifconfig.getInetMask();

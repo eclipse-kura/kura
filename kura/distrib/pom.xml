@@ -73,6 +73,11 @@
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.kura.camel</artifactId>
+									<version>${org.eclipse.kura.camel.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
 									<artifactId>org.eclipse.kura.core</artifactId>
 									<version>${org.eclipse.kura.core.version}</version>
 								</artifactItem>
@@ -293,7 +298,8 @@
 						<configuration>
 							<tasks>
 							    <move file="target/plugins/org.eclipse.kura.api.jar" tofile="target/plugins/org.eclipse.kura.api_${org.eclipse.kura.api.version}.jar"/>
-							    <move file="target/plugins/org.eclipse.kura.core.jar" tofile="target/plugins/org.eclipse.kura.core_${org.eclipse.kura.core.version}.jar"/>
+								<move file="target/plugins/org.eclipse.kura.camel.jar" tofile="target/plugins/org.eclipse.kura.camel_${org.eclipse.kura.camel.version}.jar"/>
+								<move file="target/plugins/org.eclipse.kura.core.jar" tofile="target/plugins/org.eclipse.kura.core_${org.eclipse.kura.core.version}.jar"/>
 							    <move file="target/plugins/org.eclipse.kura.core.certificates.jar" tofile="target/plugins/org.eclipse.kura.core.certificates_${org.eclipse.kura.core.certificates.version}.jar"/>
 							    <move file="target/plugins/org.eclipse.kura.core.cloud.jar" tofile="target/plugins/org.eclipse.kura.core.cloud_${org.eclipse.kura.core.cloud.version}.jar"/>
 							    <move file="target/plugins/org.eclipse.kura.core.comm.jar" tofile="target/plugins/org.eclipse.kura.core.comm_${org.eclipse.kura.core.comm.version}.jar"/>

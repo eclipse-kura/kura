@@ -33,39 +33,43 @@
 	</ui:style>
 
 	<b:Container fluid="true">
-		<b:Row>
-			<b:Panel>
-				<b:NavPills justified="true">
-					<b:ButtonGroup size="SMALL">
-						<b:Button ui:field="apply" addStyleNames="fa fa-check"></b:Button>
-						<b:Button ui:field="reset" addStyleNames="fa fa-times"></b:Button>
-					</b:ButtonGroup>
-				</b:NavPills>
-			</b:Panel>
-		</b:Row>
-		<b:Row>
-			<g:HTMLPanel ui:field="description">
-			</g:HTMLPanel>
+		<b:Column size="MD_12">
+			<b:Row>
+				<b:Panel>
+					<b:NavPills justified="true">
+						<b:ButtonGroup size="SMALL">
+							<b:Button ui:field="apply" addStyleNames="fa fa-check"></b:Button>
+							<b:Button ui:field="reset" addStyleNames="fa fa-times"></b:Button>
+						</b:ButtonGroup>
+					</b:NavPills>
+				</b:Panel>
+			</b:Row>
+			<b:Row>
+				<g:HTMLPanel ui:field="description">
+				</g:HTMLPanel>
 
-			<b:Form ui:field="deviceSslCertsForm">
-				<b:FieldSet>
-					<b:FormGroup ui:field="groupStorageAliasForm">
-						<b:FormLabel for="storageAliasInput" ui:field="storageAliasLabel" />
-						<b:Input type="TEXT" b:id="storageAlias" ui:field="storageAliasInput" />
-					</b:FormGroup>
+				<b:Form ui:field="deviceSslCertsForm">
+					<b:FieldSet>
+						<b:FormGroup ui:field="groupStorageAliasForm">
+							<b:FormLabel for="storageAliasInput" ui:field="storageAliasLabel" />
+							<b:Input type="TEXT" b:id="storageAlias" ui:field="storageAliasInput" />
+						</b:FormGroup>
 
-					<b:FormGroup ui:field="groupPrivateKeyForm">
-						<b:FormLabel for="privateKeyInput" ui:field="privateKeyLabel" />
-						<b:TextArea b:id="privateKeyInput" addStyleNames="{style.center-panel}" ui:field="privateKeyInput" />
-					</b:FormGroup>
-					
-					<b:FormGroup ui:field="groupCertForm">
-						<b:FormLabel for="certificateInput" ui:field="certificateLabel" />
-						<b:TextArea b:id="certificateInput" addStyleNames="{style.center-panel}" ui:field="certificateInput" />
-					</b:FormGroup>
-				</b:FieldSet>
-			</b:Form>
-		</b:Row>
+						<b:FormGroup ui:field="groupPrivateKeyForm">
+							<b:FormLabel for="privateKeyInput" ui:field="privateKeyLabel" />
+							<b:TextArea b:id="privateKeyInput" addStyleNames="{style.center-panel}"
+								ui:field="privateKeyInput" />
+						</b:FormGroup>
+
+						<b:FormGroup ui:field="groupCertForm">
+							<b:FormLabel for="certificateInput" ui:field="certificateLabel" />
+							<b:TextArea b:id="certificateInput" addStyleNames="{style.center-panel}"
+								ui:field="certificateInput" />
+						</b:FormGroup>
+					</b:FieldSet>
+				</b:Form>
+			</b:Row>
+		</b:Column>
 	</b:Container>
 
 </ui:UiBinder> 

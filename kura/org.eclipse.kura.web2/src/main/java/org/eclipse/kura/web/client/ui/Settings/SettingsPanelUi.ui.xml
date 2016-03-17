@@ -48,9 +48,8 @@
 		</b:Row>
 
 		<b:Row>
-			<b:Well addStyleNames="{style.center-panel}" ui:field="content"/>
+			<b:Well addStyleNames="{style.center-panel}" ui:field="content" />
 		</b:Row>
-
 	</b:Container>
 
 </ui:UiBinder> 

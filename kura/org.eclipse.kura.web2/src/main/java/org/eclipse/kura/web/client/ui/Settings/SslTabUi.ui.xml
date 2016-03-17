@@ -53,12 +53,13 @@
 					<b:FieldSet>
 						<b:FormGroup ui:field="defaultProtocolFormGroup">
 							<b:FormLabel for="defaultProtocolInput" ui:field="defaultProtocolFormLabel" />
+							<b:HelpBlock ui:field="defaultProtocolHelpBlock"/>
 							<b:Input type="TEXT" b:id="defaultProtocol" ui:field="defaultProtocolInput" />
 						</b:FormGroup>
 
 						<b:FormGroup ui:field="hostnameVerificationFormGroup">
-							<b:FormLabel for="hostnameVerificationInput"
-								ui:field="hostnameVerificationFormLabel" />
+							<b:FormLabel for="hostnameVerificationInput" ui:field="hostnameVerificationFormLabel" />
+							<b:HelpBlock ui:field="hostnameVerificationHelpBlock"/>
 							<g:FlowPanel>
 								<b:RadioButton name="radio1" formValue="true"
 									ui:field="radio1" />
@@ -69,20 +70,21 @@
 
 						<b:FormGroup ui:field="keystorePathFormGroup">
 							<b:FormLabel for="keystorePathInput" ui:field="keystorePathFormLabel" />
+							<b:HelpBlock ui:field="keystorePathHelpBlock"/>
 							<b:Input type="TEXT" b:id="keystorePath" ui:field="keystorePathInput" />
 						</b:FormGroup>
 
 						<b:FormGroup ui:field="keystorePasswordFormGroup">
 							<b:FormLabel for="defaultProtocolInput" ui:field="keystorePasswordFormLabel" />
-							<b:Input type="PASSWORD" b:id="keystorePassword"
-								ui:field="keystorePasswordInput" />
+							<b:HelpBlock ui:field="keystorePasswordHelpBlock"/>
+							<b:Input type="PASSWORD" b:id="keystorePassword" ui:field="keystorePasswordInput" />
 						</b:FormGroup>
 
 						<b:FormGroup ui:field="cipherSuitesFormGroup">
 							<b:FormLabel for="cipherSuitesInput" ui:field="cipherSuitesFormLabel" />
+							<b:HelpBlock ui:field="cipherSuitesHelpBlock"/>
 							<b:Input type="TEXT" b:id="cipherSuites" ui:field="cipherSuitesInput" />
 						</b:FormGroup>
-
 					</b:FieldSet>
 				</b:Form>
 			</b:Row>

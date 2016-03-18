@@ -29,7 +29,6 @@ public class LinuxIfconfig {
 	private int m_mtu;
 	private boolean m_multicast;
 	private Map<String,String> m_driver;
-	private Boolean m_up;
 	private boolean m_linkUp;
 	
 	public LinuxIfconfig(String name) {
@@ -97,22 +96,13 @@ public class LinuxIfconfig {
 	}
 	
 	public boolean isUp() {
-		if (m_up != null) {
-			return m_up;
-		} else {
-			// old code
-			boolean ret = false;
-			if ((m_inetAddress != null) && (m_inetMask != null)) {
-				ret = true;
-			}	
-			return ret;
-		}
+		boolean ret = false;
+		if ((m_inetAddress != null) && (m_inetMask != null)) {
+			ret = true;
+		}	
+		return ret;
 	}
-	
-	public void setUp(boolean up) {
-		m_up = up;
-	}
-	
+		
 	public void setLinkUp(boolean up) {
 		m_linkUp = up;
 	}
@@ -147,7 +137,7 @@ public class LinuxIfconfig {
 				.append(", Broadcast: ").append(m_inetBcast)
 				.append(", Peer IP Address: ").append(m_peerInetAddr).append(", MTU: ")
 				.append(m_mtu).append(", multicast?: ").append(m_multicast)
-				.append(", up?: ").append(m_up).append(", link up?: ").append(m_linkUp);
+				.append(", link up?: ").append(m_linkUp);
 		return sb.toString();
 	}
 }

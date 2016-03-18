@@ -280,9 +280,9 @@ public class IpAddrShow {
 				s_logger.debug("multicast: '{}'", multicast);        			
 				config.setMulticast(multicast);
 
-				boolean up = isUp(flags);
-				s_logger.debug("up: '{}'", up);
-				config.setUp(up);
+//				boolean up = isUp(flags);
+//				s_logger.debug("up: '{}'", up);
+//				config.setUp(up);
 
 				String smtu = findValue(line, "mtu", " ");
 				s_logger.debug("mtu: '{}'", smtu);
@@ -495,16 +495,16 @@ public class IpAddrShow {
 		return multicast;
 	}
 
-	private boolean isUp(String[] flags) {
-		boolean up = false;
-		for (String flag : flags) {
-			if (flag.equals("UP")) {
-				up = true;
-				break;
-			}
-		}
-		return up;
-	}
+//	private boolean isUp(String[] flags) {
+//		boolean up = false;
+//		for (String flag : flags) {
+//			if (flag.equals("UP")) {
+//				up = true;
+//				break;
+//			}
+//		}
+//		return up;
+//	}
 
 	private static String prefix2inetmask(int prefix) throws UnknownHostException {
 		int mask = 0xffffffff << (32 - prefix);

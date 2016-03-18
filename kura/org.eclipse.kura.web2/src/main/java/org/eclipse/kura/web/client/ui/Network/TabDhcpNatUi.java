@@ -18,6 +18,7 @@ import org.eclipse.kura.web.shared.model.GwtNetIfType;
 import org.eclipse.kura.web.shared.model.GwtNetInterfaceConfig;
 import org.eclipse.kura.web.shared.model.GwtNetRouterMode;
 import org.eclipse.kura.web.shared.model.GwtSession;
+import org.eclipse.kura.web.shared.model.GwtWifiConfig;
 import org.eclipse.kura.web.shared.model.GwtWifiWirelessMode;
 import org.gwtbootstrap3.client.ui.Form;
 import org.gwtbootstrap3.client.ui.FormGroup;
@@ -191,10 +192,15 @@ public class TabDhcpNatUi extends Composite implements NetworkTab {
 		//			radio1.setEnabled(false);
 		//			radio2.setEnabled(false);
 		//		} else {
-		String mode= wirelessTab.activeConfig.getWirelessMode();
+		GwtWifiConfig wifiConfig= wirelessTab.activeConfig;
+		String wifiMode= null;
+		if (wifiConfig != null) {
+			wifiMode= wifiConfig.getWirelessMode();
+		}
 		if ( selectedNetIfConfig.getHwTypeEnum() == GwtNetIfType.WIFI && 
 				wirelessTab != null && 
-				(mode.equals(WIFI_STATION_MODE) || mode.equals(WIFI_DISABLED)) ) {
+				wifiMode != null    &&
+				(wifiMode.equals(WIFI_STATION_MODE) || wifiMode.equals(WIFI_DISABLED)) ) {
 			router.setEnabled(false);
 			begin.setEnabled(false);
 			end.setEnabled(false);

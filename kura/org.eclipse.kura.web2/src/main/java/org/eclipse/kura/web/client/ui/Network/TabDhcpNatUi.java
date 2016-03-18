@@ -147,10 +147,10 @@ public class TabDhcpNatUi extends Composite implements NetworkTab {
 			updatedNetIf.setRouterDhcpBeginAddress(begin.getText());
 			updatedNetIf.setRouterDhcpEndAddress(end.getText());
 			updatedNetIf.setRouterDhcpSubnetMask(subnet.getText());
-			if (defaultL.getText() != null) {
+			if (defaultL.getText() != null && !"".equals(defaultL.getText().trim())) {
 				updatedNetIf.setRouterDhcpDefaultLease(Integer.parseInt(defaultL.getText()));
 			}
-			if (max.getText() != null) {
+			if (max.getText() != null && !"".equals(max.getText().trim())) {
 				updatedNetIf.setRouterDhcpMaxLease(Integer.parseInt(max.getText()));
 			}
 			updatedNetIf.setRouterDnsPass(radio1.getValue());

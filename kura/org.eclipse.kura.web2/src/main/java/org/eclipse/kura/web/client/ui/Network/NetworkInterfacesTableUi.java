@@ -244,21 +244,21 @@ public class NetworkInterfacesTableUi extends Composite {
 		if (name1.startsWith("eth") && !"lo".equals(name2)) {
 			if (name2.startsWith("eth")) {
 				//compare eths
-				name1.compareTo(name2);
+				name2.compareTo(name1);
 			}
 			return new Integer(-1);
 		}
 		if (name1.startsWith("wlan") && !name2.startsWith("lo") && !name2.startsWith("eth")) {
 			if (name2.startsWith("wlan")) {
 				//compare wlans
-				name1.compareTo(name2);
+				name2.compareTo(name1);
 			}
 			return new Integer(-1);
 		}
 		if (name1.startsWith("ppp") && !name2.startsWith("wlan") && !name2.startsWith("lo") && !name2.startsWith("eth")) {
 			if (name2.startsWith("ppp")) {
 				//compare ppps
-				name1.compareTo(name2);
+				name2.compareTo(name1);
 			}
 			return new Integer(-1);
 		}

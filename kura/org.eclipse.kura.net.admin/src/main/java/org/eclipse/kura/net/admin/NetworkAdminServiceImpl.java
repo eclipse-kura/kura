@@ -834,7 +834,7 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 				
 				//if it isn't up - at least make sure the Ethernet controller is powered on
 				if(!LinuxNetworkUtil.hasAddress(interfaceName)) {
-					LinuxNetworkUtil.setUnspecifiedAddress(interfaceName);
+					LinuxNetworkUtil.deleteAddress(interfaceName);
 				}
 			} else {
 				s_logger.info("not bringing interface {} up because it is already up", interfaceName);

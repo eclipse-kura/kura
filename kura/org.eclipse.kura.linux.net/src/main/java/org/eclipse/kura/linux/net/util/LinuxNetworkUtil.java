@@ -1572,7 +1572,7 @@ public class LinuxNetworkUtil {
 			}
 			
 			//always leave the Ethernet Controller powered
-			setUnspecifiedAddress(interfaceName);
+			deleteAddress(interfaceName);
 		}
 	}
 	
@@ -1594,7 +1594,7 @@ public class LinuxNetworkUtil {
 		}
 	}
 	
-	public static void setUnspecifiedAddress(String interfaceName) throws KuraException {
+	public static void deleteAddress(String interfaceName) throws KuraException {
 		//ignore logical interfaces like "1-1.2"
 		if (Character.isDigit(interfaceName.charAt(0))) {
 			return;

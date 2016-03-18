@@ -153,14 +153,22 @@ public class LinuxNetworkUtil {
 		}
 	}
 	
-	public static boolean isUp(String ifaceName) throws KuraException {
+	public static boolean hasAddress(String ifaceName) throws KuraException {
 		//ignore logical interfaces like "1-1.2"
 		if (Character.isDigit(ifaceName.charAt(0))) {
 			return false;
 		}
 		
 		LinuxIfconfig ifconfig = getInterfaceConfiguration(ifaceName);
-		return ifconfig.isUp();
+		
+		boolean ret = false;
+		if (ifconfig != null) {
+			if ((ifconfig.getInetAddress() != null) && (ifconfig.getInetMask() != null)) {
+				ret = true;
+			}
+		}
+
+		return ret;
 	}
 	
 	@Deprecated
@@ -1558,13 +1566,13 @@ public class LinuxNetworkUtil {
 				LinuxProcessUtil.start("ifdown " + interfaceName + "\n");
 				LinuxProcessUtil.start("ifconfig " + interfaceName + " down\n");
 			} else {
-				if (isUp(interfaceName)) {
+				if (hasAddress(interfaceName)) {
 					LinuxProcessUtil.start("ifdown " + interfaceName + "\n");		
 				}
 			}
 			
 			//always leave the Ethernet Controller powered
-			powerOnEthernetController(interfaceName);
+			setUnspecifiedAddress(interfaceName);
 		}
 	}
 	
@@ -1586,34 +1594,32 @@ public class LinuxNetworkUtil {
 		}
 	}
 	
-	public static void powerOnEthernetController(String interfaceName) throws KuraException {
+	public static void setUnspecifiedAddress(String interfaceName) throws KuraException {
 		//ignore logical interfaces like "1-1.2"
 		if (Character.isDigit(interfaceName.charAt(0))) {
 			return;
 		}
 		
-		if (!isEthernetControllerPowered(interfaceName)) {
-			//power the controller since it is not on
-			SafeProcess proc = null;
-			try {
-				//start the SafeProcess
-				StringBuilder sb = new StringBuilder().append("ifconfig ").append(interfaceName).append(" 0.0.0.0");
-				proc = ProcessUtil.exec(sb.toString());
+		//power the controller since it is not on
+		SafeProcess proc = null;
+		try {
+			//start the SafeProcess
+			StringBuilder sb = new StringBuilder().append("ifconfig ").append(interfaceName).append(" 0.0.0.0");
+			proc = ProcessUtil.exec(sb.toString());
 
-				if (proc.waitFor() != 0) {
-					s_logger.error("error executing command --- " + sb.toString() + " --- exit value = " + proc.exitValue());
-					return;
-				}
-			} catch(IOException e) {
-				throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
-			} catch (InterruptedException e) {
-				throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+			if (proc.waitFor() != 0) {
+				s_logger.error("error executing command --- " + sb.toString() + " --- exit value = " + proc.exitValue());
+				return;
 			}
-			finally {
-				if (proc != null) {
-					ProcessUtil.destroy(proc);
-				}
-			}	
+		} catch(IOException e) {
+			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+		} catch (InterruptedException e) {
+			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+		}
+		finally {
+			if (proc != null) {
+				ProcessUtil.destroy(proc);
+			}
 		}
 	}
 	
@@ -1688,13 +1694,20 @@ public class LinuxNetworkUtil {
 		}
 	}
 	
-	public static boolean isEthernetControllerPowered(String interfaceName) throws KuraException {
+	public static boolean isUp(String interfaceName) throws KuraException {
 		//ignore logical interfaces like "1-1.2"
 		if (Character.isDigit(interfaceName.charAt(0))) {
 			return false;
 		}
+	
+		LinuxIfconfig config = getInterfaceConfiguration(interfaceName);
 		
-		return getInterfaceConfiguration(interfaceName).isUp();
+		boolean ret = false;
+		if (config != null) {
+			return config.isUp();
+		}
+		
+		return ret;
 	}
 	
 	@Deprecated

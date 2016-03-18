@@ -818,7 +818,7 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 		try {
 			NetInterfaceType type = LinuxNetworkUtil.getType(interfaceName);
 
-			if(!LinuxNetworkUtil.isUp(interfaceName) ||
+			if(!LinuxNetworkUtil.hasAddress(interfaceName) ||
 					(type == NetInterfaceType.WIFI && !LinuxNetworkUtil.isLinkUp(interfaceName))) {
 
 				s_logger.info("bringing interface {} up", interfaceName);
@@ -833,8 +833,8 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 				}
 				
 				//if it isn't up - at least make sure the Ethernet controller is powered on
-				if(!LinuxNetworkUtil.isUp(interfaceName)) {
-					LinuxNetworkUtil.powerOnEthernetController(interfaceName);
+				if(!LinuxNetworkUtil.hasAddress(interfaceName)) {
+					LinuxNetworkUtil.setUnspecifiedAddress(interfaceName);
 				}
 			} else {
 				s_logger.info("not bringing interface {} up because it is already up", interfaceName);
@@ -852,7 +852,7 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 		
 		if(!interfaceName.equals("lo")) {
 			try {
-				if (LinuxNetworkUtil.isUp(interfaceName)) {
+				if (LinuxNetworkUtil.hasAddress(interfaceName)) {
 					s_logger.info("bringing interface {} down", interfaceName);
 					manageDhcpClient(interfaceName, false);
 					manageDhcpServer(interfaceName, false);

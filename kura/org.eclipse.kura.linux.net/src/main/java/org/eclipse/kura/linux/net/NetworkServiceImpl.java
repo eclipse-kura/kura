@@ -460,7 +460,7 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
 		if(interfaces != null) {
 			for(int i=0; i<interfaces.size(); i++) {
 				NetInterface<? extends NetInterfaceAddress> iface = interfaces.get(i);
-				if(!LinuxNetworkUtil.isUp(iface.getName())) {
+				if(!LinuxNetworkUtil.hasAddress(iface.getName())) {
 					s_logger.debug("removing interface {} because it is not up", iface.getName());
 					interfaces.remove(i);
 					i--;

@@ -77,7 +77,7 @@ public class iwScanTool extends ScanTool implements IScanTool {
 			SafeProcess prIpLink = null;
 			SafeProcess prIpAddr = null;
 			try {
-				if(!LinuxNetworkUtil.isUp(m_ifaceName)) {
+				if(!LinuxNetworkUtil.hasAddress(m_ifaceName)) {
 				    // activate the interface
 					sb.append("ip link set ").append(m_ifaceName).append(" up");
 				    prIpLink = ProcessUtil.exec(sb.toString());

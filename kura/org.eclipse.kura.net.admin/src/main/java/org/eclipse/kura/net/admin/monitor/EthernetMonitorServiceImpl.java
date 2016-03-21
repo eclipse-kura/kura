@@ -190,7 +190,7 @@ public class EthernetMonitorServiceImpl implements EthernetMonitorService, Event
 		        // Make sure the Ethernet Controllers are powered
 		        // FIXME:MC it should be possible to refactor this under the InterfaceState to avoid dual checks
 		        if(!LinuxNetworkUtil.isUp(interfaceName)) {
-					LinuxNetworkUtil.deleteAddress(interfaceName);
+					LinuxNetworkUtil.bringUpDeletingAddress(interfaceName);
 				}
 		        	
 		        // If a new configuration exists, compare it to the existing configuration

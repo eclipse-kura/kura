@@ -92,7 +92,6 @@ public class IptablesConfig {
 		File configFile = new File(FIREWALL_TMP_CONFIG_FILE_NAME);
 		if (configFile.exists()) {
 			restore(FIREWALL_TMP_CONFIG_FILE_NAME);
-			configFile.delete();
 		}
 	}
 	
@@ -127,7 +126,6 @@ public class IptablesConfig {
 		File configFile = new File(FIREWALL_TMP_CONFIG_FILE_NAME);
 		if (configFile.exists()) {
 			restore(FIREWALL_TMP_CONFIG_FILE_NAME);
-			configFile.delete();
 		}
 	}
 	
@@ -174,29 +172,10 @@ public class IptablesConfig {
 	}
 	
 	/*
-	 * Restores (using iptables-restore) firewall settings from specified iptables configuration file 
+	 * Restores (using iptables-restore) firewall settings from temporary iptables configuration file.
+	 * Temporary configuration file is deleted upon completion. 
 	 */
 	public static void restore(String filename) {
-		/*
-		BufferedReader br = null;
-		try {
-			br = new BufferedReader(new FileReader(filename));
-			String line = null;
-			while ((line = br.readLine()) != null) {
-				s_logger.warn("restore():: line={}", line);
-			}
-		} catch (Exception e) {
-			s_logger.error("restore() :: failed to read {} - {}", filename, e);
-		} finally {
-			if (br != null) {
-				try {
-					br.close();
-				} catch (Exception e) {
-					s_logger.error("restore() :: failed to close BufferedReader - {}", e);
-				}
-			}
-		}
-		*/
 		SafeProcess proc = null;
 		try {
 			proc = ProcessUtil.exec("iptables-restore " + filename);
@@ -212,6 +191,10 @@ public class IptablesConfig {
 			if (proc != null) {
 				ProcessUtil.destroy(proc);
 			}
+		}
+		File configFile = new File(filename);
+		if (configFile.exists()) {
+			configFile.delete();
 		}
 	}
 	
@@ -310,11 +293,6 @@ public class IptablesConfig {
 					s_logger.error("clear() :: failed to close FileOutputStream - {}", e);
 				}
 			}
-		}
-		File configFile = new File(FIREWALL_TMP_CONFIG_FILE_NAME);
-		if (configFile.exists()) {
-			restore(FIREWALL_TMP_CONFIG_FILE_NAME);
-			configFile.delete();
 		}
 	}
 	

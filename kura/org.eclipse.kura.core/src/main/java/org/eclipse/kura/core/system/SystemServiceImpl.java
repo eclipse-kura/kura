@@ -568,29 +568,27 @@ public class SystemServiceImpl implements SystemService
 					ProcessUtil.destroy(proc);
 				}
 			}
-		}else if(getOsName().contains("Windows")){
+		} else if (getOsName().contains("Windows")) {
 			try {
 				s_logger.info("executing: InetAddress.getLocalHost " + primaryNetworkInterfaceName);
 				ip = InetAddress.getLocalHost();
 				Enumeration<NetworkInterface> networks = NetworkInterface.getNetworkInterfaces();
-			    while(networks.hasMoreElements()) {
-			        NetworkInterface network = networks.nextElement();
-			        if(network.getIndex()==0){
-			        	ip=network.getInetAddresses().nextElement();
-			        }
-			    }
+				while (networks.hasMoreElements()) {
+					NetworkInterface network = networks.nextElement();
+					if(network.getIndex() == 0) {
+						ip = network.getInetAddresses().nextElement();
+					}
+				}
 				NetworkInterface network = NetworkInterface.getByInetAddress(ip);
 				byte[] mac = network.getHardwareAddress();
 				macAddress = NetUtil.hardwareAddressToString(mac);
 				s_logger.info("macAddress " + macAddress);
 			} catch (UnknownHostException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				s_logger.error(e.getLocalizedMessage());
 			} catch (SocketException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				s_logger.error(e.getLocalizedMessage());
 			}
-		}else {
+		} else {
 			try {
 				List<NetInterface<? extends NetInterfaceAddress>> interfaces = m_networkService.getNetworkInterfaces();
 				if (interfaces != null) {

@@ -162,8 +162,8 @@ public class GpsClockSyncProvider implements ClockSyncProvider, EventHandler {
 		Process procDate = null;
 		Process procTime = null;
 		try {			
-			if(m_positionService!=null){
-				if(m_positionService.isLocked()){
+			if(m_positionService!=null) {
+				if(m_positionService.isLocked()) {
 					String gpsTime = m_positionService.getNmeaTime();
 					String gpsDate = m_positionService.getNmeaDate();
 					// Execute a native Windows command to perform the set time and date.
@@ -179,9 +179,9 @@ public class GpsClockSyncProvider implements ClockSyncProvider, EventHandler {
 						WindowsSetSystemTime winTime = new WindowsSetSystemTime();
 						winTime.SetLocalTime(Integer.parseInt(YY), Integer.parseInt(MM), Integer.parseInt(DD), Integer.parseInt(hh), Integer.parseInt(mm), Integer.parseInt(ss));
 
-			            m_lastSync = new Date();
-			            m_waitForLocked=false;
-			            // Call update method with 0 offset to ensure the clock event gets fired and the HW clock
+						m_lastSync = new Date();
+						m_waitForLocked=false;
+						// Call update method with 0 offset to ensure the clock event gets fired and the HW clock
 						// is updated if desired.
 						m_listener.onClockUpdate(0);
 					}

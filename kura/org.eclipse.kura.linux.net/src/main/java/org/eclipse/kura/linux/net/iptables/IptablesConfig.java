@@ -66,12 +66,8 @@ public class IptablesConfig {
 	public static void clearAllChains() throws KuraException {
 		FileOutputStream fos = null;
 		PrintWriter writer = null;
-		File configFile = new File(FIREWALL_TMP_CONFIG_FILE_NAME);
-		if (configFile.exists()) {
-			configFile.delete();
-		}
 		try {
-			fos = new FileOutputStream(configFile);
+			fos = new FileOutputStream(FIREWALL_TMP_CONFIG_FILE_NAME);
 			writer = new PrintWriter(fos);
 			writer.println("*nat");
 			writer.println("COMMIT");
@@ -93,20 +89,18 @@ public class IptablesConfig {
 				}
 			}
 		}
+		File configFile = new File(FIREWALL_TMP_CONFIG_FILE_NAME);
 		if (configFile.exists()) {
 			restore(FIREWALL_TMP_CONFIG_FILE_NAME);
+			configFile.delete();
 		}
 	}
 	
 	public static void applyBlockPolicy() throws KuraException {
 		FileOutputStream fos = null;
 		PrintWriter writer = null;
-		File configFile = new File(FIREWALL_TMP_CONFIG_FILE_NAME);
-		if (configFile.exists()) {
-			configFile.delete();
-		}
 		try {
-			fos = new FileOutputStream(configFile);
+			fos = new FileOutputStream(FIREWALL_TMP_CONFIG_FILE_NAME);
 			writer = new PrintWriter(fos);
 			writer.println("*nat");
 			writer.println("COMMIT");
@@ -130,8 +124,10 @@ public class IptablesConfig {
 				}
 			}
 		}
+		File configFile = new File(FIREWALL_TMP_CONFIG_FILE_NAME);
 		if (configFile.exists()) {
 			restore(FIREWALL_TMP_CONFIG_FILE_NAME);
+			configFile.delete();
 		}
 	}
 	
@@ -226,12 +222,8 @@ public class IptablesConfig {
 	public void save (String filename) throws KuraException {
 		FileOutputStream fos = null;
 		PrintWriter writer = null;
-		File configFile = new File(FIREWALL_TMP_CONFIG_FILE_NAME);
-		if (configFile.exists()) {
-			configFile.delete();
-		}
 		try {
-			fos = new FileOutputStream(configFile);
+			fos = new FileOutputStream(FIREWALL_TMP_CONFIG_FILE_NAME);
 			writer = new PrintWriter(fos);
 			writer.println("*filter");
 			writer.println("-A INPUT -i lo -j ACCEPT");
@@ -319,8 +311,10 @@ public class IptablesConfig {
 				}
 			}
 		}
+		File configFile = new File(FIREWALL_TMP_CONFIG_FILE_NAME);
 		if (configFile.exists()) {
 			restore(FIREWALL_TMP_CONFIG_FILE_NAME);
+			configFile.delete();
 		}
 	}
 	

@@ -57,7 +57,7 @@ public class NetworkTabsUi extends Composite {
 	AnchorListItem modemGpsTab;
 	ArrayList<AnchorListItem> visibleTabs;
 
-	Tab selectedTab;
+	NetworkTab selectedTab;
 	TabHardwareUi hardware;
 	TabTcpIpUi tcpIp;
 	TabDhcpNatUi dhcpNat;
@@ -264,7 +264,7 @@ public class NetworkTabsUi extends Composite {
 	}
 
 	// return currently selected tab
-	public Tab getSelectedTab() {
+	public NetworkTab getSelectedTab() {
 		return selectedTab;
 
 	}

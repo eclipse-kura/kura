@@ -63,7 +63,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 
-public class TabTcpIpUi extends Composite implements Tab {
+public class TabTcpIpUi extends Composite implements NetworkTab {
 
 	private static final String IPV4_MODE_MANUAL = GwtNetIfConfigMode.netIPv4ConfigModeManual.name();
 	private static final String IPV4_MODE_DHCP = GwtNetIfConfigMode.netIPv4ConfigModeDHCP.name();
@@ -190,27 +190,27 @@ public class TabTcpIpUi extends Composite implements Tab {
 				updatedNetIf.setConfigMode(IPV4_MODE_MANUAL);
 			}
 
-			if (ip.getValue() != null) {
+			if (ip.getValue() != null && !"".equals(ip.getValue().trim())) {
 				updatedNetIf.setIpAddress(ip.getValue());
 			} else {
 				updatedNetIf.setIpAddress("");
 			}
-			if (subnet.getValue() != null) {
+			if (subnet.getValue() != null && !"".equals(subnet.getValue().trim())) {
 				updatedNetIf.setSubnetMask(subnet.getValue());
 			} else {
 				updatedNetIf.setSubnetMask("");
 			}
-			if (gateway.getValue() != null) {
+			if (gateway.getValue() != null && !"".equals(gateway.getValue().trim())) {
 				updatedNetIf.setGateway(gateway.getValue());
 			} else {
 				updatedNetIf.setGateway("");
 			}
-			if (dns.getValue() != null) {
+			if (dns.getValue() != null && !"".equals(dns.getValue().trim())) {
 				updatedNetIf.setDnsServers(dns.getValue());
 			} else {
 				updatedNetIf.setDnsServers("");
 			}
-			if (search.getValue() != null) {
+			if (search.getValue() != null && !"".equals(search.getValue().trim())) {
 				updatedNetIf.setSearchDomains(search.getValue());
 			} else {
 				updatedNetIf.setSearchDomains("");

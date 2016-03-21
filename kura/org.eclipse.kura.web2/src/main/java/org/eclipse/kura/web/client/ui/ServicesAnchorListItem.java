@@ -46,8 +46,9 @@ public class ServicesAnchorListItem extends AnchorListItem {
 			@Override
 			public void onClick(ClickEvent event) {
 				if ((ui.selected != null && ui.selected != item && ui.servicesUi.isDirty()) || 
-						ui.isNetworkDirty() ||
-						ui.isFirewallDirty()) { 
+						ui.isNetworkDirty()  ||
+						ui.isFirewallDirty() ||
+						ui.isSettingsDirty() ) { 
 					final Modal modal = new Modal();
 
 					ModalHeader header = new ModalHeader();

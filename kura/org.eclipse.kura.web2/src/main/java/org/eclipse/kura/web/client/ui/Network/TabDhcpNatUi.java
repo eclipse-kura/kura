@@ -18,6 +18,7 @@ import org.eclipse.kura.web.shared.model.GwtNetIfType;
 import org.eclipse.kura.web.shared.model.GwtNetInterfaceConfig;
 import org.eclipse.kura.web.shared.model.GwtNetRouterMode;
 import org.eclipse.kura.web.shared.model.GwtSession;
+import org.eclipse.kura.web.shared.model.GwtWifiConfig;
 import org.eclipse.kura.web.shared.model.GwtWifiWirelessMode;
 import org.gwtbootstrap3.client.ui.Form;
 import org.gwtbootstrap3.client.ui.FormGroup;
@@ -45,7 +46,7 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 
-public class TabDhcpNatUi extends Composite implements Tab {
+public class TabDhcpNatUi extends Composite implements NetworkTab {
 
 	private static final String ROUTER_OFF_MESSAGE = MessageUtils.get(GwtNetRouterMode.netRouterOff.name());
 	private static final String ROUTER_NAT_MESSAGE = MessageUtils.get(GwtNetRouterMode.netRouterNat.name());
@@ -146,10 +147,10 @@ public class TabDhcpNatUi extends Composite implements Tab {
 			updatedNetIf.setRouterDhcpBeginAddress(begin.getText());
 			updatedNetIf.setRouterDhcpEndAddress(end.getText());
 			updatedNetIf.setRouterDhcpSubnetMask(subnet.getText());
-			if (defaultL.getText() != null) {
+			if (defaultL.getText() != null && !"".equals(defaultL.getText().trim())) {
 				updatedNetIf.setRouterDhcpDefaultLease(Integer.parseInt(defaultL.getText()));
 			}
-			if (max.getText() != null) {
+			if (max.getText() != null && !"".equals(max.getText().trim())) {
 				updatedNetIf.setRouterDhcpMaxLease(Integer.parseInt(max.getText()));
 			}
 			updatedNetIf.setRouterDnsPass(radio1.getValue());
@@ -191,10 +192,15 @@ public class TabDhcpNatUi extends Composite implements Tab {
 		//			radio1.setEnabled(false);
 		//			radio2.setEnabled(false);
 		//		} else {
-		String mode= wirelessTab.activeConfig.getWirelessMode();
+		GwtWifiConfig wifiConfig= wirelessTab.activeConfig;
+		String wifiMode= null;
+		if (wifiConfig != null) {
+			wifiMode= wifiConfig.getWirelessMode();
+		}
 		if ( selectedNetIfConfig.getHwTypeEnum() == GwtNetIfType.WIFI && 
 				wirelessTab != null && 
-				(mode.equals(WIFI_STATION_MODE) || mode.equals(WIFI_DISABLED)) ) {
+				wifiMode != null    &&
+				(wifiMode.equals(WIFI_STATION_MODE) || wifiMode.equals(WIFI_DISABLED)) ) {
 			router.setEnabled(false);
 			begin.setEnabled(false);
 			end.setEnabled(false);

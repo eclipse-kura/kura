@@ -14,6 +14,10 @@
 	<version>1.0.0</version>
 	<packaging>pom</packaging>
 
+	<properties>
+		<camel.version>2.16.0</camel.version>
+	</properties>
+
 	<build>
 		<plugins>
 			<plugin>
@@ -162,12 +166,29 @@
                             <artifactId>org.apache.commons.lang3</artifactId>
                             <version>${org.apache.commons.lang3.version}</version>
                         </artifactItem>
-								<artifactItem>
+						<artifactItem>
                             <groupId>org.eclipse</groupId>
                             <artifactId>org.eclipse.soda.dk.comm</artifactId>
                             <version>${org.eclipse.soda.dk.comm.version}</version>					
-								</artifactItem>    
-							</artifactItems>
+						</artifactItem>    
+								
+						<!-- Apache Camel core bundles -->
+						<artifactItem>
+							<groupId>org.apache.camel</groupId>
+							<artifactId>camel-core</artifactId>
+							<version>${camel.version}</version>
+						</artifactItem>
+						<artifactItem>
+							<groupId>org.apache.camel</groupId>
+							<artifactId>camel-core-osgi</artifactId>
+							<version>${camel.version}</version>
+						</artifactItem>
+						<artifactItem>
+							<groupId>org.apache.camel</groupId>
+							<artifactId>camel-kura</artifactId>
+							<version>${camel.version}</version>
+						</artifactItem>
+					</artifactItems>
 							<outputDirectory>${project.basedir}/target/source/plugins</outputDirectory>
 						</configuration>
 					</execution>

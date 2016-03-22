@@ -64,7 +64,6 @@ import org.eclipse.kura.net.wifi.WifiClientMonitorService;
 import org.eclipse.kura.net.wifi.WifiConfig;
 import org.eclipse.kura.net.wifi.WifiInterfaceAddressConfig;
 import org.eclipse.kura.net.wifi.WifiMode;
-import org.eclipse.kura.system.SystemService;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
@@ -94,7 +93,6 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
 	private boolean m_first;
 
 	private NetworkService m_networkService;
-	private SystemService m_systemService;
 	private EventAdmin m_eventAdmin;
 	private NetworkAdminService m_netAdminService;
 	private NetworkConfigurationService m_netConfigService;
@@ -121,14 +119,6 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
 
 	public void unsetNetworkService(NetworkService networkService) {
 		m_networkService = null;
-	}
-
-	public void setSystemService(SystemService systemService) {
-		m_systemService = systemService;
-	}
-
-	public void unsetSystemService(SystemService systemService) {
-		m_systemService = null;
 	}
 
 	public void setEventAdmin(EventAdmin eventAdmin) {
@@ -805,7 +795,7 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
 						// don't consider FirewallAutoNatConfig
 						continue;
 					}
-					
+
 					for (int j = 0; j < newNetConfigs.size(); j++) {
 						NetConfig newNetConfig = newNetConfigs.get(j);
 						if (newNetConfig instanceof FirewallAutoNatConfig) {

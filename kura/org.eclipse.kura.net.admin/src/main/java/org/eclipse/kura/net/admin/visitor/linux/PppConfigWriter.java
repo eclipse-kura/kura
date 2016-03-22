@@ -97,9 +97,9 @@ public class PppConfigWriter implements NetworkConfigurationVisitor {
                 writeConfig((ModemInterfaceConfigImpl)netInterfaceConfig);
             }
         }
-        if (!foundModemInterfaceConfigImpl) {
-        	removeKuraExtendedCellularConfig();
-        }
+//        if (!foundModemInterfaceConfigImpl) {
+//        	removeKuraExtendedCellularConfig();
+//        }
     }
     
     private void writeConfig(ModemInterfaceConfigImpl modemInterfaceConfig) throws KuraException {

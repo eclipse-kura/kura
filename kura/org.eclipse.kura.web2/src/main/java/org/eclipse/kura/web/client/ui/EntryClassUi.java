@@ -128,7 +128,7 @@ public class EntryClassUi extends Composite {
 		initWidget(uiBinder.createAndBindUi(this));
 
 		// TODO : standardize the URL?
-//		header.setUrl("eclipse/kura/icons/kura_logo_small.png");
+		//		header.setUrl("eclipse/kura/icons/kura_logo_small.png");
 		header.setStyleName("headerLogo");
 		Date now = new Date();
 		@SuppressWarnings("deprecation")
@@ -413,7 +413,7 @@ public class EntryClassUi extends Composite {
 		} else {
 			firewallDirty= false;
 		}
-		
+
 		if (settings.isVisible()) {
 			settingsDirty= settingsBinder.isDirty(); 
 		}
@@ -464,7 +464,7 @@ public class EntryClassUi extends Composite {
 			return false;
 		}
 	}
-	
+
 	public boolean isSettingsDirty(){
 		if (settings.isVisible()) {
 			return settingsBinder.isDirty();
@@ -501,7 +501,9 @@ public class EntryClassUi extends Composite {
 	}
 
 	public static void hideWaitModal() {
-		m_waitModal.hide();
+		if (m_waitModal != null) {
+			m_waitModal.hide();
+		}
 	}
 
 	private void forceTabsCleaning() {

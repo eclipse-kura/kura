@@ -32,7 +32,7 @@ import org.gwtbootstrap3.client.ui.ModalBody;
 import org.gwtbootstrap3.client.ui.ModalFooter;
 import org.gwtbootstrap3.client.ui.TabListItem;
 import org.gwtbootstrap3.client.ui.TextBox;
-import org.gwtbootstrap3.client.ui.gwt.DataGrid;
+import org.gwtbootstrap3.client.ui.gwt.CellTable;
 import org.gwtbootstrap3.client.ui.html.Span;
 
 import com.google.gwt.core.client.GWT;
@@ -64,6 +64,8 @@ public class PackagesPanelUi extends Composite {
 	private final static String SERVLET_URL = "/" + GWT.getModuleName()	+ "/file/deploy";
 	private static final Messages MSGS = GWT.create(Messages.class);
 
+	private int refreshRequests;
+
 	interface PackagesPanelUiUiBinder extends UiBinder<Widget, PackagesPanelUi> {
 	}
 
@@ -81,7 +83,7 @@ public class PackagesPanelUi extends Composite {
 	@UiField
 	Button packagesRefresh, packagesInstall, packagesUninstall;
 	@UiField
-	DataGrid<GwtDeploymentPackage> packagesGrid = new DataGrid<GwtDeploymentPackage>(10);
+	CellTable<GwtDeploymentPackage> packagesGrid = new CellTable<GwtDeploymentPackage>(10);
 	@UiField
 	FileUpload filePath;
 	@UiField
@@ -102,6 +104,20 @@ public class PackagesPanelUi extends Composite {
 		packagesGrid.setSelectionModel(selectionModel);
 		initTable();
 
+		initTabButtons();
+
+		initModalHandlers();
+	}
+
+	public void setSession(GwtSession currentSession) {
+		gwtSession = currentSession;
+	}
+
+	public void refresh() {
+		refresh(100);
+	}	
+
+	private void initTabButtons() {
 		// Refresh Button
 		packagesRefresh.setText(MSGS.refreshButton());
 		packagesRefresh.addClickHandler(new ClickHandler() {
@@ -156,19 +172,63 @@ public class PackagesPanelUi extends Composite {
 		});
 	}
 
-	public void setSession(GwtSession currentSession) {
-		gwtSession = currentSession;
-	}
+	private void initModalHandlers() {
+		fileSubmit.addClickHandler(new ClickHandler(){
+			@Override
+			public void onClick(ClickEvent event) {
+				gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
+					@Override
+					public void onFailure(Throwable ex) {
+						FailureHandler.handle(ex);
+					}
 
-	public void refresh() {
-		refresh(100);
-	}	
+					@Override
+					public void onSuccess(GwtXSRFToken token) {
+						xsrfTokenFieldFile.setValue(token.getToken());
+						packagesFormFile.submit();
+					}
+				});
+
+			}});
+
+		fileCancel.addClickHandler(new ClickHandler(){
+			@Override
+			public void onClick(ClickEvent event) {			
+				uploadModal.hide();
+			}});
+
+		urlSubmit.addClickHandler(new ClickHandler(){
+			@Override
+			public void onClick(ClickEvent event) {
+				gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
+					@Override
+					public void onFailure(Throwable ex) {
+						FailureHandler.handle(ex);
+					}
+
+					@Override
+					public void onSuccess(GwtXSRFToken token) {
+						xsrfTokenFieldUrl.setValue(token.getToken());
+						packagesFormUrl.submit();
+					}
+				});
+			}});
+
+		urlCancel.addClickHandler(new ClickHandler(){
+			@Override
+			public void onClick(ClickEvent event) {			
+				uploadModal.hide();
+			}});
+	}
 
 	private void refresh(int delay) {
 		Timer timer = new Timer() {
 			@Override
 			public void run() {
-				loadPackagesData();
+				if (refreshRequests == 0){
+					loadPackagesData();
+					refreshRequests++;
+				}
 			}
 		};
 		timer.schedule(delay);
@@ -202,29 +262,6 @@ public class PackagesPanelUi extends Composite {
 			}
 		});
 
-		fileSubmit.addClickHandler(new ClickHandler(){
-			@Override
-			public void onClick(ClickEvent event) {
-				gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
-					@Override
-					public void onFailure(Throwable ex) {
-						FailureHandler.handle(ex);
-					}
-
-					@Override
-					public void onSuccess(GwtXSRFToken token) {
-						xsrfTokenFieldFile.setValue(token.getToken());
-						packagesFormFile.submit();
-					}
-				});
-				
-			}});
-		fileCancel.addClickHandler(new ClickHandler(){
-			@Override
-			public void onClick(ClickEvent event) {			
-				uploadModal.hide();
-			}});
-
 
 		//******URL TAB ****//
 		formUrl.setName("packageUrl");
@@ -253,28 +290,6 @@ public class PackagesPanelUi extends Composite {
 				}
 			}
 		});
-
-		urlSubmit.addClickHandler(new ClickHandler(){
-			@Override
-			public void onClick(ClickEvent event) {
-				gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
-					@Override
-					public void onFailure(Throwable ex) {
-						FailureHandler.handle(ex);
-					}
-
-					@Override
-					public void onSuccess(GwtXSRFToken token) {
-						xsrfTokenFieldUrl.setValue(token.getToken());
-						packagesFormUrl.submit();
-					}
-				});
-			}});
-		urlCancel.addClickHandler(new ClickHandler(){
-			@Override
-			public void onClick(ClickEvent event) {			
-				uploadModal.hide();
-			}});
 	}
 
 	private void uninstall(final GwtDeploymentPackage selected) {
@@ -296,12 +311,11 @@ public class PackagesPanelUi extends Composite {
 					public void onFailure(Throwable caught) {
 						EntryClassUi.hideWaitModal();
 						FailureHandler.handle(caught);
-						refresh(2500);
 					}
 
 					@Override
 					public void onSuccess(Void result) {
-						refresh(2500);
+						refresh(1000);
 						EntryClassUi.hideWaitModal();
 					}});
 			}
@@ -335,12 +349,12 @@ public class PackagesPanelUi extends Composite {
 	private void loadPackagesData() {
 		packagesDataProvider.getList().clear();
 
-		//EntryClassUi.showWaitModal();
+		EntryClassUi.showWaitModal();
 		gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
 
 			@Override
 			public void onFailure(Throwable ex) {
-				//EntryClassUi.hideWaitModal();
+				EntryClassUi.hideWaitModal();
 				FailureHandler.handle(ex);
 			}
 
@@ -361,6 +375,8 @@ public class PackagesPanelUi extends Composite {
 						for(GwtDeploymentPackage pair : result){
 							packagesDataProvider.getList().add(pair);
 						}
+						int size = packagesDataProvider.getList().size();
+						packagesGrid.setVisibleRange(0, size);
 						packagesDataProvider.flush();
 
 						if(packagesDataProvider.getList().isEmpty()){
@@ -372,7 +388,8 @@ public class PackagesPanelUi extends Composite {
 							notification.setVisible(false);
 						}
 
-						//EntryClassUi.hideWaitModal();
+						refreshRequests--;
+						EntryClassUi.hideWaitModal();
 					}});
 
 			}

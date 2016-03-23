@@ -234,34 +234,38 @@ public class NetworkInterfacesTableUi extends Composite {
 		});
 	}
 	
-	private Integer compareFromName (String name1, String name2) {
+	private int compareFromName (String name1, String name2) {
+		int result= 1;
 		if (name1.equals(name2)) {
-			return 0;
+			result= 0;
 		}
 		if ("lo".equals(name1)) {
-			return new Integer(-1);
+			result= -1;
 		}
 		if (name1.startsWith("eth") && !"lo".equals(name2)) {
 			if (name2.startsWith("eth")) {
 				//compare eths
-				name2.compareTo(name1);
+				result= name1.compareTo(name2);
+			} else {
+				result= -1;
 			}
-			return new Integer(-1);
 		}
 		if (name1.startsWith("wlan") && !name2.startsWith("lo") && !name2.startsWith("eth")) {
 			if (name2.startsWith("wlan")) {
 				//compare wlans
-				name2.compareTo(name1);
+				result= name1.compareTo(name2);
+			} else {
+				result= -1;
 			}
-			return new Integer(-1);
 		}
 		if (name1.startsWith("ppp") && !name2.startsWith("wlan") && !name2.startsWith("lo") && !name2.startsWith("eth")) {
 			if (name2.startsWith("ppp")) {
 				//compare ppps
-				name2.compareTo(name1);
+				result= name1.compareTo(name2);
+			} else {
+				result= -1;
 			}
-			return new Integer(-1);
 		}
-		return new Integer(1);
+		return result;
 	}
 }

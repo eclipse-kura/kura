@@ -176,7 +176,11 @@ public class NatTabUi extends Composite {
 		TextColumn<GwtFirewallNatEntry> col1 = new TextColumn<GwtFirewallNatEntry>() {
 			@Override
 			public String getValue(GwtFirewallNatEntry object) {
-				return String.valueOf(object.getInInterface());
+				if (object.getInInterface() != null) {
+					return String.valueOf(object.getInInterface());
+				} else {
+					return "";
+				}
 			}
 		};
 		col1.setCellStyleNames("status-table-row");
@@ -185,7 +189,11 @@ public class NatTabUi extends Composite {
 		TextColumn<GwtFirewallNatEntry> col2 = new TextColumn<GwtFirewallNatEntry>() {
 			@Override
 			public String getValue(GwtFirewallNatEntry object) {
-				return String.valueOf(object.getOutInterface());
+				if (object.getOutInterface() != null) {
+					return String.valueOf(object.getOutInterface());
+				} else {
+					return "";
+				}
 			}
 		};
 		col2.setCellStyleNames("status-table-row");
@@ -194,7 +202,11 @@ public class NatTabUi extends Composite {
 		TextColumn<GwtFirewallNatEntry> col3 = new TextColumn<GwtFirewallNatEntry>() {
 			@Override
 			public String getValue(GwtFirewallNatEntry object) {
-				return String.valueOf(object.getProtocol());
+				if (object.getProtocol() != null) {
+					return String.valueOf(object.getProtocol());
+				} else {
+					return "";
+				}
 			}
 		};
 		col3.setCellStyleNames("status-table-row");
@@ -203,7 +215,11 @@ public class NatTabUi extends Composite {
 		TextColumn<GwtFirewallNatEntry> col4 = new TextColumn<GwtFirewallNatEntry>() {
 			@Override
 			public String getValue(GwtFirewallNatEntry object) {
-				return String.valueOf(object.getSourceNetwork());
+				if (object.getSourceNetwork() != null) {
+					return String.valueOf(object.getSourceNetwork());
+				} else {
+					return "";
+				}
 			}
 		};
 		col4.setCellStyleNames("status-table-row");
@@ -212,7 +228,11 @@ public class NatTabUi extends Composite {
 		TextColumn<GwtFirewallNatEntry> col5 = new TextColumn<GwtFirewallNatEntry>() {
 			@Override
 			public String getValue(GwtFirewallNatEntry object) {
-				return String.valueOf(object.getDestinationNetwork());
+				if (object.getDestinationNetwork() != null) {
+					return String.valueOf(object.getDestinationNetwork());
+				} else {
+					return "";
+				}
 			}
 		};
 		col5.setCellStyleNames("status-table-row");
@@ -221,7 +241,11 @@ public class NatTabUi extends Composite {
 		TextColumn<GwtFirewallNatEntry> col6 = new TextColumn<GwtFirewallNatEntry>() {
 			@Override
 			public String getValue(GwtFirewallNatEntry object) {
-				return String.valueOf(object.getMasquerade());
+				if (object.getMasquerade() != null) {
+					return String.valueOf(object.getMasquerade());
+				} else {
+					return "";
+				}
 			}
 		};
 		col6.setCellStyleNames("status-table-row");

@@ -186,19 +186,6 @@ public class PackagesPanelUi extends Composite {
 		xsrfTokenFieldFile.setName("xsrfToken");
 		xsrfTokenFieldFile.setValue("");
 
-		gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
-			@Override
-			public void onFailure(Throwable ex) {
-				FailureHandler.handle(ex);
-			}
-
-			@Override
-			public void onSuccess(GwtXSRFToken token) {
-				xsrfTokenFieldFile.setValue(token.getToken());
-				xsrfTokenFieldUrl.setValue(token.getToken());
-			}
-		});
-
 		packagesFormFile.setAction(SERVLET_URL + "/upload");
 		packagesFormFile.setEncoding(FormPanel.ENCODING_MULTIPART);
 		packagesFormFile.setMethod(FormPanel.METHOD_POST);
@@ -218,7 +205,19 @@ public class PackagesPanelUi extends Composite {
 		fileSubmit.addClickHandler(new ClickHandler(){
 			@Override
 			public void onClick(ClickEvent event) {
-				packagesFormFile.submit();
+				gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
+					@Override
+					public void onFailure(Throwable ex) {
+						FailureHandler.handle(ex);
+					}
+
+					@Override
+					public void onSuccess(GwtXSRFToken token) {
+						xsrfTokenFieldFile.setValue(token.getToken());
+						packagesFormFile.submit();
+					}
+				});
+				
 			}});
 		fileCancel.addClickHandler(new ClickHandler(){
 			@Override
@@ -258,7 +257,18 @@ public class PackagesPanelUi extends Composite {
 		urlSubmit.addClickHandler(new ClickHandler(){
 			@Override
 			public void onClick(ClickEvent event) {
-				packagesFormUrl.submit();
+				gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
+					@Override
+					public void onFailure(Throwable ex) {
+						FailureHandler.handle(ex);
+					}
+
+					@Override
+					public void onSuccess(GwtXSRFToken token) {
+						xsrfTokenFieldUrl.setValue(token.getToken());
+						packagesFormUrl.submit();
+					}
+				});
 			}});
 		urlCancel.addClickHandler(new ClickHandler(){
 			@Override

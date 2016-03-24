@@ -15,7 +15,6 @@ import java.io.IOException;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
-import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,7 +26,7 @@ import de.entropia.can.CanSocket.CanInterface;
 import de.entropia.can.CanSocket.Mode;
 
 
-public class CanConnectionServiceImpl implements CanConnectionService, ConfigurableComponent {
+public class CanConnectionServiceImpl implements CanConnectionService {
 
 	private static final Logger s_logger = LoggerFactory.getLogger(CanConnectionServiceImpl.class);
 	

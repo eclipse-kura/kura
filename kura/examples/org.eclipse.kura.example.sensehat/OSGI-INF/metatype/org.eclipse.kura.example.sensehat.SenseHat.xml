@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (c) 2011, 2014 Eurotech and/or its affiliates
+
+     All rights reserved. This program and the accompanying materials
+     are made available under the terms of the Eclipse Public License v1.0
+     which accompanies this distribution, and is available at
+     http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Eurotech
+
+-->
+<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
+    <OCD id="org.eclipse.kura.example.sensehat.SenseHat"
+         name="SenseHat" 
+         description="This bundle is an interface to the Raspberry Sense Hat.">
+        
+        <Icon resource="OSGI-INF/astro-pi-hat.png" size="32"/>
+
+        <AD id="imu.accelerometer.enable"  
+            name="imu.accelerometer.enable"
+            type="Boolean"
+            cardinality="0" 
+            required="true"
+            default="false" 
+            description="Enable accelerometer LSM9DS1 IMU sensor."/>
+
+        <AD id="imu.gyroscope.enable"  
+            name="imu.gyroscope.enable"
+            type="Boolean"
+            cardinality="0" 
+            required="true"
+            default="false" 
+            description="Enable gyroscope LSM9DS1 IMU sensor."/>
+            
+        <AD id="imu.compass.enable"  
+            name="imu.compass.enable"
+            type="Boolean"
+            cardinality="0" 
+            required="true"
+            default="false" 
+            description="Enable compass/magnetometer LSM9DS1 IMU sensor."/>
+            
+        <AD id="pressure.enable"  
+            name="pressure.enable"
+            type="Boolean"
+            cardinality="0" 
+            required="true"
+            default="false" 
+            description="Enable LPS25H Pressure sensor."/>
+
+        <AD id="humidity.enable"  
+            name="humidity.enable"
+            type="Boolean"
+            cardinality="0" 
+            required="true"
+            default="false" 
+            description="Enable HTS221 Humidity sensor."/>
+            
+        <AD id="screen.enable"  
+            name="screen.enable"
+            type="Boolean"
+            cardinality="0" 
+            required="true"
+            default="false" 
+            description="Enable lcd screen."/>
+
+        <AD id="screen.rotation"  
+            name="screen.rotation"
+            type="Integer"
+            cardinality="0" 
+            required="true"
+            default="0" 
+            description="Set the screen rotation. Only 0, 90, 180 and 270 degrees are allowed."/>
+            
+        <AD id="screen.message"  
+            name="screen.message"
+            type="String"
+            cardinality="0" 
+            required="true"
+            default="Hello!" 
+            description="Letter to be written on screen."/>
+            
+        <AD id="stick.enable"  
+            name="stick.enable"
+            type="Boolean"
+            cardinality="0" 
+            required="true"
+            default="false" 
+            description="Enable stick."/>
+                                    
+    </OCD>
+    
+    <Designate pid="org.eclipse.kura.example.sensehat.SenseHat">
+        <Object ocdref="org.eclipse.kura.example.sensehat.SenseHat"/>
+    </Designate>
+</MetaData>

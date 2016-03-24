@@ -19,6 +19,8 @@ import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.ui.EntryClassUi;
 import org.eclipse.kura.web.client.ui.Tab;
 import org.eclipse.kura.web.client.util.FailureHandler;
+import org.eclipse.kura.web.shared.GwtKuraErrorCode;
+import org.eclipse.kura.web.shared.GwtKuraException;
 import org.eclipse.kura.web.shared.model.GwtSnapshot;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenService;
@@ -95,50 +97,22 @@ public class SnapshotsTabUi extends Composite implements Tab {
 		initTable();
 		snapshotsGrid.setSelectionModel(selectionModel);
 
-		refresh.setText(MSGS.refresh());
-		refresh.addClickHandler(new ClickHandler() {
+		initInterfaceButtons();
+		
+		initUploadModalHandlers();
+		
+		snapshotsForm.addSubmitCompleteHandler(new SubmitCompleteHandler() {
 			@Override
-			public void onClick(ClickEvent event) {
-				refresh();
-			}
-		});
-
-		download.setText(MSGS.download());
-		download.addClickHandler(new ClickHandler() {
-			@Override
-			public void onClick(ClickEvent event) {
-				selected = selectionModel.getSelectedObject();
-				if (selected != null) {
-					//please see http://stackoverflow.com/questions/13277752/gwt-open-window-after-rpc-is-prevented-by-popup-blocker
-					m_downloadWindow= CustomWindow.open(null, "_blank", "location=no"); 
-					gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
-						@Override
-						public void onFailure(Throwable ex) {
-							FailureHandler.handle(ex);
-						}
-
-						@Override
-						public void onSuccess(GwtXSRFToken token) {
-							downloadSnapshot(token.getToken());
-						}
-					});
+			public void onSubmitComplete(SubmitCompleteEvent event) {
+				String htmlResponse = event.getResults();
+				EntryClassUi.hideWaitModal();
+				if (htmlResponse == null || htmlResponse.isEmpty()) {
+					logger.log(Level.FINER, MSGS.information() + ": " + MSGS.fileUploadSuccess());
+					refresh();
+				} else {
+					logger.log(Level.SEVERE, MSGS.information() + ": " + MSGS.fileUploadFailure());
+					FailureHandler.handle(new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR));
 				}
-			}
-		});
-
-		rollback.setText(MSGS.rollback());
-		rollback.addClickHandler(new ClickHandler() {
-			@Override
-			public void onClick(ClickEvent event) {
-				rollback();
-			}
-		});
-
-		upload.setText(MSGS.upload());
-		upload.addClickHandler(new ClickHandler() {
-			@Override
-			public void onClick(ClickEvent event) {
-				uploadAndApply();
 			}
 		});
 	}
@@ -230,6 +204,84 @@ public class SnapshotsTabUi extends Composite implements Tab {
 		snapshotsDataProvider.addDataDisplay(snapshotsGrid);
 	}
 	
+	private void initUploadModalHandlers() {
+		uploadCancel.addClickHandler(new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
+				uploadModal.hide();
+			}
+		});
+
+		uploadUpload.addClickHandler(new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
+				gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
+					@Override
+					public void onFailure(Throwable ex) {
+						FailureHandler.handle(ex);
+					}
+
+					@Override
+					public void onSuccess(GwtXSRFToken token) {
+						xsrfTokenField.setValue(token.getToken());
+						snapshotsForm.submit();
+						uploadModal.hide();
+						EntryClassUi.showWaitModal();
+					}
+				});
+			}
+		});
+	}
+
+	private void initInterfaceButtons() {
+		refresh.setText(MSGS.refresh());
+		refresh.addClickHandler(new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
+				refresh();
+			}
+		});
+
+		download.setText(MSGS.download());
+		download.addClickHandler(new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
+				selected = selectionModel.getSelectedObject();
+				if (selected != null) {
+					//please see http://stackoverflow.com/questions/13277752/gwt-open-window-after-rpc-is-prevented-by-popup-blocker
+					m_downloadWindow= CustomWindow.open(null, "_blank", "location=no"); 
+					gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
+						@Override
+						public void onFailure(Throwable ex) {
+							FailureHandler.handle(ex);
+						}
+
+						@Override
+						public void onSuccess(GwtXSRFToken token) {
+							downloadSnapshot(token.getToken());
+						}
+					});
+				}
+			}
+		});
+
+		rollback.setText(MSGS.rollback());
+		rollback.addClickHandler(new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
+				rollback();
+			}
+		});
+
+		upload.setText(MSGS.upload());
+		upload.addClickHandler(new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
+				uploadAndApply();
+			}
+		});
+	}
+	
 	private void rollback() {
 		final GwtSnapshot snapshot = selectionModel.getSelectedObject();
 		if (snapshot != null) {
@@ -316,46 +368,6 @@ public class SnapshotsTabUi extends Composite implements Tab {
 		xsrfTokenField.setID("xsrfToken");
         xsrfTokenField.setName("xsrfToken");
         xsrfTokenField.setValue("");
-        
-        gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
-			@Override
-			public void onFailure(Throwable ex) {
-				FailureHandler.handle(ex);
-			}
-
-			@Override
-			public void onSuccess(GwtXSRFToken token) {
-				xsrfTokenField.setValue(token.getToken());
-			}
-		});
-
-		uploadCancel.addClickHandler(new ClickHandler() {
-			@Override
-			public void onClick(ClickEvent event) {
-				uploadModal.hide();
-			}
-		});
-
-		uploadUpload.addClickHandler(new ClickHandler() {
-			@Override
-			public void onClick(ClickEvent event) {
-				snapshotsForm.submit();
-			}
-		});
-
-		snapshotsForm.addSubmitCompleteHandler(new SubmitCompleteHandler() {
-			@Override
-			public void onSubmitComplete(SubmitCompleteEvent event) {
-				String htmlResponse = event.getResults();
-				if (htmlResponse == null || htmlResponse.isEmpty()) {
-					logger.log(Level.FINER, MSGS.information() + ": " + MSGS.fileUploadSuccess());
-					uploadModal.hide();
-				} else {
-					logger.log(Level.SEVERE, MSGS.information() + ": " + MSGS.fileUploadFailure());
-				}
-
-			}
-		});
 
 	}
 }

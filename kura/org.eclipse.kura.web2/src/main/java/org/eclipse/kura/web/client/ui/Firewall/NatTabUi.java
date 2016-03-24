@@ -13,8 +13,6 @@ package org.eclipse.kura.web.client.ui.Firewall;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.ui.EntryClassUi;
@@ -27,6 +25,9 @@ import org.eclipse.kura.web.shared.service.GwtNetworkService;
 import org.eclipse.kura.web.shared.service.GwtNetworkServiceAsync;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenService;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenServiceAsync;
+import org.gwtbootstrap3.client.shared.event.ModalHideEvent;
+import org.gwtbootstrap3.client.shared.event.ModalHideHandler;
+import org.gwtbootstrap3.client.ui.Alert;
 import org.gwtbootstrap3.client.ui.Button;
 import org.gwtbootstrap3.client.ui.FormGroup;
 import org.gwtbootstrap3.client.ui.FormLabel;
@@ -57,7 +58,6 @@ import com.google.gwt.view.client.SingleSelectionModel;
 public class NatTabUi extends Composite {
 
 	private static NatTabUiUiBinder uiBinder = GWT.create(NatTabUiUiBinder.class);
-	private static final Logger logger = Logger.getLogger(NatTabUi.class.getSimpleName());
 
 	interface NatTabUiUiBinder extends UiBinder<Widget, NatTabUi> {
 	}
@@ -66,19 +66,22 @@ public class NatTabUi extends Composite {
 
 	private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
 	private final GwtNetworkServiceAsync gwtNetworkService = GWT.create(GwtNetworkService.class);
-	
+
 	private ListDataProvider<GwtFirewallNatEntry> natDataProvider = new ListDataProvider<GwtFirewallNatEntry>();
 	final SingleSelectionModel<GwtFirewallNatEntry> selectionModel = new SingleSelectionModel<GwtFirewallNatEntry>();
-	
+
 	private final String REGEX_ALPHANUMERIC = "^[a-zA-Z0-9_]+$";
 	private final String REGEX_NETWORK = "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,3})";
-	
+
 	private boolean m_dirty;
 
-	GwtFirewallNatEntry natEntry;
+	private GwtFirewallNatEntry newNatEntry;
+	private GwtFirewallNatEntry editNatEntry;
 
 	@UiField
 	Button apply, create, edit, delete;
+	@UiField
+	Alert notification;
 	@UiField
 	CellTable<GwtFirewallNatEntry> natGrid = new CellTable<GwtFirewallNatEntry>();
 
@@ -105,9 +108,10 @@ public class NatTabUi extends Composite {
 		initWidget(uiBinder.createAndBindUi(this));
 		initButtons();
 		initTable();
+		initModal();
 	}
 
-	
+
 	//
 	// Public methods
 	//
@@ -138,6 +142,16 @@ public class NatTabUi extends Composite {
 						int size = natDataProvider.getList().size();
 						natGrid.setVisibleRange(0, size);
 						natDataProvider.flush();
+
+						if(natDataProvider.getList().isEmpty()){
+							natGrid.setVisible(false);
+							notification.setVisible(true);
+							notification.setText(MSGS.firewallPortForwardTableNoPorts());
+						} else {
+							natGrid.setVisible(true);
+							notification.setVisible(false);
+						}
+
 						apply.setEnabled(false);
 						EntryClassUi.hideWaitModal();
 					}
@@ -145,29 +159,15 @@ public class NatTabUi extends Composite {
 			}
 		});
 	}
-	
+
 	public boolean isDirty() {
 		return m_dirty;
 	}
-	
+
 	public void setDirty(boolean b) {
 		m_dirty = b;
 	}
-	
-	
-	//
-	// Protected methods
-	//
-	protected void editEntry(GwtFirewallNatEntry natEntry, GwtFirewallNatEntry existingEntry) {
-		if (!duplicateEntry(natEntry)) {
-			natDataProvider.getList().remove(existingEntry);
-			natDataProvider.getList().add(natEntry);
-			natDataProvider.flush();
-		}
-		apply.setEnabled(true);
-	}
-	
-	
+
 	//
 	// Private methods
 	//
@@ -272,7 +272,7 @@ public class NatTabUi extends Composite {
 			@Override
 			public void onClick(ClickEvent event) {
 				final GwtFirewallNatEntry selection = selectionModel.getSelectedObject();
-				if (selection != null) {
+				if (selection != null) { //TODO: this part should be structured the same as the other firewall tabs
 					final Modal confirm = new Modal();
 					ModalBody confirmBody = new ModalBody();
 					ModalFooter confirmFooter = new ModalFooter();
@@ -312,7 +312,25 @@ public class NatTabUi extends Composite {
 			public void onClick(ClickEvent event) {
 				GwtFirewallNatEntry selection = selectionModel.getSelectedObject();
 				if (selection != null) {
-					initModal(selection);
+					showModal(selection);
+				}
+			}
+		});
+		natForm.addHideHandler(new ModalHideHandler() {
+			@Override
+			public void onHide(ModalHideEvent evt) {
+				if (editNatEntry != null) { 
+					GwtFirewallNatEntry oldEntry= selectionModel.getSelectedObject();
+					natDataProvider.getList().remove(oldEntry);
+					if (!duplicateEntry(editNatEntry)) {
+						natDataProvider.getList().add(editNatEntry);
+						natDataProvider.flush();
+						apply.setEnabled(true);
+						editNatEntry= null;
+					} else {	//end duplicate
+						natDataProvider.getList().add(oldEntry);
+						natDataProvider.flush();
+					}
 				}
 			}
 		});
@@ -323,7 +341,21 @@ public class NatTabUi extends Composite {
 		create.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
-				initModal(null);
+				showModal(null);
+			}
+		});
+		natForm.addHideHandler(new ModalHideHandler() {
+			@Override
+			public void onHide(ModalHideEvent evt) {
+				if (newNatEntry != null && !duplicateEntry(newNatEntry)) {
+					natDataProvider.getList().add(newNatEntry);
+					int size = natDataProvider.getList().size();
+					natGrid.setVisibleRange(0, size);
+					natDataProvider.flush();
+					apply.setEnabled(true);
+					natGrid.redraw();
+					newNatEntry= null;
+				}
 			}
 		});
 	}
@@ -372,22 +404,7 @@ public class NatTabUi extends Composite {
 		});
 	}
 
-	private void initModal(final GwtFirewallNatEntry existingEntry) {
-
-		if (existingEntry == null) {
-			natForm.setTitle(MSGS.firewallNatFormInformation());
-		} else {
-			natForm.setTitle(MSGS.firewallNatFormUpdate(existingEntry.getOutInterface()));
-		}
-
-		setModalFieldsLabels();
-
-		setModalFieldsValues(existingEntry);
-
-		setModalFieldsTooltips();
-
-		setModalFieldsHandlers();
-
+	private void initModal() {
 		// Handle Buttons
 		cancel.addClickHandler(new ClickHandler() {
 			@Override
@@ -408,7 +425,7 @@ public class NatTabUi extends Composite {
 					return;
 				}
 				// Fetch form data
-				natEntry = new GwtFirewallNatEntry();
+				GwtFirewallNatEntry natEntry = new GwtFirewallNatEntry();
 				natEntry.setInInterface(input.getText());
 				natEntry.setOutInterface(output.getText());
 				natEntry.setProtocol(protocol.getSelectedItemText());
@@ -416,17 +433,41 @@ public class NatTabUi extends Composite {
 				natEntry.setDestinationNetwork(destination.getText());
 				natEntry.setMasquerade(enable.getSelectedItemText());
 
-				if (existingEntry == null) {
-					addNewEntry(natEntry);
-				} else {
-					editEntry(natEntry, existingEntry);
+				if (submit.getId().equals("new")) {
+					newNatEntry= natEntry;
+					editNatEntry= null;
+				} else if (submit.getId().equals("edit")) {
+					editNatEntry= natEntry;
+					newNatEntry= null;
 				}
 				natForm.hide();
-				
+
 				setDirty(true);
 			}
 
 		});
+	}
+
+	private void showModal(final GwtFirewallNatEntry existingEntry) {
+		if (existingEntry == null) {
+			natForm.setTitle(MSGS.firewallNatFormInformation());
+		} else {
+			natForm.setTitle(MSGS.firewallNatFormUpdate(existingEntry.getOutInterface()));
+		}
+
+		setModalFieldsLabels();
+
+		setModalFieldsValues(existingEntry);
+
+		setModalFieldsTooltips();
+
+		setModalFieldsHandlers();
+
+		if (existingEntry == null) {
+			submit.setId("new");
+		} else {
+			submit.setId("edit");
+		}
 
 		natForm.show();
 	}
@@ -490,7 +531,7 @@ public class NatTabUi extends Composite {
 					break;
 				}
 			}
-			
+
 			for (int i = 0; i < enable.getItemCount(); i++) {
 				if (existingEntry.getMasquerade().equals(enable.getItemText(i))) {
 					enable.setSelectedIndex(i);
@@ -502,7 +543,7 @@ public class NatTabUi extends Composite {
 			output.setText("");
 			source.setText("");
 			destination.setText("");
-			
+
 			protocol.setSelectedIndex(0);
 			enable.setSelectedIndex(0);
 		}
@@ -544,18 +585,6 @@ public class NatTabUi extends Composite {
 		for (GwtFirewallNatMasquerade masquerade : GwtFirewallNatMasquerade.values()) {
 			enable.addItem(masquerade.name());
 		}
-	}
-
-	private void addNewEntry(GwtFirewallNatEntry natEntry) {
-		if (!duplicateEntry(natEntry)) {
-			natDataProvider.getList().add(natEntry);
-			int size = natDataProvider.getList().size();
-			natGrid.setVisibleRange(0, size);
-			natDataProvider.flush();
-		} else {
-			logger.log(Level.FINER, MSGS.firewallNatFormError() + ": " + MSGS.firewallNatFormDuplicate());
-		}
-		apply.setEnabled(true);
 	}
 
 	private boolean duplicateEntry(GwtFirewallNatEntry firewallNatEntry) {

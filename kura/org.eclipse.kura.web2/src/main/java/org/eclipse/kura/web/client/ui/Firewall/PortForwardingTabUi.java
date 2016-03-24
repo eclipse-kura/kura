@@ -124,6 +124,7 @@ public class PortForwardingTabUi extends Composite {
 
 		initButtons();
 		initTable();
+		initModal();
 	}
 
 	//
@@ -160,6 +161,16 @@ public class PortForwardingTabUi extends Composite {
 						int size = portForwardDataProvider.getList().size();
 						portForwardGrid.setVisibleRange(0, size);
 						portForwardDataProvider.flush();
+
+						if(portForwardDataProvider.getList().isEmpty()){
+							portForwardGrid.setVisible(false);
+							notification.setVisible(true);
+							notification.setText(MSGS.firewallPortForwardTableNoPorts());
+						} else {
+							portForwardGrid.setVisible(true);
+							notification.setVisible(false);
+						}
+
 						apply.setEnabled(false);
 						EntryClassUi.hideWaitModal();
 					}
@@ -333,33 +344,33 @@ public class PortForwardingTabUi extends Composite {
 		delete.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
-				final GwtFirewallPortForwardEntry selection = selectionModel.getSelectedObject();
+				GwtFirewallPortForwardEntry selection = selectionModel.getSelectedObject();
 
 				if (selection != null) {
 
 					alert.setTitle(MSGS.confirm());
 					alertBody.setText(MSGS.firewallOpenPortDeleteConfirmation(String.valueOf(selection.getInPort())));
-					yes.setText(MSGS.yesButton());
-					no.setText(MSGS.noButton());
-					no.addClickHandler(new ClickHandler() {
-						@Override
-						public void onClick(ClickEvent event) {
-							alert.hide();
-						}
-					});
-					yes.addClickHandler(new ClickHandler() {
-						@Override
-						public void onClick(ClickEvent event) {
-							alert.hide();
-							portForwardDataProvider.getList().remove(selection);
-							portForwardDataProvider.flush();
-							apply.setEnabled(true);
-							notification.setVisible(false);
-							setDirty(true);
-						}
-					});
 					alert.show();
 				}
+			}
+		});
+		yes.setText(MSGS.yesButton());
+		no.setText(MSGS.noButton());
+		no.addClickHandler(new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
+				alert.hide();
+			}
+		});
+		yes.addClickHandler(new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
+				alert.hide();
+				portForwardDataProvider.getList().remove(selectionModel.getSelectedObject());
+				portForwardDataProvider.flush();
+				apply.setEnabled(true);
+				notification.setVisible(false);
+				setDirty(true);
 			}
 		});
 	}
@@ -369,27 +380,29 @@ public class PortForwardingTabUi extends Composite {
 		edit.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
-				final GwtFirewallPortForwardEntry selection = selectionModel.getSelectedObject();
+				GwtFirewallPortForwardEntry selection = selectionModel.getSelectedObject();
 
 				if (selection != null) {
-					initModal(selection);
+					showModal(selection);
 				}
-				portForwardingForm.addHideHandler(new ModalHideHandler() {
-					@Override
-					public void onHide(ModalHideEvent evt) {
-						if (editPortForwardEntry != null && !duplicateEntry(editPortForwardEntry)) {
-							portForwardDataProvider.getList().remove(selection);
-							portForwardDataProvider.getList().add(editPortForwardEntry);
-							int size = portForwardDataProvider.getList().size();
-							portForwardGrid.setVisibleRange(0, size);
-							portForwardDataProvider.flush();
-							apply.setEnabled(true);
-							editPortForwardEntry= null;
-							//portForwardGrid.redraw();
-							//setVisibility();
-						}	//end duplicate
+			}
+		});
+		portForwardingForm.addHideHandler(new ModalHideHandler() {
+			@Override
+			public void onHide(ModalHideEvent evt) {
+				if (editPortForwardEntry != null) {
+					GwtFirewallPortForwardEntry oldEntry= selectionModel.getSelectedObject();
+					portForwardDataProvider.getList().remove(oldEntry);
+					if (!duplicateEntry(editPortForwardEntry)) {
+						portForwardDataProvider.getList().add(editPortForwardEntry);
+						portForwardDataProvider.flush();
+						apply.setEnabled(true);
+						editPortForwardEntry= null;
+					} else {	//end duplicate
+						portForwardDataProvider.getList().add(oldEntry);
+						portForwardDataProvider.flush();
 					}
-				});
+				}
 			}
 		});
 	}
@@ -399,21 +412,21 @@ public class PortForwardingTabUi extends Composite {
 		create.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
-				initModal(null);
-				portForwardingForm.addHideHandler(new ModalHideHandler() {
-					@Override
-					public void onHide(ModalHideEvent evt) {
-						if (newPortForwardEntry != null && !duplicateEntry(newPortForwardEntry)) {
-							portForwardDataProvider.getList().add(newPortForwardEntry);
-							int size = portForwardDataProvider.getList().size();
-							portForwardGrid.setVisibleRange(0, size);
-							portForwardDataProvider.flush();
-							apply.setEnabled(true);
-							portForwardGrid.redraw();
-							newPortForwardEntry= null;
-						}
-					}
-				});
+				showModal(null);
+			}
+		});
+		portForwardingForm.addHideHandler(new ModalHideHandler() {
+			@Override
+			public void onHide(ModalHideEvent evt) {
+				if (newPortForwardEntry != null && !duplicateEntry(newPortForwardEntry)) {
+					portForwardDataProvider.getList().add(newPortForwardEntry);
+					int size = portForwardDataProvider.getList().size();
+					portForwardGrid.setVisibleRange(0, size);
+					portForwardDataProvider.flush();
+					apply.setEnabled(true);
+					portForwardGrid.redraw();
+					newPortForwardEntry= null;
+				}
 			}
 		});
 	}
@@ -464,23 +477,7 @@ public class PortForwardingTabUi extends Composite {
 		});
 	}
 
-	private void initModal(final GwtFirewallPortForwardEntry existingEntry) {
-		if (existingEntry == null) {
-			// new
-			portForwardingForm.setTitle(MSGS.firewallPortForwardFormInformation());
-		} else {
-			// edit existing entry
-			portForwardingForm.setTitle(MSGS.firewallPortForwardFormUpdate(String.valueOf(existingEntry.getInPort())));
-		}
-
-		setModalFieldsLabels();
-
-		setModalFieldsTooltips();
-
-		setModalFieldsValues(existingEntry);
-
-		setModalFieldsHandlers();
-		
+	private void initModal() {
 		initMACConfirmModal();
 
 		// handle buttons
@@ -492,13 +489,6 @@ public class PortForwardingTabUi extends Composite {
 			}
 		});
 
-
-		if (existingEntry == null) {
-			submit.setId("new");
-		} else {
-			submit.setId("edit");
-		}
-		
 		submit.setText(MSGS.submitButton());
 		submit.addClickHandler(new ClickHandler() {
 
@@ -550,19 +540,43 @@ public class PortForwardingTabUi extends Composite {
 				} 
 
 				if (submit.getId().equals("new")) {
-					newPortForwardEntry = portForwardEntry;
-					editPortForwardEntry = null;
+					newPortForwardEntry= portForwardEntry;
+					editPortForwardEntry= null;
 				} else if (submit.getId().equals("edit")) {
-					editPortForwardEntry = portForwardEntry;
-					newPortForwardEntry = null;
+					editPortForwardEntry= portForwardEntry;
+					newPortForwardEntry= null;
 				}
-				submit.setId("");  //TODO: this is a patch. To understand why I need this: why I'm getting multiple click events?
-				
+
 				setDirty(true);
-				
+
 				portForwardingForm.hide();
 			}
 		});// end submit click handler
+	}
+
+	private void showModal(final GwtFirewallPortForwardEntry existingEntry) {
+		if (existingEntry == null) {
+			// new
+			portForwardingForm.setTitle(MSGS.firewallPortForwardFormInformation());
+		} else {
+			// edit existing entry
+			portForwardingForm.setTitle(MSGS.firewallPortForwardFormUpdate(String.valueOf(existingEntry.getInPort())));
+		}
+
+		setModalFieldsLabels();
+
+		setModalFieldsTooltips();
+
+		setModalFieldsValues(existingEntry);
+
+		setModalFieldsHandlers();
+
+
+		if (existingEntry == null) {
+			submit.setId("new");
+		} else {
+			submit.setId("edit");
+		}
 
 		portForwardingForm.show();
 	}// end initModal

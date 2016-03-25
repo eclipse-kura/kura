@@ -52,10 +52,10 @@ public class CanConnectionServiceImpl implements CanConnectionService {
 			//s_logger.debug("message sent on " + ifName);
 			socket.close();
 		} catch (IOException e) {
-			e.printStackTrace();
+			s_logger.error("Error on CanSocket in sendCanMessage: {}",e.getMessage());
 			throw e;
-		}
-	}
+		} 	
+    }
 
 	@Override
 	public CanMessage receiveCanMessage(int can_id, int can_mask) throws KuraException, IOException {
@@ -74,11 +74,10 @@ public class CanConnectionServiceImpl implements CanConnectionService {
 			cm.setData(cf.getData());
 			socket.close();
 			return cm;
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		} catch (IOException e) {
+			s_logger.error("Error on CanSocket in receiveCanMessage: {}",e.getMessage());
+			throw e;
 		}
-		return null;
 	}
 
 }

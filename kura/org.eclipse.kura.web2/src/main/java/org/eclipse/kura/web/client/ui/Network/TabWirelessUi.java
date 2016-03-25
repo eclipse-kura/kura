@@ -189,15 +189,15 @@ public class TabWirelessUi extends Composite implements NetworkTab {
 					String tcpIpStatus=tcpTab.getStatus();
 					if(!tcpIpStatus.equals(tcpStatus)){
 						if(GwtNetIfStatus.netIPv4StatusEnabledLAN.name().equals(tcpIpStatus)){
-							activeConfig=selectedNetIfConfig.getAccessPointWifiConfig();
+							activeConfig= selectedNetIfConfig.getAccessPointWifiConfig();
 						}else{
-							activeConfig=selectedNetIfConfig.getStationWifiConfig();
+							activeConfig= selectedNetIfConfig.getStationWifiConfig();
 						}
 						tcpStatus=tcpIpStatus;
 						netTabs.adjustInterfaceTabs();
 					}
 				}
-				refreshForm();
+				update();
 			}});
 	}
 
@@ -345,7 +345,9 @@ public class TabWirelessUi extends Composite implements NetworkTab {
 			}
 			// select proper channels
 			for (int channel : alChannels) {
-				selectionModel.setSelected(channelDataProvider.getList().get(channel - 1), true);
+				if (channel <= maxIndex) {
+					selectionModel.setSelected(channelDataProvider.getList().get(channel - 1), true);
+				}
 			}
 		} else {
 			logger.info("No channels specified, selecting all ...");

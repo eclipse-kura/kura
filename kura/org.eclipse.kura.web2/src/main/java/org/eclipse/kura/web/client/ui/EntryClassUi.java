@@ -295,6 +295,7 @@ public class EntryClassUi extends Composite {
 						contentPanelBody.clear();
 						contentPanelBody.add(packagesBinder);
 						packagesBinder.setSession(currentSession);
+						packagesBinder.setMainUi(ui);
 						packagesBinder.refresh();
 					}
 				});

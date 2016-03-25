@@ -7,14 +7,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class LSM9DS1 {
-
-	//	https://github.com/RPi-Distro/python-sense-hat/blob/master/sense_hat/sense_hat.py
-	//	https://github.com/richards-tech/RTIMULib/blob/master/RTIMULib/IMUDrivers/RTIMULSM9DS1.cpp
-	//  /etc/RTIMULib.ini
-	// See https://github.com/richards-tech/RTIMULib/blob/master/RTIMULib/IMUDrivers/RTIMULSM9DS1.cpp
-	// To do:
-	// Finish methods implementation
-	// Swap X and Y values
 	
 	private static final Logger s_logger = LoggerFactory.getLogger(LSM9DS1.class);
 

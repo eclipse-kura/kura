@@ -230,7 +230,7 @@ public class FrameBuffer {
 		System.arraycopy(alphabet.getLetter(" "), 0, message, message.length - 8, 8);
 		
 		short[][][] currentFrame = new short[8][8][3];
-		for (int i = 0; i < message.length + 1; i++) {
+		for (int i = 0; i < message.length - 8; i++) {
 			for (int x = 0; x < 8; x++) {
 				for (int y = 0; y < 8; y++) {
 					currentFrame[x][y][0] = (message[x + i][y][0] == 0) ? backColor[0] : textColor[0];

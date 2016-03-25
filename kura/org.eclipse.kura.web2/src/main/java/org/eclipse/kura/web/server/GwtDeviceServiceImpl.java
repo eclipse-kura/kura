@@ -149,7 +149,7 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
 			Position position = positionService.getPosition();
 			pairs.add( new GwtGroupedNVPair("gpsInfo", "gpsLat",  Double.toString(Math.toDegrees(position.getLatitude().getValue()))));
 			pairs.add( new GwtGroupedNVPair("gpsInfo", "gpsLong", Double.toString(Math.toDegrees(position.getLongitude().getValue()))));
-			pairs.add( new GwtGroupedNVPair("gpsInfo", "gpsAlt",  Double.toString(Math.toDegrees(position.getAltitude().getValue()))));
+			pairs.add( new GwtGroupedNVPair("gpsInfo", "gpsAlt",  position.getAltitude().toString()));
 			
 			// TODO: Add cloud status information in the Denali Device Profile
 //			deviceConfig.deviceStatus

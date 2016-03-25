@@ -183,8 +183,8 @@ public class GwtStatusServiceImpl extends OsgiRemoteServiceServlet implements Gw
 			PositionService positionService = ServiceLocator.getInstance().getService(PositionService.class);
 			
 			if (positionService != null) {
-				pairs.add(new GwtGroupedNVPair("positionStatus", "Longitude", positionService.getPosition().getLongitude().toString()));
-				pairs.add(new GwtGroupedNVPair("positionStatus", "Latitude", positionService.getPosition().getLatitude().toString()));
+				pairs.add(new GwtGroupedNVPair("positionStatus", "Longitude", Double.toString(Math.toDegrees(positionService.getPosition().getLongitude().getValue()))));
+				pairs.add(new GwtGroupedNVPair("positionStatus", "Latitude", Double.toString(Math.toDegrees(positionService.getPosition().getLatitude().getValue()))));
 				pairs.add(new GwtGroupedNVPair("positionStatus", "Altitude", positionService.getPosition().getAltitude().toString()));
 			}
 		} catch (GwtKuraException e) {

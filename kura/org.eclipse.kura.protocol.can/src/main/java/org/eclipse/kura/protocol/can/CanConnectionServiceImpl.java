@@ -42,25 +42,29 @@ public class CanConnectionServiceImpl implements CanConnectionService {
 			throws KuraException, IOException {
 		if(message.length>8)
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "CAN send : Incorrect frame length");
-			
+		
+		CanSocket socket=null;
     	try {
-			CanSocket socket = new CanSocket(Mode.RAW);
+			socket = new CanSocket(Mode.RAW);
 			socket.setLoopbackMode(false);
 			CanInterface canif = new CanInterface(socket, ifName);
 			socket.bind(canif);
 			socket.send(new CanFrame(canif, new CanId(canId), message));
 			//s_logger.debug("message sent on " + ifName);
-			socket.close();
 		} catch (IOException e) {
 			s_logger.error("Error on CanSocket in sendCanMessage: {}",e.getMessage());
 			throw e;
+		}finally{
+			if(socket!=null)
+				socket.close();
 		} 	
     }
 
 	@Override
 	public CanMessage receiveCanMessage(int can_id, int can_mask) throws KuraException, IOException {
+		CanSocket socket=null;
 		try {
-			CanSocket socket = new CanSocket(Mode.RAW);
+			socket = new CanSocket(Mode.RAW);
 			socket.setLoopbackMode(false);
 			socket.bind(CanSocket.CAN_ALL_INTERFACES);
 			if(can_id>=0){
@@ -72,11 +76,13 @@ public class CanConnectionServiceImpl implements CanConnectionService {
 			CanMessage cm = new CanMessage();
 			cm.setCanId(ci.getCanId_SFF());
 			cm.setData(cf.getData());
-			socket.close();
 			return cm;
 		} catch (IOException e) {
 			s_logger.error("Error on CanSocket in receiveCanMessage: {}",e.getMessage());
 			throw e;
+		}finally{
+			if(socket!=null)
+				socket.close();
 		}
 	}
 

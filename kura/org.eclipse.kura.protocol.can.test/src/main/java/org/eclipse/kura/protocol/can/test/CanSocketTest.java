@@ -119,9 +119,11 @@ public class CanSocketTest implements ConfigurableComponent {
 			if(m_orig>=0){
 				try {
 					testSendImpl(m_ifName,m_canId,m_orig);
-				} catch (Exception e) {
-					s_logger.warn("CanConnection Crash!");			
-					e.printStackTrace();
+				} catch (KuraException e) {
+					s_logger.warn("CanConnection Crash : {}",e.getMessage());			
+					return false;
+				} catch (IOException e) {
+					s_logger.warn("CanConnection Crash : {}",e.getMessage());			
 					return false;
 				}
 			}
@@ -137,11 +139,11 @@ public class CanSocketTest implements ConfigurableComponent {
 				cm = m_canConnection.receiveCanMessage(-1,0x7FF);
 				
 			} catch (KuraException e) {
-				s_logger.warn("CanConnection Crash! -> KuraException");			
-				e.printStackTrace();
+				s_logger.warn("CanConnection Crash : {}",e.getMessage());			
+				return false;
 			} catch (IOException e) {
-				s_logger.warn("CanConnection Crash! -> IOException");			
-				e.printStackTrace();
+				s_logger.warn("CanConnection Crash : {}",e.getMessage());			
+				return false;
 			}
 			b = cm.getData();
 			if(b!=null){
@@ -163,29 +165,25 @@ public class CanSocketTest implements ConfigurableComponent {
 
 
 
-	public void testSendImpl(String ifName, int orig, int dest) {
-		try {
-			if((m_canConnection==null)||(orig<0)) 
-				return;
-			int id = 0x500 + (orig << 4) + dest;
-			StringBuilder sb = new StringBuilder("Try to send can frame with message = ");
-			byte btest[] = new byte[8];
-			for(int i=0; i<8; i++){
-				btest[i]=(byte) (indice+i);
-				sb.append(btest[i]);
-				sb.append(" ");
-			}			
-			sb.append(" and id = ");
-			sb.append(id);
-			s_logger.info(sb.toString());
-			
-			m_canConnection.sendCanMessage(ifName, id, btest);
-			
-			indice++;
-			if(indice>14) indice=0;
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+	public void testSendImpl(String ifName, int orig, int dest) throws KuraException, IOException
+	{
+		if((m_canConnection==null)||(orig<0)) 
+			return;
+		int id = 0x500 + (orig << 4) + dest;
+		StringBuilder sb = new StringBuilder("Try to send can frame with message = ");
+		byte btest[] = new byte[8];
+		for(int i=0; i<8; i++){
+			btest[i]=(byte) (indice+i);
+			sb.append(btest[i]);
+			sb.append(" ");
+		}			
+		sb.append(" and id = ");
+		sb.append(id);
+		s_logger.info(sb.toString());
+		
+		m_canConnection.sendCanMessage(ifName, id, btest);
+		
+		indice++;
+		if(indice>14) indice=0;
 	}
 }

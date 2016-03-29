@@ -62,11 +62,12 @@ public class TabModemUi extends Composite implements NetworkTab {
 	private static final Messages MSGS = GWT.create(Messages.class);
 	private static final String REGEX_NUM = "(?:\\d*)?\\d+";
 
-	GwtSession session;
-	boolean dirty;
-	GwtModemInterfaceConfig selectedNetIfConfig;
+	private GwtSession session;
+	private TabTcpIpUi tcpTab;
+	private boolean dirty;
+	private GwtModemInterfaceConfig selectedNetIfConfig;
 	private final Map<String, String> defaultDialString = new HashMap<String, String>();
-	String dialString;
+	private String dialString;
 
 	@UiField
 	FormGroup groupReset, groupMaxfail, groupIdle, groupInterval, groupFailure,
@@ -97,12 +98,20 @@ public class TabModemUi extends Composite implements NetworkTab {
 	@UiField
 	FieldSet field;
 
-	public TabModemUi(GwtSession currentSession) {
+	public TabModemUi(GwtSession currentSession, TabTcpIpUi tcp) {
 		initWidget(uiBinder.createAndBindUi(this));
 		session = currentSession;
+		tcpTab = tcp;
+		
 		defaultDialString.put("HE910", "atd*99***1#");
 		defaultDialString.put("DE910", "atd#777");
 		initForm();
+		
+		tcpTab.status.addChangeHandler(new ChangeHandler(){
+			@Override
+			public void onChange(ChangeEvent event) {
+				update();
+			}});
 	}
 
 	@Override

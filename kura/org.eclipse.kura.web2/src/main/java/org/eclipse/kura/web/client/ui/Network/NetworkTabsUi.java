@@ -334,12 +334,12 @@ public class NetworkTabsUi extends Composite {
 		// Modem
 		modemTab = new AnchorListItem(MSGS.netModemCellular());
 		visibleTabs.add(modemTab);
-		modem = new TabModemUi(session);
+		modem = new TabModemUi(session, tcpIp);
 		modemTab.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
 				setSelected(modemTab);
-				modem.refresh();  //TODO: to check if needed here or can be invoked elsewhere
+				//modem.refresh();  //TODO: to check if needed here or can be invoked elsewhere
 				selectedTab = modem;
 				content.clear();
 				content.add(modem);

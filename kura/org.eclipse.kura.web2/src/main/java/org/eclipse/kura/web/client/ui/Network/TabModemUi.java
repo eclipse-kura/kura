@@ -132,7 +132,9 @@ public class TabModemUi extends Composite implements NetworkTab {
 			groupDial.setValidationState(ValidationState.ERROR);
 		}
 		if (apn.getText() == null || "".equals(apn.getText().trim())) {
-			groupApn.setValidationState(ValidationState.ERROR);
+			if (apn.isEnabled()) {
+				groupApn.setValidationState(ValidationState.ERROR);
+			}
 		}
 		if (maxfail.getText() == null || "".equals(maxfail.getText().trim())) {
 			groupMaxfail.setValidationState(ValidationState.ERROR);
@@ -392,8 +394,12 @@ public class TabModemUi extends Composite implements NetworkTab {
 			public void onBlur(BlurEvent event) {
 				setDirty(true);
 				if(apn.getText() == null || "".equals(apn.getText().trim())){
-					groupApn.setValidationState(ValidationState.ERROR);
-				}else{
+					if (apn.isEnabled()) {
+						groupApn.setValidationState(ValidationState.ERROR);
+					} else {
+						groupApn.setValidationState(ValidationState.NONE);
+					}
+				} else{
 					groupApn.setValidationState(ValidationState.NONE);
 				}
 			}});

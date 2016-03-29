@@ -642,8 +642,7 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
 	}
 
 	private void reloadKernelModule(String interfaceName, WifiMode wifiMode) throws KuraException {
-		s_logger.info("monitor() :: reload {} using kernel module for WiFi mode {}",
-				interfaceName, wifiMode);
+		s_logger.info("monitor() :: reload {} using kernel module for WiFi mode {}", interfaceName, wifiMode);
 		if (LinuxNetworkUtil.isKernelModuleLoaded(interfaceName, wifiMode)) {
 			LinuxNetworkUtil.unloadKernelModule(interfaceName);
 		}
@@ -668,8 +667,8 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
 						continue;
 					}
 
-					if(netInterfaceConfig instanceof WifiInterfaceConfigImpl) {
-						if(isWifiEnabled((WifiInterfaceConfigImpl)netInterfaceConfig)) {
+					if (netInterfaceConfig instanceof WifiInterfaceConfigImpl) {
+						if (isWifiEnabled((WifiInterfaceConfigImpl)netInterfaceConfig)) {
 							s_logger.debug("Adding {} to enabledInterfaces", interfaceName);
 							m_enabledInterfaces.add(interfaceName);
 						} else {
@@ -682,10 +681,10 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
 				s_logger.info("networkConfiguration is null");
 			}
 
-			if(m_enabledInterfaces.size() > 0) {
+			if (!m_enabledInterfaces.isEmpty()) {
 				m_interfaceStatuses = getInterfaceStatuses(m_enabledInterfaces);
 
-				if(monitorTask == null) {
+				if (monitorTask == null) {
 					s_logger.info("Starting WifiMonitor thread...");
 					stopThread.set(false);
 					monitorTask = m_executor.submit(new Runnable() {
@@ -786,45 +785,11 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
 				if (newWifiMode != currentWifiMode) {
 					reconfiguredInterfaces.add(interfaceName);
 					continue;
-				}
+				} 
 
-				boolean foundConfigMatch = false;
-				for (int i = 0; i < currentNetConfigs.size(); i++) {
-					NetConfig currentNetConfig = currentNetConfigs.get(i);
-					if (currentNetConfig instanceof FirewallAutoNatConfig) {
-						// don't consider FirewallAutoNatConfig
-						continue;
-					}
+				//Modes don't match. We need to compare configs deeply
+				internalWifiConfigCompare(reconfiguredInterfaces, interfaceName, currentNetConfigs, newNetConfigs);
 
-					for (int j = 0; j < newNetConfigs.size(); j++) {
-						NetConfig newNetConfig = newNetConfigs.get(j);
-						if (newNetConfig instanceof FirewallAutoNatConfig) {
-							// don't consider FirewallAutoNatConfig
-							continue;
-						}
-
-						// we check for two instances of the same class that are not equal each other.
-						if (newNetConfig.getClass() == currentNetConfig.getClass() && !newNetConfig.equals(currentNetConfig)) {
-							if (currentNetConfig instanceof WifiConfig && 
-									((WifiConfig) currentNetConfig).getMode() != ((WifiConfig) newNetConfig).getMode()) { //((WifiConfig) currentNetConfig).getMode() != newWifiMode
-								// we enter here if we are comparing WifiConfig instances and the mode differs. Two instances 
-								// of WifiConfig exist: one with mode= MASTER and one with mode= INFRA.
-								// we try to compare only objects with the same mode, in order to have a correct comparison.
-								continue;
-							} else {
-								foundConfigMatch = true;     
-								s_logger.debug("\tConfig changed - Old config: {}", currentNetConfig);
-								s_logger.debug("\tConfig changed - New config: {}", newNetConfig);
-								reconfiguredInterfaces.add(interfaceName);
-								break;
-							}
-						}
-					}
-
-					if (foundConfigMatch) {
-						break;
-					}
-				}
 			} else if(newConfig != null) {
 				//only newConfig - oldConfig is null
 				s_logger.debug("oldConfig was null, adding newConfig");
@@ -837,18 +802,60 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
 			} else {
 				s_logger.debug("old and new wifi config are null...");
 			}
+		}
+
+		for (String interfaceName : reconfiguredInterfaces) {
+			s_logger.info("WifiMonitor: configuration for {} has changed", interfaceName);
+			WifiInterfaceConfigImpl newConfig = null;
+			if(m_newNetConfiguration != null) {
+				NetInterfaceConfig<? extends NetInterfaceAddressConfig> newNetInterfaceConfig = m_newNetConfiguration.getNetInterfaceConfig(interfaceName);
+				if(newNetInterfaceConfig instanceof WifiInterfaceConfigImpl) {
+					newConfig = (WifiInterfaceConfigImpl) newNetInterfaceConfig;
+				}
+			}
 
 			// do we need to monitor?
-			if(isWifiEnabled(newConfig)) {
+			if (isWifiEnabled(newConfig) && !m_enabledInterfaces.contains(interfaceName)) {
 				s_logger.debug("Adding {} to list of enabled interfaces", interfaceName);
 				m_enabledInterfaces.add(interfaceName);
-			} else {
+			} else if (!m_disabledInterfaces.contains(interfaceName)) {
 				s_logger.debug("Removing {} from list of enabled interfaces because it is disabled", interfaceName);
 				m_disabledInterfaces.add(interfaceName);
 			}
 		}
 
 		return reconfiguredInterfaces;
+	}
+
+	private void internalWifiConfigCompare(Set<String> reconfiguredInterfaces, String interfaceName, List<NetConfig> currentNetConfigs, List<NetConfig> newNetConfigs) {
+		for (int i = 0; i < currentNetConfigs.size(); i++) {
+			NetConfig currentNetConfig = currentNetConfigs.get(i);
+			if (currentNetConfig instanceof FirewallAutoNatConfig) {
+				continue; //we don't compare FirewallAutoNatConfig instances
+			} 
+			
+			for (int j = 0; j < newNetConfigs.size(); j++) {
+				NetConfig newNetConfig = newNetConfigs.get(j);
+				if (newNetConfig instanceof FirewallAutoNatConfig) {
+					continue; //we don't compare FirewallAutoNatConfig instances
+				} 
+				
+				if (newNetConfig.getClass() == currentNetConfig.getClass() && 
+						!newNetConfig.equals(currentNetConfig) && 
+						!(currentNetConfig instanceof WifiConfig && 
+						((WifiConfig) currentNetConfig).getMode() != ((WifiConfig) newNetConfig).getMode())) { //((WifiConfig) currentNetConfig).getMode() != newWifiMode
+
+					// we are not entering here if we are comparing WifiConfig instances and the mode differs. Two instances 
+					// of WifiConfig exist: one with mode= MASTER and one with mode= INFRA.
+					// we try to compare only objects with the same mode, in order to have a correct comparison.
+					s_logger.debug("\tConfig changed - Old config: {}", currentNetConfig);
+					s_logger.debug("\tConfig changed - New config: {}", newNetConfig);
+					reconfiguredInterfaces.add(interfaceName);
+					return;
+				}
+			}
+
+		}
 	}
 
 	private boolean isAccessPointAvailable(String interfaceName, String ssid) throws KuraException {

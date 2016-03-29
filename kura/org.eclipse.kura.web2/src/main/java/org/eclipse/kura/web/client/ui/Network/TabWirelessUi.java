@@ -121,11 +121,12 @@ public class TabWirelessUi extends Composite implements NetworkTab {
 	private static final int    MAX_WIFI_CHANNEL   = 13;
 	private static final int	MAX_SSID_LENGTH	   = 32;
 
-	GwtSession session;
-	TabTcpIpUi tcpTab;
-	NetworkTabsUi netTabs;
-	boolean dirty, ssidInit;
-	GwtWifiNetInterfaceConfig selectedNetIfConfig;
+	private GwtSession session;
+	private TabTcpIpUi tcpTab;
+	private NetworkTabsUi netTabs;
+	private boolean dirty;
+	private boolean ssidInit;
+	private GwtWifiNetInterfaceConfig selectedNetIfConfig;
 	GwtWifiConfig activeConfig;
 
 	@UiField
@@ -181,24 +182,9 @@ public class TabWirelessUi extends Composite implements NetworkTab {
 		initForm();
 		setPasswordValidation();
 
-		tcpTab.status.addChangeHandler(new ChangeHandler(){
-			@Override
-			public void onChange(ChangeEvent event) {
-				if(selectedNetIfConfig!=null){
-					//set the default values for wireless mode if tcp/ip status was changed
-					String tcpIpStatus=tcpTab.getStatus();
-					if(!tcpIpStatus.equals(tcpStatus)){
-						if(GwtNetIfStatus.netIPv4StatusEnabledLAN.name().equals(tcpIpStatus)){
-							activeConfig= selectedNetIfConfig.getAccessPointWifiConfig();
-						}else{
-							activeConfig= selectedNetIfConfig.getStationWifiConfig();
-						}
-						tcpStatus=tcpIpStatus;
-						netTabs.adjustInterfaceTabs();
-					}
-				}
-				update();
-			}});
+		tcpTab.status.addChangeHandler(createChangeHandler());
+		
+		wireless.addChangeHandler(createChangeHandler());
 	}
 
 	@UiHandler(value = { "wireless", "ssid", "radio", "security", "password",
@@ -308,6 +294,27 @@ public class TabWirelessUi extends Composite implements NetworkTab {
 	private void update() {
 		setValues(true);
 		refreshForm();
+	}
+	
+	private ChangeHandler createChangeHandler() {
+		return new ChangeHandler(){
+			@Override
+			public void onChange(ChangeEvent event) {
+				if(selectedNetIfConfig!=null){
+					//set the default values for wireless mode if tcp/ip status was changed
+					String tcpIpStatus=tcpTab.getStatus();
+					if(!tcpIpStatus.equals(tcpStatus)){
+						if(GwtNetIfStatus.netIPv4StatusEnabledLAN.name().equals(tcpIpStatus)){
+							activeConfig= selectedNetIfConfig.getAccessPointWifiConfig();
+						}else{
+							activeConfig= selectedNetIfConfig.getStationWifiConfig();
+						}
+						tcpStatus=tcpIpStatus;
+						netTabs.adjustInterfaceTabs();
+					}
+				}
+				update();
+			}};
 	}
 
 	private void setValues(boolean b) {

@@ -378,8 +378,8 @@ public class SslTab extends LayoutContainer {
 		m_falseRadio.setValueAttribute("false");
 
 		m_hostnameVerification = new RadioGroup();  
-		m_hostnameVerification.setName("Hostname Verification");  
-		m_hostnameVerification.setItemId("Hostname Verification");
+		m_hostnameVerification.setName(MSGS.settingsSSLConfigurationHostnameVerification());  
+		m_hostnameVerification.setItemId(MSGS.settingsSSLConfigurationHostnameVerification());
 		m_hostnameVerification.setFieldLabel(MSGS.settingsSSLConfigurationHostnameVerification());  
 		m_hostnameVerification.add(m_trueRadio);  
 		m_hostnameVerification.add(m_falseRadio);

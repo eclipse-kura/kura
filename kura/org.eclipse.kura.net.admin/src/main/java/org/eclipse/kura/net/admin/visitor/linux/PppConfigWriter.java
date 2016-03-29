@@ -90,16 +90,26 @@ public class PppConfigWriter implements NetworkConfigurationVisitor {
     @Override
     public void visit(NetworkConfiguration config) throws KuraException {
         List<NetInterfaceConfig<? extends NetInterfaceAddressConfig>> netInterfaceConfigs = config.getModifiedNetInterfaceConfigs();
+        boolean foundModifiedModemInterfaceConfigImpl = false;
         boolean foundModemInterfaceConfigImpl = false;
         for(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig : netInterfaceConfigs) {
             if(netInterfaceConfig instanceof ModemInterfaceConfigImpl) {
-            	foundModemInterfaceConfigImpl = true;
+            	foundModifiedModemInterfaceConfigImpl = true;
                 writeConfig((ModemInterfaceConfigImpl)netInterfaceConfig);
             }
         }
-//        if (!foundModemInterfaceConfigImpl) {
-//        	removeKuraExtendedCellularConfig();
-//        }
+        if (!foundModifiedModemInterfaceConfigImpl) {
+	        List<NetInterfaceConfig<? extends NetInterfaceAddressConfig>> allNetInterfaceConfigs = config.getNetInterfaceConfigs();
+	        for(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig : allNetInterfaceConfigs) {
+	        	 if(netInterfaceConfig instanceof ModemInterfaceConfigImpl) {
+	        		 foundModemInterfaceConfigImpl = true;
+	        		 break;
+	        	 }
+	        }
+	        if (!foundModemInterfaceConfigImpl) {
+	        	removeKuraExtendedCellularConfig();
+	        }
+        }
     }
     
     private void writeConfig(ModemInterfaceConfigImpl modemInterfaceConfig) throws KuraException {

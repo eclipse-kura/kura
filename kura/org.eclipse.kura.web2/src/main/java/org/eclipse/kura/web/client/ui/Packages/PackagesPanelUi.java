@@ -17,7 +17,6 @@ import java.util.logging.Logger;
 
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.ui.EntryClassUi;
-import org.eclipse.kura.web.client.ui.ServicesUi;
 import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.shared.model.GwtDeploymentPackage;
 import org.eclipse.kura.web.shared.model.GwtSession;

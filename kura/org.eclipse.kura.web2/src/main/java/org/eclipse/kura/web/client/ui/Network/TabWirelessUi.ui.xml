@@ -182,6 +182,9 @@
 					<b:PanelBody>
 						<gwt:DataGrid bordered="true" condensed="true"
 							striped="true" hover="true" height="200px" width="100%" ui:field="ssidGrid" />
+						<b:Alert type="INFO" ui:field="searching">
+							<b.html:Text text="Searching..." />
+						</b:Alert>
 						<b:Alert type="WARNING" ui:field="noSsid">
 							<b.html:Text text="No Networks found" />
 						</b:Alert>

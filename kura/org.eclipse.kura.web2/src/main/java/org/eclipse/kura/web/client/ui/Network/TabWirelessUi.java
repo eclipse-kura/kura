@@ -169,7 +169,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
 	private ListDataProvider<GwtWifiHotspotEntry> ssidDataProvider = new ListDataProvider<GwtWifiHotspotEntry>();
 	final SingleSelectionModel<GwtWifiHotspotEntry> ssidSelectionModel = new SingleSelectionModel<GwtWifiHotspotEntry>();
 	@UiField
-	Alert noSsid, scanFail;
+	Alert searching, noSsid, scanFail;
 
 	String passwordRegex, passwordError, tcpStatus;
 
@@ -182,9 +182,26 @@ public class TabWirelessUi extends Composite implements NetworkTab {
 		initForm();
 		setPasswordValidation();
 
-		tcpTab.status.addChangeHandler(createChangeHandler());
+		tcpTab.status.addChangeHandler(new ChangeHandler(){
+			@Override
+			public void onChange(ChangeEvent event) {
+				if(selectedNetIfConfig!=null){
+					//set the default values for wireless mode if tcp/ip status was changed
+					String tcpIpStatus=tcpTab.getStatus();
+					if(!tcpIpStatus.equals(tcpStatus)){
+						if(GwtNetIfStatus.netIPv4StatusEnabledLAN.name().equals(tcpIpStatus)){
+							activeConfig= selectedNetIfConfig.getAccessPointWifiConfig();
+						}else{
+							activeConfig= selectedNetIfConfig.getStationWifiConfig();
+						}
+						tcpStatus=tcpIpStatus;
+						netTabs.adjustInterfaceTabs();
+					}
+				}
+				update();
+			}});
 		
-		wireless.addChangeHandler(createChangeHandler());
+		//wireless.addChangeHandler(createChangeHandler());
 	}
 
 	@UiHandler(value = { "wireless", "ssid", "radio", "security", "password",
@@ -294,27 +311,6 @@ public class TabWirelessUi extends Composite implements NetworkTab {
 	private void update() {
 		setValues(true);
 		refreshForm();
-	}
-	
-	private ChangeHandler createChangeHandler() {
-		return new ChangeHandler(){
-			@Override
-			public void onChange(ChangeEvent event) {
-				if(selectedNetIfConfig!=null){
-					//set the default values for wireless mode if tcp/ip status was changed
-					String tcpIpStatus=tcpTab.getStatus();
-					if(!tcpIpStatus.equals(tcpStatus)){
-						if(GwtNetIfStatus.netIPv4StatusEnabledLAN.name().equals(tcpIpStatus)){
-							activeConfig= selectedNetIfConfig.getAccessPointWifiConfig();
-						}else{
-							activeConfig= selectedNetIfConfig.getStationWifiConfig();
-						}
-						tcpStatus=tcpIpStatus;
-						netTabs.adjustInterfaceTabs();
-					}
-				}
-				update();
-			}};
 	}
 
 	private void setValues(boolean b) {
@@ -605,8 +601,9 @@ public class TabWirelessUi extends Composite implements NetworkTab {
 					// use values from access point config
 					activeConfig = selectedNetIfConfig.getAccessPointWifiConfig();
 				}
+				netTabs.adjustInterfaceTabs();
 				setPasswordValidation();
-				refreshForm();
+				update();
 			}
 
 		});
@@ -635,7 +632,8 @@ public class TabWirelessUi extends Composite implements NetworkTab {
 				if (!ssidInit) {
 					initSsid();
 					ssidDataProvider.getList().clear();
-					noSsid.setVisible(true);
+					searching.setVisible(true);
+					noSsid.setVisible(false);
 					ssidGrid.setVisible(false);
 					scanFail.setVisible(false);
 				}
@@ -1318,7 +1316,8 @@ public class TabWirelessUi extends Composite implements NetworkTab {
 
 	private void loadSsidData() {
 		ssidDataProvider.getList().clear();
-		noSsid.setVisible(true);
+		searching.setVisible(true);
+		noSsid.setVisible(false);
 		ssidGrid.setVisible(false);
 		scanFail.setVisible(false);
 		//EntryClassUi.showWaitModal();
@@ -1338,6 +1337,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
 						public void onFailure(Throwable caught) {
 							//EntryClassUi.hideWaitModal();
 							//FailureHandler.handle(caught);
+							searching.setVisible(false);
 							noSsid.setVisible(false);
 							ssidGrid.setVisible(false);
 							scanFail.setVisible(true);
@@ -1349,11 +1349,13 @@ public class TabWirelessUi extends Composite implements NetworkTab {
 								ssidDataProvider.getList().add(pair);
 							}
 							ssidDataProvider.flush();
-							if (ssidDataProvider.getList().size() > 0) {
+							if (!ssidDataProvider.getList().isEmpty()) {
+								searching.setVisible(false);
 								noSsid.setVisible(false);
 								ssidGrid.setVisible(true);
 								scanFail.setVisible(false);
 							} else {
+								searching.setVisible(false);
 								noSsid.setVisible(true);
 								ssidGrid.setVisible(false);
 								scanFail.setVisible(false);

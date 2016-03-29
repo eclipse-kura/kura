@@ -53,8 +53,8 @@ import org.gwtbootstrap3.client.ui.RadioButton;
 import org.gwtbootstrap3.client.ui.TextBox;
 import org.gwtbootstrap3.client.ui.constants.ValidationState;
 import org.gwtbootstrap3.client.ui.gwt.CellTable;
-import org.gwtbootstrap3.client.ui.gwt.DataGrid;
 import org.gwtbootstrap3.client.ui.html.Span;
+import org.gwtbootstrap3.client.ui.html.Text;
 
 import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.cell.client.FieldUpdater;
@@ -135,6 +135,8 @@ public class TabWirelessUi extends Composite implements NetworkTab {
 	final SingleSelectionModel<GwtWifiChannelModel> selectionModel = new SingleSelectionModel<GwtWifiChannelModel>();
 	@UiField
 	Alert noChannels;
+	@UiField
+	Text noChannelsText;
 
 	@UiField
 	FormLabel labelWireless, labelSsid, labelRadio, labelSecurity,
@@ -165,11 +167,17 @@ public class TabWirelessUi extends Composite implements NetworkTab {
 	@UiField
 	PanelHeader ssidTitle;
 	@UiField
-	DataGrid<GwtWifiHotspotEntry> ssidGrid = new DataGrid<GwtWifiHotspotEntry>();
+	CellTable<GwtWifiHotspotEntry> ssidGrid = new CellTable<GwtWifiHotspotEntry>();
 	private ListDataProvider<GwtWifiHotspotEntry> ssidDataProvider = new ListDataProvider<GwtWifiHotspotEntry>();
 	final SingleSelectionModel<GwtWifiHotspotEntry> ssidSelectionModel = new SingleSelectionModel<GwtWifiHotspotEntry>();
 	@UiField
 	Alert searching, noSsid, scanFail;
+	@UiField
+	Text searchingText;
+	@UiField
+	Text noSsidText;
+	@UiField
+	Text scanFailText;
 
 	String passwordRegex, passwordError, tcpStatus;
 
@@ -1144,7 +1152,8 @@ public class TabWirelessUi extends Composite implements NetworkTab {
 
 		});
 
-		if (channelDataProvider.getList().size() > 0) {
+		noChannelsText.setText(MSGS.netWifiAlertNoChannels());
+		if (!channelDataProvider.getList().isEmpty()) {
 			noChannels.setVisible(false);
 			channelGrid.setVisible(true);
 		} else {
@@ -1189,6 +1198,10 @@ public class TabWirelessUi extends Composite implements NetworkTab {
 		ssidModal.setTitle("Wireless Networks");
 		ssidTitle.setText("Available Networks in the Range");
 		ssidModal.show();
+		
+		searchingText.setText(MSGS.netWifiAlertSearch());
+		noSsidText.setText(MSGS.netWifiAlertNoSSID());
+		scanFailText.setText(MSGS.netWifiAlertScanFail());
 	}
 
 	private void initSsid() {
@@ -1352,6 +1365,8 @@ public class TabWirelessUi extends Composite implements NetworkTab {
 							if (!ssidDataProvider.getList().isEmpty()) {
 								searching.setVisible(false);
 								noSsid.setVisible(false);
+								int size = ssidDataProvider.getList().size();
+								ssidGrid.setVisibleRange(0, size);
 								ssidGrid.setVisible(true);
 								scanFail.setVisible(false);
 							} else {

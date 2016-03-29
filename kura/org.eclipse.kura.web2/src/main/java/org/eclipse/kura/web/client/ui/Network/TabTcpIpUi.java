@@ -45,6 +45,7 @@ import org.gwtbootstrap3.client.ui.PanelHeader;
 import org.gwtbootstrap3.client.ui.TextBox;
 import org.gwtbootstrap3.client.ui.constants.ValidationState;
 import org.gwtbootstrap3.client.ui.html.Span;
+import org.gwtbootstrap3.client.ui.html.Text;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.BlurEvent;
@@ -118,6 +119,8 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
 	Modal wanModal;
 	@UiField
 	Alert multipleWanWarn;
+	@UiField
+	Text multipleWanWarnText;
 
 	public TabTcpIpUi(GwtSession currentSession, NetworkTabsUi netTabs) {
 		initWidget(uiBinder.createAndBindUi(this));
@@ -746,6 +749,7 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
 	}
 	
 	private void initModal() {
-		wanModal.setTitle("Warning!");
+		wanModal.setTitle(MSGS.warning());
+		multipleWanWarnText.setText(MSGS.netStatusWarning());
 	}
 }

@@ -68,17 +68,47 @@ public class TabDhcpNatUi extends Composite implements NetworkTab {
 	@UiField
 	Form form;
 	@UiField
-	FormLabel labelRouter, labelBegin, labelEnd, labelSubnet, labelDefaultL,
-	labelMax, labelPass;
+	FormLabel labelRouter;
+	@UiField
+	FormLabel labelBegin;
+	@UiField
+	FormLabel labelEnd;
+	@UiField
+	FormLabel labelSubnet;
+	@UiField
+	FormLabel labelDefaultL;
+	@UiField
+	FormLabel labelMax;
+	@UiField
+	FormLabel labelPass;
 	@UiField
 	ListBox router;
 	@UiField
-	TextBox begin, end, subnet, defaultL, max;
+	TextBox begin;
 	@UiField
-	RadioButton radio1, radio2;
+	TextBox end;
 	@UiField
-	FormGroup groupRouter, groupBegin, groupEnd, groupSubnet, groupDefaultL,
-	groupMax;
+	TextBox subnet;
+	@UiField
+	TextBox defaultL;
+	@UiField
+	TextBox max;
+	@UiField
+	RadioButton radio1;
+	@UiField
+	RadioButton radio2;
+	@UiField
+	FormGroup groupRouter;
+	@UiField
+	FormGroup groupBegin;
+	@UiField
+	FormGroup groupEnd;
+	@UiField
+	FormGroup groupSubnet;
+	@UiField
+	FormGroup groupDefaultL;
+	@UiField
+	FormGroup groupMax;
 	@UiField
 	HelpBlock helpRouter;
 	@UiField
@@ -93,6 +123,18 @@ public class TabDhcpNatUi extends Composite implements NetworkTab {
 		session = currentSession;
 		setDirty(false);
 		initForm();
+		
+		tcpTab.status.addChangeHandler(new ChangeHandler(){
+			@Override
+			public void onChange(ChangeEvent event) {
+				update();
+			}});
+		
+		wirelessTab.wireless.addChangeHandler(new ChangeHandler(){
+			@Override
+			public void onChange(ChangeEvent event) {
+				update();
+			}});
 	}
 
 	@Override

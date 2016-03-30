@@ -208,8 +208,6 @@ public class TabWirelessUi extends Composite implements NetworkTab {
 				}
 				update();
 			}});
-		
-		//wireless.addChangeHandler(createChangeHandler());
 	}
 
 	@UiHandler(value = { "wireless", "ssid", "radio", "security", "password",
@@ -434,6 +432,9 @@ public class TabWirelessUi extends Composite implements NetworkTab {
 			setForm(true);
 			// Station mode
 			if (WIFI_MODE_STATION_MESSAGE.equals(wireless.getSelectedItemText())) {  //TODO: take a look at the logic here and at next if: couldn't it be unified?
+				if (tcpipStatus.equals(IPV4_STATUS_WAN_MESSAGE)) {
+					wireless.setEnabled(false);
+				}
 				radio.setEnabled(false);
 				groupVerify.setVisible(false);
 			} else if (WIFI_MODE_ACCESS_POINT_MESSAGE.equals(wireless.getSelectedItemText())) {
@@ -591,18 +592,18 @@ public class TabWirelessUi extends Composite implements NetworkTab {
 		wireless.addChangeHandler(new ChangeHandler() {
 			@Override
 			public void onChange(ChangeEvent event) {
-				String accessPointName= WIFI_MODE_ACCESS_POINT_MESSAGE;
-				String stationModeName= WIFI_MODE_STATION_MESSAGE;
-				if (tcpTab.getStatus().equals(GwtNetIfStatus.netIPv4StatusEnabledWAN) &&
-					wireless.getSelectedItemText().equals(accessPointName)) {
-					helpWireless.setText(MSGS.netWifiWirelessEnabledForWANError());
-					groupWireless.setValidationState(ValidationState.ERROR);
-				}else{
+//				String accessPointName= WIFI_MODE_ACCESS_POINT_MESSAGE;
+//				String stationModeName= WIFI_MODE_STATION_MESSAGE;
+//				if (tcpTab.getStatus().equals(IPV4_STATUS_WAN_MESSAGE) &&
+//					wireless.getSelectedItemText().equals(accessPointName)) {
+//					helpWireless.setText(MSGS.netWifiWirelessEnabledForWANError());
+//					groupWireless.setValidationState(ValidationState.ERROR);
+//				}else{
 					helpWireless.setText("");
 					groupWireless.setValidationState(ValidationState.NONE);
-				}
+//				}
 
-				if (wireless.getSelectedItemText().equals(stationModeName)) {
+				if (wireless.getSelectedItemText().equals(WIFI_MODE_STATION_MESSAGE)) {
 					// Use Values from station config
 					activeConfig = selectedNetIfConfig.getStationWifiConfig();
 				} else {
@@ -1199,7 +1200,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
 		ssidTitle.setText("Available Networks in the Range");
 		ssidModal.show();
 		
-		searchingText.setText(MSGS.netWifiAlertSearch());
+		searchingText.setText(MSGS.netWifiAlertScanning());
 		noSsidText.setText(MSGS.netWifiAlertNoSSID());
 		scanFailText.setText(MSGS.netWifiAlertScanFail());
 	}

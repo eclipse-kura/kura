@@ -712,7 +712,7 @@ public class TabModemUi extends Composite implements NetworkTab {
 			}
 		});
 
-		helpTitle.setText("Help Text");
+		helpTitle.setText(MSGS.netHelpTitle());
 		radio1.setText(MSGS.trueLabel());
 		radio2.setText(MSGS.falseLabel());
 
@@ -722,7 +722,7 @@ public class TabModemUi extends Composite implements NetworkTab {
 
 	private void resetHelp() {
 		helpText.clear();
-		helpText.add(new Span("Mouse over enabled items on the left to see help text."));
+		helpText.add(new Span(MSGS.netHelpDefaultHint()));
 	}
 
 	private void update() {

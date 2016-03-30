@@ -126,7 +126,7 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
 		initWidget(uiBinder.createAndBindUi(this));
 		session = currentSession;
 		tabs = netTabs;
-		helpTitle.setText("Help Text");
+		helpTitle.setText(MSGS.netHelpTitle());
 		initForm();
 		dnsRead.setVisible(false);
 		
@@ -607,7 +607,7 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
 
 	private void resetHelp() {
 		helpText.clear();
-		helpText.add(new Span("Mouse over enabled items on the left to see help text."));
+		helpText.add(new Span(MSGS.netHelpDefaultHint()));
 	}
 
 	private void update() {

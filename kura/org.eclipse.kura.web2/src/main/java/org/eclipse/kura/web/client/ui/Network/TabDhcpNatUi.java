@@ -239,9 +239,8 @@ public class TabDhcpNatUi extends Composite implements NetworkTab {
 		if (wifiConfig != null) {
 			wifiMode= wifiConfig.getWirelessMode();
 		}
-		if ( selectedNetIfConfig.getHwTypeEnum() == GwtNetIfType.WIFI && 
-				wirelessTab != null && 
-				wifiMode != null    &&
+		if ( selectedNetIfConfig.getHwTypeEnum() == GwtNetIfType.WIFI &&  
+				wifiMode != null &&
 				(wifiMode.equals(WIFI_STATION_MODE) || wifiMode.equals(WIFI_DISABLED)) ) {
 			router.setEnabled(false);
 			begin.setEnabled(false);
@@ -531,13 +530,11 @@ public class TabDhcpNatUi extends Composite implements NetworkTab {
 			public void onValueChange(ValueChangeEvent<Boolean> event) {
 				setDirty(true);
 			}});
-
-
-		helpTitle.setText("Help Text");
+		helpTitle.setText(MSGS.netHelpTitle());
 	}
 
 	private void resetHelp() {
 		helpText.clear();
-		helpText.add(new Span("Mouse over enabled items on the left to see help text."));
+		helpText.add(new Span(MSGS.netHelpDefaultHint()));
 	}
 }

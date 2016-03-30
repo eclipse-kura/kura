@@ -1039,12 +1039,12 @@ public class TabWirelessUi extends Composite implements NetworkTab {
 		// Channel Grid
 		initGrid();
 		
-		helpTitle.setText("Help Text");
+		helpTitle.setText(MSGS.netHelpTitle());
 	}
 
 	private void resetHelp() {
 		helpText.clear();
-		helpText.add(new Span("Mouse over enabled items on the left to see help text."));
+		helpText.add(new Span(MSGS.netHelpDefaultHint()));
 	}
 
 	private void initGrid() {

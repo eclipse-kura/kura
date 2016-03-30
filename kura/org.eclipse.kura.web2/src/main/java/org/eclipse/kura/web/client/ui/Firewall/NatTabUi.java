@@ -16,6 +16,7 @@ import java.util.List;
 
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.ui.EntryClassUi;
+import org.eclipse.kura.web.client.ui.Tab;
 import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.shared.model.GwtFirewallNatEntry;
 import org.eclipse.kura.web.shared.model.GwtFirewallNatMasquerade;
@@ -55,7 +56,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SingleSelectionModel;
 
-public class NatTabUi extends Composite {
+public class NatTabUi extends Composite implements Tab {
 
 	private static NatTabUiUiBinder uiBinder = GWT.create(NatTabUiUiBinder.class);
 
@@ -115,7 +116,8 @@ public class NatTabUi extends Composite {
 	//
 	// Public methods
 	//
-	public void loadData() {
+	@Override
+	public void refresh() {
 		EntryClassUi.showWaitModal();
 		natDataProvider.getList().clear();
 		gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
@@ -160,13 +162,22 @@ public class NatTabUi extends Composite {
 		});
 	}
 
+	@Override
 	public boolean isDirty() {
 		return m_dirty;
 	}
 
+	@Override
 	public void setDirty(boolean b) {
 		m_dirty = b;
 	}
+	
+	@Override
+	public boolean isValid() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+	
 
 	//
 	// Private methods

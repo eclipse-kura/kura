@@ -16,6 +16,7 @@ import java.util.List;
 
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.ui.EntryClassUi;
+import org.eclipse.kura.web.client.ui.Tab;
 import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.client.util.TextFieldValidator.FieldType;
 import org.eclipse.kura.web.shared.model.GwtFirewallNatMasquerade;
@@ -56,7 +57,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SingleSelectionModel;
 
-public class PortForwardingTabUi extends Composite {
+public class PortForwardingTabUi extends Composite implements Tab {
 
 	private static PortForwardingTabUiUiBinder uiBinder = GWT.create(PortForwardingTabUiUiBinder.class);
 
@@ -130,7 +131,8 @@ public class PortForwardingTabUi extends Composite {
 	//
 	// Public methods
 	//
-	public void loadData() {
+	@Override
+	public void refresh() {
 		EntryClassUi.showWaitModal();
 		portForwardDataProvider.getList().clear();
 		notification.setVisible(false);
@@ -180,12 +182,19 @@ public class PortForwardingTabUi extends Composite {
 		});
 	}
 
+	@Override
 	public boolean isDirty() {
 		return m_dirty;
 	}
 
+	@Override
 	public void setDirty(boolean b) {
 		m_dirty = b;
+	}
+	
+	@Override
+	public boolean isValid() {
+		return true;
 	}
 
 

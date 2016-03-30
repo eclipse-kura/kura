@@ -242,8 +242,6 @@ public class TabWirelessUi extends Composite implements NetworkTab {
 		dirty = flag;
 	}
 
-
-
 	@Override
 	public boolean isDirty() {
 		return dirty;

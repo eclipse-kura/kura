@@ -59,7 +59,6 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PopupPanel;
@@ -185,12 +184,17 @@ public class EntryClassUi extends Composite {
 			statusMessage= MSGS.connectionStatusDisconnected();
 		}
 
-		String imgRefreshLabel = new String("<image src=\""+ img.getUrl() +"\" "
-				+ "width=\"23\" height=\"23\" "
-				+ "style=\"vertical-align: middle; float: right;\" title=\"" + statusMessage + "\"/>");
+		StringBuilder imageSB= new StringBuilder();
+		imageSB.append("<image src=\"");
+		imageSB.append(img.getUrl());
+		imageSB.append("\" ");
+		imageSB.append("width=\"23\" height=\"23\" style=\"vertical-align: middle; float: right;\" title=\"");
+		imageSB.append(statusMessage);
+		imageSB.append("\"/>");
 		
-		String statusHTML= status.getHTML();
-		status.setHTML(statusHTML + imgRefreshLabel);
+		StringBuilder statusHTML= new StringBuilder(status.getHTML());
+		statusHTML.append(imageSB.toString());
+		status.setHTML(statusHTML.toString());
 		status.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {

@@ -265,6 +265,25 @@
 						</configuration>
 					</execution>
 					<execution>
+						<id>get-can-bundle</id>
+						<phase>generate-resources</phase>
+						<goals>
+							<goal>copy</goal>
+						</goals>
+						<configuration>
+							<skip>${org.eclipse.kura.can.skip}</skip>
+							<artifactItems>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.kura.protocol.can</artifactId>
+									<version>${org.eclipse.kura.protocol.can.version}</version>
+								</artifactItem>
+							</artifactItems>
+							<stripVersion>true</stripVersion>
+							<outputDirectory>${project.basedir}/target/plugins</outputDirectory>
+						</configuration>
+					</execution>
+					<execution>
 						<id>get-gpio-bundle</id>
 						<phase>generate-resources</phase>
 						<goals>
@@ -322,6 +341,7 @@
   								<move file="target/plugins/org.eclipse.kura.core.status.jar" tofile="target/plugins/org.eclipse.kura.core.status_${org.eclipse.kura.core.status.version}.jar"/>
 							    <move file="target/plugins/org.eclipse.kura.net.admin.jar" tofile="target/plugins/org.eclipse.kura.net.admin_${org.eclipse.kura.net.admin.version}.jar"/>
 							    <move file="target/plugins/org.eclipse.kura.protocol.modbus.jar" tofile="target/plugins/org.eclipse.kura.protocol.modbus_${org.eclipse.kura.protocol.modbus.version}.jar" failonerror="false"/>
+							    <move file="target/plugins/org.eclipse.kura.protocol.can.jar" tofile="target/plugins/org.eclipse.kura.protocol.can_${org.eclipse.kura.protocol.can.version}.jar" failonerror="false"/>
 							    <move file="target/plugins/org.eclipse.kura.web.jar" tofile="target/plugins/org.eclipse.kura.web_${org.eclipse.kura.web.version}.jar" failonerror="false" />
   								<move file="target/plugins/org.eclipse.kura.web2.jar" tofile="target/plugins/org.eclipse.kura.web2_${org.eclipse.kura.web2.version}.jar" failonerror="false" />
 								<move file="target/plugins/org.eclipse.kura.linux.gpio.jar" tofile="target/plugins/org.eclipse.kura.linux.gpio_${org.eclipse.kura.linux.gpio.version}.jar" failonerror="false"/>
@@ -2281,6 +2301,35 @@
 										<property name="kura.build.version" value="${kura.build.version}" />
 										<ant antfile="${basedir}/src/main/ant/build_modbus_dp.xml"
 											target="build-dp" />
+									</target>
+								</configuration>
+							</execution>
+							
+							<execution>
+								<id>check-can</id>
+								<phase>install</phase>
+								<goals>
+									<goal>run</goal>
+								</goals>
+								<configuration>
+									<exportAntProperties>true</exportAntProperties>
+									<target name="verify-can">
+										<available file="target/plugins/org.eclipse.kura.protocol.can_${org.eclipse.kura.protocol.can.version}.jar" property="can.jar.present" />
+									</target>
+								</configuration>
+							</execution>
+							
+							<execution>
+								<id>can-dp</id>
+								<phase>install</phase>
+								<goals>
+									<goal>run</goal>
+								</goals>
+								<configuration>
+									<target name="dp-can" if="can.jar.present">
+										<property name="deployment.package.version" value="${deployment.package.version}" />
+										<property name="kura.build.version" value="${kura.build.version}" />
+										<ant antfile="${basedir}/src/main/ant/build_can_dp.xml" target="build-dp" />
 									</target>
 								</configuration>
 							</execution>

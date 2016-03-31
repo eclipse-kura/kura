@@ -31,6 +31,7 @@
 		<kura.basedir>${project.basedir}</kura.basedir>
 		<org.eclipse.kura.web.skip>true</org.eclipse.kura.web.skip>
 		<org.eclipse.kura.web2.skip>true</org.eclipse.kura.web2.skip>
+		<org.eclipse.kura.can.skip>true</org.eclipse.kura.can.skip>
 		<org.eclipse.kura.dio.skip>false</org.eclipse.kura.dio.skip>
 		<org.eclipse.kura.dio.include>true</org.eclipse.kura.dio.include>
 	</properties>
@@ -68,6 +69,18 @@
 			</activation>
 			<modules>
 				<module>org.eclipse.kura.web</module>
+				<module>distrib</module>
+			</modules>
+		</profile>
+		<profile>
+			<id>can</id>
+			<properties>
+				<org.eclipse.kura.can.skip>false</org.eclipse.kura.can.skip>
+			</properties>
+			<activation>
+				<activeByDefault>false</activeByDefault>
+			</activation>
+			<modules>
 				<module>distrib</module>
 			</modules>
 		</profile>

@@ -442,7 +442,7 @@ fi
             <zipfileset dir="${kura.osgi.repo}/plugins/"
                         prefix="${build.output.name}/plugins"/>
 
-            <zipfileset dir="../target-definition/common/repository/plugins" excludes="com.google.protobuf_2.6.0.jar,org.eclipse.paho.*"
+            <zipfileset dir="../target-definition/common/repository/plugins" excludes="com.google.protobuf_2.6.0.jar,org.eclipse.paho.*,com.gwt.user_*"
                         prefix="${build.output.name}/plugins"/>
 
 
@@ -637,6 +637,8 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
 		<zip destfile="${project.build.directory}/${build.output.name}.zip" update="true">
 			<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.web_${org.eclipse.kura.web.version}.jar"
                         prefix="${build.output.name}/kura/plugins" />
+            <zipfileset file="../target-definition/common/repository/plugins/com.gwt.user_0.2.0.jar"
+                        prefix="${build.output.name}/plugins" />
 		</zip>
 	</target>
 
@@ -644,6 +646,8 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
 		<zip destfile="${project.build.directory}/${build.output.name}.zip" update="true">
 			<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.web2_${org.eclipse.kura.web2.version}.jar"
                         prefix="${build.output.name}/kura/plugins" />
+            <zipfileset file="../target-definition/common/repository/plugins/com.gwt.user_1.0.0.jar"
+                        prefix="${build.output.name}/plugins" />
 		</zip>
 	</target>
 	

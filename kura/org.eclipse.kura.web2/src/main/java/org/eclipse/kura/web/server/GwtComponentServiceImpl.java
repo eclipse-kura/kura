@@ -59,7 +59,8 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
 				if (config.getPid().endsWith("SystemPropertiesService") || 
 						config.getPid().endsWith("NetworkAdminService") ||
 						config.getPid().endsWith("NetworkConfigurationService") ||
-						config.getPid().endsWith("SslManagerService")) {
+						config.getPid().endsWith("SslManagerService")   ||
+						config.getPid().endsWith("FirewallConfigurationService")) {
 					continue;
 				}
 
@@ -70,7 +71,7 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
 					gwtConfig.setComponentId(ocd.getId());
 					gwtConfig.setComponentName(ocd.getName());
 					gwtConfig.setComponentDescription(ocd.getDescription());
-					if (ocd.getIcon() != null && ocd.getIcon().size() > 0) {
+					if (ocd.getIcon() != null && !ocd.getIcon().isEmpty()) {
 						Icon icon = ocd.getIcon().get(0);
 						gwtConfig.setComponentIcon(icon.getResource());
 					}
@@ -85,7 +86,7 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
 						gwtParam.setType(GwtConfigParameterType.valueOf(ad.getType().name()));
 						gwtParam.setRequired(ad.isRequired());
 						gwtParam.setCardinality(ad.getCardinality());
-						if (ad.getOption() != null && ad.getOption().size() > 0) {
+						if (ad.getOption() != null && !ad.getOption().isEmpty()) {
 							Map<String, String> options = new HashMap<String, String>();
 							for (Option option : ad.getOption()) {
 								options.put(option.getLabel(), option.getValue());
@@ -167,7 +168,7 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
 					gwtConfig.setComponentId(ocd.getId());
 					gwtConfig.setComponentName(ocd.getName());
 					gwtConfig.setComponentDescription(ocd.getDescription());
-					if (ocd.getIcon() != null && ocd.getIcon().size() > 0) {
+					if (ocd.getIcon() != null && !ocd.getIcon().isEmpty()) {
 						Icon icon = ocd.getIcon().get(0);
 						gwtConfig.setComponentIcon(icon.getResource());
 					}
@@ -183,7 +184,7 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
 						gwtParam.setType(GwtConfigParameterType.valueOf(ad.getType().name()));
 						gwtParam.setRequired(ad.isRequired());
 						gwtParam.setCardinality(ad.getCardinality());
-						if (ad.getOption() != null && ad.getOption().size() > 0) {
+						if (ad.getOption() != null && !ad.getOption().isEmpty()) {
 							Map<String, String> options = new HashMap<String, String>();
 							for (Option option : ad.getOption()) {
 								options.put(option.getLabel(), option.getValue());
@@ -276,8 +277,7 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
 			//
 			// apply them
 			cs.updateConfiguration(gwtCompConfig.getComponentId(), properties);
-		} 
-		catch (Throwable t) {
+		} catch (Throwable t) {
 			KuraExceptionHandler.handle(t);
 		}
 	}

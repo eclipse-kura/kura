@@ -140,12 +140,9 @@
 			</b:ModalBody>
 
 			<b:ModalFooter ui:field="alertFooter">
-				<b:Button text="yes" ui:field="yes" />
-				<b:Button text="no" ui:field="no" />
+				<b:Button ui:field="yes" />
+				<b:Button ui:field="no" />
 			</b:ModalFooter>
 		</b:Modal>
-
-
 	</b:Container>
-
 </ui:UiBinder> 

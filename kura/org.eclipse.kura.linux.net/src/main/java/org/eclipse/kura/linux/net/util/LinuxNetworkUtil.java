@@ -393,7 +393,7 @@ public class LinuxNetworkUtil {
 			//determine if wifi
 			if (config.getType() == NetInterfaceType.ETHERNET) {
 				Collection<String> wifiOptions = WifiOptions.getSupportedOptions(ifaceName);
-				if (wifiOptions != null) {
+				if (wifiOptions != null && !wifiOptions.isEmpty()) {
 					for (String op : wifiOptions) {
 						s_logger.trace("WiFi option supported on {} : {}", ifaceName, op);
 					}

@@ -16,6 +16,7 @@ import java.util.List;
 
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.ui.EntryClassUi;
+import org.eclipse.kura.web.client.ui.Tab;
 import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.client.util.TextFieldValidator.FieldType;
 import org.eclipse.kura.web.shared.model.GwtFirewallNatMasquerade;
@@ -26,6 +27,8 @@ import org.eclipse.kura.web.shared.service.GwtNetworkService;
 import org.eclipse.kura.web.shared.service.GwtNetworkServiceAsync;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenService;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenServiceAsync;
+import org.gwtbootstrap3.client.shared.event.ModalHideEvent;
+import org.gwtbootstrap3.client.shared.event.ModalHideHandler;
 import org.gwtbootstrap3.client.ui.Alert;
 import org.gwtbootstrap3.client.ui.Button;
 import org.gwtbootstrap3.client.ui.FormGroup;
@@ -54,7 +57,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SingleSelectionModel;
 
-public class PortForwardingTabUi extends Composite {
+public class PortForwardingTabUi extends Composite implements Tab {
 
 	private static PortForwardingTabUiUiBinder uiBinder = GWT.create(PortForwardingTabUiUiBinder.class);
 
@@ -69,7 +72,8 @@ public class PortForwardingTabUi extends Composite {
 	private ListDataProvider<GwtFirewallPortForwardEntry> portForwardDataProvider = new ListDataProvider<GwtFirewallPortForwardEntry>();
 	final SingleSelectionModel<GwtFirewallPortForwardEntry> selectionModel = new SingleSelectionModel<GwtFirewallPortForwardEntry>();
 
-	GwtFirewallPortForwardEntry portForwardEntry;
+	private GwtFirewallPortForwardEntry newPortForwardEntry;
+	private GwtFirewallPortForwardEntry editPortForwardEntry;
 
 	private boolean m_dirty;
 
@@ -121,12 +125,14 @@ public class PortForwardingTabUi extends Composite {
 
 		initButtons();
 		initTable();
+		initModal();
 	}
 
 	//
 	// Public methods
 	//
-	public void loadData() {
+	@Override
+	public void refresh() {
 		EntryClassUi.showWaitModal();
 		portForwardDataProvider.getList().clear();
 		notification.setVisible(false);
@@ -157,6 +163,16 @@ public class PortForwardingTabUi extends Composite {
 						int size = portForwardDataProvider.getList().size();
 						portForwardGrid.setVisibleRange(0, size);
 						portForwardDataProvider.flush();
+
+						if(portForwardDataProvider.getList().isEmpty()){
+							portForwardGrid.setVisible(false);
+							notification.setVisible(true);
+							notification.setText(MSGS.firewallPortForwardTableNoPorts());
+						} else {
+							portForwardGrid.setVisible(true);
+							notification.setVisible(false);
+						}
+
 						apply.setEnabled(false);
 						EntryClassUi.hideWaitModal();
 					}
@@ -166,12 +182,19 @@ public class PortForwardingTabUi extends Composite {
 		});
 	}
 
+	@Override
 	public boolean isDirty() {
 		return m_dirty;
 	}
 
+	@Override
 	public void setDirty(boolean b) {
 		m_dirty = b;
+	}
+	
+	@Override
+	public boolean isValid() {
+		return true;
 	}
 
 
@@ -183,7 +206,11 @@ public class PortForwardingTabUi extends Composite {
 		TextColumn<GwtFirewallPortForwardEntry> col1 = new TextColumn<GwtFirewallPortForwardEntry>() {
 			@Override
 			public String getValue(GwtFirewallPortForwardEntry object) {
-				return String.valueOf(object.getInboundInterface());
+				if (object.getInboundInterface() != null) {
+					return String.valueOf(object.getInboundInterface());
+				} else {
+					return "";
+				}
 			}
 		};
 		col1.setCellStyleNames("status-table-row");
@@ -192,17 +219,24 @@ public class PortForwardingTabUi extends Composite {
 		TextColumn<GwtFirewallPortForwardEntry> col2 = new TextColumn<GwtFirewallPortForwardEntry>() {
 			@Override
 			public String getValue(GwtFirewallPortForwardEntry object) {
-				return String.valueOf(object.getOutboundInterface());
+				if (object.getOutboundInterface() != null) {
+					return String.valueOf(object.getOutboundInterface());
+				} else {
+					return "";
+				}
 			}
 		};
 		col2.setCellStyleNames("status-table-row");
-		portForwardGrid.addColumn(col2,
-				MSGS.firewallPortForwardOutboundInterface());
+		portForwardGrid.addColumn(col2, MSGS.firewallPortForwardOutboundInterface());
 
 		TextColumn<GwtFirewallPortForwardEntry> col3 = new TextColumn<GwtFirewallPortForwardEntry>() {
 			@Override
 			public String getValue(GwtFirewallPortForwardEntry object) {
-				return String.valueOf(object.getAddress());
+				if (object.getAddress() != null) {
+					return String.valueOf(object.getAddress());
+				} else {
+					return "";
+				}
 			}
 		};
 		col3.setCellStyleNames("status-table-row");
@@ -211,7 +245,11 @@ public class PortForwardingTabUi extends Composite {
 		TextColumn<GwtFirewallPortForwardEntry> col4 = new TextColumn<GwtFirewallPortForwardEntry>() {
 			@Override
 			public String getValue(GwtFirewallPortForwardEntry object) {
-				return String.valueOf(object.getProtocol());
+				if (object.getProtocol() != null) {
+					return String.valueOf(object.getProtocol());
+				} else {
+					return "";
+				}
 			}
 		};
 		col4.setCellStyleNames("status-table-row");
@@ -220,7 +258,11 @@ public class PortForwardingTabUi extends Composite {
 		TextColumn<GwtFirewallPortForwardEntry> col5 = new TextColumn<GwtFirewallPortForwardEntry>() {
 			@Override
 			public String getValue(GwtFirewallPortForwardEntry object) {
-				return String.valueOf(object.getInPort());
+				if (object.getInPort() != null) {
+					return String.valueOf(object.getInPort());
+				} else {
+					return "";
+				}
 			}
 		};
 		col5.setCellStyleNames("status-table-row");
@@ -229,7 +271,11 @@ public class PortForwardingTabUi extends Composite {
 		TextColumn<GwtFirewallPortForwardEntry> col6 = new TextColumn<GwtFirewallPortForwardEntry>() {
 			@Override
 			public String getValue(GwtFirewallPortForwardEntry object) {
-				return String.valueOf(object.getOutPort());
+				if (object.getOutPort() != null) {
+					return String.valueOf(object.getOutPort());
+				} else {
+					return "";
+				}
 			}
 		};
 		col6.setCellStyleNames("status-table-row");
@@ -238,7 +284,11 @@ public class PortForwardingTabUi extends Composite {
 		TextColumn<GwtFirewallPortForwardEntry> col7 = new TextColumn<GwtFirewallPortForwardEntry>() {
 			@Override
 			public String getValue(GwtFirewallPortForwardEntry object) {
-				return String.valueOf(object.getMasquerade());
+				if (object.getMasquerade() != null) {
+					return String.valueOf(object.getMasquerade());
+				} else {
+					return "";
+				}
 			}
 		};
 		col7.setCellStyleNames("status-table-row");
@@ -247,17 +297,24 @@ public class PortForwardingTabUi extends Composite {
 		TextColumn<GwtFirewallPortForwardEntry> col8 = new TextColumn<GwtFirewallPortForwardEntry>() {
 			@Override
 			public String getValue(GwtFirewallPortForwardEntry object) {
-				return String.valueOf(object.getPermittedNetwork());
+				if (object.getPermittedNetwork() != null) {
+					return String.valueOf(object.getPermittedNetwork());
+				} else {
+					return "";
+				}
 			}
 		};
 		col8.setCellStyleNames("status-table-row");
-		portForwardGrid.addColumn(col8,
-				MSGS.firewallPortForwardPermittedNetwork());
+		portForwardGrid.addColumn(col8, MSGS.firewallPortForwardPermittedNetwork());
 
 		TextColumn<GwtFirewallPortForwardEntry> col9 = new TextColumn<GwtFirewallPortForwardEntry>() {
 			@Override
 			public String getValue(GwtFirewallPortForwardEntry object) {
-				return String.valueOf(object.getPermittedMAC());
+				if (object.getPermittedMAC() != null) {
+					return String.valueOf(object.getPermittedMAC());
+				} else {
+					return "";
+				}
 			}
 		};
 		col9.setCellStyleNames("status-table-row");
@@ -266,7 +323,11 @@ public class PortForwardingTabUi extends Composite {
 		TextColumn<GwtFirewallPortForwardEntry> col10 = new TextColumn<GwtFirewallPortForwardEntry>() {
 			@Override
 			public String getValue(GwtFirewallPortForwardEntry object) {
-				return String.valueOf(object.getSourcePortRange());
+				if (object.getSourcePortRange() != null) {
+					return String.valueOf(object.getSourcePortRange());
+				} else {
+					return "";
+				}
 			}
 		};
 		col10.setCellStyleNames("status-table-row");
@@ -292,33 +353,33 @@ public class PortForwardingTabUi extends Composite {
 		delete.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
-				final GwtFirewallPortForwardEntry selection = selectionModel.getSelectedObject();
+				GwtFirewallPortForwardEntry selection = selectionModel.getSelectedObject();
 
 				if (selection != null) {
 
 					alert.setTitle(MSGS.confirm());
 					alertBody.setText(MSGS.firewallOpenPortDeleteConfirmation(String.valueOf(selection.getInPort())));
-					yes.setText(MSGS.yesButton());
-					no.setText(MSGS.noButton());
-					no.addClickHandler(new ClickHandler() {
-						@Override
-						public void onClick(ClickEvent event) {
-							alert.hide();
-						}
-					});
-					yes.addClickHandler(new ClickHandler() {
-						@Override
-						public void onClick(ClickEvent event) {
-							alert.hide();
-							portForwardDataProvider.getList().remove(selection);
-							portForwardDataProvider.flush();
-							apply.setEnabled(true);
-							notification.setVisible(false);
-							setDirty(true);
-						}
-					});
 					alert.show();
 				}
+			}
+		});
+		yes.setText(MSGS.yesButton());
+		no.setText(MSGS.noButton());
+		no.addClickHandler(new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
+				alert.hide();
+			}
+		});
+		yes.addClickHandler(new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
+				alert.hide();
+				portForwardDataProvider.getList().remove(selectionModel.getSelectedObject());
+				portForwardDataProvider.flush();
+				apply.setEnabled(true);
+				notification.setVisible(false);
+				setDirty(true);
 			}
 		});
 	}
@@ -328,10 +389,28 @@ public class PortForwardingTabUi extends Composite {
 		edit.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
-				final GwtFirewallPortForwardEntry selection = selectionModel.getSelectedObject();
+				GwtFirewallPortForwardEntry selection = selectionModel.getSelectedObject();
 
 				if (selection != null) {
-					initModal(selection);
+					showModal(selection);
+				}
+			}
+		});
+		portForwardingForm.addHideHandler(new ModalHideHandler() {
+			@Override
+			public void onHide(ModalHideEvent evt) {
+				if (editPortForwardEntry != null) {
+					GwtFirewallPortForwardEntry oldEntry= selectionModel.getSelectedObject();
+					portForwardDataProvider.getList().remove(oldEntry);
+					if (!duplicateEntry(editPortForwardEntry)) {
+						portForwardDataProvider.getList().add(editPortForwardEntry);
+						portForwardDataProvider.flush();
+						apply.setEnabled(true);
+						editPortForwardEntry= null;
+					} else {	//end duplicate
+						portForwardDataProvider.getList().add(oldEntry);
+						portForwardDataProvider.flush();
+					}
 				}
 			}
 		});
@@ -342,7 +421,21 @@ public class PortForwardingTabUi extends Composite {
 		create.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
-				initModal(null);
+				showModal(null);
+			}
+		});
+		portForwardingForm.addHideHandler(new ModalHideHandler() {
+			@Override
+			public void onHide(ModalHideEvent evt) {
+				if (newPortForwardEntry != null && !duplicateEntry(newPortForwardEntry)) {
+					portForwardDataProvider.getList().add(newPortForwardEntry);
+					int size = portForwardDataProvider.getList().size();
+					portForwardGrid.setVisibleRange(0, size);
+					portForwardDataProvider.flush();
+					apply.setEnabled(true);
+					portForwardGrid.redraw();
+					newPortForwardEntry= null;
+				}
 			}
 		});
 	}
@@ -393,36 +486,21 @@ public class PortForwardingTabUi extends Composite {
 		});
 	}
 
-	private void initModal(final GwtFirewallPortForwardEntry existingEntry) {
-		final GwtFirewallPortForwardEntry oldEntry= existingEntry;
-
-		if (existingEntry == null) {
-			// new
-			portForwardingForm.setTitle(MSGS.firewallPortForwardFormInformation());
-		} else {
-			// edit existing entry
-			portForwardingForm.setTitle(MSGS.firewallPortForwardFormUpdate(String.valueOf(existingEntry.getInPort())));
-		}
-
-		setModalFieldsLabels();
-
-		setModalFieldsTooltips();
-
-		setModalFieldsValues(existingEntry);
-
-		setModalFieldsHandlers();
+	private void initModal() {
+		initMACConfirmModal();
 
 		// handle buttons
+		cancel.setText(MSGS.cancelButton());
 		cancel.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
-				portForwardEntry = null;
 				portForwardingForm.hide();
 			}
 		});
 
-
+		submit.setText(MSGS.submitButton());
 		submit.addClickHandler(new ClickHandler() {
+
 			@Override
 			public void onClick(ClickEvent event) {
 				checkFieldsValues();
@@ -439,64 +517,85 @@ public class PortForwardingTabUi extends Composite {
 				}
 
 
-				portForwardEntry = new GwtFirewallPortForwardEntry();
+				final GwtFirewallPortForwardEntry portForwardEntry = new GwtFirewallPortForwardEntry();
 				portForwardEntry.setInboundInterface(input.getText());
 				portForwardEntry.setOutboundInterface(output.getText());
 				portForwardEntry.setAddress(lan.getText());
 				portForwardEntry.setProtocol(protocol.getSelectedItemText());
-				if (internal.getText() != null && !"".equals(internal.getText())) {
+				if (internal.getText() != null && !"".equals(internal.getText().trim())) {
 					portForwardEntry.setInPort(Integer.parseInt(internal.getText()));
 				}
-				if (external.getText() != null && !"".equals(external.getText())) {
+				if (external.getText() != null && !"".equals(external.getText().trim())) {
 					portForwardEntry.setOutPort(Integer.parseInt(external.getText()));
 				}
 				portForwardEntry.setMasquerade(enable.getSelectedItemText());
-				if (permittedNw.getText() != null && !"".equals(permittedNw.getText())) {
+				if (permittedNw.getText() != null && !"".equals(permittedNw.getText().trim())) {
 					portForwardEntry.setPermittedNetwork(permittedNw.getText());
 				} else {
 					portForwardEntry.setPermittedNetwork("0.0.0.0/0");
 				}
-				if (permittedMac.getText() != null && !"".equals(permittedMac.getText())) {
-					confirm.setTitle(MSGS.firewallPortForwardFormNotification());
-					confirmBody.clear();
-					confirmBody.add(new Span(MSGS.firewallPortForwardFormNotificationMacFiltering()));
-					confirmFooter.clear();
+				if (permittedMac.getText() != null && !"".equals(permittedMac.getText().trim())) {
 					confirmFooter.add(new Button(MSGS.okButton(), new ClickHandler() {
 						@Override
 						public void onClick(ClickEvent event) {
 							portForwardEntry.setPermittedMAC(permittedMac.getText());
 							confirm.hide();
-							portForwardEntry.setSourcePortRange(source.getText());
-
-							if (oldEntry != null) {
-								editEntry(portForwardEntry,oldEntry);
-							} else {
-								addNewEntry(portForwardEntry);											 
-							}
-							portForwardEntry=null;
-							portForwardingForm.hide();
 						}
 					}));
 					confirm.show();
-
-				} else {
+				}
+				if (source.getText() != null && !"".equals(source.getText().trim())) {
 					portForwardEntry.setSourcePortRange(source.getText());
+				} 
 
-					//Add values to table
-					if (oldEntry != null) {
-						editEntry(portForwardEntry,oldEntry);	
-					} else {
-						addNewEntry(portForwardEntry);										 
-					}
-					portForwardEntry=null;
-					portForwardingForm.hide();
-				} //end else (mac!=null)
+				if (submit.getId().equals("new")) {
+					newPortForwardEntry= portForwardEntry;
+					editPortForwardEntry= null;
+				} else if (submit.getId().equals("edit")) {
+					editPortForwardEntry= portForwardEntry;
+					newPortForwardEntry= null;
+				}
+
 				setDirty(true);
+
+				portForwardingForm.hide();
 			}
 		});// end submit click handler
+	}
+
+	private void showModal(final GwtFirewallPortForwardEntry existingEntry) {
+		if (existingEntry == null) {
+			// new
+			portForwardingForm.setTitle(MSGS.firewallPortForwardFormInformation());
+		} else {
+			// edit existing entry
+			portForwardingForm.setTitle(MSGS.firewallPortForwardFormUpdate(String.valueOf(existingEntry.getInPort())));
+		}
+
+		setModalFieldsLabels();
+
+		setModalFieldsTooltips();
+
+		setModalFieldsValues(existingEntry);
+
+		setModalFieldsHandlers();
+
+
+		if (existingEntry == null) {
+			submit.setId("new");
+		} else {
+			submit.setId("edit");
+		}
 
 		portForwardingForm.show();
 	}// end initModal
+
+	private void initMACConfirmModal() {
+		confirm.setTitle(MSGS.firewallPortForwardFormNotification());
+		confirmBody.clear();
+		confirmBody.add(new Span(MSGS.firewallPortForwardFormNotificationMacFiltering()));
+		confirmFooter.clear();
+	}
 
 	private void setModalFieldsHandlers() {
 		//Set validations
@@ -610,14 +709,14 @@ public class PortForwardingTabUi extends Composite {
 				}
 			}
 		} else {
-			input.setText("");
-			output.setText("");
-			lan.setText("");
-			external.setText("");
-			internal.setText("");
-			permittedNw.setText("");
-			permittedMac.setText("");
-			source.setText("");
+			input.reset();
+			output.reset();
+			lan.reset();
+			external.reset();
+			internal.reset();
+			permittedNw.reset();
+			permittedMac.reset();
+			source.reset();
 
 			protocol.setSelectedIndex(0);
 			enable.setSelectedIndex(0);
@@ -660,8 +759,6 @@ public class PortForwardingTabUi extends Composite {
 		labelPermitttedNw.setText(MSGS.firewallPortForwardFormPermittedNetwork());
 		labelPermitttedMac.setText(MSGS.firewallPortForwardFormPermittedMac());
 		labelSource.setText(MSGS.firewallPortForwardFormSourcePortRange());
-		submit.setText(MSGS.submitButton());
-		cancel.setText(MSGS.cancelButton());
 	}
 
 	private boolean duplicateEntry(GwtFirewallPortForwardEntry portForwardEntry) {
@@ -693,34 +790,6 @@ public class PortForwardingTabUi extends Composite {
 			}
 		}
 		return isDuplicateEntry;
-	}
-
-	private void addNewEntry(GwtFirewallPortForwardEntry portForwardEntry){
-		if (!duplicateEntry(portForwardEntry)) {
-			portForwardDataProvider.getList().add(portForwardEntry);
-			int size = portForwardDataProvider.getList().size();
-			portForwardGrid.setVisibleRange(0, size);
-			portForwardDataProvider.flush();
-			apply.setEnabled(true);
-			portForwardGrid.redraw();
-			portForwardEntry = null;
-		} else {
-			//Growl.growl(MSGS.firewallPortForwardFormError()
-			//      + ": ",
-			//    MSGS.firewallPortForwardFormDuplicate());
-		}
-
-	}
-
-	private void editEntry(GwtFirewallPortForwardEntry portForwardEntry, GwtFirewallPortForwardEntry existingEntry){
-		if(!duplicateEntry(portForwardEntry)){
-			portForwardDataProvider.getList().remove(existingEntry);
-			portForwardDataProvider.flush();
-			portForwardDataProvider.getList().add(portForwardEntry);
-			portForwardDataProvider.flush();
-			apply.setEnabled(true);
-			portForwardGrid.redraw();
-		}
 	}
 
 	private void checkFieldsValues() {

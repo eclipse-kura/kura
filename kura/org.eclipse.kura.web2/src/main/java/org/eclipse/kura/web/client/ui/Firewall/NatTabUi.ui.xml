@@ -36,6 +36,7 @@
 		</b:Row>
 
 		<b:Row>
+			<b:Alert type="WARNING" ui:field="notification" />
 			<gwt:CellTable bordered="true" condensed="true" striped="true"
 				hover="true" height="100%" width="100%" ui:field="natGrid" />
 		</b:Row>

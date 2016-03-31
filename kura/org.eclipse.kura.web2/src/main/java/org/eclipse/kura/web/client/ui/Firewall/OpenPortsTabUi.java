@@ -16,6 +16,7 @@ import java.util.List;
 
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.ui.EntryClassUi;
+import org.eclipse.kura.web.client.ui.Tab;
 import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.client.util.TextFieldValidator.FieldType;
 import org.eclipse.kura.web.shared.model.GwtFirewallOpenPortEntry;
@@ -55,7 +56,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SingleSelectionModel;
 
-public class OpenPortsTabUi extends Composite {
+public class OpenPortsTabUi extends Composite implements Tab {
 
 	private static OpenPortsTabUiUiBinder uiBinder = GWT.create(OpenPortsTabUiUiBinder.class);
 
@@ -111,13 +112,15 @@ public class OpenPortsTabUi extends Composite {
 		openPortsGrid.setSelectionModel(selectionModel);
 
 		initButtons();
-		initTable();	
+		initTable();
+		initModal();
 	}
 
 	//
 	// Public methods
 	//
-	public void loadData() {
+	@Override
+	public void refresh() {
 		EntryClassUi.showWaitModal();
 		openPortsDataProvider.getList().clear();
 		notification.setVisible(false);
@@ -163,14 +166,22 @@ public class OpenPortsTabUi extends Composite {
 		return editOpenPortEntry;
 	}
 	
+	@Override
 	public boolean isDirty() {
 		return m_dirty;
 	}
 	
+	@Override
 	public void setDirty(boolean b) {
 		m_dirty = b;
 	}
+	
 
+	@Override
+	public boolean isValid() {
+		return true;
+	}
+	
 
 	//
 	//Private methods
@@ -331,31 +342,30 @@ public class OpenPortsTabUi extends Composite {
 		create.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
-				initModal(null);
-				// TODO add warnings for port 80 and 22
-				openPortsForm.addHideHandler(new ModalHideHandler() {
-					@Override
-					public void onHide(ModalHideEvent evt) {
+				showModal(null);
+			}
+		});
+		// TODO add warnings for port 80 and 22
+		openPortsForm.addHideHandler(new ModalHideHandler() {
+			@Override
+			public void onHide(ModalHideEvent evt) {
 
-						if (getNewOpenPortEntry()!= null) {
-							GwtFirewallOpenPortEntry newEntry = getNewOpenPortEntry();
-							if (!duplicateEntry(newEntry)) {
-								openPortsDataProvider.getList().add(newEntry);
-								int size = openPortsDataProvider.getList().size();
-								openPortsGrid.setVisibleRange(0, size);
-								openPortsDataProvider.flush();
-								apply.setEnabled(true);
-								setVisibility();
-								openPortsGrid.redraw();
-							} else {
-								//Growl.growl(MSGS.firewallOpenPortFormError()
-								//		+ ": ",
-								//		MSGS.firewallOpenPortFormDuplicate());
-							}
-						}
+				if (getNewOpenPortEntry()!= null) {
+					GwtFirewallOpenPortEntry newEntry = getNewOpenPortEntry();
+					if (!duplicateEntry(newEntry)) {
+						openPortsDataProvider.getList().add(newEntry);
+						int size = openPortsDataProvider.getList().size();
+						openPortsGrid.setVisibleRange(0, size);
+						openPortsDataProvider.flush();
+						apply.setEnabled(true);
+						setVisibility();
+						openPortsGrid.redraw();
+					} else {
+						//Growl.growl(MSGS.firewallOpenPortFormError()
+						//		+ ": ",
+						//		MSGS.firewallOpenPortFormDuplicate());
 					}
-				});
-
+				}
 			}
 		});
 	}
@@ -364,7 +374,7 @@ public class OpenPortsTabUi extends Composite {
 		edit.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
-				final GwtFirewallOpenPortEntry selection = selectionModel.getSelectedObject();
+				GwtFirewallOpenPortEntry selection = selectionModel.getSelectedObject();
 				if (selection != null) {
 					if (selection.getPortRange().equals("22")) {
 						// show warning
@@ -380,7 +390,7 @@ public class OpenPortsTabUi extends Composite {
 						yes.addClickHandler(new ClickHandler() {
 							@Override
 							public void onClick(ClickEvent event) {
-								initModal(selection);
+								showModal(selectionModel.getSelectedObject());
 								alert.hide();
 							}
 						});
@@ -400,35 +410,38 @@ public class OpenPortsTabUi extends Composite {
 						yes.addClickHandler(new ClickHandler() {
 							@Override
 							public void onClick(ClickEvent event) {
-								initModal(selection);
+								showModal(selectionModel.getSelectedObject());
 								alert.hide();
 							}
 						});
 						alert.show();
 
 					} else {
-						initModal(selection);
+						showModal(selection);
 					}
-
-					openPortsForm.addHideHandler(new ModalHideHandler() {
-						@Override
-						public void onHide(ModalHideEvent evt) {
-
-							if (getEditOpenPortEntry() != null) {
-								final GwtFirewallOpenPortEntry editEntry = getEditOpenPortEntry();
-								if (!duplicateEntry(getEditOpenPortEntry())) {
-									openPortsDataProvider.getList().remove(selection);
-									openPortsDataProvider.getList().add(editEntry);
-									openPortsDataProvider.flush();
-									apply.setEnabled(true);
-									setVisibility();
-								}	//end duplicate
-
-							}//end !=null
-						}//end onHide
-					});
 				}
 			}
+		});
+		openPortsForm.addHideHandler(new ModalHideHandler() {
+			@Override
+			public void onHide(ModalHideEvent evt) {
+
+				if (getEditOpenPortEntry() != null) {
+					final GwtFirewallOpenPortEntry editEntry = getEditOpenPortEntry();
+					GwtFirewallOpenPortEntry oldEntry= selectionModel.getSelectedObject();
+					openPortsDataProvider.getList().remove(oldEntry);
+					if (!duplicateEntry(getEditOpenPortEntry())) {
+						openPortsDataProvider.getList().add(editEntry);
+						openPortsDataProvider.flush();
+						apply.setEnabled(true);
+						setVisibility();
+					} else {	//end duplicate
+						openPortsDataProvider.getList().add(oldEntry);
+						openPortsDataProvider.flush();
+					}
+
+				}//end !=null
+			}//end onHide
 		});
 	}
 
@@ -436,63 +449,45 @@ public class OpenPortsTabUi extends Composite {
 		delete.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
-				final GwtFirewallOpenPortEntry selection = selectionModel.getSelectedObject();
+				GwtFirewallOpenPortEntry selection = selectionModel.getSelectedObject();
 				if (selection != null) {
 					alert.setTitle(MSGS.confirm());
 					alertBody.setText(MSGS.firewallOpenPortDeleteConfirmation(String.valueOf(selection.getPortRange())));
-					yes.setText(MSGS.yesButton());
-					no.setText(MSGS.noButton());
-					no.addClickHandler(new ClickHandler() {
-						@Override
-						public void onClick(ClickEvent event) {
-							alert.hide();
-						}
-					});
-					yes.addClickHandler(new ClickHandler() {
-						@Override
-						public void onClick(ClickEvent event) {							
-							alert.hide();
-							openPortsDataProvider.getList().remove(selection);
-							openPortsDataProvider.flush();
-							apply.setEnabled(true);
-							setVisibility();
-							
-							setDirty(true);
-						}
-					});
 					alert.show();
 				}
 			}
 		});
+		yes.setText(MSGS.yesButton());
+		no.setText(MSGS.noButton());
+		no.addClickHandler(new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
+				alert.hide();
+			}
+		});
+		yes.addClickHandler(new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {							
+				alert.hide();
+				openPortsDataProvider.getList().remove(selectionModel.getSelectedObject());
+				openPortsDataProvider.flush();
+				apply.setEnabled(true);
+				setVisibility();
+				
+				setDirty(true);
+			}
+		});
 	}
-
-	private void initModal(final GwtFirewallOpenPortEntry existingEntry) {
-
-		if (existingEntry == null) {
-			// new
-			openPortsForm.setTitle(MSGS.firewallOpenPortFormInformation());
-		} else {
-			// edit existing entry
-			openPortsForm.setTitle(MSGS.firewallOpenPortFormUpdate(String.valueOf(existingEntry.getPortRange())));
-		}
-
-		setModalFieldsLabels();
-
-		setModalFieldsValues(existingEntry);
-
-		setModalFieldsTooltips();
-
-		setModalFieldsHandlers();
-
-
+	
+	private void initModal() {
 		cancel.setText(MSGS.cancelButton());
 		cancel.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
 				openPortsForm.hide();
-				openPortEntry = null;
-				editOpenPortEntry=null;
-				newOpenPortEntry=null;
+				openPortEntry= null;
+				editOpenPortEntry= null;
+				newOpenPortEntry= null;
 			}
 		});
 
@@ -537,14 +532,13 @@ public class OpenPortsTabUi extends Composite {
 						!"".equals(source.getText().trim())) {
 					openPortEntry.setSourcePortRange(source.getText());
 				}
-				
-				editOpenPortEntry = null;
-				newOpenPortEntry = null;
 
-				if (existingEntry == null) {
+				if (submit.getId().equals("new")) {
 					newOpenPortEntry = openPortEntry;
-				} else {
+					editOpenPortEntry = null;
+				} else if (submit.getId().equals("edit")) {
 					editOpenPortEntry = openPortEntry;
+					newOpenPortEntry = null;
 				}
 				
 				setDirty(true);
@@ -552,6 +546,31 @@ public class OpenPortsTabUi extends Composite {
 				openPortsForm.hide();
 			}
 		});
+	}
+
+	private void showModal(final GwtFirewallOpenPortEntry existingEntry) {
+		if (existingEntry == null) {
+			// new
+			openPortsForm.setTitle(MSGS.firewallOpenPortFormInformation());
+		} else {
+			// edit existing entry
+			openPortsForm.setTitle(MSGS.firewallOpenPortFormUpdate(String.valueOf(existingEntry.getPortRange())));
+		}
+
+		setModalFieldsLabels();
+
+		setModalFieldsValues(existingEntry);
+
+		setModalFieldsTooltips();
+
+		setModalFieldsHandlers();
+		
+		
+		if (existingEntry == null) {
+			submit.setId("new");
+		} else {
+			submit.setId("edit");
+		}
 
 		openPortsForm.show();
 	}

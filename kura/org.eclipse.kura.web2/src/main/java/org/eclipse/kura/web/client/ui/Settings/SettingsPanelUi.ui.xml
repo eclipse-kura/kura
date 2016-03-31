@@ -27,11 +27,7 @@
 
 	<b:Container fluid="true">
 		<b:Row>
-			<g:HTMLPanel>
-				<p>
-					Review and update the available system settings.
-				</p>
-			</g:HTMLPanel>
+			<g:HTMLPanel ui:field="settingsIntro" />
 		</b:Row>
 
 		<b:Row>

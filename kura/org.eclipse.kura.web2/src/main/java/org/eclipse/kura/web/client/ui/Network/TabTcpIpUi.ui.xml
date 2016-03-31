@@ -104,7 +104,7 @@
 					<b:PanelBody>
 						<b:Alert type="WARNING" ui:field="multipleWanWarn">
 							<b.html:Text
-								text="Multiple WAN interfaces enabled at the same time!" />
+								ui:field="multipleWanWarnText" />
 						</b:Alert>
 					</b:PanelBody>
 				</b:Panel>

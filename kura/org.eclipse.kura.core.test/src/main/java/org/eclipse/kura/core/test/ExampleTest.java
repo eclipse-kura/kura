@@ -63,7 +63,9 @@ public class ExampleTest implements DataServiceListener {
 	// This is a problem if a JUnit test needs to synchronize with a callback because the synchronization
 	// cannot happen through instance members (e.g. a Lock).
 	// The easiest think is to share everything is needed through static members.
-	// 
+	//
+	// See also:
+	// http://stackoverflow.com/questions/7161338/using-osgi-declarative-services-in-the-context-of-a-junit-test
 	private static DataService s_dataService;
 	private static CountDownLatch s_dependencyLatch = new CountDownLatch(1);	// initialize with number of dependencies
 	

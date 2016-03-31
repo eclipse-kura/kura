@@ -17,6 +17,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.kura.web.client.messages.Messages;
+import org.eclipse.kura.web.client.ui.resources.Resources;
 import org.eclipse.kura.web.client.ui.Device.DevicePanelUi;
 import org.eclipse.kura.web.client.ui.Firewall.FirewallPanelUi;
 import org.eclipse.kura.web.client.ui.Network.NetworkPanelUi;
@@ -45,6 +46,7 @@ import org.gwtbootstrap3.client.ui.NavPills;
 import org.gwtbootstrap3.client.ui.Panel;
 import org.gwtbootstrap3.client.ui.PanelBody;
 import org.gwtbootstrap3.client.ui.PanelHeader;
+import org.gwtbootstrap3.client.ui.TabListItem;
 import org.gwtbootstrap3.client.ui.constants.IconSize;
 import org.gwtbootstrap3.client.ui.constants.IconType;
 import org.gwtbootstrap3.client.ui.html.Span;
@@ -57,6 +59,8 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
@@ -111,7 +115,9 @@ public class EntryClassUi extends Composite {
 	@UiField
 	PanelBody contentPanelBody;
 	@UiField
-	AnchorListItem status, device, network, firewall, packages, settings, wires;
+	TabListItem status;
+	@UiField
+	AnchorListItem device, network, firewall, packages, settings, wires;
 	@UiField
 	ScrollPanel servicesPanel;
 	@UiField
@@ -162,13 +168,29 @@ public class EntryClassUi extends Composite {
 
 	}
 
-	public void initSystemPanel(GwtSession GwtSession) {
+	public void initSystemPanel(GwtSession GwtSession, boolean connectionStatus) {
 		if (!GwtSession.isNetAdminAvailable()) {
 			network.setVisible(false);
 			firewall.setVisible(false);
 		}
 
 		// Status Panel
+		Image img;
+		String statusMessage;
+		if (connectionStatus) {
+			img= new Image(Resources.INSTANCE.greenPlug32().getSafeUri());
+			statusMessage= MSGS.connectionStatusConnected();
+		} else {
+			img= new Image(Resources.INSTANCE.redPlug32().getSafeUri());
+			statusMessage= MSGS.connectionStatusDisconnected();
+		}
+
+		String imgRefreshLabel = new String("<image src=\""+ img.getUrl() +"\" "
+				+ "width=\"23\" height=\"23\" "
+				+ "style=\"vertical-align: middle; float: right;\" title=\"" + statusMessage + "\"/>");
+		
+		String statusHTML= status.getHTML();
+		status.setHTML(statusHTML + imgRefreshLabel);
 		status.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {

@@ -163,35 +163,29 @@ public class ServicesAnchorListItem extends AnchorListItem {
 			return IconType.TERMINAL;
 		} else if (name.equals("DenaliService")) {
 			return IconType.SPINNER;
-			//		} else if (icon != null && 
-			//				(icon.toLowerCase().startsWith("http://") ||
-			//       			     icon.toLowerCase().startsWith("https://")) &&
-			//       				Util.isImagePath(icon)) {
-			//       			return new ScaledAbstractImagePrototype(IconHelper.createPath(icon, 32, 32));
-			//       		}
-			//       		else if (icon != null &&
-			//       				Util.isImagePath(icon)) {
-			//       			return new ScaledAbstractImagePrototype(IconHelper.createPath(SERVLET_URL + model.get("componentId"), 32, 32));
-			//       		}
 		} else {
-			return null; //IconType.CHEVRON_CIRCLE_RIGHT;
+			return null;
 		}
 	}
 
 	private String getImagePath() {									
-		String icon = item.getComponentIcon();
+		String icon= item.getComponentIcon();
+		String componentId= item.getComponentId();
 		if (icon != null && 
-				(icon.toLowerCase().startsWith("http://") ||
-						icon.toLowerCase().startsWith("https://")) //&&
-				) { //Util.isImagePath(icon)
+				(icon.toLowerCase().startsWith("http://") || icon.toLowerCase().startsWith("https://")) &&
+				isImagePath(icon)) { //Util.isImagePath(icon)
 			return icon;
-		}
-		else if (icon != null //&&
-				) { //Util.isImagePath(icon)
-			return SERVLET_URL + icon;
-		}
-		else {
+		} else if (icon != null && isImagePath(icon)) { //Util.isImagePath(icon)
+			return SERVLET_URL + componentId;
+		} else {
 			return null;
 		}
+	}
+
+	private boolean isImagePath(String icon) {
+		boolean isPng= icon.toLowerCase().endsWith(".png");
+		boolean isJpg= icon.toLowerCase().endsWith(".jpg");
+		boolean isGif= icon.toLowerCase().endsWith(".gif");
+		return isPng || isJpg || isGif;
 	}
 }

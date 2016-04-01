@@ -278,12 +278,12 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
 	public void refresh() {
 		if (isDirty()) {
 			setDirty(false);
+			resetValidations();
 			if (selectedNetIfConfig == null) {
 				reset();
 			} else {
 				update();
 			}
-			resetValidations();
 		}
 	}
 

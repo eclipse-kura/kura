@@ -174,6 +174,7 @@ public class TabModemUi extends Composite implements NetworkTab {
 	public void refresh() {
 		if (isDirty()) {
 			setDirty(false);
+			resetValidations();
 			if (selectedNetIfConfig == null) {
 				reset();
 			} else {
@@ -718,6 +719,24 @@ public class TabModemUi extends Composite implements NetworkTab {
 
 		radio1.setValue(true);
 		radio2.setValue(false);
+	}
+	
+	private void resetValidations() {
+		groupApn.setValidationState(ValidationState.NONE);
+		groupDial.setValidationState(ValidationState.NONE);
+		groupFailure.setValidationState(ValidationState.NONE);
+		groupIdle.setValidationState(ValidationState.NONE);
+		groupInterval.setValidationState(ValidationState.NONE);
+		groupMaxfail.setValidationState(ValidationState.NONE);
+		groupNumber.setValidationState(ValidationState.NONE);
+		groupReset.setValidationState(ValidationState.NONE);
+		
+		helpReset.setText(""); 
+		helpMaxfail.setText(""); 
+		helpIdle.setText(""); 
+		helpInterval.setText(""); 
+		helpFailure.setText(""); 
+		helpNumber.setText("");
 	}
 
 	private void resetHelp() {

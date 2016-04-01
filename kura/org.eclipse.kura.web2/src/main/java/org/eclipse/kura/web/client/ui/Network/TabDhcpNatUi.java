@@ -170,6 +170,7 @@ public class TabDhcpNatUi extends Composite implements NetworkTab {
 	public void refresh() {
 		if (isDirty()) {
 			setDirty(false);
+			resetValidations();
 			if (selectedNetIfConfig == null) {
 				reset();
 			} else {
@@ -295,6 +296,17 @@ public class TabDhcpNatUi extends Composite implements NetworkTab {
 		radio1.setActive(true);
 		radio2.setActive(false);
 		update();
+	}
+	
+	private void resetValidations() {
+		groupRouter.setValidationState(ValidationState.NONE);
+		groupBegin.setValidationState(ValidationState.NONE);
+		groupEnd.setValidationState(ValidationState.NONE);
+		groupSubnet.setValidationState(ValidationState.NONE);
+		groupDefaultL.setValidationState(ValidationState.NONE);
+		groupMax.setValidationState(ValidationState.NONE);
+		
+		helpRouter.setText("");
 	}
 
 	private void initForm() {

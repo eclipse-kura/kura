@@ -242,6 +242,18 @@ public class HostapdConfigReader implements NetworkConfigurationVisitor {
 						wifiConfig.setHardwareMode("n");
 					}
 				}
+			} else {
+				s_logger.warn("getWifiHostConfig() :: {} file doesn't exist, will generate default wifiConfig", configFile.getName());
+				wifiConfig.setSSID("kura_gateway");
+				wifiConfig.setDriver("nl80211");
+				wifiConfig.setChannels(new int[] { 11 });
+				wifiConfig.setPasskey("");
+				wifiConfig.setSecurity(WifiSecurity.SECURITY_NONE);
+				wifiConfig.setPairwiseCiphers(WifiCiphers.CCMP);
+				wifiConfig.setRadioMode(WifiRadioMode.RADIO_MODE_80211b);
+				wifiConfig.setIgnoreSSID(false);
+				wifiConfig.setBroadcast(true);
+				wifiConfig.setHardwareMode("b");
 			}
 			return wifiConfig;
 		} catch (Exception e) {

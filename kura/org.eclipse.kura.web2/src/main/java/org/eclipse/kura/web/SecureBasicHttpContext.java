@@ -67,7 +67,13 @@ public class SecureBasicHttpContext implements HttpContext
 	public synchronized boolean handleSecurity(HttpServletRequest request,
 			HttpServletResponse response) 
 					throws IOException 
-	{        
+	{      
+		response.setHeader("X-FRAME-OPTIONS", "SAMEORIGIN");
+		response.setHeader("X-XSS-protection", "1; mode=block");
+		response.setHeader("X-Content-Type-Options", "nosniff");
+		response.setHeader("Cache-Control", "no-cache,no-store");
+		response.setHeader("Pragma", "no-cache");
+		
 		// If a trailing "/" is used when accesssing the app, redirect
 		if (request.getRequestURI().equals(m_appRoot + "/")) {
 			response.sendRedirect(m_appRoot);
@@ -175,7 +181,7 @@ public class SecureBasicHttpContext implements HttpContext
 	 */
 	private Subject authorize(String userid, String password) 
 	{        
-		s_logger.debug("Authenticating user [" + userid + "]");
+		s_logger.debug("Authenticating user [{}]", userid);
 		try {
 			if (m_authMgr.authenticate(userid, password)) {
 				// TODO : We are temporarily returning an empty Subject, 

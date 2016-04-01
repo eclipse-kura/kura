@@ -408,8 +408,10 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 
 									// passkey
 									Password psswd= wifiConfig.getPasskey();
-									String password= new String(psswd.getPassword());
-									gwtWifiConfig.setPassword(password);
+									if (psswd != null) {
+										String password= new String(psswd.getPassword());
+										gwtWifiConfig.setPassword(password);
+									}
 
 									// channel
 									int [] channels = wifiConfig.getChannels();

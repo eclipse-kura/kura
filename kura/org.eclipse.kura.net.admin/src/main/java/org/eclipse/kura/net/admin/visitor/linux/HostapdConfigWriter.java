@@ -26,8 +26,8 @@ import org.eclipse.kura.core.net.WifiInterfaceAddressConfigImpl;
 import org.eclipse.kura.core.util.IOUtil;
 import org.eclipse.kura.core.util.ProcessUtil;
 import org.eclipse.kura.core.util.SafeProcess;
-import org.eclipse.kura.linux.net.util.KuraConstants;
 import org.eclipse.kura.linux.net.wifi.Hostapd;
+import org.eclipse.kura.linux.net.wifi.HostapdManager;
 import org.eclipse.kura.net.NetConfig;
 import org.eclipse.kura.net.NetConfigIP4;
 import org.eclipse.kura.net.NetInterfaceAddressConfig;
@@ -49,18 +49,7 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
 	
 	private static final String HEXES = "0123456789ABCDEF";
 	
-	private static String HOSTAPD_CONFIG_FILE = null;
 	private static final String HOSTAPD_TMP_CONFIG_FILE = "/etc/hostapd.conf.tmp";
-	
-	private static final String OS_VERSION = System.getProperty("kura.os.version");
-	
-	static {
-		if (OS_VERSION.equals(KuraConstants.Intel_Edison.getImageName() + "_" + KuraConstants.Intel_Edison.getImageVersion() + "_" + KuraConstants.Intel_Edison.getTargetName())) {
-			HOSTAPD_CONFIG_FILE = "/etc/hostapd/hostapd.conf";
-		} else {
-			HOSTAPD_CONFIG_FILE = "/etc/hostapd.conf";
-		}
-	}
 	
 	private static HostapdConfigWriter s_instance;
 	
@@ -227,7 +216,7 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
 			this.copyFile(fileAsString, outputFile);
 			
 			//move the file if we made it this far
-			this.moveFile();
+			this.moveFile(interfaceName);
 			
 			return;
 		} else if(wifiConfig.getSecurity() == WifiSecurity.SECURITY_WEP) {
@@ -360,7 +349,7 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
 			this.copyFile(fileAsString, outputFile);
 			
 			//move the file if we made it this far
-			this.moveFile();
+			this.moveFile(interfaceName);
 			
 			return;
 		} else if ((wifiConfig.getSecurity() == WifiSecurity.SECURITY_WPA)
@@ -484,7 +473,7 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
 			this.copyFile(fileAsString, tmpOutputFile);
 			
 			//move the file if we made it this far
-			this.moveFile();
+			this.moveFile(interfaceName);
 			
 			return;
 		} else {
@@ -524,9 +513,9 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
 		}
 	}
 	
-	private void moveFile() throws Exception {
+	private void moveFile(String ifaceName) throws Exception {
 		File tmpFile = new File(HOSTAPD_TMP_CONFIG_FILE);
-		File file = new File(HOSTAPD_CONFIG_FILE);
+		File file = new File(HostapdManager.getHostapdConfigFileName(ifaceName));
 		if(!FileUtils.contentEquals(tmpFile, file)) {
 			if(tmpFile.renameTo(file)){
 				s_logger.trace("Successfully wrote hostapd.conf file");

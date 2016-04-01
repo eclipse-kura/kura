@@ -579,7 +579,7 @@ public class OpenPortsTabUi extends Composite implements Tab {
 		permittedI.addChangeHandler(new ChangeHandler() {
 			@Override
 			public void onChange(ChangeEvent event) {
-				if (permittedI.getText() != null && !"".equals(permittedI.getText())) {
+				if (!permittedI.getText().trim().isEmpty()) {
 					unpermittedI.clear();
 					unpermittedI.setEnabled(false);
 				} else {
@@ -591,7 +591,7 @@ public class OpenPortsTabUi extends Composite implements Tab {
 		unpermittedI.addChangeHandler(new ChangeHandler() {
 			@Override
 			public void onChange(ChangeEvent event) {
-				if (unpermittedI.getText() != null && !"".equals(unpermittedI.getText())) {
+				if (!unpermittedI.getText().trim().isEmpty()) {
 					permittedI.clear();
 					permittedI.setEnabled(false);
 				} else {
@@ -605,7 +605,7 @@ public class OpenPortsTabUi extends Composite implements Tab {
 		port.addBlurHandler(new BlurHandler(){
 			@Override
 			public void onBlur(BlurEvent event) {
-				if((!port.getText().trim().matches(FieldType.NUMERIC.getRegex()) && port.getText().trim().length() != 0) || 
+				if((!port.getText().trim().matches(FieldType.PORT_RANGE.getRegex()) && port.getText().trim().length() != 0) || 
 						(port.getText()==null || "".equals(port.getText().trim()))){
 					groupPort.setValidationState(ValidationState.ERROR);
 				}else{					
@@ -692,7 +692,9 @@ public class OpenPortsTabUi extends Composite implements Tab {
 
 			permittedNw.setText("");
 			permittedI.setText("");
+			permittedI.setEnabled(true);
 			unpermittedI.setText("");
+			unpermittedI.setEnabled(true);
 			permittedMac.setText("");
 			source.setText("");
 		}

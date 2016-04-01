@@ -11,12 +11,12 @@
  *******************************************************************************/
 package org.eclipse.kura.core.test;
 
+import static org.junit.Assert.assertEquals;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import junit.framework.TestCase;
 
 import org.eclipse.kura.core.configuration.ComponentConfigurationImpl;
 import org.eclipse.kura.core.configuration.XmlComponentConfigurations;
@@ -24,12 +24,10 @@ import org.eclipse.kura.core.configuration.metatype.Tocd;
 import org.eclipse.kura.core.configuration.util.ComponentUtil;
 import org.eclipse.kura.core.configuration.util.StringUtil;
 import org.eclipse.kura.core.configuration.util.XmlUtil;
-import org.eclipse.kura.test.annotation.TestTarget;
 import org.junit.Test;
 
-public class ComponentConfigurationImplTest extends TestCase 
+public class ComponentConfigurationImplTest
 {
-	@TestTarget(targetPlatforms={TestTarget.PLATFORM_ALL})
 	@Test
 	public void testSplitDefaultValues()
 		throws Exception
@@ -53,7 +51,6 @@ public class ComponentConfigurationImplTest extends TestCase
 		assertEquals(expected, joined);
 	}
 
-	@TestTarget(targetPlatforms={TestTarget.PLATFORM_ALL})
 	@Test
 	public void testSplitDefaultValues2()
 		throws Exception
@@ -68,7 +65,6 @@ public class ComponentConfigurationImplTest extends TestCase
 		assertEquals("d",    defaultValues[3]);
 	}
 
-	@TestTarget(targetPlatforms={TestTarget.PLATFORM_ALL})
 	@Test
 	public void testPropertiesMarshallUnmarshall()
 		throws Exception
@@ -102,7 +98,6 @@ public class ComponentConfigurationImplTest extends TestCase
 		assertEquals(properties, properties1);
 	}
 
-	@TestTarget(targetPlatforms={TestTarget.PLATFORM_ALL})
 	@Test
 	public void testOCDMarshallUnmarshall()
 		throws Exception

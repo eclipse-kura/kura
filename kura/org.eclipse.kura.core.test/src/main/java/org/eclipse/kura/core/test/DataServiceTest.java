@@ -30,7 +30,6 @@ import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraStoreException;
 import org.eclipse.kura.data.DataService;
 import org.eclipse.kura.data.DataServiceListener;
-import org.eclipse.kura.test.annotation.TestTarget;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -62,37 +61,15 @@ public class DataServiceTest implements DataServiceListener {
 	static final String MSG_TOPIC2 = "#account-name/#client-id/"+MSG_SEMATIC_TOPIC2;
 	static final String MSG_PAYLOAD = "Lorem ipsum dolor sit amet";
 	
-	// JUnit 3 and is called before every test
-//	public void setUp() {
-//		System.err.println("JUnit 3 setUp");
-//		// Wait for OSGi dependencies
-//		try {
-//			s_dependencyLatch.await(5, TimeUnit.SECONDS);
-//		} catch (InterruptedException e) {
-//			fail("OSGi dependencies unfulfilled");
-//		}
-//	}
-	
-	// JUnit 4 and is called before every test
-//	@Before
-//	public void setUpBefore() {
-//		System.err.println("@Before (JUnit4) setUpBefore");
-//		// Wait for OSGi dependencies
-//		try {
-//			s_dependencyLatch.await(5, TimeUnit.SECONDS);
-//		} catch (InterruptedException e) {
-//			fail("OSGi dependencies unfulfilled");
-//		}
-//	}
-	
-	// JUnit 4 and is called once
 	@BeforeClass
 	public static void setUpBeforeClass() {
 		// Wait for OSGi dependencies
 		try {
-			s_dependencyLatch.await(5, TimeUnit.SECONDS);
+			if (!s_dependencyLatch.await(5, TimeUnit.SECONDS)) {
+				fail("OSGi dependencies unfulfilled");
+			}
 		} catch (InterruptedException e) {
-			fail("OSGi dependencies unfulfilled");
+			fail("Interrupted waiting for OSGi dependencies");
 		}
 	}
 		
@@ -105,7 +82,6 @@ public class DataServiceTest implements DataServiceListener {
 		s_dataService = null;
 	}
 	
-	@TestTarget(targetPlatforms={TestTarget.PLATFORM_ALL})
 	@Test
 	public void testConnect() throws KuraConnectException {
 		if (!s_dataService.isConnected()) {
@@ -113,7 +89,6 @@ public class DataServiceTest implements DataServiceListener {
 		}
 	}
 	
-	@TestTarget(targetPlatforms={TestTarget.PLATFORM_ALL})
 	@Test
 	public void testDisconnect() throws KuraConnectException, InterruptedException {
 		if (!s_dataService.isConnected()) {
@@ -147,7 +122,6 @@ public class DataServiceTest implements DataServiceListener {
 		s_lock.unlock();
 	}
 	
-	@TestTarget(targetPlatforms={TestTarget.PLATFORM_ALL})
 	@Test
 	public void testPublish() throws KuraConnectException, InterruptedException {
 		if (!s_dataService.isConnected()) {
@@ -299,7 +273,6 @@ public class DataServiceTest implements DataServiceListener {
 		assertTrue(allConfirmed);
 	}
 	
-	@TestTarget(targetPlatforms={TestTarget.PLATFORM_ALL})
 	@Test
 	public void testSubscribe() throws KuraException, InterruptedException {
 		if (!s_dataService.isConnected()) {
@@ -344,8 +317,7 @@ public class DataServiceTest implements DataServiceListener {
 
 	@Override
 	public void onConnectionLost(Throwable cause) {
-		// TODO Auto-generated method stub
-		
+		// ignore
 	}
 
 	@Override

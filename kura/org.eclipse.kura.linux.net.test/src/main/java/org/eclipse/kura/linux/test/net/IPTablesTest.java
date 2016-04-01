@@ -31,7 +31,6 @@ import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.util.ProcessUtil;
 import org.eclipse.kura.core.util.SafeProcess;
 import org.eclipse.kura.linux.net.iptables.LinuxFirewall;
-import org.eclipse.kura.test.annotation.TestTarget;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -49,8 +48,6 @@ public class IPTablesTest extends TestCase {
 	private static final String TMPDIR = "/tmp/" + IPTablesTest.class.getName();
 	private static String oldConfig = TMPDIR + "/iptables_" + new SimpleDateFormat("yyyyMMdd-HHmmss").format(new Date());
 
-	
-	@TestTarget(targetPlatforms={TestTarget.PLATFORM_ALL})
 	@BeforeClass
 	public void setUp() {
 		s_firewall = LinuxFirewall.getInstance();
@@ -84,7 +81,6 @@ public class IPTablesTest extends TestCase {
 		}
 	}
 		
-	@TestTarget(targetPlatforms={TestTarget.PLATFORM_ALL})
 	@Test
 	public void testDisable() {
 		s_logger.info("Test disable firewall");
@@ -99,7 +95,6 @@ public class IPTablesTest extends TestCase {
 		}
 	}
 	
-	@TestTarget(targetPlatforms={TestTarget.PLATFORM_ALL})
 	@Test
 	public void testEnable() {
 		s_logger.info("Test enable firewall");
@@ -114,7 +109,6 @@ public class IPTablesTest extends TestCase {
 		}
 	}
 	
-	@TestTarget(targetPlatforms={TestTarget.PLATFORM_ALL})
 	@Test
 	public void testLocalRule() {
 		s_logger.info("Test local rule");
@@ -133,7 +127,6 @@ public class IPTablesTest extends TestCase {
 		}
 	}
 	
-	@TestTarget(targetPlatforms={TestTarget.PLATFORM_ALL})
 	@Test
 	public void testNatRule() {
 		s_logger.info("Test NAT rule");
@@ -152,7 +145,6 @@ public class IPTablesTest extends TestCase {
 		}
 	}
 	
-	@TestTarget(targetPlatforms={TestTarget.PLATFORM_ALL})
 	@Test
 	public void testPortForwardRule() {
 		s_logger.info("Test port forward rule");
@@ -188,8 +180,6 @@ public class IPTablesTest extends TestCase {
 		}
 	}
 
-
-	@TestTarget(targetPlatforms={TestTarget.PLATFORM_ALL})
 	@AfterClass()
 	public void tearDown() {
 		// Restore old iptables config

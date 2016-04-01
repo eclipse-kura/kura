@@ -11,46 +11,57 @@
  *******************************************************************************/
 package org.eclipse.kura.core.test.hw;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
+
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-import junit.framework.TestCase;
-
-import org.eclipse.kura.test.annotation.TestTarget;
+import org.eclipse.kura.comm.CommConnection;
+import org.eclipse.kura.comm.CommURI;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.osgi.service.io.ConnectionFactory;
 
-public class CommTest extends TestCase {
+public class CommTest {
 	
-	private static CountDownLatch dependencyLatch = new CountDownLatch(1);	// initialize with number of dependencies
-	private static ConnectionFactory connectionFactory;
+	private static CountDownLatch s_dependencyLatch = new CountDownLatch(1);	// initialize with number of dependencies
+	private static ConnectionFactory s_connectionFactory;
 	//private static String SERIAL_PORT_NAME ="/dev/tty.PL2303-00001004";
-	private static String SERIAL_PORT_NAME ="/dev/ttyUSB0";
+	private static final String SERIAL_PORT_NAME ="/dev/ttyUSB0";
 	
 	@BeforeClass
-	public void setUp() {
+	public static void setUp() {
 		// Wait for OSGi dependencies
 		try {
-			dependencyLatch.await(5, TimeUnit.SECONDS);
+			if (!s_dependencyLatch.await(5, TimeUnit.SECONDS)) {
+				fail("OSGi dependencies unfulfilled");
+			}
 		} catch (InterruptedException e) {
-			fail("OSGi dependencies unfulfilled");
+			fail("Interrupted waiting for OSGi dependencies");
 		}
 	}
 	
 	public void setConnectionFactory(ConnectionFactory connectionFactory) {
-		CommTest.connectionFactory = connectionFactory;
-		dependencyLatch.countDown();
+		CommTest.s_connectionFactory = connectionFactory;
+		s_dependencyLatch.countDown();
 	}
 	
-	@TestTarget(targetPlatforms={TestTarget.PLATFORM_ALL})
+	public void unsetConnectionFactory(ConnectionFactory connectionFactory) {
+		CommTest.s_connectionFactory = null;
+	}
+	
 	@Test
 	public void testServiceExists() {
-		assertNotNull(CommTest.connectionFactory);
+		assertNotNull(CommTest.s_connectionFactory);
 	}
 	
 	//Dont run these hardware tests in CloudBees!!!
-	/*@Test
+	@Test
+	@Ignore
 	public void testCommConnection()
 		throws Exception
 	{		
@@ -62,7 +73,7 @@ public class CommTest extends TestCase {
 									.withTimeout(2000)
 									.build().toString();
 		
-		CommConnection conn = (CommConnection) CommTest.connectionFactory.createConnection(uri, 1, false);
+		CommConnection conn = (CommConnection) s_connectionFactory.createConnection(uri, 1, false);
 		assertNotNull(conn);
 		
 		OutputStream os = conn.openOutputStream();
@@ -77,6 +88,7 @@ public class CommTest extends TestCase {
 	}
 	
 	@Test
+	@Ignore
 	public void testOpenSerialPort() {
 		try {
 			String uri = new CommURI.Builder(SERIAL_PORT_NAME)
@@ -86,7 +98,7 @@ public class CommTest extends TestCase {
 										.withParity(0)
 										.withTimeout(2000)
 										.build().toString();
-			CommConnection conn = (CommConnection) CommTest.connectionFactory.createConnection(uri, 1, false);
+			CommConnection conn = (CommConnection) CommTest.s_connectionFactory.createConnection(uri, 1, false);
 			assertNotNull(conn);
 
 			InputStream is = conn.openInputStream();
@@ -107,6 +119,7 @@ public class CommTest extends TestCase {
 	}
 	
 	@Test
+	@Ignore
 	public void testWriteToPort() {
 		try {
 			String uri = new CommURI.Builder(SERIAL_PORT_NAME)
@@ -116,7 +129,7 @@ public class CommTest extends TestCase {
 										.withParity(0)
 										.withTimeout(2000)
 										.build().toString();
-			CommConnection conn = (CommConnection) CommTest.connectionFactory.createConnection(uri, 1, false);
+			CommConnection conn = (CommConnection) CommTest.s_connectionFactory.createConnection(uri, 1, false);
 			assertNotNull(conn);
 
 			OutputStream os = conn.openOutputStream();
@@ -133,11 +146,11 @@ public class CommTest extends TestCase {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-	}*/
-	
+	}
 	
 	//  CAN'T READ IN AUTOMATED TEST
-	/*@Test
+	@Test
+	@Ignore
 	public void testReadFromPort() {
 		try {
 			String uri = new CommURI.Builder(SERIAL_PORT_NAME)
@@ -147,7 +160,7 @@ public class CommTest extends TestCase {
 										.withParity(0)
 										.withTimeout(2000)
 										.build().toString();
-			CommConnection conn = (CommConnection) CommTest.connectionFactory.createConnection(uri, 1, false);
+			CommConnection conn = (CommConnection) CommTest.s_connectionFactory.createConnection(uri, 1, false);
 			assertNotNull(conn);
 			
 			InputStream is = conn.openInputStream();
@@ -171,10 +184,10 @@ public class CommTest extends TestCase {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-	}*/
+	}
 	
-	/*
 	@Test
+	@Ignore
 	public void testTwoPorts() {
 		try {
 			String uri = new CommURI.Builder(SERIAL_PORT_NAME)
@@ -184,7 +197,7 @@ public class CommTest extends TestCase {
 										.withParity(0)
 										.withTimeout(2000)
 										.build().toString();
-			CommConnection connOne = (CommConnection) CommTest.connectionFactory.createConnection(uri, 1, false);
+			CommConnection connOne = (CommConnection) CommTest.s_connectionFactory.createConnection(uri, 1, false);
 			assertNotNull(connOne);
 			uri = new CommURI.Builder(SERIAL_PORT_NAME)
 										.withBaudRate(19200)
@@ -193,7 +206,7 @@ public class CommTest extends TestCase {
 										.withParity(0)
 										.withTimeout(2000)
 										.build().toString();
-			CommConnection connTwo = (CommConnection) CommTest.connectionFactory.createConnection(uri, 1, false);
+			CommConnection connTwo = (CommConnection) CommTest.s_connectionFactory.createConnection(uri, 1, false);
 			assertNotNull(connTwo);
 			
 			InputStream isOne = connOne.openInputStream();
@@ -241,5 +254,5 @@ public class CommTest extends TestCase {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-	}*/
+	}
 }

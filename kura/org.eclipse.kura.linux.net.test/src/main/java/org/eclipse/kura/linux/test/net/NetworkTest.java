@@ -19,7 +19,6 @@ import java.util.concurrent.TimeUnit;
 
 import org.eclipse.kura.net.NetworkService;
 import org.eclipse.kura.system.SystemService;
-import org.eclipse.kura.test.annotation.TestTarget;
 import org.eclipse.kura.usb.UsbDeviceAddedEvent;
 import org.eclipse.kura.usb.UsbDeviceRemovedEvent;
 import org.junit.BeforeClass;
@@ -91,7 +90,6 @@ public class NetworkTest extends TestCase implements EventHandler {
 		dependencyLatch.countDown();
 	}
 	
-	@TestTarget(targetPlatforms={TestTarget.PLATFORM_ALL})
 	@Test
 	public void testServiceExists() {
 		assertNotNull(NetworkTest.s_networkService);

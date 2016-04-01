@@ -11,23 +11,25 @@
  *******************************************************************************/
 package org.eclipse.kura.core.test;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-
-import junit.framework.TestCase;
 
 import org.eclipse.kura.cloud.CloudClient;
 import org.eclipse.kura.cloud.CloudClientListener;
 import org.eclipse.kura.cloud.CloudService;
 import org.eclipse.kura.message.KuraPayload;
-import org.eclipse.kura.test.annotation.TestTarget;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-public class CloudServiceTest extends TestCase implements CloudClientListener
+public class CloudServiceTest implements CloudClientListener
 {
-	private static CountDownLatch dependencyLatch = new CountDownLatch(1);	// initialize with number of dependencies
-	private static CloudService   cloudService;
+	private static CountDownLatch s_dependencyLatch = new CountDownLatch(1);	// initialize with number of dependencies
+	private static CloudService   s_cloudService;
 	
 	private int            publishedMsgId;
 	private boolean        publishPublished;
@@ -40,18 +42,24 @@ public class CloudServiceTest extends TestCase implements CloudClientListener
 	private boolean        controlArrived;
 	
 	@BeforeClass
-	public void setUp() {
+	public static void setUp() {
 		// Wait for OSGi dependencies
 		try {
-			dependencyLatch.await(5, TimeUnit.SECONDS);
+			if (!s_dependencyLatch.await(5, TimeUnit.SECONDS)) {
+				fail("OSGi dependencies unfulfilled");
+			}
 		} catch (InterruptedException e) {
-			fail("OSGi dependencies unfulfilled");
+			fail("Interrupted waiting for OSGi dependencies");
 		}
 	}
 	
 	public void setCloudService(CloudService cloudService) {
-		CloudServiceTest.cloudService = cloudService;
-		dependencyLatch.countDown();
+		CloudServiceTest.s_cloudService = cloudService;
+		s_dependencyLatch.countDown();
+	}
+
+	public void unsetCloudService(CloudService cloudService) {
+		CloudServiceTest.s_cloudService = null;
 	}
 	
 	@Test
@@ -59,13 +67,11 @@ public class CloudServiceTest extends TestCase implements CloudClientListener
 		assertTrue(true);
 	}
 	
-	@TestTarget(targetPlatforms={TestTarget.PLATFORM_ALL})
 	@Test
 	public void testServiceExists() {
-		assertNotNull(CloudServiceTest.cloudService);
+		assertNotNull(CloudServiceTest.s_cloudService);
 	}
 	
-	@TestTarget(targetPlatforms={TestTarget.PLATFORM_ALL})
 	@Test
 	public void testService() 
 		throws Exception
@@ -73,7 +79,7 @@ public class CloudServiceTest extends TestCase implements CloudClientListener
 		publishArrived = false;
 		controlArrived = false;
 				
-		CloudClient cloudAppClient = CloudServiceTest.cloudService.newCloudClient("testService");
+		CloudClient cloudAppClient = CloudServiceTest.s_cloudService.newCloudClient("testService");
 		cloudAppClient.addCloudClientListener(this);
 		
 		// test regular subscriptions

@@ -23,7 +23,6 @@ import junit.framework.TestCase;
 import org.eclipse.kura.linux.net.wifi.Hostapd;
 import org.eclipse.kura.net.wifi.WifiRadioMode;
 import org.eclipse.kura.net.wifi.WifiSecurity;
-import org.eclipse.kura.test.annotation.TestTarget;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -47,8 +46,6 @@ public class HostapdTest extends TestCase {
 	private static final int m_channel = 10;
 	private static final String m_password = "123HostapdTestPassword";
 
-	
-	@TestTarget(targetPlatforms={TestTarget.PLATFORM_ALL})
 	@BeforeClass
 	public void setUp() {
 		File tmpDir = new File(TMPDIR);
@@ -103,8 +100,7 @@ public class HostapdTest extends TestCase {
 			e.printStackTrace();
 		}
 	}
-		
-	@TestTarget(targetPlatforms={TestTarget.PLATFORM_ALL})
+
 	@Test
 	public void testDisable() {
 		s_logger.info("Test disable hostapd");
@@ -116,8 +112,7 @@ public class HostapdTest extends TestCase {
 			fail("testDisable failed: " + e);
 		}
 	}
-	
-	@TestTarget(targetPlatforms={TestTarget.PLATFORM_ALL})
+
 	@Test
 	public void testEnable() {
 		s_logger.info("Test enable hostapd");
@@ -140,9 +135,6 @@ public class HostapdTest extends TestCase {
 		}
 	}
 	
-	
-
-	@TestTarget(targetPlatforms={TestTarget.PLATFORM_ALL})
 	@AfterClass()
 	public void tearDown() {
 		
@@ -206,5 +198,4 @@ public class HostapdTest extends TestCase {
 
 		return data.toString();
 	}
-
 }

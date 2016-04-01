@@ -62,7 +62,7 @@ public class RemoteTargetTest {
 			m_cloudClient  = cloudService.newCloudClient("RemoteTargetTest");
 		}
 		catch (Exception e) {
-			e.printStackTrace();
+			s_logger.warn("CloudClient instantiation failed", e);
 		}
 	}
 	
@@ -142,7 +142,7 @@ public class RemoteTargetTest {
 			}
 			
 			s_logger.warn("Tests finished - shutting down");
-			System.exit(0);
+			//System.exit(0);
 		}
 			
 		componentContext.getBundleContext().registerService(CommandProvider.class.getName(), new KuraTestCommandProvider(), null);
@@ -207,9 +207,8 @@ public class RemoteTargetTest {
 			dataProps.put("connect.auto-on-startup", true);
 			dataConfig.update(dataProps);
 		} catch(Exception e) {
-			e.printStackTrace();
-			s_logger.error("Failed to reconfigure the broker settings - failing out");
-			System.exit(-1);
+			s_logger.error("Failed to reconfigure the broker settings - failing out", e);
+			//System.exit(-1);
 		}
 		
 		//wait for connection?
@@ -222,7 +221,7 @@ public class RemoteTargetTest {
 		try {
 			m_cloudClient.publish("test/start", payload, 1, false);
 		} catch (KuraException e) {
-			e.printStackTrace();
+			s_logger.warn("Publish failed", e);
 		}
 	}
 	
@@ -237,7 +236,7 @@ public class RemoteTargetTest {
 		try {
 			m_cloudClient.publish("test/finished", payload, 1, false);
 		} catch (KuraException e) {
-			e.printStackTrace();
+			s_logger.warn("Publish failed", e);
 		}
 	}
 }

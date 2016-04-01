@@ -115,7 +115,7 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
 						}
 						
 						if(netInterfaceStatus == NetInterfaceStatus.netIPv4StatusDisabled) {
-		        			s_logger.info("Network interface status for " + interfaceName + " is disabled - not overwriting hostapd configuration file");
+		        			s_logger.info("Network interface status for {} is disabled - not overwriting hostapd configuration file", interfaceName);
 		        			return;
 		        		}
 						
@@ -123,7 +123,7 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
 							try {
 								generateHostapdConf(apConfig, interfaceName, interfaceDriver);
 							} catch (Exception e) {
-								s_logger.error("Failed to generate hostapd configuration file");
+								s_logger.error("Failed to generate hostapd configuration file for {} interface", interfaceName);
 								throw KuraException.internalError(e);
 							}
 						}
@@ -140,7 +140,7 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
 		
 		s_logger.debug("Generating Hostapd Config");
 		
-		if (wifiConfig.getSecurity() == WifiSecurity.SECURITY_NONE) {
+		if ((wifiConfig.getSecurity() == WifiSecurity.SECURITY_NONE) || (wifiConfig.getSecurity() == WifiSecurity.NONE)) {
 			
 			File outputFile = new File(HOSTAPD_TMP_CONFIG_FILE);
 			
@@ -155,7 +155,7 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
 				fileAsString = fileAsString.replaceFirst("KURA_DRIVER", interfaceDriver);
 			} else {
 				String drv = Hostapd.getDriver(interfaceName);
-				s_logger.warn("The 'driver' parameter must be set: setting to: " + drv);
+				s_logger.warn("The 'driver' parameter must be set: setting to: {}", drv);
 				fileAsString = fileAsString.replaceFirst("KURA_DRIVER", drv);
 				//throw KuraException.internalError("the driver name can not be null");
 			}
@@ -233,7 +233,7 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
 				fileAsString = fileAsString.replaceFirst("KURA_DRIVER", interfaceDriver);
 			} else {
 				String drv = Hostapd.getDriver(interfaceName);
-				s_logger.warn("The 'driver' parameter must be set: setting to: " + drv);
+				s_logger.warn("The 'driver' parameter must be set: setting to: {}", drv);
 				fileAsString = fileAsString.replaceFirst("KURA_DRIVER", drv);
 				//throw KuraException.internalError("the driver name can not be null");
 			}
@@ -380,7 +380,7 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
 				fileAsString = fileAsString.replaceFirst("KURA_DRIVER", interfaceDriver);
 			} else {
 				String drv = Hostapd.getDriver(interfaceName);
-				s_logger.warn("The 'driver' parameter must be set: setting to: " + drv);
+				s_logger.warn("The 'driver' parameter must be set: setting to: {}", drv);
 				fileAsString = fileAsString.replaceFirst("KURA_DRIVER", drv);
 				//throw KuraException.internalError("the driver name can not be null");
 			}
@@ -477,8 +477,7 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
 			
 			return;
 		} else {
-			s_logger.error("unsupported security type: " + wifiConfig.getSecurity() +
-					" It must be WifiSecurity.SECURITY_NONE, WifiSecurity.SECURITY_WEP, WifiSecurity.SECURITY_WPA, or WifiSecurity.SECURITY_WPA2");
+			s_logger.error("Unsupported security type: {}. It must be WifiSecurity.NONE, WifiSecurity.SECURITY_NONE, WifiSecurity.SECURITY_WEP, WifiSecurity.SECURITY_WPA, or WifiSecurity.SECURITY_WPA2", wifiConfig.getSecurity());
 			throw KuraException.internalError("unsupported security type: " + wifiConfig.getSecurity());
 		}
 	}

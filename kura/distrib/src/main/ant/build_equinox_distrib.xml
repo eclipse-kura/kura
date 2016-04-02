@@ -123,6 +123,8 @@
                  token="{org.eclipse.kura.linux.watchdog.version}" value="${org.eclipse.kura.linux.watchdog.version}"/>
         <replace file="${project.build.directory}/${build.output.name}/config.ini"
                  token="{org.eclipse.kura.core.status.version}" value="${org.eclipse.kura.core.status.version}"/>
+        <replace file="${project.build.directory}/${build.output.name}/config.ini"
+                 token="{org.eclipse.kura.camel.version}" value="${org.eclipse.kura.camel.version}"/>
         
 
 		<!-- Conditional entries. Check for jar presence, and invoke relevant ant target-->
@@ -490,6 +492,8 @@ fi
                         prefix="${build.output.name}/kura/plugins" />
 			<!--<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.net.admin_${org.eclipse.kura.net.admin.version}.jar"
                         prefix="${build.output.name}/kura/plugins" /> -->
+            <zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.camel_${org.eclipse.kura.camel.version}.jar"
+                        prefix="${build.output.name}/kura/plugins" />
         </zip>
 		
 		<!-- Conditional inclusion of jar files in the distribution jar -->

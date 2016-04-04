@@ -406,6 +406,12 @@ public class ServicesUi extends Composite {
 		} else {
 			textBox.setText("");
 		}
+		
+		if (param.getMin() != null && param.getMin().equals(param.getMax())) {
+			textBox.setReadOnly(true);
+			textBox.setEnabled(false);
+        }
+		
 		formGroup.add(textBox);
 
 		textBox.addValueChangeHandler(new ValueChangeHandler<String>() {
@@ -448,6 +454,11 @@ public class ServicesUi extends Composite {
 		} else {
 			input.setText("");
 		}
+		
+		if (param.getMin() != null && param.getMin().equals(param.getMax())) {
+			input.setReadOnly(true);
+			input.setEnabled(false);
+        }
 
 		input.addValueChangeHandler(new ValueChangeHandler<String>() {
 			@Override
@@ -509,6 +520,11 @@ public class ServicesUi extends Composite {
 
 		radioTrue.setValue(Boolean.parseBoolean(param.getValue()));
 		radioFalse.setValue(!Boolean.parseBoolean(param.getValue()));
+		
+		if (param.getMin() != null && param.getMin().equals(param.getMax())) {
+			radioTrue.setEnabled(false);
+			radioFalse.setEnabled(false);
+        }
 
 		flowPanel.add(radioTrue);
 		flowPanel.add(radioFalse);
@@ -567,13 +583,13 @@ public class ServicesUi extends Composite {
 		while (it.hasNext()) {
 			current = it.next();
 			listBox.addItem(current);
-			if (param.getDefault() != null
-					&& oMap.get(current).equals((String) param.getDefault())) {
+			if (param.getDefault() != null && 
+					oMap.get(current).equals((String) param.getDefault())) {
 				listBox.setSelectedIndex(i);
 			}
 
-			if (param.getValue() != null
-					&& oMap.get(current).equals((String) param.getValue())) {
+			if (param.getValue() != null && 
+					oMap.get(current).equals((String) param.getValue())) {
 				listBox.setSelectedIndex(i);
 			}
 			i++;

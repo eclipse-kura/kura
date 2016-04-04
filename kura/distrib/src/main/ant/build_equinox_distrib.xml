@@ -123,9 +123,8 @@
                  token="{org.eclipse.kura.linux.watchdog.version}" value="${org.eclipse.kura.linux.watchdog.version}"/>
         <replace file="${project.build.directory}/${build.output.name}/config.ini"
                  token="{org.eclipse.kura.core.status.version}" value="${org.eclipse.kura.core.status.version}"/>
-        <replace file="${project.build.directory}/${build.output.name}/config.ini"
-                 token="{org.eclipse.kura.camel.version}" value="${org.eclipse.kura.camel.version}"/>
-        
+
+		<antcall target="camel-config" />        
 
 		<!-- Conditional entries. Check for jar presence, and invoke relevant ant target-->
 		<available file="${project.build.directory}/plugins/org.eclipse.kura.web_${org.eclipse.kura.web.version}.jar" property="web.jar.present" />
@@ -492,9 +491,9 @@ fi
                         prefix="${build.output.name}/kura/plugins" />
 			<!--<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.net.admin_${org.eclipse.kura.net.admin.version}.jar"
                         prefix="${build.output.name}/kura/plugins" /> -->
-            <zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.camel_${org.eclipse.kura.camel.version}.jar"
-                        prefix="${build.output.name}/kura/plugins" />
         </zip>
+        
+        <antcall target="camel-jar" />
 		
 		<!-- Conditional inclusion of jar files in the distribution jar -->
 		<antcall target="web-jar" />
@@ -614,6 +613,13 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
         </propertyfile>
     </target>
 
+	<target name="camel-config">
+		<propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
+            	<entry key="osgi.bundles" operation="+"
+                   value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.camel_${org.eclipse.kura.camel.version}.jar@4:start" />
+        </propertyfile>
+	</target>
+
 	<target name="web-config" if="web.jar.present">
 		<propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
             	<entry key="osgi.bundles" operation="+"
@@ -635,6 +641,13 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
 			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.linux.gpio_${org.eclipse.kura.linux.gpio.version}.jar@5:start" />
 		</propertyfile>
+	</target>
+	
+	<target name="camel-jar">
+		<zip destfile="${project.build.directory}/${build.output.name}.zip" update="true">
+			<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.camel_${org.eclipse.kura.camel.version}.jar"
+                        prefix="${build.output.name}/kura/plugins" />
+		</zip>
 	</target>
 
 	<target name="web-jar" if="web.jar.present">

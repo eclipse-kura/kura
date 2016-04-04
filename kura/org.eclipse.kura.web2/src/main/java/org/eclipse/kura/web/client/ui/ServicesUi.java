@@ -72,6 +72,8 @@ import com.google.gwt.user.client.ui.Widget;
 
 public class ServicesUi extends Composite {
 
+	private static final String CONFIG_MAX_VALUE = "configMaxValue";
+	private static final String CONFIG_MIN_VALUE = "configMinValue";
 	private static ServicesUiUiBinder uiBinder = GWT.create(ServicesUiUiBinder.class);
 	private static final Logger logger = Logger.getLogger(ServicesUi.class.getSimpleName());
 	private static Logger errorLogger = Logger.getLogger("ErrorLogger");
@@ -617,7 +619,7 @@ public class ServicesUi extends Composite {
 	//Validates all the entered values
 	private boolean validate(GwtConfigParameter param, TextBox box, FormGroup group){
 
-		if(param.isRequired() && (box.getText().trim()==null || "".equals(box.getText().trim()))) {
+		if(param.isRequired() && (box.getText().trim() == null || "".equals(box.getText().trim()))) {
 			group.setValidationState(ValidationState.ERROR);
 			valid.put(param.getName(), false);
 			box.setPlaceholder(MSGS.formRequiredParameter());
@@ -625,10 +627,10 @@ public class ServicesUi extends Composite {
 		} else {
 			if (param.getType().equals(GwtConfigParameterType.CHAR)) {
 				if (param.getMin() != null) {
-					if(Character.valueOf(param.getMin().charAt(0)).charValue() > Character.valueOf(box.getText().trim().charAt(0)).charValue()){
+					if(Character.valueOf(param.getMin().charAt(0)).charValue() > Character.valueOf(box.getText().trim().charAt(0)).charValue()){  //TODO: why this character boxing?
 						group.setValidationState(ValidationState.ERROR);
 						valid.put(param.getName(), false);
-						box.setPlaceholder(MessageUtils.get("configMinValue", Character.valueOf(param.getMin().charAt(0)).charValue()));
+						box.setPlaceholder(MessageUtils.get(CONFIG_MIN_VALUE, Character.valueOf(param.getMin().charAt(0)).charValue()));
 						return false;
 					}
 				}
@@ -636,7 +638,7 @@ public class ServicesUi extends Composite {
 					if(Character.valueOf(param.getMax().charAt(0)).charValue() < Character.valueOf(box.getText().trim().charAt(0)).charValue()){
 						group.setValidationState(ValidationState.ERROR);
 						valid.put(param.getName(), false);
-						box.setPlaceholder(MessageUtils.get("configMaxValue", Character.valueOf(param.getMax().charAt(0)).charValue()));
+						box.setPlaceholder(MessageUtils.get(CONFIG_MAX_VALUE, Character.valueOf(param.getMax().charAt(0)).charValue()));
 						return false;
 					}
 				}
@@ -644,13 +646,13 @@ public class ServicesUi extends Composite {
 				if ((String.valueOf(box.getText().trim()).length()) < 0) {
 					group.setValidationState(ValidationState.ERROR);
 					valid.put(param.getName(), false);
-					box.setPlaceholder(MessageUtils.get("configMinValue", 0));
+					box.setPlaceholder(MessageUtils.get(CONFIG_MIN_VALUE, 0));
 					return false;
 				}				
 				if ((String.valueOf(box.getText().trim()).length()) > 255) {
 					group.setValidationState(ValidationState.ERROR);
 					valid.put(param.getName(), false);
-					box.setPlaceholder(MessageUtils.get("configMaxValue", 255));
+					box.setPlaceholder(MessageUtils.get(CONFIG_MAX_VALUE, 255));
 					return false;
 				}	
 			} else if (!box.getText().trim().matches(REGEX_NUM)) { 
@@ -667,7 +669,7 @@ public class ServicesUi extends Composite {
 							if (Float.valueOf(param.getMin()).floatValue() > Float.valueOf(box.getText().trim()).floatValue()) {
 								group.setValidationState(ValidationState.ERROR);
 								valid.put(param.getName(), false);
-								box.setPlaceholder(MessageUtils.get("configMinValue", param.getMin()));
+								box.setPlaceholder(MessageUtils.get(CONFIG_MIN_VALUE, param.getMin()));
 								return false;
 							}
 						}
@@ -675,7 +677,7 @@ public class ServicesUi extends Composite {
 							if (Float.valueOf(param.getMax()).floatValue() < Float.valueOf(box.getText().trim()).floatValue()) {
 								group.setValidationState(ValidationState.ERROR);
 								valid.put(param.getName(), false);
-								box.setPlaceholder(MessageUtils.get("configMaxValue", param.getMax()));
+								box.setPlaceholder(MessageUtils.get(CONFIG_MAX_VALUE, param.getMax()));
 								return false;
 							}
 						}
@@ -684,7 +686,7 @@ public class ServicesUi extends Composite {
 							if (Integer.valueOf(param.getMin()).intValue() > Integer.valueOf(box.getText().trim()).intValue()) {
 								group.setValidationState(ValidationState.ERROR);
 								valid.put(param.getName(), false);
-								box.setPlaceholder(MessageUtils.get("configMinValue", param.getMin()));
+								box.setPlaceholder(MessageUtils.get(CONFIG_MIN_VALUE, param.getMin()));
 								return false;
 							}
 						}
@@ -692,7 +694,7 @@ public class ServicesUi extends Composite {
 							if (Integer.valueOf(param.getMax()).intValue() < Integer.valueOf(box.getText().trim()).intValue()) {
 								group.setValidationState(ValidationState.ERROR);
 								valid.put(param.getName(), false);
-								box.setPlaceholder(MessageUtils.get("configMaxValue", param.getMax()));
+								box.setPlaceholder(MessageUtils.get(CONFIG_MAX_VALUE, param.getMax()));
 								return false;
 							}
 						}
@@ -701,7 +703,7 @@ public class ServicesUi extends Composite {
 							if (Short.valueOf(param.getMin()).shortValue() > Short.valueOf(box.getText().trim()).shortValue()) {
 								group.setValidationState(ValidationState.ERROR);
 								valid.put(param.getName(), false);
-								box.setPlaceholder(MessageUtils.get("configMinValue", param.getMin()));
+								box.setPlaceholder(MessageUtils.get(CONFIG_MIN_VALUE, param.getMin()));
 								return false;
 							}
 						}
@@ -709,7 +711,7 @@ public class ServicesUi extends Composite {
 							if (Short.valueOf(param.getMax()).shortValue() < Short.valueOf(box.getText().trim()).shortValue()) {
 								group.setValidationState(ValidationState.ERROR);
 								valid.put(param.getName(), false);
-								box.setPlaceholder(MessageUtils.get("configMaxValue", param.getMax()));
+								box.setPlaceholder(MessageUtils.get(CONFIG_MAX_VALUE, param.getMax()));
 								return false;
 							}
 						}
@@ -718,7 +720,7 @@ public class ServicesUi extends Composite {
 							if (Byte.valueOf(param.getMin()).byteValue() > Byte.valueOf(box.getText().trim()).byteValue()) {
 								group.setValidationState(ValidationState.ERROR);
 								valid.put(param.getName(), false);
-								box.setPlaceholder(MessageUtils.get("configMinValue", param.getMin()));
+								box.setPlaceholder(MessageUtils.get(CONFIG_MIN_VALUE, param.getMin()));
 								return false;
 							}
 						}
@@ -726,7 +728,7 @@ public class ServicesUi extends Composite {
 							if (Byte.valueOf(param.getMax()).byteValue() < Byte.valueOf(box.getText().trim()).byteValue()) {
 								group.setValidationState(ValidationState.ERROR);
 								valid.put(param.getName(), false);
-								box.setPlaceholder(MessageUtils.get("configMaxValue", param.getMax()));
+								box.setPlaceholder(MessageUtils.get(CONFIG_MAX_VALUE, param.getMax()));
 								return false;
 							}
 						}
@@ -735,7 +737,7 @@ public class ServicesUi extends Composite {
 							if (Long.valueOf(param.getMin()).longValue() > Long.valueOf(box.getText().trim()).longValue()) {
 								group.setValidationState(ValidationState.ERROR);
 								valid.put(param.getName(), false);
-								box.setPlaceholder(MessageUtils.get("configMinValue", param.getMin()));
+								box.setPlaceholder(MessageUtils.get(CONFIG_MIN_VALUE, param.getMin()));
 								return false;
 							}
 						}
@@ -743,7 +745,7 @@ public class ServicesUi extends Composite {
 							if (Long.valueOf(param.getMax()).longValue() < Long.valueOf(box.getText().trim()).longValue()) {
 								group.setValidationState(ValidationState.ERROR);
 								valid.put(param.getName(), false);
-								box.setPlaceholder(MessageUtils.get("configMaxValue", param.getMax()));
+								box.setPlaceholder(MessageUtils.get(CONFIG_MAX_VALUE, param.getMax()));
 								return false;
 							}
 						}
@@ -752,7 +754,7 @@ public class ServicesUi extends Composite {
 							if (Double.valueOf(param.getMin()).doubleValue() > Double.valueOf(box.getText().trim()).doubleValue()) {
 								group.setValidationState(ValidationState.ERROR);
 								valid.put(param.getName(), false);
-								box.setPlaceholder(MessageUtils.get("configMinValue", param.getMin()));
+								box.setPlaceholder(MessageUtils.get(CONFIG_MIN_VALUE, param.getMin()));
 								return false;
 							}
 						}
@@ -760,7 +762,7 @@ public class ServicesUi extends Composite {
 							if (Double.valueOf(param.getMax()).doubleValue() < Double.valueOf(box.getText().trim()).doubleValue()) {
 								group.setValidationState(ValidationState.ERROR);
 								valid.put(param.getName(), false);
-								box.setPlaceholder(MessageUtils.get("configMaxValue", param.getMax()));
+								box.setPlaceholder(MessageUtils.get(CONFIG_MAX_VALUE, param.getMax()));
 								return false;
 							}
 						}

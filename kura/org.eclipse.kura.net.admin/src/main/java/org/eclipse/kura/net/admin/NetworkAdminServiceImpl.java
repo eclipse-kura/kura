@@ -1449,6 +1449,11 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
             if(wifiConfig != null) {
                 s_logger.debug("Starting wpa_supplicant");
                 WpaSupplicantManager.start(ifaceName, wifiMode, wifiConfig.getDriver());
+                if (isWifiConnectionCompleted(ifaceName, 60)) {
+                	s_logger.debug("WiFi Connection Completed on {} !", ifaceName);
+                } else {
+                	s_logger.warn("Failed to complete WiFi Connection on {}", ifaceName);
+                }
             } else {
                 s_logger.warn("No WifiConfig configured for mode " + wifiMode);
             }

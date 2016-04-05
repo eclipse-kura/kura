@@ -452,7 +452,7 @@ public class ServicesUi extends Composite {
 		}
 
 		String formattedValue= new String();
-		switch (param.getType()) {
+		switch (param.getType()) {  //TODO: Probably this formatting step has no sense. But it seems that, if not in debug, all the browsers are able to display the double value as expected
 		case LONG:
 			if (param.getValue() != null) {
 				formattedValue= String.valueOf(Long.parseLong(param.getValue()));

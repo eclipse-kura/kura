@@ -105,7 +105,7 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
 									if(gwtParam.getType().equals(GwtConfigParameterType.PASSWORD)){
 										gwtParam.setValue(PLACEHOLDER);
 									} else {
-										gwtParam.setValue(value.toString());
+										gwtParam.setValue(String.valueOf(value));
 									}
 								}
 								else {
@@ -118,7 +118,7 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
 												if(gwtParam.getType().equals(GwtConfigParameterType.PASSWORD)){
 													strValues.add(PLACEHOLDER);
 												} else {
-													strValues.add(v.toString());
+													strValues.add(String.valueOf(v));
 												}
 											}
 										}
@@ -200,7 +200,7 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
 							Object value = config.getConfigurationProperties().get(ad.getId());
 							if (value != null) {
 								if (cardinality == 0 || cardinality == 1 || cardinality == -1) {
-									gwtParam.setValue(value.toString());
+									gwtParam.setValue(String.valueOf(value));
 								}
 								else {
 									// this could be an array value
@@ -209,7 +209,7 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
 										List<String> strValues = new ArrayList<String>();
 										for (Object v : objValues) {
 											if (v != null) {
-												strValues.add(v.toString());
+												strValues.add(String.valueOf(v));
 											}
 										}
 										gwtParam.setValues(strValues.toArray( new String[]{}));

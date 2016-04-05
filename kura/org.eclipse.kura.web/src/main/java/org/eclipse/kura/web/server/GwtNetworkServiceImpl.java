@@ -151,7 +151,6 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 			GwtNetInterfaceConfig gwtNetConfig = null;		
 			for (NetInterfaceConfig<? extends NetInterfaceAddressConfig> netIfConfig : nas.getNetworkInterfaceConfigs()) {
 				s_logger.debug("Getting config for " + netIfConfig.getName() + " with type " + netIfConfig.getType());
-
 				s_logger.debug("Interface State: {}", netIfConfig.getState());
 
 				if (netIfConfig.getType() == NetInterfaceType.WIFI) {
@@ -781,9 +780,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 			}
 
 			if(config.getHwTypeEnum() == GwtNetIfType.WIFI) {
-
-
-
+				
 				if (config instanceof GwtWifiNetInterfaceConfig) {
 					//WifiConfig wifiConfig = new WifiConfig();					
 					GwtWifiConfig gwtWifiConfig = ((GwtWifiNetInterfaceConfig) config).getActiveWifiConfig();
@@ -801,8 +798,10 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 							for(GwtNetInterfaceConfig netConfig: listResult){
 								if(netConfig instanceof GwtWifiNetInterfaceConfig){
 									GwtWifiNetInterfaceConfig oldWifiConfig= (GwtWifiNetInterfaceConfig) netConfig;
-									GwtWifiConfig oldGwtWifiConfig= oldWifiConfig.getActiveWifiConfig();
-									wifiConfig.setPasskey(oldGwtWifiConfig.getPassword());
+									if (config.getName().equals(oldWifiConfig.getName())) {
+										GwtWifiConfig oldGwtWifiConfig= oldWifiConfig.getActiveWifiConfig();
+										wifiConfig.setPasskey(oldGwtWifiConfig.getPassword());
+									}
 								}
 							}
 						}

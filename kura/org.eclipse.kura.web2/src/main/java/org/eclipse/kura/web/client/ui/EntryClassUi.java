@@ -11,6 +11,7 @@
  *******************************************************************************/
 package org.eclipse.kura.web.client.ui;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
@@ -27,12 +28,15 @@ import org.eclipse.kura.web.client.ui.Status.StatusPanelUi;
 import org.eclipse.kura.web.client.ui.wires.WiresPanelUi;
 import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
+import org.eclipse.kura.web.shared.model.GwtGroupedNVPair;
 import org.eclipse.kura.web.shared.model.GwtSession;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.eclipse.kura.web.shared.service.GwtComponentService;
 import org.eclipse.kura.web.shared.service.GwtComponentServiceAsync;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenService;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenServiceAsync;
+import org.eclipse.kura.web.shared.service.GwtStatusService;
+import org.eclipse.kura.web.shared.service.GwtStatusServiceAsync;
 import org.gwtbootstrap3.client.shared.event.ModalHideEvent;
 import org.gwtbootstrap3.client.shared.event.ModalHideHandler;
 import org.gwtbootstrap3.client.ui.AnchorListItem;
@@ -86,6 +90,7 @@ public class EntryClassUi extends Composite {
 
 	private final GwtComponentServiceAsync gwtComponentService = GWT.create(GwtComponentService.class);
 	private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
+	private final GwtStatusServiceAsync gwtStatusService = GWT.create(GwtStatusService.class);
 
 	public GwtConfigComponent selected = null;
 
@@ -174,46 +179,55 @@ public class EntryClassUi extends Composite {
 		}
 
 		// Status Panel
-		Image img;
-		String statusMessage;
-		if (connectionStatus) {
-			img= new Image(Resources.INSTANCE.greenPlug32().getSafeUri());
-			statusMessage= MSGS.connectionStatusConnected();
-		} else {
-			img= new Image(Resources.INSTANCE.redPlug32().getSafeUri());
-			statusMessage= MSGS.connectionStatusDisconnected();
-		}
-
-		StringBuilder imageSB= new StringBuilder();
-		imageSB.append("<image src=\"");
-		imageSB.append(img.getUrl());
-		imageSB.append("\" ");
-		imageSB.append("width=\"23\" height=\"23\" style=\"vertical-align: middle; float: right;\" title=\"");
-		imageSB.append(statusMessage);
-		imageSB.append("\"/>");
-		
-		StringBuilder statusHTML= new StringBuilder(status.getHTML());
-		statusHTML.append(imageSB.toString());
-		status.setHTML(statusHTML.toString());
+		setConnectionStatusImage(connectionStatus);
 		status.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
 				Button b = new Button(MSGS.yesButton(), new ClickHandler() {
 					@Override
 					public void onClick(ClickEvent event) {
-						forceTabsCleaning();
-						if (modal != null ) {
-							modal.hide();
-						}
-						if (servicesUi != null) {
-							servicesUi.renderForm();
-						}
-						contentPanel.setVisible(true);
-						contentPanelHeader.setText("Status");
-						contentPanelBody.clear();
-						contentPanelBody.add(statusBinder);
-						statusBinder.setSession(currentSession);
-						statusBinder.loadStatusData();
+						gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
+							@Override
+							public void onFailure(Throwable ex) {
+								FailureHandler.handle(ex);
+							}
+
+							@Override
+							public void onSuccess(GwtXSRFToken token) {     
+								gwtStatusService.getDeviceConfig(token, currentSession.isNetAdminAvailable(), new AsyncCallback<ArrayList<GwtGroupedNVPair>>() {
+									public void onFailure(Throwable caught) {
+
+										FailureHandler.handle(caught);
+									}
+									public void onSuccess(ArrayList<GwtGroupedNVPair> pairs) {
+										forceTabsCleaning();
+										boolean isConnected= false;
+										for (GwtGroupedNVPair result : pairs) {
+											if ("Connection Status".equals(result.getName())) {
+												if ("CONNECTED".equals(result.getValue())) {
+													isConnected= true;
+												} else {
+													isConnected= false;
+												}
+											}
+										}
+										setConnectionStatusImage(isConnected);
+										if (modal != null) {
+											modal.hide();
+										}
+										if (servicesUi != null) {
+											servicesUi.renderForm();
+										}
+										contentPanel.setVisible(true);
+										contentPanelHeader.setText("Status");
+										contentPanelBody.clear();
+										contentPanelBody.add(statusBinder);
+										statusBinder.setSession(currentSession);
+										statusBinder.loadStatusData();
+									}
+								});
+							}
+						});
 					}
 				});
 				renderDirtyConfigModal(b);
@@ -379,6 +393,34 @@ public class EntryClassUi extends Composite {
 				renderDirtyConfigModal(b);
 			}
 		});
+	}
+
+	private void setConnectionStatusImage(boolean isConnected) {
+
+		Image img;
+		String statusMessage;
+
+
+		if (isConnected) {
+			img= new Image(Resources.INSTANCE.greenPlug32().getSafeUri());
+			statusMessage= MSGS.connectionStatusConnected();
+		} else {
+			img= new Image(Resources.INSTANCE.redPlug32().getSafeUri());
+			statusMessage= MSGS.connectionStatusDisconnected();
+		}
+
+		StringBuilder imageSB= new StringBuilder();
+		imageSB.append("<image src=\"");
+		imageSB.append(img.getUrl());
+		imageSB.append("\" ");
+		imageSB.append("width=\"23\" height=\"23\" style=\"vertical-align: middle; float: right;\" title=\"");
+		imageSB.append(statusMessage);
+		imageSB.append("\"/>");
+
+		String baseStatusHTML= status.getHTML().split("<im")[0];
+		StringBuilder statusHTML= new StringBuilder(baseStatusHTML);
+		statusHTML.append(imageSB.toString());
+		status.setHTML(statusHTML.toString());
 	}
 
 	public void initServicesTree() {

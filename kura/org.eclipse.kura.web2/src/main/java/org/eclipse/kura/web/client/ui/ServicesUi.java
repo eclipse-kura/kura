@@ -721,6 +721,12 @@ public class ServicesUi extends Composite {
 			return false;
 		} else if (box.getText().trim() != null && !"".equals(box.getText().trim())){
 			if (param.getType().equals(GwtConfigParameterType.CHAR)) {
+				if (box.getText().trim().length() > 1) {
+					group.setValidationState(ValidationState.ERROR);
+					valid.put(param.getName(), false);
+					box.setPlaceholder(MessageUtils.get(Integer.toString(box.getText().trim().length()), box.getText()));
+					return false;
+				}
 				if (param.getMin() != null) {
 					if(Character.valueOf(param.getMin().charAt(0)).charValue() > Character.valueOf(box.getText().trim().charAt(0)).charValue()){  //TODO: why this character boxing?
 						group.setValidationState(ValidationState.ERROR);

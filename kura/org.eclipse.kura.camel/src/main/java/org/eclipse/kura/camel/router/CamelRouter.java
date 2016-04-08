@@ -70,7 +70,7 @@ public abstract class CamelRouter extends KuraRouter implements ConfigurableComp
 	}
 
 	public void refreshCamelRouteXml(String oldCamelRouteXml, String newCamelRouteXml) {
-		if (newCamelRouteXml != null && !newCamelRouteXml.equals(oldCamelRouteXml)) {
+		if (newCamelRouteXml != null && !newCamelRouteXml.isEmpty() && !newCamelRouteXml.equals(oldCamelRouteXml)) {
 			this.m_camelRouteXml = newCamelRouteXml;
 			if (!m_camelRouteXml.isEmpty()) {
 				try {

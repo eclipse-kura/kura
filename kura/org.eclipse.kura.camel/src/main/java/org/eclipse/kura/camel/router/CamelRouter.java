@@ -103,22 +103,9 @@ public abstract class CamelRouter extends KuraRouter implements ConfigurableComp
 		}
 	}
 
-	@Override
-	protected void beforeStart(CamelContext camelContext) {
-		PropertiesComponent pc = camelContext.getComponent(RouterConstants.PROPERTIES_COMPONENT, PropertiesComponent.class);
-		pc.addFunction(new MetatypePropertiesFunction(m_properties));
-	}
-
 	protected void modified(Map<String, Object> properties) {
 		m_properties = properties;
-		try {
-			camelContext.stop();
-			beforeStart(camelContext);
-			updated(m_properties);
-			camelContext.addRoutes(this);
-			camelContext.start();
-		} catch (Exception e) {
-			s_logger.warn("Cannot restart Camel Context", e);
-		}
+		updated(m_properties);
 	}
+
 }

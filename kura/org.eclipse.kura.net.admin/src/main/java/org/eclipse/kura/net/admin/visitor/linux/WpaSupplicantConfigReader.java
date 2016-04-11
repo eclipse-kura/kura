@@ -26,7 +26,7 @@ import org.eclipse.kura.core.net.NetworkConfiguration;
 import org.eclipse.kura.core.net.NetworkConfigurationVisitor;
 import org.eclipse.kura.core.net.WifiInterfaceAddressConfigImpl;
 import org.eclipse.kura.core.net.WifiInterfaceConfigImpl;
-import org.eclipse.kura.linux.net.util.KuraConstants;
+import org.eclipse.kura.linux.net.wifi.WpaSupplicantManager;
 import org.eclipse.kura.net.NetConfig;
 import org.eclipse.kura.net.NetInterfaceAddressConfig;
 import org.eclipse.kura.net.NetInterfaceConfig;
@@ -45,19 +45,7 @@ import org.slf4j.LoggerFactory;
 public class WpaSupplicantConfigReader implements NetworkConfigurationVisitor {
 
     private static final Logger s_logger = LoggerFactory.getLogger(WpaSupplicantConfigReader.class);
-    
-    private static String WPA_CONFIG_FILE = null;
-    
-    private static final String OS_VERSION = System.getProperty("kura.os.version");
-    
-    static {
-		if (OS_VERSION.equals(KuraConstants.Intel_Edison.getImageName() + "_" + KuraConstants.Intel_Edison.getImageVersion() + "_" + KuraConstants.Intel_Edison.getTargetName())) {
-			WPA_CONFIG_FILE = "/etc/wpa_supplicant/wpa_supplicant.conf";
-		} else {
-			WPA_CONFIG_FILE = "/etc/wpa_supplicant.conf";
-		}
-	}
-
+  
     private static WpaSupplicantConfigReader s_instance;
     
     public static WpaSupplicantConfigReader getInstance() {
@@ -126,7 +114,7 @@ public class WpaSupplicantConfigReader implements NetworkConfigurationVisitor {
         WifiCiphers groupCiphers = null;
 
     	// Get properties from config file
-        Properties props = parseConfigFile();
+        Properties props = parseConfigFile(ifaceName);
         
         if (props == null) {
             s_logger.warn("WPA in client mode is not configured");
@@ -290,13 +278,13 @@ public class WpaSupplicantConfigReader implements NetworkConfigurationVisitor {
         return wifiConfig;
     }
     
-    private static Properties parseConfigFile () throws KuraException {
+    private static Properties parseConfigFile (String ifaceName) throws KuraException {
         
         Properties props = null;
         
         BufferedReader br = null;
         try {
-            File wpaConfigFile = new File(WPA_CONFIG_FILE);
+            File wpaConfigFile = new File(WpaSupplicantManager.getWpaSupplicantConfigFilename(ifaceName));
             if (wpaConfigFile.exists()) {
     
                 // Read into a string

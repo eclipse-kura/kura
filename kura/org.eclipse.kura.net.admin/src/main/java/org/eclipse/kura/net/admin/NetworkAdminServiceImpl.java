@@ -1148,7 +1148,7 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 		    if (wifiMode == WifiMode.MASTER) {
 		    	if (WpaSupplicantManager.isTempRunning()) {
 					s_logger.debug("getWifiHotspots() :: stoping temporary instance of wpa_supplicant");
-					WpaSupplicantManager.stop();
+					WpaSupplicantManager.stop(ifaceName);
 				}
 		    }
 	    } catch(Throwable t) {
@@ -1167,9 +1167,9 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 		try {
 			wpaSupplicantConfigWriter.generateTempWpaSupplicantConf(wifiConfig, ifaceName);
 
-			if (WpaSupplicantManager.isRunning()) {
+			if (WpaSupplicantManager.isRunning(ifaceName)) {
 				s_logger.debug("verifyWifiCredentials() :: stoping wpa_supplicant");
-				WpaSupplicantManager.stop();
+				WpaSupplicantManager.stop(ifaceName);
 				restartSupplicant = true;
 			}
 			s_logger.debug("verifyWifiCredentials() :: Restarting temporary instance of wpa_supplicant");
@@ -1179,7 +1179,7 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 			
 			if (WpaSupplicantManager.isTempRunning()) {
 				s_logger.debug("verifyWifiCredentials() :: stoping temporary instance of wpa_supplicant");
-				WpaSupplicantManager.stop();
+				WpaSupplicantManager.stop(ifaceName);
 			}
 		} catch (KuraException e) {
 			e.printStackTrace();
@@ -1434,14 +1434,14 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
         s_logger.debug("Configuring {} for {} mode", ifaceName, wifiMode);
         
         s_logger.debug("Stopping hostapd and wpa_supplicant");
-        HostapdManager.stop();
-        WpaSupplicantManager.stop();
+        HostapdManager.stop(ifaceName);
+        WpaSupplicantManager.stop(ifaceName);
         
         if (status == NetInterfaceStatus.netIPv4StatusEnabledLAN
                 && wifiMode.equals(WifiMode.MASTER)) {
             
             s_logger.debug("Starting hostapd");
-            HostapdManager.start();
+            HostapdManager.start(ifaceName);
             
         } else if((status == NetInterfaceStatus.netIPv4StatusEnabledLAN || status == NetInterfaceStatus.netIPv4StatusEnabledWAN)
                 && (wifiMode.equals(WifiMode.INFRA) || wifiMode.equals(WifiMode.ADHOC))) {
@@ -1449,6 +1449,11 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
             if(wifiConfig != null) {
                 s_logger.debug("Starting wpa_supplicant");
                 WpaSupplicantManager.start(ifaceName, wifiMode, wifiConfig.getDriver());
+                if (isWifiConnectionCompleted(ifaceName, 60)) {
+                	s_logger.debug("WiFi Connection Completed on {} !", ifaceName);
+                } else {
+                	s_logger.warn("Failed to complete WiFi Connection on {}", ifaceName);
+                }
             } else {
                 s_logger.warn("No WifiConfig configured for mode " + wifiMode);
             }
@@ -1459,8 +1464,8 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 	
 	private void disableWifiInterface (String ifaceName) throws KuraException {
 	    s_logger.debug("Stopping hostapd and wpa_supplicant");
-		HostapdManager.stop();
-		WpaSupplicantManager.stop();
+		HostapdManager.stop(ifaceName);
+		WpaSupplicantManager.stop(ifaceName);
 	}
 	
 	

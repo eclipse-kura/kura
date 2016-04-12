@@ -79,6 +79,9 @@
               tofile="${project.build.directory}/${build.output.name}/jdk.dio.properties" />
 		<copy file="src/main/resources/common/jdk.dio.policy"
               tofile="${project.build.directory}/${build.output.name}/jdk.dio.policy" />
+              
+        <!-- Populate config.ini with correct OSGi packages -->
+		<!-- <antcall target="api-config" /> -->
 
 		<!-- Populate config.ini with correct versions -->
 		<replace file="${project.build.directory}/${build.output.name}/config.ini"
@@ -753,6 +756,12 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
 	<!-- Camel config targets -->
 	<target name="camel-config">
 		<propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
+			<entry key="osgi.bundles" operation="+"
+				   value=", reference:file:${kura.install.dir}/kura/plugins/org.apache.camel.camel-core_${org.apache.camel.camel-core.version}.jar@3" />
+			<entry key="osgi.bundles" operation="+"
+				   value=", reference:file:${kura.install.dir}/kura/plugins/org.apache.camel.camel-core-osgi_${org.apache.camel.camel-core-osgi.version}.jar@3" />
+			<entry key="osgi.bundles" operation="+"
+			       value=", reference:file:${kura.install.dir}/kura/plugins/org.apache.camel.camel-kura_${org.apache.camel.camel-kura.version}.jar@3" />
 			<entry key="osgi.bundles" operation="+"
                    value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.camel_${org.eclipse.kura.camel.version}.jar@4:start" />
 		</propertyfile>

@@ -12,12 +12,25 @@
 package org.eclipse.kura.camel.router;
 
 import java.io.ByteArrayInputStream;
+import java.lang.reflect.Field;
 import java.util.Map;
 
 import org.apache.camel.CamelContext;
-import org.apache.camel.component.kura.KuraRouter;
+import org.apache.camel.component.bean.BeanComponent;
+import org.apache.camel.component.beanclass.ClassComponent;
+import org.apache.camel.component.binding.BindingNameComponent;
+import org.apache.camel.component.browse.BrowseComponent;
+import org.apache.camel.component.direct.DirectComponent;
+import org.apache.camel.component.log.LogComponent;
+import org.apache.camel.component.mock.MockComponent;
 import org.apache.camel.component.properties.PropertiesComponent;
+import org.apache.camel.component.seda.SedaComponent;
+import org.apache.camel.component.timer.TimerComponent;
+import org.apache.camel.impl.DefaultCamelContext;
+import org.apache.camel.language.simple.SimpleLanguage;
 import org.apache.camel.model.RoutesDefinition;
+import org.apache.camel.spi.Language;
+import org.apache.camel.component.kura.KuraRouter;
 import org.eclipse.kura.camel.RouterConstants;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.osgi.framework.BundleContext;
@@ -103,9 +116,45 @@ public abstract class CamelRouter extends KuraRouter implements ConfigurableComp
 		}
 	}
 
+	@Override
+	protected void beforeStart(CamelContext camelContext) {
+		registerComponents();
+		super.beforeStart(camelContext);
+	}
+
 	protected void modified(Map<String, Object> properties) {
 		m_properties = properties;
 		updated(m_properties);
+	}
+
+	// Components registration
+
+	protected void registerComponents() {
+		camelContext.addComponent("bean", new BeanComponent());
+		camelContext.addComponent("binding", new BindingNameComponent());
+		camelContext.addComponent("browse", new BrowseComponent());
+		camelContext.addComponent("class", new ClassComponent());
+		camelContext.addComponent("direct", new DirectComponent());
+		camelContext.addComponent("log", new LogComponent());
+		camelContext.addComponent("mock", new MockComponent());
+		camelContext.addComponent("properties", new PropertiesComponent());
+		camelContext.addComponent("seda", new SedaComponent());
+		camelContext.addComponent("timer", new TimerComponent());
+
+		registerLanguage("simple", new SimpleLanguage());
+	}
+
+	protected void registerLanguage(String languageName, Language language) {
+		try {
+			Field field = DefaultCamelContext.class.getDeclaredField("languages");
+			field.setAccessible(true);
+			Map<String, Language> languages = (Map<String, Language>) field.get(camelContext);
+			languages.put(languageName, language);
+		} catch (NoSuchFieldException e) {
+			throw new RuntimeException(e);
+		} catch (IllegalAccessException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 }

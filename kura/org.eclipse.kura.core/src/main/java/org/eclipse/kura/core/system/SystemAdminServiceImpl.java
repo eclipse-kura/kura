@@ -16,6 +16,9 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.Date;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 
 import org.eclipse.kura.core.util.ProcessUtil;
 import org.eclipse.kura.core.util.SafeProcess;
@@ -23,8 +26,6 @@ import org.eclipse.kura.system.SystemAdminService;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import org.eclipse.kura.windows.system.KuraNativeWin;
 
 public class SystemAdminServiceImpl implements SystemAdminService 
 {
@@ -78,14 +79,17 @@ public class SystemAdminServiceImpl implements SystemAdminService
 		String uptimeStr = UNKNOWN;
 		long uptime = 0;
 
-		if(this.getOsName().toLowerCase().contains(OS_WINDOWS))
-		{
+		if(this.getOsName().toLowerCase().contains(OS_WINDOWS)) {
 			try {
-				KuraNativeWin nativeWin = new KuraNativeWin();
-				uptime = nativeWin.getTickCount();
-				uptimeStr = Long.toString(uptime);
+			    	String[] lastBootUpTime = runSystemCommand("wmic os get LastBootUpTime ").split("\n");
+			    	if(lastBootUpTime[0].toLowerCase().startsWith("lastbootuptime")) {
+			    		String lastBoot = lastBootUpTime[2];
+			    		DateFormat df = new SimpleDateFormat("yyyyMMddHHmmss");
+					Date bootDate =  df.parse(lastBoot);
+					uptime = System.currentTimeMillis() - bootDate.getTime();
+					uptimeStr = Long.toString(uptime);
+				}
 			}
-
 			catch(Exception e) {
 				uptimeStr = "0";
 				s_logger.error("Could not read uptime", e);

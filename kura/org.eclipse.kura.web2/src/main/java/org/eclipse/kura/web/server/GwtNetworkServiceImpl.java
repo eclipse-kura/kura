@@ -109,7 +109,9 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 			if(netConfig instanceof GwtWifiNetInterfaceConfig){
 				GwtWifiNetInterfaceConfig wifiConfig= (GwtWifiNetInterfaceConfig) netConfig;
 				GwtWifiConfig gwtWifiConfig= wifiConfig.getActiveWifiConfig();
-				gwtWifiConfig.setPassword(PLACEHOLDER);
+				if (gwtWifiConfig != null) {
+					gwtWifiConfig.setPassword(PLACEHOLDER);
+				}
 			}
 		}
 		return result;
@@ -799,7 +801,9 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 									GwtWifiNetInterfaceConfig oldWifiConfig= (GwtWifiNetInterfaceConfig) netConfig;
 									if (config.getName().equals(oldWifiConfig.getName())) {
 										GwtWifiConfig oldGwtWifiConfig= oldWifiConfig.getActiveWifiConfig();
-										wifiConfig.setPasskey(oldGwtWifiConfig.getPassword());
+										if (oldGwtWifiConfig != null) {
+											wifiConfig.setPasskey(oldGwtWifiConfig.getPassword());
+										}
 									}
 								}
 							}

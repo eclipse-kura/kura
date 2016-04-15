@@ -146,7 +146,7 @@ public class GwtStatusServiceImpl extends OsgiRemoteServiceServlet implements Gw
 					GwtWifiConfig gwtActiveWifiConfig = ((GwtWifiNetInterfaceConfig)gwtNetInterfaceConfig).getActiveWifiConfig();
 					String currentWifiSsid = null;
 					if (gwtActiveWifiConfig != null) {
-						gwtActiveWifiConfig.getWirelessSsid();
+						currentWifiSsid = gwtActiveWifiConfig.getWirelessSsid();
 					}
 					if (currentStatus.equals("Disabled"))
 						pairs.add(new GwtGroupedNVPair("networkStatusWifi", gwtNetInterfaceConfig.getName(), currentStatus));

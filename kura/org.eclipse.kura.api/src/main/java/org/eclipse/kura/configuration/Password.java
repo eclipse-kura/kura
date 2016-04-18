@@ -29,6 +29,7 @@ public class Password
 		return password;
 	}
 	
+	@Override
 	public String toString() {
 		return new String(password);
 	}

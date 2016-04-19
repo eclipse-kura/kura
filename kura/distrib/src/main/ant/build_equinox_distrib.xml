@@ -81,7 +81,7 @@
               tofile="${project.build.directory}/${build.output.name}/jdk.dio.policy" />
               
         <!-- Populate config.ini with correct OSGi packages -->
-		<!-- <antcall target="api-config" /> -->
+		<antcall target="osgi-base-config" />
 
 		<!-- Populate config.ini with correct versions -->
 		<replace file="${project.build.directory}/${build.output.name}/config.ini"
@@ -598,6 +598,100 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
                    value="${http.port}" />
 		</propertyfile>
 	</target>
+	
+	<!-- OSGi base configs -->
+	<target name="osgi-base-config">
+		<propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
+			<entry key="osgi.bundles" operation="+"
+				value="reference:file:${kura.install.dir}/kura/plugins/org.eclipse.equinox.cm_${org.eclipse.equinox.cm.version}.jar@1:start" />
+			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/kura/plugins/org.eclipse.equinox.common_${org.eclipse.equinox.common.version}.jar@1:start" />
+			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/kura/plugins/org.eclipse.equinox.registry_${org.eclipse.equinox.registry.version}.jar@1:start" />
+			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/kura/plugins/org.eclipse.equinox.http.registry_${org.eclipse.equinox.http.registry.version}.jar@1:start" />
+			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/kura/plugins/org.eclipse.equinox.console_${org.eclipse.equinox.console.version}.jar@1" />
+			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/kura/plugins/org.eclipse.equinox.ds_${org.eclipse.equinox.ds.version}.jar@1:start" />
+			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/kura/plugins/org.eclipse.equinox.event_${org.eclipse.equinox.event.version}.jar@1:start" />
+			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/kura/plugins/org.eclipse.equinox.io_${org.eclipse.equinox.io.version}.jar@1:start" />
+			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/kura/plugins/org.eclipse.equinox.metatype_${org.eclipse.equinox.metatype.version}.jar@1:start" />
+			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/kura/plugins/org.eclipse.equinox.util_${org.eclipse.equinox.util.version}.jar@1:start" />
+			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/kura/plugins/org.eclipse.osgi.services_${org.eclipse.osgi.services.version}.jar@2:start" />
+			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/kura/plugins/org.eclipse.osgi.util_${org.eclipse.osgi.util.version}.jar@2:start" />
+			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/kura/plugins/org.apache.felix.gogo.command_${org.apache.felix.gogo.command.version}.jar@5" />
+			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/kura/plugins/org.apache.felix.gogo.runtime_${org.apache.felix.gogo.runtime.version}.jar@5" />
+			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/kura/plugins/org.apache.felix.gogo.shell_${org.apache.felix.gogo.shell.version}.jar@5" />
+			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/kura/plugins/org.knowhowlab.osgi.monitoradmin_${org.knowhowlab.osgi.monitoradmin.version}.jar@3:start" />
+			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/kura/plugins/org.apache.felix.dependencymanager_${org.apache.felix.dependencymanager.version}.jar@3:start" />
+			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/kura/plugins/org.apache.felix.deploymentadmin_${org.apache.felix.deploymentadmin.version}.jar@3:start" />
+			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/kura/plugins/osgi.cmpn_${osgi.cmpn.version}.jar@3:start" />
+			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/kura/plugins/org.eclipse.equinox.http.jetty_${org.eclipse.equinox.http.jetty.version}.jar@5:start" />
+			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/kura/plugins/org.eclipse.equinox.http.servlet_${org.eclipse.equinox.http.servlet.version}.jar@5:start" />
+			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/kura/plugins/org.eclipse.jetty.continuation_${org.eclipse.jetty.continuation.version}.jar@5:start" />
+			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/kura/plugins/org.eclipse.jetty.http_${org.eclipse.jetty.http.version}.jar@5:start" />
+			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/kura/plugins/org.eclipse.jetty.io_${org.eclipse.jetty.io.version}.jar@5:start" />
+			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/kura/plugins/org.eclipse.jetty.security_${org.eclipse.jetty.security.version}.jar@5:start" />
+			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/kura/plugins/org.eclipse.jetty.server_${org.eclipse.jetty.server.version}.jar@5:start" />
+			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/kura/plugins/org.eclipse.jetty.servlet_${org.eclipse.jetty.servlet.version}.jar@5:start" />
+			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/kura/plugins/org.eclipse.jetty.util_${org.eclipse.jetty.util.version}.jar@5:start" />
+			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/kura/plugins/javax.servlet_${javax.servlet.version}.jar@5:start" />
+			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/kura/plugins/org.apache.commons.fileupload_${org.apache.commons.fileupload.version}.jar@3:start" />
+			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/kura/plugins/org.apache.commons.io_${org.apache.commons.io.version}.jar@3:start" />
+			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/kura/plugins/slf4j.api_${slf4j.api.version}.jar@3:start" />
+			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/kura/plugins/slf4j.log4j12_${slf4j.log4j12.version}.jar@3" />
+			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/kura/plugins/log4j_${log4j.version}.jar@3" />
+			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/kura/plugins/log4j.apache-log4j-extras_${log4j.apache-log4j-extras.version}.jar@3" />
+			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/kura/plugins/org.json_${org.json.version}.jar@5:start" />
+			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/kura/plugins/org.hsqldb.hsqldb_${org.hsqldb.hsqldb.version}.jar@3:start" />
+			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/kura/plugins/com.codeminders.hidapi_${com.codeminders.hidapi.version}.jar@3:start" />
+			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/kura/plugins/org.eclipse.soda.dk.comm_${org.eclipse.soda.dk.comm.version}.jar@3:start" />
+			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/kura/plugins/org.apache.commons.lang3_${org.apache.commons.lang3.version}.jar@4:start" />
+			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/kura/plugins/org.usb4java_${org.usb4java.version}.jar@4:start" />
+			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/kura/plugins/usb4java-javax_${usb4java-javax.version}.jar@4:start" />
+			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/kura/plugins/jdk.dio_${jdk.dio.version}.jar@3" />
+			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/kura/plugins/org.apache.commons.net_${org.apache.commons.net.version}.jar@3:start" />
+		</propertyfile>
+	</target>
 
 	
 	<!-- Kura config targets -->
@@ -730,6 +824,8 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
 	<target name="web-config" if="web.jar.present">
 		<propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
 			<entry key="osgi.bundles" operation="+"
+				   value=", reference:file:${kura.install.dir}/kura/plugins/com.gwt.user_0.2.0.jar@3" />
+			<entry key="osgi.bundles" operation="+"
 	               value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.web_${org.eclipse.kura.web.version}.jar@6:start" />
 		</propertyfile>
 	</target>
@@ -737,10 +833,10 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
 	<target name="web2-config" if="web2.jar.present">
 		<propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
 			<entry key="osgi.bundles" operation="+"
+				   value=", reference:file:${kura.install.dir}/kura/plugins/com.gwt.user_1.0.0.jar@3" />
+			<entry key="osgi.bundles" operation="+"
 	               value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.web2_${org.eclipse.kura.web2.version}.jar@6:start" />
 		</propertyfile>
-		<replace file="${project.build.directory}/${build.output.name}/config.ini"
-	             token="com.gwt.user_0.2.0" value="com.gwt.user_1.0.0"/>
 	</target>
 
 	<target name="gpio-config" if="linux.gpio.jar.present">

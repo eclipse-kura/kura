@@ -31,7 +31,6 @@ import org.eclipse.kura.core.linux.util.LinuxProcessUtil;
 import org.eclipse.kura.core.util.ProcessUtil;
 import org.eclipse.kura.core.util.SafeProcess;
 import org.eclipse.kura.linux.net.NetworkServiceImpl;
-import org.eclipse.kura.linux.net.dhcp.DhcpClientTool;
 import org.eclipse.kura.linux.net.wifi.WifiOptions;
 import org.eclipse.kura.net.NetInterfaceType;
 import org.eclipse.kura.net.wifi.WifiInterface.Capability;
@@ -1174,21 +1173,12 @@ public class LinuxNetworkUtil {
 			if (Character.isDigit(interfaceName.charAt(0))) {
 				return;
 			}
+			
 			// FIXME:
-			// * Can we unify the below cases?
-			// * Why do we need 'ifdown iface' followed by 'ifconfig iface down'?
 			// * Do we really need to bring down the interface before deleting addresses?
-			if (OS_VERSION.equals(KuraConstants.Mini_Gateway.getImageName() + "_" + KuraConstants.Mini_Gateway.getImageVersion())) {
-				// FIXME: check the exit code and throw an exception
+			if (hasAddress(interfaceName)) {
 				LinuxProcessUtil.start("ifdown " + interfaceName + "\n");
 				LinuxProcessUtil.start("ifconfig " + interfaceName + " down\n");
-			} else {
-				if (hasAddress(interfaceName)) {
-					// FIXME: check the exit code and throw an exception
-					LinuxProcessUtil.start("ifdown " + interfaceName + "\n");
-					// FIXME: this has been observed to fail (with exit code == 1).
-					// Should we try an 'ifconfig iface down' like above?
-				}
 			}
 			
 			//always leave the Ethernet Controller powered
@@ -1216,6 +1206,7 @@ public class LinuxNetworkUtil {
 				LinuxProcessUtil.start("ifup --force " + interfaceName + "\n");
 			} else {
 				// FIXME: check the exit code and throw an exception
+				LinuxProcessUtil.start("ifconfig " + interfaceName + " up\n");
 				LinuxProcessUtil.start("ifup " + interfaceName + "\n");						
 			}
 		}

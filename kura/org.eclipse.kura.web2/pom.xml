@@ -37,19 +37,6 @@
 		<webappDirectory>${project.build.directory}/${project.build.finalName}</webappDirectory>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
-	
-	<distributionManagement>
-			<repository>
-				<id>repo.eclipse.org</id>
-				<name>Kura Repository - Releases</name>
-				<url>https://repo.eclipse.org/content/repositories/kura-releases/</url>
-			</repository>
-			<snapshotRepository>
-				<id>repo.eclipse.org</id>
-				<name>Kura Repository - Snapshots</name>
-				<url>https://repo.eclipse.org/content/repositories/kura-snapshots/</url>
-			</snapshotRepository>
-	</distributionManagement>
 
 	<dependencies>
 		<!-- <dependency> <groupId>com.google.gwt</groupId> <artifactId>gwt-osgi</artifactId>

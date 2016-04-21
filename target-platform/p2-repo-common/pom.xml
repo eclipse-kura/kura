@@ -170,17 +170,17 @@
 								<artifactItem>
 									<groupId>org.apache.camel</groupId>
 									<artifactId>camel-core</artifactId>
-									<version>${camel-core.version}</version>
+									<version>${org.apache.camel.camel-core.version}</version>
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.apache.camel</groupId>
 									<artifactId>camel-core-osgi</artifactId>
-									<version>${camel-core-osgi.version}</version>
+									<version>${org.apache.camel.camel-core-osgi.version}</version>
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.apache.camel</groupId>
 									<artifactId>camel-kura</artifactId>
-									<version>${camel-core-osgi.version}</version>
+									<version>${org.apache.camel.camel-kura.version}</version>
 								</artifactItem>
 							</artifactItems>
 							<outputDirectory>${project.basedir}/target/source/plugins</outputDirectory>

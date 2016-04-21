@@ -11,7 +11,7 @@
 
     <groupId>org.eclipse.kura</groupId>
     <artifactId>usb4java-javax</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1-SNAPSHOT</version>
     <packaging>bundle</packaging>
 
     <name>usb4java-javax</name>

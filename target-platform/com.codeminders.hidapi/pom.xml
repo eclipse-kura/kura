@@ -2,7 +2,7 @@
 <project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <modelVersion>4.0.0</modelVersion>
-    
+
     <parent>
         <groupId>org.eclipse.kura</groupId>
         <artifactId>target-platform</artifactId>
@@ -11,7 +11,7 @@
 
     <groupId>org.eclipse.kura</groupId>
     <artifactId>com.codeminders.hidapi</artifactId>
-    <version>1.1.1</version>
+    <version>1.1.2-SNAPSHOT</version>
     <packaging>bundle</packaging>
 
     <name>Java API for working with Human Interface USB Devices (HID)</name>
@@ -22,7 +22,7 @@
         <license>
             <name>New BSD License</name>
             <url>http://opensource.org/licenses/BSD-3-Clause</url>
-            <distribution>repo</distribution>    
+            <distribution>repo</distribution>
         </license>
     </licenses>
     <scm>
@@ -47,7 +47,7 @@
             <email>dshmyga@codeminders.com</email>
         </developer>
     </developers>
-    
+
     <properties>
         <maven.compiler.source>1.6</maven.compiler.source>
         <maven.compiler.target>1.6</maven.compiler.target>
@@ -60,7 +60,7 @@
 			<version>3.8.1.v20120830-144521</version>
 		</dependency>
     </dependencies>
-    
+
     <build>
     <resources>
         <resource>
@@ -109,11 +109,11 @@
 						lib/linux/armv6_hf/libhidapi.so; osname=Linux; processor=ARM; selection-filter="(&amp;(kura.arch=armv6_hf))",
 						lib/linux/armv5_sf/libhidapi.so; osname=Linux; processor=ARM; selection-filter="(&amp;(kura.arch=armv6_sf))",
 						lib/linux/armv5_sf/libhidapi.so; osname=Linux; processor=ARM; selection-filter="(&amp;(kura.arch=armv5_sf))",
-						lib/mac/x86/libhidapi.jnilib; osname=macosx; processor=x86,					
-						lib/mac/x86_64/libhidapi.jnilib; osname=macosx; processor=x86-64,					
-						lib/win/x86/hidapi.dll; osname=win32; processor=x86,					
+						lib/mac/x86/libhidapi.jnilib; osname=macosx; processor=x86,
+						lib/mac/x86_64/libhidapi.jnilib; osname=macosx; processor=x86-64,
+						lib/win/x86/hidapi.dll; osname=win32; processor=x86,
 						lib/win/x86_64/hidapi.dll; osname=win64; processor=x86-64,
-						*				
+						*
 					</Bundle-NativeCode>
 					<Export-Package>
 						com.codeminders.hidapi
@@ -134,7 +134,7 @@
         	  </execution>
         	</executions>
 	   </plugin>
-       
+
     </plugins>
         <pluginManagement>
             <plugins>

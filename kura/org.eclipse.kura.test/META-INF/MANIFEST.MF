@@ -6,17 +6,12 @@ Bundle-Version: 1.0.2.qualifier
 Bundle-Vendor: EUROTECH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Service-Component: OSGI-INF/*.xml
-Import-Package: junit.framework,
- org.eclipse.kura; version="[1.0,2.0)",
- org.eclipse.kura.cloud; version="[1.0,2.0)",
- org.eclipse.kura.message; version="[1.0,2.0)",
- org.eclipse.kura.system; version="[1.0,2.0)",
- org.eclipse.osgi.framework.console;version="1.1.0",
- org.junit,
+Import-Package: org.eclipse.kura.configuration;version="[1.1,2.0)",
+ org.eclipse.kura.system;version="[1.0,2.0)",
+ org.junit.runner;version="4.10.0",
+ org.junit.runner.notification;version="4.10.0",
  org.osgi.framework;version="1.5.0",
- org.osgi.service.cm;version="1.4.0",
  org.osgi.service.component;version="1.2.0",
  org.osgi.util.tracker;version="1.5.1",
  org.slf4j;version="1.6.4"
-Export-Package: org.eclipse.kura.test.annotation; version="1.0.0"
 Bundle-ActivationPolicy: lazy

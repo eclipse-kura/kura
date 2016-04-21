@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+
+     All rights reserved. This program and the accompanying materials
+     are made available under the terms of the Eclipse Public License v1.0
+     which accompanies this distribution, and is available at
+     http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Eurotech
+
+-->
+<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
+    <OCD id="org.eclipse.kura.test.RemoteTargetTest"
+         name="TestRunner"
+         description="The Kura Junit test runner.">
+        
+        <Icon resource="http://s3.amazonaws.com/kura-resources/application/icon/applications-other.png" size="32"/>
+
+        <AD id="1.test.bundle"
+            name="1.test.bundle"
+            type="String"
+            cardinality="0"
+            required="false"
+            default="org.eclipse.kura.core.test"
+            description="Test bundle #1."/>
+        
+        <AD id="1.test.classes"
+            name="1.test.classes"
+            type="String"
+            cardinality="5"
+            required="false"
+            default="org.eclipse.kura.core.test.AllCoreTests"
+            description="Test classes of test bundle #1."/>
+
+        <AD id="2.test.bundle"
+            name="2.test.bundle"
+            type="String"
+            cardinality="0"
+            required="false"
+            default=""
+            description="Test bundle #2."/>
+        
+        <AD id="2.test.classes"
+            name="2.test.classes"
+            type="String"
+            cardinality="5"
+            required="false"
+            default=""
+            description="Test classes of test bundle #2."/>
+            
+        <AD id="3.test.bundle"
+            name="3.test.bundle"
+            type="String"
+            cardinality="0"
+            required="false"
+            default=""
+            description="Test bundle #3."/>
+        
+        <AD id="3.test.classes"
+            name="3.test.classes"
+            type="String"
+            cardinality="5"
+            required="false"
+            default=""
+            description="Test classes of test bundle #3."/>
+            
+        <AD id="4.test.bundle"
+            name="4.test.bundle"
+            type="String"
+            cardinality="0"
+            required="false"
+            default=""
+            description="Test bundle #4."/>
+        
+        <AD id="4.test.classes"
+            name="4.test.classes"
+            type="String"
+            cardinality="5"
+            required="false"
+            default=""
+            description="Test classes of test bundle #4."/>
+
+        <AD id="5.test.bundle"
+            name="5.test.bundle"
+            type="String"
+            cardinality="0"
+            required="false"
+            default=""
+            description="Test bundle #5."/>
+        
+        <AD id="5.test.classes"
+            name="5.test.classes"
+            type="String"
+            cardinality="5"
+            required="false"
+            default=""
+            description="Test classes of test bundle #5."/>
+
+        <AD id="bundle.wait.timeout"
+            name="bundle.wait.timeout"
+            type="Long"
+            cardinality="0"
+            required="true"
+            default="30000"
+            min="1"
+            description="Timeout to wait for a test bundle to RESOLVE or ACTIVATE [ms]."/>
+            
+        <AD id="auto.shutdown"
+            name="auto.shutdown"
+            type="Boolean"
+            cardinality="0"
+            required="true"
+            default="false"
+            description="Automatically shutdown OSGi on test completion."/>
+    </OCD>
+    <Designate pid="org.eclipse.kura.test.RemoteTargetTest">
+        <Object ocdref="org.eclipse.kura.test.RemoteTargetTest"/>
+    </Designate>
+</MetaData>

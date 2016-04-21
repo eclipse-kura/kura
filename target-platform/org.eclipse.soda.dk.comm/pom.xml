@@ -129,14 +129,6 @@ Import-Package: org.osgi.framework;version="1.4.0"
         	</executions>
 	   </plugin>
 	   
-	   <plugin>
-			<groupId>org.apache.maven.plugins</groupId>
-			<artifactId>maven-deploy-plugin</artifactId>
-			<version>2.8.1</version>
-			<configuration>
-			</configuration>
-		</plugin>
-	   
         </plugins>
         <pluginManagement>
         	<plugins>

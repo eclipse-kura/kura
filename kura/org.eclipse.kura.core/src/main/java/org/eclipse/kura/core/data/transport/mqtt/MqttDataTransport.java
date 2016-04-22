@@ -173,7 +173,7 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 					decryptedPropertiesMap.put(key, decryptedPassword);
 				} catch (Exception e) {
 					s_logger.info("Password is not encrypted");
-					decryptedPropertiesMap.put(key, ((String) value).toCharArray());
+					decryptedPropertiesMap.put(key, new Password((String) value));
 				}
 			} else {
 				decryptedPropertiesMap.put(key, value);
@@ -233,7 +233,7 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 					decryptedPropertiesMap.put(key, decryptedPassword);
 				} catch (Exception e) {
 					s_logger.info("Password is not encrypted");
-					decryptedPropertiesMap.put(key, ((String) value).toCharArray());
+					decryptedPropertiesMap.put(key, new Password((String) value));
 				}
 			} else {
 				decryptedPropertiesMap.put(key, value);

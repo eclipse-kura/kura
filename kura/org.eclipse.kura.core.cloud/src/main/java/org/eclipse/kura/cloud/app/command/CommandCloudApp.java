@@ -106,7 +106,7 @@ PasswordCommandService {
 					Password decryptedPassword= new Password(m_cryptoService.decryptAes(value.toString().toCharArray()));
 					this.properties.put(key, decryptedPassword);
 				} catch (Exception e) {
-					this.properties.put(key, value.toString().toCharArray());
+					this.properties.put(key, new Password((String) value));
 				} 
 			}else{
 				this.properties.put(key, value);

@@ -1,6 +1,7 @@
 package org.eclipse.kura.example.sensehat.sensors;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 
 import jdk.dio.DeviceManager;
 import jdk.dio.i2cbus.I2CDevice;
@@ -29,6 +30,10 @@ public class KuraI2CDevice {
 		m_device.write(value);
 	}
 
+	public void write(int register, int size, ByteBuffer value) throws IOException {
+		m_device.write(register, size, value);
+	}
+	
 	public void beginTransaction() throws IOException {
 		m_device.begin();
 	}

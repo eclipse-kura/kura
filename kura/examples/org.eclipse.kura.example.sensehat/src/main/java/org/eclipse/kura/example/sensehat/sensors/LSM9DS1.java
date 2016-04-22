@@ -1,6 +1,7 @@
 package org.eclipse.kura.example.sensehat.sensors;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 
 import org.eclipse.kura.KuraException;
 import org.slf4j.Logger;
@@ -8,6 +9,10 @@ import org.slf4j.LoggerFactory;
 
 public class LSM9DS1 {
 	
+	
+//	https://github.com/RPi-Distro/python-sense-hat
+//	https://github.com/richards-tech/RTIMULib
+		
 	private static final Logger s_logger = LoggerFactory.getLogger(LSM9DS1.class);
 
 	// Accelerometer and gyroscope register address map
@@ -204,7 +209,6 @@ public class LSM9DS1 {
 					enableGyroscope();
 				} else {
 					disableGyroscope();
-					disableAccelerometer();
 				}
 
 				if (enableMagnetometer) {
@@ -266,15 +270,9 @@ public class LSM9DS1 {
 	public static void write(int device, int register, int value) throws KuraException {
 		try {
 			if (device == 0) {
-				AccI2CDevice.beginTransaction();
-				AccI2CDevice.write(register);
-				AccI2CDevice.write(value);
-				AccI2CDevice.endTransaction();
+				AccI2CDevice.write(register, 1, ByteBuffer.wrap(ByteBuffer.allocate(4).putInt(value).array()));
 			} else if (device == 1) {
-				MagI2CDevice.beginTransaction();
-				MagI2CDevice.write(register);
-				MagI2CDevice.write(value);
-				MagI2CDevice.endTransaction();				
+				MagI2CDevice.write(register, 1, ByteBuffer.wrap(ByteBuffer.allocate(4).putInt(value).array()));				
 			} else {
 				throw KuraException.internalError("Device not supported.");
 			}		
@@ -428,7 +426,7 @@ public class LSM9DS1 {
 
 		// Enable accelerometer with default settings (ODR=119Hz, BW=50Hz, FS=+/-8g)
 		try {
-			write(ACC_DEVICE, CTRL_REG6_XL, 0x00000078);
+			write(ACC_DEVICE, CTRL_REG6_XL, 0x0000007B);
 		} catch (KuraException e) {
 			s_logger.info(e.toString());
 		}

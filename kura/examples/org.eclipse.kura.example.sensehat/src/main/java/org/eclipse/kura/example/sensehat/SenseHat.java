@@ -1,9 +1,19 @@
 package org.eclipse.kura.example.sensehat;
 
+import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
+
+import jdk.dio.DeviceManager;
+import jdk.dio.DeviceNotFoundException;
+import jdk.dio.InvalidDeviceConfigException;
+import jdk.dio.UnavailableDeviceException;
+import jdk.dio.UnsupportedDeviceTypeException;
+import jdk.dio.i2cbus.I2CDevice;
+import jdk.dio.i2cbus.I2CDeviceConfig;
 
 import org.eclipse.kura.cloud.CloudClient;
 import org.eclipse.kura.cloud.CloudClientListener;
@@ -168,6 +178,7 @@ public class SenseHat implements ConfigurableComponent, CloudClientListener {
 		if (frameBuffer != null) {
 			frameBuffer.clearFrameBuffer();
 			frameBuffer.closeFrameBuffer();
+			frameBuffer = null;
 		}
 
 		// shutting down the worker and cleaning up the properties
@@ -246,7 +257,6 @@ public class SenseHat implements ConfigurableComponent, CloudClientListener {
 					s_logger.info("Compass X : " + comp[0] + " Y : " + comp[1] + " Z : " + comp[2]);
 				}
 			}
-
 		}
 		else {
 			LSM9DS1.closeDevice();
@@ -301,6 +311,7 @@ public class SenseHat implements ConfigurableComponent, CloudClientListener {
 			if (frameBuffer != null) {
 				frameBuffer.clearFrameBuffer();
 				frameBuffer.closeFrameBuffer();
+				frameBuffer = null;
 			}
 		}
 

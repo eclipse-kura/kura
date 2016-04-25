@@ -93,13 +93,13 @@ public class CamelCloudClient implements CloudClient {
     }
 
     @Override
-    public int controlPublish(String topic, KuraPayload payload, int i, boolean retain, int priority) throws KuraException {
-        return doPublish(true, null, topic, payload, i, retain, priority);
+    public int controlPublish(String topic, KuraPayload payload, int qos, boolean retain, int priority) throws KuraException {
+        return doPublish(true, null, topic, payload, qos, retain, priority);
     }
 
     @Override
-    public int controlPublish(String s, String s1, KuraPayload kuraPayload, int i, boolean b, int i1) throws KuraException {
-        return doPublish(true, s, s1, kuraPayload, i, b, i1);
+    public int controlPublish(String deviceId, String topic, KuraPayload kuraPayload, int qos, boolean retain, int priority) throws KuraException {
+        return doPublish(true, deviceId, topic, kuraPayload, qos, retain, priority);
     }
 
     @Override

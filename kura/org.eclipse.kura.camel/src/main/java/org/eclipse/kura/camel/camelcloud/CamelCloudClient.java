@@ -24,6 +24,8 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
+import static org.eclipse.kura.KuraErrorCode.CONFIGURATION_ERROR;
+import static org.eclipse.kura.KuraErrorCode.OPERATION_NOT_SUPPORTED;
 import static org.eclipse.kura.camel.camelcloud.KuraCloudClientConstants.*;
 import static java.lang.String.format;
 import static org.apache.camel.ServiceStatus.Started;
@@ -145,16 +147,17 @@ public class CamelCloudClient implements CloudClient {
 
     @Override
     public List<Integer> getUnpublishedMessageIds() throws KuraException {
-        throw new UnsupportedOperationException();
+        throw new KuraException(OPERATION_NOT_SUPPORTED);
     }
 
     @Override
     public List<Integer> getInFlightMessageIds() throws KuraException {
-        throw new UnsupportedOperationException();    }
+        throw new KuraException(OPERATION_NOT_SUPPORTED);
+    }
 
     @Override
     public List<Integer> getDroppedInFlightMessageIds() throws KuraException {
-        throw new UnsupportedOperationException();
+        throw new KuraException(OPERATION_NOT_SUPPORTED);
     }
 
     // Helpers
@@ -206,7 +209,7 @@ public class CamelCloudClient implements CloudClient {
             });
         } catch (Exception e) {
             s_logger.warn("Error while adding subscription route. Rethrowing root cause.");
-            throw new RuntimeException(e);
+            throw new KuraException(CONFIGURATION_ERROR, e);
         }
     }
 

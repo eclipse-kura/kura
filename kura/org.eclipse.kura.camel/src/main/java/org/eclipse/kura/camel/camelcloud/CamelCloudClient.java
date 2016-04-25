@@ -30,7 +30,7 @@ import static org.apache.camel.ServiceStatus.Started;
 
 public class CamelCloudClient implements CloudClient {
 
-    private final Logger LOG = LoggerFactory.getLogger(CamelCloudClient.class);
+    private final Logger s_logger = LoggerFactory.getLogger(CamelCloudClient.class);
 
     private final CamelCloudService cloudService;
 
@@ -176,7 +176,7 @@ public class CamelCloudClient implements CloudClient {
     }
 
     private void doSubscribe(final boolean isControl, final String topic, final int qos) throws KuraException {
-        LOG.debug("About to subscribe to topic {} with QOS {}.", topic, qos);
+        s_logger.debug("About to subscribe to topic {} with QOS {}.", topic, qos);
         final String internalQueue = applicationId + ":" + topic;
         try {
             camelContext.addRoutes(new RouteBuilder() {
@@ -205,7 +205,7 @@ public class CamelCloudClient implements CloudClient {
                 }
             });
         } catch (Exception e) {
-            LOG.warn("Error while adding subscription route. Rethrowing root cause.");
+            s_logger.warn("Error while adding subscription route. Rethrowing root cause.");
             throw new RuntimeException(e);
         }
     }

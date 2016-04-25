@@ -20,7 +20,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class ConcurrentHashMapCloudClientCache implements CloudClientCache {
 
-    private final static Logger LOG = LoggerFactory.getLogger(ConcurrentHashMapCloudClientCache.class);
+    private final static Logger s_logger = LoggerFactory.getLogger(ConcurrentHashMapCloudClientCache.class);
 
     private final Map<String, CloudClient> cacheMap = new ConcurrentHashMap<String, CloudClient>();
 
@@ -39,7 +39,7 @@ public class ConcurrentHashMapCloudClientCache implements CloudClientCache {
         try {
             CloudClient cloudClient = get(applicationId);
             if (cloudClient == null) {
-                LOG.debug("CloudClient for application ID {} not found. Creating new one.", applicationId);
+                s_logger.debug("CloudClient for application ID {} not found. Creating new one.", applicationId);
                 cloudClient = cloudService.newCloudClient(applicationId);
                 put(applicationId, cloudClient);
             }

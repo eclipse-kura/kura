@@ -16,11 +16,11 @@ import org.slf4j.LoggerFactory;
 
 public class EmptyCloudClientListener implements CloudClientListener {
 
-    private final static Logger LOG = LoggerFactory.getLogger(EmptyCloudClientListener.class);
+    private final static Logger s_logger = LoggerFactory.getLogger(EmptyCloudClientListener.class);
 
     @Override
     public void onControlMessageArrived(String deviceId, String topic, KuraPayload kuraPayload, int qos, boolean retain) {
-        LOG.debug("Executed empty onControlMessageArrived callback with deviceId {}, topic {}, payload {}, QOS {} and retain {}. ",
+        s_logger.debug("Executed empty onControlMessageArrived callback with deviceId {}, topic {}, payload {}, QOS {} and retain {}. ",
                 new Object[]{deviceId, topic, kuraPayload, qos, retain});
     }
 

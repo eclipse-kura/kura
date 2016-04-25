@@ -20,7 +20,7 @@ public final class KuraServiceFactory<T> {
 
     // Logger
 
-    private static final Logger LOG = getLogger(KuraServiceFactory.class);
+    private static final Logger s_logger = getLogger(KuraServiceFactory.class);
 
     // Constructors
 
@@ -37,7 +37,7 @@ public final class KuraServiceFactory<T> {
         Set<T> servicesFromRegistry = registry.findByType(clazz);
         if (servicesFromRegistry.size() == 1) {
             T service = servicesFromRegistry.iterator().next();
-            LOG.info("Found Kura " + clazz.getCanonicalName() + " in the registry. Kura component will use that instance.");
+            s_logger.info("Found Kura " + clazz.getCanonicalName() + " in the registry. Kura component will use that instance.");
             return service;
         } else if (servicesFromRegistry.size() > 1) {
             throw new IllegalStateException("Too many " + clazz.getCanonicalName() + " services found in a registry: "

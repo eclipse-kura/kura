@@ -51,13 +51,13 @@ following steps:
 
 4.  Download the Kura package with:
 
-    <pre>wget https://s3.amazonaws.com/kura_downloads/debian/release/<latest_version>/kura_<latest_version>_beaglebone_debian_armv7.deb</pre>
+    <pre>wget https://s3.amazonaws.com/kura_downloads/debian/release/1.4.0/kura_1.4.0_beaglebone_debian_installer.deb</pre>
 
 5.  Install Kura with: 
 
     <pre>sudo apt-get update
 
-    sudo dpkg -i kura_<latest_version>_beaglebone_debian_armv7.deb
+    sudo dpkg -i kura_1.4.0_beaglebone_debian_installer.deb
 
     sudo apt-get install -f</pre>
 

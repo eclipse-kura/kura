@@ -28,7 +28,7 @@ NOTE: These packages **do** contain the web UI and CAN bus support. For more inf
 Target Platform Installation
 ============================
 
-To install Kura with its dependencies on the Raspberry Pi, perform the
+To install Kura with its dependencies on the Raspberry Pi 2, perform the
 following steps:
 
 1. Boot the Raspberry Pi with the latest Raspbian image.
@@ -45,13 +45,13 @@ following steps:
 
 4.  Download the Kura package with:
 
-    <pre>wget https://s3.amazonaws.com/kura_downloads/raspbian/release/<latest_version>/kura_<latest_version>_raspberry-pi_armv6.deb</pre>
+	<pre>wget https://s3.amazonaws.com/kura_downloads/raspbian/release/1.4.0/kura_1.4.0_raspberry-pi-2_installer.deb</pre>
 
 5.  Install Kura with: 
 
     <pre>sudo apt-get update
 
-    sudo dpkg -i kura_<latest_version>_raspberry-pi_armv6.deb
+    sudo dpkg -i kura_1.4.0_raspberry-pi-2_installer.deb
 
     sudo apt-get install -f</pre>
 

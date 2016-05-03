@@ -291,7 +291,7 @@ public class BluetoothGattImpl implements BluetoothGatt, BluetoothProcessListene
 		// gatttool prompt indicates not connected, but session started
 		if (line.matches(REGEX_NOT_CONNECTED)) {
 			m_connected = false;
-			m_ready = false;
+			m_ready = true;
 		}
 		// gatttool prompt indicates connected
 		else if (line.matches(REGEX_CONNECTED)) {

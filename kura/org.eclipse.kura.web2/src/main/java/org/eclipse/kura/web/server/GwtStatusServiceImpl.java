@@ -28,6 +28,7 @@ import org.eclipse.kura.web.shared.model.GwtNetIfStatus;
 import org.eclipse.kura.web.shared.model.GwtNetIfType;
 import org.eclipse.kura.web.shared.model.GwtNetInterfaceConfig;
 import org.eclipse.kura.web.shared.model.GwtNetRouterMode;
+import org.eclipse.kura.web.shared.model.GwtWifiConfig;
 import org.eclipse.kura.web.shared.model.GwtWifiNetInterfaceConfig;
 import org.eclipse.kura.web.shared.model.GwtWifiWirelessMode;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
@@ -142,7 +143,11 @@ public class GwtStatusServiceImpl extends OsgiRemoteServiceServlet implements Gw
 				}
 				else if (gwtNetInterfaceConfig.getHwTypeEnum() == GwtNetIfType.WIFI && !gwtNetInterfaceConfig.getName().startsWith("mon")) {
 					String currentWifiMode = ((GwtWifiNetInterfaceConfig)gwtNetInterfaceConfig).getWirelessModeEnum() == GwtWifiWirelessMode.netWifiWirelessModeStation ? "Station Mode" : "Access Point";
-					String currentWifiSsid = ((GwtWifiNetInterfaceConfig)gwtNetInterfaceConfig).getActiveWifiConfig().getWirelessSsid();
+					GwtWifiConfig gwtActiveWifiConfig = ((GwtWifiNetInterfaceConfig)gwtNetInterfaceConfig).getActiveWifiConfig();
+					String currentWifiSsid = null;
+					if (gwtActiveWifiConfig != null) {
+						currentWifiSsid = gwtActiveWifiConfig.getWirelessSsid();
+					}
 					if (currentStatus.equals("Disabled"))
 						pairs.add(new GwtGroupedNVPair("networkStatusWifi", gwtNetInterfaceConfig.getName(), currentStatus));
 					else
@@ -183,8 +188,8 @@ public class GwtStatusServiceImpl extends OsgiRemoteServiceServlet implements Gw
 			PositionService positionService = ServiceLocator.getInstance().getService(PositionService.class);
 			
 			if (positionService != null) {
-				pairs.add(new GwtGroupedNVPair("positionStatus", "Longitude", positionService.getPosition().getLongitude().toString()));
-				pairs.add(new GwtGroupedNVPair("positionStatus", "Latitude", positionService.getPosition().getLatitude().toString()));
+				pairs.add(new GwtGroupedNVPair("positionStatus", "Longitude", Double.toString(Math.toDegrees(positionService.getPosition().getLongitude().getValue()))));
+				pairs.add(new GwtGroupedNVPair("positionStatus", "Latitude", Double.toString(Math.toDegrees(positionService.getPosition().getLatitude().getValue()))));
 				pairs.add(new GwtGroupedNVPair("positionStatus", "Altitude", positionService.getPosition().getAltitude().toString()));
 			}
 		} catch (GwtKuraException e) {

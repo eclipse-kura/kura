@@ -150,7 +150,7 @@
 									striped="true" hover="true" height="100%" width="100%"
 									ui:field="channelGrid" />
 								<b:Alert type="WARNING" ui:field="noChannels">
-									<b.html:Text text="No Available Channels." />
+									<b.html:Text ui:field="noChannelsText" />
 								</b:Alert>
 							</b:FormGroup>
 
@@ -180,13 +180,16 @@
 				<b:Panel>
 					<b:PanelHeader ui:field="ssidTitle" />
 					<b:PanelBody>
-						<gwt:DataGrid bordered="true" condensed="true"
-							striped="true" hover="true" height="200px" width="100%" ui:field="ssidGrid" />
+						<gwt:CellTable bordered="true" condensed="true"
+							striped="true" hover="true" height="100%" width="100%" ui:field="ssidGrid" />
+						<b:Alert type="INFO" ui:field="searching">
+							<b.html:Text ui:field="searchingText" />
+						</b:Alert>
 						<b:Alert type="WARNING" ui:field="noSsid">
-							<b.html:Text text="No Networks found" />
+							<b.html:Text ui:field="noSsidText" />
 						</b:Alert>
 						<b:Alert type="DANGER" ui:field="scanFail">
-							<b.html:Text text="The scan operation failed. Please retry." />
+							<b.html:Text ui:field="scanFailText" />
 						</b:Alert>
 					</b:PanelBody>
 				</b:Panel>

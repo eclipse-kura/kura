@@ -28,6 +28,7 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Timer;
 
 public class ServicesAnchorListItem extends AnchorListItem {
+	private static final String SERVLET_URL = "/" + GWT.getModuleName() + "/file/icon?pid=";
 
 	EntryClassUi ui;
 	GwtConfigComponent item;
@@ -40,8 +41,26 @@ public class ServicesAnchorListItem extends AnchorListItem {
 		item = service;
 		instance = this;
 
-		super.setText(item.getComponentName());
-		super.setIcon(getIcon(item.getComponentName()));
+		IconType icon= getIcon(item.getComponentName());
+		if (icon == null) {
+			String imageURL= getImagePath();
+			if (imageURL != null) {
+				StringBuilder imageTag= new StringBuilder();
+				imageTag.append("<img src='");
+				imageTag.append(imageURL);
+				imageTag.append("' height='20' width='20'/>");
+				imageTag.append(" ");
+				imageTag.append(item.getComponentName());
+				super.anchor.setHTML(imageTag.toString());
+			} else {
+				super.setIcon(IconType.CHEVRON_CIRCLE_RIGHT);
+				super.setText(item.getComponentName());
+			}
+		} else {
+			super.setIcon(icon);
+			super.setText(item.getComponentName());
+		}
+
 		super.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
@@ -59,44 +78,51 @@ public class ServicesAnchorListItem extends AnchorListItem {
 					body.add(new Span(MSGS.deviceConfigDirty()));
 					modal.add(body);
 
-					
-					ModalFooter footer = new ModalFooter();
-					footer.add(new Button(MSGS.yesButton(),
-							new ClickHandler() {
-								@Override
-								public void onClick(ClickEvent event) {
-									ui.setDirty(false);
-									ui.selected = item;
-									modal.hide();
-									instance.setIconSpin(true);
-									ui.render(item);
-									Timer timer = new Timer() {
-										@Override
-										public void run() {
-											instance.setIconSpin(false);
-										}
-									};
-									timer.schedule(2000);
 
+					ModalFooter footer = new ModalFooter();
+					footer.add(new Button(MSGS.yesButton(), new ClickHandler() {
+						@Override
+						public void onClick(ClickEvent event) {
+							ui.setDirty(false);
+							ui.selected = item;
+							modal.hide();
+							if (instance.getIcon() != null) {
+								instance.setIconSpin(true);
+							}
+							ui.render(item);
+							Timer timer = new Timer() {
+								@Override
+								public void run() {
+									if (instance.getIcon() != null) {
+										instance.setIconSpin(false);
+									}
 								}
-							}));
-						footer.add(new Button(MSGS.noButton(), new ClickHandler(){
-							@Override
-							public void onClick(ClickEvent event) {
-								modal.hide();
-							}}));
+							};
+							timer.schedule(2000);
+
+						}
+					}));
+					footer.add(new Button(MSGS.noButton(), new ClickHandler(){
+						@Override
+						public void onClick(ClickEvent event) {
+							modal.hide();
+						}}));
 					modal.add(footer);
 
 					modal.show();
 
 				} else {
 					ui.selected = item;
-					instance.setIconSpin(true);
+					if (instance.getIcon() != null) {
+						instance.setIconSpin(true);
+					}
 					ui.render(item);
 					Timer timer = new Timer() {
 						@Override
 						public void run() {
-							instance.setIconSpin(false);
+							if (instance.getIcon() != null) {
+								instance.setIconSpin(false);
+							}
 						}
 					};
 					timer.schedule(2000);
@@ -138,8 +164,28 @@ public class ServicesAnchorListItem extends AnchorListItem {
 		} else if (name.equals("DenaliService")) {
 			return IconType.SPINNER;
 		} else {
-			return IconType.CHEVRON_CIRCLE_RIGHT;
+			return null;
 		}
 	}
 
+	private String getImagePath() {									
+		String icon= item.getComponentIcon();
+		String componentId= item.getComponentId();
+		if (icon != null && 
+				(icon.toLowerCase().startsWith("http://") || icon.toLowerCase().startsWith("https://")) &&
+				isImagePath(icon)) { //Util.isImagePath(icon)
+			return icon;
+		} else if (icon != null && isImagePath(icon)) { //Util.isImagePath(icon)
+			return SERVLET_URL + componentId;
+		} else {
+			return null;
+		}
+	}
+
+	private boolean isImagePath(String icon) {
+		boolean isPng= icon.toLowerCase().endsWith(".png");
+		boolean isJpg= icon.toLowerCase().endsWith(".jpg");
+		boolean isGif= icon.toLowerCase().endsWith(".gif");
+		return isPng || isJpg || isGif;
+	}
 }

@@ -16,7 +16,9 @@ import java.util.List;
 
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.ui.EntryClassUi;
+import org.eclipse.kura.web.client.ui.Tab;
 import org.eclipse.kura.web.client.util.FailureHandler;
+import org.eclipse.kura.web.client.util.TextFieldValidator.FieldType;
 import org.eclipse.kura.web.shared.model.GwtFirewallNatEntry;
 import org.eclipse.kura.web.shared.model.GwtFirewallNatMasquerade;
 import org.eclipse.kura.web.shared.model.GwtFirewallNatProtocol;
@@ -55,7 +57,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SingleSelectionModel;
 
-public class NatTabUi extends Composite {
+public class NatTabUi extends Composite implements Tab {
 
 	private static NatTabUiUiBinder uiBinder = GWT.create(NatTabUiUiBinder.class);
 
@@ -69,9 +71,6 @@ public class NatTabUi extends Composite {
 
 	private ListDataProvider<GwtFirewallNatEntry> natDataProvider = new ListDataProvider<GwtFirewallNatEntry>();
 	final SingleSelectionModel<GwtFirewallNatEntry> selectionModel = new SingleSelectionModel<GwtFirewallNatEntry>();
-
-	private final String REGEX_ALPHANUMERIC = "^[a-zA-Z0-9_]+$";
-	private final String REGEX_NETWORK = "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,3})";
 
 	private boolean m_dirty;
 
@@ -115,7 +114,8 @@ public class NatTabUi extends Composite {
 	//
 	// Public methods
 	//
-	public void loadData() {
+	@Override
+	public void refresh() {
 		EntryClassUi.showWaitModal();
 		natDataProvider.getList().clear();
 		gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
@@ -160,13 +160,22 @@ public class NatTabUi extends Composite {
 		});
 	}
 
+	@Override
 	public boolean isDirty() {
 		return m_dirty;
 	}
 
+	@Override
 	public void setDirty(boolean b) {
 		m_dirty = b;
 	}
+	
+	@Override
+	public boolean isValid() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+	
 
 	//
 	// Private methods
@@ -477,8 +486,8 @@ public class NatTabUi extends Composite {
 		input.addBlurHandler(new BlurHandler() {
 			@Override
 			public void onBlur(BlurEvent event) {
-				if (!input.getText().trim().matches(REGEX_ALPHANUMERIC) || 
-						input.getText().trim().length() == 0) {
+				if (!input.getText().trim().matches(FieldType.ALPHANUMERIC.getRegex()) || 
+						input.getText().trim().isEmpty()) {
 					groupInput.setValidationState(ValidationState.ERROR);
 				} else {
 					groupInput.setValidationState(ValidationState.NONE);
@@ -488,8 +497,8 @@ public class NatTabUi extends Composite {
 		output.addBlurHandler(new BlurHandler() {
 			@Override
 			public void onBlur(BlurEvent event) {
-				if (!output.getText().trim().matches(REGEX_ALPHANUMERIC)
-						|| output.getText().trim().length() == 0) {
+				if (!output.getText().trim().matches(FieldType.ALPHANUMERIC.getRegex())
+						|| output.getText().trim().isEmpty()) {
 					groupOutput.setValidationState(ValidationState.ERROR);
 				} else {
 					groupOutput.setValidationState(ValidationState.NONE);
@@ -499,7 +508,7 @@ public class NatTabUi extends Composite {
 		source.addBlurHandler(new BlurHandler() {
 			@Override
 			public void onBlur(BlurEvent event) {
-				if (source.getText().trim().length() > 0 && !source.getText().trim().matches(REGEX_NETWORK)) {
+				if (!source.getText().trim().isEmpty() && !source.getText().trim().matches(FieldType.NETWORK.getRegex())) {
 					groupSource.setValidationState(ValidationState.ERROR);
 				} else {
 					groupSource.setValidationState(ValidationState.NONE);
@@ -509,7 +518,7 @@ public class NatTabUi extends Composite {
 		destination.addBlurHandler(new BlurHandler() {
 			@Override
 			public void onBlur(BlurEvent event) {
-				if (destination.getText().trim().length() > 0 && !destination.getText().trim().matches(REGEX_NETWORK)) {
+				if (!destination.getText().trim().isEmpty() && !destination.getText().trim().matches(FieldType.NETWORK.getRegex())) {
 					groupDestination.setValidationState(ValidationState.ERROR);
 				} else {
 					groupDestination.setValidationState(ValidationState.NONE);

@@ -60,7 +60,7 @@ public class FirewallPanelUi extends Composite {
 				content.clear();
 				content.add(openPortsBinder);
 				if (!openPortsBinder.isDirty()) {
-					openPortsBinder.loadData();
+					openPortsBinder.refresh();
 				}
 			}});
 
@@ -71,7 +71,7 @@ public class FirewallPanelUi extends Composite {
 				content.clear();
 				content.add(portForwardingBinder);
 				if (!portForwardingBinder.isDirty()) {
-					portForwardingBinder.loadData();
+					portForwardingBinder.refresh();
 				}
 			}});
 
@@ -82,7 +82,7 @@ public class FirewallPanelUi extends Composite {
 				content.clear();
 				content.add(ipForwardingBinder);
 				if (!ipForwardingBinder.isDirty()) {
-					ipForwardingBinder.loadData();
+					ipForwardingBinder.refresh();
 				}
 			}});
 	}
@@ -91,7 +91,7 @@ public class FirewallPanelUi extends Composite {
 		setSelectedActive(openPorts);
 		content.clear();
 		content.add(openPortsBinder);
-		openPortsBinder.loadData();
+		openPortsBinder.refresh();
 	}
 
 	public void setSelectedActive(AnchorListItem item){

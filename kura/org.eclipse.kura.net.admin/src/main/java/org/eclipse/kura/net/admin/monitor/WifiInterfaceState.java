@@ -29,7 +29,7 @@ public class WifiInterfaceState extends InterfaceState {
 	public WifiInterfaceState(String interfaceName, WifiMode wifiMode) throws KuraException {
 		super(NetInterfaceType.WIFI, interfaceName);
 		if (WifiMode.MASTER.equals(wifiMode)) {
-			if (HostapdManager.isRunning() && WifiMode.MASTER.equals(LinuxNetworkUtil.getWifiMode(interfaceName))) {
+			if (HostapdManager.isRunning(interfaceName) && WifiMode.MASTER.equals(LinuxNetworkUtil.getWifiMode(interfaceName))) {
 				m_link = true;
 			}
 		}

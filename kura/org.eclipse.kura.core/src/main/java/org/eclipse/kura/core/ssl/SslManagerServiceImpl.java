@@ -39,6 +39,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.KeyManagerFactory;
@@ -78,7 +79,7 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
 	private Timer                    m_timer;
 
 	private boolean                  m_configurationDirty;
-	private SSLSocketFactory         m_sslSocketFactory;
+	private Map<String, SSLSocketFactory> m_sslSocketFactories;
 
 	private SystemService 			 m_systemService;
 
@@ -128,6 +129,7 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
 		m_ctx = componentContext;
 		m_properties = properties;
 		m_options = new SslManagerServiceOptions(properties);
+		m_sslSocketFactories = new ConcurrentHashMap<String, SSLSocketFactory>();
 
 		ServiceTracker<SslServiceListener, SslServiceListener> listenersTracker = new ServiceTracker<SslServiceListener, SslServiceListener>(
 				componentContext.getBundleContext(),
@@ -225,10 +227,17 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
 			boolean hostnameVerification)
 					throws GeneralSecurityException, IOException
 	{
-		// Only create a new SSLSocketFactory instance if the configuration has changed.
+		// Only create a new SSLSocketFactory instance if the configuration has changed or
+		// for a new alias.
 		// This allows for SSL Context Resumption and abbreviated SSL handshake
 		// in case of reconnects to the same host.
-		if (m_sslSocketFactory == null || m_configurationDirty) {
+		if (m_configurationDirty) {
+			m_sslSocketFactories.clear();
+			m_configurationDirty = false;
+		}
+		
+		SSLSocketFactory factory = m_sslSocketFactories.get(keyAlias);
+		if (factory == null) {
 			s_logger.info("Creating a new SSLSocketFactory instance");
 
 			TrustManager[] tms = getTrustManagers(trustStore);
@@ -239,11 +248,11 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
 
 			KeyManager[] kms = getKeyManagers(keyStore, keyStorePassword, keyAlias);
 
-			m_sslSocketFactory = createSSLSocketFactory(protocol, ciphers, kms, tms, hostnameVerification);
-			m_configurationDirty = false;
+			factory = createSSLSocketFactory(protocol, ciphers, kms, tms, hostnameVerification);
+			m_sslSocketFactories.put(keyAlias, factory);
 		}
-
-		return m_sslSocketFactory;
+		
+		return factory;
 	}
 
 

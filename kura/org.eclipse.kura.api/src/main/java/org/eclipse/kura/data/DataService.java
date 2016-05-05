@@ -18,6 +18,7 @@ import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraNotConnectedException;
 import org.eclipse.kura.KuraStoreException;
 import org.eclipse.kura.KuraTimeoutException;
+import org.eclipse.kura.data.listener.DataServiceListener;
 
 /**
  * The DataService provides the ability of connecting to a remote
@@ -186,4 +187,21 @@ public interface DataService
 	List<Integer> getDroppedInFlightMessageIds(String topicRegex)
 			throws KuraStoreException;
 	
+	/**
+	 * Adds a listener.
+	 * 
+	 * @param listener
+	 * 
+	 * @since {@link org.eclipse.kura.data} 1.1.0
+	 */
+	public void addDataServiceListener(DataServiceListener listener);
+	
+	/**
+	 * Removes a listener.
+	 * 
+	 * @param listener
+	 * 
+	 * @since {@link org.eclipse.kura.data} 1.1.0
+	 */
+	public void removeDataServiceListener(DataServiceListener listener);
 }

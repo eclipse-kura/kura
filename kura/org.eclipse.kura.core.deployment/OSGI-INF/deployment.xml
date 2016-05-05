@@ -14,16 +14,30 @@
 -->
 <scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" activate="activate" deactivate="deactivate" name="org.eclipse.kura.core.deployment.CloudDeploymentHandlerV2">
    <implementation class="org.eclipse.kura.core.deployment.CloudDeploymentHandlerV2"/>
-	<!-- 
-   <reference bind="setDeploymentAgentService" cardinality="1..1" interface="org.eclipse.kura.deployment.agent.DeploymentAgentService" name="DeploymentAgentService" policy="static" unbind="unsetDeploymentAgentService"/>
-   -->
-   <reference bind="setDeploymentAdmin" cardinality="1..1" interface="org.osgi.service.deploymentadmin.DeploymentAdmin" name="DeploymentAdmin" policy="static" unbind="unsetDeploymentAdmin"/>
-   <reference bind="setCloudService" cardinality="1..1" interface="org.eclipse.kura.cloud.CloudService" name="CloudService" policy="static" unbind="unsetCloudService"/>
-   <reference bind="setSslManagerService" cardinality="1..1" interface="org.eclipse.kura.ssl.SslManagerService" name="SslManagerService" policy="static" unbind="unsetSslManagerService"/>
-   <reference name="DataTransportService"
-              bind="setDataTransportService" 
-              unbind="unsetDataTransportService"
-              cardinality="1..1" 
+   <reference name="DeploymentAdmin"
               policy="static"
+              cardinality="1..1"
+              bind="setDeploymentAdmin"
+              unbind="unsetDeploymentAdmin"
+              interface="org.osgi.service.deploymentadmin.DeploymentAdmin"/>
+   <reference name="CloudService"
+              policy="static"
+              cardinality="1..1"
+              bind="setCloudService"
+              unbind="unsetCloudService"
+              target="(kura.service.pid=org.eclipse.kura.cloud.CloudService)"
+              interface="org.eclipse.kura.cloud.CloudService"/>
+   <reference name="SslManagerService"
+              policy="static"
+              cardinality="1..1"
+              bind="setSslManagerService"
+              unbind="unsetSslManagerService"
+              interface="org.eclipse.kura.ssl.SslManagerService"/>
+   <reference name="DataTransportService"
+              policy="static"
+              cardinality="1..1"
+              bind="setDataTransportService"
+              unbind="unsetDataTransportService"
+              target="(kura.service.pid=org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport)"
               interface="org.eclipse.kura.data.DataTransportService"/>
 </scr:component>

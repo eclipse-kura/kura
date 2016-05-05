@@ -94,7 +94,7 @@
             description="Disable republishing the MQTT Birth Certificate on reconnects"/>    
     </OCD>
     
-    <Designate pid="org.eclipse.kura.cloud.CloudService">
+    <Designate pid="org.eclipse.kura.cloud.CloudService" factoryPid="org.eclipse.kura.cloud.CloudService">
         <Object ocdref="org.eclipse.kura.cloud.CloudService"/>
     </Designate>
 </MetaData>

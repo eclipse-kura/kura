@@ -1,0 +1,493 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--
+
+    Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+
+     All rights reserved. This program and the accompanying materials
+     are made available under the terms of the Eclipse Public License v1.0
+     which accompanies this distribution, and is available at
+     http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Eurotech
+
+-->
+<esf:configurations xmlns:ocd="http://www.osgi.org/xmlns/metatype/v1.2.0" xmlns:esf="http://eurotech.com/esf/2.0">
+    <esf:configuration pid="org.eclipse.kura.net.admin.NetworkConfigurationService">
+        <esf:properties>
+            <esf:property name="net.interface.wlan0.config.wifi.master.broadcast" array="false" encrypted="false" type="Boolean">
+                <esf:value>false</esf:value>
+            </esf:property>
+            <esf:property name="net.interface.eth0.config.ip4.dnsServers" array="false" encrypted="false" type="String">
+                <esf:value></esf:value>
+            </esf:property>
+            <esf:property name="net.interface.eth0.ip4.dnsServers" array="false" encrypted="false" type="String">
+                <esf:value></esf:value>
+            </esf:property>
+            <esf:property name="net.interface.eth0.config.dhcpServer4.passDns" array="false" encrypted="false" type="Boolean">
+                <esf:value>false</esf:value>
+            </esf:property>
+            <esf:property name="net.interface.wlan0.config.wifi.master.passphrase" array="false" encrypted="false" type="String">
+                <esf:value>testKEYS</esf:value>
+            </esf:property>
+            <esf:property name="net.interface.eth0.driver" array="false" encrypted="false" type="String">
+                <esf:value>unknown</esf:value>
+            </esf:property>
+            <esf:property name="net.interface.wlan0.config.autoconnect" array="false" encrypted="false" type="Boolean">
+                <esf:value>true</esf:value>
+            </esf:property>
+            <esf:property name="net.interface.eth0.driver.version" array="false" encrypted="false" type="String">
+                <esf:value>unkown</esf:value>
+            </esf:property>
+            <esf:property name="net.interface.eth0.virtual" array="false" encrypted="false" type="Boolean">
+                <esf:value>false</esf:value>
+            </esf:property>
+            <esf:property name="net.interface.wlan0.config.wifi.infra.mode" array="false" encrypted="false" type="String">
+                <esf:value>INFRA</esf:value>
+            </esf:property>
+            <esf:property name="net.interface.wlan0.wifi.bitrate" array="false" encrypted="false" type="Long">
+                <esf:value>0</esf:value>
+            </esf:property>
+            <esf:property name="net.interface.wlan0.config.wifi.infra.channel" array="false" encrypted="false" type="String">
+                <esf:value>1 2 3 4 5 6 7 8 9 10 11</esf:value>
+            </esf:property>
+            <esf:property name="net.interface.eth0.type" array="false" encrypted="false" type="String">
+                <esf:value>ETHERNET</esf:value>
+            </esf:property>
+            <esf:property name="net.interface.lo.type" array="false" encrypted="false" type="String">
+                <esf:value>LOOPBACK</esf:value>
+            </esf:property>
+            <esf:property name="net.interface.wlan0.virtual" array="false" encrypted="false" type="Boolean">
+                <esf:value>false</esf:value>
+            </esf:property>
+            <esf:property name="net.interface.lo.virtual" array="false" encrypted="false" type="Boolean">
+                <esf:value>false</esf:value>
+            </esf:property>
+            <esf:property name="net.interface.lo.ptp" array="false" encrypted="false" type="Boolean">
+                <esf:value>false</esf:value>
+            </esf:property>
+            <esf:property name="net.interface.wlan0.config.wifi.master.hardwareMode" array="false" encrypted="false" type="String">
+                <esf:value>g</esf:value>
+            </esf:property>
+            <esf:property name="net.interface.wlan0.config.wifi.master.securityType" array="false" encrypted="false" type="String">
+                <esf:value>SECURITY_WPA2</esf:value>
+            </esf:property>
+            <esf:property name="net.interface.lo.config.ip4.prefix" array="false" encrypted="false" type="Short">
+                <esf:value>8</esf:value>
+            </esf:property>
+            <esf:property name="net.interface.wlan0.firmware.version" array="false" encrypted="false" type="String">
+                <esf:value>unknown</esf:value>
+            </esf:property>
+            <esf:property name="net.interface.lo.config.winsServers" array="false" encrypted="false" type="String">
+                <esf:value></esf:value>
+            </esf:property>
+            <esf:property name="net.interface.lo.config.mtu" array="false" encrypted="false" type="Integer">
+                <esf:value>16436</esf:value>
+            </esf:property>
+            <esf:property name="net.interface.lo.ip4.broadcast" array="false" encrypted="false" type="String">
+                <esf:value>255.0.0.0</esf:value>
+            </esf:property>
+            <esf:property name="net.interface.eth0.config.ip4.status" array="false" encrypted="false" type="String">
+                <esf:value>netIPv4StatusEnabledWAN</esf:value>
+            </esf:property>
+            <esf:property name="net.interface.wlan0.loopback" array="false" encrypted="false" type="Boolean">
+                <esf:value>false</esf:value>
+            </esf:property>
+            <esf:property name="net.interface.eth0.config.name" array="false" encrypted="false" type="String">
+                <esf:value>eth0</esf:value>
+            </esf:property>
+            <esf:property name="net.interface.wlan0.wifi.capabilities" array="false" encrypted="false" type="String">
+                <esf:value>CIPHER_TKIP CIPHER_CCMP WPA RSN </esf:value>
+            </esf:property>
+            <esf:property name="net.interface.wlan0.config.wifi.infra.broadcast" array="false" encrypted="false" type="Boolean">
+                <esf:value>false</esf:value>
+            </esf:property>
+            <esf:property name="net.interface.wlan0.config.dhcpServer4.passDns" array="false" encrypted="false" type="Boolean">
+                <esf:value>true</esf:value>
+            </esf:property>
+            <esf:property name="net.interface.wlan0.config.nat.enabled" array="false" encrypted="false" type="Boolean">
+                <esf:value>true</esf:value>
+            </esf:property>
+            <esf:property name="net.interface.eth0.eth.link.up" array="false" encrypted="false" type="Boolean">
+                <esf:value>true</esf:value>
+            </esf:property>
+            <esf:property name="net.interface.wlan0.ptp" array="false" encrypted="false" type="Boolean">
+                <esf:value>false</esf:value>
+            </esf:property>
+            <esf:property name="net.interface.eth0.config.dhcpServer4.prefix" array="false" encrypted="false" type="Short">
+                <esf:value>24</esf:value>
+            </esf:property>
+            <esf:property name="net.interface.wlan0.config.winsServers" array="false" encrypted="false" type="String">
+                <esf:value></esf:value>
+            </esf:property>
+            <esf:property name="net.interface.eth0.config.mtu" array="false" encrypted="false" type="Integer">
+                <esf:value>1500</esf:value>
+            </esf:property>
+            <esf:property name="net.interface.eth0.usb.devicePath" array="false" encrypted="false" type="String">
+                <esf:value>1.1</esf:value>
+            </esf:property>
+            <esf:property name="net.interface.wlan0.up" array="false" encrypted="false" type="Boolean">
+                <esf:value>false</esf:value>
+            </esf:property>
+            <esf:property name="net.interface.eth0.ip4.broadcast" array="false" encrypted="false" type="String">
+                <esf:value>255.255.255.0</esf:value>
+            </esf:property>
+            <esf:property name="net.interface.wlan0.config.dhcpServer4.rangeStart" array="false" encrypted="false" type="String">
+                <esf:value>172.16.1.100</esf:value>
+            </esf:property>
+            <esf:property name="net.interface.wlan0.config.wifi.master.mode" array="false" encrypted="false" type="String">
+                <esf:value>MASTER</esf:value>
+            </esf:property>
+            <esf:property name="net.interface.wlan0.config.wifi.infra.driver" array="false" encrypted="false" type="String">
+                <esf:value>nl80211</esf:value>
+            </esf:property>
+            <esf:property name="net.interface.wlan0.type" array="false" encrypted="false" type="String">
+                <esf:value>WIFI</esf:value>
+            </esf:property>
+            <esf:property name="net.interface.wlan0.config.wifi.master.driver" array="false" encrypted="false" type="String">
+                <esf:value>nl80211</esf:value>
+            </esf:property>
+            <esf:property name="net.interface.wlan0.mac" array="false" encrypted="false" type="String">
+                <esf:value></esf:value>
+            </esf:property>
+            <esf:property name="net.interface.eth0.usb.vendor.id" array="false" encrypted="false" type="String">
+                <esf:value>0424</esf:value>
+            </esf:property>
+            <esf:property name="net.interfaces" array="false" encrypted="false" type="String">
+                <esf:value>lo,wlan0,eth0</esf:value>
+            </esf:property>
+            <esf:property name="net.interface.wlan0.config.wifi.infra.securityType" array="false" encrypted="false" type="String">
+                <esf:value>NONE</esf:value>
+            </esf:property>
+            <esf:property name="net.interface.wlan0.config.ip4.address" array="false" encrypted="false" type="String">
+                <esf:value>172.16.1.1</esf:value>
+            </esf:property>
+            <esf:property name="net.interface.eth0.ip4.address" array="false" encrypted="false" type="String">
+                <esf:value></esf:value>
+            </esf:property>
+            <esf:property name="net.interface.lo.config.domains" array="false" encrypted="false" type="String">
+                <esf:value></esf:value>
+            </esf:property>
+            <esf:property name="net.interface.lo.ip4.address" array="false" encrypted="false" type="String">
+                <esf:value>127.0.0.1</esf:value>
+            </esf:property>
+            <esf:property name="net.interface.lo.config.autoconnect" array="false" encrypted="false" type="Boolean">
+                <esf:value>true</esf:value>
+            </esf:property>
+            <esf:property name="net.interface.lo.mac" array="false" encrypted="false" type="String">
+                <esf:value>00:00:00:00:00:00</esf:value>
+            </esf:property>
+            <esf:property name="net.interface.lo.loopback" array="false" encrypted="false" type="Boolean">
+                <esf:value>true</esf:value>
+            </esf:property>
+            <esf:property name="net.interface.eth0.config.dhcpServer4.maxLeaseTime" array="false" encrypted="false" type="Integer">
+                <esf:value>7200</esf:value>
+            </esf:property>
+            <esf:property name="net.interface.wlan0.config.ip4.gateway" array="false" encrypted="false" type="String">
+                <esf:value></esf:value>
+            </esf:property>
+            <esf:property name="net.interface.eth0.usb.product.id" array="false" encrypted="false" type="String">
+                <esf:value>ec00</esf:value>
+            </esf:property>
+            <esf:property name="net.interface.eth0.config.dhcpServer4.rangeStart" array="false" encrypted="false" type="String">
+                <esf:value>172.16.0.100</esf:value>
+            </esf:property>
+            <esf:property name="net.interface.eth0.config.dhcpServer4.enabled" array="false" encrypted="false" type="Boolean">
+                <esf:value>false</esf:value>
+            </esf:property>
+            <esf:property name="net.interface.wlan0.config.state" array="false" encrypted="false" type="String">
+                <esf:value>DISCONNECTED</esf:value>
+            </esf:property>
+            <esf:property name="net.interface.lo.firmware.version" array="false" encrypted="false" type="String">
+                <esf:value>unknown</esf:value>
+            </esf:property>
+            <esf:property name="net.interface.lo.ip4.dnsServers" array="false" encrypted="false" type="String">
+                <esf:value>127.0.0.1</esf:value>
+            </esf:property>
+            <esf:property name="net.interface.lo.config.name" array="false" encrypted="false" type="String">
+                <esf:value>lo</esf:value>
+            </esf:property>
+            <esf:property name="net.interface.eth0.mac" array="false" encrypted="false" type="String">
+                <esf:value></esf:value>
+            </esf:property>
+            <esf:property name="net.interface.wlan0.config.name" array="false" encrypted="false" type="String">
+                <esf:value>wlan0</esf:value>
+            </esf:property>
+            <esf:property name="net.interface.lo.driver.version" array="false" encrypted="false" type="String">
+                <esf:value>unknown</esf:value>
+            </esf:property>
+            <esf:property name="net.interface.lo.config.state" array="false" encrypted="false" type="String">
+                <esf:value>ACTIVATED</esf:value>
+            </esf:property>
+            <esf:property name="net.interface.eth0.config.dhcpServer4.defaultLeaseTime" array="false" encrypted="false" type="Integer">
+                <esf:value>7200</esf:value>
+            </esf:property>
+            <esf:property name="net.interface.lo.driver" array="false" encrypted="false" type="String">
+                <esf:value>unknown</esf:value>
+            </esf:property>
+            <esf:property name="net.interface.eth0.ptp" array="false" encrypted="false" type="Boolean">
+                <esf:value>false</esf:value>
+            </esf:property>
+            <esf:property name="modified.interface.names" array="false" encrypted="false" type="String">
+                <esf:value>wlan0</esf:value>
+            </esf:property>
+            <esf:property name="net.interface.lo.config.ip4.address" array="false" encrypted="false" type="String">
+                <esf:value>127.0.0.1</esf:value>
+            </esf:property>
+            <esf:property name="net.interface.wlan0.config.dhcpServer4.enabled" array="false" encrypted="false" type="Boolean">
+                <esf:value>true</esf:value>
+            </esf:property>
+            <esf:property name="net.interface.eth0.config.dhcpClient4.enabled" array="false" encrypted="false" type="Boolean">
+                <esf:value>true</esf:value>
+            </esf:property>
+            <esf:property name="net.interface.eth0.config.dhcpServer4.rangeEnd" array="false" encrypted="false" type="String">
+                <esf:value>172.16.0.110</esf:value>
+            </esf:property>
+            <esf:property name="net.interface.eth0.config.state" array="false" encrypted="false" type="String">
+                <esf:value>ACTIVATED</esf:value>
+            </esf:property>
+            <esf:property name="net.interface.eth0.usb.busNumber" array="false" encrypted="false" type="String">
+                <esf:value>1</esf:value>
+            </esf:property>
+            <esf:property name="net.interface.wlan0.config.wifi.mode" array="false" encrypted="false" type="String">
+                <esf:value>MASTER</esf:value>
+            </esf:property>
+            <esf:property name="net.interface.wlan0.driver" array="false" encrypted="false" type="String">
+                <esf:value>unknown</esf:value>
+            </esf:property>
+            <esf:property name="net.interface.wlan0.config.wifi.master.radioMode" array="false" encrypted="false" type="String">
+                <esf:value>RADIO_MODE_80211g</esf:value>
+            </esf:property>
+            <esf:property name="net.interface.wlan0.config.dhcpServer4.rangeEnd" array="false" encrypted="false" type="String">
+                <esf:value>172.16.1.110</esf:value>
+            </esf:property>
+            <esf:property name="net.interface.lo.up" array="false" encrypted="false" type="Boolean">
+                <esf:value>true</esf:value>
+            </esf:property>
+            <esf:property name="net.interface.lo.config.dhcpClient4.enabled" array="false" encrypted="false" type="Boolean">
+                <esf:value>false</esf:value>
+            </esf:property>
+            <esf:property name="net.interface.wlan0.config.mtu" array="false" encrypted="false" type="Integer">
+                <esf:value>1500</esf:value>
+            </esf:property>
+            <esf:property name="net.interface.lo.config.ip4.gateway" array="false" encrypted="false" type="String">
+                <esf:value></esf:value>
+            </esf:property>
+            <esf:property name="net.interface.lo.config.ip4.status" array="false" encrypted="false" type="String">
+                <esf:value>netIPv4StatusEnabledLAN</esf:value>
+            </esf:property>
+            <esf:property name="net.interface.wlan0.config.dhcpServer4.maxLeaseTime" array="false" encrypted="false" type="Integer">
+                <esf:value>7200</esf:value>
+            </esf:property>
+            <esf:property name="net.interface.wlan0.config.wifi.master.ssid" array="false" encrypted="false" type="String">
+                <esf:value>kura_gateway_B8:27:EB:2B:4E:35</esf:value>
+            </esf:property>
+            <esf:property name="net.interface.eth0.config.autoconnect" array="false" encrypted="false" type="Boolean">
+                <esf:value>true</esf:value>
+            </esf:property>
+            <esf:property name="net.interface.eth0.usb.product.name" array="false" encrypted="false"/>
+            <esf:property name="net.interface.wlan0.config.dhcpServer4.prefix" array="false" encrypted="false" type="Short">
+                <esf:value>24</esf:value>
+            </esf:property>
+            <esf:property name="net.interface.wlan0.config.wifi.master.channel" array="false" encrypted="false" type="String">
+                <esf:value>1</esf:value>
+            </esf:property>
+            <esf:property name="net.interface.lo.config.ip4.dnsServers" array="false" encrypted="false" type="String">
+                <esf:value></esf:value>
+            </esf:property>
+            <esf:property name="net.interface.eth0.usb.vendor.name" array="false" encrypted="false"/>
+            <esf:property name="net.interface.eth0.loopback" array="false" encrypted="false" type="Boolean">
+                <esf:value>false</esf:value>
+            </esf:property>
+            <esf:property name="net.interface.wlan0.config.ip4.prefix" array="false" encrypted="false" type="Short">
+                <esf:value>24</esf:value>
+            </esf:property>
+            <esf:property name="net.interface.wlan0.config.wifi.infra.passphrase" array="false" encrypted="false" type="String">
+                <esf:value></esf:value>
+            </esf:property>
+            <esf:property name="net.interface.wlan0.config.ip4.dnsServers" array="false" encrypted="false" type="String">
+                <esf:value></esf:value>
+            </esf:property>
+            <esf:property name="net.interface.wlan0.config.domains" array="false" encrypted="false" type="String">
+                <esf:value></esf:value>
+            </esf:property>
+            <esf:property name="net.interface.wlan0.config.dhcpClient4.enabled" array="false" encrypted="false" type="Boolean">
+                <esf:value>false</esf:value>
+            </esf:property>
+            <esf:property name="net.interface.wlan0.config.wifi.infra.ssid" array="false" encrypted="false" type="String">
+                <esf:value></esf:value>
+            </esf:property>
+            <esf:property name="net.interface.wlan0.config.wifi.infra.hardwareMode" array="false" encrypted="false" type="String">
+                <esf:value></esf:value>
+            </esf:property>
+            <esf:property name="net.interface.wlan0.config.dhcpServer4.defaultLeaseTime" array="false" encrypted="false" type="Integer">
+                <esf:value>7200</esf:value>
+            </esf:property>
+            <esf:property name="net.interface.wlan0.config.ip4.status" array="false" encrypted="false" type="String">
+                <esf:value>netIPv4StatusEnabledLAN</esf:value>
+            </esf:property>
+            <esf:property name="net.interface.eth0.firmware.version" array="false" encrypted="false" type="String">
+                <esf:value>unknown</esf:value>
+            </esf:property>
+            <esf:property name="net.interface.eth0.up" array="false" encrypted="false" type="Boolean">
+                <esf:value>true</esf:value>
+            </esf:property>
+            <esf:property name="net.interface.wlan0.driver.version" array="false" encrypted="false" type="String">
+                <esf:value>unknown</esf:value>
+            </esf:property>
+        </esf:properties>
+    </esf:configuration>
+    <esf:configuration pid="org.eclipse.kura.watchdog.WatchdogService">
+        <esf:properties>
+            <esf:property name="enabled" array="false" encrypted="false" type="Boolean">
+                <esf:value>false</esf:value>
+            </esf:property>
+            <esf:property name="service.pid" array="false" encrypted="false" type="String">
+                <esf:value>org.eclipse.kura.watchdog.WatchdogService</esf:value>
+            </esf:property>
+            <esf:property name="pingInterval" array="false" encrypted="false" type="Integer">
+                <esf:value>10000</esf:value>
+            </esf:property>
+        </esf:properties>
+    </esf:configuration>
+    <esf:configuration pid="org.eclipse.kura.clock.ClockService">
+        <esf:properties>
+            <esf:property name="enabled" array="false" encrypted="false" type="Boolean">
+                <esf:value>true</esf:value>
+            </esf:property>
+            <esf:property name="clock.ntp.port" array="false" encrypted="false" type="Integer">
+                <esf:value>123</esf:value>
+            </esf:property>
+            <esf:property name="clock.ntp.refresh-interval" array="false" encrypted="false" type="Integer">
+                <esf:value>3600</esf:value>
+            </esf:property>
+            <esf:property name="clock.provider" array="false" encrypted="false" type="String">
+                <esf:value>java-ntp</esf:value>
+            </esf:property>
+            <esf:property name="clock.set.hwclock" array="false" encrypted="false" type="Boolean">
+                <esf:value>true</esf:value>
+            </esf:property>
+            <esf:property name="clock.ntp.timeout" array="false" encrypted="false" type="Integer">
+                <esf:value>10000</esf:value>
+            </esf:property>
+            <esf:property name="clock.ntp.host" array="false" encrypted="false" type="String">
+                <esf:value>0.pool.ntp.org</esf:value>
+            </esf:property>
+            <esf:property name="service.pid" array="false" encrypted="false" type="String">
+                <esf:value>org.eclipse.kura.clock.ClockService</esf:value>
+            </esf:property>
+        </esf:properties>
+    </esf:configuration>
+    <esf:configuration pid="org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport">
+        <esf:properties>
+            <esf:property name="clean-session" array="false" encrypted="false" type="Boolean">
+                <esf:value>true</esf:value>
+            </esf:property>
+            <esf:property name="username" array="false" encrypted="false" type="String">
+                <esf:value>username</esf:value>
+            </esf:property>
+            <esf:property name="topic.context.account-name" array="false" encrypted="false" type="String">
+                <esf:value>account-name</esf:value>
+            </esf:property>
+            <esf:property name="broker-url" array="false" encrypted="false" type="String">
+                <esf:value>mqtt://broker-url:1883/</esf:value>
+            </esf:property>
+            <esf:property name="lwt.retain" array="false" encrypted="false" type="Boolean">
+                <esf:value>false</esf:value>
+            </esf:property>
+            <esf:property name="in-flight.persistence" array="false" encrypted="false" type="String">
+                <esf:value>file</esf:value>
+            </esf:property>
+            <esf:property name="lwt.topic" array="false" encrypted="false" type="String">
+                <esf:value>$EDC/#account-name/#client-id/MQTT/LWT</esf:value>
+            </esf:property>
+            <esf:property name="keep-alive" array="false" encrypted="false" type="Integer">
+                <esf:value>30</esf:value>
+            </esf:property>
+            <esf:property name="service.pid" array="false" encrypted="false" type="String">
+                <esf:value>org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport</esf:value>
+            </esf:property>
+            <esf:property name="password" array="false" encrypted="false" type="Password">
+                <esf:value>password</esf:value>
+            </esf:property>
+            <esf:property name="timeout" array="false" encrypted="false" type="Integer">
+                <esf:value>20</esf:value>
+            </esf:property>
+            <esf:property name="lwt.qos" array="false" encrypted="false" type="Integer">
+                <esf:value>0</esf:value>
+            </esf:property>
+           	<esf:property name="protocol-version" array="false" encrypted="false" type="Integer">
+                <esf:value>4</esf:value>
+            </esf:property>
+        </esf:properties>
+    </esf:configuration>
+    <esf:configuration pid="org.eclipse.kura.data.DataService">
+        <esf:properties>
+            <esf:property name="in-flight-messages.congestion-timeout" array="false" encrypted="false" type="Integer">
+                <esf:value>0</esf:value>
+            </esf:property>
+            <esf:property name="store.purge-age" array="false" encrypted="false" type="Integer">
+                <esf:value>60</esf:value>
+            </esf:property>
+            <esf:property name="in-flight-messages.republish-on-new-session" array="false" encrypted="false" type="Boolean">
+                <esf:value>true</esf:value>
+            </esf:property>
+            <esf:property name="store.capacity" array="false" encrypted="false" type="Integer">
+                <esf:value>1000</esf:value>
+            </esf:property>
+            <esf:property name="disconnect.quiesce-timeout" array="false" encrypted="false" type="Integer">
+                <esf:value>10</esf:value>
+            </esf:property>
+            <esf:property name="connect.auto-on-startup" array="false" encrypted="false" type="Boolean">
+                <esf:value>false</esf:value>
+            </esf:property>
+            <esf:property name="connect.retry-interval" array="false" encrypted="false" type="Integer">
+                <esf:value>60</esf:value>
+            </esf:property>
+            <esf:property name="service.pid" array="false" encrypted="false" type="String">
+                <esf:value>org.eclipse.kura.data.DataService</esf:value>
+            </esf:property>
+            <esf:property name="in-flight-messages.max-number" array="false" encrypted="false" type="Integer">
+                <esf:value>9</esf:value>
+            </esf:property>
+            <esf:property name="store.housekeeper-interval" array="false" encrypted="false" type="Integer">
+                <esf:value>900</esf:value>
+            </esf:property>
+        </esf:properties>
+    </esf:configuration>
+    <esf:configuration pid="org.eclipse.kura.position.PositionService">
+        <esf:properties>
+            <esf:property name="port" array="false" encrypted="false" type="String">
+                <esf:value>1-3.2</esf:value>
+            </esf:property>
+            <esf:property name="enabled" array="false" encrypted="false" type="Boolean">
+                <esf:value>false</esf:value>
+            </esf:property>
+            <esf:property name="parity" array="false" encrypted="false" type="Integer">
+                <esf:value>0</esf:value>
+            </esf:property>
+            <esf:property name="stopBits" array="false" encrypted="false" type="Integer">
+                <esf:value>1</esf:value>
+            </esf:property>
+            <esf:property name="baudRate" array="false" encrypted="false" type="Integer">
+                <esf:value>115200</esf:value>
+            </esf:property>
+            <esf:property name="service.pid" array="false" encrypted="false" type="String">
+                <esf:value>org.eclipse.kura.position.PositionService</esf:value>
+            </esf:property>
+            <esf:property name="bitsPerWord" array="false" encrypted="false" type="Integer">
+                <esf:value>8</esf:value>
+            </esf:property>
+        </esf:properties>
+    </esf:configuration>
+    <esf:configuration pid="org.eclipse.kura.cloud.CloudService">
+        <esf:properties>
+            <esf:property name="encode.gzip" array="false" encrypted="false" type="Boolean">
+                <esf:value>true</esf:value>
+            </esf:property>
+            <esf:property name="device.display-name" array="false" encrypted="false" type="String">
+                <esf:value>Raspberry Pi 2</esf:value>
+            </esf:property>
+        </esf:properties>
+    </esf:configuration>
+</esf:configurations>

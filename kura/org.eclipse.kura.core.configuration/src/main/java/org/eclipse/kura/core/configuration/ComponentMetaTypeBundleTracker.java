@@ -13,9 +13,12 @@ package org.eclipse.kura.core.configuration;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 
+import org.eclipse.kura.configuration.ConfigurationService;
+import org.eclipse.kura.configuration.metatype.Designate;
 import org.eclipse.kura.configuration.metatype.OCD;
+import org.eclipse.kura.core.configuration.metatype.Tmetadata;
+import org.eclipse.kura.core.configuration.metatype.Tocd;
 import org.eclipse.kura.core.configuration.util.CollectionsUtil;
 import org.eclipse.kura.core.configuration.util.ComponentUtil;
 import org.osgi.framework.Bundle;
@@ -108,33 +111,49 @@ public class ComponentMetaTypeBundleTracker extends BundleTracker<Bundle>
 		// Note: configuration properties in snapshots no longer present in 
 		// the meta-type are not purged.
 
-		Map<String,OCD> ocds = ComponentUtil.getObjectClassDefinition(m_context, bundle);
-		for (Entry<String, OCD> ocdEntry : ocds.entrySet()) {
-			String pid = ocdEntry.getKey();
+		Map<String,Tmetadata> metas = ComponentUtil.getMetadata(m_context, bundle); 
+		for (String metatypePid : metas.keySet()) {
 			try {
-				OCD ocd = ocdEntry.getValue();
-				Configuration config = m_configurationAdmin.getConfiguration(pid ,null);
-				if (config != null) {
-
-					// get the properties from ConfigurationAdmin if any are present
-					Map<String, Object> props = new HashMap<String, Object>(); 
-					if (config.getProperties() != null) {
-						props = CollectionsUtil.dictionaryToMap(config.getProperties(), ocd);
-					}
 				
-					// merge the current properties, if any, with the defaults from metatype
-					boolean mergeDone = m_configurationService.mergeWithDefaults(ocds.get(pid), props); 
-					if (mergeDone) {					
+				// register the OCD for all the contained services
+				Tmetadata  metadata = metas.get(metatypePid);
+				if (metadata != null) {
+					
+					// check if this component is a factory
+					boolean isFactory = false;
+					Designate designate = ComponentUtil.getDesignate(metadata, metatypePid);
+					if (designate.getFactoryPid() != null && !designate.getFactoryPid().isEmpty()) {
+						isFactory = true;
+					}
 
-						// there was a merge with the defaults
-						// so notify the updated configuration to ConfigurationAdmin
+					// register the pid with the OCD and whether it is a factory
+					OCD ocd = ComponentUtil.getOCD(metadata, metatypePid);
+					m_configurationService.registerComponentOCD(metatypePid, (Tocd) ocd, isFactory);
+									
+					Configuration config = m_configurationAdmin.getConfiguration(metatypePid);
+					if (!isFactory && config != null) {
+	
+						// get the properties from ConfigurationAdmin if any are present
+						Map<String, Object> props = new HashMap<String, Object>();
+						if (config.getProperties() != null) {
+							props.putAll(CollectionsUtil.dictionaryToMap(config.getProperties(), ocd));
+						}
+						
+						if (!props.containsKey(ConfigurationService.KURA_SERVICE_PID)) {
+							props.put(ConfigurationService.KURA_SERVICE_PID, metatypePid);
+						}
+					
+						// merge the current properties, if any, with the defaults from metatype
+						m_configurationService.mergeWithDefaults(ocd, props);
+						// FIXME: this might cause an unwanted snapshot
+						// Cannot call ConfigurationService.update because the component is not tracked yet!
 						config.update(CollectionsUtil.mapToDictionary(props));
-						s_logger.info("Seeding updated configuration for pid: {}", pid);
+						s_logger.info("Seeding updated configuration for pid: {}", metatypePid);
 					}
 				}
 			}
 			catch (Exception e) {
-				s_logger.error("Error seeding configuration for pid: "+pid, e);
+				s_logger.error("Error seeding configuration for pid: "+metatypePid, e);
 			}
 		}
 	}

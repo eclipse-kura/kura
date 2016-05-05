@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+
+     All rights reserved. This program and the accompanying materials
+     are made available under the terms of the Eclipse Public License v1.0
+     which accompanies this distribution, and is available at
+     http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Eurotech
+
+-->
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" name="org.eclipse.kura.core.configuration.CloudConfigurationHandler">
+   <implementation class="org.eclipse.kura.core.configuration.CloudConfigurationHandler"/>
+   <reference name="ConfigurationService"
+              policy="static"
+              cardinality="1..1"
+              bind="setConfigurationService"
+              unbind="unsetConfigurationService"
+              interface="org.eclipse.kura.configuration.ConfigurationService"/>
+   <reference name="SystemService"
+              policy="static"
+              cardinality="1..1"
+              bind="setSystemService"
+              unbind="unsetSystemService"
+              interface="org.eclipse.kura.system.SystemService"/>
+   <reference name="CloudService"
+              policy="dynamic"
+              cardinality="0..1"
+              bind="setCloudService"
+              unbind="unsetCloudService"
+              target="(kura.service.pid=org.eclipse.kura.cloud.CloudService)"
+              interface="org.eclipse.kura.cloud.CloudService"/>
+</scr:component>

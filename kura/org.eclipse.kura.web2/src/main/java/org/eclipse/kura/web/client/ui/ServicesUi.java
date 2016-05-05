@@ -373,7 +373,7 @@ public class ServicesUi extends Composite {
 			case STRING:
 				TextBox tb = (TextBox) wg;
 				String value = tb.getText();
-				if (value != null && value.trim().length() > 0) {
+				if (value != null) {
 					return value;
 				} else {
 					return null;

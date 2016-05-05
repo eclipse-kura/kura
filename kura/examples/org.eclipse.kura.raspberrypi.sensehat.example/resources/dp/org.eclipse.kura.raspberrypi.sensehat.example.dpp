@@ -1,0 +1,27 @@
+#Deployment Plugin Project File
+#Thu May 05 09:47:55 CEST 2016
+build.ant.name=<.>/resources/dp/org.eclipse.kura.raspberrypi.sensehat.example_build.xml
+build.dp.file=<.>/resources/dp/org.eclipse.kura.raspberrypi.sensehat.example.dp
+build.location=
+bundles.0.bundle_path=<.>/target/org.eclipse.kura.raspberrypi.sensehat.example-1.0.0-SNAPSHOT.jar
+bundles.0.customizer=false
+bundles.0.headers.count=0
+bundles.0.missing=false
+bundles.0.name=bundles/org.eclipse.kura.raspberrypi.sensehat.example-1.0.0-SNAPSHOT.jar
+bundles.0.symbolic_name=org.eclipse.kura.raspberrypi.sensehat.example;singleton\:\=true
+bundles.0.version=1.0.0.201605041746
+bundles.1.bundle_path=/Users/pierantonio.merlino/Work/Kura/dev/develop2/kura/kura/examples/org.eclipse.kura.raspberrypi.sensehat/target/org.eclipse.kura.raspberrypi.sensehat-1.0.0-SNAPSHOT.jar
+bundles.1.customizer=false
+bundles.1.headers.count=0
+bundles.1.missing=false
+bundles.1.name=bundles/org.eclipse.kura.raspberrypi.sensehat-1.0.0-SNAPSHOT.jar
+bundles.1.symbolic_name=org.eclipse.kura.raspberrypi.sensehat;singleton\:\=true
+bundles.1.version=1.0.0.201605050937
+bundles.count=2
+certificates.count=0
+general.signbundles=false
+headers.other.headers=
+headers.symbolic.name=org.eclipse.kura.raspberrypi.sensehat.example
+headers.version=1.0.0
+resources.count=0
+

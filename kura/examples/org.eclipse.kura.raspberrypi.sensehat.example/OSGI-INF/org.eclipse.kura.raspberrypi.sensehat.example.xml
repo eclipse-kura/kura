@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" activate="activate" configuration-policy="require" deactivate="deactivate" immediate="true" modified="updated" name="org.eclipse.kura.raspberrypi.sensehat.example.SenseHatExample">
+   <implementation class="org.eclipse.kura.raspberrypi.sensehat.example.SenseHatExample"/>
+   <reference bind="setSenseHatService" cardinality="1..1" interface="org.eclipse.kura.raspberrypi.sensehat.SenseHat" name="SenseHat" policy="static" unbind="unsetSenseHatService"/>
+   <service>
+      <provide interface="org.eclipse.kura.raspberrypi.sensehat.example.SenseHatExample"/>
+   </service>
+   <property name="service.pid" type="String" value="org.eclipse.kura.raspberrypi.sensehat.example.SenseHatExample"/>
+</scr:component>

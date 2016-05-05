@@ -16,6 +16,7 @@ import java.util.List;
 
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.ui.EntryClassUi;
+import org.eclipse.kura.web.client.ui.Tab;
 import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.client.util.TextFieldValidator.FieldType;
 import org.eclipse.kura.web.shared.model.GwtFirewallNatMasquerade;
@@ -56,7 +57,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SingleSelectionModel;
 
-public class PortForwardingTabUi extends Composite {
+public class PortForwardingTabUi extends Composite implements Tab {
 
 	private static PortForwardingTabUiUiBinder uiBinder = GWT.create(PortForwardingTabUiUiBinder.class);
 
@@ -130,7 +131,8 @@ public class PortForwardingTabUi extends Composite {
 	//
 	// Public methods
 	//
-	public void loadData() {
+	@Override
+	public void refresh() {
 		EntryClassUi.showWaitModal();
 		portForwardDataProvider.getList().clear();
 		notification.setVisible(false);
@@ -180,12 +182,19 @@ public class PortForwardingTabUi extends Composite {
 		});
 	}
 
+	@Override
 	public boolean isDirty() {
 		return m_dirty;
 	}
 
+	@Override
 	public void setDirty(boolean b) {
 		m_dirty = b;
+	}
+	
+	@Override
+	public boolean isValid() {
+		return true;
 	}
 
 
@@ -347,7 +356,6 @@ public class PortForwardingTabUi extends Composite {
 				GwtFirewallPortForwardEntry selection = selectionModel.getSelectedObject();
 
 				if (selection != null) {
-
 					alert.setTitle(MSGS.confirm());
 					alertBody.setText(MSGS.firewallOpenPortDeleteConfirmation(String.valueOf(selection.getInPort())));
 					alert.show();
@@ -593,7 +601,7 @@ public class PortForwardingTabUi extends Composite {
 		input.addBlurHandler(new BlurHandler(){
 			@Override
 			public void onBlur(BlurEvent event) {
-				if(input.getText().trim().length() == 0 || !input.getText().trim().matches(FieldType.ALPHANUMERIC.getRegex())){
+				if(input.getText().trim().isEmpty() || !input.getText().trim().matches(FieldType.ALPHANUMERIC.getRegex())){
 					groupInput.setValidationState(ValidationState.ERROR);
 				}else{
 					groupInput.setValidationState(ValidationState.NONE);
@@ -602,7 +610,7 @@ public class PortForwardingTabUi extends Composite {
 		output.addBlurHandler(new BlurHandler(){
 			@Override
 			public void onBlur(BlurEvent event) {
-				if(output.getText().trim().length() == 0 || !output.getText().trim().matches(FieldType.ALPHANUMERIC.getRegex())){
+				if(output.getText().trim().isEmpty() || !output.getText().trim().matches(FieldType.ALPHANUMERIC.getRegex())){
 					groupOutput.setValidationState(ValidationState.ERROR);
 				}else{
 					groupOutput.setValidationState(ValidationState.NONE);
@@ -611,7 +619,7 @@ public class PortForwardingTabUi extends Composite {
 		lan.addBlurHandler(new BlurHandler(){
 			@Override
 			public void onBlur(BlurEvent event) {
-				if(lan.getText().trim().length() == 0 || !lan.getText().trim().matches(FieldType.IPv4_ADDRESS.getRegex())){
+				if(lan.getText().trim().isEmpty() || !lan.getText().trim().matches(FieldType.IPv4_ADDRESS.getRegex())){
 					groupLan.setValidationState(ValidationState.ERROR);
 				}else{
 					groupLan.setValidationState(ValidationState.NONE);
@@ -620,7 +628,7 @@ public class PortForwardingTabUi extends Composite {
 		internal.addBlurHandler(new BlurHandler(){
 			@Override
 			public void onBlur(BlurEvent event) {
-				if(internal.getText().trim().length() == 0 || !internal.getText().trim().matches(FieldType.NUMERIC.getRegex())){
+				if(internal.getText().trim().isEmpty() || !internal.getText().trim().matches(FieldType.NUMERIC.getRegex())){
 					groupInternal.setValidationState(ValidationState.ERROR);
 				}else{
 					groupInternal.setValidationState(ValidationState.NONE);
@@ -629,7 +637,7 @@ public class PortForwardingTabUi extends Composite {
 		external.addBlurHandler(new BlurHandler(){
 			@Override
 			public void onBlur(BlurEvent event) {
-				if(external.getText().trim().length() == 0 || !external.getText().trim().matches(FieldType.NUMERIC.getRegex())){
+				if(external.getText().trim().isEmpty() || !external.getText().trim().matches(FieldType.NUMERIC.getRegex())){
 					groupExternal.setValidationState(ValidationState.ERROR);
 				}else{
 					groupExternal.setValidationState(ValidationState.NONE);
@@ -638,7 +646,7 @@ public class PortForwardingTabUi extends Composite {
 		permittedNw.addBlurHandler(new BlurHandler(){
 			@Override
 			public void onBlur(BlurEvent event) {
-				if(permittedNw.getText().trim().length() != 0 && !permittedNw.getText().trim().matches(FieldType.NETWORK.getRegex())){
+				if(!permittedNw.getText().trim().isEmpty() && !permittedNw.getText().trim().matches(FieldType.NETWORK.getRegex())){
 					groupPermittedNw.setValidationState(ValidationState.ERROR);
 				}else{
 					groupPermittedNw.setValidationState(ValidationState.NONE);
@@ -647,7 +655,7 @@ public class PortForwardingTabUi extends Composite {
 		permittedMac.addBlurHandler(new BlurHandler(){
 			@Override
 			public void onBlur(BlurEvent event) {
-				if(permittedMac.getText().trim().length() != 0 && !permittedMac.getText().trim().matches(FieldType.MAC_ADDRESS.getRegex())){
+				if(!permittedMac.getText().trim().isEmpty() && !permittedMac.getText().trim().matches(FieldType.MAC_ADDRESS.getRegex())){
 					groupPermittedMac.setValidationState(ValidationState.ERROR);
 				}else{
 					groupPermittedMac.setValidationState(ValidationState.NONE);
@@ -656,7 +664,7 @@ public class PortForwardingTabUi extends Composite {
 		source.addBlurHandler(new BlurHandler(){
 			@Override
 			public void onBlur(BlurEvent event) {
-				if(source.getText().trim().length() != 0 && !source.getText().trim().matches(FieldType.PORT_RANGE.getRegex())){
+				if(!source.getText().trim().isEmpty() && !source.getText().trim().matches(FieldType.PORT_RANGE.getRegex())){
 					groupSource.setValidationState(ValidationState.ERROR);
 				}else{
 					groupSource.setValidationState(ValidationState.NONE);
@@ -740,9 +748,9 @@ public class PortForwardingTabUi extends Composite {
 
 	private void setModalFieldsLabels() {
 		// setLabels
-		labelInput.setText(MSGS.firewallPortForwardFormInboundInterface());
-		labelOutput.setText(MSGS.firewallPortForwardFormOutboundInterface());
-		labelLan.setText(MSGS.firewallPortForwardFormAddress());
+		labelInput.setText(MSGS.firewallPortForwardFormInboundInterface() + "*");
+		labelOutput.setText(MSGS.firewallPortForwardFormOutboundInterface() + "*");
+		labelLan.setText(MSGS.firewallPortForwardFormAddress() + "*");
 		labelProtocol.setText(MSGS.firewallPortForwardFormProtocol());
 		labelExternal.setText(MSGS.firewallPortForwardFormOutPort());
 		labelInternal.setText(MSGS.firewallPortForwardFormInPort());

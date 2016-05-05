@@ -280,17 +280,17 @@ public class CloudConfigurationHandler extends Cloudlet
 				
 				// the configuration for all components has been requested
 				Set<String> componentPids = m_configService.getConfigurableComponentPids();
-				for(String componentPid : componentPids) {
+				for (String componentPid : componentPids) {
 					boolean skip = false;
-					if(pidsToIgnore != null && !pidsToIgnore.isEmpty()) {
-						for(String pidToIgnore : pidsToIgnore) {
-							if(componentPid.equals(pidToIgnore)) {
-								skip=true;
+					if (pidsToIgnore != null && !pidsToIgnore.isEmpty()) {
+						for (String pidToIgnore : pidsToIgnore) {
+							if (componentPid.equals(pidToIgnore)) {
+								skip= true;
 								break;
 							}
 						}
 					}
-					if(skip) {
+					if (skip) {
 						continue;
 					}
 					
@@ -316,8 +316,7 @@ public class CloudConfigurationHandler extends Cloudlet
 					}
 					configs.add((ComponentConfigurationImpl) cc);
 				}
-			}
-			else {
+			} else {
 
 				// the configuration for a specific component has been requested.
 				ComponentConfiguration cc = m_configService.getComponentConfiguration(pid);

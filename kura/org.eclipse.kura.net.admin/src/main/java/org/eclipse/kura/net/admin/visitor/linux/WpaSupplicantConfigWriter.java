@@ -30,6 +30,7 @@ import org.eclipse.kura.core.util.IOUtil;
 import org.eclipse.kura.core.util.ProcessUtil;
 import org.eclipse.kura.core.util.SafeProcess;
 import org.eclipse.kura.linux.net.util.KuraConstants;
+import org.eclipse.kura.linux.net.wifi.WpaSupplicantManager;
 import org.eclipse.kura.net.NetConfig;
 import org.eclipse.kura.net.NetConfigIP4;
 import org.eclipse.kura.net.NetInterfaceAddressConfig;
@@ -49,19 +50,10 @@ import org.slf4j.LoggerFactory;
 public class WpaSupplicantConfigWriter implements NetworkConfigurationVisitor {
 	private static final Logger s_logger = LoggerFactory.getLogger(WpaSupplicantConfigWriter.class);
 	
-	private static String WPA_CONFIG_FILE = null;
 	private static final String WPA_TMP_CONFIG_FILE = "/etc/wpa_supplicant.conf.tmp";
 	private static final String TMP_WPA_CONFIG_FILE = "/tmp/wpa_supplicant.conf";
 	
 	private static final String OS_VERSION = System.getProperty("kura.os.version");
-	
-	static {
-		if (OS_VERSION.equals(KuraConstants.Intel_Edison.getImageName() + "_" + KuraConstants.Intel_Edison.getImageVersion() + "_" + KuraConstants.Intel_Edison.getTargetName())) {
-			WPA_CONFIG_FILE = "/etc/wpa_supplicant/wpa_supplicant.conf";
-		} else {
-			WPA_CONFIG_FILE = "/etc/wpa_supplicant.conf";
-		}
-	}
 	
 	private static final String HEXES = "0123456789ABCDEF";
 	
@@ -192,7 +184,7 @@ public class WpaSupplicantConfigWriter implements NetworkConfigurationVisitor {
     	        		if(wpaSupplicantConfig != null) {
                             s_logger.debug("Writing wifiConfig: {}", wpaSupplicantConfig);
                             generateWpaSupplicantConf(wpaSupplicantConfig, interfaceName, WPA_TMP_CONFIG_FILE);
-                            moveWpaSupplicantConf(WPA_TMP_CONFIG_FILE);
+                            moveWpaSupplicantConf(interfaceName, WPA_TMP_CONFIG_FILE);
     	        		}
                     } catch (Exception e) {
                         s_logger.error("Failed to configure WPA Supplicant");
@@ -433,10 +425,10 @@ public class WpaSupplicantConfigWriter implements NetworkConfigurationVisitor {
 		}
 	}
 	
-	private void moveWpaSupplicantConf(String configFile) throws KuraException {
+	private void moveWpaSupplicantConf(String ifaceName, String configFile) throws KuraException {
 		
 		File outputFile = new File(configFile);
-		File wpaConfigFile = new File(WPA_CONFIG_FILE);
+		File wpaConfigFile = new File(WpaSupplicantManager.getWpaSupplicantConfigFilename(ifaceName));
 		try {
 			if(!FileUtils.contentEquals(outputFile, wpaConfigFile)) {
 			    if(outputFile.renameTo(wpaConfigFile)){

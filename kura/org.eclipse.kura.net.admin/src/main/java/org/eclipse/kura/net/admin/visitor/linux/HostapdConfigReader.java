@@ -23,7 +23,7 @@ import org.eclipse.kura.core.net.NetworkConfiguration;
 import org.eclipse.kura.core.net.NetworkConfigurationVisitor;
 import org.eclipse.kura.core.net.WifiInterfaceAddressConfigImpl;
 import org.eclipse.kura.core.net.WifiInterfaceConfigImpl;
-import org.eclipse.kura.linux.net.util.KuraConstants;
+import org.eclipse.kura.linux.net.wifi.HostapdManager;
 import org.eclipse.kura.net.NetConfig;
 import org.eclipse.kura.net.NetInterfaceAddressConfig;
 import org.eclipse.kura.net.NetInterfaceConfig;
@@ -39,18 +39,6 @@ import org.slf4j.LoggerFactory;
 public class HostapdConfigReader implements NetworkConfigurationVisitor {
 
 	private static final Logger s_logger = LoggerFactory.getLogger(HostapdConfigReader.class);
-
-	private static String HOSTAPD_CONFIG_FILE = null;
-	
-	private static final String OS_VERSION = System.getProperty("kura.os.version");
-	
-	static {
-		if (OS_VERSION.equals(KuraConstants.Intel_Edison.getImageName() + "_" + KuraConstants.Intel_Edison.getImageVersion() + "_" + KuraConstants.Intel_Edison.getTargetName())) {
-			HOSTAPD_CONFIG_FILE = "/etc/hostapd/hostapd.conf";
-		} else {
-			HOSTAPD_CONFIG_FILE = "/etc/hostapd.conf";
-		}
-	}
 
 	private static HostapdConfigReader s_instance;
 
@@ -113,7 +101,7 @@ public class HostapdConfigReader implements NetworkConfigurationVisitor {
 			WifiConfig wifiConfig = new WifiConfig();
 			wifiConfig.setMode(WifiMode.MASTER);
 
-			File configFile = new File(HOSTAPD_CONFIG_FILE);
+			File configFile = new File(HostapdManager.getHostapdConfigFileName(ifaceName));
 			Properties hostapdProps = new Properties();
 
 			s_logger.debug("parsing hostapd config file: "
@@ -254,6 +242,18 @@ public class HostapdConfigReader implements NetworkConfigurationVisitor {
 						wifiConfig.setHardwareMode("n");
 					}
 				}
+			} else {
+				s_logger.warn("getWifiHostConfig() :: {} file doesn't exist, will generate default wifiConfig", configFile.getName());
+				wifiConfig.setSSID("kura_gateway");
+				wifiConfig.setDriver("nl80211");
+				wifiConfig.setChannels(new int[] { 11 });
+				wifiConfig.setPasskey("");
+				wifiConfig.setSecurity(WifiSecurity.SECURITY_NONE);
+				wifiConfig.setPairwiseCiphers(WifiCiphers.CCMP);
+				wifiConfig.setRadioMode(WifiRadioMode.RADIO_MODE_80211b);
+				wifiConfig.setIgnoreSSID(false);
+				wifiConfig.setBroadcast(true);
+				wifiConfig.setHardwareMode("b");
 			}
 			return wifiConfig;
 		} catch (Exception e) {

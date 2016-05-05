@@ -45,6 +45,7 @@ import org.gwtbootstrap3.client.ui.PanelHeader;
 import org.gwtbootstrap3.client.ui.TextBox;
 import org.gwtbootstrap3.client.ui.constants.ValidationState;
 import org.gwtbootstrap3.client.ui.html.Span;
+import org.gwtbootstrap3.client.ui.html.Text;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.BlurEvent;
@@ -118,12 +119,14 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
 	Modal wanModal;
 	@UiField
 	Alert multipleWanWarn;
+	@UiField
+	Text multipleWanWarnText;
 
 	public TabTcpIpUi(GwtSession currentSession, NetworkTabsUi netTabs) {
 		initWidget(uiBinder.createAndBindUi(this));
 		session = currentSession;
 		tabs = netTabs;
-		helpTitle.setText("Help Text");
+		helpTitle.setText(MSGS.netHelpTitle());
 		initForm();
 		dnsRead.setVisible(false);
 		
@@ -218,23 +221,23 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
 		}
 	}
 
+	@Override
 	public boolean isValid() {
 		boolean flag = true;
 		// check and make sure if 'Enabled for WAN' then either DHCP is selected
 		// or STATIC and a gateway is set
 		if ( !IPV4_STATUS_DISABLED_MESSAGE.equals(status.getSelectedValue()) && 
 			 configure.getSelectedItemText().equalsIgnoreCase(VMSGS.netIPv4ConfigModeManual()) ) {
-			if ( (gateway.getValue() == null || gateway.getValue().trim().equals("")) && 
+			if ( (gateway.getValue() == null || "".equals(gateway.getValue().trim())) && 
 				 IPV4_STATUS_WAN_MESSAGE.equals(status.getSelectedValue()) ) {
 				groupGateway.setValidationState(ValidationState.ERROR);
 				helpGateway.setText(MSGS.netIPv4InvalidAddress());
 				flag = false;
 			}
-			if (ip.getValue() == null || ip.getValue().trim().equals("")) {
+			if (ip.getValue() == null || "".equals(ip.getValue().trim())) {
 				groupIp.setValidationState(ValidationState.ERROR);
 				helpIp.setText(MSGS.netIPv4InvalidAddress());
 			}
-
 		}
 		if ( groupIp.getValidationState().equals(ValidationState.ERROR)      || 
 			 groupSubnet.getValidationState().equals(ValidationState.ERROR)  || 
@@ -275,12 +278,12 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
 	public void refresh() {
 		if (isDirty()) {
 			setDirty(false);
+			resetValidations();
 			if (selectedNetIfConfig == null) {
 				reset();
 			} else {
 				update();
 			}
-			resetValidations();
 		}
 	}
 
@@ -359,11 +362,13 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
 				if (isWanEnabled()) {
 					EntryClassUi.showWaitModal();
 					gwtNetworkService.findNetInterfaceConfigurations(new AsyncCallback<ArrayList<GwtNetInterfaceConfig>>() {
+						@Override
 						public void onFailure(Throwable caught) {
 							EntryClassUi.hideWaitModal();
 							FailureHandler.handle(caught);
 						}
 
+						@Override
 						public void onSuccess(ArrayList<GwtNetInterfaceConfig> result) {
 							EntryClassUi.hideWaitModal();
 							for (GwtNetInterfaceConfig config : result) {
@@ -602,7 +607,7 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
 
 	private void resetHelp() {
 		helpText.clear();
-		helpText.add(new Span("Mouse over enabled items on the left to see help text."));
+		helpText.add(new Span(MSGS.netHelpDefaultHint()));
 	}
 
 	private void update() {
@@ -744,6 +749,7 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
 	}
 	
 	private void initModal() {
-		wanModal.setTitle("Warning!");
+		wanModal.setTitle(MSGS.warning());
+		multipleWanWarnText.setText(MSGS.netStatusWarning());
 	}
 }

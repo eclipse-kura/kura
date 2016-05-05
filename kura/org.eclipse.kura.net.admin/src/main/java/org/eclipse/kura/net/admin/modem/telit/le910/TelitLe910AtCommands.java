@@ -14,7 +14,7 @@ package org.eclipse.kura.net.admin.modem.telit.le910;
 
 public enum TelitLe910AtCommands {
 
-	gpsPowerUp("AT$GPSSLSR=2,3\r\n");
+	gpsStartLocationServiceRequest("AT$GPSSLSR=2,3\r\n");
 	
 	private String m_command;
 	

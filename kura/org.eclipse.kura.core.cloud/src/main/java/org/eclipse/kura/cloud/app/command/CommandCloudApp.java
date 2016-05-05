@@ -197,7 +197,9 @@ PasswordCommandService {
 					UnZip.unZipBytes(zipBytes, dir);
 				} catch (IOException e) {
 					s_logger.error("Error unzipping command zip bytes", e);
+					commandResp.setResponseCode(KuraResponsePayload.RESPONSE_CODE_ERROR);
 					commandResp.setException(e);
+					return commandResp;
 				}
 			}
 
@@ -208,15 +210,14 @@ PasswordCommandService {
 				s_logger.error("Error executing command {}", t);
 				commandResp.setResponseCode(KuraResponsePayload.RESPONSE_CODE_ERROR);
 				commandResp.setException(t);
-
+				return commandResp;
 			}
 
 			boolean runAsync = commandReq.isRunAsync() != null ? commandReq
 					.isRunAsync() : false;
 					int timeout = getTimeout(commandReq);
 
-					ProcessMonitorThread pmt = null;
-					pmt = new ProcessMonitorThread(proc, commandReq.getStdin(), timeout);
+					ProcessMonitorThread pmt = new ProcessMonitorThread(proc, commandReq.getStdin(), timeout);
 					pmt.start();
 
 					if (!runAsync) {
@@ -231,7 +232,6 @@ PasswordCommandService {
 					}
 
 		} else {
-
 			s_logger.error("Password required but not correct and/or missing");
 			commandResp.setResponseCode(KuraResponsePayload.RESPONSE_CODE_ERROR);
 			commandResp.setExceptionMessage("Password missing or not correct");

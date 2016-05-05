@@ -139,18 +139,7 @@ public class NatTabUi extends Composite implements Tab {
 						for (GwtFirewallNatEntry pair : result) {
 							natDataProvider.getList().add(pair);
 						}
-						int size = natDataProvider.getList().size();
-						natGrid.setVisibleRange(0, size);
-						natDataProvider.flush();
-
-						if(natDataProvider.getList().isEmpty()){
-							natGrid.setVisible(false);
-							notification.setVisible(true);
-							notification.setText(MSGS.firewallPortForwardTableNoPorts());
-						} else {
-							natGrid.setVisible(true);
-							notification.setVisible(false);
-						}
+						refreshTable();
 
 						apply.setEnabled(false);
 						EntryClassUi.hideWaitModal();
@@ -263,6 +252,22 @@ public class NatTabUi extends Composite implements Tab {
 		natDataProvider.addDataDisplay(natGrid);
 		natGrid.setSelectionModel(selectionModel);
 	}
+	
+	private void refreshTable() {
+		int size = natDataProvider.getList().size();
+		natGrid.setVisibleRange(0, size);
+		natDataProvider.flush();
+
+		if(natDataProvider.getList().isEmpty()){
+			natGrid.setVisible(false);
+			notification.setVisible(true);
+			notification.setText(MSGS.firewallPortForwardTableNoPorts());
+		} else {
+			natGrid.setVisible(true);
+			notification.setVisible(false);
+		}
+		natGrid.redraw();
+	}
 
 	//Initialize tab buttons
 	private void initButtons() {
@@ -292,7 +297,7 @@ public class NatTabUi extends Composite implements Tab {
 						@Override
 						public void onClick(ClickEvent event) {
 							natDataProvider.getList().remove(selection);
-							natDataProvider.flush();
+							refreshTable();
 							apply.setEnabled(true);
 							confirm.hide();
 							setDirty(true);
@@ -358,11 +363,8 @@ public class NatTabUi extends Composite implements Tab {
 			public void onHide(ModalHideEvent evt) {
 				if (newNatEntry != null && !duplicateEntry(newNatEntry)) {
 					natDataProvider.getList().add(newNatEntry);
-					int size = natDataProvider.getList().size();
-					natGrid.setVisibleRange(0, size);
-					natDataProvider.flush();
+					refreshTable();
 					apply.setEnabled(true);
-					natGrid.redraw();
 					newNatEntry= null;
 				}
 			}

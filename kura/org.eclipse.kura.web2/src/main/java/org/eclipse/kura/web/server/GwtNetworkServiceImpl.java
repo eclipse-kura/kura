@@ -1296,10 +1296,10 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 
 			String srcNetwork = GwtSafeHtmlUtils.htmlEscape(entry.getSourceNetwork());
 			String dstNetwork = GwtSafeHtmlUtils.htmlEscape(entry.getDestinationNetwork());
-			if (srcNetwork == null) {
+			if (srcNetwork == null || "".equals(srcNetwork)) {
 				srcNetwork = "0.0.0.0/0";
 			}
-			if (dstNetwork == null) {
+			if (dstNetwork == null || "".equals(dstNetwork)) {
 				dstNetwork = "0.0.0.0/0";
 			}
 

@@ -50,8 +50,7 @@ public class CollectionsUtil
 				}else{
 					map.put(key, new Password(value.toString()));
 				}
-			}
-			else {
+			} else {
 				map.put(key, value);
 			}
 		}
@@ -71,7 +70,7 @@ public class CollectionsUtil
 			String key = keys.next();
 			Object value = map.get(key);
 			if (value != null) {
-				if (value instanceof Password) {
+				if (value instanceof Password) {  //TODO: this should be removed in next version. Password values should be kept as they are and not mapped to String objects. This was originally done due to Password class not in APIs, but this is not the condition anymore. This change would cause third party code to receive Password objects instead of strings. At the other side, managing everything with Password objects would make everything more logic and consistent.
 					dictionary.put(key, value.toString());
 				}
 				else {

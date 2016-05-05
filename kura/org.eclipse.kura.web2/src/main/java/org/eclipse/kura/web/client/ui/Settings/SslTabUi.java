@@ -246,7 +246,7 @@ public class SslTabUi extends Composite implements Tab {
 	private void initFormLabels() {
 		description.add(new Span("<p>" + MSGS.settingsSSLConfigurationDescription() + "</p>"));
 		defaultProtocolFormLabel.setText(MSGS.settingsSSLConfigurationProtocol());  //TODO: From here: must be changed. Fetch in some way the metatype values!
-		hostnameVerificationFormLabel.setText("Hostname Verification"); //TODO: externalize string
+		hostnameVerificationFormLabel.setText(MSGS.settingsSSLConfigurationHostnameVerification());
 		radio1.setText(MSGS.trueLabel());
 		radio2.setText(MSGS.falseLabel());
 		keystorePathFormLabel.setText(MSGS.settingsSSLConfigurationKeystorePath());

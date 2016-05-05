@@ -199,11 +199,12 @@ public class IpAddrShow {
 						if (parts.length > 1) {
 							sprefix = parts[1];
 						}
+						int prefix = 32;
 						if (sprefix != null) {
-							int prefix = Integer.valueOf(sprefix);
-							String inetmask = prefix2inetmask(prefix);
-							config.setInetMask(inetmask);
+							prefix = Integer.valueOf(sprefix);
 						}
+						String inetmask = prefix2inetmask(prefix);
+						config.setInetMask(inetmask);
 					}
 				}
 

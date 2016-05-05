@@ -14,11 +14,13 @@ package org.eclipse.kura.web.client.ui.Settings;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.shared.model.GwtSession;
 import org.eclipse.kura.web.shared.service.GwtSecurityService;
 import org.eclipse.kura.web.shared.service.GwtSecurityServiceAsync;
 import org.gwtbootstrap3.client.ui.AnchorListItem;
 import org.gwtbootstrap3.client.ui.Well;
+import org.gwtbootstrap3.client.ui.html.Paragraph;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -27,12 +29,14 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 public class SettingsPanelUi extends Composite {
 
 	private static SettingsPanelUiUiBinder uiBinder = GWT.create(SettingsPanelUiUiBinder.class);
 	private static final Logger logger = Logger.getLogger(SettingsPanelUi.class.getSimpleName());
+	private static final Messages MSGS = GWT.create(Messages.class);
 	
 	private final GwtSecurityServiceAsync gwtSecurityService = GWT.create(GwtSecurityService.class);
 
@@ -50,13 +54,19 @@ public class SettingsPanelUi extends Composite {
 	AnchorListItem snapshots, appCert, sslConfig, serverCert, deviceCert, security;
 	@UiField
 	Well content;
+	@UiField
+	HTMLPanel settingsIntro;
 
 	public SettingsPanelUi() {
 		logger.log(Level.FINER, "Initiating SettingsPanelUI...");
 		initWidget(uiBinder.createAndBindUi(this));
 		setSelectedActive(snapshots);
+		Paragraph description = new Paragraph();
+		description.setText(MSGS.settingsIntro());
+		settingsIntro.add(description);
 		content.clear();
 		content.add(snapshotsBinder);
+		
 		
 		snapshots.setVisible(true);
 		appCert.setVisible(false);

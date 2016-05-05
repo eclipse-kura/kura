@@ -25,17 +25,17 @@ public class IptablesConfig {
 	public static final String FIREWALL_CONFIG_FILE_NAME = "/etc/sysconfig/iptables";
 	public static final String FIREWALL_TMP_CONFIG_FILE_NAME = "/tmp/iptables";
 	
-	private static final String ALLOW_ALL_TRAFFIC_TO_LOOPBACK = "iptables -A INPUT -i lo -j ACCEPT";
-	private static final String ALLOW_ONLY_INCOMING_TO_OUTGOING = "iptables -A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT";
+	private static final String ALLOW_ALL_TRAFFIC_TO_LOOPBACK = "-A INPUT -i lo -j ACCEPT";
+	private static final String ALLOW_ONLY_INCOMING_TO_OUTGOING = "-A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT";
 	
 	private static final String[] ALLOW_ICMP = {
-		"iptables -A INPUT -p icmp -m icmp --icmp-type 8 -m state --state NEW,RELATED,ESTABLISHED -j ACCEPT",
-		"iptables -A OUTPUT -p icmp -m icmp --icmp-type 0 -m state --state RELATED,ESTABLISHED -j ACCEPT"
+		"-A INPUT -p icmp -m icmp --icmp-type 8 -m state --state NEW,RELATED,ESTABLISHED -j ACCEPT",
+		"-A OUTPUT -p icmp -m icmp --icmp-type 0 -m state --state RELATED,ESTABLISHED -j ACCEPT"
 	};
 
 	private static final String[] DO_NOT_ALLOW_ICMP = {
-		"iptables -A INPUT -p icmp -m icmp --icmp-type 8 -m state --state NEW,RELATED,ESTABLISHED -j DROP",
-		"iptables -A OUTPUT -p icmp -m icmp --icmp-type 0 -m state --state RELATED,ESTABLISHED -j DROP"
+		"-A INPUT -p icmp -m icmp --icmp-type 8 -m state --state NEW,RELATED,ESTABLISHED -j DROP",
+		"-A OUTPUT -p icmp -m icmp --icmp-type 0 -m state --state RELATED,ESTABLISHED -j DROP"
 	};
 	
 	private LinkedHashSet<LocalRule> m_localRules;
@@ -104,8 +104,8 @@ public class IptablesConfig {
 			writer.println("*nat");
 			writer.println("COMMIT");
 			writer.println("*filter");
-			writer.println("-A INPUT -i lo -j ACCEPT");
-			writer.println("-A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT");
+			writer.println(ALLOW_ALL_TRAFFIC_TO_LOOPBACK);
+			writer.println(ALLOW_ONLY_INCOMING_TO_OUTGOING);
 			writer.println("COMMIT");
 		} catch (Exception e) {
 			s_logger.error("clear() :: failed to clear all chains - {}", e);
@@ -209,8 +209,17 @@ public class IptablesConfig {
 			fos = new FileOutputStream(FIREWALL_TMP_CONFIG_FILE_NAME);
 			writer = new PrintWriter(fos);
 			writer.println("*filter");
-			writer.println("-A INPUT -i lo -j ACCEPT");
-			writer.println("-A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT");
+			writer.println(ALLOW_ALL_TRAFFIC_TO_LOOPBACK);
+			writer.println(ALLOW_ONLY_INCOMING_TO_OUTGOING);
+			if (m_allowIcmp) {
+				for (String sAllowIcmp : ALLOW_ICMP) {
+					writer.println(sAllowIcmp);
+				}
+			} else {
+				for (String sDoNotAllowIcmp : DO_NOT_ALLOW_ICMP) {
+					writer.println(sDoNotAllowIcmp);
+				}
+			}
 			if ((m_localRules != null) && !m_localRules.isEmpty()) {
 				for(LocalRule lr : m_localRules) {	
 					writer.println(lr);
@@ -339,20 +348,20 @@ public class IptablesConfig {
 					} else if (readingFilterTable && line.startsWith("-A FORWARD")) {
 						filterForwardChain.add(new FilterForwardChainRule(line));
 					} else if (readingFilterTable && line.startsWith("-A INPUT")) {
-						if (ALLOW_ALL_TRAFFIC_TO_LOOPBACK.contains(line)) {
+						if (ALLOW_ALL_TRAFFIC_TO_LOOPBACK.equals(line)) {
 							continue;
 						}
-						if (ALLOW_ONLY_INCOMING_TO_OUTGOING.contains(line)) {
+						if (ALLOW_ONLY_INCOMING_TO_OUTGOING.equals(line)) {
 							continue;
 						}
 						for(String allowIcmp : ALLOW_ICMP) {
-							if(allowIcmp.contains(line)) {
+							if(allowIcmp.equals(line)) {
 								m_allowIcmp = true;
 								continue lineloop;
 							}
 						}
 						for(String allowIcmp : DO_NOT_ALLOW_ICMP) {
-							if(allowIcmp.contains(line)) {
+							if(allowIcmp.equals(line)) {
 								m_allowIcmp = false;
 								continue lineloop;
 							}

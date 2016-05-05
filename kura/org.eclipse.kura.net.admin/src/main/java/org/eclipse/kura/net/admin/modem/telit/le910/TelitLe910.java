@@ -39,9 +39,11 @@ public class TelitLe910 extends TelitHe910 implements HspaCellularModem {
 		super(device, platform, connectionFactory);
 	}
 	
+	/* Don't need this since we can now use AT$GPSP=1
 	public void enableGps() throws KuraException {
 		enableGps(TelitLe910AtCommands.gpsPowerUp.getCommand());
 	}
+	*/
 	
 	@Override
 	public List<ModemTechnologyType> getTechnologyTypes() throws KuraException {

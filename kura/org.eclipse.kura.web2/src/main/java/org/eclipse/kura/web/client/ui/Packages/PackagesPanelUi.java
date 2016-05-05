@@ -65,6 +65,13 @@ public class PackagesPanelUi extends Composite {
 	private static final Messages MSGS = GWT.create(Messages.class);
 
 	private int refreshRequests;
+	private EntryClassUi entryClassUi;
+	
+	private ListDataProvider<GwtDeploymentPackage> packagesDataProvider = new ListDataProvider<GwtDeploymentPackage>();
+	private final SingleSelectionModel<GwtDeploymentPackage> selectionModel = new SingleSelectionModel<GwtDeploymentPackage>();
+
+	private GwtSession gwtSession;
+	private GwtDeploymentPackage selected;
 
 	interface PackagesPanelUiUiBinder extends UiBinder<Widget, PackagesPanelUi> {
 	}
@@ -91,11 +98,6 @@ public class PackagesPanelUi extends Composite {
 	@UiField
 	Hidden xsrfTokenFieldFile, xsrfTokenFieldUrl;
 
-	private ListDataProvider<GwtDeploymentPackage> packagesDataProvider = new ListDataProvider<GwtDeploymentPackage>();
-	final SingleSelectionModel<GwtDeploymentPackage> selectionModel = new SingleSelectionModel<GwtDeploymentPackage>();
-
-	GwtSession gwtSession;
-	GwtDeploymentPackage selected;
 
 	public PackagesPanelUi() {
 
@@ -111,6 +113,10 @@ public class PackagesPanelUi extends Composite {
 
 	public void setSession(GwtSession currentSession) {
 		gwtSession = currentSession;
+	}
+	
+	public void setMainUi(EntryClassUi entryClassUi) {
+		this.entryClassUi= entryClassUi;
 	}
 
 	public void refresh() {
@@ -386,6 +392,9 @@ public class PackagesPanelUi extends Composite {
 						} else {
 							packagesGrid.setVisible(true);
 							notification.setVisible(false);
+						}
+						if (entryClassUi != null) {
+							entryClassUi.initServicesTree();
 						}
 
 						refreshRequests--;

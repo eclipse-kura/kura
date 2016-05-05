@@ -16,7 +16,7 @@
     name="org.eclipse.kura.net.admin.FirewallConfigurationService"
     activate="activate"
     deactivate="deactivate"
-    configuration-policy="require"
+    configuration-policy="optional"
     immediate="true"
     modified="updated">
    <implementation class="org.eclipse.kura.net.admin.FirewallConfigurationServiceImpl"/>

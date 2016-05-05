@@ -41,7 +41,7 @@ public class ComponentConfigurationImpl implements ComponentConfiguration
 	public String getPid() {
 		return pid;
 	}
-
+	
 	public Tocd  getDefinition() {
 		return definition;
 	}
@@ -61,4 +61,5 @@ public class ComponentConfigurationImpl implements ComponentConfiguration
 	public void setProperties(Map<String, Object> properties) {
 		this.properties = properties;
 	}	
+
 }

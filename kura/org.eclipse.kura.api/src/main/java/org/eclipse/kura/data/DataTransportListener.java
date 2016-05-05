@@ -15,8 +15,11 @@ package org.eclipse.kura.data;
  * Listener interface to be implemented by applications that needs to be notified of events in the {@link DataTransportService}.
  * All registered listeners are called synchronously by the {@link DataTransportService} at the occurrence of the event.
  * It expected that implementers of this interface do NOT perform long running tasks in the implementation of this interface.
+ * 
+ * @deprecated As of {@link org.eclipse.kura.data} 1.1.0, use {@link DataTransportService#addDataTransportListener(org.eclipse.kura.data.transport.listener.DataTransportListener)}
+ * to register a listener to a DataTransportService.
  */
-public interface DataTransportListener 
+public interface DataTransportListener
 {	
 	/**
 	 * Notifies the listener of the establishment of the new connection with the remote server.

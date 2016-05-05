@@ -12,21 +12,12 @@
       Eurotech
 
 -->
-<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" 
-    name="org.eclipse.kura.data.DataService"
-    activate="activate" 
-    deactivate="deactivate" 
-    modified="updated" 
-    enabled="true" 
-    immediate="true"
-    configuration-policy="require">
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" activate="activate" configuration-policy="require" deactivate="deactivate" enabled="true" immediate="false" modified="updated" name="org.eclipse.kura.data.DataService">
    <implementation class="org.eclipse.kura.core.data.DataServiceImpl"/>
    <service>
       <provide interface="org.eclipse.kura.configuration.ConfigurableComponent"/>
-      <provide interface="org.eclipse.kura.data.DataTransportListener"/>
       <provide interface="org.eclipse.kura.data.DataService"/>
    </service>
-   <property name="service.pid" value="org.eclipse.kura.data.DataService"/>
    <reference name="DbService" 
               bind="setDbService" 
               unbind="unsetDbService"
@@ -35,14 +26,18 @@
               interface="org.eclipse.kura.db.DbService"/>
    <reference name="DataTransportService"
               bind="setDataTransportService" 
-              unbind="unsetDataTransportService"
+              unbind="unsetDataTransportService" 
               cardinality="1..1" 
-              policy="static"
+              policy="static" 
               interface="org.eclipse.kura.data.DataTransportService"/>
-   <reference name="CloudConnectionStatusService"   
-       		  policy="static"
+   <reference name="CloudConnectionStatusService"
+              policy="static"
               cardinality="1..1"
               bind="setCloudConnectionStatusService"
               unbind="unsetCloudConnectionStatusService"
               interface="org.eclipse.kura.status.CloudConnectionStatusService"/>
+   <reference name="DataServiceListener"
+              policy="dynamic"
+              cardinality="0..n"
+              interface="org.eclipse.kura.data.DataServiceListener"/>
 </scr:component>

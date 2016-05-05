@@ -25,11 +25,12 @@ import org.eclipse.kura.KuraNotConnectedException;
 import org.eclipse.kura.KuraTimeoutException;
 import org.eclipse.kura.KuraTooManyInflightMessagesException;
 import org.eclipse.kura.configuration.ConfigurableComponent;
+import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.core.data.transport.mqtt.MqttClientConfiguration.PersistenceType;
 import org.eclipse.kura.core.util.ValidationUtil;
 import org.eclipse.kura.crypto.CryptoService;
-import org.eclipse.kura.data.DataTransportListener;
+import org.eclipse.kura.data.transport.listener.DataTransportListener;
 import org.eclipse.kura.data.DataTransportService;
 import org.eclipse.kura.data.DataTransportToken;
 import org.eclipse.kura.ssl.SslManagerService;
@@ -50,7 +51,6 @@ import org.eclipse.paho.client.mqttv3.MqttPersistenceException;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 import org.eclipse.paho.client.mqttv3.persist.MqttDefaultFilePersistence;
 import org.osgi.service.component.ComponentContext;
-import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -77,7 +77,7 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 
 	private MqttAsyncClient m_mqttClient;
 
-	private DataTransportListeners m_dataTransportListeners;
+	private DataTransportListenerS m_dataTransportListeners;
 
 	private MqttClientConfiguration m_clientConf;
 	private boolean m_newSession;
@@ -158,7 +158,7 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 	// ----------------------------------------------------------------
 
 	protected void activate(ComponentContext componentContext, Map<String, Object> properties) {
-		s_logger.info("Activating...");
+		s_logger.info("Activating {}...", properties.get(ConfigurationService.KURA_SERVICE_PID));
 
 		// We need to catch the configuration exception and activate anyway.
 		// Otherwise the ConfigurationService will not be able to track us.
@@ -188,20 +188,13 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 			s_logger.error("Invalid client configuration. Service will not be able to connect until the configuration is updated", e);			
 		}
 
-		ServiceTracker<DataTransportListener, DataTransportListener> listenersTracker = new ServiceTracker<DataTransportListener, DataTransportListener>(
-				componentContext.getBundleContext(), DataTransportListener.class, null);
-
-		// Deferred open of tracker to prevent
-		// java.lang.Exception: Recursive invocation of
-		// ServiceFactory.getService
-		// on ProSyst
-		m_dataTransportListeners = new DataTransportListeners(listenersTracker);
+		m_dataTransportListeners = new DataTransportListenerS(componentContext);
 
 		// Do nothing waiting for the connect request from the upper layer.
 	}
 
 	protected void deactivate(ComponentContext componentContext) {
-		s_logger.debug("Deactivating...");
+		s_logger.debug("Deactivating {}...", m_properties.get(ConfigurationService.KURA_SERVICE_PID));
 
 		// Before deactivating us, the OSGi container should have first
 		// deactivated all dependent components.
@@ -213,12 +206,10 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 		if (isConnected()) {
 			disconnect(0);
 		}
-
-		m_dataTransportListeners.close();
 	}
 
 	public void updated(Map<String, Object> properties) {
-		s_logger.info("Updating...");
+		s_logger.info("Updating {}...", properties.get(ConfigurationService.KURA_SERVICE_PID));
 
 		m_properties.clear();
 
@@ -539,6 +530,16 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 
 		return token;
 	}
+	
+	@Override
+	public void addDataTransportListener(DataTransportListener listener) {
+		m_dataTransportListeners.add(listener);		
+	}
+
+	@Override
+	public void removeDataTransportListener(DataTransportListener listener) {
+		m_dataTransportListeners.remove(listener);
+	}
 
 	// ---------------------------------------------------------
 	//
@@ -691,12 +692,12 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 			ValidationUtil.notNull((Boolean) properties.get(MQTT_CLEAN_SESSION_PROP_NAME), MQTT_CLEAN_SESSION_PROP_NAME);
 
 			String userName = (String) properties.get(MQTT_USERNAME_PROP_NAME);
-			if (userName != null) {
+			if (userName != null && !userName.isEmpty()) {
 				conOpt.setUserName(userName);
 			}
 
 			Password password = (Password) properties.get(MQTT_PASSWORD_PROP_NAME);
-			if (password != null) {
+			if (password != null && password.toString().length() != 0) {
 				conOpt.setPassword(password.getPassword());
 			}
 

@@ -202,7 +202,6 @@ public class CommandTabUi extends Composite {
 	public void display(String string){
 		resultPanel.clear();		
 		resultPanel.add(new HTML((new SafeHtmlBuilder().appendEscapedLines(string).toSafeHtml())));
-
 	}
 
 	public void setSession(GwtSession currentSession) {

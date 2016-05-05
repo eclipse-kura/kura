@@ -145,9 +145,7 @@ public class OpenPortsTabUi extends Composite implements Tab {
 						for (GwtFirewallOpenPortEntry pair : result) {
 							openPortsDataProvider.getList().add(pair);
 						}
-						int size = openPortsDataProvider.getList().size();
-						openPortsGrid.setVisibleRange(0, size);
-						openPortsDataProvider.flush();
+						refreshTable();
 						setVisibility();
 						apply.setEnabled(false);
 						EntryClassUi.hideWaitModal();
@@ -281,6 +279,13 @@ public class OpenPortsTabUi extends Composite implements Tab {
 
 		openPortsDataProvider.addDataDisplay(openPortsGrid);
 	}
+	
+	private void refreshTable() {
+		int size = openPortsDataProvider.getList().size();
+		openPortsGrid.setVisibleRange(0, size);
+		openPortsDataProvider.flush();
+		openPortsGrid.redraw();
+	}
 
 	//Initialize tab buttons
 	private void initButtons() {
@@ -354,12 +359,9 @@ public class OpenPortsTabUi extends Composite implements Tab {
 					GwtFirewallOpenPortEntry newEntry = getNewOpenPortEntry();
 					if (!duplicateEntry(newEntry)) {
 						openPortsDataProvider.getList().add(newEntry);
-						int size = openPortsDataProvider.getList().size();
-						openPortsGrid.setVisibleRange(0, size);
-						openPortsDataProvider.flush();
-						apply.setEnabled(true);
+						refreshTable();
 						setVisibility();
-						openPortsGrid.redraw();
+						apply.setEnabled(true);
 					} else {
 						//Growl.growl(MSGS.firewallOpenPortFormError()
 						//		+ ": ",
@@ -470,7 +472,7 @@ public class OpenPortsTabUi extends Composite implements Tab {
 			public void onClick(ClickEvent event) {							
 				alert.hide();
 				openPortsDataProvider.getList().remove(selectionModel.getSelectedObject());
-				openPortsDataProvider.flush();
+				refreshTable();
 				apply.setEnabled(true);
 				setVisibility();
 				

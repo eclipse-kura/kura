@@ -160,18 +160,7 @@ public class PortForwardingTabUi extends Composite implements Tab {
 						for (GwtFirewallPortForwardEntry pair : result) {
 							portForwardDataProvider.getList().add(pair);
 						}
-						int size = portForwardDataProvider.getList().size();
-						portForwardGrid.setVisibleRange(0, size);
-						portForwardDataProvider.flush();
-
-						if(portForwardDataProvider.getList().isEmpty()){
-							portForwardGrid.setVisible(false);
-							notification.setVisible(true);
-							notification.setText(MSGS.firewallPortForwardTableNoPorts());
-						} else {
-							portForwardGrid.setVisible(true);
-							notification.setVisible(false);
-						}
+						refreshTable();
 
 						apply.setEnabled(false);
 						EntryClassUi.hideWaitModal();
@@ -336,6 +325,22 @@ public class PortForwardingTabUi extends Composite implements Tab {
 		portForwardDataProvider.addDataDisplay(portForwardGrid);
 		portForwardGrid.setSelectionModel(selectionModel);
 	}
+	
+	private void refreshTable() {
+		int size = portForwardDataProvider.getList().size();
+		portForwardGrid.setVisibleRange(0, size);
+		portForwardDataProvider.flush();
+
+		if(portForwardDataProvider.getList().isEmpty()){
+			portForwardGrid.setVisible(false);
+			notification.setVisible(true);
+			notification.setText(MSGS.firewallPortForwardTableNoPorts());
+		} else {
+			portForwardGrid.setVisible(true);
+			notification.setVisible(false);
+		}
+		portForwardGrid.redraw();
+	}
 
 	//Initialize buttons
 	private void initButtons() {
@@ -375,9 +380,8 @@ public class PortForwardingTabUi extends Composite implements Tab {
 			public void onClick(ClickEvent event) {
 				alert.hide();
 				portForwardDataProvider.getList().remove(selectionModel.getSelectedObject());
-				portForwardDataProvider.flush();
+				refreshTable();
 				apply.setEnabled(true);
-				notification.setVisible(false);
 				setDirty(true);
 			}
 		});
@@ -428,11 +432,8 @@ public class PortForwardingTabUi extends Composite implements Tab {
 			public void onHide(ModalHideEvent evt) {
 				if (newPortForwardEntry != null && !duplicateEntry(newPortForwardEntry)) {
 					portForwardDataProvider.getList().add(newPortForwardEntry);
-					int size = portForwardDataProvider.getList().size();
-					portForwardGrid.setVisibleRange(0, size);
-					portForwardDataProvider.flush();
+					refreshTable();
 					apply.setEnabled(true);
-					portForwardGrid.redraw();
 					newPortForwardEntry= null;
 				}
 			}

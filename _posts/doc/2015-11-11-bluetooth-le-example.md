@@ -70,7 +70,7 @@ Change to the blues folder, and then configure and install the package:
 
 ```
 cd bluez-4.101
-sudo ./configure --disable-systemd
+sudo ./configure --disable-systemd --enable-tools
 sudo make
 sudo make install
 ```

@@ -101,6 +101,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 
 	private static Logger s_logger = LoggerFactory.getLogger(GwtNetworkServiceImpl.class);
 
+	@Override
 	public ArrayList<GwtNetInterfaceConfig> findNetInterfaceConfigurations() throws GwtKuraException {
 		ArrayList<GwtNetInterfaceConfig> result= privateFindNetInterfaceConfigurations();
 
@@ -108,10 +109,18 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 		for(GwtNetInterfaceConfig netConfig: result){
 			if(netConfig instanceof GwtWifiNetInterfaceConfig){
 				GwtWifiNetInterfaceConfig wifiConfig= (GwtWifiNetInterfaceConfig) netConfig;
-				GwtWifiConfig gwtWifiConfig= wifiConfig.getActiveWifiConfig();
-				if (gwtWifiConfig != null) {
-					gwtWifiConfig.setPassword(PLACEHOLDER);
+				GwtWifiConfig gwtAPWifiConfig= wifiConfig.getAccessPointWifiConfig();
+				if (gwtAPWifiConfig != null) {
+					gwtAPWifiConfig.setPassword(PLACEHOLDER);
 				}
+				
+				GwtWifiConfig gwtStationWifiConfig= wifiConfig.getStationWifiConfig();
+				if (gwtStationWifiConfig != null) {
+					gwtStationWifiConfig.setPassword(PLACEHOLDER);
+				}
+			} else if (netConfig instanceof GwtModemInterfaceConfig) {
+				GwtModemInterfaceConfig modemConfig= (GwtModemInterfaceConfig) netConfig;
+				modemConfig.setPassword(PLACEHOLDER);
 			}
 		}
 		return result;
@@ -672,8 +681,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 		return new ArrayList<GwtNetInterfaceConfig>(gwtNetConfigs);
 	}
 
-
-
+	@Override
 	public void updateNetInterfaceConfigurations(GwtXSRFToken xsrfToken, GwtNetInterfaceConfig config) 
 			throws GwtKuraException 
 	{		
@@ -784,12 +792,10 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 
 			if(config.getHwTypeEnum() == GwtNetIfType.WIFI) {
 				
-				if (config instanceof GwtWifiNetInterfaceConfig) {
-					//WifiConfig wifiConfig = new WifiConfig();					
+				if (config instanceof GwtWifiNetInterfaceConfig) {					
 					GwtWifiConfig gwtWifiConfig = ((GwtWifiNetInterfaceConfig) config).getActiveWifiConfig();
-
-					if(gwtWifiConfig != null) {
-						gwtWifiConfig.setWirelessMode(((GwtWifiNetInterfaceConfig)config).getWirelessMode());
+					
+					if (gwtWifiConfig != null) {
 						WifiConfig wifiConfig = this.getWifiConfig(gwtWifiConfig);
 
 						String passKey= new String(wifiConfig.getPasskey().getPassword());
@@ -797,13 +803,18 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 
 							ArrayList<GwtNetInterfaceConfig> result= privateFindNetInterfaceConfigurations();
 							for(GwtNetInterfaceConfig netConfig: result){
-								if(netConfig instanceof GwtWifiNetInterfaceConfig){
+								if(netConfig instanceof GwtWifiNetInterfaceConfig && 
+										config.getName().equals(((GwtWifiNetInterfaceConfig) netConfig).getName())){
 									GwtWifiNetInterfaceConfig oldWifiConfig= (GwtWifiNetInterfaceConfig) netConfig;
-									if (config.getName().equals(oldWifiConfig.getName())) {
-										GwtWifiConfig oldGwtWifiConfig= oldWifiConfig.getActiveWifiConfig();
-										if (oldGwtWifiConfig != null) {
-											wifiConfig.setPasskey(oldGwtWifiConfig.getPassword());
-										}
+									GwtWifiConfig oldGwtWifiConfig;
+									if (gwtWifiConfig.getWirelessMode().equals(GwtWifiWirelessMode.netWifiWirelessModeAccessPoint.name())) {
+										oldGwtWifiConfig= oldWifiConfig.getAccessPointWifiConfig();
+									} else {
+										oldGwtWifiConfig= oldWifiConfig.getStationWifiConfig();
+									}
+									
+									if (oldGwtWifiConfig != null) {
+										wifiConfig.setPasskey(oldGwtWifiConfig.getPassword());
 									}
 								}
 							}
@@ -836,7 +847,20 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 					modemConfig.setDialString(gwtModemConfig.getDialString());
 					modemConfig.setHeaderCompression(gwtModemConfig.getHeaderCompression());
 
-					modemConfig.setPassword(gwtModemConfig.getPassword());
+					
+					String passKey= new String(gwtModemConfig.getPassword());
+					if(passKey != null && passKey.equals(PLACEHOLDER)){
+						ArrayList<GwtNetInterfaceConfig> result= privateFindNetInterfaceConfigurations();
+						for(GwtNetInterfaceConfig netConfig: result){
+							if(netConfig instanceof GwtModemInterfaceConfig){
+								GwtModemInterfaceConfig oldModemConfig= (GwtModemInterfaceConfig) netConfig;
+								if (gwtModemConfig.getName().equals(oldModemConfig.getName())) {
+									modemConfig.setPassword(oldModemConfig.getPassword());
+								}
+							}
+						}
+					}
+					
 
 					modemConfig.setUsername(gwtModemConfig.getUsername());
 					modemConfig.setResetTimeout(gwtModemConfig.getResetTimeout());
@@ -889,7 +913,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 		}
 	}
 
-
+	@Override
 	public ArrayList<GwtFirewallOpenPortEntry> findDeviceFirewallOpenPorts(GwtXSRFToken xsrfToken) throws GwtKuraException 
 	{
 		checkXSRFToken(xsrfToken);
@@ -923,11 +947,11 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 			return new ArrayList<GwtFirewallOpenPortEntry>(gwtOpenPortEntries);
 
 		} catch (KuraException e) {
-			e.printStackTrace();
 			throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
 		}
 	}
 
+	@Override
 	public ArrayList<GwtWifiHotspotEntry> findWifiHotspots(GwtXSRFToken xsrfToken, String interfaceName) throws GwtKuraException {
 
 		checkXSRFToken(xsrfToken);
@@ -1025,13 +1049,14 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 				}
 			}
 		} catch (Throwable t) {
-			t.printStackTrace();
+			s_logger.error(t.getMessage());
 			KuraExceptionHandler.handle(t);
 		}
 
 		return new ArrayList<GwtWifiHotspotEntry>(gwtWifiHotspotsEntries);
 	}
 
+	@Override
 	public boolean verifyWifiCredentials(GwtXSRFToken xsrfToken, String interfaceName, GwtWifiConfig gwtWifiConfig) throws GwtKuraException {
 
 		checkXSRFToken(xsrfToken);
@@ -1041,6 +1066,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 		return status;
 	}
 
+	@Override
 	public ArrayList<GwtFirewallPortForwardEntry> findDeviceFirewallPortForwards(GwtXSRFToken xsrfToken) throws GwtKuraException 
 	{
 		checkXSRFToken(xsrfToken);
@@ -1080,6 +1106,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 		}
 	}
 
+	@Override
 	public ArrayList<GwtFirewallNatEntry> findDeficeFirewallNATs(GwtXSRFToken xsrfToken) throws GwtKuraException {
 
 		checkXSRFToken(xsrfToken);
@@ -1181,6 +1208,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 		}
 	}
 
+	@Override
 	public void updateDeviceFirewallOpenPorts(GwtXSRFToken xsrfToken,  List<GwtFirewallOpenPortEntry> entries) throws GwtKuraException {
 		checkXSRFToken(xsrfToken);
 		NetworkAdminService nas = ServiceLocator.getInstance().getService(NetworkAdminService.class);
@@ -1221,17 +1249,18 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 
 			nas.setFirewallOpenPortConfiguration(firewallOpenPortConfigIPs);
 		} catch (KuraException e) {
-			e.printStackTrace();
+			s_logger.warn("Exception while updating firewall open ports: {}", e.getMessage());
 			throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
 		} catch (NumberFormatException e) {
-			e.printStackTrace();
+			s_logger.warn("Exception while updating firewall open ports: {}", e.getMessage());
 			throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
 		} catch (UnknownHostException e) {
-			e.printStackTrace();
+			s_logger.warn("Exception while updating firewall open ports: {}", e.getMessage());
 			throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
 		}
 	}
 
+	@Override
 	public void updateDeviceFirewallPortForwards(GwtXSRFToken xsrfToken, List<GwtFirewallPortForwardEntry> entries) throws GwtKuraException {
 
 		s_logger.debug("updateDeviceFirewallPortForwards() :: updating port forward entries");
@@ -1271,20 +1300,18 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 
 			nas.setFirewallPortForwardingConfiguration(firewallPortForwardConfigIPs);
 		} catch (KuraException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			s_logger.warn("Exception while updating firewall port forwards: {}", e.getMessage());
 			throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
 		} catch (NumberFormatException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			s_logger.warn("Exception while updating firewall port forwards: {}", e.getMessage());
 			throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
 		} catch (UnknownHostException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			s_logger.warn("Exception while updating firewall port forwards: {}", e.getMessage());
 			throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
 		}
 	}
 
+	@Override
 	public void updateDeviceFirewallNATs(GwtXSRFToken xsrfToken, List<GwtFirewallNatEntry> entries) throws GwtKuraException {
 
 		s_logger.debug("updateDeviceFirewallNATs() :: updating NAT entries");
@@ -1315,18 +1342,17 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 		try {
 			nas.setFirewallNatConfiguration(firewallNatConfigs);
 		} catch (KuraException e) {
-			e.printStackTrace();
 			throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
 		}
 	}
 
+	@Override
 	public void renewDhcpLease(GwtXSRFToken xsrfToken, String interfaceName) throws GwtKuraException {
 		checkXSRFToken(xsrfToken);
 		NetworkAdminService nas = ServiceLocator.getInstance().getService(NetworkAdminService.class);
 		try {
 			nas.renewDhcpLease(GwtSafeHtmlUtils.htmlEscape(interfaceName));
 		} catch (KuraException e) {
-			e.printStackTrace();
 			throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
 		}
 	}

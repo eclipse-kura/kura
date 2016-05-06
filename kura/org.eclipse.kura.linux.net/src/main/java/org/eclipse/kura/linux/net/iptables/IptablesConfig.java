@@ -175,26 +175,26 @@ public class IptablesConfig {
 	 * Restores (using iptables-restore) firewall settings from temporary iptables configuration file.
 	 * Temporary configuration file is deleted upon completion. 
 	 */
-	public static void restore(String filename) {
+	public static void restore(String filename) throws KuraException {
 		SafeProcess proc = null;
 		try {
 			proc = ProcessUtil.exec("iptables-restore " + filename);
 			int status = proc.waitFor();
 			if (status != 0) {
-				 s_logger.error("restore() :: failed - {}", LinuxProcessUtil.getInputStreamAsString(proc.getErrorStream()));
-				
+				s_logger.error("restore() :: failed - {}", LinuxProcessUtil.getInputStreamAsString(proc.getErrorStream()));
 				throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "Failed to execute the iptable-restore command");
 			}		
 		} catch (Exception e) {
 			s_logger.error("restore() :: exception={}", e);
+			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
 		} finally {
 			if (proc != null) {
 				ProcessUtil.destroy(proc);
 			}
-		}
-		File configFile = new File(filename);
-		if (configFile.exists()) {
-			configFile.delete();
+			File configFile = new File(filename);
+			if (configFile.exists()) {
+				configFile.delete();
+			}
 		}
 	}
 	

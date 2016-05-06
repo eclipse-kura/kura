@@ -1,3 +1,14 @@
+/*******************************************************************************
+ * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     Eurotech
+ *******************************************************************************/
 package org.eclipse.kura.raspberrypi.sensehat.example;
 
 import java.util.Map;
@@ -24,8 +35,6 @@ import org.slf4j.LoggerFactory;
 public class SenseHatExample implements ConfigurableComponent {
 
 	private static final Logger s_logger = LoggerFactory.getLogger(SenseHatExample.class);
-
-	private ComponentContext m_ctx;
 
 	private static final int I2C_BUS = 1;
 	private static final int I2C_ADDRESS_SIZE = 7;
@@ -107,53 +116,11 @@ public class SenseHatExample implements ConfigurableComponent {
 	{
 		s_logger.info("Activating Sense Hat Application...");
 
-		m_ctx = componentContext;
-
 		m_executor = new ScheduledThreadPoolExecutor(1);
 		m_executor.setContinueExistingPeriodicTasksAfterShutdownPolicy(false);
 		m_executor.setExecuteExistingDelayedTasksAfterShutdownPolicy(false);
 		
-		m_properties = properties;
-		if (m_properties.get(IMU_ACC_ENABLE) != null) 
-			m_imuAccEnable = (Boolean) m_properties.get(IMU_ACC_ENABLE);
-		if (m_properties.get(IMU_GYRO_ENABLE) != null) 
-			m_imuGyroEnable = (Boolean) m_properties.get(IMU_GYRO_ENABLE);
-		if (m_properties.get(IMU_COMP_ENABLE) != null) 
-			m_imuCompEnable = (Boolean) m_properties.get(IMU_COMP_ENABLE);
-		if (m_properties.get(IMU_SAMPLES) != null) 
-			m_imuSamples = (Integer) m_properties.get(IMU_SAMPLES);		
-		if (m_properties.get(PRE_ENABLE) != null)
-			m_preEnable = (Boolean) m_properties.get(PRE_ENABLE);
-		if (m_properties.get(HUM_ENABLE) != null)
-			m_humEnable = (Boolean) m_properties.get(HUM_ENABLE);
-		if (m_properties.get(LCD_ENABLE) != null)
-			m_lcdEnable = (Boolean) m_properties.get(LCD_ENABLE);
-		if (m_properties.get(STICK_ENABLE) != null)
-			m_stickEnable = (Boolean) m_properties.get(STICK_ENABLE);
-		if (m_properties.get(SCREEN_MESSAGE) != null)
-			m_screenMessage = (String) m_properties.get(SCREEN_MESSAGE);		
-		if (m_properties.get(SCREEN_ROTATION) != null)
-			m_screenRotation = (Integer) m_properties.get(SCREEN_ROTATION);
-		if (m_properties.get(SCREEN_TEXT_COLOR) != null) {
-			if (((String) m_properties.get(SCREEN_TEXT_COLOR)).contains("RED")) 
-				m_screenTextColor = Colors.RED;
-			else if (((String) m_properties.get(SCREEN_TEXT_COLOR)).contains("ORANGE")) 
-				m_screenTextColor = Colors.ORANGE;
-			else if (((String) m_properties.get(SCREEN_TEXT_COLOR)).contains("YELLOW")) 
-				m_screenTextColor = Colors.YELLOW;
-			else if (((String) m_properties.get(SCREEN_TEXT_COLOR)).contains("GREEN")) 
-				m_screenTextColor = Colors.GREEN;
-			else if (((String) m_properties.get(SCREEN_TEXT_COLOR)).contains("BLUE")) 
-				m_screenTextColor = Colors.BLUE;
-			else if (((String) m_properties.get(SCREEN_TEXT_COLOR)).contains("PURPLE")) 
-				m_screenTextColor = Colors.PURPLE;
-			else if (((String) m_properties.get(SCREEN_TEXT_COLOR)).contains("VIOLET")) 
-				m_screenTextColor = Colors.VIOLET;
-			else if (((String) m_properties.get(SCREEN_TEXT_COLOR)).contains("WHITE")) 
-				m_screenTextColor = Colors.WHITE;
-			else if (((String) m_properties.get(SCREEN_TEXT_COLOR)).contains("BLACK")) 
-				m_screenTextColor = Colors.BLACK;
-		}
+		getProperties(properties);
 
 		if (startUpdateThread != null) {
 			startUpdateThread.cancel(true);
@@ -167,7 +134,6 @@ public class SenseHatExample implements ConfigurableComponent {
 		
 		s_logger.info("Activating Sense Hat Application... Done.");
 	}
-
 
 	protected void deactivate(ComponentContext componentContext) 
 	{
@@ -206,47 +172,7 @@ public class SenseHatExample implements ConfigurableComponent {
 		s_logger.info("Updated Sense Hat Application...");
 
 		// store the properties received
-		m_properties = properties;
-		if (m_properties.get(IMU_ACC_ENABLE) != null) 
-			m_imuAccEnable = (Boolean) m_properties.get(IMU_ACC_ENABLE);
-		if (m_properties.get(IMU_GYRO_ENABLE) != null) 
-			m_imuGyroEnable = (Boolean) m_properties.get(IMU_GYRO_ENABLE);
-		if (m_properties.get(IMU_COMP_ENABLE) != null) 
-			m_imuCompEnable = (Boolean) m_properties.get(IMU_COMP_ENABLE);
-		if (m_properties.get(IMU_SAMPLES) != null) 
-			m_imuSamples = (Integer) m_properties.get(IMU_SAMPLES);
-		if (m_properties.get(PRE_ENABLE) != null)
-			m_preEnable = (Boolean) m_properties.get(PRE_ENABLE);
-		if (m_properties.get(HUM_ENABLE) != null)
-			m_humEnable = (Boolean) m_properties.get(HUM_ENABLE);
-		if (m_properties.get(LCD_ENABLE) != null)
-			m_lcdEnable = (Boolean) m_properties.get(LCD_ENABLE);
-		if (m_properties.get(STICK_ENABLE) != null)
-			m_stickEnable = (Boolean) m_properties.get(STICK_ENABLE);
-		if (m_properties.get(SCREEN_MESSAGE) != null)
-			m_screenMessage = (String) m_properties.get(SCREEN_MESSAGE);	
-		if (m_properties.get(SCREEN_ROTATION) != null)
-			m_screenRotation = (Integer) m_properties.get(SCREEN_ROTATION);	
-		if (m_properties.get(SCREEN_TEXT_COLOR) != null) {
-			if (((String) m_properties.get(SCREEN_TEXT_COLOR)).contains("RED")) 
-				m_screenTextColor = Colors.RED;
-			else if (((String) m_properties.get(SCREEN_TEXT_COLOR)).contains("ORANGE")) 
-				m_screenTextColor = Colors.ORANGE;
-			else if (((String) m_properties.get(SCREEN_TEXT_COLOR)).contains("YELLOW")) 
-				m_screenTextColor = Colors.YELLOW;
-			else if (((String) m_properties.get(SCREEN_TEXT_COLOR)).contains("GREEN")) 
-				m_screenTextColor = Colors.GREEN;
-			else if (((String) m_properties.get(SCREEN_TEXT_COLOR)).contains("BLUE")) 
-				m_screenTextColor = Colors.BLUE;
-			else if (((String) m_properties.get(SCREEN_TEXT_COLOR)).contains("PURPLE")) 
-				m_screenTextColor = Colors.PURPLE;
-			else if (((String) m_properties.get(SCREEN_TEXT_COLOR)).contains("VIOLET")) 
-				m_screenTextColor = Colors.VIOLET;
-			else if (((String) m_properties.get(SCREEN_TEXT_COLOR)).contains("WHITE")) 
-				m_screenTextColor = Colors.WHITE;
-			else if (((String) m_properties.get(SCREEN_TEXT_COLOR)).contains("BLACK")) 
-				m_screenTextColor = Colors.BLACK;
-		}
+		getProperties(properties);
 
 		if (startUpdateThread != null) {
 			startUpdateThread.cancel(true);
@@ -336,7 +262,7 @@ public class SenseHatExample implements ConfigurableComponent {
 
 		if (m_lcdEnable) {
 
-			frameBuffer = m_senseHat.getFrameBuffer(m_ctx);
+			frameBuffer = m_senseHat.getFrameBuffer();
 			FrameBuffer.setRotation(m_screenRotation);
 			frameBuffer.showMessage(m_screenMessage, m_screenTextColor, Colors.BLACK);
 
@@ -437,6 +363,52 @@ public class SenseHatExample implements ConfigurableComponent {
 			}
 		}
 
+	}
+	
+	private void getProperties(Map<String,Object> properties) {
+		
+		m_properties = properties;
+		if (m_properties.get(IMU_ACC_ENABLE) != null) 
+			m_imuAccEnable = (Boolean) m_properties.get(IMU_ACC_ENABLE);
+		if (m_properties.get(IMU_GYRO_ENABLE) != null) 
+			m_imuGyroEnable = (Boolean) m_properties.get(IMU_GYRO_ENABLE);
+		if (m_properties.get(IMU_COMP_ENABLE) != null) 
+			m_imuCompEnable = (Boolean) m_properties.get(IMU_COMP_ENABLE);
+		if (m_properties.get(IMU_SAMPLES) != null) 
+			m_imuSamples = (Integer) m_properties.get(IMU_SAMPLES);		
+		if (m_properties.get(PRE_ENABLE) != null)
+			m_preEnable = (Boolean) m_properties.get(PRE_ENABLE);
+		if (m_properties.get(HUM_ENABLE) != null)
+			m_humEnable = (Boolean) m_properties.get(HUM_ENABLE);
+		if (m_properties.get(LCD_ENABLE) != null)
+			m_lcdEnable = (Boolean) m_properties.get(LCD_ENABLE);
+		if (m_properties.get(STICK_ENABLE) != null)
+			m_stickEnable = (Boolean) m_properties.get(STICK_ENABLE);
+		if (m_properties.get(SCREEN_MESSAGE) != null)
+			m_screenMessage = (String) m_properties.get(SCREEN_MESSAGE);		
+		if (m_properties.get(SCREEN_ROTATION) != null)
+			m_screenRotation = (Integer) m_properties.get(SCREEN_ROTATION);
+		if (m_properties.get(SCREEN_TEXT_COLOR) != null) {
+			if (((String) m_properties.get(SCREEN_TEXT_COLOR)).contains("RED")) 
+				m_screenTextColor = Colors.RED;
+			else if (((String) m_properties.get(SCREEN_TEXT_COLOR)).contains("ORANGE")) 
+				m_screenTextColor = Colors.ORANGE;
+			else if (((String) m_properties.get(SCREEN_TEXT_COLOR)).contains("YELLOW")) 
+				m_screenTextColor = Colors.YELLOW;
+			else if (((String) m_properties.get(SCREEN_TEXT_COLOR)).contains("GREEN")) 
+				m_screenTextColor = Colors.GREEN;
+			else if (((String) m_properties.get(SCREEN_TEXT_COLOR)).contains("BLUE")) 
+				m_screenTextColor = Colors.BLUE;
+			else if (((String) m_properties.get(SCREEN_TEXT_COLOR)).contains("PURPLE")) 
+				m_screenTextColor = Colors.PURPLE;
+			else if (((String) m_properties.get(SCREEN_TEXT_COLOR)).contains("VIOLET")) 
+				m_screenTextColor = Colors.VIOLET;
+			else if (((String) m_properties.get(SCREEN_TEXT_COLOR)).contains("WHITE")) 
+				m_screenTextColor = Colors.WHITE;
+			else if (((String) m_properties.get(SCREEN_TEXT_COLOR)).contains("BLACK")) 
+				m_screenTextColor = Colors.BLACK;
+		}
+		
 	}
 
 }

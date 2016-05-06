@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright (c) 2011, 2014 Eurotech and/or its affiliates
+    Copyright (c) 2011, 2016 Eurotech and/or its affiliates
 
      All rights reserved. This program and the accompanying materials
      are made available under the terms of the Eclipse Public License v1.0
@@ -81,7 +81,12 @@
             cardinality="0" 
             required="true"
             default="0" 
-            description="Set the screen rotation. Only 0, 90, 180 and 270 degrees are allowed."/>
+            description="Set the screen rotation.">
+            <Option label="0" value="0"/>
+            <Option label="90" value="90"/>
+            <Option label="180" value="180"/>
+            <Option label="270" value="270"/>
+        </AD>
             
         <AD id="screen.message"  
             name="screen.message"

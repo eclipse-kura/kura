@@ -1,3 +1,14 @@
+/*******************************************************************************
+ * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     Eurotech
+ *******************************************************************************/
 package org.eclipse.kura.raspberrypi.sensehat.impl;
 
 import org.eclipse.kura.raspberrypi.sensehat.SenseHat;
@@ -13,10 +24,12 @@ import org.slf4j.LoggerFactory;
 public class SenseHatImpl implements SenseHat {
 	
 	private static final Logger s_logger = LoggerFactory.getLogger(SenseHatImpl.class);
-
+	private ComponentContext m_ctx;
+	
     protected void activate(ComponentContext componentContext) 
     {
         s_logger.info("Activate SenseHat Service.");
+        m_ctx = componentContext;
     }
     
     protected void deactivate(ComponentContext componentContext) {
@@ -29,8 +42,8 @@ public class SenseHatImpl implements SenseHat {
     }
 	
 	@Override
-	public FrameBuffer getFrameBuffer(ComponentContext ctx) {
-		return FrameBuffer.getFrameBuffer(ctx);
+	public FrameBuffer getFrameBuffer() {
+		return FrameBuffer.getFrameBuffer(m_ctx);
 	}
 
 	@Override

@@ -182,6 +182,11 @@
 									<artifactId>camel-kura</artifactId>
 									<version>${org.apache.camel.camel-kura.version}</version>
 								</artifactItem>
+								<artifactItem>
+									<groupId>com.google.guava</groupId>
+									<artifactId>guava</artifactId>
+									<version>19.0</version>
+								</artifactItem>
 							</artifactItems>
 							<outputDirectory>${project.basedir}/target/source/plugins</outputDirectory>
 						</configuration>

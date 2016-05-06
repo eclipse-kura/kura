@@ -1,0 +1,114 @@
+/**
+ * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ *
+ *  All rights reserved. This program and the accompanying materials
+ *  are made available under the terms of the Eclipse Public License v1.0
+ *  which accompanies this distribution, and is available at
+ *  http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *   Eurotech
+ *   Amit Kumar Mondal (admin@amitinside.com)
+ */
+package org.eclipse.kura.wire;
+
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+
+import org.osgi.util.position.Position;
+
+import com.google.common.base.MoreObjects;
+import com.google.common.collect.Lists;
+
+/**
+ * The Class WireRecord represents a record to be transmitted during wire
+ * communication between wire emitter and wire receiver
+ */
+public final class WireRecord {
+
+	/** The wire fields. */
+	private final List<WireField> m_fields;
+
+	/** The position. */
+	private final Position m_position;
+
+	/** The timestamp. */
+	private final Date m_timestamp;
+
+	/**
+	 * Instantiates a new wire record.
+	 *
+	 * @param timestamp
+	 *            the timestamp
+	 * @param fields
+	 *            the fields
+	 */
+	public WireRecord(final Date timestamp, final List<WireField> fields) {
+		this.m_timestamp = timestamp;
+		this.m_position = null;
+		this.m_fields = Collections.unmodifiableList(fields);
+	}
+
+	/**
+	 * Instantiates a new wire record.
+	 *
+	 * @param timestamp
+	 *            the timestamp
+	 * @param position
+	 *            the position
+	 * @param fields
+	 *            the fields
+	 */
+	public WireRecord(final Date timestamp, final Position position, final List<WireField> fields) {
+		this.m_timestamp = timestamp;
+		this.m_position = position;
+		this.m_fields = Collections.unmodifiableList(fields);
+	}
+
+	/**
+	 * Instantiates a new wire record.
+	 *
+	 * @param dataFields
+	 *            the data fields
+	 */
+	public WireRecord(final WireField... dataFields) {
+		this.m_timestamp = new Date();
+		this.m_position = null;
+		this.m_fields = Collections.unmodifiableList(Lists.newArrayList(dataFields));
+	}
+
+	/**
+	 * Gets the associated fields.
+	 *
+	 * @return the fields
+	 */
+	public List<WireField> getFields() {
+		return this.m_fields;
+	}
+
+	/**
+	 * Gets the position.
+	 *
+	 * @return the position
+	 */
+	public Position getPosition() {
+		return this.m_position;
+	}
+
+	/**
+	 * Gets the timestamp.
+	 *
+	 * @return the timestamp
+	 */
+	public Date getTimestamp() {
+		return this.m_timestamp;
+	}
+
+	/** {@inheritDoc} */
+	@Override
+	public String toString() {
+		return MoreObjects.toStringHelper(this).add("wire_fields", this.m_fields).add("position", this.m_position)
+				.add("timestamp", this.m_timestamp).toString();
+	}
+}

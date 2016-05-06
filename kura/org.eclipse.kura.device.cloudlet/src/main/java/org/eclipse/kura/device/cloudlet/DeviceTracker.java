@@ -1,0 +1,103 @@
+/**
+ * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ *
+ *  All rights reserved. This program and the accompanying materials
+ *  are made available under the terms of the Eclipse Public License v1.0
+ *  which accompanies this distribution, and is available at
+ *  http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *   Eurotech
+ *   Amit Kumar Mondal (admin@amitinside.com)
+ */
+package org.eclipse.kura.device.cloudlet;
+
+import java.util.Collection;
+import java.util.List;
+
+import org.eclipse.kura.device.Device;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTracker;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.common.annotations.Beta;
+import com.google.common.base.Throwables;
+import com.google.common.collect.Lists;
+
+/**
+ * The Class DeviceTracker is responsible for tracking all the existing device
+ * instances in the OSGi service registry
+ */
+@Beta
+public final class DeviceTracker extends ServiceTracker<Object, Object> {
+
+	/** The Logger instance. */
+	private static final Logger s_logger = LoggerFactory.getLogger(DeviceTracker.class);
+
+	/** The list of devices present in the OSGi service registry. */
+	private final List<Device> m_devices;
+
+	/**
+	 * Instantiates a new device tracker.
+	 *
+	 * @param context
+	 *            the context
+	 * @throws InvalidSyntaxException
+	 *             the invalid syntax exception
+	 */
+	public DeviceTracker(final BundleContext context) throws InvalidSyntaxException {
+		super(context, context.createFilter("(" + Constants.OBJECTCLASS + "=*)"), null);
+		this.m_devices = Lists.newCopyOnWriteArrayList();
+	}
+
+	/** {@inheritDoc} */
+	@Override
+	public Object addingService(final ServiceReference<Object> reference) {
+		final Object service = super.addingService(reference);
+		if (service instanceof Device) {
+			s_logger.info("Device has been found by Device Cloudlet Tracker....==> adding service");
+			this.m_devices.add((Device) service);
+		}
+		return service;
+	}
+
+	/**
+	 * Returns the list of found devices in the service registry
+	 *
+	 * @return the list of devices
+	 */
+	public List<Device> getDevicesList() {
+		return this.m_devices;
+	}
+
+	/** {@inheritDoc} */
+	@Override
+	public void open() {
+		super.open();
+		try {
+			final Collection<ServiceReference<Device>> deviceServiceRefs = this.context
+					.getServiceReferences(Device.class, null);
+			for (final ServiceReference<Device> ref : deviceServiceRefs) {
+				s_logger.info("Device has been found by Device Cloudlet Tracker....==> open");
+				this.m_devices.add(this.context.getService(ref));
+			}
+		} catch (final InvalidSyntaxException e) {
+			s_logger.error("Exception while searching for drivers...." + Throwables.getStackTraceAsString(e));
+		}
+	}
+
+	/** {@inheritDoc} */
+	@Override
+	public void removedService(final ServiceReference<Object> reference, final Object service) {
+		super.removedService(reference, service);
+		if (service instanceof Device) {
+			this.m_devices.remove(service);
+			s_logger.info("Device has been removed by Device Cloudlet Tracker...");
+		}
+	}
+
+}

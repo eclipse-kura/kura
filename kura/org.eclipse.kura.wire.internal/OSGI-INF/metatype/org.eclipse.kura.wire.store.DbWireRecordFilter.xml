@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (c) 2011, 2014 Eurotech and/or its affiliates
+
+     All rights reserved. This program and the accompanying materials
+     are made available under the terms of the Eclipse Public License v1.0
+     which accompanies this distribution, and is available at
+     http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Eurotech
+      Amit Kumar Mondal (admin@amitinside.com)
+
+-->
+
+<!-- default="SELECT AVG(TEMP) AS AVG_TEMP FROM (SELECT TEMPERATUREINTERNAL AS TEMP FROM DR_HEATER ORDER BY TIMESTAMP DESC LIMIT 10);"-->
+
+<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
+    <OCD id="org.eclipse.kura.wire.store.DbWireRecordFilter"
+         name="DbWireRecordFilter" 
+         description="DbWireRecordFilter provides filtering and aggregation for WireRecords stored by the DbWireRecordStores.">
+
+        <Icon resource="DbService" size="32"/>
+        
+        <AD id="sql.view"
+        	name="sql.view"
+        	type="String"
+        	cardinality="0"
+        	required="true"
+        	default="SELECT AVG(DATA) AS AVG_DOUBLE FROM (SELECT DOUBLE_DATA AS DATA FROM DRIVER_EXAMPLE ORDER BY TIMESTAMP DESC LIMIT 10);"
+        	description="SQL to be executed to build a view.">
+        </AD>
+    </OCD>
+    
+    <Designate pid="org.eclipse.kura.wire.store.DbWireRecordFilter" factoryPid="org.eclipse.kura.wire.store.DbWireRecordFilter">
+        <Object ocdref="org.eclipse.kura.wire.store.DbWireRecordFilter"/>
+    </Designate>
+</MetaData>

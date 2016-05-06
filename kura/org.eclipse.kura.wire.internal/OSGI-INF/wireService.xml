@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+
+     All rights reserved. This program and the accompanying materials
+     are made available under the terms of the Eclipse Public License v1.0
+     which accompanies this distribution, and is available at
+     http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Eurotech
+
+-->
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" 
+    name="org.eclipse.kura.wire.internal.WireServiceImpl"
+    activate="activate" 
+    deactivate="deactivate" 
+    modified="updated" 
+    enabled="true" 
+    immediate="true"
+    configuration-policy="require">
+   <implementation class="org.eclipse.kura.wire.internal.WireServiceImpl"/>
+   <service>
+      <provide interface="org.eclipse.kura.configuration.SelfConfiguringComponent"/>
+      <provide interface="org.eclipse.kura.wire.WireService"/>
+   </service>
+   <property name="service.pid" value="org.eclipse.kura.wire.internal.WireServiceImpl"/>
+   <reference name="MultitonService" 
+              bind="setMultitonService" 
+              unbind="unsetMultitonService"
+              cardinality="1..1" 
+              policy="static" 
+              interface="org.eclipse.kura.multitons.MultitonService"/>
+   <reference name="WireAdmin" 
+              bind="setWireAdmin" 
+              unbind="unsetWireAdmin"
+              cardinality="1..1" 
+              policy="static" 
+              interface="org.osgi.service.wireadmin.WireAdmin"/>
+   <reference name="ConfigurationService" 
+              bind="setConfigurationService" 
+              unbind="unsetConfigurationService"
+              cardinality="1..1" 
+              policy="static" 
+              interface="org.eclipse.kura.configuration.ConfigurationService"/>
+</scr:component>

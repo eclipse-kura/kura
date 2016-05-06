@@ -1,3 +1,14 @@
+/*******************************************************************************
+ * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     Eurotech
+ *******************************************************************************/
 package org.eclipse.kura.raspberrypi.sensehat;
 
 import org.eclipse.kura.raspberrypi.sensehat.ledmatrix.FrameBuffer;
@@ -5,11 +16,10 @@ import org.eclipse.kura.raspberrypi.sensehat.sensors.HTS221;
 import org.eclipse.kura.raspberrypi.sensehat.sensors.LPS25H;
 import org.eclipse.kura.raspberrypi.sensehat.sensors.LSM9DS1;
 import org.eclipse.kura.raspsberrypi.sensehat.joystick.Joystick;
-import org.osgi.service.component.ComponentContext;
 
 public interface SenseHat {
 	
-	public FrameBuffer getFrameBuffer(ComponentContext ctx);
+	public FrameBuffer getFrameBuffer();
 	
 	public Joystick getJoystick();
 	

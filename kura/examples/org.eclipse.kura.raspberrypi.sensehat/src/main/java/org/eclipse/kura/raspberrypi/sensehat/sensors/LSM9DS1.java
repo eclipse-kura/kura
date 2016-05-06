@@ -1,3 +1,14 @@
+/*******************************************************************************
+ * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     Eurotech
+ *******************************************************************************/
 package org.eclipse.kura.raspberrypi.sensehat.sensors;
 
 import java.io.IOException;
@@ -8,8 +19,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class LSM9DS1 {
-	
-	// Note: the gyroscope calibration needs some work. The results aren't so close the SenseHat library. 
 	
 	private static final Logger s_logger = LoggerFactory.getLogger(LSM9DS1.class);
 
@@ -102,23 +111,23 @@ public class LSM9DS1 {
 	public static final float ACC_SCALE_8G        = 0.000244F;
 	public static final float ACC_SCALE_16G       = 0.000732F;
 	
-	public static final float AccelCalMinX        = -0.988512F;
-	public static final float AccelCalMinY        = -1.011500F;
-	public static final float AccelCalMinZ        = -1.012328F;
-	public static final float AccelCalMaxX        = 1.006410F;
-	public static final float AccelCalMaxY        = 1.004973F;
-	public static final float AccelCalMaxZ        = 1.001244F;
+	public static final float ACCEL_CAL_MIN_X     = -0.988512F;
+	public static final float ACCEL_CAL_MIN_Y     = -1.011500F;
+	public static final float ACCEL_CAL_MIN_Z     = -1.012328F;
+	public static final float ACCEL_CAL_MAX_X     = 1.006410F;
+	public static final float ACCEL_CAL_MAX_Y     = 1.004973F;
+	public static final float ACCEL_CAL_MAX_Z     = 1.001244F;
 	
 	public static final float GYRO_SCALE_250      = (float) (Math.PI / 180.0) * 0.00875F;
 	public static final float GYRO_SCALE_500      = (float) (Math.PI / 180.0) * 0.0175F;
 	public static final float GYRO_SCALE_2000     = (float) (Math.PI / 180.0) * 0.07F;
 	
-	public static final float GyroBiasXInit       = 0.024642F;
-	public static final float GyroBiasYInit       = 0.020255F;
-	public static final float GyroBiasZInit       = -0.011905F;
+	public static final float GYRO_BIAS_X_INIT    = 0.024642F;
+	public static final float GYRO_BIAS_Y_INIT    = 0.020255F;
+	public static final float GYRO_BIAS_Z_INIT    = -0.011905F;
 	
-	public static final float GyroLearningAlpha   = 2.0F;
-	public static final float GyroContiniousAlpha = 0.01F;
+	public static final float GYRO_LEARNING_ALPHA   = 2.0F;
+	public static final float GYRO_CONTINIOUS_ALPHA = 0.01F;
 	
 	public static final float ACC_ZERO            = 0.05F;
 	public static final float GYRO_ZERO           = 0.2F;
@@ -128,44 +137,43 @@ public class LSM9DS1 {
 	public static final float MAG_SCALE_12       = 0.043F;
 	public static final float MAG_SCALE_16       = 0.058F;
 	
-	public static final float COMPASS_ALPHA      = 0.2F;
-	
-	public static final float CompassMinX              = -26.074535F;
-	public static final float CompassMinY              = -2.034567F;
-	public static final float CompassMinZ              = -14.253133F;
-	public static final float CompassMaxX              = 49.599648F;
-	public static final float CompassMaxY              = 70.567223F;
-	public static final float CompassMaxZ              = 55.166424F;
-	public static final float compassEllipsoidOffsetX  = 0.268940F;
-	public static final float compassEllipsoidOffsetY  = 0.530345F;
-	public static final float compassEllipsoidOffsetZ  = -0.120908F;
-	public static final float compassEllipsoidCorr11   = 0.973294F;
-	public static final float compassEllipsoidCorr12   = -0.014069F;
-	public static final float compassEllipsoidCorr13   = -0.021423F;
-	public static final float compassEllipsoidCorr21   = -0.014069F;
-	public static final float compassEllipsoidCorr22   = 0.965692F;
-	public static final float compassEllipsoidCorr23   = -0.002746F;
-	public static final float compassEllipsoidCorr31   = -0.021423F;
-	public static final float compassEllipsoidCorr32   = -0.002746F;
-	public static final float compassEllipsoidCorr33   = 0.980103F;
+	public static final float COMPASS_ALPHA               = 0.2F;
+	public static final float COMPASS_MIN_X               = -26.074535F;
+	public static final float COMPASS_MIN_Y               = -2.034567F;
+	public static final float COMPASS_MIN_Z               = -14.253133F;
+	public static final float COMPASS_MAX_X               = 49.599648F;
+	public static final float COMPASS_MAX_Y               = 70.567223F;
+	public static final float COMPASS_MAX_Z               = 55.166424F;
+	public static final float COMPASS_ELLIPSOID_OFFSET_X  = 0.268940F;
+	public static final float COMPASS_ELLIPSOID_OFFSET_Y  = 0.530345F;
+	public static final float COMPASS_ELLIPSOID_OFFSET_Z  = -0.120908F;
+	public static final float COMPASS_ELLIPSOID_CORR_11   = 0.973294F;
+	public static final float COMPASS_ELLIPSOID_CORR_12   = -0.014069F;
+	public static final float COMPASS_ELLIPSOID_CORR_13   = -0.021423F;
+	public static final float COMPASS_ELLIPSOID_CORR_21   = -0.014069F;
+	public static final float COMPASS_ELLIPSOID_CORR_22   = 0.965692F;
+	public static final float COMPASS_ELLIPSOID_CORR_23   = -0.002746F;
+	public static final float COMPASS_ELLIPSOID_CORR_31   = -0.021423F;
+	public static final float COMPASS_ELLIPSOID_CORR_32   = -0.002746F;
+	public static final float COMPASS_ELLIPSOID_CORR_33   = 0.980103F;
 
-	private static LSM9DS1 IMUSensor = null;
-	private static KuraI2CDevice AccI2CDevice = null;
-	private static KuraI2CDevice MagI2CDevice = null;
+	private static LSM9DS1 imuSensor = null;
+	private static KuraI2CDevice accI2CDevice = null;
+	private static KuraI2CDevice magI2CDevice = null;
 	
 	private float[] previousAcceleration = {0F, 0F, 0F};
-	private float GyroBiasX;
-	private float GyroBiasY;
-	private float GyroBiasZ;
-	private int   GyroSampleCount = 0;
-	private static int GyroSampleRate = 0;
+	private float gyroBiasX;
+	private float gyroBiasY;
+	private float gyroBiasZ;
+	private int   gyroSampleCount = 0;
+	private static int gyroSampleRate = 0;
 
-	private float CompassScaleX;
-	private float CompassScaleY;
-	private float CompassScaleZ;
-	private float CompassOffsetX;
-	private float CompassOffsetY;
-	private float CompassOffsetZ;
+	private float compassScaleX;
+	private float compassScaleY;
+	private float compassScaleZ;
+	private float compassOffsetX;
+	private float compassOffsetY;
+	private float compassOffsetZ;
 	
 	private float[] CompassAverage = {0.0F, 0.0F, 0.0F};
 	
@@ -176,16 +184,16 @@ public class LSM9DS1 {
 	}
 
 	public static synchronized LSM9DS1 getIMUSensor(int bus, int accAddress, int magAddress, int addressSize, int frequency) {
-		if (IMUSensor == null && AccI2CDevice == null && MagI2CDevice == null) {
-			IMUSensor = new LSM9DS1();
+		if (imuSensor == null && accI2CDevice == null && magI2CDevice == null) {
+			imuSensor = new LSM9DS1();
 			try {
-				AccI2CDevice = new KuraI2CDevice(bus, accAddress, addressSize, frequency);
-				MagI2CDevice = new KuraI2CDevice(bus, magAddress, addressSize, frequency);
+				accI2CDevice = new KuraI2CDevice(bus, accAddress, addressSize, frequency);
+				magI2CDevice = new KuraI2CDevice(bus, magAddress, addressSize, frequency);
 			} catch (IOException e) {
 				s_logger.error("Could not create I2C Device", e);
 			}
 		}
-		return IMUSensor;
+		return imuSensor;
 	}
 
 	public boolean initDevice(boolean enableAccelerometer, boolean enableGyroscope, boolean enableMagnetometer) {
@@ -224,18 +232,18 @@ public class LSM9DS1 {
 
 	public static void closeDevice() {
 		try {
-			if (AccI2CDevice != null && MagI2CDevice != null) {
+			if (accI2CDevice != null && magI2CDevice != null) {
 				// Power off the device : PD = 0 (power-down mode)
 				disableAccelerometer();
 				disableGyroscope();
 				disableMagnetometer();
-				AccI2CDevice.close();
-				AccI2CDevice = null;
-				MagI2CDevice.close();
-				MagI2CDevice = null;
+				accI2CDevice.close();
+				accI2CDevice = null;
+				magI2CDevice.close();
+				magI2CDevice = null;
 			}
-			if (IMUSensor != null)
-				IMUSensor = null;
+			if (imuSensor != null)
+				imuSensor = null;
 		} catch (Exception e) {
 			s_logger.error("Error in closing device", e);
 		}
@@ -245,13 +253,13 @@ public class LSM9DS1 {
 		int result = 0;
 		try {
 			if (device == 0) {
-				AccI2CDevice.write(register);
+				accI2CDevice.write(register);
 				Thread.sleep(5);
-				result = AccI2CDevice.read();
+				result = accI2CDevice.read();
 			} else if (device == 1) {
-				MagI2CDevice.write(register);
+				magI2CDevice.write(register);
 				Thread.sleep(5);
-				result = MagI2CDevice.read();
+				result = magI2CDevice.read();
 			} else {
 				throw KuraException.internalError("Device not supported.");
 			}
@@ -267,9 +275,9 @@ public class LSM9DS1 {
 	public static void write(int device, int register, byte[] value) throws KuraException {
 		try {
 			if (device == ACC_DEVICE) {
-				AccI2CDevice.write(register, 1, ByteBuffer.wrap(value));
+				accI2CDevice.write(register, 1, ByteBuffer.wrap(value));
 			} else if (device == MAG_DEVICE) {
-				MagI2CDevice.write(register, 1, ByteBuffer.wrap(value));				
+				magI2CDevice.write(register, 1, ByteBuffer.wrap(value));				
 			} else {
 				throw KuraException.internalError("Device not supported.");
 			}		
@@ -474,7 +482,7 @@ public class LSM9DS1 {
 			write(ACC_DEVICE, CTRL_REG1_G, value);
 			value[0] = 0x44;
 			write(ACC_DEVICE, CTRL_REG3_G, value);
-			GyroSampleRate = 119;
+			gyroSampleRate = 119;
 		} catch (KuraException e) {
 			s_logger.error("Unable to write to I2C device.", e);
 		} catch (InterruptedException e) {
@@ -530,19 +538,19 @@ public class LSM9DS1 {
 	private void calibrateAcceleration(float[] acc) {
 		
 	    if (acc[0] >= 0.0)
-	    	acc[0] = acc[0] / AccelCalMaxX;
+	    	acc[0] = acc[0] / ACCEL_CAL_MAX_X;
 	    else
-	    	acc[0] = acc[0] / (-AccelCalMinX);
+	    	acc[0] = acc[0] / (-ACCEL_CAL_MIN_X);
 
 	    if (acc[1] >= 0.0)
-	    	acc[1] = acc[1] / AccelCalMaxY;
+	    	acc[1] = acc[1] / ACCEL_CAL_MAX_Y;
 	    else
-	    	acc[1] = acc[1] / (-AccelCalMinY);
+	    	acc[1] = acc[1] / (-ACCEL_CAL_MIN_Y);
 	    
 	    if (acc[2] >= 0.0)
-	    	acc[2] = acc[2] / AccelCalMaxZ;
+	    	acc[2] = acc[2] / ACCEL_CAL_MAX_Z;
 	    else
-	    	acc[2] = acc[2] / (-AccelCalMinZ);
+	    	acc[2] = acc[2] / (-ACCEL_CAL_MIN_Z);
 	    
 	}
 	
@@ -564,50 +572,50 @@ public class LSM9DS1 {
 		float gyroVectorLength = (float) Math.sqrt(Math.pow(gyro[0], 2) + Math.pow(gyro[1], 2) + Math.pow(gyro[2], 2));
 		if (accVectorLength < ACC_ZERO && gyroVectorLength < GYRO_ZERO) {
 			// Correct the initial bias with real measures
-			if (GyroSampleCount < (5 * GyroSampleRate)) {
-				GyroBiasX = (1.0F - GyroLearningAlpha) * GyroBiasX + GyroLearningAlpha * gyro[0];
-				GyroBiasY = (1.0F - GyroLearningAlpha) * GyroBiasY + GyroLearningAlpha * gyro[1];
-				GyroBiasZ = (1.0F - GyroLearningAlpha) * GyroBiasZ + GyroLearningAlpha * gyro[2];
+			if (gyroSampleCount < (5 * gyroSampleRate)) {
+				gyroBiasX = (1.0F - GYRO_LEARNING_ALPHA) * gyroBiasX + GYRO_LEARNING_ALPHA * gyro[0];
+				gyroBiasY = (1.0F - GYRO_LEARNING_ALPHA) * gyroBiasY + GYRO_LEARNING_ALPHA * gyro[1];
+				gyroBiasZ = (1.0F - GYRO_LEARNING_ALPHA) * gyroBiasZ + GYRO_LEARNING_ALPHA * gyro[2];
 				
-				GyroSampleCount++;
+				gyroSampleCount++;
 			}
 			else {
-				GyroBiasX = (1.0F - GyroContiniousAlpha) * GyroBiasX + GyroContiniousAlpha * gyro[0];
-				GyroBiasY = (1.0F - GyroContiniousAlpha) * GyroBiasY + GyroContiniousAlpha * gyro[1];
-				GyroBiasZ = (1.0F - GyroContiniousAlpha) * GyroBiasZ + GyroContiniousAlpha * gyro[2];
+				gyroBiasX = (1.0F - GYRO_CONTINIOUS_ALPHA) * gyroBiasX + GYRO_CONTINIOUS_ALPHA * gyro[0];
+				gyroBiasY = (1.0F - GYRO_CONTINIOUS_ALPHA) * gyroBiasY + GYRO_CONTINIOUS_ALPHA * gyro[1];
+				gyroBiasZ = (1.0F - GYRO_CONTINIOUS_ALPHA) * gyroBiasZ + GYRO_CONTINIOUS_ALPHA * gyro[2];
 			}
 		}
 		
-		gyro[0] -= GyroBiasX;
-		gyro[1] -= GyroBiasY;
-		gyro[2] -= GyroBiasZ;
+		gyro[0] -= gyroBiasX;
+		gyro[1] -= gyroBiasY;
+		gyro[2] -= gyroBiasZ;
 	}
 	
 	public void setGyroSampleRate(int sampleRate) {
-		GyroSampleRate = sampleRate;
+		gyroSampleRate = sampleRate;
 	}
 	
 	private void calibrateMagnetometer(float[] mag) {
 		
-		mag[0] = (mag[0] - CompassOffsetX) * CompassScaleX;
-		mag[1] = (mag[1] - CompassOffsetY) * CompassScaleY;
-		mag[2] = (mag[2] - CompassOffsetZ) * CompassScaleZ;
+		mag[0] = (mag[0] - compassOffsetX) * compassScaleX;
+		mag[1] = (mag[1] - compassOffsetY) * compassScaleY;
+		mag[2] = (mag[2] - compassOffsetZ) * compassScaleZ;
 		
-		mag[0] -= compassEllipsoidOffsetX;
-		mag[1] -= compassEllipsoidOffsetY;
-		mag[2] -= compassEllipsoidOffsetZ;
+		mag[0] -= COMPASS_ELLIPSOID_OFFSET_X;
+		mag[1] -= COMPASS_ELLIPSOID_OFFSET_Y;
+		mag[2] -= COMPASS_ELLIPSOID_OFFSET_Z;
 		
-		mag[0] = mag[0] * compassEllipsoidCorr11 +
-				 mag[1] * compassEllipsoidCorr12 +
-				 mag[2] * compassEllipsoidCorr13;
+		mag[0] = mag[0] * COMPASS_ELLIPSOID_CORR_11 +
+				 mag[1] * COMPASS_ELLIPSOID_CORR_12 +
+				 mag[2] * COMPASS_ELLIPSOID_CORR_13;
 		
-		mag[1] = mag[0] * compassEllipsoidCorr21 +
-				 mag[1] * compassEllipsoidCorr22 +
-				 mag[2] * compassEllipsoidCorr23;
+		mag[1] = mag[0] * COMPASS_ELLIPSOID_CORR_21 +
+				 mag[1] * COMPASS_ELLIPSOID_CORR_22 +
+				 mag[2] * COMPASS_ELLIPSOID_CORR_23;
 		
-		mag[2] = mag[0] * compassEllipsoidCorr31 +
-				 mag[1] * compassEllipsoidCorr32 +
-				 mag[2] * compassEllipsoidCorr33;
+		mag[2] = mag[0] * COMPASS_ELLIPSOID_CORR_31 +
+				 mag[1] * COMPASS_ELLIPSOID_CORR_32 +
+				 mag[2] * COMPASS_ELLIPSOID_CORR_33;
 		
 		CompassAverage[0] = mag[0] * COMPASS_ALPHA + CompassAverage[0] * (1.0F - COMPASS_ALPHA);
 		CompassAverage[1] = mag[1] * COMPASS_ALPHA + CompassAverage[1] * (1.0F - COMPASS_ALPHA);
@@ -617,23 +625,23 @@ public class LSM9DS1 {
 	
 	private void setCalibrationData() {
 		
-		GyroBiasX = GyroBiasXInit;
-		GyroBiasY = GyroBiasYInit;
-		GyroBiasZ = GyroBiasZInit;
+		gyroBiasX = GYRO_BIAS_X_INIT;
+		gyroBiasY = GYRO_BIAS_Y_INIT;
+		gyroBiasZ = GYRO_BIAS_Z_INIT;
 		
-		float compassSwingX = CompassMaxX - CompassMinX;
-		float compassSwingY = CompassMaxY - CompassMinY;
-		float compassSwingZ = CompassMaxZ - CompassMinZ;
+		float compassSwingX = COMPASS_MAX_X - COMPASS_MIN_X;
+		float compassSwingY = COMPASS_MAX_Y - COMPASS_MIN_Y;
+		float compassSwingZ = COMPASS_MAX_Z - COMPASS_MIN_Z;
 		
 		float maxCompassSwing = Math.max(compassSwingX, Math.max(compassSwingY, compassSwingZ)) / 2.0F;
 		
-		CompassScaleX = maxCompassSwing / (compassSwingX / 2.0F);
-		CompassScaleY = maxCompassSwing / (compassSwingY / 2.0F);
-		CompassScaleZ = maxCompassSwing / (compassSwingZ / 2.0F);
+		compassScaleX = maxCompassSwing / (compassSwingX / 2.0F);
+		compassScaleY = maxCompassSwing / (compassSwingY / 2.0F);
+		compassScaleZ = maxCompassSwing / (compassSwingZ / 2.0F);
 
-		CompassOffsetX = (CompassMaxX + CompassMinX) / 2.0F;
-		CompassOffsetY = (CompassMaxY + CompassMinY) / 2.0F;
-		CompassOffsetZ = (CompassMaxZ + CompassMinZ) / 2.0F;
+		compassOffsetX = (COMPASS_MAX_X + COMPASS_MIN_X) / 2.0F;
+		compassOffsetY = (COMPASS_MAX_Y + COMPASS_MIN_Y) / 2.0F;
+		compassOffsetZ = (COMPASS_MAX_Z + COMPASS_MIN_Z) / 2.0F;
 		
 	}
 	

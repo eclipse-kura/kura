@@ -13,9 +13,10 @@
 package org.eclipse.kura.device.cloudlet;
 
 import java.util.Collection;
-import java.util.List;
+import java.util.Map;
 
 import org.eclipse.kura.device.Device;
+import org.eclipse.kura.device.internal.BaseDevice;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.InvalidSyntaxException;
@@ -26,7 +27,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.annotations.Beta;
 import com.google.common.base.Throwables;
-import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 
 /**
  * The Class DeviceTracker is responsible for tracking all the existing device
@@ -38,8 +39,8 @@ public final class DeviceTracker extends ServiceTracker<Object, Object> {
 	/** The Logger instance. */
 	private static final Logger s_logger = LoggerFactory.getLogger(DeviceTracker.class);
 
-	/** The list of devices present in the OSGi service registry. */
-	private final List<Device> m_devices;
+	/** The map of devices present in the OSGi service registry. */
+	private final Map<String, Device> m_devices;
 
 	/**
 	 * Instantiates a new device tracker.
@@ -51,7 +52,7 @@ public final class DeviceTracker extends ServiceTracker<Object, Object> {
 	 */
 	public DeviceTracker(final BundleContext context) throws InvalidSyntaxException {
 		super(context, context.createFilter("(" + Constants.OBJECTCLASS + "=*)"), null);
-		this.m_devices = Lists.newCopyOnWriteArrayList();
+		this.m_devices = Maps.newConcurrentMap();
 	}
 
 	/** {@inheritDoc} */
@@ -60,7 +61,8 @@ public final class DeviceTracker extends ServiceTracker<Object, Object> {
 		final Object service = super.addingService(reference);
 		if (service instanceof Device) {
 			s_logger.info("Device has been found by Device Cloudlet Tracker....==> adding service");
-			this.m_devices.add((Device) service);
+			final BaseDevice device = (BaseDevice) service;
+			this.m_devices.put(device.getDeviceName(), device);
 		}
 		return service;
 	}
@@ -68,9 +70,9 @@ public final class DeviceTracker extends ServiceTracker<Object, Object> {
 	/**
 	 * Returns the list of found devices in the service registry
 	 *
-	 * @return the list of devices
+	 * @return the map of devices
 	 */
-	public List<Device> getDevicesList() {
+	public Map<String, Device> getDevicesList() {
 		return this.m_devices;
 	}
 
@@ -83,7 +85,8 @@ public final class DeviceTracker extends ServiceTracker<Object, Object> {
 					.getServiceReferences(Device.class, null);
 			for (final ServiceReference<Device> ref : deviceServiceRefs) {
 				s_logger.info("Device has been found by Device Cloudlet Tracker....==> open");
-				this.m_devices.add(this.context.getService(ref));
+				final BaseDevice device = (BaseDevice) this.context.getService(ref);
+				this.m_devices.put(device.getDeviceName(), device);
 			}
 		} catch (final InvalidSyntaxException e) {
 			s_logger.error("Exception while searching for drivers...." + Throwables.getStackTraceAsString(e));

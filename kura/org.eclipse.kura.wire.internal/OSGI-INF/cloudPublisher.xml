@@ -14,23 +14,24 @@
 
 -->
 <scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" 
-               name="org.eclipse.kura.wire.cloud.publisher.CloudPublisher"
+               name="org.eclipse.kura.wire.cloud.publisher.CloudPublisherImpl"
                activate="activate" 
                deactivate="deactivate" 
                modified="updated"
                enabled="true" 
                immediate="true" 
                configuration-policy="require"> 
-   <implementation class="org.eclipse.kura.wire.cloud.publisher.CloudPublisher"/>
+   <implementation class="org.eclipse.kura.wire.cloud.publisher.CloudPublisherImpl"/>
    
-   <property name="service.pid" value="org.eclipse.kura.wire.cloud.publisher.CloudPublisher"/>
+   <property name="service.pid" value="org.eclipse.kura.wire.cloud.publisher.CloudPublisherImpl"/>
    
    <service>
       <provide interface="org.eclipse.kura.configuration.ConfigurableComponent"/>
       <provide interface="org.eclipse.kura.data.DataServiceListener"/>
       <provide interface="org.eclipse.kura.wire.WireComponent"/>
       <provide interface="org.eclipse.kura.wire.WireReceiver"/>
-      <provide interface="org.osgi.service.wireadmin.Consumer"/>      
+      <provide interface="org.osgi.service.wireadmin.Consumer"/>
+      <provide interface="org.eclipse.kura.wire.CloudPublisher"/>      
    </service>
    <reference name="DataService" 
               interface="org.eclipse.kura.data.DataService" 

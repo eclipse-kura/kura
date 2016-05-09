@@ -25,6 +25,7 @@ import org.eclipse.kura.data.DataService;
 import org.eclipse.kura.data.DataServiceListener;
 import org.eclipse.kura.message.KuraPayload;
 import org.eclipse.kura.message.KuraPosition;
+import org.eclipse.kura.wire.CloudPublisher;
 import org.eclipse.kura.wire.WireEnvelope;
 import org.eclipse.kura.wire.WireField;
 import org.eclipse.kura.wire.WireReceiver;
@@ -40,13 +41,12 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Throwables;
 
 /**
- * A wire Component responsible for publishing received wire records to the
+ * The Class CloudPublisherImpl is the implementation of {@link CloudPublisher}
+ * to publish a list of wire records as received in Wire Envelope to the
  * configured cloud platform
  */
-public final class CloudPublisher implements WireReceiver, DataServiceListener, ConfigurableComponent {
-
-	// FIXME: Extract the CloudPubliher service interface in the API and
-	// implement a publish(DataRecord... ) method
+public final class CloudPublisherImpl
+		implements WireReceiver, DataServiceListener, ConfigurableComponent, CloudPublisher {
 
 	// FIXME: Add option to select the format of the message being published:
 	// KuraProtoBuf or JSON
@@ -55,17 +55,13 @@ public final class CloudPublisher implements WireReceiver, DataServiceListener, 
 	private static CloudPublisherDisconnectManager s_disconnectManager;
 
 	/** The Logger. */
-	private static final Logger s_logger = LoggerFactory.getLogger(CloudPublisher.class);
+	private static final Logger s_logger = LoggerFactory.getLogger(CloudPublisherImpl.class);
 
 	/** The cloud client. */
 	private CloudClient m_cloudClient;
 
 	/** The cloud service. */
 	private volatile CloudService m_cloudService;
-
-	/** The component context. */
-	@SuppressWarnings("unused")
-	private ComponentContext m_ctx;
 
 	/** The data service. */
 	private volatile DataService m_dataService;
@@ -77,7 +73,7 @@ public final class CloudPublisher implements WireReceiver, DataServiceListener, 
 	private WireSupport m_wireSupport;
 
 	/**
-	 * OSGi Service Component callback for activation
+	 * OSGi Service Component callback for activation.
 	 *
 	 * @param componentContext
 	 *            the component context
@@ -87,11 +83,7 @@ public final class CloudPublisher implements WireReceiver, DataServiceListener, 
 	protected synchronized void activate(final ComponentContext componentContext,
 			final Map<String, Object> properties) {
 		s_logger.info("Activating Cloud Publisher Wire Component...");
-
-		// save the bundle context and the properties
-		this.m_ctx = componentContext;
 		this.m_wireSupport = WireSupport.of(this);
-
 		// Update properties
 		this.m_options = new CloudPublisherOptions(properties);
 
@@ -208,7 +200,7 @@ public final class CloudPublisher implements WireReceiver, DataServiceListener, 
 	 *            the component context
 	 */
 	protected synchronized void deactivate(final ComponentContext componentContext) {
-		s_logger.info("deactivate...");
+		s_logger.info("Deactivating Cloud Publisher Wire Component...");
 
 		// close the client
 		this.closeCloudClient();
@@ -221,11 +213,12 @@ public final class CloudPublisher implements WireReceiver, DataServiceListener, 
 			s_disconnectManager = null;
 		}
 
-		// no need to release the cloud clients as the updated app
+		// no need to release the cloud clients as the updated application
 		// certificate is already published due the missing dependency
 		// we only need to empty our CloudClient list
 		this.m_dataService = null;
 		this.m_cloudService = null;
+		s_logger.info("Deactivating Cloud Publisher Wire Component...Done");
 	}
 
 	/**
@@ -255,6 +248,7 @@ public final class CloudPublisher implements WireReceiver, DataServiceListener, 
 	/** {@inheritDoc} */
 	@Override
 	public void onConnectionEstablished() {
+		// Not required
 	}
 
 	/** {@inheritDoc} */
@@ -280,52 +274,69 @@ public final class CloudPublisher implements WireReceiver, DataServiceListener, 
 	/** {@inheritDoc} */
 	@Override
 	public void onMessageArrived(final String topic, final byte[] payload, final int qos, final boolean retained) {
+		// Not required
 	}
 
 	/** {@inheritDoc} */
 	@Override
 	public void onMessageConfirmed(final int messageId, final String topic) {
+		// Not required
 	}
 
 	/** {@inheritDoc} */
 	@Override
 	public void onMessagePublished(final int messageId, final String topic) {
+		// Not required
 	}
 
 	/** {@inheritDoc} */
 	@Override
 	public void onWireReceive(final WireEnvelope wireEnvelope) {
-		s_logger.info("Receiving WireEnvelope from {}", wireEnvelope.getEmitterName());
-		try {
-			// Open connection if necessary
-			this.startPublishing();
-
-			// Publish received data records
-			final List<WireRecord> dataRecords = wireEnvelope.getRecords();
-			for (final WireRecord dataRecord : dataRecords) {
-
-				// prepare the topic
-				final String appTopic = this.m_options.getPublishingTopic();
-
-				// prepare the payload
-				final KuraPayload kuraPayload = this.buildKuraPayload(dataRecord);
-
-				// publish the payload
-				this.m_cloudClient.publish(appTopic, kuraPayload, this.m_options.getPublishingQos(),
-						this.m_options.getPublishingRetain(), this.m_options.getPublishingPriority());
-			}
-
-			// Close connection if necessary
-			this.stopPublishing();
-		} catch (final KuraException e) {
-			s_logger.error("Could not publish DataRecords", e);
-		}
+		s_logger.info("Received WireEnvelope from {}", wireEnvelope.getEmitterName());
+		this.publish(wireEnvelope.getRecords());
+		this.stopPublishing();
 	}
 
 	/** {@inheritDoc} */
 	@Override
 	public void producersConnected(final Wire[] wires) {
 		this.m_wireSupport.producersConnected(wires);
+	}
+
+	/** {@inheritDoc} */
+	@Override
+	public void publish(final List<WireRecord> wireRecords) {
+		if (this.m_cloudClient == null) {
+			throw new KuraRuntimeException(KuraErrorCode.INTERNAL_ERROR, "CloudClient not available");
+		}
+
+		if (!AutoConnectMode.AUTOCONNECT_MODE_OFF.equals(this.m_options.getAutoConnectMode())
+				&& !this.m_dataService.isAutoConnectEnabled() && !this.m_dataService.isConnected()) {
+
+			// FIXME: this connect should be a connectWithRetry
+			// While the CloudPublisher is active the connection should be in
+			// retry mode
+			// m_dataService.connectAndStayConnected();
+			try {
+				this.m_dataService.connect();
+				for (final WireRecord dataRecord : wireRecords) {
+
+					// prepare the topic
+					final String appTopic = this.m_options.getPublishingTopic();
+
+					// prepare the payload
+					final KuraPayload kuraPayload = this.buildKuraPayload(dataRecord);
+
+					// publish the payload
+					this.m_cloudClient.publish(appTopic, kuraPayload, this.m_options.getPublishingQos(),
+							this.m_options.getPublishingRetain(), this.m_options.getPublishingPriority());
+				}
+			} catch (final KuraException e) {
+				s_logger.error("Error in publishing wire records using cloud publisher.."
+						+ Throwables.getStackTraceAsString(e));
+			}
+
+		}
 	}
 
 	/**
@@ -360,28 +371,6 @@ public final class CloudPublisher implements WireReceiver, DataServiceListener, 
 		// create the new CloudClient for the specified application
 		final String appId = this.m_options.getPublishingApplication();
 		this.m_cloudClient = this.m_cloudService.newCloudClient(appId);
-	}
-
-	/**
-	 * Start publishing.
-	 *
-	 * @throws KuraException
-	 *             the kura exception
-	 */
-	private void startPublishing() throws KuraException {
-		if (this.m_cloudClient == null) {
-			throw new KuraRuntimeException(KuraErrorCode.INTERNAL_ERROR, "CloudClient not available");
-		}
-
-		if (!AutoConnectMode.AUTOCONNECT_MODE_OFF.equals(this.m_options.getAutoConnectMode())
-				&& !this.m_dataService.isAutoConnectEnabled() && !this.m_dataService.isConnected()) {
-
-			// FIXME: this connect should be a connectWithRetry
-			// While the CloudPublisher is active the connection should be in
-			// retry mode
-			// m_dataService.connectAndStayConnected();
-			this.m_dataService.connect();
-		}
 	}
 
 	/**
@@ -429,13 +418,13 @@ public final class CloudPublisher implements WireReceiver, DataServiceListener, 
 	}
 
 	/**
-	 * Updated.
+	 * OSGi Service Component callback for updating.
 	 *
 	 * @param properties
 	 *            the properties
 	 */
 	public synchronized void updated(final Map<String, Object> properties) {
-		s_logger.info("updated...: " + properties);
+		s_logger.info("Updating Cloud Publisher Wire Component...");
 
 		// Update properties
 		this.m_options = new CloudPublisherOptions(properties);
@@ -457,6 +446,7 @@ public final class CloudPublisher implements WireReceiver, DataServiceListener, 
 		} catch (final KuraException e) {
 			s_logger.warn("Cannot setup CloudClient..." + Throwables.getStackTraceAsString(e));
 		}
+		s_logger.info("Updating Cloud Publisher Wire Component...Done");
 	}
 
 	/** {@inheritDoc} */

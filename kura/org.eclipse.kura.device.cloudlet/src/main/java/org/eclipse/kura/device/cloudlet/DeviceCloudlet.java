@@ -19,10 +19,20 @@ import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloud.CloudService;
 import org.eclipse.kura.cloud.Cloudlet;
 import org.eclipse.kura.cloud.CloudletTopic;
+import org.eclipse.kura.device.Channel;
 import org.eclipse.kura.device.Device;
+import org.eclipse.kura.device.DeviceRecord;
 import org.eclipse.kura.device.internal.BaseDevice;
 import org.eclipse.kura.message.KuraRequestPayload;
 import org.eclipse.kura.message.KuraResponsePayload;
+import org.eclipse.kura.type.BooleanValue;
+import org.eclipse.kura.type.ByteValue;
+import org.eclipse.kura.type.DoubleValue;
+import org.eclipse.kura.type.IntegerValue;
+import org.eclipse.kura.type.LongValue;
+import org.eclipse.kura.type.ShortValue;
+import org.eclipse.kura.type.StringValue;
+import org.eclipse.kura.type.TypedValue;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
@@ -30,6 +40,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.annotations.Beta;
 import com.google.common.base.Throwables;
+import com.google.common.collect.Lists;
 
 /**
  * The Class DeviceCloudlet is used to provide MQTT read/write operations on the
@@ -39,7 +50,7 @@ import com.google.common.base.Throwables;
 public final class DeviceCloudlet extends Cloudlet {
 
 	/** Application Identifier for Cloudlet. */
-	private static final String APP_ID = "DEVICE-CLOUD";
+	private static final String APP_ID = "DEV-CLOUD";
 
 	/** The Logger instance. */
 	private static final Logger s_logger = LoggerFactory.getLogger(DeviceCloudlet.class);
@@ -47,8 +58,8 @@ public final class DeviceCloudlet extends Cloudlet {
 	/** Cloud Service Dependency. */
 	private volatile CloudService m_cloudService;
 
-	/** The list of devices present in the OSGi service registry. */
-	private List<Device> m_devices;
+	/** The map of devices present in the OSGi service registry. */
+	private Map<String, Device> m_devices;
 
 	/** Device Driver Tracker. */
 	private DeviceTracker m_deviceTracker;
@@ -108,7 +119,90 @@ public final class DeviceCloudlet extends Cloudlet {
 	protected synchronized void deactivate(final ComponentContext componentContext) {
 		s_logger.debug("Deactivating Device Cloudlet...");
 		super.deactivate(componentContext);
+		this.m_cloudService = null;
 		s_logger.debug("Deactivating Device Cloudlet...Done");
+	}
+
+	/**
+	 * The device cloudlet receives a request to perform EXEC operations on
+	 * following commands.
+	 *
+	 * The available commands are as follows
+	 * <ul>
+	 * <li>read</li> e.g /read/device_name/channel_name
+	 * <li>write</li> e.g /write/device_name/channel_name topic with payload
+	 * "value" and "type"
+	 * </ul>
+	 *
+	 * The "value" key in the request payload can be one of the following
+	 * <ul>
+	 * <li>INTEGER</li>
+	 * <li>LONG</li>
+	 * <li>STRING</li>
+	 * <li>BOOLEAN</li>
+	 * <li>BYTE</li>
+	 * <li>SHORT</li>
+	 * <li>DUBLE</li>
+	 * </ul>
+	 *
+	 * @param reqTopic
+	 *            the request topic
+	 * @param reqPayload
+	 *            the request payload
+	 * @param respPayload
+	 *            the response payload
+	 * @throws KuraException
+	 *             the kura exception
+	 * @see Cloudlet
+	 */
+	@Override
+	protected void doExec(final CloudletTopic reqTopic, final KuraRequestPayload reqPayload,
+			final KuraResponsePayload respPayload) throws KuraException {
+		s_logger.info("Cloudlet EXEC Request received on the Device Cloudlet");
+		// Checks if the operation name "read", the name of the device and the
+		// name of the channel are provided
+		if ("read".equals(reqTopic.getResources()[0]) && (reqTopic.getResources().length > 2)) {
+			// perform a search operation at the beginning
+			this.findDevices();
+			final String deviceName = reqTopic.getResources()[1];
+			final String channelName = reqTopic.getResources()[2];
+			final BaseDevice device = (BaseDevice) this.m_devices.get(deviceName);
+			final Map<String, Channel> deviceConfiguredChannels = device.getChannels();
+			if ((deviceConfiguredChannels != null) && deviceConfiguredChannels.containsKey(channelName)) {
+				final List<DeviceRecord> deviceRecords = device.read(Lists.newArrayList(channelName));
+				for (final DeviceRecord deviceRecord : deviceRecords) {
+					respPayload.addMetric("Flag", deviceRecord.getDeviceFlag());
+					respPayload.addMetric("Timestamp", deviceRecord.getTimetstamp());
+					respPayload.addMetric("Value", deviceRecord.getValue());
+					respPayload.addMetric("Channel_Name", deviceRecord.getChannelName());
+				}
+			}
+		}
+		// Checks if the operation name "write", the name of the device and the
+		// name of the channel are provided
+		if ("write".equals(reqTopic.getResources()[0]) && (reqTopic.getResources().length > 2)) {
+			// perform a search operation at the beginning
+			this.findDevices();
+			final String deviceName = reqTopic.getResources()[1];
+			final String channelName = reqTopic.getResources()[2];
+			final BaseDevice device = (BaseDevice) this.m_devices.get(deviceName);
+			final Map<String, Channel> deviceConfiguredChannels = device.getChannels();
+			if ((deviceConfiguredChannels != null) && deviceConfiguredChannels.containsKey(channelName)) {
+				final DeviceRecord deviceRecord = new DeviceRecord();
+				deviceRecord.setChannelName(channelName);
+				final String userValue = (String) reqPayload.getMetric("value");
+				final String userType = (String) reqPayload.getMetric("type");
+				this.wrapValue(deviceRecord, userValue, userType);
+				final List<DeviceRecord> deviceRecords = device.write(Lists.newArrayList(deviceRecord));
+				for (final DeviceRecord record : deviceRecords) {
+					respPayload.addMetric("Flag", record.getDeviceFlag());
+					respPayload.addMetric("Timestamp", record.getTimetstamp());
+					respPayload.addMetric("Value", record.getValue());
+					respPayload.addMetric("Channel_Name", record.getChannelName());
+				}
+			}
+		}
+		s_logger.info("Cloudlet GET Request received on the Device Cloudlet");
 	}
 
 	/**
@@ -117,15 +211,16 @@ public final class DeviceCloudlet extends Cloudlet {
 	 *
 	 * The available commands are as follows
 	 * <ul>
-	 * <li>list-devices</li>
+	 * <li>list-devices</li> e.g: /list-devices
+	 * <li>list-channels</li> e.g: /list-channels/device_name
 	 * </ul>
 	 *
 	 * @param reqTopic
-	 *            the req topic
+	 *            the request topic
 	 * @param reqPayload
-	 *            the req payload
+	 *            the request payload
 	 * @param respPayload
-	 *            the resp payload
+	 *            the response payload
 	 * @throws KuraException
 	 *             the kura exception
 	 * @see Cloudlet
@@ -135,39 +230,31 @@ public final class DeviceCloudlet extends Cloudlet {
 			final KuraResponsePayload respPayload) throws KuraException {
 		s_logger.info("Cloudlet GET Request received on the Device Cloudlet");
 		if ("list-devices".equals(reqTopic.getResources()[0])) {
-			this.m_devices = this.m_deviceTracker.getDevicesList();
+			this.findDevices();
 			int index = 1;
-			for (final Device device : this.m_devices) {
-				respPayload.addMetric(String.valueOf(index++), ((BaseDevice) device).getDeviceName());
+			for (final String deviceName : this.m_devices.keySet()) {
+				final BaseDevice device = (BaseDevice) this.m_devices.get(deviceName);
+				respPayload.addMetric(String.valueOf(index++), device.getDeviceName());
+			}
+		}
+		if ("list-channels".equals(reqTopic.getResources()[0]) && (reqTopic.getResources().length > 1)) {
+			this.findDevices();
+			final String deviceName = reqTopic.getResources()[1];
+			final BaseDevice device = (BaseDevice) this.m_devices.get(deviceName);
+			final Map<String, Channel> deviceConfiguredChannels = device.getChannels();
+			int index = 1;
+			for (final String channelName : deviceConfiguredChannels.keySet()) {
+				respPayload.addMetric(String.valueOf(index++), channelName);
 			}
 		}
 		s_logger.info("Cloudlet GET Request received on the Device Cloudlet");
 	}
 
 	/**
-	 * The device cloudlet receives a request to perform PUT operations on
-	 * following commands.
-	 *
-	 * The available commands are as follows
-	 * <ul>
-	 * <li></li>
-	 * </ul>
-	 *
-	 * @param reqTopic
-	 *            the req topic
-	 * @param reqPayload
-	 *            the req payload
-	 * @param respPayload
-	 *            the resp payload
-	 * @throws KuraException
-	 *             the kura exception
-	 * @see Cloudlet
+	 * Searches for all the currently available devices in the service registry
 	 */
-	@Override
-	protected void doPut(final CloudletTopic reqTopic, final KuraRequestPayload reqPayload,
-			final KuraResponsePayload respPayload) throws KuraException {
-		// TODO Auto-generated method stub
-		super.doPut(reqTopic, reqPayload, respPayload);
+	private void findDevices() {
+		this.m_devices = this.m_deviceTracker.getDevicesList();
 	}
 
 	/**
@@ -180,6 +267,46 @@ public final class DeviceCloudlet extends Cloudlet {
 		if (this.m_cloudService == cloudService) {
 			this.m_cloudService = null;
 			super.setCloudService(null);
+		}
+	}
+
+	/**
+	 * Wraps the provided user provided value to the an instance of
+	 * {@link TypedValue} in the device record
+	 *
+	 * @param deviceRecord
+	 *            the device record to contain the typed value
+	 * @param userValue
+	 *            the value to wrap
+	 * @param userType
+	 *            the type to use
+	 */
+	private void wrapValue(final DeviceRecord deviceRecord, final String userValue, final String userType) {
+		TypedValue<?> value = null;
+
+		if ("INTEGER".equalsIgnoreCase(userType)) {
+			value = new IntegerValue(Integer.valueOf(userValue));
+		}
+		if ("BOOLEAN".equalsIgnoreCase(userType)) {
+			value = new BooleanValue(Boolean.valueOf(userValue));
+		}
+		if ("BYTE".equalsIgnoreCase(userType)) {
+			value = new ByteValue(Byte.valueOf(userValue));
+		}
+		if ("DOUBLE".equalsIgnoreCase(userType)) {
+			value = new DoubleValue(Double.valueOf(userValue));
+		}
+		if ("LONG".equalsIgnoreCase(userType)) {
+			value = new LongValue(Long.valueOf(userValue));
+		}
+		if ("SHORT".equalsIgnoreCase(userType)) {
+			value = new ShortValue(Short.valueOf(userValue));
+		}
+		if ("STRING".equalsIgnoreCase(userType)) {
+			value = new StringValue(userValue);
+		}
+		if (userValue != null) {
+			deviceRecord.setValue(value);
 		}
 	}
 

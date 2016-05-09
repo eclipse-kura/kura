@@ -20,6 +20,7 @@ import java.util.regex.Pattern;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.SelfConfiguringComponent;
 import org.eclipse.kura.configuration.metatype.Option;
@@ -93,6 +94,9 @@ public class BaseDevice implements Device, SelfConfiguringComponent {
 
 	/** Device Driver Tracker. */
 	private DriverTracker m_driverTracker;
+
+	/** Synchronization Monitor for driver specific operations. */
+	private final Object m_monitor = new Object();
 
 	/** The configurable properties of this device. */
 	private Map<String, Object> m_properties;
@@ -190,8 +194,24 @@ public class BaseDevice implements Device, SelfConfiguringComponent {
 	 */
 	protected synchronized void deactivate(final ComponentContext componentContext) {
 		s_logger.debug("Deactivating Base Device...");
+		try {
+			synchronized (this.m_monitor) {
+				this.m_driver.disconnect();
+			}
+		} catch (final KuraException e) {
+			s_logger.error("Error in disconnecting driver..." + Throwables.getStackTraceAsString(e));
+		}
 		this.m_driver = null;
 		s_logger.debug("Deactivating Base Device...Done");
+	}
+
+	/**
+	 * Retrieves the map of configured channels to this device
+	 *
+	 * @return the channels' map
+	 */
+	public Map<String, Channel> getChannels() {
+		return this.m_channels;
 	}
 
 	/** {@inheritDoc} */
@@ -279,18 +299,15 @@ public class BaseDevice implements Device, SelfConfiguringComponent {
 		final List<DeviceRecord> deviceRecords = Lists.newArrayList();
 		final List<DriverRecord> driverRecords = Lists.newArrayList();
 
-		// Synchronization Monitor
-		final Object monitor = new Object();
-
 		for (final String channelName : channelNames) {
 
 			if (!this.m_channels.containsKey(channelName)) {
-				throw new KuraException(KuraErrorCode.INTERNAL_ERROR);
+				throw new KuraRuntimeException(KuraErrorCode.INTERNAL_ERROR, "Channel not available");
 			}
 
 			final Channel channel = this.m_channels.get(channelName);
 			if (!(channel.getType() == ChannelType.READ) || !(channel.getType() == ChannelType.READ_WRITE)) {
-				throw new KuraException(KuraErrorCode.INTERNAL_ERROR);
+				throw new KuraRuntimeException(KuraErrorCode.INTERNAL_ERROR, "Channel type not within defined types");
 			}
 
 			final DriverRecord driverRecord = new DriverRecord();
@@ -301,9 +318,9 @@ public class BaseDevice implements Device, SelfConfiguringComponent {
 		}
 
 		if (this.m_driver == null) {
-			throw new KuraException(KuraErrorCode.INTERNAL_ERROR);
+			throw new KuraRuntimeException(KuraErrorCode.INTERNAL_ERROR, "Driver not available");
 		}
-		synchronized (monitor) {
+		synchronized (this.m_monitor) {
 			this.m_driver.read(driverRecords);
 		}
 
@@ -343,16 +360,14 @@ public class BaseDevice implements Device, SelfConfiguringComponent {
 		if (this.m_channels.containsKey(channelName)) {
 			channel = this.m_channels.get(channelName);
 		}
-		// Synchronization Monitor
-		final Object monitor = new Object();
 
 		final DriverListener driverListener = new BaseDriverListener(deviceListener);
 
 		this.m_deviceListeners.put(deviceListener, driverListener);
 		if (this.m_driver == null) {
-			throw new KuraException(KuraErrorCode.INTERNAL_ERROR);
+			throw new KuraRuntimeException(KuraErrorCode.INTERNAL_ERROR, "Driver not available");
 		}
-		synchronized (monitor) {
+		synchronized (this.m_monitor) {
 			this.m_driver.registerDriverListener(ImmutableMap.copyOf(channel.getConfig()), driverListener);
 		}
 
@@ -535,13 +550,11 @@ public class BaseDevice implements Device, SelfConfiguringComponent {
 	@Override
 	public void unregisterDeviceListener(final DeviceListener deviceListener) throws KuraException {
 		s_logger.debug("Unregistering Device Listener...");
-		// Synchronization Monitor
-		final Object monitor = new Object();
 
 		if (this.m_driver == null) {
-			throw new KuraException(KuraErrorCode.INTERNAL_ERROR);
+			throw new KuraRuntimeException(KuraErrorCode.INTERNAL_ERROR, "Driver not available");
 		}
-		synchronized (monitor) {
+		synchronized (this.m_monitor) {
 			this.m_driver.unregisterDriverListener(this.m_deviceListeners.get(deviceListener));
 		}
 		this.m_deviceListeners.remove(deviceListener);
@@ -571,18 +584,16 @@ public class BaseDevice implements Device, SelfConfiguringComponent {
 		s_logger.debug("Writing to channels...");
 
 		final List<DriverRecord> driverRecords = Lists.newArrayList();
-		// Synchronization Monitor
-		final Object monitor = new Object();
 
 		for (final DeviceRecord deviceRecord : deviceRecords) {
 
 			if (!this.m_channels.containsKey(deviceRecord.getChannelName())) {
-				throw new KuraException(KuraErrorCode.INTERNAL_ERROR);
+				throw new KuraRuntimeException(KuraErrorCode.INTERNAL_ERROR, "Channel not available");
 			}
 
 			final Channel channel = this.m_channels.get(deviceRecord.getChannelName());
 			if (!(channel.getType() == ChannelType.WRITE) || !(channel.getType() == ChannelType.READ_WRITE)) {
-				throw new KuraException(KuraErrorCode.INTERNAL_ERROR);
+				throw new KuraRuntimeException(KuraErrorCode.INTERNAL_ERROR, "Channel type not within defined types");
 			}
 
 			final DriverRecord driverRecord = new DriverRecord();
@@ -594,9 +605,9 @@ public class BaseDevice implements Device, SelfConfiguringComponent {
 		}
 
 		if (this.m_driver == null) {
-			throw new KuraException(KuraErrorCode.INTERNAL_ERROR);
+			throw new KuraRuntimeException(KuraErrorCode.INTERNAL_ERROR, "Driver not available");
 		}
-		synchronized (monitor) {
+		synchronized (this.m_monitor) {
 			this.m_driver.write(driverRecords);
 		}
 

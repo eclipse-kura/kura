@@ -16,9 +16,12 @@ import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.configuration.ComponentConfiguration;
+import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.core.net.NetworkConfiguration;
 import org.eclipse.kura.core.net.NetworkConfigurationVisitor;
 import org.eclipse.kura.core.net.WifiInterfaceAddressConfigImpl;
@@ -33,6 +36,9 @@ import org.eclipse.kura.net.wifi.WifiInterfaceAddressConfig;
 import org.eclipse.kura.net.wifi.WifiMode;
 import org.eclipse.kura.net.wifi.WifiRadioMode;
 import org.eclipse.kura.net.wifi.WifiSecurity;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.FrameworkUtil;
+import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -182,19 +188,11 @@ public class HostapdConfigReader implements NetworkConfigurationVisitor {
 											+ configFile.getAbsolutePath());
 						}
 
-						if (hostapdProps.containsKey("wpa_passphrase")) {
-							password = hostapdProps
-									.getProperty("wpa_passphrase");
-						} else if (hostapdProps.containsKey("wpa_psk")) {
-							password = hostapdProps.getProperty("wpa_psk");
-						} else {
-							throw KuraException
-									.internalError("malformatted config file, no wpa passphrase: "
-											+ configFile.getAbsolutePath());
-						}
+						password = getPassphrase(ifaceName);
+						s_logger.warn("<IAB> getWifiHostConfig() :: password is: {}", password );
 					} else if (hostapdProps.containsKey("wep_key0")) {
 						security = WifiSecurity.SECURITY_WEP;
-						password = hostapdProps.getProperty("wep_key0");
+						password = getPassphrase(ifaceName);
 					}
 					
 					WifiCiphers pairwise = null;
@@ -260,5 +258,30 @@ public class HostapdConfigReader implements NetworkConfigurationVisitor {
 			s_logger.error("Exception getting WiFi configuration", e);
 			throw KuraException.internalError(e);
 		}
+	}
+	
+	private static String getPassphrase (String ifaceName) throws KuraException {
+		String passphrase = null;
+		ConfigurationService cs = getConfigurationService();
+		if (cs != null) {
+			ComponentConfiguration cc = cs.getConfigurableComponentConfiguration("org.eclipse.kura.net.admin.NetworkConfigurationService");
+			Map<String, Object> props = cc.getConfigurationProperties();
+			StringBuilder sb = new StringBuilder();
+			sb.append("net.interface.").append(ifaceName).append(".config.wifi.master.passphrase");
+			passphrase = (String)props.get(sb.toString());
+		}
+		return passphrase;
+	}
+	
+	private static ConfigurationService getConfigurationService() {
+		ConfigurationService cs = null;
+		BundleContext bundleContext = FrameworkUtil.getBundle(HostapdConfigReader.class).getBundleContext();
+		if(bundleContext != null) {
+			ServiceReference<ConfigurationService> sr = bundleContext.getServiceReference(ConfigurationService.class);
+			if (sr != null) {
+				cs = bundleContext.getService(sr);
+			}
+		}
+		return cs;
 	}
 }

@@ -271,10 +271,19 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 	public ComponentConfiguration getComponentConfiguration(String pid) throws KuraException {
 		ComponentConfiguration cc = null;
 		if (!m_selfConfigComponents.contains(pid)) {
-			cc = getConfigurableComponentConfiguration(pid);
+			cc = privGetConfigurableComponentConfiguration(pid);
 		} else {
 			cc = getSelfConfiguringComponentConfiguration(pid);
 		}
+		if(cc != null && cc.getConfigurationProperties() != null){
+			decryptPasswords(cc);
+		}
+		return cc;
+	}
+	
+	@Override
+	public ComponentConfiguration getConfigurableComponentConfiguration(String pid) throws KuraException {
+		ComponentConfiguration cc = privGetConfigurableComponentConfiguration(pid);
 		if(cc != null && cc.getConfigurationProperties() != null){
 			decryptPasswords(cc);
 		}
@@ -713,7 +722,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 		}
 	}
 
-	private ComponentConfiguration getConfigurableComponentConfiguration(String pid) {
+	private ComponentConfiguration privGetConfigurableComponentConfiguration(String pid) {
 		ComponentConfiguration cc = null;
 		try {
 
@@ -1195,7 +1204,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 
 			if (!isConfigToUpdate) {
 				if (!m_selfConfigComponents.contains(pid)) {
-					cc = getConfigurableComponentConfiguration(pid);
+					cc = privGetConfigurableComponentConfiguration(pid);
 				} else {
 					cc = getSelfConfiguringComponentConfiguration(pid);
 				}

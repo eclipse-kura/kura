@@ -80,6 +80,7 @@ public interface ConfigurationService
 	 */
 	public ComponentConfiguration getComponentConfiguration(String pid) throws KuraException;
 	
+	public ComponentConfiguration getConfigurableComponentConfiguration(String pid) throws KuraException;
 	
 	/**
 	 * Updates the Configuration of the registered component with the specified pid.

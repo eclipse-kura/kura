@@ -11,13 +11,21 @@
  *******************************************************************************/
 package org.eclipse.kura.linux.net.wifi;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 
+import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.linux.util.LinuxProcessUtil;
 import org.eclipse.kura.linux.net.util.KuraConstants;
 import org.eclipse.kura.linux.net.util.LinuxNetworkUtil;
 import org.eclipse.kura.net.wifi.WifiMode;
+import org.eclipse.kura.net.wifi.WifiPassword;
+import org.eclipse.kura.net.wifi.WifiSecurity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,15 +38,15 @@ public class WpaSupplicantManager {
 	
 	private static String m_driver = null;
 
-	public static void start(String interfaceName, final WifiMode mode, String driver) throws KuraException {
-		start (interfaceName, mode, driver, new File(getWpaSupplicantConfigFilename(interfaceName)));
+	public static void start(String interfaceName, String driver, WifiPassword passkey, WifiSecurity wifiSecurity) throws KuraException {
+		start (interfaceName, driver, generateSupplicantConfigFile(interfaceName, passkey, wifiSecurity));
 	}
 
 	public static void startTemp(String interfaceName, final WifiMode mode, String driver) throws KuraException {
-		start (interfaceName, mode, driver, TEMP_CONFIG_FILE);
+		start (interfaceName, driver, TEMP_CONFIG_FILE);
 	}
 
-	private static synchronized void start(String interfaceName, final WifiMode mode, String driver, File configFile) throws KuraException {
+	private static synchronized void start(String interfaceName, String driver, File configFile) throws KuraException {
 		s_logger.debug("enable WPA Supplicant");
 
 		try {
@@ -64,6 +72,14 @@ public class WpaSupplicantManager {
 		} catch (Exception e) {
 			s_logger.error("Exception while enabling WPA Supplicant!", e);
 			throw KuraException.internalError(e);
+		} finally {
+			if (!OS_VERSION.equals(KuraConstants.Intel_Edison.getImageName() + "_" + KuraConstants.Intel_Edison.getImageVersion() + "_" + KuraConstants.Intel_Edison.getTargetName())) {
+				// delete temporary wpa_supplicant.conf that contains passkey
+				File tmpHostapdConfigFile = new File(privGetWpaSupplicantConfigFilename(interfaceName));
+				if (tmpHostapdConfigFile.exists()) {
+					tmpHostapdConfigFile.delete();
+				}
+			}
 		}
 	}
 
@@ -180,5 +196,58 @@ public class WpaSupplicantManager {
 			sb.append("/etc/wpa_supplicant-").append(ifaceName).append(".conf");
 		}
 		return sb.toString();
+	}
+	
+	private static String privGetWpaSupplicantConfigFilename(String ifaceName) {
+		StringBuilder sb = new StringBuilder();
+		if (OS_VERSION.equals(KuraConstants.Intel_Edison.getImageName() + "_" + KuraConstants.Intel_Edison.getImageVersion() + "_" + KuraConstants.Intel_Edison.getTargetName())) {
+			sb.append("/etc/wpa_supplicant/wpa_supplicant.conf");
+		} else {
+			sb.append("/tmp/wpa_supplicant-").append(ifaceName).append(".conf");
+		}
+		return sb.toString();
+	}
+	
+	private static File generateSupplicantConfigFile(String ifaceName, WifiPassword passkey, WifiSecurity wifiSecurity) throws KuraException {
+		File retConfigFile = new File(privGetWpaSupplicantConfigFilename(ifaceName));
+		File configFile = new File(getWpaSupplicantConfigFilename(ifaceName));
+		if(!configFile.exists()) {
+			throw KuraException.internalError("Config file does not exist: " + configFile.getAbsolutePath());
+		}
+		BufferedReader br = null;
+		PrintWriter pw = null;	
+		try {
+			br = new BufferedReader(new FileReader(configFile));
+			pw = new PrintWriter(new FileWriter(retConfigFile));
+			String line = null;
+            while ((line = br.readLine()) != null) {
+               line = line.trim();
+               if (!(line.startsWith("#") || line.isEmpty())) {
+            	   if (line.startsWith("wep_key") || line.startsWith("psk")) {
+            		   int ind = line.indexOf('=');
+            		   if (ind > 0) {
+            			   passkey.validate(wifiSecurity);
+            			   pw.println(line.substring(0, ind+1).concat(passkey.toString()));
+            		   }
+            	   } else {
+            		   pw.println(line);
+            	   }
+               }
+            }
+		} catch (Exception e) {
+			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+		} finally {
+			try {
+				if (br != null) {
+					br.close();
+				}
+				if (pw != null) {
+					pw.close();
+				}
+			} catch (IOException e) {
+				s_logger.error("Failed to close file stream - {}", e);
+			}
+		}
+		return retConfigFile;
 	}
 }

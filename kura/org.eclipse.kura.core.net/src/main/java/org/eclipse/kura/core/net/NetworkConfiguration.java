@@ -62,6 +62,7 @@ import org.eclipse.kura.net.wifi.WifiInterface.Capability;
 import org.eclipse.kura.net.wifi.WifiInterfaceAddress;
 import org.eclipse.kura.net.wifi.WifiInterfaceAddressConfig;
 import org.eclipse.kura.net.wifi.WifiMode;
+import org.eclipse.kura.net.wifi.WifiPassword;
 import org.eclipse.kura.net.wifi.WifiRadioMode;
 import org.eclipse.kura.net.wifi.WifiSecurity;
 import org.eclipse.kura.usb.UsbDevice;
@@ -869,7 +870,7 @@ public class NetworkConfiguration {
 			psswd = (Password) psswdObj;
 		} else if (psswdObj instanceof String) {
 			char[] tempPsswd= ((String) psswdObj).toCharArray();
-			psswd= new Password(tempPsswd);
+			psswd= new WifiPassword(tempPsswd);
 		}
 		String passphrase = new String(psswd.getPassword());
 		

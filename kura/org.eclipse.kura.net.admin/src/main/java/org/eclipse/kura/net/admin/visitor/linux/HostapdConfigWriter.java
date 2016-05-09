@@ -34,6 +34,7 @@ import org.eclipse.kura.net.NetInterfaceAddressConfig;
 import org.eclipse.kura.net.NetInterfaceConfig;
 import org.eclipse.kura.net.NetInterfaceStatus;
 import org.eclipse.kura.net.NetInterfaceType;
+import org.eclipse.kura.net.admin.visitor.linux.util.WifiVisitorUtil;
 import org.eclipse.kura.net.wifi.WifiCiphers;
 import org.eclipse.kura.net.wifi.WifiConfig;
 import org.eclipse.kura.net.wifi.WifiMode;
@@ -282,9 +283,11 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
 				throw KuraException.internalError("the channel must be between 1 (inclusive) and 11 (inclusive) or 1 (inclusive) and 13 (inclusive) depending on your locale");
 			}
 			
-			// validate passkey but don't add it to configuration file
+			// validate passkey but add it to snapshot and not to configuration file
 			wifiConfig.getPasskey().validate(wifiConfig.getSecurity());
 			fileAsString = fileAsString.replaceFirst("KURA_WEP_KEY", "");
+			WifiVisitorUtil.setPassphrase(wifiConfig.getPasskey().toString(), interfaceName, WifiMode.MASTER);
+			
 			if (wifiConfig.ignoreSSID()) {
 				fileAsString = fileAsString.replaceFirst("KURA_IGNORE_BROADCAST_SSID", "2");
 			} else {
@@ -398,9 +401,11 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
 				throw KuraException.internalError("invalid WiFi Pairwise Ciphers");
 			}
 			
-			// validate passkey but don't add it to configuration file
+			// validate passkey but add it to snapshot and not to configuration file
 			wifiConfig.getPasskey().validate(wifiConfig.getSecurity());
 			fileAsString = fileAsString.replaceFirst("KURA_PASSPHRASE", "");
+			WifiVisitorUtil.setPassphrase(wifiConfig.getPasskey().toString(), interfaceName, WifiMode.MASTER);
+			
 			if (wifiConfig.ignoreSSID()) {
 				fileAsString = fileAsString.replaceFirst("KURA_IGNORE_BROADCAST_SSID", "2");
 			} else {

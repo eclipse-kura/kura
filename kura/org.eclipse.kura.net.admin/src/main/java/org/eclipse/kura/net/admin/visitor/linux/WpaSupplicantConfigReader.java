@@ -19,12 +19,9 @@ import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 
 import org.eclipse.kura.KuraException;
-import org.eclipse.kura.configuration.ComponentConfiguration;
-import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.core.net.NetworkConfiguration;
 import org.eclipse.kura.core.net.NetworkConfigurationVisitor;
 import org.eclipse.kura.core.net.WifiInterfaceAddressConfigImpl;
@@ -34,6 +31,7 @@ import org.eclipse.kura.net.NetConfig;
 import org.eclipse.kura.net.NetInterfaceAddressConfig;
 import org.eclipse.kura.net.NetInterfaceConfig;
 import org.eclipse.kura.net.admin.visitor.linux.util.KuranetConfig;
+import org.eclipse.kura.net.admin.visitor.linux.util.WifiVisitorUtil;
 import org.eclipse.kura.net.admin.visitor.linux.util.WpaSupplicantUtil;
 import org.eclipse.kura.net.wifi.WifiBgscan;
 import org.eclipse.kura.net.wifi.WifiCiphers;
@@ -41,9 +39,6 @@ import org.eclipse.kura.net.wifi.WifiConfig;
 import org.eclipse.kura.net.wifi.WifiInterfaceAddressConfig;
 import org.eclipse.kura.net.wifi.WifiMode;
 import org.eclipse.kura.net.wifi.WifiSecurity;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.FrameworkUtil;
-import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -210,7 +205,7 @@ public class WpaSupplicantConfigReader implements NetworkConfigurationVisitor {
 		        String keyMgmt = props.getProperty("key_mgmt");
 		        s_logger.debug("current wpa_supplicant.conf: key_mgmt={}", keyMgmt);
 		        if (keyMgmt != null && keyMgmt.equalsIgnoreCase("WPA-PSK")) {
-		        	password = getPassphrase(ifaceName);
+		        	password = WifiVisitorUtil.getPassphrase(ifaceName, WifiMode.INFRA);
 		        	s_logger.warn("<IAB> getWifiClientConfig() :: password is: {}", password );
 		            if (proto != null) {
 						if(proto.trim().equals("WPA")) {
@@ -224,7 +219,7 @@ public class WpaSupplicantConfigReader implements NetworkConfigurationVisitor {
 						wifiSecurity = WifiSecurity.SECURITY_WPA2;
 					}
 		        } else {
-		        	password = getPassphrase(ifaceName);
+		        	password = WifiVisitorUtil.getPassphrase(ifaceName, WifiMode.INFRA);
 		            if (password != null) {
 		                wifiSecurity = WifiSecurity.SECURITY_WEP;
 		            } else {
@@ -341,29 +336,4 @@ public class WpaSupplicantConfigReader implements NetworkConfigurationVisitor {
 
         return props;
     }
-    
-    private static String getPassphrase (String ifaceName) throws KuraException {
-    	String passphrase = null;
-		ConfigurationService cs = getConfigurationService();
-		if (cs != null) {
-			ComponentConfiguration cc = cs.getConfigurableComponentConfiguration("org.eclipse.kura.net.admin.NetworkConfigurationService");
-			Map<String, Object> props = cc.getConfigurationProperties();
-			StringBuilder sb = new StringBuilder();
-			sb.append("net.interface.").append(ifaceName).append(".config.wifi.infra.passphrase");
-			passphrase = (String)props.get(sb.toString());
-		}
-		return passphrase;
-	}
-	
-	private static ConfigurationService getConfigurationService() {
-		ConfigurationService cs = null;
-		BundleContext bundleContext = FrameworkUtil.getBundle(HostapdConfigReader.class).getBundleContext();
-		if(bundleContext != null) {
-			ServiceReference<ConfigurationService> sr = bundleContext.getServiceReference(ConfigurationService.class);
-			if (sr != null) {
-				cs = bundleContext.getService(sr);
-			}
-		}
-		return cs;
-	}
 }

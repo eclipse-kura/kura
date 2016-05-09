@@ -35,6 +35,7 @@ import org.eclipse.kura.net.NetInterfaceConfig;
 import org.eclipse.kura.net.NetInterfaceStatus;
 import org.eclipse.kura.net.NetInterfaceType;
 import org.eclipse.kura.net.admin.visitor.linux.util.KuranetConfig;
+import org.eclipse.kura.net.admin.visitor.linux.util.WifiVisitorUtil;
 import org.eclipse.kura.net.admin.visitor.linux.util.WpaSupplicantUtil;
 import org.eclipse.kura.net.wifi.WifiCiphers;
 import org.eclipse.kura.net.wifi.WifiConfig;
@@ -230,10 +231,11 @@ public class WpaSupplicantConfigWriter implements NetworkConfigurationVisitor {
 				throw KuraException.internalError("the essid can not be null");
 			}
 			
-			// TODO
-			// validate passkey but don't add it to configuration file
+			// validate passkey but add it to snapshot and not to configuration file
 			wifiConfig.getPasskey().validate(wifiConfig.getSecurity());
 			fileAsString = fileAsString.replaceFirst("KURA_WEP_KEY", "");
+			WifiVisitorUtil.setPassphrase(wifiConfig.getPasskey().toString(), interfaceName, WifiMode.INFRA);
+			
 			if (wifiConfig.getBgscan() != null) {
 				fileAsString = fileAsString.replaceFirst("KURA_BGSCAN",
 						wifiConfig.getBgscan().toString());
@@ -279,10 +281,10 @@ public class WpaSupplicantConfigWriter implements NetworkConfigurationVisitor {
 				throw KuraException.internalError("the essid can not be null");
 			}
 			
-			// TODO
-			// validate passkey but don't add it to configuration file
+			// validate passkey but add it to snapshot and not to configuration file
 			wifiConfig.getPasskey().validate(wifiConfig.getSecurity());
 			fileAsString = fileAsString.replaceFirst("KURA_PASSPHRASE", "");
+			WifiVisitorUtil.setPassphrase(wifiConfig.getPasskey().toString(), interfaceName, WifiMode.INFRA);
 						
 			if(wifiConfig.getSecurity() == WifiSecurity.SECURITY_WPA) {
 				fileAsString = fileAsString.replaceFirst("KURA_PROTO", "WPA");

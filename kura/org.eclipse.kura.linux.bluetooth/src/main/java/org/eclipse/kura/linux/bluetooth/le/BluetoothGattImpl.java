@@ -39,7 +39,6 @@ public class BluetoothGattImpl implements BluetoothGatt, BluetoothProcessListene
 
 	private final String REGEX_NOT_CONNECTED   = "\\[\\s{3}\\].*>$";
 	private final String REGEX_CONNECTED       = ".*\\[CON\\].*>$";
-	private final String REGEX_CONNECTED_2     = ".*Connection successful.*$";
 //	private final String REGEX_SERVICES        = "attr.handle\\:.*[0-9|a-f|A-F]{8}(-[0-9|a-f|A-F]{4}){3}-[0-9|a-f|A-F]{12}$";
 //	private final String REGEX_CHARACTERISTICS = "handle.*properties.*value\\shandle.*uuid\\:\\s[0-9|a-f|A-F]{8}(-[0-9|a-f|A-F]{4}){3}-[0-9|a-f|A-F]{12}$";
 	private final String REGEX_READ_CHAR       = "Characteristic\\svalue/descriptor\\:[\\s|0-9|a-f|A-F]*";
@@ -300,7 +299,7 @@ public class BluetoothGattImpl implements BluetoothGatt, BluetoothProcessListene
 			m_connected = true;
 		}
 		// the other type of gatttool prompt indicates connected
-		else if (line.matches(REGEX_CONNECTED_2)) {
+		else if (line.contains("Connection successful")) {
 			m_ready = true;
 			m_connected = true;
 		}

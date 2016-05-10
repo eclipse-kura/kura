@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.cloud.CloudClient;
 import org.eclipse.kura.cloud.CloudService;
 import org.eclipse.kura.cloud.Cloudlet;
 import org.eclipse.kura.cloud.CloudletTopic;
@@ -44,7 +45,14 @@ import com.google.common.collect.Lists;
 
 /**
  * The Class DeviceCloudlet is used to provide MQTT read/write operations on the
- * device
+ * device. The application id is configured as "DEV-CLOUD"
+ *
+ * @see Cloudlet
+ * @see CloudClient
+ * @see DeviceCloudlet#doGet(CloudletTopic, KuraRequestPayload,
+ *      KuraResponsePayload)
+ * @see DeviceCloudlet#doExec(CloudletTopic, KuraRequestPayload,
+ *      KuraResponsePayload)
  */
 @Beta
 public final class DeviceCloudlet extends Cloudlet {
@@ -158,7 +166,7 @@ public final class DeviceCloudlet extends Cloudlet {
 	@Override
 	protected void doExec(final CloudletTopic reqTopic, final KuraRequestPayload reqPayload,
 			final KuraResponsePayload respPayload) throws KuraException {
-		s_logger.info("Cloudlet EXEC Request received on the Device Cloudlet");
+		s_logger.info("Cloudlet EXEC Request received on the Device Cloudlet....");
 		// Checks if the operation name "read", the name of the device and the
 		// name of the channel are provided
 		if ("read".equals(reqTopic.getResources()[0]) && (reqTopic.getResources().length > 2)) {
@@ -202,7 +210,7 @@ public final class DeviceCloudlet extends Cloudlet {
 				}
 			}
 		}
-		s_logger.info("Cloudlet GET Request received on the Device Cloudlet");
+		s_logger.info("Cloudlet GET Request received on the Device Cloudlet....Done");
 	}
 
 	/**

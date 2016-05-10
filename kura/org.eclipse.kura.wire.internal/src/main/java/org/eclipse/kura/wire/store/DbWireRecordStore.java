@@ -50,15 +50,17 @@ import org.osgi.service.wireadmin.Wire;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.annotations.Beta;
 import com.google.common.base.Throwables;
 
 /**
  * The Class DbWireRecordStore is a wire component which is responsible to store
  * the received Wire Record
  */
+@Beta
 public final class DbWireRecordStore implements WireEmitter, WireReceiver, ConfigurableComponent {
 
-	/** The Constant COLUMN_NAME. */
+	/** The Constant denoting name of the column. */
 	private static final String COLUMN_NAME = "COLUMN_NAME";
 
 	/**
@@ -77,19 +79,19 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
 	/** The Logger. */
 	private static final Logger s_logger = LoggerFactory.getLogger(DbWireRecordStore.class);
 
-	/** The Constant denoting add column. */
+	/** The Constant denoting query to add column. */
 	private static final String SQL_ADD_COLUMN = "ALTER TABLE DR_{0} ADD COLUMN {1} {2};";
 
-	/** The Constant denoting create table. */
+	/** The Constant denoting denoting query to create table. */
 	private static final String SQL_CREATE_TABLE = "CREATE TABLE IF NOT EXISTS DR_{0} (timestamp TIMESTAMP);";
 
-	/** The Constant denoting drop column. */
+	/** The Constant denoting denoting query to drop column. */
 	private static final String SQL_DROP_COLUMN = "ALTER TABLE DR_{0} DROP COLUMN {1};";
 
-	/** The Constant denoting insert record. */
+	/** The Constant denoting denoting query to insert record. */
 	private static final String SQL_INSERT_RECORD = "INSERT INTO DR_{0} ({1}) VALUES ({2});";
 
-	/** The Component COntext. */
+	/** The Component Context. */
 	private ComponentContext m_ctx;
 
 	/** The DB Service. */
@@ -151,7 +153,7 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
 	 * Closes the connection
 	 *
 	 * @param conn
-	 *            the conn
+	 *            the connection instance
 	 */
 	private void close(final Connection conn) {
 		this.m_dbService.close(conn);
@@ -161,7 +163,7 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
 	 * Closes the connection
 	 *
 	 * @param rss
-	 *            the rss
+	 *            the result set
 	 */
 	private void close(final ResultSet... rss) {
 		this.m_dbService.close(rss);
@@ -171,7 +173,7 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
 	 * Closes the connection
 	 *
 	 * @param stmts
-	 *            the stmts
+	 *            the statements
 	 */
 	private void close(final Statement... stmts) {
 		this.m_dbService.close(stmts);
@@ -202,14 +204,14 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
 	/**
 	 * Escapes sql string
 	 *
-	 * @param s
+	 * @param string
 	 *            the string to be filtered
 	 * @return the escaped string
 	 */
-	private String escapeSql(final String s) {
+	private String escapeSql(final String string) {
 		// The escaping java mechanism is used as it conforms to the generic
 		// standard that Java also follows
-		return StringEscapeUtils.escapeJava(s);
+		return StringEscapeUtils.escapeJava(string);
 	}
 
 	/**
@@ -226,7 +228,6 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
 		Connection conn = null;
 		PreparedStatement stmt = null;
 		try {
-
 			conn = this.getConnection();
 			stmt = conn.prepareStatement(sql);
 			for (int i = 0; i < params.length; i++) {
@@ -240,7 +241,6 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
 		} finally {
 			this.close(stmt);
 			this.close(conn);
-			stmt.close();
 		}
 	}
 
@@ -302,7 +302,6 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
 		Connection conn = null;
 		PreparedStatement stmt = null;
 		try {
-
 			conn = this.getConnection();
 			stmt = conn.prepareStatement(sqlInsert);
 			stmt.setTimestamp(1, new Timestamp(dataRecord.getTimestamp().getTime()));
@@ -471,7 +470,7 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
 	 * @param dbService
 	 *            the new db service
 	 */
-	public void setDbService(final DbService dbService) {
+	public synchronized void setDbService(final DbService dbService) {
 		this.m_dbService = dbService;
 	}
 
@@ -488,7 +487,6 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
 		int retryCount = 0;
 		do {
 			try {
-
 				// store the record
 				this.insertDataRecord(emitterId, dataRecord);
 				inserted = true;
@@ -510,7 +508,7 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
 	 * @param dataService
 	 *            the data service
 	 */
-	public void unsetDbService(final DbService dataService) {
+	public synchronized void unsetDbService(final DbService dataService) {
 		this.m_dbService = null;
 	}
 

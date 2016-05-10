@@ -345,7 +345,7 @@ public final class CloudPublisherImpl
 	 * @param cloudService
 	 *            the new cloud service
 	 */
-	public void setCloudService(final CloudService cloudService) {
+	public synchronized void setCloudService(final CloudService cloudService) {
 		this.m_cloudService = cloudService;
 	}
 
@@ -355,7 +355,7 @@ public final class CloudPublisherImpl
 	 * @param dataService
 	 *            the new data service
 	 */
-	public void setDataService(final DataService dataService) {
+	public synchronized void setDataService(final DataService dataService) {
 		this.m_dataService = dataService;
 	}
 
@@ -403,7 +403,7 @@ public final class CloudPublisherImpl
 	 * @param cloudService
 	 *            the cloud service
 	 */
-	public void unsetCloudService(final CloudService cloudService) {
+	public synchronized void unsetCloudService(final CloudService cloudService) {
 		this.m_cloudService = null;
 	}
 
@@ -413,7 +413,7 @@ public final class CloudPublisherImpl
 	 * @param dataService
 	 *            the data service
 	 */
-	public void unsetDataService(final DataService dataService) {
+	public synchronized void unsetDataService(final DataService dataService) {
 		this.m_dataService = null;
 	}
 

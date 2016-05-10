@@ -12,13 +12,15 @@
  */
 package org.eclipse.kura.wire.cloud.publisher;
 
-import java.util.Date;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import org.eclipse.kura.data.DataService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.base.Throwables;
 
 /**
  * The Class CloudPublisherDisconnectManager manages the disconnection with
@@ -29,20 +31,17 @@ public final class CloudPublisherDisconnectManager {
 	/** The Logger instance. */
 	private static final Logger s_logger = LoggerFactory.getLogger(CloudPublisherDisconnectManager.class);
 
-	/** The Constant denotes timer name. */
-	private static final String TIMER_NAME = "CloudPublisherDisconnectManager";
-
 	/** The data service dependency. */
 	private final DataService m_dataService;
+
+	/** Schedule Executor Service **/
+	private final ScheduledExecutorService m_executorService;
 
 	/** The next execution time. */
 	private long m_nextExecutionTime;
 
 	/** The quiece timeout. */
 	private long m_quieceTimeout;
-
-	/** The timer instance. */
-	private Timer m_timer;
 
 	/**
 	 * Instantiates a new cloud publisher disconnect manager.
@@ -56,6 +55,7 @@ public final class CloudPublisherDisconnectManager {
 		this.m_dataService = dataService;
 		this.m_quieceTimeout = quieceTimeout;
 		this.m_nextExecutionTime = 0;
+		this.m_executorService = Executors.newScheduledThreadPool(1);
 	}
 
 	/**
@@ -65,12 +65,11 @@ public final class CloudPublisherDisconnectManager {
 	 *            the minutes
 	 */
 	public synchronized void disconnectInMinutes(final int minutes) {
-		// check if the required timeout is longer than the one already
-		// scheduled
+		// check if the required timeout is longer than the scheduled one
 		final long remainingDelay = this.m_nextExecutionTime - System.currentTimeMillis();
 		final long requiredDelay = (long) minutes * 60 * 1000;
 		if (requiredDelay > remainingDelay) {
-			this.scheduleNewTimer(requiredDelay);
+			this.schedule(requiredDelay);
 		}
 	}
 
@@ -84,25 +83,18 @@ public final class CloudPublisherDisconnectManager {
 	}
 
 	/**
-	 * Schedule new timer.
+	 * Schedule new schedule thread pool executor with the specified delay
 	 *
 	 * @param delay
 	 *            the delay
 	 */
-	private void scheduleNewTimer(final long delay) {
+	private void schedule(final long delay) {
 		// cancel existing timer
-		if (this.m_timer != null) {
-			this.m_timer.cancel();
+		if (this.m_executorService != null) {
+			this.m_executorService.shutdown();
 		}
 
-		// calculate next execution
-		s_logger.info("Scheduling disconnect in {} msec...", delay);
-		this.m_nextExecutionTime = System.currentTimeMillis() + delay;
-
-		// start new timer
-		this.m_timer = new Timer(TIMER_NAME);
-		this.m_timer.schedule(new TimerTask() {
-
+		this.m_executorService.schedule(new Runnable() {
 			@Override
 			public void run() {
 				// disconnect
@@ -110,15 +102,13 @@ public final class CloudPublisherDisconnectManager {
 					CloudPublisherDisconnectManager.this.m_dataService
 							.disconnect(CloudPublisherDisconnectManager.this.m_quieceTimeout);
 				} catch (final Exception e) {
-					s_logger.warn("Error disconnecting", e);
+					s_logger.warn("Error while disconnecting..." + Throwables.getRootCause(e));
 				}
-
-				// cleanup
-				CloudPublisherDisconnectManager.this.m_timer = null;
+				// cleaning up
 				CloudPublisherDisconnectManager.this.m_nextExecutionTime = 0;
 			}
+		}, delay, TimeUnit.MILLISECONDS);
 
-		}, new Date(this.m_nextExecutionTime));
 	}
 
 	/**
@@ -132,14 +122,13 @@ public final class CloudPublisherDisconnectManager {
 	}
 
 	/**
-	 * Stops the timer
+	 * Stops the scheduler thread pool
 	 */
 	public synchronized void stop() {
-		// cancel existing timer
-		if (this.m_timer != null) {
-			this.m_timer.cancel();
+		s_logger.info("Scheduler stopping....");
+		if (this.m_executorService != null) {
+			this.m_executorService.shutdown();
 		}
-
-		s_logger.info("Stopped.");
+		s_logger.info("Scheduler stopping....Done");
 	}
 }

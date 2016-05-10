@@ -35,23 +35,23 @@ import com.google.common.base.Throwables;
  */
 public final class WireSeviceTracker extends ServiceTracker<Object, Object> {
 
-	/** The Constant s_logger. */
+	/** The Logger. */
 	private static final Logger s_logger = LoggerFactory.getLogger(WireSeviceTracker.class);
 
-	/** The m_wire emitters. */
+	/** The wire emitters. */
 	private final List<String> m_wireEmitters;
 
-	/** The m_wire receivers. */
+	/** The wire receivers. */
 	private final List<String> m_wireReceivers;
 
-	/** The m_wire service. */
+	/** The wire service. */
 	private final WireServiceImpl m_wireService;
 
 	/**
 	 * Instantiates a new wire service tracker.
 	 *
 	 * @param context
-	 *            the context
+	 *            the bundle context
 	 * @param wireService
 	 *            the wire service
 	 * @throws InvalidSyntaxException

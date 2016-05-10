@@ -32,15 +32,15 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Throwables;
 
 /**
- * The Class Timer represents a Wire Component which triggers an event on every
- * interval as configured.
+ * The Class Timer represents a Wire Component which triggers a ticking event on every
+ * interval as configured. It fires the event on every tick.
  */
 public final class Timer implements WireEmitter, ConfigurableComponent {
 
-	/** The Constant PROP_INTERVAL denoting the property from the metatype */
+	/** The Constant denoting the interval property from the metatype */
 	private static final String PROP_INTERVAL = "interval";
 
-	/** The Constant PROP_TIMER_NAME denoting the property from the metatype */
+	/** The Constant denoting the name property from the metatype */
 	private static final String PROP_TIMER_NAME = "name";
 
 	/** The Logger instance. */
@@ -79,15 +79,13 @@ public final class Timer implements WireEmitter, ConfigurableComponent {
 	 * OSGi service component activation callback
 	 *
 	 * @param ctx
-	 *            the ctx component context
+	 *            the component context
 	 * @param properties
-	 *            the properties
+	 *            the configured properties
 	 */
 	protected void activate(final ComponentContext ctx, final Map<String, Object> properties) {
 		s_logger.info("Activating Wire timer...");
-
 		this.m_properties = properties;
-
 		this.doUpdate();
 	}
 
@@ -101,7 +99,7 @@ public final class Timer implements WireEmitter, ConfigurableComponent {
 	 * OSGi service component deactivation callback
 	 *
 	 * @param ctx
-	 *            the ctx component context
+	 *            the component context
 	 */
 	protected void deactivate(final ComponentContext ctx) {
 		s_logger.info("Deactivating Wire timer...");
@@ -134,9 +132,9 @@ public final class Timer implements WireEmitter, ConfigurableComponent {
 					try {
 						TimeUnit.SECONDS.sleep(Timer.this.m_interval);
 					} catch (final InterruptedException e) {
-						s_logger.error(Throwables.getStackTraceAsString(e));
+						s_logger.error(Throwables.getRootCause(e).getMessage());
 					}
-					Timer.this.m_wireSupport.emit(
+					m_wireSupport.emit(
 							new WireRecord(new WireField(TIMER_EVENT_FIELD_NAME, new StringValue(Timer.this.m_name))));
 				}
 			}
@@ -158,8 +156,8 @@ public final class Timer implements WireEmitter, ConfigurableComponent {
 	/**
 	 * OSGi service component modification callback
 	 *
-	 * @param ctx
-	 *            the ctx component context
+	 * @param properties
+	 *            the updated properties
 	 */
 	protected void updated(final Map<String, Object> properties) {
 		s_logger.info("Updating Wire timer...");

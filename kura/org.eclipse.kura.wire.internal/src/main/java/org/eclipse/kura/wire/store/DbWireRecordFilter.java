@@ -14,40 +14,28 @@ package org.eclipse.kura.wire.store;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
 import java.util.Map;
 
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.db.DbService;
-import org.eclipse.kura.type.BooleanValue;
-import org.eclipse.kura.type.ByteArrayValue;
-import org.eclipse.kura.type.ByteValue;
-import org.eclipse.kura.type.DataType;
-import org.eclipse.kura.type.DoubleValue;
-import org.eclipse.kura.type.IntegerValue;
-import org.eclipse.kura.type.LongValue;
-import org.eclipse.kura.type.ShortValue;
-import org.eclipse.kura.type.StringValue;
 import org.eclipse.kura.wire.WireEmitter;
 import org.eclipse.kura.wire.WireEnvelope;
-import org.eclipse.kura.wire.WireField;
 import org.eclipse.kura.wire.WireReceiver;
-import org.eclipse.kura.wire.WireRecord;
 import org.eclipse.kura.wire.WireSupport;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.wireadmin.Wire;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.annotations.Beta;
+
 /**
  * The Class DbWireRecordFilter is responsible for representing a wire component
  * which is mainly used to filter records as received by wire record
  */
+@Beta
 public final class DbWireRecordFilter implements WireEmitter, WireReceiver, ConfigurableComponent {
 
 	/** The Constant s_logger. */
@@ -81,7 +69,6 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Conf
 		s_logger.info("Activating DB Wire Record Filter...");
 		this.m_ctx = componentContext;
 		this.m_wireSupport = WireSupport.of(this);
-
 		this.m_options = new DbWireRecordFilterOptions(properties);
 		s_logger.info("Activating DB Wire Record Filter...Done");
 	}
@@ -182,89 +169,6 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Conf
 	}
 
 	/**
-	 * Refresh data view.
-	 *
-	 * @return the list
-	 * @throws SQLException
-	 *             the SQL exception
-	 */
-	private List<WireRecord> refreshDataView() throws SQLException {
-		final Date now = new Date();
-		final List<WireRecord> dataRecords = new ArrayList<WireRecord>();
-		Connection conn = null;
-		Statement stmt = null;
-		ResultSet rset = null;
-		final String sqlView = this.m_options.getSqlView();
-		try {
-
-			conn = this.getConnection();
-			stmt = conn.createStatement();
-			rset = stmt.executeQuery(sqlView);
-			if (rset != null) {
-				while (rset.next()) {
-
-					final List<WireField> dataFields = new ArrayList<WireField>();
-					final ResultSetMetaData rmet = rset.getMetaData();
-					for (int i = 1; i <= rmet.getColumnCount(); i++) {
-
-						String fieldName = rmet.getColumnLabel(i);
-						if (fieldName == null) {
-							fieldName = rmet.getColumnName(i);
-						}
-
-						WireField dataField = null;
-
-						final int jdbcType = rmet.getColumnType(i);
-						final DataType dataType = DbDataTypeMapper.getDataType(jdbcType);
-						switch (dataType) {
-						case BOOLEAN:
-							final boolean boolValue = rset.getBoolean(i);
-							dataField = new WireField(fieldName, new BooleanValue(boolValue));
-							break;
-						case BYTE:
-							final byte byteValue = rset.getByte(i);
-							dataField = new WireField(fieldName, new ByteValue(byteValue));
-							break;
-						case DOUBLE:
-							final double doubleValue = rset.getDouble(i);
-							dataField = new WireField(fieldName, new DoubleValue(doubleValue));
-							break;
-						case INTEGER:
-							final int intValue = rset.getInt(i);
-							dataField = new WireField(fieldName, new IntegerValue(intValue));
-							break;
-						case LONG:
-							final long longValue = rset.getLong(i);
-							dataField = new WireField(fieldName, new LongValue(longValue));
-							break;
-						case BYTE_ARRAY:
-							final byte[] bytesValue = rset.getBytes(i);
-							dataField = new WireField(fieldName, new ByteArrayValue(bytesValue));
-							break;
-						case SHORT:
-							final short shortValue = rset.getShort(i);
-							dataField = new WireField(fieldName, new ShortValue(shortValue));
-							break;
-						case STRING:
-							final String stringValue = rset.getString(i);
-							dataField = new WireField(fieldName, new StringValue(stringValue));
-							break;
-						}
-						dataFields.add(dataField);
-					}
-					dataRecords.add(new WireRecord(now, dataFields));
-				}
-			}
-		} finally {
-			this.close(rset);
-			this.close(stmt);
-			this.close(conn);
-		}
-
-		return dataRecords;
-	}
-
-	/**
 	 * Sets the db service.
 	 *
 	 * @param dbService
@@ -275,10 +179,10 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Conf
 	}
 
 	/**
-	 * Unset db service.
+	 * Unset Db service.
 	 *
 	 * @param dataService
-	 *            the data service
+	 *            the DB service
 	 */
 	public synchronized void unsetDbService(final DbService dataService) {
 		this.m_dbService = null;
@@ -288,7 +192,7 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Conf
 	 * OSGi service component callback for updating
 	 *
 	 * @param properties
-	 *            the properties
+	 *            the updated properties
 	 */
 	public synchronized void updated(final Map<String, Object> properties) {
 		s_logger.info("Updating DBWireRecordFilter..." + properties);

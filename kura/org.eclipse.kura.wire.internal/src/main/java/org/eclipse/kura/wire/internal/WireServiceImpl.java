@@ -103,19 +103,16 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 
 		this.m_ctx = componentContext;
 		try {
-
 			m_options = WireServiceOptions.newInstance(properties);
 			this.m_properties = properties;
 
 			for (final WireConfiguration conf : m_options.getWireConfigurations()) {
 				this.m_wireConfig.add(conf);
 			}
-
 			this.m_serviceTracker = new WireSeviceTracker(this.m_ctx.getBundleContext(), this);
 			this.m_serviceTracker.open();
 
 			this.createWires();
-
 		} catch (final JSONException jsone) {
 			throw new ComponentException(jsone);
 		} catch (final InvalidSyntaxException e) {
@@ -136,7 +133,7 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 	 */
 	private String createComponentFromProperty(final String value, final String name) {
 		final String[] tokens = value.split("\\|");
-		if (tokens[0].equals("FACTORY")) {
+		if ("FACTORY".equals(tokens[0])) {
 			return this.createWireComponent(tokens[1], name);
 		} else {
 			return tokens[1];
@@ -144,7 +141,7 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 	}
 
 	/**
-	 * Creates the wire between the provider wire emitter and wire receiver
+	 * Creates the wire between the provided wire emitter and wire receiver
 	 *
 	 * @param emitterName
 	 *            the wire emitter name
@@ -235,6 +232,7 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 	 */
 	protected synchronized void deactivate(final ComponentContext componentContext) {
 		s_logger.info("Deactivating Wire Service Component..");
+		this.m_configService = null;
 		s_logger.info("Deactivating Wire Service Component..Done");
 	}
 

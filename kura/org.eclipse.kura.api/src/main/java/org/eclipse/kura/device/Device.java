@@ -15,6 +15,7 @@ package org.eclipse.kura.device;
 import java.util.List;
 
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.KuraRuntimeException;
 
 /**
  * This interface provides higher level abstraction to operate or perform
@@ -42,19 +43,20 @@ public interface Device {
 	 * @param channelNames
 	 *            the list of channel names which are to be read. The channel
 	 *            names for a device must be unique for every channel.
-	 * @throws KuraException
+	 * @throws KuraRuntimeException
 	 *             if the method is not implemented by the device then specific
 	 *             error code {@code KuraErrorCode#OPERATION_NOT_SUPPORTED}
-	 *             needs to be set in the thrown {@link KuraException} and if
-	 *             the connection to the device was interrupted, then error code
-	 *             {@code KuraErrorCode#CONNECTION_FAILED} needs to be set in
-	 *             the thrown {@link KuraException}. For any other internal
+	 *             needs to be set in the thrown {@link KuraRuntimeException}
+	 * @throws KuraException
+	 *             if the connection to the device was interrupted, then error
+	 *             code {@code KuraErrorCode#CONNECTION_FAILED} needs to be set
+	 *             in the thrown {@link KuraException}. For any other internal
 	 *             exception, the error code
 	 *             {@code KuraErrorCode#INTERNAL_ERROR} will be set.
 	 * @return the list of device records which comprises the currently read
 	 *         value in case of success or the reason of failure
 	 */
-	public List<DeviceRecord> read(List<String> channelNames) throws KuraException;
+	public List<DeviceRecord> read(List<String> channelNames) throws KuraRuntimeException, KuraException;
 
 	/**
 	 * Registers device listener for the provided channel name for a monitor
@@ -65,19 +67,21 @@ public interface Device {
 	 *            unique for every channel.
 	 * @param deviceListener
 	 *            the device listener
-	 * @throws KuraException
+	 * @throws KuraRuntimeException
 	 *             if the method is not implemented by the device then specific
 	 *             error code {@code KuraErrorCode#OPERATION_NOT_SUPPORTED}
-	 *             needs to be set in the thrown {@link KuraException} and if
-	 *             the connection to the device was interrupted, then error code
-	 *             {@code KuraErrorCode#CONNECTION_FAILED} needs to be set in
-	 *             the thrown {@link KuraException} and if the channel is not
+	 *             needs to be set in the thrown {@link KuraRuntimeException}
+	 * @throws KuraException
+	 *             if the connection to the device was interrupted, then error
+	 *             code {@code KuraErrorCode#CONNECTION_FAILED} needs to be set
+	 *             in the thrown {@link KuraException} and if the channel is not
 	 *             present, error code {@code KuraErrorCode#INTERNAL_ERROR}
 	 *             needs to be set in the thrown {@link KuraException}. For any
 	 *             other internal exception, then error code
 	 *             {@code KuraErrorCode#INTERNAL_ERROR} will be set.
 	 */
-	public void registerDeviceListener(String channelName, DeviceListener deviceListener) throws KuraException;
+	public void registerDeviceListener(String channelName, DeviceListener deviceListener)
+			throws KuraRuntimeException, KuraException;
 
 	/**
 	 * Unregisters a already registered device listener which has been
@@ -85,14 +89,15 @@ public interface Device {
 	 *
 	 * @param deviceListener
 	 *            the device listener to unregister
-	 * @throws KuraException
+	 * @throws KuraRuntimeException
 	 *             if the method is not implemented by the device then specific
 	 *             error code {@code KuraErrorCode#OPERATION_NOT_SUPPORTED}
-	 *             needs to be set in the thrown {@link KuraException}. For any
-	 *             other internal exception, the error code
+	 *             needs to be set in the thrown {@link KuraRuntimeException}
+	 * @throws KuraException
+	 *             For any other internal exception, then error code
 	 *             {@code KuraErrorCode#INTERNAL_ERROR} will be set.
 	 */
-	public void unregisterDeviceListener(DeviceListener deviceListener) throws KuraException;
+	public void unregisterDeviceListener(DeviceListener deviceListener) throws KuraRuntimeException, KuraException;
 
 	/**
 	 * Writes the data to the provided communication channels that correspond to
@@ -108,18 +113,21 @@ public interface Device {
 	 *            written and the values that are to be written. They will be
 	 *            filled by this function with a device flag stating whether the
 	 *            write process is successful or not.
-	 * @throws KuraException
+	 * @throws KuraRuntimeException
 	 *             if the method is not implemented by the device then specific
 	 *             error code {@code KuraErrorCode#OPERATION_NOT_SUPPORTED}
-	 *             needs to be set in the thrown {@link KuraException} and if
-	 *             the connection to the device was interrupted, then error code
-	 *             {@code KuraErrorCode#CONNECTION_FAILED} needs to be set in
-	 *             the thrown {@link Exception}. For any other internal
-	 *             exception, then error code
+	 *             needs to be set in the thrown {@link KuraRuntimeException}
+	 * @throws KuraException
+	 *             if the connection to the device was interrupted, then error
+	 *             code {@code KuraErrorCode#CONNECTION_FAILED} needs to be set
+	 *             in the thrown {@link KuraException} and if the channel is not
+	 *             present, error code {@code KuraErrorCode#INTERNAL_ERROR}
+	 *             needs to be set in the thrown {@link KuraException}. For any
+	 *             other internal exception, then error code
 	 *             {@code KuraErrorCode#INTERNAL_ERROR} will be set.
 	 * @return the list of device records which comprises the status of the
 	 *         write operations
 	 */
-	public List<DeviceRecord> write(List<DeviceRecord> deviceRecords) throws KuraException;
+	public List<DeviceRecord> write(List<DeviceRecord> deviceRecords) throws KuraRuntimeException, KuraException;
 
 }

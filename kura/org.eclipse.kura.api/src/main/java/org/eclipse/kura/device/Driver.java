@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.KuraRuntimeException;
 
 /**
  * The Interface Driver is the main interface that all Kura specific
@@ -83,17 +84,20 @@ public interface Driver {
 	 *            the records hold the information of what channels are to be
 	 *            read. They will be filled by this function with the records
 	 *            read.
-	 * @throws KuraException
+	 * @throws KuraRuntimeException
 	 *             if the method is not implemented by the driver then specific
 	 *             error code {@code KuraErrorCode#OPERATION_NOT_SUPPORTED}
-	 *             needs to be set in the thrown {@link KuraException} and if
-	 *             the connection to the device was interrupted, then error code
-	 *             {@code KuraErrorCode#CONNECTION_FAILED} needs to be set in
-	 *             the thrown {@link KuraException}. For any other internal
-	 *             exception, the error code
+	 *             needs to be set in the thrown {@link KuraRuntimeException}
+	 * @throws KuraException
+	 *             if the connection to the device was interrupted, then error
+	 *             code {@code KuraErrorCode#CONNECTION_FAILED} needs to be set
+	 *             in the thrown {@link KuraException} and if the channel is not
+	 *             present, error code {@code KuraErrorCode#INTERNAL_ERROR}
+	 *             needs to be set in the thrown {@link KuraException}. For any
+	 *             other internal exception, then error code
 	 *             {@code KuraErrorCode#INTERNAL_ERROR} will be set.
 	 */
-	public void read(List<DriverRecord> records) throws KuraException;
+	public void read(List<DriverRecord> records) throws KuraRuntimeException, KuraException;
 
 	/**
 	 * Registers driver listener for the provided channel configuration for a
@@ -103,17 +107,21 @@ public interface Driver {
 	 *            the channel configuration
 	 * @param listener
 	 *            the listener
-	 * @throws KuraException
+	 * @throws KuraRuntimeException
 	 *             if the method is not implemented by the driver then specific
 	 *             error code {@code KuraErrorCode#OPERATION_NOT_SUPPORTED}
-	 *             needs to be set in the thrown {@link KuraException} and if
-	 *             the connection to the device was interrupted, then error code
-	 *             {@code KuraErrorCode#CONNECTION_FAILED} needs to be set in
-	 *             the thrown {@link KuraException}. For any other internal
-	 *             exception, the error code
+	 *             needs to be set in the thrown {@link KuraRuntimeException}
+	 * @throws KuraException
+	 *             if the connection to the device was interrupted, then error
+	 *             code {@code KuraErrorCode#CONNECTION_FAILED} needs to be set
+	 *             in the thrown {@link KuraException} and if the channel is not
+	 *             present, error code {@code KuraErrorCode#INTERNAL_ERROR}
+	 *             needs to be set in the thrown {@link KuraException}. For any
+	 *             other internal exception, then error code
 	 *             {@code KuraErrorCode#INTERNAL_ERROR} will be set.
 	 */
-	public void registerDriverListener(Map<String, Object> channelConfig, DriverListener listener) throws KuraException;
+	public void registerDriverListener(Map<String, Object> channelConfig, DriverListener listener)
+			throws KuraRuntimeException, KuraException;
 
 	/**
 	 * Unregisters a already registered driver listener which has been
@@ -121,14 +129,20 @@ public interface Driver {
 	 *
 	 * @param listener
 	 *            the listener to unregister
-	 * @throws KuraException
+	 * @throws KuraRuntimeException
 	 *             if the method is not implemented by the driver then specific
 	 *             error code {@code KuraErrorCode#OPERATION_NOT_SUPPORTED}
+	 *             needs to be set in the thrown {@link KuraRuntimeException}
+	 * @throws KuraException
+	 *             if the connection to the device was interrupted, then error
+	 *             code {@code KuraErrorCode#CONNECTION_FAILED} needs to be set
+	 *             in the thrown {@link KuraException} and if the channel is not
+	 *             present, error code {@code KuraErrorCode#INTERNAL_ERROR}
 	 *             needs to be set in the thrown {@link KuraException}. For any
-	 *             other internal exception, the error code
+	 *             other internal exception, then error code
 	 *             {@code KuraErrorCode#INTERNAL_ERROR} will be set.
 	 */
-	public void unregisterDriverListener(DriverListener listener) throws KuraException;
+	public void unregisterDriverListener(DriverListener listener) throws KuraRuntimeException, KuraException;
 
 	/**
 	 * Writes the data channels that correspond to the given driver records. The
@@ -143,16 +157,19 @@ public interface Driver {
 	 *            written and the values that are to written. They will be
 	 *            filled by this function with a driver flag stating whether the
 	 *            write process was successful or not.
-	 * @throws KuraException
+	 * @throws KuraRuntimeException
 	 *             if the method is not implemented by the driver then specific
 	 *             error code {@code KuraErrorCode#OPERATION_NOT_SUPPORTED}
-	 *             needs to be set in the thrown {@link KuraException} and if
-	 *             the connection to the device was interrupted, then error code
-	 *             {@code KuraErrorCode#CONNECTION_FAILED} needs to be set in
-	 *             the thrown {@link Exception}. For any other internal
-	 *             exception, the error code
+	 *             needs to be set in the thrown {@link KuraRuntimeException}
+	 * @throws KuraException
+	 *             if the connection to the device was interrupted, then error
+	 *             code {@code KuraErrorCode#CONNECTION_FAILED} needs to be set
+	 *             in the thrown {@link KuraException} and if the channel is not
+	 *             present, error code {@code KuraErrorCode#INTERNAL_ERROR}
+	 *             needs to be set in the thrown {@link KuraException}. For any
+	 *             other internal exception, then error code
 	 *             {@code KuraErrorCode#INTERNAL_ERROR} will be set.
 	 */
-	public void write(List<DriverRecord> records) throws KuraException;
+	public void write(List<DriverRecord> records) throws KuraRuntimeException, KuraException;
 
 }

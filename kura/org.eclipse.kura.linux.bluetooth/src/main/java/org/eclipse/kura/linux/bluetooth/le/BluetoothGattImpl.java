@@ -37,16 +37,16 @@ public class BluetoothGattImpl implements BluetoothGatt, BluetoothProcessListene
 	private final long GATT_SERVICE_TIMEOUT    = 6000;
 	private final long GATT_COMMAND_TIMEOUT    = 2000;
 
-	private final String REGEX_NOT_CONNECTED   = "\\[\\s{3}\\].*>$";
-	private final String REGEX_CONNECTED       = ".*\\[CON\\].*>$";
-//	private final String REGEX_SERVICES        = "attr.handle\\:.*[0-9|a-f|A-F]{8}(-[0-9|a-f|A-F]{4}){3}-[0-9|a-f|A-F]{12}$";
-//	private final String REGEX_CHARACTERISTICS = "handle.*properties.*value\\shandle.*uuid\\:\\s[0-9|a-f|A-F]{8}(-[0-9|a-f|A-F]{4}){3}-[0-9|a-f|A-F]{12}$";
-	private final String REGEX_READ_CHAR       = "Characteristic\\svalue/descriptor\\:[\\s|0-9|a-f|A-F]*";
-	private final String REGEX_READ_CHAR_UUID  = "handle\\:.*value\\:[\\s|0-9|a-f|A-F]*";
-	private final String REGEX_NOTIFICATION    = ".*Notification\\shandle.*value\\:.*[\\n\\r]*";
-	private final String REGEX_ERROR_HANDLE    = "Invalid\\shandle";
-	private final String REGEX_ERROR_UUID      = "Invalid\\sUUID";
-
+	private final String[] NOT_CONNECTED        = {"[   ]", "disconnected", "not connected", "error: connect"};
+    private final String[] CONNECTED            = {"[con]", "connection successful", "usage: mtu <value>"};
+    private final String   SERVICES             = "attr handle:";
+    private final String   CHARACTERISTICS      = "handle:";
+    private final String   READ_CHAR            = "characteristic value/descriptor:";
+    private final String   REGEX_READ_CHAR_UUID = "handle\\:.*value\\:[\\s|0-9|a-f|A-F]*";
+    private final String   NOTIFICATION         = "notification handle";
+    private final String   ERROR_HANDLE         = "invalid handle";
+    private final String[] ERROR_UUID           = {"invalid uuid", "read characteristics by uuid failed: attribute can't be read"};
+	
 	private List<BluetoothGattService> m_bluetoothServices;
 	private List<BluetoothGattCharacteristic> m_bluetoothGattCharacteristics;
 	private BluetoothLeNotificationListener m_listener;
@@ -113,7 +113,8 @@ public class BluetoothGattImpl implements BluetoothGatt, BluetoothProcessListene
 			m_bufferedWriter = m_proc.getWriter();
 			s_logger.info("Check for connection...");
 			m_ready = false;
-			String command = "\n";
+			// Since in Bluez-5.x the connection status is shown by blue text, use mtu command to check connection :-)
+			String command = "mtu\n";
 			sendCmd(command);
 
 			// Wait for connection or timeout
@@ -289,12 +290,12 @@ public class BluetoothGattImpl implements BluetoothGatt, BluetoothProcessListene
 		s_logger.debug("Processing line : "+line);
 			
 		// gatttool prompt indicates not connected, but session started
-		if (line.matches(REGEX_NOT_CONNECTED)) {
+		if (checkString(line.toLowerCase(), NOT_CONNECTED)) {
 			m_connected = false;
 			m_ready = false;
 		}
 		// gatttool prompt indicates connected
-		else if (line.matches(REGEX_CONNECTED)) {
+		else if (checkString(line.toLowerCase(), CONNECTED)) {
 			m_ready = true;
 			m_connected = true;
 		}
@@ -308,7 +309,7 @@ public class BluetoothGattImpl implements BluetoothGatt, BluetoothProcessListene
 			s_logger.info("m_charValueUuid: " + m_charValueUuid);
 		}
 		// services are being returned
-		else if (line.startsWith("attr handle:")){
+		else if (line.toLowerCase().startsWith(SERVICES)) {
 			s_logger.debug("Service : {}", line);
 			// Parse the services line, line is expected to be:
 			// attr handle: 0xnnnn, end grp handle: 0xmmmm uuid: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
@@ -318,12 +319,14 @@ public class BluetoothGattImpl implements BluetoothGatt, BluetoothProcessListene
 			String uuid = attr[8];
 
 			if (m_bluetoothServices != null) {
-				s_logger.debug("Adding new GATT service: " + uuid + ":" + startHandle + ":" + endHandle);
-				m_bluetoothServices.add(new BluetoothGattServiceImpl(uuid, startHandle, endHandle));
+				if (isNewService(uuid)) {
+					s_logger.debug("Adding new GATT service: " + uuid + ":" + startHandle + ":" + endHandle);
+					m_bluetoothServices.add(new BluetoothGattServiceImpl(uuid, startHandle, endHandle));
+				}
 			}
 		}
 		// characteristics are being returned
-		else if (line.startsWith("handle:")){
+		else if (line.toLowerCase().startsWith(CHARACTERISTICS)) {
 			s_logger.debug("Characteristic : {}", line);
 			// Parse the characteristic line, line is expected to be:
 			// handle: 0xnnnn, char properties: 0xmm, char value handle: 0xpppp, uuid: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
@@ -333,13 +336,15 @@ public class BluetoothGattImpl implements BluetoothGatt, BluetoothProcessListene
 			String valueHandle = attr[8].substring(0,  attr[8].length() - 1);
 			String uuid = attr[10].substring(0,  attr[10].length() - 1);
 			if (m_bluetoothGattCharacteristics != null) {
-				s_logger.debug("Adding new GATT characteristic: {}", uuid);
-				s_logger.debug(handle+"  "+properties+"  "+valueHandle);
-				m_bluetoothGattCharacteristics.add(new BluetoothGattCharacteristicImpl(uuid, handle, properties, valueHandle));
+				if (isNewGattCharacteristic(uuid)) {
+					s_logger.debug("Adding new GATT characteristic: {}", uuid);
+					s_logger.debug(handle+"  "+properties+"  "+valueHandle);
+					m_bluetoothGattCharacteristics.add(new BluetoothGattCharacteristicImpl(uuid, handle, properties, valueHandle));
+				}
 			}
 		}
 		// characteristic read by handle returned
-		else if (line.matches(REGEX_READ_CHAR)) {
+		else if (line.toLowerCase().contains(READ_CHAR)) {
 			s_logger.debug("Characteristic value by handle received: {}", line);
 			// Parse the characteristic line, line is expected to be:
 			// Characteristic value/descriptor: <value>
@@ -348,7 +353,7 @@ public class BluetoothGattImpl implements BluetoothGatt, BluetoothProcessListene
 
 		}
 		// receiving notifications, need to notify listener
-		else if (line.matches(REGEX_NOTIFICATION)) {
+		else if (line.toLowerCase().contains(NOTIFICATION)) {
 			s_logger.debug("Receiving notification: " + line);
 			// Parse the characteristic line, line is expected to be:
 			// Notification handle = 0xmmmm value: <value>
@@ -360,15 +365,46 @@ public class BluetoothGattImpl implements BluetoothGatt, BluetoothProcessListene
 			m_listener.onDataReceived(handle, value);
 		}
 		// error reading handle
-		else if (line.matches(REGEX_ERROR_HANDLE)) {
-			s_logger.info("REGEX_ERROR_HANDLE");
+		else if (line.toLowerCase().contains(ERROR_HANDLE)) {
+			s_logger.info("ERROR_HANDLE");
 			m_charValue = "ERROR: Invalid handle!";
 		}
 		// error reading UUID
-		else if (line.matches(REGEX_ERROR_UUID)) {
-			s_logger.info("REGEX_ERROR_UUID");
+		else if (checkString(line.toLowerCase(), ERROR_UUID)) {
+			s_logger.info("ERROR_UUID");
 			m_charValueUuid = "ERROR: Invalid UUID!";
 		}
 
 	}
+	
+	private boolean checkString(String line, String[] lines) {
+
+		for (String item : lines)
+		{
+			if(line.contains(item))
+				return true;
+		}
+		return false;
+
+	}
+	
+	private boolean isNewService(String uuid) {
+		
+		for (BluetoothGattService service : m_bluetoothServices) {
+			if (service.getUuid().toString().equals(uuid))
+				return false;
+		}
+		return true;
+	}
+	
+	private boolean isNewGattCharacteristic(String uuid) {
+		
+		for (BluetoothGattCharacteristic characteristic : m_bluetoothGattCharacteristics) {
+			if (characteristic.getUuid().toString().equals(uuid))
+				return false;
+		}
+		return true;		
+		
+	}
+	
 }

@@ -27,6 +27,8 @@ import org.eclipse.kura.web.shared.service.GwtSecurityService;
 import org.eclipse.kura.web.shared.service.GwtSecurityServiceAsync;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenService;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenServiceAsync;
+import org.eclipse.kura.web.shared.service.GwtStatusService;
+import org.eclipse.kura.web.shared.service.GwtStatusServiceAsync;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
@@ -43,13 +45,15 @@ public class denali implements EntryPoint
 {
 	private static final Messages MSGS = GWT.create(Messages.class);
 	Logger logger = Logger.getLogger(denali.class.getSimpleName());
+	private final GwtStatusServiceAsync gwtStatusService = GWT.create(GwtStatusService.class);
 	private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
 	private final GwtDeviceServiceAsync gwtDeviceService = GWT.create(GwtDeviceService.class);
 	private final GwtSecurityServiceAsync gwtSecurityService = GWT.create(GwtSecurityService.class);
-	
+
 	private final EntryClassUi binder = GWT.create(EntryClassUi.class);
-	
+
 	private boolean isDevelopMode = false;
+	private boolean m_connected;
 
 	/**
 	 * Note, we defer all application initialization code to
@@ -111,35 +115,61 @@ public class denali implements EntryPoint
 							}
 						}
 
-						gwtSecurityService.isDebugMode(new AsyncCallback<Boolean>() {
-
-							public void onFailure(Throwable caught) {
-								FailureHandler.handle(caught, denali.class.getSimpleName());
-								binder.setFooter(gwtSession);
-								binder.initSystemPanel(gwtSession);
-								binder.setSession(gwtSession);
-								binder.initServicesTree();
-								//binder.setDirty(false);
+						gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
+							@Override
+							public void onFailure(Throwable ex) {
+								FailureHandler.handle(ex);
 							}
 
-							public void onSuccess(Boolean result) {
-								if(result){
-									isDevelopMode = true;
-									gwtSession.setDevelopMode(true);
-								}
-								binder.setFooter(gwtSession);
-								binder.initSystemPanel(gwtSession);
-								binder.setSession(gwtSession);
-								binder.initServicesTree();
-								//binder.setDirty(false);
-							}
-						});
+							@Override
+							public void onSuccess(GwtXSRFToken token) {     
+								gwtStatusService.getDeviceConfig(token, gwtSession.isNetAdminAvailable(), new AsyncCallback<ArrayList<GwtGroupedNVPair>>() {
+									public void onFailure(Throwable caught) {
+
+										FailureHandler.handle(caught);
+									}
+									public void onSuccess(ArrayList<GwtGroupedNVPair> pairs) {
+										for (GwtGroupedNVPair result : pairs) {
+											if ("Connection Status".equals(result.getName())) {
+												if ("CONNECTED".equals(result.getValue())) {
+													m_connected = true;
+												} else {
+													m_connected = false;
+												}
+											}
+										}
+										gwtSecurityService.isDebugMode(new AsyncCallback<Boolean>() {
+
+											public void onFailure(Throwable caught) {
+												FailureHandler.handle(caught, denali.class.getSimpleName());
+												binder.setFooter(gwtSession);
+												binder.initSystemPanel(gwtSession, m_connected);
+												binder.setSession(gwtSession);
+												binder.initServicesTree();
+												//binder.setDirty(false);
+											}
+
+											public void onSuccess(Boolean result) {
+												if(result){
+													isDevelopMode = true;
+													gwtSession.setDevelopMode(true);
+												}
+												binder.setFooter(gwtSession);
+												binder.initSystemPanel(gwtSession, m_connected);
+												binder.setSession(gwtSession);
+												binder.initServicesTree();
+												//binder.setDirty(false);
+											}
+										});
+									}
+								});
+							}});
 					}
 
 					public void onFailure(Throwable caught) {
 						FailureHandler.handle(caught, denali.class.getSimpleName());
 						binder.setFooter(new GwtSession());
-						binder.initSystemPanel(new GwtSession());
+						binder.initSystemPanel(new GwtSession(), m_connected);
 						binder.setSession(new GwtSession());
 					}
 				});

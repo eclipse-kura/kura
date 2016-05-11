@@ -1,0 +1,25 @@
+<project name="build_can_dp" default="build-dp" basedir="../../../">
+
+	<target name="build-dp">
+    	<echo message="Building the DP for can" />
+
+		<!-- Create the manifest -->
+		<echo file="${project.build.directory}/org.eclipse.kura.protocol.can_${org.eclipse.kura.protocol.can.version}/dp_stage/META-INF/MANIFEST.MF" append="false">Manifest-Version: 1.0
+DeploymentPackage-SymbolicName: org.eclipse.kura.protocol.can
+DeploymentPackage-Version: ${deployment.package.version}
+
+Name: org.eclipse.kura.protocol.can_${org.eclipse.kura.protocol.can.version}.jar
+Bundle-SymbolicName: org.eclipse.kura.protocol.can
+Bundle-Version: ${org.eclipse.kura.protocol.can.version}</echo>
+
+	<!-- move everything into place -->
+        <copy    file="${project.build.directory}/plugins/org.eclipse.kura.protocol.can_${org.eclipse.kura.protocol.can.version}.jar"
+                 todir="${project.build.directory}/org.eclipse.kura.protocol.can_${org.eclipse.kura.protocol.can.version}/dp_stage" />
+	
+
+        <jar destfile="${project.build.directory}/org.eclipse.kura.protocol.can_${deployment.package.version}.dp"
+		manifest="${project.build.directory}/org.eclipse.kura.protocol.can_${org.eclipse.kura.protocol.can.version}/dp_stage/META-INF/MANIFEST.MF"
+                basedir="${project.build.directory}/org.eclipse.kura.protocol.can_${org.eclipse.kura.protocol.can.version}/dp_stage" />	
+    </target>
+    
+</project>

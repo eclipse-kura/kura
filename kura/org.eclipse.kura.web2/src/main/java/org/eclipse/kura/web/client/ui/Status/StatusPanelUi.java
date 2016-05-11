@@ -61,7 +61,9 @@ public class StatusPanelUi extends Composite {
 	private final GwtStatusServiceAsync gwtStatusService = GWT.create(GwtStatusService.class);
 	private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
 	
-	GwtSession currentSession;
+	private GwtSession currentSession;
+	private ListDataProvider<GwtGroupedNVPair> statusGridProvider = new ListDataProvider<GwtGroupedNVPair>();
+	private EntryClassUi parent;
 
 	@UiField
 	Well statusWell;
@@ -69,7 +71,9 @@ public class StatusPanelUi extends Composite {
 	Button statusRefresh, statusConnect, statusDisconnect;
 	@UiField
 	CellTable<GwtGroupedNVPair> statusGrid = new CellTable<GwtGroupedNVPair>();
-	private ListDataProvider<GwtGroupedNVPair> statusGridProvider = new ListDataProvider<GwtGroupedNVPair>();
+	
+	
+	
 
 	public StatusPanelUi() {
 		logger.log(Level.FINER, "Initializing StatusPanelUi...");
@@ -149,7 +153,6 @@ public class StatusPanelUi extends Composite {
 	// fetch table data
 	public void loadStatusData() {
 		statusGridProvider.getList().clear();
-		
 		EntryClassUi.showWaitModal();
 		gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
 
@@ -179,10 +182,11 @@ public class StatusPanelUi extends Composite {
 										if ("CONNECTED".equals(resultPair.getValue())) {
 											statusConnect.setEnabled(false);
 											statusDisconnect.setEnabled(true);
-										}
-										else {
+											parent.updateConnectionStatusImage(true);
+										} else {
 											statusConnect.setEnabled(true);
 											statusDisconnect.setEnabled(false);
+											parent.updateConnectionStatusImage(false);
 										}
 									}
 									if (!title.equals(resultPair.getGroup())) {
@@ -196,11 +200,13 @@ public class StatusPanelUi extends Composite {
 								statusGridProvider.flush();
 								EntryClassUi.hideWaitModal();
 							}
-
 						});
 			}
-			
 		});
+	}
+	
+	public void setParent(EntryClassUi parent) {
+		this.parent= parent;
 	}
 	
 	private void connectDataService() {

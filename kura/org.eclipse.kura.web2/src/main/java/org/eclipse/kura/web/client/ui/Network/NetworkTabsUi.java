@@ -12,7 +12,6 @@
 package org.eclipse.kura.web.client.ui.Network;
 
 import java.util.ArrayList;
-import java.util.logging.Logger;
 
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.util.MessageUtils;
@@ -42,7 +41,6 @@ public class NetworkTabsUi extends Composite {
 	private static final String IPV4_STATUS_ENABLED_LAN_MESSAGE = MessageUtils.get(GwtNetIfStatus.netIPv4StatusEnabledLAN.name());
 	
 	private static NetworkTabsUiUiBinder uiBinder = GWT.create(NetworkTabsUiUiBinder.class);
-	private static final Logger logger = Logger.getLogger(NetworkTabsUi.class.getSimpleName());
 
 	interface NetworkTabsUiUiBinder extends UiBinder<Widget, NetworkTabsUi> {
 	}
@@ -57,7 +55,7 @@ public class NetworkTabsUi extends Composite {
 	AnchorListItem modemGpsTab;
 	ArrayList<AnchorListItem> visibleTabs;
 
-	Tab selectedTab;
+	NetworkTab selectedTab;
 	TabHardwareUi hardware;
 	TabTcpIpUi tcpIp;
 	TabDhcpNatUi dhcpNat;
@@ -170,8 +168,6 @@ public class NetworkTabsUi extends Composite {
 		boolean includeDhcpNat = !tcpIp.isDhcp() && netIfStatus.equals(IPV4_STATUS_ENABLED_LAN_MESSAGE);
 
 		if (netIfConfig instanceof GwtWifiNetInterfaceConfig) {
-			// insert Wifi tab
-			includeDhcpNat = true;
 			removeTab(modemTab);
 			removeTab(modemGpsTab);
 			insertTab(wirelessTab, 1);
@@ -186,7 +182,7 @@ public class NetworkTabsUi extends Composite {
 			}
 		} else if (netIfConfig instanceof GwtModemInterfaceConfig) {
 			includeDhcpNat = false;
-			//modemTab.setEnabled(false);
+			
 			removeTab(wirelessTab);
 			removeTab(dhcpNatTab);
 			// insert Modem tab
@@ -264,7 +260,7 @@ public class NetworkTabsUi extends Composite {
 	}
 
 	// return currently selected tab
-	public Tab getSelectedTab() {
+	public NetworkTab getSelectedTab() {
 		return selectedTab;
 
 	}
@@ -334,12 +330,11 @@ public class NetworkTabsUi extends Composite {
 		// Modem
 		modemTab = new AnchorListItem(MSGS.netModemCellular());
 		visibleTabs.add(modemTab);
-		modem = new TabModemUi(session);
+		modem = new TabModemUi(session, tcpIp);
 		modemTab.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
 				setSelected(modemTab);
-				modem.refresh();  //TODO: to check if needed here or can be invoked elsewhere
 				selectedTab = modem;
 				content.clear();
 				content.add(modem);

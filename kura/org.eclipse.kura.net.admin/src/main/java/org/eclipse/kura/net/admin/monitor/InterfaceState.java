@@ -34,7 +34,7 @@ public class InterfaceState {
     
     public InterfaceState(NetInterfaceType type, String interfaceName) throws KuraException {
         m_name = interfaceName;
-        m_up = LinuxNetworkUtil.isUp(interfaceName);
+        m_up = LinuxNetworkUtil.hasAddress(interfaceName);
         m_link = LinuxNetworkUtil.isLinkUp(type, interfaceName);
         
         ConnectionInfo connInfo = new ConnectionInfoImpl(interfaceName);

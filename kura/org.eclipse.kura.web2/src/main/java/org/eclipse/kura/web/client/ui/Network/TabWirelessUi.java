@@ -53,8 +53,8 @@ import org.gwtbootstrap3.client.ui.RadioButton;
 import org.gwtbootstrap3.client.ui.TextBox;
 import org.gwtbootstrap3.client.ui.constants.ValidationState;
 import org.gwtbootstrap3.client.ui.gwt.CellTable;
-import org.gwtbootstrap3.client.ui.gwt.DataGrid;
 import org.gwtbootstrap3.client.ui.html.Span;
+import org.gwtbootstrap3.client.ui.html.Text;
 
 import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.cell.client.FieldUpdater;
@@ -84,7 +84,7 @@ import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
 
-public class TabWirelessUi extends Composite implements Tab {
+public class TabWirelessUi extends Composite implements NetworkTab {
 
 	private static final String WIFI_MODE_STATION = GwtWifiWirelessMode.netWifiWirelessModeStation.name();
 	private static final String WIFI_MODE_STATION_MESSAGE = MessageUtils.get(WIFI_MODE_STATION);
@@ -121,11 +121,12 @@ public class TabWirelessUi extends Composite implements Tab {
 	private static final int    MAX_WIFI_CHANNEL   = 13;
 	private static final int	MAX_SSID_LENGTH	   = 32;
 
-	GwtSession session;
-	TabTcpIpUi tcpTab;
-	NetworkTabsUi netTabs;
-	boolean dirty, ssidInit;
-	GwtWifiNetInterfaceConfig selectedNetIfConfig;
+	private GwtSession session;
+	private TabTcpIpUi tcpTab;
+	private NetworkTabsUi netTabs;
+	private boolean dirty;
+	private boolean ssidInit;
+	private GwtWifiNetInterfaceConfig selectedNetIfConfig;
 	GwtWifiConfig activeConfig;
 
 	@UiField
@@ -134,6 +135,8 @@ public class TabWirelessUi extends Composite implements Tab {
 	final SingleSelectionModel<GwtWifiChannelModel> selectionModel = new SingleSelectionModel<GwtWifiChannelModel>();
 	@UiField
 	Alert noChannels;
+	@UiField
+	Text noChannelsText;
 
 	@UiField
 	FormLabel labelWireless, labelSsid, labelRadio, labelSecurity,
@@ -164,11 +167,17 @@ public class TabWirelessUi extends Composite implements Tab {
 	@UiField
 	PanelHeader ssidTitle;
 	@UiField
-	DataGrid<GwtWifiHotspotEntry> ssidGrid = new DataGrid<GwtWifiHotspotEntry>();
+	CellTable<GwtWifiHotspotEntry> ssidGrid = new CellTable<GwtWifiHotspotEntry>();
 	private ListDataProvider<GwtWifiHotspotEntry> ssidDataProvider = new ListDataProvider<GwtWifiHotspotEntry>();
 	final SingleSelectionModel<GwtWifiHotspotEntry> ssidSelectionModel = new SingleSelectionModel<GwtWifiHotspotEntry>();
 	@UiField
-	Alert noSsid, scanFail;
+	Alert searching, noSsid, scanFail;
+	@UiField
+	Text searchingText;
+	@UiField
+	Text noSsidText;
+	@UiField
+	Text scanFailText;
 
 	String passwordRegex, passwordError, tcpStatus;
 
@@ -189,15 +198,15 @@ public class TabWirelessUi extends Composite implements Tab {
 					String tcpIpStatus=tcpTab.getStatus();
 					if(!tcpIpStatus.equals(tcpStatus)){
 						if(GwtNetIfStatus.netIPv4StatusEnabledLAN.name().equals(tcpIpStatus)){
-							activeConfig=selectedNetIfConfig.getAccessPointWifiConfig();
+							activeConfig= selectedNetIfConfig.getAccessPointWifiConfig();
 						}else{
-							activeConfig=selectedNetIfConfig.getStationWifiConfig();
+							activeConfig= selectedNetIfConfig.getStationWifiConfig();
 						}
 						tcpStatus=tcpIpStatus;
 						netTabs.adjustInterfaceTabs();
 					}
 				}
-				refreshForm();
+				update();
 			}});
 	}
 
@@ -232,8 +241,6 @@ public class TabWirelessUi extends Composite implements Tab {
 	public void setDirty(boolean flag) {
 		dirty = flag;
 	}
-
-
 
 	@Override
 	public boolean isDirty() {
@@ -345,7 +352,9 @@ public class TabWirelessUi extends Composite implements Tab {
 			}
 			// select proper channels
 			for (int channel : alChannels) {
-				selectionModel.setSelected(channelDataProvider.getList().get(channel - 1), true);
+				if (channel <= maxIndex) {
+					selectionModel.setSelected(channelDataProvider.getList().get(channel - 1), true);
+				}
 			}
 		} else {
 			logger.info("No channels specified, selecting all ...");
@@ -421,6 +430,9 @@ public class TabWirelessUi extends Composite implements Tab {
 			setForm(true);
 			// Station mode
 			if (WIFI_MODE_STATION_MESSAGE.equals(wireless.getSelectedItemText())) {  //TODO: take a look at the logic here and at next if: couldn't it be unified?
+				if (tcpipStatus.equals(IPV4_STATUS_WAN_MESSAGE)) {
+					wireless.setEnabled(false);
+				}
 				radio.setEnabled(false);
 				groupVerify.setVisible(false);
 			} else if (WIFI_MODE_ACCESS_POINT_MESSAGE.equals(wireless.getSelectedItemText())) {
@@ -578,26 +590,27 @@ public class TabWirelessUi extends Composite implements Tab {
 		wireless.addChangeHandler(new ChangeHandler() {
 			@Override
 			public void onChange(ChangeEvent event) {
-				String accessPointName= WIFI_MODE_ACCESS_POINT_MESSAGE;
-				String stationModeName= WIFI_MODE_STATION_MESSAGE;
-				if (tcpTab.getStatus().equals(GwtNetIfStatus.netIPv4StatusEnabledWAN) &&
-					wireless.getSelectedItemText().equals(accessPointName)) {
-					helpWireless.setText(MSGS.netWifiWirelessEnabledForWANError());
-					groupWireless.setValidationState(ValidationState.ERROR);
-				}else{
+//				String accessPointName= WIFI_MODE_ACCESS_POINT_MESSAGE;
+//				String stationModeName= WIFI_MODE_STATION_MESSAGE;
+//				if (tcpTab.getStatus().equals(IPV4_STATUS_WAN_MESSAGE) &&
+//					wireless.getSelectedItemText().equals(accessPointName)) {
+//					helpWireless.setText(MSGS.netWifiWirelessEnabledForWANError());
+//					groupWireless.setValidationState(ValidationState.ERROR);
+//				}else{
 					helpWireless.setText("");
 					groupWireless.setValidationState(ValidationState.NONE);
-				}
+//				}
 
-				if (wireless.getSelectedItemText().equals(stationModeName)) {
+				if (wireless.getSelectedItemText().equals(WIFI_MODE_STATION_MESSAGE)) {
 					// Use Values from station config
 					activeConfig = selectedNetIfConfig.getStationWifiConfig();
 				} else {
 					// use values from access point config
 					activeConfig = selectedNetIfConfig.getAccessPointWifiConfig();
 				}
+				netTabs.adjustInterfaceTabs();
 				setPasswordValidation();
-				refreshForm();
+				update();
 			}
 
 		});
@@ -626,7 +639,8 @@ public class TabWirelessUi extends Composite implements Tab {
 				if (!ssidInit) {
 					initSsid();
 					ssidDataProvider.getList().clear();
-					noSsid.setVisible(true);
+					searching.setVisible(true);
+					noSsid.setVisible(false);
 					ssidGrid.setVisible(false);
 					scanFail.setVisible(false);
 				}
@@ -1023,12 +1037,12 @@ public class TabWirelessUi extends Composite implements Tab {
 		// Channel Grid
 		initGrid();
 		
-		helpTitle.setText("Help Text");
+		helpTitle.setText(MSGS.netHelpTitle());
 	}
 
 	private void resetHelp() {
 		helpText.clear();
-		helpText.add(new Span("Mouse over enabled items on the left to see help text."));
+		helpText.add(new Span(MSGS.netHelpDefaultHint()));
 	}
 
 	private void initGrid() {
@@ -1137,7 +1151,8 @@ public class TabWirelessUi extends Composite implements Tab {
 
 		});
 
-		if (channelDataProvider.getList().size() > 0) {
+		noChannelsText.setText(MSGS.netWifiAlertNoChannels());
+		if (!channelDataProvider.getList().isEmpty()) {
 			noChannels.setVisible(false);
 			channelGrid.setVisible(true);
 		} else {
@@ -1182,6 +1197,10 @@ public class TabWirelessUi extends Composite implements Tab {
 		ssidModal.setTitle("Wireless Networks");
 		ssidTitle.setText("Available Networks in the Range");
 		ssidModal.show();
+		
+		searchingText.setText(MSGS.netWifiAlertScanning());
+		noSsidText.setText(MSGS.netWifiAlertNoSSID());
+		scanFailText.setText(MSGS.netWifiAlertScanFail());
 	}
 
 	private void initSsid() {
@@ -1309,7 +1328,8 @@ public class TabWirelessUi extends Composite implements Tab {
 
 	private void loadSsidData() {
 		ssidDataProvider.getList().clear();
-		noSsid.setVisible(true);
+		searching.setVisible(true);
+		noSsid.setVisible(false);
 		ssidGrid.setVisible(false);
 		scanFail.setVisible(false);
 		//EntryClassUi.showWaitModal();
@@ -1329,6 +1349,7 @@ public class TabWirelessUi extends Composite implements Tab {
 						public void onFailure(Throwable caught) {
 							//EntryClassUi.hideWaitModal();
 							//FailureHandler.handle(caught);
+							searching.setVisible(false);
 							noSsid.setVisible(false);
 							ssidGrid.setVisible(false);
 							scanFail.setVisible(true);
@@ -1340,11 +1361,15 @@ public class TabWirelessUi extends Composite implements Tab {
 								ssidDataProvider.getList().add(pair);
 							}
 							ssidDataProvider.flush();
-							if (ssidDataProvider.getList().size() > 0) {
+							if (!ssidDataProvider.getList().isEmpty()) {
+								searching.setVisible(false);
 								noSsid.setVisible(false);
+								int size = ssidDataProvider.getList().size();
+								ssidGrid.setVisibleRange(0, size);
 								ssidGrid.setVisible(true);
 								scanFail.setVisible(false);
 							} else {
+								searching.setVisible(false);
 								noSsid.setVisible(true);
 								ssidGrid.setVisible(false);
 								scanFail.setVisible(false);

@@ -704,13 +704,13 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
         <replace file="${project.build.directory}/${build.output.name}/config.ini"
                  token="{org.eclipse.kura.deployment.update.version}" value="${org.eclipse.kura.deployment.update.version}"/>
         <replace file="${project.build.directory}/${build.output.name}/config.ini"
-                 token="{org.eclipse.kura.windows.net.version}" value="${org.eclipse.kura.windows.net.version}"/>
+                 token="{org.eclipse.kura.emulator.net.version}" value="${org.eclipse.kura.emulator.net.version}"/>
         <replace file="${project.build.directory}/${build.output.name}/config.ini"
                  token="{org.eclipse.kura.linux.position.version}" value="${org.eclipse.kura.linux.position.version}"/>
         <replace file="${project.build.directory}/${build.output.name}/config.ini"
                  token="{org.eclipse.kura.windows.command.version}" value="${org.eclipse.kura.windows.command.version}"/>
         <replace file="${project.build.directory}/${build.output.name}/config.ini"
-                 token="{org.eclipse.kura.windows.usb.version}" value="${org.eclipse.kura.windows.usb.version}"/>
+                 token="{org.eclipse.kura.emulator.usb.version}" value="${org.eclipse.kura.emulator.usb.version}"/>
         <replace file="${project.build.directory}/${build.output.name}/config.ini"
                  token="{org.eclipse.kura.emulator.watchdog.version}" value="${org.eclipse.kura.emulator.watchdog.version}"/>
         <replace file="${project.build.directory}/${build.output.name}/config.ini"
@@ -829,7 +829,7 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
 		<copy file="${project.build.directory}/plugins/org.eclipse.kura.core.net_${org.eclipse.kura.core.net.version}.jar"
 			todir="${build.install.dir.kura}/kura/plugins" />
 
-		<copy file="${project.build.directory}/plugins/org.eclipse.kura.windows.net_${org.eclipse.kura.windows.net.version}.jar"
+		<copy file="${project.build.directory}/plugins/org.eclipse.kura.emulator.net_${org.eclipse.kura.emulator.net.version}.jar"
 			todir="${build.install.dir.kura}/kura/plugins" />
 
 		<copy file="${project.build.directory}/plugins/org.eclipse.kura.linux.position_${org.eclipse.kura.linux.position.version}.jar"
@@ -838,7 +838,7 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
 		<copy file="${project.build.directory}/plugins/org.eclipse.kura.windows.command_${org.eclipse.kura.windows.command.version}.jar"
 			todir="${build.install.dir.kura}/kura/plugins" />
 
-		<copy file="${project.build.directory}/plugins/org.eclipse.kura.windows.usb_${org.eclipse.kura.windows.usb.version}.jar"
+		<copy file="${project.build.directory}/plugins/org.eclipse.kura.emulator.usb_${org.eclipse.kura.emulator.usb.version}.jar"
 			todir="${build.install.dir.kura}/kura/plugins" />
 
 		<copy file="${project.build.directory}/plugins/org.eclipse.kura.emulator.watchdog_${org.eclipse.kura.emulator.watchdog.version}.jar"

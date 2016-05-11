@@ -218,18 +218,8 @@
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.eclipse.kura</groupId>
-									<artifactId>org.eclipse.kura.windows.net</artifactId>
-									<version>${org.eclipse.kura.windows.net.version}</version>
-								</artifactItem>
-								<artifactItem>
-									<groupId>org.eclipse.kura</groupId>
 									<artifactId>org.eclipse.kura.windows.command</artifactId>
 									<version>${org.eclipse.kura.windows.command.version}</version>
-								</artifactItem>
-								<artifactItem>
-									<groupId>org.eclipse.kura</groupId>
-									<artifactId>org.eclipse.kura.windows.usb</artifactId>
-									<version>${org.eclipse.kura.windows.usb.version}</version>
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.eclipse.kura</groupId>
@@ -360,9 +350,7 @@
   								<move file="target/plugins/org.eclipse.kura.emulator.position.jar" tofile="target/plugins/org.eclipse.kura.emulator.position_${org.eclipse.kura.emulator.position.version}.jar" />
   								<move file="target/plugins/org.eclipse.kura.emulator.usb.jar" tofile="target/plugins/org.eclipse.kura.emulator.usb_${org.eclipse.kura.emulator.usb.version}.jar" />
   								<move file="target/plugins/org.eclipse.kura.emulator.watchdog.jar" tofile="target/plugins/org.eclipse.kura.emulator.watchdog_${org.eclipse.kura.emulator.watchdog.version}.jar" />
-							    <move file="target/plugins/org.eclipse.kura.windows.net.jar" tofile="target/plugins/org.eclipse.kura.windows.net_${org.eclipse.kura.windows.net.version}.jar"/>
 							    <move file="target/plugins/org.eclipse.kura.windows.command.jar" tofile="target/plugins/org.eclipse.kura.windows.command_${org.eclipse.kura.windows.command.version}.jar"/>
-							    <move file="target/plugins/org.eclipse.kura.windows.usb.jar" tofile="target/plugins/org.eclipse.kura.windows.usb_${org.eclipse.kura.windows.usb.version}.jar"/>
 							    <move file="target/plugins/org.eclipse.kura.windows.clock.jar" tofile="target/plugins/org.eclipse.kura.windows.clock_${org.eclipse.kura.windows.clock.version}.jar"/>
 							</tasks>
 						</configuration>

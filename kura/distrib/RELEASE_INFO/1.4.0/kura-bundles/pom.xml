@@ -171,38 +171,13 @@
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>
-                                    <artifactId>org.eclipse.kura.windows.net</artifactId>
-                                    <version>1.0.2</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.eclipse.kura</groupId>
-                                    <artifactId>org.eclipse.kura.windows.position</artifactId>
-                                    <version>1.0.2</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.eclipse.kura</groupId>
                                     <artifactId>org.eclipse.kura.windows.command</artifactId>
-                                    <version>1.0.2</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.eclipse.kura</groupId>
-                                    <artifactId>org.eclipse.kura.windows.usb</artifactId>
-                                    <version>1.0.2</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.eclipse.kura</groupId>
-                                    <artifactId>org.eclipse.kura.windows.watchdog</artifactId>
                                     <version>1.0.2</version>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>
                                     <artifactId>org.eclipse.kura.windows.clock</artifactId>
                                     <version>1.0.2</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.eclipse.kura</groupId>
-                                    <artifactId>org.eclipse.kura.windows.status</artifactId>
-                                    <version>1.0.0</version>
                                 </artifactItem>
                           </artifactItems>
                             <stripVersion>true</stripVersion>

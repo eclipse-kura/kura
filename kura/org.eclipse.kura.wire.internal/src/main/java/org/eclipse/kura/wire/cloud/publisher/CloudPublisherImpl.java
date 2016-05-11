@@ -32,12 +32,15 @@ import org.eclipse.kura.wire.WireReceiver;
 import org.eclipse.kura.wire.WireRecord;
 import org.eclipse.kura.wire.WireSupport;
 import org.eclipse.kura.wire.cloud.publisher.CloudPublisherOptions.AutoConnectMode;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.wireadmin.Wire;
 import org.osgi.util.position.Position;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.annotations.Beta;
 import com.google.common.base.Throwables;
 
 /**
@@ -45,11 +48,9 @@ import com.google.common.base.Throwables;
  * to publish a list of wire records as received in Wire Envelope to the
  * configured cloud platform
  */
+@Beta
 public final class CloudPublisherImpl
 		implements WireReceiver, DataServiceListener, ConfigurableComponent, CloudPublisher {
-
-	// FIXME: Add option to select the format of the message being published:
-	// KuraProtoBuf or JSON
 
 	/** The Cloud Publisher Disconnection Manager. */
 	private static CloudPublisherDisconnectManager s_disconnectManager;
@@ -103,10 +104,67 @@ public final class CloudPublisherImpl
 	}
 
 	/**
-	 * Builds the kura payload.
+	 * Builds the JSON instance from the provided wire record
 	 *
 	 * @param dataRecord
-	 *            the data record
+	 *            the wire record
+	 * @return the json instance
+	 */
+	private JSONObject buildJsonObject(final WireRecord wireRecord) {
+		final JSONObject jsonObject = new JSONObject();
+		try {
+			if (wireRecord.getTimestamp() != null) {
+				jsonObject.put("timestamp", wireRecord.getTimestamp());
+			}
+
+			if (wireRecord.getPosition() != null) {
+				jsonObject.put("position", this.buildKuraPositionForJson(wireRecord.getPosition()));
+			}
+
+			for (final WireField dataField : wireRecord.getFields()) {
+				Object value = null;
+				switch (dataField.getValue().getType()) {
+				case STRING:
+					value = dataField.getValue().getValue();
+					break;
+				case DOUBLE:
+					value = dataField.getValue().getValue();
+					break;
+				case INTEGER:
+					value = dataField.getValue().getValue();
+					break;
+				case LONG:
+					value = dataField.getValue().getValue();
+					break;
+				case BOOLEAN:
+					value = dataField.getValue().getValue();
+					break;
+				case BYTE_ARRAY:
+					value = dataField.getValue().getValue();
+					break;
+				case BYTE:
+					value = ((Byte) dataField.getValue().getValue()).intValue();
+					break;
+				case SHORT:
+					value = ((Short) dataField.getValue().getValue()).intValue();
+					break;
+				default:
+					break;
+				}
+				jsonObject.put(dataField.getName(), value);
+			}
+		} catch (final Exception ex) {
+			s_logger.error("Error while building JSON instance from the wire records..."
+					+ Throwables.getStackTraceAsString(ex));
+		}
+		return jsonObject;
+	}
+
+	/**
+	 * Builds the kura payload from the provided wire record
+	 *
+	 * @param dataRecord
+	 *            the wire record
 	 * @return the kura payload
 	 */
 	private KuraPayload buildKuraPayload(final WireRecord dataRecord) {
@@ -157,10 +215,10 @@ public final class CloudPublisherImpl
 	}
 
 	/**
-	 * Builds the kura position.
+	 * Builds the kura position from the OSGi position instance
 	 *
 	 * @param position
-	 *            the position
+	 *            the OSGi position instance
 	 * @return the kura position
 	 */
 	private KuraPosition buildKuraPosition(final Position position) {
@@ -181,6 +239,34 @@ public final class CloudPublisherImpl
 			kuraPosition.setHeading(position.getTrack().getValue());
 		}
 		return kuraPosition;
+	}
+
+	/**
+	 * Builds the kura position from the OSGi position instance
+	 *
+	 * @param position
+	 *            the OSGi position instance
+	 * @return the kura position
+	 * @throws JSONException
+	 */
+	private JSONObject buildKuraPositionForJson(final Position position) throws JSONException {
+		final JSONObject jsonObject = new JSONObject();
+		if (position.getLatitude() != null) {
+			jsonObject.put("latitude", position.getLatitude().getValue());
+		}
+		if (position.getLongitude() != null) {
+			jsonObject.put("longitude", position.getLongitude().getValue());
+		}
+		if (position.getAltitude() != null) {
+			jsonObject.put("altitude", position.getAltitude().getValue());
+		}
+		if (position.getSpeed() != null) {
+			jsonObject.put("speed", position.getSpeed().getValue());
+		}
+		if (position.getTrack() != null) {
+			jsonObject.put("heading", position.getTrack().getValue());
+		}
+		return jsonObject;
 	}
 
 	/**
@@ -324,12 +410,21 @@ public final class CloudPublisherImpl
 					// prepare the topic
 					final String appTopic = this.m_options.getPublishingTopic();
 
-					// prepare the payload
-					final KuraPayload kuraPayload = this.buildKuraPayload(dataRecord);
+					if (this.m_options.getMessageType() == 1) { // Kura Payload
+						// prepare the payload
+						final KuraPayload kuraPayload = this.buildKuraPayload(dataRecord);
 
-					// publish the payload
-					this.m_cloudClient.publish(appTopic, kuraPayload, this.m_options.getPublishingQos(),
-							this.m_options.getPublishingRetain(), this.m_options.getPublishingPriority());
+						// publish the payload
+						this.m_cloudClient.publish(appTopic, kuraPayload, this.m_options.getPublishingQos(),
+								this.m_options.getPublishingRetain(), this.m_options.getPublishingPriority());
+					}
+
+					if (this.m_options.getMessageType() == 2) { // JSON
+						final JSONObject jsonWire = this.buildJsonObject(dataRecord);
+						this.m_cloudClient.publish(appTopic, jsonWire.toString().getBytes(),
+								this.m_options.getPublishingQos(), this.m_options.getPublishingRetain(),
+								this.m_options.getPublishingPriority());
+					}
 				}
 			} catch (final KuraException e) {
 				s_logger.error("Error in publishing wire records using cloud publisher.."

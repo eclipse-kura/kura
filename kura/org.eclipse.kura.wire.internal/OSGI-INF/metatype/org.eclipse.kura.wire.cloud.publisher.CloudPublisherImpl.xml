@@ -91,6 +91,17 @@
             default="false"
             description="Whether or not the broker should retain the message">
         </AD>
+        
+         <AD id="publish.message.type"
+            name="publish.message.type"
+            type="Integer"
+            cardinality="0"
+            required="true"
+            default="1"
+            description="Option to control whether the wire records will be wrapped into a Kura Payload or a JSON message">
+            <Option label="Kura Payload" value="1" />
+            <Option label="JSON" value="2" />
+        </AD>
     </OCD>
     
     <Designate pid="org.eclipse.kura.wire.cloud.publisher.CloudPublisherImpl" factoryPid="org.eclipse.kura.wire.cloud.publisher.CloudPublisherImpl">

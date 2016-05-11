@@ -79,6 +79,9 @@ public final class CloudPublisherOptions {
 	/** The Constant denoting wire emitters. */
 	private static final String CONF_EMITTERS = "data.emitters";
 
+	/** The Constant denoting message type. */
+	private static final String CONF_MESSAGE_TYPE = "publish.message.type";
+
 	/** The Constant denoting priority. */
 	private static final String CONF_PRIORITY = "publish.priority";
 
@@ -99,6 +102,9 @@ public final class CloudPublisherOptions {
 
 	/** The Constant denoting default auto connect mode. */
 	private static final AutoConnectMode DEFAULT_AUTOCONNECT_MODE = AutoConnectMode.AUTOCONNECT_MODE_ON_AND_OFF;
+
+	/** The Constant denoting default message type : Kura Payload. */
+	private static final int DEFAULT_MESSAGE_TYPE = 1;
 
 	/** The Constant denoting default priority. */
 	private static final int DEFAULT_PRIORITY = 7;
@@ -162,6 +168,20 @@ public final class CloudPublisherOptions {
 			quieceTimeout = (Integer) this.m_properties.get(CONF_QUIECE_TIMEOUT);
 		}
 		return quieceTimeout;
+	}
+
+	/**
+	 * Returns the message type to be used for wrapping wire records.
+	 *
+	 * @return the type of the encoding message type
+	 */
+	public int getMessageType() {
+		int messageType = DEFAULT_MESSAGE_TYPE;
+		if ((this.m_properties != null) && (this.m_properties.get(CONF_MESSAGE_TYPE) != null)
+				&& (this.m_properties.get(CONF_MESSAGE_TYPE) instanceof Integer)) {
+			messageType = (Integer) this.m_properties.get(CONF_MESSAGE_TYPE);
+		}
+		return messageType;
 	}
 
 	/**

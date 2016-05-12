@@ -23,7 +23,7 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 
-public class TabHardwareUi extends Composite implements Tab {
+public class TabHardwareUi extends Composite implements NetworkTab {
 
 	private static TabHardwareUiUiBinder uiBinder = GWT.create(TabHardwareUiUiBinder.class);
 

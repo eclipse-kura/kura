@@ -22,6 +22,7 @@ import org.eclipse.kura.cloud.Cloudlet;
 import org.eclipse.kura.cloud.CloudletTopic;
 import org.eclipse.kura.command.PasswordCommandService;
 import org.eclipse.kura.configuration.ConfigurableComponent;
+import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.message.KuraRequestPayload;
 import org.eclipse.kura.message.KuraResponsePayload;
@@ -102,10 +103,10 @@ PasswordCommandService {
 			Object value = entry.getValue();
 			if (key.equals(COMMAND_PASSWORD_ID)) {
 				try {
-					char[] decryptedPassword= m_cryptoService.decryptAes(value.toString().toCharArray());
+					Password decryptedPassword= new Password(m_cryptoService.decryptAes(value.toString().toCharArray()));
 					this.properties.put(key, decryptedPassword);
 				} catch (Exception e) {
-					this.properties.put(key, value.toString().toCharArray());
+					this.properties.put(key, new Password((String) value));
 				} 
 			}else{
 				this.properties.put(key, value);
@@ -172,7 +173,7 @@ PasswordCommandService {
 		// String receivedPassword= (String)
 		// reqPayload.getMetric(EDC_PASSWORD_METRIC_NAME);
 		String receivedPassword = (String) commandReq.getMetric(EDC_PASSWORD_METRIC_NAME);
-		char[] commandPassword = (char[])properties.get(COMMAND_PASSWORD_ID);
+		Password commandPassword = (Password) properties.get(COMMAND_PASSWORD_ID);
 
 		KuraCommandResponsePayload commandResp = new KuraCommandResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
 
@@ -197,7 +198,9 @@ PasswordCommandService {
 					UnZip.unZipBytes(zipBytes, dir);
 				} catch (IOException e) {
 					s_logger.error("Error unzipping command zip bytes", e);
+					commandResp.setResponseCode(KuraResponsePayload.RESPONSE_CODE_ERROR);
 					commandResp.setException(e);
+					return commandResp;
 				}
 			}
 
@@ -208,15 +211,14 @@ PasswordCommandService {
 				s_logger.error("Error executing command {}", t);
 				commandResp.setResponseCode(KuraResponsePayload.RESPONSE_CODE_ERROR);
 				commandResp.setException(t);
-
+				return commandResp;
 			}
 
 			boolean runAsync = commandReq.isRunAsync() != null ? commandReq
 					.isRunAsync() : false;
 					int timeout = getTimeout(commandReq);
 
-					ProcessMonitorThread pmt = null;
-					pmt = new ProcessMonitorThread(proc, commandReq.getStdin(), timeout);
+					ProcessMonitorThread pmt = new ProcessMonitorThread(proc, commandReq.getStdin(), timeout);
 					pmt.start();
 
 					if (!runAsync) {
@@ -231,7 +233,6 @@ PasswordCommandService {
 					}
 
 		} else {
-
 			s_logger.error("Password required but not correct and/or missing");
 			commandResp.setResponseCode(KuraResponsePayload.RESPONSE_CODE_ERROR);
 			commandResp.setExceptionMessage("Password missing or not correct");
@@ -247,17 +248,15 @@ PasswordCommandService {
 		boolean verificationEnabled = (Boolean) properties.get(COMMAND_ENABLED_ID);
 		if (verificationEnabled) {
 
-			char[] commandPassword = (char[]) properties.get(COMMAND_PASSWORD_ID);
-			boolean isExecutionAllowed = verifyPasswords(commandPassword,
-					password);
+			Password commandPassword = (Password) properties.get(COMMAND_PASSWORD_ID);
+			boolean isExecutionAllowed = verifyPasswords(commandPassword, password);
 			if (isExecutionAllowed) {
 
 				String[] cmdArray = cmd.split(" ");
 				String defaultDir = getDefaultWorkDir();
 				String[] environment = getDefaultEnvironment();
 				try {
-					Process proc = createExecutionProcess(defaultDir, cmdArray,
-							environment);
+					Process proc = createExecutionProcess(defaultDir, cmdArray, environment);
 
 					int timeout = getDefaultTimeout();
 					ProcessMonitorThread pmt = null;
@@ -280,8 +279,7 @@ PasswordCommandService {
 					throw new KuraException(KuraErrorCode.INTERNAL_ERROR, ex);
 				}
 			} else {
-				throw new KuraException(
-						KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID);
+				throw new KuraException(KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID);
 			}
 		} else {
 			throw new KuraException(KuraErrorCode.OPERATION_NOT_SUPPORTED);
@@ -342,18 +340,17 @@ PasswordCommandService {
 		return defaultEnv;
 	}
 
-	private boolean verifyPasswords(char[] commandPassword,
-			String receivedPassword) {
+	private boolean verifyPasswords(Password commandPassword, String receivedPassword) {
 		if (commandPassword == null && receivedPassword == null) {
 			return true;
 		}
-		if (commandPassword == null && receivedPassword.equals("")) {
+		if (commandPassword == null && "".equals(receivedPassword)) {
 			return true;
 		}
 		if(commandPassword == null){
 			return false;
 		}
-		String pwd = new String(commandPassword);
+		String pwd = commandPassword.toString();
 		return pwd.equals(receivedPassword);
 	}
 

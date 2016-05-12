@@ -18,6 +18,7 @@ import org.eclipse.kura.web.shared.model.GwtNetIfType;
 import org.eclipse.kura.web.shared.model.GwtNetInterfaceConfig;
 import org.eclipse.kura.web.shared.model.GwtNetRouterMode;
 import org.eclipse.kura.web.shared.model.GwtSession;
+import org.eclipse.kura.web.shared.model.GwtWifiConfig;
 import org.eclipse.kura.web.shared.model.GwtWifiWirelessMode;
 import org.gwtbootstrap3.client.ui.Form;
 import org.gwtbootstrap3.client.ui.FormGroup;
@@ -45,7 +46,7 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 
-public class TabDhcpNatUi extends Composite implements Tab {
+public class TabDhcpNatUi extends Composite implements NetworkTab {
 
 	private static final String ROUTER_OFF_MESSAGE = MessageUtils.get(GwtNetRouterMode.netRouterOff.name());
 	private static final String ROUTER_NAT_MESSAGE = MessageUtils.get(GwtNetRouterMode.netRouterNat.name());
@@ -67,17 +68,47 @@ public class TabDhcpNatUi extends Composite implements Tab {
 	@UiField
 	Form form;
 	@UiField
-	FormLabel labelRouter, labelBegin, labelEnd, labelSubnet, labelDefaultL,
-	labelMax, labelPass;
+	FormLabel labelRouter;
+	@UiField
+	FormLabel labelBegin;
+	@UiField
+	FormLabel labelEnd;
+	@UiField
+	FormLabel labelSubnet;
+	@UiField
+	FormLabel labelDefaultL;
+	@UiField
+	FormLabel labelMax;
+	@UiField
+	FormLabel labelPass;
 	@UiField
 	ListBox router;
 	@UiField
-	TextBox begin, end, subnet, defaultL, max;
+	TextBox begin;
 	@UiField
-	RadioButton radio1, radio2;
+	TextBox end;
 	@UiField
-	FormGroup groupRouter, groupBegin, groupEnd, groupSubnet, groupDefaultL,
-	groupMax;
+	TextBox subnet;
+	@UiField
+	TextBox defaultL;
+	@UiField
+	TextBox max;
+	@UiField
+	RadioButton radio1;
+	@UiField
+	RadioButton radio2;
+	@UiField
+	FormGroup groupRouter;
+	@UiField
+	FormGroup groupBegin;
+	@UiField
+	FormGroup groupEnd;
+	@UiField
+	FormGroup groupSubnet;
+	@UiField
+	FormGroup groupDefaultL;
+	@UiField
+	FormGroup groupMax;
 	@UiField
 	HelpBlock helpRouter;
 	@UiField
@@ -92,6 +123,18 @@ public class TabDhcpNatUi extends Composite implements Tab {
 		session = currentSession;
 		setDirty(false);
 		initForm();
+		
+		tcpTab.status.addChangeHandler(new ChangeHandler(){
+			@Override
+			public void onChange(ChangeEvent event) {
+				update();
+			}});
+		
+		wirelessTab.wireless.addChangeHandler(new ChangeHandler(){
+			@Override
+			public void onChange(ChangeEvent event) {
+				update();
+			}});
 	}
 
 	@Override
@@ -127,6 +170,7 @@ public class TabDhcpNatUi extends Composite implements Tab {
 	public void refresh() {
 		if (isDirty()) {
 			setDirty(false);
+			resetValidations();
 			if (selectedNetIfConfig == null) {
 				reset();
 			} else {
@@ -146,13 +190,13 @@ public class TabDhcpNatUi extends Composite implements Tab {
 			updatedNetIf.setRouterDhcpBeginAddress(begin.getText());
 			updatedNetIf.setRouterDhcpEndAddress(end.getText());
 			updatedNetIf.setRouterDhcpSubnetMask(subnet.getText());
-			if (defaultL.getText() != null) {
+			if (defaultL.getText() != null && !"".equals(defaultL.getText().trim())) {
 				updatedNetIf.setRouterDhcpDefaultLease(Integer.parseInt(defaultL.getText()));
 			}
-			if (max.getText() != null) {
+			if (max.getText() != null && !"".equals(max.getText().trim())) {
 				updatedNetIf.setRouterDhcpMaxLease(Integer.parseInt(max.getText()));
 			}
-			updatedNetIf.setRouterDnsPass(radio1.isActive());
+			updatedNetIf.setRouterDnsPass(radio1.getValue());
 
 		}
 	}
@@ -191,10 +235,14 @@ public class TabDhcpNatUi extends Composite implements Tab {
 		//			radio1.setEnabled(false);
 		//			radio2.setEnabled(false);
 		//		} else {
-		String mode= wirelessTab.activeConfig.getWirelessMode();
-		if ( selectedNetIfConfig.getHwTypeEnum() == GwtNetIfType.WIFI && 
-				wirelessTab != null && 
-				(mode.equals(WIFI_STATION_MODE) || mode.equals(WIFI_DISABLED)) ) {
+		GwtWifiConfig wifiConfig= wirelessTab.activeConfig;
+		String wifiMode= null;
+		if (wifiConfig != null) {
+			wifiMode= wifiConfig.getWirelessMode();
+		}
+		if ( selectedNetIfConfig.getHwTypeEnum() == GwtNetIfType.WIFI &&  
+				wifiMode != null &&
+				(wifiMode.equals(WIFI_STATION_MODE) || wifiMode.equals(WIFI_DISABLED)) ) {
 			router.setEnabled(false);
 			begin.setEnabled(false);
 			end.setEnabled(false);
@@ -248,6 +296,17 @@ public class TabDhcpNatUi extends Composite implements Tab {
 		radio1.setActive(true);
 		radio2.setActive(false);
 		update();
+	}
+	
+	private void resetValidations() {
+		groupRouter.setValidationState(ValidationState.NONE);
+		groupBegin.setValidationState(ValidationState.NONE);
+		groupEnd.setValidationState(ValidationState.NONE);
+		groupSubnet.setValidationState(ValidationState.NONE);
+		groupDefaultL.setValidationState(ValidationState.NONE);
+		groupMax.setValidationState(ValidationState.NONE);
+		
+		helpRouter.setText("");
 	}
 
 	private void initForm() {
@@ -483,13 +542,11 @@ public class TabDhcpNatUi extends Composite implements Tab {
 			public void onValueChange(ValueChangeEvent<Boolean> event) {
 				setDirty(true);
 			}});
-
-
-		helpTitle.setText("Help Text");
+		helpTitle.setText(MSGS.netHelpTitle());
 	}
 
 	private void resetHelp() {
 		helpText.clear();
-		helpText.add(new Span("Mouse over enabled items on the left to see help text."));
+		helpText.add(new Span(MSGS.netHelpDefaultHint()));
 	}
 }

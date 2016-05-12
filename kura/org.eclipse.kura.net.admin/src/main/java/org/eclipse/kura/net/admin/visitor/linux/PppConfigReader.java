@@ -131,7 +131,7 @@ public class PppConfigReader implements NetworkConfigurationVisitor {
                 netConfigs.add(getNetConfigIP4(interfaceName));
                 
                 // Populate with DNS provided by PPP (displayed as read-only in Denali)
-                if (LinuxNetworkUtil.isUp("ppp" + modemConfig.getPppNumber())) {  
+                if (LinuxNetworkUtil.hasAddress("ppp" + modemConfig.getPppNumber())) {  
 	            	List<? extends IPAddress>pppDnsServers = LinuxDns.getInstance().getPppDnServers();
 	            	if (pppDnsServers != null) {
 	            		((ModemInterfaceAddressConfigImpl) netInterfaceAddressConfig).setDnsServers(pppDnsServers);

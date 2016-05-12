@@ -68,6 +68,17 @@
 					</g:ScrollPanel>
 				</b:Well>
 			</b:Row>
+			<b:Modal closable="true" dataKeyboard="true" ui:field="incompleteFieldsModal">
+				<b:ModalBody>
+					<b:Panel>
+						<b:PanelBody>
+							<b:Alert type="WARNING" ui:field="incompleteFields">
+								<b.html:Text ui:field="incompleteFieldsText" />
+							</b:Alert>
+						</b:PanelBody>
+					</b:Panel>
+				</b:ModalBody>
+			</b:Modal>
 		</b:Column>
 	</b:Container>
 </ui:UiBinder> 

@@ -27,26 +27,25 @@
 
 	<b:Container fluid="true">
 		<b:Row>
-			<g:HTMLPanel>
-				<p>
-					Review and update the available system settings.
-				</p>
-			</g:HTMLPanel>
+			<g:HTMLPanel ui:field="settingsIntro" />
 		</b:Row>
 
 		<b:Row>
 			<b:Navbar>
 				<b:NavbarNav>
 					<b:AnchorListItem text="Snapshots" ui:field="snapshots" />
-					<b:AnchorListItem text="SSL Certificates" ui:field="ssl" />
+					<b:AnchorListItem text="Application Certificate" ui:field="appCert" />
+					<b:AnchorListItem text="SSL Configuration" ui:field="sslConfig" />
+					<b:AnchorListItem text="Server SSL Certificate" ui:field="serverCert" />
+					<b:AnchorListItem text="Device SSL Certificate" ui:field="deviceCert" />
+					<b:AnchorListItem text="Security Policies" ui:field="security" />
 				</b:NavbarNav>
 			</b:Navbar>
 		</b:Row>
 
 		<b:Row>
-			<b:Well addStyleNames="{style.center-panel}" ui:field="content"/>
+			<b:Well addStyleNames="{style.center-panel}" ui:field="content" />
 		</b:Row>
-
 	</b:Container>
 
 </ui:UiBinder> 

@@ -23,11 +23,14 @@ public class LinuxIfconfig {
 	private NetInterfaceType m_type;
 	private String m_macAddress;
 	private String m_inetAddress;
+	private String m_peerInetAddr;
 	private String m_inetBcast;
 	private String m_inetMask;
 	private int m_mtu;
 	private boolean m_multicast;
 	private Map<String,String> m_driver;
+	private Boolean m_up;
+	private boolean m_linkUp;
 	
 	public LinuxIfconfig(String name) {
 		m_name = name;
@@ -66,6 +69,12 @@ public class LinuxIfconfig {
 	public void setInetMask(String inetMask) {
 		m_inetMask = inetMask;
 	}
+	public String getPeerInetAddr() {
+		return m_peerInetAddr;
+	}
+	public void setPeerInetAddr(String peerInetAddr) {
+		m_peerInetAddr = peerInetAddr;
+	}
 	public int getMtu() {
 		return m_mtu;
 	}
@@ -88,11 +97,28 @@ public class LinuxIfconfig {
 	}
 	
 	public boolean isUp() {
-		boolean ret = false;
-		if ((m_inetAddress != null) && (m_inetMask != null)) {
-			ret = true;
-		}	
-		return ret;
+		if (m_up != null) {
+			return m_up;
+		} else {
+			// old code
+			boolean ret = false;
+			if ((m_inetAddress != null) && (m_inetMask != null)) {
+				ret = true;
+			}	
+			return ret;
+		}
+	}
+	
+	public void setUp(boolean up) {
+		m_up = up;
+	}
+	
+	public void setLinkUp(boolean up) {
+		m_linkUp = up;
+	}
+	
+	public boolean isLinkUp() {
+		return m_linkUp;
 	}
 	
 	public byte[] getMacAddressBytes() throws KuraException {
@@ -118,8 +144,10 @@ public class LinuxIfconfig {
 		sb.append(m_name).append(":-> type: ").append(m_type).append(", MAC: ")
 				.append(m_macAddress).append(", IP Address: ")
 				.append(m_inetAddress).append(", Netmask: ").append(m_inetMask)
-				.append(", Broadcast: ").append(m_inetBcast).append(", MTU: ")
-				.append(m_mtu).append(", multicast?: ").append(m_multicast);
+				.append(", Broadcast: ").append(m_inetBcast)
+				.append(", Peer IP Address: ").append(m_peerInetAddr).append(", MTU: ")
+				.append(m_mtu).append(", multicast?: ").append(m_multicast)
+				.append(", up?: ").append(m_up).append(", link up?: ").append(m_linkUp);
 		return sb.toString();
 	}
 }

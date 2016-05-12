@@ -23,7 +23,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
 
-public class TabModemGpsUi extends Composite implements Tab {
+public class TabModemGpsUi extends Composite implements NetworkTab {
 	
 	private static TabModemGpsUiUiBinder uiBinder = GWT.create(TabModemGpsUiUiBinder.class);
 	interface TabModemGpsUiUiBinder extends UiBinder<Widget, TabModemGpsUi> {
@@ -145,7 +145,7 @@ public class TabModemGpsUi extends Composite implements Tab {
 				dirty = true;
 		}});
 				
-		helpTitle.setText("Help Text");		
+		helpTitle.setText(MSGS.netHelpTitle());		
 		radio1.setText(MSGS.trueLabel());
 		radio2.setText(MSGS.falseLabel());		
 		radio1.setValue(true);
@@ -155,7 +155,7 @@ public class TabModemGpsUi extends Composite implements Tab {
 	
 	private void resetHelp() {
 		helpText.clear();
-		helpText.add(new Span("Mouse over enabled items on the left to see help text."));
+		helpText.add(new Span(MSGS.netHelpDefaultHint()));
 	}
 	
 	private void update() {

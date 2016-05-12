@@ -51,7 +51,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
 
-public class TabModemUi extends Composite implements Tab {
+public class TabModemUi extends Composite implements NetworkTab {
 
 	private static final String MODEM_AUTH_NONE_MESSAGE = MessageUtils.get(GwtModemAuthType.netModemAuthNONE.name());
 	private static TabModemUiUiBinder uiBinder = GWT.create(TabModemUiUiBinder.class);
@@ -62,11 +62,12 @@ public class TabModemUi extends Composite implements Tab {
 	private static final Messages MSGS = GWT.create(Messages.class);
 	private static final String REGEX_NUM = "(?:\\d*)?\\d+";
 
-	GwtSession session;
-	boolean dirty;
-	GwtModemInterfaceConfig selectedNetIfConfig;
+	private GwtSession session;
+	private TabTcpIpUi tcpTab;
+	private boolean dirty;
+	private GwtModemInterfaceConfig selectedNetIfConfig;
 	private final Map<String, String> defaultDialString = new HashMap<String, String>();
-	String dialString;
+	private String dialString;
 
 	@UiField
 	FormGroup groupReset, groupMaxfail, groupIdle, groupInterval, groupFailure,
@@ -97,12 +98,20 @@ public class TabModemUi extends Composite implements Tab {
 	@UiField
 	FieldSet field;
 
-	public TabModemUi(GwtSession currentSession) {
+	public TabModemUi(GwtSession currentSession, TabTcpIpUi tcp) {
 		initWidget(uiBinder.createAndBindUi(this));
 		session = currentSession;
+		tcpTab = tcp;
+
 		defaultDialString.put("HE910", "atd*99***1#");
 		defaultDialString.put("DE910", "atd#777");
 		initForm();
+
+		tcpTab.status.addChangeHandler(new ChangeHandler(){
+			@Override
+			public void onChange(ChangeEvent event) {
+				update();
+			}});
 	}
 
 	@Override
@@ -123,7 +132,9 @@ public class TabModemUi extends Composite implements Tab {
 			groupDial.setValidationState(ValidationState.ERROR);
 		}
 		if (apn.getText() == null || "".equals(apn.getText().trim())) {
-			groupApn.setValidationState(ValidationState.ERROR);
+			if (apn.isEnabled()) {
+				groupApn.setValidationState(ValidationState.ERROR);
+			}
 		}
 		if (maxfail.getText() == null || "".equals(maxfail.getText().trim())) {
 			groupMaxfail.setValidationState(ValidationState.ERROR);
@@ -137,14 +148,14 @@ public class TabModemUi extends Composite implements Tab {
 		if (failure.getText() == null || "".equals(failure.getText().trim())) {
 			groupFailure.setValidationState(ValidationState.ERROR);
 		}
-		
+
 		if( groupNumber.getValidationState().equals(ValidationState.ERROR)   ||
-			groupDial.getValidationState().equals(ValidationState.ERROR)     ||
-			groupApn.getValidationState().equals(ValidationState.ERROR)      || 
-			groupMaxfail.getValidationState().equals(ValidationState.ERROR)  ||
-			groupIdle.getValidationState().equals(ValidationState.ERROR)     ||
-			groupInterval.getValidationState().equals(ValidationState.ERROR) ||
-			groupFailure.getValidationState().equals(ValidationState.ERROR)  ){
+				groupDial.getValidationState().equals(ValidationState.ERROR)     ||
+				groupApn.getValidationState().equals(ValidationState.ERROR)      || 
+				groupMaxfail.getValidationState().equals(ValidationState.ERROR)  ||
+				groupIdle.getValidationState().equals(ValidationState.ERROR)     ||
+				groupInterval.getValidationState().equals(ValidationState.ERROR) ||
+				groupFailure.getValidationState().equals(ValidationState.ERROR)  ){
 			return false;
 		}else{
 			return true;
@@ -163,6 +174,7 @@ public class TabModemUi extends Composite implements Tab {
 	public void refresh() {
 		if (isDirty()) {
 			setDirty(false);
+			resetValidations();
 			if (selectedNetIfConfig == null) {
 				reset();
 			} else {
@@ -288,8 +300,8 @@ public class TabModemUi extends Composite implements Tab {
 			public void onBlur(BlurEvent event) {
 				setDirty(true);
 				if ( number.getText().trim() != null && 
-					 ( !number.getText().trim().matches(REGEX_NUM) || 
-					   Integer.parseInt(number.getText()) < 0) ) {
+						( !number.getText().trim().matches(REGEX_NUM) || 
+								Integer.parseInt(number.getText()) < 0) ) {
 					helpNumber.setText("This Field requires a numeric input");
 					groupNumber.setValidationState(ValidationState.ERROR);
 				}else{
@@ -383,8 +395,12 @@ public class TabModemUi extends Composite implements Tab {
 			public void onBlur(BlurEvent event) {
 				setDirty(true);
 				if(apn.getText() == null || "".equals(apn.getText().trim())){
-					groupApn.setValidationState(ValidationState.ERROR);
-				}else{
+					if (apn.isEnabled()) {
+						groupApn.setValidationState(ValidationState.ERROR);
+					} else {
+						groupApn.setValidationState(ValidationState.NONE);
+					}
+				} else{
 					groupApn.setValidationState(ValidationState.NONE);
 				}
 			}});
@@ -485,9 +501,9 @@ public class TabModemUi extends Composite implements Tab {
 			public void onBlur(BlurEvent event) {
 				setDirty(true);
 				if ( reset.getText().trim() != null && 
-					 ( !reset.getText().trim().matches(REGEX_NUM) || 
-					   ( Integer.parseInt(reset.getText()) < 0 || 
-					     Integer.parseInt(reset.getText()) == 1)) ) {
+						( !reset.getText().trim().matches(REGEX_NUM) || 
+								( Integer.parseInt(reset.getText()) < 0 || 
+										Integer.parseInt(reset.getText()) == 1)) ) {
 					helpReset.setText(MSGS.netModemInvalidResetTimeout());
 					groupReset.setValidationState(ValidationState.ERROR);
 				} else {
@@ -564,9 +580,9 @@ public class TabModemUi extends Composite implements Tab {
 			public void onBlur(BlurEvent event) {
 				setDirty(true);
 				if ( maxfail.getText().trim() != null && 
-					 ( !maxfail.getText().trim().matches(REGEX_NUM) || 
-					   Integer.parseInt(maxfail.getText() ) <= 0) || 
-					   maxfail.getText().trim().length() <= 0 ) {
+						( !maxfail.getText().trim().matches(REGEX_NUM) || 
+								Integer.parseInt(maxfail.getText() ) <= 0) || 
+						maxfail.getText().trim().length() <= 0 ) {
 					helpMaxfail.setText(MSGS.netModemInvalidMaxFail());
 					groupMaxfail.setValidationState(ValidationState.ERROR);
 				} else {
@@ -598,8 +614,8 @@ public class TabModemUi extends Composite implements Tab {
 			public void onBlur(BlurEvent event) {
 				setDirty(true);
 				if ( idle.getText().trim() != null && 
-					 ( !idle.getText().trim().matches(REGEX_NUM) || 
-					   Integer.parseInt(idle.getText()) < 0) ) {
+						( !idle.getText().trim().matches(REGEX_NUM) || 
+								Integer.parseInt(idle.getText()) < 0) ) {
 					helpIdle.setText(MSGS.netModemInvalidIdle());
 					groupIdle.setValidationState(ValidationState.ERROR);
 				} else {
@@ -654,8 +670,8 @@ public class TabModemUi extends Composite implements Tab {
 			public void onBlur(BlurEvent event) {
 				setDirty(true);
 				if ( interval.getText().trim() != null && 
-					 ( !interval.getText().trim().matches(REGEX_NUM) || 
-					   Integer.parseInt(interval.getText()) < 0) ) {
+						( !interval.getText().trim().matches(REGEX_NUM) || 
+								Integer.parseInt(interval.getText()) < 0) ) {
 					helpInterval.setText(MSGS.netModemInvalidLcpEchoInterval());
 					groupInterval.setValidationState(ValidationState.ERROR);
 				}else{
@@ -686,8 +702,8 @@ public class TabModemUi extends Composite implements Tab {
 			public void onBlur(BlurEvent event) {
 				setDirty(true);
 				if ( failure.getText().trim() != null && 
-					 ( !failure.getText().trim().matches(REGEX_NUM) || 
-					   Integer.parseInt(failure.getText()) < 0) ) {
+						( !failure.getText().trim().matches(REGEX_NUM) || 
+								Integer.parseInt(failure.getText()) < 0) ) {
 					helpFailure.setText(MSGS.netModemInvalidLcpEchoFailure());
 					groupFailure.setValidationState(ValidationState.ERROR);
 				} else {
@@ -697,17 +713,35 @@ public class TabModemUi extends Composite implements Tab {
 			}
 		});
 
-		helpTitle.setText("Help Text");
+		helpTitle.setText(MSGS.netHelpTitle());
 		radio1.setText(MSGS.trueLabel());
 		radio2.setText(MSGS.falseLabel());
-		
+
 		radio1.setValue(true);
 		radio2.setValue(false);
+	}
+	
+	private void resetValidations() {
+		groupApn.setValidationState(ValidationState.NONE);
+		groupDial.setValidationState(ValidationState.NONE);
+		groupFailure.setValidationState(ValidationState.NONE);
+		groupIdle.setValidationState(ValidationState.NONE);
+		groupInterval.setValidationState(ValidationState.NONE);
+		groupMaxfail.setValidationState(ValidationState.NONE);
+		groupNumber.setValidationState(ValidationState.NONE);
+		groupReset.setValidationState(ValidationState.NONE);
+		
+		helpReset.setText(""); 
+		helpMaxfail.setText(""); 
+		helpIdle.setText(""); 
+		helpInterval.setText(""); 
+		helpFailure.setText(""); 
+		helpNumber.setText("");
 	}
 
 	private void resetHelp() {
 		helpText.clear();
-		helpText.add(new Span("Mouse over enabled items on the left to see help text."));
+		helpText.add(new Span(MSGS.netHelpDefaultHint()));
 	}
 
 	private void update() {
@@ -776,11 +810,11 @@ public class TabModemUi extends Composite implements Tab {
 		active.setEnabled(true);
 		interval.setEnabled(true);
 		failure.setEnabled(true);
-		
+
 		String authTypeVal = auth.getSelectedItemText().trim();
 
 		if ( authTypeVal == null || 
-			 authTypeVal.equalsIgnoreCase(MODEM_AUTH_NONE_MESSAGE) ) {
+				authTypeVal.equalsIgnoreCase(MODEM_AUTH_NONE_MESSAGE) ) {
 			username.setEnabled(false);
 			password.setEnabled(false);
 		} else {
@@ -796,14 +830,16 @@ public class TabModemUi extends Composite implements Tab {
 			radio1.setEnabled(false);
 			radio2.setEnabled(false);
 		}
-		*/
-		
-		for (String techType : selectedNetIfConfig.getNetworkTechnology()) {
-			if (techType.equals("EVDO") || techType.equals("CDMA")) {
-				apn.setEnabled(false);
-				auth.setEnabled(false);
-				username.setEnabled(false);
-				password.setEnabled(false);
+		 */
+
+		if (selectedNetIfConfig != null) {
+			for (String techType : selectedNetIfConfig.getNetworkTechnology()) {
+				if (techType.equals("EVDO") || techType.equals("CDMA")) {
+					apn.setEnabled(false);
+					auth.setEnabled(false);
+					username.setEnabled(false);
+					password.setEnabled(false);
+				}
 			}
 		}
 	}

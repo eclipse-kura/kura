@@ -25,6 +25,7 @@ import org.eclipse.kura.KuraNotConnectedException;
 import org.eclipse.kura.KuraTimeoutException;
 import org.eclipse.kura.KuraTooManyInflightMessagesException;
 import org.eclipse.kura.configuration.ConfigurableComponent;
+import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.core.data.transport.mqtt.MqttClientConfiguration.PersistenceType;
 import org.eclipse.kura.core.util.ValidationUtil;
 import org.eclipse.kura.crypto.CryptoService;
@@ -168,11 +169,11 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 			Object value = entry.getValue();
 			if (key.equals(MQTT_PASSWORD_PROP_NAME)) {
 				try {
-					char[] decryptedPassword = m_cryptoService.decryptAes(((String) value).toCharArray());
+					Password decryptedPassword = new Password(m_cryptoService.decryptAes(((String) value).toCharArray()));
 					decryptedPropertiesMap.put(key, decryptedPassword);
 				} catch (Exception e) {
 					s_logger.info("Password is not encrypted");
-					decryptedPropertiesMap.put(key, ((String) value).toCharArray());
+					decryptedPropertiesMap.put(key, new Password((String) value));
 				}
 			} else {
 				decryptedPropertiesMap.put(key, value);
@@ -228,11 +229,11 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 			Object value = entry.getValue();
 			if (key.equals(MQTT_PASSWORD_PROP_NAME)) {
 				try {
-					char[] decryptedPassword = m_cryptoService.decryptAes(((String) value).toCharArray());
+					Password decryptedPassword = new Password(m_cryptoService.decryptAes(((String) value).toCharArray()));
 					decryptedPropertiesMap.put(key, decryptedPassword);
 				} catch (Exception e) {
 					s_logger.info("Password is not encrypted");
-					decryptedPropertiesMap.put(key, ((String) value).toCharArray());
+					decryptedPropertiesMap.put(key, new Password((String) value));
 				}
 			} else {
 				decryptedPropertiesMap.put(key, value);
@@ -694,9 +695,9 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 				conOpt.setUserName(userName);
 			}
 
-			char[] password = (char[]) properties.get(MQTT_PASSWORD_PROP_NAME);
+			Password password = (Password) properties.get(MQTT_PASSWORD_PROP_NAME);
 			if (password != null) {
-				conOpt.setPassword(password);
+				conOpt.setPassword(password.getPassword());
 			}
 
 			conOpt.setKeepAliveInterval((Integer) properties.get(MQTT_KEEP_ALIVE_PROP_NAME));

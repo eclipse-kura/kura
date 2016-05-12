@@ -26,8 +26,8 @@ import org.eclipse.kura.core.net.WifiInterfaceAddressConfigImpl;
 import org.eclipse.kura.core.util.IOUtil;
 import org.eclipse.kura.core.util.ProcessUtil;
 import org.eclipse.kura.core.util.SafeProcess;
-import org.eclipse.kura.linux.net.util.KuraConstants;
 import org.eclipse.kura.linux.net.wifi.Hostapd;
+import org.eclipse.kura.linux.net.wifi.HostapdManager;
 import org.eclipse.kura.net.NetConfig;
 import org.eclipse.kura.net.NetConfigIP4;
 import org.eclipse.kura.net.NetInterfaceAddressConfig;
@@ -49,18 +49,7 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
 	
 	private static final String HEXES = "0123456789ABCDEF";
 	
-	private static String HOSTAPD_CONFIG_FILE = null;
 	private static final String HOSTAPD_TMP_CONFIG_FILE = "/etc/hostapd.conf.tmp";
-	
-	private static final String OS_VERSION = System.getProperty("kura.os.version");
-	
-	static {
-		if (OS_VERSION.equals(KuraConstants.Intel_Edison.getImageName() + "_" + KuraConstants.Intel_Edison.getImageVersion() + "_" + KuraConstants.Intel_Edison.getTargetName())) {
-			HOSTAPD_CONFIG_FILE = "/etc/hostapd/hostapd.conf";
-		} else {
-			HOSTAPD_CONFIG_FILE = "/etc/hostapd.conf";
-		}
-	}
 	
 	private static HostapdConfigWriter s_instance;
 	
@@ -126,7 +115,7 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
 						}
 						
 						if(netInterfaceStatus == NetInterfaceStatus.netIPv4StatusDisabled) {
-		        			s_logger.info("Network interface status for " + interfaceName + " is disabled - not overwriting hostapd configuration file");
+		        			s_logger.info("Network interface status for {} is disabled - not overwriting hostapd configuration file", interfaceName);
 		        			return;
 		        		}
 						
@@ -134,7 +123,7 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
 							try {
 								generateHostapdConf(apConfig, interfaceName, interfaceDriver);
 							} catch (Exception e) {
-								s_logger.error("Failed to generate hostapd configuration file");
+								s_logger.error("Failed to generate hostapd configuration file for {} interface", interfaceName);
 								throw KuraException.internalError(e);
 							}
 						}
@@ -151,7 +140,7 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
 		
 		s_logger.debug("Generating Hostapd Config");
 		
-		if (wifiConfig.getSecurity() == WifiSecurity.SECURITY_NONE) {
+		if ((wifiConfig.getSecurity() == WifiSecurity.SECURITY_NONE) || (wifiConfig.getSecurity() == WifiSecurity.NONE)) {
 			
 			File outputFile = new File(HOSTAPD_TMP_CONFIG_FILE);
 			
@@ -166,7 +155,7 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
 				fileAsString = fileAsString.replaceFirst("KURA_DRIVER", interfaceDriver);
 			} else {
 				String drv = Hostapd.getDriver(interfaceName);
-				s_logger.warn("The 'driver' parameter must be set: setting to: " + drv);
+				s_logger.warn("The 'driver' parameter must be set: setting to: {}", drv);
 				fileAsString = fileAsString.replaceFirst("KURA_DRIVER", drv);
 				//throw KuraException.internalError("the driver name can not be null");
 			}
@@ -227,7 +216,7 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
 			this.copyFile(fileAsString, outputFile);
 			
 			//move the file if we made it this far
-			this.moveFile();
+			this.moveFile(interfaceName);
 			
 			return;
 		} else if(wifiConfig.getSecurity() == WifiSecurity.SECURITY_WEP) {
@@ -244,7 +233,7 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
 				fileAsString = fileAsString.replaceFirst("KURA_DRIVER", interfaceDriver);
 			} else {
 				String drv = Hostapd.getDriver(interfaceName);
-				s_logger.warn("The 'driver' parameter must be set: setting to: " + drv);
+				s_logger.warn("The 'driver' parameter must be set: setting to: {}", drv);
 				fileAsString = fileAsString.replaceFirst("KURA_DRIVER", drv);
 				//throw KuraException.internalError("the driver name can not be null");
 			}
@@ -360,7 +349,7 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
 			this.copyFile(fileAsString, outputFile);
 			
 			//move the file if we made it this far
-			this.moveFile();
+			this.moveFile(interfaceName);
 			
 			return;
 		} else if ((wifiConfig.getSecurity() == WifiSecurity.SECURITY_WPA)
@@ -391,7 +380,7 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
 				fileAsString = fileAsString.replaceFirst("KURA_DRIVER", interfaceDriver);
 			} else {
 				String drv = Hostapd.getDriver(interfaceName);
-				s_logger.warn("The 'driver' parameter must be set: setting to: " + drv);
+				s_logger.warn("The 'driver' parameter must be set: setting to: {}", drv);
 				fileAsString = fileAsString.replaceFirst("KURA_DRIVER", drv);
 				//throw KuraException.internalError("the driver name can not be null");
 			}
@@ -484,12 +473,11 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
 			this.copyFile(fileAsString, tmpOutputFile);
 			
 			//move the file if we made it this far
-			this.moveFile();
+			this.moveFile(interfaceName);
 			
 			return;
 		} else {
-			s_logger.error("unsupported security type: " + wifiConfig.getSecurity() +
-					" It must be WifiSecurity.SECURITY_NONE, WifiSecurity.SECURITY_WEP, WifiSecurity.SECURITY_WPA, or WifiSecurity.SECURITY_WPA2");
+			s_logger.error("Unsupported security type: {}. It must be WifiSecurity.NONE, WifiSecurity.SECURITY_NONE, WifiSecurity.SECURITY_WEP, WifiSecurity.SECURITY_WPA, or WifiSecurity.SECURITY_WPA2", wifiConfig.getSecurity());
 			throw KuraException.internalError("unsupported security type: " + wifiConfig.getSecurity());
 		}
 	}
@@ -524,9 +512,9 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
 		}
 	}
 	
-	private void moveFile() throws Exception {
+	private void moveFile(String ifaceName) throws Exception {
 		File tmpFile = new File(HOSTAPD_TMP_CONFIG_FILE);
-		File file = new File(HOSTAPD_CONFIG_FILE);
+		File file = new File(HostapdManager.getHostapdConfigFileName(ifaceName));
 		if(!FileUtils.contentEquals(tmpFile, file)) {
 			if(tmpFile.renameTo(file)){
 				s_logger.trace("Successfully wrote hostapd.conf file");

@@ -12,6 +12,9 @@
 
 package org.eclipse.kura.linux.net.iptables;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.slf4j.Logger;
@@ -30,6 +33,25 @@ public class FilterForwardChainRule {
 	private String m_dstNetwork;
 	private short m_dstMask;
 	private String m_protocol;
+	private String m_permittedMacAddress;
+	private int m_srcPortFirst;
+	private int m_srcPortLast;
+	private int m_dstPort;
+	
+	public FilterForwardChainRule(String inputInterface, String outputInterface,
+			String srcNetwork, short srcMask, String dstNetwork, short dstMask,
+			String protocol, String permittedMacAddress, int srcPortFirst, int srcPortLast) {
+		m_inputInterface = inputInterface;
+		m_outputInterface = outputInterface;
+		m_srcNetwork = srcNetwork;
+		m_srcMask = srcMask;
+		m_dstNetwork = dstNetwork;
+		m_dstMask = dstMask;
+		m_protocol = protocol;
+		m_permittedMacAddress = permittedMacAddress;
+		m_srcPortFirst = srcPortFirst;
+		m_srcPortLast = srcPortLast;
+	}
 
 	public FilterForwardChainRule(String rule) throws KuraException {
 		try {
@@ -55,6 +77,46 @@ public class FilterForwardChainRule {
 		} catch (Exception e) {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
 		}
+	}
+	
+	public List<String> toStrings() {
+		List<String> ret = new ArrayList<String>();
+		StringBuilder sb = new StringBuilder("-A FORWARD");
+		if (m_srcNetwork != null) {
+			sb.append(" -s ").append(m_srcNetwork).append('/').append(m_srcMask);
+		}
+		if (m_dstNetwork != null) {
+			sb.append(" -d ").append(m_dstNetwork).append('/').append(m_dstMask);
+		}
+		sb.append(" -i ").append(m_inputInterface);
+		sb.append(" -o ").append(m_outputInterface);
+		if (m_protocol != null) {
+			sb.append(" -p ").append(m_protocol);
+			sb.append(" -m ").append(m_protocol);
+		}
+		if (m_permittedMacAddress != null) {
+			sb.append(" -m mac --mac-source ").append(m_permittedMacAddress);
+		}
+		if ((m_srcPortFirst > 0) && (m_srcPortLast >= m_srcPortFirst)) {
+			sb.append(" --sport ").append(m_srcPortFirst).append(':').append(m_srcPortLast);
+		}
+		if (m_dstPort > 0) {
+			sb.append(" --dport ").append(m_dstPort);
+		}
+		sb.append(" -j ACCEPT");
+		ret.add(sb.toString());
+		sb = new StringBuilder("-A FORWARD");
+		if (m_dstNetwork != null) {
+			sb.append(" -s ").append(m_dstNetwork).append('/').append(m_dstMask);
+		}
+		sb.append(" -i ").append(m_outputInterface);
+		sb.append(" -o ").append(m_inputInterface);
+		if (m_protocol != null) {
+			sb.append(" -p ").append(m_protocol);
+		}
+		sb.append(" -m state --state RELATED,ESTABLISHED -j ACCEPT");
+		ret.add(sb.toString());
+		return ret;
 	}
 	
 	@Override
@@ -119,12 +181,12 @@ public class FilterForwardChainRule {
         }
         return true;
     }
-	
+
 	@Override
 	public String toString() {
 		return m_rule;
 	}
-
+	
 	public String getInputInterface() {
 		return m_inputInterface;
 	}

@@ -396,7 +396,7 @@ public class DnsMonitorServiceImpl implements DnsMonitorService, EventHandler {
     							// FIXME - don't like this
     							// cannot use interfaceName here because it one config behind
     							int pppNo = ((ModemInterfaceConfigImpl) netInterfaceConfig).getPppNum();
-    							if (LinuxNetworkUtil.isUp("ppp"+pppNo)) {  
+    							if (LinuxNetworkUtil.hasAddress("ppp"+pppNo)) {  
 	    							List<IPAddress> servers = linuxDns.getPppDnServers();   
 	    							if (servers != null) {
 	    								s_logger.debug("Adding PPP dns servers: {}", servers);

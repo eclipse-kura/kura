@@ -67,7 +67,13 @@ public class SecureBasicHttpContext implements HttpContext
 	public synchronized boolean handleSecurity(HttpServletRequest request,
 			HttpServletResponse response) 
 					throws IOException 
-	{        
+	{      
+		response.setHeader("X-FRAME-OPTIONS", "SAMEORIGIN");
+		response.setHeader("X-XSS-protection", "1; mode=block");
+		response.setHeader("X-Content-Type-Options", "nosniff");
+		response.setHeader("Cache-Control", "no-cache,no-store");
+		response.setHeader("Pragma", "no-cache");
+		
 		// If a trailing "/" is used when accesssing the app, redirect
 		if (request.getRequestURI().equals(m_appRoot + "/")) {
 			response.sendRedirect(m_appRoot);
@@ -116,7 +122,7 @@ public class SecureBasicHttpContext implements HttpContext
 		String userid = credentials.substring(0, colon);
 		String password = credentials.substring(colon + 1);
 
-		Subject subject = login(request, userid, password);
+		Subject subject = login(request, response, userid, password);
 		if (subject == null) {
 			return failAuthorization(response);
 		}
@@ -124,6 +130,7 @@ public class SecureBasicHttpContext implements HttpContext
 		request.setAttribute(HttpContext.REMOTE_USER, null);
 		request.setAttribute(HttpContext.AUTHENTICATION_TYPE, request.getAuthType());
 		request.setAttribute(HttpContext.AUTHORIZATION, null);
+		
 		return true;
 	}
 
@@ -141,12 +148,13 @@ public class SecureBasicHttpContext implements HttpContext
 	/**
 	 * Authenticates a user against an LDAP directory if he does not have an active session.
 	 * @param request
+	 * @param response 
 	 * @param userid
 	 * @param password
 	 * @return A Subject Object if the credentials are valid, null otherwise.
 	 */
 	private Subject login(HttpServletRequest request, 
-			String userid,
+			HttpServletResponse response, String userid,
 			String password) 
 	{
 		Subject subject = null;
@@ -160,6 +168,10 @@ public class SecureBasicHttpContext implements HttpContext
 		subject = authorize(userid, password);
 		session.setAttribute("subject", subject);
 		session.setAttribute("username", userid);
+		if (session.isNew()) {
+			String sessionid = session.getId();
+			response.setHeader("SET-COOKIE", "JSESSIONID=" + sessionid + "; HttpOnly");  //TODO: this response header is highly discouraged. Find a better solution (that probably will require a new version of Jetty). See here: https://www.owasp.org/index.php/HttpOnly#Using_Java_to_Set_HttpOnly
+		}
 		return subject;
 
 	}
@@ -175,7 +187,7 @@ public class SecureBasicHttpContext implements HttpContext
 	 */
 	private Subject authorize(String userid, String password) 
 	{        
-		s_logger.debug("Authenticating user [" + userid + "]");
+		s_logger.debug("Authenticating user [{}]", userid);
 		try {
 			if (m_authMgr.authenticate(userid, password)) {
 				// TODO : We are temporarily returning an empty Subject, 

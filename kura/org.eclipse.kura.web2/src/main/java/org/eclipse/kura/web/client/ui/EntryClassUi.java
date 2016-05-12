@@ -17,6 +17,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.kura.web.client.messages.Messages;
+import org.eclipse.kura.web.client.ui.resources.Resources;
 import org.eclipse.kura.web.client.ui.Device.DevicePanelUi;
 import org.eclipse.kura.web.client.ui.Firewall.FirewallPanelUi;
 import org.eclipse.kura.web.client.ui.Network.NetworkPanelUi;
@@ -37,7 +38,6 @@ import org.gwtbootstrap3.client.shared.event.ModalHideHandler;
 import org.gwtbootstrap3.client.ui.AnchorListItem;
 import org.gwtbootstrap3.client.ui.Button;
 import org.gwtbootstrap3.client.ui.Icon;
-import org.gwtbootstrap3.client.ui.Image;
 import org.gwtbootstrap3.client.ui.Modal;
 import org.gwtbootstrap3.client.ui.ModalBody;
 import org.gwtbootstrap3.client.ui.ModalFooter;
@@ -46,6 +46,7 @@ import org.gwtbootstrap3.client.ui.NavPills;
 import org.gwtbootstrap3.client.ui.Panel;
 import org.gwtbootstrap3.client.ui.PanelBody;
 import org.gwtbootstrap3.client.ui.PanelHeader;
+import org.gwtbootstrap3.client.ui.TabListItem;
 import org.gwtbootstrap3.client.ui.constants.IconSize;
 import org.gwtbootstrap3.client.ui.constants.IconType;
 import org.gwtbootstrap3.client.ui.html.Span;
@@ -58,6 +59,7 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
@@ -98,6 +100,7 @@ public class EntryClassUi extends Composite {
 	private boolean servicesDirty;
 	private boolean networkDirty;
 	private boolean firewallDirty;
+	private boolean settingsDirty;
 
 
 	@UiField
@@ -111,7 +114,9 @@ public class EntryClassUi extends Composite {
 	@UiField
 	PanelBody contentPanelBody;
 	@UiField
-	AnchorListItem status, device, network, firewall, packages, settings, wires;
+	TabListItem status;
+	@UiField
+	AnchorListItem device, network, firewall, packages, settings, wires;
 	@UiField
 	ScrollPanel servicesPanel;
 	@UiField
@@ -128,7 +133,7 @@ public class EntryClassUi extends Composite {
 		initWidget(uiBinder.createAndBindUi(this));
 
 		// TODO : standardize the URL?
-//		header.setUrl("eclipse/kura/icons/kura_logo_small.png");
+		//		header.setUrl("eclipse/kura/icons/kura_logo_small.png");
 		header.setStyleName("headerLogo");
 		Date now = new Date();
 		@SuppressWarnings("deprecation")
@@ -162,21 +167,22 @@ public class EntryClassUi extends Composite {
 
 	}
 
-	public void initSystemPanel(GwtSession GwtSession) {
+	public void initSystemPanel(GwtSession GwtSession, boolean connectionStatus) {
+		final EntryClassUi m_instanceReference= this;
 		if (!GwtSession.isNetAdminAvailable()) {
 			network.setVisible(false);
 			firewall.setVisible(false);
 		}
 
 		// Status Panel
+		updateConnectionStatusImage(connectionStatus);
 		status.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
 				Button b = new Button(MSGS.yesButton(), new ClickHandler() {
 					@Override
 					public void onClick(ClickEvent event) {
-						forceTabsCleaning();
-						if (modal != null ) {
+						if (modal != null) {
 							modal.hide();
 						}
 						if (servicesUi != null) {
@@ -187,9 +193,11 @@ public class EntryClassUi extends Composite {
 						contentPanelBody.clear();
 						contentPanelBody.add(statusBinder);
 						statusBinder.setSession(currentSession);
+						statusBinder.setParent(m_instanceReference);
 						statusBinder.loadStatusData();
 					}
 				});
+
 				renderDirtyConfigModal(b);
 			}
 		});
@@ -295,6 +303,7 @@ public class EntryClassUi extends Composite {
 						contentPanelBody.clear();
 						contentPanelBody.add(packagesBinder);
 						packagesBinder.setSession(currentSession);
+						packagesBinder.setMainUi(ui);
 						packagesBinder.refresh();
 					}
 				});
@@ -396,25 +405,61 @@ public class EntryClassUi extends Composite {
 		contentPanelBody.add(servicesUi);
 	}
 
+	public void updateConnectionStatusImage(boolean isConnected) {
+
+		Image img;
+		String statusMessage;
+
+
+		if (isConnected) {
+			img= new Image(Resources.INSTANCE.greenPlug32().getSafeUri());
+			statusMessage= MSGS.connectionStatusConnected();
+		} else {
+			img= new Image(Resources.INSTANCE.redPlug32().getSafeUri());
+			statusMessage= MSGS.connectionStatusDisconnected();
+		}
+
+		StringBuilder imageSB= new StringBuilder();
+		imageSB.append("<image src=\"");
+		imageSB.append(img.getUrl());
+		imageSB.append("\" ");
+		imageSB.append("width=\"23\" height=\"23\" style=\"vertical-align: middle; float: right;\" title=\"");
+		imageSB.append(statusMessage);
+		imageSB.append("\"/>");
+
+		String baseStatusHTML= status.getHTML().split("<im")[0];
+		StringBuilder statusHTML= new StringBuilder(baseStatusHTML);
+		statusHTML.append(imageSB.toString());
+		status.setHTML(statusHTML.toString());
+	}
+
+
 	// create the prompt for dirty configuration before switching to another tab
 	private void renderDirtyConfigModal(Button b) {
-		if(servicesUi != null) {
-			servicesDirty=servicesUi.isDirty();
+		if (servicesUi != null) {
+			servicesDirty= servicesUi.isDirty();
 		}
 
 		if (network.isVisible()) {
-			networkDirty = networkBinder.isDirty();
+			networkDirty= networkBinder.isDirty();
 		} else {
-			networkDirty = false;
+			networkDirty= false;
 		}
 
 		if (firewall.isVisible()) {
-			firewallDirty = firewallBinder.isDirty();
+			firewallDirty= firewallBinder.isDirty();
 		} else {
-			firewallDirty = false;
+			firewallDirty= false;
 		}
 
-		if ((servicesUi!=null && servicesUi.isDirty()) || networkDirty || firewallDirty) {
+		if (settings.isVisible()) {
+			settingsDirty= settingsBinder.isDirty(); 
+		}
+
+		if (	(servicesUi!=null && servicesUi.isDirty()) || 
+				networkDirty  || 
+				firewallDirty || 
+				settingsDirty ) {
 			modal = new Modal();
 
 			ModalHeader header = new ModalHeader();
@@ -458,6 +503,14 @@ public class EntryClassUi extends Composite {
 		}
 	}
 
+	public boolean isSettingsDirty(){
+		if (settings.isVisible()) {
+			return settingsBinder.isDirty();
+		} else {
+			return false;
+		}
+	}
+
 	public void setDirty(boolean b) {
 		if (servicesUi != null){
 			servicesUi.setDirty(false);
@@ -467,6 +520,9 @@ public class EntryClassUi extends Composite {
 		}
 		if (firewall.isVisible()) {
 			firewallBinder.setDirty(false);
+		}
+		if (settings.isVisible()) {
+			settingsBinder.setDirty(false);
 		}
 	}
 
@@ -483,7 +539,9 @@ public class EntryClassUi extends Composite {
 	}
 
 	public static void hideWaitModal() {
-		m_waitModal.hide();
+		if (m_waitModal != null) {
+			m_waitModal.hide();
+		}
 	}
 
 	private void forceTabsCleaning() {
@@ -495,6 +553,9 @@ public class EntryClassUi extends Composite {
 		}
 		if (firewall.isVisible()) {
 			firewallBinder.setDirty(false);
+		}
+		if (settings.isVisible()) {
+			settingsBinder.setDirty(false);
 		}
 	}
 }

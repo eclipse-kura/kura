@@ -71,7 +71,7 @@
 											</b:PanelHeader>
 											<b:PanelBody ui:field='systemPanel'>
 												<b:NavPills stacked="true">
-													<b:AnchorListItem text="Status" icon="EXCLAMATION"
+													<b:TabListItem text="Status" icon="EXCLAMATION"
 														iconFixedWidth="true" ui:field="status" />
 
 													<b:AnchorListItem text="Device" icon="HDD_O"

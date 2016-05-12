@@ -18,7 +18,7 @@
 	<parent>
 		<artifactId>kura</artifactId>
 		<groupId>org.eclipse.kura</groupId>
-		<version>1.5.0-SNAPSHOT</version>
+		<version>2.0.0-SNAPSHOT</version>
 		<relativePath>../pom_pom.xml</relativePath>
 	</parent>
 
@@ -54,6 +54,26 @@
 		</extensions>
 		<plugins>
 			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>properties-maven-plugin</artifactId> 
+				<version>1.0-alpha-1</version>
+				<executions>
+					<execution>
+						<phase>initialize</phase>
+						<goals>
+							<goal>read-project-properties</goal>
+						</goals>
+						<configuration>
+							<files>
+								<file>${basedir}/build.properties</file>
+								<file>${basedir}/config/kura.build.properties</file>
+								<file>${kura.basedir}/../target-platform/config/kura.target-platform.build.properties</file>
+							</files>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
 				<!-- get kura bundles from (release or local) repository -->
 				<artifactId>maven-dependency-plugin</artifactId>
 				<version>2.8</version>
@@ -70,6 +90,11 @@
 									<groupId>org.eclipse.kura</groupId>
 									<artifactId>org.eclipse.kura.api</artifactId>
 									<version>${org.eclipse.kura.api.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.kura.camel</artifactId>
+									<version>${org.eclipse.kura.camel.version}</version>
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.eclipse.kura</groupId>
@@ -232,7 +257,7 @@
 						</configuration>
 					</execution>
 					<execution>
-						<id>get-web-bundle</id>
+						<id>get-web-classic-bundle</id>
 						<phase>generate-resources</phase>
 						<goals>
 							<goal>copy</goal>
@@ -244,14 +269,7 @@
 									<groupId>org.eclipse.kura</groupId>
 									<artifactId>org.eclipse.kura.web</artifactId>
 									<version>${org.eclipse.kura.web.version}</version>
-								</artifactItem>
-
-								<artifactItem>
-									<groupId>org.eclipse.kura</groupId>
-									<artifactId>org.eclipse.kura.protocol.can</artifactId>
-									<version>${org.eclipse.kura.protocol.can.version}</version>
-								</artifactItem>
-
+								</artifactItem>			
 							</artifactItems>
 							<stripVersion>true</stripVersion>
 							<outputDirectory>${project.basedir}/target/plugins</outputDirectory>
@@ -271,13 +289,25 @@
 									<artifactId>org.eclipse.kura.web2</artifactId>
 									<version>${org.eclipse.kura.web2.version}</version>
 								</artifactItem>
-
+							</artifactItems>
+							<stripVersion>true</stripVersion>
+							<outputDirectory>${project.basedir}/target/plugins</outputDirectory>
+						</configuration>
+					</execution>
+					<execution>
+						<id>get-can-bundle</id>
+						<phase>generate-resources</phase>
+						<goals>
+							<goal>copy</goal>
+						</goals>
+						<configuration>
+							<skip>${org.eclipse.kura.can.skip}</skip>
+							<artifactItems>
 								<artifactItem>
 									<groupId>org.eclipse.kura</groupId>
 									<artifactId>org.eclipse.kura.protocol.can</artifactId>
 									<version>${org.eclipse.kura.protocol.can.version}</version>
 								</artifactItem>
-
 							</artifactItems>
 							<stripVersion>true</stripVersion>
 							<outputDirectory>${project.basedir}/target/plugins</outputDirectory>
@@ -317,7 +347,8 @@
 						<configuration>
 							<tasks>
 							    <move file="target/plugins/org.eclipse.kura.api.jar" tofile="target/plugins/org.eclipse.kura.api_${org.eclipse.kura.api.version}.jar"/>
-							    <move file="target/plugins/org.eclipse.kura.core.jar" tofile="target/plugins/org.eclipse.kura.core_${org.eclipse.kura.core.version}.jar"/>
+								<move file="target/plugins/org.eclipse.kura.camel.jar" tofile="target/plugins/org.eclipse.kura.camel_${org.eclipse.kura.camel.version}.jar"/>
+								<move file="target/plugins/org.eclipse.kura.core.jar" tofile="target/plugins/org.eclipse.kura.core_${org.eclipse.kura.core.version}.jar"/>
 							    <move file="target/plugins/org.eclipse.kura.core.certificates.jar" tofile="target/plugins/org.eclipse.kura.core.certificates_${org.eclipse.kura.core.certificates.version}.jar"/>
 							    <move file="target/plugins/org.eclipse.kura.core.cloud.jar" tofile="target/plugins/org.eclipse.kura.core.cloud_${org.eclipse.kura.core.cloud.version}.jar"/>
 							    <move file="target/plugins/org.eclipse.kura.core.comm.jar" tofile="target/plugins/org.eclipse.kura.core.comm_${org.eclipse.kura.core.comm.version}.jar"/>
@@ -623,24 +654,6 @@
                     </resource>
                 </resources>
                 <plugins>
-                    <plugin>
-						<groupId>org.codehaus.mojo</groupId>
-						<artifactId>properties-maven-plugin</artifactId> <version>1.0-alpha-1</version>
-						<executions>
-							<execution>
-								<phase>initialize</phase>
-								<goals>
-									<goal>read-project-properties</goal>
-								</goals>
-								<configuration>
-									<files>
-										<file>${basedir}/build.properties</file>
-										<file>${basedir}/config/kura.build.properties</file>
-									</files>
-								</configuration>
-							</execution>
-						</executions>
-					</plugin>
 					<plugin>
                         <groupId>org.codehaus.mojo</groupId>
                         <artifactId>buildnumber-maven-plugin</artifactId>
@@ -706,24 +719,6 @@
                     </resource>
                 </resources>
                 <plugins>
-                    <plugin>
-						<groupId>org.codehaus.mojo</groupId>
-						<artifactId>properties-maven-plugin</artifactId> <version>1.0-alpha-1</version>
-						<executions>
-							<execution>
-								<phase>initialize</phase>
-								<goals>
-									<goal>read-project-properties</goal>
-								</goals>
-								<configuration>
-									<files>
-										<file>${basedir}/build.properties</file>
-										<file>${basedir}/config/kura.build.properties</file>
-									</files>
-								</configuration>
-							</execution>
-						</executions>
-					</plugin>
 					<plugin>
                         <groupId>org.codehaus.mojo</groupId>
                         <artifactId>buildnumber-maven-plugin</artifactId>
@@ -791,25 +786,6 @@
 					</resource>
 				</resources>
 				<plugins>
-					<plugin>
-						<groupId>org.codehaus.mojo</groupId>
-						<artifactId>properties-maven-plugin</artifactId>
-						<version>1.0-alpha-1</version>
-						<executions>
-							<execution>
-								<phase>initialize</phase>
-								<goals>
-									<goal>read-project-properties</goal>
-								</goals>
-								<configuration>
-									<files>
-										<file>${basedir}/build.properties</file>
-										<file>${basedir}/config/kura.build.properties</file>
-									</files>
-								</configuration>
-							</execution>
-						</executions>
-					</plugin>
 					<plugin>
 						<groupId>org.codehaus.mojo</groupId>
 						<artifactId>buildnumber-maven-plugin</artifactId>
@@ -955,25 +931,6 @@
 				<plugins>
 					<plugin>
 						<groupId>org.codehaus.mojo</groupId>
-						<artifactId>properties-maven-plugin</artifactId>
-						<version>1.0-alpha-1</version>
-						<executions>
-							<execution>
-								<phase>initialize</phase>
-								<goals>
-									<goal>read-project-properties</goal>
-								</goals>
-								<configuration>
-									<files>
-										<file>${basedir}/build.properties</file>
-										<file>${basedir}/config/kura.build.properties</file>
-									</files>
-								</configuration>
-							</execution>
-						</executions>
-					</plugin>
-					<plugin>
-						<groupId>org.codehaus.mojo</groupId>
 						<artifactId>buildnumber-maven-plugin</artifactId>
 						<version>1.0</version>
 						<executions>
@@ -1096,25 +1053,6 @@
 					</resource>
 				</resources>
 				<plugins>
-					<plugin>
-						<groupId>org.codehaus.mojo</groupId>
-						<artifactId>properties-maven-plugin</artifactId>
-						<version>1.0-alpha-1</version>
-						<executions>
-							<execution>
-								<phase>initialize</phase>
-								<goals>
-									<goal>read-project-properties</goal>
-								</goals>
-								<configuration>
-									<files>
-										<file>${basedir}/build.properties</file>
-										<file>${basedir}/config/kura.build.properties</file>
-									</files>
-								</configuration>
-							</execution>
-						</executions>
-					</plugin>
 					<plugin>
 						<groupId>org.codehaus.mojo</groupId>
 						<artifactId>buildnumber-maven-plugin</artifactId>
@@ -1249,24 +1187,6 @@
 				<plugins>
 					<plugin>
 						<groupId>org.codehaus.mojo</groupId>
-						<artifactId>properties-maven-plugin</artifactId> <version>1.0-alpha-1</version>
-						<executions>
-							<execution>
-								<phase>initialize</phase>
-								<goals>
-									<goal>read-project-properties</goal>
-								</goals>
-								<configuration>
-									<files>
-										<file>${basedir}/build.properties</file>
-										<file>${basedir}/config/kura.build.properties</file>
-									</files>
-								</configuration>
-							</execution>
-						</executions>
-					</plugin>
-					<plugin>
-						<groupId>org.codehaus.mojo</groupId>
 						<artifactId>buildnumber-maven-plugin</artifactId>
 						<version>1.0</version>
 						<executions>
@@ -1387,25 +1307,6 @@
 					</resource>
 				</resources>
 				<plugins>
-					<plugin>
-						<groupId>org.codehaus.mojo</groupId>
-						<artifactId>properties-maven-plugin</artifactId>
-						<version>1.0-alpha-1</version>
-						<executions>
-							<execution>
-								<phase>initialize</phase>
-								<goals>
-									<goal>read-project-properties</goal>
-								</goals>
-								<configuration>
-									<files>
-										<file>${basedir}/build.properties</file>
-										<file>${basedir}/config/kura.build.properties</file>
-									</files>
-								</configuration>
-							</execution>
-						</executions>
-					</plugin>
 					<plugin>
 						<groupId>org.codehaus.mojo</groupId>
 						<artifactId>buildnumber-maven-plugin</artifactId>
@@ -1540,24 +1441,6 @@
 				<plugins>
 					<plugin>
 						<groupId>org.codehaus.mojo</groupId>
-						<artifactId>properties-maven-plugin</artifactId> <version>1.0-alpha-1</version>
-						<executions>
-							<execution>
-								<phase>initialize</phase>
-								<goals>
-									<goal>read-project-properties</goal>
-								</goals>
-								<configuration>
-									<files>
-										<file>${basedir}/build.properties</file>
-										<file>${basedir}/config/kura.build.properties</file>
-									</files>
-								</configuration>
-							</execution>
-						</executions>
-					</plugin>
-					<plugin>
-						<groupId>org.codehaus.mojo</groupId>
 						<artifactId>buildnumber-maven-plugin</artifactId>
 						<version>1.0</version>
 						<executions>
@@ -1678,25 +1561,6 @@
 					</resource>
 				</resources>
 				<plugins>
-					<plugin>
-						<groupId>org.codehaus.mojo</groupId>
-						<artifactId>properties-maven-plugin</artifactId>
-						<version>1.0-alpha-1</version>
-						<executions>
-							<execution>
-								<phase>initialize</phase>
-								<goals>
-									<goal>read-project-properties</goal>
-								</goals>
-								<configuration>
-									<files>
-										<file>${basedir}/build.properties</file>
-										<file>${basedir}/config/kura.build.properties</file>
-									</files>
-								</configuration>
-							</execution>
-						</executions>
-					</plugin>
 					<plugin>
 						<groupId>org.codehaus.mojo</groupId>
 						<artifactId>buildnumber-maven-plugin</artifactId>
@@ -1822,25 +1686,6 @@
 				<plugins>
 					<plugin>
 						<groupId>org.codehaus.mojo</groupId>
-						<artifactId>properties-maven-plugin</artifactId>
-						<version>1.0-alpha-1</version>
-						<executions>
-							<execution>
-								<phase>initialize</phase>
-								<goals>
-									<goal>read-project-properties</goal>
-								</goals>
-								<configuration>
-									<files>
-										<file>${basedir}/build.properties</file>
-										<file>${basedir}/config/kura.build.properties</file>
-									</files>
-								</configuration>
-							</execution>
-						</executions>
-					</plugin>
-					<plugin>
-						<groupId>org.codehaus.mojo</groupId>
 						<artifactId>buildnumber-maven-plugin</artifactId>
 						<version>1.0</version>
 						<executions>
@@ -1958,25 +1803,6 @@
 				<plugins>
 					<plugin>
 						<groupId>org.codehaus.mojo</groupId>
-						<artifactId>properties-maven-plugin</artifactId>
-						<version>1.0-alpha-1</version>
-						<executions>
-							<execution>
-								<phase>initialize</phase>
-								<goals>
-									<goal>read-project-properties</goal>
-								</goals>
-								<configuration>
-									<files>
-										<file>${basedir}/build.properties</file>
-										<file>${basedir}/config/kura.build.properties</file>
-									</files>
-								</configuration>
-							</execution>
-						</executions>
-					</plugin>
-					<plugin>
-						<groupId>org.codehaus.mojo</groupId>
 						<artifactId>buildnumber-maven-plugin</artifactId>
 						<version>1.0</version>
 						<executions>
@@ -2036,25 +1862,6 @@
 					</resource>
 				</resources>
 				<plugins>
-					<plugin>
-						<groupId>org.codehaus.mojo</groupId>
-						<artifactId>properties-maven-plugin</artifactId>
-						<version>1.0-alpha-1</version>
-						<executions>
-							<execution>
-								<phase>initialize</phase>
-								<goals>
-									<goal>read-project-properties</goal>
-								</goals>
-								<configuration>
-									<files>
-										<file>${basedir}/build.properties</file>
-										<file>${basedir}/config/kura.build.properties</file>
-									</files>
-								</configuration>
-							</execution>
-						</executions>
-					</plugin>
 					<plugin>
 						<groupId>org.codehaus.mojo</groupId>
 						<artifactId>buildnumber-maven-plugin</artifactId>
@@ -2387,6 +2194,35 @@
 										<property name="kura.build.version" value="${kura.build.version}" />
 										<ant antfile="${basedir}/src/main/ant/build_modbus_dp.xml"
 											target="build-dp" />
+									</target>
+								</configuration>
+							</execution>
+							
+							<execution>
+								<id>check-can</id>
+								<phase>install</phase>
+								<goals>
+									<goal>run</goal>
+								</goals>
+								<configuration>
+									<exportAntProperties>true</exportAntProperties>
+									<target name="verify-can">
+										<available file="target/plugins/org.eclipse.kura.protocol.can_${org.eclipse.kura.protocol.can.version}.jar" property="can.jar.present" />
+									</target>
+								</configuration>
+							</execution>
+							
+							<execution>
+								<id>can-dp</id>
+								<phase>install</phase>
+								<goals>
+									<goal>run</goal>
+								</goals>
+								<configuration>
+									<target name="dp-can" if="can.jar.present">
+										<property name="deployment.package.version" value="${deployment.package.version}" />
+										<property name="kura.build.version" value="${kura.build.version}" />
+										<ant antfile="${basedir}/src/main/ant/build_can_dp.xml" target="build-dp" />
 									</target>
 								</configuration>
 							</execution>

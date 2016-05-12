@@ -31,7 +31,6 @@ import org.eclipse.kura.core.linux.util.LinuxProcessUtil;
 import org.eclipse.kura.core.util.ProcessUtil;
 import org.eclipse.kura.core.util.SafeProcess;
 import org.eclipse.kura.linux.net.NetworkServiceImpl;
-import org.eclipse.kura.linux.net.dhcp.DhcpClientTool;
 import org.eclipse.kura.linux.net.wifi.WifiOptions;
 import org.eclipse.kura.net.NetInterfaceType;
 import org.eclipse.kura.net.wifi.WifiInterface.Capability;
@@ -49,51 +48,26 @@ public class LinuxNetworkUtil {
 	private static Map<String, LinuxIfconfig> s_ifconfigs = new HashMap<String, LinuxIfconfig>();
 	
 	private static final String [] s_ignoreIfaces = {"can", "sit", "mon.wlan"};
-
-	public static List<String> getInterfaceNames() throws KuraException {
-		SafeProcess proc = null;
-		BufferedReader br = null;
-		List<String> ifaces = new ArrayList<String>();
-		try {
-
-			//start the process
-			proc = ProcessUtil.exec("ifconfig");
-			if (proc.waitFor() != 0) {
-				s_logger.error("error executing command --- ifconfig --- exit value = " + proc.exitValue());
-				throw new KuraException(KuraErrorCode.INTERNAL_ERROR);
-			}
-			
-			//get the output
-			br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
-			String line = null;
-
-			while((line = br.readLine()) != null) {
-				if(line.indexOf("Link encap:") > -1) {
-					StringTokenizer st = new StringTokenizer(line);
-					ifaces.add(st.nextToken());
-				}
-			}
-		} catch(IOException e) {
-			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
-		}  catch(InterruptedException e) {
-			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
-		} 
-		finally {
-			if (br != null) {
-				try {
-					br.close();
-					br = null;
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
-			if (proc != null) ProcessUtil.destroy(proc);
-		}
-		
-		return ifaces;
-	}
+	
+	private static final ArrayList<String> s_tools = new ArrayList<String>(); 
 
 	public static List<String> getAllInterfaceNames() throws KuraException {
+		try {
+			IpAddrShow ipAddrShow = new IpAddrShow();
+			LinuxIfconfig[] configs = ipAddrShow.exec();
+			List<String> ifaces = new ArrayList<String>();
+			for (LinuxIfconfig config : configs) {
+				ifaces.add(config.getName());
+			}
+			return ifaces;
+		} catch (KuraException e) {
+			s_logger.warn("FIXME: IpAddrShow failed. Falling back to old method", e);
+			return getAllInterfaceNamesInternal();
+		}
+	}
+	
+	@Deprecated
+	private static List<String> getAllInterfaceNamesInternal() throws KuraException {
 		SafeProcess proc = null;
 		BufferedReader br = null;
 		try {
@@ -105,7 +79,7 @@ public class LinuxNetworkUtil {
 				s_logger.error("error executing command --- ifconfig -a --- exit value = " + proc.exitValue());
 				throw new KuraException(KuraErrorCode.INTERNAL_ERROR);
 			}
-			
+
 			//get the output
 			br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
 			String line = null;
@@ -116,7 +90,7 @@ public class LinuxNetworkUtil {
 					ifaces.add(st.nextToken());
 				}
 			}
-			
+
 			return ifaces;
 		} catch(IOException e) {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
@@ -130,77 +104,32 @@ public class LinuxNetworkUtil {
 					s_logger.error("I/O Exception while closing BufferedReader!");
 				}
 			}
-			
+
 			if (proc != null) ProcessUtil.destroy(proc);
 		}
 	}
 	
-	public static boolean isUp(String ifaceName) throws KuraException {
-		//ignore logical interfaces like "1-1.2"
-		if (Character.isDigit(ifaceName.charAt(0))) {
-			return false;
-		}
-		
-		boolean ret = false;
-		LinuxIfconfig ifconfig = getInterfaceConfiguration(ifaceName);
-		if (ifconfig != null) {
-			if ((ifconfig.getInetAddress() != null) && (ifconfig.getInetMask() != null)) {
-				ret = true;
-			}
-		}
-		
-		return ret;	
-	}
-	
-	public static boolean isDhclientRunning(String interfaceName) throws KuraException {
-		//ignore logical interfaces like "1-1.2"
-		if (Character.isDigit(interfaceName.charAt(0))) {
-			return false;
-		}
-		SafeProcess proc = null;
-		BufferedReader br = null;
-		try {
-			//start the process
-			proc = ProcessUtil.exec("ps ax");
-			if (proc.waitFor() != 0) {
-				s_logger.error("error executing command --- ps ax --- exit value = " + proc.exitValue());
-				throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "Unable to check in dhclient is running for " + interfaceName);
-			}
-
-			//get the output
-			br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
-			String line = null;
-
-			while((line = br.readLine()) != null) {
-				if(line.indexOf(interfaceName) > -1 && line.indexOf(DhcpClientTool.DHCLIENT.getValue()) > -1) {					
-					return true;
-				}
-			}
-		} catch(IOException e) {
-			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
-		} catch (InterruptedException e) {
-			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
-		}
-		finally {
-			if(br != null){
-				try{
-					br.close();
-				}catch(IOException ex){
-					s_logger.error("I/O Exception while closing BufferedReader!");
-				}
-			}
-			
-			if (proc != null) ProcessUtil.destroy(proc);
-		}
-
-		return false;
-	}
-
+	/*
+	 * Returns null if the interface is not found
+	 */
 	public static String getCurrentIpAddress(String ifaceName) throws KuraException {
 		//ignore logical interfaces like "1-1.2"
 		if (Character.isDigit(ifaceName.charAt(0))) {
 			return null;
 		}
+
+		LinuxIfconfig ifconfig = getInterfaceConfiguration(ifaceName);
+		
+		return ifconfig != null ? ifconfig.getInetAddress() : null;
+	}
+	
+	@Deprecated
+	private static String getCurrentIpAddressInternal(String ifaceName) throws KuraException {
+		//ignore logical interfaces like "1-1.2"
+		if (Character.isDigit(ifaceName.charAt(0))) {
+			return null;
+		}
+		
 		String ipAddress = null;
 		SafeProcess proc = null;
 		BufferedReader br = null;
@@ -211,7 +140,7 @@ public class LinuxNetworkUtil {
 				s_logger.warn("getCurrentIpAddress() :: error executing command --- ifconfig {} --- exit value = {}", ifaceName , proc.exitValue());
 				return ipAddress;
 			}
-			
+
 			//get the output
 			br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
 			String line = null;
@@ -240,68 +169,33 @@ public class LinuxNetworkUtil {
 					s_logger.error("I/O Exception while closing BufferedReader!");
 				}
 			}
-			
+
 			if (proc != null) ProcessUtil.destroy(proc);
 		}
 		return ipAddress;
 	}
 
-	public static String getCurrentNetmask(String ifaceName) throws KuraException {
-		//ignore logical interfaces like "1-1.2"
-		if (Character.isDigit(ifaceName.charAt(0))) {
-			return null;
-		}
-		String netmask = null;
-		SafeProcess proc = null;
-		BufferedReader br = null;
-		try {
-			//start the process
-			proc = ProcessUtil.exec("ifconfig " + ifaceName);
-			if (proc.waitFor() != 0) {
-                s_logger.warn("getCurrentNetmask() :: error executing command --- ifconfig {} --- exit value = {}", ifaceName , proc.exitValue());
-                return netmask;
-			}
-			
-			//get the output
-			br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
-			String line = null;
-
-			while ((line = br.readLine()) != null) {
-				if (line.indexOf(ifaceName) > -1) {
-					if ((line = br.readLine()) != null) {
-						int i = line.indexOf("Mask:");
-						if (i > -1) {
-							netmask = line.substring(i + 5);
-						}
-					}
-					break;
-				}
-			}			
-		} catch(IOException e) {
-			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
-		} catch (InterruptedException e) {
-			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
-		}
-		finally {
-			if(br != null){
-				try{
-					br.close();
-				}catch(IOException ex){
-					s_logger.error("I/O Exception while closing BufferedReader!");
-				}
-			}
-			
-			if (proc != null) ProcessUtil.destroy(proc);
-		}
-
-		return netmask;
-	}
-	
+	/*
+	 * Returns -1 if the interface is not found
+	 */
 	public static int getCurrentMtu(String ifaceName) throws KuraException {
 		//ignore logical interfaces like "1-1.2"
 		if (Character.isDigit(ifaceName.charAt(0))) {
 			return -1;
 		}
+		
+		LinuxIfconfig ifconfig = getInterfaceConfiguration(ifaceName);
+		
+		return ifconfig != null ? ifconfig.getMtu() : -1;
+	}
+	
+	@Deprecated
+	private static int getCurrentMtuInternal(String ifaceName) throws KuraException {
+		//ignore logical interfaces like "1-1.2"
+		if (Character.isDigit(ifaceName.charAt(0))) {
+			return -1;
+		}
+		
 		int mtu = -1;
 		String stringMtu = null;
 		SafeProcess proc = null;
@@ -310,21 +204,21 @@ public class LinuxNetworkUtil {
 			//start the process
 			proc = ProcessUtil.exec("ifconfig " + ifaceName);
 			if (proc.waitFor() != 0) {
-                s_logger.warn("getCurrentMtu() :: error executing command --- ifconfig {} --- exit value = {}", ifaceName , proc.exitValue());
-                return mtu;
-            }
+				s_logger.warn("getCurrentMtu() :: error executing command --- ifconfig {} --- exit value = {}", ifaceName , proc.exitValue());
+				return mtu;
+			}
 
-		    //get the output
-		    br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
-		    String line = null;
-		    while ((line = br.readLine()) != null) {
-		        if (line.indexOf("MTU:") > -1) {
-		            stringMtu = line.substring(line.indexOf("MTU:") + 4, line.indexOf("Metric:") - 2);
-		            break;
-		        }
-		    }
-		    
-		    mtu = Integer.parseInt(stringMtu);
+			//get the output
+			br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+			String line = null;
+			while ((line = br.readLine()) != null) {
+				if (line.indexOf("MTU:") > -1) {
+					stringMtu = line.substring(line.indexOf("MTU:") + 4, line.indexOf("Metric:") - 2);
+					break;
+				}
+			}
+
+			mtu = Integer.parseInt(stringMtu);
 
 		} catch (Exception e) {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
@@ -337,112 +231,10 @@ public class LinuxNetworkUtil {
 					s_logger.error("I/O Exception while closing BufferedReader!");
 				}
 			}
-			
+
 			if (proc != null) ProcessUtil.destroy(proc);
 		}
 		return mtu;
-	}
-
-	public static String getCurrentBroadcastAddress(String ifaceName) throws KuraException {
-		//ignore logical interfaces like "1-1.2"
-		if (Character.isDigit(ifaceName.charAt(0))) {
-			return null;
-		}
-		String broadcast = null;
-		SafeProcess proc = null;
-		BufferedReader br = null;
-		try {
-			//start the process
-			proc = ProcessUtil.exec("ifconfig " + ifaceName);
-			if (proc.waitFor() != 0) {
-                s_logger.warn("getCurrentBroadcastAddress() :: error executing command --- ifconfig {} --- exit value = {}", ifaceName , proc.exitValue());
-                return broadcast;
-			}
-			
-			//get the output
-			br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
-			String line = null;
-
-			while ((line = br.readLine()) != null) {
-				if (line.indexOf(ifaceName) > -1) {
-					if ((line = br.readLine()) != null) {
-						int i = line.indexOf("Bcast:");
-						if (i > -1) {
-							broadcast = line.substring(i + 6, line.indexOf(' ', i + 6));
-						}
-					}
-					break;
-				}
-			}
-		} catch(IOException e) {
-			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
-		} catch (InterruptedException e) {
-			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
-		}
-		finally {
-			if(br != null){
-				try{
-					br.close();
-				}catch(IOException ex){
-					s_logger.error("I/O Exception while closing BufferedReader!");
-				}
-			}
-			
-			if (proc != null) ProcessUtil.destroy(proc);
-		}
-
-		return broadcast;
-	}
-	
-	public static String getCurrentPtpAddress(String ifaceName) throws KuraException {
-		//ignore logical interfaces like "1-1.2"
-		if (Character.isDigit(ifaceName.charAt(0))) {
-			return null;
-		}
-		String ptp = null;
-		SafeProcess proc = null;
-		BufferedReader br = null;
-		try {
-			//start the process
-			proc = ProcessUtil.exec("ifconfig " + ifaceName);
-			if (proc.waitFor() != 0) {
-                s_logger.warn("getCurrentPtpAddress() :: error executing command --- ifconfig {} --- exit value = {}", ifaceName , proc.exitValue());
-                return ptp;
-			}
-			
-			//get the output
-			br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
-			String line = null;
-
-			while ((line = br.readLine()) != null) {
-				if (line.indexOf(ifaceName) > -1) {
-					if ((line = br.readLine()) != null) {
-						int i = line.indexOf("P-t-P:");
-						if (i > -1) {
-							ptp = line.substring(i + 6, line.indexOf(' ', i + 6));
-						}
-					}
-					break;
-				}
-			}			
-		} catch(IOException e) {
-			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
-		} catch (InterruptedException e) {
-			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
-		}
-		finally {
-			if(br != null){
-				try{
-					br.close();
-				}catch(IOException ex){
-					s_logger.error("I/O Exception while closing BufferedReader!");
-				}
-			}
-			
-			if (proc != null) ProcessUtil.destroy(proc);
-		}
-
-		return ptp;
 	}
 
 	public static boolean isLinkUp(String ifaceName) throws KuraException {
@@ -453,23 +245,44 @@ public class LinuxNetworkUtil {
 		return isLinkUp(getType(ifaceName), ifaceName);
 	}
 	
+	/*
+	 * Returns false if the interface is not found
+	 */
 	public static boolean isLinkUp(NetInterfaceType ifaceType, String ifaceName) throws KuraException {
 		//ignore logical interfaces like "1-1.2"
 		if (Character.isDigit(ifaceName.charAt(0))) {
 			return false;
 		}
+				
+		try {
+			LinuxIfconfig ifconfig = getInterfaceConfiguration(ifaceName);
+			// FIXME: should we throw an exception if config is null?
+			return ifconfig != null ? ifconfig.isLinkUp() : false;
+		} catch (KuraException e) {
+			s_logger.warn("FIXME: IpAddrShow failed. Falling back to old method", e);
+			return isLinkUpInternal(ifaceType, ifaceName);
+		}		
+	}
+	
+	@Deprecated
+	private static boolean isLinkUpInternal(NetInterfaceType ifaceType, String ifaceName) throws KuraException {
+		//ignore logical interfaces like "1-1.2"
+		if (Character.isDigit(ifaceName.charAt(0))) {
+			return false;
+		}
+		
 		try {
 			if(ifaceType == NetInterfaceType.WIFI) {
 				Collection<String> supportedWifiOptions = WifiOptions.getSupportedOptions(ifaceName);
 				LinkTool linkTool = null;
 				if ((supportedWifiOptions != null) && (supportedWifiOptions.size() > 0)) {
-		            if (supportedWifiOptions.contains(WifiOptions.WIFI_MANAGED_DRIVER_NL80211)) {
-		            	linkTool = new IwLinkTool(ifaceName);
-		            } else if (supportedWifiOptions.contains(WifiOptions.WIFI_MANAGED_DRIVER_WEXT)) {
-		            	linkTool = new iwconfigLinkTool(ifaceName);
-		            }
+					if (supportedWifiOptions.contains(WifiOptions.WIFI_MANAGED_DRIVER_NL80211)) {
+						linkTool = new IwLinkTool(ifaceName);
+					} else if (supportedWifiOptions.contains(WifiOptions.WIFI_MANAGED_DRIVER_WEXT)) {
+						linkTool = new iwconfigLinkTool(ifaceName);
+					}
 				}
-				
+
 				if((linkTool != null) && linkTool.get()) {
 					return linkTool.isLinkDetected();
 				} else {
@@ -478,13 +291,13 @@ public class LinuxNetworkUtil {
 					return false;
 				}
 			} else if(ifaceType == NetInterfaceType.ETHERNET) {
-			    LinkTool linkTool = null;
-			    if (toolExists("ethtool")) {
-			    	linkTool = new EthTool (ifaceName);
-			    } else if (toolExists("mii-tool")) {
-			    	linkTool = new MiiTool (ifaceName);
-			    }
-			    
+				LinkTool linkTool = null;
+				if (toolExists("ethtool")) {
+					linkTool = new EthTool (ifaceName);
+				} else if (toolExists("mii-tool")) {
+					linkTool = new MiiTool (ifaceName);
+				}
+
 				if (linkTool != null) {
 					if(linkTool.get()) {
 						return linkTool.isLinkDetected();
@@ -510,13 +323,18 @@ public class LinuxNetworkUtil {
 	
 	public static boolean toolExists(String tool) {
 		boolean ret = false;
-		String[] searchFolders = new String[]{"/sbin/", "/usr/sbin/", "/bin/"};
+		final String[] searchFolders = new String[]{"/sbin/", "/usr/sbin/", "/bin/"};
 		
-		for (String folder : searchFolders) {
-			File fTool = new File(folder + tool);
-			if (fTool.exists()) {
-				ret = true;
-				break;
+		if (s_tools.contains(tool)) {
+			ret = true;
+		} else {
+			for (String folder : searchFolders) {
+				File fTool = new File(folder + tool);
+				if (fTool.exists()) {
+					s_tools.add(tool);
+					ret = true;
+					break;
+				}
 			}
 		}
 		return ret;
@@ -558,7 +376,66 @@ public class LinuxNetworkUtil {
 		}
 	}
 	
+	/*
+	 * Returns null if the interface is not found
+	 * Note: the returned configuration is also stored in the static cache
+	 */
 	public static LinuxIfconfig getInterfaceConfiguration(String ifaceName) throws KuraException {
+		try {
+			IpAddrShow ipAddrShow = new IpAddrShow(ifaceName);
+			LinuxIfconfig[] configs = ipAddrShow.exec();
+			if (configs.length == 0) {
+				return null;
+			}
+			LinuxIfconfig config = configs[0];
+			
+			//determine if wifi
+			if (config.getType() == NetInterfaceType.ETHERNET) {
+				Collection<String> wifiOptions = WifiOptions.getSupportedOptions(ifaceName);
+				if (wifiOptions != null && !wifiOptions.isEmpty()) {
+					for (String op : wifiOptions) {
+						s_logger.trace("WiFi option supported on {} : {}", ifaceName, op);
+					}
+					config.setType(NetInterfaceType.WIFI);
+				}
+			}
+			
+			// determine driver
+			if ((config.getType() == NetInterfaceType.ETHERNET) || (config.getType() == NetInterfaceType.WIFI)) {
+				try {
+					Map<String,String> driver = getEthernetDriver(ifaceName);
+					config.setDriver(driver);
+				} catch (KuraException e) {
+					s_logger.error("getInterfaceConfiguration() :: failed to obtain driver information - {}", e);
+				}
+			}
+			
+			// cache information
+			s_ifconfigs.put(ifaceName, config);
+			return config;
+		} catch (KuraException e) {
+			if (e.getCode() == KuraErrorCode.OS_COMMAND_ERROR) {
+				// Assuming ifconfig fails because a PPP link went down and its interface cannot be found
+				if(ifaceName.matches("^ppp\\d+$")) {
+					File pppFile = new File(NetworkServiceImpl.PPP_PEERS_DIR + ifaceName);
+					if (pppFile.exists()) {
+						LinuxIfconfig config = new LinuxIfconfig(ifaceName);
+						config.setType(NetInterfaceType.valueOf("MODEM"));
+						return config;
+					}
+				}
+			} else {
+				s_logger.warn("FIXME: IpAddrShow failed. Falling back to old ifconfig method", e);
+
+				// FIXME: ifconfig is deprecated
+				return getInterfaceConfigurationInternal(ifaceName);
+			}
+		}
+		return null;
+	}
+	
+	@Deprecated
+	private static LinuxIfconfig getInterfaceConfigurationInternal(String ifaceName) throws KuraException {
 		//ignore logical interfaces like "1-1.2"
 		if (Character.isDigit(ifaceName.charAt(0))) {
 			return null;
@@ -661,158 +538,10 @@ public class LinuxNetworkUtil {
 		s_ifconfigs.put(ifaceName, linuxIfconfig);
 		return linuxIfconfig;
 	}
-
-	public static String getMacAddress(String ifaceName) throws KuraException {
-		//ignore logical interfaces like "1-1.2"
-		if (Character.isDigit(ifaceName.charAt(0))) {
-			return null;
-		}
-		
-		String mac = null;
-		if (s_ifconfigs.containsKey(ifaceName)) {
-			LinuxIfconfig ifconfig = s_ifconfigs.get(ifaceName);
-			mac = ifconfig.getMacAddress();
-			s_logger.trace("getMacAddress() :: interface={}, MAC={}", ifaceName, mac);
-		} else {
-			s_ifconfigs.put(ifaceName, new LinuxIfconfig(ifaceName));
-		}
-		
-		if (mac != null) {
-			return mac;
-		}
-		
-		SafeProcess proc = null;
-		BufferedReader br = null;
-		try {
-			//start the process
-			proc = ProcessUtil.exec("ifconfig " + ifaceName);
-			if (proc.waitFor() != 0) {
-                s_logger.warn("getMacAddress() :: error executing command --- ifconfig {} --- exit value = {}", ifaceName , proc.exitValue());
-                return null;
-			}
-
-			//get the output
-			br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
-			String line = null;
-
-			while((line = br.readLine()) != null) {
-				int index = line.indexOf("HWaddr ");
-				if(index > -1) {
-					mac = line.substring(index + 7, line.length()-2);
-				}
-			}
-			
-		} catch (IOException e) {
-			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
-		} catch (InterruptedException e) {
-			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
-		}
-		finally {
-			if(br != null){
-				try{
-					br.close();
-				}catch(IOException ex){
-					s_logger.error("I/O Exception while closing BufferedReader!");
-				}
-			}
-			
-			if (proc != null) {
-				ProcessUtil.destroy(proc);
-			}
-		}
-		
-		s_logger.trace("getMacAddress() :: interface={}, MAC Address={}", ifaceName, mac);
-		LinuxIfconfig ifconfig = s_ifconfigs.get(ifaceName);
-		ifconfig.setMacAddress(mac);
-		
-		return mac;
-	}
 	
-	public static byte[] getMacAddressBytes(String interfaceName) throws KuraException {
-		//ignore logical interfaces like "1-1.2"
-		if (Character.isDigit(interfaceName.charAt(0))) {
-			return new byte[]{0, 0, 0, 0, 0, 0};
-		}
-
-		String macAddress = LinuxNetworkUtil.getMacAddress(interfaceName);		
-
-		if(macAddress == null) {
-			return new byte[]{0, 0, 0, 0, 0, 0};
-		}
-
-		macAddress = macAddress.replaceAll(":","");
-
-		byte[] mac = new byte[6];
-        for(int i=0; i<6; i++) {
-        	mac[i] = (byte) ((Character.digit(macAddress.charAt(i*2), 16) << 4)
-        					+ Character.digit(macAddress.charAt(i*2+1), 16));
-        }
-        
-        return mac;
-	}
-	
-	public static boolean isSupportsMulticast(String ifaceName) throws KuraException {		
-		//ignore logical interfaces like "1-1.2"
-		if (Character.isDigit(ifaceName.charAt(0))) {
-			return false;
-		}
-		
-		Boolean suportsMulticast = null;
-		if (s_ifconfigs.containsKey(ifaceName)) {
-			LinuxIfconfig ifconfig = s_ifconfigs.get(ifaceName);
-			suportsMulticast = ifconfig.isMulticast();
-			s_logger.trace("isSupportsMulticast() :: interface={}, multicast?={}", ifaceName, suportsMulticast);
-		} else {
-			s_ifconfigs.put(ifaceName, new LinuxIfconfig(ifaceName));
-		}
-		
-		if (suportsMulticast != null) {
-			return suportsMulticast;
-		}
-		
-		SafeProcess proc = null;
-		BufferedReader br = null;
-		try {
-			//start the process
-			proc = ProcessUtil.exec("ifconfig " + ifaceName);
-			if (proc.waitFor() != 0) {
-                s_logger.warn("isSupportsMulticast() :: error executing command --- ifconfig {} --- exit value = {}", ifaceName , proc.exitValue());
-                return false;
-			}
-
-			//get the output
-			br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
-			String line = null;
-
-			while ((line = br.readLine()) != null) {
-				if (line.contains("MULTICAST")) {
-					suportsMulticast = true;
-					break;
-				}
-			}
-		} catch(Exception e) {
-		    s_logger.warn("Error reading multicast info", e);
-		} finally {
-			if(br != null){
-				try{
-					br.close();
-				}catch(IOException ex){
-					s_logger.error("I/O Exception while closing BufferedReader!");
-				}
-			}
-			
-			if (proc != null) {
-				ProcessUtil.destroy(proc);
-			}
-		}
-		
-		s_logger.trace("isSupportsMulticast() :: interface={}, multicast?={}", ifaceName, suportsMulticast);
-		LinuxIfconfig ifconfig = s_ifconfigs.get(ifaceName);
-		ifconfig.setMulticast(suportsMulticast);
-		
-		return suportsMulticast;
-	}
-
+	/*
+	 * Returns false on error
+	 */
 	public static boolean canPing(String ipAddress, int count) throws KuraException {
 		SafeProcess proc = null;
 		try {
@@ -820,6 +549,7 @@ public class LinuxNetworkUtil {
 			if(proc.waitFor() == 0) {
 				return true;
 			} else {
+				// FIXME: throw an exception?
 				return false;
 			}
 		} catch(IOException e) {
@@ -834,7 +564,38 @@ public class LinuxNetworkUtil {
 		}
 	}
 	
+	/*
+	 * Returns NetInterfaceType.UNKNOWN for ignored interfaces or if the interface is not found
+	 * Note: may return a cached information
+	 */
 	public static NetInterfaceType getType(String ifaceName) throws KuraException {
+		//ignore logical interfaces like "1-1.2"
+		if (Character.isDigit(ifaceName.charAt(0))) {
+			return NetInterfaceType.UNKNOWN;
+		}
+		for (String ignoreIface : s_ignoreIfaces) {
+			if (ifaceName.startsWith(ignoreIface)) {
+				return NetInterfaceType.UNKNOWN;
+			}
+		}
+		
+		NetInterfaceType ifaceType = null;
+
+		if (s_ifconfigs.containsKey(ifaceName)) {
+			LinuxIfconfig ifconfig = s_ifconfigs.get(ifaceName);
+			ifaceType = ifconfig.getType();
+		} else {
+			LinuxIfconfig ifconfig = getInterfaceConfiguration(ifaceName);
+			if (ifconfig != null) {
+				ifaceType = ifconfig.getType();
+			}
+		}
+		s_logger.trace("getType() :: interface={}, type={}", ifaceName, ifaceType);
+		return ifaceType;
+	}
+	
+	@Deprecated
+	private static NetInterfaceType getTypeInternal(String ifaceName) throws KuraException {
 		//ignore logical interfaces like "1-1.2"
 		if (Character.isDigit(ifaceName.charAt(0))) {
 			return NetInterfaceType.UNKNOWN;
@@ -905,7 +666,8 @@ public class LinuxNetworkUtil {
 		
 		return ifaceType;
 	}
-	
+
+	@Deprecated
 	private static NetInterfaceType getInterfaceType (String ifaceName, String line) throws KuraException {
 		
 		NetInterfaceType ifaceType = NetInterfaceType.UNKNOWN;
@@ -944,7 +706,11 @@ public class LinuxNetworkUtil {
 		}
 		return ifaceType;
 	}
-	
+
+	/*
+	 * Return a dummy driver if the interface cannot be found or in case of an error
+	 * Note: may return a cached information
+	 */
 	public static Map<String,String> getEthernetDriver(String interfaceName) throws KuraException
 	{
 		Map<String, String> driver = null;
@@ -960,8 +726,6 @@ public class LinuxNetworkUtil {
 		if (s_ifconfigs.containsKey(interfaceName)) {
 			LinuxIfconfig ifconfig = s_ifconfigs.get(interfaceName);
 			driver = ifconfig.getDriver();
-		} else {
-			s_ifconfigs.put(interfaceName, new LinuxIfconfig(interfaceName));
 		}
 		
 		if (driver != null) {
@@ -980,11 +744,14 @@ public class LinuxNetworkUtil {
 			if (toolExists("ethtool")) {
 				if (TARGET_NAME.equals(KuraConstants.ReliaGATE_15_10.getTargetName())) {
 					SafeProcess proc = ProcessUtil.exec("ifconfig " + interfaceName + " up");
-					proc.waitFor();
+					if (proc.waitFor() != 0) {
+						s_logger.warn("getEthernetDriver() :: error executing command --- ifconfig {} up", interfaceName);
+					}
 				}
 				procEthtool = ProcessUtil.exec("ethtool -i " + interfaceName);
 				if (procEthtool.waitFor() != 0) {
 	                s_logger.warn("getEthernetDriver() :: error executing command --- ethtool -i {}", interfaceName);
+	                // FIXME: throw exception
 	                return driver;
 				}
 			}
@@ -1026,6 +793,9 @@ public class LinuxNetworkUtil {
 		return driver;
 	}
 	
+	/*
+	 * Returns an empty capabilities set if the interface is not found or on error
+	 */
 	public static EnumSet<Capability> getWifiCapabilities(String ifaceName) throws KuraException {
 		EnumSet<Capability> capabilities = EnumSet.noneOf(Capability.class);
 		
@@ -1041,6 +811,7 @@ public class LinuxNetworkUtil {
 			proc = ProcessUtil.exec("iwlist " + ifaceName + " auth");
 			if (proc.waitFor() != 0) {
                 s_logger.warn("error executing command --- iwlist --- exit value = {}", proc.exitValue());
+                // FIXME: throw exception
                 return capabilities;
 			}
 	
@@ -1089,6 +860,9 @@ public class LinuxNetworkUtil {
 		return capabilities;
 	}
 	
+	/*
+	 * Returns WifiMode.UNKNOWN if the interface is not found or on error
+	 */
 	public static WifiMode getWifiMode(String ifaceName) throws KuraException {
 		//ignore logical interfaces like "1-1.2"
 		if (Character.isDigit(ifaceName.charAt(0))) {
@@ -1105,7 +879,7 @@ public class LinuxNetworkUtil {
 				procIw = ProcessUtil.exec("iw dev " + ifaceName + " info");
 				if (procIw.waitFor() != 0) {
 					s_logger.warn("error executing command --- iw --- exit value = {}; will try iwconfig ...", procIw.exitValue());
-					//return mode;
+					// fallback to iwconfig
 				}
 				
 				br1 = new BufferedReader(new InputStreamReader(procIw.getInputStream()));
@@ -1129,6 +903,7 @@ public class LinuxNetworkUtil {
 					procIwConfig = ProcessUtil.exec("iwconfig " + ifaceName);
 					if (procIwConfig.waitFor() != 0) {
 						s_logger.error("error executing command --- iwconfig --- exit value = {}", procIwConfig.exitValue());
+						// FIXME: throw exception
 		                return mode;
 					}
 					
@@ -1184,6 +959,9 @@ public class LinuxNetworkUtil {
 		return mode;
 	}
 	
+	/*
+	 * Returns 0 if the interface is not found or on error
+	 */
 	public static long getWifiBitrate(String ifaceName) throws KuraException {
 		long bitRate = 0;
 		
@@ -1201,6 +979,7 @@ public class LinuxNetworkUtil {
 				proc = ProcessUtil.exec("iw dev " + ifaceName + " link");
 				if (proc.waitFor() != 0) {
 					s_logger.warn("error executing command --- iw --- exit value = {}", proc.exitValue());
+					// FIXME: why don't we fallback to iwconfig like in the case of getWifiMode()?
 					return bitRate;
 				}
 				else {	
@@ -1239,6 +1018,7 @@ public class LinuxNetworkUtil {
 				proc = ProcessUtil.exec("iwconfig " + ifaceName);
 				if (proc.waitFor() != 0) {
 					s_logger.warn("error executing command --- iwconfig --- exit value = {}", proc.exitValue());
+					// FIXME: throw exception
 					return bitRate;
 				}
 	
@@ -1292,6 +1072,9 @@ public class LinuxNetworkUtil {
 		return bitRate;
 	}
 	
+	/*
+	 * Return null if the interface is not found or on error
+	 */
 	public static String getSSID(String ifaceName) throws KuraException {
 		//ignore logical interfaces like "1-1.2"
 		if (Character.isDigit(ifaceName.charAt(0))) {
@@ -1307,6 +1090,7 @@ public class LinuxNetworkUtil {
 				proc = ProcessUtil.exec("iw dev " + ifaceName + " link");
 				if (proc.waitFor() != 0) {
 					s_logger.warn("error executing command --- iw --- exit value = {}", proc.exitValue());
+					// FIXME: why don't we fallback to iwconfig like in the case of getWifiMode()?
 					return ssid;
 				}
 	
@@ -1332,6 +1116,7 @@ public class LinuxNetworkUtil {
 				proc = ProcessUtil.exec("iwconfig " + ifaceName);
 				if (proc.waitFor() != 0) {
 					s_logger.warn("error executing command --- iwconfig --- exit value = {}", proc.exitValue());
+					// FIXME: throw exception
 					return ssid;
 				}
 	
@@ -1375,24 +1160,29 @@ public class LinuxNetworkUtil {
 		
 		return ssid;
 	}
-		
+
+	/*
+	 * Note: this method DOES NOT bring down the interface.
+	 * Instead, it just deletes the IP address leaving the interface up.
+	 * The trick leaves the interface powered up allowing to detect a link state change.
+	 * After a successful call to this method, a call to hasAddress() method returns false.
+	 */
 	public static void disableInterface(String interfaceName) throws Exception {
 		if(interfaceName != null) {
 			//ignore logical interfaces like "1-1.2"
 			if (Character.isDigit(interfaceName.charAt(0))) {
 				return;
 			}
-			if (OS_VERSION.equals(KuraConstants.Mini_Gateway.getImageName() + "_" + KuraConstants.Mini_Gateway.getImageVersion())) {
+			
+			// FIXME:
+			// * Do we really need to bring down the interface before deleting addresses?
+			if (hasAddress(interfaceName)) {
 				LinuxProcessUtil.start("ifdown " + interfaceName + "\n");
 				LinuxProcessUtil.start("ifconfig " + interfaceName + " down\n");
-			} else {
-				if (isUp(interfaceName)) {
-					LinuxProcessUtil.start("ifdown " + interfaceName + "\n");		
-				}
 			}
 			
 			//always leave the Ethernet Controller powered
-			powerOnEthernetController(interfaceName);
+			bringUpDeletingAddress(interfaceName);
 		}
 	}
 	
@@ -1402,19 +1192,108 @@ public class LinuxNetworkUtil {
 			if (Character.isDigit(interfaceName.charAt(0))) {
 				return;
 			}
+			// FIXME:
+			// * Can we unify the below cases?
+			// * Why is 'ifconfig iface' sometimes required before 'ifup iface'?
+			// * Is '-f', '--force' used because the interface is or might be already up?
 			if (OS_VERSION.equals(KuraConstants.Mini_Gateway.getImageName() + "_" + KuraConstants.Mini_Gateway.getImageVersion())) {
+				// FIXME: check the exit code and throw an exception
 				LinuxProcessUtil.start("ifconfig " + interfaceName + " up\n");
 				LinuxProcessUtil.start("ifup -f " + interfaceName + "\n");
-			} else if (OS_VERSION.equals(KuraConstants.Raspberry_Pi.getImageName())) { 
+			} else if (OS_VERSION.equals(KuraConstants.Raspberry_Pi.getImageName())) {
+				// FIXME: check the exit code and throw an exception
 				LinuxProcessUtil.start("ifconfig " + interfaceName + " up\n");
 				LinuxProcessUtil.start("ifup --force " + interfaceName + "\n");
 			} else {
+				// FIXME: check the exit code and throw an exception
+				LinuxProcessUtil.start("ifconfig " + interfaceName + " up\n");
 				LinuxProcessUtil.start("ifup " + interfaceName + "\n");						
 			}
 		}
 	}
 	
-	public static void powerOnEthernetController(String interfaceName) throws KuraException {
+	/*
+	 * Returns true if both the inet address and inet mask are non-null.
+	 * Returns false if the interface is not found.
+	 */
+	public static boolean hasAddress(String ifaceName) throws KuraException {
+		//ignore logical interfaces like "1-1.2"
+		if (Character.isDigit(ifaceName.charAt(0))) {
+			return false;
+		}
+		
+		LinuxIfconfig ifconfig = getInterfaceConfiguration(ifaceName);
+	
+		// FIXME: should we throw an exception if config is null?
+		boolean ret = false;
+		if (ifconfig != null &&
+			ifconfig.getInetAddress() != null && (ifconfig.getInetMask() != null)) {
+				ret = true;
+		}
+
+		return ret;
+	}
+	
+	@Deprecated
+	private static boolean isUpInternal(String ifaceName) throws KuraException {
+		//ignore logical interfaces like "1-1.2"
+		if (Character.isDigit(ifaceName.charAt(0))) {
+			return false;
+		}
+		
+		boolean ret = false;
+		LinuxIfconfig ifconfig = getInterfaceConfigurationInternal(ifaceName);
+		if (ifconfig != null) {
+			if ((ifconfig.getInetAddress() != null) && (ifconfig.getInetMask() != null)) {
+				ret = true;
+			}
+		}
+
+		return ret;
+	}
+	
+	/*
+	 * This method bring up the interface deleting its IP address.
+	 * The trick powers the interface up allowing to detect a link state change.
+	 * After a successful call to this method, a call to hasAddress() method returns false.
+	 */
+	public static void bringUpDeletingAddress(String interfaceName) throws KuraException {
+		//ignore logical interfaces like "1-1.2"
+		if (Character.isDigit(interfaceName.charAt(0))) {
+			return;
+		}
+		
+		//Power the controller.
+		//This is implementing by setting the IPv4 unspecified address 0.0.0.0.
+		//This is equivalent to e.g.:
+		//ip addr del 172.16.0.1/32 dev eth0
+		//or, to delete all the interface address:
+		//ip addr flush dev eth0
+		SafeProcess proc = null;
+		try {
+			//start the SafeProcess
+			StringBuilder sb = new StringBuilder().append("ifconfig ").append(interfaceName).append(" 0.0.0.0");
+			proc = ProcessUtil.exec(sb.toString());
+
+			if (proc.waitFor() != 0) {
+				// FIXME: throw an exception
+				s_logger.error("error executing command --- " + sb.toString() + " --- exit value = " + proc.exitValue());
+				return;
+			}
+		} catch(IOException e) {
+			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+		} catch (InterruptedException e) {
+			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+		}
+		finally {
+			if (proc != null) {
+				ProcessUtil.destroy(proc);
+			}
+		}
+	}
+	
+	@Deprecated
+	private static void powerOnEthernetControllerInternal(String interfaceName) throws KuraException {
 		//ignore logical interfaces like "1-1.2"
 		if (Character.isDigit(interfaceName.charAt(0))) {
 			return;
@@ -1484,7 +1363,23 @@ public class LinuxNetworkUtil {
 		}
 	}
 	
-	public static boolean isEthernetControllerPowered(String interfaceName) throws KuraException {
+	/*
+	 * Returns true if the interface is up (e.g. by 'ifup iface' or 'ifconfig iface up').
+	 * Returns false if the interface is not found.
+	 */
+	public static boolean isUp(String interfaceName) throws KuraException {
+		//ignore logical interfaces like "1-1.2"
+		if (Character.isDigit(interfaceName.charAt(0))) {
+			return false;
+		}
+
+		LinuxIfconfig config = getInterfaceConfiguration(interfaceName);
+		
+		return config != null ? config.isUp() : false;
+	}
+	
+	@Deprecated
+	private static boolean isEthernetControllerPoweredInternal(String interfaceName) throws KuraException {
 		//ignore logical interfaces like "1-1.2"
 		if (Character.isDigit(interfaceName.charAt(0))) {
 			return false;
@@ -1549,9 +1444,8 @@ public class LinuxNetworkUtil {
 			try {
 				s_logger.debug("Executing '{}'", cmd);
 				proc = ProcessUtil.exec(cmd);
-				int code = -1;
-				if ((code = proc.waitFor()) != 0) {
-					throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "'"+cmd+"' exited with code: "+code);
+				if ((proc.waitFor()) != 0) {
+					throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, cmd, proc.exitValue());
 				}
 
 				//get the output
@@ -1593,9 +1487,8 @@ public class LinuxNetworkUtil {
 				String cmd = "rmmod bcmdhd";
 				s_logger.debug("Executing '{}'", cmd);
 				proc = ProcessUtil.exec(cmd);
-				int code = -1;
-				if ((code = proc.waitFor()) != 0) {
-					throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "'"+cmd+"' exited with code: "+code);
+				if (proc.waitFor() != 0) {
+					throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, cmd, proc.exitValue());
 				}
 			} catch (IOException e) {
 				throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e,"'rmmod bcmdhd' failed");
@@ -1629,9 +1522,8 @@ public class LinuxNetworkUtil {
 			try {
 				s_logger.debug("Executing '{}'", cmd);
 				proc = ProcessUtil.exec(cmd);
-				int code = -1;
-				if ((code = proc.waitFor()) != 0) {
-					throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "'"+cmd+"' exited with code: "+code);
+				if (proc.waitFor() != 0) {
+					throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, cmd, proc.exitValue());
 				}
 			} catch (IOException e) {
 				throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e, "'"+cmd+"' failed");

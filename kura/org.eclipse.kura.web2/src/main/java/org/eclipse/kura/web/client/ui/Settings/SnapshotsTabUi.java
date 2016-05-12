@@ -17,7 +17,10 @@ import java.util.logging.Logger;
 
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.ui.EntryClassUi;
+import org.eclipse.kura.web.client.ui.Tab;
 import org.eclipse.kura.web.client.util.FailureHandler;
+import org.eclipse.kura.web.shared.GwtKuraErrorCode;
+import org.eclipse.kura.web.shared.GwtKuraException;
 import org.eclipse.kura.web.shared.model.GwtSnapshot;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenService;
@@ -49,7 +52,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SingleSelectionModel;
 
-public class SnapshotsTabUi extends Composite {
+public class SnapshotsTabUi extends Composite implements Tab {
 
 	private static SnapshotsTabUiUiBinder uiBinder = GWT.create(SnapshotsTabUiUiBinder.class);
 	private static final Logger logger = Logger.getLogger(SnapshotsTabUi.class.getSimpleName());
@@ -94,6 +97,143 @@ public class SnapshotsTabUi extends Composite {
 		initTable();
 		snapshotsGrid.setSelectionModel(selectionModel);
 
+		initInterfaceButtons();
+		
+		initUploadModalHandlers();
+		
+		snapshotsForm.addSubmitCompleteHandler(new SubmitCompleteHandler() {
+			@Override
+			public void onSubmitComplete(SubmitCompleteEvent event) {
+				String htmlResponse = event.getResults();
+				EntryClassUi.hideWaitModal();
+				if (htmlResponse == null || htmlResponse.isEmpty()) {
+					logger.log(Level.FINER, MSGS.information() + ": " + MSGS.fileUploadSuccess());
+					refresh();
+				} else {
+					logger.log(Level.SEVERE, MSGS.information() + ": " + MSGS.fileUploadFailure());
+					FailureHandler.handle(new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR));
+				}
+			}
+		});
+	}
+	
+	@Override
+	public void setDirty(boolean flag) {
+	}
+
+	@Override
+	public boolean isDirty() {
+		return false;
+	}
+
+	@Override
+	public boolean isValid() {
+		return true;
+	}
+
+	@Override
+	public void refresh() {
+		notification.setVisible(false);
+		EntryClassUi.showWaitModal();
+		gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
+
+			@Override
+			public void onFailure(Throwable ex) {
+				EntryClassUi.hideWaitModal();
+				FailureHandler.handle(ex);
+			}
+
+			@Override
+			public void onSuccess(GwtXSRFToken token) {
+				gwtSnapshotService.findDeviceSnapshots(token, new AsyncCallback<ArrayList<GwtSnapshot>>() {
+					@Override
+					public void onFailure(Throwable ex) {
+						EntryClassUi.hideWaitModal();
+						FailureHandler.handle(ex);
+					}
+
+					@Override
+					public void onSuccess(ArrayList<GwtSnapshot> result) {
+						snapshotsDataProvider.getList().clear();
+						for (GwtSnapshot pair : result) {
+							snapshotsDataProvider.getList().add(pair);
+						}
+						int snapshotsDataSize= snapshotsDataProvider.getList().size();
+						if (snapshotsDataSize == 0) {
+							snapshotsGrid.setVisible(false);
+							notification.setVisible(true);
+							notification.setText("No Snapshots Available");
+							download.setEnabled(false);
+							rollback.setEnabled(false);
+						} else {
+							snapshotsGrid.setVisibleRange(0, snapshotsDataSize);
+							snapshotsGrid.setVisible(true);
+							notification.setVisible(false);
+							download.setEnabled(true);
+							rollback.setEnabled(true);
+						}
+						snapshotsDataProvider.flush();
+						EntryClassUi.hideWaitModal();
+					}
+				});
+			}
+			
+		});		
+	}
+
+	private void initTable() {
+
+		TextColumn<GwtSnapshot> col1 = new TextColumn<GwtSnapshot>() {
+			@Override
+			public String getValue(GwtSnapshot object) {
+				return String.valueOf(object.getSnapshotId());
+			}
+		};
+		col1.setCellStyleNames("status-table-row");
+		snapshotsGrid.addColumn(col1, MSGS.deviceSnapshotId());
+
+		TextColumn<GwtSnapshot> col2 = new TextColumn<GwtSnapshot>() {
+			@Override
+			public String getValue(GwtSnapshot object) {
+				return String.valueOf(object.get("createdOnFormatted"));
+			}
+		};
+		col2.setCellStyleNames("status-table-row");
+		snapshotsGrid.addColumn(col2, MSGS.deviceSnapshotCreatedOn());
+
+		snapshotsDataProvider.addDataDisplay(snapshotsGrid);
+	}
+	
+	private void initUploadModalHandlers() {
+		uploadCancel.addClickHandler(new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
+				uploadModal.hide();
+			}
+		});
+
+		uploadUpload.addClickHandler(new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
+				gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
+					@Override
+					public void onFailure(Throwable ex) {
+						FailureHandler.handle(ex);
+					}
+
+					@Override
+					public void onSuccess(GwtXSRFToken token) {
+						xsrfTokenField.setValue(token.getToken());
+						snapshotsForm.submit();
+						uploadModal.hide();
+						EntryClassUi.showWaitModal();
+					}
+				});
+			}
+		});
+	}
+
+	private void initInterfaceButtons() {
 		refresh.setText(MSGS.refresh());
 		refresh.addClickHandler(new ClickHandler() {
 			@Override
@@ -141,81 +281,7 @@ public class SnapshotsTabUi extends Composite {
 			}
 		});
 	}
-
-	private void initTable() {
-
-		TextColumn<GwtSnapshot> col1 = new TextColumn<GwtSnapshot>() {
-			@Override
-			public String getValue(GwtSnapshot object) {
-				return String.valueOf(object.getSnapshotId());
-			}
-		};
-		col1.setCellStyleNames("status-table-row");
-		snapshotsGrid.addColumn(col1, MSGS.deviceSnapshotId());
-
-		TextColumn<GwtSnapshot> col2 = new TextColumn<GwtSnapshot>() {
-			@Override
-			public String getValue(GwtSnapshot object) {
-				return String.valueOf(object.get("createdOnFormatted"));
-			}
-		};
-		col2.setCellStyleNames("status-table-row");
-		snapshotsGrid.addColumn(col2, MSGS.deviceSnapshotCreatedOn());
-
-		snapshotsDataProvider.addDataDisplay(snapshotsGrid);
-	}
-
-	public void refresh() {
-		notification.setVisible(false);
-		EntryClassUi.showWaitModal();
-		gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
-
-			@Override
-			public void onFailure(Throwable ex) {
-				EntryClassUi.hideWaitModal();
-				FailureHandler.handle(ex);
-			}
-
-			@Override
-			public void onSuccess(GwtXSRFToken token) {
-				gwtSnapshotService.findDeviceSnapshots(token, new AsyncCallback<ArrayList<GwtSnapshot>>() {
-					@Override
-					public void onFailure(Throwable ex) {
-						EntryClassUi.hideWaitModal();
-						FailureHandler.handle(ex);
-					}
-
-					@Override
-					public void onSuccess(ArrayList<GwtSnapshot> result) {
-						snapshotsDataProvider.getList().clear();
-						for (GwtSnapshot pair : result) {
-							snapshotsDataProvider.getList().add(pair);
-						}
-						int snapshotsDataSize= snapshotsDataProvider.getList().size();
-						if (snapshotsDataSize == 0) {
-							snapshotsGrid.setVisible(false);
-							notification.setVisible(true);
-							notification.setText("No Snapshots Available");
-							download.setEnabled(false);
-							rollback.setEnabled(false);
-						} else {
-							snapshotsGrid.setVisibleRange(0, snapshotsDataSize);
-							snapshotsGrid.setVisible(true);
-							notification.setVisible(false);
-							download.setEnabled(true);
-							rollback.setEnabled(true);
-						}
-						snapshotsDataProvider.flush();
-						EntryClassUi.hideWaitModal();
-					}
-				});
-			}
-			
-		});
-
-		
-	}
-
+	
 	private void rollback() {
 		final GwtSnapshot snapshot = selectionModel.getSelectedObject();
 		if (snapshot != null) {
@@ -302,47 +368,6 @@ public class SnapshotsTabUi extends Composite {
 		xsrfTokenField.setID("xsrfToken");
         xsrfTokenField.setName("xsrfToken");
         xsrfTokenField.setValue("");
-        
-        gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
-			@Override
-			public void onFailure(Throwable ex) {
-				FailureHandler.handle(ex);
-			}
-
-			@Override
-			public void onSuccess(GwtXSRFToken token) {
-				xsrfTokenField.setValue(token.getToken());
-			}
-		});
-
-		uploadCancel.addClickHandler(new ClickHandler() {
-			@Override
-			public void onClick(ClickEvent event) {
-				uploadModal.hide();
-			}
-		});
-
-		uploadUpload.addClickHandler(new ClickHandler() {
-			@Override
-			public void onClick(ClickEvent event) {
-				snapshotsForm.submit();
-			}
-		});
-
-		snapshotsForm.addSubmitCompleteHandler(new SubmitCompleteHandler() {
-			@Override
-			public void onSubmitComplete(SubmitCompleteEvent event) {
-				String htmlResponse = event.getResults();
-				if (htmlResponse == null || htmlResponse.isEmpty()) {
-					logger.log(Level.FINER, MSGS.information() + ": " + MSGS.fileUploadSuccess());
-					uploadModal.hide();
-				} else {
-					logger.log(Level.SEVERE, MSGS.information() + ": " + MSGS.fileUploadFailure());
-				}
-
-			}
-		});
 
 	}
-
 }

@@ -28,6 +28,7 @@ import org.eclipse.kura.web.shared.service.GwtSecurityTokenServiceAsync;
 import org.gwtbootstrap3.client.ui.Alert;
 import org.gwtbootstrap3.client.ui.AnchorButton;
 import org.gwtbootstrap3.client.ui.Modal;
+import org.gwtbootstrap3.client.ui.html.Text;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -67,6 +68,9 @@ public class NetworkButtonBarUi extends Composite {
 	Modal incompleteFieldsModal;
 	@UiField
 	Alert incompleteFields;
+	@UiField
+	Text incompleteFieldsText;
+	
 	
 
 	public NetworkButtonBarUi(GwtSession currentSession,
@@ -246,7 +250,8 @@ public class NetworkButtonBarUi extends Composite {
 	}
 	
 	private void initModal() {
-		incompleteFieldsModal.setTitle("Warning!");
+		incompleteFieldsModal.setTitle(MSGS.warning());
+		incompleteFieldsText.setText(MSGS.formWithErrorsOrIncomplete());
 	}
 
 }

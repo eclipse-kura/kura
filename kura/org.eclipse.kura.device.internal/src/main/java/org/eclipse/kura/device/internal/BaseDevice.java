@@ -12,11 +12,12 @@
  */
 package org.eclipse.kura.device.internal;
 
-import java.util.HashSet;
+import static org.eclipse.kura.device.internal.DeviceConfiguration.DEVICE_DESC_PROP;
+import static org.eclipse.kura.device.internal.DeviceConfiguration.DEVICE_DRIVER_PROP;
+import static org.eclipse.kura.device.internal.DeviceConfiguration.DEVICE_ID_PROP;
+
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
@@ -40,7 +41,6 @@ import org.eclipse.kura.device.Driver;
 import org.eclipse.kura.device.DriverFlag;
 import org.eclipse.kura.device.DriverListener;
 import org.eclipse.kura.device.DriverRecord;
-import org.eclipse.kura.type.DataType;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
@@ -51,46 +51,27 @@ import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 
 /**
  * The Class BaseDevice is a basic device implementation of a Kura Field Device
- * which associates a device driver
+ * which associates a device driver.
  */
 public class BaseDevice implements Device, SelfConfiguringComponent {
-
-	/** Device Description Property to be used in the configuration */
-	private static final String DEVICE_DESC_PROP = "device.desc";
-
-	/** Device Driver Name Property to be used in the configuration */
-	private static final String DEVICE_DRIVER_PROP = "driver.id";
-
-	/** Device Name Property to be used in the configuration */
-	private static final String DEVICE_ID_PROP = "device.name";
 
 	/** The Logger instance. */
 	private static final Logger s_logger = LoggerFactory.getLogger(BaseDevice.class);
 
-	/** The list of channels associated with this device. */
-	protected final Map<String, Channel> m_channels;
-
 	/** The service component context. */
 	private ComponentContext m_ctx;
 
-	/** The device description */
-	protected String m_deviceDescription;
+	/** The provided device configuration wrapper instance. */
+	protected DeviceConfiguration m_deviceConfiguration;
 
-	/** Container of mapped device listeners and drivers listener */
+	/** Container of mapped device listeners and drivers listener. */
 	private final Map<DeviceListener, DriverListener> m_deviceListeners;
-
-	/** The device name */
-	protected String m_deviceName;
 
 	/** The Driver instance. */
 	protected volatile Driver m_driver;
-
-	/** Name of the driver to be associated with */
-	private String m_driverId;
 
 	/** Device Driver Tracker. */
 	private DriverTracker m_driverTracker;
@@ -105,7 +86,6 @@ public class BaseDevice implements Device, SelfConfiguringComponent {
 	 * Instantiates a new base device.
 	 */
 	public BaseDevice() {
-		this.m_channels = Maps.newConcurrentMap();
 		this.m_deviceListeners = Maps.newConcurrentMap();
 	}
 
@@ -125,16 +105,6 @@ public class BaseDevice implements Device, SelfConfiguringComponent {
 		this.m_properties = properties;
 		this.retrieveConfigurationsFromProperties(properties);
 		s_logger.debug("Activating Base Device...Done");
-	}
-
-	/**
-	 * Adds the channel to the map of all the associated channels
-	 *
-	 * @param channel
-	 *            the channel to be inserted
-	 */
-	private void addChannel(final Channel channel) {
-		this.m_channels.put(channel.getName(), channel);
 	}
 
 	/**
@@ -196,22 +166,15 @@ public class BaseDevice implements Device, SelfConfiguringComponent {
 		s_logger.debug("Deactivating Base Device...");
 		try {
 			synchronized (this.m_monitor) {
-				this.m_driver.disconnect();
+				if (this.m_driver != null) {
+					this.m_driver.disconnect();
+				}
 			}
 		} catch (final KuraException e) {
 			s_logger.error("Error in disconnecting driver..." + Throwables.getStackTraceAsString(e));
 		}
 		this.m_driver = null;
 		s_logger.debug("Deactivating Base Device...Done");
-	}
-
-	/**
-	 * Retrieves the map of configured channels to this device
-	 *
-	 * @return the channels' map
-	 */
-	public Map<String, Channel> getChannels() {
-		return this.m_channels;
 	}
 
 	/** {@inheritDoc} */
@@ -223,9 +186,9 @@ public class BaseDevice implements Device, SelfConfiguringComponent {
 		final String CHANNEL_PROPERTY_POSTFIX = ".";
 
 		final Tocd mainOcd = new Tocd();
-		mainOcd.setName(this.m_deviceName);
-		mainOcd.setDescription(this.m_deviceDescription);
-		mainOcd.setId(this.m_deviceName);
+		mainOcd.setName(this.m_deviceConfiguration.getDeviceName());
+		mainOcd.setDescription(this.m_deviceConfiguration.getDeviceDescription());
+		mainOcd.setId(this.m_deviceConfiguration.getDeviceName());
 
 		final Tad deviceNameAd = new Tad();
 		deviceNameAd.setId(DEVICE_ID_PROP);
@@ -283,12 +246,12 @@ public class BaseDevice implements Device, SelfConfiguringComponent {
 	}
 
 	/**
-	 * Returns the name of the device
+	 * Gets the device configuration.
 	 *
-	 * @return the name
+	 * @return the device configuration
 	 */
-	public String getDeviceName() {
-		return this.m_deviceName;
+	public DeviceConfiguration getDeviceConfiguration() {
+		return this.m_deviceConfiguration;
 	}
 
 	/** {@inheritDoc} */
@@ -299,19 +262,21 @@ public class BaseDevice implements Device, SelfConfiguringComponent {
 		final List<DeviceRecord> deviceRecords = Lists.newArrayList();
 		final List<DriverRecord> driverRecords = Lists.newArrayList();
 
+		final Map<String, Channel> channels = this.m_deviceConfiguration.getChannels();
+
 		for (final String channelName : channelNames) {
 
-			if (!this.m_channels.containsKey(channelName)) {
+			if (!channels.containsKey(channelName)) {
 				throw new KuraRuntimeException(KuraErrorCode.INTERNAL_ERROR, "Channel not available");
 			}
 
-			final Channel channel = this.m_channels.get(channelName);
+			final Channel channel = channels.get(channelName);
 			if (!(channel.getType() == ChannelType.READ) || !(channel.getType() == ChannelType.READ_WRITE)) {
 				throw new KuraRuntimeException(KuraErrorCode.INTERNAL_ERROR, "Channel type not within defined types");
 			}
 
 			final DriverRecord driverRecord = new DriverRecord();
-			driverRecord.setChannelConfig(ImmutableMap.copyOf(this.m_channels.get(channelName).getConfig()));
+			driverRecord.setChannelConfig(ImmutableMap.copyOf(channels.get(channelName).getConfig()));
 			driverRecord.setChannelName(channelName);
 
 			driverRecords.add(driverRecord);
@@ -357,8 +322,10 @@ public class BaseDevice implements Device, SelfConfiguringComponent {
 
 		Channel channel = null;
 
-		if (this.m_channels.containsKey(channelName)) {
-			channel = this.m_channels.get(channelName);
+		final Map<String, Channel> channels = this.m_deviceConfiguration.getChannels();
+
+		if (channels.containsKey(channelName)) {
+			channel = channels.get(channelName);
 		}
 
 		final DriverListener driverListener = new BaseDriverListener(deviceListener);
@@ -375,165 +342,14 @@ public class BaseDevice implements Device, SelfConfiguringComponent {
 	}
 
 	/**
-	 * Retrieve channel specific configuration from the provided properties. The
-	 * representation in the provided properties signifies a single channel and
-	 * it should conform to the following specification.
-	 *
-	 * The properties should contain the following values
-	 * <ul>
-	 * <li>name</li>
-	 * <li>type</li>
-	 * <li>value_type</li>
-	 * <li>channel_config</li>
-	 * </ul>
-	 *
-	 * The key "name" must be String. The key "value_type" must be in one of the
-	 * following
-	 *
-	 * <ul>
-	 * <li>INTEGER</li>
-	 * <li>BOOLEAN</li>
-	 * <li>BYTE</li>
-	 * <li>DOUBLE</li>
-	 * <li>LONG</li>
-	 * <li>SHORT</li>
-	 * <li>STRING</li>
-	 * <li>BYTE_ARRAY</li>
-	 * </ul>
-	 *
-	 * The channel "type" should be one of the following
-	 *
-	 * <ul>
-	 * <li>READ</li>
-	 * <li>WRITE</li>
-	 * <li>READ_WRITE</li>
-	 * </ul>
-	 *
-	 * The "channel_config" is a map which provides all the channel specific
-	 * settings.
+	 * Retrieve channels from the provided properties.
 	 *
 	 * @param properties
-	 *            the properties to retrieve channel from
-	 * @return the specific channel
+	 *            the properties
 	 */
-	@SuppressWarnings("unchecked")
-	private Channel retrieveChannel(final Map<String, Object> properties) {
-		s_logger.debug("Retrieving single channel information from the properties...");
-
-		String channelName = null;
-		ChannelType channelType = null;
-		DataType dataType = null;
-		Map<String, Object> channelConfig = null;
-
-		if (properties != null) {
-			if (properties.containsKey("name")) {
-				channelName = (String) properties.get("name");
-			}
-			if (properties.containsKey("type")) {
-				final String type = (String) properties.get("type");
-				if ("READ".equals(type)) {
-					channelType = ChannelType.READ;
-				}
-				if ("WRITE".equals(type)) {
-					channelType = ChannelType.WRITE;
-				}
-				if ("READ_WRITE".equals(type)) {
-					channelType = ChannelType.READ_WRITE;
-				}
-			}
-			if (properties.containsKey("value_type")) {
-				final String type = (String) properties.get("value_type");
-
-				if ("INTEGER".equalsIgnoreCase(type)) {
-					dataType = DataType.INTEGER;
-				}
-				if ("BOOLEAN".equalsIgnoreCase(type)) {
-					dataType = DataType.BOOLEAN;
-				}
-				if ("BYTE".equalsIgnoreCase(type)) {
-					dataType = DataType.BYTE;
-				}
-				if ("DOUBLE".equalsIgnoreCase(type)) {
-					dataType = DataType.DOUBLE;
-				}
-				if ("LONG".equalsIgnoreCase(type)) {
-					dataType = DataType.LONG;
-				}
-				if ("SHORT".equalsIgnoreCase(type)) {
-					dataType = DataType.SHORT;
-				}
-				if ("STRING".equalsIgnoreCase(type)) {
-					dataType = DataType.STRING;
-				}
-				if ("BYTE_ARRAY".equalsIgnoreCase(type)) {
-					dataType = DataType.BYTE_ARRAY;
-				}
-			}
-			if (properties.containsKey("channel_config")) {
-				channelConfig = (Map<String, Object>) properties.get("channel_config");
-			}
-		}
-		s_logger.debug("Retrieving single channel information from the properties...Done");
-
-		return Channel.of(channelName, channelType, dataType, channelConfig);
-	}
-
-	/**
-	 * Retrieve channels from properties. The properties must conform to the
-	 * following specifications. The properties must have the following.
-	 *
-	 * <ul>
-	 * <li>CHx.</li> where x is any no (eg: CH103432214. / CH1124124215. /
-	 * CH5654364436. etc) (Note it the format includes a "." at the end)
-	 * <li>map object containing a channel configuration</li>
-	 * <li>the value associated with "driver.id" key in the map denotes the
-	 * driver instance name to be consumed by this device</li>
-	 * <li>A value associated with key "device.name" must be present to denote
-	 * the device name</li>
-	 * <li>A value associated with "device.desc" key denotes the device
-	 * description</li>
-	 * </ul>
-	 *
-	 * For further information on how to provide a channel configuration, @see
-	 * {@link BaseDevice#retrieveChannel(Map)}
-	 *
-	 * @param properties
-	 *            the properties to be used to retrieve channels from
-	 */
-	@SuppressWarnings("unchecked")
 	private void retrieveConfigurationsFromProperties(final Map<String, Object> properties) {
 		s_logger.debug("Retrieving configurations from the properties...");
-
-		final HashSet<Integer> parsedIndexes = Sets.newHashSet();
-		// Matching channel information
-		final Pattern pattern = Pattern.compile("(CH)\\d{1,}\\.");
-
-		for (final String property : properties.keySet()) {
-			try {
-				final Matcher matcher = pattern.matcher(property);
-				if (matcher.matches()) {
-					final String prefix = property.substring(0, property.indexOf('.') + 1);
-					final int index = Integer.parseInt(prefix.substring(1, prefix.length() - 1));
-					if (!parsedIndexes.contains(index)) {
-						parsedIndexes.add(index);
-						final Channel channel = this.retrieveChannel((Map<String, Object>) properties.get(index));
-						this.addChannel(channel);
-					}
-				}
-				if (properties.containsKey(DEVICE_DRIVER_PROP)) {
-					this.m_driverId = (String) properties.get(DEVICE_DRIVER_PROP);
-				}
-				if (properties.containsKey(DEVICE_ID_PROP)) {
-					this.m_deviceName = (String) properties.get(DEVICE_ID_PROP);
-				}
-				if (properties.containsKey(DEVICE_DESC_PROP)) {
-					this.m_deviceDescription = (String) properties.get(DEVICE_DESC_PROP);
-				}
-			} catch (final Exception ex) {
-				s_logger.error("Error while retrieving channels from the provided configurable properties..."
-						+ Throwables.getStackTraceAsString(ex));
-			}
-		}
+		this.m_deviceConfiguration = new DeviceConfiguration(properties);
 		s_logger.debug("Retrieving configurations from the properties...Done");
 
 	}
@@ -541,9 +357,7 @@ public class BaseDevice implements Device, SelfConfiguringComponent {
 	/** {@inheritDoc} */
 	@Override
 	public String toString() {
-		return MoreObjects.toStringHelper(this).add("device_name", this.m_deviceName)
-				.add("device_description", this.m_deviceDescription).add("driver_name", this.m_driverId)
-				.add("associated_channels", this.m_channels).add("associated_properties", this.m_properties).toString();
+		return MoreObjects.toStringHelper(this).add("Device Configuration", this.m_deviceConfiguration).toString();
 	}
 
 	/** {@inheritDoc} */
@@ -573,7 +387,7 @@ public class BaseDevice implements Device, SelfConfiguringComponent {
 
 		this.m_properties = properties;
 		this.retrieveConfigurationsFromProperties(properties);
-		this.attachDriver(this.m_driverId);
+		this.attachDriver(this.m_deviceConfiguration.getDriverId());
 
 		s_logger.debug("Updating Base Device Configurations...Done");
 	}
@@ -585,13 +399,15 @@ public class BaseDevice implements Device, SelfConfiguringComponent {
 
 		final List<DriverRecord> driverRecords = Lists.newArrayList();
 
+		final Map<String, Channel> channels = this.m_deviceConfiguration.getChannels();
+
 		for (final DeviceRecord deviceRecord : deviceRecords) {
 
-			if (!this.m_channels.containsKey(deviceRecord.getChannelName())) {
+			if (!channels.containsKey(deviceRecord.getChannelName())) {
 				throw new KuraRuntimeException(KuraErrorCode.INTERNAL_ERROR, "Channel not available");
 			}
 
-			final Channel channel = this.m_channels.get(deviceRecord.getChannelName());
+			final Channel channel = channels.get(deviceRecord.getChannelName());
 			if (!(channel.getType() == ChannelType.WRITE) || !(channel.getType() == ChannelType.READ_WRITE)) {
 				throw new KuraRuntimeException(KuraErrorCode.INTERNAL_ERROR, "Channel type not within defined types");
 			}

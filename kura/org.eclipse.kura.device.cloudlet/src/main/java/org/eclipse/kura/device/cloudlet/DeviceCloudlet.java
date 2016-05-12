@@ -24,6 +24,7 @@ import org.eclipse.kura.device.Channel;
 import org.eclipse.kura.device.Device;
 import org.eclipse.kura.device.DeviceRecord;
 import org.eclipse.kura.device.internal.BaseDevice;
+import org.eclipse.kura.device.internal.DeviceConfiguration;
 import org.eclipse.kura.message.KuraRequestPayload;
 import org.eclipse.kura.message.KuraResponsePayload;
 import org.eclipse.kura.type.BooleanValue;
@@ -175,7 +176,8 @@ public final class DeviceCloudlet extends Cloudlet {
 			final String deviceName = reqTopic.getResources()[1];
 			final String channelName = reqTopic.getResources()[2];
 			final BaseDevice device = (BaseDevice) this.m_devices.get(deviceName);
-			final Map<String, Channel> deviceConfiguredChannels = device.getChannels();
+			final DeviceConfiguration configuration = device.getDeviceConfiguration();
+			final Map<String, Channel> deviceConfiguredChannels = configuration.getChannels();
 			if ((deviceConfiguredChannels != null) && deviceConfiguredChannels.containsKey(channelName)) {
 				final List<DeviceRecord> deviceRecords = device.read(Lists.newArrayList(channelName));
 				for (final DeviceRecord deviceRecord : deviceRecords) {
@@ -194,7 +196,8 @@ public final class DeviceCloudlet extends Cloudlet {
 			final String deviceName = reqTopic.getResources()[1];
 			final String channelName = reqTopic.getResources()[2];
 			final BaseDevice device = (BaseDevice) this.m_devices.get(deviceName);
-			final Map<String, Channel> deviceConfiguredChannels = device.getChannels();
+			final DeviceConfiguration configuration = device.getDeviceConfiguration();
+			final Map<String, Channel> deviceConfiguredChannels = configuration.getChannels();
 			if ((deviceConfiguredChannels != null) && deviceConfiguredChannels.containsKey(channelName)) {
 				final DeviceRecord deviceRecord = new DeviceRecord();
 				deviceRecord.setChannelName(channelName);
@@ -242,14 +245,15 @@ public final class DeviceCloudlet extends Cloudlet {
 			int index = 1;
 			for (final String deviceName : this.m_devices.keySet()) {
 				final BaseDevice device = (BaseDevice) this.m_devices.get(deviceName);
-				respPayload.addMetric(String.valueOf(index++), device.getDeviceName());
+				respPayload.addMetric(String.valueOf(index++), device.getDeviceConfiguration().getDeviceName());
 			}
 		}
 		if ("list-channels".equals(reqTopic.getResources()[0]) && (reqTopic.getResources().length > 1)) {
 			this.findDevices();
 			final String deviceName = reqTopic.getResources()[1];
 			final BaseDevice device = (BaseDevice) this.m_devices.get(deviceName);
-			final Map<String, Channel> deviceConfiguredChannels = device.getChannels();
+			final DeviceConfiguration configuration = device.getDeviceConfiguration();
+			final Map<String, Channel> deviceConfiguredChannels = configuration.getChannels();
 			int index = 1;
 			for (final String channelName : deviceConfiguredChannels.keySet()) {
 				respPayload.addMetric(String.valueOf(index++), channelName);

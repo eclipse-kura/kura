@@ -1,0 +1,286 @@
+/**
+ * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ *
+ *  All rights reserved. This program and the accompanying materials
+ *  are made available under the terms of the Eclipse Public License v1.0
+ *  which accompanies this distribution, and is available at
+ *  http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *   Eurotech
+ *   Amit Kumar Mondal (admin@amitinside.com)
+ */
+package org.eclipse.kura.device.internal;
+
+import java.util.HashSet;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import org.eclipse.kura.device.Channel;
+import org.eclipse.kura.device.ChannelType;
+import org.eclipse.kura.type.DataType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.common.base.MoreObjects;
+import com.google.common.base.Throwables;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
+
+/**
+ * This class DeviceConfiguration is responsible for retrieving channels from
+ * properties. The properties must conform to the following specifications. The
+ * properties must have the following.
+ *
+ * <ul>
+ * <li>CHx.</li> where x is any no (eg: CH103432214. / CH1124124215. /
+ * CH5654364436. etc) (Note it the format includes a "." at the end)
+ * <li>map object containing a channel configuration</li>
+ * <li>the value associated with "driver.id" key in the map denotes the driver
+ * instance name to be consumed by this device</li>
+ * <li>A value associated with key "device.name" must be present to denote the
+ * device name</li>
+ * <li>A value associated with "device.desc" key denotes the device
+ * description</li>
+ * </ul>
+ *
+ * For further information on how to provide a channel configuration, @see
+ * {@link DeviceConfiguration#retrieveChannel(Map)}
+ */
+public final class DeviceConfiguration {
+
+	/** Device Description Property to be used in the configuration. */
+	public static final String DEVICE_DESC_PROP = "device.desc";
+
+	/** Device Driver Name Property to be used in the configuration. */
+	public static final String DEVICE_DRIVER_PROP = "driver.id";
+
+	/** Device Name Property to be used in the configuration. */
+	public static final String DEVICE_ID_PROP = "device.name";
+
+	/** The Logger instance. */
+	private static final Logger s_logger = LoggerFactory.getLogger(DeviceConfiguration.class);
+
+	/** The list of channels associated with this device. */
+	private final Map<String, Channel> m_channels;
+
+	/** The device description. */
+	private String m_deviceDescription;
+
+	/** The device name. */
+	private String m_deviceName;
+
+	/** Name of the driver to be associated with. */
+	private String m_driverId;
+
+	/**
+	 * Instantiates a new device configuration.
+	 *
+	 * @param properties
+	 *            the configured properties
+	 */
+	public DeviceConfiguration(final Map<String, Object> properties) {
+		this.extractProperties(properties);
+		this.m_channels = Maps.newConcurrentMap();
+	}
+
+	/**
+	 * Adds the channel to the map of all the associated channels.
+	 *
+	 * @param channel
+	 *            the channel to be inserted
+	 */
+	private void addChannel(final Channel channel) {
+		this.m_channels.put(channel.getName(), channel);
+	}
+
+	/**
+	 * Extract the configurations from the provided properties
+	 *
+	 * @param properties
+	 *            the provided properties
+	 */
+	@SuppressWarnings("unchecked")
+	private void extractProperties(final Map<String, Object> properties) {
+		final HashSet<Integer> parsedIndexes = Sets.newHashSet();
+		// Matching channel information
+		final Pattern pattern = Pattern.compile("(CH)\\d{1,}\\.");
+
+		for (final String property : properties.keySet()) {
+			try {
+				final Matcher matcher = pattern.matcher(property);
+				if (matcher.matches()) {
+					final String prefix = property.substring(0, property.indexOf('.') + 1);
+					final int index = Integer.parseInt(prefix.substring(1, prefix.length() - 1));
+					if (!parsedIndexes.contains(index)) {
+						parsedIndexes.add(index);
+						final Channel channel = this.retrieveChannel((Map<String, Object>) properties.get(index));
+						this.addChannel(channel);
+					}
+				}
+				if (properties.containsKey(DEVICE_DRIVER_PROP)) {
+					this.m_driverId = (String) properties.get(DEVICE_DRIVER_PROP);
+				}
+				if (properties.containsKey(DEVICE_ID_PROP)) {
+					this.m_deviceName = (String) properties.get(DEVICE_ID_PROP);
+				}
+				if (properties.containsKey(DEVICE_DESC_PROP)) {
+					this.m_deviceDescription = (String) properties.get(DEVICE_DESC_PROP);
+				}
+			} catch (final Exception ex) {
+				s_logger.error("Error while retrieving channels from the provided configurable properties..."
+						+ Throwables.getStackTraceAsString(ex));
+			}
+		}
+	}
+
+	/**
+	 * Gets the channels.
+	 *
+	 * @return the channels
+	 */
+	public Map<String, Channel> getChannels() {
+		return this.m_channels;
+	}
+
+	/**
+	 * Gets the device description.
+	 *
+	 * @return the device description
+	 */
+	public String getDeviceDescription() {
+		return this.m_deviceDescription;
+	}
+
+	/**
+	 * Gets the device name.
+	 *
+	 * @return the device name
+	 */
+	public String getDeviceName() {
+		return this.m_deviceName;
+	}
+
+	/**
+	 * Gets the driver id.
+	 *
+	 * @return the driver id
+	 */
+	public String getDriverId() {
+		return this.m_driverId;
+	}
+
+	/**
+	 * Retrieve channel specific configuration from the provided properties. The
+	 * representation in the provided properties signifies a single channel and
+	 * it should conform to the following specification.
+	 *
+	 * The properties should contain the following values
+	 * <ul>
+	 * <li>name</li>
+	 * <li>type</li>
+	 * <li>value_type</li>
+	 * <li>channel_config</li>
+	 * </ul>
+	 *
+	 * The key "name" must be String. The key "value_type" must be in one of the
+	 * following
+	 *
+	 * <ul>
+	 * <li>INTEGER</li>
+	 * <li>BOOLEAN</li>
+	 * <li>BYTE</li>
+	 * <li>DOUBLE</li>
+	 * <li>LONG</li>
+	 * <li>SHORT</li>
+	 * <li>STRING</li>
+	 * <li>BYTE_ARRAY</li>
+	 * </ul>
+	 *
+	 * The channel "type" should be one of the following
+	 *
+	 * <ul>
+	 * <li>READ</li>
+	 * <li>WRITE</li>
+	 * <li>READ_WRITE</li>
+	 * </ul>
+	 *
+	 * The "channel_config" is a map which provides all the channel specific
+	 * settings.
+	 *
+	 * @param properties
+	 *            the properties to retrieve channel from
+	 * @return the specific channel
+	 */
+	@SuppressWarnings("unchecked")
+	private Channel retrieveChannel(final Map<String, Object> properties) {
+		s_logger.debug("Retrieving single channel information from the properties...");
+
+		String channelName = null;
+		ChannelType channelType = null;
+		DataType dataType = null;
+		Map<String, Object> channelConfig = null;
+
+		if (properties != null) {
+			if (properties.containsKey("name")) {
+				channelName = (String) properties.get("name");
+			}
+			if (properties.containsKey("type")) {
+				final String type = (String) properties.get("type");
+				if ("READ".equals(type)) {
+					channelType = ChannelType.READ;
+				}
+				if ("WRITE".equals(type)) {
+					channelType = ChannelType.WRITE;
+				}
+				if ("READ_WRITE".equals(type)) {
+					channelType = ChannelType.READ_WRITE;
+				}
+			}
+			if (properties.containsKey("value_type")) {
+				final String type = (String) properties.get("value_type");
+
+				if ("INTEGER".equalsIgnoreCase(type)) {
+					dataType = DataType.INTEGER;
+				}
+				if ("BOOLEAN".equalsIgnoreCase(type)) {
+					dataType = DataType.BOOLEAN;
+				}
+				if ("BYTE".equalsIgnoreCase(type)) {
+					dataType = DataType.BYTE;
+				}
+				if ("DOUBLE".equalsIgnoreCase(type)) {
+					dataType = DataType.DOUBLE;
+				}
+				if ("LONG".equalsIgnoreCase(type)) {
+					dataType = DataType.LONG;
+				}
+				if ("SHORT".equalsIgnoreCase(type)) {
+					dataType = DataType.SHORT;
+				}
+				if ("STRING".equalsIgnoreCase(type)) {
+					dataType = DataType.STRING;
+				}
+				if ("BYTE_ARRAY".equalsIgnoreCase(type)) {
+					dataType = DataType.BYTE_ARRAY;
+				}
+			}
+			if (properties.containsKey("channel_config")) {
+				channelConfig = (Map<String, Object>) properties.get("channel_config");
+			}
+		}
+		s_logger.debug("Retrieving single channel information from the properties...Done");
+
+		return Channel.of(channelName, channelType, dataType, channelConfig);
+	}
+
+	/** {@inheritDoc} */
+	@Override
+	public String toString() {
+		return MoreObjects.toStringHelper(this).add("device_name", this.m_deviceName)
+				.add("device_description", this.m_deviceDescription).add("driver_name", this.m_driverId)
+				.add("associated_channels", this.m_channels).toString();
+	}
+
+}

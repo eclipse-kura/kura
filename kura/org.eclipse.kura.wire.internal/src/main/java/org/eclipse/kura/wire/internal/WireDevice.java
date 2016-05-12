@@ -122,7 +122,7 @@ public final class WireDevice extends BaseDevice implements WireComponent, WireE
 	/** {@inheritDoc} */
 	@Override
 	public String getName() {
-		return this.m_deviceName;
+		return this.m_deviceConfiguration.getDeviceName();
 	}
 
 	/** {@inheritDoc} */
@@ -131,9 +131,11 @@ public final class WireDevice extends BaseDevice implements WireComponent, WireE
 		final List<DeviceRecord> deviceRecordsToWriteChannels = Lists.newArrayList();
 		final List<String> channelsToRead = Lists.newArrayList();
 
+		final Map<String, Channel> channels = this.m_deviceConfiguration.getChannels();
+
 		// determining channels to read
-		for (final String channelKey : this.m_channels.keySet()) {
-			final Channel channel = this.m_channels.get(channelKey);
+		for (final String channelKey : channels.keySet()) {
+			final Channel channel = channels.get(channelKey);
 			channelsToRead.add(channel.getName());
 		}
 
@@ -151,8 +153,8 @@ public final class WireDevice extends BaseDevice implements WireComponent, WireE
 		// determining channels to write
 		for (final WireRecord wireRecord : wireEnvelope.getRecords()) {
 			for (final WireField wireField : wireRecord.getFields()) {
-				for (final String channelKey : this.m_channels.keySet()) {
-					final Channel channel = this.m_channels.get(channelKey);
+				for (final String channelKey : channels.keySet()) {
+					final Channel channel = channels.get(channelKey);
 					deviceRecordsToWriteChannels.add(this.prepareDeviceRecord(channel, wireField.getValue()));
 				}
 			}

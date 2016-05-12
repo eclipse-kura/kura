@@ -13,6 +13,7 @@
 package org.eclipse.kura.device;
 
 import java.util.Map;
+import java.util.Objects;
 
 import org.eclipse.kura.type.DataType;
 
@@ -21,7 +22,8 @@ import com.google.common.base.MoreObjects;
 /**
  * The Class Channel represents a communication channel of a device. The
  * communication channel has all the required configuration to perform specific
- * operation (read/write/monitor)
+ * operation (read/write/monitor). The channel names must be unique to each
+ * other.
  */
 public final class Channel {
 
@@ -78,6 +80,12 @@ public final class Channel {
 		this.m_valueType = valueType;
 	}
 
+	/** {@inheritDoc} */
+	@Override
+	public boolean equals(final Object otherChannel) {
+		return Objects.equals(this.m_name, ((Channel) (otherChannel)).getName());
+	}
+
 	/**
 	 * Gets the configuration of the communication channel.
 	 *
@@ -112,6 +120,12 @@ public final class Channel {
 	 */
 	public DataType getValueType() {
 		return this.m_valueType;
+	}
+
+	/** {@inheritDoc} */
+	@Override
+	public int hashCode() {
+		return Objects.hash(this.m_name, this.m_type, this.m_valueType, this.m_config);
 	}
 
 	/**

@@ -33,7 +33,6 @@ public final class DeviceEvent {
 	 *            the device record
 	 */
 	public DeviceEvent(final DeviceRecord deviceRecord) {
-		super();
 		this.m_deviceRecord = deviceRecord;
 	}
 

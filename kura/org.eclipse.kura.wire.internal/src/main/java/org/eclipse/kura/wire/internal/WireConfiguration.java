@@ -66,7 +66,6 @@ public final class WireConfiguration {
 	 *            the filter
 	 */
 	public WireConfiguration(final String emitterName, final String receiverName, final String filter) {
-		super();
 		this.m_emitterName = emitterName;
 		this.m_receiverName = receiverName;
 		this.m_filter = filter;
@@ -84,7 +83,8 @@ public final class WireConfiguration {
 	 * @param created
 	 *            the created
 	 */
-	WireConfiguration(final String emitterName, final String receiverName, final String filter, final boolean created) {
+	public WireConfiguration(final String emitterName, final String receiverName, final String filter,
+			final boolean created) {
 		super();
 		this.m_emitterName = emitterName;
 		this.m_receiverName = receiverName;

@@ -14,8 +14,6 @@ package org.eclipse.kura.device.internal;
 
 import java.util.HashSet;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.eclipse.kura.device.Channel;
 import org.eclipse.kura.device.ChannelType;
@@ -23,7 +21,9 @@ import org.eclipse.kura.type.DataType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.CharMatcher;
 import com.google.common.base.MoreObjects;
+import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -37,18 +37,57 @@ import com.google.common.collect.Sets;
  * <li>CHx.</li> where x is any no (eg: CH103432214. / CH1124124215. /
  * CH5654364436. etc) (Note it the format includes a "." at the end)
  * <li>map object containing a channel configuration</li>
- * <li>the value associated with "driver.id" key in the map denotes the driver
- * instance name to be consumed by this device</li>
- * <li>A value associated with key "device.name" must be present to denote the
- * device name</li>
- * <li>A value associated with "device.desc" key denotes the device
+ * <li>the value associated with <b><i>driver.id</i></b> key in the map denotes
+ * the driver instance name to be consumed by this device</li>
+ * <li>A value associated with key <b><i>device.name</i></b> must be present to
+ * denote the device name</li>
+ * <li>A value associated with <b><i>device.desc</i></b> key denotes the device
  * description</li>
  * </ul>
  *
- * For further information on how to provide a channel configuration, @see
- * {@link DeviceConfiguration#retrieveChannel(Map)}
+ * The representation in the provided properties signifies a single channel and
+ * it should conform to the following specification.
+ *
+ * The properties should contain the following keys
+ * <ul>
+ * <li>name</li>
+ * <li>type</li>
+ * <li>value_type</li>
+ * <li>channel_config</li>
+ * </ul>
+ *
+ * The key <b><i>name</i></b> must be String. The key <b><i>value_type</i></b>
+ * must be in one of the following
+ *
+ * <ul>
+ * <li>INTEGER</li>
+ * <li>BOOLEAN</li>
+ * <li>BYTE</li>
+ * <li>DOUBLE</li>
+ * <li>LONG</li>
+ * <li>SHORT</li>
+ * <li>STRING</li>
+ * <li>BYTE_ARRAY</li>
+ * </ul>
+ *
+ * The channel "type" should be one of the following
+ *
+ * <ul>
+ * <li>READ</li>
+ * <li>WRITE</li>
+ * <li>READ_WRITE</li>
+ * </ul>
+ *
+ * The "channel_config" is a map which provides all the channel specific
+ * settings.
  */
 public final class DeviceConfiguration {
+
+	/** String denoting a postfix for channel configuration property */
+	public static final String CHANNEL_PROPERTY_POSTFIX = ".";
+
+	/** String denoting a prefix for channel configuration property */
+	public static final String CHANNEL_PROPERTY_PREFIX = "CH";
 
 	/** Device Description Property to be used in the configuration. */
 	public static final String DEVICE_DESC_PROP = "device.desc";
@@ -103,20 +142,25 @@ public final class DeviceConfiguration {
 	 */
 	@SuppressWarnings("unchecked")
 	private void extractProperties(final Map<String, Object> properties) {
-		final HashSet<Integer> parsedIndexes = Sets.newHashSet();
-		// Matching channel information
-		final Pattern pattern = Pattern.compile("(CH)\\d{1,}\\.");
+		Preconditions.checkNotNull(properties);
 
+		final HashSet<Integer> parsedIndexes = Sets.newHashSet();
 		for (final String property : properties.keySet()) {
 			try {
-				final Matcher matcher = pattern.matcher(property);
-				if (matcher.matches()) {
-					final String prefix = property.substring(0, property.indexOf('.') + 1);
-					final int index = Integer.parseInt(prefix.substring(1, prefix.length() - 1));
+				final String startStr = CharMatcher.DIGIT.removeFrom(property);
+				if ((CHANNEL_PROPERTY_PREFIX + CHANNEL_PROPERTY_POSTFIX).equals(startStr)) {
+					final String extractedNo = CharMatcher.DIGIT.retainFrom(property);
+					final int index = Integer.parseInt(extractedNo);
 					if (!parsedIndexes.contains(index)) {
 						parsedIndexes.add(index);
-						final Channel channel = this.retrieveChannel((Map<String, Object>) properties.get(index));
-						this.addChannel(channel);
+						final Object channelProperties = properties.get(index);
+						Channel channel = null;
+						// if any key has values of type map, then it is
+						// designated for channels
+						if (channelProperties instanceof Map<?, ?>) {
+							channel = this.retrieveChannel((Map<String, Object>) properties.get(index));
+							this.addChannel(channel);
+						}
 					}
 				}
 				if (properties.containsKey(DEVICE_DRIVER_PROP)) {
@@ -174,40 +218,7 @@ public final class DeviceConfiguration {
 	/**
 	 * Retrieve channel specific configuration from the provided properties. The
 	 * representation in the provided properties signifies a single channel and
-	 * it should conform to the following specification.
-	 *
-	 * The properties should contain the following values
-	 * <ul>
-	 * <li>name</li>
-	 * <li>type</li>
-	 * <li>value_type</li>
-	 * <li>channel_config</li>
-	 * </ul>
-	 *
-	 * The key "name" must be String. The key "value_type" must be in one of the
-	 * following
-	 *
-	 * <ul>
-	 * <li>INTEGER</li>
-	 * <li>BOOLEAN</li>
-	 * <li>BYTE</li>
-	 * <li>DOUBLE</li>
-	 * <li>LONG</li>
-	 * <li>SHORT</li>
-	 * <li>STRING</li>
-	 * <li>BYTE_ARRAY</li>
-	 * </ul>
-	 *
-	 * The channel "type" should be one of the following
-	 *
-	 * <ul>
-	 * <li>READ</li>
-	 * <li>WRITE</li>
-	 * <li>READ_WRITE</li>
-	 * </ul>
-	 *
-	 * The "channel_config" is a map which provides all the channel specific
-	 * settings.
+	 * it should conform to the mentioned specification.
 	 *
 	 * @param properties
 	 *            the properties to retrieve channel from
@@ -216,6 +227,7 @@ public final class DeviceConfiguration {
 	@SuppressWarnings("unchecked")
 	private Channel retrieveChannel(final Map<String, Object> properties) {
 		s_logger.debug("Retrieving single channel information from the properties...");
+		Preconditions.checkNotNull(properties);
 
 		String channelName = null;
 		ChannelType channelType = null;
@@ -271,7 +283,6 @@ public final class DeviceConfiguration {
 			}
 		}
 		s_logger.debug("Retrieving single channel information from the properties...Done");
-
 		return Channel.of(channelName, channelType, dataType, channelConfig);
 	}
 

@@ -41,6 +41,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.annotations.Beta;
+import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 
@@ -294,6 +295,10 @@ public final class DeviceCloudlet extends Cloudlet {
 	 *            the type to use
 	 */
 	private void wrapValue(final DeviceRecord deviceRecord, final String userValue, final String userType) {
+		Preconditions.checkNotNull(deviceRecord);
+		Preconditions.checkNotNull(userValue);
+		Preconditions.checkNotNull(userType);
+
 		TypedValue<?> value = null;
 
 		if ("INTEGER".equalsIgnoreCase(userType)) {

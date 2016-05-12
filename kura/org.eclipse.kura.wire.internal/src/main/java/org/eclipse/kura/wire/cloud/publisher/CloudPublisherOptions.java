@@ -17,6 +17,8 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Throwables;
+
 /**
  * The Class CloudPublisherOptions is responsible to provide all the required
  * options for the Cloud Publisher Wire Component
@@ -26,7 +28,7 @@ public final class CloudPublisherOptions {
 	/**
 	 * The different Auto Connect Modes.
 	 */
-	public static enum AutoConnectMode {
+	public enum AutoConnectMode {
 
 		/** The autoconnect mode off. */
 		AUTOCONNECT_MODE_OFF(-2),
@@ -85,7 +87,7 @@ public final class CloudPublisherOptions {
 	/** The Constant denoting priority. */
 	private static final String CONF_PRIORITY = "publish.priority";
 
-	/** The Constant denotiy QoS. */
+	/** The Constant denoting QoS. */
 	private static final String CONF_QOS = "publish.qos";
 
 	/** The Constant denoting quiece timeout. */
@@ -150,7 +152,8 @@ public final class CloudPublisherOptions {
 			try {
 				autoConnectMode = AutoConnectMode.valueOf(autoconnectModeValue);
 			} catch (final IllegalArgumentException iea) {
-				s_logger.warn("Invalid autoconnect mode:" + autoconnectModeValue, iea);
+				s_logger.warn("Invalid autoconnect mode:" + autoconnectModeValue,
+						Throwables.getStackTraceAsString(iea));
 			}
 		}
 		return autoConnectMode;

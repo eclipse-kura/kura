@@ -62,7 +62,7 @@ public final class DeviceTracker extends ServiceTracker<Object, Object> {
 		if (service instanceof Device) {
 			s_logger.info("Device has been found by Device Cloudlet Tracker....==> adding service");
 			final BaseDevice device = (BaseDevice) service;
-			this.m_devices.put(device.getDeviceName(), device);
+			this.m_devices.put(device.getDeviceConfiguration().getDeviceName(), device);
 		}
 		return service;
 	}
@@ -86,7 +86,7 @@ public final class DeviceTracker extends ServiceTracker<Object, Object> {
 			for (final ServiceReference<Device> ref : deviceServiceRefs) {
 				s_logger.info("Device has been found by Device Cloudlet Tracker....==> open");
 				final BaseDevice device = (BaseDevice) this.context.getService(ref);
-				this.m_devices.put(device.getDeviceName(), device);
+				this.m_devices.put(device.getDeviceConfiguration().getDeviceName(), device);
 			}
 		} catch (final InvalidSyntaxException e) {
 			s_logger.error("Exception while searching for drivers...." + Throwables.getStackTraceAsString(e));

@@ -55,7 +55,7 @@ public final class CloudPublisherDisconnectManager {
 		this.m_dataService = dataService;
 		this.m_quieceTimeout = quieceTimeout;
 		this.m_nextExecutionTime = 0;
-		this.m_executorService = Executors.newScheduledThreadPool(1);
+		this.m_executorService = Executors.newScheduledThreadPool(5);
 	}
 
 	/**
@@ -99,13 +99,12 @@ public final class CloudPublisherDisconnectManager {
 			public void run() {
 				// disconnect
 				try {
-					CloudPublisherDisconnectManager.this.m_dataService
-							.disconnect(CloudPublisherDisconnectManager.this.m_quieceTimeout);
+					m_dataService.disconnect(m_quieceTimeout);
 				} catch (final Exception e) {
-					s_logger.warn("Error while disconnecting..." + Throwables.getRootCause(e));
+					s_logger.warn("Error while disconnecting cloud publisher..." + Throwables.getRootCause(e));
 				}
 				// cleaning up
-				CloudPublisherDisconnectManager.this.m_nextExecutionTime = 0;
+				m_nextExecutionTime = 0;
 			}
 		}, delay, TimeUnit.MILLISECONDS);
 

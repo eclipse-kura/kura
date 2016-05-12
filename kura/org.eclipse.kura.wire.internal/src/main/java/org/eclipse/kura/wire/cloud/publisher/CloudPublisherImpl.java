@@ -41,6 +41,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.annotations.Beta;
+import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
 
 /**
@@ -111,6 +112,8 @@ public final class CloudPublisherImpl
 	 * @return the json instance
 	 */
 	private JSONObject buildJsonObject(final WireRecord wireRecord) {
+		Preconditions.checkNotNull(wireRecord);
+
 		final JSONObject jsonObject = new JSONObject();
 		try {
 			if (wireRecord.getTimestamp() != null) {
@@ -163,22 +166,24 @@ public final class CloudPublisherImpl
 	/**
 	 * Builds the kura payload from the provided wire record
 	 *
-	 * @param dataRecord
+	 * @param wireRecord
 	 *            the wire record
 	 * @return the kura payload
 	 */
-	private KuraPayload buildKuraPayload(final WireRecord dataRecord) {
+	private KuraPayload buildKuraPayload(final WireRecord wireRecord) {
+		Preconditions.checkNotNull(wireRecord);
+
 		final KuraPayload kuraPayload = new KuraPayload();
 
-		if (dataRecord.getTimestamp() != null) {
-			kuraPayload.setTimestamp(dataRecord.getTimestamp());
+		if (wireRecord.getTimestamp() != null) {
+			kuraPayload.setTimestamp(wireRecord.getTimestamp());
 		}
 
-		if (dataRecord.getPosition() != null) {
-			kuraPayload.setPosition(this.buildKuraPosition(dataRecord.getPosition()));
+		if (wireRecord.getPosition() != null) {
+			kuraPayload.setPosition(this.buildKuraPosition(wireRecord.getPosition()));
 		}
 
-		for (final WireField dataField : dataRecord.getFields()) {
+		for (final WireField dataField : wireRecord.getFields()) {
 			Object value = null;
 			switch (dataField.getValue().getType()) {
 			case STRING:
@@ -222,6 +227,8 @@ public final class CloudPublisherImpl
 	 * @return the kura position
 	 */
 	private KuraPosition buildKuraPosition(final Position position) {
+		Preconditions.checkNotNull(position);
+
 		final KuraPosition kuraPosition = new KuraPosition();
 		if (position.getLatitude() != null) {
 			kuraPosition.setLatitude(position.getLatitude().getValue());
@@ -250,6 +257,8 @@ public final class CloudPublisherImpl
 	 * @throws JSONException
 	 */
 	private JSONObject buildKuraPositionForJson(final Position position) throws JSONException {
+		Preconditions.checkNotNull(position);
+
 		final JSONObject jsonObject = new JSONObject();
 		if (position.getLatitude() != null) {
 			jsonObject.put("latitude", position.getLatitude().getValue());

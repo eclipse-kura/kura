@@ -12,6 +12,8 @@
  */
 package org.eclipse.kura.device.internal;
 
+import static org.eclipse.kura.device.internal.DeviceConfiguration.CHANNEL_PROPERTY_POSTFIX;
+import static org.eclipse.kura.device.internal.DeviceConfiguration.CHANNEL_PROPERTY_PREFIX;
 import static org.eclipse.kura.device.internal.DeviceConfiguration.DEVICE_DESC_PROP;
 import static org.eclipse.kura.device.internal.DeviceConfiguration.DEVICE_DRIVER_PROP;
 import static org.eclipse.kura.device.internal.DeviceConfiguration.DEVICE_ID_PROP;
@@ -47,6 +49,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.MoreObjects;
+import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
@@ -54,9 +57,15 @@ import com.google.common.collect.Maps;
 
 /**
  * The Class BaseDevice is a basic device implementation of a Kura Field Device
- * which associates a device driver.
+ * which associates a device driver. All devices which associates a driver must
+ * extend this class to conform to the kura device specifications.
  */
 public class BaseDevice implements Device, SelfConfiguringComponent {
+
+	/**
+	 * Exception message constant denoting the unavailability of driver
+	 */
+	private static final String EXCEPTION_MSG_DRIVER_NOT_AVAILABLE = "Driver not available";
 
 	/** The Logger instance. */
 	private static final Logger s_logger = LoggerFactory.getLogger(BaseDevice.class);
@@ -116,6 +125,7 @@ public class BaseDevice implements Device, SelfConfiguringComponent {
 	 */
 	private synchronized void attachDriver(final String driverId) {
 		s_logger.debug("Attaching driver instance...");
+		Preconditions.checkNotNull(driverId);
 		try {
 			this.m_driverTracker = new DriverTracker(this.m_ctx.getBundleContext(), this, driverId);
 			this.m_driverTracker.open();
@@ -135,6 +145,9 @@ public class BaseDevice implements Device, SelfConfiguringComponent {
 	 * @return the new attribute definition
 	 */
 	private Tad cloneAd(final Tad oldAd, final String prefix) {
+		Preconditions.checkNotNull(oldAd);
+		Preconditions.checkNotNull(prefix);
+
 		final Tad result = new Tad();
 
 		result.setId(prefix + oldAd.getId());
@@ -182,8 +195,6 @@ public class BaseDevice implements Device, SelfConfiguringComponent {
 	@Override
 	public ComponentConfiguration getConfiguration() throws KuraException {
 		final String componentName = this.m_ctx.getProperties().get("service.pid").toString();
-		final String CHANNEL_PROPERTY_PREFIX = "CH";
-		final String CHANNEL_PROPERTY_POSTFIX = ".";
 
 		final Tocd mainOcd = new Tocd();
 		mainOcd.setName(this.m_deviceConfiguration.getDeviceName());
@@ -233,13 +244,15 @@ public class BaseDevice implements Device, SelfConfiguringComponent {
 				channelConfiguration = (List<Tad>) descriptor;
 			}
 
-			final BaseDeviceChannelDescriptor basicDeviceChanneldescriptor = BaseDeviceChannelDescriptor.getDefault();
-			basicDeviceChanneldescriptor.getDefaultConfiguration().addAll(channelConfiguration);
-
-			for (final Tad attribute : channelConfiguration) {
-				final Tad newAttribute = this.cloneAd(attribute,
-						CHANNEL_PROPERTY_PREFIX + System.currentTimeMillis() + CHANNEL_PROPERTY_POSTFIX);
-				mainOcd.addAD(newAttribute);
+			if (channelConfiguration != null) {
+				final BaseDeviceChannelDescriptor basicDeviceChanneldescriptor = BaseDeviceChannelDescriptor
+						.getDefault();
+				basicDeviceChanneldescriptor.getDefaultConfiguration().addAll(channelConfiguration);
+				for (final Tad attribute : channelConfiguration) {
+					final Tad newAttribute = this.cloneAd(attribute,
+							CHANNEL_PROPERTY_PREFIX + System.currentTimeMillis() + CHANNEL_PROPERTY_POSTFIX);
+					mainOcd.addAD(newAttribute);
+				}
 			}
 		}
 		return new ComponentConfigurationImpl(componentName, mainOcd, props);
@@ -283,7 +296,7 @@ public class BaseDevice implements Device, SelfConfiguringComponent {
 		}
 
 		if (this.m_driver == null) {
-			throw new KuraRuntimeException(KuraErrorCode.INTERNAL_ERROR, "Driver not available");
+			throw new KuraRuntimeException(KuraErrorCode.INTERNAL_ERROR, EXCEPTION_MSG_DRIVER_NOT_AVAILABLE);
 		}
 		synchronized (this.m_monitor) {
 			this.m_driver.read(driverRecords);
@@ -301,6 +314,9 @@ public class BaseDevice implements Device, SelfConfiguringComponent {
 				break;
 			case DRIVER_ERROR_UNSPECIFIED:
 				deviceRecord.setDeviceFlag(DeviceFlag.DEVICE_ERROR_UNSPECIFIED);
+				break;
+			case UNKNOWN:
+				deviceRecord.setDeviceFlag(DeviceFlag.UNKNOWN);
 				break;
 			default:
 				break;
@@ -332,7 +348,7 @@ public class BaseDevice implements Device, SelfConfiguringComponent {
 
 		this.m_deviceListeners.put(deviceListener, driverListener);
 		if (this.m_driver == null) {
-			throw new KuraRuntimeException(KuraErrorCode.INTERNAL_ERROR, "Driver not available");
+			throw new KuraRuntimeException(KuraErrorCode.INTERNAL_ERROR, EXCEPTION_MSG_DRIVER_NOT_AVAILABLE);
 		}
 		synchronized (this.m_monitor) {
 			this.m_driver.registerDriverListener(ImmutableMap.copyOf(channel.getConfig()), driverListener);
@@ -366,7 +382,7 @@ public class BaseDevice implements Device, SelfConfiguringComponent {
 		s_logger.debug("Unregistering Device Listener...");
 
 		if (this.m_driver == null) {
-			throw new KuraRuntimeException(KuraErrorCode.INTERNAL_ERROR, "Driver not available");
+			throw new KuraRuntimeException(KuraErrorCode.INTERNAL_ERROR, EXCEPTION_MSG_DRIVER_NOT_AVAILABLE);
 		}
 		synchronized (this.m_monitor) {
 			this.m_driver.unregisterDriverListener(this.m_deviceListeners.get(deviceListener));
@@ -421,7 +437,7 @@ public class BaseDevice implements Device, SelfConfiguringComponent {
 		}
 
 		if (this.m_driver == null) {
-			throw new KuraRuntimeException(KuraErrorCode.INTERNAL_ERROR, "Driver not available");
+			throw new KuraRuntimeException(KuraErrorCode.INTERNAL_ERROR, EXCEPTION_MSG_DRIVER_NOT_AVAILABLE);
 		}
 		synchronized (this.m_monitor) {
 			this.m_driver.write(driverRecords);
@@ -440,6 +456,9 @@ public class BaseDevice implements Device, SelfConfiguringComponent {
 			case DRIVER_ERROR_UNSPECIFIED:
 				deviceRecord.setDeviceFlag(DeviceFlag.DEVICE_ERROR_UNSPECIFIED);
 				break;
+			case UNKNOWN:
+				deviceRecord.setDeviceFlag(DeviceFlag.UNKNOWN);
+				break;
 			default:
 				break;
 			}
@@ -450,5 +469,4 @@ public class BaseDevice implements Device, SelfConfiguringComponent {
 		s_logger.debug("Writing to channels...Done");
 		return deviceRecords;
 	}
-
 }

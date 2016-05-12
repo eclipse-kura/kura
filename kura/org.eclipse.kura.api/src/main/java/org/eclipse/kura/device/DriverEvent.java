@@ -28,7 +28,6 @@ public final class DriverEvent {
 
 	/** Constructor */
 	public DriverEvent(final DriverRecord driverRecord) {
-		super();
 		this.m_driverRecord = driverRecord;
 	}
 

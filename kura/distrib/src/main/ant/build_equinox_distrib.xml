@@ -701,13 +701,12 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
 
 		<!-- Conditional entries. Check for jar presence, and invoke relevant ant target-->
 		<available file="${project.build.directory}/plugins/org.eclipse.kura.web_${org.eclipse.kura.web.version}.jar" property="web.jar.present" />
-		<antcall target="web-config-win" />
+		<antcall target="web-config" />
 
 		<available file="${project.build.directory}/plugins/org.eclipse.kura.web2_${org.eclipse.kura.web2.version}.jar" property="web2.jar.present" />
-		<antcall target="web2-config-win" />
+		<antcall target="web2-config" />
 
-		<available file="${project.build.directory}/plugins/org.eclipse.kura.emulator.gpio_${org.eclipse.kura.emulator.gpio.version}.jar" property="emulated.gpio.jar.present" />
-		<antcall target="emulated-gpio-config-win" />
+		<antcall target="emulator-gpio-config" />
 
 		<condition property="is.nn">
 			<contains string="${build.name}" substring="-nn"/>
@@ -1162,14 +1161,14 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
 		</propertyfile>
 	</target>
 
-	<target name="emulator-usb-config">
+	<target name="emulator.usb-config">
 		<propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
 			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.emulator.usb_${org.eclipse.kura.emulator.usb.version}.jar@4:start" />
 		</propertyfile>
 	</target>
 
-	<target name="emulator-watchdog-config">
+	<target name="emulator.watchdog-config">
 		<propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
 			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.emulator.watchdog_${org.eclipse.kura.emulator.watchdog.version}.jar@4:start" />
@@ -1278,28 +1277,7 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
                         prefix="${build.output.name}/kura/plugins" />
 		</zip>
 	</target>
-	<target name="web-config-win" if="web.jar.present">
-		<propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
-            	<entry key="osgi.bundles" operation="+"
-                   value=", reference:file:../kura/plugins/org.eclipse.kura.web_${org.eclipse.kura.web.version}.jar@5:start" />
-        </propertyfile>
-	</target>
 
-	<target name="web2-config-win" if="web2.jar.present">
-		<propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
-            	<entry key="osgi.bundles" operation="+"
-                   value=", reference:file:../kura/plugins/org.eclipse.kura.web2_${org.eclipse.kura.web2.version}.jar@6:start" />
-        </propertyfile>
-		<replace file="${project.build.directory}/${build.output.name}/config.ini"
-                 token="com.gwt.user_0.2.0" value="com.gwt.user_1.0.0"/>
-	</target>
-
-	<target name="emulated-gpio-config-win" if="emulated.gpio.jar.present">
-		<propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
-			<entry key="osgi.bundles" operation="+"
-				value=", reference:file:../kura/plugins/org.eclipse.kura.emulator.gpio_${org.eclipse.kura.emulator.gpio.version}.jar@5:start" />
-		</propertyfile>
-	</target>
 
 	<target name="web-jar-win" if="web.jar.present">
     	<echo message="web-jar-win ${project.build.directory}/${build.output.name}/config.ini..." />

@@ -328,6 +328,8 @@ Section "kura (required)"
 	!insertmacro _ReplaceInFile "$data_dir\Kura\kura\log4j.properties" "/var"                           "$temp_dir_/kura"
 
 	!insertmacro _ReplaceInFile "$data_dir\Kura\kura\config.ini"       "/tmp/kura"                      "$temp_dir_/kura"
+	!insertmacro _ReplaceInFile "$data_dir\Kura\kura\config.ini"       "/opt/eclipse/kura/plugins"      "../plugins"
+	!insertmacro _ReplaceInFile "$data_dir\Kura\kura\config.ini"       "/opt/eclipse/kura/kura/plugins" "../kura/plugins"
 
 	!insertmacro _ReplaceInFile "$INSTDIR\start_kura_debug.bat"        "c:\opt\eclipse"                 `%ALLUSERSPROFILE%`
 	!insertmacro _ReplaceInFile "$INSTDIR\start_kura_debug.bat"        "\tmp\.kura"                     `%TEMP%\kura`

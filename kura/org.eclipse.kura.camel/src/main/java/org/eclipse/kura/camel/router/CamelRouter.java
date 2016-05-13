@@ -20,12 +20,26 @@ import org.apache.camel.component.bean.BeanComponent;
 import org.apache.camel.component.beanclass.ClassComponent;
 import org.apache.camel.component.binding.BindingNameComponent;
 import org.apache.camel.component.browse.BrowseComponent;
+import org.apache.camel.component.controlbus.ControlBusComponent;
+import org.apache.camel.component.dataformat.DataFormatComponent;
+import org.apache.camel.component.dataset.DataSetComponent;
 import org.apache.camel.component.direct.DirectComponent;
+import org.apache.camel.component.directvm.DirectVmComponent;
+import org.apache.camel.component.file.FileComponent;
+import org.apache.camel.component.language.LanguageComponent;
 import org.apache.camel.component.log.LogComponent;
 import org.apache.camel.component.mock.MockComponent;
 import org.apache.camel.component.properties.PropertiesComponent;
+import org.apache.camel.component.ref.RefComponent;
+import org.apache.camel.component.rest.RestComponent;
+import org.apache.camel.component.scheduler.SchedulerComponent;
 import org.apache.camel.component.seda.SedaComponent;
+import org.apache.camel.component.stub.StubComponent;
+import org.apache.camel.component.test.TestComponent;
 import org.apache.camel.component.timer.TimerComponent;
+import org.apache.camel.component.validator.ValidatorComponent;
+import org.apache.camel.component.vm.VmComponent;
+import org.apache.camel.component.xslt.XsltComponent;
 import org.apache.camel.impl.DefaultCamelContext;
 import org.apache.camel.language.simple.SimpleLanguage;
 import org.apache.camel.model.RoutesDefinition;
@@ -84,17 +98,14 @@ public abstract class CamelRouter extends KuraRouter implements ConfigurableComp
 
 	public void refreshCamelRouteXml(String oldCamelRouteXml, String newCamelRouteXml) {
 		if (newCamelRouteXml != null && !newCamelRouteXml.isEmpty() &&
-				newCamelRouteXml.contains("<route ") &&
 				!newCamelRouteXml.equals(oldCamelRouteXml)) {
 			this.m_camelRouteXml = newCamelRouteXml;
-			if (!m_camelRouteXml.isEmpty()) {
-				try {
-					ByteArrayInputStream bais =  new ByteArrayInputStream(m_camelRouteXml.getBytes());
-					RoutesDefinition routesDefinition = camelContext.loadRoutesDefinition(bais);
-					camelContext.addRouteDefinitions(routesDefinition.getRoutes());
-				} catch (Exception e) {
-					s_logger.warn("Cannot load routes definitions: {}", m_camelRouteXml, e);
-				}
+			try {
+				ByteArrayInputStream bais =  new ByteArrayInputStream(m_camelRouteXml.getBytes());
+				RoutesDefinition routesDefinition = camelContext.loadRoutesDefinition(bais);
+				camelContext.addRouteDefinitions(routesDefinition.getRoutes());
+			} catch (Exception e) {
+				s_logger.warn("Cannot load routes definitions: {}", m_camelRouteXml, e);
 			}
 		}
 	}
@@ -136,12 +147,26 @@ public abstract class CamelRouter extends KuraRouter implements ConfigurableComp
 		camelContext.addComponent("binding", new BindingNameComponent());
 		camelContext.addComponent("browse", new BrowseComponent());
 		camelContext.addComponent("class", new ClassComponent());
+		camelContext.addComponent("controlbus", new ControlBusComponent());
+		camelContext.addComponent("dataformat", new DataFormatComponent());
+		camelContext.addComponent("dataset", new DataSetComponent());
 		camelContext.addComponent("direct", new DirectComponent());
+		camelContext.addComponent("direct-vm", new DirectVmComponent());
+		camelContext.addComponent("file", new FileComponent());
+		camelContext.addComponent("language", new LanguageComponent());
 		camelContext.addComponent("log", new LogComponent());
 		camelContext.addComponent("mock", new MockComponent());
 		camelContext.addComponent("properties", new PropertiesComponent());
+		camelContext.addComponent("ref", new RefComponent());
+		camelContext.addComponent("rest", new RestComponent());
 		camelContext.addComponent("seda", new SedaComponent());
+		camelContext.addComponent("scheduler", new SchedulerComponent());
+		camelContext.addComponent("stub", new StubComponent());
+		camelContext.addComponent("test", new TestComponent());
 		camelContext.addComponent("timer", new TimerComponent());
+		camelContext.addComponent("validator", new ValidatorComponent());
+		camelContext.addComponent("vm", new VmComponent());
+		camelContext.addComponent("xlst", new XsltComponent());
 
 		registerLanguage("simple", new SimpleLanguage());
 	}

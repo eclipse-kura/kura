@@ -12,7 +12,6 @@
  */
 package org.eclipse.kura.wire;
 
-import java.util.Collections;
 import java.util.List;
 
 import org.osgi.service.wireadmin.Consumer;
@@ -20,6 +19,7 @@ import org.osgi.service.wireadmin.Producer;
 import org.osgi.service.wireadmin.Wire;
 
 import com.google.common.base.MoreObjects;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 
 /**
@@ -31,7 +31,7 @@ public final class WireSupport implements Producer, Consumer {
 
 	/**
 	 * Returns a Wire Support instance of the provided wire component
-	 * 
+	 *
 	 * @param wireComponent
 	 *            the wire component
 	 * @return the wire support instance
@@ -99,7 +99,7 @@ public final class WireSupport implements Producer, Consumer {
 	 * @return the incoming wires
 	 */
 	public List<Wire> getIncomingWires() {
-		return Collections.unmodifiableList(this.m_incomingWires);
+		return ImmutableList.copyOf(this.m_incomingWires);
 	}
 
 	/**
@@ -108,7 +108,7 @@ public final class WireSupport implements Producer, Consumer {
 	 * @return the outgoing wires
 	 */
 	public List<Wire> getOutgoingWires() {
-		return Collections.unmodifiableList(this.m_outgoingWires);
+		return ImmutableList.copyOf(this.m_outgoingWires);
 	}
 
 	/** {@inheritDoc} */

@@ -12,14 +12,13 @@
  */
 package org.eclipse.kura.wire;
 
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
 import org.osgi.util.position.Position;
 
 import com.google.common.base.MoreObjects;
-import com.google.common.collect.Lists;
+import com.google.common.collect.ImmutableList;
 
 /**
  * The Class WireRecord represents a record to be transmitted during wire
@@ -47,7 +46,7 @@ public final class WireRecord {
 	public WireRecord(final Date timestamp, final List<WireField> fields) {
 		this.m_timestamp = timestamp;
 		this.m_position = null;
-		this.m_fields = Collections.unmodifiableList(fields);
+		this.m_fields = ImmutableList.copyOf(fields);
 	}
 
 	/**
@@ -63,7 +62,7 @@ public final class WireRecord {
 	public WireRecord(final Date timestamp, final Position position, final List<WireField> fields) {
 		this.m_timestamp = timestamp;
 		this.m_position = position;
-		this.m_fields = Collections.unmodifiableList(fields);
+		this.m_fields = ImmutableList.copyOf(fields);
 	}
 
 	/**
@@ -75,7 +74,7 @@ public final class WireRecord {
 	public WireRecord(final WireField... dataFields) {
 		this.m_timestamp = new Date();
 		this.m_position = null;
-		this.m_fields = Collections.unmodifiableList(Lists.newArrayList(dataFields));
+		this.m_fields = ImmutableList.copyOf(dataFields);
 	}
 
 	/**

@@ -12,9 +12,7 @@
  */
 package org.eclipse.kura.wire.internal;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.kura.wire.WireEmitter;
@@ -28,6 +26,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Throwables;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
 
 /**
  * The Class WireSeviceTracker represents a OSGi service tracker to track Wire
@@ -60,8 +60,8 @@ public final class WireSeviceTracker extends ServiceTracker<Object, Object> {
 	public WireSeviceTracker(final BundleContext context, final WireServiceImpl wireService)
 			throws InvalidSyntaxException {
 		super(context, context.createFilter("(" + Constants.OBJECTCLASS + "=*)"), null);
-		this.m_wireEmitters = new ArrayList<String>();
-		this.m_wireReceivers = new ArrayList<String>();
+		this.m_wireEmitters = Lists.newArrayList();
+		this.m_wireReceivers = Lists.newArrayList();
 		this.m_wireService = wireService;
 	}
 
@@ -101,7 +101,7 @@ public final class WireSeviceTracker extends ServiceTracker<Object, Object> {
 	 * @return the wire emitters
 	 */
 	public List<String> getWireEmitters() {
-		return Collections.unmodifiableList(this.m_wireEmitters);
+		return ImmutableList.copyOf(this.m_wireEmitters);
 	}
 
 	/**
@@ -110,7 +110,7 @@ public final class WireSeviceTracker extends ServiceTracker<Object, Object> {
 	 * @return the wire receivers
 	 */
 	public List<String> getWireReceivers() {
-		return Collections.unmodifiableList(this.m_wireReceivers);
+		return ImmutableList.copyOf(this.m_wireReceivers);
 	}
 
 	/** {@inheritDoc} */

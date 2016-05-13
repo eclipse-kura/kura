@@ -12,7 +12,6 @@
  */
 package org.eclipse.kura.wire.internal;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -21,6 +20,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.google.common.base.MoreObjects;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 
 /**
@@ -74,7 +74,7 @@ public final class WireServiceOptions {
 	 * @return the wire configurations
 	 */
 	public List<WireConfiguration> getWireConfigurations() {
-		return Collections.unmodifiableList(m_wireConfigurations);
+		return ImmutableList.copyOf(m_wireConfigurations);
 	}
 
 	/**

@@ -43,6 +43,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.annotations.Beta;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
+import com.google.common.util.concurrent.Monitor;
 
 /**
  * The Class CloudPublisherImpl is the implementation of {@link CloudPublisher}
@@ -68,11 +69,18 @@ public final class CloudPublisherImpl
 	/** The data service. */
 	private volatile DataService m_dataService;
 
+	/** Synchronization Monitor. */
+	private final Monitor m_monitor;
+
 	/** The cloud publisher options. */
 	private CloudPublisherOptions m_options;
 
 	/** The wire supporter component. */
 	private WireSupport m_wireSupport;
+
+	public CloudPublisherImpl() {
+		this.m_monitor = new Monitor();
+	}
 
 	/**
 	 * OSGi Service Component callback for activation.
@@ -301,11 +309,14 @@ public final class CloudPublisherImpl
 		this.closeCloudClient();
 
 		// close the disconnect manager
-		synchronized (s_disconnectManager) {
+		this.m_monitor.enter();
+		try {
 			if (s_disconnectManager != null) {
 				s_disconnectManager.stop();
 			}
 			s_disconnectManager = null;
+		} finally {
+			this.m_monitor.leave();
 		}
 
 		// no need to release the cloud clients as the updated application
@@ -534,7 +545,8 @@ public final class CloudPublisherImpl
 		this.m_options = new CloudPublisherOptions(properties);
 
 		// create the singleton disconnect manager
-		synchronized (s_disconnectManager) {
+		this.m_monitor.enter();
+		try {
 			if (s_disconnectManager != null) {
 
 				s_disconnectManager.setQuieceTimeout(this.m_options.getAutoConnectQuieceTimeout());
@@ -542,6 +554,8 @@ public final class CloudPublisherImpl
 				final int minDelay = this.m_options.getAutoConnectMode().getDisconnectDelay();
 				s_disconnectManager.disconnectInMinutes(minDelay);
 			}
+		} finally {
+			this.m_monitor.leave();
 		}
 
 		// recreate the CloudClient

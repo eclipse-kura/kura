@@ -54,6 +54,7 @@ import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.util.concurrent.Monitor;
 
 /**
  * The Class BaseDevice is a basic device implementation of a Kura Field Device
@@ -86,7 +87,7 @@ public class BaseDevice implements Device, SelfConfiguringComponent {
 	private DriverTracker m_driverTracker;
 
 	/** Synchronization Monitor for driver specific operations. */
-	private final Object m_monitor = new Object();
+	private final Monitor m_monitor;
 
 	/** The configurable properties of this device. */
 	private Map<String, Object> m_properties;
@@ -96,6 +97,7 @@ public class BaseDevice implements Device, SelfConfiguringComponent {
 	 */
 	public BaseDevice() {
 		this.m_deviceListeners = Maps.newConcurrentMap();
+		this.m_monitor = new Monitor();
 	}
 
 	/**
@@ -178,10 +180,13 @@ public class BaseDevice implements Device, SelfConfiguringComponent {
 	protected synchronized void deactivate(final ComponentContext componentContext) {
 		s_logger.debug("Deactivating Base Device...");
 		try {
-			synchronized (this.m_monitor) {
+			this.m_monitor.enter();
+			try {
 				if (this.m_driver != null) {
 					this.m_driver.disconnect();
 				}
+			} finally {
+				this.m_monitor.leave();
 			}
 		} catch (final KuraException e) {
 			s_logger.error("Error in disconnecting driver..." + Throwables.getStackTraceAsString(e));
@@ -298,8 +303,11 @@ public class BaseDevice implements Device, SelfConfiguringComponent {
 		if (this.m_driver == null) {
 			throw new KuraRuntimeException(KuraErrorCode.INTERNAL_ERROR, EXCEPTION_MSG_DRIVER_NOT_AVAILABLE);
 		}
-		synchronized (this.m_monitor) {
+		this.m_monitor.enter();
+		try {
 			this.m_driver.read(driverRecords);
+		} finally {
+			this.m_monitor.leave();
 		}
 
 		for (final DriverRecord driverRecord : driverRecords) {
@@ -350,8 +358,11 @@ public class BaseDevice implements Device, SelfConfiguringComponent {
 		if (this.m_driver == null) {
 			throw new KuraRuntimeException(KuraErrorCode.INTERNAL_ERROR, EXCEPTION_MSG_DRIVER_NOT_AVAILABLE);
 		}
-		synchronized (this.m_monitor) {
+		this.m_monitor.enter();
+		try {
 			this.m_driver.registerDriverListener(ImmutableMap.copyOf(channel.getConfig()), driverListener);
+		} finally {
+			this.m_monitor.leave();
 		}
 
 		s_logger.debug("Registering Device Listener for monitoring...Done");
@@ -384,8 +395,11 @@ public class BaseDevice implements Device, SelfConfiguringComponent {
 		if (this.m_driver == null) {
 			throw new KuraRuntimeException(KuraErrorCode.INTERNAL_ERROR, EXCEPTION_MSG_DRIVER_NOT_AVAILABLE);
 		}
-		synchronized (this.m_monitor) {
+		this.m_monitor.enter();
+		try {
 			this.m_driver.unregisterDriverListener(this.m_deviceListeners.get(deviceListener));
+		} finally {
+			this.m_monitor.leave();
 		}
 		this.m_deviceListeners.remove(deviceListener);
 		s_logger.debug("Unregistering Device Listener...Done");
@@ -439,8 +453,11 @@ public class BaseDevice implements Device, SelfConfiguringComponent {
 		if (this.m_driver == null) {
 			throw new KuraRuntimeException(KuraErrorCode.INTERNAL_ERROR, EXCEPTION_MSG_DRIVER_NOT_AVAILABLE);
 		}
-		synchronized (this.m_monitor) {
+		this.m_monitor.enter();
+		try {
 			this.m_driver.write(driverRecords);
+		} finally {
+			this.m_monitor.leave();
 		}
 
 		for (final DriverRecord driverRecord : driverRecords) {

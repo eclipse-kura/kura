@@ -41,6 +41,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.util.concurrent.Monitor;
 
 /**
  * The Class WireServiceImpl implements Wire Service
@@ -68,6 +69,9 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 	/** The Service Component Context. */
 	private ComponentContext m_ctx;
 
+	/** Synchronization Monitor. */
+	private final Monitor m_monitor;
+
 	/** The service component properties. */
 	private Map<String, Object> m_properties;
 
@@ -85,6 +89,7 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 	 */
 	public WireServiceImpl() {
 		this.m_wireConfig = Lists.newArrayList();
+		this.m_monitor = new Monitor();
 	}
 
 	/**
@@ -674,12 +679,15 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 		final String newReceiver = this.m_configService.getCurrentComponentPid(oldReceiverName);
 
 		if ((newEmitter != oldEmitterName) || (newReceiver != oldReceiverName)) {
-			synchronized (this.m_wireConfig) {
+			this.m_monitor.enter();
+			try {
 				for (final WireConfiguration wc : this.m_wireConfig) {
 					if ((wc.getEmitterName() == oldEmitterName) || (wc.getReceiverName() == oldReceiverName)) {
 						wc.update(newEmitter, newReceiver);
 					}
 				}
+			} finally {
+				this.m_monitor.leave();
 			}
 		}
 	}

@@ -98,17 +98,14 @@ public abstract class CamelRouter extends KuraRouter implements ConfigurableComp
 
 	public void refreshCamelRouteXml(String oldCamelRouteXml, String newCamelRouteXml) {
 		if (newCamelRouteXml != null && !newCamelRouteXml.isEmpty() &&
-				newCamelRouteXml.contains("<route ") &&
 				!newCamelRouteXml.equals(oldCamelRouteXml)) {
 			this.m_camelRouteXml = newCamelRouteXml;
-			if (!m_camelRouteXml.isEmpty()) {
-				try {
-					ByteArrayInputStream bais =  new ByteArrayInputStream(m_camelRouteXml.getBytes());
-					RoutesDefinition routesDefinition = camelContext.loadRoutesDefinition(bais);
-					camelContext.addRouteDefinitions(routesDefinition.getRoutes());
-				} catch (Exception e) {
-					s_logger.warn("Cannot load routes definitions: {}", m_camelRouteXml, e);
-				}
+			try {
+				ByteArrayInputStream bais =  new ByteArrayInputStream(m_camelRouteXml.getBytes());
+				RoutesDefinition routesDefinition = camelContext.loadRoutesDefinition(bais);
+				camelContext.addRouteDefinitions(routesDefinition.getRoutes());
+			} catch (Exception e) {
+				s_logger.warn("Cannot load routes definitions: {}", m_camelRouteXml, e);
 			}
 		}
 	}

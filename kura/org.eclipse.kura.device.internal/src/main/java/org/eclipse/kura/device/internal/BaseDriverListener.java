@@ -13,9 +13,11 @@
 package org.eclipse.kura.device.internal;
 
 import org.eclipse.kura.device.DeviceEvent;
+import org.eclipse.kura.device.DeviceFlag;
 import org.eclipse.kura.device.DeviceListener;
 import org.eclipse.kura.device.DeviceRecord;
 import org.eclipse.kura.device.DriverEvent;
+import org.eclipse.kura.device.DriverFlag;
 import org.eclipse.kura.device.DriverListener;
 import org.eclipse.kura.device.DriverRecord;
 
@@ -49,7 +51,24 @@ public final class BaseDriverListener implements DriverListener {
 		final DriverRecord driverRecord = event.getDriverRecord();
 		final DeviceRecord deviceRecord = new DeviceRecord();
 		deviceRecord.setChannelName(driverRecord.getChannelName());
-		// TODO set more flag
+		final DriverFlag driverFlag = driverRecord.getDriverFlag();
+
+		switch (driverFlag) {
+		case READ_SUCCESSFUL:
+			deviceRecord.setDeviceFlag(DeviceFlag.READ_SUCCESSFUL);
+			break;
+		case WRITE_SUCCESSFUL:
+			deviceRecord.setDeviceFlag(DeviceFlag.READ_SUCCESSFUL);
+			break;
+		case DRIVER_ERROR_UNSPECIFIED:
+			deviceRecord.setDeviceFlag(DeviceFlag.DEVICE_ERROR_UNSPECIFIED);
+			break;
+		case UNKNOWN:
+			deviceRecord.setDeviceFlag(DeviceFlag.UNKNOWN);
+			break;
+		default:
+			break;
+		}
 		deviceRecord.setTimetstamp(driverRecord.getTimetstamp());
 		deviceRecord.setValue(driverRecord.getValue());
 		final DeviceEvent deviceEvent = new DeviceEvent(deviceRecord);

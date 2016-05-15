@@ -4,9 +4,11 @@ Bundle-Name: Kura Device Accessor Provider
 Bundle-SymbolicName: org.eclipse.kura.device.internal
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: EUROTECH
+Bundle-Category: Device-Driver Management
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.google.common.base;version="19.0.0",
- com.google.common.collect,
+ com.google.common.collect;version="19.0.0",
+ com.google.common.util.concurrent;version="19.0.0",
  org.eclipse.kura;version="[1.0,2.0)",
  org.eclipse.kura.cloud;version="[1.0,2.0)",
  org.eclipse.kura.configuration;version="[1.0,2.0)",
@@ -15,8 +17,9 @@ Import-Package: com.google.common.base;version="19.0.0",
  org.eclipse.kura.core.configuration.metatype;version="[1.0,2.0)",
  org.eclipse.kura.device;version="[1.0,1.1)",
  org.eclipse.kura.type;version="[1.0,2.0)",
- org.osgi.framework,
- org.osgi.service.component,
- org.osgi.util.tracker,
- org.slf4j
+ org.osgi.framework;version="[1.7.0,2.0.0)",
+ org.osgi.service.component;version="1.2.0",
+ org.osgi.util.tracker;version="1.5.0",
+ org.slf4j;version="1.6.4"
 Export-Package: org.eclipse.kura.device.internal;version="1.0.0"
+Bundle-ActivationPolicy: lazy

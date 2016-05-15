@@ -4,11 +4,15 @@ Bundle-Name: Kura Wires Topology Management
 Bundle-SymbolicName: org.eclipse.kura.wire.internal
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: EUROTECH
+Bundle-Category: Device-Driver Management
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: com.google.common.base;version="19.0.0",
- com.google.common.collect,
+Import-Package: com.google.common.annotations;version="19.0.0",
+ com.google.common.base;version="19.0.0",
+ com.google.common.collect;version="19.0.0",
+ com.google.common.util.concurrent;version="19.0.0",
  org.apache.commons.lang3,
  org.eclipse.kura;version="[1.0,2.0)",
+ org.eclipse.kura.cloud;version="1.0.0",
  org.eclipse.kura.configuration;version="[1.0,2.0)",
  org.eclipse.kura.core.configuration;version="[1.0,2.0)",
  org.eclipse.kura.core.configuration.metatype;version="[1.0,2.0)",
@@ -19,18 +23,18 @@ Import-Package: com.google.common.base;version="19.0.0",
  org.eclipse.kura.message;version="[1.0,2.0)",
  org.eclipse.kura.type;version="[1.0,2.0)",
  org.eclipse.kura.wire;version="[1.0,1.1)",
- org.json,
- org.osgi.framework,
- org.osgi.framework.wiring,
- org.osgi.service.component,
- org.osgi.service.wireadmin,
- org.osgi.util.measurement,
- org.osgi.util.position,
- org.osgi.util.tracker,
- org.slf4j
-Export-Package: org.eclipse.kura.wire.cloud.publisher,
- org.eclipse.kura.wire.internal,
- org.eclipse.kura.wire.store,
- org.eclipse.kura.wire.timer
+ org.json;version="1.0.0",
+ org.osgi.framework;version="[1.7.0,2.0.0)",
+ org.osgi.framework.wiring;version="1.1.0",
+ org.osgi.service.component;version="1.2.0",
+ org.osgi.service.wireadmin;version="1.0.1",
+ org.osgi.util.measurement;version="1.0.1",
+ org.osgi.util.position;version="1.0.1",
+ org.osgi.util.tracker;version="1.5.0",
+ org.slf4j;version="1.6.4"
+Export-Package: org.eclipse.kura.wire.cloud.publisher;version="1.0.0",
+ org.eclipse.kura.wire.internal;version="1.0.0",
+ org.eclipse.kura.wire.store;version="1.0.0",
+ org.eclipse.kura.wire.timer;version="1.0.0"
 Service-Component: OSGI-INF/*.xml
 Bundle-ActivationPolicy: lazy

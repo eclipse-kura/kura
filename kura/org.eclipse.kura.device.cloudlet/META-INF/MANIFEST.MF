@@ -4,17 +4,21 @@ Bundle-Name: Device Cloudlet
 Bundle-SymbolicName: org.eclipse.kura.device.cloudlet
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: EUROTECH
+Bundle-Category: Device-Driver Management
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: com.google.common.base;version="19.0.0",
- com.google.common.collect,
+Import-Package: com.google.common.annotations;version="19.0.0",
+ com.google.common.base;version="19.0.0",
+ com.google.common.collect;version="19.0.0",
  org.eclipse.kura;version="1.1.0",
  org.eclipse.kura.cloud;version="[1.0,2.0)",
  org.eclipse.kura.device;version="[1.0,2.0)",
  org.eclipse.kura.device.internal;version="[1.0,2.0)",
  org.eclipse.kura.message;version="1.0.0",
- org.osgi.framework,
- org.osgi.service.component,
- org.osgi.util.tracker,
- org.slf4j
+ org.eclipse.kura.type;version="1.0.0",
+ org.osgi.framework;version="[1.7.0,2.0.0)",
+ org.osgi.service.component;version="1.2.0",
+ org.osgi.util.tracker;version="1.5.0",
+ org.slf4j;version="1.6.4"
 Bundle-ActivationPolicy: lazy
 Service-Component: OSGI-INF/deviceCloudletComponent.xml
+Export-Package: org.eclipse.kura.device.cloudlet;version="1.0.0"

@@ -99,7 +99,7 @@ public final class DriverTracker extends ServiceTracker<Object, Object> {
 	public void removedService(final ServiceReference<Object> reference, final Object service) {
 		super.removedService(reference, service);
 		if ((service instanceof Driver) && reference.getProperty(DRIVER_ID_PROPERTY).equals(this.m_driverId)) {
-			s_logger.info("Driver has been removed by the driver tracker...");
+			s_logger.info("Driver has been removed by the driver tracker..." + service);
 			this.m_device.m_driver = null;
 		}
 	}

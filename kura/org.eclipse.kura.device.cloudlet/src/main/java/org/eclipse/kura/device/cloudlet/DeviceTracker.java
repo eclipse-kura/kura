@@ -25,7 +25,6 @@ import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.annotations.Beta;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Maps;
 
@@ -33,7 +32,6 @@ import com.google.common.collect.Maps;
  * The Class DeviceTracker is responsible for tracking all the existing device
  * instances in the OSGi service registry
  */
-@Beta
 public final class DeviceTracker extends ServiceTracker<Object, Object> {
 
 	/** The Logger instance. */
@@ -46,7 +44,7 @@ public final class DeviceTracker extends ServiceTracker<Object, Object> {
 	 * Instantiates a new device tracker.
 	 *
 	 * @param context
-	 *            the context
+	 *            the bundle context
 	 * @throws InvalidSyntaxException
 	 *             the invalid syntax exception
 	 */
@@ -99,7 +97,7 @@ public final class DeviceTracker extends ServiceTracker<Object, Object> {
 		super.removedService(reference, service);
 		if (service instanceof Device) {
 			this.m_devices.remove(service);
-			s_logger.info("Device has been removed by Device Cloudlet Tracker...");
+			s_logger.info("Device has been removed by Device Cloudlet Tracker..." + service);
 		}
 	}
 

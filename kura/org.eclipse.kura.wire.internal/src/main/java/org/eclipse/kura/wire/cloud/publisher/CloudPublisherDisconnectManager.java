@@ -12,6 +12,8 @@
  */
 package org.eclipse.kura.wire.cloud.publisher;
 
+import static com.google.common.base.Preconditions.checkArgument;
+
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -87,8 +89,12 @@ public final class CloudPublisherDisconnectManager {
 	 *
 	 * @param delay
 	 *            the delay
+	 * @throws IllegalArgumentException
+	 *             if delay provided is negative
 	 */
 	private void schedule(final long delay) {
+		checkArgument(delay < 0);
+
 		// cancel existing timer
 		if (this.m_executorService != null) {
 			this.m_executorService.shutdown();
@@ -99,12 +105,13 @@ public final class CloudPublisherDisconnectManager {
 			public void run() {
 				// disconnect
 				try {
-					m_dataService.disconnect(m_quieceTimeout);
+					CloudPublisherDisconnectManager.this.m_dataService
+							.disconnect(CloudPublisherDisconnectManager.this.m_quieceTimeout);
 				} catch (final Exception e) {
 					s_logger.warn("Error while disconnecting cloud publisher..." + Throwables.getRootCause(e));
 				}
 				// cleaning up
-				m_nextExecutionTime = 0;
+				CloudPublisherDisconnectManager.this.m_nextExecutionTime = 0;
 			}
 		}, delay, TimeUnit.MILLISECONDS);
 

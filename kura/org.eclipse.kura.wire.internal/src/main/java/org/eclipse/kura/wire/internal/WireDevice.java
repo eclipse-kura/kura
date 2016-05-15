@@ -12,6 +12,9 @@
  */
 package org.eclipse.kura.wire.internal;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -44,6 +47,16 @@ import com.google.common.collect.Lists;
  * level abstraction of a Kura device. This wire device is an integral wire
  * component in Kura Wires topology as it represents an industrial device with a
  * field protocol driver associated to it.
+ *
+ * The WireRecord to be emitted by every wire device comprises the following
+ * keys
+ *
+ * <ul>
+ * <li>Channel_Name</li>
+ * <li>Device_Flag</li>
+ * <li>Timestamp</li>
+ * <li>Value</li>
+ * </ul>
  */
 public final class WireDevice extends BaseDevice implements WireComponent, WireEmitter, WireReceiver {
 
@@ -86,21 +99,20 @@ public final class WireDevice extends BaseDevice implements WireComponent, WireE
 	}
 
 	/**
-	 * Emits the provided list of device records to the associated wires. The
-	 * WireRecord comprises the following keys
-	 *
-	 * <ul>
-	 * <li>Channel_Name</li>
-	 * <li>Device_Flag</li>
-	 * <li>Timestamp</li>
-	 * <li>Value</li>
-	 * </ul>
+	 * Emits the provided list of device records to the associated wires.
 	 *
 	 * @param recentlyReadRecords
 	 *            the list of device records conforming to the aforementioned
 	 *            specification
+	 * @throws NullPointerException
+	 *             if provided records list is null
+	 * @throws IllegalArgumentException
+	 *             if the provided list is empty or null
 	 */
 	private void emitDeviceRecords(final List<DeviceRecord> deviceRecords) {
+		checkArgument(deviceRecords.size() != 0);
+		checkNotNull(deviceRecords);
+
 		final List<WireRecord> wireRecords = Lists.newArrayList();
 
 		for (final DeviceRecord deviceRecord : deviceRecords) {
@@ -180,8 +192,13 @@ public final class WireDevice extends BaseDevice implements WireComponent, WireE
 	 * @param channel
 	 *            the channel to get the values from
 	 * @return the device record
+	 * @throws NullPointerException
+	 *             if any of the provided arguments is null
 	 */
 	private DeviceRecord prepareDeviceRecord(final Channel channel, final TypedValue<?> value) {
+		checkNotNull(channel);
+		checkNotNull(value);
+
 		final DeviceRecord deviceRecord = new DeviceRecord();
 		deviceRecord.setChannelName(channel.getName());
 		deviceRecord.setValue(value);

@@ -146,7 +146,8 @@ public final class CloudPublisherOptions {
 	 */
 	public AutoConnectMode getAutoConnectMode() {
 		AutoConnectMode autoConnectMode = DEFAULT_AUTOCONNECT_MODE;
-		if ((this.m_properties != null) && (this.m_properties.get(CONF_AUTOCONNECT_MODE) != null)
+		if ((this.m_properties != null) && this.m_properties.containsKey(CONF_AUTOCONNECT_MODE)
+				&& (this.m_properties.get(CONF_AUTOCONNECT_MODE) != null)
 				&& (this.m_properties.get(CONF_AUTOCONNECT_MODE) instanceof String)) {
 			final String autoconnectModeValue = (String) this.m_properties.get(CONF_AUTOCONNECT_MODE);
 			try {
@@ -166,7 +167,8 @@ public final class CloudPublisherOptions {
 	 */
 	public int getAutoConnectQuieceTimeout() {
 		int quieceTimeout = DEFAULT_QUIECE_TIMEOUT;
-		if ((this.m_properties != null) && (this.m_properties.get(CONF_QUIECE_TIMEOUT) != null)
+		if ((this.m_properties != null) && this.m_properties.containsKey(CONF_QUIECE_TIMEOUT)
+				&& (this.m_properties.get(CONF_QUIECE_TIMEOUT) != null)
 				&& (this.m_properties.get(CONF_QUIECE_TIMEOUT) instanceof Integer)) {
 			quieceTimeout = (Integer) this.m_properties.get(CONF_QUIECE_TIMEOUT);
 		}
@@ -180,7 +182,8 @@ public final class CloudPublisherOptions {
 	 */
 	public int getMessageType() {
 		int messageType = DEFAULT_MESSAGE_TYPE;
-		if ((this.m_properties != null) && (this.m_properties.get(CONF_MESSAGE_TYPE) != null)
+		if ((this.m_properties != null) && this.m_properties.containsKey(CONF_MESSAGE_TYPE)
+				&& (this.m_properties.get(CONF_MESSAGE_TYPE) != null)
 				&& (this.m_properties.get(CONF_MESSAGE_TYPE) instanceof Integer)) {
 			messageType = (Integer) this.m_properties.get(CONF_MESSAGE_TYPE);
 		}
@@ -194,7 +197,8 @@ public final class CloudPublisherOptions {
 	 */
 	public String getPublishingApplication() {
 		String publishingApp = DEFAULT_APPLICATION;
-		if ((this.m_properties != null) && (this.m_properties.get(CONF_APPLICATION) != null)
+		if ((this.m_properties != null) && this.m_properties.containsKey(CONF_APPLICATION)
+				&& (this.m_properties.get(CONF_APPLICATION) != null)
 				&& (this.m_properties.get(CONF_APPLICATION) instanceof String)) {
 			publishingApp = (String) this.m_properties.get(CONF_APPLICATION);
 		}
@@ -208,7 +212,8 @@ public final class CloudPublisherOptions {
 	 */
 	public int getPublishingPriority() {
 		int publishingPriority = DEFAULT_PRIORITY;
-		if ((this.m_properties != null) && (this.m_properties.get(CONF_PRIORITY) != null)
+		if ((this.m_properties != null) && this.m_properties.containsKey(CONF_PRIORITY)
+				&& (this.m_properties.get(CONF_PRIORITY) != null)
 				&& (this.m_properties.get(CONF_PRIORITY) instanceof Integer)) {
 			publishingPriority = (Integer) this.m_properties.get(CONF_PRIORITY);
 		}
@@ -222,8 +227,8 @@ public final class CloudPublisherOptions {
 	 */
 	public int getPublishingQos() {
 		int publishingQos = DEFAULT_QOS;
-		if ((this.m_properties != null) && (this.m_properties.get(CONF_QOS) != null)
-				&& (this.m_properties.get(CONF_QOS) instanceof Integer)) {
+		if ((this.m_properties != null) && this.m_properties.containsKey(CONF_QOS)
+				&& (this.m_properties.get(CONF_QOS) != null) && (this.m_properties.get(CONF_QOS) instanceof Integer)) {
 			publishingQos = (Integer) this.m_properties.get(CONF_QOS);
 		}
 		return publishingQos;
@@ -236,7 +241,8 @@ public final class CloudPublisherOptions {
 	 */
 	public boolean getPublishingRetain() {
 		boolean publishingRetain = DEFAULT_RETAIN;
-		if ((this.m_properties != null) && (this.m_properties.get(CONF_RETAIN) != null)
+		if ((this.m_properties != null) && this.m_properties.containsKey(CONF_RETAIN)
+				&& (this.m_properties.get(CONF_RETAIN) != null)
 				&& (this.m_properties.get(CONF_RETAIN) instanceof Integer)) {
 			publishingRetain = (Boolean) this.m_properties.get(CONF_RETAIN);
 		}
@@ -250,7 +256,8 @@ public final class CloudPublisherOptions {
 	 */
 	public String getPublishingTopic() {
 		String publishingTopic = DEFAULT_TOPIC;
-		if ((this.m_properties != null) && (this.m_properties.get(CONF_TOPIC) != null)
+		if ((this.m_properties != null) && this.m_properties.containsKey(CONF_TOPIC)
+				&& (this.m_properties.get(CONF_TOPIC) != null)
 				&& (this.m_properties.get(CONF_TOPIC) instanceof String)) {
 			publishingTopic = (String) this.m_properties.get(CONF_TOPIC);
 		}
@@ -264,7 +271,8 @@ public final class CloudPublisherOptions {
 	 */
 	public String[] getSubscribedEmitters() {
 		String[] emitteres = {};
-		if ((this.m_properties != null) && (this.m_properties.get(CONF_EMITTERS) != null)
+		if ((this.m_properties != null) && this.m_properties.containsKey(CONF_EMITTERS)
+				&& (this.m_properties.get(CONF_EMITTERS) != null)
 				&& (this.m_properties.get(CONF_EMITTERS) instanceof String)) {
 			final String emittersStr = (String) this.m_properties.get(CONF_EMITTERS);
 			emitteres = emittersStr.split(",");

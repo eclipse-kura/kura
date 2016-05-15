@@ -32,14 +32,14 @@ public final class DbWireRecordFilterOptions {
 	/** The Constant denotes sqt view. */
 	private static final String CONF_SQL_VIEW = "sql.view";
 
-	/** The m_properties. */
+	/** The Configured Properties. */
 	private final Map<String, Object> m_properties;
 
 	/**
 	 * Instantiates a new db wire record filter options.
 	 *
 	 * @param properties
-	 *            the properties
+	 *            the provided properties
 	 */
 	public DbWireRecordFilterOptions(final Map<String, Object> properties) {
 		this.m_properties = properties;
@@ -52,7 +52,8 @@ public final class DbWireRecordFilterOptions {
 	 */
 	public String getEmitterId() {
 		String emitterId = null;
-		if ((this.m_properties != null) && (this.m_properties.get(CONF_EMITTER_ID) != null)
+		if ((this.m_properties != null) && this.m_properties.containsKey(CONF_EMITTER_ID)
+				&& (this.m_properties.get(CONF_EMITTER_ID) != null)
 				&& (this.m_properties.get(CONF_EMITTER_ID) instanceof String)) {
 			emitterId = (String) this.m_properties.get(CONF_EMITTER_ID);
 		}
@@ -94,7 +95,8 @@ public final class DbWireRecordFilterOptions {
 	 */
 	public String[] getSubscribedEmitters() {
 		String[] emitteres = {};
-		if ((this.m_properties != null) && (this.m_properties.get(CONF_EMITTERS) != null)
+		if ((this.m_properties != null) && this.m_properties.containsKey(CONF_EMITTERS)
+				&& (this.m_properties.get(CONF_EMITTERS) != null)
 				&& (this.m_properties.get(CONF_EMITTERS) instanceof String)) {
 			final String emittersStr = (String) this.m_properties.get(CONF_EMITTERS);
 			emitteres = emittersStr.split(",");

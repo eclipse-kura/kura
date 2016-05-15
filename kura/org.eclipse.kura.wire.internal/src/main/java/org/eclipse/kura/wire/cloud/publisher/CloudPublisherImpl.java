@@ -12,6 +12,8 @@
  */
 package org.eclipse.kura.wire.cloud.publisher;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.util.List;
 import java.util.Map;
 
@@ -41,7 +43,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.annotations.Beta;
-import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
 import com.google.common.util.concurrent.Monitor;
 
@@ -118,9 +119,11 @@ public final class CloudPublisherImpl
 	 * @param dataRecord
 	 *            the wire record
 	 * @return the json instance
+	 * @throws NullPointerException
+	 *             if the wire record provided is null
 	 */
 	private JSONObject buildJsonObject(final WireRecord wireRecord) {
-		Preconditions.checkNotNull(wireRecord);
+		checkNotNull(wireRecord);
 
 		final JSONObject jsonObject = new JSONObject();
 		try {
@@ -177,9 +180,11 @@ public final class CloudPublisherImpl
 	 * @param wireRecord
 	 *            the wire record
 	 * @return the kura payload
+	 * @throws NullPointerException
+	 *             if the wire record provided is null
 	 */
 	private KuraPayload buildKuraPayload(final WireRecord wireRecord) {
-		Preconditions.checkNotNull(wireRecord);
+		checkNotNull(wireRecord);
 
 		final KuraPayload kuraPayload = new KuraPayload();
 
@@ -233,9 +238,11 @@ public final class CloudPublisherImpl
 	 * @param position
 	 *            the OSGi position instance
 	 * @return the kura position
+	 * @throws NullPointerException
+	 *             if the position provided is null
 	 */
 	private KuraPosition buildKuraPosition(final Position position) {
-		Preconditions.checkNotNull(position);
+		checkNotNull(position);
 
 		final KuraPosition kuraPosition = new KuraPosition();
 		if (position.getLatitude() != null) {
@@ -263,9 +270,12 @@ public final class CloudPublisherImpl
 	 *            the OSGi position instance
 	 * @return the kura position
 	 * @throws JSONException
+	 *             if it encounters any JSON parsing specific error
+	 * @throws NullPointerException
+	 *             if position provided is null
 	 */
 	private JSONObject buildKuraPositionForJson(final Position position) throws JSONException {
-		Preconditions.checkNotNull(position);
+		checkNotNull(position);
 
 		final JSONObject jsonObject = new JSONObject();
 		if (position.getLatitude() != null) {
@@ -536,7 +546,7 @@ public final class CloudPublisherImpl
 	 * OSGi Service Component callback for updating.
 	 *
 	 * @param properties
-	 *            the properties
+	 *            the updated properties
 	 */
 	public synchronized void updated(final Map<String, Object> properties) {
 		s_logger.info("Updating Cloud Publisher Wire Component...");
@@ -548,7 +558,6 @@ public final class CloudPublisherImpl
 		this.m_monitor.enter();
 		try {
 			if (s_disconnectManager != null) {
-
 				s_disconnectManager.setQuieceTimeout(this.m_options.getAutoConnectQuieceTimeout());
 
 				final int minDelay = this.m_options.getAutoConnectMode().getDisconnectDelay();

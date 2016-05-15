@@ -12,6 +12,8 @@
  */
 package org.eclipse.kura.device.internal;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.util.HashSet;
 import java.util.Map;
 
@@ -23,7 +25,6 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.CharMatcher;
 import com.google.common.base.MoreObjects;
-import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -101,6 +102,17 @@ public final class DeviceConfiguration {
 	/** The Logger instance. */
 	private static final Logger s_logger = LoggerFactory.getLogger(DeviceConfiguration.class);
 
+	/**
+	 * Static factory to instantiate a new device configuration
+	 *
+	 * @param properties
+	 *            the configured properties
+	 * @return the device configuration
+	 */
+	public static DeviceConfiguration of(final Map<String, Object> properties) {
+		return new DeviceConfiguration(properties);
+	}
+
 	/** The list of channels associated with this device. */
 	private final Map<String, Channel> m_channels;
 
@@ -119,7 +131,7 @@ public final class DeviceConfiguration {
 	 * @param properties
 	 *            the configured properties
 	 */
-	public DeviceConfiguration(final Map<String, Object> properties) {
+	private DeviceConfiguration(final Map<String, Object> properties) {
 		this.extractProperties(properties);
 		this.m_channels = Maps.newConcurrentMap();
 	}
@@ -139,10 +151,12 @@ public final class DeviceConfiguration {
 	 *
 	 * @param properties
 	 *            the provided properties
+	 * @throws NullPointerException
+	 *             if the properties is null
 	 */
 	@SuppressWarnings("unchecked")
 	private void extractProperties(final Map<String, Object> properties) {
-		Preconditions.checkNotNull(properties);
+		checkNotNull(properties);
 
 		final HashSet<Integer> parsedIndexes = Sets.newHashSet();
 		for (final String property : properties.keySet()) {
@@ -223,11 +237,13 @@ public final class DeviceConfiguration {
 	 * @param properties
 	 *            the properties to retrieve channel from
 	 * @return the specific channel
+	 * @throws NullPointerException
+	 *             if the properties is null
 	 */
 	@SuppressWarnings("unchecked")
 	private Channel retrieveChannel(final Map<String, Object> properties) {
 		s_logger.debug("Retrieving single channel information from the properties...");
-		Preconditions.checkNotNull(properties);
+		checkNotNull(properties);
 
 		String channelName = null;
 		ChannelType channelType = null;
@@ -279,7 +295,10 @@ public final class DeviceConfiguration {
 				}
 			}
 			if (properties.containsKey("channel_config")) {
-				channelConfig = (Map<String, Object>) properties.get("channel_config");
+				final Object value = properties.get("channel_config");
+				if (value instanceof Map<?, ?>) {
+					channelConfig = (Map<String, Object>) properties.get("channel_config");
+				}
 			}
 		}
 		s_logger.debug("Retrieving single channel information from the properties...Done");

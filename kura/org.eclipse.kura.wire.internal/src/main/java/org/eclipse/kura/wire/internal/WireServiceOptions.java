@@ -12,6 +12,8 @@
  */
 package org.eclipse.kura.wire.internal;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.util.List;
 import java.util.Map;
 
@@ -42,10 +44,17 @@ public final class WireServiceOptions {
 	 * @return the wire service options
 	 * @throws JSONException
 	 *             the JSON exception
+	 * @throws NullPointerException
+	 *             if provided properties is null
 	 */
 	public static WireServiceOptions newInstance(final Map<String, Object> properties) throws JSONException {
+		checkNotNull(properties);
+
 		final List<WireConfiguration> wireConfs = Lists.newCopyOnWriteArrayList();
-		final Object objWires = properties.get(CONF_WIRES);
+		Object objWires = null;
+		if (properties.containsKey(CONF_WIRES)) {
+			objWires = properties.get(CONF_WIRES);
+		}
 		if (objWires instanceof String) {
 
 			final String strWires = (String) objWires;

@@ -12,6 +12,8 @@
  */
 package org.eclipse.kura.wire.internal;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -197,7 +199,6 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 		}
 
 		for (final WireConfiguration conf : cloned) {
-
 			this.updatePidNamesInList(conf.getEmitterName(), conf.getReceiverName());
 			final String emitter = this.m_configService.getCurrentComponentPid(conf.getEmitterName());
 			final String receiver = this.m_configService.getCurrentComponentPid(conf.getReceiverName());
@@ -238,6 +239,7 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 	protected synchronized void deactivate(final ComponentContext componentContext) {
 		s_logger.info("Deactivating Wire Service Component..");
 		this.m_configService = null;
+		this.m_wireAdmin = null;
 		s_logger.info("Deactivating Wire Service Component..Done");
 	}
 
@@ -300,7 +302,7 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 		emitterName.setRequired(false);
 		emitterName.setDefault("");
 		emitterName.setDescription(
-				"multiton.instance.name for the resulting component. If left null it will equal service.pid");
+				"multiton.instance.name for the resulting component. If left null it will be equal to service.pid");
 		wiresOCD.addAD(emitterName);
 
 		// Create an option element for each producer factory
@@ -338,7 +340,7 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 		receiverName.setDefault("");
 
 		sb = new StringBuilder(
-				"multiton.instance.name for the resulting component. If left null it will equal service.pid<br /><br /><b>Active wires:</b><br />");
+				"multiton.instance.name for the resulting component. If left null it will equal  toservice.pid<br /><br /><b>Active wires:</b><br />");
 
 		sb.append("<table style=\"width:100%; border: 1px solid black;\">");
 
@@ -411,8 +413,7 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 					"Error while retrieving configuration of Wire Service..." + Throwables.getStackTraceAsString(e));
 		}
 
-		final ComponentConfigurationImpl cc = new ComponentConfigurationImpl(PROP_PID, wiresOCD, this.m_properties);
-		return cc;
+		return new ComponentConfigurationImpl(PROP_PID, wiresOCD, this.m_properties);
 	}
 
 	/**
@@ -441,8 +442,13 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 	 * @param receiver
 	 *            the wire receiver
 	 * @return the wire configuration
+	 * @throws NullPointerException
+	 *             if any of the provided arguments is null
 	 */
 	private WireConfiguration getWireConfiguration(final String emitter, final String receiver) {
+		checkNotNull(emitter);
+		checkNotNull(receiver);
+
 		for (final WireConfiguration wc : this.m_wireConfig) {
 			if (wc.getEmitterName().equals(emitter) && wc.getReceiverName().equals(receiver)) {
 				return wc;
@@ -457,7 +463,7 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 	 * Persist wires.
 	 *
 	 * @param shouldPersist
-	 *            the should persist
+	 *            the should persist flag
 	 */
 	private void persistWires(final boolean shouldPersist) {
 		s_logger.info("Persisting Wires..");
@@ -510,9 +516,14 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 	 * @param receiverPid
 	 *            the receiver pid
 	 * @return true, if successful
+	 * @throws NullPointerException
+	 *             if any of the provided arguments is null
 	 */
 	@Override
 	public boolean removeWire(final String emitterPid, final String receiverPid) {
+		checkNotNull(emitterPid);
+		checkNotNull(receiverPid);
+
 		s_logger.info("Removing Wires..");
 		try {
 			WireConfiguration theWire = null;
@@ -574,7 +585,9 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 	 *            the new configuration service
 	 */
 	public synchronized void setConfigurationService(final ConfigurationService configService) {
-		this.m_configService = configService;
+		if (this.m_configService == null) {
+			this.m_configService = configService;
+		}
 	}
 
 	/**
@@ -584,7 +597,9 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 	 *            the new wire admin service dependency
 	 */
 	public synchronized void setWireAdmin(final WireAdmin wireAdmin) {
-		this.m_wireAdmin = wireAdmin;
+		if (this.m_wireAdmin == null) {
+			this.m_wireAdmin = wireAdmin;
+		}
 	}
 
 	/**
@@ -594,7 +609,9 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 	 *            the configuration service
 	 */
 	public synchronized void unsetConfigurationService(final ConfigurationService configService) {
-		this.m_configService = null;
+		if (this.m_configService == configService) {
+			this.m_configService = null;
+		}
 	}
 
 	/**
@@ -604,7 +621,9 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 	 *            the wire admin
 	 */
 	public synchronized void unsetWireAdmin(final WireAdmin wireAdmin) {
-		this.m_wireAdmin = null;
+		if (this.m_wireAdmin == wireAdmin) {
+			this.m_wireAdmin = null;
+		}
 	}
 
 	/**
@@ -673,8 +692,13 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 	 *            the old emitter name
 	 * @param oldReceiverName
 	 *            the old receiver name
+	 * @throws NullPointerException
+	 *             if any of the provided arguments is null
 	 */
 	private void updatePidNamesInList(final String oldEmitterName, final String oldReceiverName) {
+		checkNotNull(oldEmitterName);
+		checkNotNull(oldReceiverName);
+
 		final String newEmitter = this.m_configService.getCurrentComponentPid(oldEmitterName);
 		final String newReceiver = this.m_configService.getCurrentComponentPid(oldReceiverName);
 
@@ -700,8 +724,13 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 	 * @param receiver
 	 *            the wire receiver name
 	 * @return true, if successful
+	 * @throws NullPointerException
+	 *             if any of the provided arguments is null
 	 */
 	private boolean wireAlreadyCreated(final String emitter, final String receiver) {
+		checkNotNull(emitter);
+		checkNotNull(receiver);
+
 		for (final WireConfiguration wc : this.m_wireConfig) {
 			if (wc.getEmitterName().equals(emitter) && wc.getReceiverName().equals(receiver) && wc.isCreated()) {
 				return true;

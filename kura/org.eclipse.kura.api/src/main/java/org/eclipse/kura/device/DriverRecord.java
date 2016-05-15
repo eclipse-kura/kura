@@ -17,6 +17,7 @@ import java.util.Map;
 import org.eclipse.kura.type.TypedValue;
 
 import com.google.common.base.MoreObjects;
+import com.google.common.collect.ImmutableMap;
 
 /**
  * This class represents records needed for read, write or a monitor operation
@@ -57,7 +58,7 @@ public final class DriverRecord {
 	 * @return the channel configuration
 	 */
 	public Map<String, Object> getChannelConfig() {
-		return this.m_channelConfig;
+		return ImmutableMap.copyOf(this.m_channelConfig);
 	}
 
 	/**

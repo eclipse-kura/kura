@@ -12,6 +12,7 @@
  */
 package org.eclipse.kura.device.internal;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static org.eclipse.kura.device.internal.DeviceConfiguration.CHANNEL_PROPERTY_POSTFIX;
 import static org.eclipse.kura.device.internal.DeviceConfiguration.CHANNEL_PROPERTY_PREFIX;
 import static org.eclipse.kura.device.internal.DeviceConfiguration.DEVICE_DESC_PROP;
@@ -49,7 +50,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.MoreObjects;
-import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
@@ -124,10 +124,13 @@ public class BaseDevice implements Device, SelfConfiguringComponent {
 	 *
 	 * @param driverId
 	 *            the identifier of the driver
+	 * @throws NullPointerException
+	 *             if driver id provided is null
 	 */
 	private synchronized void attachDriver(final String driverId) {
 		s_logger.debug("Attaching driver instance...");
-		Preconditions.checkNotNull(driverId);
+		checkNotNull(driverId);
+
 		try {
 			this.m_driverTracker = new DriverTracker(this.m_ctx.getBundleContext(), this, driverId);
 			this.m_driverTracker.open();
@@ -145,10 +148,12 @@ public class BaseDevice implements Device, SelfConfiguringComponent {
 	 * @param prefix
 	 *            the prefix to be prepended
 	 * @return the new attribute definition
+	 * @throws NullPointerException
+	 *             if any of the provided argument is null
 	 */
 	private Tad cloneAd(final Tad oldAd, final String prefix) {
-		Preconditions.checkNotNull(oldAd);
-		Preconditions.checkNotNull(prefix);
+		checkNotNull(oldAd);
+		checkNotNull(prefix);
 
 		final Tad result = new Tad();
 
@@ -290,7 +295,8 @@ public class BaseDevice implements Device, SelfConfiguringComponent {
 
 			final Channel channel = channels.get(channelName);
 			if (!(channel.getType() == ChannelType.READ) || !(channel.getType() == ChannelType.READ_WRITE)) {
-				throw new KuraRuntimeException(KuraErrorCode.INTERNAL_ERROR, "Channel type not within defined types");
+				throw new KuraRuntimeException(KuraErrorCode.INTERNAL_ERROR,
+						"Channel type not within defined types (READ OR READ_WRITE) : " + channel);
 			}
 
 			final DriverRecord driverRecord = new DriverRecord();
@@ -376,7 +382,7 @@ public class BaseDevice implements Device, SelfConfiguringComponent {
 	 */
 	private void retrieveConfigurationsFromProperties(final Map<String, Object> properties) {
 		s_logger.debug("Retrieving configurations from the properties...");
-		this.m_deviceConfiguration = new DeviceConfiguration(properties);
+		this.m_deviceConfiguration = DeviceConfiguration.of(properties);
 		s_logger.debug("Retrieving configurations from the properties...Done");
 
 	}
@@ -439,7 +445,8 @@ public class BaseDevice implements Device, SelfConfiguringComponent {
 
 			final Channel channel = channels.get(deviceRecord.getChannelName());
 			if (!(channel.getType() == ChannelType.WRITE) || !(channel.getType() == ChannelType.READ_WRITE)) {
-				throw new KuraRuntimeException(KuraErrorCode.INTERNAL_ERROR, "Channel type not within defined types");
+				throw new KuraRuntimeException(KuraErrorCode.INTERNAL_ERROR,
+						"Channel type not within defined types (WRITE OR READ_WRITE) : " + channel);
 			}
 
 			final DriverRecord driverRecord = new DriverRecord();

@@ -13,6 +13,8 @@
 
 package org.eclipse.kura.wire.internal;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -32,8 +34,12 @@ public final class WireConfiguration {
 	 * @return the wire configuration
 	 * @throws JSONException
 	 *             the JSON exception
+	 * @throws NullPointerException
+	 *             if the json object instance passed as argument is null
 	 */
 	public static WireConfiguration newInstanceFromJson(final JSONObject jsonWire) throws JSONException {
+		checkNotNull(jsonWire);
+
 		final String emitter = jsonWire.getString("p");
 		final String receiver = jsonWire.getString("c");
 		final String filter = jsonWire.optString("f");
@@ -85,10 +91,10 @@ public final class WireConfiguration {
 	 */
 	public WireConfiguration(final String emitterName, final String receiverName, final String filter,
 			final boolean created) {
-		super();
 		this.m_emitterName = emitterName;
 		this.m_receiverName = receiverName;
 		this.m_filter = filter;
+		this.m_created = created;
 	}
 
 	/**

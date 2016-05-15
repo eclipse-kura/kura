@@ -12,6 +12,8 @@
  */
 package org.eclipse.kura.device.cloudlet;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.util.List;
 import java.util.Map;
 
@@ -41,13 +43,36 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.annotations.Beta;
-import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 
 /**
  * The Class DeviceCloudlet is used to provide MQTT read/write operations on the
- * device. The application id is configured as "DEV-CLOUD"
+ * device. The application id is configured as "DEV-CLOUD".
+ *
+ * The available EXEC commands are as follows
+ * <ul>
+ * <li>read</li> e.g /read/device_name/channel_name
+ * <li>write</li> e.g /write/device_name/channel_name topic with payload "value"
+ * and "type"
+ * </ul>
+ *
+ * The "value" key in the request payload can be one of the following
+ * <ul>
+ * <li>INTEGER</li>
+ * <li>LONG</li>
+ * <li>STRING</li>
+ * <li>BOOLEAN</li>
+ * <li>BYTE</li>
+ * <li>SHORT</li>
+ * <li>DUBLE</li>
+ * </ul>
+ *
+ * The available GET commands are as follows
+ * <ul>
+ * <li>list-devices</li> e.g: /list-devices
+ * <li>list-channels</li> e.g: /list-channels/device_name
+ * </ul>
  *
  * @see Cloudlet
  * @see CloudClient
@@ -134,26 +159,7 @@ public final class DeviceCloudlet extends Cloudlet {
 	}
 
 	/**
-	 * The device cloudlet receives a request to perform EXEC operations on
-	 * following commands.
-	 *
-	 * The available commands are as follows
-	 * <ul>
-	 * <li>read</li> e.g /read/device_name/channel_name
-	 * <li>write</li> e.g /write/device_name/channel_name topic with payload
-	 * "value" and "type"
-	 * </ul>
-	 *
-	 * The "value" key in the request payload can be one of the following
-	 * <ul>
-	 * <li>INTEGER</li>
-	 * <li>LONG</li>
-	 * <li>STRING</li>
-	 * <li>BOOLEAN</li>
-	 * <li>BYTE</li>
-	 * <li>SHORT</li>
-	 * <li>DUBLE</li>
-	 * </ul>
+	 * The device cloudlet receives a request to perform EXEC operations
 	 *
 	 * @param reqTopic
 	 *            the request topic
@@ -218,14 +224,7 @@ public final class DeviceCloudlet extends Cloudlet {
 	}
 
 	/**
-	 * The device cloudlet receives a request to perform GET operations on
-	 * following commands.
-	 *
-	 * The available commands are as follows
-	 * <ul>
-	 * <li>list-devices</li> e.g: /list-devices
-	 * <li>list-channels</li> e.g: /list-channels/device_name
-	 * </ul>
+	 * The device cloudlet receives a request to perform GET operations
 	 *
 	 * @param reqTopic
 	 *            the request topic
@@ -293,11 +292,13 @@ public final class DeviceCloudlet extends Cloudlet {
 	 *            the value to wrap
 	 * @param userType
 	 *            the type to use
+	 * @throws NullPointerException
+	 *             if the any of the provided arguments is null
 	 */
 	private void wrapValue(final DeviceRecord deviceRecord, final String userValue, final String userType) {
-		Preconditions.checkNotNull(deviceRecord);
-		Preconditions.checkNotNull(userValue);
-		Preconditions.checkNotNull(userType);
+		checkNotNull(deviceRecord);
+		checkNotNull(userValue);
+		checkNotNull(userType);
 
 		TypedValue<?> value = null;
 

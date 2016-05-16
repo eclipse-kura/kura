@@ -1107,7 +1107,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
     }
 
     @Override
-    public ArrayList<GwtFirewallNatEntry> findDeficeFirewallNATs(GwtXSRFToken xsrfToken) throws GwtKuraException {
+    public ArrayList<GwtFirewallNatEntry> findDeviceFirewallNATs(GwtXSRFToken xsrfToken) throws GwtKuraException {
 
         checkXSRFToken(xsrfToken);
         NetworkAdminService nas = ServiceLocator.getInstance().getService(NetworkAdminService.class);
@@ -1118,7 +1118,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
             if (firewallConfigs != null && !firewallConfigs.isEmpty()) {
                 for (NetConfig netConfig : firewallConfigs) {
                     if (netConfig instanceof FirewallNatConfig) {
-                        s_logger.debug("findDeficeFirewallNATs() :: adding new NAT Entry");
+                        s_logger.debug("findDeviceFirewallNATs() :: adding new NAT Entry");
                         GwtFirewallNatEntry entry = new GwtFirewallNatEntry();
                         entry.setInInterface(((FirewallNatConfig)netConfig).getSourceInterface());
                         entry.setOutInterface(((FirewallNatConfig)netConfig).getDestinationInterface());

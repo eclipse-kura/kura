@@ -72,8 +72,11 @@ public final class WireServiceOptions {
 	 *
 	 * @param configurations
 	 *            the list of Wire Configurations
+	 * @throws NullPointerException
+	 *             if provided configurations is null
 	 */
 	private WireServiceOptions(final List<WireConfiguration> configurations) {
+		checkNotNull(configurations);
 		m_wireConfigurations = configurations;
 	}
 

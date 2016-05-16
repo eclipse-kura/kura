@@ -12,6 +12,8 @@
  */
 package org.eclipse.kura.wire.store;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
@@ -275,12 +277,17 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
 	 *
 	 * @param tableName
 	 *            the table name
-	 * @param dataRecord
+	 * @param wireRecord
 	 *            the data record
 	 * @throws SQLException
 	 *             the SQL exception
+	 * @throws NullPointerException
+	 *             if any of the provided argument is null
 	 */
-	private void insertDataRecord(final String tableName, final WireRecord dataRecord) throws SQLException {
+	private void insertDataRecord(final String tableName, final WireRecord wireRecord) throws SQLException {
+		checkNotNull(tableName);
+		checkNotNull(wireRecord);
+
 		final String sqlTableName = this.escapeSql(tableName);
 		final StringBuilder sbCols = new StringBuilder();
 		final StringBuilder sbVals = new StringBuilder();
@@ -289,7 +296,7 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
 		sbCols.append("TIMESTAMP");
 		sbVals.append("?");
 
-		final List<WireField> dataFields = dataRecord.getFields();
+		final List<WireField> dataFields = wireRecord.getFields();
 		for (final WireField dataField : dataFields) {
 			final String sqlColName = this.escapeSql(dataField.getName());
 			sbCols.append(", " + sqlColName);
@@ -304,7 +311,7 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
 		try {
 			conn = this.getConnection();
 			stmt = conn.prepareStatement(sqlInsert);
-			stmt.setTimestamp(1, new Timestamp(dataRecord.getTimestamp().getTime()));
+			stmt.setTimestamp(1, new Timestamp(wireRecord.getTimestamp().getTime()));
 			for (int i = 0; i < dataFields.size(); i++) {
 
 				final WireField dataField = dataFields.get(i);
@@ -379,12 +386,17 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
 	 *
 	 * @param tableName
 	 *            the table name
-	 * @param dataRecord
+	 * @param wireRecord
 	 *            the data record
 	 * @throws SQLException
 	 *             the SQL exception
+	 * @throws NullPointerException
+	 *             if any of the provided argument is null
 	 */
-	private void reconcileColumns(final String tableName, final WireRecord dataRecord) throws SQLException {
+	private void reconcileColumns(final String tableName, final WireRecord wireRecord) throws SQLException {
+		checkNotNull(tableName);
+		checkNotNull(wireRecord);
+
 		final String sqlTableName = this.escapeSql(tableName);
 		Connection conn = null;
 		ResultSet rsColumns = null;
@@ -408,7 +420,7 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
 		}
 
 		// reconcile columns
-		final List<WireField> dataFields = dataRecord.getFields();
+		final List<WireField> dataFields = wireRecord.getFields();
 		for (final WireField dataField : dataFields) {
 
 			final String sqlColName = this.escapeSql(dataField.getName());
@@ -434,8 +446,12 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
 	 *            the table name
 	 * @throws SQLException
 	 *             the SQL exception
+	 * @throws NullPointerException
+	 *             if the provided argument is null
 	 */
 	private void reconcileTable(final String tableName) throws SQLException {
+		checkNotNull(tableName);
+
 		final String sqlTableName = this.escapeSql(tableName);
 		final Connection conn = this.getConnection();
 		try {
@@ -458,7 +474,7 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
 	 * Rollback.
 	 *
 	 * @param conn
-	 *            the conn
+	 *            the connection instance
 	 */
 	private void rollback(final Connection conn) {
 		this.m_dbService.rollback(conn);

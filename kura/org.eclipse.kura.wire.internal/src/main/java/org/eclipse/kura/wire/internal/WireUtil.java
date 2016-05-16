@@ -11,6 +11,8 @@
  */
 package org.eclipse.kura.wire.internal;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.util.Collection;
 import java.util.List;
 
@@ -46,8 +48,12 @@ public final class WireUtil {
 	 * @param ctx
 	 *            the bundle context
 	 * @return the wire emitters and receivers
+	 * @throws NullPointerException
+	 *             if provided component context is null
 	 */
 	public static List<String> getEmittersAndReceivers(final ComponentContext ctx) {
+		checkNotNull(ctx);
+
 		final List<String> result = Lists.newArrayList();
 		try {
 			final Collection<ServiceReference<WireEmitter>> emitters = ctx.getBundleContext()
@@ -76,10 +82,16 @@ public final class WireUtil {
 	 * @param iface
 	 *            the interface
 	 * @return the factories and instances
+	 * @throws NullPointerException
+	 *             if any of the provided argument is null
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public static List<String> getFactoriesAndInstances(final ComponentContext ctx, final String factoryPid,
 			final Class iface) {
+		checkNotNull(ctx);
+		checkNotNull(factoryPid);
+		checkNotNull(iface);
+
 		final List<String> result = Lists.newArrayList();
 		// Iterate through the bundles
 		for (final Bundle b : ctx.getBundleContext().getBundles()) {
@@ -127,8 +139,13 @@ public final class WireUtil {
 	 * @param name
 	 *            the name
 	 * @return true, if it is a Wire Emitter
+	 * @throws NullPointerException
+	 *             if any of the provided argument is null
 	 */
 	public static boolean isEmitter(final BundleContext ctx, final String name) {
+		checkNotNull(ctx);
+		checkNotNull(name);
+
 		try {
 			final Collection<ServiceReference<WireEmitter>> services = ctx.getServiceReferences(WireEmitter.class,
 					null);
@@ -147,12 +164,17 @@ public final class WireUtil {
 	 * Checks if it is a Wire Receiver.
 	 *
 	 * @param ctx
-	 *            the ctx
+	 *            the bundle context
 	 * @param pid
 	 *            the pid
 	 * @return true, if it is a Wire Receiver
+	 * @throws NullPointerException
+	 *             if any of the provided argument is null
 	 */
 	public static boolean isReceiver(final BundleContext ctx, final String pid) {
+		checkNotNull(ctx);
+		checkNotNull(pid);
+
 		try {
 			final Collection<ServiceReference<WireReceiver>> services = ctx.getServiceReferences(WireReceiver.class,
 					null);

@@ -512,7 +512,7 @@ public final class CloudPublisherImpl
 			case AUTOCONNECT_MODE_OFF:
 			case AUTOCONNECT_MODE_ON_AND_STAY:
 				// nothing to do. Connection is either not opened or should not
-				// be closed.
+				// be closed
 				break;
 			default:
 				final int minDelay = this.m_options.getAutoConnectMode().getDisconnectDelay();

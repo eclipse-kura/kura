@@ -110,7 +110,7 @@ public final class WireDevice extends BaseDevice implements WireComponent, WireE
 	 *             if the provided list is empty or null
 	 */
 	private void emitDeviceRecords(final List<DeviceRecord> deviceRecords) {
-		checkArgument(deviceRecords.size() != 0);
+		checkArgument(deviceRecords.isEmpty());
 		checkNotNull(deviceRecords);
 
 		final List<WireRecord> wireRecords = Lists.newArrayList();

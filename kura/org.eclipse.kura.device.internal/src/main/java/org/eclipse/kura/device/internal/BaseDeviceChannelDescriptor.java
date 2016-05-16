@@ -49,6 +49,7 @@ public final class BaseDeviceChannelDescriptor {
 	 */
 	private BaseDeviceChannelDescriptor() {
 		this.defaultElements = Lists.newArrayList();
+
 		final Tad name = new Tad();
 		name.setId(NAME);
 		name.setName(NAME);
@@ -57,7 +58,9 @@ public final class BaseDeviceChannelDescriptor {
 		name.setDescription("Name of the Point");
 		name.setCardinality(0);
 		name.setRequired(true);
+
 		this.defaultElements.add(name);
+
 		final Tad type = new Tad();
 		type.setName(TYPE);
 		type.setId(TYPE);
@@ -65,18 +68,22 @@ public final class BaseDeviceChannelDescriptor {
 		type.setType(Tscalar.STRING);
 		type.setRequired(true);
 		type.setDefault("String");
+
 		final Toption oBoolean = new Toption();
 		oBoolean.setValue("Boolean");
 		oBoolean.setLabel("Boolean");
 		type.getOption().add(oBoolean);
+
 		final Toption oByte = new Toption();
 		oByte.setValue("Byte");
 		oByte.setLabel("Byte");
 		type.getOption().add(oByte);
+
 		final Toption oDouble = new Toption();
 		oDouble.setValue("Double");
 		oDouble.setLabel("Double");
 		type.getOption().add(oDouble);
+
 		final Toption oInteger = new Toption();
 		oInteger.setValue("Integer");
 		oInteger.setLabel("Integer");
@@ -85,18 +92,22 @@ public final class BaseDeviceChannelDescriptor {
 		oLong.setValue("Long");
 		oLong.setLabel("Long");
 		type.getOption().add(oLong);
+
 		final Toption oByteArray = new Toption();
 		oByteArray.setValue("Byte Array");
 		oByteArray.setLabel("Byte Array");
 		type.getOption().add(oByteArray);
+
 		final Toption oShort = new Toption();
 		oShort.setValue("Short");
 		oShort.setLabel("Short");
 		type.getOption().add(oShort);
+
 		final Toption oString = new Toption();
 		oString.setValue("String");
 		oString.setLabel("String");
 		type.getOption().add(oString);
+
 		this.defaultElements.add(type);
 	}
 

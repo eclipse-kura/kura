@@ -131,10 +131,10 @@ public final class CloudPublisherDisconnectManager {
 	 * Stops the scheduler thread pool
 	 */
 	public synchronized void stop() {
-		s_logger.info("Scheduler stopping....");
+		s_logger.info("Scheduler stopping in Cloud Publisher Dosconnect Manager....");
 		if (this.m_executorService != null) {
 			this.m_executorService.shutdown();
 		}
-		s_logger.info("Scheduler stopping....Done");
+		s_logger.info("Scheduler stopping in Cloud Publisher Dosconnect Manager....Done");
 	}
 }

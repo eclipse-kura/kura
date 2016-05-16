@@ -12,10 +12,6 @@
  */
 package org.eclipse.kura.wire.store;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.Map;
 
 import org.eclipse.kura.configuration.ConfigurableComponent;
@@ -33,7 +29,7 @@ import com.google.common.annotations.Beta;
 
 /**
  * The Class DbWireRecordFilter is responsible for representing a wire component
- * which is mainly used to filter records as received by wire record
+ * which is mainly used to filter records as received from the wire record
  */
 @Beta
 public final class DbWireRecordFilter implements WireEmitter, WireReceiver, ConfigurableComponent {
@@ -73,36 +69,6 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Conf
 		s_logger.info("Activating DB Wire Record Filter...Done");
 	}
 
-	/**
-	 * Closes the connection
-	 *
-	 * @param connection
-	 *            the connection instance to close
-	 */
-	private void close(final Connection connection) {
-		this.m_dbService.close(connection);
-	}
-
-	/**
-	 * Closes the connection
-	 *
-	 * @param resultSet
-	 *            the result set
-	 */
-	private void close(final ResultSet... resultSet) {
-		this.m_dbService.close(resultSet);
-	}
-
-	/**
-	 * Closes the DB connection
-	 *
-	 * @param statements
-	 *            the the statements
-	 */
-	private void close(final Statement... statements) {
-		this.m_dbService.close(statements);
-	}
-
 	/** {@inheritDoc} */
 	@Override
 	public void consumersConnected(final Wire[] wires) {
@@ -121,17 +87,6 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Conf
 		// certificate is already published due the missing dependency
 		// we only need to empty our CloudClient list
 		this.m_dbService = null;
-	}
-
-	/**
-	 * Gets the connection.
-	 *
-	 * @return the connection
-	 * @throws SQLException
-	 *             the SQL exception
-	 */
-	private Connection getConnection() throws SQLException {
-		return this.m_dbService.getConnection();
 	}
 
 	/**

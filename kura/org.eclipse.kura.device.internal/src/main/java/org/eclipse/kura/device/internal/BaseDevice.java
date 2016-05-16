@@ -351,7 +351,6 @@ public class BaseDevice implements Device, SelfConfiguringComponent {
 		s_logger.debug("Registering Device Listener for monitoring...");
 
 		Channel channel = null;
-
 		final Map<String, Channel> channels = this.m_deviceConfiguration.getChannels();
 
 		if (channels.containsKey(channelName)) {
@@ -436,7 +435,6 @@ public class BaseDevice implements Device, SelfConfiguringComponent {
 		final List<DriverRecord> driverRecords = Lists.newArrayList();
 
 		final Map<String, Channel> channels = this.m_deviceConfiguration.getChannels();
-
 		for (final DeviceRecord deviceRecord : deviceRecords) {
 
 			if (!channels.containsKey(deviceRecord.getChannelName())) {

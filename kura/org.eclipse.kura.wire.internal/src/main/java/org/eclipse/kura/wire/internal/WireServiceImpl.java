@@ -137,8 +137,13 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 	 * @param name
 	 *            the name
 	 * @return the string
+	 * @throws NullPointerException
+	 *             if any of the provided argument is null
 	 */
 	private String createComponentFromProperty(final String value, final String name) {
+		checkNotNull(value);
+		checkNotNull(name);
+
 		final String[] tokens = value.split("\\|");
 		if ("FACTORY".equals(tokens[0])) {
 			return this.createWireComponent(tokens[1], name);

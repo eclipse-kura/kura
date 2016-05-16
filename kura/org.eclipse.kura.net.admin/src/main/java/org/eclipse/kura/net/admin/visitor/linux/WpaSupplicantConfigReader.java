@@ -225,6 +225,7 @@ public class WpaSupplicantConfigReader implements NetworkConfigurationVisitor {
 		            } else {
 		                wifiSecurity = WifiSecurity.SECURITY_NONE;
 		            }
+		            		        	
 		            pairwiseCiphers = null;
 		            groupCiphers = null;
 		        }

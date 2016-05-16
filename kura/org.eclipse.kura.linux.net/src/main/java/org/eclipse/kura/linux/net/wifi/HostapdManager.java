@@ -20,6 +20,7 @@ import java.io.PrintWriter;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.core.linux.util.LinuxProcessUtil;
 import org.eclipse.kura.core.util.ProcessUtil;
 import org.eclipse.kura.core.util.SafeProcess;
@@ -36,7 +37,7 @@ public class HostapdManager {
 	private static final String OS_VERSION = System.getProperty("kura.os.version");
 	private static final String HOSTAPD_EXEC = "hostapd";
 
-	public static void start(String ifaceName, WifiPassword passkey, WifiSecurity wifiSecurity) throws KuraException {
+	public static void start(String ifaceName, Password passkey, WifiSecurity wifiSecurity) throws KuraException {
 		SafeProcess proc = null;
 		try {
 			if(HostapdManager.isRunning(ifaceName)) {
@@ -58,7 +59,7 @@ public class HostapdManager {
 		finally {
 			if (proc != null) {
 				ProcessUtil.destroy(proc);
-			}
+			} /* TODO - <IAB> comment out for now
 			if (!OS_VERSION.equals(KuraConstants.Intel_Edison.getImageName() + "_" + KuraConstants.Intel_Edison.getImageVersion() + "_" + KuraConstants.Intel_Edison.getTargetName())) {
 				// delete temporary hostapd.conf that contains passkey
 				File tmpHostapdConfigFile = new File(privGetHostapdConfigFileName(ifaceName));
@@ -66,6 +67,7 @@ public class HostapdManager {
 					tmpHostapdConfigFile.delete();
 				}
 			}
+			*/
 		}
 	}
 
@@ -113,7 +115,7 @@ public class HostapdManager {
 	}
 
 	private static String generateStartCommand(String ifaceName,
-			WifiPassword passkey, WifiSecurity wifiSecurity)
+			Password passkey, WifiSecurity wifiSecurity)
 			throws KuraException {
 		StringBuilder cmd = new StringBuilder();
 		if (OS_VERSION.equals(KuraConstants.Intel_Edison.getImageName() + "_" + KuraConstants.Intel_Edison.getImageVersion() + "_" + KuraConstants.Intel_Edison.getTargetName())) {
@@ -164,7 +166,7 @@ public class HostapdManager {
 		return sb.toString();
 	}
 	
-	private static File generateHostapdConfigFile(String ifaceName, WifiPassword passkey, WifiSecurity wifiSecurity) throws KuraException {
+	private static File generateHostapdConfigFile(String ifaceName, Password passkey, WifiSecurity wifiSecurity) throws KuraException {
 		File retConfigFile = new File(privGetHostapdConfigFileName(ifaceName));
 		File configFile = new File(getHostapdConfigFileName(ifaceName));
 		if(!configFile.exists()) {
@@ -182,7 +184,7 @@ public class HostapdManager {
             	   if (line.startsWith("wep_key") || line.startsWith("wpa_passphrase")) {
             		   int ind = line.indexOf('=');
             		   if (ind > 0) {
-            			   passkey.validate(wifiSecurity);
+            			   ((WifiPassword)passkey).validate(wifiSecurity);
             			   pw.println(line.substring(0, ind+1).concat(passkey.toString()));
             		   }
             	   } else {

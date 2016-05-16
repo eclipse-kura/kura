@@ -38,6 +38,7 @@ import org.eclipse.kura.net.admin.visitor.linux.util.WifiVisitorUtil;
 import org.eclipse.kura.net.wifi.WifiCiphers;
 import org.eclipse.kura.net.wifi.WifiConfig;
 import org.eclipse.kura.net.wifi.WifiMode;
+import org.eclipse.kura.net.wifi.WifiPassword;
 import org.eclipse.kura.net.wifi.WifiRadioMode;
 import org.eclipse.kura.net.wifi.WifiSecurity;
 import org.osgi.framework.FrameworkUtil;
@@ -284,8 +285,9 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
 			}
 			
 			// validate passkey but add it to snapshot and not to configuration file
-			wifiConfig.getPasskey().validate(wifiConfig.getSecurity());
+			((WifiPassword)wifiConfig.getPasskey()).validate(wifiConfig.getSecurity());
 			fileAsString = fileAsString.replaceFirst("KURA_WEP_KEY", "");
+			// TODO - <IAB> comment out for now
 			WifiVisitorUtil.setPassphrase(wifiConfig.getPasskey().toString(), interfaceName, WifiMode.MASTER);
 			
 			if (wifiConfig.ignoreSSID()) {
@@ -402,8 +404,9 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
 			}
 			
 			// validate passkey but add it to snapshot and not to configuration file
-			wifiConfig.getPasskey().validate(wifiConfig.getSecurity());
+			((WifiPassword)wifiConfig.getPasskey()).validate(wifiConfig.getSecurity());
 			fileAsString = fileAsString.replaceFirst("KURA_PASSPHRASE", "");
+			// TODO - <IAB> comment out for now
 			WifiVisitorUtil.setPassphrase(wifiConfig.getPasskey().toString(), interfaceName, WifiMode.MASTER);
 			
 			if (wifiConfig.ignoreSSID()) {

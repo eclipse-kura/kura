@@ -296,8 +296,8 @@ public class BluetoothGattImpl implements BluetoothGatt, BluetoothProcessListene
 		}
 		// gatttool prompt indicates connected
 		else if (checkString(line.toLowerCase(), CONNECTED)) {
-			m_ready = true;
 			m_connected = true;
+			m_ready = true;
 		}
 		// characteristic read by UUID returned
 		else if (line.matches(REGEX_READ_CHAR_UUID)) {

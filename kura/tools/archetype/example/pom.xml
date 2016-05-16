@@ -1,0 +1,63 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>org.eclipse.kura.tools</groupId>
+		<artifactId>archetype</artifactId>
+		<version>0.1.0-SNAPSHOT</version>
+	</parent>
+
+    <groupId>org.eclipse.kura.archetype</groupId>
+    <artifactId>org.eclipse.kura.archetype.example</artifactId>
+	<version>0.1.0-SNAPSHOT</version>
+    <name>Eclipse Kura Example Project Archetype</name>
+    
+    <description>This is the Maven-Archetype for creating an Eclipse Kura example project.</description>
+  
+    <packaging>maven-archetype</packaging>
+
+    <build>
+        <extensions>
+            <extension>
+                <groupId>org.apache.maven.archetype</groupId>
+                <artifactId>archetype-packaging</artifactId>
+                <version>2.4</version>
+            </extension>
+        </extensions>
+	
+		<pluginManagement>
+      		<plugins>
+        		<plugin>
+          			<artifactId>maven-archetype-plugin</artifactId>
+          			<version>2.4</version>
+        		</plugin>
+      		</plugins>
+    	</pluginManagement>	
+    
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<version>1.7</version>
+				<executions>
+					<execution>
+						<id>tools-copy-tp</id>
+						<phase>prepare-package</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
+						<configuration>
+							<target>
+								<delete dir="src/mail/resources/archetype-resources/target-definition" />
+								<copy todir="src/main/resources/archetype-resources/target-definition">
+									<fileset dir="../../../distrib/target/staging/target-definition" />
+								</copy>	
+							</target>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+</project>

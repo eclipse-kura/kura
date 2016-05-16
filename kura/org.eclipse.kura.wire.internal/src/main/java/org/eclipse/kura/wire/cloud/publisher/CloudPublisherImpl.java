@@ -49,7 +49,7 @@ import com.google.common.util.concurrent.Monitor;
 /**
  * The Class CloudPublisherImpl is the implementation of {@link CloudPublisher}
  * to publish a list of wire records as received in Wire Envelope to the
- * configured cloud platform
+ * configured cloud platform.
  */
 @Beta
 public final class CloudPublisherImpl
@@ -58,7 +58,7 @@ public final class CloudPublisherImpl
 	/** The Cloud Publisher Disconnection Manager. */
 	private static CloudPublisherDisconnectManager s_disconnectManager;
 
-	/** The Logger. */
+	/** The Logger instance. */
 	private static final Logger s_logger = LoggerFactory.getLogger(CloudPublisherImpl.class);
 
 	/** The cloud client. */
@@ -79,6 +79,9 @@ public final class CloudPublisherImpl
 	/** The wire supporter component. */
 	private WireSupport m_wireSupport;
 
+	/**
+	 * Instantiates a new cloud publisher instance.
+	 */
 	public CloudPublisherImpl() {
 		this.m_monitor = new Monitor();
 	}
@@ -114,9 +117,9 @@ public final class CloudPublisherImpl
 	}
 
 	/**
-	 * Builds the JSON instance from the provided wire record
+	 * Builds the JSON instance from the provided wire record.
 	 *
-	 * @param dataRecord
+	 * @param wireRecord
 	 *            the wire record
 	 * @return the json instance
 	 * @throws NullPointerException
@@ -175,7 +178,7 @@ public final class CloudPublisherImpl
 	}
 
 	/**
-	 * Builds the kura payload from the provided wire record
+	 * Builds the kura payload from the provided wire record.
 	 *
 	 * @param wireRecord
 	 *            the wire record
@@ -233,7 +236,7 @@ public final class CloudPublisherImpl
 	}
 
 	/**
-	 * Builds the kura position from the OSGi position instance
+	 * Builds the kura position from the OSGi position instance.
 	 *
 	 * @param position
 	 *            the OSGi position instance
@@ -264,7 +267,7 @@ public final class CloudPublisherImpl
 	}
 
 	/**
-	 * Builds the kura position from the OSGi position instance
+	 * Builds the kura position from the OSGi position instance.
 	 *
 	 * @param position
 	 *            the OSGi position instance

@@ -12,6 +12,7 @@
  */
 package org.eclipse.kura.wire;
 
+import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
 
@@ -33,7 +34,7 @@ public final class WireRecord {
 	private final Position m_position;
 
 	/** The timestamp. */
-	private final Date m_timestamp;
+	private final Timestamp m_timestamp;
 
 	/**
 	 * Instantiates a new wire record.
@@ -43,7 +44,7 @@ public final class WireRecord {
 	 * @param fields
 	 *            the fields
 	 */
-	public WireRecord(final Date timestamp, final List<WireField> fields) {
+	public WireRecord(final Timestamp timestamp, final List<WireField> fields) {
 		this.m_timestamp = timestamp;
 		this.m_position = null;
 		this.m_fields = ImmutableList.copyOf(fields);
@@ -59,7 +60,7 @@ public final class WireRecord {
 	 * @param fields
 	 *            the fields
 	 */
-	public WireRecord(final Date timestamp, final Position position, final List<WireField> fields) {
+	public WireRecord(final Timestamp timestamp, final Position position, final List<WireField> fields) {
 		this.m_timestamp = timestamp;
 		this.m_position = position;
 		this.m_fields = ImmutableList.copyOf(fields);
@@ -69,10 +70,10 @@ public final class WireRecord {
 	 * Instantiates a new wire record.
 	 *
 	 * @param dataFields
-	 *            the data fields
+	 *            the wire fields
 	 */
 	public WireRecord(final WireField... dataFields) {
-		this.m_timestamp = new Date();
+		this.m_timestamp = new Timestamp(new Date().getTime());
 		this.m_position = null;
 		this.m_fields = ImmutableList.copyOf(dataFields);
 	}

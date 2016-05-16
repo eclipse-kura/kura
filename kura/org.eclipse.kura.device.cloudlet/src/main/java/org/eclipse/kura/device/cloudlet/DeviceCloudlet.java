@@ -266,7 +266,7 @@ public final class DeviceCloudlet extends Cloudlet {
 	 * Searches for all the currently available devices in the service registry
 	 */
 	private void findDevices() {
-		this.m_devices = this.m_deviceTracker.getDevicesList();
+		this.m_devices = this.m_deviceTracker.getRegisteredDevices();
 	}
 
 	/**

@@ -15,7 +15,7 @@ package org.eclipse.kura.wire.store;
 import java.util.Map;
 
 /**
- * The Class DbWireRecordStoreOptions is responsible to contain all the Db Wire
+ * The Class DbWireRecordStoreOptions is responsible to contain all the DB Wire
  * Record Store related options
  */
 public final class DbWireRecordStoreOptions {

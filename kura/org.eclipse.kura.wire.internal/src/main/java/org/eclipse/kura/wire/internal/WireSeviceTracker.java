@@ -35,7 +35,7 @@ import com.google.common.collect.Lists;
  */
 public final class WireSeviceTracker extends ServiceTracker<Object, Object> {
 
-	/** The Logger. */
+	/** The Logger instance. */
 	private static final Logger s_logger = LoggerFactory.getLogger(WireSeviceTracker.class);
 
 	/** The wire emitters. */
@@ -77,13 +77,13 @@ public final class WireSeviceTracker extends ServiceTracker<Object, Object> {
 		final String property = (String) reference.getProperty("service.pid");
 		if (service instanceof WireEmitter) {
 			this.m_wireEmitters.add(property);
-			s_logger.debug("Registration of Wire Emitter..." + property);
+			s_logger.debug("Registering Wire Emitter..." + property);
 			flag = true;
 		}
 
 		if (service instanceof WireReceiver) {
 			this.m_wireReceivers.add(property);
-			s_logger.debug("Registration of Wire Receiver..." + property);
+			s_logger.debug("Registering Wire Receiver..." + property);
 			flag = true;
 		}
 

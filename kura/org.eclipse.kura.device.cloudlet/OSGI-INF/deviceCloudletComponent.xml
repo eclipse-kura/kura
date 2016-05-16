@@ -13,9 +13,17 @@
       Amit Kumar Mondal (admin@amitinside.com)
 
 -->
-<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" activate="activate" deactivate="deactivate" name="org.eclipse.kura.device.cloudlet">
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" 
+	activate="activate" 
+	deactivate="deactivate" 
+	name="org.eclipse.kura.device.cloudlet">
    <implementation class="org.eclipse.kura.device.cloudlet.DeviceCloudlet"/>
-   <reference bind="bindCloudService" cardinality="1..1" interface="org.eclipse.kura.cloud.CloudService" name="CloudService" policy="static" unbind="unbindCloudService"/>
+   <reference bind="bindCloudService" 
+   		cardinality="1..1" 
+   		interface="org.eclipse.kura.cloud.CloudService" 
+   		name="CloudService" 
+   		policy="static" 
+   		unbind="unbindCloudService"/>
    <service>
       <provide interface="org.eclipse.kura.cloud.CloudClientListener"/>
    </service>

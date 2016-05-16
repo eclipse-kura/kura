@@ -58,7 +58,7 @@ public interface WireService {
 	 *
 	 * @param name
 	 *            the name of the Wire Component
-	 * @return true, if removal successful
+	 * @return true, if removal is successful
 	 */
 	public boolean removeWireComponent(String name);
 

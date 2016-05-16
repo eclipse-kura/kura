@@ -13,11 +13,11 @@
 package org.eclipse.kura.device;
 
 import java.util.Map;
-import java.util.Objects;
 
 import org.eclipse.kura.type.DataType;
 
 import com.google.common.base.MoreObjects;
+import com.google.common.base.Objects;
 
 /**
  * The Class Channel represents a communication channel of a device. The
@@ -83,7 +83,10 @@ public final class Channel {
 	/** {@inheritDoc} */
 	@Override
 	public boolean equals(final Object otherChannel) {
-		return Objects.equals(this.m_name, ((Channel) (otherChannel)).getName());
+		if (otherChannel instanceof Channel) {
+			return Objects.equal(this.m_name, ((Channel) (otherChannel)).getName());
+		}
+		return false;
 	}
 
 	/**
@@ -125,7 +128,7 @@ public final class Channel {
 	/** {@inheritDoc} */
 	@Override
 	public int hashCode() {
-		return Objects.hash(this.m_name, this.m_type, this.m_valueType, this.m_config);
+		return Objects.hashCode(this.m_name, this.m_type, this.m_valueType, this.m_config);
 	}
 
 	/**

@@ -26,7 +26,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang3.StringEscapeUtils;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.db.DbService;
 import org.eclipse.kura.type.BooleanValue;
@@ -193,16 +192,26 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
 	}
 
 	/**
-	 * Escapes sql string
+	 * Perform basic SQL validation on input string. This is to allow safe
+	 * encoding of parameters that must contain quotes, while still protecting
+	 * users from SQL injection.
+	 *
+	 * We prevent SQL from breaking out of quotes by replacing any quotes in
+	 * input stream with double quotes. Backslashes are too risky to allow so
+	 * are removed completely
 	 *
 	 * @param string
 	 *            the string to be filtered
 	 * @return the escaped string
 	 */
 	private String escapeSql(final String string) {
-		// The escaping java mechanism is used as it conforms to the generic
-		// standard that Java also follows
-		return StringEscapeUtils.escapeJava(string);
+		// ' --> ''
+		String escapedString = string.replaceAll("'", "''");
+		// " --> ""
+		escapedString = escapedString.replaceAll("\"", "\"\"");
+		// \ --> (remove backslashes)
+		escapedString = escapedString.replaceAll("\\\\", "");
+		return escapedString;
 	}
 
 	/**
@@ -350,6 +359,8 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
 	/** {@inheritDoc} */
 	@Override
 	public synchronized void onWireReceive(final WireEnvelope wireEvelope) {
+		s_logger.debug("Wire Enveloped received..." + this.m_wireSupport);
+
 		final List<WireRecord> dataRecords = wireEvelope.getRecords();
 		for (final WireRecord dataRecord : dataRecords) {
 			this.storeWireRecord(wireEvelope.getEmitterName(), dataRecord);

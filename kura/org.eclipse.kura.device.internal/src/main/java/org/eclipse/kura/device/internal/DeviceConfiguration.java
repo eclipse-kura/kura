@@ -250,12 +250,18 @@ public final class DeviceConfiguration {
 		DataType dataType = null;
 		Map<String, Object> channelConfig = null;
 
+		// All key names present is the properties
+		final String channelConfigKey = "channel_config";
+		final String channelValueTypeKey = "value_type";
+		final String channelTypeKey = "type";
+		final String channelNameKey = "name";
+
 		if (properties != null) {
-			if (properties.containsKey("name")) {
-				channelName = (String) properties.get("name");
+			if (properties.containsKey(channelNameKey)) {
+				channelName = (String) properties.get(channelNameKey);
 			}
-			if (properties.containsKey("type")) {
-				final String type = (String) properties.get("type");
+			if (properties.containsKey(channelTypeKey)) {
+				final String type = (String) properties.get(channelTypeKey);
 				if ("READ".equals(type)) {
 					channelType = ChannelType.READ;
 				}
@@ -266,8 +272,8 @@ public final class DeviceConfiguration {
 					channelType = ChannelType.READ_WRITE;
 				}
 			}
-			if (properties.containsKey("value_type")) {
-				final String type = (String) properties.get("value_type");
+			if (properties.containsKey(channelValueTypeKey)) {
+				final String type = (String) properties.get(channelValueTypeKey);
 
 				if ("INTEGER".equalsIgnoreCase(type)) {
 					dataType = DataType.INTEGER;
@@ -294,10 +300,10 @@ public final class DeviceConfiguration {
 					dataType = DataType.BYTE_ARRAY;
 				}
 			}
-			if (properties.containsKey("channel_config")) {
-				final Object value = properties.get("channel_config");
+			if (properties.containsKey(channelConfigKey)) {
+				final Object value = properties.get(channelConfigKey);
 				if (value instanceof Map<?, ?>) {
-					channelConfig = (Map<String, Object>) properties.get("channel_config");
+					channelConfig = (Map<String, Object>) properties.get(channelConfigKey);
 				}
 			}
 		}

@@ -63,7 +63,7 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 	/** The Constant denoting Wire Emitter. */
 	private static final String PROP_PRODUCER_PID = "wireadmin.producer.pid";
 
-	/** The Logger. */
+	/** The Logger instance. */
 	private static final Logger s_logger = LoggerFactory.getLogger(WireServiceImpl.class);
 
 	/** The Configuration Service instance. */
@@ -275,7 +275,7 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 		final Set<String> factoryPids = this.m_configService.getComponentFactoryPids();
 
 		for (final String factoryPid : factoryPids) {
-			emittersOptions.addAll(WireUtil.getFactoriesAndInstances(this.m_ctx, factoryPid, WireEmitter.class));
+			emittersOptions.addAll(WireUtils.getFactoriesAndInstances(this.m_ctx, factoryPid, WireEmitter.class));
 		}
 
 		final Tad emitterTad = new Tad();
@@ -284,10 +284,12 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 		emitterTad.setType(Tscalar.STRING);
 		emitterTad.setCardinality(0);
 		emitterTad.setRequired(true);
+
 		final Toption defaultOpt = new Toption();
 		defaultOpt.setLabel("No new multiton");
 		defaultOpt.setValue("NONE");
 		emitterTad.getOption().add(defaultOpt);
+
 		StringBuilder sb = new StringBuilder();
 		for (final String emitterOption : emittersOptions) {
 			final Toption opt = new Toption();
@@ -315,7 +317,7 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 		final List<String> receiversOptions = Lists.newArrayList();
 
 		for (final String factoryPid : factoryPids) {
-			receiversOptions.addAll(WireUtil.getFactoriesAndInstances(this.m_ctx, factoryPid, WireReceiver.class));
+			receiversOptions.addAll(WireUtils.getFactoriesAndInstances(this.m_ctx, factoryPid, WireReceiver.class));
 		}
 
 		final Tad receiverTad = new Tad();
@@ -394,7 +396,7 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 		opt.setValue("NONE");
 		servicesTad.getOption().add(opt);
 
-		for (final String s : WireUtil.getEmittersAndReceivers(this.m_ctx)) {
+		for (final String s : WireUtils.getEmittersAndReceivers(this.m_ctx)) {
 			o = new Toption();
 			o.setLabel(s);
 			o.setValue(s);

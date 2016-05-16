@@ -33,7 +33,7 @@ public final class WireServiceOptions {
 	/** The Constant denoting the wires. */
 	public static final String CONF_WIRES = "wires";
 
-	/** The wire configurations. */
+	/** The list of wire configurations. */
 	private static List<WireConfiguration> m_wireConfigurations;
 
 	/**

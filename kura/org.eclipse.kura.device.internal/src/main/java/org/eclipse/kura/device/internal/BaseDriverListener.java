@@ -58,7 +58,7 @@ public final class BaseDriverListener implements DriverListener {
 			deviceRecord.setDeviceFlag(DeviceFlag.READ_SUCCESSFUL);
 			break;
 		case WRITE_SUCCESSFUL:
-			deviceRecord.setDeviceFlag(DeviceFlag.READ_SUCCESSFUL);
+			deviceRecord.setDeviceFlag(DeviceFlag.WRITE_SUCCESSFUL);
 			break;
 		case DRIVER_ERROR_UNSPECIFIED:
 			deviceRecord.setDeviceFlag(DeviceFlag.DEVICE_ERROR_UNSPECIFIED);

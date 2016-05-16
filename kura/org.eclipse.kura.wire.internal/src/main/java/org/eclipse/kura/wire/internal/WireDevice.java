@@ -15,6 +15,7 @@ package org.eclipse.kura.wire.internal;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -123,7 +124,7 @@ public final class WireDevice extends BaseDevice implements WireComponent, WireE
 			final WireField timestampWireField = new WireField("Timestamp",
 					new LongValue(deviceRecord.getTimetstamp()));
 			final WireField valueWireField = new WireField("Value", deviceRecord.getValue());
-			final WireRecord wireRecord = new WireRecord(new Date(),
+			final WireRecord wireRecord = new WireRecord(new Timestamp(new Date().getTime()),
 					Lists.newArrayList(channelWireField, deviceFlagWireField, timestampWireField, valueWireField));
 			wireRecords.add(wireRecord);
 		}
@@ -140,6 +141,8 @@ public final class WireDevice extends BaseDevice implements WireComponent, WireE
 	/** {@inheritDoc} */
 	@Override
 	public void onWireReceive(final WireEnvelope wireEnvelope) {
+		s_logger.debug("Wire Enveloped received..." + this.m_wireSupport);
+
 		final List<DeviceRecord> deviceRecordsToWriteChannels = Lists.newArrayList();
 		final List<String> channelsToRead = Lists.newArrayList();
 

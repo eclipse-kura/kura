@@ -34,10 +34,10 @@ import com.google.common.collect.Lists;
  * The Class WireUtil comprises all necessary utility methods of Kura Wires
  * Topology
  */
-public final class WireUtil {
+public final class WireUtils {
 
 	/** The Constant s_logger. */
-	private static final Logger s_logger = LoggerFactory.getLogger(WireUtil.class);
+	private static final Logger s_logger = LoggerFactory.getLogger(WireUtils.class);
 
 	/** Service Property */
 	private static final String SERVICE_PID_PROPERTY = "service.pid";
@@ -76,7 +76,7 @@ public final class WireUtil {
 	 * Gets the factories and instances.
 	 *
 	 * @param ctx
-	 *            the bundle context
+	 *            the service component context
 	 * @param factoryPid
 	 *            the factory pid
 	 * @param iface
@@ -190,9 +190,9 @@ public final class WireUtil {
 	}
 
 	/**
-	 * Instantiates a new wire util.
+	 * Instantiates a new wire utils.
 	 */
-	private WireUtil() {
+	private WireUtils() {
 		// Not needed because it is a utility class
 	}
 

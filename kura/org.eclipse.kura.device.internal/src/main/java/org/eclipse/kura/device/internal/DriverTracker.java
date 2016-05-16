@@ -70,7 +70,9 @@ public final class DriverTracker extends ServiceTracker<Object, Object> {
 
 		if ((service instanceof Driver) && reference.getProperty(DRIVER_ID_PROPERTY).equals(this.m_driverId)) {
 			s_logger.info("Driver has been found by the driver tracker....==> adding service");
-			this.m_device.m_driver = (Driver) service;
+			if (service instanceof Driver) {
+				this.m_device.m_driver = (Driver) service;
+			}
 		}
 		return service;
 	}
@@ -85,7 +87,9 @@ public final class DriverTracker extends ServiceTracker<Object, Object> {
 			for (final ServiceReference<Driver> ref : driverRefs) {
 				if (ref.getProperty(DRIVER_ID_PROPERTY).equals(this.m_driverId)) {
 					s_logger.info("Driver has been found by the driver tracker....==> open");
-					this.m_device.m_driver = this.context.getService(ref);
+					if (ref instanceof Driver) {
+						this.m_device.m_driver = this.context.getService(ref);
+					}
 				}
 			}
 		} catch (final InvalidSyntaxException e) {

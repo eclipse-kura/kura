@@ -107,7 +107,7 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Conf
 	/** {@inheritDoc} */
 	@Override
 	public synchronized void onWireReceive(final WireEnvelope wireEvelope) {
-		s_logger.error("wireEnvelope received!");
+		s_logger.debug("Wire Enveloped received..." + this.m_wireSupport);
 		// FIXME: add implementation
 	}
 

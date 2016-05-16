@@ -35,11 +35,11 @@ import org.eclipse.kura.net.NetInterfaceConfig;
 import org.eclipse.kura.net.NetInterfaceStatus;
 import org.eclipse.kura.net.NetInterfaceType;
 import org.eclipse.kura.net.admin.visitor.linux.util.KuranetConfig;
-import org.eclipse.kura.net.admin.visitor.linux.util.WifiVisitorUtil;
 import org.eclipse.kura.net.admin.visitor.linux.util.WpaSupplicantUtil;
 import org.eclipse.kura.net.wifi.WifiCiphers;
 import org.eclipse.kura.net.wifi.WifiConfig;
 import org.eclipse.kura.net.wifi.WifiMode;
+import org.eclipse.kura.net.wifi.WifiPassword;
 import org.eclipse.kura.net.wifi.WifiSecurity;
 import org.osgi.framework.FrameworkUtil;
 import org.slf4j.Logger;
@@ -205,6 +205,7 @@ public class WpaSupplicantConfigWriter implements NetworkConfigurationVisitor {
             throw KuraException.internalError(e);
         }
 		if (wifiConfig.getSecurity() == WifiSecurity.SECURITY_WEP) {
+			s_logger.warn("<IAB> generateWpaSupplicantConf() :: wifiConfig={}", wifiConfig);
 			File outputFile = new File(configFile);
 			
 			String fileAsString = null;
@@ -232,9 +233,10 @@ public class WpaSupplicantConfigWriter implements NetworkConfigurationVisitor {
 			}
 			
 			// validate passkey but add it to snapshot and not to configuration file
-			wifiConfig.getPasskey().validate(wifiConfig.getSecurity());
+			((WifiPassword)wifiConfig.getPasskey()).validate(wifiConfig.getSecurity());
 			fileAsString = fileAsString.replaceFirst("KURA_WEP_KEY", "");
-			WifiVisitorUtil.setPassphrase(wifiConfig.getPasskey().toString(), interfaceName, WifiMode.INFRA);
+			// TODO - <IAB> comment out for now
+			//WifiVisitorUtil.setPassphrase(wifiConfig.getPasskey().toString(), interfaceName, WifiMode.INFRA);
 			
 			if (wifiConfig.getBgscan() != null) {
 				fileAsString = fileAsString.replaceFirst("KURA_BGSCAN",
@@ -282,9 +284,10 @@ public class WpaSupplicantConfigWriter implements NetworkConfigurationVisitor {
 			}
 			
 			// validate passkey but add it to snapshot and not to configuration file
-			wifiConfig.getPasskey().validate(wifiConfig.getSecurity());
+			((WifiPassword)wifiConfig.getPasskey()).validate(wifiConfig.getSecurity());
 			fileAsString = fileAsString.replaceFirst("KURA_PASSPHRASE", "");
-			WifiVisitorUtil.setPassphrase(wifiConfig.getPasskey().toString(), interfaceName, WifiMode.INFRA);
+			// TODO - <IAB> comment out for now
+			//WifiVisitorUtil.setPassphrase(wifiConfig.getPasskey().toString(), interfaceName, WifiMode.INFRA);
 						
 			if(wifiConfig.getSecurity() == WifiSecurity.SECURITY_WPA) {
 				fileAsString = fileAsString.replaceFirst("KURA_PROTO", "WPA");

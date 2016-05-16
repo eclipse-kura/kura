@@ -271,7 +271,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 	public ComponentConfiguration getComponentConfiguration(String pid) throws KuraException {
 		ComponentConfiguration cc = null;
 		if (!m_selfConfigComponents.contains(pid)) {
-			cc = privGetConfigurableComponentConfiguration(pid);
+			cc = getConfigurableComponentConfiguration(pid);
 		} else {
 			cc = getSelfConfiguringComponentConfiguration(pid);
 		}
@@ -282,12 +282,16 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 	}
 	
 	@Override
-	public ComponentConfiguration getConfigurableComponentConfiguration(String pid) throws KuraException {
-		ComponentConfiguration cc = privGetConfigurableComponentConfiguration(pid);
-		if(cc != null && cc.getConfigurationProperties() != null){
-			decryptPasswords(cc);
+	public Map<String, Object> getConfigurableComponentConfigurationProperties(String pid) throws KuraException {
+		s_logger.warn("<IAB> [+] getConfigurableComponentConfigurationProperties()");
+		Map<String, Object> props = null;
+		ComponentConfiguration cc = getConfigurableComponentConfiguration(pid);
+		if(cc != null) {
+			s_logger.warn("<IAB> [1] getConfigurableComponentConfigurationProperties()");
+			props = cc.getConfigurationProperties();
 		}
-		return cc;
+		s_logger.warn("<IAB> [-] getConfigurableComponentConfigurationProperties()");
+		return props;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -540,7 +544,6 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 				}
 			}
 		}
-
 		return configProperties;
 	}
 
@@ -722,7 +725,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 		}
 	}
 
-	private ComponentConfiguration privGetConfigurableComponentConfiguration(String pid) {
+	private ComponentConfiguration getConfigurableComponentConfiguration(String pid) {
 		ComponentConfiguration cc = null;
 		try {
 
@@ -1204,7 +1207,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 
 			if (!isConfigToUpdate) {
 				if (!m_selfConfigComponents.contains(pid)) {
-					cc = privGetConfigurableComponentConfiguration(pid);
+					cc = getConfigurableComponentConfiguration(pid);
 				} else {
 					cc = getSelfConfiguringComponentConfiguration(pid);
 				}

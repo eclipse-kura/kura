@@ -40,7 +40,7 @@ public class WifiConfig implements NetConfig {
 	private WifiCiphers m_groupCiphers;
 	
 	/** The passkey for the wifi interface **/
-	private WifiPassword m_passkey;
+	private Password m_passkey;
 	
 	/** The hardware mode **/
 	private String m_hwMode;
@@ -138,12 +138,12 @@ public class WifiConfig implements NetConfig {
 		this.m_groupCiphers = group;
 	}
 	
-	public WifiPassword getPasskey() {
+	public Password getPasskey() {
 		return this.m_passkey;
 	}
 	
 	public void setPasskey(String key) {
-		WifiPassword psswd= new WifiPassword(key);
+		Password psswd= new WifiPassword(key);
 		this.m_passkey = psswd;
 	}
 	

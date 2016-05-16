@@ -756,7 +756,8 @@ public class NetworkConfiguration {
 		if(wifiConfig != null && psswd != null) {
 			properties.put(prefix+".passphrase", psswd);
 		} else {
-			properties.put(prefix+".passphrase", "");
+			s_logger.warn("<IAB> ### addWifiConfigIP4Properties() :: new WifiPassword('')");
+			properties.put(prefix+".passphrase", new WifiPassword("")); // <IAB>
 		}
 		if(wifiConfig != null && wifiConfig.getHardwareMode() != null) {
 			properties.put(prefix+".hardwareMode", wifiConfig.getHardwareMode());

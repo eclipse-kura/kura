@@ -20,6 +20,7 @@ import java.io.PrintWriter;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.core.linux.util.LinuxProcessUtil;
 import org.eclipse.kura.linux.net.util.KuraConstants;
 import org.eclipse.kura.linux.net.util.LinuxNetworkUtil;
@@ -38,7 +39,7 @@ public class WpaSupplicantManager {
 	
 	private static String m_driver = null;
 
-	public static void start(String interfaceName, String driver, WifiPassword passkey, WifiSecurity wifiSecurity) throws KuraException {
+	public static void start(String interfaceName, String driver, Password passkey, WifiSecurity wifiSecurity) throws KuraException {
 		start (interfaceName, driver, generateSupplicantConfigFile(interfaceName, passkey, wifiSecurity));
 	}
 
@@ -73,6 +74,7 @@ public class WpaSupplicantManager {
 			s_logger.error("Exception while enabling WPA Supplicant!", e);
 			throw KuraException.internalError(e);
 		} finally {
+			/* TODO - <IAB> comment out for now
 			if (!OS_VERSION.equals(KuraConstants.Intel_Edison.getImageName() + "_" + KuraConstants.Intel_Edison.getImageVersion() + "_" + KuraConstants.Intel_Edison.getTargetName())) {
 				// delete temporary wpa_supplicant.conf that contains passkey
 				File tmpHostapdConfigFile = new File(privGetWpaSupplicantConfigFilename(interfaceName));
@@ -80,6 +82,7 @@ public class WpaSupplicantManager {
 					tmpHostapdConfigFile.delete();
 				}
 			}
+			*/
 		}
 	}
 
@@ -208,7 +211,7 @@ public class WpaSupplicantManager {
 		return sb.toString();
 	}
 	
-	private static File generateSupplicantConfigFile(String ifaceName, WifiPassword passkey, WifiSecurity wifiSecurity) throws KuraException {
+	private static File generateSupplicantConfigFile(String ifaceName, Password passkey, WifiSecurity wifiSecurity) throws KuraException {
 		File retConfigFile = new File(privGetWpaSupplicantConfigFilename(ifaceName));
 		File configFile = new File(getWpaSupplicantConfigFilename(ifaceName));
 		if(!configFile.exists()) {
@@ -226,7 +229,7 @@ public class WpaSupplicantManager {
             	   if (line.startsWith("wep_key") || line.startsWith("psk")) {
             		   int ind = line.indexOf('=');
             		   if (ind > 0) {
-            			   passkey.validate(wifiSecurity);
+            			   ((WifiPassword)passkey).validate(wifiSecurity);
             			   pw.println(line.substring(0, ind+1).concat(passkey.toString()));
             		   }
             	   } else {

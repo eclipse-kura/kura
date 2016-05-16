@@ -21,6 +21,7 @@ import java.util.Map;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.core.net.util.NetworkUtil;
 import org.eclipse.kura.core.util.NetUtil;
 import org.eclipse.kura.net.IP4Address;
@@ -61,7 +62,6 @@ import org.eclipse.kura.net.wifi.WifiConfig;
 import org.eclipse.kura.net.wifi.WifiHotspotInfo;
 import org.eclipse.kura.net.wifi.WifiInterfaceAddressConfig;
 import org.eclipse.kura.net.wifi.WifiMode;
-import org.eclipse.kura.net.wifi.WifiPassword;
 import org.eclipse.kura.net.wifi.WifiRadioMode;
 import org.eclipse.kura.net.wifi.WifiSecurity;
 import org.eclipse.kura.system.SystemService;
@@ -412,7 +412,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 									gwtWifiConfig.setIgnoreSSID(wifiConfig.ignoreSSID());
 
 									// passkey
-									WifiPassword psswd= wifiConfig.getPasskey();
+									Password psswd= wifiConfig.getPasskey();
 									String password= new String(psswd.getPassword());
 									gwtWifiConfig.setPassword(password);
 

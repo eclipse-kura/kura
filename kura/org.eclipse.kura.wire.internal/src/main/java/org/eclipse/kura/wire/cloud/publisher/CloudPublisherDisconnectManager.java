@@ -12,12 +12,13 @@
  */
 package org.eclipse.kura.wire.cloud.publisher;
 
-import static com.google.common.base.Preconditions.checkArgument;
+import static org.eclipse.kura.device.internal.DevicePreconditions.checkCondition;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.data.DataService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,8 +53,12 @@ public final class CloudPublisherDisconnectManager {
 	 *            the data service
 	 * @param quieceTimeout
 	 *            the quiece timeout
+	 * @throws KuraRuntimeException
+	 *             if data service dependency is null
 	 */
 	public CloudPublisherDisconnectManager(final DataService dataService, final long quieceTimeout) {
+		checkCondition(dataService == null, "Data Service cannot be null");
+
 		this.m_dataService = dataService;
 		this.m_quieceTimeout = quieceTimeout;
 		this.m_nextExecutionTime = 0;
@@ -65,11 +70,11 @@ public final class CloudPublisherDisconnectManager {
 	 *
 	 * @param minutes
 	 *            the minutes
-	 * @throws IllegalArgumentException
+	 * @throws KuraRuntimeException
 	 *             if argument passed is negative
 	 */
 	public synchronized void disconnectInMinutes(final int minutes) {
-		checkArgument(minutes < 0);
+		checkCondition(minutes < 0, "Minutes cannot be null");
 		// check if the required timeout is longer than the scheduled one
 		final long remainingDelay = this.m_nextExecutionTime - System.currentTimeMillis();
 		final long requiredDelay = (long) minutes * 60 * 1000;
@@ -92,11 +97,11 @@ public final class CloudPublisherDisconnectManager {
 	 *
 	 * @param delay
 	 *            the delay
-	 * @throws IllegalArgumentException
+	 * @throws KuraRuntimeException
 	 *             if delay provided is negative
 	 */
 	private void schedule(final long delay) {
-		checkArgument(delay < 0);
+		checkCondition(delay < 0, "Delay cannot be negative");
 
 		// cancel existing timer
 		if (this.m_executorService != null) {
@@ -108,13 +113,12 @@ public final class CloudPublisherDisconnectManager {
 			public void run() {
 				// disconnect
 				try {
-					CloudPublisherDisconnectManager.this.m_dataService
-							.disconnect(CloudPublisherDisconnectManager.this.m_quieceTimeout);
+					m_dataService.disconnect(CloudPublisherDisconnectManager.this.m_quieceTimeout);
 				} catch (final Exception e) {
 					s_logger.warn("Error while disconnecting cloud publisher..." + Throwables.getRootCause(e));
 				}
 				// cleaning up
-				CloudPublisherDisconnectManager.this.m_nextExecutionTime = 0;
+				m_nextExecutionTime = 0;
 			}
 		}, delay, TimeUnit.MILLISECONDS);
 

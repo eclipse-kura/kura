@@ -12,7 +12,7 @@
  */
 package org.eclipse.kura.wire.internal;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static org.eclipse.kura.device.internal.DevicePreconditions.checkCondition;
 
 import java.util.HashMap;
 import java.util.List;
@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.configuration.SelfConfiguringComponent;
@@ -106,7 +107,7 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 	 *             the component exception
 	 */
 	protected synchronized void activate(final ComponentContext componentContext, final Map<String, Object> properties)
-			throws ComponentException {
+			throws Exception {
 		s_logger.info("Activating Wire Service...");
 
 		this.m_ctx = componentContext;
@@ -121,13 +122,11 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 			this.m_serviceTracker.open();
 
 			this.createWires();
-		} catch (final JSONException jsone) {
-			throw new ComponentException(jsone);
-		} catch (final InvalidSyntaxException e) {
-			s_logger.error(Throwables.getStackTraceAsString(e));
+		} catch (final Throwable throwable) {
+			Throwables.propagateIfInstanceOf(throwable, JSONException.class);
+			s_logger.error(Throwables.getStackTraceAsString(throwable));
 		}
 		s_logger.info("Activating Wire Service...Done");
-
 	}
 
 	/**
@@ -138,12 +137,12 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 	 * @param name
 	 *            the name
 	 * @return the string
-	 * @throws NullPointerException
+	 * @throws KuraRuntimeException
 	 *             if any of the provided argument is null
 	 */
 	private String createComponentFromProperty(final String value, final String name) {
-		checkNotNull(value);
-		checkNotNull(name);
+		checkCondition(value == null, "Value cannot be null");
+		checkCondition(name == null, "Name cannot be null");
 
 		final String[] tokens = value.split("\\|");
 		if ("FACTORY".equals(tokens[0])) {
@@ -161,9 +160,14 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 	 * @param receiverName
 	 *            the wire receiver name
 	 * @return the wire
+	 * @throws KuraRuntimeException
+	 *             if any of the arguments is null
 	 */
 	@Override
 	public Wire createWire(final String emitterName, final String receiverName) {
+		checkCondition(emitterName == null, "Emitter name cannot be null");
+		checkCondition(receiverName == null, "Receiver name cannot be null");
+
 		s_logger.info("Creating wire between..." + emitterName + " and " + receiverName + ".....");
 		final WireConfiguration conf = new WireConfiguration(emitterName, receiverName, null);
 		this.m_wireConfig.add(conf);
@@ -177,11 +181,16 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 	 * @param factoryPid
 	 *            the factory pid
 	 * @param name
-	 *            the name
+	 *            the wire component name
 	 * @return the pid of the wire component
+	 * @throws KuraRuntimeException
+	 *             if any of the arguments is null
 	 */
 	@Override
 	public String createWireComponent(final String factoryPid, final String name) {
+		checkCondition(factoryPid == null, "Factory PID cannot be null");
+		checkCondition(name == null, "Wire Component name cannot be null");
+
 		s_logger.info("Creating wire component of " + name + ".....");
 		String newPid = null;
 		try {
@@ -450,12 +459,12 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 	 * @param receiver
 	 *            the wire receiver
 	 * @return the wire configuration
-	 * @throws NullPointerException
+	 * @throws KuraRuntimeException
 	 *             if any of the provided arguments is null
 	 */
 	private WireConfiguration getWireConfiguration(final String emitter, final String receiver) {
-		checkNotNull(emitter);
-		checkNotNull(receiver);
+		checkCondition(emitter == null, "Emitter name cannot be null");
+		checkCondition(receiver == null, "Receiver name cannot be null");
 
 		for (final WireConfiguration wc : this.m_wireConfig) {
 			if (wc.getEmitterName().equals(emitter) && wc.getReceiverName().equals(receiver)) {
@@ -502,8 +511,12 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 	 * @param pid
 	 *            the wire component pid
 	 * @return true, if successful
+	 * @throws KuraRuntimeException
+	 *             if argument is null
 	 */
 	private boolean removePidRelatedWires(final String pid) {
+		checkCondition(pid == null, "Factory PID cannot be null");
+
 		boolean atLeatOneRemoved = false;
 		final WireConfiguration[] copy = FluentIterable.from(this.m_wireConfig).toArray(WireConfiguration.class);
 		for (final WireConfiguration wc : copy) {
@@ -524,13 +537,13 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 	 * @param receiverPid
 	 *            the receiver pid
 	 * @return true, if successful
-	 * @throws NullPointerException
+	 * @throws KuraRuntimeException
 	 *             if any of the provided arguments is null
 	 */
 	@Override
 	public boolean removeWire(final String emitterPid, final String receiverPid) {
-		checkNotNull(emitterPid);
-		checkNotNull(receiverPid);
+		checkCondition(emitterPid == null, "Emitter name cannot be null");
+		checkCondition(receiverPid == null, "Receiver name cannot be null");
 
 		s_logger.info("Removing Wires..");
 		try {
@@ -567,9 +580,13 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 	 * @param pid
 	 *            the pid
 	 * @return true, if successful
+	 * @throws KuraRuntimeException
+	 *             if argument is null
 	 */
 	@Override
 	public boolean removeWireComponent(final String pid) {
+		checkCondition(pid == null, "Wire Component PID cannot be null");
+
 		s_logger.info("Removing Wire Component..");
 		// Search for wires using the pid we are going to delete
 		this.removePidRelatedWires(pid);
@@ -700,12 +717,12 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 	 *            the old emitter name
 	 * @param oldReceiverName
 	 *            the old receiver name
-	 * @throws NullPointerException
+	 * @throws KuraRuntimeException
 	 *             if any of the provided arguments is null
 	 */
 	private void updatePidNamesInList(final String oldEmitterName, final String oldReceiverName) {
-		checkNotNull(oldEmitterName);
-		checkNotNull(oldReceiverName);
+		checkCondition(oldEmitterName == null, "Emitter name cannot be null");
+		checkCondition(oldReceiverName == null, "Receiver name cannot be null");
 
 		final String newEmitter = this.m_configService.getCurrentComponentPid(oldEmitterName);
 		final String newReceiver = this.m_configService.getCurrentComponentPid(oldReceiverName);
@@ -732,12 +749,12 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 	 * @param receiver
 	 *            the wire receiver name
 	 * @return true, if successful
-	 * @throws NullPointerException
+	 * @throws KuraRuntimeException
 	 *             if any of the provided arguments is null
 	 */
 	private boolean wireAlreadyCreated(final String emitter, final String receiver) {
-		checkNotNull(emitter);
-		checkNotNull(receiver);
+		checkCondition(emitter == null, "Emitter name cannot be null");
+		checkCondition(receiver == null, "Receiver name cannot be null");
 
 		for (final WireConfiguration wc : this.m_wireConfig) {
 			if (wc.getEmitterName().equals(emitter) && wc.getReceiverName().equals(receiver) && wc.isCreated()) {

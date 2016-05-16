@@ -14,6 +14,8 @@ package org.eclipse.kura.wire;
 
 import java.util.List;
 
+import org.eclipse.kura.KuraRuntimeException;
+
 /**
  * A wire Component interface responsible for publishing the provided wire
  * records to the configured cloud platform
@@ -26,7 +28,9 @@ public interface CloudPublisher {
 	 *
 	 * @param wireRecords
 	 *            the wire records to be published
+	 * @throws KuraRuntimeException
+	 *             if argument is null or empty
 	 */
-	public void publish(List<WireRecord> wireRecords);
+	public void publish(List<WireRecord> wireRecords) throws KuraRuntimeException;
 
 }

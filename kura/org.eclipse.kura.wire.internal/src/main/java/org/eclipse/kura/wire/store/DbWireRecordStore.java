@@ -12,7 +12,7 @@
  */
 package org.eclipse.kura.wire.store;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static org.eclipse.kura.device.internal.DevicePreconditions.checkCondition;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.db.DbService;
 import org.eclipse.kura.type.BooleanValue;
@@ -183,7 +184,6 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
 	 */
 	protected synchronized void deactivate(final ComponentContext componentContext) {
 		s_logger.info("Deactivating DB Wire Record Store...");
-
 		// no need to release the cloud clients as the updated application
 		// certificate is already published due the missing dependency
 		// we only need to empty our CloudClient list
@@ -203,8 +203,11 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
 	 * @param string
 	 *            the string to be filtered
 	 * @return the escaped string
+	 * @throws KuraRuntimeException
+	 *             if argument is null
 	 */
 	private String escapeSql(final String string) {
+		checkCondition(string == null, "Provided String cannot be null");
 		// ' --> ''
 		String escapedString = string.replaceAll("'", "''");
 		// " --> ""
@@ -223,8 +226,13 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
 	 *            the params extra parameters needed for the query
 	 * @throws SQLException
 	 *             the SQL exception
+	 * @throws KuraRuntimeException
+	 *             if any of the arguments is null
 	 */
 	private synchronized void execute(final String sql, final Integer... params) throws SQLException {
+		checkCondition(sql == null, "SQL query cannot be null");
+		checkCondition(params == null, "Extra Parameters cannot be null");
+
 		Connection conn = null;
 		PreparedStatement stmt = null;
 		try {
@@ -235,9 +243,9 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
 			}
 			stmt.execute();
 			conn.commit();
-		} catch (final SQLException e) {
+		} catch (final Exception e) {
 			this.rollback(conn);
-			throw e;
+			Throwables.propagateIfInstanceOf(e, SQLException.class);
 		} finally {
 			this.close(stmt);
 			this.close(conn);
@@ -247,7 +255,7 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
 	/**
 	 * Gets the connection.
 	 *
-	 * @return the connection
+	 * @return the connection instance
 	 * @throws SQLException
 	 *             the SQL exception
 	 */
@@ -279,12 +287,12 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
 	 *            the wire record
 	 * @throws SQLException
 	 *             the SQL exception
-	 * @throws NullPointerException
+	 * @throws KuraRuntimeException
 	 *             if any of the provided argument is null
 	 */
 	private void insertDataRecord(final String tableName, final WireRecord wireRecord) throws SQLException {
-		checkNotNull(tableName);
-		checkNotNull(wireRecord);
+		checkCondition(tableName == null, "Table name cannot be null");
+		checkCondition(wireRecord == null, "Wire Record cannot be null");
 
 		final String sqlTableName = this.escapeSql(tableName);
 		final StringBuilder sbCols = new StringBuilder();
@@ -359,6 +367,7 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
 	/** {@inheritDoc} */
 	@Override
 	public synchronized void onWireReceive(final WireEnvelope wireEvelope) {
+		checkCondition(wireEvelope == null, "Wire envelope cannot be null");
 		s_logger.debug("Wire Enveloped received..." + this.m_wireSupport);
 
 		final List<WireRecord> dataRecords = wireEvelope.getRecords();
@@ -390,12 +399,12 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
 	 *            the data record
 	 * @throws SQLException
 	 *             the SQL exception
-	 * @throws NullPointerException
-	 *             if any of the provided argument is null
+	 * @throws KuraRuntimeException
+	 *             if any of the provided arguments is null
 	 */
 	private void reconcileColumns(final String tableName, final WireRecord wireRecord) throws SQLException {
-		checkNotNull(tableName);
-		checkNotNull(wireRecord);
+		checkCondition(tableName == null, "Table name cannot be null");
+		checkCondition(wireRecord == null, "Wire Record cannot be null");
 
 		final String sqlTableName = this.escapeSql(tableName);
 		Connection conn = null;
@@ -446,11 +455,11 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
 	 *            the table name
 	 * @throws SQLException
 	 *             the SQL exception
-	 * @throws NullPointerException
+	 * @throws KuraRuntimeException
 	 *             if the provided argument is null
 	 */
 	private void reconcileTable(final String tableName) throws SQLException {
-		checkNotNull(tableName);
+		checkCondition(tableName == null, "Table name cannot be null");
 
 		final String sqlTableName = this.escapeSql(tableName);
 		final Connection conn = this.getConnection();
@@ -471,7 +480,7 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
 	}
 
 	/**
-	 * Rollback.
+	 * Rollback the connection
 	 *
 	 * @param conn
 	 *            the connection instance
@@ -492,18 +501,21 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
 
 	/** {@inheritDoc} */
 	@Override
-	public void storeWireRecord(final String tableName, final WireRecord dataRecord) {
+	public void storeWireRecord(final String tableName, final WireRecord wireRecord) {
+		checkCondition(tableName == null, "Table name cannot be null");
+		checkCondition(wireRecord == null, "Wire Record cannot be null");
+
 		boolean inserted = false;
 		int retryCount = 0;
 		do {
 			try {
 				// store the record
-				this.insertDataRecord(tableName, dataRecord);
+				this.insertDataRecord(tableName, wireRecord);
 				inserted = true;
 			} catch (final SQLException e) {
 				try {
 					this.reconcileTable(tableName);
-					this.reconcileColumns(tableName, dataRecord);
+					this.reconcileColumns(tableName, wireRecord);
 					retryCount++;
 				} catch (final SQLException ee) {
 					s_logger.error("Cannot reconcile the database...", Throwables.getStackTraceAsString(ee));
@@ -513,25 +525,23 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
 	}
 
 	/**
-	 * Unset db service.
+	 * Unset DB service.
 	 *
 	 * @param dataService
-	 *            the data service
+	 *            the DB service
 	 */
 	public synchronized void unsetDbService(final DbService dataService) {
 		this.m_dbService = null;
 	}
 
 	/**
-	 * Updated.
+	 * OSGi Service Component callback for updation
 	 *
 	 * @param properties
-	 *            the properties
+	 *            the updated service component properties
 	 */
 	public void updated(final Map<String, Object> properties) {
 		s_logger.info("updated...: " + properties);
-
-		// Update properties
 		this.m_options = new DbWireRecordStoreOptions(properties);
 	}
 

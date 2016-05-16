@@ -12,12 +12,13 @@
  */
 package org.eclipse.kura.device.cloudlet;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static org.eclipse.kura.device.internal.DevicePreconditions.checkCondition;
 
 import java.util.List;
 import java.util.Map;
 
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.cloud.CloudClient;
 import org.eclipse.kura.cloud.CloudService;
 import org.eclipse.kura.cloud.Cloudlet;
@@ -292,13 +293,13 @@ public final class DeviceCloudlet extends Cloudlet {
 	 *            the value to wrap
 	 * @param userType
 	 *            the type to use
-	 * @throws NullPointerException
+	 * @throws KuraRuntimeException
 	 *             if the any of the provided arguments is null
 	 */
 	private void wrapValue(final DeviceRecord deviceRecord, final String userValue, final String userType) {
-		checkNotNull(deviceRecord);
-		checkNotNull(userValue);
-		checkNotNull(userType);
+		checkCondition(deviceRecord == null, "Device Record cannot be null");
+		checkCondition(userValue == null, "User Provided Value cannot be null");
+		checkCondition(userType == null, "User Provided Type cannot be null");
 
 		TypedValue<?> value = null;
 

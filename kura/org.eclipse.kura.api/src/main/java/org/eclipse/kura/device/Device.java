@@ -53,6 +53,8 @@ public interface Device {
 	 *             in the thrown {@link KuraException}. For any other internal
 	 *             exception, the error code
 	 *             {@code KuraErrorCode#INTERNAL_ERROR} will be set.
+	 * @throws KuraRuntimeException
+	 *             if argument is null or empty
 	 * @return the list of device records which comprises the currently read
 	 *         value in case of success or the reason of failure
 	 */
@@ -79,6 +81,8 @@ public interface Device {
 	 *             needs to be set in the thrown {@link KuraException}. For any
 	 *             other internal exception, then error code
 	 *             {@code KuraErrorCode#INTERNAL_ERROR} will be set.
+	 * @throws KuraRuntimeException
+	 *             if any of the arguments is null
 	 */
 	public void registerDeviceListener(String channelName, DeviceListener deviceListener)
 			throws KuraRuntimeException, KuraException;
@@ -96,6 +100,8 @@ public interface Device {
 	 * @throws KuraException
 	 *             For any other internal exception, then error code
 	 *             {@code KuraErrorCode#INTERNAL_ERROR} will be set.
+	 * @throws KuraRuntimeException
+	 *             if argument is null
 	 */
 	public void unregisterDeviceListener(DeviceListener deviceListener) throws KuraRuntimeException, KuraException;
 
@@ -125,6 +131,8 @@ public interface Device {
 	 *             needs to be set in the thrown {@link KuraException}. For any
 	 *             other internal exception, then error code
 	 *             {@code KuraErrorCode#INTERNAL_ERROR} will be set.
+	 * @throws KuraRuntimeException
+	 *             if argument is null or empty
 	 * @return the list of device records which comprises the status of the
 	 *         write operations
 	 */

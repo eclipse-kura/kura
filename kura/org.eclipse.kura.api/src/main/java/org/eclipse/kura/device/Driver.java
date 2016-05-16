@@ -96,6 +96,8 @@ public interface Driver {
 	 *             needs to be set in the thrown {@link KuraException}. For any
 	 *             other internal exception, then error code
 	 *             {@code KuraErrorCode#INTERNAL_ERROR} will be set.
+	 * @throws KuraRuntimeException
+	 *             if argument is null or empty
 	 */
 	public void read(List<DriverRecord> records) throws KuraRuntimeException, KuraException;
 
@@ -119,6 +121,8 @@ public interface Driver {
 	 *             needs to be set in the thrown {@link KuraException}. For any
 	 *             other internal exception, then error code
 	 *             {@code KuraErrorCode#INTERNAL_ERROR} will be set.
+	 * @throws KuraRuntimeException
+	 *             if any of the argument is null
 	 */
 	public void registerDriverListener(Map<String, Object> channelConfig, DriverListener listener)
 			throws KuraRuntimeException, KuraException;
@@ -141,6 +145,8 @@ public interface Driver {
 	 *             needs to be set in the thrown {@link KuraException}. For any
 	 *             other internal exception, then error code
 	 *             {@code KuraErrorCode#INTERNAL_ERROR} will be set.
+	 * @throws KuraRuntimeException
+	 *             if argument is null
 	 */
 	public void unregisterDriverListener(DriverListener listener) throws KuraRuntimeException, KuraException;
 
@@ -169,6 +175,8 @@ public interface Driver {
 	 *             needs to be set in the thrown {@link KuraException}. For any
 	 *             other internal exception, then error code
 	 *             {@code KuraErrorCode#INTERNAL_ERROR} will be set.
+	 * @throws KuraRuntimeException
+	 *             if argument is null or empty
 	 */
 	public void write(List<DriverRecord> records) throws KuraRuntimeException, KuraException;
 

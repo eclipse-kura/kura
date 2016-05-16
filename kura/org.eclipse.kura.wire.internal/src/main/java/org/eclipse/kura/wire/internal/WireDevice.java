@@ -12,8 +12,7 @@
  */
 package org.eclipse.kura.wire.internal;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
+import static org.eclipse.kura.device.internal.DevicePreconditions.checkCondition;
 
 import java.sql.Timestamp;
 import java.util.Date;
@@ -21,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.device.Channel;
 import org.eclipse.kura.device.DeviceRecord;
 import org.eclipse.kura.device.internal.BaseDevice;
@@ -105,14 +105,12 @@ public final class WireDevice extends BaseDevice implements WireComponent, WireE
 	 * @param recentlyReadRecords
 	 *            the list of device records conforming to the aforementioned
 	 *            specification
-	 * @throws NullPointerException
-	 *             if provided records list is null
-	 * @throws IllegalArgumentException
-	 *             if the provided list is empty or null
+	 * @throws KuraRuntimeException
+	 *             if provided records list is null or it is empty
 	 */
 	private void emitDeviceRecords(final List<DeviceRecord> deviceRecords) {
-		checkArgument(deviceRecords.isEmpty());
-		checkNotNull(deviceRecords);
+		checkCondition(deviceRecords == null, "Device records cannot be null");
+		checkCondition(deviceRecords.isEmpty(), "Device records cannot be empty");
 
 		final List<WireRecord> wireRecords = Lists.newArrayList();
 
@@ -141,6 +139,7 @@ public final class WireDevice extends BaseDevice implements WireComponent, WireE
 	/** {@inheritDoc} */
 	@Override
 	public void onWireReceive(final WireEnvelope wireEnvelope) {
+		checkCondition(wireEnvelope == null, "Wire Envelope cannot be null");
 		s_logger.debug("Wire Enveloped received..." + this.m_wireSupport);
 
 		final List<DeviceRecord> deviceRecordsToWriteChannels = Lists.newArrayList();
@@ -195,12 +194,12 @@ public final class WireDevice extends BaseDevice implements WireComponent, WireE
 	 * @param channel
 	 *            the channel to get the values from
 	 * @return the device record
-	 * @throws NullPointerException
+	 * @throws KuraRuntimeException
 	 *             if any of the provided arguments is null
 	 */
 	private DeviceRecord prepareDeviceRecord(final Channel channel, final TypedValue<?> value) {
-		checkNotNull(channel);
-		checkNotNull(value);
+		checkCondition(channel == null, "Channel cannot be null");
+		checkCondition(value == null, "Value cannot be null");
 
 		final DeviceRecord deviceRecord = new DeviceRecord();
 		deviceRecord.setChannelName(channel.getName());

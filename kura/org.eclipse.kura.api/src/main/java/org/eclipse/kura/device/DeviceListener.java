@@ -12,6 +12,8 @@
  */
 package org.eclipse.kura.device;
 
+import org.eclipse.kura.KuraRuntimeException;
+
 /**
  * The listener interface is mainly for receiving device events. The class that
  * is interested in processing a device event implements this interface, and the
@@ -29,6 +31,8 @@ public interface DeviceListener {
 	 *
 	 * @param event
 	 *            the fired device event
+	 * @throws KuraRuntimeException
+	 *             if event is null
 	 */
 	public void onDeviceEvent(DeviceEvent event);
 

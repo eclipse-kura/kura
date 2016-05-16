@@ -12,6 +12,8 @@
  */
 package org.eclipse.kura.wire;
 
+import org.eclipse.kura.KuraRuntimeException;
+
 /**
  * The Interface WireRecordStore is responsible to store and manage wire records
  * in a dedicated record store
@@ -25,7 +27,9 @@ public interface WireRecordStore {
 	 *            the table name to which the wire record will be inserted
 	 * @param wireRecord
 	 *            the wire record to insert
+	 * @throws KuraRuntimeException
+	 *             if any of the arguments is null
 	 */
-	public void storeWireRecord(String tableName, WireRecord wireRecord);
+	public void storeWireRecord(String tableName, WireRecord wireRecord) throws KuraRuntimeException;
 
 }

@@ -12,17 +12,16 @@
  */
 package org.eclipse.kura.device.internal;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static org.eclipse.kura.device.internal.DeviceConfiguration.CHANNEL_PROPERTY_POSTFIX;
 import static org.eclipse.kura.device.internal.DeviceConfiguration.CHANNEL_PROPERTY_PREFIX;
 import static org.eclipse.kura.device.internal.DeviceConfiguration.DEVICE_DESC_PROP;
 import static org.eclipse.kura.device.internal.DeviceConfiguration.DEVICE_DRIVER_PROP;
 import static org.eclipse.kura.device.internal.DeviceConfiguration.DEVICE_ID_PROP;
+import static org.eclipse.kura.device.internal.DevicePreconditions.checkCondition;
 
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.configuration.ComponentConfiguration;
@@ -62,11 +61,6 @@ import com.google.common.util.concurrent.Monitor;
  * extend this class to conform to the kura device specifications.
  */
 public class BaseDevice implements Device, SelfConfiguringComponent {
-
-	/**
-	 * Exception message constant denoting the unavailability of driver
-	 */
-	private static final String EXCEPTION_MSG_DRIVER_NOT_AVAILABLE = "Driver not available";
 
 	/** The Logger instance. */
 	private static final Logger s_logger = LoggerFactory.getLogger(BaseDevice.class);
@@ -124,12 +118,12 @@ public class BaseDevice implements Device, SelfConfiguringComponent {
 	 *
 	 * @param driverId
 	 *            the identifier of the driver
-	 * @throws NullPointerException
+	 * @throws KuraRuntimeException
 	 *             if driver id provided is null
 	 */
 	private synchronized void attachDriver(final String driverId) {
 		s_logger.debug("Attaching driver instance...");
-		checkNotNull(driverId);
+		checkCondition(driverId == null, "Driver ID cannot be null");
 
 		try {
 			this.m_driverTracker = new DriverTracker(this.m_ctx.getBundleContext(), this, driverId);
@@ -148,12 +142,12 @@ public class BaseDevice implements Device, SelfConfiguringComponent {
 	 * @param prefix
 	 *            the prefix to be prepended
 	 * @return the new attribute definition
-	 * @throws NullPointerException
+	 * @throws KuraRuntimeException
 	 *             if any of the provided argument is null
 	 */
 	private Tad cloneAd(final Tad oldAd, final String prefix) {
-		checkNotNull(oldAd);
-		checkNotNull(prefix);
+		checkCondition(oldAd == null, "Old Attribute Definition cannot be null");
+		checkCondition(prefix == null, "Attribute Definition Prefix cannot be null");
 
 		final Tad result = new Tad();
 
@@ -184,17 +178,15 @@ public class BaseDevice implements Device, SelfConfiguringComponent {
 	 */
 	protected synchronized void deactivate(final ComponentContext componentContext) {
 		s_logger.debug("Deactivating Base Device...");
+		this.m_monitor.enter();
 		try {
-			this.m_monitor.enter();
-			try {
-				if (this.m_driver != null) {
-					this.m_driver.disconnect();
-				}
-			} finally {
-				this.m_monitor.leave();
+			if (this.m_driver != null) {
+				this.m_driver.disconnect();
 			}
 		} catch (final KuraException e) {
 			s_logger.error("Error in disconnecting driver..." + Throwables.getStackTraceAsString(e));
+		} finally {
+			this.m_monitor.leave();
 		}
 		this.m_driver = null;
 		s_logger.debug("Deactivating Base Device...Done");
@@ -280,6 +272,10 @@ public class BaseDevice implements Device, SelfConfiguringComponent {
 	/** {@inheritDoc} */
 	@Override
 	public List<DeviceRecord> read(final List<String> channelNames) throws KuraException {
+		checkCondition(channelNames.isEmpty() || (channelNames == null),
+				"List of channel names cannot be empty or null");
+		checkCondition(this.m_driver == null, "Driver cannot be null");
+
 		s_logger.debug("Reading device channels...");
 
 		final List<DeviceRecord> deviceRecords = Lists.newArrayList();
@@ -289,15 +285,11 @@ public class BaseDevice implements Device, SelfConfiguringComponent {
 
 		for (final String channelName : channelNames) {
 
-			if (!channels.containsKey(channelName)) {
-				throw new KuraRuntimeException(KuraErrorCode.INTERNAL_ERROR, "Channel not available");
-			}
+			checkCondition(!channels.containsKey(channelName), "Channel not available");
 
 			final Channel channel = channels.get(channelName);
-			if (!(channel.getType() == ChannelType.READ) || !(channel.getType() == ChannelType.READ_WRITE)) {
-				throw new KuraRuntimeException(KuraErrorCode.INTERNAL_ERROR,
-						"Channel type not within defined types (READ OR READ_WRITE) : " + channel);
-			}
+			checkCondition(!(channel.getType() == ChannelType.READ) || !(channel.getType() == ChannelType.READ_WRITE),
+					"Channel type not within defined types (READ OR READ_WRITE) : " + channel);
 
 			final DriverRecord driverRecord = new DriverRecord();
 			driverRecord.setChannelConfig(ImmutableMap.copyOf(channels.get(channelName).getConfig()));
@@ -306,9 +298,6 @@ public class BaseDevice implements Device, SelfConfiguringComponent {
 			driverRecords.add(driverRecord);
 		}
 
-		if (this.m_driver == null) {
-			throw new KuraRuntimeException(KuraErrorCode.INTERNAL_ERROR, EXCEPTION_MSG_DRIVER_NOT_AVAILABLE);
-		}
 		this.m_monitor.enter();
 		try {
 			this.m_driver.read(driverRecords);
@@ -348,6 +337,9 @@ public class BaseDevice implements Device, SelfConfiguringComponent {
 	@Override
 	public void registerDeviceListener(final String channelName, final DeviceListener deviceListener)
 			throws KuraException {
+		checkCondition(channelName == null, "Channel name cannot be null");
+		checkCondition(deviceListener == null, "Device Listener cannot be null");
+
 		s_logger.debug("Registering Device Listener for monitoring...");
 
 		Channel channel = null;
@@ -360,9 +352,8 @@ public class BaseDevice implements Device, SelfConfiguringComponent {
 		final DriverListener driverListener = new BaseDriverListener(deviceListener);
 
 		this.m_deviceListeners.put(deviceListener, driverListener);
-		if (this.m_driver == null) {
-			throw new KuraRuntimeException(KuraErrorCode.INTERNAL_ERROR, EXCEPTION_MSG_DRIVER_NOT_AVAILABLE);
-		}
+		checkCondition(this.m_driver == null, "Driver cannot be null");
+
 		this.m_monitor.enter();
 		try {
 			if (channel != null) {
@@ -397,11 +388,10 @@ public class BaseDevice implements Device, SelfConfiguringComponent {
 	/** {@inheritDoc} */
 	@Override
 	public void unregisterDeviceListener(final DeviceListener deviceListener) throws KuraException {
+		checkCondition(deviceListener == null, "Device Listener cannot be null");
 		s_logger.debug("Unregistering Device Listener...");
 
-		if (this.m_driver == null) {
-			throw new KuraRuntimeException(KuraErrorCode.INTERNAL_ERROR, EXCEPTION_MSG_DRIVER_NOT_AVAILABLE);
-		}
+		checkCondition(this.m_driver == null, "Driver cannot be null");
 		this.m_monitor.enter();
 		try {
 			this.m_driver.unregisterDriverListener(this.m_deviceListeners.get(deviceListener));
@@ -433,21 +423,17 @@ public class BaseDevice implements Device, SelfConfiguringComponent {
 	@Override
 	public List<DeviceRecord> write(final List<DeviceRecord> deviceRecords) throws KuraException {
 		s_logger.debug("Writing to channels...");
+		checkCondition((deviceRecords == null) || deviceRecords.isEmpty(), "Device Records cannot be null or empty");
 
 		final List<DriverRecord> driverRecords = Lists.newArrayList();
 
 		final Map<String, Channel> channels = this.m_deviceConfiguration.getChannels();
 		for (final DeviceRecord deviceRecord : deviceRecords) {
-
-			if (!channels.containsKey(deviceRecord.getChannelName())) {
-				throw new KuraRuntimeException(KuraErrorCode.INTERNAL_ERROR, "Channel not available");
-			}
+			checkCondition(!channels.containsKey(deviceRecord.getChannelName()), "Channel not available");
 
 			final Channel channel = channels.get(deviceRecord.getChannelName());
-			if (!(channel.getType() == ChannelType.WRITE) || !(channel.getType() == ChannelType.READ_WRITE)) {
-				throw new KuraRuntimeException(KuraErrorCode.INTERNAL_ERROR,
-						"Channel type not within defined types (WRITE OR READ_WRITE) : " + channel);
-			}
+			checkCondition(!(channel.getType() == ChannelType.WRITE) || !(channel.getType() == ChannelType.READ_WRITE),
+					"Channel type not within defined types (WRITE OR READ_WRITE) : " + channel);
 
 			final DriverRecord driverRecord = new DriverRecord();
 			driverRecord.setChannelConfig(ImmutableMap.copyOf(channel.getConfig()));
@@ -457,9 +443,7 @@ public class BaseDevice implements Device, SelfConfiguringComponent {
 			driverRecords.add(driverRecord);
 		}
 
-		if (this.m_driver == null) {
-			throw new KuraRuntimeException(KuraErrorCode.INTERNAL_ERROR, EXCEPTION_MSG_DRIVER_NOT_AVAILABLE);
-		}
+		checkCondition(this.m_driver == null, "Driver cannot be null");
 		this.m_monitor.enter();
 		try {
 			this.m_driver.write(driverRecords);

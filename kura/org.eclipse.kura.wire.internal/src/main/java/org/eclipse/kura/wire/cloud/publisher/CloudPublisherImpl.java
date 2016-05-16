@@ -12,12 +12,11 @@
  */
 package org.eclipse.kura.wire.cloud.publisher;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static org.eclipse.kura.device.internal.DevicePreconditions.checkCondition;
 
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.cloud.CloudClient;
@@ -122,11 +121,11 @@ public final class CloudPublisherImpl
 	 * @param wireRecord
 	 *            the wire record
 	 * @return the json instance
-	 * @throws NullPointerException
+	 * @throws KuraRuntimeException
 	 *             if the wire record provided is null
 	 */
 	private JSONObject buildJsonObject(final WireRecord wireRecord) {
-		checkNotNull(wireRecord);
+		checkCondition(wireRecord == null, "Wire Record cannot be null");
 
 		final JSONObject jsonObject = new JSONObject();
 		try {
@@ -183,11 +182,11 @@ public final class CloudPublisherImpl
 	 * @param wireRecord
 	 *            the wire record
 	 * @return the kura payload
-	 * @throws NullPointerException
+	 * @throws KuraRuntimeException
 	 *             if the wire record provided is null
 	 */
 	private KuraPayload buildKuraPayload(final WireRecord wireRecord) {
-		checkNotNull(wireRecord);
+		checkCondition(wireRecord == null, "Wire Record cannot be null");
 
 		final KuraPayload kuraPayload = new KuraPayload();
 
@@ -241,11 +240,11 @@ public final class CloudPublisherImpl
 	 * @param position
 	 *            the OSGi position instance
 	 * @return the kura position
-	 * @throws NullPointerException
+	 * @throws KuraRuntimeException
 	 *             if the position provided is null
 	 */
 	private KuraPosition buildKuraPosition(final Position position) {
-		checkNotNull(position);
+		checkCondition(position == null, "Position cannot be null");
 
 		final KuraPosition kuraPosition = new KuraPosition();
 		if (position.getLatitude() != null) {
@@ -274,11 +273,11 @@ public final class CloudPublisherImpl
 	 * @return the kura position
 	 * @throws JSONException
 	 *             if it encounters any JSON parsing specific error
-	 * @throws NullPointerException
+	 * @throws KuraRuntimeException
 	 *             if position provided is null
 	 */
 	private JSONObject buildKuraPositionForJson(final Position position) throws JSONException {
-		checkNotNull(position);
+		checkCondition(position == null, "Position cannot be null");
 
 		final JSONObject jsonObject = new JSONObject();
 		if (position.getLatitude() != null) {
@@ -419,15 +418,15 @@ public final class CloudPublisherImpl
 	/** {@inheritDoc} */
 	@Override
 	public void producersConnected(final Wire[] wires) {
+		checkCondition(wires == null, "Wires cannot be null");
 		this.m_wireSupport.producersConnected(wires);
 	}
 
 	/** {@inheritDoc} */
 	@Override
 	public void publish(final List<WireRecord> wireRecords) {
-		if (this.m_cloudClient == null) {
-			throw new KuraRuntimeException(KuraErrorCode.INTERNAL_ERROR, "CloudClient not available");
-		}
+		checkCondition(this.m_cloudClient == null, "Cloud Client cannot be null");
+		checkCondition(wireRecords == null, "Wire Records cannot be null");
 
 		if (!AutoConnectMode.AUTOCONNECT_MODE_OFF.equals(this.m_options.getAutoConnectMode())
 				&& !this.m_dataService.isAutoConnectEnabled() && !this.m_dataService.isConnected()) {
@@ -442,7 +441,6 @@ public final class CloudPublisherImpl
 
 					// prepare the topic
 					final String appTopic = this.m_options.getPublishingTopic();
-
 					if (this.m_options.getMessageType() == 1) { // Kura Payload
 						// prepare the payload
 						final KuraPayload kuraPayload = this.buildKuraPayload(dataRecord);
@@ -503,11 +501,12 @@ public final class CloudPublisherImpl
 
 	/**
 	 * Stop publishing.
+	 * 
+	 * @throws KuraRuntimeException
+	 *             if cloud client is null
 	 */
 	private void stopPublishing() {
-		if (this.m_cloudClient == null) {
-			throw new KuraRuntimeException(KuraErrorCode.INTERNAL_ERROR, "CloudClient not available");
-		}
+		checkCondition(this.m_cloudClient == null, "Cloud Client cannot be null");
 
 		if (this.m_dataService.isConnected() && !this.m_dataService.isAutoConnectEnabled()) {
 			final AutoConnectMode autoConnMode = this.m_options.getAutoConnectMode();

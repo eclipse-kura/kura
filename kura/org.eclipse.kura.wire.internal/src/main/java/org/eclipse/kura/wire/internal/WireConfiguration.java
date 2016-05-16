@@ -13,8 +13,9 @@
 
 package org.eclipse.kura.wire.internal;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static org.eclipse.kura.device.internal.DevicePreconditions.checkCondition;
 
+import org.eclipse.kura.KuraRuntimeException;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -34,11 +35,11 @@ public final class WireConfiguration {
 	 * @return the wire configuration
 	 * @throws JSONException
 	 *             the JSON exception
-	 * @throws NullPointerException
+	 * @throws KuraRuntimeException
 	 *             if the json object instance passed as argument is null
 	 */
 	public static WireConfiguration newInstanceFromJson(final JSONObject jsonWire) throws JSONException {
-		checkNotNull(jsonWire);
+		checkCondition(jsonWire == null, "JSON Object cannot be null");
 
 		final String emitter = jsonWire.getString("p");
 		final String receiver = jsonWire.getString("c");
@@ -70,8 +71,14 @@ public final class WireConfiguration {
 	 *            the Wire Receiver name
 	 * @param filter
 	 *            the filter
+	 * @throws KuraRuntimeException
+	 *             if any of the arguments is null
 	 */
 	public WireConfiguration(final String emitterName, final String receiverName, final String filter) {
+		checkCondition(emitterName == null, "Emitter name cannot be null");
+		checkCondition(receiverName == null, "Receiver name cannot be null");
+		checkCondition(filter == null, "Filter cannot be null");
+
 		this.m_emitterName = emitterName;
 		this.m_receiverName = receiverName;
 		this.m_filter = filter;
@@ -87,10 +94,17 @@ public final class WireConfiguration {
 	 * @param filter
 	 *            the filter
 	 * @param created
-	 *            the created
+	 *            the created flag signifying whether Wire Admin has already
+	 *            created the wire between the wire emitter and a wire receiver
+	 * @throws KuraRuntimeException
+	 *             if any of the arguments is null
 	 */
 	public WireConfiguration(final String emitterName, final String receiverName, final String filter,
 			final boolean created) {
+		checkCondition(emitterName == null, "Emitter name cannot be null");
+		checkCondition(receiverName == null, "Receiver name cannot be null");
+		checkCondition(filter == null, "Filter cannot be null");
+
 		this.m_emitterName = emitterName;
 		this.m_receiverName = receiverName;
 		this.m_filter = filter;
@@ -128,7 +142,7 @@ public final class WireConfiguration {
 	 * Checks if is wire admin has already created a wire between the wire
 	 * emitter and a wire receiver
 	 *
-	 * @return true, if is created
+	 * @return true, if it is created
 	 */
 	public boolean isCreated() {
 		return this.m_created;
@@ -177,8 +191,13 @@ public final class WireConfiguration {
 	 *            the new Wire Emitter name
 	 * @param newReceiverName
 	 *            the new Wire Receiver name
+	 * @throws KuraRuntimeException
+	 *             if any of the arguments is null
 	 */
 	public void update(final String newEmitterName, final String newReceiverName) {
+		checkCondition(newEmitterName == null, "Emitter name cannot be null");
+		checkCondition(newReceiverName == null, "Receiver name cannot be null");
+
 		this.m_emitterName = newEmitterName;
 		this.m_receiverName = newReceiverName;
 	}

@@ -12,6 +12,8 @@
  */
 package org.eclipse.kura.device;
 
+import org.eclipse.kura.KuraRuntimeException;
+
 /**
  * The listener interface for receiving driver events. The class that is
  * interested in processing a driver event implements this interface, and the
@@ -29,6 +31,8 @@ public interface DriverListener {
 	 *
 	 * @param event
 	 *            the fired driver event
+	 * @throws KuraRuntimeException
+	 *             if event is null
 	 */
 	public void onDriverEvent(DriverEvent event);
 

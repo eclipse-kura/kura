@@ -12,6 +12,8 @@
  */
 package org.eclipse.kura.wire.store;
 
+import static org.eclipse.kura.device.internal.DevicePreconditions.checkCondition;
+
 import java.util.Map;
 
 import org.eclipse.kura.configuration.ConfigurableComponent;
@@ -107,6 +109,7 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Conf
 	/** {@inheritDoc} */
 	@Override
 	public synchronized void onWireReceive(final WireEnvelope wireEvelope) {
+		checkCondition(wireEvelope == null, "Wire envelope cannot be null");
 		s_logger.debug("Wire Enveloped received..." + this.m_wireSupport);
 		// FIXME: add implementation
 	}

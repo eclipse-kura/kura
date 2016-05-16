@@ -12,11 +12,12 @@
  */
 package org.eclipse.kura.wire.internal;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static org.eclipse.kura.device.internal.DevicePreconditions.checkCondition;
 
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.kura.KuraRuntimeException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -44,11 +45,11 @@ public final class WireServiceOptions {
 	 * @return the wire service options
 	 * @throws JSONException
 	 *             the JSON exception
-	 * @throws NullPointerException
+	 * @throws KuraRuntimeException
 	 *             if provided properties is null
 	 */
 	public static WireServiceOptions newInstance(final Map<String, Object> properties) throws JSONException {
-		checkNotNull(properties);
+		checkCondition(properties == null, "Configured Wire Service properties cannot be null");
 
 		final List<WireConfiguration> wireConfs = Lists.newCopyOnWriteArrayList();
 		Object objWires = null;
@@ -56,7 +57,6 @@ public final class WireServiceOptions {
 			objWires = properties.get(CONF_WIRES);
 		}
 		if (objWires instanceof String) {
-
 			final String strWires = (String) objWires;
 			final JSONArray jsonWires = new JSONArray(strWires);
 			for (int i = 0; i < jsonWires.length(); i++) {
@@ -72,11 +72,11 @@ public final class WireServiceOptions {
 	 *
 	 * @param configurations
 	 *            the list of Wire Configurations
-	 * @throws NullPointerException
+	 * @throws KuraRuntimeException
 	 *             if provided configurations is null
 	 */
 	private WireServiceOptions(final List<WireConfiguration> configurations) {
-		checkNotNull(configurations);
+		checkCondition(configurations == null, "Configurations cannot be null");
 		m_wireConfigurations = configurations;
 	}
 

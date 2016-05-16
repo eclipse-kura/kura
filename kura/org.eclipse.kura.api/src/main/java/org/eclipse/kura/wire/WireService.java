@@ -12,6 +12,7 @@
  */
 package org.eclipse.kura.wire;
 
+import org.eclipse.kura.KuraRuntimeException;
 import org.osgi.service.wireadmin.Wire;
 
 /**
@@ -27,9 +28,11 @@ public interface WireService {
 	 *            the name of the Wire Emitter
 	 * @param receiverName
 	 *            the name of the Wire Receiver
+	 * @throws KuraRuntimeException
+	 *             if any of the arguments is null
 	 * @return the wire instance recently created
 	 */
-	public Wire createWire(String emitterName, String receiverName);
+	public Wire createWire(String emitterName, String receiverName) throws KuraRuntimeException;
 
 	/**
 	 * Creates the wire component.
@@ -38,9 +41,11 @@ public interface WireService {
 	 *            the factory pid for the Wire Component
 	 * @param name
 	 *            the name for the Wire Component
+	 * @throws KuraRuntimeException
+	 *             if any of the arguments is null
 	 * @return the wire component name which is recently created
 	 */
-	public String createWireComponent(String factoryPid, String name);
+	public String createWireComponent(String factoryPid, String name) throws KuraRuntimeException;
 
 	/**
 	 * Removes the wire between the provided wire emitter and the receiver
@@ -49,17 +54,21 @@ public interface WireService {
 	 *            the name of the Wire Emitter
 	 * @param receiverName
 	 *            the name of the Wire Receiver
+	 * @throws KuraRuntimeException
+	 *             if any of the arguments is null
 	 * @return true, if removal is successful
 	 */
-	public boolean removeWire(String emitterName, String receiverName);
+	public boolean removeWire(String emitterName, String receiverName) throws KuraRuntimeException;
 
 	/**
 	 * Removes the wire component.
 	 *
 	 * @param name
 	 *            the name of the Wire Component
+	 * @throws KuraRuntimeException
+	 *             if argument is null
 	 * @return true, if removal is successful
 	 */
-	public boolean removeWireComponent(String name);
+	public boolean removeWireComponent(String name) throws KuraRuntimeException;
 
 }

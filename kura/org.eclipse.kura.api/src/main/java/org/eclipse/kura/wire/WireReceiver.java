@@ -12,6 +12,7 @@
  */
 package org.eclipse.kura.wire;
 
+import org.eclipse.kura.KuraRuntimeException;
 import org.osgi.service.wireadmin.Consumer;
 
 /**
@@ -25,6 +26,8 @@ public interface WireReceiver extends WireComponent, Consumer {
 	 *
 	 * @param wireEnvelope
 	 *            the received wire envelope
+	 * @throws KuraRuntimeException
+	 *             if argument is null
 	 */
-	public void onWireReceive(WireEnvelope wireEnvelope);
+	public void onWireReceive(WireEnvelope wireEnvelope) throws KuraRuntimeException;
 }

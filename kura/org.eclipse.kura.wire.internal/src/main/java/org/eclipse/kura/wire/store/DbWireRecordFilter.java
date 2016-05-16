@@ -34,7 +34,7 @@ import com.google.common.annotations.Beta;
 @Beta
 public final class DbWireRecordFilter implements WireEmitter, WireReceiver, ConfigurableComponent {
 
-	/** The Constant s_logger. */
+	/** The Logger instance. */
 	private static final Logger s_logger = LoggerFactory.getLogger(DbWireRecordFilter.class);
 
 	// FIXME: Remove refresh rate parameter and add a new DataEventTimer service
@@ -108,7 +108,7 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Conf
 	@Override
 	public synchronized void onWireReceive(final WireEnvelope wireEvelope) {
 		s_logger.error("wireEnvelope received!");
-		// FIXME: add implementation for onWireReceive
+		// FIXME: add implementation
 	}
 
 	/** {@inheritDoc} */
@@ -124,17 +124,17 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Conf
 	}
 
 	/**
-	 * Sets the db service.
+	 * Sets the DB service.
 	 *
 	 * @param dbService
-	 *            the new db service
+	 *            the new DB service
 	 */
 	public synchronized void setDbService(final DbService dbService) {
 		this.m_dbService = dbService;
 	}
 
 	/**
-	 * Unset Db service.
+	 * Unset DB service.
 	 *
 	 * @param dataService
 	 *            the DB service

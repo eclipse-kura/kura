@@ -22,8 +22,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -45,6 +43,7 @@ import org.eclipse.kura.wire.WireEnvelope;
 import org.eclipse.kura.wire.WireField;
 import org.eclipse.kura.wire.WireReceiver;
 import org.eclipse.kura.wire.WireRecord;
+import org.eclipse.kura.wire.WireRecordStore;
 import org.eclipse.kura.wire.WireSupport;
 import org.eclipse.kura.wire.store.DbDataTypeMapper.JdbcType;
 import org.osgi.service.component.ComponentContext;
@@ -60,19 +59,34 @@ import com.google.common.base.Throwables;
  * the received Wire Record
  */
 @Beta
-public final class DbWireRecordStore implements WireEmitter, WireReceiver, ConfigurableComponent {
+public final class DbWireRecordStore implements WireEmitter, WireReceiver, ConfigurableComponent, WireRecordStore {
 
 	/** The Constant denoting name of the column. */
 	private static final String COLUMN_NAME = "COLUMN_NAME";
 
 	/**
-	 * FIXME: Extract the DataRecordStore service interface in the API and
-	 * implement a store and query method FIXME: Add primary key and index on
-	 * timestamp FIXME: Verify timestamp resolution to milliseconds FIXME: Add
-	 * support for period cleanup of the data records collected! FIXME: Add
-	 * support for different table type - persisted vs in-memory. FIXME: SQL
-	 * escaping of the names of the tables and columns. Be careful on the
-	 * capitalization; it is lossy? FIXME: Add support for Cloudlet
+	 * FIXME: Add primary key and index on timestamp
+	 */
+
+	/**
+	 * FIXME: Verify timestamp resolution to milliseconds
+	 */
+
+	/**
+	 * FIXME: Add support for period cleanup of the data records collected!
+	 */
+
+	/**
+	 * FIXME: Add support for different table type - persisted vs in-memory.
+	 */
+
+	/**
+	 * FIXME: SQL escaping of the names of the tables and columns. Be careful on
+	 * the capitalization; it is lossy?
+	 */
+
+	/**
+	 * FIXME: Add support for Cloudlet
 	 */
 
 	/** The constant data type */
@@ -118,36 +132,11 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
 			final Map<String, Object> properties) {
 		s_logger.info("Activating DB Wire Record Store...");
 
-		// save the bundle context and the properties
 		this.m_ctx = componentContext;
 		this.m_wireSupport = WireSupport.of(this);
 
-		// Update properties
 		this.m_options = new DbWireRecordStoreOptions(properties);
 
-		// FIXME: remove test table create and insert
-		try {
-
-			final List<WireField> fields = new ArrayList<WireField>();
-			fields.add(new WireField("c_byte", new ByteValue((byte) 1)));
-			fields.add(new WireField("c_short", new ShortValue((short) 1)));
-			fields.add(new WireField("c_int", new IntegerValue(1)));
-			fields.add(new WireField("c_long", new LongValue(1)));
-			fields.add(new WireField("c_double", new DoubleValue(1)));
-			fields.add(new WireField("c_bool", new BooleanValue(true)));
-			fields.add(new WireField("c_raw", new ByteArrayValue(new byte[] {})));
-			fields.add(new WireField("c_string", new StringValue("a")));
-
-			final WireRecord dataRecord = new WireRecord(new Date(), fields);
-
-			final String tableName = "testTable";
-			this.reconcileTable(tableName);
-
-			this.reconcileColumns(tableName, dataRecord);
-			this.insertDataRecord(tableName, dataRecord);
-		} catch (final SQLException e) {
-			s_logger.error(Throwables.getStackTraceAsString(e));
-		}
 		s_logger.info("Activating DB Wire Record Store...Done");
 	}
 
@@ -196,7 +185,7 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
 	protected synchronized void deactivate(final ComponentContext componentContext) {
 		s_logger.info("Deactivating DB Wire Record Store...");
 
-		// no need to release the cloud clients as the updated app
+		// no need to release the cloud clients as the updated application
 		// certificate is already published due the missing dependency
 		// we only need to empty our CloudClient list
 		this.m_dbService = null;
@@ -278,7 +267,7 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
 	 * @param tableName
 	 *            the table name
 	 * @param wireRecord
-	 *            the data record
+	 *            the wire record
 	 * @throws SQLException
 	 *             the SQL exception
 	 * @throws NullPointerException
@@ -363,7 +352,7 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
 	public synchronized void onWireReceive(final WireEnvelope wireEvelope) {
 		final List<WireRecord> dataRecords = wireEvelope.getRecords();
 		for (final WireRecord dataRecord : dataRecords) {
-			this.storeDataRecord(wireEvelope.getEmitterName(), dataRecord);
+			this.storeWireRecord(wireEvelope.getEmitterName(), dataRecord);
 		}
 		// emit the storage event
 		this.m_wireSupport.emit(dataRecords);
@@ -490,29 +479,23 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
 		this.m_dbService = dbService;
 	}
 
-	/**
-	 * Store data record.
-	 *
-	 * @param emitterId
-	 *            the emitter id
-	 * @param dataRecord
-	 *            the data record
-	 */
-	private void storeDataRecord(final String emitterId, final WireRecord dataRecord) {
+	/** {@inheritDoc} */
+	@Override
+	public void storeWireRecord(final String tableName, final WireRecord dataRecord) {
 		boolean inserted = false;
 		int retryCount = 0;
 		do {
 			try {
 				// store the record
-				this.insertDataRecord(emitterId, dataRecord);
+				this.insertDataRecord(tableName, dataRecord);
 				inserted = true;
 			} catch (final SQLException e) {
 				try {
-					this.reconcileTable(emitterId);
-					this.reconcileColumns(emitterId, dataRecord);
+					this.reconcileTable(tableName);
+					this.reconcileColumns(tableName, dataRecord);
 					retryCount++;
 				} catch (final SQLException ee) {
-					s_logger.error("Cannot reconcile the database", Throwables.getStackTraceAsString(ee));
+					s_logger.error("Cannot reconcile the database...", Throwables.getStackTraceAsString(ee));
 				}
 			}
 		} while (!inserted && (retryCount < 2));

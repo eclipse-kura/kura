@@ -41,6 +41,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Throwables;
+import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.util.concurrent.Monitor;
@@ -497,12 +498,12 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 	 * Removes the pid related wires.
 	 *
 	 * @param pid
-	 *            the pid
+	 *            the wire component pid
 	 * @return true, if successful
 	 */
 	private boolean removePidRelatedWires(final String pid) {
 		boolean atLeatOneRemoved = false;
-		final WireConfiguration[] copy = this.m_wireConfig.toArray(new WireConfiguration[] {});
+		final WireConfiguration[] copy = FluentIterable.from(this.m_wireConfig).toArray(WireConfiguration.class);
 		for (final WireConfiguration wc : copy) {
 			if (wc.getEmitterName().equals(pid) || wc.getReceiverName().equals(pid)) {
 				// if found, delete the wire

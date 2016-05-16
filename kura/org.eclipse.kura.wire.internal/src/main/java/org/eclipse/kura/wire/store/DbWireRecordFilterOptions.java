@@ -29,7 +29,7 @@ public final class DbWireRecordFilterOptions {
 	/** The Constant denotes the refresh rate. */
 	private static final String CONF_REFRESH_RATE = "refresh.rate";
 
-	/** The Constant denotes sqt view. */
+	/** The Constant denotes sql view. */
 	private static final String CONF_SQL_VIEW = "sql.view";
 
 	/** The Configured Properties. */

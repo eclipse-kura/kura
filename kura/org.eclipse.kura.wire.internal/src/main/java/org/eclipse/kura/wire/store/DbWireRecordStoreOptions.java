@@ -30,10 +30,10 @@ public final class DbWireRecordStoreOptions {
 	private final Map<String, Object> m_properties;
 
 	/**
-	 * Instantiates a new db wire record store options.
+	 * Instantiates a new DB wire record store options.
 	 *
 	 * @param properties
-	 *            the properties
+	 *            the configured properties
 	 */
 	public DbWireRecordStoreOptions(final Map<String, Object> properties) {
 		this.m_properties = properties;

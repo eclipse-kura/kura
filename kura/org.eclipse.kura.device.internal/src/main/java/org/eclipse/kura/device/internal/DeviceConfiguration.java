@@ -168,7 +168,7 @@ public final class DeviceConfiguration {
 					if (!parsedIndexes.contains(index)) {
 						parsedIndexes.add(index);
 						final Object channelProperties = properties.get(index);
-						Channel channel = null;
+						Channel channel;
 						// if any key has values of type map, then it is
 						// designated for channels
 						if (channelProperties instanceof Map<?, ?>) {

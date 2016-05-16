@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+
+     All rights reserved. This program and the accompanying materials
+     are made available under the terms of the Eclipse Public License v1.0
+     which accompanies this distribution, and is available at
+     http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Eurotech
+
+-->
+<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
+    <OCD id="org.eclipse.kura.raspberrypi.sensehat.example.SenseHatExample"
+         name="SenseHat" 
+         description="This bundle is an interface to the Raspberry Sense Hat.">
+        
+        <Icon resource="OSGI-INF/astro-pi-hat.png" size="32"/>
+
+        <AD id="imu.accelerometer.enable"  
+            name="imu.accelerometer.enable"
+            type="Boolean"
+            cardinality="0" 
+            required="true"
+            default="false" 
+            description="Enable accelerometer LSM9DS1 IMU sensor."/>
+
+        <AD id="imu.gyroscope.enable"  
+            name="imu.gyroscope.enable"
+            type="Boolean"
+            cardinality="0" 
+            required="true"
+            default="false" 
+            description="Enable gyroscope LSM9DS1 IMU sensor."/>
+            
+        <AD id="imu.compass.enable"  
+            name="imu.compass.enable"
+            type="Boolean"
+            cardinality="0" 
+            required="true"
+            default="false" 
+            description="Enable compass/magnetometer LSM9DS1 IMU sensor."/>
+            
+        <AD id="imu.sample.number"  
+            name="imu.sample.number"
+            type="Integer"
+            cardinality="0" 
+            required="true"
+            default="20" 
+            description="Set the number of samples that the IMU sensor has to retrieve before returning the result."/>
+            
+        <AD id="pressure.enable"  
+            name="pressure.enable"
+            type="Boolean"
+            cardinality="0" 
+            required="true"
+            default="false" 
+            description="Enable LPS25H Pressure sensor."/>
+
+        <AD id="humidity.enable"  
+            name="humidity.enable"
+            type="Boolean"
+            cardinality="0" 
+            required="true"
+            default="false" 
+            description="Enable HTS221 Humidity sensor."/>
+            
+        <AD id="screen.enable"  
+            name="screen.enable"
+            type="Boolean"
+            cardinality="0" 
+            required="true"
+            default="false" 
+            description="Enable lcd screen."/>
+
+        <AD id="screen.rotation"  
+            name="screen.rotation"
+            type="Integer"
+            cardinality="0" 
+            required="true"
+            default="0" 
+            description="Set the screen rotation.">
+            <Option label="0" value="0"/>
+            <Option label="90" value="90"/>
+            <Option label="180" value="180"/>
+            <Option label="270" value="270"/>
+        </AD>
+            
+        <AD id="screen.message"  
+            name="screen.message"
+            type="String"
+            cardinality="0" 
+            required="true"
+            default="Hello!" 
+            description="Message to be written on screen."/>
+            
+        <AD id="screen.text.color"
+            name="screen.text.color"
+            type="String"
+            cardinality="0" 
+            required="true"
+            default="ORANGE"
+            description="Set the color of the text.">
+            <Option label="RED" value="RED"/>
+            <Option label="ORANGE" value="ORANGE"/>
+            <Option label="YELLOW" value="YELLOW"/>
+            <Option label="GREEN" value="GREEN"/>
+            <Option label="BLUE" value="BLUE"/>
+            <Option label="PURPLE" value="PURPLE"/>
+            <Option label="VIOLET" value="VIOLET"/>
+            <Option label="WHITE" value="WHITE"/>
+            <Option label="BLACK" value="BLACK"/>
+        </AD>
+        
+        <AD id="stick.enable"  
+            name="stick.enable"
+            type="Boolean"
+            cardinality="0" 
+            required="true"
+            default="false" 
+            description="Enable stick."/>
+                                    
+    </OCD>
+    
+    <Designate pid="org.eclipse.kura.raspberrypi.sensehat.example.SenseHatExample">
+        <Object ocdref="org.eclipse.kura.raspberrypi.sensehat.example.SenseHatExample"/>
+    </Designate>
+</MetaData>

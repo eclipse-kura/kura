@@ -358,7 +358,7 @@ public class NatConfigTab extends LayoutContainer {
 
 					@Override
 					public void onSuccess(GwtXSRFToken token) {	
-						gwtNetworkService.findDeficeFirewallNATs(token, callback);
+						gwtNetworkService.findDeviceFirewallNATs(token, callback);
 					}});
 			}
 		};

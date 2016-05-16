@@ -100,7 +100,7 @@ public final class DeviceTracker extends ServiceTracker<Object, Object> {
 	@Override
 	public void removedService(final ServiceReference<Object> reference, final Object service) {
 		super.removedService(reference, service);
-		if (service instanceof Device) {
+		if ((service instanceof Device) && this.m_devices.containsKey(service)) {
 			this.m_devices.remove(service);
 			s_logger.info("Device has been removed by Device Cloudlet Tracker..." + service);
 		}

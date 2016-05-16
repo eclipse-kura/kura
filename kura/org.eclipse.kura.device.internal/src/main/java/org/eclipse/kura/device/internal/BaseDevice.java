@@ -365,7 +365,9 @@ public class BaseDevice implements Device, SelfConfiguringComponent {
 		}
 		this.m_monitor.enter();
 		try {
-			this.m_driver.registerDriverListener(ImmutableMap.copyOf(channel.getConfig()), driverListener);
+			if (channel != null) {
+				this.m_driver.registerDriverListener(ImmutableMap.copyOf(channel.getConfig()), driverListener);
+			}
 		} finally {
 			this.m_monitor.leave();
 		}

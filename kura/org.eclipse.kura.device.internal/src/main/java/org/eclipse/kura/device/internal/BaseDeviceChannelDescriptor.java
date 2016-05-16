@@ -42,13 +42,13 @@ public final class BaseDeviceChannelDescriptor {
 	}
 
 	/** The default elements. */
-	private final List<Tad> defaultElements;
+	private final List<Tad> m_defaultElements;
 
 	/**
 	 * Instantiates a new base device channel descriptor.
 	 */
 	private BaseDeviceChannelDescriptor() {
-		this.defaultElements = Lists.newArrayList();
+		this.m_defaultElements = Lists.newArrayList();
 
 		final Tad name = new Tad();
 		name.setId(NAME);
@@ -59,7 +59,7 @@ public final class BaseDeviceChannelDescriptor {
 		name.setCardinality(0);
 		name.setRequired(true);
 
-		this.defaultElements.add(name);
+		this.m_defaultElements.add(name);
 
 		final Tad type = new Tad();
 		type.setName(TYPE);
@@ -108,7 +108,7 @@ public final class BaseDeviceChannelDescriptor {
 		oString.setLabel("String");
 		type.getOption().add(oString);
 
-		this.defaultElements.add(type);
+		this.m_defaultElements.add(type);
 	}
 
 	/**
@@ -117,7 +117,7 @@ public final class BaseDeviceChannelDescriptor {
 	 * @return the default configuration
 	 */
 	public List<Tad> getDefaultConfiguration() {
-		return this.defaultElements;
+		return this.m_defaultElements;
 	}
 
 }

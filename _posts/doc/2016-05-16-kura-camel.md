@@ -12,6 +12,9 @@ Kura provides `org.eclipse.kura.camel.router.CamelRouter` class, which extends
 [camel-kura](http://camel.apache.org/kura) module. While `KuraRouter` provides a generic base for Kura routes, it 
 doesn't rely on the Kura-specific jars, because of limitations of the Apache Camel policy regarding adding 3rd parties repositories to the Camel (like Eclipse Kura repository). `CamelRouter` extends `KuraRouter` and enhances it with Kura-specific API.
 
+In the near future we plan to migrate Kura related code from Apache Camel to Eclipse Kura, so all the code related to
+Kura-Camel integration will be hosted here under Kura umbrella.
+
 ## Maven dependency
 
 In order to start using `RhiotKuraRouter`, Maven users should add the following dependency to their POM file:
@@ -22,7 +25,7 @@ In order to start using `RhiotKuraRouter`, Maven users should add the following 
       <version>${kura.version}</version>
     </dependency>
 
-Adding Rhiot `org.eclipse.kura.camel` module to your project, imports transitive Kura dependencies. This is big advantage over Apache
+Adding `org.eclipse.kura.camel` module to your project, imports transitive Kura dependencies. This is big advantage over Apache
 Camel camel-kura module, which doesn't rely on Kura API and therefore doesn't import Kura jars.
 
 ## Usage

@@ -27,9 +27,9 @@ import org.osgi.service.component.ComponentException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class KuraExample implements ConfigurableComponent, CloudClientListener
+public class KuraApp implements ConfigurableComponent, CloudClientListener
 {
-	private static final Logger s_logger = LoggerFactory.getLogger(KuraExample.class);
+	private static final Logger s_logger = LoggerFactory.getLogger(KuraApp.class);
 
     private static final String   PUBLISH_TOPIC_PROP_NAME  = "publish.semanticTopic";
     private static final String   PUBLISH_QOS_PROP_NAME    = "publish.qos";
@@ -49,7 +49,7 @@ public class KuraExample implements ConfigurableComponent, CloudClientListener
 	//
 	// ----------------------------------------------------------------
 
-	public KuraExample()
+	public KuraApp()
 	{
 		super();
 	}

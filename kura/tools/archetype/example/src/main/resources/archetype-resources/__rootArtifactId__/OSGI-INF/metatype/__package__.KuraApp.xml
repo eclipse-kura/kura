@@ -16,8 +16,8 @@
 
 -->
 <MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
-    <OCD id="${package}.KuraExample"
-         name="KuraExample"
+    <OCD id="${package}.KuraApp"
+         name="KuraApp"
          description="Exampel project. ">
 
         <Icon resource="OSGI-INF/heater.png" size="32"/>
@@ -51,7 +51,7 @@
             description="Default retaing flag for the published messages."/>
     </OCD>
 
-    <Designate pid="${package}.KuraExample">
-        <Object ocdref="${package}.KuraExample"/>
+    <Designate pid="${package}.KuraApp">
+        <Object ocdref="${package}.KuraApp"/>
     </Designate>
 </MetaData>

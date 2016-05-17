@@ -12,9 +12,9 @@
     <artifactId>org.eclipse.kura.archetype.example</artifactId>
 	<version>0.1.0-SNAPSHOT</version>
     <name>Eclipse Kura Example Project Archetype</name>
-    
+
     <description>This is the Maven-Archetype for creating an Eclipse Kura example project.</description>
-  
+
     <packaging>maven-archetype</packaging>
 
     <build>
@@ -25,7 +25,7 @@
                 <version>2.4</version>
             </extension>
         </extensions>
-	
+
 		<pluginManagement>
       		<plugins>
         		<plugin>
@@ -33,8 +33,8 @@
           			<version>2.4</version>
         		</plugin>
       		</plugins>
-    	</pluginManagement>	
-    
+    	</pluginManagement>
+
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -43,7 +43,7 @@
 				<executions>
 					<execution>
 						<id>tools-copy-tp</id>
-						<phase>prepare-package</phase>
+						<phase>validate</phase>
 						<goals>
 							<goal>run</goal>
 						</goals>
@@ -52,7 +52,7 @@
 								<delete dir="src/mail/resources/archetype-resources/target-definition" />
 								<copy todir="src/main/resources/archetype-resources/target-definition">
 									<fileset dir="../../../distrib/target/staging/target-definition" />
-								</copy>	
+								</copy>
 							</target>
 						</configuration>
 					</execution>

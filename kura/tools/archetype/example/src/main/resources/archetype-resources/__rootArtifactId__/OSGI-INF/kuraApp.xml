@@ -16,19 +16,19 @@
 
 -->
 <scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0"
-    name="${package}.KuraExample"
+    name="${package}.KuraApp"
     activate="activate"
     deactivate="deactivate"
     modified="updated"
     enabled="true"
     immediate="true"
     configuration-policy="require">
-	<implementation class="${package}.KuraExample"/>
+	<implementation class="${package}.KuraApp"/>
 
    <!-- If the component is configurable through the Kura ConfigurationService, it must expose a Service. -->
-   <property name="service.pid" type="String" value="${package}.KuraExample"/>
+   <property name="service.pid" type="String" value="${package}.KuraApp"/>
    <service>
-       <provide interface="${package}.KuraExample"/>
+       <provide interface="${package}.KuraApp"/>
    </service>
 
    <reference name="CloudService"

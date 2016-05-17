@@ -12,7 +12,7 @@
  */
 package org.eclipse.kura.wire.store;
 
-import static org.eclipse.kura.device.internal.DevicePreconditions.checkCondition;
+import static org.eclipse.kura.device.internal.Preconditions.checkCondition;
 
 import java.util.Map;
 

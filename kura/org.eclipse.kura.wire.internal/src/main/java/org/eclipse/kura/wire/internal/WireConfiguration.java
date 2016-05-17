@@ -13,7 +13,7 @@
 
 package org.eclipse.kura.wire.internal;
 
-import static org.eclipse.kura.device.internal.DevicePreconditions.checkCondition;
+import static org.eclipse.kura.device.internal.Preconditions.checkCondition;
 
 import org.eclipse.kura.KuraRuntimeException;
 import org.json.JSONException;

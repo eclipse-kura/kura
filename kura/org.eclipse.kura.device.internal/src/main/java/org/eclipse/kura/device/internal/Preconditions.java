@@ -17,44 +17,52 @@ import org.eclipse.kura.KuraRuntimeException;
 
 /**
  * The Class DevicePreconditions is responsible to provide utility methods to
- * throw {@link KuraRuntimeException}
+ * check for conditions or predicates and it throws {@link KuraRuntimeException}
+ * with {@link KuraErrorCode#INTERNAL_ERROR} if the provided flag is not
+ * satisfied
  */
-public final class DevicePreconditions {
+public final class Preconditions {
 
 	/**
-	 * Check condition and throw exception
+	 * Checks condition and throws exception
 	 *
 	 * @param flag
-	 *            the flag to check, and if it's not satisfied, then throw the
-	 *            exception
+	 *            the flag condition to check, and if it's not satisfied, then
+	 *            throw the exception
+	 * @throws KuraRuntimeException
+	 *             if the provided flag or condition is true
 	 */
 	public static void checkCondition(final boolean flag) {
 		checkCondition(flag, KuraErrorCode.INTERNAL_ERROR, "");
 	}
 
 	/**
-	 * Check condition and throw exception
+	 * Checks condition and throws exception
 	 *
 	 * @param flag
-	 *            the flag to check, and if it's not satisfied, then throw the
-	 *            exception
+	 *            the flag condition to check, and if it's not satisfied, then
+	 *            throw the exception
 	 * @param errorCode
 	 *            the error code to set
+	 * @throws KuraRuntimeException
+	 *             if the provided flag or condition is true
 	 */
 	public static void checkCondition(final boolean flag, final KuraErrorCode errorCode) {
-		checkCondition(flag, errorCode, "");
+		checkCondition(flag, errorCode, errorCode.toString());
 	}
 
 	/**
-	 * Check condition and throw exception
+	 * Checks condition and throws exception
 	 *
 	 * @param flag
-	 *            the flag to check, and if it's not satisfied, then throw the
-	 *            exception
+	 *            the flag condition to check, and if it's not satisfied, then
+	 *            throw the exception
 	 * @param errorCode
 	 *            the error code to set
 	 * @param message
 	 *            the exception message
+	 * @throws KuraRuntimeException
+	 *             if the provided flag or condition is true
 	 */
 	public static void checkCondition(final boolean flag, final KuraErrorCode errorCode, final String message) {
 		if (flag) {
@@ -63,13 +71,15 @@ public final class DevicePreconditions {
 	}
 
 	/**
-	 * Check condition and throw exception
+	 * Checks condition and throws exception
 	 *
 	 * @param flag
-	 *            the flag to check, and if it's not satisfied, then throw the
-	 *            exception
+	 *            the flag condition to check, and if it's not satisfied, then
+	 *            throw the exception
 	 * @param message
 	 *            the exception message
+	 * @throws KuraRuntimeException
+	 *             if the provided flag or condition is true
 	 */
 	public static void checkCondition(final boolean flag, final String message) {
 		checkCondition(flag, KuraErrorCode.INTERNAL_ERROR, message);
@@ -78,7 +88,7 @@ public final class DevicePreconditions {
 	/**
 	 * Instantiates a new device preconditions.
 	 */
-	private DevicePreconditions() {
+	private Preconditions() {
 		// Not needed because of utility class
 	}
 

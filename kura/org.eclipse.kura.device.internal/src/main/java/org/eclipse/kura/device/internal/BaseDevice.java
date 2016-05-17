@@ -17,7 +17,7 @@ import static org.eclipse.kura.device.internal.DeviceConfiguration.CHANNEL_PROPE
 import static org.eclipse.kura.device.internal.DeviceConfiguration.DEVICE_DESC_PROP;
 import static org.eclipse.kura.device.internal.DeviceConfiguration.DEVICE_DRIVER_PROP;
 import static org.eclipse.kura.device.internal.DeviceConfiguration.DEVICE_ID_PROP;
-import static org.eclipse.kura.device.internal.DevicePreconditions.checkCondition;
+import static org.eclipse.kura.device.internal.Preconditions.checkCondition;
 
 import java.util.List;
 import java.util.Map;

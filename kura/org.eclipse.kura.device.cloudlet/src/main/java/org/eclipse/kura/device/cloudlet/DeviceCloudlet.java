@@ -12,7 +12,7 @@
  */
 package org.eclipse.kura.device.cloudlet;
 
-import static org.eclipse.kura.device.internal.DevicePreconditions.checkCondition;
+import static org.eclipse.kura.device.internal.Preconditions.checkCondition;
 
 import java.util.List;
 import java.util.Map;
@@ -294,7 +294,7 @@ public final class DeviceCloudlet extends Cloudlet {
 	 * @param userType
 	 *            the type to use
 	 * @throws KuraRuntimeException
-	 *             if the any of the provided arguments is null
+	 *             if any of the provided arguments is null
 	 */
 	private void wrapValue(final DeviceRecord deviceRecord, final String userValue, final String userType) {
 		checkCondition(deviceRecord == null, "Device Record cannot be null");

@@ -422,6 +422,11 @@ public class SierraMc87xx implements HspaCellularModem {
 	public void disableGps() throws KuraException {
 		// TODO Auto-generated method stub
 	}
+	
+	@Override
+	public void forceDisableGps() throws KuraException {
+		// TODO Auto-generated method stub
+	}
 
 	@Override
 	public List<NetConfig> getConfiguration() {

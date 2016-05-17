@@ -156,6 +156,8 @@ public interface CellularModem {
     
     public void disableGps() throws KuraException;
     
+    public void forceDisableGps() throws KuraException;
+    
     public List<NetConfig> getConfiguration();
     
     public void setConfiguration(List<NetConfig> netConfigs);

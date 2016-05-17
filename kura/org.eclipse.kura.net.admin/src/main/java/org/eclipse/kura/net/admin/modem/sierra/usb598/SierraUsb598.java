@@ -482,6 +482,11 @@ public class SierraUsb598 implements EvdoCellularModem {
 	public void disableGps() throws KuraException {
 		// TODO Auto-generated method stub
 	}
+	
+	@Override
+	public void forceDisableGps() throws KuraException {
+		// TODO Auto-generated method stub
+	}
 
 	@Override
 	public boolean isProvisioned() throws KuraException {

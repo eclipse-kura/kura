@@ -913,7 +913,7 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 
 		boolean ret = false;
 		if (portIsReachable && !modem.isGpsEnabled()) {
-			s_logger.error("disableModemGps() :: Modem GPS is disabled :: portIsReachable={}, modem.isGpsEnabled()={}",
+			s_logger.info("disableModemGps() :: Modem GPS is disabled :: portIsReachable={}, modem.isGpsEnabled()={}",
 					portIsReachable, modem.isGpsEnabled());
 			ret = true;
 		}

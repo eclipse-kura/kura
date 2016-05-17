@@ -243,7 +243,8 @@ public class CommConnectionImpl implements CommConnection
 	}
 	
 	private synchronized ByteBuffer getResponse(int timeout) throws IOException {
-		ByteBuffer buffer = ByteBuffer.allocate(4096);
+		int bufferLimit = 4096;
+		ByteBuffer buffer = ByteBuffer.allocate(bufferLimit);
 		Date start = new Date();
 		
         while(m_inputStream.available() < 1 && ((new Date()).getTime() - start.getTime()) < timeout) {
@@ -254,7 +255,7 @@ public class CommConnectionImpl implements CommConnection
             }
         }
 
-		while (m_inputStream.available() >= 1) {
+		while ((m_inputStream.available() >= 1) && (buffer.limit() < bufferLimit)) {
             int c = m_inputStream.read();
             buffer.put((byte) c);
 		}
@@ -265,17 +266,19 @@ public class CommConnectionImpl implements CommConnection
 	}
 	
 	private synchronized ByteBuffer getResponse(int timeout, int demark) throws IOException {
-		ByteBuffer buffer = ByteBuffer.allocate(4096);
+		int bufferLimit = 4096;
+		ByteBuffer buffer = ByteBuffer.allocate(bufferLimit);
 		long start = System.currentTimeMillis();
 		
-		while ((m_inputStream.available() < 1)
-				&& ((System.currentTimeMillis() - start) < timeout)) {
-			try {Thread.sleep(10);}catch (InterruptedException e) {}
+		while ((m_inputStream.available() < 1) && ((System.currentTimeMillis() - start) < timeout)) {
+			try {
+				Thread.sleep(10);
+			} catch (InterruptedException e) {}
 		}
 
 		start = System.currentTimeMillis();
 		do {
-			if (m_inputStream.available() > 0) {
+			while ((m_inputStream.available() > 0) && (buffer.limit() < bufferLimit)) {
 				start = System.currentTimeMillis();
 				int c = m_inputStream.read();
 	            buffer.put((byte) c);

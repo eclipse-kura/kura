@@ -357,6 +357,12 @@ public class GpsDevice {
 
 			double lon, lat, speed, alt, track;
 			
+			// Eat empty lines
+			if (scannedInput.isEmpty() || scannedInput.equals("") || scannedInput.equals("\n")) {
+				s_logger.debug("NMEA string empty");
+				return;
+			}
+				
 			// got a message... do a cksum
 			if (!NmeaCksum(scannedInput)){
 				s_logger.error("NMEA checksum not valid");

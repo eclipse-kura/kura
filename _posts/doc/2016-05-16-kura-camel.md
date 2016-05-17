@@ -1,3 +1,10 @@
+---
+layout: page
+title:  "Apache Camel integration"
+date:   2016-05-16 11:31:11
+categories: [doc]
+---
+
 # Camel Kura router
 
 Kura provides `org.eclipse.kura.camel.router.CamelRouter` class, which extends 

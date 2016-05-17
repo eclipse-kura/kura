@@ -69,9 +69,7 @@ configured using Kura web UI.
 We highly recommend to use our [Kura Camel quickstart](https://rhiot.gitbooks.io/rhiotdocumentation/content/quickstarts/kura_camel_quickstart.html) as a template for creating Kura Camel routers. Our quickstart is configured as SCR component, so you can just deploy it to the Kura server and see your gateway route module deployed as a configurable service. To specify the route XML that should be loaded by a Camel context running in a deployed module, edit the `camel.route.xml` service property and click `Apply` button. As soon as `Apply` button is clicked, the route will be parsed and loaded.
 
 
-<a href="kura_camel_routes_webui.png" target="_blank">
-  <img src="kura_camel_routes_webui.png" align="center" height="500" hspace="30">
-</a>
+![]({{ site.baseurl }}/assets/images/camel/media/kura_camel_routes_webui.png)
 
 A xml route sample :
 
@@ -87,6 +85,4 @@ A xml route sample :
 Our Kura Camel quickstart can be also used from the 
 [EuroTech Everyware Cloud (EC)](http://www.eurotech.com/en/products/software+services/everyware+cloud+m2m+platform/m2m+what+it+is).
 
-<a href="kura_camel_routes_webui.png" target="_blank">
-  <img src="kura_camel_routes_ec.png" align="center" height="500" hspace="30">
-</a>
+![]({{ site.baseurl }}/assets/images/camel/media/kura_camel_routes_ec.png)

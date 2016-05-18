@@ -291,6 +291,7 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
 			CryptoService cryptoService = WifiVisitorUtil.getCryptoService();
 			String passphrase = "";
 			if (cryptoService != null) {
+				// encrypt password before putting it to the /etc/hostapd.conf
 				passphrase = new String(cryptoService.encryptAes(wifiConfig.getPasskey().getPassword()));
 			}
 			fileAsString = fileAsString.replaceFirst("KURA_WEP_KEY", passphrase);
@@ -414,6 +415,7 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
 			CryptoService cryptoService = WifiVisitorUtil.getCryptoService();
 			String passphrase = "";
 			if (cryptoService != null) {
+				// encrypt password before putting it to the /etc/hostapd.conf
 				passphrase = new String(cryptoService.encryptAes(wifiConfig.getPasskey().getPassword()));
 			}
 			

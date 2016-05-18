@@ -80,6 +80,12 @@ public interface ConfigurationService
 	 */
 	public ComponentConfiguration getComponentConfiguration(String pid) throws KuraException;
 	
+	/**
+	 * Returns component configuration properties for specified PID
+	 * @param pid - the ID of the component whose configuration is requested
+	 * @return component configuration properties
+	 * @throws KuraException
+	 */
 	public Map<String, Object> getConfigurableComponentConfigurationProperties(String pid) throws KuraException;
 	
 	/**

@@ -207,7 +207,6 @@ public class WpaSupplicantConfigReader implements NetworkConfigurationVisitor {
 		        String keyMgmt = props.getProperty("key_mgmt");
 		        s_logger.debug("current wpa_supplicant.conf: key_mgmt={}", keyMgmt);
 		        if (keyMgmt != null && keyMgmt.equalsIgnoreCase("WPA-PSK")) {
-		        	//password = WifiVisitorUtil.getPassphrase(ifaceName, WifiMode.INFRA);
 		        	password = props.getProperty("psk");
 		            if (proto != null) {
 						if(proto.trim().equals("WPA")) {
@@ -221,7 +220,6 @@ public class WpaSupplicantConfigReader implements NetworkConfigurationVisitor {
 						wifiSecurity = WifiSecurity.SECURITY_WPA2;
 					}
 		        } else {
-		        	//password = WifiVisitorUtil.getPassphrase(ifaceName, WifiMode.INFRA);
 		        	password = props.getProperty("wep_key0");
 		            if (password != null) {
 		                wifiSecurity = WifiSecurity.SECURITY_WEP;
@@ -233,6 +231,7 @@ public class WpaSupplicantConfigReader implements NetworkConfigurationVisitor {
 		            groupCiphers = null;
 		        }
 		        if ((password != null) && !password.isEmpty()) {
+		        	// get encrypted password from the /etc/wpa_supplicant.conf and decrypt it
 					CryptoService cryptoService = WifiVisitorUtil.getCryptoService();
 					if (cryptoService != null) {
 						try {
@@ -243,6 +242,7 @@ public class WpaSupplicantConfigReader implements NetworkConfigurationVisitor {
 						}
 					}
 				} else {
+					// get password from configuration snapshot and decrypt it
 					password = WifiVisitorUtil.getPassphrase(ifaceName, WifiMode.INFRA);
 				}
 		        

@@ -26,6 +26,7 @@ import org.eclipse.kura.core.net.WifiInterfaceAddressConfigImpl;
 import org.eclipse.kura.core.util.IOUtil;
 import org.eclipse.kura.core.util.ProcessUtil;
 import org.eclipse.kura.core.util.SafeProcess;
+import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.linux.net.wifi.Hostapd;
 import org.eclipse.kura.linux.net.wifi.HostapdManager;
 import org.eclipse.kura.net.NetConfig;
@@ -284,11 +285,15 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
 				throw KuraException.internalError("the channel must be between 1 (inclusive) and 11 (inclusive) or 1 (inclusive) and 13 (inclusive) depending on your locale");
 			}
 			
-			// validate passkey but add it to snapshot and not to configuration file
-			((WifiPassword)wifiConfig.getPasskey()).validate(wifiConfig.getSecurity());
-			fileAsString = fileAsString.replaceFirst("KURA_WEP_KEY", "");
-			// TODO - <IAB> comment out for now
-			WifiVisitorUtil.setPassphrase(wifiConfig.getPasskey().toString(), interfaceName, WifiMode.MASTER);
+			WifiPassword wifiPassword = new WifiPassword(wifiConfig.getPasskey().toString());
+			wifiPassword.validate(wifiConfig.getSecurity());
+			
+			CryptoService cryptoService = WifiVisitorUtil.getCryptoService();
+			String passphrase = "";
+			if (cryptoService != null) {
+				passphrase = new String(cryptoService.encryptAes(wifiConfig.getPasskey().getPassword()));
+			}
+			fileAsString = fileAsString.replaceFirst("KURA_WEP_KEY", passphrase);
 			
 			if (wifiConfig.ignoreSSID()) {
 				fileAsString = fileAsString.replaceFirst("KURA_IGNORE_BROADCAST_SSID", "2");
@@ -403,11 +408,16 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
 				throw KuraException.internalError("invalid WiFi Pairwise Ciphers");
 			}
 			
-			// validate passkey but add it to snapshot and not to configuration file
-			((WifiPassword)wifiConfig.getPasskey()).validate(wifiConfig.getSecurity());
-			fileAsString = fileAsString.replaceFirst("KURA_PASSPHRASE", "");
-			// TODO - <IAB> comment out for now
-			WifiVisitorUtil.setPassphrase(wifiConfig.getPasskey().toString(), interfaceName, WifiMode.MASTER);
+			WifiPassword wifiPassword = new WifiPassword(wifiConfig.getPasskey().toString());
+			wifiPassword.validate(wifiConfig.getSecurity());
+			
+			CryptoService cryptoService = WifiVisitorUtil.getCryptoService();
+			String passphrase = "";
+			if (cryptoService != null) {
+				passphrase = new String(cryptoService.encryptAes(wifiConfig.getPasskey().getPassword()));
+			}
+			
+			fileAsString = fileAsString.replaceFirst("KURA_PASSPHRASE", passphrase);
 			
 			if (wifiConfig.ignoreSSID()) {
 				fileAsString = fileAsString.replaceFirst("KURA_IGNORE_BROADCAST_SSID", "2");

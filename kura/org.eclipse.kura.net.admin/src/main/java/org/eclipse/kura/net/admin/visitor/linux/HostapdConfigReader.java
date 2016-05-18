@@ -185,7 +185,6 @@ public class HostapdConfigReader implements NetworkConfigurationVisitor {
 											+ configFile.getAbsolutePath());
 						}
 
-						//password = WifiVisitorUtil.getPassphrase(ifaceName, WifiMode.MASTER);
 						if (hostapdProps.containsKey("wpa_passphrase")) {
 							password = hostapdProps
 									.getProperty("wpa_passphrase");
@@ -199,9 +198,9 @@ public class HostapdConfigReader implements NetworkConfigurationVisitor {
 					} else if (hostapdProps.containsKey("wep_key0")) {
 						security = WifiSecurity.SECURITY_WEP;
 						password = hostapdProps.getProperty("wep_key0");
-						//password = WifiVisitorUtil.getPassphrase(ifaceName, WifiMode.MASTER);
 					}
 					if ((password != null) && !password.isEmpty()) {
+						// get encrypted password from the /etc/hostapd.conf and decrypt it
 						CryptoService cryptoService = WifiVisitorUtil.getCryptoService();
 						if (cryptoService != null) {
 							try {
@@ -212,6 +211,7 @@ public class HostapdConfigReader implements NetworkConfigurationVisitor {
 							}
 						}
 					} else {
+						// get password from configuration snapshot and decrypt it
 						password = WifiVisitorUtil.getPassphrase(ifaceName, WifiMode.MASTER);
 					}
 					

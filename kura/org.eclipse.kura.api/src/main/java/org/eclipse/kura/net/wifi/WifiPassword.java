@@ -18,14 +18,30 @@ public class WifiPassword extends Password {
 	
 	private static final String HEXES = "0123456789ABCDEF";
 	
+	/**
+	 * WifiPassword constructor
+	 * 
+	 * @param password - WiFi password as {@link String}
+	 */
 	public WifiPassword(String password) {
 		super(password);
 	}
 	
+	/**
+	 * WifiPassword constructor
+	 * 
+	 * @param password - - WiFi password as {@link char[]}
+	 */
 	public WifiPassword(char[] password) {
 		super(password);
 	}
 		
+	/**
+	 * Validates WiFi password
+	 * 
+	 * @param wifiSecurity - WiFi security as {@link WifiSecurity}
+	 * @throws KuraException
+	 */
 	public void validate(WifiSecurity wifiSecurity) throws KuraException {
 		if (m_password == null) {
 			throw KuraException.internalError("the passwd can not be null");
@@ -39,9 +55,6 @@ public class WifiPassword extends Password {
 				} catch(Exception e) {
 					throw KuraException.internalError("the WEP key (passwd) must be all HEX characters (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, a, b, c, d, e, and f");
 				}
-				
-				//since we're here - save the password
-				//fileAsString = fileAsString.replaceFirst("KURA_WEP_KEY", passKey);
 			} else if(passKey.length() == 26) {
 				String part1 = passKey.substring(0, 13);
 				String part2 = passKey.substring(13);
@@ -52,9 +65,6 @@ public class WifiPassword extends Password {
 				} catch(Exception e) {
 					throw KuraException.internalError("the WEP key (passwd) must be all HEX characters (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, a, b, c, d, e, and f");
 				}
-				
-				//since we're here - save the password
-				//fileAsString = fileAsString.replaceFirst("KURA_WEP_KEY", passKey);
 			} else if(passKey.length() == 32) {
 				String part1 = passKey.substring(0, 10);
 				String part2 = passKey.substring(10, 20);
@@ -66,18 +76,12 @@ public class WifiPassword extends Password {
 				} catch(Exception e) {
 					throw KuraException.internalError("the WEP key (passwd) must be all HEX characters (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, a, b, c, d, e, and f");
 				}
-				
-				//since we're here - save the password
-				//fileAsString = fileAsString.replaceFirst("KURA_WEP_KEY", passKey);
 			} else if ((passKey.length() == 5)
 					|| (passKey.length() == 13)
 					|| (passKey.length() == 16)) {
 				
 				// 5, 13, or 16 ASCII characters
 				passKey = toHex(passKey);
-				
-				//since we're here - save the password
-				//fileAsString = fileAsString.replaceFirst("KURA_WEP_KEY", passKey);
 			} else {
 				throw KuraException.internalError("the WEP key (passwd) must be 10, 26, or 32 HEX characters in length");
 			}

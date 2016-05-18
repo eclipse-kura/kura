@@ -238,6 +238,7 @@ public class WpaSupplicantConfigWriter implements NetworkConfigurationVisitor {
 			CryptoService cryptoService = WifiVisitorUtil.getCryptoService();
 			String passphrase = "";
 			if (cryptoService != null) {
+				// encrypt password before putting it to the /etc/wpa_supplicant.conf
 				passphrase = new String(cryptoService.encryptAes(wifiConfig.getPasskey().getPassword()));
 			}
 			fileAsString = fileAsString.replaceFirst("KURA_WEP_KEY", passphrase);
@@ -292,6 +293,7 @@ public class WpaSupplicantConfigWriter implements NetworkConfigurationVisitor {
 			CryptoService cryptoService = WifiVisitorUtil.getCryptoService();
 			String passphrase = "";
 			if (cryptoService != null) {
+				// encrypt password before putting it to the /etc/wpa_supplicant.conf
 				passphrase = new String(cryptoService.encryptAes(wifiConfig.getPasskey().getPassword()));
 			}
 			fileAsString = fileAsString.replaceFirst("KURA_PASSPHRASE", passphrase);

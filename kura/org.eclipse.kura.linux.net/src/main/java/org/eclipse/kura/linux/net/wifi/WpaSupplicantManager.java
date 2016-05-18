@@ -74,7 +74,6 @@ public class WpaSupplicantManager {
 			s_logger.error("Exception while enabling WPA Supplicant!", e);
 			throw KuraException.internalError(e);
 		} finally {
-			/* TODO - <IAB> comment out for now
 			if (!OS_VERSION.equals(KuraConstants.Intel_Edison.getImageName() + "_" + KuraConstants.Intel_Edison.getImageVersion() + "_" + KuraConstants.Intel_Edison.getTargetName())) {
 				// delete temporary wpa_supplicant.conf that contains passkey
 				File tmpHostapdConfigFile = new File(privGetWpaSupplicantConfigFilename(interfaceName));
@@ -82,7 +81,6 @@ public class WpaSupplicantManager {
 					tmpHostapdConfigFile.delete();
 				}
 			}
-			*/
 		}
 	}
 
@@ -229,8 +227,11 @@ public class WpaSupplicantManager {
             	   if (line.startsWith("wep_key") || line.startsWith("psk")) {
             		   int ind = line.indexOf('=');
             		   if (ind > 0) {
-            			   ((WifiPassword)passkey).validate(wifiSecurity);
-            			   pw.println(line.substring(0, ind+1).concat(passkey.toString()));
+            			   WifiPassword wifiPassword = new WifiPassword(passkey.toString());
+            			   wifiPassword.validate(wifiSecurity);
+            			   StringBuilder sbPasskey = new StringBuilder(line.substring(0, ind+1));
+            			   sbPasskey.append('"').append(passkey.toString()).append('"');
+            			   pw.println(sbPasskey.toString());
             		   }
             	   } else {
             		   pw.println(line);

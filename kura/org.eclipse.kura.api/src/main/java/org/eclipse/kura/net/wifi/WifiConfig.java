@@ -76,7 +76,7 @@ public class WifiConfig implements NetConfig {
 		this.m_ssid = ssid;
 		this.m_channels = channels;
 		this.m_security = security;
-		this.m_passkey = new WifiPassword(passkey);
+		this.m_passkey = new Password(passkey);
 		this.m_hwMode = hwMode;
 		this.m_broadcast = broadcast;
 		this.m_bgscan = bgscan;
@@ -143,7 +143,7 @@ public class WifiConfig implements NetConfig {
 	}
 	
 	public void setPasskey(String key) {
-		Password psswd= new WifiPassword(key);
+		Password psswd= new Password(key);
 		this.m_passkey = psswd;
 	}
 	

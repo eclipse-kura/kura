@@ -62,7 +62,6 @@ import org.eclipse.kura.net.wifi.WifiInterface.Capability;
 import org.eclipse.kura.net.wifi.WifiInterfaceAddress;
 import org.eclipse.kura.net.wifi.WifiInterfaceAddressConfig;
 import org.eclipse.kura.net.wifi.WifiMode;
-import org.eclipse.kura.net.wifi.WifiPassword;
 import org.eclipse.kura.net.wifi.WifiRadioMode;
 import org.eclipse.kura.net.wifi.WifiSecurity;
 import org.eclipse.kura.usb.UsbDevice;
@@ -756,8 +755,7 @@ public class NetworkConfiguration {
 		if(wifiConfig != null && psswd != null) {
 			properties.put(prefix+".passphrase", psswd);
 		} else {
-			s_logger.warn("<IAB> ### addWifiConfigIP4Properties() :: new WifiPassword('')");
-			properties.put(prefix+".passphrase", new WifiPassword("")); // <IAB>
+			properties.put(prefix+".passphrase", new Password(""));
 		}
 		if(wifiConfig != null && wifiConfig.getHardwareMode() != null) {
 			properties.put(prefix+".hardwareMode", wifiConfig.getHardwareMode());
@@ -871,7 +869,7 @@ public class NetworkConfiguration {
 			psswd = (Password) psswdObj;
 		} else if (psswdObj instanceof String) {
 			char[] tempPsswd= ((String) psswdObj).toCharArray();
-			psswd= new WifiPassword(tempPsswd);
+			psswd= new Password(tempPsswd);
 		}
 		String passphrase = new String(psswd.getPassword());
 		

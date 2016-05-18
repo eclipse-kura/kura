@@ -22,10 +22,12 @@ import java.util.List;
 import java.util.Properties;
 
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.core.net.NetworkConfiguration;
 import org.eclipse.kura.core.net.NetworkConfigurationVisitor;
 import org.eclipse.kura.core.net.WifiInterfaceAddressConfigImpl;
 import org.eclipse.kura.core.net.WifiInterfaceConfigImpl;
+import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.linux.net.wifi.WpaSupplicantManager;
 import org.eclipse.kura.net.NetConfig;
 import org.eclipse.kura.net.NetInterfaceAddressConfig;
@@ -205,8 +207,8 @@ public class WpaSupplicantConfigReader implements NetworkConfigurationVisitor {
 		        String keyMgmt = props.getProperty("key_mgmt");
 		        s_logger.debug("current wpa_supplicant.conf: key_mgmt={}", keyMgmt);
 		        if (keyMgmt != null && keyMgmt.equalsIgnoreCase("WPA-PSK")) {
-		        	password = WifiVisitorUtil.getPassphrase(ifaceName, WifiMode.INFRA);
-		        	s_logger.warn("<IAB> getWifiClientConfig() :: password is: {}", password );
+		        	//password = WifiVisitorUtil.getPassphrase(ifaceName, WifiMode.INFRA);
+		        	password = props.getProperty("psk");
 		            if (proto != null) {
 						if(proto.trim().equals("WPA")) {
 							wifiSecurity = WifiSecurity.SECURITY_WPA;
@@ -219,7 +221,8 @@ public class WpaSupplicantConfigReader implements NetworkConfigurationVisitor {
 						wifiSecurity = WifiSecurity.SECURITY_WPA2;
 					}
 		        } else {
-		        	password = WifiVisitorUtil.getPassphrase(ifaceName, WifiMode.INFRA);
+		        	//password = WifiVisitorUtil.getPassphrase(ifaceName, WifiMode.INFRA);
+		        	password = props.getProperty("wep_key0");
 		            if (password != null) {
 		                wifiSecurity = WifiSecurity.SECURITY_WEP;
 		            } else {
@@ -229,9 +232,19 @@ public class WpaSupplicantConfigReader implements NetworkConfigurationVisitor {
 		            pairwiseCiphers = null;
 		            groupCiphers = null;
 		        }
-		        if(password == null) {
-		        	password = "";
-		        }
+		        if ((password != null) && !password.isEmpty()) {
+					CryptoService cryptoService = WifiVisitorUtil.getCryptoService();
+					if (cryptoService != null) {
+						try {
+							Password decryptedPassword = new Password(cryptoService.decryptAes(password.toCharArray()));
+							password = decryptedPassword.toString();
+						} catch (KuraException e) {
+							s_logger.error("getWifiClientConfig() :: Failed to decrypt password={} - {}", password, e);
+						}
+					}
+				} else {
+					password = WifiVisitorUtil.getPassphrase(ifaceName, WifiMode.INFRA);
+				}
 		        
 		        String sBgscan = props.getProperty("bgscan");
 		        if (sBgscan != null) {

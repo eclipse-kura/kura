@@ -19,10 +19,12 @@ import java.util.List;
 import java.util.Properties;
 
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.core.net.NetworkConfiguration;
 import org.eclipse.kura.core.net.NetworkConfigurationVisitor;
 import org.eclipse.kura.core.net.WifiInterfaceAddressConfigImpl;
 import org.eclipse.kura.core.net.WifiInterfaceConfigImpl;
+import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.linux.net.wifi.HostapdManager;
 import org.eclipse.kura.net.NetConfig;
 import org.eclipse.kura.net.NetInterfaceAddressConfig;
@@ -183,10 +185,33 @@ public class HostapdConfigReader implements NetworkConfigurationVisitor {
 											+ configFile.getAbsolutePath());
 						}
 
-						password = WifiVisitorUtil.getPassphrase(ifaceName, WifiMode.MASTER);
-						s_logger.warn("<IAB> getWifiHostConfig() :: password is: {}", password );
+						//password = WifiVisitorUtil.getPassphrase(ifaceName, WifiMode.MASTER);
+						if (hostapdProps.containsKey("wpa_passphrase")) {
+							password = hostapdProps
+									.getProperty("wpa_passphrase");
+						} else if (hostapdProps.containsKey("wpa_psk")) {
+							password = hostapdProps.getProperty("wpa_psk");
+						} else {
+							throw KuraException
+									.internalError("malformatted config file, no wpa passphrase: "
+											+ configFile.getAbsolutePath());
+						}
 					} else if (hostapdProps.containsKey("wep_key0")) {
 						security = WifiSecurity.SECURITY_WEP;
+						password = hostapdProps.getProperty("wep_key0");
+						//password = WifiVisitorUtil.getPassphrase(ifaceName, WifiMode.MASTER);
+					}
+					if ((password != null) && !password.isEmpty()) {
+						CryptoService cryptoService = WifiVisitorUtil.getCryptoService();
+						if (cryptoService != null) {
+							try {
+								Password decryptedPassword = new Password(cryptoService.decryptAes(password.toCharArray()));
+								password = decryptedPassword.toString();
+							} catch (KuraException e) {
+								s_logger.error("getWifiHostConfig() :: Failed to decrypt password={} - {}", password, e);
+							}
+						}
+					} else {
 						password = WifiVisitorUtil.getPassphrase(ifaceName, WifiMode.MASTER);
 					}
 					

@@ -283,14 +283,11 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 	
 	@Override
 	public Map<String, Object> getConfigurableComponentConfigurationProperties(String pid) throws KuraException {
-		s_logger.warn("<IAB> [+] getConfigurableComponentConfigurationProperties()");
 		Map<String, Object> props = null;
 		ComponentConfiguration cc = getConfigurableComponentConfiguration(pid);
 		if(cc != null) {
-			s_logger.warn("<IAB> [1] getConfigurableComponentConfigurationProperties()");
 			props = cc.getConfigurationProperties();
 		}
-		s_logger.warn("<IAB> [-] getConfigurableComponentConfigurationProperties()");
 		return props;
 	}
 

@@ -25,12 +25,12 @@ public class WifiPassword extends Password {
 	public WifiPassword(char[] password) {
 		super(password);
 	}
-	
+		
 	public void validate(WifiSecurity wifiSecurity) throws KuraException {
 		if (m_password == null) {
 			throw KuraException.internalError("the passwd can not be null");
 		}
-		String passKey = m_password.toString().trim();
+		String passKey = new String(m_password).trim();
 		if (wifiSecurity == WifiSecurity.SECURITY_WEP) {
 			if(passKey.length() == 10) {
 				//check to make sure it is all hex

@@ -13,7 +13,7 @@ package org.eclipse.kura.configuration;
 
 public class Password 
 {
-	protected char[] m_password;
+	private char[] m_password;
 
 	public Password(String password) {
 		super();

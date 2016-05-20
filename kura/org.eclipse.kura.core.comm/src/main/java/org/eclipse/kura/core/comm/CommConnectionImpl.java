@@ -255,7 +255,7 @@ public class CommConnectionImpl implements CommConnection
             }
         }
 
-		while ((m_inputStream.available() >= 1) && (buffer.limit() < bufferLimit)) {
+		while ((m_inputStream.available() >= 1) && (buffer.position() < bufferLimit - 1)) {
             int c = m_inputStream.read();
             buffer.put((byte) c);
 		}
@@ -278,7 +278,7 @@ public class CommConnectionImpl implements CommConnection
 
 		start = System.currentTimeMillis();
 		do {
-			while ((m_inputStream.available() > 0) && (buffer.limit() < bufferLimit)) {
+			if ((m_inputStream.available() > 0) && (buffer.position() < bufferLimit - 1)) {
 				start = System.currentTimeMillis();
 				int c = m_inputStream.read();
 	            buffer.put((byte) c);

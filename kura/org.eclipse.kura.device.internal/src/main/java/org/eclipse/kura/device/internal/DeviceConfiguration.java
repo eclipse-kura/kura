@@ -115,7 +115,7 @@ public final class DeviceConfiguration {
 	}
 
 	/** The list of channels associated with this device. */
-	private final Map<String, Channel> m_channels;
+	private final Map<String, Channel> m_channels = Maps.newConcurrentMap();
 
 	/** The device description. */
 	private String m_deviceDescription;
@@ -134,7 +134,6 @@ public final class DeviceConfiguration {
 	 */
 	private DeviceConfiguration(final Map<String, Object> properties) {
 		this.extractProperties(properties);
-		this.m_channels = Maps.newConcurrentMap();
 	}
 
 	/**
@@ -159,21 +158,22 @@ public final class DeviceConfiguration {
 	private void extractProperties(final Map<String, Object> properties) {
 		checkCondition(properties == null, "Properties cannot be null");
 
-		final HashSet<Integer> parsedIndexes = Sets.newHashSet();
+		final HashSet<Long> parsedIndexes = Sets.newHashSet();
 		for (final String property : properties.keySet()) {
 			try {
 				final String startStr = CharMatcher.DIGIT.removeFrom(property);
 				if ((CHANNEL_PROPERTY_PREFIX + CHANNEL_PROPERTY_POSTFIX).equals(startStr)) {
 					final String extractedNo = CharMatcher.DIGIT.retainFrom(property);
-					final int index = Integer.parseInt(extractedNo);
+					final long index = Long.parseLong(extractedNo);
 					if (!parsedIndexes.contains(index)) {
 						parsedIndexes.add(index);
-						final Object channelProperties = properties.get(index);
+						final Object channelProperties = properties
+								.get(CHANNEL_PROPERTY_PREFIX + index + CHANNEL_PROPERTY_POSTFIX);
 						Channel channel;
 						// if any key has values of type map, then it is
 						// designated for channels
 						if (channelProperties instanceof Map<?, ?>) {
-							channel = this.retrieveChannel((Map<String, Object>) properties.get(index));
+							channel = this.retrieveChannel((Map<String, Object>) channelProperties);
 							this.addChannel(channel);
 						}
 					}

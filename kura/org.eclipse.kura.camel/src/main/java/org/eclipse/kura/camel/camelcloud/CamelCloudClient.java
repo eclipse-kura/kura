@@ -23,6 +23,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import static org.eclipse.kura.KuraErrorCode.CONFIGURATION_ERROR;
 import static org.eclipse.kura.KuraErrorCode.OPERATION_NOT_SUPPORTED;
@@ -33,6 +35,8 @@ import static org.apache.camel.ServiceStatus.Started;
 public class CamelCloudClient implements CloudClient {
 
     private final Logger s_logger = LoggerFactory.getLogger(CamelCloudClient.class);
+
+    private ScheduledExecutorService executorService;
 
     private final CamelCloudService cloudService;
 
@@ -52,10 +56,11 @@ public class CamelCloudClient implements CloudClient {
         this.producerTemplate = camelContext.createProducerTemplate();
         this.applicationId = applicationId;
         this.baseEndpoint = baseEndpoint;
+        this.executorService = camelContext.getExecutorServiceManager().newDefaultScheduledThreadPool(this, "cloudClientExecutor");
     }
 
     public CamelCloudClient(CamelCloudService cloudService, CamelContext camelContext, String applicationId) {
-        this(cloudService, camelContext, applicationId, "seda:%s");
+        this(cloudService, camelContext, applicationId, "vm:%s");
     }
 
     // Cloud client API
@@ -121,10 +126,19 @@ public class CamelCloudClient implements CloudClient {
 
     @Override
     public void unsubscribe(String topic) throws KuraException {
-        String internalQueue = applicationId + ":" + topic;
+        final String internalQueue = applicationId + ":" + topic;
         try {
-            camelContext.stopRoute(internalQueue);
-            camelContext.removeRoute(internalQueue);
+            executorService.schedule(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        camelContext.stopRoute(internalQueue);
+                        camelContext.removeRoute(internalQueue);
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            }, 1, TimeUnit.SECONDS);
         } catch (Exception e) {
             throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
         }

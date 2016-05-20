@@ -169,11 +169,10 @@ public final class DeviceConfiguration {
 						parsedIndexes.add(index);
 						final Object channelProperties = properties
 								.get(CHANNEL_PROPERTY_PREFIX + index + CHANNEL_PROPERTY_POSTFIX);
-						Channel channel;
 						// if any key has values of type map, then it is
 						// designated for channels
 						if (channelProperties instanceof Map<?, ?>) {
-							channel = this.retrieveChannel((Map<String, Object>) channelProperties);
+							final Channel channel = this.retrieveChannel((Map<String, Object>) channelProperties);
 							this.addChannel(channel);
 						}
 					}

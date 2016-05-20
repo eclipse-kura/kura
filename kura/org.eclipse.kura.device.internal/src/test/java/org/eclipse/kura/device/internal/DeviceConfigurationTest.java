@@ -53,20 +53,62 @@ public final class DeviceConfigurationTest extends TestCase {
 		this.m_properties.put(DEVICE_DRIVER_PROP, "sample.driver");
 		this.m_properties.put(DEVICE_ID_PROP, "sample.device");
 		this.m_properties.put(DEVICE_DESC_PROP, "sample.device.description");
-		this.m_sampleChannelConfig = Maps.newHashMap();
-		this.m_sampleChannelConfig.put("name", "sample.channel");
-		this.m_sampleChannelConfig.put("type", "READ");
-		this.m_sampleChannelConfig.put("value_type", "INTEGER");
-		this.m_properties.put(CHANNEL_PROPERTY_PREFIX + System.currentTimeMillis() + CHANNEL_PROPERTY_POSTFIX,
-				this.m_sampleChannelConfig);
-		this.m_configuration = DeviceConfiguration.of(this.m_properties);
 	}
 
 	/**
-	 * Test properties.
+	 * Test sample channel properties.
 	 */
 	@Test
-	public void testProperties() {
+	public void testSampleChannelProperties1() {
+		this.m_sampleChannelConfig = Maps.newHashMap();
+		this.m_sampleChannelConfig.put("name", "sample.channel1");
+		this.m_sampleChannelConfig.put("type", "WRITE");
+		this.m_sampleChannelConfig.put("value_type", "BOOLEAN");
+		this.m_sampleChannelConfig.put("channel_config", Maps.newHashMap());
+		this.m_properties.put(CHANNEL_PROPERTY_PREFIX + System.currentTimeMillis() + CHANNEL_PROPERTY_POSTFIX,
+				this.m_sampleChannelConfig);
+		this.m_configuration = DeviceConfiguration.of(this.m_properties);
+
+		assertNotNull(this.m_configuration);
+		assertNotNull(this.m_configuration.getDeviceName());
+		assertNotNull(this.m_configuration.getDeviceDescription());
+		assertNotNull(this.m_configuration.getDriverId());
+		assertEquals("sample.driver", this.m_configuration.getDriverId());
+		assertEquals("sample.device", this.m_configuration.getDeviceName());
+		assertEquals("sample.device.description", this.m_configuration.getDeviceDescription());
+
+		assertEquals(1, this.m_configuration.getChannels().size());
+		assertNotNull(this.m_configuration.getChannels().get("sample.channel1"));
+		final Channel channel = new Channel("sample.channel", ChannelType.WRITE, DataType.BOOLEAN,
+				this.m_sampleChannelConfig);
+		assertEquals("sample.channel", channel.getName());
+		assertEquals(ChannelType.WRITE, channel.getType());
+		assertEquals(DataType.BOOLEAN, channel.getValueType());
+		assertNotNull(channel.getConfig());
+	}
+
+	/**
+	 * Test sample channel properties.
+	 */
+	@Test
+	public void testSampleChannelProperties2() {
+		this.m_sampleChannelConfig = Maps.newHashMap();
+		this.m_sampleChannelConfig.put("name", "sample.channel2");
+		this.m_sampleChannelConfig.put("type", "READ");
+		this.m_sampleChannelConfig.put("value_type", "INTEGER");
+		this.m_sampleChannelConfig.put("channel_config", Maps.newHashMap());
+		this.m_properties.put(CHANNEL_PROPERTY_PREFIX + System.currentTimeMillis() + CHANNEL_PROPERTY_POSTFIX,
+				this.m_sampleChannelConfig);
+		this.m_configuration = DeviceConfiguration.of(this.m_properties);
+
+		assertNotNull(this.m_configuration);
+		assertNotNull(this.m_configuration.getDeviceName());
+		assertNotNull(this.m_configuration.getDeviceDescription());
+		assertNotNull(this.m_configuration.getDriverId());
+		assertEquals("sample.driver", this.m_configuration.getDriverId());
+		assertEquals("sample.device", this.m_configuration.getDeviceName());
+		assertEquals("sample.device.description", this.m_configuration.getDeviceDescription());
+
 		assertNotNull(this.m_configuration);
 		assertNotNull(this.m_configuration.getDeviceName());
 		assertNotNull(this.m_configuration.getDeviceDescription());
@@ -75,12 +117,13 @@ public final class DeviceConfigurationTest extends TestCase {
 		assertEquals("sample.device", this.m_configuration.getDeviceName());
 		assertEquals("sample.device.description", this.m_configuration.getDeviceDescription());
 		assertEquals(1, this.m_configuration.getChannels().size());
-		assertNotNull(this.m_configuration.getChannels().get("sample.channel"));
+		assertNotNull(this.m_configuration.getChannels().get("sample.channel2"));
 		final Channel channel = new Channel("sample.channel", ChannelType.READ, DataType.INTEGER,
 				this.m_sampleChannelConfig);
 		assertEquals("sample.channel", channel.getName());
 		assertEquals(ChannelType.READ, channel.getType());
 		assertEquals(DataType.INTEGER, channel.getValueType());
+		assertNotNull(channel.getConfig());
 	}
 
 }

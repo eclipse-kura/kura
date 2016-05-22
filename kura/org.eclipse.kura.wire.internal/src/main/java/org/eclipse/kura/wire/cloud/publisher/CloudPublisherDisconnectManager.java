@@ -74,7 +74,7 @@ public final class CloudPublisherDisconnectManager {
 	 *             if argument passed is negative
 	 */
 	public synchronized void disconnectInMinutes(final int minutes) {
-		checkCondition(minutes < 0, "Minutes cannot be null");
+		checkCondition(minutes < 0, "Minutes cannot be negative");
 		// check if the required timeout is longer than the scheduled one
 		final long remainingDelay = this.m_nextExecutionTime - System.currentTimeMillis();
 		final long requiredDelay = (long) minutes * 60 * 1000;

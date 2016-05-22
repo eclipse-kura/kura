@@ -231,7 +231,7 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
 	 */
 	private synchronized void execute(final String sql, final Integer... params) throws SQLException {
 		checkCondition(sql == null, "SQL query cannot be null");
-		checkCondition(params == null, "Extra Parameters cannot be null");
+		checkCondition(params == null, "Extra Parameters to execute query cannot be null");
 
 		Connection conn = null;
 		PreparedStatement stmt = null;
@@ -367,7 +367,7 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
 	/** {@inheritDoc} */
 	@Override
 	public synchronized void onWireReceive(final WireEnvelope wireEvelope) {
-		checkCondition(wireEvelope == null, "Wire envelope cannot be null");
+		checkCondition(wireEvelope == null, "Wire Envelope cannot be null");
 		s_logger.debug("Wire Enveloped received..." + this.m_wireSupport);
 
 		final List<WireRecord> dataRecords = wireEvelope.getRecords();
@@ -541,7 +541,7 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
 	 *            the updated service component properties
 	 */
 	public void updated(final Map<String, Object> properties) {
-		s_logger.info("updated...: " + properties);
+		s_logger.info("Updating DB Wire Record Store with..." + properties);
 		this.m_options = new DbWireRecordStoreOptions(properties);
 	}
 

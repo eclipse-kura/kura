@@ -272,8 +272,8 @@ public class BaseDevice implements Device, SelfConfiguringComponent {
 	/** {@inheritDoc} */
 	@Override
 	public List<DeviceRecord> read(final List<String> channelNames) throws KuraException {
-		checkCondition(channelNames.isEmpty() || (channelNames == null),
-				"List of channel names cannot be empty or null");
+		checkCondition((channelNames == null), "List of channel names cannot be null");
+		checkCondition(channelNames.isEmpty(), "List of channel names cannot be empty");
 		checkCondition(this.m_driver == null, "Driver cannot be null");
 
 		s_logger.debug("Reading device channels...");
@@ -284,7 +284,6 @@ public class BaseDevice implements Device, SelfConfiguringComponent {
 		final Map<String, Channel> channels = this.m_deviceConfiguration.getChannels();
 
 		for (final String channelName : channelNames) {
-
 			checkCondition(!channels.containsKey(channelName), "Channel not available");
 
 			final Channel channel = channels.get(channelName);

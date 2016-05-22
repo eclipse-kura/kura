@@ -190,7 +190,7 @@ public final class DeviceCloudlet extends Cloudlet {
 				final List<DeviceRecord> deviceRecords = device.read(Lists.newArrayList(channelName));
 				for (final DeviceRecord deviceRecord : deviceRecords) {
 					respPayload.addMetric("Flag", deviceRecord.getDeviceFlag());
-					respPayload.addMetric("Timestamp", deviceRecord.getTimetstamp());
+					respPayload.addMetric("Timestamp", deviceRecord.getTimestamp());
 					respPayload.addMetric("Value", deviceRecord.getValue());
 					respPayload.addMetric("Channel_Name", deviceRecord.getChannelName());
 				}
@@ -215,7 +215,7 @@ public final class DeviceCloudlet extends Cloudlet {
 				final List<DeviceRecord> deviceRecords = device.write(Lists.newArrayList(deviceRecord));
 				for (final DeviceRecord record : deviceRecords) {
 					respPayload.addMetric("Flag", record.getDeviceFlag());
-					respPayload.addMetric("Timestamp", record.getTimetstamp());
+					respPayload.addMetric("Timestamp", record.getTimestamp());
 					respPayload.addMetric("Value", record.getValue());
 					respPayload.addMetric("Channel_Name", record.getChannelName());
 				}

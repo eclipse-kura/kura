@@ -72,7 +72,7 @@ public final class BaseDriverListener implements DriverListener {
 		default:
 			break;
 		}
-		deviceRecord.setTimetstamp(driverRecord.getTimetstamp());
+		deviceRecord.setTimestamp(driverRecord.getTimestamp());
 		deviceRecord.setValue(driverRecord.getValue());
 		final DeviceEvent deviceEvent = new DeviceEvent(deviceRecord);
 		this.m_deviceListener.onDeviceEvent(deviceEvent);

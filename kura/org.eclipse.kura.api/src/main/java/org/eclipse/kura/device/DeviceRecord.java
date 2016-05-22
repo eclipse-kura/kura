@@ -30,8 +30,8 @@ public final class DeviceRecord {
 	/** The device flag. */
 	private DeviceFlag m_deviceFlag;
 
-	/** The timetstamp of the record */
-	private long m_timetstamp;
+	/** The timestamp of the record */
+	private long m_timestamp;
 
 	/**
 	 * Represents the value as read by the driver during a read or a monitor
@@ -59,12 +59,12 @@ public final class DeviceRecord {
 	}
 
 	/**
-	 * Gets the timetstamp.
+	 * Gets the timestamp.
 	 *
-	 * @return the timetstamp
+	 * @return the timestamp
 	 */
-	public long getTimetstamp() {
-		return this.m_timetstamp;
+	public long getTimestamp() {
+		return this.m_timestamp;
 	}
 
 	/**
@@ -97,13 +97,13 @@ public final class DeviceRecord {
 	}
 
 	/**
-	 * Sets the timetstamp as provided
+	 * Sets the timestamp as provided
 	 *
 	 * @param timetstamp
-	 *            the new timetstamp
+	 *            the new timestamp
 	 */
-	public void setTimetstamp(final long timetstamp) {
-		this.m_timetstamp = timetstamp;
+	public void setTimestamp(final long timestamp) {
+		this.m_timestamp = timestamp;
 	}
 
 	/**
@@ -120,7 +120,7 @@ public final class DeviceRecord {
 	@Override
 	public String toString() {
 		return MoreObjects.toStringHelper(this).add("channel_name", this.m_channelName)
-				.add("device_flag", this.m_deviceFlag).add("timestamp", this.m_timetstamp).add("value", this.m_value)
+				.add("device_flag", this.m_deviceFlag).add("timestamp", this.m_timestamp).add("value", this.m_value)
 				.toString();
 	}
 

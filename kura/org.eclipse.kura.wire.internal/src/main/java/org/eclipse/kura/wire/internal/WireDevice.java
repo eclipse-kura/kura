@@ -22,6 +22,7 @@ import java.util.Map;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.device.Channel;
+import org.eclipse.kura.device.ChannelType;
 import org.eclipse.kura.device.DeviceRecord;
 import org.eclipse.kura.device.internal.BaseDevice;
 import org.eclipse.kura.type.LongValue;
@@ -119,8 +120,7 @@ public final class WireDevice extends BaseDevice implements WireComponent, WireE
 					new StringValue(deviceRecord.getChannelName()));
 			final WireField deviceFlagWireField = new WireField("Device_Flag",
 					new StringValue(deviceRecord.getDeviceFlag().name()));
-			final WireField timestampWireField = new WireField("Timestamp",
-					new LongValue(deviceRecord.getTimetstamp()));
+			final WireField timestampWireField = new WireField("Timestamp", new LongValue(deviceRecord.getTimestamp()));
 			final WireField valueWireField = new WireField("Value", deviceRecord.getValue());
 			final WireRecord wireRecord = new WireRecord(new Timestamp(new Date().getTime()),
 					Lists.newArrayList(channelWireField, deviceFlagWireField, timestampWireField, valueWireField));
@@ -150,7 +150,9 @@ public final class WireDevice extends BaseDevice implements WireComponent, WireE
 		// determining channels to read
 		for (final String channelKey : channels.keySet()) {
 			final Channel channel = channels.get(channelKey);
-			channelsToRead.add(channel.getName());
+			if ((channel.getType() == ChannelType.READ) || (channel.getType() == ChannelType.READ_WRITE)) {
+				channelsToRead.add(channel.getName());
+			}
 		}
 
 		if (wireEnvelope.getRecords().get(0).getFields().get(0).getName().equals(Timer.TIMER_EVENT_FIELD_NAME)) {
@@ -169,7 +171,9 @@ public final class WireDevice extends BaseDevice implements WireComponent, WireE
 			for (final WireField wireField : wireRecord.getFields()) {
 				for (final String channelKey : channels.keySet()) {
 					final Channel channel = channels.get(channelKey);
-					deviceRecordsToWriteChannels.add(this.prepareDeviceRecord(channel, wireField.getValue()));
+					if ((channel.getType() == ChannelType.WRITE) || (channel.getType() == ChannelType.READ_WRITE)) {
+						deviceRecordsToWriteChannels.add(this.prepareDeviceRecord(channel, wireField.getValue()));
+					}
 				}
 			}
 		}

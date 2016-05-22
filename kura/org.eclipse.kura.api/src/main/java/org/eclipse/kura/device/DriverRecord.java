@@ -43,7 +43,7 @@ public final class DriverRecord {
 	private DriverFlag m_driverFlag;
 
 	/** Represents the timestamp of the operation performed. */
-	private long m_timetstamp;
+	private long m_timestamp;
 
 	/**
 	 * Represents the value as read by the driver during a read or a monitor
@@ -82,10 +82,10 @@ public final class DriverRecord {
 	/**
 	 * Returns the associated timestamp.
 	 *
-	 * @return the timetstamp
+	 * @return the timestamp
 	 */
-	public long getTimetstamp() {
-		return this.m_timetstamp;
+	public long getTimestamp() {
+		return this.m_timestamp;
 	}
 
 	/**
@@ -131,10 +131,10 @@ public final class DriverRecord {
 	 * Sets the timestamp as provided.
 	 *
 	 * @param timetstamp
-	 *            the new timetstamp
+	 *            the new timestamp
 	 */
-	public void setTimetstamp(final long timetstamp) {
-		this.m_timetstamp = timetstamp;
+	public void setTimestamp(final long timestamp) {
+		this.m_timestamp = timestamp;
 	}
 
 	/**
@@ -151,8 +151,8 @@ public final class DriverRecord {
 	@Override
 	public String toString() {
 		return MoreObjects.toStringHelper(this).add("channel_name", this.m_channelName)
-				.add("driver_flag", this.m_driverFlag).add("timestamp", this.m_timetstamp).add("value", this.m_value)
-				.toString();
+				.add("channel_config", this.m_channelConfig).add("driver_flag", this.m_driverFlag)
+				.add("timestamp", this.m_timestamp).add("value", this.m_value).toString();
 	}
 
 }

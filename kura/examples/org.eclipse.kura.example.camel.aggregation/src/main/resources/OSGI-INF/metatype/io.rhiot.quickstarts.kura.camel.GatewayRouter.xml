@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
+    <OCD id="io.rhiot.quickstarts.kura.camel.GatewayRouter"
+         name="Rhiot Camel gateway" description="Configurable Camel-based Kura gateway">
+        
+        <Icon resource="OSGI-INF/rhiot-logo.png" size="32" />
+
+        <AD id="camel.route.xml" name="camel.route.xml"
+            description="Camel XML route definition &#x200b;&#x200b;&#x200b;&#x200b;&#x200b;&#x200b;&#x200b;&#x200b;&#x200b;&#x200b;"
+            type="String" max="10000" cardinality="0" required="false" default=' '/>
+
+    </OCD>
+
+    <Designate pid="io.rhiot.quickstarts.kura.camel.GatewayRouter">
+        <Object ocdref="io.rhiot.quickstarts.kura.camel.GatewayRouter"/>
+    </Designate>
+</MetaData>

@@ -16,8 +16,6 @@ import org.eclipse.kura.configuration.Password;
 
 public class WifiPassword extends Password {
 	
-	private static final String HEXES = "0123456789ABCDEF";
-	
 	/**
 	 * WifiPassword constructor
 	 * 
@@ -76,13 +74,8 @@ public class WifiPassword extends Password {
 				} catch(Exception e) {
 					throw KuraException.internalError("the WEP key (passwd) must be all HEX characters (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, a, b, c, d, e, and f");
 				}
-			} else if ((passKey.length() == 5)
-					|| (passKey.length() == 13)
-					|| (passKey.length() == 16)) {
-				
-				// 5, 13, or 16 ASCII characters
-				passKey = toHex(passKey);
-			} else {
+			} else if (!((passKey.length() == 5) || (passKey.length() == 13) || (passKey.length() == 16))) {	
+				// not 5, 13, or 16 ASCII characters
 				throw KuraException.internalError("the WEP key (passwd) must be 10, 26, or 32 HEX characters in length");
 			}
 		} else if ((wifiSecurity == WifiSecurity.SECURITY_WPA)
@@ -92,21 +85,5 @@ public class WifiPassword extends Password {
 				throw KuraException.internalError("the WPA passphrase (passwd) must be between 8 (inclusive) and 63 (inclusive) characters in length: " + passKey);
 			}
 		}
-	}
-	
-	/*
-	 * This method converts supplied string to hex
-	 */
-	private String toHex(String s) {
-		if (s == null) {
-			return null;
-		}
-		byte[] raw = s.getBytes();
-
-		StringBuffer hex = new StringBuffer(2 * raw.length);
-		for (int i = 0; i < raw.length; i++) {
-			hex.append(HEXES.charAt((raw[i] & 0xF0) >> 4)).append(HEXES.charAt((raw[i] & 0x0F)));
-		}
-		return hex.toString();
 	}
 }

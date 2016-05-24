@@ -9,7 +9,7 @@
  * Contributors:
  *     Red Hat
  *******************************************************************************/
-package io.rhiot.quickstarts.kura.camel;
+package org.eclipse.kura.example.camel.aggregation;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.processor.aggregate.AggregationStrategy;

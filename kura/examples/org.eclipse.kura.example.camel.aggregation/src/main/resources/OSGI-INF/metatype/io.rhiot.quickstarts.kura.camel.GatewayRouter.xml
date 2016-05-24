@@ -14,7 +14,7 @@
 -->
 <MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
     <OCD id="io.rhiot.quickstarts.kura.camel.GatewayRouter"
-         name="Rhiot Camel gateway" description="Configurable Camel-based Kura gateway">
+         name="Camel gateway" description="Configurable Camel-based Kura gateway">
         
         <Icon resource="OSGI-INF/logo.png" size="32" />
 

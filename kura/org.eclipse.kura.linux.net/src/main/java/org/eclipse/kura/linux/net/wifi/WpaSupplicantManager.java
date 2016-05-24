@@ -38,6 +38,15 @@ public class WpaSupplicantManager {
 	private static final File TEMP_CONFIG_FILE = new File("/tmp/wpa_supplicant.conf");
 	
 	private static String m_driver = null;
+	
+	private static boolean s_isIntelEdison = false;
+	static {
+		StringBuilder sb = new StringBuilder(KuraConstants.Intel_Edison.getImageName());
+		sb.append('_').append(KuraConstants.Intel_Edison.getImageVersion()).append('_').append(KuraConstants.Intel_Edison.getTargetName());
+		if(OS_VERSION.equals(sb.toString())) {
+			s_isIntelEdison = true;
+		}
+	}
 
 	public static void start(String interfaceName, String driver, Password passkey, WifiSecurity wifiSecurity) throws KuraException {
 		start (interfaceName, driver, generateSupplicantConfigFile(interfaceName, passkey, wifiSecurity));
@@ -57,7 +66,7 @@ public class WpaSupplicantManager {
 
 			String drv = WpaSupplicant.getDriver(interfaceName);
 			if (drv != null) {
-				if (OS_VERSION.equals(KuraConstants.Intel_Edison.getImageName() + "_" + KuraConstants.Intel_Edison.getImageVersion() + "_" + KuraConstants.Intel_Edison.getTargetName())) {
+				if (s_isIntelEdison) {
 					m_driver = driver;
 				} else {
 					m_driver =  drv;
@@ -74,9 +83,9 @@ public class WpaSupplicantManager {
 			s_logger.error("Exception while enabling WPA Supplicant!", e);
 			throw KuraException.internalError(e);
 		} finally {
-			if (!OS_VERSION.equals(KuraConstants.Intel_Edison.getImageName() + "_" + KuraConstants.Intel_Edison.getImageVersion() + "_" + KuraConstants.Intel_Edison.getTargetName())) {
+			if (!s_isIntelEdison) {
 				// delete temporary wpa_supplicant.conf that contains passkey
-				File tmpHostapdConfigFile = new File(privGetWpaSupplicantConfigFilename(interfaceName));
+				File tmpHostapdConfigFile = new File(getWpaSupplicantConfigFilename(interfaceName, "/tmp"));
 				if (tmpHostapdConfigFile.exists()) {
 					tmpHostapdConfigFile.delete();
 				}
@@ -90,7 +99,7 @@ public class WpaSupplicantManager {
 	 */
 	private static String formSupplicantStartCommand(String ifaceName, File configFile) {
 		StringBuilder sb = new StringBuilder();
-		if (OS_VERSION.equals(KuraConstants.Intel_Edison.getImageName() + "_" + KuraConstants.Intel_Edison.getImageVersion() + "_" + KuraConstants.Intel_Edison.getTargetName())) {
+		if (s_isIntelEdison) {
 			sb.append("systemctl start wpa_supplicant");
 		} else {
 			sb.append("wpa_supplicant -B -D ");
@@ -110,7 +119,7 @@ public class WpaSupplicantManager {
 	private static String formSupplicantStopCommand(String ifaceName) throws KuraException {
 
 		StringBuilder sb = new StringBuilder();
-		if (OS_VERSION.equals(KuraConstants.Intel_Edison.getImageName() + "_" + KuraConstants.Intel_Edison.getImageVersion() + "_" + KuraConstants.Intel_Edison.getTargetName())) {
+		if (s_isIntelEdison) {
 			sb.append("systemctl stop wpa_supplicant");
 		} else {
 			//sb.append("killall wpa_supplicant");
@@ -190,36 +199,34 @@ public class WpaSupplicantManager {
 	}
 	
 	public static String getWpaSupplicantConfigFilename(String ifaceName) {
-		StringBuilder sb = new StringBuilder();
-		if (OS_VERSION.equals(KuraConstants.Intel_Edison.getImageName() + "_" + KuraConstants.Intel_Edison.getImageVersion() + "_" + KuraConstants.Intel_Edison.getTargetName())) {
-			sb.append("/etc/wpa_supplicant/wpa_supplicant.conf");
-		} else {
-			sb.append("/etc/wpa_supplicant-").append(ifaceName).append(".conf");
-		}
-		return sb.toString();
+		return getWpaSupplicantConfigFilename(ifaceName, "/etc");
 	}
 	
-	private static String privGetWpaSupplicantConfigFilename(String ifaceName) {
+	private static String getWpaSupplicantConfigFilename(String ifaceName, String folder) {
 		StringBuilder sb = new StringBuilder();
-		if (OS_VERSION.equals(KuraConstants.Intel_Edison.getImageName() + "_" + KuraConstants.Intel_Edison.getImageVersion() + "_" + KuraConstants.Intel_Edison.getTargetName())) {
+		if (s_isIntelEdison) {
 			sb.append("/etc/wpa_supplicant/wpa_supplicant.conf");
 		} else {
-			sb.append("/tmp/wpa_supplicant-").append(ifaceName).append(".conf");
+			sb.append(folder).append('/').append("wpa_supplicant-").append(ifaceName).append(".conf");
 		}
 		return sb.toString();
 	}
 	
 	private static File generateSupplicantConfigFile(String ifaceName, Password passkey, WifiSecurity wifiSecurity) throws KuraException {
-		File retConfigFile = new File(privGetWpaSupplicantConfigFilename(ifaceName));
+		File retConfigFile = new File(getWpaSupplicantConfigFilename(ifaceName, "/tmp"));
 		File configFile = new File(getWpaSupplicantConfigFilename(ifaceName));
 		if(!configFile.exists()) {
 			throw KuraException.internalError("Config file does not exist: " + configFile.getAbsolutePath());
 		}
+		FileReader fr = null;
+		FileWriter fw = null;
 		BufferedReader br = null;
 		PrintWriter pw = null;	
 		try {
-			br = new BufferedReader(new FileReader(configFile));
-			pw = new PrintWriter(new FileWriter(retConfigFile));
+			fr = new FileReader(configFile);
+			br = new BufferedReader(fr);
+			fw = new FileWriter(retConfigFile);
+			pw = new PrintWriter(fw);
 			String line = null;
             while ((line = br.readLine()) != null) {
                line = line.trim();
@@ -245,8 +252,14 @@ public class WpaSupplicantManager {
 				if (br != null) {
 					br.close();
 				}
+				if (fr != null) {
+					fr.close();
+				}
 				if (pw != null) {
 					pw.close();
+				}
+				if (fw != null) {
+					fw.close();
 				}
 			} catch (IOException e) {
 				s_logger.error("Failed to close file stream - {}", e);

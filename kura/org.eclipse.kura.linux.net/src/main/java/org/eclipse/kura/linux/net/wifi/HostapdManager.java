@@ -36,6 +36,15 @@ public class HostapdManager {
 
 	private static final String OS_VERSION = System.getProperty("kura.os.version");
 	private static final String HOSTAPD_EXEC = "hostapd";
+	
+	private static boolean s_isIntelEdison = false;
+	static {
+		StringBuilder sb = new StringBuilder(KuraConstants.Intel_Edison.getImageName());
+		sb.append('_').append(KuraConstants.Intel_Edison.getImageVersion()).append('_').append(KuraConstants.Intel_Edison.getTargetName());
+		if(OS_VERSION.equals(sb.toString())) {
+			s_isIntelEdison = true;
+		}
+	}
 
 	public static void start(String ifaceName, Password passkey, WifiSecurity wifiSecurity) throws KuraException {
 		SafeProcess proc = null;
@@ -60,9 +69,9 @@ public class HostapdManager {
 			if (proc != null) {
 				ProcessUtil.destroy(proc);
 			}
-			if (!OS_VERSION.equals(KuraConstants.Intel_Edison.getImageName() + "_" + KuraConstants.Intel_Edison.getImageVersion() + "_" + KuraConstants.Intel_Edison.getTargetName())) {
+			if (!s_isIntelEdison) {
 				// delete temporary hostapd.conf that contains passkey
-				File tmpHostapdConfigFile = new File(privGetHostapdConfigFileName(ifaceName));
+				File tmpHostapdConfigFile = new File(getHostapdConfigFileName(ifaceName, "/tmp"));
 				if (tmpHostapdConfigFile.exists()) {
 					tmpHostapdConfigFile.delete();
 				}
@@ -104,7 +113,7 @@ public class HostapdManager {
 	
 	public static int getPid(String ifaceName) throws KuraException {
 		try {
-			String [] tokens = {privGetHostapdConfigFileName(ifaceName)};
+			String [] tokens = {getHostapdConfigFileName(ifaceName, "/tmp")};
 			int pid = LinuxProcessUtil.getPid("hostapd", tokens);
 			s_logger.trace("getPid() :: pid={}", pid);
 			return pid;
@@ -117,7 +126,7 @@ public class HostapdManager {
 			Password passkey, WifiSecurity wifiSecurity)
 			throws KuraException {
 		StringBuilder cmd = new StringBuilder();
-		if (OS_VERSION.equals(KuraConstants.Intel_Edison.getImageName() + "_" + KuraConstants.Intel_Edison.getImageVersion() + "_" + KuraConstants.Intel_Edison.getTargetName())) {
+		if (s_isIntelEdison) {
 			cmd.append("systemctl start hostapd");
 		} else {
 			File configFile = generateHostapdConfigFile(ifaceName, passkey, wifiSecurity);
@@ -128,7 +137,7 @@ public class HostapdManager {
 
 	private static String generateStopCommand(String ifaceName) throws KuraException {
 		StringBuilder cmd = new StringBuilder();
-		if (OS_VERSION.equals(KuraConstants.Intel_Edison.getImageName() + "_" + KuraConstants.Intel_Edison.getImageVersion() + "_" + KuraConstants.Intel_Edison.getTargetName())) {
+		if (s_isIntelEdison) {
 			cmd.append("systemctl stop hostapd");
 		} else {
 			int pid;
@@ -146,36 +155,34 @@ public class HostapdManager {
 	}
 	
 	public static String getHostapdConfigFileName(String ifaceName) {
-		StringBuilder sb = new StringBuilder();
-		if (OS_VERSION.equals(KuraConstants.Intel_Edison.getImageName() + "_" + KuraConstants.Intel_Edison.getImageVersion() + "_" + KuraConstants.Intel_Edison.getTargetName())) {
-			sb.append("/etc/hostapd/hostapd.conf");
-		} else {
-			sb.append("/etc/hostapd-").append(ifaceName).append(".conf");
-		}
-		return sb.toString();
+		return getHostapdConfigFileName(ifaceName, "/etc");
 	}
 	
-	private static String privGetHostapdConfigFileName(String ifaceName) {
+	private static String getHostapdConfigFileName(String ifaceName, String folder) {
 		StringBuilder sb = new StringBuilder();
-		if (OS_VERSION.equals(KuraConstants.Intel_Edison.getImageName() + "_" + KuraConstants.Intel_Edison.getImageVersion() + "_" + KuraConstants.Intel_Edison.getTargetName())) {
+		if (s_isIntelEdison) {
 			sb.append("/etc/hostapd/hostapd.conf");
 		} else {
-			sb.append("/tmp/hostapd-").append(ifaceName).append(".conf");
+			sb.append(folder).append('/').append("hostapd-").append(ifaceName).append(".conf");
 		}
 		return sb.toString();
 	}
 	
 	private static File generateHostapdConfigFile(String ifaceName, Password passkey, WifiSecurity wifiSecurity) throws KuraException {
-		File retConfigFile = new File(privGetHostapdConfigFileName(ifaceName));
+		File retConfigFile = new File(getHostapdConfigFileName(ifaceName, "/tmp"));
 		File configFile = new File(getHostapdConfigFileName(ifaceName));
 		if(!configFile.exists()) {
 			throw KuraException.internalError("Config file does not exist: " + configFile.getAbsolutePath());
 		}
+		FileReader fr = null;
+		FileWriter fw = null;
 		BufferedReader br = null;
 		PrintWriter pw = null;	
 		try {
-			br = new BufferedReader(new FileReader(configFile));
-			pw = new PrintWriter(new FileWriter(retConfigFile));
+			fr = new FileReader(configFile);
+			br = new BufferedReader(fr);
+			fw = new FileWriter(retConfigFile);
+			pw = new PrintWriter(fw);
 			String line = null;
             while ((line = br.readLine()) != null) {
                line = line.trim();
@@ -199,8 +206,14 @@ public class HostapdManager {
 				if (br != null) {
 					br.close();
 				}
+				if (fr != null) {
+					fr.close();
+				}
 				if (pw != null) {
 					pw.close();
+				}
+				if (fw != null) {
+					fw.close();
 				}
 			} catch (IOException e) {
 				s_logger.error("Failed to close file stream - {}", e);

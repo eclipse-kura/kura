@@ -12,8 +12,10 @@
 
 package org.eclipse.kura.linux.net.modem;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 
@@ -36,6 +38,9 @@ public class ModemDriver {
 	private static final String GPIO_60_PATH = "/sys/class/gpio/gpio60";
 	private static final String GPIO_60_DIRECTION_PATH = GPIO_60_PATH + "/direction";
 	private static final String GPIO_60_VALUE_PATH = GPIO_60_PATH + "/value";
+	private static final String GPIO_77_PATH = "/sys/class/gpio/gpio77";
+    private static final String GPIO_77_DIRECTION_PATH = GPIO_77_PATH + "/direction";
+    private static final String GPIO_77_VALUE_PATH = GPIO_77_PATH + "/value";
 	private static final String GPIO_PATH = "/sys/class/gpio";
 	private static final String GPIO_EXPORT_PATH = GPIO_PATH + "/export";
 	
@@ -84,6 +89,9 @@ public class ModemDriver {
 				status = exec5021Gpio110();
 				s_logger.info("turnModemOff() :: '{}' returned {}", RELIAGATE_50_21_GPIO_11_0_CMD, status);
 				retVal = (status == 0) ? true : false;
+			} else if (TARGET_NAME.equals(KuraConstants.Reliagate_20_25.getTargetName())) {
+			    invertGpioValue("65", GPIO_65_PATH, GPIO_65_DIRECTION_PATH, GPIO_65_VALUE_PATH); //toggling internal modem
+			    invertGpioValue("77", GPIO_77_PATH, GPIO_77_DIRECTION_PATH, GPIO_77_VALUE_PATH); //toggling external modem by toggling the J9 usb port
 			} else {
 				s_logger.warn("turnModemOff() :: modem turnOff operation is not supported for the {} platform", TARGET_NAME);
 				retVal = true;
@@ -126,7 +134,10 @@ public class ModemDriver {
 				status = exec5021Gpio6();
 				s_logger.info("turnModemOn() :: '{}' returned {}", RELIAGATE_50_21_GPIO_6_CMD, status);
 				retVal = (status == 0) ? true : false;
-			} else {
+			} else if (TARGET_NAME.equals(KuraConstants.Reliagate_20_25.getTargetName())) {
+                invertGpioValue("65", GPIO_65_PATH, GPIO_65_DIRECTION_PATH, GPIO_65_VALUE_PATH); //value inversion for internal modem
+                invertGpioValue("77", GPIO_77_PATH, GPIO_77_DIRECTION_PATH, GPIO_77_VALUE_PATH); //value inversion for external modem by toggling the J9 usb port
+            } else {
 				s_logger.warn("turnModemOn() :: modem turnOn operation is not supported for the {} platform", TARGET_NAME);
 				retVal = true;
 				break;
@@ -231,30 +242,99 @@ public class ModemDriver {
 		}
 	}
 	
-	protected void toggleGpio(String gpio, String gpioPath, String directionPath, String valuePath) throws IOException { 		
-		File fgpioFolder = new File (gpioPath);
-		if (!fgpioFolder.exists()) {
-			BufferedWriter bwGpioSelect = new BufferedWriter(new FileWriter(GPIO_EXPORT_PATH));
-			bwGpioSelect.write(gpio);
-			bwGpioSelect.flush();
-			bwGpioSelect.close();
-		}
-
-		BufferedWriter bwGpioDirection = new BufferedWriter(new FileWriter(directionPath));
-		bwGpioDirection.write("out");
-		bwGpioDirection.flush();
-		bwGpioDirection.close();
-
-		BufferedWriter fGpioValue = new BufferedWriter(new FileWriter(valuePath));
-		fGpioValue.write("0");
-		fGpioValue.flush();
-		fGpioValue.write("1");
-		fGpioValue.flush();
-		sleep(5000);
-		fGpioValue.write("0");
-		fGpioValue.flush();
-		fGpioValue.close();
+	private void toggleGpio(String gpio, String gpioPath, String directionPath, String valuePath) throws IOException, InterruptedException { 		
+	    try {
+	        invertGpioValue(gpio, gpioPath, directionPath, valuePath);
+            Thread.sleep(5000);
+            invertGpioValue(gpio, gpioPath, directionPath, valuePath);
+        } catch (InterruptedException e) {
+            s_logger.warn("Exception in the inversion process. {}", e.getMessage());
+            throw e;
+        }
 	}
+	
+	private void invertGpioValue(String gpio, String gpioPath, String directionPath, String valuePath) throws IOException {       
+        exportGpio(gpio, gpioPath);  //Prepare gpios
+        setGpioDirection(directionPath, "out");
+        
+        FileReader fGpioOldValueReader= null;  //read current value
+        BufferedReader fGpioOldValue= null;
+        int oldValue= 0;
+        try {
+            fGpioOldValueReader= new FileReader(valuePath);
+            fGpioOldValue= new BufferedReader(fGpioOldValueReader);
+            oldValue= Integer.parseInt(fGpioOldValue.readLine());
+        } catch (Exception e) {
+            s_logger.debug("Error while trying to read gpio value: {}", e.getMessage());
+        } finally {
+            if (fGpioOldValue != null) {
+                fGpioOldValue.close();
+            }
+            if (fGpioOldValueReader != null) {
+                fGpioOldValueReader.close();
+            }
+        }
+
+        FileWriter gpioValueWriter= null;
+        BufferedWriter fGpioValue= null;
+        try {
+            gpioValueWriter= new FileWriter(valuePath);
+            fGpioValue = new BufferedWriter(gpioValueWriter);
+            int triggerValue= (oldValue + 1) % 2;
+            fGpioValue.write(Integer.toString(oldValue));  //TODO: verify if this write can be removed
+            fGpioValue.flush();
+            fGpioValue.write(Integer.toString(triggerValue));
+            fGpioValue.flush();
+        } finally {
+            if (fGpioValue != null) {
+                fGpioValue.close();
+            }
+            if (gpioValueWriter != null) {
+                gpioValueWriter.close();
+            }
+        }
+    }
+
+    private void setGpioDirection(String directionPath, String direction) throws IOException {
+        FileWriter directionFileWriter= null;
+		BufferedWriter bwGpioDirection= null;
+		try {
+		    directionFileWriter= new FileWriter(directionPath);
+		    bwGpioDirection= new BufferedWriter(directionFileWriter);
+		    bwGpioDirection.write(direction);
+		    bwGpioDirection.flush();
+		} catch (Exception e) {
+		    s_logger.debug("Error while trying to write gpio direction: {}", e.getMessage());
+		} finally {
+		    if (bwGpioDirection != null) {
+                bwGpioDirection.close();
+            }
+            if (directionFileWriter != null) {
+                directionFileWriter.close();
+            }
+		}
+    }
+
+    private void exportGpio(String gpio, String gpioPath) throws IOException {
+        File fgpioFolder = new File (gpioPath);
+		if (!fgpioFolder.exists()) {
+		    FileWriter bwGpioExportWriter= null;
+		    BufferedWriter bwGpioSelect= null;
+		    try {
+		        bwGpioExportWriter= new FileWriter(GPIO_EXPORT_PATH);
+		        bwGpioSelect = new BufferedWriter(bwGpioExportWriter);
+			    bwGpioSelect.write(gpio);
+			    bwGpioSelect.flush();
+		    } finally {
+		        if (bwGpioSelect != null) {
+                    bwGpioSelect.close();
+                }
+                if (bwGpioExportWriter != null) {
+                    bwGpioExportWriter.close();
+                }
+	        }
+		}
+    }
 
 	protected void echoSysfsResource(String resource, boolean level) throws IOException {
 		BufferedWriter resourceValue = new BufferedWriter(new FileWriter(resource));

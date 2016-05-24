@@ -6,7 +6,8 @@ Bundle-Version: 2.0.0.qualifier
 Bundle-Vendor: EUROTECH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Service-Component: OSGI-INF/*.xml
-Import-Package: com.google.gwt.safehtml.shared,
+Import-Package: com.google.gwt.http.client,
+ com.google.gwt.safehtml.shared,
  com.google.gwt.user.client,
  com.google.gwt.user.client.rpc,
  com.google.gwt.user.client.rpc.core.java.lang,

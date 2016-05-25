@@ -82,7 +82,7 @@ public class EntryClassUi extends Composite {
 	private final SettingsPanelUi settingsBinder = GWT.create(SettingsPanelUi.class);
 	private final FirewallPanelUi firewallBinder = GWT.create(FirewallPanelUi.class);
 	private final NetworkPanelUi networkBinder   = GWT.create(NetworkPanelUi.class);
-	private final WiresPanelUi   wiresBinder     = GWT.create(WiresPanelUi.class);
+	//private final WiresPanelUi   wiresBinder     = GWT.create(WiresPanelUi.class);
 
 	private final GwtComponentServiceAsync gwtComponentService = GWT.create(GwtComponentService.class);
 	private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
@@ -116,7 +116,7 @@ public class EntryClassUi extends Composite {
 	@UiField
 	TabListItem status;
 	@UiField
-	AnchorListItem device, network, firewall, packages, settings, wires;
+	AnchorListItem device, network, firewall, packages, settings;
 	@UiField
 	ScrollPanel servicesPanel;
 	@UiField
@@ -338,29 +338,29 @@ public class EntryClassUi extends Composite {
 		});
 
 		// Status Panel
-		wires.addClickHandler(new ClickHandler() {
-			@Override
-			public void onClick(ClickEvent event) {
-				Button b = new Button(MSGS.yesButton(), new ClickHandler() {
-					@Override
-					public void onClick(ClickEvent event) {
-						forceTabsCleaning();
-						if (modal != null ) {
-							modal.hide();
-						}
-						if (servicesUi != null) {
-							servicesUi.renderForm();
-						}
-						contentPanel.setVisible(true);
-						contentPanelHeader.setText("Kura Wires");
-						contentPanelBody.clear();
-						contentPanelBody.add(wiresBinder);
-
-					}
-				});
-				renderDirtyConfigModal(b);
-			}
-		});
+//		wires.addClickHandler(new ClickHandler() {
+//			@Override
+//			public void onClick(ClickEvent event) {
+//				Button b = new Button(MSGS.yesButton(), new ClickHandler() {
+//					@Override
+//					public void onClick(ClickEvent event) {
+//						forceTabsCleaning();
+//						if (modal != null ) {
+//							modal.hide();
+//						}
+//						if (servicesUi != null) {
+//							servicesUi.renderForm();
+//						}
+//						contentPanel.setVisible(true);
+//						contentPanelHeader.setText("Kura Wires");
+//						contentPanelBody.clear();
+//						contentPanelBody.add(wiresBinder);
+//
+//					}
+//				});
+//				renderDirtyConfigModal(b);
+//			}
+//		});
 	}
 
 	public void initServicesTree() {

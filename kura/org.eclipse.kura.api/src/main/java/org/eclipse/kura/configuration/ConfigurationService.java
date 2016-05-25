@@ -81,14 +81,6 @@ public interface ConfigurationService
 	public ComponentConfiguration getComponentConfiguration(String pid) throws KuraException;
 	
 	/**
-	 * Returns component configuration properties for specified PID
-	 * @param pid - the ID of the component whose configuration is requested
-	 * @return component configuration properties
-	 * @throws KuraException
-	 */
-	public Map<String, Object> getConfigurableComponentConfigurationProperties(String pid) throws KuraException;
-	
-	/**
 	 * Updates the Configuration of the registered component with the specified pid.
 	 * Using the OSGi ConfigurationAdmin, it retrieves the Configuration of the 
 	 * component with the specified PID and then send an update using the 

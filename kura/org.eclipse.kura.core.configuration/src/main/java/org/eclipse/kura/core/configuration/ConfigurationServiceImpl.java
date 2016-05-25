@@ -281,16 +281,6 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 		return cc;
 	}
 	
-	@Override
-	public Map<String, Object> getConfigurableComponentConfigurationProperties(String pid) throws KuraException {
-		Map<String, Object> props = null;
-		ComponentConfiguration cc = getConfigurableComponentConfiguration(pid);
-		if(cc != null) {
-			props = cc.getConfigurationProperties();
-		}
-		return props;
-	}
-
 	@SuppressWarnings("unchecked")
 	@Override
 	public synchronized void updateConfiguration(String pidToUpdate, Map<String, Object> propertiesToUpdate) throws KuraException {

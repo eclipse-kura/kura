@@ -12,9 +12,12 @@
 
 package org.eclipse.kura.net.admin.visitor.linux.util;
 
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.crypto.CryptoService;
@@ -27,7 +30,7 @@ import org.osgi.framework.ServiceReference;
 public class WifiVisitorUtil {
 
 	private static final String NETWORK_CONFIGURATION_SERVICE_PID = "org.eclipse.kura.net.admin.NetworkConfigurationService";
-	
+	//private static final Logger s_logger = LoggerFactory.getLogger(WifiVisitorUtil.class);
 	/**
 	 * Obtains password from configuration snapshot and dercypts it.
 	 * 
@@ -42,13 +45,25 @@ public class WifiVisitorUtil {
 		ConfigurationService configurationService = getConfigurationService();
 		CryptoService cryptoService = getCryptoService();
 		if ((configurationService != null) && (cryptoService != null)) {
-			Map<String, Object> props = configurationService.getConfigurableComponentConfigurationProperties(NETWORK_CONFIGURATION_SERVICE_PID);	
-			if (props.containsKey(key)) {
-				passphrase = (String)props.get(key);
-				try {
-					Password decryptedPassword = new Password(cryptoService.decryptAes(passphrase.toCharArray()));
-					passphrase = decryptedPassword.toString();
-				} catch (KuraException e) {
+			long snapshotId = 0L;
+			Set<Long> snapshotIds = configurationService.getSnapshots();
+			for (Long id : snapshotIds) {
+				if (id.longValue() > snapshotId) {
+					snapshotId = id.longValue();
+				}
+			}
+			ComponentConfiguration netConfigServiceComponentConfig = null;
+			List<ComponentConfiguration> componentConfigurations = configurationService.getSnapshot(snapshotId);
+			for (ComponentConfiguration cc : componentConfigurations) {
+				if (NETWORK_CONFIGURATION_SERVICE_PID.equals(cc.getPid())) {
+					netConfigServiceComponentConfig = cc;
+					break;
+				}
+			}
+			if (netConfigServiceComponentConfig != null) {
+				Map<String, Object> props = netConfigServiceComponentConfig.getConfigurationProperties();
+				if (props.containsKey(key)) {
+					passphrase = ((Password)props.get(key)).toString();
 				}
 			}
 		}

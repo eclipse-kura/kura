@@ -90,12 +90,12 @@ Our Kura Camel quickstart can be also used from the
 
 ![]({{ site.baseurl }}/assets/images/camel/media/kura_camel_routes_ec.png)
 
-## Kura Camel quickstart
+# Kura Camel quickstart
 
 The Kura Camel quickstart can be used to create Camel router OSGi bundle project deployable into the
 [Eclipse Kura](https://www.eclipse.org/kura) gateway.
 
-### Creating a Kura Camel project
+## Creating a Kura Camel project
 
 In order to create the Kura Camel project execute the following commands:
 
@@ -104,9 +104,9 @@ In order to create the Kura Camel project execute the following commands:
     cd org.eclipse.kura.example.camel.quickstart
     mvn install
 
-### Prerequisites
+## Prerequisites
 
-#### Find your device
+### Find your device
 
 We presume that you have [Eclipse Kura](https://wiki.eclipse.org/Kura/Raspberry_Pi) already installed on your target device. And that you know the IP address of that device.
 
@@ -114,7 +114,7 @@ Then export address of your Raspberry Pi device to RPBI IP environment variable:
 
     export RBPI_IP=192.168.1.100
 
-#### Configure Kura
+### Configure Kura
 
 Keep in mind that `/opt/eclipse/kura/kura/config.ini` file on your target device should have OSGi boot delegation
 enabled for packages `sun`. A boot delegation of `sun` packages is required to make Camel work smoothly in
@@ -123,7 +123,7 @@ the `/opt/eclipse/kura/kura/config.ini`:
 
     org.osgi.framework.bootdelegation=sun.*,com.sun.*
 
-### Deployment
+## Deployment
 
 In order to deploy Camel application to a Kura server, you have to copy necessary Camel jars and a bundle containing your application. Your bundle can be deployed into the target device by executing an `scp` command. For example:
 
@@ -152,7 +152,7 @@ You can retrieve ID of your bundle using the following command:
 Keep in mind that bundles you deployed using the recipe above are not installed permanently and will be reverted after the server restart. Please read Kura documentation for more details regarding
 [permanent deployments](http://eclipse.github.io/kura/doc/deploying-bundles.html#making-deployment-permanent).
 
-### What the quickstart is actually doing?
+## What the quickstart is actually doing?
 
 This quickstart triggers [Camel timer](http://camel.apache.org/timer.html) generate random temperature value every second and sends it to the system
 logger using [Camel Log](http://camel.apache.org/log) component. This is fairy simple functionality, but enough to

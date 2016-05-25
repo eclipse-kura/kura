@@ -89,7 +89,7 @@ public class ModemDriver {
 				status = exec5021Gpio110();
 				s_logger.info("turnModemOff() :: '{}' returned {}", RELIAGATE_50_21_GPIO_11_0_CMD, status);
 				retVal = (status == 0) ? true : false;
-			} else if (TARGET_NAME.equals(KuraConstants.Reliagate_20_25.getTargetName())) {
+			} else if (TARGET_NAME.equals(KuraConstants.Reliagate_20_25.getTargetName())) {  //TODO: make resets more smart, based on the effective modem that has to be stopped/started
 			    invertGpioValue("65", GPIO_65_PATH, GPIO_65_DIRECTION_PATH, GPIO_65_VALUE_PATH); //toggling internal modem
 			    invertGpioValue("77", GPIO_77_PATH, GPIO_77_DIRECTION_PATH, GPIO_77_VALUE_PATH); //toggling external modem by toggling the J9 usb port
 			} else {

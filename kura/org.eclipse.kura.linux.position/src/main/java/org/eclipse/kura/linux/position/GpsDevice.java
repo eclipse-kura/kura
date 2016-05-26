@@ -315,49 +315,55 @@ public class GpsDevice {
 			return connConfig;
 		}
 
-		public boolean doPollWork() {
-			try {
-				StringBuffer readBuffer = new StringBuffer();
-				int c=-1;
-				if (in != null) {
-					while (c != 10) {
-						try {
-							c = in.read();
-						} catch (Exception e) {
-							s_logger.error("Exception in gps read - {}", e);
-							Thread.sleep(1000);
-							return false;
-						}
-						if (c != 13 && c != -1) {
-							readBuffer.append((char) c);
-						}
-					}
-					try {
-						if (readBuffer.length() > 0) {
-							s_logger.debug("GPS RAW: {}", readBuffer.toString());
-							if ((m_listeners != null) && !m_listeners.isEmpty()) {
-								for (PositionListener listener : m_listeners) {
-									listener.newNmeaSentence(readBuffer.toString());
-								}
-							}
-							parseNmeaSentence(readBuffer.toString());
-						}
-					} catch (Exception e) {
-						s_logger.error("Exception in parseNmeaSentence - {}", e);
-					}
-				} else {
-					s_logger.debug("GPS InputStream is null");
-					Thread.sleep(1000);
-				}
-			} catch (Exception e) {
-				s_logger.error("Exception in Gps doPollWork");
-				try {
-					Thread.sleep(1000);
-				} catch (InterruptedException e1) {}
-			}
-			return true;
-		}
+        public boolean doPollWork() {
+            try {
+                StringBuffer readBuffer = new StringBuffer();
+                int c=-1;
+                if (in != null) {
+                    while (c != 10) {
+                        try {
+                            c = in.read();
+                        } catch (Exception e) {
+                            s_logger.error("Exception in gps read - {}", e);
+                            sleep(1000);
+                            return false;
+                        }
+                        if (c != 13 && c != -1) {
+                            readBuffer.append((char) c);
+                        }
+                    }
+                    try {
+                        if (readBuffer.length() > 0) {
+                            s_logger.debug("GPS RAW: {}", readBuffer.toString());
+                            if ((m_listeners != null) && !m_listeners.isEmpty()) {
+                                for (PositionListener listener : m_listeners) {
+                                    listener.newNmeaSentence(readBuffer.toString());
+                                }
+                            }
+                            parseNmeaSentence(readBuffer.toString());
+                        }
+                    } catch (Exception e) {
+                        s_logger.error("Exception in parseNmeaSentence - {}", e);
+                    }
+                } else {
+                    s_logger.debug("GPS InputStream is null");
+                    sleep(1000);
+                }
+            } catch (Exception e) {
+                s_logger.error("Exception in Gps doPollWork");
+                sleep(1000);
+            }
+            return true;
+        }
 
+        private void sleep(int value) {
+            try {
+                Thread.sleep(value);
+            } catch (InterruptedException e) {
+                s_logger.warn("Interrupted - {}", e);
+            }
+        }
+        
 		private void parseNmeaSentence(String scannedInput) {
 
 			double lon;

@@ -340,7 +340,8 @@ public class PositionServiceImpl implements PositionService, ConfigurableCompone
 					Properties currentConfigProps = m_gpsDevice.getConnectConfig();
 					Properties serialProperties = getSerialConnectionProperties(m_properties);
 					if ((currentConfigProps != null) && (serialProperties != null)) {
-						checkProperties(currentConfigProps, serialProperties);
+						if (checkProperties(currentConfigProps, serialProperties)) 
+							return;
 					}
 				}
 				
@@ -551,8 +552,7 @@ public class PositionServiceImpl implements PositionService, ConfigurableCompone
 		return prop;
 	}
 	
-	private void checkProperties(Properties currentConfigProps,
-			Properties serialProperties) {
+	private boolean checkProperties(Properties currentConfigProps, Properties serialProperties) {
 		if (currentConfigProps.getProperty(PORT).equals(serialProperties.getProperty(PORT))
 				&& currentConfigProps.getProperty(BAUDRATE).equals(serialProperties.getProperty(BAUDRATE))	
 				&& currentConfigProps.getProperty(STOPBITS).equals(serialProperties.getProperty(STOPBITS))
@@ -560,7 +560,9 @@ public class PositionServiceImpl implements PositionService, ConfigurableCompone
 				&& currentConfigProps.getProperty(PARITY).equals(serialProperties.getProperty(PARITY))) {
 
 			s_logger.debug("configureGpsDevice() :: same configuration, no need ot reconfigure GPS device");
-			return;
+			return true;
 		}
+		else 
+			return false;
 	}
 }

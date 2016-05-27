@@ -72,7 +72,7 @@ public class BaseDevice implements Device, SelfConfiguringComponent {
 	protected DeviceConfiguration m_deviceConfiguration;
 
 	/** Container of mapped device listeners and drivers listener. */
-	private final Map<DeviceListener, DriverListener> m_deviceListeners;
+	protected final Map<DeviceListener, DriverListener> m_deviceListeners;
 
 	/** The Driver instance. */
 	protected volatile Driver m_driver;
@@ -252,7 +252,7 @@ public class BaseDevice implements Device, SelfConfiguringComponent {
 				basicDeviceChanneldescriptor.getDefaultConfiguration().addAll(channelConfiguration);
 				for (final Tad attribute : channelConfiguration) {
 					final Tad newAttribute = this.cloneAd(attribute,
-							CHANNEL_PROPERTY_PREFIX + System.currentTimeMillis() + CHANNEL_PROPERTY_POSTFIX);
+							CHANNEL_PROPERTY_PREFIX + System.nanoTime() + CHANNEL_PROPERTY_POSTFIX);
 					mainOcd.addAD(newAttribute);
 				}
 			}
@@ -267,6 +267,24 @@ public class BaseDevice implements Device, SelfConfiguringComponent {
 	 */
 	public DeviceConfiguration getDeviceConfiguration() {
 		return this.m_deviceConfiguration;
+	}
+
+	/**
+	 * Returns the injected instance of the Driver
+	 *
+	 * @return the driver instance
+	 */
+	public Driver getDriver() {
+		return this.m_driver;
+	}
+
+	/**
+	 * Returns the associated device listeners
+	 *
+	 * @return the device listeners containment
+	 */
+	public Map<DeviceListener, DriverListener> getListeners() {
+		return this.m_deviceListeners;
 	}
 
 	/** {@inheritDoc} */
@@ -341,22 +359,17 @@ public class BaseDevice implements Device, SelfConfiguringComponent {
 
 		s_logger.debug("Registering Device Listener for monitoring...");
 
-		Channel channel = null;
 		final Map<String, Channel> channels = this.m_deviceConfiguration.getChannels();
+		checkCondition(!channels.containsKey(channelName), "Channel not available");
 
-		if (channels.containsKey(channelName)) {
-			channel = channels.get(channelName);
-		}
-
-		final DriverListener driverListener = new BaseDriverListener(deviceListener);
+		final Channel channel = channels.get(channelName);
+		final DriverListener driverListener = new BaseDriverListener(channelName, deviceListener);
 		this.m_deviceListeners.put(deviceListener, driverListener);
 		checkCondition(this.m_driver == null, "Driver cannot be null");
 
 		this.m_monitor.enter();
 		try {
-			if (channel != null) {
-				this.m_driver.registerDriverListener(ImmutableMap.copyOf(channel.getConfig()), driverListener);
-			}
+			this.m_driver.registerDriverListener(ImmutableMap.copyOf(channel.getConfig()), driverListener);
 		} finally {
 			this.m_monitor.leave();
 		}
@@ -469,7 +482,6 @@ public class BaseDevice implements Device, SelfConfiguringComponent {
 			default:
 				break;
 			}
-
 			deviceRecord.setTimestamp(driverRecord.getTimestamp());
 		}
 		s_logger.debug("Writing to channels...Done");

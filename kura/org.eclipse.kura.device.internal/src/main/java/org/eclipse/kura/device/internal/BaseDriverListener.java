@@ -34,16 +34,22 @@ import org.eclipse.kura.device.DriverRecord;
  */
 public final class BaseDriverListener implements DriverListener {
 
+	/** The channel name. */
+	private final String m_channelName;
+
 	/** The device listener instance. */
 	private final DeviceListener m_deviceListener;
 
 	/**
 	 * Instantiates a new base driver listener.
 	 *
+	 * @param channelName
+	 *            the channel name as provided
 	 * @param deviceListener
 	 *            the device listener
 	 */
-	public BaseDriverListener(final DeviceListener deviceListener) {
+	public BaseDriverListener(final String channelName, final DeviceListener deviceListener) {
+		this.m_channelName = channelName;
 		this.m_deviceListener = deviceListener;
 	}
 
@@ -74,6 +80,7 @@ public final class BaseDriverListener implements DriverListener {
 		}
 		deviceRecord.setTimestamp(driverRecord.getTimestamp());
 		deviceRecord.setValue(driverRecord.getValue());
+		deviceRecord.setChannelName(this.m_channelName);
 		final DeviceEvent deviceEvent = new DeviceEvent(deviceRecord);
 		this.m_deviceListener.onDeviceEvent(deviceEvent);
 	}

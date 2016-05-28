@@ -14,9 +14,12 @@ package org.eclipse.kura.type;
 
 import static org.eclipse.kura.type.DataType.BYTE_ARRAY;
 
+import org.eclipse.kura.KuraErrorCode;
+import org.eclipse.kura.KuraRuntimeException;
+
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ComparisonChain;
-import com.google.common.collect.Ordering;
+import com.google.common.primitives.UnsignedBytes;
 
 /**
  * This class represents a {@link Byte[]} value as a {@link TypedValue}.
@@ -44,10 +47,10 @@ public final class ByteArrayValue implements TypedValue<byte[]> {
 	@SuppressWarnings("rawtypes")
 	public int compareTo(final TypedValue otherTypedValue) {
 		if (!(otherTypedValue instanceof ByteArrayValue)) {
-			return 0;
+			throw new KuraRuntimeException(KuraErrorCode.INTERNAL_ERROR, "Typed Value is not byte array");
 		}
-		return ComparisonChain.start()
-				.compare(this.m_value, ((ByteArrayValue) (otherTypedValue)).getValue(), Ordering.allEqual()).result();
+		return ComparisonChain.start().compare(this.m_value, ((ByteArrayValue) (otherTypedValue)).getValue(),
+				UnsignedBytes.lexicographicalComparator()).result();
 	}
 
 	/** {@inheritDoc} */

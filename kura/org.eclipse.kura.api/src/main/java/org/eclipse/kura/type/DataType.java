@@ -17,6 +17,20 @@ package org.eclipse.kura.type;
  * Java data types as {@link TypedValue}
  */
 public enum DataType {
-
-	BOOLEAN, BYTE, BYTE_ARRAY, DOUBLE, INTEGER, LONG, SHORT, STRING
+	/** boolean type */
+	BOOLEAN,
+	/** byte type */
+	BYTE,
+	/** byte array type */
+	BYTE_ARRAY,
+	/** double array Type */
+	DOUBLE,
+	/** integer type */
+	INTEGER,
+	/** long type */
+	LONG,
+	/** short type */
+	SHORT,
+	/** string type */
+	STRING
 }

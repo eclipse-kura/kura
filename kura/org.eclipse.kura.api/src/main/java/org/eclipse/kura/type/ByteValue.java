@@ -14,6 +14,9 @@ package org.eclipse.kura.type;
 
 import static org.eclipse.kura.type.DataType.BYTE;
 
+import org.eclipse.kura.KuraErrorCode;
+import org.eclipse.kura.KuraRuntimeException;
+
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.Ordering;
@@ -44,7 +47,7 @@ public final class ByteValue implements TypedValue<Byte> {
 	@SuppressWarnings("rawtypes")
 	public int compareTo(final TypedValue otherTypedValue) {
 		if (!(otherTypedValue instanceof ByteValue)) {
-			return 0;
+			throw new KuraRuntimeException(KuraErrorCode.INTERNAL_ERROR, "Typed Value is not byte");
 		}
 		return ComparisonChain.start()
 				.compare(this.m_value, ((ByteValue) (otherTypedValue)).getValue(), Ordering.natural()).result();

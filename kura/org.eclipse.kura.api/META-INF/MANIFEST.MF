@@ -39,6 +39,7 @@ Export-Package: org.eclipse.kura;version="1.1.0",
  org.eclipse.kura.wire;version="1.0.0"
 Import-Package: com.google.common.base;version="19.0.0",
  com.google.common.collect;version="19.0.0",
+ com.google.common.primitives;version="19.0.0",
  javax.comm;version="1.2.0",
  javax.crypto,
  javax.microedition.io,

@@ -21,7 +21,6 @@ import org.osgi.util.position.Position;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Ordering;
 
 /**
  * The Class WireRecord represents a record to be transmitted during wire
@@ -83,8 +82,7 @@ public final class WireRecord implements Comparable<WireRecord> {
 	/** {@inheritDoc} */
 	@Override
 	public int compareTo(final WireRecord otherWireRecord) {
-		return ComparisonChain.start().compare(this.m_timestamp, otherWireRecord.getTimestamp())
-				.compare(this.m_fields, otherWireRecord.getFields(), Ordering.allEqual()).result();
+		return ComparisonChain.start().compare(this.m_timestamp, otherWireRecord.getTimestamp()).result();
 	}
 
 	/**

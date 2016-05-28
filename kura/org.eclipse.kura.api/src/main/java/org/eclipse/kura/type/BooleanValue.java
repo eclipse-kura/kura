@@ -14,6 +14,9 @@ package org.eclipse.kura.type;
 
 import static org.eclipse.kura.type.DataType.BOOLEAN;
 
+import org.eclipse.kura.KuraErrorCode;
+import org.eclipse.kura.KuraRuntimeException;
+
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.Ordering;
@@ -44,7 +47,7 @@ public final class BooleanValue implements TypedValue<Boolean> {
 	@SuppressWarnings("rawtypes")
 	public int compareTo(final TypedValue otherTypedValue) {
 		if (!(otherTypedValue instanceof BooleanValue)) {
-			return 0;
+			throw new KuraRuntimeException(KuraErrorCode.INTERNAL_ERROR, "Typed Value is not boolean");
 		}
 		return ComparisonChain.start()
 				.compare(this.m_value, ((BooleanValue) (otherTypedValue)).getValue(), Ordering.natural()).result();

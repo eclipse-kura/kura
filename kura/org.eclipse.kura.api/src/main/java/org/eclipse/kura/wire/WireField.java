@@ -15,12 +15,13 @@ package org.eclipse.kura.wire;
 import org.eclipse.kura.type.TypedValue;
 
 import com.google.common.base.MoreObjects;
+import com.google.common.collect.ComparisonChain;
 
 /**
  * The WireField represents an abstract data type to be used in
  * {@link WireRecord}
  */
-public final class WireField {
+public final class WireField implements Comparable<WireField> {
 
 	/** The name of the field */
 	private final String m_name;
@@ -39,6 +40,13 @@ public final class WireField {
 	public WireField(final String name, final TypedValue<?> value) {
 		this.m_name = name;
 		this.m_value = value;
+	}
+
+	/** {@inheritDoc} */
+	@Override
+	public int compareTo(final WireField otherWireField) {
+		return ComparisonChain.start().compare(this.m_name, otherWireField.getName())
+				.compare(this.m_value, otherWireField.getValue()).result();
 	}
 
 	/**

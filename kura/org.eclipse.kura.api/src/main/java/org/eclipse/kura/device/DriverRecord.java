@@ -17,13 +17,14 @@ import java.util.Map;
 import org.eclipse.kura.type.TypedValue;
 
 import com.google.common.base.MoreObjects;
+import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.ImmutableMap;
 
 /**
  * This class represents records needed for read, write or a monitor operation
  * on the provided channel configuration by the Kura specific device driver.
  */
-public final class DriverRecord {
+public final class DriverRecord implements Comparable<DriverRecord> {
 
 	/**
 	 * Provided channel configuration to perform read or write or monitor
@@ -51,6 +52,15 @@ public final class DriverRecord {
 	 * the driver to the actual device.
 	 */
 	private TypedValue<?> m_value;
+
+	/** {@inheritDoc} */
+	@Override
+	public int compareTo(final DriverRecord otherDriverRecord) {
+		return ComparisonChain.start().compare(this.m_channelName, otherDriverRecord.getChannelName())
+				.compare(this.m_value, otherDriverRecord.getValue())
+				.compare(this.m_driverFlag, otherDriverRecord.getDriverFlag())
+				.compare(this.m_timestamp, otherDriverRecord.getTimestamp()).result();
+	}
 
 	/**
 	 * Returns the channel configuration as provided.

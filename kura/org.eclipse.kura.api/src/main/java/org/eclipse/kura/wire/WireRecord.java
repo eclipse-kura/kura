@@ -19,13 +19,15 @@ import java.util.List;
 import org.osgi.util.position.Position;
 
 import com.google.common.base.MoreObjects;
+import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Ordering;
 
 /**
  * The Class WireRecord represents a record to be transmitted during wire
  * communication between wire emitter and wire receiver
  */
-public final class WireRecord {
+public final class WireRecord implements Comparable<WireRecord> {
 
 	/** The wire fields. */
 	private final List<WireField> m_fields;
@@ -76,6 +78,13 @@ public final class WireRecord {
 		this.m_timestamp = new Timestamp(new Date().getTime());
 		this.m_position = null;
 		this.m_fields = ImmutableList.copyOf(dataFields);
+	}
+
+	/** {@inheritDoc} */
+	@Override
+	public int compareTo(final WireRecord otherWireRecord) {
+		return ComparisonChain.start().compare(this.m_timestamp, otherWireRecord.getTimestamp())
+				.compare(this.m_fields, otherWireRecord.getFields(), Ordering.allEqual()).result();
 	}
 
 	/**

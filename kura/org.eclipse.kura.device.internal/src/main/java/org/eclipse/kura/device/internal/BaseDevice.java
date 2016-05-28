@@ -109,6 +109,7 @@ public class BaseDevice implements Device, SelfConfiguringComponent {
 		this.m_ctx = componentContext;
 		this.m_properties = properties;
 		this.retrieveConfigurationsFromProperties(properties);
+		this.attachDriver(this.m_deviceConfiguration.getDriverId());
 		s_logger.debug("Activating Base Device...Done");
 	}
 
@@ -124,7 +125,6 @@ public class BaseDevice implements Device, SelfConfiguringComponent {
 	private synchronized void attachDriver(final String driverId) {
 		s_logger.debug("Attaching driver instance...");
 		checkCondition(driverId == null, "Driver ID cannot be null");
-
 		try {
 			this.m_driverTracker = new DriverTracker(this.m_ctx.getBundleContext(), this, driverId);
 			this.m_driverTracker.open();

@@ -15,6 +15,8 @@ package org.eclipse.kura.type;
 import static org.eclipse.kura.type.DataType.DOUBLE;
 
 import com.google.common.base.MoreObjects;
+import com.google.common.collect.ComparisonChain;
+import com.google.common.collect.Ordering;
 
 /**
  * This class represents a {@link Double} value as a {@link TypedValue}.
@@ -25,7 +27,7 @@ public final class DoubleValue implements TypedValue<Double> {
 	 * The actual contained value that will be represented as
 	 * {@link TypedValue}.
 	 */
-	private final double value;
+	private final double m_value;
 
 	/**
 	 * Instantiates a new double value.
@@ -34,7 +36,18 @@ public final class DoubleValue implements TypedValue<Double> {
 	 *            the value
 	 */
 	public DoubleValue(final double value) {
-		this.value = value;
+		this.m_value = value;
+	}
+
+	/** {@inheritDoc} */
+	@Override
+	@SuppressWarnings("rawtypes")
+	public int compareTo(final TypedValue otherTypedValue) {
+		if (!(otherTypedValue instanceof DoubleValue)) {
+			return 0;
+		}
+		return ComparisonChain.start()
+				.compare(this.m_value, ((DoubleValue) (otherTypedValue)).getValue(), Ordering.natural()).result();
 	}
 
 	/** {@inheritDoc} */
@@ -46,12 +59,12 @@ public final class DoubleValue implements TypedValue<Double> {
 	/** {@inheritDoc} */
 	@Override
 	public Double getValue() {
-		return this.value;
+		return this.m_value;
 	}
 
 	/** {@inheritDoc} */
 	@Override
 	public String toString() {
-		return MoreObjects.toStringHelper(this).add("double_value", this.value).toString();
+		return MoreObjects.toStringHelper(this).add("double_value", this.m_value).toString();
 	}
 }

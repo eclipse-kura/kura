@@ -15,6 +15,8 @@ package org.eclipse.kura.type;
 import static org.eclipse.kura.type.DataType.INTEGER;
 
 import com.google.common.base.MoreObjects;
+import com.google.common.collect.ComparisonChain;
+import com.google.common.collect.Ordering;
 
 /**
  * This class represents a {@link Integer} value as a {@link TypedValue}.
@@ -25,7 +27,7 @@ public final class IntegerValue implements TypedValue<Integer> {
 	 * The actual contained value that will be represented as
 	 * {@link TypedValue}.
 	 */
-	private final int value;
+	private final int m_value;
 
 	/**
 	 * Instantiates a new integer value.
@@ -34,7 +36,18 @@ public final class IntegerValue implements TypedValue<Integer> {
 	 *            the value
 	 */
 	public IntegerValue(final int value) {
-		this.value = value;
+		this.m_value = value;
+	}
+
+	/** {@inheritDoc} */
+	@Override
+	@SuppressWarnings("rawtypes")
+	public int compareTo(final TypedValue otherTypedValue) {
+		if (!(otherTypedValue instanceof IntegerValue)) {
+			return 0;
+		}
+		return ComparisonChain.start()
+				.compare(this.m_value, ((IntegerValue) (otherTypedValue)).getValue(), Ordering.natural()).result();
 	}
 
 	/** {@inheritDoc} */
@@ -46,12 +59,12 @@ public final class IntegerValue implements TypedValue<Integer> {
 	/** {@inheritDoc} */
 	@Override
 	public Integer getValue() {
-		return this.value;
+		return this.m_value;
 	}
 
 	/** {@inheritDoc} */
 	@Override
 	public String toString() {
-		return MoreObjects.toStringHelper(this).add("integer_value", this.value).toString();
+		return MoreObjects.toStringHelper(this).add("integer_value", this.m_value).toString();
 	}
 }

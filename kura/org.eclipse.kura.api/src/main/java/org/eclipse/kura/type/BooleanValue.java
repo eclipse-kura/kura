@@ -15,6 +15,8 @@ package org.eclipse.kura.type;
 import static org.eclipse.kura.type.DataType.BOOLEAN;
 
 import com.google.common.base.MoreObjects;
+import com.google.common.collect.ComparisonChain;
+import com.google.common.collect.Ordering;
 
 /**
  * This class represents a {@link Boolean} value as a {@link TypedValue}.
@@ -25,7 +27,7 @@ public final class BooleanValue implements TypedValue<Boolean> {
 	 * The actual contained value that will be represented as
 	 * {@link TypedValue}.
 	 */
-	private final boolean value;
+	private final boolean m_value;
 
 	/**
 	 * Instantiates a new boolean value.
@@ -34,7 +36,18 @@ public final class BooleanValue implements TypedValue<Boolean> {
 	 *            the value
 	 */
 	public BooleanValue(final boolean value) {
-		this.value = value;
+		this.m_value = value;
+	}
+
+	/** {@inheritDoc} */
+	@Override
+	@SuppressWarnings("rawtypes")
+	public int compareTo(final TypedValue otherTypedValue) {
+		if (!(otherTypedValue instanceof BooleanValue)) {
+			return 0;
+		}
+		return ComparisonChain.start()
+				.compare(this.m_value, ((BooleanValue) (otherTypedValue)).getValue(), Ordering.natural()).result();
 	}
 
 	/** {@inheritDoc} */
@@ -46,12 +59,12 @@ public final class BooleanValue implements TypedValue<Boolean> {
 	/** {@inheritDoc} */
 	@Override
 	public Boolean getValue() {
-		return this.value;
+		return this.m_value;
 	}
 
 	/** {@inheritDoc} */
 	@Override
 	public String toString() {
-		return MoreObjects.toStringHelper(this).add("boolean_value", this.value).toString();
+		return MoreObjects.toStringHelper(this).add("boolean_value", this.m_value).toString();
 	}
 }

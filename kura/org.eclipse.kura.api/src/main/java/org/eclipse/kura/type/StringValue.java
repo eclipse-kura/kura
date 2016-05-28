@@ -15,6 +15,7 @@ package org.eclipse.kura.type;
 import static org.eclipse.kura.type.DataType.STRING;
 
 import com.google.common.base.MoreObjects;
+import com.google.common.collect.ComparisonChain;
 
 /**
  * This class represents a {@link Short} value as a {@link TypedValue}.
@@ -25,7 +26,7 @@ public final class StringValue implements TypedValue<String> {
 	 * The actual contained value that will be represented as
 	 * {@link TypedValue}.
 	 */
-	private final String value;
+	private final String m_value;
 
 	/**
 	 * Instantiates a new string value.
@@ -34,7 +35,17 @@ public final class StringValue implements TypedValue<String> {
 	 *            the value
 	 */
 	public StringValue(final String value) {
-		this.value = value;
+		this.m_value = value;
+	}
+
+	/** {@inheritDoc} */
+	@Override
+	@SuppressWarnings("rawtypes")
+	public int compareTo(final TypedValue otherTypedValue) {
+		if (!(otherTypedValue instanceof StringValue)) {
+			return 0;
+		}
+		return ComparisonChain.start().compare(this.m_value, ((StringValue) (otherTypedValue)).getValue()).result();
 	}
 
 	/** {@inheritDoc} */
@@ -46,12 +57,12 @@ public final class StringValue implements TypedValue<String> {
 	/** {@inheritDoc} */
 	@Override
 	public String getValue() {
-		return this.value;
+		return this.m_value;
 	}
 
 	/** {@inheritDoc} */
 	@Override
 	public String toString() {
-		return MoreObjects.toStringHelper(this).add("string_value", this.value).toString();
+		return MoreObjects.toStringHelper(this).add("string_value", this.m_value).toString();
 	}
 }

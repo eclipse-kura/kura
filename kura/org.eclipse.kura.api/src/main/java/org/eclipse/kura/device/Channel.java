@@ -18,6 +18,7 @@ import org.eclipse.kura.type.DataType;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
+import com.google.common.collect.ComparisonChain;
 
 /**
  * The Class Channel represents a communication channel of a device. The
@@ -25,7 +26,7 @@ import com.google.common.base.Objects;
  * operation (read/write/monitor). The channel names must be unique to each
  * other.
  */
-public final class Channel {
+public final class Channel implements Comparable<Channel> {
 
 	/**
 	 * Creates a new channel with the provided values
@@ -78,6 +79,14 @@ public final class Channel {
 		this.m_name = name;
 		this.m_type = type;
 		this.m_valueType = valueType;
+	}
+
+	/** {@inheritDoc} */
+	@Override
+	public int compareTo(final Channel otherChannel) {
+		return ComparisonChain.start().compare(this.m_name, otherChannel.getName())
+				.compare(this.m_type, otherChannel.getType()).compare(this.m_valueType, otherChannel.getValueType())
+				.result();
 	}
 
 	/** {@inheritDoc} */

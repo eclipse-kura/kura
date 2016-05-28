@@ -15,12 +15,13 @@ package org.eclipse.kura.device;
 import org.eclipse.kura.type.TypedValue;
 
 import com.google.common.base.MoreObjects;
+import com.google.common.collect.ComparisonChain;
 
 /**
  * The Class DeviceRecord represents a record to perform read/write/monitor
  * operation on the provided channel using the associated device driver
  */
-public final class DeviceRecord {
+public final class DeviceRecord implements Comparable<DeviceRecord> {
 
 	/**
 	 * The channel name. The channel name for a device must be unique.
@@ -39,6 +40,15 @@ public final class DeviceRecord {
 	 * the driver to the actual device.
 	 */
 	private TypedValue<?> m_value;
+
+	/** {@inheritDoc} */
+	@Override
+	public int compareTo(final DeviceRecord otherDeviceRecord) {
+		return ComparisonChain.start().compare(this.m_channelName, otherDeviceRecord.getChannelName())
+				.compare(this.m_value, otherDeviceRecord.getValue())
+				.compare(this.m_deviceFlag, otherDeviceRecord.getDeviceFlag())
+				.compare(this.m_timestamp, otherDeviceRecord.getTimestamp()).result();
+	}
 
 	/**
 	 * Gets the channel name.

@@ -15,6 +15,8 @@ package org.eclipse.kura.type;
 import static org.eclipse.kura.type.DataType.LONG;
 
 import com.google.common.base.MoreObjects;
+import com.google.common.collect.ComparisonChain;
+import com.google.common.collect.Ordering;
 
 /**
  * This class represents a {@link Long} value as a {@link TypedValue}.
@@ -25,7 +27,7 @@ public final class LongValue implements TypedValue<Long> {
 	 * The actual contained value that will be represented as
 	 * {@link TypedValue}.
 	 */
-	private final long value;
+	private final long m_value;
 
 	/**
 	 * Instantiates a new long value.
@@ -34,7 +36,18 @@ public final class LongValue implements TypedValue<Long> {
 	 *            the value
 	 */
 	public LongValue(final long value) {
-		this.value = value;
+		this.m_value = value;
+	}
+
+	/** {@inheritDoc} */
+	@Override
+	@SuppressWarnings("rawtypes")
+	public int compareTo(final TypedValue otherTypedValue) {
+		if (!(otherTypedValue instanceof LongValue)) {
+			return 0;
+		}
+		return ComparisonChain.start()
+				.compare(this.m_value, ((LongValue) (otherTypedValue)).getValue(), Ordering.natural()).result();
 	}
 
 	/** {@inheritDoc} */
@@ -46,12 +59,13 @@ public final class LongValue implements TypedValue<Long> {
 	/** {@inheritDoc} */
 	@Override
 	public Long getValue() {
-		return this.value;
+		return this.m_value;
 	}
 
 	/** {@inheritDoc} */
 	@Override
 	public String toString() {
-		return MoreObjects.toStringHelper(this).add("long_value", this.value).toString();
+		return MoreObjects.toStringHelper(this).add("long_value", this.m_value).toString();
 	}
+
 }

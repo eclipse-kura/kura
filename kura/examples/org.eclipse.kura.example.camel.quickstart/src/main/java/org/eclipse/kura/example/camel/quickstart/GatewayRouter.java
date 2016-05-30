@@ -1,4 +1,4 @@
-package io.rhiot.quickstarts.kura.camel;
+package org.eclipse.kura.example.camel.quickstart;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;

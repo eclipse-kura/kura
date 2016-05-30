@@ -62,8 +62,10 @@ public class WifiVisitorUtil {
 			}
 			if (netConfigServiceComponentConfig != null) {
 				Map<String, Object> props = netConfigServiceComponentConfig.getConfigurationProperties();
-				if (props.containsKey(key)) {
+				if (props.containsKey(key) && props.get(key) instanceof Password) {
 					passphrase = ((Password)props.get(key)).toString();
+				} else if (props.containsKey(key) && props.get(key) instanceof String) {
+				    passphrase = (new Password((String)props.get(key))).toString();
 				}
 			}
 		}

@@ -3,7 +3,7 @@
     <OCD id="io.rhiot.quickstarts.kura.camel.GatewayRouter"
          name="Rhiot Camel gateway" description="Configurable Camel-based Kura gateway">
         
-        <Icon resource="OSGI-INF/rhiot-logo.png" size="32" />
+        <Icon resource="OSGI-INF/logo.png" size="32" />
 
         <AD id="camel.route.xml" name="camel.route.xml"
             description="Camel XML route definition &#x200b;&#x200b;&#x200b;&#x200b;&#x200b;&#x200b;&#x200b;&#x200b;&#x200b;&#x200b;"

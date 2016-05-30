@@ -16,19 +16,22 @@ import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
 
+import org.eclipse.kura.annotation.Immutable;
+import org.eclipse.kura.annotation.ThreadSafe;
 import org.osgi.util.position.Position;
 
 import com.google.common.base.MoreObjects;
-import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.ImmutableList;
 
 /**
  * The Class WireRecord represents a record to be transmitted during wire
  * communication between wire emitter and wire receiver
  */
-public final class WireRecord implements Comparable<WireRecord> {
+@Immutable
+@ThreadSafe
+public final class WireRecord {
 
-	/** The wire fields. */
+	/** The contained wire fields. */
 	private final List<WireField> m_fields;
 
 	/** The position. */
@@ -70,19 +73,13 @@ public final class WireRecord implements Comparable<WireRecord> {
 	/**
 	 * Instantiates a new wire record.
 	 *
-	 * @param dataFields
+	 * @param fields
 	 *            the wire fields
 	 */
-	public WireRecord(final WireField... dataFields) {
+	public WireRecord(final WireField... fields) {
 		this.m_timestamp = new Timestamp(new Date().getTime());
 		this.m_position = null;
-		this.m_fields = ImmutableList.copyOf(dataFields);
-	}
-
-	/** {@inheritDoc} */
-	@Override
-	public int compareTo(final WireRecord otherWireRecord) {
-		return ComparisonChain.start().compare(this.m_timestamp, otherWireRecord.getTimestamp()).result();
+		this.m_fields = ImmutableList.copyOf(fields);
 	}
 
 	/**

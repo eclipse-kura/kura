@@ -14,6 +14,8 @@ package org.eclipse.kura.device;
 
 import java.util.Map;
 
+import org.eclipse.kura.annotation.Immutable;
+import org.eclipse.kura.annotation.ThreadSafe;
 import org.eclipse.kura.type.DataType;
 
 import com.google.common.base.MoreObjects;
@@ -26,40 +28,24 @@ import com.google.common.collect.ComparisonChain;
  * operation (read/write/monitor). The channel names must be unique to each
  * other.
  */
+@Immutable
+@ThreadSafe
 public final class Channel implements Comparable<Channel> {
 
-	/**
-	 * Creates a new channel with the provided values
-	 *
-	 * @param name
-	 *            the name of the channel
-	 * @param type
-	 *            the type of the channel
-	 * @param valueType
-	 *            the value type of the channel
-	 * @param configuration
-	 *            the configuration to be read
-	 * @return the channel
-	 */
-	public static Channel of(final String name, final ChannelType type, final DataType valueType,
-			final Map<String, Object> configuration) {
-		return new Channel(name, type, valueType, configuration);
-	}
-
 	/** The communication channel configuration. */
-	private Map<String, Object> m_config;
+	private final Map<String, Object> m_config;
 
 	/** The name of the communication channel. */
-	private String m_name;
+	private final String m_name;
 
 	/** The type of the channel. */
-	private ChannelType m_type;
+	private final ChannelType m_type;
 
 	/**
 	 * The data type of the value as expected for the operations
 	 * (read/write/monitor).
 	 */
-	private DataType m_valueType;
+	private final DataType m_valueType;
 
 	/**
 	 * Instantiates a new channel.
@@ -93,7 +79,9 @@ public final class Channel implements Comparable<Channel> {
 	@Override
 	public boolean equals(final Object otherChannel) {
 		if (otherChannel instanceof Channel) {
-			return Objects.equal(this.m_name, ((Channel) (otherChannel)).getName());
+			final Channel ch = (Channel) otherChannel;
+			return Objects.equal(this.m_name, ch.getName()) && Objects.equal(this.m_type, ch.getType())
+					&& Objects.equal(this.m_valueType, ch.getValueType());
 		}
 		return false;
 	}
@@ -138,46 +126,6 @@ public final class Channel implements Comparable<Channel> {
 	@Override
 	public int hashCode() {
 		return Objects.hashCode(this.m_name, this.m_type, this.m_valueType, this.m_config);
-	}
-
-	/**
-	 * Sets the configuration of the communication channel.
-	 *
-	 * @param config
-	 *            the configuration of the communication channel
-	 */
-	public void setConfig(final Map<String, Object> config) {
-		this.m_config = config;
-	}
-
-	/**
-	 * Sets the name of the communication channel.
-	 *
-	 * @param name
-	 *            the new name of the communication channel
-	 */
-	public void setName(final String name) {
-		this.m_name = name;
-	}
-
-	/**
-	 * Sets the type of the communication channel.
-	 *
-	 * @param type
-	 *            the new type of the communication channel
-	 */
-	public void setType(final ChannelType type) {
-		this.m_type = type;
-	}
-
-	/**
-	 * Sets the value type as expected for performing the operations.
-	 *
-	 * @param valueType
-	 *            the new value type
-	 */
-	public void setValueType(final DataType valueType) {
-		this.m_valueType = valueType;
 	}
 
 	/** {@inheritDoc} */

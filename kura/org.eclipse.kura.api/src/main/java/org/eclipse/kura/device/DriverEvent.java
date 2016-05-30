@@ -12,27 +12,39 @@
  */
 package org.eclipse.kura.device;
 
+import org.eclipse.kura.annotation.Immutable;
+import org.eclipse.kura.annotation.ThreadSafe;
+
 import com.google.common.base.MoreObjects;
 
 /**
  * This class represents an event occurred while monitoring specific channel
- * configuration by the driver
+ * configuration by the driver.
  */
+@Immutable
+@ThreadSafe
 public final class DriverEvent {
 
 	/**
 	 * Represents the driver record as triggered due to the driver monitor
-	 * operation
+	 * operation.
 	 */
 	private final DriverRecord m_driverRecord;
 
-	/** Constructor */
+	/**
+	 * Instantiates a new driver event.
+	 *
+	 * @param driverRecord
+	 *            the driver record
+	 */
 	public DriverEvent(final DriverRecord driverRecord) {
 		this.m_driverRecord = driverRecord;
 	}
 
 	/**
-	 * Returns the associated driver record
+	 * Returns the associated driver record.
+	 *
+	 * @return the driver record
 	 */
 	public DriverRecord getDriverRecord() {
 		return this.m_driverRecord;

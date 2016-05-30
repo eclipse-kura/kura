@@ -16,13 +16,18 @@ import static org.eclipse.kura.type.DataType.STRING;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraRuntimeException;
+import org.eclipse.kura.annotation.Immutable;
+import org.eclipse.kura.annotation.ThreadSafe;
 
 import com.google.common.base.MoreObjects;
+import com.google.common.base.Objects;
 import com.google.common.collect.ComparisonChain;
 
 /**
  * This class represents a {@link Short} value as a {@link TypedValue}.
  */
+@Immutable
+@ThreadSafe
 public final class StringValue implements TypedValue<String> {
 
 	/**
@@ -53,6 +58,15 @@ public final class StringValue implements TypedValue<String> {
 
 	/** {@inheritDoc} */
 	@Override
+	public boolean equals(final Object obj) {
+		if (obj instanceof StringValue) {
+			return Objects.equal(((StringValue) obj).getValue(), this.m_value);
+		}
+		return false;
+	}
+
+	/** {@inheritDoc} */
+	@Override
 	public DataType getType() {
 		return STRING;
 	}
@@ -61,6 +75,12 @@ public final class StringValue implements TypedValue<String> {
 	@Override
 	public String getValue() {
 		return this.m_value;
+	}
+
+	/** {@inheritDoc} */
+	@Override
+	public int hashCode() {
+		return Objects.hashCode(this.m_value);
 	}
 
 	/** {@inheritDoc} */

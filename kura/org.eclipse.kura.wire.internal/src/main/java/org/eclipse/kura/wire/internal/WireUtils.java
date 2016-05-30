@@ -11,7 +11,7 @@
  */
 package org.eclipse.kura.wire.internal;
 
-import static org.eclipse.kura.device.internal.Preconditions.checkCondition;
+import static org.eclipse.kura.device.util.Preconditions.checkCondition;
 
 import java.util.Collection;
 import java.util.List;
@@ -191,10 +191,10 @@ public final class WireUtils {
 	}
 
 	/**
-	 * Instantiates a new wire utils.
+	 * Constructor
 	 */
 	private WireUtils() {
-		// Not needed because it is a utility class
+		// Not needed to instantiate because it is an utility class
 	}
 
 }

@@ -16,14 +16,19 @@ import static org.eclipse.kura.type.DataType.LONG;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraRuntimeException;
+import org.eclipse.kura.annotation.Immutable;
+import org.eclipse.kura.annotation.ThreadSafe;
 
 import com.google.common.base.MoreObjects;
+import com.google.common.base.Objects;
 import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.Ordering;
 
 /**
  * This class represents a {@link Long} value as a {@link TypedValue}.
  */
+@Immutable
+@ThreadSafe
 public final class LongValue implements TypedValue<Long> {
 
 	/**
@@ -55,6 +60,15 @@ public final class LongValue implements TypedValue<Long> {
 
 	/** {@inheritDoc} */
 	@Override
+	public boolean equals(final Object obj) {
+		if (obj instanceof LongValue) {
+			return Objects.equal(((LongValue) obj).getValue(), this.m_value);
+		}
+		return false;
+	}
+
+	/** {@inheritDoc} */
+	@Override
 	public DataType getType() {
 		return LONG;
 	}
@@ -63,6 +77,12 @@ public final class LongValue implements TypedValue<Long> {
 	@Override
 	public Long getValue() {
 		return this.m_value;
+	}
+
+	/** {@inheritDoc} */
+	@Override
+	public int hashCode() {
+		return Objects.hashCode(this.m_value);
 	}
 
 	/** {@inheritDoc} */

@@ -12,12 +12,17 @@
  */
 package org.eclipse.kura.device;
 
+import org.eclipse.kura.annotation.Immutable;
+import org.eclipse.kura.annotation.ThreadSafe;
+
 import com.google.common.base.MoreObjects;
 
 /**
  * This class represents an event occurred while monitoring specific channel
  * configuration by the device.
  */
+@Immutable
+@ThreadSafe
 public final class DeviceEvent {
 
 	/**

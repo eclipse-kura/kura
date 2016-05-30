@@ -17,7 +17,7 @@ import static org.eclipse.kura.device.internal.DeviceConfiguration.CHANNEL_PROPE
 import static org.eclipse.kura.device.internal.DeviceConfiguration.DEVICE_DESC_PROP;
 import static org.eclipse.kura.device.internal.DeviceConfiguration.DEVICE_DRIVER_PROP;
 import static org.eclipse.kura.device.internal.DeviceConfiguration.DEVICE_ID_PROP;
-import static org.eclipse.kura.device.internal.Preconditions.checkCondition;
+import static org.eclipse.kura.device.util.Preconditions.checkCondition;
 
 import java.util.List;
 import java.util.Map;
@@ -43,6 +43,7 @@ import org.eclipse.kura.device.Driver;
 import org.eclipse.kura.device.DriverFlag;
 import org.eclipse.kura.device.DriverListener;
 import org.eclipse.kura.device.DriverRecord;
+import org.eclipse.kura.device.util.DeviceHelper;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
@@ -66,7 +67,7 @@ public class BaseDevice implements Device, SelfConfiguringComponent {
 	private static final Logger s_logger = LoggerFactory.getLogger(BaseDevice.class);
 
 	/** The service component context. */
-	private ComponentContext m_ctx;
+	private ComponentContext m_context;
 
 	/** The provided device configuration wrapper instance. */
 	protected DeviceConfiguration m_deviceConfiguration;
@@ -106,7 +107,7 @@ public class BaseDevice implements Device, SelfConfiguringComponent {
 	protected synchronized void activate(final ComponentContext componentContext,
 			final Map<String, Object> properties) {
 		s_logger.debug("Activating Base Device...");
-		this.m_ctx = componentContext;
+		this.m_context = componentContext;
 		this.m_properties = properties;
 		this.retrieveConfigurationsFromProperties(properties);
 		this.attachDriver(this.m_deviceConfiguration.getDriverId());
@@ -126,7 +127,7 @@ public class BaseDevice implements Device, SelfConfiguringComponent {
 		s_logger.debug("Attaching driver instance...");
 		checkCondition(driverId == null, "Driver ID cannot be null");
 		try {
-			this.m_driverTracker = new DriverTracker(this.m_ctx.getBundleContext(), this, driverId);
+			this.m_driverTracker = new DriverTracker(this.m_context.getBundleContext(), this, driverId);
 			this.m_driverTracker.open();
 		} catch (final InvalidSyntaxException e) {
 			s_logger.error("Error in searching for drivers..." + Throwables.getStackTraceAsString(e));
@@ -150,7 +151,6 @@ public class BaseDevice implements Device, SelfConfiguringComponent {
 		checkCondition(prefix == null, "Attribute Definition Prefix cannot be null");
 
 		final Tad result = new Tad();
-
 		result.setId(prefix + oldAd.getId());
 		result.setName(prefix + oldAd.getName());
 		result.setCardinality(oldAd.getCardinality());
@@ -196,7 +196,7 @@ public class BaseDevice implements Device, SelfConfiguringComponent {
 	@SuppressWarnings("unchecked")
 	@Override
 	public ComponentConfiguration getConfiguration() throws KuraException {
-		final String componentName = this.m_ctx.getProperties().get("service.pid").toString();
+		final String componentName = this.m_context.getProperties().get("service.pid").toString();
 
 		final Tocd mainOcd = new Tocd();
 		mainOcd.setName(this.m_deviceConfiguration.getDeviceName());
@@ -308,9 +308,8 @@ public class BaseDevice implements Device, SelfConfiguringComponent {
 			checkCondition((channel.getType() != ChannelType.READ) || !(channel.getType() != ChannelType.READ_WRITE),
 					"Channel type not within defined types (READ OR READ_WRITE) : " + channel);
 
-			final DriverRecord driverRecord = new DriverRecord();
+			final DriverRecord driverRecord = DeviceHelper.newDriverRecord(channelName);
 			driverRecord.setChannelConfig(ImmutableMap.copyOf(channel.getConfig()));
-			driverRecord.setChannelName(channelName);
 
 			driverRecords.add(driverRecord);
 		}
@@ -323,9 +322,7 @@ public class BaseDevice implements Device, SelfConfiguringComponent {
 		}
 
 		for (final DriverRecord driverRecord : driverRecords) {
-			final DeviceRecord deviceRecord = new DeviceRecord();
-			deviceRecord.setChannelName(driverRecord.getChannelName());
-
+			final DeviceRecord deviceRecord = DeviceHelper.newDeviceRecord(driverRecord.getChannelName());
 			final DriverFlag driverFlag = driverRecord.getDriverFlag();
 
 			switch (driverFlag) {
@@ -447,9 +444,8 @@ public class BaseDevice implements Device, SelfConfiguringComponent {
 			checkCondition((channel.getType() != ChannelType.WRITE) || !(channel.getType() != ChannelType.READ_WRITE),
 					"Channel type not within defined types (WRITE OR READ_WRITE) : " + channel);
 
-			final DriverRecord driverRecord = new DriverRecord();
+			final DriverRecord driverRecord = DeviceHelper.newDriverRecord(channel.getName());
 			driverRecord.setChannelConfig(ImmutableMap.copyOf(channel.getConfig()));
-			driverRecord.setChannelName(channel.getName());
 			driverRecord.setValue(deviceRecord.getValue());
 
 			driverRecords.add(driverRecord);

@@ -12,15 +12,20 @@
  */
 package org.eclipse.kura.wire;
 
+import org.eclipse.kura.annotation.Immutable;
+import org.eclipse.kura.annotation.ThreadSafe;
 import org.eclipse.kura.type.TypedValue;
 
 import com.google.common.base.MoreObjects;
+import com.google.common.base.Objects;
 import com.google.common.collect.ComparisonChain;
 
 /**
  * The WireField represents an abstract data type to be used in
  * {@link WireRecord}
  */
+@Immutable
+@ThreadSafe
 public final class WireField implements Comparable<WireField> {
 
 	/** The name of the field */
@@ -49,6 +54,16 @@ public final class WireField implements Comparable<WireField> {
 				.compare(this.m_value, otherWireField.getValue()).result();
 	}
 
+	/** {@inheritDoc} */
+	@Override
+	public boolean equals(final Object obj) {
+		if (obj instanceof WireField) {
+			final WireField wf = (WireField) obj;
+			return Objects.equal(wf.getValue(), this.m_value) && Objects.equal(wf.getName(), this.m_name);
+		}
+		return false;
+	}
+
 	/**
 	 * Gets the name of the field
 	 *
@@ -65,6 +80,12 @@ public final class WireField implements Comparable<WireField> {
 	 */
 	public TypedValue<?> getValue() {
 		return this.m_value;
+	}
+
+	/** {@inheritDoc} */
+	@Override
+	public int hashCode() {
+		return Objects.hashCode(this.m_value, this.m_name);
 	}
 
 	/** {@inheritDoc} */

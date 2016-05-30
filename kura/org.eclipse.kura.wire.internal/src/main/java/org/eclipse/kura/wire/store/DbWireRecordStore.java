@@ -12,7 +12,7 @@
  */
 package org.eclipse.kura.wire.store;
 
-import static org.eclipse.kura.device.internal.Preconditions.checkCondition;
+import static org.eclipse.kura.device.util.Preconditions.checkCondition;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -46,6 +46,7 @@ import org.eclipse.kura.wire.WireRecord;
 import org.eclipse.kura.wire.WireRecordStore;
 import org.eclipse.kura.wire.WireSupport;
 import org.eclipse.kura.wire.store.DbDataTypeMapper.JdbcType;
+import org.eclipse.kura.wire.util.WireHelper;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.wireadmin.Wire;
 import org.slf4j.Logger;
@@ -133,7 +134,7 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
 		s_logger.info("Activating DB Wire Record Store...");
 
 		this.m_ctx = componentContext;
-		this.m_wireSupport = WireSupport.of(this);
+		this.m_wireSupport = WireHelper.newWireSupport(this);
 
 		this.m_options = new DbWireRecordStoreOptions(properties);
 

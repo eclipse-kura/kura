@@ -12,7 +12,7 @@
  */
 package org.eclipse.kura.device.cloudlet;
 
-import static org.eclipse.kura.device.internal.Preconditions.checkCondition;
+import static org.eclipse.kura.device.util.Preconditions.checkCondition;
 
 import java.util.List;
 import java.util.Map;
@@ -28,16 +28,11 @@ import org.eclipse.kura.device.Device;
 import org.eclipse.kura.device.DeviceRecord;
 import org.eclipse.kura.device.internal.BaseDevice;
 import org.eclipse.kura.device.internal.DeviceConfiguration;
+import org.eclipse.kura.device.util.DeviceHelper;
 import org.eclipse.kura.message.KuraRequestPayload;
 import org.eclipse.kura.message.KuraResponsePayload;
-import org.eclipse.kura.type.BooleanValue;
-import org.eclipse.kura.type.ByteValue;
-import org.eclipse.kura.type.DoubleValue;
-import org.eclipse.kura.type.IntegerValue;
-import org.eclipse.kura.type.LongValue;
-import org.eclipse.kura.type.ShortValue;
-import org.eclipse.kura.type.StringValue;
 import org.eclipse.kura.type.TypedValue;
+import org.eclipse.kura.type.util.TypedValueHelper;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
@@ -207,8 +202,7 @@ public final class DeviceCloudlet extends Cloudlet {
 			final DeviceConfiguration configuration = device.getDeviceConfiguration();
 			final Map<String, Channel> deviceConfiguredChannels = configuration.getChannels();
 			if ((deviceConfiguredChannels != null) && deviceConfiguredChannels.containsKey(channelName)) {
-				final DeviceRecord deviceRecord = new DeviceRecord();
-				deviceRecord.setChannelName(channelName);
+				final DeviceRecord deviceRecord = DeviceHelper.newDeviceRecord(channelName);
 				final String userValue = (String) reqPayload.getMetric("value");
 				final String userType = (String) reqPayload.getMetric("type");
 				this.wrapValue(deviceRecord, userValue, userType);
@@ -304,25 +298,25 @@ public final class DeviceCloudlet extends Cloudlet {
 		TypedValue<?> value = null;
 
 		if ("INTEGER".equalsIgnoreCase(userType)) {
-			value = new IntegerValue(Integer.valueOf(userValue));
+			value = TypedValueHelper.newIntegerValue(Integer.valueOf(userValue));
 		}
 		if ("BOOLEAN".equalsIgnoreCase(userType)) {
-			value = new BooleanValue(Boolean.valueOf(userValue));
+			value = TypedValueHelper.newBooleanValue(Boolean.valueOf(userValue));
 		}
 		if ("BYTE".equalsIgnoreCase(userType)) {
-			value = new ByteValue(Byte.valueOf(userValue));
+			value = TypedValueHelper.newByteValue(Byte.valueOf(userValue));
 		}
 		if ("DOUBLE".equalsIgnoreCase(userType)) {
-			value = new DoubleValue(Double.valueOf(userValue));
+			value = TypedValueHelper.newDoubleValue(Double.valueOf(userValue));
 		}
 		if ("LONG".equalsIgnoreCase(userType)) {
-			value = new LongValue(Long.valueOf(userValue));
+			value = TypedValueHelper.newLongValue(Long.valueOf(userValue));
 		}
 		if ("SHORT".equalsIgnoreCase(userType)) {
-			value = new ShortValue(Short.valueOf(userValue));
+			value = TypedValueHelper.newShortValue(Short.valueOf(userValue));
 		}
 		if ("STRING".equalsIgnoreCase(userType)) {
-			value = new StringValue(userValue);
+			value = TypedValueHelper.newStringValue(userValue);
 		}
 		if (userValue != null) {
 			deviceRecord.setValue(value);

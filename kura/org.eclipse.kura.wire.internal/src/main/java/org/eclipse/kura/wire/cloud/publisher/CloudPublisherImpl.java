@@ -12,7 +12,7 @@
  */
 package org.eclipse.kura.wire.cloud.publisher;
 
-import static org.eclipse.kura.device.internal.Preconditions.checkCondition;
+import static org.eclipse.kura.device.util.Preconditions.checkCondition;
 
 import java.util.List;
 import java.util.Map;
@@ -33,6 +33,7 @@ import org.eclipse.kura.wire.WireReceiver;
 import org.eclipse.kura.wire.WireRecord;
 import org.eclipse.kura.wire.WireSupport;
 import org.eclipse.kura.wire.cloud.publisher.CloudPublisherOptions.AutoConnectMode;
+import org.eclipse.kura.wire.util.WireHelper;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.osgi.service.component.ComponentContext;
@@ -96,7 +97,7 @@ public final class CloudPublisherImpl
 	protected synchronized void activate(final ComponentContext componentContext,
 			final Map<String, Object> properties) {
 		s_logger.info("Activating Cloud Publisher Wire Component...");
-		this.m_wireSupport = WireSupport.of(this);
+		this.m_wireSupport = WireHelper.newWireSupport(this);
 		// Update properties
 		this.m_options = new CloudPublisherOptions(properties);
 
@@ -501,7 +502,7 @@ public final class CloudPublisherImpl
 
 	/**
 	 * Stop publishing.
-	 * 
+	 *
 	 * @throws KuraRuntimeException
 	 *             if cloud client is null
 	 */

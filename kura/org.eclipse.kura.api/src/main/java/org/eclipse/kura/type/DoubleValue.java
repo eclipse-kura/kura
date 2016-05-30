@@ -16,14 +16,19 @@ import static org.eclipse.kura.type.DataType.DOUBLE;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraRuntimeException;
+import org.eclipse.kura.annotation.Immutable;
+import org.eclipse.kura.annotation.ThreadSafe;
 
 import com.google.common.base.MoreObjects;
+import com.google.common.base.Objects;
 import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.Ordering;
 
 /**
  * This class represents a {@link Double} value as a {@link TypedValue}.
  */
+@Immutable
+@ThreadSafe
 public final class DoubleValue implements TypedValue<Double> {
 
 	/**
@@ -55,6 +60,15 @@ public final class DoubleValue implements TypedValue<Double> {
 
 	/** {@inheritDoc} */
 	@Override
+	public boolean equals(final Object obj) {
+		if (obj instanceof DoubleValue) {
+			return Objects.equal(((DoubleValue) obj).getValue(), this.m_value);
+		}
+		return false;
+	}
+
+	/** {@inheritDoc} */
+	@Override
 	public DataType getType() {
 		return DOUBLE;
 	}
@@ -63,6 +77,12 @@ public final class DoubleValue implements TypedValue<Double> {
 	@Override
 	public Double getValue() {
 		return this.m_value;
+	}
+
+	/** {@inheritDoc} */
+	@Override
+	public int hashCode() {
+		return Objects.hashCode(this.m_value);
 	}
 
 	/** {@inheritDoc} */

@@ -14,9 +14,11 @@ package org.eclipse.kura.device;
 
 import java.util.Map;
 
+import org.eclipse.kura.annotation.NotThreadSafe;
 import org.eclipse.kura.type.TypedValue;
 
 import com.google.common.base.MoreObjects;
+import com.google.common.base.Objects;
 import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.ImmutableMap;
 
@@ -24,6 +26,7 @@ import com.google.common.collect.ImmutableMap;
  * This class represents records needed for read, write or a monitor operation
  * on the provided channel configuration by the Kura specific device driver.
  */
+@NotThreadSafe
 public final class DriverRecord implements Comparable<DriverRecord> {
 
 	/**
@@ -33,7 +36,7 @@ public final class DriverRecord implements Comparable<DriverRecord> {
 	private Map<String, Object> m_channelConfig;
 
 	/**
-	 * Channel Name as associated in the device.
+	 * Channel Name as associated with the device.
 	 */
 	private String m_channelName;
 
@@ -53,6 +56,16 @@ public final class DriverRecord implements Comparable<DriverRecord> {
 	 */
 	private TypedValue<?> m_value;
 
+	/**
+	 * Instantiates a new driver record.
+	 *
+	 * @param channelName
+	 *            the channel name
+	 */
+	public DriverRecord(final String channelName) {
+		this.m_channelName = channelName;
+	}
+
 	/** {@inheritDoc} */
 	@Override
 	public int compareTo(final DriverRecord otherDriverRecord) {
@@ -60,6 +73,19 @@ public final class DriverRecord implements Comparable<DriverRecord> {
 				.compare(this.m_value, otherDriverRecord.getValue())
 				.compare(this.m_driverFlag, otherDriverRecord.getDriverFlag())
 				.compare(this.m_timestamp, otherDriverRecord.getTimestamp()).result();
+	}
+
+	/** {@inheritDoc} */
+	@Override
+	public boolean equals(final Object obj) {
+		if (obj instanceof DriverRecord) {
+			final DriverRecord rec = (DriverRecord) obj;
+			return Objects.equal(rec.getChannelName(), this.m_channelName)
+					&& Objects.equal(rec.getValue(), this.m_value)
+					&& Objects.equal(rec.getDriverFlag(), this.m_driverFlag)
+					&& Objects.equal(rec.getTimestamp(), this.m_timestamp);
+		}
+		return false;
 	}
 
 	/**
@@ -105,6 +131,12 @@ public final class DriverRecord implements Comparable<DriverRecord> {
 	 */
 	public TypedValue<?> getValue() {
 		return this.m_value;
+	}
+
+	/** {@inheritDoc} */
+	@Override
+	public int hashCode() {
+		return Objects.hashCode(this.m_channelName, this.m_value, this.m_driverFlag, this.m_timestamp);
 	}
 
 	/**

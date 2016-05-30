@@ -29,17 +29,6 @@ import com.google.common.collect.Lists;
  */
 public final class WireSupport implements Producer, Consumer {
 
-	/**
-	 * Returns a Wire Support instance of the provided wire component
-	 *
-	 * @param wireComponent
-	 *            the wire component
-	 * @return the wire support instance
-	 */
-	public static WireSupport of(final WireComponent wireComponent) {
-		return new WireSupport(wireComponent);
-	}
-
 	/** The incoming wires. */
 	private List<Wire> m_incomingWires;
 
@@ -55,7 +44,7 @@ public final class WireSupport implements Producer, Consumer {
 	 * @param wireSupporter
 	 *            the wire supporter component
 	 */
-	private WireSupport(final WireComponent wireSupporter) {
+	public WireSupport(final WireComponent wireSupporter) {
 		this.m_outgoingWires = Lists.newArrayList();
 		this.m_incomingWires = Lists.newArrayList();
 		this.m_wireSupporter = wireSupporter;

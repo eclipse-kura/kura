@@ -12,26 +12,30 @@
  */
 package org.eclipse.kura.device;
 
+import org.eclipse.kura.annotation.NotThreadSafe;
 import org.eclipse.kura.type.TypedValue;
 
 import com.google.common.base.MoreObjects;
+import com.google.common.base.Objects;
 import com.google.common.collect.ComparisonChain;
 
 /**
  * The Class DeviceRecord represents a record to perform read/write/monitor
- * operation on the provided channel using the associated device driver
+ * operation on the provided channel using the associated device driver.
  */
+@NotThreadSafe
 public final class DeviceRecord implements Comparable<DeviceRecord> {
 
 	/**
-	 * The channel name. The channel name for a device must be unique.
+	 * The associated channel name. The channel name for any device must be
+	 * unique.
 	 */
 	private String m_channelName;
 
 	/** The device flag. */
 	private DeviceFlag m_deviceFlag;
 
-	/** The timestamp of the record */
+	/** The timestamp of the record. */
 	private long m_timestamp;
 
 	/**
@@ -41,6 +45,16 @@ public final class DeviceRecord implements Comparable<DeviceRecord> {
 	 */
 	private TypedValue<?> m_value;
 
+	/**
+	 * Instantiates a new device record.
+	 *
+	 * @param channelName
+	 *            the channel name
+	 */
+	public DeviceRecord(final String channelName) {
+		this.m_channelName = channelName;
+	}
+
 	/** {@inheritDoc} */
 	@Override
 	public int compareTo(final DeviceRecord otherDeviceRecord) {
@@ -48,6 +62,19 @@ public final class DeviceRecord implements Comparable<DeviceRecord> {
 				.compare(this.m_value, otherDeviceRecord.getValue())
 				.compare(this.m_deviceFlag, otherDeviceRecord.getDeviceFlag())
 				.compare(this.m_timestamp, otherDeviceRecord.getTimestamp()).result();
+	}
+
+	/** {@inheritDoc} */
+	@Override
+	public boolean equals(final Object obj) {
+		if (obj instanceof DeviceRecord) {
+			final DeviceRecord rec = (DeviceRecord) obj;
+			return Objects.equal(rec.getChannelName(), this.m_channelName)
+					&& Objects.equal(rec.getValue(), this.m_value)
+					&& Objects.equal(rec.getDeviceFlag(), this.m_deviceFlag)
+					&& Objects.equal(rec.getTimestamp(), this.m_timestamp);
+		}
+		return false;
 	}
 
 	/**
@@ -86,8 +113,14 @@ public final class DeviceRecord implements Comparable<DeviceRecord> {
 		return this.m_value;
 	}
 
+	/** {@inheritDoc} */
+	@Override
+	public int hashCode() {
+		return Objects.hashCode(this.m_channelName, this.m_value, this.m_deviceFlag, this.m_timestamp);
+	}
+
 	/**
-	 * Sets the channel name as provided
+	 * Sets the channel name as provided.
 	 *
 	 * @param channelName
 	 *            the new channel name
@@ -97,7 +130,7 @@ public final class DeviceRecord implements Comparable<DeviceRecord> {
 	}
 
 	/**
-	 * Sets the device flag as provided
+	 * Sets the device flag as provided.
 	 *
 	 * @param deviceFlag
 	 *            the new device flag
@@ -107,9 +140,9 @@ public final class DeviceRecord implements Comparable<DeviceRecord> {
 	}
 
 	/**
-	 * Sets the timestamp as provided
+	 * Sets the timestamp as provided.
 	 *
-	 * @param timetstamp
+	 * @param timestamp
 	 *            the new timestamp
 	 */
 	public void setTimestamp(final long timestamp) {
@@ -117,7 +150,7 @@ public final class DeviceRecord implements Comparable<DeviceRecord> {
 	}
 
 	/**
-	 * Sets the value as provided
+	 * Sets the value as provided.
 	 *
 	 * @param value
 	 *            the new value

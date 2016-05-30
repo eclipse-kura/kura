@@ -14,16 +14,23 @@ package org.eclipse.kura.type;
 
 import static org.eclipse.kura.type.DataType.BYTE_ARRAY;
 
+import java.util.Arrays;
+
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraRuntimeException;
+import org.eclipse.kura.annotation.Immutable;
+import org.eclipse.kura.annotation.ThreadSafe;
 
 import com.google.common.base.MoreObjects;
+import com.google.common.base.Objects;
 import com.google.common.collect.ComparisonChain;
 import com.google.common.primitives.UnsignedBytes;
 
 /**
  * This class represents a {@link Byte[]} value as a {@link TypedValue}.
  */
+@Immutable
+@ThreadSafe
 public final class ByteArrayValue implements TypedValue<byte[]> {
 
 	/**
@@ -55,6 +62,15 @@ public final class ByteArrayValue implements TypedValue<byte[]> {
 
 	/** {@inheritDoc} */
 	@Override
+	public boolean equals(final Object obj) {
+		if (obj instanceof ByteArrayValue) {
+			return Arrays.equals(((ByteArrayValue) obj).getValue(), this.m_value);
+		}
+		return false;
+	}
+
+	/** {@inheritDoc} */
+	@Override
 	public DataType getType() {
 		return BYTE_ARRAY;
 	}
@@ -63,6 +79,12 @@ public final class ByteArrayValue implements TypedValue<byte[]> {
 	@Override
 	public byte[] getValue() {
 		return this.m_value;
+	}
+
+	/** {@inheritDoc} */
+	@Override
+	public int hashCode() {
+		return Objects.hashCode(this.m_value);
 	}
 
 	/** {@inheritDoc} */

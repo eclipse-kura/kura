@@ -12,7 +12,7 @@
  */
 package org.eclipse.kura.wire.cloud.publisher;
 
-import static org.eclipse.kura.device.internal.Preconditions.checkCondition;
+import static org.eclipse.kura.device.util.Preconditions.checkCondition;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;

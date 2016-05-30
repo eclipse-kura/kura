@@ -12,7 +12,7 @@
  */
 package org.eclipse.kura.device.internal;
 
-import static org.eclipse.kura.device.internal.Preconditions.checkCondition;
+import static org.eclipse.kura.device.util.Preconditions.checkCondition;
 
 import java.util.HashSet;
 import java.util.Map;
@@ -20,6 +20,7 @@ import java.util.Map;
 import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.device.Channel;
 import org.eclipse.kura.device.ChannelType;
+import org.eclipse.kura.device.util.DeviceHelper;
 import org.eclipse.kura.type.DataType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -308,7 +309,7 @@ public final class DeviceConfiguration {
 			}
 		}
 		s_logger.debug("Retrieving single channel information from the properties...Done");
-		return Channel.of(channelName, channelType, dataType, channelConfig);
+		return DeviceHelper.newChannel(channelName, channelType, dataType, channelConfig);
 	}
 
 	/** {@inheritDoc} */

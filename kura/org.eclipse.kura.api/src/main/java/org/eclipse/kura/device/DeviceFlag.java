@@ -16,6 +16,21 @@ package org.eclipse.kura.device;
  * This represents all the Kura Device specific flag codes
  */
 public enum DeviceFlag {
-
-	DEVICE_ERROR_UNSPECIFIED, READ_SUCCESSFUL, UNKNOWN, WRITE_SUCCESSFUL
+	/**
+	 * In case of device communication failure for a known indistinguishable
+	 * reason
+	 */
+	DEVICE_ERROR_UNSPECIFIED,
+	/**
+	 * In case of successful reading operation
+	 */
+	READ_SUCCESSFUL,
+	/**
+	 * In case of failure due to completely unknown reason
+	 */
+	UNKNOWN,
+	/**
+	 * In case of successful writing operation
+	 */
+	WRITE_SUCCESSFUL
 }

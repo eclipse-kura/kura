@@ -12,7 +12,7 @@
  */
 package org.eclipse.kura.wire.internal;
 
-import static org.eclipse.kura.device.internal.Preconditions.checkCondition;
+import static org.eclipse.kura.device.util.Preconditions.checkCondition;
 
 import java.sql.Timestamp;
 import java.util.Date;
@@ -25,10 +25,9 @@ import org.eclipse.kura.device.Channel;
 import org.eclipse.kura.device.ChannelType;
 import org.eclipse.kura.device.DeviceRecord;
 import org.eclipse.kura.device.internal.BaseDevice;
-import org.eclipse.kura.type.LongValue;
-import org.eclipse.kura.type.StringValue;
+import org.eclipse.kura.device.util.DeviceHelper;
 import org.eclipse.kura.type.TypedValue;
-import org.eclipse.kura.wire.WireComponent;
+import org.eclipse.kura.type.util.TypedValueHelper;
 import org.eclipse.kura.wire.WireEmitter;
 import org.eclipse.kura.wire.WireEnvelope;
 import org.eclipse.kura.wire.WireField;
@@ -36,6 +35,7 @@ import org.eclipse.kura.wire.WireReceiver;
 import org.eclipse.kura.wire.WireRecord;
 import org.eclipse.kura.wire.WireSupport;
 import org.eclipse.kura.wire.timer.Timer;
+import org.eclipse.kura.wire.util.WireHelper;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.wireadmin.Wire;
 import org.slf4j.Logger;
@@ -46,7 +46,7 @@ import com.google.common.collect.Lists;
 
 /**
  * The Class WireDevice is a wire component which provides all necessary higher
- * level abstraction of a Kura device. This wire device is an integral wire
+ * level abstractions of a Kura device. This wire device is an integral wire
  * component in Kura Wires topology as it represents an industrial device with a
  * field protocol driver associated to it.
  *
@@ -60,7 +60,7 @@ import com.google.common.collect.Lists;
  * <li>Value</li>
  * </ul>
  */
-public final class WireDevice extends BaseDevice implements WireComponent, WireEmitter, WireReceiver {
+public final class WireDevice extends BaseDevice implements WireEmitter, WireReceiver {
 
 	/** The Logger instance. */
 	private static final Logger s_logger = LoggerFactory.getLogger(WireDevice.class);
@@ -72,7 +72,7 @@ public final class WireDevice extends BaseDevice implements WireComponent, WireE
 	 * Instantiates a new wire device.
 	 */
 	public WireDevice() {
-		this.m_wireSupport = WireSupport.of(this);
+		this.m_wireSupport = WireHelper.newWireSupport(this);
 	}
 
 	/** {@inheritDoc} */
@@ -116,13 +116,14 @@ public final class WireDevice extends BaseDevice implements WireComponent, WireE
 		final List<WireRecord> wireRecords = Lists.newArrayList();
 
 		for (final DeviceRecord deviceRecord : deviceRecords) {
-			final WireField channelWireField = new WireField("Channel_Name",
-					new StringValue(deviceRecord.getChannelName()));
-			final WireField deviceFlagWireField = new WireField("Device_Flag",
-					new StringValue(deviceRecord.getDeviceFlag().name()));
-			final WireField timestampWireField = new WireField("Timestamp", new LongValue(deviceRecord.getTimestamp()));
-			final WireField valueWireField = new WireField("Value", deviceRecord.getValue());
-			final WireRecord wireRecord = new WireRecord(new Timestamp(new Date().getTime()),
+			final WireField channelWireField = WireHelper.newWireField("Channel_Name",
+					TypedValueHelper.newStringValue(deviceRecord.getChannelName()));
+			final WireField deviceFlagWireField = WireHelper.newWireField("Device_Flag",
+					TypedValueHelper.newStringValue(deviceRecord.getDeviceFlag().name()));
+			final WireField timestampWireField = WireHelper.newWireField("Timestamp",
+					TypedValueHelper.newLongValue(deviceRecord.getTimestamp()));
+			final WireField valueWireField = WireHelper.newWireField("Value", deviceRecord.getValue());
+			final WireRecord wireRecord = WireHelper.newWireRecord(new Timestamp(new Date().getTime()),
 					Lists.newArrayList(channelWireField, deviceFlagWireField, timestampWireField, valueWireField));
 			wireRecords.add(wireRecord);
 		}
@@ -136,7 +137,23 @@ public final class WireDevice extends BaseDevice implements WireComponent, WireE
 		return this.m_deviceConfiguration.getDeviceName();
 	}
 
-	/** {@inheritDoc} */
+	/**
+	 * This method is triggered as soon as the wire component receives a Wire
+	 * Envelope. After it receives a Wire Envelope, it checks for all associated
+	 * channels to read and write and perform the operations accordingly. The
+	 * order of executions are performed the following way:
+	 *
+	 * <ul>
+	 * <li>Perform all read operations on associated reading channels</li>
+	 * <li>Perform all write operations on associated writing channels</li>
+	 * <ul>
+	 *
+	 * Both of the aforementioned operations are performed as soon as it timer
+	 * wire component is also triggered.
+	 *
+	 * @param wireEnvelope
+	 *            the received wire envelope
+	 */
 	@Override
 	public void onWireReceive(final WireEnvelope wireEnvelope) {
 		checkCondition(wireEnvelope == null, "Wire Envelope cannot be null");
@@ -154,6 +171,7 @@ public final class WireDevice extends BaseDevice implements WireComponent, WireE
 				channelsToRead.add(channel.getName());
 			}
 		}
+		checkCondition(wireEnvelope.getRecords().isEmpty(), "Wire records cannot be empty");
 
 		if (wireEnvelope.getRecords().get(0).getFields().get(0).getName().equals(Timer.TIMER_EVENT_FIELD_NAME)) {
 			// perform the read operation on timer event receive
@@ -205,8 +223,7 @@ public final class WireDevice extends BaseDevice implements WireComponent, WireE
 		checkCondition(channel == null, "Channel cannot be null");
 		checkCondition(value == null, "Value cannot be null");
 
-		final DeviceRecord deviceRecord = new DeviceRecord();
-		deviceRecord.setChannelName(channel.getName());
+		final DeviceRecord deviceRecord = DeviceHelper.newDeviceRecord(channel.getName());
 		deviceRecord.setValue(value);
 		return deviceRecord;
 	}

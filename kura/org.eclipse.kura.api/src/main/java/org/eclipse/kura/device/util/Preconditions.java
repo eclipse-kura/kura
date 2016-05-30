@@ -10,7 +10,7 @@
  *   Eurotech
  *   Amit Kumar Mondal (admin@amitinside.com)
  */
-package org.eclipse.kura.device.internal;
+package org.eclipse.kura.device.util;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraRuntimeException;
@@ -18,17 +18,16 @@ import org.eclipse.kura.KuraRuntimeException;
 /**
  * The Class DevicePreconditions is responsible to provide utility methods to
  * check for conditions or predicates and it throws {@link KuraRuntimeException}
- * with {@link KuraErrorCode#INTERNAL_ERROR} if the provided flag is not
- * satisfied
+ * with {@link KuraErrorCode#INTERNAL_ERROR} if the provided flag is satisfied
  */
 public final class Preconditions {
 
 	/**
-	 * Checks condition and throws exception
+	 * Checks condition and throws exception if satisfied
 	 *
 	 * @param flag
-	 *            the flag condition to check, and if it's not satisfied, then
-	 *            throw the exception
+	 *            the flag condition to check, and if it's satisfied, then throw
+	 *            the exception
 	 * @throws KuraRuntimeException
 	 *             if the provided flag or condition is true
 	 */
@@ -37,11 +36,11 @@ public final class Preconditions {
 	}
 
 	/**
-	 * Checks condition and throws exception
+	 * Checks condition and throws exception if satisfied
 	 *
 	 * @param flag
-	 *            the flag condition to check, and if it's not satisfied, then
-	 *            throw the exception
+	 *            the flag condition to check, and if it's satisfied, then throw
+	 *            the exception
 	 * @param errorCode
 	 *            the error code to set
 	 * @throws KuraRuntimeException
@@ -52,11 +51,11 @@ public final class Preconditions {
 	}
 
 	/**
-	 * Checks condition and throws exception
+	 * Checks condition and throws exception if satisfied
 	 *
 	 * @param flag
-	 *            the flag condition to check, and if it's not satisfied, then
-	 *            throw the exception
+	 *            the flag condition to check, and if it's satisfied, then throw
+	 *            the exception
 	 * @param errorCode
 	 *            the error code to set
 	 * @param message
@@ -71,11 +70,11 @@ public final class Preconditions {
 	}
 
 	/**
-	 * Checks condition and throws exception
+	 * Checks condition and throws exception if satisfied
 	 *
 	 * @param flag
-	 *            the flag condition to check, and if it's not satisfied, then
-	 *            throw the exception
+	 *            the flag condition to check, and if it's satisfied, then throw
+	 *            the exception
 	 * @param message
 	 *            the exception message
 	 * @throws KuraRuntimeException

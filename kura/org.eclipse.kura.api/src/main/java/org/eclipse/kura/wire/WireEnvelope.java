@@ -14,6 +14,8 @@ package org.eclipse.kura.wire;
 
 import java.util.List;
 
+import org.eclipse.kura.annotation.Immutable;
+import org.eclipse.kura.annotation.ThreadSafe;
 import org.osgi.service.wireadmin.BasicEnvelope;
 
 import com.google.common.base.MoreObjects;
@@ -23,6 +25,8 @@ import com.google.common.base.MoreObjects;
  * abstract data to be transmitted between the wire emitter and the wire
  * receiver
  */
+@Immutable
+@ThreadSafe
 public final class WireEnvelope extends BasicEnvelope {
 
 	/**

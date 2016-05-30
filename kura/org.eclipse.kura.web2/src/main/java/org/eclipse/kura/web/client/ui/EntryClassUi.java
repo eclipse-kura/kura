@@ -31,6 +31,8 @@ import org.eclipse.kura.web.shared.model.GwtSession;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.eclipse.kura.web.shared.service.GwtComponentService;
 import org.eclipse.kura.web.shared.service.GwtComponentServiceAsync;
+import org.eclipse.kura.web.shared.service.GwtPackageService;
+import org.eclipse.kura.web.shared.service.GwtPackageServiceAsync;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenService;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenServiceAsync;
 import org.gwtbootstrap3.client.shared.event.ModalHideEvent;
@@ -54,6 +56,12 @@ import org.gwtbootstrap3.client.ui.html.Span;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.http.client.Request;
+import com.google.gwt.http.client.RequestBuilder;
+import com.google.gwt.http.client.RequestCallback;
+import com.google.gwt.http.client.RequestException;
+import com.google.gwt.http.client.Response;
+import com.google.gwt.http.client.URL;
 import com.google.gwt.logging.client.HasWidgetsLogHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -84,6 +92,7 @@ public class EntryClassUi extends Composite {
 	private final NetworkPanelUi networkBinder   = GWT.create(NetworkPanelUi.class);
 	//private final WiresPanelUi   wiresBinder     = GWT.create(WiresPanelUi.class);
 
+	private final GwtPackageServiceAsync gwtPackageService = GWT.create(GwtPackageService.class);
 	private final GwtComponentServiceAsync gwtComponentService = GWT.create(GwtComponentService.class);
 	private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
 
@@ -150,6 +159,10 @@ public class EntryClassUi extends Composite {
 				errorLogArea.clear();
 			}
 		});
+		
+		//
+		dragDropInit(this);
+		
 		FailureHandler.setPopup(errorPopup);
 	}
 
@@ -558,4 +571,107 @@ public class EntryClassUi extends Composite {
 			settingsBinder.setDirty(false);
 		}
 	}
+	
+	private void eclipseMarketplaceInstall(String url) {
+		
+		// Construct the REST URL for Eclipse Marketplace
+		String appId = url.split("=")[1];
+		final String empApi = "http://marketplace.eclipse.org/node/" + appId + "/api/p";
+		
+		// Generate security token
+		EntryClassUi.showWaitModal();
+		gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
+
+			@Override
+			public void onFailure(Throwable ex) {
+				EntryClassUi.hideWaitModal();
+				FailureHandler.handle(ex, EntryClassUi.class.getName());
+			}
+
+			@Override
+			public void onSuccess(GwtXSRFToken token) {
+				// Retrieve the URL of the DP via the Eclipse Marketplace API
+				gwtPackageService.getMarketplaceUri(token, empApi, new AsyncCallback<String>() {
+
+					@Override
+					public void onFailure(Throwable ex) {
+						EntryClassUi.hideWaitModal();
+						logger.log(Level.SEVERE, ex.getMessage(), ex);
+						FailureHandler.handle(ex, EntryClassUi.class.getName());
+					}
+
+					@Override
+					public void onSuccess(String result) {
+						installMarketplaceDp(result);
+						EntryClassUi.hideWaitModal();
+					}
+					
+				});
+				
+			}
+		});
+	}
+	
+	private void installMarketplaceDp(final String uri) {
+		String url = "/" + GWT.getModuleName()	+ "/file/deploy/url";
+		final RequestBuilder builder = new RequestBuilder(RequestBuilder.POST, URL.encode(url));
+		
+		gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
+
+			@Override
+			public void onFailure(Throwable ex) {
+				EntryClassUi.hideWaitModal();
+				FailureHandler.handle(ex, EntryClassUi.class.getName());
+			}
+
+			@Override
+			public void onSuccess(GwtXSRFToken token) {
+				StringBuilder sb = new StringBuilder();
+				sb.append("xsrfToken=" + token.getToken());
+				sb.append("&packageUrl=" + uri);
+				
+				builder.setHeader("Content-type", "application/x-www-form-urlencoded");
+				try {
+					builder.sendRequest(sb.toString(), new RequestCallback() {
+
+						@Override
+						public void onResponseReceived(Request request, Response response) {
+							logger.info(response.getText());
+						}
+
+						@Override
+						public void onError(Request request, Throwable ex) {
+							logger.log(Level.SEVERE, ex.getMessage(), ex);
+							FailureHandler.handle(ex, EntryClassUi.class.getName());
+						}
+						
+					});
+				} catch (RequestException e) {
+					logger.log(Level.SEVERE, e.getMessage(), e);
+					FailureHandler.handle(e, EntryClassUi.class.getName());
+				}
+			}
+		});
+	}
+	
+	public static native void dragDropInit(EntryClassUi ecu) /*-{
+		$wnd.$("html").on("dragover", function(event) {
+		    event.preventDefault();  
+		    event.stopPropagation();
+		});
+		
+		$wnd.$("html").on("dragleave", function(event) {
+		    event.preventDefault();  
+		    event.stopPropagation();
+		});
+		
+		$wnd.$("html").on("drop", function(event) {
+		    event.preventDefault();  
+		    event.stopPropagation();
+		    console.log(event.originalEvent.dataTransfer.getData("text"));
+		    if (confirm("Install file?") == true) {
+		    	ecu.@org.eclipse.kura.web.client.ui.EntryClassUi::eclipseMarketplaceInstall(Ljava/lang/String;)(event.originalEvent.dataTransfer.getData("text"));
+		    }
+		});
+	}-*/;
 }

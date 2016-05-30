@@ -280,7 +280,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 		}
 		return cc;
 	}
-
+	
 	@SuppressWarnings("unchecked")
 	@Override
 	public synchronized void updateConfiguration(String pidToUpdate, Map<String, Object> propertiesToUpdate) throws KuraException {
@@ -531,7 +531,6 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 				}
 			}
 		}
-
 		return configProperties;
 	}
 

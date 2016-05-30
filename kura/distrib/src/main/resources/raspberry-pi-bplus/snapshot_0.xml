@@ -319,7 +319,7 @@
                 <esf:value>24</esf:value>
             </esf:property>
             <esf:property name="net.interface.wlan0.config.wifi.infra.passphrase" array="false" encrypted="false" type="String">
-                <esf:value></esf:value>
+                <esf:value>wepKeyInfraWlan0</esf:value>
             </esf:property>
             <esf:property name="net.interface.wlan0.config.ip4.dnsServers" array="false" encrypted="false" type="String">
                 <esf:value></esf:value>

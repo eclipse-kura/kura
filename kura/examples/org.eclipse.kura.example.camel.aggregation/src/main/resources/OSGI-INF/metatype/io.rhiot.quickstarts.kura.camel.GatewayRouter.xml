@@ -24,7 +24,7 @@
 
     </OCD>
 
-    <Designate pid="io.rhiot.quickstarts.kura.camel.GatewayRouter">
+    <Designate pid="org.eclipse.kura.example.camel.aggregation.GatewayRouter">
         <Object ocdref="org.eclipse.kura.example.camel.aggregation.GatewayRouter"/>
     </Designate>
 </MetaData>

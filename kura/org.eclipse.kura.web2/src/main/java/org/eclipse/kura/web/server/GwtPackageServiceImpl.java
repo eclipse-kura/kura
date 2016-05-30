@@ -37,14 +37,11 @@ import org.osgi.service.deploymentadmin.DeploymentPackage;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
-public class GwtPackageServiceImpl extends OsgiRemoteServiceServlet implements GwtPackageService
-{
+public class GwtPackageServiceImpl extends OsgiRemoteServiceServlet implements GwtPackageService {
 	private static final long serialVersionUID = -3422518194598042896L;
 
-
-	public List<GwtDeploymentPackage> findDeviceDeploymentPackages(GwtXSRFToken xsrfToken)
-		throws GwtKuraException 
-	{
+	@Override
+	public List<GwtDeploymentPackage> findDeviceDeploymentPackages(GwtXSRFToken xsrfToken) throws GwtKuraException {
 		checkXSRFToken(xsrfToken);
 		DeploymentAdmin deploymentAdmin = ServiceLocator.getInstance().getService(DeploymentAdmin.class);
 		
@@ -77,12 +74,9 @@ public class GwtPackageServiceImpl extends OsgiRemoteServiceServlet implements G
 		
 		return gwtDeploymentPackages;
 	}
-
 	
-	
-	public void uninstallDeploymentPackage(GwtXSRFToken xsrfToken, String packageName)
-		throws GwtKuraException 
-	{
+	@Override
+	public void uninstallDeploymentPackage(GwtXSRFToken xsrfToken, String packageName) throws GwtKuraException {
 		checkXSRFToken(xsrfToken);
 		DeploymentAgentService deploymentAgentService = ServiceLocator.getInstance().getService(DeploymentAgentService.class);		
 		try {
@@ -93,6 +87,7 @@ public class GwtPackageServiceImpl extends OsgiRemoteServiceServlet implements G
 		}
 	}
 	
+	@Override
 	public String getMarketplaceUri(GwtXSRFToken xsrfToken, String url) throws GwtKuraException {
 		String uri = null;
 		URL mpUrl = null;
@@ -116,11 +111,9 @@ public class GwtPackageServiceImpl extends OsgiRemoteServiceServlet implements G
 		} catch (IOException e) {
 			throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
 		} catch (SAXException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		    throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
 		} catch (ParserConfigurationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		    throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
 		} finally {
 	    	if (connection != null) {
 	    		connection.disconnect();
@@ -129,5 +122,4 @@ public class GwtPackageServiceImpl extends OsgiRemoteServiceServlet implements G
 		
 		return uri;
 	}
-
 }

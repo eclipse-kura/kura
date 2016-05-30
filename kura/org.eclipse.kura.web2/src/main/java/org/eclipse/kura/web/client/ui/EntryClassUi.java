@@ -65,6 +65,7 @@ import com.google.gwt.http.client.URL;
 import com.google.gwt.logging.client.HasWidgetsLogHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Image;
@@ -603,9 +604,15 @@ public class EntryClassUi extends Composite {
 					@Override
 					public void onSuccess(String result) {
 						installMarketplaceDp(result);
-						EntryClassUi.hideWaitModal();
+						Timer timer = new Timer() {
+				            @Override
+				            public void run() {
+				                initServicesTree();
+		                        EntryClassUi.hideWaitModal();
+				            }
+				        };
+				        timer.schedule(2000);
 					}
-					
 				});
 				
 			}

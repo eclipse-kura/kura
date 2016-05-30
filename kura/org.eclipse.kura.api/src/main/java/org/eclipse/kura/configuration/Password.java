@@ -13,24 +13,26 @@ package org.eclipse.kura.configuration;
 
 public class Password 
 {
-	private char[] password;
+	private char[] m_password;
 
 	public Password(String password) {
 		super();
-		this.password = password.toCharArray();
+		if (password != null) {
+			m_password = password.toCharArray();
+		}
 	}
 	
 	public Password(char[] password) {
 		super();
-		this.password = password;
+		m_password = password;
 	}
 
 	public char[] getPassword() {
-		return password;
+		return m_password;
 	}
 	
 	@Override
 	public String toString() {
-		return new String(password);
+		return new String(m_password);
 	}
 }

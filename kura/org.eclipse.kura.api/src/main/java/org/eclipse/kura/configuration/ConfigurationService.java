@@ -80,7 +80,6 @@ public interface ConfigurationService
 	 */
 	public ComponentConfiguration getComponentConfiguration(String pid) throws KuraException;
 	
-	
 	/**
 	 * Updates the Configuration of the registered component with the specified pid.
 	 * Using the OSGi ConfigurationAdmin, it retrieves the Configuration of the 

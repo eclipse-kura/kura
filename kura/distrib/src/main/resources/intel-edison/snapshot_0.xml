@@ -365,7 +365,7 @@
                 <esf:value>false</esf:value>
             </esf:property>
             <esf:property name="net.interface.wlan0.config.wifi.infra.passphrase" array="false" encrypted="false" type="String">
-                <esf:value>testKEYS</esf:value>
+                <esf:value>wepKeyInfraWlan0</esf:value>
             </esf:property>
             <esf:property name="net.interface.wlan0.config.domains" array="false" encrypted="false" type="String">
                 <esf:value></esf:value>

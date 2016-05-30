@@ -107,7 +107,31 @@
             required="true"
             default="false"
             description="Enable buttons."/>
+
+        <AD id="switchOnRedLed"
+            name="switchOnRedLed"
+            type="Boolean"
+            cardinality="0"
+            required="true"
+            default="false"
+            description="Switch on the red led."/>
             
+        <AD id="switchOnGreenLed"
+            name="switchOnGreenLed"
+            type="Boolean"
+            cardinality="0"
+            required="true"
+            default="false"
+            description="Switch on the green led."/>
+            
+         <AD id="switchOnBuzzer"
+            name="switchOnBuzzer"
+            type="Boolean"
+            cardinality="0"
+            required="true"
+            default="false"
+            description="Switch on the buzzer."/>
+                        
         <AD id="publishTopic"  
             name="publishTopic"
             type="String"

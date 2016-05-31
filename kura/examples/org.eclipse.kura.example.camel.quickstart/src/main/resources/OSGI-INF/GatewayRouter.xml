@@ -8,5 +8,5 @@
 	<service>
 		<provide interface="org.eclipse.kura.example.camel.quickstart.GatewayRouter"/>
 	</service>
-	<property name="service.pid" type="String" value="io.rhiot.quickstarts.kura.camel.GatewayRouter"/>
+	<property name="service.pid" type="String" value="org.eclipse.kura.example.camel.quickstart.GatewayRouter"/>
 </scr:component>

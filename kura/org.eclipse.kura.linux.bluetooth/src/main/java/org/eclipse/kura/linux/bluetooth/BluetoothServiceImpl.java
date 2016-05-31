@@ -53,8 +53,7 @@ public class BluetoothServiceImpl implements BluetoothService {
 	@Override
 	public BluetoothAdapter getBluetoothAdapter(String name) {
 		try {
-			BluetoothAdapterImpl ba = new BluetoothAdapterImpl(name);
-			return ba;
+			return new BluetoothAdapterImpl(name);
 		} catch (KuraException e) {
 			s_logger.error("Could not get bluetooth adapter", e);
 			return null;

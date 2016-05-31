@@ -161,3 +161,22 @@ demonstrate the Camel Kura project is actually working and processing messages.
 In order to see messages logged by Camel router to Kura log file execute the following command on your remote device:
 
     tail -f /var/log/kura.log
+
+# Kura Camel aggregation example
+
+The Kura Camel aggregation example can be used to create Camel router OSGi bundle project deployable into the
+[Eclipse Kura](https://www.eclipse.org/kura) gateway. The project demonstrates how to levarage Camel aggregation feature
+to periodically calculate a value from the sensor data received within the given time frame.
+
+## Creating a Kura Camel aggregation example project
+
+In order to create the Kura Camel project execute the following commands:
+
+    git clone git@github.com:eclipse/kura.git
+    cp -r kura/kura/examples/org.eclipse.kura.example.camel.aggregation org.eclipse.kura.example.camel.aggregation
+    cd org.eclipse.kura.example.camel.aggregation
+    mvn install
+
+## Deployment
+
+In order to deploy the example, follow instructions from the general Camel Kura quickstart.

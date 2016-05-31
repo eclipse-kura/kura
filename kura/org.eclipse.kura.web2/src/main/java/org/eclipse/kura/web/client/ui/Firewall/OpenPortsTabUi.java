@@ -155,14 +155,6 @@ public class OpenPortsTabUi extends Composite implements Tab {
 
 		});
 	}
-
-	public GwtFirewallOpenPortEntry getNewOpenPortEntry() {
-		return newOpenPortEntry;
-	}
-
-	public GwtFirewallOpenPortEntry getEditOpenPortEntry() {
-		return editOpenPortEntry;
-	}
 	
 	@Override
 	public boolean isDirty() {
@@ -355,10 +347,9 @@ public class OpenPortsTabUi extends Composite implements Tab {
 			@Override
 			public void onHide(ModalHideEvent evt) {
 
-				if (getNewOpenPortEntry()!= null) {
-					GwtFirewallOpenPortEntry newEntry = getNewOpenPortEntry();
-					if (!duplicateEntry(newEntry)) {
-						openPortsDataProvider.getList().add(newEntry);
+				if (newOpenPortEntry!= null) {
+					if (!duplicateEntry(newOpenPortEntry)) {
+						openPortsDataProvider.getList().add(newOpenPortEntry);
 						refreshTable();
 						setVisibility();
 						apply.setEnabled(true);
@@ -428,12 +419,11 @@ public class OpenPortsTabUi extends Composite implements Tab {
 			@Override
 			public void onHide(ModalHideEvent evt) {
 
-				if (getEditOpenPortEntry() != null) {
-					final GwtFirewallOpenPortEntry editEntry = getEditOpenPortEntry();
+				if (editOpenPortEntry != null) {
 					GwtFirewallOpenPortEntry oldEntry= selectionModel.getSelectedObject();
 					openPortsDataProvider.getList().remove(oldEntry);
-					if (!duplicateEntry(getEditOpenPortEntry())) {
-						openPortsDataProvider.getList().add(editEntry);
+					if (!duplicateEntry(editOpenPortEntry)) {
+						openPortsDataProvider.getList().add(editOpenPortEntry);
 						openPortsDataProvider.flush();
 						apply.setEnabled(true);
 						setVisibility();

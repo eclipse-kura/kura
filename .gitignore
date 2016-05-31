@@ -25,3 +25,4 @@ manifests
 
 +# IntelliJ Idea
 .idea/
+*.iml

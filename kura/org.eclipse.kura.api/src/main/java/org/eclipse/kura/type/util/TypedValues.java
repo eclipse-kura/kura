@@ -26,7 +26,7 @@ import org.eclipse.kura.type.TypedValue;
  * The Class TypedValues is an utility class to quickly create different
  * {@link TypedValue}
  */
-public final class TypedValueHelper {
+public final class TypedValues {
 
 	/**
 	 * Creates new boolean value.
@@ -117,7 +117,7 @@ public final class TypedValueHelper {
 	}
 
 	/** Constructor */
-	private TypedValueHelper() {
+	private TypedValues() {
 		// Static Factory Methods container. No need to instantiate.
 	}
 

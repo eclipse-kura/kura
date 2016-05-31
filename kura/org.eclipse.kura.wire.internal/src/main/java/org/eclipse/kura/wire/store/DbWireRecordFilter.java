@@ -22,7 +22,7 @@ import org.eclipse.kura.wire.WireEmitter;
 import org.eclipse.kura.wire.WireEnvelope;
 import org.eclipse.kura.wire.WireReceiver;
 import org.eclipse.kura.wire.WireSupport;
-import org.eclipse.kura.wire.util.WireHelper;
+import org.eclipse.kura.wire.util.Wires;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.wireadmin.Wire;
 import org.slf4j.Logger;
@@ -67,7 +67,7 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Conf
 			final Map<String, Object> properties) {
 		s_logger.info("Activating DB Wire Record Filter...");
 		this.m_ctx = componentContext;
-		this.m_wireSupport = WireHelper.newWireSupport(this);
+		this.m_wireSupport = Wires.newWireSupport(this);
 		this.m_options = new DbWireRecordFilterOptions(properties);
 		s_logger.info("Activating DB Wire Record Filter...Done");
 	}

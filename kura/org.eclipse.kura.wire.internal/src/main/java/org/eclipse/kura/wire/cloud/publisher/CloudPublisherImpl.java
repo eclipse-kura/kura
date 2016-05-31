@@ -33,7 +33,7 @@ import org.eclipse.kura.wire.WireReceiver;
 import org.eclipse.kura.wire.WireRecord;
 import org.eclipse.kura.wire.WireSupport;
 import org.eclipse.kura.wire.cloud.publisher.CloudPublisherOptions.AutoConnectMode;
-import org.eclipse.kura.wire.util.WireHelper;
+import org.eclipse.kura.wire.util.Wires;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.osgi.service.component.ComponentContext;
@@ -97,7 +97,7 @@ public final class CloudPublisherImpl
 	protected synchronized void activate(final ComponentContext componentContext,
 			final Map<String, Object> properties) {
 		s_logger.info("Activating Cloud Publisher Wire Component...");
-		this.m_wireSupport = WireHelper.newWireSupport(this);
+		this.m_wireSupport = Wires.newWireSupport(this);
 		// Update properties
 		this.m_options = new CloudPublisherOptions(properties);
 

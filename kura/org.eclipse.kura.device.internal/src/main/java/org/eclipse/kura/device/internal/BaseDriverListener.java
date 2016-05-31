@@ -22,7 +22,7 @@ import org.eclipse.kura.device.DriverEvent;
 import org.eclipse.kura.device.DriverFlag;
 import org.eclipse.kura.device.DriverListener;
 import org.eclipse.kura.device.DriverRecord;
-import org.eclipse.kura.device.util.DeviceHelper;
+import org.eclipse.kura.device.util.Devices;
 
 /**
  * This is a basic driver listener used to listen for driver events so that it
@@ -59,7 +59,7 @@ public final class BaseDriverListener implements DriverListener {
 	public void onDriverEvent(final DriverEvent event) {
 		checkCondition(event == null, "Driver Event cannot be null");
 		final DriverRecord driverRecord = event.getDriverRecord();
-		final DeviceRecord deviceRecord = DeviceHelper.newDeviceRecord(this.m_channelName);
+		final DeviceRecord deviceRecord = Devices.newDeviceRecord(this.m_channelName);
 		final DriverFlag driverFlag = driverRecord.getDriverFlag();
 
 		switch (driverFlag) {

@@ -494,8 +494,7 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 		try {
 			final String jsonString = m_options.toJsonString();
 			newProperties.put(WireServiceOptions.CONF_WIRES, jsonString);
-			this.m_configService.updateConfiguration("org.eclipse.kura.core.wire.WireServiceImpl", newProperties,
-					shouldPersist);
+			this.m_configService.updateConfiguration(this.getClass().getName(), newProperties, shouldPersist);
 		} catch (final JSONException e) {
 			s_logger.error(Throwables.getStackTraceAsString(e));
 		} catch (final KuraException e) {

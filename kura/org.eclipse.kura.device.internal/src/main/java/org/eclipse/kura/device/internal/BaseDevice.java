@@ -43,7 +43,7 @@ import org.eclipse.kura.device.Driver;
 import org.eclipse.kura.device.DriverFlag;
 import org.eclipse.kura.device.DriverListener;
 import org.eclipse.kura.device.DriverRecord;
-import org.eclipse.kura.device.util.DeviceHelper;
+import org.eclipse.kura.device.util.Devices;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
@@ -308,7 +308,7 @@ public class BaseDevice implements Device, SelfConfiguringComponent {
 			checkCondition((channel.getType() != ChannelType.READ) || !(channel.getType() != ChannelType.READ_WRITE),
 					"Channel type not within defined types (READ OR READ_WRITE) : " + channel);
 
-			final DriverRecord driverRecord = DeviceHelper.newDriverRecord(channelName);
+			final DriverRecord driverRecord = Devices.newDriverRecord(channelName);
 			driverRecord.setChannelConfig(ImmutableMap.copyOf(channel.getConfig()));
 
 			driverRecords.add(driverRecord);
@@ -322,7 +322,7 @@ public class BaseDevice implements Device, SelfConfiguringComponent {
 		}
 
 		for (final DriverRecord driverRecord : driverRecords) {
-			final DeviceRecord deviceRecord = DeviceHelper.newDeviceRecord(driverRecord.getChannelName());
+			final DeviceRecord deviceRecord = Devices.newDeviceRecord(driverRecord.getChannelName());
 			final DriverFlag driverFlag = driverRecord.getDriverFlag();
 
 			switch (driverFlag) {
@@ -444,7 +444,7 @@ public class BaseDevice implements Device, SelfConfiguringComponent {
 			checkCondition((channel.getType() != ChannelType.WRITE) || !(channel.getType() != ChannelType.READ_WRITE),
 					"Channel type not within defined types (WRITE OR READ_WRITE) : " + channel);
 
-			final DriverRecord driverRecord = DeviceHelper.newDriverRecord(channel.getName());
+			final DriverRecord driverRecord = Devices.newDriverRecord(channel.getName());
 			driverRecord.setChannelConfig(ImmutableMap.copyOf(channel.getConfig()));
 			driverRecord.setValue(deviceRecord.getValue());
 

@@ -32,7 +32,7 @@ import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 
 /**
- * The Class WireUtil comprises all necessary utility methods of Kura Wires
+ * The Class WireUtils comprises all necessary utility methods of Kura Wires
  * Topology
  */
 public final class WireUtils {
@@ -194,7 +194,7 @@ public final class WireUtils {
 	 * Constructor
 	 */
 	private WireUtils() {
-		// Not needed to instantiate because it is an utility class
+		// Static Factory Methods container. No need to instantiate.
 	}
 
 }

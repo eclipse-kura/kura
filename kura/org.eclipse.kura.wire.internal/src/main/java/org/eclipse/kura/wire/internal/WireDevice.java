@@ -25,9 +25,9 @@ import org.eclipse.kura.device.Channel;
 import org.eclipse.kura.device.ChannelType;
 import org.eclipse.kura.device.DeviceRecord;
 import org.eclipse.kura.device.internal.BaseDevice;
-import org.eclipse.kura.device.util.DeviceHelper;
+import org.eclipse.kura.device.util.Devices;
 import org.eclipse.kura.type.TypedValue;
-import org.eclipse.kura.type.util.TypedValueHelper;
+import org.eclipse.kura.type.util.TypedValues;
 import org.eclipse.kura.wire.WireEmitter;
 import org.eclipse.kura.wire.WireEnvelope;
 import org.eclipse.kura.wire.WireField;
@@ -35,7 +35,7 @@ import org.eclipse.kura.wire.WireReceiver;
 import org.eclipse.kura.wire.WireRecord;
 import org.eclipse.kura.wire.WireSupport;
 import org.eclipse.kura.wire.timer.Timer;
-import org.eclipse.kura.wire.util.WireHelper;
+import org.eclipse.kura.wire.util.Wires;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.wireadmin.Wire;
 import org.slf4j.Logger;
@@ -72,7 +72,7 @@ public final class WireDevice extends BaseDevice implements WireEmitter, WireRec
 	 * Instantiates a new wire device.
 	 */
 	public WireDevice() {
-		this.m_wireSupport = WireHelper.newWireSupport(this);
+		this.m_wireSupport = Wires.newWireSupport(this);
 	}
 
 	/** {@inheritDoc} */
@@ -116,14 +116,14 @@ public final class WireDevice extends BaseDevice implements WireEmitter, WireRec
 		final List<WireRecord> wireRecords = Lists.newArrayList();
 
 		for (final DeviceRecord deviceRecord : deviceRecords) {
-			final WireField channelWireField = WireHelper.newWireField("Channel_Name",
-					TypedValueHelper.newStringValue(deviceRecord.getChannelName()));
-			final WireField deviceFlagWireField = WireHelper.newWireField("Device_Flag",
-					TypedValueHelper.newStringValue(deviceRecord.getDeviceFlag().name()));
-			final WireField timestampWireField = WireHelper.newWireField("Timestamp",
-					TypedValueHelper.newLongValue(deviceRecord.getTimestamp()));
-			final WireField valueWireField = WireHelper.newWireField("Value", deviceRecord.getValue());
-			final WireRecord wireRecord = WireHelper.newWireRecord(new Timestamp(new Date().getTime()),
+			final WireField channelWireField = Wires.newWireField("Channel_Name",
+					TypedValues.newStringValue(deviceRecord.getChannelName()));
+			final WireField deviceFlagWireField = Wires.newWireField("Device_Flag",
+					TypedValues.newStringValue(deviceRecord.getDeviceFlag().name()));
+			final WireField timestampWireField = Wires.newWireField("Timestamp",
+					TypedValues.newLongValue(deviceRecord.getTimestamp()));
+			final WireField valueWireField = Wires.newWireField("Value", deviceRecord.getValue());
+			final WireRecord wireRecord = Wires.newWireRecord(new Timestamp(new Date().getTime()),
 					Lists.newArrayList(channelWireField, deviceFlagWireField, timestampWireField, valueWireField));
 			wireRecords.add(wireRecord);
 		}
@@ -223,7 +223,7 @@ public final class WireDevice extends BaseDevice implements WireEmitter, WireRec
 		checkCondition(channel == null, "Channel cannot be null");
 		checkCondition(value == null, "Value cannot be null");
 
-		final DeviceRecord deviceRecord = DeviceHelper.newDeviceRecord(channel.getName());
+		final DeviceRecord deviceRecord = Devices.newDeviceRecord(channel.getName());
 		deviceRecord.setValue(value);
 		return deviceRecord;
 	}

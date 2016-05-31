@@ -16,9 +16,9 @@ import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraRuntimeException;
 
 /**
- * The Class DevicePreconditions is responsible to provide utility methods to
- * check for conditions or predicates and it throws {@link KuraRuntimeException}
- * with {@link KuraErrorCode#INTERNAL_ERROR} if the provided flag is satisfied
+ * The Class Preconditions is responsible to provide utility methods to check
+ * for conditions or predicates and it throws {@link KuraRuntimeException} with
+ * {@link KuraErrorCode#INTERNAL_ERROR} if the provided flag is satisfied
  */
 public final class Preconditions {
 
@@ -88,7 +88,7 @@ public final class Preconditions {
 	 * Instantiates a new device preconditions.
 	 */
 	private Preconditions() {
-		// Not needed because of utility class
+		// Static Factory Methods container. No need to instantiate.
 	}
 
 }

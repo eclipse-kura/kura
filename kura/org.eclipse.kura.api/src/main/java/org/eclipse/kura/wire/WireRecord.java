@@ -46,7 +46,7 @@ public final class WireRecord {
 	 * @param timestamp
 	 *            the timestamp
 	 * @param fields
-	 *            the fields
+	 *            the wire fields
 	 */
 	public WireRecord(final Timestamp timestamp, final List<WireField> fields) {
 		this.m_timestamp = timestamp;
@@ -62,7 +62,7 @@ public final class WireRecord {
 	 * @param position
 	 *            the position
 	 * @param fields
-	 *            the fields
+	 *            the wire fields
 	 */
 	public WireRecord(final Timestamp timestamp, final Position position, final List<WireField> fields) {
 		this.m_timestamp = timestamp;

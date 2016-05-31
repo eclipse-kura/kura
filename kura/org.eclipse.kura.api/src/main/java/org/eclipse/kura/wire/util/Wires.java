@@ -23,10 +23,10 @@ import org.eclipse.kura.wire.WireSupport;
 import org.osgi.util.position.Position;
 
 /**
- * The Class WireHelper is an utility class to provide quick operations for Kura
+ * The Class Wires is an utility class to provide quick operations for Kura
  * Wires.
  */
-public final class WireHelper {
+public final class Wires {
 
 	/**
 	 * Prepares new wire field.
@@ -95,7 +95,7 @@ public final class WireHelper {
 	/**
 	 * Constructor.
 	 */
-	private WireHelper() {
+	private Wires() {
 		// Static Factory Methods container. No need to instantiate.
 	}
 

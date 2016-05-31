@@ -19,10 +19,10 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.kura.configuration.ConfigurableComponent;
-import org.eclipse.kura.type.util.TypedValueHelper;
+import org.eclipse.kura.type.util.TypedValues;
 import org.eclipse.kura.wire.WireEmitter;
 import org.eclipse.kura.wire.WireSupport;
-import org.eclipse.kura.wire.util.WireHelper;
+import org.eclipse.kura.wire.util.Wires;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.wireadmin.Wire;
 import org.slf4j.Logger;
@@ -69,7 +69,7 @@ public final class Timer implements WireEmitter, ConfigurableComponent {
 	 */
 	public Timer() {
 		this.m_executorService = Executors.newScheduledThreadPool(5);
-		this.m_wireSupport = WireHelper.newWireSupport(this);
+		this.m_wireSupport = Wires.newWireSupport(this);
 	}
 
 	/**
@@ -124,8 +124,8 @@ public final class Timer implements WireEmitter, ConfigurableComponent {
 			/** {@inheritDoc} */
 			@Override
 			public void run() {
-				m_wireSupport.emit(WireHelper.newWireRecord(WireHelper.newWireField(TIMER_EVENT_FIELD_NAME,
-						TypedValueHelper.newStringValue(Timer.this.m_name))));
+				m_wireSupport.emit(Wires.newWireRecord(Wires.newWireField(TIMER_EVENT_FIELD_NAME,
+						TypedValues.newStringValue(Timer.this.m_name))));
 			}
 		}, this.m_interval, TimeUnit.SECONDS);
 	}

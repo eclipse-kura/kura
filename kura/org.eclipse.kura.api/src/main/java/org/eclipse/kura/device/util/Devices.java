@@ -21,10 +21,10 @@ import org.eclipse.kura.device.DriverRecord;
 import org.eclipse.kura.type.DataType;
 
 /**
- * The Class DeviceHelper is an utility class to provide useful static factory
+ * The Class Devices is an utility class to provide useful static factory
  * methods for devices and drivers
  */
-public final class DeviceHelper {
+public final class Devices {
 
 	/**
 	 * Creates a new channel with the provided values
@@ -67,8 +67,8 @@ public final class DeviceHelper {
 	}
 
 	/** Constructor */
-	private DeviceHelper() {
-		// Not required
+	private Devices() {
+		// Static Factory Methods container. No need to instantiate.
 	}
 
 }

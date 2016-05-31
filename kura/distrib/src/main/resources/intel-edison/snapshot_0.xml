@@ -193,7 +193,7 @@
             <esf:property name="net.interface.usb0.config.ip4.dnsServers" array="false" encrypted="false" type="String">
                 <esf:value></esf:value>
             </esf:property>
-            <esf:property name="net.interface.wlan0.config.wifi.master.passphrase" array="false" encrypted="false" type="String">
+            <esf:property name="net.interface.wlan0.config.wifi.master.passphrase" array="false" encrypted="false" type="Password">
                 <esf:value>testKEYS</esf:value>
             </esf:property>
             <esf:property name="net.interface.usb0.driver" array="false" encrypted="false" type="String">
@@ -364,8 +364,8 @@
             <esf:property name="net.interface.usb0.loopback" array="false" encrypted="false" type="Boolean">
                 <esf:value>false</esf:value>
             </esf:property>
-            <esf:property name="net.interface.wlan0.config.wifi.infra.passphrase" array="false" encrypted="false" type="String">
-                <esf:value>testKEYS</esf:value>
+            <esf:property name="net.interface.wlan0.config.wifi.infra.passphrase" array="false" encrypted="false" type="Password">
+                <esf:value>wepKeyInfraWlan0</esf:value>
             </esf:property>
             <esf:property name="net.interface.wlan0.config.domains" array="false" encrypted="false" type="String">
                 <esf:value></esf:value>

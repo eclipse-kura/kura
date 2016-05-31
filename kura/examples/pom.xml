@@ -46,6 +46,8 @@
                 <module>org.eclipse.kura.example.ble.tisensortag</module>
                 <module>org.eclipse.kura.example.beacon</module>
                 <module>org.eclipse.kura.example.beacon.scanner</module>
+                <module>org.eclipse.kura.example.camel.quickstart</module>
+                <module>org.eclipse.kura.example.camel.aggregation</module>
                 <module>org.eclipse.kura.raspberrypi.sensehat</module>
                 <module>org.eclipse.kura.raspberrypi.sensehat.example</module>
             </modules>

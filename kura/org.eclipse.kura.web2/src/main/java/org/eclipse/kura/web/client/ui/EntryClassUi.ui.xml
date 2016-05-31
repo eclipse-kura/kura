@@ -88,9 +88,9 @@
 
 													<b:AnchorListItem icon="GEAR"
 														iconFixedWidth="true" text="Settings" ui:field="settings" />
-													
+													<!--  
 													<b:AnchorListItem icon="GEAR"
-														iconFixedWidth="true" text="Kura Wires" ui:field="wires"/>
+														iconFixedWidth="true" text="Kura Wires" ui:field="wires"/> -->
 												</b:NavPills>
 											</b:PanelBody>
 										</b:Panel>

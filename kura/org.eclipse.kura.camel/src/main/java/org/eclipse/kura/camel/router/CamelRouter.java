@@ -132,6 +132,7 @@ public abstract class CamelRouter extends KuraRouter implements ConfigurableComp
 	@Override
 	protected void beforeStart(CamelContext camelContext) {
 		camelContext.getShutdownStrategy().setTimeout(5);
+		camelContext.disableJMX();
 		registerComponents();
 		super.beforeStart(camelContext);
 	}

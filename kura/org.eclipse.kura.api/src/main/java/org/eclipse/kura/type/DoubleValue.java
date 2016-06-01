@@ -34,7 +34,7 @@ public final class DoubleValue implements TypedValue<Double> {
 	 * The actual contained value that will be represented as
 	 * {@link TypedValue}.
 	 */
-	private final double m_value;
+	private final double value;
 
 	/**
 	 * Instantiates a new double value.
@@ -43,7 +43,7 @@ public final class DoubleValue implements TypedValue<Double> {
 	 *            the value
 	 */
 	public DoubleValue(final double value) {
-		this.m_value = value;
+		this.value = value;
 	}
 
 	/** {@inheritDoc} */
@@ -52,14 +52,14 @@ public final class DoubleValue implements TypedValue<Double> {
 	public int compareTo(final TypedValue otherTypedValue) {
 		checkNonInstance(otherTypedValue, DoubleValue.class, "Typed Value is not double");
 		return ComparisonChain.start()
-				.compare(this.m_value, ((DoubleValue) (otherTypedValue)).getValue(), Ordering.natural()).result();
+				.compare(this.value, ((DoubleValue) (otherTypedValue)).getValue(), Ordering.natural()).result();
 	}
 
 	/** {@inheritDoc} */
 	@Override
 	public boolean equals(final Object obj) {
 		if (obj instanceof DoubleValue) {
-			return Objects.equal(((DoubleValue) obj).getValue(), this.m_value);
+			return Objects.equal(((DoubleValue) obj).getValue(), this.value);
 		}
 		return false;
 	}
@@ -73,18 +73,18 @@ public final class DoubleValue implements TypedValue<Double> {
 	/** {@inheritDoc} */
 	@Override
 	public Double getValue() {
-		return this.m_value;
+		return this.value;
 	}
 
 	/** {@inheritDoc} */
 	@Override
 	public int hashCode() {
-		return Objects.hashCode(this.m_value);
+		return Objects.hashCode(this.value);
 	}
 
 	/** {@inheritDoc} */
 	@Override
 	public String toString() {
-		return MoreObjects.toStringHelper(this).add("double_value", this.m_value).toString();
+		return MoreObjects.toStringHelper(this).add("double_value", this.value).toString();
 	}
 }

@@ -33,6 +33,8 @@ import org.eclipse.kura.wire.WireConfiguration;
 import org.eclipse.kura.wire.WireEmitter;
 import org.eclipse.kura.wire.WireReceiver;
 import org.eclipse.kura.wire.WireService;
+import org.eclipse.kura.wire.WireServiceOptions;
+import org.eclipse.kura.wire.util.Wires;
 import org.json.JSONException;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.component.ComponentContext;
@@ -113,7 +115,7 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 
 		this.m_ctx = componentContext;
 		try {
-			m_options = WireServiceOptions.newInstance(properties);
+			m_options = Wires.newWireServiceOptions(properties);
 			this.m_properties = properties;
 
 			for (final WireConfiguration conf : m_options.getWireConfigurations()) {
@@ -170,7 +172,7 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 		checkNull(receiverName, "Receiver name cannot be null");
 
 		s_logger.info("Creating wire between..." + emitterName + " and " + receiverName + ".....");
-		final WireConfiguration conf = new WireConfiguration(emitterName, receiverName, null);
+		final WireConfiguration conf = Wires.newWireConfiguration(emitterName, receiverName, null);
 		this.m_wireConfig.add(conf);
 		s_logger.info("Creating wire between..." + emitterName + " and " + receiverName + ".....Done");
 		return this.m_wireAdmin.createWire(emitterName, receiverName, null);
@@ -210,8 +212,8 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 		s_logger.info("Creating wires.....");
 		final List<WireConfiguration> cloned = Lists.newArrayList();
 		for (final WireConfiguration wc : this.m_wireConfig) {
-			cloned.add(
-					new WireConfiguration(wc.getEmitterName(), wc.getReceiverName(), wc.getFilter(), wc.isCreated()));
+			cloned.add(Wires.newWireConfiguration(wc.getEmitterName(), wc.getReceiverName(), wc.getFilter(),
+					wc.isCreated()));
 		}
 
 		for (final WireConfiguration conf : cloned) {
@@ -677,7 +679,7 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 					final String emitterString = this.createComponentFromProperty(emitterPid.toString(), emitterName);
 					final String receiverString = this.createComponentFromProperty(receiverPid.toString(),
 							receiverName);
-					final WireConfiguration wc = new WireConfiguration(emitterString, receiverString, null, false);
+					final WireConfiguration wc = Wires.newWireConfiguration(emitterString, receiverString, null, false);
 					this.m_wireConfig.add(wc);
 					this.createWires();
 					if (emitterPid.toString().startsWith("INSTANCE") && receiverPid.toString().startsWith("INSTANCE")) {

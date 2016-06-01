@@ -34,7 +34,7 @@ public final class IntegerValue implements TypedValue<Integer> {
 	 * The actual contained value that will be represented as
 	 * {@link TypedValue}.
 	 */
-	private final int m_value;
+	private final int value;
 
 	/**
 	 * Instantiates a new integer value.
@@ -43,7 +43,7 @@ public final class IntegerValue implements TypedValue<Integer> {
 	 *            the value
 	 */
 	public IntegerValue(final int value) {
-		this.m_value = value;
+		this.value = value;
 	}
 
 	/** {@inheritDoc} */
@@ -52,14 +52,14 @@ public final class IntegerValue implements TypedValue<Integer> {
 	public int compareTo(final TypedValue otherTypedValue) {
 		checkNonInstance(otherTypedValue, IntegerValue.class, "Typed Value is not integer");
 		return ComparisonChain.start()
-				.compare(this.m_value, ((IntegerValue) (otherTypedValue)).getValue(), Ordering.natural()).result();
+				.compare(this.value, ((IntegerValue) (otherTypedValue)).getValue(), Ordering.natural()).result();
 	}
 
 	/** {@inheritDoc} */
 	@Override
 	public boolean equals(final Object obj) {
 		if (obj instanceof IntegerValue) {
-			return Objects.equal(((IntegerValue) obj).getValue(), this.m_value);
+			return Objects.equal(((IntegerValue) obj).getValue(), this.value);
 		}
 		return false;
 	}
@@ -73,18 +73,18 @@ public final class IntegerValue implements TypedValue<Integer> {
 	/** {@inheritDoc} */
 	@Override
 	public Integer getValue() {
-		return this.m_value;
+		return this.value;
 	}
 
 	/** {@inheritDoc} */
 	@Override
 	public int hashCode() {
-		return Objects.hashCode(this.m_value);
+		return Objects.hashCode(this.value);
 	}
 
 	/** {@inheritDoc} */
 	@Override
 	public String toString() {
-		return MoreObjects.toStringHelper(this).add("integer_value", this.m_value).toString();
+		return MoreObjects.toStringHelper(this).add("integer_value", this.value).toString();
 	}
 }

@@ -36,19 +36,19 @@ import com.google.common.collect.ComparisonChain;
 public final class Channel implements Comparable<Channel> {
 
 	/** The communication channel configuration. */
-	private final Map<String, Object> m_config;
+	private final Map<String, Object> configuration;
 
 	/** The name of the communication channel. */
-	private final String m_name;
+	private final String name;
 
 	/** The type of the channel. */
-	private final ChannelType m_type;
+	private final ChannelType type;
 
 	/**
 	 * The data type of the value as expected for the operations
 	 * (read/write/monitor).
 	 */
-	private final DataType m_valueType;
+	private final DataType valueType;
 
 	/**
 	 * Instantiates a new channel.
@@ -71,18 +71,18 @@ public final class Channel implements Comparable<Channel> {
 		checkNull(valueType, "Channel value type cannot be null");
 		checkNull(config, "Channel configuration cannot be null");
 
-		this.m_config = config;
-		this.m_name = name;
-		this.m_type = type;
-		this.m_valueType = valueType;
+		this.configuration = config;
+		this.name = name;
+		this.type = type;
+		this.valueType = valueType;
 	}
 
 	/** {@inheritDoc} */
 	@Override
 	public int compareTo(final Channel otherChannel) {
 		checkNull(otherChannel, "Provided channel to compare is null");
-		return ComparisonChain.start().compare(this.m_name, otherChannel.getName())
-				.compare(this.m_type, otherChannel.getType()).compare(this.m_valueType, otherChannel.getValueType())
+		return ComparisonChain.start().compare(this.name, otherChannel.getName())
+				.compare(this.type, otherChannel.getType()).compare(this.valueType, otherChannel.getValueType())
 				.result();
 	}
 
@@ -91,8 +91,8 @@ public final class Channel implements Comparable<Channel> {
 	public boolean equals(final Object otherChannel) {
 		if (otherChannel instanceof Channel) {
 			final Channel ch = (Channel) otherChannel;
-			return Objects.equal(this.m_name, ch.getName()) && Objects.equal(this.m_type, ch.getType())
-					&& Objects.equal(this.m_valueType, ch.getValueType());
+			return Objects.equal(this.name, ch.getName()) && Objects.equal(this.type, ch.getType())
+					&& Objects.equal(this.valueType, ch.getValueType());
 		}
 		return false;
 	}
@@ -103,7 +103,7 @@ public final class Channel implements Comparable<Channel> {
 	 * @return the configuration of the communication channel
 	 */
 	public Map<String, Object> getConfig() {
-		return this.m_config;
+		return this.configuration;
 	}
 
 	/**
@@ -112,7 +112,7 @@ public final class Channel implements Comparable<Channel> {
 	 * @return the name of the communication channel
 	 */
 	public String getName() {
-		return this.m_name;
+		return this.name;
 	}
 
 	/**
@@ -121,7 +121,7 @@ public final class Channel implements Comparable<Channel> {
 	 * @return the type of the communication channel
 	 */
 	public ChannelType getType() {
-		return this.m_type;
+		return this.type;
 	}
 
 	/**
@@ -130,20 +130,20 @@ public final class Channel implements Comparable<Channel> {
 	 * @return the value type
 	 */
 	public DataType getValueType() {
-		return this.m_valueType;
+		return this.valueType;
 	}
 
 	/** {@inheritDoc} */
 	@Override
 	public int hashCode() {
-		return Objects.hashCode(this.m_name, this.m_type, this.m_valueType, this.m_config);
+		return Objects.hashCode(this.name, this.type, this.valueType, this.configuration);
 	}
 
 	/** {@inheritDoc} */
 	@Override
 	public String toString() {
-		return MoreObjects.toStringHelper(this).add("name", this.m_name).add("channel_type", this.m_type)
-				.add("value_type", this.m_valueType).add("channel_configuration", this.m_config).toString();
+		return MoreObjects.toStringHelper(this).add("name", this.name).add("channel_type", this.type)
+				.add("value_type", this.valueType).add("channel_configuration", this.configuration).toString();
 	}
 
 }

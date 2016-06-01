@@ -32,7 +32,7 @@ public final class DriverEvent {
 	 * Represents the driver record as triggered due to the driver monitor
 	 * operation.
 	 */
-	private final DriverRecord m_driverRecord;
+	private final DriverRecord driverRecord;
 
 	/**
 	 * Instantiates a new driver event.
@@ -44,7 +44,7 @@ public final class DriverEvent {
 	 */
 	public DriverEvent(final DriverRecord driverRecord) {
 		checkNull(driverRecord, "Driver record cannot be null");
-		this.m_driverRecord = driverRecord;
+		this.driverRecord = driverRecord;
 	}
 
 	/**
@@ -53,13 +53,13 @@ public final class DriverEvent {
 	 * @return the driver record
 	 */
 	public DriverRecord getDriverRecord() {
-		return this.m_driverRecord;
+		return this.driverRecord;
 	}
 
 	/** {@inheritDoc} */
 	@Override
 	public String toString() {
-		return MoreObjects.toStringHelper(this).add("driver_record", this.m_driverRecord).toString();
+		return MoreObjects.toStringHelper(this).add("driver_record", this.driverRecord).toString();
 	}
 
 }

@@ -35,13 +35,13 @@ import com.google.common.collect.ImmutableList;
 public final class WireRecord {
 
 	/** The contained wire fields. */
-	private final List<WireField> m_fields;
+	private final List<WireField> fields;
 
 	/** The position. */
-	private final Position m_position;
+	private final Position position;
 
 	/** The timestamp. */
-	private final Timestamp m_timestamp;
+	private final Timestamp timestamp;
 
 	/**
 	 * Instantiates a new wire record.
@@ -57,9 +57,9 @@ public final class WireRecord {
 		checkNull(timestamp, "Timestamp cannot be null");
 		checkNull(fields, "Wire fields cannot be null");
 
-		this.m_timestamp = timestamp;
-		this.m_position = null;
-		this.m_fields = ImmutableList.copyOf(fields);
+		this.timestamp = timestamp;
+		this.position = null;
+		this.fields = ImmutableList.copyOf(fields);
 	}
 
 	/**
@@ -79,9 +79,9 @@ public final class WireRecord {
 		checkNull(position, "Position cannot be null");
 		checkNull(fields, "Wire fields cannot be null");
 
-		this.m_timestamp = timestamp;
-		this.m_position = position;
-		this.m_fields = ImmutableList.copyOf(fields);
+		this.timestamp = timestamp;
+		this.position = position;
+		this.fields = ImmutableList.copyOf(fields);
 	}
 
 	/**
@@ -94,9 +94,9 @@ public final class WireRecord {
 	 */
 	public WireRecord(final WireField... fields) {
 		checkNull(fields, "Wire fields cannot be null");
-		this.m_timestamp = new Timestamp(new Date().getTime());
-		this.m_position = null;
-		this.m_fields = ImmutableList.copyOf(fields);
+		this.timestamp = new Timestamp(new Date().getTime());
+		this.position = null;
+		this.fields = ImmutableList.copyOf(fields);
 	}
 
 	/**
@@ -105,7 +105,7 @@ public final class WireRecord {
 	 * @return the fields
 	 */
 	public List<WireField> getFields() {
-		return this.m_fields;
+		return this.fields;
 	}
 
 	/**
@@ -114,7 +114,7 @@ public final class WireRecord {
 	 * @return the position
 	 */
 	public Position getPosition() {
-		return this.m_position;
+		return this.position;
 	}
 
 	/**
@@ -123,13 +123,13 @@ public final class WireRecord {
 	 * @return the timestamp
 	 */
 	public Date getTimestamp() {
-		return this.m_timestamp;
+		return this.timestamp;
 	}
 
 	/** {@inheritDoc} */
 	@Override
 	public String toString() {
-		return MoreObjects.toStringHelper(this).add("wire_fields", this.m_fields).add("position", this.m_position)
-				.add("timestamp", this.m_timestamp).toString();
+		return MoreObjects.toStringHelper(this).add("wire_fields", this.fields).add("position", this.position)
+				.add("timestamp", this.timestamp).toString();
 	}
 }

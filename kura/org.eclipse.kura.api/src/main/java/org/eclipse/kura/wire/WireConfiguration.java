@@ -34,16 +34,16 @@ public final class WireConfiguration {
 	 * This signifies if Wire Admin Service has already created the wire between
 	 * the wire emitter and the wire receiver.
 	 */
-	private boolean m_created;
+	private boolean created;
 
 	/** The Wire Emitter Name. */
-	private String m_emitterName;
+	private String emitterName;
 
 	/** The Filter. */
-	private final String m_filter;
+	private final String filter;
 
 	/** The Wire Receiver Name. */
-	private String m_receiverName;
+	private String receiverName;
 
 	/**
 	 * Instantiates a new wire configuration.
@@ -62,10 +62,10 @@ public final class WireConfiguration {
 		checkNull(receiverName, "Receiver name cannot be null");
 		checkNull(filter, "Filter cannot be null");
 
-		this.m_emitterName = emitterName;
-		this.m_receiverName = receiverName;
-		this.m_filter = filter;
-		this.m_created = false;
+		this.emitterName = emitterName;
+		this.receiverName = receiverName;
+		this.filter = filter;
+		this.created = false;
 	}
 
 	/**
@@ -89,10 +89,10 @@ public final class WireConfiguration {
 		checkNull(receiverName, "Receiver name cannot be null");
 		checkNull(filter, "Filter cannot be null");
 
-		this.m_emitterName = emitterName;
-		this.m_receiverName = receiverName;
-		this.m_filter = filter;
-		this.m_created = created;
+		this.emitterName = emitterName;
+		this.receiverName = receiverName;
+		this.filter = filter;
+		this.created = created;
 	}
 
 	/** {@inheritDoc} */
@@ -100,10 +100,10 @@ public final class WireConfiguration {
 	public boolean equals(final Object obj) {
 		if (obj instanceof WireConfiguration) {
 			final WireConfiguration wireConfiguration = (WireConfiguration) obj;
-			return Objects.equal(this.m_emitterName, wireConfiguration.getEmitterName())
-					&& Objects.equal(this.m_receiverName, wireConfiguration.getReceiverName())
-					&& Objects.equal(this.m_filter, wireConfiguration.getFilter())
-					&& Objects.equal(this.m_created, wireConfiguration.isCreated());
+			return Objects.equal(this.emitterName, wireConfiguration.getEmitterName())
+					&& Objects.equal(this.receiverName, wireConfiguration.getReceiverName())
+					&& Objects.equal(this.filter, wireConfiguration.getFilter())
+					&& Objects.equal(this.created, wireConfiguration.isCreated());
 		}
 		return false;
 	}
@@ -114,7 +114,7 @@ public final class WireConfiguration {
 	 * @return the Wire Emitter name
 	 */
 	public String getEmitterName() {
-		return this.m_emitterName;
+		return this.emitterName;
 	}
 
 	/**
@@ -123,7 +123,7 @@ public final class WireConfiguration {
 	 * @return the filter
 	 */
 	public String getFilter() {
-		return this.m_filter;
+		return this.filter;
 	}
 
 	/**
@@ -132,13 +132,13 @@ public final class WireConfiguration {
 	 * @return the Wire Receiver name
 	 */
 	public String getReceiverName() {
-		return this.m_receiverName;
+		return this.receiverName;
 	}
 
 	/** {@inheritDoc} */
 	@Override
 	public int hashCode() {
-		return Objects.hashCode(this.m_created, this.m_emitterName, this.m_filter, this.m_receiverName);
+		return Objects.hashCode(this.created, this.emitterName, this.filter, this.receiverName);
 	}
 
 	/**
@@ -148,7 +148,7 @@ public final class WireConfiguration {
 	 * @return true, if it is created
 	 */
 	public boolean isCreated() {
-		return this.m_created;
+		return this.created;
 	}
 
 	/**
@@ -159,7 +159,7 @@ public final class WireConfiguration {
 	 *            the new created
 	 */
 	public void setCreated(final boolean created) {
-		this.m_created = created;
+		this.created = created;
 	}
 
 	/**
@@ -171,10 +171,10 @@ public final class WireConfiguration {
 	 */
 	public JSONObject toJson() throws JSONException {
 		final JSONObject jsonWire = new JSONObject();
-		jsonWire.put("p", this.m_emitterName);
-		jsonWire.put("c", this.m_receiverName);
-		if ((this.m_filter != null) && !this.m_filter.isEmpty()) {
-			jsonWire.putOpt("f", this.m_filter);
+		jsonWire.put("p", this.emitterName);
+		jsonWire.put("c", this.receiverName);
+		if ((this.filter != null) && !this.filter.isEmpty()) {
+			jsonWire.putOpt("f", this.filter);
 		}
 		return jsonWire;
 	}
@@ -182,8 +182,8 @@ public final class WireConfiguration {
 	/** {@inheritDoc} */
 	@Override
 	public String toString() {
-		return MoreObjects.toStringHelper(this).add("emitter_name", this.m_emitterName)
-				.add("receiver_name", this.m_receiverName).add("filter", this.m_filter).toString();
+		return MoreObjects.toStringHelper(this).add("emitter_name", this.emitterName)
+				.add("receiver_name", this.receiverName).add("filter", this.filter).toString();
 	}
 
 	/**
@@ -201,7 +201,7 @@ public final class WireConfiguration {
 		checkNull(newEmitterName, "Emitter name cannot be null");
 		checkNull(newReceiverName, "Receiver name cannot be null");
 
-		this.m_emitterName = newEmitterName;
-		this.m_receiverName = newReceiverName;
+		this.emitterName = newEmitterName;
+		this.receiverName = newReceiverName;
 	}
 }

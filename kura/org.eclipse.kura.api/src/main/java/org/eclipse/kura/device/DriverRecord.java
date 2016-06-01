@@ -36,28 +36,28 @@ public final class DriverRecord implements Comparable<DriverRecord> {
 	 * Provided channel configuration to perform read or write or monitor
 	 * operation.
 	 */
-	private Map<String, Object> m_channelConfig;
+	private Map<String, Object> channelConfiguration;
 
 	/**
 	 * Channel Name as associated with the device.
 	 */
-	private String m_channelName;
+	private String channelName;
 
 	/**
 	 * Represents a driver specific flag which signifies the status of the read
 	 * or write or monitor operation.
 	 */
-	private DriverFlag m_driverFlag;
+	private DriverFlag driverFlag;
 
 	/** Represents the timestamp of the operation performed. */
-	private long m_timestamp;
+	private long timestamp;
 
 	/**
 	 * Represents the value as read by the driver during a read or a monitor
 	 * operation. It can also represent the value which needs to be written by
 	 * the driver to the actual device.
 	 */
-	private TypedValue<?> m_value;
+	private TypedValue<?> value;
 
 	/**
 	 * Instantiates a new driver record.
@@ -69,17 +69,17 @@ public final class DriverRecord implements Comparable<DriverRecord> {
 	 */
 	public DriverRecord(final String channelName) {
 		checkNull(channelName, "Channel name cannot be null");
-		this.m_channelName = channelName;
+		this.channelName = channelName;
 	}
 
 	/** {@inheritDoc} */
 	@Override
 	public int compareTo(final DriverRecord otherDriverRecord) {
 		checkNull(otherDriverRecord, "Provided driver record to compare is null");
-		return ComparisonChain.start().compare(this.m_channelName, otherDriverRecord.getChannelName())
-				.compare(this.m_value, otherDriverRecord.getValue())
-				.compare(this.m_driverFlag, otherDriverRecord.getDriverFlag())
-				.compare(this.m_timestamp, otherDriverRecord.getTimestamp()).result();
+		return ComparisonChain.start().compare(this.channelName, otherDriverRecord.getChannelName())
+				.compare(this.value, otherDriverRecord.getValue())
+				.compare(this.driverFlag, otherDriverRecord.getDriverFlag())
+				.compare(this.timestamp, otherDriverRecord.getTimestamp()).result();
 	}
 
 	/** {@inheritDoc} */
@@ -87,10 +87,10 @@ public final class DriverRecord implements Comparable<DriverRecord> {
 	public boolean equals(final Object obj) {
 		if (obj instanceof DriverRecord) {
 			final DriverRecord rec = (DriverRecord) obj;
-			return Objects.equal(rec.getChannelName(), this.m_channelName)
-					&& Objects.equal(rec.getValue(), this.m_value)
-					&& Objects.equal(rec.getDriverFlag(), this.m_driverFlag)
-					&& Objects.equal(rec.getTimestamp(), this.m_timestamp);
+			return Objects.equal(rec.getChannelName(), this.channelName)
+					&& Objects.equal(rec.getValue(), this.value)
+					&& Objects.equal(rec.getDriverFlag(), this.driverFlag)
+					&& Objects.equal(rec.getTimestamp(), this.timestamp);
 		}
 		return false;
 	}
@@ -101,7 +101,7 @@ public final class DriverRecord implements Comparable<DriverRecord> {
 	 * @return the channel configuration
 	 */
 	public Map<String, Object> getChannelConfig() {
-		return this.m_channelConfig;
+		return this.channelConfiguration;
 	}
 
 	/**
@@ -110,7 +110,7 @@ public final class DriverRecord implements Comparable<DriverRecord> {
 	 * @return the channel name
 	 */
 	public String getChannelName() {
-		return this.m_channelName;
+		return this.channelName;
 	}
 
 	/**
@@ -119,7 +119,7 @@ public final class DriverRecord implements Comparable<DriverRecord> {
 	 * @return the driver flag
 	 */
 	public DriverFlag getDriverFlag() {
-		return this.m_driverFlag;
+		return this.driverFlag;
 	}
 
 	/**
@@ -128,7 +128,7 @@ public final class DriverRecord implements Comparable<DriverRecord> {
 	 * @return the timestamp
 	 */
 	public long getTimestamp() {
-		return this.m_timestamp;
+		return this.timestamp;
 	}
 
 	/**
@@ -137,13 +137,13 @@ public final class DriverRecord implements Comparable<DriverRecord> {
 	 * @return the value
 	 */
 	public TypedValue<?> getValue() {
-		return this.m_value;
+		return this.value;
 	}
 
 	/** {@inheritDoc} */
 	@Override
 	public int hashCode() {
-		return Objects.hashCode(this.m_channelName, this.m_value, this.m_driverFlag, this.m_timestamp);
+		return Objects.hashCode(this.channelName, this.value, this.driverFlag, this.timestamp);
 	}
 
 	/**
@@ -156,7 +156,7 @@ public final class DriverRecord implements Comparable<DriverRecord> {
 	 */
 	public void setChannelConfig(final Map<String, Object> channelConfig) {
 		checkNull(channelConfig, "Channel configuration cannot be null");
-		this.m_channelConfig = ImmutableMap.copyOf(channelConfig);
+		this.channelConfiguration = ImmutableMap.copyOf(channelConfig);
 	}
 
 	/**
@@ -169,7 +169,7 @@ public final class DriverRecord implements Comparable<DriverRecord> {
 	 */
 	public void setChannelName(final String channelName) {
 		checkNull(channelName, "Channel name cannot be null");
-		this.m_channelName = channelName;
+		this.channelName = channelName;
 	}
 
 	/**
@@ -182,7 +182,7 @@ public final class DriverRecord implements Comparable<DriverRecord> {
 	 */
 	public void setDriverFlag(final DriverFlag driverFlag) {
 		checkNull(driverFlag, "Driver flag cannot be null");
-		this.m_driverFlag = driverFlag;
+		this.driverFlag = driverFlag;
 	}
 
 	/**
@@ -192,7 +192,7 @@ public final class DriverRecord implements Comparable<DriverRecord> {
 	 *            the new timestamp
 	 */
 	public void setTimestamp(final long timestamp) {
-		this.m_timestamp = timestamp;
+		this.timestamp = timestamp;
 	}
 
 	/**
@@ -205,15 +205,15 @@ public final class DriverRecord implements Comparable<DriverRecord> {
 	 */
 	public void setValue(final TypedValue<?> value) {
 		checkNull(value, "Value type cannot be null");
-		this.m_value = value;
+		this.value = value;
 	}
 
 	/** {@inheritDoc} */
 	@Override
 	public String toString() {
-		return MoreObjects.toStringHelper(this).add("channel_name", this.m_channelName)
-				.add("channel_config", this.m_channelConfig).add("driver_flag", this.m_driverFlag)
-				.add("timestamp", this.m_timestamp).add("value", this.m_value).toString();
+		return MoreObjects.toStringHelper(this).add("channel_name", this.channelName)
+				.add("channel_config", this.channelConfiguration).add("driver_flag", this.driverFlag)
+				.add("timestamp", this.timestamp).add("value", this.value).toString();
 	}
 
 }

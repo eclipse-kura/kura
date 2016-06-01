@@ -32,10 +32,10 @@ import com.google.common.collect.ComparisonChain;
 public final class WireField implements Comparable<WireField> {
 
 	/** The name of the field */
-	private final String m_name;
+	private final String name;
 
 	/** The value as contained */
-	private final TypedValue<?> m_value;
+	private final TypedValue<?> value;
 
 	/**
 	 * Instantiates a new wire field.
@@ -51,15 +51,15 @@ public final class WireField implements Comparable<WireField> {
 		checkNull(name, "Wire field name cannot be null");
 		checkNull(value, "Wire field value type cannot be null");
 
-		this.m_name = name;
-		this.m_value = value;
+		this.name = name;
+		this.value = value;
 	}
 
 	/** {@inheritDoc} */
 	@Override
 	public int compareTo(final WireField otherWireField) {
-		return ComparisonChain.start().compare(this.m_name, otherWireField.getName())
-				.compare(this.m_value, otherWireField.getValue()).result();
+		return ComparisonChain.start().compare(this.name, otherWireField.getName())
+				.compare(this.value, otherWireField.getValue()).result();
 	}
 
 	/** {@inheritDoc} */
@@ -67,7 +67,7 @@ public final class WireField implements Comparable<WireField> {
 	public boolean equals(final Object obj) {
 		if (obj instanceof WireField) {
 			final WireField wf = (WireField) obj;
-			return Objects.equal(wf.getValue(), this.m_value) && Objects.equal(wf.getName(), this.m_name);
+			return Objects.equal(wf.getValue(), this.value) && Objects.equal(wf.getName(), this.name);
 		}
 		return false;
 	}
@@ -78,7 +78,7 @@ public final class WireField implements Comparable<WireField> {
 	 * @return the name of the field
 	 */
 	public String getName() {
-		return this.m_name;
+		return this.name;
 	}
 
 	/**
@@ -87,18 +87,18 @@ public final class WireField implements Comparable<WireField> {
 	 * @return the contained value
 	 */
 	public TypedValue<?> getValue() {
-		return this.m_value;
+		return this.value;
 	}
 
 	/** {@inheritDoc} */
 	@Override
 	public int hashCode() {
-		return Objects.hashCode(this.m_value, this.m_name);
+		return Objects.hashCode(this.value, this.name);
 	}
 
 	/** {@inheritDoc} */
 	@Override
 	public String toString() {
-		return MoreObjects.toStringHelper(this).add("name", this.m_name).add("value", this.m_value).toString();
+		return MoreObjects.toStringHelper(this).add("name", this.name).add("value", this.value).toString();
 	}
 }

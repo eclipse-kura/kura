@@ -13,9 +13,11 @@
 package org.eclipse.kura.wire.util;
 
 import static org.eclipse.kura.Preconditions.checkCondition;
+import static org.eclipse.kura.Preconditions.checkNull;
 
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.type.TypedValue;
@@ -23,10 +25,14 @@ import org.eclipse.kura.wire.WireComponent;
 import org.eclipse.kura.wire.WireConfiguration;
 import org.eclipse.kura.wire.WireField;
 import org.eclipse.kura.wire.WireRecord;
+import org.eclipse.kura.wire.WireServiceOptions;
 import org.eclipse.kura.wire.WireSupport;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.osgi.util.position.Position;
+
+import com.google.common.collect.Lists;
 
 /**
  * The Class Wires is an utility class to provide quick operations for Kura
@@ -45,13 +51,79 @@ public final class Wires {
 	 * @throws KuraRuntimeException
 	 *             if the json object instance passed as argument is null
 	 */
-	public static WireConfiguration newConfigurationFromJson(final JSONObject jsonWire) throws JSONException {
+	public static WireConfiguration newWireConfigurationFromJson(final JSONObject jsonWire) throws JSONException {
 		checkCondition(jsonWire == null, "JSON Object cannot be null");
 
 		final String emitter = jsonWire.getString("p");
 		final String receiver = jsonWire.getString("c");
 		final String filter = jsonWire.optString("f");
 		return new WireConfiguration(emitter, receiver, filter);
+	}
+
+	/**
+	 * Creates New instance of {@link WireServiceOptions}
+	 *
+	 * @param properties
+	 *            the properties
+	 * @return the wire service options
+	 * @throws JSONException
+	 *             the JSON exception
+	 * @throws KuraRuntimeException
+	 *             if provided properties is null
+	 */
+	public static WireServiceOptions newWireServiceOptions(final Map<String, Object> properties) throws JSONException {
+		checkNull(properties, "Configured Wire Service properties cannot be null");
+		final List<WireConfiguration> wireConfs = Lists.newCopyOnWriteArrayList();
+		Object objWires = null;
+		if (properties.containsKey(WireServiceOptions.CONF_WIRES)) {
+			objWires = properties.get(WireServiceOptions.CONF_WIRES);
+		}
+		if (objWires instanceof String) {
+			final String strWires = (String) objWires;
+			final JSONArray jsonWires = new JSONArray(strWires);
+			for (int i = 0; i < jsonWires.length(); i++) {
+				final JSONObject jsonWire = jsonWires.getJSONObject(i);
+				wireConfs.add(Wires.newWireConfigurationFromJson(jsonWire));
+			}
+		}
+		return new WireServiceOptions(wireConfs);
+	}
+
+	/**
+	 * Instantiates a new wire configuration.
+	 *
+	 * @param emitterName
+	 *            the Wire Emitter name
+	 * @param receiverName
+	 *            the Wire Receiver name
+	 * @param filter
+	 *            the filter
+	 * @throws KuraRuntimeException
+	 *             if any of the arguments is null
+	 */
+	public static WireConfiguration newWireConfiguration(final String emitterName, final String receiverName,
+			final String filter) {
+		return new WireConfiguration(emitterName, receiverName, filter);
+	}
+
+	/**
+	 * Instantiates a new wire configuration.
+	 *
+	 * @param emitterName
+	 *            the Wire Emitter name
+	 * @param receiverName
+	 *            the Wire Receiver name
+	 * @param filter
+	 *            the filter
+	 * @param created
+	 *            the created flag signifying whether Wire Admin has already
+	 *            created the wire between the wire emitter and a wire receiver
+	 * @throws KuraRuntimeException
+	 *             if any of the arguments is null
+	 */
+	public static WireConfiguration newWireConfiguration(final String emitterName, final String receiverName,
+			final String filter, final boolean created) {
+		return new WireConfiguration(emitterName, receiverName, filter, created);
 	}
 
 	/**

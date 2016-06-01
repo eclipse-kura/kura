@@ -33,13 +33,13 @@ import com.google.common.collect.Lists;
 public final class WireSupport implements Producer, Consumer {
 
 	/** The incoming wires. */
-	private List<Wire> m_incomingWires;
+	private List<Wire> incomingWires;
 
 	/** The outgoing wires. */
-	private List<Wire> m_outgoingWires;
+	private List<Wire> outgoingWires;
 
 	/** The supported Wire Component */
-	private final WireComponent m_wireSupporter;
+	private final WireComponent wireSupporter;
 
 	/**
 	 * Instantiates a new wire support.
@@ -51,15 +51,15 @@ public final class WireSupport implements Producer, Consumer {
 	 */
 	public WireSupport(final WireComponent wireSupporter) {
 		checkNull(wireSupporter, "Wire supported component cannot be null");
-		this.m_outgoingWires = Lists.newArrayList();
-		this.m_incomingWires = Lists.newArrayList();
-		this.m_wireSupporter = wireSupporter;
+		this.outgoingWires = Lists.newArrayList();
+		this.incomingWires = Lists.newArrayList();
+		this.wireSupporter = wireSupporter;
 	}
 
 	/** {@inheritDoc} */
 	@Override
 	public synchronized void consumersConnected(final Wire[] wires) {
-		this.m_outgoingWires = Lists.newArrayList(wires);
+		this.outgoingWires = Lists.newArrayList(wires);
 	}
 
 	/**
@@ -69,10 +69,10 @@ public final class WireSupport implements Producer, Consumer {
 	 *            the wire records
 	 */
 	public synchronized void emit(final List<WireRecord> wireRecords) {
-		if (this.m_wireSupporter instanceof WireEmitter) {
-			final String emitterPid = this.m_wireSupporter.getName();
+		if (this.wireSupporter instanceof WireEmitter) {
+			final String emitterPid = this.wireSupporter.getName();
 			final WireEnvelope wei = new WireEnvelope(emitterPid, wireRecords);
-			for (final Wire wire : this.m_outgoingWires) {
+			for (final Wire wire : this.outgoingWires) {
 				wire.update(wei);
 			}
 		}
@@ -94,7 +94,7 @@ public final class WireSupport implements Producer, Consumer {
 	 * @return the incoming wires
 	 */
 	public List<Wire> getIncomingWires() {
-		return ImmutableList.copyOf(this.m_incomingWires);
+		return ImmutableList.copyOf(this.incomingWires);
 	}
 
 	/**
@@ -103,7 +103,7 @@ public final class WireSupport implements Producer, Consumer {
 	 * @return the outgoing wires
 	 */
 	public List<Wire> getOutgoingWires() {
-		return ImmutableList.copyOf(this.m_outgoingWires);
+		return ImmutableList.copyOf(this.outgoingWires);
 	}
 
 	/** {@inheritDoc} */
@@ -115,22 +115,22 @@ public final class WireSupport implements Producer, Consumer {
 	/** {@inheritDoc} */
 	@Override
 	public void producersConnected(final Wire[] wires) {
-		this.m_incomingWires = Lists.newArrayList(wires);
+		this.incomingWires = Lists.newArrayList(wires);
 	}
 
 	/** {@inheritDoc} */
 	@Override
 	public String toString() {
-		return MoreObjects.toStringHelper(this).add("incoming_wires", this.m_incomingWires)
-				.add("outgoing_wires", this.m_outgoingWires).add("wire_component", this.m_wireSupporter).toString();
+		return MoreObjects.toStringHelper(this).add("incoming_wires", this.incomingWires)
+				.add("outgoing_wires", this.outgoingWires).add("wire_component", this.wireSupporter).toString();
 	}
 
 	/** {@inheritDoc} */
 	@Override
 	public void updated(final Wire wire, final Object value) {
 		checkNull(wire, "Wire cannot be null");
-		if ((value instanceof WireEnvelope) && (this.m_wireSupporter instanceof WireReceiver)) {
-			((WireReceiver) this.m_wireSupporter).onWireReceive((WireEnvelope) value);
+		if ((value instanceof WireEnvelope) && (this.wireSupporter instanceof WireReceiver)) {
+			((WireReceiver) this.wireSupporter).onWireReceive((WireEnvelope) value);
 		}
 	}
 }

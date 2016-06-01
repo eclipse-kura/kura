@@ -36,7 +36,7 @@ public final class ByteArrayValue implements TypedValue<byte[]> {
 	 * The actual contained value that will be represented as
 	 * {@link TypedValue}.
 	 */
-	private final byte[] m_value;
+	private final byte[] value;
 
 	/**
 	 * Instantiates a new byte array value.
@@ -45,7 +45,7 @@ public final class ByteArrayValue implements TypedValue<byte[]> {
 	 *            the value
 	 */
 	public ByteArrayValue(final byte[] value) {
-		this.m_value = value;
+		this.value = value;
 	}
 
 	/** {@inheritDoc} */
@@ -53,7 +53,7 @@ public final class ByteArrayValue implements TypedValue<byte[]> {
 	@SuppressWarnings("rawtypes")
 	public int compareTo(final TypedValue otherTypedValue) {
 		checkNonInstance(otherTypedValue, ByteArrayValue.class, "Typed Value is not byte array");
-		return ComparisonChain.start().compare(this.m_value, ((ByteArrayValue) (otherTypedValue)).getValue(),
+		return ComparisonChain.start().compare(this.value, ((ByteArrayValue) (otherTypedValue)).getValue(),
 				UnsignedBytes.lexicographicalComparator()).result();
 	}
 
@@ -61,7 +61,7 @@ public final class ByteArrayValue implements TypedValue<byte[]> {
 	@Override
 	public boolean equals(final Object obj) {
 		if (obj instanceof ByteArrayValue) {
-			return Arrays.equals(((ByteArrayValue) obj).getValue(), this.m_value);
+			return Arrays.equals(((ByteArrayValue) obj).getValue(), this.value);
 		}
 		return false;
 	}
@@ -75,18 +75,18 @@ public final class ByteArrayValue implements TypedValue<byte[]> {
 	/** {@inheritDoc} */
 	@Override
 	public byte[] getValue() {
-		return this.m_value;
+		return this.value;
 	}
 
 	/** {@inheritDoc} */
 	@Override
 	public int hashCode() {
-		return Objects.hashCode(this.m_value);
+		return Objects.hashCode(this.value);
 	}
 
 	/** {@inheritDoc} */
 	@Override
 	public String toString() {
-		return MoreObjects.toStringHelper(this).add("byte_array_value", this.m_value).toString();
+		return MoreObjects.toStringHelper(this).add("byte_array_value", this.value).toString();
 	}
 }

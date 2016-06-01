@@ -34,7 +34,7 @@ public final class BooleanValue implements TypedValue<Boolean> {
 	 * The actual contained value that will be represented as
 	 * {@link TypedValue}.
 	 */
-	private final boolean m_value;
+	private final boolean value;
 
 	/**
 	 * Instantiates a new boolean value.
@@ -43,7 +43,7 @@ public final class BooleanValue implements TypedValue<Boolean> {
 	 *            the value
 	 */
 	public BooleanValue(final boolean value) {
-		this.m_value = value;
+		this.value = value;
 	}
 
 	/** {@inheritDoc} */
@@ -52,14 +52,14 @@ public final class BooleanValue implements TypedValue<Boolean> {
 	public int compareTo(final TypedValue otherTypedValue) {
 		checkNonInstance(otherTypedValue, BooleanValue.class, "Typed Value is not boolean");
 		return ComparisonChain.start()
-				.compare(this.m_value, ((BooleanValue) (otherTypedValue)).getValue(), Ordering.natural()).result();
+				.compare(this.value, ((BooleanValue) (otherTypedValue)).getValue(), Ordering.natural()).result();
 	}
 
 	/** {@inheritDoc} */
 	@Override
 	public boolean equals(final Object obj) {
 		if (obj instanceof BooleanValue) {
-			return Objects.equal(((BooleanValue) obj).getValue(), this.m_value);
+			return Objects.equal(((BooleanValue) obj).getValue(), this.value);
 		}
 		return false;
 	}
@@ -73,18 +73,18 @@ public final class BooleanValue implements TypedValue<Boolean> {
 	/** {@inheritDoc} */
 	@Override
 	public Boolean getValue() {
-		return this.m_value;
+		return this.value;
 	}
 
 	/** {@inheritDoc} */
 	@Override
 	public int hashCode() {
-		return Objects.hashCode(this.m_value);
+		return Objects.hashCode(this.value);
 	}
 
 	/** {@inheritDoc} */
 	@Override
 	public String toString() {
-		return MoreObjects.toStringHelper(this).add("boolean_value", this.m_value).toString();
+		return MoreObjects.toStringHelper(this).add("boolean_value", this.value).toString();
 	}
 }

@@ -34,7 +34,7 @@ public final class LongValue implements TypedValue<Long> {
 	 * The actual contained value that will be represented as
 	 * {@link TypedValue}.
 	 */
-	private final long m_value;
+	private final long value;
 
 	/**
 	 * Instantiates a new long value.
@@ -43,7 +43,7 @@ public final class LongValue implements TypedValue<Long> {
 	 *            the value
 	 */
 	public LongValue(final long value) {
-		this.m_value = value;
+		this.value = value;
 	}
 
 	/** {@inheritDoc} */
@@ -52,14 +52,14 @@ public final class LongValue implements TypedValue<Long> {
 	public int compareTo(final TypedValue otherTypedValue) {
 		checkNonInstance(otherTypedValue, LongValue.class, "Typed Value is not long");
 		return ComparisonChain.start()
-				.compare(this.m_value, ((LongValue) (otherTypedValue)).getValue(), Ordering.natural()).result();
+				.compare(this.value, ((LongValue) (otherTypedValue)).getValue(), Ordering.natural()).result();
 	}
 
 	/** {@inheritDoc} */
 	@Override
 	public boolean equals(final Object obj) {
 		if (obj instanceof LongValue) {
-			return Objects.equal(((LongValue) obj).getValue(), this.m_value);
+			return Objects.equal(((LongValue) obj).getValue(), this.value);
 		}
 		return false;
 	}
@@ -73,19 +73,19 @@ public final class LongValue implements TypedValue<Long> {
 	/** {@inheritDoc} */
 	@Override
 	public Long getValue() {
-		return this.m_value;
+		return this.value;
 	}
 
 	/** {@inheritDoc} */
 	@Override
 	public int hashCode() {
-		return Objects.hashCode(this.m_value);
+		return Objects.hashCode(this.value);
 	}
 
 	/** {@inheritDoc} */
 	@Override
 	public String toString() {
-		return MoreObjects.toStringHelper(this).add("long_value", this.m_value).toString();
+		return MoreObjects.toStringHelper(this).add("long_value", this.value).toString();
 	}
 
 }

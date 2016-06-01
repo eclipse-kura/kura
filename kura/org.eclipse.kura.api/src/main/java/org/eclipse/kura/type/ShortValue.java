@@ -34,7 +34,7 @@ public final class ShortValue implements TypedValue<Short> {
 	 * The actual contained value that will be represented as
 	 * {@link TypedValue}.
 	 */
-	private final short m_value;
+	private final short value;
 
 	/**
 	 * Instantiates a new short value.
@@ -43,7 +43,7 @@ public final class ShortValue implements TypedValue<Short> {
 	 *            the value
 	 */
 	public ShortValue(final short value) {
-		this.m_value = value;
+		this.value = value;
 	}
 
 	/** {@inheritDoc} */
@@ -52,14 +52,14 @@ public final class ShortValue implements TypedValue<Short> {
 	public int compareTo(final TypedValue otherTypedValue) {
 		checkNonInstance(otherTypedValue, ShortValue.class, "Typed Value is not short");
 		return ComparisonChain.start()
-				.compare(this.m_value, ((ShortValue) (otherTypedValue)).getValue(), Ordering.natural()).result();
+				.compare(this.value, ((ShortValue) (otherTypedValue)).getValue(), Ordering.natural()).result();
 	}
 
 	/** {@inheritDoc} */
 	@Override
 	public boolean equals(final Object obj) {
 		if (obj instanceof ShortValue) {
-			return Objects.equal(((ShortValue) obj).getValue(), this.m_value);
+			return Objects.equal(((ShortValue) obj).getValue(), this.value);
 		}
 		return false;
 	}
@@ -73,18 +73,18 @@ public final class ShortValue implements TypedValue<Short> {
 	/** {@inheritDoc} */
 	@Override
 	public Short getValue() {
-		return this.m_value;
+		return this.value;
 	}
 
 	/** {@inheritDoc} */
 	@Override
 	public int hashCode() {
-		return Objects.hashCode(this.m_value);
+		return Objects.hashCode(this.value);
 	}
 
 	/** {@inheritDoc} */
 	@Override
 	public String toString() {
-		return MoreObjects.toStringHelper(this).add("short_value", this.m_value).toString();
+		return MoreObjects.toStringHelper(this).add("short_value", this.value).toString();
 	}
 }

@@ -32,7 +32,7 @@ public final class DeviceEvent {
 	 * Represents the device record as triggered due to the device specific
 	 * monitor operation.
 	 */
-	private final DeviceRecord m_deviceRecord;
+	private final DeviceRecord deviceRecord;
 
 	/**
 	 * Instantiates a new device event.
@@ -44,7 +44,7 @@ public final class DeviceEvent {
 	 */
 	public DeviceEvent(final DeviceRecord deviceRecord) {
 		checkNull(deviceRecord, "Device record cannot be null");
-		this.m_deviceRecord = deviceRecord;
+		this.deviceRecord = deviceRecord;
 	}
 
 	/**
@@ -53,13 +53,13 @@ public final class DeviceEvent {
 	 * @return the device record
 	 */
 	public DeviceRecord getDeviceRecord() {
-		return this.m_deviceRecord;
+		return this.deviceRecord;
 	}
 
 	/** {@inheritDoc} */
 	@Override
 	public String toString() {
-		return MoreObjects.toStringHelper(this).add("device_record", this.m_deviceRecord).toString();
+		return MoreObjects.toStringHelper(this).add("device_record", this.deviceRecord).toString();
 	}
 
 }

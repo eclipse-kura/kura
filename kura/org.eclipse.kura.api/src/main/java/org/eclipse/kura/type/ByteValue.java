@@ -34,7 +34,7 @@ public final class ByteValue implements TypedValue<Byte> {
 	 * The actual contained value that will be represented as
 	 * {@link TypedValue}.
 	 */
-	private final byte m_value;
+	private final byte value;
 
 	/**
 	 * Instantiates a new byte value.
@@ -43,7 +43,7 @@ public final class ByteValue implements TypedValue<Byte> {
 	 *            the value
 	 */
 	public ByteValue(final byte value) {
-		this.m_value = value;
+		this.value = value;
 	}
 
 	/** {@inheritDoc} */
@@ -52,14 +52,14 @@ public final class ByteValue implements TypedValue<Byte> {
 	public int compareTo(final TypedValue otherTypedValue) {
 		checkNonInstance(otherTypedValue, ByteValue.class, "Typed Value is not byte value");
 		return ComparisonChain.start()
-				.compare(this.m_value, ((ByteValue) (otherTypedValue)).getValue(), Ordering.natural()).result();
+				.compare(this.value, ((ByteValue) (otherTypedValue)).getValue(), Ordering.natural()).result();
 	}
 
 	/** {@inheritDoc} */
 	@Override
 	public boolean equals(final Object obj) {
 		if (obj instanceof ByteValue) {
-			return Objects.equal(((ByteValue) obj).getValue(), this.m_value);
+			return Objects.equal(((ByteValue) obj).getValue(), this.value);
 		}
 		return false;
 	}
@@ -73,18 +73,18 @@ public final class ByteValue implements TypedValue<Byte> {
 	/** {@inheritDoc} */
 	@Override
 	public Byte getValue() {
-		return this.m_value;
+		return this.value;
 	}
 
 	/** {@inheritDoc} */
 	@Override
 	public int hashCode() {
-		return Objects.hashCode(this.m_value);
+		return Objects.hashCode(this.value);
 	}
 
 	/** {@inheritDoc} */
 	@Override
 	public String toString() {
-		return MoreObjects.toStringHelper(this).add("byte_value", this.m_value).toString();
+		return MoreObjects.toStringHelper(this).add("byte_value", this.value).toString();
 	}
 }

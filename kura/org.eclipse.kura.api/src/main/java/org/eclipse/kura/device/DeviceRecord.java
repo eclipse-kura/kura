@@ -33,20 +33,20 @@ public final class DeviceRecord implements Comparable<DeviceRecord> {
 	 * The associated channel name. The channel name for any device must be
 	 * unique.
 	 */
-	private String m_channelName;
+	private String channelName;
 
 	/** The device flag. */
-	private DeviceFlag m_deviceFlag;
+	private DeviceFlag deviceFlag;
 
 	/** The timestamp of the record. */
-	private long m_timestamp;
+	private long timestamp;
 
 	/**
 	 * Represents the value as read by the driver during a read or a monitor
 	 * operation. It can also represent the value which needs to be written by
 	 * the driver to the actual device.
 	 */
-	private TypedValue<?> m_value;
+	private TypedValue<?> value;
 
 	/**
 	 * Instantiates a new device record.
@@ -58,17 +58,17 @@ public final class DeviceRecord implements Comparable<DeviceRecord> {
 	 */
 	public DeviceRecord(final String channelName) {
 		checkNull(channelName, "Channel name cannot be null");
-		this.m_channelName = channelName;
+		this.channelName = channelName;
 	}
 
 	/** {@inheritDoc} */
 	@Override
 	public int compareTo(final DeviceRecord otherDeviceRecord) {
 		checkNull(otherDeviceRecord, "Provided device record to compare is null");
-		return ComparisonChain.start().compare(this.m_channelName, otherDeviceRecord.getChannelName())
-				.compare(this.m_value, otherDeviceRecord.getValue())
-				.compare(this.m_deviceFlag, otherDeviceRecord.getDeviceFlag())
-				.compare(this.m_timestamp, otherDeviceRecord.getTimestamp()).result();
+		return ComparisonChain.start().compare(this.channelName, otherDeviceRecord.getChannelName())
+				.compare(this.value, otherDeviceRecord.getValue())
+				.compare(this.deviceFlag, otherDeviceRecord.getDeviceFlag())
+				.compare(this.timestamp, otherDeviceRecord.getTimestamp()).result();
 	}
 
 	/** {@inheritDoc} */
@@ -76,10 +76,10 @@ public final class DeviceRecord implements Comparable<DeviceRecord> {
 	public boolean equals(final Object obj) {
 		if (obj instanceof DeviceRecord) {
 			final DeviceRecord rec = (DeviceRecord) obj;
-			return Objects.equal(rec.getChannelName(), this.m_channelName)
-					&& Objects.equal(rec.getValue(), this.m_value)
-					&& Objects.equal(rec.getDeviceFlag(), this.m_deviceFlag)
-					&& Objects.equal(rec.getTimestamp(), this.m_timestamp);
+			return Objects.equal(rec.getChannelName(), this.channelName)
+					&& Objects.equal(rec.getValue(), this.value)
+					&& Objects.equal(rec.getDeviceFlag(), this.deviceFlag)
+					&& Objects.equal(rec.getTimestamp(), this.timestamp);
 		}
 		return false;
 	}
@@ -90,7 +90,7 @@ public final class DeviceRecord implements Comparable<DeviceRecord> {
 	 * @return the channel name
 	 */
 	public String getChannelName() {
-		return this.m_channelName;
+		return this.channelName;
 	}
 
 	/**
@@ -99,7 +99,7 @@ public final class DeviceRecord implements Comparable<DeviceRecord> {
 	 * @return the device flag
 	 */
 	public DeviceFlag getDeviceFlag() {
-		return this.m_deviceFlag;
+		return this.deviceFlag;
 	}
 
 	/**
@@ -108,7 +108,7 @@ public final class DeviceRecord implements Comparable<DeviceRecord> {
 	 * @return the timestamp
 	 */
 	public long getTimestamp() {
-		return this.m_timestamp;
+		return this.timestamp;
 	}
 
 	/**
@@ -117,13 +117,13 @@ public final class DeviceRecord implements Comparable<DeviceRecord> {
 	 * @return the value
 	 */
 	public TypedValue<?> getValue() {
-		return this.m_value;
+		return this.value;
 	}
 
 	/** {@inheritDoc} */
 	@Override
 	public int hashCode() {
-		return Objects.hashCode(this.m_channelName, this.m_value, this.m_deviceFlag, this.m_timestamp);
+		return Objects.hashCode(this.channelName, this.value, this.deviceFlag, this.timestamp);
 	}
 
 	/**
@@ -136,7 +136,7 @@ public final class DeviceRecord implements Comparable<DeviceRecord> {
 	 */
 	public void setChannelName(final String channelName) {
 		checkNull(channelName, "Channel name cannot be null");
-		this.m_channelName = channelName;
+		this.channelName = channelName;
 	}
 
 	/**
@@ -149,7 +149,7 @@ public final class DeviceRecord implements Comparable<DeviceRecord> {
 	 */
 	public void setDeviceFlag(final DeviceFlag deviceFlag) {
 		checkNull(deviceFlag, "Device flag cannot be null");
-		this.m_deviceFlag = deviceFlag;
+		this.deviceFlag = deviceFlag;
 	}
 
 	/**
@@ -159,7 +159,7 @@ public final class DeviceRecord implements Comparable<DeviceRecord> {
 	 *            the new timestamp
 	 */
 	public void setTimestamp(final long timestamp) {
-		this.m_timestamp = timestamp;
+		this.timestamp = timestamp;
 	}
 
 	/**
@@ -172,14 +172,14 @@ public final class DeviceRecord implements Comparable<DeviceRecord> {
 	 */
 	public void setValue(final TypedValue<?> value) {
 		checkNull(value, "Value type cannot be null");
-		this.m_value = value;
+		this.value = value;
 	}
 
 	/** {@inheritDoc} */
 	@Override
 	public String toString() {
-		return MoreObjects.toStringHelper(this).add("channel_name", this.m_channelName)
-				.add("device_flag", this.m_deviceFlag).add("timestamp", this.m_timestamp).add("value", this.m_value)
+		return MoreObjects.toStringHelper(this).add("channel_name", this.channelName)
+				.add("device_flag", this.deviceFlag).add("timestamp", this.timestamp).add("value", this.value)
 				.toString();
 	}
 

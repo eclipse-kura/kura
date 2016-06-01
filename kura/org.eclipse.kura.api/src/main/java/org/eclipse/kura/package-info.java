@@ -10,10 +10,14 @@
  *     Eurotech
  *******************************************************************************/
 /**
- * 
+ *
  */
 /**
- * Contains objects necessary to manage framework exceptions.
+ * Contains the necessary classes for the following framework related operations
+ * <ul>
+ * <li>Management of Exceptions</li>
+ * <li>Preconditions for Defensive Programming</li>
+ * </ul>
  *
  */
 package org.eclipse.kura;

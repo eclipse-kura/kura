@@ -12,6 +12,9 @@
  */
 package org.eclipse.kura.wire;
 
+import static org.eclipse.kura.Preconditions.checkNull;
+
+import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.annotation.Immutable;
 import org.eclipse.kura.annotation.ThreadSafe;
 import org.eclipse.kura.type.TypedValue;
@@ -41,8 +44,13 @@ public final class WireField implements Comparable<WireField> {
 	 *            the name
 	 * @param value
 	 *            the value
+	 * @throws KuraRuntimeException
+	 *             if any of the arguments is null
 	 */
 	public WireField(final String name, final TypedValue<?> value) {
+		checkNull(name, "Wire field name cannot be null");
+		checkNull(value, "Wire field value type cannot be null");
+
 		this.m_name = name;
 		this.m_value = value;
 	}

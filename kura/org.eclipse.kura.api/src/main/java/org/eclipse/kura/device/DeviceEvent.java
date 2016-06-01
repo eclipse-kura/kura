@@ -12,6 +12,9 @@
  */
 package org.eclipse.kura.device;
 
+import static org.eclipse.kura.Preconditions.checkNull;
+
+import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.annotation.Immutable;
 import org.eclipse.kura.annotation.ThreadSafe;
 
@@ -36,8 +39,11 @@ public final class DeviceEvent {
 	 *
 	 * @param deviceRecord
 	 *            the device record
+	 * @throws KuraRuntimeException
+	 *             if the argument is null
 	 */
 	public DeviceEvent(final DeviceRecord deviceRecord) {
+		checkNull(deviceRecord, "Device record cannot be null");
 		this.m_deviceRecord = deviceRecord;
 	}
 

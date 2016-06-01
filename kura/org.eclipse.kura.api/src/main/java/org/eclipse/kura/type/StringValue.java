@@ -12,15 +12,15 @@
  */
 package org.eclipse.kura.type;
 
+import static org.eclipse.kura.Preconditions.checkNonInstance;
 import static org.eclipse.kura.type.DataType.STRING;
 
-import org.eclipse.kura.KuraErrorCode;
-import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.annotation.Immutable;
 import org.eclipse.kura.annotation.ThreadSafe;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
+import com.google.common.base.Strings;
 import com.google.common.collect.ComparisonChain;
 
 /**
@@ -43,16 +43,14 @@ public final class StringValue implements TypedValue<String> {
 	 *            the value
 	 */
 	public StringValue(final String value) {
-		this.m_value = value;
+		this.m_value = Strings.nullToEmpty(value);
 	}
 
 	/** {@inheritDoc} */
 	@Override
 	@SuppressWarnings("rawtypes")
 	public int compareTo(final TypedValue otherTypedValue) {
-		if (!(otherTypedValue instanceof StringValue)) {
-			throw new KuraRuntimeException(KuraErrorCode.INTERNAL_ERROR, "Typed Value is not string");
-		}
+		checkNonInstance(otherTypedValue, StringValue.class, "Typed Value is not string");
 		return ComparisonChain.start().compare(this.m_value, ((StringValue) (otherTypedValue)).getValue()).result();
 	}
 

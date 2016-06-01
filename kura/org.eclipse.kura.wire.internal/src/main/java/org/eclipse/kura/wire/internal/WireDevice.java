@@ -12,7 +12,8 @@
  */
 package org.eclipse.kura.wire.internal;
 
-import static org.eclipse.kura.device.util.Preconditions.checkCondition;
+import static org.eclipse.kura.Preconditions.checkCondition;
+import static org.eclipse.kura.Preconditions.checkNull;
 
 import java.sql.Timestamp;
 import java.util.Date;
@@ -110,7 +111,7 @@ public final class WireDevice extends BaseDevice implements WireEmitter, WireRec
 	 *             if provided records list is null or it is empty
 	 */
 	private void emitDeviceRecords(final List<DeviceRecord> deviceRecords) {
-		checkCondition(deviceRecords == null, "Device records cannot be null");
+		checkNull(deviceRecords, "Device records cannot be null");
 		checkCondition(deviceRecords.isEmpty(), "Device records cannot be empty");
 
 		final List<WireRecord> wireRecords = Lists.newArrayList();
@@ -156,7 +157,7 @@ public final class WireDevice extends BaseDevice implements WireEmitter, WireRec
 	 */
 	@Override
 	public void onWireReceive(final WireEnvelope wireEnvelope) {
-		checkCondition(wireEnvelope == null, "Wire Envelope cannot be null");
+		checkNull(wireEnvelope, "Wire Envelope cannot be null");
 		s_logger.debug("Wire Enveloped received..." + this.m_wireSupport);
 
 		final List<DeviceRecord> deviceRecordsToWriteChannels = Lists.newArrayList();
@@ -220,8 +221,8 @@ public final class WireDevice extends BaseDevice implements WireEmitter, WireRec
 	 *             if any of the provided arguments is null
 	 */
 	private DeviceRecord prepareDeviceRecord(final Channel channel, final TypedValue<?> value) {
-		checkCondition(channel == null, "Channel cannot be null");
-		checkCondition(value == null, "Value cannot be null");
+		checkNull(channel, "Channel cannot be null");
+		checkNull(value, "Value cannot be null");
 
 		final DeviceRecord deviceRecord = Devices.newDeviceRecord(channel.getName());
 		deviceRecord.setValue(value);

@@ -12,10 +12,9 @@
  */
 package org.eclipse.kura.type;
 
+import static org.eclipse.kura.Preconditions.checkNonInstance;
 import static org.eclipse.kura.type.DataType.LONG;
 
-import org.eclipse.kura.KuraErrorCode;
-import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.annotation.Immutable;
 import org.eclipse.kura.annotation.ThreadSafe;
 
@@ -51,9 +50,7 @@ public final class LongValue implements TypedValue<Long> {
 	@Override
 	@SuppressWarnings("rawtypes")
 	public int compareTo(final TypedValue otherTypedValue) {
-		if (!(otherTypedValue instanceof LongValue)) {
-			throw new KuraRuntimeException(KuraErrorCode.INTERNAL_ERROR, "Typed Value is not long");
-		}
+		checkNonInstance(otherTypedValue, LongValue.class, "Typed Value is not long");
 		return ComparisonChain.start()
 				.compare(this.m_value, ((LongValue) (otherTypedValue)).getValue(), Ordering.natural()).result();
 	}

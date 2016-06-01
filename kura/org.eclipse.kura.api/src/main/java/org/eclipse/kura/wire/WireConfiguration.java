@@ -11,47 +11,30 @@
  *   Amit Kumar Mondal (admin@amitinside.com)
  */
 
-package org.eclipse.kura.wire.internal;
+package org.eclipse.kura.wire;
 
-import static org.eclipse.kura.device.util.Preconditions.checkCondition;
+import static org.eclipse.kura.Preconditions.checkNull;
 
 import org.eclipse.kura.KuraRuntimeException;
+import org.eclipse.kura.annotation.NotThreadSafe;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.google.common.base.MoreObjects;
+import com.google.common.base.Objects;
 
 /**
  * The Class WireConfiguration represents a wiring configuration between a Wire
  * Emitter and a Wire Receiver
  */
+@NotThreadSafe
 public final class WireConfiguration {
 
 	/**
-	 * Returns new instance of Wire Configuration from json object provided
-	 *
-	 * @param jsonWire
-	 *            the json object representing the wires
-	 * @return the wire configuration
-	 * @throws JSONException
-	 *             the JSON exception
-	 * @throws KuraRuntimeException
-	 *             if the json object instance passed as argument is null
+	 * This signifies if Wire Admin Service has already created the wire between
+	 * the wire emitter and the wire receiver.
 	 */
-	public static WireConfiguration newInstanceFromJson(final JSONObject jsonWire) throws JSONException {
-		checkCondition(jsonWire == null, "JSON Object cannot be null");
-
-		final String emitter = jsonWire.getString("p");
-		final String receiver = jsonWire.getString("c");
-		final String filter = jsonWire.optString("f");
-		return new WireConfiguration(emitter, receiver, filter);
-	}
-
-	/**
-	 * This signifies if wire admin has already created the wire between the
-	 * wire emitter and the wire receiver.
-	 */
-	private boolean m_created = false;
+	private boolean m_created;
 
 	/** The Wire Emitter Name. */
 	private String m_emitterName;
@@ -75,13 +58,14 @@ public final class WireConfiguration {
 	 *             if any of the arguments is null
 	 */
 	public WireConfiguration(final String emitterName, final String receiverName, final String filter) {
-		checkCondition(emitterName == null, "Emitter name cannot be null");
-		checkCondition(receiverName == null, "Receiver name cannot be null");
-		checkCondition(filter == null, "Filter cannot be null");
+		checkNull(emitterName, "Emitter name cannot be null");
+		checkNull(receiverName, "Receiver name cannot be null");
+		checkNull(filter, "Filter cannot be null");
 
 		this.m_emitterName = emitterName;
 		this.m_receiverName = receiverName;
 		this.m_filter = filter;
+		this.m_created = false;
 	}
 
 	/**
@@ -101,14 +85,27 @@ public final class WireConfiguration {
 	 */
 	public WireConfiguration(final String emitterName, final String receiverName, final String filter,
 			final boolean created) {
-		checkCondition(emitterName == null, "Emitter name cannot be null");
-		checkCondition(receiverName == null, "Receiver name cannot be null");
-		checkCondition(filter == null, "Filter cannot be null");
+		checkNull(emitterName, "Emitter name cannot be null");
+		checkNull(receiverName, "Receiver name cannot be null");
+		checkNull(filter, "Filter cannot be null");
 
 		this.m_emitterName = emitterName;
 		this.m_receiverName = receiverName;
 		this.m_filter = filter;
 		this.m_created = created;
+	}
+
+	/** {@inheritDoc} */
+	@Override
+	public boolean equals(final Object obj) {
+		if (obj instanceof WireConfiguration) {
+			final WireConfiguration wireConfiguration = (WireConfiguration) obj;
+			return Objects.equal(this.m_emitterName, wireConfiguration.getEmitterName())
+					&& Objects.equal(this.m_receiverName, wireConfiguration.getReceiverName())
+					&& Objects.equal(this.m_filter, wireConfiguration.getFilter())
+					&& Objects.equal(this.m_created, wireConfiguration.isCreated());
+		}
+		return false;
 	}
 
 	/**
@@ -136,6 +133,12 @@ public final class WireConfiguration {
 	 */
 	public String getReceiverName() {
 		return this.m_receiverName;
+	}
+
+	/** {@inheritDoc} */
+	@Override
+	public int hashCode() {
+		return Objects.hashCode(this.m_created, this.m_emitterName, this.m_filter, this.m_receiverName);
 	}
 
 	/**
@@ -195,8 +198,8 @@ public final class WireConfiguration {
 	 *             if any of the arguments is null
 	 */
 	public void update(final String newEmitterName, final String newReceiverName) {
-		checkCondition(newEmitterName == null, "Emitter name cannot be null");
-		checkCondition(newReceiverName == null, "Receiver name cannot be null");
+		checkNull(newEmitterName, "Emitter name cannot be null");
+		checkNull(newReceiverName, "Receiver name cannot be null");
 
 		this.m_emitterName = newEmitterName;
 		this.m_receiverName = newReceiverName;

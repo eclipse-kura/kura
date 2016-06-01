@@ -12,6 +12,9 @@
  */
 package org.eclipse.kura.device;
 
+import static org.eclipse.kura.Preconditions.checkNull;
+
+import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.annotation.NotThreadSafe;
 import org.eclipse.kura.type.TypedValue;
 
@@ -50,14 +53,18 @@ public final class DeviceRecord implements Comparable<DeviceRecord> {
 	 *
 	 * @param channelName
 	 *            the channel name
+	 * @throws KuraRuntimeException
+	 *             if the argument is null
 	 */
 	public DeviceRecord(final String channelName) {
+		checkNull(channelName, "Channel name cannot be null");
 		this.m_channelName = channelName;
 	}
 
 	/** {@inheritDoc} */
 	@Override
 	public int compareTo(final DeviceRecord otherDeviceRecord) {
+		checkNull(otherDeviceRecord, "Provided device record to compare is null");
 		return ComparisonChain.start().compare(this.m_channelName, otherDeviceRecord.getChannelName())
 				.compare(this.m_value, otherDeviceRecord.getValue())
 				.compare(this.m_deviceFlag, otherDeviceRecord.getDeviceFlag())
@@ -124,8 +131,11 @@ public final class DeviceRecord implements Comparable<DeviceRecord> {
 	 *
 	 * @param channelName
 	 *            the new channel name
+	 * @throws KuraRuntimeException
+	 *             if the argument is null
 	 */
 	public void setChannelName(final String channelName) {
+		checkNull(channelName, "Channel name cannot be null");
 		this.m_channelName = channelName;
 	}
 
@@ -134,8 +144,11 @@ public final class DeviceRecord implements Comparable<DeviceRecord> {
 	 *
 	 * @param deviceFlag
 	 *            the new device flag
+	 * @throws KuraRuntimeException
+	 *             if the argument is null
 	 */
 	public void setDeviceFlag(final DeviceFlag deviceFlag) {
+		checkNull(deviceFlag, "Device flag cannot be null");
 		this.m_deviceFlag = deviceFlag;
 	}
 
@@ -154,8 +167,11 @@ public final class DeviceRecord implements Comparable<DeviceRecord> {
 	 *
 	 * @param value
 	 *            the new value
+	 * @throws KuraRuntimeException
+	 *             if the argument is null
 	 */
 	public void setValue(final TypedValue<?> value) {
+		checkNull(value, "Value type cannot be null");
 		this.m_value = value;
 	}
 

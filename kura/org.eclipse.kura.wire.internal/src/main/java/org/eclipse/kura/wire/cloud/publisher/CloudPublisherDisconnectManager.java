@@ -12,7 +12,8 @@
  */
 package org.eclipse.kura.wire.cloud.publisher;
 
-import static org.eclipse.kura.device.util.Preconditions.checkCondition;
+import static org.eclipse.kura.Preconditions.checkCondition;
+import static org.eclipse.kura.Preconditions.checkNull;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -57,8 +58,7 @@ public final class CloudPublisherDisconnectManager {
 	 *             if data service dependency is null
 	 */
 	public CloudPublisherDisconnectManager(final DataService dataService, final long quieceTimeout) {
-		checkCondition(dataService == null, "Data Service cannot be null");
-
+		checkNull(dataService, "Data Service cannot be null");
 		this.m_dataService = dataService;
 		this.m_quieceTimeout = quieceTimeout;
 		this.m_nextExecutionTime = 0;
@@ -113,12 +113,13 @@ public final class CloudPublisherDisconnectManager {
 			public void run() {
 				// disconnect
 				try {
-					m_dataService.disconnect(CloudPublisherDisconnectManager.this.m_quieceTimeout);
+					CloudPublisherDisconnectManager.this.m_dataService
+							.disconnect(CloudPublisherDisconnectManager.this.m_quieceTimeout);
 				} catch (final Exception e) {
 					s_logger.warn("Error while disconnecting cloud publisher..." + Throwables.getRootCause(e));
 				}
 				// cleaning up
-				m_nextExecutionTime = 0;
+				CloudPublisherDisconnectManager.this.m_nextExecutionTime = 0;
 			}
 		}, delay, TimeUnit.MILLISECONDS);
 

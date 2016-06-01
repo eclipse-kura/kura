@@ -12,7 +12,7 @@
  */
 package org.eclipse.kura.device.internal;
 
-import static org.eclipse.kura.device.util.Preconditions.checkCondition;
+import static org.eclipse.kura.Preconditions.checkNull;
 
 import java.util.HashSet;
 import java.util.Map;
@@ -132,8 +132,11 @@ public final class DeviceConfiguration {
 	 *
 	 * @param properties
 	 *            the configured properties
+	 * @throws KuraRuntimeException
+	 *             if the argument is null
 	 */
 	private DeviceConfiguration(final Map<String, Object> properties) {
+		checkNull(properties, "Properties cannot be null");
 		this.extractProperties(properties);
 	}
 
@@ -152,13 +155,9 @@ public final class DeviceConfiguration {
 	 *
 	 * @param properties
 	 *            the provided properties
-	 * @throws KuraRuntimeException
-	 *             if the properties is null
 	 */
 	@SuppressWarnings("unchecked")
 	private void extractProperties(final Map<String, Object> properties) {
-		checkCondition(properties == null, "Properties cannot be null");
-
 		final HashSet<Long> parsedIndexes = Sets.newHashSet();
 		for (final String property : properties.keySet()) {
 			try {
@@ -239,11 +238,11 @@ public final class DeviceConfiguration {
 	 *            the properties to retrieve channel from
 	 * @return the specific channel
 	 * @throws KuraRuntimeException
-	 *             if the properties is null
+	 *             if the argument is null
 	 */
 	@SuppressWarnings("unchecked")
 	private Channel retrieveChannel(final Map<String, Object> properties) {
-		checkCondition(properties == null, "Properties cannot be null");
+		checkNull(properties, "Properties cannot be null");
 		s_logger.debug("Retrieving single channel information from the properties...");
 
 		String channelName = null;

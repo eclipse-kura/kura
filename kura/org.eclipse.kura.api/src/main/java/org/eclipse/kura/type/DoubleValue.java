@@ -12,10 +12,9 @@
  */
 package org.eclipse.kura.type;
 
+import static org.eclipse.kura.Preconditions.checkNonInstance;
 import static org.eclipse.kura.type.DataType.DOUBLE;
 
-import org.eclipse.kura.KuraErrorCode;
-import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.annotation.Immutable;
 import org.eclipse.kura.annotation.ThreadSafe;
 
@@ -51,9 +50,7 @@ public final class DoubleValue implements TypedValue<Double> {
 	@Override
 	@SuppressWarnings("rawtypes")
 	public int compareTo(final TypedValue otherTypedValue) {
-		if (!(otherTypedValue instanceof DoubleValue)) {
-			throw new KuraRuntimeException(KuraErrorCode.INTERNAL_ERROR, "Typed Value is not double");
-		}
+		checkNonInstance(otherTypedValue, DoubleValue.class, "Typed Value is not double");
 		return ComparisonChain.start()
 				.compare(this.m_value, ((DoubleValue) (otherTypedValue)).getValue(), Ordering.natural()).result();
 	}

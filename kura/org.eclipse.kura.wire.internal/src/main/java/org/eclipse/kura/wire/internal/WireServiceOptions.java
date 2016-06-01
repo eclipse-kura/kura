@@ -12,12 +12,14 @@
  */
 package org.eclipse.kura.wire.internal;
 
-import static org.eclipse.kura.device.util.Preconditions.checkCondition;
+import static org.eclipse.kura.Preconditions.checkNull;
 
 import java.util.List;
 import java.util.Map;
 
 import org.eclipse.kura.KuraRuntimeException;
+import org.eclipse.kura.wire.WireConfiguration;
+import org.eclipse.kura.wire.util.Wires;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -34,9 +36,6 @@ public final class WireServiceOptions {
 	/** The Constant denoting the wires. */
 	public static final String CONF_WIRES = "wires";
 
-	/** The list of wire configurations. */
-	private static List<WireConfiguration> m_wireConfigurations;
-
 	/**
 	 * New instance of {@link WireServiceOptions}
 	 *
@@ -49,8 +48,7 @@ public final class WireServiceOptions {
 	 *             if provided properties is null
 	 */
 	public static WireServiceOptions newInstance(final Map<String, Object> properties) throws JSONException {
-		checkCondition(properties == null, "Configured Wire Service properties cannot be null");
-
+		checkNull(properties, "Configured Wire Service properties cannot be null");
 		final List<WireConfiguration> wireConfs = Lists.newCopyOnWriteArrayList();
 		Object objWires = null;
 		if (properties.containsKey(CONF_WIRES)) {
@@ -61,11 +59,14 @@ public final class WireServiceOptions {
 			final JSONArray jsonWires = new JSONArray(strWires);
 			for (int i = 0; i < jsonWires.length(); i++) {
 				final JSONObject jsonWire = jsonWires.getJSONObject(i);
-				wireConfs.add(WireConfiguration.newInstanceFromJson(jsonWire));
+				wireConfs.add(Wires.newConfigurationFromJson(jsonWire));
 			}
 		}
 		return new WireServiceOptions(wireConfs);
 	}
+
+	/** The list of wire configurations. */
+	private final List<WireConfiguration> m_wireConfigurations;
 
 	/**
 	 * Instantiates a new wire service options.
@@ -76,8 +77,8 @@ public final class WireServiceOptions {
 	 *             if provided configurations is null
 	 */
 	private WireServiceOptions(final List<WireConfiguration> configurations) {
-		checkCondition(configurations == null, "Configurations cannot be null");
-		m_wireConfigurations = configurations;
+		checkNull(configurations, "Configurations cannot be null");
+		this.m_wireConfigurations = configurations;
 	}
 
 	/**
@@ -86,7 +87,7 @@ public final class WireServiceOptions {
 	 * @return the wire configurations
 	 */
 	public List<WireConfiguration> getWireConfigurations() {
-		return ImmutableList.copyOf(m_wireConfigurations);
+		return ImmutableList.copyOf(this.m_wireConfigurations);
 	}
 
 	/**
@@ -95,7 +96,7 @@ public final class WireServiceOptions {
 	 * @return the wire configurations
 	 */
 	public List<WireConfiguration> getWires() {
-		return m_wireConfigurations;
+		return this.m_wireConfigurations;
 	}
 
 	/**
@@ -107,7 +108,7 @@ public final class WireServiceOptions {
 	 */
 	public String toJsonString() throws JSONException {
 		final JSONArray jsonWires = new JSONArray();
-		for (final WireConfiguration wireConfig : m_wireConfigurations) {
+		for (final WireConfiguration wireConfig : this.m_wireConfigurations) {
 			jsonWires.put(wireConfig.toJson());
 		}
 		return jsonWires.toString();
@@ -116,7 +117,7 @@ public final class WireServiceOptions {
 	/** {@inheritDoc} */
 	@Override
 	public String toString() {
-		return MoreObjects.toStringHelper(this).add("wire_configurations", m_wireConfigurations).toString();
+		return MoreObjects.toStringHelper(this).add("wire_configurations", this.m_wireConfigurations).toString();
 	}
 
 }

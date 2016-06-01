@@ -12,7 +12,7 @@
  */
 package org.eclipse.kura.wire.cloud.publisher;
 
-import static org.eclipse.kura.device.util.Preconditions.checkCondition;
+import static org.eclipse.kura.Preconditions.checkNull;
 
 import java.util.List;
 import java.util.Map;
@@ -126,8 +126,7 @@ public final class CloudPublisherImpl
 	 *             if the wire record provided is null
 	 */
 	private JSONObject buildJsonObject(final WireRecord wireRecord) {
-		checkCondition(wireRecord == null, "Wire Record cannot be null");
-
+		checkNull(wireRecord, "Wire Record cannot be null");
 		final JSONObject jsonObject = new JSONObject();
 		try {
 			if (wireRecord.getTimestamp() != null) {
@@ -187,8 +186,7 @@ public final class CloudPublisherImpl
 	 *             if the wire record provided is null
 	 */
 	private KuraPayload buildKuraPayload(final WireRecord wireRecord) {
-		checkCondition(wireRecord == null, "Wire Record cannot be null");
-
+		checkNull(wireRecord, "Wire Record cannot be null");
 		final KuraPayload kuraPayload = new KuraPayload();
 
 		if (wireRecord.getTimestamp() != null) {
@@ -245,8 +243,7 @@ public final class CloudPublisherImpl
 	 *             if the position provided is null
 	 */
 	private KuraPosition buildKuraPosition(final Position position) {
-		checkCondition(position == null, "Position cannot be null");
-
+		checkNull(position, "Position cannot be null");
 		final KuraPosition kuraPosition = new KuraPosition();
 		if (position.getLatitude() != null) {
 			kuraPosition.setLatitude(position.getLatitude().getValue());
@@ -278,8 +275,7 @@ public final class CloudPublisherImpl
 	 *             if position provided is null
 	 */
 	private JSONObject buildKuraPositionForJson(final Position position) throws JSONException {
-		checkCondition(position == null, "Position cannot be null");
-
+		checkNull(position, "Position cannot be null");
 		final JSONObject jsonObject = new JSONObject();
 		if (position.getLatitude() != null) {
 			jsonObject.put("latitude", position.getLatitude().getValue());
@@ -419,15 +415,15 @@ public final class CloudPublisherImpl
 	/** {@inheritDoc} */
 	@Override
 	public void producersConnected(final Wire[] wires) {
-		checkCondition(wires == null, "Wires cannot be null");
+		checkNull(wires, "Wires cannot be null");
 		this.m_wireSupport.producersConnected(wires);
 	}
 
 	/** {@inheritDoc} */
 	@Override
 	public void publish(final List<WireRecord> wireRecords) {
-		checkCondition(this.m_cloudClient == null, "Cloud Client cannot be null");
-		checkCondition(wireRecords == null, "Wire Records cannot be null");
+		checkNull(this.m_cloudClient, "Cloud Client cannot be null");
+		checkNull(wireRecords, "Wire Records cannot be null");
 
 		if (!AutoConnectMode.AUTOCONNECT_MODE_OFF.equals(this.m_options.getAutoConnectMode())
 				&& !this.m_dataService.isAutoConnectEnabled() && !this.m_dataService.isConnected()) {
@@ -507,8 +503,7 @@ public final class CloudPublisherImpl
 	 *             if cloud client is null
 	 */
 	private void stopPublishing() {
-		checkCondition(this.m_cloudClient == null, "Cloud Client cannot be null");
-
+		checkNull(this.m_cloudClient, "Cloud client cannot be null");
 		if (this.m_dataService.isConnected() && !this.m_dataService.isAutoConnectEnabled()) {
 			final AutoConnectMode autoConnMode = this.m_options.getAutoConnectMode();
 			switch (autoConnMode) {
@@ -556,7 +551,6 @@ public final class CloudPublisherImpl
 
 		// Update properties
 		this.m_options = new CloudPublisherOptions(properties);
-
 		// create the singleton disconnect manager
 		this.m_monitor.enter();
 		try {

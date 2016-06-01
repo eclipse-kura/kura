@@ -12,12 +12,11 @@
  */
 package org.eclipse.kura.type;
 
+import static org.eclipse.kura.Preconditions.checkNonInstance;
 import static org.eclipse.kura.type.DataType.BYTE_ARRAY;
 
 import java.util.Arrays;
 
-import org.eclipse.kura.KuraErrorCode;
-import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.annotation.Immutable;
 import org.eclipse.kura.annotation.ThreadSafe;
 
@@ -53,9 +52,7 @@ public final class ByteArrayValue implements TypedValue<byte[]> {
 	@Override
 	@SuppressWarnings("rawtypes")
 	public int compareTo(final TypedValue otherTypedValue) {
-		if (!(otherTypedValue instanceof ByteArrayValue)) {
-			throw new KuraRuntimeException(KuraErrorCode.INTERNAL_ERROR, "Typed Value is not byte array");
-		}
+		checkNonInstance(otherTypedValue, ByteArrayValue.class, "Typed Value is not byte array");
 		return ComparisonChain.start().compare(this.m_value, ((ByteArrayValue) (otherTypedValue)).getValue(),
 				UnsignedBytes.lexicographicalComparator()).result();
 	}

@@ -12,8 +12,11 @@
  */
 package org.eclipse.kura.device;
 
+import static org.eclipse.kura.Preconditions.checkNull;
+
 import java.util.Map;
 
+import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.annotation.NotThreadSafe;
 import org.eclipse.kura.type.TypedValue;
 
@@ -61,14 +64,18 @@ public final class DriverRecord implements Comparable<DriverRecord> {
 	 *
 	 * @param channelName
 	 *            the channel name
+	 * @throws KuraRuntimeException
+	 *             if the argument is null
 	 */
 	public DriverRecord(final String channelName) {
+		checkNull(channelName, "Channel name cannot be null");
 		this.m_channelName = channelName;
 	}
 
 	/** {@inheritDoc} */
 	@Override
 	public int compareTo(final DriverRecord otherDriverRecord) {
+		checkNull(otherDriverRecord, "Provided driver record to compare is null");
 		return ComparisonChain.start().compare(this.m_channelName, otherDriverRecord.getChannelName())
 				.compare(this.m_value, otherDriverRecord.getValue())
 				.compare(this.m_driverFlag, otherDriverRecord.getDriverFlag())
@@ -94,7 +101,7 @@ public final class DriverRecord implements Comparable<DriverRecord> {
 	 * @return the channel configuration
 	 */
 	public Map<String, Object> getChannelConfig() {
-		return ImmutableMap.copyOf(this.m_channelConfig);
+		return this.m_channelConfig;
 	}
 
 	/**
@@ -144,9 +151,12 @@ public final class DriverRecord implements Comparable<DriverRecord> {
 	 *
 	 * @param channelConfig
 	 *            the channel config
+	 * @throws KuraRuntimeException
+	 *             if the argument is null
 	 */
 	public void setChannelConfig(final Map<String, Object> channelConfig) {
-		this.m_channelConfig = channelConfig;
+		checkNull(channelConfig, "Channel configuration cannot be null");
+		this.m_channelConfig = ImmutableMap.copyOf(channelConfig);
 	}
 
 	/**
@@ -154,8 +164,11 @@ public final class DriverRecord implements Comparable<DriverRecord> {
 	 *
 	 * @param channelName
 	 *            the new channel name
+	 * @throws KuraRuntimeException
+	 *             if the argument is null
 	 */
 	public void setChannelName(final String channelName) {
+		checkNull(channelName, "Channel name cannot be null");
 		this.m_channelName = channelName;
 	}
 
@@ -164,8 +177,11 @@ public final class DriverRecord implements Comparable<DriverRecord> {
 	 *
 	 * @param driverFlag
 	 *            the new driver flag
+	 * @throws KuraRuntimeException
+	 *             if the argument is null
 	 */
 	public void setDriverFlag(final DriverFlag driverFlag) {
+		checkNull(driverFlag, "Driver flag cannot be null");
 		this.m_driverFlag = driverFlag;
 	}
 
@@ -184,8 +200,11 @@ public final class DriverRecord implements Comparable<DriverRecord> {
 	 *
 	 * @param value
 	 *            the new value
+	 * @throws KuraRuntimeException
+	 *             if the argument is null
 	 */
 	public void setValue(final TypedValue<?> value) {
+		checkNull(value, "Value type cannot be null");
 		this.m_value = value;
 	}
 

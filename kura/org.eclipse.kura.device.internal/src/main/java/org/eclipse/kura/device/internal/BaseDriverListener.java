@@ -12,8 +12,9 @@
  */
 package org.eclipse.kura.device.internal;
 
-import static org.eclipse.kura.device.util.Preconditions.checkCondition;
+import static org.eclipse.kura.Preconditions.checkNull;
 
+import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.device.DeviceEvent;
 import org.eclipse.kura.device.DeviceFlag;
 import org.eclipse.kura.device.DeviceListener;
@@ -48,8 +49,13 @@ public final class BaseDriverListener implements DriverListener {
 	 *            the channel name as provided
 	 * @param deviceListener
 	 *            the device listener
+	 * @throws KuraRuntimeException
+	 *             if any of the arguments is null
 	 */
 	public BaseDriverListener(final String channelName, final DeviceListener deviceListener) {
+		checkNull(channelName, "Channel name cannot be null");
+		checkNull(deviceListener, "Device listener cannot be null");
+
 		this.m_channelName = channelName;
 		this.m_deviceListener = deviceListener;
 	}
@@ -57,7 +63,8 @@ public final class BaseDriverListener implements DriverListener {
 	/** {@inheritDoc} */
 	@Override
 	public void onDriverEvent(final DriverEvent event) {
-		checkCondition(event == null, "Driver Event cannot be null");
+		checkNull(event, "Driver Event cannot be null");
+
 		final DriverRecord driverRecord = event.getDriverRecord();
 		final DeviceRecord deviceRecord = Devices.newDeviceRecord(this.m_channelName);
 		final DriverFlag driverFlag = driverRecord.getDriverFlag();

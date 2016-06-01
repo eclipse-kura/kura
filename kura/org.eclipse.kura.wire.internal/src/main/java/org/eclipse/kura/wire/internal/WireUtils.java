@@ -11,7 +11,7 @@
  */
 package org.eclipse.kura.wire.internal;
 
-import static org.eclipse.kura.device.util.Preconditions.checkCondition;
+import static org.eclipse.kura.Preconditions.checkNull;
 
 import java.util.Collection;
 import java.util.List;
@@ -53,8 +53,7 @@ public final class WireUtils {
 	 *             if provided component context is null
 	 */
 	public static List<String> getEmittersAndReceivers(final ComponentContext ctx) {
-		checkCondition(ctx == null, "Component context cannot be null");
-
+		checkNull(ctx, "Component context cannot be null");
 		final List<String> result = Lists.newArrayList();
 		try {
 			final Collection<ServiceReference<WireEmitter>> emitters = ctx.getBundleContext()
@@ -89,9 +88,9 @@ public final class WireUtils {
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public static List<String> getFactoriesAndInstances(final ComponentContext ctx, final String factoryPid,
 			final Class iface) {
-		checkCondition(ctx == null, "Component context cannot be null");
-		checkCondition(factoryPid == null, "Factory PID cannot be null");
-		checkCondition(iface == null, "Interface class cannot be null");
+		checkNull(ctx, "Component context cannot be null");
+		checkNull(factoryPid, "Factory PID cannot be null");
+		checkNull(iface, "Interface class cannot be null");
 
 		final List<String> result = Lists.newArrayList();
 		// Iterate through the bundles
@@ -118,7 +117,6 @@ public final class WireUtils {
 				}
 			}
 		}
-
 		// After the factories, iterate through available services implementing
 		// the passed interface
 		try {
@@ -144,8 +142,8 @@ public final class WireUtils {
 	 *             if any of the provided argument is null
 	 */
 	public static boolean isEmitter(final BundleContext ctx, final String name) {
-		checkCondition(ctx == null, "Bundle context cannot be null");
-		checkCondition(name == null, "Wire Emitter name cannot be null");
+		checkNull(ctx, "Bundle context cannot be null");
+		checkNull(name, "Wire Emitter name cannot be null");
 
 		try {
 			final Collection<ServiceReference<WireEmitter>> services = ctx.getServiceReferences(WireEmitter.class,
@@ -173,8 +171,8 @@ public final class WireUtils {
 	 *             if any of the provided argument is null
 	 */
 	public static boolean isReceiver(final BundleContext ctx, final String pid) {
-		checkCondition(ctx == null, "Bundle context cannot be null");
-		checkCondition(pid == null, "Wire Receiver PID cannot be null");
+		checkNull(ctx, "Bundle context cannot be null");
+		checkNull(pid, "Wire Receiver PID cannot be null");
 
 		try {
 			final Collection<ServiceReference<WireReceiver>> services = ctx.getServiceReferences(WireReceiver.class,

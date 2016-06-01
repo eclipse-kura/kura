@@ -10,10 +10,7 @@
  *   Eurotech
  *   Amit Kumar Mondal (admin@amitinside.com)
  */
-package org.eclipse.kura.device.util;
-
-import org.eclipse.kura.KuraErrorCode;
-import org.eclipse.kura.KuraRuntimeException;
+package org.eclipse.kura;
 
 /**
  * The Class Preconditions is responsible to provide utility methods to check
@@ -82,6 +79,52 @@ public final class Preconditions {
 	 */
 	public static void checkCondition(final boolean flag, final String message) {
 		checkCondition(flag, KuraErrorCode.INTERNAL_ERROR, message);
+	}
+
+	/**
+	 * Checks if the provided object is an instance of the provided class
+	 *
+	 * @param object
+	 *            the object to verify
+	 * @param instanceClass
+	 *            the instance to check
+	 * @param message
+	 *            the exception message
+	 * @throws KuraRuntimeException
+	 *             if the check is successful
+	 */
+	public static void checkInstance(final Object object, final Class<?> instanceClass, final String message) {
+		checkCondition(object.getClass().isAssignableFrom(instanceClass), KuraErrorCode.INTERNAL_ERROR, message);
+	}
+
+	/**
+	 * Checks if the provided object is an instance of the provided class
+	 *
+	 * @param object
+	 *            the object to verify
+	 * @param instanceClass
+	 *            the instance to check
+	 * @param message
+	 *            the exception message
+	 * @throws KuraRuntimeException
+	 *             if the check is successful
+	 */
+	public static void checkNonInstance(final Object object, final Class<?> instanceClass, final String message) {
+		checkCondition(!object.getClass().isAssignableFrom(instanceClass), KuraErrorCode.INTERNAL_ERROR, message);
+	}
+
+	/**
+	 * Checks if the provided object is null
+	 *
+	 * @param obj
+	 *            the object to check if it's null
+	 * @param message
+	 *            the exception message
+	 * @throws KuraRuntimeException
+	 *             if the provided flag or condition is true
+	 */
+	public static void checkNull(final Object obj, final String message) {
+		checkCondition(obj == null, message);
 	}
 
 	/**

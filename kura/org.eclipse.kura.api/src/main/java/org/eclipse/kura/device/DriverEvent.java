@@ -12,6 +12,9 @@
  */
 package org.eclipse.kura.device;
 
+import static org.eclipse.kura.Preconditions.checkNull;
+
+import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.annotation.Immutable;
 import org.eclipse.kura.annotation.ThreadSafe;
 
@@ -36,8 +39,11 @@ public final class DriverEvent {
 	 *
 	 * @param driverRecord
 	 *            the driver record
+	 * @throws KuraRuntimeException
+	 *             if the argument is null
 	 */
 	public DriverEvent(final DriverRecord driverRecord) {
+		checkNull(driverRecord, "Driver record cannot be null");
 		this.m_driverRecord = driverRecord;
 	}
 

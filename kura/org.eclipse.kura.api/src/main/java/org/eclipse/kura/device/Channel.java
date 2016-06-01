@@ -12,8 +12,11 @@
  */
 package org.eclipse.kura.device;
 
+import static org.eclipse.kura.Preconditions.checkNull;
+
 import java.util.Map;
 
+import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.annotation.Immutable;
 import org.eclipse.kura.annotation.ThreadSafe;
 import org.eclipse.kura.type.DataType;
@@ -58,9 +61,16 @@ public final class Channel implements Comparable<Channel> {
 	 *            the value type
 	 * @param config
 	 *            the config
+	 * @throws KuraRuntimeException
+	 *             if any of the arguments is null
 	 */
 	public Channel(final String name, final ChannelType type, final DataType valueType,
 			final Map<String, Object> config) {
+		checkNull(name, "Channel name cannot be null");
+		checkNull(type, "Channel type cannot be null");
+		checkNull(valueType, "Channel value type cannot be null");
+		checkNull(config, "Channel configuration cannot be null");
+
 		this.m_config = config;
 		this.m_name = name;
 		this.m_type = type;
@@ -70,6 +80,7 @@ public final class Channel implements Comparable<Channel> {
 	/** {@inheritDoc} */
 	@Override
 	public int compareTo(final Channel otherChannel) {
+		checkNull(otherChannel, "Provided channel to compare is null");
 		return ComparisonChain.start().compare(this.m_name, otherChannel.getName())
 				.compare(this.m_type, otherChannel.getType()).compare(this.m_valueType, otherChannel.getValueType())
 				.result();

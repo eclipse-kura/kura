@@ -12,8 +12,11 @@
  */
 package org.eclipse.kura.wire;
 
+import static org.eclipse.kura.Preconditions.checkNull;
+
 import java.util.List;
 
+import org.eclipse.kura.KuraRuntimeException;
 import org.osgi.service.wireadmin.Consumer;
 import org.osgi.service.wireadmin.Producer;
 import org.osgi.service.wireadmin.Wire;
@@ -43,8 +46,11 @@ public final class WireSupport implements Producer, Consumer {
 	 *
 	 * @param wireSupporter
 	 *            the wire supporter component
+	 * @throws KuraRuntimeException
+	 *             if the argument is null
 	 */
 	public WireSupport(final WireComponent wireSupporter) {
+		checkNull(wireSupporter, "Wire supported component cannot be null");
 		this.m_outgoingWires = Lists.newArrayList();
 		this.m_incomingWires = Lists.newArrayList();
 		this.m_wireSupporter = wireSupporter;
@@ -122,6 +128,7 @@ public final class WireSupport implements Producer, Consumer {
 	/** {@inheritDoc} */
 	@Override
 	public void updated(final Wire wire, final Object value) {
+		checkNull(wire, "Wire cannot be null");
 		if ((value instanceof WireEnvelope) && (this.m_wireSupporter instanceof WireReceiver)) {
 			((WireReceiver) this.m_wireSupporter).onWireReceive((WireEnvelope) value);
 		}

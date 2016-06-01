@@ -12,14 +12,20 @@
  */
 package org.eclipse.kura.wire.util;
 
+import static org.eclipse.kura.Preconditions.checkCondition;
+
 import java.sql.Timestamp;
 import java.util.List;
 
+import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.type.TypedValue;
 import org.eclipse.kura.wire.WireComponent;
+import org.eclipse.kura.wire.WireConfiguration;
 import org.eclipse.kura.wire.WireField;
 import org.eclipse.kura.wire.WireRecord;
 import org.eclipse.kura.wire.WireSupport;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.osgi.util.position.Position;
 
 /**
@@ -27,6 +33,26 @@ import org.osgi.util.position.Position;
  * Wires.
  */
 public final class Wires {
+
+	/**
+	 * Returns new instance of Wire Configuration from json object provided
+	 *
+	 * @param jsonWire
+	 *            the json object representing the wires
+	 * @return the wire configuration
+	 * @throws JSONException
+	 *             the JSON exception
+	 * @throws KuraRuntimeException
+	 *             if the json object instance passed as argument is null
+	 */
+	public static WireConfiguration newConfigurationFromJson(final JSONObject jsonWire) throws JSONException {
+		checkCondition(jsonWire == null, "JSON Object cannot be null");
+
+		final String emitter = jsonWire.getString("p");
+		final String receiver = jsonWire.getString("c");
+		final String filter = jsonWire.optString("f");
+		return new WireConfiguration(emitter, receiver, filter);
+	}
 
 	/**
 	 * Prepares new wire field.

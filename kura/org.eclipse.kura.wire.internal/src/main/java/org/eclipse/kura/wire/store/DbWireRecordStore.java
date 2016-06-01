@@ -12,7 +12,7 @@
  */
 package org.eclipse.kura.wire.store;
 
-import static org.eclipse.kura.device.util.Preconditions.checkCondition;
+import static org.eclipse.kura.Preconditions.checkNull;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -208,7 +208,7 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
 	 *             if argument is null
 	 */
 	private String escapeSql(final String string) {
-		checkCondition(string == null, "Provided String cannot be null");
+		checkNull(string, "Provided String cannot be null");
 		// ' --> ''
 		String escapedString = string.replaceAll("'", "''");
 		// " --> ""
@@ -231,8 +231,8 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
 	 *             if any of the arguments is null
 	 */
 	private synchronized void execute(final String sql, final Integer... params) throws SQLException {
-		checkCondition(sql == null, "SQL query cannot be null");
-		checkCondition(params == null, "Extra Parameters to execute query cannot be null");
+		checkNull(sql, "SQL query cannot be null");
+		checkNull(params, "Extra Parameters to execute query cannot be null");
 
 		Connection conn = null;
 		PreparedStatement stmt = null;
@@ -292,8 +292,8 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
 	 *             if any of the provided argument is null
 	 */
 	private void insertDataRecord(final String tableName, final WireRecord wireRecord) throws SQLException {
-		checkCondition(tableName == null, "Table name cannot be null");
-		checkCondition(wireRecord == null, "Wire Record cannot be null");
+		checkNull(tableName, "Table name cannot be null");
+		checkNull(wireRecord, "Wire Record cannot be null");
 
 		final String sqlTableName = this.escapeSql(tableName);
 		final StringBuilder sbCols = new StringBuilder();
@@ -368,7 +368,7 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
 	/** {@inheritDoc} */
 	@Override
 	public synchronized void onWireReceive(final WireEnvelope wireEvelope) {
-		checkCondition(wireEvelope == null, "Wire Envelope cannot be null");
+		checkNull(wireEvelope, "Wire Envelope cannot be null");
 		s_logger.debug("Wire Enveloped received..." + this.m_wireSupport);
 
 		final List<WireRecord> dataRecords = wireEvelope.getRecords();
@@ -404,8 +404,8 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
 	 *             if any of the provided arguments is null
 	 */
 	private void reconcileColumns(final String tableName, final WireRecord wireRecord) throws SQLException {
-		checkCondition(tableName == null, "Table name cannot be null");
-		checkCondition(wireRecord == null, "Wire Record cannot be null");
+		checkNull(tableName, "Table name cannot be null");
+		checkNull(wireRecord, "Wire Record cannot be null");
 
 		final String sqlTableName = this.escapeSql(tableName);
 		Connection conn = null;
@@ -460,8 +460,7 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
 	 *             if the provided argument is null
 	 */
 	private void reconcileTable(final String tableName) throws SQLException {
-		checkCondition(tableName == null, "Table name cannot be null");
-
+		checkNull(tableName, "Table name cannot be null");
 		final String sqlTableName = this.escapeSql(tableName);
 		final Connection conn = this.getConnection();
 		try {
@@ -503,14 +502,13 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
 	/** {@inheritDoc} */
 	@Override
 	public void storeWireRecord(final String tableName, final WireRecord wireRecord) {
-		checkCondition(tableName == null, "Table name cannot be null");
-		checkCondition(wireRecord == null, "Wire Record cannot be null");
+		checkNull(tableName, "Table name cannot be null");
+		checkNull(wireRecord, "Wire Record cannot be null");
 
 		boolean inserted = false;
 		int retryCount = 0;
 		do {
 			try {
-				// store the record
 				this.insertDataRecord(tableName, wireRecord);
 				inserted = true;
 			} catch (final SQLException e) {
@@ -526,7 +524,7 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
 	}
 
 	/**
-	 * Unset DB service.
+	 * Unregister DB service.
 	 *
 	 * @param dataService
 	 *            the DB service

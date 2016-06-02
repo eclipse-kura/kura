@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<archetype-descriptor xsi:schemaLocation="http://maven.apache.org/plugins/maven-archetype-plugin/archetype-descriptor/1.0.0 http://maven.apache.org/xsd/archetype-descriptor-1.0.0.xsd" name="org.eclipse.kura.archetype"
+    xmlns="http://maven.apache.org/plugins/maven-archetype-plugin/archetype-descriptor/1.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <fileSets>
+    <fileSet filtered="true" encoding="UTF-8">
+      <directory>org.eclipse.kura.emulator</directory>
+      <includes>
+        <include>**/*.project</include>
+        <include>**/*.html</include>
+        <include>**/*.properties</include>
+        <include>**/*.classpath</include>
+      </includes>
+    </fileSet>
+    <fileSet filtered="true" encoding="UTF-8">
+      <directory>org.eclipse.kura.emulator/src</directory>
+      <includes>
+        <include>**/*.java</include>
+        <include>**/*.properties</include>
+        <include>**/*.txt</include>
+      </includes>
+    </fileSet>
+    <fileSet filtered="true" encoding="UTF-8">
+      <directory>org.eclipse.kura.emulator/OSGI-INF</directory>
+      <includes>
+        <include>**/*.xml</include>
+      </includes>
+    </fileSet>
+    <fileSet filtered="true" encoding="UTF-8">
+      <directory>target-definition/target</directory>
+      <includes>
+        <include>**/*.xml</include>
+      </includes>
+    </fileSet>
+    <fileSet filtered="true" encoding="UTF-8">
+      <directory>target-definition</directory>
+      <includes>
+        <include>.project</include>
+      </includes>
+    </fileSet>
+    <fileSet filtered="true" encoding="UTF-8">
+      <directory>target-definition/equinox_3.8.1</directory>
+      <includes>
+        <include>**/*.xml</include>
+      </includes>
+    </fileSet>
+    <fileSet filtered="true" encoding="UTF-8">
+      <directory>target-definition/common</directory>
+      <includes>
+        <include>**/*.xml</include>
+      </includes>
+    </fileSet>
+    <fileSet filtered="true" encoding="UTF-8">
+      <directory>org.eclipse.kura.emulator/target</directory>
+      <includes>
+        <include>**/*.properties</include>
+        <include>**/*.txt</include>
+      </includes>
+    </fileSet>
+    <fileSet filtered="true" encoding="UTF-8">
+      <directory>org.eclipse.kura.emulator/about_files</directory>
+      <includes>
+        <include>**/*.html</include>
+      </includes>
+    </fileSet>
+    <fileSet encoding="UTF-8">
+      <directory>target-definition/.settings</directory>
+      <includes>
+        <include>**/*.prefs</include>
+      </includes>
+    </fileSet>
+    <fileSet encoding="UTF-8">
+      <directory>org.eclipse.kura.emulator/META-INF</directory>
+      <includes>
+        <include>**/*.MF</include>
+      </includes>
+    </fileSet>
+    <fileSet encoding="UTF-8">
+      <directory>org.eclipse.kura.emulator/src</directory>
+      <includes>
+        <include>**/*.launch</include>
+        <include>**/*.policy</include>
+      </includes>
+    </fileSet>
+    <fileSet encoding="UTF-8">
+      <directory>.metadata/.plugins</directory>
+      <includes>
+        <include>**/*.xmi</include>
+      </includes>
+    </fileSet>
+    <fileSet encoding="UTF-8">
+      <directory>target-definition</directory>
+      <includes>
+        <include>**/*.target</include>
+      </includes>
+    </fileSet>
+    <fileSet encoding="UTF-8">
+      <directory>org.eclipse.kura.emulator/.settings</directory>
+      <includes>
+        <include>**/*.prefs</include>
+      </includes>
+    </fileSet>
+    <fileSet encoding="UTF-8">
+      <directory>target-definition/equinox_3.8.1</directory>
+      <includes>
+        <include>**/*.jar</include>
+      </includes>
+    </fileSet>
+    <fileSet encoding="UTF-8">
+      <directory>target-definition/common</directory>
+      <includes>
+        <include>**/*.jar</include>
+      </includes>
+    </fileSet>
+    <fileSet encoding="UTF-8">
+      <directory>org.eclipse.kura.emulator/target</directory>
+      <includes>
+        <include>**/*.launch</include>
+        <include>**/*.class</include>
+        <include>**/*.policy</include>
+      </includes>
+    </fileSet>
+
+      <fileSet filtered="true" packaged="true" encoding="UTF-8">
+        <directory>__rootArtifactId__/src/main/java</directory>
+        <includes>
+          <include>**/*.java</include>
+        </includes>
+      </fileSet>
+      <fileSet filtered="true" encoding="UTF-8">
+        <directory>__rootArtifactId__/src/main/resources</directory>
+        <includes>
+          <include>**/*.xml</include>
+        </includes>
+      </fileSet>
+      <fileSet filtered="true" encoding="UTF-8">
+        <directory>__rootArtifactId__/about_files</directory>
+        <includes>
+          <include>**/*.html</include>
+        </includes>
+      </fileSet>
+      <fileSet filtered="true" encoding="UTF-8">
+        <directory>__rootArtifactId__/OSGI-INF/metatype</directory>
+        <includes>
+          <include>**/*.xml</include>
+        </includes>
+      </fileSet>
+      <fileSet filtered="true" encoding="UTF-8">
+        <directory>__rootArtifactId__/OSGI-INF</directory>
+        <includes>
+          <include>**/*.xml</include>
+        </includes>
+      </fileSet>
+      <fileSet encoding="UTF-8">
+        <directory>__rootArtifactId__/OSGI-INF</directory>
+        <includes>
+          <include>**/*.png</include>
+        </includes>
+      </fileSet>
+      <fileSet filtered="true" encoding="UTF-8">
+        <directory>__rootArtifactId__/META-INF</directory>
+        <includes>
+          <include>**/*.MF</include>
+        </includes>
+      </fileSet>
+      <fileSet filtered="true" encoding="UTF-8">
+        <directory>__rootArtifactId__</directory>
+        <includes>
+          <include>.classpath</include>
+          <include>.project</include>
+          <include>about.html</include>
+          <include>build.properties</include>
+          <include>pom.xml</include>
+        </includes>
+    </fileSet>
+  </fileSets>
+</archetype-descriptor>

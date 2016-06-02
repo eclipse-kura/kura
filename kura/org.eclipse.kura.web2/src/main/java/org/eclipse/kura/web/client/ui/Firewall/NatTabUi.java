@@ -127,7 +127,7 @@ public class NatTabUi extends Composite implements Tab {
 
 			@Override
 			public void onSuccess(GwtXSRFToken token) {
-				gwtNetworkService.findDeficeFirewallNATs(token, new AsyncCallback<ArrayList<GwtFirewallNatEntry>>() {
+				gwtNetworkService.findDeviceFirewallNATs(token, new AsyncCallback<ArrayList<GwtFirewallNatEntry>>() {
 					@Override
 					public void onFailure(Throwable caught) {
 						EntryClassUi.hideWaitModal();

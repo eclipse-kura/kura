@@ -713,7 +713,7 @@ public class ServicesUi extends Composite {
 	}
 
 	//Validates all the entered values
-	private boolean validate(GwtConfigParameter param, TextBox box, FormGroup group){
+	private boolean validate(GwtConfigParameter param, TextBox box, FormGroup group){  //TODO: validation should be done like in the old web ui: cleaner approach
 		if(param.isRequired() && (box.getText().trim() == null || "".equals(box.getText().trim()))) {
 			group.setValidationState(ValidationState.ERROR);
 			valid.put(param.getName(), false);
@@ -744,16 +744,18 @@ public class ServicesUi extends Composite {
 					}
 				}
 			} else if (param.getType().equals(GwtConfigParameterType.STRING)) {
-				if ((String.valueOf(box.getText().trim()).length()) < 0) {
+				int configMinValue= Integer.parseInt(param.getMin());
+				int configMaxValue= Integer.parseInt(param.getMax());
+				if ((String.valueOf(box.getText().trim()).length()) < Math.max(configMinValue, 0)) {
 					group.setValidationState(ValidationState.ERROR);
 					valid.put(param.getName(), false);
-					box.setPlaceholder(MessageUtils.get(CONFIG_MIN_VALUE, 0));
+					box.setPlaceholder(MessageUtils.get(CONFIG_MIN_VALUE, Math.max(configMinValue, 0)));
 					return false;
 				}				
-				if ((String.valueOf(box.getText().trim()).length()) > 255) {
+				if ((String.valueOf(box.getText().trim()).length()) > Math.min(configMaxValue, 255)) {
 					group.setValidationState(ValidationState.ERROR);
 					valid.put(param.getName(), false);
-					box.setPlaceholder(MessageUtils.get(CONFIG_MAX_VALUE, 255));
+					box.setPlaceholder(MessageUtils.get(CONFIG_MAX_VALUE, Math.min(configMaxValue, 255)));
 					return false;
 				}	
 			} else {

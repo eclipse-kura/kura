@@ -1876,6 +1876,25 @@
 						</executions>
 					</plugin>
 					<plugin>
+						<groupId>org.sonatype.tycho</groupId>
+						<artifactId>tycho-p2-extras-plugin</artifactId>
+						<version>0.11.0</version>
+						<executions>
+							<execution>
+								<phase>package</phase>
+								<goals>
+									<goal>publish-features-and-bundles</goal>
+								</goals>
+							</execution>
+						</executions>
+						<configuration>
+							<compress>false</compress>
+							<sourceLocation>${project.build.directory}/staging/target-definition/equinox_3.8.1/repository</sourceLocation>
+							<artifactRepositoryLocation>${project.build.directory}/staging/target-definition/equinox_3.8.1/repository</artifactRepositoryLocation>
+							<metadataRepositoryLocation>${project.build.directory}/staging/target-definition/equinox_3.8.1/repository</metadataRepositoryLocation>
+						</configuration>
+					</plugin>
+					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-antrun-plugin</artifactId>
 						<version>1.7</version>
@@ -1936,6 +1955,9 @@
 										<copy file="src/main/resources/common/kura-equinox_3.8.1.target"
 											todir="${project.build.directory}/staging/target-definition" />
 										<copy
+											file="${project.build.directory}/plugins/org.eclipse.kura.api_${org.eclipse.kura.api.version}.jar"
+											todir="${project.build.directory}/staging/target-definition/equinox_3.8.1/repository/plugins" />
+										<copy
 											file="${project.build.directory}/plugins/org.eclipse.kura.core.comm_${org.eclipse.kura.core.comm.version}.jar"
 											todir="${project.build.directory}/staging/target-definition/equinox_3.8.1/repository/plugins" />
 										<copy
@@ -1966,7 +1988,10 @@
 											file="${project.build.directory}/plugins/org.eclipse.kura.web_${org.eclipse.kura.web.version}.jar"
 											todir="${project.build.directory}/staging/target-definition/equinox_3.8.1/repository/plugins"
 											failonerror="false" />
-
+										<copy
+											file="${project.build.directory}/plugins/org.eclipse.kura.web2_${org.eclipse.kura.web2.version}.jar"
+											todir="${project.build.directory}/staging/target-definition/equinox_3.8.1/repository/plugins"
+											failonerror="false" />
 									</target>
 								</configuration>
 							</execution>
@@ -2011,7 +2036,7 @@
 											tofile="${project.build.directory}/staging/emulator/.classpath" />
 
 										<!-- Stage the API -->
-										<copy todir="${project.build.directory}/staging/api">
+										<!--<copy todir="${project.build.directory}/staging/api">
 											<fileset dir="../org.eclipse.kura.api" />
 										</copy>
 										<delete file="${project.build.directory}/staging/api/pom.xml" />
@@ -2024,7 +2049,7 @@
 										<copy file="src/main/resources/common/projects/api.project"
 											tofile="${project.build.directory}/staging/api/.project" />
 										<move file="${project.build.directory}/staging/api/api.classpath"
-											tofile="${project.build.directory}/staging/api/.classpath" />
+											tofile="${project.build.directory}/staging/api/.classpath" />-->
 
 										<!-- Stage the Demo Heater Project -->
 										<copy todir="${project.build.directory}/staging/demo_heater">
@@ -2105,8 +2130,8 @@
 												prefix="target-definition/" />
 											<zipfileset dir="${project.build.directory}/staging/emulator/"
 												prefix="org.eclipse.kura.emulator/" />
-											<zipfileset dir="${project.build.directory}/staging/api/"
-												prefix="org.eclipse.kura.api/" />
+											<!--<zipfileset dir="${project.build.directory}/staging/api/"
+												prefix="org.eclipse.kura.api/" />-->
 											<zipfileset dir="${project.build.directory}/staging/demo_heater/"
 												prefix="org.eclipse.kura.demo.heater/" />
 											<zipfileset dir="${project.build.directory}/staging/beacon/"
@@ -2148,25 +2173,7 @@
 							</execution>
 						</executions>
 					</plugin>
-					<plugin>
-						<groupId>org.sonatype.tycho</groupId>
-						<artifactId>tycho-p2-extras-plugin</artifactId>
-						<version>0.11.0</version>
-						<executions>
-							<execution>
-								<phase>package</phase>
-								<goals>
-									<goal>publish-features-and-bundles</goal>
-								</goals>
-							</execution>
-						</executions>
-						<configuration>
-							<compress>false</compress>
-							<sourceLocation>${project.build.directory}/staging/target-definition/equinox_3.8.1/repository</sourceLocation>
-							<artifactRepositoryLocation>${project.build.directory}/staging/target-definition/equinox_3.8.1/repository</artifactRepositoryLocation>
-							<metadataRepositoryLocation>${project.build.directory}/staging/target-definition/equinox_3.8.1/repository</metadataRepositoryLocation>
-						</configuration>
-					</plugin>
+					
 				</plugins>
 			</build>
 		</profile>

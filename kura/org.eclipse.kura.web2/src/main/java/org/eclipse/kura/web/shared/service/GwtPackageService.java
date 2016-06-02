@@ -26,5 +26,7 @@ public interface GwtPackageService extends RemoteService
 	public List<GwtDeploymentPackage> findDeviceDeploymentPackages(GwtXSRFToken xsrfToken) throws GwtKuraException;
 	
 	public void uninstallDeploymentPackage(GwtXSRFToken xsrfToken, String packageName) throws GwtKuraException;
+	
+	public String getMarketplaceUri(GwtXSRFToken xsrfToken, String url) throws GwtKuraException;
 
 }

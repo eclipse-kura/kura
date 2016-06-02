@@ -6,7 +6,8 @@ Bundle-Version: 2.0.0.qualifier
 Bundle-Vendor: EUROTECH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Service-Component: OSGI-INF/*.xml
-Import-Package: com.google.gwt.safehtml.shared,
+Import-Package: com.google.gwt.http.client,
+ com.google.gwt.safehtml.shared,
  com.google.gwt.user.client,
  com.google.gwt.user.client.rpc,
  com.google.gwt.user.client.rpc.core.java.lang,
@@ -26,6 +27,7 @@ Import-Package: com.google.gwt.safehtml.shared,
  javax.servlet;version="2.6.0",
  javax.servlet.http;version="2.6.0",
  javax.xml.bind;resolution:=optional,
+ javax.xml.parsers,
  org.apache.commons.fileupload;version="1.2.2",
  org.apache.commons.fileupload.disk;version="1.2.2",
  org.apache.commons.fileupload.servlet;version="1.2.2",
@@ -63,5 +65,7 @@ Import-Package: com.google.gwt.safehtml.shared,
  org.osgi.service.metatype;version="1.2.0",
  org.osgi.util.measurement;version="1.0.1",
  org.osgi.util.position;version="1.0.1",
- org.slf4j;version="1.6.4"
+ org.slf4j;version="1.6.4",
+ org.w3c.dom,
+ org.xml.sax
 Bundle-ClassPath: .

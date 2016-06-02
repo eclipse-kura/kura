@@ -11,8 +11,16 @@
  *******************************************************************************/
 package org.eclipse.kura.web.server;
 
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 
 import org.eclipse.kura.deployment.agent.DeploymentAgentService;
 import org.eclipse.kura.web.client.util.GwtSafeHtmlUtils;
@@ -26,15 +34,14 @@ import org.eclipse.kura.web.shared.service.GwtPackageService;
 import org.osgi.service.deploymentadmin.BundleInfo;
 import org.osgi.service.deploymentadmin.DeploymentAdmin;
 import org.osgi.service.deploymentadmin.DeploymentPackage;
+import org.w3c.dom.Document;
+import org.xml.sax.SAXException;
 
-public class GwtPackageServiceImpl extends OsgiRemoteServiceServlet implements GwtPackageService
-{
+public class GwtPackageServiceImpl extends OsgiRemoteServiceServlet implements GwtPackageService {
 	private static final long serialVersionUID = -3422518194598042896L;
 
-
-	public List<GwtDeploymentPackage> findDeviceDeploymentPackages(GwtXSRFToken xsrfToken)
-		throws GwtKuraException 
-	{
+	@Override
+	public List<GwtDeploymentPackage> findDeviceDeploymentPackages(GwtXSRFToken xsrfToken) throws GwtKuraException {
 		checkXSRFToken(xsrfToken);
 		DeploymentAdmin deploymentAdmin = ServiceLocator.getInstance().getService(DeploymentAdmin.class);
 		
@@ -67,21 +74,52 @@ public class GwtPackageServiceImpl extends OsgiRemoteServiceServlet implements G
 		
 		return gwtDeploymentPackages;
 	}
-
 	
-	
-	public void uninstallDeploymentPackage(GwtXSRFToken xsrfToken, String packageName)
-		throws GwtKuraException 
-	{
+	@Override
+	public void uninstallDeploymentPackage(GwtXSRFToken xsrfToken, String packageName) throws GwtKuraException {
 		checkXSRFToken(xsrfToken);
 		DeploymentAgentService deploymentAgentService = ServiceLocator.getInstance().getService(DeploymentAgentService.class);		
 		try {
 			deploymentAgentService.uninstallDeploymentPackageAsync(GwtSafeHtmlUtils.htmlEscape(packageName));
 		} 
 		catch (Exception e) {
-			// TODO Auto-generated catch block
 			throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
 		}
 	}
+	
+	@Override
+	public String getMarketplaceUri(GwtXSRFToken xsrfToken, String url) throws GwtKuraException {
+		String uri = null;
+		URL mpUrl = null;
+		HttpURLConnection connection = null;
+	    
+	    try {
+	    	mpUrl = new URL(url);
+	    	connection = (HttpURLConnection) mpUrl.openConnection();
+	    	
+	    	connection.setRequestMethod("GET");
+	    	connection.connect();
+	        
+	        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+	        DocumentBuilder db = dbf.newDocumentBuilder();
+	        Document doc = db.parse(connection.getInputStream());
 
+	        uri = doc.getElementsByTagName("updateurl").item(0).getTextContent();
+	    	
+	    } catch (MalformedURLException e) {
+	    	throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
+		} catch (IOException e) {
+			throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
+		} catch (SAXException e) {
+		    throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
+		} catch (ParserConfigurationException e) {
+		    throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
+		} finally {
+	    	if (connection != null) {
+	    		connection.disconnect();
+	    	}
+	      }
+		
+		return uri;
+	}
 }

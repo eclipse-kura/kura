@@ -338,25 +338,25 @@ public class PppConfigReader implements NetworkConfigurationVisitor {
 	        
 	        // Get the auth type and credentials
 	        // pppd will use CHAP if available, else PAP
-	        String secret = "";
+	        password = "";
 	        if (isGsmGprsUmtsHspa) {
 	        	String chapSecret = ChapLinux.getInstance().getSecret(model, username, "*", "*");
 	        	String papSecret = PapLinux.getInstance().getSecret(model, username, "*", "*");
 	        	if ((chapSecret != null) && (papSecret != null) && chapSecret.equals(papSecret)) {
 	        		authType = AuthType.AUTO;
-	        		secret = chapSecret;
+	        		password = chapSecret;
 	        	} else if (chapSecret != null) {
 	        		authType = AuthType.CHAP;
-	        		secret = chapSecret;
+	        		password = chapSecret;
 	        	} else if (papSecret != null) {
 	        		authType = AuthType.PAP;
-	        		secret = papSecret;
+	        		password = papSecret;
 	        	} 
 	        	
 		        s_logger.debug("* APN: {}", apn);
 		        s_logger.debug("* auth: {}", authType);
 		        s_logger.debug("* username: {}", username);
-		        s_logger.debug("* password: {}", secret);
+		        s_logger.debug("* password: {}", password);
 	        }
         }
         

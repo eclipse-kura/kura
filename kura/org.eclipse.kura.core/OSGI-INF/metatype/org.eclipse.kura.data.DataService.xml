@@ -100,7 +100,7 @@
             description="Timeouts the in-flight messages congestion condition. The service will force a disconnect attempting to reconnect (0 to disable)."/>
             
     </OCD>
-    <Designate pid="org.eclipse.kura.data.DataService">
+    <Designate pid="org.eclipse.kura.data.DataService" factoryPid="org.eclipse.kura.data.DataService">
         <Object ocdref="org.eclipse.kura.data.DataService"/>
     </Designate>
 </MetaData>

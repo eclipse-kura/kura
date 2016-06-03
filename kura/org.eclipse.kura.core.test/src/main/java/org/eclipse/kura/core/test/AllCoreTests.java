@@ -11,8 +11,10 @@
  *******************************************************************************/
 package org.eclipse.kura.core.test;
 
-import java.util.Dictionary;
+import java.util.Map;
 
+import org.eclipse.kura.configuration.ComponentConfiguration;
+import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.data.DataService;
 import org.eclipse.kura.system.SystemService;
 import org.junit.AfterClass;
@@ -20,8 +22,6 @@ import org.junit.BeforeClass;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
-import org.osgi.service.cm.Configuration;
-import org.osgi.service.cm.ConfigurationAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,16 +31,16 @@ import org.slf4j.LoggerFactory;
 public class AllCoreTests {
 	private static final Logger s_logger = LoggerFactory.getLogger(AllCoreTests.class);
 
-	private static ConfigurationAdmin s_configAdmin;
-	private static DataService        s_dataService;
-	private static SystemService      s_sysService;
-
-	public void setConfigAdmin(ConfigurationAdmin configAdmin) {
-		s_configAdmin = configAdmin;
+	private static ConfigurationService s_configService;
+	private static DataService          s_dataService;
+	private static SystemService        s_sysService;
+	
+	public void setConfigService(ConfigurationService configService) {
+		s_configService = configService;
 	}
 
-	public void unsetConfigAdmin(ConfigurationAdmin configAdmin) {
-		s_configAdmin = configAdmin;
+	public void unsetConfigService(ConfigurationService configService) {
+		s_configService = configService;
 	}
 
 	public void setDataService(DataService dataService) {
@@ -64,7 +64,7 @@ public class AllCoreTests {
 		s_logger.info("setUpClass...");
 
 		int waitCount = 10;
-		while ((s_configAdmin == null || s_dataService == null) && waitCount > 0) {
+		while ((s_configService == null || s_dataService == null) && waitCount > 0) {
 			try {
 				Thread.sleep(1000);
 			} catch (Exception e) {
@@ -74,21 +74,27 @@ public class AllCoreTests {
 			s_logger.info("Waiting for ConfigAdmin and DataService " + waitCount + "...");
 		}
 
-		if (s_configAdmin == null || s_dataService == null) {
+		if (s_configService == null || s_dataService == null) {
 			throw new Exception("ConfigAdmin and DataService not set.");
 		}
 
 		try {
 
 			// update the settings
-			Configuration mqttConfig = s_configAdmin.getConfiguration("org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport");
-			Dictionary<String, Object> mqttProps = mqttConfig.getProperties();
+			ComponentConfiguration mqttConfig = s_configService.getComponentConfiguration("org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport");
+			Map<String, Object> mqttProps = mqttConfig.getConfigurationProperties();
 			
-	         mqttProps.put("broker-url", "mqtt://iot.eclipse.org:1883/");
-	         mqttProps.put("topic.context.account-name", "guest");
-	         mqttProps.put("username", "guest");
-	         mqttProps.put("password", "welcome");
-			
+//	         mqttProps.put("broker-url", "mqtt://iot.eclipse.org:1883/");
+//	         mqttProps.put("topic.context.account-name", "guest");
+//	         mqttProps.put("username", "guest");
+//	         mqttProps.put("password", "welcome");
+
+	         mqttProps.put("broker-url", "mqtt://broker-sandbox.everyware-cloud.com:1883/");
+	         mqttProps.put("topic.context.account-name", "ethdev");
+	         mqttProps.put("username", "ethdev_broker");
+	         mqttProps.put("password", "We!come12345");
+
+	         
 			// cloudbees fails in getting the primary MAC address
 			// we need to compensate for it.
 			String clientId = "cloudbees-kura"; 
@@ -99,12 +105,12 @@ public class AllCoreTests {
 				// ignore.
 			}
 			mqttProps.put("client-id", clientId);
-			mqttConfig.update(mqttProps);
+			s_configService.updateConfiguration("org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport", mqttProps);
 
-			Configuration dataConfig = s_configAdmin.getConfiguration("org.eclipse.kura.data.DataService");
-			Dictionary<String, Object> dataProps = dataConfig.getProperties();
+			ComponentConfiguration dataConfig = s_configService.getComponentConfiguration("org.eclipse.kura.data.DataService");
+			Map<String, Object> dataProps = dataConfig.getConfigurationProperties();
 			dataProps.put("connect.auto-on-startup", false);
-			dataConfig.update(dataProps);
+			s_configService.updateConfiguration("org.eclipse.kura.data.DataService", dataProps);
 
 			// waiting for the configuration to be applied
 			try {

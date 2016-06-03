@@ -48,7 +48,11 @@ public enum KuraErrorCode {
 	GPIO_EXCEPTION,
 	/**
 	 * Error executing an OS command.
-	 * @since package org.eclipse.kura 1.1.0
+	 * @since {@link org.eclipse.kura} 1.1.0
 	 */
-	OS_COMMAND_ERROR;
+	OS_COMMAND_ERROR,
+	/**
+	 * @since {@link org.eclipse.kura} 1.2.0
+	 */
+	INVALID_PARAMETER
 }

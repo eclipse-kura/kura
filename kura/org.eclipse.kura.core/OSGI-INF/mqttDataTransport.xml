@@ -12,13 +12,13 @@
       Eurotech
 
 -->
-<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" activate="activate" configuration-policy="require" deactivate="deactivate" enabled="true" immediate="true" modified="updated" name="org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport">
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" activate="activate" configuration-policy="require" deactivate="deactivate" enabled="true" immediate="false" modified="updated" name="org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport">
    <implementation class="org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport"/>
    <service>
       <provide interface="org.eclipse.kura.data.DataTransportService"/>
-      <provide interface="org.eclipse.kura.ssl.SslServiceListener" />
+      <provide interface="org.eclipse.kura.ssl.SslServiceListener"/>
+      <provide interface="org.eclipse.kura.configuration.ConfigurableComponent"/>
    </service>
-   <property name="service.pid" value="org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport"/>
    <reference name="SystemService" 
               policy="static"
               cardinality="1..1"
@@ -43,4 +43,8 @@
               bind="setCloudConnectionStatusService"
               unbind="unsetCloudConnectionStatusService"
               interface="org.eclipse.kura.status.CloudConnectionStatusService"/>
+   <reference name="DataTransportListener"
+              policy="dynamic"
+              cardinality="0..n"
+              interface="org.eclipse.kura.data.DataTransportListener"/>
 </scr:component>

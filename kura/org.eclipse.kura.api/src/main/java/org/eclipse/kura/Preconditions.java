@@ -12,6 +12,10 @@
  */
 package org.eclipse.kura;
 
+import org.eclipse.kura.annotation.Nullable;
+
+import com.google.common.base.Strings;
+
 /**
  * The Class Preconditions is responsible to provide utility methods to check
  * for conditions or predicates and it throws {@link KuraRuntimeException} with
@@ -29,7 +33,7 @@ public final class Preconditions {
 	 *             if the provided flag or condition is true
 	 */
 	public static void checkCondition(final boolean flag) {
-		checkCondition(flag, KuraErrorCode.INTERNAL_ERROR, "");
+		checkCondition(flag, KuraErrorCode.INTERNAL_ERROR, null);
 	}
 
 	/**
@@ -60,9 +64,10 @@ public final class Preconditions {
 	 * @throws KuraRuntimeException
 	 *             if the provided flag or condition is true
 	 */
-	public static void checkCondition(final boolean flag, final KuraErrorCode errorCode, final String message) {
+	public static void checkCondition(final boolean flag, final KuraErrorCode errorCode,
+			@Nullable final String message) {
 		if (flag) {
-			throw new KuraRuntimeException(errorCode, message);
+			throw new KuraRuntimeException(errorCode, Strings.nullToEmpty(message));
 		}
 	}
 
@@ -77,7 +82,7 @@ public final class Preconditions {
 	 * @throws KuraRuntimeException
 	 *             if the provided flag or condition is true
 	 */
-	public static void checkCondition(final boolean flag, final String message) {
+	public static void checkCondition(final boolean flag, @Nullable final String message) {
 		checkCondition(flag, KuraErrorCode.INTERNAL_ERROR, message);
 	}
 
@@ -93,8 +98,9 @@ public final class Preconditions {
 	 * @throws KuraRuntimeException
 	 *             if the check is successful
 	 */
-	public static void checkInstance(final Object object, final Class<?> instanceClass, final String message) {
+	public static <T> T checkInstance(final T object, final Class<?> instanceClass, @Nullable final String message) {
 		checkCondition(object.getClass().isAssignableFrom(instanceClass), KuraErrorCode.INTERNAL_ERROR, message);
+		return object;
 	}
 
 	/**
@@ -109,27 +115,28 @@ public final class Preconditions {
 	 * @throws KuraRuntimeException
 	 *             if the check is successful
 	 */
-	public static void checkNonInstance(final Object object, final Class<?> instanceClass, final String message) {
+	public static <T> T checkNonInstance(final T object, final Class<?> instanceClass, @Nullable final String message) {
 		checkCondition(!object.getClass().isAssignableFrom(instanceClass), KuraErrorCode.INTERNAL_ERROR, message);
+		return object;
 	}
 
 	/**
 	 * Checks if the provided object is null
 	 *
-	 * @param obj
+	 * @param object
 	 *            the object to check if it's null
 	 * @param message
 	 *            the exception message
+	 * @return the non null instance
 	 * @throws KuraRuntimeException
 	 *             if the provided flag or condition is true
 	 */
-	public static void checkNull(final Object obj, final String message) {
-		checkCondition(obj == null, message);
+	public static <T> T checkNull(final T object, @Nullable final String message) {
+		checkCondition(object == null, message);
+		return object;
 	}
 
-	/**
-	 * Instantiates a new device preconditions.
-	 */
+	/** Constructor */
 	private Preconditions() {
 		// Static Factory Methods container. No need to instantiate.
 	}

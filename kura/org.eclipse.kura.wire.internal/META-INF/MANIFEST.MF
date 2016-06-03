@@ -9,6 +9,7 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.google.common.annotations;version="19.0.0",
  com.google.common.base;version="19.0.0",
  com.google.common.collect;version="19.0.0",
+ com.google.common.escape;version="19.0.0",
  com.google.common.util.concurrent;version="19.0.0",
  org.eclipse.kura;version="[1.0,2.0)",
  org.eclipse.kura.cloud;version="1.0.0",

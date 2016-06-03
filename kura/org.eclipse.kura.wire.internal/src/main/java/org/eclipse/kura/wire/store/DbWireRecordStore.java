@@ -54,6 +54,8 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.annotations.Beta;
 import com.google.common.base.Throwables;
+import com.google.common.escape.Escaper;
+import com.google.common.escape.Escapers;
 
 /**
  * The Class DbWireRecordStore is a wire component which is responsible to store
@@ -61,6 +63,11 @@ import com.google.common.base.Throwables;
  */
 @Beta
 public final class DbWireRecordStore implements WireEmitter, WireReceiver, ConfigurableComponent, WireRecordStore {
+
+	/**
+	 * SQL Escaper Builder to escape characters to sanitize SQL queries
+	 */
+	private static Escapers.Builder builder = Escapers.builder();
 
 	/** The Constant denoting name of the column. */
 	private static final String COLUMN_NAME = "COLUMN_NAME";
@@ -201,6 +208,8 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
 	 * input stream with double quotes. Backslashes are too risky to allow so
 	 * are removed completely
 	 *
+	 * (' --> '') (" --> "") (\ --> (remove backslashes))
+	 *
 	 * @param string
 	 *            the string to be filtered
 	 * @return the escaped string
@@ -209,13 +218,8 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
 	 */
 	private String escapeSql(final String string) {
 		checkNull(string, "Provided String cannot be null");
-		// ' --> ''
-		String escapedString = string.replaceAll("'", "''");
-		// " --> ""
-		escapedString = escapedString.replaceAll("\"", "\"\"");
-		// \ --> (remove backslashes)
-		escapedString = escapedString.replaceAll("\\\\", "");
-		return escapedString;
+		final Escaper escaper = builder.addEscape('\'', "''").addEscape('"', "\"\"").addEscape('\\', "").build();
+		return escaper.escape(string);
 	}
 
 	/**

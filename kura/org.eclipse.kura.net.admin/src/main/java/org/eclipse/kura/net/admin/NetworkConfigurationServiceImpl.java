@@ -71,7 +71,7 @@ import org.slf4j.LoggerFactory;
 
 public class NetworkConfigurationServiceImpl implements NetworkConfigurationService, SelfConfiguringComponent, EventHandler {
     
-    public static final String UNCONFIGURED_MODEM_REGEX = "^\\d+-\\d+(\\.\\d+)?$";
+    public static final String UNCONFIGURED_MODEM_REGEX = "^\\d+-\\d+(\\.\\d+)*$";
 
     private static final Logger s_logger = LoggerFactory.getLogger(NetworkConfigurationServiceImpl.class);
         

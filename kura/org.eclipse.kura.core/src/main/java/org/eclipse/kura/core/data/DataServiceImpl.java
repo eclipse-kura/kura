@@ -33,10 +33,11 @@ import org.eclipse.kura.KuraStoreException;
 import org.eclipse.kura.KuraTimeoutException;
 import org.eclipse.kura.KuraTooManyInflightMessagesException;
 import org.eclipse.kura.configuration.ConfigurableComponent;
+import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.core.data.store.DbDataStore;
 import org.eclipse.kura.data.DataService;
-import org.eclipse.kura.data.DataServiceListener;
-import org.eclipse.kura.data.DataTransportListener;
+import org.eclipse.kura.data.listener.DataServiceListener;
+import org.eclipse.kura.data.transport.listener.DataTransportListener;
 import org.eclipse.kura.data.DataTransportService;
 import org.eclipse.kura.data.DataTransportToken;
 import org.eclipse.kura.db.DbService;
@@ -45,7 +46,6 @@ import org.eclipse.kura.status.CloudConnectionStatusEnum;
 import org.eclipse.kura.status.CloudConnectionStatusService;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.ComponentException;
-import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -70,7 +70,7 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
 	
 	private DataTransportService m_dataTransportService;
 	private DbService m_dbService;
-	private DataServiceListeners m_dataServiceListeners;
+	private DataServiceListenerS m_dataServiceListeners;
 	
 	protected ScheduledExecutorService m_reconnectExecutor;
 	private ScheduledFuture<?> m_reconnectFuture;
@@ -96,7 +96,8 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
 
 	protected void activate(ComponentContext componentContext,
 			Map<String, Object> properties) {
-		s_logger.info("Activating...");
+		String pid = (String) properties.get(ConfigurationService.KURA_SERVICE_PID);
+		s_logger.info("Activating {}...", pid);
 		
 		m_reconnectExecutor = Executors.newSingleThreadScheduledExecutor();
 		m_publisherExecutor = Executors.newSingleThreadScheduledExecutor();
@@ -104,7 +105,12 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
 						
 		m_properties.putAll(properties);
 		
-		m_store = new DbDataStore();
+		String[] parts = pid.split("-");
+		String table = "ds_messages";
+		if (parts.length > 1) {
+				table += "_" + parts[1];
+		}
+		m_store = new DbDataStore(table);
 		
 		try {
 			m_store.start(m_dbService,
@@ -133,23 +139,18 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
 			throw new ComponentException("Failed to start store", e);
 		}
 		
-		ServiceTracker<DataServiceListener, DataServiceListener> listenersTracker = new ServiceTracker<DataServiceListener, DataServiceListener>(
-				componentContext.getBundleContext(),
-				DataServiceListener.class, null);
-		 		
-		// Deferred open of tracker to prevent
-		// java.lang.Exception: Recursive invocation of ServiceFactory.getService
-		// on ProSyst
-		m_dataServiceListeners = new DataServiceListeners(listenersTracker);
+		m_dataServiceListeners = new DataServiceListenerS(componentContext);
 		
 		//Register the component in the CloudConnectionStatus Service
 		m_cloudConnectionStatusService.register(this);
+		
+		m_dataTransportService.addDataTransportListener(this);
 		
 		startReconnectTask();
 	}
 	
 	public void updated(Map<String, Object> properties) {
-		s_logger.info("Updating...");
+		s_logger.info("Updating {}...", properties.get(ConfigurationService.KURA_SERVICE_PID));
 		
 		stopReconnectTask();
 		
@@ -166,9 +167,14 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
 	}
 	
 	protected void deactivate(ComponentContext componentContext) {
-		s_logger.info("Deactivating...");
+		s_logger.info("Deactivating {}...", m_properties.get(ConfigurationService.KURA_SERVICE_PID));
+		
+		stopReconnectTask();
+		m_reconnectExecutor.shutdownNow();
 		
 		m_congestionExecutor.shutdownNow();
+		
+		disconnect();
 		
 		// Await termination of the publisher executor tasks
 		try {
@@ -177,18 +183,10 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
 			s_logger.info("Interrupted", e);
 		}
 		m_publisherExecutor.shutdownNow();
-		
-		stopReconnectTask();
-		m_reconnectExecutor.shutdownNow();
-		
-		disconnect();
-
-		m_dataServiceListeners.close();
+				
+		m_dataTransportService.removeDataTransportListener(this);
 				
 		m_store.stop();
-		
-		//Unregister the component from the CloudConnectionStatus Service
-		m_cloudConnectionStatusService.unregister(this);
 	}
 		
 	// ----------------------------------------------------------------
@@ -219,6 +217,16 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
 	
 	public void unsetCloudConnectionStatusService(CloudConnectionStatusService cloudConnectionStatusService){
 		this.m_cloudConnectionStatusService = null;
+	}
+	
+	@Override
+	public void addDataServiceListener(DataServiceListener listener) {
+		m_dataServiceListeners.add(listener);	
+	}
+
+	@Override
+	public void removeDataServiceListener(DataServiceListener listener) {
+		m_dataServiceListeners.remove(listener);
 	}
 	
 	@Override

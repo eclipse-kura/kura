@@ -12,16 +12,14 @@
       Eurotech
 
 -->
-<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" activate="activate" configuration-policy="require" deactivate="deactivate" enabled="true" immediate="true" modified="updated" name="org.eclipse.kura.cloud.CloudService">
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" activate="activate" configuration-policy="require" deactivate="deactivate" enabled="true" immediate="false" modified="updated" name="org.eclipse.kura.cloud.CloudService">
    <implementation class="org.eclipse.kura.core.cloud.CloudServiceImpl"/>
    <service>
       <provide interface="org.eclipse.kura.cloud.CloudService"/>
-      <provide interface="org.eclipse.kura.data.DataServiceListener"/>
       <provide interface="org.eclipse.kura.configuration.ConfigurableComponent"/>
       <provide interface="org.eclipse.kura.cloud.CloudPayloadProtoBufEncoder"/>
       <provide interface="org.eclipse.kura.cloud.CloudPayloadProtoBufDecoder"/>
    </service>
-   <property name="service.pid" value="org.eclipse.kura.cloud.CloudService"/>
    <reference name="DataService" 
               interface="org.eclipse.kura.data.DataService" 
               policy="static" 
@@ -57,5 +55,5 @@
               policy="static" 
               bind="setEventAdmin" 
               unbind="unsetEventAdmin"
-              interface="org.osgi.service.event.EventAdmin"/> 	
+              interface="org.osgi.service.event.EventAdmin"/>
 </scr:component>

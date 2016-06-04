@@ -246,7 +246,7 @@
             <esf:property name="net.interface.wlan0.config.ip4.dnsServers" array="false" encrypted="false" type="String">
                 <esf:value></esf:value>
             </esf:property>
-            <esf:property name="net.interface.wlan0.config.wifi.master.passphrase" array="false" encrypted="false" type="String">
+            <esf:property name="net.interface.wlan0.config.wifi.master.passphrase" array="false" encrypted="false" type="Password">
                 <esf:value>testKEYS</esf:value>
             </esf:property>
             <esf:property name="net.interface.wlan0.config.autoconnect" array="false" encrypted="false" type="Boolean">
@@ -324,8 +324,8 @@
             <esf:property name="net.interface.wlan0.config.dhcpServer4.prefix" array="false" encrypted="false" type="Short">
                 <esf:value>24</esf:value>
             </esf:property>
-            <esf:property name="net.interface.wlan0.config.wifi.infra.passphrase" array="false" encrypted="false" type="String">
-                <esf:value>testKEYS</esf:value>
+            <esf:property name="net.interface.wlan0.config.wifi.infra.passphrase" array="false" encrypted="false" type="Password">
+                <esf:value>wepKeyInfraWlan0</esf:value>
             </esf:property>
             <esf:property name="net.interface.wlan0.config.domains" array="false" encrypted="false" type="String">
                 <esf:value></esf:value>

@@ -423,15 +423,19 @@ public class BluetoothLe implements ConfigurableComponent, CloudClientListener, 
 				s_logger.info("TiSensorTag already connected!");
 				m_connected = true;
 			}
-			
-			KuraPayload payload = new KuraPayload();
-			payload.setTimestamp(new Date());
-			if (myTiSensorTag.getCC2650())
-				payload.addMetric("Type", "CC2650");
-			else
-				payload.addMetric("Type", "CC2541");
-			
+
 			if (m_connected) {
+				
+				KuraPayload payload = new KuraPayload();
+				payload.setTimestamp(new Date());
+				if (myTiSensorTag.getCC2650())
+					payload.addMetric("Type", "CC2650");
+				else
+					payload.addMetric("Type", "CC2541");
+			
+				// Test
+				doServicesDiscovery(myTiSensorTag);
+				doCharacteristicsDiscovery(myTiSensorTag);
 				
 				myTiSensorTag.setFirmwareRevision(myTiSensorTag.firmwareRevision());
 				

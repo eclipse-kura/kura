@@ -143,7 +143,7 @@
         </AD>
         
         </OCD>
-    <Designate pid="org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport">
+    <Designate pid = "org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport" factoryPid = "org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport">
         <Object ocdref="org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport"/>
     </Designate>
 </MetaData>

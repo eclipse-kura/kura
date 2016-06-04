@@ -755,7 +755,7 @@ public class NetworkConfiguration {
 		if(wifiConfig != null && psswd != null) {
 			properties.put(prefix+".passphrase", psswd);
 		} else {
-			properties.put(prefix+".passphrase", "");
+			properties.put(prefix+".passphrase", new Password(""));
 		}
 		if(wifiConfig != null && wifiConfig.getHardwareMode() != null) {
 			properties.put(prefix+".hardwareMode", wifiConfig.getHardwareMode());

@@ -13,6 +13,7 @@
 package org.eclipse.kura.type;
 
 import static org.eclipse.kura.Preconditions.checkNonInstance;
+import static org.eclipse.kura.Preconditions.checkNull;
 import static org.eclipse.kura.type.DataType.INTEGER;
 
 import org.eclipse.kura.annotation.Immutable;
@@ -50,7 +51,9 @@ public final class IntegerValue implements TypedValue<Integer> {
 	@Override
 	@SuppressWarnings("rawtypes")
 	public int compareTo(final TypedValue otherTypedValue) {
+		checkNull(otherTypedValue, "Typed Value cannot be null");
 		checkNonInstance(otherTypedValue, IntegerValue.class, "Typed Value is not integer");
+
 		return ComparisonChain.start()
 				.compare(this.value, ((IntegerValue) (otherTypedValue)).getValue(), Ordering.natural()).result();
 	}

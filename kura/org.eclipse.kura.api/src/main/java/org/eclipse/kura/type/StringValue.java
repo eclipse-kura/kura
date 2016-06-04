@@ -13,9 +13,11 @@
 package org.eclipse.kura.type;
 
 import static org.eclipse.kura.Preconditions.checkNonInstance;
+import static org.eclipse.kura.Preconditions.checkNull;
 import static org.eclipse.kura.type.DataType.STRING;
 
 import org.eclipse.kura.annotation.Immutable;
+import org.eclipse.kura.annotation.Nullable;
 import org.eclipse.kura.annotation.ThreadSafe;
 
 import com.google.common.base.MoreObjects;
@@ -42,7 +44,7 @@ public final class StringValue implements TypedValue<String> {
 	 * @param value
 	 *            the value
 	 */
-	public StringValue(final String value) {
+	public StringValue(@Nullable final String value) {
 		this.value = Strings.nullToEmpty(value);
 	}
 
@@ -50,7 +52,9 @@ public final class StringValue implements TypedValue<String> {
 	@Override
 	@SuppressWarnings("rawtypes")
 	public int compareTo(final TypedValue otherTypedValue) {
+		checkNull(otherTypedValue, "Typed Value cannot be null");
 		checkNonInstance(otherTypedValue, StringValue.class, "Typed Value is not string");
+
 		return ComparisonChain.start().compare(this.value, ((StringValue) (otherTypedValue)).getValue()).result();
 	}
 

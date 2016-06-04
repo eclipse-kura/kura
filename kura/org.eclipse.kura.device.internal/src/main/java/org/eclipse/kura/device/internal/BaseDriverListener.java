@@ -64,7 +64,6 @@ public final class BaseDriverListener implements DriverListener {
 	@Override
 	public void onDriverEvent(final DriverEvent event) {
 		checkNull(event, "Driver Event cannot be null");
-
 		final DriverRecord driverRecord = event.getDriverRecord();
 		final DeviceRecord deviceRecord = Devices.newDeviceRecord(this.m_channelName);
 		final DriverFlag driverFlag = driverRecord.getDriverFlag();

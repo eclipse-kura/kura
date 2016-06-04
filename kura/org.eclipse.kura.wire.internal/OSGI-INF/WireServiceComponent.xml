@@ -10,6 +10,7 @@
 
     Contributors:
       Eurotech
+      Amit Kumar Mondal (admin@amitinside.com)
 
 -->
 <scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" 
@@ -25,22 +26,16 @@
       <provide interface="org.eclipse.kura.configuration.SelfConfiguringComponent"/>
       <provide interface="org.eclipse.kura.wire.WireService"/>
    </service>
-   <property name="service.pid" value="org.eclipse.kura.wire.internal.WireServiceImpl"/>
-   <reference name="MultitonService" 
-              bind="setMultitonService" 
-              unbind="unsetMultitonService"
-              cardinality="1..1" 
-              policy="static" 
-              interface="org.eclipse.kura.multitons.MultitonService"/>
+   <property name="service.pid" value="org.eclipse.kura.wire.internal.WireServiceImpl"/>/>
    <reference name="WireAdmin" 
-              bind="setWireAdmin" 
-              unbind="unsetWireAdmin"
+              bind="bindWireAdmin" 
+              unbind="unbindWireAdmin"
               cardinality="1..1" 
               policy="static" 
               interface="org.osgi.service.wireadmin.WireAdmin"/>
    <reference name="ConfigurationService" 
-              bind="setConfigurationService" 
-              unbind="unsetConfigurationService"
+              bind="bindConfigurationService" 
+              unbind="unbindConfigurationService"
               cardinality="1..1" 
               policy="static" 
               interface="org.eclipse.kura.configuration.ConfigurationService"/>

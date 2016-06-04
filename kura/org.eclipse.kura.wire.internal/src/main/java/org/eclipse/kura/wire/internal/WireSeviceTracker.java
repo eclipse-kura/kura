@@ -15,6 +15,7 @@ package org.eclipse.kura.wire.internal;
 import java.util.Collection;
 import java.util.List;
 
+import org.eclipse.kura.KuraException;
 import org.eclipse.kura.wire.WireEmitter;
 import org.eclipse.kura.wire.WireReceiver;
 import org.osgi.framework.BundleContext;
@@ -80,18 +81,19 @@ public final class WireSeviceTracker extends ServiceTracker<Object, Object> {
 			s_logger.debug("Registering Wire Emitter..." + property);
 			flag = true;
 		}
-
 		if (service instanceof WireReceiver) {
 			this.m_wireReceivers.add(property);
 			s_logger.debug("Registering Wire Receiver..." + property);
 			flag = true;
 		}
-
 		if (flag) {
-			this.m_wireService.createWires();
+			try {
+				this.m_wireService.createWires();
+			} catch (final KuraException e) {
+				s_logger.error("Error while creating wires..." + Throwables.getStackTraceAsString(e));
+			}
 		}
-		s_logger.debug("Adding Wire Components....Done");
-
+		s_logger.info("Adding Wire Components....Done");
 		return service;
 	}
 
@@ -130,7 +132,7 @@ public final class WireSeviceTracker extends ServiceTracker<Object, Object> {
 				this.m_wireReceivers.add((String) ref.getProperty("service.pid"));
 			}
 		} catch (final InvalidSyntaxException e) {
-			s_logger.error("Service Tracker Syntax is invalid..." + Throwables.getStackTraceAsString(e));
+			Throwables.propagate(e);
 		}
 		s_logger.debug("Starting to track Wire Components....Done");
 	}

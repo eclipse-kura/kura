@@ -22,12 +22,12 @@ import org.osgi.service.wireadmin.Wire;
 public interface WireService {
 
 	/**
-	 * Creates the wire between the provided emitter and the receiver
+	 * Creates the wire between the provided wire emitter and the wire receiver
 	 *
 	 * @param emitterName
-	 *            the name of the Wire Emitter
+	 *            the name of the wire emitter
 	 * @param receiverName
-	 *            the name of the Wire Receiver
+	 *            the name of the wire receiver
 	 * @throws KuraRuntimeException
 	 *             if any of the arguments is null
 	 * @return the wire instance recently created
@@ -38,9 +38,9 @@ public interface WireService {
 	 * Creates the wire component.
 	 *
 	 * @param factoryPid
-	 *            the factory pid for the Wire Component
+	 *            the factory pid for the wire component
 	 * @param name
-	 *            the name for the Wire Component
+	 *            the name for the wire component
 	 * @throws KuraRuntimeException
 	 *             if any of the arguments is null
 	 * @return the wire component name which is recently created
@@ -48,12 +48,12 @@ public interface WireService {
 	public String createWireComponent(String factoryPid, String name) throws KuraRuntimeException;
 
 	/**
-	 * Removes the wire between the provided wire emitter and the receiver
+	 * Removes the wire between the provided wire emitter and the wire receiver
 	 *
 	 * @param emitterName
-	 *            the name of the Wire Emitter
+	 *            the name of the wire emitter
 	 * @param receiverName
-	 *            the name of the Wire Receiver
+	 *            the name of the wire receiver
 	 * @throws KuraRuntimeException
 	 *             if any of the arguments is null
 	 * @return true, if removal is successful
@@ -64,7 +64,7 @@ public interface WireService {
 	 * Removes the wire component.
 	 *
 	 * @param name
-	 *            the name of the Wire Component
+	 *            the name of the wire component
 	 * @throws KuraRuntimeException
 	 *             if argument is null
 	 * @return true, if removal is successful

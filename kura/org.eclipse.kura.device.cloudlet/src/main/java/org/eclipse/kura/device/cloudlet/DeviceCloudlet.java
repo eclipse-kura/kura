@@ -121,7 +121,7 @@ public final class DeviceCloudlet extends Cloudlet {
 		try {
 			this.m_deviceTracker = new DeviceTracker(componentContext.getBundleContext());
 		} catch (final InvalidSyntaxException e) {
-			s_logger.error("Error in searching for devices..." + Throwables.getStackTraceAsString(e));
+			Throwables.propagate(e);
 		}
 		s_logger.debug("Activating Device Cloudlet...Done");
 	}

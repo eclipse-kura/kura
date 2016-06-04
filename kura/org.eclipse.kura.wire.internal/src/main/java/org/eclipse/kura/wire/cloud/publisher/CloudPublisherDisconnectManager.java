@@ -102,24 +102,21 @@ public final class CloudPublisherDisconnectManager {
 	 */
 	private void schedule(final long delay) {
 		checkCondition(delay < 0, "Delay cannot be negative");
-
 		// cancel existing timer
 		if (this.m_executorService != null) {
 			this.m_executorService.shutdown();
 		}
-
 		this.m_executorService.schedule(new Runnable() {
 			@Override
 			public void run() {
 				// disconnect
 				try {
-					CloudPublisherDisconnectManager.this.m_dataService
-							.disconnect(CloudPublisherDisconnectManager.this.m_quieceTimeout);
+					m_dataService.disconnect(CloudPublisherDisconnectManager.this.m_quieceTimeout);
 				} catch (final Exception e) {
 					s_logger.warn("Error while disconnecting cloud publisher..." + Throwables.getRootCause(e));
 				}
 				// cleaning up
-				CloudPublisherDisconnectManager.this.m_nextExecutionTime = 0;
+				m_nextExecutionTime = 0;
 			}
 		}, delay, TimeUnit.MILLISECONDS);
 

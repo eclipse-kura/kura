@@ -17,6 +17,7 @@ import static org.eclipse.kura.Preconditions.checkNull;
 
 import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.annotation.NotThreadSafe;
+import org.eclipse.kura.annotation.Nullable;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -40,6 +41,7 @@ public final class WireConfiguration {
 	private String emitterName;
 
 	/** The Filter. */
+	@Nullable
 	private final String filter;
 
 	/** The Wire Receiver Name. */
@@ -57,7 +59,7 @@ public final class WireConfiguration {
 	 * @throws KuraRuntimeException
 	 *             if any of the arguments is null
 	 */
-	public WireConfiguration(final String emitterName, final String receiverName, final String filter) {
+	public WireConfiguration(final String emitterName, final String receiverName, @Nullable final String filter) {
 		checkNull(emitterName, "Emitter name cannot be null");
 		checkNull(receiverName, "Receiver name cannot be null");
 		checkNull(filter, "Filter cannot be null");

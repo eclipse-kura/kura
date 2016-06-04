@@ -217,7 +217,7 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
 	 *             if argument is null
 	 */
 	private String escapeSql(final String string) {
-		checkNull(string, "Provided String cannot be null");
+		checkNull(string, "Provided string cannot be null");
 		final Escaper escaper = builder.addEscape('\'', "''").addEscape('"', "\"\"").addEscape('\\', "").build();
 		return escaper.escape(string);
 	}
@@ -362,7 +362,7 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
 			s_logger.info("Stored double of value");
 		} catch (final SQLException e) {
 			this.rollback(conn);
-			throw e;
+			Throwables.propagate(e);
 		} finally {
 			this.close(stmt);
 			this.close(conn);
@@ -521,7 +521,7 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
 					this.reconcileColumns(tableName, wireRecord);
 					retryCount++;
 				} catch (final SQLException ee) {
-					s_logger.error("Cannot reconcile the database...", Throwables.getStackTraceAsString(ee));
+					Throwables.propagate(ee);
 				}
 			}
 		} while (!inserted && (retryCount < 2));

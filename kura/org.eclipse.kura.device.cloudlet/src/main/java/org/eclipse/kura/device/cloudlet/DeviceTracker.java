@@ -92,7 +92,7 @@ public final class DeviceTracker extends ServiceTracker<Object, Object> {
 				}
 			}
 		} catch (final InvalidSyntaxException e) {
-			s_logger.error("Exception while searching for drivers...." + Throwables.getStackTraceAsString(e));
+			Throwables.propagate(e);
 		}
 	}
 

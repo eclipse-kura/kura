@@ -62,7 +62,7 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 	private static final String PROP_CONSUMER_PID = "wireadmin.consumer.pid";
 
 	/** The Constant denoting Wire Service PID */
-	private static final String PROP_PID = "org.eclipse.kura.core.wire.WireServiceImpl";
+	private static final String PROP_PID = "org.eclipse.kura.wire.internal.WireServiceImpl";
 
 	/** The Constant denoting Wire Emitter. */
 	private static final String PROP_PRODUCER_PID = "wireadmin.producer.pid";
@@ -86,16 +86,14 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 	private WireSeviceTracker m_serviceTracker;
 
 	/** The Wire Admin dependency. */
-	private WireAdmin m_wireAdmin;
+	private volatile WireAdmin m_wireAdmin;
 
 	/** The list of wire configurations */
-	private final List<WireConfiguration> m_wireConfig;
+	private final List<WireConfiguration> m_wireConfigs;
 
-	/**
-	 * Instantiates a new wire service impl.
-	 */
+	/** Constructor */
 	public WireServiceImpl() {
-		this.m_wireConfig = Lists.newArrayList();
+		this.m_wireConfigs = Lists.newArrayList();
 		this.m_monitor = new Monitor();
 	}
 
@@ -119,17 +117,40 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 			this.m_properties = properties;
 
 			for (final WireConfiguration conf : m_options.getWireConfigurations()) {
-				this.m_wireConfig.add(conf);
+				this.m_wireConfigs.add(conf);
 			}
 			this.m_serviceTracker = new WireSeviceTracker(this.m_ctx.getBundleContext(), this);
 			this.m_serviceTracker.open();
-
 			this.createWires();
 		} catch (final Throwable throwable) {
 			Throwables.propagateIfInstanceOf(throwable, JSONException.class);
 			s_logger.error(Throwables.getStackTraceAsString(throwable));
 		}
 		s_logger.info("Activating Wire Service...Done");
+	}
+
+	/**
+	 * Binds the configuration service.
+	 *
+	 * @param configService
+	 *            the new configuration service
+	 */
+	public synchronized void bindConfigurationService(final ConfigurationService configService) {
+		if (this.m_configService == null) {
+			this.m_configService = configService;
+		}
+	}
+
+	/**
+	 * Binds the wire admin dependency
+	 *
+	 * @param wireAdmin
+	 *            the new wire admin service dependency
+	 */
+	public synchronized void bindWireAdmin(final WireAdmin wireAdmin) {
+		if (this.m_wireAdmin == null) {
+			this.m_wireAdmin = wireAdmin;
+		}
 	}
 
 	/**
@@ -145,7 +166,7 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 	 */
 	private String createComponentFromProperty(final String value, final String name) {
 		checkNull(value, "Value cannot be null");
-		checkNull(name, "Name cannot be null");
+		checkNull(name, "Component name cannot be null");
 
 		final String[] tokens = value.split("\\|");
 		if ("FACTORY".equals(tokens[0])) {
@@ -155,17 +176,7 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 		}
 	}
 
-	/**
-	 * Creates the wire between the provided wire emitter and wire receiver
-	 *
-	 * @param emitterName
-	 *            the wire emitter name
-	 * @param receiverName
-	 *            the wire receiver name
-	 * @return the wire
-	 * @throws KuraRuntimeException
-	 *             if any of the arguments is null
-	 */
+	/** {@inheritDoc} */
 	@Override
 	public Wire createWire(final String emitterName, final String receiverName) {
 		checkNull(emitterName, "Emitter name cannot be null");
@@ -173,70 +184,57 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 
 		s_logger.info("Creating wire between..." + emitterName + " and " + receiverName + ".....");
 		final WireConfiguration conf = Wires.newWireConfiguration(emitterName, receiverName, null);
-		this.m_wireConfig.add(conf);
+		this.m_wireConfigs.add(conf);
 		s_logger.info("Creating wire between..." + emitterName + " and " + receiverName + ".....Done");
 		return this.m_wireAdmin.createWire(emitterName, receiverName, null);
 	}
 
-	/**
-	 * Creates the wire component.
-	 *
-	 * @param factoryPid
-	 *            the factory pid
-	 * @param name
-	 *            the wire component name
-	 * @return the pid of the wire component
-	 * @throws KuraRuntimeException
-	 *             if any of the arguments is null
-	 */
+	/** {@inheritDoc} */
 	@Override
 	public String createWireComponent(final String factoryPid, final String name) {
 		checkNull(factoryPid, "Factory PID cannot be null");
 		checkNull(name, "Wire Component name cannot be null");
 
 		s_logger.info("Creating wire component of " + name + ".....");
-		String newPid = null;
 		try {
-			newPid = this.m_configService.newConfigurableComponent(factoryPid, null, false, name);
-		} catch (final Exception ex) {
+			this.m_configService.createFactoryConfiguration(factoryPid, name, null, false);
+		} catch (final KuraException ex) {
 			s_logger.error("Error while creating wire component..." + Throwables.getStackTraceAsString(ex));
 		}
-		return newPid;
+		return factoryPid;
 	}
 
 	/**
 	 * Creates the wires.
 	 */
-	protected synchronized void createWires() {
-		// TODO: remove existing wires?
+	protected synchronized void createWires() throws KuraException {
 		s_logger.info("Creating wires.....");
+		// remove existing wires
+		this.removeExistingWires();
+		// create new wires
 		final List<WireConfiguration> cloned = Lists.newArrayList();
-		for (final WireConfiguration wc : this.m_wireConfig) {
+		for (final WireConfiguration wc : this.m_wireConfigs) {
 			cloned.add(Wires.newWireConfiguration(wc.getEmitterName(), wc.getReceiverName(), wc.getFilter(),
 					wc.isCreated()));
 		}
-
 		for (final WireConfiguration conf : cloned) {
 			this.updatePidNamesInList(conf.getEmitterName(), conf.getReceiverName());
-			final String emitter = this.m_configService.getCurrentComponentPid(conf.getEmitterName());
-			final String receiver = this.m_configService.getCurrentComponentPid(conf.getReceiverName());
+			final String emitter = this.m_configService.getComponentConfiguration(conf.getEmitterName()).getPid();
+			final String receiver = this.m_configService.getComponentConfiguration(conf.getReceiverName()).getPid();
 			boolean emitterFound = false;
 			boolean receiverFound = false;
-
 			for (final String s : this.m_serviceTracker.getWireEmitters()) {
 				if (s.equals(emitter)) {
 					emitterFound = true;
 					break;
 				}
 			}
-
 			for (final String s : this.m_serviceTracker.getWireReceivers()) {
 				if (s.equals(receiver)) {
 					receiverFound = true;
 					break;
 				}
 			}
-
 			if (emitterFound && receiverFound && !this.wireAlreadyCreated(emitter, receiver)) {
 				s_logger.info("Creating wire between {} and {}", emitter, receiver);
 				this.m_wireAdmin.createWire(emitter, receiver, null);
@@ -261,13 +259,7 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 		s_logger.info("Deactivating Wire Service Component..Done");
 	}
 
-	/**
-	 * Gets the configuration.
-	 *
-	 * @return the configuration
-	 * @throws KuraException
-	 *             the kura exception
-	 */
+	/** {@inheritDoc} */
 	@Override
 	public ComponentConfiguration getConfiguration() throws KuraException {
 		final Tocd wiresOCD = new Tocd();
@@ -284,7 +276,7 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 		final String DELETE_INSTANCE_AD = "delete.instances";
 
 		final List<String> emittersOptions = Lists.newArrayList();
-		final Set<String> factoryPids = this.m_configService.getComponentFactoryPids();
+		final Set<String> factoryPids = this.m_configService.getFactoryComponentPids();
 
 		for (final String factoryPid : factoryPids) {
 			emittersOptions.addAll(WireUtils.getFactoriesAndInstances(this.m_ctx, factoryPid, WireEmitter.class));
@@ -298,7 +290,7 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 		emitterTad.setRequired(true);
 
 		final Toption defaultOpt = new Toption();
-		defaultOpt.setLabel("No new multiton");
+		defaultOpt.setLabel("No new instance");
 		defaultOpt.setValue("NONE");
 		emitterTad.getOption().add(defaultOpt);
 
@@ -361,16 +353,12 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 
 		sb = new StringBuilder(
 				"multiton.instance.name for the resulting component. If left null it will equal  toservice.pid<br /><br /><b>Active wires:</b><br />");
-
 		sb.append("<table style=\"width:100%; border: 1px solid black;\">");
-
 		sb.append("<tr><td><b>Emitter</b></td><td><b>Receiver</b></td></tr>");
-
-		for (final WireConfiguration wc : this.m_wireConfig) {
+		for (final WireConfiguration wc : this.m_wireConfigs) {
 			sb.append("<tr><td>").append(wc.getEmitterName()).append("</td><td>").append(wc.getReceiverName())
 					.append("</td></tr>");
 		}
-
 		sb.append("</table>");
 		receiverName.setDescription(sb.toString());
 		wiresOCD.addAD(receiverName);
@@ -382,8 +370,8 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 		wiresTad.setCardinality(0);
 		wiresTad.setRequired(true);
 		wiresTad.setDefault("NONE");
-		for (int i = 0; i < this.m_wireConfig.size(); i++) {
-			final WireConfiguration wc = this.m_wireConfig.get(i);
+		for (int i = 0; i < this.m_wireConfigs.size(); i++) {
+			final WireConfiguration wc = this.m_wireConfigs.get(i);
 			final Toption o = new Toption();
 			o.setLabel("P:" + wc.getEmitterName() + " - C:" + wc.getReceiverName());
 			o.setValue(String.valueOf(i));
@@ -421,37 +409,18 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 
 		try {
 			this.m_properties = new HashMap<String, Object>();
-			// Put the json configuration into the properties so to persist them
-			// in the snapshot
+			// Put the json configuration into the properties to persist in the
+			// snapshot
 			this.m_properties.put("wires", m_options.toJsonString());
 			this.m_properties.put(DELETE_INSTANCE_AD, "NONE");
 			this.m_properties.put(DELETE_WIRES_AD, "NONE");
 			this.m_properties.put(RECEIVER_PID_AD, "NONE");
 			this.m_properties.put(EMITTER_PID_AD, "NONE");
 		} catch (final JSONException e) {
-			s_logger.error(
-					"Error while retrieving configuration of Wire Service..." + Throwables.getStackTraceAsString(e));
+			Throwables.propagate(e);
 		}
 
 		return new ComponentConfigurationImpl(PROP_PID, wiresOCD, this.m_properties);
-	}
-
-	/**
-	 * Gets the configuration service.
-	 *
-	 * @return the configuration service
-	 */
-	public ConfigurationService getConfigurationService() {
-		return this.m_configService;
-	}
-
-	/**
-	 * Gets the wire admin service
-	 *
-	 * @return the wire admin service
-	 */
-	public WireAdmin getWireAdmin() {
-		return this.m_wireAdmin;
 	}
 
 	/**
@@ -466,63 +435,73 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 	 *             if any of the provided arguments is null
 	 */
 	private WireConfiguration getWireConfiguration(final String emitter, final String receiver) {
-		checkNull(emitter, "Emitter name cannot be null");
-		checkNull(receiver, "Receiver name cannot be null");
+		checkNull(emitter, "Wire Emitter name cannot be null");
+		checkNull(receiver, "Wire Receiver name cannot be null");
 
-		for (final WireConfiguration wc : this.m_wireConfig) {
+		for (final WireConfiguration wc : this.m_wireConfigs) {
 			if (wc.getEmitterName().equals(emitter) && wc.getReceiverName().equals(receiver)) {
 				return wc;
 			}
 		}
-		final WireConfiguration wc = new WireConfiguration(emitter, receiver, null);
-		this.m_wireConfig.add(wc);
+		final WireConfiguration wc = Wires.newWireConfiguration(emitter, receiver, null);
+		this.m_wireConfigs.add(wc);
 		return wc;
 	}
 
 	/**
-	 * Persist wires.
+	 * Persist wires in the configuration
 	 *
 	 * @param shouldPersist
-	 *            the should persist flag
+	 *            if set to true a snapshot will be taken
 	 */
 	private void persistWires(final boolean shouldPersist) {
 		s_logger.info("Persisting Wires..");
 
 		final List<WireConfiguration> list = m_options.getWires();
 		list.clear();
-		for (final WireConfiguration w : this.m_wireConfig) {
+		for (final WireConfiguration w : this.m_wireConfigs) {
 			list.add(w);
 		}
 		final Map<String, Object> newProperties = Maps.newHashMap(this.m_properties);
 		try {
 			final String jsonString = m_options.toJsonString();
 			newProperties.put(WireServiceOptions.CONF_WIRES, jsonString);
-			this.m_configService.updateConfiguration(this.getClass().getName(), newProperties, shouldPersist);
-		} catch (final JSONException e) {
-			s_logger.error(Throwables.getStackTraceAsString(e));
-		} catch (final KuraException e) {
-			s_logger.error(Throwables.getStackTraceAsString(e));
+			this.m_configService.updateConfiguration(PROP_PID, newProperties, shouldPersist);
+		} catch (final Throwable throwable) {
+			Throwables.propagateIfInstanceOf(throwable, JSONException.class);
+			s_logger.error(Throwables.getStackTraceAsString(throwable));
 		}
 		s_logger.info("Persisting Wires..Done");
 
 	}
 
 	/**
-	 * Removes the pid related wires.
+	 * Removes the existing wires between the emitters and receivers from the
+	 * stored configurations
+	 */
+	private void removeExistingWires() {
+		for (final WireConfiguration configuration : this.m_wireConfigs) {
+			final String emitter = configuration.getEmitterName();
+			final String receiver = configuration.getReceiverName();
+			this.removeWire(emitter, receiver);
+		}
+	}
+
+	/**
+	 * Removes all the existing wires related to the specific PID.
 	 *
 	 * @param pid
-	 *            the wire component pid
+	 *            the wire component PID
 	 * @return true, if successful
 	 * @throws KuraRuntimeException
 	 *             if argument is null
 	 */
 	private boolean removePidRelatedWires(final String pid) {
-		checkNull(pid, "Factory PID cannot be null");
+		checkNull(pid, "PID cannot be null");
 		boolean atLeatOneRemoved = false;
-		final WireConfiguration[] copy = FluentIterable.from(this.m_wireConfig).toArray(WireConfiguration.class);
+		final WireConfiguration[] copy = FluentIterable.from(this.m_wireConfigs).toArray(WireConfiguration.class);
 		for (final WireConfiguration wc : copy) {
 			if (wc.getEmitterName().equals(pid) || wc.getReceiverName().equals(pid)) {
-				// if found, delete the wire
 				this.removeWire(wc.getEmitterName(), wc.getReceiverName());
 				atLeatOneRemoved = true;
 			}
@@ -530,17 +509,7 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 		return atLeatOneRemoved;
 	}
 
-	/**
-	 * Removes the wire.
-	 *
-	 * @param emitterPid
-	 *            the emitter pid
-	 * @param receiverPid
-	 *            the receiver pid
-	 * @return true, if successful
-	 * @throws KuraRuntimeException
-	 *             if any of the provided arguments is null
-	 */
+	/** {@inheritDoc} */
 	@Override
 	public boolean removeWire(final String emitterPid, final String receiverPid) {
 		checkNull(emitterPid, "Emitter name cannot be null");
@@ -548,52 +517,45 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 
 		s_logger.info("Removing Wires..");
 		try {
-			WireConfiguration theWire = null;
-			for (final WireConfiguration conf : this.m_wireConfig) {
+			WireConfiguration wire = null;
+			for (final WireConfiguration conf : this.m_wireConfigs) {
 				if (conf.getEmitterName().equals(emitterPid) && conf.getReceiverName().equals(receiverPid)) {
-					theWire = conf;
+					wire = conf;
 					break;
 				}
 			}
-			if (theWire != null) {
-				final Wire[] list = this.m_wireAdmin.getWires(null);
-				for (final Wire w : list) {
-					final String prod = w.getProperties().get(PROP_PRODUCER_PID).toString();
-					final String cons = w.getProperties().get(PROP_CONSUMER_PID).toString();
-					if (prod.equals(theWire.getEmitterName()) && cons.equals(theWire.getReceiverName())) {
-						this.m_wireAdmin.deleteWire(w);
-						this.m_wireConfig.remove(theWire);
-						this.persistWires(true);
-						return true;
+			if (wire != null) {
+				final Wire[] wiresList = this.m_wireAdmin.getWires(null);
+				if (wiresList != null) {
+					for (final Wire w : wiresList) {
+						final String producer = w.getProperties().get(PROP_PRODUCER_PID).toString();
+						final String consumer = w.getProperties().get(PROP_CONSUMER_PID).toString();
+						if (producer.equals(wire.getEmitterName()) && consumer.equals(wire.getReceiverName())) {
+							this.m_wireAdmin.deleteWire(w);
+							this.m_wireConfigs.remove(wire);
+							this.persistWires(true);
+							return true;
+						}
 					}
 				}
 			}
 		} catch (final InvalidSyntaxException e) {
-			s_logger.error(Throwables.getStackTraceAsString(e));
+			Throwables.propagate(e);
 		}
 		s_logger.info("Removing Wires..Done");
 		return false;
 	}
 
-	/**
-	 * Removes the wire component.
-	 *
-	 * @param pid
-	 *            the wire component pid
-	 * @return true, if successful
-	 * @throws KuraRuntimeException
-	 *             if argument is null
-	 */
+	/** {@inheritDoc} */
 	@Override
 	public boolean removeWireComponent(final String pid) {
 		checkNull(pid, "Wire Component PID cannot be null");
 		s_logger.info("Removing Wire Component..");
 		// Search for wires using the pid we are going to delete
 		this.removePidRelatedWires(pid);
-
 		// Then delete the instance
 		try {
-			this.m_configService.deleteConfigurableComponent(pid);
+			this.m_configService.deleteFactoryConfiguration(pid, false);
 		} catch (final KuraException e) {
 			s_logger.error(Throwables.getStackTraceAsString(e));
 			return false;
@@ -604,48 +566,24 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 	}
 
 	/**
-	 * Sets the configuration service.
-	 *
-	 * @param configService
-	 *            the new configuration service
-	 */
-	public synchronized void setConfigurationService(final ConfigurationService configService) {
-		if (this.m_configService == null) {
-			this.m_configService = configService;
-		}
-	}
-
-	/**
-	 * Sets the wire admin dependency
-	 *
-	 * @param wireAdmin
-	 *            the new wire admin service dependency
-	 */
-	public synchronized void setWireAdmin(final WireAdmin wireAdmin) {
-		if (this.m_wireAdmin == null) {
-			this.m_wireAdmin = wireAdmin;
-		}
-	}
-
-	/**
-	 * Unset configuration service.
+	 * Deregisters configuration service dependency
 	 *
 	 * @param configService
 	 *            the configuration service
 	 */
-	public synchronized void unsetConfigurationService(final ConfigurationService configService) {
+	public synchronized void unbindConfigurationService(final ConfigurationService configService) {
 		if (this.m_configService == configService) {
 			this.m_configService = null;
 		}
 	}
 
 	/**
-	 * Unset wire admin.
+	 * Deregisters wire admin dependency
 	 *
 	 * @param wireAdmin
 	 *            the wire admin
 	 */
-	public synchronized void unsetWireAdmin(final WireAdmin wireAdmin) {
+	public synchronized void unbindWireAdmin(final WireAdmin wireAdmin) {
 		if (this.m_wireAdmin == wireAdmin) {
 			this.m_wireAdmin = null;
 		}
@@ -672,7 +610,6 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 			if (properties.containsKey("receiver.name")) {
 				emitterName = (String) properties.get("receiver.name");
 			}
-
 			// NEW WIRE
 			if ((emitterPid != null) && (receiverPid != null)) {
 				if (!emitterPid.toString().equals("NONE") && !receiverPid.toString().equals("NONE")) {
@@ -680,7 +617,7 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 					final String receiverString = this.createComponentFromProperty(receiverPid.toString(),
 							receiverName);
 					final WireConfiguration wc = Wires.newWireConfiguration(emitterString, receiverString, null, false);
-					this.m_wireConfig.add(wc);
+					this.m_wireConfigs.add(wc);
 					this.createWires();
 					if (emitterPid.toString().startsWith("INSTANCE") && receiverPid.toString().startsWith("INSTANCE")) {
 						this.m_configService.snapshot();
@@ -690,16 +627,13 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 
 			// DELETE EXISTING WIRE
 			final Object wiresDelete = properties.get("delete.wires");
-
 			if ((wiresDelete != null) && !wiresDelete.toString().equals("NONE")) {
 				final int index = Integer.parseInt(wiresDelete.toString());
-				final WireConfiguration wc = this.m_wireConfig.get(index);
+				final WireConfiguration wc = this.m_wireConfigs.get(index);
 				this.removeWire(wc.getEmitterName(), wc.getReceiverName());
 			}
-
 			// DELETE EMITTER/RECEIVER INSTANCE
 			final Object instancesDelete = properties.get("delete.instances");
-
 			if ((instancesDelete != null) && !instancesDelete.toString().equals("NONE")) {
 				this.removeWireComponent(instancesDelete.toString());
 			}
@@ -720,17 +654,17 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 	 * @throws KuraRuntimeException
 	 *             if any of the provided arguments is null
 	 */
-	private void updatePidNamesInList(final String oldEmitterName, final String oldReceiverName) {
+	private void updatePidNamesInList(final String oldEmitterName, final String oldReceiverName) throws KuraException {
 		checkNull(oldEmitterName, "Emitter name cannot be null");
 		checkNull(oldReceiverName, "Receiver name cannot be null");
 
-		final String newEmitter = this.m_configService.getCurrentComponentPid(oldEmitterName);
-		final String newReceiver = this.m_configService.getCurrentComponentPid(oldReceiverName);
+		final String newEmitter = this.m_configService.getComponentConfiguration(oldEmitterName).getPid();
+		final String newReceiver = this.m_configService.getComponentConfiguration(oldReceiverName).getPid();
 
 		if ((newEmitter != oldEmitterName) || (newReceiver != oldReceiverName)) {
 			this.m_monitor.enter();
 			try {
-				for (final WireConfiguration wc : this.m_wireConfig) {
+				for (final WireConfiguration wc : this.m_wireConfigs) {
 					if ((wc.getEmitterName() == oldEmitterName) || (wc.getReceiverName() == oldReceiverName)) {
 						wc.update(newEmitter, newReceiver);
 					}
@@ -756,7 +690,7 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 		checkNull(emitter, "Emitter name cannot be null");
 		checkNull(receiver, "Receiver name cannot be null");
 
-		for (final WireConfiguration wc : this.m_wireConfig) {
+		for (final WireConfiguration wc : this.m_wireConfigs) {
 			if (wc.getEmitterName().equals(emitter) && wc.getReceiverName().equals(receiver) && wc.isCreated()) {
 				return true;
 			}

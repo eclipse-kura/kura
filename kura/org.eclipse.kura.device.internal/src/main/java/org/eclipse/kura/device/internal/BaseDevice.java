@@ -125,13 +125,13 @@ public class BaseDevice implements Device, SelfConfiguringComponent {
 	 *             if driver id provided is null
 	 */
 	private synchronized void attachDriver(final String driverId) {
-		s_logger.debug("Attaching driver instance...");
 		checkNull(driverId, "Driver ID cannot be null");
+		s_logger.debug("Attaching driver instance...");
 		try {
 			this.m_driverTracker = new DriverTracker(this.m_context.getBundleContext(), this, driverId);
 			this.m_driverTracker.open();
 		} catch (final InvalidSyntaxException e) {
-			s_logger.error("Error in searching for drivers..." + Throwables.getStackTraceAsString(e));
+			Throwables.propagate(e);
 		}
 		s_logger.debug("Attaching driver instance...Done");
 	}
@@ -296,12 +296,10 @@ public class BaseDevice implements Device, SelfConfiguringComponent {
 		checkNull(this.m_driver, "Driver cannot be null");
 
 		s_logger.debug("Reading device channels...");
-
 		final List<DeviceRecord> deviceRecords = Lists.newArrayList();
 		final List<DriverRecord> driverRecords = Lists.newArrayList();
 
 		final Map<String, Channel> channels = this.m_deviceConfiguration.getChannels();
-
 		for (final String channelName : channelNames) {
 			checkCondition(!channels.containsKey(channelName), "Channel not available");
 
@@ -311,7 +309,6 @@ public class BaseDevice implements Device, SelfConfiguringComponent {
 
 			final DriverRecord driverRecord = Devices.newDriverRecord(channelName);
 			driverRecord.setChannelConfig(channel.getConfig());
-
 			driverRecords.add(driverRecord);
 		}
 
@@ -356,7 +353,6 @@ public class BaseDevice implements Device, SelfConfiguringComponent {
 		checkNull(deviceListener, "Device Listener cannot be null");
 
 		s_logger.debug("Registering Device Listener for monitoring...");
-
 		final Map<String, Channel> channels = this.m_deviceConfiguration.getChannels();
 		checkCondition(!channels.containsKey(channelName), "Channel not available");
 
@@ -398,9 +394,9 @@ public class BaseDevice implements Device, SelfConfiguringComponent {
 	@Override
 	public void unregisterDeviceListener(final DeviceListener deviceListener) throws KuraException {
 		checkNull(deviceListener, "Device Listener cannot be null");
-		s_logger.debug("Unregistering Device Listener...");
-
 		checkNull(this.m_driver, "Driver cannot be null");
+
+		s_logger.debug("Unregistering Device Listener...");
 		this.m_monitor.enter();
 		try {
 			this.m_driver.unregisterDriverListener(this.m_deviceListeners.get(deviceListener));
@@ -431,10 +427,10 @@ public class BaseDevice implements Device, SelfConfiguringComponent {
 	/** {@inheritDoc} */
 	@Override
 	public List<DeviceRecord> write(final List<DeviceRecord> deviceRecords) throws KuraException {
-		s_logger.debug("Writing to channels...");
 		checkNull(deviceRecords, "Device Records cannot be null");
 		checkCondition(deviceRecords.isEmpty(), "Device Records cannot be empty");
 
+		s_logger.debug("Writing to channels...");
 		final List<DriverRecord> driverRecords = Lists.newArrayList();
 		final Map<DriverRecord, DeviceRecord> mappedRecords = Maps.newHashMap();
 

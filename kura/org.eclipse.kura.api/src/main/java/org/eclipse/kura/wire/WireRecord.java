@@ -20,6 +20,7 @@ import java.util.List;
 
 import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.annotation.Immutable;
+import org.eclipse.kura.annotation.Nullable;
 import org.eclipse.kura.annotation.ThreadSafe;
 import org.osgi.util.position.Position;
 
@@ -38,6 +39,7 @@ public final class WireRecord {
 	private final List<WireField> fields;
 
 	/** The position. */
+	@Nullable
 	private final Position position;
 
 	/** The timestamp. */
@@ -74,9 +76,8 @@ public final class WireRecord {
 	 * @throws KuraRuntimeException
 	 *             if any of the argument is null
 	 */
-	public WireRecord(final Timestamp timestamp, final Position position, final List<WireField> fields) {
+	public WireRecord(final Timestamp timestamp, @Nullable final Position position, final List<WireField> fields) {
 		checkNull(timestamp, "Timestamp cannot be null");
-		checkNull(position, "Position cannot be null");
 		checkNull(fields, "Wire fields cannot be null");
 
 		this.timestamp = timestamp;

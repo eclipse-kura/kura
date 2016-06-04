@@ -25,8 +25,6 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.wiring.BundleWiring;
 import org.osgi.service.component.ComponentContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
@@ -36,9 +34,6 @@ import com.google.common.collect.Lists;
  * Topology
  */
 public final class WireUtils {
-
-	/** The Constant s_logger. */
-	private static final Logger s_logger = LoggerFactory.getLogger(WireUtils.class);
 
 	/** Service Property */
 	private static final String SERVICE_PID_PROPERTY = "service.pid";
@@ -67,7 +62,7 @@ public final class WireUtils {
 				result.add(service.getProperty(SERVICE_PID_PROPERTY).toString());
 			}
 		} catch (final InvalidSyntaxException e) {
-			s_logger.error("Invalid Syntax during Service Lookup..." + Throwables.getStackTraceAsString(e));
+			Throwables.propagate(e);
 		}
 		return result;
 	}
@@ -85,9 +80,8 @@ public final class WireUtils {
 	 * @throws KuraRuntimeException
 	 *             if any of the provided argument is null
 	 */
-	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public static List<String> getFactoriesAndInstances(final ComponentContext ctx, final String factoryPid,
-			final Class iface) {
+			final Class<?> iface) {
 		checkNull(ctx, "Component context cannot be null");
 		checkNull(factoryPid, "Factory PID cannot be null");
 		checkNull(iface, "Interface class cannot be null");
@@ -113,25 +107,28 @@ public final class WireUtils {
 						break;
 					}
 				} catch (final ClassNotFoundException e) {
-					s_logger.error("Internal Error..." + Throwables.getStackTraceAsString(e));
+					Throwables.propagate(e);
 				}
 			}
 		}
 		// After the factories, iterate through available services implementing
 		// the passed interface
 		try {
-			final Collection<ServiceReference<?>> services = ctx.getBundleContext().getServiceReferences(iface, null);
-			for (final ServiceReference<?> service : services) {
-				result.add("INSTANCE|" + service.getProperty(SERVICE_PID_PROPERTY));
+			final Collection<?> services = ctx.getBundleContext().getServiceReferences(iface, null);
+			for (final Object service : services) {
+				if (service instanceof ServiceReference) {
+					final ServiceReference<?> reference = (ServiceReference<?>) service;
+					result.add("INSTANCE|" + reference.getProperty(SERVICE_PID_PROPERTY));
+				}
 			}
 		} catch (final InvalidSyntaxException e) {
-			s_logger.error("Invalid Syntax during Service Lookup...." + Throwables.getStackTraceAsString(e));
+			Throwables.propagate(e);
 		}
 		return result;
 	}
 
 	/**
-	 * Checks if it is a Wire emitter.
+	 * Checks if the provided name corresponds to any Wire emitter.
 	 *
 	 * @param ctx
 	 *            the bundle context
@@ -154,13 +151,13 @@ public final class WireUtils {
 				}
 			}
 		} catch (final InvalidSyntaxException e) {
-			s_logger.error("Invalid Syntax during Service Lookup....." + Throwables.getStackTraceAsString(e));
+			Throwables.propagate(e);
 		}
 		return false;
 	}
 
 	/**
-	 * Checks if it is a Wire Receiver.
+	 * Checks if the provided name corresponds to any Wire receiver.
 	 *
 	 * @param ctx
 	 *            the bundle context
@@ -183,7 +180,7 @@ public final class WireUtils {
 				}
 			}
 		} catch (final InvalidSyntaxException e) {
-			s_logger.error("Invalid Syntax during Service Lookup......" + Throwables.getStackTraceAsString(e));
+			Throwables.propagate(e);
 		}
 		return false;
 	}

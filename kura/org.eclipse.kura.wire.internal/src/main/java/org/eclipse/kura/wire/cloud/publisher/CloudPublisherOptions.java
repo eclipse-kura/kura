@@ -153,8 +153,7 @@ public final class CloudPublisherOptions {
 			try {
 				autoConnectMode = AutoConnectMode.valueOf(autoconnectModeValue);
 			} catch (final IllegalArgumentException iea) {
-				s_logger.warn("Invalid autoconnect mode:" + autoconnectModeValue,
-						Throwables.getStackTraceAsString(iea));
+				Throwables.propagate(iea);
 			}
 		}
 		return autoConnectMode;

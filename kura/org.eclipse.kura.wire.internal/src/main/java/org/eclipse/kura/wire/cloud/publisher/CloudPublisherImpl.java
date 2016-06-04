@@ -111,7 +111,7 @@ public final class CloudPublisherImpl
 		try {
 			this.setupCloudClient();
 		} catch (final KuraException e) {
-			s_logger.warn("Cannot setup CloudClient.." + Throwables.getStackTraceAsString(e));
+			s_logger.error("Cannot setup CloudClient.." + Throwables.getStackTraceAsString(e));
 		}
 		s_logger.info("Activating Cloud Publisher Wire Component...Done");
 	}
@@ -568,7 +568,7 @@ public final class CloudPublisherImpl
 		try {
 			this.setupCloudClient();
 		} catch (final KuraException e) {
-			s_logger.warn("Cannot setup CloudClient..." + Throwables.getStackTraceAsString(e));
+			s_logger.error("Cannot setup CloudClient..." + Throwables.getStackTraceAsString(e));
 		}
 		s_logger.info("Updating Cloud Publisher Wire Component...Done");
 	}

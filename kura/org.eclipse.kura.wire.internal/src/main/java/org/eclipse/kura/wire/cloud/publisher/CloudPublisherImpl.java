@@ -23,7 +23,7 @@ import org.eclipse.kura.cloud.CloudClient;
 import org.eclipse.kura.cloud.CloudService;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.data.DataService;
-import org.eclipse.kura.data.DataServiceListener;
+import org.eclipse.kura.data.listener.DataServiceListener;
 import org.eclipse.kura.message.KuraPayload;
 import org.eclipse.kura.message.KuraPosition;
 import org.eclipse.kura.wire.CloudPublisher;

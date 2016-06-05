@@ -14,9 +14,6 @@ package org.eclipse.kura.wire.cloud.publisher;
 
 import java.util.Map;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.common.base.Throwables;
 
 /**
@@ -122,9 +119,6 @@ public final class CloudPublisherOptions {
 
 	/** The Constant denoting default mqtt topic. */
 	private static final String DEFAULT_TOPIC = "EVENT";
-
-	/** The Logger. */
-	private static final Logger s_logger = LoggerFactory.getLogger(CloudPublisherOptions.class);
 
 	/** The service component properties container. */
 	private final Map<String, Object> m_properties;

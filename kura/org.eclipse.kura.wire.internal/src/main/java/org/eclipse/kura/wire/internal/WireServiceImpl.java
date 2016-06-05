@@ -240,7 +240,11 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 				this.m_wireAdmin.createWire(emitter, receiver, null);
 				final WireConfiguration wc = this.getWireConfiguration(emitter, receiver);
 				wc.setCreated(true);
-				this.persistWires(false);
+				try {
+					this.persistWires(false);
+				} catch (final JSONException e) {
+					s_logger.error("Failed to persist wires...");
+				}
 			}
 		}
 		s_logger.info("Creating wires.....Done");
@@ -453,8 +457,10 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 	 *
 	 * @param shouldPersist
 	 *            if set to true a snapshot will be taken
+	 * @throws JSONException
+	 *             if persistence fails
 	 */
-	private void persistWires(final boolean shouldPersist) {
+	private void persistWires(final boolean shouldPersist) throws JSONException {
 		s_logger.info("Persisting Wires..");
 
 		final List<WireConfiguration> list = m_options.getWires();
@@ -533,7 +539,11 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 						if (producer.equals(wire.getEmitterName()) && consumer.equals(wire.getReceiverName())) {
 							this.m_wireAdmin.deleteWire(w);
 							this.m_wireConfigs.remove(wire);
-							this.persistWires(true);
+							try {
+								this.persistWires(true);
+							} catch (final JSONException e) {
+								s_logger.error("Failed to persist wires...");
+							}
 							return true;
 						}
 					}
@@ -560,13 +570,17 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 			s_logger.error(Throwables.getStackTraceAsString(e));
 			return false;
 		}
-		this.persistWires(true);
+		try {
+			this.persistWires(true);
+		} catch (final JSONException e) {
+			s_logger.error("Failed to persist wires...");
+		}
 		s_logger.info("Removing Wire Component..Done");
 		return true;
 	}
 
 	/**
-	 * Deregisters configuration service dependency
+	 * Unbinds configuration service dependency
 	 *
 	 * @param configService
 	 *            the configuration service
@@ -578,7 +592,7 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 	}
 
 	/**
-	 * Deregisters wire admin dependency
+	 * Unbinds wire admin dependency
 	 *
 	 * @param wireAdmin
 	 *            the wire admin

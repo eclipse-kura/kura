@@ -13,7 +13,7 @@
 
 -->
 <scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" 
-    name="io.rhiot.quickstarts.kura.camel.GatewayRouter"
+    name="org.eclipse.kura.example.camel.aggregation.GatewayRouter"
 	configuration-policy="require" enabled="true" immediate="true"
     activate="activate" deactivate="deactivate" modified="modified">
 	<implementation class="org.eclipse.kura.example.camel.aggregation.GatewayRouter"/>

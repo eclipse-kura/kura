@@ -109,11 +109,12 @@ public final class CloudPublisherDisconnectManager {
 		this.m_executorService.schedule(new Runnable() {
 			@Override
 			public void run() {
-				// disconnect
 				try {
-					m_dataService.disconnect(CloudPublisherDisconnectManager.this.m_quieceTimeout);
-				} catch (final Exception e) {
-					s_logger.warn("Error while disconnecting cloud publisher..." + Throwables.getRootCause(e));
+					// disconnect
+					m_dataService.disconnect(m_quieceTimeout);
+				} catch (final Exception exception) {
+					s_logger.error("Error while disconnecting cloud publisher..."
+							+ Throwables.getStackTraceAsString(exception));
 				}
 				// cleaning up
 				m_nextExecutionTime = 0;

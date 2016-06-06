@@ -48,7 +48,7 @@ public final class WireConfiguration {
 	private String receiverName;
 
 	/**
-	 * Instantiates a new wire configuration.
+	 * Instantiate a new wire configuration.
 	 *
 	 * @param emitterName
 	 *            the Wire Emitter name
@@ -57,12 +57,11 @@ public final class WireConfiguration {
 	 * @param filter
 	 *            the filter
 	 * @throws KuraRuntimeException
-	 *             if any of the arguments is null
+	 *             if any of the arguments is null (except filter)
 	 */
 	public WireConfiguration(final String emitterName, final String receiverName, @Nullable final String filter) {
 		checkNull(emitterName, "Emitter name cannot be null");
 		checkNull(receiverName, "Receiver name cannot be null");
-		checkNull(filter, "Filter cannot be null");
 
 		this.emitterName = emitterName;
 		this.receiverName = receiverName;
@@ -71,7 +70,7 @@ public final class WireConfiguration {
 	}
 
 	/**
-	 * Instantiates a new wire configuration.
+	 * Instantiate a new wire configuration.
 	 *
 	 * @param emitterName
 	 *            the Wire Emitter name
@@ -83,13 +82,12 @@ public final class WireConfiguration {
 	 *            the created flag signifying whether Wire Admin has already
 	 *            created the wire between the wire emitter and a wire receiver
 	 * @throws KuraRuntimeException
-	 *             if any of the arguments is null
+	 *             if any of the arguments is null (except filter)
 	 */
-	public WireConfiguration(final String emitterName, final String receiverName, final String filter,
+	public WireConfiguration(final String emitterName, final String receiverName, @Nullable final String filter,
 			final boolean created) {
 		checkNull(emitterName, "Emitter name cannot be null");
 		checkNull(receiverName, "Receiver name cannot be null");
-		checkNull(filter, "Filter cannot be null");
 
 		this.emitterName = emitterName;
 		this.receiverName = receiverName;
@@ -104,14 +102,13 @@ public final class WireConfiguration {
 			final WireConfiguration wireConfiguration = (WireConfiguration) obj;
 			return Objects.equal(this.emitterName, wireConfiguration.getEmitterName())
 					&& Objects.equal(this.receiverName, wireConfiguration.getReceiverName())
-					&& Objects.equal(this.filter, wireConfiguration.getFilter())
 					&& Objects.equal(this.created, wireConfiguration.isCreated());
 		}
 		return false;
 	}
 
 	/**
-	 * Gets the Wire Emitter name.
+	 * Get the Wire Emitter name.
 	 *
 	 * @return the Wire Emitter name
 	 */
@@ -120,7 +117,7 @@ public final class WireConfiguration {
 	}
 
 	/**
-	 * Gets the filter.
+	 * Get the filter.
 	 *
 	 * @return the filter
 	 */
@@ -129,7 +126,7 @@ public final class WireConfiguration {
 	}
 
 	/**
-	 * Gets the Wire Receiver name.
+	 * Get the Wire Receiver name.
 	 *
 	 * @return the Wire Receiver name
 	 */
@@ -140,11 +137,11 @@ public final class WireConfiguration {
 	/** {@inheritDoc} */
 	@Override
 	public int hashCode() {
-		return Objects.hashCode(this.created, this.emitterName, this.filter, this.receiverName);
+		return Objects.hashCode(this.created, this.emitterName, this.receiverName);
 	}
 
 	/**
-	 * Checks if is wire admin has already created a wire between the wire
+	 * Check if is wire admin has already created a wire between the wire
 	 * emitter and a wire receiver
 	 *
 	 * @return true, if it is created
@@ -154,8 +151,8 @@ public final class WireConfiguration {
 	}
 
 	/**
-	 * Sets the value to the flag to check whether wire admin has already
-	 * created a wire between the wire emitter and a wire receiver
+	 * Set the value to the flag to check whether wire admin has already created
+	 * a wire between the wire emitter and a wire receiver
 	 *
 	 * @param created
 	 *            the new created
@@ -165,7 +162,7 @@ public final class WireConfiguration {
 	}
 
 	/**
-	 * Converts the Wire Configuration to json.
+	 * Convert the Wire Configuration to json.
 	 *
 	 * @return the JSON object
 	 * @throws JSONException
@@ -189,7 +186,7 @@ public final class WireConfiguration {
 	}
 
 	/**
-	 * Updates the names of the Wire Components associated with this Wire
+	 * Update the names of the Wire Components associated with this Wire
 	 * Configuration
 	 *
 	 * @param newEmitterName

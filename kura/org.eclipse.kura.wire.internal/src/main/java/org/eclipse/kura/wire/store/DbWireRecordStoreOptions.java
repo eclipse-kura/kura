@@ -12,7 +12,11 @@
  */
 package org.eclipse.kura.wire.store;
 
+import java.util.List;
 import java.util.Map;
+
+import com.google.common.base.Splitter;
+import com.google.common.collect.ImmutableList;
 
 /**
  * The Class DbWireRecordStoreOptions is responsible to contain all the DB Wire
@@ -26,7 +30,7 @@ public final class DbWireRecordStoreOptions {
 	/** The Constant denotes wire receiver. */
 	private static final String CONF_EMITTERS = "data.emitters";
 
-	/** The m_properties. */
+	/** The Properties to parse. */
 	private final Map<String, Object> m_properties;
 
 	/**
@@ -46,7 +50,8 @@ public final class DbWireRecordStoreOptions {
 	 */
 	public String getEmitterId() {
 		String emitterId = null;
-		if ((this.m_properties != null) && (this.m_properties.get(CONF_EMITTER_ID) != null)
+		if ((this.m_properties != null) && this.m_properties.containsKey(CONF_EMITTER_ID)
+				&& (this.m_properties.get(CONF_EMITTER_ID) != null)
 				&& (this.m_properties.get(CONF_EMITTER_ID) instanceof String)) {
 			emitterId = (String) this.m_properties.get(CONF_EMITTER_ID);
 		}
@@ -58,13 +63,13 @@ public final class DbWireRecordStoreOptions {
 	 *
 	 * @return the subscribed emitters
 	 */
-	public String[] getSubscribedEmitters() {
-		String[] emitteres = {};
-		if ((this.m_properties != null) && (this.m_properties.get(CONF_EMITTERS) != null)
+	public List<String> getSubscribedEmitters() {
+		if ((this.m_properties != null) && this.m_properties.containsKey(CONF_EMITTERS)
+				&& (this.m_properties.get(CONF_EMITTERS) != null)
 				&& (this.m_properties.get(CONF_EMITTERS) instanceof String)) {
 			final String emittersStr = (String) this.m_properties.get(CONF_EMITTERS);
-			emitteres = emittersStr.split(",");
+			return Splitter.on(",").omitEmptyStrings().splitToList(emittersStr);
 		}
-		return emitteres;
+		return ImmutableList.of();
 	}
 }

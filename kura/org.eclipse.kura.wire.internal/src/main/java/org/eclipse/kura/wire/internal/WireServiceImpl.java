@@ -130,7 +130,7 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 	}
 
 	/**
-	 * Binds the configuration service.
+	 * Bind the configuration service.
 	 *
 	 * @param configService
 	 *            the new configuration service
@@ -142,7 +142,7 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 	}
 
 	/**
-	 * Binds the wire admin dependency
+	 * Bind the wire admin dependency
 	 *
 	 * @param wireAdmin
 	 *            the new wire admin service dependency
@@ -205,7 +205,7 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 	}
 
 	/**
-	 * Creates the wires.
+	 * Create the wires.
 	 */
 	protected synchronized void createWires() throws KuraException {
 		s_logger.info("Creating wires.....");
@@ -423,7 +423,6 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 		} catch (final JSONException e) {
 			Throwables.propagate(e);
 		}
-
 		return new ComponentConfigurationImpl(PROP_PID, wiresOCD, this.m_properties);
 	}
 
@@ -462,7 +461,6 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 	 */
 	private void persistWires(final boolean shouldPersist) throws JSONException {
 		s_logger.info("Persisting Wires..");
-
 		final List<WireConfiguration> list = m_options.getWires();
 		list.clear();
 		for (final WireConfiguration w : this.m_wireConfigs) {
@@ -478,7 +476,6 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 			s_logger.error(Throwables.getStackTraceAsString(throwable));
 		}
 		s_logger.info("Persisting Wires..Done");
-
 	}
 
 	/**
@@ -580,7 +577,7 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 	}
 
 	/**
-	 * Unbinds configuration service dependency
+	 * Unbind configuration service dependency
 	 *
 	 * @param configService
 	 *            the configuration service
@@ -592,7 +589,7 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 	}
 
 	/**
-	 * Unbinds wire admin dependency
+	 * Unbind wire admin dependency
 	 *
 	 * @param wireAdmin
 	 *            the wire admin
@@ -611,20 +608,22 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 	 */
 	public synchronized void updated(final Map<String, Object> properties) {
 		s_logger.info("Updating Wire Service Component...: " + properties);
-
 		try {
 			final Object emitterPid = properties.get("emitter.pids");
 			final Object receiverPid = properties.get("receiver.pids");
 
 			String emitterName = null;
-			final String receiverName = null;
-			if (properties.containsKey("emitter.name")) {
-				emitterName = (String) properties.get("emitter.name");
+			String receiverName = null;
+			final String emitter_key_property = "emitter.name";
+			final String receiver_key_property = "receiver.name";
+
+			if (properties.containsKey(emitter_key_property)) {
+				emitterName = (String) properties.get(emitter_key_property);
 			}
-			if (properties.containsKey("receiver.name")) {
-				emitterName = (String) properties.get("receiver.name");
+			if (properties.containsKey(receiver_key_property)) {
+				receiverName = (String) properties.get(receiver_key_property);
 			}
-			// NEW WIRE
+			// New Wire
 			if ((emitterPid != null) && (receiverPid != null)) {
 				if (!emitterPid.toString().equals("NONE") && !receiverPid.toString().equals("NONE")) {
 					final String emitterString = this.createComponentFromProperty(emitterPid.toString(), emitterName);
@@ -639,20 +638,29 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 				}
 			}
 
-			// DELETE EXISTING WIRE
-			final Object wiresDelete = properties.get("delete.wires");
+			final String delete_wires_key_property = "delete.wires";
+			// Delete Existing Wire
+			Object wiresDelete = null;
+			if (properties.containsKey(delete_wires_key_property)) {
+				wiresDelete = properties.get(delete_wires_key_property);
+			}
 			if ((wiresDelete != null) && !wiresDelete.toString().equals("NONE")) {
 				final int index = Integer.parseInt(wiresDelete.toString());
 				final WireConfiguration wc = this.m_wireConfigs.get(index);
 				this.removeWire(wc.getEmitterName(), wc.getReceiverName());
 			}
-			// DELETE EMITTER/RECEIVER INSTANCE
-			final Object instancesDelete = properties.get("delete.instances");
+
+			final String delete_instances_key_property = "delete.instances";
+			// Delete Emitter/Receiver Instance
+			Object instancesDelete = null;
+			if (properties.containsKey(delete_instances_key_property)) {
+				instancesDelete = properties.get(delete_instances_key_property);
+			}
 			if ((instancesDelete != null) && !instancesDelete.toString().equals("NONE")) {
 				this.removeWireComponent(instancesDelete.toString());
 			}
-		} catch (final Exception ex) {
-			s_logger.error("Error during WireServiceImpl update! Something went wrong..."
+		} catch (final KuraException ex) {
+			s_logger.error("Error during Wire Service Component update! Something went wrong..."
 					+ Throwables.getStackTraceAsString(ex));
 		}
 		s_logger.info("Updating Wire Service Component...Done");

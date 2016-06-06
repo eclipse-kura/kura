@@ -12,7 +12,11 @@
  */
 package org.eclipse.kura.wire.store;
 
+import java.util.List;
 import java.util.Map;
+
+import com.google.common.base.Splitter;
+import com.google.common.collect.ImmutableList;
 
 /**
  * The Class DbWireRecordFilterOptions is responsible to contain all the Db Wire
@@ -20,23 +24,23 @@ import java.util.Map;
  */
 public final class DbWireRecordFilterOptions {
 
-	/** The Constant denotes the wire emitter name. */
+	/** The Constant denotes wire emitter. */
 	private static final String CONF_EMITTER_ID = "emitter.id";
 
-	/** The Constant denotes all the data emitters. */
+	/** The Constant denotes wire receiver. */
 	private static final String CONF_EMITTERS = "data.emitters";
 
 	/** The Constant denotes the refresh rate. */
 	private static final String CONF_REFRESH_RATE = "refresh.rate";
 
-	/** The Constant denotes sql view. */
+	/** The Constant denotes SQL view. */
 	private static final String CONF_SQL_VIEW = "sql.view";
 
 	/** The Configured Properties. */
 	private final Map<String, Object> m_properties;
 
 	/**
-	 * Instantiates a new db wire record filter options.
+	 * Instantiates a new DB wire record filter options.
 	 *
 	 * @param properties
 	 *            the provided properties
@@ -46,7 +50,7 @@ public final class DbWireRecordFilterOptions {
 	}
 
 	/**
-	 * Returns the ID to be used for this emitter.
+	 * Returns the ID to be used for this wire emitter.
 	 *
 	 * @return the emitter id
 	 */
@@ -67,8 +71,8 @@ public final class DbWireRecordFilterOptions {
 	 */
 	public int getRefreshRate() {
 		int refreshRate = 0;
-		if ((this.m_properties != null) && (this.m_properties.get(CONF_SQL_VIEW) != null)
-				&& (this.m_properties.get(CONF_SQL_VIEW) instanceof Integer)) {
+		if ((this.m_properties != null) && (this.m_properties.containsKey(CONF_REFRESH_RATE))
+				&& (this.m_properties.get(CONF_REFRESH_RATE) instanceof Integer)) {
 			refreshRate = (Integer) this.m_properties.get(CONF_REFRESH_RATE);
 		}
 		return refreshRate;
@@ -77,11 +81,11 @@ public final class DbWireRecordFilterOptions {
 	/**
 	 * Returns the SQL to be executed for this view.
 	 *
-	 * @return the sql view
+	 * @return the configured SQL view
 	 */
 	public String getSqlView() {
 		String sqlView = null;
-		if ((this.m_properties != null) && (this.m_properties.get(CONF_SQL_VIEW) != null)
+		if ((this.m_properties != null) && (this.m_properties.containsKey(CONF_SQL_VIEW))
 				&& (this.m_properties.get(CONF_SQL_VIEW) instanceof String)) {
 			sqlView = (String) this.m_properties.get(CONF_SQL_VIEW);
 		}
@@ -89,18 +93,18 @@ public final class DbWireRecordFilterOptions {
 	}
 
 	/**
-	 * Returns the emitters to be used for message publishing.
+	 * Returns the wire emitters to be used for message publishing.
 	 *
 	 * @return the subscribed emitters
 	 */
-	public String[] getSubscribedEmitters() {
-		String[] emitteres = {};
+	public List<String> getSubscribedEmitters() {
 		if ((this.m_properties != null) && this.m_properties.containsKey(CONF_EMITTERS)
 				&& (this.m_properties.get(CONF_EMITTERS) != null)
 				&& (this.m_properties.get(CONF_EMITTERS) instanceof String)) {
 			final String emittersStr = (String) this.m_properties.get(CONF_EMITTERS);
-			emitteres = emittersStr.split(",");
+			return Splitter.on(",").omitEmptyStrings().splitToList(emittersStr);
 		}
-		return emitteres;
+		return ImmutableList.of();
 	}
+
 }

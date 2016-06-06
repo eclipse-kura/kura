@@ -125,7 +125,7 @@ public final class Timer implements WireEmitter, ConfigurableComponent {
 			@Override
 			public void run() {
 				m_wireSupport.emit(Wires.newWireRecord(Wires.newWireField(TIMER_EVENT_FIELD_NAME,
-						TypedValues.newStringValue(Timer.this.m_name))));
+						TypedValues.newStringValue(m_name))));
 			}
 		}, this.m_interval, TimeUnit.SECONDS);
 	}

@@ -42,7 +42,6 @@ import org.osgi.util.position.Position;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.annotations.Beta;
 import com.google.common.base.Throwables;
 import com.google.common.util.concurrent.Monitor;
 
@@ -51,7 +50,6 @@ import com.google.common.util.concurrent.Monitor;
  * to publish a list of wire records as received in Wire Envelope to the
  * configured cloud platform.
  */
-@Beta
 public final class CloudPublisherImpl
 		implements WireReceiver, DataServiceListener, ConfigurableComponent, CloudPublisher {
 
@@ -106,7 +104,6 @@ public final class CloudPublisherImpl
 			s_disconnectManager = new CloudPublisherDisconnectManager(this.m_dataService,
 					this.m_options.getAutoConnectQuieceTimeout());
 		}
-
 		// recreate the CloudClient
 		try {
 			this.setupCloudClient();
@@ -125,53 +122,48 @@ public final class CloudPublisherImpl
 	 * @throws KuraRuntimeException
 	 *             if the wire record provided is null
 	 */
-	private JSONObject buildJsonObject(final WireRecord wireRecord) {
+	private JSONObject buildJsonObject(final WireRecord wireRecord) throws JSONException {
 		checkNull(wireRecord, "Wire Record cannot be null");
 		final JSONObject jsonObject = new JSONObject();
-		try {
-			if (wireRecord.getTimestamp() != null) {
-				jsonObject.put("timestamp", wireRecord.getTimestamp());
-			}
+		if (wireRecord.getTimestamp() != null) {
+			jsonObject.put("timestamp", wireRecord.getTimestamp());
+		}
 
-			if (wireRecord.getPosition() != null) {
-				jsonObject.put("position", this.buildKuraPositionForJson(wireRecord.getPosition()));
-			}
+		if (wireRecord.getPosition() != null) {
+			jsonObject.put("position", this.buildKuraPositionForJson(wireRecord.getPosition()));
+		}
 
-			for (final WireField dataField : wireRecord.getFields()) {
-				Object value = null;
-				switch (dataField.getValue().getType()) {
-				case STRING:
-					value = dataField.getValue().getValue();
-					break;
-				case DOUBLE:
-					value = dataField.getValue().getValue();
-					break;
-				case INTEGER:
-					value = dataField.getValue().getValue();
-					break;
-				case LONG:
-					value = dataField.getValue().getValue();
-					break;
-				case BOOLEAN:
-					value = dataField.getValue().getValue();
-					break;
-				case BYTE_ARRAY:
-					value = dataField.getValue().getValue();
-					break;
-				case BYTE:
-					value = ((Byte) dataField.getValue().getValue()).intValue();
-					break;
-				case SHORT:
-					value = ((Short) dataField.getValue().getValue()).intValue();
-					break;
-				default:
-					break;
-				}
-				jsonObject.put(dataField.getName(), value);
+		for (final WireField dataField : wireRecord.getFields()) {
+			Object value = null;
+			switch (dataField.getValue().getType()) {
+			case STRING:
+				value = dataField.getValue().getValue();
+				break;
+			case DOUBLE:
+				value = dataField.getValue().getValue();
+				break;
+			case INTEGER:
+				value = dataField.getValue().getValue();
+				break;
+			case LONG:
+				value = dataField.getValue().getValue();
+				break;
+			case BOOLEAN:
+				value = dataField.getValue().getValue();
+				break;
+			case BYTE_ARRAY:
+				value = dataField.getValue().getValue();
+				break;
+			case BYTE:
+				value = ((Byte) dataField.getValue().getValue()).byteValue();
+				break;
+			case SHORT:
+				value = ((Short) dataField.getValue().getValue()).shortValue();
+				break;
+			default:
+				break;
 			}
-		} catch (final Exception ex) {
-			s_logger.error("Error while building JSON instance from the wire records..."
-					+ Throwables.getStackTraceAsString(ex));
+			jsonObject.put(dataField.getName(), value);
 		}
 		return jsonObject;
 	}
@@ -199,30 +191,31 @@ public final class CloudPublisherImpl
 
 		for (final WireField dataField : wireRecord.getFields()) {
 			Object value = null;
+			final Object wrappedValue = dataField.getValue().getValue();
 			switch (dataField.getValue().getType()) {
 			case STRING:
-				value = dataField.getValue().getValue();
+				value = String.valueOf(wrappedValue);
 				break;
 			case DOUBLE:
-				value = dataField.getValue().getValue();
+				value = ((Double) wrappedValue).doubleValue();
 				break;
 			case INTEGER:
-				value = dataField.getValue().getValue();
+				value = ((Integer) wrappedValue).intValue();
 				break;
 			case LONG:
-				value = dataField.getValue().getValue();
+				value = ((Long) wrappedValue).longValue();
 				break;
 			case BOOLEAN:
-				value = dataField.getValue().getValue();
+				value = ((Boolean) wrappedValue).booleanValue();
 				break;
 			case BYTE_ARRAY:
-				value = dataField.getValue().getValue();
+				value = wrappedValue;
 				break;
 			case BYTE:
-				value = ((Byte) dataField.getValue().getValue()).intValue();
+				value = ((Byte) wrappedValue).byteValue();
 				break;
 			case SHORT:
-				value = ((Short) dataField.getValue().getValue()).intValue();
+				value = ((Short) wrappedValue).shortValue();
 				break;
 			default:
 				break;
@@ -313,10 +306,8 @@ public final class CloudPublisherImpl
 	 */
 	protected synchronized void deactivate(final ComponentContext componentContext) {
 		s_logger.info("Deactivating Cloud Publisher Wire Component...");
-
 		// close the client
 		this.closeCloudClient();
-
 		// close the disconnect manager
 		this.m_monitor.enter();
 		try {
@@ -327,7 +318,6 @@ public final class CloudPublisherImpl
 		} finally {
 			this.m_monitor.leave();
 		}
-
 		// no need to release the cloud clients as the updated application
 		// certificate is already published due the missing dependency
 		// we only need to empty our CloudClient list
@@ -337,7 +327,7 @@ public final class CloudPublisherImpl
 	}
 
 	/**
-	 * Gets the cloud service.
+	 * Get the cloud service.
 	 *
 	 * @return the cloud service
 	 */
@@ -346,7 +336,7 @@ public final class CloudPublisherImpl
 	}
 
 	/**
-	 * Gets the data service.
+	 * Get the data service.
 	 *
 	 * @return the data service
 	 */
@@ -428,25 +418,20 @@ public final class CloudPublisherImpl
 		if (!AutoConnectMode.AUTOCONNECT_MODE_OFF.equals(this.m_options.getAutoConnectMode())
 				&& !this.m_dataService.isAutoConnectEnabled() && !this.m_dataService.isConnected()) {
 
-			// FIXME: this connect should be a connectWithRetry
-			// While the CloudPublisher is active the connection should be in
-			// retry mode
-			// m_dataService.connectAndStayConnected();
 			try {
-				this.m_dataService.connect();
+				if (!this.m_dataService.isConnected()) {
+					this.m_dataService.connect();
+				}
 				for (final WireRecord dataRecord : wireRecords) {
-
 					// prepare the topic
 					final String appTopic = this.m_options.getPublishingTopic();
 					if (this.m_options.getMessageType() == 1) { // Kura Payload
 						// prepare the payload
 						final KuraPayload kuraPayload = this.buildKuraPayload(dataRecord);
-
 						// publish the payload
 						this.m_cloudClient.publish(appTopic, kuraPayload, this.m_options.getPublishingQos(),
 								this.m_options.getPublishingRetain(), this.m_options.getPublishingPriority());
 					}
-
 					if (this.m_options.getMessageType() == 2) { // JSON
 						final JSONObject jsonWire = this.buildJsonObject(dataRecord);
 						this.m_cloudClient.publish(appTopic, jsonWire.toString().getBytes(),
@@ -454,7 +439,7 @@ public final class CloudPublisherImpl
 								this.m_options.getPublishingPriority());
 					}
 				}
-			} catch (final KuraException e) {
+			} catch (final Exception e) {
 				s_logger.error("Error in publishing wire records using cloud publisher.."
 						+ Throwables.getStackTraceAsString(e));
 			}
@@ -463,23 +448,27 @@ public final class CloudPublisherImpl
 	}
 
 	/**
-	 * Sets the cloud service.
+	 * Set the cloud service.
 	 *
 	 * @param cloudService
 	 *            the new cloud service
 	 */
 	public synchronized void setCloudService(final CloudService cloudService) {
-		this.m_cloudService = cloudService;
+		if (this.m_cloudService == null) {
+			this.m_cloudService = cloudService;
+		}
 	}
 
 	/**
-	 * Sets the data service.
+	 * Set the data service.
 	 *
 	 * @param dataService
 	 *            the new data service
 	 */
 	public synchronized void setDataService(final DataService dataService) {
-		this.m_dataService = dataService;
+		if (this.m_dataService == null) {
+			this.m_dataService = dataService;
+		}
 	}
 
 	/**
@@ -490,7 +479,6 @@ public final class CloudPublisherImpl
 	 */
 	private void setupCloudClient() throws KuraException {
 		this.closeCloudClient();
-
 		// create the new CloudClient for the specified application
 		final String appId = this.m_options.getPublishingApplication();
 		this.m_cloudClient = this.m_cloudService.newCloudClient(appId);
@@ -527,7 +515,9 @@ public final class CloudPublisherImpl
 	 *            the cloud service
 	 */
 	public synchronized void unsetCloudService(final CloudService cloudService) {
-		this.m_cloudService = null;
+		if (this.m_cloudService == cloudService) {
+			this.m_cloudService = null;
+		}
 	}
 
 	/**
@@ -537,7 +527,9 @@ public final class CloudPublisherImpl
 	 *            the data service
 	 */
 	public synchronized void unsetDataService(final DataService dataService) {
-		this.m_dataService = null;
+		if (this.m_dataService == dataService) {
+			this.m_dataService = null;
+		}
 	}
 
 	/**
@@ -548,7 +540,6 @@ public final class CloudPublisherImpl
 	 */
 	public synchronized void updated(final Map<String, Object> properties) {
 		s_logger.info("Updating Cloud Publisher Wire Component...");
-
 		// Update properties
 		this.m_options = new CloudPublisherOptions(properties);
 		// create the singleton disconnect manager
@@ -563,7 +554,6 @@ public final class CloudPublisherImpl
 		} finally {
 			this.m_monitor.leave();
 		}
-
 		// recreate the CloudClient
 		try {
 			this.setupCloudClient();

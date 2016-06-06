@@ -12,6 +12,7 @@
  */
 package org.eclipse.kura.type.util;
 
+import org.eclipse.kura.annotation.Nullable;
 import org.eclipse.kura.type.BooleanValue;
 import org.eclipse.kura.type.ByteArrayValue;
 import org.eclipse.kura.type.ByteValue;
@@ -112,7 +113,7 @@ public final class TypedValues {
 	 *            the string value to be represented as {@link TypedValue}
 	 * @return the string value represented as {@link TypedValue}
 	 */
-	public static StringValue newStringValue(final String value) {
+	public static StringValue newStringValue(@Nullable final String value) {
 		return new StringValue(value);
 	}
 

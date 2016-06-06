@@ -22,7 +22,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.text.MessageFormat;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -54,6 +53,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.annotations.Beta;
 import com.google.common.base.Throwables;
+import com.google.common.collect.Maps;
 import com.google.common.escape.Escaper;
 import com.google.common.escape.Escapers;
 
@@ -62,10 +62,11 @@ import com.google.common.escape.Escapers;
  * the received Wire Record
  */
 @Beta
-public final class DbWireRecordStore implements WireEmitter, WireReceiver, ConfigurableComponent, WireRecordStore {
+public final class DbWireRecordStore implements WireEmitter, WireReceiver, WireRecordStore, ConfigurableComponent {
 
 	/**
-	 * SQL Escaper Builder to escape characters to sanitize SQL queries
+	 * SQL Escaper Builder to escape characters to sanitize SQL table and column
+	 * names
 	 */
 	private static Escapers.Builder builder = Escapers.builder();
 
@@ -88,19 +89,10 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
 	 * FIXME: Add support for different table type - persisted vs in-memory.
 	 */
 
-	/**
-	 * FIXME: SQL escaping of the names of the tables and columns. Be careful on
-	 * the capitalization; it is lossy?
-	 */
-
-	/**
-	 * FIXME: Add support for Cloudlet
-	 */
-
 	/** The constant data type */
 	private static final String DATA_TYPE = "DATA_TYPE";
 
-	/** The Logger. */
+	/** The Logger instance. */
 	private static final Logger s_logger = LoggerFactory.getLogger(DbWireRecordStore.class);
 
 	/** The Constant denoting query to add column. */
@@ -122,7 +114,6 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
 	private volatile DbService m_dbService;
 
 	/** The wire record options. */
-	@SuppressWarnings("unused")
 	private DbWireRecordStoreOptions m_options;
 
 	/** The Wire Supporter Component. */
@@ -139,17 +130,14 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
 	protected synchronized void activate(final ComponentContext componentContext,
 			final Map<String, Object> properties) {
 		s_logger.info("Activating DB Wire Record Store...");
-
 		this.m_ctx = componentContext;
 		this.m_wireSupport = Wires.newWireSupport(this);
-
 		this.m_options = new DbWireRecordStoreOptions(properties);
-
 		s_logger.info("Activating DB Wire Record Store...Done");
 	}
 
 	/**
-	 * Closes the connection
+	 * Close the connection
 	 *
 	 * @param conn
 	 *            the connection instance
@@ -159,7 +147,7 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
 	}
 
 	/**
-	 * Closes the connection
+	 * Close the connection
 	 *
 	 * @param rss
 	 *            the result set
@@ -169,7 +157,7 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
 	}
 
 	/**
-	 * Closes the connection
+	 * Close the connection
 	 *
 	 * @param stmts
 	 *            the statements
@@ -200,43 +188,19 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
 	}
 
 	/**
-	 * Perform basic SQL validation on input string. This is to allow safe
-	 * encoding of parameters that must contain quotes, while still protecting
-	 * users from SQL injection.
-	 *
-	 * We prevent SQL from breaking out of quotes by replacing any quotes in
-	 * input stream with double quotes. Backslashes are too risky to allow so
-	 * are removed completely
-	 *
-	 * (' --> '') (" --> "") (\ --> (remove backslashes))
-	 *
-	 * @param string
-	 *            the string to be filtered
-	 * @return the escaped string
-	 * @throws KuraRuntimeException
-	 *             if argument is null
-	 */
-	private String escapeSql(final String string) {
-		checkNull(string, "Provided string cannot be null");
-		final Escaper escaper = builder.addEscape('\'', "''").addEscape('"', "\"\"").addEscape('\\', "").build();
-		return escaper.escape(string);
-	}
-
-	/**
 	 * Executes the provided sql query.
 	 *
 	 * @param sql
-	 *            the sql query to execute
+	 *            the SQL query to execute
 	 * @param params
 	 *            the params extra parameters needed for the query
 	 * @throws SQLException
 	 *             the SQL exception
 	 * @throws KuraRuntimeException
-	 *             if any of the arguments is null
+	 *             if SQL query argument is null
 	 */
 	private synchronized void execute(final String sql, final Integer... params) throws SQLException {
 		checkNull(sql, "SQL query cannot be null");
-		checkNull(params, "Extra Parameters to execute query cannot be null");
 
 		Connection conn = null;
 		PreparedStatement stmt = null;
@@ -269,9 +233,9 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
 	}
 
 	/**
-	 * Gets the db service.
+	 * Gets the DB service.
 	 *
-	 * @return the db service
+	 * @return the DB service
 	 */
 	public DbService getDbService() {
 		return this.m_dbService;
@@ -299,7 +263,7 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
 		checkNull(tableName, "Table name cannot be null");
 		checkNull(wireRecord, "Wire Record cannot be null");
 
-		final String sqlTableName = this.escapeSql(tableName);
+		final String sqlTableName = this.sanitizeSqlTableAndColumnName(tableName);
 		final StringBuilder sbCols = new StringBuilder();
 		final StringBuilder sbVals = new StringBuilder();
 
@@ -309,7 +273,7 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
 
 		final List<WireField> dataFields = wireRecord.getFields();
 		for (final WireField dataField : dataFields) {
-			final String sqlColName = this.escapeSql(dataField.getName());
+			final String sqlColName = this.sanitizeSqlTableAndColumnName(dataField.getName());
 			sbCols.append(", " + sqlColName);
 			sbVals.append(", ?");
 		}
@@ -324,34 +288,41 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
 			stmt = conn.prepareStatement(sqlInsert);
 			stmt.setTimestamp(1, new Timestamp(wireRecord.getTimestamp().getTime()));
 			for (int i = 0; i < dataFields.size(); i++) {
-
 				final WireField dataField = dataFields.get(i);
 				final DataType dataType = dataField.getValue().getType();
+				final Object value = dataField.getValue();
 				switch (dataType) {
 				case BOOLEAN:
-					stmt.setBoolean(2 + i, ((BooleanValue) dataField.getValue()).getValue());
+					s_logger.info("Storing boolean of value {}", ((BooleanValue) value).getValue());
+					stmt.setBoolean(2 + i, ((BooleanValue) value).getValue());
 					break;
 				case BYTE:
-					stmt.setByte(2 + i, ((ByteValue) dataField.getValue()).getValue());
+					s_logger.info("Storing byte of value {}", ((ByteValue) value).getValue());
+					stmt.setByte(2 + i, ((ByteValue) value).getValue());
 					break;
 				case DOUBLE:
-					s_logger.info("Storing double of value {}", ((DoubleValue) dataField.getValue()).getValue());
-					stmt.setDouble(2 + i, ((DoubleValue) dataField.getValue()).getValue());
+					s_logger.info("Storing double of value {}", ((DoubleValue) value).getValue());
+					stmt.setDouble(2 + i, ((DoubleValue) value).getValue());
 					break;
 				case INTEGER:
-					stmt.setInt(2 + i, ((IntegerValue) dataField.getValue()).getValue());
+					s_logger.info("Storing integer of value {}", ((IntegerValue) value).getValue());
+					stmt.setInt(2 + i, ((IntegerValue) value).getValue());
 					break;
 				case LONG:
-					stmt.setLong(2 + i, ((LongValue) dataField.getValue()).getValue());
+					s_logger.info("Storing long of value {}", ((LongValue) value).getValue());
+					stmt.setLong(2 + i, ((LongValue) value).getValue());
 					break;
 				case BYTE_ARRAY:
-					stmt.setBytes(2 + i, ((ByteArrayValue) dataField.getValue()).getValue());
+					s_logger.info("Storing byte array of value {}", ((ByteArrayValue) value).getValue());
+					stmt.setBytes(2 + i, ((ByteArrayValue) value).getValue());
 					break;
 				case SHORT:
-					stmt.setShort(2 + i, ((ShortValue) dataField.getValue()).getValue());
+					s_logger.info("Storing short of value {}", ((ShortValue) value).getValue());
+					stmt.setShort(2 + i, ((ShortValue) value).getValue());
 					break;
 				case STRING:
-					stmt.setString(2 + i, ((StringValue) dataField.getValue()).getValue());
+					s_logger.info("Storing string of value {}", ((StringValue) value).getValue());
+					stmt.setString(2 + i, ((StringValue) value).getValue());
 					break;
 				default:
 					break;
@@ -359,7 +330,7 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
 			}
 			stmt.execute();
 			conn.commit();
-			s_logger.info("Stored double of value");
+			s_logger.info("Stored typed value");
 		} catch (final SQLException e) {
 			this.rollback(conn);
 			Throwables.propagate(e);
@@ -374,10 +345,9 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
 	public synchronized void onWireReceive(final WireEnvelope wireEvelope) {
 		checkNull(wireEvelope, "Wire Envelope cannot be null");
 		s_logger.debug("Wire Enveloped received..." + this.m_wireSupport);
-
 		final List<WireRecord> dataRecords = wireEvelope.getRecords();
 		for (final WireRecord dataRecord : dataRecords) {
-			this.storeWireRecord(wireEvelope.getEmitterName(), dataRecord);
+			this.store(wireEvelope.getEmitterName(), dataRecord);
 		}
 		// emit the storage event
 		this.m_wireSupport.emit(dataRecords);
@@ -411,10 +381,10 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
 		checkNull(tableName, "Table name cannot be null");
 		checkNull(wireRecord, "Wire Record cannot be null");
 
-		final String sqlTableName = this.escapeSql(tableName);
+		final String sqlTableName = this.sanitizeSqlTableAndColumnName(tableName);
 		Connection conn = null;
 		ResultSet rsColumns = null;
-		final Map<String, Integer> columns = new HashMap<String, Integer>();
+		final Map<String, Integer> columns = Maps.newHashMap();
 		try {
 			// check for the table that would collect the data of this emitter
 			conn = this.getConnection();
@@ -432,20 +402,16 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
 			this.close(rsColumns);
 			this.close(conn);
 		}
-
 		// reconcile columns
 		final List<WireField> dataFields = wireRecord.getFields();
 		for (final WireField dataField : dataFields) {
-
-			final String sqlColName = this.escapeSql(dataField.getName());
+			final String sqlColName = this.sanitizeSqlTableAndColumnName(dataField.getName());
 			final Integer sqlColType = columns.get(sqlColName);
 			final JdbcType jdbcType = DbDataTypeMapper.getJdbcType(dataField.getValue().getType());
 			if (sqlColType == null) {
-
 				// add column
 				this.execute(MessageFormat.format(SQL_ADD_COLUMN, sqlTableName, sqlColName, jdbcType.getTypeString()));
 			} else if (sqlColType != jdbcType.getType()) {
-
 				// drop old column and add new one
 				this.execute(MessageFormat.format(SQL_DROP_COLUMN, sqlTableName, sqlColName));
 				this.execute(MessageFormat.format(SQL_ADD_COLUMN, sqlTableName, sqlColName, jdbcType.getTypeString()));
@@ -465,10 +431,9 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
 	 */
 	private void reconcileTable(final String tableName) throws SQLException {
 		checkNull(tableName, "Table name cannot be null");
-		final String sqlTableName = this.escapeSql(tableName);
+		final String sqlTableName = this.sanitizeSqlTableAndColumnName(tableName);
 		final Connection conn = this.getConnection();
 		try {
-
 			// check for the table that would collect the data of this emitter
 			final String catalog = conn.getCatalog();
 			final DatabaseMetaData dbMetaData = conn.getMetaData();
@@ -494,18 +459,42 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
 	}
 
 	/**
-	 * Sets the db service.
+	 * Perform basic SQL table name and column name validation on input string.
+	 * This is to allow safe encoding of parameters that must contain quotes,
+	 * while still protecting users from SQL injection on the table names and
+	 * column names.
+	 *
+	 * (' --> '_') (" --> _) (\ --> (remove backslashes)) (. --> _) ( (space)
+	 * --> _)
+	 *
+	 * @param string
+	 *            the string to be filtered
+	 * @return the escaped string
+	 * @throws KuraRuntimeException
+	 *             if argument is null
+	 */
+	private String sanitizeSqlTableAndColumnName(final String string) {
+		checkNull(string, "Provided string cannot be null");
+		final Escaper escaper = builder.addEscape('\'', "_").addEscape('"', "_").addEscape('\\', "").addEscape('.', "_")
+				.addEscape(' ', "_").build();
+		return escaper.escape(string).toLowerCase();
+	}
+
+	/**
+	 * Set the DB service.
 	 *
 	 * @param dbService
-	 *            the new db service
+	 *            the new DB service
 	 */
 	public synchronized void setDbService(final DbService dbService) {
-		this.m_dbService = dbService;
+		if (this.m_dbService == null) {
+			this.m_dbService = dbService;
+		}
 	}
 
 	/** {@inheritDoc} */
 	@Override
-	public void storeWireRecord(final String tableName, final WireRecord wireRecord) {
+	public void store(final String tableName, final WireRecord wireRecord) {
 		checkNull(tableName, "Table name cannot be null");
 		checkNull(wireRecord, "Wire Record cannot be null");
 
@@ -528,13 +517,15 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
 	}
 
 	/**
-	 * Unregister DB service.
+	 * Unset the DB service.
 	 *
-	 * @param dataService
+	 * @param dbService
 	 *            the DB service
 	 */
-	public synchronized void unsetDbService(final DbService dataService) {
-		this.m_dbService = null;
+	public synchronized void unsetDbService(final DbService dbService) {
+		if (this.m_dbService == dbService) {
+			this.m_dbService = null;
+		}
 	}
 
 	/**
@@ -543,9 +534,10 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
 	 * @param properties
 	 *            the updated service component properties
 	 */
-	public void updated(final Map<String, Object> properties) {
+	public synchronized void updated(final Map<String, Object> properties) {
 		s_logger.info("Updating DB Wire Record Store with..." + properties);
 		this.m_options = new DbWireRecordStoreOptions(properties);
+		s_logger.info("Updating DB Wire Record Store...Done");
 	}
 
 	/** {@inheritDoc} */

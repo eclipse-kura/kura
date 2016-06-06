@@ -12,7 +12,6 @@
  */
 package org.eclipse.kura.wire.util;
 
-import static org.eclipse.kura.Preconditions.checkCondition;
 import static org.eclipse.kura.Preconditions.checkNull;
 
 import java.sql.Timestamp;
@@ -20,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.kura.KuraRuntimeException;
+import org.eclipse.kura.annotation.Nullable;
 import org.eclipse.kura.type.TypedValue;
 import org.eclipse.kura.wire.WireComponent;
 import org.eclipse.kura.wire.WireConfiguration;
@@ -55,7 +55,7 @@ public final class Wires {
 	 *             if any of the arguments is null
 	 */
 	public static WireConfiguration newWireConfiguration(final String emitterName, final String receiverName,
-			final String filter) {
+			@Nullable final String filter) {
 		return new WireConfiguration(emitterName, receiverName, filter);
 	}
 
@@ -76,7 +76,7 @@ public final class Wires {
 	 *             if any of the arguments is null
 	 */
 	public static WireConfiguration newWireConfiguration(final String emitterName, final String receiverName,
-			final String filter, final boolean created) {
+			@Nullable final String filter, final boolean created) {
 		return new WireConfiguration(emitterName, receiverName, filter, created);
 	}
 
@@ -92,7 +92,7 @@ public final class Wires {
 	 *             if the json object instance passed as argument is null
 	 */
 	public static WireConfiguration newWireConfigurationFromJson(final JSONObject jsonWire) throws JSONException {
-		checkCondition(jsonWire == null, "JSON Object cannot be null");
+		checkNull(jsonWire, "JSON Object cannot be null");
 		final String emitter = jsonWire.getString("p");
 		final String receiver = jsonWire.getString("c");
 		final String filter = jsonWire.optString("f");
@@ -152,7 +152,7 @@ public final class Wires {
 	 *            the wire fields
 	 * @return the wire record
 	 */
-	public static WireRecord newWireRecord(final Timestamp timestamp, final Position position,
+	public static WireRecord newWireRecord(final Timestamp timestamp, @Nullable final Position position,
 			final List<WireField> fields) {
 		return new WireRecord(timestamp, position, fields);
 	}

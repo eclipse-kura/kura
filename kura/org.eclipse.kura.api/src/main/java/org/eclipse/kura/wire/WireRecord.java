@@ -74,7 +74,7 @@ public final class WireRecord {
 	 * @param fields
 	 *            the wire fields
 	 * @throws KuraRuntimeException
-	 *             if any of the argument is null
+	 *             if any of the argument is null (except position)
 	 */
 	public WireRecord(final Timestamp timestamp, @Nullable final Position position, final List<WireField> fields) {
 		checkNull(timestamp, "Timestamp cannot be null");

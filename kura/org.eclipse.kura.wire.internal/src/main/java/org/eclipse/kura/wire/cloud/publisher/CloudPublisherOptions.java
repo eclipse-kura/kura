@@ -12,9 +12,12 @@
  */
 package org.eclipse.kura.wire.cloud.publisher;
 
+import java.util.List;
 import java.util.Map;
 
+import com.google.common.base.Splitter;
 import com.google.common.base.Throwables;
+import com.google.common.collect.ImmutableList;
 
 /**
  * The Class CloudPublisherOptions is responsible to provide all the required
@@ -258,18 +261,17 @@ public final class CloudPublisherOptions {
 	}
 
 	/**
-	 * Returns the emitters to be used for message publishing.
+	 * Returns the wire emitters to be used for message publishing.
 	 *
 	 * @return the subscribed emitters
 	 */
-	public String[] getSubscribedEmitters() {
-		String[] emitteres = {};
+	public List<String> getSubscribedEmitters() {
 		if ((this.m_properties != null) && this.m_properties.containsKey(CONF_EMITTERS)
 				&& (this.m_properties.get(CONF_EMITTERS) != null)
 				&& (this.m_properties.get(CONF_EMITTERS) instanceof String)) {
 			final String emittersStr = (String) this.m_properties.get(CONF_EMITTERS);
-			emitteres = emittersStr.split(",");
+			return Splitter.on(",").omitEmptyStrings().splitToList(emittersStr);
 		}
-		return emitteres;
+		return ImmutableList.of();
 	}
 }

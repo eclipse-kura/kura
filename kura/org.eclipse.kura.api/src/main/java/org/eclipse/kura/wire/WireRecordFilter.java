@@ -12,18 +12,23 @@
  */
 package org.eclipse.kura.wire;
 
+import org.eclipse.kura.KuraRuntimeException;
+
 /**
- * Wire Component interface represents a generic identity for
- * {@link WireEmitter}s and {@link WireReceiver}s. A Wire Component is a
- * generalization of a component responsible for producing data also known as
- * {@code WireEmitter} and/or consuming data also known as {@code WireReceiver}.
+ * The Interface WireRecordFilter is responsible to filter out the provided wire
+ * record
  */
-public interface WireComponent {
+public interface WireRecordFilter {
 
 	/**
-	 * Gets the name of the wire component
+	 * filter the provided wire record
 	 *
-	 * @return the name of the wire component
+	 * @param record
+	 *            the wire record to be filtered
+	 * @return true, if successful
+	 * @throws KuraRuntimeException
+	 *             if the argument is null
 	 */
-	public String getName();
+	public boolean filter(WireRecord record) throws KuraRuntimeException;
+
 }

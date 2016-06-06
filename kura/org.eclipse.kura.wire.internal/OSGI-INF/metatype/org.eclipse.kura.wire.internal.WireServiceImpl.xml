@@ -14,7 +14,7 @@
 <MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
     <OCD id="org.eclipse.kura.wire.internal.WireServiceImpl" 
          name="WireService" 
-         description="WireService description">
+         description="WireService leverages Kura Wiring communication functionalities between Wire Components">
 
         <Icon resource="WireService" size="32"/>
                 

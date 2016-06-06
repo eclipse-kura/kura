@@ -61,7 +61,7 @@ public final class DbWireRecordFilterOptions extends AbstractConfigurationOption
 		String sqlView = null;
 		if ((this.m_properties != null) && (this.m_properties.containsKey(CONF_SQL_VIEW))
 				&& (this.m_properties.get(CONF_SQL_VIEW) instanceof String)) {
-			sqlView = (String) this.m_properties.get(CONF_SQL_VIEW);
+			sqlView = String.valueOf(this.m_properties.get(CONF_SQL_VIEW));
 		}
 		return sqlView;
 	}

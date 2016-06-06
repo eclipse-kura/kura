@@ -74,14 +74,6 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, WireR
 	private static final String COLUMN_NAME = "COLUMN_NAME";
 
 	/**
-	 * FIXME: Add primary key and index on timestamp
-	 */
-
-	/**
-	 * FIXME: Verify timestamp resolution to milliseconds
-	 */
-
-	/**
 	 * FIXME: Add support for period cleanup of the data records collected!
 	 */
 
@@ -99,7 +91,7 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, WireR
 	private static final String SQL_ADD_COLUMN = "ALTER TABLE DR_{0} ADD COLUMN {1} {2};";
 
 	/** The Constant denoting denoting query to create table. */
-	private static final String SQL_CREATE_TABLE = "CREATE TABLE IF NOT EXISTS DR_{0} (timestamp TIMESTAMP);";
+	private static final String SQL_CREATE_TABLE = "CREATE TABLE IF NOT EXISTS DR_{0} (timestamp TIMESTAMP NOT NULL PRIMARY KEY);";
 
 	/** The Constant denoting denoting query to drop column. */
 	private static final String SQL_DROP_COLUMN = "ALTER TABLE DR_{0} DROP COLUMN {1};";
@@ -188,7 +180,7 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, WireR
 	}
 
 	/**
-	 * Executes the provided sql query.
+	 * Executes the provided SQL query.
 	 *
 	 * @param sql
 	 *            the SQL query to execute
@@ -201,7 +193,6 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, WireR
 	 */
 	private synchronized void execute(final String sql, final Integer... params) throws SQLException {
 		checkNull(sql, "SQL query cannot be null");
-
 		Connection conn = null;
 		PreparedStatement stmt = null;
 		try {
@@ -212,9 +203,9 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, WireR
 			}
 			stmt.execute();
 			conn.commit();
-		} catch (final Exception e) {
+		} catch (final SQLException e) {
 			this.rollback(conn);
-			Throwables.propagateIfInstanceOf(e, SQLException.class);
+			Throwables.propagate(e);
 		} finally {
 			this.close(stmt);
 			this.close(conn);
@@ -529,7 +520,7 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, WireR
 	}
 
 	/**
-	 * OSGi Service Component callback for updation
+	 * OSGi Service Component callback for updating
 	 *
 	 * @param properties
 	 *            the updated service component properties

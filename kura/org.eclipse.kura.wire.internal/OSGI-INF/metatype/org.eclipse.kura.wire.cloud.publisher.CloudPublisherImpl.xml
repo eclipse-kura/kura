@@ -42,6 +42,7 @@
             cardinality="0"
             required="true"
             default="0"
+            min="0"
             description="Timeout to be used when closing a Cloud Connection.">
         </AD>
 
@@ -69,6 +70,7 @@
             cardinality="0"
             required="true"
             default="7"
+            min="0"
             description="Relative ordering of this message with other messages that may be currently queued for publishing. Application should consider using priority 5 or higher.">
         </AD>
 
@@ -78,6 +80,8 @@
             cardinality="0"
             required="true"
             default="1"
+            min="0"
+            max="2"
             description="An integer specifying the quality of service the message was published on.">
         </AD>
 

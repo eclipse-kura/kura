@@ -14,7 +14,7 @@
 <MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
     <OCD id="org.eclipse.kura.wire.store.DbWireRecordFilter"
          name="DbWireRecordFilter" 
-         description="DbWireRecordFilter provides filtering and aggregation for WireRecords stored by the DbWireRecordStores.">
+         description="DbWireRecordFilter provides filtering and aggregation for Wire Records stored by the DbWireRecordStores.">
 
         <Icon resource="DbWireRecordFilter" size="32"/>
         
@@ -24,7 +24,7 @@
         	cardinality="0"
         	required="true"
         	default="SELECT AVG(DATA) AS AVG_DOUBLE FROM (SELECT DOUBLE_DATA AS DATA FROM DRIVER_EXAMPLE ORDER BY TIMESTAMP DESC LIMIT 10);"
-        	description="SQL to be executed to build a view.">
+        	description="SQL to be executed to build a view">
         </AD>
         
         <AD id="refresh.rate"
@@ -33,6 +33,7 @@
         	cardinality="0"
         	required="true"
         	default="30"
+        	min="5"
         	description="Refresh rate, in seconds">
         </AD>
         

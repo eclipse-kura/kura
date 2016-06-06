@@ -139,7 +139,7 @@ public final class CloudPublisherOptions extends AbstractConfigurationOptions {
 		if ((this.m_properties != null) && this.m_properties.containsKey(CONF_AUTOCONNECT_MODE)
 				&& (this.m_properties.get(CONF_AUTOCONNECT_MODE) != null)
 				&& (this.m_properties.get(CONF_AUTOCONNECT_MODE) instanceof String)) {
-			final String autoconnectModeValue = (String) this.m_properties.get(CONF_AUTOCONNECT_MODE);
+			final String autoconnectModeValue = String.valueOf(this.m_properties.get(CONF_AUTOCONNECT_MODE));
 			try {
 				autoConnectMode = AutoConnectMode.valueOf(autoconnectModeValue);
 			} catch (final IllegalArgumentException iea) {
@@ -189,7 +189,7 @@ public final class CloudPublisherOptions extends AbstractConfigurationOptions {
 		if ((this.m_properties != null) && this.m_properties.containsKey(CONF_APPLICATION)
 				&& (this.m_properties.get(CONF_APPLICATION) != null)
 				&& (this.m_properties.get(CONF_APPLICATION) instanceof String)) {
-			publishingApp = (String) this.m_properties.get(CONF_APPLICATION);
+			publishingApp = String.valueOf(this.m_properties.get(CONF_APPLICATION));
 		}
 		return publishingApp;
 	}
@@ -212,7 +212,7 @@ public final class CloudPublisherOptions extends AbstractConfigurationOptions {
 	/**
 	 * Returns the QoS to be used for message publishing.
 	 *
-	 * @return the publishing qos
+	 * @return the publishing QoS
 	 */
 	public int getPublishingQos() {
 		int publishingQos = DEFAULT_QOS;
@@ -248,7 +248,7 @@ public final class CloudPublisherOptions extends AbstractConfigurationOptions {
 		if ((this.m_properties != null) && this.m_properties.containsKey(CONF_TOPIC)
 				&& (this.m_properties.get(CONF_TOPIC) != null)
 				&& (this.m_properties.get(CONF_TOPIC) instanceof String)) {
-			publishingTopic = (String) this.m_properties.get(CONF_TOPIC);
+			publishingTopic = String.valueOf(this.m_properties.get(CONF_TOPIC));
 		}
 		return publishingTopic;
 	}

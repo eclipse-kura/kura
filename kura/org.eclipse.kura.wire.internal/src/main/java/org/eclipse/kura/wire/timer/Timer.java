@@ -115,17 +115,14 @@ public final class Timer implements WireEmitter, ConfigurableComponent {
 	private void doUpdate() {
 		this.m_name = this.m_properties.get(PROP_TIMER_NAME).toString();
 		this.m_interval = (Integer) this.m_properties.get(PROP_INTERVAL);
-
 		if (this.m_tickHandle != null) {
 			this.m_tickHandle.cancel(true);
 		}
-
 		this.m_tickHandle = this.m_executorService.schedule(new Runnable() {
 			/** {@inheritDoc} */
 			@Override
 			public void run() {
-				m_wireSupport.emit(Wires.newWireRecord(Wires.newWireField(TIMER_EVENT_FIELD_NAME,
-						TypedValues.newStringValue(m_name))));
+				m_wireSupport.emit(Wires.newWireRecord(Wires.newWireField(TIMER_EVENT_FIELD_NAME, TypedValues.newStringValue(m_name))));
 			}
 		}, this.m_interval, TimeUnit.SECONDS);
 	}

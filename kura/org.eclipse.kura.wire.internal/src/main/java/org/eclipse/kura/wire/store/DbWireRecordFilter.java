@@ -23,6 +23,10 @@ import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.db.DbService;
@@ -61,11 +65,23 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Wire
 	/** The DB Service dependency. */
 	private volatile DbService m_dbService;
 
+	/** Scheduled Executor Service */
+	private final ScheduledExecutorService m_executorService;
+
 	/** The DB Filter Options. */
 	private DbWireRecordFilterOptions m_options;
 
+	/** The future handle of the thread pool executor service. */
+	private ScheduledFuture<?> m_tickHandle;
+
 	/** The Wire Supporter component. */
-	private WireSupport m_wireSupport;
+	private final WireSupport m_wireSupport;
+
+	/** Constructor */
+	public DbWireRecordFilter() {
+		this.m_wireSupport = Wires.newWireSupport(this);
+		this.m_executorService = Executors.newScheduledThreadPool(5);
+	}
 
 	/**
 	 * OSGi service component callback for deactivation
@@ -79,7 +95,6 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Wire
 			final Map<String, Object> properties) {
 		s_logger.info("Activating DB Wire Record Filter...");
 		this.m_ctx = componentContext;
-		this.m_wireSupport = Wires.newWireSupport(this);
 		this.m_options = new DbWireRecordFilterOptions(properties);
 		s_logger.info("Activating DB Wire Record Filter...Done");
 	}
@@ -132,6 +147,10 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Wire
 		// certificate is already published due the missing dependency
 		// we only need to empty our CloudClient list
 		this.m_dbService = null;
+		if (this.m_tickHandle != null) {
+			this.m_tickHandle.cancel(true);
+		}
+		this.m_executorService.shutdown();
 		s_logger.info("Activating DB Wire Record Filter...Done");
 	}
 
@@ -264,7 +283,6 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Wire
 			this.close(stmt);
 			this.close(conn);
 		}
-
 		return dataRecords;
 	}
 
@@ -301,12 +319,18 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Wire
 	public synchronized void updated(final Map<String, Object> properties) {
 		s_logger.info("Updating DBWireRecordFilter..." + properties);
 		this.m_options = new DbWireRecordFilterOptions(properties);
-		try {
-			this.refreshDataView();
-		} catch (final SQLException e) {
-			s_logger.error(Throwables.getStackTraceAsString(e));
-		}
-		s_logger.info("Updating DBWireRecordFilter...Done " + properties);
+		this.m_tickHandle = this.m_executorService.schedule(new Runnable() {
+			/** {@inheritDoc} */
+			@Override
+			public void run() {
+				try {
+					refreshDataView();
+				} catch (final SQLException e) {
+					s_logger.error(Throwables.getStackTraceAsString(e));
+				}
+			}
+		}, this.m_options.getRefreshRate(), TimeUnit.SECONDS);
+		s_logger.info("Updating DBWireRecordFilter...Done ");
 	}
 
 	/** {@inheritDoc} */

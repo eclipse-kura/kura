@@ -135,30 +135,31 @@ public final class CloudPublisherImpl
 
 		for (final WireField dataField : wireRecord.getFields()) {
 			Object value = null;
+			final Object wrappedValue = dataField.getValue().getValue();
 			switch (dataField.getValue().getType()) {
 			case STRING:
-				value = dataField.getValue().getValue();
+				value = String.valueOf(wrappedValue);
 				break;
 			case DOUBLE:
-				value = dataField.getValue().getValue();
+				value = ((Double) wrappedValue).doubleValue();
 				break;
 			case INTEGER:
-				value = dataField.getValue().getValue();
+				value = ((Integer) wrappedValue).intValue();
 				break;
 			case LONG:
-				value = dataField.getValue().getValue();
+				value = ((Long) wrappedValue).longValue();
 				break;
 			case BOOLEAN:
-				value = dataField.getValue().getValue();
+				value = ((Boolean) wrappedValue).booleanValue();
 				break;
 			case BYTE_ARRAY:
-				value = dataField.getValue().getValue();
+				value = wrappedValue;
 				break;
 			case BYTE:
-				value = ((Byte) dataField.getValue().getValue()).byteValue();
+				value = ((Byte) wrappedValue).byteValue();
 				break;
 			case SHORT:
-				value = ((Short) dataField.getValue().getValue()).shortValue();
+				value = ((Short) wrappedValue).shortValue();
 				break;
 			default:
 				break;

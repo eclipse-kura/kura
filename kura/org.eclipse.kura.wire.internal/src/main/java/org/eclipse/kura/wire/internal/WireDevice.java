@@ -73,6 +73,7 @@ public final class WireDevice extends AbstractDevice implements WireEmitter, Wir
 	 * Instantiate a new wire device.
 	 */
 	public WireDevice() {
+		super();
 		this.m_wireSupport = Wires.newWireSupport(this);
 	}
 
@@ -127,7 +128,6 @@ public final class WireDevice extends AbstractDevice implements WireEmitter, Wir
 					Lists.newArrayList(channelWireField, deviceFlagWireField, timestampWireField, valueWireField));
 			wireRecords.add(wireRecord);
 		}
-
 		this.m_wireSupport.emit(wireRecords);
 	}
 

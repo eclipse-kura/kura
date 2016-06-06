@@ -110,7 +110,6 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 	protected synchronized void activate(final ComponentContext componentContext, final Map<String, Object> properties)
 			throws Exception {
 		s_logger.info("Activating Wire Service...");
-
 		this.m_ctx = componentContext;
 		try {
 			m_options = Wires.newWireServiceOptions(properties);
@@ -356,7 +355,7 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 		receiverName.setDefault("");
 
 		sb = new StringBuilder(
-				"multiton.instance.name for the resulting component. If left null it will equal  toservice.pid<br /><br /><b>Active wires:</b><br />");
+				"multiton.instance.name for the resulting component. If left null it will equal to service.pid<br /><br /><b>Active wires:</b><br />");
 		sb.append("<table style=\"width:100%; border: 1px solid black;\">");
 		sb.append("<tr><td><b>Emitter</b></td><td><b>Receiver</b></td></tr>");
 		for (final WireConfiguration wc : this.m_wireConfigs) {
@@ -413,8 +412,7 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 
 		try {
 			this.m_properties = new HashMap<String, Object>();
-			// Put the json configuration into the properties to persist in the
-			// snapshot
+			// Put the JSON configuration into properties to persist in snapshot
 			this.m_properties.put("wires", m_options.toJsonString());
 			this.m_properties.put(DELETE_INSTANCE_AD, "NONE");
 			this.m_properties.put(DELETE_WIRES_AD, "NONE");
@@ -682,7 +680,6 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 
 		final String newEmitter = this.m_configService.getComponentConfiguration(oldEmitterName).getPid();
 		final String newReceiver = this.m_configService.getComponentConfiguration(oldReceiverName).getPid();
-
 		if ((newEmitter != oldEmitterName) || (newReceiver != oldReceiverName)) {
 			this.m_monitor.enter();
 			try {

@@ -38,8 +38,8 @@
             default="10000"
             description="Shortest time between publishes per beacon in ms"/>
 
-        <AD id="companyName"
-            name="companyName"
+        <AD id="companyCode"
+            name="companyCode"
             type="String"
             cardinality="0"
             required="true"

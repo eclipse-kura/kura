@@ -25,13 +25,13 @@ public class BeaconScannerExample implements ConfigurableComponent, BluetoothBea
 	private static final String PROPERTY_TOPIC_PREFIX	= "topicPrefix";
 	private static final String PROPERTY_INAME			= "iname";
 	private static final String PROPERTY_RATE_LIMIT		= "rate_limit";
-	private static final String PROPERTY_COMPANY_NAME   = "companyName";
+	private static final String PROPERTY_COMPANY_CODE   = "companyCode";
 
 	// Configurable State
 	private String adapterName;		// eg. hci0
 	private String topicPrefix;		// eg. beacons
 	private int rateLimit;			// eg. 5000ms
-	private String companyName;
+	private String companyCode;
 	private Boolean enableScanning;
 	
 	// Internal State
@@ -103,8 +103,8 @@ public class BeaconScannerExample implements ConfigurableComponent, BluetoothBea
 					topicPrefix = (String)value;
 				} else if (key.equals(PROPERTY_RATE_LIMIT)) {
 					rateLimit = (Integer)value;
-				} else if (key.equals(PROPERTY_COMPANY_NAME)) {
-					companyName = (String)value;
+				} else if (key.equals(PROPERTY_COMPANY_CODE)) {
+					companyCode = (String)value;
 				} else if (key.equals(PROPERTY_ENABLE)) {
 					enableScanning = (Boolean)value;
 				}
@@ -126,7 +126,7 @@ public class BeaconScannerExample implements ConfigurableComponent, BluetoothBea
 		
 		bluetoothAdapter = bluetoothService.getBluetoothAdapter(adapterName);
 		if(bluetoothAdapter != null) {
-			bluetoothAdapter.startBeaconScan(companyName, this);
+			bluetoothAdapter.startBeaconScan(companyCode, this);
 		}
 		
 	}

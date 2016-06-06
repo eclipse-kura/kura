@@ -40,8 +40,8 @@ public class KuraCloudComponent extends UriEndpointComponent {
     protected Endpoint createEndpoint(String uri, String remain, Map<String, Object> parameters) throws Exception {
         KuraCloudEndpoint kuraCloudEndpoint = new KuraCloudEndpoint(uri, this, cloudService);
 
-        String[] res = remain.split("/");
-        if (res.length != 2) {
+        String[] res = remain.split("/", 2);
+        if (res.length < 2) {
             throw new IllegalArgumentException("Wrong kura-cloud URI format. Should be: kura-cloud:app/topic");
         }
         parameters.put(KuraCloudConstants.APPLICATION_ID, res[0]);

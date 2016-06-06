@@ -66,7 +66,7 @@ public interface BluetoothAdapter {
 	 * relayed through the {@link BluetoothLeScanListener} when the scan
 	 * is complete.
 	 * 
-	 * @param listener	Interface for collecting scan results
+	 * @param listener	  Interface for collecting scan results
 	 */
 	public void startLeScan(BluetoothLeScanListener listener);
 	
@@ -74,10 +74,11 @@ public interface BluetoothAdapter {
 	/**
 	* Starts an asynchronous scan for Bluetooth LE beacons. Beacon data is
 	* relayed through the {@link BluetoothBeaconScanListener} as it arrives.
-	* 
+	*
+	* @param companyName Hexadecimal string representing the company code
 	* @param listener Interface for collecting beacon data.
 	*/
-	void startBeaconScan(BluetoothBeaconScanListener listener);
+	void startBeaconScan(String companyName, BluetoothBeaconScanListener listener);
 	
 	
 	/**

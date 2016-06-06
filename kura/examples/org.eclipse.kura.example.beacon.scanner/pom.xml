@@ -23,7 +23,7 @@
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
-	<artifactId>org.eclipse.kura.example.beacon_scanner</artifactId>
+	<artifactId>org.eclipse.kura.example.beacon.scanner</artifactId>
 	<version>1.0.1-SNAPSHOT</version>
 	<packaging>eclipse-plugin</packaging>
 

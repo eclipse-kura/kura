@@ -58,14 +58,14 @@ import com.google.common.collect.Maps;
 import com.google.common.util.concurrent.Monitor;
 
 /**
- * The Class BaseDevice is a basic device implementation of a Kura Field Device
- * which associates a device driver. All devices which associates a driver must
- * extend this class to conform to the kura device specifications.
+ * The Class AbstractDevice is a basic device implementation of a Kura Field
+ * Device which associates a device driver. All devices which associates a
+ * driver must extend this class to conform to the kura device specifications.
  */
-public class BaseDevice implements Device, SelfConfiguringComponent {
+public abstract class AbstractDevice implements Device, SelfConfiguringComponent {
 
 	/** The Logger instance. */
-	private static final Logger s_logger = LoggerFactory.getLogger(BaseDevice.class);
+	private static final Logger s_logger = LoggerFactory.getLogger(AbstractDevice.class);
 
 	/** The service component context. */
 	private ComponentContext m_context;
@@ -91,7 +91,7 @@ public class BaseDevice implements Device, SelfConfiguringComponent {
 	/**
 	 * Instantiates a new base device.
 	 */
-	public BaseDevice() {
+	protected AbstractDevice() {
 		this.m_deviceListeners = Maps.newConcurrentMap();
 		this.m_monitor = new Monitor();
 	}

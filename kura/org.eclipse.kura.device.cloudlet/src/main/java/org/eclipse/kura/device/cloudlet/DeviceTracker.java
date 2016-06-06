@@ -16,7 +16,7 @@ import java.util.Collection;
 import java.util.Map;
 
 import org.eclipse.kura.device.Device;
-import org.eclipse.kura.device.internal.BaseDevice;
+import org.eclipse.kura.device.internal.AbstractDevice;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.InvalidSyntaxException;
@@ -60,8 +60,8 @@ public final class DeviceTracker extends ServiceTracker<Object, Object> {
 		if (service instanceof Device) {
 			s_logger.info("Device has been found by Device Cloudlet Tracker....==> adding service");
 			if (service instanceof Device) {
-				final BaseDevice device = (BaseDevice) service;
-				this.m_devices.put(device.getDeviceConfiguration().getDeviceName(), device);
+				final Device device = (Device) service;
+				this.m_devices.put(((AbstractDevice) device).getDeviceConfiguration().getDeviceName(), device);
 			}
 		}
 		return service;
@@ -87,8 +87,8 @@ public final class DeviceTracker extends ServiceTracker<Object, Object> {
 				s_logger.info("Device has been found by Device Cloudlet Tracker....==> open");
 				final Object object = this.context.getService(ref);
 				if (object instanceof Device) {
-					final BaseDevice device = (BaseDevice) this.context.getService(ref);
-					this.m_devices.put(device.getDeviceConfiguration().getDeviceName(), device);
+					final Device device = this.context.getService(ref);
+					this.m_devices.put(((AbstractDevice) device).getDeviceConfiguration().getDeviceName(), device);
 				}
 			}
 		} catch (final InvalidSyntaxException e) {

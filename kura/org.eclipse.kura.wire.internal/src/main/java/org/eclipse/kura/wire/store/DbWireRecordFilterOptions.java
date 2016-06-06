@@ -12,32 +12,21 @@
  */
 package org.eclipse.kura.wire.store;
 
-import java.util.List;
 import java.util.Map;
 
-import com.google.common.base.Splitter;
-import com.google.common.collect.ImmutableList;
+import org.eclipse.kura.wire.internal.AbstractConfigurationOptions;
 
 /**
  * The Class DbWireRecordFilterOptions is responsible to contain all the Db Wire
  * Record related filter options
  */
-public final class DbWireRecordFilterOptions {
-
-	/** The Constant denotes wire emitter. */
-	private static final String CONF_EMITTER_ID = "emitter.id";
-
-	/** The Constant denotes wire receiver. */
-	private static final String CONF_EMITTERS = "data.emitters";
+public final class DbWireRecordFilterOptions extends AbstractConfigurationOptions {
 
 	/** The Constant denotes the refresh rate. */
 	private static final String CONF_REFRESH_RATE = "refresh.rate";
 
 	/** The Constant denotes SQL view. */
 	private static final String CONF_SQL_VIEW = "sql.view";
-
-	/** The Configured Properties. */
-	private final Map<String, Object> m_properties;
 
 	/**
 	 * Instantiates a new DB wire record filter options.
@@ -46,22 +35,7 @@ public final class DbWireRecordFilterOptions {
 	 *            the provided properties
 	 */
 	public DbWireRecordFilterOptions(final Map<String, Object> properties) {
-		this.m_properties = properties;
-	}
-
-	/**
-	 * Returns the ID to be used for this wire emitter.
-	 *
-	 * @return the emitter id
-	 */
-	public String getEmitterId() {
-		String emitterId = null;
-		if ((this.m_properties != null) && this.m_properties.containsKey(CONF_EMITTER_ID)
-				&& (this.m_properties.get(CONF_EMITTER_ID) != null)
-				&& (this.m_properties.get(CONF_EMITTER_ID) instanceof String)) {
-			emitterId = (String) this.m_properties.get(CONF_EMITTER_ID);
-		}
-		return emitterId;
+		super(properties);
 	}
 
 	/**
@@ -90,21 +64,6 @@ public final class DbWireRecordFilterOptions {
 			sqlView = (String) this.m_properties.get(CONF_SQL_VIEW);
 		}
 		return sqlView;
-	}
-
-	/**
-	 * Returns the wire emitters to be used for message publishing.
-	 *
-	 * @return the subscribed emitters
-	 */
-	public List<String> getSubscribedEmitters() {
-		if ((this.m_properties != null) && this.m_properties.containsKey(CONF_EMITTERS)
-				&& (this.m_properties.get(CONF_EMITTERS) != null)
-				&& (this.m_properties.get(CONF_EMITTERS) instanceof String)) {
-			final String emittersStr = (String) this.m_properties.get(CONF_EMITTERS);
-			return Splitter.on(",").omitEmptyStrings().splitToList(emittersStr);
-		}
-		return ImmutableList.of();
 	}
 
 }

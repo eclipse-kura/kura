@@ -12,18 +12,17 @@
  */
 package org.eclipse.kura.wire.cloud.publisher;
 
-import java.util.List;
 import java.util.Map;
 
-import com.google.common.base.Splitter;
+import org.eclipse.kura.wire.internal.AbstractConfigurationOptions;
+
 import com.google.common.base.Throwables;
-import com.google.common.collect.ImmutableList;
 
 /**
  * The Class CloudPublisherOptions is responsible to provide all the required
  * options for the Cloud Publisher Wire Component
  */
-public final class CloudPublisherOptions {
+public final class CloudPublisherOptions extends AbstractConfigurationOptions {
 
 	/**
 	 * The different Auto Connect Modes.
@@ -78,9 +77,6 @@ public final class CloudPublisherOptions {
 	/** The Constant denoting autoconnect mode. */
 	private static final String CONF_AUTOCONNECT_MODE = "autoconnect.mode";
 
-	/** The Constant denoting wire emitters. */
-	private static final String CONF_EMITTERS = "data.emitters";
-
 	/** The Constant denoting message type. */
 	private static final String CONF_MESSAGE_TYPE = "publish.message.type";
 
@@ -123,9 +119,6 @@ public final class CloudPublisherOptions {
 	/** The Constant denoting default mqtt topic. */
 	private static final String DEFAULT_TOPIC = "EVENT";
 
-	/** The service component properties container. */
-	private final Map<String, Object> m_properties;
-
 	/**
 	 * Instantiates a new cloud publisher options.
 	 *
@@ -133,7 +126,7 @@ public final class CloudPublisherOptions {
 	 *            the properties
 	 */
 	public CloudPublisherOptions(final Map<String, Object> properties) {
-		this.m_properties = properties;
+		super(properties);
 	}
 
 	/**
@@ -260,18 +253,4 @@ public final class CloudPublisherOptions {
 		return publishingTopic;
 	}
 
-	/**
-	 * Returns the wire emitters to be used for message publishing.
-	 *
-	 * @return the subscribed emitters
-	 */
-	public List<String> getSubscribedEmitters() {
-		if ((this.m_properties != null) && this.m_properties.containsKey(CONF_EMITTERS)
-				&& (this.m_properties.get(CONF_EMITTERS) != null)
-				&& (this.m_properties.get(CONF_EMITTERS) instanceof String)) {
-			final String emittersStr = (String) this.m_properties.get(CONF_EMITTERS);
-			return Splitter.on(",").omitEmptyStrings().splitToList(emittersStr);
-		}
-		return ImmutableList.of();
-	}
 }

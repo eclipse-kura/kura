@@ -14,6 +14,7 @@ package org.eclipse.kura.device.internal;
 
 import java.util.Collection;
 
+import org.eclipse.kura.device.Device;
 import org.eclipse.kura.device.Driver;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -38,8 +39,8 @@ public final class DriverTracker extends ServiceTracker<Object, Object> {
 	/** The Logger instance. */
 	private static final Logger s_logger = LoggerFactory.getLogger(DriverTracker.class);
 
-	/** The Base Device Instance */
-	private final BaseDevice m_device;
+	/** The Device Instance */
+	private final Device m_device;
 
 	/** The Driver Identifier */
 	private final String m_driverId;
@@ -56,7 +57,7 @@ public final class DriverTracker extends ServiceTracker<Object, Object> {
 	 * @throws InvalidSyntaxException
 	 *             the invalid syntax exception
 	 */
-	public DriverTracker(final BundleContext context, final BaseDevice device, final String driverId)
+	public DriverTracker(final BundleContext context, final Device device, final String driverId)
 			throws InvalidSyntaxException {
 		super(context, context.createFilter("(" + Constants.OBJECTCLASS + "=*)"), null);
 		this.m_driverId = driverId;
@@ -71,7 +72,7 @@ public final class DriverTracker extends ServiceTracker<Object, Object> {
 		if ((service instanceof Driver) && reference.getProperty(DRIVER_ID_PROPERTY).equals(this.m_driverId)) {
 			s_logger.info("Driver has been found by the driver tracker....==> adding service");
 			if (service instanceof Driver) {
-				this.m_device.m_driver = (Driver) service;
+				((AbstractDevice) this.m_device).m_driver = (Driver) service;
 			}
 		}
 		return service;
@@ -88,7 +89,7 @@ public final class DriverTracker extends ServiceTracker<Object, Object> {
 				if (ref.getProperty(DRIVER_ID_PROPERTY).equals(this.m_driverId)) {
 					s_logger.info("Driver has been found by the driver tracker....==> open");
 					if (ref instanceof Driver) {
-						this.m_device.m_driver = this.context.getService(ref);
+						((AbstractDevice) this.m_device).m_driver = this.context.getService(ref);
 					}
 				}
 			}
@@ -103,7 +104,7 @@ public final class DriverTracker extends ServiceTracker<Object, Object> {
 		super.removedService(reference, service);
 		if ((service instanceof Driver) && reference.getProperty(DRIVER_ID_PROPERTY).equals(this.m_driverId)) {
 			s_logger.info("Driver has been removed by the driver tracker..." + service);
-			this.m_device.m_driver = null;
+			((AbstractDevice) this.m_device).m_driver = null;
 		}
 	}
 

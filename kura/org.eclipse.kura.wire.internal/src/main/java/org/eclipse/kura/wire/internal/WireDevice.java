@@ -25,7 +25,7 @@ import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.device.Channel;
 import org.eclipse.kura.device.ChannelType;
 import org.eclipse.kura.device.DeviceRecord;
-import org.eclipse.kura.device.internal.BaseDevice;
+import org.eclipse.kura.device.internal.AbstractDevice;
 import org.eclipse.kura.device.util.Devices;
 import org.eclipse.kura.type.TypedValue;
 import org.eclipse.kura.type.util.TypedValues;
@@ -61,7 +61,7 @@ import com.google.common.collect.Lists;
  * <li>Value</li>
  * </ul>
  */
-public final class WireDevice extends BaseDevice implements WireEmitter, WireReceiver {
+public final class WireDevice extends AbstractDevice implements WireEmitter, WireReceiver {
 
 	/** The Logger instance. */
 	private static final Logger s_logger = LoggerFactory.getLogger(WireDevice.class);
@@ -70,7 +70,7 @@ public final class WireDevice extends BaseDevice implements WireEmitter, WireRec
 	protected WireSupport m_wireSupport;
 
 	/**
-	 * Instantiates a new wire device.
+	 * Instantiate a new wire device.
 	 */
 	public WireDevice() {
 		this.m_wireSupport = Wires.newWireSupport(this);
@@ -102,7 +102,7 @@ public final class WireDevice extends BaseDevice implements WireEmitter, WireRec
 	}
 
 	/**
-	 * Emits the provided list of device records to the associated wires.
+	 * Emit the provided list of device records to the associated wires.
 	 *
 	 * @param recentlyReadRecords
 	 *            the list of device records conforming to the aforementioned
@@ -115,7 +115,6 @@ public final class WireDevice extends BaseDevice implements WireEmitter, WireRec
 		checkCondition(deviceRecords.isEmpty(), "Device records cannot be empty");
 
 		final List<WireRecord> wireRecords = Lists.newArrayList();
-
 		for (final DeviceRecord deviceRecord : deviceRecords) {
 			final WireField channelWireField = Wires.newWireField("Channel_Name",
 					TypedValues.newStringValue(deviceRecord.getChannelName()));
@@ -162,9 +161,7 @@ public final class WireDevice extends BaseDevice implements WireEmitter, WireRec
 
 		final List<DeviceRecord> deviceRecordsToWriteChannels = Lists.newArrayList();
 		final List<String> channelsToRead = Lists.newArrayList();
-
 		final Map<String, Channel> channels = this.m_deviceConfiguration.getChannels();
-
 		// determining channels to read
 		for (final String channelKey : channels.keySet()) {
 			final Channel channel = channels.get(channelKey);
@@ -173,7 +170,6 @@ public final class WireDevice extends BaseDevice implements WireEmitter, WireRec
 			}
 		}
 		checkCondition(wireEnvelope.getRecords().isEmpty(), "Wire records cannot be empty");
-
 		if (wireEnvelope.getRecords().get(0).getFields().get(0).getName().equals(Timer.TIMER_EVENT_FIELD_NAME)) {
 			// perform the read operation on timer event receive
 			try {
@@ -184,7 +180,6 @@ public final class WireDevice extends BaseDevice implements WireEmitter, WireRec
 						"Error while performing read from the wire device..." + Throwables.getStackTraceAsString(e));
 			}
 		}
-
 		// determining channels to write
 		for (final WireRecord wireRecord : wireEnvelope.getRecords()) {
 			for (final WireField wireField : wireRecord.getFields()) {
@@ -212,7 +207,7 @@ public final class WireDevice extends BaseDevice implements WireEmitter, WireRec
 	}
 
 	/**
-	 * Creates a device record from the provided channel information
+	 * Create a device record from the provided channel information
 	 *
 	 * @param channel
 	 *            the channel to get the values from

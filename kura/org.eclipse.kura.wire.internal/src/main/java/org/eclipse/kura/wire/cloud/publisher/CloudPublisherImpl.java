@@ -102,7 +102,7 @@ public final class CloudPublisherImpl
 		// create the singleton disconnect manager
 		if (s_disconnectManager == null) {
 			s_disconnectManager = new CloudPublisherDisconnectManager(this.m_dataService,
-					this.m_options.getAutoConnectQuieceTimeout());
+					this.m_options.getAutoConnectQuiesceTimeout());
 		}
 		// recreate the CloudClient
 		try {
@@ -128,11 +128,9 @@ public final class CloudPublisherImpl
 		if (wireRecord.getTimestamp() != null) {
 			jsonObject.put("timestamp", wireRecord.getTimestamp());
 		}
-
 		if (wireRecord.getPosition() != null) {
 			jsonObject.put("position", this.buildKuraPositionForJson(wireRecord.getPosition()));
 		}
-
 		for (final WireField dataField : wireRecord.getFields()) {
 			Object value = null;
 			final Object wrappedValue = dataField.getValue().getValue();
@@ -185,11 +183,9 @@ public final class CloudPublisherImpl
 		if (wireRecord.getTimestamp() != null) {
 			kuraPayload.setTimestamp(wireRecord.getTimestamp());
 		}
-
 		if (wireRecord.getPosition() != null) {
 			kuraPayload.setPosition(this.buildKuraPosition(wireRecord.getPosition()));
 		}
-
 		for (final WireField dataField : wireRecord.getFields()) {
 			Object value = null;
 			final Object wrappedValue = dataField.getValue().getValue();
@@ -223,7 +219,6 @@ public final class CloudPublisherImpl
 			}
 			kuraPayload.addMetric(dataField.getName(), value);
 		}
-
 		return kuraPayload;
 	}
 
@@ -418,7 +413,6 @@ public final class CloudPublisherImpl
 
 		if (!AutoConnectMode.AUTOCONNECT_MODE_OFF.equals(this.m_options.getAutoConnectMode())
 				&& !this.m_dataService.isAutoConnectEnabled() && !this.m_dataService.isConnected()) {
-
 			try {
 				if (!this.m_dataService.isConnected()) {
 					this.m_dataService.connect();
@@ -547,15 +541,14 @@ public final class CloudPublisherImpl
 		this.m_monitor.enter();
 		try {
 			if (s_disconnectManager != null) {
-				s_disconnectManager.setQuieceTimeout(this.m_options.getAutoConnectQuieceTimeout());
-
+				s_disconnectManager.setQuiesceTimeout(this.m_options.getAutoConnectQuiesceTimeout());
 				final int minDelay = this.m_options.getAutoConnectMode().getDisconnectDelay();
 				s_disconnectManager.disconnectInMinutes(minDelay);
 			}
 		} finally {
 			this.m_monitor.leave();
 		}
-		// recreate the CloudClient
+		// recreate the Cloud Client
 		try {
 			this.setupCloudClient();
 		} catch (final KuraException e) {

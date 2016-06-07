@@ -12,7 +12,6 @@
  */
 package org.eclipse.kura.type;
 
-import static org.eclipse.kura.Preconditions.checkNonInstance;
 import static org.eclipse.kura.Preconditions.checkNull;
 import static org.eclipse.kura.type.DataType.BYTE;
 
@@ -49,13 +48,9 @@ public final class ByteValue implements TypedValue<Byte> {
 
 	/** {@inheritDoc} */
 	@Override
-	@SuppressWarnings("rawtypes")
-	public int compareTo(final TypedValue otherTypedValue) {
+	public int compareTo(final TypedValue<Byte> otherTypedValue) {
 		checkNull(otherTypedValue, "Typed Value cannot be null");
-		checkNonInstance(otherTypedValue, ByteValue.class, "Typed Value is not byte value");
-
-		return ComparisonChain.start()
-				.compare(this.value, ((ByteValue) (otherTypedValue)).getValue(), Ordering.natural()).result();
+		return ComparisonChain.start().compare(this.value, otherTypedValue.getValue(), Ordering.natural()).result();
 	}
 
 	/** {@inheritDoc} */

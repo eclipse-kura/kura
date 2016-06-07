@@ -12,6 +12,8 @@
  */
 package org.eclipse.kura.wire;
 
+import java.util.List;
+
 import org.eclipse.kura.KuraRuntimeException;
 
 /**
@@ -21,14 +23,10 @@ import org.eclipse.kura.KuraRuntimeException;
 public interface WireRecordFilter {
 
 	/**
-	 * filter the provided wire record
+	 * filter the list of provided wire records
 	 *
-	 * @param record
-	 *            the wire record to be filtered
-	 * @return true, if successful
-	 * @throws KuraRuntimeException
-	 *             if the argument is null
+	 * @return the list of filtered wire records
 	 */
-	public boolean filter(WireRecord record) throws KuraRuntimeException;
+	public List<WireRecord> filter() throws KuraRuntimeException;
 
 }

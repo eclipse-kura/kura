@@ -12,7 +12,6 @@
  */
 package org.eclipse.kura.type;
 
-import static org.eclipse.kura.Preconditions.checkNonInstance;
 import static org.eclipse.kura.Preconditions.checkNull;
 import static org.eclipse.kura.type.DataType.SHORT;
 
@@ -49,13 +48,9 @@ public final class ShortValue implements TypedValue<Short> {
 
 	/** {@inheritDoc} */
 	@Override
-	@SuppressWarnings("rawtypes")
-	public int compareTo(final TypedValue otherTypedValue) {
+	public int compareTo(final TypedValue<Short> otherTypedValue) {
 		checkNull(otherTypedValue, "Typed Value cannot be null");
-		checkNonInstance(otherTypedValue, ShortValue.class, "Typed Value is not short");
-
-		return ComparisonChain.start()
-				.compare(this.value, ((ShortValue) (otherTypedValue)).getValue(), Ordering.natural()).result();
+		return ComparisonChain.start().compare(this.value, otherTypedValue.getValue(), Ordering.natural()).result();
 	}
 
 	/** {@inheritDoc} */

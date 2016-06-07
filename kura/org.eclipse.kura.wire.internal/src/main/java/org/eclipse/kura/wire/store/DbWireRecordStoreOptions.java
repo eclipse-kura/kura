@@ -22,6 +22,9 @@ import org.eclipse.kura.wire.internal.AbstractConfigurationOptions;
  */
 public final class DbWireRecordStoreOptions extends AbstractConfigurationOptions {
 
+	/** The Constant denotes the period as configured for periodic cleanup. */
+	private static final String PERIODIC_CLEANUP_ID = "period.cleanup";
+
 	/**
 	 * Instantiates a new DB wire record store options.
 	 *
@@ -30,6 +33,21 @@ public final class DbWireRecordStoreOptions extends AbstractConfigurationOptions
 	 */
 	public DbWireRecordStoreOptions(final Map<String, Object> properties) {
 		super(properties);
+	}
+
+	/**
+	 * Returns the period as configured for the periodic cleanup.
+	 *
+	 * @return the period
+	 */
+	public int getPeriodicCleanupRate() {
+		int period = 0;
+		if ((this.m_properties != null) && this.m_properties.containsKey(PERIODIC_CLEANUP_ID)
+				&& (this.m_properties.get(PERIODIC_CLEANUP_ID) != null)
+				&& (this.m_properties.get(PERIODIC_CLEANUP_ID) instanceof Integer)) {
+			period = (Integer) this.m_properties.get(PERIODIC_CLEANUP_ID);
+		}
+		return period;
 	}
 
 }

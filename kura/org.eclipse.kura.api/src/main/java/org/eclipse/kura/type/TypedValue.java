@@ -18,8 +18,7 @@ package org.eclipse.kura.type;
  * @param <T>
  *            The Java Value Type to be represented
  */
-@SuppressWarnings("rawtypes")
-public interface TypedValue<T> extends Comparable<TypedValue> {
+public interface TypedValue<T> extends Comparable<TypedValue<T>> {
 
 	/**
 	 * Returns the data type of the represented value

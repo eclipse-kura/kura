@@ -45,22 +45,32 @@ import org.osgi.service.wireadmin.Wire;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.annotations.Beta;
 import com.google.common.base.Throwables;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 
 /**
  * The Class DbWireRecordFilter is responsible for representing a wire component
  * which is mainly used to filter records as received from the wire record
  */
-@Beta
 public final class DbWireRecordFilter implements WireEmitter, WireReceiver, WireRecordFilter, ConfigurableComponent {
 
 	/** The Logger instance. */
 	private static final Logger s_logger = LoggerFactory.getLogger(DbWireRecordFilter.class);
 
+	/** Container to store cache values of SQL view wire records */
+	private final Cache<Long, List<WireRecord>> m_cache;
+
+	/** Cache last updated timestamp */
+	private long m_cacheLastUpdated;
+
 	/** The component context. */
 	private ComponentContext m_ctx;
+
+	/** DB Utility Helper */
+	private DbServiceHelper m_dbHelper;
 
 	/** The DB Service dependency. */
 	private volatile DbService m_dbService;
@@ -80,7 +90,8 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Wire
 	/** Constructor */
 	public DbWireRecordFilter() {
 		this.m_wireSupport = Wires.newWireSupport(this);
-		this.m_executorService = Executors.newScheduledThreadPool(5);
+		this.m_executorService = Executors.newSingleThreadScheduledExecutor();
+		this.m_cache = CacheBuilder.newBuilder().maximumSize(10000).expireAfterWrite(30, TimeUnit.MINUTES).build();
 	}
 
 	/**
@@ -96,37 +107,9 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Wire
 		s_logger.info("Activating DB Wire Record Filter...");
 		this.m_ctx = componentContext;
 		this.m_options = new DbWireRecordFilterOptions(properties);
+		this.m_dbHelper = DbServiceHelper.getInstance(this.m_dbService);
+		this.scheduleRefresh();
 		s_logger.info("Activating DB Wire Record Filter...Done");
-	}
-
-	/**
-	 * Close the connection instance
-	 *
-	 * @param conn
-	 *            the connection instance to be closed
-	 */
-	private void close(final Connection conn) {
-		this.m_dbService.close(conn);
-	}
-
-	/**
-	 * close the result sets
-	 *
-	 * @param rss
-	 *            the result sets
-	 */
-	private void close(final ResultSet... rss) {
-		this.m_dbService.close(rss);
-	}
-
-	/**
-	 * Close the SQL statements
-	 *
-	 * @param stmts
-	 *            the SQL statements
-	 */
-	private void close(final Statement... stmts) {
-		this.m_dbService.close(stmts);
 	}
 
 	/** {@inheritDoc} */
@@ -156,25 +139,14 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Wire
 
 	/** {@inheritDoc} */
 	@Override
-	public boolean filter(final WireRecord record) {
-		checkNull(record, "Wire record cannot be null");
-		s_logger.debug("Wire record filtering started..." + record);
-		// TODO Implement how to filter the record
-		s_logger.debug("Wire record filtering started...done");
-		return false;
-	}
-
-	private Connection getConnection() throws SQLException {
-		return this.m_dbService.getConnection();
-	}
-
-	/**
-	 * Gets the DB service.
-	 *
-	 * @return the DB service
-	 */
-	public DbService getDbService() {
-		return this.m_dbService;
+	public List<WireRecord> filter() {
+		s_logger.debug("Wire record filtering started...");
+		try {
+			return this.refreshSQLView();
+		} catch (final SQLException e) {
+			s_logger.error("Error while filtering wire records.." + Throwables.getStackTraceAsString(e));
+		}
+		return ImmutableList.of();
 	}
 
 	/** {@inheritDoc} */
@@ -185,17 +157,22 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Wire
 
 	/** {@inheritDoc} */
 	@Override
-	public synchronized void onWireReceive(final WireEnvelope wireEvelope) {
-		checkNull(wireEvelope, "Wire envelope cannot be null");
-		s_logger.debug("Wire Enveloped received..." + this.m_wireSupport);
-		final List<WireRecord> dataRecords = wireEvelope.getRecords();
-		final List<WireRecord> filteredRecords = Lists.newArrayList();
-		for (final WireRecord dataRecord : dataRecords) {
-			if (this.filter(dataRecord)) {
-				filteredRecords.add(dataRecord);
-			}
+	public synchronized void onWireReceive(final WireEnvelope wireEnvelope) {
+		checkNull(wireEnvelope, "Wire envelope cannot be null");
+		s_logger.debug("Wire Enveloped received..." + wireEnvelope);
+		// No need to look into the wire envelope as the filtered records are
+		// prepared from the SQL view as configured by the user
+		final Date currentTime = new Date(System.currentTimeMillis());
+		// if current time is after the time for which the cache is last
+		// updated due to scheduled refresh view operation, then this is
+		// going to be new update operation. Hence, update the cache.
+		if (currentTime.after(new Date(this.m_cacheLastUpdated))) {
+			this.m_cacheLastUpdated = currentTime.getTime();
+			this.m_cache.put(this.m_cacheLastUpdated, this.filter());
 		}
-		this.m_wireSupport.emit(filteredRecords);
+		// simply read the last updated cache value. There is no need to update
+		// the cache.
+		this.m_wireSupport.emit(this.m_cache.getIfPresent(this.m_cacheLastUpdated));
 	}
 
 	/** {@inheritDoc} */
@@ -211,9 +188,9 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Wire
 	}
 
 	/**
-	 * Refresh the SQL data view
+	 * Refresh the SQL view
 	 */
-	private List<WireRecord> refreshDataView() throws SQLException {
+	private List<WireRecord> refreshSQLView() throws SQLException {
 		final Date now = new Date();
 		final List<WireRecord> dataRecords = Lists.newArrayList();
 		Connection conn = null;
@@ -221,7 +198,7 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Wire
 		ResultSet rset = null;
 		final String sqlView = this.m_options.getSqlView();
 		try {
-			conn = this.getConnection();
+			conn = this.m_dbHelper.getConnection();
 			stmt = conn.createStatement();
 			rset = stmt.executeQuery(sqlView);
 			if (rset != null) {
@@ -279,11 +256,30 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Wire
 			Throwables.propagateIfInstanceOf(e, SQLException.class);
 			s_logger.error(Throwables.getStackTraceAsString(e));
 		} finally {
-			this.close(rset);
-			this.close(stmt);
-			this.close(conn);
+			this.m_dbHelper.close(rset);
+			this.m_dbHelper.close(stmt);
+			this.m_dbHelper.close(conn);
 		}
 		return dataRecords;
+	}
+
+	/**
+	 * Schedule refresh of SQL view operation
+	 */
+	private void scheduleRefresh() {
+		// Cancel the current refresh view handle
+		if (this.m_tickHandle != null) {
+			this.m_tickHandle.cancel(true);
+		}
+		// schedule the new refresh view
+		this.m_tickHandle = this.m_executorService.schedule(new Runnable() {
+			/** {@inheritDoc} */
+			@Override
+			public void run() {
+				m_cacheLastUpdated = System.currentTimeMillis();
+				m_cache.put(m_cacheLastUpdated, filter());
+			}
+		}, this.m_options.getRefreshRate(), TimeUnit.SECONDS);
 	}
 
 	/**
@@ -319,17 +315,7 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Wire
 	public synchronized void updated(final Map<String, Object> properties) {
 		s_logger.info("Updating DBWireRecordFilter..." + properties);
 		this.m_options = new DbWireRecordFilterOptions(properties);
-		this.m_tickHandle = this.m_executorService.schedule(new Runnable() {
-			/** {@inheritDoc} */
-			@Override
-			public void run() {
-				try {
-					refreshDataView();
-				} catch (final SQLException e) {
-					s_logger.error(Throwables.getStackTraceAsString(e));
-				}
-			}
-		}, this.m_options.getRefreshRate(), TimeUnit.SECONDS);
+		this.scheduleRefresh();
 		s_logger.info("Updating DBWireRecordFilter...Done ");
 	}
 

@@ -67,14 +67,11 @@ public final class WireSeviceTracker extends ServiceTracker<Object, Object> {
 	}
 
 	/** {@inheritDoc} */
-	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Override
-	public Object addingService(final ServiceReference reference) {
+	public Object addingService(final ServiceReference<Object> reference) {
 		s_logger.debug("Adding Wire Components....");
-
 		final Object service = super.addingService(reference);
 		boolean flag = false;
-
 		final String property = (String) reference.getProperty("service.pid");
 		if (service instanceof WireEmitter) {
 			this.m_wireEmitters.add(property);

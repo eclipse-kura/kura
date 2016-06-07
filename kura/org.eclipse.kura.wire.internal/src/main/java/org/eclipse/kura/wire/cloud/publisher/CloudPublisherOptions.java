@@ -113,10 +113,10 @@ public final class CloudPublisherOptions extends AbstractConfigurationOptions {
 	/** The Constant DEFAULT_QUIECE_TIMEOUT. */
 	private static final int DEFAULT_QUIECE_TIMEOUT = 1000;
 
-	/** The Constant denoting default mqtt retain. */
+	/** The Constant denoting default MQTT retain. */
 	private static final boolean DEFAULT_RETAIN = false;
 
-	/** The Constant denoting default mqtt topic. */
+	/** The Constant denoting default MQTT topic. */
 	private static final String DEFAULT_TOPIC = "EVENT";
 
 	/**
@@ -152,9 +152,9 @@ public final class CloudPublisherOptions extends AbstractConfigurationOptions {
 	/**
 	 * Returns the QoS to be used for message publishing.
 	 *
-	 * @return the auto connect quiece timeout
+	 * @return the auto connect quiesce timeout
 	 */
-	public int getAutoConnectQuieceTimeout() {
+	public int getAutoConnectQuiesceTimeout() {
 		int quieceTimeout = DEFAULT_QUIECE_TIMEOUT;
 		if ((this.m_properties != null) && this.m_properties.containsKey(CONF_QUIECE_TIMEOUT)
 				&& (this.m_properties.get(CONF_QUIECE_TIMEOUT) != null)

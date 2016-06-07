@@ -17,6 +17,7 @@ import static org.eclipse.kura.Preconditions.checkNull;
 import java.util.List;
 
 import org.eclipse.kura.KuraRuntimeException;
+import org.eclipse.kura.wire.util.Wires;
 import org.osgi.service.wireadmin.Consumer;
 import org.osgi.service.wireadmin.Producer;
 import org.osgi.service.wireadmin.Wire;
@@ -69,9 +70,10 @@ public final class WireSupport implements Producer, Consumer {
 	 *            the wire records
 	 */
 	public synchronized void emit(final List<WireRecord> wireRecords) {
+		checkNull(wireRecords, "List of wire records cannot be null");
 		if (this.wireSupporter instanceof WireEmitter) {
 			final String emitterPid = this.wireSupporter.getName();
-			final WireEnvelope wei = new WireEnvelope(emitterPid, wireRecords);
+			final WireEnvelope wei = Wires.newWireEnvelope(emitterPid, wireRecords);
 			for (final Wire wire : this.outgoingWires) {
 				wire.update(wei);
 			}

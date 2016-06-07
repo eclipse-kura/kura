@@ -44,23 +44,23 @@ public final class CloudPublisherDisconnectManager {
 	/** The next execution time. */
 	private long m_nextExecutionTime;
 
-	/** The quiece timeout. */
-	private long m_quieceTimeout;
+	/** The quiesce timeout. */
+	private long m_quiesceTimeout;
 
 	/**
 	 * Instantiates a new cloud publisher disconnect manager.
 	 *
 	 * @param dataService
 	 *            the data service
-	 * @param quieceTimeout
-	 *            the quiece timeout
+	 * @param quiesceTimeout
+	 *            the quiesce timeout
 	 * @throws KuraRuntimeException
 	 *             if data service dependency is null
 	 */
-	public CloudPublisherDisconnectManager(final DataService dataService, final long quieceTimeout) {
+	public CloudPublisherDisconnectManager(final DataService dataService, final long quiesceTimeout) {
 		checkNull(dataService, "Data Service cannot be null");
 		this.m_dataService = dataService;
-		this.m_quieceTimeout = quieceTimeout;
+		this.m_quiesceTimeout = quiesceTimeout;
 		this.m_nextExecutionTime = 0;
 		this.m_executorService = Executors.newScheduledThreadPool(5);
 	}
@@ -84,12 +84,12 @@ public final class CloudPublisherDisconnectManager {
 	}
 
 	/**
-	 * Gets the quiece timeout.
+	 * Gets the quiesce timeout.
 	 *
-	 * @return the quiece timeout
+	 * @return the quiesce timeout
 	 */
-	public long getQuieceTimeout() {
-		return this.m_quieceTimeout;
+	public long getQuiesceTimeout() {
+		return this.m_quiesceTimeout;
 	}
 
 	/**
@@ -110,8 +110,7 @@ public final class CloudPublisherDisconnectManager {
 			@Override
 			public void run() {
 				try {
-					// disconnect
-					m_dataService.disconnect(m_quieceTimeout);
+					m_dataService.disconnect(m_quiesceTimeout);
 				} catch (final Exception exception) {
 					s_logger.error("Error while disconnecting cloud publisher..."
 							+ Throwables.getStackTraceAsString(exception));
@@ -124,13 +123,13 @@ public final class CloudPublisherDisconnectManager {
 	}
 
 	/**
-	 * Sets the quiece timeout.
+	 * Sets the quiesce timeout.
 	 *
-	 * @param quieceTimeout
-	 *            the new quiece timeout
+	 * @param quiesceTimeout
+	 *            the new quiesce timeout
 	 */
-	public void setQuieceTimeout(final long quieceTimeout) {
-		this.m_quieceTimeout = quieceTimeout;
+	public void setQuiesceTimeout(final long quiesceTimeout) {
+		this.m_quiesceTimeout = quiesceTimeout;
 	}
 
 	/**

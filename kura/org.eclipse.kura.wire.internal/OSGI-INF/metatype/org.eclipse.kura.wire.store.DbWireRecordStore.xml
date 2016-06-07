@@ -18,13 +18,14 @@
 
         <Icon resource="DbWireRecordStore" size="32"/>   
         
-        <AD id="attr"
-            name="attr"
-            type="String"
+        <AD id="period.cleanup"
+            name="period.cleanup"
+            type="Integer"
             cardinality="0"
             required="true"
-            default="aa"
-            description="">
+            default="0"
+            description="Option for periodic cleanup of the data records collected! (in seconds) (0 denotes disabled)"
+           	min="0">
         </AD>
              
     </OCD>

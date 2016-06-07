@@ -32,4 +32,14 @@ public interface WireRecordStore {
 	 */
 	public void store(String tableName, WireRecord wireRecord) throws KuraRuntimeException;
 
+	/**
+	 * Truncates the provided table.
+	 *
+	 * @param tableName
+	 *            the table name whose records will be truncated
+	 * @throws KuraRuntimeException
+	 *             if the argument is null
+	 */
+	public void truncate(String tableName) throws KuraRuntimeException;
+
 }

@@ -12,7 +12,6 @@
  */
 package org.eclipse.kura.type;
 
-import static org.eclipse.kura.Preconditions.checkNonInstance;
 import static org.eclipse.kura.Preconditions.checkNull;
 import static org.eclipse.kura.type.DataType.BYTE_ARRAY;
 
@@ -52,13 +51,10 @@ public final class ByteArrayValue implements TypedValue<byte[]> {
 
 	/** {@inheritDoc} */
 	@Override
-	@SuppressWarnings("rawtypes")
-	public int compareTo(final TypedValue otherTypedValue) {
+	public int compareTo(final TypedValue<byte[]> otherTypedValue) {
 		checkNull(otherTypedValue, "Typed Value cannot be null");
-		checkNonInstance(otherTypedValue, ByteArrayValue.class, "Typed Value is not byte array");
-
-		return ComparisonChain.start().compare(this.value, ((ByteArrayValue) (otherTypedValue)).getValue(),
-				UnsignedBytes.lexicographicalComparator()).result();
+		return ComparisonChain.start()
+				.compare(this.value, otherTypedValue.getValue(), UnsignedBytes.lexicographicalComparator()).result();
 	}
 
 	/** {@inheritDoc} */

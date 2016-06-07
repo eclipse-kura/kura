@@ -133,35 +133,35 @@ public class ServicesAnchorListItem extends AnchorListItem {
 	}
 
 	private IconType getIcon(String name) {
-		if (name.equals("BluetoothService")) {
+		if (name.startsWith("BluetoothService")) {
 			return IconType.BTC;
-		} else if (name.equals("CloudService")) {
+		} else if (name.startsWith("CloudService")) {
 			return IconType.CLOUD;
-		} else if (name.equals("DiagnosticsService")) {
+		} else if (name.startsWith("DiagnosticsService")) {
 			return IconType.AMBULANCE;
-		} else if (name.equals("ClockService")) {
+		} else if (name.startsWith("ClockService")) {
 			return IconType.CLOCK_O;
-		} else if (name.equals("DataService")) {
+		} else if (name.startsWith("DataService")) {
 			return IconType.DATABASE;
-		} else if (name.equals("MqttDataTransport")) {
+		} else if (name.startsWith("MqttDataTransport")) {
 			return IconType.FORUMBEE;
-		} else if (name.equals("PositionService")) {
+		} else if (name.startsWith("PositionService")) {
 			return IconType.LOCATION_ARROW;
-		} else if (name.equals("WatchdogService")) {
+		} else if (name.startsWith("WatchdogService")) {
 			return IconType.HEARTBEAT;
-		} else if (name.equals("SslManagerService")) {
+		} else if (name.startsWith("SslManagerService")) {
 			return IconType.LOCK;
-		} else if (name.equals("VpnService")) {
+		} else if (name.startsWith("VpnService")) {
 			return IconType.CONNECTDEVELOP;
-		} else if (name.equals("ProvisioningService")) {
+		} else if (name.startsWith("ProvisioningService")) {
 			return IconType.EXCLAMATION_CIRCLE;
-		} else if (name.equals("CommandPasswordService")) {
+		} else if (name.startsWith("CommandPasswordService")) {
 			return IconType.CHAIN;
-		} else if (name.equals("WebConsole")) {
+		} else if (name.startsWith("WebConsole")) {
 			return IconType.LAPTOP;
-		} else if (name.equals("CommandService")) {
+		} else if (name.startsWith("CommandService")) {
 			return IconType.TERMINAL;
-		} else if (name.equals("DenaliService")) {
+		} else if (name.startsWith("DenaliService")) {
 			return IconType.SPINNER;
 		} else {
 			return null;

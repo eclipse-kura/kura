@@ -87,7 +87,7 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, WireR
 	private static final String SQL_INSERT_RECORD = "INSERT INTO DR_{0} ({1}) VALUES ({2});";
 
 	/** The Constant denoting denoting query to truncate table. */
-	private static final String SQL_TRUNCATE_TABLE = "TRUNCATE TABLE DR_{0};";
+	private static final String SQL_TRUNCATE_TABLE = "TRUNCATE DR_{0};";
 
 	/** The Component Context. */
 	private ComponentContext m_ctx;
@@ -115,7 +115,7 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, WireR
 
 	/** Constructor */
 	public DbWireRecordStore() {
-		this.m_executorService = Executors.newScheduledThreadPool(5);
+		this.m_executorService = Executors.newSingleThreadScheduledExecutor();
 		this.m_wireSupport = Wires.newWireSupport(this);
 		this.m_tableNames = Sets.newHashSet();
 	}

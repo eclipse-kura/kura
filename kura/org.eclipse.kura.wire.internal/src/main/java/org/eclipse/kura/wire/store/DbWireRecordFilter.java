@@ -23,6 +23,7 @@ import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -46,8 +47,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Throwables;
-import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 
@@ -57,11 +59,18 @@ import com.google.common.collect.Lists;
  */
 public final class DbWireRecordFilter implements WireEmitter, WireReceiver, WireRecordFilter, ConfigurableComponent {
 
+	/**
+	 * This denotes the allowed interval (in seconds) for which the cache data
+	 * will be retrieved if time difference between the current time and the
+	 * last cache updated time is less than this interval
+	 */
+	private static final int CACHE_RETRIEVAL_ALLOWED_INTERVAL = 60;
+
 	/** The Logger instance. */
 	private static final Logger s_logger = LoggerFactory.getLogger(DbWireRecordFilter.class);
 
 	/** Container to store cache values of SQL view wire records */
-	private final Cache<Long, List<WireRecord>> m_cache;
+	private final LoadingCache<Long, List<WireRecord>> m_cache;
 
 	/** Cache last updated timestamp */
 	private long m_cacheLastUpdated;
@@ -91,7 +100,15 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Wire
 	public DbWireRecordFilter() {
 		this.m_wireSupport = Wires.newWireSupport(this);
 		this.m_executorService = Executors.newSingleThreadScheduledExecutor();
-		this.m_cache = CacheBuilder.newBuilder().maximumSize(10000).expireAfterWrite(30, TimeUnit.MINUTES).build();
+		this.m_cache = CacheBuilder.newBuilder().maximumSize(10000).expireAfterWrite(60, TimeUnit.MINUTES)
+				.build(new CacheLoader<Long, List<WireRecord>>() {
+					/** {@inheritDoc} */
+					@Override
+					public List<WireRecord> load(final Long timestamp) throws Exception {
+						m_cacheLastUpdated = System.currentTimeMillis();
+						return filter();
+					}
+				});
 	}
 
 	/**
@@ -139,7 +156,7 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Wire
 
 	/** {@inheritDoc} */
 	@Override
-	public List<WireRecord> filter() {
+	public synchronized List<WireRecord> filter() {
 		s_logger.debug("Wire record filtering started...");
 		try {
 			return this.refreshSQLView();
@@ -155,24 +172,35 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Wire
 		return (String) this.m_ctx.getProperties().get("service.pid");
 	}
 
-	/** {@inheritDoc} */
+	/**
+	 * Trigger emitting data as soon as new wire envelope is received. This
+	 * Retrieves the last updated value from the cache if the time difference
+	 * between the current time and the last cache updated time is less than the
+	 * allowed interval
+	 * ({@link DbWireRecordFilter#CACHE_RETRIEVAL_ALLOWED_INTERVAL}). If it is
+	 * more than the aforementioned time difference, then retrieve the value
+	 * from the cache using current time as a key. This will actually result in
+	 * a cache miss. Every cache miss will internally be handled by
+	 * {@link LoadingCache} in such a way that whenever a cache miss occurs it
+	 * will load the value from the DB.
+	 */
 	@Override
 	public synchronized void onWireReceive(final WireEnvelope wireEnvelope) {
 		checkNull(wireEnvelope, "Wire envelope cannot be null");
 		s_logger.debug("Wire Enveloped received..." + wireEnvelope);
-		// No need to look into the wire envelope as the filtered records are
-		// prepared from the SQL view as configured by the user
-		final Date currentTime = new Date(System.currentTimeMillis());
-		// if current time is after the time for which the cache is last
-		// updated due to scheduled refresh view operation, then this is
-		// going to be new update operation. Hence, update the cache.
-		if (currentTime.after(new Date(this.m_cacheLastUpdated))) {
-			this.m_cacheLastUpdated = currentTime.getTime();
-			this.m_cache.put(this.m_cacheLastUpdated, this.filter());
+		try {
+			final Long currrentTime = System.currentTimeMillis();
+			final long differenceInSec = (currrentTime - this.m_cacheLastUpdated) / (1000);
+			List<WireRecord> recordsToEmit;
+			if (differenceInSec < CACHE_RETRIEVAL_ALLOWED_INTERVAL) {
+				recordsToEmit = this.m_cache.get(this.m_cacheLastUpdated);
+			} else {
+				recordsToEmit = this.m_cache.get(currrentTime);
+			}
+			this.m_wireSupport.emit(recordsToEmit);
+		} catch (final ExecutionException e) {
+			s_logger.error("Error in emitting wire records..." + Throwables.getStackTraceAsString(e));
 		}
-		// simply read the last updated cache value. There is no need to update
-		// the cache.
-		this.m_wireSupport.emit(this.m_cache.getIfPresent(this.m_cacheLastUpdated));
 	}
 
 	/** {@inheritDoc} */
@@ -216,34 +244,42 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Wire
 						switch (dataType) {
 						case BOOLEAN:
 							final boolean boolValue = rset.getBoolean(i);
+							s_logger.info("Refreshing boolean value {}", boolValue);
 							dataField = Wires.newWireField(fieldName, TypedValues.newBooleanValue(boolValue));
 							break;
 						case BYTE:
 							final byte byteValue = rset.getByte(i);
+							s_logger.info("Refreshing byte value {}", byteValue);
 							dataField = Wires.newWireField(fieldName, TypedValues.newByteValue(byteValue));
 							break;
 						case DOUBLE:
 							final double doubleValue = rset.getDouble(i);
+							s_logger.info("Refreshing double value {}", doubleValue);
 							dataField = Wires.newWireField(fieldName, TypedValues.newDoubleValue(doubleValue));
 							break;
 						case INTEGER:
 							final int intValue = rset.getInt(i);
+							s_logger.info("Refreshing integer value {}", intValue);
 							dataField = Wires.newWireField(fieldName, TypedValues.newIntegerValue(intValue));
 							break;
 						case LONG:
 							final long longValue = rset.getLong(i);
+							s_logger.info("Refreshing long value {}", longValue);
 							dataField = Wires.newWireField(fieldName, TypedValues.newLongValue(longValue));
 							break;
 						case BYTE_ARRAY:
 							final byte[] bytesValue = rset.getBytes(i);
+							s_logger.info("Refreshing byte array value {}", bytesValue);
 							dataField = Wires.newWireField(fieldName, TypedValues.newByteArrayValue(bytesValue));
 							break;
 						case SHORT:
 							final short shortValue = rset.getShort(i);
+							s_logger.info("Refreshing short value {}", shortValue);
 							dataField = Wires.newWireField(fieldName, TypedValues.newShortValue(shortValue));
 							break;
 						case STRING:
 							final String stringValue = rset.getString(i);
+							s_logger.info("Refreshing string value {}", stringValue);
 							dataField = Wires.newWireField(fieldName, TypedValues.newStringValue(stringValue));
 							break;
 						}
@@ -252,6 +288,7 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Wire
 					dataRecords.add(Wires.newWireRecord(new Timestamp(now.getTime()), dataFields));
 				}
 			}
+			s_logger.info("Refreshed typed values");
 		} catch (final Exception e) {
 			Throwables.propagateIfInstanceOf(e, SQLException.class);
 			s_logger.error(Throwables.getStackTraceAsString(e));

@@ -22,6 +22,9 @@ import org.eclipse.kura.wire.internal.AbstractConfigurationOptions;
  */
 public final class DbWireRecordFilterOptions extends AbstractConfigurationOptions {
 
+	/** The Constant denotes the cache update interval. */
+	private static final String CONF_CACHE_INTERVAL = "cache.update.interval";
+
 	/** The Constant denotes the refresh rate. */
 	private static final String CONF_REFRESH_RATE = "refresh.rate";
 
@@ -36,6 +39,20 @@ public final class DbWireRecordFilterOptions extends AbstractConfigurationOption
 	 */
 	public DbWireRecordFilterOptions(final Map<String, Object> properties) {
 		super(properties);
+	}
+
+	/**
+	 * Returns the cache interval as configured.
+	 *
+	 * @return the configured cache interval
+	 */
+	public int getCacheInterval() {
+		int cacheInterval = 0;
+		if ((this.m_properties != null) && (this.m_properties.containsKey(CONF_CACHE_INTERVAL))
+				&& (this.m_properties.get(CONF_CACHE_INTERVAL) instanceof String)) {
+			cacheInterval = (Integer) this.m_properties.get(CONF_CACHE_INTERVAL);
+		}
+		return cacheInterval;
 	}
 
 	/**

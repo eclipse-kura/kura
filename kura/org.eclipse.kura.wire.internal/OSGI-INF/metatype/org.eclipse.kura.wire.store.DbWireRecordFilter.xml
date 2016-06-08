@@ -37,6 +37,16 @@
         	description="Refresh rate, in seconds">
         </AD>
         
+        <AD id="cache.update.interval"
+        	name="cache.update.interval"
+        	type="Integer"
+        	cardinality="0"
+        	required="true"
+        	default="60"
+        	min="60"
+        	description="This denotes the allowed interval (in seconds) for which the cache data will be retrieved if time difference between the current time and the last cache updated time is less than this interval">
+        </AD>
+        
     </OCD>
     
     <Designate pid="org.eclipse.kura.wire.store.DbWireRecordFilter" factoryPid="org.eclipse.kura.wire.store.DbWireRecordFilter">

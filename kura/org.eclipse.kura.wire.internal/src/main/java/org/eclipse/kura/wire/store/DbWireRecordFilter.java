@@ -59,17 +59,10 @@ import com.google.common.collect.Lists;
  */
 public final class DbWireRecordFilter implements WireEmitter, WireReceiver, WireRecordFilter, ConfigurableComponent {
 
-	/**
-	 * This denotes the allowed interval (in seconds) for which the cache data
-	 * will be retrieved if time difference between the current time and the
-	 * last cache updated time is less than this interval
-	 */
-	private static final int CACHE_RETRIEVAL_ALLOWED_INTERVAL = 60;
-
 	/** The Logger instance. */
 	private static final Logger s_logger = LoggerFactory.getLogger(DbWireRecordFilter.class);
 
-	/** Container to store cache values of SQL view wire records */
+	/** Cache container to store values of SQL view wire records */
 	private final LoadingCache<Long, List<WireRecord>> m_cache;
 
 	/** Cache last updated timestamp */
@@ -174,15 +167,13 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Wire
 
 	/**
 	 * Trigger emitting data as soon as new wire envelope is received. This
-	 * Retrieves the last updated value from the cache if the time difference
+	 * retrieves the last updated value from the cache if the time difference
 	 * between the current time and the last cache updated time is less than the
-	 * allowed interval
-	 * ({@link DbWireRecordFilter#CACHE_RETRIEVAL_ALLOWED_INTERVAL}). If it is
-	 * more than the aforementioned time difference, then retrieve the value
-	 * from the cache using current time as a key. This will actually result in
-	 * a cache miss. Every cache miss will internally be handled by
-	 * {@link LoadingCache} in such a way that whenever a cache miss occurs it
-	 * will load the value from the DB.
+	 * configured cache interval. If it is more than the aforementioned time
+	 * difference, then retrieve the value from the cache using current time as
+	 * a key. This will actually result in a cache miss. Every cache miss will
+	 * internally be handled by {@link LoadingCache} in such a way that whenever
+	 * a cache miss occurs it will load the value from the DB.
 	 */
 	@Override
 	public synchronized void onWireReceive(final WireEnvelope wireEnvelope) {
@@ -190,9 +181,9 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Wire
 		s_logger.debug("Wire Enveloped received..." + wireEnvelope);
 		try {
 			final Long currrentTime = System.currentTimeMillis();
-			final long differenceInSec = (currrentTime - this.m_cacheLastUpdated) / (1000);
+			final long differenceInSec = (currrentTime - this.m_cacheLastUpdated) / 1000;
 			List<WireRecord> recordsToEmit;
-			if (differenceInSec < CACHE_RETRIEVAL_ALLOWED_INTERVAL) {
+			if (differenceInSec < this.m_options.getCacheInterval()) {
 				recordsToEmit = this.m_cache.get(this.m_cacheLastUpdated);
 			} else {
 				recordsToEmit = this.m_cache.get(currrentTime);

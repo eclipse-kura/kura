@@ -19,9 +19,12 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Arrays;
 
 import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.db.DbService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Throwables;
 import com.google.common.escape.Escaper;
@@ -37,7 +40,10 @@ public final class DbServiceHelper {
 	 * SQL Escaper Builder to escape characters to sanitize SQL table and column
 	 * names.
 	 */
-	private static Escapers.Builder builder = Escapers.builder();
+	private static Escapers.Builder s_builder = Escapers.builder();
+
+	/** The Logger instance. */
+	private static final Logger s_logger = LoggerFactory.getLogger(DbServiceHelper.class);
 
 	/**
 	 * Gets the single instance of DbUtils.
@@ -56,14 +62,14 @@ public final class DbServiceHelper {
 	public DbService s_DbService;
 
 	/**
-	 * Instantiates a new DB utils.
+	 * Instantiates a new DB Service Helper.
 	 *
 	 * @param dbService
 	 *            the DB service
 	 * @throws KuraRuntimeException
 	 *             if argument is null
 	 */
-	public DbServiceHelper(final DbService dbService) {
+	private DbServiceHelper(final DbService dbService) {
 		checkNull(dbService, "Db Service cannot be null");
 		this.s_DbService = dbService;
 	}
@@ -78,7 +84,9 @@ public final class DbServiceHelper {
 	 */
 	public void close(final Connection conn) {
 		checkNull(conn, "Connection instance cannnot be null");
+		s_logger.debug("Closing connection instance..." + conn);
 		this.s_DbService.close(conn);
+		s_logger.debug("Closed connection instance...Done");
 	}
 
 	/**
@@ -88,7 +96,9 @@ public final class DbServiceHelper {
 	 *            the result sets
 	 */
 	public void close(final ResultSet... rss) {
+		s_logger.debug("Closing all result sets..." + Arrays.toString(rss));
 		this.s_DbService.close(rss);
+		s_logger.debug("Closing all result sets...Done");
 	}
 
 	/**
@@ -98,7 +108,9 @@ public final class DbServiceHelper {
 	 *            the SQL statements
 	 */
 	public void close(final Statement... stmts) {
+		s_logger.debug("Closing all statements..." + Arrays.toString(stmts));
 		this.s_DbService.close(stmts);
+		s_logger.debug("Closing all statements...Done");
 	}
 
 	/**
@@ -115,6 +127,7 @@ public final class DbServiceHelper {
 	 */
 	public synchronized void execute(final String sql, final Integer... params) throws SQLException {
 		checkNull(sql, "SQL query cannot be null");
+		s_logger.debug("Executing SQL query..." + sql);
 		Connection conn = null;
 		PreparedStatement stmt = null;
 		try {
@@ -132,6 +145,7 @@ public final class DbServiceHelper {
 			this.close(stmt);
 			this.close(conn);
 		}
+		s_logger.debug("Executing SQL query...Done");
 	}
 
 	/**
@@ -155,7 +169,9 @@ public final class DbServiceHelper {
 	 */
 	public void rollback(final Connection conn) {
 		checkNull(conn, "Connection instance cannnot be null");
+		s_logger.debug("Rolling back the connection instance..." + conn);
 		this.s_DbService.rollback(conn);
+		s_logger.debug("Rolling back the connection instance...Done");
 	}
 
 	/**
@@ -168,15 +184,16 @@ public final class DbServiceHelper {
 	 * --> _)
 	 *
 	 * @param string
-	 *            the string to be filtered
+	 *            the string to be sanitized
 	 * @return the escaped string
 	 * @throws KuraRuntimeException
 	 *             if argument is null
 	 */
 	public String sanitizeSqlTableAndColumnName(final String string) {
 		checkNull(string, "Provided string cannot be null");
-		final Escaper escaper = builder.addEscape('\'', "_").addEscape('"', "_").addEscape('\\', "").addEscape('.', "_")
-				.addEscape(' ', "_").build();
+		s_logger.debug("Sanitizing the provided string..." + string);
+		final Escaper escaper = s_builder.addEscape('\'', "_").addEscape('"', "_").addEscape('\\', "")
+				.addEscape('.', "_").addEscape(' ', "_").build();
 		return escaper.escape(string).toLowerCase();
 	}
 }

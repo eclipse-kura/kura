@@ -114,7 +114,6 @@ public class GwtStatusServiceImpl extends OsgiRemoteServiceServlet implements Gw
                         pairs.add(new GwtGroupedNVPair("cloudStatus", "Username", dataTransportService.getUsername()));
                         pairs.add(new GwtGroupedNVPair("cloudStatus", "Client ID", dataTransportService.getClientId()));
                     }
-                    pairs.add(new GwtGroupedNVPair("cloudStatus", "", ""));
                     ServiceLocator.getInstance().ungetService(dataServiceReference);
                 }
                 ServiceLocator.getInstance().ungetService(cloudServiceReference);

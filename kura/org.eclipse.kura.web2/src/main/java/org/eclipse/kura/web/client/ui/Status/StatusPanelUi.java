@@ -86,6 +86,7 @@ public class StatusPanelUi extends Composite {
 			@Override
 			public String getStyleNames(GwtGroupedNVPair row, int rowIndex) {
 				if ("Cloud and Data Service".equals(row.getName()) ||
+				        "Connection Name".equals(row.getName()) ||
 						"Ethernet Settings".equals(row.getName()) ||
 						"Wireless Settings".equals(row.getName()) ||
 						"Cellular Settings".equals(row.getName()) ||

@@ -136,5 +136,13 @@ public class TiSensorTagGatt {
 	
 	public static final UUID UUID_MOV_SENSOR_VALUE			    = UUID.fromString("f000aa81-0451-4000-b000-000000000000");
 	public static final UUID UUID_MOV_SENSOR_ENABLE		        = UUID.fromString("f000aa82-0451-4000-b000-000000000000");
-	public static final UUID UUID_MOV_SENSOR_PERIOD		        = UUID.fromString("f000aa83-0451-4000-b000-000000000000");	
+	public static final UUID UUID_MOV_SENSOR_PERIOD		        = UUID.fromString("f000aa83-0451-4000-b000-000000000000");
+	
+	// IO Service (leds and buzzer)
+	// CC2560
+	public static final String HANDLE_IO_SENSOR_VALUE_2650		= "0x004E";
+	public static final String HANDLE_IO_SENSOR_ENABLE_2650	    = "0x0050";
+	
+	public static final UUID UUID_IO_SENSOR_VALUE			    = UUID.fromString("f000aa65-0451-4000-b000-000000000000");
+	public static final UUID UUID_IO_SENSOR_ENABLE		        = UUID.fromString("f000aa66-0451-4000-b000-000000000000");
 }

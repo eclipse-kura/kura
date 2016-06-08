@@ -673,6 +673,7 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 			clientId = clientId.replace('/', '-');
 			clientId = clientId.replace('+', '-');
 			clientId = clientId.replace('#', '-');
+			clientId = clientId.replace('.', '-');
 
 
 			// Configure the broker URL

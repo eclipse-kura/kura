@@ -73,7 +73,7 @@ import com.google.common.collect.Sets;
  * <li>BYTE_ARRAY</li>
  * </ul>
  *
- * The channel "type" should be one of the following
+ * The channel {@code type} should be one of the following
  *
  * <ul>
  * <li>READ</li>
@@ -81,7 +81,7 @@ import com.google.common.collect.Sets;
  * <li>READ_WRITE</li>
  * </ul>
  *
- * The "channel_config" is a map which provides all the channel specific
+ * The {@code channel_config} is a map which provides all the channel specific
  * settings.
  */
 public final class DeviceConfiguration {

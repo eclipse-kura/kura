@@ -4,6 +4,7 @@ Bundle-Name: org.eclipse.kura.api
 Bundle-SymbolicName: org.eclipse.kura.api;singleton:=true
 Bundle-Version: 1.0.8.qualifier
 Bundle-Vendor: EUROTECH
+Bundle-License: Eclipse Public License v1.0
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Export-Package: org.eclipse.kura;version="1.2.0",
  org.eclipse.kura.bluetooth;version="1.2.0",

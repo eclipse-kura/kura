@@ -635,7 +635,6 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 					}
 				}
 			}
-
 			final String delete_wires_key_property = "delete.wires";
 			// Delete Existing Wire
 			Object wiresDelete = null;

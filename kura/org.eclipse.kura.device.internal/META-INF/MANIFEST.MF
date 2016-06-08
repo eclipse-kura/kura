@@ -4,6 +4,7 @@ Bundle-Name: Kura Device Accessor Provider
 Bundle-SymbolicName: org.eclipse.kura.device.internal
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: EUROTECH
+Bundle-License: Eclipse Public License v1.0
 Bundle-Category: Device-Driver Management
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.google.common.base;version="19.0.0",

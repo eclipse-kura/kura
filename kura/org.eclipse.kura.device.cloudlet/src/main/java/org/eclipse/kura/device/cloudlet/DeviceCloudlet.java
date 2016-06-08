@@ -20,7 +20,6 @@ import java.util.Map;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.cloud.CloudClient;
-import org.eclipse.kura.cloud.CloudService;
 import org.eclipse.kura.cloud.Cloudlet;
 import org.eclipse.kura.cloud.CloudletTopic;
 import org.eclipse.kura.device.Channel;
@@ -44,16 +43,23 @@ import com.google.common.collect.Lists;
 
 /**
  * The Class DeviceCloudlet is used to provide MQTT read/write operations on the
- * device. The application id is configured as "DEV-CLOUD".
+ * device. The application id is configured as {@code DEV-CLOUD}.
+ *
+ * The available GET commands are as follows
+ * <ul>
+ * <li>list-devices</li> e.g: /list-devices
+ * <li>list-channels</li> e.g: /list-channels/device_name
+ * </ul>
  *
  * The available EXEC commands are as follows
  * <ul>
  * <li>read</li> e.g /read/device_name/channel_name
- * <li>write</li> e.g /write/device_name/channel_name topic with payload "value"
- * and "type"
+ * <li>write</li> e.g /write/device_name/channel_name topic with payload
+ * {@code value} and {@code type}
  * </ul>
  *
- * The "value" key in the request payload can be one of the following
+ * The {@code value} key in the request payload can be one of the following
+ * (case-insensitive)
  * <ul>
  * <li>INTEGER</li>
  * <li>LONG</li>
@@ -61,13 +67,7 @@ import com.google.common.collect.Lists;
  * <li>BOOLEAN</li>
  * <li>BYTE</li>
  * <li>SHORT</li>
- * <li>DUBLE</li>
- * </ul>
- *
- * The available GET commands are as follows
- * <ul>
- * <li>list-devices</li> e.g: /list-devices
- * <li>list-channels</li> e.g: /list-channels/device_name
+ * <li>DOUBLE</li>
  * </ul>
  *
  * @see Cloudlet
@@ -86,9 +86,6 @@ public final class DeviceCloudlet extends Cloudlet {
 	/** The Logger instance. */
 	private static final Logger s_logger = LoggerFactory.getLogger(DeviceCloudlet.class);
 
-	/** Cloud Service Dependency. */
-	private volatile CloudService m_cloudService;
-
 	/** The map of devices present in the OSGi service registry. */
 	private Map<String, Device> m_devices;
 
@@ -105,17 +102,9 @@ public final class DeviceCloudlet extends Cloudlet {
 		super(APP_ID);
 	}
 
-	/**
-	 * Callback method used to trigger when this service component will be
-	 * activated.
-	 *
-	 * @param componentContext
-	 *            the component context
-	 * @param properties
-	 *            the configurable properties
-	 */
-	protected synchronized void activate(final ComponentContext componentContext,
-			final Map<String, Object> properties) {
+	/** {@inheritDoc} */
+	@Override
+	protected synchronized void activate(final ComponentContext componentContext) {
 		s_logger.debug("Activating Device Cloudlet...");
 		super.activate(componentContext);
 		try {
@@ -126,47 +115,16 @@ public final class DeviceCloudlet extends Cloudlet {
 		s_logger.debug("Activating Device Cloudlet...Done");
 	}
 
-	/**
-	 * Callback to be used while {@link CloudService} is registering.
-	 *
-	 * @param cloudService
-	 *            the cloud service
-	 */
-	public synchronized void bindCloudService(final CloudService cloudService) {
-		if (this.m_cloudService == null) {
-			this.m_cloudService = cloudService;
-			super.setCloudService(this.m_cloudService);
-		}
-	}
-
-	/**
-	 * Callback method used to trigger when this service component will be
-	 * deactivated.
-	 *
-	 * @param componentContext
-	 *            the component context
-	 */
+	/** {@inheritDoc} */
 	@Override
 	protected synchronized void deactivate(final ComponentContext componentContext) {
 		s_logger.debug("Deactivating Device Cloudlet...");
 		super.deactivate(componentContext);
-		this.m_cloudService = null;
+		super.setCloudService(null);
 		s_logger.debug("Deactivating Device Cloudlet...Done");
 	}
 
-	/**
-	 * The device cloudlet receives a request to perform EXEC operations
-	 *
-	 * @param reqTopic
-	 *            the request topic
-	 * @param reqPayload
-	 *            the request payload
-	 * @param respPayload
-	 *            the response payload
-	 * @throws KuraException
-	 *             the kura exception
-	 * @see Cloudlet
-	 */
+	/** {@inheritDoc} */
 	@Override
 	protected void doExec(final CloudletTopic reqTopic, final KuraRequestPayload reqPayload,
 			final KuraResponsePayload respPayload) throws KuraException {
@@ -218,19 +176,7 @@ public final class DeviceCloudlet extends Cloudlet {
 		s_logger.info("Cloudlet GET Request received on the Device Cloudlet....Done");
 	}
 
-	/**
-	 * The device cloudlet receives a request to perform GET operations
-	 *
-	 * @param reqTopic
-	 *            the request topic
-	 * @param reqPayload
-	 *            the request payload
-	 * @param respPayload
-	 *            the response payload
-	 * @throws KuraException
-	 *             the kura exception
-	 * @see Cloudlet
-	 */
+	/** {@inheritDoc} */
 	@Override
 	protected void doGet(final CloudletTopic reqTopic, final KuraRequestPayload reqPayload,
 			final KuraResponsePayload respPayload) throws KuraException {
@@ -266,19 +212,6 @@ public final class DeviceCloudlet extends Cloudlet {
 	}
 
 	/**
-	 * Callback to be used while {@link CloudService} is deregistering.
-	 *
-	 * @param cloudService
-	 *            the cloud service
-	 */
-	public synchronized void unbindCloudService(final CloudService cloudService) {
-		if (this.m_cloudService == cloudService) {
-			this.m_cloudService = null;
-			super.setCloudService(null);
-		}
-	}
-
-	/**
 	 * Wraps the provided user provided value to the an instance of
 	 * {@link TypedValue} in the device record
 	 *
@@ -297,7 +230,6 @@ public final class DeviceCloudlet extends Cloudlet {
 		checkNull(userType, "User Provided Type cannot be null");
 
 		TypedValue<?> value = null;
-
 		if ("INTEGER".equalsIgnoreCase(userType)) {
 			value = TypedValues.newIntegerValue(Integer.valueOf(userValue));
 		}

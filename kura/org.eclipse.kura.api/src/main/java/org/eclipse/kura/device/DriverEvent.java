@@ -21,8 +21,8 @@ import org.eclipse.kura.annotation.ThreadSafe;
 import com.google.common.base.MoreObjects;
 
 /**
- * This class represents an event occurred while monitoring specific channel
- * configuration by the driver.
+ * The DriverEvent class represents an event occurred while monitoring specific
+ * channel configuration by the driver.
  */
 @Immutable
 @ThreadSafe

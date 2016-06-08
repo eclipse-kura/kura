@@ -18,7 +18,7 @@ import org.eclipse.kura.KuraRuntimeException;
 
 /**
  * The Interface WireRecordFilter is responsible to filter out the provided wire
- * record
+ * records
  */
 public interface WireRecordFilter {
 

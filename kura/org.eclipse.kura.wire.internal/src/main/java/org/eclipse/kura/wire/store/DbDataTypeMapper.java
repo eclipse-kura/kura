@@ -31,14 +31,14 @@ public final class DbDataTypeMapper {
 	 */
 	public static class JdbcType {
 
-		/** The jdbc type represented as integer. */
+		/** The JDBC type represented as integer. */
 		private final int m_type;
 
-		/** The jdbc type represented as string. */
+		/** The JDBC type represented as string. */
 		private final String m_typeStr;
 
 		/**
-		 * Instantiates a new jdbc type.
+		 * Instantiates a new JDBC type.
 		 *
 		 * @param type
 		 *            the type
@@ -111,11 +111,11 @@ public final class DbDataTypeMapper {
 	}
 
 	/**
-	 * Gets the jdbc type.
+	 * Gets the JDBC type.
 	 *
 	 * @param dataType
 	 *            the data type
-	 * @return the jdbc type
+	 * @return the JDBC type
 	 */
 	public static JdbcType getJdbcType(final DataType dataType) {
 		return s_dataTypeMap.get(dataType);

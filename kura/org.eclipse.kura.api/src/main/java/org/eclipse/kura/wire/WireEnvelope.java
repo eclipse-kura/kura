@@ -30,6 +30,12 @@ import com.google.common.base.MoreObjects;
 public final class WireEnvelope extends BasicEnvelope {
 
 	/**
+	 * The scope as agreed by the composite producer and consumer. This remains
+	 * same for all the Kura Wires communications.
+	 */
+	private static final String SCOPE = "WIRES";
+
+	/**
 	 * Instantiates a new wire envelope.
 	 *
 	 * @param emitterName
@@ -38,7 +44,7 @@ public final class WireEnvelope extends BasicEnvelope {
 	 *            the wire records
 	 */
 	public WireEnvelope(final String emitterName, final List<WireRecord> wireRecords) {
-		super(wireRecords, emitterName, null);
+		super(wireRecords, emitterName, SCOPE);
 	}
 
 	/**

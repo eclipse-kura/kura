@@ -4,6 +4,7 @@ Bundle-Name: Device Test
 Bundle-SymbolicName: org.eclipse.kura.device.test
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: EUROTECH
+Bundle-License: Eclipse Public License v1.0
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Require-Bundle: org.junit;bundle-version="4.10.0",
  org.eclipse.kura.device.internal;bundle-version="1.0.0"

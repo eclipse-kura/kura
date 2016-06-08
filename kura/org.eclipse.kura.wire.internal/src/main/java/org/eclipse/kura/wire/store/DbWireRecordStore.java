@@ -389,7 +389,7 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, WireR
 				@Override
 				public void run() {
 					for (final String tableName : m_tableNames) {
-						truncate(tableName);
+						clear(tableName);
 					}
 				}
 			}, cleanUpRate, TimeUnit.SECONDS);
@@ -434,7 +434,7 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, WireR
 
 	/** {@inheritDoc} */
 	@Override
-	public void truncate(final String tableName) throws KuraRuntimeException {
+	public void clear(final String tableName) throws KuraRuntimeException {
 		checkNull(tableName, "Table name cannot be null");
 		final String sqlTableName = this.m_dbHelper.sanitizeSqlTableAndColumnName(tableName);
 		Connection conn = null;

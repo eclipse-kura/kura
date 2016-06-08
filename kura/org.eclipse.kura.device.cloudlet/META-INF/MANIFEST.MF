@@ -4,6 +4,7 @@ Bundle-Name: Device Cloudlet
 Bundle-SymbolicName: org.eclipse.kura.device.cloudlet
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: EUROTECH
+Bundle-License: Eclipse Public License v1.0
 Bundle-Category: Device-Driver Management
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.google.common.annotations;version="19.0.0",
@@ -22,5 +23,5 @@ Import-Package: com.google.common.annotations;version="19.0.0",
  org.osgi.util.tracker;version="1.5.0",
  org.slf4j;version="1.6.4"
 Bundle-ActivationPolicy: lazy
-Service-Component: OSGI-INF/deviceCloudletComponent.xml
+Service-Component: OSGI-INF/*.xml
 Export-Package: org.eclipse.kura.device.cloudlet;version="1.0.0"

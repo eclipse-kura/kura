@@ -180,7 +180,7 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Wire
 		checkNull(wireEnvelope, "Wire envelope cannot be null");
 		s_logger.debug("Wire Enveloped received..." + wireEnvelope);
 		try {
-			final Long currrentTime = System.currentTimeMillis();
+			final long currrentTime = System.currentTimeMillis();
 			final long differenceInSec = (currrentTime - this.m_cacheLastUpdated) / 1000;
 			List<WireRecord> recordsToEmit;
 			if (differenceInSec < this.m_options.getCacheInterval()) {

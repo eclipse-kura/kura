@@ -283,9 +283,6 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
         } else {
             cc = getSelfConfiguringComponentConfiguration(pid);
         }
-        if(cc != null && cc.getConfigurationProperties() != null){
-            decryptPasswords(cc);
-        }
         return cc;
     }
 
@@ -569,29 +566,13 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
         }
         if (isFactory) {
             m_factoryPids.add(metatypePid);
-            
+
             for (Map.Entry<String, String> entry : m_factoryPidByPid.entrySet()) {
                 if (entry.getValue().equals(metatypePid)) {
                     try {
                         Configuration config = m_configurationAdmin.getConfiguration(m_servicePidByPid.get(entry.getKey()));
                         if (config != null) {
-
-                            // get the properties from ConfigurationAdmin if any are present
-                            Map<String, Object> props = new HashMap<String, Object>();
-                            if (config.getProperties() != null) {
-                                props.putAll(CollectionsUtil.dictionaryToMap(config.getProperties(), ocd));
-                            }
-
-                            if (!props.containsKey(ConfigurationService.KURA_SERVICE_PID)) {
-                                props.put(ConfigurationService.KURA_SERVICE_PID, entry.getKey());
-                            }
-
-                            // merge the current properties, if any, with the defaults from metatype
-                            mergeWithDefaults(ocd, props);
-                            updateConfiguration(entry.getKey(), props, false);
-                            // FIXME: this might cause an unwanted snapshot
-                            // Cannot call ConfigurationService.update because the component is not tracked yet!
-                            //config.update(CollectionsUtil.mapToDictionary(props));
+                            updateConfiguration(entry.getKey(), CollectionsUtil.dictionaryToMap(config.getProperties(), ocd), false);
                             s_logger.info("Seeding updated configuration for pid: {}", entry.getKey());
                         }
                     } catch (IOException e) {
@@ -602,8 +583,9 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
         } else {
             try {
                 Configuration config = m_configurationAdmin.getConfiguration(metatypePid);
-                if (config != null) {
-
+                if (config != null && m_allActivatedPids.contains(metatypePid)) {
+                    updateConfiguration(metatypePid, CollectionsUtil.dictionaryToMap(config.getProperties(), ocd), false);
+                } else if (config != null) {
                     // get the properties from ConfigurationAdmin if any are present
                     Map<String, Object> props = new HashMap<String, Object>();
                     if (config.getProperties() != null) {
@@ -616,12 +598,11 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 
                     // merge the current properties, if any, with the defaults from metatype
                     mergeWithDefaults(ocd, props);
-                    // FIXME: this might cause an unwanted snapshot
-                    // Cannot call ConfigurationService.update because the component is not tracked yet!
+
                     config.update(CollectionsUtil.mapToDictionary(props));
-                    //updateConfiguration(metatypePid, props, false);
                     s_logger.info("Seeding updated configuration for pid: {}", metatypePid);
                 }
+
             } catch (IOException e) {
                 throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
             }
@@ -717,15 +698,21 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 
     private void encryptPasswords(Map<String, Object> propertiesToUpdate){
         for (Entry<String, Object> property : propertiesToUpdate.entrySet()) {
-            if (property.getValue() != null) {
-                if (property.getValue() instanceof Password) {
-                    try {
-                        propertiesToUpdate.put(property.getKey(), new Password(m_cryptoService.encryptAes(property.getValue().toString().toCharArray())));
-                    } catch (Exception e) {
-                        s_logger.warn("Failed to encrypt Password property: {}", property.getKey());
-                        propertiesToUpdate.remove(property.getKey());
-                    }
-                }
+            if (property.getValue() != null && property.getValue() instanceof Password) {
+                encryptPassword(propertiesToUpdate, property.getKey(), (Password) property.getValue());
+            }
+        }
+    }
+
+    private void encryptPassword(Map<String, Object> propertiesToUpdate, String key, Password password) {
+        try {
+            m_cryptoService.decryptAes(password.getPassword());
+        } catch (Exception e1) {
+            try {
+                propertiesToUpdate.put(key, new Password(m_cryptoService.encryptAes(password.getPassword())));
+            } catch (Exception e) {
+                s_logger.warn("Failed to encrypt Password property: {}", key);
+                propertiesToUpdate.remove(key);
             }
         }
     }

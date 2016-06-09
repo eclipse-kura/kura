@@ -278,6 +278,10 @@ public class CloudConfigurationHandler extends Cloudlet
 					
 					ComponentConfiguration cc = m_configurationService.getComponentConfiguration(componentPid);
 					
+					if (cc != null && cc.getConfigurationProperties() != null){
+					    ((ConfigurationServiceImpl) m_configurationService).decryptPasswords(cc);
+			        }
+					
 					// TODO: define a validate method for ComponentConfiguration
 					if (cc == null) {
 						s_logger.error("null ComponentConfiguration");

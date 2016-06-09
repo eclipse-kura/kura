@@ -129,27 +129,6 @@ public class ComponentMetaTypeBundleTracker extends BundleTracker<Bundle>
 					// register the pid with the OCD and whether it is a factory
 					OCD ocd = ComponentUtil.getOCD(metadata, metatypePid);
 					m_configurationService.registerComponentOCD(metatypePid, (Tocd) ocd, isFactory);
-									
-					Configuration config = m_configurationAdmin.getConfiguration(metatypePid);
-					if (!isFactory && config != null) {
-	
-						// get the properties from ConfigurationAdmin if any are present
-						Map<String, Object> props = new HashMap<String, Object>();
-						if (config.getProperties() != null) {
-							props.putAll(CollectionsUtil.dictionaryToMap(config.getProperties(), ocd));
-						}
-						
-						if (!props.containsKey(ConfigurationService.KURA_SERVICE_PID)) {
-							props.put(ConfigurationService.KURA_SERVICE_PID, metatypePid);
-						}
-					
-						// merge the current properties, if any, with the defaults from metatype
-						m_configurationService.mergeWithDefaults(ocd, props);
-						// FIXME: this might cause an unwanted snapshot
-						// Cannot call ConfigurationService.update because the component is not tracked yet!
-						config.update(CollectionsUtil.mapToDictionary(props));
-						s_logger.info("Seeding updated configuration for pid: {}", metatypePid);
-					}
 				}
 			}
 			catch (Exception e) {

@@ -11,22 +11,17 @@
  *******************************************************************************/
 package org.eclipse.kura.core.configuration;
 
-import java.util.HashMap;
 import java.util.Map;
 
-import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.configuration.metatype.Designate;
 import org.eclipse.kura.configuration.metatype.OCD;
 import org.eclipse.kura.core.configuration.metatype.Tmetadata;
 import org.eclipse.kura.core.configuration.metatype.Tocd;
-import org.eclipse.kura.core.configuration.util.CollectionsUtil;
 import org.eclipse.kura.core.configuration.util.ComponentUtil;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
 import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.service.cm.Configuration;
-import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.util.tracker.BundleTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,17 +35,14 @@ public class ComponentMetaTypeBundleTracker extends BundleTracker<Bundle>
 	private static final Logger s_logger = LoggerFactory.getLogger(ComponentMetaTypeBundleTracker.class);
 
 	private BundleContext m_context;
-	private ConfigurationAdmin m_configurationAdmin;
 	private ConfigurationServiceImpl m_configurationService;
 
 	public ComponentMetaTypeBundleTracker(BundleContext context,
-										  ConfigurationAdmin configurationAdmin,
 										  ConfigurationServiceImpl configurationService) 
 		throws InvalidSyntaxException 
 	{
 		super(context, Bundle.ACTIVE, null);		
 		m_context = context;
-		m_configurationAdmin = configurationAdmin;
 		m_configurationService = configurationService;
 	}
 
@@ -129,27 +121,6 @@ public class ComponentMetaTypeBundleTracker extends BundleTracker<Bundle>
 					// register the pid with the OCD and whether it is a factory
 					OCD ocd = ComponentUtil.getOCD(metadata, metatypePid);
 					m_configurationService.registerComponentOCD(metatypePid, (Tocd) ocd, isFactory);
-									
-					Configuration config = m_configurationAdmin.getConfiguration(metatypePid);
-					if (!isFactory && config != null) {
-	
-						// get the properties from ConfigurationAdmin if any are present
-						Map<String, Object> props = new HashMap<String, Object>();
-						if (config.getProperties() != null) {
-							props.putAll(CollectionsUtil.dictionaryToMap(config.getProperties(), ocd));
-						}
-						
-						if (!props.containsKey(ConfigurationService.KURA_SERVICE_PID)) {
-							props.put(ConfigurationService.KURA_SERVICE_PID, metatypePid);
-						}
-					
-						// merge the current properties, if any, with the defaults from metatype
-						m_configurationService.mergeWithDefaults(ocd, props);
-						// FIXME: this might cause an unwanted snapshot
-						// Cannot call ConfigurationService.update because the component is not tracked yet!
-						config.update(CollectionsUtil.mapToDictionary(props));
-						s_logger.info("Seeding updated configuration for pid: {}", metatypePid);
-					}
 				}
 			}
 			catch (Exception e) {

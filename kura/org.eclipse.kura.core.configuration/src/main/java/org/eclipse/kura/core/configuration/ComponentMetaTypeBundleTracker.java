@@ -11,22 +11,17 @@
  *******************************************************************************/
 package org.eclipse.kura.core.configuration;
 
-import java.util.HashMap;
 import java.util.Map;
 
-import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.configuration.metatype.Designate;
 import org.eclipse.kura.configuration.metatype.OCD;
 import org.eclipse.kura.core.configuration.metatype.Tmetadata;
 import org.eclipse.kura.core.configuration.metatype.Tocd;
-import org.eclipse.kura.core.configuration.util.CollectionsUtil;
 import org.eclipse.kura.core.configuration.util.ComponentUtil;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
 import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.service.cm.Configuration;
-import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.util.tracker.BundleTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,17 +35,14 @@ public class ComponentMetaTypeBundleTracker extends BundleTracker<Bundle>
 	private static final Logger s_logger = LoggerFactory.getLogger(ComponentMetaTypeBundleTracker.class);
 
 	private BundleContext m_context;
-	private ConfigurationAdmin m_configurationAdmin;
 	private ConfigurationServiceImpl m_configurationService;
 
 	public ComponentMetaTypeBundleTracker(BundleContext context,
-										  ConfigurationAdmin configurationAdmin,
 										  ConfigurationServiceImpl configurationService) 
 		throws InvalidSyntaxException 
 	{
 		super(context, Bundle.ACTIVE, null);		
 		m_context = context;
-		m_configurationAdmin = configurationAdmin;
 		m_configurationService = configurationService;
 	}
 

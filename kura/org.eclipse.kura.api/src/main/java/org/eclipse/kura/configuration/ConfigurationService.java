@@ -231,13 +231,37 @@ public interface ConfigurationService
 	 * The Configuration Service is compliant with the OSGi MetaType Service so 
 	 * it accepts all attribute types defined in the OSGi Compendium Specifications.
 	 * <br>
-	 * @param pid The PID of the component whose configuration is requested.
-	 * @param properties Properties to be used as the new Configuration for the specified Component.
+     * @param configs The list of ComponentConfiguration whose update is requested.
 	 * @throws KuraException if the properties specified do not pass the validation of the ObjectClassDefinition
 	 */	
 	public void updateConfigurations(List<ComponentConfiguration> configs)
 		throws KuraException;
 		
+	/**
+     * Updates the Configuration of the registered components.
+     * Using the OSGi ConfigurationAdmin, it retrieves the Configuration of the 
+     * component with the specified PID and then send an update using the 
+     * specified properties.
+     * <br>
+     * If the component to be updated is not yet registered with the ConfigurationService,
+     * it is first registered and then it is updated with the specified properties.
+     * Before updating the component, the specified properties are validated against
+     * the ObjectClassDefinition associated to the Component. The Configuration Service
+     * is fully compliant with the OSGi MetaType Information and the validation happens
+     * through the OSGi MetaType Service.
+     * <br>
+     * The Configuration Service is compliant with the OSGi MetaType Service so 
+     * it accepts all attribute types defined in the OSGi Compendium Specifications.
+     * <br>
+     * @param configs The list of ComponentConfiguration whose update is requested.
+     * @param takeSnapshot defines whether or not this configuration update should trigger a snapshot.
+     * @throws KuraException if the properties specified do not pass the validation of the ObjectClassDefinition
+     * 
+     * @since {@link org.eclipse.kura.configuration} 1.1.0
+     */
+    public void updateConfigurations(List<ComponentConfiguration> configs, boolean takeSnapshot)
+        throws KuraException;
+	
 	/**
 	 * Returns the ID of all the snapshots taken by the ConfigurationService.
 	 * The snapshot ID is the epoch time at which the snapshot was taken.

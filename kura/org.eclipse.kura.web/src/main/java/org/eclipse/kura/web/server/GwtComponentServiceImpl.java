@@ -17,7 +17,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurationService;
@@ -25,7 +24,6 @@ import org.eclipse.kura.configuration.metatype.AD;
 import org.eclipse.kura.configuration.metatype.Icon;
 import org.eclipse.kura.configuration.metatype.OCD;
 import org.eclipse.kura.configuration.metatype.Option;
-import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.web.server.util.KuraExceptionHandler;
 import org.eclipse.kura.web.server.util.ServiceLocator;
@@ -57,9 +55,6 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
                     return name0.compareTo(name1);
                 }});
             for (ComponentConfiguration config : configs) {
-                if(config != null && config.getConfigurationProperties() != null){
-                    decryptPasswords(config);
-                }
                 
                 // ignore items we want to hide
                 if (config.getPid().endsWith("SystemPropertiesService") || 
@@ -164,9 +159,6 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
                     return name0.compareTo(name1);
                 }});
             for (ComponentConfiguration config : configs) {
-                if(config != null && config.getConfigurationProperties() != null){
-                    decryptPasswords(config);
-                }
                 
                 // ignore items we want to hide
                 if (!config.getPid().endsWith("CommandCloudApp")) {
@@ -254,9 +246,6 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
                 Object objValue = null;
 
                 ComponentConfiguration currentCC= cs.getComponentConfiguration(gwtCompConfig.getComponentId());
-                if(currentCC != null && currentCC.getConfigurationProperties() != null){
-                    decryptPasswords(currentCC);
-                }
 
                 Map<String,Object> currentConfigProp= currentCC.getConfigurationProperties();
                 Object currentObjValue = currentConfigProp.get(gwtConfigParam.getName());
@@ -409,20 +398,5 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
         }
 
         return null;
-    }
-
-    private Map<String, Object> decryptPasswords(ComponentConfiguration config) throws GwtKuraException {
-        CryptoService cryptoService = ServiceLocator.getInstance().getService(CryptoService.class);
-        Map<String, Object> configProperties = config.getConfigurationProperties();
-        for (Entry<String, Object> property : configProperties.entrySet()) {
-            if (property.getValue() instanceof Password && cryptoService != null) {
-                try {
-                    Password decryptedPassword = new Password(cryptoService.decryptAes(property.getValue().toString().toCharArray()));
-                    configProperties.put(property.getKey(), decryptedPassword);
-                } catch (Exception e) {
-                }
-            }
-        }
-        return configProperties;
     }
 }

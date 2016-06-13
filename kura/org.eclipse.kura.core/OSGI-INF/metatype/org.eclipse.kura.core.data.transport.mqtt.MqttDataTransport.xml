@@ -58,7 +58,7 @@
             cardinality="0"
             required="false"
             default="" 
-            description="Client identifier to be used when connecting to the MQTT broker. The identifier has to be unique within your account. Characters '/', '+', and '#' are invalid and they will be replaced by '-'. If left empty, this is automatically determined by the client software as the MAC address of the main network interface (in general uppercase and without ':')."/>
+            description="Client identifier to be used when connecting to the MQTT broker. The identifier has to be unique within your account. Characters '/', '+', '#' and '.' are invalid and they will be replaced by '-'. If left empty, this is automatically determined by the client software as the MAC address of the main network interface (in general uppercase and without ':')."/>
         
         <AD id="keep-alive"  
             name="keep-alive"

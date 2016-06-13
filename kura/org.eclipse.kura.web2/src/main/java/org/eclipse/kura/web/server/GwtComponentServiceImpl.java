@@ -45,6 +45,7 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
 		try {
 
 			List<ComponentConfiguration> configs = cs.getComponentConfigurations();
+			
 			// sort the list alphabetically by service name
 			Collections.sort(configs, new Comparator<ComponentConfiguration>() {
 				public int compare(ComponentConfiguration arg0,
@@ -68,8 +69,17 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
 				if (ocd != null) {
 
 					GwtConfigComponent gwtConfig = new GwtConfigComponent();
-					gwtConfig.setComponentId(ocd.getId());
-					gwtConfig.setComponentName(ocd.getName());
+					//gwtConfig.setComponentId(ocd.getId());
+					gwtConfig.setComponentId(config.getPid());
+					
+					Map<String, Object> props = config.getConfigurationProperties();
+					if (props != null && props.get("service.factoryPid") != null){
+						String pid = stripPidPrefix(config.getPid());
+						gwtConfig.setComponentName(pid);
+					}else{
+						gwtConfig.setComponentName(ocd.getName());
+					}
+					
 					gwtConfig.setComponentDescription(ocd.getDescription());
 					if (ocd.getIcon() != null && !ocd.getIcon().isEmpty()) {
 						Icon icon = ocd.getIcon().get(0);
@@ -165,8 +175,17 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
 				if (ocd != null) {
 
 					GwtConfigComponent gwtConfig = new GwtConfigComponent();
-					gwtConfig.setComponentId(ocd.getId());
-					gwtConfig.setComponentName(ocd.getName());
+					//gwtConfig.setComponentId(ocd.getId());
+					gwtConfig.setComponentId(config.getPid());
+					
+					Map<String, Object> props = config.getConfigurationProperties();
+					if (props != null && props.get("service.factoryPid") != null){
+						String pid = stripPidPrefix(config.getPid());
+						gwtConfig.setComponentName(pid);
+					}else{
+						gwtConfig.setComponentName(ocd.getName());
+					}
+					
 					gwtConfig.setComponentDescription(ocd.getDescription());
 					if (ocd.getIcon() != null && !ocd.getIcon().isEmpty()) {
 						Icon icon = ocd.getIcon().get(0);
@@ -237,6 +256,8 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
 
 			// Build the new properties
 			Map<String,Object> properties = new HashMap<String,Object>();
+			ComponentConfiguration backupCC= cs.getComponentConfiguration(gwtCompConfig.getComponentId());
+			Map<String,Object> backupConfigProp= backupCC.getConfigurationProperties();
 			for (GwtConfigParameter gwtConfigParam : gwtCompConfig.getParameters()) {
 
 				Object objValue = null;
@@ -274,6 +295,10 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
 				properties.put(gwtConfigParam.getName(), objValue);
 			}
 
+			// Force kura.service.pid into properties, if originally present
+			if(backupConfigProp.get("kura.service.pid")!=null){
+				properties.put("kura.service.pid", backupConfigProp.get("kura.service.pid"));
+			}
 			//
 			// apply them
 			cs.updateConfiguration(gwtCompConfig.getComponentId(), properties);
@@ -392,5 +417,19 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
 		}
 
 		return null;
+	}
+	
+	private String stripPidPrefix(String pid) {
+		int start = pid.lastIndexOf('.');
+		if (start < 0) {
+			return pid;
+		} else {
+			int begin = start + 1;
+			if (begin < pid.length()) {
+				return pid.substring(begin);
+			} else {
+				return pid;
+			}
+		}
 	}
 }

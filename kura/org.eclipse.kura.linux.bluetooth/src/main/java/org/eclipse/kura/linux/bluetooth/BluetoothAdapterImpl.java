@@ -128,10 +128,10 @@ public class BluetoothAdapterImpl implements BluetoothAdapter {
 	}
 	
 	@Override
-	public void startBeaconScan(BluetoothBeaconScanListener listener) {
+	public void startBeaconScan(String companyName, BluetoothBeaconScanListener listener) {
 		killLeScan();
 		m_bls = new BluetoothLeScanner();
-		m_bls.startBeaconScan(m_name, listener);
+		m_bls.startBeaconScan(m_name, companyName, listener);
 	}
 
 	public void killLeScan() {

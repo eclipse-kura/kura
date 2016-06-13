@@ -39,6 +39,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.KeyManagerFactory;
@@ -77,8 +78,7 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
 
 	private Timer                    m_timer;
 
-	private boolean                  m_configurationDirty;
-	private SSLSocketFactory         m_sslSocketFactory;
+	private Map<ConnectionSslOptions, SSLSocketFactory> m_sslSocketFactories;
 
 	private SystemService 			 m_systemService;
 
@@ -128,6 +128,7 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
 		m_ctx = componentContext;
 		m_properties = properties;
 		m_options = new SslManagerServiceOptions(properties);
+		m_sslSocketFactories = new ConcurrentHashMap<ConnectionSslOptions, SSLSocketFactory>();
 
 		ServiceTracker<SslServiceListener, SslServiceListener> listenersTracker = new ServiceTracker<SslServiceListener, SslServiceListener>(
 				componentContext.getBundleContext(),
@@ -158,7 +159,6 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
 
 		changeKeyStorePassword();
 
-		m_configurationDirty = true;
 		// Notify listeners that service has been updated
 		m_sslServiceListeners.onConfigurationUpdated();
 	}
@@ -181,7 +181,7 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
 	public SSLSocketFactory getSSLSocketFactory()
 			throws GeneralSecurityException, IOException
 	{
-		return getSSLSocketFactory(null);
+		return getSSLSocketFactory("");
 	}
 
 
@@ -208,11 +208,8 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
 			String trustStore,
 			String keyStore,
 			char[] keyStorePassword,
-			String keyAlias)
-					throws GeneralSecurityException, IOException
-	{
-		return getSSLSocketFactory(protocol, ciphers, trustStore, keyStore,
-				keyStorePassword, keyAlias, true);
+			String keyAlias) throws GeneralSecurityException, IOException {   
+		return getSSLSocketFactory(protocol, ciphers, trustStore, keyStore, keyStorePassword, keyAlias, m_options.isSslHostnameVerification());
 	}
 
 	@Override
@@ -225,25 +222,20 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
 			boolean hostnameVerification)
 					throws GeneralSecurityException, IOException
 	{
-		// Only create a new SSLSocketFactory instance if the configuration has changed.
-		// This allows for SSL Context Resumption and abbreviated SSL handshake
-		// in case of reconnects to the same host.
-		if (m_sslSocketFactory == null || m_configurationDirty) {
-			s_logger.info("Creating a new SSLSocketFactory instance");
-
-			TrustManager[] tms = getTrustManagers(trustStore);
-
-			if(tms == null){
-				throw new GeneralSecurityException("SSL keystore tampered!");
-			}
-
-			KeyManager[] kms = getKeyManagers(keyStore, keyStorePassword, keyAlias);
-
-			m_sslSocketFactory = createSSLSocketFactory(protocol, ciphers, kms, tms, hostnameVerification);
-			m_configurationDirty = false;
-		}
-
-		return m_sslSocketFactory;
+	    ConnectionSslOptions connSslOpts= new ConnectionSslOptions(m_options);
+        connSslOpts.setProtocol(protocol);
+        connSslOpts.setCiphers(ciphers);
+        connSslOpts.setTrustStore(trustStore);
+        connSslOpts.setKeyStore(keyStore);
+        if (keyStorePassword == null) {
+            connSslOpts.setKeyStorePassword(getKeyStorePassword());
+        } else {
+            connSslOpts.setKeyStorePassword(keyStorePassword);
+        }
+        connSslOpts.setAlias(keyAlias);
+        connSslOpts.setHostnameVerification(hostnameVerification);
+        
+        return getSSLSocketFactoryInternal(connSslOpts);
 	}
 
 
@@ -303,7 +295,6 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
 			// save it
 			tsOutStream = new FileOutputStream(trustStore);
 			ts.store(tsOutStream, trustStorePassword);
-			m_configurationDirty = true;
 		}
 		finally{
 			close(tsReadStream);
@@ -341,7 +332,6 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
 					return passwordProtection;
 				}
 			});
-			m_configurationDirty = true;
 		}
 		finally{
 			close(tsReadStream);
@@ -379,7 +369,6 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
 			// save it
 			tsOutStream = new FileOutputStream(keyStore);
 			ks.store(tsOutStream, keyStorePassword);
-			m_configurationDirty = true;
 		}
 		finally{
 			close(tsReadStream);
@@ -389,7 +378,6 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
 
 	@Override
 	public SslManagerServiceOptions getConfigurationOptions() throws GeneralSecurityException, IOException {
-		// TODO Auto-generated method stub
 		return m_options;
 	}
 
@@ -399,6 +387,32 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
 	//
 	// ----------------------------------------------------------------
 
+	private SSLSocketFactory getSSLSocketFactoryInternal(ConnectionSslOptions options)
+                    throws GeneralSecurityException, IOException
+    {
+        // Only create a new SSLSocketFactory instance if the configuration has changed or
+        // for a new alias.
+        // This allows for SSL Context Resumption and abbreviated SSL handshake
+        // in case of reconnects to the same host.
+	    SSLSocketFactory factory= m_sslSocketFactories.get(options);
+        if (factory == null) {
+            s_logger.info("Creating a new SSLSocketFactory instance");
+
+            TrustManager[] tms = getTrustManagers(options.getTrustStore());
+
+            if(tms == null){
+                throw new GeneralSecurityException("SSL keystore tampered!");
+            }
+
+            KeyManager[] kms = getKeyManagers(options.getKeyStore(), options.getKeyStorePassword(), options.getAlias());
+
+            factory = createSSLSocketFactory(options.getProtocol(), options.getCiphers(), kms, tms, options.getHostnameVerification());
+            m_sslSocketFactories.put(options, factory);
+        }
+        
+        return factory;
+    }
+	
 	private static SSLSocketFactory createSSLSocketFactory(String protocol,
 			String ciphers,
 			KeyManager[] kms,

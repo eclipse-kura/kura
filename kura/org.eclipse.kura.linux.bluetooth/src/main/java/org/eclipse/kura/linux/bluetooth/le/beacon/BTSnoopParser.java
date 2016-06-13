@@ -13,12 +13,15 @@ public class BTSnoopParser {
 	private InputStream is;
 	private boolean gotHeader = false;
 	
-	public BTSnoopParser(InputStream is) {
+	public BTSnoopParser() {
+	}
+	
+	public void setInputStream(InputStream is) {
 		this.is = is;
 	}
 	
 	@SuppressWarnings("unused")
-	public byte[] readRecord() throws InterruptedException, IOException {
+	public byte[] readRecord() throws IOException {
 		if(!gotHeader) {
 			// Read past the 16-byte header
 			IOUtils.readFully(is, new byte[16]);

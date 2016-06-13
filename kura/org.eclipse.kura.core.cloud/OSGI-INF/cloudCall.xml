@@ -18,7 +18,6 @@
    <implementation class="org.eclipse.kura.core.cloud.call.CloudCallServiceImpl"/>
    <service>
       <provide interface="org.eclipse.kura.cloud.CloudCallService"/>
-      <provide interface="org.eclipse.kura.data.DataServiceListener"/>
    </service>
    <property name="service.pid" type="String" value="org.eclipse.kura.cloud.CloudCallService"/>
    <reference name="DataService"

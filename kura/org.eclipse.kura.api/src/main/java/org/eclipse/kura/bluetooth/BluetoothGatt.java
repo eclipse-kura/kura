@@ -29,7 +29,7 @@ public interface BluetoothGatt {
 	 * 
 	 * @return If connection was successful
 	 */
-	public boolean connect() throws KuraException;
+	public boolean connect(String adapterName) throws KuraException;
 	
 	/**
 	 * Disconnect from devices GATT server.

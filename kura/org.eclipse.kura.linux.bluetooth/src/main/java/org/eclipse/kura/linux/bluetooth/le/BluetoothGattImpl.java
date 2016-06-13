@@ -70,8 +70,8 @@ public class BluetoothGattImpl implements BluetoothGatt, BluetoothProcessListene
 	//
 	// --------------------------------------------------------------------
 	@Override
-	public boolean connect() throws KuraException {
-		m_proc = BluetoothUtil.startSession(m_address, this);
+	public boolean connect(String adapterName) throws KuraException {
+		m_proc = BluetoothUtil.startSession(adapterName, m_address, this);
 		if (m_proc != null) {
 			m_bufferedWriter = m_proc.getWriter();
 			s_logger.info("Sending connect message...");

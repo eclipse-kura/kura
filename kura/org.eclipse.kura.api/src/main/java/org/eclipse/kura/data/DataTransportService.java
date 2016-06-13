@@ -16,6 +16,7 @@ import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraNotConnectedException;
 import org.eclipse.kura.KuraTimeoutException;
 import org.eclipse.kura.KuraTooManyInflightMessagesException;
+import org.eclipse.kura.data.transport.listener.DataTransportListener;
 
 
 /**
@@ -107,4 +108,22 @@ public interface DataTransportService
 	 */
 	public DataTransportToken publish(String topic, byte[] payload, int qos, boolean retain)
 			throws KuraTooManyInflightMessagesException, KuraException, KuraNotConnectedException;
+	
+	/**
+	 * Adds a listener.
+	 * 
+	 * @param listener
+	 * 
+	 * @since {@link org.eclipse.kura.data} 1.1.0
+	 */
+	public void addDataTransportListener(DataTransportListener listener);
+	
+	/**
+	 * Removes a listener.
+	 * 
+	 * @param listener
+	 * 
+	 * @since {@link org.eclipse.kura.data} 1.1.0
+	 */
+	public void removeDataTransportListener(DataTransportListener listener);
 }

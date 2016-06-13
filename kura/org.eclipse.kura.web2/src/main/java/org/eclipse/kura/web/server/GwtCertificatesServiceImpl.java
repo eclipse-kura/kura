@@ -108,13 +108,15 @@ public class GwtCertificatesServiceImpl extends OsgiRemoteServiceServlet impleme
 			}else{
 				SslManagerService sslService = ServiceLocator.getInstance().getService(SslManagerService.class);
 
+				boolean leafAssigned= false;
 				for(X509Certificate cert: certs){
-					if(cert.getBasicConstraints() != -1){ //Certificate is CA. http://stackoverflow.com/questions/12092457/how-to-check-if-x509certificate-is-ca-certificate
-						String certificateAlias= "ca-"+cert.getSerialNumber().toString();
-						sslService.installTrustCertificate(certificateAlias, cert);
-					} else { //certificate is leaf
-						sslService.installTrustCertificate("ssl-" + alias, cert);
-					}
+				    if (!leafAssigned && (cert.getBasicConstraints() == -1 || (cert.getKeyUsage() != null && !cert.getKeyUsage()[5]))) { //certificate is leaf
+				        sslService.installTrustCertificate("ssl-" + alias, cert);
+				        leafAssigned= true;
+				    } else { //Certificate is CA. http://stackoverflow.com/questions/12092457/how-to-check-if-x509certificate-is-ca-certificate
+				        String certificateAlias= "ca-" + cert.getSerialNumber().toString();
+                        sslService.installTrustCertificate(certificateAlias, cert);
+				    }
 				}
 			}
 			return certs.length;
@@ -139,13 +141,15 @@ public class GwtCertificatesServiceImpl extends OsgiRemoteServiceServlet impleme
 			}else{
 				CertificatesService certificateService = ServiceLocator.getInstance().getService(CertificatesService.class);
 
+				boolean leafAssigned= false;
 				for(X509Certificate cert: certs){
-					if(cert.getBasicConstraints() != -1){ //Certificate is CA. http://stackoverflow.com/questions/12092457/how-to-check-if-x509certificate-is-ca-certificate
-						String certificateAlias= "bundle-"+cert.getSerialNumber().toString();
-						certificateService.storeCertificate(cert, certificateAlias);
-					} else { //certificate is leaf
-						certificateService.storeCertificate(cert, "bundle-" + alias);
-					}
+				    if (!leafAssigned && (cert.getBasicConstraints() == -1 || (cert.getKeyUsage() != null && !cert.getKeyUsage()[5]))) { //certificate is leaf
+				        certificateService.storeCertificate(cert, "bundle-" + alias);
+				        leafAssigned= true;
+				    } else { //Certificate is CA. http://stackoverflow.com/questions/12092457/how-to-check-if-x509certificate-is-ca-certificate
+				        String certificateAlias= "bundle-" + cert.getSerialNumber().toString();
+                        certificateService.storeCertificate(cert, certificateAlias);
+				    }
 				}
 			}
 			return certs.length;

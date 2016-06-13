@@ -150,7 +150,7 @@ public class DeviceCertsTabUi extends Composite implements Tab {
 
 					@Override
 					public void onSuccess(GwtXSRFToken token) {	
-						gwtCertificatesService.storePublicPrivateKeys(token, privateKeyInput.getValue(), certificateInput.getValue(), storageAliasInput.getValue(), null, new AsyncCallback<Integer>() {
+						gwtCertificatesService.storePublicPrivateKeys(token, privateKeyInput.getValue(), certificateInput.getValue(), null, storageAliasInput.getValue(), new AsyncCallback<Integer>() {
 							public void onFailure(Throwable caught) {
 								FailureHandler.handle(caught);
 								EntryClassUi.hideWaitModal();

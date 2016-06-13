@@ -44,6 +44,7 @@ public class BluetoothLeScanner implements BluetoothProcessListener, BTSnoopList
 	private BluetoothLeScanListener m_listener = null;
 	private BluetoothBeaconScanListener m_beacon_listener = null;
 	private boolean m_scanRunning = false;
+	private String m_companyName;
 
 	public BluetoothLeScanner() {
 		m_devices = new HashMap<String, String>();
@@ -61,8 +62,9 @@ public class BluetoothLeScanner implements BluetoothProcessListener, BTSnoopList
 	}
 	
 
-	public void startBeaconScan(String name, BluetoothBeaconScanListener listener) {
+	public void startBeaconScan(String name, String companyName, BluetoothBeaconScanListener listener) {
 		m_beacon_listener = listener;
+		m_companyName = companyName;
 
 		s_logger.info("Starting bluetooth le beacon scan...");
 
@@ -88,7 +90,7 @@ public class BluetoothLeScanner implements BluetoothProcessListener, BTSnoopList
 		// Shut down btdump process
 		if (m_dump_proc != null) {
 			s_logger.info("Killing btdump...");
-			m_dump_proc.destroy();
+			m_dump_proc.destroyBTSnoop();;
 			m_dump_proc = null;
 		}
 		else
@@ -172,7 +174,7 @@ public class BluetoothLeScanner implements BluetoothProcessListener, BTSnoopList
 		try {
 			
 			// Extract beacon advertisements
-			List<BluetoothBeaconData> beaconDatas = BluetoothUtil.parseLEAdvertisingReport(record);
+			List<BluetoothBeaconData> beaconDatas = BluetoothUtil.parseLEAdvertisingReport(record, m_companyName);
 
 			// Extract beacon data
 			for(BluetoothBeaconData beaconData : beaconDatas) {

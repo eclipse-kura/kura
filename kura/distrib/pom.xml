@@ -55,7 +55,7 @@
 		<plugins>
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>properties-maven-plugin</artifactId> 
+				<artifactId>properties-maven-plugin</artifactId>
 				<version>1.0-alpha-1</version>
 				<executions>
 					<execution>
@@ -269,7 +269,7 @@
 									<groupId>org.eclipse.kura</groupId>
 									<artifactId>org.eclipse.kura.web</artifactId>
 									<version>${org.eclipse.kura.web.version}</version>
-								</artifactItem>			
+								</artifactItem>
 							</artifactItems>
 							<stripVersion>true</stripVersion>
 							<outputDirectory>${project.basedir}/target/plugins</outputDirectory>
@@ -414,19 +414,19 @@
 								<!-- Copy distrib/config/kura.build.properties in distrib/RELEASE_INFO/${project.version}/config -->
 								<copy
 									file="config/kura.build.properties"
-									todir="RELEASE_INFO/${project.version}/config" 
+									todir="RELEASE_INFO/${project.version}/config"
 									overwrite="true" />
 
                 				<!-- Copy target-platform/config/kura.target-platform.build.properties in distrib/RELEASE_INFO/${project.version}/config -->
 								<copy
 									file="${kura.basedir}/../../../target-platform/config/kura.target-platform.build.properties"
-									todir="RELEASE_INFO/${project.version}/config" 
+									todir="RELEASE_INFO/${project.version}/config"
 									overwrite="true" />
 
 							    <!-- Copy src/main/resources/common/previous-version-pom-template.xml in distrib/RELEASE_INFO/${project.version}/pom.xml -->
 								<copy
 									file="src/main/resources/common/release-info.root.pom.xml"
-									tofile="RELEASE_INFO/${project.version}/pom.xml" 
+									tofile="RELEASE_INFO/${project.version}/pom.xml"
 									overwrite="true" />
 								<!-- replace kura version -->
 								<replace token="&lt;version&gt;[kura-version]&lt;/version&gt;" value="&lt;version&gt;${project.version}&lt;/version&gt;" dir="RELEASE_INFO/${project.version}">
@@ -436,7 +436,7 @@
 								<!-- Copy src/main/resources/common/kura-bundles-pom.xml in distrib/RELEASE_INFO/${project.version}/kura-bundles/pom.xml -->
 								<copy
 									file="src/main/resources/common/kura-bundles-pom.xml"
-									tofile="RELEASE_INFO/${project.version}/kura-bundles/pom.xml" 
+									tofile="RELEASE_INFO/${project.version}/kura-bundles/pom.xml"
 									overwrite="true" />
 								<!-- replace kura version -->
 								<replace token="&lt;version&gt;[kura-version]&lt;/version&gt;" value="&lt;version&gt;${project.version}&lt;/version&gt;" dir="RELEASE_INFO/${project.version}/kura-bundles">
@@ -451,7 +451,7 @@
 								<!-- Copy target-platform/p2-repo-common/pom.xml in distrib/RELEASE_INFO/${project.version}/p2-repo-common/pom.xml -->
 								<copy
 									file="${kura.basedir}/../../../target-platform/p2-repo-common/pom.xml"
-									tofile="RELEASE_INFO/${project.version}/p2-repo-common/pom.xml" 
+									tofile="RELEASE_INFO/${project.version}/p2-repo-common/pom.xml"
 									overwrite="true" />
 								<!-- replace artifactId -->
 								<replace token="&lt;artifactId&gt;target-platform&lt;/artifactId&gt;" value="&lt;artifactId&gt;target-platform-previous&lt;/artifactId&gt;" dir="RELEASE_INFO/${project.version}/p2-repo-common">
@@ -471,7 +471,7 @@
 								<!-- Copy target-platform/p2-repo-equinox_3.8.1/pom.xml in distrib/RELEASE_INFO/${project.version}/p2-repo-equinox_3.8.1/pom.xml -->
 								<copy
 									file="${kura.basedir}/../../../target-platform/p2-repo-equinox_3.8.1/pom.xml"
-									tofile="RELEASE_INFO/${project.version}/p2-repo-equinox_3.8.1/pom.xml" 
+									tofile="RELEASE_INFO/${project.version}/p2-repo-equinox_3.8.1/pom.xml"
 									overwrite="true" />
 								<!-- replace artifactId -->
 								<replace token="&lt;artifactId&gt;target-platform&lt;/artifactId&gt;" value="&lt;artifactId&gt;target-platform-previous&lt;/artifactId&gt;" dir="RELEASE_INFO/${project.version}/p2-repo-equinox_3.8.1">
@@ -770,7 +770,7 @@
 			<id>beaglebone</id>
 			<properties>
 				<project.raspbian.dependencies>hostapd, isc-dhcp-server, iw,
-					dos2unix, bind9, unzip, ethtool, telnet</project.raspbian.dependencies>
+					dos2unix, bind9, unzip, ethtool, telnet, wireless-tools</project.raspbian.dependencies>
 <!--
 				<kura.install.dir>/opt/eclipse</kura.install.dir>
 -->
@@ -1037,7 +1037,7 @@
 			<id>raspberry-pi</id>
 			<properties>
 				<project.raspbian.dependencies>hostapd, isc-dhcp-server, iw,
-					dos2unix, bind9, unzip, ethtool, telnet</project.raspbian.dependencies>
+					dos2unix, bind9, unzip, ethtool, telnet, wireless-tools</project.raspbian.dependencies>
 <!--
 				<kura.install.dir>/opt/eclipse</kura.install.dir>
 -->
@@ -1291,7 +1291,7 @@
 			<id>raspberry-pi-bplus</id>
 			<properties>
 				<project.raspbian.dependencies>hostapd, isc-dhcp-server, iw,
-					dos2unix, bind9, unzip, ethtool, telnet</project.raspbian.dependencies>
+					dos2unix, bind9, unzip, ethtool, telnet, wireless-tools</project.raspbian.dependencies>
 <!--
 				<kura.install.dir>/opt/eclipse</kura.install.dir>
 -->
@@ -1545,7 +1545,7 @@
 		<profile>
 			<id>raspberry-pi-2</id>
 			<properties>
-				<project.raspbian.dependencies>hostapd, isc-dhcp-server, iw, dos2unix, bind9, unzip, ethtool, telnet</project.raspbian.dependencies>
+				<project.raspbian.dependencies>hostapd, isc-dhcp-server, iw, dos2unix, bind9, unzip, ethtool, telnet, wireless-tools</project.raspbian.dependencies>
 <!--
 				<kura.install.dir>/opt/eclipse</kura.install.dir>
 -->
@@ -1921,22 +1921,22 @@
 											<fileset dir="../target-definition" />
 										</copy>
 										<!-- Add individual emulator bundles-->
-										<copy 
+										<copy
 											file="${project.build.directory}/plugins/org.eclipse.kura.emulator.clock_${org.eclipse.kura.emulator.clock.version}.jar"
 											todir="${project.build.directory}/staging/target-definition/equinox_3.8.1/repository/plugins"/>
-										<copy 
+										<copy
 											file="${project.build.directory}/plugins/org.eclipse.kura.emulator.gpio_${org.eclipse.kura.emulator.gpio.version}.jar"
 											todir="${project.build.directory}/staging/target-definition/equinox_3.8.1/repository/plugins"/>
-										<copy 
+										<copy
 											file="${project.build.directory}/plugins/org.eclipse.kura.emulator.net_${org.eclipse.kura.emulator.net.version}.jar"
 											todir="${project.build.directory}/staging/target-definition/equinox_3.8.1/repository/plugins"/>
-										<copy 
+										<copy
 											file="${project.build.directory}/plugins/org.eclipse.kura.emulator.position_${org.eclipse.kura.emulator.position.version}.jar"
 											todir="${project.build.directory}/staging/target-definition/equinox_3.8.1/repository/plugins"/>
-										<copy 
+										<copy
 											file="${project.build.directory}/plugins/org.eclipse.kura.emulator.usb_${org.eclipse.kura.emulator.usb.version}.jar"
 											todir="${project.build.directory}/staging/target-definition/equinox_3.8.1/repository/plugins"/>
-										<copy 
+										<copy
 											file="${project.build.directory}/plugins/org.eclipse.kura.emulator.watchdog_${org.eclipse.kura.emulator.watchdog.version}.jar"
 											todir="${project.build.directory}/staging/target-definition/equinox_3.8.1/repository/plugins"/>
 
@@ -2068,7 +2068,7 @@
 										<move
 											file="${project.build.directory}/staging/demo_heater/demo_heater.classpath"
 											tofile="${project.build.directory}/staging/demo_heater/.classpath" />
-											
+
 										<!-- Stage the org.eclipse.kura.example.beacon Project -->
 										<copy todir="${project.build.directory}/staging/beacon">
 											<fileset dir="../examples/org.eclipse.kura.example.beacon" />
@@ -2086,7 +2086,7 @@
 										<move
 											file="${project.build.directory}/staging/beacon/beacon.classpath"
 											tofile="${project.build.directory}/staging/beacon/.classpath" />
-											
+
 										<!-- Stage the org.eclipse.kura.example.ble.tisensortag Project -->
 										<copy todir="${project.build.directory}/staging/tisensortag">
 											<fileset dir="../examples/org.eclipse.kura.example.ble.tisensortag" />
@@ -2104,7 +2104,7 @@
 										<move
 											file="${project.build.directory}/staging/tisensortag/tisensortag.classpath"
 											tofile="${project.build.directory}/staging/tisensortag/.classpath" />
-											
+
 										<!-- Stage the org.eclipse.kura.example.publisher Project -->
 										<copy todir="${project.build.directory}/staging/publisher">
 											<fileset dir="../examples/org.eclipse.kura.example.publisher" />
@@ -2173,7 +2173,7 @@
 							</execution>
 						</executions>
 					</plugin>
-					
+
 				</plugins>
 			</build>
 		</profile>
@@ -2204,7 +2204,7 @@
 									</target>
 								</configuration>
 							</execution>
-							
+
 							<execution>
 								<id>check-can</id>
 								<phase>install</phase>
@@ -2218,7 +2218,7 @@
 									</target>
 								</configuration>
 							</execution>
-							
+
 							<execution>
 								<id>can-dp</id>
 								<phase>install</phase>

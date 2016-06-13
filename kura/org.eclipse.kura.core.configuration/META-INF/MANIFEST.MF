@@ -17,7 +17,7 @@ Import-Package: javax.crypto,
  javax.xml.transform.stream,
  org.eclipse.kura;version="[1.0,2.0)",
  org.eclipse.kura.cloud;version="[1.0,1.1)",
- org.eclipse.kura.configuration;version="[1.0,1.1)",
+ org.eclipse.kura.configuration;version="[1.1,1.2)",
  org.eclipse.kura.configuration.metatype;version="[1.0,2.0)",
  org.eclipse.kura.core.util;version="[1.0,2.0)",
  org.eclipse.kura.crypto;version="[1.0,2.0)",
@@ -33,4 +33,4 @@ Import-Package: javax.crypto,
  org.xml.sax
 Export-Package: org.eclipse.kura.core.configuration;version="1.0.2",
  org.eclipse.kura.core.configuration.metatype;version="1.0.0",
- org.eclipse.kura.core.configuration.util;version="1.0.0"
+ org.eclipse.kura.core.configuration.util;version="1.0.1"

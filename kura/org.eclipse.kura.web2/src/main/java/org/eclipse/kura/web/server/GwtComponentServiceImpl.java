@@ -45,7 +45,6 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
 		try {
 
 			List<ComponentConfiguration> configs = cs.getComponentConfigurations();
-			
 			// sort the list alphabetically by service name
 			Collections.sort(configs, new Comparator<ComponentConfiguration>() {
 				public int compare(ComponentConfiguration arg0,
@@ -360,60 +359,73 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
 		switch (type) {
 		case BOOLEAN:
 			for (String value : defaultValues) {
-				values.add(Boolean.valueOf(value));				
+				if (!value.trim().isEmpty())
+					values.add(Boolean.valueOf(value));				
 			}
 			return values.toArray( new Boolean[]{});
 
 		case BYTE: 
 			for (String value : defaultValues) {
-				values.add(Byte.valueOf(value));				
+				if (!value.trim().isEmpty())
+					values.add(Byte.valueOf(value));				
 			}
 			return values.toArray( new Byte[]{});
 
 		case CHAR: 
 			for (String value : defaultValues) {
-				values.add( new Character(value.charAt(0)));		
+				if (!value.trim().isEmpty())
+					values.add( new Character(value.charAt(0)));		
 			}
 			return values.toArray( new Character[]{});
 
 		case DOUBLE: 
 			for (String value : defaultValues) {
-				values.add(Double.valueOf(value));		
+				if (!value.trim().isEmpty())
+					values.add(Double.valueOf(value));		
 			}
 			return values.toArray( new Double[]{});
 
 		case FLOAT: 
 			for (String value : defaultValues) {
-				values.add(Float.valueOf(value));
+				if (!value.trim().isEmpty())
+					values.add(Float.valueOf(value));
 			}
 			return values.toArray( new Float[]{});
 
 		case INTEGER: 
 			for (String value : defaultValues) {
-				values.add(Integer.valueOf(value));		
+				if (!value.trim().isEmpty())
+					values.add(Integer.valueOf(value));		
 			}
 			return values.toArray( new Integer[]{});
 
 		case LONG: 
 			for (String value : defaultValues) {
-				values.add(Long.valueOf(value));		
+				if (!value.trim().isEmpty())
+					values.add(Long.valueOf(value));		
 			}
 			return values.toArray( new Long[]{});
 
 		case SHORT: 
 			for (String value : defaultValues) {
-				values.add(Short.valueOf(value));		
+				if (!value.trim().isEmpty())
+					values.add(Short.valueOf(value));		
 			}
 			return values.toArray( new Short[]{});
 
 		case PASSWORD: 
 			for (String value : defaultValues) {
-				values.add( new Password(value));		
+				if (!value.trim().isEmpty())
+					values.add( new Password(value));		
 			}
 			return values.toArray( new Password[]{});
 
 		case STRING:
-			return defaultValues;
+			for (String value : defaultValues) {
+				if (!value.trim().isEmpty())
+					values.add(value);
+			}
+			return values.toArray( new String[]{});
 		}
 
 		return null;

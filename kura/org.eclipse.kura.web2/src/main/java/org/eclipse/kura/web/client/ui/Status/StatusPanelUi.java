@@ -178,18 +178,24 @@ public class StatusPanelUi extends Composite {
 							public void onSuccess(ArrayList<GwtGroupedNVPair> result) {
 								String title = "cloudStatus";
 								statusGridProvider.getList().add(new GwtGroupedNVPair(" ",msgs.getString(title), " "));
+								
+								statusConnect.setEnabled(true);
+                                statusDisconnect.setEnabled(false);
+                                parent.updateConnectionStatusImage(false);
+                                
+								int connectionNameIndex= 0;
+								
 								for (GwtGroupedNVPair resultPair : result) {
-									if ("Connection Status".equals(resultPair.getName())) {
-										if ("CONNECTED".equals(resultPair.getValue())) {
-											statusConnect.setEnabled(false);
-											statusDisconnect.setEnabled(true);
-											parent.updateConnectionStatusImage(true);
-										} else {
-											statusConnect.setEnabled(true);
-											statusDisconnect.setEnabled(false);
-											parent.updateConnectionStatusImage(false);
-										}
-									}
+								    if ("Connection Name".equals(resultPair.getName()) && "CloudService".equals(resultPair.getValue())) {
+                                        GwtGroupedNVPair connectionStatus= result.get(connectionNameIndex + 1); // done based on the idea that in the pairs data connection name is before connection status
+                                        if ("Connection Status".equals(connectionStatus.getName()) && "CONNECTED".equals(connectionStatus.getValue())) {
+                                            statusConnect.setEnabled(false);
+                                            statusDisconnect.setEnabled(true);
+                                            parent.updateConnectionStatusImage(true);
+                                        }
+								    }
+								    connectionNameIndex++;
+								    
 									if (!title.equals(resultPair.getGroup())) {
 										title = resultPair.getGroup();
 										statusGridProvider.getList().add(new GwtGroupedNVPair(" ", msgs.getString(title), " "));

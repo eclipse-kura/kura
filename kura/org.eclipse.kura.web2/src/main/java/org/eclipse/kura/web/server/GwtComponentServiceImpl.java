@@ -425,7 +425,7 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
 				if (!value.trim().isEmpty())
 					values.add(value);
 			}
-			return defaultValues;
+			return values.toArray( new String[]{});
 		}
 
 		return null;

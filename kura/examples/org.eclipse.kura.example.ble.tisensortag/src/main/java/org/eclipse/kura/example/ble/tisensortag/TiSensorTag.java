@@ -60,11 +60,11 @@ public class TiSensorTag implements BluetoothLeNotificationListener {
 		return m_connected;
 	}
 	
-    public boolean connect() {
+    public boolean connect(String adapterName) {
         m_bluetoothGatt = m_device.getBluetoothGatt();
         boolean connected = false;
 		try {
-			connected = m_bluetoothGatt.connect();
+			connected = m_bluetoothGatt.connect(adapterName);
 		} catch (KuraException e) {
 			s_logger.error(e.toString());
 		}

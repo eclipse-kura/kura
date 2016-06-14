@@ -1190,7 +1190,7 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 				s_logger.debug("verifyWifiCredentials() :: Restarting wpa_supplicant");
 				WpaSupplicant wpaSupplicant = WpaSupplicant.getWpaSupplicant(ifaceName);
 				if (wpaSupplicant != null) {
-					WpaSupplicantManager.start(ifaceName, wpaSupplicant.getDriver(), wifiConfig.getPasskey(), wifiConfig.getSecurity());
+				    WpaSupplicantManager.start(ifaceName, wpaSupplicant.getMode(), wpaSupplicant.getDriver());
 					if (isWifiConnectionCompleted(ifaceName, tout)) {
 						this.renewDhcpLease(ifaceName);
 					}
@@ -1441,14 +1441,14 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
                 && wifiMode.equals(WifiMode.MASTER)) {
             
             s_logger.debug("Starting hostapd");
-            HostapdManager.start(ifaceName, wifiConfig.getPasskey(), wifiConfig.getSecurity());
+            HostapdManager.start(ifaceName);
             
         } else if((status == NetInterfaceStatus.netIPv4StatusEnabledLAN || status == NetInterfaceStatus.netIPv4StatusEnabledWAN)
                 && (wifiMode.equals(WifiMode.INFRA) || wifiMode.equals(WifiMode.ADHOC))) {
 
             if(wifiConfig != null) {
                 s_logger.debug("Starting wpa_supplicant");
-                WpaSupplicantManager.start(ifaceName, wifiConfig.getDriver(), wifiConfig.getPasskey(), wifiConfig.getSecurity());
+                WpaSupplicantManager.start(ifaceName, wifiMode, wifiConfig.getDriver());
                 if (isWifiConnectionCompleted(ifaceName, 60)) {
                 	s_logger.debug("WiFi Connection Completed on {} !", ifaceName);
                 } else {

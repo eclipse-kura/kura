@@ -19,17 +19,14 @@ import java.util.List;
 import java.util.Properties;
 
 import org.eclipse.kura.KuraException;
-import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.core.net.NetworkConfiguration;
 import org.eclipse.kura.core.net.NetworkConfigurationVisitor;
 import org.eclipse.kura.core.net.WifiInterfaceAddressConfigImpl;
 import org.eclipse.kura.core.net.WifiInterfaceConfigImpl;
-import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.linux.net.wifi.HostapdManager;
 import org.eclipse.kura.net.NetConfig;
 import org.eclipse.kura.net.NetInterfaceAddressConfig;
 import org.eclipse.kura.net.NetInterfaceConfig;
-import org.eclipse.kura.net.admin.visitor.linux.util.WifiVisitorUtil;
 import org.eclipse.kura.net.wifi.WifiCiphers;
 import org.eclipse.kura.net.wifi.WifiConfig;
 import org.eclipse.kura.net.wifi.WifiInterfaceAddressConfig;
@@ -198,21 +195,6 @@ public class HostapdConfigReader implements NetworkConfigurationVisitor {
 					} else if (hostapdProps.containsKey("wep_key0")) {
 						security = WifiSecurity.SECURITY_WEP;
 						password = hostapdProps.getProperty("wep_key0");
-					}
-					if ((password != null) && !password.isEmpty()) {
-						// get encrypted password from the /etc/hostapd.conf and decrypt it
-						CryptoService cryptoService = WifiVisitorUtil.getCryptoService();
-						if (cryptoService != null) {
-							try {
-								Password decryptedPassword = new Password(cryptoService.decryptAes(password.toCharArray()));
-								password = decryptedPassword.toString();
-							} catch (KuraException e) {
-								s_logger.error("getWifiHostConfig() :: Failed to decrypt password={} - {}", password, e);
-							}
-						}
-					} else {
-						// get password from configuration snapshot and decrypt it
-						password = WifiVisitorUtil.getPassphrase(ifaceName, WifiMode.MASTER);
 					}
 					
 					WifiCiphers pairwise = null;

@@ -26,7 +26,6 @@ import org.eclipse.kura.core.net.WifiInterfaceAddressConfigImpl;
 import org.eclipse.kura.core.util.IOUtil;
 import org.eclipse.kura.core.util.ProcessUtil;
 import org.eclipse.kura.core.util.SafeProcess;
-import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.linux.net.wifi.Hostapd;
 import org.eclipse.kura.linux.net.wifi.HostapdManager;
 import org.eclipse.kura.net.NetConfig;
@@ -35,11 +34,9 @@ import org.eclipse.kura.net.NetInterfaceAddressConfig;
 import org.eclipse.kura.net.NetInterfaceConfig;
 import org.eclipse.kura.net.NetInterfaceStatus;
 import org.eclipse.kura.net.NetInterfaceType;
-import org.eclipse.kura.net.admin.visitor.linux.util.WifiVisitorUtil;
 import org.eclipse.kura.net.wifi.WifiCiphers;
 import org.eclipse.kura.net.wifi.WifiConfig;
 import org.eclipse.kura.net.wifi.WifiMode;
-import org.eclipse.kura.net.wifi.WifiPassword;
 import org.eclipse.kura.net.wifi.WifiRadioMode;
 import org.eclipse.kura.net.wifi.WifiSecurity;
 import org.osgi.framework.FrameworkUtil;
@@ -49,6 +46,8 @@ import org.slf4j.LoggerFactory;
 public class HostapdConfigWriter implements NetworkConfigurationVisitor {
 	
 	private static final Logger s_logger = LoggerFactory.getLogger(HostapdConfigWriter.class);
+	
+	private static final String HEXES = "0123456789ABCDEF";
 	
 	private static final String HOSTAPD_TMP_CONFIG_FILE = "/etc/hostapd.conf.tmp";
 	
@@ -284,17 +283,59 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
 			} else {
 				throw KuraException.internalError("the channel must be between 1 (inclusive) and 11 (inclusive) or 1 (inclusive) and 13 (inclusive) depending on your locale");
 			}
-			
-			WifiPassword wifiPassword = new WifiPassword(wifiConfig.getPasskey().toString());
-			wifiPassword.validate(wifiConfig.getSecurity());
-			
-			CryptoService cryptoService = WifiVisitorUtil.getCryptoService();
-			String passphrase = "";
-			if (cryptoService != null) {
-				// encrypt password before putting it to the /etc/hostapd.conf
-				passphrase = new String(cryptoService.encryptAes(wifiConfig.getPasskey().getPassword()));
+			String passKey = new String(wifiConfig.getPasskey().getPassword());
+			if(passKey != null) {
+				if(passKey.length() == 10) {
+					//check to make sure it is all hex
+					try {
+						Long.parseLong(passKey, 16);
+					} catch(Exception e) {
+						throw KuraException.internalError("the WEP key (passwd) must be all HEX characters (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, a, b, c, d, e, and f");
+					}
+					
+					//since we're here - save the password
+					fileAsString = fileAsString.replaceFirst("KURA_WEP_KEY", passKey);
+				} else if(passKey.length() == 26) {
+					String part1 = passKey.substring(0, 13);
+					String part2 = passKey.substring(13);
+					
+					try {
+						Long.parseLong(part1, 16);
+						Long.parseLong(part2, 16);
+					} catch(Exception e) {
+						throw KuraException.internalError("the WEP key (passwd) must be all HEX characters (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, a, b, c, d, e, and f");
+					}
+					
+					//since we're here - save the password
+					fileAsString = fileAsString.replaceFirst("KURA_WEP_KEY", passKey);
+				} else if(passKey.length() == 32) {
+					String part1 = passKey.substring(0, 10);
+					String part2 = passKey.substring(10, 20);
+					String part3 = passKey.substring(20);
+					try {
+						Long.parseLong(part1, 16);
+						Long.parseLong(part2, 16);
+						Long.parseLong(part3, 16);
+					} catch(Exception e) {
+						throw KuraException.internalError("the WEP key (passwd) must be all HEX characters (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, a, b, c, d, e, and f");
+					}
+					
+					//since we're here - save the password
+					fileAsString = fileAsString.replaceFirst("KURA_WEP_KEY", passKey);
+				} else if ((passKey.length() == 5)
+						|| (passKey.length() == 13)
+						|| (passKey.length() == 16)) {
+					
+					// 5, 13, or 16 ASCII characters
+					passKey = toHex(passKey);
+					
+					//since we're here - save the password
+					fileAsString = fileAsString.replaceFirst("KURA_WEP_KEY", passKey);
+				} else {
+					throw KuraException.internalError("the WEP key (passwd) must be 10, 26, or 32 HEX characters in length");
+				}
+				
 			}
-			fileAsString = fileAsString.replaceFirst("KURA_WEP_KEY", passphrase);
 			
 			if (wifiConfig.ignoreSSID()) {
 				fileAsString = fileAsString.replaceFirst("KURA_IGNORE_BROADCAST_SSID", "2");
@@ -409,17 +450,16 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
 				throw KuraException.internalError("invalid WiFi Pairwise Ciphers");
 			}
 			
-			WifiPassword wifiPassword = new WifiPassword(wifiConfig.getPasskey().toString());
-			wifiPassword.validate(wifiConfig.getSecurity());
-			
-			CryptoService cryptoService = WifiVisitorUtil.getCryptoService();
-			String passphrase = "";
-			if (cryptoService != null) {
-				// encrypt password before putting it to the /etc/hostapd.conf
-				passphrase = new String(cryptoService.encryptAes(wifiConfig.getPasskey().getPassword()));
+			String passKey= new String(wifiConfig.getPasskey().getPassword());
+			if(wifiConfig.getPasskey() != null && passKey.trim().length() > 0) {
+				if((passKey.length() < 8) || (passKey.length() > 63)) {
+					throw KuraException.internalError("the WPA passphrase (passwd) must be between 8 (inclusive) and 63 (inclusive) characters in length: " + wifiConfig.getPasskey());
+				} else {
+					fileAsString = fileAsString.replaceFirst("KURA_PASSPHRASE", passKey.trim());
+				}
+			} else {
+				throw KuraException.internalError("the passwd can not be null");
 			}
-			
-			fileAsString = fileAsString.replaceFirst("KURA_PASSPHRASE", passphrase);
 			
 			if (wifiConfig.ignoreSSID()) {
 				fileAsString = fileAsString.replaceFirst("KURA_IGNORE_BROADCAST_SSID", "2");
@@ -505,4 +545,21 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
 			if (procDos != null) ProcessUtil.destroy(procDos);			
 		}
 	}
+	
+	/*
+	 * This method converts supplied string to hex
+	 */
+	private String toHex(String s) {
+		if (s == null) {
+			return null;
+		}
+		byte[] raw = s.getBytes();
+
+		StringBuffer hex = new StringBuffer(2 * raw.length);
+		for (int i = 0; i < raw.length; i++) {
+			hex.append(HEXES.charAt((raw[i] & 0xF0) >> 4)).append(HEXES.charAt((raw[i] & 0x0F)));
+		}
+		return hex.toString();
+	}
+
 }

@@ -14,8 +14,8 @@ package org.eclipse.kura.device.internal;
 
 import static org.eclipse.kura.Preconditions.checkNull;
 
-import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.device.Channel;
@@ -158,7 +158,7 @@ public final class DeviceConfiguration {
 	 */
 	@SuppressWarnings("unchecked")
 	private void extractProperties(final Map<String, Object> properties) {
-		final HashSet<Long> parsedIndexes = Sets.newHashSet();
+		final Set<Long> parsedIndexes = Sets.newHashSet();
 		for (final String property : properties.keySet()) {
 			try {
 				final String startStr = CharMatcher.DIGIT.removeFrom(property);

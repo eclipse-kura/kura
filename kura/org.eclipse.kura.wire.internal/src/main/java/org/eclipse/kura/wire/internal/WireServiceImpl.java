@@ -14,7 +14,6 @@ package org.eclipse.kura.wire.internal;
 
 import static org.eclipse.kura.Preconditions.checkNull;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -55,9 +54,6 @@ import com.google.common.util.concurrent.Monitor;
  */
 public final class WireServiceImpl implements SelfConfiguringComponent, WireService {
 
-	/** The Wire Service options. */
-	private static WireServiceOptions m_options;
-
 	/** The Constant denoting Wire Receiver. */
 	private static final String PROP_CONSUMER_PID = "wireadmin.consumer.pid";
 
@@ -78,6 +74,9 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 
 	/** Synchronization Monitor. */
 	private final Monitor m_monitor;
+
+	/** The Wire Service options. */
+	private WireServiceOptions m_options;
 
 	/** The service component properties. */
 	private Map<String, Object> m_properties;
@@ -112,10 +111,10 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 		s_logger.info("Activating Wire Service...");
 		this.m_ctx = componentContext;
 		try {
-			m_options = Wires.newWireServiceOptions(properties);
+			this.m_options = Wires.newWireServiceOptions(properties);
 			this.m_properties = properties;
 
-			for (final WireConfiguration conf : m_options.getWireConfigurations()) {
+			for (final WireConfiguration conf : this.m_options.getWireConfigurations()) {
 				this.m_wireConfigs.add(conf);
 			}
 			this.m_serviceTracker = new WireSeviceTracker(this.m_ctx.getBundleContext(), this);
@@ -411,9 +410,9 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 		wiresOCD.addAD(servicesTad);
 
 		try {
-			this.m_properties = new HashMap<String, Object>();
+			this.m_properties = Maps.newHashMap();
 			// Put the JSON configuration into properties to persist in snapshot
-			this.m_properties.put("wires", m_options.toJsonString());
+			this.m_properties.put("wires", this.m_options.toJsonString());
 			this.m_properties.put(DELETE_INSTANCE_AD, "NONE");
 			this.m_properties.put(DELETE_WIRES_AD, "NONE");
 			this.m_properties.put(RECEIVER_PID_AD, "NONE");
@@ -459,14 +458,14 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 	 */
 	private void persistWires(final boolean shouldPersist) throws JSONException {
 		s_logger.info("Persisting Wires..");
-		final List<WireConfiguration> list = m_options.getWires();
+		final List<WireConfiguration> list = this.m_options.getWires();
 		list.clear();
 		for (final WireConfiguration w : this.m_wireConfigs) {
 			list.add(w);
 		}
 		final Map<String, Object> newProperties = Maps.newHashMap(this.m_properties);
 		try {
-			final String jsonString = m_options.toJsonString();
+			final String jsonString = this.m_options.toJsonString();
 			newProperties.put(WireServiceOptions.CONF_WIRES, jsonString);
 			this.m_configService.updateConfiguration(PROP_PID, newProperties, shouldPersist);
 		} catch (final Throwable throwable) {

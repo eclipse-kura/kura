@@ -37,21 +37,20 @@ import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.annotations.Beta;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 
 /**
  * The Class DeviceCloudlet is used to provide MQTT read/write operations on the
- * device. The application id is configured as {@code DEV-CLOUD}.
+ * device. The application id is configured as {@code Devicelet}.
  *
- * The available GET commands are as follows
+ * The available {@code GET} commands are as follows
  * <ul>
  * <li>list-devices</li> e.g: /list-devices
  * <li>list-channels</li> e.g: /list-channels/device_name
  * </ul>
  *
- * The available EXEC commands are as follows
+ * The available {@code PUT} commands are as follows
  * <ul>
  * <li>read</li> e.g /read/device_name/channel_name
  * <li>write</li> e.g /write/device_name/channel_name topic with payload
@@ -74,14 +73,13 @@ import com.google.common.collect.Lists;
  * @see CloudClient
  * @see DeviceCloudlet#doGet(CloudletTopic, KuraRequestPayload,
  *      KuraResponsePayload)
- * @see DeviceCloudlet#doExec(CloudletTopic, KuraRequestPayload,
+ * @see DeviceCloudlet#doPut(CloudletTopic, KuraRequestPayload,
  *      KuraResponsePayload)
  */
-@Beta
 public final class DeviceCloudlet extends Cloudlet {
 
 	/** Application Identifier for Cloudlet. */
-	private static final String APP_ID = "DEV-CLOUD";
+	private static final String APP_ID = "Devicelet";
 
 	/** The Logger instance. */
 	private static final Logger s_logger = LoggerFactory.getLogger(DeviceCloudlet.class);
@@ -126,7 +124,35 @@ public final class DeviceCloudlet extends Cloudlet {
 
 	/** {@inheritDoc} */
 	@Override
-	protected void doExec(final CloudletTopic reqTopic, final KuraRequestPayload reqPayload,
+	protected void doGet(final CloudletTopic reqTopic, final KuraRequestPayload reqPayload,
+			final KuraResponsePayload respPayload) throws KuraException {
+		s_logger.info("Cloudlet GET Request received on the Device Cloudlet");
+		if ("list-devices".equals(reqTopic.getResources()[0])) {
+			this.findDevices();
+			int index = 1;
+			for (final String deviceName : this.m_devices.keySet()) {
+				final Device device = this.m_devices.get(deviceName);
+				respPayload.addMetric(String.valueOf(index++),
+						((AbstractDevice) device).getDeviceConfiguration().getDeviceName());
+			}
+		}
+		if ("list-channels".equals(reqTopic.getResources()[0]) && (reqTopic.getResources().length > 1)) {
+			this.findDevices();
+			final String deviceName = reqTopic.getResources()[1];
+			final Device device = this.m_devices.get(deviceName);
+			final DeviceConfiguration configuration = ((AbstractDevice) device).getDeviceConfiguration();
+			final Map<String, Channel> deviceConfiguredChannels = configuration.getChannels();
+			int index = 1;
+			for (final String channelName : deviceConfiguredChannels.keySet()) {
+				respPayload.addMetric(String.valueOf(index++), channelName);
+			}
+		}
+		s_logger.info("Cloudlet GET Request received on the Device Cloudlet");
+	}
+
+	/** {@inheritDoc} */
+	@Override
+	protected void doPut(final CloudletTopic reqTopic, final KuraRequestPayload reqPayload,
 			final KuraResponsePayload respPayload) throws KuraException {
 		s_logger.info("Cloudlet EXEC Request received on the Device Cloudlet....");
 		// Checks if the operation name "read", the name of the device and the
@@ -174,34 +200,6 @@ public final class DeviceCloudlet extends Cloudlet {
 			}
 		}
 		s_logger.info("Cloudlet GET Request received on the Device Cloudlet....Done");
-	}
-
-	/** {@inheritDoc} */
-	@Override
-	protected void doGet(final CloudletTopic reqTopic, final KuraRequestPayload reqPayload,
-			final KuraResponsePayload respPayload) throws KuraException {
-		s_logger.info("Cloudlet GET Request received on the Device Cloudlet");
-		if ("list-devices".equals(reqTopic.getResources()[0])) {
-			this.findDevices();
-			int index = 1;
-			for (final String deviceName : this.m_devices.keySet()) {
-				final Device device = this.m_devices.get(deviceName);
-				respPayload.addMetric(String.valueOf(index++),
-						((AbstractDevice) device).getDeviceConfiguration().getDeviceName());
-			}
-		}
-		if ("list-channels".equals(reqTopic.getResources()[0]) && (reqTopic.getResources().length > 1)) {
-			this.findDevices();
-			final String deviceName = reqTopic.getResources()[1];
-			final Device device = this.m_devices.get(deviceName);
-			final DeviceConfiguration configuration = ((AbstractDevice) device).getDeviceConfiguration();
-			final Map<String, Channel> deviceConfiguredChannels = configuration.getChannels();
-			int index = 1;
-			for (final String channelName : deviceConfiguredChannels.keySet()) {
-				respPayload.addMetric(String.valueOf(index++), channelName);
-			}
-		}
-		s_logger.info("Cloudlet GET Request received on the Device Cloudlet");
 	}
 
 	/**

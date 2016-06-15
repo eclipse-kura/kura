@@ -435,7 +435,7 @@ public class BluetoothLe implements ConfigurableComponent, CloudClientListener, 
 			
 			if (!myTiSensorTag.isConnected()) {
 				s_logger.info("Connecting to TiSensorTag...");
-				m_connected = myTiSensorTag.connect();
+				m_connected = myTiSensorTag.connect(iname);
 			}
 			else {
 				s_logger.info("TiSensorTag already connected!");
@@ -452,8 +452,8 @@ public class BluetoothLe implements ConfigurableComponent, CloudClientListener, 
 					payload.addMetric("Type", "CC2541");
 			
 				// Test
-				doServicesDiscovery(myTiSensorTag);
-				doCharacteristicsDiscovery(myTiSensorTag);
+//				doServicesDiscovery(myTiSensorTag);
+//				doCharacteristicsDiscovery(myTiSensorTag);
 				
 				myTiSensorTag.setFirmwareRevision(myTiSensorTag.firmwareRevision());
 				

@@ -43,140 +43,143 @@ import com.google.gwt.user.client.ui.RootPanel;
  */
 public class denali implements EntryPoint 
 {
-	private static final Messages MSGS = GWT.create(Messages.class);
-	Logger logger = Logger.getLogger(denali.class.getSimpleName());
-	private final GwtStatusServiceAsync gwtStatusService = GWT.create(GwtStatusService.class);
-	private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
-	private final GwtDeviceServiceAsync gwtDeviceService = GWT.create(GwtDeviceService.class);
-	private final GwtSecurityServiceAsync gwtSecurityService = GWT.create(GwtSecurityService.class);
+    private static final Messages MSGS = GWT.create(Messages.class);
+    Logger logger = Logger.getLogger(denali.class.getSimpleName());
+    private final GwtStatusServiceAsync gwtStatusService = GWT.create(GwtStatusService.class);
+    private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
+    private final GwtDeviceServiceAsync gwtDeviceService = GWT.create(GwtDeviceService.class);
+    private final GwtSecurityServiceAsync gwtSecurityService = GWT.create(GwtSecurityService.class);
 
-	private final EntryClassUi binder = GWT.create(EntryClassUi.class);
+    private final EntryClassUi binder = GWT.create(EntryClassUi.class);
 
-	private boolean isDevelopMode = false;
-	private boolean m_connected;
+    private boolean isDevelopMode = false;
+    private boolean m_connected;
 
-	/**
-	 * Note, we defer all application initialization code to
-	 * {@link #onModuleLoad2()} so that the UncaughtExceptionHandler can catch
-	 * any unexpected exceptions.
-	 */
-	public void onModuleLoad() 
-	{
-		// use deferred command to catch initialization exceptions in
-		// onModuleLoad2
-		Scheduler.get().scheduleDeferred(new ScheduledCommand() {
-			public void execute() {
-				onModuleLoad2();
-			}
-		});
-	}
+    /**
+     * Note, we defer all application initialization code to
+     * {@link #onModuleLoad2()} so that the UncaughtExceptionHandler can catch
+     * any unexpected exceptions.
+     */
+    public void onModuleLoad() 
+    {
+        // use deferred command to catch initialization exceptions in
+        // onModuleLoad2
+        Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+            public void execute() {
+                onModuleLoad2();
+            }
+        });
+    }
 
 
-	/**
-	 * This is the 'real' entry point method.
-	 */
-	public void onModuleLoad2() {
+    /**
+     * This is the 'real' entry point method.
+     */
+    public void onModuleLoad2() {
 
-		RootPanel.get().add(binder);
+        RootPanel.get().add(binder);
 
-		// load custom CSS/JS
-		loadCss("denali/skin/skin.css");
-		ScriptInjector.fromUrl("denali/skin/skin.js?v=1").inject(); // Make sure this request is not cached
+        // load custom CSS/JS
+        loadCss("denali/skin/skin.css");
+        ScriptInjector.fromUrl("denali/skin/skin.js?v=1").inject(); // Make sure this request is not cached
 
-		gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
-			@Override
-			public void onFailure(Throwable ex) {
-				FailureHandler.handle(ex, denali.class.getSimpleName());
-			}
+        gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
+            @Override
+            public void onFailure(Throwable ex) {
+                FailureHandler.handle(ex, denali.class.getSimpleName());
+            }
 
-			@Override
-			public void onSuccess(GwtXSRFToken token) {	
-				gwtDeviceService.findSystemProperties(token, new AsyncCallback<ArrayList<GwtGroupedNVPair>>() {    				
-					public void onSuccess(ArrayList<GwtGroupedNVPair> results) {
+            @Override
+            public void onSuccess(GwtXSRFToken token) {	
+                gwtDeviceService.findSystemProperties(token, new AsyncCallback<ArrayList<GwtGroupedNVPair>>() {    				
+                    public void onSuccess(ArrayList<GwtGroupedNVPair> results) {
 
-						final GwtSession gwtSession = new GwtSession();
+                        final GwtSession gwtSession = new GwtSession();
 
-						if (results != null) {
-							List<GwtGroupedNVPair> pairs = results;
-							if (pairs != null) {
-								for (GwtGroupedNVPair pair : pairs) {
-									String name = pair.getName();
-									if (name != null && name.equals("kura.have.net.admin")) {
-										Boolean value = Boolean.valueOf(pair.getValue());
-										gwtSession.setNetAdminAvailable(value);
-									}
-									if (name != null && name.equals("kura.version")) {
-										gwtSession.setKuraVersion(pair.getValue());
-									}
-									if (name != null && name.equals("kura.os.version")) {
-										gwtSession.setOsVersion(pair.getValue());
-									}
-								}
-							}
-						}
+                        if (results != null) {
+                            List<GwtGroupedNVPair> pairs = results;
+                            if (pairs != null) {
+                                for (GwtGroupedNVPair pair : pairs) {
+                                    String name = pair.getName();
+                                    if (name != null && name.equals("kura.have.net.admin")) {
+                                        Boolean value = Boolean.valueOf(pair.getValue());
+                                        gwtSession.setNetAdminAvailable(value);
+                                    }
+                                    if (name != null && name.equals("kura.version")) {
+                                        gwtSession.setKuraVersion(pair.getValue());
+                                    }
+                                    if (name != null && name.equals("kura.os.version")) {
+                                        gwtSession.setOsVersion(pair.getValue());
+                                    }
+                                }
+                            }
+                        }
 
-						gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
-							@Override
-							public void onFailure(Throwable ex) {
-								FailureHandler.handle(ex);
-							}
+                        gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
+                            @Override
+                            public void onFailure(Throwable ex) {
+                                FailureHandler.handle(ex);
+                            }
 
-							@Override
-							public void onSuccess(GwtXSRFToken token) {     
-								gwtStatusService.getDeviceConfig(token, gwtSession.isNetAdminAvailable(), new AsyncCallback<ArrayList<GwtGroupedNVPair>>() {
-									public void onFailure(Throwable caught) {
+                            @Override
+                            public void onSuccess(GwtXSRFToken token) {     
+                                gwtStatusService.getDeviceConfig(token, gwtSession.isNetAdminAvailable(), new AsyncCallback<ArrayList<GwtGroupedNVPair>>() {
+                                    public void onFailure(Throwable caught) {
 
-										FailureHandler.handle(caught);
-									}
-									public void onSuccess(ArrayList<GwtGroupedNVPair> pairs) {
-										for (GwtGroupedNVPair result : pairs) {
-											if ("Connection Status".equals(result.getName())) {
-												if ("CONNECTED".equals(result.getValue())) {
-													m_connected = true;
-												} else {
-													m_connected = false;
-												}
-											}
-										}
-										gwtSecurityService.isDebugMode(new AsyncCallback<Boolean>() {
+                                        FailureHandler.handle(caught);
+                                    }
+                                    public void onSuccess(ArrayList<GwtGroupedNVPair> pairs) {
+                                        m_connected = false;
+                                        int connectionNameIndex= 0;
+                                        for (GwtGroupedNVPair result : pairs) {
+                                            if ("Connection Name".equals(result.getName()) && "CloudService".equals(result.getValue())) {
+                                                GwtGroupedNVPair connectionStatus= pairs.get(connectionNameIndex + 1); // done based on the idea that in the pairs data connection name is before connection status
+                                                if ("Connection Status".equals(connectionStatus.getName()) && "CONNECTED".equals(connectionStatus.getValue())) {
+                                                    m_connected = true;
+                                                    break;
+                                                }   
+                                            }
+                                            connectionNameIndex++;
+                                        }
+                                        gwtSecurityService.isDebugMode(new AsyncCallback<Boolean>() {
 
-											public void onFailure(Throwable caught) {
-												FailureHandler.handle(caught, denali.class.getSimpleName());
-												binder.setFooter(gwtSession);
-												binder.initSystemPanel(gwtSession, m_connected);
-												binder.setSession(gwtSession);
-												binder.initServicesTree();
-												//binder.setDirty(false);
-											}
+                                            public void onFailure(Throwable caught) {
+                                                FailureHandler.handle(caught, denali.class.getSimpleName());
+                                                binder.setFooter(gwtSession);
+                                                binder.initSystemPanel(gwtSession, m_connected);
+                                                binder.setSession(gwtSession);
+                                                binder.initServicesTree();
+                                                //binder.setDirty(false);
+                                            }
 
-											public void onSuccess(Boolean result) {
-												if(result){
-													isDevelopMode = true;
-													gwtSession.setDevelopMode(true);
-												}
-												binder.setFooter(gwtSession);
-												binder.initSystemPanel(gwtSession, m_connected);
-												binder.setSession(gwtSession);
-												binder.initServicesTree();
-												//binder.setDirty(false);
-											}
-										});
-									}
-								});
-							}});
-					}
+                                            public void onSuccess(Boolean result) {
+                                                if(result){
+                                                    isDevelopMode = true;
+                                                    gwtSession.setDevelopMode(true);
+                                                }
+                                                binder.setFooter(gwtSession);
+                                                binder.initSystemPanel(gwtSession, m_connected);
+                                                binder.setSession(gwtSession);
+                                                binder.initServicesTree();
+                                                //binder.setDirty(false);
+                                            }
+                                        });
+                                    }
+                                });
+                            }});
+                    }
 
-					public void onFailure(Throwable caught) {
-						FailureHandler.handle(caught, denali.class.getSimpleName());
-						binder.setFooter(new GwtSession());
-						binder.initSystemPanel(new GwtSession(), m_connected);
-						binder.setSession(new GwtSession());
-					}
-				});
-			}});
-	}
+                    public void onFailure(Throwable caught) {
+                        FailureHandler.handle(caught, denali.class.getSimpleName());
+                        binder.setFooter(new GwtSession());
+                        binder.initSystemPanel(new GwtSession(), m_connected);
+                        binder.setSession(new GwtSession());
+                    }
+                });
+            }});
+    }
 
-	private static native void loadCss(String url) /*-{
+    private static native void loadCss(String url) /*-{
 		var l = $doc.createElement("link");
 		l.setAttribute("id", url);
 		l.setAttribute("rel", "stylesheet");

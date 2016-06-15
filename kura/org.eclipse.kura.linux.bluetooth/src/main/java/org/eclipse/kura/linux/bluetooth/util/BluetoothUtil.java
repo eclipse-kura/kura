@@ -296,8 +296,8 @@ public class BluetoothUtil {
 	 * Method to start an interactive session with a remote Bluetooth LE device using the gatttool utility. The
 	 * listener is used to receive output from the process. 
 	 */
-	public static BluetoothProcess startSession(String address, BluetoothProcessListener listener) {
-		String[] command = { GATTTOOL, "-b", address, "-I" };
+	public static BluetoothProcess startSession(String adapterName, String address, BluetoothProcessListener listener) {
+		String[] command = { GATTTOOL, "-i", adapterName, "-b", address, "-I" };
 		BluetoothProcess proc = null;
 		try {
 			proc = exec(command, listener);

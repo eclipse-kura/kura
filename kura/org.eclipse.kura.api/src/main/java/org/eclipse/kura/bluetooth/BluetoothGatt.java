@@ -30,6 +30,15 @@ public interface BluetoothGatt {
 	 * @return If connection was successful
 	 */
 	public boolean connect() throws KuraException;
+
+	/**
+	 * Connect to devices GATT server with a given adapter.
+	 * 
+	 * @param adapterName the name of the bluetooth adapter
+	 * @return If connection was successful
+	 * @since {@link org.eclipse.kura.bluetooth} 1.2.0 
+	 */
+	public boolean connect(String adapterName) throws KuraException;
 	
 	/**
 	 * Disconnect from devices GATT server.

@@ -204,7 +204,24 @@ public class StatusPanelUi extends Composite {
 								String title = "cloudStatus";
 								String connectionName = null;
 								statusGridProvider.getList().add(new GwtGroupedNVPair(" ",msgs.getString(title), " "));
+								
+                                parent.updateConnectionStatusImage(false);
+                                
+								int connectionNameIndex= 0;
+								
 								for (GwtGroupedNVPair resultPair : result) {
+									if ("Connection Name".equals(resultPair.getName()) && "CloudService".equals(resultPair.getValue())) {
+										GwtGroupedNVPair connectionStatus= result.get(connectionNameIndex + 1); // done based on the idea that in the pairs data connection name is before connection status
+										
+										if ("Connection Status".equals(connectionStatus.getName()) && "CONNECTED".equals(connectionStatus.getValue())) {
+											parent.updateConnectionStatusImage(true);
+										} else {
+											parent.updateConnectionStatusImage(false);
+										}
+									}
+									connectionNameIndex++;
+									
+									// Setup connection button grid
 									if ("Connection Name".equals(resultPair.getName())) {
 										connectionName = resultPair.getValue();
 										addConnectionRow(connectionName);
@@ -213,13 +230,12 @@ public class StatusPanelUi extends Composite {
 										if ("CONNECTED".equals(resultPair.getValue())) {
 											connectButtons.get(connectionName).setEnabled(false);
 											disconnectButtons.get(connectionName).setEnabled(true);
-											parent.updateConnectionStatusImage(true);
 										} else {
 											connectButtons.get(connectionName).setEnabled(true);
 											disconnectButtons.get(connectionName).setEnabled(false);
-											parent.updateConnectionStatusImage(false);
 										}
 									}
+									
 									if (!title.equals(resultPair.getGroup())) {
 										title = resultPair.getGroup();
 										statusGridProvider.getList().add(new GwtGroupedNVPair(" ", msgs.getString(title), " "));

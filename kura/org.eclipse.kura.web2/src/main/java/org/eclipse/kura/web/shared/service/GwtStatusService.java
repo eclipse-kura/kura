@@ -39,7 +39,7 @@ public interface GwtStatusService extends RemoteService {
 	 * @param xsrfToken - A GwtXSRFToken token necessary to prevent cross-site request forgery attacks.
 	 * @throws GwtKuraException
 	 */
-	public void connectDataService(GwtXSRFToken xsrfToken) throws GwtKuraException;
+	public void connectDataService(GwtXSRFToken xsrfToken, String connectionId) throws GwtKuraException;
 	
 	/**
 	 * Disconnects the local MQTT client.
@@ -47,5 +47,5 @@ public interface GwtStatusService extends RemoteService {
 	 * @param xsrfToken - A GwtXSRFToken token necessary to prevent cross-site request forgery attacks.
 	 * @throws GwtKuraException
 	 */
-	public void disconnectDataService(GwtXSRFToken xsrfToken) throws GwtKuraException;
+	public void disconnectDataService(GwtXSRFToken xsrfToken, String connectionId) throws GwtKuraException;
 }

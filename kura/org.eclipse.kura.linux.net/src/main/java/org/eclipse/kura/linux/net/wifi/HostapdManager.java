@@ -11,22 +11,13 @@
  *******************************************************************************/
 package org.eclipse.kura.linux.net.wifi;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
 
-import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
-import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.core.linux.util.LinuxProcessUtil;
 import org.eclipse.kura.core.util.ProcessUtil;
 import org.eclipse.kura.core.util.SafeProcess;
 import org.eclipse.kura.linux.net.util.KuraConstants;
-import org.eclipse.kura.net.wifi.WifiPassword;
-import org.eclipse.kura.net.wifi.WifiSecurity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,15 +37,19 @@ public class HostapdManager {
 		}
 	}
 
-	public static void start(String ifaceName, Password passkey, WifiSecurity wifiSecurity) throws KuraException {
+	public static void start(String ifaceName) throws KuraException {
 		SafeProcess proc = null;
+		File configFile = new File(getHostapdConfigFileName(ifaceName));      
+		if (!configFile.exists()) {      
+		    throw KuraException.internalError("Config file does not exist: " + configFile.getAbsolutePath());       
+		}
 		try {
 			if(HostapdManager.isRunning(ifaceName)) {
 				stop(ifaceName);
 			}
 			
 			//start hostapd
-			String launchHostapdCommand = generateStartCommand(ifaceName, passkey, wifiSecurity);
+			String launchHostapdCommand = generateStartCommand(ifaceName);
 			s_logger.debug("starting hostapd --> {}", launchHostapdCommand);
 			proc = ProcessUtil.exec(launchHostapdCommand);
 			if(proc.waitFor() != 0) {
@@ -68,13 +63,6 @@ public class HostapdManager {
 		finally {
 			if (proc != null) {
 				ProcessUtil.destroy(proc);
-			}
-			if (!s_isIntelEdison) {
-				// delete temporary hostapd.conf that contains passkey
-				File tmpHostapdConfigFile = new File(getHostapdConfigFileName(ifaceName, "/tmp"));
-				if (tmpHostapdConfigFile.exists()) {
-					tmpHostapdConfigFile.delete();
-				}
 			}
 		}
 	}
@@ -113,7 +101,7 @@ public class HostapdManager {
 	
 	public static int getPid(String ifaceName) throws KuraException {
 		try {
-			String [] tokens = {getHostapdConfigFileName(ifaceName, "/tmp")};
+		    String [] tokens = {getHostapdConfigFileName(ifaceName)};
 			int pid = LinuxProcessUtil.getPid("hostapd", tokens);
 			s_logger.trace("getPid() :: pid={}", pid);
 			return pid;
@@ -122,14 +110,12 @@ public class HostapdManager {
 		}
 	}
 
-	private static String generateStartCommand(String ifaceName,
-			Password passkey, WifiSecurity wifiSecurity)
-			throws KuraException {
+	private static String generateStartCommand(String ifaceName) {
 		StringBuilder cmd = new StringBuilder();
 		if (s_isIntelEdison) {
 			cmd.append("systemctl start hostapd");
 		} else {
-			File configFile = generateHostapdConfigFile(ifaceName, passkey, wifiSecurity);
+		    File configFile = new File(getHostapdConfigFileName(ifaceName));
 			cmd.append(HOSTAPD_EXEC).append(" -B ").append(configFile.getAbsolutePath());
 		}
 		return cmd.toString();
@@ -155,70 +141,12 @@ public class HostapdManager {
 	}
 	
 	public static String getHostapdConfigFileName(String ifaceName) {
-		return getHostapdConfigFileName(ifaceName, "/etc");
-	}
-	
-	private static String getHostapdConfigFileName(String ifaceName, String folder) {
 		StringBuilder sb = new StringBuilder();
 		if (s_isIntelEdison) {
 			sb.append("/etc/hostapd/hostapd.conf");
 		} else {
-			sb.append(folder).append('/').append("hostapd-").append(ifaceName).append(".conf");
+		    sb.append("/etc/hostapd-").append(ifaceName).append(".conf");
 		}
 		return sb.toString();
-	}
-	
-	private static File generateHostapdConfigFile(String ifaceName, Password passkey, WifiSecurity wifiSecurity) throws KuraException {
-		File retConfigFile = new File(getHostapdConfigFileName(ifaceName, "/tmp"));
-		File configFile = new File(getHostapdConfigFileName(ifaceName));
-		if(!configFile.exists()) {
-			throw KuraException.internalError("Config file does not exist: " + configFile.getAbsolutePath());
-		}
-		FileReader fr = null;
-		FileWriter fw = null;
-		BufferedReader br = null;
-		PrintWriter pw = null;	
-		try {
-			fr = new FileReader(configFile);
-			br = new BufferedReader(fr);
-			fw = new FileWriter(retConfigFile);
-			pw = new PrintWriter(fw);
-			String line = null;
-            while ((line = br.readLine()) != null) {
-               line = line.trim();
-               if (!(line.startsWith("#") || line.isEmpty())) {
-            	   if (line.startsWith("wep_key") || line.startsWith("wpa_passphrase")) {
-            		   int ind = line.indexOf('=');
-            		   if (ind > 0) {
-            			   WifiPassword wifiPassword = new WifiPassword(passkey.toString());
-            			   wifiPassword.validate(wifiSecurity);
-            			   pw.println(line.substring(0, ind+1).concat(passkey.toString()));
-            		   }
-            	   } else {
-            		   pw.println(line);
-            	   }
-               }
-            }
-		} catch (Exception e) {
-			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
-		} finally {
-			try {
-				if (br != null) {
-					br.close();
-				}
-				if (fr != null) {
-					fr.close();
-				}
-				if (pw != null) {
-					pw.close();
-				}
-				if (fw != null) {
-					fw.close();
-				}
-			} catch (IOException e) {
-				s_logger.error("Failed to close file stream - {}", e);
-			}
-		}
-		return retConfigFile;
 	}
 }

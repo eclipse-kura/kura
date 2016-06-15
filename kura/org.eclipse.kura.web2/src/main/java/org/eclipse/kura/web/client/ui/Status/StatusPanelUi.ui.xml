@@ -43,5 +43,18 @@
 				</b:Well>
 			</b:Row>
 		</b:Column>
+		<b:Modal closable="false" ui:field="connectModal">
+			<b:ModalBody>
+				<b:Panel>
+					<b:PanelHeader><b:Heading size="H3" text="Available Connections" /></b:PanelHeader>
+					<b:PanelBody ui:field="connectPanel">
+						<b:Row addStyleNames="rowHeader"><b:Column size="MD_6"><g:HTML>Connection Name</g:HTML></b:Column></b:Row>
+					</b:PanelBody>
+				</b:Panel>
+			</b:ModalBody>
+			<b:ModalFooter>
+				<b:Button ui:field="cancel" />
+			</b:ModalFooter>
+		</b:Modal>
 	</b:Container>
 </ui:UiBinder> 

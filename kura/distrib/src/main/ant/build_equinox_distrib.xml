@@ -849,7 +849,7 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
 		<!-- Conditional inclusion of jar files in the distribution jar -->
 		<antcall target="web-jar-win" />
 		<antcall target="web2-jar-win" />
-		<antcall target="emulated-gpio-jar-win" />
+		<antcall target="emulator-gpio-jar-win" />
 
         <echo message="Building Kura Distribution for ${build.name}-jars..." />
         
@@ -1294,7 +1294,7 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
 			todir="${build.install.dir.kura}/plugins" />
 	</target>
 
-	<target name="emulated-gpio-jar-win" if="emulated.gpio.jar.present">
+	<target name="emulator-gpio-jar-win">
     	<echo message="emul-gpio-jar-win ${project.build.directory}/${build.output.name}/config.ini..." />
 		<copy file="${project.build.directory}/plugins/org.eclipse.kura.emulator.gpio_${org.eclipse.kura.emulator.gpio.version}.jar"
 			todir="${build.install.dir.kura}/kura/plugins" />

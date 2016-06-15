@@ -22,6 +22,9 @@ TIMESTAMP=`date +%Y%m%d%H%M%S`
 LOG=/tmp/kura_upgrade_${TIMESTAMP}.log
 ABSOLUTE_PATH=`readlink -m $0`
 
+HOSTAPD_FILE=/etc/hostapd
+WPASUPPLICANT_FILE=/etc/wpa_supplicant
+
 # Assume we will fail
 SUCCESS=1
 
@@ -170,6 +173,18 @@ OLD_INSTALL_PATH=`readlink -f ${BASE_DIR}/kura`
 rm -f ${BASE_DIR}/kura
 find ${BASE_DIR} \! -name '${INSTALL_DIR}' -delete
 ln -s ${BASE_DIR}/${INSTALL_DIR} ${BASE_DIR}/kura
+
+# if /etc/hostapd.conf file exists and /etc/hostapd-wlan0.conf file doesn't exist
+# rename /etc/hostapd.conf to /etc/hostapd-wlan0.conf
+if [[ -f ${HOSTAPD_FILE}.conf && ! -f ${HOSTAPD_FILE}-wlan0.conf ]]; then
+    mv ${HOSTAPD_FILE}.conf ${HOSTAPD_FILE}-wlan0.conf
+fi
+
+# if /etc/wpa_supplicant.conf file exists and /etc/wpa_supplicant-wlan0.conf file doesn't exist
+# rename /etc/wpa_supplicant.conf to /etc/wpa_supplicant-wlan0.conf
+if [[ -f ${WPASUPPLICANT_FILE}.conf && ! -f ${WPASUPPLICANT_FILE}-wlan0.conf ]]; then
+    mv ${WPASUPPLICANT_FILE}.conf ${WPASUPPLICANT_FILE}-wlan0.conf
+fi
 
 # Upgrade was successful
 SUCCESS=0

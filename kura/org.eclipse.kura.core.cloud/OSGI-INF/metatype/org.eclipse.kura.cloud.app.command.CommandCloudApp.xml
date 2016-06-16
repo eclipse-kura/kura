@@ -42,8 +42,8 @@
         	type="String"
         	cardinality="0"
         	required="false"
-        	default="/tmp"
-        	description="Specifies the working directory where the command execution is performed.">
+        	default=""
+        	description="Specifies the working directory where the command execution is performed. (Defaults to the system specified temporary directory.)">
         </AD>
         
         <AD id="command.timeout"

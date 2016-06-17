@@ -26,8 +26,8 @@ import java.util.Map;
 import org.apache.felix.dm.DependencyActivatorBase;
 import org.apache.felix.dm.DependencyManager;
 import org.eclipse.kura.device.Device;
+import org.eclipse.kura.device.internal.BaseDevice;
 import org.eclipse.kura.device.internal.test.DeviceConfigurationTest;
-import org.eclipse.kura.device.internal.test.DeviceStub;
 import org.eclipse.kura.device.internal.test.DeviceTest;
 import org.eclipse.kura.device.internal.test.DriverStub;
 import org.osgi.framework.BundleContext;
@@ -51,9 +51,9 @@ public final class Activator extends DependencyActivatorBase {
 		// Registering Driver
 		manager.add(this.createComponent().setInterface(Driver.class.getName(), this.newDriverProperties())
 				.setImplementation(DriverStub.class));
-		// Registering Device Stub as a Device component
+		// Registering basic Device Stub as a Device component
 		manager.add(this.createComponent().setInterface(Device.class.getName(), this.newDeviceProperties())
-				.setImplementation(DeviceStub.class));
+				.setImplementation(BaseDevice.class));
 		// Creating service component for Base Device Test
 		manager.add(this.createComponent()
 				.setInterface(Object.class.getName(), this.newTestProperties("BasicDeviceStubTest"))

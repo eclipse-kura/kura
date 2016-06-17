@@ -25,7 +25,7 @@ import org.eclipse.kura.cloud.CloudletTopic;
 import org.eclipse.kura.device.Channel;
 import org.eclipse.kura.device.Device;
 import org.eclipse.kura.device.DeviceRecord;
-import org.eclipse.kura.device.internal.AbstractDevice;
+import org.eclipse.kura.device.internal.BaseDevice;
 import org.eclipse.kura.device.internal.DeviceConfiguration;
 import org.eclipse.kura.device.util.Devices;
 import org.eclipse.kura.message.KuraRequestPayload;
@@ -139,14 +139,14 @@ public final class DeviceCloudlet extends Cloudlet {
 				for (final String deviceName : this.m_devices.keySet()) {
 					final Device device = this.m_devices.get(deviceName);
 					respPayload.addMetric(String.valueOf(index++),
-							((AbstractDevice) device).getDeviceConfiguration().getDeviceName());
+							((BaseDevice) device).getDeviceConfiguration().getDeviceName());
 				}
 			}
 			// Checks if the name of the device is provided
 			if (reqTopic.getResources().length == 2) {
 				final String deviceName = reqTopic.getResources()[1];
 				final Device device = this.m_devices.get(deviceName);
-				final DeviceConfiguration configuration = ((AbstractDevice) device).getDeviceConfiguration();
+				final DeviceConfiguration configuration = ((BaseDevice) device).getDeviceConfiguration();
 				final Map<String, Channel> deviceConfiguredChannels = configuration.getChannels();
 				int index = 1;
 				for (final String channelName : deviceConfiguredChannels.keySet()) {
@@ -159,7 +159,7 @@ public final class DeviceCloudlet extends Cloudlet {
 				final String deviceName = reqTopic.getResources()[1];
 				final String channelName = reqTopic.getResources()[2];
 				final Device device = this.m_devices.get(deviceName);
-				final DeviceConfiguration configuration = ((AbstractDevice) device).getDeviceConfiguration();
+				final DeviceConfiguration configuration = ((BaseDevice) device).getDeviceConfiguration();
 				final Map<String, Channel> deviceConfiguredChannels = configuration.getChannels();
 				if ((deviceConfiguredChannels != null) && deviceConfiguredChannels.containsKey(channelName)) {
 					final List<DeviceRecord> deviceRecords = device.read(Lists.newArrayList(channelName));
@@ -188,7 +188,7 @@ public final class DeviceCloudlet extends Cloudlet {
 			final String deviceName = reqTopic.getResources()[1];
 			final String channelName = reqTopic.getResources()[2];
 			final Device device = this.m_devices.get(deviceName);
-			final DeviceConfiguration configuration = ((AbstractDevice) device).getDeviceConfiguration();
+			final DeviceConfiguration configuration = ((BaseDevice) device).getDeviceConfiguration();
 			final Map<String, Channel> deviceConfiguredChannels = configuration.getChannels();
 			if ((deviceConfiguredChannels != null) && deviceConfiguredChannels.containsKey(channelName)) {
 				final DeviceRecord deviceRecord = Devices.newDeviceRecord(channelName);

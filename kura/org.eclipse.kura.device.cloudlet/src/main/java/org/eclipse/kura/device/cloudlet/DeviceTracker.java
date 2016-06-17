@@ -16,7 +16,7 @@ import java.util.Collection;
 import java.util.Map;
 
 import org.eclipse.kura.device.Device;
-import org.eclipse.kura.device.internal.AbstractDevice;
+import org.eclipse.kura.device.internal.BaseDevice;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.InvalidSyntaxException;
@@ -61,7 +61,7 @@ public final class DeviceTracker extends ServiceTracker<Object, Object> {
 			s_logger.info("Device has been found by Device Cloudlet Tracker....==> adding service");
 			if (service instanceof Device) {
 				final Device device = (Device) service;
-				final String deviceName = ((AbstractDevice) device).getDeviceConfiguration().getDeviceName();
+				final String deviceName = ((BaseDevice) device).getDeviceConfiguration().getDeviceName();
 				this.m_devices.put(deviceName, device);
 			}
 		}
@@ -89,7 +89,7 @@ public final class DeviceTracker extends ServiceTracker<Object, Object> {
 				final Object object = this.context.getService(ref);
 				if (object instanceof Device) {
 					final Device device = this.context.getService(ref);
-					final String deviceName = ((AbstractDevice) device).getDeviceConfiguration().getDeviceName();
+					final String deviceName = ((BaseDevice) device).getDeviceConfiguration().getDeviceName();
 					this.m_devices.put(deviceName, device);
 				}
 			}
@@ -103,7 +103,7 @@ public final class DeviceTracker extends ServiceTracker<Object, Object> {
 	public void removedService(final ServiceReference<Object> reference, final Object service) {
 		super.removedService(reference, service);
 		if ((service instanceof Device)) {
-			final String deviceName = ((AbstractDevice) service).getDeviceConfiguration().getDeviceName();
+			final String deviceName = ((BaseDevice) service).getDeviceConfiguration().getDeviceName();
 			if (this.m_devices.containsKey(deviceName)) {
 				this.m_devices.remove(deviceName);
 			}

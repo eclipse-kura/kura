@@ -26,6 +26,7 @@ import org.eclipse.kura.device.DeviceEvent;
 import org.eclipse.kura.device.DeviceFlag;
 import org.eclipse.kura.device.DeviceListener;
 import org.eclipse.kura.device.DeviceRecord;
+import org.eclipse.kura.device.internal.BaseDevice;
 import org.eclipse.kura.device.internal.DeviceConfiguration;
 import org.eclipse.kura.device.util.Devices;
 import org.eclipse.kura.type.util.TypedValues;
@@ -47,7 +48,7 @@ public final class DeviceTest {
 
 	/** Service Component Registration Callback */
 	protected void activate(final ComponentContext conext, final Map<String, Object> properties) {
-		this.m_configuration = ((DeviceStub) this.m_device).getDeviceConfiguration();
+		this.m_configuration = ((BaseDevice) this.m_device).getDeviceConfiguration();
 	}
 
 	/**
@@ -124,11 +125,11 @@ public final class DeviceTest {
 			}
 		};
 		this.m_device.registerDeviceListener(channelName, deviceListener);
-		assertEquals(1, ((DriverStub) (((DeviceStub) this.m_device).getDriver())).m_listeners.size());
-		assertEquals(1, ((DeviceStub) this.m_device).getListeners().size());
+		assertEquals(1, ((DriverStub) (((BaseDevice) this.m_device).getDriver())).m_listeners.size());
+		assertEquals(1, ((BaseDevice) this.m_device).getListeners().size());
 		this.m_device.unregisterDeviceListener(deviceListener);
-		assertEquals(0, ((DriverStub) (((DeviceStub) this.m_device).getDriver())).m_listeners.size());
-		assertEquals(0, ((DeviceStub) this.m_device).getListeners().size());
+		assertEquals(0, ((DriverStub) (((BaseDevice) this.m_device).getDriver())).m_listeners.size());
+		assertEquals(0, ((BaseDevice) this.m_device).getListeners().size());
 	}
 
 	/**

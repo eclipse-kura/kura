@@ -60,7 +60,7 @@ import com.google.common.collect.Sets;
  * </ul>
  *
  * The key <b><i>name</i></b> must be String. The key <b><i>value_type</i></b>
- * must be in one of the following
+ * must be in one of the following (case-insensitive)
  *
  * <ul>
  * <li>INTEGER</li>
@@ -73,7 +73,7 @@ import com.google.common.collect.Sets;
  * <li>BYTE_ARRAY</li>
  * </ul>
  *
- * The channel {@code type} should be one of the following
+ * The channel {@code type} should be one of the following (case-insensitive)
  *
  * <ul>
  * <li>READ</li>
@@ -262,13 +262,13 @@ public final class DeviceConfiguration {
 			}
 			if (properties.containsKey(channelTypeKey)) {
 				final String type = (String) properties.get(channelTypeKey);
-				if ("READ".equals(type)) {
+				if ("READ".equalsIgnoreCase(type)) {
 					channelType = ChannelType.READ;
 				}
-				if ("WRITE".equals(type)) {
+				if ("WRITE".equalsIgnoreCase(type)) {
 					channelType = ChannelType.WRITE;
 				}
-				if ("READ_WRITE".equals(type)) {
+				if ("READ_WRITE".equalsIgnoreCase(type)) {
 					channelType = ChannelType.READ_WRITE;
 				}
 			}

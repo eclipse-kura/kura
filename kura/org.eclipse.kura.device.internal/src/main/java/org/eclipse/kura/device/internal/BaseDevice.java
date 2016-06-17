@@ -58,14 +58,19 @@ import com.google.common.collect.Maps;
 import com.google.common.util.concurrent.Monitor;
 
 /**
- * The Class AbstractDevice is a basic device implementation of a Kura Field
- * Device which associates a device driver. All devices which associates a
- * driver must extend this class to conform to the kura device specifications.
+ * The Class BaseDevice is a basic Kura device implementation of an Industrial
+ * Field Device which associates a device driver. All devices which associates a
+ * driver either extend this class for more specific functionality or use this
+ * to conform to the Kura device specifications.
+ *
+ * The basic device implementation requires a specific set of configurations to
+ * be provided by the user. Please check {@see DeviceConfiguration} for more
+ * information on how to provide the configurations to the basic Kura device.
  */
-public abstract class AbstractDevice implements Device, SelfConfiguringComponent {
+public class BaseDevice implements Device, SelfConfiguringComponent {
 
 	/** The Logger instance. */
-	private static final Logger s_logger = LoggerFactory.getLogger(AbstractDevice.class);
+	private static final Logger s_logger = LoggerFactory.getLogger(BaseDevice.class);
 
 	/** The service component context. */
 	private ComponentContext m_context;
@@ -89,9 +94,9 @@ public abstract class AbstractDevice implements Device, SelfConfiguringComponent
 	private Map<String, Object> m_properties;
 
 	/**
-	 * Instantiates a new base device.
+	 * Instantiates a new Base Device.
 	 */
-	protected AbstractDevice() {
+	protected BaseDevice() {
 		this.m_deviceListeners = Maps.newConcurrentMap();
 		this.m_monitor = new Monitor();
 	}
@@ -416,11 +421,9 @@ public abstract class AbstractDevice implements Device, SelfConfiguringComponent
 	 */
 	protected synchronized void updated(final Map<String, Object> properties) {
 		s_logger.debug("Updating Base Device Configurations...");
-
 		this.m_properties = properties;
 		this.retrieveConfigurationsFromProperties(properties);
 		this.attachDriver(this.m_deviceConfiguration.getDriverId());
-
 		s_logger.debug("Updating Base Device Configurations...Done");
 	}
 
@@ -441,11 +444,9 @@ public abstract class AbstractDevice implements Device, SelfConfiguringComponent
 			final Channel channel = channels.get(deviceRecord.getChannelName());
 			checkCondition((channel.getType() != ChannelType.WRITE) || !(channel.getType() != ChannelType.READ_WRITE),
 					"Channel type not within defined types (WRITE OR READ_WRITE) : " + channel);
-
 			final DriverRecord driverRecord = Devices.newDriverRecord(channel.getName());
 			driverRecord.setChannelConfig(channel.getConfig());
 			driverRecord.setValue(deviceRecord.getValue());
-
 			driverRecords.add(driverRecord);
 			mappedRecords.put(driverRecord, deviceRecord);
 		}
@@ -461,7 +462,6 @@ public abstract class AbstractDevice implements Device, SelfConfiguringComponent
 		for (final DriverRecord driverRecord : mappedRecords.keySet()) {
 			final DeviceRecord deviceRecord = mappedRecords.get(driverRecord);
 			deviceRecord.setChannelName(driverRecord.getChannelName());
-
 			final DriverFlag driverFlag = driverRecord.getDriverFlag();
 			switch (driverFlag) {
 			case WRITE_SUCCESSFUL:

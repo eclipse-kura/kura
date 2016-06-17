@@ -25,7 +25,7 @@ import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.device.Channel;
 import org.eclipse.kura.device.ChannelType;
 import org.eclipse.kura.device.DeviceRecord;
-import org.eclipse.kura.device.internal.AbstractDevice;
+import org.eclipse.kura.device.internal.BaseDevice;
 import org.eclipse.kura.device.util.Devices;
 import org.eclipse.kura.type.TypedValue;
 import org.eclipse.kura.type.util.TypedValues;
@@ -61,7 +61,7 @@ import com.google.common.collect.Lists;
  * <li>Value</li>
  * </ul>
  */
-public final class WireDevice extends AbstractDevice implements WireEmitter, WireReceiver {
+public final class WireDevice extends BaseDevice implements WireEmitter, WireReceiver {
 
 	/** The Logger instance. */
 	private static final Logger s_logger = LoggerFactory.getLogger(WireDevice.class);

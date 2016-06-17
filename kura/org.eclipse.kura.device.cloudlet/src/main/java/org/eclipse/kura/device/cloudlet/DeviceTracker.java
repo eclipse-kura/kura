@@ -61,7 +61,8 @@ public final class DeviceTracker extends ServiceTracker<Object, Object> {
 			s_logger.info("Device has been found by Device Cloudlet Tracker....==> adding service");
 			if (service instanceof Device) {
 				final Device device = (Device) service;
-				this.m_devices.put(((AbstractDevice) device).getDeviceConfiguration().getDeviceName(), device);
+				final String deviceName = ((AbstractDevice) device).getDeviceConfiguration().getDeviceName();
+				this.m_devices.put(deviceName, device);
 			}
 		}
 		return service;
@@ -88,7 +89,8 @@ public final class DeviceTracker extends ServiceTracker<Object, Object> {
 				final Object object = this.context.getService(ref);
 				if (object instanceof Device) {
 					final Device device = this.context.getService(ref);
-					this.m_devices.put(((AbstractDevice) device).getDeviceConfiguration().getDeviceName(), device);
+					final String deviceName = ((AbstractDevice) device).getDeviceConfiguration().getDeviceName();
+					this.m_devices.put(deviceName, device);
 				}
 			}
 		} catch (final InvalidSyntaxException e) {
@@ -100,8 +102,11 @@ public final class DeviceTracker extends ServiceTracker<Object, Object> {
 	@Override
 	public void removedService(final ServiceReference<Object> reference, final Object service) {
 		super.removedService(reference, service);
-		if ((service instanceof Device) && this.m_devices.containsKey(service)) {
-			this.m_devices.remove(service);
+		if ((service instanceof Device)) {
+			final String deviceName = ((AbstractDevice) service).getDeviceConfiguration().getDeviceName();
+			if (this.m_devices.containsKey(deviceName)) {
+				this.m_devices.remove(deviceName);
+			}
 			s_logger.info("Device has been removed by Device Cloudlet Tracker..." + service);
 		}
 	}

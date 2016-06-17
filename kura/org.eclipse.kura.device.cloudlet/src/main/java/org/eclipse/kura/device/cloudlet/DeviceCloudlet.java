@@ -46,18 +46,22 @@ import com.google.common.collect.Lists;
  *
  * The available {@code GET} commands are as follows
  * <ul>
- * <li>list-devices</li> e.g: /list-devices
- * <li>list-channels</li> e.g: /list-channels/device_name
+ * <li>/devices</li> : to retrieve all the devices
+ * <li>/devices/device_name</li> : to retrieve all the channels of the provided
+ * device name
+ * <li>/devices/device_name/channel_name</li> : to retrieve the value of the
+ * specified channel from the provided device name
  * </ul>
  *
  * The available {@code PUT} commands are as follows
  * <ul>
- * <li>read</li> e.g /read/device_name/channel_name
- * <li>write</li> e.g /write/device_name/channel_name topic with payload
- * {@code value} and {@code type}
+ * <li>/devices/device_name/channel_name</li> : to write the provided
+ * {@code value} in the payload to the specified channel of the provided device
+ * name. The payload must also include the {@code type} of the {@code value}
+ * provided.
  * </ul>
  *
- * The {@code value} key in the request payload can be one of the following
+ * The {@code type} key in the request payload can be one of the following
  * (case-insensitive)
  * <ul>
  * <li>INTEGER</li>
@@ -127,24 +131,45 @@ public final class DeviceCloudlet extends Cloudlet {
 	protected void doGet(final CloudletTopic reqTopic, final KuraRequestPayload reqPayload,
 			final KuraResponsePayload respPayload) throws KuraException {
 		s_logger.info("Cloudlet GET Request received on the Device Cloudlet");
-		if ("list-devices".equals(reqTopic.getResources()[0])) {
+		if ("devices".equals(reqTopic.getResources()[0])) {
+			// perform a search operation at the beginning
 			this.findDevices();
-			int index = 1;
-			for (final String deviceName : this.m_devices.keySet()) {
-				final Device device = this.m_devices.get(deviceName);
-				respPayload.addMetric(String.valueOf(index++),
-						((AbstractDevice) device).getDeviceConfiguration().getDeviceName());
+			if (reqTopic.getResources().length == 1) {
+				int index = 1;
+				for (final String deviceName : this.m_devices.keySet()) {
+					final Device device = this.m_devices.get(deviceName);
+					respPayload.addMetric(String.valueOf(index++),
+							((AbstractDevice) device).getDeviceConfiguration().getDeviceName());
+				}
 			}
-		}
-		if ("list-channels".equals(reqTopic.getResources()[0]) && (reqTopic.getResources().length > 1)) {
-			this.findDevices();
-			final String deviceName = reqTopic.getResources()[1];
-			final Device device = this.m_devices.get(deviceName);
-			final DeviceConfiguration configuration = ((AbstractDevice) device).getDeviceConfiguration();
-			final Map<String, Channel> deviceConfiguredChannels = configuration.getChannels();
-			int index = 1;
-			for (final String channelName : deviceConfiguredChannels.keySet()) {
-				respPayload.addMetric(String.valueOf(index++), channelName);
+			// Checks if the name of the device is provided
+			if (reqTopic.getResources().length == 2) {
+				final String deviceName = reqTopic.getResources()[1];
+				final Device device = this.m_devices.get(deviceName);
+				final DeviceConfiguration configuration = ((AbstractDevice) device).getDeviceConfiguration();
+				final Map<String, Channel> deviceConfiguredChannels = configuration.getChannels();
+				int index = 1;
+				for (final String channelName : deviceConfiguredChannels.keySet()) {
+					respPayload.addMetric(String.valueOf(index++), channelName);
+				}
+			}
+			// Checks if the name of the device and the name of the channel are
+			// provided
+			if (reqTopic.getResources().length == 3) {
+				final String deviceName = reqTopic.getResources()[1];
+				final String channelName = reqTopic.getResources()[2];
+				final Device device = this.m_devices.get(deviceName);
+				final DeviceConfiguration configuration = ((AbstractDevice) device).getDeviceConfiguration();
+				final Map<String, Channel> deviceConfiguredChannels = configuration.getChannels();
+				if ((deviceConfiguredChannels != null) && deviceConfiguredChannels.containsKey(channelName)) {
+					final List<DeviceRecord> deviceRecords = device.read(Lists.newArrayList(channelName));
+					for (final DeviceRecord deviceRecord : deviceRecords) {
+						respPayload.addMetric("flag", deviceRecord.getDeviceFlag());
+						respPayload.addMetric("timestamp", deviceRecord.getTimestamp());
+						respPayload.addMetric("value", deviceRecord.getValue());
+						respPayload.addMetric("channel_name", deviceRecord.getChannelName());
+					}
+				}
 			}
 		}
 		s_logger.info("Cloudlet GET Request received on the Device Cloudlet");
@@ -155,29 +180,9 @@ public final class DeviceCloudlet extends Cloudlet {
 	protected void doPut(final CloudletTopic reqTopic, final KuraRequestPayload reqPayload,
 			final KuraResponsePayload respPayload) throws KuraException {
 		s_logger.info("Cloudlet EXEC Request received on the Device Cloudlet....");
-		// Checks if the operation name "read", the name of the device and the
-		// name of the channel are provided
-		if ("read".equals(reqTopic.getResources()[0]) && (reqTopic.getResources().length > 2)) {
-			// perform a search operation at the beginning
-			this.findDevices();
-			final String deviceName = reqTopic.getResources()[1];
-			final String channelName = reqTopic.getResources()[2];
-			final Device device = this.m_devices.get(deviceName);
-			final DeviceConfiguration configuration = ((AbstractDevice) device).getDeviceConfiguration();
-			final Map<String, Channel> deviceConfiguredChannels = configuration.getChannels();
-			if ((deviceConfiguredChannels != null) && deviceConfiguredChannels.containsKey(channelName)) {
-				final List<DeviceRecord> deviceRecords = device.read(Lists.newArrayList(channelName));
-				for (final DeviceRecord deviceRecord : deviceRecords) {
-					respPayload.addMetric("Flag", deviceRecord.getDeviceFlag());
-					respPayload.addMetric("Timestamp", deviceRecord.getTimestamp());
-					respPayload.addMetric("Value", deviceRecord.getValue());
-					respPayload.addMetric("Channel_Name", deviceRecord.getChannelName());
-				}
-			}
-		}
-		// Checks if the operation name "write", the name of the device and the
-		// name of the channel are provided
-		if ("write".equals(reqTopic.getResources()[0]) && (reqTopic.getResources().length > 2)) {
+		// Checks if the name of the device and the name of the channel are
+		// provided
+		if ("devices".equals(reqTopic.getResources()[0]) && (reqTopic.getResources().length > 2)) {
 			// perform a search operation at the beginning
 			this.findDevices();
 			final String deviceName = reqTopic.getResources()[1];
@@ -192,10 +197,10 @@ public final class DeviceCloudlet extends Cloudlet {
 				this.wrapValue(deviceRecord, userValue, userType);
 				final List<DeviceRecord> deviceRecords = device.write(Lists.newArrayList(deviceRecord));
 				for (final DeviceRecord record : deviceRecords) {
-					respPayload.addMetric("Flag", record.getDeviceFlag());
-					respPayload.addMetric("Timestamp", record.getTimestamp());
-					respPayload.addMetric("Value", record.getValue());
-					respPayload.addMetric("Channel_Name", record.getChannelName());
+					respPayload.addMetric("flag", record.getDeviceFlag());
+					respPayload.addMetric("timestamp", record.getTimestamp());
+					respPayload.addMetric("value", record.getValue());
+					respPayload.addMetric("channel_name", record.getChannelName());
 				}
 			}
 		}

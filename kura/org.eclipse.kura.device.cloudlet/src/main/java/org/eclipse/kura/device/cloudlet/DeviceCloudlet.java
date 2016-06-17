@@ -111,6 +111,7 @@ public final class DeviceCloudlet extends Cloudlet {
 		super.activate(componentContext);
 		try {
 			this.m_deviceTracker = new DeviceTracker(componentContext.getBundleContext());
+			this.m_deviceTracker.open();
 		} catch (final InvalidSyntaxException e) {
 			Throwables.propagate(e);
 		}
@@ -211,7 +212,6 @@ public final class DeviceCloudlet extends Cloudlet {
 	 * Searches for all the currently available devices in the service registry
 	 */
 	private void findDevices() {
-		this.m_deviceTracker.open();
 		this.m_devices = this.m_deviceTracker.getRegisteredDevices();
 	}
 

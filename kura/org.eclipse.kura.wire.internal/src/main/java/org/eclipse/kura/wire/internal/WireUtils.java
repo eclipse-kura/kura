@@ -37,6 +37,11 @@ public final class WireUtils {
 
 	/** Service Property */
 	private static final String SERVICE_PID_PROPERTY = "service.pid";
+	
+	/** Constructor */
+	private WireUtils() {
+		// Static Factory Methods container. No need to instantiate.
+	}
 
 	/**
 	 * Gets the wire emitters and receivers.
@@ -183,13 +188,6 @@ public final class WireUtils {
 			Throwables.propagate(e);
 		}
 		return false;
-	}
-
-	/**
-	 * Constructor
-	 */
-	private WireUtils() {
-		// Static Factory Methods container. No need to instantiate.
 	}
 
 }

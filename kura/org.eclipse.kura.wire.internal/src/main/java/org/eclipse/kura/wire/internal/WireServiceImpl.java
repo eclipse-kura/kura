@@ -33,7 +33,7 @@ import org.eclipse.kura.wire.WireEmitter;
 import org.eclipse.kura.wire.WireReceiver;
 import org.eclipse.kura.wire.WireService;
 import org.eclipse.kura.wire.WireServiceOptions;
-import org.eclipse.kura.wire.util.Wires;
+import org.eclipse.kura.wire.Wires;
 import org.json.JSONException;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.component.ComponentContext;

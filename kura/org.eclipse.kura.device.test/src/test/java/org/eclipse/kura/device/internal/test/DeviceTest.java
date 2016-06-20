@@ -29,7 +29,7 @@ import org.eclipse.kura.device.DeviceRecord;
 import org.eclipse.kura.device.internal.BaseDevice;
 import org.eclipse.kura.device.internal.DeviceConfiguration;
 import org.eclipse.kura.device.util.Devices;
-import org.eclipse.kura.type.util.TypedValues;
+import org.eclipse.kura.type.TypedValues;
 import org.junit.Test;
 import org.osgi.service.component.ComponentContext;
 

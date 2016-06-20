@@ -31,7 +31,7 @@ import org.eclipse.kura.device.util.Devices;
 import org.eclipse.kura.message.KuraRequestPayload;
 import org.eclipse.kura.message.KuraResponsePayload;
 import org.eclipse.kura.type.TypedValue;
-import org.eclipse.kura.type.util.TypedValues;
+import org.eclipse.kura.type.TypedValues;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;

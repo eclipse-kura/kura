@@ -11,6 +11,7 @@
  *     Amit Kumar Mondal (admin@amitinside.com)
  *******************************************************************************/
 /**
- * Provides all necessary APIs to manipulate Kura Wires topology
+ * Provides all necessary APIs and all utility classes comprising necessary
+ * static factory methods to manipulate Kura Wires topology
  */
 package org.eclipse.kura.wire;

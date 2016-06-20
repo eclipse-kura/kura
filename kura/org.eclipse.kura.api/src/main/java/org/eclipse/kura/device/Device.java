@@ -114,11 +114,11 @@ public interface Device {
 	 * up and a {@code KuraException} with a suitable error code shall be
 	 * thrown.
 	 *
-	 * @param records
-	 *            the records hold the information of what channels are to be
-	 *            written and the values that are to be written. They will be
-	 *            filled by this function with a device flag stating whether the
-	 *            write process is successful or not.
+	 * @param deviceRecords
+	 *            the device records hold the information of what channels are
+	 *            to be written and the values that are to be written. They will
+	 *            be filled by this function with a device flag stating whether
+	 *            the write process is successful or not.
 	 * @throws KuraRuntimeException
 	 *             if the method is not implemented by the device then specific
 	 *             error code {@code KuraErrorCode#OPERATION_NOT_SUPPORTED}

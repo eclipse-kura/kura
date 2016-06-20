@@ -10,7 +10,7 @@
  *   Eurotech
  *   Amit Kumar Mondal (admin@amitinside.com)
  */
-package org.eclipse.kura.wire.util;
+package org.eclipse.kura.wire;
 
 import static org.eclipse.kura.Preconditions.checkNull;
 
@@ -21,13 +21,6 @@ import java.util.Map;
 import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.annotation.Nullable;
 import org.eclipse.kura.type.TypedValue;
-import org.eclipse.kura.wire.WireComponent;
-import org.eclipse.kura.wire.WireConfiguration;
-import org.eclipse.kura.wire.WireEnvelope;
-import org.eclipse.kura.wire.WireField;
-import org.eclipse.kura.wire.WireRecord;
-import org.eclipse.kura.wire.WireServiceOptions;
-import org.eclipse.kura.wire.WireSupport;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -40,6 +33,11 @@ import com.google.common.collect.Lists;
  * Wires.
  */
 public final class Wires {
+	
+	/** Constructor */
+	private Wires() {
+		// Static Factory Methods container. No need to instantiate.
+	}
 
 	/**
 	 * Instantiates a new wire configuration.
@@ -206,11 +204,6 @@ public final class Wires {
 	 */
 	public static WireSupport newWireSupport(final WireComponent wireComponent) {
 		return new WireSupport(wireComponent);
-	}
-
-	/** Constructor */
-	private Wires() {
-		// Static Factory Methods container. No need to instantiate.
 	}
 
 }

@@ -10,24 +10,20 @@
  *   Eurotech
  *   Amit Kumar Mondal (admin@amitinside.com)
  */
-package org.eclipse.kura.type.util;
+package org.eclipse.kura.type;
 
 import org.eclipse.kura.annotation.Nullable;
-import org.eclipse.kura.type.BooleanValue;
-import org.eclipse.kura.type.ByteArrayValue;
-import org.eclipse.kura.type.ByteValue;
-import org.eclipse.kura.type.DoubleValue;
-import org.eclipse.kura.type.IntegerValue;
-import org.eclipse.kura.type.LongValue;
-import org.eclipse.kura.type.ShortValue;
-import org.eclipse.kura.type.StringValue;
-import org.eclipse.kura.type.TypedValue;
 
 /**
  * The Class TypedValues is an utility class to quickly create different
  * {@link TypedValue}
  */
 public final class TypedValues {
+	
+	/** Constructor */
+	private TypedValues() {
+		// Static Factory Methods container. No need to instantiate.
+	}
 
 	/**
 	 * Creates new boolean value.
@@ -115,11 +111,6 @@ public final class TypedValues {
 	 */
 	public static StringValue newStringValue(@Nullable final String value) {
 		return new StringValue(value);
-	}
-
-	/** Constructor */
-	private TypedValues() {
-		// Static Factory Methods container. No need to instantiate.
 	}
 
 }

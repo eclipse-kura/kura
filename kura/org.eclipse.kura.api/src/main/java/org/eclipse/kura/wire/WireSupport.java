@@ -17,7 +17,6 @@ import static org.eclipse.kura.Preconditions.checkNull;
 import java.util.List;
 
 import org.eclipse.kura.KuraRuntimeException;
-import org.eclipse.kura.wire.util.Wires;
 import org.osgi.service.wireadmin.Consumer;
 import org.osgi.service.wireadmin.Producer;
 import org.osgi.service.wireadmin.Wire;

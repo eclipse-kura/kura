@@ -309,7 +309,7 @@ public class BaseDevice implements Device, SelfConfiguringComponent {
 			checkCondition(!channels.containsKey(channelName), "Channel not available");
 
 			final Channel channel = channels.get(channelName);
-			checkCondition((channel.getType() != ChannelType.READ) || !(channel.getType() != ChannelType.READ_WRITE),
+			checkCondition((channel.getType() != ChannelType.READ) || (channel.getType() != ChannelType.READ_WRITE),
 					"Channel type not within defined types (READ OR READ_WRITE) : " + channel);
 
 			final DriverRecord driverRecord = Devices.newDriverRecord(channelName);
@@ -442,7 +442,7 @@ public class BaseDevice implements Device, SelfConfiguringComponent {
 			checkCondition(!channels.containsKey(deviceRecord.getChannelName()), "Channel not available");
 
 			final Channel channel = channels.get(deviceRecord.getChannelName());
-			checkCondition((channel.getType() != ChannelType.WRITE) || !(channel.getType() != ChannelType.READ_WRITE),
+			checkCondition((channel.getType() != ChannelType.WRITE) || (channel.getType() != ChannelType.READ_WRITE),
 					"Channel type not within defined types (WRITE OR READ_WRITE) : " + channel);
 			final DriverRecord driverRecord = Devices.newDriverRecord(channel.getName());
 			driverRecord.setChannelConfig(channel.getConfig());

@@ -19,10 +19,10 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.kura.configuration.ConfigurableComponent;
-import org.eclipse.kura.type.util.TypedValues;
+import org.eclipse.kura.type.TypedValues;
 import org.eclipse.kura.wire.WireEmitter;
 import org.eclipse.kura.wire.WireSupport;
-import org.eclipse.kura.wire.util.Wires;
+import org.eclipse.kura.wire.Wires;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.wireadmin.Wire;
 import org.slf4j.Logger;

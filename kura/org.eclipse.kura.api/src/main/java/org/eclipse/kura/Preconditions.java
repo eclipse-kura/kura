@@ -22,6 +22,11 @@ import com.google.common.base.Strings;
  * {@link KuraErrorCode#INTERNAL_ERROR} if the provided flag is satisfied
  */
 public final class Preconditions {
+	
+	/** Constructor */
+	private Preconditions() {
+		// Static Factory Methods container. No need to instantiate.
+	}
 
 	/**
 	 * Checks condition and throws exception if satisfied
@@ -134,11 +139,6 @@ public final class Preconditions {
 	public static <T> T checkNull(final T object, @Nullable final String message) {
 		checkCondition(object == null, message);
 		return object;
-	}
-
-	/** Constructor */
-	private Preconditions() {
-		// Static Factory Methods container. No need to instantiate.
 	}
 
 }

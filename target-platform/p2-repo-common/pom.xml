@@ -182,6 +182,11 @@
 									<artifactId>camel-kura</artifactId>
 									<version>${org.apache.camel.camel-kura.version}</version>
 								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.kura.windows.system</artifactId>
+									<version>1.0.1</version>
+								</artifactItem>
 							</artifactItems>
 							<outputDirectory>${project.basedir}/target/source/plugins</outputDirectory>
 						</configuration>

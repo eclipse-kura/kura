@@ -140,6 +140,33 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, WireR
 
 	/** {@inheritDoc} */
 	@Override
+	public void clear(final String tableName) {
+		checkNull(tableName, "Table name cannot be null");
+		final String sqlTableName = this.m_dbHelper.sanitizeSqlTableAndColumnName(tableName);
+		Connection conn = null;
+		try {
+			conn = this.m_dbHelper.getConnection();
+			// check for the table that collects the data
+			final String catalog = conn.getCatalog();
+			final DatabaseMetaData dbMetaData = conn.getMetaData();
+			final ResultSet rsTbls = dbMetaData.getTables(catalog, null, sqlTableName, null);
+			if (rsTbls.next()) {
+				// table does exist, truncate it
+				s_logger.info("Truncating table DR_{}...", sqlTableName);
+				this.m_dbHelper.execute(MessageFormat.format(SQL_TRUNCATE_TABLE, sqlTableName));
+			}
+		} catch (final SQLException sqlException) {
+			s_logger.error("Error in truncating the table " + sqlTableName + "..."
+					+ Throwables.getStackTraceAsString(sqlException));
+		} finally {
+			if (conn != null) {
+				this.m_dbHelper.close(conn);
+			}
+		}
+	}
+
+	/** {@inheritDoc} */
+	@Override
 	public void consumersConnected(final Wire[] wires) {
 		this.m_wireSupport.consumersConnected(wires);
 	}
@@ -388,8 +415,8 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, WireR
 				/** {@inheritDoc} */
 				@Override
 				public void run() {
-					for (final String tableName : m_tableNames) {
-						clear(tableName);
+					for (final String tableName : DbWireRecordStore.this.m_tableNames) {
+						DbWireRecordStore.this.clear(tableName);
 					}
 				}
 			}, cleanUpRate, TimeUnit.SECONDS);
@@ -430,33 +457,6 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, WireR
 				}
 			}
 		} while (!inserted && (retryCount < 2));
-	}
-
-	/** {@inheritDoc} */
-	@Override
-	public void clear(final String tableName) throws KuraRuntimeException {
-		checkNull(tableName, "Table name cannot be null");
-		final String sqlTableName = this.m_dbHelper.sanitizeSqlTableAndColumnName(tableName);
-		Connection conn = null;
-		try {
-			conn = this.m_dbHelper.getConnection();
-			// check for the table that collects the data
-			final String catalog = conn.getCatalog();
-			final DatabaseMetaData dbMetaData = conn.getMetaData();
-			final ResultSet rsTbls = dbMetaData.getTables(catalog, null, sqlTableName, null);
-			if (rsTbls.next()) {
-				// table does exist, truncate it
-				s_logger.info("Truncating table DR_{}...", sqlTableName);
-				this.m_dbHelper.execute(MessageFormat.format(SQL_TRUNCATE_TABLE, sqlTableName));
-			}
-		} catch (final SQLException sqlException) {
-			s_logger.error("Error in truncating the table " + sqlTableName + "..."
-					+ Throwables.getStackTraceAsString(sqlException));
-		} finally {
-			if (conn != null) {
-				this.m_dbHelper.close(conn);
-			}
-		}
 	}
 
 	/**

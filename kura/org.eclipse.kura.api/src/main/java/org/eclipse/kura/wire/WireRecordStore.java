@@ -28,7 +28,7 @@ public interface WireRecordStore {
 	 * @throws KuraRuntimeException
 	 *             if the argument is null
 	 */
-	public void clear(String tableName) throws KuraRuntimeException;
+	public void clear(String tableName);
 
 	/**
 	 * Stores the provided wire record into the provided table.
@@ -40,6 +40,6 @@ public interface WireRecordStore {
 	 * @throws KuraRuntimeException
 	 *             if any of the arguments is null
 	 */
-	public void store(String tableName, WireRecord wireRecord) throws KuraRuntimeException;
+	public void store(String tableName, WireRecord wireRecord);
 
 }

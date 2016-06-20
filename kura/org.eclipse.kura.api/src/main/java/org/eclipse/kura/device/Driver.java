@@ -99,7 +99,7 @@ public interface Driver {
 	 * @throws KuraRuntimeException
 	 *             if argument is null or empty
 	 */
-	public void read(List<DriverRecord> records) throws KuraRuntimeException, KuraException;
+	public void read(List<DriverRecord> records) throws KuraException;
 
 	/**
 	 * Registers driver listener for the provided channel configuration for a
@@ -124,8 +124,7 @@ public interface Driver {
 	 * @throws KuraRuntimeException
 	 *             if any of the argument is null
 	 */
-	public void registerDriverListener(Map<String, Object> channelConfig, DriverListener listener)
-			throws KuraRuntimeException, KuraException;
+	public void registerDriverListener(Map<String, Object> channelConfig, DriverListener listener) throws KuraException;
 
 	/**
 	 * Unregisters a already registered driver listener which has been
@@ -148,7 +147,7 @@ public interface Driver {
 	 * @throws KuraRuntimeException
 	 *             if argument is null
 	 */
-	public void unregisterDriverListener(DriverListener listener) throws KuraRuntimeException, KuraException;
+	public void unregisterDriverListener(DriverListener listener) throws KuraException;
 
 	/**
 	 * Writes the data channels that correspond to the given driver records. The
@@ -178,6 +177,6 @@ public interface Driver {
 	 * @throws KuraRuntimeException
 	 *             if argument is null or empty
 	 */
-	public void write(List<DriverRecord> records) throws KuraRuntimeException, KuraException;
+	public void write(List<DriverRecord> records) throws KuraException;
 
 }

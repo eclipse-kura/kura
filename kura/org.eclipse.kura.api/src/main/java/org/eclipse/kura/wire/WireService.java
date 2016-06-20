@@ -32,7 +32,7 @@ public interface WireService {
 	 *             if any of the arguments is null
 	 * @return the wire instance recently created
 	 */
-	public Wire createWire(String emitterName, String receiverName) throws KuraRuntimeException;
+	public Wire createWire(String emitterName, String receiverName);
 
 	/**
 	 * Creates the wire component.
@@ -45,7 +45,7 @@ public interface WireService {
 	 *             if any of the arguments is null
 	 * @return the wire component name which is recently created
 	 */
-	public String createWireComponent(String factoryPid, String name) throws KuraRuntimeException;
+	public String createWireComponent(String factoryPid, String name);
 
 	/**
 	 * Removes the wire between the provided wire emitter and the wire receiver
@@ -58,7 +58,7 @@ public interface WireService {
 	 *             if any of the arguments is null
 	 * @return true, if removal is successful
 	 */
-	public boolean removeWire(String emitterName, String receiverName) throws KuraRuntimeException;
+	public boolean removeWire(String emitterName, String receiverName);
 
 	/**
 	 * Removes the wire component.
@@ -69,6 +69,6 @@ public interface WireService {
 	 *             if argument is null
 	 * @return true, if removal is successful
 	 */
-	public boolean removeWireComponent(String name) throws KuraRuntimeException;
+	public boolean removeWireComponent(String name);
 
 }

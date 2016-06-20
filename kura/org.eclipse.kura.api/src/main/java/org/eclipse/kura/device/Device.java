@@ -58,7 +58,7 @@ public interface Device {
 	 * @return the list of device records which comprises the currently read
 	 *         value in case of success or the reason of failure
 	 */
-	public List<DeviceRecord> read(List<String> channelNames) throws KuraRuntimeException, KuraException;
+	public List<DeviceRecord> read(List<String> channelNames) throws KuraException;
 
 	/**
 	 * Registers device listener for the provided channel name for a monitor
@@ -84,8 +84,7 @@ public interface Device {
 	 * @throws KuraRuntimeException
 	 *             if any of the arguments is null
 	 */
-	public void registerDeviceListener(String channelName, DeviceListener deviceListener)
-			throws KuraRuntimeException, KuraException;
+	public void registerDeviceListener(String channelName, DeviceListener deviceListener) throws KuraException;
 
 	/**
 	 * Unregisters a already registered device listener which has been
@@ -103,7 +102,7 @@ public interface Device {
 	 * @throws KuraRuntimeException
 	 *             if argument is null
 	 */
-	public void unregisterDeviceListener(DeviceListener deviceListener) throws KuraRuntimeException, KuraException;
+	public void unregisterDeviceListener(DeviceListener deviceListener) throws KuraException;
 
 	/**
 	 * Writes the data to the provided communication channels that correspond to
@@ -136,6 +135,6 @@ public interface Device {
 	 * @return the list of device records which comprises the status of the
 	 *         write operations
 	 */
-	public List<DeviceRecord> write(List<DeviceRecord> deviceRecords) throws KuraRuntimeException, KuraException;
+	public List<DeviceRecord> write(List<DeviceRecord> deviceRecords) throws KuraException;
 
 }

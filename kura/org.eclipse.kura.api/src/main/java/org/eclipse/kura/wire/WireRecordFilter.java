@@ -14,8 +14,6 @@ package org.eclipse.kura.wire;
 
 import java.util.List;
 
-import org.eclipse.kura.KuraRuntimeException;
-
 /**
  * The Interface WireRecordFilter is responsible to filter out the provided wire
  * records
@@ -27,6 +25,6 @@ public interface WireRecordFilter {
 	 *
 	 * @return the list of filtered wire records
 	 */
-	public List<WireRecord> filter() throws KuraRuntimeException;
+	public List<WireRecord> filter();
 
 }

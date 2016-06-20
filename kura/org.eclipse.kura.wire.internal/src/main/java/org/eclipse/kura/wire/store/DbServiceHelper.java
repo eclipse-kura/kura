@@ -46,7 +46,7 @@ public final class DbServiceHelper {
 	private static final Logger s_logger = LoggerFactory.getLogger(DbServiceHelper.class);
 
 	/** The dependent DB service instance. */
-	public DbService s_DbService;
+	public DbService s_dbService;
 
 	/**
 	 * Instantiates a new DB Service Helper.
@@ -58,7 +58,7 @@ public final class DbServiceHelper {
 	 */
 	private DbServiceHelper(final DbService dbService) {
 		checkNull(dbService, "Db Service cannot be null");
-		this.s_DbService = dbService;
+		this.s_dbService = dbService;
 	}
 
 	/**
@@ -72,7 +72,7 @@ public final class DbServiceHelper {
 	public void close(final Connection conn) {
 		checkNull(conn, "Connection instance cannnot be null");
 		s_logger.debug("Closing connection instance..." + conn);
-		this.s_DbService.close(conn);
+		this.s_dbService.close(conn);
 		s_logger.debug("Closed connection instance...Done");
 	}
 
@@ -84,7 +84,7 @@ public final class DbServiceHelper {
 	 */
 	public void close(final ResultSet... rss) {
 		s_logger.debug("Closing all result sets..." + Arrays.toString(rss));
-		this.s_DbService.close(rss);
+		this.s_dbService.close(rss);
 		s_logger.debug("Closing all result sets...Done");
 	}
 
@@ -96,7 +96,7 @@ public final class DbServiceHelper {
 	 */
 	public void close(final Statement... stmts) {
 		s_logger.debug("Closing all statements..." + Arrays.toString(stmts));
-		this.s_DbService.close(stmts);
+		this.s_dbService.close(stmts);
 		s_logger.debug("Closing all statements...Done");
 	}
 
@@ -143,7 +143,7 @@ public final class DbServiceHelper {
 	 *             the SQL exception
 	 */
 	public Connection getConnection() throws SQLException {
-		return this.s_DbService.getConnection();
+		return this.s_dbService.getConnection();
 	}
 
 	/**
@@ -157,7 +157,7 @@ public final class DbServiceHelper {
 	public void rollback(final Connection conn) {
 		checkNull(conn, "Connection instance cannnot be null");
 		s_logger.debug("Rolling back the connection instance..." + conn);
-		this.s_DbService.rollback(conn);
+		this.s_dbService.rollback(conn);
 		s_logger.debug("Rolling back the connection instance...Done");
 	}
 

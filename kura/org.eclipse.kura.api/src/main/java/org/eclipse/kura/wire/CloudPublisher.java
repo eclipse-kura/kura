@@ -31,6 +31,6 @@ public interface CloudPublisher {
 	 * @throws KuraRuntimeException
 	 *             if argument is null or empty
 	 */
-	public void publish(List<WireRecord> wireRecords) throws KuraRuntimeException;
+	public void publish(List<WireRecord> wireRecords);
 
 }

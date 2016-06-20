@@ -16,7 +16,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.kura.KuraException;
-import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.device.ChannelDescriptor;
 import org.eclipse.kura.device.Devices;
 import org.eclipse.kura.device.Driver;
@@ -64,7 +63,7 @@ public final class DriverStub implements Driver {
 
 	/** {@inheritDoc} */
 	@Override
-	public synchronized void read(final List<DriverRecord> records) throws KuraRuntimeException, KuraException {
+	public synchronized void read(final List<DriverRecord> records) throws KuraException {
 		for (final DriverRecord record : records) {
 			record.setValue(TypedValues.newBooleanValue(true));
 			record.setDriverFlag(DriverFlag.READ_SUCCESSFUL);
@@ -74,7 +73,7 @@ public final class DriverStub implements Driver {
 	/** {@inheritDoc} */
 	@Override
 	public synchronized void registerDriverListener(final Map<String, Object> channelConfig,
-			final DriverListener listener) throws KuraRuntimeException, KuraException {
+			final DriverListener listener) throws KuraException {
 		final DriverRecord record = Devices.newDriverRecord("sample.channel3");
 		record.setValue(TypedValues.newIntegerValue(20));
 		record.setDriverFlag(DriverFlag.READ_SUCCESSFUL);
@@ -86,14 +85,13 @@ public final class DriverStub implements Driver {
 
 	/** {@inheritDoc} */
 	@Override
-	public synchronized void unregisterDriverListener(final DriverListener listener)
-			throws KuraRuntimeException, KuraException {
+	public synchronized void unregisterDriverListener(final DriverListener listener) throws KuraException {
 		this.m_listeners.remove(listener);
 	}
 
 	/** {@inheritDoc} */
 	@Override
-	public synchronized void write(final List<DriverRecord> records) throws KuraRuntimeException, KuraException {
+	public synchronized void write(final List<DriverRecord> records) throws KuraException {
 		for (final DriverRecord record : records) {
 			record.setDriverFlag(DriverFlag.WRITE_SUCCESSFUL);
 		}

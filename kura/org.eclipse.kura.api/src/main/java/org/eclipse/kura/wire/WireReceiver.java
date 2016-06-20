@@ -29,5 +29,5 @@ public interface WireReceiver extends WireComponent, Consumer {
 	 * @throws KuraRuntimeException
 	 *             if argument is null
 	 */
-	public void onWireReceive(WireEnvelope wireEnvelope) throws KuraRuntimeException;
+	public void onWireReceive(WireEnvelope wireEnvelope);
 }

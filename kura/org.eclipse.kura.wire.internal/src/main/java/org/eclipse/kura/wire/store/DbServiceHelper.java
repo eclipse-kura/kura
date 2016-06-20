@@ -45,19 +45,6 @@ public final class DbServiceHelper {
 	/** The Logger instance. */
 	private static final Logger s_logger = LoggerFactory.getLogger(DbServiceHelper.class);
 
-	/**
-	 * Gets the single instance of DbUtils.
-	 *
-	 * @param dbService
-	 *            the db service
-	 * @return single instance of DbUtils
-	 * @throws KuraRuntimeException
-	 *             if argument is null
-	 */
-	public static DbServiceHelper getInstance(final DbService dbService) {
-		return new DbServiceHelper(dbService);
-	}
-
 	/** The dependent DB service instance. */
 	public DbService s_DbService;
 
@@ -195,5 +182,18 @@ public final class DbServiceHelper {
 		final Escaper escaper = s_builder.addEscape('\'', "_").addEscape('"', "_").addEscape('\\', "")
 				.addEscape('.', "_").addEscape(' ', "_").build();
 		return escaper.escape(string).toLowerCase();
+	}
+	
+	/**
+	 * Gets the single instance of DbUtils.
+	 *
+	 * @param dbService
+	 *            the db service
+	 * @return single instance of DbUtils
+	 * @throws KuraRuntimeException
+	 *             if argument is null
+	 */
+	public static DbServiceHelper getInstance(final DbService dbService) {
+		return new DbServiceHelper(dbService);
 	}
 }

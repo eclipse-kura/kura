@@ -19,11 +19,11 @@ import org.eclipse.kura.device.DeviceEvent;
 import org.eclipse.kura.device.DeviceFlag;
 import org.eclipse.kura.device.DeviceListener;
 import org.eclipse.kura.device.DeviceRecord;
+import org.eclipse.kura.device.Devices;
 import org.eclipse.kura.device.DriverEvent;
 import org.eclipse.kura.device.DriverFlag;
 import org.eclipse.kura.device.DriverListener;
 import org.eclipse.kura.device.DriverRecord;
-import org.eclipse.kura.device.util.Devices;
 
 /**
  * This is a basic driver listener used to listen for driver events so that it

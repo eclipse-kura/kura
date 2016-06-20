@@ -40,11 +40,11 @@ import org.eclipse.kura.device.Device;
 import org.eclipse.kura.device.DeviceFlag;
 import org.eclipse.kura.device.DeviceListener;
 import org.eclipse.kura.device.DeviceRecord;
+import org.eclipse.kura.device.Devices;
 import org.eclipse.kura.device.Driver;
 import org.eclipse.kura.device.DriverFlag;
 import org.eclipse.kura.device.DriverListener;
 import org.eclipse.kura.device.DriverRecord;
-import org.eclipse.kura.device.util.Devices;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
@@ -239,8 +239,8 @@ public class BaseDevice implements Device, SelfConfiguringComponent {
 
 		final Map<String, Object> props = Maps.newHashMap();
 
-		for (final String key : this.m_properties.keySet()) {
-			props.put(key, this.m_properties.get(key));
+		for (final Map.Entry<String, Object> entry : this.m_properties.entrySet()) {
+			props.put(entry.getKey(), entry.getValue());
 		}
 
 		if ((this.m_driver != null) && (this.m_driver.getChannelDescriptor() != null)) {

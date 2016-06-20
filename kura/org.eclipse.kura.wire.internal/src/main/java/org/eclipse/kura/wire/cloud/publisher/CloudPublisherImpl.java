@@ -132,37 +132,8 @@ public final class CloudPublisherImpl
 			jsonObject.put("position", this.buildKuraPositionForJson(wireRecord.getPosition()));
 		}
 		for (final WireField dataField : wireRecord.getFields()) {
-			Object value = null;
 			final Object wrappedValue = dataField.getValue().getValue();
-			switch (dataField.getValue().getType()) {
-			case STRING:
-				value = String.valueOf(wrappedValue);
-				break;
-			case DOUBLE:
-				value = ((Double) wrappedValue).doubleValue();
-				break;
-			case INTEGER:
-				value = ((Integer) wrappedValue).intValue();
-				break;
-			case LONG:
-				value = ((Long) wrappedValue).longValue();
-				break;
-			case BOOLEAN:
-				value = ((Boolean) wrappedValue).booleanValue();
-				break;
-			case BYTE_ARRAY:
-				value = wrappedValue;
-				break;
-			case BYTE:
-				value = ((Byte) wrappedValue).byteValue();
-				break;
-			case SHORT:
-				value = ((Short) wrappedValue).shortValue();
-				break;
-			default:
-				break;
-			}
-			jsonObject.put(dataField.getName(), value);
+			jsonObject.put(dataField.getName(), wrappedValue);
 		}
 		return jsonObject;
 	}
@@ -187,37 +158,8 @@ public final class CloudPublisherImpl
 			kuraPayload.setPosition(this.buildKuraPosition(wireRecord.getPosition()));
 		}
 		for (final WireField dataField : wireRecord.getFields()) {
-			Object value = null;
 			final Object wrappedValue = dataField.getValue().getValue();
-			switch (dataField.getValue().getType()) {
-			case STRING:
-				value = String.valueOf(wrappedValue);
-				break;
-			case DOUBLE:
-				value = ((Double) wrappedValue).doubleValue();
-				break;
-			case INTEGER:
-				value = ((Integer) wrappedValue).intValue();
-				break;
-			case LONG:
-				value = ((Long) wrappedValue).longValue();
-				break;
-			case BOOLEAN:
-				value = ((Boolean) wrappedValue).booleanValue();
-				break;
-			case BYTE_ARRAY:
-				value = wrappedValue;
-				break;
-			case BYTE:
-				value = ((Byte) wrappedValue).byteValue();
-				break;
-			case SHORT:
-				value = ((Short) wrappedValue).shortValue();
-				break;
-			default:
-				break;
-			}
-			kuraPayload.addMetric(dataField.getName(), value);
+			kuraPayload.addMetric(dataField.getName(), wrappedValue);
 		}
 		return kuraPayload;
 	}
@@ -320,24 +262,6 @@ public final class CloudPublisherImpl
 		this.m_dataService = null;
 		this.m_cloudService = null;
 		s_logger.info("Deactivating Cloud Publisher Wire Component...Done");
-	}
-
-	/**
-	 * Get the cloud service.
-	 *
-	 * @return the cloud service
-	 */
-	public CloudService getCloudService() {
-		return this.m_cloudService;
-	}
-
-	/**
-	 * Get the data service.
-	 *
-	 * @return the data service
-	 */
-	public DataService getDataService() {
-		return this.m_dataService;
 	}
 
 	/** {@inheritDoc} */

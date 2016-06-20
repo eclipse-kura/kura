@@ -11,6 +11,7 @@
  *     Amit Kumar Mondal (admin@amitinside.com)
  *******************************************************************************/
 /**
- * Provides all necessary APIs for Kura Device Management
+ * Provides all necessary APIs and all utility classes comprising necessary
+ * static factory methods for Kura Device Management
  */
 package org.eclipse.kura.device;

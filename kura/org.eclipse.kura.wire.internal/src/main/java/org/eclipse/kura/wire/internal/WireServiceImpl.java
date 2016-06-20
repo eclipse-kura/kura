@@ -120,9 +120,9 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 			this.m_serviceTracker = new WireSeviceTracker(this.m_ctx.getBundleContext(), this);
 			this.m_serviceTracker.open();
 			this.createWires();
-		} catch (final Throwable throwable) {
-			Throwables.propagateIfInstanceOf(throwable, JSONException.class);
-			s_logger.error(Throwables.getStackTraceAsString(throwable));
+		} catch (final Exception exception) {
+			Throwables.propagateIfInstanceOf(exception, JSONException.class);
+			s_logger.error(Throwables.getStackTraceAsString(exception));
 		}
 		s_logger.info("Activating Wire Service...Done");
 	}
@@ -241,7 +241,7 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 				try {
 					this.persistWires(false);
 				} catch (final JSONException e) {
-					s_logger.error("Failed to persist wires...");
+					s_logger.error("Failed to persist wires..." + Throwables.getStackTraceAsString(e));
 				}
 			}
 		}
@@ -270,12 +270,12 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 		wiresOCD.setDescription("Create a new Wire");
 
 		// All attribute definitions
-		final String EMITTER_PID_AD = "emitter.pids";
-		final String EMITTER_NAME_AD = "emitter.name";
-		final String RECEIVER_PID_AD = "receiver.pids";
-		final String RECEIVER_NAME_AD = "receiver.name";
-		final String DELETE_WIRES_AD = "delete.wires";
-		final String DELETE_INSTANCE_AD = "delete.instances";
+		final String emitterPidAd = "emitter.pids";
+		final String emitterNameAd = "emitter.name";
+		final String receiverPidAd = "receiver.pids";
+		final String receiverNameAd = "receiver.name";
+		final String deleteWiresAd = "delete.wires";
+		final String deleteInstanceAd = "delete.instances";
 
 		final List<String> emittersOptions = Lists.newArrayList();
 		final Set<String> factoryPids = this.m_configService.getFactoryComponentPids();
@@ -285,8 +285,8 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 		}
 
 		final Tad emitterTad = new Tad();
-		emitterTad.setId(EMITTER_PID_AD);
-		emitterTad.setName(EMITTER_PID_AD);
+		emitterTad.setId(emitterPidAd);
+		emitterTad.setName(emitterPidAd);
 		emitterTad.setType(Tscalar.STRING);
 		emitterTad.setCardinality(0);
 		emitterTad.setRequired(true);
@@ -309,8 +309,8 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 		wiresOCD.addAD(emitterTad);
 
 		final Tad emitterName = new Tad();
-		emitterName.setId(EMITTER_NAME_AD);
-		emitterName.setName(EMITTER_NAME_AD);
+		emitterName.setId(emitterNameAd);
+		emitterName.setName(emitterNameAd);
 		emitterName.setType(Tscalar.STRING);
 		emitterName.setCardinality(0);
 		emitterName.setRequired(false);
@@ -327,8 +327,8 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 		}
 
 		final Tad receiverTad = new Tad();
-		receiverTad.setId(RECEIVER_PID_AD);
-		receiverTad.setName(RECEIVER_PID_AD);
+		receiverTad.setId(receiverPidAd);
+		receiverTad.setName(receiverPidAd);
 		receiverTad.setType(Tscalar.STRING);
 		receiverTad.setCardinality(0);
 		receiverTad.setRequired(true);
@@ -346,8 +346,8 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 		wiresOCD.addAD(receiverTad);
 
 		final Tad receiverName = new Tad();
-		receiverName.setId(RECEIVER_NAME_AD);
-		receiverName.setName(RECEIVER_NAME_AD);
+		receiverName.setId(receiverNameAd);
+		receiverName.setName(receiverNameAd);
 		receiverName.setType(Tscalar.STRING);
 		receiverName.setCardinality(0);
 		receiverName.setRequired(false);
@@ -366,8 +366,8 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 		wiresOCD.addAD(receiverName);
 
 		final Tad wiresTad = new Tad();
-		wiresTad.setName(DELETE_WIRES_AD);
-		wiresTad.setId(DELETE_WIRES_AD);
+		wiresTad.setName(deleteWiresAd);
+		wiresTad.setId(deleteWiresAd);
 		wiresTad.setType(Tscalar.STRING);
 		wiresTad.setCardinality(0);
 		wiresTad.setRequired(true);
@@ -387,8 +387,8 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 		wiresOCD.addAD(wiresTad);
 
 		final Tad servicesTad = new Tad();
-		servicesTad.setName(DELETE_INSTANCE_AD);
-		servicesTad.setId(DELETE_INSTANCE_AD);
+		servicesTad.setName(deleteInstanceAd);
+		servicesTad.setId(deleteInstanceAd);
 		servicesTad.setType(Tscalar.STRING);
 		servicesTad.setCardinality(0);
 		servicesTad.setRequired(true);
@@ -413,10 +413,10 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 			this.m_properties = Maps.newHashMap();
 			// Put the JSON configuration into properties to persist in snapshot
 			this.m_properties.put("wires", this.m_options.toJsonString());
-			this.m_properties.put(DELETE_INSTANCE_AD, "NONE");
-			this.m_properties.put(DELETE_WIRES_AD, "NONE");
-			this.m_properties.put(RECEIVER_PID_AD, "NONE");
-			this.m_properties.put(EMITTER_PID_AD, "NONE");
+			this.m_properties.put(deleteInstanceAd, "NONE");
+			this.m_properties.put(deleteWiresAd, "NONE");
+			this.m_properties.put(receiverPidAd, "NONE");
+			this.m_properties.put(emitterPidAd, "NONE");
 		} catch (final JSONException e) {
 			Throwables.propagate(e);
 		}
@@ -468,9 +468,9 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 			final String jsonString = this.m_options.toJsonString();
 			newProperties.put(WireServiceOptions.CONF_WIRES, jsonString);
 			this.m_configService.updateConfiguration(PROP_PID, newProperties, shouldPersist);
-		} catch (final Throwable throwable) {
-			Throwables.propagateIfInstanceOf(throwable, JSONException.class);
-			s_logger.error(Throwables.getStackTraceAsString(throwable));
+		} catch (final Exception exception) {
+			Throwables.propagateIfInstanceOf(exception, JSONException.class);
+			s_logger.error(Throwables.getStackTraceAsString(exception));
 		}
 		s_logger.info("Persisting Wires..Done");
 	}
@@ -515,7 +515,7 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 		checkNull(emitterPid, "Emitter name cannot be null");
 		checkNull(receiverPid, "Receiver name cannot be null");
 
-		s_logger.info("Removing Wires..");
+		s_logger.info("Removing Wires...");
 		try {
 			WireConfiguration wire = null;
 			for (final WireConfiguration conf : this.m_wireConfigs) {
@@ -536,7 +536,7 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 							try {
 								this.persistWires(true);
 							} catch (final JSONException e) {
-								s_logger.error("Failed to persist wires...");
+								s_logger.error("Failed to persist wires..." + Throwables.getStackTraceAsString(e));
 							}
 							return true;
 						}
@@ -555,7 +555,7 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 	public boolean removeWireComponent(final String pid) {
 		checkNull(pid, "Wire Component PID cannot be null");
 		s_logger.info("Removing Wire Component..");
-		// Search for wires using the pid we are going to delete
+		// Search for wires using the PID we are going to delete
 		this.removePidRelatedWires(pid);
 		// Then delete the instance
 		try {
@@ -567,7 +567,7 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 		try {
 			this.persistWires(true);
 		} catch (final JSONException e) {
-			s_logger.error("Failed to persist wires...");
+			s_logger.error("Failed to persist wires..." + Throwables.getStackTraceAsString(e));
 		}
 		s_logger.info("Removing Wire Component..Done");
 		return true;
@@ -611,34 +611,32 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 
 			String emitterName = null;
 			String receiverName = null;
-			final String emitter_key_property = "emitter.name";
-			final String receiver_key_property = "receiver.name";
+			final String emitterKeyProperty = "emitter.name";
+			final String receiverKeyProperty = "receiver.name";
 
-			if (properties.containsKey(emitter_key_property)) {
-				emitterName = (String) properties.get(emitter_key_property);
+			if (properties.containsKey(emitterKeyProperty)) {
+				emitterName = (String) properties.get(emitterKeyProperty);
 			}
-			if (properties.containsKey(receiver_key_property)) {
-				receiverName = (String) properties.get(receiver_key_property);
+			if (properties.containsKey(receiverKeyProperty)) {
+				receiverName = (String) properties.get(receiverKeyProperty);
 			}
 			// New Wire
-			if ((emitterPid != null) && (receiverPid != null)) {
-				if (!emitterPid.toString().equals("NONE") && !receiverPid.toString().equals("NONE")) {
-					final String emitterString = this.createComponentFromProperty(emitterPid.toString(), emitterName);
-					final String receiverString = this.createComponentFromProperty(receiverPid.toString(),
-							receiverName);
-					final WireConfiguration wc = Wires.newWireConfiguration(emitterString, receiverString, null, false);
-					this.m_wireConfigs.add(wc);
-					this.createWires();
-					if (emitterPid.toString().startsWith("INSTANCE") && receiverPid.toString().startsWith("INSTANCE")) {
-						this.m_configService.snapshot();
-					}
+			if ((emitterPid != null) && (receiverPid != null) && !emitterPid.toString().equals("NONE")
+					&& !receiverPid.toString().equals("NONE")) {
+				final String emitterString = this.createComponentFromProperty(emitterPid.toString(), emitterName);
+				final String receiverString = this.createComponentFromProperty(receiverPid.toString(), receiverName);
+				final WireConfiguration wc = Wires.newWireConfiguration(emitterString, receiverString, null, false);
+				this.m_wireConfigs.add(wc);
+				this.createWires();
+				if (emitterPid.toString().startsWith("INSTANCE") && receiverPid.toString().startsWith("INSTANCE")) {
+					this.m_configService.snapshot();
 				}
 			}
-			final String delete_wires_key_property = "delete.wires";
+			final String deleteWiresKeyProperty = "delete.wires";
 			// Delete Existing Wire
 			Object wiresDelete = null;
-			if (properties.containsKey(delete_wires_key_property)) {
-				wiresDelete = properties.get(delete_wires_key_property);
+			if (properties.containsKey(deleteWiresKeyProperty)) {
+				wiresDelete = properties.get(deleteWiresKeyProperty);
 			}
 			if ((wiresDelete != null) && !wiresDelete.toString().equals("NONE")) {
 				final int index = Integer.parseInt(wiresDelete.toString());
@@ -646,11 +644,11 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 				this.removeWire(wc.getEmitterName(), wc.getReceiverName());
 			}
 
-			final String delete_instances_key_property = "delete.instances";
+			final String deleteInstancesKeyProperty = "delete.instances";
 			// Delete Emitter/Receiver Instance
 			Object instancesDelete = null;
-			if (properties.containsKey(delete_instances_key_property)) {
-				instancesDelete = properties.get(delete_instances_key_property);
+			if (properties.containsKey(deleteInstancesKeyProperty)) {
+				instancesDelete = properties.get(deleteInstancesKeyProperty);
 			}
 			if ((instancesDelete != null) && !instancesDelete.toString().equals("NONE")) {
 				this.removeWireComponent(instancesDelete.toString());

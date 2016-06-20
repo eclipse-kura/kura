@@ -39,6 +39,9 @@ public final class WireSeviceTracker extends ServiceTracker<Object, Object> {
 	/** The Logger instance. */
 	private static final Logger s_logger = LoggerFactory.getLogger(WireSeviceTracker.class);
 
+	/** Service PID Constant */
+	private static final String SERVICE_PID = "service.pid";
+
 	/** The wire emitters. */
 	private final List<String> m_wireEmitters;
 
@@ -72,7 +75,7 @@ public final class WireSeviceTracker extends ServiceTracker<Object, Object> {
 		s_logger.debug("Adding Wire Components....");
 		final Object service = super.addingService(reference);
 		boolean flag = false;
-		final String property = (String) reference.getProperty("service.pid");
+		final String property = (String) reference.getProperty(SERVICE_PID);
 		if (service instanceof WireEmitter) {
 			this.m_wireEmitters.add(property);
 			s_logger.debug("Registering Wire Emitter..." + property);
@@ -121,12 +124,12 @@ public final class WireSeviceTracker extends ServiceTracker<Object, Object> {
 			final Collection<ServiceReference<WireEmitter>> emitterRefs = this.context
 					.getServiceReferences(WireEmitter.class, null);
 			for (final ServiceReference<?> ref : emitterRefs) {
-				this.m_wireEmitters.add((String) ref.getProperty("service.pid"));
+				this.m_wireEmitters.add((String) ref.getProperty(SERVICE_PID));
 			}
 			final Collection<ServiceReference<WireReceiver>> receiverRefs = this.context
 					.getServiceReferences(WireReceiver.class, null);
 			for (final ServiceReference<?> ref : receiverRefs) {
-				this.m_wireReceivers.add((String) ref.getProperty("service.pid"));
+				this.m_wireReceivers.add((String) ref.getProperty(SERVICE_PID));
 			}
 		} catch (final InvalidSyntaxException e) {
 			Throwables.propagate(e);

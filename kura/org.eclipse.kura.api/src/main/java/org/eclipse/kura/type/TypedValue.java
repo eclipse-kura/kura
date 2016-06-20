@@ -22,11 +22,15 @@ public interface TypedValue<T> extends Comparable<TypedValue<T>> {
 
 	/**
 	 * Returns the data type of the represented value
+	 *
+	 * @return the datatype as associated
 	 */
 	public DataType getType();
 
 	/**
 	 * Returns the actual value as represented
+	 *
+	 * @return the value as associated
 	 */
 	public T getValue();
 }

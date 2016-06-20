@@ -31,19 +31,7 @@ public final class BaseDeviceChannelDescriptor {
 
 	/** Type Property to be used in the configuration */
 	private static final String TYPE = "type";
-
-	/**
-	 * Gets the default descriptor
-	 *
-	 * @return the default descriptor
-	 */
-	public static BaseDeviceChannelDescriptor getDefault() {
-		return new BaseDeviceChannelDescriptor();
-	}
-
-	/** The default elements. */
-	private final List<Tad> m_defaultElements;
-
+	
 	/**
 	 * Instantiates a new base device channel descriptor.
 	 */
@@ -110,6 +98,18 @@ public final class BaseDeviceChannelDescriptor {
 
 		this.m_defaultElements.add(type);
 	}
+
+	/**
+	 * Gets the default descriptor
+	 *
+	 * @return the default descriptor
+	 */
+	public static BaseDeviceChannelDescriptor getDefault() {
+		return new BaseDeviceChannelDescriptor();
+	}
+
+	/** The default elements. */
+	private final List<Tad> m_defaultElements;
 
 	/**
 	 * Gets the default configuration.

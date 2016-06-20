@@ -102,7 +102,7 @@ public final class DeviceTracker extends ServiceTracker<Object, Object> {
 	@Override
 	public void removedService(final ServiceReference<Object> reference, final Object service) {
 		super.removedService(reference, service);
-		if ((service instanceof Device)) {
+		if (service instanceof Device) {
 			final String deviceName = ((BaseDevice) service).getDeviceConfiguration().getDeviceName();
 			if (this.m_devices.containsKey(deviceName)) {
 				this.m_devices.remove(deviceName);

@@ -20,7 +20,7 @@ import java.util.Set;
 import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.device.Channel;
 import org.eclipse.kura.device.ChannelType;
-import org.eclipse.kura.device.util.Devices;
+import org.eclipse.kura.device.Devices;
 import org.eclipse.kura.type.DataType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -104,17 +104,6 @@ public final class DeviceConfiguration {
 	/** The Logger instance. */
 	private static final Logger s_logger = LoggerFactory.getLogger(DeviceConfiguration.class);
 
-	/**
-	 * Static factory to instantiate a new device configuration
-	 *
-	 * @param properties
-	 *            the configured properties
-	 * @return the device configuration
-	 */
-	public static DeviceConfiguration of(final Map<String, Object> properties) {
-		return new DeviceConfiguration(properties);
-	}
-
 	/** The list of channels associated with this device. */
 	private final Map<String, Channel> m_channels = Maps.newConcurrentMap();
 
@@ -151,12 +140,38 @@ public final class DeviceConfiguration {
 	}
 
 	/**
+	 * Checks the availability of the provided index in the provided indices and
+	 * retrieves the channel from the provided properties and add the channel to
+	 * the associated map
+	 *
+	 * @param properties
+	 *            the properties to retrieve the channels from
+	 * @param indices
+	 *            the list of provided indices
+	 * @param index
+	 *            the index for which the presence is checked
+	 */
+	@SuppressWarnings("unchecked")
+	private void checkChannelAvailability(final Map<String, Object> properties, final Set<Long> indices,
+			final long index) {
+		if (!indices.contains(index)) {
+			indices.add(index);
+			final Object channelProperties = properties.get(CHANNEL_PROPERTY_PREFIX + index + CHANNEL_PROPERTY_POSTFIX);
+			// if any key has values of type map, then it is
+			// designated for channels
+			if (channelProperties instanceof Map<?, ?>) {
+				final Channel channel = this.retrieveChannel((Map<String, Object>) channelProperties);
+				this.addChannel(channel);
+			}
+		}
+	}
+
+	/**
 	 * Extract the configurations from the provided properties
 	 *
 	 * @param properties
 	 *            the provided properties
 	 */
-	@SuppressWarnings("unchecked")
 	private void extractProperties(final Map<String, Object> properties) {
 		final Set<Long> parsedIndexes = Sets.newHashSet();
 		for (final String property : properties.keySet()) {
@@ -165,17 +180,7 @@ public final class DeviceConfiguration {
 				if ((CHANNEL_PROPERTY_PREFIX + CHANNEL_PROPERTY_POSTFIX).equals(startStr)) {
 					final String extractedNo = CharMatcher.DIGIT.retainFrom(property);
 					final long index = Long.parseLong(extractedNo);
-					if (!parsedIndexes.contains(index)) {
-						parsedIndexes.add(index);
-						final Object channelProperties = properties
-								.get(CHANNEL_PROPERTY_PREFIX + index + CHANNEL_PROPERTY_POSTFIX);
-						// if any key has values of type map, then it is
-						// designated for channels
-						if (channelProperties instanceof Map<?, ?>) {
-							final Channel channel = this.retrieveChannel((Map<String, Object>) channelProperties);
-							this.addChannel(channel);
-						}
-					}
+					this.checkChannelAvailability(properties, parsedIndexes, index);
 				}
 				if (properties.containsKey(DEVICE_DRIVER_PROP)) {
 					this.m_driverId = (String) properties.get(DEVICE_DRIVER_PROP);
@@ -317,6 +322,17 @@ public final class DeviceConfiguration {
 		return MoreObjects.toStringHelper(this).add("device_name", this.m_deviceName)
 				.add("device_description", this.m_deviceDescription).add("driver_name", this.m_driverId)
 				.add("associated_channels", this.m_channels).toString();
+	}
+	
+	/**
+	 * Static factory to instantiate a new device configuration
+	 *
+	 * @param properties
+	 *            the configured properties
+	 * @return the device configuration
+	 */
+	public static DeviceConfiguration of(final Map<String, Object> properties) {
+		return new DeviceConfiguration(properties);
 	}
 
 }

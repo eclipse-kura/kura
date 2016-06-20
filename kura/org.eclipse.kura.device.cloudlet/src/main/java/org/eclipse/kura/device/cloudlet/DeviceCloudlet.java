@@ -25,9 +25,9 @@ import org.eclipse.kura.cloud.CloudletTopic;
 import org.eclipse.kura.device.Channel;
 import org.eclipse.kura.device.Device;
 import org.eclipse.kura.device.DeviceRecord;
+import org.eclipse.kura.device.Devices;
 import org.eclipse.kura.device.internal.BaseDevice;
 import org.eclipse.kura.device.internal.DeviceConfiguration;
-import org.eclipse.kura.device.util.Devices;
 import org.eclipse.kura.message.KuraRequestPayload;
 import org.eclipse.kura.message.KuraResponsePayload;
 import org.eclipse.kura.type.TypedValue;
@@ -137,8 +137,8 @@ public final class DeviceCloudlet extends Cloudlet {
 			this.findDevices();
 			if (reqTopic.getResources().length == 1) {
 				int index = 1;
-				for (final String deviceName : this.m_devices.keySet()) {
-					final Device device = this.m_devices.get(deviceName);
+				for (final Map.Entry<String, Device> deviceEntry : this.m_devices.entrySet()) {
+					final Device device = deviceEntry.getValue();
 					respPayload.addMetric(String.valueOf(index++),
 							((BaseDevice) device).getDeviceConfiguration().getDeviceName());
 				}
@@ -164,12 +164,7 @@ public final class DeviceCloudlet extends Cloudlet {
 				final Map<String, Channel> deviceConfiguredChannels = configuration.getChannels();
 				if ((deviceConfiguredChannels != null) && deviceConfiguredChannels.containsKey(channelName)) {
 					final List<DeviceRecord> deviceRecords = device.read(Lists.newArrayList(channelName));
-					for (final DeviceRecord deviceRecord : deviceRecords) {
-						respPayload.addMetric("flag", deviceRecord.getDeviceFlag());
-						respPayload.addMetric("timestamp", deviceRecord.getTimestamp());
-						respPayload.addMetric("value", deviceRecord.getValue());
-						respPayload.addMetric("channel_name", deviceRecord.getChannelName());
-					}
+					this.prepareResponse(respPayload, deviceRecords);
 				}
 			}
 		}
@@ -197,12 +192,7 @@ public final class DeviceCloudlet extends Cloudlet {
 				final String userType = (String) reqPayload.getMetric("type");
 				this.wrapValue(deviceRecord, userValue, userType);
 				final List<DeviceRecord> deviceRecords = device.write(Lists.newArrayList(deviceRecord));
-				for (final DeviceRecord record : deviceRecords) {
-					respPayload.addMetric("flag", record.getDeviceFlag());
-					respPayload.addMetric("timestamp", record.getTimestamp());
-					respPayload.addMetric("value", record.getValue());
-					respPayload.addMetric("channel_name", record.getChannelName());
-				}
+				this.prepareResponse(respPayload, deviceRecords);
 			}
 		}
 		s_logger.info("Cloudlet GET Request received on the Device Cloudlet....Done");
@@ -213,6 +203,23 @@ public final class DeviceCloudlet extends Cloudlet {
 	 */
 	private void findDevices() {
 		this.m_devices = this.m_deviceTracker.getRegisteredDevices();
+	}
+
+	/**
+	 * Prepares the response payload based on the device records as provided
+	 *
+	 * @param respPayload
+	 *            the response payload to prepare
+	 * @param deviceRecords
+	 *            the list of device records
+	 */
+	private void prepareResponse(final KuraResponsePayload respPayload, final List<DeviceRecord> deviceRecords) {
+		for (final DeviceRecord deviceRecord : deviceRecords) {
+			respPayload.addMetric("flag", deviceRecord.getDeviceFlag());
+			respPayload.addMetric("timestamp", deviceRecord.getTimestamp());
+			respPayload.addMetric("value", deviceRecord.getValue());
+			respPayload.addMetric("channel_name", deviceRecord.getChannelName());
+		}
 	}
 
 	/**

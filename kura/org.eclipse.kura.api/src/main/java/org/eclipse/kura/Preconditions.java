@@ -102,6 +102,7 @@ public final class Preconditions {
 	 *            the exception message
 	 * @throws KuraRuntimeException
 	 *             if the check is successful
+	 * @return the non null instance
 	 */
 	public static <T> T checkInstance(final T object, final Class<?> instanceClass, @Nullable final String message) {
 		checkCondition(object.getClass().isAssignableFrom(instanceClass), KuraErrorCode.INTERNAL_ERROR, message);
@@ -119,6 +120,7 @@ public final class Preconditions {
 	 *            the exception message
 	 * @throws KuraRuntimeException
 	 *             if the check is successful
+	 * @return the non null instance
 	 */
 	public static <T> T checkNonInstance(final T object, final Class<?> instanceClass, @Nullable final String message) {
 		checkCondition(!object.getClass().isAssignableFrom(instanceClass), KuraErrorCode.INTERNAL_ERROR, message);

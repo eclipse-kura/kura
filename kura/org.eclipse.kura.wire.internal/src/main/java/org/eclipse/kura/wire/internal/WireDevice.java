@@ -25,8 +25,8 @@ import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.device.Channel;
 import org.eclipse.kura.device.ChannelType;
 import org.eclipse.kura.device.DeviceRecord;
+import org.eclipse.kura.device.Devices;
 import org.eclipse.kura.device.internal.BaseDevice;
-import org.eclipse.kura.device.util.Devices;
 import org.eclipse.kura.type.TypedValue;
 import org.eclipse.kura.type.TypedValues;
 import org.eclipse.kura.wire.WireEmitter;
@@ -163,8 +163,8 @@ public final class WireDevice extends BaseDevice implements WireEmitter, WireRec
 		final List<String> channelsToRead = Lists.newArrayList();
 		final Map<String, Channel> channels = this.m_deviceConfiguration.getChannels();
 		// determining channels to read
-		for (final String channelKey : channels.keySet()) {
-			final Channel channel = channels.get(channelKey);
+		for (final Map.Entry<String, Channel> channelEntry : channels.entrySet()) {
+			final Channel channel = channelEntry.getValue();
 			if ((channel.getType() == ChannelType.READ) || (channel.getType() == ChannelType.READ_WRITE)) {
 				channelsToRead.add(channel.getName());
 			}
@@ -183,8 +183,8 @@ public final class WireDevice extends BaseDevice implements WireEmitter, WireRec
 		// determining channels to write
 		for (final WireRecord wireRecord : wireEnvelope.getRecords()) {
 			for (final WireField wireField : wireRecord.getFields()) {
-				for (final String channelKey : channels.keySet()) {
-					final Channel channel = channels.get(channelKey);
+				for (final Map.Entry<String, Channel> channelEntry : channels.entrySet()) {
+					final Channel channel = channelEntry.getValue();
 					if ((channel.getType() == ChannelType.WRITE) || (channel.getType() == ChannelType.READ_WRITE)) {
 						deviceRecordsToWriteChannels.add(this.prepareDeviceRecord(channel, wireField.getValue()));
 					}

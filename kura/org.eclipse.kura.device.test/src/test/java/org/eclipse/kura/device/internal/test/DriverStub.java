@@ -18,12 +18,12 @@ import java.util.Map;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.device.ChannelDescriptor;
+import org.eclipse.kura.device.Devices;
 import org.eclipse.kura.device.Driver;
 import org.eclipse.kura.device.DriverEvent;
 import org.eclipse.kura.device.DriverFlag;
 import org.eclipse.kura.device.DriverListener;
 import org.eclipse.kura.device.DriverRecord;
-import org.eclipse.kura.device.util.Devices;
 import org.eclipse.kura.type.TypedValues;
 
 import com.google.common.collect.Lists;

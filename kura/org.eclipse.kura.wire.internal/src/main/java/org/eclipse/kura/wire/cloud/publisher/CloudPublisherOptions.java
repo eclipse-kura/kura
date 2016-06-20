@@ -72,7 +72,7 @@ public final class CloudPublisherOptions extends AbstractConfigurationOptions {
 	}
 
 	/** The Constant denoting the publisher application. */
-	private static final String CONF_APPLICATION = "publish.application";;
+	private static final String CONF_APPLICATION = "publish.application";
 
 	/** The Constant denoting autoconnect mode. */
 	private static final String CONF_AUTOCONNECT_MODE = "autoconnect.mode";

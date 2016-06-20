@@ -25,6 +25,13 @@ import com.google.common.collect.Maps;
  * Types
  */
 public final class DbDataTypeMapper {
+	
+	/**
+	 * Not needed because of utility class
+	 */
+	private DbDataTypeMapper() {
+		// Not needed
+	}
 
 	/**
 	 * The Class JdbcType.
@@ -121,10 +128,4 @@ public final class DbDataTypeMapper {
 		return s_dataTypeMap.get(dataType);
 	}
 
-	/**
-	 * Not needed because of utility class
-	 */
-	private DbDataTypeMapper() {
-		// Not needed
-	}
 }

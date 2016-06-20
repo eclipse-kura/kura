@@ -10,14 +10,10 @@
  *   Eurotech
  *   Amit Kumar Mondal (admin@amitinside.com)
  */
-package org.eclipse.kura.device.util;
+package org.eclipse.kura.device;
 
 import java.util.Map;
 
-import org.eclipse.kura.device.Channel;
-import org.eclipse.kura.device.ChannelType;
-import org.eclipse.kura.device.DeviceRecord;
-import org.eclipse.kura.device.DriverRecord;
 import org.eclipse.kura.type.DataType;
 
 /**
@@ -25,6 +21,11 @@ import org.eclipse.kura.type.DataType;
  * methods for devices and drivers
  */
 public final class Devices {
+	
+	/** Constructor */
+	private Devices() {
+		// Static Factory Methods container. No need to instantiate.
+	}
 
 	/**
 	 * Creates a new channel with the provided values
@@ -64,11 +65,6 @@ public final class Devices {
 	 */
 	public static DriverRecord newDriverRecord(final String channelName) {
 		return new DriverRecord(channelName);
-	}
-
-	/** Constructor */
-	private Devices() {
-		// Static Factory Methods container. No need to instantiate.
 	}
 
 }

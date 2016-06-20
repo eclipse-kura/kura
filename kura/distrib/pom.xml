@@ -241,6 +241,16 @@
 									<artifactId>org.eclipse.kura.protocol.modbus</artifactId>
 									<version>${org.eclipse.kura.protocol.modbus.version}</version>
 								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.kura.windows.command</artifactId>
+									<version>${org.eclipse.kura.windows.command.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.kura.windows.clock</artifactId>
+									<version>${org.eclipse.kura.windows.clock.version}</version>
+								</artifactItem>
 							</artifactItems>
 							<stripVersion>true</stripVersion>
 							<outputDirectory>${project.basedir}/target/plugins</outputDirectory>
@@ -371,6 +381,8 @@
   								<move file="target/plugins/org.eclipse.kura.emulator.position.jar" tofile="target/plugins/org.eclipse.kura.emulator.position_${org.eclipse.kura.emulator.position.version}.jar" />
   								<move file="target/plugins/org.eclipse.kura.emulator.usb.jar" tofile="target/plugins/org.eclipse.kura.emulator.usb_${org.eclipse.kura.emulator.usb.version}.jar" />
   								<move file="target/plugins/org.eclipse.kura.emulator.watchdog.jar" tofile="target/plugins/org.eclipse.kura.emulator.watchdog_${org.eclipse.kura.emulator.watchdog.version}.jar" />
+							    <move file="target/plugins/org.eclipse.kura.windows.command.jar" tofile="target/plugins/org.eclipse.kura.windows.command_${org.eclipse.kura.windows.command.version}.jar"/>
+							    <move file="target/plugins/org.eclipse.kura.windows.clock.jar" tofile="target/plugins/org.eclipse.kura.windows.clock_${org.eclipse.kura.windows.clock.version}.jar"/>
 							</tasks>
 						</configuration>
 					</execution>
@@ -431,7 +443,8 @@
 									<include name="pom.xml"/>
 								</replace>
 								<!-- execute script to add artifacts to pom file -->
-								<exec executable="src/main/sh/generate_kura_bundles_pom.sh" output="RELEASE_INFO/${project.version}/kura-bundles/pom.xml" append="true">
+								<exec executable="bash" output="RELEASE_INFO/${project.version}/kura-bundles/pom.xml" append="true">
+									<arg value="src/main/sh/generate_kura_bundles_pom.sh" />
 									<arg value="RELEASE_INFO/${project.version}/config/kura.build.properties" />
 								</exec>
 
@@ -448,10 +461,12 @@
 								<replace token="&lt;/artifactItems&gt;" value="&lt;/artifactItems&gt;&lt;stripVersion&gt;true&lt;/stripVersion&gt;" dir="RELEASE_INFO/${project.version}/p2-repo-common">
 									<include name="pom.xml"/>
 								</replace>
-								<!-- execute script to add artifacts to pom file -->
-								<exec executable="src/main/sh/generate_p2_repo_pom.sh" output="RELEASE_INFO/${project.version}/p2-repo-common/pom.xml">
+								<!-- execute script to add artifacts to pom file - need to have different input/output files (Win) -->
+								<exec executable="bash" output="RELEASE_INFO/${project.version}/p2-repo-common/pom_.xml">
+									<arg value="src/main/sh/generate_p2_repo_pom.sh" />
 									<arg value="RELEASE_INFO/${project.version}/p2-repo-common/pom.xml" />
 								</exec>
+								<move file="RELEASE_INFO/${project.version}/p2-repo-common/pom_.xml" tofile="RELEASE_INFO/${project.version}/p2-repo-common/pom.xml"/>
 
 								<!-- Copy target-platform/p2-repo-equinox_3.8.1/pom.xml in distrib/RELEASE_INFO/${project.version}/p2-repo-equinox_3.8.1/pom.xml -->
 								<copy
@@ -466,10 +481,12 @@
 								<replace token="&lt;/artifactItems&gt;" value="&lt;/artifactItems&gt;&lt;stripVersion&gt;true&lt;/stripVersion&gt;" dir="RELEASE_INFO/${project.version}/p2-repo-equinox_3.8.1">
 									<include name="pom.xml"/>
 								</replace>
-								<!-- execute script to add artifacts to pom file -->
-								<exec executable="src/main/sh/generate_p2_repo_pom.sh" output="RELEASE_INFO/${project.version}/p2-repo-equinox_3.8.1/pom.xml">
+								<!-- execute script to add artifacts to pom file - need to have different input/output files (Win) -->
+								<exec executable="bash" output="RELEASE_INFO/${project.version}/p2-repo-equinox_3.8.1/pom_.xml">
+									<arg value="src/main/sh/generate_p2_repo_pom.sh" />
 									<arg value="RELEASE_INFO/${project.version}/p2-repo-equinox_3.8.1/pom.xml" />
 								</exec>
+								<move file="RELEASE_INFO/${project.version}/p2-repo-equinox_3.8.1/pom_.xml" tofile="RELEASE_INFO/${project.version}/p2-repo-equinox_3.8.1/pom.xml"/>
 							</target>
 						</configuration>
 					</execution>
@@ -1771,6 +1788,67 @@
 			</build>
 		</profile>
 
+		<profile>
+			<id>Win64-nn</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<build>
+				<resources>
+					<resource>
+						<directory>src/main/resources</directory>
+						<filtering>true</filtering>
+					</resource>
+				</resources>
+				<plugins>
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>buildnumber-maven-plugin</artifactId>
+						<version>1.0</version>
+						<executions>
+							<execution>
+								<phase>validate</phase>
+								<goals>
+									<goal>create-timestamp</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-antrun-plugin</artifactId>
+						<version>1.7</version>
+						<executions>
+							<execution>
+								<id>Win64-nn-jars</id>
+								<phase>install</phase>
+								<goals>
+									<goal>run</goal>
+								</goals>
+								<configuration>
+									<target>
+										<property name="buildNumber" value="buildNumber" />
+										<property name="project.version" value="${project.version}" />
+										<property name="project.build.profile" value="${project.build.profile}" />
+										<property name="project.build.directory" value="${project.build.directory}" />
+										<property name="build.name" value="Win64-nn" />
+										<property name="target.device" value="Win64" />
+										<property name="kura.os.version" value="Windows 64" />
+										<property name="kura.arch" value="x64" />
+										<property name="kura.mem.size" value="256m" />
+										<property name="kura.install.dir" value="/opt/eclipse" />
+										<ant antfile="${basedir}/src/main/ant/build_equinox_distrib.xml"
+											target="dist-windows" />
+									</target>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>	
+
+		
 		<profile>
 			<id>dev-env</id>
 			<activation>

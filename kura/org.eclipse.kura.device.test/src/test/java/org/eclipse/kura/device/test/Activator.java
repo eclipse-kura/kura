@@ -18,7 +18,6 @@ import static org.eclipse.kura.device.internal.DeviceConfiguration.DEVICE_DESC_P
 import static org.eclipse.kura.device.internal.DeviceConfiguration.DEVICE_DRIVER_PROP;
 import static org.eclipse.kura.device.internal.DeviceConfiguration.DEVICE_ID_PROP;
 
-import java.sql.Driver;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Map;
@@ -26,6 +25,7 @@ import java.util.Map;
 import org.apache.felix.dm.DependencyActivatorBase;
 import org.apache.felix.dm.DependencyManager;
 import org.eclipse.kura.device.Device;
+import org.eclipse.kura.device.Driver;
 import org.eclipse.kura.device.internal.BaseDevice;
 import org.eclipse.kura.device.internal.test.DeviceConfigurationTest;
 import org.eclipse.kura.device.internal.test.DeviceTest;

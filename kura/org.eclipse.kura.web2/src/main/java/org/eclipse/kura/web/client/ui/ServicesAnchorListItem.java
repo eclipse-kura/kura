@@ -163,6 +163,16 @@ public class ServicesAnchorListItem extends AnchorListItem {
 			return IconType.TERMINAL;
 		} else if (name.startsWith("DenaliService")) {
 			return IconType.SPINNER;
+		} else if (name.startsWith("CloudPublisher")) {
+			return IconType.CLOUD_UPLOAD;
+		} else if (name.startsWith("Timer")) {
+			return IconType.CLOCK_O;
+		} else if (name.startsWith("RecordFilter")) {
+			return IconType.FILTER;
+		} else if (name.startsWith("RecordStore")) {
+			return IconType.SAVE;
+		} else if (name.startsWith("WireService")) {
+			return IconType.CHAIN;
 		} else {
 			return null;
 		}

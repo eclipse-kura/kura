@@ -13,13 +13,13 @@
 -->
 <MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
     <OCD id="org.eclipse.kura.wire.store.DbWireRecordStore"
-         name="DbWireRecordStore" 
-         description="DbWireRecordStore provides storage for WireRecords produced by connected WireEmitters.">
+         name="RecordStore" 
+         description="A wire component that provides storage for Wire Records produced by connected WireEmitters.">
 
-        <Icon resource="DbWireRecordStore" size="32"/>   
+        <Icon resource="RecordStore" size="32"/>   
         
-        <AD id="period.cleanup"
-            name="period.cleanup"
+        <AD id="periodic.cleanup"
+            name="periodic.cleanup"
             type="Integer"
             cardinality="0"
             required="true"
@@ -30,7 +30,7 @@
              
     </OCD>
     
-    <Designate pid="org.eclipse.kura.wire.store.DbWireRecordStore" factoryPid="org.eclipse.kura.wire.store.DbWireRecordStore">
+    <Designate pid="org.eclipse.kura.wire.store.DbWireRecordStore">
         <Object ocdref="org.eclipse.kura.wire.store.DbWireRecordStore"/>
     </Designate>
 </MetaData>

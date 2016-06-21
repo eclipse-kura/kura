@@ -20,6 +20,7 @@ import java.util.Map;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.cloud.CloudClient;
+import org.eclipse.kura.cloud.CloudService;
 import org.eclipse.kura.cloud.Cloudlet;
 import org.eclipse.kura.cloud.CloudletTopic;
 import org.eclipse.kura.device.Channel;
@@ -96,11 +97,8 @@ public final class DeviceCloudlet extends Cloudlet {
 
 	/**
 	 * Instantiates a new device cloudlet.
-	 *
-	 * @param appId
-	 *            the application id
 	 */
-	public DeviceCloudlet(final String appId) {
+	public DeviceCloudlet() {
 		super(APP_ID);
 	}
 
@@ -116,6 +114,18 @@ public final class DeviceCloudlet extends Cloudlet {
 			Throwables.propagate(e);
 		}
 		s_logger.debug("Activating Device Cloudlet...Done");
+	}
+
+	/**
+	 * Cloud Service registration callback
+	 *
+	 * @param cloudService
+	 *            the cloud service dependency
+	 */
+	protected synchronized void bindCloudService(final CloudService cloudService) {
+		if (this.getCloudService() == null) {
+			super.setCloudService(cloudService);
+		}
 	}
 
 	/** {@inheritDoc} */
@@ -224,6 +234,18 @@ public final class DeviceCloudlet extends Cloudlet {
 			respPayload.addMetric("timestamp", deviceRecord.getTimestamp());
 			respPayload.addMetric("value", deviceRecord.getValue());
 			respPayload.addMetric("channel_name", deviceRecord.getChannelName());
+		}
+	}
+
+	/**
+	 * Cloud Service deregistration callback
+	 *
+	 * @param cloudService
+	 *            the cloud service dependency
+	 */
+	protected synchronized void unbindCloudService(final CloudService cloudService) {
+		if (this.getCloudService() == cloudService) {
+			super.unsetCloudService(cloudService);
 		}
 	}
 

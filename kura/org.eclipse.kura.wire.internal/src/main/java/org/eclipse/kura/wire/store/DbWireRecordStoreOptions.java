@@ -23,7 +23,7 @@ import org.eclipse.kura.wire.internal.AbstractConfigurationOptions;
 final class DbWireRecordStoreOptions extends AbstractConfigurationOptions {
 
 	/** The Constant denotes the period as configured for periodic cleanup. */
-	private static final String PERIODIC_CLEANUP_ID = "period.cleanup";
+	private static final String PERIODIC_CLEANUP_ID = "periodic.cleanup";
 
 	/**
 	 * Instantiates a new DB wire record store options.

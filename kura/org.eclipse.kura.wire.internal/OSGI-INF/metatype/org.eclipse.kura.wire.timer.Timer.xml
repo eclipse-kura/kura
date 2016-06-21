@@ -14,7 +14,7 @@
 <MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
     <OCD id="org.eclipse.kura.wire.timer.Timer" 
          name="Timer" 
-         description="A component that triggers a ticking event on every configured interval">
+         description="A wire component that fires a ticking event on every configured interval">
 
         <Icon resource="Timer" size="32"/>
                 
@@ -37,7 +37,7 @@
 
     </OCD>
     
-    <Designate pid="org.eclipse.kura.wire.timer.Timer" factoryPid="org.eclipse.kura.wire.timer.Timer">
+    <Designate pid="org.eclipse.kura.wire.timer.Timer">
         <Object ocdref="org.eclipse.kura.wire.timer.Timer"/>
     </Designate>
 </MetaData>

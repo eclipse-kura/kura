@@ -13,10 +13,10 @@
 -->
 <MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
     <OCD id="org.eclipse.kura.wire.store.DbWireRecordFilter"
-         name="DbWireRecordFilter" 
-         description="DbWireRecordFilter provides filtering and aggregation for Wire Records stored by the DbWireRecordStores.">
+         name="RecordFilter" 
+         description="A wire component that provides filtering and aggregation for Wire Records stored by the DbWireRecordStores.">
 
-        <Icon resource="DbWireRecordFilter" size="32"/>
+        <Icon resource="RecordFilter" size="32"/>
         
         <AD id="sql.view"
         	name="sql.view"
@@ -49,7 +49,7 @@
         
     </OCD>
     
-    <Designate pid="org.eclipse.kura.wire.store.DbWireRecordFilter" factoryPid="org.eclipse.kura.wire.store.DbWireRecordFilter">
+    <Designate pid="org.eclipse.kura.wire.store.DbWireRecordFilter">
         <Object ocdref="org.eclipse.kura.wire.store.DbWireRecordFilter"/>
     </Designate>
 </MetaData>

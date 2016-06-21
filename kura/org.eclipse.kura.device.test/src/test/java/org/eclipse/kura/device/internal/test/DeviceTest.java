@@ -37,6 +37,8 @@ import com.google.common.collect.Lists;
 
 /**
  * The Class DeviceTest is responsible for testing base device implementation
+ *
+ * TODO: Need to find a way to programmatically update BaseDevice service
  */
 public final class DeviceTest {
 
@@ -47,7 +49,7 @@ public final class DeviceTest {
 	private volatile Device m_device;
 
 	/** Service Component Registration Callback */
-	protected void activate(final ComponentContext conext, final Map<String, Object> properties) {
+	protected synchronized void activate(final ComponentContext conext, final Map<String, Object> properties) {
 		this.m_configuration = ((BaseDevice) this.m_device).getDeviceConfiguration();
 	}
 
@@ -61,7 +63,7 @@ public final class DeviceTest {
 	}
 
 	/** Service Component Deregistration Callback */
-	protected void deactivate() throws Exception {
+	protected synchronized void deactivate() throws Exception {
 		this.m_device = null;
 	}
 

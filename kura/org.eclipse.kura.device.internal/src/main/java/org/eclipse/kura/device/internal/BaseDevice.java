@@ -96,7 +96,7 @@ public class BaseDevice implements Device, SelfConfiguringComponent {
 	/**
 	 * Instantiates a new Base Device.
 	 */
-	protected BaseDevice() {
+	public BaseDevice() {
 		this.m_deviceListeners = Maps.newConcurrentMap();
 		this.m_monitor = new Monitor();
 	}
@@ -115,14 +115,20 @@ public class BaseDevice implements Device, SelfConfiguringComponent {
 		s_logger.debug("Activating Base Device...");
 		this.m_context = componentContext;
 		this.m_properties = properties;
-		this.retrieveConfigurationsFromProperties(properties);
-		this.attachDriver(this.m_deviceConfiguration.getDriverId());
+		// We don't retrieve any configuration while activating device component
+		// because the user would provide the necessary configuration while
+		// updating. Let's consider the scenario for Wire Device. The user will
+		// drag the Wire Device Component to the Kura Wires composer UI and at
+		// that point of time, the device component is already activated but the
+		// configuration of the driver to be attached is not at all provided.
+		// So, we don't need to retrieve any configuration while activating a
+		// device component.
 		s_logger.debug("Activating Base Device...Done");
 	}
 
 	/**
 	 * Tracks the Driver in the OSGi service registry with the specified driver
-	 * id.
+	 * ID.
 	 *
 	 * @param driverId
 	 *            the identifier of the driver
@@ -244,7 +250,6 @@ public class BaseDevice implements Device, SelfConfiguringComponent {
 		}
 
 		if ((this.m_driver != null) && (this.m_driver.getChannelDescriptor() != null)) {
-
 			List<Tad> channelConfiguration = null;
 			final ChannelDescriptor channelDescriptor = this.m_driver.getChannelDescriptor();
 			final Object descriptor = channelDescriptor.getDescriptor();
@@ -422,6 +427,9 @@ public class BaseDevice implements Device, SelfConfiguringComponent {
 	protected synchronized void updated(final Map<String, Object> properties) {
 		s_logger.debug("Updating Base Device Configurations...");
 		this.m_properties = properties;
+		// As mentioned in the comment in activate method, we only extract
+		// configuration while updating. Please refer to the previous comment
+		// for more details.
 		this.retrieveConfigurationsFromProperties(properties);
 		this.attachDriver(this.m_deviceConfiguration.getDriverId());
 		s_logger.debug("Updating Base Device Configurations...Done");

@@ -22,4 +22,3 @@ Import-Package: com.google.common.annotations;version="19.0.0",
  org.slf4j;version="1.6.4"
 Bundle-ActivationPolicy: lazy
 Service-Component: OSGI-INF/*.xml
-Export-Package: org.eclipse.kura.device.cloudlet;version="1.0.0"

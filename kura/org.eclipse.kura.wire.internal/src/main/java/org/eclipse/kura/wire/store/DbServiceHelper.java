@@ -34,7 +34,7 @@ import com.google.common.escape.Escapers;
  * The Class DbServiceHelper is responsible for providing {@link DbService}
  * instance dependent helper methods for quick database related operations
  */
-public final class DbServiceHelper {
+final class DbServiceHelper {
 
 	/**
 	 * SQL Escaper Builder to escape characters to sanitize SQL table and column
@@ -46,7 +46,7 @@ public final class DbServiceHelper {
 	private static final Logger s_logger = LoggerFactory.getLogger(DbServiceHelper.class);
 
 	/** The dependent DB service instance. */
-	public DbService s_dbService;
+	private DbService m_dbService;
 
 	/**
 	 * Instantiates a new DB Service Helper.
@@ -58,7 +58,7 @@ public final class DbServiceHelper {
 	 */
 	private DbServiceHelper(final DbService dbService) {
 		checkNull(dbService, "Db Service cannot be null");
-		this.s_dbService = dbService;
+		this.m_dbService = dbService;
 	}
 
 	/**
@@ -69,10 +69,10 @@ public final class DbServiceHelper {
 	 * @throws KuraRuntimeException
 	 *             if argument is null
 	 */
-	public void close(final Connection conn) {
+	void close(final Connection conn) {
 		checkNull(conn, "Connection instance cannnot be null");
 		s_logger.debug("Closing connection instance..." + conn);
-		this.s_dbService.close(conn);
+		this.m_dbService.close(conn);
 		s_logger.debug("Closed connection instance...Done");
 	}
 
@@ -82,9 +82,9 @@ public final class DbServiceHelper {
 	 * @param rss
 	 *            the result sets
 	 */
-	public void close(final ResultSet... rss) {
+	void close(final ResultSet... rss) {
 		s_logger.debug("Closing all result sets..." + Arrays.toString(rss));
-		this.s_dbService.close(rss);
+		this.m_dbService.close(rss);
 		s_logger.debug("Closing all result sets...Done");
 	}
 
@@ -94,9 +94,9 @@ public final class DbServiceHelper {
 	 * @param stmts
 	 *            the SQL statements
 	 */
-	public void close(final Statement... stmts) {
+	void close(final Statement... stmts) {
 		s_logger.debug("Closing all statements..." + Arrays.toString(stmts));
-		this.s_dbService.close(stmts);
+		this.m_dbService.close(stmts);
 		s_logger.debug("Closing all statements...Done");
 	}
 
@@ -112,7 +112,7 @@ public final class DbServiceHelper {
 	 * @throws KuraRuntimeException
 	 *             if SQL query argument is null
 	 */
-	public synchronized void execute(final String sql, final Integer... params) throws SQLException {
+	synchronized void execute(final String sql, final Integer... params) throws SQLException {
 		checkNull(sql, "SQL query cannot be null");
 		s_logger.debug("Executing SQL query..." + sql);
 		Connection conn = null;
@@ -142,8 +142,8 @@ public final class DbServiceHelper {
 	 * @throws SQLException
 	 *             the SQL exception
 	 */
-	public Connection getConnection() throws SQLException {
-		return this.s_dbService.getConnection();
+	Connection getConnection() throws SQLException {
+		return this.m_dbService.getConnection();
 	}
 
 	/**
@@ -154,10 +154,10 @@ public final class DbServiceHelper {
 	 * @throws KuraRuntimeException
 	 *             if argument is null
 	 */
-	public void rollback(final Connection conn) {
+	void rollback(final Connection conn) {
 		checkNull(conn, "Connection instance cannnot be null");
 		s_logger.debug("Rolling back the connection instance..." + conn);
-		this.s_dbService.rollback(conn);
+		this.m_dbService.rollback(conn);
 		s_logger.debug("Rolling back the connection instance...Done");
 	}
 
@@ -176,7 +176,7 @@ public final class DbServiceHelper {
 	 * @throws KuraRuntimeException
 	 *             if argument is null
 	 */
-	public String sanitizeSqlTableAndColumnName(final String string) {
+	String sanitizeSqlTableAndColumnName(final String string) {
 		checkNull(string, "Provided string cannot be null");
 		s_logger.debug("Sanitizing the provided string..." + string);
 		final Escaper escaper = s_builder.addEscape('\'', "_").addEscape('"', "_").addEscape('\\', "")
@@ -193,7 +193,7 @@ public final class DbServiceHelper {
 	 * @throws KuraRuntimeException
 	 *             if argument is null
 	 */
-	public static DbServiceHelper getInstance(final DbService dbService) {
+	static DbServiceHelper getInstance(final DbService dbService) {
 		return new DbServiceHelper(dbService);
 	}
 }

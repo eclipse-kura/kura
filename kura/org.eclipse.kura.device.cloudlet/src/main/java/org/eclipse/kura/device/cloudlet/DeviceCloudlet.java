@@ -80,7 +80,7 @@ import com.google.common.collect.Lists;
  * @see DeviceCloudlet#doPut(CloudletTopic, KuraRequestPayload,
  *      KuraResponsePayload)
  */
-public final class DeviceCloudlet extends Cloudlet {
+final class DeviceCloudlet extends Cloudlet {
 
 	/** Application Identifier for Cloudlet. */
 	private static final String APP_ID = "Devicelet";
@@ -100,7 +100,7 @@ public final class DeviceCloudlet extends Cloudlet {
 	 * @param appId
 	 *            the application id
 	 */
-	protected DeviceCloudlet(final String appId) {
+	DeviceCloudlet(final String appId) {
 		super(APP_ID);
 	}
 
@@ -212,8 +212,13 @@ public final class DeviceCloudlet extends Cloudlet {
 	 *            the response payload to prepare
 	 * @param deviceRecords
 	 *            the list of device records
+	 * @throws KuraRuntimeException
+	 *             if any of the arguments is null
 	 */
 	private void prepareResponse(final KuraResponsePayload respPayload, final List<DeviceRecord> deviceRecords) {
+		checkNull(respPayload, "Response Payload cannot be null");
+		checkNull(deviceRecords, "List of device records cannot be null");
+
 		for (final DeviceRecord deviceRecord : deviceRecords) {
 			respPayload.addMetric("flag", deviceRecord.getDeviceFlag());
 			respPayload.addMetric("timestamp", deviceRecord.getTimestamp());

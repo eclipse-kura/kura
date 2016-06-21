@@ -30,7 +30,7 @@ import com.google.common.base.Throwables;
  * The Class CloudPublisherDisconnectManager manages the disconnection with
  * Cloud Publisher
  */
-public final class CloudPublisherDisconnectManager {
+final class CloudPublisherDisconnectManager {
 
 	/** The Logger instance. */
 	private static final Logger s_logger = LoggerFactory.getLogger(CloudPublisherDisconnectManager.class);
@@ -57,7 +57,7 @@ public final class CloudPublisherDisconnectManager {
 	 * @throws KuraRuntimeException
 	 *             if data service dependency is null
 	 */
-	public CloudPublisherDisconnectManager(final DataService dataService, final long quiesceTimeout) {
+	CloudPublisherDisconnectManager(final DataService dataService, final long quiesceTimeout) {
 		checkNull(dataService, "Data Service cannot be null");
 		this.m_dataService = dataService;
 		this.m_quiesceTimeout = quiesceTimeout;
@@ -73,7 +73,7 @@ public final class CloudPublisherDisconnectManager {
 	 * @throws KuraRuntimeException
 	 *             if argument passed is negative
 	 */
-	public synchronized void disconnectInMinutes(final int minutes) {
+	synchronized void disconnectInMinutes(final int minutes) {
 		checkCondition(minutes < 0, "Minutes cannot be negative");
 		// check if the required timeout is longer than the scheduled one
 		final long remainingDelay = this.m_nextExecutionTime - System.currentTimeMillis();
@@ -88,7 +88,7 @@ public final class CloudPublisherDisconnectManager {
 	 *
 	 * @return the quiesce timeout
 	 */
-	public long getQuiesceTimeout() {
+	long getQuiesceTimeout() {
 		return this.m_quiesceTimeout;
 	}
 
@@ -128,14 +128,14 @@ public final class CloudPublisherDisconnectManager {
 	 * @param quiesceTimeout
 	 *            the new quiesce timeout
 	 */
-	public void setQuiesceTimeout(final long quiesceTimeout) {
+	void setQuiesceTimeout(final long quiesceTimeout) {
 		this.m_quiesceTimeout = quiesceTimeout;
 	}
 
 	/**
 	 * Stops the scheduler thread pool
 	 */
-	public synchronized void stop() {
+	synchronized void stop() {
 		s_logger.info("Scheduler stopping in Cloud Publisher Dosconnect Manager....");
 		if (this.m_executorService != null) {
 			this.m_executorService.shutdown();

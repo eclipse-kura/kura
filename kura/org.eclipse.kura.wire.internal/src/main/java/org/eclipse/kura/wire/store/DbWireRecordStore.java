@@ -63,7 +63,7 @@ import com.google.common.collect.Sets;
  * The Class DbWireRecordStore is a wire component which is responsible to store
  * the received Wire Record.
  */
-public final class DbWireRecordStore implements WireEmitter, WireReceiver, WireRecordStore, ConfigurableComponent {
+final class DbWireRecordStore implements WireEmitter, WireReceiver, WireRecordStore, ConfigurableComponent {
 
 	/** The Constant denoting name of the column. */
 	private static final String COLUMN_NAME = "COLUMN_NAME";
@@ -114,7 +114,7 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, WireR
 	private final WireSupport m_wireSupport;
 
 	/** Constructor */
-	public DbWireRecordStore() {
+	DbWireRecordStore() {
 		this.m_executorService = Executors.newSingleThreadScheduledExecutor();
 		this.m_wireSupport = Wires.newWireSupport(this);
 		this.m_tableNames = Sets.newHashSet();

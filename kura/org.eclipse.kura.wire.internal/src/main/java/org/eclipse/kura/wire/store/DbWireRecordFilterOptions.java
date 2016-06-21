@@ -20,7 +20,7 @@ import org.eclipse.kura.wire.internal.AbstractConfigurationOptions;
  * The Class DbWireRecordFilterOptions is responsible to contain all the Db Wire
  * Record related filter options
  */
-public final class DbWireRecordFilterOptions extends AbstractConfigurationOptions {
+final class DbWireRecordFilterOptions extends AbstractConfigurationOptions {
 
 	/** The Constant denotes the cache update interval. */
 	private static final String CONF_CACHE_INTERVAL = "cache.update.interval";
@@ -37,7 +37,7 @@ public final class DbWireRecordFilterOptions extends AbstractConfigurationOption
 	 * @param properties
 	 *            the provided properties
 	 */
-	public DbWireRecordFilterOptions(final Map<String, Object> properties) {
+	DbWireRecordFilterOptions(final Map<String, Object> properties) {
 		super(properties);
 	}
 
@@ -46,7 +46,7 @@ public final class DbWireRecordFilterOptions extends AbstractConfigurationOption
 	 *
 	 * @return the configured cache interval
 	 */
-	public int getCacheInterval() {
+	int getCacheInterval() {
 		int cacheInterval = 0;
 		if ((this.m_properties != null) && (this.m_properties.containsKey(CONF_CACHE_INTERVAL))
 				&& (this.m_properties.get(CONF_CACHE_INTERVAL) instanceof String)) {
@@ -60,7 +60,7 @@ public final class DbWireRecordFilterOptions extends AbstractConfigurationOption
 	 *
 	 * @return the refresh rate
 	 */
-	public int getRefreshRate() {
+	int getRefreshRate() {
 		int refreshRate = 0;
 		if ((this.m_properties != null) && (this.m_properties.containsKey(CONF_REFRESH_RATE))
 				&& (this.m_properties.get(CONF_REFRESH_RATE) instanceof Integer)) {
@@ -74,7 +74,7 @@ public final class DbWireRecordFilterOptions extends AbstractConfigurationOption
 	 *
 	 * @return the configured SQL view
 	 */
-	public String getSqlView() {
+	String getSqlView() {
 		String sqlView = null;
 		if ((this.m_properties != null) && (this.m_properties.containsKey(CONF_SQL_VIEW))
 				&& (this.m_properties.get(CONF_SQL_VIEW) instanceof String)) {

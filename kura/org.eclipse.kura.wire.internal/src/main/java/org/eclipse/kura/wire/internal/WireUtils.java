@@ -107,8 +107,7 @@ public final class WireUtils {
 						result.add("FACTORY|" + factoryPid);
 					} else {
 						// Found the class, but it doesn't implement the
-						// interface.
-						// Probably another multiton component.
+						// interface. Probably another multiton component.
 						break;
 					}
 				} catch (final ClassNotFoundException e) {

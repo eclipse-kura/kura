@@ -2,10 +2,23 @@ Eclipse Kura - 2.0.0
 -------------------------------------------------------------------------
 
 Added Features :
-
+  * Added support for multiple connections
+  * Added support for Wi-Fi Multi Mode
+  * Created a new web UI bundle named org.eclipse.kura.web2 that integrates GWT 2.7 and GwtBootstrap 3 technologies
+  * Updated bluetooth APIs and added support for Bluez 5.x
+  * Initial integration of RedHat's Camel stack
+  * Created a Kura applications section inside the Eclipse marketplace and added support in the local web UI for the application
+    install via drag-and-drop 
+  * Created SenseHat example project
+  * Updated the SensorTag Example project exposing buzzer and leds
+  * Created the beacon.scanner project
   
-Bug Fixes :
-
+Bug Fixes and closed issues:
+  * Fixed github issues #78, #82, #96, #98, #112, #113, #114, #116, #120, #121, #127, #128, #129, #131,
+    #134, #138, #139, #141, #143, #167, #169, #177, #179, #182, #184, #187, #188, #193, #198, #199, #201,
+    #202, #203, #209, #212, #214, #215, #218, #227, #228, #229, #230, #233, #238, #241, #250, #252, #254,
+    #255, #256, #258, #260, #267, #270, #271, #272, #279, #284
+  
 
 Know Issues :
   * BLE only tested on the Raspberry Pi B with a Broadcom BCM20702 USB dongle and the TI SensorTag. The kernel version was "Linux raspberrypi 3.18.11-v7+ #781 SMP PREEMPT Tue Apr 21 18:07:59 BST 2015 armv7l GNU/Linux". Note that on the kernel "Linux version 4.1.7-v7+ (dc4@dc4-XPS13-9333) (gcc version 4.8.3 20140303 (prerelease) (crosstool-NG linaro-1.13.1+bzr2650 - Linaro GCC 2014.03) ) #817 SMP PREEMPT Sat Sep 19 15:32:00 BST 2015" has a bug on gatttool and the BLE connection failes.

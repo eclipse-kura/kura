@@ -111,6 +111,7 @@
 		<antcall target="linux.usb-config" />
 		<antcall target="linux.bluetooth-config" />
 		<antcall target="linux.watchdog-config" />
+		<antcall target="wires-config" />
 		
 		
 		<!-- Added Camel bundles configs -->
@@ -461,6 +462,10 @@ fi
                         prefix="${build.output.name}/kura/plugins" />
 			<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.core.net_${org.eclipse.kura.core.net.version}.jar"
                         prefix="${build.output.name}/kura/plugins" />
+            <zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.device.cloudlet_${org.eclipse.kura.device.cloudlet.version}.jar"
+                        prefix="${build.output.name}/kura/plugins" />
+            <zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.device.internal_${org.eclipse.kura.device.internal.version}.jar"
+                        prefix="${build.output.name}/kura/plugins" />
 			<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.linux.clock_${org.eclipse.kura.linux.clock.version}.jar"
                         prefix="${build.output.name}/kura/plugins" />
 			<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.linux.command_${org.eclipse.kura.linux.command.version}.jar"
@@ -478,6 +483,8 @@ fi
 			<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.linux.gpio_${org.eclipse.kura.linux.gpio.version}.jar"
                         prefix="${build.output.name}/kura/plugins" />
 			<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.linux_${org.eclipse.kura.linux.version}.jar"
+                        prefix="${build.output.name}/kura/plugins" />
+            <zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.wire.internal_${org.eclipse.kura.wire.internal.version}.jar"
                         prefix="${build.output.name}/kura/plugins" />
 		</zip>
 
@@ -674,6 +681,8 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
 			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/kura/plugins/log4j_${log4j.version}.jar@3" />
 			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/kura/plugins/com.google.guava_${com.google.guava.version}.jar@3" />
+			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/kura/plugins/log4j.apache-log4j-extras_${log4j.apache-log4j-extras.version}.jar@3" />
 			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/kura/plugins/org.json_${org.json.version}.jar@5:start" />
@@ -821,6 +830,17 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
 		<propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
 			<entry key="osgi.bundles" operation="+"
 	               value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.core.status_${org.eclipse.kura.core.status.version}.jar@4" />
+		</propertyfile>
+	</target>
+
+	<target name="wires-config">
+		<propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
+			<entry key="osgi.bundles" operation="+"
+                   value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.device.internal_${org.eclipse.kura.device.internal.version}.jar@4:start" />
+            <entry key="osgi.bundles" operation="+"
+				   value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.device.cloudlet_${org.eclipse.kura.device.cloudlet.version}.jar@5:start" />
+            <entry key="osgi.bundles" operation="+"
+                   value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.wire.internal_${org.eclipse.kura.wire.internal.version}.jar@5:start" />
 		</propertyfile>
 	</target>
 	

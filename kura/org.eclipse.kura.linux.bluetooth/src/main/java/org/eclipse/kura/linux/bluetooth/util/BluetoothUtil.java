@@ -57,7 +57,6 @@ public class BluetoothUtil {
 			
 			f.setExecutable(true);
 		} catch (IOException e) {
-			
 			s_logger.info("Unable to update", e);
 		}
 		
@@ -297,8 +296,8 @@ public class BluetoothUtil {
 	 * Method to start an interactive session with a remote Bluetooth LE device using the gatttool utility. The
 	 * listener is used to receive output from the process. 
 	 */
-	public static BluetoothProcess startSession(String address, BluetoothProcessListener listener) {
-		String[] command = { GATTTOOL, "-b", address, "-I" };
+	public static BluetoothProcess startSession(String adapterName, String address, BluetoothProcessListener listener) {
+		String[] command = { GATTTOOL, "-i", adapterName, "-b", address, "-I" };
 		BluetoothProcess proc = null;
 		try {
 			proc = exec(command, listener);
@@ -368,7 +367,7 @@ public class BluetoothUtil {
 	 * @param i Index of first byte of EIR data
 	 * @return BeaconInfo or null if no beacon data present
 	 */
-	private static BluetoothBeaconData parseEIRData(byte[] b, int payloadPtr, int len) {
+	private static BluetoothBeaconData parseEIRData(byte[] b, int payloadPtr, int len, String companyName) {
 		
 		for(int ptr = payloadPtr; ptr < payloadPtr + len;) {
 			
@@ -381,12 +380,11 @@ public class BluetoothUtil {
 			if(dataType == (byte)0xFF) { // Data-Type: Manufacturer-Specific
 
 				int prefixPtr = ptr + 2;
-				byte[] prefix = new byte[] {
-						0x4c,
-						0x00,
-						0x02,
-						0x15
-				};
+				byte[] prefix = new byte[4];
+				prefix[0] = new Integer(Integer.parseInt(companyName.substring(2, 4),16)).byteValue();
+				prefix[1] = new Integer(Integer.parseInt(companyName.substring(0, 2),16)).byteValue();
+				prefix[2] = 0x02;
+				prefix[3] = 0x15;
 				
 				if(Arrays.equals(prefix, Arrays.copyOfRange(b, prefixPtr, prefixPtr + prefix.length))) {
 					BluetoothBeaconData bi = new BluetoothBeaconData();
@@ -428,7 +426,7 @@ public class BluetoothUtil {
 	 * @return
 	 */
 	@SuppressWarnings("unused")
-	public static List<BluetoothBeaconData> parseLEAdvertisingReport(byte[] b) {
+	public static List<BluetoothBeaconData> parseLEAdvertisingReport(byte[] b, String companyName) {
 		
 		List<BluetoothBeaconData> results = new LinkedList<BluetoothBeaconData>();
 		
@@ -466,7 +464,7 @@ public class BluetoothUtil {
 			
 			int len = b[ptr++];
 			
-			BluetoothBeaconData bi = parseEIRData(b, ptr, len);
+			BluetoothBeaconData bi = parseEIRData(b, ptr, len, companyName);
 			if(bi != null) {
 
 				bi.address = address;

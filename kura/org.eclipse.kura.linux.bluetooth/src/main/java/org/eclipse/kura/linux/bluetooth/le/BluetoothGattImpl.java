@@ -71,7 +71,13 @@ public class BluetoothGattImpl implements BluetoothGatt, BluetoothProcessListene
 	// --------------------------------------------------------------------
 	@Override
 	public boolean connect() throws KuraException {
-		m_proc = BluetoothUtil.startSession(m_address, this);
+		return connect("hci0");
+	}
+	
+	
+	@Override
+	public boolean connect(String adapterName) throws KuraException {
+		m_proc = BluetoothUtil.startSession(adapterName, m_address, this);
 		if (m_proc != null) {
 			m_bufferedWriter = m_proc.getWriter();
 			s_logger.info("Sending connect message...");
@@ -85,7 +91,7 @@ public class BluetoothGattImpl implements BluetoothGatt, BluetoothProcessListene
 				try {
 					Thread.sleep(10);
 				} catch (InterruptedException e) {
-					e.printStackTrace();
+					s_logger.error("Exception waiting for connection", e);
 				}
 			}
 			if (!m_ready) {
@@ -123,7 +129,7 @@ public class BluetoothGattImpl implements BluetoothGatt, BluetoothProcessListene
 				try {
 					Thread.sleep(10);
 				} catch (InterruptedException e) {
-					e.printStackTrace();
+					s_logger.error("Exception waiting for connection", e);
 				}
 			}
 			if (!m_ready) {
@@ -153,7 +159,7 @@ public class BluetoothGattImpl implements BluetoothGatt, BluetoothProcessListene
 			try {
 				Thread.sleep(GATT_SERVICE_TIMEOUT);
 			} catch (InterruptedException e) {
-				e.printStackTrace();
+				s_logger.error("Exception waiting for services", e);
 			}
 		}
 		return m_bluetoothServices;
@@ -169,7 +175,7 @@ public class BluetoothGattImpl implements BluetoothGatt, BluetoothProcessListene
 			try {
 				Thread.sleep(GATT_SERVICE_TIMEOUT);
 			} catch (InterruptedException e) {
-				e.printStackTrace();
+				s_logger.error("Exception waiting for characteristics", e);
 			}
 		}
 		return m_bluetoothGattCharacteristics;
@@ -188,7 +194,7 @@ public class BluetoothGattImpl implements BluetoothGatt, BluetoothProcessListene
 				try {
 					Thread.sleep(10);
 				} catch (InterruptedException e) {
-					e.printStackTrace();
+					s_logger.error("Exception waiting for characteristics", e);
 				}
 			}
 			if (m_charValue == "") {
@@ -218,7 +224,7 @@ public class BluetoothGattImpl implements BluetoothGatt, BluetoothProcessListene
 				try {
 					Thread.sleep(10);
 				} catch (InterruptedException e) {
-					e.printStackTrace();
+					s_logger.error("Exception waiting for characteristics", e);
 				}
 			}
 			if (m_charValue == "") {
@@ -406,5 +412,5 @@ public class BluetoothGattImpl implements BluetoothGatt, BluetoothProcessListene
 		return true;		
 		
 	}
-	
+
 }

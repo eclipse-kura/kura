@@ -1,4 +1,4 @@
-package org.eclipse.kura.example.beacon_scanner;
+package org.eclipse.kura.example.beacon.scanner;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -17,18 +17,22 @@ import org.osgi.service.component.ComponentException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class BeaconExample implements ConfigurableComponent, BluetoothBeaconScanListener {
+public class BeaconScannerExample implements ConfigurableComponent, BluetoothBeaconScanListener {
 
-	private static final Logger log = LoggerFactory.getLogger(BeaconExample.class);
+	private static final Logger logger = LoggerFactory.getLogger(BeaconScannerExample.class);
 
+	private static final String PROPERTY_ENABLE         = "enableScanning";
 	private static final String PROPERTY_TOPIC_PREFIX	= "topicPrefix";
 	private static final String PROPERTY_INAME			= "iname";
 	private static final String PROPERTY_RATE_LIMIT		= "rate_limit";
+	private static final String PROPERTY_COMPANY_CODE   = "companyCode";
 
 	// Configurable State
 	private String adapterName;		// eg. hci0
 	private String topicPrefix;		// eg. beacons
 	private int rateLimit;			// eg. 5000ms
+	private String companyCode;
+	private Boolean enableScanning;
 	
 	// Internal State
 	private BluetoothService	bluetoothService;
@@ -43,43 +47,44 @@ public class BeaconExample implements ConfigurableComponent, BluetoothBeaconScan
 	}
 
 	public void unsetBluetoothService(BluetoothService bluetoothService) {
-		bluetoothService = null;
+		this.bluetoothService = null;
 	}
 	
 	public void setCloudService(CloudService cloudService) {
 		this.cloudService = cloudService;
 	}
 
-	public void unsetCloudService(CloudService bluetoothService) {
-		cloudService = null;
+	public void unsetCloudService(CloudService cloudService) {
+		this.cloudService = null;
 	}
 
 	protected void activate(ComponentContext context, Map<String,Object> properties) {
-		log.info("Activating Bluetooth Beacon example...");
+		logger.info("Activating Bluetooth Beacon Scanner example...");
 		
-
 		try {
-			cloudClient = cloudService.newCloudClient("BeaconExample");
+			cloudClient = cloudService.newCloudClient("BeaconScannerExample");
 		} catch(Exception e) {
-			log.error("Unable to get CloudClient", e);
+			logger.error("Unable to get CloudClient", e);
 			throw new ComponentException(e);
 		}
 		
+		enableScanning = false;
 		updated(properties);
 		
-		log.info("Activating Bluetooth Beacon example...Done");
+		logger.info("Activating Bluetooth Beacon Scanner example...Done");
 
 	}
 
 	protected void deactivate(ComponentContext context) {
 
-		log.debug("Deactivating Beacon Example...");
+		logger.debug("Deactivating Beacon Scanner Example...");
 		
 		releaseResources();
+		enableScanning = false;
 		
 		cloudClient.release();
 		
-		log.debug("Deactivating Beacon Example... Done.");
+		logger.debug("Deactivating Beacon Scanner Example... Done.");
 	}
 
 	protected void updated(Map<String,Object> properties) {
@@ -94,20 +99,23 @@ public class BeaconExample implements ConfigurableComponent, BluetoothBeaconScan
 				
 				if(key.equals(PROPERTY_INAME)) {
 					adapterName = (String)value;
-					
-				} else if(key.equals(PROPERTY_TOPIC_PREFIX)) {
+				} else if (key.equals(PROPERTY_TOPIC_PREFIX)) {
 					topicPrefix = (String)value;
-					
-				} else if(key.equals(PROPERTY_RATE_LIMIT)) {
+				} else if (key.equals(PROPERTY_RATE_LIMIT)) {
 					rateLimit = (Integer)value;
+				} else if (key.equals(PROPERTY_COMPANY_CODE)) {
+					companyCode = (String)value;
+				} else if (key.equals(PROPERTY_ENABLE)) {
+					enableScanning = (Boolean)value;
 				}
-
+				
 			} catch(Exception e) {
-				log.error("Bad property type {} ({})", key, value.getClass().getSimpleName());
+				logger.error("Bad property type {}", key, e);
 			}
 		}
 		
-		setup();
+		if (enableScanning)
+			setup();
 		
 	}
 
@@ -118,7 +126,7 @@ public class BeaconExample implements ConfigurableComponent, BluetoothBeaconScan
 		
 		bluetoothAdapter = bluetoothService.getBluetoothAdapter(adapterName);
 		if(bluetoothAdapter != null) {
-			bluetoothAdapter.startBeaconScan(this);
+			bluetoothAdapter.startBeaconScan(companyCode, this);
 		}
 		
 	}
@@ -134,11 +142,11 @@ public class BeaconExample implements ConfigurableComponent, BluetoothBeaconScan
 	
 	private double calculateDistance(int rssi, int txpower) {
 		
-		double distance = 0.0;
+		double distance;
 		
-		int ratio_dB = txpower - rssi;
-		double ratio_linear = Math.pow(10, (ratio_dB/10)); 
-		distance = Math.sqrt(ratio_linear);
+		int ratioDB = txpower - rssi;
+		double ratioLinear = Math.pow(10, (double) ratioDB/10); 
+		distance = Math.sqrt(ratioLinear);
 		
 //      See http://stackoverflow.com/questions/20416218/understanding-ibeacon-distancing/20434019#20434019		
 //		double ratio = rssi*1.0/txpower;
@@ -155,6 +163,7 @@ public class BeaconExample implements ConfigurableComponent, BluetoothBeaconScan
 	@Override
 	public void onBeaconDataReceived(BluetoothBeaconData beaconData) {
 		
+		logger.debug("Beacon from {} detected.", beaconData.address);
 		long now = System.nanoTime();
 		
 		Long lastPublishTime = publishTimes.get(beaconData.address);
@@ -176,7 +185,7 @@ public class BeaconExample implements ConfigurableComponent, BluetoothBeaconScan
 			try {
 				cloudClient.publish(topicPrefix + "/" + beaconData.address, kp, 2, false);
 			} catch (KuraException e) {
-				log.error("Unable to publish", e);
+				logger.error("Unable to publish", e);
 			}
 		}
 	}

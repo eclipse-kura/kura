@@ -38,6 +38,9 @@ public class BluetoothProcess {
 	private Future<?> m_futureErrorGobbler;
 	private BufferedWriter m_bufferedWriter;
 	
+	private BTSnoopParser parser;
+	private boolean btSnoopReady;
+	
 	public BufferedWriter getWriter() {
 		return m_bufferedWriter;
 	}
@@ -77,6 +80,10 @@ public class BluetoothProcess {
 	}
 	
 	void execSnoop(String[] cmdArray, final BTSnoopListener listener) throws IOException {
+		btSnoopReady = true;
+		if (parser == null)
+			parser = new BTSnoopParser();
+		
 		s_logger.debug("Executing: {}", Arrays.toString(cmdArray));
 		ProcessBuilder pb = new ProcessBuilder(cmdArray);
 		m_process = pb.start();
@@ -98,16 +105,16 @@ public class BluetoothProcess {
 	
 	public void destroy() {
 		if (m_process != null) {
-			s_logger.info("Closing streams and killing..." );
-            closeQuietly(m_process.getInputStream());
-            closeQuietly(m_process.getErrorStream());
-            closeQuietly(m_process.getOutputStream());
-            if(m_futureInputGobbler != null) m_futureInputGobbler.cancel(true);
-            if(m_futureErrorGobbler != null) m_futureErrorGobbler.cancel(true);
-            m_process.destroy();
-            m_process = null;
+			closeStreams();
+			m_process.destroy();
+			m_process = null;
 		}
-		m_process  = null;
+	}
+	
+	public void destroyBTSnoop() {
+		if (m_process != null) {
+			btSnoopReady = false;
+		}
 	}
 	
 	private void readInputStreamFully(InputStream is, BluetoothProcessListener listener) throws IOException {
@@ -137,17 +144,18 @@ public class BluetoothProcess {
 	
 	private void readBTSnoopStreamFully(InputStream is, BTSnoopListener listener) throws IOException {
 		
-		BTSnoopParser parser = new BTSnoopParser(is);
+		parser.setInputStream(is);
 		
-		while(true) {
-			try {
-				byte[] packet = parser.readRecord();
-				listener.processBTSnoopRecord(packet);
-			} catch(InterruptedException e) {
-				s_logger.debug("End of stream!");
-				break;
-			}
+		while(btSnoopReady) {
+			byte[] packet = parser.readRecord();
+			listener.processBTSnoopRecord(packet);
 		}
+		
+		closeStreams();
+        m_process.destroy();
+        m_process = null;
+        
+		s_logger.debug("End of stream!");
 	}
 	
 	private void readErrorStreamFully(InputStream is, BluetoothProcessListener listener) throws IOException {
@@ -162,6 +170,17 @@ public class BluetoothProcess {
 		}
 		listener.processErrorStream(stringBuilder.toString());
 		s_logger.debug("End of stream!");
+	}
+	
+	private void closeStreams() {
+		s_logger.info("Closing streams and killing..." );
+		closeQuietly(m_process.getErrorStream());
+		closeQuietly(m_process.getOutputStream());
+		closeQuietly(m_process.getInputStream());
+		if (m_futureInputGobbler != null) 
+			m_futureInputGobbler.cancel(true);
+		if (m_futureErrorGobbler != null) 
+			m_futureErrorGobbler.cancel(true);
 	}
 	
 	private void closeQuietly(InputStream is) {

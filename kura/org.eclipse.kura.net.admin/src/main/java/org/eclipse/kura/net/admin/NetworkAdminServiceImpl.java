@@ -91,8 +91,6 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 	
 	private static final String OS_VERSION = System.getProperty("kura.os.version");
 	
-	//private static final String SSID_REGEXP = "[0-9A-Za-z/.@#:\\ \\_\\-]+";
-	
     private ComponentContext                   m_ctx;
 	private ConfigurationService               m_configurationService;
 	private NetworkConfigurationService		   m_networkConfigurationService;
@@ -107,9 +105,11 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
     };
     
     private class NetworkRollbackItem {
-		String m_src; String m_dst;
+		String m_src; 
+		String m_dst;
 		NetworkRollbackItem(String src, String dst) {
-			m_src = src; m_dst = dst;
+			m_src = src; 
+			m_dst = dst;
 		}
 	}
 
@@ -172,7 +172,7 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 				linuxNamed.enable();
 			}
 		} catch (KuraException e) {
-			e.printStackTrace();
+		    s_logger.warn("Exception while activating NetworkAdmin Service!", e);
 		}
 		
         Dictionary<String, String[]> d = new Hashtable<String, String[]>();
@@ -205,14 +205,14 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 	    
 	    ArrayList<NetConfig> netConfigs = new ArrayList<NetConfig>();
 	    NetworkConfiguration networkConfig = m_networkConfigurationService.getNetworkConfiguration();
-	    if ((interfaceName != null) && (networkConfig != null)) {
+	    if (interfaceName != null && networkConfig != null) {
 	    	try {
 	    		s_logger.debug("Getting networkInterfaceConfigs for {}", interfaceName);
-				if(networkConfig != null && networkConfig.getNetInterfaceConfigs() != null && networkConfig.getNetInterfaceConfigs().size() > 0) {
-		    	    for(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig : networkConfig.getNetInterfaceConfigs()) {
+				if (networkConfig.getNetInterfaceConfigs() != null && !networkConfig.getNetInterfaceConfigs().isEmpty()) {
+		    	    for (NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig : networkConfig.getNetInterfaceConfigs()) {
 		    	        if(interfaceName.equals(netInterfaceConfig.getName())) {
 		    	            List<? extends NetInterfaceAddressConfig> netInterfaceAddressConfigs = netInterfaceConfig.getNetInterfaceAddresses();
-		    	            if(netInterfaceAddressConfigs != null && netInterfaceAddressConfigs.size() > 0) {
+		    	            if(netInterfaceAddressConfigs != null && !netInterfaceAddressConfigs.isEmpty()) {
 		        	            for(NetInterfaceAddressConfig netInterfaceAddressConfig : netInterfaceAddressConfigs) {
 		        	                netConfigs.addAll(netInterfaceAddressConfig.getConfigs());
 		        	            }
@@ -239,9 +239,12 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 		NetConfigIP6 netConfig6 = null;
 		DhcpServerConfigIP4 dhcpServerConfigIP4 = null;
 		FirewallAutoNatConfig natConfig = null;
-		boolean hadNetConfig4 = false, hadNetConfig6 = false, hadDhcpServerConfigIP4 = false, hadNatConfig = false;
+		boolean hadNetConfig4 = false;
+		boolean hadNetConfig6 = false;
+		boolean hadDhcpServerConfigIP4 = false;
+		boolean hadNatConfig = false;
 		
-		if(netConfigs != null && netConfigs.size() > 0) {
+		if(netConfigs != null && !netConfigs.isEmpty()) {
 			for(NetConfig netConfig : netConfigs) {
 				if(!netConfig.isValid()) {
 					throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR, "NetConfig Configuration is invalid: " + netConfig.toString());
@@ -277,7 +280,7 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 			for (NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig : netInterfaceConfigs) {
 				if (netInterfaceConfig.getName().equals(interfaceName)) {
 					//handle MTU
-					if(mtu != netInterfaceConfig.getMTU()) {
+					if (mtu != netInterfaceConfig.getMTU()) {
 						AbstractNetInterface<?> absNetInterfaceConfig = (AbstractNetInterface<?>)netInterfaceConfig;
 						s_logger.debug("updating MTU for {}", interfaceName);
 						absNetInterfaceConfig.setMTU(mtu);
@@ -286,7 +289,7 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 					}
 					
 					//handle autoconnect
-					if(autoConnect != netInterfaceConfig.isAutoConnect()) {
+					if (autoConnect != netInterfaceConfig.isAutoConnect()) {
 						AbstractNetInterface<?> absNetInterfaceConfig = (AbstractNetInterface<?>)netInterfaceConfig;
 						s_logger.debug("updating autoConnect for {} to be {}", interfaceName, autoConnect);
 						absNetInterfaceConfig.setAutoConnect(autoConnect);
@@ -296,7 +299,7 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 					
 					//replace existing configs
 					List<? extends NetInterfaceAddressConfig> netInterfaceAddressConfigs = netInterfaceConfig.getNetInterfaceAddresses();
-					if(netInterfaceAddressConfigs != null && netInterfaceAddressConfigs.size() > 0) {
+					if (netInterfaceAddressConfigs != null && !netInterfaceAddressConfigs.isEmpty()) {
 						for(NetInterfaceAddressConfig netInterfaceAddressConfig : netInterfaceAddressConfigs) {
 							List<NetConfig> existingNetConfigs = netInterfaceAddressConfig.getConfigs();
 							List<NetConfig> newNetConfigs = new ArrayList<NetConfig>();
@@ -310,7 +313,7 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
                                         newNetConfigs.add(netConfig4);
 										if(!netConfig.equals(netConfig4)) {									
 											s_logger.debug("updating NetConfig4 for {}", interfaceName);
-											s_logger.debug("Is new State DHCP? {}", ((NetConfigIP4)netConfig4).isDhcp());
+											s_logger.debug("Is new State DHCP? {}", netConfig4.isDhcp());
 											configurationChanged = true;
 											if(!modifiedInterfaceNames.contains(interfaceName)) {modifiedInterfaceNames.add(interfaceName);}
 										} else {
@@ -326,7 +329,9 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 										if(!netConfig.equals(netConfig6)) {
 											s_logger.debug("updating NetConfig6 for {}", interfaceName);
 											configurationChanged = true;
-											if(!modifiedInterfaceNames.contains(interfaceName)) {modifiedInterfaceNames.add(interfaceName);}
+											if(!modifiedInterfaceNames.contains(interfaceName)) {
+											    modifiedInterfaceNames.add(interfaceName);
+											}
 										} else {
 											s_logger.debug("not updating NetConfig6 for {} because it is unchanged", interfaceName);
 										}
@@ -335,14 +340,18 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 									if(dhcpServerConfigIP4 == null) {
 										s_logger.debug("removing DhcpServerConfigIP4 for {}", interfaceName);
 										configurationChanged = true;
-										if(!modifiedInterfaceNames.contains(interfaceName)) {modifiedInterfaceNames.add(interfaceName);}
+										if(!modifiedInterfaceNames.contains(interfaceName)) {
+										    modifiedInterfaceNames.add(interfaceName);
+										}
 									} else {
 										hadDhcpServerConfigIP4 = true;
                                         newNetConfigs.add(dhcpServerConfigIP4);
 										if(!netConfig.equals(dhcpServerConfigIP4)) {
 											s_logger.debug("updating DhcpServerConfigIP4 for {}", interfaceName);
 											configurationChanged = true;
-											if(!modifiedInterfaceNames.contains(interfaceName)) {modifiedInterfaceNames.add(interfaceName);}
+											if(!modifiedInterfaceNames.contains(interfaceName)) { 
+											    modifiedInterfaceNames.add(interfaceName);
+											}
 										} else {
 											s_logger.debug("not updating DhcpServerConfigIP4 for {} because it is unchanged", interfaceName);
 										}
@@ -351,14 +360,18 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 									if(natConfig == null) {
 										s_logger.debug("removing FirewallAutoNatConfig for {}", interfaceName);
 										configurationChanged = true;
-										if(!modifiedInterfaceNames.contains(interfaceName)) {modifiedInterfaceNames.add(interfaceName);}
+										if(!modifiedInterfaceNames.contains(interfaceName)) {
+										    modifiedInterfaceNames.add(interfaceName);
+										}
 									} else {
 										hadNatConfig = true;
                                         newNetConfigs.add(natConfig);
 										if(!netConfig.equals(natConfig)) {
 											s_logger.debug("updating FirewallAutoNatConfig for {}", interfaceName);
 											configurationChanged = true;
-											if(!modifiedInterfaceNames.contains(interfaceName)) {modifiedInterfaceNames.add(interfaceName);}
+											if(!modifiedInterfaceNames.contains(interfaceName)) {
+											    modifiedInterfaceNames.add(interfaceName);
+											}
 										} else {
 											s_logger.debug("not updating FirewallAutoNatConfig for {} because it is unchanged", interfaceName);
 										}
@@ -369,31 +382,39 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 							}
 							
 							// add configs that did not match any in the current configuration
-							if(netConfigs != null && netConfigs.size() > 0) {
+							if(netConfigs != null && !netConfigs.isEmpty()) {
 								for(NetConfig netConfig : netConfigs) {
 									if(netConfig instanceof NetConfigIP4 && !hadNetConfig4) {
 										s_logger.debug("adding new NetConfig4 to existing config for {}", interfaceName);
 										newNetConfigs.add(netConfig);
 										configurationChanged = true;
-										if(!modifiedInterfaceNames.contains(interfaceName)) {modifiedInterfaceNames.add(interfaceName);}
+										if(!modifiedInterfaceNames.contains(interfaceName)) {
+										    modifiedInterfaceNames.add(interfaceName);
+										}
 									}
 									if(netConfig instanceof NetConfigIP6 && !hadNetConfig6) {
 										s_logger.debug("adding new NetConfig6 to existing config for {}", interfaceName);
 										newNetConfigs.add(netConfig);
 										configurationChanged = true;
-										if(!modifiedInterfaceNames.contains(interfaceName)) {modifiedInterfaceNames.add(interfaceName);}
+										if(!modifiedInterfaceNames.contains(interfaceName)) {
+										    modifiedInterfaceNames.add(interfaceName);
+										}
 									}
 									if(netConfig instanceof DhcpServerConfigIP4 && !hadDhcpServerConfigIP4) {
 										s_logger.debug("adding new DhcpServerConfigIP4 to existing config for {}", interfaceName);
 										newNetConfigs.add(netConfig);
 										configurationChanged = true;
-										if(!modifiedInterfaceNames.contains(interfaceName)) {modifiedInterfaceNames.add(interfaceName);}
+										if(!modifiedInterfaceNames.contains(interfaceName)) {
+										    modifiedInterfaceNames.add(interfaceName);
+										}
 									}
 									if(netConfig instanceof FirewallAutoNatConfig && !hadNatConfig) {
 										s_logger.debug("adding new FirewallAutoNatConfig to existing config for {}", interfaceName);
 										newNetConfigs.add(netConfig);
 										configurationChanged = true;
-										if(!modifiedInterfaceNames.contains(interfaceName)) {modifiedInterfaceNames.add(interfaceName);}
+										if(!modifiedInterfaceNames.contains(interfaceName)) {
+										    modifiedInterfaceNames.add(interfaceName);
+										}
 									}
 								}
 							}
@@ -413,7 +434,7 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 			    submitNetworkConfiguration(modifiedInterfaceNames, newNetworkConfiguration);
 			}
 		} catch (UnknownHostException e) {
-			e.printStackTrace();
+			s_logger.warn("Exception while updating EthernetInterfaceConfig", e);
 		}
 	}
 
@@ -427,9 +448,13 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 		WifiConfig wifiConfig = null;
 		DhcpServerConfigIP4 dhcpServerConfigIP4 = null;
 		FirewallAutoNatConfig natConfig = null;
-		boolean hadNetConfig4 = false, hadNetConfig6 = false, hadWifiConfig = false, hadDhcpServerConfigIP4 = false, hadNatConfig = false;
+		boolean hadNetConfig4 = false;
+		boolean hadNetConfig6 = false;
+		boolean hadWifiConfig = false;
+		boolean hadDhcpServerConfigIP4 = false;
+		boolean hadNatConfig = false;
 		
-		if(netConfigs != null && netConfigs.size() > 0) {
+		if(netConfigs != null && !netConfigs.isEmpty()) {
 			for(NetConfig netConfig : netConfigs) {
 				if(!netConfig.isValid()) {
 					throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR, "NetConfig Configuration is invalid: " + netConfig.toString());
@@ -477,7 +502,7 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 					
 					//replace existing configs
 					List<? extends NetInterfaceAddressConfig> netInterfaceAddressConfigs = netInterfaceConfig.getNetInterfaceAddresses();
-					if(netInterfaceAddressConfigs != null && netInterfaceAddressConfigs.size() > 0) {
+					if (netInterfaceAddressConfigs != null && !netInterfaceAddressConfigs.isEmpty()) {
 						for(NetInterfaceAddressConfig netInterfaceAddressConfig : netInterfaceAddressConfigs) {
 							List<NetConfig> existingNetConfigs = netInterfaceAddressConfig.getConfigs();
 							List<NetConfig> newNetConfigs = new ArrayList<NetConfig>();
@@ -492,9 +517,11 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 										newNetConfigs.add(netConfig4);
 										if(!netConfig.equals(netConfig4)) {									
 											s_logger.debug("updating NetConfig4 for {}", interfaceName);
-											s_logger.debug("Is new State DHCP? {}", ((NetConfigIP4)netConfig4).isDhcp());
+											s_logger.debug("Is new State DHCP? {}", netConfig4.isDhcp());
 											configurationChanged = true;
-											if(!modifiedInterfaceNames.contains(interfaceName)) {modifiedInterfaceNames.add(interfaceName);}
+											if(!modifiedInterfaceNames.contains(interfaceName)) {
+											    modifiedInterfaceNames.add(interfaceName);
+											}
 										} else {
 											s_logger.debug("not updating NetConfig4 for {} because it is unchanged", interfaceName);
 										}
@@ -508,7 +535,9 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 										if(!netConfig.equals(netConfig6)) {
 											s_logger.debug("updating NetConfig6 for {}", interfaceName);
 											configurationChanged = true;
-											if(!modifiedInterfaceNames.contains(interfaceName)) {modifiedInterfaceNames.add(interfaceName);}
+											if(!modifiedInterfaceNames.contains(interfaceName)) {
+											    modifiedInterfaceNames.add(interfaceName);
+											}
 										} else {
 											s_logger.debug("not updating NetConfig6 for {} because it is unchanged", interfaceName);
 										}
@@ -527,7 +556,9 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 		    								if(!netConfig.equals(wifiConfig)) {	
 		    									s_logger.debug("updating WifiConfig for {}", interfaceName);
 		    									configurationChanged = true;
-												if(!modifiedInterfaceNames.contains(interfaceName)) {modifiedInterfaceNames.add(interfaceName);}
+		    									if(!modifiedInterfaceNames.contains(interfaceName)) {
+		    									    modifiedInterfaceNames.add(interfaceName);
+		    									}
 		    								} else {
 		    									s_logger.debug("not updating WifiConfig for {} because it is unchanged", interfaceName);
 		    								}
@@ -541,14 +572,18 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 									if(dhcpServerConfigIP4 == null) {
 										s_logger.debug("removing DhcpServerConfigIP4 for {}", interfaceName);
 										configurationChanged = true;
-										if(!modifiedInterfaceNames.contains(interfaceName)) {modifiedInterfaceNames.add(interfaceName);}
+										if(!modifiedInterfaceNames.contains(interfaceName)) {
+										    modifiedInterfaceNames.add(interfaceName);
+										}
 									} else {
 										hadDhcpServerConfigIP4 = true;
                                         newNetConfigs.add(dhcpServerConfigIP4);
 										if(!netConfig.equals(dhcpServerConfigIP4)) {
 											s_logger.debug("updating DhcpServerConfigIP4 for {}", interfaceName);
 											configurationChanged = true;
-											if(!modifiedInterfaceNames.contains(interfaceName)) {modifiedInterfaceNames.add(interfaceName);}
+											if(!modifiedInterfaceNames.contains(interfaceName)) {
+											    modifiedInterfaceNames.add(interfaceName);
+											}
 										} else {
 											s_logger.debug("not updating DhcpServerConfigIP4 for {} because it is unchanged", interfaceName);
 										}
@@ -557,14 +592,18 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 									if(natConfig == null) {
 										s_logger.debug("removing FirewallAutoNatConfig for {}", interfaceName);
 										configurationChanged = true;
-										if(!modifiedInterfaceNames.contains(interfaceName)) {modifiedInterfaceNames.add(interfaceName);}
+										if(!modifiedInterfaceNames.contains(interfaceName)) {
+										    modifiedInterfaceNames.add(interfaceName);
+										}
 									} else {
 										hadNatConfig = true;
                                         newNetConfigs.add(natConfig);
 										if(!netConfig.equals(natConfig)) {
 											s_logger.debug("updating FirewallAutoNatConfig for {}", interfaceName);
 											configurationChanged = true;
-											if(!modifiedInterfaceNames.contains(interfaceName)) {modifiedInterfaceNames.add(interfaceName);}
+											if(!modifiedInterfaceNames.contains(interfaceName)) {
+											    modifiedInterfaceNames.add(interfaceName);
+											}
 										} else {
 											s_logger.debug("not updating FirewallNatConfig for {} because it is unchanged", interfaceName);
 										}
@@ -575,37 +614,47 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 							}
 	
 							// add configs that did not match any in the current configuration
-							if(netConfigs != null && netConfigs.size() > 0) {
+							if(netConfigs != null && !netConfigs.isEmpty()) {
 								for(NetConfig netConfig : netConfigs) {
 									if(netConfig instanceof NetConfigIP4 && !hadNetConfig4) {
 										s_logger.debug("adding new NetConfig4 to existing config for {}", interfaceName);
 										newNetConfigs.add(netConfig);
 										configurationChanged = true;
-										if(!modifiedInterfaceNames.contains(interfaceName)) {modifiedInterfaceNames.add(interfaceName);}
+										if(!modifiedInterfaceNames.contains(interfaceName)) {
+										    modifiedInterfaceNames.add(interfaceName);
+										}
 									}
 									if(netConfig instanceof NetConfigIP6 && !hadNetConfig6) {
 										s_logger.debug("adding new NetConfig6 to existing config for {}", interfaceName);
 										newNetConfigs.add(netConfig);
 										configurationChanged = true;
-										if(!modifiedInterfaceNames.contains(interfaceName)) {modifiedInterfaceNames.add(interfaceName);}
+										if(!modifiedInterfaceNames.contains(interfaceName)) {
+										    modifiedInterfaceNames.add(interfaceName);
+										}
 									}
 									if(netConfig instanceof WifiConfig && !hadWifiConfig) {
 										s_logger.debug("adding new WifiConfig to existing config for {}", interfaceName);
 										newNetConfigs.add(netConfig);
 										configurationChanged = true;
-										if(!modifiedInterfaceNames.contains(interfaceName)) {modifiedInterfaceNames.add(interfaceName);}
+										if(!modifiedInterfaceNames.contains(interfaceName)) {
+										    modifiedInterfaceNames.add(interfaceName);
+										}
 									}
 									if(netConfig instanceof DhcpServerConfigIP4 && !hadDhcpServerConfigIP4) {
 										s_logger.debug("adding new DhcpServerConfigIP4 to existing config for {}", interfaceName);
 										newNetConfigs.add(netConfig);
 										configurationChanged = true;
-										if(!modifiedInterfaceNames.contains(interfaceName)) {modifiedInterfaceNames.add(interfaceName);}
+										if(!modifiedInterfaceNames.contains(interfaceName)) {
+										    modifiedInterfaceNames.add(interfaceName);
+										}
 									}
 									if(netConfig instanceof FirewallAutoNatConfig && !hadNatConfig) {
 										s_logger.debug("adding new FirewallAutoNatConfig to existing config for {}", interfaceName);
 										newNetConfigs.add(netConfig);
 										configurationChanged = true;
-										if(!modifiedInterfaceNames.contains(interfaceName)) {modifiedInterfaceNames.add(interfaceName);}
+										if(!modifiedInterfaceNames.contains(interfaceName)) {
+										    modifiedInterfaceNames.add(interfaceName);
+										}
 									}
 								}
 							}
@@ -630,7 +679,7 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 			    submitNetworkConfiguration(modifiedInterfaceNames, newNetworkConfiguration);
 			}
 		} catch (UnknownHostException e) {
-			e.printStackTrace();
+			s_logger.warn("Exception while updating WifiInterfaceConfig", e);
 		}
 	}
 
@@ -643,9 +692,11 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 	    NetConfigIP4 netConfig4 = null;
 		NetConfigIP6 netConfig6 = null;
 		ModemConfig modemConfig = null;
-		boolean hadNetConfig4 = false,  hadNetConfig6 = false, hadModemConfig = false;
+		boolean hadNetConfig4 = false;
+		boolean hadNetConfig6 = false;
+		boolean hadModemConfig = false;
 		
-		if(netConfigs != null && netConfigs.size() > 0) {
+		if(netConfigs != null && !netConfigs.isEmpty()) {
 			for(NetConfig netConfig : netConfigs) {
 				if(!netConfig.isValid()) {
 					throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR, "NetConfig Configuration is invalid: " + netConfig.toString());
@@ -686,20 +737,25 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 						s_logger.debug("updating MTU for {}", interfaceName);
 						absNetInterfaceConfig.setMTU(mtu);
 						configurationChanged = true;
-						if(!modifiedInterfaceNames.contains(interfaceName)) {modifiedInterfaceNames.add(interfaceName);}
+						if(!modifiedInterfaceNames.contains(interfaceName)) {
+						    modifiedInterfaceNames.add(interfaceName);
+						}
 					}
 					
 					if(netInterfaceConfig instanceof ModemInterfaceConfigImpl) {
 					    ModemInterfaceConfigImpl modemInterfaceConfig = (ModemInterfaceConfigImpl)netInterfaceConfig;
-					    if(modemId == null)
+					    if(modemId == null) {
 					        modemId = "";
+					    }
 					    				    
 					    // handle modem id
 					    if(!modemId.equals(modemInterfaceConfig.getModemIdentifier())) {
 					        s_logger.debug("updating Modem identifier: {}", modemId );
 					        modemInterfaceConfig.setModemIdentifier(modemId);
 		                    configurationChanged = true;
-							if(!modifiedInterfaceNames.contains(interfaceName)) {modifiedInterfaceNames.add(interfaceName);}
+		                    if(!modifiedInterfaceNames.contains(interfaceName)) {
+		                        modifiedInterfaceNames.add(interfaceName);
+		                    }
 		                }
 					    
 	                    // handle ppp num
@@ -707,29 +763,33 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 	                        s_logger.debug("updating PPP number: {}", pppNumber);
 	                        modemInterfaceConfig.setPppNum(pppNumber);
 	                        configurationChanged = true;
-							if(!modifiedInterfaceNames.contains(interfaceName)) {modifiedInterfaceNames.add(interfaceName);}
+	                        if(!modifiedInterfaceNames.contains(interfaceName)) {
+	                            modifiedInterfaceNames.add(interfaceName);
+	                        }
 	                    }			    
 					}
 					
 					//replace existing configs
 					List<? extends NetInterfaceAddressConfig> netInterfaceAddressConfigs = netInterfaceConfig.getNetInterfaceAddresses();
-					if(netInterfaceAddressConfigs != null && netInterfaceAddressConfigs.size() > 0) {
-						for(NetInterfaceAddressConfig netInterfaceAddressConfig : netInterfaceAddressConfigs) {
+					if (netInterfaceAddressConfigs != null && !netInterfaceAddressConfigs.isEmpty()) {
+						for (NetInterfaceAddressConfig netInterfaceAddressConfig : netInterfaceAddressConfigs) {
 							List<NetConfig> existingNetConfigs = netInterfaceAddressConfig.getConfigs();
 							List<NetConfig> newNetConfigs = new ArrayList<NetConfig>();
-							for(NetConfig netConfig : existingNetConfigs) {
+							for (NetConfig netConfig : existingNetConfigs) {
 								s_logger.debug("looking at existing NetConfig for {} with value: {}", interfaceName, netConfig);			
-								if(netConfig instanceof NetConfigIP4) {
-									if(netConfig4 == null) {
+								if (netConfig instanceof NetConfigIP4) {
+									if (netConfig4 == null) {
 										s_logger.debug("removing NetConfig4 for {}", interfaceName);
 									} else {
 										hadNetConfig4 = true;
                                         newNetConfigs.add(netConfig4);
 										if(!netConfig.equals(netConfig4)) {									
 											s_logger.debug("updating NetConfig4 for {}", interfaceName);
-											s_logger.debug("Is new State DHCP? {}", ((NetConfigIP4)netConfig4).isDhcp());
+											s_logger.debug("Is new State DHCP? {}", netConfig4.isDhcp());
 											configurationChanged = true;
-											if(!modifiedInterfaceNames.contains(interfaceName)) {modifiedInterfaceNames.add(interfaceName);}
+											if(!modifiedInterfaceNames.contains(interfaceName)) {
+											    modifiedInterfaceNames.add(interfaceName);
+											}
 										} else {
 											s_logger.debug("not updating NetConfig4 for {} because it is unchanged", interfaceName);
 										}
@@ -743,7 +803,9 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 										if(!netConfig.equals(netConfig6)) {
 											s_logger.debug("updating NetConfig6 for {}", interfaceName);
 											configurationChanged = true;
-											if(!modifiedInterfaceNames.contains(interfaceName)) {modifiedInterfaceNames.add(interfaceName);}
+											if(!modifiedInterfaceNames.contains(interfaceName)) {
+											    modifiedInterfaceNames.add(interfaceName);
+											}
 										} else {
 											s_logger.debug("not updating NetConfig6 for {} because it is unchanged", interfaceName);
 										}
@@ -757,7 +819,9 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 										if(!netConfig.equals(modemConfig)) {	
 											s_logger.debug("updating ModemConfig for {}", interfaceName);
 											configurationChanged = true;
-											if(!modifiedInterfaceNames.contains(interfaceName)) {modifiedInterfaceNames.add(interfaceName);}
+											if(!modifiedInterfaceNames.contains(interfaceName)) {
+											    modifiedInterfaceNames.add(interfaceName);
+											}
 										} else {
 											s_logger.debug("not updating ModemConfig for {} because it is unchanged", interfaceName);
 										}
@@ -768,25 +832,31 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 							}
 	
 							// add configs that did not match any in the current configuration
-							if(netConfigs != null && netConfigs.size() > 0) {
+							if(netConfigs != null && !netConfigs.isEmpty()) {
 								for(NetConfig netConfig : netConfigs) {
 									if(netConfig instanceof NetConfigIP4 && !hadNetConfig4) {
 										s_logger.debug("adding new NetConfig4 to existing config for {}", interfaceName);
 										newNetConfigs.add(netConfig);
 										configurationChanged = true;
-										if(!modifiedInterfaceNames.contains(interfaceName)) {modifiedInterfaceNames.add(interfaceName);}
+										if(!modifiedInterfaceNames.contains(interfaceName)) {
+										    modifiedInterfaceNames.add(interfaceName);
+										}
 									}
 									if(netConfig instanceof NetConfigIP6 && !hadNetConfig6) {
 										s_logger.debug("adding new NetConfig6 to existing config for {}", interfaceName);
 										newNetConfigs.add(netConfig);
 										configurationChanged = true;
-										if(!modifiedInterfaceNames.contains(interfaceName)) {modifiedInterfaceNames.add(interfaceName);}
+										if(!modifiedInterfaceNames.contains(interfaceName)) {
+										    modifiedInterfaceNames.add(interfaceName);
+										}
 									}
 									if(netConfig instanceof ModemConfig && !hadModemConfig) {
 										s_logger.debug("adding new ModemConfig to existing config for {}", interfaceName);
 										newNetConfigs.add(netConfig);
 										configurationChanged = true;
-										if(!modifiedInterfaceNames.contains(interfaceName)) {modifiedInterfaceNames.add(interfaceName);}
+										if(!modifiedInterfaceNames.contains(interfaceName)) {
+										    modifiedInterfaceNames.add(interfaceName);
+										}
 									}
 								}
 							}
@@ -808,7 +878,7 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 			    submitNetworkConfiguration(modifiedInterfaceNames, newNetworkConfiguration);
 			}
 		} catch (UnknownHostException e) {
-			e.printStackTrace();
+			s_logger.warn("Exception while updating ModemInterfaceConfig", e);
 		}
 	}
 
@@ -876,8 +946,8 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 		}
 	}
 	
+	@Override
 	public void manageDhcpClient(String interfaceName, boolean enable) throws KuraException {
-		
 		try {
 			/*
 			int pid = LinuxProcessUtil.getPid(formDhclientCommand(interfaceName, false));
@@ -901,20 +971,21 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 		}
 	}
 	
+	@Override
 	public void manageDhcpServer(String interfaceName, boolean enable) throws KuraException {
-		
 		DhcpServerManager.disable(interfaceName);
 		if (enable) {
 			DhcpServerManager.enable(interfaceName);			
 		}
 	}
 	
+	@Override
 	public void renewDhcpLease(String interfaceName) throws KuraException {
-		
 		DhcpClientManager.releaseCurrentLease(interfaceName);
 		DhcpClientManager.enable(interfaceName);
 	}
 	
+	@Override
 	public void manageFirewall (String gatewayIface) throws KuraException {
 		// get desired NAT rules interfaces
 		LinkedHashSet<NATRule> desiredNatRules = null; 
@@ -926,10 +997,10 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 				for (NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig : netInterfaceConfigs) {
 					String ifaceName = netInterfaceConfig.getName();
 					List<? extends NetInterfaceAddressConfig> netInterfaceAddressConfigs = netInterfaceConfig.getNetInterfaceAddresses();
-					if(netInterfaceAddressConfigs != null && netInterfaceAddressConfigs.size() > 0) {
+					if(netInterfaceAddressConfigs != null && !netInterfaceAddressConfigs.isEmpty()) {
 						for(NetInterfaceAddressConfig netInterfaceAddressConfig : netInterfaceAddressConfigs) {
 							List<NetConfig> existingNetConfigs = netInterfaceAddressConfig.getConfigs();
-							if(existingNetConfigs != null && existingNetConfigs.size() > 0) {
+							if(existingNetConfigs != null && !existingNetConfigs.isEmpty()) {
 								for(NetConfig netConfig : existingNetConfigs) {
 									if (netConfig instanceof FirewallAutoNatConfig) {
 										if (desiredNatRules == null) {
@@ -943,7 +1014,7 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 					}
 				}
 			} catch (UnknownHostException e) {
-				e.printStackTrace();
+				s_logger.warn("Exception while updating firewall configuration", e);
 			}
 		}
 		
@@ -964,15 +1035,13 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 	}
 
 	@Override
-	public void setFirewallOpenPortConfiguration(
-			List<FirewallOpenPortConfigIP<? extends IPAddress>> firewallConfiguration) throws KuraException {
+	public void setFirewallOpenPortConfiguration(List<FirewallOpenPortConfigIP<? extends IPAddress>> firewallConfiguration) throws KuraException {
 		m_firewallConfigurationService.setFirewallOpenPortConfiguration(firewallConfiguration);
 		submitFirewallConfiguration();
 	}
 
 	@Override
-	public void setFirewallPortForwardingConfiguration(
-			List<FirewallPortForwardConfigIP<? extends IPAddress>> firewallConfiguration) throws KuraException {
+	public void setFirewallPortForwardingConfiguration(List<FirewallPortForwardConfigIP<? extends IPAddress>> firewallConfiguration) throws KuraException {
 		m_firewallConfigurationService.setFirewallPortForwardingConfiguration(firewallConfiguration);
 		submitFirewallConfiguration();
 	}
@@ -983,8 +1052,8 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 		submitFirewallConfiguration();
 	}
 	
+	@Override
 	public Map<String, WifiHotspotInfo> getWifiHotspots(String ifaceName) throws KuraException {
-		
 		Map<String, WifiHotspotInfo> mWifiHotspotInfo = new HashMap<String, WifiHotspotInfo>();
 		WifiMode wifiMode = WifiMode.UNKNOWN;
 		List<? extends NetInterfaceConfig<? extends NetInterfaceAddressConfig>> netInterfaceConfigs = getNetworkInterfaceConfigs();
@@ -1046,8 +1115,7 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 			    	WifiSecurity wifiSecurity = WifiSecurity.NONE;
 			    	
 			    	EnumSet<WifiSecurity> esWpaSecurity = wap.getWpaSecurity();
-			    	if ((esWpaSecurity != null) && (esWpaSecurity.size() > 0)) {
-			    		
+			    	if (esWpaSecurity != null && !esWpaSecurity.isEmpty()) {
 			    		wifiSecurity = WifiSecurity.SECURITY_WPA;
 			    		
 			    		Iterator<WifiSecurity> itWpaSecurity = esWpaSecurity.iterator();	
@@ -1057,7 +1125,7 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 			    	}
 			    	
 			    	EnumSet<WifiSecurity> esRsnSecurity = wap.getRsnSecurity();
-			    	if ((esRsnSecurity != null) && (esRsnSecurity.size() > 0)) {
+			    	if (esRsnSecurity != null && !esRsnSecurity.isEmpty()) {
 			    		if (wifiSecurity == WifiSecurity.SECURITY_WPA) {
 			    			wifiSecurity = WifiSecurity.SECURITY_WPA_WPA2;
 			    		} else {
@@ -1071,7 +1139,7 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 			    	
 			    	if (wifiSecurity == WifiSecurity.NONE) {
 			    		List<String> capabilities = wap.getCapabilities();
-			    		if ((capabilities != null) && (capabilities.size() > 0)) {
+			    		if (capabilities != null && !capabilities.isEmpty()) {
 				    		for (String capab : capabilities) {
 				    			if (capab.equals("Privacy")) {
 				    				wifiSecurity = WifiSecurity.SECURITY_WEP;
@@ -1178,11 +1246,11 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 			ret = isWifiConnectionCompleted(ifaceName, tout);
 			
 			if (WpaSupplicantManager.isTempRunning()) {
-				s_logger.debug("verifyWifiCredentials() :: stoping temporary instance of wpa_supplicant");
+				s_logger.debug("verifyWifiCredentials() :: stopping temporary instance of wpa_supplicant");
 				WpaSupplicantManager.stop(ifaceName);
 			}
 		} catch (KuraException e) {
-			e.printStackTrace();
+		    s_logger.warn("Exception while managing the temporary instance of the Wpa supplicant.", e);
 		}
 		
 		if (restartSupplicant) {
@@ -1190,13 +1258,13 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 				s_logger.debug("verifyWifiCredentials() :: Restarting wpa_supplicant");
 				WpaSupplicant wpaSupplicant = WpaSupplicant.getWpaSupplicant(ifaceName);
 				if (wpaSupplicant != null) {
-					WpaSupplicantManager.start(ifaceName, wpaSupplicant.getDriver(), wifiConfig.getPasskey(), wifiConfig.getSecurity());
+				    WpaSupplicantManager.start(ifaceName, wpaSupplicant.getMode(), wpaSupplicant.getDriver());
 					if (isWifiConnectionCompleted(ifaceName, tout)) {
 						this.renewDhcpLease(ifaceName);
 					}
 				}
 			} catch (KuraException e) {
-				e.printStackTrace();
+				s_logger.warn("Exception while trying to restart the Wpa supplicant.", e);
 			}
 		}
 		
@@ -1319,21 +1387,30 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 	        destFile.createNewFile();
 	    }
 
+	    FileInputStream sourceStream= null;
+	    FileOutputStream destinationStream= null;
 	    FileChannel source = null;
 	    FileChannel destination = null;
 
 	    try {
-	        source = new FileInputStream(sourceFile).getChannel();
-	        destination = new FileOutputStream(destFile).getChannel();
+	        sourceStream= new FileInputStream(sourceFile);
+	        source = sourceStream.getChannel();
+	        destinationStream= new FileOutputStream(destFile);
+	        destination = destinationStream.getChannel();
 	        destination.transferFrom(source, 0, source.size());
-	    }
-	    finally {
-	        if(source != null) {
+	    } finally {
+	        if (source != null) {
 	            source.close();
 	        }
-	        if(destination != null) {
+	        if (destination != null) {
 	            destination.close();
 	        }
+	        if (sourceStream != null) {
+	            sourceStream.close();
+	        }
+	        if (destinationStream != null) {
+	            destinationStream.close();
+            }
 	    }
 	}
 	
@@ -1390,7 +1467,7 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 	//   Private Methods
 	//
 	// ----------------------------------------------------------------	
-	private void enableWifiInterface (String ifaceName) throws KuraException {
+	private void enableWifiInterface(String ifaceName) throws KuraException {
 		
 	    // ignore mon.* interface
 	    if(ifaceName.startsWith("mon.")) {
@@ -1441,14 +1518,14 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
                 && wifiMode.equals(WifiMode.MASTER)) {
             
             s_logger.debug("Starting hostapd");
-            HostapdManager.start(ifaceName, wifiConfig.getPasskey(), wifiConfig.getSecurity());
+            HostapdManager.start(ifaceName);
             
         } else if((status == NetInterfaceStatus.netIPv4StatusEnabledLAN || status == NetInterfaceStatus.netIPv4StatusEnabledWAN)
                 && (wifiMode.equals(WifiMode.INFRA) || wifiMode.equals(WifiMode.ADHOC))) {
 
             if(wifiConfig != null) {
                 s_logger.debug("Starting wpa_supplicant");
-                WpaSupplicantManager.start(ifaceName, wifiConfig.getDriver(), wifiConfig.getPasskey(), wifiConfig.getSecurity());
+                WpaSupplicantManager.start(ifaceName, wifiMode, wifiConfig.getDriver());
                 if (isWifiConnectionCompleted(ifaceName, 60)) {
                 	s_logger.debug("WiFi Connection Completed on {} !", ifaceName);
                 } else {
@@ -1500,7 +1577,7 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 		// TODO
 		short timeout = 30;		// in seconds
 	    
-	    m_pendingFirewallConfigurationChange = true;
+	    m_pendingFirewallConfigurationChange = true; //WTF: why this is set to true? the while and the if will be always executed!
 	    
 	    m_configurationService.snapshot();
 	    
@@ -1520,8 +1597,6 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 	}
 	
 	private int frequencyMhz2Channel(int frequency) {
-		
-		int channel = (frequency - 2407)/5;
-		return channel;
+		return (frequency - 2407)/5;
 	}
 }

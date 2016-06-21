@@ -1,11 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
-    <OCD id="org.eclipse.kura.example.beacon_scanner.BeaconExample"
+    <OCD id="org.eclipse.kura.example.beacon.scanner.BeaconScannerExample"
          name="Beacon Scanner" 
-         description="iBeacon Scanning Example.">
+         description="Beacon Scanning Example.">
          
          <Icon resource="http://s3.amazonaws.com/kura-resources/application/icon/beacon_scanner.png" size="32"/>
          
+         <AD id="enableScanning"
+            name="enableScanning"
+            type="Boolean"
+            cardinality="0"
+            required="true"
+            default="false"
+            description="Enable Beacon scanning."/>
+            
          <AD id="topicPrefix"
             name="topicPrefix"
             type="String"
@@ -29,10 +37,18 @@
             required="true"
             default="10000"
             description="Shortest time between publishes per beacon in ms"/>
-                    
+
+        <AD id="companyCode"
+            name="companyCode"
+            type="String"
+            cardinality="0"
+            required="true"
+            default="0000"
+            description="Hexadecimal string representing the company code."/>
+                                
     </OCD>
 
-    <Designate pid="org.eclipse.kura.example.beacon_scanner.BeaconExample">
-        <Object ocdref="org.eclipse.kura.example.beacon_scanner.BeaconExample"/>
+    <Designate pid="org.eclipse.kura.example.beacon.scanner.BeaconScannerExample">
+        <Object ocdref="org.eclipse.kura.example.beacon.scanner.BeaconScannerExample"/>
     </Designate>
 </MetaData>

@@ -53,6 +53,9 @@ public class BluetoothLe implements ConfigurableComponent, CloudClientListener, 
 	private String PROPERTY_GYRO     = "enableGyroscope";
 	private String PROPERTY_OPTO     = "enableLuxometer";
 	private String PROPERTY_BUTTONS  = "enableButtons";
+	private String PROPERTY_REDLED   = "switchOnRedLed";
+	private String PROPERTY_GREENLED = "switchOnGreenLed";
+	private String PROPERTY_BUZZER   = "switchOnBuzzer";
 	private String PROPERTY_TOPIC    = "publishTopic";
 	private String PROPERTY_INAME    = "iname";
 
@@ -80,6 +83,9 @@ public class BluetoothLe implements ConfigurableComponent, CloudClientListener, 
 	private boolean enableGyro     = false;
 	private boolean enableOpto     = false;
 	private boolean enableButtons  = false;
+	private boolean enableRedLed   = false;
+	private boolean enableGreenLed = false;
+	private boolean enableBuzzer   = false;
 
 	public void setCloudService(CloudService cloudService) {
 		m_cloudService = cloudService;
@@ -128,6 +134,12 @@ public class BluetoothLe implements ConfigurableComponent, CloudClientListener, 
 				enableOpto = (Boolean) properties.get(PROPERTY_OPTO);
 			if (properties.get(PROPERTY_BUTTONS) != null)
 				enableButtons = (Boolean) properties.get(PROPERTY_BUTTONS);
+			if (properties.get(PROPERTY_REDLED) != null)
+				enableRedLed = (Boolean) properties.get(PROPERTY_REDLED);
+			if (properties.get(PROPERTY_GREENLED) != null)
+				enableGreenLed = (Boolean) properties.get(PROPERTY_GREENLED);
+			if (properties.get(PROPERTY_BUZZER) != null)
+				enableBuzzer = (Boolean) properties.get(PROPERTY_BUZZER);	
 			if (properties.get(PROPERTY_TOPIC) != null)
 				m_topic = (String) properties.get(PROPERTY_TOPIC);
 			if (properties.get(PROPERTY_INAME) != null)
@@ -243,6 +255,12 @@ public class BluetoothLe implements ConfigurableComponent, CloudClientListener, 
 				enableOpto = (Boolean) properties.get(PROPERTY_OPTO);
 			if (properties.get(PROPERTY_BUTTONS) != null)
 				enableButtons = (Boolean) properties.get(PROPERTY_BUTTONS);
+			if (properties.get(PROPERTY_REDLED) != null)
+				enableRedLed = (Boolean) properties.get(PROPERTY_REDLED);
+			if (properties.get(PROPERTY_GREENLED) != null)
+				enableGreenLed = (Boolean) properties.get(PROPERTY_GREENLED);
+			if (properties.get(PROPERTY_BUZZER) != null)
+				enableBuzzer = (Boolean) properties.get(PROPERTY_BUZZER);
 			if (properties.get(PROPERTY_TOPIC) != null)
 				m_topic = (String) properties.get(PROPERTY_TOPIC);
 			if (properties.get(PROPERTY_INAME) != null)
@@ -417,7 +435,7 @@ public class BluetoothLe implements ConfigurableComponent, CloudClientListener, 
 			
 			if (!myTiSensorTag.isConnected()) {
 				s_logger.info("Connecting to TiSensorTag...");
-				m_connected = myTiSensorTag.connect();
+				m_connected = myTiSensorTag.connect(iname);
 			}
 			else {
 				s_logger.info("TiSensorTag already connected!");
@@ -434,8 +452,8 @@ public class BluetoothLe implements ConfigurableComponent, CloudClientListener, 
 					payload.addMetric("Type", "CC2541");
 			
 				// Test
-				doServicesDiscovery(myTiSensorTag);
-				doCharacteristicsDiscovery(myTiSensorTag);
+//				doServicesDiscovery(myTiSensorTag);
+//				doCharacteristicsDiscovery(myTiSensorTag);
 				
 				myTiSensorTag.setFirmwareRevision(myTiSensorTag.firmwareRevision());
 				
@@ -577,6 +595,26 @@ public class BluetoothLe implements ConfigurableComponent, CloudClientListener, 
 					// For buttons only enable notifications
 					myTiSensorTag.enableKeysNotification();
 				}
+				
+				if (enableRedLed) {
+					myTiSensorTag.switchOnRedLed();
+				} else {
+					myTiSensorTag.switchOffRedLed();
+				}
+
+				if (enableGreenLed) {
+					myTiSensorTag.switchOnGreenLed();
+				} else {
+					myTiSensorTag.switchOffGreenLed();
+				}
+				
+				if (enableBuzzer) {
+					myTiSensorTag.switchOnBuzzer();
+				} else {
+					myTiSensorTag.switchOffBuzzer();
+				}
+				
+				myTiSensorTag.enableIOService();
 				
 				try {
 					// Publish only if there are metrics to be published!

@@ -34,6 +34,7 @@ import org.eclipse.kura.data.transport.listener.DataTransportListener;
 import org.eclipse.kura.data.DataTransportService;
 import org.eclipse.kura.data.DataTransportToken;
 import org.eclipse.kura.ssl.SslManagerService;
+import org.eclipse.kura.ssl.SslManagerServiceOptions;
 import org.eclipse.kura.ssl.SslServiceListener;
 import org.eclipse.kura.status.CloudConnectionStatusComponent;
 import org.eclipse.kura.status.CloudConnectionStatusEnum;
@@ -112,6 +113,13 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 
 	private static final String TOPIC_ACCOUNT_NAME_CTX_NAME = "account-name";
 	private static final String TOPIC_DEVICE_ID_CTX_NAME = "client-id";
+	
+	private static final String SSL_PROTOCOL = SslManagerServiceOptions.PROP_PROTOCOL;
+	private static final String SSL_CIPHERS = SslManagerServiceOptions.PROP_CIPHERS;
+	private static final String SSL_HN_VERIFY = SslManagerServiceOptions.PROP_HN_VERIFY;
+	private static final String SSL_CERT_ALIAS = "ssl.certificate.alias";
+	private static final String SSL_DEFAULT_HN_VERIFY = "use-ssl-service-config";
+	
 
 	// ----------------------------------------------------------------
 	//
@@ -673,6 +681,7 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 			clientId = clientId.replace('/', '-');
 			clientId = clientId.replace('+', '-');
 			clientId = clientId.replace('#', '-');
+			clientId = clientId.replace('.', '-');
 
 
 			// Configure the broker URL
@@ -751,8 +760,22 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 		// SSL
 		if (brokerUrl.startsWith("ssl")) {
 			try {
-				String alias = m_topicContext.get(TOPIC_ACCOUNT_NAME_CTX_NAME);
-				SSLSocketFactory ssf = m_sslManagerService.getSSLSocketFactory(alias);
+			    String alias = (String) m_properties.get(SSL_CERT_ALIAS);
+			    if (alias == null || "".equals(alias.trim())) {
+			        alias = m_topicContext.get(TOPIC_ACCOUNT_NAME_CTX_NAME);
+			    }
+
+				String protocol = (String) m_properties.get(SSL_PROTOCOL);
+				String ciphers = (String) m_properties.get(SSL_CIPHERS);
+				String hnVerification = (String) m_properties.get(SSL_HN_VERIFY);
+				
+				SSLSocketFactory ssf;
+				if (SSL_DEFAULT_HN_VERIFY.equals(hnVerification)) {
+				    ssf = m_sslManagerService.getSSLSocketFactory(protocol, ciphers, null, null, null, alias);
+				} else {
+				    ssf = m_sslManagerService.getSSLSocketFactory(protocol, ciphers, null, null, null, alias, Boolean.valueOf(hnVerification));
+				}
+				
 				conOpt.setSocketFactory(ssf);
 			} catch (Exception e) {
 				s_logger.error("SSL setup failed", e);

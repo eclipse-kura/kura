@@ -50,7 +50,7 @@ import com.google.common.util.concurrent.Monitor;
  * to publish a list of wire records as received in Wire Envelope to the
  * configured cloud platform.
  */
-final class CloudPublisherImpl
+public final class CloudPublisherImpl
 		implements WireReceiver, DataServiceListener, ConfigurableComponent, CloudPublisher {
 
 	/** The Cloud Publisher Disconnection Manager. */
@@ -80,7 +80,7 @@ final class CloudPublisherImpl
 	/**
 	 * Instantiates a new cloud publisher instance.
 	 */
-	CloudPublisherImpl() {
+	public CloudPublisherImpl() {
 		this.m_monitor = new Monitor();
 	}
 

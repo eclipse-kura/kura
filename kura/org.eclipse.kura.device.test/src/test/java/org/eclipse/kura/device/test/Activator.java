@@ -37,7 +37,7 @@ import com.google.common.collect.Maps;
 /**
  * The bundle activator which registers tests as services.
  */
-final class Activator extends DependencyActivatorBase {
+public final class Activator extends DependencyActivatorBase {
 
 	/** {@inheritDoc} */
 	@Override

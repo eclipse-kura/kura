@@ -80,7 +80,7 @@ import com.google.common.collect.Lists;
  * @see DeviceCloudlet#doPut(CloudletTopic, KuraRequestPayload,
  *      KuraResponsePayload)
  */
-final class DeviceCloudlet extends Cloudlet {
+public final class DeviceCloudlet extends Cloudlet {
 
 	/** Application Identifier for Cloudlet. */
 	private static final String APP_ID = "Devicelet";
@@ -100,7 +100,7 @@ final class DeviceCloudlet extends Cloudlet {
 	 * @param appId
 	 *            the application id
 	 */
-	DeviceCloudlet(final String appId) {
+	public DeviceCloudlet(final String appId) {
 		super(APP_ID);
 	}
 

@@ -57,7 +57,7 @@ import com.google.common.collect.Lists;
  * The Class DbWireRecordFilter is responsible for representing a wire component
  * which is mainly used to filter records as received from the wire record
  */
-final class DbWireRecordFilter implements WireEmitter, WireReceiver, WireRecordFilter, ConfigurableComponent {
+public final class DbWireRecordFilter implements WireEmitter, WireReceiver, WireRecordFilter, ConfigurableComponent {
 
 	/** The Logger instance. */
 	private static final Logger s_logger = LoggerFactory.getLogger(DbWireRecordFilter.class);
@@ -90,7 +90,7 @@ final class DbWireRecordFilter implements WireEmitter, WireReceiver, WireRecordF
 	private final WireSupport m_wireSupport;
 
 	/** Constructor */
-	DbWireRecordFilter() {
+	public DbWireRecordFilter() {
 		this.m_wireSupport = Wires.newWireSupport(this);
 		this.m_executorService = Executors.newSingleThreadScheduledExecutor();
 		this.m_cache = CacheBuilder.newBuilder().maximumSize(10000).expireAfterWrite(60, TimeUnit.MINUTES)

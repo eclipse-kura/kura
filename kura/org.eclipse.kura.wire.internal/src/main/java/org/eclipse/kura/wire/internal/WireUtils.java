@@ -33,7 +33,7 @@ import com.google.common.collect.Lists;
  * The Class WireUtils comprises all necessary utility methods of Kura Wires
  * Topology
  */
-public final class WireUtils {
+final class WireUtils {
 
 	/** Service Property */
 	private static final String SERVICE_PID_PROPERTY = "service.pid";

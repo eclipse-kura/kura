@@ -57,7 +57,7 @@ import com.google.common.collect.Lists;
  * The Class DbWireRecordFilter is responsible for representing a wire component
  * which is mainly used to filter records as received from the wire record
  */
-public final class DbWireRecordFilter implements WireEmitter, WireReceiver, WireRecordFilter, ConfigurableComponent {
+final class DbWireRecordFilter implements WireEmitter, WireReceiver, WireRecordFilter, ConfigurableComponent {
 
 	/** The Logger instance. */
 	private static final Logger s_logger = LoggerFactory.getLogger(DbWireRecordFilter.class);
@@ -90,7 +90,7 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Wire
 	private final WireSupport m_wireSupport;
 
 	/** Constructor */
-	public DbWireRecordFilter() {
+	DbWireRecordFilter() {
 		this.m_wireSupport = Wires.newWireSupport(this);
 		this.m_executorService = Executors.newSingleThreadScheduledExecutor();
 		this.m_cache = CacheBuilder.newBuilder().maximumSize(10000).expireAfterWrite(60, TimeUnit.MINUTES)
@@ -98,8 +98,8 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Wire
 					/** {@inheritDoc} */
 					@Override
 					public List<WireRecord> load(final Long timestamp) throws Exception {
-						m_cacheLastUpdated = System.currentTimeMillis();
-						return filter();
+						DbWireRecordFilter.this.m_cacheLastUpdated = System.currentTimeMillis();
+						return DbWireRecordFilter.this.filter();
 					}
 				});
 	}
@@ -304,8 +304,9 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Wire
 			/** {@inheritDoc} */
 			@Override
 			public void run() {
-				m_cacheLastUpdated = System.currentTimeMillis();
-				m_cache.put(m_cacheLastUpdated, filter());
+				DbWireRecordFilter.this.m_cacheLastUpdated = System.currentTimeMillis();
+				DbWireRecordFilter.this.m_cache.put(DbWireRecordFilter.this.m_cacheLastUpdated,
+						DbWireRecordFilter.this.filter());
 			}
 		}, this.m_options.getRefreshRate(), TimeUnit.SECONDS);
 	}

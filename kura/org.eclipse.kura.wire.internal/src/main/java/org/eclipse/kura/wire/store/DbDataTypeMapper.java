@@ -24,7 +24,7 @@ import com.google.common.collect.Maps;
  * The Class DbDataTypeMapper maps all the Kura specific data types to JDBC Data
  * Types
  */
-public final class DbDataTypeMapper {
+final class DbDataTypeMapper {
 	
 	/**
 	 * Not needed because of utility class
@@ -36,7 +36,7 @@ public final class DbDataTypeMapper {
 	/**
 	 * The Class JdbcType.
 	 */
-	public static class JdbcType {
+	static class JdbcType {
 
 		/** The JDBC type represented as integer. */
 		private final int m_type;
@@ -52,7 +52,7 @@ public final class DbDataTypeMapper {
 		 * @param typeStr
 		 *            the type string
 		 */
-		public JdbcType(final int type, final String typeStr) {
+		JdbcType(final int type, final String typeStr) {
 			this.m_type = type;
 			this.m_typeStr = typeStr;
 		}
@@ -62,7 +62,7 @@ public final class DbDataTypeMapper {
 		 *
 		 * @return the type
 		 */
-		public int getType() {
+		int getType() {
 			return this.m_type;
 		}
 
@@ -71,7 +71,7 @@ public final class DbDataTypeMapper {
 		 *
 		 * @return the type string
 		 */
-		public String getTypeString() {
+		String getTypeString() {
 			return this.m_typeStr;
 		}
 	}
@@ -113,7 +113,7 @@ public final class DbDataTypeMapper {
 	 *            the jdbc type
 	 * @return the data type
 	 */
-	public static DataType getDataType(final int jdbcType) {
+	static DataType getDataType(final int jdbcType) {
 		return s_jdbcTypeMap.get(jdbcType);
 	}
 
@@ -124,7 +124,7 @@ public final class DbDataTypeMapper {
 	 *            the data type
 	 * @return the JDBC type
 	 */
-	public static JdbcType getJdbcType(final DataType dataType) {
+	static JdbcType getJdbcType(final DataType dataType) {
 		return s_dataTypeMap.get(dataType);
 	}
 

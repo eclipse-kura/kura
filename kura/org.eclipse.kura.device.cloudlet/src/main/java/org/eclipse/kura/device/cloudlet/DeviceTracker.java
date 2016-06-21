@@ -32,7 +32,7 @@ import com.google.common.collect.Maps;
  * The Class DeviceTracker is responsible for tracking all the existing device
  * instances in the OSGi service registry
  */
-public final class DeviceTracker extends ServiceTracker<Object, Object> {
+final class DeviceTracker extends ServiceTracker<Object, Object> {
 
 	/** The Logger instance. */
 	private static final Logger s_logger = LoggerFactory.getLogger(DeviceTracker.class);
@@ -48,7 +48,7 @@ public final class DeviceTracker extends ServiceTracker<Object, Object> {
 	 * @throws InvalidSyntaxException
 	 *             the invalid syntax exception
 	 */
-	public DeviceTracker(final BundleContext context) throws InvalidSyntaxException {
+	DeviceTracker(final BundleContext context) throws InvalidSyntaxException {
 		super(context, context.createFilter("(" + Constants.OBJECTCLASS + "=*)"), null);
 		this.m_devices = Maps.newConcurrentMap();
 	}
@@ -73,7 +73,7 @@ public final class DeviceTracker extends ServiceTracker<Object, Object> {
 	 *
 	 * @return the map of devices
 	 */
-	public Map<String, Device> getRegisteredDevices() {
+	Map<String, Device> getRegisteredDevices() {
 		return this.m_devices;
 	}
 

@@ -35,9 +35,6 @@ Import-Package: com.google.common.annotations;version="19.0.0",
  org.osgi.util.position;version="1.0.1",
  org.osgi.util.tracker;version="1.5.0",
  org.slf4j;version="1.6.4"
-Export-Package: org.eclipse.kura.wire.cloud.publisher;version="1.0.0",
- org.eclipse.kura.wire.internal;version="1.0.0",
- org.eclipse.kura.wire.store;version="1.0.0",
- org.eclipse.kura.wire.timer;version="1.0.0"
+Export-Package: org.eclipse.kura.wire.internal;version="1.0.0"
 Service-Component: OSGI-INF/*.xml
 Bundle-ActivationPolicy: lazy

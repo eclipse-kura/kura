@@ -22,12 +22,12 @@ import com.google.common.base.Throwables;
  * The Class CloudPublisherOptions is responsible to provide all the required
  * options for the Cloud Publisher Wire Component
  */
-public final class CloudPublisherOptions extends AbstractConfigurationOptions {
+final class CloudPublisherOptions extends AbstractConfigurationOptions {
 
 	/**
 	 * The different Auto Connect Modes.
 	 */
-	public enum AutoConnectMode {
+	enum AutoConnectMode {
 
 		/** The autoconnect mode off. */
 		AUTOCONNECT_MODE_OFF(-2),
@@ -57,7 +57,7 @@ public final class CloudPublisherOptions extends AbstractConfigurationOptions {
 		 * @param disconnectDelay
 		 *            the disconnect delay
 		 */
-		private AutoConnectMode(final int disconnectDelay) {
+		AutoConnectMode(final int disconnectDelay) {
 			this.disconnectDelay = disconnectDelay;
 		}
 
@@ -66,7 +66,7 @@ public final class CloudPublisherOptions extends AbstractConfigurationOptions {
 		 *
 		 * @return the disconnect delay
 		 */
-		public int getDisconnectDelay() {
+		int getDisconnectDelay() {
 			return this.disconnectDelay;
 		}
 	}
@@ -125,7 +125,7 @@ public final class CloudPublisherOptions extends AbstractConfigurationOptions {
 	 * @param properties
 	 *            the properties
 	 */
-	public CloudPublisherOptions(final Map<String, Object> properties) {
+	CloudPublisherOptions(final Map<String, Object> properties) {
 		super(properties);
 	}
 
@@ -134,7 +134,7 @@ public final class CloudPublisherOptions extends AbstractConfigurationOptions {
 	 *
 	 * @return the auto connect mode
 	 */
-	public AutoConnectMode getAutoConnectMode() {
+	AutoConnectMode getAutoConnectMode() {
 		AutoConnectMode autoConnectMode = DEFAULT_AUTOCONNECT_MODE;
 		if ((this.m_properties != null) && this.m_properties.containsKey(CONF_AUTOCONNECT_MODE)
 				&& (this.m_properties.get(CONF_AUTOCONNECT_MODE) != null)
@@ -154,7 +154,7 @@ public final class CloudPublisherOptions extends AbstractConfigurationOptions {
 	 *
 	 * @return the auto connect quiesce timeout
 	 */
-	public int getAutoConnectQuiesceTimeout() {
+	int getAutoConnectQuiesceTimeout() {
 		int quieceTimeout = DEFAULT_QUIECE_TIMEOUT;
 		if ((this.m_properties != null) && this.m_properties.containsKey(CONF_QUIECE_TIMEOUT)
 				&& (this.m_properties.get(CONF_QUIECE_TIMEOUT) != null)
@@ -169,7 +169,7 @@ public final class CloudPublisherOptions extends AbstractConfigurationOptions {
 	 *
 	 * @return the type of the encoding message type
 	 */
-	public int getMessageType() {
+	int getMessageType() {
 		int messageType = DEFAULT_MESSAGE_TYPE;
 		if ((this.m_properties != null) && this.m_properties.containsKey(CONF_MESSAGE_TYPE)
 				&& (this.m_properties.get(CONF_MESSAGE_TYPE) != null)
@@ -184,7 +184,7 @@ public final class CloudPublisherOptions extends AbstractConfigurationOptions {
 	 *
 	 * @return the publishing application
 	 */
-	public String getPublishingApplication() {
+	String getPublishingApplication() {
 		String publishingApp = DEFAULT_APPLICATION;
 		if ((this.m_properties != null) && this.m_properties.containsKey(CONF_APPLICATION)
 				&& (this.m_properties.get(CONF_APPLICATION) != null)
@@ -199,7 +199,7 @@ public final class CloudPublisherOptions extends AbstractConfigurationOptions {
 	 *
 	 * @return the publishing priority
 	 */
-	public int getPublishingPriority() {
+	int getPublishingPriority() {
 		int publishingPriority = DEFAULT_PRIORITY;
 		if ((this.m_properties != null) && this.m_properties.containsKey(CONF_PRIORITY)
 				&& (this.m_properties.get(CONF_PRIORITY) != null)
@@ -214,7 +214,7 @@ public final class CloudPublisherOptions extends AbstractConfigurationOptions {
 	 *
 	 * @return the publishing QoS
 	 */
-	public int getPublishingQos() {
+	int getPublishingQos() {
 		int publishingQos = DEFAULT_QOS;
 		if ((this.m_properties != null) && this.m_properties.containsKey(CONF_QOS)
 				&& (this.m_properties.get(CONF_QOS) != null) && (this.m_properties.get(CONF_QOS) instanceof Integer)) {
@@ -228,7 +228,7 @@ public final class CloudPublisherOptions extends AbstractConfigurationOptions {
 	 *
 	 * @return the publishing retain
 	 */
-	public boolean getPublishingRetain() {
+	boolean getPublishingRetain() {
 		boolean publishingRetain = DEFAULT_RETAIN;
 		if ((this.m_properties != null) && this.m_properties.containsKey(CONF_RETAIN)
 				&& (this.m_properties.get(CONF_RETAIN) != null)
@@ -243,7 +243,7 @@ public final class CloudPublisherOptions extends AbstractConfigurationOptions {
 	 *
 	 * @return the publishing topic
 	 */
-	public String getPublishingTopic() {
+	String getPublishingTopic() {
 		String publishingTopic = DEFAULT_TOPIC;
 		if ((this.m_properties != null) && this.m_properties.containsKey(CONF_TOPIC)
 				&& (this.m_properties.get(CONF_TOPIC) != null)

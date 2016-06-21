@@ -50,7 +50,7 @@ import com.google.common.util.concurrent.Monitor;
  * to publish a list of wire records as received in Wire Envelope to the
  * configured cloud platform.
  */
-public final class CloudPublisherImpl
+final class CloudPublisherImpl
 		implements WireReceiver, DataServiceListener, ConfigurableComponent, CloudPublisher {
 
 	/** The Cloud Publisher Disconnection Manager. */
@@ -80,7 +80,7 @@ public final class CloudPublisherImpl
 	/**
 	 * Instantiates a new cloud publisher instance.
 	 */
-	public CloudPublisherImpl() {
+	CloudPublisherImpl() {
 		this.m_monitor = new Monitor();
 	}
 
@@ -317,6 +317,7 @@ public final class CloudPublisherImpl
 	/** {@inheritDoc} */
 	@Override
 	public void onWireReceive(final WireEnvelope wireEnvelope) {
+		checkNull(wireEnvelope, "Wire Envelope cannot be null");
 		s_logger.info("Received WireEnvelope from {}", wireEnvelope.getEmitterName());
 		this.publish(wireEnvelope.getRecords());
 		this.stopPublishing();

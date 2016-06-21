@@ -12,6 +12,8 @@ Added Features :
   * Created SenseHat example project
   * Updated the SensorTag Example project exposing buzzer and leds
   * Created the beacon.scanner project
+  * Native libraries now support x86_64
+  * Reviewed/refactored the GPS position service
   
 Bug Fixes and closed issues:
   * Fixed github issues #78, #82, #96, #98, #112, #113, #114, #116, #120, #121, #127, #128, #129, #131,

@@ -226,8 +226,13 @@ public class PackagesPanelUi extends Composite {
 
 					@Override
 					public void onSuccess(GwtXSRFToken token) {
-						xsrfTokenFieldUrl.setValue(token.getToken());
-						packagesFormUrl.submit();
+					    if (!"".equals(formUrl.getValue())) {
+					        xsrfTokenFieldUrl.setValue(token.getToken());
+	                        packagesFormUrl.submit();
+					    } else {
+                            uploadModal.hide();
+                            uploadErrorModal.show();
+                        }
 					}
 				});
 			}});

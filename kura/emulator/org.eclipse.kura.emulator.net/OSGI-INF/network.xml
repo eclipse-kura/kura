@@ -18,4 +18,11 @@
       <provide interface="org.eclipse.kura.net.NetworkService"/>
    </service>
    <property name="service.pid" value="org.eclipse.kura.net.NetworkService"/>
+   
+   <reference name="Emulator" 
+              interface="org.eclipse.kura.emulator.Emulator" 
+              bind="setEmulator" 
+              unbind="unsetEmulator"
+              cardinality="1..1" 
+              policy="static"/>
 </scr:component>

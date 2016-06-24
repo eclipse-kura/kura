@@ -104,8 +104,8 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Wire
 					/** {@inheritDoc} */
 					@Override
 					public List<WireRecord> load(final Long timestamp) throws Exception {
-						DbWireRecordFilter.this.m_cacheLastUpdated = System.currentTimeMillis();
-						return DbWireRecordFilter.this.filter();
+						m_cacheLastUpdated = System.currentTimeMillis();
+						return filter();
 					}
 				});
 	}

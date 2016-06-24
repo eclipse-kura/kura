@@ -17,6 +17,8 @@ import java.util.Collection;
 import java.util.List;
 
 import org.eclipse.kura.KuraRuntimeException;
+import org.eclipse.kura.localization.LocalizationAdapter;
+import org.eclipse.kura.localization.WireMessages;
 import org.eclipse.kura.wire.WireEmitter;
 import org.eclipse.kura.wire.WireReceiver;
 import org.osgi.framework.Bundle;
@@ -35,6 +37,9 @@ import com.google.common.collect.Lists;
  */
 final class WireUtils {
 
+	/** Localization Resource */
+	private static final WireMessages s_messages = LocalizationAdapter.adapt(WireMessages.class);
+
 	/** Service Property */
 	private static final String SERVICE_PID_PROPERTY = "service.pid";
 	
@@ -46,22 +51,22 @@ final class WireUtils {
 	/**
 	 * Gets the wire emitters and receivers.
 	 *
-	 * @param ctx
+	 * @param context
 	 *            the bundle context
 	 * @return the wire emitters and receivers
 	 * @throws KuraRuntimeException
 	 *             if provided component context is null
 	 */
-	public static List<String> getEmittersAndReceivers(final ComponentContext ctx) {
-		checkNull(ctx, "Component context cannot be null");
+	static List<String> getEmittersAndReceivers(final ComponentContext context) {
+		checkNull(context, s_messages.componentContextNonNull());
 		final List<String> result = Lists.newArrayList();
 		try {
-			final Collection<ServiceReference<WireEmitter>> emitters = ctx.getBundleContext()
+			final Collection<ServiceReference<WireEmitter>> emitters = context.getBundleContext()
 					.getServiceReferences(WireEmitter.class, null);
 			for (final ServiceReference<WireEmitter> service : emitters) {
 				result.add(service.getProperty(SERVICE_PID_PROPERTY).toString());
 			}
-			final Collection<ServiceReference<WireReceiver>> consumers = ctx.getBundleContext()
+			final Collection<ServiceReference<WireReceiver>> consumers = context.getBundleContext()
 					.getServiceReferences(WireReceiver.class, null);
 			for (final ServiceReference<WireReceiver> service : consumers) {
 				result.add(service.getProperty(SERVICE_PID_PROPERTY).toString());
@@ -75,25 +80,25 @@ final class WireUtils {
 	/**
 	 * Gets the factories and instances.
 	 *
-	 * @param ctx
+	 * @param context
 	 *            the service component context
 	 * @param factoryPid
-	 *            the factory pid
+	 *            the factory PID
 	 * @param iface
 	 *            the interface
 	 * @return the factories and instances
 	 * @throws KuraRuntimeException
 	 *             if any of the provided argument is null
 	 */
-	public static List<String> getFactoriesAndInstances(final ComponentContext ctx, final String factoryPid,
+	static List<String> getFactoriesAndInstances(final ComponentContext context, final String factoryPid,
 			final Class<?> iface) {
-		checkNull(ctx, "Component context cannot be null");
-		checkNull(factoryPid, "Factory PID cannot be null");
-		checkNull(iface, "Interface class cannot be null");
+		checkNull(context, s_messages.componentContextNonNull());
+		checkNull(factoryPid, s_messages.factoryPidNonNull());
+		checkNull(iface, s_messages.interfaceClassNonNull());
 
 		final List<String> result = Lists.newArrayList();
 		// Iterate through the bundles
-		for (final Bundle b : ctx.getBundleContext().getBundles()) {
+		for (final Bundle b : context.getBundleContext().getBundles()) {
 			// Search for a possible candidate for the factoryPid
 			if (factoryPid.startsWith(b.getSymbolicName())) {
 				// Try instantiating the factory. If it fails, move on to next
@@ -118,7 +123,7 @@ final class WireUtils {
 		// After the factories, iterate through available services implementing
 		// the passed interface
 		try {
-			final Collection<?> services = ctx.getBundleContext().getServiceReferences(iface, null);
+			final Collection<?> services = context.getBundleContext().getServiceReferences(iface, null);
 			for (final Object service : services) {
 				if (service instanceof ServiceReference) {
 					final ServiceReference<?> reference = (ServiceReference<?>) service;
@@ -134,7 +139,7 @@ final class WireUtils {
 	/**
 	 * Checks if the provided name corresponds to any Wire emitter.
 	 *
-	 * @param ctx
+	 * @param context
 	 *            the bundle context
 	 * @param name
 	 *            the name
@@ -142,12 +147,12 @@ final class WireUtils {
 	 * @throws KuraRuntimeException
 	 *             if any of the provided argument is null
 	 */
-	public static boolean isEmitter(final BundleContext ctx, final String name) {
-		checkNull(ctx, "Bundle context cannot be null");
-		checkNull(name, "Wire Emitter name cannot be null");
+	static boolean isEmitter(final BundleContext context, final String name) {
+		checkNull(context, s_messages.bundleContextNonNull());
+		checkNull(name, s_messages.emitterNameNonNull());
 
 		try {
-			final Collection<ServiceReference<WireEmitter>> services = ctx.getServiceReferences(WireEmitter.class,
+			final Collection<ServiceReference<WireEmitter>> services = context.getServiceReferences(WireEmitter.class,
 					null);
 			for (final ServiceReference<?> service : services) {
 				if (service.getProperty(SERVICE_PID_PROPERTY).equals(name)) {
@@ -163,20 +168,20 @@ final class WireUtils {
 	/**
 	 * Checks if the provided name corresponds to any Wire receiver.
 	 *
-	 * @param ctx
+	 * @param context
 	 *            the bundle context
 	 * @param pid
-	 *            the wire receiver pid
+	 *            the wire receiver PID
 	 * @return true, if it is a Wire Receiver
 	 * @throws KuraRuntimeException
 	 *             if any of the provided argument is null
 	 */
-	public static boolean isReceiver(final BundleContext ctx, final String pid) {
-		checkNull(ctx, "Bundle context cannot be null");
-		checkNull(pid, "Wire Receiver PID cannot be null");
+	static boolean isReceiver(final BundleContext context, final String pid) {
+		checkNull(context, s_messages.bundleContextNonNull());
+		checkNull(pid, s_messages.receiverNameNonNull());
 
 		try {
-			final Collection<ServiceReference<WireReceiver>> services = ctx.getServiceReferences(WireReceiver.class,
+			final Collection<ServiceReference<WireReceiver>> services = context.getServiceReferences(WireReceiver.class,
 					null);
 			for (final ServiceReference<?> service : services) {
 				if (service.getProperty(SERVICE_PID_PROPERTY).equals(pid)) {

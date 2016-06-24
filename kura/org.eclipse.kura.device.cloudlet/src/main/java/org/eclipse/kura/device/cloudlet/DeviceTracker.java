@@ -20,6 +20,8 @@ import java.util.Map;
 import org.eclipse.kura.device.Device;
 import org.eclipse.kura.device.internal.BaseDevice;
 import org.eclipse.kura.device.internal.DeviceConfiguration;
+import org.eclipse.kura.localization.DeviceCloudletMessages;
+import org.eclipse.kura.localization.LocalizationAdapter;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.InvalidSyntaxException;
@@ -39,6 +41,9 @@ final class DeviceTracker extends ServiceTracker<Object, Object> {
 
 	/** The Logger instance. */
 	private static final Logger s_logger = LoggerFactory.getLogger(DeviceTracker.class);
+
+	/** Localization Resource */
+	private static final DeviceCloudletMessages s_messages = LocalizationAdapter.adapt(DeviceCloudletMessages.class);
 
 	/** The map of devices present in the OSGi service registry. */
 	private final Map<String, Device> m_devices;
@@ -61,7 +66,7 @@ final class DeviceTracker extends ServiceTracker<Object, Object> {
 	public Object addingService(final ServiceReference<Object> reference) {
 		final Object service = super.addingService(reference);
 		if (service instanceof Device) {
-			s_logger.info("Device has been found by Device Cloudlet Tracker....==> adding service");
+			s_logger.info(s_messages.deviceFoundAdding());
 			if (service instanceof Device) {
 				this.addService(service);
 			}
@@ -76,7 +81,7 @@ final class DeviceTracker extends ServiceTracker<Object, Object> {
 	 *            the device service instance
 	 */
 	private void addService(final Object service) {
-		checkNull(service, "Device service instance cannot be null");
+		checkNull(service, s_messages.deviceServiceNonNull());
 		final Device device = (Device) service;
 		final DeviceConfiguration deviceConfiguration = ((BaseDevice) device).getDeviceConfiguration();
 		if (deviceConfiguration != null) {
@@ -102,7 +107,7 @@ final class DeviceTracker extends ServiceTracker<Object, Object> {
 			final Collection<ServiceReference<Device>> deviceServiceRefs = this.context
 					.getServiceReferences(Device.class, null);
 			for (final ServiceReference<Device> ref : deviceServiceRefs) {
-				s_logger.info("Device has been found by Device Cloudlet Tracker....==> open");
+				s_logger.info(s_messages.deviceFoundOpen());
 				final Object object = this.context.getService(ref);
 				if (object instanceof Device) {
 					this.addService(object);
@@ -125,7 +130,7 @@ final class DeviceTracker extends ServiceTracker<Object, Object> {
 					this.m_devices.remove(deviceName);
 				}
 			}
-			s_logger.info("Device has been removed by Device Cloudlet Tracker..." + service);
+			s_logger.info(s_messages.deviceRemoved() + service);
 		}
 	}
 

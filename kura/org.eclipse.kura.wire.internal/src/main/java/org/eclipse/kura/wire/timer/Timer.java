@@ -19,6 +19,8 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.kura.configuration.ConfigurableComponent;
+import org.eclipse.kura.localization.LocalizationAdapter;
+import org.eclipse.kura.localization.WireMessages;
 import org.eclipse.kura.type.TypedValues;
 import org.eclipse.kura.wire.WireEmitter;
 import org.eclipse.kura.wire.WireSupport;
@@ -42,6 +44,9 @@ public final class Timer implements WireEmitter, ConfigurableComponent {
 
 	/** The Logger instance. */
 	private static final Logger s_logger = LoggerFactory.getLogger(Timer.class);
+
+	/** Localization Resource */
+	private static final WireMessages s_message = LocalizationAdapter.adapt(WireMessages.class);
 
 	/** The Constant denotes the field name of the timer */
 	public static final String TIMER_EVENT_FIELD_NAME = "TimerTick";
@@ -81,10 +86,10 @@ public final class Timer implements WireEmitter, ConfigurableComponent {
 	 *            the configured properties
 	 */
 	protected void activate(final ComponentContext ctx, final Map<String, Object> properties) {
-		s_logger.info("Activating timer...");
+		s_logger.info(s_message.activatingTimer());
 		this.m_properties = properties;
 		this.doUpdate();
-		s_logger.info("Activating timer...Done");
+		s_logger.info(s_message.activatingTimerDone());
 	}
 
 	/** {@inheritDoc} */
@@ -100,12 +105,12 @@ public final class Timer implements WireEmitter, ConfigurableComponent {
 	 *            the component context
 	 */
 	protected void deactivate(final ComponentContext ctx) {
-		s_logger.info("Deactivating timer...");
+		s_logger.info(s_message.deactivatingTimer());
 		if (this.m_tickHandle != null) {
 			this.m_tickHandle.cancel(true);
 		}
 		this.m_executorService.shutdown();
-		s_logger.info("Deactivating timer...Done");
+		s_logger.info(s_message.deactivatingTimerDone());
 	}
 
 	/**
@@ -122,7 +127,8 @@ public final class Timer implements WireEmitter, ConfigurableComponent {
 			/** {@inheritDoc} */
 			@Override
 			public void run() {
-				m_wireSupport.emit(Wires.newWireRecord(Wires.newWireField(TIMER_EVENT_FIELD_NAME, TypedValues.newStringValue(m_name))));
+				m_wireSupport.emit(Wires.newWireRecord(
+						Wires.newWireField(TIMER_EVENT_FIELD_NAME, TypedValues.newStringValue(m_name))));
 			}
 		}, this.m_interval, TimeUnit.SECONDS);
 	}
@@ -146,9 +152,9 @@ public final class Timer implements WireEmitter, ConfigurableComponent {
 	 *            the updated properties
 	 */
 	protected void updated(final Map<String, Object> properties) {
-		s_logger.info("Updating timer...");
+		s_logger.info(s_message.updatingTimer());
 		this.m_properties = properties;
 		this.doUpdate();
-		s_logger.info("Updating timer...Done");
+		s_logger.info(s_message.updatingTimerDone());
 	}
 }

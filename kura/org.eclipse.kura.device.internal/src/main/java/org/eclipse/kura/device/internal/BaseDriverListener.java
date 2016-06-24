@@ -24,6 +24,8 @@ import org.eclipse.kura.device.DriverEvent;
 import org.eclipse.kura.device.DriverFlag;
 import org.eclipse.kura.device.DriverListener;
 import org.eclipse.kura.device.DriverRecord;
+import org.eclipse.kura.localization.DeviceMessages;
+import org.eclipse.kura.localization.LocalizationAdapter;
 
 /**
  * This is a basic driver listener used to listen for driver events so that it
@@ -35,6 +37,9 @@ import org.eclipse.kura.device.DriverRecord;
  * @see DriverEvent
  */
 public final class BaseDriverListener implements DriverListener {
+
+	/** Localization Resource */
+	private static final DeviceMessages s_message = LocalizationAdapter.adapt(DeviceMessages.class);
 
 	/** The channel name. */
 	private final String m_channelName;
@@ -63,7 +68,7 @@ public final class BaseDriverListener implements DriverListener {
 	/** {@inheritDoc} */
 	@Override
 	public void onDriverEvent(final DriverEvent event) {
-		checkNull(event, "Driver Event cannot be null");
+		checkNull(event, s_message.driverEventNonNull());
 		final DriverRecord driverRecord = event.getDriverRecord();
 		final DeviceRecord deviceRecord = Devices.newDeviceRecord(this.m_channelName);
 		final DriverFlag driverFlag = driverRecord.getDriverFlag();

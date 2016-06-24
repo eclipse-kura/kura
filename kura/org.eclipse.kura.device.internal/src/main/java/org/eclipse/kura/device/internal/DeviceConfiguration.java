@@ -21,6 +21,8 @@ import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.device.Channel;
 import org.eclipse.kura.device.ChannelType;
 import org.eclipse.kura.device.Devices;
+import org.eclipse.kura.localization.DeviceMessages;
+import org.eclipse.kura.localization.LocalizationAdapter;
 import org.eclipse.kura.type.DataType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -104,6 +106,9 @@ public final class DeviceConfiguration {
 	/** The Logger instance. */
 	private static final Logger s_logger = LoggerFactory.getLogger(DeviceConfiguration.class);
 
+	/** Localization Resource */
+	private static final DeviceMessages s_message = LocalizationAdapter.adapt(DeviceMessages.class);
+
 	/** The list of channels associated with this device. */
 	private final Map<String, Channel> m_channels = Maps.newConcurrentMap();
 
@@ -122,10 +127,10 @@ public final class DeviceConfiguration {
 	 * @param properties
 	 *            the configured properties
 	 * @throws KuraRuntimeException
-	 *             if the argument is null
+	 *             if any of the arguments is null
 	 */
 	private DeviceConfiguration(final Map<String, Object> properties) {
-		checkNull(properties, "Properties cannot be null");
+		checkNull(properties, s_message.propertiesNonNull());
 		this.extractProperties(properties);
 	}
 
@@ -192,8 +197,7 @@ public final class DeviceConfiguration {
 					this.m_deviceDescription = (String) properties.get(DEVICE_DESC_PROP);
 				}
 			} catch (final Exception ex) {
-				s_logger.error("Error while retrieving channels from the provided configurable properties..."
-						+ Throwables.getStackTraceAsString(ex));
+				s_logger.error(s_message.errorRetrievingChannels() + Throwables.getStackTraceAsString(ex));
 			}
 		}
 	}
@@ -247,8 +251,8 @@ public final class DeviceConfiguration {
 	 */
 	@SuppressWarnings("unchecked")
 	private Channel retrieveChannel(final Map<String, Object> properties) {
-		checkNull(properties, "Properties cannot be null");
-		s_logger.debug("Retrieving single channel information from the properties...");
+		checkNull(properties, s_message.propertiesNonNull());
+		s_logger.debug(s_message.retrievingChannel());
 
 		String channelName = null;
 		ChannelType channelType = null;
@@ -312,16 +316,16 @@ public final class DeviceConfiguration {
 				}
 			}
 		}
-		s_logger.debug("Retrieving single channel information from the properties...Done");
+		s_logger.debug(s_message.retrievingChannelDone());
 		return Devices.newChannel(channelName, channelType, dataType, channelConfig);
 	}
 
 	/** {@inheritDoc} */
 	@Override
 	public String toString() {
-		return MoreObjects.toStringHelper(this).add("device_name", this.m_deviceName)
-				.add("device_description", this.m_deviceDescription).add("driver_name", this.m_driverId)
-				.add("associated_channels", this.m_channels).toString();
+		return MoreObjects.toStringHelper(this).add(s_message.name(), this.m_deviceName)
+				.add(s_message.description(), this.m_deviceDescription).add(s_message.driverName(), this.m_driverId)
+				.add(s_message.channels(), this.m_channels).toString();
 	}
 	
 	/**

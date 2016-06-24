@@ -1,0 +1,12 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Kura Localization
+Bundle-SymbolicName: org.eclipse.kura.localization;singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Bundle-Vendor: EUROTECH
+Bundle-License: Eclipse Public License v1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Export-Package: org.eclipse.kura.localization;version="1.0.0"
+Bundle-ActivationPolicy: lazy
+Bundle-ClassPath: lib/c10n-core-1.2.jar,
+ .

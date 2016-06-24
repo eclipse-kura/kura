@@ -29,6 +29,8 @@ import org.eclipse.kura.device.DeviceRecord;
 import org.eclipse.kura.device.Devices;
 import org.eclipse.kura.device.internal.BaseDevice;
 import org.eclipse.kura.device.internal.DeviceConfiguration;
+import org.eclipse.kura.localization.DeviceCloudletMessages;
+import org.eclipse.kura.localization.LocalizationAdapter;
 import org.eclipse.kura.message.KuraRequestPayload;
 import org.eclipse.kura.message.KuraResponsePayload;
 import org.eclipse.kura.type.TypedValue;
@@ -89,6 +91,9 @@ public final class DeviceCloudlet extends Cloudlet {
 	/** The Logger instance. */
 	private static final Logger s_logger = LoggerFactory.getLogger(DeviceCloudlet.class);
 
+	/** Localization Resource */
+	private static final DeviceCloudletMessages s_messages = LocalizationAdapter.adapt(DeviceCloudletMessages.class);
+
 	/** The map of devices present in the OSGi service registry. */
 	private Map<String, Device> m_devices;
 
@@ -105,7 +110,7 @@ public final class DeviceCloudlet extends Cloudlet {
 	/** {@inheritDoc} */
 	@Override
 	protected synchronized void activate(final ComponentContext componentContext) {
-		s_logger.debug("Activating Device Cloudlet...");
+		s_logger.debug(s_messages.activating());
 		super.activate(componentContext);
 		try {
 			this.m_deviceTracker = new DeviceTracker(componentContext.getBundleContext());
@@ -113,7 +118,7 @@ public final class DeviceCloudlet extends Cloudlet {
 		} catch (final InvalidSyntaxException e) {
 			Throwables.propagate(e);
 		}
-		s_logger.debug("Activating Device Cloudlet...Done");
+		s_logger.debug(s_messages.activatingDone());
 	}
 
 	/**
@@ -131,17 +136,17 @@ public final class DeviceCloudlet extends Cloudlet {
 	/** {@inheritDoc} */
 	@Override
 	protected synchronized void deactivate(final ComponentContext componentContext) {
-		s_logger.debug("Deactivating Device Cloudlet...");
+		s_logger.debug(s_messages.deactivating());
 		super.deactivate(componentContext);
 		super.setCloudService(null);
-		s_logger.debug("Deactivating Device Cloudlet...Done");
+		s_logger.debug(s_messages.deactivatingDone());
 	}
 
 	/** {@inheritDoc} */
 	@Override
 	protected void doGet(final CloudletTopic reqTopic, final KuraRequestPayload reqPayload,
 			final KuraResponsePayload respPayload) throws KuraException {
-		s_logger.info("Cloudlet GET Request received on the Device Cloudlet");
+		s_logger.info(s_messages.cloudGETReqReceiving());
 		if ("devices".equals(reqTopic.getResources()[0])) {
 			// perform a search operation at the beginning
 			this.findDevices();
@@ -178,14 +183,14 @@ public final class DeviceCloudlet extends Cloudlet {
 				}
 			}
 		}
-		s_logger.info("Cloudlet GET Request received on the Device Cloudlet");
+		s_logger.info(s_messages.cloudGETReqReceived());
 	}
 
 	/** {@inheritDoc} */
 	@Override
 	protected void doPut(final CloudletTopic reqTopic, final KuraRequestPayload reqPayload,
 			final KuraResponsePayload respPayload) throws KuraException {
-		s_logger.info("Cloudlet EXEC Request received on the Device Cloudlet....");
+		s_logger.info(s_messages.cloudPUTReqReceiving());
 		// Checks if the name of the device and the name of the channel are
 		// provided
 		if ("devices".equals(reqTopic.getResources()[0]) && (reqTopic.getResources().length > 2)) {
@@ -205,7 +210,7 @@ public final class DeviceCloudlet extends Cloudlet {
 				this.prepareResponse(respPayload, deviceRecords);
 			}
 		}
-		s_logger.info("Cloudlet GET Request received on the Device Cloudlet....Done");
+		s_logger.info(s_messages.cloudPUTReqReceived());
 	}
 
 	/**
@@ -226,14 +231,14 @@ public final class DeviceCloudlet extends Cloudlet {
 	 *             if any of the arguments is null
 	 */
 	private void prepareResponse(final KuraResponsePayload respPayload, final List<DeviceRecord> deviceRecords) {
-		checkNull(respPayload, "Response Payload cannot be null");
-		checkNull(deviceRecords, "List of device records cannot be null");
+		checkNull(respPayload, s_messages.respPayloadNonNull());
+		checkNull(deviceRecords, s_messages.deviceRecordsNonNull());
 
 		for (final DeviceRecord deviceRecord : deviceRecords) {
-			respPayload.addMetric("flag", deviceRecord.getDeviceFlag());
-			respPayload.addMetric("timestamp", deviceRecord.getTimestamp());
-			respPayload.addMetric("value", deviceRecord.getValue());
-			respPayload.addMetric("channel_name", deviceRecord.getChannelName());
+			respPayload.addMetric(s_messages.flag(), deviceRecord.getDeviceFlag());
+			respPayload.addMetric(s_messages.timestamp(), deviceRecord.getTimestamp());
+			respPayload.addMetric(s_messages.value(), deviceRecord.getValue());
+			respPayload.addMetric(s_messages.channel(), deviceRecord.getChannelName());
 		}
 	}
 
@@ -263,9 +268,9 @@ public final class DeviceCloudlet extends Cloudlet {
 	 *             if any of the provided arguments is null
 	 */
 	private void wrapValue(final DeviceRecord deviceRecord, final String userValue, final String userType) {
-		checkNull(deviceRecord, "Device Record cannot be null");
-		checkNull(userValue, "User Provided Value cannot be null");
-		checkNull(userType, "User Provided Type cannot be null");
+		checkNull(deviceRecord, s_messages.deviceRecordNonNull());
+		checkNull(userValue, s_messages.valueNonNull());
+		checkNull(userType, s_messages.typeNonNull());
 
 		TypedValue<?> value = null;
 		if ("INTEGER".equalsIgnoreCase(userType)) {

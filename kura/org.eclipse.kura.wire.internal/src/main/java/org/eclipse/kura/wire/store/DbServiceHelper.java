@@ -23,6 +23,8 @@ import java.util.Arrays;
 
 import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.db.DbService;
+import org.eclipse.kura.localization.LocalizationAdapter;
+import org.eclipse.kura.localization.WireMessages;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,17 +38,17 @@ import com.google.common.escape.Escapers;
  */
 final class DbServiceHelper {
 
-	/**
-	 * SQL Escaper Builder to escape characters to sanitize SQL table and column
-	 * names.
-	 */
+	/** Escaper Builder to sanitize SQL table and column names. */
 	private static Escapers.Builder s_builder = Escapers.builder();
 
 	/** The Logger instance. */
 	private static final Logger s_logger = LoggerFactory.getLogger(DbServiceHelper.class);
 
+	/** Localization Resource */
+	private static final WireMessages s_message = LocalizationAdapter.adapt(WireMessages.class);
+
 	/** The dependent DB service instance. */
-	private DbService m_dbService;
+	private final DbService m_dbService;
 
 	/**
 	 * Instantiates a new DB Service Helper.
@@ -57,7 +59,7 @@ final class DbServiceHelper {
 	 *             if argument is null
 	 */
 	private DbServiceHelper(final DbService dbService) {
-		checkNull(dbService, "Db Service cannot be null");
+		checkNull(dbService, s_message.dbServiceNonNull());
 		this.m_dbService = dbService;
 	}
 
@@ -70,10 +72,10 @@ final class DbServiceHelper {
 	 *             if argument is null
 	 */
 	void close(final Connection conn) {
-		checkNull(conn, "Connection instance cannnot be null");
-		s_logger.debug("Closing connection instance..." + conn);
+		checkNull(conn, s_message.connectionNonNull());
+		s_logger.debug(s_message.closingConnection() + conn);
 		this.m_dbService.close(conn);
-		s_logger.debug("Closed connection instance...Done");
+		s_logger.debug(s_message.closingConnectionDone());
 	}
 
 	/**
@@ -83,9 +85,9 @@ final class DbServiceHelper {
 	 *            the result sets
 	 */
 	void close(final ResultSet... rss) {
-		s_logger.debug("Closing all result sets..." + Arrays.toString(rss));
+		s_logger.debug(s_message.closingResultSet() + Arrays.toString(rss));
 		this.m_dbService.close(rss);
-		s_logger.debug("Closing all result sets...Done");
+		s_logger.debug(s_message.closingResultSetDone());
 	}
 
 	/**
@@ -95,9 +97,9 @@ final class DbServiceHelper {
 	 *            the SQL statements
 	 */
 	void close(final Statement... stmts) {
-		s_logger.debug("Closing all statements..." + Arrays.toString(stmts));
+		s_logger.debug(s_message.closingStatement() + Arrays.toString(stmts));
 		this.m_dbService.close(stmts);
-		s_logger.debug("Closing all statements...Done");
+		s_logger.debug(s_message.closingStatementDone());
 	}
 
 	/**
@@ -106,15 +108,15 @@ final class DbServiceHelper {
 	 * @param sql
 	 *            the SQL query to execute
 	 * @param params
-	 *            the params extra parameters needed for the query
+	 *            the extra parameters needed for the query
 	 * @throws SQLException
 	 *             the SQL exception
 	 * @throws KuraRuntimeException
 	 *             if SQL query argument is null
 	 */
 	synchronized void execute(final String sql, final Integer... params) throws SQLException {
-		checkNull(sql, "SQL query cannot be null");
-		s_logger.debug("Executing SQL query..." + sql);
+		checkNull(sql, s_message.sqlQueryNonNull());
+		s_logger.debug(s_message.execSql() + sql);
 		Connection conn = null;
 		PreparedStatement stmt = null;
 		try {
@@ -132,7 +134,7 @@ final class DbServiceHelper {
 			this.close(stmt);
 			this.close(conn);
 		}
-		s_logger.debug("Executing SQL query...Done");
+		s_logger.debug(s_message.execSqlDone());
 	}
 
 	/**
@@ -155,10 +157,10 @@ final class DbServiceHelper {
 	 *             if argument is null
 	 */
 	void rollback(final Connection conn) {
-		checkNull(conn, "Connection instance cannnot be null");
-		s_logger.debug("Rolling back the connection instance..." + conn);
+		checkNull(conn, s_message.connectionNonNull());
+		s_logger.debug(s_message.rollback() + conn);
 		this.m_dbService.rollback(conn);
-		s_logger.debug("Rolling back the connection instance...Done");
+		s_logger.debug(s_message.rollbackDone());
 	}
 
 	/**
@@ -177,8 +179,8 @@ final class DbServiceHelper {
 	 *             if argument is null
 	 */
 	String sanitizeSqlTableAndColumnName(final String string) {
-		checkNull(string, "Provided string cannot be null");
-		s_logger.debug("Sanitizing the provided string..." + string);
+		checkNull(string, s_message.stringNonNull());
+		s_logger.debug(s_message.sanitize() + string);
 		final Escaper escaper = s_builder.addEscape('\'', "_").addEscape('"', "_").addEscape('\\', "")
 				.addEscape('.', "_").addEscape(' ', "_").build();
 		return escaper.escape(string).toLowerCase();

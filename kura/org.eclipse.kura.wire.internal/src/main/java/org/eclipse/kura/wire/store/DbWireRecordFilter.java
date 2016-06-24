@@ -20,6 +20,7 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +32,8 @@ import java.util.concurrent.TimeUnit;
 
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.db.DbService;
+import org.eclipse.kura.localization.LocalizationAdapter;
+import org.eclipse.kura.localization.WireMessages;
 import org.eclipse.kura.type.DataType;
 import org.eclipse.kura.type.TypedValues;
 import org.eclipse.kura.wire.WireEmitter;
@@ -61,6 +64,9 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Wire
 
 	/** The Logger instance. */
 	private static final Logger s_logger = LoggerFactory.getLogger(DbWireRecordFilter.class);
+
+	/** Localization Resource */
+	private static final WireMessages s_message = LocalizationAdapter.adapt(WireMessages.class);
 
 	/** Cache container to store values of SQL view wire records */
 	private final LoadingCache<Long, List<WireRecord>> m_cache;
@@ -114,12 +120,12 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Wire
 	 */
 	protected synchronized void activate(final ComponentContext componentContext,
 			final Map<String, Object> properties) {
-		s_logger.info("Activating DB Wire Record Filter...");
+		s_logger.info(s_message.activatingFilter());
 		this.m_ctx = componentContext;
 		this.m_options = new DbWireRecordFilterOptions(properties);
 		this.m_dbHelper = DbServiceHelper.getInstance(this.m_dbService);
 		this.scheduleRefresh();
-		s_logger.info("Activating DB Wire Record Filter...Done");
+		s_logger.info(s_message.activatingFilterDone());
 	}
 
 	/** {@inheritDoc} */
@@ -135,7 +141,7 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Wire
 	 *            the component context
 	 */
 	protected synchronized void deactivate(final ComponentContext componentContext) {
-		s_logger.info("Dectivating DB Wire Record Filter...");
+		s_logger.info(s_message.deactivatingFilter());
 		// no need to release the cloud clients as the updated app
 		// certificate is already published due the missing dependency
 		// we only need to empty our CloudClient list
@@ -144,17 +150,17 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Wire
 			this.m_tickHandle.cancel(true);
 		}
 		this.m_executorService.shutdown();
-		s_logger.info("Activating DB Wire Record Filter...Done");
+		s_logger.info(s_message.deactivatingFilterDone());
 	}
 
 	/** {@inheritDoc} */
 	@Override
 	public synchronized List<WireRecord> filter() {
-		s_logger.debug("Wire record filtering started...");
+		s_logger.debug(s_message.filteringStarted());
 		try {
 			return this.refreshSQLView();
 		} catch (final SQLException e) {
-			s_logger.error("Error while filtering wire records.." + Throwables.getStackTraceAsString(e));
+			s_logger.error(s_message.errorFiltering() + Throwables.getStackTraceAsString(e));
 		}
 		return ImmutableList.of();
 	}
@@ -177,8 +183,8 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Wire
 	 */
 	@Override
 	public synchronized void onWireReceive(final WireEnvelope wireEnvelope) {
-		checkNull(wireEnvelope, "Wire envelope cannot be null");
-		s_logger.debug("Wire Enveloped received..." + wireEnvelope);
+		checkNull(wireEnvelope, s_message.wireEnvelopeNonNull());
+		s_logger.debug(s_message.wireEnvelopeReceived() + wireEnvelope);
 		try {
 			final long currrentTime = System.currentTimeMillis();
 			final long differenceInSec = (currrentTime - this.m_cacheLastUpdated) / 1000;
@@ -190,7 +196,7 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Wire
 			}
 			this.m_wireSupport.emit(recordsToEmit);
 		} catch (final ExecutionException e) {
-			s_logger.error("Error in emitting wire records..." + Throwables.getStackTraceAsString(e));
+			s_logger.error(s_message.errorEmitting() + Throwables.getStackTraceAsString(e));
 		}
 	}
 
@@ -235,43 +241,45 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Wire
 						switch (dataType) {
 						case BOOLEAN:
 							final boolean boolValue = rset.getBoolean(i);
-							s_logger.info("Refreshing boolean value {}", boolValue);
+							s_logger.info(s_message.refreshBoolean(boolValue));
 							dataField = Wires.newWireField(fieldName, TypedValues.newBooleanValue(boolValue));
 							break;
 						case BYTE:
 							final byte byteValue = rset.getByte(i);
-							s_logger.info("Refreshing byte value {}", byteValue);
+							s_logger.info(s_message.refreshByte(byteValue));
 							dataField = Wires.newWireField(fieldName, TypedValues.newByteValue(byteValue));
 							break;
 						case DOUBLE:
 							final double doubleValue = rset.getDouble(i);
-							s_logger.info("Refreshing double value {}", doubleValue);
+							s_logger.info(s_message.refreshDouble(doubleValue));
 							dataField = Wires.newWireField(fieldName, TypedValues.newDoubleValue(doubleValue));
 							break;
 						case INTEGER:
 							final int intValue = rset.getInt(i);
-							s_logger.info("Refreshing integer value {}", intValue);
+							s_logger.info(s_message.refreshInteger(intValue));
 							dataField = Wires.newWireField(fieldName, TypedValues.newIntegerValue(intValue));
 							break;
 						case LONG:
 							final long longValue = rset.getLong(i);
-							s_logger.info("Refreshing long value {}", longValue);
+							s_logger.info(s_message.refreshLong(longValue));
 							dataField = Wires.newWireField(fieldName, TypedValues.newLongValue(longValue));
 							break;
 						case BYTE_ARRAY:
 							final byte[] bytesValue = rset.getBytes(i);
-							s_logger.info("Refreshing byte array value {}", bytesValue);
+							s_logger.info(s_message.refreshByteArray(Arrays.toString(bytesValue)));
 							dataField = Wires.newWireField(fieldName, TypedValues.newByteArrayValue(bytesValue));
 							break;
 						case SHORT:
 							final short shortValue = rset.getShort(i);
-							s_logger.info("Refreshing short value {}", shortValue);
+							s_logger.info(s_message.refreshShort(shortValue));
 							dataField = Wires.newWireField(fieldName, TypedValues.newShortValue(shortValue));
 							break;
 						case STRING:
 							final String stringValue = rset.getString(i);
-							s_logger.info("Refreshing string value {}", stringValue);
+							s_logger.info(s_message.refreshString(stringValue));
 							dataField = Wires.newWireField(fieldName, TypedValues.newStringValue(stringValue));
+							break;
+						default:
 							break;
 						}
 						dataFields.add(dataField);
@@ -279,7 +287,7 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Wire
 					dataRecords.add(Wires.newWireRecord(new Timestamp(now.getTime()), dataFields));
 				}
 			}
-			s_logger.info("Refreshed typed values");
+			s_logger.info(s_message.refreshed());
 		} catch (final Exception e) {
 			Throwables.propagateIfInstanceOf(e, SQLException.class);
 			s_logger.error(Throwables.getStackTraceAsString(e));
@@ -304,9 +312,8 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Wire
 			/** {@inheritDoc} */
 			@Override
 			public void run() {
-				DbWireRecordFilter.this.m_cacheLastUpdated = System.currentTimeMillis();
-				DbWireRecordFilter.this.m_cache.put(DbWireRecordFilter.this.m_cacheLastUpdated,
-						DbWireRecordFilter.this.filter());
+				m_cacheLastUpdated = System.currentTimeMillis();
+				m_cache.put(m_cacheLastUpdated, filter());
 			}
 		}, this.m_options.getRefreshRate(), TimeUnit.SECONDS);
 	}
@@ -342,10 +349,10 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Wire
 	 *            the updated properties
 	 */
 	public synchronized void updated(final Map<String, Object> properties) {
-		s_logger.info("Updating DBWireRecordFilter..." + properties);
+		s_logger.info(s_message.updatingFilter() + properties);
 		this.m_options = new DbWireRecordFilterOptions(properties);
 		this.scheduleRefresh();
-		s_logger.info("Updating DBWireRecordFilter...Done ");
+		s_logger.info(s_message.updatingFilterDone());
 	}
 
 	/** {@inheritDoc} */

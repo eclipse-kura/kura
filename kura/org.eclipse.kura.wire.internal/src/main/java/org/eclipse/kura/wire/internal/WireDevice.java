@@ -81,9 +81,9 @@ public final class WireDevice extends BaseDevice implements WireEmitter, WireRec
 	@Override
 	protected synchronized void activate(final ComponentContext componentContext,
 			final Map<String, Object> properties) {
-		s_logger.debug("Activating Wire Device...");
+		s_logger.debug(s_message.activatingWireDevice());
 		super.activate(componentContext, properties);
-		s_logger.debug("Activating Wire Device...Done");
+		s_logger.debug(s_message.activatingWireDeviceDone());
 	}
 
 	/** {@inheritDoc} */
@@ -97,9 +97,9 @@ public final class WireDevice extends BaseDevice implements WireEmitter, WireRec
 	 */
 	@Override
 	protected synchronized void deactivate(final ComponentContext context) {
-		s_logger.debug("Deactivating Wire Device...");
+		s_logger.debug(s_message.deactivatingWireDevice());
 		super.deactivate(context);
-		s_logger.debug("Deactivating Wire Device...Done");
+		s_logger.debug(s_message.deactivatingWireDeviceDone());
 	}
 
 	/**
@@ -112,18 +112,18 @@ public final class WireDevice extends BaseDevice implements WireEmitter, WireRec
 	 *             if provided records list is null or it is empty
 	 */
 	private void emitDeviceRecords(final List<DeviceRecord> deviceRecords) {
-		checkNull(deviceRecords, "Device records cannot be null");
-		checkCondition(deviceRecords.isEmpty(), "Device records cannot be empty");
+		checkNull(deviceRecords, s_message.deviceRecordsNonNull());
+		checkCondition(deviceRecords.isEmpty(), s_message.deviceRecordsNonEmpty());
 
 		final List<WireRecord> wireRecords = Lists.newArrayList();
 		for (final DeviceRecord deviceRecord : deviceRecords) {
-			final WireField channelWireField = Wires.newWireField("Channel_Name",
+			final WireField channelWireField = Wires.newWireField(s_message.channelName(),
 					TypedValues.newStringValue(deviceRecord.getChannelName()));
-			final WireField deviceFlagWireField = Wires.newWireField("Device_Flag",
+			final WireField deviceFlagWireField = Wires.newWireField(s_message.deviceFlag(),
 					TypedValues.newStringValue(deviceRecord.getDeviceFlag().name()));
-			final WireField timestampWireField = Wires.newWireField("Timestamp",
+			final WireField timestampWireField = Wires.newWireField(s_message.timestamp(),
 					TypedValues.newLongValue(deviceRecord.getTimestamp()));
-			final WireField valueWireField = Wires.newWireField("Value", deviceRecord.getValue());
+			final WireField valueWireField = Wires.newWireField(s_message.value(), deviceRecord.getValue());
 			final WireRecord wireRecord = Wires.newWireRecord(new Timestamp(new Date().getTime()),
 					Lists.newArrayList(channelWireField, deviceFlagWireField, timestampWireField, valueWireField));
 			wireRecords.add(wireRecord);
@@ -156,8 +156,8 @@ public final class WireDevice extends BaseDevice implements WireEmitter, WireRec
 	 */
 	@Override
 	public void onWireReceive(final WireEnvelope wireEnvelope) {
-		checkNull(wireEnvelope, "Wire Envelope cannot be null");
-		s_logger.debug("Wire Enveloped received..." + this.m_wireSupport);
+		checkNull(wireEnvelope, s_message.wireEnvelopeNonNull());
+		s_logger.debug(s_message.wireEnvelopeReceived() + this.m_wireSupport);
 
 		final List<DeviceRecord> deviceRecordsToWriteChannels = Lists.newArrayList();
 		final List<String> channelsToRead = Lists.newArrayList();
@@ -169,15 +169,14 @@ public final class WireDevice extends BaseDevice implements WireEmitter, WireRec
 				channelsToRead.add(channel.getName());
 			}
 		}
-		checkCondition(wireEnvelope.getRecords().isEmpty(), "Wire records cannot be empty");
+		checkCondition(wireEnvelope.getRecords().isEmpty(), s_message.wireRecordsNonEmpty());
 		if (wireEnvelope.getRecords().get(0).getFields().get(0).getName().equals(Timer.TIMER_EVENT_FIELD_NAME)) {
 			// perform the read operation on timer event receive
 			try {
 				final List<DeviceRecord> recentlyReadRecords = this.read(channelsToRead);
 				this.emitDeviceRecords(recentlyReadRecords);
 			} catch (final KuraException e) {
-				s_logger.error(
-						"Error while performing read from the wire device..." + Throwables.getStackTraceAsString(e));
+				s_logger.error(s_message.errorPerformingRead() + Throwables.getStackTraceAsString(e));
 			}
 		}
 		// determining channels to write
@@ -195,8 +194,7 @@ public final class WireDevice extends BaseDevice implements WireEmitter, WireRec
 		try {
 			this.write(deviceRecordsToWriteChannels);
 		} catch (final KuraException e) {
-			s_logger.error(
-					"Error while performing write from the wire device..." + Throwables.getStackTraceAsString(e));
+			s_logger.error(s_message.errorPerformingWrite() + Throwables.getStackTraceAsString(e));
 		}
 	}
 
@@ -216,8 +214,8 @@ public final class WireDevice extends BaseDevice implements WireEmitter, WireRec
 	 *             if any of the provided arguments is null
 	 */
 	private DeviceRecord prepareDeviceRecord(final Channel channel, final TypedValue<?> value) {
-		checkNull(channel, "Channel cannot be null");
-		checkNull(value, "Value cannot be null");
+		checkNull(channel, s_message.channelNonNull());
+		checkNull(value, s_message.valueNonNull());
 
 		final DeviceRecord deviceRecord = Devices.newDeviceRecord(channel.getName());
 		deviceRecord.setValue(value);
@@ -233,9 +231,9 @@ public final class WireDevice extends BaseDevice implements WireEmitter, WireRec
 	/** {@inheritDoc} */
 	@Override
 	protected synchronized void updated(final Map<String, Object> properties) {
-		s_logger.debug("Updating Wire Device...");
+		s_logger.debug(s_message.updatingWireDevice());
 		super.updated(properties);
-		s_logger.debug("Updating Wire Device...Done");
+		s_logger.debug(s_message.updatingWireDeviceDone());
 	}
 
 	/** {@inheritDoc} */

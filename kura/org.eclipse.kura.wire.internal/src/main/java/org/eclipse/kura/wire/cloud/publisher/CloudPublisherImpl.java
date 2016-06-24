@@ -24,6 +24,8 @@ import org.eclipse.kura.cloud.CloudService;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.data.DataService;
 import org.eclipse.kura.data.listener.DataServiceListener;
+import org.eclipse.kura.localization.LocalizationAdapter;
+import org.eclipse.kura.localization.WireMessages;
 import org.eclipse.kura.message.KuraPayload;
 import org.eclipse.kura.message.KuraPosition;
 import org.eclipse.kura.wire.CloudPublisher;
@@ -58,6 +60,9 @@ public final class CloudPublisherImpl
 
 	/** The Logger instance. */
 	private static final Logger s_logger = LoggerFactory.getLogger(CloudPublisherImpl.class);
+
+	/** Localization Resource */
+	private static final WireMessages s_message = LocalizationAdapter.adapt(WireMessages.class);
 
 	/** The cloud client. */
 	private CloudClient m_cloudClient;
@@ -94,11 +99,10 @@ public final class CloudPublisherImpl
 	 */
 	protected synchronized void activate(final ComponentContext componentContext,
 			final Map<String, Object> properties) {
-		s_logger.info("Activating Cloud Publisher Wire Component...");
+		s_logger.info(s_message.activatingCloudPublisher());
 		this.m_wireSupport = Wires.newWireSupport(this);
 		// Update properties
 		this.m_options = new CloudPublisherOptions(properties);
-
 		// create the singleton disconnect manager
 		if (s_disconnectManager == null) {
 			s_disconnectManager = new CloudPublisherDisconnectManager(this.m_dataService,
@@ -108,9 +112,9 @@ public final class CloudPublisherImpl
 		try {
 			this.setupCloudClient();
 		} catch (final KuraException e) {
-			s_logger.error("Cannot setup CloudClient.." + Throwables.getStackTraceAsString(e));
+			s_logger.error(s_message.cloudClientSetupProblem() + Throwables.getStackTraceAsString(e));
 		}
-		s_logger.info("Activating Cloud Publisher Wire Component...Done");
+		s_logger.info(s_message.activatingCloudPublisherDone());
 	}
 
 	/**
@@ -118,18 +122,18 @@ public final class CloudPublisherImpl
 	 *
 	 * @param wireRecord
 	 *            the wire record
-	 * @return the json instance
+	 * @return the JSON instance
 	 * @throws KuraRuntimeException
 	 *             if the wire record provided is null
 	 */
 	private JSONObject buildJsonObject(final WireRecord wireRecord) throws JSONException {
-		checkNull(wireRecord, "Wire Record cannot be null");
+		checkNull(wireRecord, s_message.wireRecordNonNull());
 		final JSONObject jsonObject = new JSONObject();
 		if (wireRecord.getTimestamp() != null) {
-			jsonObject.put("timestamp", wireRecord.getTimestamp());
+			jsonObject.put(s_message.timestamp(), wireRecord.getTimestamp());
 		}
 		if (wireRecord.getPosition() != null) {
-			jsonObject.put("position", this.buildKuraPositionForJson(wireRecord.getPosition()));
+			jsonObject.put(s_message.position(), this.buildKuraPositionForJson(wireRecord.getPosition()));
 		}
 		for (final WireField dataField : wireRecord.getFields()) {
 			final Object wrappedValue = dataField.getValue().getValue();
@@ -148,7 +152,7 @@ public final class CloudPublisherImpl
 	 *             if the wire record provided is null
 	 */
 	private KuraPayload buildKuraPayload(final WireRecord wireRecord) {
-		checkNull(wireRecord, "Wire Record cannot be null");
+		checkNull(wireRecord, s_message.wireRecordNonNull());
 		final KuraPayload kuraPayload = new KuraPayload();
 
 		if (wireRecord.getTimestamp() != null) {
@@ -174,7 +178,7 @@ public final class CloudPublisherImpl
 	 *             if the position provided is null
 	 */
 	private KuraPosition buildKuraPosition(final Position position) {
-		checkNull(position, "Position cannot be null");
+		checkNull(position, s_message.positionNonNull());
 		final KuraPosition kuraPosition = new KuraPosition();
 		if (position.getLatitude() != null) {
 			kuraPosition.setLatitude(position.getLatitude().getValue());
@@ -206,22 +210,22 @@ public final class CloudPublisherImpl
 	 *             if position provided is null
 	 */
 	private JSONObject buildKuraPositionForJson(final Position position) throws JSONException {
-		checkNull(position, "Position cannot be null");
+		checkNull(position, s_message.positionNonNull());
 		final JSONObject jsonObject = new JSONObject();
 		if (position.getLatitude() != null) {
-			jsonObject.put("latitude", position.getLatitude().getValue());
+			jsonObject.put(s_message.latitude(), position.getLatitude().getValue());
 		}
 		if (position.getLongitude() != null) {
-			jsonObject.put("longitude", position.getLongitude().getValue());
+			jsonObject.put(s_message.longitude(), position.getLongitude().getValue());
 		}
 		if (position.getAltitude() != null) {
-			jsonObject.put("altitude", position.getAltitude().getValue());
+			jsonObject.put(s_message.altitude(), position.getAltitude().getValue());
 		}
 		if (position.getSpeed() != null) {
-			jsonObject.put("speed", position.getSpeed().getValue());
+			jsonObject.put(s_message.speed(), position.getSpeed().getValue());
 		}
 		if (position.getTrack() != null) {
-			jsonObject.put("heading", position.getTrack().getValue());
+			jsonObject.put(s_message.heading(), position.getTrack().getValue());
 		}
 		return jsonObject;
 	}
@@ -243,7 +247,7 @@ public final class CloudPublisherImpl
 	 *            the component context
 	 */
 	protected synchronized void deactivate(final ComponentContext componentContext) {
-		s_logger.info("Deactivating Cloud Publisher Wire Component...");
+		s_logger.info(s_message.deactivatingCloudPublisher());
 		// close the client
 		this.closeCloudClient();
 		// close the disconnect manager
@@ -261,7 +265,7 @@ public final class CloudPublisherImpl
 		// we only need to empty our CloudClient list
 		this.m_dataService = null;
 		this.m_cloudService = null;
-		s_logger.info("Deactivating Cloud Publisher Wire Component...Done");
+		s_logger.info(s_message.deactivatingCloudPublisherDone());
 	}
 
 	/** {@inheritDoc} */
@@ -317,8 +321,8 @@ public final class CloudPublisherImpl
 	/** {@inheritDoc} */
 	@Override
 	public void onWireReceive(final WireEnvelope wireEnvelope) {
-		checkNull(wireEnvelope, "Wire Envelope cannot be null");
-		s_logger.info("Received WireEnvelope from {}", wireEnvelope.getEmitterName());
+		checkNull(wireEnvelope, s_message.wireEnvelopeNonNull());
+		s_logger.info(s_message.wireRecordReceived(wireEnvelope.getEmitterName()));
 		this.publish(wireEnvelope.getRecords());
 		this.stopPublishing();
 	}
@@ -326,15 +330,15 @@ public final class CloudPublisherImpl
 	/** {@inheritDoc} */
 	@Override
 	public void producersConnected(final Wire[] wires) {
-		checkNull(wires, "Wires cannot be null");
+		checkNull(wires, s_message.wiresNonNull());
 		this.m_wireSupport.producersConnected(wires);
 	}
 
 	/** {@inheritDoc} */
 	@Override
 	public void publish(final List<WireRecord> wireRecords) {
-		checkNull(this.m_cloudClient, "Cloud Client cannot be null");
-		checkNull(wireRecords, "Wire Records cannot be null");
+		checkNull(this.m_cloudClient, s_message.cloudClientNonNull());
+		checkNull(wireRecords, s_message.wireRecordsNonNull());
 
 		if (!AutoConnectMode.AUTOCONNECT_MODE_OFF.equals(this.m_options.getAutoConnectMode())
 				&& !this.m_dataService.isAutoConnectEnabled() && !this.m_dataService.isConnected()) {
@@ -360,8 +364,7 @@ public final class CloudPublisherImpl
 					}
 				}
 			} catch (final Exception e) {
-				s_logger.error("Error in publishing wire records using cloud publisher.."
-						+ Throwables.getStackTraceAsString(e));
+				s_logger.error(s_message.errorPublishingWireRecords() + Throwables.getStackTraceAsString(e));
 			}
 
 		}
@@ -411,7 +414,7 @@ public final class CloudPublisherImpl
 	 *             if cloud client is null
 	 */
 	private void stopPublishing() {
-		checkNull(this.m_cloudClient, "Cloud client cannot be null");
+		checkNull(this.m_cloudClient, s_message.cloudClientNonNull());
 		if (this.m_dataService.isConnected() && !this.m_dataService.isAutoConnectEnabled()) {
 			final AutoConnectMode autoConnMode = this.m_options.getAutoConnectMode();
 			switch (autoConnMode) {
@@ -459,7 +462,7 @@ public final class CloudPublisherImpl
 	 *            the updated properties
 	 */
 	public synchronized void updated(final Map<String, Object> properties) {
-		s_logger.info("Updating Cloud Publisher Wire Component...");
+		s_logger.info(s_message.updatingCloudPublisher());
 		// Update properties
 		this.m_options = new CloudPublisherOptions(properties);
 		// create the singleton disconnect manager
@@ -477,9 +480,9 @@ public final class CloudPublisherImpl
 		try {
 			this.setupCloudClient();
 		} catch (final KuraException e) {
-			s_logger.error("Cannot setup CloudClient..." + Throwables.getStackTraceAsString(e));
+			s_logger.error(s_message.cloudClientSetupProblem() + Throwables.getStackTraceAsString(e));
 		}
-		s_logger.info("Updating Cloud Publisher Wire Component...Done");
+		s_logger.info(s_message.updatingCloudPublisherDone());
 	}
 
 	/** {@inheritDoc} */

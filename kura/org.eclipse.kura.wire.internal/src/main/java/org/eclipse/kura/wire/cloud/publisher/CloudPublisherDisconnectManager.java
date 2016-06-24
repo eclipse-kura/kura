@@ -21,6 +21,8 @@ import java.util.concurrent.TimeUnit;
 
 import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.data.DataService;
+import org.eclipse.kura.localization.LocalizationAdapter;
+import org.eclipse.kura.localization.WireMessages;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,6 +36,9 @@ final class CloudPublisherDisconnectManager {
 
 	/** The Logger instance. */
 	private static final Logger s_logger = LoggerFactory.getLogger(CloudPublisherDisconnectManager.class);
+
+	/** Localization Resource */
+	private static final WireMessages s_message = LocalizationAdapter.adapt(WireMessages.class);
 
 	/** The data service dependency. */
 	private final DataService m_dataService;
@@ -58,7 +63,7 @@ final class CloudPublisherDisconnectManager {
 	 *             if data service dependency is null
 	 */
 	CloudPublisherDisconnectManager(final DataService dataService, final long quiesceTimeout) {
-		checkNull(dataService, "Data Service cannot be null");
+		checkNull(dataService, s_message.dataServiceNonNull());
 		this.m_dataService = dataService;
 		this.m_quiesceTimeout = quiesceTimeout;
 		this.m_nextExecutionTime = 0;
@@ -74,7 +79,7 @@ final class CloudPublisherDisconnectManager {
 	 *             if argument passed is negative
 	 */
 	synchronized void disconnectInMinutes(final int minutes) {
-		checkCondition(minutes < 0, "Minutes cannot be negative");
+		checkCondition(minutes < 0, s_message.minutesNonNegative());
 		// check if the required timeout is longer than the scheduled one
 		final long remainingDelay = this.m_nextExecutionTime - System.currentTimeMillis();
 		final long requiredDelay = (long) minutes * 60 * 1000;
@@ -101,7 +106,7 @@ final class CloudPublisherDisconnectManager {
 	 *             if delay provided is negative
 	 */
 	private void schedule(final long delay) {
-		checkCondition(delay < 0, "Delay cannot be negative");
+		checkCondition(delay < 0, s_message.delayNonNegative());
 		// cancel existing timer
 		if (this.m_executorService != null) {
 			this.m_executorService.shutdown();
@@ -112,8 +117,8 @@ final class CloudPublisherDisconnectManager {
 				try {
 					m_dataService.disconnect(m_quiesceTimeout);
 				} catch (final Exception exception) {
-					s_logger.error("Error while disconnecting cloud publisher..."
-							+ Throwables.getStackTraceAsString(exception));
+					s_logger.error(
+							s_message.errorDisconnectingCloudPublisher() + Throwables.getStackTraceAsString(exception));
 				}
 				// cleaning up
 				m_nextExecutionTime = 0;
@@ -136,10 +141,10 @@ final class CloudPublisherDisconnectManager {
 	 * Stops the scheduler thread pool
 	 */
 	synchronized void stop() {
-		s_logger.info("Scheduler stopping in Cloud Publisher Dosconnect Manager....");
+		s_logger.info(s_message.schedulerStopping());
 		if (this.m_executorService != null) {
 			this.m_executorService.shutdown();
 		}
-		s_logger.info("Scheduler stopping in Cloud Publisher Dosconnect Manager....Done");
+		s_logger.info(s_message.schedulerStopped());
 	}
 }

@@ -16,6 +16,8 @@ import java.util.Collection;
 import java.util.List;
 
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.localization.LocalizationAdapter;
+import org.eclipse.kura.localization.WireMessages;
 import org.eclipse.kura.wire.WireEmitter;
 import org.eclipse.kura.wire.WireReceiver;
 import org.osgi.framework.BundleContext;
@@ -38,6 +40,9 @@ public final class WireSeviceTracker extends ServiceTracker<Object, Object> {
 
 	/** The Logger instance. */
 	private static final Logger s_logger = LoggerFactory.getLogger(WireSeviceTracker.class);
+
+	/** Localization Resource */
+	private static final WireMessages s_message = LocalizationAdapter.adapt(WireMessages.class);
 
 	/** Service PID Constant */
 	private static final String SERVICE_PID = "service.pid";
@@ -72,28 +77,28 @@ public final class WireSeviceTracker extends ServiceTracker<Object, Object> {
 	/** {@inheritDoc} */
 	@Override
 	public Object addingService(final ServiceReference<Object> reference) {
-		s_logger.debug("Adding Wire Components....");
+		s_logger.debug(s_message.addingWireComponent());
 		final Object service = super.addingService(reference);
 		boolean flag = false;
 		final String property = (String) reference.getProperty(SERVICE_PID);
 		if (service instanceof WireEmitter) {
 			this.m_wireEmitters.add(property);
-			s_logger.debug("Registering Wire Emitter..." + property);
+			s_logger.debug(s_message.registeringEmitter() + property);
 			flag = true;
 		}
 		if (service instanceof WireReceiver) {
 			this.m_wireReceivers.add(property);
-			s_logger.debug("Registering Wire Receiver..." + property);
+			s_logger.debug(s_message.registeringReceiver() + property);
 			flag = true;
 		}
 		if (flag) {
 			try {
 				this.m_wireService.createWires();
 			} catch (final KuraException e) {
-				s_logger.error("Error while creating wires..." + Throwables.getStackTraceAsString(e));
+				s_logger.error(s_message.errorCreatingWires() + Throwables.getStackTraceAsString(e));
 			}
 		}
-		s_logger.info("Adding Wire Components....Done");
+		s_logger.info(s_message.addingWireComponentDone());
 		return service;
 	}
 
@@ -118,7 +123,7 @@ public final class WireSeviceTracker extends ServiceTracker<Object, Object> {
 	/** {@inheritDoc} */
 	@Override
 	public void open() {
-		s_logger.debug("Starting to track Wire Components....");
+		s_logger.debug(s_message.trackWireComponents());
 		super.open();
 		try {
 			final Collection<ServiceReference<WireEmitter>> emitterRefs = this.context
@@ -134,7 +139,7 @@ public final class WireSeviceTracker extends ServiceTracker<Object, Object> {
 		} catch (final InvalidSyntaxException e) {
 			Throwables.propagate(e);
 		}
-		s_logger.debug("Starting to track Wire Components....Done");
+		s_logger.debug(s_message.trackWireComponentsDone());
 	}
 
 }

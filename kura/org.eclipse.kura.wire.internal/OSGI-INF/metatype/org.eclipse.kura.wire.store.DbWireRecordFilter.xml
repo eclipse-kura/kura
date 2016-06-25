@@ -32,9 +32,9 @@
         	type="Integer"
         	cardinality="0"
         	required="true"
-        	default="30"
+        	default="0"
         	min="5"
-        	description="Refresh rate, in seconds">
+        	description="Refresh rate, in seconds (0 denotes disabled)">
         </AD>
         
         <AD id="cache.update.interval"

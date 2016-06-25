@@ -12,37 +12,35 @@
  */
 package org.eclipse.kura.device.internal;
 
-import java.util.Collection;
-
 import org.eclipse.kura.device.Device;
 import org.eclipse.kura.device.Driver;
 import org.eclipse.kura.localization.DeviceMessages;
 import org.eclipse.kura.localization.LocalizationAdapter;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.Constants;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
-import org.osgi.util.tracker.ServiceTracker;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.base.Throwables;
 
 /**
  * The Class DriverTracker is responsible for tracking the specific driver as
  * provided. It tracks for the service in the OSGi service registry and it
  * triggers the specific methods as soon as it is injected.
  */
-public final class DriverTracker extends ServiceTracker<Object, Object> {
+final class DriverTrackerCustomizer implements ServiceTrackerCustomizer<Driver, Driver> {
 
 	/** Driver ID Property */
 	private static final String DRIVER_ID_PROPERTY = "instance.name";
 
 	/** The Logger instance. */
-	private static final Logger s_logger = LoggerFactory.getLogger(DriverTracker.class);
+	private static final Logger s_logger = LoggerFactory.getLogger(DriverTrackerCustomizer.class);
 
 	/** Localization Resource */
 	private static final DeviceMessages s_message = LocalizationAdapter.adapt(DeviceMessages.class);
+
+	/** Bundle Context */
+	private final BundleContext m_context;
 
 	/** The Device Instance */
 	private final Device m_device;
@@ -62,48 +60,36 @@ public final class DriverTracker extends ServiceTracker<Object, Object> {
 	 * @throws InvalidSyntaxException
 	 *             the invalid syntax exception
 	 */
-	public DriverTracker(final BundleContext context, final Device device, final String driverId)
+	DriverTrackerCustomizer(final BundleContext context, final Device device, final String driverId)
 			throws InvalidSyntaxException {
-		super(context, context.createFilter("(" + Constants.OBJECTCLASS + "=*)"), null);
 		this.m_driverId = driverId;
 		this.m_device = device;
+		this.m_context = context;
 	}
 
 	/** {@inheritDoc} */
 	@Override
-	public Object addingService(final ServiceReference<Object> reference) {
-		final Object service = super.addingService(reference);
-		if ((service instanceof Driver) && reference.getProperty(DRIVER_ID_PROPERTY).equals(this.m_driverId)) {
+	public Driver addingService(final ServiceReference<Driver> reference) {
+		final Driver driver = this.m_context.getService(reference);
+		if (reference.getProperty(DRIVER_ID_PROPERTY).equals(this.m_driverId)) {
 			s_logger.info(s_message.driverFoundAdding());
-			((BaseDevice) this.m_device).m_driver = (Driver) service;
+			((BaseDevice) this.m_device).m_driver = driver;
 		}
-		return service;
+		return driver;
 	}
 
 	/** {@inheritDoc} */
 	@Override
-	public void open() {
-		super.open();
-		try {
-			final Collection<ServiceReference<Driver>> driverRefs = this.context.getServiceReferences(Driver.class,
-					null);
-			for (final ServiceReference<Driver> reference : driverRefs) {
-				if (reference.getProperty(DRIVER_ID_PROPERTY).equals(this.m_driverId)
-						&& (reference instanceof Driver)) {
-					s_logger.info(s_message.driverFoundOpen());
-					((BaseDevice) this.m_device).m_driver = this.context.getService(reference);
-				}
-			}
-		} catch (final InvalidSyntaxException e) {
-			Throwables.propagate(e);
-		}
+	public void modifiedService(final ServiceReference<Driver> reference, final Driver service) {
+		this.removedService(reference, service);
+		this.addingService(reference);
 	}
 
 	/** {@inheritDoc} */
 	@Override
-	public void removedService(final ServiceReference<Object> reference, final Object service) {
-		super.removedService(reference, service);
-		if ((service instanceof Driver) && reference.getProperty(DRIVER_ID_PROPERTY).equals(this.m_driverId)) {
+	public void removedService(final ServiceReference<Driver> reference, final Driver service) {
+		this.m_context.ungetService(reference);
+		if (reference.getProperty(DRIVER_ID_PROPERTY).equals(this.m_driverId)) {
 			s_logger.info(s_message.driverRemoved() + service);
 			((BaseDevice) this.m_device).m_driver = null;
 		}

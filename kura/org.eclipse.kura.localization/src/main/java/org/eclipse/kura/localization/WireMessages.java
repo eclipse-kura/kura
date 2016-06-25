@@ -165,6 +165,12 @@ public interface WireMessages {
 	@En("Delay cannot be negative")
 	public String delayNonNegative();
 
+	@En("Deregistering Wire Emitter {0}...")
+	public String deregisteringEmitter(String emitterName);
+
+	@En("Deregistering Wire Receiver {0}...")
+	public String deregisteringReceiver(String receiverName);
+
 	@En("Emitter name cannot be null")
 	public String emitterNameNonNull();
 
@@ -189,8 +195,8 @@ public interface WireMessages {
 	@En("Error in publishing wire records using cloud publisher..")
 	public String errorPublishingWireRecords();
 
-	@En("Error in truncating the table ")
-	public String errorTruncatingTable();
+	@En("Error in truncating the table {0}....")
+	public String errorTruncatingTable(String tableName);
 
 	@En("Error during Wire Service Component update! Something went wrong...")
 	public String errorUpdatingWireService();
@@ -279,11 +285,11 @@ public interface WireMessages {
 	@En("Refreshing string value {0}")
 	public String refreshString(String value);
 
-	@En("Registering Wire Emitter...")
-	public String registeringEmitter();
+	@En("Registering Wire Emitter {0}...")
+	public String registeringEmitter(String emitterName);
 
-	@En("Registering Wire Receiver...")
-	public String registeringReceiver();
+	@En("Registering Wire Receiver {0}...")
+	public String registeringReceiver(String receiverName);
 
 	@En("Removing Wire Component...")
 	public String removingWireComponent();

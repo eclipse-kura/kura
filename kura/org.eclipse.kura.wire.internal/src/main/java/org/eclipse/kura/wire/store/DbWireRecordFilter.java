@@ -303,19 +303,22 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Wire
 	 * Schedule refresh of SQL view operation
 	 */
 	private void scheduleRefresh() {
+		final int refreshRate = this.m_options.getRefreshRate();
 		// Cancel the current refresh view handle
 		if (this.m_tickHandle != null) {
 			this.m_tickHandle.cancel(true);
 		}
 		// schedule the new refresh view
-		this.m_tickHandle = this.m_executorService.schedule(new Runnable() {
-			/** {@inheritDoc} */
-			@Override
-			public void run() {
-				m_cacheLastUpdated = System.currentTimeMillis();
-				m_cache.put(m_cacheLastUpdated, filter());
-			}
-		}, this.m_options.getRefreshRate(), TimeUnit.SECONDS);
+		if (refreshRate != 0) {
+			this.m_tickHandle = this.m_executorService.schedule(new Runnable() {
+				/** {@inheritDoc} */
+				@Override
+				public void run() {
+					m_cacheLastUpdated = System.currentTimeMillis();
+					m_cache.put(m_cacheLastUpdated, filter());
+				}
+			}, refreshRate, TimeUnit.SECONDS);
+		}
 	}
 
 	/**

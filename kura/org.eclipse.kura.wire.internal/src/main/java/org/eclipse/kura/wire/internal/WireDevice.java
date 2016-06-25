@@ -67,7 +67,7 @@ public final class WireDevice extends BaseDevice implements WireEmitter, WireRec
 	private static final Logger s_logger = LoggerFactory.getLogger(WireDevice.class);
 
 	/** Wire Supporter Component */
-	protected WireSupport m_wireSupport;
+	private final WireSupport m_wireSupport;
 
 	/**
 	 * Instantiate a new wire device.

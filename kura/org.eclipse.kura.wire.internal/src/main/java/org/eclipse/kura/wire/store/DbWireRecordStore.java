@@ -162,8 +162,8 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, WireR
 				this.m_dbHelper.execute(MessageFormat.format(SQL_TRUNCATE_TABLE, sqlTableName));
 			}
 		} catch (final SQLException sqlException) {
-			s_logger.error(s_message.errorTruncatingTable() + sqlTableName + "..."
-					+ Throwables.getStackTraceAsString(sqlException));
+			s_logger.error(
+					s_message.errorTruncatingTable(sqlTableName) + Throwables.getStackTraceAsString(sqlException));
 		} finally {
 			if (conn != null) {
 				this.m_dbHelper.close(conn);

@@ -41,7 +41,7 @@ final class WireUtils {
 	private static final WireMessages s_messages = LocalizationAdapter.adapt(WireMessages.class);
 
 	/** Service Property */
-	private static final String SERVICE_PID_PROPERTY = "service.pid";
+	public static final String SERVICE_PID_PROPERTY = "service.pid";
 	
 	/** Constructor */
 	private WireUtils() {

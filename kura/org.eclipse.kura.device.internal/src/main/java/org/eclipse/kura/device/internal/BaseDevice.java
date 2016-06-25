@@ -49,6 +49,7 @@ import org.eclipse.kura.localization.DeviceMessages;
 import org.eclipse.kura.localization.LocalizationAdapter;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -89,14 +90,17 @@ public class BaseDevice implements Device, SelfConfiguringComponent {
 	/** The Driver instance. */
 	protected volatile Driver m_driver;
 
-	/** Device Driver Tracker. */
-	private DriverTracker m_driverTracker;
+	/** Device Driver Tracker Customizer. */
+	private DriverTrackerCustomizer m_driverTrackerCustomizer;
 
 	/** Synchronization Monitor for driver specific operations. */
 	private final Monitor m_monitor;
 
 	/** The configurable properties of this device. */
 	private Map<String, Object> m_properties;
+
+	/** Device Driver Tracker. */
+	private ServiceTracker<Driver, Driver> m_serviceTracker;
 
 	/**
 	 * Instantiates a new Base Device.
@@ -144,8 +148,11 @@ public class BaseDevice implements Device, SelfConfiguringComponent {
 		checkNull(driverId, s_message.driverIdNonNull());
 		s_logger.debug(s_message.driverAttach());
 		try {
-			this.m_driverTracker = new DriverTracker(this.m_context.getBundleContext(), this, driverId);
-			this.m_driverTracker.open();
+			this.m_driverTrackerCustomizer = new DriverTrackerCustomizer(this.m_context.getBundleContext(), this,
+					driverId);
+			this.m_serviceTracker = new ServiceTracker<Driver, Driver>(this.m_context.getBundleContext(),
+					Driver.class.getName(), this.m_driverTrackerCustomizer);
+			this.m_serviceTracker.open();
 		} catch (final InvalidSyntaxException e) {
 			Throwables.propagate(e);
 		}
@@ -206,6 +213,7 @@ public class BaseDevice implements Device, SelfConfiguringComponent {
 			this.m_monitor.leave();
 		}
 		this.m_driver = null;
+		this.m_serviceTracker.close();
 		s_logger.debug(s_message.deactivatingDone());
 	}
 

@@ -36,7 +36,7 @@ import org.eclipse.kura.localization.LocalizationAdapter;
  * @see DeviceEvent
  * @see DriverEvent
  */
-public final class BaseDriverListener implements DriverListener {
+final class BaseDriverListener implements DriverListener {
 
 	/** Localization Resource */
 	private static final DeviceMessages s_message = LocalizationAdapter.adapt(DeviceMessages.class);
@@ -57,7 +57,7 @@ public final class BaseDriverListener implements DriverListener {
 	 * @throws KuraRuntimeException
 	 *             if any of the arguments is null
 	 */
-	public BaseDriverListener(final String channelName, final DeviceListener deviceListener) {
+	BaseDriverListener(final String channelName, final DeviceListener deviceListener) {
 		checkNull(channelName, "Channel name cannot be null");
 		checkNull(deviceListener, "Device listener cannot be null");
 

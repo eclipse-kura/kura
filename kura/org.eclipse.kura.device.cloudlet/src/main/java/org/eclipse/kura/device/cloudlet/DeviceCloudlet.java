@@ -37,6 +37,7 @@ import org.eclipse.kura.type.TypedValue;
 import org.eclipse.kura.type.TypedValues;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -97,8 +98,11 @@ public final class DeviceCloudlet extends Cloudlet {
 	/** The map of devices present in the OSGi service registry. */
 	private Map<String, Device> m_devices;
 
-	/** Device Driver Tracker. */
-	private DeviceTracker m_deviceTracker;
+	/** Device Tracker Customizer */
+	private DeviceTrackerCustomizer m_deviceTrackerCustomizer;
+
+	/** Device Tracker. */
+	private ServiceTracker<Device, Device> m_serviceTracker;
 
 	/**
 	 * Instantiates a new device cloudlet.
@@ -113,8 +117,10 @@ public final class DeviceCloudlet extends Cloudlet {
 		s_logger.debug(s_messages.activating());
 		super.activate(componentContext);
 		try {
-			this.m_deviceTracker = new DeviceTracker(componentContext.getBundleContext());
-			this.m_deviceTracker.open();
+			this.m_deviceTrackerCustomizer = new DeviceTrackerCustomizer(componentContext.getBundleContext());
+			this.m_serviceTracker = new ServiceTracker<Device, Device>(componentContext.getBundleContext(),
+					Device.class.getName(), this.m_deviceTrackerCustomizer);
+			this.m_serviceTracker.open();
 		} catch (final InvalidSyntaxException e) {
 			Throwables.propagate(e);
 		}
@@ -139,6 +145,7 @@ public final class DeviceCloudlet extends Cloudlet {
 		s_logger.debug(s_messages.deactivating());
 		super.deactivate(componentContext);
 		super.setCloudService(null);
+		this.m_serviceTracker.close();
 		s_logger.debug(s_messages.deactivatingDone());
 	}
 
@@ -217,7 +224,7 @@ public final class DeviceCloudlet extends Cloudlet {
 	 * Searches for all the currently available devices in the service registry
 	 */
 	private void findDevices() {
-		this.m_devices = this.m_deviceTracker.getRegisteredDevices();
+		this.m_devices = this.m_deviceTrackerCustomizer.getRegisteredDevices();
 	}
 
 	/**

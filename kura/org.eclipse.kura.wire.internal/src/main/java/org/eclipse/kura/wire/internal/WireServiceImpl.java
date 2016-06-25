@@ -30,6 +30,7 @@ import org.eclipse.kura.core.configuration.metatype.Toption;
 import org.eclipse.kura.core.configuration.metatype.Tscalar;
 import org.eclipse.kura.localization.LocalizationAdapter;
 import org.eclipse.kura.localization.WireMessages;
+import org.eclipse.kura.wire.WireComponent;
 import org.eclipse.kura.wire.WireConfiguration;
 import org.eclipse.kura.wire.WireEmitter;
 import org.eclipse.kura.wire.WireReceiver;
@@ -42,6 +43,7 @@ import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.ComponentException;
 import org.osgi.service.wireadmin.Wire;
 import org.osgi.service.wireadmin.WireAdmin;
+import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -94,8 +96,11 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 	/** The service component properties. */
 	private Map<String, Object> m_properties;
 
+	/** Wire Component Tracker. */
+	private ServiceTracker<WireComponent, WireComponent> m_serviceTracker;
+
 	/** The service tracker to track all wire components */
-	private WireSeviceTracker m_serviceTracker;
+	private WireComponentTrackerCustomizer m_trackerCustomizer;
 
 	/** The Wire Admin dependency. */
 	private volatile WireAdmin m_wireAdmin;
@@ -130,7 +135,9 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 			for (final WireConfiguration conf : this.m_options.getWireConfigurations()) {
 				this.m_wireConfigs.add(conf);
 			}
-			this.m_serviceTracker = new WireSeviceTracker(this.m_ctx.getBundleContext(), this);
+			this.m_trackerCustomizer = new WireComponentTrackerCustomizer(this.m_ctx.getBundleContext(), this);
+			this.m_serviceTracker = new ServiceTracker<WireComponent, WireComponent>(
+					componentContext.getBundleContext(), WireComponent.class.getName(), this.m_trackerCustomizer);
 			this.m_serviceTracker.open();
 			this.createWires();
 		} catch (final Exception exception) {
@@ -234,13 +241,13 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 			final String receiver = this.m_configService.getComponentConfiguration(conf.getReceiverName()).getPid();
 			boolean emitterFound = false;
 			boolean receiverFound = false;
-			for (final String s : this.m_serviceTracker.getWireEmitters()) {
+			for (final String s : this.m_trackerCustomizer.getWireEmitters()) {
 				if (s.equals(emitter)) {
 					emitterFound = true;
 					break;
 				}
 			}
-			for (final String s : this.m_serviceTracker.getWireReceivers()) {
+			for (final String s : this.m_trackerCustomizer.getWireReceivers()) {
 				if (s.equals(receiver)) {
 					receiverFound = true;
 					break;
@@ -271,6 +278,7 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 		s_logger.info(s_message.deactivatingWireService());
 		this.m_configService = null;
 		this.m_wireAdmin = null;
+		this.m_serviceTracker.close();
 		s_logger.info(s_message.deactivatingWireServiceDone());
 	}
 

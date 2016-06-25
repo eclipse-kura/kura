@@ -27,7 +27,7 @@ import com.google.common.collect.Lists;
  * The Class BaseDeviceChannelDescriptor returns the default channel descriptor
  * required for a base device
  */
-public final class BaseDeviceChannelDescriptor {
+final class BaseDeviceChannelDescriptor {
 
 	/** Name Property to be used in the configuration */
 	private static final String NAME = "name";
@@ -116,7 +116,7 @@ public final class BaseDeviceChannelDescriptor {
 	 *
 	 * @return the default configuration
 	 */
-	public List<Tad> getDefaultConfiguration() {
+	List<Tad> getDefaultConfiguration() {
 		return this.m_defaultElements;
 	}
 	
@@ -125,7 +125,7 @@ public final class BaseDeviceChannelDescriptor {
 	 *
 	 * @return the default descriptor
 	 */
-	public static BaseDeviceChannelDescriptor getDefault() {
+	static BaseDeviceChannelDescriptor getDefault() {
 		return new BaseDeviceChannelDescriptor();
 	}
 

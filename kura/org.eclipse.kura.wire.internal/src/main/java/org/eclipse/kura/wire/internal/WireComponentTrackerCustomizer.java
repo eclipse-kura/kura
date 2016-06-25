@@ -32,8 +32,8 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 
 /**
- * The Class WireSeviceTracker represents a OSGi service tracker to track Wire
- * Components (Wire Receiver and Wire Emitter)
+ * The Class WireComponentTrackerCustomizer represents an OSGi service tracker
+ * to track Wire Components (Wire Receiver and Wire Emitter)
  */
 final class WireComponentTrackerCustomizer implements ServiceTrackerCustomizer<WireComponent, WireComponent> {
 

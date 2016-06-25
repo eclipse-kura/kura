@@ -24,9 +24,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * The Class DriverTracker is responsible for tracking the specific driver as
- * provided. It tracks for the service in the OSGi service registry and it
- * triggers the specific methods as soon as it is injected.
+ * The Class DriverTrackerCustomizer is responsible for tracking the specific
+ * driver as provided. It tracks for the service in the OSGi service registry
+ * and it triggers the specific methods as soon as it is injected.
  */
 final class DriverTrackerCustomizer implements ServiceTrackerCustomizer<Driver, Driver> {
 

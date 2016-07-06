@@ -68,7 +68,7 @@ int w32DeviceInputStream_readDeviceOneByteNC(JNIEnv *jenv, jobject jobj) {
     if (NULL == overlap.hEvent) {
         lastRc = GetLastError();
         iveSerThrowWin(jenv,"Error creating event semaphore",lastRc);
-        return 0;
+        return -1;
     }
 	success = ReadFile(osHandle, buf, 1, &actualBytes, &overlap);
 	if(success) {
@@ -79,18 +79,23 @@ int w32DeviceInputStream_readDeviceOneByteNC(JNIEnv *jenv, jobject jobj) {
 		if (ERROR_IO_PENDING != lastRc) {
 			CloseHandle(overlap.hEvent);
 			iveSerThrowWin(jenv,"Error reading data",lastRc);
-			return 0;
+			return -1;
 		}
 	}
 	buf[0] = 0;
 	actualBytes = 0;
 #ifndef _WIN32_WCE
-	success = GetOverlappedResult(osHandle,&overlap,&actualBytes,TRUE);
+	if (WaitForSingleObject(overlap.hEvent,500) == WAIT_OBJECT_0) {
+		success = GetOverlappedResult(osHandle,&overlap,&actualBytes,TRUE);
+	}
+	else {
+		success = FALSE;
+        }
 #endif
 	if ( success && actualBytes ) {
 		lastRc = (int)(unsigned char)(buf[0]);
 	} else {
-		lastRc = GetLastError();
+		lastRc = -1;/*GetLastError();*/
 	}
 	CloseHandle(overlap.hEvent);
 	return lastRc;

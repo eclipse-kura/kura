@@ -1,0 +1,24 @@
+
+KURALauncher32 : Release/Win32/x86/KURALauncher.exe
+
+KURALauncher64 : Release/Win32/x64/KURALauncher.exe
+
+
+Objs/x86/main32.o : main.c
+	i686-w64-mingw32-gcc -c main.c -o $@
+
+Objs/x86/utils32.o : utils.c
+	i686-w64-mingw32-gcc -c utils.c -o $@
+
+Objs/x64/main64.o : main.c
+	x86_64-w64-mingw32-gcc -c main.c -o $@
+
+Objs/x64/utils64.o : utils.c
+	x86_64-w64-mingw32-gcc -c utils.c -o $@
+
+
+Release/Win32/x86/KURALauncher.exe : Objs/x86/main32.o Objs/x86/utils32.o
+	i686-w64-mingw32-gcc -Wl,--subsystem,windows Objs/x86/main32.o Objs/x86/utils32.o -o $@
+
+Release/Win32/x64/KURALauncher.exe : Objs/x64/main64.o Objs/x64/utils64.o
+	x86_64-w64-mingw32-gcc -Wl,--subsystem,windows Objs/x64/main64.o Objs/x64/utils64.o -o $@

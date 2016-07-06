@@ -17,6 +17,7 @@ BOOL g_bTerminate;							// Set to true to indicate the service should terminate
 #define KURA_CMD_LINE_SIZE			32768
 char *g_pszKuraCommandLine = NULL;
 
+#if defined(_AMD64_)
 char KuraJavaArgs[] = "java \
 -Xms256m -Xmx256m -Dkura.os.version=win32 \
 -Dkura.arch=x86_64 \
@@ -34,6 +35,25 @@ char KuraJavaArgs[] = "java \
 -console \
 -consoleLog \
 ";
+#else
+char KuraJavaArgs[] = "java \
+-Xms256m -Xmx256m -Dkura.os.version=win32 \
+-Dkura.arch=x86 \
+-Dtarget.device=windows \
+-Declipse.ignoreApp=true \
+-Dkura.home=%KURA_HOME% \
+-Dkura.data.dir=%KURA_DATA% \
+-Dkura.configuration=file:%KURA_HOME_URI%/kura.properties \
+-Dkura.custom.configuration=file:%KURA_HOME_URI%/kura_custom.properties \
+-Ddpa.configuration=%KURA_HOME%\\dpa.properties \
+-Dlog4j.configuration=file:%KURA_HOME_URI%/log4j.properties \
+-Djdk.tls.trustNameService=true \
+-jar \"%~dp0\\plugins\\org.eclipse.osgi_3.8.1.v20120830-144521.jar\" \
+-configuration %KURA_TEMP%\\Configuration \
+-console \
+-consoleLog \
+";
+#endif
 
 // Replace substr with replacement in string and return number of replacements made
 // Caller should provide a buffer large enough for the replaced string to fit it

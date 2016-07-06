@@ -233,6 +233,21 @@
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.kura.device.cloudlet</artifactId>
+									<version>${org.eclipse.kura.device.cloudlet.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.kura.device.internal</artifactId>
+									<version>${org.eclipse.kura.device.internal.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.kura.localization</artifactId>
+									<version>${org.eclipse.kura.localization.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
 									<artifactId>org.eclipse.kura.net.admin</artifactId>
 									<version>${org.eclipse.kura.net.admin.version}</version>
 								</artifactItem>
@@ -240,6 +255,11 @@
 									<groupId>org.eclipse.kura</groupId>
 									<artifactId>org.eclipse.kura.protocol.modbus</artifactId>
 									<version>${org.eclipse.kura.protocol.modbus.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.kura.wire.internal</artifactId>
+									<version>${org.eclipse.kura.wire.internal.version}</version>
 								</artifactItem>
 							</artifactItems>
 							<stripVersion>true</stripVersion>
@@ -371,6 +391,10 @@
   								<move file="target/plugins/org.eclipse.kura.emulator.position.jar" tofile="target/plugins/org.eclipse.kura.emulator.position_${org.eclipse.kura.emulator.position.version}.jar" />
   								<move file="target/plugins/org.eclipse.kura.emulator.usb.jar" tofile="target/plugins/org.eclipse.kura.emulator.usb_${org.eclipse.kura.emulator.usb.version}.jar" />
   								<move file="target/plugins/org.eclipse.kura.emulator.watchdog.jar" tofile="target/plugins/org.eclipse.kura.emulator.watchdog_${org.eclipse.kura.emulator.watchdog.version}.jar" />
+  								<move file="target/plugins/org.eclipse.kura.device.cloudlet.jar" tofile="target/plugins/org.eclipse.kura.device.cloudlet_${org.eclipse.kura.device.cloudlet.version}.jar" />
+  								<move file="target/plugins/org.eclipse.kura.device.internal.jar" tofile="target/plugins/org.eclipse.kura.device.internal_${org.eclipse.kura.device.internal.version}.jar" />
+  								<move file="target/plugins/org.eclipse.kura.localization.jar" tofile="target/plugins/org.eclipse.kura.localization_${org.eclipse.kura.localization.version}.jar" />
+  								<move file="target/plugins/org.eclipse.kura.wire.internal.jar" tofile="target/plugins/org.eclipse.kura.wire.internal_${org.eclipse.kura.wire.internal.version}.jar" />
 							</tasks>
 						</configuration>
 					</execution>

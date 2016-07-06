@@ -213,7 +213,9 @@ public class BaseDevice implements Device, SelfConfiguringComponent {
 			this.m_monitor.leave();
 		}
 		this.m_driver = null;
-		this.m_serviceTracker.close();
+		if (this.m_serviceTracker != null) {
+			this.m_serviceTracker.close();
+		}
 		s_logger.debug(s_message.deactivatingDone());
 	}
 

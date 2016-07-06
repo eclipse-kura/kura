@@ -12,6 +12,8 @@
  */
 package org.eclipse.kura.device.internal;
 
+import static org.eclipse.kura.device.internal.DeviceConfiguration.DEVICE_DRIVER_PROP;
+
 import org.eclipse.kura.device.Device;
 import org.eclipse.kura.device.Driver;
 import org.eclipse.kura.localization.DeviceMessages;
@@ -29,9 +31,6 @@ import org.slf4j.LoggerFactory;
  * and it triggers the specific methods as soon as it is injected.
  */
 final class DriverTrackerCustomizer implements ServiceTrackerCustomizer<Driver, Driver> {
-
-	/** Driver ID Property */
-	private static final String DRIVER_ID_PROPERTY = "instance.name";
 
 	/** The Logger instance. */
 	private static final Logger s_logger = LoggerFactory.getLogger(DriverTrackerCustomizer.class);
@@ -71,7 +70,7 @@ final class DriverTrackerCustomizer implements ServiceTrackerCustomizer<Driver, 
 	@Override
 	public Driver addingService(final ServiceReference<Driver> reference) {
 		final Driver driver = this.m_context.getService(reference);
-		if (reference.getProperty(DRIVER_ID_PROPERTY).equals(this.m_driverId)) {
+		if (reference.getProperty(DEVICE_DRIVER_PROP).equals(this.m_driverId)) {
 			s_logger.info(s_message.driverFoundAdding());
 			((BaseDevice) this.m_device).m_driver = driver;
 		}
@@ -89,7 +88,7 @@ final class DriverTrackerCustomizer implements ServiceTrackerCustomizer<Driver, 
 	@Override
 	public void removedService(final ServiceReference<Driver> reference, final Driver service) {
 		this.m_context.ungetService(reference);
-		if (reference.getProperty(DRIVER_ID_PROPERTY).equals(this.m_driverId)) {
+		if (reference.getProperty(DEVICE_DRIVER_PROP).equals(this.m_driverId)) {
 			s_logger.info(s_message.driverRemoved() + service);
 			((BaseDevice) this.m_device).m_driver = null;
 		}

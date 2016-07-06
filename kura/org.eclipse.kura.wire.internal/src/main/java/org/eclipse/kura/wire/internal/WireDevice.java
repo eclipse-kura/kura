@@ -230,7 +230,7 @@ public final class WireDevice extends BaseDevice implements WireEmitter, WireRec
 
 	/** {@inheritDoc} */
 	@Override
-	protected synchronized void updated(final Map<String, Object> properties) {
+	public synchronized void updated(final Map<String, Object> properties) {
 		s_logger.debug(s_message.updatingWireDevice());
 		super.updated(properties);
 		s_logger.debug(s_message.updatingWireDeviceDone());

@@ -23,7 +23,7 @@
    <property name="service.pid" type="String" value="org.eclipse.kura.wire.internal.WireDevice"/>
    <service>
       <provide interface="org.eclipse.kura.device.Device"/>
-      <provide interface="org.eclipse.kura.wires.WireComponent"/>
+      <provide interface="org.eclipse.kura.wire.WireComponent"/>
       <provide interface="org.eclipse.kura.wire.WireEmitter"/>
       <provide interface="org.eclipse.kura.wire.WireReceiver"/>
       <provide interface="org.osgi.service.wireadmin.Producer"/>

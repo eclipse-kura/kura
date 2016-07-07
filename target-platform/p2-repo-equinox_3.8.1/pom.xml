@@ -173,7 +173,6 @@
                             <artifactId>org.eclipse.equinox.util</artifactId>
                             <version>${org.eclipse.equinox.util.version}</version>
                         </artifactItem>
-                        <!-- Add WireAdmin Implementation Bundle to Eurotech Maven Repository -->
                         <artifactItem>
                             <groupId>org.eclipse</groupId>
                             <artifactId>org.eclipse.equinox.wireadmin</artifactId>

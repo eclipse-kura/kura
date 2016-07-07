@@ -226,9 +226,9 @@ public class BaseDevice implements Device, SelfConfiguringComponent {
 		final String componentName = this.m_context.getProperties().get("service.pid").toString();
 
 		final Tocd mainOcd = new Tocd();
-		mainOcd.setName(this.m_deviceConfiguration.getDeviceName());
-		mainOcd.setDescription(this.m_deviceConfiguration.getDeviceDescription());
-		mainOcd.setId(this.m_deviceConfiguration.getDeviceName());
+		mainOcd.setId(this.getClass().getName());
+		mainOcd.setName(s_message.ocdName());
+		mainOcd.setDescription(s_message.ocdDescription());
 
 		final Tad deviceNameAd = new Tad();
 		deviceNameAd.setId(DEVICE_ID_PROP);

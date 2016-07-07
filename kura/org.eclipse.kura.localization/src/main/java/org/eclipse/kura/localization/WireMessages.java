@@ -51,9 +51,6 @@ public interface WireMessages {
 	@En("Activating Wire Service...Done")
 	public String activatingWireServiceDone();
 
-	@En("<br /><br /><b>Active wires:</b><br />")
-	public String activeWires();
-
 	@En("Adding Wire Components....")
 	public String addingWireComponent();
 
@@ -429,7 +426,7 @@ public interface WireMessages {
 	@En("Wire Records cannot be null")
 	public String wireRecordsNonNull();
 
-	@En("Wire Service")
+	@En("WireService")
 	public String wireService();
 
 	@En("Wires cannot be null")

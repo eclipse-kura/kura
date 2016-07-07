@@ -157,6 +157,12 @@ public interface DeviceMessages {
 	@En("Device Name")
 	public String name();
 
+	@En("Configure Wire Device Instance")
+	public String ocdDescription();
+
+	@En("WireDevice")
+	public String ocdName();
+
 	@En("Old Attribute Definition cannot be null")
 	public String oldAdNonNull();
 

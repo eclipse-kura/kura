@@ -102,9 +102,6 @@ public interface WireMessages {
 	@En("Connection instance cannnot be null")
 	public String connectionNonNull();
 
-	@En("Create a new Wire")
-	public String creatingNewWire();
-
 	@En("Creating table DR_{0}...")
 	public String creatingTable(String tableName);
 
@@ -168,6 +165,9 @@ public interface WireMessages {
 	@En("Deregistering Wire Receiver {0}...")
 	public String deregisteringReceiver(String receiverName);
 
+	@En("WireService leverages Kura Wiring communication functionalities between Wire Components")
+	public String description();
+
 	@En("Emitter name cannot be null")
 	public String emitterNameNonNull();
 
@@ -227,6 +227,9 @@ public interface WireMessages {
 
 	@En("multiton.instance.name for the resulting component. If left null it will be equal to service.pid")
 	public String multitonInstanceName();
+
+	@En("WireService")
+	public String name();
 
 	@En("Do not delete any instance")
 	public String noDeleteInstance();
@@ -425,9 +428,6 @@ public interface WireMessages {
 
 	@En("Wire Records cannot be null")
 	public String wireRecordsNonNull();
-
-	@En("WireService")
-	public String wireService();
 
 	@En("Wires cannot be null")
 	public String wiresNonNull();

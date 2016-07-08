@@ -85,7 +85,7 @@ public final class Timer implements WireEmitter, ConfigurableComponent {
 	 * @param properties
 	 *            the configured properties
 	 */
-	protected void activate(final ComponentContext ctx, final Map<String, Object> properties) {
+	protected synchronized void activate(final ComponentContext ctx, final Map<String, Object> properties) {
 		s_logger.info(s_message.activatingTimer());
 		this.m_properties = properties;
 		this.doUpdate();
@@ -104,12 +104,14 @@ public final class Timer implements WireEmitter, ConfigurableComponent {
 	 * @param ctx
 	 *            the component context
 	 */
-	protected void deactivate(final ComponentContext ctx) {
+	protected synchronized void deactivate(final ComponentContext ctx) {
 		s_logger.info(s_message.deactivatingTimer());
 		if (this.m_tickHandle != null) {
 			this.m_tickHandle.cancel(true);
 		}
-		this.m_executorService.shutdown();
+		if (this.m_executorService != null) {
+			this.m_executorService.shutdown();
+		}
 		s_logger.info(s_message.deactivatingTimerDone());
 	}
 
@@ -123,14 +125,14 @@ public final class Timer implements WireEmitter, ConfigurableComponent {
 		if (this.m_tickHandle != null) {
 			this.m_tickHandle.cancel(true);
 		}
-		this.m_tickHandle = this.m_executorService.schedule(new Runnable() {
+		this.m_tickHandle = this.m_executorService.scheduleAtFixedRate(new Runnable() {
 			/** {@inheritDoc} */
 			@Override
 			public void run() {
 				m_wireSupport.emit(Wires.newWireRecord(
 						Wires.newWireField(TIMER_EVENT_FIELD_NAME, TypedValues.newStringValue(m_name))));
 			}
-		}, this.m_interval, TimeUnit.SECONDS);
+		}, 0, this.m_interval, TimeUnit.SECONDS);
 	}
 
 	/** {@inheritDoc} */
@@ -151,7 +153,7 @@ public final class Timer implements WireEmitter, ConfigurableComponent {
 	 * @param properties
 	 *            the updated properties
 	 */
-	protected void updated(final Map<String, Object> properties) {
+	protected synchronized void updated(final Map<String, Object> properties) {
 		s_logger.info(s_message.updatingTimer());
 		this.m_properties = properties;
 		this.doUpdate();

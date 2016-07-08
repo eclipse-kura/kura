@@ -12,7 +12,7 @@
       Amit Kumar Mondal (admin@amitinside.com)
 -->
 <scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" 
-               name="org.eclipse.kura.wire.timer.Timer"
+               name="org.eclipse.kura.wire.Timer"
                activate="activate" 
                deactivate="deactivate" 
                modified="updated"
@@ -20,9 +20,7 @@
                immediate="true" 
                configuration-policy="require"> 
    <implementation class="org.eclipse.kura.wire.timer.Timer"/>
-   
-   <property name="service.pid" value="org.eclipse.kura.wire.timer.Timer"/>
-   
+   <property name="service.pid" value="org.eclipse.kura.wire.Timer"/>
    <service>
       <provide interface="org.eclipse.kura.configuration.ConfigurableComponent"/>
       <provide interface="org.eclipse.kura.wire.WireComponent"/>

@@ -12,7 +12,7 @@
       Amit Kumar Mondal (admin@amitinside.com)
 -->
 <scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" 
-    name="org.eclipse.kura.wire.store.DbWireRecordStore"
+    name="org.eclipse.kura.wire.DbWireRecordStore"
     activate="activate" 
     deactivate="deactivate" 
     modified="updated" 
@@ -29,7 +29,7 @@
       <provide interface="org.osgi.service.wireadmin.Consumer"/>
       <provide interface="org.eclipse.kura.wire.WireRecordStore"/>      
    </service>
-   <property name="service.pid" value="org.eclipse.kura.wire.store.DbWireRecordStore"/>
+   <property name="service.pid" value="org.eclipse.kura.wire.DbWireRecordStore"/>
    <reference name="DbService" 
               bind="setDbService" 
               unbind="unsetDbService"

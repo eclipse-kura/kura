@@ -848,9 +848,9 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
 	<target name="wires-config">
 		<propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
 			<entry key="osgi.bundles" operation="+"
-                   value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.device.internal_${org.eclipse.kura.device.internal.version}.jar@4:start" />
+                   value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.asset.internal_${org.eclipse.kura.asset.internal.version}.jar@4:start" />
             <entry key="osgi.bundles" operation="+"
-				   value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.device.cloudlet_${org.eclipse.kura.device.cloudlet.version}.jar@5:start" />
+				   value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.asset.cloudlet_${org.eclipse.kura.asset.cloudlet.version}.jar@5:start" />
             <entry key="osgi.bundles" operation="+"
                    value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.wire.internal_${org.eclipse.kura.wire.internal.version}.jar@5:start" />
 		</propertyfile>
@@ -923,9 +923,9 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
 
 	<target name="wires-jar">
 		<zip destfile="${project.build.directory}/${build.output.name}.zip" update="true">
-			<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.device.internal_${org.eclipse.kura.device.internal.version}.jar"
+			<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.asset.internal_${org.eclipse.kura.asset.internal.version}.jar"
                         prefix="${build.output.name}/kura/plugins" />
-            <zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.device.cloudlet_${org.eclipse.kura.device.cloudlet.version}.jar"
+            <zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.asset.cloudlet_${org.eclipse.kura.asset.cloudlet.version}.jar"
                         prefix="${build.output.name}/kura/plugins" />
             <zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.wire.internal_${org.eclipse.kura.wire.internal.version}.jar"
                         prefix="${build.output.name}/kura/plugins" />

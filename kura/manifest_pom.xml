@@ -41,9 +41,8 @@
 		<module>org.eclipse.kura.deployment.customizer</module>
 		<module>org.eclipse.kura.deployment.customizer.upgrade</module>
 		<module>org.eclipse.kura.deployment.update</module>
-		<module>org.eclipse.kura.device.cloudlet</module>
-		<module>org.eclipse.kura.device.internal</module>
-		<module>org.eclipse.kura.device.test</module>
+		<module>org.eclipse.kura.asset.cloudlet</module>
+		<module>org.eclipse.kura.asset.internal</module>
 		<module>org.eclipse.kura.linux.bluetooth</module>
 		<module>org.eclipse.kura.linux.clock</module>
 		<module>org.eclipse.kura.linux.command</module>

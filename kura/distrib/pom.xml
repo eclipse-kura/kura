@@ -233,13 +233,13 @@
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.eclipse.kura</groupId>
-									<artifactId>org.eclipse.kura.device.cloudlet</artifactId>
-									<version>${org.eclipse.kura.device.cloudlet.version}</version>
+									<artifactId>org.eclipse.kura.asset.cloudlet</artifactId>
+									<version>${org.eclipse.kura.asset.cloudlet.version}</version>
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.eclipse.kura</groupId>
-									<artifactId>org.eclipse.kura.device.internal</artifactId>
-									<version>${org.eclipse.kura.device.internal.version}</version>
+									<artifactId>org.eclipse.kura.asset.internal</artifactId>
+									<version>${org.eclipse.kura.asset.internal.version}</version>
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.eclipse.kura</groupId>
@@ -391,8 +391,8 @@
   								<move file="target/plugins/org.eclipse.kura.emulator.position.jar" tofile="target/plugins/org.eclipse.kura.emulator.position_${org.eclipse.kura.emulator.position.version}.jar" />
   								<move file="target/plugins/org.eclipse.kura.emulator.usb.jar" tofile="target/plugins/org.eclipse.kura.emulator.usb_${org.eclipse.kura.emulator.usb.version}.jar" />
   								<move file="target/plugins/org.eclipse.kura.emulator.watchdog.jar" tofile="target/plugins/org.eclipse.kura.emulator.watchdog_${org.eclipse.kura.emulator.watchdog.version}.jar" />
-  								<move file="target/plugins/org.eclipse.kura.device.cloudlet.jar" tofile="target/plugins/org.eclipse.kura.device.cloudlet_${org.eclipse.kura.device.cloudlet.version}.jar" />
-  								<move file="target/plugins/org.eclipse.kura.device.internal.jar" tofile="target/plugins/org.eclipse.kura.device.internal_${org.eclipse.kura.device.internal.version}.jar" />
+  								<move file="target/plugins/org.eclipse.kura.asset.cloudlet.jar" tofile="target/plugins/org.eclipse.kura.asset.cloudlet_${org.eclipse.kura.asset.cloudlet.version}.jar" />
+  								<move file="target/plugins/org.eclipse.kura.asset.internal.jar" tofile="target/plugins/org.eclipse.kura.asset.internal_${org.eclipse.kura.asset.internal.version}.jar" />
   								<move file="target/plugins/org.eclipse.kura.localization.jar" tofile="target/plugins/org.eclipse.kura.localization_${org.eclipse.kura.localization.version}.jar" />
   								<move file="target/plugins/org.eclipse.kura.wire.internal.jar" tofile="target/plugins/org.eclipse.kura.wire.internal_${org.eclipse.kura.wire.internal.version}.jar" />
 							</tasks>

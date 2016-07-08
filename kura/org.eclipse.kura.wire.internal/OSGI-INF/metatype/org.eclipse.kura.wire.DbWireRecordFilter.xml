@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+
+     All rights reserved. This program and the accompanying materials
+     are made available under the terms of the Eclipse Public License v1.0
+     which accompanies this distribution, and is available at
+     http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Eurotech
+      Amit Kumar Mondal (admin@amitinside.com)
+-->
+<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
+    <OCD id="org.eclipse.kura.wire.DbWireRecordFilter"
+         name="RecordFilter" 
+         description="A wire component that provides filtering and aggregation for Wire Records stored by the DbWireRecordStores.">
+
+        <Icon resource="RecordFilter" size="32"/>
+        
+        <AD id="sql.view"
+        	name="sql.view"
+        	type="String"
+        	cardinality="0"
+        	required="true"
+        	default="SELECT AVG(DATA) AS AVG_DOUBLE FROM (SELECT DOUBLE_DATA AS DATA FROM DRIVER_EXAMPLE ORDER BY TIMESTAMP DESC LIMIT 10);"
+        	description="SQL to be executed to build a view">
+        </AD>
+        
+        <AD id="refresh.rate"
+        	name="refresh.rate"
+        	type="Integer"
+        	cardinality="0"
+        	required="true"
+        	default="0"
+        	min="5"
+        	description="Refresh rate, in seconds (0 denotes disabled)">
+        </AD>
+        
+        <AD id="cache.update.interval"
+        	name="cache.update.interval"
+        	type="Integer"
+        	cardinality="0"
+        	required="true"
+        	default="60"
+        	min="60"
+        	description="This denotes the allowed interval (in seconds) for which the cache data will be retrieved if time difference between the current time and the last cache updated time is less than this interval">
+        </AD>
+        
+    </OCD>
+    
+    <Designate pid="org.eclipse.kura.wire.DbWireRecordFilter">
+        <Object ocdref="org.eclipse.kura.wire.DbWireRecordFilter"/>
+    </Designate>
+</MetaData>

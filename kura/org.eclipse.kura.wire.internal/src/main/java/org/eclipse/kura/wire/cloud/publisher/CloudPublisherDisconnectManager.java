@@ -17,6 +17,7 @@ import static org.eclipse.kura.Preconditions.checkNull;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.kura.KuraRuntimeException;
@@ -44,13 +45,16 @@ final class CloudPublisherDisconnectManager {
 	private final DataService m_dataService;
 
 	/** Schedule Executor Service **/
-	private final ScheduledExecutorService m_executorService;
+	private ScheduledExecutorService m_executorService;
 
 	/** The next execution time. */
 	private long m_nextExecutionTime;
 
 	/** The quiesce timeout. */
 	private long m_quiesceTimeout;
+
+	/** The future handle of the thread pool executor service. */
+	private ScheduledFuture<?> m_tickHandle;
 
 	/**
 	 * Instantiates a new cloud publisher disconnect manager.
@@ -108,10 +112,11 @@ final class CloudPublisherDisconnectManager {
 	private void schedule(final long delay) {
 		checkCondition(delay < 0, s_message.delayNonNegative());
 		// cancel existing timer
-		if (this.m_executorService != null) {
-			this.m_executorService.shutdown();
+		if (this.m_tickHandle != null) {
+			this.m_tickHandle.cancel(true);
 		}
-		this.m_executorService.schedule(new Runnable() {
+		this.m_tickHandle = this.m_executorService.scheduleAtFixedRate(new Runnable() {
+			/** {@inheritDoc} */
 			@Override
 			public void run() {
 				try {
@@ -123,7 +128,7 @@ final class CloudPublisherDisconnectManager {
 				// cleaning up
 				m_nextExecutionTime = 0;
 			}
-		}, delay, TimeUnit.MILLISECONDS);
+		}, 0, delay, TimeUnit.MILLISECONDS);
 
 	}
 
@@ -142,9 +147,13 @@ final class CloudPublisherDisconnectManager {
 	 */
 	synchronized void stop() {
 		s_logger.info(s_message.schedulerStopping());
+		if (this.m_tickHandle != null) {
+			this.m_tickHandle.cancel(true);
+		}
 		if (this.m_executorService != null) {
 			this.m_executorService.shutdown();
 		}
+		this.m_executorService = null;
 		s_logger.info(s_message.schedulerStopped());
 	}
 }

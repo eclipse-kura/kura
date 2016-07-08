@@ -20,7 +20,7 @@ import com.google.common.collect.ImmutableList;
 
 /**
  * The Class AbstractConfigurationOptions wraps all the necessary default
- * configurations for several wire components (except wire devices). These
+ * configurations for several wire components (except wire assets). These
  * configurations aren't meant to be configured externally from Kura Web
  * Console, whereas it would be configured internally while wiring components
  * visually together.

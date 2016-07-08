@@ -1,0 +1,25 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Asset Cloudlet
+Bundle-SymbolicName: org.eclipse.kura.asset.cloudlet
+Bundle-Version: 1.0.0.qualifier
+Bundle-Vendor: EUROTECH
+Bundle-License: Eclipse Public License v1.0
+Bundle-Category: Asset-Driver Management
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: com.google.common.annotations;version="19.0.0",
+ com.google.common.base;version="19.0.0",
+ com.google.common.collect;version="19.0.0",
+ org.eclipse.kura;version="[1.1,2.0)",
+ org.eclipse.kura.asset;version="[1.0,2.0)",
+ org.eclipse.kura.asset.internal;version="[1.0,2.0)",
+ org.eclipse.kura.cloud;version="[1.0,2.0)",
+ org.eclipse.kura.localization;version="[1.0,2.0)",
+ org.eclipse.kura.message;version="[1.0,2.0)",
+ org.eclipse.kura.type;version="[1.0,2.0)",
+ org.osgi.framework;version="[1.7.0,2.0.0)",
+ org.osgi.service.component;version="1.2.0",
+ org.osgi.util.tracker;version="1.5.0",
+ org.slf4j;version="1.6.4"
+Bundle-ActivationPolicy: lazy
+Service-Component: OSGI-INF/*.xml

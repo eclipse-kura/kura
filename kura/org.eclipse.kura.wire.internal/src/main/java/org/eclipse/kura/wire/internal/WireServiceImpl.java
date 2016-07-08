@@ -58,6 +58,9 @@ import com.google.common.util.concurrent.Monitor;
  */
 public final class WireServiceImpl implements SelfConfiguringComponent, WireService {
 
+	/** Configuration PID Property */
+	private static final String CONF_PID = "org.eclipse.kura.wire.WireService";
+
 	/** Delete Instance Property */
 	private static final String DELETE_INSTANCE = "delete.instances";
 
@@ -81,14 +84,13 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 	/** The Constant denoting Wire Receiver. */
 	private static final String PROP_CONSUMER_PID = "wireadmin.consumer.pid";
 
-	/** The Constant denoting Wire Service PID */
-	private static final String PROP_PID = "org.eclipse.kura.wire.internal.WireServiceImpl";
-
 	/** The Constant denoting Wire Emitter. */
 	private static final String PROP_PRODUCER_PID = "wireadmin.producer.pid";
 
+	/** String literal for receiver name to be used in properties */
 	private static final String RECEIVER_NAME = "receiver.name";
 
+	/** String literal for receiver pid to be used in properties */
 	private static final String RECEIVER_PID = "receiver.pids";
 
 	/** The Logger instance. */
@@ -302,9 +304,9 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 	@Override
 	public ComponentConfiguration getConfiguration() throws KuraException {
 		final Tocd wiresOCD = new Tocd();
-		wiresOCD.setId(this.getClass().getName());
-		wiresOCD.setName(s_message.wireService());
-		wiresOCD.setDescription(s_message.creatingNewWire());
+		wiresOCD.setId(CONF_PID);
+		wiresOCD.setName(s_message.name());
+		wiresOCD.setDescription(s_message.description());
 
 		final List<String> emittersOptions = Lists.newArrayList();
 		final Set<String> factoryPids = this.m_configService.getFactoryComponentPids();
@@ -439,7 +441,7 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 		} catch (final JSONException e) {
 			Throwables.propagate(e);
 		}
-		return new ComponentConfigurationImpl(PROP_PID, wiresOCD, this.m_properties);
+		return new ComponentConfigurationImpl(CONF_PID, wiresOCD, this.m_properties);
 	}
 
 	/**
@@ -486,7 +488,7 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 		try {
 			final String jsonString = this.m_options.toJsonString();
 			newProperties.put(WireServiceOptions.CONF_WIRES, jsonString);
-			this.m_configService.updateConfiguration(PROP_PID, newProperties, shouldPersist);
+			this.m_configService.updateConfiguration(CONF_PID, newProperties, shouldPersist);
 		} catch (final Exception exception) {
 			Throwables.propagateIfInstanceOf(exception, JSONException.class);
 			s_logger.error(Throwables.getStackTraceAsString(exception));

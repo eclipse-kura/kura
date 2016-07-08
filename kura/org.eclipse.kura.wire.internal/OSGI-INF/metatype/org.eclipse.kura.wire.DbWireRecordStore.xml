@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+
+     All rights reserved. This program and the accompanying materials
+     are made available under the terms of the Eclipse Public License v1.0
+     which accompanies this distribution, and is available at
+     http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Eurotech
+      Amit Kumar Mondal (admin@amitinside.com)
+-->
+<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
+    <OCD id="org.eclipse.kura.wire.DbWireRecordStore"
+         name="RecordStore" 
+         description="A wire component that provides storage for Wire Records produced by connected WireEmitters.">
+
+        <Icon resource="RecordStore" size="32"/>   
+        
+        <AD id="periodic.cleanup"
+            name="periodic.cleanup"
+            type="Integer"
+            cardinality="0"
+            required="true"
+            default="0"
+            description="Option for periodic cleanup of the data records collected! (in seconds) (0 denotes disabled)"
+           	min="0">
+        </AD>
+             
+    </OCD>
+    
+    <Designate pid="org.eclipse.kura.wire.DbWireRecordStore">
+        <Object ocdref="org.eclipse.kura.wire.DbWireRecordStore"/>
+    </Designate>
+</MetaData>

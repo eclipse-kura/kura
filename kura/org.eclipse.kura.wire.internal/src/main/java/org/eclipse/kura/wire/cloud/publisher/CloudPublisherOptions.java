@@ -87,7 +87,7 @@ final class CloudPublisherOptions extends AbstractConfigurationOptions {
 	private static final String CONF_QOS = "publish.qos";
 
 	/** The Constant denoting quiece timeout. */
-	private static final String CONF_QUIECE_TIMEOUT = "autoconnect.quiceTimeout";
+	private static final String CONF_QUIECE_TIMEOUT = "autoconnect.quiesceTimeout";
 
 	/** The Constant denoting mqtt retain */
 	private static final String CONF_RETAIN = "publish.retain";

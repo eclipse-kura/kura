@@ -99,6 +99,9 @@ public interface WireMessages {
 	@En("Component name cannot be null")
 	public String componentNameNonNull();
 
+	@En("Configurations cannot be null")
+	public String configurationNonNull();
+
 	@En("Connection instance cannnot be null")
 	public String connectionNonNull();
 
@@ -414,6 +417,9 @@ public interface WireMessages {
 	@En("Wire Component name cannot be null")
 	public String wireComponentNameNonNull();
 
+	@En("wire_configurations")
+	public String wireConf();
+
 	@En("Wire Envelope cannot be null")
 	public String wireEnvelopeNonNull();
 
@@ -428,6 +434,9 @@ public interface WireMessages {
 
 	@En("Wire Records cannot be null")
 	public String wireRecordsNonNull();
+
+	@En("Configured Wire Service properties cannot be null")
+	public String wireServicePropNonNull();
 
 	@En("Wires cannot be null")
 	public String wiresNonNull();

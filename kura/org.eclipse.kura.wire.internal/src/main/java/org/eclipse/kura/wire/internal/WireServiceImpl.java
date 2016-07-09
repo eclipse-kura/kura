@@ -13,6 +13,7 @@
 package org.eclipse.kura.wire.internal;
 
 import static org.eclipse.kura.Preconditions.checkNull;
+import static org.eclipse.kura.wire.internal.WireServiceOptions.CONF_WIRES;
 
 import java.util.List;
 import java.util.Map;
@@ -35,7 +36,6 @@ import org.eclipse.kura.wire.WireConfiguration;
 import org.eclipse.kura.wire.WireEmitter;
 import org.eclipse.kura.wire.WireReceiver;
 import org.eclipse.kura.wire.WireService;
-import org.eclipse.kura.wire.WireServiceOptions;
 import org.eclipse.kura.wire.Wires;
 import org.json.JSONException;
 import org.osgi.framework.InvalidSyntaxException;
@@ -147,7 +147,7 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 		s_logger.info(s_message.activatingWireService());
 		this.m_ctx = componentContext;
 		try {
-			this.m_options = Wires.newWireServiceOptions(properties);
+			this.m_options = WireUtils.newWireServiceOptions(properties);
 			this.m_properties = properties;
 
 			for (final WireConfiguration conf : this.m_options.getWireConfigurations()) {
@@ -433,7 +433,7 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 		try {
 			this.m_properties = Maps.newHashMap();
 			// Put the JSON configuration into properties to persist in snapshot
-			this.m_properties.put("wires", this.m_options.toJsonString());
+			this.m_properties.put(CONF_WIRES, this.m_options.toJsonString());
 			this.m_properties.put(DELETE_INSTANCE, NONE);
 			this.m_properties.put(DELETE_WIRES, NONE);
 			this.m_properties.put(RECEIVER_PID, NONE);
@@ -487,7 +487,7 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 		final Map<String, Object> newProperties = Maps.newHashMap(this.m_properties);
 		try {
 			final String jsonString = this.m_options.toJsonString();
-			newProperties.put(WireServiceOptions.CONF_WIRES, jsonString);
+			newProperties.put(CONF_WIRES, jsonString);
 			this.m_configService.updateConfiguration(CONF_PID, newProperties, shouldPersist);
 		} catch (final Exception exception) {
 			Throwables.propagateIfInstanceOf(exception, JSONException.class);

@@ -16,17 +16,13 @@ import static org.eclipse.kura.Preconditions.checkNull;
 
 import java.sql.Timestamp;
 import java.util.List;
-import java.util.Map;
 
 import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.annotation.Nullable;
 import org.eclipse.kura.type.TypedValue;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.osgi.util.position.Position;
-
-import com.google.common.collect.Lists;
 
 /**
  * The Class Wires is an utility class to provide quick operations for Kura
@@ -164,35 +160,6 @@ public final class Wires {
 	 */
 	public static WireRecord newWireRecord(final WireField... fields) {
 		return new WireRecord(fields);
-	}
-
-	/**
-	 * Creates New instance of {@link WireServiceOptions}
-	 *
-	 * @param properties
-	 *            the properties
-	 * @return the wire service options
-	 * @throws JSONException
-	 *             the JSON exception
-	 * @throws KuraRuntimeException
-	 *             if provided properties is null
-	 */
-	public static WireServiceOptions newWireServiceOptions(final Map<String, Object> properties) throws JSONException {
-		checkNull(properties, "Configured Wire Service properties cannot be null");
-		final List<WireConfiguration> wireConfs = Lists.newCopyOnWriteArrayList();
-		Object objWires = null;
-		if (properties.containsKey(WireServiceOptions.CONF_WIRES)) {
-			objWires = properties.get(WireServiceOptions.CONF_WIRES);
-		}
-		if ((objWires != null) && (objWires instanceof String)) {
-			final String strWires = (String) objWires;
-			final JSONArray jsonWires = new JSONArray(strWires);
-			for (int i = 0; i < jsonWires.length(); i++) {
-				final JSONObject jsonWire = jsonWires.getJSONObject(i);
-				wireConfs.add(Wires.newWireConfigurationFromJson(jsonWire));
-			}
-		}
-		return new WireServiceOptions(wireConfs);
 	}
 
 	/**

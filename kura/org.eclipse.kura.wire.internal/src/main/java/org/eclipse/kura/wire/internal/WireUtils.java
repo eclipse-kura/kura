@@ -12,15 +12,22 @@
 package org.eclipse.kura.wire.internal;
 
 import static org.eclipse.kura.Preconditions.checkNull;
+import static org.eclipse.kura.wire.internal.WireServiceOptions.CONF_WIRES;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.localization.LocalizationAdapter;
 import org.eclipse.kura.localization.WireMessages;
+import org.eclipse.kura.wire.WireConfiguration;
 import org.eclipse.kura.wire.WireEmitter;
 import org.eclipse.kura.wire.WireReceiver;
+import org.eclipse.kura.wire.Wires;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
@@ -192,6 +199,35 @@ final class WireUtils {
 			Throwables.propagate(e);
 		}
 		return false;
+	}
+
+	/**
+	 * Creates New instance of {@link WireServiceOptions}
+	 *
+	 * @param properties
+	 *            the properties
+	 * @return the wire service options
+	 * @throws JSONException
+	 *             the JSON exception
+	 * @throws KuraRuntimeException
+	 *             if provided properties is null
+	 */
+	static WireServiceOptions newWireServiceOptions(final Map<String, Object> properties) throws JSONException {
+		checkNull(properties, s_messages.wireServicePropNonNull());
+		final List<WireConfiguration> wireConfs = Lists.newCopyOnWriteArrayList();
+		Object objWires = null;
+		if (properties.containsKey(CONF_WIRES)) {
+			objWires = properties.get(CONF_WIRES);
+		}
+		if ((objWires != null) && (objWires instanceof String)) {
+			final String strWires = (String) objWires;
+			final JSONArray jsonWires = new JSONArray(strWires);
+			for (int i = 0; i < jsonWires.length(); i++) {
+				final JSONObject jsonWire = jsonWires.getJSONObject(i);
+				wireConfs.add(Wires.newWireConfigurationFromJson(jsonWire));
+			}
+		}
+		return new WireServiceOptions(wireConfs);
 	}
 
 }

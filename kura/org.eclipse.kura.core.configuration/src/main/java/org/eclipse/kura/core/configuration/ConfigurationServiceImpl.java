@@ -570,6 +570,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
         if (!m_allActivatedPids.contains(pid)) {
             s_logger.info("Registration of SelfConfiguringComponent {} by {}...", pid, this);
             m_allActivatedPids.add(pid);
+            m_servicePidByPid.put(pid, pid);
             m_activatedSelfConfigComponents.add(pid);
         }
     }

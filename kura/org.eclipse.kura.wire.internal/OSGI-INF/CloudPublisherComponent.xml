@@ -33,12 +33,12 @@
               interface="org.eclipse.kura.data.DataService" 
               policy="static" 
               cardinality="1..1" 
-              bind="setDataService" 
-              unbind="unsetDataService"/>
+              bind="bindDataService" 
+              unbind="unbindDataService"/>
    <reference name="CloudService" 
               interface="org.eclipse.kura.cloud.CloudService" 
               policy="static" 
               cardinality="1..1" 
-              bind="setCloudService" 
-              unbind="unsetCloudService"/>
+              bind="bindCloudService" 
+              unbind="unbindCloudService"/>
 </scr:component>

@@ -24,15 +24,15 @@ public interface WireService {
 	/**
 	 * Creates the wire between the provided wire emitter and the wire receiver
 	 *
-	 * @param emitterName
-	 *            the name of the wire emitter
-	 * @param receiverName
-	 *            the name of the wire receiver
+	 * @param emitterPid
+	 *            the PID of the wire emitter
+	 * @param receiverPid
+	 *            the PID of the wire receiver
 	 * @throws KuraRuntimeException
 	 *             if any of the arguments is null
 	 * @return the wire instance recently created
 	 */
-	public Wire createWire(String emitterName, String receiverName);
+	public Wire createWire(String emitterPid, String receiverPid);
 
 	/**
 	 * Creates the wire component.
@@ -43,32 +43,31 @@ public interface WireService {
 	 *            the name for the wire component
 	 * @throws KuraRuntimeException
 	 *             if any of the arguments is null
-	 * @return the wire component name which is recently created
 	 */
 	public void createWireComponent(String factoryPid, String name);
 
 	/**
 	 * Removes the wire between the provided wire emitter and the wire receiver
 	 *
-	 * @param emitterName
-	 *            the name of the wire emitter
-	 * @param receiverName
-	 *            the name of the wire receiver
+	 * @param emitterPid
+	 *            the PID of the wire emitter
+	 * @param receiverPid
+	 *            the PID of the wire receiver
 	 * @throws KuraRuntimeException
 	 *             if any of the arguments is null
 	 * @return true, if removal is successful
 	 */
-	public boolean removeWire(String emitterName, String receiverName);
+	public boolean removeWire(String emitterPid, String receiverPid);
 
 	/**
 	 * Removes the wire component.
 	 *
-	 * @param name
-	 *            the name of the wire component
+	 * @param pid
+	 *            the PID of the wire component
 	 * @throws KuraRuntimeException
 	 *             if argument is null
 	 * @return true, if removal is successful
 	 */
-	public boolean removeWireComponent(String name);
+	public boolean removeWireComponent(String pid);
 
 }

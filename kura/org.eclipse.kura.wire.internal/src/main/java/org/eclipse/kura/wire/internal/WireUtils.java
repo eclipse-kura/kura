@@ -48,6 +48,11 @@ final class WireUtils {
 
 	/** Localization Resource */
 	private static final WireMessages s_messages = LocalizationAdapter.adapt(WireMessages.class);
+	
+	/** Constructor */
+	private WireUtils() {
+		// Static Factory Methods container. No need to instantiate.
+	}
 
 	/**
 	 * Gets the wire emitters and receivers.
@@ -150,7 +155,7 @@ final class WireUtils {
 	 */
 	static boolean isEmitter(final BundleContext context, final String name) {
 		checkNull(context, s_messages.bundleContextNonNull());
-		checkNull(name, s_messages.emitterNameNonNull());
+		checkNull(name, s_messages.emitterPidNonNull());
 
 		try {
 			final Collection<ServiceReference<WireEmitter>> services = context.getServiceReferences(WireEmitter.class,
@@ -179,7 +184,7 @@ final class WireUtils {
 	 */
 	static boolean isReceiver(final BundleContext context, final String pid) {
 		checkNull(context, s_messages.bundleContextNonNull());
-		checkNull(pid, s_messages.receiverNameNonNull());
+		checkNull(pid, s_messages.receiverPidNonNull());
 
 		try {
 			final Collection<ServiceReference<WireReceiver>> services = context.getServiceReferences(WireReceiver.class,
@@ -207,12 +212,12 @@ final class WireUtils {
 	static WireServiceOptions newWireServiceOptions(final Map<String, Object> properties) {
 		checkNull(properties, s_messages.wireServicePropNonNull());
 		final List<WireConfiguration> wireConfs = Lists.newCopyOnWriteArrayList();
-		final Set<Integer> wireIds = Sets.newHashSet();
+		final Set<Long> wireIds = Sets.newHashSet();
 		final String separator = ".";
 		for (final Map.Entry<String, Object> entry : properties.entrySet()) {
 			final String key = entry.getKey();
 			if (key.contains(separator)) {
-				final Integer wireConfId = Integer.valueOf(key.substring(0, key.indexOf(separator)));
+				final Long wireConfId = Long.parseLong(key.substring(0, key.indexOf(separator)));
 				wireIds.add(wireConfId);
 			}
 		}
@@ -241,11 +246,6 @@ final class WireUtils {
 		}
 
 		return new WireServiceOptions(wireConfs);
-	}
-
-	/** Constructor */
-	private WireUtils() {
-		// Static Factory Methods container. No need to instantiate.
 	}
 
 }

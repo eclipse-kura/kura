@@ -75,6 +75,9 @@ public class BaseAsset implements Asset {
 	/** Container of mapped asset listeners and drivers listener. */
 	protected final Map<AssetListener, DriverListener> m_assetListeners;
 
+	/** The provided asset options instance. */
+	protected AssetOptions m_assetOptions;
+
 	/** The service component context. */
 	protected ComponentContext m_context;
 
@@ -115,14 +118,7 @@ public class BaseAsset implements Asset {
 		s_logger.debug(s_message.activating());
 		this.m_context = componentContext;
 		this.m_properties = properties;
-		// We don't retrieve any configuration while activating asset component
-		// because the user would provide the necessary configuration while
-		// updating. Let's consider the scenario for Wire Asset. The user will
-		// drag the Wire Asset Component to the Kura Wires composer UI and at
-		// that point of time, the asset component is already activated but the
-		// configuration of the driver to be attached is not at all provided.
-		// So, we don't need to retrieve any configuration while activating an
-		// asset component.
+		this.retrieveConfigurationsFromProperties(properties);
 		s_logger.debug(s_message.activatingDone());
 	}
 
@@ -388,10 +384,13 @@ public class BaseAsset implements Asset {
 	 */
 	private void retrieveConfigurationsFromProperties(final Map<String, Object> properties) {
 		s_logger.debug(s_message.retrievingConf());
-		final AssetOptions assetOptions = new AssetOptions(properties);
-		this.m_assetConfiguration = assetOptions.getAssetConfiguration();
+		if (this.m_assetOptions == null) {
+			this.m_assetOptions = new AssetOptions(properties);
+		}
+		if ((this.m_assetConfiguration == null) && (this.m_assetOptions != null)) {
+			this.m_assetConfiguration = this.m_assetOptions.getAssetConfiguration();
+		}
 		s_logger.debug(s_message.retrievingConfDone());
-
 	}
 
 	/** {@inheritDoc} */
@@ -427,9 +426,6 @@ public class BaseAsset implements Asset {
 	protected synchronized void updated(final Map<String, Object> properties) {
 		s_logger.debug(s_message.updating());
 		this.m_properties = properties;
-		// As mentioned in the comment in activate method, we only extract
-		// configuration while updating. Please refer to the previous comment
-		// for more details.
 		this.retrieveConfigurationsFromProperties(properties);
 		this.attachDriver(this.m_assetConfiguration.getDriverId());
 		s_logger.debug(s_message.updatingDone());

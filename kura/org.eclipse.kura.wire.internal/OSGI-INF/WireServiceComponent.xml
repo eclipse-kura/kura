@@ -24,7 +24,9 @@
       <provide interface="org.eclipse.kura.configuration.SelfConfiguringComponent"/>
       <provide interface="org.eclipse.kura.wire.WireService"/>
    </service>
-   <property name="service.pid" value="org.eclipse.kura.wire.WireService"/>/>
+   <property name="service.pid" value="org.eclipse.kura.wire.WireService"/>
+   <property name="osgi.command.scope" type="String" value="kura.wire"/>
+   <property name="osgi.command.function" type="String" value="{'createWire', 'createWireComponent', 'removeWire', 'removeWireComponent'}"/>
    <reference name="WireAdmin" 
               bind="bindWireAdmin" 
               unbind="unbindWireAdmin"

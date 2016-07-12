@@ -29,8 +29,8 @@ import com.google.common.base.Objects;
 @NotThreadSafe
 public final class WireConfiguration {
 
-	/** The Wire Emitter Name. */
-	private String emitterName;
+	/** The Wire Emitter PID. */
+	private String emitterPid;
 
 	/** The Filter. */
 	@Nullable
@@ -42,27 +42,27 @@ public final class WireConfiguration {
 	 */
 	private boolean isCreated;
 
-	/** The Wire Receiver Name. */
-	private String receiverName;
+	/** The Wire Receiver PID. */
+	private String receiverPid;
 
 	/**
 	 * Instantiate a new wire configuration.
 	 *
-	 * @param emitterName
-	 *            the Wire Emitter name
-	 * @param receiverName
-	 *            the Wire Receiver name
+	 * @param emitterPid
+	 *            the Wire Emitter PID
+	 * @param receiverPid
+	 *            the Wire Receiver PID
 	 * @param filter
 	 *            the filter
 	 * @throws KuraRuntimeException
 	 *             if any of the arguments is null (except filter)
 	 */
-	public WireConfiguration(final String emitterName, final String receiverName, @Nullable final String filter) {
-		checkNull(emitterName, "Emitter name cannot be null");
-		checkNull(receiverName, "Receiver name cannot be null");
+	public WireConfiguration(final String emitterPid, final String receiverPid, @Nullable final String filter) {
+		checkNull(emitterPid, "Emitter PID cannot be null");
+		checkNull(receiverPid, "Receiver PID cannot be null");
 
-		this.emitterName = emitterName;
-		this.receiverName = receiverName;
+		this.emitterPid = emitterPid;
+		this.receiverPid = receiverPid;
 		this.filter = filter;
 		this.isCreated = false;
 	}
@@ -70,10 +70,10 @@ public final class WireConfiguration {
 	/**
 	 * Instantiate a new wire configuration.
 	 *
-	 * @param emitterName
-	 *            the Wire Emitter name
-	 * @param receiverName
-	 *            the Wire Receiver name
+	 * @param emitterPid
+	 *            the Wire Emitter PID
+	 * @param receiverPid
+	 *            the Wire Receiver PID
 	 * @param filter
 	 *            the filter
 	 * @param isCreated
@@ -82,13 +82,13 @@ public final class WireConfiguration {
 	 * @throws KuraRuntimeException
 	 *             if any of the arguments is null (except filter)
 	 */
-	public WireConfiguration(final String emitterName, final String receiverName, @Nullable final String filter,
+	public WireConfiguration(final String emitterPid, final String receiverPid, @Nullable final String filter,
 			final boolean isCreated) {
-		checkNull(emitterName, "Emitter name cannot be null");
-		checkNull(receiverName, "Receiver name cannot be null");
+		checkNull(emitterPid, "Emitter PID cannot be null");
+		checkNull(receiverPid, "Receiver PID cannot be null");
 
-		this.emitterName = emitterName;
-		this.receiverName = receiverName;
+		this.emitterPid = emitterPid;
+		this.receiverPid = receiverPid;
 		this.filter = filter;
 		this.isCreated = isCreated;
 	}
@@ -98,20 +98,20 @@ public final class WireConfiguration {
 	public boolean equals(final Object obj) {
 		if (obj instanceof WireConfiguration) {
 			final WireConfiguration wireConfiguration = (WireConfiguration) obj;
-			return Objects.equal(this.emitterName, wireConfiguration.getEmitterName())
-					&& Objects.equal(this.receiverName, wireConfiguration.getReceiverName())
+			return Objects.equal(this.emitterPid, wireConfiguration.getEmitterPid())
+					&& Objects.equal(this.receiverPid, wireConfiguration.getReceiverPid())
 					&& Objects.equal(this.isCreated, wireConfiguration.isCreated());
 		}
 		return false;
 	}
 
 	/**
-	 * Get the Wire Emitter name.
+	 * Get the Wire Emitter PID.
 	 *
-	 * @return the Wire Emitter name
+	 * @return the Wire Emitter PID
 	 */
-	public String getEmitterName() {
-		return this.emitterName;
+	public String getEmitterPid() {
+		return this.emitterPid;
 	}
 
 	/**
@@ -124,18 +124,18 @@ public final class WireConfiguration {
 	}
 
 	/**
-	 * Get the Wire Receiver name.
+	 * Gets the Wire Receiver PID.
 	 *
-	 * @return the Wire Receiver name
+	 * @return the Wire Receiver PID
 	 */
-	public String getReceiverName() {
-		return this.receiverName;
+	public String getReceiverPid() {
+		return this.receiverPid;
 	}
 
 	/** {@inheritDoc} */
 	@Override
 	public int hashCode() {
-		return Objects.hashCode(this.isCreated, this.emitterName, this.receiverName);
+		return Objects.hashCode(this.isCreated, this.emitterPid, this.receiverPid);
 	}
 
 	/**
@@ -153,7 +153,7 @@ public final class WireConfiguration {
 	 * a wire between the wire emitter and a wire receiver
 	 *
 	 * @param isCreated
-	 *            the new created
+	 *            the new created flag
 	 */
 	public void setCreated(final boolean isCreated) {
 		this.isCreated = isCreated;
@@ -162,26 +162,26 @@ public final class WireConfiguration {
 	/** {@inheritDoc} */
 	@Override
 	public String toString() {
-		return MoreObjects.toStringHelper(this).add("emitter_name", this.emitterName)
-				.add("receiver_name", this.receiverName).add("filter", this.filter).toString();
+		return MoreObjects.toStringHelper(this).add("emitter_pid", this.emitterPid)
+				.add("receiver_pid", this.receiverPid).add("filter", this.filter).toString();
 	}
 
 	/**
-	 * Update the names of the Wire Components associated with this Wire
+	 * Update the PIDs of the Wire Components associated with this Wire
 	 * Configuration
 	 *
-	 * @param newEmitterName
-	 *            the new Wire Emitter name
-	 * @param newReceiverName
-	 *            the new Wire Receiver name
+	 * @param newEmitterPid
+	 *            the new Wire Emitter PID
+	 * @param newReceiverPid
+	 *            the new Wire Receiver PID
 	 * @throws KuraRuntimeException
 	 *             if any of the arguments is null
 	 */
-	public void update(final String newEmitterName, final String newReceiverName) {
-		checkNull(newEmitterName, "Emitter name cannot be null");
-		checkNull(newReceiverName, "Receiver name cannot be null");
+	public void update(final String newEmitterPid, final String newReceiverPid) {
+		checkNull(newEmitterPid, "Emitter PID cannot be null");
+		checkNull(newReceiverPid, "Receiver PID cannot be null");
 
-		this.emitterName = newEmitterName;
-		this.receiverName = newReceiverName;
+		this.emitterPid = newEmitterPid;
+		this.receiverPid = newReceiverPid;
 	}
 }

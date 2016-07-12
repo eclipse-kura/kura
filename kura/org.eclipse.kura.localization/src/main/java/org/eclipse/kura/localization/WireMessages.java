@@ -168,8 +168,8 @@ public interface WireMessages {
 	@En("WireService leverages Kura Wiring communication functionalities between Wire Components")
 	public String description();
 
-	@En("Emitter name cannot be null")
-	public String emitterNameNonNull();
+	@En("Emitter PID cannot be null")
+	public String emitterPidNonNull();
 
 	@En("Error while creating wire component...")
 	public String errorCreatingWireComponent();
@@ -261,8 +261,8 @@ public interface WireMessages {
 	@En("Properties cannot be null")
 	public String propertiesNonNull();
 
-	@En("Receiver name cannot be null")
-	public String receiverNameNonNull();
+	@En("Receiver PID cannot be null")
+	public String receiverPidNonNull();
 
 	@En("Refreshing boolean value {0}")
 	public String refreshBoolean(boolean value);

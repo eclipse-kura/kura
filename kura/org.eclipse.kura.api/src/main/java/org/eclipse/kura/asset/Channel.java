@@ -35,7 +35,7 @@ public final class Channel {
 	/** The communication channel configuration. */
 	private final Map<String, Object> configuration;
 
-	/** The unique identifier of the channel */
+	/** The unique identifier of the channel. */
 	private final long id;
 
 	/** The name of the communication channel. */
@@ -101,6 +101,11 @@ public final class Channel {
 		return this.configuration;
 	}
 
+	/**
+	 * Gets the ID.
+	 *
+	 * @return the id
+	 */
 	public long getId() {
 		return this.id;
 	}

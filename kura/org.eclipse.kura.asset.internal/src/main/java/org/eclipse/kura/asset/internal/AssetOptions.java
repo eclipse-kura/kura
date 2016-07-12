@@ -17,7 +17,6 @@ import static org.eclipse.kura.Preconditions.checkNull;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicLong;
 
 import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.asset.AssetConfiguration;
@@ -49,10 +48,10 @@ import com.google.common.collect.Sets;
  * denote the asset name</li>
  * <li>A value associated with <b><i>asset.desc</i></b> key denotes the asset
  * description</li>
- * <li>x.CH.[property]</li> where x is any number denoting the channel ID and
- * the {@code [property]} denotes the protocol specific properties. (Note that
- * the format includes atleast two ".") denotes map object containing a channel
- * configuration</li>
+ * <li>x.CH.[property]</li> where x is any number denoting the channel's unique
+ * ID and the {@code [property]} denotes the protocol specific properties. (Note
+ * that the format includes atleast two ".") denotes map object containing a
+ * channel configuration</li>
  *
  * For example, 1.CH.name, 1.CH.value.type etc.
  *
@@ -138,9 +137,6 @@ public final class AssetOptions {
 
 	/** Name of the driver to be associated with. */
 	private String m_driverId;
-
-	/** Channel ID tracker */
-	private final AtomicLong m_idTracker = new AtomicLong(1);
 
 	/**
 	 * Instantiates a new asset configuration.
@@ -315,8 +311,7 @@ public final class AssetOptions {
 				}
 			}
 		}
-		final Channel channel = Assets.newChannel(this.m_idTracker.getAndIncrement(), channelName, channelType,
-				dataType, channelConfig);
+		final Channel channel = Assets.newChannel(channelId, channelName, channelType, dataType, channelConfig);
 		s_logger.debug(s_message.retrievingChannelDone());
 		return channel;
 	}

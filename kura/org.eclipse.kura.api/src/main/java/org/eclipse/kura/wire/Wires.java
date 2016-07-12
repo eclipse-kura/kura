@@ -20,8 +20,6 @@ import java.util.List;
 import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.annotation.Nullable;
 import org.eclipse.kura.type.TypedValue;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.osgi.util.position.Position;
 
 /**
@@ -62,7 +60,7 @@ public final class Wires {
 	 *            the Wire Receiver name
 	 * @param filter
 	 *            the filter
-	 * @param created
+	 * @param isCreated
 	 *            the created flag signifying whether Wire Admin has already
 	 *            created the wire between the wire emitter and a wire receiver
 	 * @return the Wire Configuration
@@ -70,27 +68,8 @@ public final class Wires {
 	 *             if any of the arguments is null
 	 */
 	public static WireConfiguration newWireConfiguration(final String emitterName, final String receiverName,
-			@Nullable final String filter, final boolean created) {
-		return new WireConfiguration(emitterName, receiverName, filter, created);
-	}
-
-	/**
-	 * Returns new instance of Wire Configuration from JSON object provided
-	 *
-	 * @param jsonWire
-	 *            the JSON object representing the wires
-	 * @return the wire configuration
-	 * @throws JSONException
-	 *             the JSON exception
-	 * @throws KuraRuntimeException
-	 *             if the JSON object instance passed as argument is null
-	 */
-	public static WireConfiguration newWireConfigurationFromJson(final JSONObject jsonWire) throws JSONException {
-		checkNull(jsonWire, "JSON Object cannot be null");
-		final String emitter = jsonWire.getString("emitter");
-		final String receiver = jsonWire.getString("receiver");
-		final String filter = jsonWire.optString("filter");
-		return new WireConfiguration(emitter, receiver, filter);
+			@Nullable final String filter, final boolean isCreated) {
+		return new WireConfiguration(emitterName, receiverName, filter, isCreated);
 	}
 
 	/**

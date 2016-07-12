@@ -36,8 +36,8 @@
             <Option label="Connect on event and stay connected indefinitely." value="AUTOCONNECT_MODE_ON_AND_STAY" />
         </AD>
 
-        <AD id="autoconnect.quiesceTimeout"
-            name="autoconnect.quiesceTimeout"
+        <AD id="autoconnect.timeout"
+            name="autoconnect.timeout"
             type="Integer"
             cardinality="0"
             required="true"

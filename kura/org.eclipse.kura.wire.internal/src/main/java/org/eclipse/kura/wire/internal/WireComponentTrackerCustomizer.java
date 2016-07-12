@@ -116,7 +116,7 @@ final class WireComponentTrackerCustomizer implements ServiceTrackerCustomizer<W
 	 *
 	 * @return the wire emitters
 	 */
-	public List<String> getWireEmitters() {
+	List<String> getWireEmitters() {
 		return ImmutableList.copyOf(this.m_wireEmitters);
 	}
 
@@ -125,7 +125,7 @@ final class WireComponentTrackerCustomizer implements ServiceTrackerCustomizer<W
 	 *
 	 * @return the wire receivers
 	 */
-	public List<String> getWireReceivers() {
+	List<String> getWireReceivers() {
 		return ImmutableList.copyOf(this.m_wireReceivers);
 	}
 

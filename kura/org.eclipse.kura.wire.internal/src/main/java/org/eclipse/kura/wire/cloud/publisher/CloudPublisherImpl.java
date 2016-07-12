@@ -118,6 +118,30 @@ public final class CloudPublisherImpl
 	}
 
 	/**
+	 * Binds the cloud service.
+	 *
+	 * @param cloudService
+	 *            the new cloud service
+	 */
+	public synchronized void bindCloudService(final CloudService cloudService) {
+		if (this.m_cloudService == null) {
+			this.m_cloudService = cloudService;
+		}
+	}
+
+	/**
+	 * Binds the data service.
+	 *
+	 * @param dataService
+	 *            the new data service
+	 */
+	public synchronized void bindDataService(final DataService dataService) {
+		if (this.m_dataService == null) {
+			this.m_dataService = dataService;
+		}
+	}
+
+	/**
 	 * Builds the JSON instance from the provided wire record.
 	 *
 	 * @param wireRecord
@@ -371,30 +395,6 @@ public final class CloudPublisherImpl
 	}
 
 	/**
-	 * Set the cloud service.
-	 *
-	 * @param cloudService
-	 *            the new cloud service
-	 */
-	public synchronized void setCloudService(final CloudService cloudService) {
-		if (this.m_cloudService == null) {
-			this.m_cloudService = cloudService;
-		}
-	}
-
-	/**
-	 * Set the data service.
-	 *
-	 * @param dataService
-	 *            the new data service
-	 */
-	public synchronized void setDataService(final DataService dataService) {
-		if (this.m_dataService == null) {
-			this.m_dataService = dataService;
-		}
-	}
-
-	/**
 	 * Setup cloud client.
 	 *
 	 * @throws KuraException
@@ -432,24 +432,24 @@ public final class CloudPublisherImpl
 	}
 
 	/**
-	 * Unset cloud service.
+	 * Unbinds cloud service.
 	 *
 	 * @param cloudService
 	 *            the cloud service
 	 */
-	public synchronized void unsetCloudService(final CloudService cloudService) {
+	public synchronized void unbindCloudService(final CloudService cloudService) {
 		if (this.m_cloudService == cloudService) {
 			this.m_cloudService = null;
 		}
 	}
 
 	/**
-	 * Unset data service.
+	 * Unbinds data service.
 	 *
 	 * @param dataService
 	 *            the data service
 	 */
-	public synchronized void unsetDataService(final DataService dataService) {
+	public synchronized void unbindDataService(final DataService dataService) {
 		if (this.m_dataService == dataService) {
 			this.m_dataService = null;
 		}

@@ -96,9 +96,6 @@ public interface WireMessages {
 	@En("Component context cannot be null")
 	public String componentContextNonNull();
 
-	@En("Component name cannot be null")
-	public String componentNameNonNull();
-
 	@En("Configurations cannot be null")
 	public String configurationNonNull();
 
@@ -216,6 +213,9 @@ public interface WireMessages {
 	@En("heading")
 	public String heading();
 
+	@En("Insertion failed. Reconciling Table and Columns...")
+	public String insertionFailed();
+
 	@En("Interface class cannot be null")
 	public String interfaceClassNonNull();
 
@@ -257,6 +257,9 @@ public interface WireMessages {
 
 	@En("Position cannot be null")
 	public String positionNonNull();
+
+	@En("Properties cannot be null")
+	public String propertiesNonNull();
 
 	@En("Receiver name cannot be null")
 	public String receiverNameNonNull();
@@ -411,9 +414,6 @@ public interface WireMessages {
 	@En("Updating Wire Service Component...Done")
 	public String updatingWireServiceDone();
 
-	@En("Value cannot be null")
-	public String valueNonNull();
-
 	@En("Wire Component name cannot be null")
 	public String wireComponentNameNonNull();
 
@@ -434,6 +434,9 @@ public interface WireMessages {
 
 	@En("Wire Records cannot be null")
 	public String wireRecordsNonNull();
+
+	@En("Wire Service cannot be null")
+	public String wireServiceNonNull();
 
 	@En("Configured Wire Service properties cannot be null")
 	public String wireServicePropNonNull();

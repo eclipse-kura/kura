@@ -40,19 +40,25 @@ public interface AssetMessages {
 	@En("asset_flag")
 	public String assetFlag();
 
+	@En("Asset cannot be null")
+	public String assetNonNull();
+
 	@En("Asset Records cannot be empty")
 	public String assetRecordsNonEmpty();
 
 	@En("Asset Records cannot be null")
 	public String assetRecordsNonNull();
 
-	@En("Boolean")
+	@En("BOOLEAN")
 	public String booleanString();
 
-	@En("Byte Array")
+	@En("Bundle context cannot be null")
+	public String bundleContextNonNull();
+
+	@En("BYTE_ARRAY")
 	public String byteArray();
 
-	@En("Byte")
+	@En("BYTE")
 	public String byteStr();
 
 	@En("channel_name")
@@ -100,7 +106,7 @@ public interface AssetMessages {
 	@En("Asset Description")
 	public String description();
 
-	@En("Double")
+	@En("DOUBLE")
 	public String doubleStr();
 
 	@En("Attaching driver instance...")
@@ -145,13 +151,16 @@ public interface AssetMessages {
 	@En("field name")
 	public String fieldName();
 
-	@En("Integer")
+	@En("Provided indices cannot be null")
+	public String indicesNonNull();
+
+	@En("INTEGER")
 	public String integerStr();
 
 	@En("Asset Listener cannot be null")
 	public String listenerNonNull();
 
-	@En("Long")
+	@En("LONG")
 	public String longStr();
 
 	@En("Asset Name")
@@ -166,17 +175,26 @@ public interface AssetMessages {
 	@En("Old Attribute Definition cannot be null")
 	public String oldAdNonNull();
 
-	@En("Name of the Point")
+	@En("Name of the Channel")
 	public String pointName();
+
+	@En("Prefix cannot be null")
+	public String prefixNonNull();
 
 	@En("Properties cannot be null")
 	public String propertiesNonNull();
+
+	@En("READ")
+	public String read();
 
 	@En("Reading asset channels...")
 	public String readingChannels();
 
 	@En("Reading asset channels...Done")
 	public String readingChannelsDone();
+
+	@En("READ_WRITE")
+	public String readWrite();
 
 	@En("Registering Asset Listener for monitoring...")
 	public String registeringListener();
@@ -196,16 +214,19 @@ public interface AssetMessages {
 	@En("Retrieving configurations from the properties...Done")
 	public String retrievingConfDone();
 
-	@En("Short")
+	@En("SHORT")
 	public String shortStr();
 
-	@En("String")
+	@En("STRING")
 	public String string();
 
 	@En("timestamp")
 	public String timestamp();
 
-	@En("Primitive type of the Point")
+	@En("Type of the channel")
+	public String type();
+
+	@En("Value type of the channel")
 	public String typePoint();
 
 	@En("Unregistering Asset Listener...")
@@ -240,6 +261,9 @@ public interface AssetMessages {
 
 	@En("Wire records cannot be empty")
 	public String wireRecordsNonEmpty();
+
+	@En("WRITE")
+	public String write();
 
 	@En("Writing to channels...")
 	public String writing();

@@ -13,6 +13,7 @@
 package org.eclipse.kura.wire.store;
 
 import static org.eclipse.kura.Preconditions.checkNull;
+import static org.osgi.framework.Constants.SERVICE_PID;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -199,7 +200,7 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, WireR
 	/** {@inheritDoc} */
 	@Override
 	public String getName() {
-		return (String) this.m_ctx.getProperties().get("service.pid");
+		return (String) this.m_ctx.getProperties().get(SERVICE_PID);
 	}
 
 	/**
@@ -421,8 +422,8 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, WireR
 				/** {@inheritDoc} */
 				@Override
 				public void run() {
-					for (final String tableName : m_tableNames) {
-						clear(tableName);
+					for (final String tableName : DbWireRecordStore.this.m_tableNames) {
+						DbWireRecordStore.this.clear(tableName);
 					}
 				}
 			}, cleanUpRate, TimeUnit.SECONDS);
@@ -454,6 +455,7 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, WireR
 				this.insertDataRecord(tableName, wireRecord);
 				inserted = true;
 			} catch (final SQLException e) {
+				s_logger.debug(s_message.insertionFailed() + Throwables.getStackTraceAsString(e));
 				try {
 					this.reconcileTable(tableName);
 					this.reconcileColumns(tableName, wireRecord);

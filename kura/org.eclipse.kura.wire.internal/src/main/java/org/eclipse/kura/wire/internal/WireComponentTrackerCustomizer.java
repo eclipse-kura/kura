@@ -12,9 +12,13 @@
  */
 package org.eclipse.kura.wire.internal;
 
+import static org.eclipse.kura.Preconditions.checkNull;
+import static org.osgi.framework.Constants.SERVICE_PID;
+
 import java.util.List;
 
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.localization.LocalizationAdapter;
 import org.eclipse.kura.localization.WireMessages;
 import org.eclipse.kura.wire.WireComponent;
@@ -64,9 +68,14 @@ final class WireComponentTrackerCustomizer implements ServiceTrackerCustomizer<W
 	 *            the wire service
 	 * @throws InvalidSyntaxException
 	 *             the invalid syntax exception
+	 * @throws KuraRuntimeException
+	 *             if any of the arguments is null
 	 */
 	WireComponentTrackerCustomizer(final BundleContext context, final WireServiceImpl wireService)
 			throws InvalidSyntaxException {
+		checkNull(context, s_message.bundleContextNonNull());
+		checkNull(wireService, s_message.wireServiceNonNull());
+
 		this.m_wireEmitters = Lists.newArrayList();
 		this.m_wireReceivers = Lists.newArrayList();
 		this.m_wireService = wireService;
@@ -80,7 +89,7 @@ final class WireComponentTrackerCustomizer implements ServiceTrackerCustomizer<W
 		s_logger.debug(s_message.removingWireComponent());
 		this.m_context.ungetService(reference);
 		boolean flag = false;
-		final String property = (String) reference.getProperty(WireUtils.SERVICE_PID_PROPERTY);
+		final String property = (String) reference.getProperty(SERVICE_PID);
 		if (service instanceof WireEmitter) {
 			this.m_wireEmitters.add(property);
 			s_logger.debug(s_message.registeringEmitter(property));
@@ -133,7 +142,7 @@ final class WireComponentTrackerCustomizer implements ServiceTrackerCustomizer<W
 		s_logger.debug(s_message.addingWireComponent());
 		this.m_context.ungetService(reference);
 		boolean flag = false;
-		final String property = (String) reference.getProperty(WireUtils.SERVICE_PID_PROPERTY);
+		final String property = (String) reference.getProperty(SERVICE_PID);
 		if (service instanceof WireEmitter) {
 			this.m_wireEmitters.remove(property);
 			s_logger.debug(s_message.deregisteringEmitter(property));

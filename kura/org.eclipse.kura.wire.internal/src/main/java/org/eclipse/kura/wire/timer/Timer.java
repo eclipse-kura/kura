@@ -73,7 +73,7 @@ public final class Timer implements WireEmitter, ConfigurableComponent {
 	 * Instantiates a new timer.
 	 */
 	public Timer() {
-		this.m_executorService = Executors.newScheduledThreadPool(5);
+		this.m_executorService = Executors.newSingleThreadScheduledExecutor();
 		this.m_wireSupport = Wires.newWireSupport(this);
 	}
 

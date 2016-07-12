@@ -14,13 +14,11 @@ package org.eclipse.kura.wire.store;
 
 import java.util.Map;
 
-import org.eclipse.kura.wire.internal.AbstractConfigurationOptions;
-
 /**
  * The Class DbWireRecordFilterOptions is responsible to contain all the Db Wire
  * Record related filter options
  */
-final class DbWireRecordFilterOptions extends AbstractConfigurationOptions {
+final class DbWireRecordFilterOptions {
 
 	/** The Constant denotes the cache update interval. */
 	private static final String CONF_CACHE_INTERVAL = "cache.update.interval";
@@ -31,6 +29,9 @@ final class DbWireRecordFilterOptions extends AbstractConfigurationOptions {
 	/** The Constant denotes SQL view. */
 	private static final String CONF_SQL_VIEW = "sql.view";
 
+	/** The properties as associated */
+	private final Map<String, Object> m_properties;
+
 	/**
 	 * Instantiates a new DB wire record filter options.
 	 *
@@ -38,7 +39,7 @@ final class DbWireRecordFilterOptions extends AbstractConfigurationOptions {
 	 *            the provided properties
 	 */
 	DbWireRecordFilterOptions(final Map<String, Object> properties) {
-		super(properties);
+		this.m_properties = properties;
 	}
 
 	/**

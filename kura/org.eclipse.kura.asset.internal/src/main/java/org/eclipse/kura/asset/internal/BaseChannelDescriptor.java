@@ -15,6 +15,8 @@ package org.eclipse.kura.asset.internal;
 import java.util.List;
 
 import org.eclipse.kura.KuraRuntimeException;
+import org.eclipse.kura.asset.AssetConfiguration;
+import org.eclipse.kura.asset.ChannelDescriptor;
 import org.eclipse.kura.core.configuration.metatype.Tad;
 import org.eclipse.kura.core.configuration.metatype.Toption;
 import org.eclipse.kura.core.configuration.metatype.Tscalar;
@@ -24,19 +26,51 @@ import org.eclipse.kura.localization.LocalizationAdapter;
 import com.google.common.collect.Lists;
 
 /**
- * The Class BaseAssetChannelDescriptor returns the default channel descriptor
- * required for a base asset
+ * The Class BaseChannelDescriptor returns the basic channel descriptor required
+ * for a channel
+ *
+ * The basic descriptions include the following
+ * <ul>
+ * <li>name</li> denotes the name of the channel
+ * <li>type</li>
+ * <li>value.type</li>
+ * <ul>
+ *
+ * The <b><i>type</i></b> would be one of the following:
+ * <ul>
+ * <li>READ</li>
+ * <li>WRITE</li>
+ * <li>READ_WRITE</li>
+ * <ul>
+ *
+ * The <b><i>value.type</i></b> would be one of the following:
+ * <ul>
+ * <li>INTEGER</li>
+ * <li>DOUBLE</li>
+ * <li>BYTE</li>
+ * <li>SHORT</li>
+ * <li>LONG</li>
+ * <li>BOOLEAN</li>
+ * <li>STRING</li>
+ * <li>BYTE_ARRAY</li>
+ * <ul>
+ *
+ * @see AssetOptions
+ * @see AssetConfiguration
  */
-public final class BaseAssetChannelDescriptor {
+public final class BaseChannelDescriptor implements ChannelDescriptor {
 
 	/** Name Property to be used in the configuration */
-	private static final String NAME = "name";
+	public static final String NAME = "name";
 
 	/** Localization Resource */
 	private static final AssetMessages s_message = LocalizationAdapter.adapt(AssetMessages.class);
 
 	/** Type Property to be used in the configuration */
-	private static final String TYPE = "type";
+	public static final String TYPE = "type";
+
+	/** Value type Property to be used in the configuration */
+	public static final String VALUE_TYPE = "value.type";
 
 	/** The default elements. */
 	private final List<Tad> m_defaultElements;
@@ -47,14 +81,14 @@ public final class BaseAssetChannelDescriptor {
 	 * @throws KuraRuntimeException
 	 *             if argument is null
 	 */
-	private BaseAssetChannelDescriptor() {
+	public BaseChannelDescriptor() {
 		this.m_defaultElements = Lists.newArrayList();
 
 		final Tad name = new Tad();
 		name.setId(NAME);
 		name.setName(NAME);
 		name.setType(Tscalar.STRING);
-		name.setDefault(s_message.fieldName());
+		name.setDefault(s_message.string());
 		name.setDescription(s_message.pointName());
 		name.setCardinality(0);
 		name.setRequired(true);
@@ -64,69 +98,80 @@ public final class BaseAssetChannelDescriptor {
 		final Tad type = new Tad();
 		type.setName(TYPE);
 		type.setId(TYPE);
-		type.setDescription(s_message.typePoint());
+		type.setDescription(s_message.type());
 		type.setType(Tscalar.STRING);
 		type.setRequired(true);
 		type.setDefault(s_message.string());
 
+		final Toption oRead = new Toption();
+		oRead.setValue(s_message.read());
+		oRead.setLabel(s_message.read());
+		type.getOption().add(oRead);
+
+		final Toption oWrite = new Toption();
+		oWrite.setValue(s_message.write());
+		oWrite.setLabel(s_message.write());
+		type.getOption().add(oWrite);
+
+		final Toption oReadWrite = new Toption();
+		oReadWrite.setValue(s_message.readWrite());
+		oReadWrite.setLabel(s_message.readWrite());
+		type.getOption().add(oReadWrite);
+
+		final Tad valueType = new Tad();
+		valueType.setName(VALUE_TYPE);
+		valueType.setId(VALUE_TYPE);
+		valueType.setDescription(s_message.typePoint());
+		valueType.setType(Tscalar.STRING);
+		valueType.setRequired(true);
+		valueType.setDefault(s_message.string());
+
 		final Toption oBoolean = new Toption();
 		oBoolean.setValue(s_message.booleanString());
 		oBoolean.setLabel(s_message.booleanString());
-		type.getOption().add(oBoolean);
+		valueType.getOption().add(oBoolean);
 
 		final Toption oByte = new Toption();
 		oByte.setValue(s_message.byteStr());
 		oByte.setLabel(s_message.byteStr());
-		type.getOption().add(oByte);
+		valueType.getOption().add(oByte);
 
 		final Toption oDouble = new Toption();
 		oDouble.setValue(s_message.doubleStr());
 		oDouble.setLabel(s_message.doubleStr());
-		type.getOption().add(oDouble);
+		valueType.getOption().add(oDouble);
 
 		final Toption oInteger = new Toption();
 		oInteger.setValue(s_message.integerStr());
 		oInteger.setLabel(s_message.integerStr());
-		type.getOption().add(oInteger);
+		valueType.getOption().add(oInteger);
 		final Toption oLong = new Toption();
 		oLong.setValue(s_message.longStr());
 		oLong.setLabel(s_message.longStr());
-		type.getOption().add(oLong);
+		valueType.getOption().add(oLong);
 
 		final Toption oByteArray = new Toption();
 		oByteArray.setValue(s_message.byteArray());
 		oByteArray.setLabel(s_message.byteArray());
-		type.getOption().add(oByteArray);
+		valueType.getOption().add(oByteArray);
 
 		final Toption oShort = new Toption();
 		oShort.setValue(s_message.shortStr());
 		oShort.setLabel(s_message.shortStr());
-		type.getOption().add(oShort);
+		valueType.getOption().add(oShort);
 
 		final Toption oString = new Toption();
 		oString.setValue(s_message.string());
 		oString.setLabel(s_message.string());
-		type.getOption().add(oString);
+		valueType.getOption().add(oString);
 
-		this.m_defaultElements.add(type);
+		this.m_defaultElements.add(valueType);
 	}
 
-	/**
-	 * Gets the default configuration.
-	 *
-	 * @return the default configuration
-	 */
-	public List<Tad> getDefaultConfiguration() {
+	/** {@inheritDoc} */
+	@Override
+	public Object getDescriptor() {
 		return this.m_defaultElements;
-	}
-	
-	/**
-	 * Gets the default descriptor
-	 *
-	 * @return the default descriptor
-	 */
-	public static BaseAssetChannelDescriptor getDefault() {
-		return new BaseAssetChannelDescriptor();
 	}
 
 }

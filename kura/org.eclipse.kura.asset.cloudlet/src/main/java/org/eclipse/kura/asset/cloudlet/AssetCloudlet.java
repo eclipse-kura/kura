@@ -12,6 +12,7 @@
  */
 package org.eclipse.kura.asset.cloudlet;
 
+import static org.eclipse.kura.Preconditions.checkCondition;
 import static org.eclipse.kura.Preconditions.checkNull;
 
 import java.util.List;
@@ -20,10 +21,10 @@ import java.util.Map;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.asset.Asset;
+import org.eclipse.kura.asset.AssetConfiguration;
 import org.eclipse.kura.asset.AssetRecord;
 import org.eclipse.kura.asset.Assets;
 import org.eclipse.kura.asset.Channel;
-import org.eclipse.kura.asset.internal.AssetConfiguration;
 import org.eclipse.kura.asset.internal.BaseAsset;
 import org.eclipse.kura.cloud.CloudClient;
 import org.eclipse.kura.cloud.CloudService;
@@ -93,7 +94,7 @@ public final class AssetCloudlet extends Cloudlet {
 	private static final Logger s_logger = LoggerFactory.getLogger(AssetCloudlet.class);
 
 	/** Localization Resource */
-	private static final AssetCloudletMessages s_messages = LocalizationAdapter.adapt(AssetCloudletMessages.class);
+	private static final AssetCloudletMessages s_message = LocalizationAdapter.adapt(AssetCloudletMessages.class);
 
 	/** The map of assets present in the OSGi service registry. */
 	private Map<String, Asset> m_assets;
@@ -114,7 +115,7 @@ public final class AssetCloudlet extends Cloudlet {
 	/** {@inheritDoc} */
 	@Override
 	protected synchronized void activate(final ComponentContext componentContext) {
-		s_logger.debug(s_messages.activating());
+		s_logger.debug(s_message.activating());
 		super.activate(componentContext);
 		try {
 			this.m_assetTrackerCustomizer = new AssetTrackerCustomizer(componentContext.getBundleContext());
@@ -124,7 +125,7 @@ public final class AssetCloudlet extends Cloudlet {
 		} catch (final InvalidSyntaxException e) {
 			Throwables.propagate(e);
 		}
-		s_logger.debug(s_messages.activatingDone());
+		s_logger.debug(s_message.activatingDone());
 	}
 
 	/**
@@ -139,21 +140,46 @@ public final class AssetCloudlet extends Cloudlet {
 		}
 	}
 
+	/**
+	 * Checks if the provided channel is present in the provided map
+	 *
+	 * @param channelName
+	 *            the name of channel
+	 * @param channels
+	 *            the provided container of channels
+	 * @return the id of the channel if found or else 0
+	 * @throws KuraRuntimeException
+	 *             if driver id provided is null
+	 */
+	private long checkChannelAvailability(final String channelName, final Map<Long, Channel> channels) {
+		checkNull(channelName, s_message.channelNameNonNull());
+		checkNull(channels, s_message.channelsNonNull());
+		checkCondition(channels.isEmpty(), s_message.channelsNonEmpty());
+
+		for (final Map.Entry<Long, Channel> channel : channels.entrySet()) {
+			final String chName = channel.getValue().getName();
+			if (channelName.equals(chName)) {
+				return channel.getKey();
+			}
+		}
+		return 0;
+	}
+
 	/** {@inheritDoc} */
 	@Override
 	protected synchronized void deactivate(final ComponentContext componentContext) {
-		s_logger.debug(s_messages.deactivating());
+		s_logger.debug(s_message.deactivating());
 		super.deactivate(componentContext);
 		super.setCloudService(null);
 		this.m_serviceTracker.close();
-		s_logger.debug(s_messages.deactivatingDone());
+		s_logger.debug(s_message.deactivatingDone());
 	}
 
 	/** {@inheritDoc} */
 	@Override
 	protected void doGet(final CloudletTopic reqTopic, final KuraRequestPayload reqPayload,
 			final KuraResponsePayload respPayload) throws KuraException {
-		s_logger.info(s_messages.cloudGETReqReceiving());
+		s_logger.info(s_message.cloudGETReqReceiving());
 		if ("assets".equals(reqTopic.getResources()[0])) {
 			// perform a search operation at the beginning
 			this.findAssets();
@@ -162,7 +188,7 @@ public final class AssetCloudlet extends Cloudlet {
 				for (final Map.Entry<String, Asset> assetEntry : this.m_assets.entrySet()) {
 					final Asset asset = assetEntry.getValue();
 					respPayload.addMetric(String.valueOf(index++),
-							((BaseAsset) asset).getAssetConfiguration().getAssetName());
+							((BaseAsset) asset).getAssetConfiguration().getName());
 				}
 			}
 			// Checks if the name of the asset is provided
@@ -170,10 +196,10 @@ public final class AssetCloudlet extends Cloudlet {
 				final String assetName = reqTopic.getResources()[1];
 				final Asset asset = this.m_assets.get(assetName);
 				final AssetConfiguration configuration = ((BaseAsset) asset).getAssetConfiguration();
-				final Map<String, Channel> assetConfiguredChannels = configuration.getChannels();
+				final Map<Long, Channel> assetConfiguredChannels = configuration.getChannels();
 				int index = 1;
-				for (final String channelName : assetConfiguredChannels.keySet()) {
-					respPayload.addMetric(String.valueOf(index++), channelName);
+				for (final Long channelId : assetConfiguredChannels.keySet()) {
+					respPayload.addMetric(String.valueOf(index++), assetConfiguredChannels.get(channelId));
 				}
 			}
 			// Checks if the name of the asset and the name of the channel are
@@ -183,21 +209,22 @@ public final class AssetCloudlet extends Cloudlet {
 				final String channelName = reqTopic.getResources()[2];
 				final Asset asset = this.m_assets.get(assetName);
 				final AssetConfiguration configuration = ((BaseAsset) asset).getAssetConfiguration();
-				final Map<String, Channel> assetConfiguredChannels = configuration.getChannels();
-				if ((assetConfiguredChannels != null) && assetConfiguredChannels.containsKey(channelName)) {
+				final Map<Long, Channel> assetConfiguredChannels = configuration.getChannels();
+				final long id = this.checkChannelAvailability(channelName, assetConfiguredChannels);
+				if ((assetConfiguredChannels != null) && (id != 0)) {
 					final List<AssetRecord> assetRecords = asset.read(Lists.newArrayList(channelName));
 					this.prepareResponse(respPayload, assetRecords);
 				}
 			}
 		}
-		s_logger.info(s_messages.cloudGETReqReceived());
+		s_logger.info(s_message.cloudGETReqReceived());
 	}
 
 	/** {@inheritDoc} */
 	@Override
 	protected void doPut(final CloudletTopic reqTopic, final KuraRequestPayload reqPayload,
 			final KuraResponsePayload respPayload) throws KuraException {
-		s_logger.info(s_messages.cloudPUTReqReceiving());
+		s_logger.info(s_message.cloudPUTReqReceiving());
 		// Checks if the name of the asset and the name of the channel are
 		// provided
 		if ("assets".equals(reqTopic.getResources()[0]) && (reqTopic.getResources().length > 2)) {
@@ -207,8 +234,9 @@ public final class AssetCloudlet extends Cloudlet {
 			final String channelName = reqTopic.getResources()[2];
 			final Asset asset = this.m_assets.get(assetName);
 			final AssetConfiguration configuration = ((BaseAsset) asset).getAssetConfiguration();
-			final Map<String, Channel> assetConfiguredChannels = configuration.getChannels();
-			if ((assetConfiguredChannels != null) && assetConfiguredChannels.containsKey(channelName)) {
+			final Map<Long, Channel> assetConfiguredChannels = configuration.getChannels();
+			final long id = this.checkChannelAvailability(channelName, assetConfiguredChannels);
+			if ((assetConfiguredChannels != null) && (id != 0)) {
 				final AssetRecord assetRecord = Assets.newAssetRecord(channelName);
 				final String userValue = (String) reqPayload.getMetric("value");
 				final String userType = (String) reqPayload.getMetric("type");
@@ -217,7 +245,7 @@ public final class AssetCloudlet extends Cloudlet {
 				this.prepareResponse(respPayload, assetRecords);
 			}
 		}
-		s_logger.info(s_messages.cloudPUTReqReceived());
+		s_logger.info(s_message.cloudPUTReqReceived());
 	}
 
 	/**
@@ -238,14 +266,14 @@ public final class AssetCloudlet extends Cloudlet {
 	 *             if any of the arguments is null
 	 */
 	private void prepareResponse(final KuraResponsePayload respPayload, final List<AssetRecord> assetRecords) {
-		checkNull(respPayload, s_messages.respPayloadNonNull());
-		checkNull(assetRecords, s_messages.assetRecordsNonNull());
+		checkNull(respPayload, s_message.respPayloadNonNull());
+		checkNull(assetRecords, s_message.assetRecordsNonNull());
 
 		for (final AssetRecord assetRecord : assetRecords) {
-			respPayload.addMetric(s_messages.flag(), assetRecord.getAssetFlag());
-			respPayload.addMetric(s_messages.timestamp(), assetRecord.getTimestamp());
-			respPayload.addMetric(s_messages.value(), assetRecord.getValue());
-			respPayload.addMetric(s_messages.channel(), assetRecord.getChannelName());
+			respPayload.addMetric(s_message.flag(), assetRecord.getAssetFlag());
+			respPayload.addMetric(s_message.timestamp(), assetRecord.getTimestamp());
+			respPayload.addMetric(s_message.value(), assetRecord.getValue());
+			respPayload.addMetric(s_message.channel(), assetRecord.getChannelName());
 		}
 	}
 
@@ -275,9 +303,9 @@ public final class AssetCloudlet extends Cloudlet {
 	 *             if any of the provided arguments is null
 	 */
 	private void wrapValue(final AssetRecord assetRecord, final String userValue, final String userType) {
-		checkNull(assetRecord, s_messages.assetRecordNonNull());
-		checkNull(userValue, s_messages.valueNonNull());
-		checkNull(userType, s_messages.typeNonNull());
+		checkNull(assetRecord, s_message.assetRecordNonNull());
+		checkNull(userValue, s_message.valueNonNull());
+		checkNull(userType, s_message.typeNonNull());
 
 		TypedValue<?> value = null;
 		if ("INTEGER".equalsIgnoreCase(userType)) {

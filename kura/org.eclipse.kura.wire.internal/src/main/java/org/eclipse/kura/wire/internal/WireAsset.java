@@ -14,16 +14,22 @@ package org.eclipse.kura.wire.internal;
 
 import static org.eclipse.kura.Preconditions.checkCondition;
 import static org.eclipse.kura.Preconditions.checkNull;
-import static org.eclipse.kura.asset.internal.AssetConfiguration.ASSET_DESC_PROP;
-import static org.eclipse.kura.asset.internal.AssetConfiguration.ASSET_DRIVER_PROP;
-import static org.eclipse.kura.asset.internal.AssetConfiguration.ASSET_ID_PROP;
-import static org.eclipse.kura.asset.internal.AssetConfiguration.CHANNEL_PROPERTY_POSTFIX;
-import static org.eclipse.kura.asset.internal.AssetConfiguration.CHANNEL_PROPERTY_PREFIX;
+import static org.eclipse.kura.asset.internal.AssetOptions.ASSET_DESC_PROP;
+import static org.eclipse.kura.asset.internal.AssetOptions.ASSET_DRIVER_PROP;
+import static org.eclipse.kura.asset.internal.AssetOptions.ASSET_ID_PROP;
+import static org.eclipse.kura.asset.internal.AssetOptions.CHANNEL_PROPERTY_POSTFIX;
+import static org.eclipse.kura.asset.internal.AssetOptions.CHANNEL_PROPERTY_PREFIX;
+import static org.eclipse.kura.asset.internal.AssetOptions.DRIVER_PROPERTY_PREFIX;
+import static org.eclipse.kura.asset.internal.BaseChannelDescriptor.NAME;
+import static org.eclipse.kura.asset.internal.BaseChannelDescriptor.TYPE;
+import static org.eclipse.kura.asset.internal.BaseChannelDescriptor.VALUE_TYPE;
+import static org.osgi.framework.Constants.SERVICE_PID;
 
 import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraRuntimeException;
@@ -33,7 +39,7 @@ import org.eclipse.kura.asset.Channel;
 import org.eclipse.kura.asset.ChannelDescriptor;
 import org.eclipse.kura.asset.ChannelType;
 import org.eclipse.kura.asset.internal.BaseAsset;
-import org.eclipse.kura.asset.internal.BaseAssetChannelDescriptor;
+import org.eclipse.kura.asset.internal.BaseChannelDescriptor;
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.SelfConfiguringComponent;
 import org.eclipse.kura.configuration.metatype.Option;
@@ -60,6 +66,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 
 /**
  * The Class WireAsset is a wire component which provides all necessary higher
@@ -118,10 +125,15 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
 	private Tad cloneAd(final Tad oldAd, final String prefix) {
 		checkNull(oldAd, s_message.oldAdNonNull());
 		checkNull(prefix, s_message.adPrefixNonNull());
-
+		String pref = prefix;
+		if ((oldAd.getId() != ASSET_DESC_PROP) || (oldAd.getId() != ASSET_DRIVER_PROP)
+				|| (oldAd.getId() != ASSET_ID_PROP) || (oldAd.getId() != NAME) || (oldAd.getId() != TYPE)
+				|| (oldAd.getId() != VALUE_TYPE)) {
+			pref = prefix + DRIVER_PROPERTY_PREFIX;
+		}
 		final Tad result = new Tad();
-		result.setId(prefix + oldAd.getId());
-		result.setName(prefix + oldAd.getName());
+		result.setId(pref + oldAd.getId());
+		result.setName(pref + oldAd.getName());
 		result.setCardinality(oldAd.getCardinality());
 		result.setType(Tscalar.fromValue(oldAd.getType().value()));
 		result.setDescription(oldAd.getDescription());
@@ -136,6 +148,7 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
 			result.getOption().add(newOption);
 		}
 		return result;
+
 	}
 
 	/** {@inheritDoc} */
@@ -187,7 +200,7 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
 	@SuppressWarnings("unchecked")
 	@Override
 	public ComponentConfiguration getConfiguration() throws KuraException {
-		final String componentName = this.m_context.getProperties().get("service.pid").toString();
+		final String componentName = this.m_context.getProperties().get(SERVICE_PID).toString();
 
 		final Tocd mainOcd = new Tocd();
 		mainOcd.setId(CONF_PID);
@@ -227,22 +240,31 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
 		for (final Map.Entry<String, Object> entry : this.m_properties.entrySet()) {
 			props.put(entry.getKey(), entry.getValue());
 		}
-
-		if ((this.m_driver != null) && (this.m_driver.getChannelDescriptor() != null)) {
-			List<Tad> channelConfiguration = null;
-			final ChannelDescriptor channelDescriptor = this.m_driver.getChannelDescriptor();
+		ChannelDescriptor channelDescriptor = null;
+		if (this.m_driver != null) {
+			channelDescriptor = this.m_driver.getChannelDescriptor();
+		}
+		if (channelDescriptor != null) {
+			List<Tad> driverSpecificChannelConfiguration = null;
 			final Object descriptor = channelDescriptor.getDescriptor();
 			if (descriptor instanceof List<?>) {
-				channelConfiguration = (List<Tad>) descriptor;
+				driverSpecificChannelConfiguration = (List<Tad>) descriptor;
 			}
-
-			if (channelConfiguration != null) {
-				final BaseAssetChannelDescriptor basicAssetChanneldescriptor = BaseAssetChannelDescriptor.getDefault();
-				basicAssetChanneldescriptor.getDefaultConfiguration().addAll(channelConfiguration);
+			if (driverSpecificChannelConfiguration != null) {
+				final ChannelDescriptor basicChanneldescriptor = new BaseChannelDescriptor();
+				List<Tad> channelConfiguration = null;
+				final Object baseChannelDescriptor = basicChanneldescriptor.getDescriptor();
+				if (baseChannelDescriptor instanceof List<?>) {
+					channelConfiguration = (List<Tad>) baseChannelDescriptor;
+				}
+				if (channelConfiguration != null) {
+					channelConfiguration.addAll(driverSpecificChannelConfiguration);
+				}
 				for (final Tad attribute : channelConfiguration) {
-					final Tad newAttribute = this.cloneAd(attribute,
-							CHANNEL_PROPERTY_PREFIX + System.nanoTime() + CHANNEL_PROPERTY_POSTFIX);
-					mainOcd.addAD(newAttribute);
+					for (final String prefix : this.retrieveChannelPrefixes(this.m_assetConfiguration.getChannels())) {
+						final Tad newAttribute = this.cloneAd(attribute, prefix);
+						mainOcd.addAD(newAttribute);
+					}
 				}
 			}
 		}
@@ -252,7 +274,7 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
 	/** {@inheritDoc} */
 	@Override
 	public String getName() {
-		return this.m_assetConfiguration.getAssetName();
+		return this.m_assetConfiguration.getName();
 	}
 
 	/**
@@ -279,9 +301,9 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
 
 		final List<AssetRecord> assetRecordsToWriteChannels = Lists.newArrayList();
 		final List<String> channelsToRead = Lists.newArrayList();
-		final Map<String, Channel> channels = this.m_assetConfiguration.getChannels();
+		final Map<Long, Channel> channels = this.m_assetConfiguration.getChannels();
 		// determining channels to read
-		for (final Map.Entry<String, Channel> channelEntry : channels.entrySet()) {
+		for (final Map.Entry<Long, Channel> channelEntry : channels.entrySet()) {
 			final Channel channel = channelEntry.getValue();
 			if ((channel.getType() == ChannelType.READ) || (channel.getType() == ChannelType.READ_WRITE)) {
 				channelsToRead.add(channel.getName());
@@ -300,7 +322,7 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
 		// determining channels to write
 		for (final WireRecord wireRecord : wireEnvelope.getRecords()) {
 			for (final WireField wireField : wireRecord.getFields()) {
-				for (final Map.Entry<String, Channel> channelEntry : channels.entrySet()) {
+				for (final Map.Entry<Long, Channel> channelEntry : channels.entrySet()) {
 					final Channel channel = channelEntry.getValue();
 					if ((channel.getType() == ChannelType.WRITE) || (channel.getType() == ChannelType.READ_WRITE)) {
 						assetRecordsToWriteChannels.add(this.prepareAssetRecord(channel, wireField.getValue()));
@@ -344,6 +366,26 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
 	@Override
 	public void producersConnected(final Wire[] wires) {
 		this.m_wireSupport.producersConnected(wires);
+	}
+
+	/**
+	 * Retrieves the set of prefixes of the channels from the map of channels
+	 *
+	 * @param channels
+	 *            the properties to parse
+	 * @return the list of channel IDs
+	 * @throws KuraRuntimeException
+	 *             if the argument is null
+	 */
+	private Set<String> retrieveChannelPrefixes(final Map<Long, Channel> channels) {
+		checkNull(channels, s_message.propertiesNonNull());
+		final Set<String> channelPrefixes = Sets.newHashSet();
+		for (final Map.Entry<Long, Channel> entry : channels.entrySet()) {
+			final Long key = entry.getKey();
+			final String prefix = key + CHANNEL_PROPERTY_POSTFIX + CHANNEL_PROPERTY_PREFIX + CHANNEL_PROPERTY_POSTFIX;
+			channelPrefixes.add(prefix);
+		}
+		return channelPrefixes;
 	}
 
 	/** {@inheritDoc} */

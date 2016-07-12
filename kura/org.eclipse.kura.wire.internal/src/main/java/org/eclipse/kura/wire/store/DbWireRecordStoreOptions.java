@@ -14,16 +14,17 @@ package org.eclipse.kura.wire.store;
 
 import java.util.Map;
 
-import org.eclipse.kura.wire.internal.AbstractConfigurationOptions;
-
 /**
  * The Class DbWireRecordStoreOptions is responsible to contain all the DB Wire
  * Record Store related options
  */
-final class DbWireRecordStoreOptions extends AbstractConfigurationOptions {
+final class DbWireRecordStoreOptions {
 
 	/** The Constant denotes the period as configured for periodic cleanup. */
 	private static final String PERIODIC_CLEANUP_ID = "periodic.cleanup";
+
+	/** The properties as associated */
+	private final Map<String, Object> m_properties;
 
 	/**
 	 * Instantiates a new DB wire record store options.
@@ -32,7 +33,7 @@ final class DbWireRecordStoreOptions extends AbstractConfigurationOptions {
 	 *            the configured properties
 	 */
 	DbWireRecordStoreOptions(final Map<String, Object> properties) {
-		super(properties);
+		this.m_properties = properties;
 	}
 
 	/**

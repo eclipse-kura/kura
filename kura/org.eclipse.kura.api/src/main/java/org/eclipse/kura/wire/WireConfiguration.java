@@ -18,8 +18,6 @@ import static org.eclipse.kura.Preconditions.checkNull;
 import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.annotation.NotThreadSafe;
 import org.eclipse.kura.annotation.Nullable;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
@@ -31,18 +29,18 @@ import com.google.common.base.Objects;
 @NotThreadSafe
 public final class WireConfiguration {
 
-	/**
-	 * This signifies if Wire Admin Service has already created the wire between
-	 * the wire emitter and the wire receiver.
-	 */
-	private boolean created;
-
 	/** The Wire Emitter Name. */
 	private String emitterName;
 
 	/** The Filter. */
 	@Nullable
 	private final String filter;
+
+	/**
+	 * This signifies if Wire Admin Service has already created the wire between
+	 * the wire emitter and the wire receiver.
+	 */
+	private boolean isCreated;
 
 	/** The Wire Receiver Name. */
 	private String receiverName;
@@ -66,7 +64,7 @@ public final class WireConfiguration {
 		this.emitterName = emitterName;
 		this.receiverName = receiverName;
 		this.filter = filter;
-		this.created = false;
+		this.isCreated = false;
 	}
 
 	/**
@@ -78,21 +76,21 @@ public final class WireConfiguration {
 	 *            the Wire Receiver name
 	 * @param filter
 	 *            the filter
-	 * @param created
+	 * @param isCreated
 	 *            the created flag signifying whether Wire Admin has already
 	 *            created the wire between the wire emitter and a wire receiver
 	 * @throws KuraRuntimeException
 	 *             if any of the arguments is null (except filter)
 	 */
 	public WireConfiguration(final String emitterName, final String receiverName, @Nullable final String filter,
-			final boolean created) {
+			final boolean isCreated) {
 		checkNull(emitterName, "Emitter name cannot be null");
 		checkNull(receiverName, "Receiver name cannot be null");
 
 		this.emitterName = emitterName;
 		this.receiverName = receiverName;
 		this.filter = filter;
-		this.created = created;
+		this.isCreated = isCreated;
 	}
 
 	/** {@inheritDoc} */
@@ -102,7 +100,7 @@ public final class WireConfiguration {
 			final WireConfiguration wireConfiguration = (WireConfiguration) obj;
 			return Objects.equal(this.emitterName, wireConfiguration.getEmitterName())
 					&& Objects.equal(this.receiverName, wireConfiguration.getReceiverName())
-					&& Objects.equal(this.created, wireConfiguration.isCreated());
+					&& Objects.equal(this.isCreated, wireConfiguration.isCreated());
 		}
 		return false;
 	}
@@ -137,7 +135,7 @@ public final class WireConfiguration {
 	/** {@inheritDoc} */
 	@Override
 	public int hashCode() {
-		return Objects.hashCode(this.created, this.emitterName, this.receiverName);
+		return Objects.hashCode(this.isCreated, this.emitterName, this.receiverName);
 	}
 
 	/**
@@ -147,35 +145,18 @@ public final class WireConfiguration {
 	 * @return true, if it is created
 	 */
 	public boolean isCreated() {
-		return this.created;
+		return this.isCreated;
 	}
 
 	/**
 	 * Set the value to the flag to check whether wire admin has already created
 	 * a wire between the wire emitter and a wire receiver
 	 *
-	 * @param created
+	 * @param isCreated
 	 *            the new created
 	 */
-	public void setCreated(final boolean created) {
-		this.created = created;
-	}
-
-	/**
-	 * Convert the Wire Configuration to json.
-	 *
-	 * @return the JSON object
-	 * @throws JSONException
-	 *             the JSON exception
-	 */
-	public JSONObject toJson() throws JSONException {
-		final JSONObject jsonWire = new JSONObject();
-		jsonWire.put("p", this.emitterName);
-		jsonWire.put("c", this.receiverName);
-		if ((this.filter != null) && !this.filter.isEmpty()) {
-			jsonWire.putOpt("f", this.filter);
-		}
-		return jsonWire;
+	public void setCreated(final boolean isCreated) {
+		this.isCreated = isCreated;
 	}
 
 	/** {@inheritDoc} */

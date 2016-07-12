@@ -13,7 +13,7 @@
 package org.eclipse.kura.wire.store;
 
 import static org.eclipse.kura.Preconditions.checkNull;
-
+import static org.osgi.framework.Constants.SERVICE_PID;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -168,7 +168,7 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Wire
 	/** {@inheritDoc} */
 	@Override
 	public String getName() {
-		return (String) this.m_ctx.getProperties().get("service.pid");
+		return (String) this.m_ctx.getProperties().get(SERVICE_PID);
 	}
 
 	/**

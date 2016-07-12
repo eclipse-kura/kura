@@ -38,14 +38,14 @@ public interface WireService {
 	 * Creates the wire component.
 	 *
 	 * @param factoryPid
-	 *            the factory pid for the wire component
+	 *            the factory PID for the wire component
 	 * @param name
 	 *            the name for the wire component
 	 * @throws KuraRuntimeException
 	 *             if any of the arguments is null
 	 * @return the wire component name which is recently created
 	 */
-	public String createWireComponent(String factoryPid, String name);
+	public void createWireComponent(String factoryPid, String name);
 
 	/**
 	 * Removes the wire between the provided wire emitter and the wire receiver

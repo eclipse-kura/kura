@@ -12,11 +12,14 @@
 package org.eclipse.kura.wire.internal;
 
 import static org.eclipse.kura.Preconditions.checkNull;
-import static org.eclipse.kura.wire.internal.WireServiceOptions.CONF_WIRES;
+import static org.eclipse.kura.wire.internal.WireServiceImpl.FACTORY_PREFIX;
+import static org.eclipse.kura.wire.internal.WireServiceImpl.INSTANCE_PREFIX;
+import static org.osgi.framework.Constants.SERVICE_PID;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.localization.LocalizationAdapter;
@@ -25,9 +28,6 @@ import org.eclipse.kura.wire.WireConfiguration;
 import org.eclipse.kura.wire.WireEmitter;
 import org.eclipse.kura.wire.WireReceiver;
 import org.eclipse.kura.wire.Wires;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
@@ -35,8 +35,10 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.framework.wiring.BundleWiring;
 import org.osgi.service.component.ComponentContext;
 
+import com.google.common.base.CharMatcher;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
 /**
  * The Class WireUtils comprises all necessary utility methods of Kura Wires
@@ -46,14 +48,6 @@ final class WireUtils {
 
 	/** Localization Resource */
 	private static final WireMessages s_messages = LocalizationAdapter.adapt(WireMessages.class);
-
-	/** Service Property */
-	public static final String SERVICE_PID_PROPERTY = "service.pid";
-	
-	/** Constructor */
-	private WireUtils() {
-		// Static Factory Methods container. No need to instantiate.
-	}
 
 	/**
 	 * Gets the wire emitters and receivers.
@@ -71,12 +65,12 @@ final class WireUtils {
 			final Collection<ServiceReference<WireEmitter>> emitters = context.getBundleContext()
 					.getServiceReferences(WireEmitter.class, null);
 			for (final ServiceReference<WireEmitter> service : emitters) {
-				result.add(service.getProperty(SERVICE_PID_PROPERTY).toString());
+				result.add(service.getProperty(SERVICE_PID).toString());
 			}
 			final Collection<ServiceReference<WireReceiver>> consumers = context.getBundleContext()
 					.getServiceReferences(WireReceiver.class, null);
 			for (final ServiceReference<WireReceiver> service : consumers) {
-				result.add(service.getProperty(SERVICE_PID_PROPERTY).toString());
+				result.add(service.getProperty(SERVICE_PID).toString());
 			}
 		} catch (final InvalidSyntaxException e) {
 			Throwables.propagate(e);
@@ -116,10 +110,10 @@ final class WireUtils {
 					// If it doesn't fail introspect for the interface
 					if (iface.isAssignableFrom(clazz)) {
 						// Found a class implementing the interface.
-						result.add("FACTORY|" + factoryPid);
+						result.add(FACTORY_PREFIX + "|" + factoryPid);
 					} else {
 						// Found the class, but it doesn't implement the
-						// interface. Probably another multiton component.
+						// interface. Probably another factory component.
 						break;
 					}
 				} catch (final ClassNotFoundException e) {
@@ -128,13 +122,13 @@ final class WireUtils {
 			}
 		}
 		// After the factories, iterate through available services implementing
-		// the passed interface
+		// the provided interface
 		try {
 			final Collection<?> services = context.getBundleContext().getServiceReferences(iface, null);
 			for (final Object service : services) {
 				if (service instanceof ServiceReference) {
 					final ServiceReference<?> reference = (ServiceReference<?>) service;
-					result.add("INSTANCE|" + reference.getProperty(SERVICE_PID_PROPERTY));
+					result.add(INSTANCE_PREFIX + "|" + reference.getProperty(SERVICE_PID));
 				}
 			}
 		} catch (final InvalidSyntaxException e) {
@@ -162,7 +156,7 @@ final class WireUtils {
 			final Collection<ServiceReference<WireEmitter>> services = context.getServiceReferences(WireEmitter.class,
 					null);
 			for (final ServiceReference<?> service : services) {
-				if (service.getProperty(SERVICE_PID_PROPERTY).equals(name)) {
+				if (service.getProperty(SERVICE_PID).equals(name)) {
 					return true;
 				}
 			}
@@ -191,7 +185,7 @@ final class WireUtils {
 			final Collection<ServiceReference<WireReceiver>> services = context.getServiceReferences(WireReceiver.class,
 					null);
 			for (final ServiceReference<?> service : services) {
-				if (service.getProperty(SERVICE_PID_PROPERTY).equals(pid)) {
+				if (service.getProperty(SERVICE_PID).equals(pid)) {
 					return true;
 				}
 			}
@@ -202,32 +196,56 @@ final class WireUtils {
 	}
 
 	/**
-	 * Creates New instance of {@link WireServiceOptions}
+	 * Creates new instance of {@link WireServiceOptions}
 	 *
 	 * @param properties
 	 *            the properties
 	 * @return the wire service options
-	 * @throws JSONException
-	 *             the JSON exception
 	 * @throws KuraRuntimeException
 	 *             if provided properties is null
 	 */
-	static WireServiceOptions newWireServiceOptions(final Map<String, Object> properties) throws JSONException {
+	static WireServiceOptions newWireServiceOptions(final Map<String, Object> properties) {
 		checkNull(properties, s_messages.wireServicePropNonNull());
 		final List<WireConfiguration> wireConfs = Lists.newCopyOnWriteArrayList();
-		Object objWires = null;
-		if (properties.containsKey(CONF_WIRES)) {
-			objWires = properties.get(CONF_WIRES);
-		}
-		if ((objWires != null) && (objWires instanceof String)) {
-			final String strWires = (String) objWires;
-			final JSONArray jsonWires = new JSONArray(strWires);
-			for (int i = 0; i < jsonWires.length(); i++) {
-				final JSONObject jsonWire = jsonWires.getJSONObject(i);
-				wireConfs.add(Wires.newWireConfigurationFromJson(jsonWire));
+		final Set<Integer> wireIds = Sets.newHashSet();
+		final String separator = ".";
+		for (final Map.Entry<String, Object> entry : properties.entrySet()) {
+			final String key = entry.getKey();
+			if (key.contains(separator)) {
+				final Integer wireConfId = Integer.valueOf(key.substring(0, key.indexOf(separator)));
+				wireIds.add(wireConfId);
 			}
 		}
+		for (int i = 0; i < wireIds.size(); i++) {
+			String emitterName = null;
+			String receiverName = null;
+			String filter = null;
+			for (final Map.Entry<String, Object> entry : properties.entrySet()) {
+				final String key = entry.getKey();
+				final String value = String.valueOf(entry.getValue());
+
+				if (CharMatcher.DIGIT.matchesAllOf(key.substring(0, key.indexOf(separator)))) {
+					if (key.contains("emitter")) {
+						emitterName = value;
+					}
+					if (key.contains("receiver")) {
+						receiverName = value;
+					}
+					if (key.contains("filter")) {
+						filter = value;
+					}
+				}
+			}
+			final WireConfiguration configuration = Wires.newWireConfiguration(emitterName, receiverName, filter);
+			wireConfs.add(configuration);
+		}
+
 		return new WireServiceOptions(wireConfs);
+	}
+
+	/** Constructor */
+	private WireUtils() {
+		// Static Factory Methods container. No need to instantiate.
 	}
 
 }

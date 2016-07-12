@@ -27,8 +27,41 @@ public interface AssetCloudletMessages {
 	@En("Activating Asset Cloudlet...Done")
 	public String activatingDone();
 
+	@En("Asset has been found by Asset Cloudlet Tracker....==> adding service")
+	public String assetFoundAdding();
+
+	@En("Asset has been found by Asset Cloudlet Tracker....==> open")
+	public String assetFoundOpen();
+
+	@En("Asset Record cannot be null")
+	public String assetRecordNonNull();
+
+	@En("List of asset records cannot be null")
+	public String assetRecordsNonNull();
+
+	@En("Asset has been removed by Asset Cloudlet Tracker....")
+	public String assetRemoved();
+
+	@En("Asset service instance cannot be null")
+	public String assetServiceNonNull();
+
+	@En("Bundle context cannot be null")
+	public String bundleContextNonNull();
+
 	@En("channel_name")
 	public String channel();
+
+	@En("Channel name cannot be null")
+	public String channelNameNonNull();
+
+	@En("Channel cannot be null")
+	public String channelNonNull();
+
+	@En("List of channel names cannot be empty")
+	public String channelsNonEmpty();
+
+	@En("List of channel names cannot be null")
+	public String channelsNonNull();
 
 	@En("Cloudlet GET Request received on the Asset Cloudlet")
 	public String cloudGETReqReceived();
@@ -47,24 +80,6 @@ public interface AssetCloudletMessages {
 
 	@En("Deactivating Asset Cloudlet...Done")
 	public String deactivatingDone();
-
-	@En("Asset has been found by Asset Cloudlet Tracker....==> adding service")
-	public String assetFoundAdding();
-
-	@En("Asset has been found by Asset Cloudlet Tracker....==> open")
-	public String assetFoundOpen();
-
-	@En("Asset Record cannot be null")
-	public String assetRecordNonNull();
-
-	@En("List of asset records cannot be null")
-	public String assetRecordsNonNull();
-
-	@En("Asset has been removed by Asset Cloudlet Tracker....")
-	public String assetRemoved();
-
-	@En("Asset service instance cannot be null")
-	public String assetServiceNonNull();
 
 	@En("flag")
 	public String flag();

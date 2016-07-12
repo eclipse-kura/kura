@@ -75,21 +75,21 @@ public final class Wires {
 	}
 
 	/**
-	 * Returns new instance of Wire Configuration from json object provided
+	 * Returns new instance of Wire Configuration from JSON object provided
 	 *
 	 * @param jsonWire
-	 *            the json object representing the wires
+	 *            the JSON object representing the wires
 	 * @return the wire configuration
 	 * @throws JSONException
 	 *             the JSON exception
 	 * @throws KuraRuntimeException
-	 *             if the json object instance passed as argument is null
+	 *             if the JSON object instance passed as argument is null
 	 */
 	public static WireConfiguration newWireConfigurationFromJson(final JSONObject jsonWire) throws JSONException {
 		checkNull(jsonWire, "JSON Object cannot be null");
-		final String emitter = jsonWire.getString("p");
-		final String receiver = jsonWire.getString("c");
-		final String filter = jsonWire.optString("f");
+		final String emitter = jsonWire.getString("emitter");
+		final String receiver = jsonWire.getString("receiver");
+		final String filter = jsonWire.optString("filter");
 		return new WireConfiguration(emitter, receiver, filter);
 	}
 

@@ -18,7 +18,7 @@ import java.util.Map;
 
 import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.asset.Asset;
-import org.eclipse.kura.asset.internal.AssetConfiguration;
+import org.eclipse.kura.asset.AssetConfiguration;
 import org.eclipse.kura.asset.internal.BaseAsset;
 import org.eclipse.kura.localization.AssetCloudletMessages;
 import org.eclipse.kura.localization.LocalizationAdapter;
@@ -42,7 +42,7 @@ final class AssetTrackerCustomizer implements ServiceTrackerCustomizer<Asset, As
 	private static final Logger s_logger = LoggerFactory.getLogger(AssetTrackerCustomizer.class);
 
 	/** Localization Resource */
-	private static final AssetCloudletMessages s_messages = LocalizationAdapter.adapt(AssetCloudletMessages.class);
+	private static final AssetCloudletMessages s_message = LocalizationAdapter.adapt(AssetCloudletMessages.class);
 
 	/** The map of assets present in the OSGi service registry. */
 	private final Map<String, Asset> m_assets;
@@ -57,8 +57,11 @@ final class AssetTrackerCustomizer implements ServiceTrackerCustomizer<Asset, As
 	 *            the bundle context
 	 * @throws InvalidSyntaxException
 	 *             the invalid syntax exception
+	 * @throws KuraRuntimeException
+	 *             if any of the arguments is null
 	 */
 	AssetTrackerCustomizer(final BundleContext context) throws InvalidSyntaxException {
+		checkNull(context, s_message.bundleContextNonNull());
 		this.m_assets = Maps.newConcurrentMap();
 		this.m_context = context;
 	}
@@ -67,7 +70,7 @@ final class AssetTrackerCustomizer implements ServiceTrackerCustomizer<Asset, As
 	@Override
 	public Asset addingService(final ServiceReference<Asset> reference) {
 		final Asset service = this.m_context.getService(reference);
-		s_logger.info(s_messages.assetFoundAdding());
+		s_logger.info(s_message.assetFoundAdding());
 		if (service != null) {
 			return this.addService(service);
 		}
@@ -84,10 +87,10 @@ final class AssetTrackerCustomizer implements ServiceTrackerCustomizer<Asset, As
 	 * @return Asset service instance
 	 */
 	private Asset addService(final Asset service) {
-		checkNull(service, s_messages.assetServiceNonNull());
+		checkNull(service, s_message.assetServiceNonNull());
 		final AssetConfiguration assetConfiguration = ((BaseAsset) service).getAssetConfiguration();
 		if (assetConfiguration != null) {
-			final String assetName = assetConfiguration.getAssetName();
+			final String assetName = assetConfiguration.getName();
 			this.m_assets.put(assetName, service);
 		}
 		return service;
@@ -115,12 +118,12 @@ final class AssetTrackerCustomizer implements ServiceTrackerCustomizer<Asset, As
 		this.m_context.ungetService(reference);
 		final AssetConfiguration assetConfiguration = ((BaseAsset) service).getAssetConfiguration();
 		if (assetConfiguration != null) {
-			final String assetName = assetConfiguration.getAssetName();
+			final String assetName = assetConfiguration.getName();
 			if (this.m_assets.containsKey(assetName)) {
 				this.m_assets.remove(assetName);
 			}
 		}
-		s_logger.info(s_messages.assetRemoved() + service);
+		s_logger.info(s_message.assetRemoved() + service);
 	}
 
 }

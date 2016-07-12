@@ -20,14 +20,13 @@ import org.eclipse.kura.type.TypedValue;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
-import com.google.common.collect.ComparisonChain;
 
 /**
  * The Class AssetRecord represents a record to perform read/write/monitor
  * operation on the provided channel using the associated device driver.
  */
 @NotThreadSafe
-public final class AssetRecord implements Comparable<AssetRecord> {
+public final class AssetRecord {
 
 	/** The asset flag. */
 	private AssetFlag assetFlag;
@@ -59,16 +58,6 @@ public final class AssetRecord implements Comparable<AssetRecord> {
 	public AssetRecord(final String channelName) {
 		checkNull(channelName, "Channel name cannot be null");
 		this.channelName = channelName;
-	}
-
-	/** {@inheritDoc} */
-	@Override
-	public int compareTo(final AssetRecord otherAssetRecord) {
-		checkNull(otherAssetRecord, "Provided asset record to compare is null");
-		return ComparisonChain.start().compare(this.channelName, otherAssetRecord.getChannelName())
-				.compare(this.value, otherAssetRecord.getValue())
-				.compare(this.assetFlag, otherAssetRecord.getAssetFlag())
-				.compare(this.timestamp, otherAssetRecord.getTimestamp()).result();
 	}
 
 	/** {@inheritDoc} */

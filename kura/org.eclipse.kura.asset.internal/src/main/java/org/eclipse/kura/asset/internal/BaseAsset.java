@@ -21,6 +21,8 @@ import java.util.Map;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.asset.Asset;
+import org.eclipse.kura.asset.AssetConfiguration;
+import org.eclipse.kura.asset.AssetEvent;
 import org.eclipse.kura.asset.AssetFlag;
 import org.eclipse.kura.asset.AssetListener;
 import org.eclipse.kura.asset.AssetRecord;
@@ -28,6 +30,7 @@ import org.eclipse.kura.asset.Assets;
 import org.eclipse.kura.asset.Channel;
 import org.eclipse.kura.asset.ChannelType;
 import org.eclipse.kura.asset.Driver;
+import org.eclipse.kura.asset.DriverEvent;
 import org.eclipse.kura.asset.DriverFlag;
 import org.eclipse.kura.asset.DriverListener;
 import org.eclipse.kura.asset.DriverRecord;
@@ -56,7 +59,7 @@ import com.google.common.util.concurrent.Monitor;
  * be provided by the user. Please check {@see AssetConfiguration} for more
  * information on how to provide the configurations to the basic Kura asset.
  *
- * @see AssetConfiguration
+ * @see AssetOptions
  */
 public class BaseAsset implements Asset {
 
@@ -148,6 +151,31 @@ public class BaseAsset implements Asset {
 	}
 
 	/**
+	 * Checks if the provided channel is present in the provided map
+	 *
+	 * @param channelName
+	 *            the name of channel
+	 * @param channels
+	 *            the provided container of channels
+	 * @return the id of the channel if found or else 0
+	 * @throws KuraRuntimeException
+	 *             if driver id provided is null
+	 */
+	private long checkChannelAvailability(final String channelName, final Map<Long, Channel> channels) {
+		checkNull(channelName, s_message.channelNameNonNull());
+		checkNull(channels, s_message.channelsNonNull());
+		checkCondition(channels.isEmpty(), s_message.channelsNonEmpty());
+
+		for (final Map.Entry<Long, Channel> channel : channels.entrySet()) {
+			final String chName = channel.getValue().getName();
+			if (channelName.equals(chName)) {
+				return channel.getKey();
+			}
+		}
+		return 0;
+	}
+
+	/**
 	 * Callback method used to trigger when this service component will be
 	 * deactivated.
 	 *
@@ -211,16 +239,17 @@ public class BaseAsset implements Asset {
 		final List<AssetRecord> assetRecords = Lists.newArrayList();
 		final List<DriverRecord> driverRecords = Lists.newArrayList();
 
-		final Map<String, Channel> channels = this.m_assetConfiguration.getChannels();
+		final Map<Long, Channel> channels = this.m_assetConfiguration.getChannels();
 		for (final String channelName : channelNames) {
-			checkCondition(!channels.containsKey(channelName), s_message.channelUnavailable());
+			final long id = this.checkChannelAvailability(channelName, channels);
+			checkCondition(id == 0, s_message.channelUnavailable());
 
-			final Channel channel = channels.get(channelName);
+			final Channel channel = channels.get(id);
 			checkCondition((channel.getType() != ChannelType.READ) || (channel.getType() != ChannelType.READ_WRITE),
 					s_message.channelTypeNotReadable() + channel);
 
 			final DriverRecord driverRecord = Assets.newDriverRecord(channelName);
-			driverRecord.setChannelConfig(channel.getConfig());
+			driverRecord.setChannelConfig(channel.getConfiguration());
 			driverRecords.add(driverRecord);
 		}
 
@@ -265,17 +294,85 @@ public class BaseAsset implements Asset {
 		checkNull(assetListener, s_message.listenerNonNull());
 
 		s_logger.debug(s_message.registeringListener());
-		final Map<String, Channel> channels = this.m_assetConfiguration.getChannels();
-		checkCondition(!channels.containsKey(channelName), s_message.channelUnavailable());
+		final Map<Long, Channel> channels = this.m_assetConfiguration.getChannels();
+		final long id = this.checkChannelAvailability(channelName, channels);
+		checkCondition(id == 0, s_message.channelUnavailable());
+
+		/**
+		 * This is a basic driver listener used to listen for driver events so
+		 * that it can be propagated upwards to the respective asset listener
+		 *
+		 * @see AssetListener
+		 * @see DriverListener
+		 * @see AssetEvent
+		 * @see DriverEvent
+		 */
+		final class BaseDriverListener implements DriverListener {
+
+			/** The asset listener instance. */
+			private final AssetListener m_assetListener;
+
+			/** The channel name. */
+			private final String m_channelName;
+
+			/**
+			 * Instantiates a new base driver listener.
+			 *
+			 * @param channelName
+			 *            the channel name as provided
+			 * @param assetListener
+			 *            the asset listener
+			 * @throws KuraRuntimeException
+			 *             if any of the arguments is null
+			 */
+			BaseDriverListener(final String channelName, final AssetListener assetListener) {
+				checkNull(channelName, s_message.channelNameNonNull());
+				checkNull(assetListener, s_message.listenerNonNull());
+
+				this.m_channelName = channelName;
+				this.m_assetListener = assetListener;
+			}
+
+			/** {@inheritDoc} */
+			@Override
+			public void onDriverEvent(final DriverEvent event) {
+				checkNull(event, s_message.driverEventNonNull());
+				final DriverRecord driverRecord = event.getDriverRecord();
+				final AssetRecord assetRecord = Assets.newAssetRecord(this.m_channelName);
+				final DriverFlag driverFlag = driverRecord.getDriverFlag();
+
+				switch (driverFlag) {
+				case READ_SUCCESSFUL:
+					assetRecord.setAssetFlag(AssetFlag.READ_SUCCESSFUL);
+					break;
+				case WRITE_SUCCESSFUL:
+					assetRecord.setAssetFlag(AssetFlag.WRITE_SUCCESSFUL);
+					break;
+				case DRIVER_ERROR_UNSPECIFIED:
+					assetRecord.setAssetFlag(AssetFlag.ASSET_ERROR_UNSPECIFIED);
+					break;
+				case UNKNOWN:
+					assetRecord.setAssetFlag(AssetFlag.UNKNOWN);
+					break;
+				default:
+					break;
+				}
+				assetRecord.setTimestamp(driverRecord.getTimestamp());
+				assetRecord.setValue(driverRecord.getValue());
+				final AssetEvent assetEvent = Assets.newAssetEvent(assetRecord);
+				this.m_assetListener.onAssetEvent(assetEvent);
+			}
+		}
 
 		final Channel channel = channels.get(channelName);
 		final DriverListener driverListener = new BaseDriverListener(channelName, assetListener);
+
 		this.m_assetListeners.put(assetListener, driverListener);
 		checkNull(this.m_driver, s_message.driverNonNull());
 
 		this.m_monitor.enter();
 		try {
-			this.m_driver.registerDriverListener(ImmutableMap.copyOf(channel.getConfig()), driverListener);
+			this.m_driver.registerDriverListener(ImmutableMap.copyOf(channel.getConfiguration()), driverListener);
 		} finally {
 			this.m_monitor.leave();
 		}
@@ -291,7 +388,8 @@ public class BaseAsset implements Asset {
 	 */
 	private void retrieveConfigurationsFromProperties(final Map<String, Object> properties) {
 		s_logger.debug(s_message.retrievingConf());
-		this.m_assetConfiguration = AssetConfiguration.of(properties);
+		final AssetOptions assetOptions = new AssetOptions(properties);
+		this.m_assetConfiguration = assetOptions.getAssetConfiguration();
 		s_logger.debug(s_message.retrievingConfDone());
 
 	}
@@ -347,15 +445,16 @@ public class BaseAsset implements Asset {
 		final List<DriverRecord> driverRecords = Lists.newArrayList();
 		final Map<DriverRecord, AssetRecord> mappedRecords = Maps.newHashMap();
 
-		final Map<String, Channel> channels = this.m_assetConfiguration.getChannels();
+		final Map<Long, Channel> channels = this.m_assetConfiguration.getChannels();
 		for (final AssetRecord assetRecord : assetRecords) {
-			checkCondition(!channels.containsKey(assetRecord.getChannelName()), s_message.channelUnavailable());
+			final long id = this.checkChannelAvailability(assetRecord.getChannelName(), channels);
+			checkCondition(id == 0, s_message.channelUnavailable());
 
-			final Channel channel = channels.get(assetRecord.getChannelName());
+			final Channel channel = channels.get(id);
 			checkCondition((channel.getType() != ChannelType.WRITE) || (channel.getType() != ChannelType.READ_WRITE),
 					s_message.channelTypeNotWritable() + channel);
 			final DriverRecord driverRecord = Assets.newDriverRecord(channel.getName());
-			driverRecord.setChannelConfig(channel.getConfig());
+			driverRecord.setChannelConfig(channel.getConfiguration());
 			driverRecord.setValue(assetRecord.getValue());
 			driverRecords.add(driverRecord);
 			mappedRecords.put(driverRecord, assetRecord);

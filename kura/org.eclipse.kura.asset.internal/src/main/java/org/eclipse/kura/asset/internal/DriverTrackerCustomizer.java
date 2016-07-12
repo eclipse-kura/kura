@@ -12,8 +12,10 @@
  */
 package org.eclipse.kura.asset.internal;
 
-import static org.eclipse.kura.asset.internal.AssetConfiguration.ASSET_DRIVER_PROP;
+import static org.eclipse.kura.Preconditions.checkNull;
+import static org.eclipse.kura.asset.internal.AssetOptions.ASSET_DRIVER_PROP;
 
+import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.asset.Asset;
 import org.eclipse.kura.asset.Driver;
 import org.eclipse.kura.localization.AssetMessages;
@@ -58,9 +60,15 @@ final class DriverTrackerCustomizer implements ServiceTrackerCustomizer<Driver, 
 	 *            the driver id
 	 * @throws InvalidSyntaxException
 	 *             the invalid syntax exception
+	 * @throws KuraRuntimeException
+	 *             if any of the arguments is null
 	 */
 	DriverTrackerCustomizer(final BundleContext context, final Asset asset, final String driverId)
 			throws InvalidSyntaxException {
+		checkNull(context, s_message.bundleContextNonNull());
+		checkNull(asset, s_message.assetNonNull());
+		checkNull(driverId, s_message.driverIdNonNull());
+
 		this.m_driverId = driverId;
 		this.m_asset = asset;
 		this.m_context = context;

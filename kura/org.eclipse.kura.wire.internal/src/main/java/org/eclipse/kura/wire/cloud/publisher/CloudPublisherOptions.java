@@ -14,15 +14,13 @@ package org.eclipse.kura.wire.cloud.publisher;
 
 import java.util.Map;
 
-import org.eclipse.kura.wire.internal.AbstractConfigurationOptions;
-
 import com.google.common.base.Throwables;
 
 /**
  * The Class CloudPublisherOptions is responsible to provide all the required
  * options for the Cloud Publisher Wire Component
  */
-final class CloudPublisherOptions extends AbstractConfigurationOptions {
+final class CloudPublisherOptions {
 
 	/**
 	 * The different Auto Connect Modes.
@@ -119,6 +117,9 @@ final class CloudPublisherOptions extends AbstractConfigurationOptions {
 	/** The Constant denoting default MQTT topic. */
 	private static final String DEFAULT_TOPIC = "EVENT";
 
+	/** The properties as associated */
+	private final Map<String, Object> m_properties;
+
 	/**
 	 * Instantiates a new cloud publisher options.
 	 *
@@ -126,7 +127,7 @@ final class CloudPublisherOptions extends AbstractConfigurationOptions {
 	 *            the properties
 	 */
 	CloudPublisherOptions(final Map<String, Object> properties) {
-		super(properties);
+		this.m_properties = properties;
 	}
 
 	/**

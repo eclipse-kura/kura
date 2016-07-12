@@ -22,7 +22,6 @@ import org.eclipse.kura.type.TypedValue;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
-import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.ImmutableMap;
 
 /**
@@ -30,7 +29,7 @@ import com.google.common.collect.ImmutableMap;
  * on the provided channel configuration by the Kura specific device driver.
  */
 @NotThreadSafe
-public final class DriverRecord implements Comparable<DriverRecord> {
+public final class DriverRecord {
 
 	/**
 	 * Provided channel configuration to perform read or write or monitor
@@ -70,16 +69,6 @@ public final class DriverRecord implements Comparable<DriverRecord> {
 	public DriverRecord(final String channelName) {
 		checkNull(channelName, "Channel name cannot be null");
 		this.channelName = channelName;
-	}
-
-	/** {@inheritDoc} */
-	@Override
-	public int compareTo(final DriverRecord otherDriverRecord) {
-		checkNull(otherDriverRecord, "Provided driver record to compare is null");
-		return ComparisonChain.start().compare(this.channelName, otherDriverRecord.getChannelName())
-				.compare(this.value, otherDriverRecord.getValue())
-				.compare(this.driverFlag, otherDriverRecord.getDriverFlag())
-				.compare(this.timestamp, otherDriverRecord.getTimestamp()).result();
 	}
 
 	/** {@inheritDoc} */

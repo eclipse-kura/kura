@@ -14,6 +14,7 @@ package org.eclipse.kura.asset;
 
 import java.util.Map;
 
+import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.type.DataType;
 
 /**
@@ -25,6 +26,26 @@ public final class Assets {
 	/** Constructor */
 	private Assets() {
 		// Static Factory Methods container. No need to instantiate.
+	}
+
+	/**
+	 * Prepares a new asset configuration.
+	 *
+	 * @param name
+	 *            the name of the asset
+	 * @param description
+	 *            the description of the asset
+	 * @param driverId
+	 *            the driver id
+	 * @param channels
+	 *            the map of all channel configurations
+	 * @return the asset configuration
+	 * @throws KuraRuntimeException
+	 *             if any of the arguments is null
+	 */
+	public static AssetConfiguration newAssetConfigruation(final String name, final String description,
+			final String driverId, final Map<Long, Channel> channels) {
+		return new AssetConfiguration(name, description, driverId, channels);
 	}
 
 	/**
@@ -52,6 +73,8 @@ public final class Assets {
 	/**
 	 * Creates a new channel with the provided values
 	 *
+	 * @param id
+	 *            the ID of the channel
 	 * @param name
 	 *            the name of the channel
 	 * @param type
@@ -62,9 +85,9 @@ public final class Assets {
 	 *            the configuration to be read
 	 * @return the channel
 	 */
-	public static Channel newChannel(final String name, final ChannelType type, final DataType valueType,
+	public static Channel newChannel(final long id, final String name, final ChannelType type, final DataType valueType,
 			final Map<String, Object> configuration) {
-		return new Channel(name, type, valueType, configuration);
+		return new Channel(id, name, type, valueType, configuration);
 	}
 
 	/**

@@ -19,12 +19,17 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.StringReader;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.security.AccessController;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivilegedAction;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -514,6 +519,7 @@ public class SystemServiceImpl implements SystemService
 	public String getPrimaryMacAddress() {
 		String primaryNetworkInterfaceName = getPrimaryNetworkInterfaceName();
 		String macAddress = null;
+		InetAddress ip;
 
 		if (OS_MAC_OSX.equals(getOsName())) {
 			SafeProcess proc = null;
@@ -560,6 +566,26 @@ public class SystemServiceImpl implements SystemService
 					ProcessUtil.destroy(proc);
 				}
 			}
+		} else if (getOsName().contains("Windows")) {
+			try {
+				s_logger.info("executing: InetAddress.getLocalHost " + primaryNetworkInterfaceName);
+				ip = InetAddress.getLocalHost();
+				Enumeration<NetworkInterface> networks = NetworkInterface.getNetworkInterfaces();
+				while (networks.hasMoreElements()) {
+					NetworkInterface network = networks.nextElement();
+					if(network.getIndex() == 0) {
+						ip = network.getInetAddresses().nextElement();
+					}
+				}
+				NetworkInterface network = NetworkInterface.getByInetAddress(ip);
+				byte[] mac = network.getHardwareAddress();
+				macAddress = NetUtil.hardwareAddressToString(mac);
+				s_logger.info("macAddress " + macAddress);
+			} catch (UnknownHostException e) {
+				s_logger.error(e.getLocalizedMessage());
+			} catch (SocketException e) {
+				s_logger.error(e.getLocalizedMessage());
+			}
 		} else {
 			try {
 				List<NetInterface<? extends NetInterfaceAddress>> interfaces = m_networkService.getNetworkInterfaces();
@@ -586,9 +612,11 @@ public class SystemServiceImpl implements SystemService
 			return this.m_kuraProperties.getProperty(KEY_PRIMARY_NET_IFACE);
 		} else {
 			if (OS_MAC_OSX.equals(getOsName())) {
-				return "en0";
-			} else if (OS_LINUX.equals(getOsName())) {
-				return "eth0";
+        	                return "en0";
+        	        } else if (OS_LINUX.equals(getOsName())) {
+        	                return "eth0";
+        	        } else if (getOsName().contains("Windows")) {
+        	                return "windows";
 			} else {
 				s_logger.error("Unsupported platform");
 				return null;

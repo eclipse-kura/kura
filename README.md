@@ -27,3 +27,5 @@ Getting Started
 If you are new to Kura, please visit the [getting started page](https://wiki.eclipse.org/Kura/Getting_Started).
 
 To raise an issue, please report a bug on [Eclipse bugzilla](https://bugs.eclipse.org/bugs/buglist.cgi?bug_status=UNCONFIRMED&bug_status=NEW&bug_status=ASSIGNED&bug_status=REOPENED&classification=Technology&list_id=4625660&order=Bug%20Number&product=Kura&query_format=advanced).
+
+Test modification

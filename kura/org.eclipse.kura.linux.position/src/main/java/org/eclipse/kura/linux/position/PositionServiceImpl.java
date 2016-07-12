@@ -470,7 +470,7 @@ public class PositionServiceImpl implements PositionService, ConfigurableCompone
 				portName = (String) m_properties.get("port");
 
 				if(portName != null) {
-					if(portName.contains("/dev/")) {
+					if(portName.contains("/dev/") || portName.contains("COM")) {
 						File f = new File(portName);
 						if(f.exists()) {
 							return true;
@@ -512,7 +512,7 @@ public class PositionServiceImpl implements PositionService, ConfigurableCompone
 			}
 			
 			portName = (String) props.get("port");
-			if(portName != null && !portName.contains("/dev/")) {
+			if(portName != null && !portName.contains("/dev/") && !portName.contains("COM")) {
 				List<UsbTtyDevice> utds = m_usbService.getUsbTtyDevices();
 				for(UsbTtyDevice utd : utds) {
 					if(utd.getUsbPort().equals(portName)) {

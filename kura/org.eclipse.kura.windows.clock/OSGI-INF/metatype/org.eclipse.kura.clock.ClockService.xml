@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+
+     All rights reserved. This program and the accompanying materials
+     are made available under the terms of the Eclipse Public License v1.0
+     which accompanies this distribution, and is available at
+     http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Eurotech
+
+-->
+<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
+    <OCD id="org.eclipse.kura.clock.ClockService" 
+         name="ClockService" 
+         description="ClockService Configuration">
+        
+        <Icon resource="ClockService" size="32"/>
+        
+       	<AD id="enabled"
+            name="enabled"
+            type="Boolean"
+            cardinality="0"
+            required="true"
+            default="true"
+            description="Whether or not to enable the ClockService"/>
+            
+                
+        <AD id="clock.provider"  
+            name="clock.provider"
+            type="String"
+            cardinality="0" 
+            required="true"
+            default="java-ntp" 
+            description="Source for setting the system clock">
+           <Option label="java-ntp" value="java-ntp"/>
+           <Option label="ntpd"     value="ntpd"/>
+        </AD>
+
+        <AD id="clock.ntp.host"  
+            name="clock.ntp.host"
+            type="String"
+            cardinality="0" 
+            required="false"
+            default="0.pool.ntp.org" 
+            description="The hostname that provides the system time via NTP"/>
+
+        <AD id="clock.ntp.port"  
+            name="clock.ntp.port"
+            type="Integer"
+            cardinality="0" 
+            required="false"
+            default="123" 
+            description="The port number that provides the system time via NTP"/>
+
+        <AD id="clock.ntp.timeout"  
+            name="clock.ntp.timeout"
+            type="Integer"
+            cardinality="0" 
+            required="false"
+            default="10000" 
+            description="The NTP timeout in milliseconds"/>
+
+        <AD id="clock.ntp.max-retry"  
+            name="clock.ntp.max-retry"
+            type="Integer"
+            cardinality="0" 
+            required="false"
+            default="10" 
+            description="When sync fails the system retries every minute for max-retry times. After, the next retry will occur on next refresh-interval"/>
+
+        <AD id="clock.ntp.retry.interval"  
+            name="clock.ntp.retry.interval"
+            type="Integer"
+            cardinality="0" 
+            required="true"
+            min="1"
+            default="5" 
+            description="When sync fails, interval in seconds between each retry. If clock.ntp.refresh-interval is less than 0 - no update, if equal to zero - try only once at startup"/>
+
+        <AD id="clock.ntp.refresh-interval"  
+            name="clock.ntp.refresh-interval"
+            type="Integer"
+            cardinality="0" 
+            required="false"
+            default="3600" 
+            description="Whether or not to sync the clock and if so, the frequency in seconds.  If less than 0 - no update, if equal to zero - sync once at startup, if greater than zero - the frequency in seconds to perform a new clock sync"/>
+
+    </OCD>
+    <Designate pid="org.eclipse.kura.clock.ClockService">
+        <Object ocdref="org.eclipse.kura.clock.ClockService"/>
+    </Designate>
+</MetaData>

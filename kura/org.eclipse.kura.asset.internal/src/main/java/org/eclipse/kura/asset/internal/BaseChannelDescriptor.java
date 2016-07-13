@@ -14,7 +14,6 @@ package org.eclipse.kura.asset.internal;
 
 import java.util.List;
 
-import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.asset.AssetConfiguration;
 import org.eclipse.kura.asset.ChannelDescriptor;
 import org.eclipse.kura.core.configuration.metatype.Tad;
@@ -77,9 +76,6 @@ public final class BaseChannelDescriptor implements ChannelDescriptor {
 
 	/**
 	 * Instantiates a new base asset channel descriptor.
-	 *
-	 * @throws KuraRuntimeException
-	 *             if argument is null
 	 */
 	public BaseChannelDescriptor() {
 		this.m_defaultElements = Lists.newArrayList();

@@ -21,25 +21,18 @@ import org.eclipse.kura.KuraRuntimeException;
 public interface WireRecordStore {
 
 	/**
-	 * Clear all the stored wired records from the provided table.
-	 *
-	 * @param tableName
-	 *            the table name whose records will be truncated
-	 * @throws KuraRuntimeException
-	 *             if the argument is null
+	 * Clear all the stored wired records from the configured table.
 	 */
-	public void clear(String tableName);
+	public void clear();
 
 	/**
-	 * Stores the provided wire record into the provided table.
+	 * Stores the provided wire record into the configured table.
 	 *
-	 * @param tableName
-	 *            the table name to which the wire record will be inserted
 	 * @param wireRecord
 	 *            the wire record to insert
 	 * @throws KuraRuntimeException
-	 *             if any of the arguments is null
+	 *             if the argument is null
 	 */
-	public void store(String tableName, WireRecord wireRecord);
+	public void store(WireRecord wireRecord);
 
 }

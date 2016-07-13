@@ -31,8 +31,8 @@
    </service>
    <property name="service.pid" value="org.eclipse.kura.wire.DbWireRecordStore"/>
    <reference name="DbService" 
-              bind="setDbService" 
-              unbind="unsetDbService"
+              bind="bindDbService" 
+              unbind="unbindDbService"
               cardinality="1..1" 
               policy="static" 
               interface="org.eclipse.kura.db.DbService"/>

@@ -15,14 +15,20 @@ package org.eclipse.kura.wire.internal;
 import static org.eclipse.kura.Preconditions.checkNull;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.localization.LocalizationAdapter;
 import org.eclipse.kura.localization.WireMessages;
 import org.eclipse.kura.wire.WireConfiguration;
+import org.eclipse.kura.wire.Wires;
 
+import com.google.common.base.CharMatcher;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
 /**
  * Captures the configuration of the Wire Graph.
@@ -43,9 +49,57 @@ final class WireServiceOptions {
 	 * @throws KuraRuntimeException
 	 *             if provided configurations is null
 	 */
-	WireServiceOptions(final List<WireConfiguration> configurations) {
+	private WireServiceOptions(final List<WireConfiguration> configurations) {
 		checkNull(configurations, s_message.configurationNonNull());
 		this.wireConfigurations = configurations;
+	}
+	
+	/**
+	 * Creates new instance of {@link WireServiceOptions}
+	 *
+	 * @param properties
+	 *            the properties
+	 * @return the wire service options
+	 * @throws KuraRuntimeException
+	 *             if provided properties is null
+	 */
+	static WireServiceOptions getInstance(final Map<String, Object> properties) {
+		checkNull(properties, s_message.wireServicePropNonNull());
+		final List<WireConfiguration> wireConfs = Lists.newCopyOnWriteArrayList();
+		final Set<Long> wireIds = Sets.newHashSet();
+		final String separator = ".";
+		for (final Map.Entry<String, Object> entry : properties.entrySet()) {
+			final String key = entry.getKey();
+			if (key.contains(separator)) {
+				final Long wireConfId = Long.parseLong(key.substring(0, key.indexOf(separator)));
+				wireIds.add(wireConfId);
+			}
+		}
+		for (int i = 0; i < wireIds.size(); i++) {
+			String emitterName = null;
+			String receiverName = null;
+			String filter = null;
+			for (final Map.Entry<String, Object> entry : properties.entrySet()) {
+				final String key = entry.getKey();
+				final String value = String.valueOf(entry.getValue());
+
+				if (CharMatcher.DIGIT.matchesAllOf(key.substring(0, key.indexOf(separator)))) {
+					if (key.contains("emitter")) {
+						emitterName = value;
+					}
+					if (key.contains("receiver")) {
+						receiverName = value;
+					}
+					if (key.contains("filter")) {
+						filter = value;
+					}
+				}
+			}
+			final WireConfiguration configuration = Wires.newWireConfiguration(emitterName, receiverName, filter);
+			wireConfs.add(configuration);
+		}
+
+		return new WireServiceOptions(wireConfs);
 	}
 
 	/**

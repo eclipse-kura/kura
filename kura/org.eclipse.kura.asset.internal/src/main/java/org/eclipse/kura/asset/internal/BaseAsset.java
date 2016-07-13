@@ -60,6 +60,7 @@ import com.google.common.util.concurrent.Monitor;
  * information on how to provide the configurations to the basic Kura asset.
  *
  * @see AssetOptions
+ * @see AssetConfiguration
  */
 public class BaseAsset implements Asset {
 

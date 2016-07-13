@@ -62,6 +62,19 @@ final class DbServiceHelper {
 		checkNull(dbService, s_message.dbServiceNonNull());
 		this.m_dbService = dbService;
 	}
+	
+	/**
+	 * Gets the single instance of DbUtils.
+	 *
+	 * @param dbService
+	 *            the DB service
+	 * @return single instance of DbUtils
+	 * @throws KuraRuntimeException
+	 *             if argument is null
+	 */
+	static DbServiceHelper getInstance(final DbService dbService) {
+		return new DbServiceHelper(dbService);
+	}
 
 	/**
 	 * Close the connection instance.
@@ -186,16 +199,4 @@ final class DbServiceHelper {
 		return escaper.escape(string).toLowerCase();
 	}
 	
-	/**
-	 * Gets the single instance of DbUtils.
-	 *
-	 * @param dbService
-	 *            the db service
-	 * @return single instance of DbUtils
-	 * @throws KuraRuntimeException
-	 *             if argument is null
-	 */
-	static DbServiceHelper getInstance(final DbService dbService) {
-		return new DbServiceHelper(dbService);
-	}
 }

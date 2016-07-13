@@ -16,7 +16,15 @@
          name="RecordStore" 
          description="A wire component that provides storage for Wire Records produced by connected WireEmitters.">
 
-        <Icon resource="RecordStore" size="32"/>   
+        <Icon resource="RecordStore" size="32"/>
+        
+        <AD id="table.name"
+            name="table.name"
+            type="String"
+            cardinality="0"
+            required="true"
+            default=""
+            description="The name of the table to be created and all the operations will be performed on it"/>   
         
         <AD id="periodic.cleanup"
             name="periodic.cleanup"

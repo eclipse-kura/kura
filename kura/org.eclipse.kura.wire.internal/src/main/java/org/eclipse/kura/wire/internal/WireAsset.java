@@ -82,6 +82,8 @@ import com.google.common.collect.Sets;
  * <li>timestamp</li>
  * <li>value</li>
  * </ul>
+ *
+ * @see BaseAsset
  */
 public final class WireAsset extends BaseAsset implements WireEmitter, WireReceiver, SelfConfiguringComponent {
 

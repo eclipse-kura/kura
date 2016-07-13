@@ -12,6 +12,7 @@
  */
 package org.eclipse.kura.wire;
 
+import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraRuntimeException;
 import org.osgi.service.wireadmin.Wire;
 
@@ -41,10 +42,12 @@ public interface WireService {
 	 *            the factory PID for the wire component
 	 * @param name
 	 *            the name for the wire component
+	 * @throws KuraException
+	 *             if the wire component factory creation fails
 	 * @throws KuraRuntimeException
 	 *             if any of the arguments is null
 	 */
-	public void createWireComponent(String factoryPid, String name);
+	public void createWireComponent(String factoryPid, String name) throws KuraException;
 
 	/**
 	 * Removes the wire between the provided wire emitter and the wire receiver

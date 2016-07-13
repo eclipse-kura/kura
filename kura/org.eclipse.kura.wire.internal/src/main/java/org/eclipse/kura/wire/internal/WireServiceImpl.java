@@ -40,7 +40,6 @@ import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Splitter;
 import com.google.common.base.Throwables;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
@@ -54,15 +53,6 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 
 	/** Configuration PID Property */
 	private static final String CONF_PID = "org.eclipse.kura.wire.WireService";
-
-	/** The String literal to be used as prefix for service factory */
-	public static final String FACTORY_PREFIX = "FACTORY";
-
-	/**
-	 * String literal to be used as prefix for emitter and receiver to be used
-	 * in wire configuration
-	 */
-	public static final String INSTANCE_PREFIX = "INSTANCE";
 
 	/** The Logger instance. */
 	private static final Logger s_logger = LoggerFactory.getLogger(WireServiceImpl.class);
@@ -167,19 +157,12 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 
 	/** {@inheritDoc} */
 	@Override
-	public void createWireComponent(final String factoryPid, final String name) {
+	public void createWireComponent(final String factoryPid, final String name) throws KuraException {
 		checkNull(factoryPid, s_message.factoryPidNonNull());
 		checkNull(name, s_message.wireComponentNameNonNull());
 
 		s_logger.info(s_message.creatingWireComponent(name));
-		try {
-			final List<String> splittedString = Splitter.on("|").omitEmptyStrings().splitToList(factoryPid);
-			if (!splittedString.isEmpty() && (FACTORY_PREFIX.equals(splittedString.get(0)))) {
-				this.m_configService.createFactoryConfiguration(factoryPid, name, null, true);
-			}
-		} catch (final KuraException ex) {
-			s_logger.error(s_message.errorCreatingWireComponent() + Throwables.getStackTraceAsString(ex));
-		}
+		this.m_configService.createFactoryConfiguration(factoryPid, name, null, true);
 	}
 
 	/**
@@ -248,7 +231,7 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 	 */
 	private void extractProperties(final Map<String, Object> properties) {
 		checkNull(properties, s_message.propertiesNonNull());
-		this.m_options = WireUtils.newWireServiceOptions(properties);
+		this.m_options = WireServiceOptions.getInstance(properties);
 		this.m_properties = properties;
 
 		for (final WireConfiguration conf : this.m_options.getWireConfigurations()) {

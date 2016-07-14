@@ -8,6 +8,7 @@
  *
  * Contributors:
  *     Eurotech
+ *     Jens Reimann <jreimann@redhat.com> - cleanup static lock initialization
  *******************************************************************************/
 package org.eclipse.kura.linux.net.dns;
 
@@ -47,11 +48,10 @@ public class LinuxDns {
 	private static final String GLOBAL_DHCP_LEASES_DIR = "/var/lib/dhcp";
 	private static final String IFACE_DHCP_LEASES_DIR = "/var/lib/dhclient";
 	
-	private static Object s_lock;
+	private static final Object s_lock = new Object ();
 	private static LinuxDns s_linuxDns = null;
 	
 	private LinuxDns() {
-		s_lock = new Object();
 	}
 	
 	public static synchronized LinuxDns getInstance() {

@@ -8,11 +8,13 @@
  *
  * Contributors:
  *     Eurotech
+ *     Jens Reimann <jreimann@redhat.com> - Allows setting working directory
  *******************************************************************************/
 package org.eclipse.kura.core.util;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -65,11 +67,17 @@ public class SafeProcess
 		return new ByteArrayInputStream(m_errBytes);
 	}
 
-	void exec(String[] cmdarray)
+	void exec(String[] cmdarray) throws IOException {
+		exec(null, cmdarray);
+	}
+	
+	void exec(File directory, String[] cmdarray)
 	    throws IOException
 	{
         s_logger.debug("Executing: {}", Arrays.toString(cmdarray));
         ProcessBuilder pb = new ProcessBuilder(cmdarray);
+        
+        if ( directory != null ) pb.directory(directory);
         m_process = pb.start();
 
         // process the input stream

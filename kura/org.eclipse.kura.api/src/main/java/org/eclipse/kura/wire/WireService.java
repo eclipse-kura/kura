@@ -12,65 +12,51 @@
  */
 package org.eclipse.kura.wire;
 
+import java.util.List;
+
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraRuntimeException;
-import org.osgi.service.wireadmin.Wire;
 
 /**
- * This interface provides all necessary service methods to manipulate wire
- * mechanisms in Kura Wires topology.
+ * This WireService interface provides all necessary service API methods to
+ * manipulate wire mechanisms in Kura Wires topology.
  */
 public interface WireService {
 
 	/**
-	 * Creates the wire between the provided wire emitter and the wire receiver
+	 * Creates the wire configuration for the provided wire emitter and the wire
+	 * receiver
 	 *
 	 * @param emitterPid
 	 *            the PID of the wire emitter
 	 * @param receiverPid
 	 *            the PID of the wire receiver
+	 * @throws KuraException
+	 *             if there doesn't exist any Wire Component having provided
+	 *             emitter PID or any Wire Component having provided receiver
+	 *             PID
 	 * @throws KuraRuntimeException
 	 *             if any of the arguments is null
 	 * @return the wire instance recently created
 	 */
-	public Wire createWire(String emitterPid, String receiverPid);
+	public WireConfiguration createWireConfiguration(String emitterPid, String receiverPid) throws KuraException;
 
 	/**
-	 * Creates the wire component.
+	 * Removes the provided wire configuration for the provided wire emitter and
+	 * the wire receiver
 	 *
-	 * @param factoryPid
-	 *            the factory PID for the wire component
-	 * @param name
-	 *            the name for the wire component
-	 * @throws KuraException
-	 *             if the wire component factory creation fails
+	 * @param wireConfiguration
+	 *            the wire configuration to be
 	 * @throws KuraRuntimeException
-	 *             if any of the arguments is null
+	 *             if the argument is null
 	 */
-	public void createWireComponent(String factoryPid, String name) throws KuraException;
+	public void deleteWireConfiguration(WireConfiguration wireConfiguration);
 
 	/**
-	 * Removes the wire between the provided wire emitter and the wire receiver
+	 * Retrieves the list of already created Wire Configurations
 	 *
-	 * @param emitterPid
-	 *            the PID of the wire emitter
-	 * @param receiverPid
-	 *            the PID of the wire receiver
-	 * @throws KuraRuntimeException
-	 *             if any of the arguments is null
-	 * @return true, if removal is successful
+	 * @return the list of wire configurations
 	 */
-	public boolean removeWire(String emitterPid, String receiverPid);
-
-	/**
-	 * Removes the wire component.
-	 *
-	 * @param pid
-	 *            the PID of the wire component
-	 * @throws KuraRuntimeException
-	 *             if argument is null
-	 * @return true, if removal is successful
-	 */
-	public boolean removeWireComponent(String pid);
+	public List<WireConfiguration> getWireConfigurations();
 
 }

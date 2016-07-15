@@ -16,18 +16,19 @@ import org.eclipse.kura.KuraRuntimeException;
 import org.osgi.service.wireadmin.Consumer;
 
 /**
- * Represents a wire component which is a data consumer that can receive
- * produced or emitted values from {@link WireEmitter}.
+ * The WireReceiver interface Represents a wire component which is a data
+ * consumer that can receive produced or emitted values from upstream
+ * {@link WireEmitter}.
  */
 public interface WireReceiver extends WireComponent, Consumer {
 
 	/**
-	 * Triggers when the wire component receives an {@link WireEnvelope}
+	 * Triggers when the wire component receives a {@link WireEnvelope}
 	 *
 	 * @param wireEnvelope
 	 *            the received wire envelope
 	 * @throws KuraRuntimeException
-	 *             if argument is null
+	 *             if the argument is null
 	 */
 	public void onWireReceive(WireEnvelope wireEnvelope);
 }

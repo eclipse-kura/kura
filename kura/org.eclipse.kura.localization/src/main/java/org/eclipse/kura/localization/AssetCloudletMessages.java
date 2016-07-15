@@ -27,6 +27,9 @@ public interface AssetCloudletMessages {
 	@En("Activating Asset Cloudlet...Done")
 	public String activatingDone();
 
+	@En("AssetCloudlet activation failed {0}")
+	public String activationFailed(Throwable e);
+
 	@En("Asset has been found by Asset Cloudlet Tracker....==> adding service")
 	public String assetFoundAdding();
 

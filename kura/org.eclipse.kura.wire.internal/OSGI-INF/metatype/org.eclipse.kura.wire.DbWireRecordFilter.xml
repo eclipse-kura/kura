@@ -49,7 +49,7 @@
         
     </OCD>
     
-    <Designate pid="org.eclipse.kura.wire.DbWireRecordFilter">
+    <Designate pid="org.eclipse.kura.wire.DbWireRecordFilter" factoryPid="org.eclipse.kura.wire.DbWireRecordFilter">
         <Object ocdref="org.eclipse.kura.wire.DbWireRecordFilter"/>
     </Designate>
 </MetaData>

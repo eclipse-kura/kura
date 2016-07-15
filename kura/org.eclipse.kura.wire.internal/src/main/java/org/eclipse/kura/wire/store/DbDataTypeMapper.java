@@ -14,29 +14,21 @@
 package org.eclipse.kura.wire.store;
 
 import java.sql.Types;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.kura.type.DataType;
-
-import com.google.common.collect.Maps;
 
 /**
  * The Class DbDataTypeMapper maps all the Kura specific data types to JDBC Data
  * Types
  */
-final class DbDataTypeMapper {
-	
-	/**
-	 * Not needed because of utility class
-	 */
-	private DbDataTypeMapper() {
-		// Not needed
-	}
+public final class DbDataTypeMapper {
 
 	/**
 	 * The Class JdbcType.
 	 */
-	static class JdbcType {
+	public static class JdbcType {
 
 		/** The JDBC type represented as integer. */
 		private final int m_type;
@@ -80,10 +72,10 @@ final class DbDataTypeMapper {
 	 * The map containing key-value pairs of the Kura Datatype and the JDBC
 	 * datatype
 	 */
-	private static Map<DataType, JdbcType> s_dataTypeMap = Maps.newHashMap();
+	private static Map<DataType, JdbcType> s_dataTypeMap = new HashMap<DataType, JdbcType>();
 
-	/** The s_jdbc type map. */
-	private static Map<Integer, DataType> s_jdbcTypeMap = Maps.newHashMap();
+	/** The JDBC Type Holder map. */
+	private static Map<Integer, DataType> s_jdbcTypeMap = new HashMap<Integer, DataType>();
 
 	static {
 		s_dataTypeMap.put(DataType.BYTE, new JdbcType(Types.TINYINT, "TINYINT"));
@@ -95,6 +87,7 @@ final class DbDataTypeMapper {
 		s_dataTypeMap.put(DataType.BYTE_ARRAY, new JdbcType(Types.BINARY, "BINARY"));
 		s_dataTypeMap.put(DataType.STRING, new JdbcType(Types.VARCHAR, "VARCHAR(102400)"));
 	}
+
 	static {
 		s_jdbcTypeMap.put(Types.TINYINT, DataType.BYTE);
 		s_jdbcTypeMap.put(Types.SMALLINT, DataType.SHORT);
@@ -105,6 +98,13 @@ final class DbDataTypeMapper {
 		s_jdbcTypeMap.put(Types.BINARY, DataType.BYTE_ARRAY);
 		s_jdbcTypeMap.put(Types.VARCHAR, DataType.STRING);
 	}
+	
+	/**
+	 * Constructor
+	 */
+	private DbDataTypeMapper() {
+		// Not needed
+	}
 
 	/**
 	 * Gets the data type.
@@ -113,7 +113,7 @@ final class DbDataTypeMapper {
 	 *            the jdbc type
 	 * @return the data type
 	 */
-	static DataType getDataType(final int jdbcType) {
+	public static DataType getDataType(final int jdbcType) {
 		return s_jdbcTypeMap.get(jdbcType);
 	}
 
@@ -124,7 +124,7 @@ final class DbDataTypeMapper {
 	 *            the data type
 	 * @return the JDBC type
 	 */
-	static JdbcType getJdbcType(final DataType dataType) {
+	public static JdbcType getJdbcType(final DataType dataType) {
 		return s_dataTypeMap.get(dataType);
 	}
 

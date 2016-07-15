@@ -16,25 +16,27 @@ import static org.eclipse.kura.Preconditions.checkNull;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.cloud.CloudClient;
 import org.eclipse.kura.cloud.CloudService;
 import org.eclipse.kura.configuration.ConfigurableComponent;
+import org.eclipse.kura.core.util.ThrowableUtil;
 import org.eclipse.kura.data.DataService;
 import org.eclipse.kura.data.listener.DataServiceListener;
 import org.eclipse.kura.localization.LocalizationAdapter;
 import org.eclipse.kura.localization.WireMessages;
 import org.eclipse.kura.message.KuraPayload;
 import org.eclipse.kura.message.KuraPosition;
-import org.eclipse.kura.wire.CloudPublisher;
 import org.eclipse.kura.wire.WireEnvelope;
 import org.eclipse.kura.wire.WireField;
+import org.eclipse.kura.wire.WireHelperService;
 import org.eclipse.kura.wire.WireReceiver;
 import org.eclipse.kura.wire.WireRecord;
 import org.eclipse.kura.wire.WireSupport;
-import org.eclipse.kura.wire.Wires;
 import org.eclipse.kura.wire.cloud.publisher.CloudPublisherOptions.AutoConnectMode;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -44,16 +46,12 @@ import org.osgi.util.position.Position;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Throwables;
-import com.google.common.util.concurrent.Monitor;
-
 /**
  * The Class CloudPublisherImpl is the implementation of {@link CloudPublisher}
  * to publish a list of wire records as received in Wire Envelope to the
  * configured cloud platform.
  */
-public final class CloudPublisherImpl
-		implements WireReceiver, DataServiceListener, ConfigurableComponent, CloudPublisher {
+public final class CloudPublisherImpl implements WireReceiver, DataServiceListener, ConfigurableComponent {
 
 	/** The Cloud Publisher Disconnection Manager. */
 	private static CloudPublisherDisconnectManager s_disconnectManager;
@@ -74,10 +72,13 @@ public final class CloudPublisherImpl
 	private volatile DataService m_dataService;
 
 	/** Synchronization Monitor. */
-	private final Monitor m_monitor;
+	private final Lock m_monitor;
 
 	/** The cloud publisher options. */
 	private CloudPublisherOptions m_options;
+
+	/** The Wire Helper Service. */
+	private volatile WireHelperService m_wireHelperService;
 
 	/** The wire supporter component. */
 	private WireSupport m_wireSupport;
@@ -86,7 +87,7 @@ public final class CloudPublisherImpl
 	 * Instantiates a new cloud publisher instance.
 	 */
 	public CloudPublisherImpl() {
-		this.m_monitor = new Monitor();
+		this.m_monitor = new ReentrantLock();
 	}
 
 	/**
@@ -100,7 +101,7 @@ public final class CloudPublisherImpl
 	protected synchronized void activate(final ComponentContext componentContext,
 			final Map<String, Object> properties) {
 		s_logger.info(s_message.activatingCloudPublisher());
-		this.m_wireSupport = Wires.newWireSupport(this);
+		this.m_wireSupport = this.m_wireHelperService.newWireSupport(this);
 		// Update properties
 		this.m_options = new CloudPublisherOptions(properties);
 		// create the singleton disconnect manager
@@ -112,7 +113,7 @@ public final class CloudPublisherImpl
 		try {
 			this.setupCloudClient();
 		} catch (final KuraException e) {
-			s_logger.error(s_message.cloudClientSetupProblem() + Throwables.getStackTraceAsString(e));
+			s_logger.error(s_message.cloudClientSetupProblem() + ThrowableUtil.stackTraceAsString(e));
 		}
 		s_logger.info(s_message.activatingCloudPublisherDone());
 	}
@@ -138,6 +139,18 @@ public final class CloudPublisherImpl
 	public synchronized void bindDataService(final DataService dataService) {
 		if (this.m_dataService == null) {
 			this.m_dataService = dataService;
+		}
+	}
+
+	/**
+	 * Binds the Wire Helper Service.
+	 *
+	 * @param wireHelperService
+	 *            the new Wire Helper Service
+	 */
+	public synchronized void bindWireHelperService(final WireHelperService wireHelperService) {
+		if (this.m_wireHelperService == null) {
+			this.m_wireHelperService = wireHelperService;
 		}
 	}
 
@@ -275,14 +288,14 @@ public final class CloudPublisherImpl
 		// close the client
 		this.closeCloudClient();
 		// close the disconnect manager
-		this.m_monitor.enter();
+		this.m_monitor.lock();
 		try {
 			if (s_disconnectManager != null) {
 				s_disconnectManager.stop();
 			}
 			s_disconnectManager = null;
 		} finally {
-			this.m_monitor.leave();
+			this.m_monitor.unlock();
 		}
 		// no need to release the cloud clients as the updated application
 		// certificate is already published due the missing dependency
@@ -290,12 +303,6 @@ public final class CloudPublisherImpl
 		this.m_dataService = null;
 		this.m_cloudService = null;
 		s_logger.info(s_message.deactivatingCloudPublisherDone());
-	}
-
-	/** {@inheritDoc} */
-	@Override
-	public String getName() {
-		return this.getClass().getName();
 	}
 
 	/** {@inheritDoc} */
@@ -346,7 +353,7 @@ public final class CloudPublisherImpl
 	@Override
 	public void onWireReceive(final WireEnvelope wireEnvelope) {
 		checkNull(wireEnvelope, s_message.wireEnvelopeNonNull());
-		s_logger.info(s_message.wireRecordReceived(wireEnvelope.getEmitterName()));
+		s_logger.info(s_message.wireRecordReceived(wireEnvelope.getEmitterPid()));
 		this.publish(wireEnvelope.getRecords());
 		this.stopPublishing();
 	}
@@ -359,7 +366,6 @@ public final class CloudPublisherImpl
 	}
 
 	/** {@inheritDoc} */
-	@Override
 	public void publish(final List<WireRecord> wireRecords) {
 		checkNull(this.m_cloudClient, s_message.cloudClientNonNull());
 		checkNull(wireRecords, s_message.wireRecordsNonNull());
@@ -388,7 +394,7 @@ public final class CloudPublisherImpl
 					}
 				}
 			} catch (final Exception e) {
-				s_logger.error(s_message.errorPublishingWireRecords() + Throwables.getStackTraceAsString(e));
+				s_logger.error(s_message.errorPublishingWireRecords() + ThrowableUtil.stackTraceAsString(e));
 			}
 
 		}
@@ -456,6 +462,18 @@ public final class CloudPublisherImpl
 	}
 
 	/**
+	 * Unbinds the Wire Helper Service.
+	 *
+	 * @param wireHelperService
+	 *            the new Wire Helper Service
+	 */
+	public synchronized void unbindWireHelperService(final WireHelperService wireHelperService) {
+		if (this.m_wireHelperService == wireHelperService) {
+			this.m_wireHelperService = null;
+		}
+	}
+
+	/**
 	 * OSGi Service Component callback for updating.
 	 *
 	 * @param properties
@@ -466,7 +484,7 @@ public final class CloudPublisherImpl
 		// Update properties
 		this.m_options = new CloudPublisherOptions(properties);
 		// create the singleton disconnect manager
-		this.m_monitor.enter();
+		this.m_monitor.lock();
 		try {
 			if (s_disconnectManager != null) {
 				s_disconnectManager.setQuiesceTimeout(this.m_options.getAutoConnectQuiesceTimeout());
@@ -474,13 +492,13 @@ public final class CloudPublisherImpl
 				s_disconnectManager.disconnectInMinutes(minDelay);
 			}
 		} finally {
-			this.m_monitor.leave();
+			this.m_monitor.unlock();
 		}
 		// recreate the Cloud Client
 		try {
 			this.setupCloudClient();
 		} catch (final KuraException e) {
-			s_logger.error(s_message.cloudClientSetupProblem() + Throwables.getStackTraceAsString(e));
+			s_logger.error(s_message.cloudClientSetupProblem() + ThrowableUtil.stackTraceAsString(e));
 		}
 		s_logger.info(s_message.updatingCloudPublisherDone());
 	}

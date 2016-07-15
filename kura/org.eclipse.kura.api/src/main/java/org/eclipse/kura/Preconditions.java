@@ -14,8 +14,6 @@ package org.eclipse.kura;
 
 import org.eclipse.kura.annotation.Nullable;
 
-import com.google.common.base.Strings;
-
 /**
  * The Class Preconditions is responsible to provide utility methods to check
  * for conditions or predicates and it throws {@link KuraRuntimeException} with
@@ -72,7 +70,7 @@ public final class Preconditions {
 	public static void checkCondition(final boolean flag, final KuraErrorCode errorCode,
 			@Nullable final String message) {
 		if (flag) {
-			throw new KuraRuntimeException(errorCode, Strings.nullToEmpty(message));
+			throw new KuraRuntimeException(errorCode, message == null ? "" : message);
 		}
 	}
 

@@ -40,6 +40,9 @@ public interface AssetMessages {
 	@En("asset_flag")
 	public String assetFlag();
 
+	@En("Asset Helper Service cannot be null")
+	public String assetHelperNonNull();
+
 	@En("Asset cannot be null")
 	public String assetNonNull();
 

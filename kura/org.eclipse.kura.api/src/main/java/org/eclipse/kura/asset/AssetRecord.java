@@ -18,9 +18,6 @@ import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.annotation.NotThreadSafe;
 import org.eclipse.kura.type.TypedValue;
 
-import com.google.common.base.MoreObjects;
-import com.google.common.base.Objects;
-
 /**
  * The Class AssetRecord represents a record to perform read/write/monitor
  * operation on the provided channel using the associated device driver.
@@ -63,13 +60,37 @@ public final class AssetRecord {
 	/** {@inheritDoc} */
 	@Override
 	public boolean equals(final Object obj) {
-		if (obj instanceof AssetRecord) {
-			final AssetRecord rec = (AssetRecord) obj;
-			return Objects.equal(rec.getChannelName(), this.channelName) && Objects.equal(rec.getValue(), this.value)
-					&& Objects.equal(rec.getAssetFlag(), this.assetFlag)
-					&& Objects.equal(rec.getTimestamp(), this.timestamp);
+		if (this == obj) {
+			return true;
 		}
-		return false;
+		if (obj == null) {
+			return false;
+		}
+		if (this.getClass() != obj.getClass()) {
+			return false;
+		}
+		final AssetRecord other = (AssetRecord) obj;
+		if (this.assetFlag != other.assetFlag) {
+			return false;
+		}
+		if (this.channelName == null) {
+			if (other.channelName != null) {
+				return false;
+			}
+		} else if (!this.channelName.equals(other.channelName)) {
+			return false;
+		}
+		if (this.timestamp != other.timestamp) {
+			return false;
+		}
+		if (this.value == null) {
+			if (other.value != null) {
+				return false;
+			}
+		} else if (!this.value.equals(other.value)) {
+			return false;
+		}
+		return true;
 	}
 
 	/**
@@ -111,7 +132,13 @@ public final class AssetRecord {
 	/** {@inheritDoc} */
 	@Override
 	public int hashCode() {
-		return Objects.hashCode(this.channelName, this.value, this.assetFlag, this.timestamp);
+		final int prime = 31;
+		int result = 1;
+		result = (prime * result) + ((this.assetFlag == null) ? 0 : this.assetFlag.hashCode());
+		result = (prime * result) + ((this.channelName == null) ? 0 : this.channelName.hashCode());
+		result = (prime * result) + (int) (this.timestamp ^ (this.timestamp >>> 32));
+		result = (prime * result) + ((this.value == null) ? 0 : this.value.hashCode());
+		return result;
 	}
 
 	/**
@@ -166,8 +193,8 @@ public final class AssetRecord {
 	/** {@inheritDoc} */
 	@Override
 	public String toString() {
-		return MoreObjects.toStringHelper(this).add("channel_name", this.channelName).add("asset_flag", this.assetFlag)
-				.add("timestamp", this.timestamp).add("value", this.value).toString();
+		return "AssetRecord [assetFlag=" + this.assetFlag + ", channelName=" + this.channelName + ", timestamp="
+				+ this.timestamp + ", value=" + this.value + "]";
 	}
 
 }

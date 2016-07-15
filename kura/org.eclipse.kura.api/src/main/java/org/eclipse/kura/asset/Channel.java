@@ -21,9 +21,6 @@ import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.annotation.NotThreadSafe;
 import org.eclipse.kura.type.DataType;
 
-import com.google.common.base.MoreObjects;
-import com.google.common.base.Objects;
-
 /**
  * The Class Channel represents a communication channel of an asset. The
  * communication channel has all the required configuration to perform specific
@@ -83,13 +80,41 @@ public final class Channel {
 
 	/** {@inheritDoc} */
 	@Override
-	public boolean equals(final Object otherChannel) {
-		if (otherChannel instanceof Channel) {
-			final Channel ch = (Channel) otherChannel;
-			return Objects.equal(this.name, ch.getName()) && Objects.equal(this.type, ch.getType())
-					&& Objects.equal(this.valueType, ch.getValueType());
+	public boolean equals(final Object obj) {
+		if (this == obj) {
+			return true;
 		}
-		return false;
+		if (obj == null) {
+			return false;
+		}
+		if (this.getClass() != obj.getClass()) {
+			return false;
+		}
+		final Channel other = (Channel) obj;
+		if (this.configuration == null) {
+			if (other.configuration != null) {
+				return false;
+			}
+		} else if (!this.configuration.equals(other.configuration)) {
+			return false;
+		}
+		if (this.id != other.id) {
+			return false;
+		}
+		if (this.name == null) {
+			if (other.name != null) {
+				return false;
+			}
+		} else if (!this.name.equals(other.name)) {
+			return false;
+		}
+		if (this.type != other.type) {
+			return false;
+		}
+		if (this.valueType != other.valueType) {
+			return false;
+		}
+		return true;
 	}
 
 	/**
@@ -140,7 +165,14 @@ public final class Channel {
 	/** {@inheritDoc} */
 	@Override
 	public int hashCode() {
-		return Objects.hashCode(this.name, this.type, this.valueType, this.configuration);
+		final int prime = 31;
+		int result = 1;
+		result = (prime * result) + ((this.configuration == null) ? 0 : this.configuration.hashCode());
+		result = (prime * result) + (int) (this.id ^ (this.id >>> 32));
+		result = (prime * result) + ((this.name == null) ? 0 : this.name.hashCode());
+		result = (prime * result) + ((this.type == null) ? 0 : this.type.hashCode());
+		result = (prime * result) + ((this.valueType == null) ? 0 : this.valueType.hashCode());
+		return result;
 	}
 
 	/**
@@ -185,8 +217,7 @@ public final class Channel {
 	/** {@inheritDoc} */
 	@Override
 	public String toString() {
-		return MoreObjects.toStringHelper(this).add("ID", this.id).add("name", this.name).add("channel_type", this.type)
-				.add("value_type", this.valueType).add("channel_configuration", this.configuration).toString();
+		return "Channel [configuration=" + this.configuration + ", id=" + this.id + ", name=" + this.name + ", type="
+				+ this.type + ", valueType=" + this.valueType + "]";
 	}
-
 }

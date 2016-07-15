@@ -15,8 +15,13 @@ package org.eclipse.kura.asset.internal;
 import static org.eclipse.kura.Preconditions.checkCondition;
 import static org.eclipse.kura.Preconditions.checkNull;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraRuntimeException;
@@ -24,9 +29,9 @@ import org.eclipse.kura.asset.Asset;
 import org.eclipse.kura.asset.AssetConfiguration;
 import org.eclipse.kura.asset.AssetEvent;
 import org.eclipse.kura.asset.AssetFlag;
+import org.eclipse.kura.asset.AssetHelperService;
 import org.eclipse.kura.asset.AssetListener;
 import org.eclipse.kura.asset.AssetRecord;
-import org.eclipse.kura.asset.Assets;
 import org.eclipse.kura.asset.Channel;
 import org.eclipse.kura.asset.ChannelType;
 import org.eclipse.kura.asset.Driver;
@@ -34,6 +39,8 @@ import org.eclipse.kura.asset.DriverEvent;
 import org.eclipse.kura.asset.DriverFlag;
 import org.eclipse.kura.asset.DriverListener;
 import org.eclipse.kura.asset.DriverRecord;
+import org.eclipse.kura.asset.internal.concealed.DriverTrackerCustomizer;
+import org.eclipse.kura.core.util.ThrowableUtil;
 import org.eclipse.kura.localization.AssetMessages;
 import org.eclipse.kura.localization.LocalizationAdapter;
 import org.osgi.framework.InvalidSyntaxException;
@@ -41,13 +48,6 @@ import org.osgi.service.component.ComponentContext;
 import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.base.MoreObjects;
-import com.google.common.base.Throwables;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.util.concurrent.Monitor;
 
 /**
  * The Class BaseAsset is a basic Kura asset implementation of an Industrial
@@ -73,6 +73,9 @@ public class BaseAsset implements Asset {
 	/** The provided asset configuration wrapper instance. */
 	protected AssetConfiguration m_assetConfiguration;
 
+	/** The Asset Helper Service instance. */
+	protected volatile AssetHelperService m_assetHelper;
+
 	/** Container of mapped asset listeners and drivers listener. */
 	protected final Map<AssetListener, DriverListener> m_assetListeners;
 
@@ -89,7 +92,7 @@ public class BaseAsset implements Asset {
 	private DriverTrackerCustomizer m_driverTrackerCustomizer;
 
 	/** Synchronization Monitor for driver specific operations. */
-	private final Monitor m_monitor;
+	private final Lock m_monitor;
 
 	/** The configurable properties of this asset. */
 	protected Map<String, Object> m_properties;
@@ -101,8 +104,8 @@ public class BaseAsset implements Asset {
 	 * Instantiates a new Base Asset.
 	 */
 	public BaseAsset() {
-		this.m_assetListeners = Maps.newConcurrentMap();
-		this.m_monitor = new Monitor();
+		this.m_assetListeners = new ConcurrentHashMap<AssetListener, DriverListener>();
+		this.m_monitor = new ReentrantLock();
 	}
 
 	/**
@@ -112,14 +115,14 @@ public class BaseAsset implements Asset {
 	 * @param componentContext
 	 *            the component context
 	 * @param properties
-	 *            the configurable properties
+	 *            the configurable service properties
 	 */
 	protected synchronized void activate(final ComponentContext componentContext,
 			final Map<String, Object> properties) {
 		s_logger.debug(s_message.activating());
 		this.m_context = componentContext;
 		this.m_properties = properties;
-		this.retrieveConfigurationsFromProperties(properties);
+		// retrieve the asset configuration on update
 		s_logger.debug(s_message.activatingDone());
 	}
 
@@ -142,7 +145,7 @@ public class BaseAsset implements Asset {
 					Driver.class.getName(), this.m_driverTrackerCustomizer);
 			this.m_serviceTracker.open();
 		} catch (final InvalidSyntaxException e) {
-			Throwables.propagate(e);
+			s_logger.error(ThrowableUtil.stackTraceAsString(e));
 		}
 		s_logger.debug(s_message.driverAttachDone());
 	}
@@ -181,15 +184,15 @@ public class BaseAsset implements Asset {
 	 */
 	protected synchronized void deactivate(final ComponentContext componentContext) {
 		s_logger.debug(s_message.deactivating());
-		this.m_monitor.enter();
+		this.m_monitor.lock();
 		try {
 			if (this.m_driver != null) {
 				this.m_driver.disconnect();
 			}
 		} catch (final KuraException e) {
-			s_logger.error(s_message.errorDriverDisconnection() + Throwables.getStackTraceAsString(e));
+			s_logger.error(s_message.errorDriverDisconnection() + ThrowableUtil.stackTraceAsString(e));
 		} finally {
-			this.m_monitor.leave();
+			this.m_monitor.unlock();
 		}
 		this.m_driver = null;
 		if (this.m_serviceTracker != null) {
@@ -233,8 +236,8 @@ public class BaseAsset implements Asset {
 		checkNull(this.m_driver, s_message.driverNonNull());
 
 		s_logger.debug(s_message.readingChannels());
-		final List<AssetRecord> assetRecords = Lists.newArrayList();
-		final List<DriverRecord> driverRecords = Lists.newArrayList();
+		final List<AssetRecord> assetRecords = new ArrayList<AssetRecord>();
+		final List<DriverRecord> driverRecords = new ArrayList<DriverRecord>();
 
 		final Map<Long, Channel> channels = this.m_assetConfiguration.getChannels();
 		for (final String channelName : channelNames) {
@@ -245,20 +248,20 @@ public class BaseAsset implements Asset {
 			checkCondition((channel.getType() != ChannelType.READ) || (channel.getType() != ChannelType.READ_WRITE),
 					s_message.channelTypeNotReadable() + channel);
 
-			final DriverRecord driverRecord = Assets.newDriverRecord(channelName);
+			final DriverRecord driverRecord = this.m_assetHelper.newDriverRecord(channelName);
 			driverRecord.setChannelConfig(channel.getConfiguration());
 			driverRecords.add(driverRecord);
 		}
 
-		this.m_monitor.enter();
+		this.m_monitor.lock();
 		try {
 			this.m_driver.read(driverRecords);
 		} finally {
-			this.m_monitor.leave();
+			this.m_monitor.unlock();
 		}
 
 		for (final DriverRecord driverRecord : driverRecords) {
-			final AssetRecord assetRecord = Assets.newAssetRecord(driverRecord.getChannelName());
+			final AssetRecord assetRecord = this.m_assetHelper.newAssetRecord(driverRecord.getChannelName());
 			final DriverFlag driverFlag = driverRecord.getDriverFlag();
 
 			switch (driverFlag) {
@@ -335,7 +338,7 @@ public class BaseAsset implements Asset {
 			public void onDriverEvent(final DriverEvent event) {
 				checkNull(event, s_message.driverEventNonNull());
 				final DriverRecord driverRecord = event.getDriverRecord();
-				final AssetRecord assetRecord = Assets.newAssetRecord(this.m_channelName);
+				final AssetRecord assetRecord = BaseAsset.this.m_assetHelper.newAssetRecord(this.m_channelName);
 				final DriverFlag driverFlag = driverRecord.getDriverFlag();
 
 				switch (driverFlag) {
@@ -356,7 +359,7 @@ public class BaseAsset implements Asset {
 				}
 				assetRecord.setTimestamp(driverRecord.getTimestamp());
 				assetRecord.setValue(driverRecord.getValue());
-				final AssetEvent assetEvent = Assets.newAssetEvent(assetRecord);
+				final AssetEvent assetEvent = BaseAsset.this.m_assetHelper.newAssetEvent(assetRecord);
 				this.m_assetListener.onAssetEvent(assetEvent);
 			}
 		}
@@ -367,11 +370,12 @@ public class BaseAsset implements Asset {
 		this.m_assetListeners.put(assetListener, driverListener);
 		checkNull(this.m_driver, s_message.driverNonNull());
 
-		this.m_monitor.enter();
+		this.m_monitor.lock();
 		try {
-			this.m_driver.registerDriverListener(ImmutableMap.copyOf(channel.getConfiguration()), driverListener);
+			this.m_driver.registerDriverListener(new HashMap<String, Object>(channel.getConfiguration()),
+					driverListener);
 		} finally {
-			this.m_monitor.leave();
+			this.m_monitor.unlock();
 		}
 
 		s_logger.debug(s_message.registeringListenerDone());
@@ -381,12 +385,12 @@ public class BaseAsset implements Asset {
 	 * Retrieve channels from the provided properties.
 	 *
 	 * @param properties
-	 *            the properties
+	 *            the properties containing the asset specific configuration
 	 */
 	private void retrieveConfigurationsFromProperties(final Map<String, Object> properties) {
 		s_logger.debug(s_message.retrievingConf());
 		if (this.m_assetOptions == null) {
-			this.m_assetOptions = new AssetOptions(properties);
+			this.m_assetOptions = new AssetOptions(properties, this.m_assetHelper);
 		}
 		if ((this.m_assetConfiguration == null) && (this.m_assetOptions != null)) {
 			this.m_assetConfiguration = this.m_assetOptions.getAssetConfiguration();
@@ -394,10 +398,20 @@ public class BaseAsset implements Asset {
 		s_logger.debug(s_message.retrievingConfDone());
 	}
 
+	/**
+	 * Sets the new driver instance
+	 *
+	 * @param the
+	 *            driver instance to set
+	 */
+	public void setDriver(final Driver driver) {
+		this.m_driver = driver;
+	}
+
 	/** {@inheritDoc} */
 	@Override
 	public String toString() {
-		return MoreObjects.toStringHelper(this).add(s_message.configuration(), this.m_assetConfiguration).toString();
+		return "BaseAsset [Asset Configuration=" + this.m_assetConfiguration + "]";
 	}
 
 	/** {@inheritDoc} */
@@ -407,11 +421,11 @@ public class BaseAsset implements Asset {
 		checkNull(this.m_driver, s_message.driverNonNull());
 
 		s_logger.debug(s_message.unregisteringListener());
-		this.m_monitor.enter();
+		this.m_monitor.lock();
 		try {
 			this.m_driver.unregisterDriverListener(this.m_assetListeners.get(assetListener));
 		} finally {
-			this.m_monitor.leave();
+			this.m_monitor.unlock();
 		}
 		this.m_assetListeners.remove(assetListener);
 		s_logger.debug(s_message.unregisteringListenerDone());
@@ -439,8 +453,8 @@ public class BaseAsset implements Asset {
 		checkCondition(assetRecords.isEmpty(), s_message.assetRecordsNonEmpty());
 
 		s_logger.debug(s_message.writing());
-		final List<DriverRecord> driverRecords = Lists.newArrayList();
-		final Map<DriverRecord, AssetRecord> mappedRecords = Maps.newHashMap();
+		final List<DriverRecord> driverRecords = new ArrayList<DriverRecord>();
+		final Map<DriverRecord, AssetRecord> mappedRecords = new HashMap<DriverRecord, AssetRecord>();
 
 		final Map<Long, Channel> channels = this.m_assetConfiguration.getChannels();
 		for (final AssetRecord assetRecord : assetRecords) {
@@ -450,7 +464,7 @@ public class BaseAsset implements Asset {
 			final Channel channel = channels.get(id);
 			checkCondition((channel.getType() != ChannelType.WRITE) || (channel.getType() != ChannelType.READ_WRITE),
 					s_message.channelTypeNotWritable() + channel);
-			final DriverRecord driverRecord = Assets.newDriverRecord(channel.getName());
+			final DriverRecord driverRecord = this.m_assetHelper.newDriverRecord(channel.getName());
 			driverRecord.setChannelConfig(channel.getConfiguration());
 			driverRecord.setValue(assetRecord.getValue());
 			driverRecords.add(driverRecord);
@@ -458,11 +472,11 @@ public class BaseAsset implements Asset {
 		}
 
 		checkNull(this.m_driver, s_message.driverNonNull());
-		this.m_monitor.enter();
+		this.m_monitor.lock();
 		try {
 			this.m_driver.write(driverRecords);
 		} finally {
-			this.m_monitor.leave();
+			this.m_monitor.unlock();
 		}
 
 		for (final DriverRecord driverRecord : mappedRecords.keySet()) {

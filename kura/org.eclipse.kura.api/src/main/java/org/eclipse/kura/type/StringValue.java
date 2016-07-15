@@ -19,11 +19,6 @@ import org.eclipse.kura.annotation.Immutable;
 import org.eclipse.kura.annotation.Nullable;
 import org.eclipse.kura.annotation.ThreadSafe;
 
-import com.google.common.base.MoreObjects;
-import com.google.common.base.Objects;
-import com.google.common.base.Strings;
-import com.google.common.collect.ComparisonChain;
-
 /**
  * This class represents a {@link Short} value as a {@link TypedValue}.
  */
@@ -44,23 +39,37 @@ public final class StringValue implements TypedValue<String> {
 	 *            the value
 	 */
 	public StringValue(@Nullable final String value) {
-		this.value = Strings.nullToEmpty(value);
+		this.value = value == null ? "" : value;
 	}
 
 	/** {@inheritDoc} */
 	@Override
 	public int compareTo(final TypedValue<String> otherTypedValue) {
 		checkNull(otherTypedValue, "Typed Value cannot be null");
-		return ComparisonChain.start().compare(this.value, otherTypedValue.getValue()).result();
+		return this.value.compareTo(otherTypedValue.getValue());
 	}
 
 	/** {@inheritDoc} */
 	@Override
 	public boolean equals(final Object obj) {
-		if (obj instanceof StringValue) {
-			return Objects.equal(((StringValue) obj).getValue(), this.value);
+		if (this == obj) {
+			return true;
 		}
-		return false;
+		if (obj == null) {
+			return false;
+		}
+		if (this.getClass() != obj.getClass()) {
+			return false;
+		}
+		final StringValue other = (StringValue) obj;
+		if (this.value == null) {
+			if (other.value != null) {
+				return false;
+			}
+		} else if (!this.value.equals(other.value)) {
+			return false;
+		}
+		return true;
 	}
 
 	/** {@inheritDoc} */
@@ -78,12 +87,16 @@ public final class StringValue implements TypedValue<String> {
 	/** {@inheritDoc} */
 	@Override
 	public int hashCode() {
-		return Objects.hashCode(this.value);
+		final int prime = 31;
+		int result = 1;
+		result = (prime * result) + ((this.value == null) ? 0 : this.value.hashCode());
+		return result;
 	}
 
 	/** {@inheritDoc} */
 	@Override
 	public String toString() {
-		return MoreObjects.toStringHelper(this).add("string_value", this.value).toString();
+		return "StringValue [value=" + this.value + "]";
 	}
+
 }

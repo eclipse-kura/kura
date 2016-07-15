@@ -19,21 +19,26 @@
     enabled="true" 
     immediate="true"
     configuration-policy="require">
-   <implementation class="org.eclipse.kura.wire.store.DbWireRecordFilter"/>
+   <implementation class="org.eclipse.kura.wire.filter.DbWireRecordFilter"/>
    <service>
       <provide interface="org.eclipse.kura.configuration.ConfigurableComponent"/>
       <provide interface="org.eclipse.kura.wire.WireComponent"/>
       <provide interface="org.eclipse.kura.wire.WireEmitter"/>
       <provide interface="org.eclipse.kura.wire.WireReceiver"/>   
-      <provide interface="org.eclipse.kura.wire.WireRecordFilter"/>    
       <provide interface="org.osgi.service.wireadmin.Producer"/>      
       <provide interface="org.osgi.service.wireadmin.Consumer"/>      
    </service>
    <property name="service.pid" value="org.eclipse.kura.wire.DbWireRecordFilter"/>
    <reference name="DbService" 
-              bind="setDbService" 
-              unbind="unsetDbService"
+              bind="bindDbService" 
+              unbind="unbindDbService"
               cardinality="1..1" 
               policy="static" 
               interface="org.eclipse.kura.db.DbService"/>
+   <reference bind="bindWireHelperService" 
+   	          cardinality="1..1" 
+   	          interface="org.eclipse.kura.wire.WireHelperService" 
+   	          name="WireHelperService" 
+   	          policy="static" 
+   	          unbind="unbindWireHelperService"/>
 </scr:component>

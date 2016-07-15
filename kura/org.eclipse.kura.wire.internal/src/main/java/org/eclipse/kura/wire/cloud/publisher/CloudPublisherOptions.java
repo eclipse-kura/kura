@@ -14,7 +14,9 @@ package org.eclipse.kura.wire.cloud.publisher;
 
 import java.util.Map;
 
-import com.google.common.base.Throwables;
+import org.eclipse.kura.KuraErrorCode;
+import org.eclipse.kura.KuraRuntimeException;
+import org.eclipse.kura.core.util.ThrowableUtil;
 
 /**
  * The Class CloudPublisherOptions is responsible to provide all the required
@@ -144,7 +146,7 @@ final class CloudPublisherOptions {
 			try {
 				autoConnectMode = AutoConnectMode.valueOf(autoconnectModeValue);
 			} catch (final IllegalArgumentException iea) {
-				Throwables.propagate(iea);
+				throw new KuraRuntimeException(KuraErrorCode.INTERNAL_ERROR, ThrowableUtil.stackTraceAsString(iea));
 			}
 		}
 		return autoConnectMode;

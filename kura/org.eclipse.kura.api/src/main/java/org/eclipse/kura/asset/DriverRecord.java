@@ -14,15 +14,12 @@ package org.eclipse.kura.asset;
 
 import static org.eclipse.kura.Preconditions.checkNull;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.annotation.NotThreadSafe;
 import org.eclipse.kura.type.TypedValue;
-
-import com.google.common.base.MoreObjects;
-import com.google.common.base.Objects;
-import com.google.common.collect.ImmutableMap;
 
 /**
  * This class represents records needed for read, write or a monitor operation
@@ -74,13 +71,44 @@ public final class DriverRecord {
 	/** {@inheritDoc} */
 	@Override
 	public boolean equals(final Object obj) {
-		if (obj instanceof DriverRecord) {
-			final DriverRecord rec = (DriverRecord) obj;
-			return Objects.equal(rec.getChannelName(), this.channelName) && Objects.equal(rec.getValue(), this.value)
-					&& Objects.equal(rec.getDriverFlag(), this.driverFlag)
-					&& Objects.equal(rec.getTimestamp(), this.timestamp);
+		if (this == obj) {
+			return true;
 		}
-		return false;
+		if (obj == null) {
+			return false;
+		}
+		if (this.getClass() != obj.getClass()) {
+			return false;
+		}
+		final DriverRecord other = (DriverRecord) obj;
+		if (this.channelConfiguration == null) {
+			if (other.channelConfiguration != null) {
+				return false;
+			}
+		} else if (!this.channelConfiguration.equals(other.channelConfiguration)) {
+			return false;
+		}
+		if (this.channelName == null) {
+			if (other.channelName != null) {
+				return false;
+			}
+		} else if (!this.channelName.equals(other.channelName)) {
+			return false;
+		}
+		if (this.driverFlag != other.driverFlag) {
+			return false;
+		}
+		if (this.timestamp != other.timestamp) {
+			return false;
+		}
+		if (this.value == null) {
+			if (other.value != null) {
+				return false;
+			}
+		} else if (!this.value.equals(other.value)) {
+			return false;
+		}
+		return true;
 	}
 
 	/**
@@ -131,7 +159,14 @@ public final class DriverRecord {
 	/** {@inheritDoc} */
 	@Override
 	public int hashCode() {
-		return Objects.hashCode(this.channelName, this.value, this.driverFlag, this.timestamp);
+		final int prime = 31;
+		int result = 1;
+		result = (prime * result) + ((this.channelConfiguration == null) ? 0 : this.channelConfiguration.hashCode());
+		result = (prime * result) + ((this.channelName == null) ? 0 : this.channelName.hashCode());
+		result = (prime * result) + ((this.driverFlag == null) ? 0 : this.driverFlag.hashCode());
+		result = (prime * result) + (int) (this.timestamp ^ (this.timestamp >>> 32));
+		result = (prime * result) + ((this.value == null) ? 0 : this.value.hashCode());
+		return result;
 	}
 
 	/**
@@ -144,7 +179,7 @@ public final class DriverRecord {
 	 */
 	public void setChannelConfig(final Map<String, Object> channelConfig) {
 		checkNull(channelConfig, "Channel configuration cannot be null");
-		this.channelConfiguration = ImmutableMap.copyOf(channelConfig);
+		this.channelConfiguration = new HashMap<String, Object>(channelConfig);
 	}
 
 	/**
@@ -199,9 +234,8 @@ public final class DriverRecord {
 	/** {@inheritDoc} */
 	@Override
 	public String toString() {
-		return MoreObjects.toStringHelper(this).add("channel_name", this.channelName)
-				.add("channel_config", this.channelConfiguration).add("driver_flag", this.driverFlag)
-				.add("timestamp", this.timestamp).add("value", this.value).toString();
+		return "DriverRecord [channelConfiguration=" + this.channelConfiguration + ", channelName=" + this.channelName
+				+ ", driverFlag=" + this.driverFlag + ", timestamp=" + this.timestamp + ", value=" + this.value + "]";
 	}
 
 }

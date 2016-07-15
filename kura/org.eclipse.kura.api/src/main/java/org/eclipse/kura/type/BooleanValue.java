@@ -18,11 +18,6 @@ import static org.eclipse.kura.type.DataType.BOOLEAN;
 import org.eclipse.kura.annotation.Immutable;
 import org.eclipse.kura.annotation.ThreadSafe;
 
-import com.google.common.base.MoreObjects;
-import com.google.common.base.Objects;
-import com.google.common.collect.ComparisonChain;
-import com.google.common.collect.Ordering;
-
 /**
  * This class represents a {@link Boolean} value as a {@link TypedValue}.
  */
@@ -43,6 +38,7 @@ public final class BooleanValue implements TypedValue<Boolean> {
 	 *            the value
 	 */
 	public BooleanValue(final boolean value) {
+		checkNull(value, "Provided Typed Value cannot be null");
 		this.value = value;
 	}
 
@@ -50,16 +46,26 @@ public final class BooleanValue implements TypedValue<Boolean> {
 	@Override
 	public int compareTo(final TypedValue<Boolean> otherTypedValue) {
 		checkNull(otherTypedValue, "Typed Value cannot be null");
-		return ComparisonChain.start().compare(this.value, otherTypedValue.getValue(), Ordering.natural()).result();
+		return Boolean.compare(this.value, otherTypedValue.getValue());
 	}
 
 	/** {@inheritDoc} */
 	@Override
 	public boolean equals(final Object obj) {
-		if (obj instanceof BooleanValue) {
-			return Objects.equal(((BooleanValue) obj).getValue(), this.value);
+		if (this == obj) {
+			return true;
 		}
-		return false;
+		if (obj == null) {
+			return false;
+		}
+		if (this.getClass() != obj.getClass()) {
+			return false;
+		}
+		final BooleanValue other = (BooleanValue) obj;
+		if (this.value != other.value) {
+			return false;
+		}
+		return true;
 	}
 
 	/** {@inheritDoc} */
@@ -77,12 +83,16 @@ public final class BooleanValue implements TypedValue<Boolean> {
 	/** {@inheritDoc} */
 	@Override
 	public int hashCode() {
-		return Objects.hashCode(this.value);
+		final int prime = 31;
+		int result = 1;
+		result = (prime * result) + (this.value ? 1231 : 1237);
+		return result;
 	}
 
 	/** {@inheritDoc} */
 	@Override
 	public String toString() {
-		return MoreObjects.toStringHelper(this).add("boolean_value", this.value).toString();
+		return "BooleanValue [value=" + this.value + "]";
 	}
+
 }

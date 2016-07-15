@@ -19,17 +19,13 @@ import org.eclipse.kura.annotation.Immutable;
 import org.eclipse.kura.annotation.ThreadSafe;
 import org.eclipse.kura.type.TypedValue;
 
-import com.google.common.base.MoreObjects;
-import com.google.common.base.Objects;
-import com.google.common.collect.ComparisonChain;
-
 /**
- * The WireField represents an abstract data type to be used in
+ * The WireField represents an ADT (abstract data type) to be used in
  * {@link WireRecord}
  */
 @Immutable
 @ThreadSafe
-public final class WireField implements Comparable<WireField> {
+public final class WireField {
 
 	/** The name of the field */
 	private final String name;
@@ -57,19 +53,32 @@ public final class WireField implements Comparable<WireField> {
 
 	/** {@inheritDoc} */
 	@Override
-	public int compareTo(final WireField otherWireField) {
-		return ComparisonChain.start().compare(this.name, otherWireField.getName())
-				.compare(this.value, otherWireField.getValue()).result();
-	}
-
-	/** {@inheritDoc} */
-	@Override
 	public boolean equals(final Object obj) {
-		if (obj instanceof WireField) {
-			final WireField wf = (WireField) obj;
-			return Objects.equal(wf.getValue(), this.value) && Objects.equal(wf.getName(), this.name);
+		if (this == obj) {
+			return true;
 		}
-		return false;
+		if (obj == null) {
+			return false;
+		}
+		if (this.getClass() != obj.getClass()) {
+			return false;
+		}
+		final WireField other = (WireField) obj;
+		if (this.name == null) {
+			if (other.name != null) {
+				return false;
+			}
+		} else if (!this.name.equals(other.name)) {
+			return false;
+		}
+		if (this.value == null) {
+			if (other.value != null) {
+				return false;
+			}
+		} else if (!this.value.equals(other.value)) {
+			return false;
+		}
+		return true;
 	}
 
 	/**
@@ -93,12 +102,17 @@ public final class WireField implements Comparable<WireField> {
 	/** {@inheritDoc} */
 	@Override
 	public int hashCode() {
-		return Objects.hashCode(this.value, this.name);
+		final int prime = 31;
+		int result = 1;
+		result = (prime * result) + ((this.name == null) ? 0 : this.name.hashCode());
+		result = (prime * result) + ((this.value == null) ? 0 : this.value.hashCode());
+		return result;
 	}
 
 	/** {@inheritDoc} */
 	@Override
 	public String toString() {
-		return MoreObjects.toStringHelper(this).add("name", this.name).add("value", this.value).toString();
+		return "WireField [name=" + this.name + ", value=" + this.value + "]";
 	}
+
 }

@@ -19,8 +19,6 @@ import java.util.Map;
 import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.annotation.NotThreadSafe;
 
-import com.google.common.base.MoreObjects;
-
 /**
  * The Class AssetConfiguration is responsible for storing the configuration for
  * an asset.
@@ -137,8 +135,7 @@ public final class AssetConfiguration {
 	/** {@inheritDoc} */
 	@Override
 	public String toString() {
-		return MoreObjects.toStringHelper(this).add("name", this.name).add("description", this.description)
-				.add("driverId", this.driverId).add("channels", this.channels).toString();
+		return "AssetConfiguration [channels=" + this.channels + ", description=" + this.description + ", driverId="
+				+ this.driverId + ", name=" + this.name + "]";
 	}
-
 }

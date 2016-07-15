@@ -10,7 +10,7 @@
  *   Eurotech
  *   Amit Kumar Mondal (admin@amitinside.com)
  */
-package org.eclipse.kura.wire.store;
+package org.eclipse.kura.wire.filter;
 
 import java.util.Map;
 

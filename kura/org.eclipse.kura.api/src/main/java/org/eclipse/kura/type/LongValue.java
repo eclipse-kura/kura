@@ -18,11 +18,6 @@ import static org.eclipse.kura.type.DataType.LONG;
 import org.eclipse.kura.annotation.Immutable;
 import org.eclipse.kura.annotation.ThreadSafe;
 
-import com.google.common.base.MoreObjects;
-import com.google.common.base.Objects;
-import com.google.common.collect.ComparisonChain;
-import com.google.common.collect.Ordering;
-
 /**
  * This class represents a {@link Long} value as a {@link TypedValue}.
  */
@@ -50,16 +45,26 @@ public final class LongValue implements TypedValue<Long> {
 	@Override
 	public int compareTo(final TypedValue<Long> otherTypedValue) {
 		checkNull(otherTypedValue, "Typed Value cannot be null");
-		return ComparisonChain.start().compare(this.value, otherTypedValue.getValue(), Ordering.natural()).result();
+		return Long.compare(this.value, otherTypedValue.getValue());
 	}
 
 	/** {@inheritDoc} */
 	@Override
 	public boolean equals(final Object obj) {
-		if (obj instanceof LongValue) {
-			return Objects.equal(((LongValue) obj).getValue(), this.value);
+		if (this == obj) {
+			return true;
 		}
-		return false;
+		if (obj == null) {
+			return false;
+		}
+		if (this.getClass() != obj.getClass()) {
+			return false;
+		}
+		final LongValue other = (LongValue) obj;
+		if (this.value != other.value) {
+			return false;
+		}
+		return true;
 	}
 
 	/** {@inheritDoc} */
@@ -77,13 +82,16 @@ public final class LongValue implements TypedValue<Long> {
 	/** {@inheritDoc} */
 	@Override
 	public int hashCode() {
-		return Objects.hashCode(this.value);
+		final int prime = 31;
+		int result = 1;
+		result = (prime * result) + (int) (this.value ^ (this.value >>> 32));
+		return result;
 	}
 
 	/** {@inheritDoc} */
 	@Override
 	public String toString() {
-		return MoreObjects.toStringHelper(this).add("long_value", this.value).toString();
+		return "LongValue [value=" + this.value + "]";
 	}
 
 }

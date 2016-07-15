@@ -18,8 +18,6 @@ import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.annotation.Immutable;
 import org.eclipse.kura.annotation.ThreadSafe;
 
-import com.google.common.base.MoreObjects;
-
 /**
  * The DriverEvent class represents an event occurred while monitoring specific
  * channel configuration by the driver.
@@ -59,7 +57,7 @@ public final class DriverEvent {
 	/** {@inheritDoc} */
 	@Override
 	public String toString() {
-		return MoreObjects.toStringHelper(this).add("driver_record", this.driverRecord).toString();
+		return "DriverEvent [driverRecord=" + this.driverRecord + "]";
 	}
 
 }

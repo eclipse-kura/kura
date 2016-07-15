@@ -20,11 +20,6 @@ import java.util.Arrays;
 import org.eclipse.kura.annotation.Immutable;
 import org.eclipse.kura.annotation.ThreadSafe;
 
-import com.google.common.base.MoreObjects;
-import com.google.common.base.Objects;
-import com.google.common.collect.ComparisonChain;
-import com.google.common.primitives.UnsignedBytes;
-
 /**
  * This class represents a {@link Byte[]} value as a {@link TypedValue}.
  */
@@ -53,17 +48,34 @@ public final class ByteArrayValue implements TypedValue<byte[]> {
 	@Override
 	public int compareTo(final TypedValue<byte[]> otherTypedValue) {
 		checkNull(otherTypedValue, "Typed Value cannot be null");
-		return ComparisonChain.start()
-				.compare(this.value, otherTypedValue.getValue(), UnsignedBytes.lexicographicalComparator()).result();
+		final byte[] otherValue = otherTypedValue.getValue();
+		for (int i = 0, j = 0; (i < this.value.length) && (j < otherValue.length); i++, j++) {
+			final int a = this.value[i] & 0xff;
+			final int b = otherValue[j] & 0xff;
+			if (a != b) {
+				return a - b;
+			}
+		}
+		return this.value.length - otherValue.length;
 	}
 
 	/** {@inheritDoc} */
 	@Override
 	public boolean equals(final Object obj) {
-		if (obj instanceof ByteArrayValue) {
-			return Arrays.equals(((ByteArrayValue) obj).getValue(), this.value);
+		if (this == obj) {
+			return true;
 		}
-		return false;
+		if (obj == null) {
+			return false;
+		}
+		if (this.getClass() != obj.getClass()) {
+			return false;
+		}
+		final ByteArrayValue other = (ByteArrayValue) obj;
+		if (!Arrays.equals(this.value, other.value)) {
+			return false;
+		}
+		return true;
 	}
 
 	/** {@inheritDoc} */
@@ -81,12 +93,16 @@ public final class ByteArrayValue implements TypedValue<byte[]> {
 	/** {@inheritDoc} */
 	@Override
 	public int hashCode() {
-		return Objects.hashCode(this.value);
+		final int prime = 31;
+		int result = 1;
+		result = (prime * result) + Arrays.hashCode(this.value);
+		return result;
 	}
 
 	/** {@inheritDoc} */
 	@Override
 	public String toString() {
-		return MoreObjects.toStringHelper(this).add("byte_array_value", this.value).toString();
+		return "ByteArrayValue [value=" + Arrays.toString(this.value) + "]";
 	}
+
 }

@@ -12,6 +12,7 @@
  */
 package org.eclipse.kura.wire.timer;
 
+import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -24,7 +25,7 @@ import org.eclipse.kura.localization.WireMessages;
 import org.eclipse.kura.type.TypedValues;
 import org.eclipse.kura.wire.WireEmitter;
 import org.eclipse.kura.wire.WireSupport;
-import org.eclipse.kura.wire.Wires;
+import org.eclipse.kura.wire.WireHelperService;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.wireadmin.Wire;
 import org.slf4j.Logger;
@@ -69,12 +70,15 @@ public final class Timer implements WireEmitter, ConfigurableComponent {
 	/** The wire supporter component. */
 	private final WireSupport m_wireSupport;
 
+	/** The Wire Helper Service. */
+	private volatile WireHelperService m_wireHelperService;
+
 	/**
 	 * Instantiates a new timer.
 	 */
 	public Timer() {
 		this.m_executorService = Executors.newSingleThreadScheduledExecutor();
-		this.m_wireSupport = Wires.newWireSupport(this);
+		this.m_wireSupport = this.m_wireHelperService.newWireSupport(this);
 	}
 
 	/**
@@ -90,6 +94,18 @@ public final class Timer implements WireEmitter, ConfigurableComponent {
 		this.m_properties = properties;
 		this.doUpdate();
 		s_logger.info(s_message.activatingTimerDone());
+	}
+
+	/**
+	 * Binds the Wire Helper Service.
+	 *
+	 * @param wireHelperService
+	 *            the new Wire Helper Service
+	 */
+	public synchronized void bindWireHelperService(final WireHelperService wireHelperService) {
+		if (this.m_wireHelperService == null) {
+			this.m_wireHelperService = wireHelperService;
+		}
 	}
 
 	/** {@inheritDoc} */
@@ -129,22 +145,29 @@ public final class Timer implements WireEmitter, ConfigurableComponent {
 			/** {@inheritDoc} */
 			@Override
 			public void run() {
-				m_wireSupport.emit(Wires.newWireRecord(
-						Wires.newWireField(TIMER_EVENT_FIELD_NAME, TypedValues.newStringValue(m_name))));
+				m_wireSupport.emit(
+						Arrays.asList(m_wireHelperService.newWireRecord(m_wireHelperService
+								.newWireField(TIMER_EVENT_FIELD_NAME, TypedValues.newStringValue(m_name)))));
 			}
 		}, 0, this.m_interval, TimeUnit.SECONDS);
 	}
 
 	/** {@inheritDoc} */
 	@Override
-	public String getName() {
-		return this.getClass().toString();
-	}
-
-	/** {@inheritDoc} */
-	@Override
 	public Object polled(final Wire wire) {
 		return this.m_wireSupport.polled(wire);
+	}
+
+	/**
+	 * Unbinds the Wire Helper Service.
+	 *
+	 * @param wireHelperService
+	 *            the new Wire Helper Service
+	 */
+	public synchronized void unbindWireHelperService(final WireHelperService wireHelperService) {
+		if (this.m_wireHelperService == wireHelperService) {
+			this.m_wireHelperService = null;
+		}
 	}
 
 	/**

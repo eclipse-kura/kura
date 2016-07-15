@@ -18,32 +18,27 @@ import static org.eclipse.kura.Preconditions.checkNull;
 import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.annotation.NotThreadSafe;
 import org.eclipse.kura.annotation.Nullable;
-
-import com.google.common.base.MoreObjects;
-import com.google.common.base.Objects;
+import org.osgi.service.wireadmin.Wire;
 
 /**
  * The Class WireConfiguration represents a wiring configuration between a Wire
- * Emitter and a Wire Receiver
+ * Emitter and a Wire Receiver.
  */
 @NotThreadSafe
 public final class WireConfiguration {
 
 	/** The Wire Emitter PID. */
-	private String emitterPid;
+	private final String emitterPid;
 
 	/** The Filter. */
 	@Nullable
 	private final String filter;
 
-	/**
-	 * This signifies if Wire Admin Service has already created the wire between
-	 * the wire emitter and the wire receiver.
-	 */
-	private boolean isCreated;
-
 	/** The Wire Receiver PID. */
-	private String receiverPid;
+	private final String receiverPid;
+
+	/** The actual Wire Admin Wire. */
+	private Wire wire;
 
 	/**
 	 * Instantiate a new wire configuration.
@@ -64,45 +59,43 @@ public final class WireConfiguration {
 		this.emitterPid = emitterPid;
 		this.receiverPid = receiverPid;
 		this.filter = filter;
-		this.isCreated = false;
-	}
-
-	/**
-	 * Instantiate a new wire configuration.
-	 *
-	 * @param emitterPid
-	 *            the Wire Emitter PID
-	 * @param receiverPid
-	 *            the Wire Receiver PID
-	 * @param filter
-	 *            the filter
-	 * @param isCreated
-	 *            the created flag signifying whether Wire Admin has already
-	 *            created the wire between the wire emitter and a wire receiver
-	 * @throws KuraRuntimeException
-	 *             if any of the arguments is null (except filter)
-	 */
-	public WireConfiguration(final String emitterPid, final String receiverPid, @Nullable final String filter,
-			final boolean isCreated) {
-		checkNull(emitterPid, "Emitter PID cannot be null");
-		checkNull(receiverPid, "Receiver PID cannot be null");
-
-		this.emitterPid = emitterPid;
-		this.receiverPid = receiverPid;
-		this.filter = filter;
-		this.isCreated = isCreated;
 	}
 
 	/** {@inheritDoc} */
 	@Override
 	public boolean equals(final Object obj) {
-		if (obj instanceof WireConfiguration) {
-			final WireConfiguration wireConfiguration = (WireConfiguration) obj;
-			return Objects.equal(this.emitterPid, wireConfiguration.getEmitterPid())
-					&& Objects.equal(this.receiverPid, wireConfiguration.getReceiverPid())
-					&& Objects.equal(this.isCreated, wireConfiguration.isCreated());
+		if (this == obj) {
+			return true;
 		}
-		return false;
+		if (obj == null) {
+			return false;
+		}
+		if (this.getClass() != obj.getClass()) {
+			return false;
+		}
+		final WireConfiguration other = (WireConfiguration) obj;
+		if (this.emitterPid == null) {
+			if (other.emitterPid != null) {
+				return false;
+			}
+		} else if (!this.emitterPid.equals(other.emitterPid)) {
+			return false;
+		}
+		if (this.filter == null) {
+			if (other.filter != null) {
+				return false;
+			}
+		} else if (!this.filter.equals(other.filter)) {
+			return false;
+		}
+		if (this.receiverPid == null) {
+			if (other.receiverPid != null) {
+				return false;
+			}
+		} else if (!this.receiverPid.equals(other.receiverPid)) {
+			return false;
+		}
+		return true;
 	}
 
 	/**
@@ -132,56 +125,41 @@ public final class WireConfiguration {
 		return this.receiverPid;
 	}
 
+	/**
+	 * Gets the wire.
+	 *
+	 * @return the wire
+	 */
+	public Wire getWire() {
+		return this.wire;
+	}
+
 	/** {@inheritDoc} */
 	@Override
 	public int hashCode() {
-		return Objects.hashCode(this.isCreated, this.emitterPid, this.receiverPid);
+		final int prime = 31;
+		int result = 1;
+		result = (prime * result) + ((this.emitterPid == null) ? 0 : this.emitterPid.hashCode());
+		result = (prime * result) + ((this.filter == null) ? 0 : this.filter.hashCode());
+		result = (prime * result) + ((this.receiverPid == null) ? 0 : this.receiverPid.hashCode());
+		return result;
 	}
 
 	/**
-	 * Check if is wire admin has already created a wire between the wire
-	 * emitter and a wire receiver
+	 * Sets the wire.
 	 *
-	 * @return true, if it is created
+	 * @param wire
+	 *            the new wire
 	 */
-	public boolean isCreated() {
-		return this.isCreated;
-	}
-
-	/**
-	 * Set the value to the flag to check whether wire admin has already created
-	 * a wire between the wire emitter and a wire receiver
-	 *
-	 * @param isCreated
-	 *            the new created flag
-	 */
-	public void setCreated(final boolean isCreated) {
-		this.isCreated = isCreated;
+	public void setWire(final Wire wire) {
+		this.wire = wire;
 	}
 
 	/** {@inheritDoc} */
 	@Override
 	public String toString() {
-		return MoreObjects.toStringHelper(this).add("emitter_pid", this.emitterPid)
-				.add("receiver_pid", this.receiverPid).add("filter", this.filter).toString();
+		return "WireConfiguration [emitterPid=" + this.emitterPid + ", filter=" + this.filter + ", receiverPid="
+				+ this.receiverPid + "]";
 	}
 
-	/**
-	 * Update the PIDs of the Wire Components associated with this Wire
-	 * Configuration
-	 *
-	 * @param newEmitterPid
-	 *            the new Wire Emitter PID
-	 * @param newReceiverPid
-	 *            the new Wire Receiver PID
-	 * @throws KuraRuntimeException
-	 *             if any of the arguments is null
-	 */
-	public void update(final String newEmitterPid, final String newReceiverPid) {
-		checkNull(newEmitterPid, "Emitter PID cannot be null");
-		checkNull(newReceiverPid, "Receiver PID cannot be null");
-
-		this.emitterPid = newEmitterPid;
-		this.receiverPid = newReceiverPid;
-	}
 }

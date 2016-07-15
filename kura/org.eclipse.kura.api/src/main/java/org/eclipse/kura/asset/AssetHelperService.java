@@ -18,15 +18,10 @@ import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.type.DataType;
 
 /**
- * The Class Assets is an utility class to provide useful static factory methods
- * for asset and drivers
+ * The interface AssetHelperService is an utility service to provide useful
+ * methods for asset and drivers
  */
-public final class Assets {
-	
-	/** Constructor */
-	private Assets() {
-		// Static Factory Methods container. No need to instantiate.
-	}
+public interface AssetHelperService {
 
 	/**
 	 * Prepares a new asset configuration.
@@ -43,10 +38,8 @@ public final class Assets {
 	 * @throws KuraRuntimeException
 	 *             if any of the arguments is null
 	 */
-	public static AssetConfiguration newAssetConfigruation(final String name, final String description,
-			final String driverId, final Map<Long, Channel> channels) {
-		return new AssetConfiguration(name, description, driverId, channels);
-	}
+	public AssetConfiguration newAssetConfigruation(final String name, final String description, final String driverId,
+			final Map<Long, Channel> channels);
 
 	/**
 	 * Prepares new asset event.
@@ -55,9 +48,7 @@ public final class Assets {
 	 *            the associated asset record
 	 * @return the asset event
 	 */
-	public static AssetEvent newAssetEvent(final AssetRecord assetRecord) {
-		return new AssetEvent(assetRecord);
-	}
+	public AssetEvent newAssetEvent(final AssetRecord assetRecord);
 
 	/**
 	 * Prepares new asset record.
@@ -66,9 +57,7 @@ public final class Assets {
 	 *            the channel name
 	 * @return the asset record
 	 */
-	public static AssetRecord newAssetRecord(final String channelName) {
-		return new AssetRecord(channelName);
-	}
+	public AssetRecord newAssetRecord(final String channelName);
 
 	/**
 	 * Creates a new channel with the provided values
@@ -85,10 +74,8 @@ public final class Assets {
 	 *            the configuration to be read
 	 * @return the channel
 	 */
-	public static Channel newChannel(final long id, final String name, final ChannelType type, final DataType valueType,
-			final Map<String, Object> configuration) {
-		return new Channel(id, name, type, valueType, configuration);
-	}
+	public Channel newChannel(final long id, final String name, final ChannelType type, final DataType valueType,
+			final Map<String, Object> configuration);
 
 	/**
 	 * Prepares new driver event.
@@ -97,9 +84,7 @@ public final class Assets {
 	 *            the associated driver record
 	 * @return the driver event
 	 */
-	public static DriverEvent newDriverEvent(final DriverRecord driverRecord) {
-		return new DriverEvent(driverRecord);
-	}
+	public DriverEvent newDriverEvent(final DriverRecord driverRecord);
 
 	/**
 	 * Prepares new driver record.
@@ -108,8 +93,6 @@ public final class Assets {
 	 *            the channel name
 	 * @return the driver record
 	 */
-	public static DriverRecord newDriverRecord(final String channelName) {
-		return new DriverRecord(channelName);
-	}
+	public DriverRecord newDriverRecord(final String channelName);
 
 }

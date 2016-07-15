@@ -13,17 +13,10 @@
 package org.eclipse.kura.wire;
 
 /**
- * Wire Component interface represents a generic identity for
+ * WireComponent is a marker interface representing a generic identity for
  * {@link WireEmitter}s and {@link WireReceiver}s. A Wire Component is a
  * generalization of a component responsible for producing data also known as
  * {@code WireEmitter} and/or consuming data also known as {@code WireReceiver}.
  */
 public interface WireComponent {
-
-	/**
-	 * Gets the name of the wire component
-	 *
-	 * @return the name of the wire component
-	 */
-	public String getName();
 }

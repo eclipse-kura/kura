@@ -14,27 +14,24 @@ package org.eclipse.kura.asset.internal;
 
 import static org.eclipse.kura.Preconditions.checkNull;
 
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.asset.AssetConfiguration;
-import org.eclipse.kura.asset.Assets;
+import org.eclipse.kura.asset.AssetHelperService;
 import org.eclipse.kura.asset.Channel;
 import org.eclipse.kura.asset.ChannelType;
+import org.eclipse.kura.core.util.ThrowableUtil;
 import org.eclipse.kura.localization.AssetMessages;
 import org.eclipse.kura.localization.LocalizationAdapter;
 import org.eclipse.kura.type.DataType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.base.CharMatcher;
-import com.google.common.base.MoreObjects;
-import com.google.common.base.Splitter;
-import com.google.common.base.Throwables;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 
 /**
  * This class AssetOptions is responsible for retrieving channels from
@@ -129,11 +126,14 @@ public final class AssetOptions {
 	/** The asset description. */
 	private String m_assetDescription;
 
+	/** The Asset Helper Service instance. */
+	private final AssetHelperService m_assetHelper;
+
 	/** The asset name. */
 	private String m_assetName;
 
 	/** The list of channels associated with this asset. */
-	private final Map<Long, Channel> m_channels = Maps.newConcurrentMap();
+	private final Map<Long, Channel> m_channels = new ConcurrentHashMap<Long, Channel>();
 
 	/** Name of the driver to be associated with. */
 	private String m_driverId;
@@ -143,11 +143,16 @@ public final class AssetOptions {
 	 *
 	 * @param properties
 	 *            the configured properties
+	 * @param assetHelperService
+	 *            the Asset Helper Service instance
 	 * @throws KuraRuntimeException
 	 *             if any of the arguments is null
 	 */
-	public AssetOptions(final Map<String, Object> properties) {
+	public AssetOptions(final Map<String, Object> properties, final AssetHelperService assetHelperService) {
 		checkNull(properties, s_message.propertiesNonNull());
+		checkNull(properties, s_message.assetHelperNonNull());
+
+		this.m_assetHelper = assetHelperService;
 		this.extractProperties(properties);
 	}
 
@@ -205,7 +210,7 @@ public final class AssetOptions {
 			}
 			this.checkChannelAvailability(properties);
 		} catch (final Exception ex) {
-			s_logger.error(s_message.errorRetrievingChannels() + Throwables.getStackTraceAsString(ex));
+			s_logger.error(s_message.errorRetrievingChannels() + ThrowableUtil.stackTraceAsString(ex));
 		}
 	}
 
@@ -215,7 +220,7 @@ public final class AssetOptions {
 	 * @return the asset configuration
 	 */
 	public AssetConfiguration getAssetConfiguration() {
-		return Assets.newAssetConfigruation(this.m_assetName, this.m_assetDescription, this.m_driverId,
+		return this.m_assetHelper.newAssetConfigruation(this.m_assetName, this.m_assetDescription, this.m_driverId,
 				this.m_channels);
 	}
 
@@ -240,7 +245,7 @@ public final class AssetOptions {
 		String channelName = null;
 		ChannelType channelType = null;
 		DataType dataType = null;
-		final Map<String, Object> channelConfig = Maps.newHashMap();
+		final Map<String, Object> channelConfig = new ConcurrentHashMap<String, Object>();
 
 		// All key names present is the properties
 		final String channelValueTypeKey = "value.type";
@@ -301,7 +306,8 @@ public final class AssetOptions {
 			for (final Map.Entry<String, Object> entry : properties.entrySet()) {
 				final String key = entry.getKey();
 				final String value = entry.getValue().toString();
-				final List<String> strings = Splitter.on(".").splitToList(key);
+
+				final List<String> strings = Arrays.asList(key.split(CHANNEL_PROPERTY_POSTFIX));
 				if ((strings.size() > 2) && key.startsWith(String.valueOf(channelId))
 						&& DRIVER_PROPERTY_PREFIX.equals(strings.get(2))) {
 					final String driverSpecificPropertyKey = DRIVER_PROPERTY_PREFIX + CHANNEL_PROPERTY_POSTFIX;
@@ -311,7 +317,8 @@ public final class AssetOptions {
 				}
 			}
 		}
-		final Channel channel = Assets.newChannel(channelId, channelName, channelType, dataType, channelConfig);
+		final Channel channel = this.m_assetHelper.newChannel(channelId, channelName, channelType, dataType,
+				channelConfig);
 		s_logger.debug(s_message.retrievingChannelDone());
 		return channel;
 	}
@@ -327,12 +334,12 @@ public final class AssetOptions {
 	 */
 	private Set<Long> retrieveChannelIds(final Map<String, Object> properties) {
 		checkNull(properties, s_message.propertiesNonNull());
-		final Set<Long> channelIds = Sets.newHashSet();
+		final Set<Long> channelIds = new HashSet<Long>();
 		for (final Map.Entry<String, Object> entry : properties.entrySet()) {
 			final String key = entry.getKey();
-			final List<String> strings = Splitter.on(CHANNEL_PROPERTY_POSTFIX).splitToList(key);
+			final List<String> strings = Arrays.asList(key.split(CHANNEL_PROPERTY_POSTFIX));
 			for (final String string : strings) {
-				if (CharMatcher.DIGIT.matchesAnyOf(string)) {
+				if (string.matches("\\d+")) {
 					channelIds.add(Long.parseLong(string));
 				}
 			}
@@ -343,9 +350,8 @@ public final class AssetOptions {
 	/** {@inheritDoc} */
 	@Override
 	public String toString() {
-		return MoreObjects.toStringHelper(this).add(s_message.name(), this.m_assetName)
-				.add(s_message.description(), this.m_assetDescription).add(s_message.driverName(), this.m_driverId)
-				.add(s_message.channels(), this.m_channels).toString();
+		return "AssetOptions [Asset Description=" + this.m_assetDescription + ", Asset Name=" + this.m_assetName
+				+ ", Channels=" + this.m_channels + ", Driver ID=" + this.m_driverId + "]";
 	}
 
 }

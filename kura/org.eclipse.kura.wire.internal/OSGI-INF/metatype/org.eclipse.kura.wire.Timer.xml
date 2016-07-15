@@ -37,7 +37,7 @@
 
     </OCD>
     
-    <Designate pid="org.eclipse.kura.wire.Timer">
+    <Designate pid="org.eclipse.kura.wire.Timer" factoryPid="org.eclipse.kura.wire.Timer">
         <Object ocdref="org.eclipse.kura.wire.Timer"/>
     </Designate>
 </MetaData>

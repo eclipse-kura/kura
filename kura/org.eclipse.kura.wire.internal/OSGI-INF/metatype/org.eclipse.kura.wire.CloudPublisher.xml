@@ -107,7 +107,7 @@
         </AD>
     </OCD>
     
-    <Designate pid="org.eclipse.kura.wire.CloudPublisher">
+    <Designate pid="org.eclipse.kura.wire.CloudPublisher" factoryPid="org.eclipse.kura.wire.CloudPublisher">
         <Object ocdref="org.eclipse.kura.wire.CloudPublisher"/>
     </Designate>
 </MetaData>

@@ -17,13 +17,15 @@ import java.util.List;
 import org.eclipse.kura.annotation.Immutable;
 import org.eclipse.kura.annotation.ThreadSafe;
 import org.osgi.service.wireadmin.BasicEnvelope;
-
-import com.google.common.base.MoreObjects;
+import org.osgi.service.wireadmin.Envelope;
 
 /**
  * The Class WireEnvelope represents a composite envelope to be used as an
  * abstract data to be transmitted between the wire emitter and the wire
  * receiver
+ *
+ * @see Envelope
+ * @see BasicEnvelope
  */
 @Immutable
 @ThreadSafe
@@ -36,23 +38,23 @@ public final class WireEnvelope extends BasicEnvelope {
 	private static final String SCOPE = "WIRES";
 
 	/**
-	 * Instantiates a new wire envelope.
+	 * Instantiates a new WireEnvelope.
 	 *
-	 * @param emitterName
-	 *            the wire emitter name
+	 * @param emitterPid
+	 *            the wire emitter PID
 	 * @param wireRecords
 	 *            the wire records
 	 */
-	public WireEnvelope(final String emitterName, final List<WireRecord> wireRecords) {
-		super(wireRecords, emitterName, SCOPE);
+	public WireEnvelope(final String emitterPid, final List<WireRecord> wireRecords) {
+		super(wireRecords, emitterPid, SCOPE);
 	}
 
 	/**
-	 * Gets the wire emitter name.
+	 * Gets the wire emitter PID.
 	 *
-	 * @return the wire emitter name
+	 * @return the wire emitter PID
 	 */
-	public String getEmitterName() {
+	public String getEmitterPid() {
 		return (String) this.getIdentification();
 	}
 
@@ -66,10 +68,4 @@ public final class WireEnvelope extends BasicEnvelope {
 		return (List<WireRecord>) this.getValue();
 	}
 
-	/** {@inheritDoc} */
-	@Override
-	public String toString() {
-		return MoreObjects.toStringHelper(this).add("emitter_name", this.getEmitterName())
-				.add("wire_records", this.getRecords()).toString();
-	}
 }

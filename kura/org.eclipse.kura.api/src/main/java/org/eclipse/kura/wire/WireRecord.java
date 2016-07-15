@@ -15,6 +15,8 @@ package org.eclipse.kura.wire;
 import static org.eclipse.kura.Preconditions.checkNull;
 
 import java.sql.Timestamp;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -23,9 +25,6 @@ import org.eclipse.kura.annotation.Immutable;
 import org.eclipse.kura.annotation.Nullable;
 import org.eclipse.kura.annotation.ThreadSafe;
 import org.osgi.util.position.Position;
-
-import com.google.common.base.MoreObjects;
-import com.google.common.collect.ImmutableList;
 
 /**
  * The Class WireRecord represents a record to be transmitted during wire
@@ -61,7 +60,7 @@ public final class WireRecord {
 
 		this.timestamp = timestamp;
 		this.position = null;
-		this.fields = ImmutableList.copyOf(fields);
+		this.fields = Collections.unmodifiableList(fields);
 	}
 
 	/**
@@ -82,7 +81,7 @@ public final class WireRecord {
 
 		this.timestamp = timestamp;
 		this.position = position;
-		this.fields = ImmutableList.copyOf(fields);
+		this.fields = Collections.unmodifiableList(fields);
 	}
 
 	/**
@@ -97,7 +96,7 @@ public final class WireRecord {
 		checkNull(fields, "Wire fields cannot be null");
 		this.timestamp = new Timestamp(new Date().getTime());
 		this.position = null;
-		this.fields = ImmutableList.copyOf(fields);
+		this.fields = Collections.unmodifiableList(Arrays.asList(fields));
 	}
 
 	/**
@@ -130,7 +129,8 @@ public final class WireRecord {
 	/** {@inheritDoc} */
 	@Override
 	public String toString() {
-		return MoreObjects.toStringHelper(this).add("wire_fields", this.fields).add("position", this.position)
-				.add("timestamp", this.timestamp).toString();
+		return "WireRecord [fields=" + this.fields + ", position=" + this.position + ", timestamp=" + this.timestamp
+				+ "]";
 	}
+
 }

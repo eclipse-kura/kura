@@ -10,7 +10,7 @@
  *   Eurotech
  *   Amit Kumar Mondal (admin@amitinside.com)
  */
-package org.eclipse.kura.wire.store;
+package org.eclipse.kura.wire.common;
 
 import static org.eclipse.kura.Preconditions.checkNull;
 
@@ -28,18 +28,11 @@ import org.eclipse.kura.localization.WireMessages;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Throwables;
-import com.google.common.escape.Escaper;
-import com.google.common.escape.Escapers;
-
 /**
  * The Class DbServiceHelper is responsible for providing {@link DbService}
  * instance dependent helper methods for quick database related operations
  */
-final class DbServiceHelper {
-
-	/** Escaper Builder to sanitize SQL table and column names. */
-	private static Escapers.Builder s_builder = Escapers.builder();
+public final class DbServiceHelper {
 
 	/** The Logger instance. */
 	private static final Logger s_logger = LoggerFactory.getLogger(DbServiceHelper.class);
@@ -62,19 +55,6 @@ final class DbServiceHelper {
 		checkNull(dbService, s_message.dbServiceNonNull());
 		this.m_dbService = dbService;
 	}
-	
-	/**
-	 * Gets the single instance of DbUtils.
-	 *
-	 * @param dbService
-	 *            the DB service
-	 * @return single instance of DbUtils
-	 * @throws KuraRuntimeException
-	 *             if argument is null
-	 */
-	static DbServiceHelper getInstance(final DbService dbService) {
-		return new DbServiceHelper(dbService);
-	}
 
 	/**
 	 * Close the connection instance.
@@ -84,7 +64,7 @@ final class DbServiceHelper {
 	 * @throws KuraRuntimeException
 	 *             if argument is null
 	 */
-	void close(final Connection conn) {
+	public void close(final Connection conn) {
 		checkNull(conn, s_message.connectionNonNull());
 		s_logger.debug(s_message.closingConnection() + conn);
 		this.m_dbService.close(conn);
@@ -97,7 +77,7 @@ final class DbServiceHelper {
 	 * @param rss
 	 *            the result sets
 	 */
-	void close(final ResultSet... rss) {
+	public void close(final ResultSet... rss) {
 		s_logger.debug(s_message.closingResultSet() + Arrays.toString(rss));
 		this.m_dbService.close(rss);
 		s_logger.debug(s_message.closingResultSetDone());
@@ -109,7 +89,7 @@ final class DbServiceHelper {
 	 * @param stmts
 	 *            the SQL statements
 	 */
-	void close(final Statement... stmts) {
+	public void close(final Statement... stmts) {
 		s_logger.debug(s_message.closingStatement() + Arrays.toString(stmts));
 		this.m_dbService.close(stmts);
 		s_logger.debug(s_message.closingStatementDone());
@@ -127,7 +107,7 @@ final class DbServiceHelper {
 	 * @throws KuraRuntimeException
 	 *             if SQL query argument is null
 	 */
-	synchronized void execute(final String sql, final Integer... params) throws SQLException {
+	public synchronized void execute(final String sql, final Integer... params) throws SQLException {
 		checkNull(sql, s_message.sqlQueryNonNull());
 		s_logger.debug(s_message.execSql() + sql);
 		Connection conn = null;
@@ -142,7 +122,7 @@ final class DbServiceHelper {
 			conn.commit();
 		} catch (final SQLException e) {
 			this.rollback(conn);
-			Throwables.propagate(e);
+			throw e;
 		} finally {
 			this.close(stmt);
 			this.close(conn);
@@ -157,7 +137,7 @@ final class DbServiceHelper {
 	 * @throws SQLException
 	 *             the SQL exception
 	 */
-	Connection getConnection() throws SQLException {
+	public Connection getConnection() throws SQLException {
 		return this.m_dbService.getConnection();
 	}
 
@@ -169,7 +149,7 @@ final class DbServiceHelper {
 	 * @throws KuraRuntimeException
 	 *             if argument is null
 	 */
-	void rollback(final Connection conn) {
+	public void rollback(final Connection conn) {
 		checkNull(conn, s_message.connectionNonNull());
 		s_logger.debug(s_message.rollback() + conn);
 		this.m_dbService.rollback(conn);
@@ -191,12 +171,23 @@ final class DbServiceHelper {
 	 * @throws KuraRuntimeException
 	 *             if argument is null
 	 */
-	String sanitizeSqlTableAndColumnName(final String string) {
+	public String sanitizeSqlTableAndColumnName(final String string) {
 		checkNull(string, s_message.stringNonNull());
 		s_logger.debug(s_message.sanitize() + string);
-		final Escaper escaper = s_builder.addEscape('\'', "_").addEscape('"', "_").addEscape('\\', "")
-				.addEscape('.', "_").addEscape(' ', "_").build();
-		return escaper.escape(string).toLowerCase();
+		return string.replaceAll("(?=[]\\[+&|!(){}^\"~*?:\\\\-])", "_");
 	}
 	
+	/**
+	 * Gets the single instance of DB Service Helper.
+	 *
+	 * @param dbService
+	 *            the DB service
+	 * @return single instance of Service Helper
+	 * @throws KuraRuntimeException
+	 *             if argument is null
+	 */
+	public static DbServiceHelper getInstance(final DbService dbService) {
+		return new DbServiceHelper(dbService);
+	}
+
 }

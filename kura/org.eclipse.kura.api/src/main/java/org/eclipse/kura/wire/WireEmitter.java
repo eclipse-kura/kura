@@ -15,8 +15,9 @@ package org.eclipse.kura.wire;
 import org.osgi.service.wireadmin.Producer;
 
 /**
- * Represents a wire component which is a data producer that can produce values.
- * The produced values can be used by other {@link WireReceiver} components.
+ * The WireEmitter is a marker interface which represents a wire component which
+ * is a data producer that can produce values. The produced values can be used
+ * by other {@link WireReceiver} components if it is wired with each other.
  */
 public interface WireEmitter extends WireComponent, Producer {
 }

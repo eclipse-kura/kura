@@ -15,6 +15,7 @@ package org.eclipse.kura.asset.cloudlet;
 import static org.eclipse.kura.Preconditions.checkCondition;
 import static org.eclipse.kura.Preconditions.checkNull;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -22,8 +23,8 @@ import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.asset.Asset;
 import org.eclipse.kura.asset.AssetConfiguration;
+import org.eclipse.kura.asset.AssetHelperService;
 import org.eclipse.kura.asset.AssetRecord;
-import org.eclipse.kura.asset.Assets;
 import org.eclipse.kura.asset.Channel;
 import org.eclipse.kura.asset.internal.BaseAsset;
 import org.eclipse.kura.cloud.CloudClient;
@@ -41,9 +42,6 @@ import org.osgi.service.component.ComponentContext;
 import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.base.Throwables;
-import com.google.common.collect.Lists;
 
 /**
  * The Class AssetCloudlet is used to provide MQTT read/write operations on the
@@ -96,6 +94,9 @@ public final class AssetCloudlet extends Cloudlet {
 	/** Localization Resource */
 	private static final AssetCloudletMessages s_message = LocalizationAdapter.adapt(AssetCloudletMessages.class);
 
+	/** The Asset Helper Service instance. */
+	private volatile AssetHelperService m_assetHelper;
+
 	/** The map of assets present in the OSGi service registry. */
 	private Map<String, Asset> m_assets;
 
@@ -123,9 +124,21 @@ public final class AssetCloudlet extends Cloudlet {
 					Asset.class.getName(), this.m_assetTrackerCustomizer);
 			this.m_serviceTracker.open();
 		} catch (final InvalidSyntaxException e) {
-			Throwables.propagate(e);
+			s_logger.error(s_message.activationFailed(e));
 		}
 		s_logger.debug(s_message.activatingDone());
+	}
+
+	/**
+	 * Binds the Asset Helper Service.
+	 *
+	 * @param assetHelperService
+	 *            the new Asset Helper Service
+	 */
+	public synchronized void bindAssetHelperService(final AssetHelperService assetHelperService) {
+		if (this.m_assetHelper == null) {
+			this.m_assetHelper = assetHelperService;
+		}
 	}
 
 	/**
@@ -212,7 +225,7 @@ public final class AssetCloudlet extends Cloudlet {
 				final Map<Long, Channel> assetConfiguredChannels = configuration.getChannels();
 				final long id = this.checkChannelAvailability(channelName, assetConfiguredChannels);
 				if ((assetConfiguredChannels != null) && (id != 0)) {
-					final List<AssetRecord> assetRecords = asset.read(Lists.newArrayList(channelName));
+					final List<AssetRecord> assetRecords = asset.read(Arrays.asList(channelName));
 					this.prepareResponse(respPayload, assetRecords);
 				}
 			}
@@ -237,11 +250,11 @@ public final class AssetCloudlet extends Cloudlet {
 			final Map<Long, Channel> assetConfiguredChannels = configuration.getChannels();
 			final long id = this.checkChannelAvailability(channelName, assetConfiguredChannels);
 			if ((assetConfiguredChannels != null) && (id != 0)) {
-				final AssetRecord assetRecord = Assets.newAssetRecord(channelName);
+				final AssetRecord assetRecord = this.m_assetHelper.newAssetRecord(channelName);
 				final String userValue = (String) reqPayload.getMetric("value");
 				final String userType = (String) reqPayload.getMetric("type");
 				this.wrapValue(assetRecord, userValue, userType);
-				final List<AssetRecord> assetRecords = asset.write(Lists.newArrayList(assetRecord));
+				final List<AssetRecord> assetRecords = asset.write(Arrays.asList(assetRecord));
 				this.prepareResponse(respPayload, assetRecords);
 			}
 		}
@@ -274,6 +287,18 @@ public final class AssetCloudlet extends Cloudlet {
 			respPayload.addMetric(s_message.timestamp(), assetRecord.getTimestamp());
 			respPayload.addMetric(s_message.value(), assetRecord.getValue());
 			respPayload.addMetric(s_message.channel(), assetRecord.getChannelName());
+		}
+	}
+
+	/**
+	 * Unbinds the Asset Helper Service.
+	 *
+	 * @param assetHelperService
+	 *            the new Asset Helper Service
+	 */
+	public synchronized void unbindAssetHelperService(final AssetHelperService assetHelperService) {
+		if (this.m_assetHelper == assetHelperService) {
+			this.m_assetHelper = null;
 		}
 	}
 

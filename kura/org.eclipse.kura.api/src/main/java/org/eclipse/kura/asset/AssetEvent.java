@@ -18,8 +18,6 @@ import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.annotation.Immutable;
 import org.eclipse.kura.annotation.ThreadSafe;
 
-import com.google.common.base.MoreObjects;
-
 /**
  * This class represents an event occurred while monitoring specific channel
  * configuration by the asset.
@@ -59,7 +57,7 @@ public final class AssetEvent {
 	/** {@inheritDoc} */
 	@Override
 	public String toString() {
-		return MoreObjects.toStringHelper(this).add("asset_record", this.assetRecord).toString();
+		return "AssetEvent [assetRecord=" + this.assetRecord + "]";
 	}
 
 }

@@ -18,11 +18,6 @@ import static org.eclipse.kura.type.DataType.DOUBLE;
 import org.eclipse.kura.annotation.Immutable;
 import org.eclipse.kura.annotation.ThreadSafe;
 
-import com.google.common.base.MoreObjects;
-import com.google.common.base.Objects;
-import com.google.common.collect.ComparisonChain;
-import com.google.common.collect.Ordering;
-
 /**
  * This class represents a {@link Double} value as a {@link TypedValue}.
  */
@@ -50,16 +45,26 @@ public final class DoubleValue implements TypedValue<Double> {
 	@Override
 	public int compareTo(final TypedValue<Double> otherTypedValue) {
 		checkNull(otherTypedValue, "Typed Value cannot be null");
-		return ComparisonChain.start().compare(this.value, otherTypedValue.getValue(), Ordering.natural()).result();
+		return Double.compare(this.value, otherTypedValue.getValue());
 	}
 
 	/** {@inheritDoc} */
 	@Override
 	public boolean equals(final Object obj) {
-		if (obj instanceof DoubleValue) {
-			return Objects.equal(((DoubleValue) obj).getValue(), this.value);
+		if (this == obj) {
+			return true;
 		}
-		return false;
+		if (obj == null) {
+			return false;
+		}
+		if (this.getClass() != obj.getClass()) {
+			return false;
+		}
+		final DoubleValue other = (DoubleValue) obj;
+		if (Double.doubleToLongBits(this.value) != Double.doubleToLongBits(other.value)) {
+			return false;
+		}
+		return true;
 	}
 
 	/** {@inheritDoc} */
@@ -77,12 +82,18 @@ public final class DoubleValue implements TypedValue<Double> {
 	/** {@inheritDoc} */
 	@Override
 	public int hashCode() {
-		return Objects.hashCode(this.value);
+		final int prime = 31;
+		int result = 1;
+		long temp;
+		temp = Double.doubleToLongBits(this.value);
+		result = (prime * result) + (int) (temp ^ (temp >>> 32));
+		return result;
 	}
 
 	/** {@inheritDoc} */
 	@Override
 	public String toString() {
-		return MoreObjects.toStringHelper(this).add("double_value", this.value).toString();
+		return "DoubleValue [value=" + this.value + "]";
 	}
+
 }

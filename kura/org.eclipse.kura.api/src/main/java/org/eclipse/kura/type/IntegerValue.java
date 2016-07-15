@@ -18,11 +18,6 @@ import static org.eclipse.kura.type.DataType.INTEGER;
 import org.eclipse.kura.annotation.Immutable;
 import org.eclipse.kura.annotation.ThreadSafe;
 
-import com.google.common.base.MoreObjects;
-import com.google.common.base.Objects;
-import com.google.common.collect.ComparisonChain;
-import com.google.common.collect.Ordering;
-
 /**
  * This class represents a {@link Integer} value as a {@link TypedValue}.
  */
@@ -50,16 +45,26 @@ public final class IntegerValue implements TypedValue<Integer> {
 	@Override
 	public int compareTo(final TypedValue<Integer> otherTypedValue) {
 		checkNull(otherTypedValue, "Typed Value cannot be null");
-		return ComparisonChain.start().compare(this.value, otherTypedValue.getValue(), Ordering.natural()).result();
+		return Integer.compare(this.value, otherTypedValue.getValue());
 	}
 
 	/** {@inheritDoc} */
 	@Override
 	public boolean equals(final Object obj) {
-		if (obj instanceof IntegerValue) {
-			return Objects.equal(((IntegerValue) obj).getValue(), this.value);
+		if (this == obj) {
+			return true;
 		}
-		return false;
+		if (obj == null) {
+			return false;
+		}
+		if (this.getClass() != obj.getClass()) {
+			return false;
+		}
+		final IntegerValue other = (IntegerValue) obj;
+		if (this.value != other.value) {
+			return false;
+		}
+		return true;
 	}
 
 	/** {@inheritDoc} */
@@ -77,12 +82,15 @@ public final class IntegerValue implements TypedValue<Integer> {
 	/** {@inheritDoc} */
 	@Override
 	public int hashCode() {
-		return Objects.hashCode(this.value);
+		final int prime = 31;
+		int result = 1;
+		result = (prime * result) + this.value;
+		return result;
 	}
 
 	/** {@inheritDoc} */
 	@Override
 	public String toString() {
-		return MoreObjects.toStringHelper(this).add("integer_value", this.value).toString();
+		return "IntegerValue [value=" + this.value + "]";
 	}
 }

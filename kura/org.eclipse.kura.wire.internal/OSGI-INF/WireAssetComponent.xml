@@ -16,7 +16,8 @@
 	deactivate="deactivate"
 	immediate="true"
 	modified="updated"
-	name="org.eclipse.kura.wire.WireAsset">
+	name="org.eclipse.kura.wire.WireAsset"
+	configuration-policy="require">
    <implementation class="org.eclipse.kura.wire.internal.WireAsset"/>
    
    <!-- If the component is configurable through the Kura ConfigurationService, it must expose a Service. -->
@@ -30,4 +31,16 @@
       <provide interface="org.osgi.service.wireadmin.Consumer"/>
       <provide interface="org.eclipse.kura.configuration.SelfConfiguringComponent"/>
    </service>
+   <reference bind="bindWireHelperService" 
+   	          cardinality="1..1" 
+   	          interface="org.eclipse.kura.wire.WireHelperService" 
+   	          name="WireHelperService" 
+   	          policy="static" 
+   	          unbind="unbindWireHelperService"/>
+   <reference bind="bindAssetHelperService" 
+   	          cardinality="1..1" 
+   	          interface="org.eclipse.kura.asset.AssetHelperService" 
+   	          name="AssetHelperService" 
+   	          policy="static" 
+   	          unbind="unbindAssetHelperService"/>
 </scr:component>

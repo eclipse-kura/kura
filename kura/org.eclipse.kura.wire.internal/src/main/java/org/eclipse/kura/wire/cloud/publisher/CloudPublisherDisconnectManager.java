@@ -21,13 +21,12 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.kura.KuraRuntimeException;
+import org.eclipse.kura.core.util.ThrowableUtil;
 import org.eclipse.kura.data.DataService;
 import org.eclipse.kura.localization.LocalizationAdapter;
 import org.eclipse.kura.localization.WireMessages;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.base.Throwables;
 
 /**
  * The Class CloudPublisherDisconnectManager manages the disconnection with
@@ -123,7 +122,7 @@ final class CloudPublisherDisconnectManager {
 					m_dataService.disconnect(m_quiesceTimeout);
 				} catch (final Exception exception) {
 					s_logger.error(
-							s_message.errorDisconnectingCloudPublisher() + Throwables.getStackTraceAsString(exception));
+							s_message.errorDisconnectingCloudPublisher() + ThrowableUtil.stackTraceAsString(exception));
 				}
 				// cleaning up
 				m_nextExecutionTime = 0;

@@ -7,13 +7,7 @@ Bundle-Vendor: EUROTECH
 Bundle-License: Eclipse Public License v1.0
 Bundle-Category: Asset-Driver Management
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: com.google.common.annotations;version="19.0.0",
- com.google.common.base;version="19.0.0",
- com.google.common.cache;version="19.0.0",
- com.google.common.collect;version="19.0.0",
- com.google.common.escape;version="19.0.0",
- com.google.common.util.concurrent;version="19.0.0",
- org.eclipse.kura;version="[1.0,2.0)",
+Import-Package: org.eclipse.kura;version="[1.0,2.0)",
  org.eclipse.kura.asset;version="[1.0,2.0)",
  org.eclipse.kura.asset.internal;version="[1.0,2.0)",
  org.eclipse.kura.cloud;version="[1.0,2.0)",
@@ -21,6 +15,7 @@ Import-Package: com.google.common.annotations;version="19.0.0",
  org.eclipse.kura.configuration.metatype;version="[1.0,2.0)",
  org.eclipse.kura.core.configuration;version="[1.0,2.0)",
  org.eclipse.kura.core.configuration.metatype;version="[1.0,2.0)",
+ org.eclipse.kura.core.util;version="[1.0,2.0)",
  org.eclipse.kura.data;version="[1.0,2.0)",
  org.eclipse.kura.data.listener;version="[1.0,2.0)",
  org.eclipse.kura.db;version="[1.0,2.0)",
@@ -37,6 +32,5 @@ Import-Package: com.google.common.annotations;version="19.0.0",
  org.osgi.util.position;version="1.0.1",
  org.osgi.util.tracker;version="1.5.0",
  org.slf4j;version="1.6.4"
-Export-Package: org.eclipse.kura.wire.internal;version="1.0.0"
 Service-Component: OSGI-INF/*.xml
 Bundle-ActivationPolicy: lazy

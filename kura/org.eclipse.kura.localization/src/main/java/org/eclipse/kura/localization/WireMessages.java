@@ -180,10 +180,10 @@ public interface WireMessages {
 	@En("Error while disconnecting cloud publisher...")
 	public String errorDisconnectingCloudPublisher();
 
-	@En("Error in emitting wire records...")
+	@En("Error in emitting Wire Records...")
 	public String errorEmitting();
 
-	@En("Error while filtering wire records...")
+	@En("Error while filtering Wire Records...")
 	public String errorFiltering();
 
 	@En("Failed to persist wires...")
@@ -191,6 +191,9 @@ public interface WireMessages {
 
 	@En("Error in publishing wire records using cloud publisher..")
 	public String errorPublishingWireRecords();
+
+	@En("Error while storing Wire Records...")
+	public String errorStoring();
 
 	@En("Error in truncating the table {0}....")
 	public String errorTruncatingTable(String tableName);
@@ -204,14 +207,26 @@ public interface WireMessages {
 	@En("Executing SQL query...Done")
 	public String execSqlDone();
 
+	@En("Extracting Propertiess...")
+	public String exectractingProp();
+
+	@En("Extracting Propertiess...Done")
+	public String exectractingPropDone();
+
 	@En("Factory PID cannot be null")
 	public String factoryPidNonNull();
 
 	@En("Wire record filtering started...")
 	public String filteringStarted();
 
+	@En("Filter cannot be null")
+	public String filterNonNull();
+
 	@En("heading")
 	public String heading();
+
+	@En("incoming_wires")
+	public String incomingWires();
 
 	@En("Insertion failed. Reconciling Table and Columns...")
 	public String insertionFailed();
@@ -242,6 +257,9 @@ public interface WireMessages {
 
 	@En("No new instance")
 	public String noNewInstance();
+
+	@En("outgoing_wires")
+	public String outgoingWires();
 
 	@En("Persisting Wires...")
 	public String persistingWires();
@@ -414,17 +432,32 @@ public interface WireMessages {
 	@En("Updating Wire Service Component...Done")
 	public String updatingWireServiceDone();
 
-	@En("Wire Component name cannot be null")
-	public String wireComponentNameNonNull();
+	@En("wire_component")
+	public String wireComponent();
+
+	@En("Wire Component cannot be null")
+	public String wireComponentNonNull();
+
+	@En("Wire Component PID cannot be null")
+	public String wireComponentPidNonNull();
 
 	@En("wire_configurations")
 	public String wireConf();
+
+	@En("Wire Configuration cannot be null")
+	public String wireConfigurationNonNull();
 
 	@En("Wire Envelope cannot be null")
 	public String wireEnvelopeNonNull();
 
 	@En("Wire Enveloped received...")
 	public String wireEnvelopeReceived();
+
+	@En("Wire Helper Service cannot be null")
+	public String wireHelperServiceNonNull();
+
+	@En("Wire cannot be null")
+	public String wireNonNull();
 
 	@En("Wire Record cannot be null")
 	public String wireRecordNonNull();
@@ -443,5 +476,8 @@ public interface WireMessages {
 
 	@En("Wires cannot be null")
 	public String wiresNonNull();
+
+	@En("Wire supported component cannot be null")
+	public String wireSupportedComponentNonNull();
 
 }

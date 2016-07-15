@@ -10,27 +10,29 @@
  *   Eurotech
  *   Amit Kumar Mondal (admin@amitinside.com)
  */
-package org.eclipse.kura.wire.store;
+package org.eclipse.kura.wire.filter;
 
 import static org.eclipse.kura.Preconditions.checkNull;
-import static org.osgi.framework.Constants.SERVICE_PID;
+
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.kura.configuration.ConfigurableComponent;
+import org.eclipse.kura.core.util.ThrowableUtil;
 import org.eclipse.kura.db.DbService;
 import org.eclipse.kura.localization.LocalizationAdapter;
 import org.eclipse.kura.localization.WireMessages;
@@ -39,28 +41,22 @@ import org.eclipse.kura.type.TypedValues;
 import org.eclipse.kura.wire.WireEmitter;
 import org.eclipse.kura.wire.WireEnvelope;
 import org.eclipse.kura.wire.WireField;
+import org.eclipse.kura.wire.WireHelperService;
 import org.eclipse.kura.wire.WireReceiver;
 import org.eclipse.kura.wire.WireRecord;
-import org.eclipse.kura.wire.WireRecordFilter;
 import org.eclipse.kura.wire.WireSupport;
-import org.eclipse.kura.wire.Wires;
+import org.eclipse.kura.wire.common.DbServiceHelper;
+import org.eclipse.kura.wire.store.DbDataTypeMapper;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.wireadmin.Wire;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Throwables;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
-
 /**
  * The Class DbWireRecordFilter is responsible for representing a wire component
  * which is mainly used to filter records as received from the wire record
  */
-public final class DbWireRecordFilter implements WireEmitter, WireReceiver, WireRecordFilter, ConfigurableComponent {
+public final class DbWireRecordFilter implements WireEmitter, WireReceiver, ConfigurableComponent {
 
 	/** The Logger instance. */
 	private static final Logger s_logger = LoggerFactory.getLogger(DbWireRecordFilter.class);
@@ -69,13 +65,7 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Wire
 	private static final WireMessages s_message = LocalizationAdapter.adapt(WireMessages.class);
 
 	/** Cache container to store values of SQL view wire records */
-	private final LoadingCache<Long, List<WireRecord>> m_cache;
-
-	/** Cache last updated timestamp */
-	private long m_cacheLastUpdated;
-
-	/** The component context. */
-	private ComponentContext m_ctx;
+	private WireRecordCache m_cache;
 
 	/** DB Utility Helper */
 	private DbServiceHelper m_dbHelper;
@@ -92,22 +82,15 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Wire
 	/** The future handle of the thread pool executor service. */
 	private ScheduledFuture<?> m_tickHandle;
 
+	/** The Wire Helper Service. */
+	private volatile WireHelperService m_wireHelperService;
+
 	/** The Wire Supporter component. */
-	private final WireSupport m_wireSupport;
+	private WireSupport m_wireSupport;
 
 	/** Constructor */
 	public DbWireRecordFilter() {
-		this.m_wireSupport = Wires.newWireSupport(this);
 		this.m_executorService = Executors.newSingleThreadScheduledExecutor();
-		this.m_cache = CacheBuilder.newBuilder().maximumSize(10000).expireAfterWrite(60, TimeUnit.MINUTES)
-				.build(new CacheLoader<Long, List<WireRecord>>() {
-					/** {@inheritDoc} */
-					@Override
-					public List<WireRecord> load(final Long timestamp) throws Exception {
-						m_cacheLastUpdated = System.currentTimeMillis();
-						return filter();
-					}
-				});
 	}
 
 	/**
@@ -121,11 +104,36 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Wire
 	protected synchronized void activate(final ComponentContext componentContext,
 			final Map<String, Object> properties) {
 		s_logger.info(s_message.activatingFilter());
-		this.m_ctx = componentContext;
 		this.m_options = new DbWireRecordFilterOptions(properties);
 		this.m_dbHelper = DbServiceHelper.getInstance(this.m_dbService);
+		this.m_wireSupport = this.m_wireHelperService.newWireSupport(this);
+		this.m_cache = new WireRecordCache(this);
 		this.scheduleRefresh();
 		s_logger.info(s_message.activatingFilterDone());
+	}
+
+	/**
+	 * Binds the DB service.
+	 *
+	 * @param dbService
+	 *            the new DB service
+	 */
+	public synchronized void bindDbService(final DbService dbService) {
+		if (this.m_dbService == null) {
+			this.m_dbService = dbService;
+		}
+	}
+
+	/**
+	 * Binds the Wire Helper Service.
+	 *
+	 * @param wireHelperService
+	 *            the new Wire Helper Service
+	 */
+	public synchronized void bindWireHelperService(final WireHelperService wireHelperService) {
+		if (this.m_wireHelperService == null) {
+			this.m_wireHelperService = wireHelperService;
+		}
 	}
 
 	/** {@inheritDoc} */
@@ -153,22 +161,19 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Wire
 		s_logger.info(s_message.deactivatingFilterDone());
 	}
 
-	/** {@inheritDoc} */
-	@Override
-	public synchronized List<WireRecord> filter() {
+	/**
+	 * Filters the database records based on the provided query
+	 *
+	 * @return the filtered records
+	 */
+	synchronized List<WireRecord> filter() {
 		s_logger.debug(s_message.filteringStarted());
 		try {
 			return this.refreshSQLView();
 		} catch (final SQLException e) {
-			s_logger.error(s_message.errorFiltering() + Throwables.getStackTraceAsString(e));
+			s_logger.error(s_message.errorFiltering() + ThrowableUtil.stackTraceAsString(e));
 		}
-		return ImmutableList.of();
-	}
-
-	/** {@inheritDoc} */
-	@Override
-	public String getName() {
-		return (String) this.m_ctx.getProperties().get(SERVICE_PID);
+		return Collections.emptyList();
 	}
 
 	/**
@@ -185,19 +190,7 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Wire
 	public synchronized void onWireReceive(final WireEnvelope wireEnvelope) {
 		checkNull(wireEnvelope, s_message.wireEnvelopeNonNull());
 		s_logger.debug(s_message.wireEnvelopeReceived() + wireEnvelope);
-		try {
-			final long currrentTime = System.currentTimeMillis();
-			final long differenceInSec = (currrentTime - this.m_cacheLastUpdated) / 1000;
-			List<WireRecord> recordsToEmit;
-			if (differenceInSec < this.m_options.getCacheInterval()) {
-				recordsToEmit = this.m_cache.get(this.m_cacheLastUpdated);
-			} else {
-				recordsToEmit = this.m_cache.get(currrentTime);
-			}
-			this.m_wireSupport.emit(recordsToEmit);
-		} catch (final ExecutionException e) {
-			s_logger.error(s_message.errorEmitting() + Throwables.getStackTraceAsString(e));
-		}
+		this.m_wireSupport.emit(this.m_cache.getValue(this.m_cache.getLastRefreshedTime().getTimeInMillis()));
 	}
 
 	/** {@inheritDoc} */
@@ -217,7 +210,7 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Wire
 	 */
 	private List<WireRecord> refreshSQLView() throws SQLException {
 		final Date now = new Date();
-		final List<WireRecord> dataRecords = Lists.newArrayList();
+		final List<WireRecord> dataRecords = new ArrayList<WireRecord>();
 		Connection conn = null;
 		Statement stmt = null;
 		ResultSet rset = null;
@@ -228,7 +221,7 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Wire
 			rset = stmt.executeQuery(sqlView);
 			if (rset != null) {
 				while (rset.next()) {
-					final List<WireField> dataFields = Lists.newArrayList();
+					final List<WireField> dataFields = new ArrayList<WireField>();
 					final ResultSetMetaData rmet = rset.getMetaData();
 					for (int i = 1; i <= rmet.getColumnCount(); i++) {
 						String fieldName = rmet.getColumnLabel(i);
@@ -242,55 +235,62 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Wire
 						case BOOLEAN:
 							final boolean boolValue = rset.getBoolean(i);
 							s_logger.info(s_message.refreshBoolean(boolValue));
-							dataField = Wires.newWireField(fieldName, TypedValues.newBooleanValue(boolValue));
+							dataField = this.m_wireHelperService.newWireField(fieldName,
+									TypedValues.newBooleanValue(boolValue));
 							break;
 						case BYTE:
 							final byte byteValue = rset.getByte(i);
 							s_logger.info(s_message.refreshByte(byteValue));
-							dataField = Wires.newWireField(fieldName, TypedValues.newByteValue(byteValue));
+							dataField = this.m_wireHelperService.newWireField(fieldName,
+									TypedValues.newByteValue(byteValue));
 							break;
 						case DOUBLE:
 							final double doubleValue = rset.getDouble(i);
 							s_logger.info(s_message.refreshDouble(doubleValue));
-							dataField = Wires.newWireField(fieldName, TypedValues.newDoubleValue(doubleValue));
+							dataField = this.m_wireHelperService.newWireField(fieldName,
+									TypedValues.newDoubleValue(doubleValue));
 							break;
 						case INTEGER:
 							final int intValue = rset.getInt(i);
 							s_logger.info(s_message.refreshInteger(intValue));
-							dataField = Wires.newWireField(fieldName, TypedValues.newIntegerValue(intValue));
+							dataField = this.m_wireHelperService.newWireField(fieldName,
+									TypedValues.newIntegerValue(intValue));
 							break;
 						case LONG:
 							final long longValue = rset.getLong(i);
 							s_logger.info(s_message.refreshLong(longValue));
-							dataField = Wires.newWireField(fieldName, TypedValues.newLongValue(longValue));
+							dataField = this.m_wireHelperService.newWireField(fieldName,
+									TypedValues.newLongValue(longValue));
 							break;
 						case BYTE_ARRAY:
 							final byte[] bytesValue = rset.getBytes(i);
 							s_logger.info(s_message.refreshByteArray(Arrays.toString(bytesValue)));
-							dataField = Wires.newWireField(fieldName, TypedValues.newByteArrayValue(bytesValue));
+							dataField = this.m_wireHelperService.newWireField(fieldName,
+									TypedValues.newByteArrayValue(bytesValue));
 							break;
 						case SHORT:
 							final short shortValue = rset.getShort(i);
 							s_logger.info(s_message.refreshShort(shortValue));
-							dataField = Wires.newWireField(fieldName, TypedValues.newShortValue(shortValue));
+							dataField = this.m_wireHelperService.newWireField(fieldName,
+									TypedValues.newShortValue(shortValue));
 							break;
 						case STRING:
 							final String stringValue = rset.getString(i);
 							s_logger.info(s_message.refreshString(stringValue));
-							dataField = Wires.newWireField(fieldName, TypedValues.newStringValue(stringValue));
+							dataField = this.m_wireHelperService.newWireField(fieldName,
+									TypedValues.newStringValue(stringValue));
 							break;
 						default:
 							break;
 						}
 						dataFields.add(dataField);
 					}
-					dataRecords.add(Wires.newWireRecord(new Timestamp(now.getTime()), dataFields));
+					dataRecords.add(this.m_wireHelperService.newWireRecord(new Timestamp(now.getTime()), dataFields));
 				}
 			}
 			s_logger.info(s_message.refreshed());
-		} catch (final Exception e) {
-			Throwables.propagateIfInstanceOf(e, SQLException.class);
-			s_logger.error(Throwables.getStackTraceAsString(e));
+		} catch (final SQLException e) {
+			throw e;
 		} finally {
 			this.m_dbHelper.close(rset);
 			this.m_dbHelper.close(stmt);
@@ -304,6 +304,7 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Wire
 	 */
 	private void scheduleRefresh() {
 		final int refreshRate = this.m_options.getRefreshRate();
+		this.m_cache.setRefreshDuration(refreshRate);
 		// Cancel the current refresh view handle
 		if (this.m_tickHandle != null) {
 			this.m_tickHandle.cancel(true);
@@ -314,34 +315,33 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Wire
 				/** {@inheritDoc} */
 				@Override
 				public void run() {
-					m_cacheLastUpdated = System.currentTimeMillis();
-					m_cache.put(m_cacheLastUpdated, filter());
+					DbWireRecordFilter.this.m_cache.put(System.currentTimeMillis(), DbWireRecordFilter.this.filter());
 				}
 			}, refreshRate, TimeUnit.SECONDS);
 		}
 	}
 
 	/**
-	 * Set the DB service.
-	 *
-	 * @param dbService
-	 *            the new DB service
-	 */
-	public synchronized void setDbService(final DbService dbService) {
-		if (this.m_dbService == null) {
-			this.m_dbService = dbService;
-		}
-	}
-
-	/**
-	 * Unset DB service.
+	 * Unbinds DB service.
 	 *
 	 * @param dbService
 	 *            the DB service
 	 */
-	public synchronized void unsetDbService(final DbService dbService) {
+	public synchronized void unbindDbService(final DbService dbService) {
 		if (this.m_dbService == dbService) {
 			this.m_dbService = null;
+		}
+	}
+
+	/**
+	 * Unbinds the Wire Helper Service.
+	 *
+	 * @param wireHelperService
+	 *            the new Wire Helper Service
+	 */
+	public synchronized void unbindWireHelperService(final WireHelperService wireHelperService) {
+		if (this.m_wireHelperService == wireHelperService) {
+			this.m_wireHelperService = null;
 		}
 	}
 

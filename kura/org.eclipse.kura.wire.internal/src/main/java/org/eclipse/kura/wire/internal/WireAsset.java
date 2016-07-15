@@ -26,15 +26,19 @@ import static org.eclipse.kura.asset.internal.BaseChannelDescriptor.VALUE_TYPE;
 import static org.osgi.framework.Constants.SERVICE_PID;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraRuntimeException;
+import org.eclipse.kura.asset.AssetHelperService;
 import org.eclipse.kura.asset.AssetRecord;
-import org.eclipse.kura.asset.Assets;
 import org.eclipse.kura.asset.Channel;
 import org.eclipse.kura.asset.ChannelDescriptor;
 import org.eclipse.kura.asset.ChannelType;
@@ -48,25 +52,21 @@ import org.eclipse.kura.core.configuration.metatype.Tad;
 import org.eclipse.kura.core.configuration.metatype.Tocd;
 import org.eclipse.kura.core.configuration.metatype.Toption;
 import org.eclipse.kura.core.configuration.metatype.Tscalar;
+import org.eclipse.kura.core.util.ThrowableUtil;
 import org.eclipse.kura.type.TypedValue;
 import org.eclipse.kura.type.TypedValues;
 import org.eclipse.kura.wire.WireEmitter;
 import org.eclipse.kura.wire.WireEnvelope;
 import org.eclipse.kura.wire.WireField;
+import org.eclipse.kura.wire.WireHelperService;
 import org.eclipse.kura.wire.WireReceiver;
 import org.eclipse.kura.wire.WireRecord;
 import org.eclipse.kura.wire.WireSupport;
-import org.eclipse.kura.wire.Wires;
 import org.eclipse.kura.wire.timer.Timer;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.wireadmin.Wire;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.base.Throwables;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 
 /**
  * The Class WireAsset is a wire component which provides all necessary higher
@@ -93,16 +93,11 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
 	/** The Logger instance. */
 	private static final Logger s_logger = LoggerFactory.getLogger(WireAsset.class);
 
-	/** Wire Supporter Component */
-	private final WireSupport m_wireSupport;
+	/** The Wire Helper Service. */
+	private volatile WireHelperService m_wireHelperService;
 
-	/**
-	 * Instantiate a new wire asset.
-	 */
-	public WireAsset() {
-		super();
-		this.m_wireSupport = Wires.newWireSupport(this);
-	}
+	/** Wire Supporter Component */
+	private WireSupport m_wireSupport;
 
 	/** {@inheritDoc} */
 	@Override
@@ -110,7 +105,32 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
 			final Map<String, Object> properties) {
 		s_logger.debug(s_message.activatingWireAsset());
 		super.activate(componentContext, properties);
+		this.m_wireSupport = this.m_wireHelperService.newWireSupport(this);
 		s_logger.debug(s_message.activatingWireAssetDone());
+	}
+
+	/**
+	 * Binds the Asset Helper Service.
+	 *
+	 * @param assetHelperService
+	 *            the new Asset Helper Service
+	 */
+	public synchronized void bindAssetHelperService(final AssetHelperService assetHelperService) {
+		if (this.m_assetHelper == null) {
+			this.m_assetHelper = assetHelperService;
+		}
+	}
+
+	/**
+	 * Binds the Wire Helper Service.
+	 *
+	 * @param wireHelperService
+	 *            the new Wire Helper Service
+	 */
+	public synchronized void bindWireHelperService(final WireHelperService wireHelperService) {
+		if (this.m_wireHelperService == null) {
+			this.m_wireHelperService = wireHelperService;
+		}
 	}
 
 	/**
@@ -182,17 +202,18 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
 		checkNull(assetRecords, s_message.assetRecordsNonNull());
 		checkCondition(assetRecords.isEmpty(), s_message.assetRecordsNonEmpty());
 
-		final List<WireRecord> wireRecords = Lists.newArrayList();
+		final List<WireRecord> wireRecords = new ArrayList<WireRecord>();
 		for (final AssetRecord assetRecord : assetRecords) {
-			final WireField channelWireField = Wires.newWireField(s_message.channelName(),
+			final WireField channelWireField = this.m_wireHelperService.newWireField(s_message.channelName(),
 					TypedValues.newStringValue(assetRecord.getChannelName()));
-			final WireField assetFlagWireField = Wires.newWireField(s_message.assetFlag(),
+			final WireField assetFlagWireField = this.m_wireHelperService.newWireField(s_message.assetFlag(),
 					TypedValues.newStringValue(assetRecord.getAssetFlag().name()));
-			final WireField timestampWireField = Wires.newWireField(s_message.timestamp(),
+			final WireField timestampWireField = this.m_wireHelperService.newWireField(s_message.timestamp(),
 					TypedValues.newLongValue(assetRecord.getTimestamp()));
-			final WireField valueWireField = Wires.newWireField(s_message.value(), assetRecord.getValue());
-			final WireRecord wireRecord = Wires.newWireRecord(new Timestamp(new Date().getTime()),
-					Lists.newArrayList(channelWireField, assetFlagWireField, timestampWireField, valueWireField));
+			final WireField valueWireField = this.m_wireHelperService.newWireField(s_message.value(),
+					assetRecord.getValue());
+			final WireRecord wireRecord = this.m_wireHelperService.newWireRecord(new Timestamp(new Date().getTime()),
+					Arrays.asList(channelWireField, assetFlagWireField, timestampWireField, valueWireField));
 			wireRecords.add(wireRecord);
 		}
 		this.m_wireSupport.emit(wireRecords);
@@ -237,7 +258,7 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
 		mainOcd.addAD(assetNameAd);
 		mainOcd.addAD(driverNameAd);
 
-		final Map<String, Object> props = Maps.newHashMap();
+		final Map<String, Object> props = new HashMap<String, Object>();
 
 		for (final Map.Entry<String, Object> entry : this.m_properties.entrySet()) {
 			props.put(entry.getKey(), entry.getValue());
@@ -273,12 +294,6 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
 		return new ComponentConfigurationImpl(componentName, mainOcd, props);
 	}
 
-	/** {@inheritDoc} */
-	@Override
-	public String getName() {
-		return this.m_assetConfiguration.getName();
-	}
-
 	/**
 	 * This method is triggered as soon as the wire component receives a Wire
 	 * Envelope. After it receives a Wire Envelope, it checks for all associated
@@ -301,8 +316,8 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
 		checkNull(wireEnvelope, s_message.wireEnvelopeNonNull());
 		s_logger.debug(s_message.wireEnvelopeReceived() + this.m_wireSupport);
 
-		final List<AssetRecord> assetRecordsToWriteChannels = Lists.newArrayList();
-		final List<String> channelsToRead = Lists.newArrayList();
+		final List<AssetRecord> assetRecordsToWriteChannels = new ArrayList<AssetRecord>();
+		final List<String> channelsToRead = new ArrayList<String>();
 		final Map<Long, Channel> channels = this.m_assetConfiguration.getChannels();
 		// determining channels to read
 		for (final Map.Entry<Long, Channel> channelEntry : channels.entrySet()) {
@@ -318,7 +333,7 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
 				final List<AssetRecord> recentlyReadRecords = this.read(channelsToRead);
 				this.emitAssetRecords(recentlyReadRecords);
 			} catch (final KuraException e) {
-				s_logger.error(s_message.errorPerformingRead() + Throwables.getStackTraceAsString(e));
+				s_logger.error(s_message.errorPerformingRead() + ThrowableUtil.stackTraceAsString(e));
 			}
 		}
 		// determining channels to write
@@ -336,7 +351,7 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
 		try {
 			this.write(assetRecordsToWriteChannels);
 		} catch (final KuraException e) {
-			s_logger.error(s_message.errorPerformingWrite() + Throwables.getStackTraceAsString(e));
+			s_logger.error(s_message.errorPerformingWrite() + ThrowableUtil.stackTraceAsString(e));
 		}
 	}
 
@@ -359,7 +374,7 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
 		checkNull(channel, s_message.channelNonNull());
 		checkNull(value, s_message.valueNonNull());
 
-		final AssetRecord assetRecord = Assets.newAssetRecord(channel.getName());
+		final AssetRecord assetRecord = this.m_assetHelper.newAssetRecord(channel.getName());
 		assetRecord.setValue(value);
 		return assetRecord;
 	}
@@ -381,13 +396,37 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
 	 */
 	private Set<String> retrieveChannelPrefixes(final Map<Long, Channel> channels) {
 		checkNull(channels, s_message.propertiesNonNull());
-		final Set<String> channelPrefixes = Sets.newHashSet();
+		final Set<String> channelPrefixes = new HashSet<String>();
 		for (final Map.Entry<Long, Channel> entry : channels.entrySet()) {
 			final Long key = entry.getKey();
 			final String prefix = key + CHANNEL_PROPERTY_POSTFIX + CHANNEL_PROPERTY_PREFIX + CHANNEL_PROPERTY_POSTFIX;
 			channelPrefixes.add(prefix);
 		}
 		return channelPrefixes;
+	}
+
+	/**
+	 * Unbinds the Asset Helper Service.
+	 *
+	 * @param assetHelperService
+	 *            the new Asset Helper Service
+	 */
+	public synchronized void unbindAssetHelperService(final AssetHelperService assetHelperService) {
+		if (this.m_assetHelper == assetHelperService) {
+			this.m_assetHelper = null;
+		}
+	}
+
+	/**
+	 * Unbinds the Wire Helper Service.
+	 *
+	 * @param wireHelperService
+	 *            the new Wire Helper Service
+	 */
+	public synchronized void unbindWireHelperService(final WireHelperService wireHelperService) {
+		if (this.m_wireHelperService == wireHelperService) {
+			this.m_wireHelperService = null;
+		}
 	}
 
 	/** {@inheritDoc} */

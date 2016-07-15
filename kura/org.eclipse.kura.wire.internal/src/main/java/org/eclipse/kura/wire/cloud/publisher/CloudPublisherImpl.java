@@ -100,7 +100,7 @@ public final class CloudPublisherImpl implements WireReceiver, DataServiceListen
 	 */
 	protected synchronized void activate(final ComponentContext componentContext,
 			final Map<String, Object> properties) {
-		s_logger.info(s_message.activatingCloudPublisher());
+		s_logger.debug(s_message.activatingCloudPublisher());
 		this.m_wireSupport = this.m_wireHelperService.newWireSupport(this);
 		// Update properties
 		this.m_options = new CloudPublisherOptions(properties);
@@ -115,7 +115,7 @@ public final class CloudPublisherImpl implements WireReceiver, DataServiceListen
 		} catch (final KuraException e) {
 			s_logger.error(s_message.cloudClientSetupProblem() + ThrowableUtil.stackTraceAsString(e));
 		}
-		s_logger.info(s_message.activatingCloudPublisherDone());
+		s_logger.debug(s_message.activatingCloudPublisherDone());
 	}
 
 	/**
@@ -284,7 +284,7 @@ public final class CloudPublisherImpl implements WireReceiver, DataServiceListen
 	 *            the component context
 	 */
 	protected synchronized void deactivate(final ComponentContext componentContext) {
-		s_logger.info(s_message.deactivatingCloudPublisher());
+		s_logger.debug(s_message.deactivatingCloudPublisher());
 		// close the client
 		this.closeCloudClient();
 		// close the disconnect manager
@@ -302,7 +302,7 @@ public final class CloudPublisherImpl implements WireReceiver, DataServiceListen
 		// we only need to empty our CloudClient list
 		this.m_dataService = null;
 		this.m_cloudService = null;
-		s_logger.info(s_message.deactivatingCloudPublisherDone());
+		s_logger.debug(s_message.deactivatingCloudPublisherDone());
 	}
 
 	/** {@inheritDoc} */
@@ -480,7 +480,7 @@ public final class CloudPublisherImpl implements WireReceiver, DataServiceListen
 	 *            the updated properties
 	 */
 	public synchronized void updated(final Map<String, Object> properties) {
-		s_logger.info(s_message.updatingCloudPublisher());
+		s_logger.debug(s_message.updatingCloudPublisher());
 		// Update properties
 		this.m_options = new CloudPublisherOptions(properties);
 		// create the singleton disconnect manager
@@ -500,7 +500,7 @@ public final class CloudPublisherImpl implements WireReceiver, DataServiceListen
 		} catch (final KuraException e) {
 			s_logger.error(s_message.cloudClientSetupProblem() + ThrowableUtil.stackTraceAsString(e));
 		}
-		s_logger.info(s_message.updatingCloudPublisherDone());
+		s_logger.debug(s_message.updatingCloudPublisherDone());
 	}
 
 	/** {@inheritDoc} */

@@ -49,7 +49,7 @@ import org.slf4j.LoggerFactory;
  *
  * The available {@code GET} commands are as follows
  * <ul>
- * <li>/assets</li> : to retrieve all the asset
+ * <li>/assets</li> : to retrieve all the assets
  * <li>/assets/asset_name</li> : to retrieve all the channels of the provided
  * asset name
  * <li>/assets/asset_name/channel_name</li> : to retrieve the value of the
@@ -162,7 +162,7 @@ public final class AssetCloudlet extends Cloudlet {
 	 *            the provided container of channels
 	 * @return the id of the channel if found or else 0
 	 * @throws KuraRuntimeException
-	 *             if driver id provided is null
+	 *             any of the arguments is null or the provided is empty
 	 */
 	private long checkChannelAvailability(final String channelName, final Map<Long, Channel> channels) {
 		checkNull(channelName, s_message.channelNameNonNull());
@@ -211,8 +211,9 @@ public final class AssetCloudlet extends Cloudlet {
 				final AssetConfiguration configuration = ((BaseAsset) asset).getAssetConfiguration();
 				final Map<Long, Channel> assetConfiguredChannels = configuration.getChannels();
 				int index = 1;
-				for (final Long channelId : assetConfiguredChannels.keySet()) {
-					respPayload.addMetric(String.valueOf(index++), assetConfiguredChannels.get(channelId));
+				for (final Map.Entry<Long, Channel> entry : assetConfiguredChannels.entrySet()) {
+					final Channel channel = entry.getValue();
+					respPayload.addMetric(String.valueOf(index++), channel);
 				}
 			}
 			// Checks if the name of the asset and the name of the channel are

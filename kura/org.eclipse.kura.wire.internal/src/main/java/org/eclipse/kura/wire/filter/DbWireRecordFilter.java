@@ -103,13 +103,13 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Conf
 	 */
 	protected synchronized void activate(final ComponentContext componentContext,
 			final Map<String, Object> properties) {
-		s_logger.info(s_message.activatingFilter());
+		s_logger.debug(s_message.activatingFilter());
 		this.m_options = new DbWireRecordFilterOptions(properties);
 		this.m_dbHelper = DbServiceHelper.getInstance(this.m_dbService);
 		this.m_wireSupport = this.m_wireHelperService.newWireSupport(this);
 		this.m_cache = new WireRecordCache(this);
 		this.scheduleRefresh();
-		s_logger.info(s_message.activatingFilterDone());
+		s_logger.debug(s_message.activatingFilterDone());
 	}
 
 	/**
@@ -149,7 +149,7 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Conf
 	 *            the component context
 	 */
 	protected synchronized void deactivate(final ComponentContext componentContext) {
-		s_logger.info(s_message.deactivatingFilter());
+		s_logger.debug(s_message.deactivatingFilter());
 		// no need to release the cloud clients as the updated app
 		// certificate is already published due the missing dependency
 		// we only need to empty our CloudClient list
@@ -158,7 +158,7 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Conf
 			this.m_tickHandle.cancel(true);
 		}
 		this.m_executorService.shutdown();
-		s_logger.info(s_message.deactivatingFilterDone());
+		s_logger.debug(s_message.deactivatingFilterDone());
 	}
 
 	/**
@@ -352,10 +352,10 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Conf
 	 *            the updated properties
 	 */
 	public synchronized void updated(final Map<String, Object> properties) {
-		s_logger.info(s_message.updatingFilter() + properties);
+		s_logger.debug(s_message.updatingFilter() + properties);
 		this.m_options = new DbWireRecordFilterOptions(properties);
 		this.scheduleRefresh();
-		s_logger.info(s_message.updatingFilterDone());
+		s_logger.debug(s_message.updatingFilterDone());
 	}
 
 	/** {@inheritDoc} */

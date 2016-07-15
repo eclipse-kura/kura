@@ -135,12 +135,12 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
 	 */
 	protected synchronized void activate(final ComponentContext componentContext,
 			final Map<String, Object> properties) {
-		s_logger.info(s_message.activatingStore());
+		s_logger.debug(s_message.activatingStore());
 		this.m_options = new DbWireRecordStoreOptions(properties);
 		this.m_dbHelper = DbServiceHelper.getInstance(this.m_dbService);
 		this.m_wireSupport = this.m_wireHelperService.newWireSupport(this);
 		this.scheduleTruncation();
-		s_logger.info(s_message.activatingStoreDone());
+		s_logger.debug(s_message.activatingStoreDone());
 	}
 
 	/**
@@ -215,7 +215,7 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
 	 *            the component context
 	 */
 	protected synchronized void deactivate(final ComponentContext componentContext) {
-		s_logger.info(s_message.deactivatingStore());
+		s_logger.debug(s_message.deactivatingStore());
 		// no need to release the cloud clients as the updated application
 		// certificate is already published due the missing dependency
 		// we only need to empty our CloudClient list
@@ -224,7 +224,7 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
 			this.m_tickHandle.cancel(true);
 		}
 		this.m_executorService.shutdown();
-		s_logger.info(s_message.deactivatingStoreDone());
+		s_logger.debug(s_message.deactivatingStoreDone());
 	}
 
 	/**
@@ -445,7 +445,7 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
 				/** {@inheritDoc} */
 				@Override
 				public void run() {
-					clear(noOfRecordsToKeep);
+					DbWireRecordStore.this.clear(noOfRecordsToKeep);
 				}
 			}, cleanUpRate, TimeUnit.SECONDS);
 		}
@@ -512,10 +512,10 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
 	 *            the updated service component properties
 	 */
 	public synchronized void updated(final Map<String, Object> properties) {
-		s_logger.info(s_message.updatingStore() + properties);
+		s_logger.debug(s_message.updatingStore() + properties);
 		this.m_options = new DbWireRecordStoreOptions(properties);
 		this.scheduleTruncation();
-		s_logger.info(s_message.updatingStoreDone());
+		s_logger.debug(s_message.updatingStoreDone());
 	}
 
 	/** {@inheritDoc} */

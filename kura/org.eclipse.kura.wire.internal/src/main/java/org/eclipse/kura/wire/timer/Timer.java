@@ -24,8 +24,8 @@ import org.eclipse.kura.localization.LocalizationAdapter;
 import org.eclipse.kura.localization.WireMessages;
 import org.eclipse.kura.type.TypedValues;
 import org.eclipse.kura.wire.WireEmitter;
-import org.eclipse.kura.wire.WireSupport;
 import org.eclipse.kura.wire.WireHelperService;
+import org.eclipse.kura.wire.WireSupport;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.wireadmin.Wire;
 import org.slf4j.Logger;
@@ -67,11 +67,11 @@ public final class Timer implements WireEmitter, ConfigurableComponent {
 	/** The future handle of the thread pool executor service. */
 	private ScheduledFuture<?> m_tickHandle;
 
-	/** The wire supporter component. */
-	private final WireSupport m_wireSupport;
-
 	/** The Wire Helper Service. */
 	private volatile WireHelperService m_wireHelperService;
+
+	/** The wire supporter component. */
+	private final WireSupport m_wireSupport;
 
 	/**
 	 * Instantiates a new timer.
@@ -90,10 +90,10 @@ public final class Timer implements WireEmitter, ConfigurableComponent {
 	 *            the configured properties
 	 */
 	protected synchronized void activate(final ComponentContext ctx, final Map<String, Object> properties) {
-		s_logger.info(s_message.activatingTimer());
+		s_logger.debug(s_message.activatingTimer());
 		this.m_properties = properties;
 		this.doUpdate();
-		s_logger.info(s_message.activatingTimerDone());
+		s_logger.debug(s_message.activatingTimerDone());
 	}
 
 	/**
@@ -121,14 +121,14 @@ public final class Timer implements WireEmitter, ConfigurableComponent {
 	 *            the component context
 	 */
 	protected synchronized void deactivate(final ComponentContext ctx) {
-		s_logger.info(s_message.deactivatingTimer());
+		s_logger.debug(s_message.deactivatingTimer());
 		if (this.m_tickHandle != null) {
 			this.m_tickHandle.cancel(true);
 		}
 		if (this.m_executorService != null) {
 			this.m_executorService.shutdown();
 		}
-		s_logger.info(s_message.deactivatingTimerDone());
+		s_logger.debug(s_message.deactivatingTimerDone());
 	}
 
 	/**
@@ -145,9 +145,9 @@ public final class Timer implements WireEmitter, ConfigurableComponent {
 			/** {@inheritDoc} */
 			@Override
 			public void run() {
-				m_wireSupport.emit(
-						Arrays.asList(m_wireHelperService.newWireRecord(m_wireHelperService
-								.newWireField(TIMER_EVENT_FIELD_NAME, TypedValues.newStringValue(m_name)))));
+				Timer.this.m_wireSupport
+						.emit(Arrays.asList(Timer.this.m_wireHelperService.newWireRecord(Timer.this.m_wireHelperService
+								.newWireField(TIMER_EVENT_FIELD_NAME, TypedValues.newStringValue(Timer.this.m_name)))));
 			}
 		}, 0, this.m_interval, TimeUnit.SECONDS);
 	}
@@ -177,9 +177,9 @@ public final class Timer implements WireEmitter, ConfigurableComponent {
 	 *            the updated properties
 	 */
 	protected synchronized void updated(final Map<String, Object> properties) {
-		s_logger.info(s_message.updatingTimer());
+		s_logger.debug(s_message.updatingTimer());
 		this.m_properties = properties;
 		this.doUpdate();
-		s_logger.info(s_message.updatingTimerDone());
+		s_logger.debug(s_message.updatingTimerDone());
 	}
 }

@@ -100,7 +100,7 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 	 */
 	protected synchronized void activate(final ComponentContext componentContext,
 			final Map<String, Object> properties) {
-		s_logger.info(s_message.activatingWireService());
+		s_logger.debug(s_message.activatingWireService());
 		this.m_ctx = componentContext;
 		try {
 			this.extractProperties(properties);
@@ -112,7 +112,7 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 		} catch (final Exception exception) {
 			s_logger.error(ThrowableUtil.stackTraceAsString(exception));
 		}
-		s_logger.info(s_message.activatingWireServiceDone());
+		s_logger.debug(s_message.activatingWireServiceDone());
 	}
 
 	/**
@@ -219,14 +219,14 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 	 *            the component context
 	 */
 	protected synchronized void deactivate(final ComponentContext componentContext) {
-		s_logger.info(s_message.deactivatingWireService());
+		s_logger.debug(s_message.deactivatingWireService());
 		this.m_configService = null;
 		this.m_wireAdmin = null;
 		this.m_serviceTracker.close();
 		for (final WireConfiguration wireConfiguration : this.m_wireConfigs) {
 			this.deleteWireConfiguration(wireConfiguration);
 		}
-		s_logger.info(s_message.deactivatingWireServiceDone());
+		s_logger.debug(s_message.deactivatingWireServiceDone());
 	}
 
 	/** {@inheritDoc} */
@@ -356,14 +356,14 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 	 *            the properties
 	 */
 	public synchronized void updated(final Map<String, Object> properties) {
-		s_logger.info(s_message.updatingWireService() + properties);
+		s_logger.debug(s_message.updatingWireService() + properties);
 		this.extractProperties(properties);
 		try {
 			this.createWires();
 		} catch (final KuraException e) {
 			s_logger.error(ThrowableUtil.stackTraceAsString(e));
 		}
-		s_logger.info(s_message.updatingWireServiceDone());
+		s_logger.debug(s_message.updatingWireServiceDone());
 	}
 
 }

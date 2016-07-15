@@ -40,9 +40,13 @@ public class OsgiRemoteServiceServlet extends KuraRemoteServiceServlet
 	    // We are going to swap the class loader 
 	    ClassLoader oldContextClassLoader = 
 	    currentThread.getContextClassLoader(); 
-	    currentThread.setContextClassLoader(this.getClass().getClassLoader()); 
-	    super.service(req, resp); 
-	    currentThread.setContextClassLoader(oldContextClassLoader); 
+	    currentThread.setContextClassLoader(this.getClass().getClassLoader());
+	    try{
+	    	super.service(req, resp);
+	    }
+	    finally {
+	    	currentThread.setContextClassLoader(oldContextClassLoader);	
+	    }
 	}
 	
 	

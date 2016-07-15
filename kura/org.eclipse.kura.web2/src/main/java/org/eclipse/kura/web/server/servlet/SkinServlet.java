@@ -8,6 +8,7 @@
  *
  * Contributors:
  *     Eurotech
+ *     Jens Reimann <jreimann@redhat.com> - fix resource leaks
  *******************************************************************************/
 package org.eclipse.kura.web.server.servlet;
 
@@ -55,8 +56,6 @@ public class SkinServlet extends HttpServlet {
 	}
 	
 	private void streamText(String resourceName, PrintWriter w) throws ServletException, IOException {
-		FileReader fr = null;
-		
 		try {
 			// check to see if we have an external resource directory configured
 			SystemService systemService = ServiceLocator.getInstance().getService(SystemService.class);
@@ -68,29 +67,26 @@ public class SkinServlet extends HttpServlet {
 			if (fResourceFile == null) return;
 				
 			// write the requested resource
-			fr = new FileReader(fResourceFile);
-			char[] buffer = new char[1024];
-			int iRead = fr.read(buffer);
-			while (iRead != -1) {
-				w.write(buffer, 0, iRead);
-				iRead = fr.read(buffer);
+			try (FileReader fr = new FileReader(fResourceFile)) {
+				char[] buffer = new char[1024];
+				int iRead = fr.read(buffer);
+				while (iRead != -1) {
+					w.write(buffer, 0, iRead);
+					iRead = fr.read(buffer);
+				}
 			}
 		}
 		catch (Exception e) {
 			s_logger.error("Error loading skin resource", e);			
 		} 
 		finally {
-			if (fr != null)
-				fr.close();
 			if (w != null)
 				w.close();
 		}
 		
 	}
 	
-	private void streamBinary(String resourceName, OutputStream o) throws ServletException, IOException {
-		FileInputStream in = null;
-		
+	private void streamBinary(final String resourceName, final OutputStream o) throws ServletException, IOException {
 		try {
 			// check to see if we have an external resource directory configured
 			SystemService systemService = ServiceLocator.getInstance().getService(SystemService.class);
@@ -102,20 +98,18 @@ public class SkinServlet extends HttpServlet {
 			if (fResourceFile == null) return;
 				
 			// write the requested resource
-			in = new FileInputStream(fResourceFile);
-			byte[] buf  = new byte[1024];
-			int len = 0;
-			while ((len = in.read(buf)) >= 0) {
-				o.write(buf, 0, len);
+			try (FileInputStream in = new FileInputStream(fResourceFile)) {
+				byte[] buf  = new byte[1024];
+				int len = 0;
+				while ((len = in.read(buf)) >= 0) {
+					o.write(buf, 0, len);
+				}
 			}
-			
 		}
 		catch (Exception e) {
 			s_logger.error("Error loading skin resource", e);			
 		} 
 		finally {
-			if (in != null)
-				in.close();
 			if (o != null)
 				o.close();
 		}

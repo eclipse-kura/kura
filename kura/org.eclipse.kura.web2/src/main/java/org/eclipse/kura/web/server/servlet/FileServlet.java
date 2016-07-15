@@ -8,6 +8,7 @@
  *
  * Contributors:
  *     Eurotech
+ *     Jens Reimann <jreimann@redhat.com> - Fix possible resource leaks
  *******************************************************************************/
 package org.eclipse.kura.web.server.servlet;
 
@@ -213,20 +214,17 @@ public class FileServlet extends HttpServlet {
 				String[] pids = mti.getPids();
 				for (String p : pids) {
 					if (p.equals(pid)) {
-						try {
-							InputStream is = mti.getObjectClassDefinition(pid, null).getIcon(32);
+						try (InputStream is = mti.getObjectClassDefinition(pid, null).getIcon(32)) {
 							if (is == null) {
 								s_logger.error("Error reading icon file.");
 								throw new ServletException("Error reading icon file.");
 							}
-							OutputStream os = resp.getOutputStream();
-							byte[] buffer = new byte[1024];
-							for (int length = 0; (length = is.read(buffer)) > 0;) {
-						        os.write(buffer, 0, length);
-						    }
-							is.close();
-							os.close();
-							
+							try (OutputStream os = resp.getOutputStream()) {
+								byte[] buffer = new byte[1024];
+								for (int length = 0; (length = is.read(buffer)) > 0;) {
+							        os.write(buffer, 0, length);
+							    }
+							}
 						} catch (IOException e) {
 							s_logger.error("Error reading icon file.");
 							throw new IOException("Error reading icon file.");
@@ -278,81 +276,66 @@ public class FileServlet extends HttpServlet {
 		// END XSRF security check
 
 		List<FileItem> fileItems = null;
-		InputStream is = null;
 		File localFolder = new File(System.getProperty("java.io.tmpdir"));
-		OutputStream os = null;
 
 		try {
 			fileItems = upload.getFileItems();
 
 			if (fileItems.size() > 0) {
 				FileItem item = fileItems.get(0);
-				is = item.getInputStream();
-
-				byte[] bytes = IOUtils.toByteArray(is);
-				ZipInputStream zis = new ZipInputStream(new ByteArrayInputStream(bytes));
-
-				int entries = 0;
-				long total = 0;
-				ZipEntry ze = zis.getNextEntry();
-				while (ze != null) {
-					byte[] buffer = new byte[BUFFER];
-
-					String expectedFilePath = new StringBuilder(localFolder.getPath()).append(File.separator).append(ze.getName()).toString();
-					String fileName = validateFileName(expectedFilePath, localFolder.getPath());
-					File newFile = new File(fileName);
-					if (newFile.isDirectory()) {
-						newFile.mkdirs();
+				try (InputStream is = item.getInputStream()) {
+	
+					byte[] bytes = IOUtils.toByteArray(is);
+					ZipInputStream zis = new ZipInputStream(new ByteArrayInputStream(bytes));
+	
+					int entries = 0;
+					long total = 0;
+					ZipEntry ze = zis.getNextEntry();
+					while (ze != null) {
+						byte[] buffer = new byte[BUFFER];
+	
+						String expectedFilePath = new StringBuilder(localFolder.getPath()).append(File.separator).append(ze.getName()).toString();
+						String fileName = validateFileName(expectedFilePath, localFolder.getPath());
+						File newFile = new File(fileName);
+						if (newFile.isDirectory()) {
+							newFile.mkdirs();
+							ze = zis.getNextEntry();
+							continue;
+						}
+						if (newFile.getParent() != null) {
+							File parent = new File(newFile.getParent());
+							parent.mkdirs();
+						}
+	
+						try(FileOutputStream fos = new FileOutputStream(newFile)){
+							int len;
+							while ((total + BUFFER <= tooBig) && (len = zis.read(buffer)) > 0) {
+								fos.write(buffer, 0, len);
+								total += len;
+							}
+							fos.flush();
+						}
+	
+						entries++;
+						if (entries > tooMany) {
+							throw new IllegalStateException("Too many files to unzip.");
+						}
+						if (total > tooBig) {
+							throw new IllegalStateException("File being unzipped is too big.");
+						}
+	
 						ze = zis.getNextEntry();
-						continue;
 					}
-					if (newFile.getParent() != null) {
-						File parent = new File(newFile.getParent());
-						parent.mkdirs();
-					}
-
-					FileOutputStream fos = new FileOutputStream(newFile);
-					int len;
-					while ((total + BUFFER <= tooBig) && (len = zis.read(buffer)) > 0) {
-						fos.write(buffer, 0, len);
-						total += len;
-					}
-					fos.flush();
-					fos.close();
-
-					entries++;
-					if (entries > tooMany) {
-						throw new IllegalStateException("Too many files to unzip.");
-					}
-					if (total > tooBig) {
-						throw new IllegalStateException("File being unzipped is too big.");
-					}
-
-					ze = zis.getNextEntry();
+	
+					zis.closeEntry();
+					zis.close();
 				}
-
-				zis.closeEntry();
-				zis.close();
 			}
 		} catch (IOException e) {
 			throw e;
 		} catch (GwtKuraException e) {
 			throw new ServletException("File is outside extraction target directory.");
 		} finally {
-			if (os != null) {
-				try {
-					os.close();
-				} catch (IOException e) {
-					s_logger.warn("Cannot close output stream", e);
-				}
-			}
-			if (is != null) {
-				try {
-					is.close();
-				} catch (IOException e) {
-					s_logger.warn("Cannot close input stream", e);
-				}
-			}
 			if (fileItems != null) {
 				for (FileItem fileItem : fileItems) {
 					fileItem.delete();
@@ -483,9 +466,7 @@ public class FileServlet extends HttpServlet {
 		// END XSRF security check
 
 		List<FileItem> fileItems = null;
-		InputStream is = null;
 		File localFile = null;
-		OutputStream os = null;
 		boolean successful = false;
 
 		try {
@@ -498,83 +479,64 @@ public class FileServlet extends HttpServlet {
 
 			FileItem item = fileItems.get(0);
 			String filename = item.getName();
-			is = item.getInputStream();
-
-			String filePath = System.getProperty("java.io.tmpdir") + File.separator + filename;
-
-			localFile = new File(filePath);
-			if (localFile.exists()) {
-				if (localFile.delete()) {
-					s_logger.error("Cannot delete file: {}", filePath);
-					throw new ServletException("Cannot delete file: " + filePath);
+			
+			try (InputStream is = item.getInputStream()) {
+	
+				String filePath = System.getProperty("java.io.tmpdir") + File.separator + filename;
+	
+				localFile = new File(filePath);
+				if (localFile.exists()) {
+					if (localFile.delete()) {
+						s_logger.error("Cannot delete file: {}", filePath);
+						throw new ServletException("Cannot delete file: " + filePath);
+					}
 				}
-			}
-
-			try {
-				localFile.createNewFile();
-				localFile.deleteOnExit();
-			} catch (IOException e) {
-				s_logger.error("Cannot create file: {}", filePath, e);
-				throw new ServletException("Cannot create file: " + filePath);				
-			}
-
-			try {
-				os = new FileOutputStream(localFile);
-			} catch (FileNotFoundException e) {
-				s_logger.error("Cannot find file: {}", filePath, e);
-				throw new ServletException("Cannot find file: " + filePath, e);				
-			}
-
-			s_logger.info("Copying uploaded package file to file: {}", filePath);
-
-			try {
-				IOUtils.copy(is, os);
-			} catch (IOException e) {
-				s_logger.error("Failed to copy deployment package file: {}", filename, e);
-				throw new ServletException("Failed to copy deployment package file: " + filename, e);
-			}
-
-			try {
-				os.close();
-			} catch (IOException e) {
-				s_logger.warn("Cannot close output stream", e);
-			}
-
-			URL url = localFile.toURI().toURL();
-			String sUrl = url.toString();
-
-			s_logger.info("Installing package...");
-			try {
-				deploymentAgentService.installDeploymentPackageAsync(sUrl);
-				successful = true;
-			} catch (Exception e) {
-				s_logger.error("Package installation failed", e);
-				throw new ServletException("Package installation failed", e);
+	
+				try {
+					localFile.createNewFile();
+					localFile.deleteOnExit();
+				} catch (IOException e) {
+					s_logger.error("Cannot create file: {}", filePath, e);
+					throw new ServletException("Cannot create file: " + filePath);				
+				}
+	
+				try (OutputStream os = new FileOutputStream(localFile)) {
+					s_logger.info("Copying uploaded package file to file: {}", filePath);
+		
+					try {
+						IOUtils.copy(is, os);
+					} catch (IOException e) {
+						s_logger.error("Failed to copy deployment package file: {}", filename, e);
+						throw new ServletException("Failed to copy deployment package file: " + filename, e);
+					}
+					
+				} catch (FileNotFoundException e) {
+					s_logger.error("Cannot find file: {}", filePath, e);
+					throw new ServletException("Cannot find file: " + filePath, e);				
+				}
+	
+				URL url = localFile.toURI().toURL();
+				String sUrl = url.toString();
+	
+				s_logger.info("Installing package...");
+				try {
+					deploymentAgentService.installDeploymentPackageAsync(sUrl);
+					successful = true;
+				} catch (Exception e) {
+					s_logger.error("Package installation failed", e);
+					throw new ServletException("Package installation failed", e);
+				}
 			}
 		} catch (IOException e) {
 			throw e;
 		} catch (ServletException e) {
 			throw e;
 		} finally {
-			if (os != null) {
-				try {
-					os.close();
-				} catch (IOException e) {
-					s_logger.warn("Cannot close output stream", e);
-				}
-			}
 			if (localFile != null && !successful) {
 				try {
 					localFile.delete();
 				} catch (Exception e) {
 					s_logger.warn("Cannot delete file");
-				}
-			}
-			if (is != null) {
-				try {
-					is.close();
-				} catch (IOException e) {
-					s_logger.warn("Cannot close input stream", e);
 				}
 			}
 			if (fileItems != null) {

@@ -10,3 +10,4 @@ Export-Package: org.eclipse.kura.localization;version="1.0.0"
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: lib/c10n-core-1.2.jar,
  .
+Eclipse-ExtensibleAPI: true

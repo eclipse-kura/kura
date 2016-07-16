@@ -21,7 +21,13 @@ import com.github.rodionmoiseev.c10n.annotations.En;
  */
 public interface UtilMessages {
 
+	@En("Dictionary cannot be null")
+	public String dictionaryNonNull();
+
 	@En("Initial Array size must not be less than 0")
 	public String initialArraySize();
+
+	@En("Map cannot be null")
+	public String mapNonNull();
 
 }

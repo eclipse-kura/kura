@@ -13,8 +13,11 @@
 package org.eclipse.kura.util.collection;
 
 import static org.eclipse.kura.Preconditions.checkCondition;
+import static org.eclipse.kura.Preconditions.checkNull;
 
 import java.util.ArrayList;
+import java.util.Dictionary;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -27,6 +30,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.localization.LocalizationAdapter;
 import org.eclipse.kura.localization.UtilMessages;
 
@@ -42,6 +46,25 @@ public final class CollectionUtil {
 	/** Constructor */
 	private CollectionUtil() {
 		// Static Factory Methods container. No need to instantiate.
+	}
+
+	/**
+	 * Converts legacy {@link Dictionary} ADT to {@link Map}
+	 *
+	 * @param dictionary
+	 *            The legacy {@link Dictionary} object to transform
+	 * @throws KuraRuntimeException
+	 *             if argument is null
+	 */
+	public static <K, V> Map<K, V> dictionaryToMap(final Dictionary<K, V> dictionary) {
+		checkNull(dictionary, s_message.dictionaryNonNull());
+		final Map<K, V> map = new HashMap<K, V>(dictionary.size());
+		final Enumeration<K> keys = dictionary.keys();
+		while (keys.hasMoreElements()) {
+			final K key = keys.nextElement();
+			map.put(key, dictionary.get(key));
+		}
+		return map;
 	}
 
 	/**
@@ -65,6 +88,8 @@ public final class CollectionUtil {
 	 * @param initialArraySize
 	 *            the initial capacity
 	 * @return empty {@code ArrayList} instance with the provided capacity
+	 * @throws KuraRuntimeException
+	 *             if argument is less than 0
 	 */
 	public static <E> List<E> newArrayListWithCapacity(final int initialArraySize) {
 		checkCondition(initialArraySize < 0, s_message.initialArraySize());
@@ -94,8 +119,11 @@ public final class CollectionUtil {
 	 * @param map
 	 *            the map to contain
 	 * @return a new, empty {@code ConcurrentHashMap}
+	 * @throws KuraRuntimeException
+	 *             if argument is null
 	 */
 	public static <K, V> ConcurrentMap<K, V> newConcurrentHashMap(final Map<K, V> map) {
+		checkNull(map, s_message.mapNonNull());
 		return new ConcurrentHashMap<K, V>(map);
 	}
 
@@ -134,8 +162,11 @@ public final class CollectionUtil {
 	 * @param map
 	 *            map the mappings to be inserted
 	 * @return a new {@code HashMap}
+	 * @throws KuraRuntimeException
+	 *             if argument is null
 	 */
 	public static <K, V> Map<K, V> newHashMap(final Map<? extends K, ? extends V> map) {
+		checkNull(map, s_message.mapNonNull());
 		return new HashMap<K, V>(map);
 	}
 

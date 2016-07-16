@@ -14,13 +14,13 @@ package org.eclipse.kura.wire.internal;
 
 import static org.eclipse.kura.Preconditions.checkNull;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.kura.localization.LocalizationAdapter;
 import org.eclipse.kura.localization.WireMessages;
+import org.eclipse.kura.util.collection.CollectionUtil;
 import org.eclipse.kura.wire.WireComponent;
 import org.eclipse.kura.wire.WireEmitter;
 import org.eclipse.kura.wire.WireEnvelope;
@@ -62,8 +62,8 @@ final class WireSupportImpl implements WireSupport {
 		checkNull(wireSupporter, s_message.wireSupportedComponentNonNull());
 		checkNull(wireHelperService, s_message.wireHelperServiceNonNull());
 
-		this.m_outgoingWires = new ArrayList<Wire>();
-		this.m_incomingWires = new ArrayList<Wire>();
+		this.m_outgoingWires = CollectionUtil.newArrayList();
+		this.m_incomingWires = CollectionUtil.newArrayList();
 		this.m_wireSupporter = wireSupporter;
 		this.m_wireHelperService = wireHelperService;
 	}

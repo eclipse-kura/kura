@@ -15,15 +15,15 @@ package org.eclipse.kura.wire.internal;
 import static org.eclipse.kura.Preconditions.checkNull;
 import static org.eclipse.kura.configuration.ConfigurationService.KURA_SERVICE_PID;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraRuntimeException;
-import org.eclipse.kura.core.util.ThrowableUtil;
 import org.eclipse.kura.localization.LocalizationAdapter;
 import org.eclipse.kura.localization.WireMessages;
+import org.eclipse.kura.util.base.ThrowableUtil;
+import org.eclipse.kura.util.collection.CollectionUtil;
 import org.eclipse.kura.wire.WireComponent;
 import org.eclipse.kura.wire.WireConfiguration;
 import org.eclipse.kura.wire.WireEmitter;
@@ -76,8 +76,8 @@ final class WireComponentTrackerCustomizer implements ServiceTrackerCustomizer<W
 		checkNull(context, s_message.bundleContextNonNull());
 		checkNull(wireService, s_message.wireServiceNonNull());
 
-		this.m_wireEmitters = new ArrayList<String>();
-		this.m_wireReceivers = new ArrayList<String>();
+		this.m_wireEmitters = CollectionUtil.newArrayList();
+		this.m_wireReceivers = CollectionUtil.newArrayList();
 		this.m_wireService = wireService;
 		this.m_context = context;
 		this.searchPreExistingWireComponents();

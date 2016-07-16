@@ -16,8 +16,6 @@ import static org.eclipse.kura.Preconditions.checkNull;
 import static org.osgi.service.wireadmin.WireConstants.WIREADMIN_CONSUMER_PID;
 import static org.osgi.service.wireadmin.WireConstants.WIREADMIN_PRODUCER_PID;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -29,9 +27,10 @@ import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.configuration.SelfConfiguringComponent;
 import org.eclipse.kura.core.configuration.ComponentConfigurationImpl;
 import org.eclipse.kura.core.configuration.metatype.Tocd;
-import org.eclipse.kura.core.util.ThrowableUtil;
 import org.eclipse.kura.localization.LocalizationAdapter;
 import org.eclipse.kura.localization.WireMessages;
+import org.eclipse.kura.util.base.ThrowableUtil;
+import org.eclipse.kura.util.collection.CollectionUtil;
 import org.eclipse.kura.wire.WireComponent;
 import org.eclipse.kura.wire.WireConfiguration;
 import org.eclipse.kura.wire.WireHelperService;
@@ -87,7 +86,7 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 
 	/** Constructor */
 	public WireServiceImpl() {
-		this.m_wireConfigs = new ArrayList<WireConfiguration>();
+		this.m_wireConfigs = CollectionUtil.newArrayList();
 	}
 
 	/**
@@ -153,7 +152,8 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 
 	/** {@inheritDoc} */
 	@Override
-	public WireConfiguration createWireConfiguration(final String emitterPid, final String receiverPid) {
+	public WireConfiguration createWireConfiguration(final String emitterPid, final String receiverPid)
+			throws KuraException {
 		checkNull(emitterPid, s_message.emitterPidNonNull());
 		checkNull(receiverPid, s_message.receiverPidNonNull());
 
@@ -161,23 +161,28 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 		if (!emitterPid.equals(receiverPid)) {
 			final String emitterFactoryPid = this.m_wireHelperService.getFactoryPid(emitterPid);
 			final String receiverFactoryPid = this.m_wireHelperService.getFactoryPid(receiverPid);
-			if ((emitterFactoryPid != null) && (receiverFactoryPid != null)) {
-				final WireConfiguration conf = this.m_wireHelperService.newWireConfiguration(emitterPid, receiverPid,
-						null);
-				this.m_wireConfigs.add(conf);
-				this.m_wireAdmin.createWire(emitterFactoryPid, receiverFactoryPid, null);
-				s_logger.info(s_message.creatingWireDone(emitterPid, receiverPid));
+			if ((emitterFactoryPid == null) || (receiverFactoryPid == null)) {
+				throw new KuraException(KuraErrorCode.INTERNAL_ERROR, s_message.componentPidsNull());
 			}
+			final WireConfiguration conf = this.m_wireHelperService.newWireConfiguration(emitterPid, receiverPid, null);
+			this.m_wireConfigs.add(conf);
+			this.m_wireAdmin.createWire(emitterFactoryPid, receiverFactoryPid, null);
+			s_logger.info(s_message.creatingWireDone(emitterPid, receiverPid));
 		}
 		return this.m_wireHelperService.newWireConfiguration(emitterPid, receiverPid, null);
 	}
 
 	/**
 	 * Create the wires based on the provided wire configurations
+	 *
+	 * @throws KuraException
+	 *             if there doesn't exist any Wire Component having provided
+	 *             emitter PID or any Wire Component having provided receiver
+	 *             PID
 	 */
 	synchronized void createWires() throws KuraException {
 		s_logger.debug(s_message.creatingWires());
-		final List<WireConfiguration> cloned = new ArrayList<WireConfiguration>();
+		final List<WireConfiguration> cloned = CollectionUtil.newArrayList();
 		for (final WireConfiguration wc : this.m_wireConfigs) {
 			cloned.add(this.m_wireHelperService.newWireConfiguration(wc.getEmitterPid(), wc.getReceiverPid(),
 					wc.getFilter()));
@@ -185,20 +190,8 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 		for (final WireConfiguration conf : cloned) {
 			final String emitterPid = conf.getEmitterPid();
 			final String receiverPid = conf.getReceiverPid();
-			boolean emitterFound = false;
-			boolean receiverFound = false;
-			for (final String s : this.m_trackerCustomizer.getWireEmitters()) {
-				if (s.equals(emitterPid)) {
-					emitterFound = true;
-					break;
-				}
-			}
-			for (final String s : this.m_trackerCustomizer.getWireReceivers()) {
-				if (s.equals(receiverPid)) {
-					receiverFound = true;
-					break;
-				}
-			}
+			final boolean emitterFound = this.m_trackerCustomizer.getWireEmitters().contains(emitterPid);
+			final boolean receiverFound = this.m_trackerCustomizer.getWireReceivers().contains(receiverPid);
 			if (emitterFound && receiverFound) {
 				s_logger.info(s_message.creatingWire(emitterPid, receiverPid));
 				final String emitterFactoryPid = this.m_wireHelperService.getFactoryPid(emitterPid);
@@ -290,7 +283,7 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 		wiresOCD.setName(s_message.name());
 		wiresOCD.setDescription(s_message.description());
 
-		final Map<String, Object> props = new HashMap<String, Object>();
+		final Map<String, Object> props = CollectionUtil.newHashMap();
 
 		for (final Map.Entry<String, Object> entry : this.m_properties.entrySet()) {
 			props.put(entry.getKey(), entry.getValue());

@@ -20,7 +20,6 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
@@ -32,12 +31,13 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.kura.configuration.ConfigurableComponent;
-import org.eclipse.kura.core.util.ThrowableUtil;
 import org.eclipse.kura.db.DbService;
 import org.eclipse.kura.localization.LocalizationAdapter;
 import org.eclipse.kura.localization.WireMessages;
 import org.eclipse.kura.type.DataType;
 import org.eclipse.kura.type.TypedValues;
+import org.eclipse.kura.util.base.ThrowableUtil;
+import org.eclipse.kura.util.collection.CollectionUtil;
 import org.eclipse.kura.wire.WireEmitter;
 import org.eclipse.kura.wire.WireEnvelope;
 import org.eclipse.kura.wire.WireField;
@@ -210,7 +210,7 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Conf
 	 */
 	private List<WireRecord> refreshSQLView() throws SQLException {
 		final Date now = new Date();
-		final List<WireRecord> dataRecords = new ArrayList<WireRecord>();
+		final List<WireRecord> dataRecords = CollectionUtil.newArrayList();
 		Connection conn = null;
 		Statement stmt = null;
 		ResultSet rset = null;
@@ -221,7 +221,7 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Conf
 			rset = stmt.executeQuery(sqlView);
 			if (rset != null) {
 				while (rset.next()) {
-					final List<WireField> dataFields = new ArrayList<WireField>();
+					final List<WireField> dataFields = CollectionUtil.newArrayList();
 					final ResultSetMetaData rmet = rset.getMetaData();
 					for (int i = 1; i <= rmet.getColumnCount(); i++) {
 						String fieldName = rmet.getColumnLabel(i);
@@ -315,7 +315,7 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Conf
 				/** {@inheritDoc} */
 				@Override
 				public void run() {
-					DbWireRecordFilter.this.m_cache.put(System.currentTimeMillis(), DbWireRecordFilter.this.filter());
+					m_cache.put(System.currentTimeMillis(), filter());
 				}
 			}, refreshRate, TimeUnit.SECONDS);
 		}

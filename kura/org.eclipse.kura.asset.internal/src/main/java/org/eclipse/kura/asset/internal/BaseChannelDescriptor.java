@@ -12,7 +12,6 @@
  */
 package org.eclipse.kura.asset.internal;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.kura.asset.AssetConfiguration;
@@ -22,6 +21,7 @@ import org.eclipse.kura.core.configuration.metatype.Toption;
 import org.eclipse.kura.core.configuration.metatype.Tscalar;
 import org.eclipse.kura.localization.AssetMessages;
 import org.eclipse.kura.localization.LocalizationAdapter;
+import org.eclipse.kura.util.collection.CollectionUtil;
 
 /**
  * The Class BaseChannelDescriptor returns the basic channel descriptor required
@@ -77,7 +77,7 @@ public final class BaseChannelDescriptor implements ChannelDescriptor {
 	 * Instantiates a new base asset channel descriptor.
 	 */
 	public BaseChannelDescriptor() {
-		this.m_defaultElements = new ArrayList<Tad>();
+		this.m_defaultElements = CollectionUtil.newArrayList();
 
 		final Tad name = new Tad();
 		name.setId(NAME);

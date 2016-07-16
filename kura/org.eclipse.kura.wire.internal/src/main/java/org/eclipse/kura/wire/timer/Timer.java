@@ -145,9 +145,9 @@ public final class Timer implements WireEmitter, ConfigurableComponent {
 			/** {@inheritDoc} */
 			@Override
 			public void run() {
-				Timer.this.m_wireSupport
-						.emit(Arrays.asList(Timer.this.m_wireHelperService.newWireRecord(Timer.this.m_wireHelperService
-								.newWireField(TIMER_EVENT_FIELD_NAME, TypedValues.newStringValue(Timer.this.m_name)))));
+				m_wireSupport
+						.emit(Arrays.asList(m_wireHelperService.newWireRecord(m_wireHelperService
+								.newWireField(TIMER_EVENT_FIELD_NAME, TypedValues.newStringValue(m_name)))));
 			}
 		}, 0, this.m_interval, TimeUnit.SECONDS);
 	}

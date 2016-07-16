@@ -14,10 +14,10 @@
 package org.eclipse.kura.wire.store;
 
 import java.sql.Types;
-import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.kura.type.DataType;
+import org.eclipse.kura.util.collection.CollectionUtil;
 
 /**
  * The Class DbDataTypeMapper maps all the Kura specific data types to JDBC Data
@@ -26,7 +26,8 @@ import org.eclipse.kura.type.DataType;
 public final class DbDataTypeMapper {
 
 	/**
-	 * The Class JdbcType.
+	 * The Class JdbcType represent a pair of the generic SQL Type and its
+	 * string representation
 	 */
 	public static class JdbcType {
 
@@ -72,10 +73,10 @@ public final class DbDataTypeMapper {
 	 * The map containing key-value pairs of the Kura Datatype and the JDBC
 	 * datatype
 	 */
-	private static Map<DataType, JdbcType> s_dataTypeMap = new HashMap<DataType, JdbcType>();
+	private static Map<DataType, JdbcType> s_dataTypeMap = CollectionUtil.newHashMap();
 
 	/** The JDBC Type Holder map. */
-	private static Map<Integer, DataType> s_jdbcTypeMap = new HashMap<Integer, DataType>();
+	private static Map<Integer, DataType> s_jdbcTypeMap = CollectionUtil.newHashMap();
 
 	static {
 		s_dataTypeMap.put(DataType.BYTE, new JdbcType(Types.TINYINT, "TINYINT"));
@@ -98,7 +99,7 @@ public final class DbDataTypeMapper {
 		s_jdbcTypeMap.put(Types.BINARY, DataType.BYTE_ARRAY);
 		s_jdbcTypeMap.put(Types.VARCHAR, DataType.STRING);
 	}
-	
+
 	/**
 	 * Constructor
 	 */

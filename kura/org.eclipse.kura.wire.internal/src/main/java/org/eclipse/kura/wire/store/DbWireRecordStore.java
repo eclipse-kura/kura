@@ -32,7 +32,6 @@ import java.util.concurrent.TimeUnit;
 
 import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.configuration.ConfigurableComponent;
-import org.eclipse.kura.core.util.ThrowableUtil;
 import org.eclipse.kura.db.DbService;
 import org.eclipse.kura.localization.LocalizationAdapter;
 import org.eclipse.kura.localization.WireMessages;
@@ -45,6 +44,8 @@ import org.eclipse.kura.type.IntegerValue;
 import org.eclipse.kura.type.LongValue;
 import org.eclipse.kura.type.ShortValue;
 import org.eclipse.kura.type.StringValue;
+import org.eclipse.kura.util.base.ThrowableUtil;
+import org.eclipse.kura.util.collection.CollectionUtil;
 import org.eclipse.kura.wire.WireEmitter;
 import org.eclipse.kura.wire.WireEnvelope;
 import org.eclipse.kura.wire.WireField;
@@ -364,7 +365,7 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
 		final String sqlTableName = this.m_dbHelper.sanitizeSqlTableAndColumnName(tableName);
 		Connection conn = null;
 		ResultSet rsColumns = null;
-		final Map<String, Integer> columns = new HashMap<String, Integer>();
+		final Map<String, Integer> columns = CollectionUtil.newHashMap();
 		try {
 			// check for the table that would collect the data of this emitter
 			conn = this.m_dbHelper.getConnection();
@@ -445,7 +446,7 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
 				/** {@inheritDoc} */
 				@Override
 				public void run() {
-					DbWireRecordStore.this.clear(noOfRecordsToKeep);
+					clear(noOfRecordsToKeep);
 				}
 			}, cleanUpRate, TimeUnit.SECONDS);
 		}

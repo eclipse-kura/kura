@@ -96,6 +96,9 @@ public interface WireMessages {
 	@En("Component context cannot be null")
 	public String componentContextNonNull();
 
+	@En("Unable to retrieve Factory PIDs of one of the provided Wire Components")
+	public String componentPidsNull();
+
 	@En("Configurations cannot be null")
 	public String configurationNonNull();
 

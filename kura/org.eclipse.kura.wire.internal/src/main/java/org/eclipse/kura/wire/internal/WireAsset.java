@@ -26,11 +26,8 @@ import static org.eclipse.kura.asset.internal.BaseChannelDescriptor.VALUE_TYPE;
 import static org.osgi.framework.Constants.SERVICE_PID;
 
 import java.sql.Timestamp;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -52,9 +49,10 @@ import org.eclipse.kura.core.configuration.metatype.Tad;
 import org.eclipse.kura.core.configuration.metatype.Tocd;
 import org.eclipse.kura.core.configuration.metatype.Toption;
 import org.eclipse.kura.core.configuration.metatype.Tscalar;
-import org.eclipse.kura.core.util.ThrowableUtil;
 import org.eclipse.kura.type.TypedValue;
 import org.eclipse.kura.type.TypedValues;
+import org.eclipse.kura.util.base.ThrowableUtil;
+import org.eclipse.kura.util.collection.CollectionUtil;
 import org.eclipse.kura.wire.WireEmitter;
 import org.eclipse.kura.wire.WireEnvelope;
 import org.eclipse.kura.wire.WireField;
@@ -202,7 +200,7 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
 		checkNull(assetRecords, s_message.assetRecordsNonNull());
 		checkCondition(assetRecords.isEmpty(), s_message.assetRecordsNonEmpty());
 
-		final List<WireRecord> wireRecords = new ArrayList<WireRecord>();
+		final List<WireRecord> wireRecords = CollectionUtil.newArrayList();
 		for (final AssetRecord assetRecord : assetRecords) {
 			final WireField channelWireField = this.m_wireHelperService.newWireField(s_message.channelName(),
 					TypedValues.newStringValue(assetRecord.getChannelName()));
@@ -258,7 +256,7 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
 		mainOcd.addAD(assetNameAd);
 		mainOcd.addAD(driverNameAd);
 
-		final Map<String, Object> props = new HashMap<String, Object>();
+		final Map<String, Object> props = CollectionUtil.newHashMap();
 
 		for (final Map.Entry<String, Object> entry : this.m_properties.entrySet()) {
 			props.put(entry.getKey(), entry.getValue());
@@ -316,8 +314,8 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
 		checkNull(wireEnvelope, s_message.wireEnvelopeNonNull());
 		s_logger.debug(s_message.wireEnvelopeReceived() + this.m_wireSupport);
 
-		final List<AssetRecord> assetRecordsToWriteChannels = new ArrayList<AssetRecord>();
-		final List<String> channelsToRead = new ArrayList<String>();
+		final List<AssetRecord> assetRecordsToWriteChannels = CollectionUtil.newArrayList();
+		final List<String> channelsToRead = CollectionUtil.newArrayList();
 		final Map<Long, Channel> channels = this.m_assetConfiguration.getChannels();
 		// determining channels to read
 		for (final Map.Entry<Long, Channel> channelEntry : channels.entrySet()) {
@@ -396,7 +394,7 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
 	 */
 	private Set<String> retrieveChannelPrefixes(final Map<Long, Channel> channels) {
 		checkNull(channels, s_message.propertiesNonNull());
-		final Set<String> channelPrefixes = new HashSet<String>();
+		final Set<String> channelPrefixes = CollectionUtil.newHashSet();
 		for (final Map.Entry<Long, Channel> entry : channels.entrySet()) {
 			final Long key = entry.getKey();
 			final String prefix = key + CHANNEL_PROPERTY_POSTFIX + CHANNEL_PROPERTY_PREFIX + CHANNEL_PROPERTY_POSTFIX;

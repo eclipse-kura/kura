@@ -15,11 +15,8 @@ package org.eclipse.kura.asset.internal;
 import static org.eclipse.kura.Preconditions.checkCondition;
 import static org.eclipse.kura.Preconditions.checkNull;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -40,9 +37,10 @@ import org.eclipse.kura.asset.DriverFlag;
 import org.eclipse.kura.asset.DriverListener;
 import org.eclipse.kura.asset.DriverRecord;
 import org.eclipse.kura.asset.internal.concealed.DriverTrackerCustomizer;
-import org.eclipse.kura.core.util.ThrowableUtil;
 import org.eclipse.kura.localization.AssetMessages;
 import org.eclipse.kura.localization.LocalizationAdapter;
+import org.eclipse.kura.util.base.ThrowableUtil;
+import org.eclipse.kura.util.collection.CollectionUtil;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.util.tracker.ServiceTracker;
@@ -104,7 +102,7 @@ public class BaseAsset implements Asset {
 	 * Instantiates a new Base Asset.
 	 */
 	public BaseAsset() {
-		this.m_assetListeners = new ConcurrentHashMap<AssetListener, DriverListener>();
+		this.m_assetListeners = CollectionUtil.newConcurrentHashMap();
 		this.m_monitor = new ReentrantLock();
 	}
 
@@ -236,8 +234,8 @@ public class BaseAsset implements Asset {
 		checkNull(this.m_driver, s_message.driverNonNull());
 
 		s_logger.debug(s_message.readingChannels());
-		final List<AssetRecord> assetRecords = new ArrayList<AssetRecord>();
-		final List<DriverRecord> driverRecords = new ArrayList<DriverRecord>();
+		final List<AssetRecord> assetRecords = CollectionUtil.newArrayList();
+		final List<DriverRecord> driverRecords = CollectionUtil.newArrayList();
 
 		final Map<Long, Channel> channels = this.m_assetConfiguration.getChannels();
 		for (final String channelName : channelNames) {
@@ -338,7 +336,7 @@ public class BaseAsset implements Asset {
 			public void onDriverEvent(final DriverEvent event) {
 				checkNull(event, s_message.driverEventNonNull());
 				final DriverRecord driverRecord = event.getDriverRecord();
-				final AssetRecord assetRecord = BaseAsset.this.m_assetHelper.newAssetRecord(this.m_channelName);
+				final AssetRecord assetRecord = m_assetHelper.newAssetRecord(this.m_channelName);
 				final DriverFlag driverFlag = driverRecord.getDriverFlag();
 
 				switch (driverFlag) {
@@ -372,8 +370,7 @@ public class BaseAsset implements Asset {
 
 		this.m_monitor.lock();
 		try {
-			this.m_driver.registerDriverListener(new HashMap<String, Object>(channel.getConfiguration()),
-					driverListener);
+			this.m_driver.registerDriverListener(CollectionUtil.newHashMap(channel.getConfiguration()), driverListener);
 		} finally {
 			this.m_monitor.unlock();
 		}
@@ -453,8 +450,8 @@ public class BaseAsset implements Asset {
 		checkCondition(assetRecords.isEmpty(), s_message.assetRecordsNonEmpty());
 
 		s_logger.debug(s_message.writing());
-		final List<DriverRecord> driverRecords = new ArrayList<DriverRecord>();
-		final Map<DriverRecord, AssetRecord> mappedRecords = new HashMap<DriverRecord, AssetRecord>();
+		final List<DriverRecord> driverRecords = CollectionUtil.newArrayList();
+		final Map<DriverRecord, AssetRecord> mappedRecords = CollectionUtil.newHashMap();
 
 		final Map<Long, Channel> channels = this.m_assetConfiguration.getChannels();
 		for (final AssetRecord assetRecord : assetRecords) {

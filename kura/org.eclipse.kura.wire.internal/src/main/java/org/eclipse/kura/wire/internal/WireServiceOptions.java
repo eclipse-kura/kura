@@ -14,15 +14,14 @@ package org.eclipse.kura.wire.internal;
 
 import static org.eclipse.kura.Preconditions.checkNull;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.localization.LocalizationAdapter;
 import org.eclipse.kura.localization.WireMessages;
+import org.eclipse.kura.util.collection.CollectionUtil;
 import org.eclipse.kura.wire.WireConfiguration;
 import org.eclipse.kura.wire.WireHelperService;
 
@@ -66,7 +65,7 @@ final class WireServiceOptions {
 	public String toString() {
 		return "WireServiceOptions [m_wireConfigurations=" + this.m_wireConfigurations + "]";
 	}
-	
+
 	/**
 	 * Creates new instance of {@link WireServiceOptions}
 	 *
@@ -80,8 +79,8 @@ final class WireServiceOptions {
 	 */
 	static WireServiceOptions getInstance(final Map<String, Object> properties, final WireHelperService helperService) {
 		checkNull(properties, s_message.wireServicePropNonNull());
-		final List<WireConfiguration> wireConfs = new CopyOnWriteArrayList<WireConfiguration>();
-		final Set<Long> wireIds = new HashSet<Long>();
+		final List<WireConfiguration> wireConfs = CollectionUtil.newCopyOnWriteArrayList();
+		final Set<Long> wireIds = CollectionUtil.newHashSet();
 		final String separator = ".";
 		for (final Map.Entry<String, Object> entry : properties.entrySet()) {
 			final String key = entry.getKey();

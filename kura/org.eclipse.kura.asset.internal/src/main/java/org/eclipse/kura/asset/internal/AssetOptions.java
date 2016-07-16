@@ -15,21 +15,20 @@ package org.eclipse.kura.asset.internal;
 import static org.eclipse.kura.Preconditions.checkNull;
 
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.asset.AssetConfiguration;
 import org.eclipse.kura.asset.AssetHelperService;
 import org.eclipse.kura.asset.Channel;
 import org.eclipse.kura.asset.ChannelType;
-import org.eclipse.kura.core.util.ThrowableUtil;
 import org.eclipse.kura.localization.AssetMessages;
 import org.eclipse.kura.localization.LocalizationAdapter;
 import org.eclipse.kura.type.DataType;
+import org.eclipse.kura.util.base.ThrowableUtil;
+import org.eclipse.kura.util.collection.CollectionUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -133,7 +132,7 @@ public final class AssetOptions {
 	private String m_assetName;
 
 	/** The list of channels associated with this asset. */
-	private final Map<Long, Channel> m_channels = new ConcurrentHashMap<Long, Channel>();
+	private final Map<Long, Channel> m_channels = CollectionUtil.newConcurrentHashMap();
 
 	/** Name of the driver to be associated with. */
 	private String m_driverId;
@@ -245,7 +244,7 @@ public final class AssetOptions {
 		String channelName = null;
 		ChannelType channelType = null;
 		DataType dataType = null;
-		final Map<String, Object> channelConfig = new ConcurrentHashMap<String, Object>();
+		final Map<String, Object> channelConfig = CollectionUtil.newConcurrentHashMap();
 
 		// All key names present is the properties
 		final String channelValueTypeKey = "value.type";
@@ -334,7 +333,7 @@ public final class AssetOptions {
 	 */
 	private Set<Long> retrieveChannelIds(final Map<String, Object> properties) {
 		checkNull(properties, s_message.propertiesNonNull());
-		final Set<Long> channelIds = new HashSet<Long>();
+		final Set<Long> channelIds = CollectionUtil.newHashSet();
 		for (final Map.Entry<String, Object> entry : properties.entrySet()) {
 			final String key = entry.getKey();
 			final List<String> strings = Arrays.asList(key.split(CHANNEL_PROPERTY_POSTFIX));

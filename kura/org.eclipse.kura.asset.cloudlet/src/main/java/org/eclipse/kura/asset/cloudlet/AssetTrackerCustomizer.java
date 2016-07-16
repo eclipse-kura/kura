@@ -15,7 +15,6 @@ package org.eclipse.kura.asset.cloudlet;
 import static org.eclipse.kura.Preconditions.checkNull;
 
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.asset.Asset;
@@ -23,6 +22,7 @@ import org.eclipse.kura.asset.AssetConfiguration;
 import org.eclipse.kura.asset.internal.BaseAsset;
 import org.eclipse.kura.localization.AssetCloudletMessages;
 import org.eclipse.kura.localization.LocalizationAdapter;
+import org.eclipse.kura.util.collection.CollectionUtil;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
@@ -60,7 +60,7 @@ final class AssetTrackerCustomizer implements ServiceTrackerCustomizer<Asset, As
 	 */
 	AssetTrackerCustomizer(final BundleContext context) throws InvalidSyntaxException {
 		checkNull(context, s_message.bundleContextNonNull());
-		this.m_assets = new ConcurrentHashMap<String, Asset>();
+		this.m_assets = CollectionUtil.newConcurrentHashMap();
 		this.m_context = context;
 	}
 
@@ -100,7 +100,7 @@ final class AssetTrackerCustomizer implements ServiceTrackerCustomizer<Asset, As
 	 * @return the map of assets
 	 */
 	Map<String, Asset> getRegisteredAssets() {
-		return new ConcurrentHashMap<String, Asset>(this.m_assets);
+		return CollectionUtil.newConcurrentHashMap(this.m_assets);
 	}
 
 	/** {@inheritDoc} */

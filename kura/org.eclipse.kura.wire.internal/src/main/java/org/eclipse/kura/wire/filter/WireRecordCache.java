@@ -15,8 +15,8 @@ package org.eclipse.kura.wire.filter;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
+import org.eclipse.kura.util.collection.CollectionUtil;
 import org.eclipse.kura.wire.WireRecord;
 
 /**
@@ -26,7 +26,7 @@ import org.eclipse.kura.wire.WireRecord;
 public final class WireRecordCache {
 
 	/** Map that is the cache. */
-	private static final Map<Long, List<WireRecord>> m_map = new ConcurrentHashMap<Long, List<WireRecord>>();
+	private static final Map<Long, List<WireRecord>> m_map = CollectionUtil.newConcurrentHashMap();
 
 	/** Last refreshed time. */
 	private Calendar m_lastRefreshedTime = null;
@@ -69,7 +69,7 @@ public final class WireRecordCache {
 	 * Returns the object in the map based on input key.
 	 *
 	 * @param key
-	 *            - key to put in cache map
+	 *            - key to get from cache map
 	 * @return object for the particular key
 	 */
 	public List<WireRecord> getValue(final Long key) {

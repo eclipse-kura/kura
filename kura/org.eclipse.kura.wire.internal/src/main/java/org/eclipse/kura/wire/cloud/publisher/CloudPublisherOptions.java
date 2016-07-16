@@ -16,7 +16,7 @@ import java.util.Map;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraRuntimeException;
-import org.eclipse.kura.core.util.ThrowableUtil;
+import org.eclipse.kura.util.base.ThrowableUtil;
 
 /**
  * The Class CloudPublisherOptions is responsible to provide all the required

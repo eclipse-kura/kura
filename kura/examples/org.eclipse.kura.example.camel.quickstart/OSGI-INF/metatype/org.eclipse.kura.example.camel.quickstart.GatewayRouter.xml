@@ -6,7 +6,7 @@
         <Icon resource="OSGI-INF/logo.png" size="32" />
 
         <AD id="camel.route.xml" name="camel.route.xml"
-            description="Camel XML route definition &#x200b;&#x200b;&#x200b;&#x200b;&#x200b;&#x200b;&#x200b;&#x200b;&#x200b;&#x200b;"
+            description="Camel XML route definition|TextArea"
             type="String" max="10000" cardinality="0" required="false" default='&lt;routes xmlns=&quot;http://camel.apache.org/schema/spring&quot;&gt;
 	&lt;route id=&quot;cloudConsumer&quot;&gt;
         &lt;from uri=&quot;kura-cloud:myapp/xmltopic&quot;/&gt;

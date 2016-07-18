@@ -8,6 +8,7 @@
  *
  * Contributors:
  *     Eurotech
+ *     Jens Reimann <jreimann@redhat.com> Fixes and cleanups
  *******************************************************************************/
 package org.eclipse.kura.web.server;
 
@@ -263,7 +264,7 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
 
 				ComponentConfiguration currentCC= cs.getComponentConfiguration(gwtCompConfig.getComponentId());
 				Map<String,Object> currentConfigProp= currentCC.getConfigurationProperties();
-				Object currentObjValue = currentConfigProp.get(gwtConfigParam.getName());
+				Object currentObjValue = currentConfigProp.get(gwtConfigParam.getId());
 
 				int cardinality = gwtConfigParam.getCardinality();	        	
 				if (cardinality == 0 || cardinality == 1 || cardinality == -1) {	        	
@@ -271,7 +272,7 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
 					String strValue = gwtConfigParam.getValue();
 
 					if((currentObjValue instanceof Password) && PLACEHOLDER.equals(strValue)){
-						objValue = currentConfigProp.get(gwtConfigParam.getName());
+						objValue = currentConfigProp.get(gwtConfigParam.getId());
 					} else {
 						objValue = getObjectValue(gwtConfigParam, strValue);
 					}
@@ -291,7 +292,7 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
 
 					objValue = getObjectValue(gwtConfigParam, strValues);
 				}
-				properties.put(gwtConfigParam.getName(), objValue);
+				properties.put(gwtConfigParam.getId(), objValue);
 			}
 
 			// Force kura.service.pid into properties, if originally present

@@ -53,10 +53,12 @@
 		<module>org.eclipse.kura.linux.usb</module>
 		<module>org.eclipse.kura.linux.watchdog</module>
 		<module>org.eclipse.kura.localization</module>
+		<module>org.eclipse.kura.localization.resources</module>
 		<module>org.eclipse.kura.net.admin</module>
 		<module>org.eclipse.kura.protocol.modbus</module>
 		<module>org.eclipse.kura.protocol.modbus.test</module>
 		<module>org.eclipse.kura.stress</module>
+		<module>org.eclipse.kura.util</module>
 		<module>org.eclipse.kura.wire.internal</module> 
 		<module>emulator</module>
 		<!--<module>org.eclipse.kura.emulator</module>-->
@@ -202,7 +204,7 @@
 			<plugin>
 		        <groupId>org.jacoco</groupId>
 		        <artifactId>jacoco-maven-plugin</artifactId>
-		        <version>0.6.4.201312101107</version>
+		        <version>0.7.7.201606060606</version>
 		        <executions>
 		          <execution>
 				  	<phase>process-test-classes</phase>

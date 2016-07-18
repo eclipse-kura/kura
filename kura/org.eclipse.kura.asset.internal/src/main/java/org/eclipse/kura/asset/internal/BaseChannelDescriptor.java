@@ -19,8 +19,8 @@ import org.eclipse.kura.asset.ChannelDescriptor;
 import org.eclipse.kura.core.configuration.metatype.Tad;
 import org.eclipse.kura.core.configuration.metatype.Toption;
 import org.eclipse.kura.core.configuration.metatype.Tscalar;
-import org.eclipse.kura.localization.AssetMessages;
 import org.eclipse.kura.localization.LocalizationAdapter;
+import org.eclipse.kura.localization.resources.AssetMessages;
 import org.eclipse.kura.util.collection.CollectionUtil;
 
 /**

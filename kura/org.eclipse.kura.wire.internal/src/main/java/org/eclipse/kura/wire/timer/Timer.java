@@ -21,7 +21,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.localization.LocalizationAdapter;
-import org.eclipse.kura.localization.WireMessages;
+import org.eclipse.kura.localization.resources.WireMessages;
 import org.eclipse.kura.type.TypedValues;
 import org.eclipse.kura.wire.WireEmitter;
 import org.eclipse.kura.wire.WireHelperService;

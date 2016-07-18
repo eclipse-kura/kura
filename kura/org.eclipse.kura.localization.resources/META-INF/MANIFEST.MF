@@ -8,3 +8,4 @@ Bundle-License: Eclipse Public License v1.0
 Bundle-Category: Localization
 Fragment-Host: org.eclipse.kura.localization;bundle-version="1.0.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Export-Package: org.eclipse.kura.localization.resources;version="1.0.0"

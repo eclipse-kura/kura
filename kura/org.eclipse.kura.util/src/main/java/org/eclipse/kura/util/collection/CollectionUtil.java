@@ -32,7 +32,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.localization.LocalizationAdapter;
-import org.eclipse.kura.localization.UtilMessages;
+import org.eclipse.kura.localization.resources.UtilMessages;
 
 /**
  * The Class CollectionUtil contains all necessary static factory methods to

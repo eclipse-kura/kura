@@ -33,7 +33,7 @@ import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.db.DbService;
 import org.eclipse.kura.localization.LocalizationAdapter;
-import org.eclipse.kura.localization.WireMessages;
+import org.eclipse.kura.localization.resources.WireMessages;
 import org.eclipse.kura.type.BooleanValue;
 import org.eclipse.kura.type.ByteArrayValue;
 import org.eclipse.kura.type.ByteValue;

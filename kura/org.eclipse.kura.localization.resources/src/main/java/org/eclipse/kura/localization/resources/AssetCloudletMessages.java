@@ -10,7 +10,7 @@
  *   Eurotech
  *   Amit Kumar Mondal (admin@amitinside.com)
  */
-package org.eclipse.kura.localization;
+package org.eclipse.kura.localization.resources;
 
 import com.github.rodionmoiseev.c10n.annotations.En;
 

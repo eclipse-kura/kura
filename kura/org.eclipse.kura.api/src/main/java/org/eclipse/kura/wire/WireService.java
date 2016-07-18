@@ -46,7 +46,7 @@ public interface WireService {
 	 * the wire receiver
 	 *
 	 * @param wireConfiguration
-	 *            the wire configuration to be
+	 *            the wire configuration to be deleted
 	 * @throws KuraRuntimeException
 	 *             if the argument is null
 	 */

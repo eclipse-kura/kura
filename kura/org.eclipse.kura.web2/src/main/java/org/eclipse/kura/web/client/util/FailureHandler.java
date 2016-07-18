@@ -11,6 +11,7 @@
  *******************************************************************************/
 package org.eclipse.kura.web.client.util;
 
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.kura.web.client.messages.Messages;
@@ -51,7 +52,7 @@ public class FailureHandler
 			switch (code) {
 			
 			default:
-				logger.info(name + ": " + caught.getLocalizedMessage());
+				logger.log(Level.INFO, name + ": " + caught.getLocalizedMessage(), caught);
 				popup.show();
 				break;
 			}
@@ -63,9 +64,8 @@ public class FailureHandler
 	        // we can ignore this error and do nothing.
 		}
 		else {
-			logger.info(name + ": " + caught.getLocalizedMessage());
+			logger.log(Level.INFO, name + ": " + caught.getLocalizedMessage(), caught);
 			popup.show();
-			caught.printStackTrace();			
 		}
 	}
 	

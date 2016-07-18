@@ -230,16 +230,17 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 		try {
 			final Wire[] wiresList = this.m_wireAdmin.getWires(null);
 			if (wiresList != null) {
-				for (final Wire w : wiresList) {
-					final String producerPid = w.getProperties().get(WIREADMIN_PRODUCER_PID).toString();
-					final String consumerPid = w.getProperties().get(WIREADMIN_CONSUMER_PID).toString();
+				for (final Wire wire : wiresList) {
+					final String producerPid = wire.getProperties().get(WIREADMIN_PRODUCER_PID).toString();
+					final String consumerPid = wire.getProperties().get(WIREADMIN_CONSUMER_PID).toString();
 					final String emitterFactoryPid = this.m_wireHelperService
 							.getFactoryPid(wireConfiguration.getEmitterPid());
 					final String receiverFactoryPid = this.m_wireHelperService
 							.getFactoryPid(wireConfiguration.getReceiverPid());
 					if ((emitterFactoryPid != null) && (receiverFactoryPid != null)
 							&& producerPid.equals(emitterFactoryPid) && consumerPid.equals(receiverFactoryPid)) {
-						this.m_wireAdmin.deleteWire(w);
+						this.m_wireAdmin.deleteWire(wire);
+						wireConfiguration.setWire(null);
 						this.m_wireConfigs.remove(wireConfiguration);
 					}
 				}

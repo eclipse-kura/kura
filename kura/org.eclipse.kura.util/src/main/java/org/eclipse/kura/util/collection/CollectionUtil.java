@@ -55,6 +55,8 @@ public final class CollectionUtil {
 	 *            The legacy {@link Dictionary} object to transform
 	 * @throws KuraRuntimeException
 	 *             if argument is null
+	 * @return the {@link Map} instance wrapping all the key-value association
+	 *         from the {@link Dictionary}
 	 */
 	public static <K, V> Map<K, V> dictionaryToMap(final Dictionary<K, V> dictionary) {
 		checkNull(dictionary, s_message.dictionaryNonNull());

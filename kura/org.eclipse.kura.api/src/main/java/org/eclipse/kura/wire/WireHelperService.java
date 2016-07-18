@@ -31,7 +31,7 @@ public interface WireHelperService {
 	 * PID
 	 *
 	 * @param wireComponentPid
-	 *            the wire component pid (kura.service.pid)
+	 *            the wire component PID (kura.service.pid)
 	 * @return the Service PID of the provided wire component or {@code null} if
 	 *         the provided Wire Component PID is not associated with any
 	 *         available Wire Component in the OSGi service registry

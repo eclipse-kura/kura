@@ -176,9 +176,15 @@ public abstract class CamelRouter extends KuraRouter implements ConfigurableComp
 	protected void registerLanguage(String languageName, Language language) {
 		try {
 			Field field = DefaultCamelContext.class.getDeclaredField("languages");
+			boolean accessible = field.isAccessible();
 			field.setAccessible(true);
-			Map<String, Language> languages = (Map<String, Language>) field.get(camelContext);
-			languages.put(languageName, language);
+			try {
+				Map<String, Language> languages = (Map<String, Language>) field.get(camelContext);
+				languages.put(languageName, language);
+			}
+			finally {
+				field.setAccessible(accessible);
+			}
 		} catch (NoSuchFieldException e) {
 			throw new RuntimeException(e);
 		} catch (IllegalAccessException e) {

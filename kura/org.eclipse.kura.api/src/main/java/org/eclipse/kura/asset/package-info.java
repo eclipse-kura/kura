@@ -12,6 +12,6 @@
  *******************************************************************************/
 /**
  * Provides all necessary APIs and all utility classes comprising necessary
- * static factory methods for Kura Asset Management
+ * static factory methods for Kura Asset Component Model
  */
 package org.eclipse.kura.asset;

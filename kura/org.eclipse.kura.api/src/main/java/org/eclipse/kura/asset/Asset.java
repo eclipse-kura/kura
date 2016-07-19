@@ -18,7 +18,7 @@ import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraRuntimeException;
 
 /**
- * This interface provides higher level abstraction to operate or perform
+ * This interface Asset provides higher level abstraction to operate or perform
  * actions on the industrial device. This actually propagates the necessary
  * operations on the associated device driver. The asset exposes the generic
  * operations to perform read, write and monitor operations. The asset only

@@ -16,9 +16,10 @@ import java.util.Map;
 
 import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.type.DataType;
+import org.osgi.service.component.ComponentContext;
 
 /**
- * The interface AssetHelperService is an utility service to provide useful
+ * The interface AssetHelperService is an utility service API to provide useful
  * methods for asset and drivers
  */
 public interface AssetHelperService {
@@ -46,7 +47,9 @@ public interface AssetHelperService {
 	 *
 	 * @param assetRecord
 	 *            the associated asset record
-	 * @return the asset event
+	 * @return the new asset event
+	 * @throws KuraRuntimeException
+	 *             if the argument is null
 	 */
 	public AssetEvent newAssetEvent(final AssetRecord assetRecord);
 
@@ -55,9 +58,24 @@ public interface AssetHelperService {
 	 *
 	 * @param channelName
 	 *            the channel name
-	 * @return the asset record
+	 * @return the new asset record
+	 * @throws KuraRuntimeException
+	 *             if the argument is null
 	 */
 	public AssetRecord newAssetRecord(final String channelName);
+
+	/**
+	 * Prepares the new basic asset instance
+	 *
+	 * @param context
+	 *            Component Context instance
+	 * @param helperService
+	 *            Asset Helper service instance
+	 * @return the newly created BaseAsset instance
+	 * @throws KuraRuntimeException
+	 *             if any of the arguments is null
+	 */
+	public BaseAsset newBaseAsset(ComponentContext context, AssetHelperService helperService);
 
 	/**
 	 * Creates a new channel with the provided values
@@ -72,7 +90,9 @@ public interface AssetHelperService {
 	 *            the value type of the channel
 	 * @param configuration
 	 *            the configuration to be read
-	 * @return the channel
+	 * @return the newly created channel
+	 * @throws KuraRuntimeException
+	 *             if any of the arguments is null
 	 */
 	public Channel newChannel(final long id, final String name, final ChannelType type, final DataType valueType,
 			final Map<String, Object> configuration);
@@ -82,7 +102,9 @@ public interface AssetHelperService {
 	 *
 	 * @param driverRecord
 	 *            the associated driver record
-	 * @return the driver event
+	 * @return the newly created driver event
+	 * @throws KuraRuntimeException
+	 *             if the argument is null
 	 */
 	public DriverEvent newDriverEvent(final DriverRecord driverRecord);
 
@@ -91,7 +113,9 @@ public interface AssetHelperService {
 	 *
 	 * @param channelName
 	 *            the channel name
-	 * @return the driver record
+	 * @return the newly created driver record
+	 * @throws KuraRuntimeException
+	 *             if the argument is null
 	 */
 	public DriverRecord newDriverRecord(final String channelName);
 

@@ -25,6 +25,8 @@
 	<modules>
 		<module>target-definition</module>
 		<module>org.eclipse.kura.api</module>
+		<module>org.eclipse.kura.asset.cloudlet</module>
+		<module>org.eclipse.kura.asset.provider</module>
 		<module>org.eclipse.kura.test</module>
 		<module>org.eclipse.kura.camel</module>
 		<module>org.eclipse.kura.core</module>
@@ -41,8 +43,6 @@
 		<module>org.eclipse.kura.deployment.customizer</module>
 		<module>org.eclipse.kura.deployment.customizer.upgrade</module>
 		<module>org.eclipse.kura.deployment.update</module>
-		<module>org.eclipse.kura.asset.cloudlet</module>
-		<module>org.eclipse.kura.asset.internal</module>
 		<module>org.eclipse.kura.linux.bluetooth</module>
 		<module>org.eclipse.kura.linux.clock</module>
 		<module>org.eclipse.kura.linux.command</module>
@@ -59,7 +59,8 @@
 		<module>org.eclipse.kura.protocol.modbus.test</module>
 		<module>org.eclipse.kura.stress</module>
 		<module>org.eclipse.kura.util</module>
-		<module>org.eclipse.kura.wire.internal</module> 
+		<module>org.eclipse.kura.wire.provider</module>
+		<module>org.eclipse.kura.wire.component.provider</module>
 		<module>emulator</module>
 		<!--<module>org.eclipse.kura.emulator</module>-->
 		<!--<module>org.eclipse.kura.emulator.gpio</module>-->

@@ -12,7 +12,11 @@
  */
 package org.eclipse.kura.localization;
 
+import static org.eclipse.kura.Preconditions.checkNull;
+
 import java.util.Locale;
+
+import org.eclipse.kura.KuraRuntimeException;
 
 import com.github.rodionmoiseev.c10n.C10N;
 import com.github.rodionmoiseev.c10n.annotations.DefaultC10NAnnotations;
@@ -45,7 +49,7 @@ public final class LocalizationAdapter {
 	static {
 		C10N.configure(new DefaultC10NAnnotations());
 	}
-	
+
 	/** Constructor */
 	private LocalizationAdapter() {
 		// Static Factory Methods container. No need to instantiate.
@@ -58,9 +62,12 @@ public final class LocalizationAdapter {
 	 *            the generic type
 	 * @param clazz
 	 *            the message resource
+	 * @throws KuraRuntimeException
+	 *             if the argument is null
 	 * @return the instance of the C10N resource
 	 */
 	public static <T> T adapt(final Class<T> clazz) {
+		checkNull(clazz, "Class instance of localization resource cannot be null");
 		return C10N.get(clazz, getSystemLocale());
 	}
 

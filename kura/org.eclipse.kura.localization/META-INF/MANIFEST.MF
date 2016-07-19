@@ -8,7 +8,9 @@ Bundle-License: Eclipse Public License v1.0
 Bundle-Category: Localization
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Export-Package: org.eclipse.kura.localization;version="1.0.0"
+Import-Package: org.eclipse.kura;version="[1.1,2.0)"
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: lib/c10n-core-1.2.jar,
  .
 Eclipse-ExtensibleAPI: true
+

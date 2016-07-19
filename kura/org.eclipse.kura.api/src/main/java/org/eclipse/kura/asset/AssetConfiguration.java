@@ -21,7 +21,62 @@ import org.eclipse.kura.annotation.NotThreadSafe;
 
 /**
  * The Class AssetConfiguration is responsible for storing the configuration for
- * an asset.
+ * an industrial device (also known as Asset in the context of Eclipse Kura).
+ *
+ * The properties as provided to an Asset must conform to the following
+ * specifications. The properties must have the following.
+ *
+ * <ul>
+ * <li>the value associated with <b><i>driver.id</i></b> key in the map denotes
+ * the driver instance name to be consumed by this asset</li>
+ * <li>A value associated with key <b><i>asset.name</i></b> must be present to
+ * denote the asset name</li>
+ * <li>A value associated with <b><i>asset.desc</i></b> key denotes the asset
+ * description</li>
+ * <li>x.CH.[property]</li> where x is any number denoting the channel's unique
+ * ID and the {@code [property]} denotes the protocol specific properties. (Note
+ * that the format includes atleast two ".") denotes map object containing a
+ * channel configuration</li>
+ *
+ * For example, 1.CH.name, 1.CH.value.type etc.
+ *
+ * The representation in the provided properties as prepended by a number
+ * signifies a single channel and it should conform to the following
+ * specification.
+ *
+ * The properties should contain the following keys
+ * <ul>
+ * <li>name</li>
+ * <li>type</li>
+ * <li>value.type</li>
+ * <li>[more configuration]</li> as mentioned by the driver in the format which
+ * begins with <b><i>DRIVER.</i></b>
+ * </ul>
+ *
+ * For example, [more configuration] would be 1.CH.DRIVER.modbus.register,
+ * 1.CH.DRIVER.modbus.unit.id etc.
+ *
+ * The key <b><i>name</i></b> must be String. The key <b><i>value.type</i></b>
+ * must be in one of the following (case-insensitive)
+ *
+ * <ul>
+ * <li>INTEGER</li>
+ * <li>BOOLEAN</li>
+ * <li>BYTE</li>
+ * <li>DOUBLE</li>
+ * <li>LONG</li>
+ * <li>SHORT</li>
+ * <li>STRING</li>
+ * <li>BYTE_ARRAY</li>
+ * </ul>
+ *
+ * The channel {@code type} should be one of the following (case-insensitive)
+ *
+ * <ul>
+ * <li>READ</li>
+ * <li>WRITE</li>
+ * <li>READ_WRITE</li>
+ * </ul>
  *
  * @see Channel
  */

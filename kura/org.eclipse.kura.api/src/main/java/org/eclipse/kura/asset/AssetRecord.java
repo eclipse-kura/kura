@@ -20,7 +20,7 @@ import org.eclipse.kura.type.TypedValue;
 
 /**
  * The Class AssetRecord represents a record to perform read/write/monitor
- * operation on the provided channel using the associated device driver.
+ * operation on the provided channel using the associated driver.
  */
 @NotThreadSafe
 public final class AssetRecord {

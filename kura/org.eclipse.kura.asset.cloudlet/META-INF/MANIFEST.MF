@@ -9,7 +9,6 @@ Bundle-Category: Asset-Driver Management
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: org.eclipse.kura;version="[1.1,2.0)",
  org.eclipse.kura.asset;version="[1.0,2.0)",
- org.eclipse.kura.asset.internal;version="[1.0,2.0)",
  org.eclipse.kura.cloud;version="[1.0,2.0)",
  org.eclipse.kura.localization;version="[1.0,2.0)",
  org.eclipse.kura.localization.resources;version="[1.0,2.0)",

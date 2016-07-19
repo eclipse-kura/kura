@@ -28,15 +28,6 @@ public interface AssetMessages {
 	@En("Activating Base Asset...Done")
 	public String activatingDone();
 
-	@En("Activating Wire Asset...")
-	public String activatingWireAsset();
-
-	@En("Activating Wire Asset...Done")
-	public String activatingWireAssetDone();
-
-	@En("Attribute Definition Prefix cannot be null")
-	public String adPrefixNonNull();
-
 	@En("asset_flag")
 	public String assetFlag();
 
@@ -52,17 +43,8 @@ public interface AssetMessages {
 	@En("Asset Records cannot be null")
 	public String assetRecordsNonNull();
 
-	@En("BOOLEAN")
-	public String booleanString();
-
 	@En("Bundle context cannot be null")
 	public String bundleContextNonNull();
-
-	@En("BYTE_ARRAY")
-	public String byteArray();
-
-	@En("BYTE")
-	public String byteStr();
 
 	@En("channel_name")
 	public String channelName();
@@ -94,23 +76,17 @@ public interface AssetMessages {
 	@En("Asset Configuration")
 	public String configuration();
 
+	@En("Component context cannot be null")
+	public String contextNonNull();
+
 	@En("Deactivating Base Asset...")
 	public String deactivating();
 
 	@En("Deactivating Base Asset...Done")
 	public String deactivatingDone();
 
-	@En("Deactivating Wire Asset...")
-	public String deactivatingWireAsset();
-
-	@En("Deactivating Wire Asset...Done")
-	public String deactivatingWireAssetDone();
-
 	@En("Asset Description")
 	public String description();
-
-	@En("DOUBLE")
-	public String doubleStr();
 
 	@En("Attaching driver instance...")
 	public String driverAttach();
@@ -142,12 +118,6 @@ public interface AssetMessages {
 	@En("Error in disconnecting driver...")
 	public String errorDriverDisconnection();
 
-	@En("Error while performing read from the Wire Asset...")
-	public String errorPerformingRead();
-
-	@En("Error while performing write from the Wire Asset...")
-	public String errorPerformingWrite();
-
 	@En("Error while retrieving channels from the provided configurable properties...")
 	public String errorRetrievingChannels();
 
@@ -157,29 +127,11 @@ public interface AssetMessages {
 	@En("Provided indices cannot be null")
 	public String indicesNonNull();
 
-	@En("INTEGER")
-	public String integerStr();
-
 	@En("Asset Listener cannot be null")
 	public String listenerNonNull();
 
-	@En("LONG")
-	public String longStr();
-
 	@En("Asset Name")
 	public String name();
-
-	@En("Configure Wire Asset Instance")
-	public String ocdDescription();
-
-	@En("WireAsset")
-	public String ocdName();
-
-	@En("Old Attribute Definition cannot be null")
-	public String oldAdNonNull();
-
-	@En("Name of the Channel")
-	public String pointName();
 
 	@En("Prefix cannot be null")
 	public String prefixNonNull();
@@ -187,17 +139,11 @@ public interface AssetMessages {
 	@En("Properties cannot be null")
 	public String propertiesNonNull();
 
-	@En("READ")
-	public String read();
-
 	@En("Reading asset channels...")
 	public String readingChannels();
 
 	@En("Reading asset channels...Done")
 	public String readingChannelsDone();
-
-	@En("READ_WRITE")
-	public String readWrite();
 
 	@En("Registering Asset Listener for monitoring...")
 	public String registeringListener();
@@ -217,20 +163,8 @@ public interface AssetMessages {
 	@En("Retrieving configurations from the properties...Done")
 	public String retrievingConfDone();
 
-	@En("SHORT")
-	public String shortStr();
-
-	@En("STRING")
-	public String string();
-
 	@En("timestamp")
 	public String timestamp();
-
-	@En("Type of the channel")
-	public String type();
-
-	@En("Value type of the channel")
-	public String typePoint();
 
 	@En("Unregistering Asset Listener...")
 	public String unregisteringListener();
@@ -244,12 +178,6 @@ public interface AssetMessages {
 	@En("Updating Base Asset Configurations...Done")
 	public String updatingDone();
 
-	@En("Updating Wire Asset...")
-	public String updatingWireAsset();
-
-	@En("Updating Wire Asset...Done")
-	public String updatingWireAssetDone();
-
 	@En("value")
 	public String value();
 
@@ -261,12 +189,6 @@ public interface AssetMessages {
 
 	@En("Wire Enveloped received...")
 	public String wireEnvelopeReceived();
-
-	@En("Wire records cannot be empty")
-	public String wireRecordsNonEmpty();
-
-	@En("WRITE")
-	public String write();
 
 	@En("Writing to channels...")
 	public String writing();

@@ -1,0 +1,32 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Different Wire Components Provider
+Bundle-SymbolicName: org.eclipse.kura.wire.component.provider
+Bundle-Version: 1.0.0.qualifier
+Bundle-Vendor: EUROTECH
+Bundle-License: Eclipse Public License v1.0
+Import-Package: org.eclipse.kura;version="[1.1,2.0)",
+ org.eclipse.kura.asset;version="[1.0,2.0)",
+ org.eclipse.kura.cloud;version="[1.0,2.0)",
+ org.eclipse.kura.configuration;version="[1.0,2.0)",
+ org.eclipse.kura.configuration.metatype;version="[1.0,2.0)",
+ org.eclipse.kura.core.configuration;version="[1.0,2.0)",
+ org.eclipse.kura.core.configuration.metatype;version="[1.0,2.0)",
+ org.eclipse.kura.data;version="[1.0,2.0)",
+ org.eclipse.kura.data.listener;version="[1.0,2.0)",
+ org.eclipse.kura.db;version="[1.0,2.0)",
+ org.eclipse.kura.localization;version="[1.0,2.0)",
+ org.eclipse.kura.localization.resources;version="[1.0,2.0)",
+ org.eclipse.kura.message;version="[1.0,2.0)",
+ org.eclipse.kura.type;version="[1.0,2.0)",
+ org.eclipse.kura.util.base;version="[1.0,2.0)",
+ org.eclipse.kura.util.collection;version="[1.0,2.0)",
+ org.eclipse.kura.wire;version="[1.0,1.1)",
+ org.json,
+ org.osgi.framework;version="[1.7.0,2.0.0)",
+ org.osgi.service.component;version="1.2.0",
+ org.osgi.service.wireadmin;version="1.0.1",
+ org.osgi.util.measurement;version="1.0.1",
+ org.osgi.util.position;version="1.0.1",
+ org.slf4j;version="1.6.4"
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6

@@ -12,6 +12,7 @@
  */
 package org.eclipse.kura.type;
 
+import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.annotation.Nullable;
 
 /**
@@ -19,7 +20,7 @@ import org.eclipse.kura.annotation.Nullable;
  * {@link TypedValue}
  */
 public final class TypedValues {
-	
+
 	/** Constructor */
 	private TypedValues() {
 		// Static Factory Methods container. No need to instantiate.
@@ -42,6 +43,8 @@ public final class TypedValues {
 	 * @param value
 	 *            the primitive byte array value
 	 * @return the byte array value represented as {@link TypedValue}
+	 * @throws KuraRuntimeException
+	 *             if the argument is null
 	 */
 	public static ByteArrayValue newByteArrayValue(final byte[] value) {
 		return new ByteArrayValue(value);

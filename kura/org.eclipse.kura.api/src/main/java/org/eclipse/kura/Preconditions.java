@@ -15,12 +15,13 @@ package org.eclipse.kura;
 import org.eclipse.kura.annotation.Nullable;
 
 /**
- * The Class Preconditions is responsible to provide utility methods to check
- * for conditions or predicates and it throws {@link KuraRuntimeException} with
- * {@link KuraErrorCode#INTERNAL_ERROR} if the provided flag is satisfied
+ * The Class Preconditions is responsible to provide utility static factory
+ * methods to check for conditions or predicates and it throws
+ * {@link KuraRuntimeException} with {@link KuraErrorCode#INTERNAL_ERROR} if the
+ * condition is satisfied
  */
 public final class Preconditions {
-	
+
 	/** Constructor */
 	private Preconditions() {
 		// Static Factory Methods container. No need to instantiate.
@@ -95,7 +96,7 @@ public final class Preconditions {
 	 * @param object
 	 *            the object to verify
 	 * @param instanceClass
-	 *            the instance to check
+	 *            the instance to check for compliance
 	 * @param message
 	 *            the exception message
 	 * @throws KuraRuntimeException
@@ -113,11 +114,11 @@ public final class Preconditions {
 	 * @param object
 	 *            the object to verify
 	 * @param instanceClass
-	 *            the instance to check
+	 *            the instance to check for compliance
 	 * @param message
 	 *            the exception message
 	 * @throws KuraRuntimeException
-	 *             if the check is successful
+	 *             if the condition is successful
 	 * @return the non null instance
 	 */
 	public static <T> T checkNonInstance(final T object, final Class<?> instanceClass, @Nullable final String message) {

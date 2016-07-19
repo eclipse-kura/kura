@@ -45,6 +45,12 @@ public interface WireMessages {
 	@En("Activating Timer...Done")
 	public String activatingTimerDone();
 
+	@En("Activating Wire Asset...")
+	public String activatingWireAsset();
+
+	@En("Activating Wire Asset...Done")
+	public String activatingWireAssetDone();
+
 	@En("Activating Wire Service...")
 	public String activatingWireService();
 
@@ -57,11 +63,38 @@ public interface WireMessages {
 	@En("Adding Wire Components....Done")
 	public String addingWireComponentDone();
 
+	@En("Attribute Definition Prefix cannot be null")
+	public String adPrefixNonNull();
+
 	@En("altitude")
 	public String altitude();
 
+	@En("asset_flag")
+	public String assetFlag();
+
+	@En("Asset Records cannot be empty")
+	public String assetRecordsNonEmpty();
+
+	@En("Asset Records cannot be null")
+	public String assetRecordsNonNull();
+
+	@En("BOOLEAN")
+	public String booleanString();
+
 	@En("Bundle context cannot be null")
 	public String bundleContextNonNull();
+
+	@En("BYTE_ARRAY")
+	public String byteArray();
+
+	@En("BYTE")
+	public String byteStr();
+
+	@En("channel_name")
+	public String channelName();
+
+	@En("Channel cannot be null")
+	public String channelNonNull();
 
 	@En("Choose a Wire Emitter")
 	public String chooseEmitter();
@@ -153,6 +186,12 @@ public interface WireMessages {
 	@En("Dectivating Timer...Done")
 	public String deactivatingTimerDone();
 
+	@En("Deactivating Wire Asset...")
+	public String deactivatingWireAsset();
+
+	@En("Deactivating Wire Asset...Done")
+	public String deactivatingWireAssetDone();
+
 	@En("Deactivating Wire Service Component...")
 	public String deactivatingWireService();
 
@@ -171,6 +210,12 @@ public interface WireMessages {
 	@En("WireService leverages Kura Wiring communication functionalities between Wire Components")
 	public String description();
 
+	@En("DOUBLE")
+	public String doubleStr();
+
+	@En("Driver Name")
+	public String driverName();
+
 	@En("Emitter PID cannot be null")
 	public String emitterPidNonNull();
 
@@ -188,6 +233,12 @@ public interface WireMessages {
 
 	@En("Error while filtering Wire Records...")
 	public String errorFiltering();
+
+	@En("Error while performing read from the Wire Asset...")
+	public String errorPerformingRead();
+
+	@En("Error while performing write from the Wire Asset...")
+	public String errorPerformingWrite();
 
 	@En("Failed to persist wires...")
 	public String errorPersistingWires();
@@ -234,6 +285,9 @@ public interface WireMessages {
 	@En("Insertion failed. Reconciling Table and Columns...")
 	public String insertionFailed();
 
+	@En("INTEGER")
+	public String integerStr();
+
 	@En("Interface class cannot be null")
 	public String interfaceClassNonNull();
 
@@ -242,6 +296,9 @@ public interface WireMessages {
 
 	@En("longitude")
 	public String longitude();
+
+	@En("LONG")
+	public String longStr();
 
 	@En("Minutes cannot be negative")
 	public String minutesNonNegative();
@@ -261,6 +318,15 @@ public interface WireMessages {
 	@En("No new instance")
 	public String noNewInstance();
 
+	@En("Configure Wire Asset Instance")
+	public String ocdDescription();
+
+	@En("WireAsset")
+	public String ocdName();
+
+	@En("Old Attribute Definition cannot be null")
+	public String oldAdNonNull();
+
 	@En("outgoing_wires")
 	public String outgoingWires();
 
@@ -273,6 +339,9 @@ public interface WireMessages {
 	@En("Wire Component PID cannot be null")
 	public String pidNonNull();
 
+	@En("Name of the Channel")
+	public String pointName();
+
 	@En("position")
 	public String position();
 
@@ -281,6 +350,12 @@ public interface WireMessages {
 
 	@En("Properties cannot be null")
 	public String propertiesNonNull();
+
+	@En("READ")
+	public String read();
+
+	@En("READ_WRITE")
+	public String readWrite();
 
 	@En("Receiver PID cannot be null")
 	public String receiverPidNonNull();
@@ -351,6 +426,9 @@ public interface WireMessages {
 	@En("Select a Wire from the list. It will be deleted when submitting the changes.")
 	public String selectWire();
 
+	@En("SHORT")
+	public String shortStr();
+
 	@En("speed")
 	public String speed();
 
@@ -387,6 +465,9 @@ public interface WireMessages {
 	@En("Storing data record from emitter {0} into table {1}...")
 	public String storingRecord(String emitterName, String tableName);
 
+	@En("STRING")
+	public String string();
+
 	@En("Provided string cannot be null")
 	public String stringNonNull();
 
@@ -404,6 +485,12 @@ public interface WireMessages {
 
 	@En("Truncating table DR_{0}...")
 	public String truncatingTable(String tableName);
+
+	@En("Type of the channel")
+	public String type();
+
+	@En("Value type of the channel")
+	public String typePoint();
 
 	@En("Updating Cloud Publisher Wire Component...")
 	public String updatingCloudPublisher();
@@ -429,11 +516,23 @@ public interface WireMessages {
 	@En("Updating Timer...Done")
 	public String updatingTimerDone();
 
+	@En("Updating Wire Asset...")
+	public String updatingWireAsset();
+
+	@En("Updating Wire Asset...Done")
+	public String updatingWireAssetDone();
+
 	@En("Updating Wire Service Component...: ")
 	public String updatingWireService();
 
 	@En("Updating Wire Service Component...Done")
 	public String updatingWireServiceDone();
+
+	@En("value")
+	public String value();
+
+	@En("Value cannot be null")
+	public String valueNonNull();
 
 	@En("wire_component")
 	public String wireComponent();
@@ -468,6 +567,9 @@ public interface WireMessages {
 	@En("Received WireEnvelope from {0}")
 	public String wireRecordReceived(String emitterName);
 
+	@En("Wire records cannot be empty")
+	public String wireRecordsNonEmpty();
+
 	@En("Wire Records cannot be null")
 	public String wireRecordsNonNull();
 
@@ -482,5 +584,8 @@ public interface WireMessages {
 
 	@En("Wire supported component cannot be null")
 	public String wireSupportedComponentNonNull();
+
+	@En("WRITE")
+	public String write();
 
 }

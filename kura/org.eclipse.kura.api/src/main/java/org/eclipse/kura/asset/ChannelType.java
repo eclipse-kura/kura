@@ -24,7 +24,8 @@ public enum ChannelType {
 	READ,
 
 	/**
-	 * The channel will be used for performing reading and writing operation
+	 * The channel will be used for performing both reading and writing
+	 * operations
 	 */
 	READ_WRITE,
 

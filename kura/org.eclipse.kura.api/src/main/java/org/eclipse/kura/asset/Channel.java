@@ -25,6 +25,8 @@ import org.eclipse.kura.type.DataType;
  * The Class Channel represents a communication channel of an asset. The
  * communication channel has all the required configuration to perform specific
  * operation (read/write/monitor).
+ *
+ * @see AssetConfiguration
  */
 @NotThreadSafe
 public final class Channel {
@@ -61,7 +63,7 @@ public final class Channel {
 	 * @param config
 	 *            the configuration
 	 * @throws KuraRuntimeException
-	 *             if any of the arguments is null
+	 *             if any of the arguments is null or channel ID is 0
 	 */
 	public Channel(final long id, final String name, final ChannelType type, final DataType valueType,
 			final Map<String, Object> config) {

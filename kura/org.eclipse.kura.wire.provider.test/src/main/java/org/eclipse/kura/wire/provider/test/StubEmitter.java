@@ -12,15 +12,22 @@
  */
 package org.eclipse.kura.wire.provider.test;
 
+import java.util.concurrent.TimeUnit;
+
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.wire.WireComponent;
 import org.eclipse.kura.wire.WireEmitter;
+import org.osgi.service.component.ComponentContext;
 import org.osgi.service.wireadmin.Wire;
 
 /**
  * The Class StubEmitter represents a stub Wire Emitter Component
  */
 public final class StubEmitter implements WireEmitter, WireComponent, ConfigurableComponent {
+
+	protected synchronized void activate(final ComponentContext context) throws Exception {
+		TimeUnit.SECONDS.sleep(1);
+	}
 
 	/** {@inheritDoc} */
 	@Override

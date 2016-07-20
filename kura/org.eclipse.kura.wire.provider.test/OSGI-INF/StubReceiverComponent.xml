@@ -14,7 +14,8 @@
 <scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" 
                name="org.eclipse.kura.wire.test.receiver"
                enabled="true" 
-               immediate="false" 
+               immediate="false"
+               activate="activate"
                configuration-policy="require"> 
    <implementation class="org.eclipse.kura.wire.provider.test.StubReceiver"/>
    <property name="service.pid" value="org.eclipse.kura.wire.test.receiver"/>

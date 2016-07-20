@@ -17,7 +17,11 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 import static org.osgi.framework.Constants.SERVICE_PID;
 
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -59,6 +63,8 @@ public class WireServiceTest {
 
 	/** The Wire Emitter PID */
 	private static final String emitterPid = "STUB.EMITTER";
+
+	private static ExecutorService executorService = Executors.newSingleThreadExecutor();
 
 	/** A flag to be set if both the stub components are available */
 	private static boolean isComponentsAvailable;
@@ -115,9 +121,9 @@ public class WireServiceTest {
 	 */
 	@TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
 	@Test
-	public void testCreateWireConfiguration() throws Exception {
+	public void testCreateDeleteGetWireConfiguration() throws Exception {
 		WireConfiguration configuration = null;
-		lock.lock();
+		// lock.lock();
 		try {
 			if (isComponentsAvailable) {
 				s_logger.info("The components are available =====>");
@@ -126,24 +132,27 @@ public class WireServiceTest {
 				assertNotNull(configuration.getWire());
 				assertEquals(configuration.getEmitterPid(), emitterPid);
 				assertEquals(configuration.getReceiverPid(), receiverPid);
-				assertEquals(1, s_wireService.getWireConfigurations().size());
+				final List<WireConfiguration> list = s_wireService.getWireConfigurations();
+				s_logger.info("List Before Delete ====>" + list);
+				assertEquals(1, list.size());
 				s_wireService.deleteWireConfiguration(configuration);
-				assertEquals(0, s_wireService.getWireConfigurations().size());
+				s_logger.info("List After Delete ====>" + list);
+				assertEquals(0, list.size());
 			}
 		} finally {
-			lock.unlock();
+			// lock.unlock();
 		}
 	}
 
 	/**
 	 * Tests the availability of injected OSGi services
 	 */
-	@TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
-	@Test
-	public void testServiceExists() {
-		assertNotNull(WireServiceTest.s_wireService);
-		assertNotNull(WireServiceTest.s_configService);
-	}
+	// @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+	// @Test
+	// public void testServiceExists() {
+	// assertNotNull(WireServiceTest.s_wireService);
+	// assertNotNull(WireServiceTest.s_configService);
+	// }
 
 	/**
 	 * Unbinds the configuration service dependency
@@ -226,18 +235,35 @@ public class WireServiceTest {
 		} catch (final InterruptedException e) {
 			fail("OSGi dependencies unfulfilled");
 		}
-		lock.lock();
-		try {
-			createStubComponents();
-			// wait for 10 seconds to become the components available in
-			// registry
-			componentsLatch.await(10, TimeUnit.SECONDS);
-		} finally {
-			if ((getFactoryPid(emitterPid) != null) && (getFactoryPid(receiverPid) != null)) {
-				componentsLatch.countDown();
-				isComponentsAvailable = true;
-				lock.unlock();
+		final Future<?> future = executorService.submit(new Runnable() {
+
+			@Override
+			public void run() {
+				try {
+					createStubComponents();
+					// wait for 10 seconds to become the components available in
+					// registry
+					try {
+						for (;;) {
+							if ((getFactoryPid(emitterPid) != null) && (getFactoryPid(receiverPid) != null)) {
+								isComponentsAvailable = true;
+								break;
+							} else {
+								TimeUnit.MILLISECONDS.sleep(100);
+							}
+						}
+					} catch (final Exception ex) {
+						s_logger.info("Exception ====>");
+					}
+				} catch (final Exception e) {
+					s_logger.info("Error =====>");
+				}
 			}
+		});
+		try {
+			future.get(5, TimeUnit.SECONDS);
+		} catch (final Exception exception) {
+			s_logger.info("Timeout exception===>");
 		}
 	}
 }

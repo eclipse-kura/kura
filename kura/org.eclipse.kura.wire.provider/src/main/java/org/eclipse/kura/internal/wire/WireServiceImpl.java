@@ -16,6 +16,8 @@ import static org.eclipse.kura.Preconditions.checkNull;
 import static org.osgi.service.wireadmin.WireConstants.WIREADMIN_CONSUMER_PID;
 import static org.osgi.service.wireadmin.WireConstants.WIREADMIN_PRODUCER_PID;
 
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -86,7 +88,8 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 
 	/** Constructor */
 	public WireServiceImpl() {
-		this.m_wireConfigs = CollectionUtil.newCopyOnWriteArrayList();
+		final List<WireConfiguration> list = CollectionUtil.newArrayList();
+		this.m_wireConfigs = Collections.synchronizedList(list);
 	}
 
 	/**
@@ -241,9 +244,18 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 							.getFactoryPid(wireConfiguration.getReceiverPid());
 					if ((emitterFactoryPid != null) && (receiverFactoryPid != null)
 							&& producerPid.equals(emitterFactoryPid) && consumerPid.equals(receiverFactoryPid)) {
-						this.m_wireAdmin.deleteWire(wire);
-						wireConfiguration.setWire(null);
-						this.m_wireConfigs.remove(wireConfiguration);
+						synchronized (this.m_wireConfigs) {
+							for (final Iterator<WireConfiguration> iter = this.m_wireConfigs.listIterator(); iter
+									.hasNext();) {
+								final WireConfiguration configuration = iter.next();
+								if (configuration.equals(wireConfiguration)) {
+									iter.remove();
+									this.m_wireAdmin.deleteWire(wire);
+									break;
+								}
+							}
+						}
+						// this.m_wireConfigs.remove(wireConfiguration);
 					}
 				}
 			}

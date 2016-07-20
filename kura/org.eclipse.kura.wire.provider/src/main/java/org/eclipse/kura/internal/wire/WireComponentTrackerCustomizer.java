@@ -20,7 +20,6 @@ import java.util.List;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraRuntimeException;
-import org.eclipse.kura.internal.wire.WireServiceImpl;
 import org.eclipse.kura.localization.LocalizationAdapter;
 import org.eclipse.kura.localization.resources.WireMessages;
 import org.eclipse.kura.util.base.ThrowableUtil;
@@ -189,6 +188,8 @@ final class WireComponentTrackerCustomizer implements ServiceTrackerCustomizer<W
 	 *
 	 * @param pid
 	 *            the wire component PID
+	 * @throws KuraRuntimeException
+	 *             if the argument is null
 	 */
 	private void removeWireComponent(final String pid) {
 		checkNull(pid, s_message.pidNonNull());

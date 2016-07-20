@@ -12,16 +12,23 @@
  */
 package org.eclipse.kura.wire.provider.test;
 
+import java.util.concurrent.TimeUnit;
+
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.wire.WireComponent;
 import org.eclipse.kura.wire.WireEnvelope;
 import org.eclipse.kura.wire.WireReceiver;
+import org.osgi.service.component.ComponentContext;
 import org.osgi.service.wireadmin.Wire;
 
 /**
  * The Class StubReceiver represents a stub Wire Receiver Component
  */
 public final class StubReceiver implements ConfigurableComponent, WireComponent, WireReceiver {
+
+	protected synchronized void activate(final ComponentContext context) throws Exception {
+		TimeUnit.SECONDS.sleep(1);
+	}
 
 	/** {@inheritDoc} */
 	@Override

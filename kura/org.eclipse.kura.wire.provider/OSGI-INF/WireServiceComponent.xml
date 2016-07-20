@@ -24,8 +24,7 @@
       <provide interface="org.eclipse.kura.wire.WireService"/>
    </service>
    <property name="service.pid" value="org.eclipse.kura.wire.WireService"/>
-   <property name="osgi.command.scope" type="String" value="kura.wire"/>
-   <property name="osgi.command.function" type="String" value="{'deleteWireConfiguration'}"/>
+   <property name="kura.service.pid" value="org.eclipse.kura.wire.WireService"/>
    <reference bind="bindWireHelperService" 
    	          cardinality="1..1" 
    	          interface="org.eclipse.kura.wire.WireHelperService" 

@@ -103,11 +103,14 @@ public final class WireHelperServiceImpl implements WireHelperService {
 	 *            valid OSGi filter (can be <code>null</code>)
 	 * @return non-<code>null</code> array of references to matching services
 	 * @throws KuraRuntimeException
-	 *             if the filter syntax is wrong, even though filter can be null
+	 *             if the filter syntax is wrong (even though filter is
+	 *             nullable) or bundle syntax or class instance name is null
 	 */
 	private ServiceReference<?>[] getServiceReferences(final BundleContext bundleContext, final String clazz,
 			final String filter) {
 		checkNull(bundleContext, s_message.bundleContextNonNull());
+		checkNull(bundleContext, s_message.clazzNonNull());
+
 		try {
 			final ServiceReference<?>[] refs = bundleContext.getServiceReferences(clazz, filter);
 			return refs == null ? new ServiceReference[0] : refs;

@@ -65,6 +65,7 @@
 		<!--<module>org.eclipse.kura.emulator</module>-->
 		<!--<module>org.eclipse.kura.emulator.gpio</module>-->
 		<module>org.eclipse.kura.core.test</module>
+		<module>org.eclipse.kura.wire.provider.test</module>
 		<module>examples</module>
 	</modules>
 

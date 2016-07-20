@@ -102,6 +102,9 @@ public interface WireMessages {
 	@En("Choose a Wire Receiver")
 	public String chooseReceiver();
 
+	@En("Class intance name cannot be null")
+	public String clazzNonNull();
+
 	@En("Closing connection instance...")
 	public String closingConnection();
 
@@ -129,7 +132,7 @@ public interface WireMessages {
 	@En("Component context cannot be null")
 	public String componentContextNonNull();
 
-	@En("Unable to retrieve Factory PIDs of one of the provided Wire Components")
+	@En("Unable to retrieve Factory PIDs of one of the provided Wire Components because of null")
 	public String componentPidsNull();
 
 	@En("Configurations cannot be null")

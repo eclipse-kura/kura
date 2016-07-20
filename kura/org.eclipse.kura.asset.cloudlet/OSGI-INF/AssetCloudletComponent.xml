@@ -15,7 +15,7 @@
 	activate="activate" 
 	deactivate="deactivate" 
 	name="org.eclipse.kura.asset.cloudlet">
-   <implementation class="org.eclipse.kura.asset.cloudlet.AssetCloudlet"/>
+   <implementation class="org.eclipse.kura.internal.asset.cloudlet.AssetCloudlet"/>
    <reference bind="bindCloudService" 
    		cardinality="1..1" 
    		interface="org.eclipse.kura.cloud.CloudService" 

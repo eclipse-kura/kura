@@ -86,7 +86,7 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 
 	/** Constructor */
 	public WireServiceImpl() {
-		this.m_wireConfigs = CollectionUtil.newArrayList();
+		this.m_wireConfigs = CollectionUtil.newCopyOnWriteArrayList();
 	}
 
 	/**
@@ -158,18 +158,22 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 		checkNull(receiverPid, s_message.receiverPidNonNull());
 
 		s_logger.info(s_message.creatingWire(emitterPid, receiverPid));
+		WireConfiguration conf = null;
 		if (!emitterPid.equals(receiverPid)) {
 			final String emitterFactoryPid = this.m_wireHelperService.getFactoryPid(emitterPid);
 			final String receiverFactoryPid = this.m_wireHelperService.getFactoryPid(receiverPid);
 			if ((emitterFactoryPid == null) || (receiverFactoryPid == null)) {
 				throw new KuraException(KuraErrorCode.INTERNAL_ERROR, s_message.componentPidsNull());
 			}
-			final WireConfiguration conf = this.m_wireHelperService.newWireConfiguration(emitterPid, receiverPid, null);
-			this.m_wireConfigs.add(conf);
-			this.m_wireAdmin.createWire(emitterFactoryPid, receiverFactoryPid, null);
+			conf = this.m_wireHelperService.newWireConfiguration(emitterPid, receiverPid, null);
+			final Wire wire = this.m_wireAdmin.createWire(emitterFactoryPid, receiverFactoryPid, null);
+			if (wire != null) {
+				conf.setWire(wire);
+				this.m_wireConfigs.add(conf);
+			}
 			s_logger.info(s_message.creatingWireDone(emitterPid, receiverPid));
 		}
-		return this.m_wireHelperService.newWireConfiguration(emitterPid, receiverPid, null);
+		return conf;
 	}
 
 	/**
@@ -213,8 +217,6 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 	 */
 	protected synchronized void deactivate(final ComponentContext componentContext) {
 		s_logger.debug(s_message.deactivatingWireService());
-		this.m_configService = null;
-		this.m_wireAdmin = null;
 		this.m_serviceTracker.close();
 		for (final WireConfiguration wireConfiguration : this.m_wireConfigs) {
 			this.deleteWireConfiguration(wireConfiguration);

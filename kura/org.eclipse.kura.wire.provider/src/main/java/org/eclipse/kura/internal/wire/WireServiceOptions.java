@@ -85,8 +85,10 @@ final class WireServiceOptions {
 		for (final Map.Entry<String, Object> entry : properties.entrySet()) {
 			final String key = entry.getKey();
 			if (key.contains(separator)) {
-				final Long wireConfId = Long.parseLong(key.substring(0, key.indexOf(separator)));
-				wireIds.add(wireConfId);
+				if (Character.isDigit(key.charAt(0))) {
+					final Long wireConfId = Long.parseLong(key.substring(0, key.indexOf(separator)));
+					wireIds.add(wireConfId);
+				}
 			}
 		}
 		for (int i = 0; i < wireIds.size(); i++) {

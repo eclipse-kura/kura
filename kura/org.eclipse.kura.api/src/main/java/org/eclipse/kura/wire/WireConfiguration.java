@@ -38,6 +38,7 @@ public final class WireConfiguration {
 	private final String receiverPid;
 
 	/** The actual Wire Admin Wire. */
+	@Nullable
 	private Wire wire;
 
 	/**

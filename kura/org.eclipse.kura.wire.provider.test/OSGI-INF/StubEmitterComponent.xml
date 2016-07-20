@@ -15,10 +15,10 @@
                name="org.eclipse.kura.wire.test.emitter"
                enabled="true"
                immediate="false"
-               activate="activate"
                configuration-policy="require"> 
    <implementation class="org.eclipse.kura.wire.provider.test.StubEmitter"/>
    <property name="service.pid" value="org.eclipse.kura.wire.test.emitter"/>
+   <property name="kura.service.pid" value="org.eclipse.kura.wire.test.emitter"/>
    <service>
       <provide interface="org.eclipse.kura.configuration.ConfigurableComponent"/>
       <provide interface="org.eclipse.kura.wire.WireComponent"/>

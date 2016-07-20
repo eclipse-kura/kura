@@ -27,33 +27,6 @@ import org.osgi.util.position.Position;
 public interface WireHelperService {
 
 	/**
-	 * Retrieves the factory PID (service.pid) of the provided wire component
-	 * PID
-	 *
-	 * @param wireComponentPid
-	 *            the wire component PID (kura.service.pid)
-	 * @return the Service PID of the provided wire component or {@code null} if
-	 *         the provided Wire Component PID is not associated with any
-	 *         available Wire Component in the OSGi service registry
-	 * @throws KuraRuntimeException
-	 *             if the argument is null
-	 */
-	public String getFactoryPid(final String wireComponentPid);
-
-	/**
-	 * Retrieves the factory PID (service.pid) of the wire component
-	 *
-	 * @param wireComponent
-	 *            the wire component
-	 * @return the Service PID of the provided wire component or {@code null} if
-	 *         the provided Wire Component PID is not associated with any
-	 *         available Wire Component in the OSGi service registry
-	 * @throws KuraRuntimeException
-	 *             if the argument is null
-	 */
-	public String getFactoryPid(final WireComponent wireComponent);
-
-	/**
 	 * Retrieves the Kura Service PID (kura.service.pid) of the wire component
 	 *
 	 * @param wireComponent
@@ -65,6 +38,34 @@ public interface WireHelperService {
 	 *             if the argument is null
 	 */
 	public String getPid(final WireComponent wireComponent);
+
+	/**
+	 * Retrieves the OSGi Component Service PID (service.pid) of the provided
+	 * wire component PID
+	 *
+	 * @param wireComponentPid
+	 *            the wire component PID (kura.service.pid)
+	 * @return the Service PID of the provided wire component or {@code null} if
+	 *         the provided Wire Component PID is not associated with any
+	 *         available Wire Component in the OSGi service registry
+	 * @throws KuraRuntimeException
+	 *             if the argument is null
+	 */
+	public String getServicePid(final String wireComponentPid);
+
+	/**
+	 * Retrieves the OSGi Component Service PID (service.pid) of the wire
+	 * component
+	 *
+	 * @param wireComponent
+	 *            the wire component
+	 * @return the Service PID of the provided wire component or {@code null} if
+	 *         the provided Wire Component PID is not associated with any
+	 *         available Wire Component in the OSGi service registry
+	 * @throws KuraRuntimeException
+	 *             if the argument is null
+	 */
+	public String getServicePid(final WireComponent wireComponent);
 
 	/**
 	 * Instantiates a new wire configuration.

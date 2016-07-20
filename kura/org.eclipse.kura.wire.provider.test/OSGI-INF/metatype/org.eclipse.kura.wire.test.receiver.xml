@@ -25,7 +25,7 @@
             description="Whether or not the broker should retain the message">
         </AD>
     </OCD>
-    <Designate pid="org.eclipse.kura.wire.test.receiver" factoryPid="org.eclipse.kura.wire.test.receiver">
+    <Designate pid="org.eclipse.kura.wire.test.receiver">
         <Object ocdref="org.eclipse.kura.wire.test.receiver"/>
     </Designate>
 </MetaData>

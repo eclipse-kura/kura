@@ -49,7 +49,7 @@ public final class WireHelperServiceImpl implements WireHelperService {
 
 	/** {@inheritDoc} */
 	@Override
-	public String getFactoryPid(final String wireComponentPid) {
+	public String getServicePid(final String wireComponentPid) {
 		checkNull(wireComponentPid, s_message.wireComponentPidNonNull());
 		final BundleContext context = FrameworkUtil.getBundle(this.getClass()).getBundleContext();
 		final ServiceReference<?>[] refs = this.getServiceReferences(context, WireComponent.class.getName(), null);
@@ -63,7 +63,7 @@ public final class WireHelperServiceImpl implements WireHelperService {
 
 	/** {@inheritDoc} */
 	@Override
-	public String getFactoryPid(final WireComponent wireComponent) {
+	public String getServicePid(final WireComponent wireComponent) {
 		checkNull(wireComponent, s_message.wireComponentNonNull());
 		final BundleContext context = FrameworkUtil.getBundle(this.getClass()).getBundleContext();
 		final ServiceReference<?>[] refs = this.getServiceReferences(context, WireComponent.class.getName(), null);

@@ -15,10 +15,10 @@
                name="org.eclipse.kura.wire.test.receiver"
                enabled="true" 
                immediate="false"
-               activate="activate"
                configuration-policy="require"> 
    <implementation class="org.eclipse.kura.wire.provider.test.StubReceiver"/>
    <property name="service.pid" value="org.eclipse.kura.wire.test.receiver"/>
+   <property name="kura.service.pid" value="org.eclipse.kura.wire.test.receiver"/>
    <service>
       <provide interface="org.eclipse.kura.configuration.ConfigurableComponent"/>
       <provide interface="org.eclipse.kura.wire.WireComponent"/>

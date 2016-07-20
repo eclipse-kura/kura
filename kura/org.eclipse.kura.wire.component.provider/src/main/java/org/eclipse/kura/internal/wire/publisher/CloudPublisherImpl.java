@@ -13,6 +13,7 @@
 package org.eclipse.kura.internal.wire.publisher;
 
 import static org.eclipse.kura.Preconditions.checkNull;
+import static org.eclipse.kura.internal.wire.publisher.CloudPublisherOptions.AutoConnectMode.AUTOCONNECT_MODE_OFF;
 
 import java.util.List;
 import java.util.Map;
@@ -370,7 +371,7 @@ public final class CloudPublisherImpl implements WireReceiver, DataServiceListen
 		checkNull(this.m_cloudClient, s_message.cloudClientNonNull());
 		checkNull(wireRecords, s_message.wireRecordsNonNull());
 
-		if (!AutoConnectMode.AUTOCONNECT_MODE_OFF.equals(this.m_options.getAutoConnectMode())
+		if (!AUTOCONNECT_MODE_OFF.equals(this.m_options.getAutoConnectMode())
 				&& !this.m_dataService.isAutoConnectEnabled() && !this.m_dataService.isConnected()) {
 			try {
 				if (!this.m_dataService.isConnected()) {

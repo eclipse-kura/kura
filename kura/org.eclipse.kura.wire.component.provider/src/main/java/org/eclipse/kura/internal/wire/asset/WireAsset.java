@@ -125,7 +125,7 @@ public final class WireAsset implements WireEmitter, WireReceiver, SelfConfiguri
 	protected synchronized void activate(final ComponentContext componentContext,
 			final Map<String, Object> properties) {
 		s_logger.debug(s_message.activatingWireAsset());
-		this.m_baseAsset = this.m_assetHelper.newBaseAsset(componentContext, this.m_assetHelper);
+		this.m_baseAsset = this.m_assetHelper.newBaseAsset(this.m_assetHelper);
 		this.m_assetConfiguration = this.m_baseAsset.getAssetConfiguration();
 		this.m_baseAsset.initialize(properties);
 		this.m_context = componentContext;

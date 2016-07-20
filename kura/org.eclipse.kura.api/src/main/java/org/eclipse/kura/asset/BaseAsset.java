@@ -44,7 +44,7 @@ public interface BaseAsset extends Asset {
 	/**
 	 * Returns the injected instance of the Driver
 	 *
-	 * @return the driver instance
+	 * @return the injected driver instance
 	 */
 	public Driver getDriver();
 
@@ -55,14 +55,6 @@ public interface BaseAsset extends Asset {
 	 *            the provided properties to parse
 	 */
 	public void initialize(Map<String, Object> properties);
-
-	/**
-	 * Sets the new driver instance
-	 *
-	 * @param driver
-	 *            driver instance to set
-	 */
-	public void setDriver(Driver driver);
 
 	/**
 	 * Updates the BaseDevice component with the newly provided properties

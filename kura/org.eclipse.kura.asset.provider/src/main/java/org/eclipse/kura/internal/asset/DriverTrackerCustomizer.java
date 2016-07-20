@@ -17,7 +17,6 @@ import static org.eclipse.kura.asset.AssetConstants.ASSET_DRIVER_PROP;
 
 import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.asset.Asset;
-import org.eclipse.kura.asset.BaseAsset;
 import org.eclipse.kura.asset.Driver;
 import org.eclipse.kura.localization.LocalizationAdapter;
 import org.eclipse.kura.localization.resources.AssetMessages;
@@ -81,7 +80,7 @@ public final class DriverTrackerCustomizer implements ServiceTrackerCustomizer<D
 		final Driver driver = this.m_context.getService(reference);
 		if (reference.getProperty(ASSET_DRIVER_PROP.value()).equals(this.m_driverId)) {
 			s_logger.info(s_message.driverFoundAdding());
-			((BaseAsset) this.m_asset).setDriver(driver);
+			((BaseAssetImpl) this.m_asset).setDriver(driver);
 		}
 		return driver;
 	}
@@ -99,7 +98,7 @@ public final class DriverTrackerCustomizer implements ServiceTrackerCustomizer<D
 		this.m_context.ungetService(reference);
 		if (reference.getProperty(ASSET_DRIVER_PROP.value()).equals(this.m_driverId)) {
 			s_logger.info(s_message.driverRemoved() + service);
-			((BaseAsset) this.m_asset).setDriver(null);
+			((BaseAssetImpl) this.m_asset).setDriver(null);
 		}
 	}
 

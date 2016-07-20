@@ -16,7 +16,6 @@ import java.util.Map;
 
 import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.type.DataType;
-import org.osgi.service.component.ComponentContext;
 
 /**
  * The interface AssetHelperService is an utility service API to provide useful
@@ -67,15 +66,13 @@ public interface AssetHelperService {
 	/**
 	 * Prepares the new basic asset instance
 	 *
-	 * @param context
-	 *            Component Context instance
 	 * @param helperService
 	 *            Asset Helper service instance
-	 * @return the newly created BaseAsset instance
+	 * @return the newly created Base Asset instance
 	 * @throws KuraRuntimeException
-	 *             if any of the arguments is null
+	 *             if the argument is null
 	 */
-	public BaseAsset newBaseAsset(ComponentContext context, AssetHelperService helperService);
+	public BaseAsset newBaseAsset(AssetHelperService helperService);
 
 	/**
 	 * Creates a new channel with the provided values

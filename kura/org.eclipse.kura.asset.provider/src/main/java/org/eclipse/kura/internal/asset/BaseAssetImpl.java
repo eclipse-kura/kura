@@ -40,8 +40,9 @@ import org.eclipse.kura.localization.LocalizationAdapter;
 import org.eclipse.kura.localization.resources.AssetMessages;
 import org.eclipse.kura.util.base.ThrowableUtil;
 import org.eclipse.kura.util.collection.CollectionUtil;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.service.component.ComponentContext;
 import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,8 +73,8 @@ public final class BaseAssetImpl implements BaseAsset {
 	/** The provided asset options instance. */
 	private AssetOptions m_assetOptions;
 
-	/** The service component context. */
-	private final ComponentContext m_context;
+	/** The Bundle context. */
+	private final BundleContext m_context;
 
 	/** The Driver instance. */
 	private volatile Driver m_driver;
@@ -90,19 +91,15 @@ public final class BaseAssetImpl implements BaseAsset {
 	/**
 	 * Instantiates a new base asset implementation.
 	 *
-	 * @param context
-	 *            the component context
 	 * @param helperService
 	 *            the asset helper service
 	 */
-	public BaseAssetImpl(final ComponentContext context, final AssetHelperService helperService) {
-		checkNull(context, s_message.contextNonNull());
+	public BaseAssetImpl(final AssetHelperService helperService) {
 		checkNull(helperService, s_message.assetHelperNonNull());
-
 		this.m_assetListeners = CollectionUtil.newConcurrentHashMap();
 		this.m_monitor = new ReentrantLock();
 		this.m_assetHelper = helperService;
-		this.m_context = context;
+		this.m_context = FrameworkUtil.getBundle(this.getClass()).getBundleContext();
 	}
 
 	/**
@@ -118,10 +115,9 @@ public final class BaseAssetImpl implements BaseAsset {
 		checkNull(driverId, s_message.driverIdNonNull());
 		s_logger.debug(s_message.driverAttach());
 		try {
-			this.m_driverTrackerCustomizer = new DriverTrackerCustomizer(this.m_context.getBundleContext(), this,
-					driverId);
-			this.m_serviceTracker = new ServiceTracker<Driver, Driver>(this.m_context.getBundleContext(),
-					Driver.class.getName(), this.m_driverTrackerCustomizer);
+			this.m_driverTrackerCustomizer = new DriverTrackerCustomizer(this.m_context, this, driverId);
+			this.m_serviceTracker = new ServiceTracker<Driver, Driver>(this.m_context, Driver.class.getName(),
+					this.m_driverTrackerCustomizer);
 			this.m_serviceTracker.open();
 		} catch (final InvalidSyntaxException e) {
 			s_logger.error(ThrowableUtil.stackTraceAsString(e));
@@ -398,8 +394,7 @@ public final class BaseAssetImpl implements BaseAsset {
 	 * @param driver
 	 *            the new driver
 	 */
-	@Override
-	public void setDriver(final Driver driver) {
+	void setDriver(final Driver driver) {
 		this.m_driver = driver;
 	}
 

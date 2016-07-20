@@ -24,7 +24,6 @@ import org.eclipse.kura.asset.ChannelType;
 import org.eclipse.kura.asset.DriverEvent;
 import org.eclipse.kura.asset.DriverRecord;
 import org.eclipse.kura.type.DataType;
-import org.osgi.service.component.ComponentContext;
 
 /**
  * The Class AssetHelperServiceImpl is an implementation of the utility API
@@ -54,8 +53,8 @@ public final class AssetHelperServiceImpl implements AssetHelperService {
 
 	/** {@inheritDoc} */
 	@Override
-	public BaseAsset newBaseAsset(final ComponentContext context, final AssetHelperService assetHelperService) {
-		return new BaseAssetImpl(context, assetHelperService);
+	public BaseAsset newBaseAsset(final AssetHelperService assetHelperService) {
+		return new BaseAssetImpl(assetHelperService);
 	}
 
 	/** {@inheritDoc} */

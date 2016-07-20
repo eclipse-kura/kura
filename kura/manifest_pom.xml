@@ -268,11 +268,6 @@
 			<plugin>
 				<groupId>org.eclipse.tycho</groupId>
 				<artifactId>tycho-packaging-plugin</artifactId>
-				<version>${tycho-version}</version>
-				<configuration>
-					<strictVersions>false</strictVersions>
-					<format>${kura.build.version}</format>
-				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.eclipse.tycho</groupId>
@@ -443,6 +438,15 @@
 							</configuration>
 						</execution>
 					</executions>
+				</plugin>
+				<plugin>
+					<groupId>org.eclipse.tycho</groupId>
+					<artifactId>tycho-packaging-plugin</artifactId>
+					<version>${tycho-version}</version>
+					<configuration>
+						<strictVersions>true</strictVersions>
+						<format>${kura.build.version}</format>
+					</configuration>
 				</plugin>
 			</plugins>
 		</pluginManagement>

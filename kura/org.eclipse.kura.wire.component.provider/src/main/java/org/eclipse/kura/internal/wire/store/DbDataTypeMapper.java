@@ -13,6 +13,15 @@
 
 package org.eclipse.kura.internal.wire.store;
 
+import static org.eclipse.kura.type.DataType.BOOLEAN;
+import static org.eclipse.kura.type.DataType.BYTE;
+import static org.eclipse.kura.type.DataType.BYTE_ARRAY;
+import static org.eclipse.kura.type.DataType.DOUBLE;
+import static org.eclipse.kura.type.DataType.INTEGER;
+import static org.eclipse.kura.type.DataType.LONG;
+import static org.eclipse.kura.type.DataType.SHORT;
+import static org.eclipse.kura.type.DataType.STRING;
+
 import java.sql.Types;
 import java.util.Map;
 
@@ -79,14 +88,14 @@ public final class DbDataTypeMapper {
 	private static Map<Integer, DataType> s_jdbcTypeMap = CollectionUtil.newHashMap();
 
 	static {
-		s_dataTypeMap.put(DataType.BYTE, new JdbcType(Types.TINYINT, "TINYINT"));
-		s_dataTypeMap.put(DataType.SHORT, new JdbcType(Types.SMALLINT, "SMALLINT"));
-		s_dataTypeMap.put(DataType.INTEGER, new JdbcType(Types.INTEGER, "INTEGER"));
-		s_dataTypeMap.put(DataType.LONG, new JdbcType(Types.BIGINT, "BIGINT"));
-		s_dataTypeMap.put(DataType.DOUBLE, new JdbcType(Types.DOUBLE, "DOUBLE"));
-		s_dataTypeMap.put(DataType.BOOLEAN, new JdbcType(Types.BOOLEAN, "BOOLEAN"));
-		s_dataTypeMap.put(DataType.BYTE_ARRAY, new JdbcType(Types.BINARY, "BINARY"));
-		s_dataTypeMap.put(DataType.STRING, new JdbcType(Types.VARCHAR, "VARCHAR(102400)"));
+		s_dataTypeMap.put(BYTE, new JdbcType(Types.TINYINT, "TINYINT"));
+		s_dataTypeMap.put(SHORT, new JdbcType(Types.SMALLINT, "SMALLINT"));
+		s_dataTypeMap.put(INTEGER, new JdbcType(Types.INTEGER, "INTEGER"));
+		s_dataTypeMap.put(LONG, new JdbcType(Types.BIGINT, "BIGINT"));
+		s_dataTypeMap.put(DOUBLE, new JdbcType(Types.DOUBLE, "DOUBLE"));
+		s_dataTypeMap.put(BOOLEAN, new JdbcType(Types.BOOLEAN, "BOOLEAN"));
+		s_dataTypeMap.put(BYTE_ARRAY, new JdbcType(Types.BINARY, "BINARY"));
+		s_dataTypeMap.put(STRING, new JdbcType(Types.VARCHAR, "VARCHAR(102400)"));
 	}
 
 	static {

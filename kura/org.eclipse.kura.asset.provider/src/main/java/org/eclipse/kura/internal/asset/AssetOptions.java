@@ -19,6 +19,17 @@ import static org.eclipse.kura.asset.AssetConstants.ASSET_ID_PROP;
 import static org.eclipse.kura.asset.AssetConstants.CHANNEL_PROPERTY_POSTFIX;
 import static org.eclipse.kura.asset.AssetConstants.CHANNEL_PROPERTY_PREFIX;
 import static org.eclipse.kura.asset.AssetConstants.DRIVER_PROPERTY_PREFIX;
+import static org.eclipse.kura.asset.ChannelType.READ;
+import static org.eclipse.kura.asset.ChannelType.READ_WRITE;
+import static org.eclipse.kura.asset.ChannelType.WRITE;
+import static org.eclipse.kura.type.DataType.BOOLEAN;
+import static org.eclipse.kura.type.DataType.BYTE;
+import static org.eclipse.kura.type.DataType.BYTE_ARRAY;
+import static org.eclipse.kura.type.DataType.DOUBLE;
+import static org.eclipse.kura.type.DataType.INTEGER;
+import static org.eclipse.kura.type.DataType.LONG;
+import static org.eclipse.kura.type.DataType.SHORT;
+import static org.eclipse.kura.type.DataType.STRING;
 
 import java.util.Arrays;
 import java.util.List;
@@ -110,7 +121,6 @@ final class AssetOptions {
 	 */
 	private void checkChannelAvailability(final Map<String, Object> properties) {
 		checkNull(properties, s_message.propertiesNonNull());
-
 		final Set<Long> channelIds = this.retrieveChannelIds(properties);
 		for (final Long channelName : channelIds) {
 			final Channel channel = this.retrieveChannel(channelName, properties);
@@ -129,14 +139,14 @@ final class AssetOptions {
 	private void extractProperties(final Map<String, Object> properties) {
 		checkNull(properties, s_message.propertiesNonNull());
 		try {
-			if (properties.containsKey(ASSET_DRIVER_PROP)) {
-				this.m_driverId = (String) properties.get(ASSET_DRIVER_PROP);
+			if (properties.containsKey(ASSET_DRIVER_PROP.value())) {
+				this.m_driverId = (String) properties.get(ASSET_DRIVER_PROP.value());
 			}
-			if (properties.containsKey(ASSET_ID_PROP)) {
-				this.m_assetName = (String) properties.get(ASSET_ID_PROP);
+			if (properties.containsKey(ASSET_ID_PROP.value())) {
+				this.m_assetName = (String) properties.get(ASSET_ID_PROP.value());
 			}
-			if (properties.containsKey(ASSET_DESC_PROP)) {
-				this.m_assetDescription = (String) properties.get(ASSET_DESC_PROP);
+			if (properties.containsKey(ASSET_DESC_PROP.value())) {
+				this.m_assetDescription = (String) properties.get(ASSET_DESC_PROP.value());
 			}
 			this.checkChannelAvailability(properties);
 		} catch (final Exception ex) {
@@ -190,56 +200,53 @@ final class AssetOptions {
 			if (properties.containsKey(channelNamePropertyKey)) {
 				channelName = (String) properties.get(channelNamePropertyKey);
 			}
-
 			final String channelTypePropertyKey = channelKeyFormat + channelTypeKey;
 			if (properties.containsKey(channelTypePropertyKey)) {
 				final String type = (String) properties.get(channelTypePropertyKey);
 				if ("READ".equalsIgnoreCase(type)) {
-					channelType = ChannelType.READ;
+					channelType = READ;
 				}
 				if ("WRITE".equalsIgnoreCase(type)) {
-					channelType = ChannelType.WRITE;
+					channelType = WRITE;
 				}
 				if ("READ_WRITE".equalsIgnoreCase(type)) {
-					channelType = ChannelType.READ_WRITE;
+					channelType = READ_WRITE;
 				}
 			}
-
 			final String channelValueTypePropertyKey = channelKeyFormat + channelValueTypeKey;
 			if (properties.containsKey(channelValueTypePropertyKey)) {
 				final String valueType = (String) properties.get(channelValueTypePropertyKey);
 				if ("INTEGER".equalsIgnoreCase(valueType)) {
-					dataType = DataType.INTEGER;
+					dataType = INTEGER;
 				}
 				if ("BOOLEAN".equalsIgnoreCase(valueType)) {
-					dataType = DataType.BOOLEAN;
+					dataType = BOOLEAN;
 				}
 				if ("BYTE".equalsIgnoreCase(valueType)) {
-					dataType = DataType.BYTE;
+					dataType = BYTE;
 				}
 				if ("DOUBLE".equalsIgnoreCase(valueType)) {
-					dataType = DataType.DOUBLE;
+					dataType = DOUBLE;
 				}
 				if ("LONG".equalsIgnoreCase(valueType)) {
-					dataType = DataType.LONG;
+					dataType = LONG;
 				}
 				if ("SHORT".equalsIgnoreCase(valueType)) {
-					dataType = DataType.SHORT;
+					dataType = SHORT;
 				}
 				if ("STRING".equalsIgnoreCase(valueType)) {
-					dataType = DataType.STRING;
+					dataType = STRING;
 				}
 				if ("BYTE_ARRAY".equalsIgnoreCase(valueType)) {
-					dataType = DataType.BYTE_ARRAY;
+					dataType = BYTE_ARRAY;
 				}
 			}
 			for (final Map.Entry<String, Object> entry : properties.entrySet()) {
 				final String key = entry.getKey();
 				final String value = entry.getValue().toString();
-
-				final List<String> strings = Arrays.asList(key.split(CHANNEL_PROPERTY_POSTFIX.value()));
+				final List<String> strings = Arrays.asList(key.split("\\" + CHANNEL_PROPERTY_POSTFIX.value()));
 				if ((strings.size() > 2) && key.startsWith(String.valueOf(channelId))
-						&& DRIVER_PROPERTY_PREFIX.equals(strings.get(2))) {
+						&& DRIVER_PROPERTY_PREFIX.value().equals(strings.get(2))) {
 					final String driverSpecificPropertyKey = DRIVER_PROPERTY_PREFIX.value()
 							+ CHANNEL_PROPERTY_POSTFIX.value();
 					final String cKey = key
@@ -268,7 +275,7 @@ final class AssetOptions {
 		final Set<Long> channelIds = CollectionUtil.newHashSet();
 		for (final Map.Entry<String, Object> entry : properties.entrySet()) {
 			final String key = entry.getKey();
-			final List<String> strings = Arrays.asList(key.split(CHANNEL_PROPERTY_POSTFIX.value()));
+			final List<String> strings = Arrays.asList(key.split("\\" + CHANNEL_PROPERTY_POSTFIX.value()));
 			for (final String string : strings) {
 				if (string.matches("\\d+")) {
 					channelIds.add(Long.parseLong(string));

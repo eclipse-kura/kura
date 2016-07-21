@@ -1,3 +1,15 @@
+/**
+ * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ *
+ *  All rights reserved. This program and the accompanying materials
+ *  are made available under the terms of the Eclipse Public License v1.0
+ *  which accompanies this distribution, and is available at
+ *  http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *   Eurotech
+ *   Amit Kumar Mondal (admin@amitinside.com)
+ */
 package org.eclipse.kura.asset.provider.test;
 
 import java.util.List;
@@ -9,49 +21,36 @@ import org.eclipse.kura.asset.Driver;
 import org.eclipse.kura.asset.DriverListener;
 import org.eclipse.kura.asset.DriverRecord;
 
-public class StubDriver implements Driver {
+public final class StubDriver implements Driver {
 
 	@Override
 	public void connect() throws KuraException {
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override
 	public void disconnect() throws KuraException {
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override
 	public ChannelDescriptor getChannelDescriptor() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public void read(List<DriverRecord> records) throws KuraException {
-		// TODO Auto-generated method stub
-
+	public void read(final List<DriverRecord> records) throws KuraException {
 	}
 
 	@Override
-	public void registerDriverListener(Map<String, Object> channelConfig, DriverListener listener)
+	public void registerDriverListener(final Map<String, Object> channelConfig, final DriverListener listener)
 			throws KuraException {
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override
-	public void unregisterDriverListener(DriverListener listener) throws KuraException {
-		// TODO Auto-generated method stub
-
+	public void unregisterDriverListener(final DriverListener listener) throws KuraException {
 	}
 
 	@Override
-	public void write(List<DriverRecord> records) throws KuraException {
-		// TODO Auto-generated method stub
-
+	public void write(final List<DriverRecord> records) throws KuraException {
 	}
 
 }

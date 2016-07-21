@@ -29,12 +29,6 @@ import java.util.Map;
 public interface BaseAsset extends Asset {
 
 	/**
-	 * Deinitializes the BaseDevice component by removing the expensive
-	 * resources
-	 */
-	public void deinitialize();
-
-	/**
 	 * Gets the asset configuration.
 	 *
 	 * @return the asset configuration
@@ -57,11 +51,8 @@ public interface BaseAsset extends Asset {
 	public void initialize(Map<String, Object> properties);
 
 	/**
-	 * Updates the BaseDevice component with the newly provided properties
-	 *
-	 * @param properties
-	 *            the updated properties to parse
+	 * Releases the expensive resources
 	 */
-	public void updated(Map<String, Object> properties);
+	public void release();
 
 }

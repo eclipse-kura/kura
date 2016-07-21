@@ -14,6 +14,13 @@ package org.eclipse.kura.internal.asset;
 
 import static org.eclipse.kura.Preconditions.checkCondition;
 import static org.eclipse.kura.Preconditions.checkNull;
+import static org.eclipse.kura.asset.AssetFlag.ASSET_ERROR_UNSPECIFIED;
+import static org.eclipse.kura.asset.AssetFlag.READ_SUCCESSFUL;
+import static org.eclipse.kura.asset.AssetFlag.UNKNOWN;
+import static org.eclipse.kura.asset.AssetFlag.WRITE_SUCCESSFUL;
+import static org.eclipse.kura.asset.ChannelType.READ;
+import static org.eclipse.kura.asset.ChannelType.READ_WRITE;
+import static org.eclipse.kura.asset.ChannelType.WRITE;
 
 import java.util.List;
 import java.util.Map;
@@ -24,13 +31,11 @@ import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.asset.AssetConfiguration;
 import org.eclipse.kura.asset.AssetEvent;
-import org.eclipse.kura.asset.AssetFlag;
 import org.eclipse.kura.asset.AssetHelperService;
 import org.eclipse.kura.asset.AssetListener;
 import org.eclipse.kura.asset.AssetRecord;
 import org.eclipse.kura.asset.BaseAsset;
 import org.eclipse.kura.asset.Channel;
-import org.eclipse.kura.asset.ChannelType;
 import org.eclipse.kura.asset.Driver;
 import org.eclipse.kura.asset.DriverEvent;
 import org.eclipse.kura.asset.DriverFlag;
@@ -152,45 +157,13 @@ public final class BaseAssetImpl implements BaseAsset {
 		return 0;
 	}
 
-	/**
-	 * Callback method used to trigger when this service component will be
-	 * deactivated.
-	 */
-	@Override
-	public void deinitialize() {
-		s_logger.debug(s_message.deactivating());
-		this.m_monitor.lock();
-		try {
-			if (this.m_driver != null) {
-				this.m_driver.disconnect();
-			}
-		} catch (final KuraException e) {
-			s_logger.error(s_message.errorDriverDisconnection() + ThrowableUtil.stackTraceAsString(e));
-		} finally {
-			this.m_monitor.unlock();
-		}
-		this.m_driver = null;
-		if (this.m_serviceTracker != null) {
-			this.m_serviceTracker.close();
-		}
-		s_logger.debug(s_message.deactivatingDone());
-	}
-
-	/**
-	 * Gets the asset configuration.
-	 *
-	 * @return the asset configuration
-	 */
+	/** {@inheritDoc} */
 	@Override
 	public AssetConfiguration getAssetConfiguration() {
 		return this.m_assetConfiguration;
 	}
 
-	/**
-	 * Returns the injected instance of the Driver.
-	 *
-	 * @return the driver instance
-	 */
+	/** {@inheritDoc} */
 	@Override
 	public Driver getDriver() {
 		return this.m_driver;
@@ -205,18 +178,13 @@ public final class BaseAssetImpl implements BaseAsset {
 		return this.m_assetListeners;
 	}
 
-	/**
-	 * Callback method used to trigger when this service component will be
-	 * activated.
-	 *
-	 * @param properties
-	 *            the configurable service properties
-	 */
+	/** {@inheritDoc} */
 	@Override
 	public void initialize(final Map<String, Object> properties) {
-		s_logger.debug(s_message.activating());
-		// retrieve the asset configuration on update
-		s_logger.debug(s_message.activatingDone());
+		s_logger.debug(s_message.updating());
+		this.retrieveConfigurationsFromProperties(properties);
+		this.attachDriver(this.m_assetConfiguration.getDriverId());
+		s_logger.debug(s_message.updatingDone());
 	}
 
 	/** {@inheritDoc} */
@@ -236,7 +204,7 @@ public final class BaseAssetImpl implements BaseAsset {
 			checkCondition(id == 0, s_message.channelUnavailable());
 
 			final Channel channel = channels.get(id);
-			checkCondition((channel.getType() != ChannelType.READ) || (channel.getType() != ChannelType.READ_WRITE),
+			checkCondition((channel.getType() != READ) || (channel.getType() != READ_WRITE),
 					s_message.channelTypeNotReadable() + channel);
 
 			final DriverRecord driverRecord = this.m_assetHelper.newDriverRecord(channelName);
@@ -257,13 +225,13 @@ public final class BaseAssetImpl implements BaseAsset {
 
 			switch (driverFlag) {
 			case READ_SUCCESSFUL:
-				assetRecord.setAssetFlag(AssetFlag.READ_SUCCESSFUL);
+				assetRecord.setAssetFlag(READ_SUCCESSFUL);
 				break;
 			case DRIVER_ERROR_UNSPECIFIED:
-				assetRecord.setAssetFlag(AssetFlag.ASSET_ERROR_UNSPECIFIED);
+				assetRecord.setAssetFlag(ASSET_ERROR_UNSPECIFIED);
 				break;
 			case UNKNOWN:
-				assetRecord.setAssetFlag(AssetFlag.UNKNOWN);
+				assetRecord.setAssetFlag(UNKNOWN);
 				break;
 			default:
 				break;
@@ -334,16 +302,16 @@ public final class BaseAssetImpl implements BaseAsset {
 
 				switch (driverFlag) {
 				case READ_SUCCESSFUL:
-					assetRecord.setAssetFlag(AssetFlag.READ_SUCCESSFUL);
+					assetRecord.setAssetFlag(READ_SUCCESSFUL);
 					break;
 				case WRITE_SUCCESSFUL:
-					assetRecord.setAssetFlag(AssetFlag.WRITE_SUCCESSFUL);
+					assetRecord.setAssetFlag(WRITE_SUCCESSFUL);
 					break;
 				case DRIVER_ERROR_UNSPECIFIED:
-					assetRecord.setAssetFlag(AssetFlag.ASSET_ERROR_UNSPECIFIED);
+					assetRecord.setAssetFlag(ASSET_ERROR_UNSPECIFIED);
 					break;
 				case UNKNOWN:
-					assetRecord.setAssetFlag(AssetFlag.UNKNOWN);
+					assetRecord.setAssetFlag(UNKNOWN);
 					break;
 				default:
 					break;
@@ -369,6 +337,27 @@ public final class BaseAssetImpl implements BaseAsset {
 		}
 
 		s_logger.debug(s_message.registeringListenerDone());
+	}
+
+	/** {@inheritDoc} */
+	@Override
+	public void release() {
+		s_logger.debug(s_message.deactivating());
+		this.m_monitor.lock();
+		try {
+			if (this.m_driver != null) {
+				this.m_driver.disconnect();
+			}
+		} catch (final KuraException e) {
+			s_logger.error(s_message.errorDriverDisconnection() + ThrowableUtil.stackTraceAsString(e));
+		} finally {
+			this.m_monitor.unlock();
+		}
+		this.m_driver = null;
+		if (this.m_serviceTracker != null) {
+			this.m_serviceTracker.close();
+		}
+		s_logger.debug(s_message.deactivatingDone());
 	}
 
 	/**
@@ -421,21 +410,6 @@ public final class BaseAssetImpl implements BaseAsset {
 		s_logger.debug(s_message.unregisteringListenerDone());
 	}
 
-	/**
-	 * Callback method used to trigger when this service component will be
-	 * updated.
-	 *
-	 * @param properties
-	 *            the configurable properties
-	 */
-	@Override
-	public void updated(final Map<String, Object> properties) {
-		s_logger.debug(s_message.updating());
-		this.retrieveConfigurationsFromProperties(properties);
-		this.attachDriver(this.m_assetConfiguration.getDriverId());
-		s_logger.debug(s_message.updatingDone());
-	}
-
 	/** {@inheritDoc} */
 	@Override
 	public List<AssetRecord> write(final List<AssetRecord> assetRecords) throws KuraException {
@@ -452,7 +426,7 @@ public final class BaseAssetImpl implements BaseAsset {
 			checkCondition(id == 0, s_message.channelUnavailable());
 
 			final Channel channel = channels.get(id);
-			checkCondition((channel.getType() != ChannelType.WRITE) || (channel.getType() != ChannelType.READ_WRITE),
+			checkCondition((channel.getType() != WRITE) || (channel.getType() != READ_WRITE),
 					s_message.channelTypeNotWritable() + channel);
 			final DriverRecord driverRecord = this.m_assetHelper.newDriverRecord(channel.getName());
 			driverRecord.setChannelConfig(channel.getConfiguration());
@@ -475,13 +449,13 @@ public final class BaseAssetImpl implements BaseAsset {
 			final DriverFlag driverFlag = driverRecord.getDriverFlag();
 			switch (driverFlag) {
 			case WRITE_SUCCESSFUL:
-				assetRecord.setAssetFlag(AssetFlag.WRITE_SUCCESSFUL);
+				assetRecord.setAssetFlag(WRITE_SUCCESSFUL);
 				break;
 			case DRIVER_ERROR_UNSPECIFIED:
-				assetRecord.setAssetFlag(AssetFlag.ASSET_ERROR_UNSPECIFIED);
+				assetRecord.setAssetFlag(ASSET_ERROR_UNSPECIFIED);
 				break;
 			case UNKNOWN:
-				assetRecord.setAssetFlag(AssetFlag.UNKNOWN);
+				assetRecord.setAssetFlag(UNKNOWN);
 				break;
 			default:
 				break;

@@ -14,5 +14,11 @@
 
 -->
 <scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" name="WireServiceTest">
-   <implementation class="org.eclipse.kura.asset.provider.test.BasicAssetTest"/>
+   <implementation class="org.eclipse.kura.asset.provider.test.BaseAssetTest"/>
+   <reference bind="bindAssetHelperService" 
+   	          cardinality="1..1" 
+   	          interface="org.eclipse.kura.asset.AssetHelperService" 
+   	          name="AssetHelperService" 
+   	          policy="static" 
+   	          unbind="unbindAssetHelperService"/>
 </scr:component>

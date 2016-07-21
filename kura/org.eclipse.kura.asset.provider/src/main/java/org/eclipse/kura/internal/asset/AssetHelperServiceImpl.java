@@ -53,8 +53,8 @@ public final class AssetHelperServiceImpl implements AssetHelperService {
 
 	/** {@inheritDoc} */
 	@Override
-	public BaseAsset newBaseAsset(final AssetHelperService assetHelperService) {
-		return new BaseAssetImpl(assetHelperService);
+	public BaseAsset newBaseAsset() {
+		return new BaseAssetImpl(this);
 	}
 
 	/** {@inheritDoc} */

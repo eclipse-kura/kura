@@ -24,6 +24,9 @@ import static org.eclipse.kura.asset.AssetConstants.NAME;
 import static org.eclipse.kura.asset.AssetConstants.TIMER_EVENT;
 import static org.eclipse.kura.asset.AssetConstants.TYPE;
 import static org.eclipse.kura.asset.AssetConstants.VALUE_TYPE;
+import static org.eclipse.kura.asset.ChannelType.READ;
+import static org.eclipse.kura.asset.ChannelType.READ_WRITE;
+import static org.eclipse.kura.asset.ChannelType.WRITE;
 import static org.osgi.framework.Constants.SERVICE_PID;
 
 import java.sql.Timestamp;
@@ -41,7 +44,6 @@ import org.eclipse.kura.asset.AssetRecord;
 import org.eclipse.kura.asset.BaseAsset;
 import org.eclipse.kura.asset.Channel;
 import org.eclipse.kura.asset.ChannelDescriptor;
-import org.eclipse.kura.asset.ChannelType;
 import org.eclipse.kura.asset.Driver;
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.SelfConfiguringComponent;
@@ -125,7 +127,7 @@ public final class WireAsset implements WireEmitter, WireReceiver, SelfConfiguri
 	protected synchronized void activate(final ComponentContext componentContext,
 			final Map<String, Object> properties) {
 		s_logger.debug(s_message.activatingWireAsset());
-		this.m_baseAsset = this.m_assetHelper.newBaseAsset(this.m_assetHelper);
+		this.m_baseAsset = this.m_assetHelper.newBaseAsset();
 		this.m_assetConfiguration = this.m_baseAsset.getAssetConfiguration();
 		this.m_baseAsset.initialize(properties);
 		this.m_context = componentContext;
@@ -209,7 +211,7 @@ public final class WireAsset implements WireEmitter, WireReceiver, SelfConfiguri
 	 */
 	protected synchronized void deactivate(final ComponentContext context) {
 		s_logger.debug(s_message.deactivatingWireAsset());
-		this.m_baseAsset.deinitialize();
+		this.m_baseAsset.release();
 		s_logger.debug(s_message.deactivatingWireAssetDone());
 	}
 
@@ -346,7 +348,7 @@ public final class WireAsset implements WireEmitter, WireReceiver, SelfConfiguri
 		// determining channels to read
 		for (final Map.Entry<Long, Channel> channelEntry : channels.entrySet()) {
 			final Channel channel = channelEntry.getValue();
-			if ((channel.getType() == ChannelType.READ) || (channel.getType() == ChannelType.READ_WRITE)) {
+			if ((channel.getType() == READ) || (channel.getType() == READ_WRITE)) {
 				channelsToRead.add(channel.getName());
 			}
 		}
@@ -365,7 +367,7 @@ public final class WireAsset implements WireEmitter, WireReceiver, SelfConfiguri
 			for (final WireField wireField : wireRecord.getFields()) {
 				for (final Map.Entry<Long, Channel> channelEntry : channels.entrySet()) {
 					final Channel channel = channelEntry.getValue();
-					if ((channel.getType() == ChannelType.WRITE) || (channel.getType() == ChannelType.READ_WRITE)) {
+					if ((channel.getType() == WRITE) || (channel.getType() == READ_WRITE)) {
 						assetRecordsToWriteChannels.add(this.prepareAssetRecord(channel, wireField.getValue()));
 					}
 				}
@@ -457,7 +459,7 @@ public final class WireAsset implements WireEmitter, WireReceiver, SelfConfiguri
 	/** {@inheritDoc} */
 	public synchronized void updated(final Map<String, Object> properties) {
 		s_logger.debug(s_message.updatingWireAsset());
-		this.m_baseAsset.updated(properties);
+		this.m_baseAsset.initialize(properties);
 		s_logger.debug(s_message.updatingWireAssetDone());
 	}
 

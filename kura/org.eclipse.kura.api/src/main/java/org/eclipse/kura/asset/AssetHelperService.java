@@ -66,13 +66,9 @@ public interface AssetHelperService {
 	/**
 	 * Prepares the new basic asset instance
 	 *
-	 * @param helperService
-	 *            Asset Helper service instance
 	 * @return the newly created Base Asset instance
-	 * @throws KuraRuntimeException
-	 *             if the argument is null
 	 */
-	public BaseAsset newBaseAsset(AssetHelperService helperService);
+	public BaseAsset newBaseAsset();
 
 	/**
 	 * Creates a new channel with the provided values

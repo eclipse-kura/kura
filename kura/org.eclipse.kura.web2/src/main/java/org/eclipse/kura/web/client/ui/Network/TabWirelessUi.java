@@ -16,6 +16,7 @@ import java.util.Set;
 import java.util.logging.Logger;
 
 import org.eclipse.kura.web.client.messages.Messages;
+import org.eclipse.kura.web.client.ui.EntryClassUi;
 import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.client.util.GwtSafeHtmlUtils;
 import org.eclipse.kura.web.client.util.MessageUtils;
@@ -47,6 +48,8 @@ import org.gwtbootstrap3.client.ui.HelpBlock;
 import org.gwtbootstrap3.client.ui.Input;
 import org.gwtbootstrap3.client.ui.ListBox;
 import org.gwtbootstrap3.client.ui.Modal;
+import org.gwtbootstrap3.client.ui.ModalBody;
+import org.gwtbootstrap3.client.ui.ModalFooter;
 import org.gwtbootstrap3.client.ui.PanelBody;
 import org.gwtbootstrap3.client.ui.PanelHeader;
 import org.gwtbootstrap3.client.ui.RadioButton;
@@ -722,6 +725,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
 		buttonPassword.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
+				EntryClassUi.showWaitModal();
 				buttonPassword.setEnabled(false);
 				final GwtWifiConfig gwtWifiConfig = getGwtWifiConfig();
 				gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
@@ -737,14 +741,19 @@ public class TabWirelessUi extends Composite implements NetworkTab {
 							@Override
 							public void onFailure(Throwable caught) {
 								FailureHandler.handle(caught);
+								EntryClassUi.hideWaitModal();
 								buttonPassword.setEnabled(true);
+								showPasswordVerificationStatus(MSGS.netWifiPasswordVerificationFailed());
 							}
 
 							@Override
 							public void onSuccess(Boolean result) {
 								if (!result.booleanValue()) {
-									password.setText("");
+									showPasswordVerificationStatus(MSGS.netWifiPasswordVerificationFailed());
+								} else {
+									showPasswordVerificationStatus(MSGS.netWifiPasswordVerificationSuccess());
 								}
+								EntryClassUi.hideWaitModal();
 								buttonPassword.setEnabled(true);
 							}
 						});
@@ -1510,5 +1519,26 @@ public class TabWirelessUi extends Composite implements NetworkTab {
 			groupPassword.setValidationState(ValidationState.NONE);
 			helpPassword.setText("");
 		}
+	}
+	
+	private void showPasswordVerificationStatus(String statusMessage) {
+		final Modal confirm = new Modal();
+		ModalBody confirmBody = new ModalBody();
+		ModalFooter confirmFooter = new ModalFooter();
+
+		confirm.setTitle(MSGS.netWifiPasswordVerificationStatus());
+		confirmBody.add(new Span(statusMessage));
+		
+
+		confirmFooter.add(new Button(MSGS.closeButton(),
+				new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
+				confirm.hide();
+			}
+		}));
+		confirm.add(confirmBody);
+		confirm.add(confirmFooter);
+		confirm.show();
 	}
 }

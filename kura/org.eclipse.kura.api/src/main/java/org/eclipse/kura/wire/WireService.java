@@ -28,9 +28,13 @@ public interface WireService {
 	 * receiver
 	 *
 	 * @param emitterPid
-	 *            the PID of the wire emitter
+	 *            the PID of the wire emitter (this PID will internally be used
+	 *            to retrieve kura.service.pid property of any matching DS
+	 *            component)
 	 * @param receiverPid
-	 *            the PID of the wire receiver
+	 *            the PID of the wire receiver (this PID will internally be used
+	 *            to retrieve kura.service.pid property of any matching DS
+	 *            component)
 	 * @throws KuraException
 	 *             if there doesn't exist any Wire Component having provided
 	 *             emitter PID or any Wire Component having provided receiver

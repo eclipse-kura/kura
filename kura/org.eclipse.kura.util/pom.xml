@@ -32,36 +32,7 @@
 		<kura.basedir>${project.basedir}/..</kura.basedir>
 	</properties>
 
-	<dependencies>
-	</dependencies>
-
 	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.eclipse.tycho</groupId>
-				<artifactId>tycho-packaging-plugin</artifactId>
-				<version>${tycho-version}</version>
-				<configuration>
-					<archive>
-						<compress>false</compress>
-					</archive>
-					<format>'${kura.build.version}'</format>
-					<compilerArgument>-warn:+discouraged,forbidden</compilerArgument>
-				</configuration>
-				<executions>
-					<execution>
-						<phase>package</phase>
-						<id>package-plugin</id>
-						<goals>
-							<goal>package-plugin</goal>
-						</goals>
-						<configuration>
-							<finalName>${project.artifactId}_${project.version}.v${kura.build.version}</finalName>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-		</plugins>
 		<pluginManagement>
 			<plugins>
 				<!--This plugin's configuration is used to store Eclipse m2e settings 
@@ -105,13 +76,7 @@
 										</versionRange>
 										<goals>
 											<goal>
-												validate-version
-											</goal>
-											<goal>
-												validate-id
-											</goal>
-											<goal>
-												build-qualifier
+												compile
 											</goal>
 										</goals>
 									</pluginExecutionFilter>

@@ -93,6 +93,8 @@ public final class BaseAssetImpl implements BaseAsset {
 	 *
 	 * @param helperService
 	 *            the asset helper service
+	 * @throws KuraRuntimeException
+	 *             if the argument is null
 	 */
 	public BaseAssetImpl(final AssetHelperService helperService) {
 		checkNull(helperService, s_message.assetHelperNonNull());
@@ -207,8 +209,6 @@ public final class BaseAssetImpl implements BaseAsset {
 	 * Callback method used to trigger when this service component will be
 	 * activated.
 	 *
-	 * @param context
-	 *            the context
 	 * @param properties
 	 *            the configurable service properties
 	 */

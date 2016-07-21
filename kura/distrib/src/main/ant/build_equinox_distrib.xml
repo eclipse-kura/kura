@@ -113,6 +113,7 @@
 		<antcall target="linux.watchdog-config" />
 		<antcall target="localization-config" />
 		<antcall target="wires-config" />
+		<antcall target="util-config" />
 		
 		
 		<!-- Added Camel bundles configs -->
@@ -491,6 +492,7 @@ fi
 
 		<antcall target="camel-jar" />
 		<antcall target="wires-jar" />
+		<antcall target="util-jar" />
 		<antcall target="localization-jar" />
 
 		<!-- Conditional inclusion of jar files in the distribution jar -->
@@ -842,17 +844,28 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
 		<propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
             <entry key="osgi.bundles" operation="+"
                    value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.localization_${org.eclipse.kura.localization.version}.jar@3:start" />
+            <entry key="osgi.bundles" operation="+"
+                   value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.localization.resources_${org.eclipse.kura.localization.resources.version}.jar@3:start" />
+		</propertyfile>
+	</target>
+
+	<target name="util-config">
+		<propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
+            <entry key="osgi.bundles" operation="+"
+                   value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.util_${org.eclipse.kura.util.version}.jar@4:start" />
 		</propertyfile>
 	</target>
 
 	<target name="wires-config">
 		<propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
 			<entry key="osgi.bundles" operation="+"
-                   value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.asset.internal_${org.eclipse.kura.asset.internal.version}.jar@4:start" />
+                   value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.asset.provider_${org.eclipse.kura.asset.provider.version}.jar@5:start" />
             <entry key="osgi.bundles" operation="+"
 				   value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.asset.cloudlet_${org.eclipse.kura.asset.cloudlet.version}.jar@5:start" />
             <entry key="osgi.bundles" operation="+"
-                   value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.wire.internal_${org.eclipse.kura.wire.internal.version}.jar@5:start" />
+                   value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.wire.provider_${org.eclipse.kura.wire.provider.version}.jar@5:start" />
+            <entry key="osgi.bundles" operation="+"
+                   value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.wire.component.provider_${org.eclipse.kura.wire.component.provider.version}.jar@5:start" />
 		</propertyfile>
 	</target>
 	
@@ -914,20 +927,29 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
 		</zip>
 	</target>
 
+	<target name="util-jar">
+		<zip destfile="${project.build.directory}/${build.output.name}.zip" update="true">
+			<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.util_${org.eclipse.kura.util.version}.jar"
+                        prefix="${build.output.name}/kura/plugins" />
+		</zip>
+	</target>
+
 	<target name="localization-jar">
 		<zip destfile="${project.build.directory}/${build.output.name}.zip" update="true">
 			<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.localization_${org.eclipse.kura.localization.version}.jar"
                         prefix="${build.output.name}/kura/plugins" />
+            <zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.localization.resources_${org.eclipse.kura.localization.resources.version}.jar" prefix="${build.output.name}/kura/plugins" />
 		</zip>
 	</target>
 
 	<target name="wires-jar">
 		<zip destfile="${project.build.directory}/${build.output.name}.zip" update="true">
-			<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.asset.internal_${org.eclipse.kura.asset.internal.version}.jar"
+			<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.asset.provider_${org.eclipse.kura.asset.provider.version}.jar"
                         prefix="${build.output.name}/kura/plugins" />
             <zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.asset.cloudlet_${org.eclipse.kura.asset.cloudlet.version}.jar"
                         prefix="${build.output.name}/kura/plugins" />
-            <zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.wire.internal_${org.eclipse.kura.wire.internal.version}.jar"
+            <zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.wire.component.provider_${org.eclipse.kura.wire.component.provider.version}.jar" prefix="${build.output.name}/kura/plugins" />
+            <zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.wire.provider_${org.eclipse.kura.wire.provider.version}.jar"
                         prefix="${build.output.name}/kura/plugins" />
 		</zip>
 	</target>

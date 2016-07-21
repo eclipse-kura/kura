@@ -238,13 +238,23 @@
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.eclipse.kura</groupId>
-									<artifactId>org.eclipse.kura.asset.internal</artifactId>
-									<version>${org.eclipse.kura.asset.internal.version}</version>
+									<artifactId>org.eclipse.kura.asset.provider</artifactId>
+									<version>${org.eclipse.kura.asset.provider.version}</version>
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.eclipse.kura</groupId>
 									<artifactId>org.eclipse.kura.localization</artifactId>
 									<version>${org.eclipse.kura.localization.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.kura.localization.resources</artifactId>
+									<version>${org.eclipse.kura.localization.resources.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.kura.util</artifactId>
+									<version>${org.eclipse.kura.util.version}</version>
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.eclipse.kura</groupId>
@@ -258,8 +268,13 @@
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.eclipse.kura</groupId>
-									<artifactId>org.eclipse.kura.wire.internal</artifactId>
-									<version>${org.eclipse.kura.wire.internal.version}</version>
+									<artifactId>org.eclipse.kura.wire.component.provider</artifactId>
+									<version>${org.eclipse.kura.wire.component.provider.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.kura.wire.provider</artifactId>
+									<version>${org.eclipse.kura.wire.provider.version}</version>
 								</artifactItem>
 							</artifactItems>
 							<stripVersion>true</stripVersion>
@@ -392,9 +407,12 @@
   								<move file="target/plugins/org.eclipse.kura.emulator.usb.jar" tofile="target/plugins/org.eclipse.kura.emulator.usb_${org.eclipse.kura.emulator.usb.version}.jar" />
   								<move file="target/plugins/org.eclipse.kura.emulator.watchdog.jar" tofile="target/plugins/org.eclipse.kura.emulator.watchdog_${org.eclipse.kura.emulator.watchdog.version}.jar" />
   								<move file="target/plugins/org.eclipse.kura.asset.cloudlet.jar" tofile="target/plugins/org.eclipse.kura.asset.cloudlet_${org.eclipse.kura.asset.cloudlet.version}.jar" />
-  								<move file="target/plugins/org.eclipse.kura.asset.internal.jar" tofile="target/plugins/org.eclipse.kura.asset.internal_${org.eclipse.kura.asset.internal.version}.jar" />
+  								<move file="target/plugins/org.eclipse.kura.asset.provider.jar" tofile="target/plugins/org.eclipse.kura.asset.provider_${org.eclipse.kura.asset.provider.version}.jar" />
   								<move file="target/plugins/org.eclipse.kura.localization.jar" tofile="target/plugins/org.eclipse.kura.localization_${org.eclipse.kura.localization.version}.jar" />
-  								<move file="target/plugins/org.eclipse.kura.wire.internal.jar" tofile="target/plugins/org.eclipse.kura.wire.internal_${org.eclipse.kura.wire.internal.version}.jar" />
+  								<move file="target/plugins/org.eclipse.kura.localization.resources.jar" tofile="target/plugins/org.eclipse.kura.localization.resources_${org.eclipse.kura.localization.resources.version}.jar" />
+  								<move file="target/plugins/org.eclipse.kura.util.jar" tofile="target/plugins/org.eclipse.kura.util_${org.eclipse.kura.util.version}.jar" />
+  								<move file="target/plugins/org.eclipse.kura.wire.provider.jar" tofile="target/plugins/org.eclipse.kura.wire.provider_${org.eclipse.kura.wire.provider.version}.jar" />
+  								<move file="target/plugins/org.eclipse.kura.wire.component.provider.jar" tofile="target/plugins/org.eclipse.kura.wire.component.provider_${org.eclipse.kura.wire.component.provider.version}.jar" />
 							</tasks>
 						</configuration>
 					</execution>

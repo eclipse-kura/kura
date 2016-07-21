@@ -298,11 +298,6 @@ public final class CloudPublisherImpl implements WireReceiver, DataServiceListen
 		} finally {
 			this.m_monitor.unlock();
 		}
-		// no need to release the cloud clients as the updated application
-		// certificate is already published due the missing dependency
-		// we only need to empty our CloudClient list
-		this.m_dataService = null;
-		this.m_cloudService = null;
 		s_logger.debug(s_message.deactivatingCloudPublisherDone());
 	}
 

@@ -183,7 +183,6 @@ public final class AssetCloudlet extends Cloudlet {
 	protected synchronized void deactivate(final ComponentContext componentContext) {
 		s_logger.debug(s_message.deactivating());
 		super.deactivate(componentContext);
-		super.setCloudService(null);
 		this.m_serviceTracker.close();
 		s_logger.debug(s_message.deactivatingDone());
 	}

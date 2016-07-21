@@ -22,7 +22,7 @@
 		<relativePath>../manifest_pom.xml</relativePath>
 	</parent>
 
-	<artifactId>org.eclipse.kura.wire.provider.test</artifactId>
+	<artifactId>org.eclipse.kura.asset.provider.test</artifactId>
 	<packaging>eclipse-test-plugin</packaging>
 	<version>1.0.0-SNAPSHOT</version>
 

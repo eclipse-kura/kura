@@ -11,21 +11,22 @@
  *******************************************************************************/
 package org.eclipse.kura.core.status;
 
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import org.eclipse.kura.core.status.runnables.BlinkStatusRunnable;
+import org.eclipse.kura.core.status.runnables.HeartbeatStatusRunnable;
+import org.eclipse.kura.core.status.runnables.LogStatusRunnable;
+import org.eclipse.kura.core.status.runnables.OnOffStatusRunnable;
 import org.eclipse.kura.gpio.GPIOService;
 import org.eclipse.kura.gpio.KuraGPIODirection;
 import org.eclipse.kura.gpio.KuraGPIOMode;
 import org.eclipse.kura.gpio.KuraGPIOPin;
 import org.eclipse.kura.gpio.KuraGPIOTrigger;
-import org.eclipse.kura.core.status.runnables.BlinkStatusRunnable;
-import org.eclipse.kura.core.status.runnables.HeartbeatStatusRunnable;
-import org.eclipse.kura.core.status.runnables.LogStatusRunnable;
-import org.eclipse.kura.core.status.runnables.OnOffStatusRunnable;
 import org.eclipse.kura.status.CloudConnectionStatusComponent;
 import org.eclipse.kura.status.CloudConnectionStatusEnum;
 import org.eclipse.kura.status.CloudConnectionStatusService;
@@ -43,6 +44,7 @@ public class CloudConnectionStatusServiceImpl implements CloudConnectionStatusSe
 	private SystemService m_systemService;
 	private GPIOService m_GPIOService;
 	
+	private int LedIndex = -1;
 	private KuraGPIOPin notificationLED;
 	
 	private ExecutorService notificationExecutor;
@@ -76,10 +78,36 @@ public class CloudConnectionStatusServiceImpl implements CloudConnectionStatusSe
 	
 	public void setGPIOService(GPIOService GpioService){
 		this.m_GPIOService = GpioService;
+		// Check if LED can be already acquired
+		if(LedIndex != -1){
+			notificationLED = m_GPIOService.getPinByTerminal(
+					 LedIndex, 
+					 KuraGPIODirection.OUTPUT, 
+					 KuraGPIOMode.OUTPUT_OPEN_DRAIN, 
+					 KuraGPIOTrigger.NONE);
+			 			 
+			 try {
+				notificationLED.open();
+			} catch (Exception e) {
+				s_logger.error("Could not open LED {}.", LedIndex);
+			}
+			 s_logger.info("CloudConnectionStatus active on LED {}.", LedIndex);
+		}
 	}
 
 	public void unsetGPIOService(GPIOService GpioService){
+		if(notificationLED != null){
+			try {
+				notificationLED.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			notificationLED = null;
+		}
 		this.m_GPIOService = null;
+		currentStatus = null;
+		internalUpdateStatus();
 	}
 
 	// ----------------------------------------------------------------
@@ -96,6 +124,7 @@ public class CloudConnectionStatusServiceImpl implements CloudConnectionStatusSe
 		String urlFromConfig = m_systemService.getProperties().getProperty(STATUS_NOTIFICATION_URL, CloudConnectionStatusURL.S_CCS+CloudConnectionStatusURL.S_NONE);
 		
 		Properties props = CloudConnectionStatusURL.parseURL(urlFromConfig);
+		LedIndex = -1;
 		
 		try{
 		 int notificationType = (Integer) props.get("notification_type");
@@ -104,14 +133,15 @@ public class CloudConnectionStatusServiceImpl implements CloudConnectionStatusSe
 		 case CloudConnectionStatusURL.TYPE_LED:
 			 currentNotificationType = CloudConnectionStatusURL.TYPE_LED;
 			 
+			 LedIndex = (Integer) props.get("led");
 			 notificationLED = m_GPIOService.getPinByTerminal(
-					 (Integer) props.get("led"), 
+					 LedIndex, 
 					 KuraGPIODirection.OUTPUT, 
 					 KuraGPIOMode.OUTPUT_OPEN_DRAIN, 
 					 KuraGPIOTrigger.NONE);
 			 			 
 			 notificationLED.open();
-			 s_logger.info("CloudConnectionStatus active on LED {}.", props.get("led"));
+			 s_logger.info("CloudConnectionStatus active on LED {}.", LedIndex);
 			 break;
 		 case CloudConnectionStatusURL.TYPE_LOG:
 			 currentNotificationType = CloudConnectionStatusURL.TYPE_LOG;
@@ -201,17 +231,22 @@ public class CloudConnectionStatusServiceImpl implements CloudConnectionStatusSe
 	
 	private Runnable getWorker(CloudConnectionStatusEnum status){
 		if(currentNotificationType == CloudConnectionStatusURL.TYPE_LED){
-			switch(status){
-			case ON:
-				return new OnOffStatusRunnable(notificationLED, true);
-			case OFF:
-				return new OnOffStatusRunnable(notificationLED, false);
-			case SLOW_BLINKING:
-				return new BlinkStatusRunnable(notificationLED, CloudConnectionStatusEnum.SLOW_BLINKING_ON_TIME, CloudConnectionStatusEnum.SLOW_BLINKING_OFF_TIME);
-			case FAST_BLINKING:
-				return new BlinkStatusRunnable(notificationLED, CloudConnectionStatusEnum.FAST_BLINKING_ON_TIME, CloudConnectionStatusEnum.FAST_BLINKING_OFF_TIME);
-			case HEARTBEAT:
-				return new HeartbeatStatusRunnable(notificationLED);
+			if(notificationLED != null && notificationLED.isOpen()){
+				switch(status){
+				case ON:
+					return new OnOffStatusRunnable(notificationLED, true);
+				case OFF:
+					return new OnOffStatusRunnable(notificationLED, false);
+				case SLOW_BLINKING:
+					return new BlinkStatusRunnable(notificationLED, CloudConnectionStatusEnum.SLOW_BLINKING_ON_TIME, CloudConnectionStatusEnum.SLOW_BLINKING_OFF_TIME);
+				case FAST_BLINKING:
+					return new BlinkStatusRunnable(notificationLED, CloudConnectionStatusEnum.FAST_BLINKING_ON_TIME, CloudConnectionStatusEnum.FAST_BLINKING_OFF_TIME);
+				case HEARTBEAT:
+					return new HeartbeatStatusRunnable(notificationLED);
+				}
+			}else{
+				// LED not available. Falling back to log notification.
+				return new LogStatusRunnable(status);
 			}
 		}else if(currentNotificationType == CloudConnectionStatusURL.TYPE_LOG){
 			return new LogStatusRunnable(status);

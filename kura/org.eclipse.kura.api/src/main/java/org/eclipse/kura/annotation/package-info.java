@@ -11,14 +11,8 @@
  *     Amit Kumar Mondal (admin@amitinside.com)
  *******************************************************************************/
 /**
+ * Provides all necessary annotations required for Kura
  *
+ * @since 1.0.9
  */
-/**
- * Contains the necessary classes for the following framework related operations
- * <ul>
- * <li>Management of Exceptions</li>
- * <li>Preconditions for Defensive Programming - @since 1.0.9</li>
- * </ul>
- *
- */
-package org.eclipse.kura;
+package org.eclipse.kura.annotation;

@@ -27,6 +27,7 @@
 		<module>org.eclipse.kura.api</module>
 		<module>org.eclipse.kura.test</module>
 		<module>org.eclipse.kura.camel</module>
+		<module>org.eclipse.kura.camel.xml</module>
 		<module>org.eclipse.kura.core</module>
 		<module>org.eclipse.kura.core.certificates</module>
 		<module>org.eclipse.kura.core.cloud</module>

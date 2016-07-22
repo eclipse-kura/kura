@@ -9,142 +9,145 @@
  *******************************************************************************/
 package org.eclipse.kura.camel.cloud;
 
-import static org.eclipse.kura.camel.cloud.KuraCloudComponent.clientCache;
-
 import org.apache.camel.Consumer;
 import org.apache.camel.Processor;
 import org.apache.camel.impl.DefaultEndpoint;
 import org.apache.camel.spi.UriEndpoint;
 import org.apache.camel.spi.UriParam;
-import org.eclipse.kura.camel.utils.KuraServiceFactory;
-import org.eclipse.kura.cloud.CloudClient;
-import org.eclipse.kura.cloud.CloudService;
+import org.eclipse.kura.camel.internal.cloud.CloudClientCache;
+import org.eclipse.kura.camel.internal.cloud.CloudClientCache.CloudClientHandle;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @UriEndpoint(scheme = "kura-cloud", title = "Kura Cloud", label = "iot,kura,cloud", syntax = "kura-cloud:applicationId/appTopic")
 public class KuraCloudEndpoint extends DefaultEndpoint {
 
-    @UriParam(defaultValue = "")
-    private String applicationId = "";
+	private static final Logger logger = LoggerFactory.getLogger(KuraCloudEndpoint.class);
 
-    @UriParam(defaultValue = "")
-    private String topic = "";
+	@UriParam(defaultValue = "")
+	private String applicationId = "";
 
-    @UriParam(defaultValue = "0")
-    private int qos;
+	@UriParam(defaultValue = "")
+	private String topic = "";
 
-    @UriParam(defaultValue = "false")
-    private boolean retain = false;
+	@UriParam(defaultValue = "0")
+	private int qos;
 
-    @UriParam(defaultValue = "5")
-    private int priority = 5;
+	@UriParam(defaultValue = "false")
+	private boolean retain = false;
 
-    @UriParam(defaultValue = "false")
-    private boolean control = false;
+	@UriParam(defaultValue = "5")
+	private int priority = 5;
 
-    @UriParam(defaultValue = "")
-    private String deviceId;
+	@UriParam(defaultValue = "false")
+	private boolean control = false;
 
-    private CloudService cloudService;
+	@UriParam(defaultValue = "")
+	private String deviceId;
 
-    public KuraCloudEndpoint(String uri, KuraCloudComponent kuraCloudComponent, CloudService cloudService) {
-        super(uri, kuraCloudComponent);
-        this.cloudService = cloudService;
-    }
+	private CloudClientHandle cloudClientHandle;
 
-    @Override
-    public Consumer createConsumer(Processor processor) throws Exception {
-        CloudClient cloudClient = clientCache().getOrCreate(applicationId, cloudService);
-        return new KuraCloudConsumer(this, processor, cloudClient);
-    }
+	private CloudClientCache cache;
 
-    @Override
-    public KuraCloudProducer createProducer() throws Exception {
-        CloudClient cloudClient = clientCache().getOrCreate(applicationId, cloudService);
-        return new KuraCloudProducer(this, cloudClient);
-    }
+	public KuraCloudEndpoint(String uri, KuraCloudComponent kuraCloudComponent, CloudClientCache cache) {
+		super(uri, kuraCloudComponent);
+		this.cache = cache;
+	}
 
-    @Override
-    public boolean isSingleton() {
-        return true;
-    }
+	@Override
+	protected void doStart() throws Exception {
+		synchronized (this) {
+			this.cloudClientHandle = this.cache.getOrCreate(this.applicationId);
+			logger.debug("CloudClient {} -> {}", applicationId, cloudClientHandle.getClient());
+		}
+		super.doStart();
+	}
 
-    @Override
-    public KuraCloudComponent getComponent() {
-        return (KuraCloudComponent) super.getComponent();
-    }
+	@Override
+	protected void doStop() throws Exception {
+		super.doStop();
 
-    public String getTopic() {
-        return topic;
-    }
+		synchronized (this) {
+			if (this.cloudClientHandle != null) {
+				this.cloudClientHandle.close();
+				this.cloudClientHandle = null;
+			}
+		}
+	}
 
-    public void setTopic(String topic) {
-        this.topic = topic;
-    }
+	@Override
+	public Consumer createConsumer(Processor processor) throws Exception {
+		return new KuraCloudConsumer(this, processor, this.cloudClientHandle.getClient());
+	}
 
-    public int getQos() {
-        return qos;
-    }
+	@Override
+	public KuraCloudProducer createProducer() throws Exception {
+		return new KuraCloudProducer(this, this.cloudClientHandle.getClient());
+	}
 
-    public void setQos(int qos) {
-        this.qos = qos;
-    }
+	@Override
+	public boolean isSingleton() {
+		return true;
+	}
 
-    public boolean isRetain() {
-        return retain;
-    }
+	@Override
+	public KuraCloudComponent getComponent() {
+		return (KuraCloudComponent) super.getComponent();
+	}
 
-    public void setRetain(boolean retain) {
-        this.retain = retain;
-    }
+	public String getTopic() {
+		return topic;
+	}
 
-    public int getPriority() {
-        return priority;
-    }
+	public void setTopic(String topic) {
+		this.topic = topic;
+	}
 
-    public void setPriority(int priority) {
-        this.priority = priority;
-    }
+	public int getQos() {
+		return qos;
+	}
 
-    public boolean isControl() {
-        return control;
-    }
+	public void setQos(int qos) {
+		this.qos = qos;
+	}
 
-    public void setControl(boolean control) {
-        this.control = control;
-    }
+	public boolean isRetain() {
+		return retain;
+	}
 
-    public String getApplicationId() {
-        return applicationId;
-    }
+	public void setRetain(boolean retain) {
+		this.retain = retain;
+	}
 
-    public void setApplicationId(String applicationId) {
-        this.applicationId = applicationId;
-    }
+	public int getPriority() {
+		return priority;
+	}
 
-    public String getDeviceId() {
-        return deviceId;
-    }
+	public void setPriority(int priority) {
+		this.priority = priority;
+	}
 
-    public void setDeviceId(String deviceId) {
-        this.deviceId = deviceId;
-    }
+	public boolean isControl() {
+		return control;
+	}
 
-    public CloudService getCloudService() {
-        if(cloudService != null) {
-            return cloudService;
-        }
+	public void setControl(boolean control) {
+		this.control = control;
+	}
 
-        if(getComponent().getCloudService() != null) {
-            cloudService = getComponent().getCloudService();
-        } else {
-            cloudService = KuraServiceFactory.retrieveService(CloudService.class, this.getCamelContext().getRegistry());
-        }
+	public String getApplicationId() {
+		return applicationId;
+	}
 
-        return cloudService;
-    }
+	public void setApplicationId(String applicationId) {
+		this.applicationId = applicationId;
+	}
 
-    public void setCloudService(CloudService cloudService) {
-        this.cloudService = cloudService;
-    }
+	public String getDeviceId() {
+		return deviceId;
+	}
 
+	public void setDeviceId(String deviceId) {
+		this.deviceId = deviceId;
+	}
 }

@@ -14,57 +14,79 @@ import java.util.Map;
 import org.apache.camel.CamelContext;
 import org.apache.camel.Endpoint;
 import org.apache.camel.impl.UriEndpointComponent;
+import org.eclipse.kura.camel.internal.cloud.CloudClientCache;
+import org.eclipse.kura.camel.internal.cloud.CloudClientCacheImpl;
 import org.eclipse.kura.cloud.CloudService;
 
 import static org.eclipse.kura.camel.utils.KuraServiceFactory.retrieveService;
 
 public class KuraCloudComponent extends UriEndpointComponent {
 
-    private final static CloudClientCache clientCache = new ConcurrentHashMapCloudClientCache();
+	private CloudService cloudService;
+	private CloudClientCache cache;
 
-    private CloudService cloudService;
+	public KuraCloudComponent() {
+		super(KuraCloudEndpoint.class);
+	}
 
-    public KuraCloudComponent() {
-        super(KuraCloudEndpoint.class);
-    }
+	// Constructors
 
-    // Constructors
+	public KuraCloudComponent(CamelContext context) {
+		super(context, KuraCloudEndpoint.class);
+	}
 
-    public KuraCloudComponent(CamelContext context, Class<? extends Endpoint> endpointClass) {
-        super(context, endpointClass);
-    }
+	@Override
+	protected void doStart() throws Exception {
+		final CloudService cloudService = getCloudService();
 
-    // Operations
+		if (cloudService == null) {
+			throw new IllegalStateException(
+					"'cloudService' is not set and not found in Camel context service registry");
+		}
+		
+		this.cache = new CloudClientCacheImpl(cloudService);
 
-    @Override
-    protected Endpoint createEndpoint(String uri, String remain, Map<String, Object> parameters) throws Exception {
-        KuraCloudEndpoint kuraCloudEndpoint = new KuraCloudEndpoint(uri, this, cloudService);
+		super.doStart();
+	}
 
-        String[] res = remain.split("/", 2);
-        if (res.length < 2) {
-            throw new IllegalArgumentException("Wrong kura-cloud URI format. Should be: kura-cloud:app/topic");
-        }
-        parameters.put(KuraCloudConstants.APPLICATION_ID, res[0]);
-        parameters.put(KuraCloudConstants.TOPIC, res[1]);
+	@Override
+	protected void doStop() throws Exception {
+		super.doStop();
+		if ( cache != null ) 
+		{
+			cache.close ();
+			cache = null;
+		}
+	}
 
-        setProperties(kuraCloudEndpoint, parameters);
+	// Operations
 
-        return kuraCloudEndpoint;
-    }
+	@Override
+	protected Endpoint createEndpoint(String uri, String remain, Map<String, Object> parameters) throws Exception {
 
-    public static CloudClientCache clientCache() {
-        return clientCache;
-    }
+		final KuraCloudEndpoint kuraCloudEndpoint = new KuraCloudEndpoint(uri, this, this.cache);
 
-    public CloudService getCloudService() {
-        if(cloudService == null) {
-            cloudService = retrieveService(CloudService.class, getCamelContext().getRegistry());
-        }
-        return cloudService;
-    }
+		String[] res = remain.split("/", 2);
+		if (res.length < 2) {
+			throw new IllegalArgumentException("Wrong kura-cloud URI format. Should be: kura-cloud:app/topic");
+		}
+		parameters.put(KuraCloudConstants.APPLICATION_ID, res[0]);
+		parameters.put(KuraCloudConstants.TOPIC, res[1]);
 
-    public void setCloudService(CloudService cloudService) {
-        this.cloudService = cloudService;
-    }
+		setProperties(kuraCloudEndpoint, parameters);
+
+		return kuraCloudEndpoint;
+	}
+
+	private CloudService getCloudService() {
+		if (cloudService == null) {
+			cloudService = retrieveService(CloudService.class, getCamelContext().getRegistry());
+		}
+		return cloudService;
+	}
+
+	public void setCloudService(CloudService cloudService) {
+		this.cloudService = cloudService;
+	}
 
 }

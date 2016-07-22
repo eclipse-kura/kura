@@ -1,25 +1,33 @@
 package org.eclipse.kura.example.camel.quickstart;
 
+import java.util.Random;
+
+import org.apache.camel.CamelContext;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.eclipse.kura.camel.camelcloud.DefaultCamelCloudService;
 import org.eclipse.kura.camel.cloud.KuraCloudComponent;
-import org.eclipse.kura.camel.router.CamelRouter;
+import org.eclipse.kura.camel.router.AbstractCamelRouter;
 import org.eclipse.kura.message.KuraPayload;
-
-import java.util.Random;
 
 /**
  * Example of the Kura Camel application.
  */
-public class GatewayRouter extends CamelRouter {
-
+public class GatewayRouterJava extends AbstractCamelRouter {
+	
+	@Override
+	protected void beforeStart(CamelContext camelContext) {
+		final KuraCloudComponent cloudComponent = new KuraCloudComponent(camelContext);
+		cloudComponent.setCloudService(new DefaultCamelCloudService(camelContext));
+		camelContext.addComponent("kura-cloud", cloudComponent);
+		
+		super.beforeStart(camelContext);
+	}
+	
     @Override
     public void configure() throws Exception {
-        KuraCloudComponent cloudComponent = new KuraCloudComponent();
-        cloudComponent.setCloudService(new DefaultCamelCloudService(camelContext));
-        camelContext.addComponent("kura-cloud", cloudComponent);
-
+    	super.configure();
+    	
         from("timer://heartbeat").
                 process(new Processor() {
                     @Override
@@ -30,9 +38,9 @@ public class GatewayRouter extends CamelRouter {
                     }
                 }).to("kura-cloud:myapp/topic");
 
-        from("kura-cloud:myapp/topic").
-                choice().
-                  when(simple("${body.metrics()[temperature]} < 10"))
+        from("kura-cloud:myapp/topic")
+                .choice()
+                  .when(simple("${body.metrics()[temperature]} < 10"))
                 .to("log:lessThanTen")
                   .when(simple("${body.metrics()[temperature]} == 10"))
                   .to("log:equalToTen")

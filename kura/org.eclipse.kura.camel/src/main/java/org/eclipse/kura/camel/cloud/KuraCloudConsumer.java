@@ -9,120 +9,123 @@
  *******************************************************************************/
 package org.eclipse.kura.camel.cloud;
 
-import org.apache.camel.*;
+import static org.apache.camel.builder.ExchangeBuilder.anExchange;
+import static org.eclipse.kura.camel.camelcloud.KuraCloudClientConstants.CAMEL_KURA_CLOUD_CONTROL;
+import static org.eclipse.kura.camel.camelcloud.KuraCloudClientConstants.CAMEL_KURA_CLOUD_DEVICEID;
+import static org.eclipse.kura.camel.camelcloud.KuraCloudClientConstants.CAMEL_KURA_CLOUD_QOS;
+import static org.eclipse.kura.camel.camelcloud.KuraCloudClientConstants.CAMEL_KURA_CLOUD_RETAIN;
+import static org.eclipse.kura.camel.camelcloud.KuraCloudClientConstants.CAMEL_KURA_CLOUD_TOPIC;
+
+import org.apache.camel.Endpoint;
+import org.apache.camel.Exchange;
+import org.apache.camel.Processor;
 import org.apache.camel.impl.DefaultConsumer;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloud.CloudClient;
 import org.eclipse.kura.cloud.CloudClientListener;
 import org.eclipse.kura.message.KuraPayload;
 
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-
-import static org.eclipse.kura.camel.camelcloud.KuraCloudClientConstants.*;
-import static org.apache.camel.builder.ExchangeBuilder.anExchange;
-
 public class KuraCloudConsumer extends DefaultConsumer implements CloudClientListener {
+	private CloudClient cloudClient;
 
-    private ScheduledExecutorService executorService;
+	public KuraCloudConsumer(Endpoint endpoint, Processor processor, CloudClient cloudClient) {
+		super(endpoint, processor);
+		this.cloudClient = cloudClient;
+	}
 
-    private CloudClient cloudClient;
+	// Life-cycle
 
-    public KuraCloudConsumer(Endpoint endpoint, Processor processor, CloudClient cloudClient) {
-        super(endpoint, processor);
-        this.cloudClient = cloudClient;
-    }
+	@Override
+	protected void doStart() throws Exception {
+		super.doStart();
+		
+		log.debug("Starting CloudClientListener.");
+		
+		this.cloudClient.addCloudClientListener(this);
+		performSubscribe();
+	}
 
-    // Life-cycle
+	@Override
+	protected void doStop() throws Exception {
+		try {
+			this.cloudClient.unsubscribe(getEndpoint().getTopic());
+		} catch (Exception e) {
+			log.info("Failed to unsubscribe", e );
+		}
+		this.cloudClient.removeCloudClientListener(this);
+		log.debug("Stopping CloudClientListener.");
+		super.doStop();
+	}
 
-    @Override
-    protected void doStart() throws Exception {
-        super.doStart();
-        executorService = getEndpoint().getCamelContext().getExecutorServiceManager().newDefaultScheduledThreadPool(this, "executor");
-        cloudClient.addCloudClientListener(this);
-        getEndpoint().getCamelContext().addStartupListener(new StartupListener() {
-            @Override
-            public void onCamelContextStarted(CamelContext context, boolean alreadyStarted) throws Exception {
-                executorService.schedule(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            cloudClient.subscribe(getEndpoint().getTopic(), 0);
-                        } catch (KuraException e) {
-                            throw new RuntimeException(e);
-                        }
-                    }
-                }, 5, TimeUnit.SECONDS);
-            }
-        });
-        log.debug("Starting CloudClientListener.");
-    }
+	// CloudClientListener callbacks
 
-    @Override
-    protected void doStop() throws Exception {
-        getEndpoint().getCamelContext().getExecutorServiceManager().shutdown(executorService);
-        cloudClient.unsubscribe(getEndpoint().getTopic());
-        cloudClient.removeCloudClientListener(this);
-        log.debug("Stopping CloudClientListener.");
-        super.doStop();
-    }
+	@Override
+	public void onControlMessageArrived(String deviceId, String appTopic, KuraPayload msg, int qos, boolean retain) {
+		onInternalMessageArrived(deviceId, appTopic, msg, qos, retain, true);
+	}
 
-    // CloudClientListener callbacks
+	@Override
+	public void onMessageArrived(String deviceId, String appTopic, KuraPayload msg, int qos, boolean retain) {
+		onInternalMessageArrived(deviceId, appTopic, msg, qos, retain, false);
+	}
 
-    @Override
-    public void onControlMessageArrived(String deviceId, String appTopic, KuraPayload msg, int qos, boolean retain) {
-        onInternalMessageArrived(deviceId, appTopic, msg, qos, retain, true);
-    }
+	@Override
+	public void onConnectionLost() {
+		log.debug("Executing empty 'onConnectionLost' callback.");
+	}
 
-    @Override
-    public void onMessageArrived(String deviceId, String appTopic, KuraPayload msg, int qos, boolean retain) {
-        onInternalMessageArrived(deviceId, appTopic, msg, qos, retain, false);
-    }
+	@Override
+	public void onConnectionEstablished() {
+		log.debug("Executing empty 'onConnectionLost' callback.");
+		performSubscribe();
+	}
 
-    @Override
-    public void onConnectionLost() {
-        log.debug("Executing empty 'onConnectionLost' callback.");
-    }
+	private void performSubscribe() {
+		try {
+			log.debug("Perform subscribe: {} / {}", this.cloudClient, getEndpoint().getTopic() );
+			this.cloudClient.subscribe(getEndpoint().getTopic(), 0);
+		} catch (KuraException e) {
+			log.warn("Failed to subscribe", e);
+		}
+	}
 
-    @Override
-    public void onConnectionEstablished() {
-        log.debug("Executing empty 'onConnectionLost' callback.");
-    }
+	@Override
+	public void onMessageConfirmed(int messageId, String appTopic) {
+		log.debug("Executing empty 'onMessageConfirmed' callback with message ID {} and application topic {}.",
+				messageId, appTopic);
+	}
 
-    @Override
-    public void onMessageConfirmed(int messageId, String appTopic) {
-        log.debug("Executing empty 'onMessageConfirmed' callback with message ID {} and application topic {}.", messageId, appTopic);
-    }
+	@Override
+	public void onMessagePublished(int messageId, String appTopic) {
+		log.debug("Executing empty 'onMessagePublished' callback with message ID {} and application topic {}.",
+				messageId, appTopic);
+	}
 
-    @Override
-    public void onMessagePublished(int messageId, String appTopic) {
-        log.debug("Executing empty 'onMessagePublished' callback with message ID {} and application topic {}.", messageId, appTopic);
-    }
+	// Helpers
 
-    // Helpers
+	private void onInternalMessageArrived(String deviceId, String appTopic, KuraPayload message, int qos,
+			boolean retain, boolean control) {
+		log.debug("Received message with deviceId {}, application topic {}.", deviceId, appTopic);
+		Exchange exchange = anExchange(getEndpoint().getCamelContext()).withBody(message)
+				.withHeader(CAMEL_KURA_CLOUD_TOPIC, appTopic)
+				.withHeader(CAMEL_KURA_CLOUD_DEVICEID, deviceId)
+				.withHeader(CAMEL_KURA_CLOUD_QOS, qos)
+				.withHeader(CAMEL_KURA_CLOUD_CONTROL, control)
+				.withHeader(CAMEL_KURA_CLOUD_RETAIN, retain)
+				.build();
+		exchange.setFromEndpoint(getEndpoint());
+		try {
+			getProcessor().process(exchange);
+		} catch (Exception e) {
+			handleException("Error while processing an incoming message:", e);
+		}
+	}
 
-    private void onInternalMessageArrived(String deviceId, String appTopic, KuraPayload message, int qos, boolean retain,
-                                          boolean control) {
-        log.debug("Received message with deviceId {}, application topic {}.", deviceId, appTopic);
-        Exchange exchange = anExchange(getEndpoint().getCamelContext()).withBody(message)
-                .withHeader(CAMEL_KURA_CLOUD_TOPIC, appTopic)
-                .withHeader(CAMEL_KURA_CLOUD_DEVICEID, deviceId)
-                .withHeader(CAMEL_KURA_CLOUD_QOS, qos)
-                .withHeader(CAMEL_KURA_CLOUD_CONTROL, control)
-                .withHeader(CAMEL_KURA_CLOUD_RETAIN, retain).build();
-        exchange.setFromEndpoint(getEndpoint());
-        try {
-            getProcessor().process(exchange);
-        } catch (Exception e) {
-            handleException("Error while processing an incoming message:", e);
-        }
-    }
+	// Getters
 
-    // Getters
-
-    @Override
-    public KuraCloudEndpoint getEndpoint() {
-        return (KuraCloudEndpoint) super.getEndpoint();
-    }
+	@Override
+	public KuraCloudEndpoint getEndpoint() {
+		return (KuraCloudEndpoint) super.getEndpoint();
+	}
 
 }

@@ -24,7 +24,7 @@ import org.eclipse.kura.data.DataTransportService;
 import org.osgi.service.component.ComponentConstants;
 
 /**
- * The Kura default {@link CloudServiceFactory} implements a three layer stack architecture.
+ * The Kura default {@link CloudServiceFactory} implements a four layer stack architecture.
  * Each layer is an OSGi Declarative Services Factory Component and provides a service as follows:
  *
  * <table>
@@ -35,10 +35,11 @@ import org.osgi.service.component.ComponentConstants;
  *    <tr><td>org.eclipse.kura.cloud.CloudService</td><td>{@link CloudService}</td></tr>
  *    <tr><td>org.eclipse.kura.data.DataService</td><td>{@link DataService}</td></tr>
  *    <tr><td>org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport</td><td>{@link DataTransportService}</td></tr>
+ *    <tr><td>org.eclipse.kura.status.CloudConnectionStatusService</td><td>{@link CloudConnectionStatusService}</td></tr>
  * </tbody>
  * </table>
  * <br>
- * When a new CloudService is created the factory creates also a DataService and a DataTransportService.
+ * When a new CloudService is created the factory creates also a DataService, a DataTransportService and a CloudConnectionStatusService.
  * Since the <i>pid</i> parameter of {@link #createConfiguration(String)} only specifies the PID of
  * the CloudService layer, a convention is needed to derive the PIDs of the lower layers.
  * <br>
@@ -53,7 +54,8 @@ import org.osgi.service.component.ComponentConstants;
  * <tbody>
  *    <tr><td>org.eclipse.kura.cloud.CloudService</td><td>org.eclipse.kura.cloud.CloudService</td></tr>
  *    <tr><td>org.eclipse.kura.data.DataService</td><td>org.eclipse.kura.data.DataService</td></tr>
- *    <tr><td></td><td>org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport</td></tr>
+ *    <tr><td>org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport</td><td>org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport</td></tr>
+ *    <tr><td>org.eclipse.kura.status.CloudConnectionStatusService</td><td>org.eclipse.kura.status.CloudConnectionStatusService</td></tr>
  * </tbody>
  * </table>
  * <br>
@@ -70,6 +72,7 @@ import org.osgi.service.component.ComponentConstants;
  *    <tr><td>org.eclipse.kura.cloud.CloudService-2</td><td>org.eclipse.kura.cloud.CloudService</td></tr>
  *    <tr><td>org.eclipse.kura.data.DataService-2</td><td>org.eclipse.kura.data.DataService</td></tr>
  *    <tr><td>org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport-2</td><td>org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport</td></tr>
+ *    <tr><td>org.eclipse.kura.status.CloudConnectionStatusService-2</td><td>org.eclipse.kura.status.CloudConnectionStatusService</td></tr>
  * </tbody>
  * </table>
  * <br>
@@ -110,14 +113,17 @@ public class DefaultCloudServiceFactory implements CloudServiceFactory {
 	// The following constants must match the factory component definitions
 	private static final String CLOUD_SERVICE_FACTORY_PID = "org.eclipse.kura.cloud.CloudService";
 	private static final String DATA_SERVICE_FACTORY_PID = "org.eclipse.kura.data.DataService";
-	private static final String DATA_TRANSPORT_SERVICE_FACTORY_PID = "org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport";	
+	private static final String DATA_TRANSPORT_SERVICE_FACTORY_PID = "org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport";
+	private static final String CLOUD_CONNECTION_STATUS_SERVICE_FACTORY_PID = "org.eclipse.kura.status.CloudConnectionStatusService";
 	
 	private static final String CLOUD_SERVICE_PID = "org.eclipse.kura.cloud.CloudService";
 	private static final String DATA_SERVICE_PID = "org.eclipse.kura.data.DataService";
 	private static final String DATA_TRANSPORT_SERVICE_PID = "org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport";
+	private static final String CLOUD_CONNECTION_STATUS_SERVICE_PID = "org.eclipse.kura.status.CloudConnectionStatusService";
 	
 	private static final String DATA_SERVICE_REFERENCE_NAME = "DataService";
 	private static final String DATA_TRANSPORT_SERVICE_REFERENCE_NAME = "DataTransportService";
+	private static final String CLOUD_CONNECTION_STATUS_SERVICE_REFERENCE_NAME = "CloudConnectionStatusService";
 		
 	private static final String REFERENCE_TARGET_VALUE_FORMAT = "("+ConfigurationService.KURA_SERVICE_PID+"=%s)";
 	
@@ -149,9 +155,11 @@ public class DefaultCloudServiceFactory implements CloudServiceFactory {
 			
 			String dataServicePid = DATA_SERVICE_PID;
 			String dataTransportServicePid = DATA_TRANSPORT_SERVICE_PID;
+			String cloudConnectionStatusServicePid = CLOUD_CONNECTION_STATUS_SERVICE_PID;
 			if (suffix != null) {
 				dataServicePid += "-" + suffix;
 				dataTransportServicePid += "-" + suffix;
+				cloudConnectionStatusServicePid += "-" + suffix;
 			}
 			
 			// create the CloudService layer and set the selective dependency on the DataService PID
@@ -168,8 +176,15 @@ public class DefaultCloudServiceFactory implements CloudServiceFactory {
 			
 			m_configurationService.createFactoryConfiguration(DATA_SERVICE_FACTORY_PID, dataServicePid, dataServiceProperties, false);
 			
-			// create the DataTransportService layer and take a snapshot
-			m_configurationService.createFactoryConfiguration(DATA_TRANSPORT_SERVICE_FACTORY_PID, dataTransportServicePid, null, true);
+			// create the DataTransportService layer and set the selective dependency on the CloudConnectionStatusService PID
+			Map<String, Object> dataTransportProperties = new HashMap<String, Object>();
+			name = CLOUD_CONNECTION_STATUS_SERVICE_REFERENCE_NAME+ComponentConstants.REFERENCE_TARGET_SUFFIX;
+			dataTransportProperties.put(name, String.format(REFERENCE_TARGET_VALUE_FORMAT, cloudConnectionStatusServicePid));
+			
+			m_configurationService.createFactoryConfiguration(DATA_TRANSPORT_SERVICE_FACTORY_PID, dataTransportServicePid, dataTransportProperties, false);
+
+			// create the CloudConnectionStatus layer and take a snapshot
+			m_configurationService.createFactoryConfiguration(CLOUD_CONNECTION_STATUS_SERVICE_FACTORY_PID, cloudConnectionStatusServicePid, null, true);
 		} else {
 			throw new KuraException(KuraErrorCode.INVALID_PARAMETER, "Invalid PID '{}'", pid);
 		}
@@ -186,14 +201,17 @@ public class DefaultCloudServiceFactory implements CloudServiceFactory {
 			
 			String dataServicePid = DATA_SERVICE_PID;
 			String dataTransportServicePid = DATA_TRANSPORT_SERVICE_PID;
+			String cloudConnectionStatusServicePid = CLOUD_CONNECTION_STATUS_SERVICE_PID;
 			if (suffix != null) {
 				dataServicePid += "-" + suffix;
 				dataTransportServicePid += "-" + suffix;
+				cloudConnectionStatusServicePid += "-" + suffix;
 			}
 			
 			m_configurationService.deleteFactoryConfiguration(pid, false);
 			m_configurationService.deleteFactoryConfiguration(dataServicePid, false);
-			m_configurationService.deleteFactoryConfiguration(dataTransportServicePid, true);
+			m_configurationService.deleteFactoryConfiguration(dataTransportServicePid, false);
+			m_configurationService.deleteFactoryConfiguration(cloudConnectionStatusServicePid, true);
 		}
 	}
 }

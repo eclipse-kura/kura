@@ -17,15 +17,16 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import org.eclipse.kura.configuration.ConfigurationService;
+import org.eclipse.kura.core.status.runnables.BlinkStatusRunnable;
+import org.eclipse.kura.core.status.runnables.HeartbeatStatusRunnable;
+import org.eclipse.kura.core.status.runnables.LogStatusRunnable;
+import org.eclipse.kura.core.status.runnables.OnOffStatusRunnable;
 import org.eclipse.kura.gpio.GPIOService;
 import org.eclipse.kura.gpio.KuraGPIODirection;
 import org.eclipse.kura.gpio.KuraGPIOMode;
 import org.eclipse.kura.gpio.KuraGPIOPin;
 import org.eclipse.kura.gpio.KuraGPIOTrigger;
-import org.eclipse.kura.core.status.runnables.BlinkStatusRunnable;
-import org.eclipse.kura.core.status.runnables.HeartbeatStatusRunnable;
-import org.eclipse.kura.core.status.runnables.LogStatusRunnable;
-import org.eclipse.kura.core.status.runnables.OnOffStatusRunnable;
 import org.eclipse.kura.status.CloudConnectionStatusComponent;
 import org.eclipse.kura.status.CloudConnectionStatusEnum;
 import org.eclipse.kura.status.CloudConnectionStatusService;
@@ -36,7 +37,9 @@ import org.slf4j.LoggerFactory;
 
 public class CloudConnectionStatusServiceImpl implements CloudConnectionStatusService {
 
-	private static final String STATUS_NOTIFICATION_URL	= "ccs.status.notification.url";
+	private static final String STATUS_NOTIFICATION_DEFAULT_URL	= "ccs.status.notification.url";
+	
+	private static final String STATUS_NOTIFICATION_TEMPLATE_URL = "ccs.status.notification.url.%s";
 	
 	private static final Logger s_logger = LoggerFactory.getLogger(CloudConnectionStatusServiceImpl.class);
 	
@@ -53,6 +56,7 @@ public class CloudConnectionStatusServiceImpl implements CloudConnectionStatusSe
 	private static int currentNotificationType;
 	private static CloudConnectionStatusEnum currentStatus = null;
 	
+	// Set containing all the Components that have to be tracked by the CloudConnectionStatusService
 	private static final HashSet<CloudConnectionStatusComponent> componentRegistry = new HashSet<CloudConnectionStatusComponent>();
 	
 	// ----------------------------------------------------------------
@@ -92,8 +96,16 @@ public class CloudConnectionStatusServiceImpl implements CloudConnectionStatusSe
 	{		
 		s_logger.info("Activating CloudConnectionStatus service...");
 		
-		
-		String urlFromConfig = m_systemService.getProperties().getProperty(STATUS_NOTIFICATION_URL, CloudConnectionStatusURL.S_CCS+CloudConnectionStatusURL.S_NONE);
+		String pid = (String) componentContext.getProperties().get(ConfigurationService.KURA_SERVICE_PID);
+		String[] parts = pid.split("-");
+		String urlFromConfig = null;
+		if(parts.length==2){
+			String propName = String.format(STATUS_NOTIFICATION_TEMPLATE_URL, parts[1]);
+			urlFromConfig = m_systemService.getProperties().getProperty(propName, null);
+		}
+		if(urlFromConfig == null){
+			urlFromConfig = m_systemService.getProperties().getProperty(STATUS_NOTIFICATION_DEFAULT_URL, CloudConnectionStatusURL.S_CCS+CloudConnectionStatusURL.S_NONE);
+		}
 		
 		Properties props = CloudConnectionStatusURL.parseURL(urlFromConfig);
 		

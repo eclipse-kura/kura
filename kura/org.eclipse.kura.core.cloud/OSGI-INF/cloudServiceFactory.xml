@@ -7,6 +7,7 @@
    </service>
    <property name="osgi.command.scope" type="String" value="kura.cloud"/>
    <property name="osgi.command.function" type="String">
-      createConfiguration
+     createConfiguration
+     deleteConfiguration
    </property>
 </scr:component>

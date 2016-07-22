@@ -40,9 +40,10 @@ public interface Asset {
 	 * connection should be cleaned up and a {@code KuraException} shall be
 	 * thrown.
 	 *
-	 * @param channelNames
-	 *            the list of channel names which are to be read. The channel
-	 *            names for an asset must be unique for every channel.
+	 * @param channelIds
+	 *            the list of channel identifiers which are to be read. The
+	 *            channel identifiers for an asset must be unique for every
+	 *            channel belonging to an asset.
 	 * @throws KuraRuntimeException
 	 *             if the method is not implemented by the asset then specific
 	 *             error code {@code KuraErrorCode#OPERATION_NOT_SUPPORTED}
@@ -58,15 +59,15 @@ public interface Asset {
 	 * @return the list of asset records which comprises the currently read
 	 *         value in case of success or the reason of failure
 	 */
-	public List<AssetRecord> read(List<String> channelNames) throws KuraException;
+	public List<AssetRecord> read(List<Long> channelIds) throws KuraException;
 
 	/**
 	 * Registers asset listener for the provided channel name for a monitor
 	 * operation on it.
 	 *
-	 * @param channelName
-	 *            the channel name. The channel names for an asset must be
-	 *            unique for every channel.
+	 * @param channelId
+	 *            the channel identifier. The channel identifier for an asset
+	 *            must be unique for every channel belonging to an asset.
 	 * @param assetListener
 	 *            the asset listener
 	 * @throws KuraRuntimeException
@@ -82,9 +83,10 @@ public interface Asset {
 	 *             other internal exception, then error code
 	 *             {@code KuraErrorCode#INTERNAL_ERROR} will be set.
 	 * @throws KuraRuntimeException
-	 *             if any of the arguments is null
+	 *             if any of the arguments is null or channel ID is less than or
+	 *             equal to zero
 	 */
-	public void registerAssetListener(String channelName, AssetListener assetListener) throws KuraException;
+	public void registerAssetListener(long channelId, AssetListener assetListener) throws KuraException;
 
 	/**
 	 * Unregisters a already registered asset listener which has been registered

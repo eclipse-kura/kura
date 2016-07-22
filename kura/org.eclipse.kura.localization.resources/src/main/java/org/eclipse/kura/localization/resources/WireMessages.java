@@ -90,6 +90,9 @@ public interface WireMessages {
 	@En("BYTE")
 	public String byteStr();
 
+	@En("channel_id")
+	public String channelId();
+
 	@En("channel_name")
 	public String channelName();
 

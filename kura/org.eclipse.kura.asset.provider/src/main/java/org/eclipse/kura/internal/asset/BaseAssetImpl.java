@@ -135,22 +135,23 @@ public final class BaseAssetImpl implements BaseAsset {
 	/**
 	 * Checks if the provided channel is present in the provided map.
 	 *
-	 * @param channelName
+	 * @param channelId
 	 *            the name of channel
 	 * @param channels
 	 *            the provided container of channels
 	 * @return the id of the channel if found or else 0
 	 * @throws KuraRuntimeException
-	 *             if driver id provided is null
+	 *             any of the arguments is null or the provided is empty or the
+	 *             provided channel ID cannot be represented as an integer
 	 */
-	private long checkChannelAvailability(final String channelName, final Map<Long, Channel> channels) {
-		checkNull(channelName, s_message.channelNameNonNull());
+	private long checkChannelAvailability(final long channelId, final Map<Long, Channel> channels) {
+		checkNull(channelId, s_message.channelNameNonNull());
 		checkNull(channels, s_message.channelsNonNull());
 		checkCondition(channels.isEmpty(), s_message.channelsNonEmpty());
 
 		for (final Map.Entry<Long, Channel> channel : channels.entrySet()) {
-			final String chName = channel.getValue().getName();
-			if (channelName.equals(chName)) {
+			final long chId = channel.getValue().getId();
+			if (channelId == chId) {
 				return channel.getKey();
 			}
 		}
@@ -189,9 +190,9 @@ public final class BaseAssetImpl implements BaseAsset {
 
 	/** {@inheritDoc} */
 	@Override
-	public List<AssetRecord> read(final List<String> channelNames) throws KuraException {
-		checkNull(channelNames, s_message.channelsNonNull());
-		checkCondition(channelNames.isEmpty(), s_message.channelsNonEmpty());
+	public List<AssetRecord> read(final List<Long> channelIds) throws KuraException {
+		checkNull(channelIds, s_message.channelsNonNull());
+		checkCondition(channelIds.isEmpty(), s_message.channelsNonEmpty());
 		checkNull(this.m_driver, s_message.driverNonNull());
 
 		s_logger.debug(s_message.readingChannels());
@@ -199,15 +200,15 @@ public final class BaseAssetImpl implements BaseAsset {
 		final List<DriverRecord> driverRecords = CollectionUtil.newArrayList();
 
 		final Map<Long, Channel> channels = this.m_assetConfiguration.getChannels();
-		for (final String channelName : channelNames) {
-			final long id = this.checkChannelAvailability(channelName, channels);
+		for (final long channelId : channelIds) {
+			final long id = this.checkChannelAvailability(channelId, channels);
 			checkCondition(id == 0, s_message.channelUnavailable());
 
 			final Channel channel = channels.get(id);
 			checkCondition((channel.getType() != READ) || (channel.getType() != READ_WRITE),
 					s_message.channelTypeNotReadable() + channel);
 
-			final DriverRecord driverRecord = this.m_assetHelper.newDriverRecord(channelName);
+			final DriverRecord driverRecord = this.m_assetHelper.newDriverRecord(channelId);
 			driverRecord.setChannelConfig(channel.getConfiguration());
 			driverRecords.add(driverRecord);
 		}
@@ -220,7 +221,7 @@ public final class BaseAssetImpl implements BaseAsset {
 		}
 
 		for (final DriverRecord driverRecord : driverRecords) {
-			final AssetRecord assetRecord = this.m_assetHelper.newAssetRecord(driverRecord.getChannelName());
+			final AssetRecord assetRecord = this.m_assetHelper.newAssetRecord(driverRecord.getChannelId());
 			final DriverFlag driverFlag = driverRecord.getDriverFlag();
 
 			switch (driverFlag) {
@@ -247,14 +248,13 @@ public final class BaseAssetImpl implements BaseAsset {
 
 	/** {@inheritDoc} */
 	@Override
-	public void registerAssetListener(final String channelName, final AssetListener assetListener)
-			throws KuraException {
-		checkNull(channelName, s_message.channelNameNonNull());
+	public void registerAssetListener(final long channelId, final AssetListener assetListener) throws KuraException {
+		checkCondition(channelId <= 0, s_message.channelIdNotLessThanZero());
 		checkNull(assetListener, s_message.listenerNonNull());
 
 		s_logger.debug(s_message.registeringListener());
 		final Map<Long, Channel> channels = this.m_assetConfiguration.getChannels();
-		final long id = this.checkChannelAvailability(channelName, channels);
+		final long id = this.checkChannelAvailability(channelId, channels);
 		checkCondition(id == 0, s_message.channelUnavailable());
 
 		/**
@@ -271,24 +271,24 @@ public final class BaseAssetImpl implements BaseAsset {
 			/** The asset listener instance. */
 			private final AssetListener m_assetListener;
 
-			/** The channel name. */
-			private final String m_channelName;
+			/** The channel identifier. */
+			private final long m_channelId;
 
 			/**
 			 * Instantiates a new base driver listener.
 			 *
-			 * @param channelName
-			 *            the channel name as provided
+			 * @param channelId
+			 *            the channel identifier as provided
 			 * @param assetListener
 			 *            the asset listener
 			 * @throws KuraRuntimeException
 			 *             if any of the arguments is null
 			 */
-			BaseDriverListener(final String channelName, final AssetListener assetListener) {
-				checkNull(channelName, s_message.channelNameNonNull());
+			BaseDriverListener(final long channelId, final AssetListener assetListener) {
+				checkCondition(channelId <= 0, s_message.channelIdNotLessThanZero());
 				checkNull(assetListener, s_message.listenerNonNull());
 
-				this.m_channelName = channelName;
+				this.m_channelId = channelId;
 				this.m_assetListener = assetListener;
 			}
 
@@ -297,7 +297,7 @@ public final class BaseAssetImpl implements BaseAsset {
 			public void onDriverEvent(final DriverEvent event) {
 				checkNull(event, s_message.driverEventNonNull());
 				final DriverRecord driverRecord = event.getDriverRecord();
-				final AssetRecord assetRecord = BaseAssetImpl.this.m_assetHelper.newAssetRecord(this.m_channelName);
+				final AssetRecord assetRecord = BaseAssetImpl.this.m_assetHelper.newAssetRecord(this.m_channelId);
 				final DriverFlag driverFlag = driverRecord.getDriverFlag();
 
 				switch (driverFlag) {
@@ -323,8 +323,8 @@ public final class BaseAssetImpl implements BaseAsset {
 			}
 		}
 
-		final Channel channel = channels.get(channelName);
-		final DriverListener driverListener = new BaseDriverListener(channelName, assetListener);
+		final Channel channel = channels.get(channelId);
+		final DriverListener driverListener = new BaseDriverListener(channelId, assetListener);
 
 		this.m_assetListeners.put(assetListener, driverListener);
 		checkNull(this.m_driver, s_message.driverNonNull());
@@ -422,13 +422,13 @@ public final class BaseAssetImpl implements BaseAsset {
 
 		final Map<Long, Channel> channels = this.m_assetConfiguration.getChannels();
 		for (final AssetRecord assetRecord : assetRecords) {
-			final long id = this.checkChannelAvailability(assetRecord.getChannelName(), channels);
+			final long id = this.checkChannelAvailability(assetRecord.getChannelId(), channels);
 			checkCondition(id == 0, s_message.channelUnavailable());
 
 			final Channel channel = channels.get(id);
 			checkCondition((channel.getType() != WRITE) || (channel.getType() != READ_WRITE),
 					s_message.channelTypeNotWritable() + channel);
-			final DriverRecord driverRecord = this.m_assetHelper.newDriverRecord(channel.getName());
+			final DriverRecord driverRecord = this.m_assetHelper.newDriverRecord(channel.getId());
 			driverRecord.setChannelConfig(channel.getConfiguration());
 			driverRecord.setValue(assetRecord.getValue());
 			driverRecords.add(driverRecord);
@@ -445,7 +445,7 @@ public final class BaseAssetImpl implements BaseAsset {
 
 		for (final DriverRecord driverRecord : mappedRecords.keySet()) {
 			final AssetRecord assetRecord = mappedRecords.get(driverRecord);
-			assetRecord.setChannelName(driverRecord.getChannelName());
+			assetRecord.setChannelId(driverRecord.getChannelId());
 			final DriverFlag driverFlag = driverRecord.getDriverFlag();
 			switch (driverFlag) {
 			case WRITE_SUCCESSFUL:

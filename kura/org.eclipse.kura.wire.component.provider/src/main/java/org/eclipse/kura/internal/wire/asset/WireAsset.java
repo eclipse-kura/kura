@@ -230,8 +230,8 @@ public final class WireAsset implements WireEmitter, WireReceiver, SelfConfiguri
 
 		final List<WireRecord> wireRecords = CollectionUtil.newArrayList();
 		for (final AssetRecord assetRecord : assetRecords) {
-			final WireField channelWireField = this.m_wireHelperService.newWireField(s_message.channelName(),
-					TypedValues.newStringValue(assetRecord.getChannelName()));
+			final WireField channelIdWireField = this.m_wireHelperService.newWireField(s_message.channelId(),
+					TypedValues.newLongValue(assetRecord.getChannelId()));
 			final WireField assetFlagWireField = this.m_wireHelperService.newWireField(s_message.assetFlag(),
 					TypedValues.newStringValue(assetRecord.getAssetFlag().name()));
 			final WireField timestampWireField = this.m_wireHelperService.newWireField(s_message.timestamp(),
@@ -239,7 +239,7 @@ public final class WireAsset implements WireEmitter, WireReceiver, SelfConfiguri
 			final WireField valueWireField = this.m_wireHelperService.newWireField(s_message.value(),
 					assetRecord.getValue());
 			final WireRecord wireRecord = this.m_wireHelperService.newWireRecord(new Timestamp(new Date().getTime()),
-					Arrays.asList(channelWireField, assetFlagWireField, timestampWireField, valueWireField));
+					Arrays.asList(channelIdWireField, assetFlagWireField, timestampWireField, valueWireField));
 			wireRecords.add(wireRecord);
 		}
 		this.m_wireSupport.emit(wireRecords);
@@ -343,13 +343,13 @@ public final class WireAsset implements WireEmitter, WireReceiver, SelfConfiguri
 		s_logger.debug(s_message.wireEnvelopeReceived() + this.m_wireSupport);
 
 		final List<AssetRecord> assetRecordsToWriteChannels = CollectionUtil.newArrayList();
-		final List<String> channelsToRead = CollectionUtil.newArrayList();
+		final List<Long> channelsToRead = CollectionUtil.newArrayList();
 		final Map<Long, Channel> channels = this.m_assetConfiguration.getChannels();
 		// determining channels to read
 		for (final Map.Entry<Long, Channel> channelEntry : channels.entrySet()) {
 			final Channel channel = channelEntry.getValue();
 			if ((channel.getType() == READ) || (channel.getType() == READ_WRITE)) {
-				channelsToRead.add(channel.getName());
+				channelsToRead.add(channel.getId());
 			}
 		}
 		checkCondition(wireEnvelope.getRecords().isEmpty(), s_message.wireRecordsNonEmpty());
@@ -400,7 +400,7 @@ public final class WireAsset implements WireEmitter, WireReceiver, SelfConfiguri
 		checkNull(channel, s_message.channelNonNull());
 		checkNull(value, s_message.valueNonNull());
 
-		final AssetRecord assetRecord = this.m_assetHelper.newAssetRecord(channel.getName());
+		final AssetRecord assetRecord = this.m_assetHelper.newAssetRecord(channel.getId());
 		assetRecord.setValue(value);
 		return assetRecord;
 	}

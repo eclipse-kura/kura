@@ -47,8 +47,8 @@ public final class AssetHelperServiceImpl implements AssetHelperService {
 
 	/** {@inheritDoc} */
 	@Override
-	public AssetRecord newAssetRecord(final String channelName) {
-		return new AssetRecord(channelName);
+	public AssetRecord newAssetRecord(final long channelId) {
+		return new AssetRecord(channelId);
 	}
 
 	/** {@inheritDoc} */
@@ -72,8 +72,8 @@ public final class AssetHelperServiceImpl implements AssetHelperService {
 
 	/** {@inheritDoc} */
 	@Override
-	public DriverRecord newDriverRecord(final String channelName) {
-		return new DriverRecord(channelName);
+	public DriverRecord newDriverRecord(final long channelId) {
+		return new DriverRecord(channelId);
 	}
 
 }

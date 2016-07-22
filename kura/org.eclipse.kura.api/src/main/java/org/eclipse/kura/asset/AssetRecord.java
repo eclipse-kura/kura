@@ -12,12 +12,14 @@
  */
 package org.eclipse.kura.asset;
 
+import static org.eclipse.kura.Preconditions.checkCondition;
 import static org.eclipse.kura.Preconditions.checkNull;
 
 import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.annotation.NotThreadSafe;
 import org.eclipse.kura.type.TypedValue;
 
+// TODO: Auto-generated Javadoc
 /**
  * The Class AssetRecord represents a record to perform read/write/monitor
  * operation on the provided channel using the associated driver.
@@ -29,10 +31,10 @@ public final class AssetRecord {
 	private AssetFlag assetFlag;
 
 	/**
-	 * The associated channel name. The channel name for any asset must be
-	 * unique.
+	 * The associated channel identifier. The channel identifier for any asset
+	 * must be unique.
 	 */
-	private String channelName;
+	private long channelId;
 
 	/** The timestamp of the record. */
 	private long timestamp;
@@ -47,14 +49,14 @@ public final class AssetRecord {
 	/**
 	 * Instantiates a new asset record.
 	 *
-	 * @param channelName
-	 *            the channel name
+	 * @param channelId
+	 *            the channel identifier
 	 * @throws KuraRuntimeException
-	 *             if the argument is null
+	 *             if the channel identifier is less than or equal to zero
 	 */
-	public AssetRecord(final String channelName) {
-		checkNull(channelName, "Channel name cannot be null");
-		this.channelName = channelName;
+	public AssetRecord(final long channelId) {
+		checkCondition(channelId <= 0, "Channel ID cannot be zero or less");
+		this.channelId = channelId;
 	}
 
 	/** {@inheritDoc} */
@@ -73,11 +75,7 @@ public final class AssetRecord {
 		if (this.assetFlag != other.assetFlag) {
 			return false;
 		}
-		if (this.channelName == null) {
-			if (other.channelName != null) {
-				return false;
-			}
-		} else if (!this.channelName.equals(other.channelName)) {
+		if (this.channelId != other.channelId) {
 			return false;
 		}
 		if (this.timestamp != other.timestamp) {
@@ -103,12 +101,12 @@ public final class AssetRecord {
 	}
 
 	/**
-	 * Gets the channel name.
+	 * Gets the channel identifier.
 	 *
-	 * @return the channel name
+	 * @return the channel identifier
 	 */
-	public String getChannelName() {
-		return this.channelName;
+	public long getChannelId() {
+		return this.channelId;
 	}
 
 	/**
@@ -135,7 +133,7 @@ public final class AssetRecord {
 		final int prime = 31;
 		int result = 1;
 		result = (prime * result) + ((this.assetFlag == null) ? 0 : this.assetFlag.hashCode());
-		result = (prime * result) + ((this.channelName == null) ? 0 : this.channelName.hashCode());
+		result = (prime * result) + (int) (this.channelId ^ (this.channelId >>> 32));
 		result = (prime * result) + (int) (this.timestamp ^ (this.timestamp >>> 32));
 		result = (prime * result) + ((this.value == null) ? 0 : this.value.hashCode());
 		return result;
@@ -155,16 +153,16 @@ public final class AssetRecord {
 	}
 
 	/**
-	 * Sets the channel name as provided.
+	 * Sets the asset flag as provided.
 	 *
-	 * @param channelName
-	 *            the new channel name
+	 * @param channelId
+	 *            the new channel id
 	 * @throws KuraRuntimeException
-	 *             if the argument is null
+	 *             if the channel identifier is less than or equal to zero
 	 */
-	public void setChannelName(final String channelName) {
-		checkNull(channelName, "Channel name cannot be null");
-		this.channelName = channelName;
+	public void setChannelId(final long channelId) {
+		checkCondition(channelId <= 0, "Channel ID cannot be zero or less");
+		this.channelId = channelId;
 	}
 
 	/**
@@ -193,7 +191,7 @@ public final class AssetRecord {
 	/** {@inheritDoc} */
 	@Override
 	public String toString() {
-		return "AssetRecord [assetFlag=" + this.assetFlag + ", channelName=" + this.channelName + ", timestamp="
+		return "AssetRecord [assetFlag=" + this.assetFlag + ", channelId=" + this.channelId + ", timestamp="
 				+ this.timestamp + ", value=" + this.value + "]";
 	}
 

@@ -46,6 +46,12 @@ public interface AssetMessages {
 	@En("Bundle context cannot be null")
 	public String bundleContextNonNull();
 
+	@En("Channel ID must be provided as an integer")
+	public String channelAsInteger();
+
+	@En("Channel ID cannot be zero or less")
+	public String channelIdNotLessThanZero();
+
 	@En("channel_name")
 	public String channelName();
 

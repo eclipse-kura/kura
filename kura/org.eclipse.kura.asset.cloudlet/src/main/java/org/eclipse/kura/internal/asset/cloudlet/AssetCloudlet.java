@@ -52,16 +52,15 @@ import org.slf4j.LoggerFactory;
  * <li>/assets</li> : to retrieve all the assets
  * <li>/assets/asset_name</li> : to retrieve all the channels of the provided
  * asset name
- * <li>/assets/asset_name/channel_name</li> : to retrieve the value of the
+ * <li>/assets/asset_name/channel_id</li> : to retrieve the value of the
  * specified channel from the provided asset name
  * </ul>
  *
  * The available {@code PUT} commands are as follows
  * <ul>
- * <li>/assets/asset_name/channel_name</li> : to write the provided
- * {@code value} in the payload to the specified channel of the provided asset
- * name. The payload must also include the {@code type} of the {@code value}
- * provided.
+ * <li>/assets/asset_name/channel_id</li> : to write the provided {@code value}
+ * in the payload to the specified channel of the provided asset name. The
+ * payload must also include the {@code type} of the {@code value} provided.
  * </ul>
  *
  * The {@code type} key in the request payload can be one of the following
@@ -156,22 +155,25 @@ public final class AssetCloudlet extends Cloudlet {
 	/**
 	 * Checks if the provided channel is present in the provided map
 	 *
-	 * @param channelName
-	 *            the name of channel
+	 * @param channelId
+	 *            the identifier of the channel
 	 * @param channels
 	 *            the provided container of channels
 	 * @return the id of the channel if found or else 0
 	 * @throws KuraRuntimeException
-	 *             any of the arguments is null or the provided is empty
+	 *             any of the arguments is null or the provided is empty or the
+	 *             provided channel ID cannot be represented as an integer
 	 */
-	private long checkChannelAvailability(final String channelName, final Map<Long, Channel> channels) {
-		checkNull(channelName, s_message.channelNameNonNull());
+	private long checkChannelAvailability(final String channelId, final Map<Long, Channel> channels) {
+		checkNull(channelId, s_message.channelNameNonNull());
+		checkCondition(channelId.matches("\\d+"), s_message.channelAsInteger());
 		checkNull(channels, s_message.channelsNonNull());
 		checkCondition(channels.isEmpty(), s_message.channelsNonEmpty());
 
 		for (final Map.Entry<Long, Channel> channel : channels.entrySet()) {
-			final String chName = channel.getValue().getName();
-			if (channelName.equals(chName)) {
+			final long chId = channel.getValue().getId();
+			final long providedChannelId = Long.valueOf(channelId);
+			if (providedChannelId == chId) {
 				return channel.getKey();
 			}
 		}
@@ -209,23 +211,22 @@ public final class AssetCloudlet extends Cloudlet {
 				final Asset asset = this.m_assets.get(assetName);
 				final AssetConfiguration configuration = ((BaseAsset) asset).getAssetConfiguration();
 				final Map<Long, Channel> assetConfiguredChannels = configuration.getChannels();
-				int index = 1;
 				for (final Map.Entry<Long, Channel> entry : assetConfiguredChannels.entrySet()) {
 					final Channel channel = entry.getValue();
-					respPayload.addMetric(String.valueOf(index++), channel);
+					respPayload.addMetric(String.valueOf(channel.getId()), channel.getName());
 				}
 			}
 			// Checks if the name of the asset and the name of the channel are
 			// provided
 			if (reqTopic.getResources().length == 3) {
 				final String assetName = reqTopic.getResources()[1];
-				final String channelName = reqTopic.getResources()[2];
+				final String channelId = reqTopic.getResources()[2];
 				final Asset asset = this.m_assets.get(assetName);
 				final AssetConfiguration configuration = ((BaseAsset) asset).getAssetConfiguration();
 				final Map<Long, Channel> assetConfiguredChannels = configuration.getChannels();
-				final long id = this.checkChannelAvailability(channelName, assetConfiguredChannels);
+				final long id = this.checkChannelAvailability(channelId, assetConfiguredChannels);
 				if ((assetConfiguredChannels != null) && (id != 0)) {
-					final List<AssetRecord> assetRecords = asset.read(Arrays.asList(channelName));
+					final List<AssetRecord> assetRecords = asset.read(Arrays.asList(id));
 					this.prepareResponse(respPayload, assetRecords);
 				}
 			}
@@ -244,13 +245,13 @@ public final class AssetCloudlet extends Cloudlet {
 			// perform a search operation at the beginning
 			this.findAssets();
 			final String assetName = reqTopic.getResources()[1];
-			final String channelName = reqTopic.getResources()[2];
+			final String channelId = reqTopic.getResources()[2];
 			final Asset asset = this.m_assets.get(assetName);
 			final AssetConfiguration configuration = ((BaseAsset) asset).getAssetConfiguration();
 			final Map<Long, Channel> assetConfiguredChannels = configuration.getChannels();
-			final long id = this.checkChannelAvailability(channelName, assetConfiguredChannels);
+			final long id = this.checkChannelAvailability(channelId, assetConfiguredChannels);
 			if ((assetConfiguredChannels != null) && (id != 0)) {
-				final AssetRecord assetRecord = this.m_assetHelper.newAssetRecord(channelName);
+				final AssetRecord assetRecord = this.m_assetHelper.newAssetRecord(id);
 				final String userValue = (String) reqPayload.getMetric("value");
 				final String userType = (String) reqPayload.getMetric("type");
 				this.wrapValue(assetRecord, userValue, userType);
@@ -286,7 +287,7 @@ public final class AssetCloudlet extends Cloudlet {
 			respPayload.addMetric(s_message.flag(), assetRecord.getAssetFlag());
 			respPayload.addMetric(s_message.timestamp(), assetRecord.getTimestamp());
 			respPayload.addMetric(s_message.value(), assetRecord.getValue());
-			respPayload.addMetric(s_message.channel(), assetRecord.getChannelName());
+			respPayload.addMetric(s_message.channel(), assetRecord.getChannelId());
 		}
 	}
 

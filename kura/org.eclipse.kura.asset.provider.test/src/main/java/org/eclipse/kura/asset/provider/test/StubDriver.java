@@ -18,37 +18,56 @@ import java.util.Map;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.asset.ChannelDescriptor;
 import org.eclipse.kura.asset.Driver;
+import org.eclipse.kura.asset.DriverFlag;
 import org.eclipse.kura.asset.DriverListener;
 import org.eclipse.kura.asset.DriverRecord;
 
 public final class StubDriver implements Driver {
 
+	private boolean isConnected;
+
+	/** {@inheritDoc} */
 	@Override
 	public void connect() throws KuraException {
+		this.isConnected = true;
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public void disconnect() throws KuraException {
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public ChannelDescriptor getChannelDescriptor() {
 		return null;
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public void read(final List<DriverRecord> records) throws KuraException {
+		if (!this.isConnected) {
+			this.connect();
+		}
+
+		for (final DriverRecord record : records) {
+			record.setDriverFlag(DriverFlag.READ_SUCCESSFUL);
+			// record.setValue(TypedValues.newBooleanValue(value);
+		}
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public void registerDriverListener(final Map<String, Object> channelConfig, final DriverListener listener)
 			throws KuraException {
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public void unregisterDriverListener(final DriverListener listener) throws KuraException {
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public void write(final List<DriverRecord> records) throws KuraException {
 	}

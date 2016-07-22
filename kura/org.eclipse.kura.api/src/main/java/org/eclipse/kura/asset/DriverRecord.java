@@ -12,6 +12,7 @@
  */
 package org.eclipse.kura.asset;
 
+import static org.eclipse.kura.Preconditions.checkCondition;
 import static org.eclipse.kura.Preconditions.checkNull;
 
 import java.util.HashMap;
@@ -35,9 +36,10 @@ public final class DriverRecord {
 	private Map<String, Object> channelConfiguration;
 
 	/**
-	 * Channel Name as associated with the asset.
+	 * The associated channel identifier. The channel identifier for any asset
+	 * must be unique.
 	 */
-	private String channelName;
+	private final long channelId;
 
 	/**
 	 * Represents a driver specific flag which signifies the status of the read
@@ -58,14 +60,14 @@ public final class DriverRecord {
 	/**
 	 * Instantiates a new driver record.
 	 *
-	 * @param channelName
-	 *            the channel name
+	 * @param channelId
+	 *            the channel identifier
 	 * @throws KuraRuntimeException
-	 *             if the argument is null
+	 *             if the channel identifier is less than or equal to zero
 	 */
-	public DriverRecord(final String channelName) {
-		checkNull(channelName, "Channel name cannot be null");
-		this.channelName = channelName;
+	public DriverRecord(final long channelId) {
+		checkCondition(channelId <= 0, "Channel ID cannot be zero or less");
+		this.channelId = channelId;
 	}
 
 	/** {@inheritDoc} */
@@ -88,11 +90,7 @@ public final class DriverRecord {
 		} else if (!this.channelConfiguration.equals(other.channelConfiguration)) {
 			return false;
 		}
-		if (this.channelName == null) {
-			if (other.channelName != null) {
-				return false;
-			}
-		} else if (!this.channelName.equals(other.channelName)) {
+		if (this.channelId != other.channelId) {
 			return false;
 		}
 		if (this.driverFlag != other.driverFlag) {
@@ -121,12 +119,12 @@ public final class DriverRecord {
 	}
 
 	/**
-	 * Gets the channel name.
+	 * Gets the channel identifier.
 	 *
-	 * @return the channel name
+	 * @return the channel identifier
 	 */
-	public String getChannelName() {
-		return this.channelName;
+	public long getChannelId() {
+		return this.channelId;
 	}
 
 	/**
@@ -162,7 +160,7 @@ public final class DriverRecord {
 		final int prime = 31;
 		int result = 1;
 		result = (prime * result) + ((this.channelConfiguration == null) ? 0 : this.channelConfiguration.hashCode());
-		result = (prime * result) + ((this.channelName == null) ? 0 : this.channelName.hashCode());
+		result = (prime * result) + (int) (this.channelId ^ (this.channelId >>> 32));
 		result = (prime * result) + ((this.driverFlag == null) ? 0 : this.driverFlag.hashCode());
 		result = (prime * result) + (int) (this.timestamp ^ (this.timestamp >>> 32));
 		result = (prime * result) + ((this.value == null) ? 0 : this.value.hashCode());
@@ -180,19 +178,6 @@ public final class DriverRecord {
 	public void setChannelConfig(final Map<String, Object> channelConfig) {
 		checkNull(channelConfig, "Channel configuration cannot be null");
 		this.channelConfiguration = new HashMap<String, Object>(channelConfig);
-	}
-
-	/**
-	 * Sets the channel name.
-	 *
-	 * @param channelName
-	 *            the new channel name
-	 * @throws KuraRuntimeException
-	 *             if the argument is null
-	 */
-	public void setChannelName(final String channelName) {
-		checkNull(channelName, "Channel name cannot be null");
-		this.channelName = channelName;
 	}
 
 	/**
@@ -234,7 +219,7 @@ public final class DriverRecord {
 	/** {@inheritDoc} */
 	@Override
 	public String toString() {
-		return "DriverRecord [channelConfiguration=" + this.channelConfiguration + ", channelName=" + this.channelName
+		return "DriverRecord [channelConfiguration=" + this.channelConfiguration + ", channelId=" + this.channelId
 				+ ", driverFlag=" + this.driverFlag + ", timestamp=" + this.timestamp + ", value=" + this.value + "]";
 	}
 

@@ -55,13 +55,13 @@ public interface AssetHelperService {
 	/**
 	 * Prepares new asset record.
 	 *
-	 * @param channelName
-	 *            the channel name
+	 * @param channelId
+	 *            the channel identifier
 	 * @return the new asset record
 	 * @throws KuraRuntimeException
-	 *             if the argument is null
+	 *             if the argument is less than or equal to zero
 	 */
-	public AssetRecord newAssetRecord(final String channelName);
+	public AssetRecord newAssetRecord(final long channelId);
 
 	/**
 	 * Prepares the new basic asset instance
@@ -104,12 +104,12 @@ public interface AssetHelperService {
 	/**
 	 * Prepares new driver record.
 	 *
-	 * @param channelName
-	 *            the channel name
+	 * @param channelId
+	 *            the channel identifier
 	 * @return the newly created driver record
 	 * @throws KuraRuntimeException
-	 *             if the argument is null
+	 *             if the argument is less than or equal to zero
 	 */
-	public DriverRecord newDriverRecord(final String channelName);
+	public DriverRecord newDriverRecord(final long channelId);
 
 }

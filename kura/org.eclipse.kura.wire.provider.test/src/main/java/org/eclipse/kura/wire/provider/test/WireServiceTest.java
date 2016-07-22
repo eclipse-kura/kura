@@ -13,12 +13,14 @@ package org.eclipse.kura.wire.provider.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
+import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.test.annotation.TestTarget;
 import org.eclipse.kura.wire.WireConfiguration;
@@ -94,6 +96,26 @@ public final class WireServiceTest {
 		assertEquals(1, list.size());
 		s_wireService.deleteWireConfiguration(configuration);
 		assertEquals(0, list.size());
+	}
+
+	/**
+	 * Tests the condition in case the emitter PID or receiver PID are not
+	 * assigned to any available wire component
+	 */
+	@TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+	@Test(expected = KuraException.class)
+	public void testEmitterReceiverPidNotAvailable() throws KuraException {
+		s_wireService.createWireConfiguration("x", "y");
+	}
+
+	/**
+	 * Tests the condition in case the emitter PID and receiver PID are same
+	 */
+	@TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+	@Test
+	public void testSameEmitterAndReceiverPid() throws KuraException {
+		final WireConfiguration configuration = s_wireService.createWireConfiguration(emitterPid, emitterPid);
+		assertNull(configuration);
 	}
 
 	/**

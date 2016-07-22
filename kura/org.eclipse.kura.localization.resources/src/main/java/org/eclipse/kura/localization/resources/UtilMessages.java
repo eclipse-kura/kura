@@ -21,6 +21,12 @@ import com.github.rodionmoiseev.c10n.annotations.En;
  */
 public interface UtilMessages {
 
+	@En("Bundle context cannot be null")
+	public String bundleContextNonNull();
+
+	@En("Class intance name cannot be null")
+	public String clazzNonNull();
+
 	@En("Dictionary cannot be null")
 	public String dictionaryNonNull();
 

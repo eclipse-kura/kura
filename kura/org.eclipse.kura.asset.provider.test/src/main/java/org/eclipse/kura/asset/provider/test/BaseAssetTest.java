@@ -130,7 +130,7 @@ public final class BaseAssetTest {
 	private static void init() {
 		final Map<String, Object> channels = CollectionUtil.newHashMap();
 		channels.put(AssetConstants.ASSET_DESC_PROP.value(), "sample.asset.desc");
-		channels.put(AssetConstants.ASSET_ID_PROP.value(), "sample.asset.name");
+		channels.put(AssetConstants.ASSET_NAME_PROP.value(), "sample.asset.name");
 		channels.put(AssetConstants.ASSET_DRIVER_PROP.value(), "sample.driver.id");
 		channels.put("1.CH.name", "sample.channel1.name");
 		channels.put("1.CH.type", "READ");

@@ -80,7 +80,7 @@ final class WireSupportImpl implements WireSupport {
 		checkNull(wireRecords, s_message.wireRecordsNonNull());
 		if (this.m_wireSupporter instanceof WireEmitter) {
 			final String emitterPid = this.m_wireHelperService.getServicePid(this.m_wireSupporter);
-			final WireEnvelope wei = new WireEnvelope(emitterPid, wireRecords);
+			final WireEnvelope wei = this.m_wireHelperService.newWireEnvelope(emitterPid, wireRecords);
 			for (final Wire wire : this.m_outgoingWires) {
 				wire.update(wei);
 			}

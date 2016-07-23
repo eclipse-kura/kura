@@ -43,7 +43,7 @@ public interface BaseAsset extends Asset {
 	public Driver getDriver();
 
 	/**
-	 * Initializes the BaseAsset component with the provided properties
+	 * Initializes the Base Asset component with the provided properties
 	 *
 	 * @param properties
 	 *            the provided properties to parse

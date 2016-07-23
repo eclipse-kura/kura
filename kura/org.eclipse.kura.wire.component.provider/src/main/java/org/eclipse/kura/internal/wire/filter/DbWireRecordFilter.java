@@ -65,7 +65,7 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Conf
 	private static final WireMessages s_message = LocalizationAdapter.adapt(WireMessages.class);
 
 	/** Cache container to store values of SQL view wire records */
-	private WireRecordCache m_cache;
+	private final WireRecordCache m_cache;
 
 	/** DB Utility Helper */
 	private DbServiceHelper m_dbHelper;
@@ -91,6 +91,7 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Conf
 	/** Constructor */
 	public DbWireRecordFilter() {
 		this.m_executorService = Executors.newSingleThreadScheduledExecutor();
+		this.m_cache = new WireRecordCache(this);
 	}
 
 	/**
@@ -107,7 +108,6 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Conf
 		this.m_options = new DbWireRecordFilterOptions(properties);
 		this.m_dbHelper = DbServiceHelper.getInstance(this.m_dbService);
 		this.m_wireSupport = this.m_wireHelperService.newWireSupport(this);
-		this.m_cache = new WireRecordCache(this);
 		this.scheduleRefresh();
 		s_logger.debug(s_message.activatingFilterDone());
 	}
@@ -150,10 +150,6 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Conf
 	 */
 	protected synchronized void deactivate(final ComponentContext componentContext) {
 		s_logger.debug(s_message.deactivatingFilter());
-		// no need to release the cloud clients as the updated app
-		// certificate is already published due the missing dependency
-		// we only need to empty our CloudClient list
-		this.m_dbService = null;
 		if (this.m_tickHandle != null) {
 			this.m_tickHandle.cancel(true);
 		}
@@ -183,14 +179,14 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Conf
 	 * configured cache interval. If it is more than the aforementioned time
 	 * difference, then retrieve the value from the cache using current time as
 	 * a key. This will actually result in a cache miss. Every cache miss will
-	 * internally be handled by {@link LoadingCache} in such a way that whenever
+	 * internally be handled by {@link WireRecordCache} in such a way that whenever
 	 * a cache miss occurs it will load the value from the DB.
 	 */
 	@Override
 	public synchronized void onWireReceive(final WireEnvelope wireEnvelope) {
 		checkNull(wireEnvelope, s_message.wireEnvelopeNonNull());
 		s_logger.debug(s_message.wireEnvelopeReceived() + wireEnvelope);
-		this.m_wireSupport.emit(this.m_cache.getValue(this.m_cache.getLastRefreshedTime().getTimeInMillis()));
+		this.m_wireSupport.emit(this.m_cache.get(this.m_cache.getLastRefreshedTime().getTimeInMillis()));
 	}
 
 	/** {@inheritDoc} */
@@ -206,7 +202,7 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Conf
 	}
 
 	/**
-	 * Refresh the SQL view
+	 * Refreshes the SQL view
 	 */
 	private List<WireRecord> refreshSQLView() throws SQLException {
 		final Date now = new Date();

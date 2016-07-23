@@ -16,10 +16,10 @@ import static org.eclipse.kura.Preconditions.checkCondition;
 import static org.eclipse.kura.Preconditions.checkNull;
 import static org.eclipse.kura.asset.AssetConstants.ASSET_DESC_PROP;
 import static org.eclipse.kura.asset.AssetConstants.ASSET_DRIVER_PROP;
-import static org.eclipse.kura.asset.AssetConstants.ASSET_ID_PROP;
+import static org.eclipse.kura.asset.AssetConstants.ASSET_NAME_PROP;
 import static org.eclipse.kura.asset.AssetConstants.CHANNEL_PROPERTY_POSTFIX;
 import static org.eclipse.kura.asset.AssetConstants.CHANNEL_PROPERTY_PREFIX;
-import static org.eclipse.kura.asset.AssetConstants.DRIVER_PROPERTY_PREFIX;
+import static org.eclipse.kura.asset.AssetConstants.DRIVER_PROPERTY_POSTFIX;
 import static org.eclipse.kura.asset.AssetConstants.NAME;
 import static org.eclipse.kura.asset.AssetConstants.TIMER_EVENT;
 import static org.eclipse.kura.asset.AssetConstants.TYPE;
@@ -90,13 +90,13 @@ import org.slf4j.LoggerFactory;
  */
 public final class WireAsset implements WireEmitter, WireReceiver, SelfConfiguringComponent {
 
-	/** Configuration PID Property */
+	/** Configuration PID Property. */
 	private static final String CONF_PID = "org.eclipse.kura.wire.WireAsset";
 
 	/** The Logger instance. */
 	private static final Logger s_logger = LoggerFactory.getLogger(WireAsset.class);
 
-	/** Localization Resource */
+	/** Localization Resource. */
 	private static final WireMessages s_message = LocalizationAdapter.adapt(WireMessages.class);
 
 	/** The provided asset configuration wrapper instance. */
@@ -105,7 +105,7 @@ public final class WireAsset implements WireEmitter, WireReceiver, SelfConfiguri
 	/** The Asset Helper Service instance. */
 	private volatile AssetHelperService m_assetHelper;
 
-	/** Basic Asset Implementation */
+	/** Basic Asset Implementation. */
 	private BaseAsset m_baseAsset;
 
 	/** The service component context. */
@@ -120,16 +120,23 @@ public final class WireAsset implements WireEmitter, WireReceiver, SelfConfiguri
 	/** The Wire Helper Service. */
 	private volatile WireHelperService m_wireHelperService;
 
-	/** Wire Supporter Component */
+	/** Wire Supporter Component. */
 	private WireSupport m_wireSupport;
 
-	/** {@inheritDoc} */
+	/**
+	 * OSGi service component callback while activation.
+	 *
+	 * @param componentContext
+	 *            the component context
+	 * @param properties
+	 *            the service properties
+	 */
 	protected synchronized void activate(final ComponentContext componentContext,
 			final Map<String, Object> properties) {
 		s_logger.debug(s_message.activatingWireAsset());
 		this.m_baseAsset = this.m_assetHelper.newBaseAsset();
-		this.m_assetConfiguration = this.m_baseAsset.getAssetConfiguration();
 		this.m_baseAsset.initialize(properties);
+		this.m_assetConfiguration = this.m_baseAsset.getAssetConfiguration();
 		this.m_context = componentContext;
 		this.m_properties = properties;
 		this.m_wireSupport = this.m_wireHelperService.newWireSupport(this);
@@ -174,14 +181,16 @@ public final class WireAsset implements WireEmitter, WireReceiver, SelfConfiguri
 	private Tad cloneAd(final Tad oldAd, final String prefix) {
 		checkNull(oldAd, s_message.oldAdNonNull());
 		checkNull(prefix, s_message.adPrefixNonNull());
+
 		String pref = prefix;
-		if ((oldAd.getId() != ASSET_DESC_PROP.value()) || (oldAd.getId() != ASSET_DRIVER_PROP.value())
-				|| (oldAd.getId() != ASSET_ID_PROP.value()) || (oldAd.getId() != NAME.value())
-				|| (oldAd.getId() != TYPE.value()) || (oldAd.getId() != VALUE_TYPE.value())) {
-			pref = prefix + DRIVER_PROPERTY_PREFIX;
+		final String oldAdId = oldAd.getId();
+		if ((oldAdId != ASSET_DESC_PROP.value()) || (oldAdId != ASSET_DRIVER_PROP.value())
+				|| (oldAdId != ASSET_NAME_PROP.value()) || (oldAdId != NAME.value()) || (oldAdId != TYPE.value())
+				|| (oldAdId != VALUE_TYPE.value())) {
+			pref = prefix + DRIVER_PROPERTY_POSTFIX.value() + CHANNEL_PROPERTY_POSTFIX.value();
 		}
 		final Tad result = new Tad();
-		result.setId(pref + oldAd.getId());
+		result.setId(pref + oldAdId);
 		result.setName(pref + oldAd.getName());
 		result.setCardinality(oldAd.getCardinality());
 		result.setType(Tscalar.fromValue(oldAd.getType().value()));
@@ -207,7 +216,10 @@ public final class WireAsset implements WireEmitter, WireReceiver, SelfConfiguri
 	}
 
 	/**
-	 * Callback used when this service component is deactivating
+	 * OSGi service component callback while deactivation.
+	 *
+	 * @param context
+	 *            the context
 	 */
 	protected synchronized void deactivate(final ComponentContext context) {
 		s_logger.debug(s_message.deactivatingWireAsset());
@@ -257,8 +269,8 @@ public final class WireAsset implements WireEmitter, WireReceiver, SelfConfiguri
 		mainOcd.setDescription(s_message.ocdDescription());
 
 		final Tad assetNameAd = new Tad();
-		assetNameAd.setId(ASSET_ID_PROP.value());
-		assetNameAd.setName(ASSET_ID_PROP.value());
+		assetNameAd.setId(ASSET_NAME_PROP.value());
+		assetNameAd.setName(ASSET_NAME_PROP.value());
 		assetNameAd.setCardinality(0);
 		assetNameAd.setType(Tscalar.STRING);
 		assetNameAd.setDescription(s_message.name());
@@ -285,7 +297,6 @@ public final class WireAsset implements WireEmitter, WireReceiver, SelfConfiguri
 		mainOcd.addAD(driverNameAd);
 
 		final Map<String, Object> props = CollectionUtil.newHashMap();
-
 		for (final Map.Entry<String, Object> entry : this.m_properties.entrySet()) {
 			props.put(entry.getKey(), entry.getValue());
 		}
@@ -388,10 +399,12 @@ public final class WireAsset implements WireEmitter, WireReceiver, SelfConfiguri
 	}
 
 	/**
-	 * Create an asset record from the provided channel information
+	 * Create an asset record from the provided channel information.
 	 *
 	 * @param channel
 	 *            the channel to get the values from
+	 * @param value
+	 *            the value
 	 * @return the asset record
 	 * @throws KuraRuntimeException
 	 *             if any of the provided arguments is null
@@ -412,7 +425,7 @@ public final class WireAsset implements WireEmitter, WireReceiver, SelfConfiguri
 	}
 
 	/**
-	 * Retrieves the set of prefixes of the channels from the map of channels
+	 * Retrieves the set of prefixes of the channels from the map of channels.
 	 *
 	 * @param channels
 	 *            the properties to parse

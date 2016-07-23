@@ -15,10 +15,10 @@ package org.eclipse.kura.internal.asset;
 import static org.eclipse.kura.Preconditions.checkNull;
 import static org.eclipse.kura.asset.AssetConstants.ASSET_DESC_PROP;
 import static org.eclipse.kura.asset.AssetConstants.ASSET_DRIVER_PROP;
-import static org.eclipse.kura.asset.AssetConstants.ASSET_ID_PROP;
+import static org.eclipse.kura.asset.AssetConstants.ASSET_NAME_PROP;
 import static org.eclipse.kura.asset.AssetConstants.CHANNEL_PROPERTY_POSTFIX;
 import static org.eclipse.kura.asset.AssetConstants.CHANNEL_PROPERTY_PREFIX;
-import static org.eclipse.kura.asset.AssetConstants.DRIVER_PROPERTY_PREFIX;
+import static org.eclipse.kura.asset.AssetConstants.DRIVER_PROPERTY_POSTFIX;
 import static org.eclipse.kura.asset.ChannelType.READ;
 import static org.eclipse.kura.asset.ChannelType.READ_WRITE;
 import static org.eclipse.kura.asset.ChannelType.WRITE;
@@ -142,8 +142,8 @@ final class AssetOptions {
 			if (properties.containsKey(ASSET_DRIVER_PROP.value())) {
 				this.m_driverId = (String) properties.get(ASSET_DRIVER_PROP.value());
 			}
-			if (properties.containsKey(ASSET_ID_PROP.value())) {
-				this.m_assetName = (String) properties.get(ASSET_ID_PROP.value());
+			if (properties.containsKey(ASSET_NAME_PROP.value())) {
+				this.m_assetName = (String) properties.get(ASSET_NAME_PROP.value());
 			}
 			if (properties.containsKey(ASSET_DESC_PROP.value())) {
 				this.m_assetDescription = (String) properties.get(ASSET_DESC_PROP.value());
@@ -246,8 +246,8 @@ final class AssetOptions {
 				final String value = entry.getValue().toString();
 				final List<String> strings = Arrays.asList(key.split("\\" + CHANNEL_PROPERTY_POSTFIX.value()));
 				if ((strings.size() > 2) && key.startsWith(String.valueOf(channelId))
-						&& DRIVER_PROPERTY_PREFIX.value().equals(strings.get(2))) {
-					final String driverSpecificPropertyKey = DRIVER_PROPERTY_PREFIX.value()
+						&& DRIVER_PROPERTY_POSTFIX.value().equals(strings.get(2))) {
+					final String driverSpecificPropertyKey = DRIVER_PROPERTY_POSTFIX.value()
 							+ CHANNEL_PROPERTY_POSTFIX.value();
 					final String cKey = key
 							.substring(key.indexOf(driverSpecificPropertyKey) + driverSpecificPropertyKey.length());

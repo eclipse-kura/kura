@@ -216,10 +216,6 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
 	 */
 	protected synchronized void deactivate(final ComponentContext componentContext) {
 		s_logger.debug(s_message.deactivatingStore());
-		// no need to release the cloud clients as the updated application
-		// certificate is already published due the missing dependency
-		// we only need to empty our CloudClient list
-		this.m_dbService = null;
 		if (this.m_tickHandle != null) {
 			this.m_tickHandle.cancel(true);
 		}

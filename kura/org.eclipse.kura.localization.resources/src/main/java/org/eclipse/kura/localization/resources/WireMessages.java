@@ -165,6 +165,9 @@ public interface WireMessages {
 	@En("Data Service cannot be null")
 	public String dataServiceNonNull();
 
+	@En("DB Filter cannot be null")
+	public String dbFilterNonNull();
+
 	@En("DB Service cannot be null")
 	public String dbServiceNonNull();
 

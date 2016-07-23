@@ -12,10 +12,15 @@
  */
 package org.eclipse.kura.internal.wire.filter;
 
+import static org.eclipse.kura.Preconditions.checkNull;
+
 import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.kura.KuraRuntimeException;
+import org.eclipse.kura.localization.LocalizationAdapter;
+import org.eclipse.kura.localization.resources.WireMessages;
 import org.eclipse.kura.util.collection.CollectionUtil;
 import org.eclipse.kura.wire.WireRecord;
 
@@ -23,10 +28,13 @@ import org.eclipse.kura.wire.WireRecord;
  * The Class WireRecordCache is responsible to contain the Wire Record cached
  * values.
  */
-public final class WireRecordCache {
+final class WireRecordCache {
 
 	/** Map that is the cache. */
 	private static final Map<Long, List<WireRecord>> m_map = CollectionUtil.newConcurrentHashMap();
+
+	/** Localization Resource */
+	private static final WireMessages s_message = LocalizationAdapter.adapt(WireMessages.class);
 
 	/** Last refreshed time. */
 	private Calendar m_lastRefreshedTime = null;
@@ -34,35 +42,20 @@ public final class WireRecordCache {
 	/** DB Wire Record Filter instance. */
 	private final DbWireRecordFilter m_recordFilter;
 
-	/** Refresh duration in seconds - 1 hour = 60 * 60 = 3600 seconds. */
-	private int m_refreshDuration = 3600;
+	/** Refresh duration in seconds */
+	private int m_refreshDuration;
 
 	/**
 	 * Instantiates a new wire record cache.
 	 *
 	 * @param filter
 	 *            the DB Wire Record filter
+	 * @throws KuraRuntimeException
+	 *             if argument is null
 	 */
-	public WireRecordCache(final DbWireRecordFilter filter) {
+	WireRecordCache(final DbWireRecordFilter filter) {
+		checkNull(filter, s_message.dbFilterNonNull());
 		this.m_recordFilter = filter;
-	}
-
-	/**
-	 * Gets the last refreshed time.
-	 *
-	 * @return the last refreshed time
-	 */
-	public Calendar getLastRefreshedTime() {
-		return this.m_lastRefreshedTime;
-	}
-
-	/**
-	 * Gets the refresh duration.
-	 *
-	 * @return the refresh duration
-	 */
-	public int getRefreshDuration() {
-		return this.m_refreshDuration;
 	}
 
 	/**
@@ -72,11 +65,29 @@ public final class WireRecordCache {
 	 *            - key to get from cache map
 	 * @return object for the particular key
 	 */
-	public List<WireRecord> getValue(final Long key) {
+	List<WireRecord> get(final long key) {
 		if (this.refreshCache()) {
 			m_map.put(this.m_lastRefreshedTime.getTimeInMillis(), this.m_recordFilter.filter());
 		}
 		return m_map.get(key);
+	}
+
+	/**
+	 * Gets the last refreshed time.
+	 *
+	 * @return the last refreshed time
+	 */
+	Calendar getLastRefreshedTime() {
+		return this.m_lastRefreshedTime;
+	}
+
+	/**
+	 * Gets the refresh duration.
+	 *
+	 * @return the refresh duration
+	 */
+	int getRefreshDuration() {
+		return this.m_refreshDuration;
 	}
 
 	/**
@@ -87,7 +98,7 @@ public final class WireRecordCache {
 	 * @param value
 	 *            - object for the key
 	 */
-	public void put(final Long key, final List<WireRecord> value) {
+	void put(final long key, final List<WireRecord> value) {
 		m_map.put(key, value);
 		this.m_lastRefreshedTime = Calendar.getInstance();
 	}
@@ -103,9 +114,11 @@ public final class WireRecordCache {
 			return false;
 		}
 		final Calendar now = Calendar.getInstance();
-		this.m_lastRefreshedTime.add(Calendar.SECOND, this.m_refreshDuration);
+		final Calendar lastRefreshedTime = Calendar.getInstance(this.m_lastRefreshedTime.getTimeZone());
+		lastRefreshedTime.setTime(this.m_lastRefreshedTime.getTime());
+		lastRefreshedTime.add(Calendar.SECOND, this.m_refreshDuration);
 
-		if (this.m_lastRefreshedTime.after(now)) {
+		if (lastRefreshedTime.after(now)) {
 			return false;
 		} else {
 			// Cache expired hence refresh it
@@ -120,7 +133,7 @@ public final class WireRecordCache {
 	 * @param lastRefreshedTime
 	 *            the new last refreshed time
 	 */
-	public void setLastRefreshedTime(final Calendar lastRefreshedTime) {
+	void setLastRefreshedTime(final Calendar lastRefreshedTime) {
 		this.m_lastRefreshedTime = lastRefreshedTime;
 	}
 
@@ -130,7 +143,7 @@ public final class WireRecordCache {
 	 * @param refreshDuration
 	 *            the new refresh duration
 	 */
-	public void setRefreshDuration(final int refreshDuration) {
+	void setRefreshDuration(final int refreshDuration) {
 		this.m_refreshDuration = refreshDuration;
 	}
 

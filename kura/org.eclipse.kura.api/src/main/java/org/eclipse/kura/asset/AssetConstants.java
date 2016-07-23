@@ -25,7 +25,7 @@ public enum AssetConstants {
 	ASSET_DRIVER_PROP("driver.id"),
 
 	/** Asset Name Property to be used in the configuration. */
-	ASSET_ID_PROP("asset.name"),
+	ASSET_NAME_PROP("asset.name"),
 
 	/** String denoting a postfix for channel configuration property. */
 	CHANNEL_PROPERTY_POSTFIX("."),
@@ -34,10 +34,10 @@ public enum AssetConstants {
 	CHANNEL_PROPERTY_PREFIX("CH"),
 
 	/**
-	 * String denoting a prefix for driver specific channel configuration
+	 * String denoting a postfix for driver specific channel configuration
 	 * property.
 	 */
-	DRIVER_PROPERTY_PREFIX("DRIVER"),
+	DRIVER_PROPERTY_POSTFIX("DRIVER"),
 
 	/** Name Property to be used in the configuration. */
 	NAME("name"),
@@ -52,7 +52,7 @@ public enum AssetConstants {
 	VALUE_TYPE("value.type");
 
 	/** The value. */
-	String value;
+	private String value;
 
 	/**
 	 * Instantiates a new asset constants.
@@ -60,7 +60,7 @@ public enum AssetConstants {
 	 * @param value
 	 *            the value
 	 */
-	AssetConstants(final String value) {
+	private AssetConstants(final String value) {
 		this.value = value;
 	}
 

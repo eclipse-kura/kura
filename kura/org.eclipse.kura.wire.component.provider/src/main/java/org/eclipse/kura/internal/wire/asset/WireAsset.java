@@ -173,7 +173,12 @@ public final class WireAsset implements WireEmitter, WireReceiver, SelfConfiguri
 	 * @param oldAd
 	 *            the old Attribute Definition
 	 * @param prefix
-	 *            the prefix to be prepended
+	 *            the prefix to be prepended (this will be in the format of
+	 *            {@code x.CH.} or {@code x.CH.DRIVER.} where {@code x} is
+	 *            channel identifier number. {@code x.CH.} will be used for the
+	 *            channel specific properties except the driver specific
+	 *            properties. The driver specific properties in the channel will
+	 *            use the {@code x.CH.DRIVER.} prefix)
 	 * @return the new attribute definition
 	 * @throws KuraRuntimeException
 	 *             if any of the provided argument is null
@@ -206,7 +211,6 @@ public final class WireAsset implements WireEmitter, WireReceiver, SelfConfiguri
 			result.getOption().add(newOption);
 		}
 		return result;
-
 	}
 
 	/** {@inheritDoc} */

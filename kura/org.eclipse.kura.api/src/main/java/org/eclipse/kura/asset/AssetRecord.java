@@ -19,7 +19,6 @@ import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.annotation.NotThreadSafe;
 import org.eclipse.kura.type.TypedValue;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class AssetRecord represents a record to perform read/write/monitor
  * operation on the provided channel using the associated driver.
@@ -34,7 +33,7 @@ public final class AssetRecord {
 	 * The associated channel identifier. The channel identifier for any asset
 	 * must be unique.
 	 */
-	private long channelId;
+	private final long channelId;
 
 	/** The timestamp of the record. */
 	private long timestamp;
@@ -150,19 +149,6 @@ public final class AssetRecord {
 	public void setAssetFlag(final AssetFlag assetFlag) {
 		checkNull(assetFlag, "Asset flag cannot be null");
 		this.assetFlag = assetFlag;
-	}
-
-	/**
-	 * Sets the asset flag as provided.
-	 *
-	 * @param channelId
-	 *            the new channel id
-	 * @throws KuraRuntimeException
-	 *             if the channel identifier is less than or equal to zero
-	 */
-	public void setChannelId(final long channelId) {
-		checkCondition(channelId <= 0, "Channel ID cannot be zero or less");
-		this.channelId = channelId;
 	}
 
 	/**

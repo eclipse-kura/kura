@@ -63,11 +63,12 @@ public final class Channel {
 	 * @param config
 	 *            the configuration
 	 * @throws KuraRuntimeException
-	 *             if any of the arguments is null or channel ID is 0
+	 *             if any of the arguments is null or channel ID is 0 or
+	 *             negative
 	 */
 	public Channel(final long id, final String name, final ChannelType type, final DataType valueType,
 			final Map<String, Object> config) {
-		checkCondition(id == 0, "Channel ID cannot be 0");
+		checkCondition(id <= 0, "Channel ID cannot be 0 or negative");
 		checkNull(name, "Channel name cannot be null");
 		checkNull(type, "Channel type cannot be null");
 		checkNull(valueType, "Channel value type cannot be null");

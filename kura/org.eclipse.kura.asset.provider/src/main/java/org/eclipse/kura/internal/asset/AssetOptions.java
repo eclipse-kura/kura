@@ -12,6 +12,7 @@
  */
 package org.eclipse.kura.internal.asset;
 
+import static org.eclipse.kura.Preconditions.checkCondition;
 import static org.eclipse.kura.Preconditions.checkNull;
 import static org.eclipse.kura.asset.AssetConstants.ASSET_DESC_PROP;
 import static org.eclipse.kura.asset.AssetConstants.ASSET_DRIVER_PROP;
@@ -117,13 +118,13 @@ final class AssetOptions {
 	 * @param properties
 	 *            the properties to retrieve the channels from
 	 * @throws KuraRuntimeException
-	 *             if any of the arguments is null
+	 *             if the argument is null
 	 */
 	private void checkChannelAvailability(final Map<String, Object> properties) {
 		checkNull(properties, s_message.propertiesNonNull());
 		final Set<Long> channelIds = this.retrieveChannelIds(properties);
-		for (final Long channelName : channelIds) {
-			final Channel channel = this.retrieveChannel(channelName, properties);
+		for (final long channelId : channelIds) {
+			final Channel channel = this.retrieveChannel(channelId, properties);
 			this.addChannel(channel);
 		}
 	}
@@ -170,15 +171,16 @@ final class AssetOptions {
 	 * it should conform to the mentioned specification.
 	 *
 	 * @param channelId
-	 *            unique channel id (in the format x.CH where x is a channel ID)
+	 *            unique channel ID (in the format x.CH where x is a channel ID)
 	 * @param properties
 	 *            the properties to retrieve channel from
 	 * @return the specific channel
 	 * @throws KuraRuntimeException
-	 *             if any of the arguments is null
+	 *             if the properties is null or the channel identifier is less
+	 *             than or equal to zero
 	 */
 	private Channel retrieveChannel(final long channelId, final Map<String, Object> properties) {
-		checkNull(channelId, s_message.prefixNonNull());
+		checkCondition(channelId <= 0, s_message.channelIdNotLessThanZero());
 		checkNull(properties, s_message.propertiesNonNull());
 
 		s_logger.debug(s_message.retrievingChannel());

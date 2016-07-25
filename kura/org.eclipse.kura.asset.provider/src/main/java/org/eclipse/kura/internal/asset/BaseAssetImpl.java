@@ -170,15 +170,6 @@ public final class BaseAssetImpl implements BaseAsset {
 		return this.m_driver;
 	}
 
-	/**
-	 * Returns the associated asset listeners.
-	 *
-	 * @return the asset listeners containment
-	 */
-	public Map<AssetListener, DriverListener> getListeners() {
-		return this.m_assetListeners;
-	}
-
 	/** {@inheritDoc} */
 	@Override
 	public void initialize(final Map<String, Object> properties) {
@@ -271,24 +262,16 @@ public final class BaseAssetImpl implements BaseAsset {
 			/** The asset listener instance. */
 			private final AssetListener m_assetListener;
 
-			/** The channel identifier. */
-			private final long m_channelId;
-
 			/**
 			 * Instantiates a new base driver listener.
 			 *
-			 * @param channelId
-			 *            the channel identifier as provided
 			 * @param assetListener
 			 *            the asset listener
 			 * @throws KuraRuntimeException
-			 *             if any of the arguments is null
+			 *             if the argument is null
 			 */
-			BaseDriverListener(final long channelId, final AssetListener assetListener) {
-				checkCondition(channelId <= 0, s_message.channelIdNotLessThanZero());
+			BaseDriverListener(final AssetListener assetListener) {
 				checkNull(assetListener, s_message.listenerNonNull());
-
-				this.m_channelId = channelId;
 				this.m_assetListener = assetListener;
 			}
 
@@ -297,9 +280,8 @@ public final class BaseAssetImpl implements BaseAsset {
 			public void onDriverEvent(final DriverEvent event) {
 				checkNull(event, s_message.driverEventNonNull());
 				final DriverRecord driverRecord = event.getDriverRecord();
-				final AssetRecord assetRecord = BaseAssetImpl.this.m_assetHelper.newAssetRecord(this.m_channelId);
+				final AssetRecord assetRecord = m_assetHelper.newAssetRecord(driverRecord.getChannelId());
 				final DriverFlag driverFlag = driverRecord.getDriverFlag();
-
 				switch (driverFlag) {
 				case READ_SUCCESSFUL:
 					assetRecord.setAssetFlag(READ_SUCCESSFUL);
@@ -318,16 +300,14 @@ public final class BaseAssetImpl implements BaseAsset {
 				}
 				assetRecord.setTimestamp(driverRecord.getTimestamp());
 				assetRecord.setValue(driverRecord.getValue());
-				final AssetEvent assetEvent = BaseAssetImpl.this.m_assetHelper.newAssetEvent(assetRecord);
+				final AssetEvent assetEvent = m_assetHelper.newAssetEvent(assetRecord);
 				this.m_assetListener.onAssetEvent(assetEvent);
 			}
 		}
-
 		final Channel channel = channels.get(channelId);
-		final DriverListener driverListener = new BaseDriverListener(channelId, assetListener);
-
-		this.m_assetListeners.put(assetListener, driverListener);
 		checkNull(this.m_driver, s_message.driverNonNull());
+		final DriverListener driverListener = new BaseDriverListener(assetListener);
+		this.m_assetListeners.put(assetListener, driverListener);
 
 		this.m_monitor.lock();
 		try {
@@ -335,7 +315,6 @@ public final class BaseAssetImpl implements BaseAsset {
 		} finally {
 			this.m_monitor.unlock();
 		}
-
 		s_logger.debug(s_message.registeringListenerDone());
 	}
 
@@ -402,7 +381,9 @@ public final class BaseAssetImpl implements BaseAsset {
 		s_logger.debug(s_message.unregisteringListener());
 		this.m_monitor.lock();
 		try {
-			this.m_driver.unregisterDriverListener(this.m_assetListeners.get(assetListener));
+			if (this.m_assetListeners.containsKey(assetListener)) {
+				this.m_driver.unregisterDriverListener(this.m_assetListeners.get(assetListener));
+			}
 		} finally {
 			this.m_monitor.unlock();
 		}
@@ -428,7 +409,7 @@ public final class BaseAssetImpl implements BaseAsset {
 			final Channel channel = channels.get(id);
 			checkCondition((channel.getType() != WRITE) || (channel.getType() != READ_WRITE),
 					s_message.channelTypeNotWritable() + channel);
-			final DriverRecord driverRecord = this.m_assetHelper.newDriverRecord(channel.getId());
+			final DriverRecord driverRecord = this.m_assetHelper.newDriverRecord(id);
 			driverRecord.setChannelConfig(channel.getConfiguration());
 			driverRecord.setValue(assetRecord.getValue());
 			driverRecords.add(driverRecord);
@@ -445,7 +426,6 @@ public final class BaseAssetImpl implements BaseAsset {
 
 		for (final DriverRecord driverRecord : mappedRecords.keySet()) {
 			final AssetRecord assetRecord = mappedRecords.get(driverRecord);
-			assetRecord.setChannelId(driverRecord.getChannelId());
 			final DriverFlag driverFlag = driverRecord.getDriverFlag();
 			switch (driverFlag) {
 			case WRITE_SUCCESSFUL:

@@ -421,7 +421,9 @@ public class OpenPortsTabUi extends Composite implements Tab {
 
 				if (editOpenPortEntry != null) {
 					GwtFirewallOpenPortEntry oldEntry= selectionModel.getSelectedObject();
-					openPortsDataProvider.getList().remove(oldEntry);
+	                
+					openPortsDataProvider.getList().remove(selectionModel.getSelectedObject());
+					refreshTable();
 					if (!duplicateEntry(editOpenPortEntry)) {
 						openPortsDataProvider.getList().add(editOpenPortEntry);
 						openPortsDataProvider.flush();
@@ -431,7 +433,7 @@ public class OpenPortsTabUi extends Composite implements Tab {
 						openPortsDataProvider.getList().add(oldEntry);
 						openPortsDataProvider.flush();
 					}
-
+					refreshTable();
 				}//end !=null
 			}//end onHide
 		});

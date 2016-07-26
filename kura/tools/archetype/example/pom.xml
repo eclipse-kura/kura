@@ -8,7 +8,7 @@
 		<version>0.1.0-SNAPSHOT</version>
 	</parent>
 
-    <groupId>org.eclipse.kura.archetype</groupId>
+    <groupId>org.eclipse.kura.tools.archetype</groupId>
     <artifactId>org.eclipse.kura.quickstart.archetype</artifactId>
 	<version>0.1.0-SNAPSHOT</version>
     <name>Eclipse Kura App Quickstart Archetype</name>

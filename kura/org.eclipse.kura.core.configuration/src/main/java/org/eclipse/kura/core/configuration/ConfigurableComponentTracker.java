@@ -86,7 +86,7 @@ public class ConfigurableComponentTracker extends ServiceTracker
 								m_confService.registerComponentConfiguration(pid, servicePid, factoryPid);
 							} else if (obj instanceof SelfConfiguringComponent) {
 								s_logger.info("Adding SelfConfiguringComponent with pid {} and service pid {}", pid, servicePid);
-								m_confService.registerSelfConfiguringComponent(pid);
+								m_confService.registerSelfConfiguringComponent(servicePid);
 							}
 						}
 						finally {
@@ -118,7 +118,7 @@ public class ConfigurableComponentTracker extends ServiceTracker
 				m_confService.registerComponentConfiguration(pid, servicePid, factoryPid);
 			} else if (service instanceof SelfConfiguringComponent) {
 				s_logger.info("Adding SelfConfiguringComponent with pid {} and service pid {}", pid, servicePid);
-				m_confService.registerSelfConfiguringComponent(pid);
+				m_confService.registerSelfConfiguringComponent(servicePid);
 			}
 		}
 
@@ -140,7 +140,7 @@ public class ConfigurableComponentTracker extends ServiceTracker
 			m_confService.unregisterComponentConfiguration(pid);
 		} else if (service instanceof SelfConfiguringComponent) {
 			s_logger.info("Removed SelfConfiguringComponent with pid {} and service pid {}", pid, servicePid);
-			m_confService.unregisterComponentConfiguration(pid);
+			m_confService.unregisterComponentConfiguration(servicePid);
 		}
 	}
 }

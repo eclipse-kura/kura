@@ -340,6 +340,14 @@ PasswordCommandService {
 		if(commandPassword == null){
 			return false;
 		}
+		
+		if ("".equals(commandPassword.toString()) && receivedPassword == null) {
+            return true;
+        }
+        if ("".equals(commandPassword.toString()) && "".equals(receivedPassword)) {
+            return true;
+        }
+		
 		String pwd = commandPassword.toString();
 		return pwd.equals(receivedPassword);
 	}

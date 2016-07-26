@@ -1,14 +1,15 @@
-/**
- * Copyright (c) 2011, 2014 Eurotech and/or its affiliates
+/*******************************************************************************
+ * Copyright (c) 2011, 2016 Eurotech and/or its affiliates and others
  *
- *  All rights reserved. This program and the accompanying materials
- *  are made available under the terms of the Eclipse Public License v1.0
- *  which accompanies this distribution, and is available at
- *  http://www.eclipse.org/legal/epl-v10.html
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Eurotech
- */
+ *     Eurotech
+ *     Benjamin Cabé - fix for GH issue #299
+ *******************************************************************************/
 package org.eclipse.kura.net.admin.visitor.linux;
 
 import java.io.File;
@@ -78,7 +79,7 @@ public class IfcfgConfigReader implements NetworkConfigurationVisitor {
 			NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig,
 			Properties kuraExtendedProps) throws KuraException {
 		String interfaceName = netInterfaceConfig.getName();
-		s_logger.debug("Getting config for " + interfaceName);
+		s_logger.debug("Getting config for {}", interfaceName);
 
 		NetInterfaceType type = netInterfaceConfig.getType();
 		if (type == NetInterfaceType.ETHERNET || type == NetInterfaceType.WIFI
@@ -290,7 +291,7 @@ public class IfcfgConfigReader implements NetworkConfigurationVisitor {
 							netInterfaceStatus, autoConnect);
 					setNetConfigIP4(netConfig, autoConnect, dhcp, address,
 							gateway, prefixString, netmask, kuraProps);
-					s_logger.debug("NetConfig: " + netConfig.toString());
+					s_logger.debug("NetConfig: {}", netConfig);
 					netConfigs.add(netConfig);
 				}
 			}
@@ -304,6 +305,16 @@ public class IfcfgConfigReader implements NetworkConfigurationVisitor {
 		try {
 			fis = new FileInputStream(ifcfgFile);
 			kuraProps.load(fis);
+			// Values in the config file may be surrounded with double quotes or single quotes. 
+			for(String key : kuraProps.stringPropertyNames()) {
+				String value = kuraProps.getProperty(key);
+				if(value.length() >= 2 && ((value.startsWith("'") && value.endsWith("'")) ||
+						(value.startsWith("\"") && value.endsWith("\""))))
+				{
+					value = value.substring(1, value.length()-1);
+					kuraProps.put(key, value);
+				}
+			}
 			
 		} catch (Exception e) {
 			s_logger.error("Could not get configuration for " + interfaceName,

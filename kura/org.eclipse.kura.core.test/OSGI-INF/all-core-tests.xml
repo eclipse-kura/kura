@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright (c) 2011, 2014 Eurotech and/or its affiliates
+    Copyright (c) 2011, 2016 Eurotech and/or its affiliates
 
      All rights reserved. This program and the accompanying materials
      are made available under the terms of the Eclipse Public License v1.0
@@ -15,7 +15,7 @@
 <scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" 
                name="org.eclipse.kura.core.test.AllCoreTests">
    <implementation class="org.eclipse.kura.core.test.AllCoreTests"/>
-   <reference bind="setConfigAdmin" cardinality="1..1" interface="org.osgi.service.cm.ConfigurationAdmin" name="ConfigurationAdmin" policy="static" unbind="unsetConfigAdmin"/>
    <reference bind="setDataService" cardinality="1..1" interface="org.eclipse.kura.data.DataService" name="CloudService" policy="static" unbind="unsetDataService"/>
-   <reference bind="setSystemService" cardinality="1..1" interface="org.eclipse.kura.system.SystemService" name="SystemService" policy="static" unbind="unsetSystemService"/>   
+   <reference bind="setSystemService" cardinality="1..1" interface="org.eclipse.kura.system.SystemService" name="SystemService" policy="static" unbind="unsetSystemService"/>
+   <reference bind="setConfigService" cardinality="1..1" interface="org.eclipse.kura.configuration.ConfigurationService" name="ConfigurationService" policy="static" unbind="unsetConfigService"/>   
 </scr:component>

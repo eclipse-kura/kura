@@ -1,62 +1,30 @@
-/**
- * Copyright (c) 2011, 2014 Eurotech and/or its affiliates
+/*******************************************************************************
+ * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
  *
- *  All rights reserved. This program and the accompanying materials
- *  are made available under the terms of the Eclipse Public License v1.0
- *  which accompanies this distribution, and is available at
- *  http://www.eclipse.org/legal/epl-v10.html
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Eurotech
- */
+ *     Eurotech
+ *******************************************************************************/
 package org.eclipse.kura.linux.net.iptables;
+
+import java.util.List;
 
 import org.eclipse.kura.KuraException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
-
-/* 
- * Copyright (c) 2013 Eurotech Inc. All rights reserved.
- */
-
 /**
  * Creates an iptables command for a NAT Rule.
  * 
- * CONFIGURATION
- * 
- * Configuration will be accepted in the form of key/value pairs.  The key/value pairs are
- * strictly defined here:
- * 
- *   CONFIG_ENTRY     -> KEY + "=" + VALUE
- *   KEY              -> TYPE + INDEX + "_" + PARAM
- *   TYPE             -> "NATRule"
- *   INDEX            -> "0" | "1" | "2" | ... | "N"
- *   PARAM (required) -> "sourceInterface" | "destinationInterface"
- *   PARAM (optional) -> "masquerade"
- *   VALUE	          -> (value of the specified parameter)
- * 
- *   EXAMPLE:
- *   
- *   NATRule0_sourceInterface=eth0
- *   NATRule0_destinationInterface=wlan0
- *   NATRule0_masquerade=true
  */
 public class NATRule {
 	
 	private static final Logger s_logger = LoggerFactory.getLogger(NATRule.class);
-	
-	/*
-	masquerading/NAT
- 		must define:
-			source network or ipaddress (i.e. xxx.xxx.xxx.xxx/mask or xxx.xxx.xxx.xxx)
-			source interface
-			destination interface
-
-	*/
-	
-    // private static final Logger s_logger = LoggerFactory.getLogger(NATRule.class);
+		
 	private String m_sourceInterface;						//i.e. eth0
 	private String m_destinationInterface;				//i.e. ppp0
 	private String m_protocol;	// protocol (i.e. all, tcp, udp) 
@@ -103,99 +71,26 @@ public class NATRule {
 		return false;
 	}
 	
-	
 	/**
 	 * Converts the <code>NATRule</code> to a <code>String</code>.  
 	 * Returns single iptables string based on the <code>NATRule</code>, which establishes the MASQUERADE and FORWARD rules:
 	 * <code>
-	 * <p>  iptables -t nat -A POSTROUTING -o {destinationInterface} -j MASQUERADE;
-	 * <p>  iptables -A FORWARD -i {sourceInterface} -o {destinationInterface} -j ACCEPT;
-	 * <p>  iptables -A FORWARD -i {destinationInterface} -o {sourceInterface} -j ACCEPT
+	 * <p>  -A POSTROUTING -o {destinationInterface} -j MASQUERADE;
+	 * <p>  -A FORWARD -i {sourceInterface} -o {destinationInterface} -j ACCEPT;
+	 * <p>  -A FORWARD -i {destinationInterface} -o {sourceInterface} -j ACCEPT
 	 * </code>
 	 * 
 	 * @return		A String representation of the <code>NATRule</code>.
 	 */
 	public String toString() {
-		
-		/*EXAMPLE
-		iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
-		iptables -A FORWARD -i eth0 -o eth1 -m state --state RELATED,ESTABLISHED -j ACCEPT
-		iptables -A FORWARD -i eth1 -o eth0 -j ACCEPT
-		*/
-		
-        StringBuilder forward = new StringBuilder();
-        forward.append("iptables -A FORWARD");
-        if (m_protocol != null) {
-        	forward.append(" -p ");
-        	forward.append(m_protocol);
-        }
-        if (m_destination != null) {
-        	forward.append(" -s ");
-        	forward.append(m_destination);
-        }
-        if (m_source != null) {
-        	forward.append(" -d ");
-        	forward.append(m_source);
-        }
-        forward.append(" -i ");
-        forward.append(m_destinationInterface);
-        forward.append(" -o ");
-        forward.append(m_sourceInterface);
-        forward.append(" -m state --state RELATED,ESTABLISHED -j ACCEPT; ");
-        
-        forward.append("iptables -A FORWARD");
-        if (m_protocol != null) {
-        	forward.append(" -p ");
-        	forward.append(m_protocol);
-        }
-        if (m_source != null) {
-        	forward.append(" -s ");
-        	forward.append(m_source);
-        }
-        if (m_destination != null) {
-        	forward.append(" -d ");
-        	forward.append(m_destination);
-        }
-        forward.append(" -i ");
-        forward.append(m_sourceInterface);
-        forward.append(" -o ");
-        forward.append(m_destinationInterface);
-        forward.append(" -j ACCEPT");
-//      
-//      String forward = new String (
-//              "iptables -A FORWARD -i " + destinationInterface + " -o " + sourceInterface + " -m state --state RELATED,ESTABLISHED -j ACCEPT; " +
-//              "iptables -A FORWARD -i " + sourceInterface + " -o " + destinationInterface + " -j ACCEPT");
-        
-        if (m_masquerade) {
-            StringBuilder masquerade = new StringBuilder();
-            masquerade.append("iptables -t nat -A POSTROUTING");
-            if (m_protocol != null) {
-            	masquerade.append(" -p ");
-            	masquerade.append(m_protocol);
-            }
-            if (m_source != null) {
-            	masquerade.append(" -s ");
-            	masquerade.append(m_source);
-            } 
-            if (m_destination != null) {
-            	masquerade.append(" -d ");
-            	masquerade.append(m_destination);
-            }
-            masquerade.append(" -o ");
-            masquerade.append(m_destinationInterface);
-            masquerade.append(" -j MASQUERADE");
-            
-            masquerade.append("; ");
-            masquerade.append(forward);
-    
-            return masquerade.toString();
-//          String masquerade = new String ("iptables -t nat -A POSTROUTING -o " + destinationInterface + " -j MASQUERADE");
-//          return masquerade + "; " + forward;
-        } else {
-            return forward.toString();
-        }
+		StringBuilder sb = new StringBuilder();
+		List<String>forwardRules = getFilterForwardChainRule().toStrings();
+		for (String forwardRule : forwardRules) {
+			sb.append(forwardRule).append("; ");
+		}
+		sb.append(getNatPostroutingChainRule().toString());
+		return sb.toString();
 	}
-
 	
 	/**
 	 * Setter for the sourceInterface.
@@ -275,6 +170,24 @@ public class NATRule {
 			}
 		}
 		return ret;
+	}
+	
+	public FilterForwardChainRule getFilterForwardChainRule() {
+		String srcNetwork = null;
+		String dstNetwork = null;
+		short srcMask = 0;
+		short dstMask = 0;
+		if (m_source != null) {
+			srcNetwork = m_source.split("/")[0];
+			srcMask = Short.parseShort(m_source.split("/")[1]);
+		}
+		if (m_destination != null) {
+			dstNetwork = m_destination.split("/")[0];
+			dstMask = Short.parseShort(m_destination.split("/")[1]);
+		}
+		return new FilterForwardChainRule(m_sourceInterface,
+				m_destinationInterface, srcNetwork, srcMask, dstNetwork,
+				dstMask, m_protocol, null, 0, 0);
 	}
 	
 	@Override

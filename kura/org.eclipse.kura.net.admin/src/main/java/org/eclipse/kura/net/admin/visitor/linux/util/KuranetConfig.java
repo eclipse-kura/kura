@@ -1,14 +1,14 @@
-/**
- * Copyright (c) 2011, 2014 Eurotech and/or its affiliates
+/*******************************************************************************
+ * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
  *
- *  All rights reserved. This program and the accompanying materials
- *  are made available under the terms of the Eclipse Public License v1.0
- *  which accompanies this distribution, and is available at
- *  http://www.eclipse.org/legal/epl-v10.html
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Eurotech
- */
+ *     Eurotech
+ *******************************************************************************/
 package org.eclipse.kura.net.admin.visitor.linux.util;
 
 import java.io.File;
@@ -34,7 +34,7 @@ public class KuranetConfig {
     public static Properties getProperties() {
         Properties kuraExtendedProps = null;   
         
-        s_logger.debug("Getting " + KURANET_FILENAME);
+        s_logger.debug("Getting {}", KURANET_FILENAME);
 
         File kuranetFile = new File(KURANET_FILENAME);
 
@@ -57,7 +57,7 @@ public class KuranetConfig {
             	}
             }
         } else {
-            s_logger.debug("File does not exist: " + KURANET_FILENAME);
+            s_logger.debug("File does not exist: {}", KURANET_FILENAME);
         }
 
         return kuraExtendedProps;
@@ -123,11 +123,11 @@ public class KuranetConfig {
         
         if(properties != null) {
         	if(properties.containsKey(key)) {
-            	s_logger.debug("Deleting property " + key);
+            	s_logger.debug("Deleting property {}", key);
         		properties.remove(key);
         		KuranetConfig.storeProperties(properties);
         	} else {
-        		s_logger.debug("Property does not exist " + key);
+        		s_logger.debug("Property does not exist {}", key);
         	}
         }
     }

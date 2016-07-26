@@ -1,14 +1,14 @@
-/**
- * Copyright (c) 2011, 2015 Eurotech and/or its affiliates
+/*******************************************************************************
+ * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
  *
- *  All rights reserved. This program and the accompanying materials
- *  are made available under the terms of the Eclipse Public License v1.0
- *  which accompanies this distribution, and is available at
- *  http://www.eclipse.org/legal/epl-v10.html
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Eurotech
- */
+ *     Eurotech
+ *******************************************************************************/
 
 package org.eclipse.kura.linux.net.iptables;
 
@@ -32,6 +32,22 @@ public class NatPreroutingChainRule {
 	private String m_permittedNetwork;
 	private int m_permittedNetworkMask;
 	private String m_permittedMacAddress;
+	
+	public NatPreroutingChainRule(String inputInterface, String protocol,
+			int externalPort, int internalPort, int srcPortFirst,
+			int srcPortLast, String dstIpAddress, String permittedNetwork,
+			int permittedNetworkMask, String permittedMacAddress) {
+		m_inputInterface = inputInterface;
+		m_protocol = protocol;
+		m_externalPort = externalPort;
+		m_internalPort = internalPort;
+		m_srcPortFirst = srcPortFirst;
+		m_srcPortLast = srcPortLast;
+		m_dstIpAddress = dstIpAddress;
+		m_permittedNetwork = permittedNetwork;
+		m_permittedNetworkMask = permittedNetworkMask;
+		m_permittedMacAddress = permittedMacAddress;
+	}
 	
 	public NatPreroutingChainRule(String rule) throws KuraException {
 		try {
@@ -65,6 +81,25 @@ public class NatPreroutingChainRule {
 		} catch (Exception e) {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
 		}
+	}
+	
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder("-A PREROUTING");
+		if ((m_permittedNetwork != null) && !m_permittedNetwork.equals("0.0.0.0")) {
+			sb.append(" -s ").append(m_permittedNetwork);
+		}
+		sb.append(" -i ").append(m_inputInterface).append(" -p ").append(m_protocol);
+		if (m_permittedMacAddress != null) {
+			sb.append(" -m mac --mac-source ").append(m_permittedMacAddress);
+		}
+		sb.append(" -m ").append(m_protocol);
+		if ((m_srcPortFirst > 0) && (m_srcPortLast >= m_srcPortFirst)) {
+			sb.append(" --sport ").append(m_srcPortFirst).append(':').append(m_srcPortLast);
+		}
+		sb.append(" --dport ").append(m_externalPort);
+		sb.append(" -j DNAT --to-destination ").append(m_dstIpAddress).append(':').append(m_internalPort);
+		return sb.toString();
 	}
 	
 	@Override
@@ -136,10 +171,6 @@ public class NatPreroutingChainRule {
         return true;
     }
 	
-	public String toString() {
-		return m_rule;
-	}
-
 	public String getInputInterface() {
 		return m_inputInterface;
 	}

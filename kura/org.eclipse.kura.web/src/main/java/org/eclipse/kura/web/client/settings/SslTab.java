@@ -1,14 +1,14 @@
-/**
- * Copyright (c) 2011, 2015 Eurotech and/or its affiliates
+/*******************************************************************************
+ * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
  *
- *  All rights reserved. This program and the accompanying materials
- *  are made available under the terms of the Eclipse Public License v1.0
- *  which accompanies this distribution, and is available at
- *  http://www.eclipse.org/legal/epl-v10.html
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Eurotech
- */
+ *     Eurotech
+ *******************************************************************************/
 package org.eclipse.kura.web.client.settings;
 
 import org.eclipse.kura.web.client.messages.Messages;
@@ -378,8 +378,8 @@ public class SslTab extends LayoutContainer {
 		m_falseRadio.setValueAttribute("false");
 
 		m_hostnameVerification = new RadioGroup();  
-		m_hostnameVerification.setName("Hostname Verification");  
-		m_hostnameVerification.setItemId("Hostname Verification");
+		m_hostnameVerification.setName(MSGS.settingsSSLConfigurationHostnameVerification());  
+		m_hostnameVerification.setItemId(MSGS.settingsSSLConfigurationHostnameVerification());
 		m_hostnameVerification.setFieldLabel(MSGS.settingsSSLConfigurationHostnameVerification());  
 		m_hostnameVerification.add(m_trueRadio);  
 		m_hostnameVerification.add(m_falseRadio);

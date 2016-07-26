@@ -1,0 +1,152 @@
+/**
+ * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ *
+ *  All rights reserved. This program and the accompanying materials
+ *  are made available under the terms of the Eclipse Public License v1.0
+ *  which accompanies this distribution, and is available at
+ *  http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *   Eurotech
+ */
+/** Add css rules here for your application. */
+
+
+/** Example rules used by the template application (remove for your app) */
+body { background-color: #009AE0 !important; }
+
+h1 {
+  font-size: 2em;
+  font-weight: bold;
+  color: #777777;
+  margin: 40px 0px 70px;
+  text-align: center;
+}
+
+.sendButton {
+  display: block;
+  font-size: 16pt;
+}
+
+/** Most GWT widgets already have a style name defined */
+.gwt-DialogBox {
+  width: 400px;
+}
+
+.dialogVPanel {
+  margin: 5px;
+}
+
+.serverResponseLabelError {
+  color: red;
+}
+
+/** Set ids using widget.getElement().setId("idOfElement") */
+#closeButton {
+  margin: 15px 6px 6px;
+}
+
+.x-tree3-node-icon {
+    margin-top: 2px;    
+}
+
+fieldset#configuration-form > div.x-form-label-left > div.x-component {
+    padding-bottom: 10px;   
+    padding-right: 25px;   
+}
+
+img.x-tree3-node-icon {
+	background-size: 100%;
+}
+
+/******************************
+***
+*** gwtbootstrap3 CSS rules 
+***
+*******************************/
+.gwt-PopupPanelGlass { width: 100%; background-color: #009AE0; opacity: 0.3; }
+
+.btn { background-color: #009AE0 !important; color: white !important; }
+
+.form-control { font-size: 11px !important; width: 95% !important; }
+
+.well div { cursor: default; }
+
+.table { font-size: 12px; }
+.rowHeader { background-color: #009AE0 !important; font-size: 14px !important; color: white !important; pointer-events: none !important;  }
+
+.connection-table-row { padding: 10px 0px 10px 0px; border: 1px solid #ddd; }
+
+.fa-refresh:before { margin-right: 5px; }
+.fa-toggle-on:before { margin-right: 5px; }
+.fa-toggle-off:before { margin-right: 5px; }
+.fa-download:before { margin-right: 5px; }
+.fa-reply:before { margin-right: 5px; }
+.fa-share:before { margin-right: 5px; }
+.fa-check:before { margin-right: 5px; }
+.fa-times:before { margin-right: 6px; }
+.fa-plus:before { margin-right: 6px; }
+.fa-minus:before { margin-right: 6px; }
+.fa-pencil:before { margin-right: 6px; }
+.fa-trash:before { margin-right: 6px; }
+
+/******************************
+***
+*** Custom CSS rules 
+***
+*******************************/
+/** Fix for unwanted vertical scrollbars in Chrome */
+.x-grid3-scroller {
+	overflow-x:			hidden;
+}
+
+/** Prevent input boxes from resizing after changing input */
+.kura-combobox input {
+	width: 225px !important;
+}
+
+.kura-textfield {
+	width: 242px !important;
+}
+
+.kura-textfield input {
+	width: 242px !important;
+}
+
+.kura-textfield + img {
+	left: 426px !important;
+}
+
+#ssid-input input {
+	width: 218px !important;
+}
+
+#wifi-password input {
+	width: 218px !important;
+}
+
+div.copyright:after {
+	content: ' Eurotech Inc., and others. Made available under the terms of the Eclipse Public License v1.0';
+}
+
+div.headerLogo { 
+	height: 			38px;
+	width: 				127px;
+	margin: 			5px 0px 5px 15px;
+	vertical-align: 	baseline;
+	background: 		url(eclipse/kura/icons/kura_logo_small.png);
+	background-repeat: 	no-repeat;
+	background-size: 	contain;
+}
+
+div.headerLogo-ie8 {
+	height:	           38px;
+	width:             127px;
+	margin:	           5px 0px 5px 15px;
+	vertical-align:    baseline;
+	background-repeat: no-repeat;
+	background-size:   contain;
+	/* IE 8 Hack */
+	filter:            progid:DXImageTransform.Microsoft.AlphaImageLoader(src='kura/org/eclipse/kura/images/kura_logo_small.png',sizingMethod='scale');
+	-ms-filter:        "progid:DXImageTransform.Microsoft.AlphaImageLoader(src='kura/org/eclipse/kura/images/kura_logo_small.png',sizingMethod='scale')";
+}

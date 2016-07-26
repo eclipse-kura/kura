@@ -1,14 +1,14 @@
-/**
- * Copyright (c) 2011, 2014 Eurotech and/or its affiliates
+/*******************************************************************************
+ * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
  *
- *  All rights reserved. This program and the accompanying materials
- *  are made available under the terms of the Eclipse Public License v1.0
- *  which accompanies this distribution, and is available at
- *  http://www.eclipse.org/legal/epl-v10.html
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Eurotech
- */
+ *     Eurotech
+ *******************************************************************************/
 package org.eclipse.kura.data;
 
 import java.util.List;
@@ -18,6 +18,7 @@ import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraNotConnectedException;
 import org.eclipse.kura.KuraStoreException;
 import org.eclipse.kura.KuraTimeoutException;
+import org.eclipse.kura.data.listener.DataServiceListener;
 
 /**
  * The DataService provides the ability of connecting to a remote
@@ -186,4 +187,21 @@ public interface DataService
 	List<Integer> getDroppedInFlightMessageIds(String topicRegex)
 			throws KuraStoreException;
 	
+	/**
+	 * Adds a listener.
+	 * 
+	 * @param listener
+	 * 
+	 * @since {@link org.eclipse.kura.data} 1.1.0
+	 */
+	public void addDataServiceListener(DataServiceListener listener);
+	
+	/**
+	 * Removes a listener.
+	 * 
+	 * @param listener
+	 * 
+	 * @since {@link org.eclipse.kura.data} 1.1.0
+	 */
+	public void removeDataServiceListener(DataServiceListener listener);
 }

@@ -1,15 +1,14 @@
-/**
- * Copyright (c) 2011, 2015 Eurotech and/or its affiliates, and others
+/*******************************************************************************
+ * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
  *
- *  All rights reserved. This program and the accompanying materials
- *  are made available under the terms of the Eclipse Public License v1.0
- *  which accompanies this distribution, and is available at
- *  http://www.eclipse.org/legal/epl-v10.html
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Eurotech
- *   Benjamin Cabé <benjamin@eclipse.org>
- */
+ *     Eurotech
+ *******************************************************************************/
 package org.eclipse.kura.core.data.transport.mqtt;
 
 import java.io.UnsupportedEncodingException;
@@ -26,13 +25,16 @@ import org.eclipse.kura.KuraNotConnectedException;
 import org.eclipse.kura.KuraTimeoutException;
 import org.eclipse.kura.KuraTooManyInflightMessagesException;
 import org.eclipse.kura.configuration.ConfigurableComponent;
+import org.eclipse.kura.configuration.ConfigurationService;
+import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.core.data.transport.mqtt.MqttClientConfiguration.PersistenceType;
 import org.eclipse.kura.core.util.ValidationUtil;
 import org.eclipse.kura.crypto.CryptoService;
-import org.eclipse.kura.data.DataTransportListener;
+import org.eclipse.kura.data.transport.listener.DataTransportListener;
 import org.eclipse.kura.data.DataTransportService;
 import org.eclipse.kura.data.DataTransportToken;
 import org.eclipse.kura.ssl.SslManagerService;
+import org.eclipse.kura.ssl.SslManagerServiceOptions;
 import org.eclipse.kura.ssl.SslServiceListener;
 import org.eclipse.kura.status.CloudConnectionStatusComponent;
 import org.eclipse.kura.status.CloudConnectionStatusEnum;
@@ -50,7 +52,6 @@ import org.eclipse.paho.client.mqttv3.MqttPersistenceException;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 import org.eclipse.paho.client.mqttv3.persist.MqttDefaultFilePersistence;
 import org.osgi.service.component.ComponentContext;
-import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -77,7 +78,7 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 
 	private MqttAsyncClient m_mqttClient;
 
-	private DataTransportListeners m_dataTransportListeners;
+	private DataTransportListenerS m_dataTransportListeners;
 
 	private MqttClientConfiguration m_clientConf;
 	private boolean m_newSession;
@@ -112,6 +113,13 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 
 	private static final String TOPIC_ACCOUNT_NAME_CTX_NAME = "account-name";
 	private static final String TOPIC_DEVICE_ID_CTX_NAME = "client-id";
+	
+	private static final String SSL_PROTOCOL = SslManagerServiceOptions.PROP_PROTOCOL;
+	private static final String SSL_CIPHERS = SslManagerServiceOptions.PROP_CIPHERS;
+	private static final String SSL_HN_VERIFY = SslManagerServiceOptions.PROP_HN_VERIFY;
+	private static final String SSL_CERT_ALIAS = "ssl.certificate.alias";
+	private static final String SSL_DEFAULT_HN_VERIFY = "use-ssl-service-config";
+	
 
 	// ----------------------------------------------------------------
 	//
@@ -158,7 +166,7 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 	// ----------------------------------------------------------------
 
 	protected void activate(ComponentContext componentContext, Map<String, Object> properties) {
-		s_logger.info("Activating...");
+		s_logger.info("Activating {}...", properties.get(ConfigurationService.KURA_SERVICE_PID));
 
 		// We need to catch the configuration exception and activate anyway.
 		// Otherwise the ConfigurationService will not be able to track us.
@@ -169,11 +177,11 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 			Object value = entry.getValue();
 			if (key.equals(MQTT_PASSWORD_PROP_NAME)) {
 				try {
-					char[] decryptedPassword = m_cryptoService.decryptAes(((String) value).toCharArray());
+					Password decryptedPassword = new Password(m_cryptoService.decryptAes(((String) value).toCharArray()));
 					decryptedPropertiesMap.put(key, decryptedPassword);
 				} catch (Exception e) {
 					s_logger.info("Password is not encrypted");
-					decryptedPropertiesMap.put(key, ((String) value).toCharArray());
+					decryptedPropertiesMap.put(key, new Password((String) value));
 				}
 			} else {
 				decryptedPropertiesMap.put(key, value);
@@ -188,20 +196,13 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 			s_logger.error("Invalid client configuration. Service will not be able to connect until the configuration is updated", e);			
 		}
 
-		ServiceTracker<DataTransportListener, DataTransportListener> listenersTracker = new ServiceTracker<DataTransportListener, DataTransportListener>(
-				componentContext.getBundleContext(), DataTransportListener.class, null);
-
-		// Deferred open of tracker to prevent
-		// java.lang.Exception: Recursive invocation of
-		// ServiceFactory.getService
-		// on ProSyst
-		m_dataTransportListeners = new DataTransportListeners(listenersTracker);
+		m_dataTransportListeners = new DataTransportListenerS(componentContext);
 
 		// Do nothing waiting for the connect request from the upper layer.
 	}
 
 	protected void deactivate(ComponentContext componentContext) {
-		s_logger.debug("Deactivating...");
+		s_logger.debug("Deactivating {}...", m_properties.get(ConfigurationService.KURA_SERVICE_PID));
 
 		// Before deactivating us, the OSGi container should have first
 		// deactivated all dependent components.
@@ -213,12 +214,10 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 		if (isConnected()) {
 			disconnect(0);
 		}
-
-		m_dataTransportListeners.close();
 	}
 
 	public void updated(Map<String, Object> properties) {
-		s_logger.info("Updating...");
+		s_logger.info("Updating {}...", properties.get(ConfigurationService.KURA_SERVICE_PID));
 
 		m_properties.clear();
 
@@ -229,11 +228,11 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 			Object value = entry.getValue();
 			if (key.equals(MQTT_PASSWORD_PROP_NAME)) {
 				try {
-					char[] decryptedPassword = m_cryptoService.decryptAes(((String) value).toCharArray());
+					Password decryptedPassword = new Password(m_cryptoService.decryptAes(((String) value).toCharArray()));
 					decryptedPropertiesMap.put(key, decryptedPassword);
 				} catch (Exception e) {
 					s_logger.info("Password is not encrypted");
-					decryptedPropertiesMap.put(key, ((String) value).toCharArray());
+					decryptedPropertiesMap.put(key, new Password((String) value));
 				}
 			} else {
 				decryptedPropertiesMap.put(key, value);
@@ -539,6 +538,16 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 
 		return token;
 	}
+	
+	@Override
+	public void addDataTransportListener(DataTransportListener listener) {
+		m_dataTransportListeners.add(listener);		
+	}
+
+	@Override
+	public void removeDataTransportListener(DataTransportListener listener) {
+		m_dataTransportListeners.remove(listener);
+	}
 
 	// ---------------------------------------------------------
 	//
@@ -672,6 +681,7 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 			clientId = clientId.replace('/', '-');
 			clientId = clientId.replace('+', '-');
 			clientId = clientId.replace('#', '-');
+			clientId = clientId.replace('.', '-');
 
 
 			// Configure the broker URL
@@ -691,13 +701,13 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 			ValidationUtil.notNull((Boolean) properties.get(MQTT_CLEAN_SESSION_PROP_NAME), MQTT_CLEAN_SESSION_PROP_NAME);
 
 			String userName = (String) properties.get(MQTT_USERNAME_PROP_NAME);
-			if (userName != null) {
+			if (userName != null && !userName.isEmpty()) {
 				conOpt.setUserName(userName);
 			}
 
-			char[] password = (char[]) properties.get(MQTT_PASSWORD_PROP_NAME);
-			if (password != null) {
-				conOpt.setPassword(password);
+			Password password = (Password) properties.get(MQTT_PASSWORD_PROP_NAME);
+			if (password != null && password.toString().length() != 0) {
+				conOpt.setPassword(password.getPassword());
 			}
 
 			conOpt.setKeepAliveInterval((Integer) properties.get(MQTT_KEEP_ALIVE_PROP_NAME));
@@ -750,8 +760,22 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 		// SSL
 		if (brokerUrl.startsWith("ssl")) {
 			try {
-				String alias = m_topicContext.get(TOPIC_ACCOUNT_NAME_CTX_NAME);
-				SSLSocketFactory ssf = m_sslManagerService.getSSLSocketFactory(alias);
+			    String alias = (String) m_properties.get(SSL_CERT_ALIAS);
+			    if (alias == null || "".equals(alias.trim())) {
+			        alias = m_topicContext.get(TOPIC_ACCOUNT_NAME_CTX_NAME);
+			    }
+
+				String protocol = (String) m_properties.get(SSL_PROTOCOL);
+				String ciphers = (String) m_properties.get(SSL_CIPHERS);
+				String hnVerification = (String) m_properties.get(SSL_HN_VERIFY);
+				
+				SSLSocketFactory ssf;
+				if (SSL_DEFAULT_HN_VERIFY.equals(hnVerification)) {
+				    ssf = m_sslManagerService.getSSLSocketFactory(protocol, ciphers, null, null, null, alias);
+				} else {
+				    ssf = m_sslManagerService.getSSLSocketFactory(protocol, ciphers, null, null, null, alias, Boolean.valueOf(hnVerification));
+				}
+				
 				conOpt.setSocketFactory(ssf);
 			} catch (Exception e) {
 				s_logger.error("SSL setup failed", e);

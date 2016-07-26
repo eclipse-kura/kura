@@ -1,14 +1,14 @@
-/**
+/*******************************************************************************
  * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
  *
- *  All rights reserved. This program and the accompanying materials
- *  are made available under the terms of the Eclipse Public License v1.0
- *  which accompanies this distribution, and is available at
- *  http://www.eclipse.org/legal/epl-v10.html
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Eurotech
- */
+ *     Eurotech
+ *******************************************************************************/
 package org.eclipse.kura.linux.net.wifi;
 
 import java.io.File;
@@ -26,36 +26,30 @@ public class HostapdManager {
 	private static Logger s_logger = LoggerFactory.getLogger(HostapdManager.class);
 
 	private static final String OS_VERSION = System.getProperty("kura.os.version");
-	private static final String TARGET_NAME = System.getProperty("target.device");
-
-	private static String HOSTAPD_CONFIG_FILE_NAME = null; 
+	private static final String HOSTAPD_EXEC = "hostapd";
+	
+	private static boolean s_isIntelEdison = false;
 	static {
-		if (OS_VERSION.equals(KuraConstants.Intel_Edison.getImageName() + "_" + KuraConstants.Intel_Edison.getImageVersion() + "_" + KuraConstants.Intel_Edison.getTargetName())) {
-			HOSTAPD_CONFIG_FILE_NAME = "/etc/hostapd/hostapd.conf";
-		} else {
-			HOSTAPD_CONFIG_FILE_NAME = "/etc/hostapd.conf";
+		StringBuilder sb = new StringBuilder(KuraConstants.Intel_Edison.getImageName());
+		sb.append('_').append(KuraConstants.Intel_Edison.getImageVersion()).append('_').append(KuraConstants.Intel_Edison.getTargetName());
+		if(OS_VERSION.equals(sb.toString())) {
+			s_isIntelEdison = true;
 		}
 	}
 
-	private static final File CONFIG_FILE = new File(HOSTAPD_CONFIG_FILE_NAME);
-	private static final String HOSTAPD_EXEC = "hostapd";
-
-	public static void start() throws KuraException {
+	public static void start(String ifaceName) throws KuraException {
 		SafeProcess proc = null;
-
-		if(!CONFIG_FILE.exists()) {
-			throw KuraException.internalError("Config file does not exist: " + CONFIG_FILE.getAbsolutePath());
+		File configFile = new File(getHostapdConfigFileName(ifaceName));      
+		if (!configFile.exists()) {      
+		    throw KuraException.internalError("Config file does not exist: " + configFile.getAbsolutePath());       
 		}
-
 		try {
-			if(HostapdManager.isRunning()) {
-				stop();
+			if(HostapdManager.isRunning(ifaceName)) {
+				stop(ifaceName);
 			}
-
-			loadKernelModules();
 			
 			//start hostapd
-			String launchHostapdCommand = generateStartCommand();
+			String launchHostapdCommand = generateStartCommand(ifaceName);
 			s_logger.debug("starting hostapd --> {}", launchHostapdCommand);
 			proc = ProcessUtil.exec(launchHostapdCommand);
 			if(proc.waitFor() != 0) {
@@ -63,7 +57,6 @@ public class HostapdManager {
 				throw KuraException.internalError("failed to start hostapd for unknown reason");
 			}
 			Thread.sleep(1000);
-
 		} catch(Exception e) {
 			throw KuraException.internalError(e);
 		}
@@ -74,14 +67,17 @@ public class HostapdManager {
 		}
 	}
 
-	public static void stop() throws KuraException {
+	public static void stop(String ifaceName) throws KuraException {
 		SafeProcess proc = null;
 		try {
 			//kill hostapd
 			s_logger.debug("stopping hostapd");
-			proc = ProcessUtil.exec(generateStopCommand());
-			proc.waitFor();
-			Thread.sleep(1000);
+			String cmd = generateStopCommand(ifaceName);
+			if ((cmd != null) && !cmd.isEmpty()) {
+				proc = ProcessUtil.exec(cmd);
+				proc.waitFor();
+				Thread.sleep(1000);
+			}
 		} catch(Exception e) {
 			throw KuraException.internalError(e);
 		}
@@ -90,61 +86,67 @@ public class HostapdManager {
 		}
 	}
 
-	public static boolean isRunning() throws KuraException {
+	public static boolean isRunning(String ifaceName) throws KuraException {
 		try {
-			// Check if hostapd is running
-			//int pid = LinuxProcessUtil.getPid(generateCommand());
-			String [] tokens = {HOSTAPD_CONFIG_FILE_NAME};
+			boolean ret = false;
+			if (getPid(ifaceName) > 0) {
+				ret = true;
+			}
+			s_logger.trace("isRunning() :: --> {}", ret);
+			return ret;
+		} catch (Exception e) {
+			throw KuraException.internalError(e);
+		}
+	}
+	
+	public static int getPid(String ifaceName) throws KuraException {
+		try {
+		    String [] tokens = {getHostapdConfigFileName(ifaceName)};
 			int pid = LinuxProcessUtil.getPid("hostapd", tokens);
-			s_logger.trace("isRunning() :: pid={}", pid);
-			return (pid > -1);
+			s_logger.trace("getPid() :: pid={}", pid);
+			return pid;
 		} catch (Exception e) {
 			throw KuraException.internalError(e);
 		}
 	}
 
-	private static String generateStartCommand() {
+	private static String generateStartCommand(String ifaceName) {
 		StringBuilder cmd = new StringBuilder();
-		if (OS_VERSION.equals(KuraConstants.Intel_Edison.getImageName() + "_" + KuraConstants.Intel_Edison.getImageVersion() + "_" + KuraConstants.Intel_Edison.getTargetName())) {
+		if (s_isIntelEdison) {
 			cmd.append("systemctl start hostapd");
 		} else {
-			cmd.append(HOSTAPD_EXEC).append(" -B ").append(CONFIG_FILE.getAbsolutePath());
+		    File configFile = new File(getHostapdConfigFileName(ifaceName));
+			cmd.append(HOSTAPD_EXEC).append(" -B ").append(configFile.getAbsolutePath());
 		}
 		return cmd.toString();
 	}
 
-	private static String generateStopCommand() {
+	private static String generateStopCommand(String ifaceName) throws KuraException {
 		StringBuilder cmd = new StringBuilder();
-		if (OS_VERSION.equals(KuraConstants.Intel_Edison.getImageName() + "_" + KuraConstants.Intel_Edison.getImageVersion() + "_" + KuraConstants.Intel_Edison.getTargetName())) {
+		if (s_isIntelEdison) {
 			cmd.append("systemctl stop hostapd");
 		} else {
-			cmd.append("killall hostapd");
+			int pid;
+			try {
+				pid = getPid(ifaceName);
+				//cmd.append("killall hostapd");
+				if (pid > 0) {
+					cmd.append("kill -9 ").append(pid);
+				}
+			} catch (KuraException e) {
+				throw KuraException.internalError(e);
+			}
 		}
 		return cmd.toString();
 	}
-
-	public static void loadKernelModules() throws KuraException {
-		SafeProcess proc = null;
-		try{
-			if (TARGET_NAME.equals(KuraConstants.ReliaGATE_10_05.getTargetName())) {
-				s_logger.debug("--> executing rmmod bcmdhd");
-				proc = ProcessUtil.exec("rmmod bcmdhd");
-				proc.waitFor();
-
-				s_logger.debug("--> executing modprobe");
-				proc = ProcessUtil.exec("modprobe -S 3.12.6 bcmdhd firmware_path=\"/system/etc/firmware/fw_bcm43438a0_apsta.bin\" op_mode=2");
-				if(proc.waitFor() != 0) {
-					s_logger.error("failed modprobe");
-					throw KuraException.internalError("failed modprobe"); 
-				}
-				Thread.sleep(1000);
-			}
-		} catch(Exception e) {
-			throw KuraException.internalError(e);
-		} finally {
-			if (proc != null) {
-				ProcessUtil.destroy(proc);
-			}
+	
+	public static String getHostapdConfigFileName(String ifaceName) {
+		StringBuilder sb = new StringBuilder();
+		if (s_isIntelEdison) {
+			sb.append("/etc/hostapd/hostapd.conf");
+		} else {
+		    sb.append("/etc/hostapd-").append(ifaceName).append(".conf");
 		}
+		return sb.toString();
 	}
 }

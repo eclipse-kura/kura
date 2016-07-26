@@ -1,14 +1,14 @@
-/**
- * Copyright (c) 2011, 2014 Eurotech and/or its affiliates
+/*******************************************************************************
+ * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
  *
- *  All rights reserved. This program and the accompanying materials
- *  are made available under the terms of the Eclipse Public License v1.0
- *  which accompanies this distribution, and is available at
- *  http://www.eclipse.org/legal/epl-v10.html
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Eurotech
- */
+ *     Eurotech
+ *******************************************************************************/
 package org.eclipse.kura.linux.net;
 
 import java.io.BufferedReader;
@@ -460,7 +460,7 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
 		if(interfaces != null) {
 			for(int i=0; i<interfaces.size(); i++) {
 				NetInterface<? extends NetInterfaceAddress> iface = interfaces.get(i);
-				if(!LinuxNetworkUtil.isUp(iface.getName())) {
+				if(!LinuxNetworkUtil.hasAddress(iface.getName())) {
 					s_logger.debug("removing interface {} because it is not up", iface.getName());
 					interfaces.remove(i);
 					i--;
@@ -865,7 +865,6 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
 			ConnectionInfo conInfo = new ConnectionInfoImpl(interfaceName);			
 			NetInterfaceAddressImpl netInterfaceAddress = new NetInterfaceAddressImpl();
 			try {
-			    // FIXME:MC The whole block of information can be fetched with a single ifconfig?
 				LinuxIfconfig ifconfig = LinuxNetworkUtil.getInterfaceConfiguration(interfaceName);
 				if (ifconfig != null) {
 					String currentNetmask = ifconfig.getInetMask();

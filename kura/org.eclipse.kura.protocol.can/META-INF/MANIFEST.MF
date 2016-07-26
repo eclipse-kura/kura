@@ -2,11 +2,11 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: org.eclipse.kura.protocol.can
 Bundle-SymbolicName: org.eclipse.kura.protocol.can;singleton:=true
-Bundle-Version: 1.0.3.qualifier
+Bundle-Version: 1.0.3
 Bundle-Vendor: EUROTECH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: org.eclipse.kura;version="[1.0,2.0)",
- org.eclipse.kura.configuration;version="[1.0,1.1)",
+ org.eclipse.kura.configuration;version="[1.1,1.2)",
  org.osgi.framework;version="1.5.0",
  org.osgi.service.cm;version="1.4.0",
  org.osgi.service.component;version="1.2.0",
@@ -17,4 +17,4 @@ Export-Package: org.eclipse.kura.protocol.can;version="1.0.0"
 Service-Component: OSGI-INF/*.xml
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .,
- lib/libsocket-can-java-1.0.1.jar
+ lib/libsocket-can-java-1.0.2.jar

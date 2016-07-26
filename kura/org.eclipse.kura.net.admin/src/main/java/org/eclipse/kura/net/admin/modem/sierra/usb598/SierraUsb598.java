@@ -1,14 +1,14 @@
-/**
- * Copyright (c) 2011, 2014 Eurotech and/or its affiliates
+/*******************************************************************************
+ * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
  *
- *  All rights reserved. This program and the accompanying materials
- *  are made available under the terms of the Eclipse Public License v1.0
- *  which accompanies this distribution, and is available at
- *  http://www.eclipse.org/legal/epl-v10.html
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Eurotech
- */
+ *     Eurotech
+ *******************************************************************************/
 package org.eclipse.kura.net.admin.modem.sierra.usb598;
 
 import java.io.IOException;
@@ -163,7 +163,7 @@ public class SierraUsb598 implements EvdoCellularModem {
         Dictionary d = new Hashtable();
         d.put(EventConstants.EVENT_TOPIC, s_topicsOfInterest);
         for (int i = 0; i < s_topicsOfInterest.length; i++) {
-        	s_logger.debug("Subscribing for " + s_topicsOfInterest[i]);
+        	s_logger.debug("Subscribing for {}", s_topicsOfInterest[i]);
         }
         //bundleContext.registerService(EventHandler.class.getName(), this, d);
         
@@ -208,7 +208,7 @@ public class SierraUsb598 implements EvdoCellularModem {
 	public String getModel() throws KuraException {
 		synchronized (m_atLock) {
 	    	if (m_model == null) {
-	    		s_logger.debug("sendCommand getModelNumber :: " + SierraUsb598AtCommands.getModelNumber.getCommand());
+	    		s_logger.debug("sendCommand getModelNumber :: {}", SierraUsb598AtCommands.getModelNumber.getCommand());
 		    	byte[] reply = null;
 		    	CommConnection commAtConnection = openSerialPort(getAtPort());
 		    	if (!isAtReachable(commAtConnection)) {
@@ -236,7 +236,7 @@ public class SierraUsb598 implements EvdoCellularModem {
 	public String getManufacturer() throws KuraException {
 		synchronized (m_atLock) {
 	    	if (m_manufacturer == null) {
-		    	s_logger.debug("sendCommand getManufacturer :: " + SierraUsb598AtCommands.getManufacturer.getCommand());
+		    	s_logger.debug("sendCommand getManufacturer :: {}", SierraUsb598AtCommands.getManufacturer.getCommand());
 		    	byte[] reply = null;
 		    	CommConnection commAtConnection = openSerialPort(getAtPort());
 		    	if (!isAtReachable(commAtConnection)) {
@@ -263,7 +263,7 @@ public class SierraUsb598 implements EvdoCellularModem {
 	public String getSerialNumber() throws KuraException {
 		synchronized (m_atLock) {
 	    	if (m_esn != null) {
-	    		s_logger.debug("sendCommand getSerialNumber :: " + SierraUsb598AtCommands.getSerialNumber.getCommand());
+	    		s_logger.debug("sendCommand getSerialNumber :: {}", SierraUsb598AtCommands.getSerialNumber.getCommand());
 	    		byte[] reply = null;
 	    		CommConnection commAtConnection = openSerialPort(getAtPort());
 	    		if (!isAtReachable(commAtConnection)) {
@@ -620,7 +620,7 @@ public class SierraUsb598 implements EvdoCellularModem {
 			try {
 				connection = (CommConnection) m_connectionFactory.createConnection(uri, 1, false);
 			} catch (Exception e) {
-				s_logger.debug("Exception creating connection: " + e);
+				s_logger.debug("Exception creating connection: {}", e);
 				throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
 			}
 		}
@@ -826,7 +826,7 @@ public class SierraUsb598 implements EvdoCellularModem {
 			cnsPayload = cnsReply.getPayload();
 			if (cnsPayload != null) {
 				m_rssi = 0 - (((cnsPayload[0] << 8) & 0x0ffff) | (cnsPayload[1] & 0x0ff));
-				s_logger.debug("!!! RSS !!! : " + m_rssi + " dBm");
+				s_logger.debug("!!! RSS !!! : {} dBm", m_rssi);
 			}
 		}
 	}
@@ -839,7 +839,7 @@ public class SierraUsb598 implements EvdoCellularModem {
 			if (cnsPayload != null) {
 				m_sid = ((cnsPayload[0] << 8) & 0x0ffff)
 						| (cnsPayload[1] & 0x0ff);
-				s_logger.debug("!!! SID !!! : " + m_sid);
+				s_logger.debug("!!! SID !!! : {}", m_sid);
 			}
 		}
 	}
@@ -852,7 +852,7 @@ private void setNetworkIdInfo(CnS cnsReply) {
 			if (cnsPayload != null) {
 				m_nid = ((cnsPayload[0] << 8) & 0x0ffff)
 						| (cnsPayload[1] & 0x0ff);
-				s_logger.debug("!!! NID !!! : " + m_nid);
+				s_logger.debug("!!! NID !!! : {}", m_nid);
 			}
 		}
 	}
@@ -865,7 +865,7 @@ private void setNetworkIdInfo(CnS cnsReply) {
 			if (cnsPayload != null) {
 				m_channelNo = ((cnsPayload[0] << 8) & 0x0ffff)
 						| (cnsPayload[1] & 0x0ff);
-				s_logger.debug("!!! Channel Number !!! : " + m_channelNo);
+				s_logger.debug("!!! Channel Number !!! : {}", m_channelNo);
 			}
 		}
 	}
@@ -879,7 +879,7 @@ private void setNetworkIdInfo(CnS cnsReply) {
 				m_channelState = ((cnsPayload[0] << 8) & 0x0ffff)
 						| (cnsPayload[1] & 0x0ff);
 
-				s_logger.debug("!!! Channel State !!! : " + m_channelState);
+				s_logger.debug("!!! Channel State !!! : {}", m_channelState);
 			}
 		}
 	}
@@ -893,7 +893,7 @@ private void setNetworkIdInfo(CnS cnsReply) {
 				m_bandClass = ((cnsPayload[0] << 8) & 0x0ffff)
 						| (cnsPayload[1] & 0x0ff);
 
-				s_logger.debug("!!! Current Band Class !!! : " + m_bandClass);
+				s_logger.debug("!!! Current Band Class !!! : {}", m_bandClass);
 			}
 		}
 	}
@@ -938,7 +938,7 @@ private void setNetworkIdInfo(CnS cnsReply) {
 				m_prlVersion = ((cnsPayload[0] << 8) & 0x0ffff)
 						| (cnsPayload[1] & 0x0ff);
 
-				s_logger.debug("!!! PRL Version !!! : " + m_prlVersion);
+				s_logger.debug("!!! PRL Version !!! : {}", m_prlVersion);
 			}
 		}
 	}
@@ -996,7 +996,7 @@ private void setNetworkIdInfo(CnS cnsReply) {
 				m_roamingStatus = ((cnsPayload[0] << 8) & 0x0ffff)
 						| (cnsPayload[1] & 0x0ff);
 
-				s_logger.debug("!!! Roaming Status !!! : " + m_roamingStatus);
+				s_logger.debug("!!! Roaming Status !!! : {}", m_roamingStatus);
 			}
 		}
 	}
@@ -1015,7 +1015,7 @@ private void setNetworkIdInfo(CnS cnsReply) {
 					mdn.append(cnsPayload[offset + i]);
 				}
 				m_mdn = this.convertDecimalNumeralToString(mdn);
-				s_logger.debug("!!! MDN !!! : " + m_mdn);
+				s_logger.debug("!!! MDN !!! : {}", m_mdn);
 			}
 		}
 	}
@@ -1034,7 +1034,7 @@ private void setNetworkIdInfo(CnS cnsReply) {
 					min.append(cnsPayload[offset + i]);
 				}
 				m_min = this.convertDecimalNumeralToString(min);
-				s_logger.debug("!!! MIN !!! : " + m_min);
+				s_logger.debug("!!! MIN !!! : {}", m_min);
 			}
 		}
 	}
@@ -1083,7 +1083,7 @@ private void setNetworkIdInfo(CnS cnsReply) {
 				m_txCount = (((cnsPayload[0] << 24) & 0x0ffffffff)
 						| ((cnsPayload[1] << 16) & 0x0ffffff)
 						| ((cnsPayload[2] << 8) & 0x0ffff) | (cnsPayload[3] & 0x0ff)) & 0x0ffffffffL;
-				s_logger.debug("!!! TX Count !!! :" + m_txCount);
+				s_logger.debug("!!! TX Count !!! :{}", m_txCount);
 			}
 		}
 	}
@@ -1100,7 +1100,7 @@ private void setNetworkIdInfo(CnS cnsReply) {
 				m_rxCount = (((cnsPayload[4] << 24) & 0x0ffffffff)
 						| ((cnsPayload[5] << 16) & 0x0ffffff)
 						| ((cnsPayload[6] << 8) & 0x0ffff) | (cnsPayload[7] & 0x0ff)) & 0x0ffffffffL;
-				s_logger.debug("!!! RX Count !!! :" + m_rxCount);
+				s_logger.debug("!!! RX Count !!! :{}", m_rxCount);
 			}
 		}
 	}
@@ -1144,7 +1144,7 @@ private void setNetworkIdInfo(CnS cnsReply) {
 			cnsReply = new CnS(m_commHipConnection.sendCommand(
 					cnsCommand.getRequest(), tout));
 		} catch (Exception e) {
-			s_logger.debug("Failed to send command: " + e);
+			s_logger.debug("Failed to send command: {}", e);
 		}
 		// ModemReply modemReply =
 		// this.modemChannelService.sendCommand(this.getHIPport(), modemCommand,

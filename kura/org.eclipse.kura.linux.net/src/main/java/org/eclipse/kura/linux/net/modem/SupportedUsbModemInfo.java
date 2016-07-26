@@ -1,14 +1,14 @@
-/**
- * Copyright (c) 2011, 2014 Eurotech and/or its affiliates
+/*******************************************************************************
+ * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
  *
- *  All rights reserved. This program and the accompanying materials
- *  are made available under the terms of the Eclipse Public License v1.0
- *  which accompanies this distribution, and is available at
- *  http://www.eclipse.org/legal/epl-v10.html
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Eurotech
- */
+ *     Eurotech
+ *******************************************************************************/
 package org.eclipse.kura.linux.net.modem;
 
 import java.util.Arrays;
@@ -24,7 +24,7 @@ public enum SupportedUsbModemInfo {
     Telit_HE910_D   ("HE910-D",  "1bc7", "0021", 7, 0, 3, 0, 3, Arrays.asList(ModemTechnologyType.HSPA, ModemTechnologyType.UMTS), Arrays.asList(new UsbModemDriver("cdc_acm", "1bc7", "0021")), ""),
     Telit_GE910		("GE910", "1bc7", "0022", 2, 0, 0, 1, 0, Arrays.asList(ModemTechnologyType.GSM_GPRS), Arrays.asList(new UsbModemDriver("cdc_acm", "1bc7", "0022")), ""),
     Telit_DE910_DUAL("DE910-DUAL",  "1bc7", "1010", 4, 0, 2, 3, 1, Arrays.asList(ModemTechnologyType.EVDO, ModemTechnologyType.CDMA), Arrays.asList(new De910ModemDriver()), ""),
-    Telit_LE910		("LE910", "1bc7", "1201", 5, 1, 2, 3, 1, Arrays.asList(ModemTechnologyType.LTE, ModemTechnologyType.HSPA, ModemTechnologyType.UMTS), Arrays.asList(new Le910ModemDriver()), ""), 
+    Telit_LE910		("LE910", "1bc7", "1201", 5, 0, 2, 3, 1, Arrays.asList(ModemTechnologyType.LTE, ModemTechnologyType.HSPA, ModemTechnologyType.UMTS), Arrays.asList(new Le910ModemDriver()), ""), 
     Telit_CE910_DUAL("CE910-DUAL", "1bc7", "1011", 2, 0, 1, 1, -1, Arrays.asList(ModemTechnologyType.CDMA), Arrays.asList(new Ce910ModemDriver()), ""),
     Sierra_MC8775   ("MC8775", "1199", "6812", 3, 0, 2, 0, -1, Arrays.asList(ModemTechnologyType.HSDPA), Arrays.asList(new UsbModemDriver("sierra", "1199", "6812")), ""),
     Sierra_MC8790   ("MC8790", "1199", "683c", 7, 0, 3, 4, -1, Arrays.asList(ModemTechnologyType.HSDPA), Arrays.asList(new UsbModemDriver("sierra", "1199", "683c")), ""),

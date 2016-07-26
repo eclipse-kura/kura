@@ -1,4 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+
+     All rights reserved. This program and the accompanying materials
+     are made available under the terms of the Eclipse Public License v1.0
+     which accompanies this distribution, and is available at
+     http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Eurotech
+
+-->
 <MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
     <OCD id="org.eclipse.kura.example.ble.tisensortag.BluetoothLe"
          name="BluetoothLe" 
@@ -6,6 +19,14 @@
          
         <Icon resource="http://s3.amazonaws.com/kura-resources/application/icon/sensortag.png" size="32"/>
 
+         <AD id="scan_enable"
+            name="scan_enable"
+            type="Boolean"
+            cardinality="0"
+            required="true"
+            default="false"
+            description="Enable scan for TI SensorTags." />
+            
          <AD id="scan_time"
             name="scan_time"
             type="Integer"
@@ -86,7 +107,31 @@
             required="true"
             default="false"
             description="Enable buttons."/>
+
+        <AD id="switchOnRedLed"
+            name="switchOnRedLed"
+            type="Boolean"
+            cardinality="0"
+            required="true"
+            default="false"
+            description="Switch on the red led."/>
             
+        <AD id="switchOnGreenLed"
+            name="switchOnGreenLed"
+            type="Boolean"
+            cardinality="0"
+            required="true"
+            default="false"
+            description="Switch on the green led."/>
+            
+         <AD id="switchOnBuzzer"
+            name="switchOnBuzzer"
+            type="Boolean"
+            cardinality="0"
+            required="true"
+            default="false"
+            description="Switch on the buzzer."/>
+                        
         <AD id="publishTopic"  
             name="publishTopic"
             type="String"

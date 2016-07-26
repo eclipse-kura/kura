@@ -1,22 +1,20 @@
-/**
+/*******************************************************************************
  * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
  *
- *  All rights reserved. This program and the accompanying materials
- *  are made available under the terms of the Eclipse Public License v1.0
- *  which accompanies this distribution, and is available at
- *  http://www.eclipse.org/legal/epl-v10.html
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Eurotech
- */
+ *     Eurotech
+ *******************************************************************************/
 package org.eclipse.kura.linux.net.wifi;
 
 import java.io.File;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.linux.util.LinuxProcessUtil;
-import org.eclipse.kura.core.util.ProcessUtil;
-import org.eclipse.kura.core.util.SafeProcess;
 import org.eclipse.kura.linux.net.util.KuraConstants;
 import org.eclipse.kura.linux.net.util.LinuxNetworkUtil;
 import org.eclipse.kura.net.wifi.WifiMode;
@@ -28,43 +26,38 @@ public class WpaSupplicantManager {
 	private static Logger s_logger = LoggerFactory.getLogger(WpaSupplicantManager.class);
 
 	private static final String OS_VERSION = System.getProperty("kura.os.version");
-	private static final String TARGET_NAME = System.getProperty("target.device");
-
-	private static String WPA_CONFIG_FILE_NAME = null;
+	private static final File TEMP_CONFIG_FILE = new File("/tmp/wpa_supplicant.conf");
+	
+	private static String m_driver = null;
+	
+	private static boolean s_isIntelEdison = false;
 	static {
-		if (OS_VERSION.equals(KuraConstants.Intel_Edison.getImageName() + "_" + KuraConstants.Intel_Edison.getImageVersion() + "_" + KuraConstants.Intel_Edison.getTargetName())) {
-			WPA_CONFIG_FILE_NAME = "/etc/wpa_supplicant/wpa_supplicant.conf";
-		} else {
-			WPA_CONFIG_FILE_NAME = "/etc/wpa_supplicant.conf";
+		StringBuilder sb = new StringBuilder(KuraConstants.Intel_Edison.getImageName());
+		sb.append('_').append(KuraConstants.Intel_Edison.getImageVersion()).append('_').append(KuraConstants.Intel_Edison.getTargetName());
+		if(OS_VERSION.equals(sb.toString())) {
+			s_isIntelEdison = true;
 		}
 	}
 
-	private static final File CONFIG_FILE = new File(WPA_CONFIG_FILE_NAME);
-	private static final File TEMP_CONFIG_FILE = new File("/tmp/wpa_supplicant.conf");
-
-	private static String m_driver = null;
-	private static String m_interfaceName = null;
-
 	public static void start(String interfaceName, final WifiMode mode, String driver) throws KuraException {
-		start (interfaceName, mode, driver, CONFIG_FILE);
+	    start (interfaceName, mode, driver, new File(getWpaSupplicantConfigFilename(interfaceName)));
 	}
 
 	public static void startTemp(String interfaceName, final WifiMode mode, String driver) throws KuraException {
-		start (interfaceName, mode, driver, TEMP_CONFIG_FILE);
+	    start (interfaceName, mode, driver, TEMP_CONFIG_FILE);
 	}
 
 	private static synchronized void start(String interfaceName, final WifiMode mode, String driver, File configFile) throws KuraException {
 		s_logger.debug("enable WPA Supplicant");
 
 		try {
-			if(WpaSupplicantManager.isRunning()) {
-				stop();
+			if(WpaSupplicantManager.isRunning(interfaceName)) {
+				stop(interfaceName);
 			}
 
-			m_interfaceName = interfaceName;
 			String drv = WpaSupplicant.getDriver(interfaceName);
 			if (drv != null) {
-				if (OS_VERSION.equals(KuraConstants.Intel_Edison.getImageName() + "_" + KuraConstants.Intel_Edison.getImageVersion() + "_" + KuraConstants.Intel_Edison.getTargetName())) {
+				if (s_isIntelEdison) {
 					m_driver = driver;
 				} else {
 					m_driver =  drv;
@@ -73,10 +66,8 @@ public class WpaSupplicantManager {
 				m_driver = driver;
 			}
 
-			loadKernelModules();
-
 			// start wpa_supplicant
-			String wpaSupplicantCommand = formSupplicantStartCommand(configFile);
+			String wpaSupplicantCommand = formSupplicantStartCommand(interfaceName, configFile);
 			s_logger.debug("starting wpa_supplicant -> {}", wpaSupplicantCommand);
 			LinuxProcessUtil.start(wpaSupplicantCommand);
 		} catch (Exception e) {
@@ -89,15 +80,15 @@ public class WpaSupplicantManager {
 	/*
 	 * This method forms wpa_supplicant start command
 	 */
-	private static String formSupplicantStartCommand(File configFile) {
+	private static String formSupplicantStartCommand(String ifaceName, File configFile) {
 		StringBuilder sb = new StringBuilder();
-		if (OS_VERSION.equals(KuraConstants.Intel_Edison.getImageName() + "_" + KuraConstants.Intel_Edison.getImageVersion() + "_" + KuraConstants.Intel_Edison.getTargetName())) {
+		if (s_isIntelEdison) {
 			sb.append("systemctl start wpa_supplicant");
 		} else {
 			sb.append("wpa_supplicant -B -D ");
 			sb.append(m_driver);
 			sb.append(" -i ");
-			sb.append(m_interfaceName);
+			sb.append(ifaceName);
 			sb.append(" -c ");
 			sb.append(configFile);
 		}
@@ -108,13 +99,22 @@ public class WpaSupplicantManager {
 	/*
 	 * This method forms wpa_supplicant start command
 	 */
-	private static String formSupplicantStopCommand() {
+	private static String formSupplicantStopCommand(String ifaceName) throws KuraException {
 
 		StringBuilder sb = new StringBuilder();
-		if (OS_VERSION.equals(KuraConstants.Intel_Edison.getImageName() + "_" + KuraConstants.Intel_Edison.getImageVersion() + "_" + KuraConstants.Intel_Edison.getTargetName())) {
+		if (s_isIntelEdison) {
 			sb.append("systemctl stop wpa_supplicant");
 		} else {
-			sb.append("killall wpa_supplicant");
+			//sb.append("killall wpa_supplicant");
+			int pid;
+			try {
+				pid = getPid(ifaceName);
+				if (pid > 0) {
+					sb.append("kill -9 ").append(pid);
+				}
+			} catch (KuraException e) {
+				throw KuraException.internalError(e);
+			}
 		}
 
 		return sb.toString();
@@ -125,13 +125,25 @@ public class WpaSupplicantManager {
 	 * 
 	 * @return {@link boolean}
 	 */
-	public static boolean isRunning() throws KuraException {
+	public static boolean isRunning(String ifaceName) throws KuraException {
 		try {
-			// Check if wpa_supplicant is running
-			//int pid = LinuxProcessUtil.getPid(formSupplicantCommand(CONFIG_FILE));
-			String [] tokens = {"-c " + CONFIG_FILE};
+			boolean ret = false;
+			if (getPid(ifaceName) > 0) {
+				ret = true;
+			}
+			s_logger.trace("isRunning() :: --> {}", ret);
+			return ret;
+		} catch (Exception e) {
+			throw KuraException.internalError(e);
+		}
+	}
+	
+	public static int getPid(String ifaceName) throws KuraException {
+		try {	
+			String [] tokens = {"-i " + ifaceName};
 			int pid = LinuxProcessUtil.getPid("wpa_supplicant", tokens);
-			return (pid > -1);
+			s_logger.trace("getPid() :: pid={}", pid);
+			return pid;
 		} catch (Exception e) {
 			throw KuraException.internalError(e);
 		}
@@ -139,8 +151,6 @@ public class WpaSupplicantManager {
 
 	public static boolean isTempRunning() throws KuraException {
 		try {
-			// Check if wpa_supplicant is running
-			//int pid = LinuxProcessUtil.getPid(formSupplicantCommand(TEMP_CONFIG_FILE));
 			String [] tokens = {"-c " + TEMP_CONFIG_FILE};
 			int pid = LinuxProcessUtil.getPid("wpa_supplicant", tokens);
 			return (pid > -1);
@@ -154,52 +164,30 @@ public class WpaSupplicantManager {
 	 * 
 	 * @throws Exception
 	 */
-	public static void stop() throws KuraException {
+	public static void stop(String ifaceName) throws KuraException {
 		try {
 			// kill wpa_supplicant
 			s_logger.debug("stopping wpa_supplicant");
-			LinuxProcessUtil.start(formSupplicantStopCommand());
-			if(m_interfaceName != null) {
-				LinuxNetworkUtil.disableInterface(m_interfaceName);
+			String cmd = formSupplicantStopCommand(ifaceName);
+			if ((cmd != null) && !cmd.isEmpty()) {
+				LinuxProcessUtil.start(cmd);
+				if(ifaceName != null) {
+					LinuxNetworkUtil.disableInterface(ifaceName);
+				}
+				Thread.sleep(1000);
 			}
-			Thread.sleep(1000);
 		} catch (Exception e) {
 			throw KuraException.internalError(e);
 		}
 	}
-
-	public static void loadKernelModules() throws KuraException {
-		SafeProcess proc = null;
-
-		try {
-
-			if (TARGET_NAME.equals(KuraConstants.ReliaGATE_10_05.getTargetName())) {
-				s_logger.debug("--> executing wpa_s rmmod");
-				proc = ProcessUtil.exec("rmmod bcmdhd");
-				proc.waitFor();
-
-				s_logger.debug("--> executing wpa_s modprobe");
-				proc = ProcessUtil.exec("modprobe -S 3.12.6 bcmdhd");
-				if(proc.waitFor() != 0) {
-					s_logger.error("failed modprobe");
-					throw KuraException.internalError("failed modprobe"); 
-				}
-				Thread.sleep(1000);
-
-				s_logger.debug("--> executing wpa_s ifconfig");
-				proc = ProcessUtil.exec("ifconfig wlan0 up");
-				if(proc.waitFor() != 0) {
-					s_logger.error("failed ifconfig wlan0 up");
-					throw KuraException.internalError("failed ifconfig wlan0 up"); 
-				}
-			}
-		} catch (Exception e) {
-			s_logger.error("Exception while preparing WPA Supplicant!", e);
-			throw KuraException.internalError(e);
-		} finally {
-			if (proc != null) {
-				ProcessUtil.destroy(proc);
-			}
+	
+	public static String getWpaSupplicantConfigFilename(String ifaceName) {
+		StringBuilder sb = new StringBuilder();
+		if (s_isIntelEdison) {
+			sb.append("/etc/wpa_supplicant/wpa_supplicant.conf");
+		} else {
+		    sb.append("/etc/wpa_supplicant-").append(ifaceName).append(".conf");
 		}
+		return sb.toString();
 	}
 }

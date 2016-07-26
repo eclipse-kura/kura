@@ -1,14 +1,14 @@
-/**
- * Copyright (c) 2011, 2014 Eurotech and/or its affiliates
+/*******************************************************************************
+ * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
  *
- *  All rights reserved. This program and the accompanying materials
- *  are made available under the terms of the Eclipse Public License v1.0
- *  which accompanies this distribution, and is available at
- *  http://www.eclipse.org/legal/epl-v10.html
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Eurotech
- */
+ *     Eurotech
+ *******************************************************************************/
 package org.eclipse.kura.web.client.network;
 
 import java.util.ArrayList;
@@ -46,6 +46,7 @@ public class NetInterfaceConfigTabs extends LayoutContainer
 	private TabItem                m_tabWirelessConfig;
 	private TabItem                m_tabDhcpNatConfig;
 	private TabItem                m_tabModemConfig;
+	private TabItem				   m_tabModemGpsConfig;
 	private TabItem                m_tabHardwareConfig;
 	
 	private GwtNetInterfaceConfig  m_netIfConfig;
@@ -53,6 +54,7 @@ public class NetInterfaceConfigTabs extends LayoutContainer
 	private WirelessConfigTab      m_wirelessConfigTab;
 	private DhcpNatConfigTab       m_dhcpNatConfigTab;
 	private ModemConfigTab         m_modemConfigTab;
+	private ModemGpsConfigTab	   m_modemGpsConfigTab;
 	private HardwareConfigTab      m_hwConfigTab;
 	
 	private Object				   m_tabsPanelLock = new Object();
@@ -114,7 +116,22 @@ public class NetInterfaceConfigTabs extends LayoutContainer
 			m_tabModemConfig.layout();
 		}
 		
-		// DHCP/NAT
+		// Modem GPS
+		if (m_modemGpsConfigTab != null) {
+			m_modemGpsConfigTab.removeFromParent();
+		}
+		m_modemGpsConfigTab = new ModemGpsConfigTab(m_currentSession);
+		m_modemGpsConfigTab.addListener(Events.Change, new Listener<BaseEvent>() {
+			public void handleEvent(BaseEvent be) {
+				theTabs.fireEvent(be.getType());
+			}
+		});
+		if (m_tabModemGpsConfig != null) {
+			m_tabModemGpsConfig.add(m_modemGpsConfigTab);
+			m_tabModemGpsConfig.layout();
+		}
+		
+ 		// DHCP/NAT
 	    if (m_dhcpNatConfigTab != null) {
 	    	m_dhcpNatConfigTab.removeFromParent();
     	}
@@ -161,6 +178,7 @@ public class NetInterfaceConfigTabs extends LayoutContainer
     	
 		m_wirelessConfigTab.setNetInterface(netIfConfig);
 		m_modemConfigTab.setNetInterface(netIfConfig);
+		m_modemGpsConfigTab.setNetInterface(netIfConfig);
     	
     	// set the tabs for this interface
     	removeInterfaceTabs();    	
@@ -178,6 +196,9 @@ public class NetInterfaceConfigTabs extends LayoutContainer
         }
         if (visibleTabs.contains(m_tabModemConfig)) {
             m_modemConfigTab.refresh();
+        }
+        if (visibleTabs.contains(m_tabModemGpsConfig)) {
+            m_modemGpsConfigTab.refresh();
         }
         if (visibleTabs.contains(m_tabDhcpNatConfig)) {
             m_dhcpNatConfigTab.refresh();
@@ -219,6 +240,9 @@ public class NetInterfaceConfigTabs extends LayoutContainer
         if (tabItems.contains(m_tabModemConfig)) {
             m_modemConfigTab.getUpdatedNetInterface(updatedNetIf);
         }
+        if (tabItems.contains(m_tabModemGpsConfig)) {
+            m_modemGpsConfigTab.getUpdatedNetInterface(updatedNetIf);
+        }
         if (tabItems.contains(m_tabDhcpNatConfig)) {
             m_dhcpNatConfigTab.getUpdatedNetInterface(updatedNetIf);
         }
@@ -243,6 +267,7 @@ public class NetInterfaceConfigTabs extends LayoutContainer
 					m_tabsPanel.getItems())) {
 				if (tabItem == m_tabWirelessConfig
 						|| tabItem == m_tabModemConfig
+						|| tabItem == m_tabModemGpsConfig
 						|| tabItem == m_tabDhcpNatConfig) {
 					removeTab(tabItem);
 				}
@@ -312,6 +337,7 @@ public class NetInterfaceConfigTabs extends LayoutContainer
 		if(m_netIfConfig instanceof GwtWifiNetInterfaceConfig) {
 			Log.debug("insert wifi tab");
 			removeTab(m_tabModemConfig);
+			removeTab(m_tabModemGpsConfig);
 			insertTab(m_tabWirelessConfig, 1);
 			if (!m_tabWirelessConfig.isEnabled()) {
 				m_tabWirelessConfig.enable();
@@ -332,10 +358,12 @@ public class NetInterfaceConfigTabs extends LayoutContainer
 			if (!m_tabModemConfig.isEnabled()) {
 				m_tabModemConfig.enable();
 			}
+			Log.debug("insert modem gps tab");
+			insertTab(m_tabModemGpsConfig, 2);
 		} else {
 			removeTab(m_tabWirelessConfig);
 			removeTab(m_tabModemConfig);
-			
+			removeTab(m_tabModemGpsConfig);
 			if(m_netIfConfig.getHwTypeEnum() == GwtNetIfType.LOOPBACK || m_netIfConfig.getName().startsWith("mon.wlan")) {
 				removeTab(m_tabDhcpNatConfig);
 			}
@@ -356,7 +384,13 @@ public class NetInterfaceConfigTabs extends LayoutContainer
     		Log.debug("Disabled - remove tabs");
     		disableInterfaceTabs();
     	} 
-
+		
+		if (m_netIfConfig instanceof GwtModemInterfaceConfig) {
+			if (!((GwtModemInterfaceConfig)m_netIfConfig).isGpsSupported()) {
+				Log.debug("Disable GPS tab");
+				m_tabModemGpsConfig.disable();
+			}
+		}
     }
     
     public boolean isValid() {
@@ -369,6 +403,9 @@ public class NetInterfaceConfigTabs extends LayoutContainer
     		return false;
     	}
     	if (tabItems.contains(m_tabModemConfig) && !m_modemConfigTab.isValid()) {
+    		return false;
+    	}
+    	if (tabItems.contains(m_tabModemGpsConfig) && !m_modemGpsConfigTab.isValid()) {
     		return false;
     	}
     	if (tabItems.contains(m_tabDhcpNatConfig) && m_tabDhcpNatConfig.isEnabled() && !m_dhcpNatConfigTab.isValid()) {
@@ -394,6 +431,10 @@ public class NetInterfaceConfigTabs extends LayoutContainer
     	}
     	if (tabItems.contains(m_tabModemConfig) && m_modemConfigTab.isDirty()) {
     		Log.debug("m_modemConfigTab is dirty");
+    		return true;
+    	}
+    	if (tabItems.contains(m_tabModemGpsConfig) && m_modemGpsConfigTab.isDirty()) {
+    		Log.debug("m_modemGpsConfigTab is dirty");
     		return true;
     	}
     	if (tabItems.contains(m_tabDhcpNatConfig) && m_tabDhcpNatConfig.isEnabled() && m_dhcpNatConfigTab.isDirty()) {
@@ -454,6 +495,17 @@ public class NetInterfaceConfigTabs extends LayoutContainer
 	            }  
 	        });
 	        m_tabsPanel.add(m_tabModemConfig);
+	        
+	        m_tabModemGpsConfig = new TabItem(MSGS.netModemGps());
+	        m_tabModemGpsConfig.setBorders(true);
+	        m_tabModemGpsConfig.setLayout(new FitLayout());
+	        m_tabModemGpsConfig.add(m_modemGpsConfigTab);
+	        m_tabModemGpsConfig.addListener(Events.Select, new Listener<ComponentEvent>() {  
+	            public void handleEvent(ComponentEvent be) { 
+	            	m_modemGpsConfigTab.refresh();
+	            }  
+	        });
+	        m_tabsPanel.add(m_tabModemGpsConfig);
 	
 	        m_tabDhcpNatConfig = new TabItem(MSGS.netRouter());
 	        m_tabDhcpNatConfig.setBorders(true);

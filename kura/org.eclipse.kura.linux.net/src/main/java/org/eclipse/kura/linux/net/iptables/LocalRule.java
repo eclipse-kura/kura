@@ -1,14 +1,14 @@
-/**
- * Copyright (c) 2011, 2014 Eurotech and/or its affiliates
+/*******************************************************************************
+ * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
  *
- *  All rights reserved. This program and the accompanying materials
- *  are made available under the terms of the Eclipse Public License v1.0
- *  which accompanies this distribution, and is available at
- *  http://www.eclipse.org/legal/epl-v10.html
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Eurotech
- */
+ *     Eurotech
+ *******************************************************************************/
 package org.eclipse.kura.linux.net.iptables;
 
 import org.eclipse.kura.KuraErrorCode;
@@ -16,40 +16,15 @@ import org.eclipse.kura.KuraException;
 import org.eclipse.kura.net.IP4Address;
 import org.eclipse.kura.net.IPAddress;
 import org.eclipse.kura.net.NetworkPair;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-/* 
- * Copyright (c) 2013 Eurotech Inc. All rights reserved.
- */
 
 /**
  * Creates an iptables command for a Local Rule, allowing an incoming port connection.
  * 
- * CONFIGURATION
- * 
- * Configuration will be accepted in the form of key/value pairs.  The key/value pairs are
- * strictly defined here:
- * 
- *   CONFIG_ENTRY     -> KEY + "=" + VALUE
- *   KEY              -> TYPE + INDEX + "_" + PARAM
- *   TYPE             -> "LocalRule"
- *   INDEX            -> "0" | "1" | "2" | ... | "N"
- *   PARAM (required) -> "port" | "protocol"
- *   PARAM (optional) -> "permittedNetwork" | "permittedMAC" | "sourcePortRange"
- *   VALUE	          -> (value of the specified parameter)
- * 
- *   EXAMPLE:
- *   
- *   LocalRule0_port=1234
- *   LocalRule0_protocol=tcp
- *   LocalRule0_permittedNetwork=192.168.1.1
- *   LocalRule0_permittedMAC=AA:BB:CC:DD:EE:FF
- *   LocalRule0_sourcePortRange=3333:4444
  */
 public class LocalRule {
 	
-	private static final Logger s_logger = LoggerFactory.getLogger(LocalRule.class);
+	//private static final Logger s_logger = LoggerFactory.getLogger(LocalRule.class);
 	
 	//required vars
 	private int m_port;
@@ -352,46 +327,45 @@ public class LocalRule {
 	 * Converts the <code>LocalRule</code> to a <code>String</code>.  
 	 * Returns one of the following iptables strings depending on the <code>LocalRule</code> format:
 	 * <code>
-	 * <p>  iptables -I INPUT -p {protocol} --dport {port} -j ACCEPT
-	 * <p>  iptables -I INPUT -p {protocol} --sport {sourcePort1:sourcePort2} --dport {port} -j ACCEPT
-	 * <p>  iptables -I INPUT -p {protocol} -m mac --mac-source {permittedMAC} --dport {port} -j ACCEPT
-	 * <p>  iptables -I INPUT -p {protocol} -m mac --mac-source {permittedMAC} --sport {sourcePort1:sourcePort2} --dport {port} -j ACCEPT
-	 * <p>  iptables -I INPUT -p {protocol} -s {permittedNetwork} --dport {port} -j ACCEPT
-	 * <p>  iptables -I INPUT -p {protocol} -s {permittedNetwork} --sport {sourcePort1:sourcePort2} --dport {port} -j ACCEPT
-	 * <p>  iptables -I INPUT -p {protocol} -s {permittedNetwork} -m mac --mac-source {permittedMAC} --dport {port} -j ACCEPT
-	 * <p>  iptables -I INPUT -p {protocol} -s {permittedNetwork} -m mac --mac-source {permittedMAC} --sport {sourcePort1:sourcePort2} --dport {port} -j ACCEPT
+	 * <p>  -A INPUT -p {protocol} --dport {port} -j ACCEPT
+	 * <p>  -A INPUT -p {protocol} --sport {sourcePort1:sourcePort2} --dport {port} -j ACCEPT
+	 * <p>  -A INPUT -p {protocol} -m mac --mac-source {permittedMAC} --dport {port} -j ACCEPT
+	 * <p>  -A INPUT -p {protocol} -m mac --mac-source {permittedMAC} --sport {sourcePort1:sourcePort2} --dport {port} -j ACCEPT
+	 * <p>  -A INPUT -p {protocol} -s {permittedNetwork} --dport {port} -j ACCEPT
+	 * <p>  -A INPUT -p {protocol} -s {permittedNetwork} --sport {sourcePort1:sourcePort2} --dport {port} -j ACCEPT
+	 * <p>  -A INPUT -p {protocol} -s {permittedNetwork} -m mac --mac-source {permittedMAC} --dport {port} -j ACCEPT
+	 * <p>  -A INPUT -p {protocol} -s {permittedNetwork} -m mac --mac-source {permittedMAC} --sport {sourcePort1:sourcePort2} --dport {port} -j ACCEPT
 	 * </code>
 	 */
 	public String toString() {
-		
 		String interfaceString = null;
 		if(m_permittedInterfaceName != null) {
-			interfaceString = new StringBuffer().append(" -i " ).append(m_permittedInterfaceName).toString();
+			interfaceString = new StringBuilder().append(" -i " ).append(m_permittedInterfaceName).toString();
 		} else if(m_unpermittedInterfaceName != null) {
-			interfaceString = new StringBuffer().append(" ! -i " ).append(m_unpermittedInterfaceName).toString();
+			interfaceString = new StringBuilder().append(" ! -i " ).append(m_unpermittedInterfaceName).toString();
 		}
 		
 		if(m_port != -1) {
 			if (m_permittedMAC == null && m_sourcePortRange == null) {
-				return new String("iptables -I INPUT -p " + m_protocol + " -s " + m_permittedNetworkString + ((interfaceString != null) ? interfaceString : "") + " --dport " + m_port + " -j ACCEPT");
+				return new String("-A INPUT -p " + m_protocol + " -s " + m_permittedNetworkString + ((interfaceString != null) ? interfaceString : "") + " --dport " + m_port + " -j ACCEPT");
 			} else if (m_permittedMAC == null && m_sourcePortRange != null) {
-				return new String("iptables -I INPUT -p " + m_protocol + " -s " + m_permittedNetworkString + ((interfaceString != null) ? interfaceString : "") + " --sport " + m_sourcePortRange + " --dport " + m_port + " -j ACCEPT");
+				return new String("-A INPUT -p " + m_protocol + " -s " + m_permittedNetworkString + ((interfaceString != null) ? interfaceString : "") + " --sport " + m_sourcePortRange + " --dport " + m_port + " -j ACCEPT");
 			} else if (m_permittedMAC != null && m_sourcePortRange == null) {
-				return new String("iptables -I INPUT -p " + m_protocol + " -s " + m_permittedNetworkString + ((interfaceString != null) ? interfaceString : "") + " -m mac --mac-source " + m_permittedMAC + " --dport " + m_port + " -j ACCEPT");
+				return new String("-A INPUT -p " + m_protocol + " -s " + m_permittedNetworkString + ((interfaceString != null) ? interfaceString : "") + " -m mac --mac-source " + m_permittedMAC + " --dport " + m_port + " -j ACCEPT");
 			} else if (m_permittedMAC != null && m_sourcePortRange != null) {
-				return new String("iptables -I INPUT -p " + m_protocol + " -s " + m_permittedNetworkString + ((interfaceString != null) ? interfaceString : "") + " -m mac --mac-source " + m_permittedMAC + " --sport " + m_sourcePortRange + " --dport " + m_port + " -j ACCEPT");
+				return new String("-A INPUT -p " + m_protocol + " -s " + m_permittedNetworkString + ((interfaceString != null) ? interfaceString : "") + " -m mac --mac-source " + m_permittedMAC + " --sport " + m_sourcePortRange + " --dport " + m_port + " -j ACCEPT");
 			} else {
 				return null;
 			}
 		} else {
 			if (m_permittedMAC == null && m_sourcePortRange == null) {
-				return new String("iptables -I INPUT -p " + m_protocol + " -s " + m_permittedNetworkString + ((interfaceString != null) ? interfaceString : "") + " --dport " + m_portRange + " -j ACCEPT");
+				return new String("-A INPUT -p " + m_protocol + " -s " + m_permittedNetworkString + ((interfaceString != null) ? interfaceString : "") + " --dport " + m_portRange + " -j ACCEPT");
 			} else if (m_permittedMAC == null && m_sourcePortRange != null) {
-				return new String("iptables -I INPUT -p " + m_protocol + " -s " + m_permittedNetworkString + ((interfaceString != null) ? interfaceString : "") + " --sport " + m_sourcePortRange + " --dport " + m_portRange + " -j ACCEPT");
+				return new String("-A INPUT -p " + m_protocol + " -s " + m_permittedNetworkString + ((interfaceString != null) ? interfaceString : "") + " --sport " + m_sourcePortRange + " --dport " + m_portRange + " -j ACCEPT");
 			} else if (m_permittedMAC != null && m_sourcePortRange == null) {
-				return new String("iptables -I INPUT -p " + m_protocol + " -s " + m_permittedNetworkString + ((interfaceString != null) ? interfaceString : "") + " -m mac --mac-source " + m_permittedMAC + " --dport " + m_portRange + " -j ACCEPT");
+				return new String("-A INPUT -p " + m_protocol + " -s " + m_permittedNetworkString + ((interfaceString != null) ? interfaceString : "") + " -m mac --mac-source " + m_permittedMAC + " --dport " + m_portRange + " -j ACCEPT");
 			} else if (m_permittedMAC != null && m_sourcePortRange != null) {
-				return new String("iptables -I INPUT -p " + m_protocol + " -s " + m_permittedNetworkString + ((interfaceString != null) ? interfaceString : "") + " -m mac --mac-source " + m_permittedMAC + " --sport " + m_sourcePortRange + " --dport " + m_portRange + " -j ACCEPT");
+				return new String("-A INPUT -p " + m_protocol + " -s " + m_permittedNetworkString + ((interfaceString != null) ? interfaceString : "") + " -m mac --mac-source " + m_permittedMAC + " --sport " + m_sourcePortRange + " --dport " + m_portRange + " -j ACCEPT");
 			} else {
 				return null;
 			}

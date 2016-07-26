@@ -1,14 +1,14 @@
-/**
- * Copyright (c) 2011, 2014 Eurotech and/or its affiliates
+/*******************************************************************************
+ * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
  *
- *  All rights reserved. This program and the accompanying materials
- *  are made available under the terms of the Eclipse Public License v1.0
- *  which accompanies this distribution, and is available at
- *  http://www.eclipse.org/legal/epl-v10.html
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Eurotech
- */
+ *     Eurotech
+ *******************************************************************************/
 package org.eclipse.kura.data;
 
 /**
@@ -19,8 +19,11 @@ package org.eclipse.kura.data;
  * <br>
  * All registered listeners are called synchronously by the {@link DataService} at the occurrence of the event.
  * It expected that implementers of this interface do NOT perform long running tasks in the implementation of this interface.
+ * 
+ * @deprecated As of {@link org.eclipse.kura.data} 1.1.0, use {@link DataService#addDataServiceListener(org.eclipse.kura.data.listener.DataServiceListener)}
+ * to register a listener to a DataService.
  */
-public interface DataServiceListener 
+public interface DataServiceListener
 {
 	/**
 	 * Notifies that the DataService has established a connection.

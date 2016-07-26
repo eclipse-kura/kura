@@ -1,14 +1,14 @@
-/**
- * Copyright (c) 2011, 2014 Eurotech and/or its affiliates
+/*******************************************************************************
+ * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
  *
- *  All rights reserved. This program and the accompanying materials
- *  are made available under the terms of the Eclipse Public License v1.0
- *  which accompanies this distribution, and is available at
- *  http://www.eclipse.org/legal/epl-v10.html
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Eurotech
- */
+ *     Eurotech
+ *******************************************************************************/
 package org.eclipse.kura.core.system;
 
 import java.io.BufferedReader;
@@ -934,13 +934,14 @@ public class SystemServiceImpl implements SystemService
 		}
 
 		String fwVersion = UNSUPPORTED;
-
-		if(OS_LINUX.equals(this.getOsName())) {
-			if("2.6.34.9-WR4.2.0.0_standard".equals(this.getOsVersion()) || "2.6.34.12-WR4.3.0.0_standard".equals(getOsVersion())) {
+		
+		if(OS_LINUX.equals(getOsName()) && (getOsVersion() != null)) {
+			if(getOsVersion().startsWith("2.6.34.9-WR4.2.0.0_standard") || getOsVersion().startsWith("2.6.34.12-WR4.3.0.0_standard")) {
 				fwVersion = runSystemInfoCommand("eth_vers_cpld") + " " + runSystemInfoCommand("eth_vers_uctl");
+			} else if (getOsVersion().startsWith("3.0.35-12.09.01+yocto")) {
+				fwVersion = runSystemInfoCommand("eth_vers_avr");
 			}
 		}
-
 		return fwVersion;
 	}
 

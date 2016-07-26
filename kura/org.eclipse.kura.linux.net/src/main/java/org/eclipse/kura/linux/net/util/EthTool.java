@@ -1,18 +1,14 @@
-/**
- * Copyright (c) 2011, 2014 Eurotech and/or its affiliates
+/*******************************************************************************
+ * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
  *
- *  All rights reserved. This program and the accompanying materials
- *  are made available under the terms of the Eclipse Public License v1.0
- *  which accompanies this distribution, and is available at
- *  http://www.eclipse.org/legal/epl-v10.html
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Eurotech
- */
-/*
-* Copyright (c) 2011 Eurotech Inc. All rights reserved.
-*/
-
+ *     Eurotech
+ *******************************************************************************/
 package org.eclipse.kura.linux.net.util;
 
 import java.io.BufferedReader;
@@ -70,7 +66,7 @@ public class EthTool implements LinkTool {
 			int ind = -1;
 		    while((line = br.readLine()) != null) {
 		    	if ((ind = line.indexOf(LINK_DETECTED)) >= 0) {
-		    		s_logger.trace("Link detected from: " + line);
+		    		s_logger.trace("Link detected from: {}", line);
 		    		line = line.substring(ind + LINK_DETECTED.length()).trim();
 		    		this.linkDetected = (line.compareTo("yes") == 0)? true : false;
 		    	} else if ((ind = line.indexOf(DUPLEX)) >= 0) {

@@ -1,18 +1,14 @@
-/**
- * Copyright (c) 2011, 2014 Eurotech and/or its affiliates
+/*******************************************************************************
+ * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
  *
- *  All rights reserved. This program and the accompanying materials
- *  are made available under the terms of the Eclipse Public License v1.0
- *  which accompanies this distribution, and is available at
- *  http://www.eclipse.org/legal/epl-v10.html
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Eurotech
- */
-/*
-* Copyright (c) 2013 Eurotech Inc. All rights reserved.
-*/
-
+ *     Eurotech
+ *******************************************************************************/
 package org.eclipse.kura.linux.net.dhcp;
 
 import java.io.File;
@@ -74,7 +70,7 @@ public class DhcpServerManager {
     				return true;
     			}
 			} else {
-			    s_logger.debug("Can't start DHCP server, config file does not exist: " + configFile.getAbsolutePath());
+			    s_logger.debug("Can't start DHCP server, config file does not exist: {}", configFile.getAbsolutePath());
 			}
 		} catch(Exception e) {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
@@ -84,7 +80,7 @@ public class DhcpServerManager {
 	}
 
 	public static boolean disable(String interfaceName) throws KuraException {
-        s_logger.debug("Disable DHCP server for " + interfaceName);
+        s_logger.debug("Disable DHCP server for {}", interfaceName);
 
 		try {
 			// Check if DHCP server is running

@@ -1,14 +1,14 @@
-/**
- * Copyright (c) 2011, 2014 Eurotech and/or its affiliates
+/*******************************************************************************
+ * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
  *
- *  All rights reserved. This program and the accompanying materials
- *  are made available under the terms of the Eclipse Public License v1.0
- *  which accompanies this distribution, and is available at
- *  http://www.eclipse.org/legal/epl-v10.html
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Eurotech
- */
+ *     Eurotech
+ *******************************************************************************/
 package org.eclipse.kura.net;
 
 import java.util.List;
@@ -211,6 +211,7 @@ public interface NetworkAdminService {
 	 * @return status
 	 * @throws KuraException
 	 */
+	@Deprecated
 	public boolean rollbackDefaultConfiguration() throws KuraException;
 	
 	/**
@@ -218,5 +219,6 @@ public interface NetworkAdminService {
 	 * @return status
 	 * @throws KuraException
 	 */
+	@Deprecated
 	public boolean rollbackDefaultFirewallConfiguration() throws KuraException;
 }

@@ -1,5 +1,31 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--
+
+    Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+
+     All rights reserved. This program and the accompanying materials
+     are made available under the terms of the Eclipse Public License v1.0
+     which accompanies this distribution, and is available at
+     http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Eurotech
+
+-->
 <esf:configurations xmlns:ocd="http://www.osgi.org/xmlns/metatype/v1.2.0" xmlns:esf="http://eurotech.com/esf/2.0">
+    <esf:configuration pid="org.eclipse.kura.net.admin.FirewallConfigurationService">
+	<esf:properties>
+	    <esf:property array="false" encrypted="false" name="firewall.open.ports" type="String">
+                <esf:value>22,tcp,,,,,,#;80,tcp,,usb0,,,,#;80,tcp,,wlan0,,,,#;80,tcp,10.234.0.0/16,,,,,#;1450,tcp,,usb0,,,,#;1450,tcp,,wlan0,,,,#;502,tcp,127.0.0.1/32,,,,,#;53,udp,,usb0,,,,#;53,udp,,wlan0,,,,#;67,udp,,usb0,,,,#;67,udp,,wlan0,,,,#;8000,tcp,,usb0,,,,#;8000,tcp,,wlan0,,,,#</esf:value>
+            </esf:property>
+	    <esf:property array="false" encrypted="false" name="firewall.port.forwarding" type="String">
+                <esf:value></esf:value>
+            </esf:property>
+	    <esf:property array="false" encrypted="false" name="firewall.nat" type="String">
+                <esf:value></esf:value>
+            </esf:property>
+	</esf:properties>
+    </esf:configuration>
     <esf:configuration pid="org.eclipse.kura.net.admin.NetworkConfigurationService">
         <esf:properties>
             <esf:property name="net.interface.wlan0.config.wifi.master.broadcast" array="false" encrypted="false" type="Boolean">
@@ -167,7 +193,7 @@
             <esf:property name="net.interface.usb0.config.ip4.dnsServers" array="false" encrypted="false" type="String">
                 <esf:value></esf:value>
             </esf:property>
-            <esf:property name="net.interface.wlan0.config.wifi.master.passphrase" array="false" encrypted="false" type="String">
+            <esf:property name="net.interface.wlan0.config.wifi.master.passphrase" array="false" encrypted="false" type="Password">
                 <esf:value>testKEYS</esf:value>
             </esf:property>
             <esf:property name="net.interface.usb0.driver" array="false" encrypted="false" type="String">
@@ -338,8 +364,8 @@
             <esf:property name="net.interface.usb0.loopback" array="false" encrypted="false" type="Boolean">
                 <esf:value>false</esf:value>
             </esf:property>
-            <esf:property name="net.interface.wlan0.config.wifi.infra.passphrase" array="false" encrypted="false" type="String">
-                <esf:value>testKEYS</esf:value>
+            <esf:property name="net.interface.wlan0.config.wifi.infra.passphrase" array="false" encrypted="false" type="Password">
+                <esf:value>wepKeyInfraWlan0</esf:value>
             </esf:property>
             <esf:property name="net.interface.wlan0.config.domains" array="false" encrypted="false" type="String">
                 <esf:value></esf:value>

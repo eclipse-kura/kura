@@ -1,14 +1,14 @@
-/**
- * Copyright (c) 2011, 2014 Eurotech and/or its affiliates
+/*******************************************************************************
+ * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
  *
- *  All rights reserved. This program and the accompanying materials
- *  are made available under the terms of the Eclipse Public License v1.0
- *  which accompanies this distribution, and is available at
- *  http://www.eclipse.org/legal/epl-v10.html
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Eurotech
- */
+ *     Eurotech
+ *******************************************************************************/
 package org.eclipse.kura.web.client.resources;
 
 import com.google.gwt.core.client.GWT;
@@ -167,5 +167,11 @@ public interface Resources extends ClientBundleWithLookup {
     
     @Source("icons/16x16/apps/bluetooth.png")
     ImageResource bluetooth();
+    
+    @Source("icons/32x32/status/green_plug.png")
+    ImageResource greenPlug32();
+    
+    @Source("icons/32x32/status/red_plug.png")
+    ImageResource redPlug32();
 
 }

@@ -1,18 +1,14 @@
-/**
- * Copyright (c) 2011, 2015 Eurotech and/or its affiliates
+/*******************************************************************************
+ * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
  *
- *  All rights reserved. This program and the accompanying materials
- *  are made available under the terms of the Eclipse Public License v1.0
- *  which accompanies this distribution, and is available at
- *  http://www.eclipse.org/legal/epl-v10.html
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Eurotech
- */
-/*
- * Copyright (c) 2011 Eurotech Inc. All rights reserved.
- */
-
+ *     Eurotech
+ *******************************************************************************/
 package org.eclipse.kura.core.cloud;
 
 import java.io.IOException;
@@ -36,8 +32,9 @@ import org.eclipse.kura.cloud.CloudPayloadProtoBufDecoder;
 import org.eclipse.kura.cloud.CloudPayloadProtoBufEncoder;
 import org.eclipse.kura.cloud.CloudService;
 import org.eclipse.kura.configuration.ConfigurableComponent;
+import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.data.DataService;
-import org.eclipse.kura.data.DataServiceListener;
+import org.eclipse.kura.data.listener.DataServiceListener;
 import org.eclipse.kura.message.KuraPayload;
 import org.eclipse.kura.message.KuraTopic;
 import org.eclipse.kura.net.NetworkService;
@@ -176,7 +173,7 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
 
 	protected void activate(ComponentContext componentContext, Map<String,Object> properties) 
 	{
-		s_logger.info("activate...");
+		s_logger.info("activate {}...", properties.get(ConfigurationService.KURA_SERVICE_PID));
 
 		//
 		// save the bundle context and the properties
@@ -190,6 +187,8 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
 		props.put(EventConstants.EVENT_TOPIC, eventTopics);
 		m_ctx.getBundleContext().registerService(EventHandler.class.getName(), this, props);
 		
+		m_dataService.addDataServiceListener(this);
+		
 		//
 		// Usually the cloud connection is setup in the
 		// onConnectionEstablished callback.
@@ -197,17 +196,23 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
 		// too late (the DataService is already connected) we
 		// setup the cloud connection here.
 		if (isConnected()) {
+			s_logger.warn("DataService is already connected. Publish BIRTH certificate");
+			try {
+				publishBirthCertificate();
+			} catch (KuraException e) {
+				s_logger.warn("Cannot publish birth certificate", e);
+			}
 			try {
 				setupCloudConnection(true);
 			} catch (KuraException e) {
-				s_logger.warn("Cannot setup cloud service connection");
+				s_logger.warn("Cannot setup cloud service connection", e);
 			}
 		}
 	}
 
 	public void updated(Map<String,Object> properties)
 	{
-		s_logger.info("updated...: " + properties);
+		s_logger.info("updated {}...: {}", properties.get(ConfigurationService.KURA_SERVICE_PID), properties);
 
 		// Update properties and re-publish Birth certificate
 		m_options = new CloudServiceOptions(properties, m_systemService);
@@ -222,7 +227,7 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
 
 	protected void deactivate(ComponentContext componentContext) 
 	{
-		s_logger.info("deactivate...");
+		s_logger.info("deactivate {}...", componentContext.getProperties().get(ConfigurationService.KURA_SERVICE_PID));
 
 		if (isConnected()) {
 			try {
@@ -231,6 +236,8 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
 				s_logger.warn("Cannot publish disconnect certificate");
 			}
 		}
+		
+		m_dataService.removeDataServiceListener(this);
 
 		// no need to release the cloud clients as the updated app 
 		// certificate is already published due the missing dependency
@@ -476,7 +483,7 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
 			}
 			catch (Exception e) {
 				// Wrap the received bytes payload into an KuraPayload					
-				s_logger.debug("Received message on topic "+topic+" that could not be decoded. Wrapping it into an KuraPayload.");
+				s_logger.debug("Received message on topic {} that could not be decoded. Wrapping it into an KuraPayload.", topic);
 				kuraPayload = new KuraPayload();
 				kuraPayload.setBody(payload);
 			}

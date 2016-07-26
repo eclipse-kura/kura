@@ -1,14 +1,14 @@
-/**
- * Copyright (c) 2011, 2015 Eurotech and/or its affiliates
+/*******************************************************************************
+ * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
  *
- *  All rights reserved. This program and the accompanying materials
- *  are made available under the terms of the Eclipse Public License v1.0
- *  which accompanies this distribution, and is available at
- *  http://www.eclipse.org/legal/epl-v10.html
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Eurotech
- */
+ *     Eurotech
+ *******************************************************************************/
 package org.eclipse.kura.net.admin.monitor;
 
 import java.lang.reflect.Method;
@@ -396,8 +396,8 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 								}
 							}
 						}
-
-						if((oldNetConfigs == null) || !isConfigsEqual(oldNetConfigs, newNetConfigs)) {	
+						
+						if((oldNetConfigs == null) || !isConfigsEqual(oldNetConfigs, newNetConfigs)) {
 							s_logger.info("new configuration for cellular modem on usb port {} netinterface {}", usbPort, ifaceName); 
 							m_networkConfig = newNetworkConfig;
 
@@ -409,7 +409,7 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 								}
 								PppFactory.releasePppService(pppService.getIfaceName());
 							}
-
+							
 							if (modem.isGpsEnabled()) {
 								if (!disableModemGps(modem)) {
 									s_logger.error("processNetworkConfigurationChangeEvent() :: Failed to disable modem GPS");
@@ -418,7 +418,7 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 							}
 
 							modem.setConfiguration(newNetConfigs);
-
+							
 							if (modem instanceof EvdoCellularModem) {
 								NetInterfaceStatus netIfaceStatus = getNetInterfaceStatus(newNetConfigs);
 								if (netIfaceStatus == NetInterfaceStatus.netIPv4StatusEnabledWAN) {
@@ -479,14 +479,17 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 	}
 
 	private boolean isConfigsEqual(List<NetConfig>oldConfig, List<NetConfig> newConfig) {
-
+		if (((oldConfig == null) && (newConfig == null))
+				|| ((oldConfig == null) && (newConfig != null))
+				|| ((oldConfig != null) && (newConfig == null))) {
+			return false;
+		}
 		boolean ret = false;
 		ModemConfig oldModemConfig = getModemConfig(oldConfig);
 		ModemConfig newModemConfig = getModemConfig(newConfig);
 		NetConfigIP4 oldNetConfigIP4 = getNetConfigIp4(oldConfig);
 		NetConfigIP4 newNetConfigIP4 = getNetConfigIp4(newConfig);
-
-		if (oldNetConfigIP4.equals(newNetConfigIP4) && oldModemConfig.equals(newModemConfig)) {
+		if (oldNetConfigIP4.equals(newNetConfigIP4) && oldModemConfig.equals(newModemConfig)) {	
 			ret = true;
 		}
 		return ret;
@@ -669,7 +672,7 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 						m_pppState = pppState;
 						ConnectionInfo connInfo = new ConnectionInfoImpl(ifaceName);
 						InterfaceState interfaceState = new InterfaceState(ifaceName, 
-								LinuxNetworkUtil.isUp(ifaceName), 
+								LinuxNetworkUtil.hasAddress(ifaceName), 
 								pppState == PppState.CONNECTED, 
 								connInfo.getIpAddress());
 						newInterfaceStatuses.put(ifaceName, interfaceState);
@@ -733,7 +736,7 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 						m_eventAdmin.postEvent(new NetworkStatusChangeEvent(interfaceName, newStatuses.get(interfaceName), null));
 					}
 				} else {
-					s_logger.debug("Posting NetworkStatusChangeEvent on enabled interface: " + interfaceName);
+					s_logger.debug("Posting NetworkStatusChangeEvent on enabled interface: {}", interfaceName);
 					m_eventAdmin.postEvent(new NetworkStatusChangeEvent(interfaceName, newStatuses.get(interfaceName), null));
 				}
 			}

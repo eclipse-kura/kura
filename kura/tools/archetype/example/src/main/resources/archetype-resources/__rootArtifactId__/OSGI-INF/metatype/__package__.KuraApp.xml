@@ -1,0 +1,57 @@
+#set( $symbol_pound = '#' )
+#set( $symbol_dollar = '$' )
+#set( $symbol_escape = '\' )
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (c) 2011, 2014 Eurotech and/or its affiliates
+
+     All rights reserved. This program and the accompanying materials
+     are made available under the terms of the Eclipse Public License v1.0
+     which accompanies this distribution, and is available at
+     http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Eurotech
+
+-->
+<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
+    <OCD id="${package}.KuraApp"
+         name="KuraApp"
+         description="Exampel project. ">
+
+        <Icon resource="OSGI-INF/heater.png" size="32"/>
+
+        <AD id="publish.semanticTopic"
+            name="publish.semanticTopic"
+            type="String"
+            cardinality="0"
+            required="true"
+            default="data"
+            description="Default semantic topic to publish the messages to."/>
+
+        <AD id="publish.qos"
+            name="publish.qos"
+            type="Integer"
+            cardinality="0"
+            required="true"
+            default="0"
+            description="Default QoS to publish the messages with.">
+           <Option label="Fire and forget" value="0"/>
+           <Option label="Al least once" value="1"/>
+           <Option label="At most once" value="2"/>
+        </AD>
+
+        <AD id="publish.retain"
+            name="publish.retain"
+            type="Boolean"
+            cardinality="0"
+            required="true"
+            default="false"
+            description="Default retaing flag for the published messages."/>
+    </OCD>
+
+    <Designate pid="${package}.KuraApp">
+        <Object ocdref="${package}.KuraApp"/>
+    </Designate>
+</MetaData>

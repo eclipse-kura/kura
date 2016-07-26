@@ -1,14 +1,14 @@
-/**
- * Copyright (c) 2011, 2015 Eurotech and/or its affiliates
+/*******************************************************************************
+ * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
  *
- *  All rights reserved. This program and the accompanying materials
- *  are made available under the terms of the Eclipse Public License v1.0
- *  which accompanies this distribution, and is available at
- *  http://www.eclipse.org/legal/epl-v10.html
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Eurotech
- */
+ *     Eurotech
+ *******************************************************************************/
 
 package org.eclipse.kura.linux.net.iptables;
 
@@ -30,6 +30,18 @@ public class NatPostroutingChainRule {
 	private String m_protocol;
 	private boolean m_masquerade;
 	
+	public NatPostroutingChainRule(String dstNetwork, short dstMask,
+			String srcNetwork, short srcMask, String dstInterface,
+			String protocol, boolean masquerade) {
+		m_dstNetwork = dstNetwork;
+		m_dstMask = dstMask;
+		m_srcNetwork = srcNetwork;
+		m_srcMask = srcMask;
+		m_dstInterface = dstInterface;
+		m_protocol = protocol;
+		m_masquerade = masquerade;
+	}
+	
 	public NatPostroutingChainRule(String dstInterface, boolean masquerade) {
 		m_dstInterface = dstInterface;
 		m_masquerade = masquerade;
@@ -47,11 +59,14 @@ public class NatPostroutingChainRule {
 			m_dstInterface = dstInterface;
 			m_protocol = protocol;
 			m_masquerade = masquerade;
-			m_dstNetwork = dstNetwork.split("/")[0];
-			m_dstMask = Short.parseShort(dstNetwork.split("/")[1]);
-			m_srcNetwork = srcNetwork.split("/")[0];
-			m_srcMask = Short.parseShort(srcNetwork.split("/")[1]);
-			
+			if (dstNetwork != null) {
+				m_dstNetwork = dstNetwork.split("/")[0];
+				m_dstMask = Short.parseShort(dstNetwork.split("/")[1]);
+			}
+			if (srcNetwork != null) {
+				m_srcNetwork = srcNetwork.split("/")[0];
+				m_srcMask = Short.parseShort(srcNetwork.split("/")[1]);
+			}
 			StringBuilder sbRule = new StringBuilder("iptables -t nat ");
 			if (m_dstNetwork != null) {
 				sbRule.append("-d ");
@@ -102,6 +117,27 @@ public class NatPostroutingChainRule {
 		} catch (Exception e) {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
 		}
+	}
+	
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		if (m_masquerade) {
+			sb.append("-A POSTROUTING");
+			if ((m_srcNetwork != null) && !m_srcNetwork.equals("0.0.0.0")) {
+				sb.append(" -s ").append(m_srcNetwork).append('/').append(m_srcMask);
+			}
+			if (m_dstNetwork != null) {
+				sb.append(" -d ").append(m_dstNetwork).append('/').append(m_dstMask);
+			}
+			sb.append(" -o ").append(m_dstInterface);
+			
+			if (m_protocol != null) {
+				sb.append(" -p ").append(m_protocol);
+			}
+			sb.append(" -j MASQUERADE");
+		}
+		return sb.toString();
 	}
 	
 	@Override
@@ -208,11 +244,6 @@ public class NatPostroutingChainRule {
 		return true;
 	}
 	
-	@Override
-	public String toString() {
-		return m_rule;
-	}
-
 	public String getDstNetwork() {
 		return m_dstNetwork;
 	}

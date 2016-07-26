@@ -1,14 +1,14 @@
-/**
- * Copyright (c) 2011, 2014 Eurotech and/or its affiliates
+/*******************************************************************************
+ * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
  *
- *  All rights reserved. This program and the accompanying materials
- *  are made available under the terms of the Eclipse Public License v1.0
- *  which accompanies this distribution, and is available at
- *  http://www.eclipse.org/legal/epl-v10.html
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Eurotech
- */
+ *     Eurotech
+ *******************************************************************************/
 package org.eclipse.kura.linux.net.util;
 
 	
@@ -22,7 +22,8 @@ public enum KuraConstants {
 	Raspberry_Pi ("raspbian", "1.0.0", "raspberry-pi"),
 	BeagleBone ("debian", "1.0.0", "beaglebone"),
 	ReliaGATE_50_21_Ubuntu("ubuntu", "14.04", "reliagate-50-21"),
-	Reliagate_10_11("yocto", "1.2.1", "reliagate-10-11");
+	Reliagate_10_11("yocto", "1.2.1", "reliagate-10-11"),
+    Reliagate_20_25("yocto", "1.2.1", "reliagate-20-25");
 	
 	private String m_imageName;
 	private String m_imageVersion;

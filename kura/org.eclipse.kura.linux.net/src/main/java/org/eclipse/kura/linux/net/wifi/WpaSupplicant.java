@@ -1,14 +1,14 @@
-/**
- * Copyright (c) 2011, 2014 Eurotech and/or its affiliates
+/*******************************************************************************
+ * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
  *
- *  All rights reserved. This program and the accompanying materials
- *  are made available under the terms of the Eclipse Public License v1.0
- *  which accompanies this distribution, and is available at
- *  http://www.eclipse.org/legal/epl-v10.html
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Eurotech
- */
+ *     Eurotech
+ *******************************************************************************/
 package org.eclipse.kura.linux.net.wifi;
 
 import java.io.BufferedInputStream;
@@ -179,20 +179,20 @@ public class WpaSupplicant {
 			s_logger.warn("WPA in client mode is not configured");
 			return null;
 		}
-		s_logger.debug("curent wpa_supplicant.conf: ssid=" + ssid);
+		s_logger.debug("curent wpa_supplicant.conf: ssid={}", ssid);
 		
 		int [] channels = null;
 		
 		// wifi mode
 		int mode = (props.getProperty("mode") != null) ? Integer.parseInt(props.getProperty("mode")) : MODE_INFRA;
-		s_logger.debug("current wpa_supplicant.conf: mode=" + mode);
+		s_logger.debug("current wpa_supplicant.conf: mode={}", mode);
 		WifiMode wifiMode = null;
 		switch (mode) {
 		case MODE_INFRA:
 			wifiMode = WifiMode.INFRA;
 			String scan_freq = props.getProperty("scan_freq");
 			if (scan_freq != null && scan_freq.length() > 0) {
-				s_logger.debug("current wpa_supplicant.conf: scan_freq=" + scan_freq);
+				s_logger.debug("current wpa_supplicant.conf: scan_freq={}", scan_freq);
 				String [] saScanFreq = scan_freq.split(" ");
 				channels = new int [saScanFreq.length];
 				for (int i = 0; i < channels.length; i++) {
@@ -213,7 +213,7 @@ public class WpaSupplicant {
 			channels = new int [1];
 			wifiMode = WifiMode.ADHOC;
 			String frequency = props.getProperty("frequency");
-			s_logger.debug("current wpa_supplicant.conf: frequency=" + frequency);
+			s_logger.debug("current wpa_supplicant.conf: frequency={}", frequency);
 			int freq = 2412;
 			if (frequency != null) { 
 				try {
@@ -234,13 +234,13 @@ public class WpaSupplicant {
 		
 		String proto = props.getProperty("proto");
 		if (proto != null) {
-			s_logger.debug("current wpa_supplicant.conf: proto=" + proto);
+			s_logger.debug("current wpa_supplicant.conf: proto={}", proto);
 		}
 		
 		WifiCiphers pairwiseCiphers = null;
 		String pairwise = props.getProperty("pairwise");
 		if (pairwise != null) {
-			s_logger.debug("current wpa_supplicant.conf: pairwise=" + pairwise);
+			s_logger.debug("current wpa_supplicant.conf: pairwise={}", pairwise);
 			if(pairwise.contains(WifiCiphers.toString(WifiCiphers.CCMP_TKIP))) {
 				pairwiseCiphers = WifiCiphers.CCMP_TKIP;
 			} else if(pairwise.contains(WifiCiphers.toString(WifiCiphers.TKIP))) {
@@ -253,7 +253,7 @@ public class WpaSupplicant {
 		WifiCiphers groupCiphers = null;
 		String group = props.getProperty("group");
 		if (group != null) {
-			s_logger.debug("current wpa_supplicant.conf: group=" + group);
+			s_logger.debug("current wpa_supplicant.conf: group={}", group);
 			if(group.contains(WifiCiphers.toString(WifiCiphers.CCMP_TKIP))) {
 				groupCiphers = WifiCiphers.CCMP_TKIP;
 			} else if(group.contains(WifiCiphers.toString(WifiCiphers.TKIP))) {
@@ -267,7 +267,7 @@ public class WpaSupplicant {
 		WifiSecurity wifiSecurity = null;
 		String password = null;
 		String keyMgmt = props.getProperty("key_mgmt");
-		s_logger.debug("current wpa_supplicant.conf: key_mgmt=" + keyMgmt);
+		s_logger.debug("current wpa_supplicant.conf: key_mgmt={}", keyMgmt);
 		if (keyMgmt != null && keyMgmt.equalsIgnoreCase("WPA-PSK")) {
 			password = props.getProperty("psk");
 			if (proto != null) {
@@ -295,7 +295,7 @@ public class WpaSupplicant {
 		WifiBgscan bgscan = null;
 		String sBgscan = props.getProperty("bgscan");
 		if (sBgscan != null) {
-			s_logger.debug("current wpa_supplicant.conf: bgscan=" + sBgscan);
+			s_logger.debug("current wpa_supplicant.conf: bgscan={}", sBgscan);
 			bgscan = new WifiBgscan(sBgscan);
 		}
 		
@@ -415,15 +415,15 @@ public class WpaSupplicant {
 			}
 			// start wpa_supplicant
 			String wpaSupplicantCommand = this.formSupplicantCommand();
-			s_logger.debug("starting wpa_supplicant -> " + wpaSupplicantCommand);
+			s_logger.debug("starting wpa_supplicant -> {}", wpaSupplicantCommand);
 			proc = ProcessUtil.exec(wpaSupplicantCommand);
 
 			int stat = proc.waitFor();
 			if (stat != 0) {
 				s_logger.error("failed to start wpa_supplicant error code is "
 						+ stat);
-				s_logger.debug("STDOUT: " + LinuxProcessUtil.getInputStreamAsString(proc.getInputStream()));
-				s_logger.debug("STDERR: " + LinuxProcessUtil.getInputStreamAsString(proc.getErrorStream()));
+				s_logger.debug("STDOUT: {}", LinuxProcessUtil.getInputStreamAsString(proc.getInputStream()));
+				s_logger.debug("STDERR: {}", LinuxProcessUtil.getInputStreamAsString(proc.getErrorStream()));
 				throw KuraException
 						.internalError("failed to start wpa_supplicant for unknown reason");
 			}
@@ -544,10 +544,10 @@ public class WpaSupplicant {
 		
 		WpaSupplicant supplicant = (WpaSupplicant)obj;
 		
-		s_logger.debug("comparing " + m_wpaSupplicant.hashCode() + " with " + supplicant.hashCode());
+		s_logger.debug("comparing {} with {}", m_wpaSupplicant.hashCode(), supplicant.hashCode());
 			
 		if (!m_wpaSupplicant.m_iface.equals(supplicant.m_iface)) {
-			s_logger.debug("current supplicant doesn't match config file: ifaceName " + this.m_iface + ":" + supplicant.m_iface);
+			s_logger.debug("current supplicant doesn't match config file: ifaceName {}:{}", this.m_iface, supplicant.m_iface);
 			return false;
 		}
 		if (!m_wpaSupplicant.m_essid.equals(supplicant.m_essid)) {

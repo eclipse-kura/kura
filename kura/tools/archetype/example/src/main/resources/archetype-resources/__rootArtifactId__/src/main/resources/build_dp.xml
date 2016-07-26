@@ -1,0 +1,28 @@
+#set( $symbol_pound = '#' )
+#set( $symbol_dollar = '$' )
+#set( $symbol_escape = '\' )
+<project name="build_dp" default="build-dp" basedir="../../../">
+
+    <target name="build-dp">
+        <echo message="Building the DP" />
+
+        <!-- Create the manifest -->
+        <echo file="${project.build.directory}/${package}_${version}/dp_stage/META-INF/MANIFEST.MF" append="false">Manifest-Version: 1.0
+DeploymentPackage-SymbolicName: ${package}
+DeploymentPackage-Version: ${version}
+
+Name: ${package}-${version}.jar
+Bundle-SymbolicName: ${package}
+Bundle-Version: ${version}</echo>
+
+    <!-- move everything into place -->
+        <copy    file="${project.build.directory}/${package}-${version}.jar"
+                 todir="${project.build.directory}/${package}_${version}/dp_stage" />
+
+
+        <jar destfile="${project.build.directory}/${package}_${version}.dp"
+        manifest="${project.build.directory}/${package}_${version}/dp_stage/META-INF/MANIFEST.MF"
+                basedir="${project.build.directory}/${package}_${version}/dp_stage" /> 
+    </target>
+
+</project>

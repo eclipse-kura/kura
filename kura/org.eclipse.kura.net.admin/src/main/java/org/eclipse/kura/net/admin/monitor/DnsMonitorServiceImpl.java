@@ -1,14 +1,14 @@
-/**
- * Copyright (c) 2011, 2014 Eurotech and/or its affiliates
+/*******************************************************************************
+ * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
  *
- *  All rights reserved. This program and the accompanying materials
- *  are made available under the terms of the Eclipse Public License v1.0
- *  which accompanies this distribution, and is available at
- *  http://www.eclipse.org/legal/epl-v10.html
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Eurotech
- */
+ *     Eurotech
+ *******************************************************************************/
 package org.eclipse.kura.net.admin.monitor;
 
 import java.util.Dictionary;
@@ -118,7 +118,7 @@ public class DnsMonitorServiceImpl implements DnsMonitorService, EventHandler {
 	    			Set<IP4Address> forwarders = new HashSet<IP4Address>();    			
 	                if(dnsServers != null && !dnsServers.isEmpty()) {
 	                	for(IPAddress dnsServer : dnsServers) {
-	                		s_logger.debug("Found DNS Server: " + dnsServer.getHostAddress());
+	                		s_logger.debug("Found DNS Server: {}", dnsServer.getHostAddress());
 	                		forwarders.add((IP4Address) dnsServer);
 	                	}
 	                }
@@ -190,7 +190,7 @@ public class DnsMonitorServiceImpl implements DnsMonitorService, EventHandler {
     
     @Override
     public void handleEvent(Event event) {
-        s_logger.debug("handleEvent - topic: " + event.getTopic());
+        s_logger.debug("handleEvent - topic: {}", event.getTopic());
         String topic = event.getTopic();
         
         if (topic.equals(NetworkConfigurationChangeEvent.NETWORK_EVENT_CONFIG_CHANGE_TOPIC)) {
@@ -251,7 +251,7 @@ public class DnsMonitorServiceImpl implements DnsMonitorService, EventHandler {
 		Set<IPAddress> dnsServers = LinuxDns.getInstance().getDnServers();
 		if(dnsServers != null && !dnsServers.isEmpty()) {
 			for(IPAddress dnsServer : dnsServers) {
-				s_logger.debug("Found DNS Server: " + dnsServer.getHostAddress());
+				s_logger.debug("Found DNS Server: {}", dnsServer.getHostAddress());
 				m_forwarders.add((IP4Address) dnsServer);
 			}
 		}
@@ -281,7 +281,7 @@ public class DnsMonitorServiceImpl implements DnsMonitorService, EventHandler {
     private void getAllowedNetworks(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig) throws KuraException {
         
         String interfaceName = netInterfaceConfig.getName();
-        s_logger.debug("Getting DNS proxy config for " + interfaceName);
+        s_logger.debug("Getting DNS proxy config for {}", interfaceName);
 
         List<? extends NetInterfaceAddressConfig> netInterfaceAddressConfigs = null;
         netInterfaceAddressConfigs = netInterfaceConfig.getNetInterfaceAddresses();
@@ -361,7 +361,7 @@ public class DnsMonitorServiceImpl implements DnsMonitorService, EventHandler {
 			        	if(isEnabledForWan(netInterfaceConfig)) {
 			        		try {
 			        			Set<IPAddress> servers = getConfiguredDnsServers(netInterfaceConfig);
-			        			s_logger.trace(netInterfaceConfig.getName() + " is WAN, adding its dns servers: " + servers);
+			        			s_logger.trace("{} is WAN, adding its dns servers: {}", netInterfaceConfig.getName(), servers);
 								serverList.addAll(servers);
 							} catch (KuraException e) {
 								s_logger.error("Error adding dns servers for " + netInterfaceConfig.getName(), e);
@@ -377,7 +377,7 @@ public class DnsMonitorServiceImpl implements DnsMonitorService, EventHandler {
 	// Get a list of dns servers for the specified NetInterfaceConfig
     private Set<IPAddress> getConfiguredDnsServers(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig) throws KuraException {
     	String interfaceName = netInterfaceConfig.getName();
-    	s_logger.trace("Getting dns servers for " + interfaceName);
+    	s_logger.trace("Getting dns servers for {}", interfaceName);
     	LinuxDns linuxDns = LinuxDns.getInstance();
     	LinkedHashSet<IPAddress> serverList = new LinkedHashSet<IPAddress>();
     	
@@ -389,17 +389,17 @@ public class DnsMonitorServiceImpl implements DnsMonitorService, EventHandler {
     				if(netConfigIP4.isDhcp()) {
     					// If DHCP but there are user defined entries, use those instead
     					if(userServers != null && !userServers.isEmpty()) {
-    						s_logger.debug("Configured for DHCP with user-defined servers - adding: " + userServers);
+    						s_logger.debug("Configured for DHCP with user-defined servers - adding: {}", userServers);
     						serverList.addAll(userServers);
     					} else {
     						if(netInterfaceConfig.getType().equals(NetInterfaceType.MODEM)) {
     							// FIXME - don't like this
     							// cannot use interfaceName here because it one config behind
     							int pppNo = ((ModemInterfaceConfigImpl) netInterfaceConfig).getPppNum();
-    							if (LinuxNetworkUtil.isUp("ppp"+pppNo)) {  
+    							if (LinuxNetworkUtil.hasAddress("ppp"+pppNo)) {  
 	    							List<IPAddress> servers = linuxDns.getPppDnServers();   
 	    							if (servers != null) {
-	    								s_logger.debug("Adding PPP dns servers: " + servers);
+	    								s_logger.debug("Adding PPP dns servers: {}", servers);
 	    								serverList.addAll(servers);
 	    							}
     							}
@@ -407,14 +407,14 @@ public class DnsMonitorServiceImpl implements DnsMonitorService, EventHandler {
     							String currentAddress = LinuxNetworkUtil.getCurrentIpAddress(interfaceName);
     							List<IPAddress> servers = linuxDns.getDhcpDnsServers(interfaceName, currentAddress); 
     							if (servers != null) {
-    								s_logger.debug("Configured for DHCP - adding DHCP servers: " + servers);
+    								s_logger.debug("Configured for DHCP - adding DHCP servers: {}", servers);
     								serverList.addAll(servers);
     							}
     						}
     					}    					
     				} else {
     					// If static, use the user defined entries
-    					s_logger.debug("Configured for static - adding user-defined servers: " + userServers);
+    					s_logger.debug("Configured for static - adding user-defined servers: {}", userServers);
     					serverList.addAll(userServers);
     				}
     			}

@@ -1,14 +1,14 @@
-/**
- * Copyright (c) 2011, 2014 Eurotech and/or its affiliates
+/*******************************************************************************
+ * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
  *
- *  All rights reserved. This program and the accompanying materials
- *  are made available under the terms of the Eclipse Public License v1.0
- *  which accompanies this distribution, and is available at
- *  http://www.eclipse.org/legal/epl-v10.html
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Eurotech
- */
+ *     Eurotech
+ *******************************************************************************/
 package org.eclipse.kura.net.admin;
 
 import java.util.ArrayList;
@@ -71,7 +71,7 @@ import org.slf4j.LoggerFactory;
 
 public class NetworkConfigurationServiceImpl implements NetworkConfigurationService, SelfConfiguringComponent, EventHandler {
     
-    public static final String UNCONFIGURED_MODEM_REGEX = "^\\d+-\\d+(\\.\\d+)?$";
+    public static final String UNCONFIGURED_MODEM_REGEX = "^\\d+-\\d+(\\.\\d+)*$";
 
     private static final Logger s_logger = LoggerFactory.getLogger(NetworkConfigurationServiceImpl.class);
         
@@ -164,7 +164,7 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
         if(properties == null) {
         	s_logger.debug("Got null properties...");
         } else {
-        	s_logger.debug("Props..." + properties);
+        	s_logger.debug("Props...{}", properties);
         }
     }
     
@@ -177,7 +177,7 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
     
     @Override
 	public void handleEvent(Event event) {
-		s_logger.debug("handleEvent - topic: " + event.getTopic());
+		s_logger.debug("handleEvent - topic: {}", event.getTopic());
         String topic = event.getTopic();
         if (topic.equals(KuraConfigReadyEvent.KURA_CONFIG_EVENT_READY_TOPIC)) {
         	m_firstConfig = false;
@@ -199,7 +199,6 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
     }
     
     public synchronized void updated(Map<String,Object> properties) {
-
         //skip the first config
 		if(m_firstConfig) {
 			s_logger.debug("Ignoring first configuration");
@@ -210,7 +209,7 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
         try {
         	if(properties != null) {
         		s_logger.debug("new properties - updating");
-        		s_logger.debug("modified.interface.names: " + properties.get("modified.interface.names"));
+        		s_logger.debug("modified.interface.names: {}", properties.get("modified.interface.names"));
         		
         		//dynamically insert the type properties..
         		Map<String,Object> modifiedProps = new HashMap<String, Object>();

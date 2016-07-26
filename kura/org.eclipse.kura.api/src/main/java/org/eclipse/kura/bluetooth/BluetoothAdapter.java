@@ -1,3 +1,14 @@
+/*******************************************************************************
+ * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     Eurotech
+ *******************************************************************************/
 package org.eclipse.kura.bluetooth;
 
 /**
@@ -14,7 +25,7 @@ public interface BluetoothAdapter {
 	public String getAddress();
 	
 	/**
-	 * Kill the process started by startLeScan.<br>
+	 * Kill the process started by startLeScan or startBeaconScan.<br>
 	 * SIGINT must be sent to the hcitool process. Otherwise the adapter must be toggled (down/up).
 	 * 
 	 */
@@ -55,9 +66,20 @@ public interface BluetoothAdapter {
 	 * relayed through the {@link BluetoothLeScanListener} when the scan
 	 * is complete.
 	 * 
-	 * @param listener	Interface for collecting scan results
+	 * @param listener	  Interface for collecting scan results
 	 */
 	public void startLeScan(BluetoothLeScanListener listener);
+	
+
+	/**
+	* Starts an asynchronous scan for Bluetooth LE beacons. Beacon data is
+	* relayed through the {@link BluetoothBeaconScanListener} as it arrives.
+	*
+	* @param companyName Hexadecimal string representing the company code
+	* @param listener Interface for collecting beacon data.
+	*/
+	void startBeaconScan(String companyName, BluetoothBeaconScanListener listener);
+	
 	
 	/**
 	 * Get a remote Bluetooth device based on hardware adress

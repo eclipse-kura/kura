@@ -1,14 +1,14 @@
-/**
- * Copyright (c) 2011, 2014 Eurotech and/or its affiliates
+/*******************************************************************************
+ * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
  *
- *  All rights reserved. This program and the accompanying materials
- *  are made available under the terms of the Eclipse Public License v1.0
- *  which accompanies this distribution, and is available at
- *  http://www.eclipse.org/legal/epl-v10.html
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Eurotech
- */
+ *     Eurotech
+ *******************************************************************************/
 
 package org.eclipse.kura.linux.net.util;
 
@@ -231,12 +231,7 @@ public class iwlistScanTool implements IScanTool {
 						// Could also be of format 39/100
 						final String[] parts = signalLevel.split("/");
 						strength = (int) Float.parseFloat(parts[0]);
-						if(strength <= 0)
-							strength = -100;
-					    else if(strength >= 100)
-					    	strength = -50;
-					    else
-					    	strength = (strength / 2) - 100;
+						strength = SignalStrengthConversion.getRssi(strength);
 					} else {
 						strength = (int)Float.parseFloat(signalLevel);
 					}
@@ -310,7 +305,7 @@ public class iwlistScanTool implements IScanTool {
 							rsnSecurity.add(WifiSecurity.KEY_MGMT_PSK);
 						}
 					} else {
-						s_logger.debug("Ignoring line in RSN: " + line);
+						s_logger.debug("Ignoring line in RSN: {}", line);
 					}
 					
 					if(foundGroup && foundPairwise && foundAuthSuites) {
@@ -361,7 +356,7 @@ public class iwlistScanTool implements IScanTool {
 							wpaSecurity.add(WifiSecurity.KEY_MGMT_PSK);
 						}
 					} else {
-						s_logger.debug("Ignoring line in WPA: " + line);
+						s_logger.debug("Ignoring line in WPA: {}", line);
 					}
 					
 					if(foundGroup && foundPairwise && foundAuthSuites) {

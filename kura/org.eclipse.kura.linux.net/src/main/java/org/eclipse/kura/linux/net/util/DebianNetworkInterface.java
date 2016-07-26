@@ -1,14 +1,14 @@
-/**
- * Copyright (c) 2011, 2014 Eurotech and/or its affiliates
+/*******************************************************************************
+ * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
  *
- *  All rights reserved. This program and the accompanying materials
- *  are made available under the terms of the Eclipse Public License v1.0
- *  which accompanies this distribution, and is available at
- *  http://www.eclipse.org/legal/epl-v10.html
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Eurotech
- */
+ *     Eurotech
+ *******************************************************************************/
 package org.eclipse.kura.linux.net.util;
 
 import java.io.File;
@@ -54,7 +54,7 @@ public class DebianNetworkInterface extends GenericNetworkInterface {
 				//found our match so load the properties
 				Scanner scanner = null;
 
-				s_logger.debug("getting args for " + interfaceName);
+				s_logger.debug("getting args for {}", interfaceName);
 				
 				//Debian specific routine to create Properties object
 	            kuraProps.setProperty("ONBOOT", "no");
@@ -116,7 +116,7 @@ public class DebianNetworkInterface extends GenericNetworkInterface {
 	                scanner.close();
 	            }
             } else if(type == NetInterfaceType.MODEM) {
-                s_logger.debug("getting args for " + interfaceName);
+                s_logger.debug("getting args for {}", interfaceName);
                 kuraProps.setProperty("BOOTPROTO", "dhcp");
                 netInterfaceConfig = getCurrentConfig(interfaceName, type, status, dhcpServerEnabled, passDns, kuraProps);
             }
@@ -152,7 +152,7 @@ public class DebianNetworkInterface extends GenericNetworkInterface {
                         	if (args[1].equals(iName)) {
                                 
 								List<? extends NetInterfaceAddressConfig> netInterfaceConfigs = netInterfaceConfig.getNetInterfaceAddresses();
-								s_logger.debug("There are " + netInterfaceConfigs.size() + " NetInterfaceConfigs in this configuration");
+								s_logger.debug("There are {} NetInterfaceConfigs in this configuration", netInterfaceConfigs.size());
 								
 								for(NetInterfaceAddressConfig netInterfaceAddressConfig : netInterfaceConfigs) {
 									List<NetConfig> netConfigs =  netInterfaceAddressConfig.getConfigs();

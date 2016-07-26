@@ -1,14 +1,14 @@
-/**
- * Copyright (c) 2011, 2014 Eurotech and/or its affiliates
+/*******************************************************************************
+ * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
  *
- *  All rights reserved. This program and the accompanying materials
- *  are made available under the terms of the Eclipse Public License v1.0
- *  which accompanies this distribution, and is available at
- *  http://www.eclipse.org/legal/epl-v10.html
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Eurotech
- */
+ *     Eurotech
+ *******************************************************************************/
 package org.eclipse.kura.net.admin.visitor.linux;
 
 import java.io.BufferedInputStream;
@@ -30,6 +30,7 @@ import org.eclipse.kura.core.util.IOUtil;
 import org.eclipse.kura.core.util.ProcessUtil;
 import org.eclipse.kura.core.util.SafeProcess;
 import org.eclipse.kura.linux.net.util.KuraConstants;
+import org.eclipse.kura.linux.net.wifi.WpaSupplicantManager;
 import org.eclipse.kura.net.NetConfig;
 import org.eclipse.kura.net.NetConfigIP4;
 import org.eclipse.kura.net.NetInterfaceAddressConfig;
@@ -49,19 +50,10 @@ import org.slf4j.LoggerFactory;
 public class WpaSupplicantConfigWriter implements NetworkConfigurationVisitor {
 	private static final Logger s_logger = LoggerFactory.getLogger(WpaSupplicantConfigWriter.class);
 	
-	private static String WPA_CONFIG_FILE = null;
 	private static final String WPA_TMP_CONFIG_FILE = "/etc/wpa_supplicant.conf.tmp";
 	private static final String TMP_WPA_CONFIG_FILE = "/tmp/wpa_supplicant.conf";
 	
 	private static final String OS_VERSION = System.getProperty("kura.os.version");
-	
-	static {
-		if (OS_VERSION.equals(KuraConstants.Intel_Edison.getImageName() + "_" + KuraConstants.Intel_Edison.getImageVersion() + "_" + KuraConstants.Intel_Edison.getTargetName())) {
-			WPA_CONFIG_FILE = "/etc/wpa_supplicant/wpa_supplicant.conf";
-		} else {
-			WPA_CONFIG_FILE = "/etc/wpa_supplicant.conf";
-		}
-	}
 	
 	private static final String HEXES = "0123456789ABCDEF";
 	
@@ -114,7 +106,7 @@ public class WpaSupplicantConfigWriter implements NetworkConfigurationVisitor {
 	
 	private void writeConfig(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig) throws KuraException{
 		String interfaceName = netInterfaceConfig.getName();
-        s_logger.debug("Writing wpa_supplicant config for " + interfaceName);
+        s_logger.debug("Writing wpa_supplicant config for {}", interfaceName);
         
         List<? extends NetInterfaceAddressConfig> netInterfaceAddressConfigs = netInterfaceConfig.getNetInterfaceAddresses();
         
@@ -190,9 +182,9 @@ public class WpaSupplicantConfigWriter implements NetworkConfigurationVisitor {
                     // Write the config
 	        		try {
     	        		if(wpaSupplicantConfig != null) {
-                            s_logger.debug("Writing wifiConfig: " + wpaSupplicantConfig);
+                            s_logger.debug("Writing wifiConfig: {}", wpaSupplicantConfig);
                             generateWpaSupplicantConf(wpaSupplicantConfig, interfaceName, WPA_TMP_CONFIG_FILE);
-                            moveWpaSupplicantConf(WPA_TMP_CONFIG_FILE);
+                            moveWpaSupplicantConf(interfaceName, WPA_TMP_CONFIG_FILE);
     	        		}
                     } catch (Exception e) {
                         s_logger.error("Failed to configure WPA Supplicant");
@@ -208,7 +200,7 @@ public class WpaSupplicantConfigWriter implements NetworkConfigurationVisitor {
 	 */
 	private void generateWpaSupplicantConf(WifiConfig wifiConfig, String interfaceName, String configFile) throws Exception {
 		s_logger.debug("Generating WPA Supplicant Config");
-		s_logger.debug("Store wifiMode driver: " + wifiConfig.getDriver());
+		s_logger.debug("Store wifiMode driver: {}", wifiConfig.getDriver());
         StringBuilder key = new StringBuilder("net.interface." +  interfaceName + ".config.wifi." + wifiConfig.getMode().toString().toLowerCase() + ".driver");
 		try {
             KuranetConfig.setProperty(key.toString(), wifiConfig.getDriver());
@@ -244,59 +236,56 @@ public class WpaSupplicantConfigWriter implements NetworkConfigurationVisitor {
 			}
 			String passKey = new String(wifiConfig.getPasskey().getPassword());
 			if (passKey != null) {
-				if (passKey.length() == 10) {
-					// check to make sure it is all hex
-					try {
-						Long.parseLong(passKey, 16);
-					} catch (Exception e) {
-						throw KuraException.internalError("the WEP key (passwd) must be all HEX characters (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, a, b, c, d, e, and f");
-					}
+			    if (passKey.length() == 10) {
+			        // check to make sure it is all hex
+			        try {
+			            Long.parseLong(passKey, 16);
+			        } catch (Exception e) {
+			            throw KuraException.internalError("the WEP key (passwd) must be all HEX characters (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, a, b, c, d, e, and f");
+			        }
+			        // since we're here - save the password
+			        fileAsString = fileAsString.replaceFirst("KURA_WEP_KEY", passKey);
+			    } else if (passKey.length() == 26) {
+			        String part1 = passKey.substring(0, 13);     
+			        String part2 = passKey.substring(13);       
 
-					// since we're here - save the password
-					fileAsString = fileAsString.replaceFirst("KURA_WEP_KEY", passKey);
-				} else if (passKey.length() == 26) {
-					String part1 = passKey.substring(0, 13);
-					String part2 = passKey.substring(13);
+			        try {       
+			            Long.parseLong(part1, 16);      
+			            Long.parseLong(part2, 16);      
+			        } catch (Exception e) {     
+			            throw KuraException.internalError("the WEP key (passwd) must be all HEX characters (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, a, b, c, d, e, and f");       
+			        }       
 
-					try {
-						Long.parseLong(part1, 16);
-						Long.parseLong(part2, 16);
-					} catch (Exception e) {
-						throw KuraException.internalError("the WEP key (passwd) must be all HEX characters (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, a, b, c, d, e, and f");
-					}
+			        // since we're here - save the password     
+			        fileAsString = fileAsString.replaceFirst("KURA_WEP_KEY", passKey);      
+			    } else if (passKey.length() == 32) {        
+			        String part1 = passKey.substring(0, 10);        
+			        String part2 = passKey.substring(10, 20);       
+			        String part3 = passKey.substring(20);       
+			        try {       
+			            Long.parseLong(part1, 16);      
+			            Long.parseLong(part2, 16);      
+			            Long.parseLong(part3, 16);      
+			        } catch (Exception e) {     
+			            throw KuraException.internalError("the WEP key (passwd) must be all HEX characters (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, a, b, c, d, e, and f");       
+			        }       
 
-					// since we're here - save the password
-					fileAsString = fileAsString.replaceFirst("KURA_WEP_KEY", passKey);
-				} else if (passKey.length() == 32) {
-					String part1 = passKey.substring(0, 10);
-					String part2 = passKey.substring(10, 20);
-					String part3 = passKey.substring(20);
-					try {
-						Long.parseLong(part1, 16);
-						Long.parseLong(part2, 16);
-						Long.parseLong(part3, 16);
-					} catch (Exception e) {
-						throw KuraException.internalError("the WEP key (passwd) must be all HEX characters (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, a, b, c, d, e, and f");
-					}
+			        // since we're here - save the password     
+			        fileAsString = fileAsString.replaceFirst("KURA_WEP_KEY", passKey);      
+			    } else if ((passKey.length() == 5)      
+			            || (passKey.length() == 13)     
+			            || (passKey.length() == 16)) {      
 
-					// since we're here - save the password
-					fileAsString = fileAsString.replaceFirst("KURA_WEP_KEY", passKey);
-				} else if ((passKey.length() == 5)
-						|| (passKey.length() == 13)
-						|| (passKey.length() == 16)) {
+			        // 5, 13, or 16 ASCII characters        
+			        passKey = toHex(passKey);       
 
-					// 5, 13, or 16 ASCII characters
-					passKey = toHex(passKey);
-
-					// since we're here - save the password
-					fileAsString = fileAsString.replaceFirst("KURA_WEP_KEY", passKey);
-				} else {
-					throw KuraException.internalError("the WEP key (passwd) must be 10, 26, or 32 HEX characters in length");
-				}
-			} else {
-				throw KuraException.internalError("the passwd can not be null");
+			        // since we're here - save the password     
+			        fileAsString = fileAsString.replaceFirst("KURA_WEP_KEY", passKey);      
+			    } else {        
+			        throw KuraException.internalError("the WEP key (passwd) must be 10, 26, or 32 HEX characters in length");       
+			    }       
 			}
-			
+
 			if (wifiConfig.getBgscan() != null) {
 				fileAsString = fileAsString.replaceFirst("KURA_BGSCAN",
 						wifiConfig.getBgscan().toString());
@@ -341,19 +330,19 @@ public class WpaSupplicantConfigWriter implements NetworkConfigurationVisitor {
 			} else {
 				throw KuraException.internalError("the essid can not be null");
 			}
+			
 			String passKey = new String(wifiConfig.getPasskey().getPassword());
 			if (passKey != null && passKey.trim().length() > 0) {
-				if ((passKey.length() < 8)
-						|| (passKey.length() > 63)) {
-					throw KuraException
-							.internalError("the WPA passphrase (passwd) must be between 8 (inclusive) and 63 (inclusive) characters in length: " + passKey);
-				} else {
-					fileAsString = fileAsString.replaceFirst("KURA_PASSPHRASE", passKey.trim());
-				}
-			} else {
-				throw KuraException.internalError("the passwd can not be null");
+			    if ((passKey.length() < 8)       
+			            || (passKey.length() > 63)) {       
+			        throw KuraException.internalError("the WPA passphrase (passwd) must be between 8 (inclusive) and 63 (inclusive) characters in length: " + passKey);        
+			    } else {        
+			        fileAsString = fileAsString.replaceFirst("KURA_PASSPHRASE", passKey.trim());        
+			    }       
+			} else {        
+			    throw KuraException.internalError("the passwd can not be null");        
 			}
-			
+						
 			if(wifiConfig.getSecurity() == WifiSecurity.SECURITY_WPA) {
 				fileAsString = fileAsString.replaceFirst("KURA_PROTO", "WPA");
 			} else if(wifiConfig.getSecurity() == WifiSecurity.SECURITY_WPA2) {
@@ -433,10 +422,10 @@ public class WpaSupplicantConfigWriter implements NetworkConfigurationVisitor {
 		}
 	}
 	
-	private void moveWpaSupplicantConf(String configFile) throws KuraException {
+	private void moveWpaSupplicantConf(String ifaceName, String configFile) throws KuraException {
 		
 		File outputFile = new File(configFile);
-		File wpaConfigFile = new File(WPA_CONFIG_FILE);
+		File wpaConfigFile = new File(WpaSupplicantManager.getWpaSupplicantConfigFilename(ifaceName));
 		try {
 			if(!FileUtils.contentEquals(outputFile, wpaConfigFile)) {
 			    if(outputFile.renameTo(wpaConfigFile)){
@@ -502,36 +491,35 @@ public class WpaSupplicantConfigWriter implements NetworkConfigurationVisitor {
 		}
 	}
 	
-	/*
-	 * This method reads supplied input stream into a string
-	 */
-	private static String readInputStreamAsString(InputStream is) throws IOException {
-		BufferedInputStream bis = new BufferedInputStream(is);
-		ByteArrayOutputStream buf = new ByteArrayOutputStream();
-		int result = bis.read();
-		while (result != -1) {
-			byte b = (byte) result;
-			buf.write(b);
-			result = bis.read();
-		}
-		return buf.toString();
-	}
-	
-	/*
-	 * This method converts the supplied string to hex
-	 */
-	private String toHex(String s) {
-		if (s == null) {
-			return null;
-		}
-		byte[] raw = s.getBytes();
-		
-		StringBuffer hex = new StringBuffer(2 * raw.length);
-		for (int i = 0; i < raw.length; i++) {
-			hex.append(HEXES.charAt((raw[i] & 0xF0) >> 4)).append(
-					HEXES.charAt((raw[i] & 0x0F)));
-		}
-		return hex.toString();
+//	/*
+//	 * This method reads supplied input stream into a string        
+//	 */     
+//	private static String readInputStreamAsString(InputStream is) throws IOException {      
+//	    BufferedInputStream bis = new BufferedInputStream(is);      
+//	    ByteArrayOutputStream buf = new ByteArrayOutputStream();        
+//	    int result = bis.read();        
+//	    while (result != -1) {      
+//	        byte b = (byte) result;     
+//	        buf.write(b);       
+//	        result = bis.read();        
+//	    }       
+//	    return buf.toString();      
+//	}       
+
+	/*      
+	 * This method converts the supplied string to hex      
+	 */     
+	private String toHex(String s) {        
+	    if (s == null) {        
+	        return null;        
+	    }       
+	    byte[] raw = s.getBytes();      
+
+	    StringBuffer hex = new StringBuffer(2 * raw.length);        
+	    for (int i = 0; i < raw.length; i++) {      
+	        hex.append(HEXES.charAt((raw[i] & 0xF0) >> 4)).append(HEXES.charAt((raw[i] & 0x0F)));     
+	    }       
+	    return hex.toString();      
 	}
 	
 	/*

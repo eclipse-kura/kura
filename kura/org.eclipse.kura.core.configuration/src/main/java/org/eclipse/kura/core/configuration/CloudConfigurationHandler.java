@@ -1,14 +1,14 @@
-/**
- * Copyright (c) 2011, 2014 Eurotech and/or its affiliates
+/*******************************************************************************
+ * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
  *
- *  All rights reserved. This program and the accompanying materials
- *  are made available under the terms of the Eclipse Public License v1.0
- *  which accompanies this distribution, and is available at
- *  http://www.eclipse.org/legal/epl-v10.html
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Eurotech
- */
+ *     Eurotech
+ *******************************************************************************/
 package org.eclipse.kura.core.configuration;
 
 import java.io.StringReader;
@@ -29,18 +29,17 @@ import org.eclipse.kura.cloud.CloudService;
 import org.eclipse.kura.cloud.Cloudlet;
 import org.eclipse.kura.cloud.CloudletTopic;
 import org.eclipse.kura.configuration.ComponentConfiguration;
+import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.core.configuration.util.XmlUtil;
 import org.eclipse.kura.message.KuraPayload;
 import org.eclipse.kura.message.KuraRequestPayload;
 import org.eclipse.kura.message.KuraResponsePayload;
 import org.eclipse.kura.system.SystemService;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
-import org.osgi.util.tracker.ServiceTracker;
+import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class CloudConfigurationHandler extends Cloudlet 
+public class CloudConfigurationHandler extends Cloudlet
 {
 	private static Logger s_logger = LoggerFactory.getLogger(CloudConfigurationHandler.class);
 	
@@ -55,61 +54,50 @@ public class CloudConfigurationHandler extends Cloudlet
 	public static final String RESOURCE_ROLLBACK       = "rollback";
 
 	private SystemService m_systemService;
+	private ConfigurationService m_configurationService;
+	
+	private ComponentContext m_ctx;
 	
 	private ScheduledExecutorService m_executor;
-	
-	//
-	// ServiceTracker to track the CloudService
-	private class ServiceTrackerAdapter extends ServiceTracker<CloudService,CloudService> 
-	{
-		private ServiceTrackerAdapter(BundleContext context) {
-			super(context, CloudService.class, null);
-		}
 		
-		public CloudService addingService(ServiceReference<CloudService> ref) {
-			CloudService cloudService = (CloudService) context.getService(ref);
-			
-			// Explicitly call dependency injection
-			setCloudService(cloudService);
-			activate(null);
-
-			return cloudService;
-		}
-
-		public void removedService(ServiceReference<CloudService> ref, CloudService service) {
-			// Explicitly call dependency injection
-			deactivate(null);
-			unsetCloudService(null);
-		}
-		
-		public void close() {
-			// Explicitly call dependency injection
-			deactivate(null);
-			unsetCloudService(null);
-			super.close();
-		}
+	protected void setConfigurationService(ConfigurationService configurationService) {
+		m_configurationService = configurationService;
 	}
 	
-	private ServiceTrackerAdapter m_serviceTrackerAdapter;
-	private ConfigurationServiceImpl m_configService;
+	protected void unsetConfigurationService(ConfigurationService configurationService) {
+		m_configurationService = null;
+	}
 	
-	public CloudConfigurationHandler(BundleContext context,
-			ConfigurationServiceImpl configService,
-			SystemService systemService) 
-	{
-		super(APP_ID);
-		m_serviceTrackerAdapter = new ServiceTrackerAdapter(context);
-		m_configService = configService;
+	protected void setSystemService(SystemService systemService) {
 		m_systemService = systemService;
 	}
-
-	public void open() {
-		m_executor = Executors.newSingleThreadScheduledExecutor();
-		m_serviceTrackerAdapter.open();
+	
+	protected void unsetSystemService(SystemService systemService) {
+		m_systemService = null;
 	}
-
-	public void close() {
-		m_serviceTrackerAdapter.close();
+	
+	// The dependency on the CloudService is optional so we might be activated
+	// before we have the CloudService.
+	public void setCloudService(CloudService cloudService) {
+		super.setCloudService(cloudService);
+		super.activate(m_ctx);
+	}
+	
+	public void unsetCloudService(CloudService cloudService) {
+		super.deactivate(m_ctx);
+		super.unsetCloudService(cloudService);
+	}
+	
+	public CloudConfigurationHandler() {
+		super(APP_ID);
+	}
+	
+	protected void activate(ComponentContext componentContext) {
+		m_ctx = componentContext;
+		m_executor = Executors.newSingleThreadScheduledExecutor();
+	}
+	
+	protected void deactivate(ComponentContext componentContext) {
 		m_executor.shutdownNow();
 	}
 	
@@ -203,28 +191,22 @@ public class CloudConfigurationHandler extends Cloudlet
 		
 		if (snapshotId != null) {
 			long sid = Long.parseLong(snapshotId);
-			XmlComponentConfigurations xmlConfigs = m_configService.loadEncryptedSnapshotFileContent(sid);
+			XmlComponentConfigurations xmlConfigs = ((ConfigurationServiceImpl) m_configurationService).loadEncryptedSnapshotFileContent(sid);
 			//
 			// marshall the response	
 			
-			//List<ComponentConfigurationImpl> decryptedConfigs = new ArrayList<ComponentConfigurationImpl>();
 			List<ComponentConfigurationImpl> configs = xmlConfigs.getConfigurations();
 			for (ComponentConfigurationImpl config : configs) {
 				if (config != null) {
 					try {
-						Map<String,Object> decryptedProperties= m_configService.decryptPasswords(config);
+						Map<String,Object> decryptedProperties= ((ConfigurationServiceImpl) m_configurationService).decryptPasswords(config);
 						config.setProperties(decryptedProperties);
-						//decryptedConfigs.add(config);
 					}
 					catch (Throwable t) {
 						s_logger.warn("Error during snapshot password decryption");
 					}
 				}
 			}
-			//xmlConfigs.setConfigurations(decryptedConfigs);
-			
-			
-			
 			
 			byte[] body = toResponseBody(xmlConfigs);
 			
@@ -236,7 +218,7 @@ public class CloudConfigurationHandler extends Cloudlet
 			// get the list of snapshot IDs and put them into a response object
 			Set<Long> sids = null;
 			try {
-				sids = m_configService.getSnapshots();
+				sids = m_configurationService.getSnapshots();
 			} catch (KuraException e) {
 				s_logger.error("Error listing snapshots: {}", e);
 				throw new KuraException(KuraErrorCode.CONFIGURATION_SNAPSHOT_LISTING, e);
@@ -279,22 +261,22 @@ public class CloudConfigurationHandler extends Cloudlet
 				List<String> pidsToIgnore = m_systemService.getDeviceManagementServiceIgnore();
 				
 				// the configuration for all components has been requested
-				Set<String> componentPids = m_configService.getConfigurableComponentPids();
-				for(String componentPid : componentPids) {
+				Set<String> componentPids = m_configurationService.getConfigurableComponentPids();
+				for (String componentPid : componentPids) {
 					boolean skip = false;
-					if(pidsToIgnore != null && !pidsToIgnore.isEmpty()) {
-						for(String pidToIgnore : pidsToIgnore) {
-							if(componentPid.equals(pidToIgnore)) {
-								skip=true;
+					if (pidsToIgnore != null && !pidsToIgnore.isEmpty()) {
+						for (String pidToIgnore : pidsToIgnore) {
+							if (componentPid.equals(pidToIgnore)) {
+								skip= true;
 								break;
 							}
 						}
 					}
-					if(skip) {
+					if (skip) {
 						continue;
 					}
 					
-					ComponentConfiguration cc = m_configService.getComponentConfiguration(componentPid);
+					ComponentConfiguration cc = m_configurationService.getComponentConfiguration(componentPid);
 					
 					// TODO: define a validate method for ComponentConfiguration
 					if (cc == null) {
@@ -316,11 +298,10 @@ public class CloudConfigurationHandler extends Cloudlet
 					}
 					configs.add((ComponentConfigurationImpl) cc);
 				}
-			}
-			else {
+			} else {
 
 				// the configuration for a specific component has been requested.
-				ComponentConfiguration cc = m_configService.getComponentConfiguration(pid);
+				ComponentConfiguration cc = m_configurationService.getComponentConfiguration(pid);
 				if (cc != null) {
 					configs.add((ComponentConfigurationImpl) cc);
 				}
@@ -378,7 +359,7 @@ public class CloudConfigurationHandler extends Cloudlet
 			return;
 		}
 
-		m_executor.schedule(new UpdateConfigurationsCallable(pid, xmlConfigs, m_configService),
+		m_executor.schedule(new UpdateConfigurationsCallable(pid, xmlConfigs, m_configurationService),
 				            1000, TimeUnit.MILLISECONDS);
 	}
 
@@ -406,7 +387,7 @@ public class CloudConfigurationHandler extends Cloudlet
 			return;
 		}
 		
-		m_executor.schedule(new RollbackCallable(sid, m_configService),
+		m_executor.schedule(new RollbackCallable(sid, m_configurationService),
 				            1000, TimeUnit.MILLISECONDS);
 	}
 
@@ -425,7 +406,7 @@ public class CloudConfigurationHandler extends Cloudlet
 		// take a new snapshot and get the id
 		long snapshotId;
 		try {
-			snapshotId = m_configService.snapshot();
+			snapshotId = m_configurationService.snapshot();
 		} catch (KuraException e) {
 			s_logger.error("Error taking snapshot: {}", e);
 			throw new KuraException(KuraErrorCode.CONFIGURATION_SNAPSHOT_TAKING, e);
@@ -469,11 +450,11 @@ class UpdateConfigurationsCallable implements Callable<Void> {
 	
 	private String m_pid;
 	private XmlComponentConfigurations m_xmlConfigurations;
-	private ConfigurationServiceImpl m_configurationService;
+	private ConfigurationService m_configurationService;
 	
 	public UpdateConfigurationsCallable(String pid,
 			                            XmlComponentConfigurations xmlConfigurations,
-			                            ConfigurationServiceImpl configurationService) {
+			                            ConfigurationService configurationService) {
 		m_pid = pid;
 		m_xmlConfigurations = xmlConfigurations;
 		m_configurationService = configurationService;
@@ -521,9 +502,9 @@ class RollbackCallable implements Callable<Void> {
 	private static Logger s_logger = LoggerFactory.getLogger(RollbackCallable.class);
 	
 	private Long m_snapshotId;
-	private ConfigurationServiceImpl m_configurationService;
+	private ConfigurationService m_configurationService;
 	
-	public RollbackCallable(Long snapshotId, ConfigurationServiceImpl configurationService) {
+	public RollbackCallable(Long snapshotId, ConfigurationService configurationService) {
 		super();
 		m_snapshotId = snapshotId;
 		m_configurationService = configurationService;
@@ -547,5 +528,4 @@ class RollbackCallable implements Callable<Void> {
 		
 		return null;
 	}
-	
 }

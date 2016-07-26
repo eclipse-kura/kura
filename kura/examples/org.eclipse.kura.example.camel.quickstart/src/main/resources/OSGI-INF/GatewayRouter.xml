@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" 
+    name="org.eclipse.kura.example.camel.quickstart.GatewayRouter"
+	configuration-policy="require" enabled="true" immediate="true"
+    activate="activate" deactivate="deactivate" modified="modified">
+	<implementation class="org.eclipse.kura.example.camel.quickstart.GatewayRouter"/>
+	<service>
+		<provide interface="org.eclipse.kura.example.camel.quickstart.GatewayRouter"/>
+	</service>
+	<property name="service.pid" type="String" value="org.eclipse.kura.example.camel.quickstart.GatewayRouter"/>
+</scr:component>

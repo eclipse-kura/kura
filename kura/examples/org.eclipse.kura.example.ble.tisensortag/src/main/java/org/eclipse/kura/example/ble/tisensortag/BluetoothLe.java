@@ -1,3 +1,14 @@
+/*******************************************************************************
+ * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     Eurotech
+ *******************************************************************************/
 package org.eclipse.kura.example.ble.tisensortag;
 
 import java.util.ArrayList;
@@ -31,6 +42,7 @@ public class BluetoothLe implements ConfigurableComponent, CloudClientListener, 
 	private static final Logger s_logger = LoggerFactory.getLogger(BluetoothLe.class);
 
 	private final String APP_ID      = "BLE_APP_V1";
+	private String PROPERTY_SCAN     = "scan_enable";
 	private String PROPERTY_SCANTIME = "scan_time";
 	private String PROPERTY_PERIOD   = "period";
 	private String PROPERTY_TEMP     = "enableTermometer";
@@ -41,6 +53,9 @@ public class BluetoothLe implements ConfigurableComponent, CloudClientListener, 
 	private String PROPERTY_GYRO     = "enableGyroscope";
 	private String PROPERTY_OPTO     = "enableLuxometer";
 	private String PROPERTY_BUTTONS  = "enableButtons";
+	private String PROPERTY_REDLED   = "switchOnRedLed";
+	private String PROPERTY_GREENLED = "switchOnGreenLed";
+	private String PROPERTY_BUZZER   = "switchOnBuzzer";
 	private String PROPERTY_TOPIC    = "publishTopic";
 	private String PROPERTY_INAME    = "iname";
 
@@ -59,6 +74,7 @@ public class BluetoothLe implements ConfigurableComponent, CloudClientListener, 
 	private long    m_startTime;
 	private boolean m_connected    = false;
 	private String  iname          = "hci0";
+	private boolean enableScan     = false;
 	private boolean enableTemp     = false;
 	private boolean enableAcc      = false;
 	private boolean enableHum      = false;
@@ -67,6 +83,9 @@ public class BluetoothLe implements ConfigurableComponent, CloudClientListener, 
 	private boolean enableGyro     = false;
 	private boolean enableOpto     = false;
 	private boolean enableButtons  = false;
+	private boolean enableRedLed   = false;
+	private boolean enableGreenLed = false;
+	private boolean enableBuzzer   = false;
 
 	public void setCloudService(CloudService cloudService) {
 		m_cloudService = cloudService;
@@ -93,6 +112,8 @@ public class BluetoothLe implements ConfigurableComponent, CloudClientListener, 
 		s_logger.info("Activating BluetoothLe example...");
 		
 		if(properties != null){
+			if (properties.get(PROPERTY_SCAN) != null)
+				enableScan = (Boolean) properties.get(PROPERTY_SCAN);
 			if (properties.get(PROPERTY_SCANTIME) != null)
 				m_scantime = (Integer) properties.get(PROPERTY_SCANTIME);
 			if (properties.get(PROPERTY_PERIOD) != null)
@@ -113,54 +134,72 @@ public class BluetoothLe implements ConfigurableComponent, CloudClientListener, 
 				enableOpto = (Boolean) properties.get(PROPERTY_OPTO);
 			if (properties.get(PROPERTY_BUTTONS) != null)
 				enableButtons = (Boolean) properties.get(PROPERTY_BUTTONS);
+			if (properties.get(PROPERTY_REDLED) != null)
+				enableRedLed = (Boolean) properties.get(PROPERTY_REDLED);
+			if (properties.get(PROPERTY_GREENLED) != null)
+				enableGreenLed = (Boolean) properties.get(PROPERTY_GREENLED);
+			if (properties.get(PROPERTY_BUZZER) != null)
+				enableBuzzer = (Boolean) properties.get(PROPERTY_BUZZER);	
 			if (properties.get(PROPERTY_TOPIC) != null)
 				m_topic = (String) properties.get(PROPERTY_TOPIC);
 			if (properties.get(PROPERTY_INAME) != null)
 				iname = (String) properties.get(PROPERTY_INAME);
 		}
-		
+
 		m_tiSensorTagList = new ArrayList<TiSensorTag>();
-		m_worker = Executors.newSingleThreadScheduledExecutor();
 
 		try {
 			m_cloudClient = m_cloudService.newCloudClient(APP_ID);
 			m_cloudClient.addCloudClientListener(this);
-
-			// Get Bluetooth adapter and ensure it is enabled
-			m_bluetoothAdapter = m_bluetoothService.getBluetoothAdapter(iname);
-			if (m_bluetoothAdapter != null) {
-				s_logger.info("Bluetooth adapter interface => " + iname);
-				s_logger.info("Bluetooth adapter address => " + m_bluetoothAdapter.getAddress());
-				s_logger.info("Bluetooth adapter le enabled => " + m_bluetoothAdapter.isLeReady());
-
-				if (!m_bluetoothAdapter.isEnabled()) {
-					s_logger.info("Enabling bluetooth adapter...");
-					m_bluetoothAdapter.enable();
-					s_logger.info("Bluetooth adapter address => " + m_bluetoothAdapter.getAddress());
-				}
-				m_startTime = 0;
-				m_connected = false;
-				m_handle = m_worker.scheduleAtFixedRate(new Runnable() {		
-					@Override
-					public void run() {
-						checkScan();
-					}
-				}, 0, 1, TimeUnit.SECONDS);
-			}
-			else s_logger.warn("No Bluetooth adapter found ...");
-		} catch (Exception e) {
-			s_logger.error("Error starting component", e);
-			throw new ComponentException(e);
+		} catch (KuraException e1) {
+			s_logger.error("Error starting component", e1);
+			throw new ComponentException(e1);
 		}
+		
+		
+		if (enableScan) {
+			
+			m_worker = Executors.newSingleThreadScheduledExecutor();
+		
+			try {
 
+				// Get Bluetooth adapter and ensure it is enabled
+				m_bluetoothAdapter = m_bluetoothService.getBluetoothAdapter(iname);
+				if (m_bluetoothAdapter != null) {
+					s_logger.info("Bluetooth adapter interface => " + iname);
+					s_logger.info("Bluetooth adapter address => " + m_bluetoothAdapter.getAddress());
+					s_logger.info("Bluetooth adapter le enabled => " + m_bluetoothAdapter.isLeReady());
+
+					if (!m_bluetoothAdapter.isEnabled()) {
+						s_logger.info("Enabling bluetooth adapter...");
+						m_bluetoothAdapter.enable();
+						s_logger.info("Bluetooth adapter address => " + m_bluetoothAdapter.getAddress());
+					}
+					m_startTime = 0;
+					m_connected = false;
+					m_handle = m_worker.scheduleAtFixedRate(new Runnable() {		
+						@Override
+						public void run() {
+							checkScan();
+						}
+					}, 0, 1, TimeUnit.SECONDS);
+				}
+				else s_logger.warn("No Bluetooth adapter found ...");
+			} catch (Exception e) {
+				s_logger.error("Error starting component", e);
+				throw new ComponentException(e);
+			}
+		}
 	}
 
 	protected void deactivate(ComponentContext context) {
 
 		s_logger.debug("Deactivating BluetoothLe...");
-		if(m_bluetoothAdapter.isScanning()){
-			s_logger.debug("m_bluetoothAdapter.isScanning");
-			m_bluetoothAdapter.killLeScan();
+		if (m_bluetoothAdapter != null) {
+			if(m_bluetoothAdapter.isScanning()){
+				s_logger.debug("m_bluetoothAdapter.isScanning");
+				m_bluetoothAdapter.killLeScan();
+			}
 		}
 
 		// disconnect SensorTags
@@ -177,14 +216,16 @@ public class BluetoothLe implements ConfigurableComponent, CloudClientListener, 
 		}
 
 		// shutting down the worker and cleaning up the properties
-		m_worker.shutdown();
+		if (m_worker != null)
+			m_worker.shutdown();
 
 		// cancel bluetoothAdapter
 		m_bluetoothAdapter = null;
 		
 		// Releasing the CloudApplicationClient
 		s_logger.info("Releasing CloudApplicationClient for {}...", APP_ID);
-		m_cloudClient.release();
+		if (m_cloudClient != null)
+			m_cloudClient.release();
 
 		s_logger.debug("Deactivating BluetoothLe... Done.");
 	}
@@ -192,6 +233,8 @@ public class BluetoothLe implements ConfigurableComponent, CloudClientListener, 
 	protected void updated(Map<String,Object> properties) {
 
 		if(properties != null){
+			if (properties.get(PROPERTY_SCAN) != null)
+				enableScan = (Boolean) properties.get(PROPERTY_SCAN);
 			if (properties.get(PROPERTY_SCANTIME) != null)
 				m_scantime = (Integer) properties.get(PROPERTY_SCANTIME);
 			if (properties.get(PROPERTY_PERIOD) != null)
@@ -212,6 +255,12 @@ public class BluetoothLe implements ConfigurableComponent, CloudClientListener, 
 				enableOpto = (Boolean) properties.get(PROPERTY_OPTO);
 			if (properties.get(PROPERTY_BUTTONS) != null)
 				enableButtons = (Boolean) properties.get(PROPERTY_BUTTONS);
+			if (properties.get(PROPERTY_REDLED) != null)
+				enableRedLed = (Boolean) properties.get(PROPERTY_REDLED);
+			if (properties.get(PROPERTY_GREENLED) != null)
+				enableGreenLed = (Boolean) properties.get(PROPERTY_GREENLED);
+			if (properties.get(PROPERTY_BUZZER) != null)
+				enableBuzzer = (Boolean) properties.get(PROPERTY_BUZZER);
 			if (properties.get(PROPERTY_TOPIC) != null)
 				m_topic = (String) properties.get(PROPERTY_TOPIC);
 			if (properties.get(PROPERTY_INAME) != null)
@@ -220,9 +269,11 @@ public class BluetoothLe implements ConfigurableComponent, CloudClientListener, 
 		
 		try {
 			s_logger.debug("Deactivating BluetoothLe...");
-			if(m_bluetoothAdapter.isScanning()){
-				s_logger.debug("m_bluetoothAdapter.isScanning");
-				m_bluetoothAdapter.killLeScan();
+			if (m_bluetoothAdapter != null) {
+				if(m_bluetoothAdapter.isScanning()){
+					s_logger.debug("m_bluetoothAdapter.isScanning");
+					m_bluetoothAdapter.killLeScan();
+				}
 			}
 
 			// disconnect SensorTags
@@ -239,36 +290,39 @@ public class BluetoothLe implements ConfigurableComponent, CloudClientListener, 
 			}
 
 			// shutting down the worker and cleaning up the properties
-			m_worker.shutdown();
+			if (m_worker != null)
+				m_worker.shutdown();
 			
 			// cancel bluetoothAdapter
 			m_bluetoothAdapter = null;
 			
-			// re-create the worker
-			m_worker = Executors.newSingleThreadScheduledExecutor();
-			
-			// Get Bluetooth adapter and ensure it is enabled
-			m_bluetoothAdapter = m_bluetoothService.getBluetoothAdapter(iname);
-			if (m_bluetoothAdapter != null) {
-				s_logger.info("Bluetooth adapter interface => " + iname);
-				s_logger.info("Bluetooth adapter address => " + m_bluetoothAdapter.getAddress());
-				s_logger.info("Bluetooth adapter le enabled => " + m_bluetoothAdapter.isLeReady());
-
-				if (!m_bluetoothAdapter.isEnabled()) {
-					s_logger.info("Enabling bluetooth adapter...");
-					m_bluetoothAdapter.enable();
+			if (enableScan) {
+				// re-create the worker
+				m_worker = Executors.newSingleThreadScheduledExecutor();
+				
+				// Get Bluetooth adapter and ensure it is enabled
+				m_bluetoothAdapter = m_bluetoothService.getBluetoothAdapter(iname);
+				if (m_bluetoothAdapter != null) {
+					s_logger.info("Bluetooth adapter interface => " + iname);
 					s_logger.info("Bluetooth adapter address => " + m_bluetoothAdapter.getAddress());
-				}
-				m_startTime = 0;
-				m_connected = false;
-				m_handle = m_worker.scheduleAtFixedRate(new Runnable() {		
-					@Override
-					public void run() {
-						checkScan();
+					s_logger.info("Bluetooth adapter le enabled => " + m_bluetoothAdapter.isLeReady());
+	
+					if (!m_bluetoothAdapter.isEnabled()) {
+						s_logger.info("Enabling bluetooth adapter...");
+						m_bluetoothAdapter.enable();
+						s_logger.info("Bluetooth adapter address => " + m_bluetoothAdapter.getAddress());
 					}
-				}, 0, 1, TimeUnit.SECONDS);
+					m_startTime = 0;
+					m_connected = false;
+					m_handle = m_worker.scheduleAtFixedRate(new Runnable() {		
+						@Override
+						public void run() {
+							checkScan();
+						}
+					}, 0, 1, TimeUnit.SECONDS);
+				}
+				else s_logger.warn("No Bluetooth adapter found ...");
 			}
-			else s_logger.warn("No Bluetooth adapter found ...");
 		} catch (Exception e) {
 			s_logger.error("Error starting component", e);
 			throw new ComponentException(e);
@@ -374,26 +428,32 @@ public class BluetoothLe implements ConfigurableComponent, CloudClientListener, 
 			}
 		}
 		
+		s_logger.debug("Found " + m_tiSensorTagList.size() + " SensorTags");
+		
 		// connect to TiSensorTags
 		for (TiSensorTag myTiSensorTag : m_tiSensorTagList) {
 			
 			if (!myTiSensorTag.isConnected()) {
 				s_logger.info("Connecting to TiSensorTag...");
-				m_connected = myTiSensorTag.connect();
+				m_connected = myTiSensorTag.connect(iname);
 			}
 			else {
 				s_logger.info("TiSensorTag already connected!");
 				m_connected = true;
 			}
-			
-			KuraPayload payload = new KuraPayload();
-			payload.setTimestamp(new Date());
-			if (myTiSensorTag.getCC2650())
-				payload.addMetric("Type", "CC2650");
-			else
-				payload.addMetric("Type", "CC2541");
-			
+
 			if (m_connected) {
+				
+				KuraPayload payload = new KuraPayload();
+				payload.setTimestamp(new Date());
+				if (myTiSensorTag.getCC2650())
+					payload.addMetric("Type", "CC2650");
+				else
+					payload.addMetric("Type", "CC2541");
+			
+				// Test
+//				doServicesDiscovery(myTiSensorTag);
+//				doCharacteristicsDiscovery(myTiSensorTag);
 				
 				myTiSensorTag.setFirmwareRevision(myTiSensorTag.firmwareRevision());
 				
@@ -536,11 +596,32 @@ public class BluetoothLe implements ConfigurableComponent, CloudClientListener, 
 					myTiSensorTag.enableKeysNotification();
 				}
 				
+				if (enableRedLed) {
+					myTiSensorTag.switchOnRedLed();
+				} else {
+					myTiSensorTag.switchOffRedLed();
+				}
+
+				if (enableGreenLed) {
+					myTiSensorTag.switchOnGreenLed();
+				} else {
+					myTiSensorTag.switchOffGreenLed();
+				}
+				
+				if (enableBuzzer) {
+					myTiSensorTag.switchOnBuzzer();
+				} else {
+					myTiSensorTag.switchOffBuzzer();
+				}
+				
+				myTiSensorTag.enableIOService();
+				
 				try {
 					// Publish only if there are metrics to be published!
-					if (!payload.metricNames().isEmpty())
+					if (!payload.metricNames().isEmpty()) {
 						m_cloudClient.publish(m_topic + "/" + myTiSensorTag.getBluetoothDevice().getAdress() , payload, 0, false);
-				} catch (KuraException e) {
+					}
+				} catch (Exception e) {
 					e.printStackTrace();
 				}
 			}

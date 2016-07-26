@@ -1,14 +1,14 @@
-/**
- * Copyright (c) 2011, 2014 Eurotech and/or its affiliates
+/*******************************************************************************
+ * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
  *
- *  All rights reserved. This program and the accompanying materials
- *  are made available under the terms of the Eclipse Public License v1.0
- *  which accompanies this distribution, and is available at
- *  http://www.eclipse.org/legal/epl-v10.html
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Eurotech
- */
+ *     Eurotech
+ *******************************************************************************/
 package org.eclipse.kura.core.data.store;
 
 import java.io.IOException;
@@ -50,12 +50,70 @@ public class DbDataStore implements DataStore
     private Calendar             m_utcCalendar;
     private ScheduledExecutorService m_houseKeeperExecutor;
     private ScheduledFuture<?>   m_houseKeeperTask;
-    int m_capacity;
+    private int m_capacity;
+    
+    private String m_table;
+    
+    private String m_sqlCreateTable;
+    private String m_sqlDropIndex;
+    private String m_sqlCreateIndex;
+    private String m_sqlMessageCount;
+    private String m_sqlResetId;
+    private String m_sqlStore;
+    private String m_sqlGetMessage;
+    private String m_sqlGetNextMessage;
+    private String m_sqlSetPublished;
+    private String m_sqlSetPublished2;
+    private String m_sqlSetConfirmed;
+    private String m_sqlAllUnpublishedMessages;
+    private String m_sqlAllInFlightMessages;
+    private String m_sqlAllDroppedInFlightMessages;
+    private String m_sqlUnpublishAllInFlightMessages;
+    private String m_sqlDropAllInFlightMessages;
+    private String m_sqlDeleteDroppedMessages;
+    private String m_sqlDeleteDroppedMessages2;
+    private String m_sqlDeleteConfirmedMessages;
+    private String m_sqlDeleteConfirmedMessages2;
+    private String m_sqlDeletePublishedMessages;
+    private String m_sqlDeletePublishedMessages2;
+    private String m_sqlDuplicateCount;
+    private String m_sqlDropPrimaryKey;
+    private String m_sqlDeleteDuplicates;
+    private String m_sqlCreatePrimaryKey;
     
     // package level constructor to be invoked only by the factory
-    public DbDataStore() {
+    public DbDataStore(String table) {
     	// do not make this static as it may not be thread safe
     	m_utcCalendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+    	
+        m_table = table;
+        
+        m_sqlCreateTable = "CREATE TABLE IF NOT EXISTS "+m_table+" (id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY, topic VARCHAR(32767 CHARACTERS), qos INTEGER, retain BOOLEAN, createdOn TIMESTAMP, publishedOn TIMESTAMP, publishedMessageId INTEGER, confirmedOn TIMESTAMP, payload VARBINARY(16777216), priority INTEGER, sessionId VARCHAR(32767 CHARACTERS), droppedOn TIMESTAMP);";
+        m_sqlDropIndex = "DROP INDEX IF EXISTS "+m_table+"_publishedOn;";
+        m_sqlCreateIndex = "CREATE INDEX "+m_table+"_nextMsg ON "+m_table+" (priority ASC, createdOn ASC, publishedOn, qos);";
+        m_sqlMessageCount = "SELECT COUNT(*) FROM "+m_table+";";
+        m_sqlResetId = "ALTER TABLE "+m_table+" ALTER COLUMN id RESTART WITH 0;";
+        m_sqlStore = "INSERT INTO "+m_table+" (topic, qos, retain, createdOn, publishedOn, publishedMessageId, confirmedOn, payload, priority, sessionId, droppedOn) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
+        m_sqlGetMessage = "SELECT id, topic, qos, retain, createdOn, publishedOn, publishedMessageId, confirmedOn, payload, priority, sessionId, droppedOn FROM "+m_table+" WHERE id = ?";
+        m_sqlGetNextMessage = "SELECT d.id, d.topic, d.qos, d.retain, d.createdOn, d.publishedOn, d.publishedMessageId, d.confirmedOn, d.payload, d.priority, d.sessionId, d.droppedOn FROM (SELECT id FROM "+m_table+" WHERE publishedOn IS NULL ORDER BY priority ASC, createdOn ASC LIMIT 1 USING INDEX) a, "+m_table+" d WHERE a.id = d.id;";
+        m_sqlSetPublished = "UPDATE "+m_table+" SET publishedOn = ?, publishedMessageId = ?, sessionId = ? WHERE id = ?;";
+        m_sqlSetPublished2 = "UPDATE "+m_table+" SET publishedOn = ? WHERE id = ?;";
+        m_sqlSetConfirmed = "UPDATE "+m_table+" SET confirmedOn = ? WHERE id = ?;";
+        m_sqlAllUnpublishedMessages = "SELECT id, topic, qos, retain, createdOn, publishedOn, publishedMessageId, confirmedOn, priority, sessionId, droppedOn FROM "+m_table+" WHERE publishedOn IS NULL ORDER BY priority ASC, createdOn ASC;";
+        m_sqlAllInFlightMessages = "SELECT id, topic, qos, retain, createdOn, publishedOn, publishedMessageId, confirmedOn, priority, sessionId, droppedOn FROM "+m_table+" WHERE publishedOn IS NOT NULL AND qos > 0 AND confirmedOn IS NULL AND droppedOn IS NULL ORDER BY priority ASC, createdOn ASC;";
+        m_sqlAllDroppedInFlightMessages = "SELECT id, topic, qos, retain, createdOn, publishedOn, publishedMessageId, confirmedOn, priority, sessionId, droppedOn FROM "+m_table+" WHERE droppedOn IS NOT NULL ORDER BY priority ASC, createdOn ASC;";
+        m_sqlUnpublishAllInFlightMessages = "UPDATE "+m_table+" SET publishedOn = NULL WHERE publishedOn IS NOT NULL AND qos > 0 AND confirmedOn IS NULL;";
+        m_sqlDropAllInFlightMessages = "UPDATE "+m_table+" SET droppedOn = ? WHERE publishedOn IS NOT NULL AND qos > 0 AND confirmedOn IS NULL;";
+        m_sqlDeleteDroppedMessages = "DELETE FROM "+m_table+" WHERE DATEDIFF('ss', droppedOn, ?) > ? AND droppedOn IS NOT NULL;";
+        m_sqlDeleteDroppedMessages2 = "DELETE FROM "+m_table+" WHERE DATEDIFF('yy', droppedOn, ?) > ? AND droppedOn IS NOT NULL;";
+        m_sqlDeleteConfirmedMessages = "DELETE FROM "+m_table+" WHERE DATEDIFF('ss', confirmedOn, ?) > ? AND confirmedOn IS NOT NULL;";
+        m_sqlDeleteConfirmedMessages2 = "DELETE FROM "+m_table+" WHERE DATEDIFF('yy', confirmedOn, ?) > ? AND confirmedOn IS NOT NULL;";
+        m_sqlDeletePublishedMessages = "DELETE FROM "+m_table+" WHERE qos = 0 AND DATEDIFF('ss', publishedOn, ?) > ? AND publishedOn IS NOT NULL;";
+        m_sqlDeletePublishedMessages2 = "DELETE FROM "+m_table+" WHERE qos = 0 AND DATEDIFF('yy', publishedOn, ?) > ? AND publishedOn IS NOT NULL;";
+        m_sqlDuplicateCount = "SELECT count(*) FROM (SELECT id, COUNT(id) FROM "+m_table+" GROUP BY id HAVING (COUNT(id) > 1)) dups;";
+        m_sqlDropPrimaryKey = "ALTER TABLE "+m_table+" DROP PRIMARY KEY;";
+        m_sqlDeleteDuplicates = "DELETE FROM "+m_table+" WHERE id IN (SELECT id FROM "+m_table+" GROUP BY id HAVING COUNT(*) > 1);";
+        m_sqlCreatePrimaryKey = "ALTER TABLE "+m_table+" ADD PRIMARY KEY (id);";
     }
     
     // ----------------------------------------------------------
@@ -80,16 +138,16 @@ public class DbDataStore implements DataStore
 	{
 		// create the MESSAGES table
 		// Note that the HSQLDB will throw an sequence limit exceeded exception when the sequence generator reaches the value 2147483647 + 1.
-		execute("CREATE TABLE IF NOT EXISTS ds_messages (id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY, topic VARCHAR(32767 CHARACTERS), qos INTEGER, retain BOOLEAN, createdOn TIMESTAMP, publishedOn TIMESTAMP, publishedMessageId INTEGER, confirmedOn TIMESTAMP, payload VARBINARY(16777216), priority INTEGER, sessionId VARCHAR(32767 CHARACTERS), droppedOn TIMESTAMP);");
+		execute(m_sqlCreateTable);
 
 
 		// From version 2.0.4, the index ds_messages_publishedOn is replaced with ds_messages_nextMsg
 		// So, drop it on startup if it exists.
-		execute("DROP INDEX IF EXISTS ds_messages_publishedOn;");
+		execute(m_sqlDropIndex);
 
 		// Introduced in 2.0.4, create index for ds_messages
 		try {
-			execute("CREATE INDEX ds_messages_nextMsg ON ds_messages (priority ASC, createdOn ASC, publishedOn, qos);");
+			execute(m_sqlCreateIndex);
 		}
 		catch (KuraStoreException e) {
 			boolean handled = false;
@@ -157,7 +215,7 @@ public class DbDataStore implements DataStore
 		try {			
 			
 			conn = getConnection();
-			stmt = conn.prepareStatement("SELECT COUNT(*) FROM ds_messages;");
+			stmt = conn.prepareStatement(m_sqlMessageCount);
 			rs = stmt.executeQuery();
 			if (rs.next()) {
 				count = rs.getInt(1);
@@ -177,7 +235,7 @@ public class DbDataStore implements DataStore
     
 	private synchronized void resetIdentityGenerator() throws KuraStoreException
 	{
-		execute("ALTER TABLE ds_messages ALTER COLUMN id RESTART WITH 0;");
+		execute(m_sqlResetId);
 	}
 	
 	public synchronized DataMessage store(String topic, byte[] payload, int qos, boolean retain, int priority) throws KuraStoreException
@@ -242,7 +300,7 @@ public class DbDataStore implements DataStore
 			conn = getConnection();
 
 			// store message
-			pstmt = conn.prepareStatement("INSERT INTO ds_messages (topic, qos, retain, createdOn, publishedOn, publishedMessageId, confirmedOn, payload, priority, sessionId, droppedOn) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);");
+			pstmt = conn.prepareStatement(m_sqlStore);
 			pstmt.setString   (1,  topic);				// topic
 			pstmt.setInt      (2,  qos);				// qos
 			pstmt.setBoolean  (3,  retain);				// retain
@@ -288,7 +346,7 @@ public class DbDataStore implements DataStore
 		try {			
 			
 			conn = getConnection();
-			stmt = conn.prepareStatement("SELECT id, topic, qos, retain, createdOn, publishedOn, publishedMessageId, confirmedOn, payload, priority, sessionId, droppedOn FROM ds_messages WHERE id = ?");
+			stmt = conn.prepareStatement(m_sqlGetMessage);
 			stmt.setInt(1, msgId);
 			rs = stmt.executeQuery();
 			if (rs.next()) {
@@ -315,7 +373,7 @@ public class DbDataStore implements DataStore
 		try {			
 			
 			conn = getConnection();
-			stmt = conn.prepareStatement("SELECT d.id, d.topic, d.qos, d.retain, d.createdOn, d.publishedOn, d.publishedMessageId, d.confirmedOn, d.payload, d.priority, d.sessionId, d.droppedOn FROM (SELECT id FROM ds_messages WHERE publishedOn IS NULL ORDER BY priority ASC, createdOn ASC LIMIT 1 USING INDEX) a, ds_messages d WHERE a.id = d.id;");
+			stmt = conn.prepareStatement(m_sqlGetNextMessage);
 			rs = stmt.executeQuery();
 			if (rs != null && rs.next()) {
 				msg  = buildDataMessage(rs);
@@ -333,8 +391,6 @@ public class DbDataStore implements DataStore
     }
     
 	public synchronized void published(int msgId, int publishedMsgId, String sessionId) throws KuraStoreException {
-		final String sql = "UPDATE ds_messages SET publishedOn = ?, publishedMessageId = ?, sessionId = ? WHERE id = ?;";
-		
 		Timestamp now = new Timestamp((new Date()).getTime());
 
 		Connection conn = null;
@@ -342,7 +398,7 @@ public class DbDataStore implements DataStore
 		try {			
 			
 			conn = getConnection();
-			stmt = conn.prepareStatement(sql);			
+			stmt = conn.prepareStatement(m_sqlSetPublished);
 			stmt.setTimestamp(1, now, m_utcCalendar); // timestamp
 			stmt.setInt      (2, publishedMsgId);
 			stmt.setString   (3, sessionId);
@@ -362,34 +418,34 @@ public class DbDataStore implements DataStore
 	}
 	
 	public synchronized void published(int msgId) throws KuraStoreException {
-		updateTimestamp("UPDATE ds_messages SET publishedOn = ? WHERE id = ?;", msgId);
+		updateTimestamp(m_sqlSetPublished2, msgId);
 	}
 
 	public synchronized void confirmed(int msgId) throws KuraStoreException {
-		updateTimestamp("UPDATE ds_messages SET confirmedOn = ? WHERE id = ?;", msgId);
+		updateTimestamp(m_sqlSetConfirmed, msgId);
 	}
     
     public synchronized List<DataMessage> allUnpublishedMessagesNoPayload() throws KuraStoreException {    
     	// Order by priority, createdOn
-    	return listMessages("SELECT id, topic, qos, retain, createdOn, publishedOn, publishedMessageId, confirmedOn, priority, sessionId, droppedOn FROM ds_messages WHERE publishedOn IS NULL ORDER BY priority ASC, createdOn ASC;");
+    	return listMessages(m_sqlAllUnpublishedMessages);
     }
     
 	public synchronized List<DataMessage> allInFlightMessagesNoPayload() throws KuraStoreException {
     	// Order by priority, createdOn
-		return listMessages("SELECT id, topic, qos, retain, createdOn, publishedOn, publishedMessageId, confirmedOn, priority, sessionId, droppedOn FROM ds_messages WHERE publishedOn IS NOT NULL AND qos > 0 AND confirmedOn IS NULL AND droppedOn IS NULL ORDER BY priority ASC, createdOn ASC;");
+		return listMessages(m_sqlAllInFlightMessages);
 	}
 	
 	public synchronized List<DataMessage> allDroppedInFlightMessagesNoPayload() throws KuraStoreException {
     	// Order by priority, createdOn
-    	return listMessages("SELECT id, topic, qos, retain, createdOn, publishedOn, publishedMessageId, confirmedOn, priority, sessionId, droppedOn FROM ds_messages WHERE droppedOn IS NOT NULL ORDER BY priority ASC, createdOn ASC;");		
+    	return listMessages(m_sqlAllDroppedInFlightMessages);		
 	}
     
 	public synchronized void unpublishAllInFlighMessages() throws KuraStoreException {
-		execute("UPDATE ds_messages SET publishedOn = NULL WHERE publishedOn IS NOT NULL AND qos > 0 AND confirmedOn IS NULL;");			
+		execute(m_sqlUnpublishAllInFlightMessages);			
 	}
 	
 	public synchronized void dropAllInFlightMessages()  throws KuraStoreException {
-		updateTimestamp("UPDATE ds_messages SET droppedOn = ? WHERE publishedOn IS NOT NULL AND qos > 0 AND confirmedOn IS NULL;");
+		updateTimestamp(m_sqlDropAllInFlightMessages);
 	}
     
     public synchronized void deleteStaleMessages(int purgeAge) throws KuraStoreException {
@@ -397,13 +453,13 @@ public class DbDataStore implements DataStore
     	Timestamp now = new Timestamp((new Date()).getTime());
     	// Delete dropped messages (published with QoS > 0)
     	try {
-    		execute("DELETE FROM ds_messages WHERE DATEDIFF('ss', droppedOn, ?) > ? AND droppedOn IS NOT NULL;", now, purgeAge);
+    		execute(m_sqlDeleteDroppedMessages, now, purgeAge);
     	} catch (KuraStoreException e) {
     		// Interval field overflow
     		Throwable cause = e.getCause();
     		if (cause != null && cause instanceof SQLDataException && ((SQLDataException) cause).getErrorCode() == INTERVAL_FIELD_OVERFLOW) {
     			s_logger.info("Delete all dropped messages older than one year");
-    			execute("DELETE FROM ds_messages WHERE DATEDIFF('yy', droppedOn, ?) > ? AND droppedOn IS NOT NULL;", now, 0);
+    			execute(m_sqlDeleteDroppedMessages2, now, 0);
     		} else {
     			throw e;
     		}
@@ -411,13 +467,13 @@ public class DbDataStore implements DataStore
     	
     	// Delete stale confirmed messages (published with QoS > 0)
     	try {
-    		execute("DELETE FROM ds_messages WHERE DATEDIFF('ss', confirmedOn, ?) > ? AND confirmedOn IS NOT NULL;", now, purgeAge);
+    		execute(m_sqlDeleteConfirmedMessages, now, purgeAge);
     	} catch (KuraStoreException e) {
     		// Interval field overflow
     		Throwable cause = e.getCause();
     		if (cause != null && cause instanceof SQLDataException && ((SQLDataException) cause).getErrorCode() == INTERVAL_FIELD_OVERFLOW) {
     			s_logger.info("Delete all confirmed messages older than one year");
-    			execute("DELETE FROM ds_messages WHERE DATEDIFF('yy', confirmedOn, ?) > ? AND confirmedOn IS NOT NULL;", now, 0);
+    			execute(m_sqlDeleteConfirmedMessages2, now, 0);
     		} else {
     			throw e;
     		}    			
@@ -425,13 +481,13 @@ public class DbDataStore implements DataStore
     	
     	// Delete stale published messages with QoS == 0
     	try {
-    		execute("DELETE FROM ds_messages WHERE qos = 0 AND DATEDIFF('ss', publishedOn, ?) > ? AND publishedOn IS NOT NULL;", now, purgeAge);
+    		execute(m_sqlDeletePublishedMessages, now, purgeAge);
     	} catch (KuraStoreException e) {
     		// Interval field overflow
     		Throwable cause = e.getCause();
     		if (cause != null && cause instanceof SQLDataException && ((SQLDataException) cause).getErrorCode() == INTERVAL_FIELD_OVERFLOW) {
     			s_logger.info("Delete all published messages older than one year");
-    			execute("DELETE FROM ds_messages WHERE qos = 0 AND DATEDIFF('yy', publishedOn, ?) > ? AND publishedOn IS NOT NULL;", now, 0);
+    			execute(m_sqlDeletePublishedMessages2, now, 0);
     		} else {
     			throw e;
     		}    		
@@ -458,7 +514,7 @@ public class DbDataStore implements DataStore
 			
 			conn = getConnection();
 			// Get the count of IDs for which duplicates exist
-			pstmt = conn.prepareStatement("SELECT count(*) FROM (SELECT id, COUNT(id) FROM ds_messages GROUP BY id HAVING (COUNT(id) > 1)) dups;");
+			pstmt = conn.prepareStatement(m_sqlDuplicateCount);
 			rs = pstmt.executeQuery();
 			if (rs.next()) {
 				count = rs.getInt(1);
@@ -472,13 +528,13 @@ public class DbDataStore implements DataStore
 			
 			stmt = conn.createStatement();
 			
-			stmt.execute("ALTER TABLE ds_messages DROP PRIMARY KEY;");
+			stmt.execute(m_sqlDropPrimaryKey);
 			s_logger.info("Primary key dropped");
 			
-			stmt.execute("DELETE FROM ds_messages WHERE id IN (SELECT id FROM ds_messages GROUP BY id HAVING COUNT(*) > 1);");
+			stmt.execute(m_sqlDeleteDuplicates);
 			s_logger.info("Duplicate messages deleted");
 			
-			stmt.execute("ALTER TABLE ds_messages ADD PRIMARY KEY (id);");
+			stmt.execute(m_sqlCreatePrimaryKey);
 			s_logger.info("Primary key created");
 			
 			conn.commit();

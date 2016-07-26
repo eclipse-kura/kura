@@ -1,14 +1,14 @@
-/**
- * Copyright (c) 2011, 2014 Eurotech and/or its affiliates
+/*******************************************************************************
+ * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
  *
- *  All rights reserved. This program and the accompanying materials
- *  are made available under the terms of the Eclipse Public License v1.0
- *  which accompanies this distribution, and is available at
- *  http://www.eclipse.org/legal/epl-v10.html
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Eurotech
- */
+ *     Eurotech
+ *******************************************************************************/
 package org.eclipse.kura.web.client.network;
 
 import java.util.List;
@@ -410,8 +410,8 @@ public class TcpIpConfigTab extends LayoutContainer
 		for (GwtNetIfConfigMode mode : GwtNetIfConfigMode.values()) {
 			m_configureCombo.add(MessageUtils.get(mode.name()));
 		}
-		if(m_selectNetIfConfig != null && m_selectNetIfConfig.getHwTypeEnum() == GwtNetIfType.MODEM) {
-			m_statusListStore.remove(m_statusListStore.findModel(GwtNetIfStatusModel.STATUS, GwtNetIfStatus.netIPv4StatusEnabledLAN.name()));
+		if ((m_selectNetIfConfig != null) && (m_selectNetIfConfig.getHwTypeEnum() == GwtNetIfType.MODEM)) {
+			m_statusListStore.remove(m_statusListStore.findModel(GwtNetIfStatusModel.STATUS, GwtNetIfStatus.netIPv4StatusEnabledLAN.name()));			
 		}
 		m_configureCombo.setSimpleValue(MessageUtils.get(GwtNetIfConfigMode.netIPv4ConfigModeDHCP.name()));
 		m_configureCombo.addSelectionChangedListener( new SelectionChangedListener<SimpleComboValue<String>>() {			
@@ -742,9 +742,11 @@ public class TcpIpConfigTab extends LayoutContainer
 		m_statusListStore.add(new GwtNetIfStatusModel(GwtNetIfStatus.netIPv4StatusDisabled,
 				MessageUtils.get("netIPv4StatusDisabled"),
 				MSGS.netIPv4ToolTipStatusDisabled()));
+		
 		m_statusListStore.add(new GwtNetIfStatusModel(GwtNetIfStatus.netIPv4StatusEnabledLAN,
 				MessageUtils.get("netIPv4StatusEnabledLAN"),
 				MSGS.netIPv4ToolTipStatusEnabledLAN()));
+		
 		m_statusListStore.add(new GwtNetIfStatusModel(GwtNetIfStatus.netIPv4StatusEnabledWAN,
 				MessageUtils.get("netIPv4StatusEnabledWAN"),
 				MSGS.netIPv4ToolTipStatusEnabledWAN()));

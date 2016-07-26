@@ -41,18 +41,6 @@
                     			<skip>false</skip>
                 		</configuration>
             		</plugin>
-                        <plugin>
-                                <groupId>org.eclipse.tycho</groupId>
-                                <artifactId>tycho-packaging-plugin</artifactId>
-                                <version>${tycho-version}</version>
-                                <configuration>
-                                	<archive>
-                						<compress>false</compress>
-                					</archive>
-                        			<format>'${kura.build.version}'</format>
-                        			<strictVersions>true</strictVersions>
-                                </configuration>
-                        </plugin>
                 </plugins>
         	<pluginManagement>
         		<plugins>
@@ -64,31 +52,6 @@
         				<configuration>
         					<lifecycleMappingMetadata>
         						<pluginExecutions>
-        							<pluginExecution>
-        								<pluginExecutionFilter>
-        									<groupId>
-        										org.eclipse.tycho
-        									</groupId>
-        									<artifactId>
-        										tycho-packaging-plugin
-        									</artifactId>
-        									<versionRange>
-        										[0.20.0,)
-        									</versionRange>
-        									<goals>
-        										<goal>validate-id</goal>
-        										<goal>
-        											build-qualifier
-        										</goal>
-        										<goal>
-        											validate-version
-        										</goal>
-        									</goals>
-        								</pluginExecutionFilter>
-        								<action>
-        									<ignore></ignore>
-        								</action>
-        							</pluginExecution>
         							<pluginExecution>
         								<pluginExecutionFilter>
         									<groupId>

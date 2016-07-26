@@ -94,6 +94,19 @@
 				</b:Well>
 			</b:ModalBody>
 		</b:Modal>
+		
+		<b:Modal closable="true" dataKeyboard="true" ui:field="uploadErrorModal">
+			<b:ModalBody>
+				<b:Panel>
+					<b:PanelBody>
+						<b:Alert type="WARNING">
+							<b.html:Text
+								ui:field="uploadErrorText" />
+						</b:Alert>
+					</b:PanelBody>
+				</b:Panel>
+			</b:ModalBody>
+		</b:Modal>
 		<!-- </b:Column> -->
 	</b:Container>
 </ui:UiBinder> 

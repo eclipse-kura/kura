@@ -42,7 +42,7 @@ public class Emulator {
 
             String snapshotFolderPath= System.getProperty("kura.snapshots");
             File snapshotFolder = new File(snapshotFolderPath);
-            if (!snapshotFolder.exists()) {
+            if (!snapshotFolder.exists() || snapshotFolder.list().length == 0) {
                 snapshotFolder.mkdirs();
                 copySnapshot(snapshotFolderPath);
             }

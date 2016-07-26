@@ -32,15 +32,18 @@ public class ModemDriver {
 	private static final Logger s_logger = LoggerFactory.getLogger(ModemDriver.class);
 	
 	private static final String TARGET_NAME = System.getProperty("target.device");
+	private static final String GPIO_64_PATH = "/sys/class/gpio/gpio64";
+    private static final String GPIO_64_DIRECTION_PATH = GPIO_64_PATH + "/direction";
+    private static final String GPIO_64_VALUE_PATH = GPIO_64_PATH + "/value";
 	private static final String GPIO_65_PATH = "/sys/class/gpio/gpio65";
 	private static final String GPIO_65_DIRECTION_PATH = GPIO_65_PATH + "/direction";
 	private static final String GPIO_65_VALUE_PATH = GPIO_65_PATH + "/value";
 	private static final String GPIO_60_PATH = "/sys/class/gpio/gpio60";
 	private static final String GPIO_60_DIRECTION_PATH = GPIO_60_PATH + "/direction";
 	private static final String GPIO_60_VALUE_PATH = GPIO_60_PATH + "/value";
-	private static final String GPIO_77_PATH = "/sys/class/gpio/gpio77";
-    private static final String GPIO_77_DIRECTION_PATH = GPIO_77_PATH + "/direction";
-    private static final String GPIO_77_VALUE_PATH = GPIO_77_PATH + "/value";
+	private static final String GPIO_76_PATH = "/sys/class/gpio/gpio76";
+    private static final String GPIO_76_DIRECTION_PATH = GPIO_76_PATH + "/direction";
+    private static final String GPIO_76_VALUE_PATH = GPIO_76_PATH + "/value";
 	private static final String GPIO_PATH = "/sys/class/gpio";
 	private static final String GPIO_EXPORT_PATH = GPIO_PATH + "/export";
 	
@@ -90,8 +93,8 @@ public class ModemDriver {
 				s_logger.info("turnModemOff() :: '{}' returned {}", RELIAGATE_50_21_GPIO_11_0_CMD, status);
 				retVal = (status == 0) ? true : false;
 			} else if (TARGET_NAME.equals(KuraConstants.Reliagate_20_25.getTargetName())) {  //TODO: make resets more smart, based on the effective modem that has to be stopped/started
-			    invertGpioValue("65", GPIO_65_PATH, GPIO_65_DIRECTION_PATH, GPIO_65_VALUE_PATH); //toggling internal modem
-			    invertGpioValue("77", GPIO_77_PATH, GPIO_77_DIRECTION_PATH, GPIO_77_VALUE_PATH); //toggling external modem by toggling the J9 usb port
+			    invertGpioValue("64", GPIO_64_PATH, GPIO_64_DIRECTION_PATH, GPIO_64_VALUE_PATH); //toggling internal modem
+			    invertGpioValue("76", GPIO_76_PATH, GPIO_76_DIRECTION_PATH, GPIO_76_VALUE_PATH); //toggling external modem by toggling the J9 usb port
 			} else {
 				s_logger.warn("turnModemOff() :: modem turnOff operation is not supported for the {} platform", TARGET_NAME);
 				retVal = true;
@@ -135,8 +138,8 @@ public class ModemDriver {
 				s_logger.info("turnModemOn() :: '{}' returned {}", RELIAGATE_50_21_GPIO_6_CMD, status);
 				retVal = (status == 0) ? true : false;
 			} else if (TARGET_NAME.equals(KuraConstants.Reliagate_20_25.getTargetName())) {
-                invertGpioValue("65", GPIO_65_PATH, GPIO_65_DIRECTION_PATH, GPIO_65_VALUE_PATH); //value inversion for internal modem
-                invertGpioValue("77", GPIO_77_PATH, GPIO_77_DIRECTION_PATH, GPIO_77_VALUE_PATH); //value inversion for external modem by toggling the J9 usb port
+                invertGpioValue("64", GPIO_64_PATH, GPIO_64_DIRECTION_PATH, GPIO_64_VALUE_PATH); //value inversion for internal modem
+                invertGpioValue("76", GPIO_76_PATH, GPIO_76_DIRECTION_PATH, GPIO_76_VALUE_PATH); //value inversion for external modem by toggling the J9 usb port
             } else {
 				s_logger.warn("turnModemOn() :: modem turnOn operation is not supported for the {} platform", TARGET_NAME);
 				retVal = true;

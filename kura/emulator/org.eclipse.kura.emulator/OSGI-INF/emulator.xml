@@ -14,4 +14,7 @@
 -->
 <scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" activate="activate" deactivate="deactivate" name="org.eclipse.kura.emulator.Emulator">
    <implementation class="org.eclipse.kura.emulator.Emulator"/>
+   <service>
+      <provide interface="org.eclipse.kura.emulator.Emulator"/>
+   </service>
 </scr:component>

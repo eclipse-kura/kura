@@ -34,6 +34,7 @@ import org.gwtbootstrap3.client.ui.TabListItem;
 import org.gwtbootstrap3.client.ui.TextBox;
 import org.gwtbootstrap3.client.ui.gwt.CellTable;
 import org.gwtbootstrap3.client.ui.html.Span;
+import org.gwtbootstrap3.client.ui.html.Text;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -88,6 +89,10 @@ public class PackagesPanelUi extends Composite {
 	@UiField
 	Alert notification;
 	@UiField
+    Modal uploadErrorModal;
+    @UiField
+    Text uploadErrorText;
+	@UiField
 	Button packagesRefresh, packagesInstall, packagesUninstall;
 	@UiField
 	CellTable<GwtDeploymentPackage> packagesGrid = new CellTable<GwtDeploymentPackage>(10);
@@ -109,6 +114,8 @@ public class PackagesPanelUi extends Composite {
 		initTabButtons();
 
 		initModalHandlers();
+		
+		initModal();
 	}
 
 	public void setSession(GwtSession currentSession) {
@@ -191,7 +198,12 @@ public class PackagesPanelUi extends Composite {
 					@Override
 					public void onSuccess(GwtXSRFToken token) {
 						xsrfTokenFieldFile.setValue(token.getToken());
-						packagesFormFile.submit();
+						if (!"".equals(filePath.getFilename())) {
+						    packagesFormFile.submit();
+						} else {
+						    uploadModal.hide();
+						    uploadErrorModal.show();
+						}
 					}
 				});
 
@@ -214,8 +226,13 @@ public class PackagesPanelUi extends Composite {
 
 					@Override
 					public void onSuccess(GwtXSRFToken token) {
-						xsrfTokenFieldUrl.setValue(token.getToken());
-						packagesFormUrl.submit();
+					    if (!"".equals(formUrl.getValue())) {
+					        xsrfTokenFieldUrl.setValue(token.getToken());
+	                        packagesFormUrl.submit();
+					    } else {
+                            uploadModal.hide();
+                            uploadErrorModal.show();
+                        }
 					}
 				});
 			}});
@@ -405,4 +422,9 @@ public class PackagesPanelUi extends Composite {
 
 		});
 	}
+	
+	private void initModal() {
+	    uploadErrorModal.setTitle(MSGS.warning());
+	    uploadErrorText.setText(MSGS.missingFileUpload());
+    }
 }

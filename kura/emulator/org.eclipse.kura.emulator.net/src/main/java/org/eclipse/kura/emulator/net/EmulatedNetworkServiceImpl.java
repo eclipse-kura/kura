@@ -21,6 +21,7 @@ import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.net.EthernetInterfaceImpl;
 import org.eclipse.kura.core.net.NetInterfaceAddressImpl;
+import org.eclipse.kura.emulator.Emulator;
 import org.eclipse.kura.net.IPAddress;
 import org.eclipse.kura.net.NetInterface;
 import org.eclipse.kura.net.NetInterfaceAddress;
@@ -38,6 +39,9 @@ public class EmulatedNetworkServiceImpl implements NetworkService
 	private static final Logger s_logger = LoggerFactory.getLogger(EmulatedNetworkServiceImpl.class);
 	
 	@SuppressWarnings("unused")
+    private Emulator m_emulator;
+	
+	@SuppressWarnings("unused")
 	private ComponentContext      m_ctx;
 
 	// ----------------------------------------------------------------
@@ -46,6 +50,13 @@ public class EmulatedNetworkServiceImpl implements NetworkService
 	//
 	// ----------------------------------------------------------------
 
+	public void setEmulator(Emulator emulator) {
+	    m_emulator = emulator;
+    }
+
+    public void unsetEmulator(Emulator emulator) {
+        m_emulator = null;
+    }
 	
 	
 	// ----------------------------------------------------------------

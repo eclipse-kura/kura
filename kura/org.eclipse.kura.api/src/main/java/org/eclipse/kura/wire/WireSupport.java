@@ -21,6 +21,8 @@ import org.osgi.service.wireadmin.Producer;
  * The interface WireSupport is responsible for managing incoming as well as
  * outgoing wires of the contained Wire Component. This is also used to perform
  * wire related operations for instance, emit and receive wire records.
+ *
+ * @noimplement This interface is not intended to be implemented by clients.
  */
 public interface WireSupport extends Producer, Consumer {
 

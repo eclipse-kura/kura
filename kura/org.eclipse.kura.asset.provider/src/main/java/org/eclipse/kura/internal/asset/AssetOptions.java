@@ -39,7 +39,7 @@ import java.util.Set;
 
 import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.asset.AssetConfiguration;
-import org.eclipse.kura.asset.AssetHelperService;
+import org.eclipse.kura.asset.AssetService;
 import org.eclipse.kura.asset.Channel;
 import org.eclipse.kura.asset.ChannelType;
 import org.eclipse.kura.localization.LocalizationAdapter;
@@ -69,7 +69,7 @@ final class AssetOptions {
 	private String m_assetDescription;
 
 	/** The Asset Helper Service instance. */
-	private final AssetHelperService m_assetHelper;
+	private final AssetService m_assetHelper;
 
 	/** The asset name. */
 	private String m_assetName;
@@ -90,7 +90,7 @@ final class AssetOptions {
 	 * @throws KuraRuntimeException
 	 *             if any of the arguments is null
 	 */
-	AssetOptions(final Map<String, Object> properties, final AssetHelperService assetHelperService) {
+	AssetOptions(final Map<String, Object> properties, final AssetService assetHelperService) {
 		checkNull(properties, s_message.propertiesNonNull());
 		checkNull(properties, s_message.assetHelperNonNull());
 
@@ -161,7 +161,7 @@ final class AssetOptions {
 	 * @return the asset configuration
 	 */
 	AssetConfiguration getAssetConfiguration() {
-		return this.m_assetHelper.newAssetConfigruation(this.m_assetName, this.m_assetDescription, this.m_driverId,
+		return this.m_assetHelper.newAssetConfiguration(this.m_assetName, this.m_assetDescription, this.m_driverId,
 				this.m_channels);
 	}
 

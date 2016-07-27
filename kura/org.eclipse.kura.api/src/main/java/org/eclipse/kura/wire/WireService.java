@@ -20,6 +20,8 @@ import org.eclipse.kura.KuraRuntimeException;
 /**
  * This WireService interface provides all necessary service API methods to
  * manipulate wire mechanisms in Kura Wires topology.
+ *
+ * @noimplement This interface is not intended to be implemented by clients.
  */
 public interface WireService {
 

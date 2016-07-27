@@ -16,8 +16,8 @@ import static org.eclipse.kura.Preconditions.checkNull;
 import static org.eclipse.kura.asset.AssetConstants.ASSET_DRIVER_PROP;
 
 import org.eclipse.kura.KuraRuntimeException;
-import org.eclipse.kura.asset.Asset;
-import org.eclipse.kura.asset.Driver;
+import org.eclipse.kura.asset.BaseAsset;
+import org.eclipse.kura.driver.Driver;
 import org.eclipse.kura.localization.LocalizationAdapter;
 import org.eclipse.kura.localization.resources.AssetMessages;
 import org.osgi.framework.BundleContext;
@@ -41,7 +41,7 @@ public final class DriverTrackerCustomizer implements ServiceTrackerCustomizer<D
 	private static final AssetMessages s_message = LocalizationAdapter.adapt(AssetMessages.class);
 
 	/** The Asset Instance */
-	private final Asset m_asset;
+	private final BaseAsset m_asset;
 
 	/** Bundle Context */
 	private final BundleContext m_context;
@@ -63,7 +63,7 @@ public final class DriverTrackerCustomizer implements ServiceTrackerCustomizer<D
 	 * @throws KuraRuntimeException
 	 *             if any of the arguments is null
 	 */
-	public DriverTrackerCustomizer(final BundleContext context, final Asset asset, final String driverId)
+	public DriverTrackerCustomizer(final BundleContext context, final BaseAsset asset, final String driverId)
 			throws InvalidSyntaxException {
 		checkNull(context, s_message.bundleContextNonNull());
 		checkNull(asset, s_message.assetNonNull());

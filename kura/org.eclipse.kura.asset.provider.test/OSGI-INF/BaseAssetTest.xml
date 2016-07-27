@@ -15,10 +15,16 @@
 -->
 <scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" name="WireServiceTest">
    <implementation class="org.eclipse.kura.asset.provider.test.BaseAssetTest"/>
-   <reference bind="bindAssetHelperService" 
+   <reference bind="bindAssetService" 
    	          cardinality="1..1" 
-   	          interface="org.eclipse.kura.asset.AssetHelperService" 
-   	          name="AssetHelperService" 
+   	          interface="org.eclipse.kura.asset.AssetService" 
+   	          name="AssetService" 
    	          policy="static" 
-   	          unbind="unbindAssetHelperService"/>
+   	          unbind="unbindAssetService"/>
+   <reference bind="bindDriverService" 
+   	          cardinality="1..1" 
+   	          interface="org.eclipse.kura.driver.DriverService" 
+   	          name="DriverService" 
+   	          policy="static" 
+   	          unbind="unbindDriverService"/>
 </scr:component>

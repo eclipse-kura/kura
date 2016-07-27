@@ -27,6 +27,7 @@ import static org.eclipse.kura.asset.AssetConstants.VALUE_TYPE;
 import static org.eclipse.kura.asset.ChannelType.READ;
 import static org.eclipse.kura.asset.ChannelType.READ_WRITE;
 import static org.eclipse.kura.asset.ChannelType.WRITE;
+import static org.eclipse.kura.configuration.ConfigurationService.KURA_SERVICE_PID;
 import static org.osgi.framework.Constants.SERVICE_PID;
 
 import java.sql.Timestamp;
@@ -38,13 +39,11 @@ import java.util.Set;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraRuntimeException;
+import org.eclipse.kura.asset.Asset;
 import org.eclipse.kura.asset.AssetConfiguration;
-import org.eclipse.kura.asset.AssetHelperService;
 import org.eclipse.kura.asset.AssetRecord;
-import org.eclipse.kura.asset.BaseAsset;
+import org.eclipse.kura.asset.AssetService;
 import org.eclipse.kura.asset.Channel;
-import org.eclipse.kura.asset.ChannelDescriptor;
-import org.eclipse.kura.asset.Driver;
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.SelfConfiguringComponent;
 import org.eclipse.kura.configuration.metatype.Option;
@@ -53,6 +52,9 @@ import org.eclipse.kura.core.configuration.metatype.Tad;
 import org.eclipse.kura.core.configuration.metatype.Tocd;
 import org.eclipse.kura.core.configuration.metatype.Toption;
 import org.eclipse.kura.core.configuration.metatype.Tscalar;
+import org.eclipse.kura.driver.ChannelDescriptor;
+import org.eclipse.kura.driver.Driver;
+import org.eclipse.kura.driver.DriverService;
 import org.eclipse.kura.localization.LocalizationAdapter;
 import org.eclipse.kura.localization.resources.WireMessages;
 import org.eclipse.kura.type.TypedValue;
@@ -86,7 +88,7 @@ import org.slf4j.LoggerFactory;
  * <li>value</li>
  * </ul>
  *
- * @see BaseAsset
+ * @see Asset
  */
 public final class WireAsset implements WireEmitter, WireReceiver, SelfConfiguringComponent {
 
@@ -99,20 +101,23 @@ public final class WireAsset implements WireEmitter, WireReceiver, SelfConfiguri
 	/** Localization Resource. */
 	private static final WireMessages s_message = LocalizationAdapter.adapt(WireMessages.class);
 
+	/** Asset Implementation. */
+	private Asset m_asset;
+
 	/** The provided asset configuration wrapper instance. */
 	private AssetConfiguration m_assetConfiguration;
 
-	/** The Asset Helper Service instance. */
-	private volatile AssetHelperService m_assetHelper;
-
-	/** Basic Asset Implementation. */
-	private BaseAsset m_baseAsset;
+	/** The Asset Service instance. */
+	private volatile AssetService m_assetService;
 
 	/** The service component context. */
 	private ComponentContext m_context;
 
 	/** The Driver instance. */
 	private volatile Driver m_driver;
+
+	/** The Driver Service instance. */
+	private volatile DriverService m_driverService;
 
 	/** The configurable properties of this asset. */
 	private Map<String, Object> m_properties;
@@ -134,9 +139,9 @@ public final class WireAsset implements WireEmitter, WireReceiver, SelfConfiguri
 	protected synchronized void activate(final ComponentContext componentContext,
 			final Map<String, Object> properties) {
 		s_logger.debug(s_message.activatingWireAsset());
-		this.m_baseAsset = this.m_assetHelper.newBaseAsset();
-		this.m_baseAsset.initialize(properties);
-		this.m_assetConfiguration = this.m_baseAsset.getAssetConfiguration();
+		this.m_asset = this.m_assetService.newAsset(this.m_driverService);
+		this.m_asset.initialize(properties);
+		this.m_assetConfiguration = this.m_asset.getAssetConfiguration();
 		this.m_context = componentContext;
 		this.m_properties = properties;
 		this.m_wireSupport = this.m_wireHelperService.newWireSupport(this);
@@ -144,14 +149,26 @@ public final class WireAsset implements WireEmitter, WireReceiver, SelfConfiguri
 	}
 
 	/**
-	 * Binds the Asset Helper Service.
+	 * Binds the Asset Service.
 	 *
-	 * @param assetHelperService
-	 *            the new Asset Helper Service
+	 * @param assetService
+	 *            the Asset Service
 	 */
-	public synchronized void bindAssetHelperService(final AssetHelperService assetHelperService) {
-		if (this.m_assetHelper == null) {
-			this.m_assetHelper = assetHelperService;
+	public synchronized void bindAssetService(final AssetService assetService) {
+		if (this.m_assetService == null) {
+			this.m_assetService = assetService;
+		}
+	}
+
+	/**
+	 * Binds the Driver Service.
+	 *
+	 * @param driverService
+	 *            the Driver Service instance
+	 */
+	public synchronized void bindDriverService(final DriverService driverService) {
+		if (this.m_driverService == null) {
+			this.m_driverService = driverService;
 		}
 	}
 
@@ -227,7 +244,7 @@ public final class WireAsset implements WireEmitter, WireReceiver, SelfConfiguri
 	 */
 	protected synchronized void deactivate(final ComponentContext context) {
 		s_logger.debug(s_message.deactivatingWireAsset());
-		this.m_baseAsset.release();
+		this.m_asset.release();
 		s_logger.debug(s_message.deactivatingWireAssetDone());
 	}
 
@@ -332,6 +349,11 @@ public final class WireAsset implements WireEmitter, WireReceiver, SelfConfiguri
 				}
 			}
 		}
+		// this will ensure that the driver must be available for the base asset
+		// to have this component satisfied
+		final String driverId = this.m_asset.getAssetConfiguration().getDriverId();
+		props.put(this.m_driver.getClass().getName() + ".target", new StringBuilder().append("(")
+				.append(KURA_SERVICE_PID).append("=").append(driverId).append(")").toString());
 		return new ComponentConfigurationImpl(componentName, mainOcd, props);
 	}
 
@@ -371,7 +393,7 @@ public final class WireAsset implements WireEmitter, WireReceiver, SelfConfiguri
 		if (wireEnvelope.getRecords().get(0).getFields().get(0).getName().equals(TIMER_EVENT.value())) {
 			// perform the read operation on timer event receive
 			try {
-				final List<AssetRecord> recentlyReadRecords = this.m_baseAsset.read(channelsToRead);
+				final List<AssetRecord> recentlyReadRecords = this.m_asset.read(channelsToRead);
 				this.emitAssetRecords(recentlyReadRecords);
 			} catch (final KuraException e) {
 				s_logger.error(s_message.errorPerformingRead() + ThrowableUtil.stackTraceAsString(e));
@@ -390,7 +412,7 @@ public final class WireAsset implements WireEmitter, WireReceiver, SelfConfiguri
 		}
 		// perform the write operation
 		try {
-			this.m_baseAsset.write(assetRecordsToWriteChannels);
+			this.m_asset.write(assetRecordsToWriteChannels);
 		} catch (final KuraException e) {
 			s_logger.error(s_message.errorPerformingWrite() + ThrowableUtil.stackTraceAsString(e));
 		}
@@ -417,7 +439,7 @@ public final class WireAsset implements WireEmitter, WireReceiver, SelfConfiguri
 		checkNull(channel, s_message.channelNonNull());
 		checkNull(value, s_message.valueNonNull());
 
-		final AssetRecord assetRecord = this.m_assetHelper.newAssetRecord(channel.getId());
+		final AssetRecord assetRecord = this.m_assetService.newAssetRecord(channel.getId());
 		assetRecord.setValue(value);
 		return assetRecord;
 	}
@@ -450,14 +472,26 @@ public final class WireAsset implements WireEmitter, WireReceiver, SelfConfiguri
 	}
 
 	/**
-	 * Unbinds the Asset Helper Service.
+	 * Unbinds the Asset Service.
 	 *
-	 * @param assetHelperService
-	 *            the new Asset Helper Service
+	 * @param assetService
+	 *            the Asset Service
 	 */
-	public synchronized void unbindAssetHelperService(final AssetHelperService assetHelperService) {
-		if (this.m_assetHelper == assetHelperService) {
-			this.m_assetHelper = null;
+	public synchronized void unbindAssetService(final AssetService assetService) {
+		if (this.m_assetService == assetService) {
+			this.m_assetService = null;
+		}
+	}
+
+	/**
+	 * Unbinds the Driver Service.
+	 *
+	 * @param driverService
+	 *            the Driver Service
+	 */
+	public synchronized void unbindDriverService(final DriverService driverService) {
+		if (this.m_driverService == driverService) {
+			this.m_driverService = null;
 		}
 	}
 
@@ -476,7 +510,7 @@ public final class WireAsset implements WireEmitter, WireReceiver, SelfConfiguri
 	/** {@inheritDoc} */
 	public synchronized void updated(final Map<String, Object> properties) {
 		s_logger.debug(s_message.updatingWireAsset());
-		this.m_baseAsset.initialize(properties);
+		this.m_asset.initialize(properties);
 		s_logger.debug(s_message.updatingWireAssetDone());
 	}
 

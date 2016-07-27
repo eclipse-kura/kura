@@ -20,12 +20,13 @@ import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
+import org.eclipse.kura.asset.Asset;
 import org.eclipse.kura.asset.AssetConfiguration;
 import org.eclipse.kura.asset.AssetConstants;
-import org.eclipse.kura.asset.AssetHelperService;
-import org.eclipse.kura.asset.BaseAsset;
+import org.eclipse.kura.asset.AssetService;
 import org.eclipse.kura.asset.Channel;
 import org.eclipse.kura.asset.ChannelType;
+import org.eclipse.kura.driver.DriverService;
 import org.eclipse.kura.test.annotation.TestTarget;
 import org.eclipse.kura.type.DataType;
 import org.eclipse.kura.util.collection.CollectionUtil;
@@ -35,18 +36,21 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This BaseAssetTest is responsible to test {@link BaseAsset}
+ * This BaseAssetTest is responsible to test {@link Asset}
  */
 public final class BaseAssetTest {
 
 	/** Basic Asset Instance */
-	private static BaseAsset baseAsset;
+	private static Asset baseAsset;
 
 	/** A latch to be initialized with the no of OSGi dependencies it needs */
 	private static CountDownLatch dependencyLatch = new CountDownLatch(1);
 
-	/** The Asset Helper Service instance. */
-	private static volatile AssetHelperService s_assetHelper;
+	/** The Asset Service instance. */
+	private static volatile AssetService s_assetService;
+
+	/** The Driver Service instance. */
+	private static volatile DriverService s_driverService;
 
 	/** Logger */
 	private static final Logger s_logger = LoggerFactory.getLogger(BaseAssetTest.class);
@@ -61,14 +65,27 @@ public final class BaseAssetTest {
 	public Map<String, Object> m_sampleChannelConfig;
 
 	/**
-	 * Binds the Asset Helper Service.
+	 * Binds the Asset Service.
 	 *
-	 * @param assetHelperService
+	 * @param assetService
 	 *            the new Asset Helper Service
 	 */
-	public synchronized void bindAssetHelperService(final AssetHelperService assetHelperService) {
-		if (s_assetHelper == null) {
-			s_assetHelper = assetHelperService;
+	public synchronized void bindAssetService(final AssetService assetService) {
+		if (s_assetService == null) {
+			s_assetService = assetService;
+			dependencyLatch.countDown();
+		}
+	}
+
+	/**
+	 * Binds the Driver Service.
+	 *
+	 * @param driverService
+	 *            the Driver Service instance
+	 */
+	public synchronized void bindDriverService(final DriverService driverService) {
+		if (s_driverService == null) {
+			s_driverService = driverService;
 			dependencyLatch.countDown();
 		}
 	}
@@ -113,14 +130,26 @@ public final class BaseAssetTest {
 	}
 
 	/**
-	 * Unbinds the Asset Helper Service.
+	 * Unbinds the Asset Service.
 	 *
-	 * @param assetHelperService
-	 *            the new Asset Helper Service
+	 * @param assetService
+	 *            the Asset Service
 	 */
-	public synchronized void unbindAssetHelperService(final AssetHelperService assetHelperService) {
-		if (s_assetHelper == assetHelperService) {
-			s_assetHelper = null;
+	public synchronized void unbindAssetService(final AssetService assetService) {
+		if (s_assetService == assetService) {
+			s_assetService = null;
+		}
+	}
+
+	/**
+	 * Unbinds the Driver Service.
+	 *
+	 * @param driverService
+	 *            the Driver Service
+	 */
+	public synchronized void unbindDriverService(final DriverService driverService) {
+		if (s_driverService == driverService) {
+			s_driverService = null;
 		}
 	}
 
@@ -160,7 +189,7 @@ public final class BaseAssetTest {
 		} catch (final InterruptedException e) {
 			fail("OSGi dependencies unfulfilled");
 		}
-		baseAsset = s_assetHelper.newBaseAsset();
+		baseAsset = s_assetService.newAsset(s_driverService);
 		init();
 	}
 

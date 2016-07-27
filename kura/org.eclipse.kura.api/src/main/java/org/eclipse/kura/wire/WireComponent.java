@@ -17,6 +17,8 @@ package org.eclipse.kura.wire;
  * {@link WireEmitter}s and {@link WireReceiver}s. A Wire Component is a
  * generalization of a component responsible for producing data also known as
  * {@code WireEmitter} and/or consuming data also known as {@code WireReceiver}.
+ *
+ * @noimplement This interface is not intended to be implemented by clients.
  */
 public interface WireComponent {
 }

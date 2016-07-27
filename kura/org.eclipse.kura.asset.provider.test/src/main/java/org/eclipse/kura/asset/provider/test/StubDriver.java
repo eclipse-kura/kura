@@ -16,11 +16,11 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.kura.KuraException;
-import org.eclipse.kura.asset.ChannelDescriptor;
-import org.eclipse.kura.asset.Driver;
-import org.eclipse.kura.asset.DriverFlag;
-import org.eclipse.kura.asset.DriverListener;
-import org.eclipse.kura.asset.DriverRecord;
+import org.eclipse.kura.driver.ChannelDescriptor;
+import org.eclipse.kura.driver.Driver;
+import org.eclipse.kura.driver.DriverFlag;
+import org.eclipse.kura.driver.DriverRecord;
+import org.eclipse.kura.driver.listener.DriverListener;
 
 public final class StubDriver implements Driver {
 
@@ -45,7 +45,7 @@ public final class StubDriver implements Driver {
 
 	/** {@inheritDoc} */
 	@Override
-	public void read(final List<DriverRecord> records) throws KuraException {
+	public List<DriverRecord> read(final List<DriverRecord> records) throws KuraException {
 		if (!this.isConnected) {
 			this.connect();
 		}
@@ -54,6 +54,7 @@ public final class StubDriver implements Driver {
 			record.setDriverFlag(DriverFlag.READ_SUCCESSFUL);
 			// record.setValue(TypedValues.newBooleanValue(value);
 		}
+		return null;
 	}
 
 	/** {@inheritDoc} */
@@ -69,7 +70,8 @@ public final class StubDriver implements Driver {
 
 	/** {@inheritDoc} */
 	@Override
-	public void write(final List<DriverRecord> records) throws KuraException {
+	public List<DriverRecord> write(final List<DriverRecord> records) throws KuraException {
+		return null;
 	}
 
 }

@@ -10,17 +10,18 @@
  *   Eurotech
  *   Amit Kumar Mondal (admin@amitinside.com)
  */
-package org.eclipse.kura.asset;
+package org.eclipse.kura.asset.listener;
 
 import org.eclipse.kura.KuraRuntimeException;
+import org.eclipse.kura.asset.AssetEvent;
 
 /**
- * The listener interface is mainly for receiving asset events. The class that
- * is interested in processing a asset event implements this interface, and the
- * object created with that class is registered with a asset component using the
- * asset component's {@code Asset#registerAssetListener(String, AssetListener)}
- * method. When the asset event occurs, that object's appropriate method is
- * invoked.
+ * The listener interface AssetListener is mainly for receiving asset events.
+ * The class that is interested in processing a asset event implements this
+ * interface, and the object created with that class is registered with a asset
+ * component using the asset component's
+ * {@code Asset#registerAssetListener(String, AssetListener)} method. When the
+ * asset event occurs, that object's appropriate method is invoked.
  *
  * @see AssetEvent
  */

@@ -14,27 +14,31 @@ package org.eclipse.kura.internal.asset;
 
 import java.util.Map;
 
+import org.eclipse.kura.asset.Asset;
 import org.eclipse.kura.asset.AssetConfiguration;
 import org.eclipse.kura.asset.AssetEvent;
-import org.eclipse.kura.asset.AssetHelperService;
 import org.eclipse.kura.asset.AssetRecord;
-import org.eclipse.kura.asset.BaseAsset;
+import org.eclipse.kura.asset.AssetService;
 import org.eclipse.kura.asset.Channel;
 import org.eclipse.kura.asset.ChannelType;
-import org.eclipse.kura.asset.DriverEvent;
-import org.eclipse.kura.asset.DriverRecord;
+import org.eclipse.kura.driver.DriverService;
 import org.eclipse.kura.type.DataType;
 
 /**
- * The Class AssetHelperServiceImpl is an implementation of the utility API
- * AssetHelperService to provide useful static factory methods for asset and
- * drivers
+ * The Class AssetServiceImpl is an implementation of the utility API
+ * AssetService to provide useful static factory methods for assets
  */
-public final class AssetHelperServiceImpl implements AssetHelperService {
+public final class AssetServiceImpl implements AssetService {
 
 	/** {@inheritDoc} */
 	@Override
-	public AssetConfiguration newAssetConfigruation(final String name, final String description, final String driverId,
+	public Asset newAsset(final DriverService driverService) {
+		return new BaseAssetImpl(this, driverService);
+	}
+
+	/** {@inheritDoc} */
+	@Override
+	public AssetConfiguration newAssetConfiguration(final String name, final String description, final String driverId,
 			final Map<Long, Channel> channels) {
 		return new AssetConfiguration(name, description, driverId, channels);
 	}
@@ -53,27 +57,9 @@ public final class AssetHelperServiceImpl implements AssetHelperService {
 
 	/** {@inheritDoc} */
 	@Override
-	public BaseAsset newBaseAsset() {
-		return new BaseAssetImpl(this);
-	}
-
-	/** {@inheritDoc} */
-	@Override
 	public Channel newChannel(final long id, final String name, final ChannelType type, final DataType valueType,
 			final Map<String, Object> configuration) {
 		return new Channel(id, name, type, valueType, configuration);
-	}
-
-	/** {@inheritDoc} */
-	@Override
-	public DriverEvent newDriverEvent(final DriverRecord driverRecord) {
-		return new DriverEvent(driverRecord);
-	}
-
-	/** {@inheritDoc} */
-	@Override
-	public DriverRecord newDriverRecord(final long channelId) {
-		return new DriverRecord(channelId);
 	}
 
 }

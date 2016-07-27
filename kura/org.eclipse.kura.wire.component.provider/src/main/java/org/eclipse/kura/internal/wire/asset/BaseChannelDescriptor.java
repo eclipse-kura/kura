@@ -19,10 +19,10 @@ import static org.eclipse.kura.asset.AssetConstants.VALUE_TYPE;
 import java.util.List;
 
 import org.eclipse.kura.asset.AssetConfiguration;
-import org.eclipse.kura.asset.ChannelDescriptor;
 import org.eclipse.kura.core.configuration.metatype.Tad;
 import org.eclipse.kura.core.configuration.metatype.Toption;
 import org.eclipse.kura.core.configuration.metatype.Tscalar;
+import org.eclipse.kura.driver.ChannelDescriptor;
 import org.eclipse.kura.localization.LocalizationAdapter;
 import org.eclipse.kura.localization.resources.WireMessages;
 import org.eclipse.kura.util.collection.CollectionUtil;

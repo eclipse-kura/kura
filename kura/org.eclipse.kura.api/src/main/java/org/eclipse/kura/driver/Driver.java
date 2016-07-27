@@ -10,13 +10,14 @@
  *   Eurotech
  *   Amit Kumar Mondal (admin@amitinside.com)
  */
-package org.eclipse.kura.asset;
+package org.eclipse.kura.driver;
 
 import java.util.List;
 import java.util.Map;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraRuntimeException;
+import org.eclipse.kura.driver.listener.DriverListener;
 
 /**
  * The Interface Driver is the main interface that all Kura specific
@@ -87,7 +88,8 @@ public interface Driver {
 	 * @throws KuraRuntimeException
 	 *             if the method is not implemented by the driver then specific
 	 *             error code {@code KuraErrorCode#OPERATION_NOT_SUPPORTED}
-	 *             needs to be set in the thrown {@link KuraRuntimeException}
+	 *             needs to be set in the thrown {@link KuraRuntimeException} or
+	 *             the provided argument is null or empty
 	 * @throws KuraException
 	 *             if the connection to the asset was interrupted, then error
 	 *             code {@code KuraErrorCode#CONNECTION_FAILED} needs to be set
@@ -98,8 +100,10 @@ public interface Driver {
 	 *             {@code KuraErrorCode#INTERNAL_ERROR} will be set.
 	 * @throws KuraRuntimeException
 	 *             if argument is null or empty
+	 * @return the list of driver records which comprises the currently read
+	 *         value in case of success or the reason of failure
 	 */
-	public void read(List<DriverRecord> records) throws KuraException;
+	public List<DriverRecord> read(List<DriverRecord> records) throws KuraException;
 
 	/**
 	 * Registers driver listener for the provided channel configuration for a
@@ -112,7 +116,8 @@ public interface Driver {
 	 * @throws KuraRuntimeException
 	 *             if the method is not implemented by the driver then specific
 	 *             error code {@code KuraErrorCode#OPERATION_NOT_SUPPORTED}
-	 *             needs to be set in the thrown {@link KuraRuntimeException}
+	 *             needs to be set in the thrown {@link KuraRuntimeException} or
+	 *             any of the arguments is null
 	 * @throws KuraException
 	 *             if the connection to the asset was interrupted, then error
 	 *             code {@code KuraErrorCode#CONNECTION_FAILED} needs to be set
@@ -121,8 +126,6 @@ public interface Driver {
 	 *             needs to be set in the thrown {@link KuraException}. For any
 	 *             other internal exception, then error code
 	 *             {@code KuraErrorCode#INTERNAL_ERROR} will be set.
-	 * @throws KuraRuntimeException
-	 *             if any of the argument is null
 	 */
 	public void registerDriverListener(Map<String, Object> channelConfig, DriverListener listener) throws KuraException;
 
@@ -135,7 +138,8 @@ public interface Driver {
 	 * @throws KuraRuntimeException
 	 *             if the method is not implemented by the driver then specific
 	 *             error code {@code KuraErrorCode#OPERATION_NOT_SUPPORTED}
-	 *             needs to be set in the thrown {@link KuraRuntimeException}
+	 *             needs to be set in the thrown {@link KuraRuntimeException} or
+	 *             the provided argument is null
 	 * @throws KuraException
 	 *             if the connection to the asset was interrupted, then error
 	 *             code {@code KuraErrorCode#CONNECTION_FAILED} needs to be set
@@ -144,8 +148,6 @@ public interface Driver {
 	 *             needs to be set in the thrown {@link KuraException}. For any
 	 *             other internal exception, then error code
 	 *             {@code KuraErrorCode#INTERNAL_ERROR} will be set.
-	 * @throws KuraRuntimeException
-	 *             if argument is null
 	 */
 	public void unregisterDriverListener(DriverListener listener) throws KuraException;
 
@@ -165,7 +167,8 @@ public interface Driver {
 	 * @throws KuraRuntimeException
 	 *             if the method is not implemented by the driver then specific
 	 *             error code {@code KuraErrorCode#OPERATION_NOT_SUPPORTED}
-	 *             needs to be set in the thrown {@link KuraRuntimeException}
+	 *             needs to be set in the thrown {@link KuraRuntimeException} or
+	 *             the provided argument is null or empty
 	 * @throws KuraException
 	 *             if the connection to the asset was interrupted, then error
 	 *             code {@code KuraErrorCode#CONNECTION_FAILED} needs to be set
@@ -174,9 +177,9 @@ public interface Driver {
 	 *             needs to be set in the thrown {@link KuraException}. For any
 	 *             other internal exception, then error code
 	 *             {@code KuraErrorCode#INTERNAL_ERROR} will be set.
-	 * @throws KuraRuntimeException
-	 *             if argument is null or empty
+	 * @return the list of driver records which comprises the status of the
+	 *         write operations
 	 */
-	public void write(List<DriverRecord> records) throws KuraException;
+	public List<DriverRecord> write(List<DriverRecord> records) throws KuraException;
 
 }

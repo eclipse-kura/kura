@@ -29,18 +29,19 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraRuntimeException;
+import org.eclipse.kura.asset.Asset;
 import org.eclipse.kura.asset.AssetConfiguration;
 import org.eclipse.kura.asset.AssetEvent;
-import org.eclipse.kura.asset.AssetHelperService;
-import org.eclipse.kura.asset.AssetListener;
 import org.eclipse.kura.asset.AssetRecord;
-import org.eclipse.kura.asset.BaseAsset;
+import org.eclipse.kura.asset.AssetService;
 import org.eclipse.kura.asset.Channel;
-import org.eclipse.kura.asset.Driver;
-import org.eclipse.kura.asset.DriverEvent;
-import org.eclipse.kura.asset.DriverFlag;
-import org.eclipse.kura.asset.DriverListener;
-import org.eclipse.kura.asset.DriverRecord;
+import org.eclipse.kura.asset.listener.AssetListener;
+import org.eclipse.kura.driver.Driver;
+import org.eclipse.kura.driver.DriverEvent;
+import org.eclipse.kura.driver.DriverFlag;
+import org.eclipse.kura.driver.DriverRecord;
+import org.eclipse.kura.driver.DriverService;
+import org.eclipse.kura.driver.listener.DriverListener;
 import org.eclipse.kura.localization.LocalizationAdapter;
 import org.eclipse.kura.localization.resources.AssetMessages;
 import org.eclipse.kura.util.base.ThrowableUtil;
@@ -58,7 +59,7 @@ import org.slf4j.LoggerFactory;
  * @see AssetOptions
  * @see AssetConfiguration
  */
-public final class BaseAssetImpl implements BaseAsset {
+public final class BaseAssetImpl implements Asset {
 
 	/** The Logger instance. */
 	private static final Logger s_logger = LoggerFactory.getLogger(BaseAssetImpl.class);
@@ -69,20 +70,23 @@ public final class BaseAssetImpl implements BaseAsset {
 	/** The provided asset configuration wrapper instance. */
 	private AssetConfiguration m_assetConfiguration;
 
-	/** The Asset Helper Service instance. */
-	private final AssetHelperService m_assetHelper;
-
 	/** Container of mapped asset listeners and drivers listener. */
 	private final Map<AssetListener, DriverListener> m_assetListeners;
 
 	/** The provided asset options instance. */
 	private AssetOptions m_assetOptions;
 
+	/** The Asset Service instance. */
+	private final AssetService m_assetService;
+
 	/** The Bundle context. */
 	private final BundleContext m_context;
 
 	/** The Driver instance. */
 	private volatile Driver m_driver;
+
+	/** The Driver Service instance. */
+	private final DriverService m_driverService;
 
 	/** Asset Driver Tracker Customizer. */
 	private DriverTrackerCustomizer m_driverTrackerCustomizer;
@@ -96,16 +100,17 @@ public final class BaseAssetImpl implements BaseAsset {
 	/**
 	 * Instantiates a new base asset implementation.
 	 *
-	 * @param helperService
-	 *            the asset helper service
+	 * @param assetService
+	 *            the asset service
 	 * @throws KuraRuntimeException
 	 *             if the argument is null
 	 */
-	public BaseAssetImpl(final AssetHelperService helperService) {
-		checkNull(helperService, s_message.assetHelperNonNull());
+	public BaseAssetImpl(final AssetService assetService, final DriverService driverService) {
+		checkNull(assetService, s_message.assetHelperNonNull());
 		this.m_assetListeners = CollectionUtil.newConcurrentHashMap();
 		this.m_monitor = new ReentrantLock();
-		this.m_assetHelper = helperService;
+		this.m_assetService = assetService;
+		this.m_driverService = driverService;
 		this.m_context = FrameworkUtil.getBundle(this.getClass()).getBundleContext();
 	}
 
@@ -166,12 +171,6 @@ public final class BaseAssetImpl implements BaseAsset {
 
 	/** {@inheritDoc} */
 	@Override
-	public Driver getDriver() {
-		return this.m_driver;
-	}
-
-	/** {@inheritDoc} */
-	@Override
 	public void initialize(final Map<String, Object> properties) {
 		s_logger.debug(s_message.updating());
 		this.retrieveConfigurationsFromProperties(properties);
@@ -199,7 +198,7 @@ public final class BaseAssetImpl implements BaseAsset {
 			checkCondition((channel.getType() != READ) || (channel.getType() != READ_WRITE),
 					s_message.channelTypeNotReadable() + channel);
 
-			final DriverRecord driverRecord = this.m_assetHelper.newDriverRecord(channelId);
+			final DriverRecord driverRecord = this.m_driverService.newDriverRecord(channelId);
 			driverRecord.setChannelConfig(channel.getConfiguration());
 			driverRecords.add(driverRecord);
 		}
@@ -212,7 +211,7 @@ public final class BaseAssetImpl implements BaseAsset {
 		}
 
 		for (final DriverRecord driverRecord : driverRecords) {
-			final AssetRecord assetRecord = this.m_assetHelper.newAssetRecord(driverRecord.getChannelId());
+			final AssetRecord assetRecord = this.m_assetService.newAssetRecord(driverRecord.getChannelId());
 			final DriverFlag driverFlag = driverRecord.getDriverFlag();
 
 			switch (driverFlag) {
@@ -280,7 +279,8 @@ public final class BaseAssetImpl implements BaseAsset {
 			public void onDriverEvent(final DriverEvent event) {
 				checkNull(event, s_message.driverEventNonNull());
 				final DriverRecord driverRecord = event.getDriverRecord();
-				final AssetRecord assetRecord = m_assetHelper.newAssetRecord(driverRecord.getChannelId());
+				final AssetRecord assetRecord = BaseAssetImpl.this.m_assetService
+						.newAssetRecord(driverRecord.getChannelId());
 				final DriverFlag driverFlag = driverRecord.getDriverFlag();
 				switch (driverFlag) {
 				case READ_SUCCESSFUL:
@@ -300,7 +300,7 @@ public final class BaseAssetImpl implements BaseAsset {
 				}
 				assetRecord.setTimestamp(driverRecord.getTimestamp());
 				assetRecord.setValue(driverRecord.getValue());
-				final AssetEvent assetEvent = m_assetHelper.newAssetEvent(assetRecord);
+				final AssetEvent assetEvent = BaseAssetImpl.this.m_assetService.newAssetEvent(assetRecord);
 				this.m_assetListener.onAssetEvent(assetEvent);
 			}
 		}
@@ -348,7 +348,7 @@ public final class BaseAssetImpl implements BaseAsset {
 	private void retrieveConfigurationsFromProperties(final Map<String, Object> properties) {
 		s_logger.debug(s_message.retrievingConf());
 		if (this.m_assetOptions == null) {
-			this.m_assetOptions = new AssetOptions(properties, this.m_assetHelper);
+			this.m_assetOptions = new AssetOptions(properties, this.m_assetService);
 		}
 		if ((this.m_assetConfiguration == null) && (this.m_assetOptions != null)) {
 			this.m_assetConfiguration = this.m_assetOptions.getAssetConfiguration();
@@ -409,7 +409,7 @@ public final class BaseAssetImpl implements BaseAsset {
 			final Channel channel = channels.get(id);
 			checkCondition((channel.getType() != WRITE) || (channel.getType() != READ_WRITE),
 					s_message.channelTypeNotWritable() + channel);
-			final DriverRecord driverRecord = this.m_assetHelper.newDriverRecord(id);
+			final DriverRecord driverRecord = this.m_driverService.newDriverRecord(id);
 			driverRecord.setChannelConfig(channel.getConfiguration());
 			driverRecord.setValue(assetRecord.getValue());
 			driverRecords.add(driverRecord);

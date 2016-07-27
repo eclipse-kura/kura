@@ -10,7 +10,7 @@
  *   Eurotech
  *   Amit Kumar Mondal (admin@amitinside.com)
  */
-package org.eclipse.kura.asset;
+package org.eclipse.kura.driver;
 
 /**
  * This represents all the Kura driver specific flag codes
@@ -31,5 +31,5 @@ public enum DriverFlag {
 	/**
 	 * In case of successful writing operation
 	 */
-	WRITE_SUCCESSFUL
+	WRITE_SUCCESSFUL;
 }

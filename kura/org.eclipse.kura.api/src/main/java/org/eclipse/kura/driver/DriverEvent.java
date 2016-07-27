@@ -10,7 +10,7 @@
  *   Eurotech
  *   Amit Kumar Mondal (admin@amitinside.com)
  */
-package org.eclipse.kura.asset;
+package org.eclipse.kura.driver;
 
 import static org.eclipse.kura.Preconditions.checkNull;
 

@@ -10,9 +10,10 @@
  *   Eurotech
  *   Amit Kumar Mondal (admin@amitinside.com)
  */
-package org.eclipse.kura.asset;
+package org.eclipse.kura.driver.listener;
 
 import org.eclipse.kura.KuraRuntimeException;
+import org.eclipse.kura.driver.DriverEvent;
 
 /**
  * The listener interface for receiving driver events. The class that is

@@ -15,13 +15,23 @@ package org.eclipse.kura.asset;
 import java.util.Map;
 
 import org.eclipse.kura.KuraRuntimeException;
+import org.eclipse.kura.driver.DriverService;
 import org.eclipse.kura.type.DataType;
 
 /**
- * The interface AssetHelperService is an utility service API to provide useful
- * methods for asset and drivers
+ * The interface AssetService is an utility service API to provide useful
+ * methods for assets
  */
-public interface AssetHelperService {
+public interface AssetService {
+
+	/**
+	 * Prepares the new asset instance
+	 *
+	 * @param driverService
+	 *            the provided driver service instance
+	 * @return the newly created Asset instance
+	 */
+	public Asset newAsset(DriverService driverService);
 
 	/**
 	 * Prepares a new asset configuration.
@@ -38,7 +48,7 @@ public interface AssetHelperService {
 	 * @throws KuraRuntimeException
 	 *             if any of the arguments is null
 	 */
-	public AssetConfiguration newAssetConfigruation(final String name, final String description, final String driverId,
+	public AssetConfiguration newAssetConfiguration(final String name, final String description, final String driverId,
 			final Map<Long, Channel> channels);
 
 	/**
@@ -64,13 +74,6 @@ public interface AssetHelperService {
 	public AssetRecord newAssetRecord(final long channelId);
 
 	/**
-	 * Prepares the new basic asset instance
-	 *
-	 * @return the newly created Base Asset instance
-	 */
-	public BaseAsset newBaseAsset();
-
-	/**
 	 * Creates a new channel with the provided values
 	 *
 	 * @param id
@@ -89,27 +92,5 @@ public interface AssetHelperService {
 	 */
 	public Channel newChannel(final long id, final String name, final ChannelType type, final DataType valueType,
 			final Map<String, Object> configuration);
-
-	/**
-	 * Prepares new driver event.
-	 *
-	 * @param driverRecord
-	 *            the associated driver record
-	 * @return the newly created driver event
-	 * @throws KuraRuntimeException
-	 *             if the argument is null
-	 */
-	public DriverEvent newDriverEvent(final DriverRecord driverRecord);
-
-	/**
-	 * Prepares new driver record.
-	 *
-	 * @param channelId
-	 *            the channel identifier
-	 * @return the newly created driver record
-	 * @throws KuraRuntimeException
-	 *             if the argument is less than or equal to zero
-	 */
-	public DriverRecord newDriverRecord(final long channelId);
 
 }

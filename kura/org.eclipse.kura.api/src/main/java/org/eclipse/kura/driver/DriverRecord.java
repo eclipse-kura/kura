@@ -10,7 +10,7 @@
  *   Eurotech
  *   Amit Kumar Mondal (admin@amitinside.com)
  */
-package org.eclipse.kura.asset;
+package org.eclipse.kura.driver;
 
 import static org.eclipse.kura.Preconditions.checkCondition;
 import static org.eclipse.kura.Preconditions.checkNull;
@@ -23,8 +23,9 @@ import org.eclipse.kura.annotation.NotThreadSafe;
 import org.eclipse.kura.type.TypedValue;
 
 /**
- * This class represents records needed for read, write or a monitor operation
- * on the provided channel configuration by the Kura specific device driver.
+ * The Class DriverRecord represents records needed for read, write or a monitor
+ * operation on the provided channel configuration by the Kura specific device
+ * driver.
  */
 @NotThreadSafe
 public final class DriverRecord {

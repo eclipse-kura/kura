@@ -11,7 +11,6 @@
  *     Amit Kumar Mondal (admin@amitinside.com)
  *******************************************************************************/
 /**
- * Provides all necessary APIs and all utility classes comprising necessary
- * static factory methods for Kura Asset Component Model Drivers
+ * Provides all necessary APIs for Drivers of Kura Asset Component Model
  */
 package org.eclipse.kura.driver;

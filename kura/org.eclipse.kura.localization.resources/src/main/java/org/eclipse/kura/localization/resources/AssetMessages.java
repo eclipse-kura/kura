@@ -79,9 +79,6 @@ public interface AssetMessages {
 	@En("Channel not available")
 	public String channelUnavailable();
 
-	@En("Class intance name cannot be null")
-	public String clazzNonNull();
-
 	@En("Asset Configuration")
 	public String configuration();
 

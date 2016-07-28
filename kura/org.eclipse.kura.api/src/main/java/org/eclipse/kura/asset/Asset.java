@@ -15,10 +15,10 @@ package org.eclipse.kura.asset;
 import java.util.Map;
 
 /**
- * The interface Asset is a high level abstraction of a Kura asset of an
- * Industrial Field Device which associates a device driver. All devices which
- * associates a driver should use this for more specific functionalities to
- * conform to the Kura asset specifications.
+ * The interface Asset is a high level abstraction of a Kura asset representing
+ * an Industrial Field Device which associates a device driver. All devices
+ * which associates a driver should use this for more specific functionalities
+ * to conform to the Kura asset specifications.
  *
  * The asset requires a specific set of configurations to be provided by the
  * user. Please check {@see AssetConfiguration} for more information on how to
@@ -36,7 +36,7 @@ public interface Asset extends BaseAsset {
 	public AssetConfiguration getAssetConfiguration();
 
 	/**
-	 * Initializes the Base Asset component with the provided properties
+	 * Initializes the Asset component with the provided properties
 	 *
 	 * @param properties
 	 *            the provided properties to parse

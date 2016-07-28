@@ -11,6 +11,6 @@
  *     Amit Kumar Mondal (admin@amitinside.com)
  *******************************************************************************/
 /**
- * Provides all necessary listeners for Kura Asset Component Model Drivers
+ * Provides all necessary listeners for Drivers of Kura Asset Component Model
  */
 package org.eclipse.kura.driver.listener;

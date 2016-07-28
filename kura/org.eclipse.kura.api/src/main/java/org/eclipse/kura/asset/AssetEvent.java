@@ -15,15 +15,13 @@ package org.eclipse.kura.asset;
 import static org.eclipse.kura.Preconditions.checkNull;
 
 import org.eclipse.kura.KuraRuntimeException;
-import org.eclipse.kura.annotation.Immutable;
-import org.eclipse.kura.annotation.ThreadSafe;
+import org.eclipse.kura.annotation.NotThreadSafe;
 
 /**
  * This class represents an event occurred while monitoring specific channel
  * configuration by the asset.
  */
-@Immutable
-@ThreadSafe
+@NotThreadSafe
 public final class AssetEvent {
 
 	/**

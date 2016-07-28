@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Different Wire Components Provider
-Bundle-SymbolicName: org.eclipse.kura.wire.component.provider
+Bundle-SymbolicName: org.eclipse.kura.wire.component.provider;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: EUROTECH
 Bundle-License: Eclipse Public License v1.0
@@ -31,3 +31,4 @@ Import-Package: org.eclipse.kura;version="[1.1,2.0)",
  org.osgi.util.position;version="1.0.1",
  org.slf4j;version="1.6.4"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-ActivationPolicy: lazy

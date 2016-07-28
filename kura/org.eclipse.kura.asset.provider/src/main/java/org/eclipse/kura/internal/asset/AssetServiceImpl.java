@@ -26,7 +26,7 @@ import org.eclipse.kura.type.DataType;
 
 /**
  * The Class AssetServiceImpl is an implementation of the utility API
- * AssetService to provide useful static factory methods for assets
+ * {@link AssetService} to provide useful factory methods for assets
  */
 public final class AssetServiceImpl implements AssetService {
 

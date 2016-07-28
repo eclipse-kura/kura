@@ -21,8 +21,8 @@ import org.eclipse.kura.KuraRuntimeException;
 public interface DriverService {
 
 	/**
-	 * Gets the actual driver instance by the provided driver identity
-	 * ({@code service.pid})
+	 * Gets the actual driver instance by the provided driver identifier
+	 * ({@code kura.service.pid})
 	 *
 	 * @param driverId
 	 *            the unique identity of the driver to check
@@ -31,7 +31,8 @@ public interface DriverService {
 	public Driver getDriver(String driverId);
 
 	/**
-	 * Gets the driver ID. ({@code kura.service.pid})
+	 * Gets the driver ID. ({@code kura.service.pid}) by the provided driver
+	 * instance
 	 *
 	 * @param driver
 	 *            the driver instance to check
@@ -40,7 +41,8 @@ public interface DriverService {
 	public String getDriverId(Driver driver);
 
 	/**
-	 * Gets the driver PID. ({@code service.pid})
+	 * Gets the driver PID. ({@code service.pid}) by the provided driver
+	 * instance
 	 *
 	 * @param driver
 	 *            the driver instance to check
@@ -49,10 +51,11 @@ public interface DriverService {
 	public String getDriverPid(Driver driver);
 
 	/**
-	 * Gets the driver PID. ({@code service.pid})
+	 * Gets the driver PID. ({@code service.pid}) by the provided driver
+	 * identifier ({@code kura.service.pid})
 	 *
 	 * @param driverId
-	 *            the unique identity of the driver to check
+	 *            the unique identifier of the driver to check
 	 * @return the driver PID
 	 */
 	public String getDriverPid(String driverId);

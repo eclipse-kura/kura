@@ -15,15 +15,13 @@ package org.eclipse.kura.driver;
 import static org.eclipse.kura.Preconditions.checkNull;
 
 import org.eclipse.kura.KuraRuntimeException;
-import org.eclipse.kura.annotation.Immutable;
-import org.eclipse.kura.annotation.ThreadSafe;
+import org.eclipse.kura.annotation.NotThreadSafe;
 
 /**
  * The DriverEvent class represents an event occurred while monitoring specific
  * channel configuration by the driver.
  */
-@Immutable
-@ThreadSafe
+@NotThreadSafe
 public final class DriverEvent {
 
 	/**

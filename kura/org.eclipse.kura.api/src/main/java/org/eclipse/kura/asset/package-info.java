@@ -11,7 +11,6 @@
  *     Amit Kumar Mondal (admin@amitinside.com)
  *******************************************************************************/
 /**
- * Provides all necessary APIs and all utility classes comprising necessary
- * static factory methods for Kura Asset Component Model
+ * Provides all necessary APIs for Kura Asset Component Model
  */
 package org.eclipse.kura.asset;

@@ -16,10 +16,10 @@ import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.driver.DriverEvent;
 
 /**
- * The listener interface for receiving driver events. The class that is
- * interested in processing a driver event implements this interface, and the
- * object created with that class is registered with a driver component using
- * the driver component's
+ * The listener interface DriverListener is mainly for receiving driver events.
+ * The class that is interested in processing a driver event implements this
+ * interface, and the object created with that class is registered with a driver
+ * component using the driver component's
  * {@code Driver#registerDriverListener(java.util.Map, DriverListener)} method.
  * When the driver event occurs, that object's appropriate method is invoked.
  *

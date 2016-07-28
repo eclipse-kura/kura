@@ -21,7 +21,7 @@ public enum AssetConstants {
 	/** Asset Description Property to be used in the configuration. */
 	ASSET_DESC_PROP("asset.desc"),
 
-	/** Driver Name Property to be used in the configuration. */
+	/** Driver ID Property to be used in the configuration. */
 	ASSET_DRIVER_PROP("driver.id"),
 
 	/** Asset Name Property to be used in the configuration. */

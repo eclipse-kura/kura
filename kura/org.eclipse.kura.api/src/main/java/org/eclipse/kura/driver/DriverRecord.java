@@ -172,7 +172,7 @@ public final class DriverRecord {
 	 * Sets the channel configuration as provided.
 	 *
 	 * @param channelConfig
-	 *            the channel config
+	 *            the channel configuration
 	 * @throws KuraRuntimeException
 	 *             if the argument is null
 	 */

@@ -15,14 +15,19 @@ Added Features :
   * Native libraries now support x86_64
   * Reviewed/refactored the GPS position service
   
-Bug Fixes and closed issues:
+Bug Fixes :
   * Fixed github issues #78, #82, #96, #98, #112, #113, #114, #116, #120, #121, #127, #128, #129, #131,
     #134, #138, #139, #141, #143, #167, #169, #177, #179, #182, #184, #187, #188, #193, #198, #199, #201,
     #202, #203, #209, #212, #214, #215, #218, #227, #228, #229, #230, #233, #238, #241, #250, #252, #254,
-    #255, #256, #258, #260, #267, #270, #271, #272, #279, #284
+    #255, #256, #258, #260, #267, #270, #271, #272, #279, #284, #302, #309
   
 
 Know Issues :
+  * Multiple connections: updating a service (e.g. MqttDataTransport) of a connection
+    has the effect to cause the unwanted reactivation of the next higher layer service (i.e. DataService)
+    of the other connection(s). This in turn will cause the reactivation of all dependent components.
+    This is not desired and not yet understood (Equinox bug?). See also Github issue #311.
+  * Modem: Ublox Lisa U201 may not be able to establish PPP connection when CHAP/PAP authentication is required.
   * BLE only tested on the Raspberry Pi B with a Broadcom BCM20702 USB dongle and the TI SensorTag. The kernel version was "Linux raspberrypi 3.18.11-v7+ #781 SMP PREEMPT Tue Apr 21 18:07:59 BST 2015 armv7l GNU/Linux". Note that on the kernel "Linux version 4.1.7-v7+ (dc4@dc4-XPS13-9333) (gcc version 4.8.3 20140303 (prerelease) (crosstool-NG linaro-1.13.1+bzr2650 - Linaro GCC 2014.03) ) #817 SMP PREEMPT Sat Sep 19 15:32:00 BST 2015" has a bug on gatttool and the BLE connection failes.
     The only working version of BlueZ is 4.101. The deb package is not available from Raspbian so it
     must be compiled from sources.

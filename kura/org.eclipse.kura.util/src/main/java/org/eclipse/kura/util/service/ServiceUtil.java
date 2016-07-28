@@ -38,24 +38,24 @@ public final class ServiceUtil {
 	}
 
 	/**
-	 * Returns references to <em>all</em> services matching the given class name
-	 * and OSGi filter.
+	 * Returns references to <em>all</em> services matching the given class
+	 * instance and OSGi filter.
 	 *
 	 * @param bundleContext
 	 *            OSGi bundle context
 	 * @param clazz
-	 *            fully qualified class name (can be <code>null</code>)
+	 *            class instance
 	 * @param filter
-	 *            valid OSGi filter (can be <code>null</code>)
+	 *            valid OSGi filter
 	 * @return non-<code>null</code> array of references to matching services
 	 * @throws KuraRuntimeException
 	 *             if the filter syntax is wrong (even though filter is
-	 *             nullable) or bundle syntax or class instance name is null
+	 *             nullable) or bundle syntax or class instance is null
 	 */
 	public static <T> ServiceReference<T>[] getServiceReferences(final BundleContext bundleContext,
 			final Class<T> clazz, final String filter) {
 		checkNull(bundleContext, s_message.bundleContextNonNull());
-		checkNull(bundleContext, s_message.clazzNonNull());
+		checkNull(clazz, s_message.clazzNonNull());
 
 		try {
 			final ServiceReference<?>[] refs = bundleContext.getServiceReferences(clazz.getName(), filter);
@@ -74,12 +74,13 @@ public final class ServiceUtil {
 	 * @param bundleContext
 	 *            OSGi bundle context
 	 * @param clazz
-	 *            fully qualified class name (can be <code>null</code>)
+	 *            fully qualified class name
 	 * @param filter
-	 *            valid OSGi filter (can be <code>null</code>)
+	 *            valid OSGi filter
 	 * @return non-<code>null</code> array of references to matching services
 	 * @throws KuraRuntimeException
-	 *             if the filter syntax is wrong, even though filter can be null
+	 *             if the filter syntax is wrong (even though filter is
+	 *             nullable) or bundle syntax or class instance name is null
 	 */
 	public static ServiceReference<?>[] getServiceReferences(final BundleContext bundleContext, final String clazz,
 			final String filter) {

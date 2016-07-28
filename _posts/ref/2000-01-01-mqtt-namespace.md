@@ -120,16 +120,8 @@ from data topics that are used in unsolicited reports and marks the
 associated messages as transient (not to be stored in the historical
 data archive, if present).
 
-NOTE: While Eclipse Kura currently requires “$EDC” as the prefix for
-control topics, this prefix may change in the future for the following
-reasons:
-
--   MQTT 3.1.1 discourages the use of topic starting with “$” for
-    application purposes.
-
--   As a binding of LWM2M over MQTT is taking shape, it would makes
-    sense to use a topic prefix for management messages like “LWM2M” or
-    similar abbreviations – e.g. “LW2”, “LWM”.
+NOTE: While **$EDC** will be used for reference for this document, this value is
+configurable through the CloudService topic.control-prefix variable. 
 
 A requester (i.e., the remote server) initiates a request/response
 conversation through the following events:
@@ -726,6 +718,8 @@ Request:
 -   Payload:
 
     -   metrics:
+        -   **dp.job.id** (Long). Mandatory.
+            Represents a unique Job ID for the download.
         -   **dp.uri** (String). Mandatory.
             Represents the URI of the deployment package.
         -   **dp.name** (String). Mandatory.
@@ -735,9 +729,9 @@ Request:
             The value of the header DeploymentPackage-Version in the DP MANIFEST.
             The file will be saved in the temporary directory as
             <dp.name>-<dp.version>.jar possibly overwriting an existing file.
-        -   **dp.download.protocol** (String) Mandatory (default: HTTP).
+        -   **dp.download.protocol** (String) Mandatory.
             Specifies the protocol to be used to download the
-            bundles/shell scripts.  
+            bundles/shell scripts. Must be set to HTTP or HTTPS.
         -   **dp.download.block.size** (Integer). Optional
             (if not specified by the cloud platform, it is estimated by the
                 device, depending on the total file size. In this case it is

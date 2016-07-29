@@ -13,7 +13,7 @@
 package org.eclipse.kura.internal.asset;
 
 import static org.eclipse.kura.Preconditions.checkNull;
-import static org.eclipse.kura.asset.AssetConstants.ASSET_DRIVER_PROP;
+import static org.eclipse.kura.driver.DriverConstants.DRIVER_ID;
 
 import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.asset.BaseAsset;
@@ -78,7 +78,7 @@ public final class DriverTrackerCustomizer implements ServiceTrackerCustomizer<D
 	@Override
 	public Driver addingService(final ServiceReference<Driver> reference) {
 		final Driver driver = this.m_context.getService(reference);
-		if (reference.getProperty(ASSET_DRIVER_PROP.value()).equals(this.m_driverId)) {
+		if (reference.getProperty(DRIVER_ID.value()).equals(this.m_driverId)) {
 			s_logger.info(s_message.driverFoundAdding());
 			((AssetImpl) this.m_asset).setDriver(driver);
 		}
@@ -96,7 +96,7 @@ public final class DriverTrackerCustomizer implements ServiceTrackerCustomizer<D
 	@Override
 	public void removedService(final ServiceReference<Driver> reference, final Driver service) {
 		this.m_context.ungetService(reference);
-		if (reference.getProperty(ASSET_DRIVER_PROP.value()).equals(this.m_driverId)) {
+		if (reference.getProperty(DRIVER_ID.value()).equals(this.m_driverId)) {
 			s_logger.info(s_message.driverRemoved() + service);
 			((AssetImpl) this.m_asset).setDriver(null);
 		}

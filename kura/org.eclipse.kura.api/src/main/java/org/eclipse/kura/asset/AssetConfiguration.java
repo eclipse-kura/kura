@@ -18,6 +18,7 @@ import java.util.Map;
 
 import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.annotation.NotThreadSafe;
+import org.eclipse.kura.type.DataType;
 
 /**
  * The Class AssetConfiguration is responsible for storing the configuration for
@@ -56,29 +57,16 @@ import org.eclipse.kura.annotation.NotThreadSafe;
  * For example, [more configuration] would be 1.CH.DRIVER.modbus.register,
  * 1.CH.DRIVER.modbus.unit.id etc.
  *
- * The key <b><i>name</i></b> must be String. The key <b><i>value.type</i></b>
- * must be in one of the following (case-insensitive)
+ * The key <b><i>name</i></b> must be String.
  *
- * <ul>
- * <li>INTEGER</li>
- * <li>BOOLEAN</li>
- * <li>BYTE</li>
- * <li>DOUBLE</li>
- * <li>LONG</li>
- * <li>SHORT</li>
- * <li>STRING</li>
- * <li>BYTE_ARRAY</li>
- * </ul>
+ * The key <b><i>value.type</i></b> must be in one of types from
+ * {@link DataType}
  *
- * The channel {@code type} should be one of the following (case-insensitive)
- *
- * <ul>
- * <li>READ</li>
- * <li>WRITE</li>
- * <li>READ_WRITE</li>
- * </ul>
+ * The channel {@code type} should be one of the types from {@link ChannelType}
  *
  * @see Channel
+ * @see ChannelType
+ * @see DataType
  */
 @NotThreadSafe
 public final class AssetConfiguration {

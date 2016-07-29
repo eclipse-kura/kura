@@ -37,6 +37,9 @@ public interface AssetMessages {
 	@En("Asset cannot be null")
 	public String assetNonNull();
 
+	@En("Asset Record cannot be null")
+	public String assetRecordNonNull();
+
 	@En("Asset Records cannot be empty")
 	public String assetRecordsNonEmpty();
 
@@ -117,6 +120,9 @@ public interface AssetMessages {
 
 	@En("Driver cannot be null")
 	public String driverNonNull();
+
+	@En("Driver Record cannot be null")
+	public String driverRecordNonNull();
 
 	@En("Driver has been removed by the driver tracker...")
 	public String driverRemoved();

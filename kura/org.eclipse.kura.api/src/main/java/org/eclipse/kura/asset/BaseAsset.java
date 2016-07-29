@@ -26,6 +26,8 @@ import org.eclipse.kura.asset.listener.AssetListener;
  * only specifies the channel specific configuration (which is very channel
  * descriptor specific) and the associated driver is mainly responsible for
  * performing all the lower level tasks on the provided channel configuration.
+ *
+ * @see AssetRecord
  */
 public interface BaseAsset {
 

@@ -22,7 +22,10 @@ public enum DriverConstants {
 	CHANNEL_ID("channel.id"),
 
 	/** Value type Property to be used in the configuration. */
-	CHANNEL_VALUE_TYPE("channel.value.type");
+	CHANNEL_VALUE_TYPE("channel.value.type"),
+
+	/** Driver Identifier */
+	DRIVER_ID("kura.service.pid");
 
 	/** The value. */
 	private String value;

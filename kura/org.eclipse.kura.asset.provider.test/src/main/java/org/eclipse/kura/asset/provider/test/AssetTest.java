@@ -16,19 +16,28 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
+import org.eclipse.kura.KuraException;
+import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.asset.Asset;
 import org.eclipse.kura.asset.AssetConfiguration;
 import org.eclipse.kura.asset.AssetConstants;
+import org.eclipse.kura.asset.AssetEvent;
+import org.eclipse.kura.asset.AssetFlag;
+import org.eclipse.kura.asset.AssetRecord;
 import org.eclipse.kura.asset.AssetService;
 import org.eclipse.kura.asset.Channel;
 import org.eclipse.kura.asset.ChannelType;
+import org.eclipse.kura.asset.listener.AssetListener;
 import org.eclipse.kura.driver.DriverService;
 import org.eclipse.kura.test.annotation.TestTarget;
 import org.eclipse.kura.type.DataType;
+import org.eclipse.kura.type.TypedValues;
 import org.eclipse.kura.util.collection.CollectionUtil;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -40,11 +49,11 @@ import org.slf4j.LoggerFactory;
  */
 public final class AssetTest {
 
-	/** Basic Asset Instance */
-	private static Asset baseAsset;
+	/** Asset Instance */
+	private static Asset asset;
 
 	/** A latch to be initialized with the no of OSGi dependencies it needs */
-	private static CountDownLatch dependencyLatch = new CountDownLatch(1);
+	private static CountDownLatch dependencyLatch = new CountDownLatch(2);
 
 	/** The Asset Service instance. */
 	private static volatile AssetService s_assetService;
@@ -96,10 +105,9 @@ public final class AssetTest {
 	@TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
 	@Test
 	public void testBasicProperties() {
-		final AssetConfiguration assetConfiguration = baseAsset.getAssetConfiguration();
-		// assertNotNull(baseAsset.getDriver());
+		final AssetConfiguration assetConfiguration = asset.getAssetConfiguration();
 		assertNotNull(assetConfiguration);
-		assertEquals("sample.driver.id", assetConfiguration.getDriverId());
+		assertEquals("org.eclipse.kura.asset.stub.driver", assetConfiguration.getDriverId());
 		assertEquals("sample.asset.desc", assetConfiguration.getDescription());
 		assertEquals("sample.asset.name", assetConfiguration.getName());
 	}
@@ -110,7 +118,7 @@ public final class AssetTest {
 	@TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
 	@Test
 	public void testChannelProperties() {
-		final AssetConfiguration assetConfiguration = baseAsset.getAssetConfiguration();
+		final AssetConfiguration assetConfiguration = asset.getAssetConfiguration();
 		assertNotNull(assetConfiguration);
 		final Map<Long, Channel> channels = assetConfiguration.getChannels();
 		assertEquals(2, channels.size());
@@ -127,6 +135,65 @@ public final class AssetTest {
 		assertEquals(DataType.BOOLEAN, channel2.getValueType());
 		assertEquals("sample.channel2.modbus.register", channel2.getConfiguration().get("modbus.register"));
 		assertEquals("sample.channel2.modbus.FC", channel2.getConfiguration().get("modbus.DUMMY.NN"));
+	}
+
+	/**
+	 * Test listening operation.
+	 */
+	@TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+	@Test
+	public void testListen() throws KuraException {
+		final AssetListener listener = new AssetListener() {
+			/** {@inheritDoc} */
+			@Override
+			public void onAssetEvent(final AssetEvent event) {
+				assertEquals(1, event.getAssetRecord().getValue().getValue());
+			}
+		};
+		asset.registerAssetListener(1, listener);
+	}
+
+	/**
+	 * Test reading operation.
+	 */
+	@TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+	@Test
+	public void testRead() throws KuraException {
+		final List<AssetRecord> records = asset.read(Arrays.asList(1L));
+		assertEquals(1, records.size());
+		assertEquals(1, records.get(0).getValue().getValue());
+	}
+
+	/**
+	 * Tests the condition in case the channel type is not readable
+	 */
+	@TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+	@Test(expected = KuraRuntimeException.class)
+	public void testReadChannelNotReadable() throws KuraException {
+		asset.read(Arrays.asList(2L));
+	}
+
+	/**
+	 * Test writing operation.
+	 */
+	@TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+	@Test
+	public void testWrite() throws KuraException {
+		final AssetRecord assetRecord = s_assetService.newAssetRecord(2L);
+		assetRecord.setValue(TypedValues.newBooleanValue(true));
+		final List<AssetRecord> records = asset.write(Arrays.asList(assetRecord));
+		assertEquals(1, records.size());
+		assertEquals(AssetFlag.WRITE_SUCCESSFUL, records.get(0).getAssetFlag());
+	}
+
+	/**
+	 * Tests the condition in case the channel type is not writable
+	 */
+	@TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+	@Test(expected = KuraRuntimeException.class)
+	public void testWriteChannelNotWritable() throws KuraException {
+		final AssetRecord assetRecord = s_assetService.newAssetRecord(1L);
+		asset.write(Arrays.asList(assetRecord));
 	}
 
 	/**
@@ -160,18 +227,18 @@ public final class AssetTest {
 		final Map<String, Object> channels = CollectionUtil.newHashMap();
 		channels.put(AssetConstants.ASSET_DESC_PROP.value(), "sample.asset.desc");
 		channels.put(AssetConstants.ASSET_NAME_PROP.value(), "sample.asset.name");
-		channels.put(AssetConstants.ASSET_DRIVER_PROP.value(), "sample.driver.id");
+		channels.put(AssetConstants.ASSET_DRIVER_PROP.value(), "org.eclipse.kura.asset.stub.driver");
 		channels.put("1.CH.name", "sample.channel1.name");
-		channels.put("1.CH.type", "READ");
-		channels.put("1.CH.value.type", "INTEGER");
+		channels.put("1.CH.type", ChannelType.READ);
+		channels.put("1.CH.value.type", DataType.INTEGER);
 		channels.put("1.CH.DRIVER.modbus.register", "sample.channel1.modbus.register");
 		channels.put("1.CH.DRIVER.modbus.FC", "sample.channel1.modbus.FC");
 		channels.put("2.CH.name", "sample.channel2.name");
-		channels.put("2.CH.type", "WRITE");
-		channels.put("2.CH.value.type", "BOOLEAN");
+		channels.put("2.CH.type", ChannelType.WRITE);
+		channels.put("2.CH.value.type", DataType.BOOLEAN);
 		channels.put("2.CH.DRIVER.modbus.register", "sample.channel2.modbus.register");
 		channels.put("2.CH.DRIVER.modbus.DUMMY.NN", "sample.channel2.modbus.FC");
-		baseAsset.initialize(channels);
+		asset.initialize(channels);
 	}
 
 	/**
@@ -189,7 +256,7 @@ public final class AssetTest {
 		} catch (final InterruptedException e) {
 			fail("OSGi dependencies unfulfilled");
 		}
-		baseAsset = s_assetService.newAsset(s_driverService);
+		asset = s_assetService.newAsset(s_driverService);
 		init();
 	}
 

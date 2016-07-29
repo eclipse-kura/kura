@@ -12,14 +12,19 @@
       Amit Kumar Mondal (admin@amitinside.com)
 -->
 <scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" 
-               name="org.eclipse.kura.wire.stub.driver"
+               name="org.eclipse.kura.asset.stub.driver"
                enabled="true" 
-               immediate="false"
-               configuration-policy="require"> 
+               immediate="true"> 
    <implementation class="org.eclipse.kura.asset.provider.test.StubDriver"/>
    <service>
-      <provide interface="org.eclipse.kura.asset.Driver"/>
+      <provide interface="org.eclipse.kura.driver.Driver"/>
    </service>
-   <property name="service.pid" value="org.eclipse.kura.wire.stub.driver"/>
-   <property name="kura.service.pid" value="org.eclipse.kura.wire.stub.driver"/>
+   <property name="service.pid" value="org.eclipse.kura.asset.stub.driver"/>
+   <property name="kura.service.pid" value="org.eclipse.kura.asset.stub.driver"/>
+   <reference bind="bindDriverService" 
+   	          cardinality="1..1" 
+   	          interface="org.eclipse.kura.driver.DriverService" 
+   	          name="DriverService" 
+   	          policy="static" 
+   	          unbind="unbindDriverService"/>
 </scr:component>

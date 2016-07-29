@@ -20,17 +20,6 @@ import static org.eclipse.kura.asset.AssetConstants.ASSET_NAME_PROP;
 import static org.eclipse.kura.asset.AssetConstants.CHANNEL_PROPERTY_POSTFIX;
 import static org.eclipse.kura.asset.AssetConstants.CHANNEL_PROPERTY_PREFIX;
 import static org.eclipse.kura.asset.AssetConstants.DRIVER_PROPERTY_POSTFIX;
-import static org.eclipse.kura.asset.ChannelType.READ;
-import static org.eclipse.kura.asset.ChannelType.READ_WRITE;
-import static org.eclipse.kura.asset.ChannelType.WRITE;
-import static org.eclipse.kura.type.DataType.BOOLEAN;
-import static org.eclipse.kura.type.DataType.BYTE;
-import static org.eclipse.kura.type.DataType.BYTE_ARRAY;
-import static org.eclipse.kura.type.DataType.DOUBLE;
-import static org.eclipse.kura.type.DataType.INTEGER;
-import static org.eclipse.kura.type.DataType.LONG;
-import static org.eclipse.kura.type.DataType.SHORT;
-import static org.eclipse.kura.type.DataType.STRING;
 
 import java.util.Arrays;
 import java.util.List;
@@ -55,7 +44,6 @@ import org.slf4j.LoggerFactory;
  * properties.
  *
  * @see AssetConfiguration
- *
  */
 final class AssetOptions {
 
@@ -204,44 +192,11 @@ final class AssetOptions {
 			}
 			final String channelTypePropertyKey = channelKeyFormat + channelTypeKey;
 			if (properties.containsKey(channelTypePropertyKey)) {
-				final String type = (String) properties.get(channelTypePropertyKey);
-				if ("READ".equalsIgnoreCase(type)) {
-					channelType = READ;
-				}
-				if ("WRITE".equalsIgnoreCase(type)) {
-					channelType = WRITE;
-				}
-				if ("READ_WRITE".equalsIgnoreCase(type)) {
-					channelType = READ_WRITE;
-				}
+				channelType = (ChannelType) properties.get(channelTypePropertyKey);
 			}
 			final String channelValueTypePropertyKey = channelKeyFormat + channelValueTypeKey;
 			if (properties.containsKey(channelValueTypePropertyKey)) {
-				final String valueType = (String) properties.get(channelValueTypePropertyKey);
-				if ("INTEGER".equalsIgnoreCase(valueType)) {
-					dataType = INTEGER;
-				}
-				if ("BOOLEAN".equalsIgnoreCase(valueType)) {
-					dataType = BOOLEAN;
-				}
-				if ("BYTE".equalsIgnoreCase(valueType)) {
-					dataType = BYTE;
-				}
-				if ("DOUBLE".equalsIgnoreCase(valueType)) {
-					dataType = DOUBLE;
-				}
-				if ("LONG".equalsIgnoreCase(valueType)) {
-					dataType = LONG;
-				}
-				if ("SHORT".equalsIgnoreCase(valueType)) {
-					dataType = SHORT;
-				}
-				if ("STRING".equalsIgnoreCase(valueType)) {
-					dataType = STRING;
-				}
-				if ("BYTE_ARRAY".equalsIgnoreCase(valueType)) {
-					dataType = BYTE_ARRAY;
-				}
+				dataType = (DataType) properties.get(channelValueTypePropertyKey);
 			}
 			for (final Map.Entry<String, Object> entry : properties.entrySet()) {
 				final String key = entry.getKey();

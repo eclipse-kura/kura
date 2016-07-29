@@ -27,6 +27,9 @@ import org.eclipse.kura.driver.listener.DriverListener;
  * communicating with the field device (asset) is provided by user using the
  * configurable component of the actual driver which is internally managed by
  * the OSGi Configuration Admin service
+ *
+ * @see DriverRecord
+ * @see ChannelDescriptor
  */
 public interface Driver {
 

@@ -101,6 +101,8 @@ public final class StubDriver implements Driver {
 			case INTEGER:
 				record.setValue(TypedValues.newIntegerValue(1));
 				break;
+			default:
+				break;
 			}
 			record.setDriverFlag(DriverFlag.READ_SUCCESSFUL);
 		}
@@ -134,6 +136,7 @@ public final class StubDriver implements Driver {
 	/** {@inheritDoc} */
 	@Override
 	public void unregisterDriverListener(final DriverListener listener) throws KuraException {
+		// not used
 	}
 
 	/** {@inheritDoc} */

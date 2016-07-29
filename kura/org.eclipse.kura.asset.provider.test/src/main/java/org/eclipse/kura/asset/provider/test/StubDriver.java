@@ -21,6 +21,7 @@ import org.eclipse.kura.driver.Driver;
 import org.eclipse.kura.driver.DriverFlag;
 import org.eclipse.kura.driver.DriverRecord;
 import org.eclipse.kura.driver.listener.DriverListener;
+import org.eclipse.kura.type.TypedValues;
 
 public final class StubDriver implements Driver {
 
@@ -35,6 +36,7 @@ public final class StubDriver implements Driver {
 	/** {@inheritDoc} */
 	@Override
 	public void disconnect() throws KuraException {
+		this.isConnected = false;
 	}
 
 	/** {@inheritDoc} */
@@ -52,9 +54,9 @@ public final class StubDriver implements Driver {
 
 		for (final DriverRecord record : records) {
 			record.setDriverFlag(DriverFlag.READ_SUCCESSFUL);
-			// record.setValue(TypedValues.newBooleanValue(value);
+			record.setValue(TypedValues.newBooleanValue(false));
 		}
-		return null;
+		return records;
 	}
 
 	/** {@inheritDoc} */

@@ -80,7 +80,7 @@ public final class DriverTrackerCustomizer implements ServiceTrackerCustomizer<D
 		final Driver driver = this.m_context.getService(reference);
 		if (reference.getProperty(ASSET_DRIVER_PROP.value()).equals(this.m_driverId)) {
 			s_logger.info(s_message.driverFoundAdding());
-			((BaseAssetImpl) this.m_asset).setDriver(driver);
+			((AssetImpl) this.m_asset).setDriver(driver);
 		}
 		return driver;
 	}
@@ -98,7 +98,7 @@ public final class DriverTrackerCustomizer implements ServiceTrackerCustomizer<D
 		this.m_context.ungetService(reference);
 		if (reference.getProperty(ASSET_DRIVER_PROP.value()).equals(this.m_driverId)) {
 			s_logger.info(s_message.driverRemoved() + service);
-			((BaseAssetImpl) this.m_asset).setDriver(null);
+			((AssetImpl) this.m_asset).setDriver(null);
 		}
 	}
 

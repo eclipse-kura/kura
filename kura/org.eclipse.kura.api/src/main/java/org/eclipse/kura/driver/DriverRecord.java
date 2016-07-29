@@ -39,6 +39,8 @@ public final class DriverRecord {
 	/**
 	 * The associated channel identifier. The channel identifier for any asset
 	 * must be unique.
+	 *
+	 * TODO: I think it should be the channel instance
 	 */
 	private final long channelId;
 

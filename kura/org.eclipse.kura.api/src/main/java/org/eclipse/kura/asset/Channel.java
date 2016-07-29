@@ -40,12 +40,11 @@ public final class Channel {
 	/** The name of the communication channel. */
 	private String name;
 
-	/** The type of the channel. */
+	/** The type of the channel. (read/write/read_Write) */
 	private ChannelType type;
 
 	/**
-	 * The data type of the value as expected for the operations
-	 * (read/write/monitor).
+	 * The data type of the value as expected from the operation
 	 */
 	private DataType valueType;
 

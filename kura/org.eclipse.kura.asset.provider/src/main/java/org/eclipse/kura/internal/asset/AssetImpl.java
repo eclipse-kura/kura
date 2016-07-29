@@ -54,15 +54,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * The Class BaseAsset is a basic Kura asset implementation.
+ * The Class AssetImpl is basic implementation of {@code Asset}.
  *
  * @see AssetOptions
  * @see AssetConfiguration
  */
-public final class BaseAssetImpl implements Asset {
+public final class AssetImpl implements Asset {
 
 	/** The Logger instance. */
-	private static final Logger s_logger = LoggerFactory.getLogger(BaseAssetImpl.class);
+	private static final Logger s_logger = LoggerFactory.getLogger(AssetImpl.class);
 
 	/** Localization Resource. */
 	private static final AssetMessages s_message = LocalizationAdapter.adapt(AssetMessages.class);
@@ -105,7 +105,7 @@ public final class BaseAssetImpl implements Asset {
 	 * @throws KuraRuntimeException
 	 *             if the argument is null
 	 */
-	public BaseAssetImpl(final AssetService assetService, final DriverService driverService) {
+	public AssetImpl(final AssetService assetService, final DriverService driverService) {
 		checkNull(assetService, s_message.assetHelperNonNull());
 		this.m_assetListeners = CollectionUtil.newConcurrentHashMap();
 		this.m_monitor = new ReentrantLock();
@@ -279,7 +279,7 @@ public final class BaseAssetImpl implements Asset {
 			public void onDriverEvent(final DriverEvent event) {
 				checkNull(event, s_message.driverEventNonNull());
 				final DriverRecord driverRecord = event.getDriverRecord();
-				final AssetRecord assetRecord = BaseAssetImpl.this.m_assetService
+				final AssetRecord assetRecord = AssetImpl.this.m_assetService
 						.newAssetRecord(driverRecord.getChannelId());
 				final DriverFlag driverFlag = driverRecord.getDriverFlag();
 				switch (driverFlag) {
@@ -300,7 +300,7 @@ public final class BaseAssetImpl implements Asset {
 				}
 				assetRecord.setTimestamp(driverRecord.getTimestamp());
 				assetRecord.setValue(driverRecord.getValue());
-				final AssetEvent assetEvent = BaseAssetImpl.this.m_assetService.newAssetEvent(assetRecord);
+				final AssetEvent assetEvent = AssetImpl.this.m_assetService.newAssetEvent(assetRecord);
 				this.m_assetListener.onAssetEvent(assetEvent);
 			}
 		}

@@ -33,7 +33,7 @@ public final class AssetServiceImpl implements AssetService {
 	/** {@inheritDoc} */
 	@Override
 	public Asset newAsset(final DriverService driverService) {
-		return new BaseAssetImpl(this, driverService);
+		return new AssetImpl(this, driverService);
 	}
 
 	/** {@inheritDoc} */

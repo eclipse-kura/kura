@@ -20,6 +20,6 @@ import org.junit.runners.Suite.SuiteClasses;
  * execute
  */
 @RunWith(Suite.class)
-@SuiteClasses({ BaseAssetTest.class })
+@SuiteClasses({ AssetTest.class })
 public final class AssetTestsSuite {
 }

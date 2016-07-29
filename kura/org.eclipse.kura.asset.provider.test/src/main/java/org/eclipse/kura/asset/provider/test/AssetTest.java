@@ -36,9 +36,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This BaseAssetTest is responsible to test {@link Asset}
+ * This AssetTest is responsible to test {@link Asset}
  */
-public final class BaseAssetTest {
+public final class AssetTest {
 
 	/** Basic Asset Instance */
 	private static Asset baseAsset;
@@ -53,7 +53,7 @@ public final class BaseAssetTest {
 	private static volatile DriverService s_driverService;
 
 	/** Logger */
-	private static final Logger s_logger = LoggerFactory.getLogger(BaseAssetTest.class);
+	private static final Logger s_logger = LoggerFactory.getLogger(AssetTest.class);
 
 	/** The Device Configuration instance. */
 	public AssetConfiguration m_configuration;

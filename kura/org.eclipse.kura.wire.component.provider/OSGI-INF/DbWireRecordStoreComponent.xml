@@ -17,7 +17,6 @@
     deactivate="deactivate" 
     modified="updated" 
     enabled="true" 
-    immediate="true"
     configuration-policy="require">
    <implementation class="org.eclipse.kura.internal.wire.store.DbWireRecordStore"/>
    <service>

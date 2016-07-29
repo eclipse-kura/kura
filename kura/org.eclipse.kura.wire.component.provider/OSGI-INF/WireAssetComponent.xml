@@ -14,7 +14,6 @@
 <scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" 
 	activate="activate"
 	deactivate="deactivate"
-	immediate="true"
 	modified="updated"
 	name="org.eclipse.kura.wire.WireAsset"
 	configuration-policy="require">

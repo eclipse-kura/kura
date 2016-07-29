@@ -35,7 +35,7 @@ import org.eclipse.kura.annotation.NotThreadSafe;
  * description</li>
  * <li>x.CH.[property]</li> where x is any number denoting the channel's unique
  * ID and the {@code [property]} denotes the protocol specific properties. (Note
- * that the format includes atleast two ".") denotes map object containing a
+ * that the format includes at least two ".") denotes map object containing a
  * channel configuration</li>
  *
  * For example, 1.CH.name, 1.CH.value.type etc.

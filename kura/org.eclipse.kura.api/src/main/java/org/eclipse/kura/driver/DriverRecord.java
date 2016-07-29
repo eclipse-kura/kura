@@ -12,7 +12,6 @@
  */
 package org.eclipse.kura.driver;
 
-import static org.eclipse.kura.Preconditions.checkCondition;
 import static org.eclipse.kura.Preconditions.checkNull;
 
 import java.util.HashMap;
@@ -20,12 +19,35 @@ import java.util.Map;
 
 import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.annotation.NotThreadSafe;
+import org.eclipse.kura.type.DataType;
 import org.eclipse.kura.type.TypedValue;
 
 /**
  * The Class DriverRecord represents records needed for read, write or a monitor
  * operation on the provided channel configuration by the Kura specific device
  * driver.
+ *
+ * A Driver Record must contain the specific channel configuration that it needs
+ * to operate on. The most basic requirements to provide the configuration is
+ * the channel ID as long value. This channel ID is essentially needed to map an
+ * asset record with a driver record and hence this channel ID needs to be set.
+ *
+ * The channel ID must be set in the map as a key of :
+ * {@link DriverConstants#CHANNEL_ID} or {@code channel.id}
+ *
+ * In case you are using driver in isolation (i.e without using Assets), then
+ * the channel ID need not to be set.
+ *
+ * But in both the scenarios, you must set the value type in the configuration
+ * map. The value type is the channel value type in case you are using Assets
+ * but not the Drivers directly.
+ *
+ * But if you are accessing Drivers directly, this value type must be set to one
+ * of the types from {@link DataType}.
+ *
+ * The value type must be set in the map as a key of :
+ * {@link DriverConstants#CHANNEL_VALUE_TYPE} or {@code channel.value.type}
+ *
  */
 @NotThreadSafe
 public final class DriverRecord {
@@ -35,14 +57,6 @@ public final class DriverRecord {
 	 * operation.
 	 */
 	private Map<String, Object> channelConfiguration;
-
-	/**
-	 * The associated channel identifier. The channel identifier for any asset
-	 * must be unique.
-	 *
-	 * TODO: I think it should be the channel instance
-	 */
-	private final long channelId;
 
 	/**
 	 * Represents a driver specific flag which signifies the status of the read
@@ -59,19 +73,6 @@ public final class DriverRecord {
 	 * the driver to the actual asset.
 	 */
 	private TypedValue<?> value;
-
-	/**
-	 * Instantiates a new driver record.
-	 *
-	 * @param channelId
-	 *            the channel identifier
-	 * @throws KuraRuntimeException
-	 *             if the channel identifier is less than or equal to zero
-	 */
-	public DriverRecord(final long channelId) {
-		checkCondition(channelId <= 0, "Channel ID cannot be zero or less");
-		this.channelId = channelId;
-	}
 
 	/** {@inheritDoc} */
 	@Override
@@ -91,9 +92,6 @@ public final class DriverRecord {
 				return false;
 			}
 		} else if (!this.channelConfiguration.equals(other.channelConfiguration)) {
-			return false;
-		}
-		if (this.channelId != other.channelId) {
 			return false;
 		}
 		if (this.driverFlag != other.driverFlag) {
@@ -119,15 +117,6 @@ public final class DriverRecord {
 	 */
 	public Map<String, Object> getChannelConfig() {
 		return this.channelConfiguration;
-	}
-
-	/**
-	 * Gets the channel identifier.
-	 *
-	 * @return the channel identifier
-	 */
-	public long getChannelId() {
-		return this.channelId;
 	}
 
 	/**
@@ -163,7 +152,6 @@ public final class DriverRecord {
 		final int prime = 31;
 		int result = 1;
 		result = (prime * result) + ((this.channelConfiguration == null) ? 0 : this.channelConfiguration.hashCode());
-		result = (prime * result) + (int) (this.channelId ^ (this.channelId >>> 32));
 		result = (prime * result) + ((this.driverFlag == null) ? 0 : this.driverFlag.hashCode());
 		result = (prime * result) + (int) (this.timestamp ^ (this.timestamp >>> 32));
 		result = (prime * result) + ((this.value == null) ? 0 : this.value.hashCode());
@@ -222,8 +210,8 @@ public final class DriverRecord {
 	/** {@inheritDoc} */
 	@Override
 	public String toString() {
-		return "DriverRecord [channelConfiguration=" + this.channelConfiguration + ", channelId=" + this.channelId
-				+ ", driverFlag=" + this.driverFlag + ", timestamp=" + this.timestamp + ", value=" + this.value + "]";
+		return "DriverRecord [channelConfiguration=" + this.channelConfiguration + ", driverFlag=" + this.driverFlag
+				+ ", timestamp=" + this.timestamp + ", value=" + this.value + "]";
 	}
 
 }

@@ -74,12 +74,8 @@ public interface DriverService {
 	/**
 	 * Prepares new driver record.
 	 *
-	 * @param channelId
-	 *            the channel identifier
 	 * @return the newly created driver record
-	 * @throws KuraRuntimeException
-	 *             if the argument is less than or equal to zero
 	 */
-	public DriverRecord newDriverRecord(final long channelId);
+	public DriverRecord newDriverRecord();
 
 }

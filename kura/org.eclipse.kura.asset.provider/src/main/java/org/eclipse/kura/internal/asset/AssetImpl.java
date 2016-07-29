@@ -21,6 +21,8 @@ import static org.eclipse.kura.asset.AssetFlag.WRITE_SUCCESSFUL;
 import static org.eclipse.kura.asset.ChannelType.READ;
 import static org.eclipse.kura.asset.ChannelType.READ_WRITE;
 import static org.eclipse.kura.asset.ChannelType.WRITE;
+import static org.eclipse.kura.driver.DriverConstants.CHANNEL_ID;
+import static org.eclipse.kura.driver.DriverConstants.CHANNEL_VALUE_TYPE;
 
 import java.util.List;
 import java.util.Map;
@@ -98,7 +100,7 @@ public final class AssetImpl implements Asset {
 	private ServiceTracker<Driver, Driver> m_serviceTracker;
 
 	/**
-	 * Instantiates a new base asset implementation.
+	 * Instantiates a new asset instance.
 	 *
 	 * @param assetService
 	 *            the asset service
@@ -198,8 +200,13 @@ public final class AssetImpl implements Asset {
 			checkCondition((channel.getType() != READ) || (channel.getType() != READ_WRITE),
 					s_message.channelTypeNotReadable() + channel);
 
-			final DriverRecord driverRecord = this.m_driverService.newDriverRecord(channelId);
-			driverRecord.setChannelConfig(channel.getConfiguration());
+			final DriverRecord driverRecord = this.m_driverService.newDriverRecord();
+			// Copy the configuration of the channel and put the channel ID and
+			// channel value type
+			final Map<String, Object> channelConf = CollectionUtil.newHashMap(channel.getConfiguration());
+			channelConf.put(CHANNEL_ID.value(), channel.getId());
+			channelConf.put(CHANNEL_VALUE_TYPE.value(), channel.getValueType());
+			driverRecord.setChannelConfig(channelConf);
 			driverRecords.add(driverRecord);
 		}
 
@@ -211,7 +218,12 @@ public final class AssetImpl implements Asset {
 		}
 
 		for (final DriverRecord driverRecord : driverRecords) {
-			final AssetRecord assetRecord = this.m_assetService.newAssetRecord(driverRecord.getChannelId());
+			final Map<String, Object> driverRecordConf = driverRecord.getChannelConfig();
+			long channelId = 0;
+			if (driverRecordConf.containsKey(CHANNEL_ID.value())) {
+				channelId = Long.valueOf(driverRecordConf.get(CHANNEL_ID.value()).toString());
+			}
+			final AssetRecord assetRecord = this.m_assetService.newAssetRecord(channelId);
 			final DriverFlag driverFlag = driverRecord.getDriverFlag();
 
 			switch (driverFlag) {
@@ -279,8 +291,12 @@ public final class AssetImpl implements Asset {
 			public void onDriverEvent(final DriverEvent event) {
 				checkNull(event, s_message.driverEventNonNull());
 				final DriverRecord driverRecord = event.getDriverRecord();
-				final AssetRecord assetRecord = AssetImpl.this.m_assetService
-						.newAssetRecord(driverRecord.getChannelId());
+				final Map<String, Object> driverRecordConf = driverRecord.getChannelConfig();
+				long channelId = 0;
+				if (driverRecordConf.containsKey(CHANNEL_ID.value())) {
+					channelId = Long.valueOf(driverRecordConf.get(CHANNEL_ID.value()).toString());
+				}
+				final AssetRecord assetRecord = AssetImpl.this.m_assetService.newAssetRecord(channelId);
 				final DriverFlag driverFlag = driverRecord.getDriverFlag();
 				switch (driverFlag) {
 				case READ_SUCCESSFUL:
@@ -409,8 +425,14 @@ public final class AssetImpl implements Asset {
 			final Channel channel = channels.get(id);
 			checkCondition((channel.getType() != WRITE) || (channel.getType() != READ_WRITE),
 					s_message.channelTypeNotWritable() + channel);
-			final DriverRecord driverRecord = this.m_driverService.newDriverRecord(id);
-			driverRecord.setChannelConfig(channel.getConfiguration());
+			final DriverRecord driverRecord = this.m_driverService.newDriverRecord();
+
+			// Copy the configuration of the channel and put the channel ID and
+			// channel value type
+			final Map<String, Object> channelConf = CollectionUtil.newHashMap(channel.getConfiguration());
+			channelConf.put(CHANNEL_ID.value(), channel.getId());
+			channelConf.put(CHANNEL_VALUE_TYPE.value(), channel.getValueType());
+			driverRecord.setChannelConfig(channelConf);
 			driverRecord.setValue(assetRecord.getValue());
 			driverRecords.add(driverRecord);
 			mappedRecords.put(driverRecord, assetRecord);

@@ -102,8 +102,8 @@ public final class DriverServiceImpl implements DriverService {
 
 	/** {@inheritDoc} */
 	@Override
-	public DriverRecord newDriverRecord(final long channelId) {
-		return new DriverRecord(channelId);
+	public DriverRecord newDriverRecord() {
+		return new DriverRecord();
 	}
 
 }

@@ -565,7 +565,7 @@ public class ModemDriver {
                 }
             }
         }
-        return 0;
+        return -1;
     }
 
     private static String readFile(File gpioChipFile) throws IOException {

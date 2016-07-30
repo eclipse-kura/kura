@@ -15,7 +15,6 @@ package org.eclipse.kura.asset.provider.test;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.kura.KuraException;
 import org.eclipse.kura.driver.ChannelDescriptor;
 import org.eclipse.kura.driver.Driver;
 import org.eclipse.kura.driver.DriverConstants;
@@ -51,13 +50,13 @@ public final class StubDriver implements Driver {
 
 	/** {@inheritDoc} */
 	@Override
-	public void connect() throws KuraException {
+	public void connect() throws ConnectionException {
 		this.isConnected = true;
 	}
 
 	/** {@inheritDoc} */
 	@Override
-	public void disconnect() throws KuraException {
+	public void disconnect() throws ConnectionException {
 		this.isConnected = false;
 	}
 
@@ -69,7 +68,7 @@ public final class StubDriver implements Driver {
 
 	/** {@inheritDoc} */
 	@Override
-	public List<DriverRecord> read(final List<DriverRecord> records) throws KuraException {
+	public List<DriverRecord> read(final List<DriverRecord> records) throws ConnectionException {
 		if (!this.isConnected) {
 			this.connect();
 		}
@@ -104,7 +103,7 @@ public final class StubDriver implements Driver {
 			default:
 				break;
 			}
-			record.setStatus(this.m_driverService.newStatus(DriverFlag.READ_SUCCESSFUL, null, null));
+			record.setDriverStatus(this.m_driverService.newStatus(DriverFlag.READ_SUCCESSFUL, null, null));
 		}
 		return records;
 	}
@@ -112,11 +111,11 @@ public final class StubDriver implements Driver {
 	/** {@inheritDoc} */
 	@Override
 	public void registerDriverListener(final Map<String, Object> channelConfig, final DriverListener listener)
-			throws KuraException {
+			throws ConnectionException {
 		final DriverRecord record = this.m_driverService.newDriverRecord();
 		record.setChannelConfig(channelConfig);
 		record.setValue(TypedValues.newIntegerValue(1));
-		record.setStatus(this.m_driverService.newStatus(DriverFlag.READ_SUCCESSFUL, null, null));
+		record.setDriverStatus(this.m_driverService.newStatus(DriverFlag.READ_SUCCESSFUL, null, null));
 		record.setTimestamp(System.currentTimeMillis());
 		listener.onDriverEvent(this.m_driverService.newDriverEvent(record));
 	}
@@ -135,19 +134,19 @@ public final class StubDriver implements Driver {
 
 	/** {@inheritDoc} */
 	@Override
-	public void unregisterDriverListener(final DriverListener listener) throws KuraException {
+	public void unregisterDriverListener(final DriverListener listener) throws ConnectionException {
 		// not used
 	}
 
 	/** {@inheritDoc} */
 	@Override
-	public List<DriverRecord> write(final List<DriverRecord> records) throws KuraException {
+	public List<DriverRecord> write(final List<DriverRecord> records) throws ConnectionException {
 		if (!this.isConnected) {
 			this.connect();
 		}
 
 		for (final DriverRecord record : records) {
-			record.setStatus(this.m_driverService.newStatus(DriverFlag.WRITE_SUCCESSFUL, null, null));
+			record.setDriverStatus(this.m_driverService.newStatus(DriverFlag.WRITE_SUCCESSFUL, null, null));
 		}
 		return records;
 	}

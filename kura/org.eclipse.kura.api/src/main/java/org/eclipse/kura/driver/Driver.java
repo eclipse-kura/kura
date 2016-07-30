@@ -15,7 +15,6 @@ package org.eclipse.kura.driver;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.driver.listener.DriverListener;
 
@@ -34,36 +33,76 @@ import org.eclipse.kura.driver.listener.DriverListener;
 public interface Driver {
 
 	/**
+	 * The Class ConnectionException. More specific to Driver operation.
+	 */
+	public final class ConnectionException extends Exception {
+
+		/** The Constant serial version UID. */
+		private static final long serialVersionUID = 3050873377900124238L;
+
+		/**
+		 * Instantiates a new connection exception.
+		 */
+		public ConnectionException() {
+			super();
+		}
+
+		/**
+		 * Instantiates a new connection exception.
+		 *
+		 * @param messsage
+		 *            the exception message
+		 */
+		public ConnectionException(final String messsage) {
+			super(messsage);
+		}
+
+		/**
+		 * Instantiates a new connection exception.
+		 *
+		 * @param message
+		 *            the exception message
+		 * @param cause
+		 *            the exception cause
+		 */
+		public ConnectionException(final String message, final Throwable cause) {
+			super(message, cause);
+		}
+
+		/**
+		 * Instantiates a new connection exception.
+		 *
+		 * @param cause
+		 *            the exception cause
+		 */
+		public ConnectionException(final Throwable cause) {
+			super(cause);
+		}
+
+	}
+
+	/**
 	 * Attempts to connect to the asset. Before performing any
 	 * read/write/monitor operation on the connection, a communication channel
 	 * has to be opened using this method. If the connection attempt fails it
-	 * throws a {@code KuraException} with appropriate error code
-	 * {@code KuraErrorCode#CONNECTION_FAILED} set.
+	 * throws a {@code ConnectionException}
 	 *
 	 * Some communication protocols are not connection oriented. That means no
 	 * connection has to be built up in order to read or write data. In this
 	 * case the connect function may optionally test if the asset is reachable.
 	 *
-	 * @throws KuraException
-	 *             if the connection to the asset was interrupted, then error
-	 *             code {@code KuraErrorCode#CONNECTION_FAILED} needs to be set
-	 *             in the thrown {@link KuraException}. For any other internal
-	 *             exception, the error code
-	 *             {@code KuraErrorCode#INTERNAL_ERROR} will be set.
+	 * @throws ConnectionException
+	 *             if the connection to the field device is interrupted
 	 */
-	public void connect() throws KuraException;
+	public void connect() throws ConnectionException;
 
 	/**
 	 * Attempts to disconnect the already established communication channel.
 	 *
-	 * @throws KuraException
-	 *             if the connection to the asset was interrupted, then error
-	 *             code {@code KuraErrorCode#CONNECTION_FAILED} needs to be set
-	 *             in the thrown {@link KuraException}. For any other internal
-	 *             exception, the error code
-	 *             {@code KuraErrorCode#INTERNAL_ERROR} will be set.
+	 * @throws ConnectionException
+	 *             if the connection to the field device is interrupted
 	 */
-	public void disconnect() throws KuraException;
+	public void disconnect() throws ConnectionException;
 
 	/**
 	 * Returns the protocol specific channel descriptor.
@@ -81,30 +120,21 @@ public interface Driver {
 	 * is set the default error code is
 	 * {@code DriverFlag#DRIVER_ERROR_UNSPECIFIED}. If the connection to the
 	 * asset is interrupted, then any necessary resources that correspond to
-	 * this connection should be cleaned up and a {@code KuraException} shall be
-	 * thrown.
+	 * this connection should be cleaned up and a {@code ConnectionException}
+	 * shall be thrown.
 	 *
 	 * @param records
 	 *            the records hold the information of what channels are to be
 	 *            read. They will be filled by this function with the records
 	 *            already read.
-	 * @throws KuraRuntimeException
-	 *             if the method is not implemented by the driver then specific
-	 *             error code {@code KuraErrorCode#OPERATION_NOT_SUPPORTED}
-	 *             needs to be set in the thrown {@link KuraRuntimeException} or
-	 *             the provided argument is null or empty
-	 * @throws KuraException
-	 *             if the connection to the asset was interrupted, then error
-	 *             code {@code KuraErrorCode#CONNECTION_FAILED} needs to be set
-	 *             in the thrown {@link KuraException}. For any other internal
-	 *             exception, then error code
-	 *             {@code KuraErrorCode#INTERNAL_ERROR} will be set.
-	 * @throws KuraRuntimeException
-	 *             if argument is null or empty
 	 * @return the list of driver records which comprises the currently read
 	 *         value in case of success or the reason of failure
+	 * @throws ConnectionException
+	 *             if the connection to the field device is interrupted
+	 * @throws KuraRuntimeException
+	 *             if argument is null or empty
 	 */
-	public List<DriverRecord> read(List<DriverRecord> records) throws KuraException;
+	public List<DriverRecord> read(List<DriverRecord> records) throws ConnectionException;
 
 	/**
 	 * Registers driver listener for the provided channel configuration for a
@@ -114,43 +144,32 @@ public interface Driver {
 	 *            the channel configuration
 	 * @param listener
 	 *            the listener
+	 * @throws ConnectionException
+	 *             if the connection to the field device is interrupted
 	 * @throws KuraRuntimeException
 	 *             if the method is not implemented by the driver then specific
 	 *             error code {@code KuraErrorCode#OPERATION_NOT_SUPPORTED}
 	 *             needs to be set in the thrown {@link KuraRuntimeException} or
 	 *             any of the arguments is null
-	 * @throws KuraException
-	 *             if the connection to the asset was interrupted, then error
-	 *             code {@code KuraErrorCode#CONNECTION_FAILED} needs to be set
-	 *             in the thrown {@link KuraException} and if the channel is not
-	 *             present, error code {@code KuraErrorCode#INTERNAL_ERROR}
-	 *             needs to be set in the thrown {@link KuraException}. For any
-	 *             other internal exception, then error code
-	 *             {@code KuraErrorCode#INTERNAL_ERROR} will be set.
 	 */
-	public void registerDriverListener(Map<String, Object> channelConfig, DriverListener listener) throws KuraException;
+	public void registerDriverListener(Map<String, Object> channelConfig, DriverListener listener)
+			throws ConnectionException;
 
 	/**
 	 * Unregisters a already registered driver listener which has been
-	 * registered for a monitor operation
+	 * registered for a monitor operation.
 	 *
 	 * @param listener
 	 *            the listener to unregister
+	 * @throws ConnectionException
+	 *             if the connection to the field device is interrupted
 	 * @throws KuraRuntimeException
 	 *             if the method is not implemented by the driver then specific
 	 *             error code {@code KuraErrorCode#OPERATION_NOT_SUPPORTED}
 	 *             needs to be set in the thrown {@link KuraRuntimeException} or
 	 *             the provided argument is null
-	 * @throws KuraException
-	 *             if the connection to the asset was interrupted, then error
-	 *             code {@code KuraErrorCode#CONNECTION_FAILED} needs to be set
-	 *             in the thrown {@link KuraException} and if the channel is not
-	 *             present, error code {@code KuraErrorCode#INTERNAL_ERROR}
-	 *             needs to be set in the thrown {@link KuraException}. For any
-	 *             other internal exception, then error code
-	 *             {@code KuraErrorCode#INTERNAL_ERROR} will be set.
 	 */
-	public void unregisterDriverListener(DriverListener listener) throws KuraException;
+	public void unregisterDriverListener(DriverListener listener) throws ConnectionException;
 
 	/**
 	 * Writes the data channels that correspond to the given driver records. The
@@ -158,27 +177,23 @@ public interface Driver {
 	 * {@code DriverFlag#WRITE_SUCCESSFUL} in the driver records. If the
 	 * connection to the asset is interrupted, then any necessary resources that
 	 * correspond to this connection should be cleaned up and a
-	 * {@code KuraException} shall be thrown.
+	 * {@code ConnectionException} shall be thrown.
 	 *
 	 * @param records
 	 *            the records hold the information of what channels are to be
 	 *            written and the values that are to written. They will be
 	 *            filled by this function with a driver flag stating whether the
 	 *            write process was successful or not.
+	 * @return the list of driver records which comprises the status of the
+	 *         write operations
+	 * @throws ConnectionException
+	 *             if the connection to the field device is interrupted
 	 * @throws KuraRuntimeException
 	 *             if the method is not implemented by the driver then specific
 	 *             error code {@code KuraErrorCode#OPERATION_NOT_SUPPORTED}
 	 *             needs to be set in the thrown {@link KuraRuntimeException} or
 	 *             the provided argument is null or empty
-	 * @throws KuraException
-	 *             if the connection to the asset was interrupted, then error
-	 *             code {@code KuraErrorCode#CONNECTION_FAILED} needs to be set
-	 *             in the thrown {@link KuraException}. For any other internal
-	 *             exception, then error code
-	 *             {@code KuraErrorCode#INTERNAL_ERROR} will be set.
-	 * @return the list of driver records which comprises the status of the
-	 *         write operations
 	 */
-	public List<DriverRecord> write(List<DriverRecord> records) throws KuraException;
+	public List<DriverRecord> write(List<DriverRecord> records) throws ConnectionException;
 
 }

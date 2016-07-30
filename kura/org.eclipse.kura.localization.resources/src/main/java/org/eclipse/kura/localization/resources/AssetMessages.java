@@ -130,6 +130,9 @@ public interface AssetMessages {
 	@En("Error in disconnecting driver...")
 	public String errorDriverDisconnection();
 
+	@En("Error in preparing asset record...")
+	public String errorPreparingAssetRecord();
+
 	@En("Error while retrieving channels from the provided configurable properties...")
 	public String errorRetrievingChannels();
 

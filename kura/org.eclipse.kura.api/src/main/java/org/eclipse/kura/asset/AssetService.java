@@ -15,7 +15,6 @@ package org.eclipse.kura.asset;
 import java.util.Map;
 
 import org.eclipse.kura.KuraRuntimeException;
-import org.eclipse.kura.driver.DriverService;
 import org.eclipse.kura.type.DataType;
 
 /**
@@ -27,11 +26,9 @@ public interface AssetService {
 	/**
 	 * Prepares the new asset instance
 	 *
-	 * @param driverService
-	 *            the provided driver service instance
 	 * @return the newly created Asset instance
 	 */
-	public Asset newAsset(DriverService driverService);
+	public Asset newAsset();
 
 	/**
 	 * Prepares a new asset configuration.

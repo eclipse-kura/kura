@@ -12,18 +12,17 @@
       Amit Kumar Mondal (admin@amitinside.com)
 -->
 <scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" 
-    name="org.eclipse.kura.asset.AssetService" 
+    name="org.eclipse.kura.wire.WireServiceCommand"
     enabled="true" 
     immediate="true">
-   <implementation class="org.eclipse.kura.internal.asset.AssetServiceImpl"/>
-   <property name="service.pid" value="org.eclipse.kura.asset.AssetService"/>
+   <implementation class="org.eclipse.kura.internal.wire.WireServiceCommandProvider"/>
    <service>
-      <provide interface="org.eclipse.kura.asset.AssetService"/>
+      <provide interface="org.eclipse.osgi.framework.console.CommandProvider"/>
    </service>
-   <reference bind="bindDriverService" 
+   <reference bind="bindWireService" 
    	          cardinality="1..1" 
-   	          interface="org.eclipse.kura.driver.DriverService" 
-   	          name="DriverService" 
+   	          interface="org.eclipse.kura.wire.WireService" 
+   	          name="WireService" 
    	          policy="static" 
-   	          unbind="unbindDriverService"/>
+   	          unbind="unbindWireService"/>
 </scr:component>

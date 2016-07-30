@@ -30,10 +30,25 @@ import org.eclipse.kura.type.DataType;
  */
 public final class AssetServiceImpl implements AssetService {
 
+	/** The Driver Service instance. */
+	private volatile DriverService m_driverService;
+
+	/**
+	 * Binds the Driver Service.
+	 *
+	 * @param driverService
+	 *            the Driver Service instance
+	 */
+	public synchronized void bindDriverService(final DriverService driverService) {
+		if (this.m_driverService == null) {
+			this.m_driverService = driverService;
+		}
+	}
+
 	/** {@inheritDoc} */
 	@Override
-	public Asset newAsset(final DriverService driverService) {
-		return new AssetImpl(this, driverService);
+	public Asset newAsset() {
+		return new AssetImpl(this, this.m_driverService);
 	}
 
 	/** {@inheritDoc} */

@@ -14,7 +14,8 @@ package org.eclipse.kura.internal.asset;
 
 import static org.eclipse.kura.Preconditions.checkNull;
 import static org.eclipse.kura.asset.AssetConstants.ASSET_DRIVER_PROP;
-import static org.osgi.framework.Constants.SERVICE_PID;
+
+import java.util.List;
 
 import org.eclipse.kura.driver.Driver;
 import org.eclipse.kura.driver.DriverEvent;
@@ -22,6 +23,7 @@ import org.eclipse.kura.driver.DriverRecord;
 import org.eclipse.kura.driver.DriverService;
 import org.eclipse.kura.localization.LocalizationAdapter;
 import org.eclipse.kura.localization.resources.AssetMessages;
+import org.eclipse.kura.util.collection.CollectionUtil;
 import org.eclipse.kura.util.service.ServiceUtil;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
@@ -35,20 +37,6 @@ public final class DriverServiceImpl implements DriverService {
 
 	/** Localization Resource */
 	private static final AssetMessages s_message = LocalizationAdapter.adapt(AssetMessages.class);
-
-	/** {@inheritDoc} */
-	@Override
-	public Driver getDriver(final String driverId) {
-		checkNull(driverId, s_message.driverIdNonNull());
-		final BundleContext context = FrameworkUtil.getBundle(this.getClass()).getBundleContext();
-		final ServiceReference<Driver>[] refs = ServiceUtil.getServiceReferences(context, Driver.class, null);
-		for (final ServiceReference<Driver> ref : refs) {
-			if (ref.getProperty("kura.service.pid").equals(driverId)) {
-				return context.getService(ref);
-			}
-		}
-		return null;
-	}
 
 	/** {@inheritDoc} */
 	@Override
@@ -67,31 +55,15 @@ public final class DriverServiceImpl implements DriverService {
 
 	/** {@inheritDoc} */
 	@Override
-	public String getDriverPid(final Driver driver) {
-		checkNull(driver, s_message.driverNonNull());
+	public List<Driver> listAvailableDrivers() {
+		final List<Driver> drivers = CollectionUtil.newArrayList();
 		final BundleContext context = FrameworkUtil.getBundle(this.getClass()).getBundleContext();
 		final ServiceReference<Driver>[] refs = ServiceUtil.getServiceReferences(context, Driver.class, null);
 		for (final ServiceReference<Driver> ref : refs) {
 			final Driver driverRef = context.getService(ref);
-			if (driverRef == driver) {
-				return ref.getProperty("service.pid").toString();
-			}
+			drivers.add(driverRef);
 		}
-		return null;
-	}
-
-	/** {@inheritDoc} */
-	@Override
-	public String getDriverPid(final String driverId) {
-		checkNull(driverId, s_message.driverIdNonNull());
-		final BundleContext context = FrameworkUtil.getBundle(this.getClass()).getBundleContext();
-		final ServiceReference<Driver>[] refs = ServiceUtil.getServiceReferences(context, Driver.class, null);
-		for (final ServiceReference<Driver> ref : refs) {
-			if (ref.getProperty("kura.service.pid").equals(driverId)) {
-				return ref.getProperty(SERVICE_PID).toString();
-			}
-		}
-		return null;
+		return drivers;
 	}
 
 	/** {@inheritDoc} */

@@ -54,7 +54,6 @@ import org.eclipse.kura.core.configuration.metatype.Toption;
 import org.eclipse.kura.core.configuration.metatype.Tscalar;
 import org.eclipse.kura.driver.ChannelDescriptor;
 import org.eclipse.kura.driver.Driver;
-import org.eclipse.kura.driver.DriverService;
 import org.eclipse.kura.localization.LocalizationAdapter;
 import org.eclipse.kura.localization.resources.WireMessages;
 import org.eclipse.kura.type.TypedValue;
@@ -116,9 +115,6 @@ public final class WireAsset implements WireEmitter, WireReceiver, SelfConfiguri
 	/** The Driver instance. */
 	private volatile Driver m_driver;
 
-	/** The Driver Service instance. */
-	private volatile DriverService m_driverService;
-
 	/** The configurable properties of this asset. */
 	private Map<String, Object> m_properties;
 
@@ -139,7 +135,7 @@ public final class WireAsset implements WireEmitter, WireReceiver, SelfConfiguri
 	protected synchronized void activate(final ComponentContext componentContext,
 			final Map<String, Object> properties) {
 		s_logger.debug(s_message.activatingWireAsset());
-		this.m_asset = this.m_assetService.newAsset(this.m_driverService);
+		this.m_asset = this.m_assetService.newAsset();
 		this.m_asset.initialize(properties);
 		this.m_assetConfiguration = this.m_asset.getAssetConfiguration();
 		this.m_context = componentContext;
@@ -157,18 +153,6 @@ public final class WireAsset implements WireEmitter, WireReceiver, SelfConfiguri
 	public synchronized void bindAssetService(final AssetService assetService) {
 		if (this.m_assetService == null) {
 			this.m_assetService = assetService;
-		}
-	}
-
-	/**
-	 * Binds the Driver Service.
-	 *
-	 * @param driverService
-	 *            the Driver Service instance
-	 */
-	public synchronized void bindDriverService(final DriverService driverService) {
-		if (this.m_driverService == null) {
-			this.m_driverService = driverService;
 		}
 	}
 
@@ -349,7 +333,7 @@ public final class WireAsset implements WireEmitter, WireReceiver, SelfConfiguri
 				}
 			}
 		}
-		// this will ensure that the driver must be available for the base asset
+		// this will ensure that the driver must be available for the asset
 		// to have this component satisfied
 		final String driverId = this.m_asset.getAssetConfiguration().getDriverId();
 		props.put(this.m_driver.getClass().getName() + ".target", new StringBuilder().append("(")
@@ -480,18 +464,6 @@ public final class WireAsset implements WireEmitter, WireReceiver, SelfConfiguri
 	public synchronized void unbindAssetService(final AssetService assetService) {
 		if (this.m_assetService == assetService) {
 			this.m_assetService = null;
-		}
-	}
-
-	/**
-	 * Unbinds the Driver Service.
-	 *
-	 * @param driverService
-	 *            the Driver Service
-	 */
-	public synchronized void unbindDriverService(final DriverService driverService) {
-		if (this.m_driverService == driverService) {
-			this.m_driverService = null;
 		}
 	}
 

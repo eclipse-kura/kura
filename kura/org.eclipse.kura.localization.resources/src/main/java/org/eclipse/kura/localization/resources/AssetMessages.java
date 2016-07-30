@@ -88,10 +88,10 @@ public interface AssetMessages {
 	@En("Component context cannot be null")
 	public String contextNonNull();
 
-	@En("Deactivating Base Asset...")
+	@En("Release Asset Resources...")
 	public String deactivating();
 
-	@En("Deactivating Base Asset...Done")
+	@En("Release Asset Resources...Done")
 	public String deactivatingDone();
 
 	@En("Asset Description")
@@ -184,10 +184,10 @@ public interface AssetMessages {
 	@En("Unregistering Asset Listener...Done")
 	public String unregisteringListenerDone();
 
-	@En("Updating Base Asset Configurations...")
+	@En("Initializing Asset Configurations...")
 	public String updating();
 
-	@En("Updating Base Asset Configurations...Done")
+	@En("Initializing Asset Configurations...Done")
 	public String updatingDone();
 
 	@En("value")

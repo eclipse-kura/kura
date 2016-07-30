@@ -71,7 +71,7 @@ public interface DriverService {
 	 * @throws KuraRuntimeException
 	 *             if the driver flag is null
 	 */
-	public DriverStatus newStatus(final DriverFlag driverFlag, @Nullable final String exceptionMessage,
+	public DriverStatus newDriverStatus(final DriverFlag driverFlag, @Nullable final String exceptionMessage,
 			@Nullable final Exception exception);
 
 }

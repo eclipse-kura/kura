@@ -50,13 +50,11 @@ import org.eclipse.kura.type.TypedValue;
  *
  * The Driver Record also contain driver status of the operation on the provided
  * channel. This status contains a flag, an exception message and an exception
- * instance. Generally for any exceptional circumstance apart from Connection
- * Interruption, the driver will never throw any exception but it would
- * definitely set the driver flag and relevant exception message or the
- * exception instance if any in the status instance. So, in the lower level, the
- * driver never throws any exception (except for connection interruption) but it
- * must set the relevant flag in the driver status.
- *
+ * instance. Generally for any exceptional circumstance, the driver will never
+ * throw any exception but it would definitely set the driver flag and relevant
+ * exception message or the exception instance if any in the status instance.
+ * So, in the lower level, the driver never throws any exception, Rather it must
+ * set the relevant flag in the driver status.
  */
 @NotThreadSafe
 public final class DriverRecord {

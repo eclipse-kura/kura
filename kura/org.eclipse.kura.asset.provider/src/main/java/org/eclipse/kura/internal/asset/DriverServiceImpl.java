@@ -82,7 +82,7 @@ public final class DriverServiceImpl implements DriverService {
 
 	/** {@inheritDoc} */
 	@Override
-	public DriverStatus newStatus(final DriverFlag driverFlag, final String exceptionMessage, final Exception exception) {
+	public DriverStatus newDriverStatus(final DriverFlag driverFlag, final String exceptionMessage, final Exception exception) {
 		return new DriverStatus(driverFlag, exceptionMessage, exception);
 	}
 

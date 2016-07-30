@@ -13,8 +13,7 @@
 -->
 <scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" 
     name="org.eclipse.kura.wire.WireServiceCommand"
-    enabled="true" 
-    immediate="true">
+    enabled="true">
    <implementation class="org.eclipse.kura.internal.wire.WireServiceCommandProvider"/>
    <service>
       <provide interface="org.eclipse.osgi.framework.console.CommandProvider"/>

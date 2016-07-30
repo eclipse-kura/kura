@@ -103,7 +103,7 @@ public final class StubDriver implements Driver {
 			default:
 				break;
 			}
-			record.setDriverStatus(this.m_driverService.newStatus(DriverFlag.READ_SUCCESSFUL, null, null));
+			record.setDriverStatus(this.m_driverService.newDriverStatus(DriverFlag.READ_SUCCESSFUL, null, null));
 		}
 		return records;
 	}
@@ -115,7 +115,7 @@ public final class StubDriver implements Driver {
 		final DriverRecord record = this.m_driverService.newDriverRecord();
 		record.setChannelConfig(channelConfig);
 		record.setValue(TypedValues.newIntegerValue(1));
-		record.setDriverStatus(this.m_driverService.newStatus(DriverFlag.READ_SUCCESSFUL, null, null));
+		record.setDriverStatus(this.m_driverService.newDriverStatus(DriverFlag.READ_SUCCESSFUL, null, null));
 		record.setTimestamp(System.currentTimeMillis());
 		listener.onDriverEvent(this.m_driverService.newDriverEvent(record));
 	}
@@ -146,7 +146,7 @@ public final class StubDriver implements Driver {
 		}
 
 		for (final DriverRecord record : records) {
-			record.setDriverStatus(this.m_driverService.newStatus(DriverFlag.WRITE_SUCCESSFUL, null, null));
+			record.setDriverStatus(this.m_driverService.newDriverStatus(DriverFlag.WRITE_SUCCESSFUL, null, null));
 		}
 		return records;
 	}

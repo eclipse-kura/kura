@@ -48,6 +48,15 @@ import org.eclipse.kura.type.TypedValue;
  * The value type must be set in the map as a key of :
  * {@link DriverConstants#CHANNEL_VALUE_TYPE} or {@code channel.value.type}
  *
+ * The Driver Record also contain driver status of the operation on the provided
+ * channel. This status contains a flag, an exception message and an exception
+ * instance. Generally for any exceptional circumstance apart from Connection
+ * Interruption, the driver will never throw any exception but it would
+ * definitely set the driver flag and relevant exception message or the
+ * exception instance if any in the status instance. So, in the lower level, the
+ * driver never throws any exception (except for connection interruption) but it
+ * must set the relevant flag in the driver status.
+ *
  */
 @NotThreadSafe
 public final class DriverRecord {
@@ -59,10 +68,10 @@ public final class DriverRecord {
 	private Map<String, Object> channelConfiguration;
 
 	/**
-	 * Represents a driver specific flag which signifies the status of the read
-	 * or write or monitor operation.
+	 * Represents a driver specific status which signifies the status of the
+	 * read or write or monitor operation.
 	 */
-	private DriverFlag driverFlag;
+	private DriverStatus driverStatus;
 
 	/** Represents the timestamp of the operation performed. */
 	private long timestamp;
@@ -94,7 +103,11 @@ public final class DriverRecord {
 		} else if (!this.channelConfiguration.equals(other.channelConfiguration)) {
 			return false;
 		}
-		if (this.driverFlag != other.driverFlag) {
+		if (this.driverStatus == null) {
+			if (other.driverStatus != null) {
+				return false;
+			}
+		} else if (!this.driverStatus.equals(other.driverStatus)) {
 			return false;
 		}
 		if (this.timestamp != other.timestamp) {
@@ -120,12 +133,12 @@ public final class DriverRecord {
 	}
 
 	/**
-	 * Returns the driver flag.
+	 * Returns the driver operation status.
 	 *
-	 * @return the driver flag
+	 * @return the driver status
 	 */
-	public DriverFlag getDriverFlag() {
-		return this.driverFlag;
+	public DriverStatus getDriverStatus() {
+		return this.driverStatus;
 	}
 
 	/**
@@ -152,7 +165,7 @@ public final class DriverRecord {
 		final int prime = 31;
 		int result = 1;
 		result = (prime * result) + ((this.channelConfiguration == null) ? 0 : this.channelConfiguration.hashCode());
-		result = (prime * result) + ((this.driverFlag == null) ? 0 : this.driverFlag.hashCode());
+		result = (prime * result) + ((this.driverStatus == null) ? 0 : this.driverStatus.hashCode());
 		result = (prime * result) + (int) (this.timestamp ^ (this.timestamp >>> 32));
 		result = (prime * result) + ((this.value == null) ? 0 : this.value.hashCode());
 		return result;
@@ -172,22 +185,22 @@ public final class DriverRecord {
 	}
 
 	/**
-	 * Sets the driver flag as provided.
+	 * Sets the status.
 	 *
-	 * @param driverFlag
-	 *            the new driver flag
+	 * @param status
+	 *            the new driver status
 	 * @throws KuraRuntimeException
 	 *             if the argument is null
 	 */
-	public void setDriverFlag(final DriverFlag driverFlag) {
-		checkNull(driverFlag, "Driver flag cannot be null");
-		this.driverFlag = driverFlag;
+	public void setDriverStatus(final DriverStatus status) {
+		checkNull(this.value, "Driver Status cannot be null");
+		this.driverStatus = status;
 	}
 
 	/**
 	 * Sets the timestamp as provided.
 	 *
-	 * @param timetstamp
+	 * @param timestamp
 	 *            the new timestamp
 	 */
 	public void setTimestamp(final long timestamp) {
@@ -210,7 +223,7 @@ public final class DriverRecord {
 	/** {@inheritDoc} */
 	@Override
 	public String toString() {
-		return "DriverRecord [channelConfiguration=" + this.channelConfiguration + ", driverFlag=" + this.driverFlag
+		return "DriverRecord [channelConfiguration=" + this.channelConfiguration + ", driverStatus=" + this.driverStatus
 				+ ", timestamp=" + this.timestamp + ", value=" + this.value + "]";
 	}
 

@@ -20,6 +20,17 @@ import static org.eclipse.kura.asset.AssetConstants.ASSET_NAME_PROP;
 import static org.eclipse.kura.asset.AssetConstants.CHANNEL_PROPERTY_POSTFIX;
 import static org.eclipse.kura.asset.AssetConstants.CHANNEL_PROPERTY_PREFIX;
 import static org.eclipse.kura.asset.AssetConstants.DRIVER_PROPERTY_POSTFIX;
+import static org.eclipse.kura.asset.ChannelType.READ;
+import static org.eclipse.kura.asset.ChannelType.READ_WRITE;
+import static org.eclipse.kura.asset.ChannelType.WRITE;
+import static org.eclipse.kura.type.DataType.BOOLEAN;
+import static org.eclipse.kura.type.DataType.BYTE;
+import static org.eclipse.kura.type.DataType.BYTE_ARRAY;
+import static org.eclipse.kura.type.DataType.DOUBLE;
+import static org.eclipse.kura.type.DataType.INTEGER;
+import static org.eclipse.kura.type.DataType.LONG;
+import static org.eclipse.kura.type.DataType.SHORT;
+import static org.eclipse.kura.type.DataType.STRING;
 
 import java.util.Arrays;
 import java.util.List;
@@ -192,11 +203,45 @@ final class AssetOptions {
 			}
 			final String channelTypePropertyKey = channelKeyFormat + channelTypeKey;
 			if (properties.containsKey(channelTypePropertyKey)) {
-				channelType = (ChannelType) properties.get(channelTypePropertyKey);
+				final String channelTypeProp = (String) properties.get(channelTypePropertyKey);
+				if ("READ".equalsIgnoreCase(channelTypeProp)) {
+					channelType = READ;
+				}
+				if ("WRITE".equalsIgnoreCase(channelTypeProp)) {
+					channelType = WRITE;
+				}
+				if ("READ_WRITE".equalsIgnoreCase(channelTypeProp)) {
+					channelType = READ_WRITE;
+				}
 			}
 			final String channelValueTypePropertyKey = channelKeyFormat + channelValueTypeKey;
 			if (properties.containsKey(channelValueTypePropertyKey)) {
-				dataType = (DataType) properties.get(channelValueTypePropertyKey);
+				final String dataTypeProp = (String) properties.get(channelValueTypePropertyKey);
+				if ("INTEGER".equalsIgnoreCase(dataTypeProp)) {
+					dataType = INTEGER;
+				}
+				if ("DOUBLE".equalsIgnoreCase(dataTypeProp)) {
+					dataType = DOUBLE;
+				}
+				if ("SHORT".equalsIgnoreCase(dataTypeProp)) {
+					dataType = SHORT;
+				}
+				if ("LONG".equalsIgnoreCase(dataTypeProp)) {
+					dataType = LONG;
+				}
+				if ("BYTE".equalsIgnoreCase(dataTypeProp)) {
+					dataType = BYTE;
+				}
+				if ("BYTE_ARRAY".equalsIgnoreCase(dataTypeProp)) {
+					dataType = BYTE_ARRAY;
+				}
+				if ("BOOLEAN".equalsIgnoreCase(dataTypeProp)) {
+					dataType = BOOLEAN;
+				}
+				if ("STRING".equalsIgnoreCase(dataTypeProp)) {
+					dataType = STRING;
+				}
+
 			}
 			for (final Map.Entry<String, Object> entry : properties.entrySet()) {
 				final String key = entry.getKey();

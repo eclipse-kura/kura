@@ -12,6 +12,7 @@
  */
 package org.eclipse.kura.driver.listener;
 
+import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.driver.DriverEvent;
 
@@ -32,9 +33,11 @@ public interface DriverListener {
 	 *
 	 * @param event
 	 *            the fired driver event
+	 * @throws KuraException
+	 *             if the driver encounters any operation specific exception
 	 * @throws KuraRuntimeException
 	 *             if event is null
 	 */
-	public void onDriverEvent(DriverEvent event);
+	public void onDriverEvent(DriverEvent event) throws KuraException;
 
 }

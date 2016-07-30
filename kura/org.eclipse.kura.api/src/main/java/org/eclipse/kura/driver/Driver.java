@@ -87,7 +87,7 @@ public interface Driver {
 	 * @param records
 	 *            the records hold the information of what channels are to be
 	 *            read. They will be filled by this function with the records
-	 *            read.
+	 *            already read.
 	 * @throws KuraRuntimeException
 	 *             if the method is not implemented by the driver then specific
 	 *             error code {@code KuraErrorCode#OPERATION_NOT_SUPPORTED}
@@ -96,10 +96,8 @@ public interface Driver {
 	 * @throws KuraException
 	 *             if the connection to the asset was interrupted, then error
 	 *             code {@code KuraErrorCode#CONNECTION_FAILED} needs to be set
-	 *             in the thrown {@link KuraException} and if the channel is not
-	 *             present, error code {@code KuraErrorCode#INTERNAL_ERROR}
-	 *             needs to be set in the thrown {@link KuraException}. For any
-	 *             other internal exception, then error code
+	 *             in the thrown {@link KuraException}. For any other internal
+	 *             exception, then error code
 	 *             {@code KuraErrorCode#INTERNAL_ERROR} will be set.
 	 * @throws KuraRuntimeException
 	 *             if argument is null or empty
@@ -175,10 +173,8 @@ public interface Driver {
 	 * @throws KuraException
 	 *             if the connection to the asset was interrupted, then error
 	 *             code {@code KuraErrorCode#CONNECTION_FAILED} needs to be set
-	 *             in the thrown {@link KuraException} and if the channel is not
-	 *             present, error code {@code KuraErrorCode#INTERNAL_ERROR}
-	 *             needs to be set in the thrown {@link KuraException}. For any
-	 *             other internal exception, then error code
+	 *             in the thrown {@link KuraException}. For any other internal
+	 *             exception, then error code
 	 *             {@code KuraErrorCode#INTERNAL_ERROR} will be set.
 	 * @return the list of driver records which comprises the status of the
 	 *         write operations

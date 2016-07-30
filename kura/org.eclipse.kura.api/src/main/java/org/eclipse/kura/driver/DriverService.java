@@ -15,6 +15,7 @@ package org.eclipse.kura.driver;
 import java.util.List;
 
 import org.eclipse.kura.KuraRuntimeException;
+import org.eclipse.kura.annotation.Nullable;
 
 /**
  * The interface DriverService is an utility service API to provide useful
@@ -34,7 +35,7 @@ public interface DriverService {
 
 	/**
 	 * Returns the list containing all the available driver instances
-	 * 
+	 *
 	 * @return the list of drivers available in service registry
 	 */
 	public List<Driver> listAvailableDrivers();
@@ -56,5 +57,21 @@ public interface DriverService {
 	 * @return the newly created driver record
 	 */
 	public DriverRecord newDriverRecord();
+
+	/**
+	 * Prepares the driver specific operation status.
+	 *
+	 * @param driverFlag
+	 *            the driver flag
+	 * @param exceptionMessage
+	 *            the exception message
+	 * @param exception
+	 *            the exception
+	 * @return the newly created status instance
+	 * @throws KuraRuntimeException
+	 *             if the driver flag is null
+	 */
+	public DriverStatus newStatus(final DriverFlag driverFlag, @Nullable final String exceptionMessage,
+			@Nullable final Exception exception);
 
 }

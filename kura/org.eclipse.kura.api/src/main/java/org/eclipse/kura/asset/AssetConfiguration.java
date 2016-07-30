@@ -60,9 +60,10 @@ import org.eclipse.kura.type.DataType;
  * The key <b><i>name</i></b> must be String.
  *
  * The key <b><i>value.type</i></b> must be in one of types from
- * {@link DataType}
+ * {@link DataType} in String representation format (case-insensitive)
  *
  * The channel {@code type} should be one of the types from {@link ChannelType}
+ * in String representation format (case-insensitive)
  *
  * @see Channel
  * @see ChannelType

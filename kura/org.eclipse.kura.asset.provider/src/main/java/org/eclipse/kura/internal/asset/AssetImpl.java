@@ -14,7 +14,6 @@ package org.eclipse.kura.internal.asset;
 
 import static org.eclipse.kura.Preconditions.checkCondition;
 import static org.eclipse.kura.Preconditions.checkNull;
-import static org.eclipse.kura.asset.AssetFlag.ASSET_ERROR_UNSPECIFIED;
 import static org.eclipse.kura.asset.AssetFlag.READ_SUCCESSFUL;
 import static org.eclipse.kura.asset.AssetFlag.UNKNOWN;
 import static org.eclipse.kura.asset.AssetFlag.WRITE_SUCCESSFUL;
@@ -29,6 +28,7 @@ import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.asset.Asset;
@@ -43,6 +43,7 @@ import org.eclipse.kura.driver.DriverEvent;
 import org.eclipse.kura.driver.DriverFlag;
 import org.eclipse.kura.driver.DriverRecord;
 import org.eclipse.kura.driver.DriverService;
+import org.eclipse.kura.driver.DriverStatus;
 import org.eclipse.kura.driver.listener.DriverListener;
 import org.eclipse.kura.localization.LocalizationAdapter;
 import org.eclipse.kura.localization.resources.AssetMessages;
@@ -104,6 +105,8 @@ public final class AssetImpl implements Asset {
 	 *
 	 * @param assetService
 	 *            the asset service
+	 * @param driverService
+	 *            the driver service
 	 * @throws KuraRuntimeException
 	 *             if the argument is null
 	 */
@@ -260,18 +263,37 @@ public final class AssetImpl implements Asset {
 				channelId = Long.valueOf(driverRecordConf.get(CHANNEL_ID.value()).toString());
 			}
 			final AssetRecord assetRecord = this.m_assetService.newAssetRecord(channelId);
-			final DriverFlag driverFlag = driverRecord.getDriverFlag();
-
+			final DriverStatus status = driverRecord.getDriverStatus();
+			final DriverFlag driverFlag = status.getDriverFlag();
+			final String exceptionMessage = (status.getExceptionMessage() == null) ? "" : status.getExceptionMessage();
+			
 			switch (driverFlag) {
 			case READ_SUCCESSFUL:
 				assetRecord.setAssetFlag(READ_SUCCESSFUL);
 				break;
-			case DRIVER_ERROR_UNSPECIFIED:
-				assetRecord.setAssetFlag(ASSET_ERROR_UNSPECIFIED);
-				break;
 			case UNKNOWN:
 				assetRecord.setAssetFlag(UNKNOWN);
 				break;
+			case CUSTOM_ERROR_0:
+			case CUSTOM_ERROR_1:
+			case CUSTOM_ERROR_2:
+			case CUSTOM_ERROR_3:
+			case CUSTOM_ERROR_4:
+			case CUSTOM_ERROR_5:
+			case CUSTOM_ERROR_6:
+			case CUSTOM_ERROR_7:
+			case CUSTOM_ERROR_8:
+			case CUSTOM_ERROR_9:
+			case COMM_DEVICE_NOT_CONNECTED:
+			case DEVICE_OR_INTERFACE_BUSY:
+			case DRIVER_ERROR_CHANNEL_ADDRESS_INVALID:
+			case DRIVER_ERROR_CHANNEL_NOT_ACCESSIBLE:
+			case DRIVER_ERROR_CHANNEL_VALUE_TYPE_CONVERSION_EXCEPTION:
+			case DRIVER_ERROR_UNSPECIFIED:
+			case DRIVER_THREW_UNKNOWN_EXCEPTION:
+			case READ_FAILURE:
+			case WRITE_FAILURE:
+				throw new KuraException(KuraErrorCode.INTERNAL_ERROR, exceptionMessage);
 			default:
 				break;
 			}
@@ -325,7 +347,7 @@ public final class AssetImpl implements Asset {
 
 			/** {@inheritDoc} */
 			@Override
-			public void onDriverEvent(final DriverEvent event) {
+			public void onDriverEvent(final DriverEvent event) throws KuraException {
 				checkNull(event, s_message.driverEventNonNull());
 				final DriverRecord driverRecord = event.getDriverRecord();
 				final Map<String, Object> driverRecordConf = driverRecord.getChannelConfig();
@@ -333,24 +355,43 @@ public final class AssetImpl implements Asset {
 				if (driverRecordConf.containsKey(CHANNEL_ID.value())) {
 					channelId = Long.valueOf(driverRecordConf.get(CHANNEL_ID.value()).toString());
 				}
-				final AssetRecord assetRecord = AssetImpl.this.m_assetService.newAssetRecord(channelId);
-				final DriverFlag driverFlag = driverRecord.getDriverFlag();
+				final AssetRecord assetRecord = m_assetService.newAssetRecord(channelId);
+				final DriverStatus status = driverRecord.getDriverStatus();
+				final DriverFlag driverFlag = status.getDriverFlag();
+				final String exceptionMessage = (status.getExceptionMessage() == null) ? ""
+						: status.getExceptionMessage();
+
 				switch (driverFlag) {
 				case READ_SUCCESSFUL:
 					assetRecord.setAssetFlag(READ_SUCCESSFUL);
 					break;
-				case WRITE_SUCCESSFUL:
-					assetRecord.setAssetFlag(WRITE_SUCCESSFUL);
-					break;
-				case DRIVER_ERROR_UNSPECIFIED:
-					assetRecord.setAssetFlag(ASSET_ERROR_UNSPECIFIED);
-					break;
 				case UNKNOWN:
 					assetRecord.setAssetFlag(UNKNOWN);
 					break;
+				case CUSTOM_ERROR_0:
+				case CUSTOM_ERROR_1:
+				case CUSTOM_ERROR_2:
+				case CUSTOM_ERROR_3:
+				case CUSTOM_ERROR_4:
+				case CUSTOM_ERROR_5:
+				case CUSTOM_ERROR_6:
+				case CUSTOM_ERROR_7:
+				case CUSTOM_ERROR_8:
+				case CUSTOM_ERROR_9:
+				case COMM_DEVICE_NOT_CONNECTED:
+				case DEVICE_OR_INTERFACE_BUSY:
+				case DRIVER_ERROR_CHANNEL_ADDRESS_INVALID:
+				case DRIVER_ERROR_CHANNEL_NOT_ACCESSIBLE:
+				case DRIVER_ERROR_CHANNEL_VALUE_TYPE_CONVERSION_EXCEPTION:
+				case DRIVER_ERROR_UNSPECIFIED:
+				case DRIVER_THREW_UNKNOWN_EXCEPTION:
+				case READ_FAILURE:
+				case WRITE_FAILURE:
+					throw new KuraException(KuraErrorCode.INTERNAL_ERROR, exceptionMessage);
 				default:
 					break;
 				}
+
 				assetRecord.setTimestamp(driverRecord.getTimestamp());
 				assetRecord.setValue(driverRecord.getValue());
 				final AssetEvent assetEvent = m_assetService.newAssetEvent(assetRecord);
@@ -488,17 +529,37 @@ public final class AssetImpl implements Asset {
 		for (final DriverRecord driverRecord : driverRecords) {
 			final AssetRecord assetRecord = this.getAssetRecordByDriverRecord(assetRecords, driverRecord);
 			checkNull(assetRecord, s_message.assetRecordNonNull());
-			final DriverFlag driverFlag = driverRecord.getDriverFlag();
+			final DriverStatus status = driverRecord.getDriverStatus();
+			final DriverFlag driverFlag = status.getDriverFlag();
+			final String exceptionMessage = (status.getExceptionMessage() == null) ? "" : status.getExceptionMessage();
+
 			switch (driverFlag) {
 			case WRITE_SUCCESSFUL:
 				assetRecord.setAssetFlag(WRITE_SUCCESSFUL);
 				break;
-			case DRIVER_ERROR_UNSPECIFIED:
-				assetRecord.setAssetFlag(ASSET_ERROR_UNSPECIFIED);
-				break;
 			case UNKNOWN:
 				assetRecord.setAssetFlag(UNKNOWN);
 				break;
+			case CUSTOM_ERROR_0:
+			case CUSTOM_ERROR_1:
+			case CUSTOM_ERROR_2:
+			case CUSTOM_ERROR_3:
+			case CUSTOM_ERROR_4:
+			case CUSTOM_ERROR_5:
+			case CUSTOM_ERROR_6:
+			case CUSTOM_ERROR_7:
+			case CUSTOM_ERROR_8:
+			case CUSTOM_ERROR_9:
+			case COMM_DEVICE_NOT_CONNECTED:
+			case DEVICE_OR_INTERFACE_BUSY:
+			case DRIVER_ERROR_CHANNEL_ADDRESS_INVALID:
+			case DRIVER_ERROR_CHANNEL_NOT_ACCESSIBLE:
+			case DRIVER_ERROR_CHANNEL_VALUE_TYPE_CONVERSION_EXCEPTION:
+			case DRIVER_ERROR_UNSPECIFIED:
+			case DRIVER_THREW_UNKNOWN_EXCEPTION:
+			case READ_FAILURE:
+			case WRITE_FAILURE:
+				throw new KuraException(KuraErrorCode.INTERNAL_ERROR, exceptionMessage);
 			default:
 				break;
 			}

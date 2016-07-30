@@ -17,11 +17,6 @@ package org.eclipse.kura.asset;
  */
 public enum AssetFlag {
 	/**
-	 * In case of asset communication failure for a known indistinguishable
-	 * reason
-	 */
-	ASSET_ERROR_UNSPECIFIED,
-	/**
 	 * In case of successful reading operation
 	 */
 	READ_SUCCESSFUL,

@@ -44,6 +44,18 @@ public final class AssetServiceImpl implements AssetService {
 			this.m_driverService = driverService;
 		}
 	}
+	
+	/**
+	 * Unbinds the Driver Service.
+	 *
+	 * @param driverService
+	 *            the Driver Service instance
+	 */
+	public synchronized void unbindDriverService(final DriverService driverService) {
+		if (this.m_driverService == driverService) {
+			this.m_driverService = null;
+		}
+	}
 
 	/** {@inheritDoc} */
 	@Override

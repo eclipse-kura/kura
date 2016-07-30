@@ -200,13 +200,13 @@ public final class AssetTest {
 		channels.put(AssetConstants.ASSET_NAME_PROP.value(), "sample.asset.name");
 		channels.put(AssetConstants.ASSET_DRIVER_PROP.value(), "org.eclipse.kura.asset.stub.driver");
 		channels.put("1.CH.name", "sample.channel1.name");
-		channels.put("1.CH.type", ChannelType.READ);
-		channels.put("1.CH.value.type", DataType.INTEGER);
+		channels.put("1.CH.type", "READ");
+		channels.put("1.CH.value.type", "INTEGER");
 		channels.put("1.CH.DRIVER.modbus.register", "sample.channel1.modbus.register");
 		channels.put("1.CH.DRIVER.modbus.FC", "sample.channel1.modbus.FC");
 		channels.put("2.CH.name", "sample.channel2.name");
-		channels.put("2.CH.type", ChannelType.WRITE);
-		channels.put("2.CH.value.type", DataType.BOOLEAN);
+		channels.put("2.CH.type", "WRITE");
+		channels.put("2.CH.value.type", "BOOLEAN");
 		channels.put("2.CH.DRIVER.modbus.register", "sample.channel2.modbus.register");
 		channels.put("2.CH.DRIVER.modbus.DUMMY.NN", "sample.channel2.modbus.FC");
 		asset.initialize(channels);

@@ -34,7 +34,6 @@ import org.eclipse.kura.asset.AssetService;
 import org.eclipse.kura.asset.Channel;
 import org.eclipse.kura.asset.ChannelType;
 import org.eclipse.kura.asset.listener.AssetListener;
-import org.eclipse.kura.driver.DriverService;
 import org.eclipse.kura.test.annotation.TestTarget;
 import org.eclipse.kura.type.DataType;
 import org.eclipse.kura.type.TypedValues;
@@ -57,9 +56,6 @@ public final class AssetTest {
 
 	/** The Asset Service instance. */
 	private static volatile AssetService s_assetService;
-
-	/** The Driver Service instance. */
-	private static volatile DriverService s_driverService;
 
 	/** Logger */
 	private static final Logger s_logger = LoggerFactory.getLogger(AssetTest.class);
@@ -87,20 +83,7 @@ public final class AssetTest {
 	}
 
 	/**
-	 * Binds the Driver Service.
-	 *
-	 * @param driverService
-	 *            the Driver Service instance
-	 */
-	public synchronized void bindDriverService(final DriverService driverService) {
-		if (s_driverService == null) {
-			s_driverService = driverService;
-			dependencyLatch.countDown();
-		}
-	}
-
-	/**
-	 * Test basic asset properties.
+	 * Test generic asset properties.
 	 */
 	@TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
 	@Test
@@ -209,18 +192,6 @@ public final class AssetTest {
 	}
 
 	/**
-	 * Unbinds the Driver Service.
-	 *
-	 * @param driverService
-	 *            the Driver Service
-	 */
-	public synchronized void unbindDriverService(final DriverService driverService) {
-		if (s_driverService == driverService) {
-			s_driverService = null;
-		}
-	}
-
-	/**
 	 * Initializes asset data
 	 */
 	private static void init() {
@@ -256,7 +227,7 @@ public final class AssetTest {
 		} catch (final InterruptedException e) {
 			fail("OSGi dependencies unfulfilled");
 		}
-		asset = s_assetService.newAsset(s_driverService);
+		asset = s_assetService.newAsset();
 		init();
 	}
 

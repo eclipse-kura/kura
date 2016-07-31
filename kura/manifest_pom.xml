@@ -25,7 +25,7 @@
 	<modules>
 		<module>target-definition</module>
 		<module>org.eclipse.kura.api</module>
-		<module>org.eclipse.kura.asset.cloudlet</module>
+		<module>org.eclipse.kura.asset.cloudlet.provider</module>
 		<module>org.eclipse.kura.asset.provider</module>
 		<module>org.eclipse.kura.test</module>
 		<module>org.eclipse.kura.camel</module>

@@ -22,7 +22,7 @@
 		<relativePath>../manifest_pom.xml</relativePath>
 	</parent>
 
-	<artifactId>org.eclipse.kura.asset.cloudlet</artifactId>
+	<artifactId>org.eclipse.kura.asset.cloudlet.provider</artifactId>
 	<version>1.0.0-SNAPSHOT</version>
 	<packaging>eclipse-plugin</packaging>
 

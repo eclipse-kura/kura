@@ -1,0 +1,12 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Modbus Driver
+Bundle-SymbolicName: org.eclipse.kura.driver.modbus
+Bundle-Version: 1.0.0.qualifier
+Bundle-Vendor: EUROTECH
+Bundle-License: Eclipse Public License v1.0
+Bundle-Category: Asset-Driver Management
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-ActivationPolicy: lazy
+Bundle-ClassPath: lib/j2mod-2.2.2.jar,
+ .

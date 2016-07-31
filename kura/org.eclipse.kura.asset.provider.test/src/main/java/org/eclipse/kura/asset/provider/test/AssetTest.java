@@ -91,8 +91,8 @@ public final class AssetTest {
 		final AssetConfiguration assetConfiguration = asset.getAssetConfiguration();
 		assertNotNull(assetConfiguration);
 		assertEquals("org.eclipse.kura.asset.stub.driver", assetConfiguration.getDriverId());
-		assertEquals("sample.asset.desc", assetConfiguration.getDescription());
-		assertEquals("sample.asset.name", assetConfiguration.getName());
+		assertEquals("sample.asset.desc", assetConfiguration.getAssetDescription());
+		assertEquals("sample.asset.name", assetConfiguration.getAssetName());
 	}
 
 	/**
@@ -103,7 +103,7 @@ public final class AssetTest {
 	public void testChannelProperties() {
 		final AssetConfiguration assetConfiguration = asset.getAssetConfiguration();
 		assertNotNull(assetConfiguration);
-		final Map<Long, Channel> channels = assetConfiguration.getChannels();
+		final Map<Long, Channel> channels = assetConfiguration.getAssetChannels();
 		assertEquals(2, channels.size());
 		final Channel channel1 = channels.get(1L);
 		assertEquals(1L, channel1.getId());

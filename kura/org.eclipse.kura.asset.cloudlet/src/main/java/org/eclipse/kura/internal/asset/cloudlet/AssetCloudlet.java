@@ -21,11 +21,11 @@ import java.util.Map;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraRuntimeException;
-import org.eclipse.kura.asset.BaseAsset;
-import org.eclipse.kura.asset.AssetConfiguration;
-import org.eclipse.kura.asset.AssetService;
-import org.eclipse.kura.asset.AssetRecord;
 import org.eclipse.kura.asset.Asset;
+import org.eclipse.kura.asset.AssetConfiguration;
+import org.eclipse.kura.asset.AssetRecord;
+import org.eclipse.kura.asset.AssetService;
+import org.eclipse.kura.asset.BaseAsset;
 import org.eclipse.kura.asset.Channel;
 import org.eclipse.kura.cloud.CloudClient;
 import org.eclipse.kura.cloud.CloudService;
@@ -97,13 +97,13 @@ public final class AssetCloudlet extends Cloudlet {
 	private volatile AssetService m_assetHelper;
 
 	/** The map of assets present in the OSGi service registry. */
-	private Map<String, BaseAsset> m_assets;
+	private Map<String, Asset> m_assets;
 
 	/** Asset Tracker Customizer */
 	private AssetTrackerCustomizer m_assetTrackerCustomizer;
 
 	/** Asset Tracker. */
-	private ServiceTracker<BaseAsset, BaseAsset> m_serviceTracker;
+	private ServiceTracker<Asset, Asset> m_serviceTracker;
 
 	/**
 	 * Instantiates a new asset cloudlet.
@@ -119,8 +119,8 @@ public final class AssetCloudlet extends Cloudlet {
 		super.activate(componentContext);
 		try {
 			this.m_assetTrackerCustomizer = new AssetTrackerCustomizer(componentContext.getBundleContext());
-			this.m_serviceTracker = new ServiceTracker<BaseAsset, BaseAsset>(componentContext.getBundleContext(),
-					BaseAsset.class.getName(), this.m_assetTrackerCustomizer);
+			this.m_serviceTracker = new ServiceTracker<Asset, Asset>(componentContext.getBundleContext(),
+					Asset.class.getName(), this.m_assetTrackerCustomizer);
 			this.m_serviceTracker.open();
 		} catch (final InvalidSyntaxException e) {
 			s_logger.error(s_message.activationFailed(e));
@@ -198,11 +198,9 @@ public final class AssetCloudlet extends Cloudlet {
 			// perform a search operation at the beginning
 			this.findAssets();
 			if (reqTopic.getResources().length == 1) {
-				int index = 1;
-				for (final Map.Entry<String, BaseAsset> assetEntry : this.m_assets.entrySet()) {
-					final BaseAsset asset = assetEntry.getValue();
-					respPayload.addMetric(String.valueOf(index++),
-							((Asset) asset).getAssetConfiguration().getName());
+				for (final Map.Entry<String, Asset> assetEntry : this.m_assets.entrySet()) {
+					final Asset asset = assetEntry.getValue();
+					respPayload.addMetric("name", asset.getAssetConfiguration().getAssetName());
 				}
 			}
 			// Checks if the name of the asset is provided
@@ -210,7 +208,7 @@ public final class AssetCloudlet extends Cloudlet {
 				final String assetName = reqTopic.getResources()[1];
 				final BaseAsset asset = this.m_assets.get(assetName);
 				final AssetConfiguration configuration = ((Asset) asset).getAssetConfiguration();
-				final Map<Long, Channel> assetConfiguredChannels = configuration.getChannels();
+				final Map<Long, Channel> assetConfiguredChannels = configuration.getAssetChannels();
 				for (final Map.Entry<Long, Channel> entry : assetConfiguredChannels.entrySet()) {
 					final Channel channel = entry.getValue();
 					respPayload.addMetric(String.valueOf(channel.getId()), channel.getName());
@@ -221,9 +219,9 @@ public final class AssetCloudlet extends Cloudlet {
 			if (reqTopic.getResources().length == 3) {
 				final String assetName = reqTopic.getResources()[1];
 				final String channelId = reqTopic.getResources()[2];
-				final BaseAsset asset = this.m_assets.get(assetName);
-				final AssetConfiguration configuration = ((Asset) asset).getAssetConfiguration();
-				final Map<Long, Channel> assetConfiguredChannels = configuration.getChannels();
+				final Asset asset = this.m_assets.get(assetName);
+				final AssetConfiguration configuration = asset.getAssetConfiguration();
+				final Map<Long, Channel> assetConfiguredChannels = configuration.getAssetChannels();
 				final long id = this.checkChannelAvailability(channelId, assetConfiguredChannels);
 				if ((assetConfiguredChannels != null) && (id != 0)) {
 					final List<AssetRecord> assetRecords = asset.read(Arrays.asList(id));
@@ -246,9 +244,9 @@ public final class AssetCloudlet extends Cloudlet {
 			this.findAssets();
 			final String assetName = reqTopic.getResources()[1];
 			final String channelId = reqTopic.getResources()[2];
-			final BaseAsset asset = this.m_assets.get(assetName);
-			final AssetConfiguration configuration = ((Asset) asset).getAssetConfiguration();
-			final Map<Long, Channel> assetConfiguredChannels = configuration.getChannels();
+			final Asset asset = this.m_assets.get(assetName);
+			final AssetConfiguration configuration = asset.getAssetConfiguration();
+			final Map<Long, Channel> assetConfiguredChannels = configuration.getAssetChannels();
 			final long id = this.checkChannelAvailability(channelId, assetConfiguredChannels);
 			if ((assetConfiguredChannels != null) && (id != 0)) {
 				final AssetRecord assetRecord = this.m_assetHelper.newAssetRecord(id);

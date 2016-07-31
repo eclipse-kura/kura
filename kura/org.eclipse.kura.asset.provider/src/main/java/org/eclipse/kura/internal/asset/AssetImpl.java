@@ -240,7 +240,17 @@ public final class AssetImpl implements Asset {
 
 		final DriverStatus status = driverRecord.getDriverStatus();
 		final DriverFlag driverFlag = status.getDriverFlag();
-		final String exceptionMessage = (status.getExceptionMessage() == null) ? "" : status.getExceptionMessage();
+		String exceptionMessage = null;
+		final Exception exception = status.getException();
+		if ((exception != null) && (status.getExceptionMessage() == null)) {
+			exceptionMessage = ThrowableUtil.stackTraceAsString(exception);
+		}
+		if ((exception == null) && (status.getExceptionMessage() == null)) {
+			exceptionMessage = "";
+		}
+		if ((exception != null) && (status.getExceptionMessage() != null)) {
+			exceptionMessage = status.getExceptionMessage();
+		}
 
 		switch (driverFlag) {
 		case READ_SUCCESSFUL:
@@ -290,7 +300,7 @@ public final class AssetImpl implements Asset {
 		final List<AssetRecord> assetRecords = CollectionUtil.newArrayList();
 		final List<DriverRecord> driverRecords = CollectionUtil.newArrayList();
 
-		final Map<Long, Channel> channels = this.m_assetConfiguration.getChannels();
+		final Map<Long, Channel> channels = this.m_assetConfiguration.getAssetChannels();
 		for (final long channelId : channelIds) {
 			final long id = this.checkChannelAvailability(channelId, channels);
 			checkCondition(id == 0, s_message.channelUnavailable());
@@ -340,7 +350,7 @@ public final class AssetImpl implements Asset {
 		checkNull(this.m_driver, s_message.driverNonNull());
 
 		s_logger.debug(s_message.registeringListener());
-		final Map<Long, Channel> channels = this.m_assetConfiguration.getChannels();
+		final Map<Long, Channel> channels = this.m_assetConfiguration.getAssetChannels();
 		final long id = this.checkChannelAvailability(channelId, channels);
 		checkCondition(id == 0, s_message.channelUnavailable());
 
@@ -498,7 +508,7 @@ public final class AssetImpl implements Asset {
 
 		s_logger.debug(s_message.writing());
 		final List<DriverRecord> driverRecords = CollectionUtil.newArrayList();
-		final Map<Long, Channel> channels = this.m_assetConfiguration.getChannels();
+		final Map<Long, Channel> channels = this.m_assetConfiguration.getAssetChannels();
 		for (final AssetRecord assetRecord : assetRecords) {
 			final long id = this.checkChannelAvailability(assetRecord.getChannelId(), channels);
 			checkCondition(id == 0, s_message.channelUnavailable());

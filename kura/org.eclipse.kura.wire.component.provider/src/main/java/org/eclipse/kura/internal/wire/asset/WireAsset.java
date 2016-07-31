@@ -326,7 +326,7 @@ public final class WireAsset implements WireEmitter, WireReceiver, SelfConfiguri
 					channelConfiguration.addAll(driverSpecificChannelConfiguration);
 				}
 				for (final Tad attribute : channelConfiguration) {
-					for (final String prefix : this.retrieveChannelPrefixes(this.m_assetConfiguration.getChannels())) {
+					for (final String prefix : this.retrieveChannelPrefixes(this.m_assetConfiguration.getAssetChannels())) {
 						final Tad newAttribute = this.cloneAd(attribute, prefix);
 						mainOcd.addAD(newAttribute);
 					}
@@ -365,7 +365,7 @@ public final class WireAsset implements WireEmitter, WireReceiver, SelfConfiguri
 
 		final List<AssetRecord> assetRecordsToWriteChannels = CollectionUtil.newArrayList();
 		final List<Long> channelsToRead = CollectionUtil.newArrayList();
-		final Map<Long, Channel> channels = this.m_assetConfiguration.getChannels();
+		final Map<Long, Channel> channels = this.m_assetConfiguration.getAssetChannels();
 		// determining channels to read
 		for (final Map.Entry<Long, Channel> channelEntry : channels.entrySet()) {
 			final Channel channel = channelEntry.getValue();

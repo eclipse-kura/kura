@@ -72,20 +72,20 @@ import org.eclipse.kura.type.DataType;
 @NotThreadSafe
 public final class AssetConfiguration {
 
+	/** the asset description. */
+	private String assetDescription;
+
+	/** the name of the asset. */
+	private String assetName;
+
 	/**
 	 * The list of channels associated with this asset. The association denotes
 	 * channel ID and its actual object reference pair.
 	 */
-	private final Map<Long, Channel> channels;
-
-	/** the asset description. */
-	private String description;
+	private final Map<Long, Channel> assetChannels;
 
 	/** the driver ID as associated with this asset. */
 	private final String driverId;
-
-	/** the name of the asset. */
-	private String name;
 
 	/**
 	 * Instantiates a new asset configuration.
@@ -108,78 +108,78 @@ public final class AssetConfiguration {
 		checkNull(description, "Asset driver ID cannot be null");
 		checkNull(description, "Asset channel configurations cannot be null");
 
-		this.description = description;
+		this.assetDescription = description;
 		this.driverId = driverId;
-		this.name = name;
-		this.channels = channels;
+		this.assetName = name;
+		this.assetChannels = channels;
 	}
 
 	/**
-	 * Gets the channels.
+	 * Gets the asset channels.
 	 *
-	 * @return the channels
+	 * @return the asset channels
 	 */
-	public Map<Long, Channel> getChannels() {
-		return this.channels;
+	public Map<Long, Channel> getAssetChannels() {
+		return this.assetChannels;
 	}
 
 	/**
-	 * Gets the description.
+	 * Gets the asset description.
 	 *
-	 * @return the description
+	 * @return the asset description
 	 */
-	public String getDescription() {
-		return this.description;
+	public String getAssetDescription() {
+		return this.assetDescription;
 	}
 
 	/**
-	 * Gets the driver id.
+	 * Gets the Asset name.
 	 *
-	 * @return the driver id
+	 * @return the asset name
+	 */
+	public String getAssetName() {
+		return this.assetName;
+	}
+
+	/**
+	 * Gets the driver ID.
+	 *
+	 * @return the driver ID
 	 */
 	public String getDriverId() {
 		return this.driverId;
 	}
 
 	/**
-	 * Gets the name.
-	 *
-	 * @return the name
-	 */
-	public String getName() {
-		return this.name;
-	}
-
-	/**
-	 * Sets the description.
+	 * Sets the asset description.
 	 *
 	 * @param description
-	 *            the new description
+	 *            the new asset description
 	 * @throws KuraRuntimeException
 	 *             if the argument is null
 	 */
-	public void setDescription(final String description) {
+	public void setAssetDescription(final String description) {
 		checkNull(description, "Asset description cannot be null");
-		this.description = description;
+		this.assetDescription = description;
 	}
 
 	/**
-	 * Sets the name.
+	 * Sets the asset name.
 	 *
-	 * @param name
-	 *            the new name
+	 * @param assetName
+	 *            the new asset name
 	 * @throws KuraRuntimeException
 	 *             if the argument is null
 	 */
-	public void setName(final String name) {
-		checkNull(this.description, "Asset name cannot be null");
-		this.name = name;
+	public void setAssetName(final String assetName) {
+		checkNull(this.assetDescription, "Asset name cannot be null");
+		this.assetName = assetName;
 	}
 
 	/** {@inheritDoc} */
 	@Override
 	public String toString() {
-		return "AssetConfiguration [channels=" + this.channels + ", description=" + this.description + ", driverId="
-				+ this.driverId + ", name=" + this.name + "]";
+		return "AssetConfiguration [channels=" + this.assetChannels + ", description=" + this.assetDescription
+				+ ", driverId=" + this.driverId + ", name=" + this.assetName + "]";
 	}
 }

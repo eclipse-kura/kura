@@ -33,7 +33,8 @@ import org.eclipse.kura.driver.listener.DriverListener;
 public interface Driver {
 
 	/**
-	 * The Class ConnectionException. More specific to Driver operation.
+	 * The Class ConnectionException is a driver specific exception which is
+	 * essentially used to raise exception related to driver connection
 	 */
 	public final class ConnectionException extends Exception {
 

@@ -76,7 +76,8 @@ import org.slf4j.LoggerFactory;
  * The Class WireAsset is a wire component which provides all necessary higher
  * level abstractions of a Kura asset. This wire asset is an integral wire
  * component in Kura Wires topology as it represents an industrial device with a
- * field protocol driver associated to it.
+ * field protocol driver associated to it.<br/>
+ * <br/>
  *
  * The WireRecord to be emitted by every wire asset comprises the following keys
  *
@@ -182,7 +183,7 @@ public final class WireAsset implements WireEmitter, WireReceiver, SelfConfiguri
 	 *            use the {@code x.CH.DRIVER.} prefix)
 	 * @return the new attribute definition
 	 * @throws KuraRuntimeException
-	 *             if any of the provided argument is null
+	 *             if any of the provided arguments is null
 	 */
 	private Tad cloneAd(final Tad oldAd, final String prefix) {
 		checkNull(oldAd, s_message.oldAdNonNull());
@@ -326,7 +327,8 @@ public final class WireAsset implements WireEmitter, WireReceiver, SelfConfiguri
 					channelConfiguration.addAll(driverSpecificChannelConfiguration);
 				}
 				for (final Tad attribute : channelConfiguration) {
-					for (final String prefix : this.retrieveChannelPrefixes(this.m_assetConfiguration.getAssetChannels())) {
+					for (final String prefix : this
+							.retrieveChannelPrefixes(this.m_assetConfiguration.getAssetChannels())) {
 						final Tad newAttribute = this.cloneAd(attribute, prefix);
 						mainOcd.addAD(newAttribute);
 					}

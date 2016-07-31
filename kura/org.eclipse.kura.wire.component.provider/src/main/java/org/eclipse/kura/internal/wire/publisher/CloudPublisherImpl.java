@@ -50,7 +50,12 @@ import org.slf4j.LoggerFactory;
 /**
  * The Class CloudPublisherImpl is the implementation of {@link CloudPublisher}
  * to publish a list of wire records as received in Wire Envelope to the
- * configured cloud platform.
+ * configured cloud platform.<br/>
+ * <br/>
+ *
+ * For every Wire Record as found in Wire Envelope will be wrapped inside a Kura
+ * Payload and will be sent to the Cloud Platform. In addition, the user can
+ * avail to wrap every Wire Record as a JSON object as well.
  */
 public final class CloudPublisherImpl implements WireReceiver, DataServiceListener, ConfigurableComponent {
 

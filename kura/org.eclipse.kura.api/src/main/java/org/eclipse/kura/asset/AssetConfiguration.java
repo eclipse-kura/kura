@@ -22,10 +22,13 @@ import org.eclipse.kura.type.DataType;
 
 /**
  * The Class AssetConfiguration is responsible for storing the configuration for
- * an industrial device (also known as Asset in the context of Eclipse Kura).
+ * an industrial device (also known as Asset in the context of Eclipse
+ * Kura).<br/>
+ * <br/>
  *
  * The properties as provided to an Asset must conform to the following
- * specifications. The properties must have the following.
+ * specifications. The properties must have the following.<br/>
+ * <br/>
  *
  * <ul>
  * <li>the value associated with <b><i>driver.id</i></b> key in the map denotes
@@ -39,11 +42,13 @@ import org.eclipse.kura.type.DataType;
  * that the format includes at least two ".") denotes map object containing a
  * channel configuration</li>
  *
- * For example, 1.CH.name, 1.CH.value.type etc.
+ * For example, 1.CH.name, 1.CH.value.type etc.<br/>
+ * <br/>
  *
  * The representation in the provided properties as prepended by a number
  * signifies a single channel and it should conform to the following
- * specification.
+ * specification.<br/>
+ * <br/>
  *
  * The properties should contain the following keys
  * <ul>
@@ -55,15 +60,19 @@ import org.eclipse.kura.type.DataType;
  * </ul>
  *
  * For example, [more configuration] would be 1.CH.DRIVER.modbus.register,
- * 1.CH.DRIVER.modbus.unit.id etc.
+ * 1.CH.DRIVER.modbus.unit.id etc.<br/>
+ * <br/>
  *
- * The key <b><i>name</i></b> must be String.
+ * The key <b><i>name</i></b> must be String.<br/>
+ * <br/>
  *
  * The key <b><i>value.type</i></b> must be in one of types from
- * {@link DataType} in String representation format (case-insensitive)
+ * {@link DataType} in String representation format (case-insensitive)<br/>
+ * <br/>
  *
  * The channel {@code type} should be one of the types from {@link ChannelType}
- * in String representation format (case-insensitive)
+ * in String representation format (case-insensitive)<br/>
+ * <br/>
  *
  * @see Channel
  * @see ChannelType
@@ -72,17 +81,17 @@ import org.eclipse.kura.type.DataType;
 @NotThreadSafe
 public final class AssetConfiguration {
 
-	/** the asset description. */
-	private String assetDescription;
-
-	/** the name of the asset. */
-	private String assetName;
-
 	/**
 	 * The list of channels associated with this asset. The association denotes
 	 * channel ID and its actual object reference pair.
 	 */
 	private final Map<Long, Channel> assetChannels;
+
+	/** the asset description. */
+	private String assetDescription;
+
+	/** the name of the asset. */
+	private String assetName;
 
 	/** the driver ID as associated with this asset. */
 	private final String driverId;

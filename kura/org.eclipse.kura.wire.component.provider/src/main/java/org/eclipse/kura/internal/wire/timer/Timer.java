@@ -70,14 +70,13 @@ public final class Timer implements WireEmitter, ConfigurableComponent {
 	private volatile WireHelperService m_wireHelperService;
 
 	/** The wire supporter component. */
-	private final WireSupport m_wireSupport;
+	private WireSupport m_wireSupport;
 
 	/**
 	 * Instantiates a new timer.
 	 */
 	public Timer() {
 		this.m_executorService = Executors.newSingleThreadScheduledExecutor();
-		this.m_wireSupport = this.m_wireHelperService.newWireSupport(this);
 	}
 
 	/**
@@ -90,6 +89,7 @@ public final class Timer implements WireEmitter, ConfigurableComponent {
 	 */
 	protected synchronized void activate(final ComponentContext ctx, final Map<String, Object> properties) {
 		s_logger.debug(s_message.activatingTimer());
+		this.m_wireSupport = this.m_wireHelperService.newWireSupport(this);
 		this.m_properties = properties;
 		this.doUpdate();
 		s_logger.debug(s_message.activatingTimerDone());
@@ -144,9 +144,9 @@ public final class Timer implements WireEmitter, ConfigurableComponent {
 			/** {@inheritDoc} */
 			@Override
 			public void run() {
-				m_wireSupport
-						.emit(Arrays.asList(m_wireHelperService.newWireRecord(m_wireHelperService
-								.newWireField(TIMER_EVENT.value(), TypedValues.newStringValue(m_name)))));
+				Timer.this.m_wireSupport
+						.emit(Arrays.asList(Timer.this.m_wireHelperService.newWireRecord(Timer.this.m_wireHelperService
+								.newWireField(TIMER_EVENT.value(), TypedValues.newStringValue(Timer.this.m_name)))));
 			}
 		}, 0, this.m_interval, TimeUnit.SECONDS);
 	}

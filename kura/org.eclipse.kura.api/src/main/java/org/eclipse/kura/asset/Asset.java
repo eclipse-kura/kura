@@ -18,7 +18,8 @@ import java.util.Map;
  * The interface Asset is a high level abstraction of a Kura asset representing
  * an Industrial Field Device which associates a device driver. All devices
  * which associates a driver should use this for more specific functionalities
- * to conform to the Kura asset specifications.
+ * to conform to the Kura asset specifications.<br/>
+ * <br/>
  *
  * The asset requires a specific set of configurations to be provided by the
  * user. Please check {@see AssetConfiguration} for more information on how to

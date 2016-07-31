@@ -25,28 +25,36 @@ import org.eclipse.kura.type.TypedValue;
 /**
  * The Class DriverRecord represents records needed for read, write or a monitor
  * operation on the provided channel configuration by the Kura specific device
- * driver.
+ * driver.<br/>
+ * <br/>
  *
  * A Driver Record must contain the specific channel configuration that it needs
  * to operate on. The most basic requirements to provide the configuration is
  * the channel ID as long value. This channel ID is essentially needed to map an
- * asset record with a driver record and hence this channel ID needs to be set.
+ * asset record with a driver record and hence this channel ID needs to be
+ * set.<br/>
+ * <br/>
  *
  * The channel ID must be set in the map as a key of :
- * {@link DriverConstants#CHANNEL_ID} or {@code channel.id}
+ * {@link DriverConstants#CHANNEL_ID} or {@code channel.id}<br/>
+ * <br/>
  *
  * In case you are using driver in isolation (i.e without using Assets), then
- * the channel ID need not to be set.
+ * the channel ID need not to be set.<br/>
+ * <br/>
  *
  * But in both the scenarios, you must set the value type in the configuration
  * map. The value type is the channel value type in case you are using Assets
- * but not the Drivers directly.
+ * but not the Drivers directly.<br/>
+ * <br/>
  *
  * But if you are accessing Drivers directly, this value type must be set to one
- * of the types from {@link DataType}.
+ * of the types from {@link DataType}.<br/>
+ * <br/>
  *
  * The value type must be set in the map as a key of :
- * {@link DriverConstants#CHANNEL_VALUE_TYPE} or {@code channel.value.type}
+ * {@link DriverConstants#CHANNEL_VALUE_TYPE} or {@code channel.value.type}<br/>
+ * <br/>
  *
  * The Driver Record also contain driver status of the operation on the provided
  * channel. This status contains a flag, an exception message and an exception

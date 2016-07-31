@@ -26,11 +26,13 @@ public interface ChannelDescriptor {
 	 * Returns the protocol specific descriptor. For using drivers in
 	 * cooperation with Kura Wires Visualization, the implementors can return
 	 * list of {@code AD}s to provide configurable properties for a
-	 * {@link ConfigurableComponent}.
+	 * {@link ConfigurableComponent}.<br/>
+	 * <br/>
 	 *
 	 * This method is essentially needed by Kura Wires Visualization model and
 	 * in case the implementors need to use specific driver implementation in
-	 * complete isolation, the implementors can return {@code null}.
+	 * complete isolation, the implementors can return {@code null}.<br/>
+	 * <br/>
 	 *
 	 * Furthermore, some implementors can also provide custom objects. In such
 	 * case, implementors must also provide another implementation for providing

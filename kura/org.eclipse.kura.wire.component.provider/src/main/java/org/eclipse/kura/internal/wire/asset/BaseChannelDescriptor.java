@@ -29,21 +29,22 @@ import org.eclipse.kura.util.collection.CollectionUtil;
 
 /**
  * The Class BaseChannelDescriptor returns the basic channel descriptor required
- * for a channel
+ * for a channel<br/>
+ * <br/>
  *
  * The basic descriptions include the following
  * <ul>
  * <li>name</li> denotes the name of the channel
  * <li>type</li>
  * <li>value.type</li>
- * <ul>
+ * </ul>
  *
  * The <b><i>type</i></b> would be one of the following:
  * <ul>
  * <li>READ</li>
  * <li>WRITE</li>
  * <li>READ_WRITE</li>
- * <ul>
+ * </ul>
  *
  * The <b><i>value.type</i></b> would be one of the following:
  * <ul>
@@ -55,7 +56,7 @@ import org.eclipse.kura.util.collection.CollectionUtil;
  * <li>BOOLEAN</li>
  * <li>STRING</li>
  * <li>BYTE_ARRAY</li>
- * <ul>
+ * </ul>
  *
  * @see AssetConfiguration
  */
@@ -134,6 +135,7 @@ public final class BaseChannelDescriptor implements ChannelDescriptor {
 		oInteger.setValue(s_message.integerStr());
 		oInteger.setLabel(s_message.integerStr());
 		valueType.getOption().add(oInteger);
+
 		final Toption oLong = new Toption();
 		oLong.setValue(s_message.longStr());
 		oLong.setLabel(s_message.longStr());

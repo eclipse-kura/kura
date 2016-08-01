@@ -21,19 +21,85 @@ import com.github.rodionmoiseev.c10n.annotations.En;
  */
 public interface ModbusDriverMessages {
 
-	@En("Bundle context cannot be null")
-	public String bundleContextNonNull();
+	@En("Activating Modbus Driver.....")
+	public String activating();
 
-	@En("Class intance name cannot be null")
-	public String clazzNonNull();
+	@En("Activating Modbus Driver.....Done")
+	public String activatingDone();
 
-	@En("Dictionary cannot be null")
-	public String dictionaryNonNull();
+	@En("COILS")
+	public String coils();
 
-	@En("Initial Array size must not be less than 0")
-	public String initialArraySize();
+	@En("Unable to Connect...")
+	public String connectionProblem();
 
-	@En("Map cannot be null")
-	public String mapNonNull();
+	@En("Deactivating Modbus Driver.....")
+	public String deactivating();
+
+	@En("Deactivating Modbus Driver.....Done")
+	public String deactivatingDone();
+
+	@En("Unable to Disconnect...")
+	public String disconnectionProblem();
+
+	@En("DISCRETE_INPUTS")
+	public String discreteInputs();
+
+	@En("Function Codes not in Range")
+	public String functionCodesNotInRange();
+
+	@En("HOLDING_REGISTERS")
+	public String holdingRegs();
+
+	@En("INPUT_REGISTERS")
+	public String inputRegs();
+
+	@En("Memory Address")
+	public String memoryAddr();
+
+	@En("Address of the register (as integer value, not HEX)")
+	public String memoryAddrDesc();
+
+	@En("No of Register")
+	public String noOfReg();
+
+	@En("No of registers to read in contiguous location")
+	public String noOfRegDesc();
+
+	@En("Primary Table")
+	public String primaryTable();
+
+	@En("Modbus Primary Memory Address Space")
+	public String primaryTableDesc();
+
+	@En("Primary Table cannot be null")
+	public String primaryTableNonNull();
+
+	@En("Properties cannot be null")
+	public String propertiesNonNull();
+
+	@En("Request type {0} is not supported")
+	public String requestTypeNotSupported(int functionCode);
+
+	@En("Modbus Response cannot be null")
+	public String responseNonNull();
+
+	@En("Modbus Transport cannot be null")
+	public String transportNonNull();
+
+	@En("Unit ID")
+	public String unitId();
+
+	@En("Unit ID to connect to")
+	public String unitIdDesc();
+
+	@En("Updating Modbus Driver.....")
+	public String updating();
+
+	@En("Updating Modbus Driver.....Done")
+	public String updatingDone();
+
+	@En("Unit ID must a positive number and less than 247")
+	public String wrongUnitId();
 
 }

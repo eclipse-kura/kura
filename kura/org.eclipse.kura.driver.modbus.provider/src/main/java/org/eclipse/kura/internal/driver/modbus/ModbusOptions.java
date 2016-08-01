@@ -12,7 +12,12 @@
  */
 package org.eclipse.kura.internal.driver.modbus;
 
+import static org.eclipse.kura.Preconditions.checkNull;
+
 import java.util.Map;
+
+import org.eclipse.kura.localization.LocalizationAdapter;
+import org.eclipse.kura.localization.resources.ModbusDriverMessages;
 
 import com.fazecast.jSerialComm.SerialPort;
 import com.ghgande.j2mod.modbus.Modbus;
@@ -47,6 +52,9 @@ final class ModbusOptions {
 	/** Modbus TCP or UDP access type configuration Port */
 	private static final String PORT = "modbus.tcp-udp.port";
 
+	/** Localization Resource. */
+	private static final ModbusDriverMessages s_message = LocalizationAdapter.adapt(ModbusDriverMessages.class);
+
 	/** Modbus Serial (RTU) access type Stopbits */
 	private static final String STOPBITS = "modbus.rtu.stopbits";
 
@@ -63,6 +71,7 @@ final class ModbusOptions {
 	 *            the properties
 	 */
 	ModbusOptions(final Map<String, Object> properties) {
+		checkNull(properties, s_message.propertiesNonNull());
 		this.m_properties = properties;
 	}
 
@@ -276,7 +285,7 @@ final class ModbusOptions {
 	/**
 	 * Returns the type of the Modbus Access
 	 *
-	 * @return the Modbus Access
+	 * @return the Modbus Access Type
 	 */
 	ModbusType getType() {
 		String messageType = null;

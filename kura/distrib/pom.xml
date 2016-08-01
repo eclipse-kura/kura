@@ -406,7 +406,7 @@
   								<move file="target/plugins/org.eclipse.kura.emulator.position.jar" tofile="target/plugins/org.eclipse.kura.emulator.position_${org.eclipse.kura.emulator.position.version}.jar" />
   								<move file="target/plugins/org.eclipse.kura.emulator.usb.jar" tofile="target/plugins/org.eclipse.kura.emulator.usb_${org.eclipse.kura.emulator.usb.version}.jar" />
   								<move file="target/plugins/org.eclipse.kura.emulator.watchdog.jar" tofile="target/plugins/org.eclipse.kura.emulator.watchdog_${org.eclipse.kura.emulator.watchdog.version}.jar" />
-  								<move file="target/plugins/org.eclipse.kura.asset.cloudlet.jar" tofile="target/plugins/org.eclipse.kura.asset.cloudlet_${org.eclipse.kura.asset.cloudlet.version}.jar" />
+  								<move file="target/plugins/org.eclipse.kura.asset.cloudlet.provider.jar" tofile="target/plugins/org.eclipse.kura.asset.cloudlet.provider_${org.eclipse.kura.asset.cloudlet.provider.version}.jar" />
   								<move file="target/plugins/org.eclipse.kura.asset.provider.jar" tofile="target/plugins/org.eclipse.kura.asset.provider_${org.eclipse.kura.asset.provider.version}.jar" />
   								<move file="target/plugins/org.eclipse.kura.localization.jar" tofile="target/plugins/org.eclipse.kura.localization_${org.eclipse.kura.localization.version}.jar" />
   								<move file="target/plugins/org.eclipse.kura.localization.resources.jar" tofile="target/plugins/org.eclipse.kura.localization.resources_${org.eclipse.kura.localization.resources.version}.jar" />

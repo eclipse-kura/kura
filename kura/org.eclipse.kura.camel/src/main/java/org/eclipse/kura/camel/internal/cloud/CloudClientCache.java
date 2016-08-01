@@ -7,17 +7,17 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *
  *******************************************************************************/
-package org.eclipse.kura.camel.cloud;
+package org.eclipse.kura.camel.internal.cloud;
 
 import org.eclipse.kura.cloud.CloudClient;
-import org.eclipse.kura.cloud.CloudService;
 
 public interface CloudClientCache {
 
-    void put(String appId, CloudClient cloudClient);
+	interface CloudClientHandle extends AutoCloseable {
+		CloudClient getClient ();
+	}
+	
+    CloudClientHandle getOrCreate(String applicationId);
 
-    CloudClient get(String appId);
-
-    CloudClient getOrCreate(String appId, CloudService cloudService);
-
+	void close();
 }

@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+
+     All rights reserved. This program and the accompanying materials
+     are made available under the terms of the Eclipse Public License v1.0
+     which accompanies this distribution, and is available at
+     http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Eurotech
+      Amit Kumar Mondal (admin@amitinside.com)
+-->
+<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
+    <OCD id="org.eclipse.kura.driver.modbus" 
+         name="ModbusDriver" 
+         description="Modbus Driver">
+
+        <AD id="access.type"
+            name="access.type"
+            type="String"
+            cardinality="0"
+            required="true"
+            default="TCP"
+            description="Option to select the type of Modbus Connection Access (TCP, UDP or RTU)">
+            <Option label="TCP" value="TCP" />
+            <Option label="UDP" value="UDP" />
+            <Option label="RTU" value="RTU" />
+        </AD>
+
+        <AD id="modbus.tcp-udp.ip"
+            name="modbus.tcp-udp.ip"
+            type="String"
+            cardinality="0"
+            required="true"
+            default="127.0.0.1"
+            description="The IP address to connect to">
+        </AD>
+
+        <AD id="modbus.tcp-udp.port"
+            name="modbus.tcp-udp.port"
+            type="Integer"
+            cardinality="0"
+            required="true"
+            default="0"
+            description="The Port for the communication">
+        </AD>
+
+        <AD id="modbus.rtu.baudrate"
+            name="modbus.rtu.baudrate"
+            type="Integer"
+            cardinality="0"
+            required="true"
+            default="9600"
+            description="Modbus Serial Connection Baudrate">
+        </AD>
+
+        <AD id="modbus.rtu.flowcontrolin"
+            name="modbus.rtu.flowcontrolin"
+            type="String"
+            cardinality="0"
+            required="true"
+            default="FLOW_CONTROL_DISABLED"
+            description="Modbus Serial Flow Control In">
+            <Option label="FLOW_CONTROL_DISABLED" value="FLOW_CONTROL_DISABLED" />
+            <Option label="FLOW_CONTROL_RTS_ENABLED" value="FLOW_CONTROL_RTS_ENABLED" />
+            <Option label="FLOW_CONTROL_CTS_ENABLED" value="FLOW_CONTROL_CTS_ENABLED" />
+            <Option label="FLOW_CONTROL_DSR_ENABLED" value="FLOW_CONTROL_DSR_ENABLED" />
+            <Option label="FLOW_CONTROL_DTR_ENABLED" value="FLOW_CONTROL_DTR_ENABLED" />
+            <Option label="FLOW_CONTROL_XONXOFF_IN_ENABLED" value="FLOW_CONTROL_XONXOFF_IN_ENABLED" />
+            <Option label="TCP" value="TCP" />
+        </AD>
+        
+        <AD id="modbus.rtu.flowcontrolout"
+            name="modbus.rtu.flowcontrolout"
+            type="String"
+            cardinality="0"
+            required="true"
+            default="FLOW_CONTROL_DISABLED"
+            description="Modbus Serial Flow Control Out">
+            <Option label="FLOW_CONTROL_DISABLED" value="FLOW_CONTROL_DISABLED" />
+            <Option label="FLOW_CONTROL_RTS_ENABLED" value="FLOW_CONTROL_RTS_ENABLED" />
+            <Option label="FLOW_CONTROL_CTS_ENABLED" value="FLOW_CONTROL_CTS_ENABLED" />
+            <Option label="FLOW_CONTROL_DSR_ENABLED" value="FLOW_CONTROL_DSR_ENABLED" />
+            <Option label="FLOW_CONTROL_DTR_ENABLED" value="FLOW_CONTROL_DTR_ENABLED" />
+            <Option label="FLOW_CONTROL_XONXOFF_OUT_ENABLED" value="FLOW_CONTROL_XONXOFF_OUT_ENABLED" />
+            <Option label="TCP" value="TCP" />
+        </AD>
+
+        <AD id="modbus.rtu.databits"
+            name="modbus.rtu.databits"
+            type="Integer"
+            cardinality="0"
+            required="true"
+            default="8"
+            description="An integer specifying Modbus Serial Databits">
+            <Option label="5" value="5"/>
+            <Option label="6" value="6"/>
+            <Option label="7" value="7"/>
+            <Option label="8" value="8"/>
+        </AD>
+        
+        <AD id="modbus.rtu.stopbits"
+            name="modbus.rtu.stopbits"
+            type="String"
+            cardinality="0"
+            required="true"
+            default="ONE_STOP_BIT"
+            description="Modbus Serial Stopbits">
+            <Option label="ONE_STOP_BIT" value="ONE_STOP_BIT"/>
+            <Option label="ONE_POINT_FIVE_STOP_BITS" value="ONE_POINT_FIVE_STOP_BITS"/>
+            <Option label="TWO_STOP_BITS" value="TWO_STOP_BITS"/>
+        </AD>
+        
+        <AD id="modbus.rtu.parity"
+            name="modbus.rtu.parity"
+            type="String"
+            cardinality="0"
+            required="true"
+            default="NO_PARITY"
+            description="Modbus Serial Parity">
+            <Option label="NO_PARITY" value="NO_PARITY"/>
+            <Option label="ODD_PARITY" value="ODD_PARITY"/>
+            <Option label="EVEN_PARITY" value="EVEN_PARITY"/>
+            <Option label="MARK_PARITY" value="MARK_PARITY"/>
+            <Option label="SPACE_PARITY" value="SPACE_PARITY"/>
+        </AD>
+        
+        <AD id="modbus.rtu.encoding"
+            name="modbus.rtu.encoding"
+            type="String"
+            cardinality="0"
+            required="true"
+            default="SERIAL_ENCODING_ASCII"
+            description="Modbus Serial Encoding">
+            <Option label="SERIAL_ENCODING_ASCII" value="SERIAL_ENCODING_ASCII"/>
+            <Option label="SERIAL_ENCODING_RTU" value="SERIAL_ENCODING_RTU"/>
+            <Option label="SERIAL_ENCODING_BIN" value="SERIAL_ENCODING_BIN"/>
+        </AD>
+    </OCD>
+    
+    <Designate pid="org.eclipse.kura.driver.modbus" factoryPid="org.eclipse.kura.driver.modbus">
+        <Object ocdref="org.eclipse.kura.driver.modbus"/>
+    </Designate>
+</MetaData>

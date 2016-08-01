@@ -464,9 +464,9 @@ fi
                         prefix="${build.output.name}/kura/plugins" />
 			<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.core.net_${org.eclipse.kura.core.net.version}.jar"
                         prefix="${build.output.name}/kura/plugins" />
-            <zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.device.cloudlet_${org.eclipse.kura.device.cloudlet.version}.jar"
+            <zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.asset.cloudlet.provider_${org.eclipse.kura.device.cloudlet.provider.version}.jar"
                         prefix="${build.output.name}/kura/plugins" />
-            <zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.device.internal_${org.eclipse.kura.device.internal.version}.jar"
+            <zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.asset.provider_${org.eclipse.kura.asset.provider.version}.jar"
                         prefix="${build.output.name}/kura/plugins" />
 			<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.linux.clock_${org.eclipse.kura.linux.clock.version}.jar"
                         prefix="${build.output.name}/kura/plugins" />
@@ -486,7 +486,15 @@ fi
                         prefix="${build.output.name}/kura/plugins" />
 			<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.linux_${org.eclipse.kura.linux.version}.jar"
                         prefix="${build.output.name}/kura/plugins" />
-            <zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.wire.internal_${org.eclipse.kura.wire.internal.version}.jar"
+            <zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.localization_${org.eclipse.kura.localization.version}.jar"
+                        prefix="${build.output.name}/kura/plugins" />
+            <zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.localization.resources_${org.eclipse.kura.localization.resources.version}.jar"
+                        prefix="${build.output.name}/kura/plugins" />
+            <zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.util_${org.eclipse.kura.util.version}.jar"
+                        prefix="${build.output.name}/kura/plugins" />
+            <zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.wire.provider_${org.eclipse.kura.wire.provider.version}.jar"
+                        prefix="${build.output.name}/kura/plugins" />
+            <zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.wire.component.provider_${org.eclipse.kura.wire.component.provider.version}.jar"
                         prefix="${build.output.name}/kura/plugins" />
 		</zip>
 

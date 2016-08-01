@@ -233,8 +233,8 @@
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.eclipse.kura</groupId>
-									<artifactId>org.eclipse.kura.asset.cloudlet</artifactId>
-									<version>${org.eclipse.kura.asset.cloudlet.version}</version>
+									<artifactId>org.eclipse.kura.asset.cloudlet.provider</artifactId>
+									<version>${org.eclipse.kura.asset.cloudlet.provider.version}</version>
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.eclipse.kura</groupId>

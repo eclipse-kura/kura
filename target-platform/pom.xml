@@ -9,6 +9,8 @@
 	<packaging>pom</packaging>
 
 	<modules>
+		<module>org.eclipse.kura.camel.sun.misc</module>
+		<module>org.eclipse.kura.sun.misc</module>
 		<module>com.codeminders.hidapi</module>
 		<module>org.usb4java</module>
 		<module>usb4java-javax</module>

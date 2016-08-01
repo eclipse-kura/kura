@@ -73,6 +73,16 @@
 									<version>${org.eclipse.paho.client.mqttv3.version}</version>
 								</artifactItem>
 								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.kura.camel.sun.misc</artifactId>
+									<version>${org.eclipse.kura.camel.sun.misc.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.kura.sun.misc</artifactId>
+									<version>${org.eclipse.kura.sun.misc.version}</version>
+								</artifactItem>
+								<artifactItem>
 									<groupId>org.tigris</groupId>
 									<artifactId>org.tigris.mtoolkit.iagent.rpc</artifactId>
 									<version>${org.tigris.mtoolkit.iagent.rpc.version}</version>
@@ -245,7 +255,7 @@
 					</execution>
 				</executions>
 			</plugin>
-			
+
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-deploy-plugin</artifactId>

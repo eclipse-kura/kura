@@ -34,6 +34,9 @@ public final class ModbusDriver implements Driver {
 	/** Localization Resource. */
 	private static final ModbusDriverMessages s_message = LocalizationAdapter.adapt(ModbusDriverMessages.class);
 
+	/** flag to check if the device is connected */
+	private final boolean m_isConnected = false;
+
 	/** {@inheritDoc} */
 	@Override
 	public void connect() throws ConnectionException {

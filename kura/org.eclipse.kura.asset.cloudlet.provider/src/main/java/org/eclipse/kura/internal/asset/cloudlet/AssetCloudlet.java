@@ -129,14 +129,14 @@ public final class AssetCloudlet extends Cloudlet {
 	}
 
 	/**
-	 * Binds the Asset Helper Service.
+	 * Binds the Asset Service.
 	 *
-	 * @param assetHelperService
-	 *            the new Asset Helper Service
+	 * @param assetService
+	 *            the new Asset Service
 	 */
-	public synchronized void bindAssetHelperService(final AssetService assetHelperService) {
+	public synchronized void bindAssetService(final AssetService assetService) {
 		if (this.m_assetHelper == null) {
-			this.m_assetHelper = assetHelperService;
+			this.m_assetHelper = assetService;
 		}
 	}
 
@@ -290,13 +290,13 @@ public final class AssetCloudlet extends Cloudlet {
 	}
 
 	/**
-	 * Unbinds the Asset Helper Service.
+	 * Unbinds the Asset Service.
 	 *
-	 * @param assetHelperService
-	 *            the new Asset Helper Service
+	 * @param assetService
+	 *            the new Asset Service
 	 */
-	public synchronized void unbindAssetHelperService(final AssetService assetHelperService) {
-		if (this.m_assetHelper == assetHelperService) {
+	public synchronized void unbindAssetService(final AssetService assetService) {
+		if (this.m_assetHelper == assetService) {
 			this.m_assetHelper = null;
 		}
 	}

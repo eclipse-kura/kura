@@ -189,6 +189,11 @@
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.apache.camel</groupId>
+									<artifactId>camel-stream</artifactId>
+									<version>${org.apache.camel.camel-stream.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.apache.camel</groupId>
 									<artifactId>camel-kura</artifactId>
 									<version>${org.apache.camel.camel-kura.version}</version>
 								</artifactItem>

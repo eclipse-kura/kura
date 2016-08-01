@@ -14,15 +14,16 @@ import java.util.Map;
 import org.apache.camel.CamelContext;
 import org.apache.camel.Endpoint;
 import org.apache.camel.impl.UriEndpointComponent;
+import org.eclipse.kura.camel.internal.cloud.CloudClientCache;
+import org.eclipse.kura.camel.internal.cloud.CloudClientCacheImpl;
 import org.eclipse.kura.cloud.CloudService;
 
 import static org.eclipse.kura.camel.utils.KuraServiceFactory.retrieveService;
 
 public class KuraCloudComponent extends UriEndpointComponent {
 
-    private final static CloudClientCache clientCache = new ConcurrentHashMapCloudClientCache();
-
     private CloudService cloudService;
+    private CloudClientCache cache;
 
     public KuraCloudComponent() {
         super(KuraCloudEndpoint.class);
@@ -30,15 +31,39 @@ public class KuraCloudComponent extends UriEndpointComponent {
 
     // Constructors
 
-    public KuraCloudComponent(CamelContext context, Class<? extends Endpoint> endpointClass) {
-        super(context, endpointClass);
+    public KuraCloudComponent(CamelContext context) {
+        super(context, KuraCloudEndpoint.class);
+    }
+
+    @Override
+    protected void doStart() throws Exception {
+        final CloudService cloudService = getCloudService();
+
+        if (cloudService == null) {
+            throw new IllegalStateException(
+                    "'cloudService' is not set and not found in Camel context service registry");
+        }
+        
+        this.cache = new CloudClientCacheImpl(cloudService);
+
+        super.doStart();
+    }
+
+    @Override
+    protected void doStop() throws Exception {
+        super.doStop();
+        if ( cache != null ) 
+        {
+            cache.close ();
+            cache = null;
+        }
     }
 
     // Operations
 
     @Override
     protected Endpoint createEndpoint(String uri, String remain, Map<String, Object> parameters) throws Exception {
-        KuraCloudEndpoint kuraCloudEndpoint = new KuraCloudEndpoint(uri, this, cloudService);
+        final KuraCloudEndpoint kuraCloudEndpoint = new KuraCloudEndpoint(uri, this, this.cache);
 
         String[] res = remain.split("/", 2);
         if (res.length < 2) {
@@ -52,11 +77,7 @@ public class KuraCloudComponent extends UriEndpointComponent {
         return kuraCloudEndpoint;
     }
 
-    public static CloudClientCache clientCache() {
-        return clientCache;
-    }
-
-    public CloudService getCloudService() {
+    private CloudService getCloudService() {
         if(cloudService == null) {
             cloudService = retrieveService(CloudService.class, getCamelContext().getRegistry());
         }

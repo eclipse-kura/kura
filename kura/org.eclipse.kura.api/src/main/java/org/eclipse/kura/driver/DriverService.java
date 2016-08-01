@@ -32,6 +32,15 @@ public interface DriverService {
 	 * @return the driver ID
 	 */
 	public String getDriverId(Driver driver);
+	
+	/**
+	 * Gets the driver instance by the provided driver ID ({@code kura.service.pid}).
+	 *
+	 * @param driverId
+	 *            the driver ID to check
+	 * @return the driver instance
+	 */
+	public Driver getDriver(String driverId);
 
 	/**
 	 * Returns the list containing all the available driver instances

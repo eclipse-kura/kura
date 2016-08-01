@@ -54,6 +54,7 @@ import org.eclipse.kura.core.configuration.metatype.Toption;
 import org.eclipse.kura.core.configuration.metatype.Tscalar;
 import org.eclipse.kura.driver.ChannelDescriptor;
 import org.eclipse.kura.driver.Driver;
+import org.eclipse.kura.driver.DriverService;
 import org.eclipse.kura.localization.LocalizationAdapter;
 import org.eclipse.kura.localization.resources.WireMessages;
 import org.eclipse.kura.type.TypedValue;
@@ -113,8 +114,11 @@ public final class WireAsset implements WireEmitter, WireReceiver, SelfConfiguri
 	/** The service component context. */
 	private ComponentContext m_context;
 
-	/** The Driver instance. */
-	private volatile Driver m_driver;
+	/** The Asset injected Driver instance. */
+	private Driver m_driver;
+
+	/** The Driver Service instance. */
+	private volatile DriverService m_driverService;
 
 	/** The configurable properties of this asset. */
 	private Map<String, Object> m_properties;
@@ -142,6 +146,7 @@ public final class WireAsset implements WireEmitter, WireReceiver, SelfConfiguri
 		this.m_context = componentContext;
 		this.m_properties = properties;
 		this.m_wireSupport = this.m_wireHelperService.newWireSupport(this);
+		this.m_driver = this.m_driverService.getDriver(this.m_asset.getAssetConfiguration().getDriverId());
 		s_logger.debug(s_message.activatingWireAssetDone());
 	}
 
@@ -154,6 +159,18 @@ public final class WireAsset implements WireEmitter, WireReceiver, SelfConfiguri
 	public synchronized void bindAssetService(final AssetService assetService) {
 		if (this.m_assetService == null) {
 			this.m_assetService = assetService;
+		}
+	}
+
+	/**
+	 * Binds the Driver Service.
+	 *
+	 * @param driverService
+	 *            the Driver Service instance
+	 */
+	public synchronized void bindDriverService(final DriverService driverService) {
+		if (this.m_driverService == null) {
+			this.m_driverService = driverService;
 		}
 	}
 
@@ -466,6 +483,18 @@ public final class WireAsset implements WireEmitter, WireReceiver, SelfConfiguri
 	public synchronized void unbindAssetService(final AssetService assetService) {
 		if (this.m_assetService == assetService) {
 			this.m_assetService = null;
+		}
+	}
+
+	/**
+	 * Unbinds the Driver Service.
+	 *
+	 * @param driverService
+	 *            the Driver Service instance
+	 */
+	public synchronized void unbindDriverService(final DriverService driverService) {
+		if (this.m_driverService == driverService) {
+			this.m_driverService = null;
 		}
 	}
 

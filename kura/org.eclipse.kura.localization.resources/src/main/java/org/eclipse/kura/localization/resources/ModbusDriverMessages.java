@@ -45,6 +45,9 @@ public interface ModbusDriverMessages {
 	@En("DISCRETE_INPUTS")
 	public String discreteInputs();
 
+	@En("Error while disconnecting....")
+	public String errorDisconnecting();
+
 	@En("Function Codes not in Range")
 	public String functionCodesNotInRange();
 

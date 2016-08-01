@@ -39,4 +39,10 @@
    	          name="AssetService" 
    	          policy="static" 
    	          unbind="unbindAssetService"/>
+   <reference bind="bindDriverService" 
+   	          cardinality="1..1" 
+   	          interface="org.eclipse.kura.driver.DriverService" 
+   	          name="DriverService" 
+   	          policy="static" 
+   	          unbind="unbindDriverService"/>
 </scr:component>

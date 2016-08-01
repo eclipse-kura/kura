@@ -16,8 +16,17 @@ import static com.ghgande.j2mod.modbus.Modbus.READ_COILS;
 import static com.ghgande.j2mod.modbus.Modbus.READ_HOLDING_REGISTERS;
 import static com.ghgande.j2mod.modbus.Modbus.READ_INPUT_DISCRETES;
 import static com.ghgande.j2mod.modbus.Modbus.READ_INPUT_REGISTERS;
+import static com.ghgande.j2mod.modbus.Modbus.WRITE_COIL;
+import static com.ghgande.j2mod.modbus.Modbus.WRITE_MULTIPLE_COILS;
+import static com.ghgande.j2mod.modbus.Modbus.WRITE_MULTIPLE_REGISTERS;
+import static com.ghgande.j2mod.modbus.Modbus.WRITE_SINGLE_REGISTER;
 import static org.eclipse.kura.Preconditions.checkCondition;
 import static org.eclipse.kura.Preconditions.checkNull;
+import static org.eclipse.kura.driver.DriverFlag.DRIVER_ERROR_CHANNEL_NOT_ACCESSIBLE;
+import static org.eclipse.kura.driver.DriverFlag.READ_FAILURE;
+import static org.eclipse.kura.driver.DriverFlag.READ_SUCCESSFUL;
+import static org.eclipse.kura.driver.DriverFlag.WRITE_FAILURE;
+import static org.eclipse.kura.driver.DriverFlag.WRITE_SUCCESSFUL;
 import static org.eclipse.kura.internal.driver.modbus.FunctionCode.FC_01_READ_COILS;
 import static org.eclipse.kura.internal.driver.modbus.FunctionCode.FC_02_READ_DISCRETE_INPUTS;
 import static org.eclipse.kura.internal.driver.modbus.FunctionCode.FC_03_READ_HOLDING_REGISTERS;
@@ -26,6 +35,9 @@ import static org.eclipse.kura.internal.driver.modbus.FunctionCode.FC_05_WRITE_S
 import static org.eclipse.kura.internal.driver.modbus.FunctionCode.FC_06_WRITE_SINGLE_REGISTER;
 import static org.eclipse.kura.internal.driver.modbus.FunctionCode.FC_15_WRITE_MULITPLE_COILS;
 import static org.eclipse.kura.internal.driver.modbus.FunctionCode.FC_16_WRITE_MULTIPLE_REGISTERS;
+import static org.eclipse.kura.internal.driver.modbus.ModbusType.RTU;
+import static org.eclipse.kura.internal.driver.modbus.ModbusType.TCP;
+import static org.eclipse.kura.internal.driver.modbus.ModbusType.UDP;
 
 import java.io.IOException;
 import java.util.List;
@@ -35,7 +47,6 @@ import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.driver.ChannelDescriptor;
 import org.eclipse.kura.driver.Driver;
-import org.eclipse.kura.driver.DriverFlag;
 import org.eclipse.kura.driver.DriverRecord;
 import org.eclipse.kura.driver.DriverService;
 import org.eclipse.kura.driver.listener.DriverListener;
@@ -78,6 +89,8 @@ import com.ghgande.j2mod.modbus.util.SerialParameters;
 /**
  * The Class ModbusDriver is a Modbus Driver implementation for Kura
  * Asset-Driver Topology.
+ *
+ * @see ModbusChannelDescriptor
  */
 public final class ModbusDriver implements Driver {
 
@@ -135,21 +148,21 @@ public final class ModbusDriver implements Driver {
 	/** {@inheritDoc} */
 	@Override
 	public void connect() throws ConnectionException {
-		if ((this.m_options.getType() == ModbusType.TCP) && (this.m_tcpMaster != null)) {
+		if ((this.m_options.getType() == TCP) && (this.m_tcpMaster != null)) {
 			try {
 				this.m_tcpMaster.connect();
 			} catch (final Exception e) {
 				throw new ConnectionException(s_message.connectionProblem() + ThrowableUtil.stackTraceAsString(e));
 			}
 		}
-		if ((this.m_options.getType() == ModbusType.UDP) && (this.m_udpMaster != null)) {
+		if ((this.m_options.getType() == UDP) && (this.m_udpMaster != null)) {
 			try {
 				this.m_udpMaster.connect();
 			} catch (final Exception e) {
 				throw new ConnectionException(s_message.connectionProblem() + ThrowableUtil.stackTraceAsString(e));
 			}
 		}
-		if ((this.m_options.getType() == ModbusType.RTU) && (this.m_rtuMaster != null)) {
+		if ((this.m_options.getType() == RTU) && (this.m_rtuMaster != null)) {
 			try {
 				this.m_rtuMaster.connect();
 			} catch (final Exception e) {
@@ -167,6 +180,11 @@ public final class ModbusDriver implements Driver {
 	 */
 	protected synchronized void deactivate(final ComponentContext componentContext) {
 		s_logger.debug(s_message.deactivating());
+		try {
+			this.disconnect();
+		} catch (final ConnectionException e) {
+			s_logger.error(s_message.errorDisconnecting() + ThrowableUtil.stackTraceAsString(e));
+		}
 		this.m_tcpMaster = null;
 		this.m_udpMaster = null;
 		this.m_rtuMaster = null;
@@ -176,21 +194,21 @@ public final class ModbusDriver implements Driver {
 	/** {@inheritDoc} */
 	@Override
 	public void disconnect() throws ConnectionException {
-		if ((this.m_options.getType() == ModbusType.TCP) && (this.m_tcpMaster != null)) {
+		if ((this.m_options.getType() == TCP) && (this.m_tcpMaster != null)) {
 			try {
 				this.m_tcpMaster.disconnect();
 			} catch (final Exception e) {
 				throw new ConnectionException(s_message.disconnectionProblem() + ThrowableUtil.stackTraceAsString(e));
 			}
 		}
-		if ((this.m_options.getType() == ModbusType.UDP) && (this.m_udpMaster != null)) {
+		if ((this.m_options.getType() == UDP) && (this.m_udpMaster != null)) {
 			try {
 				this.m_udpMaster.disconnect();
 			} catch (final Exception e) {
 				throw new ConnectionException(s_message.disconnectionProblem() + ThrowableUtil.stackTraceAsString(e));
 			}
 		}
-		if ((this.m_options.getType() == ModbusType.RTU) && (this.m_rtuMaster != null)) {
+		if ((this.m_options.getType() == RTU) && (this.m_rtuMaster != null)) {
 			try {
 				this.m_rtuMaster.disconnect();
 			} catch (final Exception e) {
@@ -297,17 +315,26 @@ public final class ModbusDriver implements Driver {
 			final int functionCode = this.getFunctionCode(primaryTable);
 			final int memoryAddr = Integer.valueOf(record.getChannelConfig().get("memory.address").toString());
 			final int regCount = Integer.valueOf(record.getChannelConfig().get("register.count").toString());
-			if ((this.m_options.getType() == ModbusType.TCP) && (this.m_tcpMaster != null)) {
-				try {
-					final ModbusResponse response = this.readRequest(unitId, this.m_tcpMaster.getTransport(),
-							functionCode, memoryAddr, regCount);
-					final TypedValue<?> value = this.getValue(response);
-					record.setValue(value);
-					record.setDriverStatus(
-							this.m_driverService.newDriverStatus(DriverFlag.READ_SUCCESSFUL, null, null));
-				} catch (final ModbusException e) {
-					record.setDriverStatus(this.m_driverService.newDriverStatus(DriverFlag.READ_FAILURE, null, e));
-				}
+			AbstractModbusTransport transport = null;
+			if ((this.m_options.getType() == TCP) && (this.m_tcpMaster != null)) {
+				transport = this.m_tcpMaster.getTransport();
+			}
+			if ((this.m_options.getType() == RTU) && (this.m_rtuMaster != null)) {
+				transport = this.m_rtuMaster.getTransport();
+			}
+			if ((this.m_options.getType() == UDP) && (this.m_udpMaster != null)) {
+				transport = this.m_udpMaster.getTransport();
+			}
+			try {
+				final ModbusResponse response = this.readRequest(unitId, transport, functionCode, memoryAddr, regCount);
+				final TypedValue<?> value = this.getValue(response);
+				record.setValue(value);
+				record.setDriverStatus(this.m_driverService.newDriverStatus(READ_SUCCESSFUL, null, null));
+			} catch (final ModbusException e) {
+				record.setDriverStatus(this.m_driverService.newDriverStatus(READ_FAILURE, null, e));
+			} catch (final KuraRuntimeException e) {
+				record.setDriverStatus(this.m_driverService.newDriverStatus(DRIVER_ERROR_CHANNEL_NOT_ACCESSIBLE,
+						s_message.transportNonNull() + " OR " + s_message.wrongUnitId(), e));
 			}
 		}
 		return records;
@@ -367,9 +394,7 @@ public final class ModbusDriver implements Driver {
 			default:
 				throw new ModbusException(s_message.requestTypeNotSupported(functionCode));
 			}
-			if (req != null) {
-				req.setUnitID(unitId);
-			}
+			req.setUnitID(unitId);
 
 			// Prepare the transaction
 			trans = modbusTransport.createTransaction();
@@ -438,16 +463,25 @@ public final class ModbusDriver implements Driver {
 			final String primaryTable = record.getChannelConfig().get("primary.table").toString();
 			final int functionCode = this.getFunctionCode(primaryTable);
 			final int memoryAddr = Integer.valueOf(record.getChannelConfig().get("memory.address").toString());
-			Integer.valueOf(record.getChannelConfig().get("register.count").toString());
-			if ((this.m_options.getType() == ModbusType.TCP) && (this.m_tcpMaster != null)) {
-				try {
-					this.writeRequest(unitId, this.m_tcpMaster.getTransport(), functionCode, memoryAddr,
-							Integer.valueOf(record.getValue().getValue().toString()));
-					record.setDriverStatus(
-							this.m_driverService.newDriverStatus(DriverFlag.WRITE_SUCCESSFUL, null, null));
-				} catch (final ModbusException e) {
-					record.setDriverStatus(this.m_driverService.newDriverStatus(DriverFlag.WRITE_FAILURE, null, e));
-				}
+			AbstractModbusTransport transport = null;
+			if ((this.m_options.getType() == TCP) && (this.m_tcpMaster != null)) {
+				transport = this.m_tcpMaster.getTransport();
+			}
+			if ((this.m_options.getType() == RTU) && (this.m_rtuMaster != null)) {
+				transport = this.m_rtuMaster.getTransport();
+			}
+			if ((this.m_options.getType() == UDP) && (this.m_udpMaster != null)) {
+				transport = this.m_udpMaster.getTransport();
+			}
+			try {
+				this.writeRequest(unitId, transport, functionCode, memoryAddr,
+						Integer.valueOf(record.getValue().getValue().toString()));
+				record.setDriverStatus(this.m_driverService.newDriverStatus(WRITE_SUCCESSFUL, null, null));
+			} catch (final ModbusException e) {
+				record.setDriverStatus(this.m_driverService.newDriverStatus(WRITE_FAILURE, null, e));
+			} catch (final KuraRuntimeException e) {
+				record.setDriverStatus(this.m_driverService.newDriverStatus(DRIVER_ERROR_CHANNEL_NOT_ACCESSIBLE,
+						s_message.transportNonNull() + " OR " + s_message.wrongUnitId(), e));
 			}
 		}
 		return records;
@@ -466,8 +500,10 @@ public final class ModbusDriver implements Driver {
 	 *            Register number
 	 * @param values
 	 *            Values to apply
-	 *
 	 * @return Response object
+	 * @throws KuraRuntimeException
+	 *             if the transport is null or the function code is wrongly set
+	 *             or the unit ID is wrongly set
 	 */
 	private ModbusResponse writeRequest(final int unitId, final AbstractModbusTransport modbusTransport,
 			final int functionCode, final int register, final int... values) throws ModbusException {
@@ -488,20 +524,20 @@ public final class ModbusDriver implements Driver {
 			ModbusRequest req = null;
 			// Prepare the request
 			switch (functionCode) {
-			case Modbus.WRITE_COIL:
+			case WRITE_COIL:
 				req = new WriteCoilRequest(register, values[0] != 0);
 				break;
-			case Modbus.WRITE_SINGLE_REGISTER:
+			case WRITE_SINGLE_REGISTER:
 				req = new WriteSingleRegisterRequest(register, new SimpleRegister(values[0]));
 				break;
-			case Modbus.WRITE_MULTIPLE_REGISTERS:
+			case WRITE_MULTIPLE_REGISTERS:
 				final Register[] regs = new Register[values.length];
 				for (int i = 0; i < values.length; i++) {
 					regs[i] = new SimpleRegister(values[i]);
 				}
 				req = new WriteMultipleRegistersRequest(register, regs);
 				break;
-			case Modbus.WRITE_MULTIPLE_COILS:
+			case WRITE_MULTIPLE_COILS:
 				final BitVector bitVector = new BitVector(values.length);
 				for (int i = 0; i < values.length; i++) {
 					bitVector.setBit(i, values[i] != 0);

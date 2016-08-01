@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">    
+	<OCD id="org.eclipse.kura.camel.xml.XmlCamelRouter"
+         name="Generic Camel XML"
+         description="A generic Apache XML Camel Router">
+        
+        <!-- FIXME: fix name later -->
+        <AD id="xml.data"  
+            name="xml.data" 
+            type="String"
+            cardinality="-1" 
+            required="true"
+            default=""
+            description="The Apache Camel XML configuration"/>
+          
+	</OCD>
+   
+    <Designate pid="org.eclipse.kura.camel.xml.XmlCamelRouter">
+        <Object ocdref="org.eclipse.kura.camel.xml.XmlCamelRouter"/>
+    </Designate>
+</MetaData>

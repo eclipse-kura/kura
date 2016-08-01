@@ -9,11 +9,33 @@
  *******************************************************************************/
 package org.eclipse.kura.camel.camelcloud;
 
+import static java.lang.String.format;
+import static org.apache.camel.ServiceStatus.Started;
+import static org.eclipse.kura.KuraErrorCode.CONFIGURATION_ERROR;
+import static org.eclipse.kura.KuraErrorCode.OPERATION_NOT_SUPPORTED;
+import static org.eclipse.kura.camel.camelcloud.KuraCloudClientConstants.CAMEL_KURA_CLOUD_CONTROL;
+import static org.eclipse.kura.camel.camelcloud.KuraCloudClientConstants.CAMEL_KURA_CLOUD_DEVICEID;
+import static org.eclipse.kura.camel.camelcloud.KuraCloudClientConstants.CAMEL_KURA_CLOUD_MESSAGEID;
+import static org.eclipse.kura.camel.camelcloud.KuraCloudClientConstants.CAMEL_KURA_CLOUD_PRIORITY;
+import static org.eclipse.kura.camel.camelcloud.KuraCloudClientConstants.CAMEL_KURA_CLOUD_QOS;
+import static org.eclipse.kura.camel.camelcloud.KuraCloudClientConstants.CAMEL_KURA_CLOUD_RETAIN;
+
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+
 import org.apache.camel.CamelContext;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.camel.ProducerTemplate;
+import org.apache.camel.StartupListener;
 import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.impl.DefaultShutdownStrategy;
+import org.apache.camel.spi.ShutdownStrategy;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloud.CloudClient;
@@ -22,216 +44,256 @@ import org.eclipse.kura.message.KuraPayload;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-
-import static org.eclipse.kura.KuraErrorCode.CONFIGURATION_ERROR;
-import static org.eclipse.kura.KuraErrorCode.OPERATION_NOT_SUPPORTED;
-import static org.eclipse.kura.camel.camelcloud.KuraCloudClientConstants.*;
-import static java.lang.String.format;
-import static org.apache.camel.ServiceStatus.Started;
-
 public class CamelCloudClient implements CloudClient {
 
-    private final Logger s_logger = LoggerFactory.getLogger(CamelCloudClient.class);
+	private final static Logger logger = LoggerFactory.getLogger(CamelCloudClient.class);
 
-    private ScheduledExecutorService executorService;
+	private final CamelCloudService cloudService;
 
-    private final CamelCloudService cloudService;
+	private final CamelContext camelContext;
 
-    private final CamelContext camelContext;
+	private final ProducerTemplate producerTemplate;
 
-    private final ProducerTemplate producerTemplate;
+	private final List<CloudClientListener> cloudClientListeners = new LinkedList<CloudClientListener>();
 
-    private final List<CloudClientListener> cloudClientListeners = new LinkedList<CloudClientListener>();
+	private final String applicationId;
 
-    private final String applicationId;
+	private final String baseEndpoint;
 
-    private final String baseEndpoint;
+	private ExecutorService executor;
 
-    public CamelCloudClient(CamelCloudService cloudService, CamelContext camelContext, String applicationId, String baseEndpoint) {
-        this.cloudService = cloudService;
-        this.camelContext = camelContext;
-        this.producerTemplate = camelContext.createProducerTemplate();
-        this.applicationId = applicationId;
-        this.baseEndpoint = baseEndpoint;
-        this.executorService = camelContext.getExecutorServiceManager().newDefaultScheduledThreadPool(this, "cloudClientExecutor");
-    }
+	public CamelCloudClient(CamelCloudService cloudService, CamelContext camelContext, String applicationId,
+			String baseEndpoint) {
+		this.cloudService = cloudService;
+		this.camelContext = camelContext;
+		this.producerTemplate = camelContext.createProducerTemplate();
+		this.applicationId = applicationId;
+		this.baseEndpoint = baseEndpoint;
+		this.executor = camelContext.getExecutorServiceManager().newThreadPool(this,
+				"CamelCloudClient/" + applicationId, 0, 1);
+	}
 
-    public CamelCloudClient(CamelCloudService cloudService, CamelContext camelContext, String applicationId) {
-        this(cloudService, camelContext, applicationId, "vm:%s");
-    }
+	public CamelCloudClient(CamelCloudService cloudService, CamelContext camelContext, String applicationId) {
+		this(cloudService, camelContext, applicationId, "vm:%s");
+	}
 
-    // Cloud client API
+	// Cloud client API
 
-    @Override
-    public String getApplicationId() {
-        return applicationId;
-    }
+	@Override
+	public String getApplicationId() {
+		return applicationId;
+	}
 
-    @Override
-    public void release() {
-        cloudService.release(applicationId);
-    }
+	@Override
+	public void release() {
+		this.cloudService.release(this.applicationId);
+		this.camelContext.getExecutorServiceManager().shutdown(executor);
+	}
 
-    @Override
-    public boolean isConnected() {
-        return camelContext.getStatus() == Started;
-    }
+	@Override
+	public boolean isConnected() {
+		return camelContext.getStatus() == Started;
+	}
 
-    @Override
-    public int publish(String topic, KuraPayload kuraPayload, int qos, boolean retain) throws KuraException {
-        return publish(topic, kuraPayload, qos, retain, 5);
-    }
+	@Override
+	public int publish(String topic, KuraPayload kuraPayload, int qos, boolean retain) throws KuraException {
+		return publish(topic, kuraPayload, qos, retain, 5);
+	}
 
-    @Override
-    public int publish(String topic, KuraPayload kuraPayload, int qos, boolean retain, int priority) throws KuraException {
-        return doPublish(false, null, topic, kuraPayload, qos, retain, priority);
-    }
+	@Override
+	public int publish(String topic, KuraPayload kuraPayload, int qos, boolean retain, int priority)
+			throws KuraException {
+		return doPublish(false, null, topic, kuraPayload, qos, retain, priority);
+	}
 
-    @Override
-    public int publish(String s, byte[] bytes, int i, boolean b, int i1) throws KuraException {
-        KuraPayload kuraPayload = new KuraPayload();
-        kuraPayload.setBody(bytes);
-        return publish(s, kuraPayload, i, b);
-    }
+	@Override
+	public int publish(String s, byte[] bytes, int i, boolean b, int i1) throws KuraException {
+		KuraPayload kuraPayload = new KuraPayload();
+		kuraPayload.setBody(bytes);
+		return publish(s, kuraPayload, i, b);
+	}
 
-    @Override
-    public int controlPublish(String topic, KuraPayload payload, int qos, boolean retain, int priority) throws KuraException {
-        return doPublish(true, null, topic, payload, qos, retain, priority);
-    }
+	@Override
+	public int controlPublish(String topic, KuraPayload payload, int qos, boolean retain, int priority)
+			throws KuraException {
+		return doPublish(true, null, topic, payload, qos, retain, priority);
+	}
 
-    @Override
-    public int controlPublish(String deviceId, String topic, KuraPayload kuraPayload, int qos, boolean retain, int priority) throws KuraException {
-        return doPublish(true, deviceId, topic, kuraPayload, qos, retain, priority);
-    }
+	@Override
+	public int controlPublish(String deviceId, String topic, KuraPayload kuraPayload, int qos, boolean retain,
+			int priority) throws KuraException {
+		return doPublish(true, deviceId, topic, kuraPayload, qos, retain, priority);
+	}
 
-    @Override
-    public int controlPublish(String deviceId, String topic, byte[] payload, int qos, boolean b, int priority) throws KuraException {
-        KuraPayload kuraPayload = new KuraPayload();
-        kuraPayload.setBody(payload);
-        return doPublish(true, deviceId, topic, kuraPayload, qos, b, priority);
-    }
+	@Override
+	public int controlPublish(String deviceId, String topic, byte[] payload, int qos, boolean b, int priority)
+			throws KuraException {
+		KuraPayload kuraPayload = new KuraPayload();
+		kuraPayload.setBody(payload);
+		return doPublish(true, deviceId, topic, kuraPayload, qos, b, priority);
+	}
 
-    @Override
-    public void subscribe(String topic, int qos) throws KuraException {
-        doSubscribe(false, topic, qos);
-    }
+	@Override
+	public void subscribe(String topic, int qos) throws KuraException {
+		forkSubscribe(false, topic, qos);
+	}
 
-    @Override
-    public void controlSubscribe(String topic, int qos) throws KuraException {
-        doSubscribe(true, topic, qos);
-    }
+	@Override
+	public void controlSubscribe(String topic, int qos) throws KuraException {
+		forkSubscribe(true, topic, qos);
+	}
 
-    @Override
-    public void unsubscribe(String topic) throws KuraException {
-        final String internalQueue = applicationId + ":" + topic;
-        try {
-            executorService.schedule(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        camelContext.stopRoute(internalQueue);
-                        camelContext.removeRoute(internalQueue);
-                    } catch (Exception e) {
-                        throw new RuntimeException(e);
-                    }
-                }
-            }, 1, TimeUnit.SECONDS);
-        } catch (Exception e) {
-            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
-        }
-    }
+	@Override
+	public void unsubscribe(String topic) throws KuraException {
+		internalUnsubscribe(this.applicationId + ":" + topic);
+	}
 
-    @Override
-    public void controlUnsubscribe(String topic) throws KuraException {
-        unsubscribe(topic);
-    }
+	private void internalUnsubscribe(final String internalQueue) throws KuraException {
+		try {
+			ShutdownStrategy strategy = this.camelContext.getShutdownStrategy();
+			if (strategy instanceof DefaultShutdownStrategy) {
+				if (((DefaultShutdownStrategy) strategy).getCurrentShutdownTaskFuture() != null) {
+					logger.debug("Skipping cleanup since the camel context is being shut down");
+					// we are "in shutdown" and would deadlock
+					return;
+				}
+			}
 
-    @Override
-    public void addCloudClientListener(CloudClientListener cloudClientListener) {
-        cloudClientListeners.add(cloudClientListener);
-    }
+			// perform shutdown
 
-    @Override
-    public void removeCloudClientListener(CloudClientListener cloudClientListener) {
-        cloudClientListeners.remove(cloudClientListener);
-    }
+			this.camelContext.stopRoute(internalQueue);
+			this.camelContext.removeRoute(internalQueue);
+		} catch (Exception e) {
+			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+		}
+	}
 
-    @Override
-    public List<Integer> getUnpublishedMessageIds() throws KuraException {
-        throw new KuraException(OPERATION_NOT_SUPPORTED);
-    }
+	@Override
+	public void controlUnsubscribe(String topic) throws KuraException {
+		unsubscribe(topic);
+	}
 
-    @Override
-    public List<Integer> getInFlightMessageIds() throws KuraException {
-        throw new KuraException(OPERATION_NOT_SUPPORTED);
-    }
+	@Override
+	public void addCloudClientListener(CloudClientListener cloudClientListener) {
+		cloudClientListeners.add(cloudClientListener);
+	}
 
-    @Override
-    public List<Integer> getDroppedInFlightMessageIds() throws KuraException {
-        throw new KuraException(OPERATION_NOT_SUPPORTED);
-    }
+	@Override
+	public void removeCloudClientListener(CloudClientListener cloudClientListener) {
+		cloudClientListeners.remove(cloudClientListener);
+	}
 
-    // Helpers
+	@Override
+	public List<Integer> getUnpublishedMessageIds() throws KuraException {
+		throw new KuraException(OPERATION_NOT_SUPPORTED);
+	}
 
-    private int doPublish(boolean isControl, String deviceId, String topic, KuraPayload kuraPayload, int qos, boolean retain, int priority) throws KuraException {
-        String target = target(applicationId + ":" + topic);
-        int kuraMessageId = Math.abs(new Random().nextInt());
+	@Override
+	public List<Integer> getInFlightMessageIds() throws KuraException {
+		throw new KuraException(OPERATION_NOT_SUPPORTED);
+	}
 
-        Map<String, Object> headers = new HashMap<String, Object>();
-        headers.put(CAMEL_KURA_CLOUD_CONTROL, isControl);
-        headers.put(CAMEL_KURA_CLOUD_MESSAGEID, kuraMessageId);
-        headers.put(CAMEL_KURA_CLOUD_DEVICEID, deviceId);
-        headers.put(CAMEL_KURA_CLOUD_QOS, qos);
-        headers.put(CAMEL_KURA_CLOUD_RETAIN, retain);
-        headers.put(CAMEL_KURA_CLOUD_PRIORITY, priority);
+	@Override
+	public List<Integer> getDroppedInFlightMessageIds() throws KuraException {
+		throw new KuraException(OPERATION_NOT_SUPPORTED);
+	}
 
-        producerTemplate.sendBodyAndHeaders(target, kuraPayload, headers);
-        return kuraMessageId;
-    }
+	// Helpers
 
-    private void doSubscribe(final boolean isControl, final String topic, final int qos) throws KuraException {
-        s_logger.debug("About to subscribe to topic {} with QOS {}.", topic, qos);
-        final String internalQueue = applicationId + ":" + topic;
-        try {
-            camelContext.addRoutes(new RouteBuilder() {
-                @Override
-                public void configure() throws Exception {
-                    from(target(internalQueue)).
-                            routeId(internalQueue).
-                            process(new Processor() {
-                                @Override
-                                public void process(Exchange exchange) throws Exception {
-                                    for(CloudClientListener listener : cloudClientListeners) {
-                                        Object body = exchange.getIn().getBody();
-                                        KuraPayload payload;
-                                        if(body instanceof KuraPayload) {
-                                            payload = (KuraPayload) body;
-                                        } else {
-                                            payload = new KuraPayload();
-                                            payload.setBody(getContext().getTypeConverter().convertTo(byte[].class, body));
-                                        }
-                                        String deviceId = exchange.getIn().getHeader(CAMEL_KURA_CLOUD_DEVICEID, String.class);
-                                        int qos = exchange.getIn().getHeader(CAMEL_KURA_CLOUD_QOS, 0, int.class);
-                                        listener.onMessageArrived(deviceId, "camel", payload, qos, true);
-                                    }
-                                }
-                            });
-                }
-            });
-        } catch (Exception e) {
-            s_logger.warn("Error while adding subscription route. Rethrowing root cause.");
-            throw new KuraException(CONFIGURATION_ERROR, e);
-        }
-    }
+	private int doPublish(boolean isControl, String deviceId, String topic, KuraPayload kuraPayload, int qos,
+			boolean retain, int priority) throws KuraException {
+		final String target = target(applicationId + ":" + topic);
+		int kuraMessageId = Math.abs(new Random().nextInt());
 
-    private String target(String topic) {
-        if (baseEndpoint.contains("%s")) {
-            return format(baseEndpoint, topic);
-        }
-        return baseEndpoint + topic;
-    }
+		Map<String, Object> headers = new HashMap<String, Object>();
+		headers.put(CAMEL_KURA_CLOUD_CONTROL, isControl);
+		headers.put(CAMEL_KURA_CLOUD_MESSAGEID, kuraMessageId);
+		headers.put(CAMEL_KURA_CLOUD_DEVICEID, deviceId);
+		headers.put(CAMEL_KURA_CLOUD_QOS, qos);
+		headers.put(CAMEL_KURA_CLOUD_RETAIN, retain);
+		headers.put(CAMEL_KURA_CLOUD_PRIORITY, priority);
+
+		logger.debug("Publishing: {} -> {} / {}", new Object[] { target, kuraPayload, this.camelContext });
+
+		producerTemplate.sendBodyAndHeaders(target, kuraPayload, headers);
+		return kuraMessageId;
+	}
+
+	private void forkSubscribe(final boolean isControl, final String topic, final int qos) throws KuraException {
+		/*
+		 * This construct is needed due to CAMEL-10206
+		 * 
+		 * It does fork off the subscription process, which actually creates a
+		 * new camel route, into the background since we currently may be in the
+		 * process of starting the camel context. If that is the case then the
+		 * newly added route won't be started since the camel context is in the
+		 * "starting" mode. Events won't get processed.
+		 * 
+		 * So we do fork off the subscription process after the camel context
+		 * has been started. The executor is needed since, according to the
+		 * camel javadoc on StartupListener, the camel context may still be in
+		 * "starting" mode when the "onCamelContextStarted" method is called.
+		 */
+		try {
+			this.camelContext.addStartupListener(new StartupListener() {
+				@Override
+				public void onCamelContextStarted(CamelContext context, boolean alreadyStarted) throws Exception {
+					executor.submit(new Callable<Void>() {
+						@Override
+						public Void call() throws Exception {
+							doSubscribe(isControl, topic, qos);
+							return null;
+						}
+					});
+				}
+			});
+		} catch (Exception e) {
+			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+		}
+	}
+
+	private void doSubscribe(final boolean isControl, final String topic, final int qos) throws KuraException {
+		logger.debug("About to subscribe to topic {} with QOS {}.", topic, qos);
+		final String internalQueue = this.applicationId + ":" + topic;
+		logger.debug("\tInternal target: {} / {}", target(internalQueue), this.camelContext);
+		try {
+			camelContext.addRoutes(new RouteBuilder() {
+				@Override
+				public void configure() throws Exception {
+					from(target(internalQueue)).routeId(internalQueue).process(new Processor() {
+						@Override
+						public void process(Exchange exchange) throws Exception {
+							logger.debug("Processing: {}", exchange);
+							for (CloudClientListener listener : cloudClientListeners) {
+								logger.debug("\t{}", listener);
+
+								Object body = exchange.getIn().getBody();
+								KuraPayload payload;
+								if (body instanceof KuraPayload) {
+									payload = (KuraPayload) body;
+								} else {
+									payload = new KuraPayload();
+									payload.setBody(getContext().getTypeConverter().convertTo(byte[].class, body));
+								}
+								String deviceId = exchange.getIn().getHeader(CAMEL_KURA_CLOUD_DEVICEID, String.class);
+								int qos = exchange.getIn().getHeader(CAMEL_KURA_CLOUD_QOS, 0, int.class);
+								listener.onMessageArrived(deviceId, "camel", payload, qos, true);
+							}
+						}
+					});
+				}
+			});
+		} catch (Exception e) {
+			logger.warn("Error while adding subscription route. Rethrowing root cause.");
+			throw new KuraException(CONFIGURATION_ERROR, e);
+		}
+	}
+
+	private String target(String topic) {
+		if (baseEndpoint.contains("%s")) {
+			return format(baseEndpoint, topic);
+		}
+		return baseEndpoint + topic;
+	}
 
 }

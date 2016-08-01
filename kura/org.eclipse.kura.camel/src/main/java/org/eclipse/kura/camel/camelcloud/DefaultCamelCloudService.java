@@ -32,33 +32,32 @@ public class DefaultCamelCloudService implements CamelCloudService {
 
     @Override
     public CloudClient newCloudClient(String applicationId) throws KuraException {
-        String baseEndpoint = baseEndpoints.get(applicationId);
+        String baseEndpoint = this.baseEndpoints.get(applicationId);
         if(baseEndpoint == null) {
             baseEndpoint = "vm:%s";
         }
-        CloudClient cloudClient = new CamelCloudClient(this, camelContext, applicationId, baseEndpoint);
-        clients.put(applicationId, cloudClient);
+        CloudClient cloudClient = new CamelCloudClient(this, this.camelContext, applicationId, baseEndpoint);
+        this.clients.put(applicationId, cloudClient);
         return cloudClient;
     }
 
     @Override
     public String[] getCloudApplicationIdentifiers() {
-        return clients.keySet().toArray(new String[0]);
+        return this.clients.keySet().toArray(new String[0]);
     }
 
     @Override
     public boolean isConnected() {
-        return camelContext.getStatus() == Started;
+        return this.camelContext.getStatus() == Started;
     }
 
     @Override
     public void registerBaseEndpoint(String applicationId, String baseEndpoint) {
-        baseEndpoints.put(applicationId, baseEndpoint);
+    	this.baseEndpoints.put(applicationId, baseEndpoint);
     }
 
     @Override
     public void release(String applicationId) {
-        clients.remove(applicationId);
+    	this.clients.remove(applicationId);
     }
-
 }

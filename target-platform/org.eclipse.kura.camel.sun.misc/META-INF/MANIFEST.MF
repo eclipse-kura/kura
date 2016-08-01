@@ -1,0 +1,9 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Import sun.misc for camel-core
+Bundle-SymbolicName: org.eclipse.kura.camel.sun.misc
+Bundle-Version: 1.0.0
+Bundle-Vendor: Eclipse Kura
+Fragment-Host: org.apache.camel.camel-core;bundle-version="2.17.2"
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Import-Package: sun.misc

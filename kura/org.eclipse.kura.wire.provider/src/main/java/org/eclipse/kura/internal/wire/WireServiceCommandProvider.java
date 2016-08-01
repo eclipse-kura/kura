@@ -38,21 +38,21 @@ public final class WireServiceCommandProvider implements CommandProvider {
 	private volatile WireService m_wireService;
 
 	/**
-	 * The command {@code createConfig} creates a Wire Configuration between the
+	 * The command {@code createWire} creates a Wire Configuration between the
 	 * provided emitter PID and receiver PID
 	 *
 	 * @param ci
 	 *            the console interpreter
 	 */
-	public void _createConfig(final CommandInterpreter ci) {
+	public void _createWire(final CommandInterpreter ci) {
 		final String argument = ci.nextArgument();
 		if (argument == null) {
-			ci.println("Usage: createConfig <emitterPid>----<receiverPid>");
+			ci.println("Usage: createWire <emitterPid>----<receiverPid>");
 		}
 		final List<String> pids = this.getPids(argument);
 		if (pids.isEmpty() || (pids.size() != 2)) {
 			ci.println("The format is wrongly provided");
-			ci.println("Usage: createConfig <emitterPid>----<receiverPid>");
+			ci.println("Usage: createWire <emitterPid>----<receiverPid>");
 		}
 		final String emitterPid = pids.get(0);
 		final String receiverPid = pids.get(1);
@@ -64,21 +64,21 @@ public final class WireServiceCommandProvider implements CommandProvider {
 	}
 
 	/**
-	 * The command {@code deleteConfig} delete existing Wire Configuration
-	 * between the provided emitter PID and receiver PID
+	 * The command {@code deleteWire} delete existing Wire Configuration between
+	 * the provided emitter PID and receiver PID
 	 *
 	 * @param ci
 	 *            the console interpreter
 	 */
-	public void _deleteConfig(final CommandInterpreter ci) {
+	public void _deleteWire(final CommandInterpreter ci) {
 		final String argument = ci.nextArgument();
 		if (argument == null) {
-			ci.println("Usage: deleteConfig <emitterPid>----<receiverPid>");
+			ci.println("Usage: deleteWire <emitterPid>----<receiverPid>");
 		}
 		final List<String> pids = this.getPids(argument);
 		if (pids.isEmpty() || (pids.size() != 2)) {
 			ci.println("The format is wrongly provided");
-			ci.println("Usage: deleteConfig <emitterPid>----<receiverPid>");
+			ci.println("Usage: deleteWire <emitterPid>----<receiverPid>");
 		}
 		final String emitterPid = pids.get(0);
 		final String receiverPid = pids.get(1);
@@ -92,13 +92,12 @@ public final class WireServiceCommandProvider implements CommandProvider {
 	}
 
 	/**
-	 * The command {@code listConfigs} lists all the available Wire
-	 * Configurations
+	 * The command {@code listWires} lists all the available Wire Configurations
 	 *
 	 * @param ci
 	 *            the console interpreter
 	 */
-	public void _listConfigs(final CommandInterpreter ci) {
+	public void _listWires(final CommandInterpreter ci) {
 		ci.println("=================== Wire Configurations ===================");
 		final List<WireConfiguration> configs = this.m_wireService.getWireConfigurations();
 		int i = 0;
@@ -107,7 +106,7 @@ public final class WireServiceCommandProvider implements CommandProvider {
 					.append(config.getEmitterPid()).append("  ").append("Receiver PID ===>").append(" ")
 					.append(config.getReceiverPid()).toString());
 		}
-		ci.println("=================== =================== ===================");
+		ci.println("===========================================================");
 	}
 
 	/**
@@ -126,9 +125,9 @@ public final class WireServiceCommandProvider implements CommandProvider {
 	@Override
 	public String getHelp() {
 		return "---Wire Service---\n"
-				+ "\tcreateConfig <emitterPid>----<receiverPid> - Creates a Wire Configuration between the provided emitter and receiver\n"
-				+ "\tlistConfigs - list all created Wire Configurations\n"
-				+ "\tdeleteConfig <emitterPid>----<receiverPid> - Deletes the already created Wire Configuration between the provided emitter and receiver\n";
+				+ "\tcreateWire <emitterPid>----<receiverPid> - Creates a Wire Configuration between the provided emitter and receiver\n"
+				+ "\tlistWires - list all created Wire Configurations\n"
+				+ "\tdeleteWire <emitterPid>----<receiverPid> - Deletes the already created Wire Configuration between the provided emitter and receiver\n";
 	}
 
 	/**

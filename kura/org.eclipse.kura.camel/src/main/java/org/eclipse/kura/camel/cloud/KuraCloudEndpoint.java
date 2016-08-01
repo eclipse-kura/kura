@@ -9,19 +9,20 @@
  *******************************************************************************/
 package org.eclipse.kura.camel.cloud;
 
-import static org.eclipse.kura.camel.cloud.KuraCloudComponent.clientCache;
-
 import org.apache.camel.Consumer;
 import org.apache.camel.Processor;
 import org.apache.camel.impl.DefaultEndpoint;
 import org.apache.camel.spi.UriEndpoint;
 import org.apache.camel.spi.UriParam;
-import org.eclipse.kura.camel.utils.KuraServiceFactory;
-import org.eclipse.kura.cloud.CloudClient;
-import org.eclipse.kura.cloud.CloudService;
+import org.eclipse.kura.camel.internal.cloud.CloudClientCache;
+import org.eclipse.kura.camel.internal.cloud.CloudClientCache.CloudClientHandle;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @UriEndpoint(scheme = "kura-cloud", title = "Kura Cloud", label = "iot,kura,cloud", syntax = "kura-cloud:applicationId/appTopic")
 public class KuraCloudEndpoint extends DefaultEndpoint {
+
+    private static final Logger logger = LoggerFactory.getLogger(KuraCloudEndpoint.class);
 
     @UriParam(defaultValue = "")
     private String applicationId = "";
@@ -44,23 +45,44 @@ public class KuraCloudEndpoint extends DefaultEndpoint {
     @UriParam(defaultValue = "")
     private String deviceId;
 
-    private CloudService cloudService;
+    private CloudClientHandle cloudClientHandle;
 
-    public KuraCloudEndpoint(String uri, KuraCloudComponent kuraCloudComponent, CloudService cloudService) {
+    private CloudClientCache cache;
+
+    public KuraCloudEndpoint(String uri, KuraCloudComponent kuraCloudComponent, CloudClientCache cache) {
         super(uri, kuraCloudComponent);
-        this.cloudService = cloudService;
+        this.cache = cache;
+    }
+
+    @Override
+    protected void doStart() throws Exception {
+        synchronized (this) {
+            this.cloudClientHandle = this.cache.getOrCreate(this.applicationId);
+            logger.debug("CloudClient {} -> {}", applicationId, cloudClientHandle.getClient());
+        }
+        super.doStart();
+    }
+
+    @Override
+    protected void doStop() throws Exception {
+        super.doStop();
+
+        synchronized (this) {
+            if (this.cloudClientHandle != null) {
+                this.cloudClientHandle.close();
+                this.cloudClientHandle = null;
+            }
+        }
     }
 
     @Override
     public Consumer createConsumer(Processor processor) throws Exception {
-        CloudClient cloudClient = clientCache().getOrCreate(applicationId, cloudService);
-        return new KuraCloudConsumer(this, processor, cloudClient);
+        return new KuraCloudConsumer(this, processor, this.cloudClientHandle.getClient());
     }
 
     @Override
     public KuraCloudProducer createProducer() throws Exception {
-        CloudClient cloudClient = clientCache().getOrCreate(applicationId, cloudService);
-        return new KuraCloudProducer(this, cloudClient);
+        return new KuraCloudProducer(this, this.cloudClientHandle.getClient());
     }
 
     @Override
@@ -128,23 +150,4 @@ public class KuraCloudEndpoint extends DefaultEndpoint {
     public void setDeviceId(String deviceId) {
         this.deviceId = deviceId;
     }
-
-    public CloudService getCloudService() {
-        if(cloudService != null) {
-            return cloudService;
-        }
-
-        if(getComponent().getCloudService() != null) {
-            cloudService = getComponent().getCloudService();
-        } else {
-            cloudService = KuraServiceFactory.retrieveService(CloudService.class, this.getCamelContext().getRegistry());
-        }
-
-        return cloudService;
-    }
-
-    public void setCloudService(CloudService cloudService) {
-        this.cloudService = cloudService;
-    }
-
 }

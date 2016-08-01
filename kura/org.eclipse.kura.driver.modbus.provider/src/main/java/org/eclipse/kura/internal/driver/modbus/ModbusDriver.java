@@ -66,9 +66,15 @@ import com.ghgande.j2mod.modbus.msg.ReadInputRegistersRequest;
 import com.ghgande.j2mod.modbus.msg.ReadInputRegistersResponse;
 import com.ghgande.j2mod.modbus.msg.ReadMultipleRegistersRequest;
 import com.ghgande.j2mod.modbus.msg.ReadMultipleRegistersResponse;
+import com.ghgande.j2mod.modbus.msg.WriteCoilRequest;
+import com.ghgande.j2mod.modbus.msg.WriteMultipleCoilsRequest;
+import com.ghgande.j2mod.modbus.msg.WriteMultipleRegistersRequest;
+import com.ghgande.j2mod.modbus.msg.WriteSingleRegisterRequest;
+import com.ghgande.j2mod.modbus.procimg.Register;
+import com.ghgande.j2mod.modbus.procimg.SimpleRegister;
+import com.ghgande.j2mod.modbus.util.BitVector;
 import com.ghgande.j2mod.modbus.util.SerialParameters;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class ModbusDriver is a Modbus Driver implementation for Kura
  * Asset-Driver Topology.
@@ -313,7 +319,7 @@ public final class ModbusDriver implements Driver {
 	 * @param unitId
 	 *            the Unit ID to connect
 	 * @param modbusTransport
-	 *            the modbus transport instance
+	 *            the Modbus transport instance
 	 * @param functionCode
 	 *            Function code to use
 	 * @param register
@@ -427,7 +433,103 @@ public final class ModbusDriver implements Driver {
 		if (!this.m_isConnected) {
 			this.connect();
 		}
-		return null;
+		for (final DriverRecord record : records) {
+			final int unitId = Integer.valueOf(record.getChannelConfig().get("unit.id").toString());
+			final String primaryTable = record.getChannelConfig().get("primary.table").toString();
+			final int functionCode = this.getFunctionCode(primaryTable);
+			final int memoryAddr = Integer.valueOf(record.getChannelConfig().get("memory.address").toString());
+			Integer.valueOf(record.getChannelConfig().get("register.count").toString());
+			if ((this.m_options.getType() == ModbusType.TCP) && (this.m_tcpMaster != null)) {
+				try {
+					this.writeRequest(unitId, this.m_tcpMaster.getTransport(), functionCode, memoryAddr,
+							Integer.valueOf(record.getValue().getValue().toString()));
+					record.setDriverStatus(
+							this.m_driverService.newDriverStatus(DriverFlag.WRITE_SUCCESSFUL, null, null));
+				} catch (final ModbusException e) {
+					record.setDriverStatus(this.m_driverService.newDriverStatus(DriverFlag.WRITE_FAILURE, null, e));
+				}
+			}
+		}
+		return records;
+	}
+
+	/**
+	 * Executes a write transaction using the function code, register and value
+	 *
+	 * @param unitId
+	 *            the Unit ID to connect
+	 * @param modbusTransport
+	 *            the Modbus transport instance
+	 * @param functionCode
+	 *            Function code to use
+	 * @param register
+	 *            Register number
+	 * @param values
+	 *            Values to apply
+	 *
+	 * @return Response object
+	 */
+	private ModbusResponse writeRequest(final int unitId, final AbstractModbusTransport modbusTransport,
+			final int functionCode, final int register, final int... values) throws ModbusException {
+		checkNull(modbusTransport, s_message.transportNonNull());
+		checkCondition(
+				(functionCode != FC_01_READ_COILS.code()) || (functionCode != FC_02_READ_DISCRETE_INPUTS.code())
+						|| (functionCode != FC_03_READ_HOLDING_REGISTERS.code())
+						|| (functionCode != FC_04_READ_INPUT_REGISTERS.code())
+						|| (functionCode != FC_05_WRITE_SINGLE_COIL.code())
+						|| (functionCode != FC_06_WRITE_SINGLE_REGISTER.code())
+						|| (functionCode != FC_15_WRITE_MULITPLE_COILS.code())
+						|| (functionCode != FC_16_WRITE_MULTIPLE_REGISTERS.code()),
+				s_message.functionCodesNotInRange());
+		checkCondition((unitId > 0) && (unitId < 247), s_message.wrongUnitId());
+
+		ModbusTransaction trans;
+		try {
+			ModbusRequest req = null;
+			// Prepare the request
+			switch (functionCode) {
+			case Modbus.WRITE_COIL:
+				req = new WriteCoilRequest(register, values[0] != 0);
+				break;
+			case Modbus.WRITE_SINGLE_REGISTER:
+				req = new WriteSingleRegisterRequest(register, new SimpleRegister(values[0]));
+				break;
+			case Modbus.WRITE_MULTIPLE_REGISTERS:
+				final Register[] regs = new Register[values.length];
+				for (int i = 0; i < values.length; i++) {
+					regs[i] = new SimpleRegister(values[i]);
+				}
+				req = new WriteMultipleRegistersRequest(register, regs);
+				break;
+			case Modbus.WRITE_MULTIPLE_COILS:
+				final BitVector bitVector = new BitVector(values.length);
+				for (int i = 0; i < values.length; i++) {
+					bitVector.setBit(i, values[i] != 0);
+				}
+				req = new WriteMultipleCoilsRequest(register, bitVector);
+				break;
+			default:
+				throw new ModbusException(s_message.requestTypeNotSupported(functionCode));
+			}
+			req.setUnitID(unitId);
+
+			// Prepare the transaction
+			trans = modbusTransport.createTransaction();
+			trans.setRequest(req);
+			if (trans instanceof ModbusTCPTransaction) {
+				((ModbusTCPTransaction) trans).setReconnecting(true);
+			}
+
+			// Execute the transaction
+			trans.execute();
+			return trans.getResponse();
+		} finally {
+			try {
+				modbusTransport.close();
+			} catch (final IOException e) {
+				s_logger.error(ThrowableUtil.stackTraceAsString(e));
+			}
+		}
 	}
 
 }

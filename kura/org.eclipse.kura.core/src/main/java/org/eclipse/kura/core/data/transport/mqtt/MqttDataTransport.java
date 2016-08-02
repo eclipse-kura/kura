@@ -353,7 +353,9 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 	@Override
 	public String getBrokerUrl() {
 		if (m_clientConf != null) {
-			return m_clientConf.getBrokerUrl();
+			String brokerUrl = m_clientConf.getBrokerUrl();
+			if(brokerUrl!=null)
+				return brokerUrl;
 		}
 		return "";
 	}

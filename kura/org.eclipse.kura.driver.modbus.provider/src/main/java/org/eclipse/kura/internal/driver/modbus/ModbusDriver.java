@@ -103,10 +103,10 @@ public final class ModbusDriver implements Driver {
 	/** The Driver Service instance. */
 	private volatile DriverService m_driverService;
 
-	/** flag to check if the device is connected. */
+	/** flag to check if the driver is connected. */
 	private boolean m_isConnected = false;
 
-	/** Modbus Configuration Parser Options. */
+	/** Modbus Configuration Options. */
 	private ModbusOptions m_options;
 
 	/** Modbus RTU Connection. */

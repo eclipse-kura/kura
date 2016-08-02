@@ -106,6 +106,22 @@ public final class S7PlcDriver implements Driver {
 		}
 	}
 
+	/**
+	 * OSGi service component callback while deactivation.
+	 *
+	 * @param componentContext
+	 *            the component context
+	 */
+	protected synchronized void deactivate(final ComponentContext componentContext) {
+		s_logger.debug(s_message.deactivating());
+		try {
+			this.disconnect();
+		} catch (final ConnectionException e) {
+			s_logger.error(s_message.errorDisconnecting() + ThrowableUtil.stackTraceAsString(e));
+		}
+		s_logger.debug(s_message.deactivatingDone());
+	}
+
 	/** {@inheritDoc} */
 	@Override
 	public void disconnect() throws ConnectionException {

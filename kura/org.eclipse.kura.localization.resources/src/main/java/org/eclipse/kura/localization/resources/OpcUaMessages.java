@@ -15,28 +15,25 @@ package org.eclipse.kura.localization.resources;
 import com.github.rodionmoiseev.c10n.annotations.En;
 
 /**
- * S7PlcMessages is considered to be a localization resource for
- * {@code S7 PLC Driver} bundle. It contains all the necessary translations for
- * every string literals mentioned in {@code S7 PLC Driver} bundle.
+ * OpcUaMessages is considered to be a localization resource for
+ * {@code OPC-UA Driver} bundle. It contains all the necessary translations for
+ * every string literals mentioned in {@code OPC-UA Driver} bundle.
  */
-public interface S7PlcMessages {
+public interface OpcUaMessages {
 
-	@En("Activating S7 PLC Driver.....")
+	@En("Activating OPC-UA Driver.....")
 	public String activating();
 
-	@En("Activating S7 PLC Driver.....Done")
+	@En("Activating OPC-UA Driver.....Done")
 	public String activatingDone();
 
-	@En("Area No")
-	public String areaNo();
-
-	@En("Unable to Connect...")
+	@En("Unable to Connect...No desired Endpoints returned")
 	public String connectionProblem();
 
-	@En("Deactivating S7 PLC Driver.....")
+	@En("Deactivating OPC-UA Driver.....")
 	public String deactivating();
 
-	@En("Deactivating S7 PLC Driver.....Done")
+	@En("Deactivating OPC-UA Driver.....Done")
 	public String deactivatingDone();
 
 	@En("Unable to Disconnect...")
@@ -45,16 +42,25 @@ public interface S7PlcMessages {
 	@En("Error while disconnecting....")
 	public String errorDisconnecting();
 
-	@En("Offset")
-	public String offset();
+	@En("Node Identifier")
+	public String nodeId();
 
 	@En("Properties cannot be null")
 	public String propertiesNonNull();
 
-	@En("Updating S7 PLC Driver.....")
+	@En("OPC-UA Read Operation Failed")
+	public String readFailed();
+
+	@En("Updating OPC-UA Driver.....")
 	public String updating();
 
-	@En("Updating S7 PLC Driver.....Done")
+	@En("Updating OPC-UA Driver.....Done")
 	public String updatingDone();
+
+	@En("Value cannot be null")
+	public String valueNonNull();
+
+	@En("OPC-UA Write Operation Failed")
+	public String writeFailed();
 
 }

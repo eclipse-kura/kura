@@ -28,9 +28,6 @@ final class OpcUaOptions {
 	/** OPC-UA Endpoint IP */
 	private static final String IP = "endpoint.ip";
 
-	/** OPC-UA Node Identifier */
-	private static final String NODE_ID = "node.id";
-
 	/** OPC-UA Endpoint Port */
 	private static final String PORT = "endpoint.port";
 
@@ -66,20 +63,6 @@ final class OpcUaOptions {
 			ipAddress = this.m_properties.get(IP).toString();
 		}
 		return ipAddress;
-	}
-
-	/**
-	 * Returns the OPC-UA Node Identifier
-	 *
-	 * @return the OPC-UA Node Identifier
-	 */
-	String getNodeId() {
-		String nodeId = null;
-		if ((this.m_properties != null) && this.m_properties.containsKey(NODE_ID)
-				&& (this.m_properties.get(NODE_ID) != null) && (this.m_properties.get(NODE_ID) instanceof String)) {
-			nodeId = this.m_properties.get(NODE_ID).toString();
-		}
-		return nodeId;
 	}
 
 	/**

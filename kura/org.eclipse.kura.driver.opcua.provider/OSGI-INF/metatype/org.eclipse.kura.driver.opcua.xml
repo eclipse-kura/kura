@@ -44,15 +44,6 @@
             description="OPC-UA Server Name">
         </AD>
         
-        <AD id="node.id"
-            name="node.id"
-            type="String"
-            cardinality="0"
-            required="true"
-            default="0"
-            description="OPC-UA Node Identifier">
-        </AD>
-        
     </OCD>
     
     <Designate pid="org.eclipse.kura.driver.opcua" factoryPid="org.eclipse.kura.driver.opcua">

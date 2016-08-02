@@ -21,11 +21,11 @@ import static org.eclipse.kura.camel.camelcloud.KuraCloudClientConstants.CAMEL_K
 import static org.eclipse.kura.camel.camelcloud.KuraCloudClientConstants.CAMEL_KURA_CLOUD_RETAIN;
 
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 
 import org.apache.camel.CamelContext;
@@ -54,7 +54,7 @@ public class CamelCloudClient implements CloudClient {
 
     private final ProducerTemplate producerTemplate;
 
-    private final List<CloudClientListener> cloudClientListeners = new LinkedList<CloudClientListener>();
+    private final List<CloudClientListener> cloudClientListeners = new CopyOnWriteArrayList<CloudClientListener>();
 
     private final String applicationId;
 

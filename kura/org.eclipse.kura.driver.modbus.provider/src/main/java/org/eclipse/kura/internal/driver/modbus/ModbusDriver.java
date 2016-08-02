@@ -93,11 +93,20 @@ import com.ghgande.j2mod.modbus.util.SerialParameters;
  */
 public final class ModbusDriver implements Driver {
 
+	/** Modbus Memory Address Property */
+	private static final String MEMORY_ADDRESS = "memory.address";
+
+	/** Modbus Memory Address Space Property */
+	private static final String PRIMARY_TABLE = "primary.table";
+
 	/** The Logger instance. */
 	private static final Logger s_logger = LoggerFactory.getLogger(ModbusDriver.class);
 
 	/** Localization Resource. */
 	private static final ModbusDriverMessages s_message = LocalizationAdapter.adapt(ModbusDriverMessages.class);
+
+	/** Modbus Unit Identifier Property */
+	private static final String UNIT_ID = "unit.id";
 
 	/** The Driver Service instance. */
 	private volatile DriverService m_driverService;
@@ -319,10 +328,10 @@ public final class ModbusDriver implements Driver {
 			this.connect();
 		}
 		for (final DriverRecord record : records) {
-			final int unitId = Integer.valueOf(record.getChannelConfig().get("unit.id").toString());
-			final String primaryTable = record.getChannelConfig().get("primary.table").toString();
+			final int unitId = Integer.valueOf(record.getChannelConfig().get(UNIT_ID).toString());
+			final String primaryTable = record.getChannelConfig().get(PRIMARY_TABLE).toString();
 			final int functionCode = this.getFunctionCode(primaryTable);
-			final int memoryAddr = Integer.valueOf(record.getChannelConfig().get("memory.address").toString());
+			final int memoryAddr = Integer.valueOf(record.getChannelConfig().get(MEMORY_ADDRESS).toString());
 
 			final ModbusType type = this.m_options.getType();
 			if ((type == TCP) && (this.m_tcpMaster != null)) {
@@ -467,10 +476,10 @@ public final class ModbusDriver implements Driver {
 			this.connect();
 		}
 		for (final DriverRecord record : records) {
-			final int unitId = Integer.valueOf(record.getChannelConfig().get("unit.id").toString());
-			final String primaryTable = record.getChannelConfig().get("primary.table").toString();
+			final int unitId = Integer.valueOf(record.getChannelConfig().get(UNIT_ID).toString());
+			final String primaryTable = record.getChannelConfig().get(PRIMARY_TABLE).toString();
 			final int functionCode = this.getFunctionCode(primaryTable);
-			final int memoryAddr = Integer.valueOf(record.getChannelConfig().get("memory.address").toString());
+			final int memoryAddr = Integer.valueOf(record.getChannelConfig().get(MEMORY_ADDRESS).toString());
 
 			final ModbusType type = this.m_options.getType();
 			if ((type == TCP) && (this.m_tcpMaster != null)) {

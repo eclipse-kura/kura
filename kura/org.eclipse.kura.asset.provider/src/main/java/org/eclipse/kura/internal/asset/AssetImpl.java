@@ -15,7 +15,6 @@ package org.eclipse.kura.internal.asset;
 import static org.eclipse.kura.Preconditions.checkCondition;
 import static org.eclipse.kura.Preconditions.checkNull;
 import static org.eclipse.kura.asset.AssetFlag.READ_SUCCESSFUL;
-import static org.eclipse.kura.asset.AssetFlag.UNKNOWN;
 import static org.eclipse.kura.asset.AssetFlag.WRITE_SUCCESSFUL;
 import static org.eclipse.kura.asset.ChannelType.READ;
 import static org.eclipse.kura.asset.ChannelType.READ_WRITE;
@@ -260,8 +259,6 @@ public final class AssetImpl implements Asset {
 			assetRecord.setAssetFlag(WRITE_SUCCESSFUL);
 			break;
 		case UNKNOWN:
-			assetRecord.setAssetFlag(UNKNOWN);
-			break;
 		case CUSTOM_ERROR_0:
 		case CUSTOM_ERROR_1:
 		case CUSTOM_ERROR_2:

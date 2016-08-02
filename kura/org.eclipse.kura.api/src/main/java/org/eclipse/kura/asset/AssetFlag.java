@@ -21,10 +21,6 @@ public enum AssetFlag {
 	 */
 	READ_SUCCESSFUL,
 	/**
-	 * In case of failure due to completely unknown reason
-	 */
-	UNKNOWN,
-	/**
 	 * In case of successful writing operation
 	 */
 	WRITE_SUCCESSFUL

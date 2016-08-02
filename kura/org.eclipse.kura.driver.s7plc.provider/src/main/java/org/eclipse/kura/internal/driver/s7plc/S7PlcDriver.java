@@ -51,6 +51,12 @@ import com.github.s7connector.api.factory.S7ConnectorFactory;
  */
 public final class S7PlcDriver implements Driver {
 
+	/** DB Area Number Property */
+	private static final String AREA_NO = "area.no";
+
+	/** DB Area Offset Property */
+	private static final String OFFSET = "offset";
+
 	/** The Logger instance. */
 	private static final Logger s_logger = LoggerFactory.getLogger(S7PlcDriver.class);
 
@@ -168,8 +174,8 @@ public final class S7PlcDriver implements Driver {
 				continue;
 			}
 			final int val = ((IntegerValue) recordValue).getValue();
-			final byte[] value = this.m_connector.read(DaveArea.DB, Integer.valueOf(config.get("area.no").toString()),
-					val, Integer.valueOf(config.get("offset").toString()));
+			final byte[] value = this.m_connector.read(DaveArea.DB, Integer.valueOf(config.get(AREA_NO).toString()),
+					val, Integer.valueOf(config.get(OFFSET).toString()));
 			if (value != null) {
 				record.setDriverStatus(this.m_driverService.newDriverStatus(READ_SUCCESSFUL));
 			}
@@ -229,8 +235,8 @@ public final class S7PlcDriver implements Driver {
 				continue;
 			}
 			final byte[] value = ((ByteArrayValue) recordValue).getValue();
-			this.m_connector.write(DaveArea.DB, Integer.valueOf(config.get("area.no").toString()),
-					Integer.valueOf(config.get("offset").toString()), value);
+			this.m_connector.write(DaveArea.DB, Integer.valueOf(config.get(AREA_NO).toString()),
+					Integer.valueOf(config.get(OFFSET).toString()), value);
 			record.setDriverStatus(this.m_driverService.newDriverStatus(WRITE_SUCCESSFUL));
 		}
 		return records;

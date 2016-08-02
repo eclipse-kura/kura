@@ -56,6 +56,9 @@ import org.slf4j.LoggerFactory;
  */
 public final class OpcUaDriver implements Driver {
 
+	/** Node Identifier Property */
+	private static final String NODE_ID = "node.id";
+
 	/** The Logger instance. */
 	private static final Logger s_logger = LoggerFactory.getLogger(OpcUaDriver.class);
 
@@ -206,7 +209,7 @@ public final class OpcUaDriver implements Driver {
 		}
 		for (final DriverRecord record : records) {
 			final Map<String, Object> config = record.getChannelConfig();
-			final NodeId nodeId = new NodeId(2, config.get("node.id").toString());
+			final NodeId nodeId = new NodeId(2, config.get(NODE_ID).toString());
 			final UaVariableNode node = this.m_client.getAddressSpace().getVariableNode(nodeId);
 			Object value = null;
 			try {
@@ -266,7 +269,7 @@ public final class OpcUaDriver implements Driver {
 		for (final DriverRecord record : records) {
 			final Map<String, Object> config = record.getChannelConfig();
 			final TypedValue<?> value = record.getValue();
-			final NodeId nodeId = new NodeId(2, config.get("node.id").toString());
+			final NodeId nodeId = new NodeId(2, config.get(NODE_ID).toString());
 			final UaVariableNode node = this.m_client.getAddressSpace().getVariableNode(nodeId);
 			final DataValue newValue = new DataValue(new Variant(value.getValue()));
 			try {

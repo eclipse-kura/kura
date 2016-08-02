@@ -21,6 +21,7 @@ import static org.eclipse.kura.driver.DriverFlag.WRITE_SUCCESSFUL;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraRuntimeException;
@@ -112,9 +113,11 @@ public final class OpcUaDriver implements Driver {
 			endpoints = UaTcpStackClient.getEndpoints(new StringBuilder().append("opc.tcp://")
 					.append(this.m_options.getIp()).append(":").append(this.m_options.getPort()).append("/")
 					.append(this.m_options.getServerName()).toString()).get();
-			final EndpointDescription endpoint = Arrays.stream(endpoints).findFirst()
-					.orElseThrow(() -> new ConnectionException(s_message.connectionProblem()));
-			final OpcUaClientConfig clientConfig = OpcUaClientConfig.builder().setEndpoint(endpoint).build();
+			final Optional<EndpointDescription> endpoint = Arrays.stream(endpoints).findFirst();
+			if (!endpoint.isPresent()) {
+				throw new ConnectionException(s_message.connectionProblem());
+			}
+			final OpcUaClientConfig clientConfig = OpcUaClientConfig.builder().setEndpoint(endpoint.get()).build();
 			this.m_client = new OpcUaClient(clientConfig);
 			this.m_isConnected = true;
 		} catch (final Exception e) {

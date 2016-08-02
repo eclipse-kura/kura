@@ -449,7 +449,7 @@
                 <esf:value>false</esf:value>
             </esf:property>
             <esf:property name="in-flight.persistence" array="false" encrypted="false" type="String">
-                <esf:value>file</esf:value>
+                <esf:value>memory</esf:value>
             </esf:property>
             <esf:property name="lwt.topic" array="false" encrypted="false" type="String">
                 <esf:value>$EDC/#account-name/#client-id/MQTT/LWT</esf:value>

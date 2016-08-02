@@ -714,12 +714,12 @@ public class ServicesUi extends Composite {
 
 	//Validates all the entered values
 	private boolean validate(GwtConfigParameter param, TextBox box, FormGroup group){  //TODO: validation should be done like in the old web ui: cleaner approach
-		if(param.isRequired() && (box.getText().trim() == null || "".equals(box.getText().trim()))) {
+	    if(param.isRequired() && (box.getText().trim() == null || "".equals(box.getText().trim()))) {
 			group.setValidationState(ValidationState.ERROR);
 			valid.put(param.getName(), false);
 			box.setPlaceholder(MSGS.formRequiredParameter());
 			return false;
-		} else if (box.getText().trim() != null && !"".equals(box.getText().trim())){
+		} else if (!param.isRequired() && box.getText().trim() != null && !"".equals(box.getText().trim())){
 			if (param.getType().equals(GwtConfigParameterType.CHAR)) {
 				if (box.getText().trim().length() > 1) {
 					group.setValidationState(ValidationState.ERROR);

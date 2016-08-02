@@ -163,6 +163,21 @@
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.kura.driver.modbus.provider</artifactId>
+									<version>${org.eclipse.kura.driver.modbus.provider.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.kura.driver.opcua.provider</artifactId>
+									<version>${org.eclipse.kura.driver.opcua.provider.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.kura.driver.s7plc.provider</artifactId>
+									<version>${org.eclipse.kura.driver.s7plc.provider.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
 									<artifactId>org.eclipse.kura.emulator.gpio</artifactId>
 									<version>${org.eclipse.kura.emulator.gpio.version}</version>
 								</artifactItem>

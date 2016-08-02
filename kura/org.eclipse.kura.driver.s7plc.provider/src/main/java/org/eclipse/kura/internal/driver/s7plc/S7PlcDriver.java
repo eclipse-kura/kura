@@ -64,7 +64,7 @@ public final class S7PlcDriver implements Driver {
 	private volatile DriverService m_driverService;
 
 	/** flag to check if the driver is connected. */
-	private boolean m_isConnected = false;
+	private boolean m_isConnected;
 
 	/** S7 PLC Configuration Options. */
 	private S7PlcOptions m_options;
@@ -119,6 +119,7 @@ public final class S7PlcDriver implements Driver {
 		} catch (final ConnectionException e) {
 			s_logger.error(s_message.errorDisconnecting() + ThrowableUtil.stackTraceAsString(e));
 		}
+		this.m_connector = null;
 		s_logger.debug(s_message.deactivatingDone());
 	}
 
@@ -128,6 +129,7 @@ public final class S7PlcDriver implements Driver {
 		if (this.m_isConnected) {
 			try {
 				this.m_connector.close();
+				this.m_isConnected = false;
 			} catch (final IOException e) {
 				throw new ConnectionException(s_message.disconnectionProblem() + ThrowableUtil.stackTraceAsString(e));
 			}
@@ -161,8 +163,8 @@ public final class S7PlcDriver implements Driver {
 			final Map<String, Object> config = record.getChannelConfig();
 			final TypedValue<?> recordValue = record.getValue();
 			if (!(recordValue instanceof IntegerValue)) {
-				record.setDriverStatus(this.m_driverService.newDriverStatus(READ_FAILURE,
-						"Channel Value Type must be an instance of Integer Value", null));
+				record.setDriverStatus(
+						this.m_driverService.newDriverStatus(READ_FAILURE, s_message.instanceOfInteger(), null));
 				continue;
 			}
 			final int val = ((IntegerValue) recordValue).getValue();
@@ -222,8 +224,8 @@ public final class S7PlcDriver implements Driver {
 			final Map<String, Object> config = record.getChannelConfig();
 			final TypedValue<?> recordValue = record.getValue();
 			if (!(recordValue instanceof ByteArrayValue)) {
-				record.setDriverStatus(this.m_driverService.newDriverStatus(WRITE_FAILURE,
-						"Channel Value Type must be an instance of Byte Array Value", null));
+				record.setDriverStatus(
+						this.m_driverService.newDriverStatus(WRITE_FAILURE, s_message.instanceOfByteArray(), null));
 				continue;
 			}
 			final byte[] value = ((ByteArrayValue) recordValue).getValue();

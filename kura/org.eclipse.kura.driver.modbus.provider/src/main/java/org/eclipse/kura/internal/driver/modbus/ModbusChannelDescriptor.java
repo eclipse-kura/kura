@@ -32,8 +32,6 @@ import org.eclipse.kura.util.collection.CollectionUtil;
  * DISCRETE_INPUTS, INPUT_REGISTERS, HOLDING_REGISTERS
  * <li>memory.address</li> denotes the memory address to perform operation (in
  * integer format)
- * <li>register.count</li> denotes the no of contagious registers to perform
- * operation
  * </ul>
  */
 public final class ModbusChannelDescriptor implements ChannelDescriptor {
@@ -98,15 +96,6 @@ public final class ModbusChannelDescriptor implements ChannelDescriptor {
 
 		this.m_elements.add(address);
 
-		final Tad noOfRegister = new Tad();
-		noOfRegister.setName(s_message.noOfReg());
-		noOfRegister.setId("register.count");
-		noOfRegister.setDescription(s_message.noOfRegDesc());
-		noOfRegister.setType(Tscalar.INTEGER);
-		noOfRegister.setRequired(true);
-		noOfRegister.setDefault("0");
-
-		this.m_elements.add(noOfRegister);
 		return this.m_elements;
 	}
 

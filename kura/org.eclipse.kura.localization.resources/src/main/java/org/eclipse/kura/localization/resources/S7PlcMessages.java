@@ -45,6 +45,12 @@ public interface S7PlcMessages {
 	@En("Error while disconnecting....")
 	public String errorDisconnecting();
 
+	@En("Channel Value Type must be an instance of Byte Array Value")
+	public String instanceOfByteArray();
+
+	@En("Channel Value Type must be an instance of Integer Value")
+	public String instanceOfInteger();
+
 	@En("Offset")
 	public String offset();
 

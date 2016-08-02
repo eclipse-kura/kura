@@ -46,6 +46,14 @@ import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * The Class OpcUaDriver is a OPC-UA Driver implementation for Kura Asset-Driver
+ * Topology. Currently it only supports reading and writing from/to a specific
+ * node. As of now, it doesn't support method execution or history read or
+ * monitoring node
+ *
+ * @see OpcUaChannelDescriptor
+ */
 public final class OpcUaDriver implements Driver {
 
 	/** The Logger instance. */
@@ -61,7 +69,7 @@ public final class OpcUaDriver implements Driver {
 	private volatile DriverService m_driverService;
 
 	/** flag to check if the driver is connected. */
-	private final boolean m_isConnected = false;
+	private boolean m_isConnected;
 
 	/** OPC-UA Configuration Options. */
 	private OpcUaOptions m_options;
@@ -98,12 +106,14 @@ public final class OpcUaDriver implements Driver {
 	public void connect() throws ConnectionException {
 		EndpointDescription[] endpoints;
 		try {
-			endpoints = UaTcpStackClient.getEndpoints("opc.tcp://" + this.m_options.getIp() + ":"
-					+ this.m_options.getPort() + "/" + this.m_options.getServerName()).get();
+			endpoints = UaTcpStackClient.getEndpoints(new StringBuilder().append("opc.tcp://")
+					.append(this.m_options.getIp()).append(":").append(this.m_options.getPort()).append("/")
+					.append(this.m_options.getServerName()).toString()).get();
 			final EndpointDescription endpoint = Arrays.stream(endpoints).findFirst()
 					.orElseThrow(() -> new ConnectionException(s_message.connectionProblem()));
 			final OpcUaClientConfig clientConfig = OpcUaClientConfig.builder().setEndpoint(endpoint).build();
 			this.m_client = new OpcUaClient(clientConfig);
+			this.m_isConnected = true;
 		} catch (final Exception e) {
 			s_logger.error(ThrowableUtil.stackTraceAsString(e));
 		}
@@ -123,13 +133,17 @@ public final class OpcUaDriver implements Driver {
 		} catch (final ConnectionException e) {
 			s_logger.error(s_message.errorDisconnecting() + ThrowableUtil.stackTraceAsString(e));
 		}
+		this.m_client = null;
 		s_logger.debug(s_message.deactivatingDone());
 	}
 
 	/** {@inheritDoc} */
 	@Override
 	public void disconnect() throws ConnectionException {
-
+		if (this.m_isConnected) {
+			this.m_client.disconnect();
+			this.m_isConnected = false;
+		}
 	}
 
 	/**
@@ -146,7 +160,7 @@ public final class OpcUaDriver implements Driver {
 	/** {@inheritDoc} */
 	@Override
 	public ChannelDescriptor getChannelDescriptor() {
-		return null;
+		return new OpcUaChannelDescriptor();
 	}
 
 	/**

@@ -63,12 +63,6 @@ public interface ModbusDriverMessages {
 	@En("Address of the register (as integer value, not HEX)")
 	public String memoryAddrDesc();
 
-	@En("No of Register")
-	public String noOfReg();
-
-	@En("No of registers to read in contiguous location")
-	public String noOfRegDesc();
-
 	@En("Primary Table")
 	public String primaryTable();
 

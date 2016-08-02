@@ -59,7 +59,6 @@ import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ghgande.j2mod.modbus.Modbus;
 import com.ghgande.j2mod.modbus.ModbusException;
 import com.ghgande.j2mod.modbus.facade.ModbusSerialMaster;
 import com.ghgande.j2mod.modbus.facade.ModbusTCPMaster;
@@ -106,6 +105,9 @@ public final class ModbusDriver implements Driver {
 	/** flag to check if the driver is connected. */
 	private boolean m_isConnected = false;
 
+	/** Modbus Transport */
+	private AbstractModbusTransport m_modbusTransport = null;
+
 	/** Modbus Configuration Options. */
 	private ModbusOptions m_options;
 
@@ -148,21 +150,22 @@ public final class ModbusDriver implements Driver {
 	/** {@inheritDoc} */
 	@Override
 	public void connect() throws ConnectionException {
-		if ((this.m_options.getType() == TCP) && (this.m_tcpMaster != null)) {
+		final ModbusType type = this.m_options.getType();
+		if ((type == TCP) && (this.m_tcpMaster != null)) {
 			try {
 				this.m_tcpMaster.connect();
 			} catch (final Exception e) {
 				throw new ConnectionException(s_message.connectionProblem() + ThrowableUtil.stackTraceAsString(e));
 			}
 		}
-		if ((this.m_options.getType() == UDP) && (this.m_udpMaster != null)) {
+		if ((type == UDP) && (this.m_udpMaster != null)) {
 			try {
 				this.m_udpMaster.connect();
 			} catch (final Exception e) {
 				throw new ConnectionException(s_message.connectionProblem() + ThrowableUtil.stackTraceAsString(e));
 			}
 		}
-		if ((this.m_options.getType() == RTU) && (this.m_rtuMaster != null)) {
+		if ((type == RTU) && (this.m_rtuMaster != null)) {
 			try {
 				this.m_rtuMaster.connect();
 			} catch (final Exception e) {
@@ -194,28 +197,34 @@ public final class ModbusDriver implements Driver {
 	/** {@inheritDoc} */
 	@Override
 	public void disconnect() throws ConnectionException {
-		if ((this.m_options.getType() == TCP) && (this.m_tcpMaster != null)) {
-			try {
-				this.m_tcpMaster.disconnect();
-			} catch (final Exception e) {
-				throw new ConnectionException(s_message.disconnectionProblem() + ThrowableUtil.stackTraceAsString(e));
+		if (this.m_isConnected) {
+			final ModbusType type = this.m_options.getType();
+			if ((type == TCP) && (this.m_tcpMaster != null)) {
+				try {
+					this.m_tcpMaster.disconnect();
+				} catch (final Exception e) {
+					throw new ConnectionException(
+							s_message.disconnectionProblem() + ThrowableUtil.stackTraceAsString(e));
+				}
 			}
-		}
-		if ((this.m_options.getType() == UDP) && (this.m_udpMaster != null)) {
-			try {
-				this.m_udpMaster.disconnect();
-			} catch (final Exception e) {
-				throw new ConnectionException(s_message.disconnectionProblem() + ThrowableUtil.stackTraceAsString(e));
+			if ((type == UDP) && (this.m_udpMaster != null)) {
+				try {
+					this.m_udpMaster.disconnect();
+				} catch (final Exception e) {
+					throw new ConnectionException(
+							s_message.disconnectionProblem() + ThrowableUtil.stackTraceAsString(e));
+				}
 			}
-		}
-		if ((this.m_options.getType() == RTU) && (this.m_rtuMaster != null)) {
-			try {
-				this.m_rtuMaster.disconnect();
-			} catch (final Exception e) {
-				throw new ConnectionException(s_message.disconnectionProblem() + ThrowableUtil.stackTraceAsString(e));
+			if ((type == RTU) && (this.m_rtuMaster != null)) {
+				try {
+					this.m_rtuMaster.disconnect();
+				} catch (final Exception e) {
+					throw new ConnectionException(
+							s_message.disconnectionProblem() + ThrowableUtil.stackTraceAsString(e));
+				}
 			}
+			this.m_isConnected = false;
 		}
-		this.m_isConnected = false;
 	}
 
 	/**
@@ -314,19 +323,21 @@ public final class ModbusDriver implements Driver {
 			final String primaryTable = record.getChannelConfig().get("primary.table").toString();
 			final int functionCode = this.getFunctionCode(primaryTable);
 			final int memoryAddr = Integer.valueOf(record.getChannelConfig().get("memory.address").toString());
-			final int regCount = Integer.valueOf(record.getChannelConfig().get("register.count").toString());
-			AbstractModbusTransport transport = null;
-			if ((this.m_options.getType() == TCP) && (this.m_tcpMaster != null)) {
-				transport = this.m_tcpMaster.getTransport();
+
+			final ModbusType type = this.m_options.getType();
+			if ((type == TCP) && (this.m_tcpMaster != null)) {
+				this.m_modbusTransport = this.m_tcpMaster.getTransport();
 			}
-			if ((this.m_options.getType() == RTU) && (this.m_rtuMaster != null)) {
-				transport = this.m_rtuMaster.getTransport();
+			if ((type == RTU) && (this.m_rtuMaster != null)) {
+				this.m_modbusTransport = this.m_rtuMaster.getTransport();
 			}
-			if ((this.m_options.getType() == UDP) && (this.m_udpMaster != null)) {
-				transport = this.m_udpMaster.getTransport();
+			if ((type == UDP) && (this.m_udpMaster != null)) {
+				this.m_modbusTransport = this.m_udpMaster.getTransport();
 			}
 			try {
-				final ModbusResponse response = this.readRequest(unitId, transport, functionCode, memoryAddr, regCount);
+				// always read single register
+				final ModbusResponse response = this.readRequest(unitId, this.m_modbusTransport, functionCode,
+						memoryAddr, 1);
 				final TypedValue<?> value = this.getValue(response);
 				record.setValue(value);
 				record.setDriverStatus(this.m_driverService.newDriverStatus(READ_SUCCESSFUL));
@@ -336,6 +347,11 @@ public final class ModbusDriver implements Driver {
 				record.setDriverStatus(this.m_driverService.newDriverStatus(DRIVER_ERROR_CHANNEL_NOT_ACCESSIBLE,
 						s_message.transportNonNull() + " OR " + s_message.wrongUnitId(), e));
 			}
+		}
+		try {
+			this.m_modbusTransport.close();
+		} catch (final IOException e) {
+			s_logger.error(ThrowableUtil.stackTraceAsString(e));
 		}
 		return records;
 	}
@@ -375,44 +391,36 @@ public final class ModbusDriver implements Driver {
 		checkCondition((unitId > 0) && (unitId < 247), s_message.wrongUnitId());
 
 		ModbusTransaction trans;
-		try {
-			ModbusRequest req = null;
-			// Prepare the request
-			switch (functionCode) {
-			case Modbus.READ_COILS:
-				req = new ReadCoilsRequest(register, count);
-				break;
-			case Modbus.READ_INPUT_DISCRETES:
-				req = new ReadInputDiscretesRequest(register, count);
-				break;
-			case Modbus.READ_INPUT_REGISTERS:
-				req = new ReadInputRegistersRequest(register, count);
-				break;
-			case Modbus.READ_HOLDING_REGISTERS:
-				req = new ReadMultipleRegistersRequest(register, count);
-				break;
-			default:
-				throw new ModbusException(s_message.requestTypeNotSupported(functionCode));
-			}
-			req.setUnitID(unitId);
-
-			// Prepare the transaction
-			trans = modbusTransport.createTransaction();
-			trans.setRequest(req);
-			if (trans instanceof ModbusTCPTransaction) {
-				((ModbusTCPTransaction) trans).setReconnecting(true);
-			}
-
-			// Execute the transaction
-			trans.execute();
-			return trans.getResponse();
-		} finally {
-			try {
-				modbusTransport.close();
-			} catch (final IOException e) {
-				s_logger.error(ThrowableUtil.stackTraceAsString(e));
-			}
+		ModbusRequest req = null;
+		// Prepare the request
+		switch (functionCode) {
+		case READ_COILS:
+			req = new ReadCoilsRequest(register, count);
+			break;
+		case READ_INPUT_DISCRETES:
+			req = new ReadInputDiscretesRequest(register, count);
+			break;
+		case READ_INPUT_REGISTERS:
+			req = new ReadInputRegistersRequest(register, count);
+			break;
+		case READ_HOLDING_REGISTERS:
+			req = new ReadMultipleRegistersRequest(register, count);
+			break;
+		default:
+			throw new ModbusException(s_message.requestTypeNotSupported(functionCode));
 		}
+		req.setUnitID(unitId);
+
+		// Prepare the transaction
+		trans = modbusTransport.createTransaction();
+		trans.setRequest(req);
+		if (trans instanceof ModbusTCPTransaction) {
+			((ModbusTCPTransaction) trans).setReconnecting(true);
+		}
+
+		// Execute the transaction
+		trans.execute();
+		return trans.getResponse();
 	}
 
 	/** {@inheritDoc} */
@@ -463,18 +471,19 @@ public final class ModbusDriver implements Driver {
 			final String primaryTable = record.getChannelConfig().get("primary.table").toString();
 			final int functionCode = this.getFunctionCode(primaryTable);
 			final int memoryAddr = Integer.valueOf(record.getChannelConfig().get("memory.address").toString());
-			AbstractModbusTransport transport = null;
-			if ((this.m_options.getType() == TCP) && (this.m_tcpMaster != null)) {
-				transport = this.m_tcpMaster.getTransport();
+
+			final ModbusType type = this.m_options.getType();
+			if ((type == TCP) && (this.m_tcpMaster != null)) {
+				this.m_modbusTransport = this.m_tcpMaster.getTransport();
 			}
-			if ((this.m_options.getType() == RTU) && (this.m_rtuMaster != null)) {
-				transport = this.m_rtuMaster.getTransport();
+			if ((type == RTU) && (this.m_rtuMaster != null)) {
+				this.m_modbusTransport = this.m_rtuMaster.getTransport();
 			}
-			if ((this.m_options.getType() == UDP) && (this.m_udpMaster != null)) {
-				transport = this.m_udpMaster.getTransport();
+			if ((type == UDP) && (this.m_udpMaster != null)) {
+				this.m_modbusTransport = this.m_udpMaster.getTransport();
 			}
 			try {
-				this.writeRequest(unitId, transport, functionCode, memoryAddr,
+				this.writeRequest(unitId, this.m_modbusTransport, functionCode, memoryAddr,
 						Integer.valueOf(record.getValue().getValue().toString()));
 				record.setDriverStatus(this.m_driverService.newDriverStatus(WRITE_SUCCESSFUL));
 			} catch (final ModbusException e) {
@@ -483,6 +492,11 @@ public final class ModbusDriver implements Driver {
 				record.setDriverStatus(this.m_driverService.newDriverStatus(DRIVER_ERROR_CHANNEL_NOT_ACCESSIBLE,
 						s_message.transportNonNull() + " OR " + s_message.wrongUnitId(), e));
 			}
+		}
+		try {
+			this.m_modbusTransport.close();
+		} catch (final IOException e) {
+			s_logger.error(ThrowableUtil.stackTraceAsString(e));
 		}
 		return records;
 	}
@@ -520,52 +534,43 @@ public final class ModbusDriver implements Driver {
 		checkCondition((unitId > 0) && (unitId < 247), s_message.wrongUnitId());
 
 		ModbusTransaction trans;
-		try {
-			ModbusRequest req = null;
-			// Prepare the request
-			switch (functionCode) {
-			case WRITE_COIL:
-				req = new WriteCoilRequest(register, values[0] != 0);
-				break;
-			case WRITE_SINGLE_REGISTER:
-				req = new WriteSingleRegisterRequest(register, new SimpleRegister(values[0]));
-				break;
-			case WRITE_MULTIPLE_REGISTERS:
-				final Register[] regs = new Register[values.length];
-				for (int i = 0; i < values.length; i++) {
-					regs[i] = new SimpleRegister(values[i]);
-				}
-				req = new WriteMultipleRegistersRequest(register, regs);
-				break;
-			case WRITE_MULTIPLE_COILS:
-				final BitVector bitVector = new BitVector(values.length);
-				for (int i = 0; i < values.length; i++) {
-					bitVector.setBit(i, values[i] != 0);
-				}
-				req = new WriteMultipleCoilsRequest(register, bitVector);
-				break;
-			default:
-				throw new ModbusException(s_message.requestTypeNotSupported(functionCode));
+		ModbusRequest req = null;
+		// Prepare the request
+		switch (functionCode) {
+		case WRITE_COIL:
+			req = new WriteCoilRequest(register, values[0] != 0);
+			break;
+		case WRITE_SINGLE_REGISTER:
+			req = new WriteSingleRegisterRequest(register, new SimpleRegister(values[0]));
+			break;
+		case WRITE_MULTIPLE_REGISTERS:
+			final Register[] regs = new Register[values.length];
+			for (int i = 0; i < values.length; i++) {
+				regs[i] = new SimpleRegister(values[i]);
 			}
-			req.setUnitID(unitId);
-
-			// Prepare the transaction
-			trans = modbusTransport.createTransaction();
-			trans.setRequest(req);
-			if (trans instanceof ModbusTCPTransaction) {
-				((ModbusTCPTransaction) trans).setReconnecting(true);
+			req = new WriteMultipleRegistersRequest(register, regs);
+			break;
+		case WRITE_MULTIPLE_COILS:
+			final BitVector bitVector = new BitVector(values.length);
+			for (int i = 0; i < values.length; i++) {
+				bitVector.setBit(i, values[i] != 0);
 			}
-
-			// Execute the transaction
-			trans.execute();
-			return trans.getResponse();
-		} finally {
-			try {
-				modbusTransport.close();
-			} catch (final IOException e) {
-				s_logger.error(ThrowableUtil.stackTraceAsString(e));
-			}
+			req = new WriteMultipleCoilsRequest(register, bitVector);
+			break;
+		default:
+			throw new ModbusException(s_message.requestTypeNotSupported(functionCode));
 		}
+		req.setUnitID(unitId);
+
+		// Prepare the transaction
+		trans = modbusTransport.createTransaction();
+		trans.setRequest(req);
+		if (trans instanceof ModbusTCPTransaction) {
+			((ModbusTCPTransaction) trans).setReconnecting(true);
+		}
+		// Execute the transaction
+		trans.execute();
+		return trans.getResponse();
 	}
 
 }

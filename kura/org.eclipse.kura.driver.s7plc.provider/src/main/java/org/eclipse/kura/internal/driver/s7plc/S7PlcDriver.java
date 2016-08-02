@@ -13,6 +13,10 @@
 package org.eclipse.kura.internal.driver.s7plc;
 
 import static org.eclipse.kura.Preconditions.checkNull;
+import static org.eclipse.kura.driver.DriverFlag.READ_FAILURE;
+import static org.eclipse.kura.driver.DriverFlag.READ_SUCCESSFUL;
+import static org.eclipse.kura.driver.DriverFlag.WRITE_FAILURE;
+import static org.eclipse.kura.driver.DriverFlag.WRITE_SUCCESSFUL;
 
 import java.io.IOException;
 import java.util.List;
@@ -27,11 +31,15 @@ import org.eclipse.kura.driver.DriverService;
 import org.eclipse.kura.driver.listener.DriverListener;
 import org.eclipse.kura.localization.LocalizationAdapter;
 import org.eclipse.kura.localization.resources.S7PlcMessages;
+import org.eclipse.kura.type.ByteArrayValue;
+import org.eclipse.kura.type.IntegerValue;
+import org.eclipse.kura.type.TypedValue;
 import org.eclipse.kura.util.base.ThrowableUtil;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.github.s7connector.api.DaveArea;
 import com.github.s7connector.api.S7Connector;
 import com.github.s7connector.api.factory.S7ConnectorFactory;
 
@@ -134,9 +142,21 @@ public final class S7PlcDriver implements Driver {
 			this.connect();
 		}
 		for (final DriverRecord record : records) {
-			// TODO
+			final Map<String, Object> config = record.getChannelConfig();
+			final TypedValue<?> recordValue = record.getValue();
+			if (!(recordValue instanceof IntegerValue)) {
+				record.setDriverStatus(this.m_driverService.newDriverStatus(READ_FAILURE,
+						"Channel Value Type must be an instance of Integer Value", null));
+				continue;
+			}
+			final int val = ((IntegerValue) recordValue).getValue();
+			final byte[] value = this.m_connector.read(DaveArea.DB, Integer.valueOf(config.get("area.no").toString()),
+					val, Integer.valueOf(config.get("offset").toString()));
+			if (value != null) {
+				record.setDriverStatus(this.m_driverService.newDriverStatus(READ_SUCCESSFUL));
+			}
 		}
-		return null;
+		return records;
 	}
 
 	/** {@inheritDoc} */
@@ -176,9 +196,26 @@ public final class S7PlcDriver implements Driver {
 		s_logger.debug(s_message.updatingDone());
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public List<DriverRecord> write(final List<DriverRecord> records) throws ConnectionException {
-		return null;
+		if (!this.m_isConnected) {
+			this.connect();
+		}
+		for (final DriverRecord record : records) {
+			final Map<String, Object> config = record.getChannelConfig();
+			final TypedValue<?> recordValue = record.getValue();
+			if (!(recordValue instanceof ByteArrayValue)) {
+				record.setDriverStatus(this.m_driverService.newDriverStatus(WRITE_FAILURE,
+						"Channel Value Type must be an instance of Byte Array Value", null));
+				continue;
+			}
+			final byte[] value = ((ByteArrayValue) recordValue).getValue();
+			this.m_connector.write(DaveArea.DB, Integer.valueOf(config.get("area.no").toString()),
+					Integer.valueOf(config.get("offset").toString()), value);
+			record.setDriverStatus(this.m_driverService.newDriverStatus(WRITE_SUCCESSFUL));
+		}
+		return records;
 	}
 
 }

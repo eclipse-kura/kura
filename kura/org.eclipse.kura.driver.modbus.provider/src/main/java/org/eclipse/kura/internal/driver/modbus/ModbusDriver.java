@@ -329,7 +329,7 @@ public final class ModbusDriver implements Driver {
 				final ModbusResponse response = this.readRequest(unitId, transport, functionCode, memoryAddr, regCount);
 				final TypedValue<?> value = this.getValue(response);
 				record.setValue(value);
-				record.setDriverStatus(this.m_driverService.newDriverStatus(READ_SUCCESSFUL, null, null));
+				record.setDriverStatus(this.m_driverService.newDriverStatus(READ_SUCCESSFUL));
 			} catch (final ModbusException e) {
 				record.setDriverStatus(this.m_driverService.newDriverStatus(READ_FAILURE, null, e));
 			} catch (final KuraRuntimeException e) {
@@ -355,7 +355,7 @@ public final class ModbusDriver implements Driver {
 	 *            Number of registers
 	 * @return Response object
 	 * @throws ModbusException
-	 *             the modbus exception
+	 *             the Modbus exception
 	 * @throws KuraRuntimeException
 	 *             if the transport is null or the function code is wrongly set
 	 *             or the unit ID is wrongly set
@@ -476,7 +476,7 @@ public final class ModbusDriver implements Driver {
 			try {
 				this.writeRequest(unitId, transport, functionCode, memoryAddr,
 						Integer.valueOf(record.getValue().getValue().toString()));
-				record.setDriverStatus(this.m_driverService.newDriverStatus(WRITE_SUCCESSFUL, null, null));
+				record.setDriverStatus(this.m_driverService.newDriverStatus(WRITE_SUCCESSFUL));
 			} catch (final ModbusException e) {
 				record.setDriverStatus(this.m_driverService.newDriverStatus(WRITE_FAILURE, null, e));
 			} catch (final KuraRuntimeException e) {

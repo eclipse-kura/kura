@@ -24,6 +24,16 @@ import org.eclipse.kura.annotation.Nullable;
 public interface DriverService {
 
 	/**
+	 * Gets the driver instance by the provided driver ID
+	 * ({@code kura.service.pid}).
+	 *
+	 * @param driverId
+	 *            the driver ID to check
+	 * @return the driver instance
+	 */
+	public Driver getDriver(String driverId);
+
+	/**
 	 * Gets the driver ID. ({@code kura.service.pid}) by the provided driver
 	 * instance
 	 *
@@ -32,15 +42,6 @@ public interface DriverService {
 	 * @return the driver ID
 	 */
 	public String getDriverId(Driver driver);
-	
-	/**
-	 * Gets the driver instance by the provided driver ID ({@code kura.service.pid}).
-	 *
-	 * @param driverId
-	 *            the driver ID to check
-	 * @return the driver instance
-	 */
-	public Driver getDriver(String driverId);
 
 	/**
 	 * Returns the list containing all the available driver instances
@@ -66,6 +67,17 @@ public interface DriverService {
 	 * @return the newly created driver record
 	 */
 	public DriverRecord newDriverRecord();
+
+	/**
+	 * Prepares the driver specific operation status.
+	 *
+	 * @param driverFlag
+	 *            the driver flag
+	 * @return the newly created status instance
+	 * @throws KuraRuntimeException
+	 *             if the driver flag is null
+	 */
+	public DriverStatus newDriverStatus(final DriverFlag driverFlag);
 
 	/**
 	 * Prepares the driver specific operation status.

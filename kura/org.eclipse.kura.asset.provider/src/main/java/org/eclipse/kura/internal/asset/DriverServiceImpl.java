@@ -14,11 +14,11 @@ package org.eclipse.kura.internal.asset;
 
 import static org.eclipse.kura.Preconditions.checkNull;
 import static org.eclipse.kura.asset.AssetConstants.ASSET_DRIVER_PROP;
+import static org.eclipse.kura.driver.DriverConstants.DRIVER_ID;
 
 import java.util.List;
 
 import org.eclipse.kura.driver.Driver;
-import static org.eclipse.kura.driver.DriverConstants.*;
 import org.eclipse.kura.driver.DriverEvent;
 import org.eclipse.kura.driver.DriverFlag;
 import org.eclipse.kura.driver.DriverRecord;
@@ -43,6 +43,20 @@ public final class DriverServiceImpl implements DriverService {
 
 	/** {@inheritDoc} */
 	@Override
+	public Driver getDriver(final String driverId) {
+		checkNull(driverId, s_message.driverIdNonNull());
+		final BundleContext context = FrameworkUtil.getBundle(this.getClass()).getBundleContext();
+		final ServiceReference<Driver>[] refs = ServiceUtil.getServiceReferences(context, Driver.class, null);
+		for (final ServiceReference<Driver> ref : refs) {
+			if (ref.getProperty(DRIVER_ID.value()).equals(driverId)) {
+				return context.getService(ref);
+			}
+		}
+		return null;
+	}
+
+	/** {@inheritDoc} */
+	@Override
 	public String getDriverId(final Driver driver) {
 		checkNull(driver, s_message.driverNonNull());
 		final BundleContext context = FrameworkUtil.getBundle(this.getClass()).getBundleContext();
@@ -51,20 +65,6 @@ public final class DriverServiceImpl implements DriverService {
 			final Driver driverRef = context.getService(ref);
 			if (driverRef == driver) {
 				return ref.getProperty(ASSET_DRIVER_PROP.value()).toString();
-			}
-		}
-		return null;
-	}
-	
-	/** {@inheritDoc} */
-	@Override
-	public Driver getDriver(final String driverId) {
-		checkNull(driverId, s_message.driverIdNonNull());
-		final BundleContext context = FrameworkUtil.getBundle(this.getClass()).getBundleContext();
-		final ServiceReference<Driver>[] refs = ServiceUtil.getServiceReferences(context, Driver.class, null);
-		for (final ServiceReference<Driver> ref : refs) {
-			if (ref.getProperty(DRIVER_ID.value()).equals(driverId)) {
-				return context.getService(ref);
 			}
 		}
 		return null;
@@ -97,7 +97,14 @@ public final class DriverServiceImpl implements DriverService {
 
 	/** {@inheritDoc} */
 	@Override
-	public DriverStatus newDriverStatus(final DriverFlag driverFlag, final String exceptionMessage, final Exception exception) {
+	public DriverStatus newDriverStatus(final DriverFlag driverFlag) {
+		return new DriverStatus(driverFlag, null, null);
+	}
+
+	/** {@inheritDoc} */
+	@Override
+	public DriverStatus newDriverStatus(final DriverFlag driverFlag, final String exceptionMessage,
+			final Exception exception) {
 		return new DriverStatus(driverFlag, exceptionMessage, exception);
 	}
 

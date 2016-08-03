@@ -82,6 +82,9 @@ Import-Package: org.osgi.framework;version="1.4.0"
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Name>%bundle.name</Bundle-Name>
                         <Bundle-Version>${project.version}</Bundle-Version>
+                        <Bundle-Localization>OSGI-INF/l10n/bundle</Bundle-Localization>
+                        <Bundle-Vendor>%bundle.vendor</Bundle-Vendor>
+                        <Bundle-Copyright>%bundle.copyright</Bundle-Copyright>
 <!--
                         <Embed-Dependency>
                             rxtx;groupId=org.rxtx;artifactId=rxtx;version=2.2.0;scope=runtime
@@ -90,6 +93,7 @@ Import-Package: org.osgi.framework;version="1.4.0"
                         <Include-Resource>
                             lib=${project.basedir}/src/main/lib,
                             ${project.basedir}/about.html,
+                            OSGI-INF=${project.basedir}/OSGI-INF,
                             about_files=${project.basedir}/about_files/
                         </Include-Resource>
                         <Bundle-NativeCode>

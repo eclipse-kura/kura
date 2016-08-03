@@ -45,9 +45,20 @@ import com.github.s7connector.api.factory.S7ConnectorFactory;
 
 /**
  * The Class S7PlcDriver is a S7 PLC Driver implementation for Kura Asset-Driver
- * Topology.
+ * Topology.<br/>
+ * <br/>
+ *
+ * This S7 PLC Driver can be used in cooperation with Kura Asset Model and in
+ * isolation as well. In case of isolation, the properties needs to be provided
+ * externally.<br/>
+ * <br/>
+ *
+ * The required properties are enlisted in {@link S7PlcChannelDescriptor} and
+ * the driver connection specific properties are enlisted in
+ * {@link S7PlcOptions}
  *
  * @see S7PlcChannelDescriptor
+ * @see S7PlcOptions
  */
 public final class S7PlcDriver implements Driver {
 

@@ -21,7 +21,15 @@ import org.eclipse.kura.localization.resources.S7PlcMessages;
 
 /**
  * The Class OpcUaOptions is responsible to provide all the required
- * configurable options for the OPC-UA Driver
+ * configurable options for the OPC-UA Driver.<br/>
+ * <br/>
+ *
+ * The different properties to configure a OPC-UA Driver are as follows:
+ * <ul>
+ * <li>endpoint.ip</li>
+ * <li>endpoint.port</li>
+ * <li>server.name</li>
+ * </ul>
  */
 final class OpcUaOptions {
 
@@ -58,8 +66,7 @@ final class OpcUaOptions {
 	 */
 	String getIp() {
 		String ipAddress = null;
-		if ((this.m_properties != null) && this.m_properties.containsKey(IP) && (this.m_properties.get(IP) != null)
-				&& (this.m_properties.get(IP) instanceof String)) {
+		if ((this.m_properties != null) && this.m_properties.containsKey(IP) && (this.m_properties.get(IP) != null)) {
 			ipAddress = this.m_properties.get(IP).toString();
 		}
 		return ipAddress;
@@ -72,8 +79,8 @@ final class OpcUaOptions {
 	 */
 	int getPort() {
 		int port = 0;
-		if ((this.m_properties != null) && this.m_properties.containsKey(PORT) && (this.m_properties.get(PORT) != null)
-				&& (this.m_properties.get(PORT) instanceof String)) {
+		if ((this.m_properties != null) && this.m_properties.containsKey(PORT)
+				&& (this.m_properties.get(PORT) != null)) {
 			port = Integer.valueOf(this.m_properties.get(PORT).toString());
 		}
 		return port;
@@ -87,8 +94,7 @@ final class OpcUaOptions {
 	String getServerName() {
 		String serverName = null;
 		if ((this.m_properties != null) && this.m_properties.containsKey(SERVER_NAME)
-				&& (this.m_properties.get(SERVER_NAME) != null)
-				&& (this.m_properties.get(SERVER_NAME) instanceof String)) {
+				&& (this.m_properties.get(SERVER_NAME) != null)) {
 			serverName = this.m_properties.get(SERVER_NAME).toString();
 		}
 		return serverName;

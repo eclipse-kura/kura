@@ -248,7 +248,7 @@ public final class AssetImpl implements Asset {
 			exceptionMessage = "";
 		}
 		if ((exception != null) && (status.getExceptionMessage() != null)) {
-			exceptionMessage = status.getExceptionMessage() + " <===> " + ThrowableUtil.stackTraceAsString(exception);
+			exceptionMessage = status.getExceptionMessage() + " " + ThrowableUtil.stackTraceAsString(exception);
 		}
 
 		switch (driverFlag) {

@@ -50,10 +50,20 @@ import org.slf4j.LoggerFactory;
 /**
  * The Class OpcUaDriver is a OPC-UA Driver implementation for Kura Asset-Driver
  * Topology. Currently it only supports reading and writing from/to a specific
- * node. As of now, it doesn't support method execution or history read or
- * monitoring node
+ * node. As of now, it doesn't support method execution or history read.<br/>
+ * <br/>
+ *
+ * This OPC-UA Driver can be used in cooperation with Kura Asset Model and in
+ * isolation as well. In case of isolation, the properties needs to be provided
+ * externally.<br/>
+ * <br/>
+ *
+ * The required properties are enlisted in {@link OpcUaChannelDescriptor} and
+ * the driver connection specific properties are enlisted in
+ * {@link OpcUaOptions}
  *
  * @see OpcUaChannelDescriptor
+ * @see OpcUaOptions
  */
 public final class OpcUaDriver implements Driver {
 

@@ -87,9 +87,21 @@ import com.ghgande.j2mod.modbus.util.SerialParameters;
 
 /**
  * The Class ModbusDriver is a Modbus Driver implementation for Kura
- * Asset-Driver Topology.
+ * Asset-Driver Topology. This Modbus Driver needs specific properties to be
+ * provided externally. <br/>
+ * <br/>
+ *
+ * This Modbus Driver can be used in cooperation with Kura Asset Model and in
+ * isolation as well. In case of isolation, the properties needs to be provided
+ * externally.<br/>
+ * <br/>
+ *
+ * The required channel specific properties are enlisted in
+ * {@link ModbusChannelDescriptor} and the driver connection specific properties
+ * are enlisted in {@link ModbusOptions}
  *
  * @see ModbusChannelDescriptor
+ * @see ModbusOptions
  */
 public final class ModbusDriver implements Driver {
 

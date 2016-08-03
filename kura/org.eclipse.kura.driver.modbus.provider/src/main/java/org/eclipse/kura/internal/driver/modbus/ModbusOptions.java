@@ -24,7 +24,29 @@ import com.ghgande.j2mod.modbus.Modbus;
 
 /**
  * The Class ModbusOptions is responsible to provide all the required
- * configurable options for the Modbus Driver
+ * configurable options for the Modbus Driver. <br/>
+ * <br/>
+ *
+ * The different properties to configure a Modbus Driver are as follows:
+ * <ul>
+ * <li>modbus.rtu.baudrate</li>
+ * <li>modbus.rtu.databits</li>
+ * <li>modbus.rtu.encoding</li>
+ * <li>modbus.rtu.flowcontrolin</li> must be one of these:
+ * FLOW_CONTROL_DISABLED, FLOW_CONTROL_RTS_ENABLED, FLOW_CONTROL_CTS_ENABLED,
+ * FLOW_CONTROL_DSR_ENABLED, FLOW_CONTROL_DTR_ENABLED,
+ * FLOW_CONTROL_XONXOFF_IN_ENABLED
+ * <li>modbus.rtu.flowcontrolout</li> must be one of these:
+ * FLOW_CONTROL_DISABLED, FLOW_CONTROL_RTS_ENABLED, FLOW_CONTROL_CTS_ENABLED,
+ * FLOW_CONTROL_DSR_ENABLED, FLOW_CONTROL_DTR_ENABLED,
+ * FLOW_CONTROL_XONXOFF_OUT_ENABLED
+ * <li>modbus.tcp-udp.ip</li>
+ * <li>modbus.rtu.parity</li> must be one of these: NO_PARITY, ODD_PARITY,
+ * EVEN_PARITY, MARK_PARITY, SPACE_PARITY
+ * <li>modbus.tcp-udp.port</li>
+ * <li>modbus.rtu.stopbits</li>
+ * <li>access.type</li> must be on of these: TCP, UDP, RTU
+ * </ul>
  */
 final class ModbusOptions {
 
@@ -83,7 +105,7 @@ final class ModbusOptions {
 	int getBaudrate() {
 		int baudRate = 0;
 		if ((this.m_properties != null) && this.m_properties.containsKey(BAUD_RATE)
-				&& (this.m_properties.get(BAUD_RATE) != null) && (this.m_properties.get(BAUD_RATE) instanceof String)) {
+				&& (this.m_properties.get(BAUD_RATE) != null)) {
 			baudRate = Integer.valueOf(this.m_properties.get(BAUD_RATE).toString());
 		}
 		return baudRate;
@@ -97,7 +119,7 @@ final class ModbusOptions {
 	int getDatabits() {
 		int databits = 0;
 		if ((this.m_properties != null) && this.m_properties.containsKey(DATABITS)
-				&& (this.m_properties.get(DATABITS) != null) && (this.m_properties.get(DATABITS) instanceof String)) {
+				&& (this.m_properties.get(DATABITS) != null)) {
 			databits = Integer.valueOf(this.m_properties.get(DATABITS).toString());
 		}
 		return databits;
@@ -111,7 +133,7 @@ final class ModbusOptions {
 	String getEncoding() {
 		String encoding = null;
 		if ((this.m_properties != null) && this.m_properties.containsKey(ENCODING)
-				&& (this.m_properties.get(ENCODING) != null) && (this.m_properties.get(ENCODING) instanceof String)) {
+				&& (this.m_properties.get(ENCODING) != null)) {
 			encoding = this.m_properties.get(ENCODING).toString();
 		}
 		if (encoding != null) {
@@ -136,8 +158,7 @@ final class ModbusOptions {
 	int getFlowControlIn() {
 		String flowControlIn = null;
 		if ((this.m_properties != null) && this.m_properties.containsKey(FLOW_CONTROL_IN)
-				&& (this.m_properties.get(FLOW_CONTROL_IN) != null)
-				&& (this.m_properties.get(FLOW_CONTROL_IN) instanceof String)) {
+				&& (this.m_properties.get(FLOW_CONTROL_IN) != null)) {
 			flowControlIn = this.m_properties.get(FLOW_CONTROL_IN).toString();
 		}
 		if (flowControlIn != null) {
@@ -171,8 +192,7 @@ final class ModbusOptions {
 	int getFlowControlOut() {
 		String flowControlOut = null;
 		if ((this.m_properties != null) && this.m_properties.containsKey(FLOW_CONTROL_OUT)
-				&& (this.m_properties.get(FLOW_CONTROL_OUT) != null)
-				&& (this.m_properties.get(FLOW_CONTROL_OUT) instanceof String)) {
+				&& (this.m_properties.get(FLOW_CONTROL_OUT) != null)) {
 			flowControlOut = this.m_properties.get(FLOW_CONTROL_OUT).toString();
 		}
 		if (flowControlOut != null) {
@@ -205,8 +225,7 @@ final class ModbusOptions {
 	 */
 	String getIp() {
 		String ipAddress = null;
-		if ((this.m_properties != null) && this.m_properties.containsKey(IP) && (this.m_properties.get(IP) != null)
-				&& (this.m_properties.get(IP) instanceof String)) {
+		if ((this.m_properties != null) && this.m_properties.containsKey(IP) && (this.m_properties.get(IP) != null)) {
 			ipAddress = this.m_properties.get(IP).toString();
 		}
 		return ipAddress;
@@ -220,7 +239,7 @@ final class ModbusOptions {
 	int getParity() {
 		String parity = null;
 		if ((this.m_properties != null) && this.m_properties.containsKey(PARITY)
-				&& (this.m_properties.get(PARITY) != null) && (this.m_properties.get(PARITY) instanceof String)) {
+				&& (this.m_properties.get(PARITY) != null)) {
 			parity = this.m_properties.get(PARITY).toString();
 		}
 		if (parity != null) {
@@ -250,8 +269,8 @@ final class ModbusOptions {
 	 */
 	int getPort() {
 		int port = 0;
-		if ((this.m_properties != null) && this.m_properties.containsKey(PORT) && (this.m_properties.get(PORT) != null)
-				&& (this.m_properties.get(PORT) instanceof String)) {
+		if ((this.m_properties != null) && this.m_properties.containsKey(PORT)
+				&& (this.m_properties.get(PORT) != null)) {
 			port = Integer.valueOf(this.m_properties.get(PORT).toString());
 		}
 		return port;
@@ -265,7 +284,7 @@ final class ModbusOptions {
 	int getStopbits() {
 		String stopbits = null;
 		if ((this.m_properties != null) && this.m_properties.containsKey(STOPBITS)
-				&& (this.m_properties.get(STOPBITS) != null) && (this.m_properties.get(STOPBITS) instanceof String)) {
+				&& (this.m_properties.get(STOPBITS) != null)) {
 			stopbits = this.m_properties.get(STOPBITS).toString();
 		}
 		if (stopbits != null) {
@@ -289,8 +308,8 @@ final class ModbusOptions {
 	 */
 	ModbusType getType() {
 		String messageType = null;
-		if ((this.m_properties != null) && this.m_properties.containsKey(TYPE) && (this.m_properties.get(TYPE) != null)
-				&& (this.m_properties.get(TYPE) instanceof String)) {
+		if ((this.m_properties != null) && this.m_properties.containsKey(TYPE)
+				&& (this.m_properties.get(TYPE) != null)) {
 			messageType = (String) this.m_properties.get(TYPE);
 		}
 		if (messageType != null) {

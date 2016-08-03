@@ -29,7 +29,7 @@ import org.eclipse.kura.util.collection.CollectionUtil;
  * <ul>
  * <li>unit.id</li> denotes the Unit to connect to
  * <li>primary.table</li> denotes the primary address space : COILS,
- * DISCRETE_INPUTS, INPUT_REGISTERS, HOLDING_REGISTERS
+ * DISCRETE_INPUTS, INPUT_REGISTERS, HOLDING_REGISTERS (string representation)
  * <li>memory.address</li> denotes the memory address to perform operation (in
  * integer format)
  * </ul>

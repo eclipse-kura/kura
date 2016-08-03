@@ -21,7 +21,16 @@ import org.eclipse.kura.localization.resources.S7PlcMessages;
 
 /**
  * The Class S7PlcOptions is responsible to provide all the required
- * configurable options for the S7 PLC Driver
+ * configurable options for the S7 PLC Driver.<br/>
+ * <br/>
+ *
+ * The different properties to configure a S7 PLC Driver are as follows:
+ * <ul>
+ * <li>host.ip</li>
+ * <li>host.port</li>
+ * <li>rack</li>
+ * <li>slot</li>
+ * </ul>
  */
 final class S7PlcOptions {
 
@@ -61,8 +70,7 @@ final class S7PlcOptions {
 	 */
 	String getIp() {
 		String ipAddress = null;
-		if ((this.m_properties != null) && this.m_properties.containsKey(IP) && (this.m_properties.get(IP) != null)
-				&& (this.m_properties.get(IP) instanceof String)) {
+		if ((this.m_properties != null) && this.m_properties.containsKey(IP) && (this.m_properties.get(IP) != null)) {
 			ipAddress = this.m_properties.get(IP).toString();
 		}
 		return ipAddress;
@@ -75,8 +83,8 @@ final class S7PlcOptions {
 	 */
 	int getPort() {
 		int port = 0;
-		if ((this.m_properties != null) && this.m_properties.containsKey(PORT) && (this.m_properties.get(PORT) != null)
-				&& (this.m_properties.get(PORT) instanceof String)) {
+		if ((this.m_properties != null) && this.m_properties.containsKey(PORT)
+				&& (this.m_properties.get(PORT) != null)) {
 			port = Integer.valueOf(this.m_properties.get(PORT).toString());
 		}
 		return port;
@@ -89,8 +97,8 @@ final class S7PlcOptions {
 	 */
 	int getRack() {
 		int rack = 0;
-		if ((this.m_properties != null) && this.m_properties.containsKey(RACK) && (this.m_properties.get(RACK) != null)
-				&& (this.m_properties.get(RACK) instanceof String)) {
+		if ((this.m_properties != null) && this.m_properties.containsKey(RACK)
+				&& (this.m_properties.get(RACK) != null)) {
 			rack = Integer.valueOf(this.m_properties.get(RACK).toString());
 		}
 		return rack;
@@ -103,8 +111,8 @@ final class S7PlcOptions {
 	 */
 	int getSlot() {
 		int slot = 0;
-		if ((this.m_properties != null) && this.m_properties.containsKey(SLOT) && (this.m_properties.get(SLOT) != null)
-				&& (this.m_properties.get(SLOT) instanceof String)) {
+		if ((this.m_properties != null) && this.m_properties.containsKey(SLOT)
+				&& (this.m_properties.get(SLOT) != null)) {
 			slot = Integer.valueOf(this.m_properties.get(SLOT).toString());
 		}
 		return slot;

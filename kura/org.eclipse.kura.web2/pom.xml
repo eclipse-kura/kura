@@ -10,6 +10,7 @@
 
     Contributors:
       Eurotech
+      Jens Reimann <jreimann@redhat.com> - remove dependency on slf4j:logj12
 
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -98,11 +99,6 @@
 	        <dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
-			<version>1.6.4</version>
-		</dependency>
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-log4j12</artifactId>
 			<version>1.6.4</version>
 		</dependency>
 		<dependency>

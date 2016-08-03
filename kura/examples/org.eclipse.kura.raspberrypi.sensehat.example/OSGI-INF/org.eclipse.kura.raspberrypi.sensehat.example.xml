@@ -18,5 +18,6 @@
    <property name="service.pid" type="String" value="org.eclipse.kura.raspberrypi.sensehat.example.SenseHatExample"/>
    <service>
       <provide interface="org.eclipse.kura.raspberrypi.sensehat.example.SenseHatExample"/>
+      <provide interface="org.eclipse.kura.configuration.ConfigurableComponent"/>
    </service>
 </scr:component>

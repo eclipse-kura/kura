@@ -17,6 +17,7 @@
    <implementation class="org.eclipse.kura.emulator.clock.ClockServiceImpl"/>
    <service>
       <provide interface="org.eclipse.kura.clock.ClockService"/>
+      <provide interface="org.eclipse.kura.configuration.ConfigurableComponent"/>
    </service>
    <property name="service.pid" value="org.eclipse.kura.clock.ClockService"/>
    <reference name="EventAdmin" 

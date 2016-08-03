@@ -75,7 +75,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Implementation of ConfigurationService.
  */
-public class ConfigurationServiceImpl implements ConfigurationService, ConfigurationListener {
+public class ConfigurationServiceImpl implements ConfigurationService {
     private static final Logger s_logger = LoggerFactory.getLogger(ConfigurationServiceImpl.class);
 
     private ComponentContext m_ctx;
@@ -103,10 +103,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
     // maps the kura.service.pid to the associated service.factoryPid
     private Map<String, String> m_factoryPidByPid;
 
-    // contains all pids (aka kura.service.pid) which have been configured and for which we have not
-    // received the corresponding ConfigurationEvent yet
-    private Set<String> m_pendingConfigurationPids;
-
+    // contains all the pids (kura.service.pid) which have to be deleted
     private Set<String> m_pendingDeletePids;
 
     // maps the kura.service.pid to the associated service.pid
@@ -153,7 +150,6 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
     public ConfigurationServiceImpl() {
         m_allActivatedPids = new HashSet<String>();
         m_activatedSelfConfigComponents = new HashSet<String>();
-        m_pendingConfigurationPids = new HashSet<String>();
         m_pendingDeletePids = new HashSet<String>();
         m_ocds = new HashMap<String, Tocd>();
         m_factoryPids = new HashSet<String>();
@@ -173,11 +169,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
         // save the bundle context
         m_ctx = componentContext;
 
-        // 1. Register the ConfigurationListener to
-        // monitor Configuration updates
-        m_ctx.getBundleContext().registerService(ConfigurationListener.class.getName(), this, null);
-
-        // 2. Load the latest snapshot and push it to ConfigurationAdmin
+        // Load the latest snapshot and push it to ConfigurationAdmin
         try {
             loadLatestSnapshotInConfigAdmin();
         } catch (Exception e) {
@@ -205,38 +197,6 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
         }
         if (m_bundleTracker != null) {
             m_bundleTracker.close();
-        }
-    }
-
-    // ----------------------------------------------------------------
-    //
-    // ConfigurationListener
-    //
-    // ----------------------------------------------------------------
-
-    @Override
-    public synchronized void configurationEvent(ConfigurationEvent event) {
-        // Called every time a new service configuration is invoked
-        // we need to take a new snapshot every time this happens
-
-        // note that the pid in the event is the service.pid
-        String pid = getPidByServicePid(event.getPid());
-
-        if (m_pendingConfigurationPids.contains(pid)) {
-
-            // ignore the ConfigurationEvent for those PIDs whose
-            // configuration update was by the ConfigurationService itself
-            m_pendingConfigurationPids.remove(pid);
-            return;
-        }
-        try {
-            if (m_allActivatedPids.contains(pid)) {
-                // Take a new snapshot
-                s_logger.info("ConfigurationEvent for tracked ConfigurableComponent with pid: {}", pid);
-                snapshot();
-            }
-        } catch (Exception e) {
-            s_logger.error("Error taking snapshot after ConfigurationEvent", e);
         }
     }
 
@@ -346,8 +306,8 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 
             registerComponentConfiguration(pid, servicePid, factoryPid);
 
-            if (!takeSnapshot) {
-                m_pendingConfigurationPids.add(pid);
+            if(takeSnapshot){
+            	snapshot();
             }
         } catch (IOException e) {
             throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR, e, "Cannot create component instance for factory " + factoryPid);
@@ -710,7 +670,6 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
             // merge the current properties, if any, with the defaults from metatype
             mergeWithDefaults(ocd, props);
 
-            m_pendingConfigurationPids.add(pid);
             config.update(CollectionsUtil.mapToDictionary(props));
             s_logger.info("Seeding updated configuration for pid: {}", pid);
         }
@@ -1096,9 +1055,6 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
 
                             cfg.update(CollectionsUtil.mapToDictionary(newProperties));
 
-                            // track it as a pending Configuration
-                            // for which we are expecting a confirmation
-                            m_pendingConfigurationPids.add(config.getPid());
                         } catch (IOException e) {
                             s_logger.warn("Error seeding initial properties to ConfigAdmin for pid: {}", config.getPid(), e);
                         }
@@ -1288,16 +1244,14 @@ public class ConfigurationServiceImpl implements ConfigurationService, Configura
             // components
         }
 
-        if (!snapshotOnConfirmation) {
-            m_pendingConfigurationPids.add(pid);
-        } else {
-            s_logger.info("Snapshot on EventAdmin configuration will be taken for {}.", pid);
-        }
-
         // Update the new properties
         // use ConfigurationAdmin to do the update
         Configuration config = m_configurationAdmin.getConfiguration(m_servicePidByPid.get(pid), null);
         config.update(CollectionsUtil.mapToDictionary(mergedProperties));
+        
+        if(snapshotOnConfirmation){
+        	snapshot();
+        }
     }
 
     private OCD getRegisteredOCD(String pid) {

@@ -34,20 +34,23 @@ public class Emulator {
         try {
             //Properties props = System.getProperties();
             String mode = System.getProperty("org.eclipse.kura.mode");
-            if(mode.equals("emulator")) {
+            if("emulator".equals(mode)) {
                 System.out.println("Framework is running in emulation mode");
             } else {
                 System.out.println("Framework is not running in emulation mode");
             }
 
-            String snapshotFolderPath= System.getProperty("kura.snapshots");
-            File snapshotFolder = new File(snapshotFolderPath);
+            final String snapshotFolderPath = System.getProperty("kura.snapshots");
+            if (snapshotFolderPath == null || snapshotFolderPath.isEmpty()) {
+            	throw new IllegalStateException ("System property 'kura.snapshots' is not set");
+            }
+            final File snapshotFolder = new File(snapshotFolderPath);
             if (!snapshotFolder.exists() || snapshotFolder.list().length == 0) {
                 snapshotFolder.mkdirs();
                 copySnapshot(snapshotFolderPath);
             }
         } catch(Exception e) {
-            System.out.println("Framework is not running in emulation mode or initialization failed!");
+            System.out.println("Framework is not running in emulation mode or initialization failed!: " + e.getMessage());
         }
     }
 

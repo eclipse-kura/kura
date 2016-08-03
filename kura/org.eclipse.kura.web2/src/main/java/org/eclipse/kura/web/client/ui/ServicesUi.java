@@ -719,7 +719,9 @@ public class ServicesUi extends Composite {
 			valid.put(param.getName(), false);
 			box.setPlaceholder(MSGS.formRequiredParameter());
 			return false;
-		} else if (!param.isRequired() && box.getText().trim() != null && !"".equals(box.getText().trim())){
+		} 
+	    
+	    if (box.getText().trim() != null && !"".equals(box.getText().trim())){
 			if (param.getType().equals(GwtConfigParameterType.CHAR)) {
 				if (box.getText().trim().length() > 1) {
 					group.setValidationState(ValidationState.ERROR);
@@ -744,18 +746,29 @@ public class ServicesUi extends Composite {
 					}
 				}
 			} else if (param.getType().equals(GwtConfigParameterType.STRING)) {
-				int configMinValue= Integer.parseInt(param.getMin());
-				int configMaxValue= Integer.parseInt(param.getMax());
-				if ((String.valueOf(box.getText().trim()).length()) < Math.max(configMinValue, 0)) {
+			    int configMinValue= 0;
+                int configMaxValue= 255;
+			    try {
+			        configMinValue = Integer.parseInt(param.getMin());
+                } catch (NumberFormatException nfe) {
+                    errorLogger.log(Level.SEVERE, "Configuration min value error! Applying UI defaults...");
+                }
+			    try {
+			        configMaxValue = Integer.parseInt(param.getMax());
+                } catch (NumberFormatException nfe) {
+                    errorLogger.log(Level.SEVERE, "Configuration max value error! Applying UI defaults...");
+                }
+			    
+				if ((String.valueOf(box.getText().trim()).length()) < configMinValue) {
 					group.setValidationState(ValidationState.ERROR);
 					valid.put(param.getName(), false);
-					box.setPlaceholder(MessageUtils.get(CONFIG_MIN_VALUE, Math.max(configMinValue, 0)));
+					box.setPlaceholder(MessageUtils.get(CONFIG_MIN_VALUE, configMinValue));
 					return false;
 				}				
-				if ((String.valueOf(box.getText().trim()).length()) > Math.min(configMaxValue, 255)) {
+				if ((String.valueOf(box.getText().trim()).length()) > configMaxValue) {
 					group.setValidationState(ValidationState.ERROR);
 					valid.put(param.getName(), false);
-					box.setPlaceholder(MessageUtils.get(CONFIG_MAX_VALUE, Math.min(configMaxValue, 255)));
+					box.setPlaceholder(MessageUtils.get(CONFIG_MAX_VALUE, configMaxValue));
 					return false;
 				}	
 			} else {

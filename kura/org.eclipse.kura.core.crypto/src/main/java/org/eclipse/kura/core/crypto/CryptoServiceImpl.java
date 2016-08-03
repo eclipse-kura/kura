@@ -8,6 +8,7 @@
  *
  * Contributors:
  *     Eurotech
+ *     Jens Reimann <jreimann@redhat.com> Fix possible NPE
  *******************************************************************************/
 package org.eclipse.kura.core.crypto;
 
@@ -35,8 +36,12 @@ import javax.crypto.spec.SecretKeySpec;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.crypto.CryptoService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class CryptoServiceImpl implements CryptoService {
+	private static final Logger logger = LoggerFactory.getLogger(CryptoServiceImpl.class);
+	
 	private static final String ALGORITHM   = "AES";
 	private static final byte[] SECRET_KEY  = "rv;ipse329183!@#".getBytes();
 
@@ -321,7 +326,12 @@ public class CryptoServiceImpl implements CryptoService {
 	}
 
 	private static void initKeystorePasswordPath() {
-		String uriSpec = System.getProperty("kura.configuration");
+		final String uriSpec = System.getProperty("kura.configuration");
+		if (uriSpec == null || uriSpec.isEmpty()) {
+			logger.error("Unable to initialize keystore password. 'kura.configuration' is not set.");
+			return;
+		}
+		
 		Properties props = new Properties();
 		FileInputStream fis = null;
 		try {

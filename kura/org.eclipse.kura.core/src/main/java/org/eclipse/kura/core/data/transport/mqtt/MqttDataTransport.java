@@ -353,7 +353,9 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 	@Override
 	public String getBrokerUrl() {
 		if (m_clientConf != null) {
-			return m_clientConf.getBrokerUrl();
+			String brokerUrl = m_clientConf.getBrokerUrl();
+			if(brokerUrl!=null)
+				return brokerUrl;
 		}
 		return "";
 	}
@@ -361,7 +363,9 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 	@Override
 	public String getAccountName() {
 		if (m_clientConf != null) {
-			return m_topicContext.get(TOPIC_ACCOUNT_NAME_CTX_NAME);
+			String accountName = m_topicContext.get(TOPIC_ACCOUNT_NAME_CTX_NAME);
+			if(accountName!=null)
+				return accountName;
 		}
 		return "";
 	}
@@ -369,7 +373,9 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 	@Override
 	public String getUsername() {
 		if (m_clientConf != null) {
-			return m_clientConf.getConnectOptions().getUserName();
+			String username = m_clientConf.getConnectOptions().getUserName();
+			if(username!=null)
+				return username;
 		}
 		return "";
 	}
@@ -377,7 +383,9 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 	@Override
 	public String getClientId() {
 		if (m_clientConf != null) {
-			return m_clientConf.getClientId();
+			String clientId = m_clientConf.getClientId();
+			if(clientId!=null)
+				return clientId;
 		}
 		return "";
 	}

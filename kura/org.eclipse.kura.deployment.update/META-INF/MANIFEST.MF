@@ -5,5 +5,4 @@ Bundle-SymbolicName: org.eclipse.kura.deployment.update;singleton:=true
 Bundle-Version: 1.0.3.qualifier
 Bundle-Vendor: EUROTECH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Service-Component: OSGI-INF/*.xml
 Bundle-ActivationPolicy: lazy

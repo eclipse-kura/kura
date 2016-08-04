@@ -18,14 +18,6 @@
 
         <Icon resource="Timer" size="32"/>
                 
-        <AD id="name"
-            name="name"
-            type="String"
-            cardinality="0"
-            required="true"
-            default="Kura Timer"
-            description="Name of the Timer"/>
-        
         <AD id="interval"
             name="interval"
             type="Integer"

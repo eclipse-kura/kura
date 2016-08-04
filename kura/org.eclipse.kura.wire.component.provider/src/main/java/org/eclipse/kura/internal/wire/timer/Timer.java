@@ -41,9 +41,6 @@ public final class Timer implements WireEmitter, ConfigurableComponent {
 	/** The Constant denoting the interval property from the metatype */
 	private static final String PROP_INTERVAL = "interval";
 
-	/** The Constant denoting the name property from the metatype */
-	private static final String PROP_TIMER_NAME = "name";
-
 	/** The Logger instance. */
 	private static final Logger s_logger = LoggerFactory.getLogger(Timer.class);
 
@@ -55,9 +52,6 @@ public final class Timer implements WireEmitter, ConfigurableComponent {
 
 	/** The interval time (in seconds). */
 	private int m_interval;
-
-	/** The Name of this wire component. */
-	private String m_name;
 
 	/** The properties as provided by configuration admin. */
 	private Map<String, Object> m_properties;
@@ -134,7 +128,6 @@ public final class Timer implements WireEmitter, ConfigurableComponent {
 	 * interval
 	 */
 	private void doUpdate() {
-		this.m_name = this.m_properties.get(PROP_TIMER_NAME).toString();
 		this.m_interval = (Integer) this.m_properties.get(PROP_INTERVAL);
 		if (this.m_tickHandle != null) {
 			this.m_tickHandle.cancel(true);

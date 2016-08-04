@@ -25,7 +25,7 @@ import org.eclipse.kura.type.TypedValue;
  */
 @Immutable
 @ThreadSafe
-public final class WireField {
+public class WireField {
 
 	/** The name of the field */
 	private final String name;

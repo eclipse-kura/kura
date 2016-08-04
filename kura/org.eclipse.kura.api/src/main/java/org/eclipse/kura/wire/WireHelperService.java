@@ -70,6 +70,17 @@ public interface WireHelperService {
 	public String getServicePid(final WireComponent wireComponent);
 
 	/**
+	 * Prepares new Exception wire field.
+	 *
+	 * @param name
+	 *            the name
+	 * @return the wire field
+	 * @throws KuraRuntimeException
+	 *             if any of the arguments is null
+	 */
+	public WireField newExceptionWireField(String name);
+
+	/**
 	 * Instantiates a new wire configuration.
 	 *
 	 * @param emitterPid

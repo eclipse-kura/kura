@@ -14,6 +14,7 @@ package org.eclipse.kura.internal.asset;
 
 import static org.eclipse.kura.Preconditions.checkCondition;
 import static org.eclipse.kura.Preconditions.checkNull;
+import static org.eclipse.kura.asset.AssetFlag.FAILURE;
 import static org.eclipse.kura.asset.AssetFlag.READ_SUCCESSFUL;
 import static org.eclipse.kura.asset.AssetFlag.WRITE_SUCCESSFUL;
 import static org.eclipse.kura.asset.ChannelType.READ;
@@ -239,17 +240,6 @@ public final class AssetImpl implements Asset {
 
 		final DriverStatus status = driverRecord.getDriverStatus();
 		final DriverFlag driverFlag = status.getDriverFlag();
-		String exceptionMessage = null;
-		final Exception exception = status.getException();
-		if ((exception != null) && (status.getExceptionMessage() == null)) {
-			exceptionMessage = ThrowableUtil.stackTraceAsString(exception);
-		}
-		if ((exception == null) && (status.getExceptionMessage() == null)) {
-			exceptionMessage = "";
-		}
-		if ((exception != null) && (status.getExceptionMessage() != null)) {
-			exceptionMessage = status.getExceptionMessage() + " " + ThrowableUtil.stackTraceAsString(exception);
-		}
 
 		switch (driverFlag) {
 		case READ_SUCCESSFUL:
@@ -258,28 +248,8 @@ public final class AssetImpl implements Asset {
 		case WRITE_SUCCESSFUL:
 			assetRecord.setAssetFlag(WRITE_SUCCESSFUL);
 			break;
-		case UNKNOWN:
-		case CUSTOM_ERROR_0:
-		case CUSTOM_ERROR_1:
-		case CUSTOM_ERROR_2:
-		case CUSTOM_ERROR_3:
-		case CUSTOM_ERROR_4:
-		case CUSTOM_ERROR_5:
-		case CUSTOM_ERROR_6:
-		case CUSTOM_ERROR_7:
-		case CUSTOM_ERROR_8:
-		case CUSTOM_ERROR_9:
-		case COMM_DEVICE_NOT_CONNECTED:
-		case DEVICE_OR_INTERFACE_BUSY:
-		case DRIVER_ERROR_CHANNEL_ADDRESS_INVALID:
-		case DRIVER_ERROR_CHANNEL_NOT_ACCESSIBLE:
-		case DRIVER_ERROR_CHANNEL_VALUE_TYPE_CONVERSION_EXCEPTION:
-		case DRIVER_ERROR_UNSPECIFIED:
-		case DRIVER_THREW_UNKNOWN_EXCEPTION:
-		case READ_FAILURE:
-		case WRITE_FAILURE:
-			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, exceptionMessage);
 		default:
+			assetRecord.setAssetFlag(FAILURE);
 			break;
 		}
 		assetRecord.setTimestamp(driverRecord.getTimestamp());

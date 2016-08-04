@@ -54,9 +54,7 @@ public interface BaseAsset {
 	 * @throws KuraException
 	 *             if the connection to the asset was interrupted, then error
 	 *             code {@code KuraErrorCode#CONNECTION_FAILED} needs to be set
-	 *             in the thrown {@link KuraException}. For any other internal
-	 *             exception, the error code
-	 *             {@code KuraErrorCode#INTERNAL_ERROR} will be set.
+	 *             in the thrown {@link KuraException}.
 	 * @throws KuraRuntimeException
 	 *             if argument is null or empty
 	 * @return the list of asset records which comprises the currently read
@@ -130,11 +128,7 @@ public interface BaseAsset {
 	 * @throws KuraException
 	 *             if the connection to the asset was interrupted, then error
 	 *             code {@code KuraErrorCode#CONNECTION_FAILED} needs to be set
-	 *             in the thrown {@link KuraException} and if the channel is not
-	 *             present, error code {@code KuraErrorCode#INTERNAL_ERROR}
-	 *             needs to be set in the thrown {@link KuraException}. For any
-	 *             other internal exception, then error code
-	 *             {@code KuraErrorCode#INTERNAL_ERROR} will be set.
+	 *             in the thrown {@link KuraException}
 	 * @throws KuraRuntimeException
 	 *             if argument is null or empty
 	 * @return the list of asset records which comprises the status of the write

@@ -21,7 +21,6 @@ import static org.eclipse.kura.asset.AssetConstants.CHANNEL_PROPERTY_POSTFIX;
 import static org.eclipse.kura.asset.AssetConstants.CHANNEL_PROPERTY_PREFIX;
 import static org.eclipse.kura.asset.AssetConstants.DRIVER_PROPERTY_POSTFIX;
 import static org.eclipse.kura.asset.AssetConstants.NAME;
-import static org.eclipse.kura.asset.AssetConstants.TIMER_EVENT;
 import static org.eclipse.kura.asset.AssetConstants.TYPE;
 import static org.eclipse.kura.asset.AssetConstants.VALUE_TYPE;
 import static org.eclipse.kura.asset.ChannelType.READ;
@@ -41,6 +40,7 @@ import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.asset.Asset;
 import org.eclipse.kura.asset.AssetConfiguration;
+import org.eclipse.kura.asset.AssetConstants;
 import org.eclipse.kura.asset.AssetRecord;
 import org.eclipse.kura.asset.AssetService;
 import org.eclipse.kura.asset.Channel;
@@ -61,6 +61,8 @@ import org.eclipse.kura.type.TypedValue;
 import org.eclipse.kura.type.TypedValues;
 import org.eclipse.kura.util.base.ThrowableUtil;
 import org.eclipse.kura.util.collection.CollectionUtil;
+import org.eclipse.kura.wire.ExceptionWireField;
+import org.eclipse.kura.wire.TimerWireField;
 import org.eclipse.kura.wire.WireEmitter;
 import org.eclipse.kura.wire.WireEnvelope;
 import org.eclipse.kura.wire.WireField;
@@ -87,6 +89,7 @@ import org.slf4j.LoggerFactory;
  * <li>asset_flag</li>
  * <li>timestamp</li>
  * <li>value</li>
+ * <li>exception</li>
  * </ul>
  *
  * @see Asset
@@ -95,6 +98,8 @@ public final class WireAsset implements WireEmitter, WireReceiver, SelfConfiguri
 
 	/** Configuration PID Property. */
 	private static final String CONF_PID = "org.eclipse.kura.wire.WireAsset";
+
+	static int i = 0;
 
 	/** The Logger instance. */
 	private static final Logger s_logger = LoggerFactory.getLogger(WireAsset.class);
@@ -148,6 +153,19 @@ public final class WireAsset implements WireEmitter, WireReceiver, SelfConfiguri
 		this.m_wireSupport = this.m_wireHelperService.newWireSupport(this);
 		this.m_driver = this.m_driverService.getDriver(this.m_asset.getAssetConfiguration().getDriverId());
 		s_logger.debug(s_message.activatingWireAssetDone());
+	}
+
+	public void addChannel(final String name, final String type, final String valueType) {
+		this.m_properties.put(i + ".CH.name", name);
+		this.m_properties.put(i + ".CH.type", type);
+		this.m_properties.put(i + ".CH.value.type", valueType);
+		this.updated(this.m_properties);
+		i++;
+	}
+
+	public void assignDriver(final String driverId) {
+		this.m_properties.put(AssetConstants.ASSET_DRIVER_PROP.value(), driverId);
+		this.updated(this.m_properties);
 	}
 
 	/**
@@ -273,8 +291,11 @@ public final class WireAsset implements WireEmitter, WireReceiver, SelfConfiguri
 					TypedValues.newLongValue(assetRecord.getTimestamp()));
 			final WireField valueWireField = this.m_wireHelperService.newWireField(s_message.value(),
 					assetRecord.getValue());
+			final WireField exceptionWireField = this.m_wireHelperService
+					.newExceptionWireField(s_message.exceptionWireField());
 			final WireRecord wireRecord = this.m_wireHelperService.newWireRecord(new Timestamp(new Date().getTime()),
-					Arrays.asList(channelIdWireField, assetFlagWireField, timestampWireField, valueWireField));
+					Arrays.asList(channelIdWireField, assetFlagWireField, timestampWireField, valueWireField,
+							exceptionWireField));
 			wireRecords.add(wireRecord);
 		}
 		this.m_wireSupport.emit(wireRecords);
@@ -393,7 +414,8 @@ public final class WireAsset implements WireEmitter, WireReceiver, SelfConfiguri
 			}
 		}
 		checkCondition(wireEnvelope.getRecords().isEmpty(), s_message.wireRecordsNonEmpty());
-		if (wireEnvelope.getRecords().get(0).getFields().get(0).getName().equals(TIMER_EVENT.value())) {
+		final Object field = wireEnvelope.getRecords().get(0).getFields().get(0);
+		if (field instanceof TimerWireField) {
 			// perform the read operation on timer event receive
 			try {
 				final List<AssetRecord> recentlyReadRecords = this.m_asset.read(channelsToRead);
@@ -408,7 +430,11 @@ public final class WireAsset implements WireEmitter, WireReceiver, SelfConfiguri
 				for (final Map.Entry<Long, Channel> channelEntry : channels.entrySet()) {
 					final Channel channel = channelEntry.getValue();
 					if ((channel.getType() == WRITE) || (channel.getType() == READ_WRITE)) {
-						assetRecordsToWriteChannels.add(this.prepareAssetRecord(channel, wireField.getValue()));
+						final String wireFieldName = wireField.getName();
+						if (channel.getName().equalsIgnoreCase(wireFieldName)
+								&& !(wireField instanceof ExceptionWireField)) {
+							assetRecordsToWriteChannels.add(this.prepareAssetRecord(channel, wireField.getValue()));
+						}
 					}
 				}
 			}

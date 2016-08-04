@@ -10,23 +10,14 @@
  *   Eurotech
  *   Amit Kumar Mondal (admin@amitinside.com)
  */
-package org.eclipse.kura.asset;
+package org.eclipse.kura.wire;
 
-/**
- * This represents all the Kura Asset specific flag codes
- */
-public enum AssetFlag {
-	/**
-	 * In case of any failure on the channel
-	 */
-	FAILURE,
-	/**
-	 * In case of successful reading operation
-	 */
-	READ_SUCCESSFUL,
+import org.eclipse.kura.type.TypedValues;
 
-	/**
-	 * In case of successful writing operation
-	 */
-	WRITE_SUCCESSFUL;
+public final class TimerWireField extends WireField {
+
+	public TimerWireField() {
+		super("TIMER", TypedValues.newStringValue("TIMER"));
+	}
+
 }

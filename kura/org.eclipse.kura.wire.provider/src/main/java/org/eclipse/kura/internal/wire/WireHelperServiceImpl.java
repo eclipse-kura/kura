@@ -25,6 +25,7 @@ import org.eclipse.kura.localization.LocalizationAdapter;
 import org.eclipse.kura.localization.resources.WireMessages;
 import org.eclipse.kura.type.TypedValue;
 import org.eclipse.kura.util.base.ThrowableUtil;
+import org.eclipse.kura.wire.ExceptionWireField;
 import org.eclipse.kura.wire.WireComponent;
 import org.eclipse.kura.wire.WireConfiguration;
 import org.eclipse.kura.wire.WireEnvelope;
@@ -46,6 +47,21 @@ public final class WireHelperServiceImpl implements WireHelperService {
 
 	/** Localization Resource */
 	private static final WireMessages s_message = LocalizationAdapter.adapt(WireMessages.class);
+
+	/** {@inheritDoc} */
+	@Override
+	public String getPid(final WireComponent wireComponent) {
+		checkNull(wireComponent, s_message.wireComponentNonNull());
+		final BundleContext context = FrameworkUtil.getBundle(this.getClass()).getBundleContext();
+		final ServiceReference<?>[] refs = this.getServiceReferences(context, WireComponent.class.getName(), null);
+		for (final ServiceReference<?> ref : refs) {
+			final WireComponent wc = (WireComponent) context.getService(ref);
+			if (wc == wireComponent) {
+				return ref.getProperty(KURA_SERVICE_PID).toString();
+			}
+		}
+		return null;
+	}
 
 	/** {@inheritDoc} */
 	@Override
@@ -71,21 +87,6 @@ public final class WireHelperServiceImpl implements WireHelperService {
 			final WireComponent wc = (WireComponent) context.getService(ref);
 			if (wc == wireComponent) {
 				return ref.getProperty(SERVICE_PID).toString();
-			}
-		}
-		return null;
-	}
-
-	/** {@inheritDoc} */
-	@Override
-	public String getPid(final WireComponent wireComponent) {
-		checkNull(wireComponent, s_message.wireComponentNonNull());
-		final BundleContext context = FrameworkUtil.getBundle(this.getClass()).getBundleContext();
-		final ServiceReference<?>[] refs = this.getServiceReferences(context, WireComponent.class.getName(), null);
-		for (final ServiceReference<?> ref : refs) {
-			final WireComponent wc = (WireComponent) context.getService(ref);
-			if (wc == wireComponent) {
-				return ref.getProperty(KURA_SERVICE_PID).toString();
 			}
 		}
 		return null;
@@ -117,6 +118,11 @@ public final class WireHelperServiceImpl implements WireHelperService {
 		} catch (final InvalidSyntaxException ise) {
 			throw new KuraRuntimeException(KuraErrorCode.INTERNAL_ERROR, ThrowableUtil.stackTraceAsString(ise));
 		}
+	}
+
+	@Override
+	public WireField newExceptionWireField(final String name) {
+		return new ExceptionWireField();
 	}
 
 	/** {@inheritDoc} */

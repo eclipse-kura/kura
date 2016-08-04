@@ -264,6 +264,9 @@ public interface WireMessages {
 	@En("Error during Wire Service Component update! Something went wrong...")
 	public String errorUpdatingWireService();
 
+	@En("exception")
+	public String exceptionWireField();
+
 	@En("Executing SQL query...")
 	public String execSql();
 

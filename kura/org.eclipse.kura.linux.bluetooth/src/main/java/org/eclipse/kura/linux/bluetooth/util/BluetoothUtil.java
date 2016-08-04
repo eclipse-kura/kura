@@ -73,16 +73,24 @@ public class BluetoothUtil {
 		String[] command = { HCICONFIG, name, "version" };
 		try {
 			proc = BluetoothProcessUtil.exec(command);
-			br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
-			sb = new StringBuilder();
+			// Check Error stream
+			br = new BufferedReader(new InputStreamReader(proc.getErrorStream()));
 			String line = null;
 			while ((line = br.readLine()) != null) {
-				if (line.contains("command not found")) {
+				if (line.toLowerCase().contains("command not found")) {
 					throw new KuraException(KuraErrorCode.OPERATION_NOT_SUPPORTED);
-				}
-				if (line.contains("No such device")) {
+				} else if (line.toLowerCase().contains("no such device")) {
 					throw new KuraException(KuraErrorCode.INTERNAL_ERROR);
 				}
+			}
+			if (br != null)
+				br.close();
+			
+			// Check Input stream
+			br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+			sb = new StringBuilder();
+			line = null;
+			while ((line = br.readLine()) != null) {
 				sb.append(line + "\n");
 			}
 			

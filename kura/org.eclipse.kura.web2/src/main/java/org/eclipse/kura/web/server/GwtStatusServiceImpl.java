@@ -8,6 +8,7 @@
  *
  * Contributors:
  *     Eurotech
+ *     Jens Reimann <jreimann@redhat.com> - Fix logging calls
  *******************************************************************************/
 package org.eclipse.kura.web.server;
 
@@ -45,7 +46,7 @@ public class GwtStatusServiceImpl extends OsgiRemoteServiceServlet implements Gw
     private static final String DATA_SERVICE_REFERENCE_NAME = "DataService";
     private static final String DATA_TRANSPORT_SERVICE_REFERENCE_NAME = "DataTransportService";
 
-    private static Logger s_logger = LoggerFactory.getLogger(GwtNetworkServiceImpl.class);
+    private static final Logger s_logger = LoggerFactory.getLogger(GwtNetworkServiceImpl.class);
 
     public ArrayList<GwtGroupedNVPair> getDeviceConfig(GwtXSRFToken xsrfToken, boolean hasNetAdmin) throws GwtKuraException {
         checkXSRFToken(xsrfToken);

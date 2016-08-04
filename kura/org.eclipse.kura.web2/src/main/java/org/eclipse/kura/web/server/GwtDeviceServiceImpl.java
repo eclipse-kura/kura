@@ -8,6 +8,7 @@
  *
  * Contributors:
  *     Eurotech
+ *     Jens Reimann <jreimann@redhat.com> - Fix logging calls
  *******************************************************************************/
 package org.eclipse.kura.web.server;
 
@@ -233,20 +234,20 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
         SystemService systemService = ServiceLocator.getInstance().getService(SystemService.class);
         Bundle[] bundles = systemService.getBundles();
 
-        s_logger.info("Starting bundle with ID: " + bundleId);
+        s_logger.info("Starting bundle with ID: {}", bundleId);
         for (Bundle b : bundles) {
             if (b.getBundleId() == Long.parseLong(bundleId)) {
                 try {
                     b.start();
                     return;
                 } catch (BundleException e) {
-                    s_logger.error("Failed to start bundle {}: {}", new Object[] {b.getBundleId(), e});
+                    s_logger.error("Failed to start bundle {}", b.getBundleId(), e);
                     throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR);
                 }
             }
         }
         // Bundle was not found, throw error
-        s_logger.error("Could not find bundle with ID: " + bundleId);
+        s_logger.error("Could not find bundle with ID: {}", bundleId);
         throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR);
     }
 
@@ -256,21 +257,21 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
         SystemService systemService = ServiceLocator.getInstance().getService(SystemService.class);
         Bundle[] bundles = systemService.getBundles();
 
-        s_logger.info("Stopping bundle with ID: " + bundleId);
+        s_logger.info("Stopping bundle with ID: {}", bundleId);
         for (Bundle b : bundles) {
             if (b.getBundleId() == Long.parseLong(bundleId)) {
                 try {
                     b.stop();
                     return;
                 } catch (BundleException e) {
-                    s_logger.error("Failed to stop bundle {}: {}", new Object[] {b.getBundleId(), e});
+                    s_logger.error("Failed to stop bundle {}", b.getBundleId(), e);
                     throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR);
                 }
             }
         }
 
         // Bundle was not found, throw error
-        s_logger.error("Could not find bundle with ID: " + bundleId);
+        s_logger.error("Could not find bundle with ID: {}", bundleId);
         throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR);
 
     }

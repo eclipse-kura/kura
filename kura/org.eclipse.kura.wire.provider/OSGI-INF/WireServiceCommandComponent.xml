@@ -18,7 +18,6 @@
    <service>
       <provide interface="org.eclipse.osgi.framework.console.CommandProvider"/>
    </service>
-   <property name="osgi.command.scope" type="String" value="kura.wire"/>
    <reference bind="bindWireService" 
    	          cardinality="1..1" 
    	          interface="org.eclipse.kura.wire.WireService" 

@@ -40,7 +40,6 @@ import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.asset.Asset;
 import org.eclipse.kura.asset.AssetConfiguration;
-import org.eclipse.kura.asset.AssetConstants;
 import org.eclipse.kura.asset.AssetFlag;
 import org.eclipse.kura.asset.AssetRecord;
 import org.eclipse.kura.asset.AssetService;
@@ -99,8 +98,6 @@ public final class WireAsset implements WireEmitter, WireReceiver, SelfConfiguri
 	/** Configuration PID Property. */
 	private static final String CONF_PID = "org.eclipse.kura.wire.WireAsset";
 
-	static int i = 0;
-
 	/** The Logger instance. */
 	private static final Logger s_logger = LoggerFactory.getLogger(WireAsset.class);
 
@@ -146,19 +143,6 @@ public final class WireAsset implements WireEmitter, WireReceiver, SelfConfiguri
 		this.m_properties = properties;
 		this.m_wireSupport = this.m_wireHelperService.newWireSupport(this);
 		s_logger.debug(s_message.activatingWireAssetDone());
-	}
-
-	public void addChannel(final String name, final String type, final String valueType) {
-		this.m_properties.put(i + ".CH.name", name);
-		this.m_properties.put(i + ".CH.type", type);
-		this.m_properties.put(i + ".CH.value.type", valueType);
-		this.updated(this.m_properties);
-		i++;
-	}
-
-	public void assignDriver(final String driverId) {
-		this.m_properties.put(AssetConstants.ASSET_DRIVER_PROP.value(), driverId);
-		this.updated(this.m_properties);
 	}
 
 	/**

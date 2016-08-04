@@ -9,6 +9,7 @@
  * Contributors:
  *     Eurotech
  *     Jens Reimann <jreimann@redhat.com> - Fix logging calls
+ *         - Fix possible NPE
  *******************************************************************************/
 package org.eclipse.kura.web.server;
 

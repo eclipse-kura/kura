@@ -23,6 +23,7 @@ import static org.eclipse.kura.asset.AssetConstants.DRIVER_PROPERTY_POSTFIX;
 import static org.eclipse.kura.asset.AssetConstants.NAME;
 import static org.eclipse.kura.asset.AssetConstants.TYPE;
 import static org.eclipse.kura.asset.AssetConstants.VALUE_TYPE;
+import static org.eclipse.kura.asset.AssetFlag.FAILURE;
 import static org.eclipse.kura.asset.ChannelType.READ;
 import static org.eclipse.kura.asset.ChannelType.READ_WRITE;
 import static org.eclipse.kura.asset.ChannelType.WRITE;
@@ -40,6 +41,7 @@ import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.asset.Asset;
 import org.eclipse.kura.asset.AssetConfiguration;
 import org.eclipse.kura.asset.AssetConstants;
+import org.eclipse.kura.asset.AssetFlag;
 import org.eclipse.kura.asset.AssetRecord;
 import org.eclipse.kura.asset.AssetService;
 import org.eclipse.kura.asset.Channel;
@@ -264,14 +266,23 @@ public final class WireAsset implements WireEmitter, WireReceiver, SelfConfiguri
 		for (final AssetRecord assetRecord : assetRecords) {
 			final WireField channelIdWireField = new WireField(s_message.channelId(),
 					TypedValues.newLongValue(assetRecord.getChannelId()));
+			final AssetFlag assetFlag = assetRecord.getAssetFlag();
 			final WireField assetFlagWireField = new WireField(s_message.assetFlag(),
-					TypedValues.newStringValue(assetRecord.getAssetFlag().name()));
+					TypedValues.newStringValue(assetFlag.name()));
 			final WireField timestampWireField = new WireField(s_message.timestamp(),
 					TypedValues.newLongValue(assetRecord.getTimestamp()));
-			final WireField valueWireField = new WireField(s_message.value(), assetRecord.getValue());
-			final WireField exceptionWireField = new ExceptionWireField();
-			final WireRecord wireRecord = new WireRecord(new Timestamp(new Date().getTime()), Arrays.asList(
-					channelIdWireField, assetFlagWireField, timestampWireField, valueWireField, exceptionWireField));
+			final TypedValue<?> value = assetRecord.getValue();
+			final WireField valueWireField = new WireField(s_message.value(), value);
+			WireField exceptionWireField;
+			WireRecord wireRecord;
+			if (assetFlag == FAILURE) {
+				exceptionWireField = new ExceptionWireField();
+				wireRecord = new WireRecord(new Timestamp(new Date().getTime()), Arrays.asList(channelIdWireField,
+						assetFlagWireField, timestampWireField, valueWireField, exceptionWireField));
+			} else {
+				wireRecord = new WireRecord(new Timestamp(new Date().getTime()),
+						Arrays.asList(channelIdWireField, assetFlagWireField, timestampWireField, valueWireField));
+			}
 			wireRecords.add(wireRecord);
 		}
 		this.m_wireSupport.emit(wireRecords);

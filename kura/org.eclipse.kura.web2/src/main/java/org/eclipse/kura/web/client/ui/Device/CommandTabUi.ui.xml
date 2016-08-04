@@ -25,6 +25,8 @@
 	.output-panel {
 		height: 250px;
 		margin-top: 20px;
+		overflow: scroll;
+		font-family: monospace;
 	}
 	</ui:style>
 	<b:Container fluid="true">

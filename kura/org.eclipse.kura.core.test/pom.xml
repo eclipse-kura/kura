@@ -19,13 +19,13 @@
 	<parent>
 		<groupId>org.eclipse.kura</groupId>
 		<artifactId>kura</artifactId>
-		<version>2.0.0-SNAPSHOT</version>
+		<version>2.1.0-SNAPSHOT</version>
 		<relativePath>../manifest_pom.xml</relativePath>
 	</parent>
 
 	<artifactId>org.eclipse.kura.core.test</artifactId>
 	<packaging>eclipse-test-plugin</packaging>
-	<version>1.0.4-SNAPSHOT</version>
+	<version>1.0.5-SNAPSHOT</version>
 
 	<properties>
 		<kura.basedir>${project.basedir}/..</kura.basedir>
@@ -33,18 +33,6 @@
 
     <build>
     <plugins>
-            <plugin>
-                    <groupId>org.eclipse.tycho</groupId>
-                    <artifactId>tycho-packaging-plugin</artifactId>
-                    <version>${tycho-version}</version>
-                    <configuration>
-                        <archive>
-                			<compress>false</compress>
-                		</archive>
-                        <format>'${kura.build.version}'</format>
-                        <strictVersions>true</strictVersions>
-                    </configuration>
-            </plugin>
             <plugin>
                 <groupId>org.eclipse.tycho</groupId>
                 <artifactId>tycho-surefire-plugin</artifactId>
@@ -70,7 +58,7 @@
 		    -->
 
                     <useUnlimitedThreads>true</useUnlimitedThreads>
-                    <argLine>${tycho.testArgLine} -DbuildingWithTycho=true -Dosgi.locking=none -Dequinox.ds.print=true -Djava.io.tmpdir=/tmp -Dorg.osgi.framework.storage=/tmp/osgi/framework_storage -Dosgi.clean=true -Dorg.eclipse.kura.mode=emulator -Dkura.configuration=file:${project.basedir}/../emulator/org.eclipse.kura.emulator/src/main/resources/kura.properties -Ddpa.configuration=/tmp/kura/dpa.properties  -Dlog4j.configuration=file:${project.basedir}/../emulator/org.eclipse.kura.emulator/src/main/resources/log4j.properties</argLine>
+                    <argLine>${tycho.testArgLine} -DbuildingWithTycho=true -Dosgi.locking=none -Dequinox.ds.print=true -Djava.io.tmpdir=/tmp -Dorg.osgi.framework.storage=/tmp/osgi/framework_storage -Dosgi.clean=true -Dorg.eclipse.kura.mode=emulator -Dkura.snapshots=${project.basedir}/../snapshots -Dkura.configuration=file:${project.basedir}/../emulator/org.eclipse.kura.emulator/src/main/resources/kura.properties -Ddpa.configuration=/tmp/kura/dpa.properties  -Dlog4j.configuration=file:${project.basedir}/../emulator/org.eclipse.kura.emulator/src/main/resources/log4j.properties</argLine>
 
 		    <!-- This can be uncommented to debug the test in the event of a failure by telneting to port 5002 and seeing the state of the OSGi runtime-->
                     <!-- <appArgLine>-consoleLog -console 5002 -noExit</appArgLine> -->
@@ -504,74 +492,5 @@
                 </configuration>
             </plugin>
         </plugins>
-    <pluginManagement>
-    	<plugins>
-    		<!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
-    		<plugin>
-    			<groupId>org.eclipse.m2e</groupId>
-    			<artifactId>lifecycle-mapping</artifactId>
-    			<version>1.0.0</version>
-    			<configuration>
-    				<lifecycleMappingMetadata>
-    					<pluginExecutions>
-    						<pluginExecution>
-    							<pluginExecutionFilter>
-    								<groupId>org.eclipse.tycho</groupId>
-    								<artifactId>
-    									tycho-compiler-plugin
-    								</artifactId>
-    								<versionRange>
-    									[0.20.0,)
-    								</versionRange>
-    								<goals>
-    									<goal>compile</goal>
-    								</goals>
-    							</pluginExecutionFilter>
-    							<action>
-    								<ignore></ignore>
-    							</action>
-    						</pluginExecution>
-    						<pluginExecution>
-    							<pluginExecutionFilter>
-    								<groupId>org.eclipse.tycho</groupId>
-    								<artifactId>
-    									tycho-packaging-plugin
-    								</artifactId>
-    								<versionRange>
-    									[0.20.0,)
-    								</versionRange>
-    								<goals>
-    									<goal>build-qualifier</goal>
-    									<goal>validate-version</goal>
-    									<goal>validate-id</goal>
-    								</goals>
-    							</pluginExecutionFilter>
-    							<action>
-    								<ignore></ignore>
-    							</action>
-    						</pluginExecution>
-    						<pluginExecution>
-    							<pluginExecutionFilter>
-    								<groupId>org.jacoco</groupId>
-    								<artifactId>
-    									jacoco-maven-plugin
-    								</artifactId>
-    								<versionRange>
-    									[0.6.4.201312101107,)
-    								</versionRange>
-    								<goals>
-    									<goal>prepare-agent</goal>
-    								</goals>
-    							</pluginExecutionFilter>
-    							<action>
-    								<ignore></ignore>
-    							</action>
-    						</pluginExecution>
-    					</pluginExecutions>
-    				</lifecycleMappingMetadata>
-    			</configuration>
-    		</plugin>
-    	</plugins>
-    </pluginManagement>
     </build>
 </project>

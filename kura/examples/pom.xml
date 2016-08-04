@@ -19,7 +19,7 @@
 	<parent>
 		<groupId>org.eclipse.kura</groupId>
 		<artifactId>kura</artifactId>
-		<version>2.0.0-SNAPSHOT</version>
+		<version>2.1.0-SNAPSHOT</version>
 		<relativePath>../manifest_pom.xml</relativePath>
 	</parent>
 
@@ -66,6 +66,13 @@
                 <module>org.eclipse.kura.example.project</module>
                 <module>org.eclipse.kura.example.publisher</module>
                 <module>org.eclipse.kura.example.serial.publisher</module>
+                <module>org.eclipse.kura.example.ble.tisensortag</module>
+                <module>org.eclipse.kura.example.beacon</module>
+                <module>org.eclipse.kura.example.beacon.scanner</module>
+                <module>org.eclipse.kura.example.camel.quickstart</module>
+                <module>org.eclipse.kura.example.camel.aggregation</module>
+                <module>org.eclipse.kura.raspberrypi.sensehat</module>
+                <module>org.eclipse.kura.raspberrypi.sensehat.example</module>
             </modules>
         </profile>
     </profiles>

@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>org.eclipse.kura</groupId>
 		<artifactId>target-platform</artifactId>
-		<version>2.0.0-SNAPSHOT</version>
+		<version>2.1.0-SNAPSHOT</version>
 	</parent>
 
 	<groupId>org.eclipse.kura</groupId>
@@ -71,6 +71,16 @@
 									<groupId>org.eclipse</groupId>
 									<artifactId>org.eclipse.paho.client.mqttv3</artifactId>
 									<version>${org.eclipse.paho.client.mqttv3.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.kura.camel.sun.misc</artifactId>
+									<version>${org.eclipse.kura.camel.sun.misc.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.kura.sun.misc</artifactId>
+									<version>${org.eclipse.kura.sun.misc.version}</version>
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.tigris</groupId>
@@ -250,7 +260,7 @@
 					</execution>
 				</executions>
 			</plugin>
-			
+
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-deploy-plugin</artifactId>

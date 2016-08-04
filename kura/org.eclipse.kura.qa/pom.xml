@@ -18,7 +18,7 @@
   <parent>
     <artifactId>kura</artifactId>
     <groupId>org.eclipse.kura</groupId>
-    <version>2.0.0-SNAPSHOT</version>
+    <version>2.1.0-SNAPSHOT</version>
     <relativePath>../pom_pom.xml</relativePath>
   </parent>
 
@@ -34,7 +34,7 @@
 		<dependency>
 			<groupId>org.eclipse.kura</groupId>
 			<artifactId>distrib</artifactId>
-			<version>1.1.0</version>
+			<version>${project.parent.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
@@ -88,18 +88,6 @@
 					</execution>
 				</executions>
 			</plugin>
-                        <plugin>
-                                <groupId>org.eclipse.tycho</groupId>
-                                <artifactId>tycho-packaging-plugin</artifactId>
-                                <version>${tycho-version}</version>
-                                <configuration>
-                                	<archive>
-                						<compress>false</compress>
-                					</archive>
-                        			<format>'${kura.build.version}'</format>
-                        			<strictVersions>true</strictVersions>
-                                </configuration>
-                        </plugin>
 		</plugins>
 		<pluginManagement>
 			<plugins>

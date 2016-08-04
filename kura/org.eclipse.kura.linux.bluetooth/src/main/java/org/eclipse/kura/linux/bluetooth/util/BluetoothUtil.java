@@ -68,26 +68,32 @@ public class BluetoothUtil {
 	public static Map<String,String> getConfig(String name) throws KuraException {
 		Map<String,String> props = new HashMap<String,String>();
 		BluetoothSafeProcess proc = null;
-		BufferedReader br = null;
-		StringBuilder sb = null;
+		BufferedReader brError = null;
+		BufferedReader brInput = null;
+		StringBuilder sbInput = null;
 		String[] command = { HCICONFIG, name, "version" };
 		try {
 			proc = BluetoothProcessUtil.exec(command);
-			br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
-			sb = new StringBuilder();
+			// Check Error stream
+			brError = new BufferedReader(new InputStreamReader(proc.getErrorStream()));
 			String line = null;
-			while ((line = br.readLine()) != null) {
-				if (line.contains("command not found")) {
+			while ((line = brError.readLine()) != null) {
+				if (line.toLowerCase().contains("command not found")) {
 					throw new KuraException(KuraErrorCode.OPERATION_NOT_SUPPORTED);
-				}
-				if (line.contains("No such device")) {
+				} else if (line.toLowerCase().contains("no such device")) {
 					throw new KuraException(KuraErrorCode.INTERNAL_ERROR);
 				}
-				sb.append(line + "\n");
+			}
+			// Check Input stream
+			brInput = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+			sbInput = new StringBuilder();
+			line = null;
+			while ((line = brInput.readLine()) != null) {
+				sbInput.append(line + "\n");
 			}
 			
 			//TODO: Pull more parameters from hciconfig? 
-			String[] results = sb.toString().split("\n");
+			String[] results = sbInput.toString().split("\n");
 			props.put("leReady", "false");
 			for (String result : results) {
 				if((result.indexOf(BD_ADDRESS)) >= 0) {
@@ -121,8 +127,10 @@ public class BluetoothUtil {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR);
 		} finally {
 			try {
-				if (br != null)
-					br.close();
+				if (brInput != null)
+					brInput.close();
+				if (brError != null)
+					brError.close();
 				if (proc != null)
 					proc.destroy();
 			} catch (IOException e) {

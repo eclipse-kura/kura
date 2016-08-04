@@ -26,7 +26,6 @@ import static org.eclipse.kura.asset.AssetConstants.VALUE_TYPE;
 import static org.eclipse.kura.asset.ChannelType.READ;
 import static org.eclipse.kura.asset.ChannelType.READ_WRITE;
 import static org.eclipse.kura.asset.ChannelType.WRITE;
-import static org.eclipse.kura.configuration.ConfigurationService.KURA_SERVICE_PID;
 import static org.osgi.framework.Constants.SERVICE_PID;
 
 import java.sql.Timestamp;
@@ -54,7 +53,6 @@ import org.eclipse.kura.core.configuration.metatype.Toption;
 import org.eclipse.kura.core.configuration.metatype.Tscalar;
 import org.eclipse.kura.driver.ChannelDescriptor;
 import org.eclipse.kura.driver.Driver;
-import org.eclipse.kura.driver.DriverService;
 import org.eclipse.kura.localization.LocalizationAdapter;
 import org.eclipse.kura.localization.resources.WireMessages;
 import org.eclipse.kura.type.TypedValue;
@@ -119,12 +117,6 @@ public final class WireAsset implements WireEmitter, WireReceiver, SelfConfiguri
 	/** The service component context. */
 	private ComponentContext m_context;
 
-	/** The Asset injected Driver instance. */
-	private Driver m_driver;
-
-	/** The Driver Service instance. */
-	private volatile DriverService m_driverService;
-
 	/** The configurable properties of this asset. */
 	private Map<String, Object> m_properties;
 
@@ -151,7 +143,6 @@ public final class WireAsset implements WireEmitter, WireReceiver, SelfConfiguri
 		this.m_context = componentContext;
 		this.m_properties = properties;
 		this.m_wireSupport = this.m_wireHelperService.newWireSupport(this);
-		this.m_driver = this.m_driverService.getDriver(this.m_asset.getAssetConfiguration().getDriverId());
 		s_logger.debug(s_message.activatingWireAssetDone());
 	}
 
@@ -177,18 +168,6 @@ public final class WireAsset implements WireEmitter, WireReceiver, SelfConfiguri
 	public synchronized void bindAssetService(final AssetService assetService) {
 		if (this.m_assetService == null) {
 			this.m_assetService = assetService;
-		}
-	}
-
-	/**
-	 * Binds the Driver Service.
-	 *
-	 * @param driverService
-	 *            the Driver Service instance
-	 */
-	public synchronized void bindDriverService(final DriverService driverService) {
-		if (this.m_driverService == null) {
-			this.m_driverService = driverService;
 		}
 	}
 
@@ -226,9 +205,9 @@ public final class WireAsset implements WireEmitter, WireReceiver, SelfConfiguri
 
 		String pref = prefix;
 		final String oldAdId = oldAd.getId();
-		if ((oldAdId != ASSET_DESC_PROP.value()) || (oldAdId != ASSET_DRIVER_PROP.value())
-				|| (oldAdId != ASSET_NAME_PROP.value()) || (oldAdId != NAME.value()) || (oldAdId != TYPE.value())
-				|| (oldAdId != VALUE_TYPE.value())) {
+		if ((oldAdId != ASSET_DESC_PROP.value()) && (oldAdId != ASSET_DRIVER_PROP.value())
+				&& (oldAdId != ASSET_NAME_PROP.value()) && (oldAdId != NAME.value()) && (oldAdId != TYPE.value())
+				&& (oldAdId != VALUE_TYPE.value())) {
 			pref = prefix + DRIVER_PROPERTY_POSTFIX.value() + CHANNEL_PROPERTY_POSTFIX.value();
 		}
 		final Tad result = new Tad();
@@ -283,19 +262,16 @@ public final class WireAsset implements WireEmitter, WireReceiver, SelfConfiguri
 
 		final List<WireRecord> wireRecords = CollectionUtil.newArrayList();
 		for (final AssetRecord assetRecord : assetRecords) {
-			final WireField channelIdWireField = this.m_wireHelperService.newWireField(s_message.channelId(),
+			final WireField channelIdWireField = new WireField(s_message.channelId(),
 					TypedValues.newLongValue(assetRecord.getChannelId()));
-			final WireField assetFlagWireField = this.m_wireHelperService.newWireField(s_message.assetFlag(),
+			final WireField assetFlagWireField = new WireField(s_message.assetFlag(),
 					TypedValues.newStringValue(assetRecord.getAssetFlag().name()));
-			final WireField timestampWireField = this.m_wireHelperService.newWireField(s_message.timestamp(),
+			final WireField timestampWireField = new WireField(s_message.timestamp(),
 					TypedValues.newLongValue(assetRecord.getTimestamp()));
-			final WireField valueWireField = this.m_wireHelperService.newWireField(s_message.value(),
-					assetRecord.getValue());
-			final WireField exceptionWireField = this.m_wireHelperService
-					.newExceptionWireField(s_message.exceptionWireField());
-			final WireRecord wireRecord = this.m_wireHelperService.newWireRecord(new Timestamp(new Date().getTime()),
-					Arrays.asList(channelIdWireField, assetFlagWireField, timestampWireField, valueWireField,
-							exceptionWireField));
+			final WireField valueWireField = new WireField(s_message.value(), assetRecord.getValue());
+			final WireField exceptionWireField = new ExceptionWireField();
+			final WireRecord wireRecord = new WireRecord(new Timestamp(new Date().getTime()), Arrays.asList(
+					channelIdWireField, assetFlagWireField, timestampWireField, valueWireField, exceptionWireField));
 			wireRecords.add(wireRecord);
 		}
 		this.m_wireSupport.emit(wireRecords);
@@ -345,8 +321,9 @@ public final class WireAsset implements WireEmitter, WireReceiver, SelfConfiguri
 			props.put(entry.getKey(), entry.getValue());
 		}
 		ChannelDescriptor channelDescriptor = null;
-		if (this.m_driver != null) {
-			channelDescriptor = this.m_driver.getChannelDescriptor();
+		final Driver driver = this.m_asset.getDriver();
+		if (driver != null) {
+			channelDescriptor = driver.getChannelDescriptor();
 		}
 		if (channelDescriptor != null) {
 			List<Tad> driverSpecificChannelConfiguration = null;
@@ -373,11 +350,6 @@ public final class WireAsset implements WireEmitter, WireReceiver, SelfConfiguri
 				}
 			}
 		}
-		// this will ensure that the driver must be available for the asset
-		// to have this component satisfied
-		final String driverId = this.m_asset.getAssetConfiguration().getDriverId();
-		props.put(this.m_driver.getClass().getName() + ".target", new StringBuilder().append("(")
-				.append(KURA_SERVICE_PID).append("=").append(driverId).append(")").toString());
 		return new ComponentConfigurationImpl(componentName, mainOcd, props);
 	}
 
@@ -468,7 +440,7 @@ public final class WireAsset implements WireEmitter, WireReceiver, SelfConfiguri
 		checkNull(channel, s_message.channelNonNull());
 		checkNull(value, s_message.valueNonNull());
 
-		final AssetRecord assetRecord = this.m_assetService.newAssetRecord(channel.getId());
+		final AssetRecord assetRecord = new AssetRecord(channel.getId());
 		assetRecord.setValue(value);
 		return assetRecord;
 	}
@@ -509,18 +481,6 @@ public final class WireAsset implements WireEmitter, WireReceiver, SelfConfiguri
 	public synchronized void unbindAssetService(final AssetService assetService) {
 		if (this.m_assetService == assetService) {
 			this.m_assetService = null;
-		}
-	}
-
-	/**
-	 * Unbinds the Driver Service.
-	 *
-	 * @param driverService
-	 *            the Driver Service instance
-	 */
-	public synchronized void unbindDriverService(final DriverService driverService) {
-		if (this.m_driverService == driverService) {
-			this.m_driverService = null;
 		}
 	}
 

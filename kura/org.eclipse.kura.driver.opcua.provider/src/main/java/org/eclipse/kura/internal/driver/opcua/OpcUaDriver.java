@@ -28,7 +28,7 @@ import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.driver.ChannelDescriptor;
 import org.eclipse.kura.driver.Driver;
 import org.eclipse.kura.driver.DriverRecord;
-import org.eclipse.kura.driver.DriverService;
+import org.eclipse.kura.driver.DriverStatus;
 import org.eclipse.kura.driver.listener.DriverListener;
 import org.eclipse.kura.localization.LocalizationAdapter;
 import org.eclipse.kura.localization.resources.OpcUaMessages;
@@ -79,9 +79,6 @@ public final class OpcUaDriver implements Driver {
 	/** OPC-UA Client Connector */
 	private OpcUaClient m_client;
 
-	/** The Driver Service instance. */
-	private volatile DriverService m_driverService;
-
 	/** flag to check if the driver is connected. */
 	private boolean m_isConnected;
 
@@ -101,18 +98,6 @@ public final class OpcUaDriver implements Driver {
 		s_logger.debug(s_message.activating());
 		this.extractProperties(properties);
 		s_logger.debug(s_message.activatingDone());
-	}
-
-	/**
-	 * Binds the Driver Service.
-	 *
-	 * @param driverService
-	 *            the Driver Service instance
-	 */
-	public synchronized void bindDriverService(final DriverService driverService) {
-		if (this.m_driverService == null) {
-			this.m_driverService = driverService;
-		}
 	}
 
 	/** {@inheritDoc} */
@@ -228,10 +213,10 @@ public final class OpcUaDriver implements Driver {
 			try {
 				value = node.readValueAttribute().get();
 			} catch (final Exception e) {
-				record.setDriverStatus(this.m_driverService.newDriverStatus(READ_FAILURE, s_message.readFailed(), e));
+				record.setDriverStatus(new DriverStatus(READ_FAILURE, s_message.readFailed(), e));
 			}
 			record.setValue(this.getTypedValue(value));
-			record.setDriverStatus(this.m_driverService.newDriverStatus(READ_SUCCESSFUL));
+			record.setDriverStatus(new DriverStatus(READ_SUCCESSFUL));
 		}
 		return records;
 	}
@@ -241,18 +226,6 @@ public final class OpcUaDriver implements Driver {
 	public void registerDriverListener(final Map<String, Object> channelConfig, final DriverListener listener)
 			throws ConnectionException {
 		throw new KuraRuntimeException(KuraErrorCode.OPERATION_NOT_SUPPORTED);
-	}
-
-	/**
-	 * Unbinds the Driver Service.
-	 *
-	 * @param driverService
-	 *            the Driver Service instance
-	 */
-	public synchronized void unbindDriverService(final DriverService driverService) {
-		if (this.m_driverService == driverService) {
-			this.m_driverService = null;
-		}
 	}
 
 	/** {@inheritDoc} */
@@ -288,9 +261,9 @@ public final class OpcUaDriver implements Driver {
 			try {
 				node.writeValue(newValue).get();
 			} catch (final Exception e) {
-				record.setDriverStatus(this.m_driverService.newDriverStatus(WRITE_FAILURE, s_message.writeFailed(), e));
+				record.setDriverStatus(new DriverStatus(WRITE_FAILURE, s_message.writeFailed(), e));
 			}
-			record.setDriverStatus(this.m_driverService.newDriverStatus(WRITE_SUCCESSFUL));
+			record.setDriverStatus(new DriverStatus(WRITE_SUCCESSFUL));
 		}
 		return records;
 	}

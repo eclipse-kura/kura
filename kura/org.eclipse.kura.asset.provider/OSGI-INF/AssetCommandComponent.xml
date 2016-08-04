@@ -12,15 +12,16 @@
       Amit Kumar Mondal (admin@amitinside.com)
 -->
 <scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" 
-               name="org.eclipse.kura.driver.opcua"
-               activate="activate" 
-               deactivate="deactivate" 
-               modified="updated"
-               enabled="true" 
-               configuration-policy="require"> 
-   <implementation class="org.eclipse.kura.internal.driver.opcua.OpcUaDriver"/>
-   <property name="service.pid" value="org.eclipse.kura.driver.opcua"/>
+    name="org.eclipse.kura.asset.AssetCommand"
+    enabled="true">
+   <implementation class="org.eclipse.kura.internal.asset.AssetCommandProvider"/>
    <service>
-      <provide interface="org.eclipse.kura.driver.Driver"/>
+      <provide interface="org.eclipse.osgi.framework.console.CommandProvider"/>
    </service>
+   <reference bind="bindConfigurationService" 
+   	          cardinality="1..1" 
+   	          interface="org.eclipse.kura.configuration.ConfigurationService" 
+   	          name="ConfigurationService" 
+   	          policy="static" 
+   	          unbind="unbindConfigurationService"/>
 </scr:component>

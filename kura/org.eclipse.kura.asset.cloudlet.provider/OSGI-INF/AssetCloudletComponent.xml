@@ -25,10 +25,4 @@
    <service>
       <provide interface="org.eclipse.kura.cloud.CloudClientListener"/>
    </service>
-    <reference bind="bindAssetService" 
-   	          cardinality="1..1" 
-   	          interface="org.eclipse.kura.asset.AssetService" 
-   	          name="AssetService" 
-   	          policy="static" 
-   	          unbind="unbindAssetService"/>
 </scr:component>

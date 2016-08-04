@@ -168,7 +168,7 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 			if ((emitterServicePid == null) || (receiverServicePid == null)) {
 				throw new KuraException(KuraErrorCode.INTERNAL_ERROR, s_message.componentPidsNull());
 			}
-			conf = this.m_wireHelperService.newWireConfiguration(emitterPid, receiverPid, null);
+			conf = new WireConfiguration(emitterPid, receiverPid, null);
 			final Wire wire = this.m_wireAdmin.createWire(emitterServicePid, receiverServicePid, null);
 			if (wire != null) {
 				conf.setWire(wire);
@@ -191,8 +191,7 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 		s_logger.debug(s_message.creatingWires());
 		final List<WireConfiguration> cloned = CollectionUtil.newArrayList();
 		for (final WireConfiguration wc : this.m_wireConfigs) {
-			cloned.add(this.m_wireHelperService.newWireConfiguration(wc.getEmitterPid(), wc.getReceiverPid(),
-					wc.getFilter()));
+			cloned.add(new WireConfiguration(wc.getEmitterPid(), wc.getReceiverPid(), wc.getFilter()));
 		}
 		for (final WireConfiguration conf : cloned) {
 			final String emitterPid = conf.getEmitterPid();
@@ -282,7 +281,7 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 			final List<WireConfiguration> list = this.m_options.getWireConfigurations();
 			list.clear();
 		}
-		this.m_options = WireServiceOptions.getInstance(properties, this.m_wireHelperService);
+		this.m_options = WireServiceOptions.getInstance(properties);
 		this.m_properties = properties;
 
 		for (final WireConfiguration conf : this.m_options.getWireConfigurations()) {
@@ -303,11 +302,11 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 		for (final Map.Entry<String, Object> entry : this.m_properties.entrySet()) {
 			props.put(entry.getKey(), entry.getValue());
 		}
-		int i = 1;
+		int i = 0;
 		for (final WireConfiguration wireConfiguration : this.m_wireConfigs) {
-			final String emitterKey = String.valueOf(i++) + ".emitter";
-			final String receiverKey = String.valueOf(i++) + ".receiver";
-			final String filterKey = String.valueOf(i++) + ".filter";
+			final String emitterKey = String.valueOf(++i) + ".emitter";
+			final String receiverKey = String.valueOf(i) + ".receiver";
+			final String filterKey = String.valueOf(i) + ".filter";
 			props.put(emitterKey, wireConfiguration.getEmitterPid());
 			props.put(receiverKey, wireConfiguration.getReceiverPid());
 			props.put(filterKey, wireConfiguration.getFilter());

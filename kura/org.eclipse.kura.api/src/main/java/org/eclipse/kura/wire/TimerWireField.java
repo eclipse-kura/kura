@@ -14,10 +14,20 @@ package org.eclipse.kura.wire;
 
 import org.eclipse.kura.type.TypedValues;
 
+/**
+ * The TimerWireField represents an ADT (abstract data type) for a Timer
+ * specific field to be used in {@link WireRecord}.
+ */
 public final class TimerWireField extends WireField {
 
+	/** Timer Field Constant */
+	private static final String PROP = "TIMER";
+
+	/**
+	 * Instantiates a new timer wire field.
+	 */
 	public TimerWireField() {
-		super("TIMER", TypedValues.newStringValue("TIMER"));
+		super(PROP, TypedValues.newStringValue(PROP));
 	}
 
 }

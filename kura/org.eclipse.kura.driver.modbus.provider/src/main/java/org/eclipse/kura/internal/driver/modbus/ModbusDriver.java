@@ -48,7 +48,7 @@ import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.driver.ChannelDescriptor;
 import org.eclipse.kura.driver.Driver;
 import org.eclipse.kura.driver.DriverRecord;
-import org.eclipse.kura.driver.DriverService;
+import org.eclipse.kura.driver.DriverStatus;
 import org.eclipse.kura.driver.listener.DriverListener;
 import org.eclipse.kura.localization.LocalizationAdapter;
 import org.eclipse.kura.localization.resources.ModbusDriverMessages;
@@ -120,9 +120,6 @@ public final class ModbusDriver implements Driver {
 	/** Modbus Unit Identifier Property */
 	private static final String UNIT_ID = "unit.id";
 
-	/** The Driver Service instance. */
-	private volatile DriverService m_driverService;
-
 	/** flag to check if the driver is connected. */
 	private boolean m_isConnected = false;
 
@@ -154,18 +151,6 @@ public final class ModbusDriver implements Driver {
 		s_logger.debug(s_message.activating());
 		this.extractProperties(properties);
 		s_logger.debug(s_message.activatingDone());
-	}
-
-	/**
-	 * Binds the Driver Service.
-	 *
-	 * @param driverService
-	 *            the Driver Service instance
-	 */
-	public synchronized void bindDriverService(final DriverService driverService) {
-		if (this.m_driverService == null) {
-			this.m_driverService = driverService;
-		}
 	}
 
 	/** {@inheritDoc} */
@@ -361,11 +346,11 @@ public final class ModbusDriver implements Driver {
 						memoryAddr, 1);
 				final TypedValue<?> value = this.getValue(response);
 				record.setValue(value);
-				record.setDriverStatus(this.m_driverService.newDriverStatus(READ_SUCCESSFUL));
+				record.setDriverStatus(new DriverStatus(READ_SUCCESSFUL));
 			} catch (final ModbusException e) {
-				record.setDriverStatus(this.m_driverService.newDriverStatus(READ_FAILURE, null, e));
+				record.setDriverStatus(new DriverStatus(READ_FAILURE, null, e));
 			} catch (final KuraRuntimeException e) {
-				record.setDriverStatus(this.m_driverService.newDriverStatus(DRIVER_ERROR_CHANNEL_NOT_ACCESSIBLE,
+				record.setDriverStatus(new DriverStatus(DRIVER_ERROR_CHANNEL_NOT_ACCESSIBLE,
 						s_message.transportNonNull() + " OR " + s_message.wrongUnitId(), e));
 			}
 		}
@@ -412,7 +397,7 @@ public final class ModbusDriver implements Driver {
 		checkCondition((unitId > 0) && (unitId < 247), s_message.wrongUnitId());
 
 		ModbusTransaction trans;
-		ModbusRequest req = null;
+		ModbusRequest req;
 		// Prepare the request
 		switch (functionCode) {
 		case READ_COILS:
@@ -449,18 +434,6 @@ public final class ModbusDriver implements Driver {
 	public void registerDriverListener(final Map<String, Object> channelConfig, final DriverListener listener)
 			throws ConnectionException {
 		throw new KuraRuntimeException(KuraErrorCode.OPERATION_NOT_SUPPORTED);
-	}
-
-	/**
-	 * Unbinds the Driver Service.
-	 *
-	 * @param driverService
-	 *            the Driver Service instance
-	 */
-	public synchronized void unbindDriverService(final DriverService driverService) {
-		if (this.m_driverService == driverService) {
-			this.m_driverService = null;
-		}
 	}
 
 	/** {@inheritDoc} */
@@ -506,11 +479,11 @@ public final class ModbusDriver implements Driver {
 			try {
 				this.writeRequest(unitId, this.m_modbusTransport, functionCode, memoryAddr,
 						Integer.valueOf(record.getValue().getValue().toString()));
-				record.setDriverStatus(this.m_driverService.newDriverStatus(WRITE_SUCCESSFUL));
+				record.setDriverStatus(new DriverStatus(WRITE_SUCCESSFUL));
 			} catch (final ModbusException e) {
-				record.setDriverStatus(this.m_driverService.newDriverStatus(WRITE_FAILURE, null, e));
+				record.setDriverStatus(new DriverStatus(WRITE_FAILURE, null, e));
 			} catch (final KuraRuntimeException e) {
-				record.setDriverStatus(this.m_driverService.newDriverStatus(DRIVER_ERROR_CHANNEL_NOT_ACCESSIBLE,
+				record.setDriverStatus(new DriverStatus(DRIVER_ERROR_CHANNEL_NOT_ACCESSIBLE,
 						s_message.transportNonNull() + " OR " + s_message.wrongUnitId(), e));
 			}
 		}

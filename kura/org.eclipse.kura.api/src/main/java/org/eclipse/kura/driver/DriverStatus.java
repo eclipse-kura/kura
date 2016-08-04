@@ -43,6 +43,21 @@ public final class DriverStatus {
 	 *
 	 * @param driverFlag
 	 *            the driver flag
+	 * @throws KuraRuntimeException
+	 *             if the driver flag is null
+	 */
+	public DriverStatus(final DriverFlag driverFlag) {
+		checkNull(driverFlag, "Driver Flag cannot be null");
+		this.driverFlag = driverFlag;
+		this.exceptionMessage = null;
+		this.exception = null;
+	}
+
+	/**
+	 * Instantiates a new status.
+	 *
+	 * @param driverFlag
+	 *            the driver flag
 	 * @param exceptionMessage
 	 *            the exception message
 	 * @param exception

@@ -39,7 +39,6 @@ import java.util.Set;
 
 import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.asset.AssetConfiguration;
-import org.eclipse.kura.asset.AssetService;
 import org.eclipse.kura.asset.Channel;
 import org.eclipse.kura.asset.ChannelType;
 import org.eclipse.kura.localization.LocalizationAdapter;
@@ -67,9 +66,6 @@ final class AssetOptions {
 	/** The asset description. */
 	private String m_assetDescription;
 
-	/** The Asset Helper Service instance. */
-	private final AssetService m_assetHelper;
-
 	/** The asset name. */
 	private String m_assetName;
 
@@ -84,16 +80,11 @@ final class AssetOptions {
 	 *
 	 * @param properties
 	 *            the configured properties
-	 * @param assetHelperService
-	 *            the Asset Helper Service instance
 	 * @throws KuraRuntimeException
-	 *             if any of the arguments is null
+	 *             if the argument is null
 	 */
-	AssetOptions(final Map<String, Object> properties, final AssetService assetHelperService) {
+	AssetOptions(final Map<String, Object> properties) {
 		checkNull(properties, s_message.propertiesNonNull());
-		checkNull(properties, s_message.assetHelperNonNull());
-
-		this.m_assetHelper = assetHelperService;
 		this.extractProperties(properties);
 	}
 
@@ -160,8 +151,7 @@ final class AssetOptions {
 	 * @return the asset configuration
 	 */
 	AssetConfiguration getAssetConfiguration() {
-		return this.m_assetHelper.newAssetConfiguration(this.m_assetName, this.m_assetDescription, this.m_driverId,
-				this.m_channels);
+		return new AssetConfiguration(this.m_assetName, this.m_assetDescription, this.m_driverId, this.m_channels);
 	}
 
 	/**
@@ -257,8 +247,7 @@ final class AssetOptions {
 				}
 			}
 		}
-		final Channel channel = this.m_assetHelper.newChannel(channelId, channelName, channelType, dataType,
-				channelConfig);
+		final Channel channel = new Channel(channelId, channelName, channelType, dataType, channelConfig);
 		s_logger.debug(s_message.retrievingChannelDone());
 		return channel;
 	}
@@ -292,6 +281,16 @@ final class AssetOptions {
 	public String toString() {
 		return "AssetOptions [Asset Description=" + this.m_assetDescription + ", Asset Name=" + this.m_assetName
 				+ ", Channels=" + this.m_channels + ", Driver ID=" + this.m_driverId + "]";
+	}
+
+	/**
+	 * Updates with new properties
+	 * 
+	 * @param properties
+	 *            the new properties
+	 */
+	public void update(final Map<String, Object> properties) {
+		this.extractProperties(properties);
 	}
 
 }

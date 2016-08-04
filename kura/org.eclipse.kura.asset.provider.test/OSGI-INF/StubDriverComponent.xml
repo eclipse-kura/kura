@@ -21,10 +21,4 @@
    </service>
    <property name="service.pid" value="org.eclipse.kura.asset.stub.driver"/>
    <property name="kura.service.pid" value="org.eclipse.kura.asset.stub.driver"/>
-   <reference bind="bindDriverService" 
-   	          cardinality="1..1" 
-   	          interface="org.eclipse.kura.driver.DriverService" 
-   	          name="DriverService" 
-   	          policy="static" 
-   	          unbind="unbindDriverService"/>
 </scr:component>

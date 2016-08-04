@@ -12,8 +12,6 @@
  */
 package org.eclipse.kura.internal.wire.timer;
 
-import static org.eclipse.kura.asset.AssetConstants.TIMER_EVENT;
-
 import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.Executors;
@@ -24,9 +22,10 @@ import java.util.concurrent.TimeUnit;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.localization.LocalizationAdapter;
 import org.eclipse.kura.localization.resources.WireMessages;
-import org.eclipse.kura.type.TypedValues;
+import org.eclipse.kura.wire.TimerWireField;
 import org.eclipse.kura.wire.WireEmitter;
 import org.eclipse.kura.wire.WireHelperService;
+import org.eclipse.kura.wire.WireRecord;
 import org.eclipse.kura.wire.WireSupport;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.wireadmin.Wire;
@@ -144,9 +143,7 @@ public final class Timer implements WireEmitter, ConfigurableComponent {
 			/** {@inheritDoc} */
 			@Override
 			public void run() {
-				m_wireSupport
-						.emit(Arrays.asList(m_wireHelperService.newWireRecord(m_wireHelperService
-								.newWireField(TIMER_EVENT.value(), TypedValues.newStringValue(m_name)))));
+				m_wireSupport.emit(Arrays.asList(new WireRecord(new TimerWireField())));
 			}
 		}, 0, this.m_interval, TimeUnit.SECONDS);
 	}

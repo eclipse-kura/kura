@@ -179,8 +179,8 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Conf
 	 * configured cache interval. If it is more than the aforementioned time
 	 * difference, then retrieve the value from the cache using current time as
 	 * a key. This will actually result in a cache miss. Every cache miss will
-	 * internally be handled by {@link WireRecordCache} in such a way that whenever
-	 * a cache miss occurs it will load the value from the DB.
+	 * internally be handled by {@link WireRecordCache} in such a way that
+	 * whenever a cache miss occurs it will load the value from the DB.
 	 */
 	@Override
 	public synchronized void onWireReceive(final WireEnvelope wireEnvelope) {
@@ -231,57 +231,49 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Conf
 						case BOOLEAN:
 							final boolean boolValue = rset.getBoolean(i);
 							s_logger.info(s_message.refreshBoolean(boolValue));
-							dataField = this.m_wireHelperService.newWireField(fieldName,
-									TypedValues.newBooleanValue(boolValue));
+							dataField = new WireField(fieldName, TypedValues.newBooleanValue(boolValue));
 							break;
 						case BYTE:
 							final byte byteValue = rset.getByte(i);
 							s_logger.info(s_message.refreshByte(byteValue));
-							dataField = this.m_wireHelperService.newWireField(fieldName,
-									TypedValues.newByteValue(byteValue));
+							dataField = new WireField(fieldName, TypedValues.newByteValue(byteValue));
 							break;
 						case DOUBLE:
 							final double doubleValue = rset.getDouble(i);
 							s_logger.info(s_message.refreshDouble(doubleValue));
-							dataField = this.m_wireHelperService.newWireField(fieldName,
-									TypedValues.newDoubleValue(doubleValue));
+							dataField = new WireField(fieldName, TypedValues.newDoubleValue(doubleValue));
 							break;
 						case INTEGER:
 							final int intValue = rset.getInt(i);
 							s_logger.info(s_message.refreshInteger(intValue));
-							dataField = this.m_wireHelperService.newWireField(fieldName,
-									TypedValues.newIntegerValue(intValue));
+							dataField = new WireField(fieldName, TypedValues.newIntegerValue(intValue));
 							break;
 						case LONG:
 							final long longValue = rset.getLong(i);
 							s_logger.info(s_message.refreshLong(longValue));
-							dataField = this.m_wireHelperService.newWireField(fieldName,
-									TypedValues.newLongValue(longValue));
+							dataField = new WireField(fieldName, TypedValues.newLongValue(longValue));
 							break;
 						case BYTE_ARRAY:
 							final byte[] bytesValue = rset.getBytes(i);
 							s_logger.info(s_message.refreshByteArray(Arrays.toString(bytesValue)));
-							dataField = this.m_wireHelperService.newWireField(fieldName,
-									TypedValues.newByteArrayValue(bytesValue));
+							dataField = new WireField(fieldName, TypedValues.newByteArrayValue(bytesValue));
 							break;
 						case SHORT:
 							final short shortValue = rset.getShort(i);
 							s_logger.info(s_message.refreshShort(shortValue));
-							dataField = this.m_wireHelperService.newWireField(fieldName,
-									TypedValues.newShortValue(shortValue));
+							dataField = new WireField(fieldName, TypedValues.newShortValue(shortValue));
 							break;
 						case STRING:
 							final String stringValue = rset.getString(i);
 							s_logger.info(s_message.refreshString(stringValue));
-							dataField = this.m_wireHelperService.newWireField(fieldName,
-									TypedValues.newStringValue(stringValue));
+							dataField = new WireField(fieldName, TypedValues.newStringValue(stringValue));
 							break;
 						default:
 							break;
 						}
 						dataFields.add(dataField);
 					}
-					dataRecords.add(this.m_wireHelperService.newWireRecord(new Timestamp(now.getTime()), dataFields));
+					dataRecords.add(new WireRecord(new Timestamp(now.getTime()), dataFields));
 				}
 			}
 			s_logger.info(s_message.refreshed());
@@ -311,7 +303,7 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Conf
 				/** {@inheritDoc} */
 				@Override
 				public void run() {
-					m_cache.put(System.currentTimeMillis(), filter());
+					DbWireRecordFilter.this.m_cache.put(System.currentTimeMillis(), DbWireRecordFilter.this.filter());
 				}
 			}, refreshRate, TimeUnit.SECONDS);
 		}

@@ -14,10 +14,20 @@ package org.eclipse.kura.wire;
 
 import org.eclipse.kura.type.TypedValues;
 
+/**
+ * The ExceptionWireField represents an ADT (abstract data type) for
+ * representing an exception flag in {@link WireRecord}.
+ */
 public final class ExceptionWireField extends WireField {
 
+	/** Exception Constant */
+	private static final String PROP = "EXCEPTION";
+
+	/**
+	 * Instantiates a new exception wire field.
+	 */
 	public ExceptionWireField() {
-		super("EXCEPTION", TypedValues.newStringValue("EXCEPTION"));
+		super(PROP, TypedValues.newStringValue(PROP));
 	}
 
 }

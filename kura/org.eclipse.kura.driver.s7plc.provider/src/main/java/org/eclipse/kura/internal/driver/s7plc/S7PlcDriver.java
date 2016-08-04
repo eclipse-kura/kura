@@ -27,7 +27,7 @@ import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.driver.ChannelDescriptor;
 import org.eclipse.kura.driver.Driver;
 import org.eclipse.kura.driver.DriverRecord;
-import org.eclipse.kura.driver.DriverService;
+import org.eclipse.kura.driver.DriverStatus;
 import org.eclipse.kura.driver.listener.DriverListener;
 import org.eclipse.kura.localization.LocalizationAdapter;
 import org.eclipse.kura.localization.resources.S7PlcMessages;
@@ -77,9 +77,6 @@ public final class S7PlcDriver implements Driver {
 	/** Connector instance */
 	private S7Connector m_connector;
 
-	/** The Driver Service instance. */
-	private volatile DriverService m_driverService;
-
 	/** flag to check if the driver is connected. */
 	private boolean m_isConnected;
 
@@ -99,18 +96,6 @@ public final class S7PlcDriver implements Driver {
 		s_logger.debug(s_message.activating());
 		this.extractProperties(properties);
 		s_logger.debug(s_message.activatingDone());
-	}
-
-	/**
-	 * Binds the Driver Service.
-	 *
-	 * @param driverService
-	 *            the Driver Service instance
-	 */
-	public synchronized void bindDriverService(final DriverService driverService) {
-		if (this.m_driverService == null) {
-			this.m_driverService = driverService;
-		}
 	}
 
 	/** {@inheritDoc} */
@@ -180,15 +165,14 @@ public final class S7PlcDriver implements Driver {
 			final Map<String, Object> config = record.getChannelConfig();
 			final TypedValue<?> recordValue = record.getValue();
 			if (!(recordValue instanceof IntegerValue)) {
-				record.setDriverStatus(
-						this.m_driverService.newDriverStatus(READ_FAILURE, s_message.instanceOfInteger(), null));
+				record.setDriverStatus(new DriverStatus(READ_FAILURE, s_message.instanceOfInteger(), null));
 				continue;
 			}
 			final int val = ((IntegerValue) recordValue).getValue();
 			final byte[] value = this.m_connector.read(DaveArea.DB, Integer.valueOf(config.get(AREA_NO).toString()),
 					val, Integer.valueOf(config.get(OFFSET).toString()));
 			if (value != null) {
-				record.setDriverStatus(this.m_driverService.newDriverStatus(READ_SUCCESSFUL));
+				record.setDriverStatus(new DriverStatus(READ_SUCCESSFUL));
 			}
 		}
 		return records;
@@ -199,18 +183,6 @@ public final class S7PlcDriver implements Driver {
 	public void registerDriverListener(final Map<String, Object> channelConfig, final DriverListener listener)
 			throws ConnectionException {
 		throw new KuraRuntimeException(KuraErrorCode.OPERATION_NOT_SUPPORTED);
-	}
-
-	/**
-	 * Unbinds the Driver Service.
-	 *
-	 * @param driverService
-	 *            the Driver Service instance
-	 */
-	public synchronized void unbindDriverService(final DriverService driverService) {
-		if (this.m_driverService == driverService) {
-			this.m_driverService = null;
-		}
 	}
 
 	/** {@inheritDoc} */
@@ -241,14 +213,13 @@ public final class S7PlcDriver implements Driver {
 			final Map<String, Object> config = record.getChannelConfig();
 			final TypedValue<?> recordValue = record.getValue();
 			if (!(recordValue instanceof ByteArrayValue)) {
-				record.setDriverStatus(
-						this.m_driverService.newDriverStatus(WRITE_FAILURE, s_message.instanceOfByteArray(), null));
+				record.setDriverStatus(new DriverStatus(WRITE_FAILURE, s_message.instanceOfByteArray(), null));
 				continue;
 			}
 			final byte[] value = ((ByteArrayValue) recordValue).getValue();
 			this.m_connector.write(DaveArea.DB, Integer.valueOf(config.get(AREA_NO).toString()),
 					Integer.valueOf(config.get(OFFSET).toString()), value);
-			record.setDriverStatus(this.m_driverService.newDriverStatus(WRITE_SUCCESSFUL));
+			record.setDriverStatus(new DriverStatus(WRITE_SUCCESSFUL));
 		}
 		return records;
 	}

@@ -14,6 +14,8 @@ package org.eclipse.kura.asset;
 
 import java.util.Map;
 
+import org.eclipse.kura.driver.Driver;
+
 /**
  * The interface Asset is a high level abstraction of a Kura asset representing
  * an Industrial Field Device which associates a device driver. All devices
@@ -35,6 +37,13 @@ public interface Asset extends BaseAsset {
 	 * @return the asset configuration
 	 */
 	public AssetConfiguration getAssetConfiguration();
+
+	/**
+	 * Returns the associated driver instance
+	 * 
+	 * @return the driver instance
+	 */
+	public Driver getDriver();
 
 	/**
 	 * Initializes the Asset component with the provided properties

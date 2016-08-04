@@ -10,10 +10,7 @@
  *   Eurotech
  *   Amit Kumar Mondal (admin@amitinside.com)
  */
-package org.eclipse.kura.asset.provider.test;
-
-import static org.eclipse.kura.driver.DriverFlag.READ_SUCCESSFUL;
-import static org.eclipse.kura.driver.DriverFlag.WRITE_SUCCESSFUL;
+package org.eclipse.kura.internal.asset;
 
 import java.util.List;
 import java.util.Map;
@@ -22,6 +19,7 @@ import org.eclipse.kura.driver.ChannelDescriptor;
 import org.eclipse.kura.driver.Driver;
 import org.eclipse.kura.driver.DriverConstants;
 import org.eclipse.kura.driver.DriverEvent;
+import org.eclipse.kura.driver.DriverFlag;
 import org.eclipse.kura.driver.DriverRecord;
 import org.eclipse.kura.driver.DriverStatus;
 import org.eclipse.kura.driver.listener.DriverListener;
@@ -29,7 +27,8 @@ import org.eclipse.kura.type.DataType;
 import org.eclipse.kura.type.TypedValues;
 
 /**
- * Stub Driver implementation required for test
+ * Stub Driver implementation required for test TODO: Remove it.. It is placed
+ * for testing
  */
 public final class StubDriver implements Driver {
 
@@ -91,7 +90,7 @@ public final class StubDriver implements Driver {
 			default:
 				break;
 			}
-			record.setDriverStatus(new DriverStatus(READ_SUCCESSFUL, null, null));
+			record.setDriverStatus(new DriverStatus(DriverFlag.READ_SUCCESSFUL, null, null));
 		}
 		return records;
 	}
@@ -103,7 +102,7 @@ public final class StubDriver implements Driver {
 		final DriverRecord record = new DriverRecord();
 		record.setChannelConfig(channelConfig);
 		record.setValue(TypedValues.newIntegerValue(1));
-		record.setDriverStatus(new DriverStatus(READ_SUCCESSFUL, null, null));
+		record.setDriverStatus(new DriverStatus(DriverFlag.READ_SUCCESSFUL, null, null));
 		record.setTimestamp(System.currentTimeMillis());
 		listener.onDriverEvent(new DriverEvent(record));
 	}
@@ -122,7 +121,7 @@ public final class StubDriver implements Driver {
 		}
 
 		for (final DriverRecord record : records) {
-			record.setDriverStatus(new DriverStatus(WRITE_SUCCESSFUL, null, null));
+			record.setDriverStatus(new DriverStatus(DriverFlag.WRITE_SUCCESSFUL, null, null));
 		}
 		return records;
 	}

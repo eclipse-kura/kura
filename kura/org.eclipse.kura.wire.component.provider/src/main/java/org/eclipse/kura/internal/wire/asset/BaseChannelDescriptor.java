@@ -108,6 +108,8 @@ public final class BaseChannelDescriptor implements ChannelDescriptor {
 		oReadWrite.setLabel(s_message.readWrite());
 		type.getOption().add(oReadWrite);
 
+		this.m_defaultElements.add(type);
+
 		final Tad valueType = new Tad();
 		valueType.setName(VALUE_TYPE.value());
 		valueType.setId(VALUE_TYPE.value());

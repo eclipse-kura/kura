@@ -24,7 +24,6 @@ import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.asset.Asset;
 import org.eclipse.kura.asset.AssetConfiguration;
 import org.eclipse.kura.asset.AssetRecord;
-import org.eclipse.kura.asset.AssetService;
 import org.eclipse.kura.asset.BaseAsset;
 import org.eclipse.kura.asset.Channel;
 import org.eclipse.kura.cloud.CloudClient;
@@ -93,9 +92,6 @@ public final class AssetCloudlet extends Cloudlet {
 	/** Localization Resource */
 	private static final AssetCloudletMessages s_message = LocalizationAdapter.adapt(AssetCloudletMessages.class);
 
-	/** The Asset Helper Service instance. */
-	private volatile AssetService m_assetHelper;
-
 	/** The map of assets present in the OSGi service registry. */
 	private Map<String, Asset> m_assets;
 
@@ -126,18 +122,6 @@ public final class AssetCloudlet extends Cloudlet {
 			s_logger.error(s_message.activationFailed(e));
 		}
 		s_logger.debug(s_message.activatingDone());
-	}
-
-	/**
-	 * Binds the Asset Service.
-	 *
-	 * @param assetService
-	 *            the new Asset Service
-	 */
-	public synchronized void bindAssetService(final AssetService assetService) {
-		if (this.m_assetHelper == null) {
-			this.m_assetHelper = assetService;
-		}
 	}
 
 	/**
@@ -249,7 +233,7 @@ public final class AssetCloudlet extends Cloudlet {
 			final Map<Long, Channel> assetConfiguredChannels = configuration.getAssetChannels();
 			final long id = this.checkChannelAvailability(channelId, assetConfiguredChannels);
 			if ((assetConfiguredChannels != null) && (id != 0)) {
-				final AssetRecord assetRecord = this.m_assetHelper.newAssetRecord(id);
+				final AssetRecord assetRecord = new AssetRecord(id);
 				final String userValue = (String) reqPayload.getMetric("value");
 				final String userType = (String) reqPayload.getMetric("type");
 				this.wrapValue(assetRecord, userValue, userType);
@@ -286,18 +270,6 @@ public final class AssetCloudlet extends Cloudlet {
 			respPayload.addMetric(s_message.timestamp(), assetRecord.getTimestamp());
 			respPayload.addMetric(s_message.value(), assetRecord.getValue());
 			respPayload.addMetric(s_message.channel(), assetRecord.getChannelId());
-		}
-	}
-
-	/**
-	 * Unbinds the Asset Service.
-	 *
-	 * @param assetService
-	 *            the new Asset Service
-	 */
-	public synchronized void unbindAssetService(final AssetService assetService) {
-		if (this.m_assetHelper == assetService) {
-			this.m_assetHelper = null;
 		}
 	}
 

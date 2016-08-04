@@ -19,11 +19,7 @@ import static org.eclipse.kura.driver.DriverConstants.DRIVER_ID;
 import java.util.List;
 
 import org.eclipse.kura.driver.Driver;
-import org.eclipse.kura.driver.DriverEvent;
-import org.eclipse.kura.driver.DriverFlag;
-import org.eclipse.kura.driver.DriverRecord;
 import org.eclipse.kura.driver.DriverService;
-import org.eclipse.kura.driver.DriverStatus;
 import org.eclipse.kura.localization.LocalizationAdapter;
 import org.eclipse.kura.localization.resources.AssetMessages;
 import org.eclipse.kura.util.collection.CollectionUtil;
@@ -81,31 +77,6 @@ public final class DriverServiceImpl implements DriverService {
 			drivers.add(driverRef);
 		}
 		return drivers;
-	}
-
-	/** {@inheritDoc} */
-	@Override
-	public DriverEvent newDriverEvent(final DriverRecord driverRecord) {
-		return new DriverEvent(driverRecord);
-	}
-
-	/** {@inheritDoc} */
-	@Override
-	public DriverRecord newDriverRecord() {
-		return new DriverRecord();
-	}
-
-	/** {@inheritDoc} */
-	@Override
-	public DriverStatus newDriverStatus(final DriverFlag driverFlag) {
-		return new DriverStatus(driverFlag, null, null);
-	}
-
-	/** {@inheritDoc} */
-	@Override
-	public DriverStatus newDriverStatus(final DriverFlag driverFlag, final String exceptionMessage,
-			final Exception exception) {
-		return new DriverStatus(driverFlag, exceptionMessage, exception);
 	}
 
 }

@@ -23,7 +23,6 @@ import org.eclipse.kura.localization.LocalizationAdapter;
 import org.eclipse.kura.localization.resources.WireMessages;
 import org.eclipse.kura.util.collection.CollectionUtil;
 import org.eclipse.kura.wire.WireConfiguration;
-import org.eclipse.kura.wire.WireHelperService;
 
 /**
  * Captures the configuration of the Wire Graph.
@@ -77,7 +76,7 @@ final class WireServiceOptions {
 	 * @throws KuraRuntimeException
 	 *             if provided properties is null
 	 */
-	static WireServiceOptions getInstance(final Map<String, Object> properties, final WireHelperService helperService) {
+	static WireServiceOptions getInstance(final Map<String, Object> properties) {
 		checkNull(properties, s_message.wireServicePropNonNull());
 		final List<WireConfiguration> wireConfs = CollectionUtil.newCopyOnWriteArrayList();
 		final Set<Long> wireIds = CollectionUtil.newHashSet();
@@ -111,7 +110,7 @@ final class WireServiceOptions {
 					}
 				}
 			}
-			final WireConfiguration configuration = helperService.newWireConfiguration(emitterPid, receiverPid, filter);
+			final WireConfiguration configuration = new WireConfiguration(emitterPid, receiverPid, filter);
 			wireConfs.add(configuration);
 		}
 		return new WireServiceOptions(wireConfs);

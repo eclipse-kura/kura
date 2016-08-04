@@ -20,10 +20,4 @@
    <service>
       <provide interface="org.eclipse.kura.asset.AssetService"/>
    </service>
-   <reference bind="bindDriverService" 
-   	          cardinality="1..1" 
-   	          interface="org.eclipse.kura.driver.DriverService" 
-   	          name="DriverService" 
-   	          policy="static" 
-   	          unbind="unbindDriverService"/>
 </scr:component>

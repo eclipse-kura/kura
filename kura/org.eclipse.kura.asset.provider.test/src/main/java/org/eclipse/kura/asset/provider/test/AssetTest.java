@@ -162,7 +162,7 @@ public final class AssetTest {
 	@TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
 	@Test
 	public void testWrite() throws KuraException {
-		final AssetRecord assetRecord = s_assetService.newAssetRecord(2L);
+		final AssetRecord assetRecord = new AssetRecord(2L);
 		assetRecord.setValue(TypedValues.newBooleanValue(true));
 		final List<AssetRecord> records = asset.write(Arrays.asList(assetRecord));
 		assertEquals(1, records.size());
@@ -175,7 +175,7 @@ public final class AssetTest {
 	@TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
 	@Test(expected = KuraRuntimeException.class)
 	public void testWriteChannelNotWritable() throws KuraException {
-		final AssetRecord assetRecord = s_assetService.newAssetRecord(1L);
+		final AssetRecord assetRecord = new AssetRecord(1L);
 		asset.write(Arrays.asList(assetRecord));
 	}
 

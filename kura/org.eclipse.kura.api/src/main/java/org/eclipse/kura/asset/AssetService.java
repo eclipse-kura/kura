@@ -12,11 +12,6 @@
  */
 package org.eclipse.kura.asset;
 
-import java.util.Map;
-
-import org.eclipse.kura.KuraRuntimeException;
-import org.eclipse.kura.type.DataType;
-
 /**
  * The interface AssetService is an utility service API to provide useful
  * methods for assets
@@ -29,65 +24,5 @@ public interface AssetService {
 	 * @return the newly created Asset instance
 	 */
 	public Asset newAsset();
-
-	/**
-	 * Prepares a new asset configuration.
-	 *
-	 * @param name
-	 *            the name of the asset
-	 * @param description
-	 *            the description of the asset
-	 * @param driverId
-	 *            the driver id
-	 * @param channels
-	 *            the map of all channel configurations
-	 * @return the asset configuration
-	 * @throws KuraRuntimeException
-	 *             if any of the arguments is null
-	 */
-	public AssetConfiguration newAssetConfiguration(final String name, final String description, final String driverId,
-			final Map<Long, Channel> channels);
-
-	/**
-	 * Prepares new asset event.
-	 *
-	 * @param assetRecord
-	 *            the associated asset record
-	 * @return the new asset event
-	 * @throws KuraRuntimeException
-	 *             if the argument is null
-	 */
-	public AssetEvent newAssetEvent(final AssetRecord assetRecord);
-
-	/**
-	 * Prepares new asset record.
-	 *
-	 * @param channelId
-	 *            the channel identifier
-	 * @return the new asset record
-	 * @throws KuraRuntimeException
-	 *             if the argument is less than or equal to zero
-	 */
-	public AssetRecord newAssetRecord(final long channelId);
-
-	/**
-	 * Creates a new channel with the provided values
-	 *
-	 * @param id
-	 *            the ID of the channel
-	 * @param name
-	 *            the name of the channel
-	 * @param type
-	 *            the type of the channel
-	 * @param valueType
-	 *            the value type of the channel
-	 * @param configuration
-	 *            the configuration to be read
-	 * @return the newly created channel
-	 * @throws KuraRuntimeException
-	 *             if any of the arguments is null
-	 */
-	public Channel newChannel(final long id, final String name, final ChannelType type, final DataType valueType,
-			final Map<String, Object> configuration);
 
 }

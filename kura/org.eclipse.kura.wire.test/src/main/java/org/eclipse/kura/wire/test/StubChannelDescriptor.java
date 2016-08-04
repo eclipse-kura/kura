@@ -10,7 +10,7 @@
  *   Eurotech
  *   Amit Kumar Mondal (admin@amitinside.com)
  */
-package org.eclipse.kura.internal.asset;
+package org.eclipse.kura.wire.test;
 
 import java.util.List;
 
@@ -19,10 +19,15 @@ import org.eclipse.kura.core.configuration.metatype.Tscalar;
 import org.eclipse.kura.driver.ChannelDescriptor;
 import org.eclipse.kura.util.collection.CollectionUtil;
 
+/**
+ * The Stub Channel Descriptor
+ */
 public class StubChannelDescriptor implements ChannelDescriptor {
 
+	/** The m elements. */
 	private List<Tad> m_elements;
 
+	/** {@inheritDoc} */
 	@Override
 	public Object getDescriptor() {
 		this.m_elements = CollectionUtil.newArrayList();

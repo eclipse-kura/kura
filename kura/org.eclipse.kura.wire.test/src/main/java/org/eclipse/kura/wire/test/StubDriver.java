@@ -10,7 +10,7 @@
  *   Eurotech
  *   Amit Kumar Mondal (admin@amitinside.com)
  */
-package org.eclipse.kura.internal.asset;
+package org.eclipse.kura.wire.test;
 
 import java.util.List;
 import java.util.Map;
@@ -27,8 +27,7 @@ import org.eclipse.kura.type.DataType;
 import org.eclipse.kura.type.TypedValues;
 
 /**
- * Stub Driver implementation required for test TODO: Remove it.. It is placed
- * for testing
+ * Stub Driver implementation required for test
  */
 public final class StubDriver implements Driver {
 

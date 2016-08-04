@@ -10,7 +10,7 @@
  *   Eurotech
  *   Amit Kumar Mondal (admin@amitinside.com)
  */
-package org.eclipse.kura.internal.asset;
+package org.eclipse.kura.wire.test;
 
 import java.util.Arrays;
 import java.util.List;

@@ -12,16 +12,13 @@
       Amit Kumar Mondal (admin@amitinside.com)
 -->
 <scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" 
-    name="org.eclipse.kura.asset.AssetCommand"
-    enabled="true">
-   <implementation class="org.eclipse.kura.internal.asset.AssetCommandProvider"/>
+               name="org.eclipse.kura.asset.stub.driver"
+               enabled="true" 
+               immediate="true"> 
+   <implementation class="org.eclipse.kura.wire.test.StubDriver"/>
    <service>
-      <provide interface="org.eclipse.osgi.framework.console.CommandProvider"/>
+      <provide interface="org.eclipse.kura.driver.Driver"/>
    </service>
-   <reference bind="bindConfigurationService" 
-   	          cardinality="1..1" 
-   	          interface="org.eclipse.kura.configuration.ConfigurationService" 
-   	          name="ConfigurationService" 
-   	          policy="static" 
-   	          unbind="unbindConfigurationService"/>
+   <property name="service.pid" value="org.eclipse.kura.asset.stub.driver"/>
+   <property name="kura.service.pid" value="org.eclipse.kura.asset.stub.driver"/>
 </scr:component>

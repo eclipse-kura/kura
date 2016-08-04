@@ -56,6 +56,39 @@ public class ModemDriver {
 	private static final String RELIAGATE_10_05_GSM_POWERKEY_GPIO_NUM = "123";
 	private static final String RELIAGATE_10_05_GSM_USB_PATH = "/sys/bus/usb/devices/usb2/authorized";
 	
+	private static final String GPIO_DIRECTION = "out";
+	
+	static {
+		if(TARGET_NAME.equals(KuraConstants.Mini_Gateway.getTargetName())) {
+			try {
+				exportGpio("65", GPIO_65_PATH);  //Prepare gpios
+				setGpioDirection(GPIO_65_DIRECTION_PATH, GPIO_DIRECTION);
+			} catch (IOException e) {
+				s_logger.error("Failed to initialize GPIO 65 - {}", e);
+			}
+		} else if (TARGET_NAME.equals(KuraConstants.Reliagate_10_11.getTargetName())) {
+			try {
+				exportGpio("60", GPIO_60_PATH);  //Prepare gpios
+				setGpioDirection(GPIO_60_DIRECTION_PATH, GPIO_DIRECTION);
+			} catch (IOException e) {
+				s_logger.error("Failed to initialize GPIO 60 - {}", e);
+			}
+		} else if (TARGET_NAME.equals(KuraConstants.Reliagate_20_25.getTargetName())) {
+			try {
+				exportGpio("64", GPIO_64_PATH);  //Prepare gpios
+				setGpioDirection(GPIO_64_DIRECTION_PATH, GPIO_DIRECTION);
+			} catch (IOException e) {
+				s_logger.error("Failed to initialize GPIO 64 - {}", e);
+			}
+			try {
+				exportGpio("76", GPIO_76_PATH);  //Prepare gpios
+				setGpioDirection(GPIO_76_DIRECTION_PATH, GPIO_DIRECTION);
+			} catch (IOException e) {
+				s_logger.error("Failed to initialize GPIO 76 - {}", e);
+			}
+		}
+	}
+	
 	public boolean turnModemOff() throws Exception {
 		if (TARGET_NAME == null) {
 			return false;
@@ -256,17 +289,13 @@ public class ModemDriver {
         }
 	}
 	
-	private void invertGpioValue(String gpio, String gpioPath, String directionPath, String valuePath) throws IOException {       
-        exportGpio(gpio, gpioPath);  //Prepare gpios
-        setGpioDirection(directionPath, "out");
-        
+	private void invertGpioValue(String gpio, String gpioPath, String directionPath, String valuePath) throws IOException {
         FileReader fGpioOldValueReader= null;  //read current value
         BufferedReader fGpioOldValue= null;
         int oldValue= 0;
         try {
             fGpioOldValueReader= new FileReader(valuePath);
-            fGpioOldValue= new BufferedReader(fGpioOldValueReader);
-            oldValue= Integer.parseInt(fGpioOldValue.readLine());
+            oldValue = fGpioOldValueReader.read() - 48;
         } catch (Exception e) {
             s_logger.debug("Error while trying to read gpio value: {}", e.getMessage());
         } finally {
@@ -298,7 +327,7 @@ public class ModemDriver {
         }
     }
 
-    private void setGpioDirection(String directionPath, String direction) throws IOException {
+    private static void setGpioDirection(String directionPath, String direction) throws IOException {
         FileWriter directionFileWriter= null;
 		BufferedWriter bwGpioDirection= null;
 		try {
@@ -318,7 +347,7 @@ public class ModemDriver {
 		}
     }
 
-    private void exportGpio(String gpio, String gpioPath) throws IOException {
+    private static void exportGpio(String gpio, String gpioPath) throws IOException {
         File fgpioFolder = new File (gpioPath);
 		if (!fgpioFolder.exists()) {
 		    FileWriter bwGpioExportWriter= null;

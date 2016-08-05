@@ -25,7 +25,6 @@ import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.configuration.ComponentConfiguration;
-import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.configuration.SelfConfiguringComponent;
 import org.eclipse.kura.core.configuration.ComponentConfigurationImpl;
 import org.eclipse.kura.core.configuration.metatype.Tocd;
@@ -58,9 +57,6 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 
 	/** Localization Resource */
 	private static final WireMessages s_message = LocalizationAdapter.adapt(WireMessages.class);
-
-	/** The Configuration Service instance. */
-	private volatile ConfigurationService m_configService;
 
 	/** The Service Component Context. */
 	private ComponentContext m_ctx;
@@ -115,18 +111,6 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 			s_logger.error(ThrowableUtil.stackTraceAsString(exception));
 		}
 		s_logger.debug(s_message.activatingWireServiceDone());
-	}
-
-	/**
-	 * Binds the configuration service.
-	 *
-	 * @param configService
-	 *            the new configuration service
-	 */
-	public synchronized void bindConfigurationService(final ConfigurationService configService) {
-		if (this.m_configService == null) {
-			this.m_configService = configService;
-		}
 	}
 
 	/**
@@ -318,18 +302,6 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 	@Override
 	public List<WireConfiguration> getWireConfigurations() {
 		return this.m_wireConfigs;
-	}
-
-	/**
-	 * Unbinds configuration service dependency
-	 *
-	 * @param configService
-	 *            the configuration service
-	 */
-	public synchronized void unbindConfigurationService(final ConfigurationService configService) {
-		if (this.m_configService == configService) {
-			this.m_configService = null;
-		}
 	}
 
 	/**

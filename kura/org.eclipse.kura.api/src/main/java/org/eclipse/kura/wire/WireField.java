@@ -25,13 +25,7 @@ import org.eclipse.kura.type.TypedValue;
  */
 @Immutable
 @ThreadSafe
-public final class WireField {
-
-	/** The name of the field */
-	private final String name;
-
-	/** The value as contained */
-	private final TypedValue<?> value;
+public class WireField {
 
 	/**
 	 * Instantiates a new wire field.
@@ -50,6 +44,12 @@ public final class WireField {
 		this.name = name;
 		this.value = value;
 	}
+
+	/** The name of the field */
+	private final String name;
+
+	/** The value as contained */
+	private final TypedValue<?> value;
 
 	/** {@inheritDoc} */
 	@Override

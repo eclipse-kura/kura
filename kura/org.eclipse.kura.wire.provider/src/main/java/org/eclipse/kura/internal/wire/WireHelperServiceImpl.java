@@ -16,24 +16,15 @@ import static org.eclipse.kura.Preconditions.checkNull;
 import static org.eclipse.kura.configuration.ConfigurationService.KURA_SERVICE_PID;
 import static org.osgi.framework.Constants.SERVICE_PID;
 
-import java.sql.Timestamp;
-import java.util.List;
-
 import org.eclipse.kura.localization.LocalizationAdapter;
 import org.eclipse.kura.localization.resources.WireMessages;
-import org.eclipse.kura.type.TypedValue;
 import org.eclipse.kura.util.service.ServiceUtil;
 import org.eclipse.kura.wire.WireComponent;
-import org.eclipse.kura.wire.WireConfiguration;
-import org.eclipse.kura.wire.WireEnvelope;
-import org.eclipse.kura.wire.WireField;
 import org.eclipse.kura.wire.WireHelperService;
-import org.eclipse.kura.wire.WireRecord;
 import org.eclipse.kura.wire.WireSupport;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceReference;
-import org.osgi.util.position.Position;
 
 /**
  * The Class WireHelperServiceImpl is the implementation of
@@ -89,46 +80,6 @@ public final class WireHelperServiceImpl implements WireHelperService {
 			}
 		}
 		return null;
-	}
-
-	/** {@inheritDoc} */
-	@Override
-	public WireConfiguration newWireConfiguration(final String emitterPid, final String receiverPid,
-			final String filter) {
-		return new WireConfiguration(emitterPid, receiverPid, filter);
-	}
-
-	/** {@inheritDoc} */
-	@Override
-	public WireEnvelope newWireEnvelope(final String emitterPid, final List<WireRecord> wireRecords) {
-		checkNull(emitterPid, s_message.emitterPidNonNull());
-		checkNull(wireRecords, s_message.wireRecordsNonNull());
-
-		return new WireEnvelope(emitterPid, wireRecords);
-	}
-
-	/** {@inheritDoc} */
-	@Override
-	public WireField newWireField(final String name, final TypedValue<?> value) {
-		return new WireField(name, value);
-	}
-
-	/** {@inheritDoc} */
-	@Override
-	public WireRecord newWireRecord(final Timestamp timestamp, final List<WireField> fields) {
-		return new WireRecord(timestamp, fields);
-	}
-
-	/** {@inheritDoc} */
-	@Override
-	public WireRecord newWireRecord(final Timestamp timestamp, final Position position, final List<WireField> fields) {
-		return new WireRecord(timestamp, position, fields);
-	}
-
-	/** {@inheritDoc} */
-	@Override
-	public WireRecord newWireRecord(final WireField... fields) {
-		return new WireRecord(fields);
 	}
 
 	/** {@inheritDoc} */

@@ -33,9 +33,6 @@ final class WireServiceOptions {
 	/** Localization Resource */
 	private static final WireMessages s_message = LocalizationAdapter.adapt(WireMessages.class);
 
-	/** The list of wire configurations. */
-	private final List<WireConfiguration> m_wireConfigurations;
-
 	/**
 	 * Instantiates a new wire service options.
 	 *
@@ -49,21 +46,6 @@ final class WireServiceOptions {
 		checkNull(configurations, s_message.wireHelperServiceNonNull());
 
 		this.m_wireConfigurations = configurations;
-	}
-
-	/**
-	 * Gets the wire configurations.
-	 *
-	 * @return the wire configurations
-	 */
-	List<WireConfiguration> getWireConfigurations() {
-		return this.m_wireConfigurations;
-	}
-
-	/** {@inheritDoc} */
-	@Override
-	public String toString() {
-		return "WireServiceOptions [m_wireConfigurations=" + this.m_wireConfigurations + "]";
 	}
 
 	/**
@@ -111,10 +93,28 @@ final class WireServiceOptions {
 					}
 				}
 			}
-			final WireConfiguration configuration = helperService.newWireConfiguration(emitterPid, receiverPid, filter);
+			final WireConfiguration configuration = new WireConfiguration(emitterPid, receiverPid, filter);
 			wireConfs.add(configuration);
 		}
 		return new WireServiceOptions(wireConfs);
+	}
+
+	/** The list of wire configurations. */
+	private final List<WireConfiguration> m_wireConfigurations;
+
+	/**
+	 * Gets the wire configurations.
+	 *
+	 * @return the wire configurations
+	 */
+	List<WireConfiguration> getWireConfigurations() {
+		return this.m_wireConfigurations;
+	}
+
+	/** {@inheritDoc} */
+	@Override
+	public String toString() {
+		return "WireServiceOptions [m_wireConfigurations=" + this.m_wireConfigurations + "]";
 	}
 
 }

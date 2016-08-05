@@ -58,6 +58,12 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 	/** Localization Resource */
 	private static final WireMessages s_message = LocalizationAdapter.adapt(WireMessages.class);
 
+	/** Constructor */
+	public WireServiceImpl() {
+		final List<WireConfiguration> list = CollectionUtil.newArrayList();
+		this.m_wireConfigs = Collections.synchronizedList(list);
+	}
+
 	/** The Service Component Context. */
 	private ComponentContext m_ctx;
 
@@ -81,12 +87,6 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 
 	/** The Wire Helper Service. */
 	private volatile WireHelperService m_wireHelperService;
-
-	/** Constructor */
-	public WireServiceImpl() {
-		final List<WireConfiguration> list = CollectionUtil.newArrayList();
-		this.m_wireConfigs = Collections.synchronizedList(list);
-	}
 
 	/**
 	 * OSGi service component callback while activation
@@ -152,7 +152,7 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 			if ((emitterServicePid == null) || (receiverServicePid == null)) {
 				throw new KuraException(KuraErrorCode.INTERNAL_ERROR, s_message.componentPidsNull());
 			}
-			conf = this.m_wireHelperService.newWireConfiguration(emitterPid, receiverPid, null);
+			conf = new WireConfiguration(emitterPid, receiverPid, null);
 			final Wire wire = this.m_wireAdmin.createWire(emitterServicePid, receiverServicePid, null);
 			if (wire != null) {
 				conf.setWire(wire);
@@ -175,8 +175,7 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 		s_logger.debug(s_message.creatingWires());
 		final List<WireConfiguration> cloned = CollectionUtil.newArrayList();
 		for (final WireConfiguration wc : this.m_wireConfigs) {
-			cloned.add(this.m_wireHelperService.newWireConfiguration(wc.getEmitterPid(), wc.getReceiverPid(),
-					wc.getFilter()));
+			cloned.add(new WireConfiguration(wc.getEmitterPid(), wc.getReceiverPid(), wc.getFilter()));
 		}
 		for (final WireConfiguration conf : cloned) {
 			final String emitterPid = conf.getEmitterPid();

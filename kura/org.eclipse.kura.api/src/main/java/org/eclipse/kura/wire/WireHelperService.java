@@ -12,13 +12,7 @@
  */
 package org.eclipse.kura.wire;
 
-import java.sql.Timestamp;
-import java.util.List;
-
 import org.eclipse.kura.KuraRuntimeException;
-import org.eclipse.kura.annotation.Nullable;
-import org.eclipse.kura.type.TypedValue;
-import org.osgi.util.position.Position;
 
 /**
  * The interface WireHelperService is an service utility API to provide quick
@@ -66,86 +60,6 @@ public interface WireHelperService {
 	 *             if the argument is null
 	 */
 	public String getServicePid(final WireComponent wireComponent);
-
-	/**
-	 * Instantiates a new wire configuration.
-	 *
-	 * @param emitterPid
-	 *            the Wire Emitter PID
-	 * @param receiverPid
-	 *            the Wire Receiver PID
-	 * @param filter
-	 *            the filter
-	 * @return the Wire Configuration
-	 * @throws KuraRuntimeException
-	 *             if emitter and/or receiver PID is null
-	 */
-	public WireConfiguration newWireConfiguration(String emitterPid, String receiverPid, @Nullable String filter);
-
-	/**
-	 * Instantiates a new wire envelope.
-	 *
-	 * @param emitterPid
-	 *            the wire emitter PID
-	 * @param wireRecords
-	 *            the wire records
-	 * @return the Wire envelope
-	 * @throws KuraRuntimeException
-	 *             if any of the arguments is null
-	 */
-	public WireEnvelope newWireEnvelope(String emitterPid, List<WireRecord> wireRecords);
-
-	/**
-	 * Prepares new wire field.
-	 *
-	 * @param name
-	 *            the name
-	 * @param value
-	 *            the value
-	 * @return the wire field
-	 * @throws KuraRuntimeException
-	 *             if any of the arguments is null
-	 */
-	public WireField newWireField(String name, TypedValue<?> value);
-
-	/**
-	 * Prepares new wire record.
-	 *
-	 * @param timestamp
-	 *            the timestamp
-	 * @param fields
-	 *            the wire fields
-	 * @return the wire record
-	 * @throws KuraRuntimeException
-	 *             if any of the arguments is null
-	 */
-	public WireRecord newWireRecord(Timestamp timestamp, List<WireField> fields);
-
-	/**
-	 * Prepares new wire record.
-	 *
-	 * @param timestamp
-	 *            the timestamp
-	 * @param position
-	 *            the position
-	 * @param fields
-	 *            the wire fields
-	 * @return the wire record
-	 * @throws KuraRuntimeException
-	 *             if timestamp or fields is null
-	 */
-	public WireRecord newWireRecord(Timestamp timestamp, @Nullable Position position, final List<WireField> fields);
-
-	/**
-	 * Prepares new wire record.
-	 *
-	 * @param fields
-	 *            the wire fields
-	 * @return the wire record
-	 * @throws KuraRuntimeException
-	 *             if the argument is null
-	 */
-	public WireRecord newWireRecord(WireField... fields);
 
 	/**
 	 * Returns a Wire Support instance of the provided wire component

@@ -38,18 +38,6 @@ final class WireSupportImpl implements WireSupport {
 	/** Localization Resource */
 	private static final WireMessages s_message = LocalizationAdapter.adapt(WireMessages.class);
 
-	/** The incoming wires. */
-	private List<Wire> m_incomingWires;
-
-	/** The outgoing wires. */
-	private List<Wire> m_outgoingWires;
-
-	/** The Wire Helper Service. */
-	private final WireHelperService m_wireHelperService;
-
-	/** The supported Wire Component. */
-	private final WireComponent m_wireSupporter;
-
 	/**
 	 * Instantiates a new wire support implementation.
 	 *
@@ -68,6 +56,18 @@ final class WireSupportImpl implements WireSupport {
 		this.m_wireHelperService = wireHelperService;
 	}
 
+	/** The incoming wires. */
+	private List<Wire> m_incomingWires;
+
+	/** The outgoing wires. */
+	private List<Wire> m_outgoingWires;
+
+	/** The Wire Helper Service. */
+	private final WireHelperService m_wireHelperService;
+
+	/** The supported Wire Component. */
+	private final WireComponent m_wireSupporter;
+
 	/** {@inheritDoc} */
 	@Override
 	public synchronized void consumersConnected(final Wire[] wires) {
@@ -80,7 +80,7 @@ final class WireSupportImpl implements WireSupport {
 		checkNull(wireRecords, s_message.wireRecordsNonNull());
 		if (this.m_wireSupporter instanceof WireEmitter) {
 			final String emitterPid = this.m_wireHelperService.getServicePid(this.m_wireSupporter);
-			final WireEnvelope wei = this.m_wireHelperService.newWireEnvelope(emitterPid, wireRecords);
+			final WireEnvelope wei = new WireEnvelope(emitterPid, wireRecords);
 			for (final Wire wire : this.m_outgoingWires) {
 				wire.update(wei);
 			}

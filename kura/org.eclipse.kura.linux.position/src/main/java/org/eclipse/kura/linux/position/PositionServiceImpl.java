@@ -306,10 +306,11 @@ public class PositionServiceImpl implements PositionService, ConfigurableCompone
 	public void handleEvent(Event event) {
 		if(!m_useGpsd){
 			if(UsbDeviceAddedEvent.USB_EVENT_DEVICE_ADDED_TOPIC.contains(event.getTopic())){
+				// Check if the USB event comes from the GPS 
 				if(serialPortExists()){
-					s_logger.debug("GPS connected");
+					s_logger.debug("USB GPS connected");
 
-					//we already have properties - just do it
+					// We already have properties from the service...
 					try {
 						if(!m_isRunning) {
 							configureGpsDevice();
@@ -321,14 +322,16 @@ public class PositionServiceImpl implements PositionService, ConfigurableCompone
 				}
 			}
 			else if(UsbDeviceRemovedEvent.USB_EVENT_DEVICE_REMOVED_TOPIC.contains(event.getTopic())){
+				// Check if the USB event comes from the GPS
 				if(!serialPortExists()) {
-					s_logger.debug("GPS disconnected");
+					s_logger.debug("USB GPS disconnected");
 					stop();
 				}
 			} else if(ModemGpsEnabledEvent.MODEM_EVENT_GPS_ENABLED_TOPIC.contains(event.getTopic())) {
 				
-				s_logger.debug("ModemGpsEnabledEvent");
+				s_logger.debug("Modem GPS connected");
 				
+				// Get the properties from the modem event
 				m_properties.put(PORT, event.getProperty(ModemGpsEnabledEvent.Port));
 				m_properties.put(BAUDRATE, event.getProperty(ModemGpsEnabledEvent.BaudRate));
 				m_properties.put(BITSPERWORD, event.getProperty(ModemGpsEnabledEvent.DataBits));
@@ -336,6 +339,7 @@ public class PositionServiceImpl implements PositionService, ConfigurableCompone
 				m_properties.put(PARITY, event.getProperty(ModemGpsEnabledEvent.Parity));
 				m_properties.put(MODEM, "true");
 				
+				// ...and check if we already have a gps device with the same configuration
 				if (m_gpsDevice != null) {
 					Properties currentConfigProps = m_gpsDevice.getConnectConfig();
 					Properties serialProperties = getSerialConnectionProperties(m_properties);
@@ -347,7 +351,8 @@ public class PositionServiceImpl implements PositionService, ConfigurableCompone
 				
 				updated(m_properties);
 			} else if (ModemGpsDisabledEvent.MODEM_EVENT_GPS_DISABLED_TOPIC.contains(event.getTopic())) {
-				s_logger.debug("ModemGpsDisabledEvent");
+				s_logger.debug("Modem GPS disconnected");
+				// Pass to the update method the properties from the service
 				updated(m_positionServiceProperties);
 			}
 		}

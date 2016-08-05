@@ -22,11 +22,14 @@ public enum SupportedSerialModemInfo {
 	MiniGateway_Telit_HE910_NAD("HE910", new String[]{"HE910-NAD", "HE910-EUD"}, "Telit", KuraConstants.Mini_Gateway.getImageName(), 
 			KuraConstants.Mini_Gateway.getImageVersion(), KuraConstants.Mini_Gateway.getTargetName(),
 			Arrays.asList(ModemTechnologyType.HSPA, ModemTechnologyType.UMTS), 
-			new SerialModemDriver("HE910", SerialModemComm.MiniGateway, "at+gmm\r\n")),
+			new SerialModemDriver("HE910", SerialModemComm.MiniGateway, "at+gmm\r\n"));
+/*	We should not have a serial modem entry for the HE910 modem on Reliagate 10-11		
+			,
 	Reliagate_10_11_Telit_HE910_NAD("HE910", new String[]{"HE910-NAD", "HE910-EUD"}, "Telit", KuraConstants.Reliagate_10_11.getImageName(), 
 			KuraConstants.Reliagate_10_11.getImageVersion(), KuraConstants.Reliagate_10_11.getTargetName(),
 			Arrays.asList(ModemTechnologyType.HSPA, ModemTechnologyType.UMTS), 
-			new SerialModemDriver("HE910", SerialModemComm.Reliagate_10_11, "at+gmm\r\n"));			
+			new SerialModemDriver("HE910", SerialModemComm.Reliagate_10_11, "at+gmm\r\n"));
+*/
 
 	private String m_modemName;
 	private String [] m_modemModels;

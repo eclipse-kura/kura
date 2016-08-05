@@ -168,6 +168,11 @@
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.kura.emulator</artifactId>
+									<version>${org.eclipse.kura.emulator.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
 									<artifactId>org.eclipse.kura.emulator.gpio</artifactId>
 									<version>${org.eclipse.kura.emulator.gpio.version}</version>
 								</artifactItem>
@@ -371,6 +376,7 @@
 							    <move file="target/plugins/org.eclipse.kura.web.jar" tofile="target/plugins/org.eclipse.kura.web_${org.eclipse.kura.web.version}.jar" failonerror="false" />
   								<move file="target/plugins/org.eclipse.kura.web2.jar" tofile="target/plugins/org.eclipse.kura.web2_${org.eclipse.kura.web2.version}.jar" failonerror="false" />
 								<move file="target/plugins/org.eclipse.kura.linux.gpio.jar" tofile="target/plugins/org.eclipse.kura.linux.gpio_${org.eclipse.kura.linux.gpio.version}.jar" failonerror="false"/>
+  								<move file="target/plugins/org.eclipse.kura.emulator.jar" tofile="target/plugins/org.eclipse.kura.emulator_${org.eclipse.kura.emulator.version}.jar"/>
   								<move file="target/plugins/org.eclipse.kura.emulator.clock.jar" tofile="target/plugins/org.eclipse.kura.emulator.clock_${org.eclipse.kura.emulator.clock.version}.jar"/>
   								<move file="target/plugins/org.eclipse.kura.emulator.gpio.jar" tofile="target/plugins/org.eclipse.kura.emulator.gpio_${org.eclipse.kura.emulator.gpio.version}.jar" />
   								<move file="target/plugins/org.eclipse.kura.emulator.net.jar" tofile="target/plugins/org.eclipse.kura.emulator.net_${org.eclipse.kura.emulator.net.version}.jar" />

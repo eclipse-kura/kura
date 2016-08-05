@@ -20,6 +20,9 @@ import static org.eclipse.kura.asset.AssetConstants.ASSET_NAME_PROP;
 import static org.eclipse.kura.asset.AssetConstants.CHANNEL_PROPERTY_POSTFIX;
 import static org.eclipse.kura.asset.AssetConstants.CHANNEL_PROPERTY_PREFIX;
 import static org.eclipse.kura.asset.AssetConstants.DRIVER_PROPERTY_POSTFIX;
+import static org.eclipse.kura.asset.AssetConstants.NAME;
+import static org.eclipse.kura.asset.AssetConstants.TYPE;
+import static org.eclipse.kura.asset.AssetConstants.VALUE_TYPE;
 import static org.eclipse.kura.asset.ChannelType.READ;
 import static org.eclipse.kura.asset.ChannelType.READ_WRITE;
 import static org.eclipse.kura.asset.ChannelType.WRITE;
@@ -179,19 +182,16 @@ final class AssetOptions {
 		final Map<String, Object> channelConfig = CollectionUtil.newConcurrentHashMap();
 
 		// All key names present is the properties
-		final String channelValueTypeKey = "value.type";
-		final String channelTypeKey = "type";
-		final String channelNameKey = "name";
 		final String channelKeyContainment = CHANNEL_PROPERTY_POSTFIX.value() + CHANNEL_PROPERTY_PREFIX.value()
 				+ CHANNEL_PROPERTY_POSTFIX.value();
 		final String channelKeyFormat = channelId + channelKeyContainment;
 
 		if (properties != null) {
-			final String channelNamePropertyKey = channelKeyFormat + channelNameKey;
+			final String channelNamePropertyKey = channelKeyFormat + NAME.value();
 			if (properties.containsKey(channelNamePropertyKey)) {
 				channelName = (String) properties.get(channelNamePropertyKey);
 			}
-			final String channelTypePropertyKey = channelKeyFormat + channelTypeKey;
+			final String channelTypePropertyKey = channelKeyFormat + TYPE.value();
 			if (properties.containsKey(channelTypePropertyKey)) {
 				final String channelTypeProp = (String) properties.get(channelTypePropertyKey);
 				if ("READ".equalsIgnoreCase(channelTypeProp)) {
@@ -204,7 +204,7 @@ final class AssetOptions {
 					channelType = READ_WRITE;
 				}
 			}
-			final String channelValueTypePropertyKey = channelKeyFormat + channelValueTypeKey;
+			final String channelValueTypePropertyKey = channelKeyFormat + VALUE_TYPE.value();
 			if (properties.containsKey(channelValueTypePropertyKey)) {
 				final String dataTypeProp = (String) properties.get(channelValueTypePropertyKey);
 				if ("INTEGER".equalsIgnoreCase(dataTypeProp)) {
@@ -285,11 +285,14 @@ final class AssetOptions {
 
 	/**
 	 * Updates with new properties
-	 * 
+	 *
 	 * @param properties
 	 *            the new properties
+	 * @throws KuraRuntimeException
+	 *             if the argument is null
 	 */
 	public void update(final Map<String, Object> properties) {
+		checkNull(properties, s_message.propertiesNonNull());
 		this.extractProperties(properties);
 	}
 

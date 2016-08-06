@@ -33,16 +33,19 @@ final class WireRecordCache {
 	/** Map that is the cache. */
 	private static final Map<Long, List<WireRecord>> m_map = CollectionUtil.newConcurrentHashMap();
 
-	/** Localization Resource */
+	/** Localization Resource. */
 	private static final WireMessages s_message = LocalizationAdapter.adapt(WireMessages.class);
 
+	/** Cache Maximum Capacity as configured. */
+	private int m_capacity;
+
 	/** Last refreshed time. */
-	private Calendar m_lastRefreshedTime = null;
+	private Calendar m_lastRefreshedTime;
 
 	/** DB Wire Record Filter instance. */
 	private final DbWireRecordFilter m_recordFilter;
 
-	/** Refresh duration in seconds */
+	/** Refresh duration in seconds. */
 	private int m_refreshDuration;
 
 	/**
@@ -73,6 +76,15 @@ final class WireRecordCache {
 	}
 
 	/**
+	 * Gets the capacity.
+	 *
+	 * @return the capacity
+	 */
+	public int getCapacity() {
+		return this.m_capacity;
+	}
+
+	/**
 	 * Gets the last refreshed time.
 	 *
 	 * @return the last refreshed time
@@ -99,6 +111,11 @@ final class WireRecordCache {
 	 *            - object for the key
 	 */
 	void put(final long key, final List<WireRecord> value) {
+		// clears the map if the size of the map is as same as the max size
+		// expected
+		if (m_map.size() == this.m_capacity) {
+			m_map.clear();
+		}
 		m_map.put(key, value);
 		this.m_lastRefreshedTime = Calendar.getInstance();
 	}
@@ -125,6 +142,16 @@ final class WireRecordCache {
 			this.m_lastRefreshedTime = Calendar.getInstance();
 			return true;
 		}
+	}
+
+	/**
+	 * Sets the capacity.
+	 *
+	 * @param capacity
+	 *            the new capacity
+	 */
+	public void setCapacity(final int capacity) {
+		this.m_capacity = capacity;
 	}
 
 	/**

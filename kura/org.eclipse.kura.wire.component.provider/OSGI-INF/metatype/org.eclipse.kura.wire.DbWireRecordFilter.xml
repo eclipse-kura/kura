@@ -47,6 +47,16 @@
         	description="This denotes the allowed interval (in seconds) for which the cache data will be retrieved if time difference between the current time and the last cache updated time is less than this interval">
         </AD>
         
+        <AD id="cache.max.capacity"
+        	name="cache.max.capacity"
+        	type="Integer"
+        	cardinality="0"
+        	required="true"
+        	default="100"
+        	min="100"
+        	description="This denotes the allowed maximum capacity for the cache">
+        </AD>
+        
         <AD id="severity.level"
             name="severity.level"
             type="String"

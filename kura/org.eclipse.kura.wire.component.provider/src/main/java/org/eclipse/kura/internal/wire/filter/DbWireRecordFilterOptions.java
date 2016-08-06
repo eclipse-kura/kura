@@ -22,6 +22,9 @@ import org.eclipse.kura.wire.SeverityLevel;
  */
 final class DbWireRecordFilterOptions {
 
+	/** The Constant denotes the cache max capacity. */
+	private static final String CONF_CACHE_CAPACITY = "cache.max.capacity";
+
 	/** The Constant denotes the cache update interval. */
 	private static final String CONF_CACHE_INTERVAL = "cache.update.interval";
 
@@ -45,6 +48,20 @@ final class DbWireRecordFilterOptions {
 	 */
 	DbWireRecordFilterOptions(final Map<String, Object> properties) {
 		this.m_properties = properties;
+	}
+
+	/**
+	 * Returns the cache max capacity as configured.
+	 *
+	 * @return the configured cache max capacity
+	 */
+	int getCacheCapacity() {
+		int cacheSize = 0;
+		if ((this.m_properties != null) && (this.m_properties.containsKey(CONF_CACHE_CAPACITY))
+				&& (this.m_properties.get(CONF_CACHE_CAPACITY) instanceof String)) {
+			cacheSize = (Integer) this.m_properties.get(CONF_CACHE_CAPACITY);
+		}
+		return cacheSize;
 	}
 
 	/**

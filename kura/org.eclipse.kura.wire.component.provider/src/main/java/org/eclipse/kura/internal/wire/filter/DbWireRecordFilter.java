@@ -294,6 +294,7 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Conf
 	private void scheduleRefresh() {
 		final int refreshRate = this.m_options.getRefreshRate();
 		this.m_cache.setRefreshDuration(refreshRate);
+		this.m_cache.setCapacity(this.m_options.getCacheCapacity());
 		// Cancel the current refresh view handle
 		if (this.m_tickHandle != null) {
 			this.m_tickHandle.cancel(true);

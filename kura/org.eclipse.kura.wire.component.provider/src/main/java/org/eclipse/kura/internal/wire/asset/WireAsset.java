@@ -90,7 +90,8 @@ import org.slf4j.LoggerFactory;
  * <li>asset_flag</li>
  * <li>timestamp</li>
  * <li>value</li>
- * <li>exception</li>
+ * <li>exception</li> (This Wire Field is present if and only if asset_flag is
+ * set to FAILURE)
  * </ul>
  *
  * @see Asset
@@ -431,7 +432,7 @@ public final class WireAsset implements WireEmitter, WireReceiver, SelfConfiguri
 						// field name, then write the wire field value to the
 						// specific channel
 						if (channel.getName().equalsIgnoreCase(wireFieldName)
-								&& (wireField.getSeverityLevel() != ERROR)) {
+								&& (wireField.getSeverityLevel() == INFO)) {
 							assetRecordsToWriteChannels.add(this.prepareAssetRecord(channel, wireField.getValue()));
 						}
 					}

@@ -17,6 +17,7 @@ import java.util.Map;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.util.base.ThrowableUtil;
+import org.eclipse.kura.wire.SeverityLevel;
 
 /**
  * The Class CloudPublisherOptions is responsible to provide all the required
@@ -118,6 +119,9 @@ final class CloudPublisherOptions {
 
 	/** The Constant denoting default MQTT topic. */
 	private static final String DEFAULT_TOPIC = "EVENT";
+
+	/** The Constant denoting severity level. */
+	private static final String SEVERITY_LEVEL = "severity.level";
 
 	/** The properties as associated */
 	private final Map<String, Object> m_properties;
@@ -254,6 +258,30 @@ final class CloudPublisherOptions {
 			publishingTopic = String.valueOf(this.m_properties.get(CONF_TOPIC));
 		}
 		return publishingTopic;
+	}
+
+	/**
+	 * Returns the severity level of accepted wire fields.
+	 *
+	 * @return the severity level
+	 */
+	SeverityLevel getSeverityLevel() {
+		String severityLevel = "ERROR";
+		if ((this.m_properties != null) && this.m_properties.containsKey(SEVERITY_LEVEL)
+				&& (this.m_properties.get(SEVERITY_LEVEL) != null)
+				&& (this.m_properties.get(SEVERITY_LEVEL) instanceof String)) {
+			severityLevel = String.valueOf(this.m_properties.get(SEVERITY_LEVEL));
+		}
+		if ("ERROR".equalsIgnoreCase(severityLevel)) {
+			return SeverityLevel.ERROR;
+		}
+		if ("INFO".equalsIgnoreCase(severityLevel)) {
+			return SeverityLevel.INFO;
+		}
+		if ("CONFIG".equalsIgnoreCase(severityLevel)) {
+			return SeverityLevel.CONFIG;
+		}
+		return SeverityLevel.ERROR;
 	}
 
 }

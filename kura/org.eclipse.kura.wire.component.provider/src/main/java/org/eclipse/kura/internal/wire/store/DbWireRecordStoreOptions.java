@@ -16,6 +16,8 @@ import static org.eclipse.kura.internal.wire.store.DbWireRecordStore.PREFIX;
 
 import java.util.Map;
 
+import org.eclipse.kura.wire.SeverityLevel;
+
 /**
  * The Class DbWireRecordStoreOptions is responsible to contain all the DB Wire
  * Record Store related options
@@ -27,6 +29,9 @@ final class DbWireRecordStoreOptions {
 
 	/** The Constant denotes the number of records in the table to keep. */
 	private static final String PERIODIC_CLEANUP_RECORDS_ID = "periodic.cleanup.records.keep";
+
+	/** The Constant denoting severity level. */
+	private static final String SEVERITY_LEVEL = "severity.level";
 
 	/** The Constant denotes the name of the table to perform operations on. */
 	private static final String TABLE_NAME = "table.name";
@@ -72,6 +77,30 @@ final class DbWireRecordStoreOptions {
 			period = (Integer) this.m_properties.get(PERIODIC_CLEANUP_ID);
 		}
 		return period;
+	}
+
+	/**
+	 * Returns the severity level of accepted wire fields.
+	 *
+	 * @return the severity level
+	 */
+	SeverityLevel getSeverityLevel() {
+		String severityLevel = "ERROR";
+		if ((this.m_properties != null) && this.m_properties.containsKey(SEVERITY_LEVEL)
+				&& (this.m_properties.get(SEVERITY_LEVEL) != null)
+				&& (this.m_properties.get(SEVERITY_LEVEL) instanceof String)) {
+			severityLevel = String.valueOf(this.m_properties.get(SEVERITY_LEVEL));
+		}
+		if ("ERROR".equalsIgnoreCase(severityLevel)) {
+			return SeverityLevel.ERROR;
+		}
+		if ("INFO".equalsIgnoreCase(severityLevel)) {
+			return SeverityLevel.INFO;
+		}
+		if ("CONFIG".equalsIgnoreCase(severityLevel)) {
+			return SeverityLevel.CONFIG;
+		}
+		return SeverityLevel.ERROR;
 	}
 
 	/**

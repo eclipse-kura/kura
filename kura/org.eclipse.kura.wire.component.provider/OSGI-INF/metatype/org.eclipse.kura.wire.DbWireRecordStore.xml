@@ -45,6 +45,18 @@
             description="Option for the number of records in the table to keep while performing a cleanup operation (if set to 0 all the records will be deleted)"
            	min="0">
         </AD>
+        
+        <AD id="severity.level"
+            name="severity.level"
+            type="String"
+            cardinality="0"
+            required="true"
+            default="ERROR"
+            description="It signifies severity level of Wire Fields to be accepted by this Wire Component">
+            <Option label="ERROR" value="ERROR" />
+            <Option label="CONFIG" value="CONFIG" />
+            <Option label="INFO" value="INFO" />
+        </AD>
              
     </OCD>
     

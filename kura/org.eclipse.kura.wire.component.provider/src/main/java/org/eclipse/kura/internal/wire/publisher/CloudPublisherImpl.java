@@ -355,7 +355,9 @@ public final class CloudPublisherImpl implements WireReceiver, DataServiceListen
 	public void onWireReceive(final WireEnvelope wireEnvelope) {
 		checkNull(wireEnvelope, s_message.wireEnvelopeNonNull());
 		s_logger.info(s_message.wireRecordReceived(wireEnvelope.getEmitterPid()));
-		this.publish(wireEnvelope.getRecords());
+		// filtering list of wire records based on the provided severity level
+		final List<WireRecord> records = this.m_wireSupport.filter(wireEnvelope.getRecords());
+		this.publish(records);
 		this.stopPublishing();
 	}
 

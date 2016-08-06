@@ -321,7 +321,8 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
 	public synchronized void onWireReceive(final WireEnvelope wireEvelope) {
 		checkNull(wireEvelope, s_message.wireEnvelopeNonNull());
 		s_logger.debug(s_message.wireEnvelopeReceived() + this.m_wireSupport);
-		final List<WireRecord> dataRecords = wireEvelope.getRecords();
+		// filtering list of wire records based on the provided severity level
+		final List<WireRecord> dataRecords = this.m_wireSupport.filter(wireEvelope.getRecords());
 		for (final WireRecord dataRecord : dataRecords) {
 			this.store(dataRecord);
 		}
@@ -441,7 +442,7 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
 				/** {@inheritDoc} */
 				@Override
 				public void run() {
-					clear(noOfRecordsToKeep);
+					DbWireRecordStore.this.clear(noOfRecordsToKeep);
 				}
 			}, cleanUpRate, TimeUnit.SECONDS);
 		}

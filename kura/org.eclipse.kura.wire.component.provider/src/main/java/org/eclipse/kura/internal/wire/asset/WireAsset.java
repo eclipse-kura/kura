@@ -27,6 +27,8 @@ import static org.eclipse.kura.asset.AssetConstants.VALUE_TYPE;
 import static org.eclipse.kura.asset.ChannelType.READ;
 import static org.eclipse.kura.asset.ChannelType.READ_WRITE;
 import static org.eclipse.kura.asset.ChannelType.WRITE;
+import static org.eclipse.kura.wire.SeverityLevel.ERROR;
+import static org.eclipse.kura.wire.SeverityLevel.INFO;
 import static org.osgi.framework.Constants.SERVICE_PID;
 
 import java.sql.Timestamp;
@@ -249,7 +251,7 @@ public final class WireAsset implements WireEmitter, WireReceiver, SelfConfiguri
 		final List<WireRecord> wireRecords = CollectionUtil.newArrayList();
 		for (final AssetRecord assetRecord : assetRecords) {
 			final AssetFlag assetFlag = assetRecord.getAssetFlag();
-			final SeverityLevel level = (assetFlag == AssetFlag.FAILURE) ? SeverityLevel.ERROR : SeverityLevel.INFO;
+			final SeverityLevel level = (assetFlag == AssetFlag.FAILURE) ? ERROR : INFO;
 			final WireField channelIdWireField = new WireField(s_message.channelId(),
 					TypedValues.newLongValue(assetRecord.getChannelId()), level);
 			final WireField assetFlagWireField = new WireField(s_message.assetFlag(),
@@ -259,7 +261,7 @@ public final class WireAsset implements WireEmitter, WireReceiver, SelfConfiguri
 			final WireField valueWireField = new WireField(s_message.value(), assetRecord.getValue(), level);
 			WireRecord wireRecord;
 			WireField errorField;
-			if (level == SeverityLevel.ERROR) {
+			if (level == ERROR) {
 				errorField = new WireField(s_message.error(), TypedValues.newStringValue("ERROR"), level);
 				wireRecord = new WireRecord(new Timestamp(new Date().getTime()), Arrays.asList(channelIdWireField,
 						assetFlagWireField, timestampWireField, valueWireField, errorField));
@@ -310,6 +312,8 @@ public final class WireAsset implements WireEmitter, WireReceiver, SelfConfiguri
 		final Tad severityLevelAd = new Tad();
 		severityLevelAd.setId(SEVERITY_LEVEL.value());
 		severityLevelAd.setName(SEVERITY_LEVEL.value());
+		// default severity level is ERROR
+		severityLevelAd.setDefault(s_message.error());
 		severityLevelAd.setCardinality(0);
 		severityLevelAd.setType(Tscalar.STRING);
 		severityLevelAd.setDescription(s_message.driverName());
@@ -423,8 +427,11 @@ public final class WireAsset implements WireEmitter, WireReceiver, SelfConfiguri
 					final Channel channel = channelEntry.getValue();
 					if ((channel.getType() == WRITE) || (channel.getType() == READ_WRITE)) {
 						final String wireFieldName = wireField.getName();
+						// if the channel name is equal to the received wire
+						// field name, then write the wire field value to the
+						// specific channel
 						if (channel.getName().equalsIgnoreCase(wireFieldName)
-								&& (wireField.getSeverityLevel() != SeverityLevel.ERROR)) {
+								&& (wireField.getSeverityLevel() != ERROR)) {
 							assetRecordsToWriteChannels.add(this.prepareAssetRecord(channel, wireField.getValue()));
 						}
 					}

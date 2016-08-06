@@ -13,6 +13,9 @@
 package org.eclipse.kura.internal.wire;
 
 import static org.eclipse.kura.Preconditions.checkNull;
+import static org.eclipse.kura.wire.SeverityLevel.CONFIG;
+import static org.eclipse.kura.wire.SeverityLevel.ERROR;
+import static org.eclipse.kura.wire.SeverityLevel.INFO;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -97,7 +100,8 @@ final class WireSupportImpl implements WireSupport {
 	@Override
 	public List<WireRecord> filter(final List<WireRecord> records) {
 		final SeverityLevel level = this.getSeverityLevel();
-		if (level == null) {
+		// If the severity level is error, then all wire fields remain
+		if ((level == null) || (level == ERROR)) {
 			return records;
 		}
 		final List<WireRecord> newRecords = CollectionUtil.newArrayList();
@@ -107,18 +111,12 @@ final class WireSupportImpl implements WireSupport {
 				// If the severity level is info, then only info wire fields
 				// will remain
 				final SeverityLevel wireFieldLevel = wireField.getSeverityLevel();
-				if ((wireFieldLevel == SeverityLevel.INFO) && (level == SeverityLevel.INFO)) {
-					newFields.add(wireField);
-				}
-				// If the severity level is error, then all wire fields remain
-				if (((wireFieldLevel == SeverityLevel.INFO) || (wireFieldLevel == SeverityLevel.CONFIG)
-						|| (wireFieldLevel == SeverityLevel.ERROR)) && (level == SeverityLevel.ERROR)) {
+				if ((wireFieldLevel == INFO) && (level == INFO)) {
 					newFields.add(wireField);
 				}
 				// If the severity level is config, then info and config wire
 				// fields remain
-				if (((wireFieldLevel == SeverityLevel.INFO) || (wireFieldLevel == SeverityLevel.CONFIG))
-						&& (level == SeverityLevel.CONFIG)) {
+				if (((wireFieldLevel == INFO) || (wireFieldLevel == CONFIG)) && (level == CONFIG)) {
 					newFields.add(wireField);
 				}
 				final WireRecord newWireRecord = new WireRecord(wireRecord.getTimestamp(), wireRecord.getPosition(),

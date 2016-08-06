@@ -16,6 +16,10 @@ package org.eclipse.kura.wire;
  * The SeverityLevel Enum signifies a severity level of a {@link WireField}.
  * Depending on the configuration as provided by different Wire Components, the
  * Wire Components will choose the specific Wire Fields that will be processed.
+ * <br/>
+ * <br/>
+ *
+ * The priority of the Severity Levels are as follows: ERROR > CONFIG > INFO
  */
 public enum SeverityLevel {
 

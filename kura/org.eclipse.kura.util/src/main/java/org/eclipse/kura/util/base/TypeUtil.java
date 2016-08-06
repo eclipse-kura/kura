@@ -37,24 +37,6 @@ public final class TypeUtil {
 	}
 
 	/**
-	 * Extracts the byte array from the provided value
-	 *
-	 * @param value
-	 * @return the byte array
-	 * @throws IOException
-	 *             if the access to byte stream fails
-	 * @throws KuraRuntimeException
-	 *             if the argument is null
-	 */
-	public static byte[] extractToByteArray(final Object value) throws IOException {
-		checkNull(value, s_message.valueNonNull());
-		final ByteArrayOutputStream b = new ByteArrayOutputStream();
-		final ObjectOutputStream o = new ObjectOutputStream(b);
-		o.writeObject(value);
-		return b.toByteArray();
-	}
-
-	/**
 	 * Returns a byte array representation of the provided integer value.
 	 *
 	 * @param value
@@ -68,6 +50,24 @@ public final class TypeUtil {
 		result[2] = (byte) (value >> 8);
 		result[3] = (byte) (value);
 		return result;
+	}
+
+	/**
+	 * Converts to the byte array from the provided object instance
+	 *
+	 * @param value
+	 * @return the byte array
+	 * @throws IOException
+	 *             if the access to byte stream fails
+	 * @throws KuraRuntimeException
+	 *             if the argument is null
+	 */
+	public static byte[] objectToByteArray(final Object value) throws IOException {
+		checkNull(value, s_message.valueNonNull());
+		final ByteArrayOutputStream b = new ByteArrayOutputStream();
+		final ObjectOutputStream o = new ObjectOutputStream(b);
+		o.writeObject(value);
+		return b.toByteArray();
 	}
 
 }

@@ -203,7 +203,7 @@ public final class OpcUaDriver implements Driver {
 			return TypedValues.newStringValue(value.toString());
 		case BYTE_ARRAY:
 			try {
-				return TypedValues.newByteArrayValue(TypeUtil.extractToByteArray(value));
+				return TypedValues.newByteArrayValue(TypeUtil.objectToByteArray(value));
 			} catch (final IOException e) {
 				return null;
 			}

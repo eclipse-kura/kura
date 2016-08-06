@@ -138,6 +138,9 @@ public interface WireMessages {
 	@En("Unable to retrieve Factory PIDs of one of the provided Wire Components because of null")
 	public String componentPidsNull();
 
+	@En("CONFIG")
+	public String config();
+
 	@En("Configurations cannot be null")
 	public String configurationNonNull();
 
@@ -228,6 +231,9 @@ public interface WireMessages {
 	@En("Emitter PID cannot be null")
 	public String emitterPidNonNull();
 
+	@En("ERROR")
+	public String error();
+
 	@En("Error while creating wire component...")
 	public String errorCreatingWireComponent();
 
@@ -293,6 +299,9 @@ public interface WireMessages {
 
 	@En("incoming_wires")
 	public String incomingWires();
+
+	@En("INFO")
+	public String info();
 
 	@En("Insertion failed. Reconciling Table and Columns...")
 	public String insertionFailed();
@@ -437,6 +446,9 @@ public interface WireMessages {
 
 	@En("Select a Wire from the list. It will be deleted when submitting the changes.")
 	public String selectWire();
+
+	@En("Severity Level")
+	public String severityLevel();
 
 	@En("SHORT")
 	public String shortStr();

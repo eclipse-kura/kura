@@ -122,7 +122,7 @@ public final class WireRecord {
 	 *
 	 * @return the timestamp
 	 */
-	public Date getTimestamp() {
+	public Timestamp getTimestamp() {
 		return this.timestamp;
 	}
 

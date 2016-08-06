@@ -13,10 +13,12 @@
 package org.eclipse.kura.internal.driver.s7plc;
 
 import static org.eclipse.kura.Preconditions.checkNull;
-import static org.eclipse.kura.driver.DriverFlag.READ_FAILURE;
+import static org.eclipse.kura.driver.DriverConstants.CHANNEL_VALUE_TYPE;
+import static org.eclipse.kura.driver.DriverFlag.DRIVER_ERROR_CHANNEL_NOT_ACCESSIBLE;
+import static org.eclipse.kura.driver.DriverFlag.DRIVER_ERROR_CHANNEL_VALUE_TYPE_CONVERSION_EXCEPTION;
 import static org.eclipse.kura.driver.DriverFlag.READ_SUCCESSFUL;
-import static org.eclipse.kura.driver.DriverFlag.WRITE_FAILURE;
 import static org.eclipse.kura.driver.DriverFlag.WRITE_SUCCESSFUL;
+import static org.eclipse.kura.type.DataType.BYTE_ARRAY;
 
 import java.io.IOException;
 import java.util.List;
@@ -32,8 +34,9 @@ import org.eclipse.kura.driver.listener.DriverListener;
 import org.eclipse.kura.localization.LocalizationAdapter;
 import org.eclipse.kura.localization.resources.S7PlcMessages;
 import org.eclipse.kura.type.ByteArrayValue;
-import org.eclipse.kura.type.IntegerValue;
+import org.eclipse.kura.type.DataType;
 import org.eclipse.kura.type.TypedValue;
+import org.eclipse.kura.type.TypedValues;
 import org.eclipse.kura.util.base.ThrowableUtil;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
@@ -64,6 +67,9 @@ public final class S7PlcDriver implements Driver {
 
 	/** DB Area Number Property */
 	private static final String AREA_NO = "area.no";
+
+	/** Number of bytes to read Property */
+	private static final String BYTE_COUNT = "byte.count";
 
 	/** DB Area Offset Property */
 	private static final String OFFSET = "offset";
@@ -162,17 +168,51 @@ public final class S7PlcDriver implements Driver {
 			this.connect();
 		}
 		for (final DriverRecord record : records) {
-			final Map<String, Object> config = record.getChannelConfig();
-			final TypedValue<?> recordValue = record.getValue();
-			if (!(recordValue instanceof IntegerValue)) {
-				record.setDriverStatus(new DriverStatus(READ_FAILURE, s_message.instanceOfInteger(), null));
+			// check if the channel type configuration is provided
+			final Map<String, Object> channelConfig = record.getChannelConfig();
+			DataType type;
+			if (!channelConfig.containsKey(CHANNEL_VALUE_TYPE.value())) {
+				record.setDriverStatus(new DriverStatus(DRIVER_ERROR_CHANNEL_NOT_ACCESSIBLE,
+						s_message.errorRetrievingValueType(), null));
+				record.setTimestamp(System.currentTimeMillis());
 				continue;
 			}
-			final int val = ((IntegerValue) recordValue).getValue();
-			final byte[] value = this.m_connector.read(DaveArea.DB, Integer.valueOf(config.get(AREA_NO).toString()),
-					val, Integer.valueOf(config.get(OFFSET).toString()));
+			type = (DataType) channelConfig.get(CHANNEL_VALUE_TYPE.value());
+			// check if the area no configuration is provided
+			if (!channelConfig.containsKey(AREA_NO)) {
+				record.setDriverStatus(
+						new DriverStatus(DRIVER_ERROR_CHANNEL_NOT_ACCESSIBLE, s_message.errorRetrievingAreaNo(), null));
+				record.setTimestamp(System.currentTimeMillis());
+				continue;
+			}
+			// check if the byte count configuration is provided
+			if (!channelConfig.containsKey(BYTE_COUNT)) {
+				record.setDriverStatus(new DriverStatus(DRIVER_ERROR_CHANNEL_NOT_ACCESSIBLE,
+						s_message.errorRetrievingByteCount(), null));
+				record.setTimestamp(System.currentTimeMillis());
+				continue;
+			}
+			// check if the area offset configuration is provided
+			if (!channelConfig.containsKey(OFFSET)) {
+				record.setDriverStatus(new DriverStatus(DRIVER_ERROR_CHANNEL_NOT_ACCESSIBLE,
+						s_message.errorRetrievingAreaOffset(), null));
+				record.setTimestamp(System.currentTimeMillis());
+				continue;
+			}
+			if (type != BYTE_ARRAY) {
+				record.setDriverStatus(new DriverStatus(DRIVER_ERROR_CHANNEL_VALUE_TYPE_CONVERSION_EXCEPTION,
+						s_message.instanceOfByteArray(), null));
+				record.setTimestamp(System.currentTimeMillis());
+				continue;
+			}
+			final byte[] value = this.m_connector.read(DaveArea.DB,
+					Integer.parseInt(channelConfig.get(AREA_NO).toString()),
+					Integer.parseInt(channelConfig.get(BYTE_COUNT).toString()),
+					Integer.parseInt(channelConfig.get(OFFSET).toString()));
 			if (value != null) {
 				record.setDriverStatus(new DriverStatus(READ_SUCCESSFUL));
+				record.setValue(TypedValues.newByteArrayValue(value));
+				record.setTimestamp(System.currentTimeMillis());
 			}
 		}
 		return records;
@@ -210,16 +250,49 @@ public final class S7PlcDriver implements Driver {
 			this.connect();
 		}
 		for (final DriverRecord record : records) {
-			final Map<String, Object> config = record.getChannelConfig();
+			// check if the channel type configuration is provided
+			final Map<String, Object> channelConfig = record.getChannelConfig();
+			DataType type = null;
+			if (!channelConfig.containsKey(CHANNEL_VALUE_TYPE.value())) {
+				record.setDriverStatus(new DriverStatus(DRIVER_ERROR_CHANNEL_NOT_ACCESSIBLE,
+						s_message.errorRetrievingValueType(), null));
+				record.setTimestamp(System.currentTimeMillis());
+				continue;
+			}
+			type = (DataType) channelConfig.get(CHANNEL_VALUE_TYPE.value());
+			// check if the area no configuration is provided
+			if (!channelConfig.containsKey(AREA_NO)) {
+				record.setDriverStatus(
+						new DriverStatus(DRIVER_ERROR_CHANNEL_NOT_ACCESSIBLE, s_message.errorRetrievingAreaNo(), null));
+				record.setTimestamp(System.currentTimeMillis());
+				continue;
+			}
+			// check if the byte count configuration is provided
+			if (!channelConfig.containsKey(BYTE_COUNT)) {
+				record.setDriverStatus(new DriverStatus(DRIVER_ERROR_CHANNEL_NOT_ACCESSIBLE,
+						s_message.errorRetrievingByteCount(), null));
+				record.setTimestamp(System.currentTimeMillis());
+				continue;
+			}
+			// check if the area offset configuration is provided
+			if (!channelConfig.containsKey(OFFSET)) {
+				record.setDriverStatus(new DriverStatus(DRIVER_ERROR_CHANNEL_NOT_ACCESSIBLE,
+						s_message.errorRetrievingAreaOffset(), null));
+				record.setTimestamp(System.currentTimeMillis());
+				continue;
+			}
 			final TypedValue<?> recordValue = record.getValue();
-			if (!(recordValue instanceof ByteArrayValue)) {
-				record.setDriverStatus(new DriverStatus(WRITE_FAILURE, s_message.instanceOfByteArray(), null));
+			if (!(recordValue instanceof ByteArrayValue) || (type != BYTE_ARRAY)) {
+				record.setDriverStatus(new DriverStatus(DRIVER_ERROR_CHANNEL_VALUE_TYPE_CONVERSION_EXCEPTION,
+						s_message.instanceOfByteArray(), null));
+				record.setTimestamp(System.currentTimeMillis());
 				continue;
 			}
 			final byte[] value = ((ByteArrayValue) recordValue).getValue();
-			this.m_connector.write(DaveArea.DB, Integer.valueOf(config.get(AREA_NO).toString()),
-					Integer.valueOf(config.get(OFFSET).toString()), value);
+			this.m_connector.write(DaveArea.DB, Integer.parseInt(channelConfig.get(AREA_NO).toString()),
+					Integer.parseInt(channelConfig.get(OFFSET).toString()), value);
 			record.setDriverStatus(new DriverStatus(WRITE_SUCCESSFUL));
+			record.setTimestamp(System.currentTimeMillis());
 		}
 		return records;
 	}

@@ -13,6 +13,7 @@
 package org.eclipse.kura.internal.wire.filter;
 
 import static org.eclipse.kura.Preconditions.checkNull;
+import static org.eclipse.kura.wire.SeverityLevel.INFO;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -231,42 +232,42 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Conf
 						case BOOLEAN:
 							final boolean boolValue = rset.getBoolean(i);
 							s_logger.info(s_message.refreshBoolean(boolValue));
-							dataField = new WireField(fieldName, TypedValues.newBooleanValue(boolValue));
+							dataField = new WireField(fieldName, TypedValues.newBooleanValue(boolValue), INFO);
 							break;
 						case BYTE:
 							final byte byteValue = rset.getByte(i);
 							s_logger.info(s_message.refreshByte(byteValue));
-							dataField = new WireField(fieldName, TypedValues.newByteValue(byteValue));
+							dataField = new WireField(fieldName, TypedValues.newByteValue(byteValue), INFO);
 							break;
 						case DOUBLE:
 							final double doubleValue = rset.getDouble(i);
 							s_logger.info(s_message.refreshDouble(doubleValue));
-							dataField = new WireField(fieldName, TypedValues.newDoubleValue(doubleValue));
+							dataField = new WireField(fieldName, TypedValues.newDoubleValue(doubleValue), INFO);
 							break;
 						case INTEGER:
 							final int intValue = rset.getInt(i);
 							s_logger.info(s_message.refreshInteger(intValue));
-							dataField = new WireField(fieldName, TypedValues.newIntegerValue(intValue));
+							dataField = new WireField(fieldName, TypedValues.newIntegerValue(intValue), INFO);
 							break;
 						case LONG:
 							final long longValue = rset.getLong(i);
 							s_logger.info(s_message.refreshLong(longValue));
-							dataField = new WireField(fieldName, TypedValues.newLongValue(longValue));
+							dataField = new WireField(fieldName, TypedValues.newLongValue(longValue), INFO);
 							break;
 						case BYTE_ARRAY:
 							final byte[] bytesValue = rset.getBytes(i);
 							s_logger.info(s_message.refreshByteArray(Arrays.toString(bytesValue)));
-							dataField = new WireField(fieldName, TypedValues.newByteArrayValue(bytesValue));
+							dataField = new WireField(fieldName, TypedValues.newByteArrayValue(bytesValue), INFO);
 							break;
 						case SHORT:
 							final short shortValue = rset.getShort(i);
 							s_logger.info(s_message.refreshShort(shortValue));
-							dataField = new WireField(fieldName, TypedValues.newShortValue(shortValue));
+							dataField = new WireField(fieldName, TypedValues.newShortValue(shortValue), INFO);
 							break;
 						case STRING:
 							final String stringValue = rset.getString(i);
 							s_logger.info(s_message.refreshString(stringValue));
-							dataField = new WireField(fieldName, TypedValues.newStringValue(stringValue));
+							dataField = new WireField(fieldName, TypedValues.newStringValue(stringValue), INFO);
 							break;
 						default:
 							break;
@@ -303,7 +304,7 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Conf
 				/** {@inheritDoc} */
 				@Override
 				public void run() {
-					DbWireRecordFilter.this.m_cache.put(System.currentTimeMillis(), DbWireRecordFilter.this.filter());
+					m_cache.put(System.currentTimeMillis(), filter());
 				}
 			}, refreshRate, TimeUnit.SECONDS);
 		}

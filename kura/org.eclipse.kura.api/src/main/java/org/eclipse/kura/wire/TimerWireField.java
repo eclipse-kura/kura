@@ -27,7 +27,7 @@ public final class TimerWireField extends WireField {
 	 * Instantiates a new timer wire field.
 	 */
 	public TimerWireField() {
-		super(PROP, TypedValues.newStringValue(PROP));
+		super(PROP, TypedValues.newStringValue(PROP), SeverityLevel.CONFIG);
 	}
 
 }

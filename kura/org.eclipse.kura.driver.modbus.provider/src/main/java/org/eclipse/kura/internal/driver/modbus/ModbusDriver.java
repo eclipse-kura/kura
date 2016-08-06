@@ -22,6 +22,7 @@ import static com.ghgande.j2mod.modbus.Modbus.WRITE_MULTIPLE_REGISTERS;
 import static com.ghgande.j2mod.modbus.Modbus.WRITE_SINGLE_REGISTER;
 import static org.eclipse.kura.Preconditions.checkCondition;
 import static org.eclipse.kura.Preconditions.checkNull;
+import static org.eclipse.kura.driver.DriverConstants.CHANNEL_VALUE_TYPE;
 import static org.eclipse.kura.driver.DriverFlag.DRIVER_ERROR_CHANNEL_NOT_ACCESSIBLE;
 import static org.eclipse.kura.driver.DriverFlag.READ_FAILURE;
 import static org.eclipse.kura.driver.DriverFlag.READ_SUCCESSFUL;
@@ -38,6 +39,8 @@ import static org.eclipse.kura.internal.driver.modbus.FunctionCode.FC_16_WRITE_M
 import static org.eclipse.kura.internal.driver.modbus.ModbusType.RTU;
 import static org.eclipse.kura.internal.driver.modbus.ModbusType.TCP;
 import static org.eclipse.kura.internal.driver.modbus.ModbusType.UDP;
+import static org.eclipse.kura.type.DataType.BOOLEAN;
+import static org.eclipse.kura.type.DataType.INTEGER;
 
 import java.io.IOException;
 import java.util.List;
@@ -52,9 +55,11 @@ import org.eclipse.kura.driver.DriverStatus;
 import org.eclipse.kura.driver.listener.DriverListener;
 import org.eclipse.kura.localization.LocalizationAdapter;
 import org.eclipse.kura.localization.resources.ModbusDriverMessages;
+import org.eclipse.kura.type.DataType;
 import org.eclipse.kura.type.TypedValue;
 import org.eclipse.kura.type.TypedValues;
 import org.eclipse.kura.util.base.ThrowableUtil;
+import org.eclipse.kura.util.base.TypeUtil;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -297,22 +302,56 @@ public final class ModbusDriver implements Driver {
 	 *
 	 * @param response
 	 *            the provided Modbus response
+	 * @param record
+	 *            the driver record to check the expected value type
 	 * @return the value
 	 * @throws KuraRuntimeException
-	 *             if the argument is null
+	 *             if any of the arguments is null
 	 */
-	private TypedValue<?> getValue(final ModbusResponse response) {
+	private TypedValue<?> getValue(final ModbusResponse response, final DriverRecord record) {
 		checkNull(response, s_message.responseNonNull());
+		checkNull(record, s_message.recordNonNull());
+
+		final Map<String, Object> channelConfig = record.getChannelConfig();
+		final DataType expectedValueType = (DataType) channelConfig.get(CHANNEL_VALUE_TYPE.value());
 		if (response instanceof ReadInputRegistersResponse) {
-			return TypedValues.newIntegerValue(((ReadInputRegistersResponse) response).getRegisterValue(0));
+			final int registerValue = ((ReadInputRegistersResponse) response).getRegisterValue(0);
+			switch (expectedValueType) {
+			case LONG:
+				return TypedValues.newLongValue(registerValue);
+			case DOUBLE:
+				return TypedValues.newDoubleValue(registerValue);
+			case INTEGER:
+				return TypedValues.newIntegerValue(registerValue);
+			case STRING:
+				return TypedValues.newStringValue(Integer.toString(registerValue));
+			case BYTE_ARRAY:
+				return TypedValues.newByteArrayValue(TypeUtil.intToBytes(registerValue));
+			default:
+				return null;
+			}
 		}
 		if (response instanceof ReadMultipleRegistersResponse) {
-			return TypedValues.newIntegerValue(((ReadMultipleRegistersResponse) response).getRegisterValue(0));
+			final int registerValue = ((ReadMultipleRegistersResponse) response).getRegisterValue(0);
+			switch (expectedValueType) {
+			case LONG:
+				return TypedValues.newLongValue(registerValue);
+			case DOUBLE:
+				return TypedValues.newDoubleValue(registerValue);
+			case INTEGER:
+				return TypedValues.newIntegerValue(registerValue);
+			case STRING:
+				return TypedValues.newStringValue(Integer.toString(registerValue));
+			case BYTE_ARRAY:
+				return TypedValues.newByteArrayValue(TypeUtil.intToBytes(registerValue));
+			default:
+				return null;
+			}
 		}
-		if (response instanceof ReadInputDiscretesResponse) {
+		if ((response instanceof ReadInputDiscretesResponse) && (expectedValueType == BOOLEAN)) {
 			return TypedValues.newBooleanValue(((ReadInputDiscretesResponse) response).getDiscreteStatus(0));
 		}
-		if (response instanceof ReadCoilsResponse) {
+		if ((response instanceof ReadCoilsResponse) && (expectedValueType == BOOLEAN)) {
 			return TypedValues.newBooleanValue(((ReadCoilsResponse) response).getCoilStatus(0));
 		}
 		return null;
@@ -325,10 +364,46 @@ public final class ModbusDriver implements Driver {
 			this.connect();
 		}
 		for (final DriverRecord record : records) {
-			final int unitId = Integer.valueOf(record.getChannelConfig().get(UNIT_ID).toString());
-			final String primaryTable = record.getChannelConfig().get(PRIMARY_TABLE).toString();
+			// check if the channel type configuration is provided
+			final Map<String, Object> channelConfig = record.getChannelConfig();
+			if (!channelConfig.containsKey(CHANNEL_VALUE_TYPE.value())) {
+				record.setDriverStatus(new DriverStatus(DRIVER_ERROR_CHANNEL_NOT_ACCESSIBLE,
+						s_message.errorRetrievingValueType(), null));
+				record.setTimestamp(System.currentTimeMillis());
+				continue;
+			}
+			// check if the unit ID configuration is provided
+			if (!channelConfig.containsKey(UNIT_ID)) {
+				record.setDriverStatus(
+						new DriverStatus(DRIVER_ERROR_CHANNEL_NOT_ACCESSIBLE, s_message.errorRetrievingUnitId(), null));
+				record.setTimestamp(System.currentTimeMillis());
+				continue;
+			}
+			// check if the primary table configuration is provided
+			if (!channelConfig.containsKey(PRIMARY_TABLE)) {
+				record.setDriverStatus(new DriverStatus(DRIVER_ERROR_CHANNEL_NOT_ACCESSIBLE,
+						s_message.errorRetrievingPrimaryTable(), null));
+				record.setTimestamp(System.currentTimeMillis());
+				continue;
+			}
+			// check if the unit ID configuration is provided
+			if (!channelConfig.containsKey(UNIT_ID)) {
+				record.setDriverStatus(
+						new DriverStatus(DRIVER_ERROR_CHANNEL_NOT_ACCESSIBLE, s_message.errorRetrievingUnitId(), null));
+				record.setTimestamp(System.currentTimeMillis());
+				continue;
+			}
+			// check if the memory address configuration is provided
+			if (!channelConfig.containsKey(MEMORY_ADDRESS)) {
+				record.setDriverStatus(new DriverStatus(DRIVER_ERROR_CHANNEL_NOT_ACCESSIBLE,
+						s_message.errorRetrievingMemAddr(), null));
+				record.setTimestamp(System.currentTimeMillis());
+				continue;
+			}
+			final int unitId = Integer.parseInt(channelConfig.get(UNIT_ID).toString());
+			final String primaryTable = channelConfig.get(PRIMARY_TABLE).toString();
 			final int functionCode = this.getFunctionCode(primaryTable);
-			final int memoryAddr = Integer.valueOf(record.getChannelConfig().get(MEMORY_ADDRESS).toString());
+			final int memoryAddr = Integer.parseInt(channelConfig.get(MEMORY_ADDRESS).toString());
 
 			final ModbusType type = this.m_options.getType();
 			if ((type == TCP) && (this.m_tcpMaster != null)) {
@@ -344,7 +419,13 @@ public final class ModbusDriver implements Driver {
 				// always read single register
 				final ModbusResponse response = this.readRequest(unitId, this.m_modbusTransport, functionCode,
 						memoryAddr, 1);
-				final TypedValue<?> value = this.getValue(response);
+				final TypedValue<?> value = this.getValue(response, record);
+				if (value == null) {
+					record.setDriverStatus(new DriverStatus(DRIVER_ERROR_CHANNEL_NOT_ACCESSIBLE,
+							s_message.errorRetrievingValueType(), null));
+					record.setTimestamp(System.currentTimeMillis());
+					continue;
+				}
 				record.setValue(value);
 				record.setDriverStatus(new DriverStatus(READ_SUCCESSFUL));
 			} catch (final ModbusException e) {
@@ -353,6 +434,7 @@ public final class ModbusDriver implements Driver {
 				record.setDriverStatus(new DriverStatus(DRIVER_ERROR_CHANNEL_NOT_ACCESSIBLE,
 						s_message.transportNonNull() + " OR " + s_message.wrongUnitId(), e));
 			}
+			record.setTimestamp(System.currentTimeMillis());
 		}
 		try {
 			this.m_modbusTransport.close();
@@ -386,13 +468,13 @@ public final class ModbusDriver implements Driver {
 			final int functionCode, final int register, final int count) throws ModbusException {
 		checkNull(modbusTransport, s_message.transportNonNull());
 		checkCondition(
-				(functionCode != FC_01_READ_COILS.code()) || (functionCode != FC_02_READ_DISCRETE_INPUTS.code())
-						|| (functionCode != FC_03_READ_HOLDING_REGISTERS.code())
-						|| (functionCode != FC_04_READ_INPUT_REGISTERS.code())
-						|| (functionCode != FC_05_WRITE_SINGLE_COIL.code())
-						|| (functionCode != FC_06_WRITE_SINGLE_REGISTER.code())
-						|| (functionCode != FC_15_WRITE_MULITPLE_COILS.code())
-						|| (functionCode != FC_16_WRITE_MULTIPLE_REGISTERS.code()),
+				(functionCode != FC_01_READ_COILS.code()) && (functionCode != FC_02_READ_DISCRETE_INPUTS.code())
+						&& (functionCode != FC_03_READ_HOLDING_REGISTERS.code())
+						&& (functionCode != FC_04_READ_INPUT_REGISTERS.code())
+						&& (functionCode != FC_05_WRITE_SINGLE_COIL.code())
+						&& (functionCode != FC_06_WRITE_SINGLE_REGISTER.code())
+						&& (functionCode != FC_15_WRITE_MULITPLE_COILS.code())
+						&& (functionCode != FC_16_WRITE_MULTIPLE_REGISTERS.code()),
 				s_message.functionCodesNotInRange());
 		checkCondition((unitId > 0) && (unitId < 247), s_message.wrongUnitId());
 
@@ -416,14 +498,12 @@ public final class ModbusDriver implements Driver {
 			throw new ModbusException(s_message.requestTypeNotSupported(functionCode));
 		}
 		req.setUnitID(unitId);
-
 		// Prepare the transaction
 		trans = modbusTransport.createTransaction();
 		trans.setRequest(req);
 		if (trans instanceof ModbusTCPTransaction) {
 			((ModbusTCPTransaction) trans).setReconnecting(true);
 		}
-
 		// Execute the transaction
 		trans.execute();
 		return trans.getResponse();
@@ -461,10 +541,46 @@ public final class ModbusDriver implements Driver {
 			this.connect();
 		}
 		for (final DriverRecord record : records) {
-			final int unitId = Integer.valueOf(record.getChannelConfig().get(UNIT_ID).toString());
-			final String primaryTable = record.getChannelConfig().get(PRIMARY_TABLE).toString();
+			// check if the channel type configuration is provided
+			final Map<String, Object> channelConfig = record.getChannelConfig();
+			if (!channelConfig.containsKey(CHANNEL_VALUE_TYPE.value())) {
+				record.setDriverStatus(new DriverStatus(DRIVER_ERROR_CHANNEL_NOT_ACCESSIBLE,
+						s_message.errorRetrievingValueType(), null));
+				record.setTimestamp(System.currentTimeMillis());
+				continue;
+			}
+			// check if the unit ID configuration is provided
+			if (!channelConfig.containsKey(UNIT_ID)) {
+				record.setDriverStatus(
+						new DriverStatus(DRIVER_ERROR_CHANNEL_NOT_ACCESSIBLE, s_message.errorRetrievingUnitId(), null));
+				record.setTimestamp(System.currentTimeMillis());
+				continue;
+			}
+			// check if the primary table configuration is provided
+			if (!channelConfig.containsKey(PRIMARY_TABLE)) {
+				record.setDriverStatus(new DriverStatus(DRIVER_ERROR_CHANNEL_NOT_ACCESSIBLE,
+						s_message.errorRetrievingPrimaryTable(), null));
+				record.setTimestamp(System.currentTimeMillis());
+				continue;
+			}
+			// check if the unit ID configuration is provided
+			if (!channelConfig.containsKey(UNIT_ID)) {
+				record.setDriverStatus(
+						new DriverStatus(DRIVER_ERROR_CHANNEL_NOT_ACCESSIBLE, s_message.errorRetrievingUnitId(), null));
+				record.setTimestamp(System.currentTimeMillis());
+				continue;
+			}
+			// check if the memory address configuration is provided
+			if (!channelConfig.containsKey(MEMORY_ADDRESS)) {
+				record.setDriverStatus(new DriverStatus(DRIVER_ERROR_CHANNEL_NOT_ACCESSIBLE,
+						s_message.errorRetrievingMemAddr(), null));
+				record.setTimestamp(System.currentTimeMillis());
+				continue;
+			}
+			final int unitId = Integer.parseInt(channelConfig.get(UNIT_ID).toString());
+			final String primaryTable = channelConfig.get(PRIMARY_TABLE).toString();
 			final int functionCode = this.getFunctionCode(primaryTable);
-			final int memoryAddr = Integer.valueOf(record.getChannelConfig().get(MEMORY_ADDRESS).toString());
+			final int memoryAddr = Integer.parseInt(channelConfig.get(MEMORY_ADDRESS).toString());
 
 			final ModbusType type = this.m_options.getType();
 			if ((type == TCP) && (this.m_tcpMaster != null)) {
@@ -477,14 +593,26 @@ public final class ModbusDriver implements Driver {
 				this.m_modbusTransport = this.m_udpMaster.getTransport();
 			}
 			try {
-				this.writeRequest(unitId, this.m_modbusTransport, functionCode, memoryAddr,
-						Integer.valueOf(record.getValue().getValue().toString()));
-				record.setDriverStatus(new DriverStatus(WRITE_SUCCESSFUL));
+				final DataType expectedValueType = (DataType) channelConfig.get(CHANNEL_VALUE_TYPE.value());
+				int valueToWrite;
+				if (expectedValueType != INTEGER) {
+					record.setDriverStatus(new DriverStatus(DRIVER_ERROR_CHANNEL_NOT_ACCESSIBLE,
+							s_message.errorRetrievingValueType(), null));
+					record.setTimestamp(System.currentTimeMillis());
+					continue;
+				}
+				valueToWrite = Integer.valueOf(record.getValue().getValue().toString());
+				if (valueToWrite != 0) {
+					this.writeRequest(unitId, this.m_modbusTransport, functionCode, memoryAddr, valueToWrite);
+					record.setDriverStatus(new DriverStatus(WRITE_SUCCESSFUL));
+				}
 			} catch (final ModbusException e) {
 				record.setDriverStatus(new DriverStatus(WRITE_FAILURE, null, e));
 			} catch (final KuraRuntimeException e) {
 				record.setDriverStatus(new DriverStatus(DRIVER_ERROR_CHANNEL_NOT_ACCESSIBLE,
 						s_message.transportNonNull() + " OR " + s_message.wrongUnitId(), e));
+			} catch (final NumberFormatException nfe) {
+				record.setDriverStatus(new DriverStatus(DRIVER_ERROR_CHANNEL_NOT_ACCESSIBLE, null, nfe));
 			}
 		}
 		try {
@@ -517,18 +645,18 @@ public final class ModbusDriver implements Driver {
 			final int functionCode, final int register, final int... values) throws ModbusException {
 		checkNull(modbusTransport, s_message.transportNonNull());
 		checkCondition(
-				(functionCode != FC_01_READ_COILS.code()) || (functionCode != FC_02_READ_DISCRETE_INPUTS.code())
-						|| (functionCode != FC_03_READ_HOLDING_REGISTERS.code())
-						|| (functionCode != FC_04_READ_INPUT_REGISTERS.code())
-						|| (functionCode != FC_05_WRITE_SINGLE_COIL.code())
-						|| (functionCode != FC_06_WRITE_SINGLE_REGISTER.code())
-						|| (functionCode != FC_15_WRITE_MULITPLE_COILS.code())
-						|| (functionCode != FC_16_WRITE_MULTIPLE_REGISTERS.code()),
+				(functionCode != FC_01_READ_COILS.code()) && (functionCode != FC_02_READ_DISCRETE_INPUTS.code())
+						&& (functionCode != FC_03_READ_HOLDING_REGISTERS.code())
+						&& (functionCode != FC_04_READ_INPUT_REGISTERS.code())
+						&& (functionCode != FC_05_WRITE_SINGLE_COIL.code())
+						&& (functionCode != FC_06_WRITE_SINGLE_REGISTER.code())
+						&& (functionCode != FC_15_WRITE_MULITPLE_COILS.code())
+						&& (functionCode != FC_16_WRITE_MULTIPLE_REGISTERS.code()),
 				s_message.functionCodesNotInRange());
 		checkCondition((unitId > 0) && (unitId < 247), s_message.wrongUnitId());
 
 		ModbusTransaction trans;
-		ModbusRequest req = null;
+		ModbusRequest req;
 		// Prepare the request
 		switch (functionCode) {
 		case WRITE_COIL:

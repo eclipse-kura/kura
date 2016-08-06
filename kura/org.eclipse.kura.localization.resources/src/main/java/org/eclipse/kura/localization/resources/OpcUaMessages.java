@@ -42,6 +42,15 @@ public interface OpcUaMessages {
 	@En("Error while disconnecting....")
 	public String errorDisconnecting();
 
+	@En("Error while retrieving Node ID....")
+	public String errorRetrievingNodeId();
+
+	@En("Error while retrieving value type....")
+	public String errorRetrievingValueType();
+
+	@En("Error while converting the retrieved value to the defined typed....")
+	public String errorValueTypeConversion();
+
 	@En("Node Identifier")
 	public String nodeId();
 
@@ -50,6 +59,9 @@ public interface OpcUaMessages {
 
 	@En("OPC-UA Read Operation Failed")
 	public String readFailed();
+
+	@En("Driver Record cannot be null")
+	public String recordNonNull();
 
 	@En("Updating OPC-UA Driver.....")
 	public String updating();

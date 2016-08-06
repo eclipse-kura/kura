@@ -13,11 +13,15 @@
 package org.eclipse.kura.internal.driver.opcua;
 
 import static org.eclipse.kura.Preconditions.checkNull;
+import static org.eclipse.kura.driver.DriverConstants.CHANNEL_VALUE_TYPE;
+import static org.eclipse.kura.driver.DriverFlag.DRIVER_ERROR_CHANNEL_NOT_ACCESSIBLE;
+import static org.eclipse.kura.driver.DriverFlag.DRIVER_ERROR_CHANNEL_VALUE_TYPE_CONVERSION_EXCEPTION;
 import static org.eclipse.kura.driver.DriverFlag.READ_FAILURE;
 import static org.eclipse.kura.driver.DriverFlag.READ_SUCCESSFUL;
 import static org.eclipse.kura.driver.DriverFlag.WRITE_FAILURE;
 import static org.eclipse.kura.driver.DriverFlag.WRITE_SUCCESSFUL;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -32,9 +36,11 @@ import org.eclipse.kura.driver.DriverStatus;
 import org.eclipse.kura.driver.listener.DriverListener;
 import org.eclipse.kura.localization.LocalizationAdapter;
 import org.eclipse.kura.localization.resources.OpcUaMessages;
+import org.eclipse.kura.type.DataType;
 import org.eclipse.kura.type.TypedValue;
 import org.eclipse.kura.type.TypedValues;
 import org.eclipse.kura.util.base.ThrowableUtil;
+import org.eclipse.kura.util.base.TypeUtil;
 import org.eclipse.milo.opcua.sdk.client.OpcUaClient;
 import org.eclipse.milo.opcua.sdk.client.api.config.OpcUaClientConfig;
 import org.eclipse.milo.opcua.sdk.client.api.nodes.attached.UaVariableNode;
@@ -169,34 +175,41 @@ public final class OpcUaDriver implements Driver {
 	 *
 	 * @param value
 	 *            the provided value to wrap
+	 * @param record
+	 *            the driver record to check the expected value type
 	 * @return the TypedValue instance
 	 * @throws KuraRuntimeException
-	 *             if the argument is null
+	 *             if any of the arguments is null
 	 */
-	private TypedValue<?> getTypedValue(final Object value) {
+	private TypedValue<?> getTypedValue(final Object value, final DriverRecord record) {
 		checkNull(value, s_message.valueNonNull());
-		if (value instanceof Long) {
+		checkNull(record, s_message.recordNonNull());
+
+		final DataType expectedValueType = (DataType) record.getChannelConfig().get(CHANNEL_VALUE_TYPE.value());
+		switch (expectedValueType) {
+		case LONG:
 			return TypedValues.newLongValue(Long.valueOf(value.toString()));
-		}
-		if (value instanceof Short) {
+		case SHORT:
 			return TypedValues.newShortValue(Short.valueOf(value.toString()));
-		}
-		if (value instanceof Double) {
+		case DOUBLE:
 			return TypedValues.newDoubleValue(Double.valueOf(value.toString()));
-		}
-		if (value instanceof Integer) {
+		case INTEGER:
 			return TypedValues.newIntegerValue(Integer.valueOf(value.toString()));
-		}
-		if (value instanceof Byte) {
+		case BYTE:
 			return TypedValues.newByteValue(Byte.valueOf(value.toString()));
-		}
-		if (value instanceof Boolean) {
+		case BOOLEAN:
 			return TypedValues.newBooleanValue(Boolean.valueOf(value.toString()));
-		}
-		if (value instanceof String) {
+		case STRING:
 			return TypedValues.newStringValue(value.toString());
+		case BYTE_ARRAY:
+			try {
+				return TypedValues.newByteArrayValue(TypeUtil.extractToByteArray(value));
+			} catch (final IOException e) {
+				return null;
+			}
+		default:
+			return null;
 		}
-		return null;
 	}
 
 	/** {@inheritDoc} */
@@ -206,17 +219,42 @@ public final class OpcUaDriver implements Driver {
 			this.connect();
 		}
 		for (final DriverRecord record : records) {
-			final Map<String, Object> config = record.getChannelConfig();
-			final NodeId nodeId = new NodeId(2, config.get(NODE_ID).toString());
+			// check if the channel type configuration is provided
+			final Map<String, Object> channelConfig = record.getChannelConfig();
+			if (!channelConfig.containsKey(CHANNEL_VALUE_TYPE.value())) {
+				record.setDriverStatus(new DriverStatus(DRIVER_ERROR_CHANNEL_NOT_ACCESSIBLE,
+						s_message.errorRetrievingValueType(), null));
+				record.setTimestamp(System.currentTimeMillis());
+				continue;
+			}
+			// check if the node ID configuration is provided
+			if (!channelConfig.containsKey(NODE_ID)) {
+				record.setDriverStatus(
+						new DriverStatus(DRIVER_ERROR_CHANNEL_NOT_ACCESSIBLE, s_message.errorRetrievingNodeId(), null));
+				record.setTimestamp(System.currentTimeMillis());
+				continue;
+			}
+			final NodeId nodeId = new NodeId(2, channelConfig.get(NODE_ID).toString());
 			final UaVariableNode node = this.m_client.getAddressSpace().getVariableNode(nodeId);
 			Object value = null;
 			try {
 				value = node.readValueAttribute().get();
 			} catch (final Exception e) {
 				record.setDriverStatus(new DriverStatus(READ_FAILURE, s_message.readFailed(), e));
+				record.setTimestamp(System.currentTimeMillis());
 			}
-			record.setValue(this.getTypedValue(value));
-			record.setDriverStatus(new DriverStatus(READ_SUCCESSFUL));
+			if (value != null) {
+				final TypedValue<?> typedValue = this.getTypedValue(value, record);
+				if (typedValue == null) {
+					record.setDriverStatus(new DriverStatus(DRIVER_ERROR_CHANNEL_VALUE_TYPE_CONVERSION_EXCEPTION,
+							s_message.errorValueTypeConversion(), null));
+					record.setTimestamp(System.currentTimeMillis());
+					continue;
+				}
+				record.setValue(typedValue);
+				record.setDriverStatus(new DriverStatus(READ_SUCCESSFUL));
+				record.setTimestamp(System.currentTimeMillis());
+			}
 		}
 		return records;
 	}
@@ -253,17 +291,32 @@ public final class OpcUaDriver implements Driver {
 			this.connect();
 		}
 		for (final DriverRecord record : records) {
-			final Map<String, Object> config = record.getChannelConfig();
+			// check if the channel type configuration is provided
+			final Map<String, Object> channelConfig = record.getChannelConfig();
+			if (!channelConfig.containsKey(CHANNEL_VALUE_TYPE.value())) {
+				record.setDriverStatus(new DriverStatus(DRIVER_ERROR_CHANNEL_NOT_ACCESSIBLE,
+						s_message.errorRetrievingValueType(), null));
+				record.setTimestamp(System.currentTimeMillis());
+				continue;
+			}
+			// check if the unit ID configuration is provided
+			if (!channelConfig.containsKey(NODE_ID)) {
+				record.setDriverStatus(
+						new DriverStatus(DRIVER_ERROR_CHANNEL_NOT_ACCESSIBLE, s_message.errorRetrievingNodeId(), null));
+				record.setTimestamp(System.currentTimeMillis());
+				continue;
+			}
 			final TypedValue<?> value = record.getValue();
-			final NodeId nodeId = new NodeId(2, config.get(NODE_ID).toString());
+			final NodeId nodeId = new NodeId(2, channelConfig.get(NODE_ID).toString());
 			final UaVariableNode node = this.m_client.getAddressSpace().getVariableNode(nodeId);
 			final DataValue newValue = new DataValue(new Variant(value.getValue()));
 			try {
 				node.writeValue(newValue).get();
+				record.setDriverStatus(new DriverStatus(WRITE_SUCCESSFUL));
 			} catch (final Exception e) {
 				record.setDriverStatus(new DriverStatus(WRITE_FAILURE, s_message.writeFailed(), e));
 			}
-			record.setDriverStatus(new DriverStatus(WRITE_SUCCESSFUL));
+			record.setTimestamp(System.currentTimeMillis());
 		}
 		return records;
 	}

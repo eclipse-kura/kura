@@ -28,6 +28,7 @@ import org.eclipse.kura.util.collection.CollectionUtil;
  * <ul>
  * <li>area.no</li> denotes the Area Number
  * <li>offset</li> the offset
+ * <li>byte.count</li> the number of bytes to read
  * </ul>
  */
 public final class S7PlcChannelDescriptor implements ChannelDescriptor {
@@ -62,6 +63,16 @@ public final class S7PlcChannelDescriptor implements ChannelDescriptor {
 		offset.setDefault("0");
 
 		this.m_elements.add(offset);
+
+		final Tad byteCount = new Tad();
+		byteCount.setName(s_message.byteCount());
+		byteCount.setId("byte.count");
+		byteCount.setDescription(s_message.byteCountDesc());
+		byteCount.setType(Tscalar.INTEGER);
+		byteCount.setRequired(true);
+		byteCount.setDefault("0");
+
+		this.m_elements.add(byteCount);
 
 		return this.m_elements;
 	}

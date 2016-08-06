@@ -36,4 +36,7 @@ public interface UtilMessages {
 	@En("Map cannot be null")
 	public String mapNonNull();
 
+	@En("Value cannot be null")
+	public String valueNonNull();
+
 }

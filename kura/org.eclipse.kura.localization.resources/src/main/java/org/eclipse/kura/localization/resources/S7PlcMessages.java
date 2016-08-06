@@ -30,6 +30,12 @@ public interface S7PlcMessages {
 	@En("Area No")
 	public String areaNo();
 
+	@En("Byte Count")
+	public String byteCount();
+
+	@En("Byte Count (required for read operation)")
+	public String byteCountDesc();
+
 	@En("Unable to Connect...")
 	public String connectionProblem();
 
@@ -45,11 +51,20 @@ public interface S7PlcMessages {
 	@En("Error while disconnecting....")
 	public String errorDisconnecting();
 
-	@En("Channel Value Type must be an instance of Byte Array Value")
-	public String instanceOfByteArray();
+	@En("Error while retrieving Area No....")
+	public String errorRetrievingAreaNo();
 
-	@En("Channel Value Type must be an instance of Integer Value")
-	public String instanceOfInteger();
+	@En("Error while retrieving Area Offset....")
+	public String errorRetrievingAreaOffset();
+
+	@En("Error while retrieving Byte Count....")
+	public String errorRetrievingByteCount();
+
+	@En("Error while retrieving value type....")
+	public String errorRetrievingValueType();
+
+	@En("Channel Value Type must be Byte Array Value")
+	public String instanceOfByteArray();
 
 	@En("Offset")
 	public String offset();

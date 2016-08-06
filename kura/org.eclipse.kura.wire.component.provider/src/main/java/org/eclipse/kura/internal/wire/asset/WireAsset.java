@@ -21,9 +21,9 @@ import static org.eclipse.kura.asset.AssetConstants.CHANNEL_PROPERTY_POSTFIX;
 import static org.eclipse.kura.asset.AssetConstants.CHANNEL_PROPERTY_PREFIX;
 import static org.eclipse.kura.asset.AssetConstants.DRIVER_PROPERTY_POSTFIX;
 import static org.eclipse.kura.asset.AssetConstants.NAME;
+import static org.eclipse.kura.asset.AssetConstants.SEVERITY_LEVEL;
 import static org.eclipse.kura.asset.AssetConstants.TYPE;
 import static org.eclipse.kura.asset.AssetConstants.VALUE_TYPE;
-import static org.eclipse.kura.asset.AssetFlag.FAILURE;
 import static org.eclipse.kura.asset.ChannelType.READ;
 import static org.eclipse.kura.asset.ChannelType.READ_WRITE;
 import static org.eclipse.kura.asset.ChannelType.WRITE;
@@ -60,7 +60,7 @@ import org.eclipse.kura.type.TypedValue;
 import org.eclipse.kura.type.TypedValues;
 import org.eclipse.kura.util.base.ThrowableUtil;
 import org.eclipse.kura.util.collection.CollectionUtil;
-import org.eclipse.kura.wire.ExceptionWireField;
+import org.eclipse.kura.wire.SeverityLevel;
 import org.eclipse.kura.wire.TimerWireField;
 import org.eclipse.kura.wire.WireEmitter;
 import org.eclipse.kura.wire.WireEnvelope;
@@ -193,7 +193,7 @@ public final class WireAsset implements WireEmitter, WireReceiver, SelfConfiguri
 		final String oldAdId = oldAd.getId();
 		if ((oldAdId != ASSET_DESC_PROP.value()) && (oldAdId != ASSET_DRIVER_PROP.value())
 				&& (oldAdId != ASSET_NAME_PROP.value()) && (oldAdId != NAME.value()) && (oldAdId != TYPE.value())
-				&& (oldAdId != VALUE_TYPE.value())) {
+				&& (oldAdId != VALUE_TYPE.value()) && (oldAdId != SEVERITY_LEVEL.value())) {
 			pref = prefix + DRIVER_PROPERTY_POSTFIX.value() + CHANNEL_PROPERTY_POSTFIX.value();
 		}
 		final Tad result = new Tad();
@@ -248,21 +248,21 @@ public final class WireAsset implements WireEmitter, WireReceiver, SelfConfiguri
 
 		final List<WireRecord> wireRecords = CollectionUtil.newArrayList();
 		for (final AssetRecord assetRecord : assetRecords) {
-			final WireField channelIdWireField = new WireField(s_message.channelId(),
-					TypedValues.newLongValue(assetRecord.getChannelId()));
 			final AssetFlag assetFlag = assetRecord.getAssetFlag();
+			final SeverityLevel level = (assetFlag == AssetFlag.FAILURE) ? SeverityLevel.ERROR : SeverityLevel.INFO;
+			final WireField channelIdWireField = new WireField(s_message.channelId(),
+					TypedValues.newLongValue(assetRecord.getChannelId()), level);
 			final WireField assetFlagWireField = new WireField(s_message.assetFlag(),
-					TypedValues.newStringValue(assetFlag.name()));
+					TypedValues.newStringValue(assetFlag.name()), level);
 			final WireField timestampWireField = new WireField(s_message.timestamp(),
-					TypedValues.newLongValue(assetRecord.getTimestamp()));
-			final TypedValue<?> value = assetRecord.getValue();
-			final WireField valueWireField = new WireField(s_message.value(), value);
-			WireField exceptionWireField;
+					TypedValues.newLongValue(assetRecord.getTimestamp()), level);
+			final WireField valueWireField = new WireField(s_message.value(), assetRecord.getValue(), level);
 			WireRecord wireRecord;
-			if (assetFlag == FAILURE) {
-				exceptionWireField = new ExceptionWireField();
+			WireField errorField;
+			if (level == SeverityLevel.ERROR) {
+				errorField = new WireField(s_message.error(), TypedValues.newStringValue("ERROR"), level);
 				wireRecord = new WireRecord(new Timestamp(new Date().getTime()), Arrays.asList(channelIdWireField,
-						assetFlagWireField, timestampWireField, valueWireField, exceptionWireField));
+						assetFlagWireField, timestampWireField, valueWireField, errorField));
 			} else {
 				wireRecord = new WireRecord(new Timestamp(new Date().getTime()),
 						Arrays.asList(channelIdWireField, assetFlagWireField, timestampWireField, valueWireField));
@@ -307,9 +307,32 @@ public final class WireAsset implements WireEmitter, WireReceiver, SelfConfiguri
 		driverNameAd.setDescription(s_message.driverName());
 		driverNameAd.setRequired(true);
 
+		final Tad severityLevelAd = new Tad();
+		severityLevelAd.setId(SEVERITY_LEVEL.value());
+		severityLevelAd.setName(SEVERITY_LEVEL.value());
+		severityLevelAd.setCardinality(0);
+		severityLevelAd.setType(Tscalar.STRING);
+		severityLevelAd.setDescription(s_message.driverName());
+		severityLevelAd.setRequired(true);
+
+		final Toption infoLevel = new Toption();
+		infoLevel.setValue(s_message.info());
+		infoLevel.setLabel(s_message.info());
+		severityLevelAd.getOption().add(infoLevel);
+
+		final Toption configLevel = new Toption();
+		configLevel.setValue(s_message.error());
+		configLevel.setLabel(s_message.error());
+		severityLevelAd.getOption().add(configLevel);
+
+		final Toption errorLevel = new Toption();
+		errorLevel.setValue(s_message.config());
+		errorLevel.setLabel(s_message.config());
+		severityLevelAd.getOption().add(errorLevel);
+
 		mainOcd.addAD(assetDescriptionAd);
 		mainOcd.addAD(assetNameAd);
-		mainOcd.addAD(driverNameAd);
+		mainOcd.addAD(severityLevelAd);
 
 		final Map<String, Object> props = CollectionUtil.newHashMap();
 		for (final Map.Entry<String, Object> entry : this.m_properties.entrySet()) {
@@ -370,6 +393,8 @@ public final class WireAsset implements WireEmitter, WireReceiver, SelfConfiguri
 		checkNull(wireEnvelope, s_message.wireEnvelopeNonNull());
 		s_logger.debug(s_message.wireEnvelopeReceived() + this.m_wireSupport);
 
+		// filtering list of wire records based on the provided severity level
+		final List<WireRecord> records = this.m_wireSupport.filter(wireEnvelope.getRecords());
 		final List<AssetRecord> assetRecordsToWriteChannels = CollectionUtil.newArrayList();
 		final List<Long> channelsToRead = CollectionUtil.newArrayList();
 		final Map<Long, Channel> channels = this.m_assetConfiguration.getAssetChannels();
@@ -380,8 +405,8 @@ public final class WireAsset implements WireEmitter, WireReceiver, SelfConfiguri
 				channelsToRead.add(channel.getId());
 			}
 		}
-		checkCondition(wireEnvelope.getRecords().isEmpty(), s_message.wireRecordsNonEmpty());
-		final Object field = wireEnvelope.getRecords().get(0).getFields().get(0);
+		checkCondition(records.isEmpty(), s_message.wireRecordsNonEmpty());
+		final Object field = records.get(0).getFields().get(0);
 		if (field instanceof TimerWireField) {
 			// perform the read operation on timer event receive
 			try {
@@ -392,14 +417,14 @@ public final class WireAsset implements WireEmitter, WireReceiver, SelfConfiguri
 			}
 		}
 		// determining channels to write
-		for (final WireRecord wireRecord : wireEnvelope.getRecords()) {
+		for (final WireRecord wireRecord : records) {
 			for (final WireField wireField : wireRecord.getFields()) {
 				for (final Map.Entry<Long, Channel> channelEntry : channels.entrySet()) {
 					final Channel channel = channelEntry.getValue();
 					if ((channel.getType() == WRITE) || (channel.getType() == READ_WRITE)) {
 						final String wireFieldName = wireField.getName();
 						if (channel.getName().equalsIgnoreCase(wireFieldName)
-								&& !(wireField instanceof ExceptionWireField)) {
+								&& (wireField.getSeverityLevel() != SeverityLevel.ERROR)) {
 							assetRecordsToWriteChannels.add(this.prepareAssetRecord(channel, wireField.getValue()));
 						}
 					}

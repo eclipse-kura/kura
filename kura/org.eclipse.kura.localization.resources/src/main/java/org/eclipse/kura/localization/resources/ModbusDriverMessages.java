@@ -48,6 +48,18 @@ public interface ModbusDriverMessages {
 	@En("Error while disconnecting....")
 	public String errorDisconnecting();
 
+	@En("Error while retrieving Memory Address....")
+	public String errorRetrievingMemAddr();
+
+	@En("Error while retrieving Primary Table....")
+	public String errorRetrievingPrimaryTable();
+
+	@En("Error while retrieving Unit ID....")
+	public String errorRetrievingUnitId();
+
+	@En("Error while retrieving value type....")
+	public String errorRetrievingValueType();
+
 	@En("Function Codes not in Range")
 	public String functionCodesNotInRange();
 
@@ -74,6 +86,9 @@ public interface ModbusDriverMessages {
 
 	@En("Properties cannot be null")
 	public String propertiesNonNull();
+
+	@En("Driver Record cannot be null")
+	public String recordNonNull();
 
 	@En("Request type {0} is not supported")
 	public String requestTypeNotSupported(int functionCode);

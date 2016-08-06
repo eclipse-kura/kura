@@ -42,6 +42,9 @@ public enum AssetConstants {
 	/** Name Property to be used in the configuration. */
 	NAME("name"),
 
+	/** Severity Level Property to be used in the configuration. */
+	SEVERITY_LEVEL("severity.level"),
+
 	/** The timer event. */
 	TIMER_EVENT("TimerEvent"),
 

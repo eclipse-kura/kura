@@ -368,12 +368,17 @@ public final class CloudPublisherImpl implements WireReceiver, DataServiceListen
 		this.m_wireSupport.producersConnected(wires);
 	}
 
-	/** {@inheritDoc} */
-	public void publish(final List<WireRecord> wireRecords) {
+	/**
+	 * Publishes the list of provided Wire Records
+	 * 
+	 * @param wireRecords
+	 *            the provided list of Wire Records
+	 */
+	private void publish(final List<WireRecord> wireRecords) {
 		checkNull(this.m_cloudClient, s_message.cloudClientNonNull());
 		checkNull(wireRecords, s_message.wireRecordsNonNull());
 
-		if (!AUTOCONNECT_MODE_OFF.equals(this.m_options.getAutoConnectMode())
+		if (AUTOCONNECT_MODE_OFF != this.m_options.getAutoConnectMode()
 				&& !this.m_dataService.isAutoConnectEnabled() && !this.m_dataService.isConnected()) {
 			try {
 				if (!this.m_dataService.isConnected()) {

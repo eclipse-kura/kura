@@ -24,6 +24,7 @@ import static org.eclipse.kura.Preconditions.checkCondition;
 import static org.eclipse.kura.Preconditions.checkNull;
 import static org.eclipse.kura.driver.DriverConstants.CHANNEL_VALUE_TYPE;
 import static org.eclipse.kura.driver.DriverFlag.DRIVER_ERROR_CHANNEL_NOT_ACCESSIBLE;
+import static org.eclipse.kura.driver.DriverFlag.DRIVER_ERROR_CHANNEL_VALUE_TYPE_CONVERSION_EXCEPTION;
 import static org.eclipse.kura.driver.DriverFlag.READ_FAILURE;
 import static org.eclipse.kura.driver.DriverFlag.READ_SUCCESSFUL;
 import static org.eclipse.kura.driver.DriverFlag.WRITE_FAILURE;
@@ -367,7 +368,7 @@ public final class ModbusDriver implements Driver {
 			// check if the channel type configuration is provided
 			final Map<String, Object> channelConfig = record.getChannelConfig();
 			if (!channelConfig.containsKey(CHANNEL_VALUE_TYPE.value())) {
-				record.setDriverStatus(new DriverStatus(DRIVER_ERROR_CHANNEL_NOT_ACCESSIBLE,
+				record.setDriverStatus(new DriverStatus(DRIVER_ERROR_CHANNEL_VALUE_TYPE_CONVERSION_EXCEPTION,
 						s_message.errorRetrievingValueType(), null));
 				record.setTimestamp(System.currentTimeMillis());
 				continue;
@@ -544,7 +545,7 @@ public final class ModbusDriver implements Driver {
 			// check if the channel type configuration is provided
 			final Map<String, Object> channelConfig = record.getChannelConfig();
 			if (!channelConfig.containsKey(CHANNEL_VALUE_TYPE.value())) {
-				record.setDriverStatus(new DriverStatus(DRIVER_ERROR_CHANNEL_NOT_ACCESSIBLE,
+				record.setDriverStatus(new DriverStatus(DRIVER_ERROR_CHANNEL_VALUE_TYPE_CONVERSION_EXCEPTION,
 						s_message.errorRetrievingValueType(), null));
 				record.setTimestamp(System.currentTimeMillis());
 				continue;

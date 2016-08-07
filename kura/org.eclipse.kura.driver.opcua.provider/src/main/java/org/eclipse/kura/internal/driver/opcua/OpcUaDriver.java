@@ -222,7 +222,7 @@ public final class OpcUaDriver implements Driver {
 			// check if the channel type configuration is provided
 			final Map<String, Object> channelConfig = record.getChannelConfig();
 			if (!channelConfig.containsKey(CHANNEL_VALUE_TYPE.value())) {
-				record.setDriverStatus(new DriverStatus(DRIVER_ERROR_CHANNEL_NOT_ACCESSIBLE,
+				record.setDriverStatus(new DriverStatus(DRIVER_ERROR_CHANNEL_VALUE_TYPE_CONVERSION_EXCEPTION,
 						s_message.errorRetrievingValueType(), null));
 				record.setTimestamp(System.currentTimeMillis());
 				continue;
@@ -294,7 +294,7 @@ public final class OpcUaDriver implements Driver {
 			// check if the channel type configuration is provided
 			final Map<String, Object> channelConfig = record.getChannelConfig();
 			if (!channelConfig.containsKey(CHANNEL_VALUE_TYPE.value())) {
-				record.setDriverStatus(new DriverStatus(DRIVER_ERROR_CHANNEL_NOT_ACCESSIBLE,
+				record.setDriverStatus(new DriverStatus(DRIVER_ERROR_CHANNEL_VALUE_TYPE_CONVERSION_EXCEPTION,
 						s_message.errorRetrievingValueType(), null));
 				record.setTimestamp(System.currentTimeMillis());
 				continue;

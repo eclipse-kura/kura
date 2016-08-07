@@ -326,7 +326,7 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
 		for (final WireRecord dataRecord : dataRecords) {
 			this.store(dataRecord);
 		}
-		// emit the storage event
+		// emit the list of Wire Records to the downstream components
 		this.m_wireSupport.emit(dataRecords);
 	}
 
@@ -442,7 +442,7 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
 				/** {@inheritDoc} */
 				@Override
 				public void run() {
-					DbWireRecordStore.this.clear(noOfRecordsToKeep);
+					clear(noOfRecordsToKeep);
 				}
 			}, cleanUpRate, TimeUnit.SECONDS);
 		}

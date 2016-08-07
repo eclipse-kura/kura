@@ -27,6 +27,15 @@ import org.eclipse.kura.type.TypedValue;
 @ThreadSafe
 public class WireField {
 
+	/** The severity level of the field */
+	private final SeverityLevel level;
+
+	/** The name of the field */
+	private final String name;
+
+	/** The value as contained */
+	private final TypedValue<?> value;
+
 	/**
 	 * Instantiates a new wire field.
 	 *
@@ -34,22 +43,20 @@ public class WireField {
 	 *            the name
 	 * @param value
 	 *            the value
+	 * @param level
+	 *            the severity level
 	 * @throws KuraRuntimeException
 	 *             if any of the arguments is null
 	 */
-	public WireField(final String name, final TypedValue<?> value) {
+	public WireField(final String name, final TypedValue<?> value, final SeverityLevel level) {
 		checkNull(name, "Wire field name cannot be null");
 		checkNull(value, "Wire field value type cannot be null");
+		checkNull(level, "Wire field severity level cannot be null");
 
 		this.name = name;
 		this.value = value;
+		this.level = level;
 	}
-
-	/** The name of the field */
-	private final String name;
-
-	/** The value as contained */
-	private final TypedValue<?> value;
 
 	/** {@inheritDoc} */
 	@Override
@@ -64,6 +71,9 @@ public class WireField {
 			return false;
 		}
 		final WireField other = (WireField) obj;
+		if (this.level != other.level) {
+			return false;
+		}
 		if (this.name == null) {
 			if (other.name != null) {
 				return false;
@@ -91,6 +101,15 @@ public class WireField {
 	}
 
 	/**
+	 * Gets the severity level of the field
+	 *
+	 * @return the severity level of the field
+	 */
+	public SeverityLevel getSeverityLevel() {
+		return this.level;
+	}
+
+	/**
 	 * Gets the contained value
 	 *
 	 * @return the contained value
@@ -104,6 +123,7 @@ public class WireField {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
+		result = (prime * result) + ((this.level == null) ? 0 : this.level.hashCode());
 		result = (prime * result) + ((this.name == null) ? 0 : this.name.hashCode());
 		result = (prime * result) + ((this.value == null) ? 0 : this.value.hashCode());
 		return result;
@@ -112,7 +132,7 @@ public class WireField {
 	/** {@inheritDoc} */
 	@Override
 	public String toString() {
-		return "WireField [name=" + this.name + ", value=" + this.value + "]";
+		return "WireField [level=" + this.level + ", name=" + this.name + ", value=" + this.value + "]";
 	}
 
 }

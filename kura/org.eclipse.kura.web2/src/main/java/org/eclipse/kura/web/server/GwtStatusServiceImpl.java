@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2016 Eurotech and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -8,12 +8,13 @@
  *
  * Contributors:
  *     Eurotech
- *     Jens Reimann <jreimann@redhat.com> - Fix logging calls
- *          - Fix possible NPE
+ *     Red Hat Inc - Fix logging calls
+ *          - Fix possible NPE, Fix generics
  *******************************************************************************/
 package org.eclipse.kura.web.server;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -65,15 +66,15 @@ public class GwtStatusServiceImpl extends OsgiRemoteServiceServlet implements Gw
     public void connectDataService(GwtXSRFToken xsrfToken, String connectionId) throws GwtKuraException {
         checkXSRFToken(xsrfToken);
 
-        ServiceReference[] cloudServiceReferences = ServiceLocator.getInstance().getServiceReferences(CloudService.class, null);
+        Collection<ServiceReference<CloudService>> cloudServiceReferences = ServiceLocator.getInstance().getServiceReferences(CloudService.class, null);
         
-        for (ServiceReference cloudServiceReference : cloudServiceReferences) {
+        for (ServiceReference<CloudService> cloudServiceReference : cloudServiceReferences) {
             String cloudServicePid = (String) cloudServiceReference.getProperty("kura.service.pid");
             if (cloudServicePid.endsWith(connectionId)) {
             	String dataServiceRef = (String) cloudServiceReference.getProperty(DATA_SERVICE_REFERENCE_NAME + ComponentConstants.REFERENCE_TARGET_SUFFIX);
-            	ServiceReference[] dataServiceReferences = ServiceLocator.getInstance().getServiceReferences(DataService.class, dataServiceRef);
+            	Collection<ServiceReference<DataService>> dataServiceReferences = ServiceLocator.getInstance().getServiceReferences(DataService.class, dataServiceRef);
             	
-            	for (ServiceReference dataServiceReference : dataServiceReferences) {
+            	for (ServiceReference<DataService> dataServiceReference : dataServiceReferences) {
             		DataService dataService= ServiceLocator.getInstance().getService(dataServiceReference);
             		if (dataService != null) {
             			int counter = 10;
@@ -104,15 +105,15 @@ public class GwtStatusServiceImpl extends OsgiRemoteServiceServlet implements Gw
     public void disconnectDataService(GwtXSRFToken xsrfToken, String connectionId) throws GwtKuraException {
         checkXSRFToken(xsrfToken);
         
-        ServiceReference[] cloudServiceReferences = ServiceLocator.getInstance().getServiceReferences(CloudService.class, null);
+        Collection<ServiceReference<CloudService>> cloudServiceReferences = ServiceLocator.getInstance().getServiceReferences(CloudService.class, null);
         
-        for (ServiceReference cloudServiceReference : cloudServiceReferences) {
+        for (ServiceReference<CloudService> cloudServiceReference : cloudServiceReferences) {
             String cloudServicePid = (String) cloudServiceReference.getProperty("kura.service.pid");
             if (cloudServicePid.endsWith(connectionId)) {
             	String dataServiceRef = (String) cloudServiceReference.getProperty(DATA_SERVICE_REFERENCE_NAME + ComponentConstants.REFERENCE_TARGET_SUFFIX);
-            	ServiceReference[] dataServiceReferences = ServiceLocator.getInstance().getServiceReferences(DataService.class, dataServiceRef);
+            	Collection<ServiceReference<DataService>> dataServiceReferences = ServiceLocator.getInstance().getServiceReferences(DataService.class, dataServiceRef);
             	
-            	for (ServiceReference dataServiceReference : dataServiceReferences) {
+            	for (ServiceReference<DataService> dataServiceReference : dataServiceReferences) {
             		DataService dataService= ServiceLocator.getInstance().getService(dataServiceReference);
             		if (dataService != null) {
             			dataService.disconnect(10);
@@ -128,15 +129,15 @@ public class GwtStatusServiceImpl extends OsgiRemoteServiceServlet implements Gw
         List<GwtGroupedNVPair> pairs = new ArrayList<GwtGroupedNVPair>();
 
         try {
-            ServiceReference[] cloudServiceReferences= ServiceLocator.getInstance().getServiceReferences(CloudService.class, null);
-            for (ServiceReference cloudServiceReference : cloudServiceReferences) {
+            Collection<ServiceReference<CloudService>> cloudServiceReferences= ServiceLocator.getInstance().getServiceReferences(CloudService.class, null);
+            for (ServiceReference<CloudService> cloudServiceReference : cloudServiceReferences) {
                 String cloudServicePid= (String) cloudServiceReference.getProperty("kura.service.pid");
                 pairs.add(new GwtGroupedNVPair("cloudStatus", "Connection Name", stripPidPrefix(cloudServicePid)));
 
                 String dataServiceRef= (String) cloudServiceReference.getProperty(DATA_SERVICE_REFERENCE_NAME + ComponentConstants.REFERENCE_TARGET_SUFFIX);
-                ServiceReference[] dataServiceReferences= ServiceLocator.getInstance().getServiceReferences(DataService.class, dataServiceRef);
+                Collection<ServiceReference<DataService>> dataServiceReferences= ServiceLocator.getInstance().getServiceReferences(DataService.class, dataServiceRef);
 
-                for (ServiceReference dataServiceReference : dataServiceReferences) {
+                for (ServiceReference<DataService> dataServiceReference : dataServiceReferences) {
                     DataService dataService= ServiceLocator.getInstance().getService(dataServiceReference);
                     if (dataService != null) {
                         pairs.add(new GwtGroupedNVPair("cloudStatus", "Connection Status", dataService.isConnected() ? "CONNECTED" : "DISCONNECTED"));

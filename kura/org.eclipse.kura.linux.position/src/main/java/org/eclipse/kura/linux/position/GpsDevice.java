@@ -84,14 +84,11 @@ public class GpsDevice {
 	}
 
 	public String getUnitAddress() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
-	public void configureProtocol(Properties protocolConfig)
-			throws PositionException {
-		// TODO Auto-generated method stub
-
+	public void configureProtocol(Properties protocolConfig) throws PositionException {
+		// Empty method
 	}
 
 	public void configureConnection(ConnectionFactory connFactory,
@@ -188,32 +185,6 @@ public class GpsDevice {
 			s_logger.debug("Configure serial connection");
 			
 			connConfig = connectionConfig;
-			
-//			String sPort;
-//			String sBaud;
-//			String sStop;
-//			String sParity;
-//			String sBits;				
-//
-//			if (((sPort = connectionConfig.getProperty("port")) == null)
-//					|| ((sBaud = connectionConfig.getProperty("baudRate")) == null)
-//					|| ((sStop = connectionConfig.getProperty("stopBits")) == null)
-//					|| ((sParity = connectionConfig.getProperty("parity")) == null)
-//					|| ((sBits = connectionConfig.getProperty("bitsPerWord")) == null))
-//				throw new PositionException("Invalid serial port configuration");
-//			
-//			int baud = Integer.valueOf(sBaud).intValue();
-//			int stop = Integer.valueOf(sStop).intValue();
-//			int parity = Integer.valueOf(sParity).intValue();
-//			int bits = Integer.valueOf(sBits).intValue();
-
-//			String uri = new CommURI.Builder(sPort)
-//									.withBaudRate(baud)
-//									.withDataBits(bits)
-//									.withStopBits(stop)
-//									.withParity(parity)
-//									.withTimeout(2000)
-//									.build().toString();
 
 			if (((connectionConfig.getProperty("port")) == null)
 					|| ((connectionConfig.getProperty("baudRate")) == null)
@@ -383,13 +354,11 @@ public class GpsDevice {
 				s_logger.error("NMEA checksum not valid");
 				return;
 			}
-			//s_logger.info(scannedInput);
 			m_lastSentence=scannedInput;
 			NMEAParser gpsParser = new NMEAParser();
 
 			gpsParser.parseSentence(scannedInput);
 			m_validPosition=gpsParser.is_validPosition();
-			//s_logger.debug("Parse : "+scannedInput+" position valid = "+m_validPosition);
 			
 			if(!m_validPosition)
 				return;
@@ -449,7 +418,6 @@ public class GpsDevice {
 					m_HDOP = gpsParser.get_HDOPNmea();
 					m_VDOP = gpsParser.get_VDOPNmea();
 					m_3Dfix = gpsParser.get_3DfixNmea();
-					//System.out.println("m_PDOP = "+m_PDOP+"  m_HDOP = "+m_HDOP+"  m_VDOP = "+m_VDOP+"  m_3Dfix = "+m_3Dfix);
 				} catch (Exception e) {
 					m_PDOP = 0;
 					m_HDOP = 0;
@@ -458,6 +426,7 @@ public class GpsDevice {
 					s_logger.error("Error parsing NMEA strings", e);
 				}
 			} else if (scannedInput.startsWith("GSV")) {
+				// Do nothing
 			} else if (scannedInput.startsWith("RMC")) {
 				try {
 					lon = gpsParser.get_longNmea();
@@ -494,9 +463,9 @@ public class GpsDevice {
 					s_logger.error("Error parsing NMEA strings", e);
 				}
 			} else if (scannedInput.indexOf("FOM") != -1) {
-				//FOM = scannedInput;
+				// FOM = scannedInput;
 			} else if (scannedInput.indexOf("PPS") != -1) {
-				//PPS = scannedInput;
+				// PPS = scannedInput;
 			} else {
 				s_logger.warn("Unrecognized NMEA sentence: " + scannedInput);
 			}

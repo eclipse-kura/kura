@@ -64,8 +64,8 @@ public class PositionServiceImpl implements PositionService, ConfigurableCompone
 	private static Future<?>				monitorTask;
 	private static boolean 					stopThread;
 
-	private Map<String,Object>				m_properties;
-	private Map<String,Object>				m_positionServiceProperties;
+	private Map<String,Object>				m_properties;  // current properties
+	private Map<String,Object>				m_positionServiceProperties;  // properties from the webUI
 	private ConnectionFactory 	            m_connectionFactory;
 	private Map<String,PositionListener>    m_positionListeners;
 	private GpsDevice					 	m_gpsDevice;
@@ -304,7 +304,7 @@ public class PositionServiceImpl implements PositionService, ConfigurableCompone
 
 	@Override
 	public void handleEvent(Event event) {
-		if(!m_useGpsd){
+		if(!m_useGpsd && m_configEnabled){
 			if(UsbDeviceAddedEvent.USB_EVENT_DEVICE_ADDED_TOPIC.contains(event.getTopic())){
 				// Check if the USB event comes from the GPS 
 				if(serialPortExists()){
@@ -326,6 +326,7 @@ public class PositionServiceImpl implements PositionService, ConfigurableCompone
 				if(!serialPortExists()) {
 					s_logger.debug("USB GPS disconnected");
 					stop();
+					updated(m_properties);
 				}
 			} else if(ModemGpsEnabledEvent.MODEM_EVENT_GPS_ENABLED_TOPIC.contains(event.getTopic())) {
 				
@@ -338,7 +339,7 @@ public class PositionServiceImpl implements PositionService, ConfigurableCompone
 				m_properties.put(STOPBITS, event.getProperty(ModemGpsEnabledEvent.StopBits));
 				m_properties.put(PARITY, event.getProperty(ModemGpsEnabledEvent.Parity));
 				m_properties.put(MODEM, "true");
-				
+
 				// ...and check if we already have a gps device with the same configuration
 				if (m_gpsDevice != null) {
 					Properties currentConfigProps = m_gpsDevice.getConnectConfig();
@@ -348,7 +349,7 @@ public class PositionServiceImpl implements PositionService, ConfigurableCompone
 							return;
 					}
 				}
-				
+
 				updated(m_properties);
 			} else if (ModemGpsDisabledEvent.MODEM_EVENT_GPS_DISABLED_TOPIC.contains(event.getTopic())) {
 				s_logger.debug("Modem GPS disconnected");
@@ -390,6 +391,7 @@ public class PositionServiceImpl implements PositionService, ConfigurableCompone
 		}		
 		if(m_gpsDevice!=null) {
 			m_gpsDevice.disconnect();
+			m_gpsDevice = null;
 		}
 
 		m_configured = false;		
@@ -476,10 +478,9 @@ public class PositionServiceImpl implements PositionService, ConfigurableCompone
 		s_logger.debug("Connecting to serial port: {}", serialProperties.getProperty("port"));
 
 		// configure connection & protocol
-		GpsDevice gpsDevice = new GpsDevice();
-		gpsDevice.configureConnection(m_connectionFactory, serialProperties);
-		gpsDevice.configureProtocol(getProtocolProperties());	
-		m_gpsDevice = gpsDevice;
+		m_gpsDevice = new GpsDevice();
+		m_gpsDevice.configureConnection(m_connectionFactory, serialProperties);
+		m_gpsDevice.configureProtocol(getProtocolProperties());	
 		m_configured = true;
 	}
 

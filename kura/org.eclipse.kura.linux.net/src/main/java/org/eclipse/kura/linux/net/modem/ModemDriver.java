@@ -104,7 +104,7 @@ public class ModemDriver {
 			if(TARGET_NAME.equals(KuraConstants.Mini_Gateway.getTargetName())) {
 				toggleGpio("65", GPIO_65_PATH, GPIO_65_DIRECTION_PATH, GPIO_65_VALUE_PATH);
 			} else if(TARGET_NAME.equals(KuraConstants.Reliagate_10_11.getTargetName())) {
-				toggleGpio("60", GPIO_60_PATH, GPIO_60_DIRECTION_PATH, GPIO_60_VALUE_PATH);
+				invertGpioValue("60", GPIO_60_PATH, GPIO_60_DIRECTION_PATH, GPIO_60_VALUE_PATH);
 			} else if (TARGET_NAME.equals(KuraConstants.Reliagate_10_20.getTargetName())) {
 				disable1020Gpio();
 			} else if (TARGET_NAME.equals(KuraConstants.ReliaGATE_50_21_Ubuntu.getTargetName())) {
@@ -156,7 +156,7 @@ public class ModemDriver {
 			if(TARGET_NAME.equals(KuraConstants.Mini_Gateway.getTargetName())) {
 				toggleGpio("65", GPIO_65_PATH, GPIO_65_DIRECTION_PATH, GPIO_65_VALUE_PATH);
 			} else if(TARGET_NAME.equals(KuraConstants.Reliagate_10_11.getTargetName())) {
-				toggleGpio("60", GPIO_60_PATH, GPIO_60_DIRECTION_PATH, GPIO_60_VALUE_PATH);
+				invertGpioValue("60", GPIO_60_PATH, GPIO_60_DIRECTION_PATH, GPIO_60_VALUE_PATH);
 			} else if (TARGET_NAME.equals(KuraConstants.Reliagate_10_20.getTargetName())) {
 				enable1020Gpio();
 			} else if (TARGET_NAME.equals(KuraConstants.ReliaGATE_50_21_Ubuntu.getTargetName())) {
@@ -295,7 +295,8 @@ public class ModemDriver {
         int oldValue= 0;
         try {
             fGpioOldValueReader= new FileReader(valuePath);
-            oldValue = fGpioOldValueReader.read() - 48;
+            fGpioOldValue= new BufferedReader(fGpioOldValueReader);
+            oldValue= Integer.parseInt(fGpioOldValue.readLine());
         } catch (Exception e) {
             s_logger.debug("Error while trying to read gpio value: {}", e.getMessage());
         } finally {

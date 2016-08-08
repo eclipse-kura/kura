@@ -1,6 +1,6 @@
 ---
 layout: page
-title:  "Bluetooth LE Beacon example"
+title:  "BLE Beacon Example"
 date:   2014-08-10 11:28:21
 categories: [doc]
 ---
@@ -101,7 +101,7 @@ The Beacon bundle is a simple example that allows you to configure the advertisi
 
 ## <span id="develop_the_beacon_bundle" class="anchor"><span id="develop_the_beacon_bundle_1" class="anchor"></span></span>Develop the Beacon Bundle
 
-The Beacon bundle code development follows the guidelines presented in the [Hello World Application](doc:hello-world-application :
+The Beacon bundle code development follows the guidelines presented in the [Hello World Application](hello-example.html) :
 
 * Create a Plug-in Project named **org.eclipse.kura.example.beacon**.
 
@@ -205,11 +205,11 @@ private void configureBeacon() {
 
 ## <span id="deploy_and_validate_the_bundle" class="anchor"><span id="deploy_and_validate_the_bundle_1" class="anchor"></span></span>Deploy and Validate the Bundle
 
-In order to proceed, you need to know the IP address of your embedded gateway that is on the remote target unit. With this information, follow the mToolkit instructions for installing a single bundle to the remote target device [located here](doc:deploy-and-debug-applications#section-install-single-bundle-to-target-device).  When the installation is complete, the bundle starts automatically.
+In order to proceed, you need to know the IP address of your embedded gateway that is on the remote target unit. With this information, follow the mToolkit instructions for installing a single bundle to the remote target device [located here](deploying-bundles.html#_Install_Single_Bundle).  When the installation is complete, the bundle starts automatically.
 
 In the ESF Gateway Administration Console, the BeaconExample tab appears on the left and enables the beacon to be configured for advertising.
 
-You should see a message similar to the one below from **/var/log/esf.log** indicating that the bundle was successfully installed and configured.
+You should see a message similar to the one below from **/var/log/kura.log** indicating that the bundle was successfully installed and configured.
 
 ```
 2015-07-09 10:46:06,522 [Component Resolve Thread (Bundle 6)] INFO  o.e.k.e.b.BeaconExample - Activating Bluetooth Beacon example...

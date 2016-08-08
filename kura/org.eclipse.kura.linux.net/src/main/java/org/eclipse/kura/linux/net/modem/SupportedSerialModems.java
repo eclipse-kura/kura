@@ -107,15 +107,7 @@ public class SupportedSerialModems {
 			modem = SupportedSerialModemInfo.MiniGateway_Telit_HE910_NAD;
 			
 		}
-		/* We should not have HE910 serial modem on Reliagate 10-11
-		else if ((OS_VERSION != null && OS_VERSION.equals(KuraConstants.Reliagate_10_11.getImageName() + "_" + KuraConstants.Reliagate_10_11.getImageVersion())) &&
-				(TARGET_NAME != null && TARGET_NAME.equals(KuraConstants.Reliagate_10_11.getTargetName()))) {
-			
-			modem = SupportedSerialModemInfo.Reliagate_10_11_Telit_HE910_NAD;
-			
-		}
-		*/
-		
+				
 		if (modem != null) {
 			
 			s_logger.info("Installing modem driver for {} ...", modem.getModemName());

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2016 Eurotech and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -8,19 +8,17 @@
  *
  * Contributors:
  *     Eurotech
+ *     Red Hat Inc - Fix build warnings
  *******************************************************************************/
 package org.eclipse.kura.linux.test.net;
 
 import junit.framework.TestCase;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 public class RoutingAgentTest extends TestCase {
-	
-	private static final Logger s_logger = LoggerFactory.getLogger(RoutingAgentTest.class);
 
 	/*
+	private static final Logger s_logger = LoggerFactory.getLogger(RoutingAgentTest.class);
+		
 	private static IRoutingAgent s_routingAgentService = null;
 
 	

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2016 Eurotech and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -8,6 +8,7 @@
  *
  * Contributors:
  *     Eurotech
+ *     Red Hat Inc - fix build warnings
  *******************************************************************************/
 package org.eclipse.kura.linux.clock;
 
@@ -24,7 +25,6 @@ import org.slf4j.LoggerFactory;
 
 public class JavaNtpClockSyncProvider extends AbstractNtpClockSyncProvider
 {
-	@SuppressWarnings("unused")
 	private static final Logger s_logger = LoggerFactory.getLogger(JavaNtpClockSyncProvider.class);
 	
 	

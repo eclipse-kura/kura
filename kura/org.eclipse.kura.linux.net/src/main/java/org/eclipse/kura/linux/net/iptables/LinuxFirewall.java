@@ -23,6 +23,7 @@ import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.util.ProcessUtil;
 import org.eclipse.kura.core.util.SafeProcess;
+import org.eclipse.kura.net.IP4Address;
 import org.eclipse.kura.net.IPAddress;
 import org.eclipse.kura.net.NetworkPair;
 import org.slf4j.Logger;
@@ -99,9 +100,9 @@ public class LinuxFirewall {
 				s_logger.debug("permittedNetwork: {}", permittedNetwork);
 				s_logger.debug("permittedNetworkPrefix: {}", permittedNetworkPrefix);
 
-				newLocalRule = new LocalRule(port, protocol, new NetworkPair(IPAddress.parseHostAddress(permittedNetwork), Short.parseShort(permittedNetworkPrefix)), permittedInterfaceName, unpermittedInterfaceName, permittedMAC, sourcePortRange);
+				newLocalRule = new LocalRule(port, protocol, new NetworkPair<IP4Address>((IP4Address)IPAddress.parseHostAddress(permittedNetwork), Short.parseShort(permittedNetworkPrefix)), permittedInterfaceName, unpermittedInterfaceName, permittedMAC, sourcePortRange);
 			} else {
-				newLocalRule = new LocalRule(port, protocol, new NetworkPair(IPAddress.parseHostAddress("0.0.0.0"), (short)0), permittedInterfaceName, permittedInterfaceName, permittedMAC, sourcePortRange);
+				newLocalRule = new LocalRule(port, protocol, new NetworkPair<IP4Address>((IP4Address)IPAddress.parseHostAddress("0.0.0.0"), (short)0), permittedInterfaceName, permittedInterfaceName, permittedMAC, sourcePortRange);
 			}
 
 			ArrayList<LocalRule> localRules = new ArrayList<LocalRule>();

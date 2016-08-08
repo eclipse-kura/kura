@@ -8,13 +8,13 @@
  *
  * Contributors:
  *     Eurotech
+ *     Red Hat Inc - Fix build warnings
  *******************************************************************************/
 package org.eclipse.kura.test;
 
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.ArrayList;
@@ -69,8 +69,8 @@ public class TestExtender implements BundleTrackerCustomizer<Object> {
 	public void test(long bundleId) {
 		s_logger.debug("Testing bundle: " + bundleId);
 		
-		List<Class> testClazzs = getTestClass(m_bundles.get(bundleId));
-		for (Class clazz : testClazzs) {
+		List<Class<?>> testClazzs = getTestClass(m_bundles.get(bundleId));
+		for (Class<?> clazz : testClazzs) {
 	          try {
 	        	  if(!clazz.isInterface()) {
 	        		  s_logger.debug("Testing CLASS in bundle with ID: " + bundleId + "  : ["+clazz.getName()+"]");
@@ -83,9 +83,9 @@ public class TestExtender implements BundleTrackerCustomizer<Object> {
 	      }
 	}
 	
-	public Class loadClass(String clazz, Bundle bundleHost) {
+	public Class<?> loadClass(String clazz, Bundle bundleHost) {
 		try {
-			Class loadClass = bundleHost.loadClass(clazz);
+			Class<?> loadClass = bundleHost.loadClass(clazz);
 			s_logger.debug("Loaded class: " + loadClass);
 			return loadClass;
 		} catch (Exception e) {
@@ -106,12 +106,12 @@ public class TestExtender implements BundleTrackerCustomizer<Object> {
 		throw new RuntimeException();
 	}
 
-	public List<Class> getTestClass(Bundle bundle) {
+	public List<Class<?>> getTestClass(Bundle bundle) {
 		try {
-			List<Class> clazzs = new ArrayList<Class>();
-			Enumeration entrs = bundle.findEntries("/", "*Test.class", true);
+			List<Class<?>> clazzs = new ArrayList<Class<?>>();
+			Enumeration<?> entrs = bundle.findEntries("/", "*Test.class", true);
 			if (entrs == null || !entrs.hasMoreElements()) {
-				return Collections.EMPTY_LIST;
+				return Collections.emptyList();
 			}
 			Bundle hostBundle = getHostBundle(bundle);
 			while (entrs.hasMoreElements()) {
@@ -125,7 +125,7 @@ public class TestExtender implements BundleTrackerCustomizer<Object> {
 					className = className.substring(9);
 				}
 				s_logger.debug("Trying to load class: " + className);
-				Class clazz = loadClass(className, hostBundle);
+				Class<?> clazz = loadClass(className, hostBundle);
 				s_logger.debug("Adding test class: " + clazz);
 				clazzs.add(clazz);
 			}
@@ -136,7 +136,7 @@ public class TestExtender implements BundleTrackerCustomizer<Object> {
 		}
 	}
 
-	public Test inspectClass(Class clazz) {
+	public Test inspectClass(Class<?> clazz) {
 		Test test = new Test();
 		Method[] declaredMethods = clazz.getDeclaredMethods();
 		for (Method method : declaredMethods) {

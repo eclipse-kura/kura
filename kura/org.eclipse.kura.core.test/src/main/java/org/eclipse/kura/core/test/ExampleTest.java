@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2016 Eurotech and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -8,6 +8,7 @@
  *
  * Contributors:
  *     Eurotech
+ *     Red Hat Inc - Fix build warnings
  *******************************************************************************/
 package org.eclipse.kura.core.test;
 
@@ -34,6 +35,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.osgi.service.component.ComponentContext;
 
+@SuppressWarnings("deprecation")
 public class ExampleTest implements DataServiceListener {
 	
 	// If you wonder why we need to use static members is our test cases, keep reading.

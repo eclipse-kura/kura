@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2016 Eurotech and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -8,6 +8,7 @@
  *
  * Contributors:
  *     Eurotech
+ *     Red Hat Inc - Fix build warnigns
  *******************************************************************************/
 package org.eclipse.kura.linux.net.util;
 
@@ -66,13 +67,13 @@ public class GenericNetworkInterface {
 	protected static String NET_CONFIGURATION_DIRECTORY;
 	protected static File kuraFile;
 	
-	protected static NetInterfaceConfig getCurrentConfig(String interfaceName,
+	protected static NetInterfaceConfig<?> getCurrentConfig(String interfaceName,
 			NetInterfaceType type, NetInterfaceStatus status,
 			boolean dhcpServerEnabled, boolean passDns, Properties kuraProps)
 			throws KuraException {
 		
 		try {
-			NetInterfaceConfig netInterfaceConfig = null;
+			NetInterfaceConfig<?> netInterfaceConfig = null;
 			boolean autoConnect = false;
 			int mtu = -1;
 			boolean dhcp = false;
@@ -80,6 +81,7 @@ public class GenericNetworkInterface {
 			String ipAddress = null;
 			String prefixString = null;
 			String netmask = null;
+			@SuppressWarnings("unused")
 			String broadcast = null;
 			String gateway = null;
 			boolean interfaceEnabled = false;
@@ -179,9 +181,9 @@ public class GenericNetworkInterface {
 				s_logger.debug("Adding a Loopback interface");
 				netInterfaceConfig = new LoopbackInterfaceConfigImpl(interfaceName);
 
-				((LoopbackInterfaceImpl)netInterfaceConfig).setMTU(mtu);
-				((LoopbackInterfaceImpl)netInterfaceConfig).setAutoConnect(true);		//loopback autoConnect should always be true?
-				((LoopbackInterfaceImpl)netInterfaceConfig).setLoopback(true);
+				((LoopbackInterfaceImpl<?>)netInterfaceConfig).setMTU(mtu);
+				((LoopbackInterfaceImpl<?>)netInterfaceConfig).setAutoConnect(true);		//loopback autoConnect should always be true?
+				((LoopbackInterfaceImpl<?>)netInterfaceConfig).setLoopback(true);
 
 				List<NetInterfaceAddressConfig> netInterfaceAddressConfigs = new ArrayList<NetInterfaceAddressConfig>();
 				List<NetInterfaceAddress> netInterfaceAddresses = new ArrayList<NetInterfaceAddress>();
@@ -224,9 +226,9 @@ public class GenericNetworkInterface {
 				s_logger.debug("Adding an Ethernet interface - {}", interfaceName);
 				netInterfaceConfig = new EthernetInterfaceConfigImpl(interfaceName);
 				
-				((EthernetInterfaceImpl)netInterfaceConfig).setMTU(mtu);
-				((EthernetInterfaceImpl)netInterfaceConfig).setAutoConnect(autoConnect);
-				((EthernetInterfaceImpl)netInterfaceConfig).setLoopback(false);
+				((EthernetInterfaceImpl<?>)netInterfaceConfig).setMTU(mtu);
+				((EthernetInterfaceImpl<?>)netInterfaceConfig).setAutoConnect(autoConnect);
+				((EthernetInterfaceImpl<?>)netInterfaceConfig).setLoopback(false);
 
 				List<NetInterfaceAddressConfig> netInterfaceAddressConfigs = new ArrayList<NetInterfaceAddressConfig>();
 				List<NetInterfaceAddress> netInterfaceAddresses = new ArrayList<NetInterfaceAddress>();
@@ -236,7 +238,7 @@ public class GenericNetworkInterface {
 				netInterfaceAddresses.add(netInterfaceAddressConfig);
 				LinuxIfconfig ifconfig = LinuxNetworkUtil.getInterfaceConfiguration(interfaceName);
 				if (ifconfig != null) {
-					((EthernetInterfaceImpl)netInterfaceConfig).setHardwareAddress(ifconfig.getMacAddressBytes());
+					((EthernetInterfaceImpl<?>)netInterfaceConfig).setHardwareAddress(ifconfig.getMacAddressBytes());
 					if(ifconfig.isUp()) {
 						try {
 							netInterfaceAddressConfig.setAddress(IPAddress.parseHostAddress(ifconfig.getInetAddress()));

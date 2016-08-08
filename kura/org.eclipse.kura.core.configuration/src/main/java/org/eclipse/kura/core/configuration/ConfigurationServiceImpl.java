@@ -9,6 +9,7 @@
  * Contributors:
  *     Eurotech
  *     Red Hat Inc - Fix issue #462
+ *         - Fix build warnings
  *******************************************************************************/
 package org.eclipse.kura.core.configuration;
 

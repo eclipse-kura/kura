@@ -4,7 +4,7 @@ Bundle-Name: org.eclipse.kura.camel
 Bundle-SymbolicName: org.eclipse.kura.camel;singleton:=true
 Bundle-Version: 1.0.1.qualifier
 Bundle-Vendor: EUROTECH
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ClassPath: .
 Bundle-ActivationPolicy: lazy
 Import-Package: org.apache.camel;version="2.16.0",

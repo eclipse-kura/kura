@@ -411,7 +411,7 @@
 						<!-- Remove packages from the list to have them included in the aggregate
 							javadocs -->
 						<excludePackageNames>
-							*.ermes:*.demo*:*.example:*.core:*.cloud.app:*.net.admin:*.deployment:*.emulator:*.linux:*.qa:*.web:*.service.io:*.test
+							*.ermes:*.demo*:*.example:*.core:*.cloud.app:*.net.admin:*.deployment:*.emulator:*.linux:*.qa:*.web:*.service.io:*.test:*.internal.*
 						</excludePackageNames>
 						<!-- Add URLs for open source javadocs below -->
 					</configuration>

@@ -454,7 +454,7 @@ public final class ModbusDriver implements Driver {
 	 *             if the transport is null or the function code, unit ID or
 	 *             register address are wrongly set
 	 */
-	private ModbusResponse readRequest(final int unitId, final AbstractModbusTransport modbusTransport,
+	private synchronized ModbusResponse readRequest(final int unitId, final AbstractModbusTransport modbusTransport,
 			final int functionCode, final int register, final int count) throws ModbusException {
 		checkNull(modbusTransport, s_message.transportNonNull());
 		checkCondition(
@@ -630,7 +630,7 @@ public final class ModbusDriver implements Driver {
 	 *             if the transport is null or the function code, unit ID or
 	 *             register address are wrongly set
 	 */
-	private ModbusResponse writeRequest(final int unitId, final AbstractModbusTransport modbusTransport,
+	private synchronized ModbusResponse writeRequest(final int unitId, final AbstractModbusTransport modbusTransport,
 			final int functionCode, final int register, final int... values) throws ModbusException {
 		checkNull(modbusTransport, s_message.transportNonNull());
 		checkCondition(

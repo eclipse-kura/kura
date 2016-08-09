@@ -70,8 +70,8 @@ public final class StubModbusDriverClient {
 		}
 	}
 
-	protected synchronized void deactivate(final Map<String, Object> properties) {
-
+	protected synchronized void deactivate(final Map<String, Object> properties) throws ConnectionException {
+		this.m_driver.disconnect();
 	}
 
 	protected synchronized void unbindDriver(final Driver driver) {

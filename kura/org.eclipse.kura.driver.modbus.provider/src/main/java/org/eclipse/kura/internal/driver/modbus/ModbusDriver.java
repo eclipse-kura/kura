@@ -126,6 +126,9 @@ public final class ModbusDriver implements Driver {
 	/** Modbus Unit Identifier Property */
 	private static final String UNIT_ID = "unit.id";
 
+	/** flag to check if the driver is connected. */
+	private boolean m_isConnected;
+
 	/** Modbus Transport */
 	private AbstractModbusTransport m_modbusTransport;
 
@@ -181,6 +184,7 @@ public final class ModbusDriver implements Driver {
 				throw new ConnectionException(s_message.connectionProblem() + ThrowableUtil.stackTraceAsString(e));
 			}
 		}
+		this.m_isConnected = true;
 	}
 
 	/**
@@ -206,26 +210,32 @@ public final class ModbusDriver implements Driver {
 	@Override
 	public void disconnect() throws ConnectionException {
 		final ModbusType type = this.m_options.getType();
-		if ((type == TCP) && (this.m_tcpMaster != null)) {
-			try {
-				this.m_tcpMaster.disconnect();
-			} catch (final Exception e) {
-				throw new ConnectionException(s_message.disconnectionProblem() + ThrowableUtil.stackTraceAsString(e));
+		if (this.m_isConnected) {
+			if ((type == TCP) && (this.m_tcpMaster != null)) {
+				try {
+					this.m_tcpMaster.disconnect();
+				} catch (final Exception e) {
+					throw new ConnectionException(
+							s_message.disconnectionProblem() + ThrowableUtil.stackTraceAsString(e));
+				}
 			}
-		}
-		if ((type == UDP) && (this.m_udpMaster != null)) {
-			try {
-				this.m_udpMaster.disconnect();
-			} catch (final Exception e) {
-				throw new ConnectionException(s_message.disconnectionProblem() + ThrowableUtil.stackTraceAsString(e));
+			if ((type == UDP) && (this.m_udpMaster != null)) {
+				try {
+					this.m_udpMaster.disconnect();
+				} catch (final Exception e) {
+					throw new ConnectionException(
+							s_message.disconnectionProblem() + ThrowableUtil.stackTraceAsString(e));
+				}
 			}
-		}
-		if ((type == RTU) && (this.m_rtuMaster != null)) {
-			try {
-				this.m_rtuMaster.disconnect();
-			} catch (final Exception e) {
-				throw new ConnectionException(s_message.disconnectionProblem() + ThrowableUtil.stackTraceAsString(e));
+			if ((type == RTU) && (this.m_rtuMaster != null)) {
+				try {
+					this.m_rtuMaster.disconnect();
+				} catch (final Exception e) {
+					throw new ConnectionException(
+							s_message.disconnectionProblem() + ThrowableUtil.stackTraceAsString(e));
+				}
 			}
+			this.m_isConnected = false;
 		}
 	}
 
@@ -352,7 +362,9 @@ public final class ModbusDriver implements Driver {
 	/** {@inheritDoc} */
 	@Override
 	public List<DriverRecord> read(final List<DriverRecord> records) throws ConnectionException {
-		this.connect();
+		if (!this.m_isConnected) {
+			this.connect();
+		}
 		for (final DriverRecord record : records) {
 			// check if the channel type configuration is provided
 			final Map<String, Object> channelConfig = record.getChannelConfig();
@@ -528,7 +540,9 @@ public final class ModbusDriver implements Driver {
 	/** {@inheritDoc} */
 	@Override
 	public List<DriverRecord> write(final List<DriverRecord> records) throws ConnectionException {
-		this.connect();
+		if (!this.m_isConnected) {
+			this.connect();
+		}
 		for (final DriverRecord record : records) {
 			// check if the channel type configuration is provided
 			final Map<String, Object> channelConfig = record.getChannelConfig();

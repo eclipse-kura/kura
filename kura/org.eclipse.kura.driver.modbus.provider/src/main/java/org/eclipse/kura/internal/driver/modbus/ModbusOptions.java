@@ -12,6 +12,9 @@
  */
 package org.eclipse.kura.internal.driver.modbus;
 
+import static com.ghgande.j2mod.modbus.Modbus.SERIAL_ENCODING_ASCII;
+import static com.ghgande.j2mod.modbus.Modbus.SERIAL_ENCODING_BIN;
+import static com.ghgande.j2mod.modbus.Modbus.SERIAL_ENCODING_RTU;
 import static org.eclipse.kura.Preconditions.checkNull;
 
 import java.util.Map;
@@ -20,7 +23,6 @@ import org.eclipse.kura.localization.LocalizationAdapter;
 import org.eclipse.kura.localization.resources.ModbusDriverMessages;
 
 import com.fazecast.jSerialComm.SerialPort;
-import com.ghgande.j2mod.modbus.Modbus;
 
 /**
  * The Class ModbusOptions is responsible to provide all the required
@@ -76,6 +78,9 @@ final class ModbusOptions {
 
 	/** Localization Resource. */
 	private static final ModbusDriverMessages s_message = LocalizationAdapter.adapt(ModbusDriverMessages.class);
+
+	/** Modbus RTU Serial configuration Port Name */
+	private static final String SERIAL_PORT = "modbus.rtu.port.name";
 
 	/** Modbus Serial (RTU) access type Stopbits */
 	private static final String STOPBITS = "modbus.rtu.stopbits";
@@ -137,14 +142,14 @@ final class ModbusOptions {
 			encoding = this.m_properties.get(ENCODING).toString();
 		}
 		if (encoding != null) {
-			if ("SERIAL_ENCODING_ASCII".equals(encoding)) {
-				return Modbus.SERIAL_ENCODING_ASCII;
+			if ("SERIAL_ENCODING_ASCII".equalsIgnoreCase(encoding)) {
+				return SERIAL_ENCODING_ASCII;
 			}
-			if ("SERIAL_ENCODING_RTU".equals(encoding)) {
-				return Modbus.SERIAL_ENCODING_RTU;
+			if ("SERIAL_ENCODING_RTU".equalsIgnoreCase(encoding)) {
+				return SERIAL_ENCODING_RTU;
 			}
-			if ("SERIAL_ENCODING_BIN".equals(encoding)) {
-				return Modbus.SERIAL_ENCODING_BIN;
+			if ("SERIAL_ENCODING_BIN".equalsIgnoreCase(encoding)) {
+				return SERIAL_ENCODING_BIN;
 			}
 		}
 		return null;
@@ -162,22 +167,22 @@ final class ModbusOptions {
 			flowControlIn = this.m_properties.get(FLOW_CONTROL_IN).toString();
 		}
 		if (flowControlIn != null) {
-			if ("FLOW_CONTROL_DISABLED".equals(flowControlIn)) {
+			if ("FLOW_CONTROL_DISABLED".equalsIgnoreCase(flowControlIn)) {
 				return SerialPort.FLOW_CONTROL_DISABLED;
 			}
-			if ("FLOW_CONTROL_RTS_ENABLED".equals(flowControlIn)) {
+			if ("FLOW_CONTROL_RTS_ENABLED".equalsIgnoreCase(flowControlIn)) {
 				return SerialPort.FLOW_CONTROL_RTS_ENABLED;
 			}
-			if ("FLOW_CONTROL_CTS_ENABLED".equals(flowControlIn)) {
+			if ("FLOW_CONTROL_CTS_ENABLED".equalsIgnoreCase(flowControlIn)) {
 				return SerialPort.FLOW_CONTROL_CTS_ENABLED;
 			}
-			if ("FLOW_CONTROL_DSR_ENABLED".equals(flowControlIn)) {
+			if ("FLOW_CONTROL_DSR_ENABLED".equalsIgnoreCase(flowControlIn)) {
 				return SerialPort.FLOW_CONTROL_DSR_ENABLED;
 			}
-			if ("FLOW_CONTROL_DTR_ENABLED".equals(flowControlIn)) {
+			if ("FLOW_CONTROL_DTR_ENABLED".equalsIgnoreCase(flowControlIn)) {
 				return SerialPort.FLOW_CONTROL_DTR_ENABLED;
 			}
-			if ("FLOW_CONTROL_XONXOFF_IN_ENABLED".equals(flowControlIn)) {
+			if ("FLOW_CONTROL_XONXOFF_IN_ENABLED".equalsIgnoreCase(flowControlIn)) {
 				return SerialPort.FLOW_CONTROL_XONXOFF_IN_ENABLED;
 			}
 		}
@@ -196,22 +201,22 @@ final class ModbusOptions {
 			flowControlOut = this.m_properties.get(FLOW_CONTROL_OUT).toString();
 		}
 		if (flowControlOut != null) {
-			if ("FLOW_CONTROL_DISABLED".equals(flowControlOut)) {
+			if ("FLOW_CONTROL_DISABLED".equalsIgnoreCase(flowControlOut)) {
 				return SerialPort.FLOW_CONTROL_DISABLED;
 			}
-			if ("FLOW_CONTROL_RTS_ENABLED".equals(flowControlOut)) {
+			if ("FLOW_CONTROL_RTS_ENABLED".equalsIgnoreCase(flowControlOut)) {
 				return SerialPort.FLOW_CONTROL_RTS_ENABLED;
 			}
-			if ("FLOW_CONTROL_CTS_ENABLED".equals(flowControlOut)) {
+			if ("FLOW_CONTROL_CTS_ENABLED".equalsIgnoreCase(flowControlOut)) {
 				return SerialPort.FLOW_CONTROL_CTS_ENABLED;
 			}
-			if ("FLOW_CONTROL_DSR_ENABLED".equals(flowControlOut)) {
+			if ("FLOW_CONTROL_DSR_ENABLED".equalsIgnoreCase(flowControlOut)) {
 				return SerialPort.FLOW_CONTROL_DSR_ENABLED;
 			}
-			if ("FLOW_CONTROL_DTR_ENABLED".equals(flowControlOut)) {
+			if ("FLOW_CONTROL_DTR_ENABLED".equalsIgnoreCase(flowControlOut)) {
 				return SerialPort.FLOW_CONTROL_DTR_ENABLED;
 			}
-			if ("FLOW_CONTROL_XONXOFF_OUT_ENABLED".equals(flowControlOut)) {
+			if ("FLOW_CONTROL_XONXOFF_OUT_ENABLED".equalsIgnoreCase(flowControlOut)) {
 				return SerialPort.FLOW_CONTROL_XONXOFF_OUT_ENABLED;
 			}
 		}
@@ -243,19 +248,19 @@ final class ModbusOptions {
 			parity = this.m_properties.get(PARITY).toString();
 		}
 		if (parity != null) {
-			if ("NO_PARITY".equals(parity)) {
+			if ("NO_PARITY".equalsIgnoreCase(parity)) {
 				return SerialPort.NO_PARITY;
 			}
-			if ("ODD_PARITY".equals(parity)) {
+			if ("ODD_PARITY".equalsIgnoreCase(parity)) {
 				return SerialPort.ODD_PARITY;
 			}
-			if ("EVEN_PARITY".equals(parity)) {
+			if ("EVEN_PARITY".equalsIgnoreCase(parity)) {
 				return SerialPort.EVEN_PARITY;
 			}
-			if ("MARK_PARITY".equals(parity)) {
+			if ("MARK_PARITY".equalsIgnoreCase(parity)) {
 				return SerialPort.MARK_PARITY;
 			}
-			if ("SPACE_PARITY".equals(parity)) {
+			if ("SPACE_PARITY".equalsIgnoreCase(parity)) {
 				return SerialPort.SPACE_PARITY;
 			}
 		}
@@ -274,6 +279,21 @@ final class ModbusOptions {
 			port = Integer.valueOf(this.m_properties.get(PORT).toString());
 		}
 		return port;
+
+	}
+
+	/**
+	 * Returns Modbus RTU Port Name
+	 *
+	 * @return the Modbus RTU Port Name
+	 */
+	String getRtuPortName() {
+		String port = null;
+		if ((this.m_properties != null) && this.m_properties.containsKey(SERIAL_PORT)
+				&& (this.m_properties.get(SERIAL_PORT) != null)) {
+			port = this.m_properties.get(SERIAL_PORT).toString();
+		}
+		return port;
 	}
 
 	/**
@@ -288,13 +308,13 @@ final class ModbusOptions {
 			stopbits = this.m_properties.get(STOPBITS).toString();
 		}
 		if (stopbits != null) {
-			if ("ONE_STOP_BIT".equals(stopbits)) {
+			if ("ONE_STOP_BIT".equalsIgnoreCase(stopbits)) {
 				return SerialPort.ONE_STOP_BIT;
 			}
-			if ("ONE_POINT_FIVE_STOP_BITS".equals(stopbits)) {
+			if ("ONE_POINT_FIVE_STOP_BITS".equalsIgnoreCase(stopbits)) {
 				return SerialPort.ONE_POINT_FIVE_STOP_BITS;
 			}
-			if ("TWO_STOP_BITS".equals(stopbits)) {
+			if ("TWO_STOP_BITS".equalsIgnoreCase(stopbits)) {
 				return SerialPort.TWO_STOP_BITS;
 			}
 		}
@@ -313,13 +333,13 @@ final class ModbusOptions {
 			messageType = (String) this.m_properties.get(TYPE);
 		}
 		if (messageType != null) {
-			if ("TCP".equals(messageType)) {
+			if ("TCP".equalsIgnoreCase(messageType)) {
 				return ModbusType.TCP;
 			}
-			if ("UDP".equals(messageType)) {
+			if ("UDP".equalsIgnoreCase(messageType)) {
 				return ModbusType.UDP;
 			}
-			if ("RTU".equals(messageType)) {
+			if ("RTU".equalsIgnoreCase(messageType)) {
 				return ModbusType.RTU;
 			}
 		}

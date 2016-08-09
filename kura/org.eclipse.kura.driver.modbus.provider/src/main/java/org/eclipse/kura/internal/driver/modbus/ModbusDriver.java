@@ -126,11 +126,8 @@ public final class ModbusDriver implements Driver {
 	/** Modbus Unit Identifier Property */
 	private static final String UNIT_ID = "unit.id";
 
-	/** flag to check if the driver is connected. */
-	private boolean m_isConnected = false;
-
 	/** Modbus Transport */
-	private AbstractModbusTransport m_modbusTransport = null;
+	private AbstractModbusTransport m_modbusTransport;
 
 	/** Modbus Configuration Options. */
 	private ModbusOptions m_options;
@@ -184,7 +181,6 @@ public final class ModbusDriver implements Driver {
 				throw new ConnectionException(s_message.connectionProblem() + ThrowableUtil.stackTraceAsString(e));
 			}
 		}
-		this.m_isConnected = true;
 	}
 
 	/**
@@ -209,33 +205,27 @@ public final class ModbusDriver implements Driver {
 	/** {@inheritDoc} */
 	@Override
 	public void disconnect() throws ConnectionException {
-		if (this.m_isConnected) {
-			final ModbusType type = this.m_options.getType();
-			if ((type == TCP) && (this.m_tcpMaster != null)) {
-				try {
-					this.m_tcpMaster.disconnect();
-				} catch (final Exception e) {
-					throw new ConnectionException(
-							s_message.disconnectionProblem() + ThrowableUtil.stackTraceAsString(e));
-				}
+		final ModbusType type = this.m_options.getType();
+		if ((type == TCP) && (this.m_tcpMaster != null)) {
+			try {
+				this.m_tcpMaster.disconnect();
+			} catch (final Exception e) {
+				throw new ConnectionException(s_message.disconnectionProblem() + ThrowableUtil.stackTraceAsString(e));
 			}
-			if ((type == UDP) && (this.m_udpMaster != null)) {
-				try {
-					this.m_udpMaster.disconnect();
-				} catch (final Exception e) {
-					throw new ConnectionException(
-							s_message.disconnectionProblem() + ThrowableUtil.stackTraceAsString(e));
-				}
+		}
+		if ((type == UDP) && (this.m_udpMaster != null)) {
+			try {
+				this.m_udpMaster.disconnect();
+			} catch (final Exception e) {
+				throw new ConnectionException(s_message.disconnectionProblem() + ThrowableUtil.stackTraceAsString(e));
 			}
-			if ((type == RTU) && (this.m_rtuMaster != null)) {
-				try {
-					this.m_rtuMaster.disconnect();
-				} catch (final Exception e) {
-					throw new ConnectionException(
-							s_message.disconnectionProblem() + ThrowableUtil.stackTraceAsString(e));
-				}
+		}
+		if ((type == RTU) && (this.m_rtuMaster != null)) {
+			try {
+				this.m_rtuMaster.disconnect();
+			} catch (final Exception e) {
+				throw new ConnectionException(s_message.disconnectionProblem() + ThrowableUtil.stackTraceAsString(e));
 			}
-			this.m_isConnected = false;
 		}
 	}
 
@@ -256,9 +246,10 @@ public final class ModbusDriver implements Driver {
 			this.m_udpMaster = new ModbusUDPMaster(this.m_options.getIp(), this.m_options.getPort());
 			break;
 		case RTU:
-			final SerialParameters parameters = new SerialParameters("", this.m_options.getBaudrate(),
-					this.m_options.getFlowControlIn(), this.m_options.getFlowControlOut(), this.m_options.getDatabits(),
-					this.m_options.getStopbits(), this.m_options.getParity(), false);
+			final SerialParameters parameters = new SerialParameters(this.m_options.getRtuPortName(),
+					this.m_options.getBaudrate(), this.m_options.getFlowControlIn(), this.m_options.getFlowControlOut(),
+					this.m_options.getDatabits(), this.m_options.getStopbits(), this.m_options.getParity(), false);
+			parameters.setEncoding(this.m_options.getEncoding());
 			this.m_rtuMaster = new ModbusSerialMaster(parameters);
 			break;
 		default:
@@ -283,16 +274,16 @@ public final class ModbusDriver implements Driver {
 	 */
 	private int getFunctionCode(final String primaryTable) {
 		checkNull(primaryTable, s_message.primaryTableNonNull());
-		if ("COILS".equals(primaryTable)) {
+		if ("COILS".equalsIgnoreCase(primaryTable)) {
 			return READ_COILS;
 		}
-		if ("DISCRETE_INPUTS".equals(primaryTable)) {
+		if ("DISCRETE_INPUTS".equalsIgnoreCase(primaryTable)) {
 			return READ_INPUT_DISCRETES;
 		}
-		if ("INPUT_REGISTERS".equals(primaryTable)) {
+		if ("INPUT_REGISTERS".equalsIgnoreCase(primaryTable)) {
 			return READ_INPUT_REGISTERS;
 		}
-		if ("HOLDING_REGISTERS".equals(primaryTable)) {
+		if ("HOLDING_REGISTERS".equalsIgnoreCase(primaryTable)) {
 			return READ_HOLDING_REGISTERS;
 		}
 		return 0;
@@ -361,9 +352,7 @@ public final class ModbusDriver implements Driver {
 	/** {@inheritDoc} */
 	@Override
 	public List<DriverRecord> read(final List<DriverRecord> records) throws ConnectionException {
-		if (!this.m_isConnected) {
-			this.connect();
-		}
+		this.connect();
 		for (final DriverRecord record : records) {
 			// check if the channel type configuration is provided
 			final Map<String, Object> channelConfig = record.getChannelConfig();
@@ -404,7 +393,7 @@ public final class ModbusDriver implements Driver {
 			final int unitId = Integer.parseInt(channelConfig.get(UNIT_ID).toString());
 			final String primaryTable = channelConfig.get(PRIMARY_TABLE).toString();
 			final int functionCode = this.getFunctionCode(primaryTable);
-			final int memoryAddr = Integer.parseInt(channelConfig.get(MEMORY_ADDRESS).toString());
+			final int memoryAddr = Integer.parseInt(channelConfig.get(MEMORY_ADDRESS).toString()) - 1;
 
 			final ModbusType type = this.m_options.getType();
 			if ((type == TCP) && (this.m_tcpMaster != null)) {
@@ -477,7 +466,7 @@ public final class ModbusDriver implements Driver {
 						&& (functionCode != FC_15_WRITE_MULITPLE_COILS.code())
 						&& (functionCode != FC_16_WRITE_MULTIPLE_REGISTERS.code()),
 				s_message.functionCodesNotInRange());
-		checkCondition((unitId > 0) && (unitId < 247), s_message.wrongUnitId());
+		checkCondition((unitId < 0) || (unitId > 247), s_message.wrongUnitId());
 
 		ModbusTransaction trans;
 		ModbusRequest req;
@@ -538,9 +527,7 @@ public final class ModbusDriver implements Driver {
 	/** {@inheritDoc} */
 	@Override
 	public List<DriverRecord> write(final List<DriverRecord> records) throws ConnectionException {
-		if (!this.m_isConnected) {
-			this.connect();
-		}
+		this.connect();
 		for (final DriverRecord record : records) {
 			// check if the channel type configuration is provided
 			final Map<String, Object> channelConfig = record.getChannelConfig();
@@ -581,7 +568,7 @@ public final class ModbusDriver implements Driver {
 			final int unitId = Integer.parseInt(channelConfig.get(UNIT_ID).toString());
 			final String primaryTable = channelConfig.get(PRIMARY_TABLE).toString();
 			final int functionCode = this.getFunctionCode(primaryTable);
-			final int memoryAddr = Integer.parseInt(channelConfig.get(MEMORY_ADDRESS).toString());
+			final int memoryAddr = Integer.parseInt(channelConfig.get(MEMORY_ADDRESS).toString()) - 1;
 
 			final ModbusType type = this.m_options.getType();
 			if ((type == TCP) && (this.m_tcpMaster != null)) {
@@ -654,7 +641,7 @@ public final class ModbusDriver implements Driver {
 						&& (functionCode != FC_15_WRITE_MULITPLE_COILS.code())
 						&& (functionCode != FC_16_WRITE_MULTIPLE_REGISTERS.code()),
 				s_message.functionCodesNotInRange());
-		checkCondition((unitId > 0) && (unitId < 247), s_message.wrongUnitId());
+		checkCondition((unitId < 0) && (unitId > 247), s_message.wrongUnitId());
 
 		ModbusTransaction trans;
 		ModbusRequest req;

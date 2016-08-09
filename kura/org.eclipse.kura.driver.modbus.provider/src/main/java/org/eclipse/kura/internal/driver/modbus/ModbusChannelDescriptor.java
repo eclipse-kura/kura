@@ -51,7 +51,9 @@ public final class ModbusChannelDescriptor implements ChannelDescriptor {
 		unitId.setId("unit.id");
 		unitId.setName(s_message.unitId());
 		unitId.setType(Tscalar.INTEGER);
-		unitId.setDefault("");
+		unitId.setDefault("1");
+		unitId.setMin("1");
+		unitId.setMax("247");
 		unitId.setDescription(s_message.unitIdDesc());
 		unitId.setCardinality(0);
 		unitId.setRequired(true);
@@ -92,7 +94,9 @@ public final class ModbusChannelDescriptor implements ChannelDescriptor {
 		address.setDescription(s_message.memoryAddrDesc());
 		address.setType(Tscalar.INTEGER);
 		address.setRequired(true);
-		address.setDefault("0");
+		address.setDefault("1");
+		address.setMin("1");
+		address.setMax("65536");
 
 		this.m_elements.add(address);
 

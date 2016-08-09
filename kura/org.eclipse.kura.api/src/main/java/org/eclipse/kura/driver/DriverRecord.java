@@ -199,7 +199,7 @@ public final class DriverRecord {
 	 *             if the argument is null
 	 */
 	public void setDriverStatus(final DriverStatus status) {
-		checkNull(this.value, "Driver Status cannot be null");
+		checkNull(status, "Driver Status cannot be null");
 		this.driverStatus = status;
 	}
 

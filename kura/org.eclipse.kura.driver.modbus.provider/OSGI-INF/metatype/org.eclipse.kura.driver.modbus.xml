@@ -22,7 +22,7 @@
             cardinality="0"
             required="true"
             default="TCP"
-            description="Option to select the type of Modbus Connection Access (TCP, UDP or RTU)">
+            description="Option to select the type of Modbus Connection Access">
             <Option label="TCP" value="TCP" />
             <Option label="UDP" value="UDP" />
             <Option label="RTU" value="RTU" />
@@ -44,6 +44,15 @@
             required="true"
             default="0"
             description="The Port for the communication">
+        </AD>
+        
+        <AD id="modbus.rtu.port.name"
+            name="modbus.rtu.port.name"
+            type="String"
+            cardinality="0"
+            required="true"
+            default="/dev/tty"
+            description="The Serial Port to connect to">
         </AD>
 
         <AD id="modbus.rtu.baudrate"

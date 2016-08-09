@@ -42,7 +42,7 @@
             type="Integer"
             cardinality="0"
             required="true"
-            default="0"
+            default="502"
             description="The Port for the communication">
         </AD>
         

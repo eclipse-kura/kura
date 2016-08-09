@@ -12,7 +12,7 @@
  */
 package org.eclipse.kura.wire.test;
 
-import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.kura.driver.Driver;
@@ -33,21 +33,34 @@ public final class StubModbusDriverClient {
 	private volatile Driver m_driver;
 
 	protected synchronized void activate(final ComponentContext context, final Map<String, Object> properties) {
-		final Map<String, Object> channelConfig = CollectionUtil.newHashMap();
-		channelConfig.put("unit.id", 10);
-		channelConfig.put("memory.address", 1);
-		channelConfig.put("channel.id", 1);
-		channelConfig.put("channel.value.type", DataType.BOOLEAN);
-		channelConfig.put("primary.table", "COILS");
-		final DriverRecord record = new DriverRecord();
-		record.setChannelConfig(channelConfig);
+		final List<DriverRecord> list = CollectionUtil.newArrayList();
+		final Map<String, Object> channelConfig1 = CollectionUtil.newHashMap();
+		channelConfig1.put("unit.id", 10);
+		channelConfig1.put("memory.address", 1);
+		channelConfig1.put("channel.id", 1);
+		channelConfig1.put("channel.value.type", DataType.BOOLEAN);
+		channelConfig1.put("primary.table", "COILS");
+		final DriverRecord record1 = new DriverRecord();
+		record1.setChannelConfig(channelConfig1);
+
+		final Map<String, Object> channelConfig2 = CollectionUtil.newHashMap();
+		channelConfig2.put("unit.id", 10);
+		channelConfig2.put("memory.address", 2);
+		channelConfig2.put("channel.id", 1);
+		channelConfig2.put("channel.value.type", DataType.BOOLEAN);
+		channelConfig2.put("primary.table", "COILS");
+		final DriverRecord record2 = new DriverRecord();
+		record2.setChannelConfig(channelConfig2);
+
+		list.add(record1);
+		list.add(record2);
 		try {
-			this.m_driver.read(Arrays.asList(record));
+			this.m_driver.read(list);
 		} catch (final ConnectionException e) {
 			s_logger.info("=========>Error from Modbus Driver =====>" + ThrowableUtil.stackTraceAsString(e));
 			return;
 		}
-		s_logger.info("=========>Data Read from Modbus Driver =====>" + record.getValue());
+		s_logger.info("=========>Data Read from Modbus Driver =====>" + list);
 
 	}
 

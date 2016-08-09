@@ -467,7 +467,7 @@ public final class ModbusDriver implements Driver {
 						&& (functionCode != FC_16_WRITE_MULTIPLE_REGISTERS.code()),
 				s_message.functionCodesNotInRange());
 		checkCondition((unitId < 1) || (unitId > 247), s_message.wrongUnitId());
-		checkCondition((register < 1) || (register > 65536), s_message.wrongRegister());
+		checkCondition((register < 0) || (register > 65535), s_message.wrongRegister());
 
 		ModbusTransaction trans;
 		ModbusRequest req;
@@ -642,8 +642,8 @@ public final class ModbusDriver implements Driver {
 						&& (functionCode != FC_15_WRITE_MULITPLE_COILS.code())
 						&& (functionCode != FC_16_WRITE_MULTIPLE_REGISTERS.code()),
 				s_message.functionCodesNotInRange());
-		checkCondition((unitId < 0) && (unitId > 247), s_message.wrongUnitId());
-		checkCondition((register < 1) || (register > 65536), s_message.wrongRegister());
+		checkCondition((unitId < 1) && (unitId > 247), s_message.wrongUnitId());
+		checkCondition((register < 0) || (register > 65535), s_message.wrongRegister());
 
 		ModbusTransaction trans;
 		ModbusRequest req;

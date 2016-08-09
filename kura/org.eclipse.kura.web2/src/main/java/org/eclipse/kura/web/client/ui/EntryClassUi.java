@@ -24,7 +24,6 @@ import org.eclipse.kura.web.client.ui.Network.NetworkPanelUi;
 import org.eclipse.kura.web.client.ui.Packages.PackagesPanelUi;
 import org.eclipse.kura.web.client.ui.Settings.SettingsPanelUi;
 import org.eclipse.kura.web.client.ui.Status.StatusPanelUi;
-import org.eclipse.kura.web.client.ui.wires.WiresPanelUi;
 import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
 import org.eclipse.kura.web.shared.model.GwtSession;
@@ -199,9 +198,6 @@ public class EntryClassUi extends Composite {
 						if (modal != null) {
 							modal.hide();
 						}
-						if (servicesUi != null) {
-							servicesUi.renderForm();
-						}
 						contentPanel.setVisible(true);
 						contentPanelHeader.setText("Status");
 						contentPanelBody.clear();
@@ -228,9 +224,6 @@ public class EntryClassUi extends Composite {
 						if (modal != null ) {
 							modal.hide();
 						}
-						if (servicesUi != null) {
-							servicesUi.renderForm();
-						}
 						contentPanel.setVisible(true);
 						contentPanelHeader.setText(MSGS.device());
 						contentPanelBody.clear();
@@ -254,9 +247,6 @@ public class EntryClassUi extends Composite {
 							forceTabsCleaning();
 							if (modal != null ) {
 								modal.hide();
-							}
-							if (servicesUi != null) {
-								servicesUi.renderForm();
 							}
 							contentPanel.setVisible(true);
 							contentPanelHeader.setText(MSGS.network());
@@ -283,9 +273,6 @@ public class EntryClassUi extends Composite {
 							if (modal != null ) {
 								modal.hide();
 							}
-							if (servicesUi != null) {
-								servicesUi.renderForm();
-							}
 							contentPanel.setVisible(true);
 							contentPanelHeader.setText(MSGS.firewall());
 							contentPanelBody.clear();
@@ -308,9 +295,6 @@ public class EntryClassUi extends Composite {
 						forceTabsCleaning();
 						if (modal != null ) {
 							modal.hide();
-						}
-						if (servicesUi != null) {
-							servicesUi.renderForm();
 						}
 						contentPanel.setVisible(true);
 						contentPanelHeader.setText(MSGS.packages());
@@ -336,9 +320,6 @@ public class EntryClassUi extends Composite {
 						if (modal != null ) {
 							modal.hide();
 						}
-						if (servicesUi != null) {
-							servicesUi.renderForm();
-						}
 						contentPanel.setVisible(true);
 						contentPanelHeader.setText(MSGS.settings());
 						contentPanelBody.clear();
@@ -350,31 +331,6 @@ public class EntryClassUi extends Composite {
 				renderDirtyConfigModal(b);
 			}
 		});
-
-		// Status Panel
-//		wires.addClickHandler(new ClickHandler() {
-//			@Override
-//			public void onClick(ClickEvent event) {
-//				Button b = new Button(MSGS.yesButton(), new ClickHandler() {
-//					@Override
-//					public void onClick(ClickEvent event) {
-//						forceTabsCleaning();
-//						if (modal != null ) {
-//							modal.hide();
-//						}
-//						if (servicesUi != null) {
-//							servicesUi.renderForm();
-//						}
-//						contentPanel.setVisible(true);
-//						contentPanelHeader.setText("Kura Wires");
-//						contentPanelBody.clear();
-//						contentPanelBody.add(wiresBinder);
-//
-//					}
-//				});
-//				renderDirtyConfigModal(b);
-//			}
-//		});
 	}
 
 	public void initServicesTree() {

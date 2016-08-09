@@ -451,8 +451,8 @@ public final class ModbusDriver implements Driver {
 	 * @throws ModbusException
 	 *             the Modbus exception
 	 * @throws KuraRuntimeException
-	 *             if the transport is null or the function code is wrongly set
-	 *             or the unit ID is wrongly set
+	 *             if the transport is null or the function code, unit ID or
+	 *             register address are wrongly set
 	 */
 	private ModbusResponse readRequest(final int unitId, final AbstractModbusTransport modbusTransport,
 			final int functionCode, final int register, final int count) throws ModbusException {
@@ -466,7 +466,8 @@ public final class ModbusDriver implements Driver {
 						&& (functionCode != FC_15_WRITE_MULITPLE_COILS.code())
 						&& (functionCode != FC_16_WRITE_MULTIPLE_REGISTERS.code()),
 				s_message.functionCodesNotInRange());
-		checkCondition((unitId < 0) || (unitId > 247), s_message.wrongUnitId());
+		checkCondition((unitId < 1) || (unitId > 247), s_message.wrongUnitId());
+		checkCondition((register < 1) || (register > 65536), s_message.wrongRegister());
 
 		ModbusTransaction trans;
 		ModbusRequest req;
@@ -626,8 +627,8 @@ public final class ModbusDriver implements Driver {
 	 *            Values to apply
 	 * @return Response object
 	 * @throws KuraRuntimeException
-	 *             if the transport is null or the function code is wrongly set
-	 *             or the unit ID is wrongly set
+	 *             if the transport is null or the function code, unit ID or
+	 *             register address are wrongly set
 	 */
 	private ModbusResponse writeRequest(final int unitId, final AbstractModbusTransport modbusTransport,
 			final int functionCode, final int register, final int... values) throws ModbusException {
@@ -642,6 +643,7 @@ public final class ModbusDriver implements Driver {
 						&& (functionCode != FC_16_WRITE_MULTIPLE_REGISTERS.code()),
 				s_message.functionCodesNotInRange());
 		checkCondition((unitId < 0) && (unitId > 247), s_message.wrongUnitId());
+		checkCondition((register < 1) || (register > 65536), s_message.wrongRegister());
 
 		ModbusTransaction trans;
 		ModbusRequest req;

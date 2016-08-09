@@ -111,7 +111,10 @@ public interface ModbusDriverMessages {
 	@En("Updating Modbus Driver.....Done")
 	public String updatingDone();
 
-	@En("Unit ID must a positive number and less than 247")
+	@En("Register address must a positive number greater than 0 but less than or equal to 65536")
+	public String wrongRegister();
+
+	@En("Unit ID must a positive number greater than 0 but less than or equal to 247")
 	public String wrongUnitId();
 
 }

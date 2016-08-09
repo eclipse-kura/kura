@@ -286,11 +286,11 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 		for (final Map.Entry<String, Object> entry : this.m_properties.entrySet()) {
 			props.put(entry.getKey(), entry.getValue());
 		}
-		int i = 1;
+		int i = 0;
 		for (final WireConfiguration wireConfiguration : this.m_wireConfigs) {
-			final String emitterKey = String.valueOf(i++) + ".emitter";
-			final String receiverKey = String.valueOf(i++) + ".receiver";
-			final String filterKey = String.valueOf(i++) + ".filter";
+			final String emitterKey = String.valueOf(++i) + ".emitter";
+			final String receiverKey = String.valueOf(i) + ".receiver";
+			final String filterKey = String.valueOf(i) + ".filter";
 			props.put(emitterKey, wireConfiguration.getEmitterPid());
 			props.put(receiverKey, wireConfiguration.getReceiverPid());
 			props.put(filterKey, wireConfiguration.getFilter());

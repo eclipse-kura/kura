@@ -617,6 +617,7 @@ public final class ModbusDriver implements Driver {
 			} catch (final NumberFormatException nfe) {
 				record.setDriverStatus(new DriverStatus(DRIVER_ERROR_CHANNEL_NOT_ACCESSIBLE, null, nfe));
 			}
+			record.setTimestamp(System.currentTimeMillis());
 		}
 		try {
 			this.m_modbusTransport.close();

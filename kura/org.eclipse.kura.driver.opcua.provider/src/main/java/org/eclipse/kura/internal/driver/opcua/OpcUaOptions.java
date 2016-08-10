@@ -172,7 +172,7 @@ final class OpcUaOptions {
 	 * @return the OPC-UA Identity Provider
 	 */
 	IdentityProvider getIdentityProvider() {
-		IdentityProvider identityProvider = null;
+		IdentityProvider identityProvider;
 		final String username = this.getUsername();
 		final String password = this.getPassword();
 		if (StringUtil.isNullOrEmpty(username) && StringUtil.isNullOrEmpty(password)) {

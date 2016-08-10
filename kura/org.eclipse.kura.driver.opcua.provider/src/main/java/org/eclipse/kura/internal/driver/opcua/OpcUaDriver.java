@@ -22,15 +22,18 @@ import static org.eclipse.kura.driver.DriverFlag.WRITE_FAILURE;
 import static org.eclipse.kura.driver.DriverFlag.WRITE_SUCCESSFUL;
 
 import java.io.IOException;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
+import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.driver.ChannelDescriptor;
 import org.eclipse.kura.driver.Driver;
+import org.eclipse.kura.driver.DriverFlag;
 import org.eclipse.kura.driver.DriverRecord;
 import org.eclipse.kura.driver.DriverStatus;
 import org.eclipse.kura.driver.listener.DriverListener;
@@ -45,12 +48,15 @@ import org.eclipse.milo.opcua.sdk.client.OpcUaClient;
 import org.eclipse.milo.opcua.sdk.client.api.config.OpcUaClientConfig;
 import org.eclipse.milo.opcua.sdk.client.api.nodes.attached.UaVariableNode;
 import org.eclipse.milo.opcua.stack.client.UaTcpStackClient;
+import org.eclipse.milo.opcua.stack.core.Stack;
 import org.eclipse.milo.opcua.stack.core.types.builtin.DataValue;
 import org.eclipse.milo.opcua.stack.core.types.builtin.LocalizedText;
 import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
 import org.eclipse.milo.opcua.stack.core.types.builtin.Variant;
 import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UInteger;
 import org.eclipse.milo.opcua.stack.core.types.structured.EndpointDescription;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.FrameworkUtil;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -108,25 +114,24 @@ public final class OpcUaDriver implements Driver {
 			final Map<String, Object> properties) {
 		s_logger.debug(s_message.activating());
 		this.extractProperties(properties);
+		this.initializeStackClassLoader();
 		s_logger.debug(s_message.activatingDone());
 	}
 
 	/** {@inheritDoc} */
 	@Override
 	public void connect() throws ConnectionException {
-		EndpointDescription[] endpoints;
 		try {
 			final String endPoint = new StringBuilder().append("opc.tcp://").append(this.m_options.getIp()).append(":")
 					.append(this.m_options.getPort()).append("/").append(this.m_options.getServerName()).toString();
-			endpoints = UaTcpStackClient.getEndpoints(endPoint).get();
-			final Optional<EndpointDescription> endpoint = Arrays.stream(endpoints).findFirst();
-			if (!endpoint.isPresent()) {
-				throw new ConnectionException(s_message.connectionProblem());
-			}
+			final EndpointDescription[] endpoints = UaTcpStackClient.getEndpoints(endPoint).get();
+			final EndpointDescription endpoint = Arrays.stream(endpoints).filter(
+					e -> e.getSecurityPolicyUri().equals(this.m_options.getSecurityPolicy().getSecurityPolicyUri()))
+					.findFirst().orElseThrow(() -> new ConnectionException(s_message.connectionProblem()));
 			final KeyStoreLoader loader = new KeyStoreLoader(this.m_options.getKeystoreType(),
 					this.m_options.getKeystoreClientAlias(), this.m_options.getKeystoreServerAlias(),
 					this.m_options.getKeystorePassword(), this.m_options.getApplicationCertificate());
-			final OpcUaClientConfig clientConfig = OpcUaClientConfig.builder().setEndpoint(endpoint.get())
+			final OpcUaClientConfig clientConfig = OpcUaClientConfig.builder().setEndpoint(endpoint)
 					.setApplicationName(LocalizedText.english(this.m_options.getApplicationName()))
 					.setApplicationUri(this.m_options.getApplicationUri())
 					.setRequestTimeout(UInteger.valueOf(this.m_options.getRequestTimeout()))
@@ -226,6 +231,22 @@ public final class OpcUaDriver implements Driver {
 		}
 	}
 
+	/**
+	 * Initialize the Milo OPC-UA stack with this bundle claassloader
+	 */
+	private void initializeStackClassLoader() {
+		try {
+			final Bundle bundle = FrameworkUtil.getBundle(this.getClass());
+			final URL url = bundle.getEntry("/lib/stack-core-0.1.0-SNAPSHOT.jar");
+			final URL fileUrl = FileLocator.toFileURL(url);
+			final ClassLoader classLoader = new URLClassLoader(new URL[] { fileUrl },
+					OpcUaDriver.class.getClassLoader());
+			Stack.setCustomClassLoader(classLoader);
+		} catch (final IOException e) {
+			s_logger.error(ThrowableUtil.stackTraceAsString(e));
+		}
+	}
+
 	/** {@inheritDoc} */
 	@Override
 	public List<DriverRecord> read(final List<DriverRecord> records) throws ConnectionException {
@@ -275,6 +296,9 @@ public final class OpcUaDriver implements Driver {
 				}
 				record.setValue(typedValue);
 				record.setDriverStatus(new DriverStatus(READ_SUCCESSFUL));
+				record.setTimestamp(System.currentTimeMillis());
+			} else {
+				record.setDriverStatus(new DriverStatus(DriverFlag.CUSTOM_ERROR_0, s_message.valueNull(), null));
 				record.setTimestamp(System.currentTimeMillis());
 			}
 		}

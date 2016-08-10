@@ -78,6 +78,9 @@ public interface OpcUaMessages {
 	@En("Value cannot be null")
 	public String valueNonNull();
 
+	@En("Value is null")
+	public String valueNull();
+
 	@En("OPC-UA Write Operation Failed")
 	public String writeFailed();
 

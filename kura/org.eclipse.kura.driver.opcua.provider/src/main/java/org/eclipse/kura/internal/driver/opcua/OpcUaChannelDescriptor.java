@@ -28,7 +28,6 @@ import org.eclipse.kura.util.collection.CollectionUtil;
  * <ul>
  * <li>node.id</li> denotes the OPC-UA Variable Node.
  * <li>node.namespace.index</li> denotes the OPC-UA Node Namespace index.
- *
  * </ul>
  */
 public final class OpcUaChannelDescriptor implements ChannelDescriptor {

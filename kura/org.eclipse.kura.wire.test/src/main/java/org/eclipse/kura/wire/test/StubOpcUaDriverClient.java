@@ -37,7 +37,7 @@ public final class StubOpcUaDriverClient {
 		final Map<String, Object> channelConfig1 = CollectionUtil.newHashMap();
 		channelConfig1.put("channel.id", 1);
 		channelConfig1.put("channel.value.type", DataType.DOUBLE);
-		channelConfig1.put("node.id", "MyDevice/MyLevel");
+		channelConfig1.put("node.id", "MyLevel");
 		channelConfig1.put("node.namespace.index", 2);
 		final DriverRecord record1 = new DriverRecord();
 		record1.setChannelConfig(channelConfig1);
@@ -45,7 +45,7 @@ public final class StubOpcUaDriverClient {
 		final Map<String, Object> channelConfig2 = CollectionUtil.newHashMap();
 		channelConfig2.put("channel.id", 1);
 		channelConfig2.put("channel.value.type", DataType.BOOLEAN);
-		channelConfig2.put("node.id", "MyDevice/MySwitch");
+		channelConfig2.put("node.id", "MySwitch");
 		channelConfig2.put("node.namespace.index", 2);
 		final DriverRecord record2 = new DriverRecord();
 		record2.setChannelConfig(channelConfig2);

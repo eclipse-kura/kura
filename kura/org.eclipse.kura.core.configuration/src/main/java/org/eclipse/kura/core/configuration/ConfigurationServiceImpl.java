@@ -13,10 +13,12 @@ package org.eclipse.kura.core.configuration;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -60,8 +62,6 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
-import org.osgi.service.cm.ConfigurationEvent;
-import org.osgi.service.cm.ConfigurationListener;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.ComponentException;
 import org.osgi.service.metatype.AttributeDefinition;
@@ -609,7 +609,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
             }
         }
 
-        if (takeSnapshot) {
+        if (takeSnapshot && (configs != null && !configs.isEmpty())) {
             saveSnapshot(configs);
         }
 
@@ -728,7 +728,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     private boolean allSnapshotsUnencrypted() {
         try {
             Set<Long> snapshotIDs = getSnapshots();
-            if (snapshotIDs == null || snapshotIDs.size() == 0) {
+            if (snapshotIDs == null || snapshotIDs.isEmpty()) {
                 return false;
             }
             Long[] snapshots = snapshotIDs.toArray(new Long[] {});
@@ -809,7 +809,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
         // Do not save the snapshot in the past
         Set<Long> snapshotIDs = getSnapshots();
-        if (snapshotIDs != null && snapshotIDs.size() > 0) {
+        if (snapshotIDs != null && !snapshotIDs.isEmpty()) {
             Long[] snapshots = snapshotIDs.toArray(new Long[] {});
             Long lastestID = snapshots[snapshotIDs.size() - 1];
 
@@ -830,21 +830,38 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     private void writeSnapshot(long sid, XmlComponentConfigurations conf) throws KuraException {
         File fSnapshot = getSnapshotFile(sid);
 
+        // Marshall the configuration into an XML
+        String xmlResult;
+        try {
+            xmlResult = XmlUtil.marshal(conf);
+            if (xmlResult.trim().isEmpty()) {
+                throw new KuraException(KuraErrorCode.INVALID_PARAMETER, conf);
+            }
+        } catch (Exception e1) {
+            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e1);
+        }
+        
+        // Encrypt the XML
+        char[] encryptedXML = m_cryptoService.encryptAes(xmlResult.toCharArray());
+
+        // Write the snapshot
         FileOutputStream fos = null;
         OutputStreamWriter osw = null;
         try {
             s_logger.info("Writing snapshot - Saving {}...", fSnapshot.getAbsolutePath());
             fos = new FileOutputStream(fSnapshot);
             osw = new OutputStreamWriter(fos, "UTF-8");
-            String xmlResult = XmlUtil.marshal(conf);
-            char[] encryptedXML = m_cryptoService.encryptAes(xmlResult.toCharArray());
             osw.append(new String(encryptedXML));
             osw.flush();
             fos.flush();
             fos.getFD().sync();
             s_logger.info("Writing snapshot - Saving {}... Done.", fSnapshot.getAbsolutePath());
-        } catch (Throwable t) {
-            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, t);
+        } catch (FileNotFoundException e) {
+            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+        } catch (UnsupportedEncodingException e) {
+            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+        } catch (IOException e) {
+            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
         } finally {
             if (osw != null){
                 try {
@@ -1395,14 +1412,5 @@ public class ConfigurationServiceImpl implements ConfigurationService {
             ocd = m_ocds.get(pid);
         }
         return ocd;
-    }
-
-    private String getPidByServicePid(String servicePid){
-        for(Entry<String, String> entry : m_servicePidByPid.entrySet()){
-            if (entry.getValue().equals(servicePid)) {
-                return entry.getKey();
-            }
-        }
-        return servicePid;
     }
 }

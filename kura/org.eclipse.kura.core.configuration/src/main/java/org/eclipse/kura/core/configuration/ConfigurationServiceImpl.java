@@ -481,10 +481,9 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     synchronized void registerComponentOCD(String metatypePid, Tocd ocd, boolean isFactory) throws KuraException {
         // metatypePid is either the 'pid' or 'factoryPid' attribute of the MetaType Designate element
         // 'pid' matches a service.pid, not a kura.service.pid
-        if (!m_ocds.containsKey(metatypePid)) {
-            s_logger.info("Registering metatype pid: {} with ocd: {} ...", metatypePid, ocd);
-            m_ocds.put(metatypePid, ocd);
-        }
+        s_logger.info("Registering metatype pid: {} with ocd: {} ...", metatypePid, ocd);
+        m_ocds.put(metatypePid, ocd);
+            
         if (isFactory) {
             registerFactoryComponentOCD(metatypePid, ocd);
         } else {

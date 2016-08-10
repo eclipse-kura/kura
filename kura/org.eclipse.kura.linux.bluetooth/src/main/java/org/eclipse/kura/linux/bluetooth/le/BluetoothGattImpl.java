@@ -190,14 +190,14 @@ public class BluetoothGattImpl implements BluetoothGatt, BluetoothProcessListene
 			
 			// Wait until read is complete, error is received or timeout
 			long startTime = System.currentTimeMillis();
-			while (m_charValue == "" && !m_charValue.startsWith("ERROR") && (System.currentTimeMillis() - startTime) < GATT_COMMAND_TIMEOUT) {
+			while ("".equals(m_charValue) && !m_charValue.startsWith("ERROR") && (System.currentTimeMillis() - startTime) < GATT_COMMAND_TIMEOUT) {
 				try {
 					Thread.sleep(10);
 				} catch (InterruptedException e) {
 					s_logger.error("Exception waiting for characteristics", e);
 				}
 			}
-			if (m_charValue == "") {
+			if ("".equals(m_charValue)) {
 				throw new KuraTimeoutException("Gatttool read timeout."); 
 			}
 			if (m_charValue.startsWith("ERROR")) {
@@ -220,17 +220,17 @@ public class BluetoothGattImpl implements BluetoothGatt, BluetoothProcessListene
 			
 			// Wait until read is complete, error is received or timeout
 			long startTime = System.currentTimeMillis();
-			while (m_charValueUuid == "" && !m_charValueUuid.startsWith("ERROR") && (System.currentTimeMillis() - startTime) < GATT_COMMAND_TIMEOUT) {
+			while ("".equals(m_charValueUuid) && !m_charValueUuid.startsWith("ERROR") && (System.currentTimeMillis() - startTime) < GATT_COMMAND_TIMEOUT) {
 				try {
 					Thread.sleep(10);
 				} catch (InterruptedException e) {
 					s_logger.error("Exception waiting for characteristics", e);
 				}
 			}
-			if (m_charValue == "") {
+			if ("".equals(m_charValueUuid)) {
 				throw new KuraTimeoutException("Gatttool read timeout."); 
 			}
-			if (m_charValue.startsWith("ERROR")) {
+			if (m_charValueUuid.startsWith("ERROR")) {
 				throw KuraException.internalError("Gatttool read error.");
 			}
 		}

@@ -29,6 +29,8 @@ import org.apache.commons.io.FileUtils;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.bluetooth.BluetoothBeaconData;
+import org.eclipse.kura.bluetooth.listener.AdvertisingReportRecord;
+import org.eclipse.kura.bluetooth.listener.BluetoothAdvertisementData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -417,6 +419,75 @@ public class BluetoothUtil {
 		return null;
 	}
 	
+	/**
+	 * Check for advertisement out of an HCL LE Advertising Report Event
+	 * 
+	 * See Bluetooth Core 4.0; 7.7.65.2 LE Advertising Report Event
+	 * @param b
+	 * @return
+	 */
+	public static BluetoothAdvertisementData parseLEAdvertisement(byte[] b) {
+		
+		BluetoothAdvertisementData btAdData = null;
+		
+		if( (b[0] != 0x04) || b[1] != 0x3E){
+			//Not and Advertisement Packet
+			return btAdData;
+		}
+				
+		// LE Advertisement Subevent Code: 0x02
+		if(b[3] != 0x02){
+			//Not a Advertisement Sub Event
+			return btAdData;
+		}
+		
+		// Start building Advertisement Data
+		btAdData = new BluetoothAdvertisementData();
+		btAdData.setRawData(b);
+		
+		btAdData.setPacketType(b[0]);
+		btAdData.setEventType(b[1]);
+		btAdData.setParameterLength(b[2]);
+		btAdData.setSubEventCode(b[3]);
+		
+		// Number of reports in this advertisement
+		btAdData.setNumberOfReports(b[4]);
+		
+		// Parse each report
+		int ptr = 5;
+		for(int nr = 0; nr < btAdData.getNumberOfReports(); nr++) {	
+			
+			AdvertisingReportRecord arr = new AdvertisingReportRecord();
+			arr.setEventType(b[ptr++]);
+			arr.setAddressType(b[ptr++]);
+			
+			// Extract remote address
+			String address = String.format("%02X:%02X:%02X:%02X:%02X:%02X",
+					b[ptr+5],
+					b[ptr+4],
+					b[ptr+3],
+					b[ptr+2],
+					b[ptr+1],
+					b[ptr+0]);
+			
+			arr.setAddress(address);
+			
+			ptr += 6;
+			
+			int arrDataLength = b[ptr++];
+			
+			arr.setLength(b[ptr++]);
+			byte[] arrData = new byte[arrDataLength];
+			System.arraycopy(b, ptr, arrData, 0, arrDataLength);
+			arr.setReportData(arrData);
+			
+			btAdData.addReportRecord(arr);
+			
+			ptr += arrDataLength;
+		}
+		
+		return btAdData;
+	}
 	
 	/**
 	 * Parse BLE beacons out of an HCL LE Advertising Report Event
@@ -430,12 +501,8 @@ public class BluetoothUtil {
 		
 		List<BluetoothBeaconData> results = new LinkedList<BluetoothBeaconData>();
 		
-		// Packet Type: Event
-		if(b[0] != 4)
-			return results;
-		
-		// Event Type: LE Advertisement Report
-		if(b[1] != 0x3E)
+		// Packet Type: Event OR Event Type: LE Advertisement Report
+		if(b[0] != 0x04 || b[1] != 0x3E)
 			return results;
 
 		int paramLen = b[2];

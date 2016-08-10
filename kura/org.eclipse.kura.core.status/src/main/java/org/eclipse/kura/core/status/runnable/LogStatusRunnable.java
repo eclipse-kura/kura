@@ -9,7 +9,7 @@
  * Contributors:
  *     Eurotech
  *******************************************************************************/
-package org.eclipse.kura.core.status.runnables;
+package org.eclipse.kura.core.status.runnable;
 
 import org.eclipse.kura.status.CloudConnectionStatusEnum;
 import org.slf4j.Logger;

@@ -9,21 +9,24 @@
  * Contributors:
  *     Eurotech
  *******************************************************************************/
-package org.eclipse.kura.core.status.runnables;
+package org.eclipse.kura.core.status.runnable;
 
 import java.io.IOException;
 
 import org.eclipse.kura.gpio.KuraClosedDeviceException;
 import org.eclipse.kura.gpio.KuraGPIOPin;
 import org.eclipse.kura.gpio.KuraUnavailableDeviceException;
-import org.eclipse.kura.status.CloudConnectionStatusEnum;
 
-public class HeartbeatStatusRunnable implements Runnable {
+public class BlinkStatusRunnable implements Runnable {
 
 	private KuraGPIOPin local_pin;
+	private final int onTime;
+	private final int offTime;
 	
-	public HeartbeatStatusRunnable(KuraGPIOPin local_pin) {
+	public BlinkStatusRunnable(KuraGPIOPin local_pin, int onTime, int offTime) {
 		this.local_pin = local_pin;
+		this.onTime = onTime;
+		this.offTime = offTime;
 	}
 
 	@Override
@@ -31,13 +34,9 @@ public class HeartbeatStatusRunnable implements Runnable {
 		while(true){
 			try{				
 				local_pin.setValue(true);
-				Thread.sleep(CloudConnectionStatusEnum.HEARTBEAT_SYSTOLE_DURATION);
+				Thread.sleep(onTime);
 				local_pin.setValue(false);
-				Thread.sleep(CloudConnectionStatusEnum.HEARTBEAT_SYSTOLE_DURATION);
-				local_pin.setValue(true);
-				Thread.sleep(CloudConnectionStatusEnum.HEARTBEAT_DIASTOLE_DURATION);
-				local_pin.setValue(false);
-				Thread.sleep(CloudConnectionStatusEnum.HEARTBEAT_PAUSE_DURATION);
+				Thread.sleep(offTime);
 			}catch(InterruptedException ex){
 				break;
 			}catch(KuraUnavailableDeviceException ex){

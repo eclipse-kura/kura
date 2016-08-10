@@ -21,6 +21,8 @@ import org.eclipse.kura.bluetooth.BluetoothBeaconData;
 import org.eclipse.kura.bluetooth.BluetoothBeaconScanListener;
 import org.eclipse.kura.bluetooth.BluetoothDevice;
 import org.eclipse.kura.bluetooth.BluetoothLeScanListener;
+import org.eclipse.kura.bluetooth.listener.BluetoothAdvertisementData;
+import org.eclipse.kura.bluetooth.listener.BluetoothAdvertisementScanListener;
 import org.eclipse.kura.linux.bluetooth.BluetoothDeviceImpl;
 import org.eclipse.kura.linux.bluetooth.util.BTSnoopListener;
 import org.eclipse.kura.linux.bluetooth.util.BluetoothProcess;
@@ -43,6 +45,7 @@ public class BluetoothLeScanner implements BluetoothProcessListener, BTSnoopList
 	private BluetoothProcess m_dump_proc = null;
 	private BluetoothLeScanListener m_listener = null;
 	private BluetoothBeaconScanListener m_beacon_listener = null;
+	private BluetoothAdvertisementScanListener m_advertisement_listener = null;
 	private boolean m_scanRunning = false;
 	private String m_companyName;
 
@@ -57,6 +60,21 @@ public class BluetoothLeScanner implements BluetoothProcessListener, BTSnoopList
 		
 		// Start scan process
 		m_proc = BluetoothUtil.hcitoolCmd(name, "lescan", this);
+					
+		set_scanRunning(true);
+	}
+	
+	public void startAdvertisementScan(String name, String companyName, BluetoothAdvertisementScanListener listener) {
+		m_advertisement_listener = listener;
+		m_companyName = companyName;
+
+		s_logger.info("Starting bluetooth le advertisement scan...");
+
+		// Start scan process
+		m_proc = BluetoothUtil.hcitoolCmd(name, new String[]{ "lescan-passive", "--duplicates" }, this);
+		
+		// Start dump process
+		m_dump_proc = BluetoothUtil.btdumpCmd(name, this);
 					
 		set_scanRunning(true);
 	}
@@ -172,6 +190,18 @@ public class BluetoothLeScanner implements BluetoothProcessListener, BTSnoopList
 	public void processBTSnoopRecord(byte[] record) {
 
 		try {
+			
+			// Extract raw advertisement data
+			BluetoothAdvertisementData bAdData = BluetoothUtil.parseLEAdvertisement(record);
+			
+			// Notify advertisement listeners
+			if (bAdData != null && m_advertisement_listener != null) {
+				try {
+					m_advertisement_listener.onAdvertisementDataReceived(bAdData);
+				} catch(Exception e) {
+					s_logger.error("Scan listener threw exception", e);
+				}
+			}
 			
 			// Extract beacon advertisements
 			List<BluetoothBeaconData> beaconDatas = BluetoothUtil.parseLEAdvertisingReport(record, m_companyName);

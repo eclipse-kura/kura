@@ -52,7 +52,7 @@
                                 <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>
                                     <artifactId>org.eclipse.kura.api</artifactId>
-                                    <version>1.0.8</version>
+                                    <version>1.0.9</version>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>

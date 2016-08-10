@@ -49,7 +49,7 @@ public final class OpcUaChannelDescriptor implements ChannelDescriptor {
 		nodeId.setDescription(s_message.nodeId());
 		nodeId.setType(Tscalar.STRING);
 		nodeId.setRequired(true);
-		nodeId.setDefault("/opc/ua/node/example");
+		nodeId.setDefault("");
 
 		final Tad namespaceIndex = new Tad();
 		namespaceIndex.setName(s_message.nodeNamespaceIndex());

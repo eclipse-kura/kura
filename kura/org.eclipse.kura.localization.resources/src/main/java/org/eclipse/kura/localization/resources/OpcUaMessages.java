@@ -54,10 +54,10 @@ public interface OpcUaMessages {
 	@En("Error while converting the retrieved value to the defined typed....")
 	public String errorValueTypeConversion();
 
-	@En("Node Identifier")
+	@En("Variable Node Identifier")
 	public String nodeId();
 
-	@En("Node Namespace Index")
+	@En("Variable Node Namespace Index")
 	public String nodeNamespaceIndex();
 
 	@En("Properties cannot be null")

@@ -1,0 +1,67 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>org.eclipse.kura</groupId>
+		<artifactId>target-platform</artifactId>
+		<version>2.1.0-SNAPSHOT</version>
+		<relativePath>../..</relativePath>
+	</parent>
+
+	<groupId>com.gwt</groupId>
+	<artifactId>com.gwt.user</artifactId>
+	<version>1.0.0</version>
+	
+	<packaging>bundle</packaging>
+	
+	<name>gwt-user</name>
+	<description>GWT User Library</description>
+	
+	<dependencies>
+		<dependency>
+			<groupId>com.google.gwt</groupId>
+			<artifactId>gwt-user</artifactId>
+			<version>2.7.0</version>
+		</dependency>
+	</dependencies>
+	
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<extensions>true</extensions>
+				<configuration>
+					<manifestLocation>META-INF</manifestLocation>
+					<instructions>
+						<Embed-Dependency>*</Embed-Dependency>
+						<Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
+						<Bundle-Name>${project.name}</Bundle-Name>
+						<Bundle-Version>${project.version}</Bundle-Version>
+						<Import-Package>
+							!com.gargoylesoftware.*, !com.google.gson,
+							!com.google.gwt.core.ext.*,
+							!com.google.gwt.core.linker.*,
+							!com.google.gwt.dev.*,
+							!com.google.gwt.lang.*,
+							!com.google.gwt.thirdparty.*,
+							!com.google.gwt.util.tools.shared,
+							!com.google.gwt.util.tools,
+							!com.ibm.icu.*, !com.thoughtworks.*,
+							!org.apache.tapestry.*,
+							!org.eclipse.jetty.*, !org.hibernate.*,
+							!org.kohsuke.*,
+							!org.objectweb.*, !javax.validation.*,
+							!junit.framework,
+							javax.servlet.http; version="2.6.0",
+							javax.servlet;
+							version="2.6.0", *
+						</Import-Package>
+						<_exportcontents>com.google.*, javax.validation.*</_exportcontents>
+					</instructions>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+</project>

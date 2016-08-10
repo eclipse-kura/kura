@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project default="default"
+	xmlns:if="ant:if"
+	xmlns:unless="ant:unless">
+	
+	<property name="target" location="target" />
+	<property name="local.root" location="../.."/>
+	
+	<property file="../../config/kura.target-platform.build.properties"/>
+	
+	<!-- ================================= 
+          target: default
+         ================================= -->
+    <target name="default">
+        <fail message="This is just a library"/>
+    </target>
+
+	
+	<!-- ================================= 
+          target: init
+         ================================= -->
+    <target name="init">
+        <mkdir dir="${target}/download"/>
+    	<mkdir dir="${target}/unpack"/>
+    	<mkdir dir="${target}/source/plugins"/>
+    </target>
+
+	<!-- = = = = = = = = = = = = = = = = =
+          macrodef: orbit
+         = = = = = = = = = = = = = = = = = -->
+    <macrodef name="orbit">
+        <attribute name="bundle" />
+        <sequential>
+        	<get src="http://download.eclipse.org/tools/orbit/downloads/drops/${orbit.release}/repository/plugins/@{bundle}_${@{bundle}.version}.jar" usetimestamp="true" dest="${target}/source/plugins/@{bundle}_${@{bundle}.version}.jar" />
+	    	<get src="http://download.eclipse.org/tools/orbit/downloads/drops/${orbit.release}/repository/plugins/@{bundle}.source_${@{bundle}.version}.jar" usetimestamp="true" dest="${target}/source/plugins/@{bundle}_${@{bundle}.version}.jar" ignoreerrors="true" />
+        </sequential>
+    </macrodef>
+	
+	<!-- = = = = = = = = = = = = = = = = =
+          macrodef: unzipped
+         = = = = = = = = = = = = = = = = = -->
+    <macrodef name="unzipped">
+    	<attribute name="package" />
+    	<attribute name="bundle" />
+        <sequential>
+        	<copy file="${target}/unpack/@{package}/plugins/@{bundle}_${@{bundle}.version}.jar" todir="${target}/source/plugins" />
+        	<copy file="${target}/unpack/@{package}/plugins/@{bundle}.source_${@{bundle}.version}.jar" todir="${target}/source/plugins" failonerror="false" />
+        </sequential>
+    </macrodef>
+	
+	<!-- = = = = = = = = = = = = = = = = =
+          macrodef: localized
+         = = = = = = = = = = = = = = = = = -->
+    <macrodef name="localized">
+    	<attribute name="bundle" />
+    	<attribute name="version" default="${@{bundle}.version}"/>
+        <sequential>
+        	<local name="versionedDirectory" />
+        	<available file="${local.root}/@{bundle}/@{version}/target/@{bundle}-@{version}.jar" property="versionedDirectory" />
+
+        	<copy
+    			if:set="versionedDirectory"
+        		file="${local.root}/@{bundle}/@{version}/target/@{bundle}-@{version}.jar" todir="${target}/source/plugins" />
+        	
+    		<copy
+    			unless:set="versionedDirectory"
+        		file="${local.root}/@{bundle}/target/@{bundle}-@{version}.jar" todir="${target}/source/plugins" />
+        	
+        </sequential>
+    </macrodef>
+	
+	<!-- = = = = = = = = = = = = = = = = =
+          macrodef: checkedin
+         = = = = = = = = = = = = = = = = = -->
+    <macrodef name="checkedin">
+    	<attribute name="bundle" />
+        <sequential>
+        	<copy file="${local.root}/p2-repos/lib/@{bundle}_${@{bundle}.version}.jar" todir="${target}/source/plugins" />
+        </sequential>
+    </macrodef>
+	
+	<scriptdef name="normalizeFileName" language="javascript">
+		<attribute name="file"/>
+		<![CDATA[
+		var file = new java.io.File(attributes.get("file"));
+		var jar = new java.util.jar.JarFile(file);
+		var attrs = jar.getManifest().getMainAttributes();
+		jar.close ();
+		var name = attrs.getValue("Bundle-SymbolicName") + "-" + attrs.getValue("Bundle-Version") + ".jar";
+		
+		if ( file.getName() != name ) {
+			java.nio.file.Files.move ( file.toPath (), new java.io.File(file.getParentFile(), name).toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
+		}
+		]]>
+	</scriptdef>
+
+	<!-- = = = = = = = = = = = = = = = = =
+          macrodef: maven
+         = = = = = = = = = = = = = = = = = -->
+    <macrodef name="maven">
+        <attribute name="groupId" />
+    	<attribute name="artifactId" />
+    	<attribute name="version" default="${@{artifactId}.version}" />
+        <sequential>
+        	<get src="http://repo1.maven.org/maven2/@{groupId}/@{artifactId}/@{version}/@{artifactId}-@{version}.jar" dest="${target}/source/plugins/@{artifactId}-@{version}.jar" />
+        	<normalizeFileName file="${target}/source/plugins/@{artifactId}-@{version}.jar" />
+        </sequential>
+    </macrodef>
+	
+</project>

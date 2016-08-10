@@ -6,7 +6,6 @@ Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: EUROTECH
 Bundle-License: Eclipse Public License v1.0
 Bundle-Category: Asset-Driver Management
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Import-Package: org.eclipse.kura;version="[1.0,2.0)",
  org.eclipse.kura.configuration;version="[1.0,2.0)",
@@ -21,8 +20,12 @@ Import-Package: org.eclipse.kura;version="[1.0,2.0)",
  org.eclipse.kura.util.collection;version="[1.0,2.0)",
  org.osgi.service.component;version="1.2.0",
  org.slf4j;version="1.6.4"
+Service-Component: OSGI-INF/*.xml
 Bundle-ClassPath: lib/sdk-client-0.1.0-20160726.024230-18.jar,
  lib/sdk-core-0.1.0-20160726.024215-18.jar,
  lib/stack-client-0.1.0-20160726.024228-18.jar,
  lib/stack-core-0.1.0-20160726.024206-18.jar,
+ lib/netty-all-4.0.40.Final.jar,
+ lib/guava-19.0.jar,
+ lib/jool-0.9.11.jar,
  .

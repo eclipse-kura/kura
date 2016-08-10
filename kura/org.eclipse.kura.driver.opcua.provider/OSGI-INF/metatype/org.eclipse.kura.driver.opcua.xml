@@ -21,7 +21,7 @@
             type="String"
             cardinality="0"
             required="true"
-            default="0"
+            default="default-server"
             description="OPC-UA Endpoint IP Address">
         </AD>
 
@@ -30,7 +30,7 @@
             type="Integer"
             cardinality="0"
             required="true"
-            default="0"
+            default="53530"
             min="1"
             description="OPC-UA Endpoint Port">
         </AD>
@@ -43,6 +43,113 @@
             default="OPC-UA-Server"
             description="OPC-UA Server Name">
         </AD>
+        
+        <AD id="session.timeout"
+            name="session.timeout"
+            type="Integer"
+            cardinality="0"
+            required="true"
+            default="120"
+            description="Session timeout (in seconds)">
+        </AD>
+        
+        <AD id="request.timeout"
+            name="request.timeout"
+            type="Integer"
+            cardinality="0"
+            required="true"
+            default="60"
+            description="Request timeout (in seconds)">
+        </AD>
+        
+        <AD id="application.name" 
+        	name="application.name" 
+        	type="String"
+			cardinality="0" 
+			required="true" 
+			default="opc-ua client"
+			description="OPC-UA application name" />
+			
+		<AD id="application.uri" 
+			name="application.uri" 
+			type="String"
+			cardinality="0" 
+			required="true" 
+			default="urn:kura:opcua:client"
+			description="OPC-UA application uri" />
+			
+		<AD id="certificate.location" 
+			name="certificate.location" 
+			type="String"
+			cardinality="0" 
+			required="true" 
+			default="PFX or JKS Keystore"
+			description="OPC-UA application certificate (Absolute Location)" />
+			
+		<AD id="security.policy" 
+			name="security.policy"
+			type="Integer" 
+			cardinality="0" 
+			required="true" 
+			default="0"
+			description="Security Policy">
+			<Option label="None" value="0" />
+			<Option label="Basic128Rsa15" value="1" />
+			<Option label="Basic256" value="2" />
+			<Option label="Basic256Sha256" value="3" />
+		</AD>
+		
+		<AD id="username" 
+			name="username"
+			type="String" 
+			cardinality="0" 
+			required="false" 
+			default=""
+			description="OPC-UA server username" />
+		
+		<AD id="password" 
+			name="password"
+			type="String" 
+			cardinality="0" 
+			required="false" 
+			default=""
+			description="OPC-UA server password" />
+		
+		<AD id="keystore.client.alias" 
+			name="keystore.client.alias" 
+			type="String"
+			cardinality="0" 
+			required="true" 
+			default="client-ai"
+			description="Client alias for the keystore" />
+
+		<AD id="keystore.server.alias" 
+			name="keystore.server.alias"
+			type="String" 
+			cardinality="0" 
+			required="true" 
+			default="server-ai"
+			description="Server alias for the keystore" />
+		
+		<AD id="keystore.type" 
+			name="keystore.type"
+			type="String" 
+			cardinality="0" 
+			required="true" 
+			default="PKCS12"
+			description="Keystore type">
+			<Option label="PKCS11" value="PKCS11" />
+			<Option label="PKCS12" value="PKCS12" />
+			<Option label="JKS" value="JKS" />
+		</AD>
+
+		<AD id="keystore.password" 
+			name="keystore.password"
+			type="String" 
+			cardinality="0" 
+			required="true" 
+			default="password"
+			description="Configurable Property to set keystore password" />
         
     </OCD>
     

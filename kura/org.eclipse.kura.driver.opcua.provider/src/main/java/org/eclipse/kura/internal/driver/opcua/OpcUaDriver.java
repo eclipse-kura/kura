@@ -46,8 +46,10 @@ import org.eclipse.milo.opcua.sdk.client.api.config.OpcUaClientConfig;
 import org.eclipse.milo.opcua.sdk.client.api.nodes.attached.UaVariableNode;
 import org.eclipse.milo.opcua.stack.client.UaTcpStackClient;
 import org.eclipse.milo.opcua.stack.core.types.builtin.DataValue;
+import org.eclipse.milo.opcua.stack.core.types.builtin.LocalizedText;
 import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
 import org.eclipse.milo.opcua.stack.core.types.builtin.Variant;
+import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UInteger;
 import org.eclipse.milo.opcua.stack.core.types.structured.EndpointDescription;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
@@ -75,6 +77,9 @@ public final class OpcUaDriver implements Driver {
 
 	/** Node Identifier Property */
 	private static final String NODE_ID = "node.id";
+
+	/** Node Namespace Index Property */
+	private static final String NODE_NAMESPACE_INDEX = "node.namespace.index";
 
 	/** The Logger instance. */
 	private static final Logger s_logger = LoggerFactory.getLogger(OpcUaDriver.class);
@@ -111,18 +116,27 @@ public final class OpcUaDriver implements Driver {
 	public void connect() throws ConnectionException {
 		EndpointDescription[] endpoints;
 		try {
-			endpoints = UaTcpStackClient.getEndpoints(new StringBuilder().append("opc.tcp://")
-					.append(this.m_options.getIp()).append(":").append(this.m_options.getPort()).append("/")
-					.append(this.m_options.getServerName()).toString()).get();
+			final String endPoint = new StringBuilder().append("opc.tcp://").append(this.m_options.getIp()).append(":")
+					.append(this.m_options.getPort()).append("/").append(this.m_options.getServerName()).toString();
+			endpoints = UaTcpStackClient.getEndpoints(endPoint).get();
 			final Optional<EndpointDescription> endpoint = Arrays.stream(endpoints).findFirst();
 			if (!endpoint.isPresent()) {
 				throw new ConnectionException(s_message.connectionProblem());
 			}
-			final OpcUaClientConfig clientConfig = OpcUaClientConfig.builder().setEndpoint(endpoint.get()).build();
+			final KeyStoreLoader loader = new KeyStoreLoader(this.m_options.getKeystoreType(),
+					this.m_options.getKeystoreClientAlias(), this.m_options.getKeystoreServerAlias(),
+					this.m_options.getKeystorePassword(), this.m_options.getApplicationCertificate());
+			final OpcUaClientConfig clientConfig = OpcUaClientConfig.builder().setEndpoint(endpoint.get())
+					.setApplicationName(LocalizedText.english(this.m_options.getApplicationName()))
+					.setApplicationUri(this.m_options.getApplicationUri())
+					.setRequestTimeout(UInteger.valueOf(this.m_options.getRequestTimeout()))
+					.setSessionTimeout(UInteger.valueOf(this.m_options.getSessionTimeout()))
+					.setIdentityProvider(this.m_options.getIdentityProvider()).setKeyPair(loader.getClientKeyPair())
+					.setCertificate(loader.getClientCertificate()).build();
 			this.m_client = new OpcUaClient(clientConfig);
 			this.m_isConnected = true;
 		} catch (final Exception e) {
-			s_logger.error(ThrowableUtil.stackTraceAsString(e));
+			throw new ConnectionException(e);
 		}
 
 	}
@@ -234,7 +248,15 @@ public final class OpcUaDriver implements Driver {
 				record.setTimestamp(System.currentTimeMillis());
 				continue;
 			}
-			final NodeId nodeId = new NodeId(2, channelConfig.get(NODE_ID).toString());
+			// check if the node namespace index configuration is provided
+			if (!channelConfig.containsKey(NODE_NAMESPACE_INDEX)) {
+				record.setDriverStatus(new DriverStatus(DRIVER_ERROR_CHANNEL_NOT_ACCESSIBLE,
+						s_message.errorRetrievingNodeNamespace(), null));
+				record.setTimestamp(System.currentTimeMillis());
+				continue;
+			}
+			final int nodeNamespaceIndex = Integer.parseInt(channelConfig.get(NODE_NAMESPACE_INDEX).toString());
+			final NodeId nodeId = new NodeId(nodeNamespaceIndex, channelConfig.get(NODE_ID).toString());
 			final UaVariableNode node = this.m_client.getAddressSpace().getVariableNode(nodeId);
 			Object value = null;
 			try {
@@ -306,8 +328,16 @@ public final class OpcUaDriver implements Driver {
 				record.setTimestamp(System.currentTimeMillis());
 				continue;
 			}
+			// check if the node namespace index configuration is provided
+			if (!channelConfig.containsKey(NODE_NAMESPACE_INDEX)) {
+				record.setDriverStatus(new DriverStatus(DRIVER_ERROR_CHANNEL_NOT_ACCESSIBLE,
+						s_message.errorRetrievingNodeNamespace(), null));
+				record.setTimestamp(System.currentTimeMillis());
+				continue;
+			}
+			final int nodeNamespaceIndex = Integer.parseInt(channelConfig.get(NODE_NAMESPACE_INDEX).toString());
 			final TypedValue<?> value = record.getValue();
-			final NodeId nodeId = new NodeId(2, channelConfig.get(NODE_ID).toString());
+			final NodeId nodeId = new NodeId(nodeNamespaceIndex, channelConfig.get(NODE_ID).toString());
 			final UaVariableNode node = this.m_client.getAddressSpace().getVariableNode(nodeId);
 			final DataValue newValue = new DataValue(new Variant(value.getValue()));
 			try {

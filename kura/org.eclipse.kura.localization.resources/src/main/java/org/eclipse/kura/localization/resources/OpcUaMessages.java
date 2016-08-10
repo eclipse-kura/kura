@@ -45,6 +45,9 @@ public interface OpcUaMessages {
 	@En("Error while retrieving Node ID....")
 	public String errorRetrievingNodeId();
 
+	@En("Error while retrieving Node Namespace index....")
+	public String errorRetrievingNodeNamespace();
+
 	@En("Error while retrieving value type....")
 	public String errorRetrievingValueType();
 
@@ -53,6 +56,9 @@ public interface OpcUaMessages {
 
 	@En("Node Identifier")
 	public String nodeId();
+
+	@En("Node Namespace Index")
+	public String nodeNamespaceIndex();
 
 	@En("Properties cannot be null")
 	public String propertiesNonNull();

@@ -17,57 +17,50 @@ import java.nio.file.Paths;
 import java.security.Key;
 import java.security.KeyPair;
 import java.security.KeyStore;
-import java.security.KeyStoreException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.cert.X509Certificate;
 
 /**
- * Loads the provided keystore
- *
- * @author AMIT KUMAR MONDAL
- *
+ * The Class KeyStoreLoader loads the provided keystore
  */
 public final class KeyStoreLoader {
 
-	/**
-	 * Keystore Certificate
-	 */
+	/** Keystore Certificate. */
 	private final String m_certificate;
 
-	/**
-	 * Keystore Client Alias
-	 */
+	/** Keystore Client Alias. */
 	private final String m_clientAlias;
 
-	/**
-	 * Keystore Client Certificate
-	 */
+	/** Keystore Client Certificate. */
 	private X509Certificate m_clientCertificate;
 
-	/**
-	 * Keystore Key Pair
-	 */
+	/** Keystore Key Pair. */
 	private KeyPair m_clientKeyPair;
 
-	/**
-	 * Keystore Type
-	 */
+	/** Keystore Type. */
 	private final String m_keystoreType;
 
-	/**
-	 * Keystore Password
-	 */
+	/** Keystore Password. */
 	private final char[] m_password;
 
-	/**
-	 * Keystore Server Alias
-	 */
+	/** Keystore Server Alias. */
 	@SuppressWarnings("unused")
 	private final String m_serverAlias;
 
 	/**
-	 * Constructor
+	 * Instantiates a new key store loader.
+	 *
+	 * @param keystoreType
+	 *            the keystore type
+	 * @param clientAlias
+	 *            the client alias
+	 * @param serverAlias
+	 *            the server alias
+	 * @param password
+	 *            the password
+	 * @param certificate
+	 *            the certificate
 	 */
 	public KeyStoreLoader(final String keystoreType, final String clientAlias, final String serverAlias,
 			final String password, final String certificate) {
@@ -79,24 +72,27 @@ public final class KeyStoreLoader {
 	}
 
 	/**
-	 * Returns the client certificate
+	 * Gets the client certificate.
+	 *
+	 * @return the client certificate
 	 */
 	public X509Certificate getClientCertificate() {
 		return this.m_clientCertificate;
 	}
 
 	/**
-	 * Returns the client key pair
+	 * Gets the client key pair.
+	 *
+	 * @return the client key pair
 	 */
 	public KeyPair getClientKeyPair() {
 		return this.m_clientKeyPair;
 	}
 
 	/**
-	 * Loads the certificate
+	 * Loads the certificate.
 	 *
 	 * @return the keystore instance
-	 * @throws KeyStoreException
 	 * @throws Exception
 	 *             if the load is unsuccessful
 	 */

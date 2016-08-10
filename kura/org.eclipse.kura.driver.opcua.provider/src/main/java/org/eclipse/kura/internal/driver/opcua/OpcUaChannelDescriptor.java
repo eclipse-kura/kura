@@ -27,7 +27,8 @@ import org.eclipse.kura.util.collection.CollectionUtil;
  *
  * <ul>
  * <li>node.id</li> denotes the OPC-UA Variable Node.
- * <li>node.namespace.index</li> denotes the OPC-UA Node Namespace index.
+ * <li>node.namespace.index</li> denotes the OPC-UA Variable Node Namespace
+ * index.
  * </ul>
  */
 public final class OpcUaChannelDescriptor implements ChannelDescriptor {
@@ -49,7 +50,7 @@ public final class OpcUaChannelDescriptor implements ChannelDescriptor {
 		nodeId.setDescription(s_message.nodeId());
 		nodeId.setType(Tscalar.STRING);
 		nodeId.setRequired(true);
-		nodeId.setDefault("");
+		nodeId.setDefault("MyNode");
 
 		final Tad namespaceIndex = new Tad();
 		namespaceIndex.setName(s_message.nodeNamespaceIndex());

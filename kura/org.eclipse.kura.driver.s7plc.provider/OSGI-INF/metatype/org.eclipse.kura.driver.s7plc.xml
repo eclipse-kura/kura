@@ -30,7 +30,7 @@
             type="Integer"
             cardinality="0"
             required="true"
-            default="502"
+            default="102"
             description="S7 PLC Host Port">
         </AD>
         

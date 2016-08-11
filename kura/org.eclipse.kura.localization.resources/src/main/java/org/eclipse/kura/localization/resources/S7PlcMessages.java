@@ -33,7 +33,7 @@ public interface S7PlcMessages {
 	@En("Byte Count")
 	public String byteCount();
 
-	@En("Byte Count (required for read operation)")
+	@En("Byte Count (required for READ operation)")
 	public String byteCountDesc();
 
 	@En("Unable to Connect...")

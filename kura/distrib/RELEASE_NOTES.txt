@@ -1,3 +1,63 @@
+Eclipse Kura - 2.0.1
+-------------------------------------------------------------------------
+  
+Bug Fixes :
+  * Fixed github issues:
+    * #340: [Configuration] Metatype not updated in the Web UI
+    * #393: [NN] NN profiles are broken in Kura 2.0.0
+    * #373: Kura 2.0.0 distribution for Raspberry-Pi includes emulator.gpio instead of linux.gpio
+    * #338: [Web2]: String input forced to a maximum length of 255
+    * #316: Debian package should declare dependency on java
+    * #296: [Web UI] Status | Connection: if the connection username is not set, "null" is shown
+    * #289: [Web UI] Wireless Password disappears after verification 
+    * #275: [Dev Env] Add org.eclipse.kura.linux.bluetooth to the target-platform.
+    
+  * Merged no issue-related Pull Requests:
+    * #441: JDK DIO: disable verbose logging from armv5_sf and x86_64 libraries.
+    * #440: Modified the configuration service to prevent the generation of empty snapshots.
+    * #439: Refactored code, modified behavior with gpio calculation from base address + offset.
+    * #438: Added more checks in ServicesUI to prevent possible exception. Removed servicesUi refresh at every click in status section.
+    * #431: Fix missing license headers
+    * #428: Fix missing camel bundle in dev workspace
+    * #417: Fix logging of exceptions and clean up other logging calls
+    * #404: Fix a possible NPE followed by a NCDFE when system property is missing
+    * #402: Fix two NullPointerExceptions and improve the error output
+    * #400: Fix build warnings
+    * #395: Remove dependency on slf4j-log4j12
+    * #388: Modified snapshot_0s in order to have memory persistance for in-flight messages.
+    * #382: Use a copy-on-write list in order to support concurrent modifications
+    * #361: Use Import-Package in preference of Require-Bundle
+    * #351: Pom cleanup
+    * #347: Reset the original state of the accessible flag
+    * #346: Clean up the error output to actually print out stack traces
+    * #336: Corrected jacoco version due to build failure in JDK8
+    * #328: Fix output of executed commands
+    * #325: Fix a possible Context Class Loader leak
+    * #320: Provide Oomph setup and clean up build issue
+    
+  
+
+Know Issues :
+  * Multiple connections: updating a service (e.g. MqttDataTransport) of a connection
+    has the effect to cause the unwanted reactivation of the next higher layer service (i.e. DataService)
+    of the other connection(s). This in turn will cause the reactivation of all dependent components.
+    This is not desired and not yet understood (Equinox bug?). See also Github issue #311.
+  * Modem: Ublox Lisa U201 may not be able to establish PPP connection when CHAP/PAP authentication is required.
+  * BLE only tested on the Raspberry Pi B with a Broadcom BCM20702 USB dongle and the TI SensorTag. The kernel version was "Linux raspberrypi 3.18.11-v7+ #781 SMP PREEMPT Tue Apr 21 18:07:59 BST 2015 armv7l GNU/Linux". Note that on the kernel "Linux version 4.1.7-v7+ (dc4@dc4-XPS13-9333) (gcc version 4.8.3 20140303 (prerelease) (crosstool-NG linaro-1.13.1+bzr2650 - Linaro GCC 2014.03) ) #817 SMP PREEMPT Sat Sep 19 15:32:00 BST 2015" has a bug on gatttool and the BLE connection failes.
+    The only working version of BlueZ is 4.101. The deb package is not available from Raspbian so it
+    must be compiled from sources.
+  * WiFi on Raspberry Pi only tested with WiPi WiFi Dongle (Realink RT5370 chipset) and official Pi USB WiFi Dongle (Broadcom BCM43143 chipset).
+    AccessPoint WiFi mode not working for Broadcom chipset.
+  * The reference JVMs are Oracle Java SE Embedded version 7 Update 40 and Java SE Embedded version 8 Update 65.
+  * Hardware watchdog: not implemented on all platforms
+  * Only one WAN interface is currently supported. A warning in displayed
+    in the WEB UI if the user attempts to enable more than one WAN interface
+  * When first modem configuration is submitted, unconfigured cellular interface for serial modem (e.g. HE910) is not being replaced by
+    ppp0 interface. Both ppp0 and HE910 interfaces are shown in the Web Admin.
+  * Web UI may hang when configuration snapshot is uploaded. This happens because HTTP connection is lost due to toggling of the network interface which happened even if network configuration hasn't been modified.
+
+
+
 Eclipse Kura - 2.0.0
 -------------------------------------------------------------------------
 

@@ -18,6 +18,19 @@
 		<module>p2-repo-common</module>
 		<module>p2-repo-equinox_3.8.1</module>
 	</modules>
+	
+	<distributionManagement>
+		<repository>
+			<id>repo.eclipse.org</id>
+			<name>Kura Repository - Releases</name>
+			<url>https://repo.eclipse.org/content/repositories/kura-releases/</url>
+		</repository>
+		<snapshotRepository>
+			<id>repo.eclipse.org</id>
+			<name>Kura Repository - Snapshots</name>
+			<url>https://repo.eclipse.org/content/repositories/kura-snapshots/</url>
+		</snapshotRepository>
+	</distributionManagement>
 
 	<profiles>
 		<profile>

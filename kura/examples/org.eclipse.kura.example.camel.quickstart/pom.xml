@@ -6,7 +6,7 @@
 
     <groupId>org.eclipse.kura</groupId>
     <artifactId>org.eclipse.kura.example.camel.quickstart</artifactId>
-    <version>1.0.1-SNAPSHOT</version>
+    <version>1.0.1</version>
     <packaging>bundle</packaging>
 
     <properties>

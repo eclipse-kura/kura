@@ -19,6 +19,7 @@ import org.eclipse.kura.driver.Driver;
 import org.eclipse.kura.driver.Driver.ConnectionException;
 import org.eclipse.kura.driver.DriverRecord;
 import org.eclipse.kura.type.DataType;
+import org.eclipse.kura.type.TypedValues;
 import org.eclipse.kura.util.base.ThrowableUtil;
 import org.eclipse.kura.util.collection.CollectionUtil;
 import org.osgi.service.component.ComponentContext;
@@ -34,6 +35,7 @@ public final class StubOpcUaDriverClient {
 
 	protected synchronized void activate(final ComponentContext context, final Map<String, Object> properties) {
 		final List<DriverRecord> list = CollectionUtil.newArrayList();
+		final List<DriverRecord> list2 = CollectionUtil.newArrayList();
 		final Map<String, Object> channelConfig1 = CollectionUtil.newHashMap();
 		channelConfig1.put("channel.id", 1);
 		channelConfig1.put("channel.value.type", DataType.DOUBLE);
@@ -50,9 +52,20 @@ public final class StubOpcUaDriverClient {
 		final DriverRecord record2 = new DriverRecord();
 		record2.setChannelConfig(channelConfig2);
 
+		final Map<String, Object> channelConfig3 = CollectionUtil.newHashMap();
+		channelConfig3.put("channel.id", 1);
+		channelConfig3.put("channel.value.type", DataType.DOUBLE);
+		channelConfig3.put("node.id", "MyLevel");
+		channelConfig3.put("node.namespace.index", 2);
+		final DriverRecord record3 = new DriverRecord();
+		record3.setValue(TypedValues.newDoubleValue(45545.32));
+		record3.setChannelConfig(channelConfig3);
+
 		list.add(record1);
 		list.add(record2);
+		list2.add(record3);
 		try {
+			this.m_driver.write(list2);
 			this.m_driver.read(list);
 		} catch (final ConnectionException e) {
 			s_logger.info("=========>Error from OPC-UA Driver =====>" + ThrowableUtil.stackTraceAsString(e));

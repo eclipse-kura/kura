@@ -19,7 +19,7 @@
 
     <groupId>org.eclipse.kura</groupId>
     <artifactId>org.eclipse.kura.example.camel.aggregation</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.0.1-SNAPSHOT</version>
     <packaging>bundle</packaging>
 
     <properties>

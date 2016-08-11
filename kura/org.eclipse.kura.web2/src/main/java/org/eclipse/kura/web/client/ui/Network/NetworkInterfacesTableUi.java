@@ -54,6 +54,7 @@ public class NetworkInterfacesTableUi extends Composite {
 
 	private static final Messages MSGS = GWT.create(Messages.class);
 	private final GwtNetworkServiceAsync gwtNetworkService = GWT.create(GwtNetworkService.class);
+	private final String SELECTED_INTERFACE = "ui.selected.interface";
 
 	GwtSession session;
 	NetworkTabsUi tabs;
@@ -69,9 +70,9 @@ public class NetworkInterfacesTableUi extends Composite {
 	final SingleSelectionModel<GwtNetInterfaceConfig> selectionModel = new SingleSelectionModel<GwtNetInterfaceConfig>();
 	TextColumn<GwtNetInterfaceConfig> col1;
 
-	public NetworkInterfacesTableUi(GwtSession session,	NetworkTabsUi tabsPanel) {
+	public NetworkInterfacesTableUi(GwtSession s,	NetworkTabsUi tabsPanel) {
 		initWidget(uiBinder.createAndBindUi(this));
-		this.session = session;
+		this.session = s;
 		this.tabs = tabsPanel;
 		initTable();
 		loadData();
@@ -80,6 +81,7 @@ public class NetworkInterfacesTableUi extends Composite {
 
 			@Override
 			public void onSelectionChange(SelectionChangeEvent event) {
+
 				if (selection != null && tabs.isDirty()) {
 					// there was an earlier selection, changes have not
 					// been saved						
@@ -96,6 +98,7 @@ public class NetworkInterfacesTableUi extends Composite {
 							confirm.hide();
 							selection = selectionModel.getSelectedObject();
 							if (selection != null) {
+								session.set(SELECTED_INTERFACE, selection.getName());
 								tabs.setNetInterface(selection);
 								tabs.setDirty(false);
 							}
@@ -117,6 +120,7 @@ public class NetworkInterfacesTableUi extends Composite {
 					// no unsaved changes
 					selection = selectionModel.getSelectedObject();
 					if (selection != null) {
+						session.set(SELECTED_INTERFACE, selection.getName());
 						tabs.setNetInterface(selection);
 					}
 				}
@@ -221,8 +225,22 @@ public class NetworkInterfacesTableUi extends Composite {
 				if (!interfacesProvider.getList().isEmpty()) {
 					interfacesGrid.setVisible(true);
 					notification.setVisible(false);
-					selectionModel.setSelected(interfacesProvider.getList().get(0),	true);
-					interfacesGrid.getSelectionModel().setSelected(interfacesProvider.getList().get(0), true);
+					
+					// Check session to see if interface was already chosen
+					// Must select based on name, as keys in SelectionModel change across RPC calls
+					String sessionSelection = (String) session.get(SELECTED_INTERFACE);
+					if (sessionSelection != null) {
+						for (GwtNetInterfaceConfig gc : interfacesProvider.getList()) {
+							if (gc.getName().equals(sessionSelection)) {
+								selectionModel.setSelected(gc, true);
+								break;
+							}							
+						}
+					}
+					else {
+						selectionModel.setSelected(interfacesProvider.getList().get(0),	true);						
+					}
+					
 
 				} else {
 					interfacesGrid.setVisible(false);

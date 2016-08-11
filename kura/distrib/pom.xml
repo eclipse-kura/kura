@@ -251,6 +251,16 @@
 									<artifactId>org.eclipse.kura.protocol.modbus</artifactId>
 									<version>${org.eclipse.kura.protocol.modbus.version}</version>
 								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.kura.example.camel.aggregation</artifactId>
+									<version>${org.eclipse.kura.example.camel.aggregation.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.kura.example.camel.quickstart</artifactId>
+									<version>${org.eclipse.kura.example.camel.quickstart.version}</version>
+								</artifactItem>
 							</artifactItems>
 							<stripVersion>true</stripVersion>
 							<outputDirectory>${project.basedir}/target/plugins</outputDirectory>
@@ -383,6 +393,9 @@
   								<move file="target/plugins/org.eclipse.kura.emulator.position.jar" tofile="target/plugins/org.eclipse.kura.emulator.position_${org.eclipse.kura.emulator.position.version}.jar" />
   								<move file="target/plugins/org.eclipse.kura.emulator.usb.jar" tofile="target/plugins/org.eclipse.kura.emulator.usb_${org.eclipse.kura.emulator.usb.version}.jar" />
   								<move file="target/plugins/org.eclipse.kura.emulator.watchdog.jar" tofile="target/plugins/org.eclipse.kura.emulator.watchdog_${org.eclipse.kura.emulator.watchdog.version}.jar" />
+  								
+  								<move file="target/plugins/org.eclipse.kura.example.camel.aggregation.jar" tofile="target/plugins/org.eclipse.kura.example.camel.aggregation_${org.eclipse.kura.example.camel.aggregation.version}.jar" failonerror="false"/>
+								<move file="target/plugins/org.eclipse.kura.example.camel.quickstart.jar" tofile="target/plugins/org.eclipse.kura.example.camel.quickstart_${org.eclipse.kura.example.camel.quickstart.version}.jar" failonerror="false"/>
 							</tasks>
 						</configuration>
 					</execution>
@@ -2118,7 +2131,7 @@
 			</build>
 		</profile>
 		<profile>
-			<id>extra-dps</id>
+			<id>extra-dps</id> <!-- To be redistributed only in release phase. In snapshot phase them will not work.-->
 			<activation>
 				<activeByDefault>true</activeByDefault>
 			</activation>
@@ -2136,9 +2149,7 @@
 									<goal>run</goal>
 								</goals>
 								<configuration>
-									<target>
-										<property name="deployment.package.version" value="${deployment.package.version}" />
-										<property name="kura.build.version" value="${kura.build.version}" />
+									<target if="${is.not.snapshot}">
 										<ant antfile="${basedir}/src/main/ant/build_modbus_dp.xml"
 											target="build-dp" />
 									</target>
@@ -2153,7 +2164,7 @@
 								</goals>
 								<configuration>
 									<exportAntProperties>true</exportAntProperties>
-									<target name="verify-can">
+									<target name="verify-can" if="${is.not.snapshot}">
 										<available file="target/plugins/org.eclipse.kura.protocol.can_${org.eclipse.kura.protocol.can.version}.jar" property="can.jar.present" />
 									</target>
 								</configuration>
@@ -2167,9 +2178,35 @@
 								</goals>
 								<configuration>
 									<target name="dp-can" if="can.jar.present">
-										<property name="deployment.package.version" value="${deployment.package.version}" />
-										<property name="kura.build.version" value="${kura.build.version}" />
 										<ant antfile="${basedir}/src/main/ant/build_can_dp.xml" target="build-dp" />
+									</target>
+								</configuration>
+							</execution>
+							
+							<execution>
+								<id>camel-aggregation-dp</id>
+								<phase>install</phase>
+								<goals>
+									<goal>run</goal>
+								</goals>
+								<configuration>
+									<target if="${is.not.snapshot}">
+										<ant antfile="${basedir}/src/main/ant/build_camel-aggregation_dp.xml"
+											target="build-dp" />
+									</target>
+								</configuration>
+							</execution>
+							
+							<execution>
+								<id>camel-quickstart-dp</id>
+								<phase>install</phase>
+								<goals>
+									<goal>run</goal>
+								</goals>
+								<configuration>
+									<target if="${is.not.snapshot}">
+										<ant antfile="${basedir}/src/main/ant/build_camel-quickstart_dp.xml"
+											target="build-dp" />
 									</target>
 								</configuration>
 							</execution>

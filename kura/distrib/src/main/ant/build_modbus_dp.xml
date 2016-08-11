@@ -6,7 +6,7 @@
 		<!-- Create the manifest -->
 		<echo file="${project.build.directory}/org.eclipse.kura.protocol.modbus_${org.eclipse.kura.protocol.modbus.version}/dp_stage/META-INF/MANIFEST.MF" append="false">Manifest-Version: 1.0
 DeploymentPackage-SymbolicName: org.eclipse.kura.protocol.modbus
-DeploymentPackage-Version: ${deployment.package.version}
+DeploymentPackage-Version: ${org.eclipse.kura.protocol.modbus.version}
 
 Name: org.eclipse.kura.protocol.modbus_${org.eclipse.kura.protocol.modbus.version}.jar
 Bundle-SymbolicName: org.eclipse.kura.protocol.modbus
@@ -17,7 +17,7 @@ Bundle-Version: ${org.eclipse.kura.protocol.modbus.version}</echo>
                  todir="${project.build.directory}/org.eclipse.kura.protocol.modbus_${org.eclipse.kura.protocol.modbus.version}/dp_stage" />
 	
 
-        <jar destfile="${project.build.directory}/org.eclipse.kura.protocol.modbus_${deployment.package.version}.dp"
+        <jar destfile="${project.build.directory}/org.eclipse.kura.protocol.modbus_${org.eclipse.kura.protocol.modbus.version}.dp"
 		manifest="${project.build.directory}/org.eclipse.kura.protocol.modbus_${org.eclipse.kura.protocol.modbus.version}/dp_stage/META-INF/MANIFEST.MF"
                 basedir="${project.build.directory}/org.eclipse.kura.protocol.modbus_${org.eclipse.kura.protocol.modbus.version}/dp_stage" />	
     </target>

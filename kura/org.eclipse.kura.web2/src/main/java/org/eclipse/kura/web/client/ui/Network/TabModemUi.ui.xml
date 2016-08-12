@@ -35,6 +35,9 @@
 	.help {
 		height: 310px;
 	}
+	.help-body {
+		width: 275px;
+	}
 	</ui:style>
 
 	<b:Container fluid="true">
@@ -156,10 +159,10 @@
 			<b:Column addStyleNames="{style.padding}" size="MD_12">
 			</b:Column>
 			<b:Column size="MD_12">
-				<b:Row>
+				<b:Row addStyleNames="affix" b:id="modem-help">
 					<b:Panel>
 						<b:PanelHeader ui:field="helpTitle" />
-						<b:PanelBody  >
+						<b:PanelBody addStyleNames="{style.help-body}" >
 							<g:ScrollPanel addStyleNames="{style.help}" ui:field="helpText" />
 						</b:PanelBody>
 					</b:Panel>

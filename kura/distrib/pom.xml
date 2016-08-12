@@ -1890,7 +1890,11 @@
 										<delete
 											file="${project.build.directory}/staging/target-definition/pom.xml" />
 										<delete
+											dir="${project.build.directory}/staging/target-definition/common/source" />
+										<delete
 											file="${project.build.directory}/staging/target-definition/kura-equinox_3.8.1.target" />
+										<delete
+											dir="${project.build.directory}/staging/target-definition/equinox_3.8.1/source" />
 										<delete
 											file="${project.build.directory}/staging/target-definition/equinox_3.8.1/repository/artifacts.xml" />
 										<delete

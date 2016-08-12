@@ -60,7 +60,7 @@
 		<replace file="${project.build.directory}/${build.output.name}/kura.properties" token="{kura.symlink}" value="${kura.symlink}"/>
 
 
-		<condition property="kura.osgi.repo" value="../target-definition/equinox_3.8.1/repository">
+		<condition property="kura.osgi.repo" value="../target-definition/equinox_3.8.1/source">
 			<or>
 				<not>
 					<isset property="kura.osgi"/>
@@ -435,7 +435,7 @@ fi
 			<zipfileset dir="${kura.osgi.repo}/plugins/"
                         prefix="${build.output.name}/plugins"/>
 
-			<zipfileset dir="../target-definition/common/repository/plugins" excludes="com.google.protobuf_2.6.0.jar,org.eclipse.paho.*,com.gwt.user_*"
+			<zipfileset dir="../target-definition/common/source/plugins" excludes="com.google.protobuf_2.6.0.jar,org.eclipse.paho.*,com.gwt.user_*"
                         prefix="${build.output.name}/plugins"/>
 
 
@@ -684,7 +684,7 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
 			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/kura/plugins/com.codeminders.hidapi_${com.codeminders.hidapi.version}.jar@3:start" />
 			<entry key="osgi.bundles" operation="+"
-				value=", reference:file:${kura.install.dir}/kura/plugins/org.eclipse.soda.dk.comm_1.2.2.SNAPSHOT.jar@3:start" /> <!-- ${org.eclipse.soda.dk.comm.version} -->
+				value=", reference:file:${kura.install.dir}/kura/plugins/org.eclipse.soda.dk.comm_${org.eclipse.soda.dk.comm.version}.jar@3:start" />
 			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/kura/plugins/org.apache.commons.lang3_${org.apache.commons.lang3.version}.jar@4:start" />
 			<entry key="osgi.bundles" operation="+"

@@ -8,7 +8,14 @@ target
 .project
 .wtpmodules
 .settings
+.sonar
+.sonarlint
+.metadata
+.recommenders
+kura/data
+kura/snapshots
 kura/target-definition/*/plugins/*
+kura/target-definition/*/source/*
 kura/target-definition/repository/artifacts.xml
 kura/target-definition/repository/content.xml
 kura/target-definition/repository/plugins/*

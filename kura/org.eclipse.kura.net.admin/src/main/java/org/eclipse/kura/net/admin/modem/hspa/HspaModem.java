@@ -262,9 +262,14 @@ public class HspaModem implements HspaCellularModem{
     public void enableGps() throws KuraException {
     	s_logger.warn("Modem GPS not supported");
     }
-    
+	
 	@Override
     public void disableGps() throws KuraException {
+		s_logger.warn("Modem GPS not supported");
+    }
+	
+	@Override
+    public void forceDisableGps() throws KuraException {
 		s_logger.warn("Modem GPS not supported");
     }
     
@@ -743,4 +748,5 @@ public class HspaModem implements HspaCellularModem{
     	}
     	return status;
 	}
+
 }

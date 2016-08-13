@@ -25,7 +25,7 @@
             cardinality="0"
             required="true"
             default="false"
-            description="Whether or not to enable the PositionService"/>
+            description="Whether or not to enable the PositionService. If a modem GPS is enabled, the position service will use it instead of the one configured below."/>
             
         <AD id="static"
         	name="static"

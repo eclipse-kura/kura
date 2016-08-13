@@ -84,14 +84,11 @@ public class GpsDevice {
 	}
 
 	public String getUnitAddress() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
-	public void configureProtocol(Properties protocolConfig)
-			throws PositionException {
-		// TODO Auto-generated method stub
-
+	public void configureProtocol(Properties protocolConfig) throws PositionException {
+		// Empty method
 	}
 
 	public void configureConnection(ConnectionFactory connFactory,
@@ -103,11 +100,7 @@ public class GpsDevice {
 			connConfigd = false;
 		}
 
-		try {
-			comm = new SerialCommunicate(connFactory, connectionConfig);
-		} catch (PositionException e) {
-			throw(e);
-		}
+		comm = new SerialCommunicate(connFactory, connectionConfig);
 		connConfigd = true;
 	}
 
@@ -178,7 +171,7 @@ public class GpsDevice {
 	 */
 	private final class SerialCommunicate {
 		
-		private final static long THREAD_TERMINATION_TOUT = 1; // in seconds
+		private static final long THREAD_TERMINATION_TOUT = 1; // in seconds
 		
 		private ScheduledExecutorService m_executor;
 		private ScheduledFuture<?>  m_task;
@@ -192,33 +185,22 @@ public class GpsDevice {
 			s_logger.debug("Configure serial connection");
 			
 			connConfig = connectionConfig;
-			
-			String sPort;
-			String sBaud;
-			String sStop;
-			String sParity;
-			String sBits;				
 
-			if (((sPort = connectionConfig.getProperty("port")) == null)
-					|| ((sBaud = connectionConfig.getProperty("baudRate")) == null)
-					|| ((sStop = connectionConfig.getProperty("stopBits")) == null)
-					|| ((sParity = connectionConfig.getProperty("parity")) == null)
-					|| ((sBits = connectionConfig.getProperty("bitsPerWord")) == null))
+			if (((connectionConfig.getProperty("port")) == null)
+					|| ((connectionConfig.getProperty("baudRate")) == null)
+					|| ((connectionConfig.getProperty("stopBits")) == null)
+					|| ((connectionConfig.getProperty("parity")) == null)
+					|| ((connectionConfig.getProperty("bitsPerWord")) == null))
 				throw new PositionException("Invalid serial port configuration");
 			
-			int baud = Integer.valueOf(sBaud).intValue();
-			int stop = Integer.valueOf(sStop).intValue();
-			int parity = Integer.valueOf(sParity).intValue();
-			int bits = Integer.valueOf(sBits).intValue();
-
-			String uri = new CommURI.Builder(sPort)
-									.withBaudRate(baud)
-									.withDataBits(bits)
-									.withStopBits(stop)
-									.withParity(parity)
-									.withTimeout(2000)
-									.build().toString();
-
+			String uri = new CommURI.Builder(connectionConfig.getProperty("port"))
+			.withBaudRate(Integer.parseInt(connectionConfig.getProperty("baudRate")))
+			.withDataBits(Integer.parseInt(connectionConfig.getProperty("bitsPerWord")))
+			.withStopBits(Integer.parseInt(connectionConfig.getProperty("stopBits")))
+			.withParity(Integer.parseInt(connectionConfig.getProperty("parity")))
+			.withTimeout(2000)
+			.build().toString();
+			
 			try {
 				conn = (CommConnection) connFactory.createConnection(uri, 1, false);
 			} catch (IOException e1) {
@@ -289,7 +271,7 @@ public class GpsDevice {
 						}
 						conn.close();
 					} catch (Exception e) {
-						e.printStackTrace();
+						s_logger.error("Unable to close the connection", e);
 					}
 					conn = null;
 				}
@@ -304,71 +286,79 @@ public class GpsDevice {
 			return connConfig;
 		}
 
-		public boolean doPollWork() {
-			try {
-				StringBuffer readBuffer = new StringBuffer();
-				int c=-1;
-				if (in != null) {
-					while (c != 10) {
-						try {
-							c = in.read();
-						} catch (Exception e) {
-							s_logger.error("Exception in gps read - {}", e);
-							try {
-								Thread.sleep(1000);
-							} catch (InterruptedException e1) {
-								s_logger.warn("Interrupted - {}", e1);
-							}
-							return false;
-						}
-						if (c != 13 && c != -1) {
-							readBuffer.append((char) c);
-						}
-					}
-					try {
-						if (readBuffer.length() > 0) {
-							s_logger.debug("GPS RAW: {}", readBuffer.toString());
-							if ((m_listeners != null) && !m_listeners.isEmpty()) {
-								for (PositionListener listener : m_listeners) {
-									listener.newNmeaSentence(readBuffer.toString());
-								}
-							}
-							parseNmeaSentence(readBuffer.toString());
-						}
-					} catch (Exception e) {
-						s_logger.error("Exception in parseNmeaSentence - {}", e);
-					}
-				} else {
-					s_logger.debug("GPS InputStream is null");
-					try {
-						Thread.sleep(1000);
-					} catch (InterruptedException e) {}
-				}
-			} catch (Exception e) {
-				s_logger.error("Exception in Gps doPollWork");
-				try {
-					Thread.sleep(1000);
-				} catch (InterruptedException e1) {}
-			}
-			return true;
-		}
+        public boolean doPollWork() {
+            try {
+                StringBuffer readBuffer = new StringBuffer();
+                int c=-1;
+                if (in != null) {
+                    while (c != 10) {
+                        try {
+                            c = in.read();
+                        } catch (Exception e) {
+                            s_logger.error("Exception in gps read - {}", e);
+                            sleep(1000);
+                            return false;
+                        }
+                        if (c != 13 && c != -1) {
+                            readBuffer.append((char) c);
+                        }
+                    }
+                    try {
+                        if (readBuffer.length() > 0) {
+                            s_logger.debug("GPS RAW: {}", readBuffer.toString());
+                            if ((m_listeners != null) && !m_listeners.isEmpty()) {
+                                for (PositionListener listener : m_listeners) {
+                                    listener.newNmeaSentence(readBuffer.toString());
+                                }
+                            }
+                            parseNmeaSentence(readBuffer.toString());
+                        }
+                    } catch (Exception e) {
+                        s_logger.error("Exception in parseNmeaSentence - {}", e);
+                    }
+                } else {
+                    s_logger.debug("GPS InputStream is null");
+                    sleep(1000);
+                }
+            } catch (Exception e) {
+                s_logger.error("Exception in Gps doPollWork");
+                sleep(1000);
+            }
+            return true;
+        }
 
+        private void sleep(int value) {
+            try {
+                Thread.sleep(value);
+            } catch (InterruptedException e) {
+                s_logger.warn("Interrupted - {}", e);
+            }
+        }
+        
 		private void parseNmeaSentence(String scannedInput) {
 
-			double lon, lat, speed, alt, track;
+			double lon;
+			double lat;
+			double speed;
+			double alt;
+			double track;
 			
+			// Eat empty lines
+			if (scannedInput.isEmpty() || "".equals(scannedInput) || "\n".equals(scannedInput)) {
+				s_logger.debug("NMEA string empty");
+				return;
+			}
+				
 			// got a message... do a cksum
-			if (!NmeaCksum(scannedInput)){
+			if (!nmeaCksum(scannedInput)){
 				s_logger.error("NMEA checksum not valid");
 				return;
 			}
-			//s_logger.info(scannedInput);
 			m_lastSentence=scannedInput;
 			NMEAParser gpsParser = new NMEAParser();
 
 			gpsParser.parseSentence(scannedInput);
 			m_validPosition=gpsParser.is_validPosition();
-			//s_logger.debug("Parse : "+scannedInput+" position valid = "+m_validPosition);
 			
 			if(!m_validPosition)
 				return;
@@ -404,7 +394,8 @@ public class GpsDevice {
 					m_altitude = null;
 					m_latitudeNmea = 0;
 					m_longitudeNmea = 0;					
-					m_altitudeNmea = 0; 
+					m_altitudeNmea = 0;
+					s_logger.error("Error parsing NMEA strings", e);
 				}
 			} else if (scannedInput.startsWith("GLL")) {
 				try {
@@ -418,7 +409,8 @@ public class GpsDevice {
 					m_latitude = null;
 					m_longitude = null;					
 					m_latitudeNmea = 0;
-					m_longitudeNmea = 0;					
+					m_longitudeNmea = 0;
+					s_logger.error("Error parsing NMEA strings", e);
 				}
 			} else if (scannedInput.startsWith("GSA")) {
 				try {
@@ -426,14 +418,15 @@ public class GpsDevice {
 					m_HDOP = gpsParser.get_HDOPNmea();
 					m_VDOP = gpsParser.get_VDOPNmea();
 					m_3Dfix = gpsParser.get_3DfixNmea();
-					//System.out.println("m_PDOP = "+m_PDOP+"  m_HDOP = "+m_HDOP+"  m_VDOP = "+m_VDOP+"  m_3Dfix = "+m_3Dfix);
 				} catch (Exception e) {
 					m_PDOP = 0;
 					m_HDOP = 0;
 					m_VDOP = 0;
 					m_3Dfix = 0;
+					s_logger.error("Error parsing NMEA strings", e);
 				}
 			} else if (scannedInput.startsWith("GSV")) {
+				// Do nothing
 			} else if (scannedInput.startsWith("RMC")) {
 				try {
 					lon = gpsParser.get_longNmea();
@@ -457,6 +450,7 @@ public class GpsDevice {
 					m_longitudeNmea = 0;
 					m_speedNmea = 0;
 					m_trackNmea = 0;
+					s_logger.error("Error parsing NMEA strings", e);
 				}
 			} else if (scannedInput.startsWith("VTG")) {
 				try {
@@ -466,30 +460,32 @@ public class GpsDevice {
 				} catch (Exception e) {
 					m_speed = null;
 					m_speedNmea = 0;
+					s_logger.error("Error parsing NMEA strings", e);
 				}
 			} else if (scannedInput.indexOf("FOM") != -1) {
-				//FOM = scannedInput;
+				// FOM = scannedInput;
 			} else if (scannedInput.indexOf("PPS") != -1) {
-				//PPS = scannedInput;
+				// PPS = scannedInput;
 			} else {
 				s_logger.warn("Unrecognized NMEA sentence: " + scannedInput);
 			}
 		}
 
-		private boolean NmeaCksum(String nmeaMessageIn){
+		private boolean nmeaCksum(String nmeaMessageIn){
 			int starpos = nmeaMessageIn.indexOf('*');
-			String s_Cksum = nmeaMessageIn.substring(starpos+1,nmeaMessageIn.length()-1);
-			int i_Cksum = Integer.parseInt(s_Cksum,16); // Check sum is coded in hex string
+			String sCksum = nmeaMessageIn.substring(starpos+1,nmeaMessageIn.length()-1);
+			int iCksum = Integer.parseInt(sCksum,16); // Check sum is coded in hex string
 
-			int i_newCksum = 0;
+			int iNewCksum = 0;
 			for (int i = 1; i < starpos; i++) {
-				i_newCksum ^= nmeaMessageIn.charAt(i);
+				iNewCksum ^= nmeaMessageIn.charAt(i);
 			}
 			
-			return(i_newCksum==i_Cksum);
+			return iNewCksum==iCksum;
 		}
 	}
 	
+	@Override
 	public String toString(){
 		StringBuilder sb = new StringBuilder();
 		sb.append(" longitude=");

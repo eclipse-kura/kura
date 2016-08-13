@@ -27,6 +27,7 @@ import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.net.modem.ModemGpsDisabledEvent;
 import org.eclipse.kura.net.modem.ModemGpsEnabledEvent;
 import org.eclipse.kura.position.NmeaPosition;
+import org.eclipse.kura.position.PositionException;
 import org.eclipse.kura.position.PositionListener;
 import org.eclipse.kura.position.PositionLockedEvent;
 import org.eclipse.kura.position.PositionLostEvent;
@@ -51,13 +52,20 @@ public class PositionServiceImpl implements PositionService, ConfigurableCompone
 
 	private static final Logger s_logger = LoggerFactory.getLogger(PositionServiceImpl.class);
 
-	private final static long THREAD_TERMINATION_TOUT = 1; // in seconds
-
+	private static final long THREAD_TERMINATION_TOUT = 1; // in seconds
+	private static final String ENABLED     = "enabled";
+	private static final String PORT        = "port";
+	private static final String BAUDRATE    = "baudRate";
+	private static final String BITSPERWORD = "bitsPerWord";
+	private static final String STOPBITS    = "stopBits";
+	private static final String MODEM       = "modem"; 
+	private static final String PARITY      = "parity";
+	
 	private static Future<?>				monitorTask;
 	private static boolean 					stopThread;
 
-	private Map<String,Object>				m_properties;
-	private Map<String,Object>				m_positionServiceProperties;
+	private Map<String,Object>				m_properties;  // current properties
+	private Map<String,Object>				m_positionServiceProperties;  // properties from the webUI
 	private ConnectionFactory 	            m_connectionFactory;
 	private Map<String,PositionListener>    m_positionListeners;
 	private GpsDevice					 	m_gpsDevice;
@@ -172,48 +180,46 @@ public class PositionServiceImpl implements PositionService, ConfigurableCompone
 	public void updated(Map<String,Object> properties) {
 		
 		s_logger.debug("Updating...");
-		if (m_gpsDevice != null) {
-			Properties currentConfigProps = m_gpsDevice.getConnectConfig();
-			Properties serialProperties = getSerialConnectionProperties(properties);
-			if ((currentConfigProps != null) && (serialProperties != null)) {
-				if (currentConfigProps.getProperty("port").equals(serialProperties.getProperty("port"))
-					&& currentConfigProps.getProperty("baudRate").equals(serialProperties.getProperty("baudRate"))	
-					&& currentConfigProps.getProperty("stopBits").equals(serialProperties.getProperty("stopBits"))
-					&& currentConfigProps.getProperty("bitsPerWord").equals(serialProperties.getProperty("bitsPerWord"))
-					&& currentConfigProps.getProperty("parity").equals(serialProperties.getProperty("parity"))) {
-					
-					s_logger.debug("configureGpsDevice() :: same configuration, no need ot reconfigure GPS device");
-					return;
-				}
-			}
-		}
-		
-		if(m_isRunning) {
-			stop();
-		}
-
-		if (!properties.containsKey("modem")) {
+		if (!properties.containsKey(MODEM)) {
 			m_positionServiceProperties.putAll(properties);
 		}	
 		m_properties.putAll(properties);
 		
-		m_configured = false;
-		m_configEnabled = false;
-		m_isRunning = false;
-		m_hasLock = false;
-		//m_useGpsd = (Boolean)m_properties.get("useGpsd");
+		if (m_properties.get(ENABLED) != null) {
+			m_configEnabled = (Boolean) m_properties.get(ENABLED);
+		} 
+		else {
+			m_configEnabled = false;
+		}
+		
+		if (m_configEnabled) {
 
-		try {
-			if ((Boolean)m_properties.get("enabled") && (Boolean) m_properties.get("static")) {
-				initializeDefaultPosition((Double) m_properties.get("latitude"), (Double) m_properties.get("longitude"), (Double) m_properties.get("altitude"));
-				m_eventAdmin.postEvent( new PositionLockedEvent( new HashMap<String,Object>()));
+			if(m_isRunning) {
+				stop();
 			}
-			else {
-				configureGpsDevice();
-				start();
+
+			m_configured = false;
+			m_isRunning = false;
+			m_hasLock = false;
+			//m_useGpsd = (Boolean)m_properties.get("useGpsd");
+
+			try {
+				if ((Boolean) m_properties.get("static")) {
+					initializeDefaultPosition((Double) m_properties.get("latitude"), (Double) m_properties.get("longitude"), (Double) m_properties.get("altitude"));
+					m_eventAdmin.postEvent( new PositionLockedEvent( new HashMap<String,Object>()));
+				}
+				else {
+					configureGpsDevice();
+					start();
+				}
+			} catch (Exception e) {
+				s_logger.error("Error starting PositionService background operations.", e);
 			}
-		} catch (Exception e) {
-			s_logger.error("Error starting PositionService background operations.", e);
+		}
+		else {
+			if(m_isRunning) {
+				stop();
+			}
 		}
 		s_logger.info("Updating... Done.");
 	}
@@ -243,6 +249,7 @@ public class PositionServiceImpl implements PositionService, ConfigurableCompone
 		else return m_defaultNmeaPosition;
 	}
 
+	@Override
 	public boolean isLocked() {
 		return m_hasLock;
 	}
@@ -265,6 +272,7 @@ public class PositionServiceImpl implements PositionService, ConfigurableCompone
 		else return null;
 	}
 	
+	@Override
 	public void registerListener(String listenerId, PositionListener positionListener) {
 		if (m_positionListeners == null) {
 			m_positionListeners = new HashMap<String, PositionListener>();
@@ -275,6 +283,7 @@ public class PositionServiceImpl implements PositionService, ConfigurableCompone
 		}
 	}
 	
+	@Override
 	public void unregisterListener(String listenerId) {
 		if ((m_positionListeners != null) && m_positionListeners.containsKey(listenerId)) {
 			m_positionListeners.remove(listenerId);
@@ -284,6 +293,7 @@ public class PositionServiceImpl implements PositionService, ConfigurableCompone
 		}
 	}
 
+	@Override
 	public String getLastSentence() {
 		if(m_useGpsd)
 			return m_GpsdLastSentence;
@@ -292,41 +302,58 @@ public class PositionServiceImpl implements PositionService, ConfigurableCompone
 		else return null;
 	}
 
+	@Override
 	public void handleEvent(Event event) {
-		if(!m_useGpsd){
+		if(!m_useGpsd && m_configEnabled){
 			if(UsbDeviceAddedEvent.USB_EVENT_DEVICE_ADDED_TOPIC.contains(event.getTopic())){
+				// Check if the USB event comes from the GPS 
 				if(serialPortExists()){
-					s_logger.debug("GPS connected");
+					s_logger.debug("USB GPS connected");
 
-					//we already have properties - just do it
+					// We already have properties from the service...
 					try {
 						if(!m_isRunning) {
 							configureGpsDevice();
 							start();
 						}
-					} catch(Exception e) {
-						e.printStackTrace();
+					} catch(PositionException e) {
+						s_logger.error("Unable to configure Gps device", e);
 					}
 				}
 			}
 			else if(UsbDeviceRemovedEvent.USB_EVENT_DEVICE_REMOVED_TOPIC.contains(event.getTopic())){
+				// Check if the USB event comes from the GPS
 				if(!serialPortExists()) {
-					s_logger.debug("GPS disconnected");
+					s_logger.debug("USB GPS disconnected");
 					stop();
+					updated(m_properties);
 				}
 			} else if(ModemGpsEnabledEvent.MODEM_EVENT_GPS_ENABLED_TOPIC.contains(event.getTopic())) {
 				
-				s_logger.debug("ModemGpsEnabledEvent");
+				s_logger.debug("Modem GPS connected");
 				
-				m_properties.put("port", event.getProperty(ModemGpsEnabledEvent.Port));
-				m_properties.put("baudRate", event.getProperty(ModemGpsEnabledEvent.BaudRate));
-				m_properties.put("bitsPerWord", event.getProperty(ModemGpsEnabledEvent.DataBits));
-				m_properties.put("stopBits", event.getProperty(ModemGpsEnabledEvent.StopBits));
-				m_properties.put("parity", event.getProperty(ModemGpsEnabledEvent.Parity));
-				m_properties.put("modem", "true");
+				// Get the properties from the modem event
+				m_properties.put(PORT, event.getProperty(ModemGpsEnabledEvent.Port));
+				m_properties.put(BAUDRATE, event.getProperty(ModemGpsEnabledEvent.BaudRate));
+				m_properties.put(BITSPERWORD, event.getProperty(ModemGpsEnabledEvent.DataBits));
+				m_properties.put(STOPBITS, event.getProperty(ModemGpsEnabledEvent.StopBits));
+				m_properties.put(PARITY, event.getProperty(ModemGpsEnabledEvent.Parity));
+				m_properties.put(MODEM, "true");
+
+				// ...and check if we already have a gps device with the same configuration
+				if (m_gpsDevice != null) {
+					Properties currentConfigProps = m_gpsDevice.getConnectConfig();
+					Properties serialProperties = getSerialConnectionProperties(m_properties);
+					if ((currentConfigProps != null) && (serialProperties != null)) {
+						if (checkProperties(currentConfigProps, serialProperties)) 
+							return;
+					}
+				}
+
 				updated(m_properties);
 			} else if (ModemGpsDisabledEvent.MODEM_EVENT_GPS_DISABLED_TOPIC.contains(event.getTopic())) {
-				s_logger.debug("ModemGpsDisabledEvent");
+				s_logger.debug("Modem GPS disconnected");
+				// Pass to the update method the properties from the service
 				updated(m_positionServiceProperties);
 			}
 		}
@@ -337,6 +364,7 @@ public class PositionServiceImpl implements PositionService, ConfigurableCompone
 		stopThread = false;
 		if (monitorTask == null) {
 			monitorTask = m_executor.submit(new Runnable() {
+				@Override
 				public void run() {
 					Thread.currentThread().setName("PositionServiceImpl");
 					while(!stopThread) {
@@ -344,7 +372,6 @@ public class PositionServiceImpl implements PositionService, ConfigurableCompone
 						try {
 							Thread.sleep(pollInterval);
 						} catch (InterruptedException e) {
-							//e.printStackTrace();
 							//exit silently ...
 						};
 					}
@@ -364,47 +391,49 @@ public class PositionServiceImpl implements PositionService, ConfigurableCompone
 		}		
 		if(m_gpsDevice!=null) {
 			m_gpsDevice.disconnect();
+			m_gpsDevice = null;
 		}
 
 		m_configured = false;		
-		m_configEnabled = false;
 		m_isRunning = false;
 		m_hasLock = false;
 	}
 
 	private void initializeDefaultPosition(double lat, double lon, double alt){
-		Measurement l_latitude = new Measurement(java.lang.Math.toRadians(lat),Unit.rad);
-		Measurement l_longitude = new Measurement(java.lang.Math.toRadians(lon),Unit.rad);					
-		Measurement l_altitude = new Measurement(alt,Unit.m); 
-		Measurement l_speed = new Measurement(0,Unit.m_s); // conversion speed in knots to m/s : 1 m/s = 1.94384449 knots
-		Measurement l_track = new Measurement(java.lang.Math.toRadians(0),Unit.rad); 
-		double l_latitudeNmea = lat;
-		double l_longitudeNmea = lon;					
-		double l_altitudeNmea = alt; 
-		double l_speedNmea = 0;
-		double l_trackNmea = 0; 
-		int l_fixQuality = 0;
-		int l_nrSatellites = 0;
-		double l_DOP = 0;
-		double l_PDOP = 0;
-		double l_HDOP = 0;
-		double l_VDOP = 0;
-		int l_3Dfix = 0;
+		Measurement lLatitude = new Measurement(java.lang.Math.toRadians(lat),Unit.rad);
+		Measurement lLongitude = new Measurement(java.lang.Math.toRadians(lon),Unit.rad);					
+		Measurement lAltitude = new Measurement(alt,Unit.m); 
+		Measurement lSpeed = new Measurement(0,Unit.m_s); // conversion speed in knots to m/s : 1 m/s = 1.94384449 knots
+		Measurement lTrack = new Measurement(java.lang.Math.toRadians(0),Unit.rad); 
+		double lLatitudeNmea = lat;
+		double lLongitudeNmea = lon;					
+		double lAltitudeNmea = alt; 
+		double lSpeedNmea = 0;
+		double lTrackNmea = 0; 
+		int lFixQuality = 0;
+		int lNrSatellites = 0;
+		double lDOP = 0;
+		double lPDOP = 0;
+		double lHDOP = 0;
+		double lVDOP = 0;
+		int l3Dfix = 0;
 
-		m_defaultPosition = new Position(l_latitude, l_longitude, l_altitude, l_speed, l_track);
-		m_defaultNmeaPosition = new NmeaPosition(l_latitudeNmea, l_longitudeNmea, l_altitudeNmea, l_speedNmea, l_trackNmea, 
-				l_fixQuality, l_nrSatellites, l_DOP, l_PDOP, l_HDOP, l_VDOP, l_3Dfix);
+		m_defaultPosition = new Position(lLatitude, lLongitude, lAltitude, lSpeed, lTrack);
+		m_defaultNmeaPosition = new NmeaPosition(lLatitudeNmea, lLongitudeNmea, lAltitudeNmea, lSpeedNmea, lTrackNmea, 
+				lFixQuality, lNrSatellites, lDOP, lPDOP, lHDOP, lVDOP, l3Dfix);
 
-		m_GpsdPosition = new Position(l_latitude, l_longitude, l_altitude, l_speed, l_track);
-		m_GpsdNmeaPosition = new NmeaPosition(l_latitudeNmea, l_longitudeNmea, l_altitudeNmea, l_speedNmea, l_trackNmea, 
-				l_fixQuality, l_nrSatellites, l_DOP, l_PDOP, l_HDOP, l_VDOP, l_3Dfix);
+		m_GpsdPosition = new Position(lLatitude, lLongitude, lAltitude, lSpeed, lTrack);
+		m_GpsdNmeaPosition = new NmeaPosition(lLatitudeNmea, lLongitudeNmea, lAltitudeNmea, lSpeedNmea, lTrackNmea, 
+				lFixQuality, lNrSatellites, lDOP, lPDOP, lHDOP, lVDOP, l3Dfix);
 	}
 
 	private void performPoll() {		
 		if(m_configEnabled && m_configured){
 			boolean isValidPosition;
-			if(m_useGpsd)isValidPosition=m_GpsdIsValidPosition;
-			else isValidPosition=m_gpsDevice.isValidPosition();
+			if(m_useGpsd)
+				isValidPosition = m_GpsdIsValidPosition;
+			else 
+				isValidPosition = m_gpsDevice.isValidPosition();
 			if(isValidPosition){
 				if(!m_hasLock){
 					m_hasLock=true;
@@ -429,7 +458,7 @@ public class PositionServiceImpl implements PositionService, ConfigurableCompone
 		}
 	}
 
-	private void configureGpsDevice() throws Exception {
+	private void configureGpsDevice() throws PositionException {
 
 		Properties serialProperties = getSerialConnectionProperties(m_properties);			
 		if(serialProperties == null) 
@@ -446,42 +475,33 @@ public class PositionServiceImpl implements PositionService, ConfigurableCompone
 			return;
 		}
 	
-		try {			
-			if(serialProperties != null) {
-				s_logger.debug("Connecting to serial port: {}", serialProperties.getProperty("port"));
-	
-				// configure connection & protocol
-				GpsDevice gpsDevice = new GpsDevice();
-				gpsDevice.configureConnection(m_connectionFactory, serialProperties);
-				gpsDevice.configureProtocol(getProtocolProperties());	
-				m_gpsDevice = gpsDevice;
-				m_configured = true;
-			}
-		} catch (Exception e) {
-			throw e;
-		}
+		s_logger.debug("Connecting to serial port: {}", serialProperties.getProperty("port"));
+
+		// configure connection & protocol
+		m_gpsDevice = new GpsDevice();
+		m_gpsDevice.configureConnection(m_connectionFactory, serialProperties);
+		m_gpsDevice.configureProtocol(getProtocolProperties());	
+		m_configured = true;
 	}
 
 	private boolean serialPortExists()
 	{
 		String portName;
 		if(m_properties != null){				
-			if(m_properties.get("port") != null){
-				portName = (String) m_properties.get("port");
+			if(m_properties.get(PORT) != null){
+				portName = (String) m_properties.get(PORT);
 
-				if(portName != null) {
-					if(portName.contains("/dev/")) {
-						File f = new File(portName);
-						if(f.exists()) {
-							return true;
-						}
-					} else {
-						List<UsbTtyDevice> utd = m_usbService.getUsbTtyDevices();	
-						if(utd!=null){
-							for (UsbTtyDevice u : utd) {
-								if(portName.equals(u.getUsbPort())) {
-									return true;
-								}
+				if(portName.contains("/dev/")) {
+					File f = new File(portName);
+					if(f.exists()) {
+						return true;
+					}
+				} else {
+					List<UsbTtyDevice> utd = m_usbService.getUsbTtyDevices();	
+					if(utd!=null){
+						for (UsbTtyDevice u : utd) {
+							if(portName.equals(u.getUsbPort())) {
+								return true;
 							}
 						}
 					}
@@ -495,23 +515,8 @@ public class PositionServiceImpl implements PositionService, ConfigurableCompone
 		Properties prop = new Properties();
 		
 		if(props != null){
-			String portName = null;
-			int baudRate = -1;
-			int bitsPerWord = -1;
-			int stopBits = -1;
-			int parity = -1;
-
-			if(props.get("enabled") != null) {
-				m_configEnabled = (Boolean)props.get("enabled");
-				if(!m_configEnabled) {
-					return null;
-				}
-			} else {
-				m_configEnabled = false;
-				return null;
-			}
 			
-			portName = (String) props.get("port");
+			String portName = (String) props.get(PORT);
 			if(portName != null && !portName.contains("/dev/")) {
 				List<UsbTtyDevice> utds = m_usbService.getUsbTtyDevices();
 				for(UsbTtyDevice utd : utds) {
@@ -521,24 +526,24 @@ public class PositionServiceImpl implements PositionService, ConfigurableCompone
 					}
 				}
 			}
-			if(props.get("baudRate") != null) baudRate 		= (Integer) props.get("baudRate");
-			if(props.get("bitsPerWord") != null) bitsPerWord = (Integer) props.get("bitsPerWord");
-			if(props.get("stopBits") != null) stopBits 		= (Integer) props.get("stopBits");
-			if(props.get("parity") != null) parity 			= (Integer) props.get("parity");
-
 			if(portName==null)
-				return null;			
-			prop.setProperty("port", portName);
-			prop.setProperty("baudRate", Integer.toString(baudRate));
-			prop.setProperty("stopBits", Integer.toString(stopBits));
-			prop.setProperty("parity", Integer.toString(parity));
-			prop.setProperty("bitsPerWord", Integer.toString(bitsPerWord));
+				return null;
 			
-			s_logger.debug("port name: {}", portName);
-			s_logger.debug("baud rate {}", baudRate);
-			s_logger.debug("stop bits {}", stopBits);
-			s_logger.debug("parity {}", parity);
-			s_logger.debug("bits per word {}", bitsPerWord);
+			prop.setProperty(PORT, portName);
+			if(props.get(BAUDRATE) != null) 
+				prop.setProperty(BAUDRATE, Integer.toString((Integer) props.get(BAUDRATE)));
+			if(props.get(BITSPERWORD) != null)
+				prop.setProperty(BITSPERWORD, Integer.toString((Integer) props.get(BITSPERWORD)));
+			if(props.get(STOPBITS) != null)
+				prop.setProperty(STOPBITS, Integer.toString((Integer) props.get(STOPBITS)));
+			if(props.get(PARITY) != null)
+				prop.setProperty(PARITY, Integer.toString((Integer) props.get(PARITY)));
+
+			s_logger.debug("port name: {}", prop.get(PORT));
+			s_logger.debug("baud rate {}", prop.get(BAUDRATE));
+			s_logger.debug("stop bits {}", prop.get(STOPBITS));
+			s_logger.debug("parity {}", prop.get(PARITY));
+			s_logger.debug("bits per word {}", prop.get(BITSPERWORD));
 			return prop;
 		} else {
 			return null;
@@ -551,5 +556,19 @@ public class PositionServiceImpl implements PositionService, ConfigurableCompone
 		prop.setProperty("unitName", "Gps");
 
 		return prop;
+	}
+	
+	private boolean checkProperties(Properties currentConfigProps, Properties serialProperties) {
+		if (currentConfigProps.getProperty(PORT).equals(serialProperties.getProperty(PORT))
+				&& currentConfigProps.getProperty(BAUDRATE).equals(serialProperties.getProperty(BAUDRATE))	
+				&& currentConfigProps.getProperty(STOPBITS).equals(serialProperties.getProperty(STOPBITS))
+				&& currentConfigProps.getProperty(BITSPERWORD).equals(serialProperties.getProperty(BITSPERWORD))
+				&& currentConfigProps.getProperty(PARITY).equals(serialProperties.getProperty(PARITY))) {
+
+			s_logger.debug("configureGpsDevice() :: same configuration, no need ot reconfigure GPS device");
+			return true;
+		}
+		else 
+			return false;
 	}
 }

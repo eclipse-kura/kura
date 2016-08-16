@@ -6,7 +6,7 @@
 	<property name="target" location="target" />
 	<property name="local.root" location="../.."/>
 	
-	<property file="../../config/kura.target-platform.build.properties"/>
+	<property file="${local.root}/config/download.version.properties"/>
 	
 	<!-- ================================= 
           target: default
@@ -86,14 +86,16 @@
 		var jar = new java.util.jar.JarFile(file);
 		var attrs = jar.getManifest().getMainAttributes();
 		jar.close ();
-		var name = attrs.getValue("Bundle-SymbolicName") + "-" + attrs.getValue("Bundle-Version") + ".jar";
+		var bsn = attrs.getValue("Bundle-SymbolicName").split(";", 2)[0];
+		var version = attrs.getValue("Bundle-Version");
+		var name = bsn + "-" + version + ".jar";
 		
 		if ( file.getName() != name ) {
 			java.nio.file.Files.move ( file.toPath (), new java.io.File(file.getParentFile(), name).toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
 		}
 		]]>
 	</scriptdef>
-
+	
 	<!-- = = = = = = = = = = = = = = = = =
           macrodef: maven
          = = = = = = = = = = = = = = = = = -->

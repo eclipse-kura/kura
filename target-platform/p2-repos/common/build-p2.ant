@@ -28,7 +28,11 @@
     	<maven groupid="org/slf4j" artifactid="slf4j-jdk14"/>
     	<maven groupid="org/slf4j" artifactid="slf4j-log4j12"/>
     	<maven groupid="log4j" artifactid="log4j"/>
+    	
+    	<!--
     	<maven groupid="log4j" artifactid="apache-log4j-extras"/>
+    	-->
+    	<checkedin bundle="apache-log4j-extras"/>
     	
     	<orbit bundle="org.apache.commons.fileupload"/>
     	

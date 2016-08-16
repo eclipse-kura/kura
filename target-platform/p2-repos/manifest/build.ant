@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project default="default">
+
+	<property name="target" location="${basedir}/target" />
+	
+    <!-- ================================= 
+          target: default
+         ================================= -->
+    <target name="default">
+    	<fail message="Call target explicitly"/>
+    </target>
+	
+
+	<scriptdef name="buildManifest" language="javascript">
+		<attribute name="manifestFile"/>
+		<attribute name="dir"/>
+		<![CDATA[
+		var file = new java.io.File(attributes.get("manifestfile")); // yes this is lowercase!
+		var dir = new java.io.File(attributes.get("dir"));
+		
+		print ( "Directory: " + dir.getAbsolutePath() );
+		
+		var files = dir.listFiles();
+		
+		var p = new java.util.Properties();
+		if ( file.exists () ) {
+			var fr = new java.io.FileReader ( file );
+			p.load ( fr );
+			fr.close ();
+		}
+		
+		for ( var i = 0 ; i < files.length; i++ ) {
+			var f = files[i];
+			var jar = new java.util.jar.JarFile(f);
+			var attrs = jar.getManifest().getMainAttributes();
+			jar.close ();
+			var bsn = attrs.getValue("Bundle-SymbolicName").split(";", 2)[0];
+    		var key = bsn + ".version";
+		    var version = attrs.getValue("Bundle-Version");
+			
+			var old = p.put ( key, version );
+			if ( old != null )  {
+				print ( "Duplicate bundle detected: " + bsn + " (v1: " + old + ", v2: " + version + ")" );
+			}
+		}
+		
+		file.getParentFile().mkdirs ();
+		var fw = new java.io.FileWriter ( file );
+		p.store ( fw, "Note: For duplicate bundles only one version will be present!" );
+		fw.close ();
+		]]>
+	</scriptdef>
+	
+    <!-- ================================= 
+          target: package
+         ================================= -->
+    <target name="package">
+    	<mkdir dir="${target}"/>
+    	<delete file="${target}/bundleVersions.properties" />
+    	<buildManifest manifestFile="${target}/bundleVersions.properties" dir="${basedir}/../common/target/repository/plugins"/>
+    	<buildManifest manifestFile="${target}/bundleVersions.properties" dir="${basedir}/../equinox_3.8.1/target/repository/plugins"/>
+    </target>
+	
+	<!-- ================================= 
+          target: install
+         ================================= -->
+    <target name="install" depends="package">
+    	<copy file="${target}/bundleVersions.properties" tofile="${basedir}/../../../kura/target-definition/config/kura.target-platform.build.properties" />
+    </target>
+
+
+</project>

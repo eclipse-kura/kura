@@ -23,6 +23,7 @@
 	</parent>
 
 	<artifactId>distrib</artifactId>
+	<packaging>pom</packaging>
 
 	<name>distrib</name>
 	<url>http://maven.apache.org</url>
@@ -67,7 +68,7 @@
 							<files>
 								<file>${basedir}/build.properties</file>
 								<file>${basedir}/config/kura.build.properties</file>
-								<file>${kura.basedir}/../target-platform/config/kura.target-platform.build.properties</file>
+								<file>${kura.basedir}/target-definition/config/kura.target-platform.build.properties</file>
 							</files>
 						</configuration>
 					</execution>
@@ -95,11 +96,6 @@
 									<groupId>org.eclipse.kura</groupId>
 									<artifactId>org.eclipse.kura.camel</artifactId>
 									<version>${org.eclipse.kura.camel.version}</version>
-								</artifactItem>
-								<artifactItem>
-									<groupId>org.eclipse.kura</groupId>
-									<artifactId>org.eclipse.kura.camel.sun.misc</artifactId>
-									<version>${org.eclipse.kura.camel.sun.misc.version}</version>
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.eclipse.kura</groupId>
@@ -357,8 +353,7 @@
 						<configuration>
 							<tasks>
 							    <move file="target/plugins/org.eclipse.kura.api.jar" tofile="target/plugins/org.eclipse.kura.api_${org.eclipse.kura.api.version}.jar"/>
-								<move file="target/plugins/org.eclipse.kura.camel.jar" tofile="target/plugins/org.eclipse.kura.camel_${org.eclipse.kura.camel.version}.jar"/>
-								<move file="target/plugins/org.eclipse.kura.camel.sun.misc.jar" tofile="target/plugins/org.eclipse.kura.camel.sun.misc_${org.eclipse.kura.camel.sun.misc.version}.jar"/>
+							    <move file="target/plugins/org.eclipse.kura.camel.jar" tofile="target/plugins/org.eclipse.kura.camel_${org.eclipse.kura.camel.version}.jar"/>
 								<move file="target/plugins/org.eclipse.kura.core.jar" tofile="target/plugins/org.eclipse.kura.core_${org.eclipse.kura.core.version}.jar"/>
 							    <move file="target/plugins/org.eclipse.kura.core.certificates.jar" tofile="target/plugins/org.eclipse.kura.core.certificates_${org.eclipse.kura.core.certificates.version}.jar"/>
 							    <move file="target/plugins/org.eclipse.kura.core.cloud.jar" tofile="target/plugins/org.eclipse.kura.core.cloud_${org.eclipse.kura.core.cloud.version}.jar"/>
@@ -430,9 +425,9 @@
 									todir="RELEASE_INFO/${project.version}/config"
 									overwrite="true" />
 
-                				<!-- Copy target-platform/config/kura.target-platform.build.properties in distrib/RELEASE_INFO/${project.version}/config -->
+                				<!-- Copy target-definition/config/kura.target-platform.build.properties in distrib/RELEASE_INFO/${project.version}/config -->
 								<copy
-									file="${kura.basedir}/../../../target-platform/config/kura.target-platform.build.properties"
+									file="${kura.basedir}/../../target-definition/config/kura.target-platform.build.properties"
 									todir="RELEASE_INFO/${project.version}/config"
 									overwrite="true" />
 

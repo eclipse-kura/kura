@@ -23,6 +23,14 @@
       name="eclipse.target.platform"
       value="Mars"/>
   <setupTask
+      xsi:type="setup:VariableTask"
+      name="kura.branch"
+      defaultValue="${scope.project.stream.name}"
+      storageURI="scope://Workspace"
+      label="Branch">
+    <description></description>
+  </setupTask>
+  <setupTask
       xsi:type="setup:CompoundTask"
       name="Choose developer type">
     <setupTask
@@ -31,11 +39,11 @@
         storageURI="scope://Workspace"
         label="Developer Type">
       <choice
-          value="user"
-          label="User"/>
-      <choice
           value="developer"
           label="Developer"/>
+      <choice
+          value="user"
+          label="User"/>
       <description>Select which type of developer for Kura you are</description>
     </setupTask>
     <setupTask
@@ -87,7 +95,8 @@
   <setupTask
       xsi:type="git:GitCloneTask"
       id="git.clone"
-      remoteURI="eclipse/kura">
+      remoteURI="eclipse/kura"
+      checkoutBranch="${kura.branch}">
     <annotation
         source="http://www.eclipse.org/oomph/setup/InducedChoices">
       <detail
@@ -134,8 +143,11 @@
           <predicate
               xsi:type="predicates:NotPredicate">
             <operand
-                xsi:type="predicates:NamePredicate"
-                pattern="org.eclipse.soda.dk.comm"/>
+                xsi:type="predicates:OrPredicate">
+              <operand
+                  xsi:type="predicates:NamePredicate"
+                  pattern="(manifest|common|equinox.*|com\.gwt\.user)"/>
+            </operand>
           </predicate>
         </sourceLocator>
       </setupTask>
@@ -169,9 +181,6 @@
     </targlet>
     <description>Kura</description>
   </setupTask>
-  <setupTask
-      xsi:type="pde:TargetPlatformTask"
-      name="Kura Target Platform Equinox 3.8.1"/>
   <setupTask
       xsi:type="setup.workingsets:WorkingSetTask">
     <workingSet
@@ -231,6 +240,10 @@
       </setupTask>
     </setupTask>
   </setupTask>
+  <setupTask
+      xsi:type="pde:TargetPlatformTask"
+      filter=""
+      name="Kura Target Platform Equinox 3.8.1"/>
   <stream name="develop"
       label="Development"/>
   <logicalProjectContainer

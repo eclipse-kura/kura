@@ -1894,7 +1894,7 @@
 										<copy
 											file="src/main/resources/common/projects/target_definition.project"
 											tofile="${project.build.directory}/staging/target-definition/.project" />
-										<copy file="src/main/resources/common/kura-equinox_3.8.1.target"
+										<copy file="${kura.basedir}/target-definition/kura-equinox_3.8.1.target"
 											todir="${project.build.directory}/staging/target-definition" />
 										<copy
 											file="${project.build.directory}/plugins/org.eclipse.kura.api_${org.eclipse.kura.api.version}.jar"

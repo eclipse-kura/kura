@@ -8,7 +8,7 @@
           target: build
          ================================= -->
     <target name="build" depends="init">
-    	<get src="http://archive.eclipse.org/equinox/drops/R-3.8.1-201209141800/equinox-SDK-3.8.1.zip" usetimestamp="true" dest="${target}/download/equinox-SDK.zip"/>
+    	<fetch src="http://archive.eclipse.org/equinox/drops/R-3.8.1-201209141800/equinox-SDK-3.8.1.zip" dest="${target}/download/equinox-SDK.zip"/>
     	<unzip src="${target}/download/equinox-SDK.zip" dest="${target}/unpack/equinox-SDK" />
     	
     	<!--

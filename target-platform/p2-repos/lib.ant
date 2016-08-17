@@ -7,6 +7,8 @@
 	<property name="local.root" location="../.."/>
 	
 	<property file="${local.root}/config/download.version.properties"/>
+		
+	<property environment="env"/>
 	
 	<!-- ================================= 
           target: default
@@ -14,7 +16,6 @@
     <target name="default">
         <fail message="This is just a library"/>
     </target>
-
 	
 	<!-- ================================= 
           target: init
@@ -23,7 +24,49 @@
         <mkdir dir="${target}/download"/>
     	<mkdir dir="${target}/unpack"/>
     	<mkdir dir="${target}/source/plugins"/>
+    	
+    	<echo message="${env.KURA_BUILD_CACHE}" />
     </target>
+	
+	<!--
+	  - Fetch a file from a remote location.
+	  - 
+	  - If the KURA_BUILD_CACHE environment variable is set, then its value will
+	  - be used as a patch for caching downloads
+	  -->
+	<macrodef name="fetch">
+		<attribute name="src"/>
+		<attribute name="dest"/>
+		<attribute name="ignoreerrors" default="false"/>
+		<sequential>
+			<sequential unless:set="env.KURA_BUILD_CACHE">
+				<get src="@{src}" dest="@{dest}" usetimestamp="true" ignoreerrors="@{ignoreerrors}"/>
+			</sequential>
+			<sequential if:set="env.KURA_BUILD_CACHE">
+				<local name="fn"/>
+				<basename file="@{src}" property="fn"/>
+				<echo message="Build cache: ${fn}" />
+				<mkdir dir="${env.KURA_BUILD_CACHE}"/>
+				<get src="@{src}" dest="${env.KURA_BUILD_CACHE}/${fn}" usetimestamp="true" ignoreerrors="@{ignoreerrors}"/>
+
+				<local name="fa"/>
+				<local name="fe"/>
+				
+				<available property="fa" file="${env.KURA_BUILD_CACHE}/${fn}" />
+				
+				<condition property="fe">
+					<and>
+						<not><isset property="fa"/></not>
+						<not><istrue value="@{ignoreerrors}"/></not>
+					</and>
+				</condition>
+				
+				<fail if:set="fe" message="Unable to download required file: @{src}"/>
+				
+				<copy if:set="fa" file="${env.KURA_BUILD_CACHE}/${fn}" tofile="@{dest}" />
+			</sequential>
+		</sequential>
+	</macrodef>
 
 	<!-- = = = = = = = = = = = = = = = = =
           macrodef: orbit
@@ -31,8 +74,8 @@
     <macrodef name="orbit">
         <attribute name="bundle" />
         <sequential>
-        	<get src="http://download.eclipse.org/tools/orbit/downloads/drops/${orbit.release}/repository/plugins/@{bundle}_${@{bundle}.version}.jar" usetimestamp="true" dest="${target}/source/plugins/@{bundle}_${@{bundle}.version}.jar" />
-	    	<get src="http://download.eclipse.org/tools/orbit/downloads/drops/${orbit.release}/repository/plugins/@{bundle}.source_${@{bundle}.version}.jar" usetimestamp="true" dest="${target}/source/plugins/@{bundle}_${@{bundle}.version}.jar" ignoreerrors="true" />
+        	<fetch src="http://download.eclipse.org/tools/orbit/downloads/drops/${orbit.release}/repository/plugins/@{bundle}_${@{bundle}.version}.jar" dest="${target}/source/plugins/@{bundle}_${@{bundle}.version}.jar" />
+	    	<fetch src="http://download.eclipse.org/tools/orbit/downloads/drops/${orbit.release}/repository/plugins/@{bundle}.source_${@{bundle}.version}.jar" dest="${target}/source/plugins/@{bundle}_${@{bundle}.version}.jar" ignoreerrors="true" />
         </sequential>
     </macrodef>
 	
@@ -104,7 +147,7 @@
     	<attribute name="artifactId" />
     	<attribute name="version" default="${@{artifactId}.version}" />
         <sequential>
-        	<get src="http://repo1.maven.org/maven2/@{groupId}/@{artifactId}/@{version}/@{artifactId}-@{version}.jar" dest="${target}/source/plugins/@{artifactId}-@{version}.jar" />
+        	<fetch src="http://repo1.maven.org/maven2/@{groupId}/@{artifactId}/@{version}/@{artifactId}-@{version}.jar" dest="${target}/source/plugins/@{artifactId}-@{version}.jar" />
         	<normalizeFileName file="${target}/source/plugins/@{artifactId}-@{version}.jar" />
         </sequential>
     </macrodef>

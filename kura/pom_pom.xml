@@ -69,7 +69,6 @@
 				<activeByDefault>false</activeByDefault>
 			</activation>
 			<modules>
-				<module>org.eclipse.kura.web2</module>
 				<module>distrib</module>
 				<module>tools</module>
 			</modules>

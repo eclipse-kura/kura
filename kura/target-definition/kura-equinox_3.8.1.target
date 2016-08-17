@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<?pde version="3.8"?><target name="Kura Target Platform Equinox 3.8.1" sequenceNumber="44">
+<?pde version="3.8"?><target name="Kura Target Platform Equinox 3.8.1" sequenceNumber="46">
 <locations>
 <location path="${project_loc:target-definition}/common/repository/plugins" type="Profile"/>
 <location path="${project_loc:target-definition}/equinox_3.8.1/repository/plugins" type="Profile"/>
+<location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
+<unit id="org.eclipse.license.feature.group" version="1.0.1.v20140414-1359"/>
+<repository location="http://download.eclipse.org/cbi/updates/license/"/>
+</location>
 </locations>
 </target>

@@ -59,10 +59,26 @@
 		<!--<module>org.eclipse.kura.emulator.gpio</module>-->
 		<module>org.eclipse.kura.core.test</module>
 		<module>examples</module>
+		
+		<!-- web UI -->
+		
+		<module>org.eclipse.kura.web2</module>
+		
+		<!-- P2 features -->
+		
+		<module>features/org.eclipse.kura.runtime.common.feature</module>
+		<module>features/org.eclipse.kura.runtime.equinox_3.8.1.feature</module>
+		<module>features/org.eclipse.kura.protocol.modbus.feature</module>
+		<module>features/org.eclipse.kura.web.feature</module>
+		
+		<!-- aggregating P2 repository -->
+		
+		<module>org.eclipse.kura-p2</module>
+		
 	</modules>
 
 	<properties>
-		<tycho-version>0.20.0</tycho-version>
+		<tycho-version>0.25.0</tycho-version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<maven.build.timestamp.format>yyyyMMddHHmm</maven.build.timestamp.format>
@@ -141,6 +157,11 @@
 			<layout>p2</layout>
 			<url>file:///${kura.basedir}/target-definition/common/repository/</url>
 		</repository>
+	    <repository>
+	      <id>license-feature</id>
+	      <url>http://download.eclipse.org/cbi/updates/license/</url>
+	      <layout>p2</layout>
+	    </repository>
 	</repositories>
 
 	<build>
